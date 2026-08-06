@@ -3,7 +3,7 @@
   "machine": {
     "schemaVersion": "2.0.0",
     "machineId": "S_EUREKA_SEVEN_HIEVO_XS",
-    "machineDataVersion": "0.1.0",
+    "machineDataVersion": "0.1.1",
     "displayName": "パチスロ交響詩篇エウレカセブン HI-EVOLUTION ZERO TYPE-ART",
     "modelName": "SエウレカセブンHIEVO XS",
     "manufacturer": "サミー",
@@ -18,7 +18,7 @@
     "schemaVersion": "2.0.0",
     "inputs": [
       {
-        "id": "INP_ART_ELIGIBLE_GAMES",
+        "id": "INP_TOTAL_GAMES",
         "name": "ART初当り対象ゲーム数",
         "category": "PRIMARY_ART",
         "type": "integer",
@@ -37,14 +37,14 @@
         "defaultValue": 0,
         "minimum": 0,
         "displayOrder": 2,
-        "parentInputId": "INP_ART_ELIGIBLE_GAMES",
+        "parentInputId": "INP_TOTAL_GAMES",
         "inferenceRole": "INCLUDE_PRIMARY"
       },
       {
         "id": "INP_COMMON_7_BELL_COUNT",
         "name": "共通7枚ベル回数",
         "category": "PRIMARY_COMMON_BELL",
-        "type": "counter",
+        "type": "integer",
         "unit": "回",
         "defaultValue": 0,
         "minimum": 0,
@@ -65,7 +65,7 @@
       },
       {
         "id": "INP_REG_ZERO_COUNT",
-        "name": "0pt終了REG回数",
+        "name": "通常時0pt終了REG回数",
         "category": "DISPLAY_ONLY_REG",
         "type": "counter",
         "unit": "回",
@@ -77,7 +77,7 @@
       },
       {
         "id": "INP_REG_ZERO_ART_HIT_COUNT",
-        "name": "0pt終了REGからのARTストック当選回数",
+        "name": "通常時0pt終了REGからのARTストック当選回数",
         "category": "DISPLAY_ONLY_REG",
         "type": "counter",
         "unit": "回",
@@ -248,7 +248,8 @@
         "probabilityEngineUsage": true,
         "modelType": "binomial",
         "numeratorInputId": "INP_ART_INITIAL_COUNT",
-        "denominatorInputId": "INP_ART_ELIGIBLE_GAMES",
+        "denominatorInputId": "INP_TOTAL_GAMES",
+        "displayFormat": "ratio_1_over_n",
         "minimumSample": 1000,
         "sampleRecommendation": 8000,
         "probabilities": {
@@ -279,6 +280,7 @@
         "numeratorInputId": "INP_COMMON_7_BELL_COUNT",
         "denominatorInputId": "INP_COMMON_7_BELL_INVERSE_RATE",
         "inputTransform": "inverse_ratio_to_trials",
+        "displayFormat": "ratio_1_over_n",
         "minimumSample": 1000,
         "sampleRecommendation": 5000,
         "probabilities": {
@@ -301,13 +303,14 @@
       },
       {
         "featureId": "FEAT_REG_ZERO_ART_DISPLAY_ONLY",
-        "name": "0pt終了REGからのARTストック当選",
+        "name": "通常時0pt終了REGからのARTストック当選",
         "adoptionCategory": "DISPLAY_ONLY",
         "calculationRole": "DISPLAY_ONLY",
         "probabilityEngineUsage": false,
         "modelType": "binomial",
         "numeratorInputId": "INP_REG_ZERO_ART_HIT_COUNT",
         "denominatorInputId": "INP_REG_ZERO_COUNT",
+        "displayFormat": "percentage",
         "minimumSample": 1,
         "sampleRecommendation": 10,
         "probabilities": {
@@ -318,7 +321,7 @@
           "SET_5": 0.0960792032,
           "SET_6": 0.109830277231
         },
-        "description": "REG5ゲームをすべて0ptで消化した場合の1個以上ストック当選率。共通ベル、ブレイクチャンス成功、既存ストックの影響を判別できないREGは除外する。ART初当りとの重複を避けるため確率計算には加えない。"
+        "description": "通常時に成立したREGを5ゲームすべて0ptで消化した場合の、1個以上ストック当選率。ART中など通常時以外のREG、共通ベル成立、ブレイクチャンス成功、REG開始前からARTストックを保有している可能性がある場合は除外する。ART初当りとの重複を避けるため確率計算には加えない。"
       }
     ]
   },
@@ -356,7 +359,7 @@
         "description": "データカウンター等で確認した対象ゲーム数と、自分で数えたART初当り回数を入力してください。マイスロのコーラリアンモードSET数は入力しません。",
         "displayOrder": 1,
         "items": [
-          { "type": "input", "inputId": "INP_ART_ELIGIBLE_GAMES", "label": "ART初当り対象ゲーム数", "widget": "number", "config": { "min": 0, "step": 1, "placeholder": "例：4000", "note": "店舗ごとの集計仕様に注意" } },
+          { "type": "input", "inputId": "INP_TOTAL_GAMES", "label": "ART初当り対象ゲーム数", "widget": "number", "config": { "min": 0, "step": 1, "placeholder": "例：4000", "note": "店舗ごとの集計仕様に注意" } },
           { "type": "input", "inputId": "INP_ART_INITIAL_COUNT", "label": "ART初当り回数", "widget": "counter", "config": { "min": 0, "step": 1, "note": "総SET数ではありません" } }
         ]
       },
@@ -366,7 +369,7 @@
         "description": "マイスロレベル3以上で確認できます。マイカウンターの回数と、1/14.15なら14.15のように表示確率の分母を入力してください。",
         "displayOrder": 2,
         "items": [
-          { "type": "input", "inputId": "INP_COMMON_7_BELL_COUNT", "label": "共通7枚ベル回数", "widget": "counter", "config": { "min": 0, "step": 1, "note": "マイスロLv.3以上" } },
+          { "type": "input", "inputId": "INP_COMMON_7_BELL_COUNT", "label": "共通7枚ベル回数", "widget": "number", "config": { "min": 0, "step": 1, "placeholder": "例：276", "note": "マイスロLv.3以上" } },
           { "type": "input", "inputId": "INP_COMMON_7_BELL_INVERSE_RATE", "label": "マイスロ表示確率の分母", "widget": "number", "config": { "min": 1, "step": 0.01, "placeholder": "例：14.15", "note": "1/○○の○○" } }
         ]
       },
