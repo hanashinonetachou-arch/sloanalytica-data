@@ -1,0 +1,88 @@
+{
+  "schemaVersion": 1,
+  "machine": {
+    "schemaVersion": "2.0.0",
+    "machineId": "S_MY_JUGGLER_V_KD",
+    "machineDataVersion": "0.1.0",
+    "displayName": "マイジャグラーⅤ",
+    "modelName": "SマイジャグラーVKD",
+    "manufacturer": "北電子",
+    "settings": ["SET_1", "SET_2", "SET_3", "SET_4", "SET_5", "SET_6"],
+    "packagePolicy": {"offlineCapable": true, "containsImages": false, "containsExecutableCode": false}
+  },
+  "inputs": {
+    "schemaVersion": "2.0.0",
+    "inputs": [
+      {"id":"INP_PREDECESSOR_GAMES","name":"着席時ゲーム数","type":"integer","unit":"G","defaultValue":0,"minimum":0,"displayOrder":1,"observationScope":"PREDECESSOR_SNAPSHOT"},
+      {"id":"INP_PREDECESSOR_BIG_COUNT","name":"着席前BIG回数","type":"integer","unit":"回","defaultValue":0,"minimum":0,"displayOrder":2,"observationScope":"PREDECESSOR_SNAPSHOT"},
+      {"id":"INP_PREDECESSOR_REG_COUNT","name":"着席前REG回数","type":"integer","unit":"回","defaultValue":0,"minimum":0,"displayOrder":3,"observationScope":"PREDECESSOR_SNAPSHOT"},
+      {"id":"INP_NORMAL_GAMES","name":"自分の通常時ゲーム数","type":"integer","unit":"G","defaultValue":0,"minimum":0,"displayOrder":4,"observationScope":"SELF_PLAY"},
+      {"id":"INP_BIG_COUNT","name":"自分のBIG回数","type":"integer","unit":"回","defaultValue":0,"minimum":0,"displayOrder":5,"observationScope":"SELF_PLAY"},
+      {"id":"INP_REG_COUNT","name":"自分のREG回数","type":"integer","unit":"回","defaultValue":0,"minimum":0,"displayOrder":6,"observationScope":"SELF_PLAY"},
+      {"id":"INP_GRAPE_COUNT","name":"ブドウ回数","type":"integer","unit":"回","defaultValue":0,"minimum":0,"displayOrder":7,"observationScope":"SELF_PLAY"},
+      {"id":"INP_NONBONUS_CHERRY_COUNT","name":"ボーナス非同時チェリー回数","type":"integer","unit":"回","defaultValue":0,"minimum":0,"displayOrder":8,"observationScope":"SELF_PLAY"},
+      {"id":"INP_CLASSIFIED_REG_COUNT","name":"判別済みREG数","type":"integer","unit":"回","defaultValue":0,"minimum":0,"displayOrder":9,"observationScope":"SELF_PLAY"},
+      {"id":"INP_SINGLE_REG_COUNT","name":"うち単独REG数","type":"integer","unit":"回","defaultValue":0,"minimum":0,"displayOrder":10,"observationScope":"SELF_PLAY"}
+    ]
+  },
+  "features": {
+    "schemaVersion": "2.0.0",
+    "features": [
+      {
+        "featureId":"FEAT_PREDECESSOR_BONUS_OUTCOME",
+        "name":"着席前のBIG・REG内訳",
+        "adoptionCategory":"INCLUDE_PRIMARY","calculationRole":"PROBABILITY","probabilityEngineUsage":true,
+        "observationScope":"PREDECESSOR_SNAPSHOT","modelType":"multinomial",
+        "numeratorInputId":"INP_PREDECESSOR_BIG_COUNT","categoryInputIds":["INP_PREDECESSOR_REG_COUNT"],"denominatorInputId":"INP_PREDECESSOR_GAMES",
+        "minimumSample":1000,"sampleRecommendation":5000,"reliabilityProfile":{"weight":1.0},
+        "description":"着席時に確認したゲーム数・BIG・REGを、着席後の自分の遊技とは別の通常時標本として評価します。小役・契機は含めません。",
+        "categoryProbabilities":{"SET_1":[0.003661662,0.002441406],"SET_2":[0.003692762,0.002594034],"SET_3":[0.003753754,0.002975298],"SET_4":[0.003937008,0.003448276],"SET_5":[0.004164931,0.003723008],"SET_6":[0.004364906,0.004364906]},
+        "reference":"北電子公式サイト掲載のBIG・REG確率"
+      },
+      {
+        "featureId":"FEAT_SELF_NORMAL_OUTCOME",
+        "name":"自分の通常時ボーナス・小役内訳",
+        "adoptionCategory":"INCLUDE_PRIMARY","calculationRole":"PROBABILITY","probabilityEngineUsage":true,
+        "observationScope":"SELF_PLAY","modelType":"multinomial",
+        "numeratorInputId":"INP_BIG_COUNT","categoryInputIds":["INP_REG_COUNT","INP_GRAPE_COUNT","INP_NONBONUS_CHERRY_COUNT"],"denominatorInputId":"INP_NORMAL_GAMES",
+        "minimumSample":1000,"sampleRecommendation":5000,"reliabilityProfile":{"weight":1.0},
+        "description":"自分の通常時だけを対象に、BIG・REG・ブドウ・ボーナス非同時チェリーを排他的に評価します。ボーナス成立ゲームはBIGまたはREGにだけ計上します。",
+        "categoryProbabilities":{"SET_1":[0.003661662,0.002441406,0.169779287,0.026095199],"SET_2":[0.003692762,0.002594034,0.170940171,0.026116479],"SET_3":[0.003753754,0.002975298,0.172117039,0.026609899],"SET_4":[0.003937008,0.003448276,0.173310225,0.028019054],"SET_5":[0.004164931,0.003723008,0.173611111,0.028026906],"SET_6":[0.004364906,0.004364906,0.176678445,0.028003924]},
+        "reference":"BIG・REG: 北電子公式サイト。ブドウ・ボーナス非同時チェリー: 一撃の全設定合計600万Gシミュレーション値"
+      },
+      {
+        "featureId":"FEAT_SINGLE_REG_PARTIAL","name":"自分で判別したREGの単独構成",
+        "adoptionCategory":"INCLUDE_SUPPORT","calculationRole":"PROBABILITY","probabilityEngineUsage":true,
+        "observationScope":"SELF_PLAY","modelType":"conditional_partial_binomial",
+        "numeratorInputId":"INP_SINGLE_REG_COUNT","denominatorInputId":"INP_CLASSIFIED_REG_COUNT","conditionedOnInputId":"INP_REG_COUNT",
+        "minimumObservationRate":0.9,"minimumSample":30,"sampleRecommendation":80,"reliabilityProfile":{"weight":0.35},
+        "description":"自分のREGのうち、単独またはチェリー重複を判別できたものだけを評価します。判別済みREGが全REGの90%未満なら、入力は保存しますが推測計算には使用しません。",
+        "probabilities":{"SET_1":0.616439,"SET_2":0.642858,"SET_3":0.681816,"SET_4":0.711445,"SET_5":0.686098,"SET_6":0.697673},
+        "reference":"一撃掲載の単独REG・チェリー重複REG確率から算出"
+      }
+    ]
+  },
+  "evidence":{"version":"1.0.0","evidences":[]},
+  "ui":{"sections":[
+    {"id":"predecessor","title":"着席時のカウンター値","description":"座った時点で確認したゲーム数・BIG・REGです。着席後の自分の遊技とは別の標本として一度だけ評価します。","displayOrder":1,"items":[
+      {"inputId":"INP_PREDECESSOR_GAMES","widget":"number","gridSpan":12,"config":{"step":1,"note":"ボーナス消化中を除く通常時ゲーム数を入力します。"}},
+      {"inputId":"INP_PREDECESSOR_BIG_COUNT","widget":"number","gridSpan":6,"config":{"step":1}},
+      {"inputId":"INP_PREDECESSOR_REG_COUNT","widget":"number","gridSpan":6,"config":{"step":1}}
+    ]},
+    {"id":"self_normal","title":"自分の通常時ボーナス・小役","description":"開始時ゲーム数からの差分が自分の通常時ゲーム数です。BIG・REG・ブドウ・ボーナス非同時チェリーを正確にカウントします。","displayOrder":2,"items":[
+      {"inputId":"INP_NORMAL_GAMES","gridSpan":12},
+      {"inputId":"INP_BIG_COUNT","widget":"number","gridSpan":6,"config":{"step":1}},
+      {"inputId":"INP_REG_COUNT","widget":"number","gridSpan":6,"config":{"step":1}},
+      {"inputId":"INP_GRAPE_COUNT","widget":"number","gridSpan":6,"config":{"step":1}},
+      {"inputId":"INP_NONBONUS_CHERRY_COUNT","widget":"number","gridSpan":6,"config":{"step":1,"note":"ボーナスが同時成立していないチェリーだけを数えます。"}}
+    ]},
+    {"id":"self_reg_cause","title":"自分のREG契機（任意）","description":"単独／チェリー重複を判別できたREGだけを入力します。判別済み率が90%未満なら、この項目は推測計算に使いません。","displayOrder":3,"items":[
+      {"inputId":"INP_CLASSIFIED_REG_COUNT","widget":"number","gridSpan":6,"config":{"step":1,"showParentPercentage":true,"parentInputId":"INP_REG_COUNT"}},
+      {"inputId":"INP_SINGLE_REG_COUNT","widget":"number","gridSpan":6,"config":{"step":1,"showParentPercentage":true,"parentInputId":"INP_CLASSIFIED_REG_COUNT"}}
+    ]}
+  ]},
+  "reliability":{},
+  "metadata":{"machineId":"S_MY_JUGGLER_V_KD","displayName":"マイジャグラーⅤ","settings":["SET_1","SET_2","SET_3","SET_4","SET_5","SET_6"]},
+  "validation":{"cases":[]},
+  "statistics":{}
+}
