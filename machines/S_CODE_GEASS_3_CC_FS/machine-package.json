@@ -3,7 +3,7 @@
   "machine": {
     "schemaVersion": "2.0.0",
     "machineId": "S_CODE_GEASS_3_CC_FS",
-    "machineDataVersion": "0.1.1",
+    "machineDataVersion": "0.1.2",
     "displayName": "パチスロ コードギアス 反逆のルルーシュ3 C.C.&Kallen ver.",
     "modelName": "Sコードギアス3C.C. FS",
     "manufacturer": "サミー",
@@ -18,14 +18,14 @@
   "inputs": {
     "schemaVersion": "2.0.0",
     "inputs": [
-      { "id": "INP_NORMAL_GAMES", "name": "通常時ゲーム数", "category": "PRIMARY_BONUS", "type": "integer", "unit": "G", "defaultValue": 0, "minimum": 0, "displayOrder": 1, "inferenceRole": "INCLUDE_PRIMARY" },
+      { "id": "INP_NORMAL_GAMES", "name": "通常・ATゲーム数", "category": "PRIMARY_SMALL_ROLE", "type": "integer", "unit": "G", "defaultValue": 0, "minimum": 0, "displayOrder": 1, "inferenceRole": "INCLUDE_PRIMARY" },
       { "id": "INP_NORMAL_HBB_BB_COUNT", "name": "通常時HBB・BB回数", "category": "PRIMARY_BONUS", "type": "counter", "unit": "回", "defaultValue": 0, "minimum": 0, "displayOrder": 2, "parentInputId": "INP_NORMAL_GAMES", "inferenceRole": "INCLUDE_PRIMARY" },
       { "id": "INP_NORMAL_RB_COUNT", "name": "通常時RB回数", "category": "PRIMARY_BONUS", "type": "counter", "unit": "回", "defaultValue": 0, "minimum": 0, "displayOrder": 3, "parentInputId": "INP_NORMAL_GAMES", "inferenceRole": "INCLUDE_PRIMARY" },
       { "id": "INP_COMMON_BELL_RED_BB_COUNT", "name": "共通ベル＋赤BB回数", "category": "PRIMARY_BONUS", "type": "counter", "unit": "回", "defaultValue": 0, "minimum": 0, "displayOrder": 4, "parentInputId": "INP_NORMAL_HBB_BB_COUNT", "inferenceRole": "INCLUDE_PRIMARY" },
       { "id": "INP_CHERRY_RB_COUNT", "name": "チェリー＋RB回数", "category": "PRIMARY_BONUS", "type": "counter", "unit": "回", "defaultValue": 0, "minimum": 0, "displayOrder": 5, "parentInputId": "INP_NORMAL_RB_COUNT", "inferenceRole": "INCLUDE_PRIMARY" },
       { "id": "INP_CHANCE_RB_COUNT", "name": "チャンス目＋RB回数", "category": "PRIMARY_BONUS", "type": "counter", "unit": "回", "defaultValue": 0, "minimum": 0, "displayOrder": 6, "parentInputId": "INP_NORMAL_RB_COUNT", "inferenceRole": "INCLUDE_PRIMARY" },
 
-      { "id": "INP_SMALL_ROLE_GAMES", "name": "小役カウント対象ゲーム数", "category": "PRIMARY_SMALL_ROLE", "type": "integer", "unit": "G", "defaultValue": 0, "minimum": 0, "displayOrder": 10, "inferenceRole": "INCLUDE_PRIMARY" },
+      { "id": "INP_SMALL_ROLE_GAMES", "name": "旧 小役カウント対象ゲーム数", "category": "REFERENCE", "type": "integer", "unit": "G", "defaultValue": 0, "minimum": 0, "displayOrder": 10, "inferenceRole": "DISPLAY_ONLY" },
       { "id": "INP_CHERRY_COUNT", "name": "チェリー回数", "category": "PRIMARY_SMALL_ROLE", "type": "integer", "unit": "回", "defaultValue": 0, "minimum": 0, "displayOrder": 11, "parentInputId": "INP_SMALL_ROLE_GAMES", "inferenceRole": "INCLUDE_PRIMARY" },
       { "id": "INP_WATERMELON_COUNT", "name": "スイカ回数", "category": "PRIMARY_SMALL_ROLE", "type": "integer", "unit": "回", "defaultValue": 0, "minimum": 0, "displayOrder": 12, "parentInputId": "INP_SMALL_ROLE_GAMES", "inferenceRole": "INCLUDE_PRIMARY" },
 
@@ -65,10 +65,10 @@
     "features": [
       {
         "featureId": "FEAT_NORMAL_BONUS_DETAIL_MULTINOMIAL",
-        "name": "通常時ボーナス内訳",
+      "name": "ボーナス内訳（参考）",
         "adoptionCategory": "INCLUDE_PRIMARY",
-        "calculationRole": "PROBABILITY",
-        "probabilityEngineUsage": true,
+      "calculationRole": "DISPLAY_ONLY",
+      "probabilityEngineUsage": false,
         "modelType": "multinomial",
         "numeratorInputId": "INP_COMMON_BELL_RED_BB_COUNT",
         "denominatorInputId": "INP_NORMAL_GAMES",
@@ -106,7 +106,7 @@
         "probabilityEngineUsage": true,
         "modelType": "multinomial",
         "numeratorInputId": "INP_CHERRY_COUNT",
-        "denominatorInputId": "INP_SMALL_ROLE_GAMES",
+      "denominatorInputId": "INP_NORMAL_GAMES",
         "categoryInputIds": ["INP_WATERMELON_COUNT"],
         "categoryProbabilities": {
           "SET_1": [0.00790513834, 0.016694490818],
@@ -226,14 +226,14 @@
     "sections": [
       {
         "id": "NORMAL_BONUS",
-        "title": "通常時ボーナス",
-        "description": "通常時だけを対象に入力してください。特定契機は通常時HBB・BBまたはRBの内数です。共通ベル契機を判別できない場合は特定契機へ数えません。",
+        "title": "通常・ATゲーム数とボーナス記録",
+        "description": "通常・ATゲーム数は実機の遊技データ表示にある値を入力します。ボーナス内訳は参考記録であり、設定推測には使用しません。",
         "displayOrder": 1,
         "items": [
-          { "type": "input", "inputId": "INP_NORMAL_GAMES", "label": "通常時ゲーム数", "widget": "number", "config": { "min": 0, "step": 1, "placeholder": "例：3000" } },
+          { "type": "input", "inputId": "INP_NORMAL_GAMES", "label": "通常・ATゲーム数", "widget": "number", "config": { "min": 0, "step": 1, "placeholder": "例：5000" } },
           { "type": "input", "inputId": "INP_NORMAL_HBB_BB_COUNT", "label": "通常時HBB・BB回数", "widget": "counter" },
           { "type": "input", "inputId": "INP_NORMAL_RB_COUNT", "label": "通常時RB回数", "widget": "counter" },
-          { "type": "input", "inputId": "INP_COMMON_BELL_RED_BB_COUNT", "label": "共通ベル＋赤BB", "widget": "counter", "config": { "note": "HBB・BBの内数" } },
+          { "type": "input", "inputId": "INP_COMMON_BELL_RED_BB_COUNT", "label": "共通ベル＋赤BB（参考）", "widget": "counter", "config": { "note": "推測非使用" } },
           { "type": "input", "inputId": "INP_CHERRY_RB_COUNT", "label": "チェリー＋RB", "widget": "counter", "config": { "note": "RBの内数" } },
           { "type": "input", "inputId": "INP_CHANCE_RB_COUNT", "label": "チャンス目＋RB", "widget": "counter", "config": { "note": "RBの内数" } }
         ]
@@ -241,10 +241,9 @@
       {
         "id": "SMALL_ROLE",
         "title": "チェリー・スイカ",
-        "description": "ボーナス中を除く通常時＋AT中の対象ゲーム数と、各小役回数を入力してください。マイスロを利用する場合は表示ゲーム数がこの母数と一致するか確認してください。",
+        "description": "通常・ATゲーム数を分母に、チェリー・スイカの回数を入力します。ボーナス成立後のゲーム数は分母に含めません。",
         "displayOrder": 2,
         "items": [
-          { "type": "input", "inputId": "INP_SMALL_ROLE_GAMES", "label": "小役カウント対象ゲーム数", "widget": "number", "config": { "min": 0, "step": 1, "placeholder": "例：5000", "note": "ボーナス中を除く" } },
           { "type": "input", "inputId": "INP_CHERRY_COUNT", "label": "チェリー回数", "widget": "number", "config": { "min": 0, "step": 1, "quickAdd": 1, "placeholder": "マイスロの回数" } },
           { "type": "input", "inputId": "INP_WATERMELON_COUNT", "label": "スイカ回数", "widget": "number", "config": { "min": 0, "step": 1, "quickAdd": 1, "placeholder": "マイスロの回数" } }
         ]
