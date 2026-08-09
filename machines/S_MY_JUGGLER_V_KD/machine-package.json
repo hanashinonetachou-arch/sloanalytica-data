@@ -3,7 +3,7 @@
   "machine": {
     "schemaVersion": "2.0.0",
     "machineId": "S_MY_JUGGLER_V_KD",
-    "machineDataVersion": "0.2.0",
+    "machineDataVersion": "0.3.0",
     "displayName": "マイジャグラーⅤ",
     "modelName": "SマイジャグラーVKD",
     "manufacturer": "北電子",
@@ -26,7 +26,7 @@
     "inputs": [
       {
         "id": "INP_PREDECESSOR_GAMES",
-        "name": "着席時ゲーム数",
+        "name": "前任者ゲーム数",
         "type": "integer",
         "unit": "G",
         "defaultValue": 0,
@@ -34,7 +34,7 @@
       },
       {
         "id": "INP_PREDECESSOR_BIG_COUNT",
-        "name": "着席前BIG回数",
+        "name": "前任者BIG",
         "type": "counter",
         "unit": "回",
         "defaultValue": 0,
@@ -42,7 +42,7 @@
       },
       {
         "id": "INP_PREDECESSOR_REG_COUNT",
-        "name": "着席前REG回数",
+        "name": "前任者REG",
         "type": "counter",
         "unit": "回",
         "defaultValue": 0,
@@ -58,7 +58,7 @@
       },
       {
         "id": "INP_NORMAL_GAMES",
-        "name": "自分の通常時ゲーム数",
+        "name": "自分のゲーム数",
         "type": "integer",
         "unit": "G",
         "defaultValue": 0,
@@ -111,7 +111,7 @@
         "name": "ブドウ",
         "type": "counter",
         "unit": "回",
-        "defaultValue": 0,
+        "defaultValue": null,
         "observationScope": "SELF_PLAY"
       },
       {
@@ -119,7 +119,7 @@
         "name": "全チェリー",
         "type": "counter",
         "unit": "回",
-        "defaultValue": 0,
+        "defaultValue": null,
         "observationScope": "SELF_PLAY"
       }
     ]
@@ -130,6 +130,7 @@
       {
         "featureId": "FEAT_PREDECESSOR_BONUS_OUTCOME",
         "name": "着席前のBIG・REG内訳",
+        "adoptionCategory": "INCLUDE_PRIMARY",
         "calculationRole": "PROBABILITY",
         "observationScope": "PREDECESSOR_SNAPSHOT",
         "modelType": "multinomial",
@@ -142,6 +143,12 @@
         "sampleRecommendation": 5000,
         "reliabilityProfile": {
           "weight": 1.0
+        },
+        "selectionRationale": {
+          "summary": "前任者区間のBIG・REGを同一ゲーム数から排他的に評価します。",
+          "adoptionReason": "前任者区間も公式確率と同じ遊技区間の観測値であり、ボーナス内訳の情報を利用できます。",
+          "shortTermReason": "ゲーム数が少ない場合は偏りが大きいため、判定は暫定として扱います。",
+          "longTermReason": "ゲーム数の増加とともにBIG・REGの設定差が比較材料になります。"
         },
         "categoryProbabilities": {
           "SET_1": [
@@ -173,21 +180,29 @@
       {
         "featureId": "FEAT_SELF_NORMAL_OUTCOME",
         "name": "自分のBIG・REG・ブドウ内訳",
+        "adoptionCategory": "INCLUDE_PRIMARY",
         "calculationRole": "PROBABILITY",
         "observationScope": "SELF_PLAY",
-        "modelType": "multinomial",
+        "modelType": "marginal_multinomial",
         "numeratorInputId": "INP_BIG_COUNT",
         "categoryInputIds": [
           "INP_REG_COUNT",
           "INP_GRAPE_COUNT"
         ],
+        "optionalCategoryInputIds": ["INP_GRAPE_COUNT"],
         "denominatorInputId": "INP_NORMAL_GAMES",
         "minimumSample": 1000,
         "sampleRecommendation": 5000,
         "reliabilityProfile": {
           "weight": 1.0
         },
-        "description": "全チェリーはカウント記録専用で、設定推測には使用しません。",
+        "description": "ブドウが未入力の場合は、ブドウを0回とせず未観測カテゴリとして計算から周辺化します。全チェリーは記録専用で、設定推測には使用しません。",
+        "selectionRationale": {
+          "summary": "自分で観測したBIG・REG・ブドウを、同一ゲーム数の排他的な多項分布として評価します。",
+          "adoptionReason": "ボーナスとブドウを二重評価せず、設定差を持つ実測値として一体で利用できます。",
+          "shortTermReason": "ブドウ未入力でもBIG・REGのみで安全に評価し、未入力を0回とは扱いません。",
+          "longTermReason": "ブドウを加えると、ゲーム数の増加に伴いボーナス内訳と小役確率の両方を比較できます。"
+        },
         "categoryProbabilities": {
           "SET_1": [
             0.003661662,
@@ -224,6 +239,7 @@
       {
         "featureId": "FEAT_SINGLE_REG_COMPOSITION",
         "name": "REGの単独構成",
+        "adoptionCategory": "INCLUDE_SUPPORT",
         "calculationRole": "PROBABILITY",
         "observationScope": "SELF_PLAY",
         "modelType": "binomial",
@@ -233,6 +249,12 @@
         "sampleRecommendation": 80,
         "reliabilityProfile": {
           "weight": 0.35
+        },
+        "selectionRationale": {
+          "summary": "REG合計のうち単独REGの比率を補助的に評価します。",
+          "adoptionReason": "REG内訳には設定差があるため、ボーナス合計とは別の構成情報として利用できます。",
+          "shortTermReason": "REG回数が少ない間は大きく偏るため、重みを0.35に抑えます。",
+          "longTermReason": "REG試行数が増えると、単独構成比が補助的な比較材料になります。"
         },
         "probabilities": {
           "SET_1": 0.616439,
@@ -253,8 +275,8 @@
     "sections": [
       {
         "id": "predecessor",
-        "title": "着席時のカウンター値",
-        "description": "着席時に一度だけ入力します。",
+        "title": "前任者区間",
+        "description": "前任者のゲーム数・BIG・REGを、着席時に一度だけ入力します。",
         "collapsible": true,
         "summaryInputIds": [
           "INP_PREDECESSOR_GAMES",
@@ -281,8 +303,8 @@
       },
       {
         "id": "self",
-        "title": "遊技中カウンター",
-        "description": "現在ゲーム数は着席時ゲーム数との差分から自動計算します。",
+        "title": "自分の区間",
+        "description": "自分のゲーム数とREG合計は自動計算します。ブドウ・全チェリーは未入力のまま開始できます。",
         "displayOrder": 2,
         "items": [
           {
@@ -312,13 +334,15 @@
           },
           {
             "inputId": "INP_GRAPE_COUNT",
-            "widget": "quick_counter",
-            "gridSpan": 6
+            "widget": "number",
+            "gridSpan": 6,
+            "config": { "quickAdd": 1, "placeholder": "未入力" }
           },
           {
             "inputId": "INP_TOTAL_CHERRY_COUNT",
-            "widget": "quick_counter",
-            "gridSpan": 6
+            "widget": "number",
+            "gridSpan": 6,
+            "config": { "quickAdd": 1, "placeholder": "未入力" }
           }
         ]
       }
