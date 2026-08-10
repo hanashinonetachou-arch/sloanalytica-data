@@ -16,6 +16,16 @@
 - [ ] 数値が出典間で一致しない場合は、推測で補完せず保留または除外する。
 - [ ] Evidenceは設定確定・設定否定・設定下限など、アプリ仕様に適合するものだけを記録する。
 
+## 1.5 ResearchDataへの固定
+
+- [ ] 調査結果を `research/<machineId>/research-data.json` に保存する。
+- [ ] `npm run research:validate -- research/<machineId>/research-data.json` を実行する。
+- [ ] 長文の調査報告書は以後の定型工程へ再投入せず、ResearchDataをSingle Source of Truthとする。
+- [ ] `pending` / `conflict` の項目だけを例外処理へ回す。
+- [ ] ResearchDataには採否・重み・必要試行数を書かない。
+
+詳細は [ResearchData Specification v1](ResearchData-Specification-v1.md) を参照してください。
+
 ## 2. 統計的・実戦的な採否
 
 - [ ] 少ない試行でも役立つか、長時間で意味があるかを評価する。
