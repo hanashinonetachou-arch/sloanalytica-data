@@ -9,6 +9,14 @@ npm test
 
 `npm run audit`は読み取り専用です。`catalog.json`を更新したり、MachineDataを書き換えたりしません。
 
+機械処理向けの監査結果が必要な場合は、次を実行します。
+
+```text
+npm run audit:report
+```
+
+`reports/audit-report.json` に `PASS/FAIL`、機種数、エラー数、警告数、エラー・警告の詳細を出力します。MachineDataや`catalog.json`自体は変更しません。今後の自動化では、このJSONを次工程へ渡し、通常時は全文データをAIへ再投入せず、`errors` / `warnings` だけを例外処理対象にできます。
+
 - `OK`：エラーなし。警告は内容を確認してからCommitしてください。
 - `FAILED`：エラーあり。表示された機種ID・ファイル・内容を直してから再実行してください。
 

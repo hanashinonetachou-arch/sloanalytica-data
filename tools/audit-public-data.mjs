@@ -200,12 +200,64 @@ export function auditRepository(root) {
   }
   return result;
 }
+export function buildAuditReport(result, generatedAt = new Date().toISOString()) {
+  return {
+    reportVersion: '1.0.0',
+    generatedAt,
+    root: result.root,
+    status: result.errors.length === 0 ? 'PASS' : 'FAIL',
+    summary: {
+      machineCount: result.machineCount,
+      errorCount: result.errors.length,
+      warningCount: result.warnings.length,
+    },
+    errors: result.errors,
+    warnings: result.warnings,
+  };
+}
+
+export function writeAuditReport(result, outputPath, generatedAt) {
+  const report = buildAuditReport(result, generatedAt);
+  fs.mkdirSync(path.dirname(outputPath), { recursive: true });
+  fs.writeFileSync(outputPath, `${JSON.stringify(report, null, 2)}\n`, 'utf8');
+  return report;
+}
+
 function print(result) {
   for (const item of [...result.errors, ...result.warnings]) console.log(`${item.severity.toUpperCase()} [${item.scope}] ${item.message}`);
   if (result.errors.length === 0) console.log(`OK: ${result.machineCount}機種を監査しました（警告 ${result.warnings.length}件）`);
   else console.log(`FAILED: ${result.machineCount}機種を監査しました（エラー ${result.errors.length}件、警告 ${result.warnings.length}件）`);
 }
+
+function parseCliArgs(argv) {
+  const positional = [];
+  let jsonOut = null;
+  for (let index = 0; index < argv.length; index += 1) {
+    const arg = argv[index];
+    if (arg === '--json-out') {
+      const value = argv[index + 1];
+      if (!value || value.startsWith('--')) throw new Error('--json-outには出力先パスが必要です');
+      jsonOut = value;
+      index += 1;
+    } else positional.push(arg);
+  }
+  if (positional.length > 1) throw new Error('引数が多すぎます。使用法: node tools/audit-public-data.mjs [root] [--json-out path]');
+  return { root: positional[0] ? path.resolve(positional[0]) : process.cwd(), jsonOut };
+}
+
 if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
-  const root = process.argv[2] ? path.resolve(process.argv[2]) : process.cwd();
-  const result = auditRepository(root); print(result); process.exitCode = result.errors.length === 0 ? 0 : 1;
+  try {
+    const args = parseCliArgs(process.argv.slice(2));
+    const result = auditRepository(args.root);
+    print(result);
+    if (args.jsonOut) {
+      const outputPath = path.resolve(args.jsonOut);
+      writeAuditReport(result, outputPath);
+      console.log(`REPORT: ${outputPath}`);
+    }
+    process.exitCode = result.errors.length === 0 ? 0 : 1;
+  } catch (error) {
+    console.error(`FAILED: ${error.message}`);
+    process.exitCode = 2;
+  }
 }

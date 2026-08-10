@@ -4,7 +4,7 @@ import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import test from 'node:test';
-import { auditRepository } from '../tools/audit-public-data.mjs';
+import { auditRepository, buildAuditReport, writeAuditReport } from '../tools/audit-public-data.mjs';
 
 function writeFixture(mutator = () => {}) {
   const root = fs.mkdtempSync(path.join(os.tmpdir(), 'sloanalytica-audit-'));
@@ -22,3 +22,30 @@ test('古いSHA・サイズはエラーになる', () => { const root = writeFix
 test('未定義入力・不正確率・不足Capabilityを検出する', () => { const root = writeFixture(data => { data.features.features[0].numeratorInputId = 'MISSING'; data.features.features[0].probabilities.SET_1 = 1.2; }); try { const errors = auditRepository(root).errors.map(x => x.message).join('\n'); assert.match(errors, /未定義の入力ID/); assert.match(errors, /確率は0以上1以下/); } finally { cleanup(root); } });
 test('auto_accumulatorの壊れた定義を検出する', () => { const root = writeFixture(data => { data.ui.sections[0].items.push({ type: 'auto_accumulator', inputId: 'MISSING_OUT', config: { autoAccumulator: { selectionInputId: 'MISSING_SELECT', conditionInputId: 'MISSING_CONDITION', excludedValues: [99], conditionExcludedValues: [], minSelection: 1, maxSelection: 19 } } }); data.features.features[0].calculationRole = 'DISPLAY_ONLY'; data.features.features[0].probabilityEngineUsage = true; }); try { const errors = auditRepository(root).errors.map(x => x.message).join('\n'); assert.match(errors, /DISPLAY_ONLY/); assert.match(errors, /出力inputIdが未定義/); assert.match(errors, /selectionInputIdが未定義/); } finally { cleanup(root); } });
 test('requiredCapabilities未記載でも安全にエラーとして報告する', () => { const root = writeFixture(); try { const catalogPath = path.join(root, 'catalog.json'); const catalog = JSON.parse(fs.readFileSync(catalogPath)); delete catalog.machines[0].requiredCapabilities; fs.writeFileSync(catalogPath, JSON.stringify(catalog)); const errors = auditRepository(root).errors.map(x => x.message).join('\n'); assert.match(errors, /必須フィールドrequiredCapabilitiesがありません/); assert.match(errors, /requiredCapabilitiesを宣言してください/); } finally { cleanup(root); } });
+
+
+test('機械可読監査レポートを生成できる', () => {
+  const root = writeFixture();
+  try {
+    const result = auditRepository(root);
+    const report = buildAuditReport(result, '2026-08-10T12:00:00.000Z');
+    assert.equal(report.reportVersion, '1.0.0');
+    assert.equal(report.status, 'PASS');
+    assert.deepEqual(report.summary, { machineCount: 1, errorCount: 0, warningCount: 0 });
+    assert.deepEqual(report.errors, []);
+    assert.deepEqual(report.warnings, []);
+  } finally { cleanup(root); }
+});
+
+test('監査レポートJSONを書き出せる', () => {
+  const root = writeFixture(data => { data.features.features[0].numeratorInputId = 'MISSING'; });
+  try {
+    const result = auditRepository(root);
+    const outputPath = path.join(root, 'reports', 'audit-report.json');
+    writeAuditReport(result, outputPath, '2026-08-10T12:00:00.000Z');
+    const report = JSON.parse(fs.readFileSync(outputPath, 'utf8'));
+    assert.equal(report.status, 'FAIL');
+    assert.ok(report.summary.errorCount > 0);
+    assert.match(report.errors.map(item => item.message).join('\n'), /未定義の入力ID/);
+  } finally { cleanup(root); }
+});
