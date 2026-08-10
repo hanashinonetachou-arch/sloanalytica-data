@@ -1,22 +1,27 @@
-# Statistical Evaluator v1
+# Statistical Evaluator v1.1
 
-Phase 3 の目的は、ResearchData に含まれる公開事実から、AIを使わず再現可能な統計指標を計算することです。
+Phase 3はResearchDataの公開事実から、AIを使わず再現可能な統計指標を計算します。採用/不採用、重み、実戦上の価値は決定しません。
 
-## 境界
-Evaluator は採用/不採用、重み、実戦上の価値を決定しません。それらは後段の SelectionData で扱います。
-
-## v1 自動計算
-- 設定別確率の最小/最大
-- 最大絶対差
+## Binomial / Poisson候補
+- 設定別確率範囲・最大差
 - 設定ペアごとの確率比
 - Bernoulli Jensen-Shannon divergence
 - 2比率の正規近似による95%分離試行数の目安
-- 隣接設定のうち最も厳しいペア
+- 最も厳しい隣接設定ペア
 
-試行数は設計比較用の近似値であり、「この回数なら設定を断定できる」という保証値ではありません。
+## Multinomial候補
+完全なカテゴリ確率分布が2設定以上ある場合に以下を計算します。
+- Jensen-Shannon divergence
+- Total Variation Distance
+- Hellinger squared distance
+- Bhattacharyya coefficient
+- Bhattacharyya上界に基づき、等事前確率の2設定識別でBayes error上界が5%以下になる試行数の目安
+- 最も厳しい隣接設定ペア
 
-## 対応
-v1 の自動試行数評価は binomial / poisson 候補を対象にします。multinomial は後続拡張でカテゴリ確率ベクトルをResearchDataに保持できるようにしてから対応します。
+Multinomialのカテゴリが欠損している、または合計が1にならない場合は推測補完せず評価しません。
+
+## 注意
+試行数は設計比較用の近似・上界ベースの目安であり、その回数で設定を断定できる保証ではありません。また「1試行」が何ゲームで得られるかはFeatureごとに異なるため、ゲーム数換算は後続工程で扱います。
 
 ## 実行
 `npm run stats:evaluate -- research/<machine>/research-data.json reports/<machine>-statistics.json`

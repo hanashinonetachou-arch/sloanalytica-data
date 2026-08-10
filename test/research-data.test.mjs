@@ -46,3 +46,36 @@ test('ratio mismatch produces warning only', () => {
   assert.equal(report.status, 'PASS');
   assert.ok(report.warnings.some((e) => e.code === 'PROBABILITY_RATIO_MISMATCH'));
 });
+
+
+test('complete multinomial distribution is valid', () => {
+  const data = clone();
+  data.features[0] = {
+    ...data.features[0], candidateModel: 'multinomial', categories: ['A','B','C'], settingValues: {},
+    settingDistributions: { SET_1: {A:.7,B:.2,C:.1}, SET_6: {A:.4,B:.2,C:.4} }
+  };
+  const report = validateResearchData(data);
+  assert.equal(report.status, 'PASS');
+});
+
+test('multinomial probability sum mismatch fails', () => {
+  const data = clone();
+  data.features[0] = {
+    ...data.features[0], candidateModel: 'multinomial', categories: ['A','B'], settingValues: {},
+    settingDistributions: { SET_1: {A:.7,B:.2}, SET_6: {A:.4,B:.6} }
+  };
+  const report = validateResearchData(data);
+  assert.equal(report.status, 'FAIL');
+  assert.ok(report.errors.some((e) => e.code === 'MULTINOMIAL_SUM'));
+});
+
+test('incomplete multinomial distribution warns without inventing values', () => {
+  const data = clone();
+  data.features[0] = {
+    ...data.features[0], candidateModel: 'multinomial', categories: ['A','B','C'], settingValues: {},
+    settingDistributions: { SET_1: {A:.7,B:.3}, SET_6: {A:.4,B:.2,C:.4} }
+  };
+  const report = validateResearchData(data);
+  assert.equal(report.status, 'PASS');
+  assert.ok(report.warnings.some((e) => e.code === 'MULTINOMIAL_INCOMPLETE'));
+});

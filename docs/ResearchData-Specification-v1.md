@@ -99,3 +99,19 @@ MachineData Auditor
 ```
 
 通常はResearchData作成後に元の長文調査報告書をAIへ再投入しません。例外・競合・定義不足だけをAIまたは人間へ戻します。
+
+## Multinomial候補の保存
+
+`candidateModel: multinomial` のFeatureは、`categories` と `settingDistributions` を使用します。
+
+```json
+{
+  "categories": ["基本", "偶数示唆", "高設定示唆"],
+  "settingDistributions": {
+    "SET_1": {"基本": 0.70, "偶数示唆": 0.20, "高設定示唆": 0.10},
+    "SET_6": {"基本": 0.45, "偶数示唆": 0.20, "高設定示唆": 0.35}
+  }
+}
+```
+
+完全な分布として評価する場合、各設定の全カテゴリ確率合計は1でなければなりません。公開情報が一部カテゴリしか存在しない場合、不足確率を推測して補完してはいけません。その場合は警告を残し、Statistical Evaluatorは自動評価対象から外します。

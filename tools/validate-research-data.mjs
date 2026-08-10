@@ -60,6 +60,33 @@ export function validateResearchData(data) {
         }
       }
     }
+    if (feature.candidateModel === 'multinomial') {
+      const categories = Array.isArray(feature.categories) ? feature.categories : [];
+      if (categories.length < 2) err('MULTINOMIAL_CATEGORIES', `Feature ${id} のmultinomialにはcategoriesを2件以上指定してください。`);
+      if (new Set(categories).size !== categories.length) err('MULTINOMIAL_CATEGORY_DUPLICATE', `Feature ${id} のcategoriesが重複しています。`);
+      const distributions = feature.settingDistributions;
+      if (!distributions || typeof distributions !== 'object' || Array.isArray(distributions)) {
+        err('MULTINOMIAL_DISTRIBUTIONS', `Feature ${id} のmultinomialにはsettingDistributionsが必要です。`);
+      } else {
+        for (const [settingId, distribution] of Object.entries(distributions)) {
+          if (!settings.has(settingId)) err('SETTING_UNKNOWN', `Feature ${id} のsettingDistributionsが実在設定にない ${settingId} を参照しています。`);
+          if (!distribution || typeof distribution !== 'object' || Array.isArray(distribution)) {
+            err('MULTINOMIAL_DISTRIBUTION_TYPE', `Feature ${id} / ${settingId} のカテゴリ分布が不正です。`);
+            continue;
+          }
+          const keys = Object.keys(distribution);
+          for (const category of keys) {
+            if (!categories.includes(category)) err('MULTINOMIAL_CATEGORY_UNKNOWN', `Feature ${id} / ${settingId} が未定義カテゴリ ${category} を参照しています。`);
+            const prob = distribution[category];
+            if (typeof prob !== 'number' || !Number.isFinite(prob) || prob < 0 || prob > 1) err('MULTINOMIAL_PROBABILITY', `Feature ${id} / ${settingId} / ${category} の確率は0～1の有限数である必要があります。`);
+          }
+          const missing = categories.filter((category) => !(category in distribution));
+          if (missing.length) warn('MULTINOMIAL_INCOMPLETE', `Feature ${id} / ${settingId} はカテゴリが不足しています: ${missing.join(', ')}`);
+          const sum = categories.reduce((acc, category) => acc + (typeof distribution[category] === 'number' && Number.isFinite(distribution[category]) ? distribution[category] : 0), 0);
+          if (missing.length === 0 && Math.abs(sum - 1) > 1e-6) err('MULTINOMIAL_SUM', `Feature ${id} / ${settingId} のカテゴリ確率合計は1である必要があります（実値 ${sum}）。`);
+        }
+      }
+    }
     if (feature.factStatus === 'conflict' && feature.crossSourceStatus !== 'conflict') warn('CONFLICT_STATUS', `Feature ${id} はfactStatus=conflictですがcrossSourceStatusがconflictではありません。`);
   }
 
