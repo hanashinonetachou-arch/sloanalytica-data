@@ -41,3 +41,13 @@ test("incomplete multinomial distribution is not invented",()=>{
  }]};
  assert.equal(evaluateResearchData(d).features[0].calculable,false);
 });
+
+test("implicit residual multinomial is evaluated with residual category",()=>{
+ const d={schemaVersion:"research-data-v1",machine:{machineId:"M",settings:["SET_1","SET_6"]},features:[{
+  researchFeatureId:"RF",name:"partial",candidateModel:"multinomial",distributionMode:"implicit_residual",
+  categories:["A","B"],settingDistributions:{SET_1:{A:.1,B:.2},SET_6:{A:.2,B:.3}}
+ }]};
+ const f=evaluateResearchData(d).features[0];
+ assert.equal(f.calculable,true);
+ assert.equal(f.categories.at(-1),"__RESIDUAL__");
+});

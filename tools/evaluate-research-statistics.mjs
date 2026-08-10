@@ -20,8 +20,17 @@ function categoricalDistribution(feature, setting){
   if(categories.length<2 || !raw || typeof raw!=="object") return null;
   const values=categories.map(c=>Number(raw[c]));
   if(values.some(p=>!Number.isFinite(p)||p<0||p>1)) return null;
-  if(Math.abs(values.reduce((a,b)=>a+b,0)-1)>1e-6) return null;
-  return values;
+  const sum=values.reduce((a,b)=>a+b,0);
+  const mode=feature.distributionMode ?? "complete";
+  if(mode==="complete"){
+    if(Math.abs(sum-1)>1e-6) return null;
+    return values;
+  }
+  if(mode==="implicit_residual"){
+    if(sum>1+1e-6) return null;
+    return [...values,Math.max(0,1-sum)];
+  }
+  return null;
 }
 function klCategorical(p,q){ let s=0; for(let i=0;i<p.length;i++){ if(p[i]<=0) continue; if(q[i]<=0) return Infinity; s+=p[i]*Math.log(p[i]/q[i]); } return s; }
 function jsCategorical(p,q){ const m=p.map((v,i)=>(v+q[i])/2); return 0.5*klCategorical(p,m)+0.5*klCategorical(q,m); }
@@ -56,11 +65,13 @@ function evaluateMultinomialFeature(f,settingOrder){
   }
   const pool=pairs.filter(x=>x.adjacent).length?pairs.filter(x=>x.adjacent):pairs;
   const hardest=pool.filter(x=>x.approxTrialsBayesErrorUpper5pct!=null).sort((a,b)=>b.approxTrialsBayesErrorUpper5pct-a.approxTrialsBayesErrorUpper5pct)[0]??null;
-  return {calculable:settings.length>=2,categories:f.categories??[],settingCount:settings.length,pairwise:pairs,hardestAdjacentPair:hardest};
+  const categories=[...(f.categories??[])];
+  if((f.distributionMode??"complete")==="implicit_residual") categories.push("__RESIDUAL__");
+  return {calculable:settings.length>=2,categories,distributionMode:f.distributionMode??"complete",settingCount:settings.length,pairwise:pairs,hardestAdjacentPair:hardest};
 }
 function evaluateFeature(f,settingOrder){
   const base={researchFeatureId:f.researchFeatureId,name:f.name,candidateModel:f.candidateModel??null};
-  if(f.candidateModel==='multinomial') return {...base,...evaluateMultinomialFeature(f,settingOrder),notes:["完全なカテゴリ確率分布のみ自動評価。欠損カテゴリは推測補完しない。","必要試行数は等事前確率の2仮説に対するBhattacharyya上界が5%以下になる試行数の目安。断定保証ではない。"]};
+  if(f.candidateModel==='multinomial') return {...base,...evaluateMultinomialFeature(f,settingOrder),notes:["completeは明示カテゴリ合計1、implicit_residualは残余確率を1-明示カテゴリ合計として数学的に追加して評価する。欠損した明示カテゴリは推測補完しない。","必要試行数は等事前確率の2仮説に対するBhattacharyya上界が5%以下になる試行数の目安。断定保証ではない。"]};
   if(["binomial","poisson"].includes(f.candidateModel)) return {...base,...evaluateScalarFeature(f,settingOrder),notes:["必要試行数は2比率の正規近似による設計比較用の目安。断定保証ではない。"]};
   return {...base,calculable:false,settingCount:0,pairwise:[],hardestAdjacentPair:null,notes:["未対応またはモデル不明のため自動統計評価対象外。"]};
 }

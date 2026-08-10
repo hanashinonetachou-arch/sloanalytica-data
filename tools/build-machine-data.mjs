@@ -26,19 +26,33 @@ function buildFeature(rf,sf,inputIds){
     sampleRecommendation:sf.sampleRecommendation ?? sf.minimumSample ?? 1
   };
   if(sf.weight!=null) base.weight=sf.weight;
+  if(sf.inputTransform!=null) base.inputTransform=sf.inputTransform;
+  if(sf.displayFormat!=null) base.displayFormat=sf.displayFormat;
   if(rf.candidateModel==="binomial" || rf.candidateModel==="poisson"){
     if(!sf.numeratorInputId||!sf.denominatorInputId) fail(`${sf.featureId}: numeratorInputId/denominatorInputId required`);
     if(!inputIds.has(sf.numeratorInputId)||!inputIds.has(sf.denominatorInputId)) fail(`${sf.featureId}: unknown input mapping`);
     base.numeratorInputId=sf.numeratorInputId; base.denominatorInputId=sf.denominatorInputId;
-    base.displayFormat="ratio_1_over_n";
+    if(base.displayFormat==null) base.displayFormat="ratio_1_over_n";
     base.probabilities=Object.fromEntries(Object.entries(rf.settingValues??{}).map(([s,v])=>[s,v.probability]).filter(([,p])=>Number.isFinite(p)));
   } else if(rf.candidateModel==="multinomial"){
     const cats=rf.categories??[];
     if(!cats.length) fail(`${sf.featureId}: categories missing in ResearchData`);
-    if(!Array.isArray(sf.categoryInputIds)||sf.categoryInputIds.length!==cats.length) fail(`${sf.featureId}: categoryInputIds must match categories`);
-    if(sf.categoryInputIds.some(id=>!inputIds.has(id))) fail(`${sf.featureId}: unknown category input`);
-    base.categoryInputIds=sf.categoryInputIds;
-    base.trialSource={mode:"sum_inputs_to_trials",inputIds:sf.categoryInputIds};
+    const orderedInputIds=[...(sf.numeratorInputId?[sf.numeratorInputId]:[]),...(sf.categoryInputIds??[])];
+    if(orderedInputIds.length!==cats.length) fail(`${sf.featureId}: numeratorInputId + categoryInputIds must match explicit categories`);
+    if(orderedInputIds.some(id=>!inputIds.has(id))) fail(`${sf.featureId}: unknown multinomial input`);
+    if(sf.numeratorInputId) base.numeratorInputId=sf.numeratorInputId;
+    if(sf.denominatorInputId){
+      if(!inputIds.has(sf.denominatorInputId)) fail(`${sf.featureId}: unknown denominator input`);
+      base.denominatorInputId=sf.denominatorInputId;
+    }
+    base.categoryInputIds=sf.categoryInputIds??[];
+    base.probabilities={};
+    if(sf.categorySubtractInputIds){
+      for(const [target,subs] of Object.entries(sf.categorySubtractInputIds)){
+        if(!inputIds.has(target) || subs.some(id=>!inputIds.has(id))) fail(`${sf.featureId}: unknown categorySubtractInputIds mapping`);
+      }
+      base.categorySubtractInputIds=sf.categorySubtractInputIds;
+    }
     base.categoryLabels=cats;
     base.categoryProbabilities=Object.fromEntries(Object.entries(rf.settingDistributions??{}).map(([s,dist])=>[s,cats.map(c=>dist[c])]));
   } else fail(`${sf.featureId}: unsupported candidateModel ${rf.candidateModel}`);

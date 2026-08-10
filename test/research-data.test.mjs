@@ -79,3 +79,13 @@ test('incomplete multinomial distribution warns without inventing values', () =>
   assert.equal(report.status, 'PASS');
   assert.ok(report.warnings.some((e) => e.code === 'MULTINOMIAL_INCOMPLETE'));
 });
+
+test("implicit residual multinomial accepts explicit probabilities below one",()=>{
+ const d=clone();
+ d.features[0].candidateModel="multinomial";
+ d.features[0].categories=["A","B"];
+ d.features[0].distributionMode="implicit_residual";
+ d.features[0].settingDistributions={SET_1:{A:.1,B:.2},SET_6:{A:.2,B:.3}};
+ const r=validateResearchData(d);
+ assert.equal(r.errors.length,0);
+});

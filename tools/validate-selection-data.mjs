@@ -25,6 +25,10 @@ export function validateSelectionData(s,research=null){
      if(f[k] && !idset.has(f[k])) errors.push(`${f.featureId}: unknown ${k} ${f[k]}`);
    }
    for(const id of f.categoryInputIds??[]) if(!idset.has(id)) errors.push(`${f.featureId}: unknown category input ${id}`);
+   for(const [target,subs] of Object.entries(f.categorySubtractInputIds??{})){
+     if(!idset.has(target)) errors.push(`${f.featureId}: unknown subtract target ${target}`);
+     for(const id of subs??[]) if(!idset.has(id)) errors.push(`${f.featureId}: unknown subtract input ${id}`);
+   }
    if(f.adoptionCategory==="EXCLUDE" && (f.numeratorInputId||f.denominatorInputId||(f.categoryInputIds?.length))) warnings.push(`${f.featureId}: EXCLUDE has unused input mapping`);
  }
  return {ok:errors.length===0,errors,warnings};
