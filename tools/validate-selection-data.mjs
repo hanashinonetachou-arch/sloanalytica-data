@@ -24,6 +24,7 @@ export function validateSelectionData(s,research=null){
    for(const k of ["numeratorInputId","denominatorInputId"]){
      if(f[k] && !idset.has(f[k])) errors.push(`${f.featureId}: unknown ${k} ${f[k]}`);
    }
+   if(f.trialCountInputId && !idset.has(f.trialCountInputId)) errors.push(`${f.featureId}: unknown trialCountInputId ${f.trialCountInputId}`);
    for(const id of f.categoryInputIds??[]) if(!idset.has(id)) errors.push(`${f.featureId}: unknown category input ${id}`);
    for(const [target,subs] of Object.entries(f.categorySubtractInputIds??{})){
      if(!idset.has(target)) errors.push(`${f.featureId}: unknown subtract target ${target}`);

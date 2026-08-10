@@ -1,37 +1,34 @@
 {
   "schemaVersion": "selection-data-v1",
   "machineId": "L_SMASLO_BAKEMONOGATARI_KH",
-  "machineDataVersion": "0.1.2",
+  "machineDataVersion": "0.1.3",
   "inputs": [
     {
-      "id": "INP_NORMAL_GAMES",
-      "name": "通常時ゲーム数",
+      "id": "INP_TOTAL_GAMES",
+      "name": "全ゲーム数",
       "type": "integer",
       "category": "PRIMARY",
       "unit": "G",
-      "displayOrder": 2,
-      "inferenceRole": "INCLUDE_PRIMARY",
-      "sessionDifferenceHelper": false
+      "displayOrder": 1,
+      "inferenceRole": "INCLUDE_PRIMARY"
     },
     {
       "id": "INP_AT_INITIAL_COUNT",
-      "name": "AT初当り回数",
+      "name": "倖時間突入回数",
       "type": "counter",
       "category": "PRIMARY",
       "unit": "回",
       "displayOrder": 2,
-      "inferenceRole": "INCLUDE_PRIMARY",
-      "parentInputId": "INP_NORMAL_GAMES"
+      "inferenceRole": "INCLUDE_PRIMARY"
     },
     {
-      "id": "INP_WATERMELON_COUNT",
-      "name": "スイカ回数",
-      "type": "counter",
+      "id": "INP_AT_INITIAL_OBSERVED_DENOMINATOR",
+      "name": "倖時間突入確率（1/○○）",
+      "type": "number",
       "category": "PRIMARY",
-      "unit": "回",
+      "unit": "",
       "displayOrder": 3,
-      "inferenceRole": "INCLUDE_PRIMARY",
-      "parentInputId": "INP_TOTAL_GAMES"
+      "inferenceRole": "INCLUDE_PRIMARY"
     },
     {
       "id": "INP_WEAK_CHERRY_DIRECT_COUNT",
@@ -39,9 +36,19 @@
       "type": "counter",
       "category": "PRIMARY",
       "unit": "回",
-      "displayOrder": 5,
+      "displayOrder": 4,
       "inferenceRole": "INCLUDE_PRIMARY",
       "parentInputId": "INP_AT_INITIAL_COUNT"
+    },
+    {
+      "id": "INP_WATERMELON_COUNT",
+      "name": "スイカ回数",
+      "type": "counter",
+      "category": "PRIMARY",
+      "unit": "回",
+      "displayOrder": 5,
+      "inferenceRole": "INCLUDE_PRIMARY",
+      "parentInputId": "INP_TOTAL_GAMES"
     },
     {
       "id": "INP_CZ_200_TRIALS",
@@ -102,15 +109,6 @@
           "value": "SET_6"
         }
       ]
-    },
-    {
-      "id": "INP_TOTAL_GAMES",
-      "name": "全ゲーム数",
-      "type": "integer",
-      "category": "PRIMARY",
-      "unit": "G",
-      "displayOrder": 1,
-      "inferenceRole": "INCLUDE_PRIMARY"
     }
   ],
   "features": [
@@ -127,14 +125,16 @@
       "categoryInputIds": [
         "INP_AT_INITIAL_COUNT"
       ],
-      "denominatorInputId": "INP_NORMAL_GAMES",
+      "denominatorInputId": "INP_AT_INITIAL_OBSERVED_DENOMINATOR",
       "categorySubtractInputIds": {
         "INP_AT_INITIAL_COUNT": [
           "INP_WEAK_CHERRY_DIRECT_COUNT"
         ]
       },
       "minimumSample": 1,
-      "sampleRecommendation": 8000
+      "sampleRecommendation": 8000,
+      "trialCountInputId": "INP_AT_INITIAL_COUNT",
+      "inputTransform": "observed_ratio_to_trials"
     },
     {
       "researchFeatureId": "RF_WATERMELON",

@@ -27,6 +27,10 @@ function buildFeature(rf,sf,inputIds){
   };
   if(sf.weight!=null) base.weight=sf.weight;
   if(sf.inputTransform!=null) base.inputTransform=sf.inputTransform;
+  if(sf.trialCountInputId!=null){
+    if(!inputIds.has(sf.trialCountInputId)) fail(`${sf.featureId}: unknown trialCountInputId ${sf.trialCountInputId}`);
+    base.trialCountInputId=sf.trialCountInputId;
+  }
   if(sf.displayFormat!=null) base.displayFormat=sf.displayFormat;
   if(rf.candidateModel==="binomial" || rf.candidateModel==="poisson"){
     if(!sf.numeratorInputId||!sf.denominatorInputId) fail(`${sf.featureId}: numeratorInputId/denominatorInputId required`);

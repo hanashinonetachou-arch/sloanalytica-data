@@ -3,7 +3,7 @@
   "machine": {
     "schemaVersion": "2.0.0",
     "machineId": "L_SMASLO_BAKEMONOGATARI_KH",
-    "machineDataVersion": "0.1.2",
+    "machineDataVersion": "0.1.3",
     "displayName": "スマスロ 化物語",
     "modelName": "L スマスロ化物語 KH",
     "manufacturer": "サミー",
@@ -37,38 +37,24 @@
         "minimum": 0
       },
       {
-        "id": "INP_NORMAL_GAMES",
-        "name": "通常時ゲーム数",
-        "type": "integer",
-        "category": "PRIMARY",
-        "unit": "G",
-        "displayOrder": 2,
-        "inferenceRole": "INCLUDE_PRIMARY",
-        "defaultValue": 0,
-        "minimum": 0,
-        "sessionDifferenceHelper": false
-      },
-      {
         "id": "INP_AT_INITIAL_COUNT",
-        "name": "AT初当り回数",
+        "name": "倖時間突入回数",
         "type": "counter",
         "category": "PRIMARY",
         "unit": "回",
-        "displayOrder": 3,
+        "displayOrder": 2,
         "inferenceRole": "INCLUDE_PRIMARY",
-        "parentInputId": "INP_NORMAL_GAMES",
         "defaultValue": 0,
         "minimum": 0
       },
       {
-        "id": "INP_WATERMELON_COUNT",
-        "name": "スイカ回数",
-        "type": "counter",
+        "id": "INP_AT_INITIAL_OBSERVED_DENOMINATOR",
+        "name": "倖時間突入確率（1/○○）",
+        "type": "number",
         "category": "PRIMARY",
-        "unit": "回",
-        "displayOrder": 4,
+        "unit": "",
+        "displayOrder": 3,
         "inferenceRole": "INCLUDE_PRIMARY",
-        "parentInputId": "INP_TOTAL_GAMES",
         "defaultValue": 0,
         "minimum": 0
       },
@@ -78,9 +64,21 @@
         "type": "counter",
         "category": "PRIMARY",
         "unit": "回",
-        "displayOrder": 6,
+        "displayOrder": 4,
         "inferenceRole": "INCLUDE_PRIMARY",
         "parentInputId": "INP_AT_INITIAL_COUNT",
+        "defaultValue": 0,
+        "minimum": 0
+      },
+      {
+        "id": "INP_WATERMELON_COUNT",
+        "name": "スイカ回数",
+        "type": "counter",
+        "category": "PRIMARY",
+        "unit": "回",
+        "displayOrder": 5,
+        "inferenceRole": "INCLUDE_PRIMARY",
+        "parentInputId": "INP_TOTAL_GAMES",
         "defaultValue": 0,
         "minimum": 0
       },
@@ -164,7 +162,7 @@
         "minimumSample": 1,
         "sampleRecommendation": 8000,
         "numeratorInputId": "INP_WEAK_CHERRY_DIRECT_COUNT",
-        "denominatorInputId": "INP_NORMAL_GAMES",
+        "denominatorInputId": "INP_AT_INITIAL_OBSERVED_DENOMINATOR",
         "categoryInputIds": [
           "INP_AT_INITIAL_COUNT"
         ],
@@ -212,8 +210,8 @@
           "SRC_1GEKI_KOYAKU"
         ],
         "selectionRationale": {
-          "summary": "AT初当りを弱チェリー直撃とその他初当りに排他的分解して使用する。",
-          "adoptionReason": "AT初当り全体と弱チェリー直撃を別々に加える二重計上を避けつつ、弱チェリー直撃の大きな設定差を保持できる。",
+          "summary": "マイスロの倖時間突入回数と表示実測確率から試行数を復元し、AT初当りを弱チェリー直撃とその他初当りに排他的分解して使用する。",
+          "adoptionReason": "マイスロの通常ゲーム数とAT初当り解析値の分母定義が一致しないため、マイスロ表示の「回数＋1/○○」から試行数を復元する。AT初当り全体と弱チェリー直撃の二重計上も排他的Multinomialで回避する。",
           "shortTermReason": "1日単位では設定間分布の重なりが大きいため単独断定には使用しない。",
           "longTermReason": "通常ゲーム数の蓄積とともにAT初当り全体と直撃構成の双方が情報として加算される。",
           "strengths": [
@@ -221,8 +219,9 @@
             "設定1から6まで公開値が揃っている"
           ],
           "limitations": [
-            "設定1対6でも厳格な識別目安は約3万G規模",
-            "直撃契機を正しく判別する必要がある"
+            "マイスロ表示の倖時間突入回数と1/○○の両方を入力する必要がある",
+            "弱チェリー直撃契機を正しく判別する必要がある",
+            "表示分母から復元した試行数は四捨五入して整数化する"
           ],
           "sourceEvidenceRefs": [
             "SRC_1GEKI_SETTING",
@@ -231,7 +230,9 @@
             "SRC_NANA_SETTING",
             "SRC_1GEKI_KOYAKU"
           ]
-        }
+        },
+        "trialCountInputId": "INP_AT_INITIAL_COUNT",
+        "inputTransform": "observed_ratio_to_trials"
       },
       {
         "featureId": "FEAT_WATERMELON",
@@ -524,15 +525,15 @@
           },
           {
             "type": "input",
-            "inputId": "INP_NORMAL_GAMES",
-            "label": "通常時ゲーム数",
-            "widget": "number"
+            "inputId": "INP_AT_INITIAL_COUNT",
+            "label": "倖時間突入回数",
+            "widget": "counter"
           },
           {
             "type": "input",
-            "inputId": "INP_AT_INITIAL_COUNT",
-            "label": "AT初当り回数",
-            "widget": "counter"
+            "inputId": "INP_AT_INITIAL_OBSERVED_DENOMINATOR",
+            "label": "倖時間突入確率（1/○○）",
+            "widget": "number"
           },
           {
             "type": "input",
@@ -600,7 +601,7 @@
     "manufacturerDetail": "製造：銀座",
     "introductionDate": "2025-12-08",
     "researchDate": "2026-08-11",
-    "machineDataVersion": "0.1.2"
+    "machineDataVersion": "0.1.3"
   },
   "validation": {
     "cases": [

@@ -64,3 +64,19 @@ test("multinomial preserves explicit mapping, residual convention and subtract r
  assert.deepEqual(f.categorySubtractInputIds,{INP_B:["INP_A"]});
  assert.equal(f.inputTransform,"sum_inputs_to_trials");
 });
+
+test("preserves observed_ratio_to_trials mapping",()=>{
+ const sel={schemaVersion:"selection-data-v1",machineId:"M",machineDataVersion:"0.1.0",
+ inputs:[
+  {id:"INP_DEN",name:"Observed denominator",type:"number",category:"C",displayOrder:1},
+  {id:"INP_TOTAL",name:"Total hits",type:"counter",category:"C",displayOrder:2},
+  {id:"INP_A",name:"A",type:"counter",category:"C",displayOrder:3},
+  {id:"INP_B",name:"B",type:"counter",category:"C",displayOrder:4}],
+ features:[{researchFeatureId:"RF2",featureId:"FEAT_SCREEN",adoptionCategory:"INCLUDE_SUPPORT",
+  numeratorInputId:"INP_A",categoryInputIds:["INP_B"],denominatorInputId:"INP_DEN",
+  inputTransform:"observed_ratio_to_trials",trialCountInputId:"INP_TOTAL"}]};
+ const p=buildMachineData(research,sel);
+ const f=p.features.features[0];
+ assert.equal(f.inputTransform,"observed_ratio_to_trials");
+ assert.equal(f.trialCountInputId,"INP_TOTAL");
+});

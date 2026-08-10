@@ -17,3 +17,10 @@ ResearchData（公開事実）と SelectionData（採用判断・入力対応）
 
 ## 今後の位置づけ
 ResearchData -> Statistical Evaluator -> SelectionData -> MachineData Builder -> Auditor
+
+
+## observed_ratio_to_trials
+外部集計サービス（マイスロ等）が「観測回数」と「実測 1/○○」を表示する場合に、
+`trialCountInputId × denominatorInputId` を四捨五入して内部試行数へ復元する。
+
+これは、アプリ側で区間ゲーム数の定義を推測・再構成せず、外部集計側の実測分母を利用するための汎用変換である。
