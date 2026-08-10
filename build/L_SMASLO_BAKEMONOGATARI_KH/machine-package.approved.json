@@ -1,0 +1,606 @@
+{
+  "schemaVersion": 1,
+  "machine": {
+    "schemaVersion": "2.0.0",
+    "machineId": "L_SMASLO_BAKEMONOGATARI_KH",
+    "machineDataVersion": "0.1.0",
+    "displayName": "スマスロ 化物語",
+    "modelName": "L スマスロ化物語 KH",
+    "manufacturer": "サミー",
+    "settings": [
+      "SET_1",
+      "SET_2",
+      "SET_3",
+      "SET_4",
+      "SET_5",
+      "SET_6"
+    ],
+    "packagePolicy": {
+      "offlineCapable": true,
+      "containsImages": false,
+      "containsExecutableCode": false
+    },
+    "manufacturerDetail": "製造：銀座"
+  },
+  "inputs": {
+    "schemaVersion": "2.0.0",
+    "inputs": [
+      {
+        "id": "INP_NORMAL_GAMES",
+        "name": "通常時ゲーム数",
+        "type": "integer",
+        "category": "PRIMARY",
+        "unit": "G",
+        "displayOrder": 1,
+        "inferenceRole": "INCLUDE_PRIMARY",
+        "defaultValue": 0,
+        "minimum": 0
+      },
+      {
+        "id": "INP_AT_INITIAL_COUNT",
+        "name": "AT初当り回数",
+        "type": "counter",
+        "category": "PRIMARY",
+        "unit": "回",
+        "displayOrder": 2,
+        "inferenceRole": "INCLUDE_PRIMARY",
+        "parentInputId": "INP_NORMAL_GAMES",
+        "defaultValue": 0,
+        "minimum": 0
+      },
+      {
+        "id": "INP_WATERMELON_COUNT",
+        "name": "スイカ回数",
+        "type": "counter",
+        "category": "PRIMARY",
+        "unit": "回",
+        "displayOrder": 3,
+        "inferenceRole": "INCLUDE_PRIMARY",
+        "parentInputId": "INP_NORMAL_GAMES",
+        "defaultValue": 0,
+        "minimum": 0
+      },
+      {
+        "id": "INP_WEAK_CHERRY_DIRECT_COUNT",
+        "name": "弱チェリーからのAT直撃回数",
+        "type": "counter",
+        "category": "PRIMARY",
+        "unit": "回",
+        "displayOrder": 5,
+        "inferenceRole": "INCLUDE_PRIMARY",
+        "parentInputId": "INP_AT_INITIAL_COUNT",
+        "defaultValue": 0,
+        "minimum": 0
+      },
+      {
+        "id": "INP_CZ_200_TRIALS",
+        "name": "200Gゾーン到達回数",
+        "type": "counter",
+        "category": "ZONE",
+        "unit": "回",
+        "displayOrder": 10,
+        "inferenceRole": "INCLUDE_SUPPORT",
+        "defaultValue": 0,
+        "minimum": 0
+      },
+      {
+        "id": "INP_CZ_200_HITS",
+        "name": "200GゾーンからのCZ当選回数",
+        "type": "counter",
+        "category": "ZONE",
+        "unit": "回",
+        "displayOrder": 11,
+        "inferenceRole": "INCLUDE_SUPPORT",
+        "parentInputId": "INP_CZ_200_TRIALS",
+        "defaultValue": 0,
+        "minimum": 0
+      },
+      {
+        "id": "INP_SETTING_FLOOR",
+        "name": "確認した設定下限",
+        "type": "enum",
+        "category": "EVIDENCE",
+        "unit": "",
+        "displayOrder": 20,
+        "inferenceRole": "INCLUDE_SUPPORT",
+        "options": [
+          {
+            "key": "NONE",
+            "label": "確認なし",
+            "value": "NONE"
+          },
+          {
+            "key": "SET_2_OR_HIGHER",
+            "label": "設定2以上（銅トロフィー／174枚など）",
+            "value": "SET_2_OR_HIGHER"
+          },
+          {
+            "key": "SET_3_OR_HIGHER",
+            "label": "設定3以上（銀トロフィー／543枚など）",
+            "value": "SET_3_OR_HIGHER"
+          },
+          {
+            "key": "SET_4_OR_HIGHER",
+            "label": "設定4以上（金トロフィー／初代3人パネルなど）",
+            "value": "SET_4_OR_HIGHER"
+          },
+          {
+            "key": "SET_5_OR_HIGHER",
+            "label": "設定5以上（キリン／ヒロイン集合／忍＋赤7など）",
+            "value": "SET_5_OR_HIGHER"
+          },
+          {
+            "key": "SET_6",
+            "label": "設定6（虹／I LOVE YOU／331枚など）",
+            "value": "SET_6"
+          }
+        ],
+        "defaultValue": "NONE"
+      }
+    ]
+  },
+  "features": {
+    "schemaVersion": "2.0.0",
+    "features": [
+      {
+        "featureId": "FEAT_AT_INITIAL_EXCLUSIVE",
+        "name": "AT初当り内訳（弱チェリー直撃／その他）",
+        "adoptionCategory": "INCLUDE_PRIMARY",
+        "calculationRole": "PROBABILITY",
+        "probabilityEngineUsage": true,
+        "modelType": "multinomial",
+        "minimumSample": 1,
+        "sampleRecommendation": 8000,
+        "numeratorInputId": "INP_WEAK_CHERRY_DIRECT_COUNT",
+        "denominatorInputId": "INP_NORMAL_GAMES",
+        "categoryInputIds": [
+          "INP_AT_INITIAL_COUNT"
+        ],
+        "probabilities": {},
+        "categorySubtractInputIds": {
+          "INP_AT_INITIAL_COUNT": [
+            "INP_WEAK_CHERRY_DIRECT_COUNT"
+          ]
+        },
+        "categoryLabels": [
+          "弱チェリー直撃AT",
+          "その他AT初当り"
+        ],
+        "categoryProbabilities": {
+          "SET_1": [
+            3.0511060259344016e-05,
+            0.003741650388250652
+          ],
+          "SET_2": [
+            6.102212051868803e-05,
+            0.0037748045001180595
+          ],
+          "SET_3": [
+            9.916094584286804e-05,
+            0.0038675189430900955
+          ],
+          "SET_4": [
+            0.00016018306636155608,
+            0.004027421623755696
+          ],
+          "SET_5": [
+            0.00022120518688024412,
+            0.004111550445702078
+          ],
+          "SET_6": [
+            0.0002898550724637681,
+            0.004263878989467016
+          ]
+        },
+        "sourceEvidenceRefs": [
+          "SRC_1GEKI_SETTING",
+          "SRC_NANA_SPEC",
+          "SRC_1GEKI_NORMAL",
+          "SRC_NANA_SETTING",
+          "SRC_1GEKI_KOYAKU"
+        ],
+        "selectionRationale": {
+          "summary": "AT初当りを弱チェリー直撃とその他初当りに排他的分解して使用する。",
+          "adoptionReason": "AT初当り全体と弱チェリー直撃を別々に加える二重計上を避けつつ、弱チェリー直撃の大きな設定差を保持できる。",
+          "shortTermReason": "1日単位では設定間分布の重なりが大きいため単独断定には使用しない。",
+          "longTermReason": "通常ゲーム数の蓄積とともにAT初当り全体と直撃構成の双方が情報として加算される。",
+          "strengths": [
+            "AT初当りと弱チェリー直撃の重複評価を回避",
+            "設定1から6まで公開値が揃っている"
+          ],
+          "limitations": [
+            "設定1対6でも厳格な識別目安は約3万G規模",
+            "直撃契機を正しく判別する必要がある"
+          ],
+          "sourceEvidenceRefs": [
+            "SRC_1GEKI_SETTING",
+            "SRC_NANA_SPEC",
+            "SRC_1GEKI_NORMAL",
+            "SRC_NANA_SETTING",
+            "SRC_1GEKI_KOYAKU"
+          ]
+        }
+      },
+      {
+        "featureId": "FEAT_WATERMELON",
+        "name": "スイカ出現率",
+        "adoptionCategory": "INCLUDE_PRIMARY",
+        "calculationRole": "PROBABILITY",
+        "probabilityEngineUsage": true,
+        "modelType": "binomial",
+        "minimumSample": 1,
+        "sampleRecommendation": 8000,
+        "displayFormat": "ratio_1_over_n",
+        "numeratorInputId": "INP_WATERMELON_COUNT",
+        "denominatorInputId": "INP_NORMAL_GAMES",
+        "probabilities": {
+          "SET_1": 0.011441647597254004,
+          "SET_2": 0.011655011655011656,
+          "SET_3": 0.01177856301531213,
+          "SET_4": 0.012547051442910916,
+          "SET_5": 0.013368983957219251,
+          "SET_6": 0.014306151645207437
+        },
+        "sourceEvidenceRefs": [
+          "SRC_1GEKI_KOYAKU",
+          "SRC_NANA_SPEC"
+        ],
+        "selectionRationale": {
+          "summary": "スイカ出現率を主推測要素として使用する。",
+          "adoptionReason": "全設定の解析値が公開され、設定1の1/87.4から設定6の1/69.9まで一貫して高設定ほど出現しやすい。",
+          "shortTermReason": "数千Gではブレるが、他Featureと組み合わせる連続的な補助情報になる。",
+          "longTermReason": "設定1対6の厳格な識別目安は約1.2万Gで、1日後半から情報量が増えやすい。",
+          "strengths": [
+            "マイスロで自動カウント可能",
+            "他の主要レア役は全設定共通で対象が明確"
+          ],
+          "limitations": [
+            "単独では設定断定不可",
+            "隣接設定差は小さい"
+          ],
+          "sourceEvidenceRefs": [
+            "SRC_1GEKI_KOYAKU",
+            "SRC_NANA_SPEC"
+          ]
+        }
+      },
+      {
+        "featureId": "FEAT_CZ_200G",
+        "name": "200G到達時のCZ当選",
+        "adoptionCategory": "INCLUDE_SUPPORT",
+        "calculationRole": "PROBABILITY",
+        "probabilityEngineUsage": true,
+        "modelType": "binomial",
+        "minimumSample": 1,
+        "sampleRecommendation": 20,
+        "displayFormat": "percentage",
+        "numeratorInputId": "INP_CZ_200_HITS",
+        "denominatorInputId": "INP_CZ_200_TRIALS",
+        "probabilities": {
+          "SET_1": 0.1,
+          "SET_2": 0.1,
+          "SET_3": 0.104,
+          "SET_4": 0.15,
+          "SET_5": 0.175,
+          "SET_6": 0.2
+        },
+        "sourceEvidenceRefs": [
+          "SRC_1GEKI_ZONE",
+          "SRC_NANA_ZONE"
+        ],
+        "selectionRationale": {
+          "summary": "200Gゾーン到達時のCZ当選を補助推測要素として使用する。",
+          "adoptionReason": "設定1・2の10%に対し設定6は20%で約2倍の差があり、300Gゾーンより相対差が大きい。",
+          "shortTermReason": "1日の到達回数は少ないため主判別にはせず、観測できた分だけ補助情報として使う。",
+          "longTermReason": "複数回の到達履歴が蓄積した場合に低設定域と高設定域の比較材料になる。",
+          "strengths": [
+            "設定1対6で2倍の設定差",
+            "契機が200G到達と明確"
+          ],
+          "limitations": [
+            "必要試行回数は多い",
+            "他契機CZと混同せずゾーン由来を判別する必要がある"
+          ],
+          "sourceEvidenceRefs": [
+            "SRC_1GEKI_ZONE",
+            "SRC_NANA_ZONE"
+          ]
+        }
+      }
+    ]
+  },
+  "evidence": {
+    "version": "1.0.0",
+    "evidences": [
+      {
+        "id": "EVI_SETTING_2_PLUS",
+        "name": "設定2以上確認",
+        "displayName": "設定2以上確認",
+        "inputId": "INP_SETTING_FLOOR",
+        "triggerValue": "SET_2_OR_HIGHER",
+        "confirmedSettings": [],
+        "deniedSettings": [
+          "SET_1"
+        ],
+        "hasImage": false,
+        "type": "SETTING_DENIAL"
+      },
+      {
+        "id": "EVI_SETTING_3_PLUS",
+        "name": "設定3以上確認",
+        "displayName": "設定3以上確認",
+        "inputId": "INP_SETTING_FLOOR",
+        "triggerValue": "SET_3_OR_HIGHER",
+        "confirmedSettings": [],
+        "deniedSettings": [
+          "SET_1",
+          "SET_2"
+        ],
+        "hasImage": false,
+        "type": "SETTING_DENIAL"
+      },
+      {
+        "id": "EVI_SETTING_4_PLUS",
+        "name": "設定4以上確認",
+        "displayName": "設定4以上確認",
+        "inputId": "INP_SETTING_FLOOR",
+        "triggerValue": "SET_4_OR_HIGHER",
+        "confirmedSettings": [],
+        "deniedSettings": [
+          "SET_1",
+          "SET_2",
+          "SET_3"
+        ],
+        "hasImage": false,
+        "type": "SETTING_DENIAL"
+      },
+      {
+        "id": "EVI_SETTING_5_PLUS",
+        "name": "設定5以上確認",
+        "displayName": "設定5以上確認",
+        "inputId": "INP_SETTING_FLOOR",
+        "triggerValue": "SET_5_OR_HIGHER",
+        "confirmedSettings": [],
+        "deniedSettings": [
+          "SET_1",
+          "SET_2",
+          "SET_3",
+          "SET_4"
+        ],
+        "hasImage": false,
+        "type": "SETTING_DENIAL"
+      },
+      {
+        "id": "EVI_SETTING_6",
+        "name": "設定6確認",
+        "displayName": "設定6確認",
+        "inputId": "INP_SETTING_FLOOR",
+        "triggerValue": "SET_6",
+        "confirmedSettings": [],
+        "deniedSettings": [
+          "SET_1",
+          "SET_2",
+          "SET_3",
+          "SET_4",
+          "SET_5"
+        ],
+        "hasImage": false,
+        "type": "SETTING_DENIAL"
+      }
+    ],
+    "sources": [
+      {
+        "id": "SRC_SAMMY_OFFICIAL",
+        "classification": "OFFICIAL",
+        "pageName": "スマスロ 化物語｜Sammy",
+        "url": "https://www.sammy.co.jp/japanese/product/pachislot/sp_bak_mo/",
+        "checkedAt": "2026-08-11"
+      },
+      {
+        "id": "SRC_PWORLD_MACHINE",
+        "classification": "ANALYSIS",
+        "pageName": "スマスロ 化物語 機種情報",
+        "url": "https://www.p-world.co.jp/machine/database/10358",
+        "checkedAt": "2026-08-11"
+      },
+      {
+        "id": "SRC_1GEKI_SETTING",
+        "classification": "ANALYSIS",
+        "pageName": "化物語（スマスロ）設定差・設定判別要素まとめ",
+        "url": "https://1geki.jp/slot/l_bakemonogatari/0/",
+        "checkedAt": "2026-08-11"
+      },
+      {
+        "id": "SRC_1GEKI_KOYAKU",
+        "classification": "ANALYSIS",
+        "pageName": "化物語（スマスロ）小役確率と通常時のベース",
+        "url": "https://1geki.jp/slot/l_bakemonogatari/4/",
+        "checkedAt": "2026-08-11"
+      },
+      {
+        "id": "SRC_1GEKI_NORMAL",
+        "classification": "ANALYSIS",
+        "pageName": "化物語（スマスロ）通常時の抽選・内部状態",
+        "url": "https://1geki.jp/slot/l_bakemonogatari/43/",
+        "checkedAt": "2026-08-11"
+      },
+      {
+        "id": "SRC_1GEKI_ZONE",
+        "classification": "ANALYSIS",
+        "pageName": "化物語（スマスロ）規定ゲーム数による抽選",
+        "url": "https://1geki.jp/slot/l_bakemonogatari/45/",
+        "checkedAt": "2026-08-11"
+      },
+      {
+        "id": "SRC_1GEKI_BONUS",
+        "classification": "ANALYSIS",
+        "pageName": "化物語（スマスロ）AT中ボーナスの詳細",
+        "url": "https://1geki.jp/slot/l_bakemonogatari/89/",
+        "checkedAt": "2026-08-11"
+      },
+      {
+        "id": "SRC_1GEKI_KAIJUREN",
+        "classification": "ANALYSIS",
+        "pageName": "化物語（スマスロ）解呪連・解呪連モード",
+        "url": "https://1geki.jp/slot/l_bakemonogatari/44/",
+        "checkedAt": "2026-08-11"
+      },
+      {
+        "id": "SRC_NANA_SETTING",
+        "classification": "ANALYSIS",
+        "pageName": "化物語 スマスロ 設定差・設定示唆演出まとめ",
+        "url": "https://nana-press.com/kaiseki/machine/1055/33275/",
+        "checkedAt": "2026-08-11"
+      },
+      {
+        "id": "SRC_NANA_SPEC",
+        "classification": "ANALYSIS",
+        "pageName": "化物語 スマスロ AT初当たり確率/小役確率",
+        "url": "https://nana-press.com/kaiseki/machine/1055/32648/",
+        "checkedAt": "2026-08-11"
+      },
+      {
+        "id": "SRC_NANA_NORMAL",
+        "classification": "ANALYSIS",
+        "pageName": "化物語 スマスロ レア小役のCZ抽選・内部状態",
+        "url": "https://nana-press.com/kaiseki/machine/1055/33285/",
+        "checkedAt": "2026-08-11"
+      },
+      {
+        "id": "SRC_NANA_ZONE",
+        "classification": "ANALYSIS",
+        "pageName": "化物語 スマスロ ゾーンの詳細・規定ゲーム数の抽選",
+        "url": "https://nana-press.com/kaiseki/machine/1055/33283/",
+        "checkedAt": "2026-08-11"
+      },
+      {
+        "id": "SRC_NANA_END",
+        "classification": "ANALYSIS",
+        "pageName": "化物語 スマスロ AT終了画面の設定示唆",
+        "url": "https://nana-press.com/kaiseki/machine/1055/33304/",
+        "checkedAt": "2026-08-11"
+      },
+      {
+        "id": "SRC_NANA_PAYOUT",
+        "classification": "ANALYSIS",
+        "pageName": "化物語 スマスロ 獲得枚数表示の設定示唆",
+        "url": "https://nana-press.com/kaiseki/machine/1055/33612/",
+        "checkedAt": "2026-08-11"
+      },
+      {
+        "id": "SRC_NANA_BONUS_SCREEN",
+        "classification": "ANALYSIS",
+        "pageName": "化物語 スマスロ ボーナス確定画面の設定示唆",
+        "url": "https://nana-press.com/kaiseki/machine/1055/33305/",
+        "checkedAt": "2026-08-11"
+      }
+    ]
+  },
+  "ui": {
+    "sections": [
+      {
+        "id": "AUTO_PRIMARY",
+        "title": "主要入力",
+        "displayOrder": 1,
+        "items": [
+          {
+            "type": "input",
+            "inputId": "INP_NORMAL_GAMES",
+            "label": "通常時ゲーム数",
+            "widget": "number"
+          },
+          {
+            "type": "input",
+            "inputId": "INP_AT_INITIAL_COUNT",
+            "label": "AT初当り回数",
+            "widget": "counter"
+          },
+          {
+            "type": "input",
+            "inputId": "INP_WATERMELON_COUNT",
+            "label": "スイカ回数",
+            "widget": "counter"
+          },
+          {
+            "type": "input",
+            "inputId": "INP_WEAK_CHERRY_DIRECT_COUNT",
+            "label": "弱チェリーからのAT直撃回数",
+            "widget": "counter"
+          }
+        ]
+      },
+      {
+        "id": "AUTO_ZONE",
+        "title": "200Gゾーン",
+        "displayOrder": 2,
+        "items": [
+          {
+            "type": "input",
+            "inputId": "INP_CZ_200_TRIALS",
+            "label": "200Gゾーン到達回数",
+            "widget": "counter"
+          },
+          {
+            "type": "input",
+            "inputId": "INP_CZ_200_HITS",
+            "label": "200GゾーンからのCZ当選回数",
+            "widget": "counter"
+          }
+        ]
+      },
+      {
+        "id": "AUTO_EVIDENCE",
+        "title": "設定確定・否定情報",
+        "displayOrder": 3,
+        "items": [
+          {
+            "type": "input",
+            "inputId": "INP_SETTING_FLOOR",
+            "label": "確認した設定下限",
+            "widget": "select"
+          }
+        ]
+      }
+    ]
+  },
+  "reliability": {},
+  "metadata": {
+    "machineId": "L_SMASLO_BAKEMONOGATARI_KH",
+    "displayName": "スマスロ 化物語",
+    "settings": [
+      "SET_1",
+      "SET_2",
+      "SET_3",
+      "SET_4",
+      "SET_5",
+      "SET_6"
+    ],
+    "formalName": "スマスロ 化物語",
+    "modelNumber": "L スマスロ化物語 KH",
+    "manufacturer": "サミー",
+    "manufacturerDetail": "製造：銀座",
+    "introductionDate": "2025-12-08",
+    "researchDate": "2026-08-11"
+  },
+  "validation": {
+    "cases": [
+      {
+        "id": "VAL_AT_DIRECT_LE_TOTAL",
+        "description": "弱チェリー直撃AT回数はAT初当り回数以下",
+        "type": "input_relation",
+        "leftInputId": "INP_WEAK_CHERRY_DIRECT_COUNT",
+        "operator": "LTE",
+        "rightInputId": "INP_AT_INITIAL_COUNT"
+      },
+      {
+        "id": "VAL_CZ200_HIT_LE_TRIAL",
+        "description": "200GゾーンCZ当選回数は到達回数以下",
+        "type": "input_relation",
+        "leftInputId": "INP_CZ_200_HITS",
+        "operator": "LTE",
+        "rightInputId": "INP_CZ_200_TRIALS"
+      }
+    ]
+  },
+  "statistics": {}
+}

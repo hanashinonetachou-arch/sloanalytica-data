@@ -1,0 +1,233 @@
+{
+  "schemaVersion": "selection-data-v1",
+  "machineId": "L_SMASLO_BAKEMONOGATARI_KH",
+  "machineDataVersion": "0.1.0",
+  "inputs": [
+    {
+      "id": "INP_NORMAL_GAMES",
+      "name": "通常時ゲーム数",
+      "type": "integer",
+      "category": "PRIMARY",
+      "unit": "G",
+      "displayOrder": 1,
+      "inferenceRole": "INCLUDE_PRIMARY"
+    },
+    {
+      "id": "INP_AT_INITIAL_COUNT",
+      "name": "AT初当り回数",
+      "type": "counter",
+      "category": "PRIMARY",
+      "unit": "回",
+      "displayOrder": 2,
+      "inferenceRole": "INCLUDE_PRIMARY",
+      "parentInputId": "INP_NORMAL_GAMES"
+    },
+    {
+      "id": "INP_WATERMELON_COUNT",
+      "name": "スイカ回数",
+      "type": "counter",
+      "category": "PRIMARY",
+      "unit": "回",
+      "displayOrder": 3,
+      "inferenceRole": "INCLUDE_PRIMARY",
+      "parentInputId": "INP_NORMAL_GAMES"
+    },
+    {
+      "id": "INP_WEAK_CHERRY_DIRECT_COUNT",
+      "name": "弱チェリーからのAT直撃回数",
+      "type": "counter",
+      "category": "PRIMARY",
+      "unit": "回",
+      "displayOrder": 5,
+      "inferenceRole": "INCLUDE_PRIMARY",
+      "parentInputId": "INP_AT_INITIAL_COUNT"
+    },
+    {
+      "id": "INP_CZ_200_TRIALS",
+      "name": "200Gゾーン到達回数",
+      "type": "counter",
+      "category": "ZONE",
+      "unit": "回",
+      "displayOrder": 10,
+      "inferenceRole": "INCLUDE_SUPPORT"
+    },
+    {
+      "id": "INP_CZ_200_HITS",
+      "name": "200GゾーンからのCZ当選回数",
+      "type": "counter",
+      "category": "ZONE",
+      "unit": "回",
+      "displayOrder": 11,
+      "inferenceRole": "INCLUDE_SUPPORT",
+      "parentInputId": "INP_CZ_200_TRIALS"
+    },
+    {
+      "id": "INP_SETTING_FLOOR",
+      "name": "確認した設定下限",
+      "type": "enum",
+      "category": "EVIDENCE",
+      "unit": "",
+      "displayOrder": 20,
+      "inferenceRole": "INCLUDE_SUPPORT",
+      "options": [
+        {
+          "key": "NONE",
+          "label": "確認なし",
+          "value": "NONE"
+        },
+        {
+          "key": "SET_2_OR_HIGHER",
+          "label": "設定2以上",
+          "value": "SET_2_OR_HIGHER"
+        },
+        {
+          "key": "SET_3_OR_HIGHER",
+          "label": "設定3以上",
+          "value": "SET_3_OR_HIGHER"
+        },
+        {
+          "key": "SET_4_OR_HIGHER",
+          "label": "設定4以上",
+          "value": "SET_4_OR_HIGHER"
+        },
+        {
+          "key": "SET_5_OR_HIGHER",
+          "label": "設定5以上",
+          "value": "SET_5_OR_HIGHER"
+        },
+        {
+          "key": "SET_6",
+          "label": "設定6",
+          "value": "SET_6"
+        }
+      ]
+    }
+  ],
+  "features": [
+    {
+      "researchFeatureId": "RF_AT_INITIAL",
+      "featureId": "FEAT_AT_INITIAL_RAW",
+      "adoptionCategory": "EXCLUDE"
+    },
+    {
+      "researchFeatureId": "RF_AT_INITIAL_EXCLUSIVE",
+      "featureId": "FEAT_AT_INITIAL_EXCLUSIVE",
+      "adoptionCategory": "INCLUDE_PRIMARY",
+      "numeratorInputId": "INP_WEAK_CHERRY_DIRECT_COUNT",
+      "categoryInputIds": [
+        "INP_AT_INITIAL_COUNT"
+      ],
+      "denominatorInputId": "INP_NORMAL_GAMES",
+      "categorySubtractInputIds": {
+        "INP_AT_INITIAL_COUNT": [
+          "INP_WEAK_CHERRY_DIRECT_COUNT"
+        ]
+      },
+      "minimumSample": 1,
+      "sampleRecommendation": 8000
+    },
+    {
+      "researchFeatureId": "RF_WATERMELON",
+      "featureId": "FEAT_WATERMELON",
+      "adoptionCategory": "INCLUDE_PRIMARY",
+      "numeratorInputId": "INP_WATERMELON_COUNT",
+      "denominatorInputId": "INP_NORMAL_GAMES",
+      "minimumSample": 1,
+      "sampleRecommendation": 8000,
+      "displayFormat": "ratio_1_over_n"
+    },
+    {
+      "researchFeatureId": "RF_WEAK_CHERRY_DIRECT",
+      "featureId": "FEAT_WEAK_CHERRY_DIRECT_RAW",
+      "adoptionCategory": "EXCLUDE"
+    },
+    {
+      "researchFeatureId": "RF_CZ_200G",
+      "featureId": "FEAT_CZ_200G",
+      "adoptionCategory": "INCLUDE_SUPPORT",
+      "numeratorInputId": "INP_CZ_200_HITS",
+      "denominatorInputId": "INP_CZ_200_TRIALS",
+      "minimumSample": 1,
+      "sampleRecommendation": 20,
+      "displayFormat": "percentage"
+    },
+    {
+      "researchFeatureId": "RF_CZ_300G",
+      "featureId": "FEAT_CZ_300G",
+      "adoptionCategory": "EXCLUDE"
+    },
+    {
+      "researchFeatureId": "RF_NORMAL_TO_HIGH",
+      "featureId": "FEAT_NORMAL_TO_HIGH",
+      "adoptionCategory": "EXCLUDE"
+    },
+    {
+      "researchFeatureId": "RF_AT_BONUS",
+      "featureId": "FEAT_AT_BONUS",
+      "adoptionCategory": "EXCLUDE"
+    },
+    {
+      "researchFeatureId": "RF_AT_END_KAIJUREN",
+      "featureId": "FEAT_AT_END_KAIJUREN",
+      "adoptionCategory": "EXCLUDE"
+    }
+  ],
+  "evidence": [
+    {
+      "researchEvidenceId": "RE_TROPHY_2",
+      "evidenceId": "EVI_SETTING_2_PLUS",
+      "inputId": "INP_SETTING_FLOOR",
+      "triggerValue": "SET_2_OR_HIGHER",
+      "displayName": "設定2以上"
+    },
+    {
+      "researchEvidenceId": "RE_TROPHY_3",
+      "evidenceId": "EVI_SETTING_3_PLUS",
+      "inputId": "INP_SETTING_FLOOR",
+      "triggerValue": "SET_3_OR_HIGHER",
+      "displayName": "設定3以上"
+    },
+    {
+      "researchEvidenceId": "RE_TROPHY_4",
+      "evidenceId": "EVI_SETTING_4_PLUS_TROPHY",
+      "inputId": "INP_SETTING_FLOOR",
+      "triggerValue": "SET_4_OR_HIGHER",
+      "displayName": "設定4以上"
+    },
+    {
+      "researchEvidenceId": "RE_TROPHY_5",
+      "evidenceId": "EVI_SETTING_5_PLUS_TROPHY",
+      "inputId": "INP_SETTING_FLOOR",
+      "triggerValue": "SET_5_OR_HIGHER",
+      "displayName": "設定5以上"
+    },
+    {
+      "researchEvidenceId": "RE_TROPHY_6",
+      "evidenceId": "EVI_SETTING_6_TROPHY",
+      "inputId": "INP_SETTING_FLOOR",
+      "triggerValue": "SET_6",
+      "displayName": "設定6"
+    },
+    {
+      "researchEvidenceId": "RE_END_4",
+      "evidenceId": "EVI_SETTING_4_PLUS_END",
+      "inputId": "INP_SETTING_FLOOR",
+      "triggerValue": "SET_4_OR_HIGHER",
+      "displayName": "設定4以上"
+    },
+    {
+      "researchEvidenceId": "RE_END_5",
+      "evidenceId": "EVI_SETTING_5_PLUS_END",
+      "inputId": "INP_SETTING_FLOOR",
+      "triggerValue": "SET_5_OR_HIGHER",
+      "displayName": "設定5以上"
+    },
+    {
+      "researchEvidenceId": "RE_END_6",
+      "evidenceId": "EVI_SETTING_6_END",
+      "inputId": "INP_SETTING_FLOOR",
+      "triggerValue": "SET_6",
+      "displayName": "設定6"
+    }
+  ]
+}

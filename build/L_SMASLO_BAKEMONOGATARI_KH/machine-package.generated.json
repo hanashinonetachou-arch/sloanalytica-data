@@ -1,0 +1,573 @@
+{
+  "schemaVersion": 1,
+  "machine": {
+    "schemaVersion": "2.0.0",
+    "machineId": "L_SMASLO_BAKEMONOGATARI_KH",
+    "machineDataVersion": "0.1.0",
+    "displayName": "スマスロ 化物語",
+    "modelName": "L スマスロ化物語 KH",
+    "manufacturer": "サミー",
+    "settings": [
+      "SET_1",
+      "SET_2",
+      "SET_3",
+      "SET_4",
+      "SET_5",
+      "SET_6"
+    ],
+    "packagePolicy": {
+      "offlineCapable": true,
+      "containsImages": false,
+      "containsExecutableCode": false
+    }
+  },
+  "inputs": {
+    "schemaVersion": "2.0.0",
+    "inputs": [
+      {
+        "id": "INP_NORMAL_GAMES",
+        "name": "通常時ゲーム数",
+        "type": "integer",
+        "category": "PRIMARY",
+        "unit": "G",
+        "displayOrder": 1,
+        "inferenceRole": "INCLUDE_PRIMARY",
+        "defaultValue": 0,
+        "minimum": 0
+      },
+      {
+        "id": "INP_AT_INITIAL_COUNT",
+        "name": "AT初当り回数",
+        "type": "counter",
+        "category": "PRIMARY",
+        "unit": "回",
+        "displayOrder": 2,
+        "inferenceRole": "INCLUDE_PRIMARY",
+        "parentInputId": "INP_NORMAL_GAMES",
+        "defaultValue": 0,
+        "minimum": 0
+      },
+      {
+        "id": "INP_WATERMELON_COUNT",
+        "name": "スイカ回数",
+        "type": "counter",
+        "category": "PRIMARY",
+        "unit": "回",
+        "displayOrder": 3,
+        "inferenceRole": "INCLUDE_PRIMARY",
+        "parentInputId": "INP_NORMAL_GAMES",
+        "defaultValue": 0,
+        "minimum": 0
+      },
+      {
+        "id": "INP_WEAK_CHERRY_DIRECT_COUNT",
+        "name": "弱チェリーからのAT直撃回数",
+        "type": "counter",
+        "category": "PRIMARY",
+        "unit": "回",
+        "displayOrder": 5,
+        "inferenceRole": "INCLUDE_PRIMARY",
+        "parentInputId": "INP_AT_INITIAL_COUNT",
+        "defaultValue": 0,
+        "minimum": 0
+      },
+      {
+        "id": "INP_CZ_200_TRIALS",
+        "name": "200Gゾーン到達回数",
+        "type": "counter",
+        "category": "ZONE",
+        "unit": "回",
+        "displayOrder": 10,
+        "inferenceRole": "INCLUDE_SUPPORT",
+        "defaultValue": 0,
+        "minimum": 0
+      },
+      {
+        "id": "INP_CZ_200_HITS",
+        "name": "200GゾーンからのCZ当選回数",
+        "type": "counter",
+        "category": "ZONE",
+        "unit": "回",
+        "displayOrder": 11,
+        "inferenceRole": "INCLUDE_SUPPORT",
+        "parentInputId": "INP_CZ_200_TRIALS",
+        "defaultValue": 0,
+        "minimum": 0
+      },
+      {
+        "id": "INP_SETTING_FLOOR",
+        "name": "確認した設定下限",
+        "type": "enum",
+        "category": "EVIDENCE",
+        "unit": "",
+        "displayOrder": 20,
+        "inferenceRole": "INCLUDE_SUPPORT",
+        "options": [
+          {
+            "key": "NONE",
+            "label": "確認なし",
+            "value": "NONE"
+          },
+          {
+            "key": "SET_2_OR_HIGHER",
+            "label": "設定2以上",
+            "value": "SET_2_OR_HIGHER"
+          },
+          {
+            "key": "SET_3_OR_HIGHER",
+            "label": "設定3以上",
+            "value": "SET_3_OR_HIGHER"
+          },
+          {
+            "key": "SET_4_OR_HIGHER",
+            "label": "設定4以上",
+            "value": "SET_4_OR_HIGHER"
+          },
+          {
+            "key": "SET_5_OR_HIGHER",
+            "label": "設定5以上",
+            "value": "SET_5_OR_HIGHER"
+          },
+          {
+            "key": "SET_6",
+            "label": "設定6",
+            "value": "SET_6"
+          }
+        ],
+        "defaultValue": "NONE"
+      }
+    ]
+  },
+  "features": {
+    "schemaVersion": "2.0.0",
+    "features": [
+      {
+        "featureId": "FEAT_AT_INITIAL_EXCLUSIVE",
+        "name": "AT初当り内訳（弱チェリー直撃／その他）",
+        "adoptionCategory": "INCLUDE_PRIMARY",
+        "calculationRole": "PROBABILITY",
+        "probabilityEngineUsage": true,
+        "modelType": "multinomial",
+        "minimumSample": 1,
+        "sampleRecommendation": 8000,
+        "numeratorInputId": "INP_WEAK_CHERRY_DIRECT_COUNT",
+        "denominatorInputId": "INP_NORMAL_GAMES",
+        "categoryInputIds": [
+          "INP_AT_INITIAL_COUNT"
+        ],
+        "probabilities": {},
+        "categorySubtractInputIds": {
+          "INP_AT_INITIAL_COUNT": [
+            "INP_WEAK_CHERRY_DIRECT_COUNT"
+          ]
+        },
+        "categoryLabels": [
+          "弱チェリー直撃AT",
+          "その他AT初当り"
+        ],
+        "categoryProbabilities": {
+          "SET_1": [
+            0.000030511060259344016,
+            0.003741650388250652
+          ],
+          "SET_2": [
+            0.00006102212051868803,
+            0.0037748045001180595
+          ],
+          "SET_3": [
+            0.00009916094584286804,
+            0.0038675189430900955
+          ],
+          "SET_4": [
+            0.00016018306636155608,
+            0.004027421623755696
+          ],
+          "SET_5": [
+            0.00022120518688024412,
+            0.004111550445702078
+          ],
+          "SET_6": [
+            0.0002898550724637681,
+            0.004263878989467016
+          ]
+        },
+        "sourceEvidenceRefs": [
+          "SRC_1GEKI_SETTING",
+          "SRC_NANA_SPEC",
+          "SRC_1GEKI_NORMAL",
+          "SRC_NANA_SETTING",
+          "SRC_1GEKI_KOYAKU"
+        ]
+      },
+      {
+        "featureId": "FEAT_WATERMELON",
+        "name": "スイカ出現率",
+        "adoptionCategory": "INCLUDE_PRIMARY",
+        "calculationRole": "PROBABILITY",
+        "probabilityEngineUsage": true,
+        "modelType": "binomial",
+        "minimumSample": 1,
+        "sampleRecommendation": 8000,
+        "displayFormat": "ratio_1_over_n",
+        "numeratorInputId": "INP_WATERMELON_COUNT",
+        "denominatorInputId": "INP_NORMAL_GAMES",
+        "probabilities": {
+          "SET_1": 0.011441647597254004,
+          "SET_2": 0.011655011655011656,
+          "SET_3": 0.01177856301531213,
+          "SET_4": 0.012547051442910916,
+          "SET_5": 0.013368983957219251,
+          "SET_6": 0.014306151645207437
+        },
+        "sourceEvidenceRefs": [
+          "SRC_1GEKI_KOYAKU",
+          "SRC_NANA_SPEC"
+        ]
+      },
+      {
+        "featureId": "FEAT_CZ_200G",
+        "name": "200G到達時のCZ当選",
+        "adoptionCategory": "INCLUDE_SUPPORT",
+        "calculationRole": "PROBABILITY",
+        "probabilityEngineUsage": true,
+        "modelType": "binomial",
+        "minimumSample": 1,
+        "sampleRecommendation": 20,
+        "displayFormat": "percentage",
+        "numeratorInputId": "INP_CZ_200_HITS",
+        "denominatorInputId": "INP_CZ_200_TRIALS",
+        "probabilities": {
+          "SET_1": 0.1,
+          "SET_2": 0.1,
+          "SET_3": 0.104,
+          "SET_4": 0.15,
+          "SET_5": 0.175,
+          "SET_6": 0.2
+        },
+        "sourceEvidenceRefs": [
+          "SRC_1GEKI_ZONE",
+          "SRC_NANA_ZONE"
+        ]
+      }
+    ]
+  },
+  "evidence": {
+    "version": "1.0.0",
+    "evidences": [
+      {
+        "id": "EVI_SETTING_2_PLUS",
+        "name": "サミートロフィー銅",
+        "displayName": "設定2以上",
+        "inputId": "INP_SETTING_FLOOR",
+        "triggerValue": "SET_2_OR_HIGHER",
+        "confirmedSettings": [],
+        "deniedSettings": [
+          "SET_1"
+        ],
+        "hasImage": false,
+        "type": "SETTING_DENIAL"
+      },
+      {
+        "id": "EVI_SETTING_3_PLUS",
+        "name": "サミートロフィー銀",
+        "displayName": "設定3以上",
+        "inputId": "INP_SETTING_FLOOR",
+        "triggerValue": "SET_3_OR_HIGHER",
+        "confirmedSettings": [],
+        "deniedSettings": [
+          "SET_1",
+          "SET_2"
+        ],
+        "hasImage": false,
+        "type": "SETTING_DENIAL"
+      },
+      {
+        "id": "EVI_SETTING_4_PLUS_TROPHY",
+        "name": "サミートロフィー金",
+        "displayName": "設定4以上",
+        "inputId": "INP_SETTING_FLOOR",
+        "triggerValue": "SET_4_OR_HIGHER",
+        "confirmedSettings": [],
+        "deniedSettings": [
+          "SET_1",
+          "SET_2",
+          "SET_3"
+        ],
+        "hasImage": false,
+        "type": "SETTING_DENIAL"
+      },
+      {
+        "id": "EVI_SETTING_5_PLUS_TROPHY",
+        "name": "サミートロフィーキリン柄",
+        "displayName": "設定5以上",
+        "inputId": "INP_SETTING_FLOOR",
+        "triggerValue": "SET_5_OR_HIGHER",
+        "confirmedSettings": [],
+        "deniedSettings": [
+          "SET_1",
+          "SET_2",
+          "SET_3",
+          "SET_4"
+        ],
+        "hasImage": false,
+        "type": "SETTING_DENIAL"
+      },
+      {
+        "id": "EVI_SETTING_6_TROPHY",
+        "name": "サミートロフィー虹",
+        "displayName": "設定6",
+        "inputId": "INP_SETTING_FLOOR",
+        "triggerValue": "SET_6",
+        "confirmedSettings": [],
+        "deniedSettings": [
+          "SET_1",
+          "SET_2",
+          "SET_3",
+          "SET_4",
+          "SET_5"
+        ],
+        "hasImage": false,
+        "type": "SETTING_DENIAL"
+      },
+      {
+        "id": "EVI_SETTING_4_PLUS_END",
+        "name": "AT終了画面 初代の3人パネル",
+        "displayName": "設定4以上",
+        "inputId": "INP_SETTING_FLOOR",
+        "triggerValue": "SET_4_OR_HIGHER",
+        "confirmedSettings": [],
+        "deniedSettings": [
+          "SET_1",
+          "SET_2",
+          "SET_3"
+        ],
+        "hasImage": false,
+        "type": "SETTING_DENIAL"
+      },
+      {
+        "id": "EVI_SETTING_5_PLUS_END",
+        "name": "AT終了画面 初代ヒロインパネル",
+        "displayName": "設定5以上",
+        "inputId": "INP_SETTING_FLOOR",
+        "triggerValue": "SET_5_OR_HIGHER",
+        "confirmedSettings": [],
+        "deniedSettings": [
+          "SET_1",
+          "SET_2",
+          "SET_3",
+          "SET_4"
+        ],
+        "hasImage": false,
+        "type": "SETTING_DENIAL"
+      },
+      {
+        "id": "EVI_SETTING_6_END",
+        "name": "AT終了画面 I LOVE YOU",
+        "displayName": "設定6",
+        "inputId": "INP_SETTING_FLOOR",
+        "triggerValue": "SET_6",
+        "confirmedSettings": [],
+        "deniedSettings": [
+          "SET_1",
+          "SET_2",
+          "SET_3",
+          "SET_4",
+          "SET_5"
+        ],
+        "hasImage": false,
+        "type": "SETTING_DENIAL"
+      }
+    ],
+    "sources": [
+      {
+        "id": "SRC_SAMMY_OFFICIAL",
+        "classification": "OFFICIAL",
+        "pageName": "スマスロ 化物語｜Sammy",
+        "url": "https://www.sammy.co.jp/japanese/product/pachislot/sp_bak_mo/",
+        "checkedAt": "2026-08-11"
+      },
+      {
+        "id": "SRC_PWORLD_MACHINE",
+        "classification": "ANALYSIS",
+        "pageName": "スマスロ 化物語 機種情報",
+        "url": "https://www.p-world.co.jp/machine/database/10358",
+        "checkedAt": "2026-08-11"
+      },
+      {
+        "id": "SRC_1GEKI_SETTING",
+        "classification": "ANALYSIS",
+        "pageName": "化物語（スマスロ）設定差・設定判別要素まとめ",
+        "url": "https://1geki.jp/slot/l_bakemonogatari/0/",
+        "checkedAt": "2026-08-11"
+      },
+      {
+        "id": "SRC_1GEKI_KOYAKU",
+        "classification": "ANALYSIS",
+        "pageName": "化物語（スマスロ）小役確率と通常時のベース",
+        "url": "https://1geki.jp/slot/l_bakemonogatari/4/",
+        "checkedAt": "2026-08-11"
+      },
+      {
+        "id": "SRC_1GEKI_NORMAL",
+        "classification": "ANALYSIS",
+        "pageName": "化物語（スマスロ）通常時の抽選・内部状態",
+        "url": "https://1geki.jp/slot/l_bakemonogatari/43/",
+        "checkedAt": "2026-08-11"
+      },
+      {
+        "id": "SRC_1GEKI_ZONE",
+        "classification": "ANALYSIS",
+        "pageName": "化物語（スマスロ）規定ゲーム数による抽選",
+        "url": "https://1geki.jp/slot/l_bakemonogatari/45/",
+        "checkedAt": "2026-08-11"
+      },
+      {
+        "id": "SRC_1GEKI_BONUS",
+        "classification": "ANALYSIS",
+        "pageName": "化物語（スマスロ）AT中ボーナスの詳細",
+        "url": "https://1geki.jp/slot/l_bakemonogatari/89/",
+        "checkedAt": "2026-08-11"
+      },
+      {
+        "id": "SRC_1GEKI_KAIJUREN",
+        "classification": "ANALYSIS",
+        "pageName": "化物語（スマスロ）解呪連・解呪連モード",
+        "url": "https://1geki.jp/slot/l_bakemonogatari/44/",
+        "checkedAt": "2026-08-11"
+      },
+      {
+        "id": "SRC_NANA_SETTING",
+        "classification": "ANALYSIS",
+        "pageName": "化物語 スマスロ 設定差・設定示唆演出まとめ",
+        "url": "https://nana-press.com/kaiseki/machine/1055/33275/",
+        "checkedAt": "2026-08-11"
+      },
+      {
+        "id": "SRC_NANA_SPEC",
+        "classification": "ANALYSIS",
+        "pageName": "化物語 スマスロ AT初当たり確率/小役確率",
+        "url": "https://nana-press.com/kaiseki/machine/1055/32648/",
+        "checkedAt": "2026-08-11"
+      },
+      {
+        "id": "SRC_NANA_NORMAL",
+        "classification": "ANALYSIS",
+        "pageName": "化物語 スマスロ レア小役のCZ抽選・内部状態",
+        "url": "https://nana-press.com/kaiseki/machine/1055/33285/",
+        "checkedAt": "2026-08-11"
+      },
+      {
+        "id": "SRC_NANA_ZONE",
+        "classification": "ANALYSIS",
+        "pageName": "化物語 スマスロ ゾーンの詳細・規定ゲーム数の抽選",
+        "url": "https://nana-press.com/kaiseki/machine/1055/33283/",
+        "checkedAt": "2026-08-11"
+      },
+      {
+        "id": "SRC_NANA_END",
+        "classification": "ANALYSIS",
+        "pageName": "化物語 スマスロ AT終了画面の設定示唆",
+        "url": "https://nana-press.com/kaiseki/machine/1055/33304/",
+        "checkedAt": "2026-08-11"
+      },
+      {
+        "id": "SRC_NANA_PAYOUT",
+        "classification": "ANALYSIS",
+        "pageName": "化物語 スマスロ 獲得枚数表示の設定示唆",
+        "url": "https://nana-press.com/kaiseki/machine/1055/33612/",
+        "checkedAt": "2026-08-11"
+      },
+      {
+        "id": "SRC_NANA_BONUS_SCREEN",
+        "classification": "ANALYSIS",
+        "pageName": "化物語 スマスロ ボーナス確定画面の設定示唆",
+        "url": "https://nana-press.com/kaiseki/machine/1055/33305/",
+        "checkedAt": "2026-08-11"
+      }
+    ]
+  },
+  "ui": {
+    "sections": [
+      {
+        "id": "AUTO_PRIMARY",
+        "title": "PRIMARY",
+        "displayOrder": 1,
+        "items": [
+          {
+            "type": "input",
+            "inputId": "INP_NORMAL_GAMES",
+            "label": "通常時ゲーム数",
+            "widget": "number"
+          },
+          {
+            "type": "input",
+            "inputId": "INP_AT_INITIAL_COUNT",
+            "label": "AT初当り回数",
+            "widget": "counter"
+          },
+          {
+            "type": "input",
+            "inputId": "INP_WATERMELON_COUNT",
+            "label": "スイカ回数",
+            "widget": "counter"
+          },
+          {
+            "type": "input",
+            "inputId": "INP_WEAK_CHERRY_DIRECT_COUNT",
+            "label": "弱チェリーからのAT直撃回数",
+            "widget": "counter"
+          }
+        ]
+      },
+      {
+        "id": "AUTO_ZONE",
+        "title": "ZONE",
+        "displayOrder": 2,
+        "items": [
+          {
+            "type": "input",
+            "inputId": "INP_CZ_200_TRIALS",
+            "label": "200Gゾーン到達回数",
+            "widget": "counter"
+          },
+          {
+            "type": "input",
+            "inputId": "INP_CZ_200_HITS",
+            "label": "200GゾーンからのCZ当選回数",
+            "widget": "counter"
+          }
+        ]
+      },
+      {
+        "id": "AUTO_EVIDENCE",
+        "title": "EVIDENCE",
+        "displayOrder": 3,
+        "items": [
+          {
+            "type": "input",
+            "inputId": "INP_SETTING_FLOOR",
+            "label": "確認した設定下限",
+            "widget": "select"
+          }
+        ]
+      }
+    ]
+  },
+  "reliability": {},
+  "metadata": {
+    "machineId": "L_SMASLO_BAKEMONOGATARI_KH",
+    "displayName": "スマスロ 化物語",
+    "settings": [
+      "SET_1",
+      "SET_2",
+      "SET_3",
+      "SET_4",
+      "SET_5",
+      "SET_6"
+    ]
+  },
+  "validation": {
+    "cases": []
+  },
+  "statistics": {}
+}
