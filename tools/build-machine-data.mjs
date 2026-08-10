@@ -1,0 +1,111 @@
+import fs from "node:fs";
+import path from "node:path";
+
+function fail(msg){ throw new Error(msg); }
+function readJson(p){ return JSON.parse(fs.readFileSync(p,"utf8")); }
+function unique(xs){ return [...new Set(xs)]; }
+function sourceClass(t){
+  if(t==="official") return "OFFICIAL";
+  if(t==="official_derived") return "OFFICIAL_DERIVED";
+  return "ANALYSIS";
+}
+function inputWithDefaults(x){
+  const y={...x,defaultValue:x.type==="boolean"?false:(x.type==="enum"?(x.options?.[0]?.value ?? "NONE"):0),minimum:["integer","number","counter"].includes(x.type)?0:undefined};
+  for(const k of Object.keys(y)) if(y[k]===undefined) delete y[k];
+  return y;
+}
+function buildFeature(rf,sf,inputIds){
+  const role=sf.adoptionCategory;
+  if(role==="EXCLUDE") return null;
+  const base={
+    featureId:sf.featureId,name:rf.name,adoptionCategory:role,
+    calculationRole:role==="DISPLAY_ONLY"?"DISPLAY_ONLY":"PROBABILITY",
+    probabilityEngineUsage:role!=="DISPLAY_ONLY",
+    modelType:rf.candidateModel,
+    minimumSample:sf.minimumSample ?? 1,
+    sampleRecommendation:sf.sampleRecommendation ?? sf.minimumSample ?? 1
+  };
+  if(sf.weight!=null) base.weight=sf.weight;
+  if(rf.candidateModel==="binomial" || rf.candidateModel==="poisson"){
+    if(!sf.numeratorInputId||!sf.denominatorInputId) fail(`${sf.featureId}: numeratorInputId/denominatorInputId required`);
+    if(!inputIds.has(sf.numeratorInputId)||!inputIds.has(sf.denominatorInputId)) fail(`${sf.featureId}: unknown input mapping`);
+    base.numeratorInputId=sf.numeratorInputId; base.denominatorInputId=sf.denominatorInputId;
+    base.displayFormat="ratio_1_over_n";
+    base.probabilities=Object.fromEntries(Object.entries(rf.settingValues??{}).map(([s,v])=>[s,v.probability]).filter(([,p])=>Number.isFinite(p)));
+  } else if(rf.candidateModel==="multinomial"){
+    const cats=rf.categories??[];
+    if(!cats.length) fail(`${sf.featureId}: categories missing in ResearchData`);
+    if(!Array.isArray(sf.categoryInputIds)||sf.categoryInputIds.length!==cats.length) fail(`${sf.featureId}: categoryInputIds must match categories`);
+    if(sf.categoryInputIds.some(id=>!inputIds.has(id))) fail(`${sf.featureId}: unknown category input`);
+    base.categoryInputIds=sf.categoryInputIds;
+    base.trialSource={mode:"sum_inputs_to_trials",inputIds:sf.categoryInputIds};
+    base.categoryLabels=cats;
+    base.categoryProbabilities=Object.fromEntries(Object.entries(rf.settingDistributions??{}).map(([s,dist])=>[s,cats.map(c=>dist[c])]));
+  } else fail(`${sf.featureId}: unsupported candidateModel ${rf.candidateModel}`);
+  base.sourceEvidenceRefs=rf.sourceRefs??[];
+  return base;
+}
+export function buildMachineData(research,selection){
+  if(selection.machineId!==research.machine?.machineId) fail("machineId mismatch");
+  const rfs=new Map((research.features??[]).map(f=>[f.researchFeatureId,f]));
+  const inputIds=new Set((selection.inputs??[]).map(x=>x.id));
+  if(inputIds.size!==(selection.inputs??[]).length) fail("duplicate input id");
+  const features=[];
+  for(const sf of selection.features??[]){
+    const rf=rfs.get(sf.researchFeatureId);
+    if(!rf) fail(`unknown researchFeatureId: ${sf.researchFeatureId}`);
+    const built=buildFeature(rf,sf,inputIds); if(built) features.push(built);
+  }
+  const sources=(research.sources??[]).map(s=>({
+    id:s.sourceId,classification:sourceClass(s.sourceType),pageName:s.title,url:s.url,checkedAt:s.checkedAt
+  }));
+  const machine={
+    schemaVersion:"2.0.0",machineId:research.machine.machineId,machineDataVersion:selection.machineDataVersion,
+    displayName:research.machine.displayName,modelName:research.machine.modelNumber,manufacturer:research.machine.manufacturer,
+    settings:research.machine.settings,
+    packagePolicy:{offlineCapable:true,containsImages:false,containsExecutableCode:false}
+  };
+  const sections=[];
+  const byCat=new Map();
+  for(const i of selection.inputs??[]){
+    if(!byCat.has(i.category)) byCat.set(i.category,[]);
+    byCat.get(i.category).push(i);
+  }
+  let order=1;
+  for(const [cat,items] of byCat){
+    sections.push({id:`AUTO_${cat}`.replace(/[^A-Z0-9_]/gi,"_").toUpperCase(),title:cat,displayOrder:order++,
+      items:items.sort((a,b)=>a.displayOrder-b.displayOrder).map(i=>({type:"input",inputId:i.id,label:i.name,widget:i.type==="counter"?"counter":i.type==="boolean"?"boolean":i.type==="enum"?"select":"number"}))});
+  }
+  const evidences=[];
+  const researchEvidence=new Map((research.evidenceCandidates??[]).map(e=>[e.researchEvidenceId,e]));
+  for(const e of selection.evidence??[]){
+    const re=researchEvidence.get(e.researchEvidenceId);
+    if(!re) fail(`unknown researchEvidenceId: ${e.researchEvidenceId}`);
+    if(!inputIds.has(e.inputId)) fail(`unknown evidence inputId: ${e.inputId}`);
+    evidences.push({id:e.evidenceId,name:re.name,displayName:e.displayName??re.name,inputId:e.inputId,triggerValue:e.triggerValue,
+      confirmedSettings:re.confirmedSettings??[],deniedSettings:re.deniedSettings??[],hasImage:false,
+      type:(re.deniedSettings?.length??0)>0 && !(re.confirmedSettings?.length??0)?"SETTING_DENIAL":"SETTING_CONFIRMATION"});
+  }
+  return {
+    schemaVersion:1,machine,
+    inputs:{schemaVersion:"2.0.0",inputs:(selection.inputs??[]).map(inputWithDefaults)},
+    features:{schemaVersion:"2.0.0",features},
+    evidence:{version:"1.0.0",evidences,sources},
+    ui:{sections},reliability:{},
+    metadata:{machineId:machine.machineId,displayName:machine.displayName,settings:machine.settings},
+    validation:{cases:[]},statistics:{}
+  };
+}
+if(import.meta.url===`file://${process.argv[1]}`){
+  const [researchPath,selectionPath,outPath]=process.argv.slice(2);
+  if(!researchPath||!selectionPath||!outPath){
+    console.error("Usage: node tools/build-machine-data.mjs <research-data.json> <selection-data.json> <output-machine-package.json>");
+    process.exit(2);
+  }
+  try{
+    const pkg=buildMachineData(readJson(researchPath),readJson(selectionPath));
+    fs.mkdirSync(path.dirname(outPath),{recursive:true});
+    fs.writeFileSync(outPath,JSON.stringify(pkg,null,2)+"\n");
+    console.log(`MachineData draft: ${outPath}`);
+  }catch(e){ console.error(`ERROR: ${e.message}`); process.exit(1); }
+}

@@ -1,0 +1,143 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://sloanalytica.local/schemas/selection-data.schema.json",
+  "title": "SloAnalytica SelectionData v1",
+  "type": "object",
+  "required": [
+    "schemaVersion",
+    "machineId",
+    "machineDataVersion",
+    "inputs",
+    "features"
+  ],
+  "properties": {
+    "schemaVersion": {
+      "const": "selection-data-v1"
+    },
+    "machineId": {
+      "type": "string",
+      "minLength": 1
+    },
+    "machineDataVersion": {
+      "type": "string",
+      "minLength": 1
+    },
+    "inputs": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "id",
+          "name",
+          "type",
+          "category",
+          "displayOrder"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^INP_[A-Z0-9_]+$"
+          },
+          "name": {
+            "type": "string",
+            "minLength": 1
+          },
+          "type": {
+            "enum": [
+              "integer",
+              "number",
+              "counter",
+              "boolean",
+              "enum"
+            ]
+          },
+          "category": {
+            "type": "string",
+            "minLength": 1
+          },
+          "unit": {
+            "type": "string"
+          },
+          "displayOrder": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "inferenceRole": {
+            "enum": [
+              "INCLUDE_PRIMARY",
+              "INCLUDE_SUPPORT",
+              "DISPLAY_ONLY"
+            ]
+          },
+          "parentInputId": {
+            "type": "string"
+          },
+          "options": {
+            "type": "array"
+          }
+        },
+        "additionalProperties": true
+      }
+    },
+    "features": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "researchFeatureId",
+          "featureId",
+          "adoptionCategory"
+        ],
+        "properties": {
+          "researchFeatureId": {
+            "type": "string"
+          },
+          "featureId": {
+            "type": "string",
+            "pattern": "^FEAT_[A-Z0-9_]+$"
+          },
+          "adoptionCategory": {
+            "enum": [
+              "INCLUDE_PRIMARY",
+              "INCLUDE_SUPPORT",
+              "DISPLAY_ONLY",
+              "EXCLUDE"
+            ]
+          },
+          "numeratorInputId": {
+            "type": "string"
+          },
+          "denominatorInputId": {
+            "type": "string"
+          },
+          "categoryInputIds": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "minimumSample": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "sampleRecommendation": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "weight": {
+            "type": "number",
+            "exclusiveMinimum": 0
+          }
+        },
+        "additionalProperties": true
+      }
+    },
+    "evidence": {
+      "type": "array",
+      "items": {
+        "type": "object"
+      }
+    }
+  },
+  "additionalProperties": true
+}
