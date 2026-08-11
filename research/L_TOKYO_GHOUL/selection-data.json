@@ -1,0 +1,255 @@
+{
+  "schemaVersion": "selection-data-v1",
+  "machineId": "L_TOKYO_GHOUL",
+  "machineDataVersion": "0.1.0",
+  "inputs": [
+    {
+      "id": "INP_AT_TRIAL_GAMES",
+      "name": "AT初当り集計ゲーム数",
+      "type": "integer",
+      "category": "PRIMARY",
+      "unit": "G",
+      "displayOrder": 1,
+      "inferenceRole": "INCLUDE_PRIMARY"
+    },
+    {
+      "id": "INP_AT_INITIAL_COUNT",
+      "name": "AT初当り回数",
+      "type": "counter",
+      "category": "PRIMARY",
+      "unit": "回",
+      "displayOrder": 2,
+      "inferenceRole": "INCLUDE_PRIMARY",
+      "parentInputId": "INP_AT_TRIAL_GAMES"
+    },
+    {
+      "id": "INP_CZ_CYCLE_COUNT",
+      "name": "100G+α CZ判別対象周期数",
+      "type": "counter",
+      "category": "ZONE",
+      "unit": "周期",
+      "displayOrder": 10,
+      "inferenceRole": "INCLUDE_SUPPORT"
+    },
+    {
+      "id": "INP_CZ_WITHIN100_COUNT",
+      "name": "100G+α以内CZ当選回数",
+      "type": "counter",
+      "category": "ZONE",
+      "unit": "回",
+      "displayOrder": 11,
+      "inferenceRole": "INCLUDE_SUPPORT",
+      "parentInputId": "INP_CZ_CYCLE_COUNT"
+    },
+    {
+      "id": "INP_SETTING_FLOOR",
+      "name": "確認した設定下限",
+      "type": "enum",
+      "category": "EVIDENCE",
+      "unit": "",
+      "displayOrder": 20,
+      "inferenceRole": "INCLUDE_SUPPORT",
+      "options": [
+        {
+          "key": "NONE",
+          "label": "確認なし",
+          "value": "NONE"
+        },
+        {
+          "key": "SET_3_OR_HIGHER",
+          "label": "設定3以上",
+          "value": "SET_3_OR_HIGHER"
+        },
+        {
+          "key": "SET_4_OR_HIGHER",
+          "label": "設定4以上",
+          "value": "SET_4_OR_HIGHER"
+        },
+        {
+          "key": "SET_5_OR_HIGHER",
+          "label": "設定5以上",
+          "value": "SET_5_OR_HIGHER"
+        },
+        {
+          "key": "SET_6",
+          "label": "設定6",
+          "value": "SET_6"
+        }
+      ]
+    },
+    {
+      "id": "INP_DENY_SET1",
+      "name": "設定1否定を確認",
+      "type": "boolean",
+      "category": "EVIDENCE",
+      "unit": "",
+      "displayOrder": 21,
+      "inferenceRole": "INCLUDE_SUPPORT"
+    },
+    {
+      "id": "INP_DENY_SET2",
+      "name": "設定2否定を確認",
+      "type": "boolean",
+      "category": "EVIDENCE",
+      "unit": "",
+      "displayOrder": 22,
+      "inferenceRole": "INCLUDE_SUPPORT"
+    },
+    {
+      "id": "INP_DENY_SET3",
+      "name": "設定3否定を確認",
+      "type": "boolean",
+      "category": "EVIDENCE",
+      "unit": "",
+      "displayOrder": 23,
+      "inferenceRole": "INCLUDE_SUPPORT"
+    },
+    {
+      "id": "INP_DENY_SET4",
+      "name": "設定4否定を確認",
+      "type": "boolean",
+      "category": "EVIDENCE",
+      "unit": "",
+      "displayOrder": 24,
+      "inferenceRole": "INCLUDE_SUPPORT"
+    },
+    {
+      "id": "INP_EVEN_CONFIRMED",
+      "name": "偶数設定濃厚を確認",
+      "type": "boolean",
+      "category": "EVIDENCE",
+      "unit": "",
+      "displayOrder": 25,
+      "inferenceRole": "INCLUDE_SUPPORT"
+    }
+  ],
+  "features": [
+    {
+      "researchFeatureId": "RF_AT_INITIAL",
+      "featureId": "FEAT_AT_INITIAL",
+      "adoptionCategory": "INCLUDE_PRIMARY",
+      "numeratorInputId": "INP_AT_INITIAL_COUNT",
+      "denominatorInputId": "INP_AT_TRIAL_GAMES",
+      "minimumSample": 1,
+      "sampleRecommendation": 8000,
+      "weight": 1.0,
+      "displayFormat": "ratio_1_over_n"
+    },
+    {
+      "researchFeatureId": "RF_CZ_WITHIN_100",
+      "featureId": "FEAT_CZ_WITHIN_100",
+      "adoptionCategory": "INCLUDE_SUPPORT",
+      "numeratorInputId": "INP_CZ_WITHIN100_COUNT",
+      "denominatorInputId": "INP_CZ_CYCLE_COUNT",
+      "minimumSample": 1,
+      "sampleRecommendation": 30,
+      "weight": 0.5,
+      "displayFormat": "percentage"
+    },
+    {
+      "researchFeatureId": "RF_CZ_COMBINED",
+      "featureId": "FEAT_CZ_COMBINED",
+      "adoptionCategory": "EXCLUDE"
+    },
+    {
+      "researchFeatureId": "RF_CZ_EXCLUSIVE",
+      "featureId": "FEAT_CZ_EXCLUSIVE",
+      "adoptionCategory": "EXCLUDE"
+    },
+    {
+      "researchFeatureId": "RF_EPISODE_BONUS",
+      "featureId": "FEAT_EPISODE_BONUS",
+      "adoptionCategory": "EXCLUDE"
+    },
+    {
+      "researchFeatureId": "RF_AT_DIRECT_REPLAY",
+      "featureId": "FEAT_AT_DIRECT_REPLAY",
+      "adoptionCategory": "EXCLUDE"
+    },
+    {
+      "researchFeatureId": "RF_AT_RETURN",
+      "featureId": "FEAT_AT_RETURN",
+      "adoptionCategory": "EXCLUDE"
+    },
+    {
+      "researchFeatureId": "RF_LOWER_REPLAY",
+      "featureId": "FEAT_LOWER_REPLAY",
+      "adoptionCategory": "EXCLUDE"
+    },
+    {
+      "researchFeatureId": "RF_WEAK_CHERRY_CZ_NORMAL",
+      "featureId": "FEAT_WEAK_CHERRY_CZ_NORMAL",
+      "adoptionCategory": "EXCLUDE"
+    },
+    {
+      "researchFeatureId": "RF_WEAK_CHERRY_CZ_HIGH",
+      "featureId": "FEAT_WEAK_CHERRY_CZ_HIGH",
+      "adoptionCategory": "EXCLUDE"
+    }
+  ],
+  "evidence": [
+    {
+      "researchEvidenceId": "RE_ENDING_3PLUS",
+      "evidenceId": "EVI_SET3_PLUS",
+      "inputId": "INP_SETTING_FLOOR",
+      "triggerValue": "SET_3_OR_HIGHER",
+      "displayName": "設定3以上"
+    },
+    {
+      "researchEvidenceId": "RE_AT_END_4PLUS",
+      "evidenceId": "EVI_SET4_PLUS",
+      "inputId": "INP_SETTING_FLOOR",
+      "triggerValue": "SET_4_OR_HIGHER",
+      "displayName": "設定4以上"
+    },
+    {
+      "researchEvidenceId": "RE_ENDING_5PLUS",
+      "evidenceId": "EVI_SET5_PLUS",
+      "inputId": "INP_SETTING_FLOOR",
+      "triggerValue": "SET_5_OR_HIGHER",
+      "displayName": "設定5以上"
+    },
+    {
+      "researchEvidenceId": "RE_AT_END_6",
+      "evidenceId": "EVI_SET6",
+      "inputId": "INP_SETTING_FLOOR",
+      "triggerValue": "SET_6",
+      "displayName": "設定6"
+    },
+    {
+      "researchEvidenceId": "RE_AT_END_NOT1",
+      "evidenceId": "EVI_DENY_SET1",
+      "inputId": "INP_DENY_SET1",
+      "triggerValue": true,
+      "displayName": "設定1否定"
+    },
+    {
+      "researchEvidenceId": "RE_INVITE_NOT2",
+      "evidenceId": "EVI_DENY_SET2",
+      "inputId": "INP_DENY_SET2",
+      "triggerValue": true,
+      "displayName": "設定2否定"
+    },
+    {
+      "researchEvidenceId": "RE_INVITE_NOT3",
+      "evidenceId": "EVI_DENY_SET3",
+      "inputId": "INP_DENY_SET3",
+      "triggerValue": true,
+      "displayName": "設定3否定"
+    },
+    {
+      "researchEvidenceId": "RE_INVITE_NOT4",
+      "evidenceId": "EVI_DENY_SET4",
+      "inputId": "INP_DENY_SET4",
+      "triggerValue": true,
+      "displayName": "設定4否定"
+    },
+    {
+      "researchEvidenceId": "RE_CZ_END_EVEN",
+      "evidenceId": "EVI_EVEN",
+      "inputId": "INP_EVEN_CONFIRMED",
+      "triggerValue": true,
+      "displayName": "偶数設定濃厚"
+    }
+  ]
+}
