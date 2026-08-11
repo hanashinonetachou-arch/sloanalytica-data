@@ -1,27 +1,37 @@
-# 公開データ監査
+# SloAnalytica Data Prototype Phase 9.4B-4
 
-MachineDataまたは`catalog.json`を変更したら、Commit前に次を実行します。
+## Scope
+Apply Difficulty Exposure definitions to existing Code Geass 3 C.C.&Kallen ver. and Tokyo Ghoul data, and strengthen final cross-machine calibration readiness rules.
 
-```text
-npm run audit
-npm test
-```
+## Applied exposure
+### S_CODE_GEASS_3_CC_FS
+- Target basis: NORMAL_AT_GAMES / 通常・ATゲーム数
+- Basis quality: EXACT / cross-machine comparable
+- FEAT_CHERRY_WATERMELON_MULTINOMIAL: EXACT per_game × 1.0
+- FEAT_RB_INFINITE_AT_BINOMIAL: unresolved, not inferred
+- FEAT_AT_END_SCREEN_MULTINOMIAL: unresolved, not inferred
 
-`npm run audit`は読み取り専用です。`catalog.json`を更新したり、MachineDataを書き換えたりしません。
+### L_TOKYO_GHOUL
+- Target basis: AT_INITIAL_TRIAL_GAMES_PROVISIONAL / AT初当り集計ゲーム数
+- Basis quality: PROVISIONAL / not final cross-machine comparable
+- FEAT_AT_INITIAL: PROVISIONAL per_game × 1.0
+- FEAT_CZ_EXCLUSIVE: PROVISIONAL setting_rate derived from the current 8G/CZ denominator rule
+- FEAT_AT_RETURN: unresolved
+- FEAT_CZ_WITHIN_100: unresolved
 
-機械処理向けの監査結果が必要な場合は、次を実行します。
+## Readiness strengthening
+Final calibration now requires:
+- explicit exposure on all included numeric Features,
+- exposure quality EXACT or DERIVED,
+- target game basis quality EXACT or DERIVED,
+- target game basis explicitly cross-machine comparable.
 
-```text
-npm run audit:report
-```
+PROVISIONAL values never make a machine READY for the final public score scale.
 
-`reports/audit-report.json` に `PASS/FAIL`、機種数、エラー数、警告数、エラー・警告の詳細を出力します。MachineDataや`catalog.json`自体は変更しません。今後の自動化では、このJSONを次工程へ渡し、通常時は全文データをAIへ再投入せず、`errors` / `warnings` だけを例外処理対象にできます。
+## Diagnostic score outputs
+These are NOT final cross-machine scores because coverage is incomplete/provisional.
+- Code Geass partial (small-role only): 1500G=10, 3000G=16, 7000G=26; coverage 1/3.
+- Tokyo Ghoul exploratory (PROVISIONAL AT initial + CZ only): 1500G=8, 3000G=14, 7000G=23; coverage 2/4.
 
-- `OK`：エラーなし。警告は内容を確認してからCommitしてください。
-- `FAILED`：エラーあり。表示された機種ID・ファイル・内容を直してから再実行してください。
-
-主な検査対象は、catalogのJSON/必須項目/重複、ローカルMachineDataとのID・バージョン・SHA-256・サイズ一致、入力・Feature・Evidenceの参照整合、確率と設定ID、auto accumulator、アプリ能力宣言です。
-
-監査でチェックサムまたはサイズ不一致が出たときは、MachineDataを意図して変更した後に`catalog.json`の`machineDataVersion`、`sha256`、`packageSizeBytes`を更新し、もう一度監査します。監査ツールは自動修正しません。
-
-新機種の追加・既存機種の更新は、[MachineData 登録・更新ワークフロー](docs/MachineData-Registration-Workflow.md)に従ってください。
+## Tests
+79/79 passed.

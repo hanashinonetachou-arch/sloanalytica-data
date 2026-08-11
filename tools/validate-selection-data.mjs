@@ -32,7 +32,7 @@ export function validateSelectionData(s,research=null){
    }
    const dx=f.difficultyExposure;
    if(dx){
-     if(!["per_game","fixed_rate","setting_rate"].includes(dx.mode)) errors.push(`${f.featureId}: invalid difficultyExposure.mode ${dx.mode}`);
+     if(!["per_game","fixed_rate","setting_rate","derived_event_rate"].includes(dx.mode)) errors.push(`${f.featureId}: invalid difficultyExposure.mode ${dx.mode}`);
      if(dx.mode==="per_game" && dx.factor!=null && (!Number.isFinite(Number(dx.factor))||Number(dx.factor)<0)) errors.push(`${f.featureId}: invalid difficultyExposure.factor`);
      if(dx.mode==="fixed_rate" && (!Number.isFinite(Number(dx.trialsPerGame))||Number(dx.trialsPerGame)<0)) errors.push(`${f.featureId}: fixed_rate requires nonnegative trialsPerGame`);
      if(dx.mode==="setting_rate"){
@@ -41,9 +41,29 @@ export function validateSelectionData(s,research=null){
          if(!Number.isFinite(Number(rates[setting]))||Number(rates[setting])<0) errors.push(`${f.featureId}: setting_rate missing/invalid ${setting}`);
        }
      }
+     if(dx.quality && !["EXACT","DERIVED","PROVISIONAL"].includes(dx.quality)) errors.push(`${f.featureId}: invalid difficultyExposure.quality ${dx.quality}`);
+     if(dx.mode==="derived_event_rate"){
+       if(!dx.sourceFeatureId) errors.push(`${f.featureId}: derived_event_rate requires sourceFeatureId`);
+       const source=(s.features??[]).find(x=>x.featureId===dx.sourceFeatureId);
+       if(dx.sourceFeatureId && !source) errors.push(`${f.featureId}: unknown difficultyExposure.sourceFeatureId ${dx.sourceFeatureId}`);
+       if(dx.sourceFeatureId===f.featureId) errors.push(`${f.featureId}: derived_event_rate cannot reference itself`);
+       if(dx.eventMultiplier!=null && (!Number.isFinite(Number(dx.eventMultiplier))||Number(dx.eventMultiplier)<0)) errors.push(`${f.featureId}: invalid difficultyExposure.eventMultiplier`);
+       if(dx.sourceCategoryId && source && research){
+         const rf=(research.features??[]).find(x=>x.researchFeatureId===source.researchFeatureId);
+         if(rf?.candidateModel!=="multinomial") errors.push(`${f.featureId}: sourceCategoryId requires multinomial source feature`);
+         else if(!(rf.categories??[]).includes(dx.sourceCategoryId)) errors.push(`${f.featureId}: unknown sourceCategoryId ${dx.sourceCategoryId}`);
+       }
+     }
    }
    if(f.adoptionCategory==="EXCLUDE" && (f.numeratorInputId||f.denominatorInputId||(f.categoryInputIds?.length))) warnings.push(`${f.featureId}: EXCLUDE has unused input mapping`);
  }
+ const da=s.difficultyAnalysis;
+ if(da?.targetGameBasis){
+   const b=da.targetGameBasis;
+   if(!b.basisId||!b.label) errors.push(`difficultyAnalysis.targetGameBasis requires basisId and label`);
+   if(!["EXACT","DERIVED","PROVISIONAL","UNRESOLVED"].includes(b.quality)) errors.push(`difficultyAnalysis.targetGameBasis invalid quality ${b.quality}`);
+ }
+ for(const q of da?.calibrationAllowedExposureQualities??[]) if(!["EXACT","DERIVED","PROVISIONAL"].includes(q)) errors.push(`difficultyAnalysis invalid calibration exposure quality ${q}`);
  const machineSettings=new Set(research?.machine?.settings??[]);
  const researchEvidenceIds=new Set((research?.evidenceCandidates??[]).map(e=>e.researchEvidenceId));
  const evidenceGroupIds=new Set();

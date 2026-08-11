@@ -5,6 +5,7 @@ const EPS=1e-12;
 const DEFAULT_TARGETS=[1500,3000,7000];
 const DEFAULT_SIMULATIONS_PER_SETTING=4000;
 const SCORE_WEIGHTS={information:0.45,exact:0.35,distance:0.20};
+const DEFAULT_ALLOWED_QUALITIES=['EXACT','DERIVED'];
 
 function clamp(v,a=0,b=1){return Math.max(a,Math.min(b,v));}
 function clampP(p){return clamp(Number(p),EPS,1-EPS);}
@@ -17,7 +18,6 @@ function trialsForBayesAccuracy80FromBC(bc){
   bc=clamp(bc,0,1);
   if(bc>=1-EPS) return null;
   if(bc<=EPS) return 1;
-  // Equal-prior Bayes error upper bound: Pe <= 0.5 * BC^n. Require Pe <= 0.20.
   return Math.max(1,Math.ceil(Math.log(0.4)/Math.log(bc)));
 }
 function categoricalDistribution(feature,setting){
@@ -37,6 +37,14 @@ function featureProbability(feature,setting){
   const v=feature.settingValues?.[setting];
   const p=Number(v?.probability);
   return Number.isFinite(p)&&p>=0?p:null;
+}
+function categoryProbability(feature,setting,categoryId){
+  if(feature.candidateModel!=='multinomial') return null;
+  const categories=Array.isArray(feature.categories)?feature.categories:[];
+  const index=categories.indexOf(categoryId);
+  if(index<0)return null;
+  const dist=categoricalDistribution(feature,setting);
+  return dist?dist[index]:null;
 }
 function pairwiseTrialEstimate(feature,settings){
   if(settings.length<2)return null;
@@ -75,20 +83,39 @@ function sampleMultinomial(n,probs,rng){
   }
   out.push(remainN);return out;
 }
-function exposureTrials(selectionFeature,trueSetting,targetGames){
-  const ex=selectionFeature.difficultyExposure;
+
+function exposureQuality(ex){return ex?.quality??'EXACT';}
+function resolveExposureTrials(selectionFeature,trueSetting,targetGames,ctx,stack=new Set()){
+  const ex=selectionFeature?.difficultyExposure;
   if(!ex||typeof ex!=='object')return null;
-  if(ex.mode==='per_game') return Math.max(0,Math.round(targetGames*Number(ex.factor??1)));
+  if(!ctx.allowedQualities.has(exposureQuality(ex)))return null;
+  if(stack.has(selectionFeature.featureId))return null;
+  const next=new Set(stack);next.add(selectionFeature.featureId);
+  if(ex.mode==='per_game'){
+    const factor=Number(ex.factor??1);return Number.isFinite(factor)&&factor>=0?Math.max(0,Math.round(targetGames*factor)):null;
+  }
   if(ex.mode==='fixed_rate'){
     const rate=Number(ex.trialsPerGame);return Number.isFinite(rate)&&rate>=0?Math.max(0,Math.round(targetGames*rate)):null;
   }
   if(ex.mode==='setting_rate'){
     const rate=Number(ex.trialsPerGameBySetting?.[trueSetting]);return Number.isFinite(rate)&&rate>=0?Math.max(0,Math.round(targetGames*rate)):null;
   }
+  if(ex.mode==='derived_event_rate'){
+    const sourceSf=ctx.selectionByFeatureId.get(ex.sourceFeatureId);
+    if(!sourceSf)return null;
+    const sourceRf=ctx.featuresById.get(sourceSf.researchFeatureId);
+    if(!sourceRf)return null;
+    const sourceTrials=resolveExposureTrials(sourceSf,trueSetting,targetGames,ctx,next);
+    if(sourceTrials==null)return null;
+    const p=ex.sourceCategoryId?categoryProbability(sourceRf,trueSetting,ex.sourceCategoryId):featureProbability(sourceRf,trueSetting);
+    if(p==null)return null;
+    const mult=Number(ex.eventMultiplier??1);
+    return Number.isFinite(mult)&&mult>=0?Math.max(0,Math.round(sourceTrials*p*mult)):null;
+  }
   return null;
 }
-function simulateObservation(researchFeature,selectionFeature,trueSetting,targetGames,rng){
-  const n=exposureTrials(selectionFeature,trueSetting,targetGames);if(n==null)return null;
+function simulateObservation(researchFeature,selectionFeature,trueSetting,targetGames,rng,ctx){
+  const n=resolveExposureTrials(selectionFeature,trueSetting,targetGames,ctx);if(n==null)return null;
   if(researchFeature.candidateModel==='multinomial'){
     const probs=categoricalDistribution(researchFeature,trueSetting);if(!probs)return null;
     return {n,counts:sampleMultinomial(n,probs,rng)};
@@ -108,24 +135,24 @@ function logLikelihood(researchFeature,obs,setting){
   }
   return obs.count*Math.log(clampP(p))+(obs.n-obs.count)*Math.log(clampP(1-p));
 }
-function posteriorForRun(settings,featuresById,selectionFeatures,trueSetting,targetGames,rng){
+function posteriorForRun(settings,featuresById,selectionFeatures,trueSetting,targetGames,rng,ctx){
   const logs=settings.map(()=>-Math.log(settings.length));
   let used=0;
   for(const sf of selectionFeatures){
     const rf=featuresById.get(sf.researchFeatureId);if(!rf)continue;
-    const obs=simulateObservation(rf,sf,trueSetting,targetGames,rng);if(!obs)continue;
+    const obs=simulateObservation(rf,sf,trueSetting,targetGames,rng,ctx);if(!obs)continue;
     const w=Number(sf.weight??1);if(!Number.isFinite(w)||w<=0)continue;
     for(let i=0;i<settings.length;i++) logs[i]+=w*logLikelihood(rf,obs,settings[i]);
     used++;
   }
   const z=logSumExp(logs);return {posterior:logs.map(v=>Math.exp(v-z)),used};
 }
-function analyzeTarget(settings,featuresById,selectionFeatures,targetGames,simulationsPerSetting,seed){
+function analyzeTarget(settings,featuresById,selectionFeatures,targetGames,simulationsPerSetting,seed,ctx){
   const rng=mulberry32(seed+targetGames);let runs=0,correct=0,entropySum=0,distanceSum=0,posteriorTrueSum=0,usedFeatureSum=0;
   for(let ti=0;ti<settings.length;ti++){
     const trueSetting=settings[ti];
     for(let r=0;r<simulationsPerSetting;r++){
-      const {posterior,used}=posteriorForRun(settings,featuresById,selectionFeatures,trueSetting,targetGames,rng);
+      const {posterior,used}=posteriorForRun(settings,featuresById,selectionFeatures,trueSetting,targetGames,rng,ctx);
       let best=0;for(let i=1;i<posterior.length;i++)if(posterior[i]>posterior[best])best=i;
       correct+=best===ti?1:0;distanceSum+=Math.abs(best-ti);posteriorTrueSum+=posterior[ti];entropySum+=entropy(posterior);usedFeatureSum+=used;runs++;
     }
@@ -143,9 +170,14 @@ function analyzeTarget(settings,featuresById,selectionFeatures,targetGames,simul
 export function evaluateMachineDifficulty(research,selection,options={}){
   const settings=Array.isArray(research.machine?.settings)?research.machine.settings:[];
   const featuresById=new Map((research.features??[]).map(f=>[f.researchFeatureId,f]));
+  const selectionByFeatureId=new Map((selection.features??[]).map(f=>[f.featureId,f]));
   const numericSelection=(selection.features??[]).filter(f=>['INCLUDE_PRIMARY','INCLUDE_SUPPORT'].includes(f.adoptionCategory));
-  const analyzable=numericSelection.filter(sf=>sf.difficultyExposure&&featuresById.has(sf.researchFeatureId));
+  const allowedQualities=new Set(options.allowedExposureQualities??selection.difficultyAnalysis?.calibrationAllowedExposureQualities??DEFAULT_ALLOWED_QUALITIES);
+  const ctx={featuresById,selectionByFeatureId,allowedQualities};
+  const exposureResolvable=sf=>settings.every(st=>resolveExposureTrials(sf,st,1500,ctx)!=null);
+  const analyzable=numericSelection.filter(sf=>sf.difficultyExposure&&featuresById.has(sf.researchFeatureId)&&exposureResolvable(sf));
   const missing=numericSelection.filter(sf=>!sf.difficultyExposure).map(sf=>sf.featureId);
+  const blocked=numericSelection.filter(sf=>sf.difficultyExposure&&!analyzable.includes(sf)).map(sf=>({featureId:sf.featureId,quality:exposureQuality(sf.difficultyExposure),mode:sf.difficultyExposure.mode}));
   const targets=options.targets??selection.difficultyAnalysis?.targetGames??DEFAULT_TARGETS;
   const simulationsPerSetting=options.simulationsPerSetting??selection.difficultyAnalysis?.simulationsPerSetting??DEFAULT_SIMULATIONS_PER_SETTING;
   const seed=options.seed??selection.difficultyAnalysis?.seed??20260812;
@@ -155,15 +187,17 @@ export function evaluateMachineDifficulty(research,selection,options={}){
   }).filter(Boolean);
   const coverage=numericSelection.length===0?1:analyzable.length/numericSelection.length;
   const status=numericSelection.length===0?'NO_NUMERIC_FEATURES':analyzable.length===numericSelection.length?'COMPLETE':analyzable.length===0?'NOT_CONFIGURED':'PARTIAL';
-  const scores=analyzable.length?targets.map(g=>analyzeTarget(settings,featuresById,analyzable,g,simulationsPerSetting,seed)):[];
+  const scores=analyzable.length?targets.map(g=>analyzeTarget(settings,featuresById,analyzable,g,simulationsPerSetting,seed,ctx)):[];
   return {
-    analyzerVersion:'difficulty-analyzer-v1.0',machineId:research.machine?.machineId??selection.machineId??null,machineDataVersion:selection.machineDataVersion??null,
+    analyzerVersion:'difficulty-analyzer-v1.1',machineId:research.machine?.machineId??selection.machineId??null,machineDataVersion:selection.machineDataVersion??null,
     generatedAt:new Date().toISOString(),status,
     scoreDefinition:{range:'0-100 integer; higher is easier to discriminate numerically',evidenceIncluded:false,prior:'uniform over available settings',weights:SCORE_WEIGHTS,components:['normalized posterior information','chance-corrected exact-setting accuracy','chance-corrected ordinal rank-distance'],settingDistance:'ordinal setting order, not numeric label gap'},
-    coverage:{includedNumericFeatureCount:numericSelection.length,analyzableFeatureCount:analyzable.length,ratio:Number(coverage.toFixed(6)),missingDifficultyExposureFeatureIds:missing},
+    targetGameBasis:selection.difficultyAnalysis?.targetGameBasis??null,
+    exposurePolicy:{allowedQualities:[...allowedQualities],derivedEventRate:'source feature exposure × source event/category probability × eventMultiplier; no observed event frequency is invented'},
+    coverage:{includedNumericFeatureCount:numericSelection.length,analyzableFeatureCount:analyzable.length,ratio:Number(coverage.toFixed(6)),missingDifficultyExposureFeatureIds:missing,blockedDifficultyExposureFeatures:blocked},
     targets:scores,
     featureTrialEstimates:featureEstimates,
-    disclaimer:'Difficulty scores exclude Hard Evidence. Game-based scores are generated only from features with explicit difficultyExposure; missing exposure is never inferred. Required trial counts are conservative design estimates, not guarantees of real-world classification accuracy.'
+    disclaimer:'Difficulty scores exclude Hard Evidence. Game-based scores use only explicitly defined and quality-allowed difficultyExposure. derived_event_rate is allowed only when its source feature and source event probability are present. Missing or provisional exposure is never silently inferred for final calibration.'
   };
 }
 

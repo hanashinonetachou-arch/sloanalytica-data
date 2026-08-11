@@ -1,16 +1,30 @@
 import fs from 'node:fs';
 import path from 'node:path';
 
+const FINAL_QUALITIES=new Set(['EXACT','DERIVED']);
 function readJson(file){return JSON.parse(fs.readFileSync(file,'utf8'));}
 function exists(file){return fs.existsSync(file);}
 function selectionStatus(selection){
   const numeric=(selection?.features??[]).filter(f=>['INCLUDE_PRIMARY','INCLUDE_SUPPORT'].includes(f.adoptionCategory));
   const missing=numeric.filter(f=>!f.difficultyExposure).map(f=>f.featureId??f.researchFeatureId??'UNKNOWN');
+  const blocked=numeric.filter(f=>f.difficultyExposure&&!FINAL_QUALITIES.has(f.difficultyExposure.quality??'EXACT')).map(f=>({featureId:f.featureId??f.researchFeatureId??'UNKNOWN',quality:f.difficultyExposure.quality??'EXACT'}));
+  const usable=numeric.filter(f=>f.difficultyExposure&&FINAL_QUALITIES.has(f.difficultyExposure.quality??'EXACT'));
+  const basis=selection?.difficultyAnalysis?.targetGameBasis??null;
+  const basisUsable=!!basis&&FINAL_QUALITIES.has(basis.quality)&&basis.crossMachineComparable===true;
+  let status='READY';
+  if(numeric.length===0)status='NO_NUMERIC_FEATURES';
+  else if(missing.length===numeric.length)status='EXPOSURE_NOT_CONFIGURED';
+  else if(missing.length||blocked.length)status='EXPOSURE_PARTIAL';
+  if(!basisUsable&&status==='READY')status='GAME_BASIS_NOT_COMPARABLE';
   return {
     numericFeatureCount:numeric.length,
     difficultyExposureConfiguredCount:numeric.length-missing.length,
+    finalCalibrationUsableFeatureCount:usable.length,
     missingDifficultyExposureFeatureIds:missing,
-    status:numeric.length===0?'NO_NUMERIC_FEATURES':missing.length===0?'READY':missing.length===numeric.length?'EXPOSURE_NOT_CONFIGURED':'EXPOSURE_PARTIAL'
+    blockedDifficultyExposureFeatures:blocked,
+    targetGameBasis:basis,
+    targetGameBasisUsableForFinalCalibration:basisUsable,
+    status
   };
 }
 
@@ -27,11 +41,12 @@ export function buildCalibrationReadiness(root='.', manifestPath='difficulty-cal
     const blockers=[];
     if(!hasResearch)blockers.push('RESEARCH_DATA_MISSING');
     if(!hasSelection)blockers.push('SELECTION_DATA_MISSING');
-    let selection=null,selectionCheck=null;
+    let selectionCheck=null;
     if(hasSelection){
-      selection=readJson(selectionPath);
-      selectionCheck=selectionStatus(selection);
+      selectionCheck=selectionStatus(readJson(selectionPath));
       if(['EXPOSURE_NOT_CONFIGURED','EXPOSURE_PARTIAL'].includes(selectionCheck.status))blockers.push('DIFFICULTY_EXPOSURE_INCOMPLETE');
+      if(!selectionCheck.targetGameBasisUsableForFinalCalibration)blockers.push('TARGET_GAME_BASIS_NOT_FINAL_COMPARABLE');
+      if(selectionCheck.blockedDifficultyExposureFeatures.length)blockers.push('NON_FINAL_EXPOSURE_QUALITY_PRESENT');
     }
     return {
       ...entry,
@@ -44,14 +59,14 @@ export function buildCalibrationReadiness(root='.', manifestPath='difficulty-cal
   });
   const readyCount=machines.filter(m=>m.readiness==='READY').length;
   return {
-    reportVersion:'difficulty-calibration-readiness-v1.0',
+    reportVersion:'difficulty-calibration-readiness-v1.1',
     phase:manifest.phase,
     generatedAt:new Date().toISOString(),
     targetGames:manifest.targetGames,
     summary:{targetMachineCount:machines.length,readyMachineCount:readyCount,notReadyMachineCount:machines.length-readyCount,allReady:readyCount===machines.length},
     machines,
     nextAction:readyCount===machines.length?'RUN_CROSS_MACHINE_CALIBRATION':'RESOLVE_BLOCKERS_BEFORE_SCORING',
-    policy:'Calibration scores must not be compared until every target machine has ResearchData, SelectionData, and explicit difficultyExposure for all included numeric features. Missing exposure must never be inferred.'
+    policy:'Final cross-machine calibration requires ResearchData, SelectionData, explicit difficultyExposure, EXACT/DERIVED exposure quality, and an EXACT/DERIVED cross-machine-comparable target game basis. PROVISIONAL and unresolved exposure must never be silently promoted.'
   };
 }
 

@@ -1,7 +1,7 @@
 {
-  "reportVersion": "difficulty-calibration-readiness-v1.0",
-  "phase": "9.4B-1",
-  "generatedAt": "2026-08-11T22:47:10.824Z",
+  "reportVersion": "difficulty-calibration-readiness-v1.1",
+  "phase": "9.4B-4",
+  "generatedAt": "2026-08-11T22:59:01.666Z",
   "targetGames": [
     1500,
     3000,
@@ -51,13 +51,22 @@
       },
       "selectionCheck": {
         "numericFeatureCount": 3,
-        "difficultyExposureConfiguredCount": 0,
+        "difficultyExposureConfiguredCount": 1,
+        "finalCalibrationUsableFeatureCount": 1,
         "missingDifficultyExposureFeatureIds": [
-          "FEAT_CHERRY_WATERMELON_MULTINOMIAL",
           "FEAT_RB_INFINITE_AT_BINOMIAL",
           "FEAT_AT_END_SCREEN_MULTINOMIAL"
         ],
-        "status": "EXPOSURE_NOT_CONFIGURED"
+        "blockedDifficultyExposureFeatures": [],
+        "targetGameBasis": {
+          "basisId": "NORMAL_AT_GAMES",
+          "label": "通常・ATゲーム数",
+          "quality": "EXACT",
+          "crossMachineComparable": true,
+          "note": "ボーナス中を除く通常時・AT中のゲーム数。チェリー・スイカFeatureの分母と1:1。"
+        },
+        "targetGameBasisUsableForFinalCalibration": true,
+        "status": "EXPOSURE_PARTIAL"
       },
       "readiness": "NOT_READY",
       "blockers": [
@@ -80,18 +89,37 @@
       },
       "selectionCheck": {
         "numericFeatureCount": 4,
-        "difficultyExposureConfiguredCount": 0,
+        "difficultyExposureConfiguredCount": 2,
+        "finalCalibrationUsableFeatureCount": 0,
         "missingDifficultyExposureFeatureIds": [
-          "FEAT_AT_INITIAL",
-          "FEAT_CZ_EXCLUSIVE",
           "FEAT_AT_RETURN",
           "FEAT_CZ_WITHIN_100"
         ],
-        "status": "EXPOSURE_NOT_CONFIGURED"
+        "blockedDifficultyExposureFeatures": [
+          {
+            "featureId": "FEAT_AT_INITIAL",
+            "quality": "PROVISIONAL"
+          },
+          {
+            "featureId": "FEAT_CZ_EXCLUSIVE",
+            "quality": "PROVISIONAL"
+          }
+        ],
+        "targetGameBasis": {
+          "basisId": "AT_INITIAL_TRIAL_GAMES_PROVISIONAL",
+          "label": "AT初当り集計ゲーム数",
+          "quality": "PROVISIONAL",
+          "crossMachineComparable": false,
+          "note": "AT中を除外しCZ中を含む暫定分母。公開解析情報で厳密な集計範囲未確認のため最終横断校正には使用しない。"
+        },
+        "targetGameBasisUsableForFinalCalibration": false,
+        "status": "EXPOSURE_PARTIAL"
       },
       "readiness": "NOT_READY",
       "blockers": [
-        "DIFFICULTY_EXPOSURE_INCOMPLETE"
+        "DIFFICULTY_EXPOSURE_INCOMPLETE",
+        "TARGET_GAME_BASIS_NOT_FINAL_COMPARABLE",
+        "NON_FINAL_EXPOSURE_QUALITY_PRESENT"
       ]
     },
     {
@@ -109,5 +137,5 @@
     }
   ],
   "nextAction": "RESOLVE_BLOCKERS_BEFORE_SCORING",
-  "policy": "Calibration scores must not be compared until every target machine has ResearchData, SelectionData, and explicit difficultyExposure for all included numeric features. Missing exposure must never be inferred."
+  "policy": "Final cross-machine calibration requires ResearchData, SelectionData, explicit difficultyExposure, EXACT/DERIVED exposure quality, and an EXACT/DERIVED cross-machine-comparable target game basis. PROVISIONAL and unresolved exposure must never be silently promoted."
 }
