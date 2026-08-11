@@ -1,0 +1,3 @@
+import test from"node:test";import assert from"node:assert/strict";import{validateUniverse}from"../tools/validate-active-machine-universe.mjs";
+test("ranking is optional in universe",()=>{const d={schemaVersion:"active-machine-universe-v1",machines:[{universeKey:"U",displayName:"機種",presenceRank:null,lifecycleStatus:"ACTIVE_CANDIDATE"}]};assert.equal(validateUniverse(d).ok,true)});
+test("bad lifecycle fails",()=>{const d={schemaVersion:"active-machine-universe-v1",machines:[{universeKey:"U",displayName:"機種",presenceRank:null,lifecycleStatus:"BAD"}]};assert.equal(validateUniverse(d).ok,false)});
