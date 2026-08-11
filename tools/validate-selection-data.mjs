@@ -30,6 +30,18 @@ export function validateSelectionData(s,research=null){
      if(!idset.has(target)) errors.push(`${f.featureId}: unknown subtract target ${target}`);
      for(const id of subs??[]) if(!idset.has(id)) errors.push(`${f.featureId}: unknown subtract input ${id}`);
    }
+   const dx=f.difficultyExposure;
+   if(dx){
+     if(!["per_game","fixed_rate","setting_rate"].includes(dx.mode)) errors.push(`${f.featureId}: invalid difficultyExposure.mode ${dx.mode}`);
+     if(dx.mode==="per_game" && dx.factor!=null && (!Number.isFinite(Number(dx.factor))||Number(dx.factor)<0)) errors.push(`${f.featureId}: invalid difficultyExposure.factor`);
+     if(dx.mode==="fixed_rate" && (!Number.isFinite(Number(dx.trialsPerGame))||Number(dx.trialsPerGame)<0)) errors.push(`${f.featureId}: fixed_rate requires nonnegative trialsPerGame`);
+     if(dx.mode==="setting_rate"){
+       const rates=dx.trialsPerGameBySetting??{};
+       for(const setting of research?.machine?.settings??[]){
+         if(!Number.isFinite(Number(rates[setting]))||Number(rates[setting])<0) errors.push(`${f.featureId}: setting_rate missing/invalid ${setting}`);
+       }
+     }
+   }
    if(f.adoptionCategory==="EXCLUDE" && (f.numeratorInputId||f.denominatorInputId||(f.categoryInputIds?.length))) warnings.push(`${f.featureId}: EXCLUDE has unused input mapping`);
  }
  const machineSettings=new Set(research?.machine?.settings??[]);
