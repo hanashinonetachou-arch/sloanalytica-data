@@ -1,0 +1,4 @@
+import fs from"node:fs";
+const a=JSON.parse(fs.readFileSync("machine-candidate-assessment.json","utf8")),p=JSON.parse(fs.readFileSync("research-preflight.json","utf8")),by=new Map((a.candidates??[]).map(c=>[c.marketKey,c]));let applied=0;
+for(const x of p.candidates??[]){const c=by.get(x.marketKey);if(!c)continue;c.researchReadiness=x.researchReadiness;c.platformFit=x.platformFit;c.estimatedWorkload=x.estimatedWorkload;c.settingInferenceValue=x.settingInferenceValue;c.assessmentStatus=x.decision==="GO"?"READY":x.decision==="HOLD"?"HOLD":"RESEARCHED";c.lastAssessedAt=p.generatedAt;c.notes=`Preflight ${x.decision}: ${x.notes}`;applied++}
+fs.writeFileSync("machine-candidate-assessment.json",JSON.stringify(a,null,2)+"\n");console.log(`Research Preflight applied: ${applied}`);

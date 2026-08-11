@@ -1,0 +1,3 @@
+import test from"node:test";import assert from"node:assert/strict";import{validatePreflight}from"../tools/validate-research-preflight.mjs";
+test("valid shallow batch",()=>{const d={schemaVersion:"research-preflight-v1",policy:{maxCandidatesPerBatch:5},candidates:[{marketKey:"K",decision:"GO",researchReadiness:"HIGH",platformFit:"HIGH",estimatedWorkload:"LOW",settingInferenceValue:"HIGH"}]};assert.equal(validatePreflight(d).ok,true)});
+test("over batch limit fails",()=>{const c={decision:"GO",researchReadiness:"HIGH",platformFit:"HIGH",estimatedWorkload:"LOW",settingInferenceValue:"HIGH"};const d={schemaVersion:"research-preflight-v1",policy:{maxCandidatesPerBatch:1},candidates:[{...c,marketKey:"A"},{...c,marketKey:"B"}]};assert.equal(validatePreflight(d).ok,false)});
