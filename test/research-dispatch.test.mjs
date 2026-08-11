@@ -1,0 +1,3 @@
+import test from"node:test";import assert from"node:assert/strict";import{validateResearchDispatch}from"../tools/validate-research-dispatch.mjs";
+test("valid dispatch passes",()=>{const d={schemaVersion:"research-dispatch-v1",policy:{maxActiveFullResearch:1},activeResearch:{dispatchId:"D",marketKey:"K",displayName:"M",status:"READY_FOR_FULL_RESEARCH"},queue:[]};assert.equal(validateResearchDispatch(d).ok,true)});
+test("v1 rejects multiple-active policy",()=>{const d={schemaVersion:"research-dispatch-v1",policy:{maxActiveFullResearch:2},activeResearch:{dispatchId:"D",marketKey:"K",displayName:"M",status:"READY_FOR_FULL_RESEARCH"},queue:[]};assert.equal(validateResearchDispatch(d).ok,false)});
