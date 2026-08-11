@@ -1,0 +1,57 @@
+{
+  "schemaVersion": "prepublish-review-v1",
+  "machineId": "L_TOKYO_GHOUL",
+  "reviewedAt": "2026-08-11",
+  "status": "NEEDS_FIX",
+  "checks": [
+    {
+      "checkId": "AT_DENOMINATOR_OBSERVABILITY",
+      "target": "FEAT_AT_INITIAL",
+      "result": "NEEDS_FIELD_CONFIRMATION",
+      "severity": "BLOCKING",
+      "finding": "AT初当りの解析値自体は複数ソース一致だが、ユーザーが入力すべき『集計ゲーム数』の実機上の取得方法をResearchDataだけでは確定できない。",
+      "action": "実機または遊技データ表示でAT初当り確率の分母と一致するゲーム数表示を確認する。確認前は自動計算用の分母仕様を確定しない。"
+    },
+    {
+      "checkId": "CZ100_INPUT_PRACTICALITY",
+      "target": "FEAT_CZ_WITHIN_100",
+      "result": "REJECT",
+      "severity": "BLOCKING",
+      "finding": "公開値は『朝一を除く全モード平均の100G+α以内CZ当選率』。ユーザーが毎周期、朝一除外・周期開始・100G+α境界を正確に管理する必要があり、入力ミスと定義ずれのリスクが高い。",
+      "action": "初回MachineDataから除外する。ResearchDataには候補として保持する。"
+    },
+    {
+      "checkId": "FEATURE_DEPENDENCY",
+      "target": "FEAT_AT_RETURN",
+      "result": "REJECT",
+      "severity": "INFO",
+      "finding": "AT引き戻しは設定差があるがAT初当り集計との包含・依存関係を完全に分離できる入力仕様が未確定。",
+      "action": "初回版では除外を維持する。"
+    },
+    {
+      "checkId": "EVIDENCE_UI",
+      "target": "Hard Evidence",
+      "result": "NEEDS_FIX",
+      "severity": "BLOCKING",
+      "finding": "設定下限を単一enumにすると、設定4以上確認後に設定6確認へ更新する操作は可能だが、複数種類の確定演出の由来を保持できない。否定Evidenceも個別booleanが増え、実戦入力UIとして煩雑。",
+      "action": "初回版では『最も強い設定下限』と『否定設定の複数選択』という汎用入力へ寄せる設計を推奨。現Platformの入力型で安全に表現できるかPublish前に確認する。"
+    },
+    {
+      "checkId": "LOW_FREQUENCY_FEATURES",
+      "target": "excluded features",
+      "result": "PASS",
+      "severity": "INFO",
+      "finding": "エピソードボーナス、リプレイ契機AT直撃、下段リプレイ、弱チェリー契機CZは1日実戦の入力効率・必要試行数・状態判別難度から初回除外が妥当。",
+      "action": "ResearchDataに保持し、将来の仕様拡張時のみ再評価する。"
+    }
+  ],
+  "publishGate": {
+    "allowed": false,
+    "blockingItems": [
+      "AT_DENOMINATOR_OBSERVABILITY",
+      "CZ100_INPUT_PRACTICALITY",
+      "EVIDENCE_UI"
+    ],
+    "nextAction": "MachineData候補をAT初当り中心へ簡素化し、Evidence入力を汎用化してから再レビューする。"
+  }
+}

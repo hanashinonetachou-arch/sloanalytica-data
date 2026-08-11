@@ -1,0 +1,3 @@
+import test from"node:test";import assert from"node:assert/strict";import{validatePrepublishReview}from"../tools/validate-prepublish-review.mjs";
+test("blocked prepublish review is valid",()=>{const d={schemaVersion:"prepublish-review-v1",status:"NEEDS_FIX",checks:[{checkId:"A",result:"NEEDS_FIELD_CONFIRMATION",severity:"BLOCKING"}],publishGate:{allowed:false,blockingItems:["A"]}};assert.equal(validatePrepublishReview(d).ok,true)});
+test("publish cannot retain blockers",()=>{const d={schemaVersion:"prepublish-review-v1",status:"PASS",checks:[],publishGate:{allowed:true,blockingItems:["A"]}};assert.equal(validatePrepublishReview(d).ok,false)});
