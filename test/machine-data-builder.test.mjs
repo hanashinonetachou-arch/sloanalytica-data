@@ -95,7 +95,7 @@ test("generic evidenceUi with unset defaults and multi_enum",()=>{
  const p=buildMachineData(r,s);
  const floor=p.inputs.inputs.find(i=>i.id==="INP_EVI_SETTING_FLOOR");
  const denied=p.inputs.inputs.find(i=>i.id==="INP_EVI_DENIED_SETTINGS");
- assert.equal(floor.type,"enum"); assert.equal(floor.defaultValue,"");
+ assert.equal(floor.type,"enum"); assert.equal(floor.defaultValue,"__UNSET__");
  assert.equal(denied.type,"multi_enum"); assert.deepEqual(denied.defaultValue,[]);
  assert.ok(p.ui.sections.some(sec=>sec.items.some(i=>i.widget==="multi_select")));
  const ev=p.evidence.evidences.find(e=>e.triggerValue==="SET_2_OR_HIGHER");

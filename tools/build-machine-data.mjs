@@ -11,7 +11,7 @@ function sourceClass(t){
 }
 function inputWithDefaults(x){
   const defaultValue=x.defaultValue!==undefined?x.defaultValue:
-    x.type==="boolean"?false:x.type==="multi_enum"?[]:x.type==="enum"?"":0;
+    x.type==="boolean"?false:x.type==="multi_enum"?[]:x.type==="enum"?"__UNSET__":0;
   const y={...x,defaultValue,minimum:["integer","number","counter"].includes(x.type)?0:undefined};
   for(const k of Object.keys(y)) if(y[k]===undefined) delete y[k];
   return y;
@@ -75,7 +75,10 @@ function materializeEvidenceUi(research,selection){
     generatedInputs.push({
       id:inputId,name:g.label,type:isMulti?"multi_enum":"enum",category:"EVIDENCE",unit:"",
       displayOrder:g.displayOrder??nextOrder++,inferenceRole:"INCLUDE_SUPPORT",
-      options:(g.options??[]).map(o=>({key:o.value,label:o.label,value:o.value}))
+      options:[
+        ...(!isMulti?[{key:"__UNSET__",label:"未選択",value:"__UNSET__"}]:[]),
+        ...(g.options??[]).map(o=>({key:o.value,label:o.label,value:o.value}))
+      ]
     });
     for(const o of g.options??[]){
       const confirmedSettings=o.allowedSettings??[];
@@ -123,12 +126,15 @@ export function buildMachineData(research,selection){
   }
   let order=1;
   for(const [cat,items] of byCat){
-    sections.push({id:`AUTO_${cat}`.replace(/[^A-Z0-9_]/gi,"_").toUpperCase(),title:cat,displayOrder:order++,
+    sections.push({
+      id:`AUTO_${cat}`.replace(/[^A-Z0-9_]/gi,"_").toUpperCase(),
+      ...(cat==="PRIMARY"||cat==="EVIDENCE"?{}:{title:cat}),
+      displayOrder:order++,
       items:items.sort((a,b)=>a.displayOrder-b.displayOrder).map(i=>({
         type:"input",inputId:i.id,label:i.name,
-        widget:i.type==="counter"?"counter":i.type==="boolean"?"boolean":i.type==="enum"?"select":i.type==="multi_enum"?"multi_select":"number",
-        ...(i.type==="enum"&&i.category==="EVIDENCE"?{placeholder:"未選択"}:{})
-      }))});
+        widget:i.type==="counter"?"counter":i.type==="boolean"?"boolean":i.type==="enum"?"select":i.type==="multi_enum"?"multi_select":"number"
+      }))
+    });
   }
   const evidences=[];
   const researchEvidence=new Map((research.evidenceCandidates??[]).map(e=>[e.researchEvidenceId,e]));
