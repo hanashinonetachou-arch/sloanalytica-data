@@ -36,6 +36,7 @@ function deriveCapabilities(pkg){
    if(f.autoAccumulator || f.inputTransform==="auto_accumulator") caps.add("auto_accumulator");
  }
  if((pkg.evidence?.evidences??[]).length) caps.add("evidence");
+ if((pkg.inputs?.inputs??[]).some(i=>i.type==="multi_enum")) caps.add("evidence_multi_select");
  return [...caps];
 }
 function defaultPackageUrl(id){

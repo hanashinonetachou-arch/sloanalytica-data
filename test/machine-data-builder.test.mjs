@@ -80,3 +80,24 @@ test("preserves observed_ratio_to_trials mapping",()=>{
  assert.equal(f.inputTransform,"observed_ratio_to_trials");
  assert.equal(f.trialCountInputId,"INP_TOTAL");
 });
+
+test("generic evidenceUi with unset defaults and multi_enum",()=>{
+ const r={...research,machine:{...research.machine,settings:["SET_1","SET_2","SET_3"]},
+  evidenceCandidates:[{researchEvidenceId:"RE_2PLUS",name:"2以上",factStatus:"verified",allowedSettings:["SET_2","SET_3"],deniedSettings:[],sourceRefs:["SRC1"]}]};
+ const s={schemaVersion:"selection-data-v1",machineId:r.machine.machineId,machineDataVersion:"0.1.0",
+  inputs:[{id:"INP_G",name:"G",type:"integer",category:"PRIMARY",displayOrder:1}],features:[],
+  evidenceUi:{groups:[
+   {groupId:"SETTING_FLOOR",label:"設定下限",selectionMode:"single",normalizationMode:"ALLOWED_SETTINGS",options:[
+    {value:"SET_2_OR_HIGHER",label:"設定2以上",allowedSettings:["SET_2","SET_3"],sourceEvidenceIds:["RE_2PLUS"]}]},
+   {groupId:"DENIED_SETTINGS",label:"否定設定",selectionMode:"multi",normalizationMode:"EXCLUDE_SETTINGS",options:[
+    {value:"SET_2",label:"設定2否定",excludedSettings:["SET_2"],sourceEvidenceIds:[]}]}
+  ]}};
+ const p=buildMachineData(r,s);
+ const floor=p.inputs.inputs.find(i=>i.id==="INP_EVI_SETTING_FLOOR");
+ const denied=p.inputs.inputs.find(i=>i.id==="INP_EVI_DENIED_SETTINGS");
+ assert.equal(floor.type,"enum"); assert.equal(floor.defaultValue,"");
+ assert.equal(denied.type,"multi_enum"); assert.deepEqual(denied.defaultValue,[]);
+ assert.ok(p.ui.sections.some(sec=>sec.items.some(i=>i.widget==="multi_select")));
+ const ev=p.evidence.evidences.find(e=>e.triggerValue==="SET_2_OR_HIGHER");
+ assert.deepEqual(ev.confirmedSettings,["SET_2","SET_3"]);
+});

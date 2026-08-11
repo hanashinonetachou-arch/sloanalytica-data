@@ -7,7 +7,7 @@ import { fileURLToPath } from 'node:url';
 export const KNOWN_CAPABILITIES = new Set([
   'binomial', 'multinomial', 'poisson', 'conditional_partial_multinomial',
   'conditional_partial_binomial', 'marginal_multinomial', 'evidence',
-  'reference_display', 'auto_accumulator',
+  'reference_display', 'auto_accumulator', 'evidence_multi_select',
 ]);
 
 const MODEL_CAPABILITY = {
@@ -74,6 +74,7 @@ function capabilityUsage(machineData, result, scope) {
     if (feature.calculationRole === 'DISPLAY_ONLY' || feature.probabilityEngineUsage === false) used.add('reference_display');
   }
   if ((machineData.evidence?.evidences ?? []).length > 0) used.add('evidence');
+  if ((machineData.inputs?.inputs ?? []).some(input => input?.type === 'multi_enum')) used.add('evidence_multi_select');
   for (const section of machineData.ui?.sections ?? []) for (const item of section.items ?? []) if (item.type === 'auto_accumulator') used.add('auto_accumulator');
   return used;
 }

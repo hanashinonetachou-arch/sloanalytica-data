@@ -10,7 +10,9 @@ function sourceClass(t){
   return "ANALYSIS";
 }
 function inputWithDefaults(x){
-  const y={...x,defaultValue:x.type==="boolean"?false:(x.type==="enum"?(x.options?.[0]?.value ?? "NONE"):0),minimum:["integer","number","counter"].includes(x.type)?0:undefined};
+  const defaultValue=x.defaultValue!==undefined?x.defaultValue:
+    x.type==="boolean"?false:x.type==="multi_enum"?[]:x.type==="enum"?"":0;
+  const y={...x,defaultValue,minimum:["integer","number","counter"].includes(x.type)?0:undefined};
   for(const k of Object.keys(y)) if(y[k]===undefined) delete y[k];
   return y;
 }
@@ -63,11 +65,41 @@ function buildFeature(rf,sf,inputIds){
   base.sourceEvidenceRefs=rf.sourceRefs??[];
   return base;
 }
+
+function materializeEvidenceUi(research,selection){
+  const generatedInputs=[],generatedEvidence=[];
+  let nextOrder=100;
+  for(const g of selection.evidenceUi?.groups??[]){
+    const inputId=`INP_EVI_${g.groupId}`;
+    const isMulti=g.selectionMode==="multi";
+    generatedInputs.push({
+      id:inputId,name:g.label,type:isMulti?"multi_enum":"enum",category:"EVIDENCE",unit:"",
+      displayOrder:g.displayOrder??nextOrder++,inferenceRole:"INCLUDE_SUPPORT",
+      options:(g.options??[]).map(o=>({key:o.value,label:o.label,value:o.value}))
+    });
+    for(const o of g.options??[]){
+      const confirmedSettings=o.allowedSettings??[];
+      const deniedSettings=o.excludedSettings??[];
+      if(!confirmedSettings.length&&!deniedSettings.length) continue;
+      generatedEvidence.push({
+        id:`EVI_${g.groupId}_${o.value}`.replace(/[^A-Z0-9_]/gi,"_").toUpperCase(),
+        name:o.label,displayName:o.label,inputId,triggerValue:o.value,
+        confirmedSettings,deniedSettings,hasImage:false,
+        type:deniedSettings.length&&!confirmedSettings.length?"SETTING_DENIAL":"SETTING_CONFIRMATION",
+        sourceEvidenceRefs:o.sourceEvidenceIds??[]
+      });
+    }
+  }
+  return {generatedInputs,generatedEvidence};
+}
+
 export function buildMachineData(research,selection){
   if(selection.machineId!==research.machine?.machineId) fail("machineId mismatch");
   const rfs=new Map((research.features??[]).map(f=>[f.researchFeatureId,f]));
-  const inputIds=new Set((selection.inputs??[]).map(x=>x.id));
-  if(inputIds.size!==(selection.inputs??[]).length) fail("duplicate input id");
+  const {generatedInputs,generatedEvidence}=materializeEvidenceUi(research,selection);
+  const allInputs=[...(selection.inputs??[]),...generatedInputs];
+  const inputIds=new Set(allInputs.map(x=>x.id));
+  if(inputIds.size!==allInputs.length) fail("duplicate input id");
   const features=[];
   for(const sf of selection.features??[]){
     const rf=rfs.get(sf.researchFeatureId);
@@ -85,14 +117,18 @@ export function buildMachineData(research,selection){
   };
   const sections=[];
   const byCat=new Map();
-  for(const i of selection.inputs??[]){
+  for(const i of allInputs){
     if(!byCat.has(i.category)) byCat.set(i.category,[]);
     byCat.get(i.category).push(i);
   }
   let order=1;
   for(const [cat,items] of byCat){
     sections.push({id:`AUTO_${cat}`.replace(/[^A-Z0-9_]/gi,"_").toUpperCase(),title:cat,displayOrder:order++,
-      items:items.sort((a,b)=>a.displayOrder-b.displayOrder).map(i=>({type:"input",inputId:i.id,label:i.name,widget:i.type==="counter"?"counter":i.type==="boolean"?"boolean":i.type==="enum"?"select":"number"}))});
+      items:items.sort((a,b)=>a.displayOrder-b.displayOrder).map(i=>({
+        type:"input",inputId:i.id,label:i.name,
+        widget:i.type==="counter"?"counter":i.type==="boolean"?"boolean":i.type==="enum"?"select":i.type==="multi_enum"?"multi_select":"number",
+        ...(i.type==="enum"&&i.category==="EVIDENCE"?{placeholder:"未選択"}:{})
+      }))});
   }
   const evidences=[];
   const researchEvidence=new Map((research.evidenceCandidates??[]).map(e=>[e.researchEvidenceId,e]));
@@ -101,12 +137,13 @@ export function buildMachineData(research,selection){
     if(!re) fail(`unknown researchEvidenceId: ${e.researchEvidenceId}`);
     if(!inputIds.has(e.inputId)) fail(`unknown evidence inputId: ${e.inputId}`);
     evidences.push({id:e.evidenceId,name:re.name,displayName:e.displayName??re.name,inputId:e.inputId,triggerValue:e.triggerValue,
-      confirmedSettings:re.confirmedSettings??[],deniedSettings:re.deniedSettings??[],hasImage:false,
+      confirmedSettings:re.allowedSettings??re.confirmedSettings??[],deniedSettings:re.deniedSettings??[],hasImage:false,
       type:(re.deniedSettings?.length??0)>0 && !(re.confirmedSettings?.length??0)?"SETTING_DENIAL":"SETTING_CONFIRMATION"});
   }
+  evidences.push(...generatedEvidence);
   return {
     schemaVersion:1,machine,
-    inputs:{schemaVersion:"2.0.0",inputs:(selection.inputs??[]).map(inputWithDefaults)},
+    inputs:{schemaVersion:"2.0.0",inputs:allInputs.map(inputWithDefaults)},
     features:{schemaVersion:"2.0.0",features},
     evidence:{version:"1.0.0",evidences,sources},
     ui:{sections},reliability:{},

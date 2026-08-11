@@ -32,6 +32,23 @@ export function validateSelectionData(s,research=null){
    }
    if(f.adoptionCategory==="EXCLUDE" && (f.numeratorInputId||f.denominatorInputId||(f.categoryInputIds?.length))) warnings.push(`${f.featureId}: EXCLUDE has unused input mapping`);
  }
+ const machineSettings=new Set(research?.machine?.settings??[]);
+ const researchEvidenceIds=new Set((research?.evidenceCandidates??[]).map(e=>e.researchEvidenceId));
+ const evidenceGroupIds=new Set();
+ for(const g of s.evidenceUi?.groups??[]){
+   if(evidenceGroupIds.has(g.groupId)) errors.push(`duplicate evidenceUi groupId ${g.groupId}`);
+   evidenceGroupIds.add(g.groupId);
+   const optionValues=new Set();
+   for(const o of g.options??[]){
+     if(optionValues.has(o.value)) errors.push(`${g.groupId}: duplicate evidenceUi option ${o.value}`);
+     optionValues.add(o.value);
+     if(o.value==="NONE") errors.push(`${g.groupId}: explicit NONE option is not allowed`);
+     for(const setting of [...(o.allowedSettings??[]),...(o.excludedSettings??[])])
+       if(research && !machineSettings.has(setting)) errors.push(`${g.groupId}/${o.value}: unknown setting ${setting}`);
+     for(const evidenceId of o.sourceEvidenceIds??[])
+       if(research && !researchEvidenceIds.has(evidenceId)) errors.push(`${g.groupId}/${o.value}: unknown research evidence ${evidenceId}`);
+   }
+ }
  return {ok:errors.length===0,errors,warnings};
 }
 if(import.meta.url===`file://${process.argv[1]}`){
