@@ -5,7 +5,9 @@ const FINAL_QUALITIES=new Set(['EXACT','DERIVED']);
 function readJson(file){return JSON.parse(fs.readFileSync(file,'utf8'));}
 function exists(file){return fs.existsSync(file);}
 function selectionStatus(selection){
-  const numeric=(selection?.features??[]).filter(f=>['INCLUDE_PRIMARY','INCLUDE_SUPPORT'].includes(f.adoptionCategory));
+  const inferenceNumeric=(selection?.features??[]).filter(f=>['INCLUDE_PRIMARY','INCLUDE_SUPPORT'].includes(f.adoptionCategory));
+  const excluded=inferenceNumeric.filter(f=>f.difficultyParticipation==='EXCLUDE');
+  const numeric=inferenceNumeric.filter(f=>f.difficultyParticipation!=='EXCLUDE');
   const missing=numeric.filter(f=>!f.difficultyExposure).map(f=>f.featureId??f.researchFeatureId??'UNKNOWN');
   const blocked=numeric.filter(f=>f.difficultyExposure&&!FINAL_QUALITIES.has(f.difficultyExposure.quality??'EXACT')).map(f=>({featureId:f.featureId??f.researchFeatureId??'UNKNOWN',quality:f.difficultyExposure.quality??'EXACT'}));
   const usable=numeric.filter(f=>f.difficultyExposure&&FINAL_QUALITIES.has(f.difficultyExposure.quality??'EXACT'));
@@ -17,6 +19,9 @@ function selectionStatus(selection){
   else if(missing.length||blocked.length)status='EXPOSURE_PARTIAL';
   if(!basisUsable&&status==='READY')status='GAME_BASIS_NOT_COMPARABLE';
   return {
+    inferenceNumericFeatureCount:inferenceNumeric.length,
+    explicitlyExcludedNumericFeatureCount:excluded.length,
+    explicitlyExcludedNumericFeatures:excluded.map(f=>({featureId:f.featureId??f.researchFeatureId??'UNKNOWN',reason:f.difficultyExclusionReason??null})),
     numericFeatureCount:numeric.length,
     difficultyExposureConfiguredCount:numeric.length-missing.length,
     finalCalibrationUsableFeatureCount:usable.length,

@@ -42,3 +42,8 @@ Hard Evidenceは難易度スコアから除外する。UIでは別途「設定�
 
 ## 実行
 `npm run difficulty:evaluate -- research/<machine>/research-data.json research/<machine>/selection-data.json [output.json]`
+
+## difficultyParticipation
+ProbabilityEngineで採用中でも、targetGamesから自然に発生しない文脈情報は
+`difficultyParticipation: "EXCLUDE"` と理由を明示して機種固有Difficultyから除外できる。
+例：着席時の前任者データ。Inferenceでの利用可否は変更しない。

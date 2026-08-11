@@ -10,8 +10,9 @@ test('calibration readiness requires final-quality exposure and comparable game 
   const geass=report.machines.find(m=>m.machineId==='S_CODE_GEASS_3_CC_FS');
   const tokyo=report.machines.find(m=>m.machineId==='L_TOKYO_GHOUL');
   const kaguya=report.machines.find(m=>m.machineKey==='KAGUYA_SAMA');
-  assert.ok(my.blockers.includes('RESEARCH_DATA_MISSING'));
-  assert.ok(my.blockers.includes('SELECTION_DATA_MISSING'));
+  assert.equal(my.readiness,'READY');
+  assert.equal(my.selectionCheck.explicitlyExcludedNumericFeatureCount,1);
+  assert.equal(my.selectionCheck.finalCalibrationUsableFeatureCount,2);
   assert.equal(geass.selectionCheck.finalCalibrationUsableFeatureCount,1);
   assert.ok(geass.blockers.includes('DIFFICULTY_EXPOSURE_INCOMPLETE'));
   assert.equal(geass.selectionCheck.targetGameBasisUsableForFinalCalibration,true);

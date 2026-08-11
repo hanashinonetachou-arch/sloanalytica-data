@@ -171,7 +171,9 @@ export function evaluateMachineDifficulty(research,selection,options={}){
   const settings=Array.isArray(research.machine?.settings)?research.machine.settings:[];
   const featuresById=new Map((research.features??[]).map(f=>[f.researchFeatureId,f]));
   const selectionByFeatureId=new Map((selection.features??[]).map(f=>[f.featureId,f]));
-  const numericSelection=(selection.features??[]).filter(f=>['INCLUDE_PRIMARY','INCLUDE_SUPPORT'].includes(f.adoptionCategory));
+  const inferenceNumericSelection=(selection.features??[]).filter(f=>['INCLUDE_PRIMARY','INCLUDE_SUPPORT'].includes(f.adoptionCategory));
+  const excludedFromDifficulty=inferenceNumericSelection.filter(f=>f.difficultyParticipation==='EXCLUDE');
+  const numericSelection=inferenceNumericSelection.filter(f=>f.difficultyParticipation!=='EXCLUDE');
   const allowedQualities=new Set(options.allowedExposureQualities??selection.difficultyAnalysis?.calibrationAllowedExposureQualities??DEFAULT_ALLOWED_QUALITIES);
   const ctx={featuresById,selectionByFeatureId,allowedQualities};
   const exposureResolvable=sf=>settings.every(st=>resolveExposureTrials(sf,st,1500,ctx)!=null);
@@ -194,10 +196,10 @@ export function evaluateMachineDifficulty(research,selection,options={}){
     scoreDefinition:{range:'0-100 integer; higher is easier to discriminate numerically',evidenceIncluded:false,prior:'uniform over available settings',weights:SCORE_WEIGHTS,components:['normalized posterior information','chance-corrected exact-setting accuracy','chance-corrected ordinal rank-distance'],settingDistance:'ordinal setting order, not numeric label gap'},
     targetGameBasis:selection.difficultyAnalysis?.targetGameBasis??null,
     exposurePolicy:{allowedQualities:[...allowedQualities],derivedEventRate:'source feature exposure × source event/category probability × eventMultiplier; no observed event frequency is invented'},
-    coverage:{includedNumericFeatureCount:numericSelection.length,analyzableFeatureCount:analyzable.length,ratio:Number(coverage.toFixed(6)),missingDifficultyExposureFeatureIds:missing,blockedDifficultyExposureFeatures:blocked},
+    coverage:{inferenceNumericFeatureCount:inferenceNumericSelection.length,includedNumericFeatureCount:numericSelection.length,explicitlyExcludedNumericFeatureCount:excludedFromDifficulty.length,explicitlyExcludedNumericFeatures:excludedFromDifficulty.map(f=>({featureId:f.featureId,reason:f.difficultyExclusionReason??null})),analyzableFeatureCount:analyzable.length,ratio:Number(coverage.toFixed(6)),missingDifficultyExposureFeatureIds:missing,blockedDifficultyExposureFeatures:blocked},
     targets:scores,
     featureTrialEstimates:featureEstimates,
-    disclaimer:'Difficulty scores exclude Hard Evidence. Game-based scores use only explicitly defined and quality-allowed difficultyExposure. derived_event_rate is allowed only when its source feature and source event probability are present. Missing or provisional exposure is never silently inferred for final calibration.'
+    disclaimer:'Difficulty scores exclude Hard Evidence and inference Features explicitly marked difficultyParticipation=EXCLUDE. Game-based scores use only explicitly defined and quality-allowed difficultyExposure. derived_event_rate is allowed only when its source feature and source event probability are present. Missing or provisional exposure is never silently inferred for final calibration.'
   };
 }
 
