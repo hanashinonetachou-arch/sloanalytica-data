@@ -1,7 +1,7 @@
 {
   "schemaVersion": "selection-data-v1",
   "machineId": "L_TOKYO_GHOUL",
-  "machineDataVersion": "0.1.2",
+  "machineDataVersion": "0.2.0",
   "inputs": [
     {
       "id": "INP_AT_TRIAL_GAMES",
@@ -10,20 +10,7 @@
       "category": "PRIMARY",
       "unit": "G",
       "displayOrder": 1,
-      "inferenceRole": "INCLUDE_PRIMARY",
-      "description": "AT中を除き、AT初当りまでに消化したゲーム数を入力してください。CZ中のゲーム数は含めます。公開解析情報ではAT初当り確率の集計範囲を確認できないため、本アプリでは暫定的にこの定義を採用しています。",
-      "denominatorDefinition": {
-        "status": "PROVISIONAL",
-        "scope": "NON_AT_GAMES_INCLUDING_CZ",
-        "include": [
-          "CZ"
-        ],
-        "exclude": [
-          "AT"
-        ],
-        "reason": "公開解析情報からAT初当り確率のゲーム数集計範囲を確認できないため。",
-        "recheckRequired": true
-      }
+      "description": "AT中を除き、AT初当りまでに消化したゲーム数を入力してください。CZ中のゲーム数は含めます。公開解析情報ではAT初当り確率の集計範囲を確認できないため、本アプリでは暫定的にこの定義を採用しています。"
     },
     {
       "id": "INP_AT_INITIAL_COUNT",
@@ -31,9 +18,59 @@
       "type": "counter",
       "category": "PRIMARY",
       "unit": "回",
-      "displayOrder": 2,
-      "inferenceRole": "INCLUDE_PRIMARY",
-      "parentInputId": "INP_AT_TRIAL_GAMES"
+      "displayOrder": 2
+    },
+    {
+      "id": "INP_REMINISCENCE_COUNT",
+      "name": "レミニセンス回数",
+      "type": "counter",
+      "category": "CZ",
+      "unit": "回",
+      "displayOrder": 10,
+      "description": "CZ出現率ではCZ消化中8G/回を分母から自動除外します。"
+    },
+    {
+      "id": "INP_RIZE_COUNT",
+      "name": "大喰いの利世回数",
+      "type": "counter",
+      "category": "CZ",
+      "unit": "回",
+      "displayOrder": 11,
+      "description": "CZ出現率ではCZ消化中8G/回を分母から自動除外します。"
+    },
+    {
+      "id": "INP_100G_TRIAL_COUNT",
+      "name": "100G到達回数",
+      "type": "counter",
+      "category": "ZONE",
+      "unit": "回",
+      "displayOrder": 20,
+      "description": "朝一モードを除く対象周期を数えてください。"
+    },
+    {
+      "id": "INP_100G_HIT_COUNT",
+      "name": "100G以内CZ以上当選回数",
+      "type": "counter",
+      "category": "ZONE",
+      "unit": "回",
+      "displayOrder": 21,
+      "description": "朝一1回目は除外して入力してください。"
+    },
+    {
+      "id": "INP_AT_END_COUNT",
+      "name": "AT終了回数",
+      "type": "counter",
+      "category": "AT_RETURN",
+      "unit": "回",
+      "displayOrder": 30
+    },
+    {
+      "id": "INP_AT_RETURN_COUNT",
+      "name": "AT引き戻し当選回数",
+      "type": "counter",
+      "category": "AT_RETURN",
+      "unit": "回",
+      "displayOrder": 31
     }
   ],
   "features": [
@@ -56,7 +93,26 @@
     {
       "researchFeatureId": "RF_CZ_EXCLUSIVE",
       "featureId": "FEAT_CZ_EXCLUSIVE",
-      "adoptionCategory": "EXCLUDE"
+      "adoptionCategory": "INCLUDE_PRIMARY",
+      "numeratorInputId": "INP_RIZE_COUNT",
+      "categoryInputIds": [
+        "INP_REMINISCENCE_COUNT"
+      ],
+      "denominatorInputId": "INP_AT_TRIAL_GAMES",
+      "denominatorAdjustments": [
+        {
+          "inputId": "INP_RIZE_COUNT",
+          "multiplier": -8
+        },
+        {
+          "inputId": "INP_REMINISCENCE_COUNT",
+          "multiplier": -8
+        }
+      ],
+      "minimumSample": 1,
+      "sampleRecommendation": 5000,
+      "weight": 1.0,
+      "displayFormat": "ratio_1_over_n"
     },
     {
       "researchFeatureId": "RF_EPISODE_BONUS",
@@ -71,7 +127,13 @@
     {
       "researchFeatureId": "RF_AT_RETURN",
       "featureId": "FEAT_AT_RETURN",
-      "adoptionCategory": "EXCLUDE"
+      "adoptionCategory": "INCLUDE_PRIMARY",
+      "numeratorInputId": "INP_AT_RETURN_COUNT",
+      "denominatorInputId": "INP_AT_END_COUNT",
+      "minimumSample": 1,
+      "sampleRecommendation": 20,
+      "weight": 1.0,
+      "displayFormat": "percentage"
     },
     {
       "researchFeatureId": "RF_LOWER_REPLAY",
@@ -91,7 +153,13 @@
     {
       "researchFeatureId": "RF_CZ_WITHIN_100",
       "featureId": "FEAT_CZ_WITHIN_100",
-      "adoptionCategory": "EXCLUDE"
+      "adoptionCategory": "INCLUDE_PRIMARY",
+      "numeratorInputId": "INP_100G_HIT_COUNT",
+      "denominatorInputId": "INP_100G_TRIAL_COUNT",
+      "minimumSample": 1,
+      "sampleRecommendation": 20,
+      "weight": 1.0,
+      "displayFormat": "percentage"
     }
   ],
   "evidence": [],

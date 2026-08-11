@@ -30,10 +30,10 @@ function paths(id){
 function deriveCapabilities(pkg){
  const caps=new Set();
  for(const f of pkg.features?.features??[]){
-   const m=f.modelType;
-   if(m) caps.add(m);
+   if(f.modelType) caps.add(f.modelType);
    if(f.calculationRole==="DISPLAY_ONLY") caps.add("reference_display");
    if(f.autoAccumulator || f.inputTransform==="auto_accumulator") caps.add("auto_accumulator");
+   if(Array.isArray(f.denominatorAdjustments)&&f.denominatorAdjustments.length) caps.add("derived_denominator");
  }
  if((pkg.evidence?.evidences??[]).length) caps.add("evidence");
  if((pkg.inputs?.inputs??[]).some(i=>i.type==="multi_enum")) caps.add("evidence_multi_select");
@@ -90,7 +90,7 @@ function publish(id,apply){
    manufacturer:pkg.machine?.manufacturer,
    machineDataVersion:pkg.machine?.machineDataVersion,
    ...(existing?.minimumAppVersionCode!==undefined?{minimumAppVersionCode:existing.minimumAppVersionCode}:{}),
-   requiredCapabilities: existing?.requiredCapabilities ?? deriveCapabilities(pkg),
+   requiredCapabilities: [...new Set([...(existing?.requiredCapabilities??[]),...deriveCapabilities(pkg)])],
    packageUrl: existing?.packageUrl ?? defaultPackageUrl(id),
    sha256:actualSha,
    packageSizeBytes:packageBytes,

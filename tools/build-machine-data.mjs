@@ -34,6 +34,12 @@ function buildFeature(rf,sf,inputIds){
     base.trialCountInputId=sf.trialCountInputId;
   }
   if(sf.displayFormat!=null) base.displayFormat=sf.displayFormat;
+  if(sf.denominatorAdjustments){
+    for(const a of sf.denominatorAdjustments){
+      if(!inputIds.has(a.inputId)||!Number.isFinite(a.multiplier)) fail(`${sf.featureId}: invalid denominatorAdjustments`);
+    }
+    base.denominatorAdjustments=sf.denominatorAdjustments;
+  }
   if(rf.candidateModel==="binomial" || rf.candidateModel==="poisson"){
     if(!sf.numeratorInputId||!sf.denominatorInputId) fail(`${sf.featureId}: numeratorInputId/denominatorInputId required`);
     if(!inputIds.has(sf.numeratorInputId)||!inputIds.has(sf.denominatorInputId)) fail(`${sf.featureId}: unknown input mapping`);
@@ -128,7 +134,7 @@ export function buildMachineData(research,selection){
   for(const [cat,items] of byCat){
     sections.push({
       id:`AUTO_${cat}`.replace(/[^A-Z0-9_]/gi,"_").toUpperCase(),
-      ...(cat==="PRIMARY"||cat==="EVIDENCE"?{}:{title:cat}),
+      ...(cat==="PRIMARY"||cat==="EVIDENCE"?{}:{title:({CZ:"CZ",ZONE:"100G以内のゲーム数解除",AT_RETURN:"AT引き戻し"}[cat]??cat)}),
       displayOrder:order++,
       items:items.sort((a,b)=>a.displayOrder-b.displayOrder).map(i=>({
         type:"input",inputId:i.id,label:i.name,

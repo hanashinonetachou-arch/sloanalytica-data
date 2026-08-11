@@ -3,7 +3,7 @@
   "machine": {
     "schemaVersion": "2.0.0",
     "machineId": "L_TOKYO_GHOUL",
-    "machineDataVersion": "0.1.2",
+    "machineDataVersion": "0.2.0",
     "displayName": "L 東京喰種",
     "modelName": "L東京喰種CT / L東京喰種FT",
     "manufacturer": "スパイキー / CROSSALPHA",
@@ -31,20 +31,7 @@
         "category": "PRIMARY",
         "unit": "G",
         "displayOrder": 1,
-        "inferenceRole": "INCLUDE_PRIMARY",
         "description": "AT中を除き、AT初当りまでに消化したゲーム数を入力してください。CZ中のゲーム数は含めます。公開解析情報ではAT初当り確率の集計範囲を確認できないため、本アプリでは暫定的にこの定義を採用しています。",
-        "denominatorDefinition": {
-          "status": "PROVISIONAL",
-          "scope": "NON_AT_GAMES_INCLUDING_CZ",
-          "include": [
-            "CZ"
-          ],
-          "exclude": [
-            "AT"
-          ],
-          "reason": "公開解析情報からAT初当り確率のゲーム数集計範囲を確認できないため。",
-          "recheckRequired": true
-        },
         "defaultValue": 0,
         "minimum": 0
       },
@@ -55,8 +42,70 @@
         "category": "PRIMARY",
         "unit": "回",
         "displayOrder": 2,
-        "inferenceRole": "INCLUDE_PRIMARY",
-        "parentInputId": "INP_AT_TRIAL_GAMES",
+        "defaultValue": 0,
+        "minimum": 0
+      },
+      {
+        "id": "INP_REMINISCENCE_COUNT",
+        "name": "レミニセンス回数",
+        "type": "counter",
+        "category": "CZ",
+        "unit": "回",
+        "displayOrder": 10,
+        "description": "CZ出現率ではCZ消化中8G/回を分母から自動除外します。",
+        "defaultValue": 0,
+        "minimum": 0
+      },
+      {
+        "id": "INP_RIZE_COUNT",
+        "name": "大喰いの利世回数",
+        "type": "counter",
+        "category": "CZ",
+        "unit": "回",
+        "displayOrder": 11,
+        "description": "CZ出現率ではCZ消化中8G/回を分母から自動除外します。",
+        "defaultValue": 0,
+        "minimum": 0
+      },
+      {
+        "id": "INP_100G_TRIAL_COUNT",
+        "name": "100G到達回数",
+        "type": "counter",
+        "category": "ZONE",
+        "unit": "回",
+        "displayOrder": 20,
+        "description": "朝一モードを除く対象周期を数えてください。",
+        "defaultValue": 0,
+        "minimum": 0
+      },
+      {
+        "id": "INP_100G_HIT_COUNT",
+        "name": "100G以内CZ以上当選回数",
+        "type": "counter",
+        "category": "ZONE",
+        "unit": "回",
+        "displayOrder": 21,
+        "description": "朝一1回目は除外して入力してください。",
+        "defaultValue": 0,
+        "minimum": 0
+      },
+      {
+        "id": "INP_AT_END_COUNT",
+        "name": "AT終了回数",
+        "type": "counter",
+        "category": "AT_RETURN",
+        "unit": "回",
+        "displayOrder": 30,
+        "defaultValue": 0,
+        "minimum": 0
+      },
+      {
+        "id": "INP_AT_RETURN_COUNT",
+        "name": "AT引き戻し当選回数",
+        "type": "counter",
+        "category": "AT_RETURN",
+        "unit": "回",
+        "displayOrder": 31,
         "defaultValue": 0,
         "minimum": 0
       },
@@ -188,44 +237,148 @@
           "SRC_DMM_SETTING"
         ],
         "selectionRationale": {
-          "summary": "AT初当り確率を初回実機テスト版の唯一の確率Featureとして使用する。",
-          "adoptionReason": "設定1の1/394.4から設定6の1/261.3まで一貫した設定差があり、複数解析サイトで一致。分母の集計範囲は公開情報で確定できないため、CZを含むAT非滞在ゲーム数を暫定採用する。",
-          "shortTermReason": "1日単位では単独断定できないが、通常時ゲーム数の蓄積に伴って継続的に情報を得られる。",
-          "longTermReason": "設定1対6でも厳格な識別目安は約1.46万G。Hard Evidenceと併用する。",
-          "strengths": [
-            "入力は通常時ゲーム数とAT初当り回数のみ",
-            "複数ソース一致",
-            "分母定義を実戦データで検算済み"
+          "summary": "AT初当りを採用。"
+        }
+      },
+      {
+        "featureId": "FEAT_CZ_EXCLUSIVE",
+        "name": "CZ内訳（大喰いの利世／レミニセンス）",
+        "adoptionCategory": "INCLUDE_PRIMARY",
+        "calculationRole": "PROBABILITY",
+        "probabilityEngineUsage": true,
+        "modelType": "multinomial",
+        "minimumSample": 1,
+        "sampleRecommendation": 5000,
+        "weight": 1,
+        "displayFormat": "ratio_1_over_n",
+        "denominatorAdjustments": [
+          {
+            "inputId": "INP_RIZE_COUNT",
+            "multiplier": -8
+          },
+          {
+            "inputId": "INP_REMINISCENCE_COUNT",
+            "multiplier": -8
+          }
+        ],
+        "numeratorInputId": "INP_RIZE_COUNT",
+        "denominatorInputId": "INP_AT_TRIAL_GAMES",
+        "categoryInputIds": [
+          "INP_REMINISCENCE_COUNT"
+        ],
+        "probabilities": {},
+        "categoryLabels": [
+          "大喰いの利世",
+          "レミニセンス"
+        ],
+        "categoryProbabilities": {
+          "SET_1": [
+            0.000480977345967005,
+            0.0033277870216306157
           ],
-          "limitations": [
-            "公開解析情報ではAT初当り確率のゲーム数集計範囲が明示されていない",
-            "本版ではCZ中を含みAT中を除くゲーム数を暫定的な分母とする",
-            "正式な集計範囲が判明した場合は再検証・更新が必要"
+          "SET_2": [
+            0.0005245213742460005,
+            0.0033886818027787187
           ],
-          "sourceEvidenceRefs": [
-            "SRC_1GEKI_MAIN",
-            "SRC_NANA_SPEC",
-            "SRC_DMM_SETTING"
+          "SET_3": [
+            0.0005804504295333179,
+            0.003477051460361613
+          ],
+          "SET_4": [
+            0.000676178240584218,
+            0.0036140224069389233
+          ],
+          "SET_5": [
+            0.0008152616990053808,
+            0.0038066235249333844
+          ],
+          "SET_6": [
+            0.0009303190994511116,
+            0.003980891719745223
           ]
+        },
+        "sourceEvidenceRefs": [
+          "SRC_NANA_SPEC",
+          "SRC_DMM_SETTING"
+        ],
+        "selectionRationale": {
+          "summary": "CZ2種類をMultinomialで採用。CZ中8G/回を自動減算。"
+        }
+      },
+      {
+        "featureId": "FEAT_AT_RETURN",
+        "name": "AT終了後の引き戻し",
+        "adoptionCategory": "INCLUDE_PRIMARY",
+        "calculationRole": "PROBABILITY",
+        "probabilityEngineUsage": true,
+        "modelType": "binomial",
+        "minimumSample": 1,
+        "sampleRecommendation": 20,
+        "weight": 1,
+        "displayFormat": "percentage",
+        "numeratorInputId": "INP_AT_RETURN_COUNT",
+        "denominatorInputId": "INP_AT_END_COUNT",
+        "probabilities": {
+          "SET_1": 0.0781,
+          "SET_2": 0.0781,
+          "SET_3": 0.0938,
+          "SET_4": 0.1094,
+          "SET_5": 0.125,
+          "SET_6": 0.1523
+        },
+        "sourceEvidenceRefs": [
+          "SRC_NANA_SETTING"
+        ],
+        "selectionRationale": {
+          "summary": "AT引き戻し率を採用。"
+        }
+      },
+      {
+        "featureId": "FEAT_CZ_WITHIN_100",
+        "name": "100G+α以内のCZ当選",
+        "adoptionCategory": "INCLUDE_PRIMARY",
+        "calculationRole": "PROBABILITY",
+        "probabilityEngineUsage": true,
+        "modelType": "binomial",
+        "minimumSample": 1,
+        "sampleRecommendation": 20,
+        "weight": 1,
+        "displayFormat": "percentage",
+        "numeratorInputId": "INP_100G_HIT_COUNT",
+        "denominatorInputId": "INP_100G_TRIAL_COUNT",
+        "probabilities": {
+          "SET_1": 0.1958,
+          "SET_2": 0.2104,
+          "SET_3": 0.2315,
+          "SET_4": 0.2637,
+          "SET_5": 0.3196,
+          "SET_6": 0.3601
+        },
+        "sourceEvidenceRefs": [
+          "SRC_NANA_SETTING",
+          "SRC_DMM_SETTING"
+        ],
+        "selectionRationale": {
+          "summary": "100G以内CZ以上当選率を採用。"
         }
       }
     ],
     "nonAdoptedElements": [
       {
-        "name": "100G+α以内CZ当選率",
-        "reason": "設定差は大きいが朝一除外・周期開始・100G+α境界の実戦管理が必要で、入力定義ずれのリスクが高いため除外。"
+        "name": "CZ合算",
+        "reason": "CZ種類別と重複。"
       },
       {
-        "name": "CZ合算・CZ内訳",
-        "reason": "CZ関連の入力負荷とAT初当りとの相関を考慮し初回版では不採用。"
+        "name": "エピソードボーナス",
+        "reason": "低頻度。"
       },
       {
-        "name": "エピソードボーナス／AT直撃／下段リプレイ／弱チェリー契機CZ",
-        "reason": "低頻度または状態判別が難しく、1日実戦では効率が低い。"
+        "name": "リプレイAT直撃",
+        "reason": "極端に低頻度。"
       },
       {
-        "name": "AT終了後の引き戻し",
-        "reason": "AT初当りとの依存・包含関係を分離する入力仕様が未確定。"
+        "name": "弱チェリー契機CZ",
+        "reason": "内部状態判別が必要。"
       }
     ]
   },
@@ -500,8 +653,65 @@
         ]
       },
       {
-        "id": "AUTO_EVIDENCE",
+        "id": "AUTO_CZ",
+        "title": "CZ",
         "displayOrder": 2,
+        "items": [
+          {
+            "type": "input",
+            "inputId": "INP_REMINISCENCE_COUNT",
+            "label": "レミニセンス回数",
+            "widget": "counter"
+          },
+          {
+            "type": "input",
+            "inputId": "INP_RIZE_COUNT",
+            "label": "大喰いの利世回数",
+            "widget": "counter"
+          }
+        ]
+      },
+      {
+        "id": "AUTO_ZONE",
+        "title": "100G以内のゲーム数解除",
+        "displayOrder": 3,
+        "items": [
+          {
+            "type": "input",
+            "inputId": "INP_100G_TRIAL_COUNT",
+            "label": "100G到達回数",
+            "widget": "counter"
+          },
+          {
+            "type": "input",
+            "inputId": "INP_100G_HIT_COUNT",
+            "label": "100G以内CZ以上当選回数",
+            "widget": "counter"
+          }
+        ]
+      },
+      {
+        "id": "AUTO_AT_RETURN",
+        "title": "AT引き戻し",
+        "displayOrder": 4,
+        "items": [
+          {
+            "type": "input",
+            "inputId": "INP_AT_END_COUNT",
+            "label": "AT終了回数",
+            "widget": "counter"
+          },
+          {
+            "type": "input",
+            "inputId": "INP_AT_RETURN_COUNT",
+            "label": "AT引き戻し当選回数",
+            "widget": "counter"
+          }
+        ]
+      },
+      {
+        "id": "AUTO_EVIDENCE",
+        "displayOrder": 5,
         "items": [
           {
             "type": "input",
@@ -547,7 +757,12 @@
         "inputId": "INP_AT_TRIAL_GAMES",
         "status": "PROVISIONAL",
         "scope": "NON_AT_GAMES_INCLUDING_CZ",
-        "note": "AT中を除外しCZ中を含む。公開解析情報で集計範囲が確認できないため暫定定義。",
+        "recheckRequired": true
+      },
+      {
+        "featureId": "FEAT_CZ_EXCLUSIVE",
+        "status": "PROVISIONAL",
+        "formula": "INP_AT_TRIAL_GAMES - 8*INP_REMINISCENCE_COUNT - 8*INP_RIZE_COUNT",
         "recheckRequired": true
       }
     ]
@@ -556,11 +771,27 @@
     "cases": [
       {
         "id": "VAL_AT_HIT_LE_GAMES",
-        "description": "AT初当り回数は通常時ゲーム数以下",
+        "description": "AT初当り回数は集計ゲーム数以下",
         "type": "input_relation",
         "leftInputId": "INP_AT_INITIAL_COUNT",
         "operator": "LTE",
         "rightInputId": "INP_AT_TRIAL_GAMES"
+      },
+      {
+        "id": "VAL_100G_HIT_LE_TRIAL",
+        "description": "100G以内当選回数は到達回数以下",
+        "type": "input_relation",
+        "leftInputId": "INP_100G_HIT_COUNT",
+        "operator": "LTE",
+        "rightInputId": "INP_100G_TRIAL_COUNT"
+      },
+      {
+        "id": "VAL_RETURN_LE_AT_END",
+        "description": "引き戻し回数はAT終了回数以下",
+        "type": "input_relation",
+        "leftInputId": "INP_AT_RETURN_COUNT",
+        "operator": "LTE",
+        "rightInputId": "INP_AT_END_COUNT"
       }
     ]
   },
