@@ -12,9 +12,9 @@ function selectionStatus(selection){
   const blocked=numeric.filter(f=>f.difficultyExposure&&!FINAL_QUALITIES.has(f.difficultyExposure.quality??'EXACT')).map(f=>({featureId:f.featureId??f.researchFeatureId??'UNKNOWN',quality:f.difficultyExposure.quality??'EXACT'}));
   const usable=numeric.filter(f=>f.difficultyExposure&&FINAL_QUALITIES.has(f.difficultyExposure.quality??'EXACT'));
   const basis=selection?.difficultyAnalysis?.targetGameBasis??null;
-  const basisUsable=!!basis&&FINAL_QUALITIES.has(basis.quality)&&basis.crossMachineComparable===true;
+  const basisUsable=numeric.length===0?null:(!!basis&&FINAL_QUALITIES.has(basis.quality)&&basis.crossMachineComparable===true);
   let status='READY';
-  if(numeric.length===0)status='NO_NUMERIC_FEATURES';
+  if(numeric.length===0)status='CALIBRATION_NOT_APPLICABLE';
   else if(missing.length===numeric.length)status='EXPOSURE_NOT_CONFIGURED';
   else if(missing.length||blocked.length)status='EXPOSURE_PARTIAL';
   if(!basisUsable&&status==='READY')status='GAME_BASIS_NOT_COMPARABLE';
@@ -50,28 +50,31 @@ export function buildCalibrationReadiness(root='.', manifestPath='difficulty-cal
     if(hasSelection){
       selectionCheck=selectionStatus(readJson(selectionPath));
       if(['EXPOSURE_NOT_CONFIGURED','EXPOSURE_PARTIAL'].includes(selectionCheck.status))blockers.push('DIFFICULTY_EXPOSURE_INCOMPLETE');
-      if(!selectionCheck.targetGameBasisUsableForFinalCalibration)blockers.push('TARGET_GAME_BASIS_NOT_FINAL_COMPARABLE');
-      if(selectionCheck.blockedDifficultyExposureFeatures.length)blockers.push('NON_FINAL_EXPOSURE_QUALITY_PRESENT');
+      if(selectionCheck.status!=='CALIBRATION_NOT_APPLICABLE' && !selectionCheck.targetGameBasisUsableForFinalCalibration)blockers.push('TARGET_GAME_BASIS_NOT_FINAL_COMPARABLE');
+      if(selectionCheck.status!=='CALIBRATION_NOT_APPLICABLE' && selectionCheck.blockedDifficultyExposureFeatures.length)blockers.push('NON_FINAL_EXPOSURE_QUALITY_PRESENT');
     }
     return {
       ...entry,
       paths:{researchData:hasResearch?path.relative(root,researchPath):null,selectionData:hasSelection?path.relative(root,selectionPath):null,machinePackage:hasPackage?path.relative(root,packagePath):null},
       sourceAvailability:{researchData:hasResearch,selectionData:hasSelection,machinePackage:hasPackage},
       selectionCheck,
-      readiness:blockers.length===0?'READY':'NOT_READY',
+      readiness:selectionCheck?.status==='CALIBRATION_NOT_APPLICABLE'?'NOT_APPLICABLE':(blockers.length===0?'READY':'NOT_READY'),
       blockers
     };
   });
   const readyCount=machines.filter(m=>m.readiness==='READY').length;
+  const notApplicableCount=machines.filter(m=>m.readiness==='NOT_APPLICABLE').length;
+  const eligibleCount=machines.length-notApplicableCount;
+  const notReadyEligibleCount=machines.filter(m=>m.readiness==='NOT_READY').length;
   return {
     reportVersion:'difficulty-calibration-readiness-v1.1',
     phase:manifest.phase,
     generatedAt:new Date().toISOString(),
     targetGames:manifest.targetGames,
-    summary:{targetMachineCount:machines.length,readyMachineCount:readyCount,notReadyMachineCount:machines.length-readyCount,allReady:readyCount===machines.length},
+    summary:{targetMachineCount:machines.length,scoreEligibleMachineCount:eligibleCount,readyMachineCount:readyCount,notApplicableMachineCount:notApplicableCount,notReadyEligibleMachineCount:notReadyEligibleCount,allScoreEligibleReady:notReadyEligibleCount===0},
     machines,
-    nextAction:readyCount===machines.length?'RUN_CROSS_MACHINE_CALIBRATION':'RESOLVE_BLOCKERS_BEFORE_SCORING',
-    policy:'Final cross-machine calibration requires ResearchData, SelectionData, explicit difficultyExposure, EXACT/DERIVED exposure quality, and an EXACT/DERIVED cross-machine-comparable target game basis. PROVISIONAL and unresolved exposure must never be silently promoted.'
+    nextAction:notReadyEligibleCount===0?'RUN_CROSS_MACHINE_CALIBRATION':'RESOLVE_BLOCKERS_BEFORE_SCORING',
+    policy:'Final cross-machine calibration requires ResearchData, SelectionData, explicit difficultyExposure, EXACT/DERIVED exposure quality, and an EXACT/DERIVED cross-machine-comparable target game basis for score-eligible machines. Machines with no adopted numeric inference Feature are NOT_APPLICABLE rather than blockers. PROVISIONAL and unresolved exposure must never be silently promoted.'
   };
 }
 

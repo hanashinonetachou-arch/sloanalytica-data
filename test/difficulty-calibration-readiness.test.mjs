@@ -21,8 +21,8 @@ test('calibration readiness requires final-quality exposure and comparable game 
   assert.equal(tokyo.selectionCheck.finalCalibrationUsableFeatureCount,0);
   assert.equal(kaguya.sourceAvailability.researchData,true);
   assert.equal(kaguya.sourceAvailability.selectionData,true);
-  assert.ok(kaguya.blockers.includes('TARGET_GAME_BASIS_NOT_FINAL_COMPARABLE'));
-  assert.ok(kaguya.blockers.includes('NON_FINAL_EXPOSURE_QUALITY_PRESENT'));
-  assert.equal(kaguya.selectionCheck.finalCalibrationUsableFeatureCount,0);
+  assert.equal(kaguya.readiness,'NOT_APPLICABLE');
+  assert.equal(kaguya.selectionCheck.status,'CALIBRATION_NOT_APPLICABLE');
+  assert.equal(kaguya.blockers.length,0);
   assert.equal(report.nextAction,'RESOLVE_BLOCKERS_BEFORE_SCORING');
 });
