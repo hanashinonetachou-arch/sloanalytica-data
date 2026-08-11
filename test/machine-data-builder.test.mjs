@@ -101,3 +101,17 @@ test("generic evidenceUi with unset defaults and multi_enum",()=>{
  const ev=p.evidence.evidences.find(e=>e.triggerValue==="SET_2_OR_HIGHER");
  assert.deepEqual(ev.confirmedSettings,["SET_2","SET_3"]);
 });
+
+test("provisional denominator definition survives build",()=>{
+ const r={...research,machine:{...research.machine,settings:["SET_1","SET_2"]}};
+ const s={schemaVersion:"selection-data-v1",machineId:r.machine.machineId,machineDataVersion:"0.1.0",
+  inputs:[{id:"INP_G",name:"AT初当り集計ゲーム数",type:"integer",category:"PRIMARY",displayOrder:1,
+    denominatorDefinition:{status:"PROVISIONAL",scope:"NON_AT_GAMES_INCLUDING_CZ",include:["CZ"],exclude:["AT"],recheckRequired:true}}],
+  features:[]};
+ const p=buildMachineData(r,s);
+ const input=p.inputs.inputs.find(i=>i.id==="INP_G");
+ assert.equal(input.denominatorDefinition.status,"PROVISIONAL");
+ assert.equal(input.denominatorDefinition.scope,"NON_AT_GAMES_INCLUDING_CZ");
+ assert.deepEqual(input.denominatorDefinition.include,["CZ"]);
+ assert.deepEqual(input.denominatorDefinition.exclude,["AT"]);
+});

@@ -3,7 +3,7 @@
   "machine": {
     "schemaVersion": "2.0.0",
     "machineId": "L_TOKYO_GHOUL",
-    "machineDataVersion": "0.1.1",
+    "machineDataVersion": "0.1.2",
     "displayName": "L 東京喰種",
     "modelName": "L東京喰種CT / L東京喰種FT",
     "manufacturer": "スパイキー / CROSSALPHA",
@@ -26,12 +26,25 @@
     "inputs": [
       {
         "id": "INP_AT_TRIAL_GAMES",
-        "name": "通常時ゲーム数",
+        "name": "AT初当り集計ゲーム数",
         "type": "integer",
         "category": "PRIMARY",
         "unit": "G",
         "displayOrder": 1,
         "inferenceRole": "INCLUDE_PRIMARY",
+        "description": "AT中を除き、AT初当りまでに消化したゲーム数を入力してください。CZ中のゲーム数は含めます。公開解析情報ではAT初当り確率の集計範囲を確認できないため、本アプリでは暫定的にこの定義を採用しています。",
+        "denominatorDefinition": {
+          "status": "PROVISIONAL",
+          "scope": "NON_AT_GAMES_INCLUDING_CZ",
+          "include": [
+            "CZ"
+          ],
+          "exclude": [
+            "AT"
+          ],
+          "reason": "公開解析情報からAT初当り確率のゲーム数集計範囲を確認できないため。",
+          "recheckRequired": true
+        },
         "defaultValue": 0,
         "minimum": 0
       },
@@ -176,7 +189,7 @@
         ],
         "selectionRationale": {
           "summary": "AT初当り確率を初回実機テスト版の唯一の確率Featureとして使用する。",
-          "adoptionReason": "設定1の1/394.4から設定6の1/261.3まで一貫した設定差があり、複数解析サイトで一致。通常時ゲーム数が分母であることも実戦集計で確認済み。",
+          "adoptionReason": "設定1の1/394.4から設定6の1/261.3まで一貫した設定差があり、複数解析サイトで一致。分母の集計範囲は公開情報で確定できないため、CZを含むAT非滞在ゲーム数を暫定採用する。",
           "shortTermReason": "1日単位では単独断定できないが、通常時ゲーム数の蓄積に伴って継続的に情報を得られる。",
           "longTermReason": "設定1対6でも厳格な識別目安は約1.46万G。Hard Evidenceと併用する。",
           "strengths": [
@@ -185,8 +198,9 @@
             "分母定義を実戦データで検算済み"
           ],
           "limitations": [
-            "総ゲーム数ではなく通常時ゲーム数を使う",
-            "隣接設定識別には多い試行数が必要"
+            "公開解析情報ではAT初当り確率のゲーム数集計範囲が明示されていない",
+            "本版ではCZ中を含みAT中を除くゲーム数を暫定的な分母とする",
+            "正式な集計範囲が判明した場合は再検証・更新が必要"
           ],
           "sourceEvidenceRefs": [
             "SRC_1GEKI_MAIN",
@@ -474,7 +488,7 @@
           {
             "type": "input",
             "inputId": "INP_AT_TRIAL_GAMES",
-            "label": "通常時ゲーム数",
+            "label": "AT初当り集計ゲーム数",
             "widget": "number"
           },
           {
@@ -527,7 +541,16 @@
     "modelNumber": "L東京喰種CT / L東京喰種FT",
     "manufacturer": "スパイキー / CROSSALPHA",
     "introductionDate": "2025-02-03",
-    "researchDate": "2026-08-11"
+    "researchDate": "2026-08-11",
+    "denominatorDefinitionNotes": [
+      {
+        "inputId": "INP_AT_TRIAL_GAMES",
+        "status": "PROVISIONAL",
+        "scope": "NON_AT_GAMES_INCLUDING_CZ",
+        "note": "AT中を除外しCZ中を含む。公開解析情報で集計範囲が確認できないため暫定定義。",
+        "recheckRequired": true
+      }
+    ]
   },
   "validation": {
     "cases": [
