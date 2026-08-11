@@ -1,0 +1,139 @@
+{
+  "reportVersion": "difficulty-exposure-audit-v1.0",
+  "phase": "9.4B-2",
+  "generatedAt": "2026-08-11T22:51:12.273Z",
+  "ok": true,
+  "errors": [],
+  "policy": {
+    "calibrationAllowedStatuses": [
+      "EXACT",
+      "DERIVED"
+    ],
+    "provisionalAllowedForFinalCalibration": false,
+    "unresolvedMayBeInferred": false,
+    "note": "Cross-machine calibration must not silently infer event-frequency exposure. PROVISIONAL exposure may be explored separately but cannot define the final public score scale."
+  },
+  "summary": {
+    "machineCount": 2,
+    "total": 7,
+    "usable": 1,
+    "blocked": 6
+  },
+  "machines": [
+    {
+      "machineId": "S_CODE_GEASS_3_CC_FS",
+      "displayName": "コードギアス3 C.C.&Kallen ver.",
+      "gameBasis": {
+        "inputId": "INP_NORMAL_GAMES",
+        "label": "通常・ATゲーム数",
+        "status": "EXACT",
+        "note": "Current small-role feature directly uses this game-count input as its denominator."
+      },
+      "features": [
+        {
+          "featureId": "FEAT_CHERRY_WATERMELON_MULTINOMIAL",
+          "researchFeatureId": "RF02",
+          "status": "EXACT",
+          "proposedExposure": {
+            "mode": "per_game",
+            "factor": 1
+          },
+          "safeToApply": true,
+          "reason": "Denominator is INP_NORMAL_GAMES, so one recorded game equals one trial.",
+          "calibrationUsable": true
+        },
+        {
+          "featureId": "FEAT_RB_INFINITE_AT_BINOMIAL",
+          "researchFeatureId": "RF03",
+          "status": "UNRESOLVED",
+          "safeToApply": false,
+          "reason": "Trials are RB後C.C.高確対象G. Mapping total analysis games to qualifying RB high-state games requires the qualifying RB occurrence rate and exclusion conditions; current ResearchData does not establish this.",
+          "calibrationUsable": false
+        },
+        {
+          "featureId": "FEAT_AT_END_SCREEN_MULTINOMIAL",
+          "researchFeatureId": "RF04",
+          "status": "UNRESOLVED",
+          "safeToApply": false,
+          "reason": "Trials are AT-end observations. AT-end observations per analysis game are not established by current ResearchData.",
+          "calibrationUsable": false
+        }
+      ],
+      "sourceAvailability": {
+        "researchData": true,
+        "selectionData": true
+      },
+      "summary": {
+        "EXACT": 1,
+        "DERIVED": 0,
+        "PROVISIONAL": 0,
+        "UNRESOLVED": 2,
+        "total": 3,
+        "usable": 1,
+        "blocked": 2
+      }
+    },
+    {
+      "machineId": "L_TOKYO_GHOUL",
+      "displayName": "東京喰種",
+      "gameBasis": {
+        "inputId": "INP_AT_TRIAL_GAMES",
+        "label": "AT初当り集計ゲーム数",
+        "status": "PROVISIONAL",
+        "note": "AT中除外・CZ中含有の暫定分母。公開解析情報で厳密な集計範囲未確認。"
+      },
+      "features": [
+        {
+          "featureId": "FEAT_AT_INITIAL",
+          "researchFeatureId": "RF_AT_INITIAL",
+          "status": "PROVISIONAL",
+          "proposedExposure": {
+            "mode": "per_game",
+            "factor": 1
+          },
+          "safeToApply": false,
+          "reason": "Feature denominator equals the provisional game basis, but the basis itself is PROVISIONAL and therefore is not suitable for final cross-machine calibration.",
+          "calibrationUsable": false
+        },
+        {
+          "featureId": "FEAT_CZ_EXCLUSIVE",
+          "researchFeatureId": "RF_CZ_EXCLUSIVE",
+          "status": "PROVISIONAL",
+          "safeToApply": false,
+          "reason": "CZ denominator is derived from the provisional AT-trial game basis by subtracting 8G per CZ. A setting-dependent expected exposure can be derived only after the base denominator definition is accepted for calibration.",
+          "calibrationUsable": false
+        },
+        {
+          "featureId": "FEAT_AT_RETURN",
+          "researchFeatureId": "RF_AT_RETURN",
+          "status": "UNRESOLVED",
+          "safeToApply": false,
+          "reason": "Trials are eligible AT ends. Eligible AT-end observations per analysis game are not established by current ResearchData.",
+          "calibrationUsable": false
+        },
+        {
+          "featureId": "FEAT_CZ_WITHIN_100",
+          "researchFeatureId": "RF_CZ_WITHIN_100",
+          "status": "UNRESOLVED",
+          "safeToApply": false,
+          "reason": "Trials are eligible 100G reaches under specific exclusions. Eligible 100G-reach observations per analysis game are not established by current ResearchData.",
+          "calibrationUsable": false
+        }
+      ],
+      "sourceAvailability": {
+        "researchData": true,
+        "selectionData": true
+      },
+      "summary": {
+        "EXACT": 0,
+        "DERIVED": 0,
+        "PROVISIONAL": 2,
+        "UNRESOLVED": 2,
+        "total": 4,
+        "usable": 0,
+        "blocked": 4
+      }
+    }
+  ],
+  "nextAction": "RESOLVE_EVENT_EXPOSURE_AND_PROVISIONAL_GAME_BASIS_BEFORE_CROSS_MACHINE_SCORING"
+}
