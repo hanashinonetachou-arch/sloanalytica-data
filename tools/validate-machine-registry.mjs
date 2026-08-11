@@ -21,6 +21,10 @@ export function validateMachineRegistry(registry){
     for(const [k,set] of Object.entries(allowed)) if(!set.has(m[k])) errors.push(`${m.machineId}: invalid ${k} ${m[k]}`);
     if(m.appStatus==="INCLUDED" && !m.machineDataVersion) errors.push(`${m.machineId}: INCLUDED requires machineDataVersion`);
     if(m.marketStatus==="ACTIVE" && !m.marketLastCheckedAt) warnings.push(`${m.machineId}: ACTIVE but marketLastCheckedAt is empty`);
+    if(m.latestInstallCountRank!=null && (!Number.isInteger(m.latestInstallCountRank)||m.latestInstallCountRank<1)) errors.push(`${m.machineId}: invalid latestInstallCountRank`);
+    if(m.latestInstallationRatePercent!=null && (!Number.isFinite(m.latestInstallationRatePercent)||m.latestInstallationRatePercent<0||m.latestInstallationRatePercent>100)) errors.push(`${m.machineId}: invalid latestInstallationRatePercent`);
+    if(m.latestSevenDayTrend!=null && !["UP","DOWN","KEEP","UNKNOWN"].includes(m.latestSevenDayTrend)) errors.push(`${m.machineId}: invalid latestSevenDayTrend`);
+    if(m.marketEvidenceLevel!=null && !["RANKED_CURRENT","RELEASE_ONLY","UNKNOWN"].includes(m.marketEvidenceLevel)) errors.push(`${m.machineId}: invalid marketEvidenceLevel`);
   }
   return {ok:errors.length===0,errors,warnings};
 }

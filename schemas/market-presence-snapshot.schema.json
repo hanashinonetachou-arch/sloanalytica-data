@@ -1,0 +1,145 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://sloanalytica.local/schemas/market-presence-snapshot.schema.json",
+  "title": "SloAnalytica Market Presence Snapshot v1",
+  "type": "object",
+  "required": [
+    "schemaVersion",
+    "snapshotId",
+    "checkedAt",
+    "scope",
+    "sources",
+    "machines"
+  ],
+  "properties": {
+    "schemaVersion": {
+      "const": "market-presence-snapshot-v1"
+    },
+    "snapshotId": {
+      "type": "string",
+      "minLength": 1
+    },
+    "checkedAt": {
+      "type": "string",
+      "minLength": 1
+    },
+    "scope": {
+      "type": "object",
+      "required": [
+        "country",
+        "category",
+        "coverage",
+        "description"
+      ],
+      "properties": {
+        "country": {
+          "type": "string"
+        },
+        "category": {
+          "const": "PACHISLOT"
+        },
+        "coverage": {
+          "enum": [
+            "TOP_INSTALL_COUNT_25",
+            "PARTIAL",
+            "FULL_CANDIDATE"
+          ]
+        },
+        "description": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": false
+    },
+    "sources": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "sourceId",
+          "publisher",
+          "title",
+          "url",
+          "checkedAt"
+        ],
+        "properties": {
+          "sourceId": {
+            "type": "string",
+            "pattern": "^[A-Z0-9_]+$"
+          },
+          "publisher": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "url": {
+            "type": "string",
+            "pattern": "^https?://"
+          },
+          "checkedAt": {
+            "type": "string"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    "machines": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "marketKey",
+          "displayName",
+          "installCountRank",
+          "installationRatePercent",
+          "sevenDayTrend",
+          "registryMachineId",
+          "sourceRefs"
+        ],
+        "properties": {
+          "marketKey": {
+            "type": "string",
+            "pattern": "^[A-Z0-9_]+$"
+          },
+          "displayName": {
+            "type": "string",
+            "minLength": 1
+          },
+          "installCountRank": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "installationRatePercent": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 100
+          },
+          "sevenDayTrend": {
+            "enum": [
+              "UP",
+              "DOWN",
+              "KEEP",
+              "UNKNOWN"
+            ]
+          },
+          "registryMachineId": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "sourceRefs": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "additionalProperties": false
+      }
+    }
+  },
+  "additionalProperties": false
+}
