@@ -1,0 +1,3 @@
+import test from"node:test";import assert from"node:assert/strict";import{validateCandidateAssessment}from"../tools/validate-machine-candidate-assessment.mjs";
+test("candidate assessment validates",()=>{const d={schemaVersion:"machine-candidate-assessment-v1",candidates:[{marketKey:"K",marketScore:80,researchReadiness:"UNKNOWN",platformFit:"UNKNOWN",estimatedWorkload:"UNKNOWN",settingInferenceValue:"UNKNOWN"}]};assert.equal(validateCandidateAssessment(d).ok,true)});
+test("invalid score fails",()=>{const d={schemaVersion:"machine-candidate-assessment-v1",candidates:[{marketKey:"K",marketScore:120,researchReadiness:"UNKNOWN",platformFit:"UNKNOWN",estimatedWorkload:"UNKNOWN",settingInferenceValue:"UNKNOWN"}]};assert.equal(validateCandidateAssessment(d).ok,false)});
