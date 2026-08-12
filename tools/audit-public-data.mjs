@@ -4,6 +4,8 @@ import path from 'node:path';
 import process from 'node:process';
 import { fileURLToPath } from 'node:url';
 
+const OPTIONAL_PRESENTATION_CAPABILITIES = new Set(['difficulty_display']);
+
 export const KNOWN_CAPABILITIES = new Set([
   'binomial', 'multinomial', 'poisson', 'conditional_partial_multinomial',
   'conditional_partial_binomial', 'marginal_multinomial', 'evidence',
@@ -198,7 +200,7 @@ export function auditRepository(root) {
     const declared = new Set(Array.isArray(entry.requiredCapabilities) ? entry.requiredCapabilities : []);
     if (!Array.isArray(entry.requiredCapabilities)) issue(result, 'error', scope, `requiredCapabilitiesを宣言してください（必要: ${[...used].join(', ') || 'なし'}）`);
     else {
-      for (const capability of used) if (!declared.has(capability)) issue(result, 'error', scope, `MachineDataが使用する能力${capability}がrequiredCapabilitiesにありません`);
+      for (const capability of used) if (!declared.has(capability) && !OPTIONAL_PRESENTATION_CAPABILITIES.has(capability)) issue(result, 'error', scope, `MachineDataが使用する能力${capability}がrequiredCapabilitiesにありません`);
       for (const capability of declared) if (!used.has(capability)) issue(result, 'warning', scope, `requiredCapabilitiesの${capability}はMachineDataから検出されません`);
     }
   }
