@@ -1,0 +1,149 @@
+{
+  "schemaVersion": "selection-data-v1",
+  "machineId": "L_MUSHOKU_TENSEI_NM",
+  "machineDataVersion": "0.2.2",
+  "inputs": [
+    {
+      "id": "INP_NORMAL_GAMES",
+      "name": "通常ゲーム数",
+      "category": "基本ゲーム数",
+      "type": "integer",
+      "unit": "G",
+      "displayOrder": 1,
+      "inferenceRole": "INCLUDE_PRIMARY"
+    },
+    {
+      "id": "INP_AT_FIRST_HITS",
+      "name": "AT初当り回数",
+      "category": "AT初当り",
+      "type": "counter",
+      "unit": "回",
+      "displayOrder": 2,
+      "inferenceRole": "INCLUDE_PRIMARY"
+    },
+    {
+      "id": "INP_HITOGAMI_ENTRIES",
+      "name": "ヒトガミの空間突入回数",
+      "category": "前兆・CZ",
+      "type": "counter",
+      "unit": "回",
+      "displayOrder": 5,
+      "inferenceRole": "INCLUDE_PRIMARY"
+    },
+    {
+      "id": "INP_HITOGAMI_SUCCESSES",
+      "name": "ヒトガミの空間本前兆（成功）回数",
+      "category": "前兆・CZ",
+      "type": "counter",
+      "unit": "回",
+      "displayOrder": 6,
+      "inferenceRole": "INCLUDE_PRIMARY"
+    },
+    {
+      "id": "INP_STAGE_CHANGES_VALID",
+      "name": "有効ステージチェンジ回数",
+      "category": "ステージ移行",
+      "type": "counter",
+      "unit": "回",
+      "displayOrder": 7,
+      "inferenceRole": "INCLUDE_PRIMARY"
+    },
+    {
+      "id": "INP_SHIRONE_TRANSITIONS",
+      "name": "シーローン王国移行回数",
+      "category": "ステージ移行",
+      "type": "counter",
+      "unit": "回",
+      "displayOrder": 8,
+      "inferenceRole": "INCLUDE_PRIMARY"
+    }
+  ],
+  "features": [
+    {
+      "researchFeatureId": "RF_MUSHOKU_AT_FIRST",
+      "featureId": "FEAT_AT_FIRST_HIT_PROBABILITY",
+      "adoptionCategory": "INCLUDE_PRIMARY",
+      "numeratorInputId": "INP_AT_FIRST_HITS",
+      "denominatorInputId": "INP_NORMAL_GAMES",
+      "minimumSample": 1000,
+      "sampleRecommendation": 6000,
+      "weight": 1.0,
+      "difficultyParticipation": "INCLUDE",
+      "difficultyExposure": {
+        "mode": "per_game",
+        "factor": 1.0,
+        "quality": "EXACT",
+        "basisId": "MUSHOKU_NORMAL_GAMES"
+      }
+    },
+    {
+      "researchFeatureId": "RF_MUSHOKU_HITOGAMI_ENTRY",
+      "featureId": "FEAT_HITOGAMI_SPACE_ENTRY_RATE",
+      "adoptionCategory": "DISPLAY_ONLY",
+      "numeratorInputId": "INP_HITOGAMI_ENTRIES",
+      "denominatorInputId": "INP_NORMAL_GAMES",
+      "minimumSample": 0,
+      "sampleRecommendation": 0,
+      "weight": 1.0,
+      "difficultyParticipation": "EXCLUDE",
+      "difficultyExclusionReason": "ProbabilityEngineでは独立尤度として使用せず、ヒトガミ本前兆のExposure導出源としてのみ使用。",
+      "difficultyExposure": {
+        "mode": "per_game",
+        "factor": 1.0,
+        "quality": "EXACT",
+        "basisId": "MUSHOKU_NORMAL_GAMES"
+      }
+    },
+    {
+      "researchFeatureId": "RF_MUSHOKU_HITOGAMI_SUCCESS",
+      "featureId": "FEAT_HITOGAMI_SPACE_PREMONITION_SUCCESS_RATE",
+      "adoptionCategory": "INCLUDE_SUPPORT",
+      "numeratorInputId": "INP_HITOGAMI_SUCCESSES",
+      "denominatorInputId": "INP_HITOGAMI_ENTRIES",
+      "minimumSample": 10,
+      "sampleRecommendation": 50,
+      "weight": 1.0,
+      "difficultyParticipation": "INCLUDE",
+      "difficultyExposure": {
+        "mode": "derived_event_rate",
+        "quality": "DERIVED",
+        "basisId": "MUSHOKU_NORMAL_GAMES",
+        "sourceFeatureId": "FEAT_HITOGAMI_SPACE_ENTRY_RATE",
+        "eventMultiplier": 1.0
+      }
+    },
+    {
+      "researchFeatureId": "RF_MUSHOKU_SHIRONE",
+      "featureId": "FEAT_SHIRONE_KINGDOM_TRANSITION_RATE",
+      "adoptionCategory": "INCLUDE_PRIMARY",
+      "numeratorInputId": "INP_SHIRONE_TRANSITIONS",
+      "denominatorInputId": "INP_STAGE_CHANGES_VALID",
+      "minimumSample": 30,
+      "sampleRecommendation": 100,
+      "weight": 1.0,
+      "difficultyParticipation": "EXCLUDE",
+      "difficultyExclusionReason": "有効ステージ移行回数は通常Gから安全に換算できないため。ProbabilityEngineでの採用は継続する。"
+    }
+  ],
+  "evidence": [],
+  "difficultyAnalysis": {
+    "targetGames": [
+      1500,
+      3000,
+      7000
+    ],
+    "simulationsPerSetting": 4000,
+    "seed": 20260812,
+    "targetGameBasis": {
+      "basisId": "MUSHOKU_NORMAL_GAMES",
+      "label": "通常ゲーム数",
+      "quality": "EXACT",
+      "crossMachineComparable": true,
+      "note": "AT初当りおよびヒトガミ突入率に対応する通常時対象G。シーローンは別試行単位のためDifficultyから明示除外。"
+    },
+    "calibrationAllowedExposureQualities": [
+      "EXACT",
+      "DERIVED"
+    ]
+  }
+}

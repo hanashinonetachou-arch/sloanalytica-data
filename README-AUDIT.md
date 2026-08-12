@@ -1,8 +1,8 @@
-# Phase 9.4B-9 — I'm Juggler EX Difficulty Data
+# Phase 9.4B-10 — Mushoku Tensei Difficulty Data
 - Formal ResearchData / SelectionData added.
-- Difficulty follows the current MachineData: BIG/REG outcome multinomial only.
-- BIG/REG probabilities are cross-checked against major analysis sources.
-- Exposure is EXACT per game; final calibration READY.
-- Grape is recorded as a rejected candidate because the available setting-specific values are practical/simulation values rather than the current MachineData's adopted confirmed analysis.
-- No bonus-combined duplicate Feature is added.
-- All tests and validators passed.
+- AT initial: EXACT per normal G.
+- Hitogami premonition success: DERIVED from verified Hitogami entry rate (about 1/157 to 1/153).
+- Shirone Kingdom transition remains an inference Feature, but is explicitly excluded from game-based Difficulty because its valid-transition denominator cannot be safely derived from normal G.
+- This follows the prior statistical selection rule that Shirone confidence must use valid transition trials, not normal G.
+- Hard Evidence is not mixed into Difficulty.
+- Full tests and validators passed.
