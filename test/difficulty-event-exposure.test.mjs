@@ -22,7 +22,7 @@ test('derived_event_rate resolves from an explicit source feature and remains an
   const r=evaluateMachineDifficulty(research(),selection(),{simulationsPerSetting:500,seed:4});
   assert.equal(r.status,'COMPLETE');
   assert.equal(r.coverage.analyzableFeatureCount,2);
-  assert.equal(r.analyzerVersion,'difficulty-analyzer-v1.1');
+  assert.equal(r.analyzerVersion,'difficulty-analyzer-v1.2');
   assert.equal(r.targetGameBasis.basisId,'PLAY_GAMES');
 });
 

@@ -41,7 +41,7 @@ export function validateSelectionData(s,research=null){
          if(!Number.isFinite(Number(rates[setting]))||Number(rates[setting])<0) errors.push(`${f.featureId}: setting_rate missing/invalid ${setting}`);
        }
      }
-     if(dx.quality && !["EXACT","DERIVED","PROVISIONAL"].includes(dx.quality)) errors.push(`${f.featureId}: invalid difficultyExposure.quality ${dx.quality}`);
+     if(dx.quality && !["EXACT","DERIVED","ESTIMATED","PROVISIONAL"].includes(dx.quality)) errors.push(`${f.featureId}: invalid difficultyExposure.quality ${dx.quality}`);
      if(dx.mode==="derived_event_rate"){
        if(!dx.sourceFeatureId) errors.push(`${f.featureId}: derived_event_rate requires sourceFeatureId`);
        const source=(s.features??[]).find(x=>x.featureId===dx.sourceFeatureId);
@@ -63,7 +63,7 @@ export function validateSelectionData(s,research=null){
    if(!b.basisId||!b.label) errors.push(`difficultyAnalysis.targetGameBasis requires basisId and label`);
    if(!["EXACT","DERIVED","PROVISIONAL","UNRESOLVED"].includes(b.quality)) errors.push(`difficultyAnalysis.targetGameBasis invalid quality ${b.quality}`);
  }
- for(const q of da?.calibrationAllowedExposureQualities??[]) if(!["EXACT","DERIVED","PROVISIONAL"].includes(q)) errors.push(`difficultyAnalysis invalid calibration exposure quality ${q}`);
+ for(const q of da?.calibrationAllowedExposureQualities??[]) if(!["EXACT","DERIVED","ESTIMATED","PROVISIONAL"].includes(q)) errors.push(`difficultyAnalysis invalid calibration exposure quality ${q}`);
  const machineSettings=new Set(research?.machine?.settings??[]);
  const researchEvidenceIds=new Set((research?.evidenceCandidates??[]).map(e=>e.researchEvidenceId));
  const evidenceGroupIds=new Set();

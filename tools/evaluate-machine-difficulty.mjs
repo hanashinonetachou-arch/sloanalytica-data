@@ -5,7 +5,7 @@ const EPS=1e-12;
 const DEFAULT_TARGETS=[1500,3000,7000];
 const DEFAULT_SIMULATIONS_PER_SETTING=4000;
 const SCORE_WEIGHTS={information:0.45,exact:0.35,distance:0.20};
-const DEFAULT_ALLOWED_QUALITIES=['EXACT','DERIVED'];
+const DEFAULT_ALLOWED_QUALITIES=['EXACT','DERIVED','ESTIMATED'];
 
 function clamp(v,a=0,b=1){return Math.max(a,Math.min(b,v));}
 function clampP(p){return clamp(Number(p),EPS,1-EPS);}
@@ -84,6 +84,17 @@ function sampleMultinomial(n,probs,rng){
   out.push(remainN);return out;
 }
 
+const QUALITY_CONFIDENCE_RANK={EXACT:5,DERIVED:4,ESTIMATED:3,PROVISIONAL:2,UNRESOLVED:1};
+const CONFIDENCE_LABELS={5:'HIGH',4:'MEDIUM_HIGH',3:'MEDIUM',2:'LOW',1:'VERY_LOW'};
+function difficultyConfidence(analyzable,numericSelection){
+ if(!numericSelection.length)return {level:'NOT_APPLICABLE',basis:'No adopted numeric inference Features.'};
+ if(!analyzable.length)return {level:'VERY_LOW',basis:'No analyzable numeric Feature exposure.'};
+ const qualities=analyzable.map(sf=>exposureQuality(sf.difficultyExposure));
+ const minRank=Math.min(...qualities.map(q=>QUALITY_CONFIDENCE_RANK[q]??1));
+ let level=CONFIDENCE_LABELS[minRank]??'VERY_LOW';
+ if(analyzable.length<numericSelection.length){const order=['VERY_LOW','LOW','MEDIUM','MEDIUM_HIGH','HIGH'];level=order[Math.max(0,order.indexOf(level)-1)];}
+ return {level,basis:`Worst included exposure quality: ${qualities.sort((a,b)=>(QUALITY_CONFIDENCE_RANK[a]??0)-(QUALITY_CONFIDENCE_RANK[b]??0))[0]}; analyzable ${analyzable.length}/${numericSelection.length}.`,qualities:[...new Set(qualities)]};
+}
 function exposureQuality(ex){return ex?.quality??'EXACT';}
 function resolveExposureTrials(selectionFeature,trueSetting,targetGames,ctx,stack=new Set()){
   const ex=selectionFeature?.difficultyExposure;
@@ -190,11 +201,13 @@ export function evaluateMachineDifficulty(research,selection,options={}){
   const coverage=numericSelection.length===0?1:analyzable.length/numericSelection.length;
   const status=numericSelection.length===0?'NO_NUMERIC_FEATURES':analyzable.length===numericSelection.length?'COMPLETE':analyzable.length===0?'NOT_CONFIGURED':'PARTIAL';
   const scores=analyzable.length?targets.map(g=>analyzeTarget(settings,featuresById,analyzable,g,simulationsPerSetting,seed,ctx)):[];
+  const scoreConfidence=difficultyConfidence(analyzable,numericSelection);
   return {
-    analyzerVersion:'difficulty-analyzer-v1.1',machineId:research.machine?.machineId??selection.machineId??null,machineDataVersion:selection.machineDataVersion??null,
+    analyzerVersion:'difficulty-analyzer-v1.2',machineId:research.machine?.machineId??selection.machineId??null,machineDataVersion:selection.machineDataVersion??null,
     generatedAt:new Date().toISOString(),status,
     scoreDefinition:{range:'0-100 integer; higher is easier to discriminate numerically',evidenceIncluded:false,prior:'uniform over available settings',weights:SCORE_WEIGHTS,components:['normalized posterior information','chance-corrected exact-setting accuracy','chance-corrected ordinal rank-distance'],settingDistance:'ordinal setting order, not numeric label gap'},
     targetGameBasis:selection.difficultyAnalysis?.targetGameBasis??null,
+    scoreConfidence,
     exposurePolicy:{allowedQualities:[...allowedQualities],derivedEventRate:'source feature exposure × source event/category probability × eventMultiplier; no observed event frequency is invented'},
     coverage:{inferenceNumericFeatureCount:inferenceNumericSelection.length,includedNumericFeatureCount:numericSelection.length,explicitlyExcludedNumericFeatureCount:excludedFromDifficulty.length,explicitlyExcludedNumericFeatures:excludedFromDifficulty.map(f=>({featureId:f.featureId,reason:f.difficultyExclusionReason??null})),analyzableFeatureCount:analyzable.length,ratio:Number(coverage.toFixed(6)),missingDifficultyExposureFeatureIds:missing,blockedDifficultyExposureFeatures:blocked},
     targets:scores,
