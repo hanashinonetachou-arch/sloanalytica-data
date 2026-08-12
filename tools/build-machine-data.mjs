@@ -134,7 +134,7 @@ export function buildMachineData(research,selection){
   for(const [cat,items] of byCat){
     sections.push({
       id:`AUTO_${cat}`.replace(/[^A-Z0-9_]/gi,"_").toUpperCase(),
-      ...(cat==="PRIMARY"||cat==="EVIDENCE"?{}:{title:({CZ:"CZ",ZONE:"100G以内のゲーム数解除",AT_RETURN:"AT引き戻し"}[cat]??cat)}),
+      ...(cat==="PRIMARY"||cat==="EVIDENCE"?{}:{title:(selection.uiCategoryLabels?.[cat]??({CZ:"CZ",ZONE:"100G以内のゲーム数解除",AT_RETURN:"AT引き戻し"}[cat]??cat))}),
       displayOrder:order++,
       items:items.sort((a,b)=>a.displayOrder-b.displayOrder).map(i=>({
         type:"input",inputId:i.id,label:i.name,

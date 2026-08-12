@@ -7,6 +7,9 @@ export function validateSelectionData(s,research=null){
  if(!s.machineId) errors.push("machineId is required");
  if(!s.machineDataVersion) errors.push("machineDataVersion is required");
  const inputs=s.inputs??[], features=s.features??[];
+ const uiCategoryLabels=s.uiCategoryLabels??{};
+ if(uiCategoryLabels===null||Array.isArray(uiCategoryLabels)||typeof uiCategoryLabels!=="object") errors.push("uiCategoryLabels must be an object");
+ else for(const [k,v] of Object.entries(uiCategoryLabels)) if(!k||typeof v!=="string"||!v.trim()) errors.push(`invalid uiCategoryLabels entry: ${k}`);
  const ids=inputs.map(x=>x.id), idset=new Set(ids);
  if(idset.size!==ids.length) errors.push("duplicate input id");
  for(const i of inputs){

@@ -115,3 +115,14 @@ test("provisional denominator definition survives build",()=>{
  assert.deepEqual(input.denominatorDefinition.include,["CZ"]);
  assert.deepEqual(input.denominatorDefinition.exclude,["AT"]);
 });
+
+
+test("uiCategoryLabels separates stable category ids from user-visible titles",()=>{
+ const sel={schemaVersion:"selection-data-v1",machineId:"M",machineDataVersion:"0.1.0",
+  uiCategoryLabels:{PRIMARY_RATE:"初当り"},
+  inputs:[{id:"INP_T",name:"Trials",type:"integer",category:"PRIMARY_RATE",displayOrder:1}],features:[]};
+ const p=buildMachineData(research,sel);
+ const sec=p.ui.sections.find(s=>s.id==="AUTO_PRIMARY_RATE");
+ assert.ok(sec);
+ assert.equal(sec.title,"初当り");
+});
