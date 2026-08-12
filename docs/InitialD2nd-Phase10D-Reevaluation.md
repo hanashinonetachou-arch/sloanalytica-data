@@ -35,4 +35,16 @@ No published or otherwise sufficiently grounded per-game exposure for AT-during-
 
 ## Publish status
 
-Publish remains blocked by the unresolved LB published-denominator equivalence issue. The earlier Phase 10D package is superseded for review purposes by this re-evaluated working state.
+LB denominator observability is resolved for prototype publication by field verification: My Sammy reported 2334 normal games, 7 LB initial hits (1/333.43), and 4 AT initial hits (1/583.50), exactly matching 2334/7 and 2334/4. The public analysis pages still do not explicitly document the strict denominator interval, so that provenance caveat is retained, but it is no longer treated as a publish blocker.
+
+Pre-Publish Review status: PASS. Prototype publication may proceed. The earlier Phase 10D package is superseded by this re-evaluated state.
+
+
+## Phase 10D-R3 publish gate
+
+- Field verification: My Sammy normal games 2334G, LB initial hits 7 => 1/333.43; AT initial hits 4 => 1/583.50.
+- `C_LB_AT_DENOMINATOR` is resolved for prototype publication by this field verification.
+- Public-source strict denominator wording remains a provenance caveat, not a blocking conflict.
+- Pre-Publish Review: PASS.
+- Publish gate: allowed=true, blockingItems=[].
+- AT-LB end-screen per-game exposure remains a non-blocking Difficulty refinement.

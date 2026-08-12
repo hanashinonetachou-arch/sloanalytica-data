@@ -49,3 +49,15 @@ test('Initial D 2nd conditioned end-screen estimate beats swimsuit-only estimate
   assert.equal(byId.get('FEAT_AT_LB_END_SCREEN')?.requiredTrials80,38);
   assert.equal(byId.get('FEAT_AT_LB_END_SWIMSUIT_ONLY')?.requiredTrials80,59);
 });
+
+
+test('Initial D 2nd LB denominator field verification resolves publish blocker',()=>{
+  const research=JSON.parse(fs.readFileSync('research/L_INITIAL_D_2ND/research-data.json','utf8'));
+  const review=JSON.parse(fs.readFileSync('build/L_INITIAL_D_2ND/prepublish-review.json','utf8'));
+  const conflict=research.conflicts.find(c=>c.conflictId==='C_LB_AT_DENOMINATOR');
+  assert.equal(conflict?.resolutionStatus,'resolved');
+  assert.match(conflict?.resolutionNote??'',/2334G/);
+  assert.equal(review.status,'PASS');
+  assert.equal(review.publishGate?.allowed,true);
+  assert.deepEqual(review.publishGate?.blockingItems,[]);
+});
