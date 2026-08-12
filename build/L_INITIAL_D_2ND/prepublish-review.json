@@ -1,0 +1,71 @@
+{
+  "schemaVersion": "prepublish-review-v1",
+  "machineId": "L_INITIAL_D_2ND",
+  "reviewedAt": "2026-08-12",
+  "status": "BLOCKED",
+  "checks": [
+    {
+      "checkId": "LB_DENOMINATOR_OBSERVABILITY",
+      "target": "FEAT_LB_INITIAL",
+      "result": "NEEDS_FIELD_CONFIRMATION",
+      "severity": "BLOCKING",
+      "finding": "マイスロ実戦記録では通常ゲーム数2334G÷LB初当り7回=1/333.43、同2334G÷AT初当り4回=1/583.50となり、ユーザー側の分母は明確に取得できる。一方、公開解析値1/216.6等の厳密な集計区間がマイスロ通常ゲーム数と完全一致することは公開資料で未確認。",
+      "action": "Conflictを解消扱いにしない。追加の公開根拠または複数実戦記録等で分母同一性を確認するまでprototype Publishを保留する。"
+    },
+    {
+      "checkId": "BELL_DENOMINATOR_UI",
+      "target": "FEAT_BELL_NORMAL",
+      "result": "PASS",
+      "severity": "INFO",
+      "finding": "公開条件は押し順ナビが出る区間をゲーム数に含めない。ベル分母をマイスロ通常Gと推測で共用せず、独立したベル集計対象Gとして保持した。",
+      "action": "入力名を『ベル集計対象G（押し順ナビ区間を除外）』へ変更し、実戦時の集計条件をUI上で明示する。"
+    },
+    {
+      "checkId": "AT_LB_DEPENDENCY",
+      "target": "FEAT_AT_INITIAL_REFERENCE",
+      "result": "PASS",
+      "severity": "INFO",
+      "finding": "AT初当りはLB初当りと強く依存するため、独立Featureとして加算すると二重評価の可能性がある。",
+      "action": "AT初当りは参考記録のみとし、probabilityEngineUsage=falseを維持する。"
+    },
+    {
+      "checkId": "LOW_FREQUENCY_AND_STATE_FEATURES",
+      "target": "excluded features",
+      "result": "PASS",
+      "severity": "INFO",
+      "finding": "CZ・チャンスチェリー・ドリフト目・AT1セット目満月は低頻度、低確/通常チェリーLB当選・200/400G高確移行は状態判別困難、LBシナリオ全体は実戦特定困難として除外されている。",
+      "action": "ResearchDataには保持し、観測方法や解析情報が改善された場合のみ再評価する。"
+    },
+    {
+      "checkId": "EVIDENCE_86_COUNT_UI",
+      "target": "86枚OVER回数",
+      "result": "PASS",
+      "severity": "INFO",
+      "finding": "86枚OVERは累積出現回数により設定下限が変化するため、『1～2回』『3回』『4回以上』は同時選択ではなく現在状態を1つ選ぶ入力が適切。",
+      "action": "獲得枚数表示のmulti選択から86枚OVER回数を分離し、single選択へ変更する。"
+    },
+    {
+      "checkId": "EVIDENCE_UI",
+      "target": "setting confirmation evidence",
+      "result": "PASS",
+      "severity": "INFO",
+      "finding": "サミートロフィー、獲得枚数表示、86枚OVER回数、AT中LB終了画面を既存Evidence UI contractで表現できる。",
+      "action": "分母ブロッカー解消後、prototype実機テストで未選択・変更・複数選択・履歴復元を確認する。"
+    },
+    {
+      "checkId": "DIFFICULTY_EXPOSURE",
+      "target": "reports/difficulty-L_INITIAL_D_2ND.json",
+      "result": "PASS",
+      "severity": "WARNING",
+      "finding": "DifficultyはLB通常G・ベル対象GをESTIMATED exposureとして評価しており、ベル対象Gとマイスロ通常Gの完全一致は仮定していない。",
+      "action": "Raw Scoreは暫定値として保持し、分母・Exposure確認後に再計算する。"
+    }
+  ],
+  "publishGate": {
+    "allowed": false,
+    "blockingItems": [
+      "LB初当り公開解析値の分母とマイスロ通常ゲーム数の同一性が未確認"
+    ],
+    "nextAction": "LB denominator confirmation"
+  }
+}
