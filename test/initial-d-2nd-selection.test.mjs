@@ -15,7 +15,7 @@ test('Initial D 2nd keeps AT initial hit display-only and LB/bell as numeric inf
 
 test('Initial D 2nd bell denominator UI preserves nav-exclusion condition',()=>{
   const input=selection.inputs.find(i=>i.id==='INP_BELL_TARGET_GAMES');
-  assert.match(input?.name??'',/押し順ナビ区間を除外/);
+  assert.match(input?.name??'',/押し順ナビ区間.*LB中.*除外/);
 });
 
 test('Initial D 2nd 86 OVER occurrence state is single-select',()=>{
@@ -24,13 +24,15 @@ test('Initial D 2nd 86 OVER occurrence state is single-select',()=>{
   assert.deepEqual(group?.options.map(o=>o.value),['OVER_86_1_2','OVER_86_3','OVER_86_4']);
 });
 
-test('Initial D 2nd AT-LB end screen uses four non-confirmation categories and preserves red/gold as evidence',()=>{
+test('Initial D 2nd AT-LB end screen uses app-compatible implicit default residual and preserves red/gold as evidence',()=>{
   const f=generated.features.features.find(x=>x.featureId==='FEAT_AT_LB_END_SCREEN');
   assert.equal(f?.probabilityEngineUsage,true);
-  assert.deepEqual(f?.categoryLabels,['デフォルト','奇数示唆','偶数示唆','水着']);
+  assert.deepEqual(f?.categoryLabels,['奇数示唆','偶数示唆','水着']);
   assert.deepEqual(f?.categoryConditioning?.excludedCategories,['設定4以上','設定6']);
+  assert.equal(f?.categoryConditioning?.residualCategory,'デフォルト');
   for(const probs of Object.values(f?.categoryProbabilities??{})){
-    assert.ok(Math.abs(probs.reduce((a,b)=>a+b,0)-1)<1e-10);
+    const explicit=probs.reduce((a,b)=>a+b,0);
+    assert.ok(explicit>0 && explicit<1);
   }
   const screenGroup=selection.evidenceUi.groups.find(g=>g.groupId==='INITIAL_D_LB_END');
   assert.ok(screenGroup?.options.some(o=>o.value==='RED'));
@@ -81,4 +83,11 @@ test('Initial D 2nd AT-LB end screen materializes summed trial denominator for a
     'INP_AT_LB_END_EVEN_COUNT',
     'INP_AT_LB_END_SWIMSUIT_COUNT'
   ]);
+  assert.equal(f?.numeratorInputId,'INP_AT_LB_END_ODD_COUNT');
+  assert.deepEqual(f?.categoryInputIds,['INP_AT_LB_END_EVEN_COUNT','INP_AT_LB_END_SWIMSUIT_COUNT']);
+  assert.deepEqual(f?.categoryLabels,['奇数示唆','偶数示唆','水着']);
+  assert.equal(f?.categoryConditioning?.residualCategory,'デフォルト');
+  for(const probs of Object.values(f?.categoryProbabilities??{})){
+    assert.ok(probs.reduce((a,b)=>a+b,0)<1,'default must remain implicit residual probability');
+  }
 });

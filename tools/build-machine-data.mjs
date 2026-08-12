@@ -51,10 +51,14 @@ function buildFeature(rf,sf,inputIds){
     if(!sourceCats.length) fail(`${sf.featureId}: categories missing in ResearchData`);
     const excludedCats=new Set(sf.categoryExcludeLabels??[]);
     for(const c of excludedCats) if(!sourceCats.includes(c)) fail(`${sf.featureId}: unknown categoryExcludeLabels ${c}`);
-    const cats=sourceCats.filter(c=>!excludedCats.has(c));
-    if(cats.length<2) fail(`${sf.featureId}: multinomial requires at least 2 included categories`);
+    const includedCats=sourceCats.filter(c=>!excludedCats.has(c));
+    if(includedCats.length<2) fail(`${sf.featureId}: multinomial requires at least 2 included categories`);
+    const residualCat=sf.residualCategoryLabel??null;
+    if(residualCat && !includedCats.includes(residualCat)) fail(`${sf.featureId}: invalid residualCategoryLabel ${residualCat}`);
+    const cats=residualCat?includedCats.filter(c=>c!==residualCat):includedCats;
+    if(cats.length<1) fail(`${sf.featureId}: multinomial requires at least 1 explicit category`);
     const orderedInputIds=[...(sf.numeratorInputId?[sf.numeratorInputId]:[]),...(sf.categoryInputIds??[])];
-    if(orderedInputIds.length!==cats.length) fail(`${sf.featureId}: numeratorInputId + categoryInputIds must match included categories`);
+    if(orderedInputIds.length!==cats.length) fail(`${sf.featureId}: numeratorInputId + categoryInputIds must match explicit categories`);
     if(orderedInputIds.some(id=>!inputIds.has(id))) fail(`${sf.featureId}: unknown multinomial input`);
     if(sf.numeratorInputId) base.numeratorInputId=sf.numeratorInputId;
     if(sf.denominatorInputId){
@@ -77,11 +81,13 @@ function buildFeature(rf,sf,inputIds){
     base.categoryProbabilities=Object.fromEntries(Object.entries(rf.settingDistributions??{}).map(([s,dist])=>{
       const probs=cats.map(c=>Number(dist[c]));
       if(probs.some(p=>!Number.isFinite(p)||p<0)) fail(`${sf.featureId}: invalid category probability for ${s}`);
-      const sum=probs.reduce((a,b)=>a+b,0);
-      if(sum<=0) fail(`${sf.featureId}: included category probability sum must be > 0 for ${s}`);
-      return [s,excludedCats.size?probs.map(p=>p/sum):probs];
+      const includedProbs=includedCats.map(c=>Number(dist[c]));
+      if(includedProbs.some(p=>!Number.isFinite(p)||p<0)) fail(`${sf.featureId}: invalid included category probability for ${s}`);
+      const includedSum=includedProbs.reduce((a,b)=>a+b,0);
+      if(includedSum<=0) fail(`${sf.featureId}: included category probability sum must be > 0 for ${s}`);
+      return [s,(excludedCats.size||residualCat)?probs.map(p=>p/includedSum):probs];
     }));
-    if(excludedCats.size) base.categoryConditioning={excludedCategories:[...excludedCats],normalization:"RENORMALIZE_INCLUDED"};
+    if(excludedCats.size||residualCat) base.categoryConditioning={excludedCategories:[...excludedCats],normalization:"RENORMALIZE_INCLUDED",...(residualCat?{residualCategory:residualCat}:{})};
   } else fail(`${sf.featureId}: unsupported candidateModel ${rf.candidateModel}`);
   base.sourceEvidenceRefs=rf.sourceRefs??[];
   return base;

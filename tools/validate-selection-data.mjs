@@ -42,6 +42,18 @@ export function validateSelectionData(s,research=null){
        if(remain.length<2) errors.push(`${f.featureId}: categoryExcludeLabels leaves fewer than 2 categories`);
      }
    }
+   if(f.residualCategoryLabel && research){
+     const rf=(research.features??[]).find(x=>x.researchFeatureId===f.researchFeatureId);
+     if(rf?.candidateModel!=="multinomial") errors.push(`${f.featureId}: residualCategoryLabel requires multinomial ResearchData`);
+     else {
+       if(!(rf.categories??[]).includes(f.residualCategoryLabel)) errors.push(`${f.featureId}: unknown residualCategoryLabel ${f.residualCategoryLabel}`);
+       if((f.categoryExcludeLabels??[]).includes(f.residualCategoryLabel)) errors.push(`${f.featureId}: residualCategoryLabel cannot also be excluded`);
+       const included=(rf.categories??[]).filter(label=>!(f.categoryExcludeLabels??[]).includes(label));
+       const explicit=included.filter(label=>label!==f.residualCategoryLabel);
+       const mapped=(f.numeratorInputId?1:0)+(f.categoryInputIds?.length??0);
+       if(mapped!==explicit.length) errors.push(`${f.featureId}: numeratorInputId + categoryInputIds must match non-residual categories`);
+     }
+   }
    for(const [target,subs] of Object.entries(f.categorySubtractInputIds??{})){
      if(!idset.has(target)) errors.push(`${f.featureId}: unknown subtract target ${target}`);
      for(const id of subs??[]) if(!idset.has(id)) errors.push(`${f.featureId}: unknown subtract input ${id}`);
