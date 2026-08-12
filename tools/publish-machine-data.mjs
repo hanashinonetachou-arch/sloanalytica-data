@@ -90,7 +90,7 @@ function publish(id,apply){
    manufacturer:pkg.machine?.manufacturer,
    machineDataVersion:pkg.machine?.machineDataVersion,
    ...(existing?.minimumAppVersionCode!==undefined?{minimumAppVersionCode:existing.minimumAppVersionCode}:{}),
-   requiredCapabilities: [...new Set([...(existing?.requiredCapabilities??[]),...deriveCapabilities(pkg)])],
+   requiredCapabilities: deriveCapabilities(pkg),
    packageUrl: existing?.packageUrl ?? defaultPackageUrl(id),
    sha256:actualSha,
    packageSizeBytes:packageBytes,

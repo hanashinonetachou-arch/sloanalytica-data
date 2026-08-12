@@ -27,3 +27,13 @@ test('catalog recent order follows addedAt and Initial D is newest',()=>{
  assert.deepEqual(c.machines.slice(0,5).map(x=>x.machineId),sorted.slice(0,5).map(x=>x.machineId));
  assert.equal(c.machines[0].machineId,'L_INITIAL_D_2ND');
 });
+
+test('difficulty catalog machineDataVersion matches catalog',()=>{
+ const c=JSON.parse(fs.readFileSync('catalog.json'));
+ const d=JSON.parse(fs.readFileSync('difficulty-catalog.json'));
+ const byId=new Map(d.entries.map(e=>[e.machineId,e]));
+ for(const m of c.machines){
+  const entry=byId.get(m.machineId);
+  if(entry?.machineDataVersion!==undefined) assert.equal(entry.machineDataVersion,m.machineDataVersion,m.machineId);
+ }
+});

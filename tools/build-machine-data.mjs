@@ -93,6 +93,36 @@ function buildFeature(rf,sf,inputIds){
   return base;
 }
 
+
+function buildSelectionSummary(research,selection){
+  const rfs=new Map((research.features??[]).map(f=>[f.researchFeatureId,f]));
+  const selected=[],rejected=[];
+  for(const sf of selection.features??[]){
+    // DISPLAY_ONLY is a legacy compatibility state. It is intentionally omitted
+    // until the machine is migrated to selected/rejected under the current policy.
+    if(sf.adoptionCategory==="DISPLAY_ONLY") continue;
+    const rf=rfs.get(sf.researchFeatureId);
+    if(!rf) continue;
+    const item={
+      featureId:sf.featureId,
+      name:rf.name,
+      reason:sf.userReason ?? sf.rejectionReason ?? (sf.adoptionCategory==="EXCLUDE"?"推測計算には使用していません。":"推測計算に採用しています。")
+    };
+    if(sf.requiredTrials?.value!=null){
+      item.requiredTrials={value:sf.requiredTrials.value,unit:sf.requiredTrials.unit??"回"};
+    }
+    if(sf.adoptionCategory==="EXCLUDE") rejected.push(item);
+    else if(sf.adoptionCategory==="INCLUDE_PRIMARY" || sf.adoptionCategory==="INCLUDE_SUPPORT") selected.push(item);
+  }
+  return {
+    schemaVersion:"selection-summary-v1",
+    evaluatedCount:selected.length+rejected.length,
+    selectedCount:selected.length,
+    rejectedCount:rejected.length,
+    selected,rejected
+  };
+}
+
 function materializeEvidenceUi(research,selection){
   const generatedInputs=[],generatedEvidence=[];
   let nextOrder=100;
@@ -127,6 +157,7 @@ export function buildMachineData(research,selection){
   if(selection.machineId!==research.machine?.machineId) fail("machineId mismatch");
   const rfs=new Map((research.features??[]).map(f=>[f.researchFeatureId,f]));
   const {generatedInputs,generatedEvidence}=materializeEvidenceUi(research,selection);
+  const selectionSummary=buildSelectionSummary(research,selection);
   const allInputs=[...(selection.inputs??[]),...generatedInputs];
   const inputIds=new Set(allInputs.map(x=>x.id));
   if(inputIds.size!==allInputs.length) fail("duplicate input id");
@@ -179,7 +210,7 @@ export function buildMachineData(research,selection){
     inputs:{schemaVersion:"2.0.0",inputs:allInputs.map(inputWithDefaults)},
     features:{schemaVersion:"2.0.0",features},
     evidence:{version:"1.0.0",evidences,sources},
-    ui:{sections},reliability:{},
+    ui:{sections},selectionSummary,reliability:{},
     metadata:{machineId:machine.machineId,displayName:machine.displayName,settings:machine.settings},
     validation:{cases:[]},statistics:{}
   };

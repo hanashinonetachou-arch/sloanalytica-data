@@ -6,11 +6,15 @@ const selection=JSON.parse(fs.readFileSync('research/L_INITIAL_D_2ND/selection-d
 const generated=JSON.parse(fs.readFileSync('build/L_INITIAL_D_2ND/machine-package.generated.json','utf8'));
 const difficulty=JSON.parse(fs.readFileSync('reports/difficulty-L_INITIAL_D_2ND.json','utf8'));
 
-test('Initial D 2nd keeps AT initial hit display-only and LB/bell as numeric inference',()=>{
+test('Initial D 2nd excludes AT initial hit from input/inference and keeps LB/bell as numeric inference',()=>{
   const byId=new Map(generated.features.features.map(f=>[f.featureId,f]));
   assert.equal(byId.get('FEAT_LB_INITIAL')?.probabilityEngineUsage,true);
   assert.equal(byId.get('FEAT_BELL_NORMAL')?.probabilityEngineUsage,true);
-  assert.equal(byId.get('FEAT_AT_INITIAL_REFERENCE')?.probabilityEngineUsage,false);
+  assert.equal(byId.has('FEAT_AT_INITIAL'),false);
+  assert.equal(selection.inputs.some(i=>i.id==='INP_AT_INITIAL_COUNT'),false);
+  const atSelection=selection.features.find(f=>f.researchFeatureId==='RF_AT_INITIAL');
+  assert.equal(atSelection?.adoptionCategory,'EXCLUDE');
+  assert.match(atSelection?.rejectionReason??'',/LB初当りと重複/);
 });
 
 test('Initial D 2nd bell denominator UI preserves nav-exclusion condition',()=>{
@@ -64,13 +68,22 @@ test('Initial D 2nd LB denominator field verification resolves publish blocker',
   assert.deepEqual(review.publishGate?.blockingItems,[]);
 });
 
-test('Initial D 2nd keeps AT reference input in initial-hit section so no empty reference section is generated',()=>{
-  const atInput=selection.inputs.find(i=>i.id==='INP_AT_INITIAL_COUNT');
-  assert.equal(atInput?.category,'PRIMARY_INITIAL_HIT');
+test('Initial D 2nd removes AT reference input and does not generate a reference section',()=>{
+  assert.equal(selection.inputs.some(i=>i.id==='INP_AT_INITIAL_COUNT'),false);
   const refSection=generated.ui.sections.find(s=>s.title==='参考記録');
   assert.equal(refSection,undefined);
   const hitSection=generated.ui.sections.find(s=>s.title==='初当り');
-  assert.ok(hitSection?.items.some(i=>i.inputId==='INP_AT_INITIAL_COUNT'));
+  assert.equal(hitSection?.items.some(i=>i.inputId==='INP_AT_INITIAL_COUNT')??false,false);
+});
+
+test('Initial D 2nd exposes an automatic selected/rejected summary',()=>{
+  const summary=generated.selectionSummary;
+  assert.equal(summary?.schemaVersion,'selection-summary-v1');
+  assert.equal(summary?.evaluatedCount,14);
+  assert.equal(summary?.selectedCount,3);
+  assert.equal(summary?.rejectedCount,11);
+  assert.ok(summary?.selected.some(i=>i.name==='通常時レジェンドバトル初当り'));
+  assert.ok(summary?.rejected.some(i=>i.name==='ATレジェンドラッシュ初当り' && /LB初当りと重複/.test(i.reason)));
 });
 
 test('Initial D 2nd AT-LB end screen materializes summed trial denominator for app FeatureEngine',()=>{
