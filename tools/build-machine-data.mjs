@@ -61,6 +61,10 @@ function buildFeature(rf,sf,inputIds){
       if(!inputIds.has(sf.denominatorInputId)) fail(`${sf.featureId}: unknown denominator input`);
       base.denominatorInputId=sf.denominatorInputId;
     }
+    if(sf.denominatorInputIds){
+      if(!Array.isArray(sf.denominatorInputIds) || sf.denominatorInputIds.length<2 || sf.denominatorInputIds.some(id=>!inputIds.has(id))) fail(`${sf.featureId}: invalid denominatorInputIds`);
+      base.denominatorInputIds=[...sf.denominatorInputIds];
+    }
     base.categoryInputIds=sf.categoryInputIds??[];
     base.probabilities={};
     if(sf.categorySubtractInputIds){

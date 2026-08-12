@@ -29,6 +29,10 @@ export function validateSelectionData(s,research=null){
    }
    if(f.trialCountInputId && !idset.has(f.trialCountInputId)) errors.push(`${f.featureId}: unknown trialCountInputId ${f.trialCountInputId}`);
    for(const id of f.categoryInputIds??[]) if(!idset.has(id)) errors.push(`${f.featureId}: unknown category input ${id}`);
+   if(f.denominatorInputIds){
+     if(!Array.isArray(f.denominatorInputIds) || f.denominatorInputIds.length<2) errors.push(`${f.featureId}: denominatorInputIds must contain at least 2 input ids`);
+     else for(const id of f.denominatorInputIds) if(!idset.has(id)) errors.push(`${f.featureId}: unknown denominator input ${id}`);
+   }
    if(f.categoryExcludeLabels?.length && research){
      const rf=(research.features??[]).find(x=>x.researchFeatureId===f.researchFeatureId);
      if(rf?.candidateModel!=="multinomial") errors.push(`${f.featureId}: categoryExcludeLabels requires multinomial ResearchData`);

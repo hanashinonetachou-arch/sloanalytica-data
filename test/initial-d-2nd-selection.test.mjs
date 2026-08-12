@@ -61,3 +61,24 @@ test('Initial D 2nd LB denominator field verification resolves publish blocker',
   assert.equal(review.publishGate?.allowed,true);
   assert.deepEqual(review.publishGate?.blockingItems,[]);
 });
+
+test('Initial D 2nd keeps AT reference input in initial-hit section so no empty reference section is generated',()=>{
+  const atInput=selection.inputs.find(i=>i.id==='INP_AT_INITIAL_COUNT');
+  assert.equal(atInput?.category,'PRIMARY_INITIAL_HIT');
+  const refSection=generated.ui.sections.find(s=>s.title==='参考記録');
+  assert.equal(refSection,undefined);
+  const hitSection=generated.ui.sections.find(s=>s.title==='初当り');
+  assert.ok(hitSection?.items.some(i=>i.inputId==='INP_AT_INITIAL_COUNT'));
+});
+
+test('Initial D 2nd AT-LB end screen materializes summed trial denominator for app FeatureEngine',()=>{
+  const f=generated.features.features.find(x=>x.featureId==='FEAT_AT_LB_END_SCREEN');
+  assert.equal(f?.inputTransform,'sum_inputs_to_trials');
+  assert.equal(f?.denominatorInputId,'INP_AT_LB_END_DEFAULT_COUNT');
+  assert.deepEqual(f?.denominatorInputIds,[
+    'INP_AT_LB_END_DEFAULT_COUNT',
+    'INP_AT_LB_END_ODD_COUNT',
+    'INP_AT_LB_END_EVEN_COUNT',
+    'INP_AT_LB_END_SWIMSUIT_COUNT'
+  ]);
+});

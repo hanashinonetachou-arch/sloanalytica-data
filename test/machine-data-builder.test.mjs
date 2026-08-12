@@ -126,3 +126,11 @@ test("uiCategoryLabels separates stable category ids from user-visible titles",(
  assert.ok(sec);
  assert.equal(sec.title,"初当り");
 });
+
+test('builder preserves denominatorInputIds for sum_inputs_to_trials multinomial',()=>{
+  const research={machine:{machineId:'TEST_SUM_TRIALS',displayName:'x',manufacturer:'x',settings:['SET_1','SET_6']},features:[{researchFeatureId:'RF_SUM',name:'sum',candidateModel:'multinomial',categories:['A','B'],settingDistributions:{SET_1:{A:0.5,B:0.5},SET_6:{A:0.4,B:0.6}},sourceRefs:[]}],evidenceCandidates:[],sources:[]};
+  const selection={machineId:'TEST_SUM_TRIALS',machineDataVersion:'0.0.1',inputs:[{id:'INP_A',name:'A',category:'PRIMARY',type:'counter',displayOrder:1},{id:'INP_B',name:'B',category:'PRIMARY',type:'counter',displayOrder:2}],features:[{researchFeatureId:'RF_SUM',featureId:'FEAT_SUM',adoptionCategory:'INCLUDE_PRIMARY',numeratorInputId:'INP_A',denominatorInputId:'INP_A',denominatorInputIds:['INP_A','INP_B'],categoryInputIds:['INP_B'],inputTransform:'sum_inputs_to_trials'}]};
+  const out=buildMachineData(research,selection);
+  const f=out.features.features[0];
+  assert.deepEqual(f.denominatorInputIds,['INP_A','INP_B']);
+});
