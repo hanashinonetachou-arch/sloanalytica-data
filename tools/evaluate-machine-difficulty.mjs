@@ -33,6 +33,17 @@ function categoricalDistribution(feature,setting){
   }
   return Math.abs(sum-1)<=1e-6?values:null;
 }
+function categoricalDistributionSelected(feature,selectionFeature,setting){
+  const base=categoricalDistribution(feature,setting);if(!base)return null;
+  const excluded=new Set(selectionFeature?.categoryExcludeLabels??[]);
+  if(!excluded.size)return base;
+  const sourceCats=feature.categories??[];
+  const kept=[];
+  for(let i=0;i<sourceCats.length;i++)if(!excluded.has(sourceCats[i]))kept.push(base[i]);
+  if((feature.distributionMode??'complete')==='implicit_residual')kept.push(base.at(-1));
+  const sum=kept.reduce((a,b)=>a+b,0);if(sum<=0)return null;
+  return kept.map(p=>p/sum);
+}
 function featureProbability(feature,setting){
   const v=feature.settingValues?.[setting];
   const p=Number(v?.probability);
@@ -46,11 +57,11 @@ function categoryProbability(feature,setting,categoryId){
   const dist=categoricalDistribution(feature,setting);
   return dist?dist[index]:null;
 }
-function pairwiseTrialEstimate(feature,settings){
+function pairwiseTrialEstimate(feature,settings,selectionFeature=null){
   if(settings.length<2)return null;
   const low=settings[0], high=settings.at(-1);
   if(feature.candidateModel==='multinomial'){
-    const p=categoricalDistribution(feature,low),q=categoricalDistribution(feature,high);
+    const p=categoricalDistributionSelected(feature,selectionFeature,low),q=categoricalDistributionSelected(feature,selectionFeature,high);
     if(!p||!q)return null;
     return {settings:[low,high],requiredTrials80:trialsForBayesAccuracy80FromBC(bcCategorical(p,q)),criterion:'equal-prior Bayes accuracy >= 80% (Bhattacharyya upper-bound estimate)'};
   }
@@ -139,16 +150,16 @@ function resolveExposureTrials(selectionFeature,trueSetting,targetGames,ctx,stac
 function simulateObservation(researchFeature,selectionFeature,trueSetting,targetGames,rng,ctx){
   const n=resolveExposureTrials(selectionFeature,trueSetting,targetGames,ctx);if(n==null)return null;
   if(researchFeature.candidateModel==='multinomial'){
-    const probs=categoricalDistribution(researchFeature,trueSetting);if(!probs)return null;
+    const probs=categoricalDistributionSelected(researchFeature,selectionFeature,trueSetting);if(!probs)return null;
     return {n,counts:sampleMultinomial(n,probs,rng)};
   }
   const p=featureProbability(researchFeature,trueSetting);if(p==null)return null;
   if(researchFeature.candidateModel==='poisson')return {n,count:samplePoisson(n*p,rng)};
   return {n,count:sampleBinomial(n,p,rng)};
 }
-function logLikelihood(researchFeature,obs,setting){
+function logLikelihood(researchFeature,selectionFeature,obs,setting){
   if(researchFeature.candidateModel==='multinomial'){
-    const probs=categoricalDistribution(researchFeature,setting);if(!probs)return -Infinity;
+    const probs=categoricalDistributionSelected(researchFeature,selectionFeature,setting);if(!probs)return -Infinity;
     return obs.counts.reduce((s,c,i)=>c>0?s+c*Math.log(clampP(probs[i])):s,0);
   }
   const p=featureProbability(researchFeature,setting);if(p==null)return -Infinity;
@@ -164,7 +175,7 @@ function posteriorForRun(settings,featuresById,selectionFeatures,trueSetting,tar
     const rf=featuresById.get(sf.researchFeatureId);if(!rf)continue;
     const obs=simulateObservation(rf,sf,trueSetting,targetGames,rng,ctx);if(!obs)continue;
     const w=Number(sf.weight??1);if(!Number.isFinite(w)||w<=0)continue;
-    for(let i=0;i<settings.length;i++) logs[i]+=w*logLikelihood(rf,obs,settings[i]);
+    for(let i=0;i<settings.length;i++) logs[i]+=w*logLikelihood(rf,sf,obs,settings[i]);
     used++;
   }
   const z=logSumExp(logs);return {posterior:logs.map(v=>Math.exp(v-z)),used};
@@ -207,7 +218,7 @@ export function evaluateMachineDifficulty(research,selection,options={}){
   const seed=options.seed??selection.difficultyAnalysis?.seed??20260812;
   const featureEstimates=(selection.features??[]).map(sf=>{
     const rf=featuresById.get(sf.researchFeatureId);if(!rf)return null;
-    return {featureId:sf.featureId,researchFeatureId:sf.researchFeatureId,name:rf.name,adoptionCategory:sf.adoptionCategory,...pairwiseTrialEstimate(rf,settings)};
+    return {featureId:sf.featureId,researchFeatureId:sf.researchFeatureId,name:rf.name,adoptionCategory:sf.adoptionCategory,...pairwiseTrialEstimate(rf,settings,sf)};
   }).filter(Boolean);
   const coverage=numericSelection.length===0?1:analyzable.length/numericSelection.length;
   const status=numericSelection.length===0?'NO_NUMERIC_FEATURES':analyzable.length===numericSelection.length?'COMPLETE':analyzable.length===0?'NOT_CONFIGURED':'PARTIAL';

@@ -29,6 +29,15 @@ export function validateSelectionData(s,research=null){
    }
    if(f.trialCountInputId && !idset.has(f.trialCountInputId)) errors.push(`${f.featureId}: unknown trialCountInputId ${f.trialCountInputId}`);
    for(const id of f.categoryInputIds??[]) if(!idset.has(id)) errors.push(`${f.featureId}: unknown category input ${id}`);
+   if(f.categoryExcludeLabels?.length && research){
+     const rf=(research.features??[]).find(x=>x.researchFeatureId===f.researchFeatureId);
+     if(rf?.candidateModel!=="multinomial") errors.push(`${f.featureId}: categoryExcludeLabels requires multinomial ResearchData`);
+     else {
+       for(const label of f.categoryExcludeLabels) if(!(rf.categories??[]).includes(label)) errors.push(`${f.featureId}: unknown categoryExcludeLabels ${label}`);
+       const remain=(rf.categories??[]).filter(label=>!f.categoryExcludeLabels.includes(label));
+       if(remain.length<2) errors.push(`${f.featureId}: categoryExcludeLabels leaves fewer than 2 categories`);
+     }
+   }
    for(const [target,subs] of Object.entries(f.categorySubtractInputIds??{})){
      if(!idset.has(target)) errors.push(`${f.featureId}: unknown subtract target ${target}`);
      for(const id of subs??[]) if(!idset.has(id)) errors.push(`${f.featureId}: unknown subtract input ${id}`);

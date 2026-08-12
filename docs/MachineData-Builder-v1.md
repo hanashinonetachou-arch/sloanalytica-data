@@ -24,3 +24,7 @@ ResearchData -> Statistical Evaluator -> SelectionData -> MachineData Builder ->
 `trialCountInputId × denominatorInputId` を四捨五入して内部試行数へ復元する。
 
 これは、アプリ側で区間ゲーム数の定義を推測・再構成せず、外部集計側の実測分母を利用するための汎用変換である。
+
+## Conditional multinomial categories
+
+When published multinomial categories include hard-confirmation categories that are handled separately by Evidence, SelectionData may set `categoryExcludeLabels` on the multinomial feature. The Builder removes those published categories from numeric inputs and renormalizes the remaining published probabilities per setting. This avoids duplicate manual entry and preserves Hard Evidence as the authoritative path for confirmation categories. The original ResearchData distribution remains unchanged and auditable.

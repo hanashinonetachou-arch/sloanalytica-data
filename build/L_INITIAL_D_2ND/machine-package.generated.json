@@ -82,6 +82,50 @@
         "minimum": 0
       },
       {
+        "id": "INP_AT_LB_END_DEFAULT_COUNT",
+        "name": "デフォルト",
+        "category": "PRIMARY_AT_LB_END",
+        "type": "counter",
+        "unit": "回",
+        "displayOrder": 20,
+        "inferenceRole": "INCLUDE_PRIMARY",
+        "defaultValue": 0,
+        "minimum": 0
+      },
+      {
+        "id": "INP_AT_LB_END_ODD_COUNT",
+        "name": "奇数示唆（文太）",
+        "category": "PRIMARY_AT_LB_END",
+        "type": "counter",
+        "unit": "回",
+        "displayOrder": 21,
+        "inferenceRole": "INCLUDE_PRIMARY",
+        "defaultValue": 0,
+        "minimum": 0
+      },
+      {
+        "id": "INP_AT_LB_END_EVEN_COUNT",
+        "name": "偶数示唆（男5人）",
+        "category": "PRIMARY_AT_LB_END",
+        "type": "counter",
+        "unit": "回",
+        "displayOrder": 22,
+        "inferenceRole": "INCLUDE_PRIMARY",
+        "defaultValue": 0,
+        "minimum": 0
+      },
+      {
+        "id": "INP_AT_LB_END_SWIMSUIT_COUNT",
+        "name": "水着",
+        "category": "PRIMARY_AT_LB_END",
+        "type": "counter",
+        "unit": "回",
+        "displayOrder": 23,
+        "inferenceRole": "INCLUDE_PRIMARY",
+        "defaultValue": 0,
+        "minimum": 0
+      },
+      {
         "id": "INP_EVI_INITIAL_D_TROPHY",
         "name": "サミートロフィー",
         "type": "enum",
@@ -189,7 +233,7 @@
       },
       {
         "id": "INP_EVI_INITIAL_D_LB_END",
-        "name": "AT中LB終了画面",
+        "name": "AT中LB終了画面（赤・金）",
         "type": "multi_enum",
         "category": "EVIDENCE",
         "unit": "",
@@ -291,6 +335,81 @@
         "sourceEvidenceRefs": [
           "SRC_NANA_SETTING",
           "SRC_DMM_SETTING"
+        ]
+      },
+      {
+        "featureId": "FEAT_AT_LB_END_SCREEN",
+        "name": "AT中LB終了画面",
+        "adoptionCategory": "INCLUDE_PRIMARY",
+        "calculationRole": "PROBABILITY",
+        "probabilityEngineUsage": true,
+        "modelType": "multinomial",
+        "minimumSample": 3,
+        "sampleRecommendation": 40,
+        "weight": 1,
+        "inputTransform": "sum_inputs_to_trials",
+        "numeratorInputId": "INP_AT_LB_END_DEFAULT_COUNT",
+        "categoryInputIds": [
+          "INP_AT_LB_END_ODD_COUNT",
+          "INP_AT_LB_END_EVEN_COUNT",
+          "INP_AT_LB_END_SWIMSUIT_COUNT"
+        ],
+        "probabilities": {},
+        "categoryLabels": [
+          "デフォルト",
+          "奇数示唆",
+          "偶数示唆",
+          "水着"
+        ],
+        "categoryProbabilities": {
+          "SET_1": [
+            0.62,
+            0.18,
+            0.12,
+            0.08
+          ],
+          "SET_2": [
+            0.6000000000000001,
+            0.12000000000000001,
+            0.18000000000000002,
+            0.10000000000000002
+          ],
+          "SET_3": [
+            0.58,
+            0.18,
+            0.12,
+            0.12
+          ],
+          "SET_4": [
+            0.5353535353535354,
+            0.1212121212121212,
+            0.1818181818181818,
+            0.1616161616161616
+          ],
+          "SET_5": [
+            0.5151515151515151,
+            0.18181818181818182,
+            0.12121212121212122,
+            0.18181818181818182
+          ],
+          "SET_6": [
+            0.4923857868020305,
+            0.1218274111675127,
+            0.18274111675126906,
+            0.20304568527918784
+          ]
+        },
+        "categoryConditioning": {
+          "excludedCategories": [
+            "設定4以上",
+            "設定6"
+          ],
+          "normalization": "RENORMALIZE_INCLUDED"
+        },
+        "sourceEvidenceRefs": [
+          "SRC_NANA_LB_END",
+          "SRC_1GEKI_SETTING",
+          "SRC_GABU_SETTING"
         ]
       }
     ]
@@ -608,6 +727,20 @@
         "pageName": "イニシャルD 2nd 設定差・設定判別",
         "url": "https://1geki.jp/slot/ini_d2nd/0/",
         "checkedAt": "2026-08-12"
+      },
+      {
+        "id": "SRC_NANA_LB_END",
+        "classification": "ANALYSIS",
+        "pageName": "スマスロ頭文字D 2nd LB終了画面の対戦相手/LBランク・設定示唆",
+        "url": "https://nana-press.com/kaiseki/machine/818/24515/",
+        "checkedAt": "2026-08-12"
+      },
+      {
+        "id": "SRC_GABU_SETTING",
+        "classification": "ANALYSIS",
+        "pageName": "スマスロ頭文字D 2nd 設定差まとめ",
+        "url": "https://p-gabu.jp/guideworks/machinecontents/detail/6668/summarize",
+        "checkedAt": "2026-08-12"
       }
     ]
   },
@@ -665,8 +798,39 @@
         ]
       },
       {
-        "id": "AUTO_EVIDENCE",
+        "id": "AUTO_PRIMARY_AT_LB_END",
+        "title": "AT中LB終了画面（通常4種）",
         "displayOrder": 4,
+        "items": [
+          {
+            "type": "input",
+            "inputId": "INP_AT_LB_END_DEFAULT_COUNT",
+            "label": "デフォルト",
+            "widget": "counter"
+          },
+          {
+            "type": "input",
+            "inputId": "INP_AT_LB_END_ODD_COUNT",
+            "label": "奇数示唆（文太）",
+            "widget": "counter"
+          },
+          {
+            "type": "input",
+            "inputId": "INP_AT_LB_END_EVEN_COUNT",
+            "label": "偶数示唆（男5人）",
+            "widget": "counter"
+          },
+          {
+            "type": "input",
+            "inputId": "INP_AT_LB_END_SWIMSUIT_COUNT",
+            "label": "水着",
+            "widget": "counter"
+          }
+        ]
+      },
+      {
+        "id": "AUTO_EVIDENCE",
+        "displayOrder": 5,
         "items": [
           {
             "type": "input",
@@ -689,7 +853,7 @@
           {
             "type": "input",
             "inputId": "INP_EVI_INITIAL_D_LB_END",
-            "label": "AT中LB終了画面",
+            "label": "AT中LB終了画面（赤・金）",
             "widget": "multi_select"
           }
         ]
