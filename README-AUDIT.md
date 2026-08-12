@@ -1,5 +1,5 @@
-# Phase 9.4B-17
-Code Geass 3 and Tokyo Ghoul now score all adopted numeric Features with explicit ESTIMATED exposure where necessary.
-Target-game basis supports ESTIMATED.
-Readiness accepts ESTIMATED while scoreConfidence reports uncertainty.
+# Phase 9.4B-18
+Bakemonogatari now scores all three adopted numeric Features.
+AT-initial and 200G-CZ exposure are explicit ESTIMATED models; watermelon remains EXACT.
+Score Confidence is LOW, separate from score magnitude.
 All tests and validators pass.
