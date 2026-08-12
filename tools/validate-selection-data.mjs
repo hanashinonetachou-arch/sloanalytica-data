@@ -61,7 +61,7 @@ export function validateSelectionData(s,research=null){
  if(da?.targetGameBasis){
    const b=da.targetGameBasis;
    if(!b.basisId||!b.label) errors.push(`difficultyAnalysis.targetGameBasis requires basisId and label`);
-   if(!["EXACT","DERIVED","PROVISIONAL","UNRESOLVED"].includes(b.quality)) errors.push(`difficultyAnalysis.targetGameBasis invalid quality ${b.quality}`);
+   if(!["EXACT","DERIVED","ESTIMATED","PROVISIONAL","UNRESOLVED"].includes(b.quality)) errors.push(`difficultyAnalysis.targetGameBasis invalid quality ${b.quality}`);
  }
  for(const q of da?.calibrationAllowedExposureQualities??[]) if(!["EXACT","DERIVED","ESTIMATED","PROVISIONAL"].includes(q)) errors.push(`difficultyAnalysis invalid calibration exposure quality ${q}`);
  const machineSettings=new Set(research?.machine?.settings??[]);

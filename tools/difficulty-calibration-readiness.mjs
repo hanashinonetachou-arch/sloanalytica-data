@@ -1,7 +1,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 
-const FINAL_QUALITIES=new Set(['EXACT','DERIVED']);
+const FINAL_QUALITIES=new Set(['EXACT','DERIVED','ESTIMATED']);
 function readJson(file){return JSON.parse(fs.readFileSync(file,'utf8'));}
 function exists(file){return fs.existsSync(file);}
 function selectionStatus(selection){
@@ -74,7 +74,7 @@ export function buildCalibrationReadiness(root='.', manifestPath='difficulty-cal
     summary:{targetMachineCount:machines.length,scoreEligibleMachineCount:eligibleCount,readyMachineCount:readyCount,notApplicableMachineCount:notApplicableCount,notReadyEligibleMachineCount:notReadyEligibleCount,allScoreEligibleReady:notReadyEligibleCount===0},
     machines,
     nextAction:notReadyEligibleCount===0?'RUN_CROSS_MACHINE_CALIBRATION':'RESOLVE_BLOCKERS_BEFORE_SCORING',
-    policy:'Final cross-machine calibration requires ResearchData, SelectionData, explicit difficultyExposure, EXACT/DERIVED exposure quality, and an EXACT/DERIVED cross-machine-comparable target game basis for score-eligible machines. Machines with no adopted numeric inference Feature are NOT_APPLICABLE rather than blockers. PROVISIONAL and unresolved exposure must never be silently promoted.'
+    policy:'Final cross-machine calibration requires ResearchData, SelectionData, explicit difficultyExposure, EXACT/DERIVED/ESTIMATED exposure quality, and an EXACT/DERIVED/ESTIMATED cross-machine-comparable target game basis for score-eligible machines. Machines with no adopted numeric inference Feature are NOT_APPLICABLE rather than blockers. PROVISIONAL and unresolved exposure must never be silently promoted.'
   };
 }
 

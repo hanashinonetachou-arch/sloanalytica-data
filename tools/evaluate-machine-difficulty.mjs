@@ -84,16 +84,27 @@ function sampleMultinomial(n,probs,rng){
   out.push(remainN);return out;
 }
 
-const QUALITY_CONFIDENCE_RANK={EXACT:5,DERIVED:4,ESTIMATED:3,PROVISIONAL:2,UNRESOLVED:1};
-const CONFIDENCE_LABELS={5:'HIGH',4:'MEDIUM_HIGH',3:'MEDIUM',2:'LOW',1:'VERY_LOW'};
+const QUALITY_CONFIDENCE_RANK={EXACT:5,DERIVED:4,ESTIMATED:3,PROVISIONAL:1,UNRESOLVED:1};
+const EXPLICIT_CONFIDENCE_RANK={HIGH:5,MEDIUM_HIGH:4,MEDIUM:3,LOW_MEDIUM:2,LOW:1};
+const CONFIDENCE_LABELS={5:'HIGH',4:'MEDIUM_HIGH',3:'MEDIUM',2:'LOW_MEDIUM',1:'LOW'};
 function difficultyConfidence(analyzable,numericSelection){
  if(!numericSelection.length)return {level:'NOT_APPLICABLE',basis:'No adopted numeric inference Features.'};
- if(!analyzable.length)return {level:'VERY_LOW',basis:'No analyzable numeric Feature exposure.'};
+ if(!analyzable.length)return {level:'LOW',basis:'No analyzable numeric Feature exposure.'};
  const qualities=analyzable.map(sf=>exposureQuality(sf.difficultyExposure));
- const minRank=Math.min(...qualities.map(q=>QUALITY_CONFIDENCE_RANK[q]??1));
- let level=CONFIDENCE_LABELS[minRank]??'VERY_LOW';
- if(analyzable.length<numericSelection.length){const order=['VERY_LOW','LOW','MEDIUM','MEDIUM_HIGH','HIGH'];level=order[Math.max(0,order.indexOf(level)-1)];}
- return {level,basis:`Worst included exposure quality: ${qualities.sort((a,b)=>(QUALITY_CONFIDENCE_RANK[a]??0)-(QUALITY_CONFIDENCE_RANK[b]??0))[0]}; analyzable ${analyzable.length}/${numericSelection.length}.`,qualities:[...new Set(qualities)]};
+ const ranks=analyzable.map(sf=>{
+   const ex=sf.difficultyExposure??{};
+   const qualityRank=QUALITY_CONFIDENCE_RANK[exposureQuality(ex)]??1;
+   const explicitRank=ex.confidence?EXPLICIT_CONFIDENCE_RANK[ex.confidence]??qualityRank:qualityRank;
+   return Math.min(qualityRank,explicitRank);
+ });
+ let minRank=Math.min(...ranks);
+ if(analyzable.length<numericSelection.length)minRank=Math.max(1,minRank-1);
+ return {
+   level:CONFIDENCE_LABELS[minRank]??'LOW',
+   basis:`Worst included exposure quality/confidence controls the score confidence; analyzable ${analyzable.length}/${numericSelection.length}.`,
+   qualities:[...new Set(qualities)],
+   explicitConfidences:[...new Set(analyzable.map(sf=>sf.difficultyExposure?.confidence).filter(Boolean))]
+ };
 }
 function exposureQuality(ex){return ex?.quality??'EXACT';}
 function resolveExposureTrials(selectionFeature,trueSetting,targetGames,ctx,stack=new Set()){
