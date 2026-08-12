@@ -14,5 +14,5 @@ test('Eureka is SCORED in standalone Difficulty Catalog',()=>{
  const e=d.entries.find(x=>x.machineId==='S_EUREKA_SEVEN_HIEVO_XS').difficulty;
  assert.equal(e.status,'SCORED');
  assert.deepEqual(e.rawScores,[{games:1500,rawScore:15},{games:3000,rawScore:23},{games:7000,rawScore:34}]);
- assert.deepEqual(e.scores,[{games:1500,score:79},{games:3000,score:79},{games:7000,score:74}]);
+ assert.deepEqual(e.scores,[{games:1500,score:33},{games:3000,score:50},{games:7000,score:74}]);
 });

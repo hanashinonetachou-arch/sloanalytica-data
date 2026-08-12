@@ -94,11 +94,13 @@ function publish(id,apply){
    packageUrl: existing?.packageUrl ?? defaultPackageUrl(id),
    sha256:actualSha,
    packageSizeBytes:packageBytes,
-   status:existing?.status ?? "available"
+   status:existing?.status ?? "available",
+   addedAt: existing?.addedAt ?? new Date().toISOString()
  };
  const nextCatalog=structuredClone(catalog);
  nextCatalog.generatedAt=new Date().toISOString();
  if(idx>=0) nextCatalog.machines[idx]=entry; else nextCatalog.machines.push(entry);
+ nextCatalog.machines.sort((a,b)=>(b.addedAt??"").localeCompare(a.addedAt??"") || String(a.displayName??"").localeCompare(String(b.displayName??""),"ja"));
 
  const reportBase={
    publishVersion:"machine-publish-v1",machineId:id,mode:apply?"APPLY":"DRY_RUN",
