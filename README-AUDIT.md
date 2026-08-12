@@ -1,18 +1,6 @@
-# Phase 9.4B-7 Audit
-
-- Added generic Numeric Inference Profile:
-  - NORMAL
-  - LIMITED
-  - EVIDENCE_DOMINANT
-  - NO_NUMERIC_INFERENCE
-- Added generic rejected-Feature diagnostics with concise `rejectionReason` plus automatically computed `requiredTrials80` when mathematically available.
-- Required trial counts are never invented when the ResearchData does not support computation.
-- Kaguya BONUS initial is now rejected from inference because the numeric setting difference is not practically useful.
-- Kaguya profile: `EVIDENCE_DOMINANT`.
-- Kaguya presentation mode: `REJECTED_FEATURES_FIRST`.
-- Kaguya BONUS initial rejection reason: `設定差が小さい。`.
-- Kaguya BONUS initial 80% discrimination estimate: `423,584G`.
-- Kaguya cross-machine Difficulty calibration readiness: `NOT_APPLICABLE` (intentional, not an error).
-- EVIDENCE_DOMINANT machines no longer block cross-machine score calibration.
-- Hard Evidence remains excluded from numeric Difficulty Score.
-- Full test suite and validators passed.
+# Phase 9.4B-8 — Revue Starlight Difficulty Data
+Formal ResearchData / SelectionData added for all six numeric inference Features.
+Final-calibration usable: bonus occurrence (EXACT) and BIG-end soft screen (DERIVED).
+PROVISIONAL exposure: blue-BIG cause, REG cause, CZ initial, CZ lamp.
+Hard Evidence excluded. Exploratory scores may include PROVISIONAL; final calibration may not.
+All tests and validators passed.
