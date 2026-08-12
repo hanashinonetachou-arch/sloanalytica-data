@@ -1,0 +1,224 @@
+{
+  "schemaVersion": "selection-data-v1",
+  "machineId": "L_INITIAL_D_2ND",
+  "machineDataVersion": "0.1.0",
+  "inputs": [
+    {
+      "id": "INP_MY_SAMMY_NORMAL_GAMES",
+      "name": "マイスロ通常ゲーム数",
+      "category": "PRIMARY_INITIAL_HIT",
+      "type": "integer",
+      "unit": "G",
+      "displayOrder": 1,
+      "inferenceRole": "INCLUDE_PRIMARY"
+    },
+    {
+      "id": "INP_LB_INITIAL_COUNT",
+      "name": "LB初当り回数",
+      "category": "PRIMARY_INITIAL_HIT",
+      "type": "counter",
+      "unit": "回",
+      "displayOrder": 2,
+      "parentInputId": "INP_MY_SAMMY_NORMAL_GAMES",
+      "inferenceRole": "INCLUDE_PRIMARY"
+    },
+    {
+      "id": "INP_AT_INITIAL_COUNT",
+      "name": "AT初当り回数（参考）",
+      "category": "DISPLAY_ONLY_INITIAL_HIT",
+      "type": "counter",
+      "unit": "回",
+      "displayOrder": 3,
+      "parentInputId": "INP_MY_SAMMY_NORMAL_GAMES",
+      "inferenceRole": "DISPLAY_ONLY"
+    },
+    {
+      "id": "INP_BELL_TARGET_GAMES",
+      "name": "ベル集計対象ゲーム数",
+      "category": "PRIMARY_BELL",
+      "type": "integer",
+      "unit": "G",
+      "displayOrder": 10,
+      "inferenceRole": "INCLUDE_PRIMARY"
+    },
+    {
+      "id": "INP_BELL_COUNT",
+      "name": "通常時ベル回数",
+      "category": "PRIMARY_BELL",
+      "type": "counter",
+      "unit": "回",
+      "displayOrder": 11,
+      "parentInputId": "INP_BELL_TARGET_GAMES",
+      "inferenceRole": "INCLUDE_PRIMARY"
+    }
+  ],
+  "features": [
+    {
+      "researchFeatureId": "RF_LB_INITIAL",
+      "featureId": "FEAT_LB_INITIAL",
+      "adoptionCategory": "INCLUDE_PRIMARY",
+      "numeratorInputId": "INP_LB_INITIAL_COUNT",
+      "denominatorInputId": "INP_MY_SAMMY_NORMAL_GAMES",
+      "minimumSample": 1,
+      "sampleRecommendation": 7000,
+      "weight": 1.0,
+      "displayFormat": "ratio_1_over_n",
+      "difficultyParticipation": "INCLUDE",
+      "difficultyExposure": {
+        "mode": "per_game",
+        "factor": 1.0,
+        "quality": "ESTIMATED",
+        "basisId": "MY_SAMMY_NORMAL_GAMES",
+        "confidence": "MEDIUM_HIGH",
+        "estimationBasis": "実戦マイスロ記録で、通常ゲーム数2334Gに対してLB初当り7回が1/333.43と一致するため、ユーザー観測分母にはマイスロ通常ゲーム数を使用する。",
+        "uncertaintyNote": "公開解析値1/○○の厳密な集計区間がマイスロ通常ゲーム数と完全一致することは公開資料で未確認。"
+      }
+    },
+    {
+      "researchFeatureId": "RF_AT_INITIAL",
+      "featureId": "FEAT_AT_INITIAL_REFERENCE",
+      "adoptionCategory": "DISPLAY_ONLY",
+      "numeratorInputId": "INP_AT_INITIAL_COUNT",
+      "denominatorInputId": "INP_MY_SAMMY_NORMAL_GAMES",
+      "minimumSample": 1,
+      "sampleRecommendation": 7000,
+      "displayFormat": "ratio_1_over_n",
+      "difficultyParticipation": "EXCLUDE",
+      "difficultyExclusionReason": "LB初当りと強く依存し、独立加算すると二重評価になる可能性がある。"
+    },
+    {
+      "researchFeatureId": "RF_DRIFT_ZONE",
+      "featureId": "FEAT_DRIFT_ZONE",
+      "adoptionCategory": "EXCLUDE",
+      "rejectionReason": "低頻度。"
+    },
+    {
+      "researchFeatureId": "RF_CHANCE_CHERRY",
+      "featureId": "FEAT_CHANCE_CHERRY",
+      "adoptionCategory": "EXCLUDE",
+      "rejectionReason": "低頻度。"
+    },
+    {
+      "researchFeatureId": "RF_DRIFT_EYE_OUTSIDE_HIGH",
+      "featureId": "FEAT_DRIFT_EYE_OUTSIDE_HIGH",
+      "adoptionCategory": "EXCLUDE",
+      "rejectionReason": "設定差が小さく低頻度。"
+    },
+    {
+      "researchFeatureId": "RF_BELL_NORMAL",
+      "featureId": "FEAT_BELL_NORMAL",
+      "adoptionCategory": "INCLUDE_PRIMARY",
+      "numeratorInputId": "INP_BELL_COUNT",
+      "denominatorInputId": "INP_BELL_TARGET_GAMES",
+      "minimumSample": 1,
+      "sampleRecommendation": 7000,
+      "weight": 1.0,
+      "displayFormat": "ratio_1_over_n",
+      "difficultyParticipation": "INCLUDE",
+      "difficultyExposure": {
+        "mode": "per_game",
+        "factor": 1.0,
+        "quality": "ESTIMATED",
+        "basisId": "BELL_NAV_EXCLUDED_GAMES",
+        "confidence": "MEDIUM_HIGH",
+        "estimationBasis": "DMM明記の『押し順ナビが出る区間をゲーム数に含めない』条件に合わせ、ベル集計対象Gを1試行/Gとして扱う。",
+        "uncertaintyNote": "ベル集計対象Gとマイスロ通常ゲーム数の完全一致は未確認のため、現時点では別入力とする。"
+      }
+    },
+    {
+      "researchFeatureId": "RF_CHERRY_LOW_NORMAL_LB",
+      "featureId": "FEAT_CHERRY_LOW_NORMAL_LB",
+      "adoptionCategory": "EXCLUDE",
+      "rejectionReason": "状態判別が困難。"
+    },
+    {
+      "researchFeatureId": "RF_200_400_HIGH_TRANSITION",
+      "featureId": "FEAT_200_400_HIGH_TRANSITION",
+      "adoptionCategory": "EXCLUDE",
+      "rejectionReason": "状態判別が困難。"
+    },
+    {
+      "researchFeatureId": "RF_LB_OPPONENT",
+      "featureId": "FEAT_LB_OPPONENT",
+      "adoptionCategory": "EXCLUDE",
+      "rejectionReason": "他のLB要素と重複。"
+    },
+    {
+      "researchFeatureId": "RF_LB_SCENARIO",
+      "featureId": "FEAT_LB_SCENARIO",
+      "adoptionCategory": "EXCLUDE",
+      "rejectionReason": "実戦でのシナリオ特定が困難。"
+    },
+    {
+      "researchFeatureId": "RF_SEIJI_OUTSIDE_CHANCE",
+      "featureId": "FEAT_SEIJI_OUTSIDE_CHANCE",
+      "adoptionCategory": "EXCLUDE",
+      "rejectionReason": "対象機会が少なく、他のLB要素とも重複。"
+    },
+    {
+      "researchFeatureId": "RF_AT_FIRST_MOON",
+      "featureId": "FEAT_AT_FIRST_MOON",
+      "adoptionCategory": "EXCLUDE",
+      "rejectionReason": "低頻度。"
+    }
+  ],
+  "evidence": [],
+  "difficultyAnalysis": {
+    "targetGames": [1500, 3000, 7000],
+    "simulationsPerSetting": 4000,
+    "seed": 20260812,
+    "targetGameBasis": {
+      "basisId": "MY_SAMMY_NORMAL_GAMES",
+      "label": "マイスロ通常ゲーム数",
+      "quality": "ESTIMATED",
+      "crossMachineComparable": true,
+      "note": "LB初当りのユーザー観測分母として実戦値との一致を確認済み。公開解析値の厳密な分母定義との一致は未確認。ベルは別のナビ除外G基準を保持する。"
+    },
+    "calibrationAllowedExposureQualities": ["EXACT", "DERIVED", "ESTIMATED"]
+  },
+  "evidenceUi": {
+    "groups": [
+      {
+        "groupId": "INITIAL_D_TROPHY",
+        "label": "サミートロフィー",
+        "selectionMode": "single",
+        "normalizationMode": "ALLOWED_SETTINGS_INTERSECTION",
+        "displayOrder": 100,
+        "options": [
+          {"value":"BRONZE","label":"銅","allowedSettings":["SET_2","SET_3","SET_4","SET_5","SET_6"],"sourceEvidenceIds":["RE_TROPHY_BRONZE"]},
+          {"value":"SILVER","label":"銀","allowedSettings":["SET_3","SET_4","SET_5","SET_6"],"sourceEvidenceIds":["RE_TROPHY_SILVER"]},
+          {"value":"GOLD","label":"金","allowedSettings":["SET_4","SET_5","SET_6"],"sourceEvidenceIds":["RE_TROPHY_GOLD"]},
+          {"value":"KIRIN","label":"キリン柄","allowedSettings":["SET_5","SET_6"],"sourceEvidenceIds":["RE_TROPHY_KIRIN"]},
+          {"value":"RAINBOW","label":"虹","allowedSettings":["SET_6"],"sourceEvidenceIds":["RE_TROPHY_RAINBOW"]}
+        ]
+      },
+      {
+        "groupId": "INITIAL_D_PAYOUT",
+        "label": "獲得枚数表示",
+        "selectionMode": "multi",
+        "normalizationMode": "ALLOWED_SETTINGS_INTERSECTION",
+        "displayOrder": 110,
+        "options": [
+          {"value":"OVER_85","label":"85枚OVER","allowedSettings":["SET_5","SET_6"],"sourceEvidenceIds":["RE_PAYOUT_85"]},
+          {"value":"OVER_86_1_2","label":"86枚OVER 1～2回","allowedSettings":["SET_2","SET_3","SET_4","SET_5","SET_6"],"sourceEvidenceIds":["RE_PAYOUT_86_1_2"]},
+          {"value":"OVER_86_3","label":"86枚OVER 3回","allowedSettings":["SET_4","SET_5","SET_6"],"sourceEvidenceIds":["RE_PAYOUT_86_3"]},
+          {"value":"OVER_86_4","label":"86枚OVER 4回以上","allowedSettings":["SET_6"],"sourceEvidenceIds":["RE_PAYOUT_86_4"]},
+          {"value":"OVER_456","label":"456枚OVER","allowedSettings":["SET_4","SET_5","SET_6"],"sourceEvidenceIds":["RE_PAYOUT_456"]},
+          {"value":"OVER_555","label":"555枚OVER","allowedSettings":["SET_5","SET_6"],"sourceEvidenceIds":["RE_PAYOUT_555"]},
+          {"value":"OVER_666","label":"666枚OVER","allowedSettings":["SET_6"],"sourceEvidenceIds":["RE_PAYOUT_666"]}
+        ]
+      },
+      {
+        "groupId": "INITIAL_D_LB_END",
+        "label": "AT中LB終了画面",
+        "selectionMode": "multi",
+        "normalizationMode": "ALLOWED_SETTINGS_INTERSECTION",
+        "displayOrder": 120,
+        "options": [
+          {"value":"RED","label":"拓海（赤）","allowedSettings":["SET_4","SET_5","SET_6"],"sourceEvidenceIds":["RE_LB_END_RED"]},
+          {"value":"GOLD","label":"拓海（金）","allowedSettings":["SET_6"],"sourceEvidenceIds":["RE_LB_END_GOLD"]}
+        ]
+      }
+    ]
+  }
+}
