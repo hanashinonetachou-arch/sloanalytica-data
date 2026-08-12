@@ -14,7 +14,9 @@ test('calibration readiness requires final-quality exposure and comparable game 
   assert.equal(my.selectionCheck.explicitlyExcludedNumericFeatureCount,1);
   assert.equal(my.selectionCheck.finalCalibrationUsableFeatureCount,2);
   assert.equal(geass.selectionCheck.finalCalibrationUsableFeatureCount,1);
-  assert.ok(geass.blockers.includes('DIFFICULTY_EXPOSURE_INCOMPLETE'));
+  assert.equal(geass.readiness,'READY');
+  assert.equal(geass.selectionCheck.explicitlyExcludedNumericFeatureCount,2);
+  assert.equal(geass.blockers.length,0);
   assert.equal(geass.selectionCheck.targetGameBasisUsableForFinalCalibration,true);
   assert.ok(tokyo.blockers.includes('TARGET_GAME_BASIS_NOT_FINAL_COMPARABLE'));
   assert.ok(tokyo.blockers.includes('NON_FINAL_EXPOSURE_QUALITY_PRESENT'));
