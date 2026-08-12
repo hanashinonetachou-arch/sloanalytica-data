@@ -41,7 +41,9 @@ export function buildNumericInferenceProfile(research,selection){
       criterion:est?.criterion??null
     };
   });
-  const evidenceCount=(selection.evidence??[]).length;
+  const legacyEvidenceCount=(selection.evidence??[]).length;
+  const evidenceUiCount=(selection.evidenceUi?.groups??[]).reduce((sum,g)=>sum+(g.options??[]).filter(o=>(o.allowedSettings??[]).length||(o.excludedSettings??[]).length).length,0);
+  const evidenceCount=legacyEvidenceCount+evidenceUiCount;
   const c=classify(adopted.length,evidenceCount);
   return {
     profileVersion:'numeric-inference-profile-v1',
