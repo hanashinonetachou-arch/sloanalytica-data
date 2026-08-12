@@ -1,11 +1,22 @@
-import test from 'node:test';import assert from 'node:assert/strict';import fs from 'node:fs';import path from 'node:path';import {validateDifficultyDisplay} from '../tools/validate-difficulty-display.mjs';
-test('all machine packages satisfy difficulty-display-v1',()=>{
- for(const e of fs.readdirSync('machines',{withFileTypes:true}).filter(x=>x.isDirectory())){
-  const p=path.join('machines',e.name,'machine-package.json');if(!fs.existsSync(p))continue;
-  const pkg=JSON.parse(fs.readFileSync(p));assert.deepEqual(validateDifficultyDisplay(pkg),[],e.name);
+import test from 'node:test';import assert from 'node:assert/strict';import fs from 'node:fs';
+test('standalone Difficulty Catalog covers all catalog machines',()=>{
+ const c=JSON.parse(fs.readFileSync('catalog.json'));
+ const d=JSON.parse(fs.readFileSync('difficulty-catalog.json'));
+ assert.equal(d.entries.length,c.machines.length);
+ const ids=new Set(d.entries.map(e=>e.machineId));
+ for(const m of c.machines)assert.ok(ids.has(m.machineId),m.machineId);
+});
+test('MachineData no longer embeds difficulty display metadata',()=>{
+ for(const dir of fs.readdirSync('machines')){
+  const p=`machines/${dir}/machine-package.json`;if(!fs.existsSync(p))continue;
+  const pkg=JSON.parse(fs.readFileSync(p));
+  assert.equal(pkg.difficulty,undefined,dir);
  }
 });
-test('evidence-dominant never requires a numeric score',()=>{
- const pkg={difficulty:{schemaVersion:'difficulty-display-v1',status:'EVIDENCE_DOMINANT',isProvisional:true,scoreModelVersion:null,scores:[],scoreRange:null,confidence:null,profile:'EVIDENCE_DOMINANT',uiPolicy:{showMachineGuideButton:true}}};
- assert.deepEqual(validateDifficultyDisplay(pkg),[]);
+test('Kaguya evidence-dominant catalog entry has no numeric score and no internal wording',()=>{
+ const d=JSON.parse(fs.readFileSync('difficulty-catalog.json'));
+ const k=d.entries.find(e=>e.machineId==='L_KAGUYA_SAMA_JA').difficulty;
+ assert.equal(k.status,'EVIDENCE_DOMINANT');
+ assert.deepEqual(k.scores,[]);
+ assert.ok((k.rejectedFeatures||[]).every(r=>!/Hard\s*Evidence/i.test(r.reason||'')));
 });

@@ -79,7 +79,6 @@ function capabilityUsage(machineData, result, scope) {
   if ((machineData.evidence?.evidences ?? []).length > 0) used.add('evidence');
   if ((machineData.inputs?.inputs ?? []).some(input => input?.type === 'multi_enum')) used.add('evidence_multi_select');
   if ((machineData.features?.features ?? []).some(f => Array.isArray(f?.denominatorAdjustments) && f.denominatorAdjustments.length)) used.add('derived_denominator');
-  if (machineData.difficulty?.schemaVersion === 'difficulty-display-v1') used.add('difficulty_display');
   for (const section of machineData.ui?.sections ?? []) for (const item of section.items ?? []) if (item.type === 'auto_accumulator') used.add('auto_accumulator');
   return used;
 }
