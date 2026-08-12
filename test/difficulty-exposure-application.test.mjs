@@ -26,6 +26,8 @@ test('Tokyo Ghoul provisional exposure is excluded from final scoring but availa
   assert.equal(normal.status,'NOT_CONFIGURED');
   assert.equal(normal.coverage.analyzableFeatureCount,0);
   const exploratory=evaluateMachineDifficulty(research,selection,{targets:[1500],simulationsPerSetting:200,seed:20,allowedExposureQualities:['EXACT','DERIVED','PROVISIONAL']});
-  assert.equal(exploratory.status,'PARTIAL');
+  assert.equal(exploratory.status,'COMPLETE');
   assert.equal(exploratory.coverage.analyzableFeatureCount,2);
+  assert.equal(exploratory.coverage.explicitlyExcludedNumericFeatureCount,2);
+  assert.equal(exploratory.coverage.missingDifficultyExposureFeatureIds.length,0);
 });
