@@ -1,0 +1,83 @@
+{
+  "schemaVersion": "selection-data-v1",
+  "machineId": "S_IM_JUGGLER_EX_TP",
+  "machineDataVersion": "0.1.0",
+  "inputs": [
+    {
+      "id": "INP_TOTAL_GAMES",
+      "name": "総ゲーム数",
+      "category": "PRIMARY",
+      "type": "integer",
+      "unit": "G",
+      "displayOrder": 1,
+      "inferenceRole": "PRIMARY"
+    },
+    {
+      "id": "INP_BIG_COUNT",
+      "name": "BIG回数",
+      "category": "PRIMARY",
+      "type": "integer",
+      "unit": "回",
+      "displayOrder": 2,
+      "inferenceRole": "PRIMARY"
+    },
+    {
+      "id": "INP_REG_COUNT",
+      "name": "REG回数",
+      "category": "PRIMARY",
+      "type": "integer",
+      "unit": "回",
+      "displayOrder": 3,
+      "inferenceRole": "PRIMARY"
+    }
+  ],
+  "features": [
+    {
+      "researchFeatureId": "RF_IM_BONUS_OUTCOME",
+      "featureId": "FEAT_BONUS_OUTCOME_MULTINOMIAL",
+      "adoptionCategory": "INCLUDE_PRIMARY",
+      "numeratorInputId": "INP_BIG_COUNT",
+      "denominatorInputId": "INP_TOTAL_GAMES",
+      "categoryInputIds": [
+        "INP_REG_COUNT"
+      ],
+      "minimumSample": 1000,
+      "sampleRecommendation": 8000,
+      "weight": 1.0,
+      "difficultyParticipation": "INCLUDE",
+      "difficultyExposure": {
+        "mode": "per_game",
+        "factor": 1.0,
+        "quality": "EXACT",
+        "basisId": "IM_TOTAL_GAMES"
+      }
+    },
+    {
+      "researchFeatureId": "RF_IM_GRAPE_CANDIDATE",
+      "featureId": "FEAT_IM_GRAPE_CANDIDATE",
+      "adoptionCategory": "EXCLUDE",
+      "rejectionReason": "解析値ではなく実戦値。"
+    }
+  ],
+  "evidence": [],
+  "difficultyAnalysis": {
+    "targetGames": [
+      1500,
+      3000,
+      7000
+    ],
+    "simulationsPerSetting": 4000,
+    "seed": 20260812,
+    "targetGameBasis": {
+      "basisId": "IM_TOTAL_GAMES",
+      "label": "総ゲーム数",
+      "quality": "EXACT",
+      "crossMachineComparable": true,
+      "note": "Aタイプの通常遊技GをDifficulty targetGamesとして直接利用。"
+    },
+    "calibrationAllowedExposureQualities": [
+      "EXACT",
+      "DERIVED"
+    ]
+  }
+}

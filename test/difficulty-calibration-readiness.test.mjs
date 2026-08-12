@@ -5,7 +5,7 @@ import {buildCalibrationReadiness} from '../tools/difficulty-calibration-readine
 test('calibration readiness requires final-quality exposure and comparable game basis',()=>{
   const report=buildCalibrationReadiness(new URL('..',import.meta.url).pathname);
   assert.equal(report.reportVersion,'difficulty-calibration-readiness-v1.1');
-  assert.equal(report.summary.targetMachineCount,5);
+  assert.equal(report.summary.targetMachineCount,6);
   const my=report.machines.find(m=>m.machineId==='S_MY_JUGGLER_V_KD');
   const geass=report.machines.find(m=>m.machineId==='S_CODE_GEASS_3_CC_FS');
   const tokyo=report.machines.find(m=>m.machineId==='L_TOKYO_GHOUL');
