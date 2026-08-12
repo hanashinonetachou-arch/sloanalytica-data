@@ -1,5 +1,2 @@
-# Phase 9.4B-18
-Bakemonogatari now scores all three adopted numeric Features.
-AT-initial and 200G-CZ exposure are explicit ESTIMATED models; watermelon remains EXACT.
-Score Confidence is LOW, separate from score magnitude.
-All tests and validators pass.
+# Phase 9.4B-19
+Cross-machine Difficulty Raw Score audit. PASS WITH CAUTION. Seven numeric machines are score-ready; Kaguya remains NOT_APPLICABLE. Raw Score and Confidence remain separate. Do not normalize to 100 yet. All tests pass.

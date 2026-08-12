@@ -1,0 +1,2 @@
+import test from 'node:test';import assert from 'node:assert/strict';import fs from 'node:fs';
+test('cross-machine audit covers seven score-eligible machines and preserves Kaguya exclusion',()=>{const a=JSON.parse(fs.readFileSync('reports/difficulty-cross-machine-audit-phase9.4B19.json'));assert.equal(a.machines.length,7);assert.equal(a.conclusion.status,'PASS_WITH_CAUTION');for(const m of a.machines){assert.ok(m.scores['1500']<=m.scores['3000']);assert.ok(m.scores['3000']<=m.scores['7000']);}assert.deepEqual(a.conclusion.notApplicableMachines,['L_KAGUYA_SAMA_JA']);});
