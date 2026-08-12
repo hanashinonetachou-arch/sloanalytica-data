@@ -86,6 +86,19 @@ test('Initial D 2nd exposes an automatic selected/rejected summary',()=>{
   assert.ok(summary?.rejected.some(i=>i.name==='ATレジェンドラッシュ初当り' && /LB初当りと重複/.test(i.reason)));
 });
 
+
+
+test('Initial D 2nd selection summary exposes trial-unit-aware required trial estimates',()=>{
+  const summary=generated.selectionSummary;
+  const selected=new Map(summary.selected.map(i=>[i.featureId,i]));
+  const rejected=new Map(summary.rejected.map(i=>[i.featureId,i]));
+  assert.deepEqual(selected.get('FEAT_LB_INITIAL')?.requiredTrials,{value:23449,unit:'通常時LB抽選対象ゲーム'});
+  assert.deepEqual(selected.get('FEAT_BELL_NORMAL')?.requiredTrials,{value:6084,unit:'押し順ナビ区間を除くゲーム'});
+  assert.deepEqual(selected.get('FEAT_AT_LB_END_SCREEN')?.requiredTrials,{value:38,unit:'AT中LB終了画面の表示1回'});
+  assert.deepEqual(rejected.get('FEAT_CHERRY_LOW_NORMAL_LB')?.requiredTrials,{value:113,unit:'低確・通常中チェリー成立'});
+  assert.deepEqual(rejected.get('FEAT_LB_SCENARIO')?.requiredTrials,{value:7,unit:'AT終了時のシナリオ選択'});
+});
+
 test('Initial D 2nd AT-LB end screen materializes summed trial denominator for app FeatureEngine',()=>{
   const f=generated.features.features.find(x=>x.featureId==='FEAT_AT_LB_END_SCREEN');
   assert.equal(f?.inputTransform,'sum_inputs_to_trials');

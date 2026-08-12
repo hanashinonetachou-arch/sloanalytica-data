@@ -134,3 +134,12 @@ test('builder preserves denominatorInputIds for sum_inputs_to_trials multinomial
   const f=out.features.features[0];
   assert.deepEqual(f.denominatorInputIds,['INP_A','INP_B']);
 });
+
+
+test('selection summary derives requiredTrials from public probabilities and preserves Research trialUnit',()=>{
+ const r={machine:{machineId:'M_TRIAL',displayName:'x',manufacturer:'x',settings:['SET_1','SET_6']},features:[{researchFeatureId:'RF_T',name:'trial',candidateModel:'binomial',trialUnit:'対象ゲーム',settingValues:{SET_1:{probability:0.01},SET_6:{probability:0.02}},sourceRefs:[]}],evidenceCandidates:[],sources:[]};
+ const sel={machineId:'M_TRIAL',machineDataVersion:'0.1.0',inputs:[{id:'INP_T',name:'T',category:'P',type:'integer',displayOrder:1},{id:'INP_N',name:'N',category:'P',type:'counter',displayOrder:2}],features:[{researchFeatureId:'RF_T',featureId:'FEAT_T',adoptionCategory:'INCLUDE_PRIMARY',numeratorInputId:'INP_N',denominatorInputId:'INP_T'}]};
+ const out=buildMachineData(r,sel);
+ assert.ok(Number.isFinite(out.selectionSummary.selected[0].requiredTrials.value));
+ assert.equal(out.selectionSummary.selected[0].requiredTrials.unit,'対象ゲーム');
+});

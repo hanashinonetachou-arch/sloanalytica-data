@@ -76,7 +76,7 @@ function run(machineId){
   execute("researchValidation","validate-research-data.mjs",[p.research]);
   execute("statisticalEvaluation","evaluate-research-statistics.mjs",[p.research,p.stats]);
   execute("selectionValidation","validate-selection-data.mjs",[p.selection,p.research]);
-  execute("machineBuild","build-machine-data.mjs",[p.research,p.selection,p.generated]);
+  execute("machineBuild","build-machine-data.mjs",[p.research,p.selection,p.generated,p.stats]);
 
   const generated=readJson(p.generated);
   let comparison={existingMachine:false};

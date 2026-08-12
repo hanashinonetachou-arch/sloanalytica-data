@@ -4,6 +4,36 @@ import path from "node:path";
 function fail(msg){ throw new Error(msg); }
 function readJson(p){ return JSON.parse(fs.readFileSync(p,"utf8")); }
 function unique(xs){ return [...new Set(xs)]; }
+
+const TRIAL_EPS=1e-12;
+function trialClamp(v,a=0,b=1){ return Math.max(a,Math.min(b,Number(v))); }
+function trialClampP(p){ return trialClamp(p,TRIAL_EPS,1-TRIAL_EPS); }
+function trialBcBernoulli(p,q){ p=trialClampP(p); q=trialClampP(q); return Math.sqrt(p*q)+Math.sqrt((1-p)*(1-q)); }
+function trialBcCategorical(p,q){ return p.reduce((sum,v,i)=>sum+Math.sqrt(Math.max(0,v)*Math.max(0,q[i])),0); }
+function trialBcPoisson(a,b){ return Math.exp(-0.5*(Math.sqrt(Math.max(0,a))-Math.sqrt(Math.max(0,b)))**2); }
+function trialCount80(bc){ bc=trialClamp(bc); if(bc>=1-TRIAL_EPS)return null; if(bc<=TRIAL_EPS)return 1; return Math.max(1,Math.ceil(Math.log(0.4)/Math.log(bc))); }
+function researchCategorical(rf,setting){
+  const cats=Array.isArray(rf.categories)?rf.categories:[]; const raw=rf.settingDistributions?.[setting];
+  if(!raw||cats.length<2)return null; const xs=cats.map(c=>Number(raw[c]));
+  if(xs.some(v=>!Number.isFinite(v)||v<0||v>1))return null; const sum=xs.reduce((a,b)=>a+b,0);
+  if((rf.distributionMode??"complete")==="implicit_residual"){ if(sum>1+1e-6)return null; return [...xs,Math.max(0,1-sum)]; }
+  return Math.abs(sum-1)<=1e-6?xs:null;
+}
+function selectedCategorical(rf,sf,setting){
+  const base=researchCategorical(rf,setting); if(!base)return null; const excluded=new Set(sf.categoryExcludeLabels??[]);
+  if(!excluded.size)return base; const cats=rf.categories??[], kept=[];
+  for(let i=0;i<cats.length;i++) if(!excluded.has(cats[i])) kept.push(base[i]);
+  if((rf.distributionMode??"complete")==="implicit_residual") kept.push(base.at(-1));
+  const sum=kept.reduce((a,b)=>a+b,0); return sum>0?kept.map(v=>v/sum):null;
+}
+function estimateRequiredTrials80(rf,sf,settings){
+  if(!Array.isArray(settings)||settings.length<2)return null; const low=settings[0],high=settings.at(-1);
+  if(rf.candidateModel==="multinomial"){ const p=selectedCategorical(rf,sf,low),q=selectedCategorical(rf,sf,high); return p&&q?trialCount80(trialBcCategorical(p,q)):null; }
+  const p=Number(rf.settingValues?.[low]?.probability),q=Number(rf.settingValues?.[high]?.probability);
+  if(!Number.isFinite(p)||!Number.isFinite(q))return null;
+  return trialCount80(rf.candidateModel==="poisson"?trialBcPoisson(p,q):trialBcBernoulli(p,q));
+}
+
 function sourceClass(t){
   if(t==="official") return "OFFICIAL";
   if(t==="official_derived") return "OFFICIAL_DERIVED";
@@ -94,8 +124,9 @@ function buildFeature(rf,sf,inputIds){
 }
 
 
-function buildSelectionSummary(research,selection){
+function buildSelectionSummary(research,selection,statistics=null){
   const rfs=new Map((research.features??[]).map(f=>[f.researchFeatureId,f]));
+  const statsById=new Map((statistics?.features??[]).map(f=>[f.researchFeatureId,f]));
   const selected=[],rejected=[];
   for(const sf of selection.features??[]){
     // DISPLAY_ONLY is a legacy compatibility state. It is intentionally omitted
@@ -109,7 +140,13 @@ function buildSelectionSummary(research,selection){
       reason:sf.userReason ?? sf.rejectionReason ?? (sf.adoptionCategory==="EXCLUDE"?"推測計算には使用していません。":"推測計算に採用しています。")
     };
     if(sf.requiredTrials?.value!=null){
-      item.requiredTrials={value:sf.requiredTrials.value,unit:sf.requiredTrials.unit??"回"};
+      item.requiredTrials={value:sf.requiredTrials.value,unit:sf.requiredTrials.unit??rf.trialUnit??"回"};
+    } else {
+      // Selection-aware estimate: category exclusions / conditional normalization must match the actual inference Feature.
+      const estimate=estimateRequiredTrials80(rf,sf,research.machine?.settings??[]);
+      const statsEstimate=statsById.get(sf.researchFeatureId)?.extremePair80?.requiredTrials80;
+      const value=Number.isFinite(estimate)?estimate:statsEstimate;
+      if(Number.isFinite(value)) item.requiredTrials={value,unit:rf.trialUnit??"回"};
     }
     if(sf.adoptionCategory==="EXCLUDE") rejected.push(item);
     else if(sf.adoptionCategory==="INCLUDE_PRIMARY" || sf.adoptionCategory==="INCLUDE_SUPPORT") selected.push(item);
@@ -153,11 +190,11 @@ function materializeEvidenceUi(research,selection){
   return {generatedInputs,generatedEvidence};
 }
 
-export function buildMachineData(research,selection){
+export function buildMachineData(research,selection,statistics=null){
   if(selection.machineId!==research.machine?.machineId) fail("machineId mismatch");
   const rfs=new Map((research.features??[]).map(f=>[f.researchFeatureId,f]));
   const {generatedInputs,generatedEvidence}=materializeEvidenceUi(research,selection);
-  const selectionSummary=buildSelectionSummary(research,selection);
+  const selectionSummary=buildSelectionSummary(research,selection,statistics);
   const allInputs=[...(selection.inputs??[]),...generatedInputs];
   const inputIds=new Set(allInputs.map(x=>x.id));
   if(inputIds.size!==allInputs.length) fail("duplicate input id");
@@ -218,11 +255,12 @@ export function buildMachineData(research,selection){
 if(import.meta.url===`file://${process.argv[1]}`){
   const [researchPath,selectionPath,outPath]=process.argv.slice(2);
   if(!researchPath||!selectionPath||!outPath){
-    console.error("Usage: node tools/build-machine-data.mjs <research-data.json> <selection-data.json> <output-machine-package.json>");
+    console.error("Usage: node tools/build-machine-data.mjs <research-data.json> <selection-data.json> <output-machine-package.json> [statistics-report.json]");
     process.exit(2);
   }
   try{
-    const pkg=buildMachineData(readJson(researchPath),readJson(selectionPath));
+    const statisticsPath=process.argv[5];
+    const pkg=buildMachineData(readJson(researchPath),readJson(selectionPath),statisticsPath?readJson(statisticsPath):null);
     fs.mkdirSync(path.dirname(outPath),{recursive:true});
     fs.writeFileSync(outPath,JSON.stringify(pkg,null,2)+"\n");
     console.log(`MachineData draft: ${outPath}`);
