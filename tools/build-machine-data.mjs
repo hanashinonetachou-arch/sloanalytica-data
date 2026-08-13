@@ -183,6 +183,7 @@ function buildSelectionSummary(research,selection,statistics=null){
       const value=Number.isFinite(estimate)?estimate:statsEstimate;
       if(Number.isFinite(value)) item.requiredTrials={value,unit:rf.trialUnit??"回"};
     }
+    if(item.requiredTrials && /既存MachineData定義|existing machine data/i.test(String(item.requiredTrials.unit))) fail(`${sf.featureId}: requiredTrials.unit must be user-facing`);
     if(sf.adoptionCategory==="EXCLUDE") rejected.push(item);
     else if(sf.adoptionCategory==="INCLUDE_PRIMARY" || sf.adoptionCategory==="INCLUDE_SUPPORT") selected.push(item);
   }
@@ -256,9 +257,12 @@ export function buildMachineData(research,selection,statistics=null){
   }
   let order=1;
   for(const [cat,items] of byCat){
+    const defaultCategoryLabels={CZ:"CZ",ZONE:"100G以内のゲーム数解除",AT_RETURN:"AT引き戻し",EVIDENCE:"設定確定・否定情報"};
+    const categoryTitle=selection.uiCategoryLabels?.[cat]??defaultCategoryLabels[cat]??(cat==="PRIMARY"?null:cat);
+    if(categoryTitle && /^(?:AUTO_|PRIMARY(?:_|$)|PREDECESSOR$|SELF_PLAY$|DISPLAY_ONLY(?:_|$)|REFERENCE_TOTAL$)/.test(categoryTitle)) fail(`ui category title must be user-facing: ${cat}`);
     sections.push({
       id:`AUTO_${cat}`.replace(/[^A-Z0-9_]/gi,"_").toUpperCase(),
-      ...(cat==="PRIMARY"||cat==="EVIDENCE"?{}:{title:(selection.uiCategoryLabels?.[cat]??({CZ:"CZ",ZONE:"100G以内のゲーム数解除",AT_RETURN:"AT引き戻し"}[cat]??cat))}),
+      ...(categoryTitle?{title:categoryTitle}:{}),
       displayOrder:order++,
       items:items.sort((a,b)=>a.displayOrder-b.displayOrder).map(i=>({
         type:"input",inputId:i.id,label:i.name,
