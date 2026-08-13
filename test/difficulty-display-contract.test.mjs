@@ -21,11 +21,11 @@ test('Kaguya evidence-dominant catalog entry has no numeric score and no interna
  assert.ok((k.rejectedFeatures||[]).every(r=>!/Hard\s*Evidence/i.test(r.reason||'')));
 });
 
-test('catalog recent order follows addedAt and Funky Juggler 2 is newest',()=>{
+test('catalog recent order follows addedAt and Happy Juggler V III is newest',()=>{
  const c=JSON.parse(fs.readFileSync('catalog.json'));
  const sorted=[...c.machines].sort((a,b)=>(b.addedAt??'').localeCompare(a.addedAt??''));
  assert.deepEqual(c.machines.slice(0,5).map(x=>x.machineId),sorted.slice(0,5).map(x=>x.machineId));
- assert.equal(c.machines[0].machineId,'S_FUNKY_JUGGLER_2_KT');
+ assert.equal(c.machines[0].machineId,'S_HAPPY_JUGGLER_V3_EA');
 });
 
 test('difficulty catalog machineDataVersion matches catalog',()=>{
