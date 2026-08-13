@@ -191,6 +191,96 @@
       "unit": "回",
       "displayOrder": 52,
       "inferenceRole": "INCLUDE_SUPPORT"
+    },
+    {
+      "id": "INP_BIG_END_SET2_COUNT",
+      "name": "BIG終了画面・設定2以上",
+      "category": "EVIDENCE",
+      "type": "counter",
+      "unit": "回",
+      "displayOrder": 60,
+      "inferenceRole": "INCLUDE_SUPPORT"
+    },
+    {
+      "id": "INP_BIG_END_SET4_COUNT",
+      "name": "BIG終了画面・設定4以上",
+      "category": "EVIDENCE",
+      "type": "counter",
+      "unit": "回",
+      "displayOrder": 61,
+      "inferenceRole": "INCLUDE_SUPPORT"
+    },
+    {
+      "id": "INP_BIG_END_SET5_COUNT",
+      "name": "BIG終了画面・設定5以上",
+      "category": "EVIDENCE",
+      "type": "counter",
+      "unit": "回",
+      "displayOrder": 62,
+      "inferenceRole": "INCLUDE_SUPPORT"
+    },
+    {
+      "id": "INP_BIG_END_SET6_COUNT",
+      "name": "BIG終了画面・設定6",
+      "category": "EVIDENCE",
+      "type": "counter",
+      "unit": "回",
+      "displayOrder": 63,
+      "inferenceRole": "INCLUDE_SUPPORT"
+    },
+    {
+      "id": "INP_AT_VOICE_SET2_COUNT",
+      "name": "AT終了時ボイス・設定2以上",
+      "category": "EVIDENCE",
+      "type": "counter",
+      "unit": "回",
+      "displayOrder": 64,
+      "inferenceRole": "INCLUDE_SUPPORT"
+    },
+    {
+      "id": "INP_AT_VOICE_SET4_COUNT",
+      "name": "AT終了時ボイス・設定4以上",
+      "category": "EVIDENCE",
+      "type": "counter",
+      "unit": "回",
+      "displayOrder": 65,
+      "inferenceRole": "INCLUDE_SUPPORT"
+    },
+    {
+      "id": "INP_AT_VOICE_SET6_COUNT",
+      "name": "AT終了時ボイス・設定6",
+      "category": "EVIDENCE",
+      "type": "counter",
+      "unit": "回",
+      "displayOrder": 66,
+      "inferenceRole": "INCLUDE_SUPPORT"
+    },
+    {
+      "id": "INP_PAYOUT_SET4_COUNT",
+      "name": "獲得枚数表示・設定4以上",
+      "category": "EVIDENCE",
+      "type": "counter",
+      "unit": "回",
+      "displayOrder": 67,
+      "inferenceRole": "INCLUDE_SUPPORT"
+    },
+    {
+      "id": "INP_PAYOUT_SET5_COUNT",
+      "name": "獲得枚数表示・設定5以上",
+      "category": "EVIDENCE",
+      "type": "counter",
+      "unit": "回",
+      "displayOrder": 68,
+      "inferenceRole": "INCLUDE_SUPPORT"
+    },
+    {
+      "id": "INP_PAYOUT_SET6_COUNT",
+      "name": "獲得枚数表示・設定6",
+      "category": "EVIDENCE",
+      "type": "counter",
+      "unit": "回",
+      "displayOrder": 69,
+      "inferenceRole": "INCLUDE_SUPPORT"
     }
   ],
   "features": [
@@ -244,7 +334,15 @@
         "estimationBasis": "Phase 9.4B-15 explicit exposure estimate.",
         "uncertaintyNote": "Observation/eligibility conditions affect expected trial frequency."
       },
-      "userReason": "契機不明をその他へ誤分類せず、特定ボーナスの設定差を利用できる。"
+      "userReason": "契機不明をその他へ誤分類せず、特定ボーナスの設定差を利用できる。",
+      "conditionedOnInputId": "INP_BLUE_BIG_COUNT",
+      "inputTransform": "sum_inputs_to_trials",
+      "denominatorInputIds": [
+        "INP_BLUE_OTHER_CONFIRMED",
+        "INP_BLUE_WATERMELON_CONFIRMED",
+        "INP_BLUE_CHANCE_CONFIRMED"
+      ],
+      "residualCategoryLabel": "OTHER"
     },
     {
       "researchFeatureId": "RF_REVUE_REG_CAUSE",
@@ -275,7 +373,16 @@
         "estimationBasis": "Phase 9.4B-15 explicit exposure estimate.",
         "uncertaintyNote": "Observation/eligibility conditions affect expected trial frequency."
       },
-      "userReason": "REGの特定契機には大きな設定差があり、契機不明を除外しながら利用できる。"
+      "userReason": "REGの特定契機には大きな設定差があり、契機不明を除外しながら利用できる。",
+      "conditionedOnInputId": "INP_REG_COUNT",
+      "inputTransform": "sum_inputs_to_trials",
+      "denominatorInputIds": [
+        "INP_REG_OTHER_CONFIRMED",
+        "INP_REG_SPECIAL_CONFIRMED",
+        "INP_REG_CHANCE_CONFIRMED",
+        "INP_REG_WATERMELON_CONFIRMED"
+      ],
+      "residualCategoryLabel": "OTHER"
     },
     {
       "researchFeatureId": "RF_REVUE_CZ",
@@ -302,10 +409,9 @@
       "researchFeatureId": "RF_REVUE_LAMP",
       "featureId": "FEAT_CZ_LAMP_MULTINOMIAL",
       "adoptionCategory": "INCLUDE_SUPPORT",
-      "numeratorInputId": "INP_LAMP_WHITE_COUNT",
+      "numeratorInputId": "INP_LAMP_BLUE_COUNT",
       "denominatorInputId": "INP_LAMP_WHITE_COUNT",
       "categoryInputIds": [
-        "INP_LAMP_BLUE_COUNT",
         "INP_LAMP_GREEN_COUNT",
         "INP_LAMP_RED_COUNT",
         "INP_LAMP_PURPLE_COUNT"
@@ -329,16 +435,24 @@
         "estimationBasis": "Phase 9.4B-15 explicit exposure estimate.",
         "uncertaintyNote": "Observation/eligibility conditions affect expected trial frequency."
       },
-      "userReason": "内部テーブルと完全一致しない観測可能な設定示唆で、設定別振り分けが公表されている。"
+      "userReason": "内部テーブルと完全一致しない観測可能な設定示唆で、設定別振り分けが公表されている。",
+      "inputTransform": "sum_inputs_to_trials",
+      "denominatorInputIds": [
+        "INP_LAMP_WHITE_COUNT",
+        "INP_LAMP_BLUE_COUNT",
+        "INP_LAMP_GREEN_COUNT",
+        "INP_LAMP_RED_COUNT",
+        "INP_LAMP_PURPLE_COUNT"
+      ],
+      "residualCategoryLabel": "WHITE"
     },
     {
       "researchFeatureId": "RF_REVUE_BIG_END",
       "featureId": "FEAT_BIG_END_SCREEN_MULTINOMIAL",
       "adoptionCategory": "INCLUDE_SUPPORT",
-      "numeratorInputId": "INP_BIG_END_DEFAULT_COUNT",
+      "numeratorInputId": "INP_BIG_END_HIGH_WEAK_COUNT",
       "denominatorInputId": "INP_BIG_END_DEFAULT_COUNT",
       "categoryInputIds": [
-        "INP_BIG_END_HIGH_WEAK_COUNT",
         "INP_BIG_END_HIGH_STRONG_COUNT"
       ],
       "minimumSample": 5,
@@ -357,7 +471,14 @@
         "quality": "DERIVED",
         "basisId": "REVUE_BONUS_ELIGIBLE_GAMES"
       },
-      "userReason": "設定1・2と設定4以上の分布差が明瞭で、確定画面と二重評価せず利用できる。"
+      "userReason": "設定1・2と設定4以上の分布差が明瞭で、確定画面と二重評価せず利用できる。",
+      "inputTransform": "sum_inputs_to_trials",
+      "denominatorInputIds": [
+        "INP_BIG_END_DEFAULT_COUNT",
+        "INP_BIG_END_HIGH_WEAK_COUNT",
+        "INP_BIG_END_HIGH_STRONG_COUNT"
+      ],
+      "residualCategoryLabel": "DEFAULT"
     }
   ],
   "evidence": [
@@ -371,7 +492,10 @@
         "SET_6"
       ],
       "deniedSettings": [],
-      "notes": "Hard Evidence。"
+      "notes": "Hard Evidence。",
+      "evidenceId": "EVI_BIG_END_SET2",
+      "inputId": "INP_BIG_END_SET2_COUNT",
+      "displayName": "BIG終了画面で設定2以上を確認"
     },
     {
       "researchEvidenceId": "RE_EVI_BIG_END_SET4",
@@ -382,7 +506,10 @@
         "SET_6"
       ],
       "deniedSettings": [],
-      "notes": "Hard Evidence。"
+      "notes": "Hard Evidence。",
+      "evidenceId": "EVI_BIG_END_SET4",
+      "inputId": "INP_BIG_END_SET4_COUNT",
+      "displayName": "BIG終了画面で設定4以上を確認"
     },
     {
       "researchEvidenceId": "RE_EVI_BIG_END_SET5",
@@ -392,7 +519,10 @@
         "SET_6"
       ],
       "deniedSettings": [],
-      "notes": "Hard Evidence。"
+      "notes": "Hard Evidence。",
+      "evidenceId": "EVI_BIG_END_SET5",
+      "inputId": "INP_BIG_END_SET5_COUNT",
+      "displayName": "BIG終了画面で設定5以上を確認"
     },
     {
       "researchEvidenceId": "RE_EVI_BIG_END_SET6",
@@ -401,7 +531,10 @@
         "SET_6"
       ],
       "deniedSettings": [],
-      "notes": "Hard Evidence。"
+      "notes": "Hard Evidence。",
+      "evidenceId": "EVI_BIG_END_SET6",
+      "inputId": "INP_BIG_END_SET6_COUNT",
+      "displayName": "BIG終了画面で設定6を確認"
     },
     {
       "researchEvidenceId": "RE_EVI_AT_VOICE_SET2",
@@ -413,7 +546,10 @@
         "SET_6"
       ],
       "deniedSettings": [],
-      "notes": "Hard Evidence。"
+      "notes": "Hard Evidence。",
+      "evidenceId": "EVI_AT_VOICE_SET2",
+      "inputId": "INP_AT_VOICE_SET2_COUNT",
+      "displayName": "AT終了時ボイスで設定2以上を確認"
     },
     {
       "researchEvidenceId": "RE_EVI_AT_VOICE_SET4",
@@ -424,7 +560,10 @@
         "SET_6"
       ],
       "deniedSettings": [],
-      "notes": "Hard Evidence。"
+      "notes": "Hard Evidence。",
+      "evidenceId": "EVI_AT_VOICE_SET4",
+      "inputId": "INP_AT_VOICE_SET4_COUNT",
+      "displayName": "AT終了時ボイスで設定4以上を確認"
     },
     {
       "researchEvidenceId": "RE_EVI_AT_VOICE_SET6",
@@ -433,7 +572,10 @@
         "SET_6"
       ],
       "deniedSettings": [],
-      "notes": "Hard Evidence。"
+      "notes": "Hard Evidence。",
+      "evidenceId": "EVI_AT_VOICE_SET6",
+      "inputId": "INP_AT_VOICE_SET6_COUNT",
+      "displayName": "AT終了時ボイスで設定6を確認"
     },
     {
       "researchEvidenceId": "RE_EVI_PAYOUT_SET4",
@@ -444,7 +586,10 @@
         "SET_6"
       ],
       "deniedSettings": [],
-      "notes": "Hard Evidence。"
+      "notes": "Hard Evidence。",
+      "evidenceId": "EVI_PAYOUT_SET4",
+      "inputId": "INP_PAYOUT_SET4_COUNT",
+      "displayName": "獲得枚数表示で設定4以上を確認"
     },
     {
       "researchEvidenceId": "RE_EVI_PAYOUT_SET5",
@@ -454,7 +599,10 @@
         "SET_6"
       ],
       "deniedSettings": [],
-      "notes": "Hard Evidence。"
+      "notes": "Hard Evidence。",
+      "evidenceId": "EVI_PAYOUT_SET5",
+      "inputId": "INP_PAYOUT_SET5_COUNT",
+      "displayName": "獲得枚数表示で設定5以上を確認"
     },
     {
       "researchEvidenceId": "RE_EVI_PAYOUT_SET6",
@@ -463,7 +611,10 @@
         "SET_6"
       ],
       "deniedSettings": [],
-      "notes": "Hard Evidence。"
+      "notes": "Hard Evidence。",
+      "evidenceId": "EVI_PAYOUT_SET6",
+      "inputId": "INP_PAYOUT_SET6_COUNT",
+      "displayName": "獲得枚数表示で設定6を確認"
     }
   ],
   "difficultyAnalysis": {

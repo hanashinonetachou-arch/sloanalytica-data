@@ -44,6 +44,16 @@ export function auditSelectionSummaryReadiness(root){
     const missingRejectedReasons=rejected.filter(f=>!trim(f.userReason)&&!trim(f.rejectionReason)).map(f=>f.featureId);
     const summary=generated?.selectionSummary??null;
     const missingRequiredTrials=summary?[...summary.selected,...summary.rejected].filter(x=>!x.requiredTrials).map(x=>x.featureId):[];
+    const sfById=new Map((selection.features??[]).map(f=>[f.featureId,f]));
+    const rfById=new Map((research.features??[]).map(f=>[f.researchFeatureId,f]));
+    const requiredTrialsUnavailableByDesign=missingRequiredTrials.filter(featureId=>{
+      const sf=sfById.get(featureId),rf=sf?rfById.get(sf.researchFeatureId):null;
+      if(!rf)return false;
+      if(!["binomial","poisson","multinomial"].includes(rf.candidateModel))return true;
+      if(rf.candidateModel==="multinomial") return !rf.settingDistributions || Object.keys(rf.settingDistributions).length<2;
+      return !rf.settingValues || Object.values(rf.settingValues).filter(v=>Number.isFinite(Number(v?.probability))).length<2;
+    });
+    const actionableMissingRequiredTrials=missingRequiredTrials.filter(id=>!requiredTrialsUnavailableByDesign.includes(id));
 
     const mp=path.join(machineRoot,machineId,'machine-package.json');
     const published=exists(mp)?readJson(mp):null;
@@ -54,10 +64,10 @@ export function auditSelectionSummaryReadiness(root){
     if(missingRejectedReasons.length) blockers.push('REJECTED_REASON_MISSING');
     const warnings=[];
     if(displayOnly.length) warnings.push('LEGACY_DISPLAY_ONLY');
-    if(missingRequiredTrials.length) warnings.push('REQUIRED_TRIALS_UNAVAILABLE');
+    if(actionableMissingRequiredTrials.length) warnings.push('REQUIRED_TRIALS_UNAVAILABLE');
     if(!publishedHasSummary) warnings.push('PUBLISHED_SUMMARY_MISSING');
     const status=blockers.length?'BLOCKED':warnings.some(x=>x!=='PUBLISHED_SUMMARY_MISSING')?'REVIEW':'READY';
-    reports.push({machineId,status,counts:{evaluated:(summary?.evaluatedCount??included.length+rejected.length),selected:included.length,rejected:rejected.length,legacyDisplayOnly:displayOnly.length},buildError,missingSelectedReasons,missingRejectedReasons,missingRequiredTrials,legacyDisplayOnly,publishedHasSummary,blockers,warnings});
+    reports.push({machineId,status,counts:{evaluated:(summary?.evaluatedCount??included.length+rejected.length),selected:included.length,rejected:rejected.length,legacyDisplayOnly:displayOnly.length},buildError,missingSelectedReasons,missingRejectedReasons,missingRequiredTrials,requiredTrialsUnavailableByDesign,actionableMissingRequiredTrials,legacyDisplayOnly,publishedHasSummary,blockers,warnings});
   }
   return {schemaVersion:'selection-summary-readiness-v1',generatedAt:new Date().toISOString(),machineCount:reports.length,summary:{ready:reports.filter(x=>x.status==='READY').length,review:reports.filter(x=>x.status==='REVIEW').length,blocked:reports.filter(x=>x.status==='BLOCKED').length},machines:reports};
 }

@@ -12,19 +12,36 @@ function trialBcBernoulli(p,q){ p=trialClampP(p); q=trialClampP(q); return Math.
 function trialBcCategorical(p,q){ return p.reduce((sum,v,i)=>sum+Math.sqrt(Math.max(0,v)*Math.max(0,q[i])),0); }
 function trialBcPoisson(a,b){ return Math.exp(-0.5*(Math.sqrt(Math.max(0,a))-Math.sqrt(Math.max(0,b)))**2); }
 function trialCount80(bc){ bc=trialClamp(bc); if(bc>=1-TRIAL_EPS)return null; if(bc<=TRIAL_EPS)return 1; return Math.max(1,Math.ceil(Math.log(0.4)/Math.log(bc))); }
-function researchCategorical(rf,setting){
+function researchCategoricalEntries(rf,setting){
   const cats=Array.isArray(rf.categories)?rf.categories:[]; const raw=rf.settingDistributions?.[setting];
-  if(!raw||cats.length<2)return null; const xs=cats.map(c=>Number(raw[c]));
-  if(xs.some(v=>!Number.isFinite(v)||v<0||v>1))return null; const sum=xs.reduce((a,b)=>a+b,0);
-  if((rf.distributionMode??"complete")==="implicit_residual"){ if(sum>1+1e-6)return null; return [...xs,Math.max(0,1-sum)]; }
-  return Math.abs(sum-1)<=1e-6?xs:null;
+  if(!raw||cats.length<2)return null;
+  const known=[],missing=[];
+  for(const c of cats){ const v=Number(raw[c]); if(Number.isFinite(v)) known.push([c,v]); else missing.push(c); }
+  if(known.some(([,v])=>v<0||v>1))return null;
+  const knownSum=known.reduce((sum,[,v])=>sum+v,0);
+  if((rf.distributionMode??"complete")==="implicit_residual"){
+    if(knownSum>1+1e-6||missing.length>1)return null;
+    const entries=[];
+    for(const c of cats){
+      const v=Number(raw[c]);
+      entries.push([c,Number.isFinite(v)?v:Math.max(0,1-knownSum)]);
+    }
+    // No named category is missing: the residual is an unnamed non-event category.
+    if(missing.length===0 && knownSum<1-1e-12) entries.push(["__IMPLICIT_RESIDUAL__",Math.max(0,1-knownSum)]);
+    return entries;
+  }
+  if(missing.length||Math.abs(knownSum-1)>1e-6)return null;
+  return cats.map(c=>[c,Number(raw[c])]);
 }
 function selectedCategorical(rf,sf,setting){
-  const base=researchCategorical(rf,setting); if(!base)return null; const excluded=new Set(sf.categoryExcludeLabels??[]);
-  if(!excluded.size)return base; const cats=rf.categories??[], kept=[];
-  for(let i=0;i<cats.length;i++) if(!excluded.has(cats[i])) kept.push(base[i]);
-  if((rf.distributionMode??"complete")==="implicit_residual") kept.push(base.at(-1));
-  const sum=kept.reduce((a,b)=>a+b,0); return sum>0?kept.map(v=>v/sum):null;
+  const entries=researchCategoricalEntries(rf,setting); if(!entries)return null;
+  const excluded=new Set(sf.categoryExcludeLabels??[]);
+  const kept=entries.filter(([c])=>!excluded.has(c));
+  if(kept.length<2)return null;
+  const probs=kept.map(([,v])=>v),sum=probs.reduce((a,b)=>a+b,0);
+  if(sum<=0)return null;
+  // categoryExcludeLabels explicitly conditions on the retained event set.
+  return excluded.size?probs.map(v=>v/sum):probs;
 }
 function estimateRequiredTrials80(rf,sf,settings){
   if(!Array.isArray(settings)||settings.length<2)return null; const low=settings[0],high=settings.at(-1);
@@ -85,6 +102,14 @@ function buildFeature(rf,sf,inputIds){
     if(includedCats.length<2) fail(`${sf.featureId}: multinomial requires at least 2 included categories`);
     const residualCat=sf.residualCategoryLabel??null;
     if(residualCat && !includedCats.includes(residualCat)) fail(`${sf.featureId}: invalid residualCategoryLabel ${residualCat}`);
+    const isConditionalPartial=typeof sf.conditionedOnInputId==="string" && sf.conditionedOnInputId.length>0;
+    if(isConditionalPartial){
+      if(!inputIds.has(sf.conditionedOnInputId)) fail(`${sf.featureId}: unknown conditionedOnInputId ${sf.conditionedOnInputId}`);
+      if(!residualCat) fail(`${sf.featureId}: conditional partial multinomial requires residualCategoryLabel`);
+      base.modelType="conditional_partial_multinomial";
+      base.conditionedOnInputId=sf.conditionedOnInputId;
+      base.inputTransform=sf.inputTransform??"sum_inputs_to_trials";
+    }
     const cats=residualCat?includedCats.filter(c=>c!==residualCat):includedCats;
     if(cats.length<1) fail(`${sf.featureId}: multinomial requires at least 1 explicit category`);
     const orderedInputIds=[...(sf.numeratorInputId?[sf.numeratorInputId]:[]),...(sf.categoryInputIds??[])];
@@ -111,13 +136,19 @@ function buildFeature(rf,sf,inputIds){
     base.categoryProbabilities=Object.fromEntries(Object.entries(rf.settingDistributions??{}).map(([s,dist])=>{
       const probs=cats.map(c=>Number(dist[c]));
       if(probs.some(p=>!Number.isFinite(p)||p<0)) fail(`${sf.featureId}: invalid category probability for ${s}`);
+      if(isConditionalPartial) return [s,probs];
+      if(residualCat){
+        const residual=Number(dist[residualCat]);
+        // If the residual is omitted from ResearchData, it is the implicit remainder and must not renormalize explicit probabilities.
+        if(!Number.isFinite(residual)) return [s,probs];
+      }
       const includedProbs=includedCats.map(c=>Number(dist[c]));
       if(includedProbs.some(p=>!Number.isFinite(p)||p<0)) fail(`${sf.featureId}: invalid included category probability for ${s}`);
       const includedSum=includedProbs.reduce((a,b)=>a+b,0);
       if(includedSum<=0) fail(`${sf.featureId}: included category probability sum must be > 0 for ${s}`);
       return [s,(excludedCats.size||residualCat)?probs.map(p=>p/includedSum):probs];
     }));
-    if(excludedCats.size||residualCat) base.categoryConditioning={excludedCategories:[...excludedCats],normalization:"RENORMALIZE_INCLUDED",...(residualCat?{residualCategory:residualCat}:{})};
+    if(!isConditionalPartial && (excludedCats.size || (residualCat && Object.values(rf.settingDistributions??{}).every(dist=>Number.isFinite(Number(dist?.[residualCat])))))) base.categoryConditioning={excludedCategories:[...excludedCats],normalization:"RENORMALIZE_INCLUDED",...(residualCat?{residualCategory:residualCat}:{})};
   } else fail(`${sf.featureId}: unsupported candidateModel ${rf.candidateModel}`);
   base.sourceEvidenceRefs=rf.sourceRefs??[];
   return base;
