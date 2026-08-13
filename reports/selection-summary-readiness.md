@@ -1,6 +1,6 @@
 # Selection Summary Readiness Audit
 
-Machines: 13 / READY 13 / REVIEW 0 / BLOCKED 0
+Machines: 14 / READY 14 / REVIEW 0 / BLOCKED 0
 
 | Machine | Status | 評価 | 採用 | 不採用 | Legacy DISPLAY_ONLY | 主な課題 |
 |---|---:|---:|---:|---:|---:|---|
@@ -15,6 +15,7 @@ Machines: 13 / READY 13 / REVIEW 0 / BLOCKED 0
 | S_GOGO_JUGGLER_3_KA | READY | 5 | 2 | 3 | 0 | - |
 | S_HAPPY_JUGGLER_V3_EA | READY | 5 | 2 | 3 | 0 | - |
 | S_IM_JUGGLER_EX_TP | READY | 2 | 1 | 1 | 0 | - |
+| S_JUGGLER_GIRLS_SS_KH | READY | 5 | 2 | 3 | 0 | - |
 | S_MY_JUGGLER_V_KD | READY | 3 | 3 | 0 | 0 | - |
 | S_REVUE_STARLIGHT_CX | READY | 6 | 6 | 0 | 0 | - |
 
