@@ -3,7 +3,7 @@
   "machine": {
     "schemaVersion": "2.0.0",
     "machineId": "L_TOKYO_GHOUL",
-    "machineDataVersion": "0.2.0",
+    "machineDataVersion": "0.2.2",
     "displayName": "L 東京喰種",
     "modelName": "L東京喰種CT / L東京喰種FT",
     "manufacturer": "スパイキー / CROSSALPHA",
@@ -219,7 +219,9 @@
         "modelType": "binomial",
         "minimumSample": 1,
         "sampleRecommendation": 8000,
-        "weight": 1,
+        "reliabilityProfile": {
+          "weight": 1
+        },
         "displayFormat": "ratio_1_over_n",
         "numeratorInputId": "INP_AT_INITIAL_COUNT",
         "denominatorInputId": "INP_AT_TRIAL_GAMES",
@@ -235,10 +237,7 @@
           "SRC_1GEKI_MAIN",
           "SRC_NANA_SPEC",
           "SRC_DMM_SETTING"
-        ],
-        "selectionRationale": {
-          "summary": "AT初当りを採用。"
-        }
+        ]
       },
       {
         "featureId": "FEAT_CZ_EXCLUSIVE",
@@ -249,7 +248,9 @@
         "modelType": "multinomial",
         "minimumSample": 1,
         "sampleRecommendation": 5000,
-        "weight": 1,
+        "reliabilityProfile": {
+          "weight": 1
+        },
         "displayFormat": "ratio_1_over_n",
         "denominatorAdjustments": [
           {
@@ -300,10 +301,7 @@
         "sourceEvidenceRefs": [
           "SRC_NANA_SPEC",
           "SRC_DMM_SETTING"
-        ],
-        "selectionRationale": {
-          "summary": "CZ2種類をMultinomialで採用。CZ中8G/回を自動減算。"
-        }
+        ]
       },
       {
         "featureId": "FEAT_AT_RETURN",
@@ -314,7 +312,9 @@
         "modelType": "binomial",
         "minimumSample": 1,
         "sampleRecommendation": 20,
-        "weight": 1,
+        "reliabilityProfile": {
+          "weight": 1
+        },
         "displayFormat": "percentage",
         "numeratorInputId": "INP_AT_RETURN_COUNT",
         "denominatorInputId": "INP_AT_END_COUNT",
@@ -328,10 +328,7 @@
         },
         "sourceEvidenceRefs": [
           "SRC_NANA_SETTING"
-        ],
-        "selectionRationale": {
-          "summary": "AT引き戻し率を採用。"
-        }
+        ]
       },
       {
         "featureId": "FEAT_CZ_WITHIN_100",
@@ -342,7 +339,9 @@
         "modelType": "binomial",
         "minimumSample": 1,
         "sampleRecommendation": 20,
-        "weight": 1,
+        "reliabilityProfile": {
+          "weight": 1
+        },
         "displayFormat": "percentage",
         "numeratorInputId": "INP_100G_HIT_COUNT",
         "denominatorInputId": "INP_100G_TRIAL_COUNT",
@@ -357,28 +356,7 @@
         "sourceEvidenceRefs": [
           "SRC_NANA_SETTING",
           "SRC_DMM_SETTING"
-        ],
-        "selectionRationale": {
-          "summary": "100G以内CZ以上当選率を採用。"
-        }
-      }
-    ],
-    "nonAdoptedElements": [
-      {
-        "name": "CZ合算",
-        "reason": "CZ種類別と重複。"
-      },
-      {
-        "name": "エピソードボーナス",
-        "reason": "低頻度。"
-      },
-      {
-        "name": "リプレイAT直撃",
-        "reason": "極端に低頻度。"
-      },
-      {
-        "name": "弱チェリー契機CZ",
-        "reason": "内部状態判別が必要。"
+        ]
       }
     ]
   },
@@ -735,6 +713,106 @@
       }
     ]
   },
+  "selectionSummary": {
+    "schemaVersion": "selection-summary-v1",
+    "evaluatedCount": 10,
+    "selectedCount": 4,
+    "rejectedCount": 6,
+    "selected": [
+      {
+        "featureId": "FEAT_AT_INITIAL",
+        "name": "AT初当り",
+        "reason": "AT初当りを採用。",
+        "requiredTrials": {
+          "value": 13791,
+          "unit": "AT抽選対象ゲーム"
+        }
+      },
+      {
+        "featureId": "FEAT_CZ_EXCLUSIVE",
+        "name": "CZ内訳（大喰いの利世／レミニセンス）",
+        "reason": "CZ2種類をMultinomialで採用。CZ中8G/回を自動減算。",
+        "requiredTrials": {
+          "value": 17794,
+          "unit": "CZ抽選対象ゲーム"
+        }
+      },
+      {
+        "featureId": "FEAT_AT_RETURN",
+        "name": "AT終了後の引き戻し",
+        "reason": "AT引き戻し率を採用。",
+        "requiredTrials": {
+          "value": 133,
+          "unit": "対象AT終了"
+        }
+      },
+      {
+        "featureId": "FEAT_CZ_WITHIN_100",
+        "name": "100G+α以内のCZ当選",
+        "reason": "100G以内CZ以上当選率を採用。",
+        "requiredTrials": {
+          "value": 54,
+          "unit": "朝一を除くCZ周期"
+        }
+      }
+    ],
+    "rejected": [
+      {
+        "featureId": "FEAT_CZ_COMBINED",
+        "name": "CZ合算",
+        "reason": "CZ種類別と重複。",
+        "requiredTrials": {
+          "value": 26133,
+          "unit": "CZ抽選対象ゲーム"
+        }
+      },
+      {
+        "featureId": "FEAT_EPISODE_BONUS",
+        "name": "エピソードボーナス",
+        "reason": "低頻度。",
+        "requiredTrials": {
+          "value": 35599,
+          "unit": "抽選対象ゲーム"
+        }
+      },
+      {
+        "featureId": "FEAT_AT_DIRECT_REPLAY",
+        "name": "リプレイ契機AT直撃",
+        "reason": "極端に低頻度。",
+        "requiredTrials": {
+          "value": 51013,
+          "unit": "通常時ゲーム"
+        }
+      },
+      {
+        "featureId": "FEAT_LOWER_REPLAY",
+        "name": "下段リプレイ",
+        "reason": "低頻度。",
+        "requiredTrials": {
+          "value": 192816,
+          "unit": "小役抽選対象ゲーム"
+        }
+      },
+      {
+        "featureId": "FEAT_WEAK_CHERRY_CZ_NORMAL",
+        "name": "通常滞在時・弱チェリーからCZ当選",
+        "reason": "内部状態判別が必要。",
+        "requiredTrials": {
+          "value": 9855,
+          "unit": "通常滞在時の弱チェリー成立"
+        }
+      },
+      {
+        "featureId": "FEAT_WEAK_CHERRY_CZ_HIGH",
+        "name": "高確滞在時・弱チェリーからCZ当選",
+        "reason": "内部状態判別が必要。",
+        "requiredTrials": {
+          "value": 4262,
+          "unit": "高確滞在時の弱チェリー成立"
+        }
+      }
+    ]
+  },
   "reliability": {},
   "metadata": {
     "machineId": "L_TOKYO_GHOUL",
@@ -746,54 +824,10 @@
       "SET_4",
       "SET_5",
       "SET_6"
-    ],
-    "formalName": "L 東京喰種",
-    "modelNumber": "L東京喰種CT / L東京喰種FT",
-    "manufacturer": "スパイキー / CROSSALPHA",
-    "introductionDate": "2025-02-03",
-    "researchDate": "2026-08-11",
-    "denominatorDefinitionNotes": [
-      {
-        "inputId": "INP_AT_TRIAL_GAMES",
-        "status": "PROVISIONAL",
-        "scope": "NON_AT_GAMES_INCLUDING_CZ",
-        "recheckRequired": true
-      },
-      {
-        "featureId": "FEAT_CZ_EXCLUSIVE",
-        "status": "PROVISIONAL",
-        "formula": "INP_AT_TRIAL_GAMES - 8*INP_REMINISCENCE_COUNT - 8*INP_RIZE_COUNT",
-        "recheckRequired": true
-      }
     ]
   },
   "validation": {
-    "cases": [
-      {
-        "id": "VAL_AT_HIT_LE_GAMES",
-        "description": "AT初当り回数は集計ゲーム数以下",
-        "type": "input_relation",
-        "leftInputId": "INP_AT_INITIAL_COUNT",
-        "operator": "LTE",
-        "rightInputId": "INP_AT_TRIAL_GAMES"
-      },
-      {
-        "id": "VAL_100G_HIT_LE_TRIAL",
-        "description": "100G以内当選回数は到達回数以下",
-        "type": "input_relation",
-        "leftInputId": "INP_100G_HIT_COUNT",
-        "operator": "LTE",
-        "rightInputId": "INP_100G_TRIAL_COUNT"
-      },
-      {
-        "id": "VAL_RETURN_LE_AT_END",
-        "description": "引き戻し回数はAT終了回数以下",
-        "type": "input_relation",
-        "leftInputId": "INP_AT_RETURN_COUNT",
-        "operator": "LTE",
-        "rightInputId": "INP_AT_END_COUNT"
-      }
-    ]
+    "cases": []
   },
   "statistics": {}
 }

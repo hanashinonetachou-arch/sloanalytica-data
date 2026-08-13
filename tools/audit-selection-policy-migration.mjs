@@ -4,8 +4,8 @@ import {buildMachineData} from './build-machine-data.mjs';
 const read=p=>JSON.parse(fs.readFileSync(p,'utf8'));
 const exists=p=>fs.existsSync(p);
 const stable=x=>JSON.stringify(x??null);
-const featureKeys=['modelType','numeratorInputId','denominatorInputId','trialCountInputId','inputTransform','denominatorInputIds','categoryInputIds','categorySubtractInputIds','conditionedOnInputId','categoryProbabilities','probabilities','categoryConditioning','denominatorAdjustments','weight'];
-const pick=(o,ks)=>{const x=Object.fromEntries(ks.filter(k=>o?.[k]!==undefined).map(k=>[k,o[k]])); x.weight=o?.weight??1; if(x.probabilities&&Object.keys(x.probabilities).length===0) delete x.probabilities; return x;};
+const featureKeys=['modelType','numeratorInputId','denominatorInputId','trialCountInputId','inputTransform','denominatorInputIds','categoryInputIds','optionalCategoryInputIds','categorySubtractInputIds','conditionedOnInputId','categoryProbabilities','probabilities','categoryConditioning','denominatorAdjustments'];
+const pick=(o,ks)=>{const x=Object.fromEntries(ks.filter(k=>o?.[k]!==undefined).map(k=>[k,o[k]])); x.weight=o?.reliabilityProfile?.weight??o?.weight??1; if(x.probabilities&&Object.keys(x.probabilities).length===0) delete x.probabilities; return x;};
 export function auditSelectionPolicyMigration(root){
  const reports=[]; const rr=path.join(root,'research');
  for(const de of fs.readdirSync(rr,{withFileTypes:true}).filter(x=>x.isDirectory()&&!x.name.startsWith('_'))){

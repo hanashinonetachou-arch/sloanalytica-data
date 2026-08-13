@@ -3,7 +3,7 @@
   "machine": {
     "schemaVersion": "2.0.0",
     "machineId": "L_SMASLO_BAKEMONOGATARI_KH",
-    "machineDataVersion": "0.1.0",
+    "machineDataVersion": "0.1.5",
     "displayName": "スマスロ 化物語",
     "modelName": "L スマスロ化物語 KH",
     "manufacturer": "サミー",
@@ -25,8 +25,8 @@
     "schemaVersion": "2.0.0",
     "inputs": [
       {
-        "id": "INP_NORMAL_GAMES",
-        "name": "通常時ゲーム数",
+        "id": "INP_TOTAL_GAMES",
+        "name": "全ゲーム数",
         "type": "integer",
         "category": "PRIMARY",
         "unit": "G",
@@ -37,25 +37,23 @@
       },
       {
         "id": "INP_AT_INITIAL_COUNT",
-        "name": "AT初当り回数",
+        "name": "倖時間突入回数",
         "type": "counter",
         "category": "PRIMARY",
         "unit": "回",
         "displayOrder": 2,
         "inferenceRole": "INCLUDE_PRIMARY",
-        "parentInputId": "INP_NORMAL_GAMES",
         "defaultValue": 0,
         "minimum": 0
       },
       {
-        "id": "INP_WATERMELON_COUNT",
-        "name": "スイカ回数",
-        "type": "counter",
+        "id": "INP_AT_INITIAL_OBSERVED_DENOMINATOR",
+        "name": "倖時間突入確率（1/○○）",
+        "type": "number",
         "category": "PRIMARY",
-        "unit": "回",
+        "unit": "",
         "displayOrder": 3,
         "inferenceRole": "INCLUDE_PRIMARY",
-        "parentInputId": "INP_NORMAL_GAMES",
         "defaultValue": 0,
         "minimum": 0
       },
@@ -65,9 +63,21 @@
         "type": "counter",
         "category": "PRIMARY",
         "unit": "回",
-        "displayOrder": 5,
+        "displayOrder": 4,
         "inferenceRole": "INCLUDE_PRIMARY",
         "parentInputId": "INP_AT_INITIAL_COUNT",
+        "defaultValue": 0,
+        "minimum": 0
+      },
+      {
+        "id": "INP_WATERMELON_COUNT",
+        "name": "スイカ回数",
+        "type": "counter",
+        "category": "PRIMARY",
+        "unit": "回",
+        "displayOrder": 5,
+        "inferenceRole": "INCLUDE_PRIMARY",
+        "parentInputId": "INP_TOTAL_GAMES",
         "defaultValue": 0,
         "minimum": 0
       },
@@ -110,27 +120,27 @@
           },
           {
             "key": "SET_2_OR_HIGHER",
-            "label": "設定2以上",
+            "label": "設定2以上（銅トロフィー／174枚など）",
             "value": "SET_2_OR_HIGHER"
           },
           {
             "key": "SET_3_OR_HIGHER",
-            "label": "設定3以上",
+            "label": "設定3以上（銀トロフィー／543枚など）",
             "value": "SET_3_OR_HIGHER"
           },
           {
             "key": "SET_4_OR_HIGHER",
-            "label": "設定4以上",
+            "label": "設定4以上（金トロフィー／初代3人パネルなど）",
             "value": "SET_4_OR_HIGHER"
           },
           {
             "key": "SET_5_OR_HIGHER",
-            "label": "設定5以上",
+            "label": "設定5以上（キリン／ヒロイン集合／忍＋赤7など）",
             "value": "SET_5_OR_HIGHER"
           },
           {
             "key": "SET_6",
-            "label": "設定6",
+            "label": "設定6（虹／I LOVE YOU／331枚など）",
             "value": "SET_6"
           }
         ],
@@ -150,8 +160,10 @@
         "modelType": "multinomial",
         "minimumSample": 1,
         "sampleRecommendation": 8000,
+        "inputTransform": "observed_ratio_to_trials",
+        "trialCountInputId": "INP_AT_INITIAL_COUNT",
         "numeratorInputId": "INP_WEAK_CHERRY_DIRECT_COUNT",
-        "denominatorInputId": "INP_NORMAL_GAMES",
+        "denominatorInputId": "INP_AT_INITIAL_OBSERVED_DENOMINATOR",
         "categoryInputIds": [
           "INP_AT_INITIAL_COUNT"
         ],
@@ -210,7 +222,7 @@
         "sampleRecommendation": 8000,
         "displayFormat": "ratio_1_over_n",
         "numeratorInputId": "INP_WATERMELON_COUNT",
-        "denominatorInputId": "INP_NORMAL_GAMES",
+        "denominatorInputId": "INP_TOTAL_GAMES",
         "probabilities": {
           "SET_1": 0.011441647597254004,
           "SET_2": 0.011655011655011656,
@@ -256,8 +268,8 @@
     "evidences": [
       {
         "id": "EVI_SETTING_2_PLUS",
-        "name": "サミートロフィー銅",
-        "displayName": "設定2以上",
+        "name": "設定2以上確認",
+        "displayName": "設定2以上確認",
         "inputId": "INP_SETTING_FLOOR",
         "triggerValue": "SET_2_OR_HIGHER",
         "confirmedSettings": [],
@@ -269,8 +281,8 @@
       },
       {
         "id": "EVI_SETTING_3_PLUS",
-        "name": "サミートロフィー銀",
-        "displayName": "設定3以上",
+        "name": "設定3以上確認",
+        "displayName": "設定3以上確認",
         "inputId": "INP_SETTING_FLOOR",
         "triggerValue": "SET_3_OR_HIGHER",
         "confirmedSettings": [],
@@ -282,9 +294,9 @@
         "type": "SETTING_DENIAL"
       },
       {
-        "id": "EVI_SETTING_4_PLUS_TROPHY",
-        "name": "サミートロフィー金",
-        "displayName": "設定4以上",
+        "id": "EVI_SETTING_4_PLUS",
+        "name": "設定4以上確認",
+        "displayName": "設定4以上確認",
         "inputId": "INP_SETTING_FLOOR",
         "triggerValue": "SET_4_OR_HIGHER",
         "confirmedSettings": [],
@@ -297,9 +309,9 @@
         "type": "SETTING_DENIAL"
       },
       {
-        "id": "EVI_SETTING_5_PLUS_TROPHY",
-        "name": "サミートロフィーキリン柄",
-        "displayName": "設定5以上",
+        "id": "EVI_SETTING_5_PLUS",
+        "name": "設定5以上確認",
+        "displayName": "設定5以上確認",
         "inputId": "INP_SETTING_FLOOR",
         "triggerValue": "SET_5_OR_HIGHER",
         "confirmedSettings": [],
@@ -313,57 +325,9 @@
         "type": "SETTING_DENIAL"
       },
       {
-        "id": "EVI_SETTING_6_TROPHY",
-        "name": "サミートロフィー虹",
-        "displayName": "設定6",
-        "inputId": "INP_SETTING_FLOOR",
-        "triggerValue": "SET_6",
-        "confirmedSettings": [],
-        "deniedSettings": [
-          "SET_1",
-          "SET_2",
-          "SET_3",
-          "SET_4",
-          "SET_5"
-        ],
-        "hasImage": false,
-        "type": "SETTING_DENIAL"
-      },
-      {
-        "id": "EVI_SETTING_4_PLUS_END",
-        "name": "AT終了画面 初代の3人パネル",
-        "displayName": "設定4以上",
-        "inputId": "INP_SETTING_FLOOR",
-        "triggerValue": "SET_4_OR_HIGHER",
-        "confirmedSettings": [],
-        "deniedSettings": [
-          "SET_1",
-          "SET_2",
-          "SET_3"
-        ],
-        "hasImage": false,
-        "type": "SETTING_DENIAL"
-      },
-      {
-        "id": "EVI_SETTING_5_PLUS_END",
-        "name": "AT終了画面 初代ヒロインパネル",
-        "displayName": "設定5以上",
-        "inputId": "INP_SETTING_FLOOR",
-        "triggerValue": "SET_5_OR_HIGHER",
-        "confirmedSettings": [],
-        "deniedSettings": [
-          "SET_1",
-          "SET_2",
-          "SET_3",
-          "SET_4"
-        ],
-        "hasImage": false,
-        "type": "SETTING_DENIAL"
-      },
-      {
-        "id": "EVI_SETTING_6_END",
-        "name": "AT終了画面 I LOVE YOU",
-        "displayName": "設定6",
+        "id": "EVI_SETTING_6",
+        "name": "設定6確認",
+        "displayName": "設定6確認",
         "inputId": "INP_SETTING_FLOOR",
         "triggerValue": "SET_6",
         "confirmedSettings": [],
@@ -490,19 +454,30 @@
     "sections": [
       {
         "id": "AUTO_PRIMARY",
-        "title": "PRIMARY",
         "displayOrder": 1,
         "items": [
           {
             "type": "input",
-            "inputId": "INP_NORMAL_GAMES",
-            "label": "通常時ゲーム数",
+            "inputId": "INP_TOTAL_GAMES",
+            "label": "全ゲーム数",
             "widget": "number"
           },
           {
             "type": "input",
             "inputId": "INP_AT_INITIAL_COUNT",
-            "label": "AT初当り回数",
+            "label": "倖時間突入回数",
+            "widget": "counter"
+          },
+          {
+            "type": "input",
+            "inputId": "INP_AT_INITIAL_OBSERVED_DENOMINATOR",
+            "label": "倖時間突入確率（1/○○）",
+            "widget": "number"
+          },
+          {
+            "type": "input",
+            "inputId": "INP_WEAK_CHERRY_DIRECT_COUNT",
+            "label": "弱チェリーからのAT直撃回数",
             "widget": "counter"
           },
           {
@@ -510,18 +485,12 @@
             "inputId": "INP_WATERMELON_COUNT",
             "label": "スイカ回数",
             "widget": "counter"
-          },
-          {
-            "type": "input",
-            "inputId": "INP_WEAK_CHERRY_DIRECT_COUNT",
-            "label": "弱チェリーからのAT直撃回数",
-            "widget": "counter"
           }
         ]
       },
       {
         "id": "AUTO_ZONE",
-        "title": "ZONE",
+        "title": "100G以内のゲーム数解除",
         "displayOrder": 2,
         "items": [
           {
@@ -540,7 +509,6 @@
       },
       {
         "id": "AUTO_EVIDENCE",
-        "title": "EVIDENCE",
         "displayOrder": 3,
         "items": [
           {
@@ -550,6 +518,97 @@
             "widget": "select"
           }
         ]
+      }
+    ]
+  },
+  "selectionSummary": {
+    "schemaVersion": "selection-summary-v1",
+    "evaluatedCount": 9,
+    "selectedCount": 3,
+    "rejectedCount": 6,
+    "selected": [
+      {
+        "featureId": "FEAT_AT_INITIAL_EXCLUSIVE",
+        "name": "AT初当り内訳（弱チェリー直撃／その他）",
+        "reason": "マイスロの通常ゲーム数とAT初当り解析値の分母定義が一致しないため、マイスロ表示の「回数＋1/○○」から試行数を復元する。AT初当り全体と弱チェリー直撃の二重計上も排他的Multinomialで回避する。",
+        "requiredTrials": {
+          "value": 12259,
+          "unit": "マイスロ表示から復元したAT初当り抽選対象ゲーム"
+        }
+      },
+      {
+        "featureId": "FEAT_WATERMELON",
+        "name": "スイカ出現率",
+        "reason": "全状態でカウント可能なスイカを、全ゲーム数を分母として使用する。設定1の1/87.4から設定6の1/69.9まで一貫して高設定ほど出現しやすい。",
+        "requiredTrials": {
+          "value": 11318,
+          "unit": "全ゲーム"
+        }
+      },
+      {
+        "featureId": "FEAT_CZ_200G",
+        "name": "200G到達時のCZ当選",
+        "reason": "設定1・2の10%に対し設定6は20%で約2倍の差があり、300Gゾーンより相対差が大きい。",
+        "requiredTrials": {
+          "value": 91,
+          "unit": "200Gゾーン到達"
+        }
+      }
+    ],
+    "rejected": [
+      {
+        "featureId": "FEAT_AT_INITIAL_RAW",
+        "name": "AT初当り",
+        "reason": "AT初当り内訳と重複。",
+        "requiredTrials": {
+          "value": 49638,
+          "unit": "通常ゲーム"
+        }
+      },
+      {
+        "featureId": "FEAT_WEAK_CHERRY_DIRECT_RAW",
+        "name": "弱チェリー成立時のAT直撃",
+        "reason": "AT初当り内訳と重複。",
+        "requiredTrials": {
+          "value": 104,
+          "unit": "弱チェリー成立"
+        }
+      },
+      {
+        "featureId": "FEAT_CZ_300G",
+        "name": "300G到達時のCZ当選",
+        "reason": "200Gゾーンより相対差が小さい。",
+        "requiredTrials": {
+          "value": 181,
+          "unit": "300Gゾーン到達"
+        }
+      },
+      {
+        "featureId": "FEAT_NORMAL_TO_HIGH",
+        "name": "通常滞在時・弱チェリー/強レア役から高確移行",
+        "reason": "内部状態判別が困難。",
+        "requiredTrials": {
+          "value": 639,
+          "unit": "通常滞在中の対象レア役成立"
+        }
+      },
+      {
+        "featureId": "FEAT_AT_BONUS",
+        "name": "AT中ボーナス確率",
+        "reason": "低頻度。",
+        "requiredTrials": {
+          "value": 141985,
+          "unit": "ATゲーム"
+        }
+      },
+      {
+        "featureId": "FEAT_AT_END_KAIJUREN",
+        "name": "AT終了時の解呪連移行",
+        "reason": "設定2の公開値未確定。",
+        "requiredTrials": {
+          "value": 318,
+          "unit": "AT終了"
+        }
       }
     ]
   },

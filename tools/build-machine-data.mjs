@@ -70,11 +70,11 @@ function buildFeature(rf,sf,inputIds){
     featureId:sf.featureId,name:rf.name,adoptionCategory:role,
     calculationRole:role==="DISPLAY_ONLY"?"DISPLAY_ONLY":"PROBABILITY",
     probabilityEngineUsage:role!=="DISPLAY_ONLY",
-    modelType:rf.candidateModel,
+    modelType:sf.modelTypeOverride??rf.candidateModel,
     minimumSample:sf.minimumSample ?? 1,
     sampleRecommendation:sf.sampleRecommendation ?? sf.minimumSample ?? 1
   };
-  if(sf.weight!=null) base.weight=sf.weight;
+  if(sf.weight!=null) base.reliabilityProfile={weight:sf.weight};
   if(sf.inputTransform!=null) base.inputTransform=sf.inputTransform;
   if(sf.trialCountInputId!=null){
     if(!inputIds.has(sf.trialCountInputId)) fail(`${sf.featureId}: unknown trialCountInputId ${sf.trialCountInputId}`);
@@ -125,6 +125,10 @@ function buildFeature(rf,sf,inputIds){
       base.denominatorInputIds=[...sf.denominatorInputIds];
     }
     base.categoryInputIds=sf.categoryInputIds??[];
+    if(sf.optionalCategoryInputIds){
+      if(!Array.isArray(sf.optionalCategoryInputIds) || sf.optionalCategoryInputIds.some(id=>!base.categoryInputIds.includes(id))) fail(`${sf.featureId}: invalid optionalCategoryInputIds`);
+      base.optionalCategoryInputIds=[...sf.optionalCategoryInputIds];
+    }
     base.probabilities={};
     if(sf.categorySubtractInputIds){
       for(const [target,subs] of Object.entries(sf.categorySubtractInputIds)){
@@ -265,12 +269,17 @@ export function buildMachineData(research,selection,statistics=null){
   const evidences=[];
   const researchEvidence=new Map((research.evidenceCandidates??[]).map(e=>[e.researchEvidenceId,e]));
   for(const e of selection.evidence??[]){
-    const re=researchEvidence.get(e.researchEvidenceId);
-    if(!re) fail(`unknown researchEvidenceId: ${e.researchEvidenceId}`);
     if(!inputIds.has(e.inputId)) fail(`unknown evidence inputId: ${e.inputId}`);
-    evidences.push({id:e.evidenceId,name:re.name,displayName:e.displayName??re.name,inputId:e.inputId,triggerValue:e.triggerValue,
-      confirmedSettings:re.allowedSettings??re.confirmedSettings??[],deniedSettings:re.deniedSettings??[],hasImage:false,
-      type:(re.deniedSettings?.length??0)>0 && !(re.confirmedSettings?.length??0)?"SETTING_DENIAL":"SETTING_CONFIRMATION"});
+    const re=e.researchEvidenceId?researchEvidence.get(e.researchEvidenceId):null;
+    if(e.researchEvidenceId && !re) fail(`unknown researchEvidenceId: ${e.researchEvidenceId}`);
+    const directContract=!e.researchEvidenceId && e.legacyContractSource==="published_machine_data";
+    if(!re && !directContract) fail(`evidence ${e.evidenceId}: researchEvidenceId or approved legacy contract required`);
+    const confirmed=re?(re.allowedSettings??re.confirmedSettings??[]):(e.confirmedSettings??[]);
+    const denied=re?(re.deniedSettings??[]):(e.deniedSettings??[]);
+    const name=re?.name??e.name??e.displayName??e.evidenceId;
+    evidences.push({id:e.evidenceId,name,displayName:e.displayName??name,inputId:e.inputId,triggerValue:e.triggerValue,
+      confirmedSettings:confirmed,deniedSettings:denied,hasImage:false,
+      type:(denied.length>0 && confirmed.length===0)?"SETTING_DENIAL":"SETTING_CONFIRMATION"});
   }
   evidences.push(...generatedEvidence);
   return {

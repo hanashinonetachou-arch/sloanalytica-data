@@ -143,3 +143,27 @@ test('selection summary derives requiredTrials from public probabilities and pre
  assert.ok(Number.isFinite(out.selectionSummary.selected[0].requiredTrials.value));
  assert.equal(out.selectionSummary.selected[0].requiredTrials.unit,'対象ゲーム');
 });
+
+test('builder stores selection weight in reliabilityProfile used by FeatureEngine',()=>{
+ const r={...research,features:[{researchFeatureId:'RF_W',name:'weighted',candidateModel:'binomial',settingValues:{SET_1:{probability:.1},SET_6:{probability:.2}},sourceRefs:['SRC1']}]};
+ const s={schemaVersion:'selection-data-v1',machineId:'M',machineDataVersion:'0.1.0',inputs:[{id:'D',name:'D',type:'integer',category:'P',displayOrder:1},{id:'N',name:'N',type:'counter',category:'P',displayOrder:2}],features:[{researchFeatureId:'RF_W',featureId:'F_W',adoptionCategory:'INCLUDE_SUPPORT',numeratorInputId:'N',denominatorInputId:'D',weight:.35}]};
+ const f=buildMachineData(r,s).features.features[0];
+ assert.equal(f.reliabilityProfile.weight,.35);
+ assert.equal(f.weight,undefined);
+});
+
+test('builder supports approved legacy evidence contracts copied from published MachineData',()=>{
+ const r={...research,evidenceCandidates:[]};
+ const s={schemaVersion:'selection-data-v1',machineId:'M',machineDataVersion:'0.1.0',inputs:[{id:'E',name:'e',type:'enum',category:'EVIDENCE',displayOrder:1,options:[{key:'NONE',label:'none',value:'NONE'},{key:'X',label:'x',value:'X'}]}],features:[],evidence:[{evidenceId:'EV_X',name:'x',inputId:'E',triggerValue:'X',confirmedSettings:['SET_6'],deniedSettings:['SET_1'],legacyContractSource:'published_machine_data'}]};
+ const e=buildMachineData(r,s).evidence.evidences[0];
+ assert.deepEqual(e.confirmedSettings,['SET_6']);
+ assert.deepEqual(e.deniedSettings,['SET_1']);
+});
+
+test('builder can preserve marginal multinomial model and optional observed category',()=>{
+ const r={...research,features:[{researchFeatureId:'RF_MM',name:'m',candidateModel:'multinomial',distributionMode:'implicit_residual',categories:['A','B','C'],settingDistributions:{SET_1:{A:.1,B:.2,C:.3},SET_6:{A:.2,B:.2,C:.3}},sourceRefs:['SRC1']}]};
+ const s={schemaVersion:'selection-data-v1',machineId:'M',machineDataVersion:'0.1.0',inputs:[{id:'D',name:'D',type:'integer',category:'P',displayOrder:1},{id:'A',name:'A',type:'counter',category:'P',displayOrder:2},{id:'B',name:'B',type:'counter',category:'P',displayOrder:3},{id:'C',name:'C',type:'counter',category:'P',displayOrder:4}],features:[{researchFeatureId:'RF_MM',featureId:'F_MM',adoptionCategory:'INCLUDE_PRIMARY',numeratorInputId:'A',denominatorInputId:'D',categoryInputIds:['B','C'],modelTypeOverride:'marginal_multinomial',optionalCategoryInputIds:['C']}]};
+ const f=buildMachineData(r,s).features.features[0];
+ assert.equal(f.modelType,'marginal_multinomial');
+ assert.deepEqual(f.optionalCategoryInputIds,['C']);
+});

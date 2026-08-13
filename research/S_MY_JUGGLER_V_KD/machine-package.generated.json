@@ -1,0 +1,423 @@
+{
+  "schemaVersion": 1,
+  "machine": {
+    "schemaVersion": "2.0.0",
+    "machineId": "S_MY_JUGGLER_V_KD",
+    "machineDataVersion": "0.3.1",
+    "displayName": "マイジャグラーⅤ",
+    "modelName": "SマイジャグラーVKD",
+    "manufacturer": "北電子",
+    "settings": [
+      "SET_1",
+      "SET_2",
+      "SET_3",
+      "SET_4",
+      "SET_5",
+      "SET_6"
+    ],
+    "packagePolicy": {
+      "offlineCapable": true,
+      "containsImages": false,
+      "containsExecutableCode": false
+    }
+  },
+  "inputs": {
+    "schemaVersion": "2.0.0",
+    "inputs": [
+      {
+        "id": "INP_PREDECESSOR_GAMES",
+        "name": "着席時ゲーム数",
+        "category": "PREDECESSOR",
+        "type": "integer",
+        "unit": "G",
+        "displayOrder": 1,
+        "inferenceRole": "INCLUDE_PRIMARY",
+        "observationScope": "PREDECESSOR_SNAPSHOT",
+        "defaultValue": 0,
+        "minimum": 0
+      },
+      {
+        "id": "INP_PREDECESSOR_BIG_COUNT",
+        "name": "着席時BIG",
+        "category": "PREDECESSOR",
+        "type": "counter",
+        "unit": "回",
+        "displayOrder": 2,
+        "inferenceRole": "INCLUDE_PRIMARY",
+        "observationScope": "PREDECESSOR_SNAPSHOT",
+        "defaultValue": 0,
+        "minimum": 0
+      },
+      {
+        "id": "INP_PREDECESSOR_REG_COUNT",
+        "name": "着席時REG",
+        "category": "PREDECESSOR",
+        "type": "counter",
+        "unit": "回",
+        "displayOrder": 3,
+        "inferenceRole": "INCLUDE_PRIMARY",
+        "observationScope": "PREDECESSOR_SNAPSHOT",
+        "defaultValue": 0,
+        "minimum": 0
+      },
+      {
+        "id": "INP_NORMAL_GAMES",
+        "name": "自分のゲーム数",
+        "category": "SELF_PLAY",
+        "type": "integer",
+        "unit": "G",
+        "displayOrder": 10,
+        "inferenceRole": "INCLUDE_PRIMARY",
+        "observationScope": "SELF_PLAY",
+        "defaultValue": 0,
+        "minimum": 0
+      },
+      {
+        "id": "INP_BIG_COUNT",
+        "name": "BIG",
+        "category": "SELF_PLAY",
+        "type": "counter",
+        "unit": "回",
+        "displayOrder": 11,
+        "inferenceRole": "INCLUDE_PRIMARY",
+        "observationScope": "SELF_PLAY",
+        "defaultValue": 0,
+        "minimum": 0
+      },
+      {
+        "id": "INP_REG_COUNT",
+        "name": "REG合計",
+        "category": "SELF_PLAY",
+        "type": "integer",
+        "unit": "回",
+        "displayOrder": 12,
+        "inferenceRole": "INCLUDE_PRIMARY",
+        "observationScope": "SELF_PLAY",
+        "defaultValue": 0,
+        "minimum": 0
+      },
+      {
+        "id": "INP_GRAPE_COUNT",
+        "name": "ブドウ",
+        "category": "SELF_PLAY",
+        "type": "counter",
+        "unit": "回",
+        "displayOrder": 13,
+        "inferenceRole": "INCLUDE_PRIMARY",
+        "observationScope": "SELF_PLAY",
+        "defaultValue": null,
+        "minimum": 0
+      },
+      {
+        "id": "INP_SINGLE_REG_COUNT",
+        "name": "単独REG",
+        "category": "SELF_PLAY",
+        "type": "counter",
+        "unit": "回",
+        "displayOrder": 14,
+        "inferenceRole": "INCLUDE_SUPPORT",
+        "observationScope": "SELF_PLAY",
+        "defaultValue": 0,
+        "minimum": 0
+      }
+    ]
+  },
+  "features": {
+    "schemaVersion": "2.0.0",
+    "features": [
+      {
+        "featureId": "FEAT_PREDECESSOR_BONUS_OUTCOME",
+        "name": "着席前BIG・REG内訳",
+        "adoptionCategory": "INCLUDE_PRIMARY",
+        "calculationRole": "PROBABILITY",
+        "probabilityEngineUsage": true,
+        "modelType": "multinomial",
+        "minimumSample": 1000,
+        "sampleRecommendation": 5000,
+        "reliabilityProfile": {
+          "weight": 1
+        },
+        "numeratorInputId": "INP_PREDECESSOR_BIG_COUNT",
+        "denominatorInputId": "INP_PREDECESSOR_GAMES",
+        "categoryInputIds": [
+          "INP_PREDECESSOR_REG_COUNT"
+        ],
+        "probabilities": {},
+        "categoryLabels": [
+          "BIG",
+          "REG"
+        ],
+        "categoryProbabilities": {
+          "SET_1": [
+            0.003661662,
+            0.002441406
+          ],
+          "SET_2": [
+            0.003692762,
+            0.002594034
+          ],
+          "SET_3": [
+            0.003753754,
+            0.002975298
+          ],
+          "SET_4": [
+            0.003937008,
+            0.003448276
+          ],
+          "SET_5": [
+            0.004164931,
+            0.003723008
+          ],
+          "SET_6": [
+            0.004364906,
+            0.004364906
+          ]
+        },
+        "sourceEvidenceRefs": [
+          "S01",
+          "S02",
+          "S03"
+        ]
+      },
+      {
+        "featureId": "FEAT_SELF_NORMAL_OUTCOME",
+        "name": "自分のBIG・REG・ブドウ内訳",
+        "adoptionCategory": "INCLUDE_PRIMARY",
+        "calculationRole": "PROBABILITY",
+        "probabilityEngineUsage": true,
+        "modelType": "marginal_multinomial",
+        "minimumSample": 1000,
+        "sampleRecommendation": 5000,
+        "reliabilityProfile": {
+          "weight": 1
+        },
+        "numeratorInputId": "INP_BIG_COUNT",
+        "denominatorInputId": "INP_NORMAL_GAMES",
+        "categoryInputIds": [
+          "INP_REG_COUNT",
+          "INP_GRAPE_COUNT"
+        ],
+        "optionalCategoryInputIds": [
+          "INP_GRAPE_COUNT"
+        ],
+        "probabilities": {},
+        "categoryLabels": [
+          "BIG",
+          "REG",
+          "GRAPE"
+        ],
+        "categoryProbabilities": {
+          "SET_1": [
+            0.003661662,
+            0.002441406,
+            0.169779287
+          ],
+          "SET_2": [
+            0.003692762,
+            0.002594034,
+            0.170940171
+          ],
+          "SET_3": [
+            0.003753754,
+            0.002975298,
+            0.172117039
+          ],
+          "SET_4": [
+            0.003937008,
+            0.003448276,
+            0.173310225
+          ],
+          "SET_5": [
+            0.004164931,
+            0.003723008,
+            0.173611111
+          ],
+          "SET_6": [
+            0.004364906,
+            0.004364906,
+            0.176678445
+          ]
+        },
+        "sourceEvidenceRefs": [
+          "S01",
+          "S02",
+          "S03"
+        ]
+      },
+      {
+        "featureId": "FEAT_SINGLE_REG_COMPOSITION",
+        "name": "REGの単独構成",
+        "adoptionCategory": "INCLUDE_SUPPORT",
+        "calculationRole": "PROBABILITY",
+        "probabilityEngineUsage": true,
+        "modelType": "binomial",
+        "minimumSample": 30,
+        "sampleRecommendation": 80,
+        "reliabilityProfile": {
+          "weight": 0.35
+        },
+        "numeratorInputId": "INP_SINGLE_REG_COUNT",
+        "denominatorInputId": "INP_REG_COUNT",
+        "displayFormat": "ratio_1_over_n",
+        "probabilities": {
+          "SET_1": 0.616439,
+          "SET_2": 0.642858,
+          "SET_3": 0.681816,
+          "SET_4": 0.711445,
+          "SET_5": 0.686098,
+          "SET_6": 0.697673
+        },
+        "sourceEvidenceRefs": [
+          "S01",
+          "S03"
+        ]
+      }
+    ]
+  },
+  "evidence": {
+    "version": "1.0.0",
+    "evidences": [],
+    "sources": [
+      {
+        "id": "S01",
+        "classification": "ANALYSIS",
+        "pageName": "マイジャグラー5 設定推測要素",
+        "url": "https://nana-press.com/kaiseki/machine/191/8706/",
+        "checkedAt": "2026-08-12"
+      },
+      {
+        "id": "S02",
+        "classification": "ANALYSIS",
+        "pageName": "マイジャグラーV スペック",
+        "url": "https://pachiseven.jp/machines/6421/cutout/2",
+        "checkedAt": "2026-08-12"
+      },
+      {
+        "id": "S03",
+        "classification": "ANALYSIS",
+        "pageName": "既存MachineData v0.3.1 calibration snapshot",
+        "url": "https://raw.githubusercontent.com/hanashinonetachou-arch/sloanalytica-data/prototype-multi-machine/machines/S_MY_JUGGLER_V_KD/machine-package.json",
+        "checkedAt": "2026-08-12"
+      }
+    ]
+  },
+  "ui": {
+    "sections": [
+      {
+        "id": "AUTO_PREDECESSOR",
+        "title": "PREDECESSOR",
+        "displayOrder": 1,
+        "items": [
+          {
+            "type": "input",
+            "inputId": "INP_PREDECESSOR_GAMES",
+            "label": "着席時ゲーム数",
+            "widget": "number"
+          },
+          {
+            "type": "input",
+            "inputId": "INP_PREDECESSOR_BIG_COUNT",
+            "label": "着席時BIG",
+            "widget": "counter"
+          },
+          {
+            "type": "input",
+            "inputId": "INP_PREDECESSOR_REG_COUNT",
+            "label": "着席時REG",
+            "widget": "counter"
+          }
+        ]
+      },
+      {
+        "id": "AUTO_SELF_PLAY",
+        "title": "SELF_PLAY",
+        "displayOrder": 2,
+        "items": [
+          {
+            "type": "input",
+            "inputId": "INP_NORMAL_GAMES",
+            "label": "自分のゲーム数",
+            "widget": "number"
+          },
+          {
+            "type": "input",
+            "inputId": "INP_BIG_COUNT",
+            "label": "BIG",
+            "widget": "counter"
+          },
+          {
+            "type": "input",
+            "inputId": "INP_REG_COUNT",
+            "label": "REG合計",
+            "widget": "number"
+          },
+          {
+            "type": "input",
+            "inputId": "INP_GRAPE_COUNT",
+            "label": "ブドウ",
+            "widget": "counter"
+          },
+          {
+            "type": "input",
+            "inputId": "INP_SINGLE_REG_COUNT",
+            "label": "単独REG",
+            "widget": "counter"
+          }
+        ]
+      }
+    ]
+  },
+  "selectionSummary": {
+    "schemaVersion": "selection-summary-v1",
+    "evaluatedCount": 3,
+    "selectedCount": 3,
+    "rejectedCount": 0,
+    "selected": [
+      {
+        "featureId": "FEAT_PREDECESSOR_BONUS_OUTCOME",
+        "name": "着席前BIG・REG内訳",
+        "reason": "前任者区間も公式確率と同じ遊技区間の観測値であり、ボーナス内訳の情報を利用できます。",
+        "requiredTrials": {
+          "value": 5911,
+          "unit": "着席前ゲーム"
+        }
+      },
+      {
+        "featureId": "FEAT_SELF_NORMAL_OUTCOME",
+        "name": "自分のBIG・REG・ブドウ内訳",
+        "reason": "ボーナスとブドウを二重評価せず、設定差を持つ実測値として一体で利用できます。",
+        "requiredTrials": {
+          "value": 4528,
+          "unit": "自分の通常遊技1G"
+        }
+      },
+      {
+        "featureId": "FEAT_SINGLE_REG_COMPOSITION",
+        "name": "REGの単独構成",
+        "reason": "REG内訳には設定差があるため、ボーナス合計とは別の構成情報として利用できます。",
+        "requiredTrials": {
+          "value": 250,
+          "unit": "REG1回"
+        }
+      }
+    ],
+    "rejected": []
+  },
+  "reliability": {},
+  "metadata": {
+    "machineId": "S_MY_JUGGLER_V_KD",
+    "displayName": "マイジャグラーⅤ",
+    "settings": [
+      "SET_1",
+      "SET_2",
+      "SET_3",
+      "SET_4",
+      "SET_5",
+      "SET_6"
+    ]
+  },
+  "validation": {
+    "cases": []
+  },
+  "statistics": {}
+}
