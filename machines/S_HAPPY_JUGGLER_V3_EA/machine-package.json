@@ -3,7 +3,7 @@
   "machine": {
     "schemaVersion": "2.0.0",
     "machineId": "S_HAPPY_JUGGLER_V3_EA",
-    "machineDataVersion": "0.1.0",
+    "machineDataVersion": "0.1.1",
     "displayName": "ハッピージャグラーVⅢ",
     "modelName": "SハッピージャグラーVⅢEA",
     "manufacturer": "北電子",
@@ -95,6 +95,18 @@
         "observationScope": "SELF_PLAY",
         "defaultValue": 0,
         "minimum": 0
+      },
+      {
+        "id": "INP_GRAPE_COUNT",
+        "name": "ブドウ",
+        "category": "SELF_PLAY",
+        "type": "counter",
+        "unit": "回",
+        "displayOrder": 13,
+        "inferenceRole": "INCLUDE_PRIMARY",
+        "observationScope": "SELF_PLAY",
+        "defaultValue": null,
+        "minimum": 0
       }
     ]
   },
@@ -155,11 +167,11 @@
       },
       {
         "featureId": "FEAT_SELF_BONUS_OUTCOME",
-        "name": "自分のBIG・REG内訳",
+        "name": "自分のBIG・REG・ブドウ内訳",
         "adoptionCategory": "INCLUDE_PRIMARY",
         "calculationRole": "PROBABILITY",
         "probabilityEngineUsage": true,
-        "modelType": "multinomial",
+        "modelType": "marginal_multinomial",
         "minimumSample": 1000,
         "sampleRecommendation": 10000,
         "reliabilityProfile": {
@@ -168,41 +180,54 @@
         "numeratorInputId": "INP_BIG_COUNT",
         "denominatorInputId": "INP_NORMAL_GAMES",
         "categoryInputIds": [
-          "INP_REG_COUNT"
+          "INP_REG_COUNT",
+          "INP_GRAPE_COUNT"
+        ],
+        "optionalCategoryInputIds": [
+          "INP_GRAPE_COUNT"
         ],
         "probabilities": {},
         "categoryLabels": [
           "BIG",
-          "REG"
+          "REG",
+          "GRAPE"
         ],
         "categoryProbabilities": {
           "SET_1": [
             0.0036616623947272058,
-            0.0025176233635448137
+            0.0025176233635448137,
+            0.16481261
           ],
           "SET_2": [
             0.003692762186115214,
-            0.00276166804750069
+            0.00276166804750069,
+            0.165700424
           ],
           "SET_3": [
             0.003799392097264438,
-            0.003005710850616171
+            0.003005710850616171,
+            0.166876047
           ],
           "SET_4": [
             0.003937007874015748,
-            0.00332667997338656
+            0.00332667997338656,
+            0.170794567
           ],
           "SET_5": [
             0.004180602006688963,
-            0.0036616623947272058
+            0.0036616623947272058,
+            0.171453917
           ],
           "SET_6": [
             0.004424778761061947,
-            0.00390625
+            0.00390625,
+            0.172413793
           ]
         },
         "sourceEvidenceRefs": [
-          "SRC_KITAC_OFFICIAL"
+          "SRC_KITAC_OFFICIAL",
+          "SRC_NANAPRESS_APP_3M",
+          "SRC_PGABU_SIM_1M"
         ]
       }
     ]
@@ -231,6 +256,20 @@
         "pageName": "ハッピージャグラーV Ⅲの立ち回り＆小ネタ｜ガリぞうのジャグラー最強攻略",
         "url": "https://p.hisshobon.jp/vpage/2490/19",
         "checkedAt": "2026-08-13"
+      },
+      {
+        "id": "SRC_NANAPRESS_APP_3M",
+        "classification": "ANALYSIS",
+        "pageName": "ハッピージャグラーVⅢ ボーナス確率/機械割/小役確率",
+        "url": "https://nana-press.com/kaiseki/machine/445/11637/",
+        "checkedAt": "2026-08-14"
+      },
+      {
+        "id": "SRC_PGABU_SIM_1M",
+        "classification": "ANALYSIS",
+        "pageName": "ハッピージャグラーVⅢ 設定差・小役出現率（実戦値）",
+        "url": "https://p-gabu.jp/guideworks/machinecontents/detail/6195/summarize",
+        "checkedAt": "2026-08-14"
       }
     ]
   },
@@ -283,6 +322,12 @@
             "inputId": "INP_REG_COUNT",
             "label": "REG",
             "widget": "counter"
+          },
+          {
+            "type": "input",
+            "inputId": "INP_GRAPE_COUNT",
+            "label": "ブドウ",
+            "widget": "counter"
           }
         ]
       }
@@ -290,9 +335,9 @@
   },
   "selectionSummary": {
     "schemaVersion": "selection-summary-v1",
-    "evaluatedCount": 5,
+    "evaluatedCount": 4,
     "selectedCount": 2,
-    "rejectedCount": 3,
+    "rejectedCount": 2,
     "selected": [
       {
         "featureId": "FEAT_PREDECESSOR_BONUS_OUTCOME",
@@ -305,20 +350,15 @@
       },
       {
         "featureId": "FEAT_SELF_BONUS_OUTCOME",
-        "name": "自分のBIG・REG内訳",
-        "reason": "BIG・REG・非ボーナスを一体で評価し、合算の二重計上を避けます。",
+        "name": "自分のBIG・REG・ブドウ内訳",
+        "reason": "BIG・REGは公式解析値、ブドウは複数の大規模シミュレーション実戦値から算出した独自推定値として、一体で利用します。",
         "requiredTrials": {
-          "value": 9689,
+          "value": 6058,
           "unit": "自分のゲーム"
         }
       }
     ],
     "rejected": [
-      {
-        "featureId": "FEAT_HJV3_GRAPE_CANDIDATE",
-        "name": "ブドウ",
-        "reason": "公表解析値として確認できない。"
-      },
       {
         "featureId": "FEAT_HJV3_SINGLE_REG_CANDIDATE",
         "name": "単独REG",

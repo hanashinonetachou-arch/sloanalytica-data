@@ -1,7 +1,7 @@
 {
   "schemaVersion": "selection-data-v1",
   "machineId": "S_FUNKY_JUGGLER_2_KT",
-  "machineDataVersion": "0.1.0",
+  "machineDataVersion": "0.1.1",
   "inputs": [
     {
       "id": "INP_PREDECESSOR_GAMES",
@@ -68,6 +68,17 @@
       "inferenceRole": "INCLUDE_PRIMARY",
       "observationScope": "SELF_PLAY",
       "defaultValue": 0
+    },
+    {
+      "id": "INP_GRAPE_COUNT",
+      "name": "ブドウ",
+      "category": "SELF_PLAY",
+      "type": "counter",
+      "unit": "回",
+      "displayOrder": 13,
+      "inferenceRole": "INCLUDE_PRIMARY",
+      "observationScope": "SELF_PLAY",
+      "defaultValue": null
     }
   ],
   "features": [
@@ -77,10 +88,15 @@
       "adoptionCategory": "INCLUDE_PRIMARY",
       "numeratorInputId": "INP_PREDECESSOR_BIG_COUNT",
       "denominatorInputId": "INP_PREDECESSOR_GAMES",
-      "categoryInputIds": ["INP_PREDECESSOR_REG_COUNT"],
+      "categoryInputIds": [
+        "INP_PREDECESSOR_REG_COUNT"
+      ],
       "minimumSample": 1000,
       "sampleRecommendation": 8000,
-      "requiredTrials": {"value": 7707, "unit": "着席時ゲーム"},
+      "requiredTrials": {
+        "value": 7707,
+        "unit": "着席時ゲーム"
+      },
       "weight": 1.0,
       "difficultyParticipation": "EXCLUDE",
       "difficultyExclusionReason": "着席前データはユーザー自身のtargetGamesから発生する情報ではないため。",
@@ -92,10 +108,16 @@
       "adoptionCategory": "INCLUDE_PRIMARY",
       "numeratorInputId": "INP_BIG_COUNT",
       "denominatorInputId": "INP_NORMAL_GAMES",
-      "categoryInputIds": ["INP_REG_COUNT"],
+      "categoryInputIds": [
+        "INP_REG_COUNT",
+        "INP_GRAPE_COUNT"
+      ],
       "minimumSample": 1000,
       "sampleRecommendation": 8000,
-      "requiredTrials": {"value": 7707, "unit": "自分のゲーム"},
+      "requiredTrials": {
+        "value": 5366,
+        "unit": "自分のゲーム"
+      },
       "weight": 1.0,
       "difficultyParticipation": "INCLUDE",
       "difficultyExposure": {
@@ -104,13 +126,11 @@
         "quality": "EXACT",
         "basisId": "SELF_NORMAL_PLAY_GAMES"
       },
-      "userReason": "BIG・REG・非ボーナスを一体で評価し、合算の二重計上を避けます。"
-    },
-    {
-      "researchFeatureId": "RF_FJ2_GRAPE_CANDIDATE",
-      "featureId": "FEAT_FJ2_GRAPE_CANDIDATE",
-      "adoptionCategory": "EXCLUDE",
-      "rejectionReason": "公表解析値として確認できない。"
+      "userReason": "BIG・REGは公式解析値、ブドウは複数の公開大規模実戦・シミュレーション値から算出した独自推定値として、一体で利用します。",
+      "modelTypeOverride": "marginal_multinomial",
+      "optionalCategoryInputIds": [
+        "INP_GRAPE_COUNT"
+      ]
     },
     {
       "researchFeatureId": "RF_FJ2_SINGLE_REG_CANDIDATE",
@@ -127,7 +147,11 @@
   ],
   "evidence": [],
   "difficultyAnalysis": {
-    "targetGames": [1500, 3000, 7000],
+    "targetGames": [
+      1500,
+      3000,
+      7000
+    ],
     "simulationsPerSetting": 4000,
     "seed": 20260813,
     "targetGameBasis": {
@@ -137,7 +161,10 @@
       "crossMachineComparable": true,
       "note": "着席時データはDifficultyスコアから除外。"
     },
-    "calibrationAllowedExposureQualities": ["EXACT", "DERIVED"]
+    "calibrationAllowedExposureQualities": [
+      "EXACT",
+      "DERIVED"
+    ]
   },
   "uiCategoryLabels": {
     "PREDECESSOR": "着席時データ",

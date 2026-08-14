@@ -3,7 +3,7 @@
   "machine": {
     "schemaVersion": "2.0.0",
     "machineId": "S_FUNKY_JUGGLER_2_KT",
-    "machineDataVersion": "0.1.0",
+    "machineDataVersion": "0.1.1",
     "displayName": "ファンキージャグラー2",
     "modelName": "Sファンキージャグラー2KT",
     "manufacturer": "北電子",
@@ -95,6 +95,18 @@
         "observationScope": "SELF_PLAY",
         "defaultValue": 0,
         "minimum": 0
+      },
+      {
+        "id": "INP_GRAPE_COUNT",
+        "name": "ブドウ",
+        "category": "SELF_PLAY",
+        "type": "counter",
+        "unit": "回",
+        "displayOrder": 13,
+        "inferenceRole": "INCLUDE_PRIMARY",
+        "observationScope": "SELF_PLAY",
+        "defaultValue": null,
+        "minimum": 0
       }
     ]
   },
@@ -156,11 +168,11 @@
       },
       {
         "featureId": "FEAT_SELF_BONUS_OUTCOME",
-        "name": "自分のBIG・REG内訳",
+        "name": "自分のBIG・REG・ブドウ内訳",
         "adoptionCategory": "INCLUDE_PRIMARY",
         "calculationRole": "PROBABILITY",
         "probabilityEngineUsage": true,
-        "modelType": "multinomial",
+        "modelType": "marginal_multinomial",
         "minimumSample": 1000,
         "sampleRecommendation": 8000,
         "reliabilityProfile": {
@@ -169,42 +181,55 @@
         "numeratorInputId": "INP_BIG_COUNT",
         "denominatorInputId": "INP_NORMAL_GAMES",
         "categoryInputIds": [
-          "INP_REG_COUNT"
+          "INP_REG_COUNT",
+          "INP_GRAPE_COUNT"
+        ],
+        "optionalCategoryInputIds": [
+          "INP_GRAPE_COUNT"
         ],
         "probabilities": {},
         "categoryLabels": [
           "BIG",
-          "REG"
+          "REG",
+          "GRAPE"
         ],
         "categoryProbabilities": {
           "SET_1": [
             0.003753753753753754,
-            0.002273760800363802
+            0.002273760800363802,
+            0.168067543
           ],
           "SET_2": [
             0.003861003861003861,
-            0.0024563989191844753
+            0.0024563989191844753,
+            0.168918919
           ],
           "SET_3": [
             0.00390625,
-            0.0027314941272876263
+            0.0027314941272876263,
+            0.16987586
           ],
           "SET_4": [
             0.004012841091492777,
-            0.003097893432465923
+            0.003097893432465923,
+            0.170941503
           ],
           "SET_5": [
             0.004164931278633903,
-            0.003341129301703976
+            0.003341129301703976,
+            0.173111021
           ],
           "SET_6": [
             0.004547521600727604,
-            0.003815337657382678
+            0.003815337657382678,
+            0.175339064
           ]
         },
         "sourceEvidenceRefs": [
           "SRC_KITAC_OFFICIAL",
-          "SRC_1GEKI_SETTING"
+          "SRC_DMM_MACHINE",
+          "SRC_1GEKI_SETTING",
+          "SRC_NANA_KOYAKU"
         ]
       }
     ]
@@ -225,21 +250,21 @@
         "classification": "ANALYSIS",
         "pageName": "ファンキージャグラー2（パチスロ）設定判別・天井・ゾーン・解析・打ち方・ヤメ時",
         "url": "https://p-town.dmm.com/machines/3961",
-        "checkedAt": "2026-08-13"
+        "checkedAt": "2026-08-14"
       },
       {
         "id": "SRC_1GEKI_SETTING",
         "classification": "ANALYSIS",
         "pageName": "ファンキージャグラー2 設定差・設定判別要素まとめ",
         "url": "https://1geki.jp/slot/s_funkyjuggler2/0/",
-        "checkedAt": "2026-08-13"
+        "checkedAt": "2026-08-14"
       },
       {
         "id": "SRC_NANA_KOYAKU",
         "classification": "ANALYSIS",
         "pageName": "ファンキージャグラー2 小役確率",
         "url": "https://nana-press.com/kaiseki/machine/142/5102/",
-        "checkedAt": "2026-08-13"
+        "checkedAt": "2026-08-14"
       }
     ]
   },
@@ -292,6 +317,12 @@
             "inputId": "INP_REG_COUNT",
             "label": "REG",
             "widget": "counter"
+          },
+          {
+            "type": "input",
+            "inputId": "INP_GRAPE_COUNT",
+            "label": "ブドウ",
+            "widget": "counter"
           }
         ]
       }
@@ -299,9 +330,9 @@
   },
   "selectionSummary": {
     "schemaVersion": "selection-summary-v1",
-    "evaluatedCount": 5,
+    "evaluatedCount": 4,
     "selectedCount": 2,
-    "rejectedCount": 3,
+    "rejectedCount": 2,
     "selected": [
       {
         "featureId": "FEAT_PREDECESSOR_BONUS_OUTCOME",
@@ -314,20 +345,15 @@
       },
       {
         "featureId": "FEAT_SELF_BONUS_OUTCOME",
-        "name": "自分のBIG・REG内訳",
-        "reason": "BIG・REG・非ボーナスを一体で評価し、合算の二重計上を避けます。",
+        "name": "自分のBIG・REG・ブドウ内訳",
+        "reason": "BIG・REGは公式解析値、ブドウは複数の公開大規模実戦・シミュレーション値から算出した独自推定値として、一体で利用します。",
         "requiredTrials": {
-          "value": 7707,
+          "value": 5366,
           "unit": "自分のゲーム"
         }
       }
     ],
     "rejected": [
-      {
-        "featureId": "FEAT_FJ2_GRAPE_CANDIDATE",
-        "name": "ブドウ",
-        "reason": "公表解析値として確認できない。"
-      },
       {
         "featureId": "FEAT_FJ2_SINGLE_REG_CANDIDATE",
         "name": "単独REG",
