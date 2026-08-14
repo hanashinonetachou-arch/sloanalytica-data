@@ -3,7 +3,7 @@
   "machine": {
     "schemaVersion": "2.0.0",
     "machineId": "S_MY_JUGGLER_V_KD",
-    "machineDataVersion": "0.3.5",
+    "machineDataVersion": "0.3.6",
     "displayName": "マイジャグラーⅤ",
     "modelName": "SマイジャグラーVKD",
     "manufacturer": "北電子",
@@ -109,8 +109,8 @@
         "minimum": 0
       },
       {
-        "id": "INP_SINGLE_REG_COUNT",
-        "name": "単独REG",
+        "id": "INP_CHERRY_REG_COUNT",
+        "name": "チェリー重複REG",
         "category": "SELF_PLAY",
         "type": "counter",
         "unit": "回",
@@ -247,26 +247,56 @@
       },
       {
         "featureId": "FEAT_SINGLE_REG_COMPOSITION",
-        "name": "REGの単独構成",
+        "name": "REGの単独・チェリー重複構成",
         "adoptionCategory": "INCLUDE_SUPPORT",
         "calculationRole": "PROBABILITY",
         "probabilityEngineUsage": true,
-        "modelType": "binomial",
+        "modelType": "multinomial",
         "minimumSample": 30,
         "sampleRecommendation": 80,
         "reliabilityProfile": {
           "weight": 0.35
         },
-        "numeratorInputId": "INP_SINGLE_REG_COUNT",
+        "numeratorInputId": "INP_CHERRY_REG_COUNT",
         "denominatorInputId": "INP_REG_COUNT",
-        "displayFormat": "ratio_1_over_n",
-        "probabilities": {
-          "SET_1": 0.616439,
-          "SET_2": 0.642858,
-          "SET_3": 0.681816,
-          "SET_4": 0.711445,
-          "SET_5": 0.686098,
-          "SET_6": 0.697673
+        "categoryInputIds": [
+          "INP_REG_COUNT"
+        ],
+        "probabilities": {},
+        "categorySubtractInputIds": {
+          "INP_REG_COUNT": [
+            "INP_CHERRY_REG_COUNT"
+          ]
+        },
+        "categoryLabels": [
+          "CHERRY_REG",
+          "SINGLE_REG"
+        ],
+        "categoryProbabilities": {
+          "SET_1": [
+            0.383561,
+            0.616439
+          ],
+          "SET_2": [
+            0.357142,
+            0.642858
+          ],
+          "SET_3": [
+            0.318184,
+            0.681816
+          ],
+          "SET_4": [
+            0.288555,
+            0.711445
+          ],
+          "SET_5": [
+            0.313902,
+            0.686098
+          ],
+          "SET_6": [
+            0.302327,
+            0.697673
+          ]
         },
         "sourceEvidenceRefs": [
           "S01",
@@ -374,8 +404,8 @@
           },
           {
             "type": "input",
-            "inputId": "INP_SINGLE_REG_COUNT",
-            "label": "単独REG",
+            "inputId": "INP_CHERRY_REG_COUNT",
+            "label": "チェリー重複REG",
             "widget": "counter"
           }
         ]
@@ -408,8 +438,8 @@
       },
       {
         "featureId": "FEAT_SINGLE_REG_COMPOSITION",
-        "name": "REGの単独構成",
-        "reason": "REG内訳には設定差があるため、ボーナス合計とは別の構成情報として利用できます。",
+        "name": "REGの単独・チェリー重複構成",
+        "reason": "チェリー重複REGを直接カウントし、単独REGはREG合計から自動算出してREG内訳の設定差を評価します。入力回数を抑えながら従来と同じ構成情報を利用できます。",
         "requiredTrials": {
           "value": 250,
           "unit": "REG1回"
