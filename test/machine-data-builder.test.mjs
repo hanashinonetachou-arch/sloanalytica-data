@@ -89,7 +89,7 @@ test("generic evidenceUi with unset defaults and multi_enum",()=>{
   evidenceUi:{groups:[
    {groupId:"SETTING_FLOOR",label:"設定下限",selectionMode:"single",normalizationMode:"ALLOWED_SETTINGS",options:[
     {value:"SET_2_OR_HIGHER",label:"設定2以上",allowedSettings:["SET_2","SET_3"],sourceEvidenceIds:["RE_2PLUS"]}]},
-   {groupId:"DENIED_SETTINGS",label:"否定設定",selectionMode:"multi",normalizationMode:"EXCLUDE_SETTINGS",options:[
+   {groupId:"DENIED_SETTINGS",label:"否定設定",selectionMode:"multi",normalizationMode:"EXCLUDE_SETTINGS",category:"BONUS_HINT",options:[
     {value:"SET_2",label:"設定2否定",excludedSettings:["SET_2"],sourceEvidenceIds:[]}]}
   ]}};
  const p=buildMachineData(r,s);
@@ -97,7 +97,8 @@ test("generic evidenceUi with unset defaults and multi_enum",()=>{
  const denied=p.inputs.inputs.find(i=>i.id==="INP_EVI_DENIED_SETTINGS");
  assert.equal(floor.type,"enum"); assert.equal(floor.defaultValue,"__UNSET__");
  assert.equal(denied.type,"multi_enum"); assert.deepEqual(denied.defaultValue,[]);
- assert.ok(p.ui.sections.some(sec=>sec.items.some(i=>i.widget==="multi_select")));
+ assert.equal(denied.category,"BONUS_HINT");
+ assert.ok(p.ui.sections.some(sec=>sec.id==="AUTO_BONUS_HINT" && sec.items.some(i=>i.inputId==="INP_EVI_DENIED_SETTINGS" && i.widget==="multi_select")));
  const ev=p.evidence.evidences.find(e=>e.triggerValue==="SET_2_OR_HIGHER");
  assert.deepEqual(ev.confirmedSettings,["SET_2","SET_3"]);
 });

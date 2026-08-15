@@ -203,7 +203,7 @@ function materializeEvidenceUi(research,selection){
     const inputId=`INP_EVI_${g.groupId}`;
     const isMulti=g.selectionMode==="multi";
     generatedInputs.push({
-      id:inputId,name:g.label,type:isMulti?"multi_enum":"enum",category:"EVIDENCE",unit:"",
+      id:inputId,name:g.label,type:isMulti?"multi_enum":"enum",category:g.category??"EVIDENCE",unit:"",
       displayOrder:g.displayOrder??nextOrder++,inferenceRole:"INCLUDE_SUPPORT",
       options:[
         ...(!isMulti?[{key:"__UNSET__",label:"未選択",value:"__UNSET__"}]:[]),

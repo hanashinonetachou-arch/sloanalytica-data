@@ -3,7 +3,7 @@
   "machine": {
     "schemaVersion": "2.0.0",
     "machineId": "LB_TOBE_HAREM_ACE_CF",
-    "machineDataVersion": "0.1.0",
+    "machineDataVersion": "0.1.1",
     "displayName": "翔べ！ハーレムエース",
     "modelName": "LB翔べ！ハーレムエースCF",
     "manufacturer": "ネット",
@@ -22,6 +22,54 @@
   "inputs": {
     "schemaVersion": "2.0.0",
     "inputs": [
+      {
+        "id": "INP_PREDECESSOR_GAMES",
+        "name": "着席時ゲーム数",
+        "category": "PREDECESSOR",
+        "type": "integer",
+        "unit": "G",
+        "displayOrder": 1,
+        "inferenceRole": "INCLUDE_PRIMARY",
+        "observationScope": "PREDECESSOR_SNAPSHOT",
+        "defaultValue": 0,
+        "minimum": 0
+      },
+      {
+        "id": "INP_PREDECESSOR_BIG_COUNT",
+        "name": "着席時BIG合計",
+        "category": "PREDECESSOR",
+        "type": "counter",
+        "unit": "回",
+        "displayOrder": 2,
+        "inferenceRole": "INCLUDE_PRIMARY",
+        "observationScope": "PREDECESSOR_SNAPSHOT",
+        "defaultValue": 0,
+        "minimum": 0
+      },
+      {
+        "id": "INP_PREDECESSOR_REG_COUNT",
+        "name": "着席時REG",
+        "category": "PREDECESSOR",
+        "type": "counter",
+        "unit": "回",
+        "displayOrder": 3,
+        "inferenceRole": "INCLUDE_PRIMARY",
+        "observationScope": "PREDECESSOR_SNAPSHOT",
+        "defaultValue": 0,
+        "minimum": 0
+      },
+      {
+        "id": "INP_PREDECESSOR_HB_COUNT",
+        "name": "うちハーレムボーナス（判別時のみ）",
+        "category": "PREDECESSOR",
+        "type": "counter",
+        "unit": "回",
+        "displayOrder": 4,
+        "inferenceRole": "INCLUDE_SUPPORT",
+        "observationScope": "PREDECESSOR_SNAPSHOT",
+        "defaultValue": null,
+        "minimum": 0
+      },
       {
         "id": "INP_NORMAL_GAMES",
         "name": "通常時ゲーム数（BT中除外）",
@@ -73,7 +121,7 @@
         "id": "INP_BT_GAMES",
         "name": "BT中ゲーム数",
         "category": "BT",
-        "type": "integer",
+        "type": "counter",
         "unit": "G",
         "displayOrder": 10,
         "inferenceRole": "INCLUDE_PRIMARY",
@@ -134,9 +182,9 @@
         "id": "INP_EVI_HAREM_BAR_STOP",
         "name": "ボーナス中BAR停止形",
         "type": "multi_enum",
-        "category": "EVIDENCE",
+        "category": "BONUS_HINT",
         "unit": "",
-        "displayOrder": 110,
+        "displayOrder": 21,
         "inferenceRole": "INCLUDE_SUPPORT",
         "options": [
           {
@@ -174,6 +222,79 @@
   "features": {
     "schemaVersion": "2.0.0",
     "features": [
+      {
+        "featureId": "FEAT_PREDECESSOR_BONUS_COARSE",
+        "name": "着席時BIG合計・REG内訳",
+        "adoptionCategory": "INCLUDE_PRIMARY",
+        "calculationRole": "PROBABILITY",
+        "probabilityEngineUsage": true,
+        "modelType": "multinomial",
+        "minimumSample": 500,
+        "sampleRecommendation": 5000,
+        "reliabilityProfile": {
+          "weight": 1
+        },
+        "numeratorInputId": "INP_PREDECESSOR_BIG_COUNT",
+        "denominatorInputId": "INP_PREDECESSOR_GAMES",
+        "categoryInputIds": [
+          "INP_PREDECESSOR_REG_COUNT"
+        ],
+        "probabilities": {},
+        "categoryLabels": [
+          "BIG_TOTAL",
+          "REG"
+        ],
+        "categoryProbabilities": {
+          "SET_1": [
+            0.0024871671574214793,
+            0.0017853954650955187
+          ],
+          "SET_2": [
+            0.002563525738132805,
+            0.001968503937007874
+          ],
+          "SET_5": [
+            0.002914470062669377,
+            0.00244140625
+          ],
+          "SET_6": [
+            0.003249923904220779,
+            0.003051571559353067
+          ]
+        },
+        "sourceEvidenceRefs": [
+          "SRC_DMM_MACHINE",
+          "SRC_NANA_SETTING",
+          "SRC_NANA_SPEC"
+        ]
+      },
+      {
+        "featureId": "FEAT_PREDECESSOR_HB_SHARE",
+        "name": "着席時BIG内ハーレムボーナス構成",
+        "adoptionCategory": "INCLUDE_SUPPORT",
+        "calculationRole": "PROBABILITY",
+        "probabilityEngineUsage": true,
+        "modelType": "binomial",
+        "minimumSample": 1,
+        "sampleRecommendation": 10,
+        "reliabilityProfile": {
+          "weight": 1
+        },
+        "numeratorInputId": "INP_PREDECESSOR_HB_COUNT",
+        "denominatorInputId": "INP_PREDECESSOR_BIG_COUNT",
+        "displayFormat": "ratio_1_over_n",
+        "probabilities": {
+          "SET_1": 0.4908005967180507,
+          "SET_2": 0.4761813415179999,
+          "SET_5": 0.41884222474460836,
+          "SET_6": 0.375609756097561
+        },
+        "sourceEvidenceRefs": [
+          "SRC_DMM_MACHINE",
+          "SRC_NANA_SETTING",
+          "SRC_NANA_SPEC"
+        ]
+      },
       {
         "featureId": "FEAT_NORMAL_BONUS_OUTCOME",
         "name": "通常時ボーナス内訳",
@@ -280,7 +401,7 @@
           },
           {
             "inputId": "INP_BT_HB_COUNT",
-            "multiplier": 20
+            "multiplier": 40
           }
         ],
         "numeratorInputId": "INP_BONUS_CHERRY_STOP_COUNT",
@@ -448,9 +569,40 @@
   "ui": {
     "sections": [
       {
+        "id": "AUTO_PREDECESSOR",
+        "title": "着席時データ",
+        "displayOrder": 1,
+        "items": [
+          {
+            "type": "input",
+            "inputId": "INP_PREDECESSOR_GAMES",
+            "label": "着席時ゲーム数",
+            "widget": "number"
+          },
+          {
+            "type": "input",
+            "inputId": "INP_PREDECESSOR_BIG_COUNT",
+            "label": "着席時BIG合計",
+            "widget": "counter"
+          },
+          {
+            "type": "input",
+            "inputId": "INP_PREDECESSOR_REG_COUNT",
+            "label": "着席時REG",
+            "widget": "counter"
+          },
+          {
+            "type": "input",
+            "inputId": "INP_PREDECESSOR_HB_COUNT",
+            "label": "うちハーレムボーナス（判別時のみ）",
+            "widget": "counter"
+          }
+        ]
+      },
+      {
         "id": "AUTO_NORMAL_BONUS",
         "title": "通常時ボーナス",
-        "displayOrder": 1,
+        "displayOrder": 2,
         "items": [
           {
             "type": "input",
@@ -481,13 +633,13 @@
       {
         "id": "AUTO_BT",
         "title": "ボーナストリガー",
-        "displayOrder": 2,
+        "displayOrder": 3,
         "items": [
           {
             "type": "input",
             "inputId": "INP_BT_GAMES",
             "label": "BT中ゲーム数",
-            "widget": "number"
+            "widget": "counter"
           },
           {
             "type": "input",
@@ -500,31 +652,31 @@
       {
         "id": "AUTO_BONUS_HINT",
         "title": "ボーナス中",
-        "displayOrder": 3,
+        "displayOrder": 4,
         "items": [
           {
             "type": "input",
             "inputId": "INP_BONUS_CHERRY_STOP_COUNT",
             "label": "ボーナス中チェリー停止",
             "widget": "counter"
+          },
+          {
+            "type": "input",
+            "inputId": "INP_EVI_HAREM_BAR_STOP",
+            "label": "ボーナス中BAR停止形",
+            "widget": "multi_select"
           }
         ]
       },
       {
         "id": "AUTO_EVIDENCE",
         "title": "設定確定情報",
-        "displayOrder": 4,
+        "displayOrder": 5,
         "items": [
           {
             "type": "input",
             "inputId": "INP_EVI_HAREM_END_SCREEN",
             "label": "ボーナス終了画面",
-            "widget": "multi_select"
-          },
-          {
-            "type": "input",
-            "inputId": "INP_EVI_HAREM_BAR_STOP",
-            "label": "ボーナス中BAR停止形",
             "widget": "multi_select"
           },
           {
@@ -539,10 +691,28 @@
   },
   "selectionSummary": {
     "schemaVersion": "selection-summary-v1",
-    "evaluatedCount": 8,
-    "selectedCount": 3,
+    "evaluatedCount": 10,
+    "selectedCount": 5,
     "rejectedCount": 5,
     "selected": [
+      {
+        "featureId": "FEAT_PREDECESSOR_BONUS_COARSE",
+        "name": "着席時BIG合計・REG内訳",
+        "reason": "着席時のBIG合計・REGも同じ設定の過去観測として利用できます。HBと通常BIGを判別できないデータカウンターでも利用できます。",
+        "requiredTrials": {
+          "value": 8306,
+          "unit": "着席時ゲーム"
+        }
+      },
+      {
+        "featureId": "FEAT_PREDECESSOR_HB_SHARE",
+        "name": "着席時BIG内ハーレムボーナス構成",
+        "reason": "データカウンターなどからHBと通常BIGを判別できる場合だけ、BIG内訳も追加情報として利用します。未入力なら計算から除外します。",
+        "requiredTrials": {
+          "value": 135,
+          "unit": "着席時BIG"
+        }
+      },
       {
         "featureId": "FEAT_NORMAL_BONUS_OUTCOME",
         "name": "通常時ボーナス内訳",
@@ -564,7 +734,7 @@
       {
         "featureId": "FEAT_BONUS_CHERRY_STOP",
         "name": "ボーナス中チェリー停止",
-        "reason": "全ボーナス中で同じ設定別確率が公開されており、通常時とは別区間の高頻度示唆として利用できます。分母は固定ボーナスG数から自動算出します。",
+        "reason": "全ボーナス中でチェリー停止確率が共通して公開されており、通常時とは別区間の高頻度示唆として利用できます。分母はHB/BIG各20G・REG 9GとBTループ構造から自動算出します。",
         "requiredTrials": {
           "value": 1168,
           "unit": "ボーナスゲーム"

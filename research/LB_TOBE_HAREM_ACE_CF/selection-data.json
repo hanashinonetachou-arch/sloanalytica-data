@@ -1,8 +1,52 @@
 {
   "schemaVersion": "selection-data-v1",
   "machineId": "LB_TOBE_HAREM_ACE_CF",
-  "machineDataVersion": "0.1.0",
+  "machineDataVersion": "0.1.1",
   "inputs": [
+    {
+      "id": "INP_PREDECESSOR_GAMES",
+      "name": "着席時ゲーム数",
+      "category": "PREDECESSOR",
+      "type": "integer",
+      "unit": "G",
+      "displayOrder": 1,
+      "inferenceRole": "INCLUDE_PRIMARY",
+      "observationScope": "PREDECESSOR_SNAPSHOT",
+      "defaultValue": 0
+    },
+    {
+      "id": "INP_PREDECESSOR_BIG_COUNT",
+      "name": "着席時BIG合計",
+      "category": "PREDECESSOR",
+      "type": "counter",
+      "unit": "回",
+      "displayOrder": 2,
+      "inferenceRole": "INCLUDE_PRIMARY",
+      "observationScope": "PREDECESSOR_SNAPSHOT",
+      "defaultValue": 0
+    },
+    {
+      "id": "INP_PREDECESSOR_REG_COUNT",
+      "name": "着席時REG",
+      "category": "PREDECESSOR",
+      "type": "counter",
+      "unit": "回",
+      "displayOrder": 3,
+      "inferenceRole": "INCLUDE_PRIMARY",
+      "observationScope": "PREDECESSOR_SNAPSHOT",
+      "defaultValue": 0
+    },
+    {
+      "id": "INP_PREDECESSOR_HB_COUNT",
+      "name": "うちハーレムボーナス（判別時のみ）",
+      "category": "PREDECESSOR",
+      "type": "counter",
+      "unit": "回",
+      "displayOrder": 4,
+      "inferenceRole": "INCLUDE_SUPPORT",
+      "observationScope": "PREDECESSOR_SNAPSHOT",
+      "defaultValue": null
+    },
     {
       "id": "INP_NORMAL_GAMES",
       "name": "通常時ゲーム数（BT中除外）",
@@ -50,7 +94,7 @@
       "id": "INP_BT_GAMES",
       "name": "BT中ゲーム数",
       "category": "BT",
-      "type": "integer",
+      "type": "counter",
       "unit": "G",
       "displayOrder": 10,
       "inferenceRole": "INCLUDE_PRIMARY",
@@ -80,12 +124,44 @@
   ],
   "features": [
     {
+      "researchFeatureId": "RF_PREDECESSOR_BONUS_COARSE",
+      "featureId": "FEAT_PREDECESSOR_BONUS_COARSE",
+      "adoptionCategory": "INCLUDE_PRIMARY",
+      "numeratorInputId": "INP_PREDECESSOR_BIG_COUNT",
+      "denominatorInputId": "INP_PREDECESSOR_GAMES",
+      "categoryInputIds": [
+        "INP_PREDECESSOR_REG_COUNT"
+      ],
+      "minimumSample": 500,
+      "sampleRecommendation": 5000,
+      "weight": 1.0,
+      "difficultyParticipation": "EXCLUDE",
+      "difficultyExclusionReason": "着席前データは自分の代表遊技G数に対するDifficulty Exposureではないため。",
+      "userReason": "着席時のBIG合計・REGも同じ設定の過去観測として利用できます。HBと通常BIGを判別できないデータカウンターでも利用できます。"
+    },
+    {
+      "researchFeatureId": "RF_PREDECESSOR_HB_SHARE",
+      "featureId": "FEAT_PREDECESSOR_HB_SHARE",
+      "adoptionCategory": "INCLUDE_SUPPORT",
+      "numeratorInputId": "INP_PREDECESSOR_HB_COUNT",
+      "denominatorInputId": "INP_PREDECESSOR_BIG_COUNT",
+      "minimumSample": 1,
+      "sampleRecommendation": 10,
+      "weight": 1.0,
+      "difficultyParticipation": "EXCLUDE",
+      "difficultyExclusionReason": "着席前データかつ任意判別入力のためDifficultyには含めない。",
+      "userReason": "データカウンターなどからHBと通常BIGを判別できる場合だけ、BIG内訳も追加情報として利用します。未入力なら計算から除外します。"
+    },
+    {
       "researchFeatureId": "RF_NORMAL_BONUS_OUTCOME",
       "featureId": "FEAT_NORMAL_BONUS_OUTCOME",
       "adoptionCategory": "INCLUDE_PRIMARY",
       "numeratorInputId": "INP_NORMAL_HB_COUNT",
       "denominatorInputId": "INP_NORMAL_GAMES",
-      "categoryInputIds": ["INP_NORMAL_BIG_COUNT", "INP_NORMAL_REG_COUNT"],
+      "categoryInputIds": [
+        "INP_NORMAL_BIG_COUNT",
+        "INP_NORMAL_REG_COUNT"
+      ],
       "minimumSample": 500,
       "sampleRecommendation": 5000,
       "weight": 1.0,
@@ -118,17 +194,29 @@
       "numeratorInputId": "INP_BONUS_CHERRY_STOP_COUNT",
       "denominatorInputId": "INP_NORMAL_HB_COUNT",
       "denominatorAdjustments": [
-        {"inputId": "INP_NORMAL_HB_COUNT", "multiplier": 39},
-        {"inputId": "INP_NORMAL_BIG_COUNT", "multiplier": 20},
-        {"inputId": "INP_NORMAL_REG_COUNT", "multiplier": 9},
-        {"inputId": "INP_BT_HB_COUNT", "multiplier": 20}
+        {
+          "inputId": "INP_NORMAL_HB_COUNT",
+          "multiplier": 39
+        },
+        {
+          "inputId": "INP_NORMAL_BIG_COUNT",
+          "multiplier": 20
+        },
+        {
+          "inputId": "INP_NORMAL_REG_COUNT",
+          "multiplier": 9
+        },
+        {
+          "inputId": "INP_BT_HB_COUNT",
+          "multiplier": 40
+        }
       ],
       "minimumSample": 20,
       "sampleRecommendation": 500,
       "weight": 1.0,
       "difficultyParticipation": "EXCLUDE",
       "difficultyExclusionReason": "通常時ゲーム数からBT連を含む全ボーナス消化Gへの期待Exposureを厳密に確定できないため。",
-      "userReason": "全ボーナス中で同じ設定別確率が公開されており、通常時とは別区間の高頻度示唆として利用できます。分母は固定ボーナスG数から自動算出します。"
+      "userReason": "全ボーナス中でチェリー停止確率が共通して公開されており、通常時とは別区間の高頻度示唆として利用できます。分母はHB/BIG各20G・REG 9GとBTループ構造から自動算出します。"
     },
     {
       "researchFeatureId": "RF_STRONG_CHERRY_BONUS",
@@ -171,9 +259,39 @@
         "normalizationMode": "ALLOWED_SETTINGS_INTERSECTION",
         "displayOrder": 100,
         "options": [
-          {"value": "DOLLS_HOUSE", "label": "ドールズ・ハウス（設定2以上）", "allowedSettings": ["SET_2", "SET_5", "SET_6"], "sourceEvidenceIds": ["RE_END_DOLLS_HOUSE"]},
-          {"value": "SALUTE", "label": "敬礼（設定5以上）", "allowedSettings": ["SET_5", "SET_6"], "sourceEvidenceIds": ["RE_END_SALUTE"]},
-          {"value": "WEDDING", "label": "ウェディングドレス（設定6）", "allowedSettings": ["SET_6"], "sourceEvidenceIds": ["RE_END_WEDDING"]}
+          {
+            "value": "DOLLS_HOUSE",
+            "label": "ドールズ・ハウス（設定2以上）",
+            "allowedSettings": [
+              "SET_2",
+              "SET_5",
+              "SET_6"
+            ],
+            "sourceEvidenceIds": [
+              "RE_END_DOLLS_HOUSE"
+            ]
+          },
+          {
+            "value": "SALUTE",
+            "label": "敬礼（設定5以上）",
+            "allowedSettings": [
+              "SET_5",
+              "SET_6"
+            ],
+            "sourceEvidenceIds": [
+              "RE_END_SALUTE"
+            ]
+          },
+          {
+            "value": "WEDDING",
+            "label": "ウェディングドレス（設定6）",
+            "allowedSettings": [
+              "SET_6"
+            ],
+            "sourceEvidenceIds": [
+              "RE_END_WEDDING"
+            ]
+          }
         ]
       },
       {
@@ -181,11 +299,33 @@
         "label": "ボーナス中BAR停止形",
         "selectionMode": "multi",
         "normalizationMode": "ALLOWED_SETTINGS_INTERSECTION",
-        "displayOrder": 110,
+        "displayOrder": 21,
         "options": [
-          {"value": "BAR_LINE", "label": "BAR揃い（設定2以上）", "allowedSettings": ["SET_2", "SET_5", "SET_6"], "sourceEvidenceIds": ["RE_BAR_LINE"]},
-          {"value": "BAR_ZV", "label": "Z字/V字停止（設定5以上）", "allowedSettings": ["SET_5", "SET_6"], "sourceEvidenceIds": ["RE_BAR_ZV"]}
-        ]
+          {
+            "value": "BAR_LINE",
+            "label": "BAR揃い（設定2以上）",
+            "allowedSettings": [
+              "SET_2",
+              "SET_5",
+              "SET_6"
+            ],
+            "sourceEvidenceIds": [
+              "RE_BAR_LINE"
+            ]
+          },
+          {
+            "value": "BAR_ZV",
+            "label": "Z字/V字停止（設定5以上）",
+            "allowedSettings": [
+              "SET_5",
+              "SET_6"
+            ],
+            "sourceEvidenceIds": [
+              "RE_BAR_ZV"
+            ]
+          }
+        ],
+        "category": "BONUS_HINT"
       },
       {
         "groupId": "HAREM_TECH_VOICE",
@@ -194,7 +334,18 @@
         "normalizationMode": "ALLOWED_SETTINGS_INTERSECTION",
         "displayOrder": 120,
         "options": [
-          {"value": "SPECIAL_2", "label": "特殊ボイス②（設定2以上）", "allowedSettings": ["SET_2", "SET_5", "SET_6"], "sourceEvidenceIds": ["RE_VOICE_SPECIAL_2"]}
+          {
+            "value": "SPECIAL_2",
+            "label": "特殊ボイス②（設定2以上）",
+            "allowedSettings": [
+              "SET_2",
+              "SET_5",
+              "SET_6"
+            ],
+            "sourceEvidenceIds": [
+              "RE_VOICE_SPECIAL_2"
+            ]
+          }
         ]
       }
     ]
@@ -203,10 +354,15 @@
     "NORMAL_BONUS": "通常時ボーナス",
     "BT": "ボーナストリガー",
     "BONUS_HINT": "ボーナス中",
-    "EVIDENCE": "設定確定情報"
+    "EVIDENCE": "設定確定情報",
+    "PREDECESSOR": "着席時データ"
   },
   "difficultyAnalysis": {
-    "targetGames": [1500, 3000, 7000],
+    "targetGames": [
+      1500,
+      3000,
+      7000
+    ],
     "simulationsPerSetting": 4000,
     "seed": 20260815,
     "targetGameBasis": {
@@ -216,6 +372,9 @@
       "crossMachineComparable": true,
       "note": "BT中・ボーナス中のFeatureはExposure未確定のためDifficultyスコアから除外。"
     },
-    "calibrationAllowedExposureQualities": ["EXACT", "DERIVED"]
+    "calibrationAllowedExposureQualities": [
+      "EXACT",
+      "DERIVED"
+    ]
   }
 }

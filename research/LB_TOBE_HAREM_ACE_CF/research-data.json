@@ -63,6 +63,84 @@
   ],
   "features": [
     {
+      "researchFeatureId": "RF_PREDECESSOR_BONUS_COARSE",
+      "name": "着席時BIG合計・REG内訳",
+      "factStatus": "verified",
+      "candidateModel": "multinomial",
+      "trialUnit": "着席時ゲーム",
+      "observationScope": "着席前のデータカウンター区間",
+      "numeratorDefinition": "着席時BIG合計回数（ハーレムボーナスを含む）",
+      "denominatorDefinition": "着席時ゲーム数（データカウンター表示）",
+      "categories": [
+        "BIG_TOTAL",
+        "REG"
+      ],
+      "distributionMode": "implicit_residual",
+      "settingValues": {},
+      "settingDistributions": {
+        "SET_1": {
+          "BIG_TOTAL": 0.0024871671574214793,
+          "REG": 0.0017853954650955187
+        },
+        "SET_2": {
+          "BIG_TOTAL": 0.002563525738132805,
+          "REG": 0.001968503937007874
+        },
+        "SET_5": {
+          "BIG_TOTAL": 0.002914470062669377,
+          "REG": 0.00244140625
+        },
+        "SET_6": {
+          "BIG_TOTAL": 0.003249923904220779,
+          "REG": 0.003051571559353067
+        }
+      },
+      "sourceRefs": [
+        "SRC_DMM_MACHINE",
+        "SRC_NANA_SETTING",
+        "SRC_NANA_SPEC"
+      ],
+      "crossSourceStatus": "confirmed_multiple_sources",
+      "sourceWording": "通常時のハーレムボーナスとBIGを合算したBIG系ボーナス、およびREGの設定別公開確率。",
+      "notes": "データカウンターでHBと通常BIGを区別できない場合でもBIG合計とREGを利用する。データカウンターのゲーム数にBT中ゲームが含まれる仕様では厳密な通常時母数と差が生じる可能性がある。"
+    },
+    {
+      "researchFeatureId": "RF_PREDECESSOR_HB_SHARE",
+      "name": "着席時BIG内ハーレムボーナス構成",
+      "factStatus": "verified",
+      "candidateModel": "binomial",
+      "trialUnit": "着席時BIG",
+      "observationScope": "着席前のBIGのうちHB/通常BIGを判別できる場合のみ",
+      "numeratorDefinition": "着席時ハーレムボーナス回数",
+      "denominatorDefinition": "着席時BIG合計回数",
+      "settingValues": {
+        "SET_1": {
+          "probability": 0.4908005967180507,
+          "rawDisplay": "0.490801"
+        },
+        "SET_2": {
+          "probability": 0.4761813415179999,
+          "rawDisplay": "0.476181"
+        },
+        "SET_5": {
+          "probability": 0.41884222474460836,
+          "rawDisplay": "0.418842"
+        },
+        "SET_6": {
+          "probability": 0.375609756097561,
+          "rawDisplay": "0.375610"
+        }
+      },
+      "sourceRefs": [
+        "SRC_DMM_MACHINE",
+        "SRC_NANA_SETTING",
+        "SRC_NANA_SPEC"
+      ],
+      "crossSourceStatus": "derived_from_confirmed_multiple_sources",
+      "sourceWording": "公開されているHB確率と通常BIG確率から、BIG系ボーナス内に占めるHB比率を算出。",
+      "notes": "HB回数が未入力なら未観測としてFeatureを除外。0を明示入力した場合はHB 0回を観測したものとして利用する。BIG合計Featureとの組合せは、BIG総数とその内訳への尤度分解なので同一情報の二重加算にはならない。"
+    },
+    {
       "researchFeatureId": "RF_NORMAL_BONUS_OUTCOME",
       "name": "通常時ボーナス内訳",
       "factStatus": "verified",
@@ -153,7 +231,7 @@
       "trialUnit": "ボーナスゲーム",
       "observationScope": "全ボーナス消化中",
       "numeratorDefinition": "予告音発生時のチェリー停止回数（BAR揃い・Z/V停止を除く）",
-      "denominatorDefinition": "全ボーナス消化ゲーム数",
+      "denominatorDefinition": "自分の遊技中に消化した全ボーナスゲーム数（HB/BIG各20G、REG 9G。HB後BTの最終BIGを含む）",
       "settingValues": {
         "SET_1": {
           "probability": 0.1,
@@ -178,7 +256,7 @@
       ],
       "crossSourceStatus": "confirmed_multiple_sources",
       "sourceWording": "ボーナス中チェリー停止の設定別公開確率。",
-      "notes": "HB/BIGは20G、REGは9G。BT連中のボーナスもボーナス消化Gとして含める。"
+      "notes": "チェリー停止確率はBIG中とHB/REG中で同一。HB/BIGは各20G、REGは9G。HB後はBTへ移行し、BTはBIG当選まで継続。BT中HBなら再びBTへ移行するため、入力値からは通常時HB・BT中HBの各1回につき「HB 20G + 最終BIG 20G」=40Gとして全ボーナスGを自動算出できる。"
     },
     {
       "researchFeatureId": "RF_STRONG_CHERRY_BONUS",
