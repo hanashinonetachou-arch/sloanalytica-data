@@ -1,0 +1,637 @@
+{
+  "schemaVersion": 1,
+  "machine": {
+    "schemaVersion": "2.0.0",
+    "machineId": "LB_TOBE_HAREM_ACE_CF",
+    "machineDataVersion": "0.1.0",
+    "displayName": "翔べ！ハーレムエース",
+    "modelName": "LB翔べ！ハーレムエースCF",
+    "manufacturer": "ネット",
+    "settings": [
+      "SET_1",
+      "SET_2",
+      "SET_5",
+      "SET_6"
+    ],
+    "packagePolicy": {
+      "offlineCapable": true,
+      "containsImages": false,
+      "containsExecutableCode": false
+    }
+  },
+  "inputs": {
+    "schemaVersion": "2.0.0",
+    "inputs": [
+      {
+        "id": "INP_NORMAL_GAMES",
+        "name": "通常時ゲーム数（BT中除外）",
+        "category": "NORMAL_BONUS",
+        "type": "integer",
+        "unit": "G",
+        "displayOrder": 1,
+        "inferenceRole": "INCLUDE_PRIMARY",
+        "defaultValue": 0,
+        "minimum": 0
+      },
+      {
+        "id": "INP_NORMAL_HB_COUNT",
+        "name": "通常時ハーレムボーナス",
+        "category": "NORMAL_BONUS",
+        "type": "counter",
+        "unit": "回",
+        "displayOrder": 2,
+        "parentInputId": "INP_NORMAL_GAMES",
+        "inferenceRole": "INCLUDE_PRIMARY",
+        "defaultValue": 0,
+        "minimum": 0
+      },
+      {
+        "id": "INP_NORMAL_BIG_COUNT",
+        "name": "通常時BIG",
+        "category": "NORMAL_BONUS",
+        "type": "counter",
+        "unit": "回",
+        "displayOrder": 3,
+        "parentInputId": "INP_NORMAL_GAMES",
+        "inferenceRole": "INCLUDE_PRIMARY",
+        "defaultValue": 0,
+        "minimum": 0
+      },
+      {
+        "id": "INP_NORMAL_REG_COUNT",
+        "name": "通常時REG",
+        "category": "NORMAL_BONUS",
+        "type": "counter",
+        "unit": "回",
+        "displayOrder": 4,
+        "parentInputId": "INP_NORMAL_GAMES",
+        "inferenceRole": "INCLUDE_PRIMARY",
+        "defaultValue": 0,
+        "minimum": 0
+      },
+      {
+        "id": "INP_BT_GAMES",
+        "name": "BT中ゲーム数",
+        "category": "BT",
+        "type": "integer",
+        "unit": "G",
+        "displayOrder": 10,
+        "inferenceRole": "INCLUDE_PRIMARY",
+        "defaultValue": 0,
+        "minimum": 0
+      },
+      {
+        "id": "INP_BT_HB_COUNT",
+        "name": "BT中ハーレムボーナス",
+        "category": "BT",
+        "type": "counter",
+        "unit": "回",
+        "displayOrder": 11,
+        "parentInputId": "INP_BT_GAMES",
+        "inferenceRole": "INCLUDE_PRIMARY",
+        "defaultValue": 0,
+        "minimum": 0
+      },
+      {
+        "id": "INP_BONUS_CHERRY_STOP_COUNT",
+        "name": "ボーナス中チェリー停止",
+        "category": "BONUS_HINT",
+        "type": "counter",
+        "unit": "回",
+        "displayOrder": 20,
+        "inferenceRole": "INCLUDE_SUPPORT",
+        "defaultValue": 0,
+        "minimum": 0
+      },
+      {
+        "id": "INP_EVI_HAREM_END_SCREEN",
+        "name": "ボーナス終了画面",
+        "type": "multi_enum",
+        "category": "EVIDENCE",
+        "unit": "",
+        "displayOrder": 100,
+        "inferenceRole": "INCLUDE_SUPPORT",
+        "options": [
+          {
+            "key": "DOLLS_HOUSE",
+            "label": "ドールズ・ハウス（設定2以上）",
+            "value": "DOLLS_HOUSE"
+          },
+          {
+            "key": "SALUTE",
+            "label": "敬礼（設定5以上）",
+            "value": "SALUTE"
+          },
+          {
+            "key": "WEDDING",
+            "label": "ウェディングドレス（設定6）",
+            "value": "WEDDING"
+          }
+        ],
+        "defaultValue": []
+      },
+      {
+        "id": "INP_EVI_HAREM_BAR_STOP",
+        "name": "ボーナス中BAR停止形",
+        "type": "multi_enum",
+        "category": "EVIDENCE",
+        "unit": "",
+        "displayOrder": 110,
+        "inferenceRole": "INCLUDE_SUPPORT",
+        "options": [
+          {
+            "key": "BAR_LINE",
+            "label": "BAR揃い（設定2以上）",
+            "value": "BAR_LINE"
+          },
+          {
+            "key": "BAR_ZV",
+            "label": "Z字/V字停止（設定5以上）",
+            "value": "BAR_ZV"
+          }
+        ],
+        "defaultValue": []
+      },
+      {
+        "id": "INP_EVI_HAREM_TECH_VOICE",
+        "name": "技術介入成功時ボイス",
+        "type": "multi_enum",
+        "category": "EVIDENCE",
+        "unit": "",
+        "displayOrder": 120,
+        "inferenceRole": "INCLUDE_SUPPORT",
+        "options": [
+          {
+            "key": "SPECIAL_2",
+            "label": "特殊ボイス②（設定2以上）",
+            "value": "SPECIAL_2"
+          }
+        ],
+        "defaultValue": []
+      }
+    ]
+  },
+  "features": {
+    "schemaVersion": "2.0.0",
+    "features": [
+      {
+        "featureId": "FEAT_NORMAL_BONUS_OUTCOME",
+        "name": "通常時ボーナス内訳",
+        "adoptionCategory": "INCLUDE_PRIMARY",
+        "calculationRole": "PROBABILITY",
+        "probabilityEngineUsage": true,
+        "modelType": "multinomial",
+        "minimumSample": 500,
+        "sampleRecommendation": 5000,
+        "reliabilityProfile": {
+          "weight": 1
+        },
+        "numeratorInputId": "INP_NORMAL_HB_COUNT",
+        "denominatorInputId": "INP_NORMAL_GAMES",
+        "categoryInputIds": [
+          "INP_NORMAL_BIG_COUNT",
+          "INP_NORMAL_REG_COUNT"
+        ],
+        "probabilities": {},
+        "categoryLabels": [
+          "HAREM_BONUS",
+          "BIG",
+          "REG"
+        ],
+        "categoryProbabilities": {
+          "SET_1": [
+            0.001220703125,
+            0.0012664640324214793,
+            0.0017853954650955187
+          ],
+          "SET_2": [
+            0.001220703125,
+            0.001342822613132805,
+            0.001968503937007874
+          ],
+          "SET_5": [
+            0.001220703125,
+            0.0016937669376693768,
+            0.00244140625
+          ],
+          "SET_6": [
+            0.001220703125,
+            0.002029220779220779,
+            0.003051571559353067
+          ]
+        },
+        "sourceEvidenceRefs": [
+          "SRC_DMM_MACHINE",
+          "SRC_NANA_SETTING",
+          "SRC_NANA_SPEC"
+        ]
+      },
+      {
+        "featureId": "FEAT_BT_HAREM_BONUS",
+        "name": "BT中ハーレムボーナス",
+        "adoptionCategory": "INCLUDE_SUPPORT",
+        "calculationRole": "PROBABILITY",
+        "probabilityEngineUsage": true,
+        "modelType": "binomial",
+        "minimumSample": 1,
+        "sampleRecommendation": 100,
+        "reliabilityProfile": {
+          "weight": 1
+        },
+        "numeratorInputId": "INP_BT_HB_COUNT",
+        "denominatorInputId": "INP_BT_GAMES",
+        "displayFormat": "ratio_1_over_n",
+        "probabilities": {
+          "SET_1": 0.00009155245497908026,
+          "SET_2": 0.0010070493454179255,
+          "SET_5": 0.0010070493454179255,
+          "SET_6": 0.0038910505836575876
+        },
+        "sourceEvidenceRefs": [
+          "SRC_DMM_MACHINE",
+          "SRC_NANA_SETTING",
+          "SRC_NANA_SPEC"
+        ]
+      },
+      {
+        "featureId": "FEAT_BONUS_CHERRY_STOP",
+        "name": "ボーナス中チェリー停止",
+        "adoptionCategory": "INCLUDE_SUPPORT",
+        "calculationRole": "PROBABILITY",
+        "probabilityEngineUsage": true,
+        "modelType": "binomial",
+        "minimumSample": 20,
+        "sampleRecommendation": 500,
+        "reliabilityProfile": {
+          "weight": 1
+        },
+        "denominatorAdjustments": [
+          {
+            "inputId": "INP_NORMAL_HB_COUNT",
+            "multiplier": 39
+          },
+          {
+            "inputId": "INP_NORMAL_BIG_COUNT",
+            "multiplier": 20
+          },
+          {
+            "inputId": "INP_NORMAL_REG_COUNT",
+            "multiplier": 9
+          },
+          {
+            "inputId": "INP_BT_HB_COUNT",
+            "multiplier": 20
+          }
+        ],
+        "numeratorInputId": "INP_BONUS_CHERRY_STOP_COUNT",
+        "denominatorInputId": "INP_NORMAL_HB_COUNT",
+        "displayFormat": "ratio_1_over_n",
+        "probabilities": {
+          "SET_1": 0.1,
+          "SET_2": 0.10526315789473684,
+          "SET_5": 0.11764705882352941,
+          "SET_6": 0.125
+        },
+        "sourceEvidenceRefs": [
+          "SRC_DMM_MACHINE",
+          "SRC_NANA_SETTING"
+        ]
+      }
+    ]
+  },
+  "evidence": {
+    "version": "1.0.0",
+    "evidences": [
+      {
+        "id": "EVI_HAREM_END_SCREEN_DOLLS_HOUSE",
+        "name": "ドールズ・ハウス（設定2以上）",
+        "displayName": "ドールズ・ハウス（設定2以上）",
+        "inputId": "INP_EVI_HAREM_END_SCREEN",
+        "triggerValue": "DOLLS_HOUSE",
+        "confirmedSettings": [
+          "SET_2",
+          "SET_5",
+          "SET_6"
+        ],
+        "deniedSettings": [],
+        "hasImage": false,
+        "type": "SETTING_CONFIRMATION",
+        "sourceEvidenceRefs": [
+          "RE_END_DOLLS_HOUSE"
+        ]
+      },
+      {
+        "id": "EVI_HAREM_END_SCREEN_SALUTE",
+        "name": "敬礼（設定5以上）",
+        "displayName": "敬礼（設定5以上）",
+        "inputId": "INP_EVI_HAREM_END_SCREEN",
+        "triggerValue": "SALUTE",
+        "confirmedSettings": [
+          "SET_5",
+          "SET_6"
+        ],
+        "deniedSettings": [],
+        "hasImage": false,
+        "type": "SETTING_CONFIRMATION",
+        "sourceEvidenceRefs": [
+          "RE_END_SALUTE"
+        ]
+      },
+      {
+        "id": "EVI_HAREM_END_SCREEN_WEDDING",
+        "name": "ウェディングドレス（設定6）",
+        "displayName": "ウェディングドレス（設定6）",
+        "inputId": "INP_EVI_HAREM_END_SCREEN",
+        "triggerValue": "WEDDING",
+        "confirmedSettings": [
+          "SET_6"
+        ],
+        "deniedSettings": [],
+        "hasImage": false,
+        "type": "SETTING_CONFIRMATION",
+        "sourceEvidenceRefs": [
+          "RE_END_WEDDING"
+        ]
+      },
+      {
+        "id": "EVI_HAREM_BAR_STOP_BAR_LINE",
+        "name": "BAR揃い（設定2以上）",
+        "displayName": "BAR揃い（設定2以上）",
+        "inputId": "INP_EVI_HAREM_BAR_STOP",
+        "triggerValue": "BAR_LINE",
+        "confirmedSettings": [
+          "SET_2",
+          "SET_5",
+          "SET_6"
+        ],
+        "deniedSettings": [],
+        "hasImage": false,
+        "type": "SETTING_CONFIRMATION",
+        "sourceEvidenceRefs": [
+          "RE_BAR_LINE"
+        ]
+      },
+      {
+        "id": "EVI_HAREM_BAR_STOP_BAR_ZV",
+        "name": "Z字/V字停止（設定5以上）",
+        "displayName": "Z字/V字停止（設定5以上）",
+        "inputId": "INP_EVI_HAREM_BAR_STOP",
+        "triggerValue": "BAR_ZV",
+        "confirmedSettings": [
+          "SET_5",
+          "SET_6"
+        ],
+        "deniedSettings": [],
+        "hasImage": false,
+        "type": "SETTING_CONFIRMATION",
+        "sourceEvidenceRefs": [
+          "RE_BAR_ZV"
+        ]
+      },
+      {
+        "id": "EVI_HAREM_TECH_VOICE_SPECIAL_2",
+        "name": "特殊ボイス②（設定2以上）",
+        "displayName": "特殊ボイス②（設定2以上）",
+        "inputId": "INP_EVI_HAREM_TECH_VOICE",
+        "triggerValue": "SPECIAL_2",
+        "confirmedSettings": [
+          "SET_2",
+          "SET_5",
+          "SET_6"
+        ],
+        "deniedSettings": [],
+        "hasImage": false,
+        "type": "SETTING_CONFIRMATION",
+        "sourceEvidenceRefs": [
+          "RE_VOICE_SPECIAL_2"
+        ]
+      }
+    ],
+    "sources": [
+      {
+        "id": "SRC_NET_OFFICIAL",
+        "classification": "OFFICIAL",
+        "pageName": "翔べ！ハーレムエース",
+        "url": "https://www.net-fun.co.jp/haremA/",
+        "checkedAt": "2026-08-15"
+      },
+      {
+        "id": "SRC_DMM_MACHINE",
+        "classification": "ANALYSIS",
+        "pageName": "翔べ！ハーレムエース 機種解析",
+        "url": "https://p-town.dmm.com/machines/4789",
+        "checkedAt": "2026-08-15"
+      },
+      {
+        "id": "SRC_NANA_SETTING",
+        "classification": "ANALYSIS",
+        "pageName": "翔べ！ハーレムエース 設定判別",
+        "url": "https://nana-press.com/kaiseki/machine/961/30029/",
+        "checkedAt": "2026-08-15"
+      },
+      {
+        "id": "SRC_NANA_SPEC",
+        "classification": "ANALYSIS",
+        "pageName": "翔べ！ハーレムエース ボーナス確率/小役確率",
+        "url": "https://nana-press.com/kaiseki/machine/961/30027/",
+        "checkedAt": "2026-08-15"
+      },
+      {
+        "id": "SRC_DMM_END",
+        "classification": "ANALYSIS",
+        "pageName": "スマスロハーレムエースの終了画面について徹底網羅！",
+        "url": "https://p-town.dmm.com/specials/4286",
+        "checkedAt": "2026-08-15"
+      }
+    ]
+  },
+  "ui": {
+    "sections": [
+      {
+        "id": "AUTO_NORMAL_BONUS",
+        "title": "通常時ボーナス",
+        "displayOrder": 1,
+        "items": [
+          {
+            "type": "input",
+            "inputId": "INP_NORMAL_GAMES",
+            "label": "通常時ゲーム数（BT中除外）",
+            "widget": "number"
+          },
+          {
+            "type": "input",
+            "inputId": "INP_NORMAL_HB_COUNT",
+            "label": "通常時ハーレムボーナス",
+            "widget": "counter"
+          },
+          {
+            "type": "input",
+            "inputId": "INP_NORMAL_BIG_COUNT",
+            "label": "通常時BIG",
+            "widget": "counter"
+          },
+          {
+            "type": "input",
+            "inputId": "INP_NORMAL_REG_COUNT",
+            "label": "通常時REG",
+            "widget": "counter"
+          }
+        ]
+      },
+      {
+        "id": "AUTO_BT",
+        "title": "ボーナストリガー",
+        "displayOrder": 2,
+        "items": [
+          {
+            "type": "input",
+            "inputId": "INP_BT_GAMES",
+            "label": "BT中ゲーム数",
+            "widget": "number"
+          },
+          {
+            "type": "input",
+            "inputId": "INP_BT_HB_COUNT",
+            "label": "BT中ハーレムボーナス",
+            "widget": "counter"
+          }
+        ]
+      },
+      {
+        "id": "AUTO_BONUS_HINT",
+        "title": "ボーナス中",
+        "displayOrder": 3,
+        "items": [
+          {
+            "type": "input",
+            "inputId": "INP_BONUS_CHERRY_STOP_COUNT",
+            "label": "ボーナス中チェリー停止",
+            "widget": "counter"
+          }
+        ]
+      },
+      {
+        "id": "AUTO_EVIDENCE",
+        "title": "設定確定情報",
+        "displayOrder": 4,
+        "items": [
+          {
+            "type": "input",
+            "inputId": "INP_EVI_HAREM_END_SCREEN",
+            "label": "ボーナス終了画面",
+            "widget": "multi_select"
+          },
+          {
+            "type": "input",
+            "inputId": "INP_EVI_HAREM_BAR_STOP",
+            "label": "ボーナス中BAR停止形",
+            "widget": "multi_select"
+          },
+          {
+            "type": "input",
+            "inputId": "INP_EVI_HAREM_TECH_VOICE",
+            "label": "技術介入成功時ボイス",
+            "widget": "multi_select"
+          }
+        ]
+      }
+    ]
+  },
+  "selectionSummary": {
+    "schemaVersion": "selection-summary-v1",
+    "evaluatedCount": 8,
+    "selectedCount": 3,
+    "rejectedCount": 5,
+    "selected": [
+      {
+        "featureId": "FEAT_NORMAL_BONUS_OUTCOME",
+        "name": "通常時ボーナス内訳",
+        "reason": "通常時のHB・BIG・REGは相互に排他的で、BIGとREGに明確な設定差があるため一体で評価します。",
+        "requiredTrials": {
+          "value": 7071,
+          "unit": "通常ゲーム"
+        }
+      },
+      {
+        "featureId": "FEAT_BT_HAREM_BONUS",
+        "name": "BT中ハーレムボーナス",
+        "reason": "BT中HBは設定6で特に出現しやすく、通常時とは別区間なので独立した推測材料として利用できます。",
+        "requiredTrials": {
+          "value": 656,
+          "unit": "BTゲーム"
+        }
+      },
+      {
+        "featureId": "FEAT_BONUS_CHERRY_STOP",
+        "name": "ボーナス中チェリー停止",
+        "reason": "全ボーナス中で同じ設定別確率が公開されており、通常時とは別区間の高頻度示唆として利用できます。分母は固定ボーナスG数から自動算出します。",
+        "requiredTrials": {
+          "value": 1168,
+          "unit": "ボーナスゲーム"
+        }
+      }
+    ],
+    "rejected": [
+      {
+        "featureId": "FEAT_STRONG_CHERRY_BONUS",
+        "name": "強チェリー＋ボーナス",
+        "reason": "通常時ボーナス内訳と重複。",
+        "requiredTrials": {
+          "value": 31708,
+          "unit": "通常ゲーム"
+        }
+      },
+      {
+        "featureId": "FEAT_DIAGONAL_WATERMELON_BONUS",
+        "name": "斜めスイカ＋ボーナス",
+        "reason": "通常時ボーナス内訳と重複。",
+        "requiredTrials": {
+          "value": 33859,
+          "unit": "通常ゲーム"
+        }
+      },
+      {
+        "featureId": "FEAT_REACH_ME_ROLE",
+        "name": "リーチ目役（1枚役）",
+        "reason": "ボーナス成立と重複。",
+        "requiredTrials": {
+          "value": 18119,
+          "unit": "通常ゲーム"
+        }
+      },
+      {
+        "featureId": "FEAT_STOP_FREEZE",
+        "name": "停止フリーズ",
+        "reason": "低頻度かつボーナス成立と重複。",
+        "requiredTrials": {
+          "value": 1264807,
+          "unit": "通常ゲーム"
+        }
+      },
+      {
+        "featureId": "FEAT_BET_FREEZE",
+        "name": "BETフリーズ",
+        "reason": "低頻度かつボーナス成立と重複。",
+        "requiredTrials": {
+          "value": 1100649,
+          "unit": "通常ゲーム"
+        }
+      }
+    ]
+  },
+  "reliability": {},
+  "metadata": {
+    "machineId": "LB_TOBE_HAREM_ACE_CF",
+    "displayName": "翔べ！ハーレムエース",
+    "settings": [
+      "SET_1",
+      "SET_2",
+      "SET_5",
+      "SET_6"
+    ]
+  },
+  "validation": {
+    "cases": []
+  },
+  "statistics": {}
+}
