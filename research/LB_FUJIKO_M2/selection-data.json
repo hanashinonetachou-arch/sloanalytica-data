@@ -1,0 +1,419 @@
+{
+  "schemaVersion": "selection-data-v1",
+  "machineId": "LB_FUJIKO_M2",
+  "machineDataVersion": "0.1.0",
+  "inputs": [
+    {
+      "id": "INP_SEAT_TOTAL_GAMES",
+      "name": "着席時 TOTAL GAME",
+      "category": "PREDECESSOR",
+      "type": "integer",
+      "unit": "G",
+      "displayOrder": 1,
+      "inferenceRole": "INCLUDE_SUPPORT",
+      "observationScope": "PREDECESSOR_SNAPSHOT",
+      "defaultValue": null,
+      "description": "遊技開始前に台メニューでTOTAL GAMEを確認できる場合のみ入力してください。確認できない場合は空欄のままで構いません。"
+    },
+    {
+      "id": "INP_SEAT_BIG",
+      "name": "着席時 BIG",
+      "category": "PREDECESSOR",
+      "type": "counter",
+      "unit": "回",
+      "displayOrder": 2,
+      "inferenceRole": "INCLUDE_SUPPORT",
+      "observationScope": "PREDECESSOR_SNAPSHOT",
+      "defaultValue": null,
+      "description": "遊技開始前の台メニューでBIG BONUS回数を正確に確認できる場合のみ入力してください。SUPER BIGは含めません。"
+    },
+    {
+      "id": "INP_SEAT_REG",
+      "name": "着席時 REG",
+      "category": "PREDECESSOR",
+      "type": "counter",
+      "unit": "回",
+      "displayOrder": 3,
+      "inferenceRole": "INCLUDE_SUPPORT",
+      "observationScope": "PREDECESSOR_SNAPSHOT",
+      "defaultValue": null,
+      "description": "遊技開始前の台メニューでREGULAR BONUS回数を正確に確認できる場合のみ入力してください。"
+    },
+    {
+      "id": "INP_NORMAL_GAMES",
+      "name": "通常ゲーム数",
+      "category": "NORMAL",
+      "type": "integer",
+      "unit": "G",
+      "displayOrder": 1,
+      "inferenceRole": "INCLUDE_PRIMARY",
+      "defaultValue": 0,
+      "observationScope": "SELF_PLAY",
+      "description": "打-WIN LITEの「通常ゲーム数」を入力してください。不二子TIME中・ボーナス中は含めません。"
+    },
+    {
+      "id": "INP_BIG",
+      "name": "BIG",
+      "category": "NORMAL",
+      "type": "counter",
+      "unit": "回",
+      "displayOrder": 2,
+      "inferenceRole": "INCLUDE_PRIMARY",
+      "defaultValue": 0,
+      "parentInputId": "INP_NORMAL_GAMES",
+      "description": "打-WIN LITE「通常中ボーナス詳細情報」のBIG BONUS回数を入力します。SUPER BIGは含めません。"
+    },
+    {
+      "id": "INP_REG",
+      "name": "REG",
+      "category": "NORMAL",
+      "type": "counter",
+      "unit": "回",
+      "displayOrder": 3,
+      "inferenceRole": "INCLUDE_PRIMARY",
+      "defaultValue": 0,
+      "parentInputId": "INP_NORMAL_GAMES",
+      "description": "打-WIN LITE「通常中ボーナス詳細情報」のREG BONUS回数を入力します。"
+    },
+    {
+      "id": "INP_PLUM_A",
+      "name": "平行プラム",
+      "category": "SMALL_ROLE",
+      "type": "counter",
+      "unit": "回",
+      "displayOrder": 10,
+      "inferenceRole": "INCLUDE_PRIMARY",
+      "defaultValue": null,
+      "parentInputId": "INP_NORMAL_GAMES",
+      "description": "打-WIN LITE「通常時小役詳細情報」の平行プラム回数（プラムA）を入力します。"
+    },
+    {
+      "id": "INP_PLUM_B",
+      "name": "斜めプラム",
+      "category": "SMALL_ROLE",
+      "type": "counter",
+      "unit": "回",
+      "displayOrder": 11,
+      "inferenceRole": "INCLUDE_PRIMARY",
+      "defaultValue": null,
+      "parentInputId": "INP_NORMAL_GAMES",
+      "description": "打-WIN LITE「通常時小役詳細情報」の斜めプラム回数（プラムB）を入力します。"
+    },
+    {
+      "id": "INP_BIG_PLUM_PARALLEL",
+      "name": "平行プラム",
+      "category": "BIG_BONUS",
+      "type": "counter",
+      "unit": "回",
+      "displayOrder": 20,
+      "inferenceRole": "INCLUDE_SUPPORT",
+      "defaultValue": null,
+      "description": "打-WIN LITE「ボーナス中詳細情報」のBIG BONUS中 平行プラム回数を入力します。"
+    },
+    {
+      "id": "INP_BIG_PLUM_DIAGONAL",
+      "name": "斜めプラム",
+      "category": "BIG_BONUS",
+      "type": "counter",
+      "unit": "回",
+      "displayOrder": 21,
+      "inferenceRole": "INCLUDE_SUPPORT",
+      "defaultValue": null,
+      "description": "打-WIN LITE「ボーナス中詳細情報」のBIG BONUS中 斜めプラム回数を入力します。"
+    }
+  ],
+  "features": [
+    {
+      "researchFeatureId": "RF_PREDECESSOR_BONUS",
+      "featureId": "FEAT_PREDECESSOR_BONUS",
+      "adoptionCategory": "INCLUDE_SUPPORT",
+      "minimumSample": 300,
+      "sampleRecommendation": 5000,
+      "weight": 1.0,
+      "numeratorInputId": "INP_SEAT_BIG",
+      "denominatorInputId": "INP_SEAT_TOTAL_GAMES",
+      "categoryInputIds": [
+        "INP_SEAT_REG"
+      ],
+      "modelTypeOverride": "marginal_multinomial",
+      "optionalCategoryInputIds": [
+        "INP_SEAT_BIG",
+        "INP_SEAT_REG"
+      ],
+      "difficultyParticipation": "EXCLUDE",
+      "difficultyExclusionReason": "着席時に取得できる補助情報で、全ユーザー共通のDifficulty比較条件にできないため。",
+      "userReason": "遊技開始前に台メニューで正確に確認できたBIG・REGだけを任意で評価します。空欄は未観測、明示0は0回観測として扱います。"
+    },
+    {
+      "researchFeatureId": "RF_BONUS_OUTCOME",
+      "featureId": "FEAT_BONUS_OUTCOME",
+      "adoptionCategory": "INCLUDE_PRIMARY",
+      "minimumSample": 300,
+      "sampleRecommendation": 5000,
+      "weight": 1.0,
+      "numeratorInputId": "INP_BIG",
+      "denominatorInputId": "INP_NORMAL_GAMES",
+      "categoryInputIds": [
+        "INP_REG"
+      ],
+      "difficultyParticipation": "INCLUDE",
+      "difficultyExposure": {
+        "mode": "per_game",
+        "factor": 1.0,
+        "quality": "EXACT",
+        "basisId": "NORMAL_GAMES"
+      },
+      "userReason": "BIG・REGは通常ゲームから生じる排他的な結果として一体評価します。特に高設定ほどBIG・REGが軽く、設定1と6の差は実戦範囲でも有効です。"
+    },
+    {
+      "researchFeatureId": "RF_NORMAL_PLUM",
+      "featureId": "FEAT_NORMAL_PLUM",
+      "adoptionCategory": "INCLUDE_PRIMARY",
+      "minimumSample": 300,
+      "sampleRecommendation": 5000,
+      "weight": 1.0,
+      "numeratorInputId": "INP_PLUM_A",
+      "denominatorInputId": "INP_NORMAL_GAMES",
+      "categoryInputIds": [
+        "INP_PLUM_B"
+      ],
+      "modelTypeOverride": "marginal_multinomial",
+      "optionalCategoryInputIds": [
+        "INP_PLUM_A",
+        "INP_PLUM_B"
+      ],
+      "difficultyParticipation": "INCLUDE",
+      "difficultyExposure": {
+        "mode": "per_game",
+        "factor": 1.0,
+        "quality": "EXACT",
+        "basisId": "NORMAL_GAMES"
+      },
+      "userReason": "打-WIN LITEで自動取得でき、通常ゲーム数に対して平行・斜めプラムをまとめて評価できます。未入力の小役は0回扱いしません。"
+    },
+    {
+      "researchFeatureId": "RF_NORMAL_CHERRY",
+      "featureId": "FEAT_NORMAL_CHERRY_EXCLUDED",
+      "adoptionCategory": "EXCLUDE",
+      "rejectionReason": "BIG・REGと一部重複し、単体の判別効率も低い。",
+      "userReason": "BIG・REGと一部重複し、単体の判別効率も低い。"
+    },
+    {
+      "researchFeatureId": "RF_BIG_DIAGONAL_PLUM",
+      "featureId": "FEAT_BIG_DIAGONAL_PLUM",
+      "adoptionCategory": "INCLUDE_SUPPORT",
+      "minimumSample": 20,
+      "sampleRecommendation": 1500,
+      "weight": 1.0,
+      "numeratorInputId": "INP_BIG_PLUM_DIAGONAL",
+      "denominatorInputId": "INP_BIG_PLUM_PARALLEL",
+      "categoryInputIds": [
+        "INP_BIG_PLUM_PARALLEL"
+      ],
+      "inputTransform": "sum_inputs_to_trials",
+      "denominatorInputIds": [
+        "INP_BIG_PLUM_DIAGONAL",
+        "INP_BIG_PLUM_PARALLEL"
+      ],
+      "difficultyParticipation": "EXCLUDE",
+      "difficultyExclusionReason": "通常時Gから（SUPER）BIG中プラム試行数へのExposureを、設定1以外のBTループを含め公開値だけで固定できないため。",
+      "userReason": "（SUPER）BIG中は斜めプラムが高設定ほど出やすく、打-WIN LITEが平行・斜めを自動集計します。設定5と6は同値なので低～高設定の補助判別として使います。"
+    },
+    {
+      "researchFeatureId": "RF_CHERRY_BIG",
+      "featureId": "FEAT_CHERRY_BIG_EXCLUDED",
+      "adoptionCategory": "EXCLUDE",
+      "rejectionReason": "低頻度でBIG・チェリーと重複。",
+      "userReason": "低頻度でBIG・チェリーと重複。"
+    },
+    {
+      "researchFeatureId": "RF_CHERRY_REG",
+      "featureId": "FEAT_CHERRY_REG_EXCLUDED",
+      "adoptionCategory": "EXCLUDE",
+      "rejectionReason": "低頻度でREG・チェリーと重複。",
+      "userReason": "低頻度でREG・チェリーと重複。"
+    }
+  ],
+  "evidence": [],
+  "evidenceUi": {
+    "groups": [
+      {
+        "groupId": "FUJIKO_END_STAMP",
+        "label": "（SUPER）BIG終了画面",
+        "selectionMode": "multi",
+        "normalizationMode": "ALLOWED_SETTINGS_INTERSECTION",
+        "displayOrder": 100,
+        "options": [
+          {
+            "value": "KA",
+            "label": "「可」（設定2以上）",
+            "allowedSettings": [
+              "SET_2",
+              "SET_4",
+              "SET_5",
+              "SET_6"
+            ],
+            "sourceEvidenceIds": [
+              "RE_STAMP_KA"
+            ]
+          },
+          {
+            "value": "RYO",
+            "label": "「良」（設定4以上）",
+            "allowedSettings": [
+              "SET_4",
+              "SET_5",
+              "SET_6"
+            ],
+            "sourceEvidenceIds": [
+              "RE_STAMP_RYO"
+            ]
+          },
+          {
+            "value": "YU",
+            "label": "「優」（設定5以上）",
+            "allowedSettings": [
+              "SET_5",
+              "SET_6"
+            ],
+            "sourceEvidenceIds": [
+              "RE_STAMP_YU"
+            ]
+          },
+          {
+            "value": "KIWAMI",
+            "label": "「極」（設定6）",
+            "allowedSettings": [
+              "SET_6"
+            ],
+            "sourceEvidenceIds": [
+              "RE_STAMP_KIWAMI"
+            ]
+          }
+        ]
+      },
+      {
+        "groupId": "FUJIKO_REG_SCENARIO",
+        "label": "REG中キャラ紹介",
+        "selectionMode": "multi",
+        "normalizationMode": "ALLOWED_SETTINGS_INTERSECTION",
+        "displayOrder": 110,
+        "options": [
+          {
+            "value": "SET2PLUS",
+            "label": "3人（設定2以上）",
+            "allowedSettings": [
+              "SET_2",
+              "SET_4",
+              "SET_5",
+              "SET_6"
+            ],
+            "sourceEvidenceIds": [
+              "RE_REG_2PLUS"
+            ]
+          },
+          {
+            "value": "SET4PLUS",
+            "label": "赤ルパン→赤不二子（設定4以上）",
+            "allowedSettings": [
+              "SET_4",
+              "SET_5",
+              "SET_6"
+            ],
+            "sourceEvidenceIds": [
+              "RE_REG_4PLUS"
+            ]
+          },
+          {
+            "value": "SET5PLUS",
+            "label": "赤ルパン→赤3人（設定5以上）",
+            "allowedSettings": [
+              "SET_5",
+              "SET_6"
+            ],
+            "sourceEvidenceIds": [
+              "RE_REG_5PLUS"
+            ]
+          }
+        ]
+      },
+      {
+        "groupId": "FUJIKO_OTHER_CONFIRMED",
+        "label": "その他の確定情報",
+        "selectionMode": "multi",
+        "normalizationMode": "ALLOWED_SETTINGS_INTERSECTION",
+        "displayOrder": 120,
+        "options": [
+          {
+            "value": "VOICE_FUJIKO",
+            "label": "枚数調整時 不二子ボイス（設定5以上）",
+            "allowedSettings": [
+              "SET_5",
+              "SET_6"
+            ],
+            "sourceEvidenceIds": [
+              "RE_VOICE_FUJIKO"
+            ]
+          },
+          {
+            "value": "JUDGE_8",
+            "label": "パチンコジャッジ 8図柄（設定2以上）",
+            "allowedSettings": [
+              "SET_2",
+              "SET_4",
+              "SET_5",
+              "SET_6"
+            ],
+            "sourceEvidenceIds": [
+              "RE_JUDGE_8"
+            ]
+          },
+          {
+            "value": "HALURUNA",
+            "label": "カードジャッジ ハルルナPUSH（設定4以上）",
+            "allowedSettings": [
+              "SET_4",
+              "SET_5",
+              "SET_6"
+            ],
+            "sourceEvidenceIds": [
+              "RE_HALURUNA"
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "uiCategoryLabels": {
+    "PREDECESSOR": "着席時データ（任意）",
+    "NORMAL": "通常時ボーナス",
+    "SMALL_ROLE": "通常時小役",
+    "BIG_BONUS": "（SUPER）BIG中",
+    "EVIDENCE": "設定確定情報"
+  },
+  "uiCategoryDescriptions": {
+    "NORMAL": "打-WIN LITEの「通常ゲーム数」「通常中ボーナス詳細情報」から入力します。",
+    "SMALL_ROLE": "打-WIN LITEの「通常時小役詳細情報」から入力します。平行・斜めプラムだけを使用します。",
+    "BIG_BONUS": "打-WIN LITEの「ボーナス中詳細情報」から平行・斜めプラム回数を入力します。",
+    "PREDECESSOR": "遊技開始前に台メニューで確認できる場合だけ入力します。確認できない項目は空欄のままにしてください。"
+  },
+  "difficultyAnalysis": {
+    "targetGames": [
+      1500,
+      3000,
+      7000
+    ],
+    "targetGameBasis": {
+      "basisId": "NORMAL_GAMES",
+      "label": "打-WIN LITEの通常ゲーム数",
+      "quality": "EXACT"
+    },
+    "simulationsPerSetting": 4000,
+    "seed": 20260816,
+    "calibrationAllowedExposureQualities": [
+      "EXACT",
+      "DERIVED",
+      "ESTIMATED"
+    ]
+  }
+}

@@ -1,0 +1,900 @@
+{
+  "schemaVersion": 1,
+  "machine": {
+    "schemaVersion": "2.0.0",
+    "machineId": "LB_FUJIKO_M2",
+    "machineDataVersion": "0.1.0",
+    "displayName": "L不二子BT",
+    "modelName": "LB不二子M2",
+    "manufacturer": "アムテックス",
+    "settings": [
+      "SET_1",
+      "SET_2",
+      "SET_4",
+      "SET_5",
+      "SET_6"
+    ],
+    "packagePolicy": {
+      "offlineCapable": true,
+      "containsImages": false,
+      "containsExecutableCode": false
+    }
+  },
+  "inputs": {
+    "schemaVersion": "2.0.0",
+    "inputs": [
+      {
+        "id": "INP_SEAT_TOTAL_GAMES",
+        "name": "着席時 TOTAL GAME",
+        "category": "PREDECESSOR",
+        "type": "integer",
+        "unit": "G",
+        "displayOrder": 1,
+        "inferenceRole": "INCLUDE_SUPPORT",
+        "observationScope": "PREDECESSOR_SNAPSHOT",
+        "defaultValue": null,
+        "description": "遊技開始前に台メニューでTOTAL GAMEを確認できる場合のみ入力してください。確認できない場合は空欄のままで構いません。",
+        "minimum": 0
+      },
+      {
+        "id": "INP_SEAT_BIG",
+        "name": "着席時 BIG",
+        "category": "PREDECESSOR",
+        "type": "counter",
+        "unit": "回",
+        "displayOrder": 2,
+        "inferenceRole": "INCLUDE_SUPPORT",
+        "observationScope": "PREDECESSOR_SNAPSHOT",
+        "defaultValue": null,
+        "description": "遊技開始前の台メニューでBIG BONUS回数を正確に確認できる場合のみ入力してください。SUPER BIGは含めません。",
+        "minimum": 0
+      },
+      {
+        "id": "INP_SEAT_REG",
+        "name": "着席時 REG",
+        "category": "PREDECESSOR",
+        "type": "counter",
+        "unit": "回",
+        "displayOrder": 3,
+        "inferenceRole": "INCLUDE_SUPPORT",
+        "observationScope": "PREDECESSOR_SNAPSHOT",
+        "defaultValue": null,
+        "description": "遊技開始前の台メニューでREGULAR BONUS回数を正確に確認できる場合のみ入力してください。",
+        "minimum": 0
+      },
+      {
+        "id": "INP_NORMAL_GAMES",
+        "name": "通常ゲーム数",
+        "category": "NORMAL",
+        "type": "integer",
+        "unit": "G",
+        "displayOrder": 1,
+        "inferenceRole": "INCLUDE_PRIMARY",
+        "defaultValue": 0,
+        "observationScope": "SELF_PLAY",
+        "description": "打-WIN LITEの「通常ゲーム数」を入力してください。不二子TIME中・ボーナス中は含めません。",
+        "minimum": 0
+      },
+      {
+        "id": "INP_BIG",
+        "name": "BIG",
+        "category": "NORMAL",
+        "type": "counter",
+        "unit": "回",
+        "displayOrder": 2,
+        "inferenceRole": "INCLUDE_PRIMARY",
+        "defaultValue": 0,
+        "parentInputId": "INP_NORMAL_GAMES",
+        "description": "打-WIN LITE「通常中ボーナス詳細情報」のBIG BONUS回数を入力します。SUPER BIGは含めません。",
+        "minimum": 0
+      },
+      {
+        "id": "INP_REG",
+        "name": "REG",
+        "category": "NORMAL",
+        "type": "counter",
+        "unit": "回",
+        "displayOrder": 3,
+        "inferenceRole": "INCLUDE_PRIMARY",
+        "defaultValue": 0,
+        "parentInputId": "INP_NORMAL_GAMES",
+        "description": "打-WIN LITE「通常中ボーナス詳細情報」のREG BONUS回数を入力します。",
+        "minimum": 0
+      },
+      {
+        "id": "INP_PLUM_A",
+        "name": "平行プラム",
+        "category": "SMALL_ROLE",
+        "type": "counter",
+        "unit": "回",
+        "displayOrder": 10,
+        "inferenceRole": "INCLUDE_PRIMARY",
+        "defaultValue": null,
+        "parentInputId": "INP_NORMAL_GAMES",
+        "description": "打-WIN LITE「通常時小役詳細情報」の平行プラム回数（プラムA）を入力します。",
+        "minimum": 0
+      },
+      {
+        "id": "INP_PLUM_B",
+        "name": "斜めプラム",
+        "category": "SMALL_ROLE",
+        "type": "counter",
+        "unit": "回",
+        "displayOrder": 11,
+        "inferenceRole": "INCLUDE_PRIMARY",
+        "defaultValue": null,
+        "parentInputId": "INP_NORMAL_GAMES",
+        "description": "打-WIN LITE「通常時小役詳細情報」の斜めプラム回数（プラムB）を入力します。",
+        "minimum": 0
+      },
+      {
+        "id": "INP_BIG_PLUM_PARALLEL",
+        "name": "平行プラム",
+        "category": "BIG_BONUS",
+        "type": "counter",
+        "unit": "回",
+        "displayOrder": 20,
+        "inferenceRole": "INCLUDE_SUPPORT",
+        "defaultValue": null,
+        "description": "打-WIN LITE「ボーナス中詳細情報」のBIG BONUS中 平行プラム回数を入力します。",
+        "minimum": 0
+      },
+      {
+        "id": "INP_BIG_PLUM_DIAGONAL",
+        "name": "斜めプラム",
+        "category": "BIG_BONUS",
+        "type": "counter",
+        "unit": "回",
+        "displayOrder": 21,
+        "inferenceRole": "INCLUDE_SUPPORT",
+        "defaultValue": null,
+        "description": "打-WIN LITE「ボーナス中詳細情報」のBIG BONUS中 斜めプラム回数を入力します。",
+        "minimum": 0
+      },
+      {
+        "id": "INP_EVI_FUJIKO_END_STAMP",
+        "name": "（SUPER）BIG終了画面",
+        "type": "multi_enum",
+        "category": "EVIDENCE",
+        "unit": "",
+        "displayOrder": 100,
+        "inferenceRole": "INCLUDE_SUPPORT",
+        "options": [
+          {
+            "key": "KA",
+            "label": "「可」（設定2以上）",
+            "value": "KA"
+          },
+          {
+            "key": "RYO",
+            "label": "「良」（設定4以上）",
+            "value": "RYO"
+          },
+          {
+            "key": "YU",
+            "label": "「優」（設定5以上）",
+            "value": "YU"
+          },
+          {
+            "key": "KIWAMI",
+            "label": "「極」（設定6）",
+            "value": "KIWAMI"
+          }
+        ],
+        "defaultValue": []
+      },
+      {
+        "id": "INP_EVI_FUJIKO_REG_SCENARIO",
+        "name": "REG中キャラ紹介",
+        "type": "multi_enum",
+        "category": "EVIDENCE",
+        "unit": "",
+        "displayOrder": 110,
+        "inferenceRole": "INCLUDE_SUPPORT",
+        "options": [
+          {
+            "key": "SET2PLUS",
+            "label": "3人（設定2以上）",
+            "value": "SET2PLUS"
+          },
+          {
+            "key": "SET4PLUS",
+            "label": "赤ルパン→赤不二子（設定4以上）",
+            "value": "SET4PLUS"
+          },
+          {
+            "key": "SET5PLUS",
+            "label": "赤ルパン→赤3人（設定5以上）",
+            "value": "SET5PLUS"
+          }
+        ],
+        "defaultValue": []
+      },
+      {
+        "id": "INP_EVI_FUJIKO_OTHER_CONFIRMED",
+        "name": "その他の確定情報",
+        "type": "multi_enum",
+        "category": "EVIDENCE",
+        "unit": "",
+        "displayOrder": 120,
+        "inferenceRole": "INCLUDE_SUPPORT",
+        "options": [
+          {
+            "key": "VOICE_FUJIKO",
+            "label": "枚数調整時 不二子ボイス（設定5以上）",
+            "value": "VOICE_FUJIKO"
+          },
+          {
+            "key": "JUDGE_8",
+            "label": "パチンコジャッジ 8図柄（設定2以上）",
+            "value": "JUDGE_8"
+          },
+          {
+            "key": "HALURUNA",
+            "label": "カードジャッジ ハルルナPUSH（設定4以上）",
+            "value": "HALURUNA"
+          }
+        ],
+        "defaultValue": []
+      }
+    ]
+  },
+  "features": {
+    "schemaVersion": "2.0.0",
+    "features": [
+      {
+        "featureId": "FEAT_PREDECESSOR_BONUS",
+        "name": "着席時 BIG・REG",
+        "adoptionCategory": "INCLUDE_SUPPORT",
+        "calculationRole": "PROBABILITY",
+        "probabilityEngineUsage": true,
+        "modelType": "marginal_multinomial",
+        "minimumSample": 300,
+        "sampleRecommendation": 5000,
+        "reliabilityProfile": {
+          "weight": 1
+        },
+        "numeratorInputId": "INP_SEAT_BIG",
+        "denominatorInputId": "INP_SEAT_TOTAL_GAMES",
+        "categoryInputIds": [
+          "INP_SEAT_REG"
+        ],
+        "optionalCategoryInputIds": [
+          "INP_SEAT_BIG",
+          "INP_SEAT_REG"
+        ],
+        "probabilities": {},
+        "categoryLabels": [
+          "BIG",
+          "REG"
+        ],
+        "categoryProbabilities": {
+          "SET_1": [
+            0.0025329280648429585,
+            0.003112356053532524
+          ],
+          "SET_2": [
+            0.0027464982147761604,
+            0.0032808398950131233
+          ],
+          "SET_4": [
+            0.0031279324366593683,
+            0.0035855145213338118
+          ],
+          "SET_5": [
+            0.0034328870580157913,
+            0.0039666798889329636
+          ],
+          "SET_6": [
+            0.004364906154517678,
+            0.004393673110720563
+          ]
+        },
+        "sourceEvidenceRefs": [
+          "SRC_1GEKI_SETTING",
+          "SRC_7NOOR"
+        ]
+      },
+      {
+        "featureId": "FEAT_BONUS_OUTCOME",
+        "name": "通常時BIG・REG",
+        "adoptionCategory": "INCLUDE_PRIMARY",
+        "calculationRole": "PROBABILITY",
+        "probabilityEngineUsage": true,
+        "modelType": "multinomial",
+        "minimumSample": 300,
+        "sampleRecommendation": 5000,
+        "reliabilityProfile": {
+          "weight": 1
+        },
+        "numeratorInputId": "INP_BIG",
+        "denominatorInputId": "INP_NORMAL_GAMES",
+        "categoryInputIds": [
+          "INP_REG"
+        ],
+        "probabilities": {},
+        "categoryLabels": [
+          "BIG",
+          "REG"
+        ],
+        "categoryProbabilities": {
+          "SET_1": [
+            0.0025329280648429585,
+            0.003112356053532524
+          ],
+          "SET_2": [
+            0.0027464982147761604,
+            0.0032808398950131233
+          ],
+          "SET_4": [
+            0.0031279324366593683,
+            0.0035855145213338118
+          ],
+          "SET_5": [
+            0.0034328870580157913,
+            0.0039666798889329636
+          ],
+          "SET_6": [
+            0.004364906154517678,
+            0.004393673110720563
+          ]
+        },
+        "sourceEvidenceRefs": [
+          "SRC_1GEKI_SETTING",
+          "SRC_DMM",
+          "SRC_PGABU"
+        ]
+      },
+      {
+        "featureId": "FEAT_NORMAL_PLUM",
+        "name": "通常時 平行プラム・斜めプラム",
+        "adoptionCategory": "INCLUDE_PRIMARY",
+        "calculationRole": "PROBABILITY",
+        "probabilityEngineUsage": true,
+        "modelType": "marginal_multinomial",
+        "minimumSample": 300,
+        "sampleRecommendation": 5000,
+        "reliabilityProfile": {
+          "weight": 1
+        },
+        "numeratorInputId": "INP_PLUM_A",
+        "denominatorInputId": "INP_NORMAL_GAMES",
+        "categoryInputIds": [
+          "INP_PLUM_B"
+        ],
+        "optionalCategoryInputIds": [
+          "INP_PLUM_A",
+          "INP_PLUM_B"
+        ],
+        "probabilities": {},
+        "categoryLabels": [
+          "PLUM_A",
+          "PLUM_B"
+        ],
+        "categoryProbabilities": {
+          "SET_1": [
+            0.1075268817204301,
+            0.0390625
+          ],
+          "SET_2": [
+            0.10989010989010989,
+            0.0398406374501992
+          ],
+          "SET_4": [
+            0.11235955056179775,
+            0.0411522633744856
+          ],
+          "SET_5": [
+            0.1149425287356322,
+            0.041666666666666664
+          ],
+          "SET_6": [
+            0.11627906976744186,
+            0.04219409282700422
+          ]
+        },
+        "sourceEvidenceRefs": [
+          "SRC_DMM",
+          "SRC_PGABU",
+          "SRC_NANA"
+        ]
+      },
+      {
+        "featureId": "FEAT_BIG_DIAGONAL_PLUM",
+        "name": "（SUPER）BIG中 斜めプラム",
+        "adoptionCategory": "INCLUDE_SUPPORT",
+        "calculationRole": "PROBABILITY",
+        "probabilityEngineUsage": true,
+        "modelType": "multinomial",
+        "minimumSample": 20,
+        "sampleRecommendation": 1500,
+        "reliabilityProfile": {
+          "weight": 1
+        },
+        "inputTransform": "sum_inputs_to_trials",
+        "numeratorInputId": "INP_BIG_PLUM_DIAGONAL",
+        "denominatorInputId": "INP_BIG_PLUM_PARALLEL",
+        "denominatorInputIds": [
+          "INP_BIG_PLUM_DIAGONAL",
+          "INP_BIG_PLUM_PARALLEL"
+        ],
+        "categoryInputIds": [
+          "INP_BIG_PLUM_PARALLEL"
+        ],
+        "probabilities": {},
+        "categoryLabels": [
+          "DIAGONAL",
+          "PARALLEL"
+        ],
+        "categoryProbabilities": {
+          "SET_1": [
+            0.2222222222222222,
+            0.7777777777777778
+          ],
+          "SET_2": [
+            0.23255813953488372,
+            0.7674418604651163
+          ],
+          "SET_4": [
+            0.24096385542168672,
+            0.7590361445783133
+          ],
+          "SET_5": [
+            0.25,
+            0.75
+          ],
+          "SET_6": [
+            0.25,
+            0.75
+          ]
+        },
+        "sourceEvidenceRefs": [
+          "SRC_DMM",
+          "SRC_PGABU",
+          "SRC_NANA",
+          "SRC_7NOOR"
+        ]
+      }
+    ]
+  },
+  "evidence": {
+    "version": "1.0.0",
+    "evidences": [
+      {
+        "id": "EVI_FUJIKO_END_STAMP_KA",
+        "name": "「可」（設定2以上）",
+        "displayName": "「可」（設定2以上）",
+        "inputId": "INP_EVI_FUJIKO_END_STAMP",
+        "triggerValue": "KA",
+        "confirmedSettings": [
+          "SET_2",
+          "SET_4",
+          "SET_5",
+          "SET_6"
+        ],
+        "deniedSettings": [],
+        "hasImage": false,
+        "type": "SETTING_CONFIRMATION",
+        "sourceEvidenceRefs": [
+          "RE_STAMP_KA"
+        ]
+      },
+      {
+        "id": "EVI_FUJIKO_END_STAMP_RYO",
+        "name": "「良」（設定4以上）",
+        "displayName": "「良」（設定4以上）",
+        "inputId": "INP_EVI_FUJIKO_END_STAMP",
+        "triggerValue": "RYO",
+        "confirmedSettings": [
+          "SET_4",
+          "SET_5",
+          "SET_6"
+        ],
+        "deniedSettings": [],
+        "hasImage": false,
+        "type": "SETTING_CONFIRMATION",
+        "sourceEvidenceRefs": [
+          "RE_STAMP_RYO"
+        ]
+      },
+      {
+        "id": "EVI_FUJIKO_END_STAMP_YU",
+        "name": "「優」（設定5以上）",
+        "displayName": "「優」（設定5以上）",
+        "inputId": "INP_EVI_FUJIKO_END_STAMP",
+        "triggerValue": "YU",
+        "confirmedSettings": [
+          "SET_5",
+          "SET_6"
+        ],
+        "deniedSettings": [],
+        "hasImage": false,
+        "type": "SETTING_CONFIRMATION",
+        "sourceEvidenceRefs": [
+          "RE_STAMP_YU"
+        ]
+      },
+      {
+        "id": "EVI_FUJIKO_END_STAMP_KIWAMI",
+        "name": "「極」（設定6）",
+        "displayName": "「極」（設定6）",
+        "inputId": "INP_EVI_FUJIKO_END_STAMP",
+        "triggerValue": "KIWAMI",
+        "confirmedSettings": [
+          "SET_6"
+        ],
+        "deniedSettings": [],
+        "hasImage": false,
+        "type": "SETTING_CONFIRMATION",
+        "sourceEvidenceRefs": [
+          "RE_STAMP_KIWAMI"
+        ]
+      },
+      {
+        "id": "EVI_FUJIKO_REG_SCENARIO_SET2PLUS",
+        "name": "3人（設定2以上）",
+        "displayName": "3人（設定2以上）",
+        "inputId": "INP_EVI_FUJIKO_REG_SCENARIO",
+        "triggerValue": "SET2PLUS",
+        "confirmedSettings": [
+          "SET_2",
+          "SET_4",
+          "SET_5",
+          "SET_6"
+        ],
+        "deniedSettings": [],
+        "hasImage": false,
+        "type": "SETTING_CONFIRMATION",
+        "sourceEvidenceRefs": [
+          "RE_REG_2PLUS"
+        ]
+      },
+      {
+        "id": "EVI_FUJIKO_REG_SCENARIO_SET4PLUS",
+        "name": "赤ルパン→赤不二子（設定4以上）",
+        "displayName": "赤ルパン→赤不二子（設定4以上）",
+        "inputId": "INP_EVI_FUJIKO_REG_SCENARIO",
+        "triggerValue": "SET4PLUS",
+        "confirmedSettings": [
+          "SET_4",
+          "SET_5",
+          "SET_6"
+        ],
+        "deniedSettings": [],
+        "hasImage": false,
+        "type": "SETTING_CONFIRMATION",
+        "sourceEvidenceRefs": [
+          "RE_REG_4PLUS"
+        ]
+      },
+      {
+        "id": "EVI_FUJIKO_REG_SCENARIO_SET5PLUS",
+        "name": "赤ルパン→赤3人（設定5以上）",
+        "displayName": "赤ルパン→赤3人（設定5以上）",
+        "inputId": "INP_EVI_FUJIKO_REG_SCENARIO",
+        "triggerValue": "SET5PLUS",
+        "confirmedSettings": [
+          "SET_5",
+          "SET_6"
+        ],
+        "deniedSettings": [],
+        "hasImage": false,
+        "type": "SETTING_CONFIRMATION",
+        "sourceEvidenceRefs": [
+          "RE_REG_5PLUS"
+        ]
+      },
+      {
+        "id": "EVI_FUJIKO_OTHER_CONFIRMED_VOICE_FUJIKO",
+        "name": "枚数調整時 不二子ボイス（設定5以上）",
+        "displayName": "枚数調整時 不二子ボイス（設定5以上）",
+        "inputId": "INP_EVI_FUJIKO_OTHER_CONFIRMED",
+        "triggerValue": "VOICE_FUJIKO",
+        "confirmedSettings": [
+          "SET_5",
+          "SET_6"
+        ],
+        "deniedSettings": [],
+        "hasImage": false,
+        "type": "SETTING_CONFIRMATION",
+        "sourceEvidenceRefs": [
+          "RE_VOICE_FUJIKO"
+        ]
+      },
+      {
+        "id": "EVI_FUJIKO_OTHER_CONFIRMED_JUDGE_8",
+        "name": "パチンコジャッジ 8図柄（設定2以上）",
+        "displayName": "パチンコジャッジ 8図柄（設定2以上）",
+        "inputId": "INP_EVI_FUJIKO_OTHER_CONFIRMED",
+        "triggerValue": "JUDGE_8",
+        "confirmedSettings": [
+          "SET_2",
+          "SET_4",
+          "SET_5",
+          "SET_6"
+        ],
+        "deniedSettings": [],
+        "hasImage": false,
+        "type": "SETTING_CONFIRMATION",
+        "sourceEvidenceRefs": [
+          "RE_JUDGE_8"
+        ]
+      },
+      {
+        "id": "EVI_FUJIKO_OTHER_CONFIRMED_HALURUNA",
+        "name": "カードジャッジ ハルルナPUSH（設定4以上）",
+        "displayName": "カードジャッジ ハルルナPUSH（設定4以上）",
+        "inputId": "INP_EVI_FUJIKO_OTHER_CONFIRMED",
+        "triggerValue": "HALURUNA",
+        "confirmedSettings": [
+          "SET_4",
+          "SET_5",
+          "SET_6"
+        ],
+        "deniedSettings": [],
+        "hasImage": false,
+        "type": "SETTING_CONFIRMATION",
+        "sourceEvidenceRefs": [
+          "RE_HALURUNA"
+        ]
+      }
+    ],
+    "sources": [
+      {
+        "id": "SRC_HEIWA_OFFICIAL",
+        "classification": "OFFICIAL",
+        "pageName": "L不二子BT 製品情報",
+        "url": "https://www.heiwanet.co.jp/products/pachislot/sfj2/",
+        "checkedAt": "2026-08-16"
+      },
+      {
+        "id": "SRC_1GEKI",
+        "classification": "ANALYSIS",
+        "pageName": "不二子（スマスロ/ボーナストリガー）解析攻略",
+        "url": "https://1geki.jp/slot/lb_fj2/",
+        "checkedAt": "2026-08-16"
+      },
+      {
+        "id": "SRC_1GEKI_SETTING",
+        "classification": "ANALYSIS",
+        "pageName": "L不二子BT 設定差・設定判別要素まとめ",
+        "url": "https://1geki.jp/slot/lb_fj2/0/",
+        "checkedAt": "2026-08-16"
+      },
+      {
+        "id": "SRC_DMM",
+        "classification": "ANALYSIS",
+        "pageName": "L不二子BT 機種情報・設定判別",
+        "url": "https://p-town.dmm.com/machines/4921",
+        "checkedAt": "2026-08-16"
+      },
+      {
+        "id": "SRC_PGABU",
+        "classification": "ANALYSIS",
+        "pageName": "L不二子BT 機種情報・設定差まとめ",
+        "url": "https://p-gabu.jp/guideworks/machinecontents/detail/6989/summarize",
+        "checkedAt": "2026-08-16"
+      },
+      {
+        "id": "SRC_NANA",
+        "classification": "ANALYSIS",
+        "pageName": "L不二子BT 設定差・設定示唆まとめ",
+        "url": "https://nana-press.com/kaiseki/machine/1070/34193/",
+        "checkedAt": "2026-08-16"
+      },
+      {
+        "id": "SRC_7NOOR",
+        "classification": "ANALYSIS",
+        "pageName": "L不二子BT 設定判別ツール",
+        "url": "https://seven.noor.jp/judge?s=fujiko_bt",
+        "checkedAt": "2026-08-16"
+      }
+    ]
+  },
+  "ui": {
+    "sections": [
+      {
+        "id": "AUTO_PREDECESSOR",
+        "title": "着席時データ（任意）",
+        "displayOrder": 1,
+        "items": [
+          {
+            "type": "input",
+            "inputId": "INP_SEAT_TOTAL_GAMES",
+            "label": "着席時 TOTAL GAME",
+            "widget": "number"
+          },
+          {
+            "type": "input",
+            "inputId": "INP_SEAT_BIG",
+            "label": "着席時 BIG",
+            "widget": "counter"
+          },
+          {
+            "type": "input",
+            "inputId": "INP_SEAT_REG",
+            "label": "着席時 REG",
+            "widget": "counter"
+          }
+        ]
+      },
+      {
+        "id": "AUTO_NORMAL",
+        "title": "通常時ボーナス",
+        "displayOrder": 2,
+        "items": [
+          {
+            "type": "input",
+            "inputId": "INP_NORMAL_GAMES",
+            "label": "通常ゲーム数",
+            "widget": "number"
+          },
+          {
+            "type": "input",
+            "inputId": "INP_BIG",
+            "label": "BIG",
+            "widget": "counter"
+          },
+          {
+            "type": "input",
+            "inputId": "INP_REG",
+            "label": "REG",
+            "widget": "counter"
+          }
+        ]
+      },
+      {
+        "id": "AUTO_SMALL_ROLE",
+        "title": "通常時小役",
+        "displayOrder": 3,
+        "items": [
+          {
+            "type": "input",
+            "inputId": "INP_PLUM_A",
+            "label": "平行プラム",
+            "widget": "counter"
+          },
+          {
+            "type": "input",
+            "inputId": "INP_PLUM_B",
+            "label": "斜めプラム",
+            "widget": "counter"
+          }
+        ]
+      },
+      {
+        "id": "AUTO_BIG_BONUS",
+        "title": "（SUPER）BIG中",
+        "displayOrder": 4,
+        "items": [
+          {
+            "type": "input",
+            "inputId": "INP_BIG_PLUM_PARALLEL",
+            "label": "平行プラム",
+            "widget": "counter"
+          },
+          {
+            "type": "input",
+            "inputId": "INP_BIG_PLUM_DIAGONAL",
+            "label": "斜めプラム",
+            "widget": "counter"
+          }
+        ]
+      },
+      {
+        "id": "AUTO_EVIDENCE",
+        "title": "設定確定情報",
+        "displayOrder": 5,
+        "items": [
+          {
+            "type": "input",
+            "inputId": "INP_EVI_FUJIKO_END_STAMP",
+            "label": "（SUPER）BIG終了画面",
+            "widget": "multi_select"
+          },
+          {
+            "type": "input",
+            "inputId": "INP_EVI_FUJIKO_REG_SCENARIO",
+            "label": "REG中キャラ紹介",
+            "widget": "multi_select"
+          },
+          {
+            "type": "input",
+            "inputId": "INP_EVI_FUJIKO_OTHER_CONFIRMED",
+            "label": "その他の確定情報",
+            "widget": "multi_select"
+          }
+        ]
+      }
+    ]
+  },
+  "selectionSummary": {
+    "schemaVersion": "selection-summary-v1",
+    "evaluatedCount": 7,
+    "selectedCount": 4,
+    "rejectedCount": 3,
+    "selected": [
+      {
+        "featureId": "FEAT_PREDECESSOR_BONUS",
+        "name": "着席時 BIG・REG",
+        "reason": "遊技開始前に台メニューで正確に確認できたBIG・REGだけを任意で評価します。空欄は未観測、明示0は0回観測として扱います。",
+        "requiredTrials": {
+          "value": 5086,
+          "unit": "着席前通常ゲーム"
+        }
+      },
+      {
+        "featureId": "FEAT_BONUS_OUTCOME",
+        "name": "通常時BIG・REG",
+        "reason": "BIG・REGは通常ゲームから生じる排他的な結果として一体評価します。特に高設定ほどBIG・REGが軽く、設定1と6の差は実戦範囲でも有効です。",
+        "requiredTrials": {
+          "value": 5086,
+          "unit": "通常ゲーム"
+        }
+      },
+      {
+        "featureId": "FEAT_NORMAL_PLUM",
+        "name": "通常時 平行プラム・斜めプラム",
+        "reason": "打-WIN LITEで自動取得でき、通常ゲーム数に対して平行・斜めプラムをまとめて評価できます。未入力の小役は0回扱いしません。",
+        "requiredTrials": {
+          "value": 6707,
+          "unit": "通常ゲーム"
+        }
+      },
+      {
+        "featureId": "FEAT_BIG_DIAGONAL_PLUM",
+        "name": "（SUPER）BIG中 斜めプラム",
+        "reason": "（SUPER）BIG中は斜めプラムが高設定ほど出やすく、打-WIN LITEが平行・斜めを自動集計します。設定5と6は同値なので低～高設定の補助判別として使います。",
+        "requiredTrials": {
+          "value": 1712,
+          "unit": "（SUPER）BIG中プラム試行"
+        }
+      }
+    ],
+    "rejected": [
+      {
+        "featureId": "FEAT_NORMAL_CHERRY_EXCLUDED",
+        "name": "通常時チェリー",
+        "reason": "BIG・REGと一部重複し、単体の判別効率も低い。",
+        "requiredTrials": {
+          "value": 21678,
+          "unit": "通常ゲーム"
+        }
+      },
+      {
+        "featureId": "FEAT_CHERRY_BIG_EXCLUDED",
+        "name": "チェリー＋BIG",
+        "reason": "低頻度でBIG・チェリーと重複。",
+        "requiredTrials": {
+          "value": 10903,
+          "unit": "通常ゲーム"
+        }
+      },
+      {
+        "featureId": "FEAT_CHERRY_REG_EXCLUDED",
+        "name": "チェリー＋REG",
+        "reason": "低頻度でREG・チェリーと重複。",
+        "requiredTrials": {
+          "value": 11828,
+          "unit": "通常ゲーム"
+        }
+      }
+    ]
+  },
+  "reliability": {},
+  "metadata": {
+    "machineId": "LB_FUJIKO_M2",
+    "displayName": "L不二子BT",
+    "settings": [
+      "SET_1",
+      "SET_2",
+      "SET_4",
+      "SET_5",
+      "SET_6"
+    ]
+  },
+  "validation": {
+    "cases": []
+  },
+  "statistics": {}
+}
