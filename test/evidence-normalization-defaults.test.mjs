@@ -1,5 +1,6 @@
 import test from"node:test";import assert from"node:assert/strict";import fs from"node:fs";import path from"node:path";import{spawnSync}from"node:child_process";
-const root=path.resolve(new URL("..",import.meta.url).pathname);
+import { fileURLToPath } from 'node:url';
+const root=fileURLToPath(new URL("..",import.meta.url));
 const spec=path.join(root,"build","L_TOKYO_GHOUL","evidence-ui.json");
 const research=path.join(root,"research","L_TOKYO_GHOUL","research-data.json");
 test("unselected means no Evidence",()=>{
