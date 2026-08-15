@@ -1,0 +1,494 @@
+{
+  "schemaVersion": 1,
+  "machine": {
+    "schemaVersion": "2.0.0",
+    "machineId": "LB_SLOT_GALFY_A4",
+    "machineDataVersion": "0.1.0",
+    "displayName": "LB スロット GALFY",
+    "modelName": "LBスロットガルフィーA4",
+    "manufacturer": "オーイズミ・アミュージオ",
+    "settings": [
+      "SET_1",
+      "SET_2",
+      "SET_5",
+      "SET_6"
+    ],
+    "packagePolicy": {
+      "offlineCapable": true,
+      "containsImages": false,
+      "containsExecutableCode": false
+    }
+  },
+  "inputs": {
+    "schemaVersion": "2.0.0",
+    "inputs": [
+      {
+        "id": "INP_NORMAL_GAMES",
+        "name": "通常時ゲーム数",
+        "category": "NORMAL",
+        "type": "integer",
+        "unit": "G",
+        "displayOrder": 1,
+        "inferenceRole": "INCLUDE_PRIMARY",
+        "defaultValue": 0,
+        "description": "BIG・REG・JAC INチャンス中を除く通常時ゲーム数を入力してください。",
+        "minimum": 0
+      },
+      {
+        "id": "INP_BIG",
+        "name": "BIG",
+        "category": "NORMAL",
+        "type": "counter",
+        "unit": "回",
+        "displayOrder": 2,
+        "inferenceRole": "INCLUDE_PRIMARY",
+        "defaultValue": 0,
+        "parentInputId": "INP_NORMAL_GAMES",
+        "minimum": 0
+      },
+      {
+        "id": "INP_REG",
+        "name": "REG",
+        "category": "NORMAL",
+        "type": "counter",
+        "unit": "回",
+        "displayOrder": 3,
+        "inferenceRole": "INCLUDE_PRIMARY",
+        "defaultValue": 0,
+        "parentInputId": "INP_NORMAL_GAMES",
+        "minimum": 0
+      },
+      {
+        "id": "INP_BELL",
+        "name": "ベル",
+        "category": "SMALL_ROLE",
+        "type": "counter",
+        "unit": "回",
+        "displayOrder": 10,
+        "inferenceRole": "INCLUDE_PRIMARY",
+        "defaultValue": 0,
+        "parentInputId": "INP_NORMAL_GAMES",
+        "description": "ベルA/Bを合算してカウントします。",
+        "minimum": 0
+      },
+      {
+        "id": "INP_SUIKA",
+        "name": "スイカ",
+        "category": "SMALL_ROLE",
+        "type": "counter",
+        "unit": "回",
+        "displayOrder": 11,
+        "inferenceRole": "INCLUDE_SUPPORT",
+        "defaultValue": 0,
+        "parentInputId": "INP_NORMAL_GAMES",
+        "description": "スイカA/Bを合算してカウントします。",
+        "minimum": 0
+      },
+      {
+        "id": "INP_CHERRY",
+        "name": "チェリー",
+        "category": "SMALL_ROLE",
+        "type": "counter",
+        "unit": "回",
+        "displayOrder": 12,
+        "inferenceRole": "INCLUDE_SUPPORT",
+        "defaultValue": 0,
+        "parentInputId": "INP_NORMAL_GAMES",
+        "minimum": 0
+      },
+      {
+        "id": "INP_BT_GAMES",
+        "name": "JAC INチャンス中ゲーム数",
+        "category": "BT",
+        "type": "counter",
+        "unit": "G",
+        "displayOrder": 20,
+        "inferenceRole": "INCLUDE_SUPPORT",
+        "defaultValue": 0,
+        "description": "BIG中の2枚掛け区間「JAC INチャンス」で消化したゲーム数を合計します。",
+        "minimum": 0
+      },
+      {
+        "id": "INP_BT_MISS",
+        "name": "うちハズレ",
+        "category": "BT",
+        "type": "counter",
+        "unit": "回",
+        "displayOrder": 21,
+        "inferenceRole": "INCLUDE_SUPPORT",
+        "defaultValue": 0,
+        "parentInputId": "INP_BT_GAMES",
+        "description": "JAC INチャンス中に停止したハズレをカウントします。",
+        "minimum": 0
+      },
+      {
+        "id": "INP_EVI_GALFY_SIDE_LAMP",
+        "name": "ボーナス終了時サイドランプ",
+        "type": "multi_enum",
+        "category": "EVIDENCE",
+        "unit": "",
+        "displayOrder": 100,
+        "inferenceRole": "INCLUDE_SUPPORT",
+        "options": [
+          {
+            "key": "RAINBOW",
+            "label": "虹（設定6）",
+            "value": "RAINBOW"
+          }
+        ],
+        "defaultValue": []
+      }
+    ]
+  },
+  "features": {
+    "schemaVersion": "2.0.0",
+    "features": [
+      {
+        "featureId": "FEAT_BONUS_OUTCOME",
+        "name": "通常時BIG・REG",
+        "adoptionCategory": "INCLUDE_PRIMARY",
+        "calculationRole": "PROBABILITY",
+        "probabilityEngineUsage": true,
+        "modelType": "multinomial",
+        "minimumSample": 300,
+        "sampleRecommendation": 5000,
+        "reliabilityProfile": {
+          "weight": 1
+        },
+        "numeratorInputId": "INP_BIG",
+        "denominatorInputId": "INP_NORMAL_GAMES",
+        "categoryInputIds": [
+          "INP_REG"
+        ],
+        "probabilities": {},
+        "categoryLabels": [
+          "BIG",
+          "REG"
+        ],
+        "categoryProbabilities": {
+          "SET_1": [
+            0.0033875338753387536,
+            0.0025025025025025025
+          ],
+          "SET_2": [
+            0.003417634996582365,
+            0.0027770063871146904
+          ],
+          "SET_5": [
+            0.00351000351000351,
+            0.003204101249599487
+          ],
+          "SET_6": [
+            0.0036010082823190494,
+            0.0036010082823190494
+          ]
+        },
+        "sourceEvidenceRefs": [
+          "SRC_NANA_SPEC",
+          "SRC_1GEKI_SETTING"
+        ]
+      },
+      {
+        "featureId": "FEAT_NORMAL_SMALL_ROLES",
+        "name": "通常時主要小役",
+        "adoptionCategory": "INCLUDE_PRIMARY",
+        "calculationRole": "PROBABILITY",
+        "probabilityEngineUsage": true,
+        "modelType": "multinomial",
+        "minimumSample": 300,
+        "sampleRecommendation": 5000,
+        "reliabilityProfile": {
+          "weight": 1
+        },
+        "numeratorInputId": "INP_BELL",
+        "denominatorInputId": "INP_NORMAL_GAMES",
+        "categoryInputIds": [
+          "INP_SUIKA",
+          "INP_CHERRY"
+        ],
+        "probabilities": {},
+        "categoryLabels": [
+          "BELL",
+          "SUIKA",
+          "CHERRY"
+        ],
+        "categoryProbabilities": {
+          "SET_1": [
+            0.06451612903225806,
+            0.01811875304134327,
+            0.030487804878048783
+          ],
+          "SET_2": [
+            0.06578947368421052,
+            0.018352855365340884,
+            0.030959752321981428
+          ],
+          "SET_5": [
+            0.06802721088435375,
+            0.018594656121517793,
+            0.031545741324921134
+          ],
+          "SET_6": [
+            0.06993006993006992,
+            0.01884454140145746,
+            0.032051282051282055
+          ]
+        },
+        "sourceEvidenceRefs": [
+          "SRC_NANA_SPEC",
+          "SRC_DMM"
+        ]
+      },
+      {
+        "featureId": "FEAT_BT_MISS",
+        "name": "JAC INチャンス中ハズレ",
+        "adoptionCategory": "INCLUDE_SUPPORT",
+        "calculationRole": "PROBABILITY",
+        "probabilityEngineUsage": true,
+        "modelType": "binomial",
+        "minimumSample": 1,
+        "sampleRecommendation": 50,
+        "reliabilityProfile": {
+          "weight": 1
+        },
+        "numeratorInputId": "INP_BT_MISS",
+        "denominatorInputId": "INP_BT_GAMES",
+        "displayFormat": "ratio_1_over_n",
+        "probabilities": {
+          "SET_1": 0.0015257857796765334,
+          "SET_2": 0.0015257857796765334,
+          "SET_5": 0.014992503748125937,
+          "SET_6": 0.029325513196480937
+        },
+        "sourceEvidenceRefs": [
+          "SRC_NANA_SPEC",
+          "SRC_1GEKI_SETTING"
+        ]
+      }
+    ]
+  },
+  "evidence": {
+    "version": "1.0.0",
+    "evidences": [
+      {
+        "id": "EVI_GALFY_SIDE_LAMP_RAINBOW",
+        "name": "虹（設定6）",
+        "displayName": "虹（設定6）",
+        "inputId": "INP_EVI_GALFY_SIDE_LAMP",
+        "triggerValue": "RAINBOW",
+        "confirmedSettings": [
+          "SET_6"
+        ],
+        "deniedSettings": [],
+        "hasImage": false,
+        "type": "SETTING_CONFIRMATION",
+        "sourceEvidenceRefs": [
+          "RE_SIDE_RAINBOW"
+        ]
+      }
+    ],
+    "sources": [
+      {
+        "id": "SRC_OIZUMI_OFFICIAL",
+        "classification": "OFFICIAL",
+        "pageName": "LBスロットGALFY 公式サイト",
+        "url": "https://www.oizumi.co.jp/machine/galfy/",
+        "checkedAt": "2026-08-15"
+      },
+      {
+        "id": "SRC_OIZUMI_RELEASE",
+        "classification": "OFFICIAL",
+        "pageName": "スマスロ新機種「LB スロット GALFY」発売のお知らせ",
+        "url": "https://oizumi.co.jp/wp-content/uploads/2026/03/7c7210608798efdd57bfff9e9451df4e.pdf",
+        "checkedAt": "2026-08-15"
+      },
+      {
+        "id": "SRC_1GEKI",
+        "classification": "ANALYSIS",
+        "pageName": "LB スロット GALFY 解析攻略",
+        "url": "https://1geki.jp/slot/lb_galfy/",
+        "checkedAt": "2026-08-15"
+      },
+      {
+        "id": "SRC_1GEKI_SETTING",
+        "classification": "ANALYSIS",
+        "pageName": "LB スロット GALFY 設定差・設定判別要素まとめ",
+        "url": "https://1geki.jp/slot/lb_galfy/0/",
+        "checkedAt": "2026-08-15"
+      },
+      {
+        "id": "SRC_NANA_SPEC",
+        "classification": "ANALYSIS",
+        "pageName": "LBガルフィー スペック情報",
+        "url": "https://nana-press.com/kaiseki/machine/1145/36534/",
+        "checkedAt": "2026-08-15"
+      },
+      {
+        "id": "SRC_NANA_SETTING",
+        "classification": "ANALYSIS",
+        "pageName": "LBガルフィー 設定判別まとめ",
+        "url": "https://nana-press.com/kaiseki/machine/1145/37072/",
+        "checkedAt": "2026-08-15"
+      },
+      {
+        "id": "SRC_DMM",
+        "classification": "ANALYSIS",
+        "pageName": "LB スロット GALFY 解析",
+        "url": "https://p-town.dmm.com/machines/4992",
+        "checkedAt": "2026-08-15"
+      }
+    ]
+  },
+  "ui": {
+    "sections": [
+      {
+        "id": "AUTO_NORMAL",
+        "title": "通常時ボーナス",
+        "displayOrder": 1,
+        "items": [
+          {
+            "type": "input",
+            "inputId": "INP_NORMAL_GAMES",
+            "label": "通常時ゲーム数",
+            "widget": "number"
+          },
+          {
+            "type": "input",
+            "inputId": "INP_BIG",
+            "label": "BIG",
+            "widget": "counter"
+          },
+          {
+            "type": "input",
+            "inputId": "INP_REG",
+            "label": "REG",
+            "widget": "counter"
+          }
+        ]
+      },
+      {
+        "id": "AUTO_SMALL_ROLE",
+        "title": "通常時小役",
+        "displayOrder": 2,
+        "items": [
+          {
+            "type": "input",
+            "inputId": "INP_BELL",
+            "label": "ベル",
+            "widget": "counter"
+          },
+          {
+            "type": "input",
+            "inputId": "INP_SUIKA",
+            "label": "スイカ",
+            "widget": "counter"
+          },
+          {
+            "type": "input",
+            "inputId": "INP_CHERRY",
+            "label": "チェリー",
+            "widget": "counter"
+          }
+        ]
+      },
+      {
+        "id": "AUTO_BT",
+        "title": "JAC INチャンス中",
+        "displayOrder": 3,
+        "items": [
+          {
+            "type": "input",
+            "inputId": "INP_BT_GAMES",
+            "label": "JAC INチャンス中ゲーム数",
+            "widget": "counter"
+          },
+          {
+            "type": "input",
+            "inputId": "INP_BT_MISS",
+            "label": "うちハズレ",
+            "widget": "counter"
+          }
+        ]
+      },
+      {
+        "id": "AUTO_EVIDENCE",
+        "title": "設定確定情報",
+        "displayOrder": 4,
+        "items": [
+          {
+            "type": "input",
+            "inputId": "INP_EVI_GALFY_SIDE_LAMP",
+            "label": "ボーナス終了時サイドランプ",
+            "widget": "multi_select"
+          }
+        ]
+      }
+    ]
+  },
+  "selectionSummary": {
+    "schemaVersion": "selection-summary-v1",
+    "evaluatedCount": 5,
+    "selectedCount": 3,
+    "rejectedCount": 2,
+    "selected": [
+      {
+        "featureId": "FEAT_BONUS_OUTCOME",
+        "name": "通常時BIG・REG",
+        "reason": "REG確率に大きな設定差があり、BIGとREGを同じ通常時ゲームから生じる排他的なボーナス結果として一体評価します。",
+        "requiredTrials": {
+          "value": 17730,
+          "unit": "通常ゲーム"
+        }
+      },
+      {
+        "featureId": "FEAT_NORMAL_SMALL_ROLES",
+        "name": "通常時主要小役",
+        "reason": "通常時ベルを中心に、スイカ・チェリーの設定差も同じ小役観測として一体評価します。",
+        "requiredTrials": {
+          "value": 12015,
+          "unit": "通常ゲーム"
+        }
+      },
+      {
+        "featureId": "FEAT_BT_MISS",
+        "name": "JAC INチャンス中ハズレ",
+        "reason": "JAC INチャンス中ハズレは設定1・2と設定5・6で非常に大きな差があり、短いBT区間でも有力な補助材料です。",
+        "requiredTrials": {
+          "value": 104,
+          "unit": "JAC INチャンスゲーム"
+        }
+      }
+    ],
+    "rejected": [
+      {
+        "featureId": "FEAT_BAR_ROLE_EXCLUDED",
+        "name": "通常時BAR揃い",
+        "reason": "低頻度。",
+        "requiredTrials": {
+          "value": 148663,
+          "unit": "通常ゲーム"
+        }
+      },
+      {
+        "featureId": "FEAT_BONUS_TRIGGER_DETAIL_EXCLUDED",
+        "name": "契機別ボーナス",
+        "reason": "BIG・REGと重複し、成立契機の正確な判別が難しい。"
+      }
+    ]
+  },
+  "reliability": {},
+  "metadata": {
+    "machineId": "LB_SLOT_GALFY_A4",
+    "displayName": "LB スロット GALFY",
+    "settings": [
+      "SET_1",
+      "SET_2",
+      "SET_5",
+      "SET_6"
+    ]
+  },
+  "validation": {
+    "cases": []
+  },
+  "statistics": {}
+}
