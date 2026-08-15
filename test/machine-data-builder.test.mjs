@@ -168,3 +168,12 @@ test('builder can preserve marginal multinomial model and optional observed cate
  assert.equal(f.modelType,'marginal_multinomial');
  assert.deepEqual(f.optionalCategoryInputIds,['C']);
 });
+
+
+test('marginal_multinomialはnumeratorInputIdも任意観測カテゴリにできる',()=>{
+ const r={...research,features:[{researchFeatureId:'RF_MM_NUM_OPT',name:'MM numerator optional',candidateModel:'multinomial',distributionMode:'implicit_residual',categories:['A','B','C'],settingDistributions:{SET_1:{A:.1,B:.2,C:.3},SET_6:{A:.2,B:.2,C:.2}},sourceRefs:['SRC1']}]} ;
+ const s={schemaVersion:'selection-data-v1',machineId:'M',machineDataVersion:'0.1.0',inputs:[{id:'D',name:'D',type:'integer',category:'P',displayOrder:1},{id:'A',name:'A',type:'counter',category:'P',displayOrder:2},{id:'B',name:'B',type:'counter',category:'P',displayOrder:3},{id:'C',name:'C',type:'counter',category:'P',displayOrder:4}],features:[{researchFeatureId:'RF_MM_NUM_OPT',featureId:'F_MM_NUM_OPT',adoptionCategory:'INCLUDE_PRIMARY',numeratorInputId:'A',denominatorInputId:'D',categoryInputIds:['B','C'],modelTypeOverride:'marginal_multinomial',optionalCategoryInputIds:['A','B','C']}]} ;
+ const out=buildMachineData(r,s);
+ const f=out.features.features.find(x=>x.featureId==='F_MM_NUM_OPT');
+ assert.deepEqual(f.optionalCategoryInputIds,['A','B','C']);
+});

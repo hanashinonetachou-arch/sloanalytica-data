@@ -126,7 +126,7 @@ function buildFeature(rf,sf,inputIds){
     }
     base.categoryInputIds=sf.categoryInputIds??[];
     if(sf.optionalCategoryInputIds){
-      if(!Array.isArray(sf.optionalCategoryInputIds) || sf.optionalCategoryInputIds.some(id=>!base.categoryInputIds.includes(id))) fail(`${sf.featureId}: invalid optionalCategoryInputIds`);
+      if(!Array.isArray(sf.optionalCategoryInputIds) || sf.optionalCategoryInputIds.some(id=>id!==base.numeratorInputId && !base.categoryInputIds.includes(id))) fail(`${sf.featureId}: invalid optionalCategoryInputIds`);
       base.optionalCategoryInputIds=[...sf.optionalCategoryInputIds];
     }
     base.probabilities={};
