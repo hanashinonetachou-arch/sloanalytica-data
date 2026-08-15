@@ -1,8 +1,32 @@
 {
   "schemaVersion": "selection-data-v1",
   "machineId": "LB_ISEKAI_QUARTET_KR",
-  "machineDataVersion": "0.1.1",
+  "machineDataVersion": "0.1.3",
   "inputs": [
+    {
+      "id": "INP_PREDECESSOR_TOTAL_GAMES",
+      "name": "着席時 総ゲーム数",
+      "description": "着席時にデータカウンターへ表示されている総ゲーム数を入力してください。この値は着席前の初当り確率にだけ使用し、自分のマイスロ区間のゲーム数には加算しません。",
+      "category": "PREDECESSOR",
+      "type": "counter",
+      "unit": "G",
+      "displayOrder": 1,
+      "inferenceRole": "INCLUDE_SUPPORT",
+      "observationScope": "PREDECESSOR_SNAPSHOT",
+      "defaultValue": 0
+    },
+    {
+      "id": "INP_PREDECESSOR_INITIAL_HIT_COUNT",
+      "name": "着席時 初当り回数",
+      "description": "データカウンターで「初当り回数」を確認できる場合のみ入力してください。BIG・REGや総ボーナス回数を代用しないでください。",
+      "category": "PREDECESSOR",
+      "type": "counter",
+      "unit": "回",
+      "displayOrder": 2,
+      "inferenceRole": "INCLUDE_SUPPORT",
+      "observationScope": "PREDECESSOR_SNAPSHOT",
+      "defaultValue": 0
+    },
     {
       "id": "INP_BELL_COUNT",
       "name": "ベル（規定数3枚）",
@@ -56,23 +80,25 @@
     },
     {
       "id": "INP_BAR_BIG_COUNT",
-      "name": "黒BAR BIG（+15G）",
+      "name": "黒BAR BIG",
       "category": "BIG_HINT",
       "type": "counter",
       "unit": "回",
       "displayOrder": 20,
       "inferenceRole": "INCLUDE_SUPPORT",
-      "defaultValue": 0
+      "defaultValue": 0,
+      "description": "マイスロの黒BAR BIG回数を入力してください。BIG中の試行ゲーム数は内部で自動算出します。"
     },
     {
       "id": "INP_RED_BLUE_BIG_COUNT",
-      "name": "赤7/青7 BIG（+13G）",
+      "name": "赤7・青7 BIG 合計",
       "category": "BIG_HINT",
       "type": "counter",
       "unit": "回",
       "displayOrder": 21,
       "inferenceRole": "INCLUDE_SUPPORT",
-      "defaultValue": 0
+      "defaultValue": 0,
+      "description": "マイスロの赤7 BIGと青7 BIGの回数を合計して入力してください。"
     },
     {
       "id": "INP_BIG_MISS15_COUNT",
@@ -96,27 +122,46 @@
     },
     {
       "id": "INP_BT_ANCHOR_COUNT",
-      "name": "分母復元用 スイカ/チェリー回数（規定数2枚）",
+      "name": "スイカ（規定数2枚）",
       "category": "BT_HINT",
       "type": "counter",
       "unit": "回",
       "displayOrder": 31,
       "inferenceRole": "INCLUDE_SUPPORT",
-      "defaultValue": 0
+      "defaultValue": 0,
+      "description": "マイスロ「規定数2枚」に表示されるスイカ回数を入力してください。BT中の試行ゲーム数を自動算出するために使います。"
     },
     {
       "id": "INP_BT_ANCHOR_INVERSE_RATE",
-      "name": "同じ小役の表示確率の分母（1/○○）",
+      "name": "スイカ表示確率の分母（1/○○）",
       "category": "BT_HINT",
       "type": "number",
       "unit": "分母",
       "displayOrder": 32,
       "parentInputId": "INP_BT_ANCHOR_COUNT",
       "inferenceRole": "INCLUDE_SUPPORT",
-      "defaultValue": 0
+      "defaultValue": 0,
+      "description": "同じ「規定数2枚」スイカの表示確率1/○○から「○○」を入力してください。"
     }
   ],
   "features": [
+    {
+      "researchFeatureId": "RF_PREDECESSOR_BONUS_INITIAL",
+      "featureId": "FEAT_PREDECESSOR_BONUS_INITIAL",
+      "adoptionCategory": "INCLUDE_SUPPORT",
+      "numeratorInputId": "INP_PREDECESSOR_INITIAL_HIT_COUNT",
+      "denominatorInputId": "INP_PREDECESSOR_TOTAL_GAMES",
+      "minimumSample": 100,
+      "sampleRecommendation": 1000,
+      "weight": 1.0,
+      "difficultyParticipation": "EXCLUDE",
+      "difficultyExclusionReason": "着席前データはユーザー自身のtargetGamesから発生する情報ではないため。",
+      "userReason": "データカウンターで初当り回数を確認できる場合、着席時の総ゲーム数と初当り回数から前任者区間のボーナス初当り確率を補助的に評価します。着席時総ゲーム数は自分のマイスロ区間には加算しません。",
+      "requiredTrials": {
+        "value": 31156,
+        "unit": "初当り対象ゲーム"
+      }
+    },
     {
       "researchFeatureId": "RF_NORMAL_3COIN_SMALL_ROLES",
       "featureId": "FEAT_NORMAL_3COIN_SMALL_ROLES",
@@ -207,7 +252,7 @@
       "featureId": "FEAT_BONUS_INITIAL",
       "adoptionCategory": "EXCLUDE",
       "rejectionReason": "通常時Featureと重複。",
-      "userReason": "通常時小役・いせかる目・BIG直撃と発生過程が重複し、マイスロ画面から厳密な初当り母数も直接取得できないため初版では不採用です。",
+      "userReason": "自分の遊技区間では通常時小役・いせかる目・BIG直撃と発生過程が重複し、マイスロから初当り母数を直接取得できないため不採用です。着席前区間はデータカウンターで初当り回数を確認できる場合のみ別Featureとして利用します。",
       "requiredTrials": {
         "value": 31156,
         "unit": "初当り対象ゲーム"
@@ -423,7 +468,8 @@
     "NORMAL_SMALL_ROLE": "通常時（マイスロ規定数3枚）",
     "BIG_HINT": "BIG中",
     "BT_HINT": "BT中（マイスロ規定数2枚）",
-    "EVIDENCE": "設定確定情報"
+    "EVIDENCE": "設定確定情報",
+    "PREDECESSOR": "着席時データ"
   },
   "difficultyAnalysis": {
     "targetGames": [
