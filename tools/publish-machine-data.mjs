@@ -12,6 +12,11 @@ function die(msg,code=1){ console.error(`ERROR: ${msg}`); process.exit(code); }
 function readJson(p){ return JSON.parse(fs.readFileSync(p,"utf8")); }
 function writeJson(p,v){ fs.mkdirSync(path.dirname(p),{recursive:true}); fs.writeFileSync(p,JSON.stringify(v,null,2)+"\n","utf8"); }
 function sha256(p){ return crypto.createHash("sha256").update(fs.readFileSync(p)).digest("hex"); }
+function canonicalJsonBuffer(p){
+ const value=readJson(p);
+ return Buffer.from(JSON.stringify(value,null,2)+"\n","utf8");
+}
+function sha256Buffer(buffer){ return crypto.createHash("sha256").update(buffer).digest("hex"); }
 function exists(p){ return fs.existsSync(p); }
 function validId(id){ return /^[A-Z0-9_]+$/.test(id); }
 
@@ -50,8 +55,9 @@ function approve(id,sourceArg){
  const pkg=readJson(source);
  if(pkg.machine?.machineId!==id) die("承認対象のmachineIdが一致しません。");
  fs.mkdirSync(p.build,{recursive:true});
- fs.copyFileSync(source,p.approved);
- const hash=sha256(p.approved);
+ const approvedBytes=canonicalJsonBuffer(source);
+ fs.writeFileSync(p.approved,approvedBytes);
+ const hash=sha256Buffer(approvedBytes);
  const approval={
    approvalVersion:"machine-publish-approval-v1",
    machineId:id,
@@ -75,15 +81,16 @@ function publish(id,apply){
  const p=paths(id);
  if(!exists(p.approved)||!exists(p.approval)) die("approved package / approval.json がありません。先に approve してください。");
  const approval=readJson(p.approval);
- const actualSha=sha256(p.approved);
+ const approvedBytes=canonicalJsonBuffer(p.approved);
+ const actualSha=sha256Buffer(approvedBytes);
  if(approval.machineId!==id || approval.approvedSha256!==actualSha) die("承認後にapproved packageが変更されています。再approveしてください。");
- const pkg=readJson(p.approved);
+ const pkg=JSON.parse(approvedBytes.toString("utf8"));
  if(pkg.machine?.machineId!==id) die("approved packageのmachineIdが一致しません。");
  const catalog=readJson(CATALOG);
  const machines=Array.isArray(catalog.machines)?catalog.machines:[];
  const idx=machines.findIndex(m=>m.machineId===id);
  const existing=idx>=0?machines[idx]:null;
- const packageBytes=fs.statSync(p.approved).size;
+ const packageBytes=approvedBytes.length;
  const entry={
    machineId:id,
    displayName:pkg.machine?.displayName,
@@ -118,7 +125,7 @@ function publish(id,apply){
  const oldTarget=exists(p.target)?fs.readFileSync(p.target):null;
  try{
    fs.mkdirSync(p.targetDir,{recursive:true});
-   fs.copyFileSync(p.approved,p.target);
+   fs.writeFileSync(p.target,approvedBytes);
    writeJson(CATALOG,nextCatalog);
    const result=audit();
    if(!result.ok) throw new Error(`最終Auditor失敗\n${result.stdout}\n${result.stderr}`);
@@ -140,7 +147,7 @@ function status(id){
  const out={machineId:id,generated:exists(p.generated),approved:exists(p.approved),approval:exists(p.approval),
    approvalValid:false,published:exists(p.target),publishReport:exists(p.publishReport)};
  if(out.approved&&out.approval){
-   try{ const a=readJson(p.approval); out.approvalValid=a.approvedSha256===sha256(p.approved); out.approvedSha256=sha256(p.approved); }catch{}
+   try{ const a=readJson(p.approval); const bytes=canonicalJsonBuffer(p.approved); const hash=sha256Buffer(bytes); out.approvalValid=a.approvedSha256===hash; out.approvedSha256=hash; }catch{}
  }
  if(out.publishReport){ try{out.lastPublishStatus=readJson(p.publishReport).status;}catch{} }
  console.log(JSON.stringify(out,null,2));

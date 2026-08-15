@@ -188,6 +188,7 @@ export function auditRepository(root) {
     const scope = `catalog:${machineId}`;
     if (!fs.existsSync(filePath)) { issue(result, 'error', scope, `対応するローカルMachineDataがありません: ${path.relative(result.root, filePath)}`); continue; }
     const bytes = fs.readFileSync(filePath);
+    if (bytes.includes(Buffer.from('\r\n'))) issue(result, 'error', scope, '公開MachineDataはLF改行である必要があります（CRLFを検出しました）');
     if (entry.packageSizeBytes !== bytes.length) issue(result, 'error', scope, `packageSizeBytesが実ファイルと不一致です (catalog=${entry.packageSizeBytes}, actual=${bytes.length})`);
     const actualSha = sha256(bytes);
     if (entry.sha256 !== actualSha) issue(result, 'error', scope, `sha256が実ファイルと不一致です (catalog=${entry.sha256}, actual=${actualSha})`);

@@ -49,3 +49,20 @@ test('監査レポートJSONを書き出せる', () => {
     assert.match(report.errors.map(item => item.message).join('\n'), /未定義の入力ID/);
   } finally { cleanup(root); }
 });
+
+test('catalogのSHA・サイズが一致していてもCRLFの公開MachineDataを拒否する', () => {
+  const root = writeFixture();
+  try {
+    const packagePath = path.join(root, 'machines', 'TEST_MACHINE', 'machine-package.json');
+    const crlf = `${JSON.stringify(JSON.parse(fs.readFileSync(packagePath, 'utf8')), null, 2)}\r\n`.replace(/(?<!\r)\n/g, '\r\n');
+    const bytes = Buffer.from(crlf, 'utf8');
+    fs.writeFileSync(packagePath, bytes);
+    const catalogPath = path.join(root, 'catalog.json');
+    const catalog = JSON.parse(fs.readFileSync(catalogPath, 'utf8'));
+    catalog.machines[0].sha256 = crypto.createHash('sha256').update(bytes).digest('hex');
+    catalog.machines[0].packageSizeBytes = bytes.length;
+    fs.writeFileSync(catalogPath, JSON.stringify(catalog));
+    const errors = auditRepository(root).errors.map(x => x.message).join('\n');
+    assert.match(errors, /LF改行/);
+  } finally { cleanup(root); }
+});
