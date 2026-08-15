@@ -1,0 +1,274 @@
+{
+  "schemaVersion": "selection-data-v1",
+  "machineId": "LB_EVA_PROMISE_DOOR_SR",
+  "machineDataVersion": "0.1.0",
+  "inputs": [
+    {
+      "id": "INP_MENU_GAMES",
+      "name": "総ゲーム数",
+      "category": "MENU_DATA",
+      "type": "counter",
+      "unit": "G",
+      "displayOrder": 1,
+      "inferenceRole": "INCLUDE_PRIMARY",
+      "defaultValue": 0,
+      "observationScope": "SELF_PLAY",
+      "description": "PUSHボタンの「遊技データ」に表示される現在の総ゲーム数を入力してください。設定推測を更新するときは最新値へ上書きしてください。"
+    },
+    {
+      "id": "INP_MENU_RED",
+      "name": "赤SBB",
+      "category": "MENU_DATA",
+      "type": "counter",
+      "unit": "回",
+      "displayOrder": 2,
+      "inferenceRole": "INCLUDE_PRIMARY",
+      "defaultValue": 0,
+      "observationScope": "SELF_PLAY",
+      "description": "台メニュー「遊技データ」に表示される現在の累積回数を入力してください。0回なら0を入力してください。"
+    },
+    {
+      "id": "INP_MENU_BLUE",
+      "name": "青SBB",
+      "category": "MENU_DATA",
+      "type": "counter",
+      "unit": "回",
+      "displayOrder": 3,
+      "inferenceRole": "INCLUDE_PRIMARY",
+      "defaultValue": 0,
+      "observationScope": "SELF_PLAY",
+      "description": "台メニュー「遊技データ」に表示される現在の累積回数を入力してください。0回なら0を入力してください。"
+    },
+    {
+      "id": "INP_MENU_YELLOW",
+      "name": "黄BIG",
+      "category": "MENU_DATA",
+      "type": "counter",
+      "unit": "回",
+      "displayOrder": 4,
+      "inferenceRole": "INCLUDE_PRIMARY",
+      "defaultValue": 0,
+      "observationScope": "SELF_PLAY",
+      "description": "台メニュー「遊技データ」に表示される現在の累積回数を入力してください。0回なら0を入力してください。"
+    },
+    {
+      "id": "INP_MENU_BOUSOU",
+      "name": "暴走モード",
+      "category": "MENU_DATA",
+      "type": "counter",
+      "unit": "回",
+      "displayOrder": 5,
+      "inferenceRole": "INCLUDE_PRIMARY",
+      "defaultValue": 0,
+      "observationScope": "SELF_PLAY",
+      "description": "台メニュー「遊技データ」に表示される現在の累積回数を入力してください。0回なら0を入力してください。"
+    },
+    {
+      "id": "INP_MENU_REG",
+      "name": "REG",
+      "category": "MENU_DATA",
+      "type": "counter",
+      "unit": "回",
+      "displayOrder": 6,
+      "inferenceRole": "INCLUDE_PRIMARY",
+      "defaultValue": 0,
+      "observationScope": "SELF_PLAY",
+      "description": "台メニュー「遊技データ」に表示される現在の累積回数を入力してください。0回なら0を入力してください。"
+    }
+  ],
+  "features": [
+    {
+      "featureId": "FEAT_DAILY_BONUS_DETAIL",
+      "researchFeatureId": "RF_DAILY_BONUS_DETAIL",
+      "adoptionCategory": "INCLUDE_PRIMARY",
+      "modelTypeOverride": "multinomial",
+      "minimumSample": 100,
+      "sampleRecommendation": 3000,
+      "weight": 1.0,
+      "numeratorInputId": "INP_MENU_RED",
+      "denominatorInputId": "INP_MENU_GAMES",
+      "categoryInputIds": [
+        "INP_MENU_BLUE",
+        "INP_MENU_YELLOW",
+        "INP_MENU_BOUSOU",
+        "INP_MENU_REG"
+      ],
+      "difficultyExposure": {
+        "mode": "per_game",
+        "factor": 1,
+        "quality": "EXACT",
+        "basisId": "NORMAL_GAMES"
+      },
+      "userReason": "赤/青SBBの偶奇差と、黄BIG・REG・暴走の高低差を同時に利用できる。台メニューの当日累積値をそのまま1つのmultinomialとして評価する。",
+      "difficultyParticipation": "INCLUDE",
+      "categoryDisplayLabels": [
+        "赤SBB",
+        "青SBB",
+        "黄BIG",
+        "暴走モード",
+        "REG"
+      ]
+    },
+    {
+      "featureId": "FEAT_BELL_YELLOW_EXCLUDED",
+      "researchFeatureId": "RF_BELL_YELLOW_BB",
+      "adoptionCategory": "EXCLUDE",
+      "userReason": "低頻度。数値Featureには使わず、確認できた場合だけ設定2以上Evidenceとして使用。",
+      "difficultyParticipation": "EXCLUDE",
+      "difficultyExclusionReason": "Hard Evidenceとしてのみ利用するためDifficulty数値スコアには含めない。"
+    },
+    {
+      "featureId": "FEAT_SINGLE_BOUSOU_EXCLUDED",
+      "researchFeatureId": "RF_SINGLE_BOUSOU",
+      "adoptionCategory": "EXCLUDE",
+      "userReason": "低頻度。数値Featureには使わず、確認できた場合だけ設定2以上Evidenceとして使用。",
+      "difficultyParticipation": "EXCLUDE",
+      "difficultyExclusionReason": "Hard Evidenceとしてのみ利用するためDifficulty数値スコアには含めない。"
+    }
+  ],
+  "evidenceUi": {
+    "groups": [
+      {
+        "groupId": "EVA_END",
+        "label": "ボーナス終了画面",
+        "selectionMode": "multi",
+        "normalizationMode": "ALLOWED_SETTINGS_INTERSECTION",
+        "displayOrder": 100,
+        "options": [
+          {
+            "value": "KAORU",
+            "label": "カヲル（設定6）",
+            "allowedSettings": [
+              "SET_6"
+            ],
+            "sourceEvidenceIds": [
+              "RE_END_KAORU"
+            ]
+          }
+        ]
+      },
+      {
+        "groupId": "EVA_REG_CHAR",
+        "label": "REG中キャラ紹介",
+        "selectionMode": "multi",
+        "normalizationMode": "ALLOWED_SETTINGS_INTERSECTION",
+        "displayOrder": 110,
+        "options": [
+          {
+            "value": "KAORU",
+            "label": "カヲル（設定6）",
+            "allowedSettings": [
+              "SET_6"
+            ],
+            "sourceEvidenceIds": [
+              "RE_REG_KAORU"
+            ]
+          }
+        ]
+      },
+      {
+        "groupId": "EVA_BT_MOVIE",
+        "label": "BT中プレミアムムービー",
+        "selectionMode": "multi",
+        "normalizationMode": "ALLOWED_SETTINGS_INTERSECTION",
+        "displayOrder": 120,
+        "options": [
+          {
+            "value": "GENDO",
+            "label": "ゲンドウ（設定4以上）",
+            "allowedSettings": [
+              "SET_4",
+              "SET_5",
+              "SET_6"
+            ],
+            "sourceEvidenceIds": [
+              "RE_BT_GENDO"
+            ]
+          },
+          {
+            "value": "KAJI",
+            "label": "加持（設定5以上）",
+            "allowedSettings": [
+              "SET_5",
+              "SET_6"
+            ],
+            "sourceEvidenceIds": [
+              "RE_BT_KAJI"
+            ]
+          },
+          {
+            "value": "KAORU",
+            "label": "カヲル（設定6）",
+            "allowedSettings": [
+              "SET_6"
+            ],
+            "sourceEvidenceIds": [
+              "RE_BT_KAORU"
+            ]
+          }
+        ]
+      },
+      {
+        "groupId": "EVA_RARE_EVIDENCE",
+        "label": "成立契機の確定情報",
+        "selectionMode": "multi",
+        "normalizationMode": "ALLOWED_SETTINGS_INTERSECTION",
+        "displayOrder": 130,
+        "options": [
+          {
+            "value": "BELL_YELLOW",
+            "label": "ベル＋黄BIG（設定2以上）",
+            "allowedSettings": [
+              "SET_2",
+              "SET_3",
+              "SET_4",
+              "SET_5",
+              "SET_6"
+            ],
+            "sourceEvidenceIds": [
+              "RE_BELL_YELLOW"
+            ]
+          },
+          {
+            "value": "SINGLE_BOUSOU",
+            "label": "単独暴走モード（設定2以上）",
+            "allowedSettings": [
+              "SET_2",
+              "SET_3",
+              "SET_4",
+              "SET_5",
+              "SET_6"
+            ],
+            "sourceEvidenceIds": [
+              "RE_SINGLE_BOUSOU"
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "uiCategoryLabels": {
+    "MENU_DATA": "台メニュー遊技データ",
+    "EVIDENCE": "設定確定情報"
+  },
+  "difficultyAnalysis": {
+    "targetGames": [
+      1500,
+      3000,
+      7000
+    ],
+    "simulationsPerSetting": 4000,
+    "seed": 20260815,
+    "targetGameBasis": {
+      "basisId": "NORMAL_GAMES",
+      "label": "通常時ゲーム数",
+      "quality": "EXACT",
+      "crossMachineComparable": true,
+      "note": "Difficultyは台メニュー総ゲーム数を通常時ゲーム相当の共通基準として評価する。"
+    },
+    "calibrationAllowedExposureQualities": [
+      "EXACT",
+      "DERIVED"
+    ]
+  }
+}
