@@ -3,7 +3,7 @@
   "machine": {
     "schemaVersion": "2.0.0",
     "machineId": "LB_SLOT_GALFY_A4",
-    "machineDataVersion": "0.1.2",
+    "machineDataVersion": "0.1.3",
     "displayName": "LB スロット GALFY",
     "modelName": "LBスロットガルフィーA4",
     "manufacturer": "オーイズミ・アミュージオ",
@@ -36,8 +36,8 @@
         "minimum": 0
       },
       {
-        "id": "INP_PREDECESSOR_BONUS_COUNT",
-        "name": "着席時 初当りボーナス合計（判別時のみ）",
+        "id": "INP_PREDECESSOR_BIG",
+        "name": "着席時 BIG初当り（判別時のみ）",
         "category": "PREDECESSOR",
         "type": "counter",
         "unit": "回",
@@ -45,7 +45,20 @@
         "inferenceRole": "INCLUDE_SUPPORT",
         "observationScope": "PREDECESSOR_SNAPSHOT",
         "defaultValue": null,
-        "description": "データカウンター等で通常時の初当りBIG・REG合計を正確に確認できる場合のみ入力してください。正確に分からない場合は空欄のままにしてください。",
+        "description": "データカウンター等で通常時BIG初当りを正確に確認できる場合のみ入力してください。正確に分からない場合は空欄のままにしてください。",
+        "minimum": 0
+      },
+      {
+        "id": "INP_PREDECESSOR_REG",
+        "name": "着席時 REG初当り（判別時のみ）",
+        "category": "PREDECESSOR",
+        "type": "counter",
+        "unit": "回",
+        "displayOrder": 3,
+        "inferenceRole": "INCLUDE_SUPPORT",
+        "observationScope": "PREDECESSOR_SNAPSHOT",
+        "defaultValue": null,
+        "description": "データカウンター等で通常時REG初当りを正確に確認できる場合のみ入力してください。正確に分からない場合は空欄のままにしてください。",
         "minimum": 0
       },
       {
@@ -171,25 +184,48 @@
     "schemaVersion": "2.0.0",
     "features": [
       {
-        "featureId": "FEAT_PREDECESSOR_BONUS_TOTAL",
-        "name": "着席時 初当りボーナス合計",
+        "featureId": "FEAT_PREDECESSOR_BONUS_OUTCOME",
+        "name": "着席時 BIG・REG初当り",
         "adoptionCategory": "INCLUDE_SUPPORT",
         "calculationRole": "PROBABILITY",
         "probabilityEngineUsage": true,
-        "modelType": "binomial",
+        "modelType": "marginal_multinomial",
         "minimumSample": 300,
         "sampleRecommendation": 5000,
         "reliabilityProfile": {
           "weight": 1
         },
-        "numeratorInputId": "INP_PREDECESSOR_BONUS_COUNT",
+        "numeratorInputId": "INP_PREDECESSOR_BIG",
         "denominatorInputId": "INP_PREDECESSOR_GAMES",
-        "displayFormat": "ratio_1_over_n",
-        "probabilities": {
-          "SET_1": 0.005890036377841256,
-          "SET_2": 0.006194641383697056,
-          "SET_5": 0.006714104759602997,
-          "SET_6": 0.007202016564638099
+        "categoryInputIds": [
+          "INP_PREDECESSOR_REG"
+        ],
+        "optionalCategoryInputIds": [
+          "INP_PREDECESSOR_BIG",
+          "INP_PREDECESSOR_REG"
+        ],
+        "probabilities": {},
+        "categoryLabels": [
+          "BIG",
+          "REG"
+        ],
+        "categoryProbabilities": {
+          "SET_1": [
+            0.0033875338753387536,
+            0.0025025025025025025
+          ],
+          "SET_2": [
+            0.003417634996582365,
+            0.0027770063871146904
+          ],
+          "SET_5": [
+            0.00351000351000351,
+            0.003204101249599487
+          ],
+          "SET_6": [
+            0.0036010082823190494,
+            0.0036010082823190494
+          ]
         },
         "sourceEvidenceRefs": [
           "SRC_NANA_SPEC",
@@ -412,8 +448,14 @@
           },
           {
             "type": "input",
-            "inputId": "INP_PREDECESSOR_BONUS_COUNT",
-            "label": "着席時 初当りボーナス合計（判別時のみ）",
+            "inputId": "INP_PREDECESSOR_BIG",
+            "label": "着席時 BIG初当り（判別時のみ）",
+            "widget": "counter"
+          },
+          {
+            "type": "input",
+            "inputId": "INP_PREDECESSOR_REG",
+            "label": "着席時 REG初当り（判別時のみ）",
             "widget": "counter"
           }
         ]
@@ -509,11 +551,11 @@
     "rejectedCount": 2,
     "selected": [
       {
-        "featureId": "FEAT_PREDECESSOR_BONUS_TOTAL",
-        "name": "着席時 初当りボーナス合計",
-        "reason": "通常時初当りを正確に確認できる場合だけ、着席前区間のボーナス合算を追加情報として利用します。初当り回数が空欄なら計算に参加しません。",
+        "featureId": "FEAT_PREDECESSOR_BONUS_OUTCOME",
+        "name": "着席時 BIG・REG初当り",
+        "reason": "通常時初当りを正確に確認できる項目だけ、着席前区間のBIG・REG情報として利用します。BIG/REGは個別に任意入力でき、空欄は未観測、明示0は0回観測として扱います。両方空欄なら計算に参加しません。",
         "requiredTrials": {
-          "value": 27625,
+          "value": 17730,
           "unit": "着席前通常ゲーム"
         }
       },
