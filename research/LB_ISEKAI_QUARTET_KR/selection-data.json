@@ -1,26 +1,26 @@
 {
   "schemaVersion": "selection-data-v1",
   "machineId": "LB_ISEKAI_QUARTET_KR",
-  "machineDataVersion": "0.1.0",
+  "machineDataVersion": "0.1.1",
   "inputs": [
-    {
-      "id": "INP_NORMAL_3COIN_GAMES",
-      "name": "通常時ゲーム数（規定数3枚）",
-      "category": "NORMAL_SMALL_ROLE",
-      "type": "integer",
-      "unit": "G",
-      "displayOrder": 1,
-      "inferenceRole": "INCLUDE_PRIMARY",
-      "defaultValue": 0
-    },
     {
       "id": "INP_BELL_COUNT",
       "name": "ベル（規定数3枚）",
       "category": "NORMAL_SMALL_ROLE",
       "type": "counter",
       "unit": "回",
+      "displayOrder": 1,
+      "inferenceRole": "INCLUDE_PRIMARY",
+      "defaultValue": 0
+    },
+    {
+      "id": "INP_BELL_INVERSE_RATE",
+      "name": "ベル表示確率の分母（1/○○）",
+      "category": "NORMAL_SMALL_ROLE",
+      "type": "number",
+      "unit": "分母",
       "displayOrder": 2,
-      "parentInputId": "INP_NORMAL_3COIN_GAMES",
+      "parentInputId": "INP_BELL_COUNT",
       "inferenceRole": "INCLUDE_PRIMARY",
       "defaultValue": 0
     },
@@ -31,7 +31,6 @@
       "type": "counter",
       "unit": "回",
       "displayOrder": 3,
-      "parentInputId": "INP_NORMAL_3COIN_GAMES",
       "inferenceRole": "INCLUDE_PRIMARY",
       "defaultValue": 0
     },
@@ -42,7 +41,6 @@
       "type": "counter",
       "unit": "回",
       "displayOrder": 4,
-      "parentInputId": "INP_NORMAL_3COIN_GAMES",
       "inferenceRole": "INCLUDE_PRIMARY",
       "defaultValue": 0
     },
@@ -53,17 +51,26 @@
       "type": "counter",
       "unit": "回",
       "displayOrder": 5,
-      "parentInputId": "INP_NORMAL_3COIN_GAMES",
       "inferenceRole": "INCLUDE_PRIMARY",
       "defaultValue": 0
     },
     {
-      "id": "INP_BIG_GAMES",
-      "name": "BIG消化ゲーム数",
+      "id": "INP_BAR_BIG_COUNT",
+      "name": "黒BAR BIG（+15G）",
       "category": "BIG_HINT",
       "type": "counter",
-      "unit": "G",
+      "unit": "回",
       "displayOrder": 20,
+      "inferenceRole": "INCLUDE_SUPPORT",
+      "defaultValue": 0
+    },
+    {
+      "id": "INP_RED_BLUE_BIG_COUNT",
+      "name": "赤7/青7 BIG（+13G）",
+      "category": "BIG_HINT",
+      "type": "counter",
+      "unit": "回",
+      "displayOrder": 21,
       "inferenceRole": "INCLUDE_SUPPORT",
       "defaultValue": 0
     },
@@ -73,29 +80,38 @@
       "category": "BIG_HINT",
       "type": "counter",
       "unit": "回",
-      "displayOrder": 21,
-      "parentInputId": "INP_BIG_GAMES",
-      "inferenceRole": "INCLUDE_SUPPORT",
-      "defaultValue": 0
-    },
-    {
-      "id": "INP_BT_VALID_GAMES",
-      "name": "BT中ゲーム数（規定数2枚）",
-      "category": "BT_HINT",
-      "type": "counter",
-      "unit": "G",
-      "displayOrder": 30,
+      "displayOrder": 22,
       "inferenceRole": "INCLUDE_SUPPORT",
       "defaultValue": 0
     },
     {
       "id": "INP_BT_SPECIAL7_COUNT",
-      "name": "特殊7枚役（マイスロ）",
+      "name": "特殊7枚役（規定数2枚・マイスロ）",
+      "category": "BT_HINT",
+      "type": "counter",
+      "unit": "回",
+      "displayOrder": 30,
+      "inferenceRole": "INCLUDE_SUPPORT",
+      "defaultValue": 0
+    },
+    {
+      "id": "INP_BT_ANCHOR_COUNT",
+      "name": "分母復元用 スイカ/チェリー回数（規定数2枚）",
       "category": "BT_HINT",
       "type": "counter",
       "unit": "回",
       "displayOrder": 31,
-      "parentInputId": "INP_BT_VALID_GAMES",
+      "inferenceRole": "INCLUDE_SUPPORT",
+      "defaultValue": 0
+    },
+    {
+      "id": "INP_BT_ANCHOR_INVERSE_RATE",
+      "name": "同じ小役の表示確率の分母（1/○○）",
+      "category": "BT_HINT",
+      "type": "number",
+      "unit": "分母",
+      "displayOrder": 32,
+      "parentInputId": "INP_BT_ANCHOR_COUNT",
       "inferenceRole": "INCLUDE_SUPPORT",
       "defaultValue": 0
     }
@@ -106,7 +122,7 @@
       "featureId": "FEAT_NORMAL_3COIN_SMALL_ROLES",
       "adoptionCategory": "INCLUDE_PRIMARY",
       "numeratorInputId": "INP_BELL_COUNT",
-      "denominatorInputId": "INP_NORMAL_3COIN_GAMES",
+      "denominatorInputId": "INP_BELL_INVERSE_RATE",
       "categoryInputIds": [
         "INP_WATERMELON_COUNT",
         "INP_CHERRY_COUNT",
@@ -122,45 +138,58 @@
         "quality": "EXACT",
         "basisId": "NORMAL_3COIN_GAMES"
       },
-      "userReason": "マイスロが通常時（規定数3枚）のベル・スイカ・チェリー・特殊15枚役を自動集計し、特にベルとスイカに実戦的な設定差があります。",
+      "userReason": "マイスロのベル回数と表示確率から規定数3枚の試行Gを自動復元し、ベル・スイカ・チェリー・特殊15枚役を一体評価します。ユーザー自身が通常時Gを計算する必要はありません。",
       "requiredTrials": {
         "value": 2917,
         "unit": "規定数3枚ゲーム"
-      }
+      },
+      "inputTransform": "inverse_ratio_to_trials"
     },
     {
       "researchFeatureId": "RF_BIG_MISS_15",
       "featureId": "FEAT_BIG_MISS_15",
       "adoptionCategory": "INCLUDE_SUPPORT",
       "numeratorInputId": "INP_BIG_MISS15_COUNT",
-      "denominatorInputId": "INP_BIG_GAMES",
+      "denominatorInputId": "INP_BAR_BIG_COUNT",
       "minimumSample": 10,
       "sampleRecommendation": 300,
       "weight": 1.0,
       "difficultyParticipation": "EXCLUDE",
       "difficultyExclusionReason": "通常時ゲーム数からBIG消化Gへの期待Exposureを厳密に確定できないため。",
-      "userReason": "BIG中のフラッシュなしバラケ目は設定1と設定6で約43倍差があり、出現時の情報量が非常に大きいです。",
+      "userReason": "BIG中のフラッシュなしバラケ目は設定差が非常に大きく、黒BAR BIGは15G、赤/青7 BIGは13Gとして分母を自動算出します（枚数調整成功時）。",
       "requiredTrials": {
         "value": 1307,
         "unit": "BIGゲーム"
-      }
+      },
+      "denominatorAdjustments": [
+        {
+          "inputId": "INP_BAR_BIG_COUNT",
+          "multiplier": 14
+        },
+        {
+          "inputId": "INP_RED_BLUE_BIG_COUNT",
+          "multiplier": 13
+        }
+      ]
     },
     {
       "researchFeatureId": "RF_BT_SPECIAL_7",
       "featureId": "FEAT_BT_SPECIAL_7",
       "adoptionCategory": "INCLUDE_SUPPORT",
       "numeratorInputId": "INP_BT_SPECIAL7_COUNT",
-      "denominatorInputId": "INP_BT_VALID_GAMES",
+      "denominatorInputId": "INP_BT_ANCHOR_INVERSE_RATE",
       "minimumSample": 10,
       "sampleRecommendation": 500,
       "weight": 1.0,
       "difficultyParticipation": "EXCLUDE",
       "difficultyExclusionReason": "通常時ゲーム数からBT中有効Gへの期待Exposureを厳密に確定できないため。",
-      "userReason": "BT中特殊7枚役は設定1と設定2以上で大きな差があり、マイスロなら除外対象を自動処理した回数を利用できます。",
+      "userReason": "マイスロの規定数2枚スイカまたはチェリーの回数と表示確率からBT中有効Gを自動復元し、特殊7枚役を評価します。特殊7枚役0回でも観測として利用できます。",
       "requiredTrials": {
         "value": 5759,
         "unit": "BT中有効ゲーム"
-      }
+      },
+      "trialCountInputId": "INP_BT_ANCHOR_COUNT",
+      "inputTransform": "observed_ratio_to_trials"
     },
     {
       "researchFeatureId": "RF_NORMAL_BT_OR_BIG",
