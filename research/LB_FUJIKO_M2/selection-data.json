@@ -1,7 +1,7 @@
 {
   "schemaVersion": "selection-data-v1",
   "machineId": "LB_FUJIKO_M2",
-  "machineDataVersion": "0.1.1",
+  "machineDataVersion": "0.1.2",
   "inputs": [
     {
       "id": "INP_SEAT_TOTAL_GAMES",
@@ -121,6 +121,61 @@
       "inferenceRole": "INCLUDE_SUPPORT",
       "defaultValue": null,
       "description": "打-WIN LITE「ボーナス中詳細情報」のBIG BONUS中 斜めプラム回数を入力します。"
+    },
+    {
+      "id": "INP_BIG_VOICE_LUPIN",
+      "name": "ルパン",
+      "category": "BIG_VOICE_1G",
+      "type": "counter",
+      "unit": "回",
+      "displayOrder": 30,
+      "inferenceRole": "INCLUDE_SUPPORT",
+      "defaultValue": null,
+      "description": "（SUPER）BIGの1G目に枚数調整を成功したとき、ルパンボイスが出た回数だけ入力します。2G目以降の成功時は含めません。"
+    },
+    {
+      "id": "INP_BIG_VOICE_JIGEN",
+      "name": "次元",
+      "category": "BIG_VOICE_1G",
+      "type": "counter",
+      "unit": "回",
+      "displayOrder": 31,
+      "inferenceRole": "INCLUDE_SUPPORT",
+      "defaultValue": null,
+      "description": "（SUPER）BIGの1G目に枚数調整を成功したとき、次元ボイスが出た回数だけ入力します。2G目以降の成功時は含めません。"
+    },
+    {
+      "id": "INP_BIG_VOICE_ZENIGATA",
+      "name": "銭形",
+      "category": "BIG_VOICE_1G",
+      "type": "counter",
+      "unit": "回",
+      "displayOrder": 32,
+      "inferenceRole": "INCLUDE_SUPPORT",
+      "defaultValue": null,
+      "description": "（SUPER）BIGの1G目に枚数調整を成功したとき、銭形ボイスが出た回数だけ入力します。2G目以降の成功時は含めません。"
+    },
+    {
+      "id": "INP_BIG_VOICE_GOEMON",
+      "name": "五ェ門",
+      "category": "BIG_VOICE_1G",
+      "type": "counter",
+      "unit": "回",
+      "displayOrder": 33,
+      "inferenceRole": "INCLUDE_SUPPORT",
+      "defaultValue": null,
+      "description": "（SUPER）BIGの1G目に枚数調整を成功したとき、五ェ門ボイスが出た回数だけ入力します。2G目以降の成功時は含めません。"
+    },
+    {
+      "id": "INP_BIG_VOICE_FUJIKO",
+      "name": "不二子",
+      "category": "BIG_VOICE_1G",
+      "type": "counter",
+      "unit": "回",
+      "displayOrder": 34,
+      "inferenceRole": "INCLUDE_SUPPORT",
+      "defaultValue": null,
+      "description": "（SUPER）BIGの1G目に枚数調整を成功したとき、不二子ボイスが出た回数だけ入力します。2G目以降の成功時は含めません。"
     }
   ],
   "features": [
@@ -233,6 +288,33 @@
       "adoptionCategory": "EXCLUDE",
       "rejectionReason": "低頻度でREG・チェリーと重複。",
       "userReason": "低頻度でREG・チェリーと重複。"
+    },
+    {
+      "researchFeatureId": "RF_BIG_VOICE_1G",
+      "featureId": "FEAT_BIG_VOICE_1G",
+      "adoptionCategory": "INCLUDE_SUPPORT",
+      "minimumSample": 1,
+      "sampleRecommendation": 20,
+      "weight": 1.0,
+      "numeratorInputId": "INP_BIG_VOICE_LUPIN",
+      "denominatorInputId": "INP_BIG_VOICE_JIGEN",
+      "categoryInputIds": [
+        "INP_BIG_VOICE_JIGEN",
+        "INP_BIG_VOICE_ZENIGATA",
+        "INP_BIG_VOICE_GOEMON",
+        "INP_BIG_VOICE_FUJIKO"
+      ],
+      "inputTransform": "sum_inputs_to_trials",
+      "denominatorInputIds": [
+        "INP_BIG_VOICE_LUPIN",
+        "INP_BIG_VOICE_JIGEN",
+        "INP_BIG_VOICE_ZENIGATA",
+        "INP_BIG_VOICE_GOEMON",
+        "INP_BIG_VOICE_FUJIKO"
+      ],
+      "difficultyParticipation": "EXCLUDE",
+      "difficultyExclusionReason": "（SUPER）BIG回数は通常時だけでなく不二子TIME中の連続ボーナスにも依存し、通常ゲーム数から1G目成功ボイス試行数への共通Exposureを安全に固定できないため。",
+      "userReason": "1G目成功時は設定別ボイス選択率が公開されており、5種類を一体で評価できます。難易度の低い2コマ目押しのため、1G目成功時だけ数える運用とします。"
     }
   ],
   "evidence": [],
@@ -346,17 +428,6 @@
         "displayOrder": 120,
         "options": [
           {
-            "value": "VOICE_FUJIKO",
-            "label": "枚数調整時 不二子ボイス（設定5以上）",
-            "allowedSettings": [
-              "SET_5",
-              "SET_6"
-            ],
-            "sourceEvidenceIds": [
-              "RE_VOICE_FUJIKO"
-            ]
-          },
-          {
             "value": "JUDGE_8",
             "label": "パチンコジャッジ 8図柄（設定2以上）",
             "allowedSettings": [
@@ -390,13 +461,15 @@
     "NORMAL": "通常時ボーナス",
     "SMALL_ROLE": "通常時小役",
     "BIG_BONUS": "（SUPER）BIG中",
-    "EVIDENCE": "設定確定情報"
+    "EVIDENCE": "設定確定情報",
+    "BIG_VOICE_1G": "（SUPER）BIG 1G目 技術介入ボイス"
   },
   "uiCategoryDescriptions": {
     "NORMAL": "打-WIN LITEの「通常ゲーム数」「通常中ボーナス詳細情報」から入力します。",
     "SMALL_ROLE": "打-WIN LITEの「通常時小役詳細情報」から入力します。平行・斜めプラムだけを使用します。",
     "BIG_BONUS": "打-WIN LITEの「ボーナス中詳細情報」から平行・斜めプラム回数を入力します。",
-    "PREDECESSOR": "遊技開始前に台メニューで確認できる場合だけ入力します。確認できない項目は空欄のままにしてください。"
+    "PREDECESSOR": "遊技開始前に台メニューで確認できる場合だけ入力します。確認できない項目は空欄のままにしてください。",
+    "BIG_VOICE_1G": "（SUPER）BIGの1G目に枚数調整を成功したときのボイスだけ入力します。2G目以降のボイスは入力しません。"
   },
   "difficultyAnalysis": {
     "targetGames": [
