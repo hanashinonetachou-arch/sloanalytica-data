@@ -1,0 +1,347 @@
+{
+  "schemaVersion": "selection-data-v1",
+  "machineId": "LB_KELLOT_5_ND05H",
+  "machineDataVersion": "0.1.0",
+  "uiCategoryLabels": {
+    "NORMAL": "通常時ボーナス",
+    "BONUS_COLOR": "ボーナス色",
+    "EVIDENCE": "設定確定情報"
+  },
+  "inputs": [
+    {
+      "id": "INP_NORMAL_GAMES",
+      "name": "通常ゲーム数",
+      "type": "integer",
+      "category": "NORMAL",
+      "unit": "G",
+      "displayOrder": 1,
+      "inferenceRole": "INCLUDE_PRIMARY",
+      "defaultValue": 0,
+      "observationScope": "SELF_PLAY",
+      "sessionDifferenceHelper": false,
+      "description": "【暫定版】スロプラNEXTで取得可能な実戦データを調査中です。調査結果により小役などの設定推測要素・入力項目を追加または変更する場合があります。現在はボーナス間の通常ゲーム数を直接入力してください。"
+    },
+    {
+      "id": "INP_BB_PLUS",
+      "name": "SBB＋BB",
+      "type": "counter",
+      "category": "NORMAL",
+      "unit": "回",
+      "displayOrder": 2,
+      "inferenceRole": "INCLUDE_PRIMARY",
+      "defaultValue": 0,
+      "parentInputId": "INP_NORMAL_GAMES",
+      "description": "SUPER BIG BONUSとBIG BONUSの合計回数を入力します。"
+    },
+    {
+      "id": "INP_RB",
+      "name": "REG",
+      "type": "counter",
+      "category": "NORMAL",
+      "unit": "回",
+      "displayOrder": 3,
+      "inferenceRole": "INCLUDE_PRIMARY",
+      "defaultValue": 0,
+      "parentInputId": "INP_NORMAL_GAMES",
+      "description": "REGULAR BONUS回数を入力します。"
+    },
+    {
+      "id": "INP_RED_HEAD",
+      "name": "赤7頭ボーナス",
+      "type": "counter",
+      "category": "BONUS_COLOR",
+      "unit": "回",
+      "displayOrder": 10,
+      "inferenceRole": "INCLUDE_SUPPORT",
+      "defaultValue": null,
+      "description": "赤7頭で入賞したSBB・BB・REGの合計回数を入力します。"
+    },
+    {
+      "id": "INP_WHITE_HEAD",
+      "name": "白7頭ボーナス",
+      "type": "counter",
+      "category": "BONUS_COLOR",
+      "unit": "回",
+      "displayOrder": 11,
+      "inferenceRole": "INCLUDE_SUPPORT",
+      "defaultValue": null,
+      "description": "白7頭で入賞したSBB・BB・REGの合計回数を入力します。"
+    }
+  ],
+  "features": [
+    {
+      "researchFeatureId": "RF_BONUS_OUTCOME",
+      "featureId": "FEAT_BONUS_OUTCOME",
+      "adoptionCategory": "INCLUDE_PRIMARY",
+      "minimumSample": 300,
+      "sampleRecommendation": 5000,
+      "weight": 1.0,
+      "numeratorInputId": "INP_BB_PLUS",
+      "denominatorInputId": "INP_NORMAL_GAMES",
+      "categoryInputIds": [
+        "INP_RB"
+      ],
+      "residualCategoryLabel": "NO_BONUS",
+      "difficultyParticipation": "INCLUDE",
+      "difficultyExposure": {
+        "mode": "per_game",
+        "factor": 1.0,
+        "quality": "EXACT",
+        "basisId": "NORMAL_GAMES"
+      },
+      "userReason": "通常時のSBB＋BBとREGを一体評価します。特にREG確率は高設定ほど大きく上昇し、ボーナス出現率が本機の主要な設定推測要素です。"
+    },
+    {
+      "researchFeatureId": "RF_BONUS_COLOR",
+      "featureId": "FEAT_BONUS_COLOR",
+      "adoptionCategory": "INCLUDE_SUPPORT",
+      "minimumSample": 1,
+      "sampleRecommendation": 30,
+      "weight": 1.0,
+      "numeratorInputId": "INP_RED_HEAD",
+      "denominatorInputId": "INP_WHITE_HEAD",
+      "categoryInputIds": [
+        "INP_WHITE_HEAD"
+      ],
+      "inputTransform": "sum_inputs_to_trials",
+      "denominatorInputIds": [
+        "INP_RED_HEAD",
+        "INP_WHITE_HEAD"
+      ],
+      "difficultyParticipation": "EXCLUDE",
+      "difficultyExclusionReason": "通常時ボーナスFeatureと同じボーナス事象の属性を再利用するため、共通Difficultyでは二重計上を避けて除外する。",
+      "userReason": "赤7頭は奇数設定、白7頭は偶数設定で優遇されるため、成立ボーナスの色構成を奇偶判別の補助として評価します。"
+    },
+    {
+      "researchFeatureId": "RF_BELL",
+      "featureId": "FEAT_BELL_EXCLUDED",
+      "adoptionCategory": "EXCLUDE",
+      "userReason": "設定差はあるが、スロプラNEXTで正確に取得できる項目・集計範囲の確認待ち。"
+    },
+    {
+      "researchFeatureId": "RF_CHERRY",
+      "featureId": "FEAT_CHERRY_EXCLUDED",
+      "adoptionCategory": "EXCLUDE",
+      "userReason": "設定差はあるが、スロプラNEXTで正確に取得できる項目・集計範囲の確認待ち。"
+    },
+    {
+      "researchFeatureId": "RF_PARALLEL_ORANGE",
+      "featureId": "FEAT_PARALLEL_ORANGE_EXCLUDED",
+      "adoptionCategory": "EXCLUDE",
+      "userReason": "設定差はあるが、スロプラNEXTで正確に取得できる項目・集計範囲の確認待ち。"
+    },
+    {
+      "researchFeatureId": "RF_DIAGONAL_ORANGE",
+      "featureId": "FEAT_DIAGONAL_ORANGE_EXCLUDED",
+      "adoptionCategory": "EXCLUDE",
+      "userReason": "設定差はあるが、スロプラNEXTで正確に取得できる項目・集計範囲の確認待ち。"
+    },
+    {
+      "researchFeatureId": "RF_CONFIRMED_ROLE",
+      "featureId": "FEAT_CONFIRMED_ROLE_EXCLUDED",
+      "adoptionCategory": "EXCLUDE",
+      "userReason": "設定差は大きいが低頻度で、スロプラNEXT調査も未完了のため暫定版では不採用。"
+    }
+  ],
+  "evidenceUi": {
+    "groups": [
+      {
+        "groupId": "KELLOT_BIG_END",
+        "label": "BIG終了画面",
+        "selectionMode": "multi",
+        "displayOrder": 100,
+        "options": [
+          {
+            "value": "SILVER",
+            "label": "銀（設定2以上）",
+            "allowedSettings": [
+              "SET_2",
+              "SET_3",
+              "SET_4",
+              "SET_5",
+              "SET_6"
+            ],
+            "sourceEvidenceIds": [
+              "RE_BIG_END_2PLUS"
+            ]
+          },
+          {
+            "value": "GOLD1",
+            "label": "金①（設定4以上）",
+            "allowedSettings": [
+              "SET_4",
+              "SET_5",
+              "SET_6"
+            ],
+            "sourceEvidenceIds": [
+              "RE_BIG_END_4PLUS"
+            ]
+          },
+          {
+            "value": "GOLD2",
+            "label": "金②（設定5以上）",
+            "allowedSettings": [
+              "SET_5",
+              "SET_6"
+            ],
+            "sourceEvidenceIds": [
+              "RE_BIG_END_5PLUS"
+            ]
+          }
+        ]
+      },
+      {
+        "groupId": "KELLOT_REG_CUTIN",
+        "label": "REG目押し成功時カットイン",
+        "selectionMode": "multi",
+        "displayOrder": 110,
+        "options": [
+          {
+            "value": "SILVER",
+            "label": "銀（設定2以上）",
+            "allowedSettings": [
+              "SET_2",
+              "SET_3",
+              "SET_4",
+              "SET_5",
+              "SET_6"
+            ],
+            "sourceEvidenceIds": [
+              "RE_REG_CUTIN_2PLUS"
+            ]
+          },
+          {
+            "value": "GOLD1",
+            "label": "金①（設定4以上）",
+            "allowedSettings": [
+              "SET_4",
+              "SET_5",
+              "SET_6"
+            ],
+            "sourceEvidenceIds": [
+              "RE_REG_CUTIN_4PLUS"
+            ]
+          },
+          {
+            "value": "GOLD2",
+            "label": "金②（設定5以上）",
+            "allowedSettings": [
+              "SET_5",
+              "SET_6"
+            ],
+            "sourceEvidenceIds": [
+              "RE_REG_CUTIN_5PLUS"
+            ]
+          }
+        ]
+      },
+      {
+        "groupId": "KELLOT_TROPHY",
+        "label": "ケロットトロフィー",
+        "selectionMode": "multi",
+        "displayOrder": 120,
+        "options": [
+          {
+            "value": "BRONZE",
+            "label": "銅（設定2以上）",
+            "allowedSettings": [
+              "SET_2",
+              "SET_3",
+              "SET_4",
+              "SET_5",
+              "SET_6"
+            ],
+            "sourceEvidenceIds": [
+              "RE_TROPHY_2PLUS"
+            ]
+          },
+          {
+            "value": "SILVER",
+            "label": "銀（設定3以上）",
+            "allowedSettings": [
+              "SET_3",
+              "SET_4",
+              "SET_5",
+              "SET_6"
+            ],
+            "sourceEvidenceIds": [
+              "RE_TROPHY_3PLUS"
+            ]
+          },
+          {
+            "value": "GOLD",
+            "label": "金（設定4以上）",
+            "allowedSettings": [
+              "SET_4",
+              "SET_5",
+              "SET_6"
+            ],
+            "sourceEvidenceIds": [
+              "RE_TROPHY_4PLUS"
+            ]
+          },
+          {
+            "value": "KELLOT",
+            "label": "ケロット柄（設定5以上）",
+            "allowedSettings": [
+              "SET_5",
+              "SET_6"
+            ],
+            "sourceEvidenceIds": [
+              "RE_TROPHY_5PLUS"
+            ]
+          },
+          {
+            "value": "RAINBOW",
+            "label": "虹（設定6）",
+            "allowedSettings": [
+              "SET_6"
+            ],
+            "sourceEvidenceIds": [
+              "RE_TROPHY_6"
+            ]
+          }
+        ]
+      },
+      {
+        "groupId": "KELLOT_FREEZE",
+        "label": "ロングフリーズ",
+        "selectionMode": "multi",
+        "displayOrder": 130,
+        "options": [
+          {
+            "value": "SET4PLUS",
+            "label": "発生（設定4以上）",
+            "allowedSettings": [
+              "SET_4",
+              "SET_5",
+              "SET_6"
+            ],
+            "sourceEvidenceIds": [
+              "RE_LONG_FREEZE_4PLUS"
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "difficultyAnalysis": {
+    "targetGames": [
+      1500,
+      3000,
+      7000
+    ],
+    "simulationsPerSetting": 4000,
+    "seed": 20260816,
+    "targetGameBasis": {
+      "basisId": "NORMAL_GAMES",
+      "label": "通常ゲーム",
+      "quality": "EXACT"
+    },
+    "calibrationAllowedExposureQualities": [
+      "EXACT",
+      "DERIVED",
+      "ESTIMATED"
+    ]
+  }
+}
