@@ -75,6 +75,10 @@ function buildFeature(rf,sf,inputIds){
     sampleRecommendation:sf.sampleRecommendation ?? sf.minimumSample ?? 1
   };
   if(sf.weight!=null) base.reliabilityProfile={weight:sf.weight};
+  if(sf.suppressedByFeatureIds!=null){
+    if(!Array.isArray(sf.suppressedByFeatureIds) || sf.suppressedByFeatureIds.length===0 || sf.suppressedByFeatureIds.some(id=>typeof id!=="string"||!id)) fail(`${sf.featureId}: invalid suppressedByFeatureIds`);
+    base.suppressedByFeatureIds=[...sf.suppressedByFeatureIds];
+  }
   if(sf.inputTransform!=null) base.inputTransform=sf.inputTransform;
   if(sf.trialCountInputId!=null){
     if(!inputIds.has(sf.trialCountInputId)) fail(`${sf.featureId}: unknown trialCountInputId ${sf.trialCountInputId}`);

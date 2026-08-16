@@ -39,6 +39,7 @@ function deriveCapabilities(pkg){
    if(f.calculationRole==="DISPLAY_ONLY") caps.add("reference_display");
    if(f.autoAccumulator || f.inputTransform==="auto_accumulator") caps.add("auto_accumulator");
    if(Array.isArray(f.denominatorAdjustments)&&f.denominatorAdjustments.length) caps.add("derived_denominator");
+   if(Array.isArray(f.suppressedByFeatureIds)&&f.suppressedByFeatureIds.length) caps.add("feature_suppression");
  }
  if((pkg.evidence?.evidences??[]).length) caps.add("evidence");
  if((pkg.inputs?.inputs??[]).some(i=>i.type==="multi_enum")) caps.add("evidence_multi_select");

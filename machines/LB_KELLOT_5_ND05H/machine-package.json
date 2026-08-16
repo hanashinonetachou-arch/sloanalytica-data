@@ -3,8 +3,8 @@
   "machine": {
     "schemaVersion": "2.0.0",
     "machineId": "LB_KELLOT_5_ND05H",
-    "machineDataVersion": "0.1.0",
-    "displayName": "スマスロケロット5BT（暫定版）",
+    "machineDataVersion": "0.2.0",
+    "displayName": "スマスロケロット5BT（スロプラNEXT未調査）",
     "modelName": "LBケロット5ND05H",
     "manufacturer": "山佐ネクスト",
     "settings": [
@@ -35,7 +35,7 @@
         "defaultValue": 0,
         "observationScope": "SELF_PLAY",
         "sessionDifferenceHelper": false,
-        "description": "【暫定版】スロプラNEXTで取得可能な実戦データを調査中です。調査結果により小役などの設定推測要素・入力項目を追加または変更する場合があります。現在はボーナス間の通常ゲーム数を直接入力してください。",
+        "description": "【スロプラNEXT未調査】スロプラNEXTで取得できる実戦データの詳細は後日確認予定です。現在は通常ゲーム数を直接入力し、小役は実戦中に手動でカウントした項目だけ入力してください。数えていない小役は空欄のままにしてください。",
         "minimum": 0
       },
       {
@@ -65,12 +65,64 @@
         "minimum": 0
       },
       {
+        "id": "INP_BELL",
+        "name": "ベル",
+        "type": "counter",
+        "category": "SMALL_ROLE",
+        "unit": "回",
+        "displayOrder": 10,
+        "inferenceRole": "INCLUDE_PRIMARY",
+        "defaultValue": null,
+        "parentInputId": "INP_NORMAL_GAMES",
+        "description": "ボーナス同時当選の有無にかかわらず、通常時に手動でカウントしたベル回数を入力します。数えていない場合は空欄のままにしてください。",
+        "minimum": 0
+      },
+      {
+        "id": "INP_CHERRY",
+        "name": "チェリー",
+        "type": "counter",
+        "category": "SMALL_ROLE",
+        "unit": "回",
+        "displayOrder": 11,
+        "inferenceRole": "INCLUDE_PRIMARY",
+        "defaultValue": null,
+        "parentInputId": "INP_NORMAL_GAMES",
+        "description": "ボーナス同時当選の有無にかかわらず、通常時に手動でカウントしたチェリー回数を入力します。数えていない場合は空欄のままにしてください。",
+        "minimum": 0
+      },
+      {
+        "id": "INP_PARALLEL_ORANGE",
+        "name": "平行オレンジ",
+        "type": "counter",
+        "category": "SMALL_ROLE",
+        "unit": "回",
+        "displayOrder": 12,
+        "inferenceRole": "INCLUDE_PRIMARY",
+        "defaultValue": null,
+        "parentInputId": "INP_NORMAL_GAMES",
+        "description": "ボーナス同時当選の有無にかかわらず、通常時に手動でカウントした平行オレンジ回数を入力します。数えていない場合は空欄のままにしてください。",
+        "minimum": 0
+      },
+      {
+        "id": "INP_DIAGONAL_ORANGE",
+        "name": "斜めオレンジ",
+        "type": "counter",
+        "category": "SMALL_ROLE",
+        "unit": "回",
+        "displayOrder": 13,
+        "inferenceRole": "INCLUDE_PRIMARY",
+        "defaultValue": null,
+        "parentInputId": "INP_NORMAL_GAMES",
+        "description": "ボーナス同時当選の有無にかかわらず、通常時に手動でカウントした斜めオレンジ回数を入力します。数えていない場合は空欄のままにしてください。",
+        "minimum": 0
+      },
+      {
         "id": "INP_RED_HEAD",
         "name": "赤7頭ボーナス",
         "type": "counter",
         "category": "BONUS_COLOR",
         "unit": "回",
-        "displayOrder": 10,
+        "displayOrder": 20,
         "inferenceRole": "INCLUDE_SUPPORT",
         "defaultValue": null,
         "description": "赤7頭で入賞したSBB・BB・REGの合計回数を入力します。",
@@ -82,7 +134,7 @@
         "type": "counter",
         "category": "BONUS_COLOR",
         "unit": "回",
-        "displayOrder": 11,
+        "displayOrder": 21,
         "inferenceRole": "INCLUDE_SUPPORT",
         "defaultValue": null,
         "description": "白7頭で入賞したSBB・BB・REGの合計回数を入力します。",
@@ -213,6 +265,9 @@
         "reliabilityProfile": {
           "weight": 1
         },
+        "suppressedByFeatureIds": [
+          "FEAT_SMALL_ROLE_OUTCOME"
+        ],
         "numeratorInputId": "INP_BB_PLUS",
         "denominatorInputId": "INP_NORMAL_GAMES",
         "categoryInputIds": [
@@ -257,6 +312,82 @@
         "sourceEvidenceRefs": [
           "SRC_1GEKI_SETTING",
           "SRC_DMM_MACHINE"
+        ]
+      },
+      {
+        "featureId": "FEAT_SMALL_ROLE_OUTCOME",
+        "name": "通常時4小役（ベル・チェリー・平行/斜めオレンジ）",
+        "adoptionCategory": "INCLUDE_PRIMARY",
+        "calculationRole": "PROBABILITY",
+        "probabilityEngineUsage": true,
+        "modelType": "marginal_multinomial",
+        "minimumSample": 500,
+        "sampleRecommendation": 5000,
+        "reliabilityProfile": {
+          "weight": 1
+        },
+        "numeratorInputId": "INP_BELL",
+        "denominatorInputId": "INP_NORMAL_GAMES",
+        "categoryInputIds": [
+          "INP_CHERRY",
+          "INP_PARALLEL_ORANGE",
+          "INP_DIAGONAL_ORANGE"
+        ],
+        "optionalCategoryInputIds": [
+          "INP_BELL",
+          "INP_CHERRY",
+          "INP_PARALLEL_ORANGE",
+          "INP_DIAGONAL_ORANGE"
+        ],
+        "probabilities": {},
+        "categoryLabels": [
+          "BELL",
+          "CHERRY",
+          "PARALLEL_ORANGE",
+          "DIAGONAL_ORANGE"
+        ],
+        "categoryProbabilities": {
+          "SET_1": [
+            0.14285714285714285,
+            0.04132231404958678,
+            0.010940919037199124,
+            0.0053390282968499726
+          ],
+          "SET_2": [
+            0.14492753623188406,
+            0.041841004184100423,
+            0.011049723756906077,
+            0.005431830526887562
+          ],
+          "SET_3": [
+            0.14492753623188406,
+            0.043859649122807015,
+            0.0111731843575419,
+            0.0055248618784530384
+          ],
+          "SET_4": [
+            0.14705882352941177,
+            0.04504504504504505,
+            0.011402508551881414,
+            0.005646527385657821
+          ],
+          "SET_5": [
+            0.15151515151515152,
+            0.046296296296296294,
+            0.01152073732718894,
+            0.0058445353594389245
+          ],
+          "SET_6": [
+            0.15384615384615385,
+            0.047619047619047616,
+            0.01177856301531213,
+            0.006134969325153374
+          ]
+        },
+        "sourceEvidenceRefs": [
+          "SRC_1GEKI_SETTING",
+          "SRC_1GEKI_SMALL_ROLE",
+          "SRC_PGABU_MACHINE"
         ]
       },
       {
@@ -590,6 +721,13 @@
         "pageName": "スロプラNEXT スマスロケロット5BT",
         "url": "https://www.yamasa-next.co.jp/slp/slktool/0E",
         "checkedAt": "2026-08-16"
+      },
+      {
+        "id": "SRC_PGABU_MACHINE",
+        "classification": "ANALYSIS",
+        "pageName": "スマスロケロット5BT 機種情報",
+        "url": "https://p-gabu.jp/guideworks/machinecontents/detail/7094",
+        "checkedAt": "2026-08-17"
       }
     ]
   },
@@ -621,9 +759,40 @@
         ]
       },
       {
+        "id": "AUTO_SMALL_ROLE",
+        "title": "通常時小役",
+        "displayOrder": 2,
+        "items": [
+          {
+            "type": "input",
+            "inputId": "INP_BELL",
+            "label": "ベル",
+            "widget": "counter"
+          },
+          {
+            "type": "input",
+            "inputId": "INP_CHERRY",
+            "label": "チェリー",
+            "widget": "counter"
+          },
+          {
+            "type": "input",
+            "inputId": "INP_PARALLEL_ORANGE",
+            "label": "平行オレンジ",
+            "widget": "counter"
+          },
+          {
+            "type": "input",
+            "inputId": "INP_DIAGONAL_ORANGE",
+            "label": "斜めオレンジ",
+            "widget": "counter"
+          }
+        ]
+      },
+      {
         "id": "AUTO_BONUS_COLOR",
         "title": "ボーナス色",
-        "displayOrder": 2,
+        "displayOrder": 3,
         "items": [
           {
             "type": "input",
@@ -642,7 +811,7 @@
       {
         "id": "AUTO_EVIDENCE",
         "title": "設定確定情報",
-        "displayOrder": 3,
+        "displayOrder": 4,
         "items": [
           {
             "type": "input",
@@ -674,16 +843,25 @@
   },
   "selectionSummary": {
     "schemaVersion": "selection-summary-v1",
-    "evaluatedCount": 7,
-    "selectedCount": 2,
-    "rejectedCount": 5,
+    "evaluatedCount": 4,
+    "selectedCount": 3,
+    "rejectedCount": 1,
     "selected": [
       {
         "featureId": "FEAT_BONUS_OUTCOME",
         "name": "通常時 ボーナス（SBB+BB・RB）",
-        "reason": "通常時のSBB＋BBとREGを一体評価します。特にREG確率は高設定ほど大きく上昇し、ボーナス出現率が本機の主要な設定推測要素です。",
+        "reason": "小役を数えていない実戦でも設定推測できるよう、通常時のSBB＋BBとREGをフォールバックとして利用します。小役を1項目でも入力した場合は、同時当選による情報重複を避けるため自動的に推測計算から外れます。",
         "requiredTrials": {
           "value": 12582,
+          "unit": "通常ゲーム"
+        }
+      },
+      {
+        "featureId": "FEAT_SMALL_ROLE_OUTCOME",
+        "name": "通常時4小役（ベル・チェリー・平行/斜めオレンジ）",
+        "reason": "ベル・チェリー・平行オレンジ・斜めオレンジには設定差があり、特に高頻度のベルとチェリーは実戦的な情報量があります。手動で数えた項目だけを一体評価し、未入力の小役は0回ではなく未観測として扱います。",
+        "requiredTrials": {
+          "value": 3143,
           "unit": "通常ゲーム"
         }
       },
@@ -699,45 +877,9 @@
     ],
     "rejected": [
       {
-        "featureId": "FEAT_BELL_EXCLUDED",
-        "name": "通常時 ベル",
-        "reason": "設定差はあるが、スロプラNEXTで正確に取得できる項目・集計範囲の確認待ち。",
-        "requiredTrials": {
-          "value": 7667,
-          "unit": "通常ゲーム"
-        }
-      },
-      {
-        "featureId": "FEAT_CHERRY_EXCLUDED",
-        "name": "通常時 チェリー",
-        "reason": "設定差はあるが、スロプラNEXTで正確に取得できる項目・集計範囲の確認待ち。",
-        "requiredTrials": {
-          "value": 7847,
-          "unit": "通常ゲーム"
-        }
-      },
-      {
-        "featureId": "FEAT_PARALLEL_ORANGE_EXCLUDED",
-        "name": "通常時 平行オレンジ",
-        "reason": "設定差はあるが、スロプラNEXTで正確に取得できる項目・集計範囲の確認待ち。",
-        "requiredTrials": {
-          "value": 117291,
-          "unit": "通常ゲーム"
-        }
-      },
-      {
-        "featureId": "FEAT_DIAGONAL_ORANGE_EXCLUDED",
-        "name": "通常時 斜めオレンジ",
-        "reason": "設定差はあるが、スロプラNEXTで正確に取得できる項目・集計範囲の確認待ち。",
-        "requiredTrials": {
-          "value": 65922,
-          "unit": "通常ゲーム"
-        }
-      },
-      {
         "featureId": "FEAT_CONFIRMED_ROLE_EXCLUDED",
         "name": "通常時 確定役",
-        "reason": "設定差は大きいが低頻度で、スロプラNEXT調査も未完了のため暫定版では不採用。",
+        "reason": "設定差は大きいものの出現頻度が低く、1日の実戦では安定した判別材料になりにくいため不採用。",
         "requiredTrials": {
           "value": 48902,
           "unit": "通常ゲーム"
@@ -748,7 +890,7 @@
   "reliability": {},
   "metadata": {
     "machineId": "LB_KELLOT_5_ND05H",
-    "displayName": "スマスロケロット5BT（暫定版）",
+    "displayName": "スマスロケロット5BT（スロプラNEXT未調査）",
     "settings": [
       "SET_1",
       "SET_2",

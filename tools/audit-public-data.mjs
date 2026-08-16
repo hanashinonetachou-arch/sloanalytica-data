@@ -10,7 +10,7 @@ export const KNOWN_CAPABILITIES = new Set([
   'binomial', 'multinomial', 'poisson', 'conditional_partial_multinomial',
   'conditional_partial_binomial', 'marginal_multinomial', 'evidence',
   'reference_display', 'auto_accumulator', 'evidence_multi_select', 'derived_denominator',
-  'difficulty_display',
+  'feature_suppression', 'difficulty_display',
 ]);
 
 const MODEL_CAPABILITY = {
@@ -75,6 +75,7 @@ function capabilityUsage(machineData, result, scope) {
     if (capability) used.add(capability);
     else if (isNonEmptyString(feature.modelType)) issue(result, 'error', scope, `unknown modelType: ${feature.modelType}`);
     if (feature.calculationRole === 'DISPLAY_ONLY' || feature.probabilityEngineUsage === false) used.add('reference_display');
+    if (Array.isArray(feature.suppressedByFeatureIds) && feature.suppressedByFeatureIds.length > 0) used.add('feature_suppression');
   }
   if ((machineData.evidence?.evidences ?? []).length > 0) used.add('evidence');
   if ((machineData.inputs?.inputs ?? []).some(input => input?.type === 'multi_enum')) used.add('evidence_multi_select');
@@ -113,6 +114,7 @@ function validateMachineData(machineData, result, machineId, filePath) {
   else {
     const featureIds = features.map(feature => feature?.featureId).filter(isNonEmptyString);
     for (const duplicate of duplicateValues(featureIds)) issue(result, 'error', scope, `Feature IDが重複しています: ${duplicate}`);
+    const featureIdSet = new Set(featureIds);
     for (const feature of features) {
       const featureScope = `${scope} feature:${feature?.featureId ?? '(IDなし)'}`;
       if (!isNonEmptyString(feature?.featureId)) issue(result, 'error', featureScope, 'Feature IDがありません');
@@ -121,6 +123,16 @@ function validateMachineData(machineData, result, machineId, filePath) {
       if (feature?.calculationRole === 'DISPLAY_ONLY' && feature?.probabilityEngineUsage !== false) issue(result, 'error', featureScope, 'DISPLAY_ONLYのFeatureはprobabilityEngineUsage: falseである必要があります');
       if (feature?.calculationRole === 'DISPLAY_ONLY' && feature?.adoptionCategory === 'INCLUDE_PRIMARY') issue(result, 'error', featureScope, 'DISPLAY_ONLYのFeatureをINCLUDE_PRIMARYにはできません');
       if (feature?.weight !== undefined && (!Number.isFinite(feature.weight) || feature.weight <= 0)) issue(result, 'error', featureScope, `無効なweightです: ${String(feature.weight)}`);
+      if (feature?.suppressedByFeatureIds !== undefined) {
+        if (!Array.isArray(feature.suppressedByFeatureIds) || feature.suppressedByFeatureIds.length === 0) issue(result, 'error', featureScope, 'suppressedByFeatureIdsは空でない配列である必要があります');
+        else {
+          for (const duplicate of duplicateValues(feature.suppressedByFeatureIds)) issue(result, 'error', featureScope, `suppressedByFeatureIdsが重複しています: ${duplicate}`);
+          for (const id of feature.suppressedByFeatureIds) {
+            if (!featureIdSet.has(id)) issue(result, 'error', featureScope, `未定義のFeature IDをsuppressedByFeatureIdsで参照しています: ${String(id)}`);
+            if (id === feature.featureId) issue(result, 'error', featureScope, 'Featureは自身をsuppressedByFeatureIdsで参照できません');
+          }
+        }
+      }
       const map = feature?.categoryProbabilities ?? feature?.probabilities;
       validateSettingProbabilityMap(map, Array.isArray(settings) ? settings : [], result, featureScope, feature?.calculationRole !== 'DISPLAY_ONLY');
     }

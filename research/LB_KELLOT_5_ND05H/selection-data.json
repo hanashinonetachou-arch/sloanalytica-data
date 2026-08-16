@@ -1,11 +1,12 @@
 {
   "schemaVersion": "selection-data-v1",
   "machineId": "LB_KELLOT_5_ND05H",
-  "machineDataVersion": "0.1.0",
+  "machineDataVersion": "0.2.0",
   "uiCategoryLabels": {
     "NORMAL": "通常時ボーナス",
     "BONUS_COLOR": "ボーナス色",
-    "EVIDENCE": "設定確定情報"
+    "EVIDENCE": "設定確定情報",
+    "SMALL_ROLE": "通常時小役"
   },
   "inputs": [
     {
@@ -19,7 +20,7 @@
       "defaultValue": 0,
       "observationScope": "SELF_PLAY",
       "sessionDifferenceHelper": false,
-      "description": "【暫定版】スロプラNEXTで取得可能な実戦データを調査中です。調査結果により小役などの設定推測要素・入力項目を追加または変更する場合があります。現在はボーナス間の通常ゲーム数を直接入力してください。"
+      "description": "【スロプラNEXT未調査】スロプラNEXTで取得できる実戦データの詳細は後日確認予定です。現在は通常ゲーム数を直接入力し、小役は実戦中に手動でカウントした項目だけ入力してください。数えていない小役は空欄のままにしてください。"
     },
     {
       "id": "INP_BB_PLUS",
@@ -46,12 +47,60 @@
       "description": "REGULAR BONUS回数を入力します。"
     },
     {
+      "id": "INP_BELL",
+      "name": "ベル",
+      "type": "counter",
+      "category": "SMALL_ROLE",
+      "unit": "回",
+      "displayOrder": 10,
+      "inferenceRole": "INCLUDE_PRIMARY",
+      "defaultValue": null,
+      "parentInputId": "INP_NORMAL_GAMES",
+      "description": "ボーナス同時当選の有無にかかわらず、通常時に手動でカウントしたベル回数を入力します。数えていない場合は空欄のままにしてください。"
+    },
+    {
+      "id": "INP_CHERRY",
+      "name": "チェリー",
+      "type": "counter",
+      "category": "SMALL_ROLE",
+      "unit": "回",
+      "displayOrder": 11,
+      "inferenceRole": "INCLUDE_PRIMARY",
+      "defaultValue": null,
+      "parentInputId": "INP_NORMAL_GAMES",
+      "description": "ボーナス同時当選の有無にかかわらず、通常時に手動でカウントしたチェリー回数を入力します。数えていない場合は空欄のままにしてください。"
+    },
+    {
+      "id": "INP_PARALLEL_ORANGE",
+      "name": "平行オレンジ",
+      "type": "counter",
+      "category": "SMALL_ROLE",
+      "unit": "回",
+      "displayOrder": 12,
+      "inferenceRole": "INCLUDE_PRIMARY",
+      "defaultValue": null,
+      "parentInputId": "INP_NORMAL_GAMES",
+      "description": "ボーナス同時当選の有無にかかわらず、通常時に手動でカウントした平行オレンジ回数を入力します。数えていない場合は空欄のままにしてください。"
+    },
+    {
+      "id": "INP_DIAGONAL_ORANGE",
+      "name": "斜めオレンジ",
+      "type": "counter",
+      "category": "SMALL_ROLE",
+      "unit": "回",
+      "displayOrder": 13,
+      "inferenceRole": "INCLUDE_PRIMARY",
+      "defaultValue": null,
+      "parentInputId": "INP_NORMAL_GAMES",
+      "description": "ボーナス同時当選の有無にかかわらず、通常時に手動でカウントした斜めオレンジ回数を入力します。数えていない場合は空欄のままにしてください。"
+    },
+    {
       "id": "INP_RED_HEAD",
       "name": "赤7頭ボーナス",
       "type": "counter",
       "category": "BONUS_COLOR",
       "unit": "回",
-      "displayOrder": 10,
+      "displayOrder": 20,
       "inferenceRole": "INCLUDE_SUPPORT",
       "defaultValue": null,
       "description": "赤7頭で入賞したSBB・BB・REGの合計回数を入力します。"
@@ -62,7 +111,7 @@
       "type": "counter",
       "category": "BONUS_COLOR",
       "unit": "回",
-      "displayOrder": 11,
+      "displayOrder": 21,
       "inferenceRole": "INCLUDE_SUPPORT",
       "defaultValue": null,
       "description": "白7頭で入賞したSBB・BB・REGの合計回数を入力します。"
@@ -82,6 +131,40 @@
         "INP_RB"
       ],
       "residualCategoryLabel": "NO_BONUS",
+      "difficultyParticipation": "EXCLUDE",
+      "difficultyExposure": {
+        "mode": "per_game",
+        "factor": 1.0,
+        "quality": "EXACT",
+        "basisId": "NORMAL_GAMES"
+      },
+      "userReason": "小役を数えていない実戦でも設定推測できるよう、通常時のSBB＋BBとREGをフォールバックとして利用します。小役を1項目でも入力した場合は、同時当選による情報重複を避けるため自動的に推測計算から外れます。",
+      "suppressedByFeatureIds": [
+        "FEAT_SMALL_ROLE_OUTCOME"
+      ],
+      "difficultyExclusionReason": "小役を1項目でも観測した場合は4小役Featureを優先し、このボーナス出現率Featureをフォールバックとして停止するため、全小役観測を前提とする共通Difficultyでは二重計上を避けて除外する。"
+    },
+    {
+      "researchFeatureId": "RF_SMALL_ROLE_OUTCOME",
+      "featureId": "FEAT_SMALL_ROLE_OUTCOME",
+      "adoptionCategory": "INCLUDE_PRIMARY",
+      "minimumSample": 500,
+      "sampleRecommendation": 5000,
+      "weight": 1.0,
+      "numeratorInputId": "INP_BELL",
+      "denominatorInputId": "INP_NORMAL_GAMES",
+      "categoryInputIds": [
+        "INP_CHERRY",
+        "INP_PARALLEL_ORANGE",
+        "INP_DIAGONAL_ORANGE"
+      ],
+      "modelTypeOverride": "marginal_multinomial",
+      "optionalCategoryInputIds": [
+        "INP_BELL",
+        "INP_CHERRY",
+        "INP_PARALLEL_ORANGE",
+        "INP_DIAGONAL_ORANGE"
+      ],
       "difficultyParticipation": "INCLUDE",
       "difficultyExposure": {
         "mode": "per_game",
@@ -89,7 +172,7 @@
         "quality": "EXACT",
         "basisId": "NORMAL_GAMES"
       },
-      "userReason": "通常時のSBB＋BBとREGを一体評価します。特にREG確率は高設定ほど大きく上昇し、ボーナス出現率が本機の主要な設定推測要素です。"
+      "userReason": "ベル・チェリー・平行オレンジ・斜めオレンジには設定差があり、特に高頻度のベルとチェリーは実戦的な情報量があります。手動で数えた項目だけを一体評価し、未入力の小役は0回ではなく未観測として扱います。"
     },
     {
       "researchFeatureId": "RF_BONUS_COLOR",
@@ -113,34 +196,10 @@
       "userReason": "赤7頭は奇数設定、白7頭は偶数設定で優遇されるため、成立ボーナスの色構成を奇偶判別の補助として評価します。"
     },
     {
-      "researchFeatureId": "RF_BELL",
-      "featureId": "FEAT_BELL_EXCLUDED",
-      "adoptionCategory": "EXCLUDE",
-      "userReason": "設定差はあるが、スロプラNEXTで正確に取得できる項目・集計範囲の確認待ち。"
-    },
-    {
-      "researchFeatureId": "RF_CHERRY",
-      "featureId": "FEAT_CHERRY_EXCLUDED",
-      "adoptionCategory": "EXCLUDE",
-      "userReason": "設定差はあるが、スロプラNEXTで正確に取得できる項目・集計範囲の確認待ち。"
-    },
-    {
-      "researchFeatureId": "RF_PARALLEL_ORANGE",
-      "featureId": "FEAT_PARALLEL_ORANGE_EXCLUDED",
-      "adoptionCategory": "EXCLUDE",
-      "userReason": "設定差はあるが、スロプラNEXTで正確に取得できる項目・集計範囲の確認待ち。"
-    },
-    {
-      "researchFeatureId": "RF_DIAGONAL_ORANGE",
-      "featureId": "FEAT_DIAGONAL_ORANGE_EXCLUDED",
-      "adoptionCategory": "EXCLUDE",
-      "userReason": "設定差はあるが、スロプラNEXTで正確に取得できる項目・集計範囲の確認待ち。"
-    },
-    {
       "researchFeatureId": "RF_CONFIRMED_ROLE",
       "featureId": "FEAT_CONFIRMED_ROLE_EXCLUDED",
       "adoptionCategory": "EXCLUDE",
-      "userReason": "設定差は大きいが低頻度で、スロプラNEXT調査も未完了のため暫定版では不採用。"
+      "userReason": "設定差は大きいものの出現頻度が低く、1日の実戦では安定した判別材料になりにくいため不採用。"
     }
   ],
   "evidenceUi": {

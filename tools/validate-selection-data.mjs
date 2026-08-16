@@ -19,6 +19,19 @@ export function validateSelectionData(s,research=null){
  }
  const featIds=features.map(x=>x.featureId), featSet=new Set(featIds);
  if(featSet.size!==featIds.length) errors.push("duplicate featureId");
+ for(const f of features){
+   if(f.suppressedByFeatureIds!==undefined){
+     if(!Array.isArray(f.suppressedByFeatureIds) || f.suppressedByFeatureIds.length===0) errors.push(`${f.featureId}: suppressedByFeatureIds must be a non-empty array`);
+     else {
+       const unique=new Set(f.suppressedByFeatureIds);
+       if(unique.size!==f.suppressedByFeatureIds.length) errors.push(`${f.featureId}: duplicate suppressedByFeatureIds`);
+       for(const id of f.suppressedByFeatureIds){
+         if(!featSet.has(id)) errors.push(`${f.featureId}: unknown suppressedByFeatureId ${id}`);
+         if(id===f.featureId) errors.push(`${f.featureId}: cannot suppress itself`);
+       }
+     }
+   }
+ }
  const researchIds=new Set((research?.features??[]).map(x=>x.researchFeatureId));
  if(research && s.machineId!==research.machine?.machineId) errors.push("machineId mismatch with ResearchData");
  for(const f of features){

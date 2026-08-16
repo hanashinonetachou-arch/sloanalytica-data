@@ -66,3 +66,21 @@ test('catalogのSHA・サイズが一致していてもCRLFの公開MachineData�
     assert.match(errors, /LF改行/);
   } finally { cleanup(root); }
 });
+
+test('feature_suppression requires a valid referenced feature and declared capability',()=>{
+ const root=writeFixture(data=>{
+   data.features.features.push({featureId:'FEAT_SECOND',modelType:'binomial',calculationRole:'PROBABILITY',probabilityEngineUsage:true,numeratorInputId:'INP_HITS',denominatorInputId:'INP_GAMES',probabilities:{SET_1:.1,SET_6:.2}});
+   data.features.features[0].suppressedByFeatureIds=['FEAT_SECOND'];
+ });
+ try{
+   let result=auditRepository(root);
+   assert.ok(result.errors.some(x=>x.message.includes('feature_suppression')||x.message.includes('requiredCapabilities')));
+   const catalogPath=path.join(root,'catalog.json'); const catalog=JSON.parse(fs.readFileSync(catalogPath,'utf8'));
+   catalog.machines[0].requiredCapabilities.push('feature_suppression'); fs.writeFileSync(catalogPath,JSON.stringify(catalog));
+   result=auditRepository(root); assert.equal(result.errors.length,0);
+   const packagePath=path.join(root,'machines','TEST_MACHINE','machine-package.json'); const data=JSON.parse(fs.readFileSync(packagePath,'utf8'));
+   data.features.features[0].suppressedByFeatureIds=['MISSING']; const bytes=Buffer.from(JSON.stringify(data)); fs.writeFileSync(packagePath,bytes);
+   catalog.machines[0].sha256=crypto.createHash('sha256').update(bytes).digest('hex'); catalog.machines[0].packageSizeBytes=bytes.length; fs.writeFileSync(catalogPath,JSON.stringify(catalog));
+   result=auditRepository(root); assert.ok(result.errors.some(x=>x.message.includes('未定義のFeature ID')));
+ } finally { cleanup(root); }
+});

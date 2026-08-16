@@ -177,3 +177,18 @@ test('marginal_multinomialはnumeratorInputIdも任意観測カテゴリにで�
  const f=out.features.features.find(x=>x.featureId==='F_MM_NUM_OPT');
  assert.deepEqual(f.optionalCategoryInputIds,['A','B','C']);
 });
+
+test('builder preserves feature suppression references for runtime fallback control',()=>{
+ const r={...research,features:[
+  {researchFeatureId:'RF_A',name:'A',candidateModel:'binomial',settingValues:{SET_1:{probability:.1},SET_6:{probability:.2}},sourceRefs:['SRC1']},
+  {researchFeatureId:'RF_B',name:'B',candidateModel:'binomial',settingValues:{SET_1:{probability:.2},SET_6:{probability:.3}},sourceRefs:['SRC1']}
+ ]};
+ const s={schemaVersion:'selection-data-v1',machineId:'M',machineDataVersion:'0.1.0',inputs:[
+  {id:'D',name:'D',type:'integer',category:'P',displayOrder:1},{id:'A',name:'A',type:'counter',category:'P',displayOrder:2},{id:'B',name:'B',type:'counter',category:'P',displayOrder:3}
+ ],features:[
+  {researchFeatureId:'RF_A',featureId:'FEAT_A',adoptionCategory:'INCLUDE_PRIMARY',numeratorInputId:'A',denominatorInputId:'D',suppressedByFeatureIds:['FEAT_B']},
+  {researchFeatureId:'RF_B',featureId:'FEAT_B',adoptionCategory:'INCLUDE_PRIMARY',numeratorInputId:'B',denominatorInputId:'D'}
+ ]};
+ const out=buildMachineData(r,s);
+ assert.deepEqual(out.features.features.find(f=>f.featureId==='FEAT_A').suppressedByFeatureIds,['FEAT_B']);
+});

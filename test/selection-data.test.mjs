@@ -38,3 +38,15 @@ test('derived_event_rate validates source feature and category dependencies',()=
   s.features[1].difficultyExposure.sourceCategoryId='NOPE';
   const bad=validateSelectionData(s,r); assert.equal(bad.ok,false); assert.ok(bad.errors.some(e=>e.includes('unknown sourceCategoryId')));
 });
+
+test('suppressedByFeatureIds must reference another selected feature',()=>{
+ const research={machine:{machineId:'M'},features:[{researchFeatureId:'RF1'},{researchFeatureId:'RF2'}]};
+ const base={schemaVersion:'selection-data-v1',machineId:'M',machineDataVersion:'0.1.0',inputs:[],features:[
+  {researchFeatureId:'RF1',featureId:'FEAT_A',adoptionCategory:'INCLUDE_PRIMARY',suppressedByFeatureIds:['FEAT_B']},
+  {researchFeatureId:'RF2',featureId:'FEAT_B',adoptionCategory:'INCLUDE_PRIMARY'}
+ ]};
+ assert.equal(validateSelectionData(base,research).ok,true);
+ const bad=structuredClone(base); bad.features[0].suppressedByFeatureIds=['MISSING'];
+ const result=validateSelectionData(bad,research);
+ assert.equal(result.ok,false); assert.ok(result.errors.some(e=>e.includes('unknown suppressedByFeatureId')));
+});
