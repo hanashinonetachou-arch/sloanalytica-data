@@ -16,10 +16,12 @@ function writeJson(p, value) {
   fs.writeFileSync(p, JSON.stringify(value, null, 2) + '\n', 'utf8');
 }
 function fail(message) { throw new Error(message); }
-function runNode(args, label) {
-  const r = spawnSync(process.execPath, args, { cwd: ROOT, encoding: 'utf8' });
+function runNpm(script, label) {
+  const npm = process.platform === 'win32' ? 'npm.cmd' : 'npm';
+  const r = spawnSync(npm, ['run', script], { cwd: ROOT, encoding: 'utf8' });
   if (r.stdout) process.stdout.write(r.stdout);
   if (r.stderr) process.stderr.write(r.stderr);
+  if (r.error) fail(`${label} could not start: ${r.error.message}`);
   if (r.status !== 0) fail(`${label} failed with exit code ${r.status}`);
 }
 
@@ -74,8 +76,8 @@ try {
     console.log('CHECK mode: generated artifacts were not written');
   }
 
-  runNode(['--test', '--test-concurrency=1', 'test/*.test.mjs'], 'test');
-  runNode([path.join(ROOT, 'tools', 'audit-public-data.mjs')], 'audit');
+  runNpm('test', 'test');
+  runNpm('audit', 'audit');
 
   const scores = (difficulty.targets ?? []).map(t => `${t.games}G=${t.score}`).join(' / ');
   const included = difficulty.coverage?.includedNumericFeatureCount ?? 0;
