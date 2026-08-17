@@ -79,16 +79,26 @@ function syncExistingCatalogMetadata(catalogPath, machinePath, machinePackage, m
   const nextVersion = machinePackage.machine?.machineDataVersion;
   const nextSha = crypto.createHash('sha256').update(bytes).digest('hex');
   const nextSize = bytes.length;
-  const changed = entry.machineDataVersion !== nextVersion || entry.sha256 !== nextSha || entry.packageSizeBytes !== nextSize;
+  const featureModelCapabilities = [...new Set((machinePackage.features?.features ?? [])
+    .map(feature => feature?.modelType)
+    .filter(modelType => typeof modelType === 'string' && modelType.length > 0))];
+  const previousCapabilities = Array.isArray(entry.requiredCapabilities) ? entry.requiredCapabilities : [];
+  const nextCapabilities = [...new Set([...previousCapabilities, ...featureModelCapabilities])];
+  const changed = entry.machineDataVersion !== nextVersion ||
+    entry.sha256 !== nextSha ||
+    entry.packageSizeBytes !== nextSize ||
+    JSON.stringify(previousCapabilities) !== JSON.stringify(nextCapabilities);
   entry.machineDataVersion = nextVersion;
   entry.sha256 = nextSha;
   entry.packageSizeBytes = nextSize;
+  entry.requiredCapabilities = nextCapabilities;
   if (changed) catalog.generatedAt = new Date().toISOString();
   writeJson(catalogPath, catalog);
   console.log(`Catalog metadata sync: ${machineId}${changed ? ' (updated)' : ' (unchanged)'}`);
   console.log(`  version: ${entry.machineDataVersion}`);
   console.log(`  size: ${entry.packageSizeBytes}`);
   console.log(`  sha256: ${entry.sha256}`);
+  console.log(`  capabilities: ${entry.requiredCapabilities.join(', ')}`);
   return true;
 }
 
@@ -192,7 +202,7 @@ try {
       }
     }
     if (fs.existsSync(machinePath)) {
-      const r = spawnSync('git', ['checkout', '--', path.relative(ROOT, machinePath)], { cwd: ROOT, encoding: 'utf8' });
+      const r = spawnSync('git', ['checkout', '--', path.relative(ROOT, p)], { cwd: ROOT, encoding: 'utf8' });
       if (r.status !== 0 && fs.existsSync(machinePath)) fs.rmSync(machinePath);
     }
   }
