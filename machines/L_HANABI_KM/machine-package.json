@@ -1,0 +1,932 @@
+{
+  "schemaVersion": 1,
+  "machine": {
+    "schemaVersion": "2.0.0",
+    "machineId": "L_HANABI_KM",
+    "machineDataVersion": "0.1.0",
+    "displayName": "スマスロ ハナビ（未調査版）",
+    "modelName": "L／ハナビ／KM",
+    "manufacturer": "アクロス",
+    "settings": [
+      "SET_1",
+      "SET_2",
+      "SET_5",
+      "SET_6"
+    ],
+    "packagePolicy": {
+      "offlineCapable": true,
+      "containsImages": false,
+      "containsExecutableCode": false
+    }
+  },
+  "inputs": {
+    "schemaVersion": "2.0.0",
+    "inputs": [
+      {
+        "id": "INP_PREDECESSOR_GAMES",
+        "name": "着席時ゲーム数",
+        "type": "integer",
+        "category": "PREDECESSOR",
+        "unit": "G",
+        "displayOrder": 1,
+        "inferenceRole": "INCLUDE_PRIMARY",
+        "defaultValue": 0,
+        "observationScope": "PREDECESSOR_SNAPSHOT",
+        "sessionDifferenceHelper": false,
+        "description": "着席時のデータカウンターに表示されている総ゲーム数を入力します。RT中を含むカウンター表示を使用してください。",
+        "minimum": 0
+      },
+      {
+        "id": "INP_PREDECESSOR_BIG_COUNT",
+        "name": "着席時BIG",
+        "type": "counter",
+        "category": "PREDECESSOR",
+        "unit": "回",
+        "displayOrder": 2,
+        "inferenceRole": "INCLUDE_PRIMARY",
+        "defaultValue": 0,
+        "observationScope": "PREDECESSOR_SNAPSHOT",
+        "parentInputId": "INP_PREDECESSOR_GAMES",
+        "description": "着席時のBIG回数を入力します。",
+        "minimum": 0
+      },
+      {
+        "id": "INP_PREDECESSOR_REG_COUNT",
+        "name": "着席時REG",
+        "type": "counter",
+        "category": "PREDECESSOR",
+        "unit": "回",
+        "displayOrder": 3,
+        "inferenceRole": "INCLUDE_PRIMARY",
+        "defaultValue": 0,
+        "observationScope": "PREDECESSOR_SNAPSHOT",
+        "parentInputId": "INP_PREDECESSOR_GAMES",
+        "description": "着席時のREG回数を入力します。",
+        "minimum": 0
+      },
+      {
+        "id": "INP_NORMAL_GAMES",
+        "name": "通常時ゲーム数（RT含む）",
+        "type": "integer",
+        "category": "NORMAL",
+        "unit": "G",
+        "displayOrder": 10,
+        "inferenceRole": "INCLUDE_PRIMARY",
+        "defaultValue": 0,
+        "observationScope": "SELF_PLAY",
+        "sessionDifferenceHelper": false,
+        "description": "自分の通常時G数を入力します。花火チャレンジ・花火GAMEは含め、BIG/REG消化中は除きます。",
+        "minimum": 0
+      },
+      {
+        "id": "INP_BIG_COUNT",
+        "name": "BIG",
+        "type": "counter",
+        "category": "NORMAL",
+        "unit": "回",
+        "displayOrder": 11,
+        "inferenceRole": "INCLUDE_PRIMARY",
+        "defaultValue": 0,
+        "parentInputId": "INP_NORMAL_GAMES",
+        "description": "自分のBIG回数を入力します。",
+        "minimum": 0
+      },
+      {
+        "id": "INP_REG_COUNT",
+        "name": "REG",
+        "type": "counter",
+        "category": "NORMAL",
+        "unit": "回",
+        "displayOrder": 12,
+        "inferenceRole": "INCLUDE_PRIMARY",
+        "defaultValue": 0,
+        "parentInputId": "INP_NORMAL_GAMES",
+        "description": "自分のREG回数を入力します。",
+        "minimum": 0
+      },
+      {
+        "id": "INP_NORMAL_BELL_GAMES",
+        "name": "風鈴観測ゲーム数",
+        "type": "integer",
+        "category": "NORMAL",
+        "unit": "G",
+        "displayOrder": 13,
+        "inferenceRole": "INCLUDE_PRIMARY",
+        "defaultValue": 0,
+        "observationScope": "SELF_PLAY",
+        "description": "通常時の風鈴を観測したゲーム数を入力します。RT中は含めません。ユニメモの通常時区間に合わせてください。",
+        "minimum": 0
+      },
+      {
+        "id": "INP_NORMAL_BELL_TOTAL",
+        "name": "風鈴合算",
+        "type": "counter",
+        "category": "NORMAL",
+        "unit": "回",
+        "displayOrder": 14,
+        "inferenceRole": "INCLUDE_PRIMARY",
+        "defaultValue": null,
+        "parentInputId": "INP_NORMAL_BELL_GAMES",
+        "description": "通常時の風鈴A＋風鈴Bの合計回数を入力します。未取得の場合は空欄にしてください。",
+        "minimum": 0
+      },
+      {
+        "id": "INP_BIG_GAME_TRIALS",
+        "name": "BIG中ゲーム数",
+        "type": "integer",
+        "category": "BIG_GAME",
+        "unit": "G",
+        "displayOrder": 30,
+        "inferenceRole": "INCLUDE_PRIMARY",
+        "defaultValue": 0,
+        "observationScope": "SELF_PLAY",
+        "description": "実際に消化したBIG中の総ゲーム数を入力します。初版ではBIG回数から自動計算しません。",
+        "minimum": 0
+      },
+      {
+        "id": "INP_BIG_BELL_B",
+        "name": "斜め風鈴（風鈴B）",
+        "type": "counter",
+        "category": "BIG_GAME",
+        "unit": "回",
+        "displayOrder": 31,
+        "inferenceRole": "INCLUDE_PRIMARY",
+        "defaultValue": null,
+        "parentInputId": "INP_BIG_GAME_TRIALS",
+        "description": "BIG中の斜め風鈴（風鈴B）回数を入力します。",
+        "minimum": 0
+      },
+      {
+        "id": "INP_BIG_SCATTER",
+        "name": "バラケ目",
+        "type": "counter",
+        "category": "BIG_GAME",
+        "unit": "回",
+        "displayOrder": 32,
+        "inferenceRole": "INCLUDE_PRIMARY",
+        "defaultValue": null,
+        "parentInputId": "INP_BIG_GAME_TRIALS",
+        "description": "BIG中のバラケ目回数を入力します。",
+        "minimum": 0
+      },
+      {
+        "id": "INP_REG_GAME_TRIALS",
+        "name": "REG中ゲーム数",
+        "type": "integer",
+        "category": "REG_GAME",
+        "unit": "G",
+        "displayOrder": 40,
+        "inferenceRole": "INCLUDE_PRIMARY",
+        "defaultValue": 0,
+        "observationScope": "SELF_PLAY",
+        "description": "実際に消化したREG中の総ゲーム数を入力します。1枚役ハズシで変動するためREG回数から自動計算しません。",
+        "minimum": 0
+      },
+      {
+        "id": "INP_REG_ONE_COIN",
+        "name": "1枚役",
+        "type": "counter",
+        "category": "REG_GAME",
+        "unit": "回",
+        "displayOrder": 41,
+        "inferenceRole": "INCLUDE_PRIMARY",
+        "defaultValue": null,
+        "parentInputId": "INP_REG_GAME_TRIALS",
+        "description": "REG中の1枚役成立回数を入力します。",
+        "minimum": 0
+      },
+      {
+        "id": "INP_REG_SCATTER",
+        "name": "バラケ目",
+        "type": "counter",
+        "category": "REG_GAME",
+        "unit": "回",
+        "displayOrder": 42,
+        "inferenceRole": "INCLUDE_PRIMARY",
+        "defaultValue": null,
+        "parentInputId": "INP_REG_GAME_TRIALS",
+        "description": "REG中のバラケ目回数を入力します。",
+        "minimum": 0
+      },
+      {
+        "id": "INP_HC_GAMES",
+        "name": "花火チャレンジゲーム数",
+        "type": "integer",
+        "category": "HC",
+        "unit": "G",
+        "displayOrder": 50,
+        "inferenceRole": "INCLUDE_PRIMARY",
+        "defaultValue": 0,
+        "observationScope": "SELF_PLAY",
+        "description": "実際に消化した花火チャレンジの総ゲーム数を入力します。",
+        "minimum": 0
+      },
+      {
+        "id": "INP_HC_MISS",
+        "name": "ハズレ",
+        "type": "counter",
+        "category": "HC",
+        "unit": "回",
+        "displayOrder": 51,
+        "inferenceRole": "INCLUDE_PRIMARY",
+        "defaultValue": null,
+        "parentInputId": "INP_HC_GAMES",
+        "description": "花火チャレンジ中のハズレ回数を入力します。",
+        "minimum": 0
+      },
+      {
+        "id": "INP_HG_GAMES",
+        "name": "花火GAMEゲーム数",
+        "type": "integer",
+        "category": "HG",
+        "unit": "G",
+        "displayOrder": 60,
+        "inferenceRole": "INCLUDE_PRIMARY",
+        "defaultValue": 0,
+        "observationScope": "SELF_PLAY",
+        "description": "実際に消化した花火GAMEの総ゲーム数を入力します。",
+        "minimum": 0
+      },
+      {
+        "id": "INP_HG_MISS",
+        "name": "ハズレ",
+        "type": "counter",
+        "category": "HG",
+        "unit": "回",
+        "displayOrder": 61,
+        "inferenceRole": "INCLUDE_PRIMARY",
+        "defaultValue": null,
+        "parentInputId": "INP_HG_GAMES",
+        "description": "花火GAME中のハズレ回数を入力します。",
+        "minimum": 0
+      },
+      {
+        "id": "INP_EVI_HANABI_REG_END",
+        "name": "REG終了画面",
+        "type": "multi_enum",
+        "category": "EVIDENCE",
+        "unit": "",
+        "displayOrder": 100,
+        "inferenceRole": "INCLUDE_SUPPORT",
+        "options": [
+          {
+            "key": "PEACE_2PLUS",
+            "label": "ピース花火（設定2以上）",
+            "value": "PEACE_2PLUS"
+          }
+        ],
+        "defaultValue": []
+      }
+    ]
+  },
+  "features": {
+    "schemaVersion": "2.0.0",
+    "features": [
+      {
+        "featureId": "FEAT_PREDECESSOR_BONUS_OUTCOME",
+        "name": "着席前BIG・REG内訳",
+        "adoptionCategory": "INCLUDE_PRIMARY",
+        "calculationRole": "PROBABILITY",
+        "probabilityEngineUsage": true,
+        "modelType": "multinomial",
+        "minimumSample": 300,
+        "sampleRecommendation": 5000,
+        "reliabilityProfile": {
+          "weight": 1
+        },
+        "numeratorInputId": "INP_PREDECESSOR_BIG_COUNT",
+        "denominatorInputId": "INP_PREDECESSOR_GAMES",
+        "categoryInputIds": [
+          "INP_PREDECESSOR_REG_COUNT"
+        ],
+        "probabilities": {},
+        "categoryLabels": [
+          "BIG",
+          "REG"
+        ],
+        "categoryProbabilities": {
+          "SET_1": [
+            0.0033568311513930854,
+            0.0025329280648429585
+          ],
+          "SET_2": [
+            0.003417634996582365,
+            0.0027925160569673272
+          ],
+          "SET_5": [
+            0.0035100035100035106,
+            0.0031887755102040817
+          ],
+          "SET_6": [
+            0.0036616623947272058,
+            0.0035398230088495575
+          ]
+        },
+        "categoryConditioning": {
+          "excludedCategories": [],
+          "normalization": "RENORMALIZE_INCLUDED",
+          "residualCategory": "NO_BONUS"
+        },
+        "sourceEvidenceRefs": [
+          "SRC_NANAPRESS_SPEC",
+          "SRC_1GEKI",
+          "SRC_1GEKI_PRACTICE"
+        ]
+      },
+      {
+        "featureId": "FEAT_BONUS_OUTCOME",
+        "name": "自分のBIG・REG",
+        "adoptionCategory": "INCLUDE_PRIMARY",
+        "calculationRole": "PROBABILITY",
+        "probabilityEngineUsage": true,
+        "modelType": "multinomial",
+        "minimumSample": 300,
+        "sampleRecommendation": 5000,
+        "reliabilityProfile": {
+          "weight": 1
+        },
+        "suppressedByFeatureIds": [
+          "FEAT_NORMAL_BELL_TOTAL"
+        ],
+        "numeratorInputId": "INP_BIG_COUNT",
+        "denominatorInputId": "INP_NORMAL_GAMES",
+        "categoryInputIds": [
+          "INP_REG_COUNT"
+        ],
+        "probabilities": {},
+        "categoryLabels": [
+          "BIG",
+          "REG"
+        ],
+        "categoryProbabilities": {
+          "SET_1": [
+            0.0033568311513930854,
+            0.0025329280648429585
+          ],
+          "SET_2": [
+            0.003417634996582365,
+            0.0027925160569673272
+          ],
+          "SET_5": [
+            0.0035100035100035106,
+            0.0031887755102040817
+          ],
+          "SET_6": [
+            0.0036616623947272058,
+            0.0035398230088495575
+          ]
+        },
+        "categoryConditioning": {
+          "excludedCategories": [],
+          "normalization": "RENORMALIZE_INCLUDED",
+          "residualCategory": "NO_BONUS"
+        },
+        "sourceEvidenceRefs": [
+          "SRC_NANAPRESS_SPEC",
+          "SRC_1GEKI",
+          "SRC_1GEKI_PRACTICE"
+        ]
+      },
+      {
+        "featureId": "FEAT_NORMAL_BELL_TOTAL",
+        "name": "通常時 風鈴合算",
+        "adoptionCategory": "INCLUDE_PRIMARY",
+        "calculationRole": "PROBABILITY",
+        "probabilityEngineUsage": true,
+        "modelType": "binomial",
+        "minimumSample": 300,
+        "sampleRecommendation": 3000,
+        "reliabilityProfile": {
+          "weight": 1
+        },
+        "numeratorInputId": "INP_NORMAL_BELL_TOTAL",
+        "denominatorInputId": "INP_NORMAL_BELL_GAMES",
+        "displayFormat": "ratio_1_over_n",
+        "probabilities": {
+          "SET_1": 0.10330578512396695,
+          "SET_2": 0.10582010582010583,
+          "SET_5": 0.11037527593818984,
+          "SET_6": 0.11574074074074073
+        },
+        "sourceEvidenceRefs": [
+          "SRC_NANAPRESS_SPEC",
+          "SRC_NANAPRESS_SETTING",
+          "SRC_1GEKI",
+          "SRC_PACHISEVEN"
+        ]
+      },
+      {
+        "featureId": "FEAT_BIG_OUTCOME",
+        "name": "BIG中 斜め風鈴・バラケ目",
+        "adoptionCategory": "INCLUDE_PRIMARY",
+        "calculationRole": "PROBABILITY",
+        "probabilityEngineUsage": true,
+        "modelType": "marginal_multinomial",
+        "minimumSample": 20,
+        "sampleRecommendation": 200,
+        "reliabilityProfile": {
+          "weight": 1
+        },
+        "numeratorInputId": "INP_BIG_BELL_B",
+        "denominatorInputId": "INP_BIG_GAME_TRIALS",
+        "categoryInputIds": [
+          "INP_BIG_SCATTER"
+        ],
+        "optionalCategoryInputIds": [
+          "INP_BIG_BELL_B",
+          "INP_BIG_SCATTER"
+        ],
+        "probabilities": {},
+        "categoryLabels": [
+          "BELL_B",
+          "SCATTER_PATTERN"
+        ],
+        "categoryProbabilities": {
+          "SET_1": [
+            0.1,
+            0.00006103515625
+          ],
+          "SET_2": [
+            0.14285714285714285,
+            0.00006103515625
+          ],
+          "SET_5": [
+            0.1,
+            0.001220703125
+          ],
+          "SET_6": [
+            0.14285714285714285,
+            0.001220703125
+          ]
+        },
+        "sourceEvidenceRefs": [
+          "SRC_NANAPRESS_SPEC",
+          "SRC_NANAPRESS_SETTING",
+          "SRC_NANAPRESS_TOOL",
+          "SRC_1GEKI_PRACTICE"
+        ]
+      },
+      {
+        "featureId": "FEAT_REG_OUTCOME",
+        "name": "REG中 1枚役・バラケ目",
+        "adoptionCategory": "INCLUDE_PRIMARY",
+        "calculationRole": "PROBABILITY",
+        "probabilityEngineUsage": true,
+        "modelType": "marginal_multinomial",
+        "minimumSample": 20,
+        "sampleRecommendation": 150,
+        "reliabilityProfile": {
+          "weight": 1
+        },
+        "numeratorInputId": "INP_REG_ONE_COIN",
+        "denominatorInputId": "INP_REG_GAME_TRIALS",
+        "categoryInputIds": [
+          "INP_REG_SCATTER"
+        ],
+        "optionalCategoryInputIds": [
+          "INP_REG_ONE_COIN",
+          "INP_REG_SCATTER"
+        ],
+        "probabilities": {},
+        "categoryLabels": [
+          "ONE_COIN_ROLE",
+          "SCATTER_PATTERN"
+        ],
+        "categoryProbabilities": {
+          "SET_1": [
+            0.125,
+            0.00006103515625
+          ],
+          "SET_2": [
+            0.125,
+            0.00006103515625
+          ],
+          "SET_5": [
+            0.14285714285714285,
+            0.00006103515625
+          ],
+          "SET_6": [
+            0.14285714285714285,
+            0.0009154994049253868
+          ]
+        },
+        "sourceEvidenceRefs": [
+          "SRC_NANAPRESS_SPEC",
+          "SRC_NANAPRESS_SETTING",
+          "SRC_NANAPRESS_TOOL",
+          "SRC_1GEKI_PRACTICE"
+        ]
+      },
+      {
+        "featureId": "FEAT_HC_MISS",
+        "name": "花火チャレンジ中ハズレ",
+        "adoptionCategory": "INCLUDE_PRIMARY",
+        "calculationRole": "PROBABILITY",
+        "probabilityEngineUsage": true,
+        "modelType": "binomial",
+        "minimumSample": 20,
+        "sampleRecommendation": 300,
+        "reliabilityProfile": {
+          "weight": 1
+        },
+        "numeratorInputId": "INP_HC_MISS",
+        "denominatorInputId": "INP_HC_GAMES",
+        "displayFormat": "ratio_1_over_n",
+        "probabilities": {
+          "SET_1": 0.2127659574468085,
+          "SET_2": 0.2222222222222222,
+          "SET_5": 0.23255813953488372,
+          "SET_6": 0.23809523809523808
+        },
+        "sourceEvidenceRefs": [
+          "SRC_NANAPRESS_SPEC",
+          "SRC_NANAPRESS_SETTING",
+          "SRC_NANAPRESS_TOOL",
+          "SRC_1GEKI_PRACTICE"
+        ]
+      },
+      {
+        "featureId": "FEAT_HG_MISS",
+        "name": "花火GAME中ハズレ",
+        "adoptionCategory": "INCLUDE_PRIMARY",
+        "calculationRole": "PROBABILITY",
+        "probabilityEngineUsage": true,
+        "modelType": "binomial",
+        "minimumSample": 20,
+        "sampleRecommendation": 250,
+        "reliabilityProfile": {
+          "weight": 1
+        },
+        "numeratorInputId": "INP_HG_MISS",
+        "denominatorInputId": "INP_HG_GAMES",
+        "displayFormat": "ratio_1_over_n",
+        "probabilities": {
+          "SET_1": 0.15625,
+          "SET_2": 0.16666666666666666,
+          "SET_5": 0.18518518518518517,
+          "SET_6": 0.18518518518518517
+        },
+        "sourceEvidenceRefs": [
+          "SRC_NANAPRESS_SPEC",
+          "SRC_NANAPRESS_SETTING",
+          "SRC_NANAPRESS_TOOL",
+          "SRC_1GEKI_PRACTICE"
+        ]
+      }
+    ]
+  },
+  "evidence": {
+    "version": "1.0.0",
+    "evidences": [
+      {
+        "id": "EVI_HANABI_REG_END_PEACE_2PLUS",
+        "name": "ピース花火（設定2以上）",
+        "displayName": "ピース花火（設定2以上）",
+        "inputId": "INP_EVI_HANABI_REG_END",
+        "triggerValue": "PEACE_2PLUS",
+        "confirmedSettings": [
+          "SET_2",
+          "SET_5",
+          "SET_6"
+        ],
+        "deniedSettings": [],
+        "hasImage": false,
+        "type": "SETTING_CONFIRMATION",
+        "sourceEvidenceRefs": [
+          "RE_REG_END_PEACE_2PLUS"
+        ]
+      }
+    ],
+    "sources": [
+      {
+        "id": "SRC_UNIVERSAL_OFFICIAL",
+        "classification": "OFFICIAL",
+        "pageName": "スマスロ ハナビ 公式製品情報",
+        "url": "https://www.universal-777.com/product/slot/hanabi_2026/",
+        "checkedAt": "2026-08-18"
+      },
+      {
+        "id": "SRC_UNIMEMO_OFFICIAL",
+        "classification": "OFFICIAL",
+        "pageName": "ユニメモ 対応機種一覧",
+        "url": "https://www.universal-777.com/fun/unimemo/",
+        "checkedAt": "2026-08-18"
+      },
+      {
+        "id": "SRC_NANAPRESS_SPEC",
+        "classification": "ANALYSIS",
+        "pageName": "スマスロ ハナビ ボーナス確率/機械割/小役確率",
+        "url": "https://nana-press.com/kaiseki/machine/1094/33269/",
+        "checkedAt": "2026-08-18"
+      },
+      {
+        "id": "SRC_NANAPRESS_SETTING",
+        "classification": "ANALYSIS",
+        "pageName": "スマスロ ハナビ 設定差・設定示唆まとめ",
+        "url": "https://nana-press.com/kaiseki/machine/1094/34886/",
+        "checkedAt": "2026-08-18"
+      },
+      {
+        "id": "SRC_NANAPRESS_TOOL",
+        "classification": "ANALYSIS",
+        "pageName": "スマスロ ハナビ 設定推測ツール（詳細版）",
+        "url": "https://nana-press.com/kaiseki/machine/1094/suisoku/",
+        "checkedAt": "2026-08-18"
+      },
+      {
+        "id": "SRC_1GEKI",
+        "classification": "ANALYSIS",
+        "pageName": "スマスロ ハナビ 解析攻略",
+        "url": "https://1geki.jp/slot/l_hanabi/",
+        "checkedAt": "2026-08-18"
+      },
+      {
+        "id": "SRC_1GEKI_PRACTICE",
+        "classification": "ANALYSIS",
+        "pageName": "スマスロ ハナビ 設定5・6実戦データ",
+        "url": "https://1geki.jp/slot/l_hanabi/7/",
+        "checkedAt": "2026-08-18"
+      },
+      {
+        "id": "SRC_PACHISEVEN",
+        "classification": "ANALYSIS",
+        "pageName": "スマスロ ハナビ 設定差・設定推測",
+        "url": "https://pachiseven.jp/machines/7313/cutout/4",
+        "checkedAt": "2026-08-18"
+      }
+    ]
+  },
+  "ui": {
+    "sections": [
+      {
+        "id": "AUTO_PREDECESSOR",
+        "title": "着席時データ",
+        "displayOrder": 1,
+        "items": [
+          {
+            "type": "input",
+            "inputId": "INP_PREDECESSOR_GAMES",
+            "label": "着席時ゲーム数",
+            "widget": "number"
+          },
+          {
+            "type": "input",
+            "inputId": "INP_PREDECESSOR_BIG_COUNT",
+            "label": "着席時BIG",
+            "widget": "counter"
+          },
+          {
+            "type": "input",
+            "inputId": "INP_PREDECESSOR_REG_COUNT",
+            "label": "着席時REG",
+            "widget": "counter"
+          }
+        ]
+      },
+      {
+        "id": "AUTO_NORMAL",
+        "title": "通常時",
+        "displayOrder": 2,
+        "items": [
+          {
+            "type": "input",
+            "inputId": "INP_NORMAL_GAMES",
+            "label": "通常時ゲーム数（RT含む）",
+            "widget": "number"
+          },
+          {
+            "type": "input",
+            "inputId": "INP_BIG_COUNT",
+            "label": "BIG",
+            "widget": "counter"
+          },
+          {
+            "type": "input",
+            "inputId": "INP_REG_COUNT",
+            "label": "REG",
+            "widget": "counter"
+          },
+          {
+            "type": "input",
+            "inputId": "INP_NORMAL_BELL_GAMES",
+            "label": "風鈴観測ゲーム数",
+            "widget": "number"
+          },
+          {
+            "type": "input",
+            "inputId": "INP_NORMAL_BELL_TOTAL",
+            "label": "風鈴合算",
+            "widget": "counter"
+          }
+        ]
+      },
+      {
+        "id": "AUTO_BIG_GAME",
+        "title": "ユニメモ BIG中",
+        "displayOrder": 3,
+        "items": [
+          {
+            "type": "input",
+            "inputId": "INP_BIG_GAME_TRIALS",
+            "label": "BIG中ゲーム数",
+            "widget": "number"
+          },
+          {
+            "type": "input",
+            "inputId": "INP_BIG_BELL_B",
+            "label": "斜め風鈴（風鈴B）",
+            "widget": "counter"
+          },
+          {
+            "type": "input",
+            "inputId": "INP_BIG_SCATTER",
+            "label": "バラケ目",
+            "widget": "counter"
+          }
+        ]
+      },
+      {
+        "id": "AUTO_REG_GAME",
+        "title": "ユニメモ REG中",
+        "displayOrder": 4,
+        "items": [
+          {
+            "type": "input",
+            "inputId": "INP_REG_GAME_TRIALS",
+            "label": "REG中ゲーム数",
+            "widget": "number"
+          },
+          {
+            "type": "input",
+            "inputId": "INP_REG_ONE_COIN",
+            "label": "1枚役",
+            "widget": "counter"
+          },
+          {
+            "type": "input",
+            "inputId": "INP_REG_SCATTER",
+            "label": "バラケ目",
+            "widget": "counter"
+          }
+        ]
+      },
+      {
+        "id": "AUTO_HC",
+        "title": "ユニメモ 花火チャレンジ",
+        "displayOrder": 5,
+        "items": [
+          {
+            "type": "input",
+            "inputId": "INP_HC_GAMES",
+            "label": "花火チャレンジゲーム数",
+            "widget": "number"
+          },
+          {
+            "type": "input",
+            "inputId": "INP_HC_MISS",
+            "label": "ハズレ",
+            "widget": "counter"
+          }
+        ]
+      },
+      {
+        "id": "AUTO_HG",
+        "title": "ユニメモ 花火GAME",
+        "displayOrder": 6,
+        "items": [
+          {
+            "type": "input",
+            "inputId": "INP_HG_GAMES",
+            "label": "花火GAMEゲーム数",
+            "widget": "number"
+          },
+          {
+            "type": "input",
+            "inputId": "INP_HG_MISS",
+            "label": "ハズレ",
+            "widget": "counter"
+          }
+        ]
+      },
+      {
+        "id": "AUTO_EVIDENCE",
+        "title": "設定確定情報",
+        "displayOrder": 7,
+        "items": [
+          {
+            "type": "input",
+            "inputId": "INP_EVI_HANABI_REG_END",
+            "label": "REG終了画面",
+            "widget": "multi_select"
+          }
+        ]
+      }
+    ]
+  },
+  "selectionSummary": {
+    "schemaVersion": "selection-summary-v1",
+    "evaluatedCount": 9,
+    "selectedCount": 7,
+    "rejectedCount": 2,
+    "selected": [
+      {
+        "featureId": "FEAT_PREDECESSOR_BONUS_OUTCOME",
+        "name": "着席前BIG・REG内訳",
+        "reason": "着席前の総ゲーム・BIG・REGを確認できる場合は、自分区間と独立した観測として利用します。",
+        "requiredTrials": {
+          "value": 20114,
+          "unit": "通常ゲーム（RT中を含み、ボーナス中を除く）"
+        }
+      },
+      {
+        "featureId": "FEAT_BONUS_OUTCOME",
+        "name": "自分のBIG・REG",
+        "reason": "特にREGに段階的な設定差があり、ユニメモ小役が未取得でも利用できるため採用します。通常時風鈴を観測した場合は二重評価を避けてフォールバック停止します。",
+        "requiredTrials": {
+          "value": 20114,
+          "unit": "通常ゲーム（RT中を含み、ボーナス中を除く）"
+        }
+      },
+      {
+        "featureId": "FEAT_NORMAL_BELL_TOTAL",
+        "name": "通常時 風鈴合算",
+        "reason": "風鈴合算は高頻度で設定1から6まで段階差があり、通常時の主力Featureとして採用します。",
+        "requiredTrials": {
+          "value": 4620,
+          "unit": "通常ゲーム（RT中を除く通常小役観測区間）"
+        }
+      },
+      {
+        "featureId": "FEAT_BIG_OUTCOME",
+        "name": "BIG中 斜め風鈴・バラケ目",
+        "reason": "斜め風鈴は偶奇、バラケ目は設定5以上の識別に強く、BIG中の重要Featureとして採用します。",
+        "requiredTrials": {
+          "value": 359,
+          "unit": "BIG消化1G"
+        }
+      },
+      {
+        "featureId": "FEAT_REG_OUTCOME",
+        "name": "REG中 1枚役・バラケ目",
+        "reason": "REG中1枚役は低設定群と高設定群、バラケ目は設定6の識別に利用できるため採用します。",
+        "requiredTrials": {
+          "value": 1526,
+          "unit": "REG消化1G"
+        }
+      },
+      {
+        "featureId": "FEAT_HC_MISS",
+        "name": "花火チャレンジ中ハズレ",
+        "reason": "花火チャレンジ中ハズレは段階的な設定差があり、実観測G数とハズレ回数を取得できる場合に採用します。",
+        "requiredTrials": {
+          "value": 1994,
+          "unit": "花火チャレンジ1G"
+        }
+      },
+      {
+        "featureId": "FEAT_HG_MISS",
+        "name": "花火GAME中ハズレ",
+        "reason": "花火GAME中ハズレは設定1/2と5/6の差が比較的大きく、実観測値を取得できる場合に採用します。",
+        "requiredTrials": {
+          "value": 1238,
+          "unit": "花火GAME1G"
+        }
+      }
+    ],
+    "rejected": [
+      {
+        "featureId": "FEAT_CHERRY_A2_EXCLUDED",
+        "name": "通常時チェリーA2",
+        "reason": "非単調で、風鈴より追加情報量が小さいため不採用です。",
+        "requiredTrials": {
+          "value": 29700,
+          "unit": "通常ゲーム"
+        }
+      },
+      {
+        "featureId": "FEAT_CHERRY_B_EXCLUDED",
+        "name": "通常時チェリーB",
+        "reason": "低頻度で設定差も小さいため不採用です。",
+        "requiredTrials": {
+          "value": 2111347,
+          "unit": "通常ゲーム"
+        }
+      }
+    ]
+  },
+  "reliability": {},
+  "metadata": {
+    "machineId": "L_HANABI_KM",
+    "displayName": "スマスロ ハナビ（未調査版）",
+    "settings": [
+      "SET_1",
+      "SET_2",
+      "SET_5",
+      "SET_6"
+    ]
+  },
+  "validation": {
+    "cases": []
+  },
+  "statistics": {}
+}
