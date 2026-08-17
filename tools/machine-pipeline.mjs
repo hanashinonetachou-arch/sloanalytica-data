@@ -24,6 +24,13 @@ function runNpm(script, label) {
   if (r.error) fail(`${label} could not start: ${r.error.message}`);
   if (r.status !== 0) fail(`${label} failed with exit code ${r.status}`);
 }
+function runNode(args, label) {
+  const r = spawnSync(process.execPath, args, { cwd: ROOT, encoding: 'utf8' });
+  if (r.stdout) process.stdout.write(r.stdout);
+  if (r.stderr) process.stderr.write(r.stderr);
+  if (r.error) fail(`${label} could not start: ${r.error.message}`);
+  if (r.status !== 0) fail(`${label} failed with exit code ${r.status}`);
+}
 
 const [machineId, ...flags] = process.argv.slice(2);
 if (!machineId || !/^[A-Z0-9_]+$/.test(machineId)) {
@@ -37,6 +44,9 @@ const selectionPath = path.join(researchDir, 'selection-data.json');
 const statisticsPath = path.join(researchDir, 'statistics-report.json');
 const difficultyPath = path.join(researchDir, 'difficulty-report.json');
 const machinePath = path.join(ROOT, 'machines', machineId, 'machine-package.json');
+const catalogPath = path.join(ROOT, 'catalog.json');
+const difficultyCatalogPath = path.join(ROOT, 'difficulty-catalog.json');
+let difficultyCatalogBackup = null;
 
 try {
   if (!fs.existsSync(researchPath)) fail(`ResearchData not found: ${path.relative(ROOT, researchPath)}`);
@@ -76,6 +86,21 @@ try {
     console.log('CHECK mode: generated artifacts were not written');
   }
 
+  const catalog = readJson(catalogPath);
+  const isPublished = (catalog.machines ?? []).some(m => m.machineId === machineId);
+  if (isPublished) {
+    if (checkOnly) difficultyCatalogBackup = fs.readFileSync(difficultyCatalogPath);
+    if (checkOnly) {
+      writeJson(statisticsPath, statistics);
+      writeJson(machinePath, machinePackage);
+      writeJson(difficultyPath, difficulty);
+    }
+    runNode(['tools/sync-machine-difficulty-catalog.mjs', machineId], 'difficulty catalog sync');
+    if (checkOnly) console.log('CHECK mode: Difficulty Catalog synced temporarily for contract tests');
+  } else {
+    console.log('Difficulty Catalog sync skipped: machine is not yet published in catalog.json');
+  }
+
   runNpm('test', 'test');
   runNpm('audit', 'audit');
 
@@ -90,5 +115,20 @@ try {
 } catch (error) {
   console.error(`PIPELINE FAILED: ${machineId}`);
   console.error(`ERROR: ${error instanceof Error ? error.message : String(error)}`);
-  process.exit(1);
+  process.exitCode = 1;
+} finally {
+  if (checkOnly) {
+    if (difficultyCatalogBackup) fs.writeFileSync(difficultyCatalogPath, difficultyCatalogBackup);
+    for (const p of [statisticsPath, difficultyPath]) {
+      if (fs.existsSync(p)) {
+        // Generated reports may already be tracked; restore checkout version when available.
+        const r = spawnSync('git', ['checkout', '--', path.relative(ROOT, p)], { cwd: ROOT, encoding: 'utf8' });
+        if (r.status !== 0 && fs.existsSync(p)) fs.rmSync(p);
+      }
+    }
+    if (fs.existsSync(machinePath)) {
+      const r = spawnSync('git', ['checkout', '--', path.relative(ROOT, machinePath)], { cwd: ROOT, encoding: 'utf8' });
+      if (r.status !== 0 && fs.existsSync(machinePath)) fs.rmSync(machinePath);
+    }
+  }
 }
