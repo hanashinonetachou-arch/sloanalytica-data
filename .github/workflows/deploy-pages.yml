@@ -72,12 +72,14 @@ jobs:
             if (!catalog || catalog.schemaVersion !== 1 || !Array.isArray(catalog.machines)) {
               throw new Error(`Invalid catalog: ${sourceCatalogPath}`);
             }
-            if (!fs.existsSync(sourceDifficultyPath)) {
-              throw new Error(`Missing difficulty catalog: ${sourceDifficultyPath}`);
-            }
 
             fs.mkdirSync(outputDir, { recursive: true });
-            fs.copyFileSync(sourceDifficultyPath, path.join(outputDir, 'difficulty-catalog.json'));
+            if (fs.existsSync(sourceDifficultyPath)) {
+              fs.copyFileSync(sourceDifficultyPath, path.join(outputDir, 'difficulty-catalog.json'));
+              catalog.difficultyCatalogUrl = `${BASE_URL}/${prefix}difficulty-catalog.json`;
+            } else {
+              delete catalog.difficultyCatalogUrl;
+            }
 
             for (const machine of catalog.machines) {
               const sourcePackage = path.join(sourceDir, 'machines', machine.machineId, 'machine-package.json');
@@ -101,7 +103,6 @@ jobs:
               machine.packageUrl = `${BASE_URL}/${prefix}machines/${encodeURIComponent(machine.machineId)}/machine-package.json`;
             }
 
-            catalog.difficultyCatalogUrl = `${BASE_URL}/${prefix}difficulty-catalog.json`;
             writeJson(path.join(outputDir, 'catalog.json'), catalog);
           }
 
