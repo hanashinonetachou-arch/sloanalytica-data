@@ -20,7 +20,6 @@ function visit(value, pointer, findings) {
   }
 }
 
-const USER_VISIBLE_ROOTS = ['inputs', 'features', 'ui', 'selectionSummary', 'evidence'];
 const failures = [];
 
 for (const entry of fs.readdirSync(MACHINES_DIR, { withFileTypes: true })) {
@@ -28,10 +27,17 @@ for (const entry of fs.readdirSync(MACHINES_DIR, { withFileTypes: true })) {
   const file = path.join(MACHINES_DIR, entry.name, 'machine-package.json');
   if (!fs.existsSync(file)) continue;
   const pkg = JSON.parse(fs.readFileSync(file, 'utf8'));
-  for (const root of USER_VISIBLE_ROOTS) {
-    if (!(root in pkg)) continue;
+  const visibleRoots = [
+    ['inputs', pkg.inputs],
+    ['features', pkg.features],
+    ['ui', pkg.ui],
+    ['selectionSummary', pkg.selectionSummary],
+    ['evidence/evidences', pkg.evidence?.evidences],
+  ];
+  for (const [root, value] of visibleRoots) {
+    if (value === undefined) continue;
     const findings = [];
-    visit(pkg[root], `/${root}`, findings);
+    visit(value, `/${root}`, findings);
     for (const finding of findings) failures.push({ machineId: entry.name, ...finding });
   }
 }
