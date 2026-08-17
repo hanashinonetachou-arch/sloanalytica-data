@@ -20,12 +20,13 @@ jobs:
   validate-machine-data:
     runs-on: ubuntu-latest
     permissions:
-      contents: read
+      contents: write
     steps:
       - name: Checkout
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
+          ref: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.ref || github.ref }}
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -54,16 +55,38 @@ jobs:
             echo 'has_machines=true' >> "$GITHUB_OUTPUT"
           fi
 
-      - name: Validate changed machines
+      - name: Build and validate changed machines
         if: steps.machines.outputs.has_machines == 'true'
         shell: bash
         run: |
           set -euo pipefail
           while IFS= read -r machine_id; do
             echo "::group::${machine_id}"
-            npm run machine:pipeline -- "$machine_id" --check
+            npm run machine:pipeline -- "$machine_id"
             echo '::endgroup::'
           done < /tmp/machine_ids.txt
+
+      - name: Commit generated artifacts
+        if: >-
+          github.event_name == 'pull_request' &&
+          steps.machines.outputs.has_machines == 'true' &&
+          github.event.pull_request.head.repo.full_name == github.repository
+        shell: bash
+        run: |
+          set -euo pipefail
+          if git diff --quiet && [[ -z "$(git status --porcelain)" ]]; then
+            echo 'Generated artifacts are already up to date.'
+            exit 0
+          fi
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add research/*/statistics-report.json research/*/difficulty-report.json machines/*/machine-package.json difficulty-catalog.json
+          if git diff --cached --quiet; then
+            echo 'No generated artifact changes to commit.'
+            exit 0
+          fi
+          git commit -m 'chore: refresh generated MachineData artifacts'
+          git push origin HEAD:${{ github.event.pull_request.head.ref }}
 
       - name: Repository tests
         if: steps.machines.outputs.has_machines != 'true'
