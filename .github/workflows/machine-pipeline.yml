@@ -1,0 +1,97 @@
+name: MachineData Pipeline
+
+on:
+  pull_request:
+    branches:
+      - prototype-multi-machine
+    paths:
+      - 'research/**/research-data.json'
+      - 'research/**/selection-data.json'
+      - 'tools/**'
+      - 'package.json'
+  workflow_dispatch:
+    inputs:
+      machine_id:
+        description: 'Machine ID to validate'
+        required: true
+        type: string
+
+jobs:
+  validate-machine-data:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.ref || github.ref }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Resolve machine IDs
+        id: machines
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
+            printf '%s\n' "${{ inputs.machine_id }}" > /tmp/machine_ids.txt
+          else
+            git diff --name-only "${{ github.event.pull_request.base.sha }}" "${{ github.event.pull_request.head.sha }}" \
+              | sed -nE 's#^research/([^/]+)/(research-data|selection-data)\.json$#\1#p' \
+              | sort -u > /tmp/machine_ids.txt
+          fi
+
+          if [[ ! -s /tmp/machine_ids.txt ]]; then
+            echo 'No machine-specific Research/Selection changes detected; running repository tests/audit only.'
+            echo 'has_machines=false' >> "$GITHUB_OUTPUT"
+          else
+            echo 'Machine IDs:'
+            cat /tmp/machine_ids.txt
+            echo 'has_machines=true' >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Build and validate changed machines
+        if: steps.machines.outputs.has_machines == 'true'
+        shell: bash
+        run: |
+          set -euo pipefail
+          while IFS= read -r machine_id; do
+            echo "::group::${machine_id}"
+            npm run machine:pipeline -- "$machine_id"
+            echo '::endgroup::'
+          done < /tmp/machine_ids.txt
+
+      - name: Commit generated artifacts
+        if: >-
+          github.event_name == 'pull_request' &&
+          steps.machines.outputs.has_machines == 'true' &&
+          github.event.pull_request.head.repo.full_name == github.repository
+        shell: bash
+        run: |
+          set -euo pipefail
+          if git diff --quiet && [[ -z "$(git status --porcelain)" ]]; then
+            echo 'Generated artifacts are already up to date.'
+            exit 0
+          fi
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add research/*/statistics-report.json research/*/difficulty-report.json machines/*/machine-package.json difficulty-catalog.json
+          if git diff --cached --quiet; then
+            echo 'No generated artifact changes to commit.'
+            exit 0
+          fi
+          git commit -m 'chore: refresh generated MachineData artifacts'
+          git push origin HEAD:${{ github.event.pull_request.head.ref }}
+
+      - name: Repository tests
+        if: steps.machines.outputs.has_machines != 'true'
+        run: npm test
+
+      - name: Repository audit
+        if: steps.machines.outputs.has_machines != 'true'
+        run: npm run audit
