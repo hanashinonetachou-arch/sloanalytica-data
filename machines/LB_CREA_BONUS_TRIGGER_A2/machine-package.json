@@ -1,0 +1,987 @@
+{
+  "schemaVersion": 1,
+  "machine": {
+    "schemaVersion": "2.0.0",
+    "machineId": "LB_CREA_BONUS_TRIGGER_A2",
+    "machineDataVersion": "0.1.0",
+    "displayName": "クレアの秘宝伝 〜はじまりの扉と太陽の石〜 ボーナストリガーver.",
+    "modelName": "LB／クレアの秘宝伝ボーナストリガーVER．／A2",
+    "manufacturer": "株式会社大都技研",
+    "settings": [
+      "SET_1",
+      "SET_2",
+      "SET_3",
+      "SET_4",
+      "SET_5",
+      "SET_6"
+    ],
+    "packagePolicy": {
+      "offlineCapable": true,
+      "containsImages": false,
+      "containsExecutableCode": false
+    }
+  },
+  "inputs": {
+    "schemaVersion": "2.0.0",
+    "inputs": [
+      {
+        "id": "INP_PREDECESSOR_GAMES",
+        "name": "着席時ゲーム数",
+        "type": "integer",
+        "category": "PREDECESSOR",
+        "unit": "G",
+        "displayOrder": 1,
+        "inferenceRole": "INCLUDE_PRIMARY",
+        "defaultValue": 0,
+        "observationScope": "PREDECESSOR_SNAPSHOT",
+        "sessionDifferenceHelper": false,
+        "description": "着席時にデータカウンターへ表示されている総ゲーム数を入力します。",
+        "minimum": 0
+      },
+      {
+        "id": "INP_PREDECESSOR_BIG_COUNT",
+        "name": "着席時BIG",
+        "type": "counter",
+        "category": "PREDECESSOR",
+        "unit": "回",
+        "displayOrder": 2,
+        "inferenceRole": "INCLUDE_PRIMARY",
+        "defaultValue": 0,
+        "observationScope": "PREDECESSOR_SNAPSHOT",
+        "parentInputId": "INP_PREDECESSOR_GAMES",
+        "description": "着席時のBIG回数を入力します。",
+        "minimum": 0
+      },
+      {
+        "id": "INP_PREDECESSOR_REG_COUNT",
+        "name": "着席時REG",
+        "type": "counter",
+        "category": "PREDECESSOR",
+        "unit": "回",
+        "displayOrder": 3,
+        "inferenceRole": "INCLUDE_PRIMARY",
+        "defaultValue": 0,
+        "observationScope": "PREDECESSOR_SNAPSHOT",
+        "parentInputId": "INP_PREDECESSOR_GAMES",
+        "description": "着席時のREG回数を入力します。",
+        "minimum": 0
+      },
+      {
+        "id": "INP_NORMAL_GAMES",
+        "name": "実戦ゲーム数",
+        "type": "integer",
+        "category": "NORMAL",
+        "unit": "G",
+        "displayOrder": 10,
+        "inferenceRole": "INCLUDE_PRIMARY",
+        "defaultValue": 0,
+        "observationScope": "SELF_PLAY",
+        "sessionDifferenceHelper": false,
+        "description": "実戦ゲーム数を入力します。実機連動機能を使用する場合はダイトモの総プレイ数をそのまま入れてください。",
+        "minimum": 0
+      },
+      {
+        "id": "INP_BIG_COUNT",
+        "name": "BIG",
+        "type": "counter",
+        "category": "NORMAL",
+        "unit": "回",
+        "displayOrder": 11,
+        "inferenceRole": "INCLUDE_PRIMARY",
+        "defaultValue": 0,
+        "parentInputId": "INP_NORMAL_GAMES",
+        "description": "実戦中のBIG回数を入力します。",
+        "minimum": 0
+      },
+      {
+        "id": "INP_REG_COUNT",
+        "name": "REG",
+        "type": "counter",
+        "category": "NORMAL",
+        "unit": "回",
+        "displayOrder": 12,
+        "inferenceRole": "INCLUDE_PRIMARY",
+        "defaultValue": 0,
+        "parentInputId": "INP_NORMAL_GAMES",
+        "description": "実戦中のREG回数を入力します。",
+        "minimum": 0
+      },
+      {
+        "id": "INP_BELL_ONLY",
+        "name": "単独共通ベル",
+        "type": "counter",
+        "category": "SMALL_ROLE",
+        "unit": "回",
+        "displayOrder": 20,
+        "inferenceRole": "INCLUDE_PRIMARY",
+        "defaultValue": null,
+        "parentInputId": "INP_NORMAL_GAMES",
+        "description": "ダイトモの共通ベル回数からベル＋ボーナス回数を差し引いた回数を入力します。",
+        "minimum": 0
+      },
+      {
+        "id": "INP_WATERMELON_ONLY",
+        "name": "単独スイカ",
+        "type": "counter",
+        "category": "SMALL_ROLE",
+        "unit": "回",
+        "displayOrder": 21,
+        "inferenceRole": "INCLUDE_PRIMARY",
+        "defaultValue": null,
+        "parentInputId": "INP_NORMAL_GAMES",
+        "description": "ダイトモのスイカ回数からスイカ＋ボーナス回数を差し引いた回数を入力します。",
+        "minimum": 0
+      },
+      {
+        "id": "INP_SLIP_WATERMELON_ONLY",
+        "name": "単独滑りスイカ",
+        "type": "counter",
+        "category": "SMALL_ROLE",
+        "unit": "回",
+        "displayOrder": 22,
+        "inferenceRole": "INCLUDE_PRIMARY",
+        "defaultValue": null,
+        "parentInputId": "INP_NORMAL_GAMES",
+        "description": "ダイトモの滑りスイカ回数から滑りスイカ＋ボーナス回数を差し引いた回数を入力します。",
+        "minimum": 0
+      },
+      {
+        "id": "INP_CHANCE_BIG",
+        "name": "チャンス目＋BIG",
+        "type": "counter",
+        "category": "BONUS_TRIGGER",
+        "unit": "回",
+        "displayOrder": 30,
+        "inferenceRole": "INCLUDE_SUPPORT",
+        "defaultValue": null,
+        "description": "ダイトモに表示されたチャンス目＋BIG回数を入力します。",
+        "minimum": 0
+      },
+      {
+        "id": "INP_CHANCE_REG",
+        "name": "チャンス目＋REG",
+        "type": "counter",
+        "category": "BONUS_TRIGGER",
+        "unit": "回",
+        "displayOrder": 31,
+        "inferenceRole": "INCLUDE_SUPPORT",
+        "defaultValue": null,
+        "description": "ダイトモに表示されたチャンス目＋REG回数を入力します。",
+        "minimum": 0
+      },
+      {
+        "id": "INP_CHERRY_BIG",
+        "name": "チェリー＋BIG",
+        "type": "counter",
+        "category": "BONUS_TRIGGER",
+        "unit": "回",
+        "displayOrder": 32,
+        "inferenceRole": "INCLUDE_SUPPORT",
+        "defaultValue": null,
+        "description": "ダイトモに表示されたチェリー＋BIG回数を入力します。",
+        "minimum": 0
+      },
+      {
+        "id": "INP_CHERRY_REG",
+        "name": "チェリー＋REG",
+        "type": "counter",
+        "category": "BONUS_TRIGGER",
+        "unit": "回",
+        "displayOrder": 33,
+        "inferenceRole": "INCLUDE_SUPPORT",
+        "defaultValue": null,
+        "description": "ダイトモに表示されたチェリー＋REG回数を入力します。",
+        "minimum": 0
+      },
+      {
+        "id": "INP_BT_JACIN",
+        "name": "通常JACIN",
+        "type": "counter",
+        "category": "BT",
+        "unit": "回",
+        "displayOrder": 40,
+        "inferenceRole": "INCLUDE_SUPPORT",
+        "defaultValue": null,
+        "description": "BT中の通常JACIN回数を入力します。ダイトモ等で確認できる場合は表示値を使用してください。",
+        "minimum": 0
+      },
+      {
+        "id": "INP_BT_MISS",
+        "name": "純ハズレ",
+        "type": "counter",
+        "category": "BT",
+        "unit": "回",
+        "displayOrder": 41,
+        "inferenceRole": "INCLUDE_SUPPORT",
+        "defaultValue": null,
+        "description": "BT中に「BAR図柄を狙え」が出ず、何も小役が揃わなかった純ハズレ回数を入力します。",
+        "minimum": 0
+      },
+      {
+        "id": "INP_EVI_CREA_TROPHY",
+        "name": "BIG終了時 コパンダトロフィー",
+        "type": "multi_enum",
+        "category": "EVIDENCE",
+        "unit": "",
+        "displayOrder": 100,
+        "inferenceRole": "INCLUDE_SUPPORT",
+        "options": [
+          {
+            "key": "BRONZE_2PLUS",
+            "label": "銅（設定2以上）",
+            "value": "BRONZE_2PLUS"
+          },
+          {
+            "key": "SILVER_3PLUS",
+            "label": "銀（設定3以上）",
+            "value": "SILVER_3PLUS"
+          },
+          {
+            "key": "GOLD_4PLUS",
+            "label": "金（設定4以上）",
+            "value": "GOLD_4PLUS"
+          },
+          {
+            "key": "LIGHTNING_5PLUS",
+            "label": "イナズマ（設定5以上）",
+            "value": "LIGHTNING_5PLUS"
+          },
+          {
+            "key": "RAINBOW_6",
+            "label": "虹（設定6）",
+            "value": "RAINBOW_6"
+          }
+        ],
+        "defaultValue": []
+      },
+      {
+        "id": "INP_EVI_CREA_REG_CARD",
+        "name": "REG中キャラカード",
+        "type": "multi_enum",
+        "category": "EVIDENCE",
+        "unit": "",
+        "displayOrder": 110,
+        "inferenceRole": "INCLUDE_SUPPORT",
+        "options": [
+          {
+            "key": "RED_4PLUS",
+            "label": "赤カード1回（設定4以上）",
+            "value": "RED_4PLUS"
+          },
+          {
+            "key": "SILVER_GOLD_ONLY_4PLUS",
+            "label": "銀・金カードのみ（設定4以上）",
+            "value": "SILVER_GOLD_ONLY_4PLUS"
+          },
+          {
+            "key": "RED_TWICE_6",
+            "label": "赤カード2回（設定6）",
+            "value": "RED_TWICE_6"
+          }
+        ],
+        "defaultValue": []
+      }
+    ]
+  },
+  "features": {
+    "schemaVersion": "2.0.0",
+    "features": [
+      {
+        "featureId": "FEAT_PREDECESSOR_BONUS_OUTCOME",
+        "name": "着席前BIG・REG内訳",
+        "adoptionCategory": "INCLUDE_PRIMARY",
+        "calculationRole": "PROBABILITY",
+        "probabilityEngineUsage": true,
+        "modelType": "multinomial",
+        "minimumSample": 300,
+        "sampleRecommendation": 5000,
+        "reliabilityProfile": {
+          "weight": 1
+        },
+        "numeratorInputId": "INP_PREDECESSOR_BIG_COUNT",
+        "denominatorInputId": "INP_PREDECESSOR_GAMES",
+        "categoryInputIds": [
+          "INP_PREDECESSOR_REG_COUNT"
+        ],
+        "probabilities": {},
+        "categoryLabels": [
+          "BIG",
+          "REG"
+        ],
+        "categoryProbabilities": {
+          "SET_1": [
+            0.0033416748046875,
+            0.0026092529296875
+          ],
+          "SET_2": [
+            0.0034027099609375,
+            0.002655029296875
+          ],
+          "SET_3": [
+            0.003509521484375,
+            0.0027923583984375
+          ],
+          "SET_4": [
+            0.0036468505859375,
+            0.00299072265625
+          ],
+          "SET_5": [
+            0.003814697265625,
+            0.0033416748046875
+          ],
+          "SET_6": [
+            0.0041656494140625,
+            0.0040435791015625
+          ]
+        },
+        "categoryConditioning": {
+          "excludedCategories": [],
+          "normalization": "RENORMALIZE_INCLUDED",
+          "residualCategory": "NO_BONUS"
+        },
+        "sourceEvidenceRefs": [
+          "SRC_NANAPRESS",
+          "SRC_PACHIMAGA",
+          "SRC_SEVEN_NOOR"
+        ]
+      },
+      {
+        "featureId": "FEAT_BONUS_OUTCOME",
+        "name": "実戦BIG・REG内訳",
+        "adoptionCategory": "INCLUDE_PRIMARY",
+        "calculationRole": "PROBABILITY",
+        "probabilityEngineUsage": true,
+        "modelType": "multinomial",
+        "minimumSample": 300,
+        "sampleRecommendation": 5000,
+        "reliabilityProfile": {
+          "weight": 1
+        },
+        "numeratorInputId": "INP_BIG_COUNT",
+        "denominatorInputId": "INP_NORMAL_GAMES",
+        "categoryInputIds": [
+          "INP_REG_COUNT"
+        ],
+        "probabilities": {},
+        "categoryLabels": [
+          "BIG",
+          "REG"
+        ],
+        "categoryProbabilities": {
+          "SET_1": [
+            0.0033416748046875,
+            0.0026092529296875
+          ],
+          "SET_2": [
+            0.0034027099609375,
+            0.002655029296875
+          ],
+          "SET_3": [
+            0.003509521484375,
+            0.0027923583984375
+          ],
+          "SET_4": [
+            0.0036468505859375,
+            0.00299072265625
+          ],
+          "SET_5": [
+            0.003814697265625,
+            0.0033416748046875
+          ],
+          "SET_6": [
+            0.0041656494140625,
+            0.0040435791015625
+          ]
+        },
+        "categoryConditioning": {
+          "excludedCategories": [],
+          "normalization": "RENORMALIZE_INCLUDED",
+          "residualCategory": "NO_BONUS"
+        },
+        "sourceEvidenceRefs": [
+          "SRC_NANAPRESS",
+          "SRC_PACHIMAGA",
+          "SRC_SEVEN_NOOR"
+        ]
+      },
+      {
+        "featureId": "FEAT_STANDALONE_SMALL_ROLE_OUTCOME",
+        "name": "単独共通ベル・単独スイカ・単独滑りスイカ",
+        "adoptionCategory": "INCLUDE_PRIMARY",
+        "calculationRole": "PROBABILITY",
+        "probabilityEngineUsage": true,
+        "modelType": "multinomial",
+        "minimumSample": 500,
+        "sampleRecommendation": 5000,
+        "reliabilityProfile": {
+          "weight": 1
+        },
+        "numeratorInputId": "INP_BELL_ONLY",
+        "denominatorInputId": "INP_NORMAL_GAMES",
+        "categoryInputIds": [
+          "INP_WATERMELON_ONLY",
+          "INP_SLIP_WATERMELON_ONLY"
+        ],
+        "probabilities": {},
+        "categoryLabels": [
+          "BELL_ONLY",
+          "WATERMELON_ONLY",
+          "SLIP_WATERMELON_ONLY"
+        ],
+        "categoryProbabilities": {
+          "SET_1": [
+            0.167083740234375,
+            0.010040283203125,
+            0.0033416748046875
+          ],
+          "SET_2": [
+            0.16937255859375,
+            0.01031494140625,
+            0.003509521484375
+          ],
+          "SET_3": [
+            0.1720428466796875,
+            0.010711669921875,
+            0.003631591796875
+          ],
+          "SET_4": [
+            0.1743316650390625,
+            0.0110626220703125,
+            0.00372314453125
+          ],
+          "SET_5": [
+            0.17547607421875,
+            0.01141357421875,
+            0.003814697265625
+          ],
+          "SET_6": [
+            0.1773834228515625,
+            0.0117645263671875,
+            0.003875732421875
+          ]
+        },
+        "sourceEvidenceRefs": [
+          "SRC_SEVEN_NOOR",
+          "SRC_NANAPRESS"
+        ]
+      },
+      {
+        "featureId": "FEAT_BONUS_TRIGGER_COMPOSITION",
+        "name": "ボーナス当選契機内訳（チャンス目・チェリー）",
+        "adoptionCategory": "INCLUDE_SUPPORT",
+        "calculationRole": "PROBABILITY",
+        "probabilityEngineUsage": true,
+        "modelType": "multinomial",
+        "minimumSample": 5,
+        "sampleRecommendation": 30,
+        "reliabilityProfile": {
+          "weight": 1
+        },
+        "denominatorAdjustments": [
+          {
+            "inputId": "INP_REG_COUNT",
+            "multiplier": 1
+          }
+        ],
+        "numeratorInputId": "INP_CHANCE_BIG",
+        "denominatorInputId": "INP_BIG_COUNT",
+        "categoryInputIds": [
+          "INP_CHANCE_REG",
+          "INP_CHERRY_BIG",
+          "INP_CHERRY_REG"
+        ],
+        "probabilities": {},
+        "categoryLabels": [
+          "CHANCE_BIG",
+          "CHANCE_REG",
+          "CHERRY_BIG",
+          "CHERRY_REG"
+        ],
+        "categoryProbabilities": {
+          "SET_1": [
+            0.35384615384615387,
+            0.35384615384615387,
+            0.05897435897435897,
+            0.07179487179487179
+          ],
+          "SET_2": [
+            0.35516372795969775,
+            0.3501259445843829,
+            0.06045340050377834,
+            0.07556675062972293
+          ],
+          "SET_3": [
+            0.35593220338983056,
+            0.33898305084745767,
+            0.060532687651331726,
+            0.09200968523002423
+          ],
+          "SET_4": [
+            0.35172413793103446,
+            0.34022988505747126,
+            0.05747126436781609,
+            0.09655172413793103
+          ],
+          "SET_5": [
+            0.34328358208955223,
+            0.3390191897654584,
+            0.05543710021321962,
+            0.11513859275053305
+          ],
+          "SET_6": [
+            0.3215613382899628,
+            0.3513011152416357,
+            0.05204460966542751,
+            0.11895910780669144
+          ]
+        },
+        "categoryConditioning": {
+          "excludedCategories": [],
+          "normalization": "RENORMALIZE_INCLUDED",
+          "residualCategory": "OTHER_BONUS"
+        },
+        "sourceEvidenceRefs": [
+          "SRC_SEVEN_NOOR",
+          "SRC_NANAPRESS"
+        ]
+      },
+      {
+        "featureId": "FEAT_BT_MISS_SHARE",
+        "name": "BT中 純ハズレ対JACIN割合",
+        "adoptionCategory": "INCLUDE_SUPPORT",
+        "calculationRole": "PROBABILITY",
+        "probabilityEngineUsage": true,
+        "modelType": "binomial",
+        "minimumSample": 10,
+        "sampleRecommendation": 50,
+        "reliabilityProfile": {
+          "weight": 1
+        },
+        "denominatorAdjustments": [
+          {
+            "inputId": "INP_BT_MISS",
+            "multiplier": 1
+          }
+        ],
+        "numeratorInputId": "INP_BT_MISS",
+        "denominatorInputId": "INP_BT_JACIN",
+        "displayFormat": "ratio_1_over_n",
+        "probabilities": {
+          "SET_1": 0.0031719548440508403,
+          "SET_2": 0.0031719548440508403,
+          "SET_3": 0.0031719548440508403,
+          "SET_4": 0.04264937945152899,
+          "SET_5": 0.04264937945152899,
+          "SET_6": 0.04264937945152899
+        },
+        "sourceEvidenceRefs": [
+          "SRC_SEVEN_NOOR",
+          "SRC_NANAPRESS"
+        ]
+      }
+    ]
+  },
+  "evidence": {
+    "version": "1.0.0",
+    "evidences": [
+      {
+        "id": "EVI_CREA_TROPHY_BRONZE_2PLUS",
+        "name": "銅（設定2以上）",
+        "displayName": "銅（設定2以上）",
+        "inputId": "INP_EVI_CREA_TROPHY",
+        "triggerValue": "BRONZE_2PLUS",
+        "confirmedSettings": [
+          "SET_2",
+          "SET_3",
+          "SET_4",
+          "SET_5",
+          "SET_6"
+        ],
+        "deniedSettings": [],
+        "hasImage": false,
+        "type": "SETTING_CONFIRMATION",
+        "sourceEvidenceRefs": [
+          "RE_TROPHY_BRONZE_2PLUS"
+        ]
+      },
+      {
+        "id": "EVI_CREA_TROPHY_SILVER_3PLUS",
+        "name": "銀（設定3以上）",
+        "displayName": "銀（設定3以上）",
+        "inputId": "INP_EVI_CREA_TROPHY",
+        "triggerValue": "SILVER_3PLUS",
+        "confirmedSettings": [
+          "SET_3",
+          "SET_4",
+          "SET_5",
+          "SET_6"
+        ],
+        "deniedSettings": [],
+        "hasImage": false,
+        "type": "SETTING_CONFIRMATION",
+        "sourceEvidenceRefs": [
+          "RE_TROPHY_SILVER_3PLUS"
+        ]
+      },
+      {
+        "id": "EVI_CREA_TROPHY_GOLD_4PLUS",
+        "name": "金（設定4以上）",
+        "displayName": "金（設定4以上）",
+        "inputId": "INP_EVI_CREA_TROPHY",
+        "triggerValue": "GOLD_4PLUS",
+        "confirmedSettings": [
+          "SET_4",
+          "SET_5",
+          "SET_6"
+        ],
+        "deniedSettings": [],
+        "hasImage": false,
+        "type": "SETTING_CONFIRMATION",
+        "sourceEvidenceRefs": [
+          "RE_TROPHY_GOLD_4PLUS"
+        ]
+      },
+      {
+        "id": "EVI_CREA_TROPHY_LIGHTNING_5PLUS",
+        "name": "イナズマ（設定5以上）",
+        "displayName": "イナズマ（設定5以上）",
+        "inputId": "INP_EVI_CREA_TROPHY",
+        "triggerValue": "LIGHTNING_5PLUS",
+        "confirmedSettings": [
+          "SET_5",
+          "SET_6"
+        ],
+        "deniedSettings": [],
+        "hasImage": false,
+        "type": "SETTING_CONFIRMATION",
+        "sourceEvidenceRefs": [
+          "RE_TROPHY_LIGHTNING_5PLUS"
+        ]
+      },
+      {
+        "id": "EVI_CREA_TROPHY_RAINBOW_6",
+        "name": "虹（設定6）",
+        "displayName": "虹（設定6）",
+        "inputId": "INP_EVI_CREA_TROPHY",
+        "triggerValue": "RAINBOW_6",
+        "confirmedSettings": [
+          "SET_6"
+        ],
+        "deniedSettings": [],
+        "hasImage": false,
+        "type": "SETTING_CONFIRMATION",
+        "sourceEvidenceRefs": [
+          "RE_TROPHY_RAINBOW_6"
+        ]
+      },
+      {
+        "id": "EVI_CREA_REG_CARD_RED_4PLUS",
+        "name": "赤カード1回（設定4以上）",
+        "displayName": "赤カード1回（設定4以上）",
+        "inputId": "INP_EVI_CREA_REG_CARD",
+        "triggerValue": "RED_4PLUS",
+        "confirmedSettings": [
+          "SET_4",
+          "SET_5",
+          "SET_6"
+        ],
+        "deniedSettings": [],
+        "hasImage": false,
+        "type": "SETTING_CONFIRMATION",
+        "sourceEvidenceRefs": [
+          "RE_REG_RED_4PLUS"
+        ]
+      },
+      {
+        "id": "EVI_CREA_REG_CARD_SILVER_GOLD_ONLY_4PLUS",
+        "name": "銀・金カードのみ（設定4以上）",
+        "displayName": "銀・金カードのみ（設定4以上）",
+        "inputId": "INP_EVI_CREA_REG_CARD",
+        "triggerValue": "SILVER_GOLD_ONLY_4PLUS",
+        "confirmedSettings": [
+          "SET_4",
+          "SET_5",
+          "SET_6"
+        ],
+        "deniedSettings": [],
+        "hasImage": false,
+        "type": "SETTING_CONFIRMATION",
+        "sourceEvidenceRefs": [
+          "RE_REG_SILVER_GOLD_ONLY_4PLUS"
+        ]
+      },
+      {
+        "id": "EVI_CREA_REG_CARD_RED_TWICE_6",
+        "name": "赤カード2回（設定6）",
+        "displayName": "赤カード2回（設定6）",
+        "inputId": "INP_EVI_CREA_REG_CARD",
+        "triggerValue": "RED_TWICE_6",
+        "confirmedSettings": [
+          "SET_6"
+        ],
+        "deniedSettings": [],
+        "hasImage": false,
+        "type": "SETTING_CONFIRMATION",
+        "sourceEvidenceRefs": [
+          "RE_REG_RED_TWICE_6"
+        ]
+      }
+    ],
+    "sources": [
+      {
+        "id": "SRC_DAITOMO_OFFICIAL",
+        "classification": "OFFICIAL",
+        "pageName": "大都技研の実機連動サービス ダイトモ",
+        "url": "https://paon-dp.com/products/daitomo/",
+        "checkedAt": "2026-08-17"
+      },
+      {
+        "id": "SRC_PWORLD",
+        "classification": "ANALYSIS",
+        "pageName": "クレアの秘宝伝 ～はじまりの扉と太陽の石～ ボーナストリガーver. 機種情報",
+        "url": "https://www.p-world.co.jp/machine/database/10325",
+        "checkedAt": "2026-08-17"
+      },
+      {
+        "id": "SRC_NANAPRESS",
+        "classification": "ANALYSIS",
+        "pageName": "クレアの秘宝伝BT 設定判別・設定差まとめ",
+        "url": "https://nana-press.com/kaiseki/machine/1006/31590/",
+        "checkedAt": "2026-08-17"
+      },
+      {
+        "id": "SRC_PACHIMAGA",
+        "classification": "ANALYSIS",
+        "pageName": "クレアの秘宝伝BT 設定判別・設定推測まとめ",
+        "url": "https://pachimaga.com/free/mach/maker-s/daitogiken/064335.php",
+        "checkedAt": "2026-08-17"
+      },
+      {
+        "id": "SRC_SEVEN_NOOR",
+        "classification": "ANALYSIS",
+        "pageName": "クレアの秘宝伝BT 設定判別ツール・推測基準値",
+        "url": "https://seven.noor.jp/judge?debug=1&s=bt_crea",
+        "checkedAt": "2026-08-17"
+      }
+    ]
+  },
+  "ui": {
+    "sections": [
+      {
+        "id": "AUTO_PREDECESSOR",
+        "title": "着席時データ",
+        "displayOrder": 1,
+        "items": [
+          {
+            "type": "input",
+            "inputId": "INP_PREDECESSOR_GAMES",
+            "label": "着席時ゲーム数",
+            "widget": "number"
+          },
+          {
+            "type": "input",
+            "inputId": "INP_PREDECESSOR_BIG_COUNT",
+            "label": "着席時BIG",
+            "widget": "counter"
+          },
+          {
+            "type": "input",
+            "inputId": "INP_PREDECESSOR_REG_COUNT",
+            "label": "着席時REG",
+            "widget": "counter"
+          }
+        ]
+      },
+      {
+        "id": "AUTO_NORMAL",
+        "title": "実戦結果",
+        "displayOrder": 2,
+        "items": [
+          {
+            "type": "input",
+            "inputId": "INP_NORMAL_GAMES",
+            "label": "実戦ゲーム数",
+            "widget": "number"
+          },
+          {
+            "type": "input",
+            "inputId": "INP_BIG_COUNT",
+            "label": "BIG",
+            "widget": "counter"
+          },
+          {
+            "type": "input",
+            "inputId": "INP_REG_COUNT",
+            "label": "REG",
+            "widget": "counter"
+          }
+        ]
+      },
+      {
+        "id": "AUTO_SMALL_ROLE",
+        "title": "小役",
+        "displayOrder": 3,
+        "items": [
+          {
+            "type": "input",
+            "inputId": "INP_BELL_ONLY",
+            "label": "単独共通ベル",
+            "widget": "counter"
+          },
+          {
+            "type": "input",
+            "inputId": "INP_WATERMELON_ONLY",
+            "label": "単独スイカ",
+            "widget": "counter"
+          },
+          {
+            "type": "input",
+            "inputId": "INP_SLIP_WATERMELON_ONLY",
+            "label": "単独滑りスイカ",
+            "widget": "counter"
+          }
+        ]
+      },
+      {
+        "id": "AUTO_BONUS_TRIGGER",
+        "title": "ボーナス当選契機",
+        "displayOrder": 4,
+        "items": [
+          {
+            "type": "input",
+            "inputId": "INP_CHANCE_BIG",
+            "label": "チャンス目＋BIG",
+            "widget": "counter"
+          },
+          {
+            "type": "input",
+            "inputId": "INP_CHANCE_REG",
+            "label": "チャンス目＋REG",
+            "widget": "counter"
+          },
+          {
+            "type": "input",
+            "inputId": "INP_CHERRY_BIG",
+            "label": "チェリー＋BIG",
+            "widget": "counter"
+          },
+          {
+            "type": "input",
+            "inputId": "INP_CHERRY_REG",
+            "label": "チェリー＋REG",
+            "widget": "counter"
+          }
+        ]
+      },
+      {
+        "id": "AUTO_BT",
+        "title": "ボーナストリガー",
+        "displayOrder": 5,
+        "items": [
+          {
+            "type": "input",
+            "inputId": "INP_BT_JACIN",
+            "label": "通常JACIN",
+            "widget": "counter"
+          },
+          {
+            "type": "input",
+            "inputId": "INP_BT_MISS",
+            "label": "純ハズレ",
+            "widget": "counter"
+          }
+        ]
+      },
+      {
+        "id": "AUTO_EVIDENCE",
+        "title": "設定確定情報",
+        "displayOrder": 6,
+        "items": [
+          {
+            "type": "input",
+            "inputId": "INP_EVI_CREA_TROPHY",
+            "label": "BIG終了時 コパンダトロフィー",
+            "widget": "multi_select"
+          },
+          {
+            "type": "input",
+            "inputId": "INP_EVI_CREA_REG_CARD",
+            "label": "REG中キャラカード",
+            "widget": "multi_select"
+          }
+        ]
+      }
+    ]
+  },
+  "selectionSummary": {
+    "schemaVersion": "selection-summary-v1",
+    "evaluatedCount": 5,
+    "selectedCount": 5,
+    "rejectedCount": 0,
+    "selected": [
+      {
+        "featureId": "FEAT_PREDECESSOR_BONUS_OUTCOME",
+        "name": "着席前BIG・REG内訳",
+        "reason": "着席前のBIG・REGも同一設定の過去観測として利用できます。",
+        "requiredTrials": {
+          "value": 9023,
+          "unit": "ゲーム"
+        }
+      },
+      {
+        "featureId": "FEAT_BONUS_OUTCOME",
+        "name": "実戦BIG・REG内訳",
+        "reason": "BIG・REGは設定差があり、特にREGは高設定ほど大きく優遇されるため採用します。",
+        "requiredTrials": {
+          "value": 9023,
+          "unit": "ゲーム"
+        }
+      },
+      {
+        "featureId": "FEAT_STANDALONE_SMALL_ROLE_OUTCOME",
+        "name": "単独共通ベル・単独スイカ・単独滑りスイカ",
+        "reason": "ダイトモで取得できる高頻度の単独小役を一体評価します。ボーナス同時当選分を除くため、BIG・REG Featureとの重複を避けられます。",
+        "requiredTrials": {
+          "value": 6307,
+          "unit": "ゲーム"
+        }
+      },
+      {
+        "featureId": "FEAT_BONUS_TRIGGER_COMPOSITION",
+        "name": "ボーナス当選契機内訳（チャンス目・チェリー）",
+        "reason": "総ボーナス発生率とは別に、ボーナス当選時の契機構成を条件付きで評価します。特にチェリー＋REGの設定差が大きいため採用します。",
+        "requiredTrials": {
+          "value": 263,
+          "unit": "ボーナス当選"
+        }
+      },
+      {
+        "featureId": "FEAT_BT_MISS_SHARE",
+        "name": "BT中 純ハズレ対JACIN割合",
+        "reason": "BT中純ハズレは設定1～3と設定4～6で約14倍の差があり、高低判別に非常に強いため採用します。",
+        "requiredTrials": {
+          "value": 80,
+          "unit": "JACINまたは純ハズレ"
+        }
+      }
+    ],
+    "rejected": []
+  },
+  "reliability": {},
+  "metadata": {
+    "machineId": "LB_CREA_BONUS_TRIGGER_A2",
+    "displayName": "クレアの秘宝伝 〜はじまりの扉と太陽の石〜 ボーナストリガーver.",
+    "settings": [
+      "SET_1",
+      "SET_2",
+      "SET_3",
+      "SET_4",
+      "SET_5",
+      "SET_6"
+    ]
+  },
+  "validation": {
+    "cases": []
+  },
+  "statistics": {}
+}
