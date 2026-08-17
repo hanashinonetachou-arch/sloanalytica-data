@@ -1,0 +1,74 @@
+name: MachineData Pipeline
+
+on:
+  pull_request:
+    branches:
+      - prototype-multi-machine
+    paths:
+      - 'research/**/research-data.json'
+      - 'research/**/selection-data.json'
+      - 'tools/**'
+      - 'package.json'
+  workflow_dispatch:
+    inputs:
+      machine_id:
+        description: 'Machine ID to validate'
+        required: true
+        type: string
+
+jobs:
+  validate-machine-data:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Resolve machine IDs
+        id: machines
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
+            printf '%s\n' "${{ inputs.machine_id }}" > /tmp/machine_ids.txt
+          else
+            git diff --name-only "${{ github.event.pull_request.base.sha }}" "${{ github.event.pull_request.head.sha }}" \
+              | sed -nE 's#^research/([^/]+)/(research-data|selection-data)\.json$#\1#p' \
+              | sort -u > /tmp/machine_ids.txt
+          fi
+
+          if [[ ! -s /tmp/machine_ids.txt ]]; then
+            echo 'No machine-specific Research/Selection changes detected; running repository tests/audit only.'
+            echo 'has_machines=false' >> "$GITHUB_OUTPUT"
+          else
+            echo 'Machine IDs:'
+            cat /tmp/machine_ids.txt
+            echo 'has_machines=true' >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Validate changed machines
+        if: steps.machines.outputs.has_machines == 'true'
+        shell: bash
+        run: |
+          set -euo pipefail
+          while IFS= read -r machine_id; do
+            echo "::group::${machine_id}"
+            npm run machine:pipeline -- "$machine_id" --check
+            echo '::endgroup::'
+          done < /tmp/machine_ids.txt
+
+      - name: Repository tests
+        if: steps.machines.outputs.has_machines != 'true'
+        run: npm test
+
+      - name: Repository audit
+        if: steps.machines.outputs.has_machines != 'true'
+        run: npm run audit
