@@ -40,8 +40,25 @@ function preserveGeneratedAtIfEquivalent(existingPath, nextValue) {
 }
 function fail(message) { throw new Error(message); }
 function runNpm(script, label) {
-  const npm = process.platform === 'win32' ? 'npm.cmd' : 'npm';
-  const r = spawnSync(npm, ['run', script], { cwd: ROOT, encoding: 'utf8' });
+  // Prefer npm's JavaScript entry point inherited from the parent `npm run` process.
+  // This avoids spawning npm.cmd directly on Windows, which can fail with EINVAL
+  // on some Node/Windows combinations.
+  const npmExecPath = process.env.npm_execpath;
+  let command;
+  let args;
+
+  if (npmExecPath) {
+    command = process.execPath;
+    args = [npmExecPath, 'run', script];
+  } else if (process.platform === 'win32') {
+    command = process.env.ComSpec || 'cmd.exe';
+    args = ['/d', '/s', '/c', `npm run ${script}`];
+  } else {
+    command = 'npm';
+    args = ['run', script];
+  }
+
+  const r = spawnSync(command, args, { cwd: ROOT, encoding: 'utf8' });
   if (r.stdout) process.stdout.write(r.stdout);
   if (r.stderr) process.stderr.write(r.stderr);
   if (r.error) fail(`${label} could not start: ${r.error.message}`);
