@@ -1,0 +1,404 @@
+{
+  "schemaVersion": 1,
+  "machine": {
+    "schemaVersion": "2.0.0",
+    "machineId": "LB_NEW_KING_HANAHANA_V_PF",
+    "machineDataVersion": "0.1.0",
+    "displayName": "スマート沖スロ ニューキングハナハナV",
+    "modelName": "LBニューキングハナハナVPF",
+    "manufacturer": "株式会社パイオニア",
+    "settings": [
+      "SET_1",
+      "SET_2",
+      "SET_3",
+      "SET_4",
+      "SET_V"
+    ],
+    "packagePolicy": {
+      "offlineCapable": true,
+      "containsImages": false,
+      "containsExecutableCode": false
+    }
+  },
+  "inputs": {
+    "schemaVersion": "2.0.0",
+    "inputs": [
+      {
+        "id": "INP_PREDECESSOR_GAMES",
+        "name": "着席時ゲーム数",
+        "type": "integer",
+        "category": "PREDECESSOR",
+        "unit": "G",
+        "displayOrder": 1,
+        "inferenceRole": "INCLUDE_PRIMARY",
+        "defaultValue": 0,
+        "observationScope": "PREDECESSOR_SNAPSHOT",
+        "description": "着席時にデータカウンターへ表示されている累計ゲーム数を入力します。自分のゲーム数の開始値にも自動反映されます。",
+        "minimum": 0
+      },
+      {
+        "id": "INP_PREDECESSOR_BIG_COUNT",
+        "name": "着席時BIG",
+        "type": "counter",
+        "category": "PREDECESSOR",
+        "unit": "回",
+        "displayOrder": 2,
+        "inferenceRole": "INCLUDE_PRIMARY",
+        "defaultValue": 0,
+        "observationScope": "PREDECESSOR_SNAPSHOT",
+        "parentInputId": "INP_PREDECESSOR_GAMES",
+        "description": "着席時にデータカウンターへ表示されているBIG回数を入力します。",
+        "minimum": 0
+      },
+      {
+        "id": "INP_PREDECESSOR_REG_COUNT",
+        "name": "着席時REG",
+        "type": "counter",
+        "category": "PREDECESSOR",
+        "unit": "回",
+        "displayOrder": 3,
+        "inferenceRole": "INCLUDE_PRIMARY",
+        "defaultValue": 0,
+        "observationScope": "PREDECESSOR_SNAPSHOT",
+        "parentInputId": "INP_PREDECESSOR_GAMES",
+        "description": "着席時にデータカウンターへ表示されているREG回数を入力します。",
+        "minimum": 0
+      },
+      {
+        "id": "INP_NORMAL_GAMES",
+        "name": "自分のゲーム数",
+        "type": "integer",
+        "category": "SELF_PLAY",
+        "unit": "G",
+        "displayOrder": 10,
+        "inferenceRole": "INCLUDE_PRIMARY",
+        "defaultValue": 0,
+        "observationScope": "SELF_PLAY",
+        "sessionDifferenceHelper": true,
+        "description": "現在のデータカウンターゲーム数－着席時ゲーム数で自動計算します。",
+        "minimum": 0
+      },
+      {
+        "id": "INP_BIG_COUNT",
+        "name": "BIG",
+        "type": "counter",
+        "category": "SELF_PLAY",
+        "unit": "回",
+        "displayOrder": 11,
+        "inferenceRole": "INCLUDE_PRIMARY",
+        "defaultValue": 0,
+        "observationScope": "SELF_PLAY",
+        "parentInputId": "INP_NORMAL_GAMES",
+        "description": "着席後に成立したBIG回数を入力します。",
+        "minimum": 0
+      },
+      {
+        "id": "INP_REG_COUNT",
+        "name": "REG",
+        "type": "counter",
+        "category": "SELF_PLAY",
+        "unit": "回",
+        "displayOrder": 12,
+        "inferenceRole": "INCLUDE_PRIMARY",
+        "defaultValue": 0,
+        "observationScope": "SELF_PLAY",
+        "parentInputId": "INP_NORMAL_GAMES",
+        "description": "着席後に成立したREG回数を入力します。",
+        "minimum": 0
+      }
+    ]
+  },
+  "features": {
+    "schemaVersion": "2.0.0",
+    "features": [
+      {
+        "featureId": "FEAT_PREDECESSOR_BONUS_OUTCOME",
+        "name": "着席前BIG・REG内訳",
+        "adoptionCategory": "INCLUDE_PRIMARY",
+        "calculationRole": "PROBABILITY",
+        "probabilityEngineUsage": true,
+        "modelType": "multinomial",
+        "minimumSample": 300,
+        "sampleRecommendation": 5000,
+        "reliabilityProfile": {
+          "weight": 1
+        },
+        "numeratorInputId": "INP_PREDECESSOR_BIG_COUNT",
+        "denominatorInputId": "INP_PREDECESSOR_GAMES",
+        "categoryInputIds": [
+          "INP_PREDECESSOR_REG_COUNT"
+        ],
+        "probabilities": {},
+        "categoryLabels": [
+          "BIG",
+          "REG"
+        ],
+        "categoryProbabilities": {
+          "SET_1": [
+            0.0033444816053511705,
+            0.0020161290322580645
+          ],
+          "SET_2": [
+            0.003436426116838488,
+            0.0021231422505307855
+          ],
+          "SET_3": [
+            0.0035587188612099642,
+            0.0022624434389140274
+          ],
+          "SET_4": [
+            0.0037313432835820895,
+            0.0024449877750611247
+          ],
+          "SET_V": [
+            0.003952569169960474,
+            0.002688172043010753
+          ]
+        },
+        "categoryConditioning": {
+          "excludedCategories": [],
+          "normalization": "RENORMALIZE_INCLUDED",
+          "residualCategory": "NO_BONUS"
+        },
+        "sourceEvidenceRefs": [
+          "SRC_NANAPRESS",
+          "SRC_1GEKI",
+          "SRC_PACHISEVEN_SETTING"
+        ]
+      },
+      {
+        "featureId": "FEAT_BONUS_OUTCOME",
+        "name": "自分のBIG・REG",
+        "adoptionCategory": "INCLUDE_PRIMARY",
+        "calculationRole": "PROBABILITY",
+        "probabilityEngineUsage": true,
+        "modelType": "multinomial",
+        "minimumSample": 300,
+        "sampleRecommendation": 5000,
+        "reliabilityProfile": {
+          "weight": 1
+        },
+        "numeratorInputId": "INP_BIG_COUNT",
+        "denominatorInputId": "INP_NORMAL_GAMES",
+        "categoryInputIds": [
+          "INP_REG_COUNT"
+        ],
+        "probabilities": {},
+        "categoryLabels": [
+          "BIG",
+          "REG"
+        ],
+        "categoryProbabilities": {
+          "SET_1": [
+            0.0033444816053511705,
+            0.0020161290322580645
+          ],
+          "SET_2": [
+            0.003436426116838488,
+            0.0021231422505307855
+          ],
+          "SET_3": [
+            0.0035587188612099642,
+            0.0022624434389140274
+          ],
+          "SET_4": [
+            0.0037313432835820895,
+            0.0024449877750611247
+          ],
+          "SET_V": [
+            0.003952569169960474,
+            0.002688172043010753
+          ]
+        },
+        "categoryConditioning": {
+          "excludedCategories": [],
+          "normalization": "RENORMALIZE_INCLUDED",
+          "residualCategory": "NO_BONUS"
+        },
+        "sourceEvidenceRefs": [
+          "SRC_NANAPRESS",
+          "SRC_1GEKI",
+          "SRC_PACHISEVEN_SETTING"
+        ]
+      }
+    ]
+  },
+  "evidence": {
+    "version": "1.0.0",
+    "evidences": [],
+    "sources": [
+      {
+        "id": "SRC_PIONEER_OFFICIAL",
+        "classification": "OFFICIAL",
+        "pageName": "ニューキングハナハナV 公式サイト",
+        "url": "https://www.slot-pioneer.co.jp/product/new_king_hanahana_v/",
+        "checkedAt": "2026-08-17"
+      },
+      {
+        "id": "SRC_PIONEER_SMARTPHONE",
+        "classification": "OFFICIAL",
+        "pageName": "スマートフォン向けコンテンツ",
+        "url": "https://www.slot-pioneer.co.jp/smafo.html",
+        "checkedAt": "2026-08-17"
+      },
+      {
+        "id": "SRC_NANAPRESS",
+        "classification": "ANALYSIS",
+        "pageName": "ニューキングハナハナV 設定差・設定示唆演出まとめ",
+        "url": "https://nana-press.com/kaiseki/machine/1075/34235/",
+        "checkedAt": "2026-08-17"
+      },
+      {
+        "id": "SRC_1GEKI",
+        "classification": "ANALYSIS",
+        "pageName": "ニューキングハナハナV（スマスロ）設定差・設定判別要素まとめ",
+        "url": "https://1geki.jp/slot/l_new_king_hanahana_v/0/",
+        "checkedAt": "2026-08-17"
+      },
+      {
+        "id": "SRC_PACHISEVEN_SETTING",
+        "classification": "ANALYSIS",
+        "pageName": "ニューキングハナハナV-30 設定差（設定推測）",
+        "url": "https://pachiseven.jp/machines/7287/cutout/4",
+        "checkedAt": "2026-08-17"
+      },
+      {
+        "id": "SRC_PACHISEVEN_BONUS",
+        "classification": "ANALYSIS",
+        "pageName": "ニューキングハナハナV-30 ボーナス解析",
+        "url": "https://pachiseven.jp/machines/7287/cutout/8",
+        "checkedAt": "2026-08-17"
+      },
+      {
+        "id": "SRC_UPSLOT",
+        "classification": "ANALYSIS",
+        "pageName": "ニューキングハナハナV 設定判別ツール",
+        "url": "https://up-slot.com/newkinghanahana-v-tool/",
+        "checkedAt": "2026-08-17"
+      }
+    ]
+  },
+  "ui": {
+    "sections": [
+      {
+        "id": "AUTO_PREDECESSOR",
+        "title": "着席時データ",
+        "displayOrder": 1,
+        "items": [
+          {
+            "type": "input",
+            "inputId": "INP_PREDECESSOR_GAMES",
+            "label": "着席時ゲーム数",
+            "widget": "number"
+          },
+          {
+            "type": "input",
+            "inputId": "INP_PREDECESSOR_BIG_COUNT",
+            "label": "着席時BIG",
+            "widget": "counter"
+          },
+          {
+            "type": "input",
+            "inputId": "INP_PREDECESSOR_REG_COUNT",
+            "label": "着席時REG",
+            "widget": "counter"
+          }
+        ]
+      },
+      {
+        "id": "AUTO_SELF_PLAY",
+        "title": "自分の区間",
+        "displayOrder": 2,
+        "items": [
+          {
+            "type": "input",
+            "inputId": "INP_NORMAL_GAMES",
+            "label": "自分のゲーム数",
+            "widget": "number"
+          },
+          {
+            "type": "input",
+            "inputId": "INP_BIG_COUNT",
+            "label": "BIG",
+            "widget": "counter"
+          },
+          {
+            "type": "input",
+            "inputId": "INP_REG_COUNT",
+            "label": "REG",
+            "widget": "counter"
+          }
+        ]
+      }
+    ]
+  },
+  "selectionSummary": {
+    "schemaVersion": "selection-summary-v1",
+    "evaluatedCount": 7,
+    "selectedCount": 2,
+    "rejectedCount": 5,
+    "selected": [
+      {
+        "featureId": "FEAT_PREDECESSOR_BONUS_OUTCOME",
+        "name": "着席前BIG・REG内訳",
+        "reason": "着席前の累計ゲーム数・BIG・REGは自分の遊技区間と重ならない独立した観測値なので、前任者区間の設定推測情報として採用します。",
+        "requiredTrials": {
+          "value": 24750,
+          "unit": "通常ゲーム"
+        }
+      },
+      {
+        "featureId": "FEAT_BONUS_OUTCOME",
+        "name": "自分のBIG・REG",
+        "reason": "BIG・REGには設定差があり、データカウンターだけで継続して正確に取得できます。自分のゲーム数は現在G－着席時Gで自動算出します。",
+        "requiredTrials": {
+          "value": 24750,
+          "unit": "通常ゲーム"
+        }
+      }
+    ],
+    "rejected": [
+      {
+        "featureId": "FEAT_BIG_FIRST_HALF_WATERMELON_EXCLUDED",
+        "name": "BIG前半スイカ",
+        "reason": "設定差は確認できますが、設定別確率が公開されていないため現時点では不採用です。"
+      },
+      {
+        "featureId": "FEAT_REG_WATERMELON_EXCLUDED",
+        "name": "REG中スイカ",
+        "reason": "設定差が示唆されていますが、設定別確率が公開されていないため現時点では不採用です。"
+      },
+      {
+        "featureId": "FEAT_BIG_SIDE_LAMP_EXCLUDED",
+        "name": "BIG後半サイドランプ",
+        "reason": "示唆内容は公開されていますが、設定別選択率が公開されていないため不採用です。"
+      },
+      {
+        "featureId": "FEAT_BONUS_END_HIBISCUS_LAMP_EXCLUDED",
+        "name": "ボーナス終了時ハイビスカスランプ",
+        "reason": "高設定期待度の順序は公開されていますが、設定別選択率が公開されていないため不採用です。"
+      },
+      {
+        "featureId": "FEAT_NORMAL_BELL_EXCLUDED",
+        "name": "通常時ベル",
+        "reason": "大手公開解析で設定別確率を確認できず、独自推定値しか見つからないため不採用です。"
+      }
+    ]
+  },
+  "reliability": {},
+  "metadata": {
+    "machineId": "LB_NEW_KING_HANAHANA_V_PF",
+    "displayName": "スマート沖スロ ニューキングハナハナV",
+    "settings": [
+      "SET_1",
+      "SET_2",
+      "SET_3",
+      "SET_4",
+      "SET_V"
+    ]
+  },
+  "validation": {
+    "cases": []
+  },
+  "statistics": {}
+}
