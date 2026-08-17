@@ -1,0 +1,242 @@
+{
+  "schemaVersion": "selection-data-v1",
+  "machineId": "LB_MAGICAL_HALLOWEEN_GS",
+  "machineDataVersion": "0.1.0",
+  "uiCategoryLabels": {
+    "PREDECESSOR": "着席時データ",
+    "NORMAL": "e-slot+ 自己実戦",
+    "SMALL_ROLE": "e-slot+ 小役",
+    "EVIDENCE": "設定確定情報"
+  },
+  "inputs": [
+    {
+      "id": "INP_PREDECESSOR_GAMES",
+      "name": "着席時ゲーム数",
+      "type": "integer",
+      "category": "PREDECESSOR",
+      "unit": "G",
+      "displayOrder": 1,
+      "inferenceRole": "INCLUDE_PRIMARY",
+      "defaultValue": 0,
+      "observationScope": "PREDECESSOR_SNAPSHOT",
+      "sessionDifferenceHelper": false,
+      "description": "着席時にデータカウンターへ表示されている累計ゲーム数を入力します。"
+    },
+    {
+      "id": "INP_PREDECESSOR_BIG_COUNT",
+      "name": "着席時BIG",
+      "type": "counter",
+      "category": "PREDECESSOR",
+      "unit": "回",
+      "displayOrder": 2,
+      "inferenceRole": "INCLUDE_PRIMARY",
+      "defaultValue": 0,
+      "observationScope": "PREDECESSOR_SNAPSHOT",
+      "parentInputId": "INP_PREDECESSOR_GAMES",
+      "description": "着席時のBIG回数を入力します。"
+    },
+    {
+      "id": "INP_PREDECESSOR_REG_COUNT",
+      "name": "着席時REG",
+      "type": "counter",
+      "category": "PREDECESSOR",
+      "unit": "回",
+      "displayOrder": 3,
+      "inferenceRole": "INCLUDE_PRIMARY",
+      "defaultValue": 0,
+      "observationScope": "PREDECESSOR_SNAPSHOT",
+      "parentInputId": "INP_PREDECESSOR_GAMES",
+      "description": "着席時のREG回数を入力します。"
+    },
+    {
+      "id": "INP_NORMAL_GAMES",
+      "name": "自己実戦ゲーム数",
+      "type": "integer",
+      "category": "NORMAL",
+      "unit": "G",
+      "displayOrder": 10,
+      "inferenceRole": "INCLUDE_PRIMARY",
+      "defaultValue": 0,
+      "observationScope": "SELF_PLAY",
+      "sessionDifferenceHelper": false,
+      "description": "e-slot+に表示された自己実戦ゲーム数を入力します。"
+    },
+    {
+      "id": "INP_BIG_COUNT",
+      "name": "BIG",
+      "type": "counter",
+      "category": "NORMAL",
+      "unit": "回",
+      "displayOrder": 11,
+      "inferenceRole": "INCLUDE_PRIMARY",
+      "defaultValue": 0,
+      "parentInputId": "INP_NORMAL_GAMES",
+      "description": "自己実戦中のBIG回数を入力します。"
+    },
+    {
+      "id": "INP_REG_COUNT",
+      "name": "REG",
+      "type": "counter",
+      "category": "NORMAL",
+      "unit": "回",
+      "displayOrder": 12,
+      "inferenceRole": "INCLUDE_PRIMARY",
+      "defaultValue": 0,
+      "parentInputId": "INP_NORMAL_GAMES",
+      "description": "自己実戦中のREG回数を入力します。"
+    },
+    {
+      "id": "INP_BELL",
+      "name": "ベル",
+      "type": "counter",
+      "category": "SMALL_ROLE",
+      "unit": "回",
+      "displayOrder": 20,
+      "inferenceRole": "INCLUDE_PRIMARY",
+      "defaultValue": null,
+      "parentInputId": "INP_NORMAL_GAMES",
+      "description": "e-slot+のベル回数を入力します。実機で項目が確認できない場合は空欄のままにしてください。"
+    }
+  ],
+  "features": [
+    {
+      "researchFeatureId": "RF_PREDECESSOR_BONUS_OUTCOME",
+      "featureId": "FEAT_PREDECESSOR_BONUS_OUTCOME",
+      "adoptionCategory": "INCLUDE_PRIMARY",
+      "minimumSample": 300,
+      "sampleRecommendation": 5000,
+      "weight": 1.0,
+      "numeratorInputId": "INP_PREDECESSOR_BIG_COUNT",
+      "denominatorInputId": "INP_PREDECESSOR_GAMES",
+      "categoryInputIds": [
+        "INP_PREDECESSOR_REG_COUNT"
+      ],
+      "residualCategoryLabel": "NO_BONUS",
+      "difficultyParticipation": "EXCLUDE",
+      "userReason": "着席前のゲーム数・BIG・REGは自己実戦区間と独立しているため、前任者区間の推測情報として採用します。",
+      "difficultyExclusionReason": "Difficultyは自分が遊技した1500G・3000G・7000Gを評価するため、着席前区間は含めません。"
+    },
+    {
+      "researchFeatureId": "RF_BONUS_OUTCOME",
+      "featureId": "FEAT_BONUS_OUTCOME",
+      "adoptionCategory": "INCLUDE_PRIMARY",
+      "minimumSample": 300,
+      "sampleRecommendation": 5000,
+      "weight": 1.0,
+      "numeratorInputId": "INP_BIG_COUNT",
+      "denominatorInputId": "INP_NORMAL_GAMES",
+      "categoryInputIds": [
+        "INP_REG_COUNT"
+      ],
+      "residualCategoryLabel": "NO_BONUS",
+      "difficultyParticipation": "EXCLUDE",
+      "difficultyExposure": {
+        "mode": "per_game",
+        "factor": 1.0,
+        "quality": "EXACT",
+        "basisId": "NORMAL_GAMES"
+      },
+      "userReason": "BIG・REGには設定差があり、e-slot+でベルを取得できない場合でも利用できるため採用します。ベル入力時は同一通常ゲーム区間の情報重複を保守的に避けるため自動停止します。",
+      "suppressedByFeatureIds": [
+        "FEAT_BELL"
+      ],
+      "difficultyExclusionReason": "ベル観測時はフォールバック停止するため、ベル観測を前提とするDifficultyでは二重計上を避けます。"
+    },
+    {
+      "researchFeatureId": "RF_BELL",
+      "featureId": "FEAT_BELL",
+      "adoptionCategory": "INCLUDE_PRIMARY",
+      "minimumSample": 500,
+      "sampleRecommendation": 5000,
+      "weight": 1.0,
+      "numeratorInputId": "INP_BELL",
+      "denominatorInputId": "INP_NORMAL_GAMES",
+      "difficultyParticipation": "INCLUDE",
+      "difficultyExposure": {
+        "mode": "per_game",
+        "factor": 1.0,
+        "quality": "EXACT",
+        "basisId": "NORMAL_GAMES"
+      },
+      "userReason": "ベルは高頻度で継続的に試行数を稼げ、設定5・6ほど出現率が上がるため主力Featureとして採用します。e-slot+の実機表示項目は最終確認します。"
+    },
+    {
+      "researchFeatureId": "RF_CHERRY_REG",
+      "featureId": "FEAT_CHERRY_REG_EXCLUDED",
+      "adoptionCategory": "EXCLUDE",
+      "userReason": "設定差はありますが約1/1,400〜1/2,000と低頻度で、1日実戦では試行量が不足しやすいため初版では不採用です。"
+    },
+    {
+      "researchFeatureId": "RF_WATERMELON_REG",
+      "featureId": "FEAT_WATERMELON_REG_EXCLUDED",
+      "adoptionCategory": "EXCLUDE",
+      "userReason": "設定差はありますが約1/1,400〜1/2,300と低頻度で、1日実戦では試行量が不足しやすいため初版では不採用です。"
+    },
+    {
+      "researchFeatureId": "RF_CHANCE_REG",
+      "featureId": "FEAT_CHANCE_REG_EXCLUDED",
+      "adoptionCategory": "EXCLUDE",
+      "userReason": "設定差はありますが約1/1,600〜1/2,200と低頻度で、1日実戦では安定しにくいため初版では不採用です。"
+    },
+    {
+      "researchFeatureId": "RF_REACH_REG",
+      "featureId": "FEAT_REACH_REG_EXCLUDED",
+      "adoptionCategory": "EXCLUDE",
+      "userReason": "他の重複契機より軽いものの約1/1,100〜1/1,700で、1日実戦の主要Featureとしては試行不足になりやすいため初版では不採用です。"
+    }
+  ],
+  "evidenceUi": {
+    "groups": [
+      {
+        "groupId": "MAGIHALLO_MINI_CHARACTER",
+        "label": "ボーナス中ミニキャラ",
+        "selectionMode": "multi",
+        "displayOrder": 100,
+        "options": [
+          {
+            "value": "PURPLE_2PLUS",
+            "label": "紫台座・キャラ矛盾（設定2以上）",
+            "allowedSettings": [
+              "SET_2",
+              "SET_5",
+              "SET_6"
+            ],
+            "sourceEvidenceIds": [
+              "RE_MINI_PURPLE_2PLUS"
+            ]
+          },
+          {
+            "value": "GOLD_5PLUS",
+            "label": "金台座（設定5以上）",
+            "allowedSettings": [
+              "SET_5",
+              "SET_6"
+            ],
+            "sourceEvidenceIds": [
+              "RE_MINI_GOLD_5PLUS"
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "difficultyAnalysis": {
+    "targetGames": [
+      1500,
+      3000,
+      7000
+    ],
+    "simulationsPerSetting": 4000,
+    "seed": 20260817,
+    "targetGameBasis": {
+      "basisId": "NORMAL_GAMES",
+      "label": "自己実戦ゲーム",
+      "quality": "EXACT"
+    },
+    "calibrationAllowedExposureQualities": [
+      "EXACT",
+      "DERIVED",
+      "ESTIMATED"
+    ]
+  }
+}
