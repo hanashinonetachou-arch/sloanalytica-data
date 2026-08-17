@@ -1,5 +1,6 @@
 import fs from 'node:fs';
 import path from 'node:path';
+import crypto from 'node:crypto';
 import { spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import { validateResearchData } from './validate-research-data.mjs';
@@ -31,6 +32,22 @@ function runNode(args, label) {
   if (r.error) fail(`${label} could not start: ${r.error.message}`);
   if (r.status !== 0) fail(`${label} failed with exit code ${r.status}`);
 }
+function syncExistingCatalogMetadata(catalogPath, machinePath, machinePackage, machineId) {
+  const catalog = readJson(catalogPath);
+  const entry = (catalog.machines ?? []).find(m => m.machineId === machineId);
+  if (!entry) return false;
+  const bytes = fs.readFileSync(machinePath);
+  entry.machineDataVersion = machinePackage.machine?.machineDataVersion;
+  entry.sha256 = crypto.createHash('sha256').update(bytes).digest('hex');
+  entry.packageSizeBytes = bytes.length;
+  catalog.generatedAt = new Date().toISOString();
+  writeJson(catalogPath, catalog);
+  console.log(`Catalog metadata sync: ${machineId}`);
+  console.log(`  version: ${entry.machineDataVersion}`);
+  console.log(`  size: ${entry.packageSizeBytes}`);
+  console.log(`  sha256: ${entry.sha256}`);
+  return true;
+}
 
 const [machineId, ...flags] = process.argv.slice(2);
 if (!machineId || !/^[A-Z0-9_]+$/.test(machineId)) {
@@ -47,6 +64,7 @@ const machinePath = path.join(ROOT, 'machines', machineId, 'machine-package.json
 const catalogPath = path.join(ROOT, 'catalog.json');
 const difficultyCatalogPath = path.join(ROOT, 'difficulty-catalog.json');
 let difficultyCatalogBackup = null;
+let catalogBackup = null;
 
 try {
   if (!fs.existsSync(researchPath)) fail(`ResearchData not found: ${path.relative(ROOT, researchPath)}`);
@@ -89,16 +107,18 @@ try {
   const catalog = readJson(catalogPath);
   const isPublished = (catalog.machines ?? []).some(m => m.machineId === machineId);
   if (isPublished) {
-    if (checkOnly) difficultyCatalogBackup = fs.readFileSync(difficultyCatalogPath);
     if (checkOnly) {
+      difficultyCatalogBackup = fs.readFileSync(difficultyCatalogPath);
+      catalogBackup = fs.readFileSync(catalogPath);
       writeJson(statisticsPath, statistics);
       writeJson(machinePath, machinePackage);
       writeJson(difficultyPath, difficulty);
     }
+    syncExistingCatalogMetadata(catalogPath, machinePath, machinePackage, machineId);
     runNode(['tools/sync-machine-difficulty-catalog.mjs', machineId], 'difficulty catalog sync');
-    if (checkOnly) console.log('CHECK mode: Difficulty Catalog synced temporarily for contract tests');
+    if (checkOnly) console.log('CHECK mode: Catalog metadata and Difficulty Catalog synced temporarily for contract tests');
   } else {
-    console.log('Difficulty Catalog sync skipped: machine is not yet published in catalog.json');
+    console.log('Catalog/Difficulty sync skipped: machine is not yet published in catalog.json');
   }
 
   runNpm('test', 'test');
@@ -119,9 +139,9 @@ try {
 } finally {
   if (checkOnly) {
     if (difficultyCatalogBackup) fs.writeFileSync(difficultyCatalogPath, difficultyCatalogBackup);
+    if (catalogBackup) fs.writeFileSync(catalogPath, catalogBackup);
     for (const p of [statisticsPath, difficultyPath]) {
       if (fs.existsSync(p)) {
-        // Generated reports may already be tracked; restore checkout version when available.
         const r = spawnSync('git', ['checkout', '--', path.relative(ROOT, p)], { cwd: ROOT, encoding: 'utf8' });
         if (r.status !== 0 && fs.existsSync(p)) fs.rmSync(p);
       }
