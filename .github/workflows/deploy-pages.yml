@@ -1,0 +1,133 @@
+name: Deploy SloAnalytica Data Pages
+
+on:
+  push:
+    branches:
+      - main
+      - prototype-multi-machine
+    paths:
+      - 'catalog.json'
+      - 'difficulty-catalog.json'
+      - 'machines/**/machine-package.json'
+      - '.github/workflows/deploy-pages.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: github-pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout production data
+        uses: actions/checkout@v4
+        with:
+          ref: main
+          path: source-main
+
+      - name: Checkout prototype data
+        uses: actions/checkout@v4
+        with:
+          ref: prototype-multi-machine
+          path: source-prototype
+
+      - name: Build Pages artifact
+        shell: bash
+        run: |
+          set -euo pipefail
+          node <<'NODE'
+          const fs = require('fs');
+          const path = require('path');
+          const crypto = require('crypto');
+
+          const BASE_URL = 'https://hanashinonetachou-arch.github.io/sloanalytica-data';
+          const SITE = path.resolve('site');
+
+          function readJson(file) {
+            return JSON.parse(fs.readFileSync(file, 'utf8'));
+          }
+
+          function writeJson(file, value) {
+            fs.mkdirSync(path.dirname(file), { recursive: true });
+            fs.writeFileSync(file, JSON.stringify(value, null, 2) + '\n', 'utf8');
+          }
+
+          function sha256(file) {
+            return crypto.createHash('sha256').update(fs.readFileSync(file)).digest('hex');
+          }
+
+          function buildVariant(sourceDir, outputPrefix) {
+            const sourceCatalogPath = path.join(sourceDir, 'catalog.json');
+            const sourceDifficultyPath = path.join(sourceDir, 'difficulty-catalog.json');
+            const catalog = readJson(sourceCatalogPath);
+            const prefix = outputPrefix ? `${outputPrefix}/` : '';
+            const outputDir = path.join(SITE, outputPrefix);
+
+            if (!catalog || catalog.schemaVersion !== 1 || !Array.isArray(catalog.machines)) {
+              throw new Error(`Invalid catalog: ${sourceCatalogPath}`);
+            }
+            if (!fs.existsSync(sourceDifficultyPath)) {
+              throw new Error(`Missing difficulty catalog: ${sourceDifficultyPath}`);
+            }
+
+            fs.mkdirSync(outputDir, { recursive: true });
+            fs.copyFileSync(sourceDifficultyPath, path.join(outputDir, 'difficulty-catalog.json'));
+
+            for (const machine of catalog.machines) {
+              const sourcePackage = path.join(sourceDir, 'machines', machine.machineId, 'machine-package.json');
+              if (!fs.existsSync(sourcePackage)) {
+                throw new Error(`Missing package for ${machine.machineId}: ${sourcePackage}`);
+              }
+
+              const bytes = fs.statSync(sourcePackage).size;
+              const hash = sha256(sourcePackage);
+              if (bytes !== machine.packageSizeBytes) {
+                throw new Error(`Package size mismatch for ${machine.machineId}: catalog=${machine.packageSizeBytes}, actual=${bytes}`);
+              }
+              if (hash.toLowerCase() !== String(machine.sha256 || '').toLowerCase()) {
+                throw new Error(`Package sha256 mismatch for ${machine.machineId}: catalog=${machine.sha256}, actual=${hash}`);
+              }
+
+              const targetPackage = path.join(outputDir, 'machines', machine.machineId, 'machine-package.json');
+              fs.mkdirSync(path.dirname(targetPackage), { recursive: true });
+              fs.copyFileSync(sourcePackage, targetPackage);
+
+              machine.packageUrl = `${BASE_URL}/${prefix}machines/${encodeURIComponent(machine.machineId)}/machine-package.json`;
+            }
+
+            catalog.difficultyCatalogUrl = `${BASE_URL}/${prefix}difficulty-catalog.json`;
+            writeJson(path.join(outputDir, 'catalog.json'), catalog);
+          }
+
+          fs.rmSync(SITE, { recursive: true, force: true });
+          fs.mkdirSync(SITE, { recursive: true });
+          buildVariant(path.resolve('source-main'), '');
+          buildVariant(path.resolve('source-prototype'), 'prototype');
+          fs.writeFileSync(path.join(SITE, 'index.html'), '<!doctype html><meta charset="utf-8"><title>SloAnalytica Data</title>\n', 'utf8');
+          fs.writeFileSync(path.join(SITE, '.nojekyll'), '', 'utf8');
+          NODE
+
+      - name: Configure Pages
+        uses: actions/configure-pages@v5
+
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v4
+        with:
+          path: site
+
+  deploy:
+    runs-on: ubuntu-latest
+    needs: build
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
