@@ -1,0 +1,503 @@
+{
+  "schemaVersion": 1,
+  "machine": {
+    "schemaVersion": "2.0.0",
+    "machineId": "LB_AREX_BRIGHT_BA",
+    "machineDataVersion": "0.1.0",
+    "displayName": "アレックス ブライト（未調査版）",
+    "modelName": "LBAREXBRIGHTBA",
+    "manufacturer": "ユニバーサルブロス",
+    "settings": [
+      "SET_1",
+      "SET_2",
+      "SET_5",
+      "SET_6"
+    ],
+    "packagePolicy": {
+      "offlineCapable": true,
+      "containsImages": false,
+      "containsExecutableCode": false
+    }
+  },
+  "inputs": {
+    "schemaVersion": "2.0.0",
+    "inputs": [
+      {
+        "id": "INP_PREDECESSOR_GAMES",
+        "name": "着席時ゲーム数",
+        "type": "integer",
+        "category": "PREDECESSOR",
+        "unit": "G",
+        "displayOrder": 1,
+        "inferenceRole": "INCLUDE_PRIMARY",
+        "defaultValue": 0,
+        "observationScope": "PREDECESSOR_SNAPSHOT",
+        "sessionDifferenceHelper": false,
+        "description": "着席時にデータカウンターへ表示されている累計ゲーム数を入力します。",
+        "minimum": 0
+      },
+      {
+        "id": "INP_PREDECESSOR_BIG_COUNT",
+        "name": "着席時BIG",
+        "type": "counter",
+        "category": "PREDECESSOR",
+        "unit": "回",
+        "displayOrder": 2,
+        "inferenceRole": "INCLUDE_PRIMARY",
+        "defaultValue": 0,
+        "observationScope": "PREDECESSOR_SNAPSHOT",
+        "parentInputId": "INP_PREDECESSOR_GAMES",
+        "description": "着席時のBIG回数を入力します。",
+        "minimum": 0
+      },
+      {
+        "id": "INP_PREDECESSOR_REG_COUNT",
+        "name": "着席時REG",
+        "type": "counter",
+        "category": "PREDECESSOR",
+        "unit": "回",
+        "displayOrder": 3,
+        "inferenceRole": "INCLUDE_PRIMARY",
+        "defaultValue": 0,
+        "observationScope": "PREDECESSOR_SNAPSHOT",
+        "parentInputId": "INP_PREDECESSOR_GAMES",
+        "description": "着席時のREG回数を入力します。",
+        "minimum": 0
+      },
+      {
+        "id": "INP_NORMAL_GAMES",
+        "name": "実戦ゲーム数",
+        "type": "integer",
+        "category": "NORMAL",
+        "unit": "G",
+        "displayOrder": 10,
+        "inferenceRole": "INCLUDE_PRIMARY",
+        "defaultValue": 0,
+        "observationScope": "SELF_PLAY",
+        "sessionDifferenceHelper": false,
+        "description": "自分が遊技した通常ゲーム数を入力します。ユニメモの当機種で取得できる具体的なゲーム数項目は実機確認待ちです。",
+        "minimum": 0
+      },
+      {
+        "id": "INP_BIG_COUNT",
+        "name": "BIG",
+        "type": "counter",
+        "category": "NORMAL",
+        "unit": "回",
+        "displayOrder": 11,
+        "inferenceRole": "INCLUDE_PRIMARY",
+        "defaultValue": 0,
+        "parentInputId": "INP_NORMAL_GAMES",
+        "description": "通常時から当選したBIG回数を入力します。BrighTループによる追加小役ゲームは新たな通常時BIGとして数えません。",
+        "minimum": 0
+      },
+      {
+        "id": "INP_REG_COUNT",
+        "name": "REG",
+        "type": "counter",
+        "category": "NORMAL",
+        "unit": "回",
+        "displayOrder": 12,
+        "inferenceRole": "INCLUDE_PRIMARY",
+        "defaultValue": 0,
+        "parentInputId": "INP_NORMAL_GAMES",
+        "description": "通常時から当選したREG回数を入力します。",
+        "minimum": 0
+      },
+      {
+        "id": "INP_WING_COUNT",
+        "name": "羽",
+        "type": "counter",
+        "category": "SMALL_ROLE",
+        "unit": "回",
+        "displayOrder": 20,
+        "inferenceRole": "INCLUDE_PRIMARY",
+        "defaultValue": null,
+        "parentInputId": "INP_NORMAL_GAMES",
+        "description": "通常時の羽回数を入力します。未計測の場合は空欄のままにしてください。",
+        "minimum": 0
+      },
+      {
+        "id": "INP_REG_MURAL_COUNT",
+        "name": "壁画調ver.",
+        "type": "counter",
+        "category": "REG_END",
+        "unit": "回",
+        "displayOrder": 30,
+        "inferenceRole": "INCLUDE_SUPPORT",
+        "defaultValue": null,
+        "parentInputId": "INP_REG_COUNT",
+        "description": "REG終了時に壁画調ver.が出現した回数を入力します。未確認の場合は空欄にしてください。",
+        "minimum": 0
+      }
+    ]
+  },
+  "features": {
+    "schemaVersion": "2.0.0",
+    "features": [
+      {
+        "featureId": "FEAT_PREDECESSOR_BONUS_OUTCOME",
+        "name": "着席前BIG・REG内訳",
+        "adoptionCategory": "INCLUDE_PRIMARY",
+        "calculationRole": "PROBABILITY",
+        "probabilityEngineUsage": true,
+        "modelType": "multinomial",
+        "minimumSample": 300,
+        "sampleRecommendation": 5000,
+        "reliabilityProfile": {
+          "weight": 1
+        },
+        "numeratorInputId": "INP_PREDECESSOR_BIG_COUNT",
+        "denominatorInputId": "INP_PREDECESSOR_GAMES",
+        "categoryInputIds": [
+          "INP_PREDECESSOR_REG_COUNT"
+        ],
+        "probabilities": {},
+        "categoryLabels": [
+          "BIG",
+          "REG"
+        ],
+        "categoryProbabilities": {
+          "SET_1": [
+            0.003235198964736331,
+            0.0023348120476301658
+          ],
+          "SET_2": [
+            0.0032959789057350037,
+            0.00244140625
+          ],
+          "SET_5": [
+            0.0033875338753387536,
+            0.0027314941272876263
+          ],
+          "SET_6": [
+            0.003479471120389701,
+            0.003204101249599487
+          ]
+        },
+        "categoryConditioning": {
+          "excludedCategories": [],
+          "normalization": "RENORMALIZE_INCLUDED",
+          "residualCategory": "NO_BONUS"
+        },
+        "sourceEvidenceRefs": [
+          "SRC_NANAPRESS",
+          "SRC_PWORLD"
+        ]
+      },
+      {
+        "featureId": "FEAT_NORMAL_OUTCOME",
+        "name": "通常時BIG・REG・羽",
+        "adoptionCategory": "INCLUDE_PRIMARY",
+        "calculationRole": "PROBABILITY",
+        "probabilityEngineUsage": true,
+        "modelType": "marginal_multinomial",
+        "minimumSample": 300,
+        "sampleRecommendation": 5000,
+        "reliabilityProfile": {
+          "weight": 1
+        },
+        "numeratorInputId": "INP_BIG_COUNT",
+        "denominatorInputId": "INP_NORMAL_GAMES",
+        "categoryInputIds": [
+          "INP_REG_COUNT",
+          "INP_WING_COUNT"
+        ],
+        "optionalCategoryInputIds": [
+          "INP_WING_COUNT"
+        ],
+        "probabilities": {},
+        "categoryLabels": [
+          "BIG",
+          "REG",
+          "WING"
+        ],
+        "categoryProbabilities": {
+          "SET_1": [
+            0.003235198964736331,
+            0.0023348120476301658,
+            0.07462686567164178
+          ],
+          "SET_2": [
+            0.0032959789057350037,
+            0.00244140625,
+            0.07692307692307693
+          ],
+          "SET_5": [
+            0.0033875338753387536,
+            0.0027314941272876263,
+            0.07936507936507936
+          ],
+          "SET_6": [
+            0.003479471120389701,
+            0.003204101249599487,
+            0.0819672131147541
+          ]
+        },
+        "sourceEvidenceRefs": [
+          "SRC_NANAPRESS",
+          "SRC_PACHISEVEN",
+          "SRC_DMM"
+        ]
+      },
+      {
+        "featureId": "FEAT_REG_END_MURAL",
+        "name": "REG終了画面 壁画調",
+        "adoptionCategory": "INCLUDE_SUPPORT",
+        "calculationRole": "PROBABILITY",
+        "probabilityEngineUsage": true,
+        "modelType": "binomial",
+        "minimumSample": 1,
+        "sampleRecommendation": 20,
+        "reliabilityProfile": {
+          "weight": 1
+        },
+        "numeratorInputId": "INP_REG_MURAL_COUNT",
+        "denominatorInputId": "INP_REG_COUNT",
+        "displayFormat": "ratio_1_over_n",
+        "probabilities": {
+          "SET_1": 0.008,
+          "SET_2": 0.008,
+          "SET_5": 0.008,
+          "SET_6": 0.05
+        },
+        "sourceEvidenceRefs": [
+          "SRC_NANAPRESS_SETTING",
+          "SRC_DMM"
+        ]
+      }
+    ]
+  },
+  "evidence": {
+    "version": "1.0.0",
+    "evidences": [],
+    "sources": [
+      {
+        "id": "SRC_UNIVERSAL_OFFICIAL",
+        "classification": "OFFICIAL",
+        "pageName": "アレックス ブライト 公式製品情報",
+        "url": "https://www.universal-777.com/product/slot/arexbright/",
+        "checkedAt": "2026-08-18"
+      },
+      {
+        "id": "SRC_UNIMEMO_OFFICIAL",
+        "classification": "OFFICIAL",
+        "pageName": "ユニメモ 対応機種一覧",
+        "url": "https://www.universal-777.com/fun/unimemo/",
+        "checkedAt": "2026-08-18"
+      },
+      {
+        "id": "SRC_PWORLD",
+        "classification": "ANALYSIS",
+        "pageName": "アレックス ブライト 機種情報",
+        "url": "https://www.p-world.co.jp/machine/database/10266",
+        "checkedAt": "2026-08-18"
+      },
+      {
+        "id": "SRC_NANAPRESS",
+        "classification": "ANALYSIS",
+        "pageName": "アレックス ブライト ボーナス確率/機械割/小役確率",
+        "url": "https://nana-press.com/kaiseki/machine/976/29384/",
+        "checkedAt": "2026-08-18"
+      },
+      {
+        "id": "SRC_NANAPRESS_SETTING",
+        "classification": "ANALYSIS",
+        "pageName": "アレックス ブライト 設定判別",
+        "url": "https://nana-press.com/kaiseki/machine/976/30618/",
+        "checkedAt": "2026-08-18"
+      },
+      {
+        "id": "SRC_PACHISEVEN",
+        "classification": "ANALYSIS",
+        "pageName": "アレックス ブライト 小役確率",
+        "url": "https://pachiseven.jp/machines/7180/cutout/1007",
+        "checkedAt": "2026-08-18"
+      },
+      {
+        "id": "SRC_DMM",
+        "classification": "ANALYSIS",
+        "pageName": "アレックス ブライト 解析情報",
+        "url": "https://p-town.dmm.com/machines/4799",
+        "checkedAt": "2026-08-18"
+      }
+    ]
+  },
+  "ui": {
+    "sections": [
+      {
+        "id": "AUTO_PREDECESSOR",
+        "title": "着席時データ",
+        "displayOrder": 1,
+        "items": [
+          {
+            "type": "input",
+            "inputId": "INP_PREDECESSOR_GAMES",
+            "label": "着席時ゲーム数",
+            "widget": "number"
+          },
+          {
+            "type": "input",
+            "inputId": "INP_PREDECESSOR_BIG_COUNT",
+            "label": "着席時BIG",
+            "widget": "counter"
+          },
+          {
+            "type": "input",
+            "inputId": "INP_PREDECESSOR_REG_COUNT",
+            "label": "着席時REG",
+            "widget": "counter"
+          }
+        ]
+      },
+      {
+        "id": "AUTO_NORMAL",
+        "title": "実戦結果",
+        "displayOrder": 2,
+        "items": [
+          {
+            "type": "input",
+            "inputId": "INP_NORMAL_GAMES",
+            "label": "実戦ゲーム数",
+            "widget": "number"
+          },
+          {
+            "type": "input",
+            "inputId": "INP_BIG_COUNT",
+            "label": "BIG",
+            "widget": "counter"
+          },
+          {
+            "type": "input",
+            "inputId": "INP_REG_COUNT",
+            "label": "REG",
+            "widget": "counter"
+          }
+        ]
+      },
+      {
+        "id": "AUTO_SMALL_ROLE",
+        "title": "小役",
+        "displayOrder": 3,
+        "items": [
+          {
+            "type": "input",
+            "inputId": "INP_WING_COUNT",
+            "label": "羽",
+            "widget": "counter"
+          }
+        ]
+      },
+      {
+        "id": "AUTO_REG_END",
+        "title": "REG終了画面",
+        "displayOrder": 4,
+        "items": [
+          {
+            "type": "input",
+            "inputId": "INP_REG_MURAL_COUNT",
+            "label": "壁画調ver.",
+            "widget": "counter"
+          }
+        ]
+      }
+    ]
+  },
+  "selectionSummary": {
+    "schemaVersion": "selection-summary-v1",
+    "evaluatedCount": 8,
+    "selectedCount": 3,
+    "rejectedCount": 5,
+    "selected": [
+      {
+        "featureId": "FEAT_PREDECESSOR_BONUS_OUTCOME",
+        "name": "着席前BIG・REG内訳",
+        "reason": "着席前のBIG・REGを同一設定の過去観測として利用します。",
+        "requiredTrials": {
+          "value": 24968,
+          "unit": "通常ゲーム"
+        }
+      },
+      {
+        "featureId": "FEAT_NORMAL_OUTCOME",
+        "name": "通常時BIG・REG・羽",
+        "reason": "BIG・REGに加えて、高頻度で段階的な設定差がある羽を同一通常ゲーム母集団として一体評価します。羽が空欄なら未観測としてBIG・REGだけを利用します。",
+        "requiredTrials": {
+          "value": 6922,
+          "unit": "通常ゲーム"
+        }
+      },
+      {
+        "featureId": "FEAT_REG_END_MURAL",
+        "name": "REG終了画面 壁画調",
+        "reason": "壁画調ver.は設定6で5.0%、設定1・2・5では0.8%と出現率差があるため、確定情報ではなくREG終了回数を分母とする数値Featureとして利用します。",
+        "requiredTrials": {
+          "value": 99,
+          "unit": "REG終了1回"
+        }
+      }
+    ],
+    "rejected": [
+      {
+        "featureId": "FEAT_NORMAL_3COIN_EXCLUDED",
+        "name": "通常時3枚役",
+        "reason": "設定差が小さく非単調で、羽に比べて1日実戦の追加情報量が小さいため不採用です。",
+        "requiredTrials": {
+          "value": 90193,
+          "unit": "通常ゲーム"
+        }
+      },
+      {
+        "featureId": "FEAT_NORMAL_CHERRY_A2_EXCLUDED",
+        "name": "通常時チェリーA2",
+        "reason": "高設定側ほど出やすいものの羽より低頻度で、入力負荷に対する追加情報量が小さいため初版では不採用です。",
+        "requiredTrials": {
+          "value": 31253,
+          "unit": "通常ゲーム"
+        }
+      },
+      {
+        "featureId": "FEAT_NORMAL_CHERRY_B_EXCLUDED",
+        "name": "通常時チェリーB",
+        "reason": "設定差が小さく低頻度のため不採用です。",
+        "requiredTrials": {
+          "value": 104891,
+          "unit": "通常ゲーム"
+        }
+      },
+      {
+        "featureId": "FEAT_BIG_SMALL_GAME_OUTCOME_PENDING",
+        "name": "BIG小役ゲーム中 羽羽鳥A・B・C",
+        "reason": "羽羽鳥A・B・Cの解析値は有力ですが、当機種のユニメモで分母となるBIG小役ゲーム数と各回数を取得できるか未確認のため、未調査版では推測に使用しません。",
+        "requiredTrials": {
+          "value": 333,
+          "unit": "BIG小役ゲーム1G"
+        }
+      },
+      {
+        "featureId": "FEAT_BIG_REACH_PATTERN_PENDING",
+        "name": "BIG/JAC中リーチ目",
+        "reason": "高設定側で強い設定差がありますが、BIG小役ゲームとJACゲームを合わせた正確な抽選対象ゲーム数を取得できるか未確認のため、未調査版では推測に使用しません。",
+        "requiredTrials": {
+          "value": 4999,
+          "unit": "対象ゲーム1G"
+        }
+      }
+    ]
+  },
+  "reliability": {},
+  "metadata": {
+    "machineId": "LB_AREX_BRIGHT_BA",
+    "displayName": "アレックス ブライト（未調査版）",
+    "settings": [
+      "SET_1",
+      "SET_2",
+      "SET_5",
+      "SET_6"
+    ]
+  },
+  "validation": {
+    "cases": []
+  },
+  "statistics": {}
+}
