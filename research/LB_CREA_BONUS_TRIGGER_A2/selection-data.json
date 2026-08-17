@@ -1,0 +1,92 @@
+{
+  "schemaVersion": "selection-data-v1",
+  "machineId": "LB_CREA_BONUS_TRIGGER_A2",
+  "machineDataVersion": "0.1.0",
+  "uiCategoryLabels": {
+    "PREDECESSOR": "着席時データ",
+    "NORMAL": "実戦結果",
+    "SMALL_ROLE": "小役",
+    "BONUS_TRIGGER": "ボーナス当選契機",
+    "BT": "ボーナストリガー",
+    "EVIDENCE": "設定確定情報"
+  },
+  "inputs": [
+    {"id":"INP_PREDECESSOR_GAMES","name":"着席時ゲーム数","type":"integer","category":"PREDECESSOR","unit":"G","displayOrder":1,"inferenceRole":"INCLUDE_PRIMARY","defaultValue":0,"observationScope":"PREDECESSOR_SNAPSHOT","sessionDifferenceHelper":false,"description":"着席時にデータカウンターへ表示されている総ゲーム数を入力します。"},
+    {"id":"INP_PREDECESSOR_BIG_COUNT","name":"着席時BIG","type":"counter","category":"PREDECESSOR","unit":"回","displayOrder":2,"inferenceRole":"INCLUDE_PRIMARY","defaultValue":0,"observationScope":"PREDECESSOR_SNAPSHOT","parentInputId":"INP_PREDECESSOR_GAMES","description":"着席時のBIG回数を入力します。"},
+    {"id":"INP_PREDECESSOR_REG_COUNT","name":"着席時REG","type":"counter","category":"PREDECESSOR","unit":"回","displayOrder":3,"inferenceRole":"INCLUDE_PRIMARY","defaultValue":0,"observationScope":"PREDECESSOR_SNAPSHOT","parentInputId":"INP_PREDECESSOR_GAMES","description":"着席時のREG回数を入力します。"},
+
+    {"id":"INP_NORMAL_GAMES","name":"実戦ゲーム数","type":"integer","category":"NORMAL","unit":"G","displayOrder":10,"inferenceRole":"INCLUDE_PRIMARY","defaultValue":0,"observationScope":"SELF_PLAY","sessionDifferenceHelper":false,"description":"実戦ゲーム数を入力します。実機連動機能を使用する場合はダイトモの総プレイ数をそのまま入れてください。"},
+    {"id":"INP_BIG_COUNT","name":"BIG","type":"counter","category":"NORMAL","unit":"回","displayOrder":11,"inferenceRole":"INCLUDE_PRIMARY","defaultValue":0,"parentInputId":"INP_NORMAL_GAMES","description":"実戦中のBIG回数を入力します。"},
+    {"id":"INP_REG_COUNT","name":"REG","type":"counter","category":"NORMAL","unit":"回","displayOrder":12,"inferenceRole":"INCLUDE_PRIMARY","defaultValue":0,"parentInputId":"INP_NORMAL_GAMES","description":"実戦中のREG回数を入力します。"},
+
+    {"id":"INP_BELL_ONLY","name":"単独共通ベル","type":"counter","category":"SMALL_ROLE","unit":"回","displayOrder":20,"inferenceRole":"INCLUDE_PRIMARY","defaultValue":null,"parentInputId":"INP_NORMAL_GAMES","description":"ダイトモの共通ベル回数からベル＋ボーナス回数を差し引いた回数を入力します。"},
+    {"id":"INP_WATERMELON_ONLY","name":"単独スイカ","type":"counter","category":"SMALL_ROLE","unit":"回","displayOrder":21,"inferenceRole":"INCLUDE_PRIMARY","defaultValue":null,"parentInputId":"INP_NORMAL_GAMES","description":"ダイトモのスイカ回数からスイカ＋ボーナス回数を差し引いた回数を入力します。"},
+    {"id":"INP_SLIP_WATERMELON_ONLY","name":"単独滑りスイカ","type":"counter","category":"SMALL_ROLE","unit":"回","displayOrder":22,"inferenceRole":"INCLUDE_PRIMARY","defaultValue":null,"parentInputId":"INP_NORMAL_GAMES","description":"ダイトモの滑りスイカ回数から滑りスイカ＋ボーナス回数を差し引いた回数を入力します。"},
+
+    {"id":"INP_CHANCE_BIG","name":"チャンス目＋BIG","type":"counter","category":"BONUS_TRIGGER","unit":"回","displayOrder":30,"inferenceRole":"INCLUDE_SUPPORT","defaultValue":null,"description":"ダイトモに表示されたチャンス目＋BIG回数を入力します。"},
+    {"id":"INP_CHANCE_REG","name":"チャンス目＋REG","type":"counter","category":"BONUS_TRIGGER","unit":"回","displayOrder":31,"inferenceRole":"INCLUDE_SUPPORT","defaultValue":null,"description":"ダイトモに表示されたチャンス目＋REG回数を入力します。"},
+    {"id":"INP_CHERRY_BIG","name":"チェリー＋BIG","type":"counter","category":"BONUS_TRIGGER","unit":"回","displayOrder":32,"inferenceRole":"INCLUDE_SUPPORT","defaultValue":null,"description":"ダイトモに表示されたチェリー＋BIG回数を入力します。"},
+    {"id":"INP_CHERRY_REG","name":"チェリー＋REG","type":"counter","category":"BONUS_TRIGGER","unit":"回","displayOrder":33,"inferenceRole":"INCLUDE_SUPPORT","defaultValue":null,"description":"ダイトモに表示されたチェリー＋REG回数を入力します。"},
+
+    {"id":"INP_BT_JACIN","name":"通常JACIN","type":"counter","category":"BT","unit":"回","displayOrder":40,"inferenceRole":"INCLUDE_SUPPORT","defaultValue":null,"description":"BT中の通常JACIN回数を入力します。ダイトモ等で確認できる場合は表示値を使用してください。"},
+    {"id":"INP_BT_MISS","name":"純ハズレ","type":"counter","category":"BT","unit":"回","displayOrder":41,"inferenceRole":"INCLUDE_SUPPORT","defaultValue":null,"description":"BT中に「BAR図柄を狙え」が出ず、何も小役が揃わなかった純ハズレ回数を入力します。"}
+  ],
+  "features": [
+    {
+      "researchFeatureId":"RF_PREDECESSOR_BONUS_OUTCOME","featureId":"FEAT_PREDECESSOR_BONUS_OUTCOME","adoptionCategory":"INCLUDE_PRIMARY","minimumSample":300,"sampleRecommendation":5000,"weight":1.0,
+      "numeratorInputId":"INP_PREDECESSOR_BIG_COUNT","denominatorInputId":"INP_PREDECESSOR_GAMES","categoryInputIds":["INP_PREDECESSOR_REG_COUNT"],"residualCategoryLabel":"NO_BONUS",
+      "difficultyParticipation":"EXCLUDE","userReason":"着席前のBIG・REGも同一設定の過去観測として利用できます。","difficultyExclusionReason":"Difficultyはユーザー自身の代表遊技G数を評価するため着席前区間は含めません。"
+    },
+    {
+      "researchFeatureId":"RF_BONUS_OUTCOME","featureId":"FEAT_BONUS_OUTCOME","adoptionCategory":"INCLUDE_PRIMARY","minimumSample":300,"sampleRecommendation":5000,"weight":1.0,
+      "numeratorInputId":"INP_BIG_COUNT","denominatorInputId":"INP_NORMAL_GAMES","categoryInputIds":["INP_REG_COUNT"],"residualCategoryLabel":"NO_BONUS",
+      "difficultyParticipation":"INCLUDE","difficultyExposure":{"mode":"per_game","factor":1.0,"quality":"EXACT","basisId":"TOTAL_PLAY_GAMES"},
+      "userReason":"BIG・REGは設定差があり、特にREGは高設定ほど大きく優遇されるため採用します。"
+    },
+    {
+      "researchFeatureId":"RF_STANDALONE_SMALL_ROLE_OUTCOME","featureId":"FEAT_STANDALONE_SMALL_ROLE_OUTCOME","adoptionCategory":"INCLUDE_PRIMARY","minimumSample":500,"sampleRecommendation":5000,"weight":1.0,
+      "numeratorInputId":"INP_BELL_ONLY","denominatorInputId":"INP_NORMAL_GAMES","categoryInputIds":["INP_WATERMELON_ONLY","INP_SLIP_WATERMELON_ONLY"],"residualCategoryLabel":"OTHER_GAMES",
+      "difficultyParticipation":"INCLUDE","difficultyExposure":{"mode":"per_game","factor":1.0,"quality":"EXACT","basisId":"TOTAL_PLAY_GAMES"},
+      "userReason":"ダイトモで取得できる高頻度の単独小役を一体評価します。ボーナス同時当選分を除くため、BIG・REG Featureとの重複を避けられます。"
+    },
+    {
+      "researchFeatureId":"RF_BONUS_TRIGGER_COMPOSITION","featureId":"FEAT_BONUS_TRIGGER_COMPOSITION","adoptionCategory":"INCLUDE_SUPPORT","minimumSample":5,"sampleRecommendation":30,"weight":1.0,
+      "numeratorInputId":"INP_CHANCE_BIG","denominatorInputId":"INP_BIG_COUNT","denominatorAdjustments":[{"inputId":"INP_REG_COUNT","multiplier":1}],"categoryInputIds":["INP_CHANCE_REG","INP_CHERRY_BIG","INP_CHERRY_REG"],"residualCategoryLabel":"OTHER_BONUS",
+      "difficultyParticipation":"EXCLUDE","userReason":"総ボーナス発生率とは別に、ボーナス当選時の契機構成を条件付きで評価します。特にチェリー＋REGの設定差が大きいため採用します。","difficultyExclusionReason":"ゲーム数からボーナス成立回数への派生ExposureをDifficultyで二重計上しないため除外します。"
+    },
+    {
+      "researchFeatureId":"RF_BT_MISS_SHARE","featureId":"FEAT_BT_MISS_SHARE","adoptionCategory":"INCLUDE_SUPPORT","minimumSample":10,"sampleRecommendation":50,"weight":1.0,
+      "numeratorInputId":"INP_BT_MISS","denominatorInputId":"INP_BT_JACIN","denominatorAdjustments":[{"inputId":"INP_BT_MISS","multiplier":1}],
+      "difficultyParticipation":"EXCLUDE","userReason":"BT中純ハズレは設定1～3と設定4～6で約14倍の差があり、高低判別に非常に強いため採用します。","difficultyExclusionReason":"通常ゲーム数からBT中JACIN試行数へのExposureを公開値だけで厳密に導出できないためDifficultyには含めません。"
+    }
+  ],
+  "evidenceUi": {
+    "groups": [
+      {
+        "groupId":"CREA_TROPHY","label":"BIG終了時 コパンダトロフィー","selectionMode":"multi","normalizationMode":"ALLOWED_SETTINGS_INTERSECTION","displayOrder":100,
+        "options":[
+          {"value":"BRONZE_2PLUS","label":"銅（設定2以上）","allowedSettings":["SET_2","SET_3","SET_4","SET_5","SET_6"],"sourceEvidenceIds":["RE_TROPHY_BRONZE_2PLUS"]},
+          {"value":"SILVER_3PLUS","label":"銀（設定3以上）","allowedSettings":["SET_3","SET_4","SET_5","SET_6"],"sourceEvidenceIds":["RE_TROPHY_SILVER_3PLUS"]},
+          {"value":"GOLD_4PLUS","label":"金（設定4以上）","allowedSettings":["SET_4","SET_5","SET_6"],"sourceEvidenceIds":["RE_TROPHY_GOLD_4PLUS"]},
+          {"value":"LIGHTNING_5PLUS","label":"イナズマ（設定5以上）","allowedSettings":["SET_5","SET_6"],"sourceEvidenceIds":["RE_TROPHY_LIGHTNING_5PLUS"]},
+          {"value":"RAINBOW_6","label":"虹（設定6）","allowedSettings":["SET_6"],"sourceEvidenceIds":["RE_TROPHY_RAINBOW_6"]}
+        ]
+      },
+      {
+        "groupId":"CREA_REG_CARD","label":"REG中キャラカード","selectionMode":"multi","normalizationMode":"ALLOWED_SETTINGS_INTERSECTION","displayOrder":110,
+        "options":[
+          {"value":"RED_4PLUS","label":"赤カード1回（設定4以上）","allowedSettings":["SET_4","SET_5","SET_6"],"sourceEvidenceIds":["RE_REG_RED_4PLUS"]},
+          {"value":"SILVER_GOLD_ONLY_4PLUS","label":"銀・金カードのみ（設定4以上）","allowedSettings":["SET_4","SET_5","SET_6"],"sourceEvidenceIds":["RE_REG_SILVER_GOLD_ONLY_4PLUS"]},
+          {"value":"RED_TWICE_6","label":"赤カード2回（設定6）","allowedSettings":["SET_6"],"sourceEvidenceIds":["RE_REG_RED_TWICE_6"]}
+        ]
+      }
+    ]
+  },
+  "difficultyAnalysis": {
+    "targetGames":[1500,3000,7000],
+    "simulationsPerSetting":4000,
+    "seed":20260817,
+    "targetGameBasis":{"basisId":"TOTAL_PLAY_GAMES","label":"実戦ゲーム","quality":"EXACT","crossMachineComparable":true,"note":"BT中ハズレとボーナス契機構成は代表ゲーム数からExposureを厳密に導出できないためDifficultyから除外。"},
+    "calibrationAllowedExposureQualities":["EXACT","DERIVED","ESTIMATED"]
+  }
+}
