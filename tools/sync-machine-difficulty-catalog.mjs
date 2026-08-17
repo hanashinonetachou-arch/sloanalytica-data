@@ -83,13 +83,16 @@ const entry = {
   machineDataVersion: machine.machineDataVersion,
   difficulty,
 };
-const idx = (doc.entries ?? []).findIndex(e => e.machineId === machineId);
-if (idx >= 0) doc.entries[idx] = entry;
-else doc.entries.unshift(entry);
-doc.generatedAt = new Date().toISOString();
+const entries = doc.entries ?? [];
+const idx = entries.findIndex(e => e.machineId === machineId);
+const previousEntry = idx >= 0 ? entries[idx] : null;
+const changed = JSON.stringify(previousEntry) !== JSON.stringify(entry);
+if (idx >= 0) entries[idx] = entry;
+else entries.unshift(entry);
+if (changed) doc.generatedAt = new Date().toISOString();
 write(difficultyCatalogPath, doc);
 
-console.log(`Difficulty Catalog sync: ${machineId}`);
+console.log(`Difficulty Catalog sync: ${machineId}${changed ? ' (updated)' : ' (unchanged)'}`);
 if (status === 'SCORED') {
   console.log(`  Raw: ${rawScores.map(s => `${s.games}G=${s.rawScore}`).join(' / ')}`);
   console.log(`  Display: ${scores.map(s => `${s.games}G=${s.score}`).join(' / ')}`);

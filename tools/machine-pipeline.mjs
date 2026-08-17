@@ -16,6 +16,28 @@ function writeJson(p, value) {
   fs.mkdirSync(path.dirname(p), { recursive: true });
   fs.writeFileSync(p, JSON.stringify(value, null, 2) + '\n', 'utf8');
 }
+function withoutGeneratedAt(value) {
+  if (Array.isArray(value)) return value.map(withoutGeneratedAt);
+  if (value && typeof value === 'object') {
+    return Object.fromEntries(Object.entries(value)
+      .filter(([key]) => key !== 'generatedAt')
+      .map(([key, child]) => [key, withoutGeneratedAt(child)]));
+  }
+  return value;
+}
+function preserveGeneratedAtIfEquivalent(existingPath, nextValue) {
+  if (!fs.existsSync(existingPath) || !nextValue || typeof nextValue !== 'object') return nextValue;
+  try {
+    const existing = readJson(existingPath);
+    const equivalent = JSON.stringify(withoutGeneratedAt(existing)) === JSON.stringify(withoutGeneratedAt(nextValue));
+    if (equivalent && existing.generatedAt && 'generatedAt' in nextValue) {
+      return { ...nextValue, generatedAt: existing.generatedAt };
+    }
+  } catch {
+    // Invalid pre-existing generated data should be replaced by the freshly generated value.
+  }
+  return nextValue;
+}
 function fail(message) { throw new Error(message); }
 function runNpm(script, label) {
   const npm = process.platform === 'win32' ? 'npm.cmd' : 'npm';
@@ -37,12 +59,16 @@ function syncExistingCatalogMetadata(catalogPath, machinePath, machinePackage, m
   const entry = (catalog.machines ?? []).find(m => m.machineId === machineId);
   if (!entry) return false;
   const bytes = fs.readFileSync(machinePath);
-  entry.machineDataVersion = machinePackage.machine?.machineDataVersion;
-  entry.sha256 = crypto.createHash('sha256').update(bytes).digest('hex');
-  entry.packageSizeBytes = bytes.length;
-  catalog.generatedAt = new Date().toISOString();
+  const nextVersion = machinePackage.machine?.machineDataVersion;
+  const nextSha = crypto.createHash('sha256').update(bytes).digest('hex');
+  const nextSize = bytes.length;
+  const changed = entry.machineDataVersion !== nextVersion || entry.sha256 !== nextSha || entry.packageSizeBytes !== nextSize;
+  entry.machineDataVersion = nextVersion;
+  entry.sha256 = nextSha;
+  entry.packageSizeBytes = nextSize;
+  if (changed) catalog.generatedAt = new Date().toISOString();
   writeJson(catalogPath, catalog);
-  console.log(`Catalog metadata sync: ${machineId}`);
+  console.log(`Catalog metadata sync: ${machineId}${changed ? ' (updated)' : ' (unchanged)'}`);
   console.log(`  version: ${entry.machineDataVersion}`);
   console.log(`  size: ${entry.packageSizeBytes}`);
   console.log(`  sha256: ${entry.sha256}`);
@@ -91,9 +117,11 @@ try {
   for (const w of selectionValidation.warnings ?? []) console.warn(`WARNING [SelectionData]: ${w}`);
   console.log(`PASS SelectionData (${selectionValidation.warnings?.length ?? 0} warnings)`);
 
-  const statistics = evaluateResearchData(research);
+  let statistics = evaluateResearchData(research);
   const machinePackage = buildMachineData(research, selection, statistics);
-  const difficulty = evaluateMachineDifficulty(research, selection);
+  let difficulty = evaluateMachineDifficulty(research, selection);
+  statistics = preserveGeneratedAtIfEquivalent(statisticsPath, statistics);
+  difficulty = preserveGeneratedAtIfEquivalent(difficultyPath, difficulty);
 
   if (!checkOnly) {
     writeJson(statisticsPath, statistics);
