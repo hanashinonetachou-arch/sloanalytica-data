@@ -1,0 +1,522 @@
+{
+  "schemaVersion": 1,
+  "machine": {
+    "schemaVersion": "2.0.0",
+    "machineId": "LB_MAGICAL_HALLOWEEN_GS",
+    "machineDataVersion": "0.1.0",
+    "displayName": "マジカルハロウィン ボーナストリガー",
+    "modelName": "LBマジカルハロウィンGS",
+    "manufacturer": "株式会社コナミアミューズメント",
+    "settings": [
+      "SET_1",
+      "SET_2",
+      "SET_5",
+      "SET_6"
+    ],
+    "packagePolicy": {
+      "offlineCapable": true,
+      "containsImages": false,
+      "containsExecutableCode": false
+    }
+  },
+  "inputs": {
+    "schemaVersion": "2.0.0",
+    "inputs": [
+      {
+        "id": "INP_PREDECESSOR_GAMES",
+        "name": "着席時ゲーム数",
+        "type": "integer",
+        "category": "PREDECESSOR",
+        "unit": "G",
+        "displayOrder": 1,
+        "inferenceRole": "INCLUDE_PRIMARY",
+        "defaultValue": 0,
+        "observationScope": "PREDECESSOR_SNAPSHOT",
+        "sessionDifferenceHelper": false,
+        "description": "着席時にデータカウンターへ表示されている累計ゲーム数を入力します。",
+        "minimum": 0
+      },
+      {
+        "id": "INP_PREDECESSOR_BIG_COUNT",
+        "name": "着席時BIG",
+        "type": "counter",
+        "category": "PREDECESSOR",
+        "unit": "回",
+        "displayOrder": 2,
+        "inferenceRole": "INCLUDE_PRIMARY",
+        "defaultValue": 0,
+        "observationScope": "PREDECESSOR_SNAPSHOT",
+        "parentInputId": "INP_PREDECESSOR_GAMES",
+        "description": "着席時のBIG回数を入力します。",
+        "minimum": 0
+      },
+      {
+        "id": "INP_PREDECESSOR_REG_COUNT",
+        "name": "着席時REG",
+        "type": "counter",
+        "category": "PREDECESSOR",
+        "unit": "回",
+        "displayOrder": 3,
+        "inferenceRole": "INCLUDE_PRIMARY",
+        "defaultValue": 0,
+        "observationScope": "PREDECESSOR_SNAPSHOT",
+        "parentInputId": "INP_PREDECESSOR_GAMES",
+        "description": "着席時のREG回数を入力します。",
+        "minimum": 0
+      },
+      {
+        "id": "INP_NORMAL_GAMES",
+        "name": "自己実戦ゲーム数",
+        "type": "integer",
+        "category": "NORMAL",
+        "unit": "G",
+        "displayOrder": 10,
+        "inferenceRole": "INCLUDE_PRIMARY",
+        "defaultValue": 0,
+        "observationScope": "SELF_PLAY",
+        "sessionDifferenceHelper": false,
+        "description": "e-slot+に表示された自己実戦ゲーム数を入力します。",
+        "minimum": 0
+      },
+      {
+        "id": "INP_BIG_COUNT",
+        "name": "BIG",
+        "type": "counter",
+        "category": "NORMAL",
+        "unit": "回",
+        "displayOrder": 11,
+        "inferenceRole": "INCLUDE_PRIMARY",
+        "defaultValue": 0,
+        "parentInputId": "INP_NORMAL_GAMES",
+        "description": "自己実戦中のBIG回数を入力します。",
+        "minimum": 0
+      },
+      {
+        "id": "INP_REG_COUNT",
+        "name": "REG",
+        "type": "counter",
+        "category": "NORMAL",
+        "unit": "回",
+        "displayOrder": 12,
+        "inferenceRole": "INCLUDE_PRIMARY",
+        "defaultValue": 0,
+        "parentInputId": "INP_NORMAL_GAMES",
+        "description": "自己実戦中のREG回数を入力します。",
+        "minimum": 0
+      },
+      {
+        "id": "INP_BELL",
+        "name": "ベル",
+        "type": "counter",
+        "category": "SMALL_ROLE",
+        "unit": "回",
+        "displayOrder": 20,
+        "inferenceRole": "INCLUDE_PRIMARY",
+        "defaultValue": null,
+        "parentInputId": "INP_NORMAL_GAMES",
+        "description": "e-slot+のベル回数を入力します。実機で項目が確認できない場合は空欄のままにしてください。",
+        "minimum": 0
+      },
+      {
+        "id": "INP_EVI_MAGIHALLO_MINI_CHARACTER",
+        "name": "ボーナス中ミニキャラ",
+        "type": "multi_enum",
+        "category": "EVIDENCE",
+        "unit": "",
+        "displayOrder": 100,
+        "inferenceRole": "INCLUDE_SUPPORT",
+        "options": [
+          {
+            "key": "PURPLE_2PLUS",
+            "label": "紫台座・キャラ矛盾（設定2以上）",
+            "value": "PURPLE_2PLUS"
+          },
+          {
+            "key": "GOLD_5PLUS",
+            "label": "金台座（設定5以上）",
+            "value": "GOLD_5PLUS"
+          }
+        ],
+        "defaultValue": []
+      }
+    ]
+  },
+  "features": {
+    "schemaVersion": "2.0.0",
+    "features": [
+      {
+        "featureId": "FEAT_PREDECESSOR_BONUS_OUTCOME",
+        "name": "着席前BIG・REG内訳",
+        "adoptionCategory": "INCLUDE_PRIMARY",
+        "calculationRole": "PROBABILITY",
+        "probabilityEngineUsage": true,
+        "modelType": "multinomial",
+        "minimumSample": 300,
+        "sampleRecommendation": 5000,
+        "reliabilityProfile": {
+          "weight": 1
+        },
+        "numeratorInputId": "INP_PREDECESSOR_BIG_COUNT",
+        "denominatorInputId": "INP_PREDECESSOR_GAMES",
+        "categoryInputIds": [
+          "INP_PREDECESSOR_REG_COUNT"
+        ],
+        "probabilities": {},
+        "categoryLabels": [
+          "BIG",
+          "REG"
+        ],
+        "categoryProbabilities": {
+          "SET_1": [
+            0.0033444816053511705,
+            0.002564102564102564
+          ],
+          "SET_2": [
+            0.003389830508474576,
+            0.002881844380403458
+          ],
+          "SET_5": [
+            0.003663003663003663,
+            0.0033222591362126247
+          ],
+          "SET_6": [
+            0.003816793893129771,
+            0.003816793893129771
+          ]
+        },
+        "categoryConditioning": {
+          "excludedCategories": [],
+          "normalization": "RENORMALIZE_INCLUDED",
+          "residualCategory": "NO_BONUS"
+        },
+        "sourceEvidenceRefs": [
+          "SRC_NANAPRESS",
+          "SRC_PWORLD"
+        ]
+      },
+      {
+        "featureId": "FEAT_BONUS_OUTCOME",
+        "name": "自分のBIG・REG",
+        "adoptionCategory": "INCLUDE_PRIMARY",
+        "calculationRole": "PROBABILITY",
+        "probabilityEngineUsage": true,
+        "modelType": "multinomial",
+        "minimumSample": 300,
+        "sampleRecommendation": 5000,
+        "reliabilityProfile": {
+          "weight": 1
+        },
+        "numeratorInputId": "INP_BIG_COUNT",
+        "denominatorInputId": "INP_NORMAL_GAMES",
+        "categoryInputIds": [
+          "INP_REG_COUNT"
+        ],
+        "probabilities": {},
+        "categoryLabels": [
+          "BIG",
+          "REG"
+        ],
+        "categoryProbabilities": {
+          "SET_1": [
+            0.0033444816053511705,
+            0.002564102564102564
+          ],
+          "SET_2": [
+            0.003389830508474576,
+            0.002881844380403458
+          ],
+          "SET_5": [
+            0.003663003663003663,
+            0.0033222591362126247
+          ],
+          "SET_6": [
+            0.003816793893129771,
+            0.003816793893129771
+          ]
+        },
+        "categoryConditioning": {
+          "excludedCategories": [],
+          "normalization": "RENORMALIZE_INCLUDED",
+          "residualCategory": "NO_BONUS"
+        },
+        "sourceEvidenceRefs": [
+          "SRC_NANAPRESS",
+          "SRC_PWORLD",
+          "SRC_ESLOT_OFFICIAL"
+        ]
+      },
+      {
+        "featureId": "FEAT_BELL",
+        "name": "通常時ベル",
+        "adoptionCategory": "INCLUDE_PRIMARY",
+        "calculationRole": "PROBABILITY",
+        "probabilityEngineUsage": true,
+        "modelType": "binomial",
+        "minimumSample": 500,
+        "sampleRecommendation": 5000,
+        "reliabilityProfile": {
+          "weight": 1
+        },
+        "numeratorInputId": "INP_BELL",
+        "denominatorInputId": "INP_NORMAL_GAMES",
+        "displayFormat": "ratio_1_over_n",
+        "probabilities": {
+          "SET_1": 0.16666666666666666,
+          "SET_2": 0.16666666666666666,
+          "SET_5": 0.1724137931034483,
+          "SET_6": 0.17543859649122806
+        },
+        "sourceEvidenceRefs": [
+          "SRC_NANAPRESS",
+          "SRC_PWORLD",
+          "SRC_SEVEN_NOOR"
+        ]
+      }
+    ]
+  },
+  "evidence": {
+    "version": "1.0.0",
+    "evidences": [
+      {
+        "id": "EVI_MAGIHALLO_MINI_CHARACTER_PURPLE_2PLUS",
+        "name": "紫台座・キャラ矛盾（設定2以上）",
+        "displayName": "紫台座・キャラ矛盾（設定2以上）",
+        "inputId": "INP_EVI_MAGIHALLO_MINI_CHARACTER",
+        "triggerValue": "PURPLE_2PLUS",
+        "confirmedSettings": [
+          "SET_2",
+          "SET_5",
+          "SET_6"
+        ],
+        "deniedSettings": [],
+        "hasImage": false,
+        "type": "SETTING_CONFIRMATION",
+        "sourceEvidenceRefs": [
+          "RE_MINI_PURPLE_2PLUS"
+        ]
+      },
+      {
+        "id": "EVI_MAGIHALLO_MINI_CHARACTER_GOLD_5PLUS",
+        "name": "金台座（設定5以上）",
+        "displayName": "金台座（設定5以上）",
+        "inputId": "INP_EVI_MAGIHALLO_MINI_CHARACTER",
+        "triggerValue": "GOLD_5PLUS",
+        "confirmedSettings": [
+          "SET_5",
+          "SET_6"
+        ],
+        "deniedSettings": [],
+        "hasImage": false,
+        "type": "SETTING_CONFIRMATION",
+        "sourceEvidenceRefs": [
+          "RE_MINI_GOLD_5PLUS"
+        ]
+      }
+    ],
+    "sources": [
+      {
+        "id": "SRC_KONAMI_OFFICIAL",
+        "classification": "OFFICIAL",
+        "pageName": "スマスロ マジカルハロウィン ボーナストリガー 公式サイト",
+        "url": "https://www.konami.com/amusement/psm/slot/magihallo-bt/00_top.html",
+        "checkedAt": "2026-08-17"
+      },
+      {
+        "id": "SRC_ESLOT_OFFICIAL",
+        "classification": "OFFICIAL",
+        "pageName": "マジカルハロウィン ボーナストリガー稼働開始・e-slot+案内",
+        "url": "https://www.konami.com/amusement/corporate/ja/topics/20250917/",
+        "checkedAt": "2026-08-17"
+      },
+      {
+        "id": "SRC_NANAPRESS",
+        "classification": "ANALYSIS",
+        "pageName": "マジハロBT 設定差・設定示唆演出まとめ",
+        "url": "https://nana-press.com/kaiseki/machine/1013/31867/",
+        "checkedAt": "2026-08-17"
+      },
+      {
+        "id": "SRC_PWORLD",
+        "classification": "ANALYSIS",
+        "pageName": "マジカルハロウィン ボーナストリガー 機種情報",
+        "url": "https://www.p-world.co.jp/machine/database/10318",
+        "checkedAt": "2026-08-17"
+      },
+      {
+        "id": "SRC_SEVEN_NOOR",
+        "classification": "ANALYSIS",
+        "pageName": "マジカルハロウィン ボーナストリガー 設定判別ツール",
+        "url": "https://seven.noor.jp/judge?s=magical_halloween_bt",
+        "checkedAt": "2026-08-17"
+      }
+    ]
+  },
+  "ui": {
+    "sections": [
+      {
+        "id": "AUTO_PREDECESSOR",
+        "title": "着席時データ",
+        "displayOrder": 1,
+        "items": [
+          {
+            "type": "input",
+            "inputId": "INP_PREDECESSOR_GAMES",
+            "label": "着席時ゲーム数",
+            "widget": "number"
+          },
+          {
+            "type": "input",
+            "inputId": "INP_PREDECESSOR_BIG_COUNT",
+            "label": "着席時BIG",
+            "widget": "counter"
+          },
+          {
+            "type": "input",
+            "inputId": "INP_PREDECESSOR_REG_COUNT",
+            "label": "着席時REG",
+            "widget": "counter"
+          }
+        ]
+      },
+      {
+        "id": "AUTO_NORMAL",
+        "title": "e-slot+ 自己実戦",
+        "displayOrder": 2,
+        "items": [
+          {
+            "type": "input",
+            "inputId": "INP_NORMAL_GAMES",
+            "label": "自己実戦ゲーム数",
+            "widget": "number"
+          },
+          {
+            "type": "input",
+            "inputId": "INP_BIG_COUNT",
+            "label": "BIG",
+            "widget": "counter"
+          },
+          {
+            "type": "input",
+            "inputId": "INP_REG_COUNT",
+            "label": "REG",
+            "widget": "counter"
+          }
+        ]
+      },
+      {
+        "id": "AUTO_SMALL_ROLE",
+        "title": "e-slot+ 小役",
+        "displayOrder": 3,
+        "items": [
+          {
+            "type": "input",
+            "inputId": "INP_BELL",
+            "label": "ベル",
+            "widget": "counter"
+          }
+        ]
+      },
+      {
+        "id": "AUTO_EVIDENCE",
+        "title": "設定確定情報",
+        "displayOrder": 4,
+        "items": [
+          {
+            "type": "input",
+            "inputId": "INP_EVI_MAGIHALLO_MINI_CHARACTER",
+            "label": "ボーナス中ミニキャラ",
+            "widget": "multi_select"
+          }
+        ]
+      }
+    ]
+  },
+  "selectionSummary": {
+    "schemaVersion": "selection-summary-v1",
+    "evaluatedCount": 7,
+    "selectedCount": 3,
+    "rejectedCount": 4,
+    "selected": [
+      {
+        "featureId": "FEAT_PREDECESSOR_BONUS_OUTCOME",
+        "name": "着席前BIG・REG内訳",
+        "reason": "着席前のゲーム数・BIG・REGは自己実戦区間と独立しているため、前任者区間の推測情報として採用します。",
+        "requiredTrials": {
+          "value": 13042,
+          "unit": "通常ゲーム"
+        }
+      },
+      {
+        "featureId": "FEAT_BONUS_OUTCOME",
+        "name": "自分のBIG・REG",
+        "reason": "BIG・REGには設定差があり、ベル成立回数とは別の観測情報として設定推測に利用できるため採用します。ベル入力時も停止せず、自己実戦BIG・REGとベルを同時に評価します。",
+        "requiredTrials": {
+          "value": 13042,
+          "unit": "通常ゲーム"
+        }
+      },
+      {
+        "featureId": "FEAT_BELL",
+        "name": "通常時ベル",
+        "reason": "ベルは高頻度で継続的に試行数を稼げ、設定5・6ほど出現率が上がるため主力Featureとして採用します。e-slot+の実機表示項目は最終確認します。",
+        "requiredTrials": {
+          "value": 13506,
+          "unit": "自己実戦ゲーム"
+        }
+      }
+    ],
+    "rejected": [
+      {
+        "featureId": "FEAT_CHERRY_REG_EXCLUDED",
+        "name": "チェリー＋REG",
+        "reason": "設定差はありますが約1/1,400〜1/2,000と低頻度で、1日実戦では試行量が不足しやすいため初版では不採用です。",
+        "requiredTrials": {
+          "value": 74250,
+          "unit": "通常ゲーム"
+        }
+      },
+      {
+        "featureId": "FEAT_WATERMELON_REG_EXCLUDED",
+        "name": "スイカ＋REG",
+        "reason": "設定差はありますが約1/1,400〜1/2,300と低頻度で、1日実戦では試行量が不足しやすいため初版では不採用です。",
+        "requiredTrials": {
+          "value": 44802,
+          "unit": "通常ゲーム"
+        }
+      },
+      {
+        "featureId": "FEAT_CHANCE_REG_EXCLUDED",
+        "name": "チャンス目＋REG",
+        "reason": "設定差はありますが約1/1,600〜1/2,200と低頻度で、1日実戦では安定しにくいため初版では不採用です。",
+        "requiredTrials": {
+          "value": 167205,
+          "unit": "通常ゲーム"
+        }
+      },
+      {
+        "featureId": "FEAT_REACH_REG_EXCLUDED",
+        "name": "リーチ目＋REG",
+        "reason": "他の重複契機より軽いものの約1/1,100〜1/1,700で、1日実戦の主要Featureとしては試行不足になりやすいため初版では不採用です。",
+        "requiredTrials": {
+          "value": 56971,
+          "unit": "通常ゲーム"
+        }
+      }
+    ]
+  },
+  "reliability": {},
+  "metadata": {
+    "machineId": "LB_MAGICAL_HALLOWEEN_GS",
+    "displayName": "マジカルハロウィン ボーナストリガー",
+    "settings": [
+      "SET_1",
+      "SET_2",
+      "SET_5",
+      "SET_6"
+    ]
+  },
+  "validation": {
+    "cases": []
+  },
+  "statistics": {}
+}
