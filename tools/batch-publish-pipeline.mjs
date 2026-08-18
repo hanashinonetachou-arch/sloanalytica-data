@@ -43,6 +43,13 @@ export function parseArgs(argv) {
   return { apply, keepBuild, file, ids };
 }
 
+export function npmSpawnSpec(args, platform = process.platform, comspec = process.env.ComSpec) {
+  if (platform === "win32") {
+    return { command: comspec || "cmd.exe", args: ["/d", "/s", "/c", "npm.cmd", ...args] };
+  }
+  return { command: "npm", args };
+}
+
 function readMachineIdsFromFile(file) {
   const p = path.resolve(file);
   if (!fs.existsSync(p)) throw new Error(`batch file not found: ${p}`);
@@ -60,6 +67,9 @@ function run(command, args, { allowFailure = false } = {}) {
   const r = spawnSync(command, args, { cwd: ROOT, encoding: "utf8", stdio: "pipe" });
   if (r.stdout) process.stdout.write(r.stdout);
   if (r.stderr) process.stderr.write(r.stderr);
+  if (r.error) {
+    throw new Error(`${path.basename(command)} ${args.join(" ")} failed to start: ${r.error.message}`);
+  }
   if (!allowFailure && r.status !== 0) {
     throw new Error(`${path.basename(command)} ${args.join(" ")} failed with exit ${r.status}`);
   }
@@ -71,8 +81,8 @@ function runNode(script, args = []) {
 }
 
 function runNpm(args) {
-  const command = process.platform === "win32" ? "npm.cmd" : "npm";
-  return run(command, args);
+  const spec = npmSpawnSpec(args);
+  return run(spec.command, spec.args);
 }
 
 function snapshotFile(p) {
