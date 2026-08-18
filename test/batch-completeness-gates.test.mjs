@@ -4,7 +4,7 @@ import fs from 'node:fs';
 import { REQUIRED_EVIDENCE_SURFACES, REQUIRED_NUMERIC_SURFACES, validateResearchCompleteness, validateSelectionEvidenceCoverage } from '../tools/batch-completeness-gates.mjs';
 
 function coverage(surfaces, source='SRC') {
-  return surfaces.map(surface => ({ surface, status: 'CHECKED', sourceRefs: [source], notes: 'checked' }));
+  return surfaces.map(surface => ({ surface, status: 'CHECKED', sourceRefs: [source], notes: 'checked candidates and disposition' }));
 }
 function researchFixture() {
   return {
@@ -36,6 +36,17 @@ test('batch research completeness requires every evidence and numeric surface', 
   const result = validateResearchCompleteness(r, { required: true });
   assert.equal(result.ok, false);
   assert.ok(result.errors.some(error => error.includes('required surface missing voice')));
+});
+
+test('CHECKED research coverage requires concrete notes and known sources', () => {
+  const r = researchFixture();
+  const voice = r.researchCompleteness.evidenceSurfaces.find(item => item.surface === 'voice');
+  voice.notes = '   ';
+  voice.sourceRefs = ['UNKNOWN'];
+  const result = validateResearchCompleteness(r, { required: true });
+  assert.equal(result.ok, false);
+  assert.ok(result.errors.some(error => error.includes('unknown sourceRef UNKNOWN')));
+  assert.ok(result.errors.some(error => error.includes('CHECKED requires notes')));
 });
 
 test('UNRESOLVED research coverage remains explicit instead of being invented', () => {
@@ -70,6 +81,13 @@ test('every Research Evidence may be UI-referenced or explicitly excluded with r
   const result = validateSelectionEvidenceCoverage(selection, research, { required: true });
   assert.equal(result.ok, true);
   assert.deepEqual(result.missing, []);
+});
+
+test('machine guard revalidates both Research completeness and Selection Evidence coverage', () => {
+  const guard = fs.readFileSync(new URL('../tools/guard-machine-pipeline.mjs', import.meta.url), 'utf8');
+  assert.match(guard, /validateResearchCompleteness/);
+  assert.match(guard, /validateSelectionEvidenceCoverage/);
+  assert.match(guard, /research completeness unresolved/);
 });
 
 test('package scripts route batch generation through completeness guards', () => {
