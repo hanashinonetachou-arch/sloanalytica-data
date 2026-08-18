@@ -59,7 +59,7 @@ function sourceClass(t){
 function inputWithDefaults(x){
   const defaultValue=x.defaultValue!==undefined?x.defaultValue:
     x.type==="boolean"?false:x.type==="multi_enum"?[]:x.type==="enum"?"__UNSET__":0;
-  const y={...x,defaultValue,minimum:["integer","number","counter"].includes(x.type)?0:undefined};
+  const y={...x,defaultValue,minimum:["integer","number","counter"].includes(x.type)?0:undefined,...(x.category==="PREDECESSOR"&&x.observationScope==null?{observationScope:"PREDECESSOR_SNAPSHOT"}:{})};
   for(const k of Object.keys(y)) if(y[k]===undefined) delete y[k];
   return y;
 }
@@ -260,7 +260,8 @@ export function buildMachineData(research,selection,statistics=null){
     byCat.get(i.category).push(i);
   }
   let order=1;
-  for(const [cat,items] of byCat){
+  const orderedCategories=[...byCat.entries()].sort(([a],[b])=>a==="PREDECESSOR"?-1:b==="PREDECESSOR"?1:0);
+  for(const [cat,items] of orderedCategories){
     const defaultCategoryLabels={CZ:"CZ",ZONE:"100G以内のゲーム数解除",AT_RETURN:"AT引き戻し",EVIDENCE:"設定確定・否定情報"};
     const categoryTitle=selection.uiCategoryLabels?.[cat]??defaultCategoryLabels[cat]??(cat==="PRIMARY"?null:cat);
     if(categoryTitle && /^(?:AUTO_|PRIMARY(?:_|$)|PREDECESSOR$|SELF_PLAY$|DISPLAY_ONLY(?:_|$)|REFERENCE_TOTAL$)/.test(categoryTitle)) fail(`ui category title must be user-facing: ${cat}`);
