@@ -34,6 +34,7 @@ function validateSurfaceGroup(entries, requiredSurfaces, sourceIds, label) {
     if (item.status === 'CHECKED') {
       if (!Array.isArray(item.sourceRefs) || item.sourceRefs.length === 0) errors.push(`${label}/${surface}: CHECKED requires sourceRefs`);
       else for (const ref of item.sourceRefs) if (!sourceIds.has(ref)) errors.push(`${label}/${surface}: unknown sourceRef ${ref}`);
+      if (!String(item.notes ?? '').trim()) errors.push(`${label}/${surface}: CHECKED requires notes describing candidates found or why none were retained`);
     }
     if ((item.status === 'NOT_APPLICABLE' || item.status === 'UNRESOLVED') && !String(item.notes ?? '').trim()) {
       errors.push(`${label}/${surface}: ${item.status} requires notes`);
