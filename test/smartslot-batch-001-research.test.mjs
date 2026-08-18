@@ -4,6 +4,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { validateResearchData } from '../tools/validate-research-data.mjs';
 
+// Batch 001: first production-scale 10-machine research validation.
 const IDS = [
   'L_BAKI_L3',
   'L_VALVRAVE_D',
