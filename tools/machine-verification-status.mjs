@@ -1,6 +1,6 @@
 import fs from 'node:fs';
 import path from 'node:path';
-import { fileURLToPath } from 'node:url';
+import { fileURLToPath, pathToFileURL } from 'node:url';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const STATUS_FILE = path.join(ROOT, 'machine-verification-status.json');
@@ -47,8 +47,13 @@ function help(){
   console.log(`SloAnalytica Real-device Verification Status v1\nUsage:\n  npm run verification:validate\n  npm run verification:status\n\nStatuses:\n  PENDING_REAL_DEVICE  公開済み・実機確認待ち\n  VERIFIED             実機確認済み\n  NEEDS_FIX            実機確認で修正必要\n  REVERIFY             修正後の再確認待ち`);
 }
 
-const cmd=process.argv[2]??'help';
-if(cmd==='validate') validate();
-else if(cmd==='status') status();
-else if(cmd==='help'||cmd==='--help') help();
-else { console.error(`unknown command: ${cmd}`); process.exit(2); }
+export function main(argv=process.argv.slice(2)){
+  const cmd=argv[0]??'help';
+  if(cmd==='validate') validate();
+  else if(cmd==='status') status();
+  else if(cmd==='help'||cmd==='--help') help();
+  else { console.error(`unknown command: ${cmd}`); process.exit(2); }
+}
+
+const invoked=process.argv[1] && pathToFileURL(path.resolve(process.argv[1])).href===import.meta.url;
+if(invoked) main();
