@@ -1,0 +1,413 @@
+{
+  "schemaVersion": 1,
+  "machine": {
+    "schemaVersion": "2.0.0",
+    "machineId": "L_GEN_CHOMUGEN_PH",
+    "machineDataVersion": "0.1.0",
+    "displayName": "L大工の源さん 超夢源",
+    "modelName": "L大工の源さん超夢源PH",
+    "manufacturer": "サンスリー",
+    "settings": [
+      "SET_1",
+      "SET_2",
+      "SET_4",
+      "SET_5",
+      "SET_6"
+    ],
+    "packagePolicy": {
+      "offlineCapable": true,
+      "containsImages": false,
+      "containsExecutableCode": false
+    }
+  },
+  "inputs": {
+    "schemaVersion": "2.0.0",
+    "inputs": [
+      {
+        "id": "INP_NORMAL_GAMES",
+        "name": "通常ゲーム数",
+        "type": "integer",
+        "category": "PRIMARY",
+        "unit": "G",
+        "displayOrder": 1,
+        "defaultValue": 0,
+        "minimum": 0
+      },
+      {
+        "id": "INP_BONUS_COUNT",
+        "name": "ボーナス初当り回数",
+        "type": "counter",
+        "category": "PRIMARY",
+        "unit": "回",
+        "displayOrder": 2,
+        "defaultValue": 0,
+        "minimum": 0
+      },
+      {
+        "id": "INP_CZ_COUNT",
+        "name": "CZ初当り回数",
+        "type": "counter",
+        "category": "PRIMARY",
+        "unit": "回",
+        "displayOrder": 3,
+        "defaultValue": 0,
+        "minimum": 0
+      },
+      {
+        "id": "INP_SEATED_GAMES",
+        "name": "着席時ゲーム数",
+        "type": "integer",
+        "category": "PREDECESSOR",
+        "unit": "G",
+        "displayOrder": 10,
+        "description": "データカウンター仕様が公開ボーナス初当り確率と合う場合のみ入力。",
+        "defaultValue": 0,
+        "minimum": 0
+      },
+      {
+        "id": "INP_SEATED_BONUS_COUNT",
+        "name": "着席時ボーナス初当り回数",
+        "type": "counter",
+        "category": "PREDECESSOR",
+        "unit": "回",
+        "displayOrder": 11,
+        "defaultValue": 0,
+        "minimum": 0
+      },
+      {
+        "id": "INP_EVI_SETTING_FLOOR",
+        "name": "確認した設定下限",
+        "type": "enum",
+        "category": "EVIDENCE",
+        "unit": "",
+        "displayOrder": 100,
+        "inferenceRole": "INCLUDE_SUPPORT",
+        "options": [
+          {
+            "key": "__UNSET__",
+            "label": "未選択",
+            "value": "__UNSET__"
+          },
+          {
+            "key": "SET_2_OR_HIGHER",
+            "label": "設定2以上",
+            "value": "SET_2_OR_HIGHER"
+          },
+          {
+            "key": "SET_4_OR_HIGHER",
+            "label": "設定4以上",
+            "value": "SET_4_OR_HIGHER"
+          },
+          {
+            "key": "SET_5_OR_HIGHER",
+            "label": "設定5以上",
+            "value": "SET_5_OR_HIGHER"
+          },
+          {
+            "key": "SET_6",
+            "label": "設定6",
+            "value": "SET_6"
+          }
+        ],
+        "defaultValue": "__UNSET__"
+      }
+    ]
+  },
+  "features": {
+    "schemaVersion": "2.0.0",
+    "features": [
+      {
+        "featureId": "FEAT_BONUS_INITIAL",
+        "name": "ボーナス初当り",
+        "adoptionCategory": "INCLUDE_PRIMARY",
+        "calculationRole": "PROBABILITY",
+        "probabilityEngineUsage": true,
+        "modelType": "binomial",
+        "minimumSample": 1,
+        "sampleRecommendation": 5000,
+        "reliabilityProfile": {
+          "weight": 1
+        },
+        "displayFormat": "ratio_1_over_n",
+        "numeratorInputId": "INP_BONUS_COUNT",
+        "denominatorInputId": "INP_NORMAL_GAMES",
+        "probabilities": {
+          "SET_1": 0.002964,
+          "SET_2": 0.003113,
+          "SET_4": 0.003588,
+          "SET_5": 0.004082,
+          "SET_6": 0.004757
+        },
+        "sourceEvidenceRefs": [
+          "SRC_GEN_NANA"
+        ]
+      },
+      {
+        "featureId": "FEAT_BONUS_PREDECESSOR",
+        "name": "着席前ボーナス初当り",
+        "adoptionCategory": "INCLUDE_SUPPORT",
+        "calculationRole": "PROBABILITY",
+        "probabilityEngineUsage": true,
+        "modelType": "binomial",
+        "minimumSample": 1,
+        "sampleRecommendation": 1000,
+        "reliabilityProfile": {
+          "weight": 1
+        },
+        "displayFormat": "ratio_1_over_n",
+        "numeratorInputId": "INP_SEATED_BONUS_COUNT",
+        "denominatorInputId": "INP_SEATED_GAMES",
+        "probabilities": {
+          "SET_1": 0.002964,
+          "SET_2": 0.003113,
+          "SET_4": 0.003588,
+          "SET_5": 0.004082,
+          "SET_6": 0.004757
+        },
+        "sourceEvidenceRefs": [
+          "SRC_GEN_NANA"
+        ]
+      },
+      {
+        "featureId": "FEAT_CZ_INITIAL",
+        "name": "CZ初当り",
+        "adoptionCategory": "INCLUDE_SUPPORT",
+        "calculationRole": "PROBABILITY",
+        "probabilityEngineUsage": true,
+        "modelType": "binomial",
+        "minimumSample": 1,
+        "sampleRecommendation": 7000,
+        "reliabilityProfile": {
+          "weight": 1
+        },
+        "displayFormat": "ratio_1_over_n",
+        "numeratorInputId": "INP_CZ_COUNT",
+        "denominatorInputId": "INP_NORMAL_GAMES",
+        "probabilities": {
+          "SET_1": 0.000805,
+          "SET_2": 0.000919,
+          "SET_4": 0.000982,
+          "SET_5": 0.001099,
+          "SET_6": 0.001189
+        },
+        "sourceEvidenceRefs": [
+          "SRC_GEN_NANA"
+        ]
+      }
+    ]
+  },
+  "evidence": {
+    "version": "1.0.0",
+    "evidences": [
+      {
+        "id": "EVI_SETTING_FLOOR_SET_2_OR_HIGHER",
+        "name": "設定2以上",
+        "displayName": "設定2以上",
+        "inputId": "INP_EVI_SETTING_FLOOR",
+        "triggerValue": "SET_2_OR_HIGHER",
+        "confirmedSettings": [
+          "SET_2",
+          "SET_4",
+          "SET_5",
+          "SET_6"
+        ],
+        "deniedSettings": [],
+        "hasImage": false,
+        "type": "SETTING_CONFIRMATION",
+        "sourceEvidenceRefs": [
+          "RE_TROPHY_2PLUS"
+        ]
+      },
+      {
+        "id": "EVI_SETTING_FLOOR_SET_4_OR_HIGHER",
+        "name": "設定4以上",
+        "displayName": "設定4以上",
+        "inputId": "INP_EVI_SETTING_FLOOR",
+        "triggerValue": "SET_4_OR_HIGHER",
+        "confirmedSettings": [
+          "SET_4",
+          "SET_5",
+          "SET_6"
+        ],
+        "deniedSettings": [],
+        "hasImage": false,
+        "type": "SETTING_CONFIRMATION",
+        "sourceEvidenceRefs": [
+          "RE_TROPHY_4PLUS",
+          "RE_PAYOUT_4PLUS",
+          "RE_WINDOW_4PLUS",
+          "RE_ENDING_RED_4PLUS"
+        ]
+      },
+      {
+        "id": "EVI_SETTING_FLOOR_SET_5_OR_HIGHER",
+        "name": "設定5以上",
+        "displayName": "設定5以上",
+        "inputId": "INP_EVI_SETTING_FLOOR",
+        "triggerValue": "SET_5_OR_HIGHER",
+        "confirmedSettings": [
+          "SET_5",
+          "SET_6"
+        ],
+        "deniedSettings": [],
+        "hasImage": false,
+        "type": "SETTING_CONFIRMATION",
+        "sourceEvidenceRefs": [
+          "RE_TROPHY_5PLUS",
+          "RE_PAYOUT_5PLUS",
+          "RE_WINDOW_5PLUS"
+        ]
+      },
+      {
+        "id": "EVI_SETTING_FLOOR_SET_6",
+        "name": "設定6",
+        "displayName": "設定6",
+        "inputId": "INP_EVI_SETTING_FLOOR",
+        "triggerValue": "SET_6",
+        "confirmedSettings": [
+          "SET_6"
+        ],
+        "deniedSettings": [],
+        "hasImage": false,
+        "type": "SETTING_CONFIRMATION",
+        "sourceEvidenceRefs": [
+          "RE_TROPHY_6",
+          "RE_PAYOUT_6",
+          "RE_WINDOW_6"
+        ]
+      }
+    ],
+    "sources": [
+      {
+        "id": "SRC_GEN_NANA",
+        "classification": "ANALYSIS",
+        "pageName": "L大工の源さん 超夢源 設定判別",
+        "url": "https://nana-press.com/kaiseki/machine/611/17642/",
+        "checkedAt": "2026-08-18"
+      }
+    ]
+  },
+  "ui": {
+    "sections": [
+      {
+        "id": "AUTO_PRIMARY",
+        "title": "ボーナス・CZ初当り",
+        "displayOrder": 1,
+        "items": [
+          {
+            "type": "input",
+            "inputId": "INP_NORMAL_GAMES",
+            "label": "通常ゲーム数",
+            "widget": "number"
+          },
+          {
+            "type": "input",
+            "inputId": "INP_BONUS_COUNT",
+            "label": "ボーナス初当り回数",
+            "widget": "counter"
+          },
+          {
+            "type": "input",
+            "inputId": "INP_CZ_COUNT",
+            "label": "CZ初当り回数",
+            "widget": "counter"
+          }
+        ]
+      },
+      {
+        "id": "AUTO_PREDECESSOR",
+        "title": "着席時データ",
+        "displayOrder": 2,
+        "items": [
+          {
+            "type": "input",
+            "inputId": "INP_SEATED_GAMES",
+            "label": "着席時ゲーム数",
+            "widget": "number"
+          },
+          {
+            "type": "input",
+            "inputId": "INP_SEATED_BONUS_COUNT",
+            "label": "着席時ボーナス初当り回数",
+            "widget": "counter"
+          }
+        ]
+      },
+      {
+        "id": "AUTO_EVIDENCE",
+        "title": "設定確定・否定情報",
+        "displayOrder": 3,
+        "items": [
+          {
+            "type": "input",
+            "inputId": "INP_EVI_SETTING_FLOOR",
+            "label": "確認した設定下限",
+            "widget": "select"
+          }
+        ]
+      }
+    ]
+  },
+  "selectionSummary": {
+    "schemaVersion": "selection-summary-v1",
+    "evaluatedCount": 4,
+    "selectedCount": 3,
+    "rejectedCount": 1,
+    "selected": [
+      {
+        "featureId": "FEAT_BONUS_INITIAL",
+        "name": "ボーナス初当り",
+        "reason": "ボーナス初当りは設定差が大きく最も追いやすいため主軸採用。",
+        "requiredTrials": {
+          "value": 8649,
+          "unit": "通常ゲーム"
+        }
+      },
+      {
+        "featureId": "FEAT_BONUS_PREDECESSOR",
+        "name": "着席前ボーナス初当り",
+        "reason": "カウンター仕様が適切なら着席前ボーナスを補助利用。",
+        "requiredTrials": {
+          "value": 8649,
+          "unit": "データカウンターゲーム"
+        }
+      },
+      {
+        "featureId": "FEAT_CZ_INITIAL",
+        "name": "CZ初当り",
+        "reason": "CZにも設定差があるため補助採用するが低頻度のためDifficultyから除外。",
+        "requiredTrials": {
+          "value": 49051,
+          "unit": "通常ゲーム"
+        }
+      }
+    ],
+    "rejected": [
+      {
+        "featureId": "FEAT_BIG_SHARE",
+        "name": "ボーナス中BIG比率",
+        "reason": "BIG/REG比率の設定差が小さく判別効率が低いため不採用。",
+        "requiredTrials": {
+          "value": 3434,
+          "unit": "ボーナス"
+        }
+      }
+    ]
+  },
+  "reliability": {},
+  "metadata": {
+    "machineId": "L_GEN_CHOMUGEN_PH",
+    "displayName": "L大工の源さん 超夢源",
+    "settings": [
+      "SET_1",
+      "SET_2",
+      "SET_4",
+      "SET_5",
+      "SET_6"
+    ]
+  },
+  "validation": {
+    "cases": []
+  },
+  "statistics": {}
+}

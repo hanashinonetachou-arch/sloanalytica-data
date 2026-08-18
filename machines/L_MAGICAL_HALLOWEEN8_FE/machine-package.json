@@ -1,0 +1,550 @@
+{
+  "schemaVersion": 1,
+  "machine": {
+    "schemaVersion": "2.0.0",
+    "machineId": "L_MAGICAL_HALLOWEEN8_FE",
+    "machineDataVersion": "0.1.0",
+    "displayName": "マジカルハロウィン8",
+    "modelName": "Lマジカルハロウィン8FE",
+    "manufacturer": "コナミアミューズメント",
+    "settings": [
+      "SET_1",
+      "SET_2",
+      "SET_3",
+      "SET_4",
+      "SET_5",
+      "SET_6"
+    ],
+    "packagePolicy": {
+      "offlineCapable": true,
+      "containsImages": false,
+      "containsExecutableCode": false
+    }
+  },
+  "inputs": {
+    "schemaVersion": "2.0.0",
+    "inputs": [
+      {
+        "id": "INP_NORMAL_GAMES",
+        "name": "通常ゲーム数",
+        "type": "integer",
+        "category": "PRIMARY",
+        "unit": "G",
+        "displayOrder": 1,
+        "defaultValue": 0,
+        "minimum": 0
+      },
+      {
+        "id": "INP_ART_COUNT",
+        "name": "ART初当り回数",
+        "type": "counter",
+        "category": "PRIMARY",
+        "unit": "回",
+        "displayOrder": 2,
+        "defaultValue": 0,
+        "minimum": 0
+      },
+      {
+        "id": "INP_SEATED_GAMES",
+        "name": "着席時ゲーム数",
+        "type": "integer",
+        "category": "PREDECESSOR",
+        "unit": "G",
+        "displayOrder": 10,
+        "description": "データカウンター仕様が公開ART初当り確率と合う場合のみ入力。",
+        "defaultValue": 0,
+        "minimum": 0
+      },
+      {
+        "id": "INP_SEATED_ART_COUNT",
+        "name": "着席時ART初当り回数",
+        "type": "counter",
+        "category": "PREDECESSOR",
+        "unit": "回",
+        "displayOrder": 11,
+        "defaultValue": 0,
+        "minimum": 0
+      },
+      {
+        "id": "INP_ROLE_GAMES",
+        "name": "小役集計ゲーム数",
+        "type": "integer",
+        "category": "ROLE",
+        "unit": "G",
+        "displayOrder": 20,
+        "description": "共通コインを集計したゲーム数。筐体メニューの遊技情報集計機能を利用できます。",
+        "defaultValue": 0,
+        "minimum": 0
+      },
+      {
+        "id": "INP_COMMON_COIN",
+        "name": "共通コイン回数",
+        "type": "counter",
+        "category": "ROLE",
+        "unit": "回",
+        "displayOrder": 21,
+        "description": "筐体メニューの遊技情報集計機能で自動確認可能です。",
+        "defaultValue": 0,
+        "minimum": 0
+      },
+      {
+        "id": "INP_DOKOMAJI_ELIGIBLE_BONUS",
+        "name": "どこまじ集計対象ボーナス回数",
+        "type": "counter",
+        "category": "DOKOMAJI",
+        "unit": "回",
+        "displayOrder": 30,
+        "description": "超高確中と判断できるボーナス、および朝一30G程度のボーナスは除外して入力します。作戦室ステージは超高確濃厚です。",
+        "defaultValue": 0,
+        "minimum": 0
+      },
+      {
+        "id": "INP_DOKOMAJI_COUNT",
+        "name": "どこまじ確認回数",
+        "type": "counter",
+        "category": "DOKOMAJI",
+        "unit": "回",
+        "displayOrder": 31,
+        "description": "集計対象ボーナスのうち、通常時にまじかるちゃんすを確認した回数を入力します。内部当選しても演出が出ない場合があるため補助要素として扱います。",
+        "defaultValue": 0,
+        "minimum": 0
+      },
+      {
+        "id": "INP_EVI_SETTING_FLOOR",
+        "name": "確認した設定下限",
+        "type": "enum",
+        "category": "EVIDENCE",
+        "unit": "",
+        "displayOrder": 100,
+        "inferenceRole": "INCLUDE_SUPPORT",
+        "options": [
+          {
+            "key": "__UNSET__",
+            "label": "未選択",
+            "value": "__UNSET__"
+          },
+          {
+            "key": "SET_2_OR_HIGHER",
+            "label": "設定2以上",
+            "value": "SET_2_OR_HIGHER"
+          },
+          {
+            "key": "SET_3_OR_HIGHER",
+            "label": "設定3以上",
+            "value": "SET_3_OR_HIGHER"
+          },
+          {
+            "key": "SET_4_OR_HIGHER",
+            "label": "設定4以上",
+            "value": "SET_4_OR_HIGHER"
+          },
+          {
+            "key": "SET_5_OR_HIGHER",
+            "label": "設定5以上",
+            "value": "SET_5_OR_HIGHER"
+          },
+          {
+            "key": "SET_6",
+            "label": "設定6",
+            "value": "SET_6"
+          }
+        ],
+        "defaultValue": "__UNSET__"
+      }
+    ]
+  },
+  "features": {
+    "schemaVersion": "2.0.0",
+    "features": [
+      {
+        "featureId": "FEAT_ART_INITIAL",
+        "name": "ART初当り",
+        "adoptionCategory": "INCLUDE_PRIMARY",
+        "calculationRole": "PROBABILITY",
+        "probabilityEngineUsage": true,
+        "modelType": "binomial",
+        "minimumSample": 1,
+        "sampleRecommendation": 5000,
+        "reliabilityProfile": {
+          "weight": 1
+        },
+        "displayFormat": "ratio_1_over_n",
+        "numeratorInputId": "INP_ART_COUNT",
+        "denominatorInputId": "INP_NORMAL_GAMES",
+        "probabilities": {
+          "SET_1": 0.002839,
+          "SET_2": 0.002981,
+          "SET_3": 0.003366,
+          "SET_4": 0.003713,
+          "SET_5": 0.003931,
+          "SET_6": 0.004409
+        },
+        "sourceEvidenceRefs": [
+          "SRC_MAGI8_NANA"
+        ]
+      },
+      {
+        "featureId": "FEAT_ART_PREDECESSOR",
+        "name": "着席前ART初当り",
+        "adoptionCategory": "INCLUDE_SUPPORT",
+        "calculationRole": "PROBABILITY",
+        "probabilityEngineUsage": true,
+        "modelType": "binomial",
+        "minimumSample": 1,
+        "sampleRecommendation": 1000,
+        "reliabilityProfile": {
+          "weight": 1
+        },
+        "displayFormat": "ratio_1_over_n",
+        "numeratorInputId": "INP_SEATED_ART_COUNT",
+        "denominatorInputId": "INP_SEATED_GAMES",
+        "probabilities": {
+          "SET_1": 0.002839,
+          "SET_2": 0.002981,
+          "SET_3": 0.003366,
+          "SET_4": 0.003713,
+          "SET_5": 0.003931,
+          "SET_6": 0.004409
+        },
+        "sourceEvidenceRefs": [
+          "SRC_MAGI8_NANA"
+        ]
+      },
+      {
+        "featureId": "FEAT_COMMON_COIN",
+        "name": "共通コイン",
+        "adoptionCategory": "INCLUDE_SUPPORT",
+        "calculationRole": "PROBABILITY",
+        "probabilityEngineUsage": true,
+        "modelType": "binomial",
+        "minimumSample": 1,
+        "sampleRecommendation": 3000,
+        "reliabilityProfile": {
+          "weight": 1
+        },
+        "displayFormat": "ratio_1_over_n",
+        "numeratorInputId": "INP_COMMON_COIN",
+        "denominatorInputId": "INP_ROLE_GAMES",
+        "probabilities": {
+          "SET_1": 0.133333,
+          "SET_2": 0.136986,
+          "SET_3": 0.140845,
+          "SET_4": 0.147059,
+          "SET_5": 0.151515,
+          "SET_6": 0.15625
+        },
+        "sourceEvidenceRefs": [
+          "SRC_MAGI8_NANA"
+        ]
+      },
+      {
+        "featureId": "FEAT_DOKOMAJI",
+        "name": "どこまじ当選率",
+        "adoptionCategory": "INCLUDE_SUPPORT",
+        "calculationRole": "PROBABILITY",
+        "probabilityEngineUsage": true,
+        "modelType": "binomial",
+        "minimumSample": 1,
+        "sampleRecommendation": 10,
+        "reliabilityProfile": {
+          "weight": 0.5
+        },
+        "displayFormat": "percent",
+        "numeratorInputId": "INP_DOKOMAJI_COUNT",
+        "denominatorInputId": "INP_DOKOMAJI_ELIGIBLE_BONUS",
+        "probabilities": {
+          "SET_1": 0.016,
+          "SET_2": 0.039,
+          "SET_3": 0.07,
+          "SET_4": 0.156,
+          "SET_5": 0.172,
+          "SET_6": 0.234
+        },
+        "sourceEvidenceRefs": [
+          "SRC_MAGI8_DOKOMAJI"
+        ]
+      }
+    ]
+  },
+  "evidence": {
+    "version": "1.0.0",
+    "evidences": [
+      {
+        "id": "EVI_SETTING_FLOOR_SET_2_OR_HIGHER",
+        "name": "設定2以上",
+        "displayName": "設定2以上",
+        "inputId": "INP_EVI_SETTING_FLOOR",
+        "triggerValue": "SET_2_OR_HIGHER",
+        "confirmedSettings": [
+          "SET_2",
+          "SET_3",
+          "SET_4",
+          "SET_5",
+          "SET_6"
+        ],
+        "deniedSettings": [],
+        "hasImage": false,
+        "type": "SETTING_CONFIRMATION",
+        "sourceEvidenceRefs": [
+          "RE_TROPHY_2PLUS",
+          "RE_PAYOUT_2PLUS",
+          "RE_ALICE_END_2PLUS",
+          "RE_ART_END_2PLUS"
+        ]
+      },
+      {
+        "id": "EVI_SETTING_FLOOR_SET_3_OR_HIGHER",
+        "name": "設定3以上",
+        "displayName": "設定3以上",
+        "inputId": "INP_EVI_SETTING_FLOOR",
+        "triggerValue": "SET_3_OR_HIGHER",
+        "confirmedSettings": [
+          "SET_3",
+          "SET_4",
+          "SET_5",
+          "SET_6"
+        ],
+        "deniedSettings": [],
+        "hasImage": false,
+        "type": "SETTING_CONFIRMATION",
+        "sourceEvidenceRefs": [
+          "RE_TROPHY_3PLUS"
+        ]
+      },
+      {
+        "id": "EVI_SETTING_FLOOR_SET_4_OR_HIGHER",
+        "name": "設定4以上",
+        "displayName": "設定4以上",
+        "inputId": "INP_EVI_SETTING_FLOOR",
+        "triggerValue": "SET_4_OR_HIGHER",
+        "confirmedSettings": [
+          "SET_4",
+          "SET_5",
+          "SET_6"
+        ],
+        "deniedSettings": [],
+        "hasImage": false,
+        "type": "SETTING_CONFIRMATION",
+        "sourceEvidenceRefs": [
+          "RE_TROPHY_4PLUS",
+          "RE_PAYOUT_4PLUS",
+          "RE_ART_END_4PLUS"
+        ]
+      },
+      {
+        "id": "EVI_SETTING_FLOOR_SET_5_OR_HIGHER",
+        "name": "設定5以上",
+        "displayName": "設定5以上",
+        "inputId": "INP_EVI_SETTING_FLOOR",
+        "triggerValue": "SET_5_OR_HIGHER",
+        "confirmedSettings": [
+          "SET_5",
+          "SET_6"
+        ],
+        "deniedSettings": [],
+        "hasImage": false,
+        "type": "SETTING_CONFIRMATION",
+        "sourceEvidenceRefs": [
+          "RE_TROPHY_5PLUS",
+          "RE_ALICE_BOTH_5PLUS"
+        ]
+      },
+      {
+        "id": "EVI_SETTING_FLOOR_SET_6",
+        "name": "設定6",
+        "displayName": "設定6",
+        "inputId": "INP_EVI_SETTING_FLOOR",
+        "triggerValue": "SET_6",
+        "confirmedSettings": [
+          "SET_6"
+        ],
+        "deniedSettings": [],
+        "hasImage": false,
+        "type": "SETTING_CONFIRMATION",
+        "sourceEvidenceRefs": [
+          "RE_TROPHY_6",
+          "RE_PAYOUT_6",
+          "RE_ART_END_6"
+        ]
+      }
+    ],
+    "sources": [
+      {
+        "id": "SRC_MAGI8_NANA",
+        "classification": "ANALYSIS",
+        "pageName": "マジカルハロウィン8 設定判別",
+        "url": "https://nana-press.com/kaiseki/machine/627/18063/",
+        "checkedAt": "2026-08-18"
+      },
+      {
+        "id": "SRC_MAGI8_TROPHY",
+        "classification": "ANALYSIS",
+        "pageName": "マジカルハロウィン8 トロフィー",
+        "url": "https://nana-press.com/kaiseki/machine/627/18090/",
+        "checkedAt": "2026-08-18"
+      },
+      {
+        "id": "SRC_MAGI8_DOKOMAJI",
+        "classification": "ANALYSIS",
+        "pageName": "マジカルハロウィン8 まじかるちゃんす（どこまじ）",
+        "url": "https://nana-press.com/kaiseki/machine/627/18071/",
+        "checkedAt": "2026-08-18"
+      }
+    ]
+  },
+  "ui": {
+    "sections": [
+      {
+        "id": "AUTO_PRIMARY",
+        "title": "ART初当り",
+        "displayOrder": 1,
+        "items": [
+          {
+            "type": "input",
+            "inputId": "INP_NORMAL_GAMES",
+            "label": "通常ゲーム数",
+            "widget": "number"
+          },
+          {
+            "type": "input",
+            "inputId": "INP_ART_COUNT",
+            "label": "ART初当り回数",
+            "widget": "counter"
+          }
+        ]
+      },
+      {
+        "id": "AUTO_PREDECESSOR",
+        "title": "着席時データ",
+        "displayOrder": 2,
+        "items": [
+          {
+            "type": "input",
+            "inputId": "INP_SEATED_GAMES",
+            "label": "着席時ゲーム数",
+            "widget": "number"
+          },
+          {
+            "type": "input",
+            "inputId": "INP_SEATED_ART_COUNT",
+            "label": "着席時ART初当り回数",
+            "widget": "counter"
+          }
+        ]
+      },
+      {
+        "id": "AUTO_ROLE",
+        "title": "小役",
+        "displayOrder": 3,
+        "items": [
+          {
+            "type": "input",
+            "inputId": "INP_ROLE_GAMES",
+            "label": "小役集計ゲーム数",
+            "widget": "number"
+          },
+          {
+            "type": "input",
+            "inputId": "INP_COMMON_COIN",
+            "label": "共通コイン回数",
+            "widget": "counter"
+          }
+        ]
+      },
+      {
+        "id": "AUTO_DOKOMAJI",
+        "title": "どこまじ",
+        "displayOrder": 4,
+        "items": [
+          {
+            "type": "input",
+            "inputId": "INP_DOKOMAJI_ELIGIBLE_BONUS",
+            "label": "どこまじ集計対象ボーナス回数",
+            "widget": "counter"
+          },
+          {
+            "type": "input",
+            "inputId": "INP_DOKOMAJI_COUNT",
+            "label": "どこまじ確認回数",
+            "widget": "counter"
+          }
+        ]
+      },
+      {
+        "id": "AUTO_EVIDENCE",
+        "title": "設定確定・否定情報",
+        "displayOrder": 5,
+        "items": [
+          {
+            "type": "input",
+            "inputId": "INP_EVI_SETTING_FLOOR",
+            "label": "確認した設定下限",
+            "widget": "select"
+          }
+        ]
+      }
+    ]
+  },
+  "selectionSummary": {
+    "schemaVersion": "selection-summary-v1",
+    "evaluatedCount": 4,
+    "selectedCount": 4,
+    "rejectedCount": 0,
+    "selected": [
+      {
+        "featureId": "FEAT_ART_INITIAL",
+        "name": "ART初当り",
+        "reason": "ART初当りの設定差が大きいため主軸採用。",
+        "requiredTrials": {
+          "value": 10611,
+          "unit": "通常ゲーム"
+        }
+      },
+      {
+        "featureId": "FEAT_ART_PREDECESSOR",
+        "name": "着席前ART初当り",
+        "reason": "カウンター仕様が適切なら着席前ART初当りも補助利用。",
+        "requiredTrials": {
+          "value": 10611,
+          "unit": "データカウンターゲーム"
+        }
+      },
+      {
+        "featureId": "FEAT_COMMON_COIN",
+        "name": "共通コイン",
+        "reason": "共通コインは高頻度で設定差があり、遊技情報集計機能で入力負荷も低いため採用。",
+        "requiredTrials": {
+          "value": 1726,
+          "unit": "小役集計ゲーム"
+        }
+      },
+      {
+        "featureId": "FEAT_DOKOMAJI",
+        "name": "どこまじ当選率",
+        "reason": "どこまじは設定1の1.6%から設定6の23.4%まで大差がある。超高確は作戦室等から実戦上かなり識別できるため、超高確中と朝一30G程度を除外して補助採用する。ただし内部当選してもまじかるちゃんすが必ず表示されるわけではなく、観測漏れがあるため重み0.5として過信を抑える。",
+        "requiredTrials": {
+          "value": 13,
+          "unit": "通常時ボーナス"
+        }
+      }
+    ],
+    "rejected": []
+  },
+  "reliability": {},
+  "metadata": {
+    "machineId": "L_MAGICAL_HALLOWEEN8_FE",
+    "displayName": "マジカルハロウィン8",
+    "settings": [
+      "SET_1",
+      "SET_2",
+      "SET_3",
+      "SET_4",
+      "SET_5",
+      "SET_6"
+    ]
+  },
+  "validation": {
+    "cases": []
+  },
+  "statistics": {}
+}
