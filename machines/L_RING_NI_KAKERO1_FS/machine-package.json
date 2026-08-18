@@ -55,6 +55,48 @@
         "minimum": 0
       },
       {
+        "id": "INP_SEATED_GAMES",
+        "name": "着席時ゲーム数",
+        "type": "integer",
+        "category": "PREDECESSOR",
+        "unit": "G",
+        "displayOrder": 10,
+        "description": "データカウンター仕様が公開ボーナス確率と合う場合のみ入力。",
+        "defaultValue": 0,
+        "minimum": 0
+      },
+      {
+        "id": "INP_SEATED_BONUS_COUNT",
+        "name": "着席時ボーナス回数",
+        "type": "counter",
+        "category": "PREDECESSOR",
+        "unit": "回",
+        "displayOrder": 11,
+        "defaultValue": 0,
+        "minimum": 0
+      },
+      {
+        "id": "INP_NORMAL_BONUS_TRIALS",
+        "name": "通常時ボーナス確認回数",
+        "type": "counter",
+        "category": "BONUS_TYPE",
+        "unit": "回",
+        "displayOrder": 20,
+        "description": "通常時から当選したボーナスのうち種類を確認できた回数。",
+        "defaultValue": 0,
+        "minimum": 0
+      },
+      {
+        "id": "INP_SAME_COLOR_BIG_PLUS",
+        "name": "同色BIG以上回数",
+        "type": "counter",
+        "category": "BONUS_TYPE",
+        "unit": "回",
+        "displayOrder": 21,
+        "defaultValue": 0,
+        "minimum": 0
+      },
+      {
         "id": "INP_EVI_SETTING_FLOOR",
         "name": "確認した設定下限",
         "type": "enum",
@@ -154,6 +196,60 @@
         "sourceEvidenceRefs": [
           "SRC_RING_NANA"
         ]
+      },
+      {
+        "featureId": "FEAT_BONUS_PREDECESSOR",
+        "name": "着席前ボーナス確率",
+        "adoptionCategory": "INCLUDE_SUPPORT",
+        "calculationRole": "PROBABILITY",
+        "probabilityEngineUsage": true,
+        "modelType": "binomial",
+        "minimumSample": 1,
+        "sampleRecommendation": 1000,
+        "reliabilityProfile": {
+          "weight": 0.7
+        },
+        "displayFormat": "ratio_1_over_n",
+        "numeratorInputId": "INP_SEATED_BONUS_COUNT",
+        "denominatorInputId": "INP_SEATED_GAMES",
+        "probabilities": {
+          "SET_1": 0.005283,
+          "SET_2": 0.005405,
+          "SET_3": 0.005587,
+          "SET_4": 0.006211,
+          "SET_5": 0.007199,
+          "SET_6": 0.008264
+        },
+        "sourceEvidenceRefs": [
+          "SRC_RING_NANA"
+        ]
+      },
+      {
+        "featureId": "FEAT_SAME_COLOR_BIG_SHARE",
+        "name": "通常時 同色BIG以上比率",
+        "adoptionCategory": "INCLUDE_SUPPORT",
+        "calculationRole": "PROBABILITY",
+        "probabilityEngineUsage": true,
+        "modelType": "binomial",
+        "minimumSample": 1,
+        "sampleRecommendation": 30,
+        "reliabilityProfile": {
+          "weight": 1
+        },
+        "displayFormat": "percent",
+        "numeratorInputId": "INP_SAME_COLOR_BIG_PLUS",
+        "denominatorInputId": "INP_NORMAL_BONUS_TRIALS",
+        "probabilities": {
+          "SET_1": 0.047,
+          "SET_2": 0.052,
+          "SET_3": 0.057,
+          "SET_4": 0.073,
+          "SET_5": 0.091,
+          "SET_6": 0.124
+        },
+        "sourceEvidenceRefs": [
+          "SRC_RING_NANA"
+        ]
       }
     ]
   },
@@ -177,7 +273,8 @@
         "hasImage": false,
         "type": "SETTING_CONFIRMATION",
         "sourceEvidenceRefs": [
-          "RE_NAMI_2PLUS"
+          "RE_NAMI_2PLUS",
+          "RE_BIG_MUSIC_2PLUS"
         ]
       },
       {
@@ -214,7 +311,9 @@
         "hasImage": false,
         "type": "SETTING_CONFIRMATION",
         "sourceEvidenceRefs": [
-          "RE_NAMI_4PLUS"
+          "RE_NAMI_4PLUS",
+          "RE_BIG_MUSIC_4PLUS",
+          "RE_QUIZ_MUSIC_4PLUS"
         ]
       },
       {
@@ -265,6 +364,7 @@
     "sections": [
       {
         "id": "AUTO_PRIMARY",
+        "title": "ボーナス・ST初当り",
         "displayOrder": 1,
         "items": [
           {
@@ -288,9 +388,47 @@
         ]
       },
       {
+        "id": "AUTO_PREDECESSOR",
+        "title": "着席時データ",
+        "displayOrder": 2,
+        "items": [
+          {
+            "type": "input",
+            "inputId": "INP_SEATED_GAMES",
+            "label": "着席時ゲーム数",
+            "widget": "number"
+          },
+          {
+            "type": "input",
+            "inputId": "INP_SEATED_BONUS_COUNT",
+            "label": "着席時ボーナス回数",
+            "widget": "counter"
+          }
+        ]
+      },
+      {
+        "id": "AUTO_BONUS_TYPE",
+        "title": "通常時ボーナス種類",
+        "displayOrder": 3,
+        "items": [
+          {
+            "type": "input",
+            "inputId": "INP_NORMAL_BONUS_TRIALS",
+            "label": "通常時ボーナス確認回数",
+            "widget": "counter"
+          },
+          {
+            "type": "input",
+            "inputId": "INP_SAME_COLOR_BIG_PLUS",
+            "label": "同色BIG以上回数",
+            "widget": "counter"
+          }
+        ]
+      },
+      {
         "id": "AUTO_EVIDENCE",
         "title": "設定確定・否定情報",
-        "displayOrder": 2,
+        "displayOrder": 4,
         "items": [
           {
             "type": "input",
@@ -304,8 +442,8 @@
   },
   "selectionSummary": {
     "schemaVersion": "selection-summary-v1",
-    "evaluatedCount": 2,
-    "selectedCount": 2,
+    "evaluatedCount": 4,
+    "selectedCount": 4,
     "rejectedCount": 0,
     "selected": [
       {
@@ -324,6 +462,24 @@
         "requiredTrials": {
           "value": 5482,
           "unit": "通常ゲーム"
+        }
+      },
+      {
+        "featureId": "FEAT_BONUS_PREDECESSOR",
+        "name": "着席前ボーナス確率",
+        "reason": "カウンター仕様が適切なら着席前ボーナスを補助利用。",
+        "requiredTrials": {
+          "value": 5482,
+          "unit": "データカウンターゲーム"
+        }
+      },
+      {
+        "featureId": "FEAT_SAME_COLOR_BIG_SHARE",
+        "name": "通常時 同色BIG以上比率",
+        "reason": "通常時ボーナスの同色BIG以上比率は4.7%→12.4%と差が大きく実戦で種類を数えられるため採用。ボーナス試行数の通常G換算はDifficultyで二重評価しない。",
+        "requiredTrials": {
+          "value": 92,
+          "unit": "通常時ボーナス"
         }
       }
     ],
