@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { normalizeMachineIds, classifyMachineQuality } from '../tools/batch-machine-pipeline.mjs';
+import { normalizeMachineIds, classifyMachineQuality, deriveOverallStatus } from '../tools/batch-machine-pipeline.mjs';
 
 test('batch normalizes unique machine IDs', () => {
   assert.deepEqual(normalizeMachineIds(['A_ONE,B_TWO', 'A_ONE', 'C_THREE']), ['A_ONE', 'B_TWO', 'C_THREE']);
@@ -38,4 +38,11 @@ test('validation failure classifies BLOCKED', () => {
     selectionValidation: { ok: true, warnings: [] },
     research: {},
   }).status, 'BLOCKED');
+});
+
+test('overall status prioritizes repository failure and BLOCKED over REVIEW', () => {
+  assert.equal(deriveOverallStatus([{ status: 'PASS' }], false), 'BLOCKED');
+  assert.equal(deriveOverallStatus([{ status: 'REVIEW' }, { status: 'BLOCKED' }], true), 'BLOCKED');
+  assert.equal(deriveOverallStatus([{ status: 'PASS' }, { status: 'REVIEW' }], true), 'REVIEW');
+  assert.equal(deriveOverallStatus([{ status: 'PASS' }], true), 'PASS');
 });
