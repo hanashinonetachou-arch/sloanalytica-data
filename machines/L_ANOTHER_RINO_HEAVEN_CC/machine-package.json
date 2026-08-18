@@ -1,0 +1,402 @@
+{
+  "schemaVersion": 1,
+  "machine": {
+    "schemaVersion": "2.0.0",
+    "machineId": "L_ANOTHER_RINO_HEAVEN_CC",
+    "machineDataVersion": "0.1.0",
+    "displayName": "スマスロリノヘブン（未調査版）",
+    "modelName": "LアナザーリノヘブンCC",
+    "manufacturer": "山佐",
+    "settings": [
+      "SET_1",
+      "SET_2",
+      "SET_4",
+      "SET_5",
+      "SET_6"
+    ],
+    "packagePolicy": {
+      "offlineCapable": true,
+      "containsImages": false,
+      "containsExecutableCode": false
+    }
+  },
+  "inputs": {
+    "schemaVersion": "2.0.0",
+    "inputs": [
+      {
+        "id": "INP_PREDECESSOR_GAMES",
+        "name": "着席時ゲーム数",
+        "type": "integer",
+        "category": "PREDECESSOR",
+        "unit": "G",
+        "displayOrder": 1,
+        "inferenceRole": "INCLUDE_PRIMARY",
+        "defaultValue": 0,
+        "observationScope": "PREDECESSOR_SNAPSHOT",
+        "description": "着席時にデータカウンターへ表示されている累計ゲーム数を入力します。自分のゲーム数の開始値として使用します。",
+        "minimum": 0
+      },
+      {
+        "id": "INP_NORMAL_GAMES",
+        "name": "自分のゲーム数",
+        "type": "integer",
+        "category": "NORMAL",
+        "unit": "G",
+        "displayOrder": 10,
+        "inferenceRole": "INCLUDE_PRIMARY",
+        "defaultValue": 0,
+        "observationScope": "SELF_PLAY",
+        "sessionDifferenceHelper": true,
+        "description": "現在のデータカウンターゲーム数－着席時ゲーム数で自動計算します。初版では実機のカウンター仕様確認前のため、ボーナス中ゲームを含む表示の場合は実機確認後に補正仕様を追加します。",
+        "minimum": 0
+      },
+      {
+        "id": "INP_INITIAL_BONUS_COUNT",
+        "name": "ボーナス初当り",
+        "type": "counter",
+        "category": "NORMAL",
+        "unit": "回",
+        "displayOrder": 11,
+        "inferenceRole": "INCLUDE_PRIMARY",
+        "defaultValue": 0,
+        "observationScope": "SELF_PLAY",
+        "parentInputId": "INP_NORMAL_GAMES",
+        "description": "着席後のボーナス初当り回数を入力します。32G以内の天国連チャン分は含めません。",
+        "minimum": 0
+      },
+      {
+        "id": "INP_3COIN_BELL",
+        "name": "3枚ベル",
+        "type": "counter",
+        "category": "NORMAL",
+        "unit": "回",
+        "displayOrder": 12,
+        "inferenceRole": "INCLUDE_PRIMARY",
+        "defaultValue": null,
+        "observationScope": "SELF_PLAY",
+        "parentInputId": "INP_NORMAL_GAMES",
+        "description": "通常時に成立した3枚ベル回数を入力します。ボーナス中は含めません。数えていない場合は空欄のままにしてください。",
+        "minimum": 0
+      },
+      {
+        "id": "INP_EVI_RINO_TROPHY",
+        "name": "ボーナス終了時 ケロットトロフィー",
+        "type": "multi_enum",
+        "category": "EVIDENCE",
+        "unit": "",
+        "displayOrder": 100,
+        "inferenceRole": "INCLUDE_SUPPORT",
+        "options": [
+          {
+            "key": "BRONZE_2PLUS",
+            "label": "銅（設定2以上）",
+            "value": "BRONZE_2PLUS"
+          },
+          {
+            "key": "GOLD_4PLUS",
+            "label": "金（設定4以上）",
+            "value": "GOLD_4PLUS"
+          },
+          {
+            "key": "KEROT_5PLUS",
+            "label": "ケロット柄（設定5以上）",
+            "value": "KEROT_5PLUS"
+          },
+          {
+            "key": "RAINBOW_6",
+            "label": "虹（設定6）",
+            "value": "RAINBOW_6"
+          }
+        ],
+        "defaultValue": []
+      }
+    ]
+  },
+  "features": {
+    "schemaVersion": "2.0.0",
+    "features": [
+      {
+        "featureId": "FEAT_BONUS_INITIAL",
+        "name": "ボーナス初当り",
+        "adoptionCategory": "INCLUDE_PRIMARY",
+        "calculationRole": "PROBABILITY",
+        "probabilityEngineUsage": true,
+        "modelType": "binomial",
+        "minimumSample": 500,
+        "sampleRecommendation": 5000,
+        "reliabilityProfile": {
+          "weight": 1
+        },
+        "numeratorInputId": "INP_INITIAL_BONUS_COUNT",
+        "denominatorInputId": "INP_NORMAL_GAMES",
+        "displayFormat": "ratio_1_over_n",
+        "probabilities": {
+          "SET_1": 0.0039541320680110716,
+          "SET_2": 0.004073319755600814,
+          "SET_4": 0.004312203536006899,
+          "SET_5": 0.004627487274409995,
+          "SET_6": 0.004935834155972359
+        },
+        "sourceEvidenceRefs": [
+          "SRC_1GEKI_SETTING",
+          "SRC_NANAPRESS_SETTING"
+        ]
+      },
+      {
+        "featureId": "FEAT_NORMAL_3COIN_BELL",
+        "name": "通常時3枚ベル",
+        "adoptionCategory": "INCLUDE_PRIMARY",
+        "calculationRole": "PROBABILITY",
+        "probabilityEngineUsage": true,
+        "modelType": "binomial",
+        "minimumSample": 500,
+        "sampleRecommendation": 5000,
+        "reliabilityProfile": {
+          "weight": 1
+        },
+        "numeratorInputId": "INP_3COIN_BELL",
+        "denominatorInputId": "INP_NORMAL_GAMES",
+        "displayFormat": "ratio_1_over_n",
+        "probabilities": {
+          "SET_1": 0.1941747572815534,
+          "SET_2": 0.19646365422396858,
+          "SET_4": 0.19880715705765406,
+          "SET_5": 0.2012072434607646,
+          "SET_6": 0.2032520325203252
+        },
+        "sourceEvidenceRefs": [
+          "SRC_1GEKI_SETTING",
+          "SRC_NANAPRESS_SETTING",
+          "SRC_PWORLD"
+        ]
+      }
+    ]
+  },
+  "evidence": {
+    "version": "1.0.0",
+    "evidences": [
+      {
+        "id": "EVI_RINO_TROPHY_BRONZE_2PLUS",
+        "name": "銅（設定2以上）",
+        "displayName": "銅（設定2以上）",
+        "inputId": "INP_EVI_RINO_TROPHY",
+        "triggerValue": "BRONZE_2PLUS",
+        "confirmedSettings": [
+          "SET_2",
+          "SET_4",
+          "SET_5",
+          "SET_6"
+        ],
+        "deniedSettings": [],
+        "hasImage": false,
+        "type": "SETTING_CONFIRMATION",
+        "sourceEvidenceRefs": [
+          "RE_TROPHY_BRONZE_2PLUS"
+        ]
+      },
+      {
+        "id": "EVI_RINO_TROPHY_GOLD_4PLUS",
+        "name": "金（設定4以上）",
+        "displayName": "金（設定4以上）",
+        "inputId": "INP_EVI_RINO_TROPHY",
+        "triggerValue": "GOLD_4PLUS",
+        "confirmedSettings": [
+          "SET_4",
+          "SET_5",
+          "SET_6"
+        ],
+        "deniedSettings": [],
+        "hasImage": false,
+        "type": "SETTING_CONFIRMATION",
+        "sourceEvidenceRefs": [
+          "RE_TROPHY_GOLD_4PLUS"
+        ]
+      },
+      {
+        "id": "EVI_RINO_TROPHY_KEROT_5PLUS",
+        "name": "ケロット柄（設定5以上）",
+        "displayName": "ケロット柄（設定5以上）",
+        "inputId": "INP_EVI_RINO_TROPHY",
+        "triggerValue": "KEROT_5PLUS",
+        "confirmedSettings": [
+          "SET_5",
+          "SET_6"
+        ],
+        "deniedSettings": [],
+        "hasImage": false,
+        "type": "SETTING_CONFIRMATION",
+        "sourceEvidenceRefs": [
+          "RE_TROPHY_KEROT_5PLUS"
+        ]
+      },
+      {
+        "id": "EVI_RINO_TROPHY_RAINBOW_6",
+        "name": "虹（設定6）",
+        "displayName": "虹（設定6）",
+        "inputId": "INP_EVI_RINO_TROPHY",
+        "triggerValue": "RAINBOW_6",
+        "confirmedSettings": [
+          "SET_6"
+        ],
+        "deniedSettings": [],
+        "hasImage": false,
+        "type": "SETTING_CONFIRMATION",
+        "sourceEvidenceRefs": [
+          "RE_TROPHY_RAINBOW_6"
+        ]
+      }
+    ],
+    "sources": [
+      {
+        "id": "SRC_YAMASA_OFFICIAL",
+        "classification": "OFFICIAL",
+        "pageName": "スマスロリノヘブン 公式機種サイト",
+        "url": "https://www1.yamasa.co.jp/rnhvn/",
+        "checkedAt": "2026-08-18"
+      },
+      {
+        "id": "SRC_PWORLD",
+        "classification": "ANALYSIS",
+        "pageName": "スマスロリノヘブン 機種情報",
+        "url": "https://www.p-world.co.jp/machine/database/9721",
+        "checkedAt": "2026-08-18"
+      },
+      {
+        "id": "SRC_1GEKI_SETTING",
+        "classification": "ANALYSIS",
+        "pageName": "スマスロ リノヘブン 設定判別･推測/立ち回りポイント",
+        "url": "https://1geki.jp/slot/s_reno_heaven/0/",
+        "checkedAt": "2026-08-18"
+      },
+      {
+        "id": "SRC_NANAPRESS_SETTING",
+        "classification": "ANALYSIS",
+        "pageName": "スマスロリノヘブン 設定差のある要素や設定示唆演出まとめ",
+        "url": "https://nana-press.com/kaiseki/machine/466/12509/",
+        "checkedAt": "2026-08-18"
+      },
+      {
+        "id": "SRC_PACHISEVEN",
+        "classification": "ANALYSIS",
+        "pageName": "スマスロリノヘブン 解析・設定判別",
+        "url": "https://pachiseven.jp/machines/6633",
+        "checkedAt": "2026-08-18"
+      },
+      {
+        "id": "SRC_SLOPURA_NEXT",
+        "classification": "OFFICIAL",
+        "pageName": "スロプラNEXT 公式サイト",
+        "url": "https://www.yamasa-next.co.jp/slp/",
+        "checkedAt": "2026-08-18"
+      }
+    ]
+  },
+  "ui": {
+    "sections": [
+      {
+        "id": "AUTO_PREDECESSOR",
+        "title": "着席時データ",
+        "displayOrder": 1,
+        "items": [
+          {
+            "type": "input",
+            "inputId": "INP_PREDECESSOR_GAMES",
+            "label": "着席時ゲーム数",
+            "widget": "number"
+          }
+        ]
+      },
+      {
+        "id": "AUTO_NORMAL",
+        "title": "通常時",
+        "displayOrder": 2,
+        "items": [
+          {
+            "type": "input",
+            "inputId": "INP_NORMAL_GAMES",
+            "label": "自分のゲーム数",
+            "widget": "number"
+          },
+          {
+            "type": "input",
+            "inputId": "INP_INITIAL_BONUS_COUNT",
+            "label": "ボーナス初当り",
+            "widget": "counter"
+          },
+          {
+            "type": "input",
+            "inputId": "INP_3COIN_BELL",
+            "label": "3枚ベル",
+            "widget": "counter"
+          }
+        ]
+      },
+      {
+        "id": "AUTO_EVIDENCE",
+        "title": "設定確定情報",
+        "displayOrder": 3,
+        "items": [
+          {
+            "type": "input",
+            "inputId": "INP_EVI_RINO_TROPHY",
+            "label": "ボーナス終了時 ケロットトロフィー",
+            "widget": "multi_select"
+          }
+        ]
+      }
+    ]
+  },
+  "selectionSummary": {
+    "schemaVersion": "selection-summary-v1",
+    "evaluatedCount": 3,
+    "selectedCount": 2,
+    "rejectedCount": 1,
+    "selected": [
+      {
+        "featureId": "FEAT_BONUS_INITIAL",
+        "name": "ボーナス初当り",
+        "reason": "ボーナス初当りは高設定ほど明確に優遇され、モード移行差の影響を避けて設定差そのものを見やすいため採用します。",
+        "requiredTrials": {
+          "value": 33556,
+          "unit": "通常ゲーム"
+        }
+      },
+      {
+        "featureId": "FEAT_NORMAL_3COIN_BELL",
+        "name": "通常時3枚ベル",
+        "reason": "通常時3枚ベルは高頻度で継続観測でき、設定1から6まで段階的な差があるため採用します。",
+        "requiredTrials": {
+          "value": 14164,
+          "unit": "通常ゲーム"
+        }
+      }
+    ],
+    "rejected": [
+      {
+        "featureId": "FEAT_BONUS_COMBINED_EXCLUDED",
+        "name": "ボーナス合算",
+        "reason": "ボーナス初当りと情報が重複し、設定差のない天国ループも含むため不採用です。",
+        "requiredTrials": {
+          "value": 18867,
+          "unit": "通常ゲーム"
+        }
+      }
+    ]
+  },
+  "reliability": {},
+  "metadata": {
+    "machineId": "L_ANOTHER_RINO_HEAVEN_CC",
+    "displayName": "スマスロリノヘブン（未調査版）",
+    "settings": [
+      "SET_1",
+      "SET_2",
+      "SET_4",
+      "SET_5",
+      "SET_6"
+    ]
+  },
+  "validation": {
+    "cases": []
+  },
+  "statistics": {}
+}
