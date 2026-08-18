@@ -40,9 +40,6 @@ function preserveGeneratedAtIfEquivalent(existingPath, nextValue) {
 }
 function fail(message) { throw new Error(message); }
 function runNpm(script, label) {
-  // Prefer npm's JavaScript entry point inherited from the parent `npm run` process.
-  // This avoids spawning npm.cmd directly on Windows, which can fail with EINVAL
-  // on some Node/Windows combinations.
   const npmExecPath = process.env.npm_execpath;
   let command;
   let args;
@@ -71,6 +68,23 @@ function runNode(args, label) {
   if (r.error) fail(`${label} could not start: ${r.error.message}`);
   if (r.status !== 0) fail(`${label} failed with exit code ${r.status}`);
 }
+function collectRequiredCapabilities(machinePackage) {
+  const capabilities = new Set();
+  for (const feature of machinePackage.features?.features ?? []) {
+    if (typeof feature?.modelType === 'string' && feature.modelType.length > 0) capabilities.add(feature.modelType);
+    if (feature?.calculationRole === 'DISPLAY_ONLY' || feature?.probabilityEngineUsage === false) capabilities.add('reference_display');
+    if (Array.isArray(feature?.suppressedByFeatureIds) && feature.suppressedByFeatureIds.length > 0) capabilities.add('feature_suppression');
+    if (Array.isArray(feature?.denominatorAdjustments) && feature.denominatorAdjustments.length > 0) capabilities.add('derived_denominator');
+  }
+  if ((machinePackage.evidence?.evidences ?? []).length > 0) capabilities.add('evidence');
+  if ((machinePackage.inputs?.inputs ?? []).some(input => input?.type === 'multi_enum')) capabilities.add('evidence_multi_select');
+  for (const section of machinePackage.ui?.sections ?? []) {
+    for (const item of section?.items ?? []) {
+      if (item?.type === 'auto_accumulator') capabilities.add('auto_accumulator');
+    }
+  }
+  return [...capabilities];
+}
 function syncExistingCatalogMetadata(catalogPath, machinePath, machinePackage, machineId) {
   const catalog = readJson(catalogPath);
   const entry = (catalog.machines ?? []).find(m => m.machineId === machineId);
@@ -79,11 +93,8 @@ function syncExistingCatalogMetadata(catalogPath, machinePath, machinePackage, m
   const nextVersion = machinePackage.machine?.machineDataVersion;
   const nextSha = crypto.createHash('sha256').update(bytes).digest('hex');
   const nextSize = bytes.length;
-  const featureModelCapabilities = [...new Set((machinePackage.features?.features ?? [])
-    .map(feature => feature?.modelType)
-    .filter(modelType => typeof modelType === 'string' && modelType.length > 0))];
   const previousCapabilities = Array.isArray(entry.requiredCapabilities) ? entry.requiredCapabilities : [];
-  const nextCapabilities = [...new Set([...previousCapabilities, ...featureModelCapabilities])];
+  const nextCapabilities = [...new Set([...previousCapabilities, ...collectRequiredCapabilities(machinePackage)])];
   const changed = entry.machineDataVersion !== nextVersion ||
     entry.sha256 !== nextSha ||
     entry.packageSizeBytes !== nextSize ||
