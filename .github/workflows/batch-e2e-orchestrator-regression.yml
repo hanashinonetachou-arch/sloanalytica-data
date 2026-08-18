@@ -1,0 +1,40 @@
+name: Batch End-to-End Orchestrator Regression
+
+on:
+  pull_request:
+    branches: [prototype-multi-machine]
+    paths:
+      - 'tools/batch-e2e-orchestrator.mjs'
+      - 'test/batch-e2e-orchestrator.test.mjs'
+      - 'package.json'
+      - '.github/workflows/batch-e2e-orchestrator-regression.yml'
+      - 'tools/batch-research-pipeline.mjs'
+      - 'tools/batch-selection-pipeline.mjs'
+      - 'tools/batch-machine-pipeline.mjs'
+
+permissions:
+  contents: read
+
+jobs:
+  regression:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Run repository tests
+        run: npm test
+      - name: Verify mixed end-to-end status batch
+        run: |
+          npm run batch:e2e -- L_ANOTHER_RINO_HEAVEN_CC "スマスロ北斗の拳" --check
+          node - <<'NODE'
+          const fs=require('fs');
+          const r=JSON.parse(fs.readFileSync('reports/batch-e2e-report.json','utf8'));
+          if(r.overallStatus!=='RESEARCH_REQUIRED') throw new Error(`unexpected overallStatus: ${r.overallStatus}`);
+          if(r.counts.PUBLISHED!==1) throw new Error(`expected PUBLISHED=1: ${JSON.stringify(r.counts)}`);
+          if(r.counts.RESEARCH_REQUIRED!==1) throw new Error(`expected RESEARCH_REQUIRED=1: ${JSON.stringify(r.counts)}`);
+          if(r.safety.machineWrite!==false || r.safety.publishIncluded!==false) throw new Error('unsafe flags');
+          NODE
+      - name: Verify help
+        run: npm run batch:e2e -- --help
