@@ -45,6 +45,27 @@
         "minimum": 0
       },
       {
+        "id": "INP_SEATED_GAMES",
+        "name": "着席時ゲーム数",
+        "type": "integer",
+        "category": "PREDECESSOR",
+        "unit": "G",
+        "displayOrder": 10,
+        "description": "データカウンター仕様が公開AT初当り確率と合う場合のみ入力。",
+        "defaultValue": 0,
+        "minimum": 0
+      },
+      {
+        "id": "INP_SEATED_AT_COUNT",
+        "name": "着席時AT初当り回数",
+        "type": "counter",
+        "category": "PREDECESSOR",
+        "unit": "回",
+        "displayOrder": 11,
+        "defaultValue": 0,
+        "minimum": 0
+      },
+      {
         "id": "INP_EVI_SETTING_FLOOR",
         "name": "確認した設定下限",
         "type": "enum",
@@ -57,11 +78,6 @@
             "key": "__UNSET__",
             "label": "未選択",
             "value": "__UNSET__"
-          },
-          {
-            "key": "SET_2_OR_HIGHER",
-            "label": "設定2以上",
-            "value": "SET_2_OR_HIGHER"
           },
           {
             "key": "SET_4_OR_HIGHER",
@@ -91,9 +107,31 @@
         "inferenceRole": "INCLUDE_SUPPORT",
         "options": [
           {
+            "key": "AT_END_DENY_1",
+            "label": "AT終了画面 景勝&直江：設定1否定",
+            "value": "AT_END_DENY_1"
+          },
+          {
             "key": "AT_END_DENY_3",
             "label": "AT終了画面 高茂：設定3否定",
             "value": "AT_END_DENY_3"
+          }
+        ],
+        "defaultValue": []
+      },
+      {
+        "id": "INP_EVI_SETTING_SUBSET",
+        "name": "確認した設定限定",
+        "type": "multi_enum",
+        "category": "EVIDENCE",
+        "unit": "",
+        "displayOrder": 102,
+        "inferenceRole": "INCLUDE_SUPPORT",
+        "options": [
+          {
+            "key": "PAYOUT_246",
+            "label": "246枚：設定2・4・6",
+            "value": "PAYOUT_246"
           }
         ],
         "defaultValue": []
@@ -129,32 +167,39 @@
         "sourceEvidenceRefs": [
           "SRC_KEIJI_NANA"
         ]
+      },
+      {
+        "featureId": "FEAT_AT_PREDECESSOR",
+        "name": "着席前AT初当り",
+        "adoptionCategory": "INCLUDE_SUPPORT",
+        "calculationRole": "PROBABILITY",
+        "probabilityEngineUsage": true,
+        "modelType": "binomial",
+        "minimumSample": 1,
+        "sampleRecommendation": 1000,
+        "reliabilityProfile": {
+          "weight": 1
+        },
+        "displayFormat": "ratio_1_over_n",
+        "numeratorInputId": "INP_SEATED_AT_COUNT",
+        "denominatorInputId": "INP_SEATED_GAMES",
+        "probabilities": {
+          "SET_1": 0.002107,
+          "SET_2": 0.002173,
+          "SET_3": 0.002283,
+          "SET_4": 0.002508,
+          "SET_5": 0.002747,
+          "SET_6": 0.002978
+        },
+        "sourceEvidenceRefs": [
+          "SRC_KEIJI_NANA"
+        ]
       }
     ]
   },
   "evidence": {
     "version": "1.0.0",
     "evidences": [
-      {
-        "id": "EVI_SETTING_FLOOR_SET_2_OR_HIGHER",
-        "name": "設定2以上",
-        "displayName": "設定2以上",
-        "inputId": "INP_EVI_SETTING_FLOOR",
-        "triggerValue": "SET_2_OR_HIGHER",
-        "confirmedSettings": [
-          "SET_2",
-          "SET_3",
-          "SET_4",
-          "SET_5",
-          "SET_6"
-        ],
-        "deniedSettings": [],
-        "hasImage": false,
-        "type": "SETTING_CONFIRMATION",
-        "sourceEvidenceRefs": [
-          "RE_AT_END_2PLUS"
-        ]
-      },
       {
         "id": "EVI_SETTING_FLOOR_SET_4_OR_HIGHER",
         "name": "設定4以上",
@@ -170,6 +215,8 @@
         "hasImage": false,
         "type": "SETTING_CONFIRMATION",
         "sourceEvidenceRefs": [
+          "RE_AT_END_4PLUS",
+          "RE_UI_4PLUS",
           "RE_PAYOUT_4PLUS"
         ]
       },
@@ -187,6 +234,8 @@
         "hasImage": false,
         "type": "SETTING_CONFIRMATION",
         "sourceEvidenceRefs": [
+          "RE_AT_END_5PLUS",
+          "RE_UI_5PLUS",
           "RE_PAYOUT_5PLUS"
         ]
       },
@@ -203,7 +252,24 @@
         "hasImage": false,
         "type": "SETTING_CONFIRMATION",
         "sourceEvidenceRefs": [
-          "RE_PAYOUT_6"
+          "RE_PAYOUT_6",
+          "RE_OMIKUJI_6"
+        ]
+      },
+      {
+        "id": "EVI_SETTING_DENIAL_AT_END_DENY_1",
+        "name": "AT終了画面 景勝&直江：設定1否定",
+        "displayName": "AT終了画面 景勝&直江：設定1否定",
+        "inputId": "INP_EVI_SETTING_DENIAL",
+        "triggerValue": "AT_END_DENY_1",
+        "confirmedSettings": [],
+        "deniedSettings": [
+          "SET_1"
+        ],
+        "hasImage": false,
+        "type": "SETTING_DENIAL",
+        "sourceEvidenceRefs": [
+          "RE_AT_END_DENY_1"
         ]
       },
       {
@@ -221,6 +287,24 @@
         "sourceEvidenceRefs": [
           "RE_AT_END_DENY_3"
         ]
+      },
+      {
+        "id": "EVI_SETTING_SUBSET_PAYOUT_246",
+        "name": "246枚：設定2・4・6",
+        "displayName": "246枚：設定2・4・6",
+        "inputId": "INP_EVI_SETTING_SUBSET",
+        "triggerValue": "PAYOUT_246",
+        "confirmedSettings": [
+          "SET_2",
+          "SET_4",
+          "SET_6"
+        ],
+        "deniedSettings": [],
+        "hasImage": false,
+        "type": "SETTING_CONFIRMATION",
+        "sourceEvidenceRefs": [
+          "RE_PAYOUT_246"
+        ]
       }
     ],
     "sources": [
@@ -237,6 +321,7 @@
     "sections": [
       {
         "id": "AUTO_PRIMARY",
+        "title": "ボーナス・AT初当り",
         "displayOrder": 1,
         "items": [
           {
@@ -254,9 +339,28 @@
         ]
       },
       {
+        "id": "AUTO_PREDECESSOR",
+        "title": "着席時データ",
+        "displayOrder": 2,
+        "items": [
+          {
+            "type": "input",
+            "inputId": "INP_SEATED_GAMES",
+            "label": "着席時ゲーム数",
+            "widget": "number"
+          },
+          {
+            "type": "input",
+            "inputId": "INP_SEATED_AT_COUNT",
+            "label": "着席時AT初当り回数",
+            "widget": "counter"
+          }
+        ]
+      },
+      {
         "id": "AUTO_EVIDENCE",
         "title": "設定確定・否定情報",
-        "displayOrder": 2,
+        "displayOrder": 3,
         "items": [
           {
             "type": "input",
@@ -269,6 +373,12 @@
             "inputId": "INP_EVI_SETTING_DENIAL",
             "label": "確認した設定否定",
             "widget": "multi_select"
+          },
+          {
+            "type": "input",
+            "inputId": "INP_EVI_SETTING_SUBSET",
+            "label": "確認した設定限定",
+            "widget": "multi_select"
           }
         ]
       }
@@ -276,8 +386,8 @@
   },
   "selectionSummary": {
     "schemaVersion": "selection-summary-v1",
-    "evaluatedCount": 2,
-    "selectedCount": 1,
+    "evaluatedCount": 3,
+    "selectedCount": 2,
     "rejectedCount": 1,
     "selected": [
       {
@@ -288,13 +398,22 @@
           "value": 39174,
           "unit": "通常ゲーム"
         }
+      },
+      {
+        "featureId": "FEAT_AT_PREDECESSOR",
+        "name": "着席前AT初当り",
+        "reason": "着席時にAT初当りが取得でき、カウンター仕様が適切なら前任者区間の補助情報として利用。",
+        "requiredTrials": {
+          "value": 24324,
+          "unit": "データカウンターゲーム"
+        }
       }
     ],
     "rejected": [
       {
         "featureId": "FEAT_AT_INITIAL",
         "name": "AT初当り",
-        "reason": "AT初当りは合算初当りの部分集合で情報が重複し試行数も少ないため不採用。",
+        "reason": "AT初当りは合算初当りの部分集合で情報が重複し試行数も少ないため自分区間では不採用。",
         "requiredTrials": {
           "value": 24324,
           "unit": "通常ゲーム"
