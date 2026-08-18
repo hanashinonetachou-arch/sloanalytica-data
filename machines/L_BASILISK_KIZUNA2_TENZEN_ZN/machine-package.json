@@ -55,12 +55,33 @@
         "minimum": 0
       },
       {
+        "id": "INP_SEATED_GAMES",
+        "name": "着席時ゲーム数",
+        "type": "integer",
+        "category": "PREDECESSOR",
+        "unit": "G",
+        "displayOrder": 10,
+        "description": "データカウンター仕様が公開BT初当り確率と合う場合のみ入力。",
+        "defaultValue": 0,
+        "minimum": 0
+      },
+      {
+        "id": "INP_SEATED_BT_COUNT",
+        "name": "着席時BT初当り回数",
+        "type": "counter",
+        "category": "PREDECESSOR",
+        "unit": "回",
+        "displayOrder": 11,
+        "defaultValue": 0,
+        "minimum": 0
+      },
+      {
         "id": "INP_ROLE_GAMES",
         "name": "小役集計ゲーム数",
         "type": "integer",
         "category": "ROLE",
         "unit": "G",
-        "displayOrder": 10,
+        "displayOrder": 20,
         "defaultValue": 0,
         "minimum": 0
       },
@@ -70,7 +91,7 @@
         "type": "counter",
         "category": "ROLE",
         "unit": "回",
-        "displayOrder": 11,
+        "displayOrder": 21,
         "defaultValue": 0,
         "minimum": 0
       },
@@ -80,7 +101,7 @@
         "type": "counter",
         "category": "BC_COLOR",
         "unit": "回",
-        "displayOrder": 20,
+        "displayOrder": 30,
         "description": "赤頭BC・紫頭BCのどちらかを判別できたBC回数を入力します。",
         "defaultValue": 0,
         "minimum": 0
@@ -91,7 +112,7 @@
         "type": "counter",
         "category": "BC_COLOR",
         "unit": "回",
-        "displayOrder": 21,
+        "displayOrder": 31,
         "defaultValue": 0,
         "minimum": 0
       },
@@ -167,7 +188,36 @@
         },
         "sourceEvidenceRefs": [
           "SRC_TENZEN_NANA",
-          "SRC_TENZEN_PACHI7"
+          "SRC_TENZEN_PACHI7",
+          "SRC_TENZEN_PWORLD"
+        ]
+      },
+      {
+        "featureId": "FEAT_BT_PREDECESSOR",
+        "name": "着席前BT初当り",
+        "adoptionCategory": "INCLUDE_SUPPORT",
+        "calculationRole": "PROBABILITY",
+        "probabilityEngineUsage": true,
+        "modelType": "binomial",
+        "minimumSample": 1,
+        "sampleRecommendation": 1000,
+        "reliabilityProfile": {
+          "weight": 1
+        },
+        "displayFormat": "ratio_1_over_n",
+        "numeratorInputId": "INP_SEATED_BT_COUNT",
+        "denominatorInputId": "INP_SEATED_GAMES",
+        "probabilities": {
+          "SET_1": 0.002392,
+          "SET_2": 0.002469,
+          "SET_3": 0.002759,
+          "SET_4": 0.003213,
+          "SET_5": 0.003591,
+          "SET_6": 0.004044
+        },
+        "sourceEvidenceRefs": [
+          "SRC_TENZEN_NANA",
+          "SRC_TENZEN_PWORLD"
         ]
       },
       {
@@ -195,7 +245,8 @@
         },
         "sourceEvidenceRefs": [
           "SRC_TENZEN_NANA",
-          "SRC_TENZEN_PACHI7"
+          "SRC_TENZEN_PACHI7",
+          "SRC_TENZEN_PWORLD"
         ]
       },
       {
@@ -223,7 +274,8 @@
         },
         "sourceEvidenceRefs": [
           "SRC_TENZEN_NANA",
-          "SRC_TENZEN_PACHI7"
+          "SRC_TENZEN_PACHI7",
+          "SRC_TENZEN_PWORLD"
         ]
       },
       {
@@ -313,7 +365,9 @@
         "hasImage": false,
         "type": "SETTING_CONFIRMATION",
         "sourceEvidenceRefs": [
-          "RE_KILLS_4PLUS"
+          "RE_KILLS_4PLUS",
+          "RE_BC_LED_RED_4PLUS",
+          "RE_SONIN_WOMEN_4PLUS"
         ]
       },
       {
@@ -330,7 +384,8 @@
         "hasImage": false,
         "type": "SETTING_CONFIRMATION",
         "sourceEvidenceRefs": [
-          "RE_KILLS_5PLUS"
+          "RE_KILLS_5PLUS",
+          "RE_SONIN_GEN_OBORO_5PLUS"
         ]
       },
       {
@@ -346,7 +401,8 @@
         "hasImage": false,
         "type": "SETTING_CONFIRMATION",
         "sourceEvidenceRefs": [
-          "RE_KILLS_6"
+          "RE_KILLS_6",
+          "RE_SONIN_HUMMING_6"
         ]
       }
     ],
@@ -364,6 +420,13 @@
         "pageName": "スマスロバジリスク絆2天膳 設定差",
         "url": "https://pachiseven.jp/machines/6849",
         "checkedAt": "2026-08-18"
+      },
+      {
+        "id": "SRC_TENZEN_PWORLD",
+        "classification": "ANALYSIS",
+        "pageName": "スマスロバジリスク絆2天膳 機種情報・設定推測",
+        "url": "https://www.p-world.co.jp/machine/database/9944",
+        "checkedAt": "2026-08-18"
       }
     ]
   },
@@ -371,6 +434,7 @@
     "sections": [
       {
         "id": "AUTO_PRIMARY",
+        "title": "BC・BT初当り",
         "displayOrder": 1,
         "items": [
           {
@@ -394,9 +458,28 @@
         ]
       },
       {
+        "id": "AUTO_PREDECESSOR",
+        "title": "着席時データ",
+        "displayOrder": 2,
+        "items": [
+          {
+            "type": "input",
+            "inputId": "INP_SEATED_GAMES",
+            "label": "着席時ゲーム数",
+            "widget": "number"
+          },
+          {
+            "type": "input",
+            "inputId": "INP_SEATED_BT_COUNT",
+            "label": "着席時BT初当り回数",
+            "widget": "counter"
+          }
+        ]
+      },
+      {
         "id": "AUTO_ROLE",
         "title": "小役",
-        "displayOrder": 2,
+        "displayOrder": 3,
         "items": [
           {
             "type": "input",
@@ -415,7 +498,7 @@
       {
         "id": "AUTO_BC_COLOR",
         "title": "BC図柄",
-        "displayOrder": 3,
+        "displayOrder": 4,
         "items": [
           {
             "type": "input",
@@ -434,7 +517,7 @@
       {
         "id": "AUTO_EVIDENCE",
         "title": "設定確定・否定情報",
-        "displayOrder": 4,
+        "displayOrder": 5,
         "items": [
           {
             "type": "input",
@@ -448,8 +531,8 @@
   },
   "selectionSummary": {
     "schemaVersion": "selection-summary-v1",
-    "evaluatedCount": 4,
-    "selectedCount": 4,
+    "evaluatedCount": 5,
+    "selectedCount": 5,
     "rejectedCount": 0,
     "selected": [
       {
@@ -459,6 +542,15 @@
         "requiredTrials": {
           "value": 8472,
           "unit": "通常ゲーム"
+        }
+      },
+      {
+        "featureId": "FEAT_BT_PREDECESSOR",
+        "name": "着席前BT初当り",
+        "reason": "カウンター仕様が適切なら着席前BT初当りを補助利用。",
+        "requiredTrials": {
+          "value": 8472,
+          "unit": "データカウンターゲーム"
         }
       },
       {
@@ -482,7 +574,7 @@
       {
         "featureId": "FEAT_RED_BC_SHARE",
         "name": "赤頭BC比率",
-        "reason": "BC図柄の偶奇差を利用するため採用。判別できたBCだけを母数にし、赤頭比率を入力する。",
+        "reason": "BC図柄の偶奇差を利用。判別できたBCだけを母数にする。",
         "requiredTrials": {
           "value": 181,
           "unit": "BC"
