@@ -8,6 +8,7 @@ on:
       - 'research/**/research-data.json'
       - 'research/**/selection-data.json'
       - 'tools/**'
+      - 'test/**'
       - 'package.json'
       - '.github/workflows/machine-pipeline.yml'
   workflow_dispatch:
@@ -35,43 +36,65 @@ jobs:
         with:
           node-version: '22'
 
-      - name: Resolve machine IDs
-        id: machines
+      - name: Resolve changed stages
+        id: stages
         shell: bash
         run: |
           set -euo pipefail
+          : > /tmp/research_files.txt
+          : > /tmp/machine_ids.txt
+
           if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
             printf '%s\n' "${{ inputs.machine_id }}" > /tmp/machine_ids.txt
           else
             git diff --name-only "${{ github.event.pull_request.base.sha }}" "${{ github.event.pull_request.head.sha }}" \
-              | sed -nE 's#^research/([^/]+)/(research-data|selection-data)\.json$#\1#p' \
+              | sed -nE '/^research\/[^/]+\/research-data\.json$/p' \
+              | sort -u > /tmp/research_files.txt
+
+            git diff --name-only "${{ github.event.pull_request.base.sha }}" "${{ github.event.pull_request.head.sha }}" \
+              | sed -nE 's#^research/([^/]+)/selection-data\.json$#\1#p' \
               | sort -u > /tmp/machine_ids.txt
           fi
 
-          if [[ ! -s /tmp/machine_ids.txt ]]; then
-            echo 'No machine-specific Research/Selection changes detected; running repository tests/audit only.'
-            echo 'has_machines=false' >> "$GITHUB_OUTPUT"
+          if [[ -s /tmp/research_files.txt ]]; then
+            echo 'Changed ResearchData:'
+            cat /tmp/research_files.txt
+            echo 'has_research=true' >> "$GITHUB_OUTPUT"
           else
-            echo 'Machine IDs:'
-            cat /tmp/machine_ids.txt
-            echo 'has_machines=true' >> "$GITHUB_OUTPUT"
+            echo 'has_research=false' >> "$GITHUB_OUTPUT"
           fi
 
-      - name: Build and validate changed machines
-        if: steps.machines.outputs.has_machines == 'true'
+          if [[ -s /tmp/machine_ids.txt ]]; then
+            echo 'Machine IDs ready for full pipeline:'
+            cat /tmp/machine_ids.txt
+            echo 'has_machines=true' >> "$GITHUB_OUTPUT"
+          else
+            echo 'No changed SelectionData; full MachineData generation is not required yet.'
+            echo 'has_machines=false' >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Validate changed ResearchData
+        if: steps.stages.outputs.has_research == 'true'
         shell: bash
         run: |
           set -euo pipefail
-          while IFS= read -r machine_id; do
-            echo "::group::${machine_id}"
-            npm run machine:pipeline -- "$machine_id"
+          while IFS= read -r research_file; do
+            echo "::group::${research_file}"
+            npm run research:validate -- "$research_file"
             echo '::endgroup::'
-          done < /tmp/machine_ids.txt
+          done < /tmp/research_files.txt
+
+      - name: Build and validate changed machines as one batch
+        if: steps.stages.outputs.has_machines == 'true'
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm run machine:batch -- --file /tmp/machine_ids.txt
 
       - name: Commit generated artifacts
         if: >-
           github.event_name == 'pull_request' &&
-          steps.machines.outputs.has_machines == 'true' &&
+          steps.stages.outputs.has_machines == 'true' &&
           github.event.pull_request.head.repo.full_name == github.repository
         shell: bash
         run: |
@@ -90,10 +113,14 @@ jobs:
           git commit -m 'chore: refresh generated MachineData artifacts'
           git push origin HEAD:${{ github.event.pull_request.head.ref }}
 
-      - name: Repository tests
-        if: steps.machines.outputs.has_machines != 'true'
+      - name: Repository tests for research-only or infrastructure changes
+        if: steps.stages.outputs.has_machines != 'true'
         run: npm test
 
-      - name: Repository audit
-        if: steps.machines.outputs.has_machines != 'true'
+      - name: Repository audit for research-only or infrastructure changes
+        if: steps.stages.outputs.has_machines != 'true'
         run: npm run audit
+
+      - name: User-facing service-name audit for research-only or infrastructure changes
+        if: steps.stages.outputs.has_machines != 'true'
+        run: npm run audit:ui-service-names
