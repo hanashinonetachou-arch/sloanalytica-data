@@ -44,6 +44,48 @@
         "minimum": 0
       },
       {
+        "id": "INP_SEATED_GAMES",
+        "name": "着席時ゲーム数",
+        "type": "integer",
+        "category": "PREDECESSOR",
+        "unit": "G",
+        "displayOrder": 10,
+        "description": "データカウンター仕様が公開AT初当り確率と合う場合のみ入力。",
+        "defaultValue": 0,
+        "minimum": 0
+      },
+      {
+        "id": "INP_SEATED_AT_COUNT",
+        "name": "着席時AT初当り回数",
+        "type": "counter",
+        "category": "PREDECESSOR",
+        "unit": "回",
+        "displayOrder": 11,
+        "defaultValue": 0,
+        "minimum": 0
+      },
+      {
+        "id": "INP_STRONG_RARE_COUNT",
+        "name": "強レア役回数",
+        "type": "counter",
+        "category": "AT_DIRECT",
+        "unit": "回",
+        "displayOrder": 20,
+        "description": "通常時の強チェリー＋強チャンス目成立回数。",
+        "defaultValue": 0,
+        "minimum": 0
+      },
+      {
+        "id": "INP_STRONG_RARE_DIRECT",
+        "name": "強レア役からのAT直撃回数",
+        "type": "counter",
+        "category": "AT_DIRECT",
+        "unit": "回",
+        "displayOrder": 21,
+        "defaultValue": 0,
+        "minimum": 0
+      },
+      {
         "id": "INP_EVI_SETTING_FLOOR",
         "name": "確認した設定下限",
         "type": "enum",
@@ -105,6 +147,58 @@
         "sourceEvidenceRefs": [
           "SRC_MONKEY_NANA"
         ]
+      },
+      {
+        "featureId": "FEAT_AT_PREDECESSOR",
+        "name": "着席前AT初当り",
+        "adoptionCategory": "INCLUDE_SUPPORT",
+        "calculationRole": "PROBABILITY",
+        "probabilityEngineUsage": true,
+        "modelType": "binomial",
+        "minimumSample": 1,
+        "sampleRecommendation": 1000,
+        "reliabilityProfile": {
+          "weight": 1
+        },
+        "displayFormat": "ratio_1_over_n",
+        "numeratorInputId": "INP_SEATED_AT_COUNT",
+        "denominatorInputId": "INP_SEATED_GAMES",
+        "probabilities": {
+          "SET_1": 0.003336,
+          "SET_2": 0.003384,
+          "SET_4": 0.003864,
+          "SET_5": 0.004243,
+          "SET_6": 0.004486
+        },
+        "sourceEvidenceRefs": [
+          "SRC_MONKEY_NANA"
+        ]
+      },
+      {
+        "featureId": "FEAT_STRONG_RARE_DIRECT",
+        "name": "強レア役からのAT直撃率",
+        "adoptionCategory": "INCLUDE_SUPPORT",
+        "calculationRole": "PROBABILITY",
+        "probabilityEngineUsage": true,
+        "modelType": "binomial",
+        "minimumSample": 1,
+        "sampleRecommendation": 20,
+        "reliabilityProfile": {
+          "weight": 1
+        },
+        "displayFormat": "percent",
+        "numeratorInputId": "INP_STRONG_RARE_DIRECT",
+        "denominatorInputId": "INP_STRONG_RARE_COUNT",
+        "probabilities": {
+          "SET_1": 0.004,
+          "SET_2": 0.012,
+          "SET_4": 0.02,
+          "SET_5": 0.039,
+          "SET_6": 0.063
+        },
+        "sourceEvidenceRefs": [
+          "SRC_MONKEY_DIRECT"
+        ]
       }
     ]
   },
@@ -126,7 +220,8 @@
         "hasImage": false,
         "type": "SETTING_CONFIRMATION",
         "sourceEvidenceRefs": [
-          "RE_PAYOUT_4PLUS"
+          "RE_PAYOUT_4PLUS",
+          "RE_WEAK_RARE_DIRECT_4PLUS"
         ]
       },
       {
@@ -177,6 +272,13 @@
         "pageName": "スマスロモンキーターンV 獲得枚数表示",
         "url": "https://nana-press.com/kaiseki/machine/644/18747/",
         "checkedAt": "2026-08-18"
+      },
+      {
+        "id": "SRC_MONKEY_DIRECT",
+        "classification": "ANALYSIS",
+        "pageName": "スマスロモンキーターンV AT直撃抽選",
+        "url": "https://nana-press.com/kaiseki/machine/644/31620/",
+        "checkedAt": "2026-08-18"
       }
     ]
   },
@@ -184,6 +286,7 @@
     "sections": [
       {
         "id": "AUTO_PRIMARY",
+        "title": "AT初当り",
         "displayOrder": 1,
         "items": [
           {
@@ -201,9 +304,47 @@
         ]
       },
       {
+        "id": "AUTO_PREDECESSOR",
+        "title": "着席時データ",
+        "displayOrder": 2,
+        "items": [
+          {
+            "type": "input",
+            "inputId": "INP_SEATED_GAMES",
+            "label": "着席時ゲーム数",
+            "widget": "number"
+          },
+          {
+            "type": "input",
+            "inputId": "INP_SEATED_AT_COUNT",
+            "label": "着席時AT初当り回数",
+            "widget": "counter"
+          }
+        ]
+      },
+      {
+        "id": "AUTO_AT_DIRECT",
+        "title": "AT直撃",
+        "displayOrder": 3,
+        "items": [
+          {
+            "type": "input",
+            "inputId": "INP_STRONG_RARE_COUNT",
+            "label": "強レア役回数",
+            "widget": "counter"
+          },
+          {
+            "type": "input",
+            "inputId": "INP_STRONG_RARE_DIRECT",
+            "label": "強レア役からのAT直撃回数",
+            "widget": "counter"
+          }
+        ]
+      },
+      {
         "id": "AUTO_EVIDENCE",
         "title": "設定確定・否定情報",
-        "displayOrder": 2,
+        "displayOrder": 4,
         "items": [
           {
             "type": "input",
@@ -217,8 +358,8 @@
   },
   "selectionSummary": {
     "schemaVersion": "selection-summary-v1",
-    "evaluatedCount": 1,
-    "selectedCount": 1,
+    "evaluatedCount": 3,
+    "selectedCount": 3,
     "rejectedCount": 0,
     "selected": [
       {
@@ -228,6 +369,24 @@
         "requiredTrials": {
           "value": 21476,
           "unit": "通常ゲーム"
+        }
+      },
+      {
+        "featureId": "FEAT_AT_PREDECESSOR",
+        "name": "着席前AT初当り",
+        "reason": "カウンター仕様が適切なら着席前AT初当りを補助利用。",
+        "requiredTrials": {
+          "value": 21476,
+          "unit": "データカウンターゲーム"
+        }
+      },
+      {
+        "featureId": "FEAT_STRONG_RARE_DIRECT",
+        "name": "強レア役からのAT直撃率",
+        "reason": "強レア役AT直撃は0.4%→6.3%と大差があり、母数と成功数を実戦で数えられるため採用。強レア役の通常GあたりExposureを固定しないためDifficultyは除外。",
+        "requiredTrials": {
+          "value": 51,
+          "unit": "強レア役"
         }
       }
     ],
