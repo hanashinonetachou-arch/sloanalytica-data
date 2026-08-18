@@ -1,0 +1,129 @@
+name: Fix Predecessor UI Batch 003 Once
+
+on:
+  push:
+    branches:
+      - prototype-multi-machine
+    paths:
+      - .github/workflows/fix-predecessor-ui-batch003-once.yml
+
+permissions:
+  contents: write
+  actions: write
+
+jobs:
+  repair:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          ref: prototype-multi-machine
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Patch builder predecessor UI policy
+        run: |
+          node <<'NODE'
+          const fs = require('fs');
+          const p = 'tools/build-machine-data.mjs';
+          let s = fs.readFileSync(p, 'utf8');
+
+          const oldInput = '  const y={...x,defaultValue,minimum:["integer","number","counter"].includes(x.type)?0:undefined};';
+          const newInput = '  const y={...x,defaultValue,minimum:["integer","number","counter"].includes(x.type)?0:undefined,...(x.category==="PREDECESSOR"&&x.observationScope==null?{observationScope:"PREDECESSOR_SNAPSHOT"}:{})};';
+          if (s.includes(oldInput)) s = s.replace(oldInput, newInput);
+          else if (!s.includes('x.category==="PREDECESSOR"&&x.observationScope==null')) throw new Error('inputWithDefaults patch anchor not found');
+
+          const oldSections = '  let order=1;\n  for(const [cat,items] of byCat){';
+          const newSections = '  let order=1;\n  const orderedCategories=[...byCat.entries()].sort(([a],[b])=>a==="PREDECESSOR"?-1:b==="PREDECESSOR"?1:0);\n  for(const [cat,items] of orderedCategories){';
+          if (s.includes(oldSections)) s = s.replace(oldSections, newSections);
+          else if (!s.includes('const orderedCategories=[...byCat.entries()]')) throw new Error('section-order patch anchor not found');
+
+          fs.writeFileSync(p, s, 'utf8');
+          NODE
+
+      - name: Add predecessor UI regression test
+        run: |
+          cat > test/predecessor-ui-policy.test.mjs <<'EOF'
+          import test from 'node:test';
+          import assert from 'node:assert/strict';
+          import fs from 'node:fs';
+          import { buildMachineData } from '../tools/build-machine-data.mjs';
+
+          test('PREDECESSOR inputs become snapshot observations and render first', () => {
+            const research = JSON.parse(fs.readFileSync('research/L_HIGURASHI_GOU_SS/research-data.json', 'utf8'));
+            const selection = JSON.parse(fs.readFileSync('research/L_HIGURASHI_GOU_SS/selection-data.json', 'utf8'));
+            const pkg = buildMachineData(research, selection);
+            const predecessorInputs = pkg.inputs.inputs.filter(input => input.category === 'PREDECESSOR');
+            assert.ok(predecessorInputs.length > 0);
+            assert.ok(predecessorInputs.every(input => input.observationScope === 'PREDECESSOR_SNAPSHOT'));
+            assert.equal(pkg.ui.sections[0]?.id, 'AUTO_PREDECESSOR');
+          });
+          EOF
+
+      - name: Build and validate 10 machines
+        run: >-
+          npm run machine:batch --
+          L_HIGURASHI_GOU_SS
+          L_TOARU_INDEX_JC
+          L_GEN_CHOMUGEN_PH
+          L_MADOKA_FORTE_UU
+          L_KENGAN_ASHURA_ND
+          L_RING_NI_KAKERO1_FS
+          L_MONKEY_TURN5_CE
+          L_MAGICAL_HALLOWEEN8_FE
+          L_KEIJI_SADO_ER
+          L_BASILISK_KIZUNA2_TENZEN_ZN
+
+      - name: Verify predecessor UI contract in generated packages
+        run: |
+          node <<'NODE'
+          const fs = require('fs');
+          const ids = [
+            'L_HIGURASHI_GOU_SS','L_TOARU_INDEX_JC','L_GEN_CHOMUGEN_PH','L_MADOKA_FORTE_UU','L_KENGAN_ASHURA_ND',
+            'L_RING_NI_KAKERO1_FS','L_MONKEY_TURN5_CE','L_MAGICAL_HALLOWEEN8_FE','L_KEIJI_SADO_ER','L_BASILISK_KIZUNA2_TENZEN_ZN'
+          ];
+          for (const id of ids) {
+            const pkg = JSON.parse(fs.readFileSync(`machines/${id}/machine-package.json`, 'utf8'));
+            const pred = pkg.inputs.inputs.filter(i => i.category === 'PREDECESSOR');
+            if (!pred.length) throw new Error(`${id}: PREDECESSOR input missing`);
+            if (pred.some(i => i.observationScope !== 'PREDECESSOR_SNAPSHOT')) throw new Error(`${id}: predecessor scope mismatch`);
+            if (pkg.ui.sections[0]?.id !== 'AUTO_PREDECESSOR') throw new Error(`${id}: predecessor section is not first`);
+          }
+          console.log(`Verified ${ids.length}/10 machines`);
+          NODE
+
+      - name: Publish 10 machines
+        run: >-
+          npm run machine:publish:batch -- --apply
+          L_HIGURASHI_GOU_SS
+          L_TOARU_INDEX_JC
+          L_GEN_CHOMUGEN_PH
+          L_MADOKA_FORTE_UU
+          L_KENGAN_ASHURA_ND
+          L_RING_NI_KAKERO1_FS
+          L_MONKEY_TURN5_CE
+          L_MAGICAL_HALLOWEEN8_FE
+          L_KEIJI_SADO_ER
+          L_BASILISK_KIZUNA2_TENZEN_ZN
+
+      - name: Commit repaired builder and published artifacts
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add tools/build-machine-data.mjs test/predecessor-ui-policy.test.mjs catalog.json difficulty-catalog.json machine-registry.json machines research reports || true
+          if git diff --cached --quiet; then
+            echo "No changes to commit"
+          else
+            git commit -m "fix: standardize predecessor input UI"
+            git push origin HEAD:prototype-multi-machine
+          fi
+
+      - name: Dispatch Pages deployment explicitly
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh workflow run deploy-pages.yml --ref prototype-multi-machine
