@@ -1,7 +1,29 @@
 {
- "schemaVersion":"selection-data-v1","machineId":"L_HEY_ELITE_SALARYMAN_KAGAMI_PA4","machineDataVersion":"0.1.0",
- "inputs":[{"id":"INP_NORMAL_GAMES","name":"通常ゲーム数","type":"integer","category":"PRIMARY","unit":"G","displayOrder":1,"defaultValue":0},{"id":"INP_INITIAL_COUNT","name":"初当り回数","type":"counter","category":"PRIMARY","unit":"回","displayOrder":2,"defaultValue":0},{"id":"INP_AT_END_COUNT","name":"AT終了回数","type":"counter","category":"AT_RETURN","unit":"回","displayOrder":10,"defaultValue":0},{"id":"INP_AT_PULLBACK_COUNT","name":"AT引き戻し回数","type":"counter","category":"AT_RETURN","unit":"回","displayOrder":11,"defaultValue":0}],
- "features":[{"researchFeatureId":"RF_INITIAL_COMBINED","featureId":"FEAT_INITIAL_COMBINED","adoptionCategory":"INCLUDE_PRIMARY","numeratorInputId":"INP_INITIAL_COUNT","denominatorInputId":"INP_NORMAL_GAMES","minimumSample":1,"sampleRecommendation":5000,"weight":1.0,"displayFormat":"ratio_1_over_n","difficultyExposure":{"mode":"per_game","factor":1.0,"quality":"ESTIMATED","basisId":"NORMAL_GAMES"},"difficultyParticipation":"INCLUDE","userReason":"初当り合算の設定差が大きく観測しやすい。"},{"researchFeatureId":"RF_COMMON_BELL","featureId":"FEAT_COMMON_BELL","adoptionCategory":"EXCLUDE","rejectionReason":"設定差が小さく、手動判別の入力負荷に見合いにくい。"},{"researchFeatureId":"RF_AT_DIRECT","featureId":"FEAT_AT_DIRECT","adoptionCategory":"EXCLUDE","rejectionReason":"設定差は大きいが低頻度。"},{"researchFeatureId":"RF_AT_PULLBACK","featureId":"FEAT_AT_PULLBACK","adoptionCategory":"INCLUDE_PRIMARY","numeratorInputId":"INP_AT_PULLBACK_COUNT","denominatorInputId":"INP_AT_END_COUNT","minimumSample":1,"sampleRecommendation":15,"weight":1.0,"displayFormat":"percentage","difficultyParticipation":"INCLUDE","userReason":"AT終了単位で設定1/2と設定6に大きな差がある。"}],
- "evidence":[],"evidenceUi":{"groups":[{"groupId":"SETTING_FLOOR","label":"確認した設定下限","selectionMode":"single","normalizationMode":"ALLOWED_SETTINGS","options":[{"value":"SET_2_OR_HIGHER","label":"設定2以上","allowedSettings":["SET_2","SET_4","SET_5","SET_6"],"sourceEvidenceIds":["RE_END_2PLUS"]},{"value":"SET_4_OR_HIGHER","label":"設定4以上","allowedSettings":["SET_4","SET_5","SET_6"],"sourceEvidenceIds":["RE_END_4PLUS"]},{"value":"SET_5_OR_HIGHER","label":"設定5以上","allowedSettings":["SET_5","SET_6"],"sourceEvidenceIds":["RE_END_5PLUS"]},{"value":"SET_6","label":"設定6","allowedSettings":["SET_6"],"sourceEvidenceIds":["RE_END_6"]}]}]},
- "difficultyAnalysis":{"targetGameBasis":{"basisId":"NORMAL_GAMES","label":"通常ゲーム数","quality":"ESTIMATED"},"calibrationAllowedExposureQualities":["EXACT","DERIVED","ESTIMATED"]}
+  "schemaVersion":"selection-data-v1",
+  "machineId":"L_HEY_ELITE_SALARYMAN_KAGAMI_PA4",
+  "machineDataVersion":"0.1.1",
+  "inputs":[
+    {"id":"INP_NORMAL_GAMES","name":"通常ゲーム数","type":"integer","category":"PRIMARY","unit":"G","displayOrder":1,"defaultValue":0},
+    {"id":"INP_INITIAL_COUNT","name":"初当り回数","type":"counter","category":"PRIMARY","unit":"回","displayOrder":2,"defaultValue":0},
+    {"id":"INP_TRUNK_COUNT","name":"抽選対象トランク成立回数","type":"counter","category":"LFW","unit":"回","displayOrder":10,"description":"通常時のラブフォースワン抽選対象となるトランクだけを数えてください。CZ中・AT中など抽選対象外の成立は含めません。","defaultValue":0},
+    {"id":"INP_TRUNK_LFW_COUNT","name":"トランク契機ラブフォースワン当選回数","type":"counter","category":"LFW","unit":"回","displayOrder":11,"defaultValue":0},
+    {"id":"INP_AT_END_COUNT","name":"AT終了回数","type":"counter","category":"AT_RETURN","unit":"回","displayOrder":20,"defaultValue":0},
+    {"id":"INP_AT_PULLBACK_COUNT","name":"AT引き戻し回数","type":"counter","category":"AT_RETURN","unit":"回","displayOrder":21,"defaultValue":0}
+  ],
+  "features":[
+    {"researchFeatureId":"RF_INITIAL_COMBINED","featureId":"FEAT_INITIAL_COMBINED","adoptionCategory":"INCLUDE_PRIMARY","numeratorInputId":"INP_INITIAL_COUNT","denominatorInputId":"INP_NORMAL_GAMES","minimumSample":1,"sampleRecommendation":5000,"weight":1.0,"displayFormat":"ratio_1_over_n","difficultyExposure":{"mode":"per_game","factor":1.0,"quality":"ESTIMATED","basisId":"NORMAL_GAMES"},"difficultyParticipation":"INCLUDE","userReason":"初当り合算の設定差が大きく観測しやすい。"},
+    {"researchFeatureId":"RF_COMMON_BELL","featureId":"FEAT_COMMON_BELL","adoptionCategory":"EXCLUDE","rejectionReason":"設定差が小さく、手動判別の入力負荷に見合いにくい。"},
+    {"researchFeatureId":"RF_AT_DIRECT","featureId":"FEAT_AT_DIRECT","adoptionCategory":"EXCLUDE","rejectionReason":"設定差は大きいが低頻度。"},
+    {"researchFeatureId":"RF_AT_PULLBACK","featureId":"FEAT_AT_PULLBACK","adoptionCategory":"INCLUDE_PRIMARY","numeratorInputId":"INP_AT_PULLBACK_COUNT","denominatorInputId":"INP_AT_END_COUNT","minimumSample":1,"sampleRecommendation":15,"weight":1.0,"displayFormat":"percentage","difficultyParticipation":"INCLUDE","userReason":"AT終了単位で設定1/2と設定6に大きな差がある。"},
+    {"researchFeatureId":"RF_TRUNK_LFW","featureId":"FEAT_TRUNK_LFW","adoptionCategory":"INCLUDE_SUPPORT","numeratorInputId":"INP_TRUNK_LFW_COUNT","denominatorInputId":"INP_TRUNK_COUNT","minimumSample":1,"sampleRecommendation":30,"weight":1.0,"displayFormat":"percentage","difficultyParticipation":"EXCLUDE","userReason":"トランク成立時のラブフォースワン当選率は16.8%～25.0%と差があり、通常時に試行を積みやすいため補助採用。"}
+  ],
+  "evidence":[],
+  "evidenceUi":{"groups":[{"groupId":"SETTING_FLOOR","label":"確認した設定下限","selectionMode":"single","normalizationMode":"ALLOWED_SETTINGS","options":[
+    {"value":"SET_2_OR_HIGHER","label":"設定2以上","allowedSettings":["SET_2","SET_4","SET_5","SET_6"],"sourceEvidenceIds":["RE_END_2PLUS"]},
+    {"value":"SET_4_OR_HIGHER","label":"設定4以上","allowedSettings":["SET_4","SET_5","SET_6"],"sourceEvidenceIds":["RE_END_4PLUS"]},
+    {"value":"SET_5_OR_HIGHER","label":"設定5以上","allowedSettings":["SET_5","SET_6"],"sourceEvidenceIds":["RE_END_5PLUS"]},
+    {"value":"SET_6","label":"設定6","allowedSettings":["SET_6"],"sourceEvidenceIds":["RE_END_6"]}
+  ]}]},
+  "uiCategoryLabels":{"LFW":"ラブフォースワン","AT_RETURN":"AT引き戻し"},
+  "difficultyAnalysis":{"targetGameBasis":{"basisId":"NORMAL_GAMES","label":"通常ゲーム数","quality":"ESTIMATED"},"calibrationAllowedExposureQualities":["EXACT","DERIVED","ESTIMATED"]}
 }
