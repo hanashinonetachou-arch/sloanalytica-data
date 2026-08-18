@@ -1,0 +1,25 @@
+name: Batch Research Pipeline Regression
+
+on:
+  pull_request:
+    paths:
+      - 'tools/batch-research-pipeline.mjs'
+      - 'test/batch-research-pipeline.test.mjs'
+      - 'package.json'
+      - '.github/workflows/batch-research-pipeline-regression.yml'
+  workflow_dispatch:
+
+jobs:
+  regression:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Run repository tests
+        run: npm test
+      - name: Verify Batch Research CLI without writes
+        run: npm run research:batch -- "Ｌ　東京喰種" "スマスロ北斗の拳" --check
+      - name: Verify Batch Research help
+        run: npm run research:batch -- --help
