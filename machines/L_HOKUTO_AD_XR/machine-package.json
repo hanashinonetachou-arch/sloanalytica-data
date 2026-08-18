@@ -1,0 +1,351 @@
+{
+  "schemaVersion": 1,
+  "machine": {
+    "schemaVersion": "2.0.0",
+    "machineId": "L_HOKUTO_AD_XR",
+    "machineDataVersion": "0.1.0",
+    "displayName": "スマスロ北斗の拳",
+    "modelName": "L パチスロ北斗の拳AD XR",
+    "manufacturer": "サミー",
+    "settings": [
+      "SET_1",
+      "SET_2",
+      "SET_4",
+      "SET_5",
+      "SET_6"
+    ],
+    "packagePolicy": {
+      "offlineCapable": true,
+      "containsImages": false,
+      "containsExecutableCode": false
+    }
+  },
+  "inputs": {
+    "schemaVersion": "2.0.0",
+    "inputs": [
+      {
+        "id": "INP_NORMAL_GAMES",
+        "name": "通常ゲーム数",
+        "type": "integer",
+        "category": "PRIMARY",
+        "unit": "G",
+        "displayOrder": 1,
+        "defaultValue": 0,
+        "minimum": 0
+      },
+      {
+        "id": "INP_AT_INITIAL_COUNT",
+        "name": "バトルボーナス初当り回数",
+        "type": "counter",
+        "category": "PRIMARY",
+        "unit": "回",
+        "displayOrder": 2,
+        "defaultValue": 0,
+        "minimum": 0
+      },
+      {
+        "id": "INP_ROLE_GAMES",
+        "name": "小役集計ゲーム数",
+        "type": "integer",
+        "category": "ROLE",
+        "unit": "G",
+        "displayOrder": 10,
+        "defaultValue": 0,
+        "minimum": 0
+      },
+      {
+        "id": "INP_WATERMELON_COUNT",
+        "name": "スイカ合算回数",
+        "type": "counter",
+        "category": "ROLE",
+        "unit": "回",
+        "displayOrder": 11,
+        "defaultValue": 0,
+        "minimum": 0
+      },
+      {
+        "id": "INP_EVI_SETTING_FLOOR",
+        "name": "確認した設定下限",
+        "type": "enum",
+        "category": "EVIDENCE",
+        "unit": "",
+        "displayOrder": 100,
+        "inferenceRole": "INCLUDE_SUPPORT",
+        "options": [
+          {
+            "key": "__UNSET__",
+            "label": "未選択",
+            "value": "__UNSET__"
+          },
+          {
+            "key": "SET_4_OR_HIGHER",
+            "label": "設定4以上",
+            "value": "SET_4_OR_HIGHER"
+          },
+          {
+            "key": "SET_5_OR_HIGHER",
+            "label": "設定5以上",
+            "value": "SET_5_OR_HIGHER"
+          },
+          {
+            "key": "SET_6",
+            "label": "設定6",
+            "value": "SET_6"
+          }
+        ],
+        "defaultValue": "__UNSET__"
+      }
+    ]
+  },
+  "features": {
+    "schemaVersion": "2.0.0",
+    "features": [
+      {
+        "featureId": "FEAT_AT_INITIAL",
+        "name": "バトルボーナス初当り",
+        "adoptionCategory": "INCLUDE_PRIMARY",
+        "calculationRole": "PROBABILITY",
+        "probabilityEngineUsage": true,
+        "modelType": "binomial",
+        "minimumSample": 1,
+        "sampleRecommendation": 5000,
+        "reliabilityProfile": {
+          "weight": 1
+        },
+        "displayFormat": "ratio_1_over_n",
+        "numeratorInputId": "INP_AT_INITIAL_COUNT",
+        "denominatorInputId": "INP_NORMAL_GAMES",
+        "probabilities": {
+          "SET_1": 0.002608242044861763,
+          "SET_2": 0.002699055330634278,
+          "SET_4": 0.0033579583613163196,
+          "SET_5": 0.003865481252415926,
+          "SET_6": 0.004253509145044662
+        },
+        "sourceEvidenceRefs": [
+          "SRC_HOKUTO_NANA_SETTING",
+          "SRC_HOKUTO_PWORLD"
+        ]
+      },
+      {
+        "featureId": "FEAT_WATERMELON_COMBINED",
+        "name": "弱・強スイカ合算",
+        "adoptionCategory": "INCLUDE_SUPPORT",
+        "calculationRole": "PROBABILITY",
+        "probabilityEngineUsage": true,
+        "modelType": "binomial",
+        "minimumSample": 1,
+        "sampleRecommendation": 7000,
+        "reliabilityProfile": {
+          "weight": 0.8
+        },
+        "displayFormat": "ratio_1_over_n",
+        "numeratorInputId": "INP_WATERMELON_COUNT",
+        "denominatorInputId": "INP_ROLE_GAMES",
+        "probabilities": {
+          "SET_1": 0.011614401858304297,
+          "SET_2": 0.011668611435239206,
+          "SET_4": 0.012106537530266344,
+          "SET_5": 0.01277139208173691,
+          "SET_6": 0.013140604467805518
+        },
+        "sourceEvidenceRefs": [
+          "SRC_HOKUTO_NANA_SETTING"
+        ]
+      }
+    ]
+  },
+  "evidence": {
+    "version": "1.0.0",
+    "evidences": [
+      {
+        "id": "EVI_SETTING_FLOOR_SET_4_OR_HIGHER",
+        "name": "設定4以上",
+        "displayName": "設定4以上",
+        "inputId": "INP_EVI_SETTING_FLOOR",
+        "triggerValue": "SET_4_OR_HIGHER",
+        "confirmedSettings": [
+          "SET_4",
+          "SET_5",
+          "SET_6"
+        ],
+        "deniedSettings": [],
+        "hasImage": false,
+        "type": "SETTING_CONFIRMATION",
+        "sourceEvidenceRefs": [
+          "RE_TROPHY_GOLD_4PLUS"
+        ]
+      },
+      {
+        "id": "EVI_SETTING_FLOOR_SET_5_OR_HIGHER",
+        "name": "設定5以上",
+        "displayName": "設定5以上",
+        "inputId": "INP_EVI_SETTING_FLOOR",
+        "triggerValue": "SET_5_OR_HIGHER",
+        "confirmedSettings": [
+          "SET_5",
+          "SET_6"
+        ],
+        "deniedSettings": [],
+        "hasImage": false,
+        "type": "SETTING_CONFIRMATION",
+        "sourceEvidenceRefs": [
+          "RE_TROPHY_KIRIN_5PLUS"
+        ]
+      },
+      {
+        "id": "EVI_SETTING_FLOOR_SET_6",
+        "name": "設定6",
+        "displayName": "設定6",
+        "inputId": "INP_EVI_SETTING_FLOOR",
+        "triggerValue": "SET_6",
+        "confirmedSettings": [
+          "SET_6"
+        ],
+        "deniedSettings": [],
+        "hasImage": false,
+        "type": "SETTING_CONFIRMATION",
+        "sourceEvidenceRefs": [
+          "RE_TROPHY_RAINBOW_6"
+        ]
+      }
+    ],
+    "sources": [
+      {
+        "id": "SRC_HOKUTO_PWORLD",
+        "classification": "ANALYSIS",
+        "pageName": "スマスロ北斗の拳 機種情報",
+        "url": "https://www.p-world.co.jp/machine/database/9786",
+        "checkedAt": "2026-08-18"
+      },
+      {
+        "id": "SRC_HOKUTO_1GEKI",
+        "classification": "ANALYSIS",
+        "pageName": "北斗の拳（スマスロ）解析攻略",
+        "url": "https://1geki.jp/slot/s_sma_hokutonoken/",
+        "checkedAt": "2026-08-18"
+      },
+      {
+        "id": "SRC_HOKUTO_NANA_SETTING",
+        "classification": "ANALYSIS",
+        "pageName": "スマスロ北斗の拳 設定判別の詳細",
+        "url": "https://nana-press.com/kaiseki/machine/514/13774/",
+        "checkedAt": "2026-08-18"
+      },
+      {
+        "id": "SRC_HOKUTO_NANA_TROPHY",
+        "classification": "ANALYSIS",
+        "pageName": "スマスロ北斗の拳 サミートロフィー",
+        "url": "https://nana-press.com/kaiseki/machine/514/14274/",
+        "checkedAt": "2026-08-18"
+      }
+    ]
+  },
+  "ui": {
+    "sections": [
+      {
+        "id": "AUTO_PRIMARY",
+        "displayOrder": 1,
+        "items": [
+          {
+            "type": "input",
+            "inputId": "INP_NORMAL_GAMES",
+            "label": "通常ゲーム数",
+            "widget": "number"
+          },
+          {
+            "type": "input",
+            "inputId": "INP_AT_INITIAL_COUNT",
+            "label": "バトルボーナス初当り回数",
+            "widget": "counter"
+          }
+        ]
+      },
+      {
+        "id": "AUTO_ROLE",
+        "title": "ROLE",
+        "displayOrder": 2,
+        "items": [
+          {
+            "type": "input",
+            "inputId": "INP_ROLE_GAMES",
+            "label": "小役集計ゲーム数",
+            "widget": "number"
+          },
+          {
+            "type": "input",
+            "inputId": "INP_WATERMELON_COUNT",
+            "label": "スイカ合算回数",
+            "widget": "counter"
+          }
+        ]
+      },
+      {
+        "id": "AUTO_EVIDENCE",
+        "title": "設定確定・否定情報",
+        "displayOrder": 3,
+        "items": [
+          {
+            "type": "input",
+            "inputId": "INP_EVI_SETTING_FLOOR",
+            "label": "確認した設定下限",
+            "widget": "select"
+          }
+        ]
+      }
+    ]
+  },
+  "selectionSummary": {
+    "schemaVersion": "selection-summary-v1",
+    "evaluatedCount": 3,
+    "selectedCount": 2,
+    "rejectedCount": 1,
+    "selected": [
+      {
+        "featureId": "FEAT_AT_INITIAL",
+        "name": "バトルボーナス初当り",
+        "reason": "設定差が明確なバトルボーナス初当りを主軸として採用。",
+        "requiredTrials": {
+          "value": 9124,
+          "unit": "通常ゲーム"
+        }
+      },
+      {
+        "featureId": "FEAT_WATERMELON_COMBINED",
+        "name": "弱・強スイカ合算",
+        "reason": "遊技データから確認しやすく、長時間ほど情報が蓄積するため補助採用。",
+        "requiredTrials": {
+          "value": 38434,
+          "unit": "遊技ゲーム"
+        }
+      }
+    ],
+    "rejected": [
+      {
+        "featureId": "FEAT_MIDDLE_CHERRY_COMBINED",
+        "name": "中段チェリー合算",
+        "reason": "設定差が小さく、スイカ合算より判別効率が低い。",
+        "requiredTrials": {
+          "value": 152116,
+          "unit": "遊技ゲーム"
+        }
+      }
+    ]
+  },
+  "reliability": {},
+  "metadata": {
+    "machineId": "L_HOKUTO_AD_XR",
+    "displayName": "スマスロ北斗の拳",
+    "settings": [
+      "SET_1",
+      "SET_2",
+      "SET_4",
+      "SET_5",
+      "SET_6"
+    ]
+  },
+  "validation": {
+    "cases": []
+  },
+  "statistics": {}
+}
