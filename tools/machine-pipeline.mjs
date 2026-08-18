@@ -104,10 +104,11 @@ function syncExistingCatalogMetadata(catalogPath, machinePath, machinePackage, m
 
 const [machineId, ...flags] = process.argv.slice(2);
 if (!machineId || !/^[A-Z0-9_]+$/.test(machineId)) {
-  console.error('Usage: npm run machine:pipeline -- <MACHINE_ID> [--check]');
+  console.error('Usage: npm run machine:pipeline -- <MACHINE_ID> [--check] [--skip-repo-checks]');
   process.exit(2);
 }
 const checkOnly = flags.includes('--check');
+const skipRepoChecks = flags.includes('--skip-repo-checks');
 const researchDir = path.join(ROOT, 'research', machineId);
 const researchPath = path.join(researchDir, 'research-data.json');
 const selectionPath = path.join(researchDir, 'selection-data.json');
@@ -176,8 +177,12 @@ try {
     console.log('Catalog/Difficulty sync skipped: machine is not yet published in catalog.json');
   }
 
-  runNpm('test', 'test');
-  runNpm('audit', 'audit');
+  if (skipRepoChecks) {
+    console.log('Repository tests/audit: SKIPPED (deferred to batch orchestrator)');
+  } else {
+    runNpm('test', 'test');
+    runNpm('audit', 'audit');
+  }
 
   const scores = (difficulty.targets ?? []).map(t => `${t.games}G=${t.score}`).join(' / ');
   const included = difficulty.coverage?.includedNumericFeatureCount ?? 0;

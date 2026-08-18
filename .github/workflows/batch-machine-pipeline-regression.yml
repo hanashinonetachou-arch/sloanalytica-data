@@ -1,0 +1,40 @@
+name: Batch Machine Pipeline Regression
+
+on:
+  pull_request:
+    branches:
+      - prototype-multi-machine
+    paths:
+      - 'tools/batch-machine-pipeline.mjs'
+      - 'test/batch-machine-pipeline.test.mjs'
+      - '.github/workflows/batch-machine-pipeline-regression.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  regression:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Run five-machine batch check
+        run: >-
+          node tools/batch-machine-pipeline.mjs
+          S_IM_JUGGLER_EX_TP
+          L_SMASLO_BAKEMONOGATARI_KH
+          L_TOKYO_GHOUL
+          L_HANABI_KM
+          L_ANOTHER_RINO_HEAVEN_CC
+          --check
+          --report reports/batch-machine-pipeline-regression.json
+
+      - name: Verify batch report
+        run: |
+          node --input-type=module -e "import fs from 'node:fs'; const r=JSON.parse(fs.readFileSync('reports/batch-machine-pipeline-regression.json','utf8')); if(r.counts.BLOCKED!==0) process.exit(1); console.log(JSON.stringify({overallStatus:r.overallStatus,counts:r.counts},null,2));"
