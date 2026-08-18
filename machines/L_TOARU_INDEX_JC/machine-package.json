@@ -55,6 +55,27 @@
         "minimum": 0
       },
       {
+        "id": "INP_SEATED_GAMES",
+        "name": "着席時ゲーム数",
+        "type": "integer",
+        "category": "PREDECESSOR",
+        "unit": "G",
+        "displayOrder": 10,
+        "description": "データカウンターの集計仕様が公開AT初当り確率と合う場合のみ入力してください。",
+        "defaultValue": 0,
+        "minimum": 0
+      },
+      {
+        "id": "INP_SEATED_AT_COUNT",
+        "name": "着席時AT初当り回数",
+        "type": "counter",
+        "category": "PREDECESSOR",
+        "unit": "回",
+        "displayOrder": 11,
+        "defaultValue": 0,
+        "minimum": 0
+      },
+      {
         "id": "INP_EVI_SETTING_FLOOR",
         "name": "確認した設定下限",
         "type": "enum",
@@ -67,6 +88,16 @@
             "key": "__UNSET__",
             "label": "未選択",
             "value": "__UNSET__"
+          },
+          {
+            "key": "SET_2_OR_HIGHER",
+            "label": "設定2以上",
+            "value": "SET_2_OR_HIGHER"
+          },
+          {
+            "key": "SET_3_OR_HIGHER",
+            "label": "設定3以上",
+            "value": "SET_3_OR_HIGHER"
           },
           {
             "key": "SET_4_OR_HIGHER",
@@ -144,12 +175,78 @@
         "sourceEvidenceRefs": [
           "SRC_TOARU_NANA"
         ]
+      },
+      {
+        "featureId": "FEAT_AT_PREDECESSOR",
+        "name": "着席前AT初当り",
+        "adoptionCategory": "INCLUDE_SUPPORT",
+        "calculationRole": "PROBABILITY",
+        "probabilityEngineUsage": true,
+        "modelType": "binomial",
+        "minimumSample": 1,
+        "sampleRecommendation": 1000,
+        "reliabilityProfile": {
+          "weight": 0.7
+        },
+        "displayFormat": "ratio_1_over_n",
+        "numeratorInputId": "INP_SEATED_AT_COUNT",
+        "denominatorInputId": "INP_SEATED_GAMES",
+        "probabilities": {
+          "SET_1": 0.0026976,
+          "SET_2": 0.0027709,
+          "SET_3": 0.0029104,
+          "SET_4": 0.003319,
+          "SET_5": 0.0035971,
+          "SET_6": 0.0037523
+        },
+        "sourceEvidenceRefs": [
+          "SRC_TOARU_NANA"
+        ]
       }
     ]
   },
   "evidence": {
     "version": "1.0.0",
     "evidences": [
+      {
+        "id": "EVI_SETTING_FLOOR_SET_2_OR_HIGHER",
+        "name": "設定2以上",
+        "displayName": "設定2以上",
+        "inputId": "INP_EVI_SETTING_FLOOR",
+        "triggerValue": "SET_2_OR_HIGHER",
+        "confirmedSettings": [
+          "SET_2",
+          "SET_3",
+          "SET_4",
+          "SET_5",
+          "SET_6"
+        ],
+        "deniedSettings": [],
+        "hasImage": false,
+        "type": "SETTING_CONFIRMATION",
+        "sourceEvidenceRefs": [
+          "RE_COIN_2PLUS"
+        ]
+      },
+      {
+        "id": "EVI_SETTING_FLOOR_SET_3_OR_HIGHER",
+        "name": "設定3以上",
+        "displayName": "設定3以上",
+        "inputId": "INP_EVI_SETTING_FLOOR",
+        "triggerValue": "SET_3_OR_HIGHER",
+        "confirmedSettings": [
+          "SET_3",
+          "SET_4",
+          "SET_5",
+          "SET_6"
+        ],
+        "deniedSettings": [],
+        "hasImage": false,
+        "type": "SETTING_CONFIRMATION",
+        "sourceEvidenceRefs": [
+          "RE_COIN_3PLUS"
+        ]
+      },
       {
         "id": "EVI_SETTING_FLOOR_SET_4_OR_HIGHER",
         "name": "設定4以上",
@@ -165,7 +262,8 @@
         "hasImage": false,
         "type": "SETTING_CONFIRMATION",
         "sourceEvidenceRefs": [
-          "RE_PAYOUT_4PLUS"
+          "RE_PAYOUT_4PLUS",
+          "RE_COIN_4PLUS"
         ]
       },
       {
@@ -182,7 +280,8 @@
         "hasImage": false,
         "type": "SETTING_CONFIRMATION",
         "sourceEvidenceRefs": [
-          "RE_AT_END_5PLUS"
+          "RE_AT_END_5PLUS",
+          "RE_COIN_5PLUS"
         ]
       },
       {
@@ -198,7 +297,8 @@
         "hasImage": false,
         "type": "SETTING_CONFIRMATION",
         "sourceEvidenceRefs": [
-          "RE_AT_END_6"
+          "RE_AT_END_6",
+          "RE_COIN_6"
         ]
       }
     ],
@@ -209,6 +309,13 @@
         "pageName": "スマスロ とある魔術の禁書目録 設定判別",
         "url": "https://nana-press.com/kaiseki/machine/608/17549/",
         "checkedAt": "2026-08-18"
+      },
+      {
+        "id": "SRC_TOARU_1GEKI",
+        "classification": "ANALYSIS",
+        "pageName": "スマスロ とある魔術の禁書目録 設定判別・設定示唆",
+        "url": "https://1geki.jp/slot/l_toaru_index/0/",
+        "checkedAt": "2026-08-18"
       }
     ]
   },
@@ -216,6 +323,7 @@
     "sections": [
       {
         "id": "AUTO_PRIMARY",
+        "title": "CZ・AT初当り",
         "displayOrder": 1,
         "items": [
           {
@@ -239,9 +347,28 @@
         ]
       },
       {
+        "id": "AUTO_PREDECESSOR",
+        "title": "着席時データ",
+        "displayOrder": 2,
+        "items": [
+          {
+            "type": "input",
+            "inputId": "INP_SEATED_GAMES",
+            "label": "着席時ゲーム数",
+            "widget": "number"
+          },
+          {
+            "type": "input",
+            "inputId": "INP_SEATED_AT_COUNT",
+            "label": "着席時AT初当り回数",
+            "widget": "counter"
+          }
+        ]
+      },
+      {
         "id": "AUTO_EVIDENCE",
         "title": "設定確定・否定情報",
-        "displayOrder": 2,
+        "displayOrder": 3,
         "items": [
           {
             "type": "input",
@@ -255,8 +382,8 @@
   },
   "selectionSummary": {
     "schemaVersion": "selection-summary-v1",
-    "evaluatedCount": 2,
-    "selectedCount": 2,
+    "evaluatedCount": 3,
+    "selectedCount": 3,
     "rejectedCount": 0,
     "selected": [
       {
@@ -271,10 +398,19 @@
       {
         "featureId": "FEAT_AT_INITIAL",
         "name": "AT初当り",
-        "reason": "AT初当りにも大きな設定差があるがCZ経由情報と重複するためDifficultyから除外。",
+        "reason": "AT初当りにも設定差があるがCZ経由情報と重複するためDifficultyから除外。",
         "requiredTrials": {
           "value": 21041,
           "unit": "通常ゲーム"
+        }
+      },
+      {
+        "featureId": "FEAT_AT_PREDECESSOR",
+        "name": "着席前AT初当り",
+        "reason": "データカウンター仕様が適切なら着席前AT初当りも補助情報として利用できる。",
+        "requiredTrials": {
+          "value": 21041,
+          "unit": "データカウンターゲーム"
         }
       }
     ],
