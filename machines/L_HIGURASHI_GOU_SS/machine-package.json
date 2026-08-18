@@ -45,12 +45,34 @@
         "minimum": 0
       },
       {
+        "id": "INP_SEATED_GAMES",
+        "name": "着席時ゲーム数",
+        "type": "integer",
+        "category": "PREDECESSOR",
+        "unit": "G",
+        "displayOrder": 10,
+        "description": "着席時のデータカウンター累計ゲーム数。公開ボーナス確率の分母と合わないカウンターでは入力しないでください。",
+        "defaultValue": 0,
+        "minimum": 0
+      },
+      {
+        "id": "INP_SEATED_BONUS_COUNT",
+        "name": "着席時ボーナス回数",
+        "type": "counter",
+        "category": "PREDECESSOR",
+        "unit": "回",
+        "displayOrder": 11,
+        "description": "着席時のBIG+REG回数。",
+        "defaultValue": 0,
+        "minimum": 0
+      },
+      {
         "id": "INP_ROLE_GAMES",
         "name": "小役集計ゲーム数",
         "type": "integer",
         "category": "ROLE",
         "unit": "G",
-        "displayOrder": 10,
+        "displayOrder": 20,
         "defaultValue": 0,
         "minimum": 0
       },
@@ -60,7 +82,29 @@
         "type": "counter",
         "category": "ROLE",
         "unit": "回",
-        "displayOrder": 11,
+        "displayOrder": 21,
+        "defaultValue": 0,
+        "minimum": 0
+      },
+      {
+        "id": "INP_ART_ROLE_GAMES",
+        "name": "ART中小役集計ゲーム数",
+        "type": "integer",
+        "category": "ART_ROLE",
+        "unit": "G",
+        "displayOrder": 30,
+        "description": "ART中に共通ベルを判別したゲーム数。",
+        "defaultValue": 0,
+        "minimum": 0
+      },
+      {
+        "id": "INP_COMMON_BELL_ART",
+        "name": "ナビなし共通ベル回数",
+        "type": "counter",
+        "category": "ART_ROLE",
+        "unit": "回",
+        "displayOrder": 31,
+        "description": "ART中のナビなしベルのみを共通ベルとして数えます。",
         "defaultValue": 0,
         "minimum": 0
       },
@@ -130,7 +174,34 @@
           "SET_1": 0.00508130081300813,
           "SET_2": 0.005202913631633715,
           "SET_3": 0.005310674455655868,
-          "SET_4": 0.005431830526887561,
+          "SET_4": 0.005431830526887562,
+          "SET_5": 0.005555555555555556,
+          "SET_6": 0.005675368898978434
+        },
+        "sourceEvidenceRefs": [
+          "SRC_HIG_NANA_SET"
+        ]
+      },
+      {
+        "featureId": "FEAT_BONUS_PREDECESSOR",
+        "name": "着席前ボーナス合算",
+        "adoptionCategory": "INCLUDE_SUPPORT",
+        "calculationRole": "PROBABILITY",
+        "probabilityEngineUsage": true,
+        "modelType": "binomial",
+        "minimumSample": 1,
+        "sampleRecommendation": 1000,
+        "reliabilityProfile": {
+          "weight": 1
+        },
+        "displayFormat": "ratio_1_over_n",
+        "numeratorInputId": "INP_SEATED_BONUS_COUNT",
+        "denominatorInputId": "INP_SEATED_GAMES",
+        "probabilities": {
+          "SET_1": 0.00508130081300813,
+          "SET_2": 0.005202913631633715,
+          "SET_3": 0.005310674455655868,
+          "SET_4": 0.005431830526887562,
           "SET_5": 0.005555555555555556,
           "SET_6": 0.005675368898978434
         },
@@ -154,12 +225,39 @@
         "numeratorInputId": "INP_WATERMELON",
         "denominatorInputId": "INP_ROLE_GAMES",
         "probabilities": {
-          "SET_1": 0.009322207719559949,
-          "SET_2": 0.00950660614126818,
-          "SET_3": 0.009659035062300782,
-          "SET_4": 0.009827708562893082,
+          "SET_1": 0.009323140033563304,
+          "SET_2": 0.00950660709192889,
+          "SET_3": 0.009659036028204384,
+          "SET_4": 0.009827044025157232,
           "SET_5": 0.009995002498750625,
           "SET_6": 0.010178117048346057
+        },
+        "sourceEvidenceRefs": [
+          "SRC_HIG_NANA_SET"
+        ]
+      },
+      {
+        "featureId": "FEAT_COMMON_BELL_ART",
+        "name": "ART中共通ベル",
+        "adoptionCategory": "INCLUDE_SUPPORT",
+        "calculationRole": "PROBABILITY",
+        "probabilityEngineUsage": true,
+        "modelType": "binomial",
+        "minimumSample": 1,
+        "sampleRecommendation": 1500,
+        "reliabilityProfile": {
+          "weight": 1
+        },
+        "displayFormat": "ratio_1_over_n",
+        "numeratorInputId": "INP_COMMON_BELL_ART",
+        "denominatorInputId": "INP_ART_ROLE_GAMES",
+        "probabilities": {
+          "SET_1": 0.04248088360237893,
+          "SET_2": 0.04342162396873643,
+          "SET_3": 0.044762757385854966,
+          "SET_4": 0.04570383912248629,
+          "SET_5": 0.046641791044776115,
+          "SET_6": 0.047596382674916705
         },
         "sourceEvidenceRefs": [
           "SRC_HIG_NANA_SET"
@@ -187,7 +285,10 @@
         "hasImage": false,
         "type": "SETTING_CONFIRMATION",
         "sourceEvidenceRefs": [
-          "RE_NIPAA_2PLUS"
+          "RE_NIPAA_2PLUS",
+          "RE_CZ_VOICE_2PLUS",
+          "RE_BONUS_END_2PLUS",
+          "RE_TROPHY_2PLUS"
         ]
       },
       {
@@ -224,7 +325,9 @@
         "hasImage": false,
         "type": "SETTING_CONFIRMATION",
         "sourceEvidenceRefs": [
-          "RE_NIPAA_4PLUS"
+          "RE_NIPAA_4PLUS",
+          "RE_TROPHY_4PLUS",
+          "RE_REG_GOLD_4PLUS"
         ]
       },
       {
@@ -241,7 +344,10 @@
         "hasImage": false,
         "type": "SETTING_CONFIRMATION",
         "sourceEvidenceRefs": [
-          "RE_NIPAA_5PLUS"
+          "RE_NIPAA_5PLUS",
+          "RE_CZ_VOICE_5PLUS",
+          "RE_BONUS_END_5PLUS",
+          "RE_TROPHY_5PLUS"
         ]
       },
       {
@@ -257,7 +363,9 @@
         "hasImage": false,
         "type": "SETTING_CONFIRMATION",
         "sourceEvidenceRefs": [
-          "RE_NIPAA_6"
+          "RE_NIPAA_6",
+          "RE_BONUS_END_6",
+          "RE_TROPHY_6"
         ]
       }
     ],
@@ -282,6 +390,7 @@
     "sections": [
       {
         "id": "AUTO_PRIMARY",
+        "title": "ボーナス・主要データ",
         "displayOrder": 1,
         "items": [
           {
@@ -299,9 +408,28 @@
         ]
       },
       {
+        "id": "AUTO_PREDECESSOR",
+        "title": "着席時データ",
+        "displayOrder": 2,
+        "items": [
+          {
+            "type": "input",
+            "inputId": "INP_SEATED_GAMES",
+            "label": "着席時ゲーム数",
+            "widget": "number"
+          },
+          {
+            "type": "input",
+            "inputId": "INP_SEATED_BONUS_COUNT",
+            "label": "着席時ボーナス回数",
+            "widget": "counter"
+          }
+        ]
+      },
+      {
         "id": "AUTO_ROLE",
         "title": "小役",
-        "displayOrder": 2,
+        "displayOrder": 3,
         "items": [
           {
             "type": "input",
@@ -318,9 +446,28 @@
         ]
       },
       {
+        "id": "AUTO_ART_ROLE",
+        "title": "ART中小役",
+        "displayOrder": 4,
+        "items": [
+          {
+            "type": "input",
+            "inputId": "INP_ART_ROLE_GAMES",
+            "label": "ART中小役集計ゲーム数",
+            "widget": "number"
+          },
+          {
+            "type": "input",
+            "inputId": "INP_COMMON_BELL_ART",
+            "label": "ナビなし共通ベル回数",
+            "widget": "counter"
+          }
+        ]
+      },
+      {
         "id": "AUTO_EVIDENCE",
         "title": "設定確定・否定情報",
-        "displayOrder": 3,
+        "displayOrder": 5,
         "items": [
           {
             "type": "input",
@@ -334,8 +481,8 @@
   },
   "selectionSummary": {
     "schemaVersion": "selection-summary-v1",
-    "evaluatedCount": 3,
-    "selectedCount": 2,
+    "evaluatedCount": 5,
+    "selectedCount": 4,
     "rejectedCount": 1,
     "selected": [
       {
@@ -348,12 +495,30 @@
         }
       },
       {
+        "featureId": "FEAT_BONUS_PREDECESSOR",
+        "name": "着席前ボーナス合算",
+        "reason": "データカウンター仕様が適切なら着席前区間もボーナス観測として利用できる。",
+        "requiredTrials": {
+          "value": 111027,
+          "unit": "データカウンターゲーム"
+        }
+      },
+      {
         "featureId": "FEAT_WATERMELON",
         "name": "スイカ",
         "reason": "スイカは比較的高頻度で設定差があり補助採用。",
         "requiredTrials": {
-          "value": 96564,
+          "value": 96780,
           "unit": "小役集計ゲーム"
+        }
+      },
+      {
+        "featureId": "FEAT_COMMON_BELL_ART",
+        "name": "ART中共通ベル",
+        "reason": "ART中ナビなしベルとして実戦判別でき、設定差もあるため採用。ART中ゲーム数を通常Gから安定換算できないためDifficultyは除外。",
+        "requiredTrials": {
+          "value": 12039,
+          "unit": "ART中小役集計ゲーム"
         }
       }
     ],
