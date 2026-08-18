@@ -3,7 +3,7 @@
   "machine": {
     "schemaVersion": "2.0.0",
     "machineId": "L_HOKUTO_AD_XR",
-    "machineDataVersion": "0.1.0",
+    "machineDataVersion": "0.1.1",
     "displayName": "スマスロ北斗の拳",
     "modelName": "L パチスロ北斗の拳AD XR",
     "manufacturer": "サミー",
@@ -44,12 +44,35 @@
         "minimum": 0
       },
       {
+        "id": "INP_SEATED_GAMES",
+        "name": "着席時ゲーム数",
+        "type": "integer",
+        "category": "PREDECESSOR",
+        "unit": "G",
+        "displayOrder": 10,
+        "description": "着席時にデータカウンターで確認した累計ゲーム数です。店舗・カウンター仕様がBB中を通常ゲームとして加算するなど、公開BB初当り確率の分母と合わないと判断した場合は入力しないでください。",
+        "defaultValue": 0,
+        "minimum": 0
+      },
+      {
+        "id": "INP_SEATED_BB_COUNT",
+        "name": "着席時バトルボーナス初当り回数",
+        "type": "counter",
+        "category": "PREDECESSOR",
+        "unit": "回",
+        "displayOrder": 11,
+        "description": "着席時にデータカウンターで確認したBB初当り回数を入力します。",
+        "defaultValue": 0,
+        "minimum": 0
+      },
+      {
         "id": "INP_ROLE_GAMES",
         "name": "小役集計ゲーム数",
         "type": "integer",
         "category": "ROLE",
         "unit": "G",
-        "displayOrder": 10,
+        "displayOrder": 20,
+        "description": "実機連動機能推奨。遊技データと同じ集計区間のゲーム数を入力してください。",
         "defaultValue": 0,
         "minimum": 0
       },
@@ -59,7 +82,59 @@
         "type": "counter",
         "category": "ROLE",
         "unit": "回",
-        "displayOrder": 11,
+        "displayOrder": 21,
+        "description": "実機連動機能推奨。遊技データで確認できる弱・強スイカの合算回数を入力してください。",
+        "defaultValue": 0,
+        "minimum": 0
+      },
+      {
+        "id": "INP_BB_END_VOICE_TRIALS",
+        "name": "ボイス確認回数",
+        "type": "counter",
+        "category": "BB_END_VOICE",
+        "unit": "回",
+        "displayOrder": 30,
+        "description": "1G連非当選だったBB終了時にサブ液晶をタッチしてボイスを確認した回数です。1G連当選時は含めません。",
+        "defaultValue": 0,
+        "minimum": 0
+      },
+      {
+        "id": "INP_BB_VOICE_SHIN",
+        "name": "シン",
+        "type": "counter",
+        "category": "BB_END_VOICE",
+        "unit": "回",
+        "displayOrder": 31,
+        "defaultValue": 0,
+        "minimum": 0
+      },
+      {
+        "id": "INP_BB_VOICE_SOUTHER",
+        "name": "サウザー",
+        "type": "counter",
+        "category": "BB_END_VOICE",
+        "unit": "回",
+        "displayOrder": 32,
+        "defaultValue": 0,
+        "minimum": 0
+      },
+      {
+        "id": "INP_BB_VOICE_JAGI",
+        "name": "ジャギ",
+        "type": "counter",
+        "category": "BB_END_VOICE",
+        "unit": "回",
+        "displayOrder": 33,
+        "defaultValue": 0,
+        "minimum": 0
+      },
+      {
+        "id": "INP_BB_VOICE_AMIBA",
+        "name": "アミバ",
+        "type": "counter",
+        "category": "BB_END_VOICE",
+        "unit": "回",
+        "displayOrder": 34,
         "defaultValue": 0,
         "minimum": 0
       },
@@ -128,6 +203,33 @@
         ]
       },
       {
+        "featureId": "FEAT_AT_INITIAL_PREDECESSOR",
+        "name": "着席時データのバトルボーナス初当り",
+        "adoptionCategory": "INCLUDE_SUPPORT",
+        "calculationRole": "PROBABILITY",
+        "probabilityEngineUsage": true,
+        "modelType": "binomial",
+        "minimumSample": 1,
+        "sampleRecommendation": 1000,
+        "reliabilityProfile": {
+          "weight": 1
+        },
+        "displayFormat": "ratio_1_over_n",
+        "numeratorInputId": "INP_SEATED_BB_COUNT",
+        "denominatorInputId": "INP_SEATED_GAMES",
+        "probabilities": {
+          "SET_1": 0.002608242044861763,
+          "SET_2": 0.002699055330634278,
+          "SET_4": 0.0033579583613163196,
+          "SET_5": 0.003865481252415926,
+          "SET_6": 0.004253509145044662
+        },
+        "sourceEvidenceRefs": [
+          "SRC_HOKUTO_NANA_SETTING",
+          "SRC_HOKUTO_PWORLD"
+        ]
+      },
+      {
         "featureId": "FEAT_WATERMELON_COMBINED",
         "name": "弱・強スイカ合算",
         "adoptionCategory": "INCLUDE_SUPPORT",
@@ -151,6 +253,74 @@
         },
         "sourceEvidenceRefs": [
           "SRC_HOKUTO_NANA_SETTING"
+        ]
+      },
+      {
+        "featureId": "FEAT_BB_END_VOICE_NON_1G",
+        "name": "BB終了時ボイス（1G連非当選時）",
+        "adoptionCategory": "INCLUDE_SUPPORT",
+        "calculationRole": "PROBABILITY",
+        "probabilityEngineUsage": true,
+        "modelType": "multinomial",
+        "minimumSample": 1,
+        "sampleRecommendation": 20,
+        "reliabilityProfile": {
+          "weight": 1
+        },
+        "numeratorInputId": "INP_BB_VOICE_SHIN",
+        "denominatorInputId": "INP_BB_END_VOICE_TRIALS",
+        "categoryInputIds": [
+          "INP_BB_VOICE_SOUTHER",
+          "INP_BB_VOICE_JAGI",
+          "INP_BB_VOICE_AMIBA"
+        ],
+        "probabilities": {},
+        "categoryLabels": [
+          "シン",
+          "サウザー",
+          "ジャギ",
+          "アミバ"
+        ],
+        "categoryProbabilities": {
+          "SET_1": [
+            0.0565,
+            0.0504,
+            0.0336,
+            0.0122
+          ],
+          "SET_2": [
+            0.061,
+            0.0534,
+            0.0381,
+            0.0153
+          ],
+          "SET_4": [
+            0.0626,
+            0.0626,
+            0.0626,
+            0.0626
+          ],
+          "SET_5": [
+            0.0671,
+            0.0671,
+            0.0671,
+            0.0671
+          ],
+          "SET_6": [
+            0.0717,
+            0.0717,
+            0.0717,
+            0.0717
+          ]
+        },
+        "categoryConditioning": {
+          "excludedCategories": [],
+          "normalization": "RENORMALIZE_INCLUDED",
+          "residualCategory": "その他"
+        },
+        "sourceEvidenceRefs": [
+          "SRC_HOKUTO_NANA_VOICE",
+          "SRC_HOKUTO_1GEKI"
         ]
       }
     ]
@@ -190,7 +360,8 @@
         "hasImage": false,
         "type": "SETTING_CONFIRMATION",
         "sourceEvidenceRefs": [
-          "RE_TROPHY_KIRIN_5PLUS"
+          "RE_TROPHY_KIRIN_5PLUS",
+          "RE_VOICE_YURIA_5PLUS"
         ]
       },
       {
@@ -233,6 +404,13 @@
         "checkedAt": "2026-08-18"
       },
       {
+        "id": "SRC_HOKUTO_NANA_VOICE",
+        "classification": "ANALYSIS",
+        "pageName": "スマスロ北斗の拳 AT終了後のボイス",
+        "url": "https://nana-press.com/kaiseki/machine/514/14273/",
+        "checkedAt": "2026-08-18"
+      },
+      {
         "id": "SRC_HOKUTO_NANA_TROPHY",
         "classification": "ANALYSIS",
         "pageName": "スマスロ北斗の拳 サミートロフィー",
@@ -262,9 +440,28 @@
         ]
       },
       {
-        "id": "AUTO_ROLE",
-        "title": "ROLE",
+        "id": "AUTO_PREDECESSOR",
+        "title": "着席時データ",
         "displayOrder": 2,
+        "items": [
+          {
+            "type": "input",
+            "inputId": "INP_SEATED_GAMES",
+            "label": "着席時ゲーム数",
+            "widget": "number"
+          },
+          {
+            "type": "input",
+            "inputId": "INP_SEATED_BB_COUNT",
+            "label": "着席時バトルボーナス初当り回数",
+            "widget": "counter"
+          }
+        ]
+      },
+      {
+        "id": "AUTO_ROLE",
+        "title": "小役",
+        "displayOrder": 3,
         "items": [
           {
             "type": "input",
@@ -281,9 +478,46 @@
         ]
       },
       {
+        "id": "AUTO_BB_END_VOICE",
+        "title": "BB終了時ボイス（1G連非当選時）",
+        "displayOrder": 4,
+        "items": [
+          {
+            "type": "input",
+            "inputId": "INP_BB_END_VOICE_TRIALS",
+            "label": "ボイス確認回数",
+            "widget": "counter"
+          },
+          {
+            "type": "input",
+            "inputId": "INP_BB_VOICE_SHIN",
+            "label": "シン",
+            "widget": "counter"
+          },
+          {
+            "type": "input",
+            "inputId": "INP_BB_VOICE_SOUTHER",
+            "label": "サウザー",
+            "widget": "counter"
+          },
+          {
+            "type": "input",
+            "inputId": "INP_BB_VOICE_JAGI",
+            "label": "ジャギ",
+            "widget": "counter"
+          },
+          {
+            "type": "input",
+            "inputId": "INP_BB_VOICE_AMIBA",
+            "label": "アミバ",
+            "widget": "counter"
+          }
+        ]
+      },
+      {
         "id": "AUTO_EVIDENCE",
         "title": "設定確定・否定情報",
-        "displayOrder": 3,
+        "displayOrder": 5,
         "items": [
           {
             "type": "input",
@@ -297,8 +531,8 @@
   },
   "selectionSummary": {
     "schemaVersion": "selection-summary-v1",
-    "evaluatedCount": 3,
-    "selectedCount": 2,
+    "evaluatedCount": 5,
+    "selectedCount": 4,
     "rejectedCount": 1,
     "selected": [
       {
@@ -311,12 +545,30 @@
         }
       },
       {
+        "featureId": "FEAT_AT_INITIAL_PREDECESSOR",
+        "name": "着席時データのバトルボーナス初当り",
+        "reason": "店舗のデータカウンター仕様が適切とユーザーが判断できる場合、着席前の区間もBB初当りの観測として利用できるため補助採用。",
+        "requiredTrials": {
+          "value": 9124,
+          "unit": "着席時データカウンターゲーム"
+        }
+      },
+      {
         "featureId": "FEAT_WATERMELON_COMBINED",
         "name": "弱・強スイカ合算",
-        "reason": "遊技データから確認しやすく、長時間ほど情報が蓄積するため補助採用。",
+        "reason": "実機連動機能から確認しやすく、長時間ほど情報が蓄積するため補助採用。",
         "requiredTrials": {
           "value": 38434,
           "unit": "遊技ゲーム"
+        }
+      },
+      {
+        "featureId": "FEAT_BB_END_VOICE_NON_1G",
+        "name": "BB終了時ボイス（1G連非当選時）",
+        "reason": "1G連非当選時はシン・サウザー・ジャギ・アミバの設定別出現率が公開されており、特にジャギ・アミバの差が大きいため採用。1G連当選時は別分布なので集計しない。",
+        "requiredTrials": {
+          "value": 45,
+          "unit": "1G連非当選BB終了"
         }
       }
     ],
