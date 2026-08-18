@@ -88,6 +88,28 @@
         "minimum": 0
       },
       {
+        "id": "INP_DOKOMAJI_ELIGIBLE_BONUS",
+        "name": "どこまじ集計対象ボーナス回数",
+        "type": "counter",
+        "category": "DOKOMAJI",
+        "unit": "回",
+        "displayOrder": 30,
+        "description": "超高確中と判断できるボーナス、および朝一30G程度のボーナスは除外して入力します。作戦室ステージは超高確濃厚です。",
+        "defaultValue": 0,
+        "minimum": 0
+      },
+      {
+        "id": "INP_DOKOMAJI_COUNT",
+        "name": "どこまじ確認回数",
+        "type": "counter",
+        "category": "DOKOMAJI",
+        "unit": "回",
+        "displayOrder": 31,
+        "description": "集計対象ボーナスのうち、通常時にまじかるちゃんすを確認した回数を入力します。内部当選しても演出が出ない場合があるため補助要素として扱います。",
+        "defaultValue": 0,
+        "minimum": 0
+      },
+      {
         "id": "INP_EVI_SETTING_FLOOR",
         "name": "確認した設定下限",
         "type": "enum",
@@ -213,6 +235,33 @@
         },
         "sourceEvidenceRefs": [
           "SRC_MAGI8_NANA"
+        ]
+      },
+      {
+        "featureId": "FEAT_DOKOMAJI",
+        "name": "どこまじ当選率",
+        "adoptionCategory": "INCLUDE_SUPPORT",
+        "calculationRole": "PROBABILITY",
+        "probabilityEngineUsage": true,
+        "modelType": "binomial",
+        "minimumSample": 1,
+        "sampleRecommendation": 10,
+        "reliabilityProfile": {
+          "weight": 0.5
+        },
+        "displayFormat": "percent",
+        "numeratorInputId": "INP_DOKOMAJI_COUNT",
+        "denominatorInputId": "INP_DOKOMAJI_ELIGIBLE_BONUS",
+        "probabilities": {
+          "SET_1": 0.016,
+          "SET_2": 0.039,
+          "SET_3": 0.07,
+          "SET_4": 0.156,
+          "SET_5": 0.172,
+          "SET_6": 0.234
+        },
+        "sourceEvidenceRefs": [
+          "SRC_MAGI8_DOKOMAJI"
         ]
       }
     ]
@@ -403,9 +452,28 @@
         ]
       },
       {
+        "id": "AUTO_DOKOMAJI",
+        "title": "どこまじ",
+        "displayOrder": 4,
+        "items": [
+          {
+            "type": "input",
+            "inputId": "INP_DOKOMAJI_ELIGIBLE_BONUS",
+            "label": "どこまじ集計対象ボーナス回数",
+            "widget": "counter"
+          },
+          {
+            "type": "input",
+            "inputId": "INP_DOKOMAJI_COUNT",
+            "label": "どこまじ確認回数",
+            "widget": "counter"
+          }
+        ]
+      },
+      {
         "id": "AUTO_EVIDENCE",
         "title": "設定確定・否定情報",
-        "displayOrder": 4,
+        "displayOrder": 5,
         "items": [
           {
             "type": "input",
@@ -420,8 +488,8 @@
   "selectionSummary": {
     "schemaVersion": "selection-summary-v1",
     "evaluatedCount": 4,
-    "selectedCount": 3,
-    "rejectedCount": 1,
+    "selectedCount": 4,
+    "rejectedCount": 0,
     "selected": [
       {
         "featureId": "FEAT_ART_INITIAL",
@@ -449,19 +517,18 @@
           "value": 1726,
           "unit": "小役集計ゲーム"
         }
-      }
-    ],
-    "rejected": [
+      },
       {
         "featureId": "FEAT_DOKOMAJI",
         "name": "どこまじ当選率",
-        "reason": "設定差は非常に大きいが、高確・超高確中は設定に関係なく発生し得る。内部状態を正確に除外できない実戦では母数条件を保証できないため不採用。",
+        "reason": "どこまじは設定1の1.6%から設定6の23.4%まで大差がある。超高確は作戦室等から実戦上かなり識別できるため、超高確中と朝一30G程度を除外して補助採用する。ただし内部当選してもまじかるちゃんすが必ず表示されるわけではなく、観測漏れがあるため重み0.5として過信を抑える。",
         "requiredTrials": {
           "value": 13,
           "unit": "通常時ボーナス"
         }
       }
-    ]
+    ],
+    "rejected": []
   },
   "reliability": {},
   "metadata": {
