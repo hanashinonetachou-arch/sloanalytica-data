@@ -6,6 +6,7 @@ import { fileURLToPath, pathToFileURL } from "node:url";
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const CATALOG = path.join(ROOT, "catalog.json");
 const DIFFICULTY_CATALOG = path.join(ROOT, "difficulty-catalog.json");
+const MACHINE_REGISTRY = path.join(ROOT, "machine-registry.json");
 const MAX_BATCH = 10;
 
 export function validMachineId(id) {
@@ -98,6 +99,7 @@ function snapshotBatch(ids) {
   return {
     catalog: snapshotFile(CATALOG),
     difficultyCatalog: snapshotFile(DIFFICULTY_CATALOG),
+    machineRegistry: snapshotFile(MACHINE_REGISTRY),
     machines: new Map(ids.map(id => {
       const p = path.join(ROOT, "machines", id, "machine-package.json");
       return [id, snapshotFile(p)];
@@ -108,6 +110,7 @@ function snapshotBatch(ids) {
 function rollbackBatch(ids, snap) {
   restoreFile(CATALOG, snap.catalog);
   restoreFile(DIFFICULTY_CATALOG, snap.difficultyCatalog);
+  restoreFile(MACHINE_REGISTRY, snap.machineRegistry);
   for (const id of ids) {
     restoreFile(path.join(ROOT, "machines", id, "machine-package.json"), snap.machines.get(id) ?? null);
   }
@@ -155,9 +158,10 @@ Default:
 --apply:
   Up to 10 machines are published as one atomic batch:
   approve -> dry-run -> publish apply -> Difficulty sync (per machine)
+  -> machine registry sync (once per batch)
   -> repository tests/audit/service-name audit (once per batch).
-  Any failure restores catalog.json, difficulty-catalog.json and all target machine packages
-  to their pre-batch bytes.
+  Any failure restores catalog.json, difficulty-catalog.json, machine-registry.json
+  and all target machine packages to their pre-batch bytes.
 
 Safety:
   - Maximum 10 unique machineIds.
@@ -181,12 +185,15 @@ export function main(argv = process.argv.slice(2)) {
   console.log(`BATCH PUBLISH START: ${ids.length} machines / mode=${mode}`);
   try {
     for (const id of ids) publishOne(id, parsed.apply);
-    if (parsed.apply) repositoryChecks();
+    if (parsed.apply) {
+      runNode("sync-machine-registry.mjs");
+      repositoryChecks();
+    }
     console.log(`\nBATCH PUBLISH PASS: ${ids.length} machines / mode=${mode}`);
   } catch (e) {
     if (parsed.apply) {
       rollbackBatch(ids, snap);
-      console.error("BATCH ROLLBACK: restored catalog, difficulty catalog and machine packages");
+      console.error("BATCH ROLLBACK: restored catalog, difficulty catalog, machine registry and machine packages");
     }
     throw e;
   } finally {
