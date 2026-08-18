@@ -55,6 +55,27 @@
         "minimum": 0
       },
       {
+        "id": "INP_SEATED_GAMES",
+        "name": "着席時ゲーム数",
+        "type": "integer",
+        "category": "PREDECESSOR",
+        "unit": "G",
+        "displayOrder": 10,
+        "description": "データカウンター仕様が公開AT初当り確率と合う場合のみ入力。",
+        "defaultValue": 0,
+        "minimum": 0
+      },
+      {
+        "id": "INP_SEATED_AT_COUNT",
+        "name": "着席時AT初当り回数",
+        "type": "counter",
+        "category": "PREDECESSOR",
+        "unit": "回",
+        "displayOrder": 11,
+        "defaultValue": 0,
+        "minimum": 0
+      },
+      {
         "id": "INP_EVI_SETTING_FLOOR",
         "name": "確認した設定下限",
         "type": "enum",
@@ -106,6 +127,33 @@
         "displayFormat": "ratio_1_over_n",
         "numeratorInputId": "INP_AT_COUNT",
         "denominatorInputId": "INP_NORMAL_GAMES",
+        "probabilities": {
+          "SET_1": 0.002503,
+          "SET_2": 0.002565,
+          "SET_3": 0.002821,
+          "SET_4": 0.003171,
+          "SET_5": 0.003502,
+          "SET_6": 0.003903
+        },
+        "sourceEvidenceRefs": [
+          "SRC_KENGAN_1GEKI"
+        ]
+      },
+      {
+        "featureId": "FEAT_AT_PREDECESSOR",
+        "name": "着席前AT初当り",
+        "adoptionCategory": "INCLUDE_SUPPORT",
+        "calculationRole": "PROBABILITY",
+        "probabilityEngineUsage": true,
+        "modelType": "binomial",
+        "minimumSample": 1,
+        "sampleRecommendation": 1000,
+        "reliabilityProfile": {
+          "weight": 1
+        },
+        "displayFormat": "ratio_1_over_n",
+        "numeratorInputId": "INP_SEATED_AT_COUNT",
+        "denominatorInputId": "INP_SEATED_GAMES",
         "probabilities": {
           "SET_1": 0.002503,
           "SET_2": 0.002565,
@@ -219,6 +267,7 @@
     "sections": [
       {
         "id": "AUTO_PRIMARY",
+        "title": "AT・CZ初当り",
         "displayOrder": 1,
         "items": [
           {
@@ -242,9 +291,28 @@
         ]
       },
       {
+        "id": "AUTO_PREDECESSOR",
+        "title": "着席時データ",
+        "displayOrder": 2,
+        "items": [
+          {
+            "type": "input",
+            "inputId": "INP_SEATED_GAMES",
+            "label": "着席時ゲーム数",
+            "widget": "number"
+          },
+          {
+            "type": "input",
+            "inputId": "INP_SEATED_AT_COUNT",
+            "label": "着席時AT初当り回数",
+            "widget": "counter"
+          }
+        ]
+      },
+      {
         "id": "AUTO_EVIDENCE",
         "title": "設定確定・否定情報",
-        "displayOrder": 2,
+        "displayOrder": 3,
         "items": [
           {
             "type": "input",
@@ -258,8 +326,8 @@
   },
   "selectionSummary": {
     "schemaVersion": "selection-summary-v1",
-    "evaluatedCount": 2,
-    "selectedCount": 2,
+    "evaluatedCount": 3,
+    "selectedCount": 3,
     "rejectedCount": 0,
     "selected": [
       {
@@ -269,6 +337,15 @@
         "requiredTrials": {
           "value": 11797,
           "unit": "通常ゲーム"
+        }
+      },
+      {
+        "featureId": "FEAT_AT_PREDECESSOR",
+        "name": "着席前AT初当り",
+        "reason": "カウンター仕様が適切なら着席前AT初当りも補助利用。",
+        "requiredTrials": {
+          "value": 11797,
+          "unit": "データカウンターゲーム"
         }
       },
       {
