@@ -1,0 +1,287 @@
+{
+  "schemaVersion": 1,
+  "machine": {
+    "schemaVersion": "2.0.0",
+    "machineId": "L_MAHJONG_FIGHT_CLUB_KAKUSEI_KM",
+    "machineDataVersion": "0.1.0",
+    "displayName": "麻雀格闘倶楽部 覚醒",
+    "modelName": "L麻雀格闘倶楽部覚醒KM",
+    "manufacturer": "コナミアミューズメント",
+    "settings": [
+      "SET_1",
+      "SET_2",
+      "SET_3",
+      "SET_4",
+      "SET_5",
+      "SET_6"
+    ],
+    "packagePolicy": {
+      "offlineCapable": true,
+      "containsImages": false,
+      "containsExecutableCode": false
+    }
+  },
+  "inputs": {
+    "schemaVersion": "2.0.0",
+    "inputs": [
+      {
+        "id": "INP_NORMAL_GAMES",
+        "name": "通常ゲーム数",
+        "type": "integer",
+        "category": "PRIMARY",
+        "unit": "G",
+        "displayOrder": 1,
+        "defaultValue": 0,
+        "minimum": 0
+      },
+      {
+        "id": "INP_AT_INITIAL_COUNT",
+        "name": "AT初当り回数",
+        "type": "counter",
+        "category": "PRIMARY",
+        "unit": "回",
+        "displayOrder": 2,
+        "defaultValue": 0,
+        "minimum": 0
+      },
+      {
+        "id": "INP_LEFT_FIRST_BELL_COUNT",
+        "name": "左1stベル回数",
+        "type": "counter",
+        "category": "SMALL_ROLE",
+        "unit": "回",
+        "displayOrder": 3,
+        "defaultValue": 0,
+        "minimum": 0
+      },
+      {
+        "id": "INP_EVI_SETTING_FLOOR",
+        "name": "確認した設定下限",
+        "type": "enum",
+        "category": "EVIDENCE",
+        "unit": "",
+        "displayOrder": 100,
+        "inferenceRole": "INCLUDE_SUPPORT",
+        "options": [
+          {
+            "key": "__UNSET__",
+            "label": "未選択",
+            "value": "__UNSET__"
+          },
+          {
+            "key": "SET_2_OR_HIGHER",
+            "label": "設定2以上",
+            "value": "SET_2_OR_HIGHER"
+          },
+          {
+            "key": "SET_6",
+            "label": "設定6",
+            "value": "SET_6"
+          }
+        ],
+        "defaultValue": "__UNSET__"
+      }
+    ]
+  },
+  "features": {
+    "schemaVersion": "2.0.0",
+    "features": [
+      {
+        "featureId": "FEAT_AT_INITIAL",
+        "name": "AT初当り",
+        "adoptionCategory": "INCLUDE_PRIMARY",
+        "calculationRole": "PROBABILITY",
+        "probabilityEngineUsage": true,
+        "modelType": "binomial",
+        "minimumSample": 1,
+        "sampleRecommendation": 5000,
+        "reliabilityProfile": {
+          "weight": 1
+        },
+        "displayFormat": "ratio_1_over_n",
+        "numeratorInputId": "INP_AT_INITIAL_COUNT",
+        "denominatorInputId": "INP_NORMAL_GAMES",
+        "probabilities": {
+          "SET_1": 0.004051864,
+          "SET_2": 0.004231909,
+          "SET_3": 0.00446628,
+          "SET_4": 0.004786022,
+          "SET_5": 0.00578369,
+          "SET_6": 0.007062147
+        },
+        "sourceEvidenceRefs": [
+          "SRC_MFC_NANA"
+        ]
+      },
+      {
+        "featureId": "FEAT_LEFT_FIRST_BELL",
+        "name": "通常時左1stベル",
+        "adoptionCategory": "INCLUDE_PRIMARY",
+        "calculationRole": "PROBABILITY",
+        "probabilityEngineUsage": true,
+        "modelType": "binomial",
+        "minimumSample": 1,
+        "sampleRecommendation": 3000,
+        "reliabilityProfile": {
+          "weight": 1
+        },
+        "displayFormat": "ratio_1_over_n",
+        "numeratorInputId": "INP_LEFT_FIRST_BELL_COUNT",
+        "denominatorInputId": "INP_NORMAL_GAMES",
+        "probabilities": {
+          "SET_1": 0.093457944,
+          "SET_2": 0.093457944,
+          "SET_3": 0.097087379,
+          "SET_4": 0.101010101,
+          "SET_5": 0.104166667,
+          "SET_6": 0.107526882
+        },
+        "sourceEvidenceRefs": [
+          "SRC_MFC_NANA"
+        ]
+      }
+    ]
+  },
+  "evidence": {
+    "version": "1.0.0",
+    "evidences": [
+      {
+        "id": "EVI_SETTING_FLOOR_SET_2_OR_HIGHER",
+        "name": "設定2以上",
+        "displayName": "設定2以上",
+        "inputId": "INP_EVI_SETTING_FLOOR",
+        "triggerValue": "SET_2_OR_HIGHER",
+        "confirmedSettings": [
+          "SET_2",
+          "SET_3",
+          "SET_4",
+          "SET_5",
+          "SET_6"
+        ],
+        "deniedSettings": [],
+        "hasImage": false,
+        "type": "SETTING_CONFIRMATION",
+        "sourceEvidenceRefs": [
+          "RE_END_2PLUS"
+        ]
+      },
+      {
+        "id": "EVI_SETTING_FLOOR_SET_6",
+        "name": "設定6",
+        "displayName": "設定6",
+        "inputId": "INP_EVI_SETTING_FLOOR",
+        "triggerValue": "SET_6",
+        "confirmedSettings": [
+          "SET_6"
+        ],
+        "deniedSettings": [],
+        "hasImage": false,
+        "type": "SETTING_CONFIRMATION",
+        "sourceEvidenceRefs": [
+          "RE_END_6"
+        ]
+      }
+    ],
+    "sources": [
+      {
+        "id": "SRC_MFC_NANA",
+        "classification": "ANALYSIS",
+        "pageName": "麻雀格闘倶楽部 覚醒 設定差のある要素",
+        "url": "https://nana-press.com/kaiseki/machine/604/16782/",
+        "checkedAt": "2026-08-18"
+      }
+    ]
+  },
+  "ui": {
+    "sections": [
+      {
+        "id": "AUTO_PRIMARY",
+        "displayOrder": 1,
+        "items": [
+          {
+            "type": "input",
+            "inputId": "INP_NORMAL_GAMES",
+            "label": "通常ゲーム数",
+            "widget": "number"
+          },
+          {
+            "type": "input",
+            "inputId": "INP_AT_INITIAL_COUNT",
+            "label": "AT初当り回数",
+            "widget": "counter"
+          }
+        ]
+      },
+      {
+        "id": "AUTO_SMALL_ROLE",
+        "title": "SMALL_ROLE",
+        "displayOrder": 2,
+        "items": [
+          {
+            "type": "input",
+            "inputId": "INP_LEFT_FIRST_BELL_COUNT",
+            "label": "左1stベル回数",
+            "widget": "counter"
+          }
+        ]
+      },
+      {
+        "id": "AUTO_EVIDENCE",
+        "title": "設定確定・否定情報",
+        "displayOrder": 3,
+        "items": [
+          {
+            "type": "input",
+            "inputId": "INP_EVI_SETTING_FLOOR",
+            "label": "確認した設定下限",
+            "widget": "select"
+          }
+        ]
+      }
+    ]
+  },
+  "selectionSummary": {
+    "schemaVersion": "selection-summary-v1",
+    "evaluatedCount": 2,
+    "selectedCount": 2,
+    "rejectedCount": 0,
+    "selected": [
+      {
+        "featureId": "FEAT_AT_INITIAL",
+        "name": "AT初当り",
+        "reason": "設定1と6で初当り差が大きく、主軸として有効。",
+        "requiredTrials": {
+          "value": 4387,
+          "unit": "通常ゲーム"
+        }
+      },
+      {
+        "featureId": "FEAT_LEFT_FIRST_BELL",
+        "name": "通常時左1stベル",
+        "reason": "高頻度で試行を稼げ、初当りと独立した数値情報として有効。通常時のみを分母にする。",
+        "requiredTrials": {
+          "value": 3344,
+          "unit": "通常ゲーム"
+        }
+      }
+    ],
+    "rejected": []
+  },
+  "reliability": {},
+  "metadata": {
+    "machineId": "L_MAHJONG_FIGHT_CLUB_KAKUSEI_KM",
+    "displayName": "麻雀格闘倶楽部 覚醒",
+    "settings": [
+      "SET_1",
+      "SET_2",
+      "SET_3",
+      "SET_4",
+      "SET_5",
+      "SET_6"
+    ]
+  },
+  "validation": {
+    "cases": []
+  },
+  "statistics": {}
+}
