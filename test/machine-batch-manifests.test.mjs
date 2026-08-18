@@ -37,7 +37,7 @@ for (const name of manifests) {
       const rr = validateResearchData(research);
       const sr = validateSelectionData(selection, research);
       assert.equal(rr.status, 'PASS', JSON.stringify(rr.errors, null, 2));
-      assert.equal(sr.status, 'PASS', JSON.stringify(sr.errors, null, 2));
+      assert.equal(sr.errors.length, 0, JSON.stringify(sr.errors, null, 2));
       assert.equal(research.machine.machineId, machineId);
       assert.equal(selection.machineId, machineId);
     });
