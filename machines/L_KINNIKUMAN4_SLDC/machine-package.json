@@ -1,0 +1,273 @@
+{
+  "schemaVersion": 1,
+  "machine": {
+    "schemaVersion": "2.0.0",
+    "machineId": "L_KINNIKUMAN4_SLDC",
+    "machineDataVersion": "0.1.0",
+    "displayName": "スマスロキン肉マン～7人の悪魔超人編～",
+    "modelName": "Lパチスロキンニクマン4SLDC",
+    "manufacturer": "山佐ネクスト",
+    "settings": [
+      "SET_1",
+      "SET_2",
+      "SET_4",
+      "SET_5",
+      "SET_6"
+    ],
+    "packagePolicy": {
+      "offlineCapable": true,
+      "containsImages": false,
+      "containsExecutableCode": false
+    }
+  },
+  "inputs": {
+    "schemaVersion": "2.0.0",
+    "inputs": [
+      {
+        "id": "INP_NORMAL_GAMES",
+        "name": "通常ゲーム数",
+        "type": "integer",
+        "category": "PRIMARY",
+        "unit": "G",
+        "displayOrder": 1,
+        "defaultValue": 0,
+        "minimum": 0
+      },
+      {
+        "id": "INP_AT_INITIAL_COUNT",
+        "name": "AT初当り回数",
+        "type": "counter",
+        "category": "PRIMARY",
+        "unit": "回",
+        "displayOrder": 2,
+        "defaultValue": 0,
+        "minimum": 0
+      },
+      {
+        "id": "INP_WEAK_RARE_COUNT",
+        "name": "弱レア小役回数",
+        "type": "counter",
+        "category": "SMALL_ROLE",
+        "unit": "回",
+        "displayOrder": 3,
+        "defaultValue": 0,
+        "minimum": 0
+      },
+      {
+        "id": "INP_EVI_SETTING_FLOOR",
+        "name": "確認した設定下限",
+        "type": "enum",
+        "category": "EVIDENCE",
+        "unit": "",
+        "displayOrder": 100,
+        "inferenceRole": "INCLUDE_SUPPORT",
+        "options": [
+          {
+            "key": "__UNSET__",
+            "label": "未選択",
+            "value": "__UNSET__"
+          },
+          {
+            "key": "SET_2_OR_HIGHER",
+            "label": "設定2以上",
+            "value": "SET_2_OR_HIGHER"
+          },
+          {
+            "key": "SET_6",
+            "label": "設定6",
+            "value": "SET_6"
+          }
+        ],
+        "defaultValue": "__UNSET__"
+      }
+    ]
+  },
+  "features": {
+    "schemaVersion": "2.0.0",
+    "features": [
+      {
+        "featureId": "FEAT_AT_INITIAL",
+        "name": "AT初当り",
+        "adoptionCategory": "INCLUDE_PRIMARY",
+        "calculationRole": "PROBABILITY",
+        "probabilityEngineUsage": true,
+        "modelType": "binomial",
+        "minimumSample": 1,
+        "sampleRecommendation": 7000,
+        "reliabilityProfile": {
+          "weight": 1
+        },
+        "displayFormat": "ratio_1_over_n",
+        "numeratorInputId": "INP_AT_INITIAL_COUNT",
+        "denominatorInputId": "INP_NORMAL_GAMES",
+        "probabilities": {
+          "SET_1": 0.002474635,
+          "SET_2": 0.0024962556,
+          "SET_4": 0.002761668,
+          "SET_5": 0.00285144,
+          "SET_6": 0.002971768
+        },
+        "sourceEvidenceRefs": [
+          "SRC_KIN_NANA"
+        ]
+      },
+      {
+        "featureId": "FEAT_WEAK_RARE",
+        "name": "弱レア小役合算",
+        "adoptionCategory": "INCLUDE_SECONDARY",
+        "calculationRole": "PROBABILITY",
+        "probabilityEngineUsage": true,
+        "modelType": "binomial",
+        "minimumSample": 1,
+        "sampleRecommendation": 3000,
+        "reliabilityProfile": {
+          "weight": 0.8
+        },
+        "displayFormat": "ratio_1_over_n",
+        "numeratorInputId": "INP_WEAK_RARE_COUNT",
+        "denominatorInputId": "INP_NORMAL_GAMES",
+        "probabilities": {
+          "SET_1": 0.02610966,
+          "SET_2": 0.026595745,
+          "SET_4": 0.027322404,
+          "SET_5": 0.028571429,
+          "SET_6": 0.03030303
+        },
+        "sourceEvidenceRefs": [
+          "SRC_KIN_NANA"
+        ]
+      }
+    ]
+  },
+  "evidence": {
+    "version": "1.0.0",
+    "evidences": [
+      {
+        "id": "EVI_SETTING_FLOOR_SET_2_OR_HIGHER",
+        "name": "設定2以上",
+        "displayName": "設定2以上",
+        "inputId": "INP_EVI_SETTING_FLOOR",
+        "triggerValue": "SET_2_OR_HIGHER",
+        "confirmedSettings": [
+          "SET_2",
+          "SET_4",
+          "SET_5",
+          "SET_6"
+        ],
+        "deniedSettings": [],
+        "hasImage": false,
+        "type": "SETTING_CONFIRMATION",
+        "sourceEvidenceRefs": [
+          "RE_TROPHY_2PLUS"
+        ]
+      },
+      {
+        "id": "EVI_SETTING_FLOOR_SET_6",
+        "name": "設定6",
+        "displayName": "設定6",
+        "inputId": "INP_EVI_SETTING_FLOOR",
+        "triggerValue": "SET_6",
+        "confirmedSettings": [
+          "SET_6"
+        ],
+        "deniedSettings": [],
+        "hasImage": false,
+        "type": "SETTING_CONFIRMATION",
+        "sourceEvidenceRefs": [
+          "RE_TROPHY_6"
+        ]
+      }
+    ],
+    "sources": [
+      {
+        "id": "SRC_KIN_NANA",
+        "classification": "ANALYSIS",
+        "pageName": "スマスロキン肉マン 設定差のある要素",
+        "url": "https://nana-press.com/kaiseki/machine/583/16187/",
+        "checkedAt": "2026-08-18"
+      }
+    ]
+  },
+  "ui": {
+    "sections": [
+      {
+        "id": "AUTO_PRIMARY",
+        "displayOrder": 1,
+        "items": [
+          {
+            "type": "input",
+            "inputId": "INP_NORMAL_GAMES",
+            "label": "通常ゲーム数",
+            "widget": "number"
+          },
+          {
+            "type": "input",
+            "inputId": "INP_AT_INITIAL_COUNT",
+            "label": "AT初当り回数",
+            "widget": "counter"
+          }
+        ]
+      },
+      {
+        "id": "AUTO_SMALL_ROLE",
+        "title": "SMALL_ROLE",
+        "displayOrder": 2,
+        "items": [
+          {
+            "type": "input",
+            "inputId": "INP_WEAK_RARE_COUNT",
+            "label": "弱レア小役回数",
+            "widget": "counter"
+          }
+        ]
+      },
+      {
+        "id": "AUTO_EVIDENCE",
+        "title": "設定確定・否定情報",
+        "displayOrder": 3,
+        "items": [
+          {
+            "type": "input",
+            "inputId": "INP_EVI_SETTING_FLOOR",
+            "label": "確認した設定下限",
+            "widget": "select"
+          }
+        ]
+      }
+    ]
+  },
+  "selectionSummary": {
+    "schemaVersion": "selection-summary-v1",
+    "evaluatedCount": 1,
+    "selectedCount": 1,
+    "rejectedCount": 0,
+    "selected": [
+      {
+        "featureId": "FEAT_AT_INITIAL",
+        "name": "AT初当り",
+        "reason": "AT初当りに段階的な設定差があり主軸として採用。",
+        "requiredTrials": {
+          "value": 80384,
+          "unit": "通常ゲーム"
+        }
+      }
+    ],
+    "rejected": []
+  },
+  "reliability": {},
+  "metadata": {
+    "machineId": "L_KINNIKUMAN4_SLDC",
+    "displayName": "スマスロキン肉マン～7人の悪魔超人編～",
+    "settings": [
+      "SET_1",
+      "SET_2",
+      "SET_4",
+      "SET_5",
+      "SET_6"
+    ]
+  },
+  "validation": {
+    "cases": []
+  },
+  "statistics": {}
+}
