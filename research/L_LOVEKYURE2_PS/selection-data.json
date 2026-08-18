@@ -1,10 +1,18 @@
 {
   "schemaVersion": "selection-data-v1",
   "machineId": "L_LOVEKYURE2_PS",
-  "machineDataVersion": "0.1.1",
+  "machineDataVersion": "0.1.2",
+  "uiCategoryLabels": {
+    "ROLE": "小役"
+  },
   "inputs": [
     {"id":"INP_NORMAL_GAMES","name":"通常ゲーム数","type":"integer","category":"PRIMARY","unit":"G","displayOrder":1,"defaultValue":0},
     {"id":"INP_ART_INITIAL_COUNT","name":"ART初当り回数","type":"counter","category":"PRIMARY","unit":"回","displayOrder":2,"defaultValue":0},
+    {"id":"INP_ROLE_GAMES","name":"小役集計ゲーム数","type":"integer","category":"ROLE","unit":"G","displayOrder":30,"description":"通常時・ART中のうち、弱チェリーとスイカをカウントしたゲーム数を入力します。ボーナス中は除外してください。","defaultValue":0},
+    {"id":"INP_WEAK_CHERRY_COUNT","name":"弱チェリー回数","type":"counter","category":"ROLE","unit":"回","displayOrder":31,"defaultValue":0},
+    {"id":"INP_WATERMELON_COUNT","name":"スイカ回数","type":"counter","category":"ROLE","unit":"回","displayOrder":32,"defaultValue":0},
+    {"id":"INP_ART_ROLE_GAMES","name":"ART中小役集計ゲーム数","type":"integer","category":"ROLE","unit":"G","displayOrder":33,"description":"共通8枚ベルを判別できるART中のゲーム数を入力します。","defaultValue":0},
+    {"id":"INP_COMMON_8_BELL_COUNT","name":"共通8枚ベル回数","type":"counter","category":"ROLE","unit":"回","displayOrder":34,"description":"ART中のナビなし右上がり8枚ベルをカウントします。通常時は押し順正解ベルと同じ停止形のため対象外です。","defaultValue":0},
     {"id":"INP_BIG_PREP_BAR_TRIALS","name":"BIG後ART準備中ゲーム数","type":"integer","category":"PRIMARY","unit":"G","displayOrder":10,"description":"BIG終了後からベルこぼし目出現までのゲーム数をカウントします。ベルこぼし目の停止形は攻略サイト等で確認してください。","defaultValue":0},
     {"id":"INP_BIG_PREP_BAR_COUNT","name":"BIG後BAR揃い回数","type":"counter","category":"PRIMARY","unit":"回","displayOrder":11,"defaultValue":0},
     {"id":"INP_REG_PREP_BAR_TRIALS","name":"REG後ART準備中ゲーム数","type":"integer","category":"PRIMARY","unit":"G","displayOrder":20,"description":"REG終了後からベルこぼし目出現までのゲーム数をカウントします。ベルこぼし目の停止形は攻略サイト等で確認してください。","defaultValue":0},
@@ -12,10 +20,34 @@
   ],
   "features": [
     {"researchFeatureId":"RF_ART_INITIAL","featureId":"FEAT_ART_INITIAL","adoptionCategory":"INCLUDE_PRIMARY","numeratorInputId":"INP_ART_INITIAL_COUNT","denominatorInputId":"INP_NORMAL_GAMES","minimumSample":1,"sampleRecommendation":7000,"weight":1.0,"displayFormat":"ratio_1_over_n","difficultyExposure":{"mode":"per_game","factor":1.0,"quality":"ESTIMATED","basisId":"NORMAL_GAMES"},"difficultyParticipation":"INCLUDE","userReason":"ART初当りは設定差が大きく、通常ゲーム数と初当り回数だけで追えるため主軸として採用。"},
+    {"researchFeatureId":"RF_WEAK_CHERRY","featureId":"FEAT_WEAK_CHERRY","adoptionCategory":"INCLUDE_SUPPORT","numeratorInputId":"INP_WEAK_CHERRY_COUNT","denominatorInputId":"INP_ROLE_GAMES","minimumSample":1,"sampleRecommendation":5000,"weight":1.0,"displayFormat":"ratio_1_over_n","difficultyParticipation":"EXCLUDE","userReason":"通常時・ART中を通して試行数を確保しやすく、高設定ほど出現率が上がるため補助採用。"},
+    {"researchFeatureId":"RF_WATERMELON","featureId":"FEAT_WATERMELON","adoptionCategory":"INCLUDE_SUPPORT","numeratorInputId":"INP_WATERMELON_COUNT","denominatorInputId":"INP_ROLE_GAMES","minimumSample":1,"sampleRecommendation":5000,"weight":1.0,"displayFormat":"ratio_1_over_n","difficultyParticipation":"EXCLUDE","userReason":"通常時・ART中を通して観測でき、設定4以上で出現率が明確に上昇するため補助採用。"},
+    {"researchFeatureId":"RF_COMMON_8_BELL","featureId":"FEAT_COMMON_8_BELL","adoptionCategory":"INCLUDE_SUPPORT","numeratorInputId":"INP_COMMON_8_BELL_COUNT","denominatorInputId":"INP_ART_ROLE_GAMES","minimumSample":1,"sampleRecommendation":1000,"weight":1.0,"displayFormat":"ratio_1_over_n","difficultyParticipation":"EXCLUDE","userReason":"設定1と6で約2倍の差がある。通常時は判別不能のため、ART中のナビなし8枚ベルだけを集計して採用。"},
     {"researchFeatureId":"RF_BIG_PREP_BAR","featureId":"FEAT_BIG_PREP_BAR","adoptionCategory":"INCLUDE_SUPPORT","numeratorInputId":"INP_BIG_PREP_BAR_COUNT","denominatorInputId":"INP_BIG_PREP_BAR_TRIALS","minimumSample":1,"sampleRecommendation":200,"weight":1.0,"displayFormat":"ratio_1_over_n","difficultyParticipation":"EXCLUDE","userReason":"BIG後のART準備中BAR揃いは設定差が大きい。分母はBIG終了後からベルこぼし目出現までを実戦でカウントできるため採用。"},
     {"researchFeatureId":"RF_REG_PREP_BAR","featureId":"FEAT_REG_PREP_BAR","adoptionCategory":"INCLUDE_SUPPORT","numeratorInputId":"INP_REG_PREP_BAR_COUNT","denominatorInputId":"INP_REG_PREP_BAR_TRIALS","minimumSample":1,"sampleRecommendation":100,"weight":1.0,"displayFormat":"ratio_1_over_n","difficultyParticipation":"EXCLUDE","userReason":"REG後のART準備中BAR揃いは設定4以上で大きく上昇する。分母はREG終了後からベルこぼし目出現までを実戦でカウントできるため採用。"}
   ],
   "evidence": [],
+  "evidenceUi": {
+    "groups": [
+      {
+        "groupId": "SETTING_FLOOR",
+        "label": "確認した設定下限",
+        "selectionMode": "single",
+        "normalizationMode": "ALLOWED_SETTINGS",
+        "options": [
+          {"value":"SET_2_OR_HIGHER","label":"設定2以上","allowedSettings":["SET_2","SET_3","SET_4","SET_5","SET_6"],"sourceEvidenceIds":["RE_ART_END_VOICE_2PLUS"]},
+          {"value":"SET_3_OR_HIGHER","label":"設定3以上","allowedSettings":["SET_3","SET_4","SET_5","SET_6"],"sourceEvidenceIds":["RE_ART_END_VOICE_3PLUS"]},
+          {"value":"SET_4_OR_HIGHER","label":"設定4以上","allowedSettings":["SET_4","SET_5","SET_6"],"sourceEvidenceIds":["RE_ART_END_VOICE_4PLUS"]},
+          {"value":"SET_5_OR_HIGHER","label":"設定5以上","allowedSettings":["SET_5","SET_6"],"sourceEvidenceIds":["RE_ART_END_VOICE_5PLUS"]},
+          {"value":"SET_6","label":"設定6","allowedSettings":["SET_6"],"sourceEvidenceIds":["RE_ART_END_VOICE_6"]}
+        ]
+      }
+    ]
+  },
+  "evidenceReview": {
+    "policyVersion": 1,
+    "exclusions": []
+  },
   "difficultyAnalysis": {
     "targetGameBasis": {"basisId":"NORMAL_GAMES","label":"通常ゲーム数","quality":"ESTIMATED"},
     "calibrationAllowedExposureQualities":["EXACT","DERIVED","ESTIMATED"]

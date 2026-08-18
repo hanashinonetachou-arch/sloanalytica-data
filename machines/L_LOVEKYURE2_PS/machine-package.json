@@ -3,7 +3,7 @@
   "machine": {
     "schemaVersion": "2.0.0",
     "machineId": "L_LOVEKYURE2_PS",
-    "machineDataVersion": "0.1.1",
+    "machineDataVersion": "0.1.2",
     "displayName": "防空少女ラブキューレ2〜極限の共鳴〜",
     "modelName": "Lラブキューレ2PS",
     "manufacturer": "コナミアミューズメント",
@@ -41,6 +41,59 @@
         "category": "PRIMARY",
         "unit": "回",
         "displayOrder": 2,
+        "defaultValue": 0,
+        "minimum": 0
+      },
+      {
+        "id": "INP_ROLE_GAMES",
+        "name": "小役集計ゲーム数",
+        "type": "integer",
+        "category": "ROLE",
+        "unit": "G",
+        "displayOrder": 30,
+        "description": "通常時・ART中のうち、弱チェリーとスイカをカウントしたゲーム数を入力します。ボーナス中は除外してください。",
+        "defaultValue": 0,
+        "minimum": 0
+      },
+      {
+        "id": "INP_WEAK_CHERRY_COUNT",
+        "name": "弱チェリー回数",
+        "type": "counter",
+        "category": "ROLE",
+        "unit": "回",
+        "displayOrder": 31,
+        "defaultValue": 0,
+        "minimum": 0
+      },
+      {
+        "id": "INP_WATERMELON_COUNT",
+        "name": "スイカ回数",
+        "type": "counter",
+        "category": "ROLE",
+        "unit": "回",
+        "displayOrder": 32,
+        "defaultValue": 0,
+        "minimum": 0
+      },
+      {
+        "id": "INP_ART_ROLE_GAMES",
+        "name": "ART中小役集計ゲーム数",
+        "type": "integer",
+        "category": "ROLE",
+        "unit": "G",
+        "displayOrder": 33,
+        "description": "共通8枚ベルを判別できるART中のゲーム数を入力します。",
+        "defaultValue": 0,
+        "minimum": 0
+      },
+      {
+        "id": "INP_COMMON_8_BELL_COUNT",
+        "name": "共通8枚ベル回数",
+        "type": "counter",
+        "category": "ROLE",
+        "unit": "回",
+        "displayOrder": 34,
+        "description": "ART中のナビなし右上がり8枚ベルをカウントします。通常時は押し順正解ベルと同じ停止形のため対象外です。",
         "defaultValue": 0,
         "minimum": 0
       },
@@ -85,6 +138,48 @@
         "displayOrder": 21,
         "defaultValue": 0,
         "minimum": 0
+      },
+      {
+        "id": "INP_EVI_SETTING_FLOOR",
+        "name": "確認した設定下限",
+        "type": "enum",
+        "category": "EVIDENCE",
+        "unit": "",
+        "displayOrder": 100,
+        "inferenceRole": "INCLUDE_SUPPORT",
+        "options": [
+          {
+            "key": "__UNSET__",
+            "label": "未選択",
+            "value": "__UNSET__"
+          },
+          {
+            "key": "SET_2_OR_HIGHER",
+            "label": "設定2以上",
+            "value": "SET_2_OR_HIGHER"
+          },
+          {
+            "key": "SET_3_OR_HIGHER",
+            "label": "設定3以上",
+            "value": "SET_3_OR_HIGHER"
+          },
+          {
+            "key": "SET_4_OR_HIGHER",
+            "label": "設定4以上",
+            "value": "SET_4_OR_HIGHER"
+          },
+          {
+            "key": "SET_5_OR_HIGHER",
+            "label": "設定5以上",
+            "value": "SET_5_OR_HIGHER"
+          },
+          {
+            "key": "SET_6",
+            "label": "設定6",
+            "value": "SET_6"
+          }
+        ],
+        "defaultValue": "__UNSET__"
       }
     ]
   },
@@ -116,6 +211,90 @@
         },
         "sourceEvidenceRefs": [
           "SRC_LOVE_NANA"
+        ]
+      },
+      {
+        "featureId": "FEAT_WEAK_CHERRY",
+        "name": "弱チェリー",
+        "adoptionCategory": "INCLUDE_SUPPORT",
+        "calculationRole": "PROBABILITY",
+        "probabilityEngineUsage": true,
+        "modelType": "binomial",
+        "minimumSample": 1,
+        "sampleRecommendation": 5000,
+        "reliabilityProfile": {
+          "weight": 1
+        },
+        "displayFormat": "ratio_1_over_n",
+        "numeratorInputId": "INP_WEAK_CHERRY_COUNT",
+        "denominatorInputId": "INP_ROLE_GAMES",
+        "probabilities": {
+          "SET_1": 0.01694915254237288,
+          "SET_2": 0.017241379310344827,
+          "SET_3": 0.017543859649122806,
+          "SET_4": 0.019230769230769232,
+          "SET_5": 0.0196078431372549,
+          "SET_6": 0.02
+        },
+        "sourceEvidenceRefs": [
+          "SRC_LOVE_NANA_SMALL_ROLE",
+          "SRC_LOVE_1GEKI_SMALL_ROLE"
+        ]
+      },
+      {
+        "featureId": "FEAT_WATERMELON",
+        "name": "スイカ",
+        "adoptionCategory": "INCLUDE_SUPPORT",
+        "calculationRole": "PROBABILITY",
+        "probabilityEngineUsage": true,
+        "modelType": "binomial",
+        "minimumSample": 1,
+        "sampleRecommendation": 5000,
+        "reliabilityProfile": {
+          "weight": 1
+        },
+        "displayFormat": "ratio_1_over_n",
+        "numeratorInputId": "INP_WATERMELON_COUNT",
+        "denominatorInputId": "INP_ROLE_GAMES",
+        "probabilities": {
+          "SET_1": 0.010101010101010102,
+          "SET_2": 0.01019367991845056,
+          "SET_3": 0.010298661174047373,
+          "SET_4": 0.012195121951219513,
+          "SET_5": 0.012345679012345678,
+          "SET_6": 0.0125
+        },
+        "sourceEvidenceRefs": [
+          "SRC_LOVE_NANA_SMALL_ROLE",
+          "SRC_LOVE_1GEKI_SMALL_ROLE"
+        ]
+      },
+      {
+        "featureId": "FEAT_COMMON_8_BELL",
+        "name": "共通8枚ベル",
+        "adoptionCategory": "INCLUDE_SUPPORT",
+        "calculationRole": "PROBABILITY",
+        "probabilityEngineUsage": true,
+        "modelType": "binomial",
+        "minimumSample": 1,
+        "sampleRecommendation": 1000,
+        "reliabilityProfile": {
+          "weight": 1
+        },
+        "displayFormat": "ratio_1_over_n",
+        "numeratorInputId": "INP_COMMON_8_BELL_COUNT",
+        "denominatorInputId": "INP_ART_ROLE_GAMES",
+        "probabilities": {
+          "SET_1": 0.0010070493454179255,
+          "SET_2": 0.0011138349298284696,
+          "SET_3": 0.0012512512512512512,
+          "SET_4": 0.001434308663224326,
+          "SET_5": 0.0016784155756965427,
+          "SET_6": 0.002014098690835851
+        },
+        "sourceEvidenceRefs": [
+          "SRC_LOVE_NANA_SMALL_ROLE",
+          "SRC_LOVE_1GEKI_SMALL_ROLE"
         ]
       },
       {
@@ -178,7 +357,98 @@
   },
   "evidence": {
     "version": "1.0.0",
-    "evidences": [],
+    "evidences": [
+      {
+        "id": "EVI_SETTING_FLOOR_SET_2_OR_HIGHER",
+        "name": "設定2以上",
+        "displayName": "設定2以上",
+        "inputId": "INP_EVI_SETTING_FLOOR",
+        "triggerValue": "SET_2_OR_HIGHER",
+        "confirmedSettings": [
+          "SET_2",
+          "SET_3",
+          "SET_4",
+          "SET_5",
+          "SET_6"
+        ],
+        "deniedSettings": [],
+        "hasImage": false,
+        "type": "SETTING_CONFIRMATION",
+        "sourceEvidenceRefs": [
+          "RE_ART_END_VOICE_2PLUS"
+        ]
+      },
+      {
+        "id": "EVI_SETTING_FLOOR_SET_3_OR_HIGHER",
+        "name": "設定3以上",
+        "displayName": "設定3以上",
+        "inputId": "INP_EVI_SETTING_FLOOR",
+        "triggerValue": "SET_3_OR_HIGHER",
+        "confirmedSettings": [
+          "SET_3",
+          "SET_4",
+          "SET_5",
+          "SET_6"
+        ],
+        "deniedSettings": [],
+        "hasImage": false,
+        "type": "SETTING_CONFIRMATION",
+        "sourceEvidenceRefs": [
+          "RE_ART_END_VOICE_3PLUS"
+        ]
+      },
+      {
+        "id": "EVI_SETTING_FLOOR_SET_4_OR_HIGHER",
+        "name": "設定4以上",
+        "displayName": "設定4以上",
+        "inputId": "INP_EVI_SETTING_FLOOR",
+        "triggerValue": "SET_4_OR_HIGHER",
+        "confirmedSettings": [
+          "SET_4",
+          "SET_5",
+          "SET_6"
+        ],
+        "deniedSettings": [],
+        "hasImage": false,
+        "type": "SETTING_CONFIRMATION",
+        "sourceEvidenceRefs": [
+          "RE_ART_END_VOICE_4PLUS"
+        ]
+      },
+      {
+        "id": "EVI_SETTING_FLOOR_SET_5_OR_HIGHER",
+        "name": "設定5以上",
+        "displayName": "設定5以上",
+        "inputId": "INP_EVI_SETTING_FLOOR",
+        "triggerValue": "SET_5_OR_HIGHER",
+        "confirmedSettings": [
+          "SET_5",
+          "SET_6"
+        ],
+        "deniedSettings": [],
+        "hasImage": false,
+        "type": "SETTING_CONFIRMATION",
+        "sourceEvidenceRefs": [
+          "RE_ART_END_VOICE_5PLUS"
+        ]
+      },
+      {
+        "id": "EVI_SETTING_FLOOR_SET_6",
+        "name": "設定6",
+        "displayName": "設定6",
+        "inputId": "INP_EVI_SETTING_FLOOR",
+        "triggerValue": "SET_6",
+        "confirmedSettings": [
+          "SET_6"
+        ],
+        "deniedSettings": [],
+        "hasImage": false,
+        "type": "SETTING_CONFIRMATION",
+        "sourceEvidenceRefs": [
+          "RE_ART_END_VOICE_6"
+        ]
+      }
+    ],
     "sources": [
       {
         "id": "SRC_LOVE_NANA",
@@ -192,6 +462,27 @@
         "classification": "ANALYSIS",
         "pageName": "防空少女ラブキューレ2 設定差のある要素まとめ",
         "url": "https://nana-press.com/kaiseki/machine/575/16161/",
+        "checkedAt": "2026-08-18"
+      },
+      {
+        "id": "SRC_LOVE_NANA_SMALL_ROLE",
+        "classification": "ANALYSIS",
+        "pageName": "防空少女ラブキューレ2 ボーナス確率/ART確率/機械割/小役確率",
+        "url": "https://nana-press.com/kaiseki/machine/575/15243/",
+        "checkedAt": "2026-08-18"
+      },
+      {
+        "id": "SRC_LOVE_1GEKI_SMALL_ROLE",
+        "classification": "ANALYSIS",
+        "pageName": "ラブキューレ2 小役確率と通常時のベース",
+        "url": "https://1geki.jp/slot/l_lovekyure2/4/",
+        "checkedAt": "2026-08-18"
+      },
+      {
+        "id": "SRC_LOVE_PACHI7_END",
+        "classification": "ANALYSIS",
+        "pageName": "防空少女ラブキューレ2 設定判別 演出・終了画面",
+        "url": "https://pachiseven.jp/machines/6767/cutout/1005",
         "checkedAt": "2026-08-18"
       },
       {
@@ -246,13 +537,63 @@
             "widget": "counter"
           }
         ]
+      },
+      {
+        "id": "AUTO_ROLE",
+        "title": "小役",
+        "displayOrder": 2,
+        "items": [
+          {
+            "type": "input",
+            "inputId": "INP_ROLE_GAMES",
+            "label": "小役集計ゲーム数",
+            "widget": "number"
+          },
+          {
+            "type": "input",
+            "inputId": "INP_WEAK_CHERRY_COUNT",
+            "label": "弱チェリー回数",
+            "widget": "counter"
+          },
+          {
+            "type": "input",
+            "inputId": "INP_WATERMELON_COUNT",
+            "label": "スイカ回数",
+            "widget": "counter"
+          },
+          {
+            "type": "input",
+            "inputId": "INP_ART_ROLE_GAMES",
+            "label": "ART中小役集計ゲーム数",
+            "widget": "number"
+          },
+          {
+            "type": "input",
+            "inputId": "INP_COMMON_8_BELL_COUNT",
+            "label": "共通8枚ベル回数",
+            "widget": "counter"
+          }
+        ]
+      },
+      {
+        "id": "AUTO_EVIDENCE",
+        "title": "設定確定・否定情報",
+        "displayOrder": 3,
+        "items": [
+          {
+            "type": "input",
+            "inputId": "INP_EVI_SETTING_FLOOR",
+            "label": "確認した設定下限",
+            "widget": "select"
+          }
+        ]
       }
     ]
   },
   "selectionSummary": {
     "schemaVersion": "selection-summary-v1",
-    "evaluatedCount": 3,
-    "selectedCount": 3,
+    "evaluatedCount": 6,
+    "selectedCount": 6,
     "rejectedCount": 0,
     "selected": [
       {
@@ -262,6 +603,33 @@
         "requiredTrials": {
           "value": 26493,
           "unit": "通常ゲーム"
+        }
+      },
+      {
+        "featureId": "FEAT_WEAK_CHERRY",
+        "name": "弱チェリー",
+        "reason": "通常時・ART中を通して試行数を確保しやすく、高設定ほど出現率が上がるため補助採用。",
+        "requiredTrials": {
+          "value": 14257,
+          "unit": "通常時・ART中の小役集計ゲーム"
+        }
+      },
+      {
+        "featureId": "FEAT_WATERMELON",
+        "name": "スイカ",
+        "reason": "通常時・ART中を通して観測でき、設定4以上で出現率が明確に上昇するため補助採用。",
+        "requiredTrials": {
+          "value": 14191,
+          "unit": "通常時・ART中の小役集計ゲーム"
+        }
+      },
+      {
+        "featureId": "FEAT_COMMON_8_BELL",
+        "name": "共通8枚ベル",
+        "reason": "設定1と6で約2倍の差がある。通常時は判別不能のため、ART中のナビなし8枚ベルだけを集計して採用。",
+        "requiredTrials": {
+          "value": 10591,
+          "unit": "ART中ゲーム"
         }
       },
       {
