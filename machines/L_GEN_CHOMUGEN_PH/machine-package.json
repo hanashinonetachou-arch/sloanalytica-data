@@ -54,6 +54,27 @@
         "minimum": 0
       },
       {
+        "id": "INP_SEATED_GAMES",
+        "name": "着席時ゲーム数",
+        "type": "integer",
+        "category": "PREDECESSOR",
+        "unit": "G",
+        "displayOrder": 10,
+        "description": "データカウンター仕様が公開ボーナス初当り確率と合う場合のみ入力。",
+        "defaultValue": 0,
+        "minimum": 0
+      },
+      {
+        "id": "INP_SEATED_BONUS_COUNT",
+        "name": "着席時ボーナス初当り回数",
+        "type": "counter",
+        "category": "PREDECESSOR",
+        "unit": "回",
+        "displayOrder": 11,
+        "defaultValue": 0,
+        "minimum": 0
+      },
+      {
         "id": "INP_EVI_SETTING_FLOOR",
         "name": "確認した設定下限",
         "type": "enum",
@@ -110,6 +131,32 @@
         "displayFormat": "ratio_1_over_n",
         "numeratorInputId": "INP_BONUS_COUNT",
         "denominatorInputId": "INP_NORMAL_GAMES",
+        "probabilities": {
+          "SET_1": 0.002964,
+          "SET_2": 0.003113,
+          "SET_4": 0.003588,
+          "SET_5": 0.004082,
+          "SET_6": 0.004757
+        },
+        "sourceEvidenceRefs": [
+          "SRC_GEN_NANA"
+        ]
+      },
+      {
+        "featureId": "FEAT_BONUS_PREDECESSOR",
+        "name": "着席前ボーナス初当り",
+        "adoptionCategory": "INCLUDE_SUPPORT",
+        "calculationRole": "PROBABILITY",
+        "probabilityEngineUsage": true,
+        "modelType": "binomial",
+        "minimumSample": 1,
+        "sampleRecommendation": 1000,
+        "reliabilityProfile": {
+          "weight": 1
+        },
+        "displayFormat": "ratio_1_over_n",
+        "numeratorInputId": "INP_SEATED_BONUS_COUNT",
+        "denominatorInputId": "INP_SEATED_GAMES",
         "probabilities": {
           "SET_1": 0.002964,
           "SET_2": 0.003113,
@@ -186,7 +233,10 @@
         "hasImage": false,
         "type": "SETTING_CONFIRMATION",
         "sourceEvidenceRefs": [
-          "RE_TROPHY_4PLUS"
+          "RE_TROPHY_4PLUS",
+          "RE_PAYOUT_4PLUS",
+          "RE_WINDOW_4PLUS",
+          "RE_ENDING_RED_4PLUS"
         ]
       },
       {
@@ -203,7 +253,9 @@
         "hasImage": false,
         "type": "SETTING_CONFIRMATION",
         "sourceEvidenceRefs": [
-          "RE_TROPHY_5PLUS"
+          "RE_TROPHY_5PLUS",
+          "RE_PAYOUT_5PLUS",
+          "RE_WINDOW_5PLUS"
         ]
       },
       {
@@ -219,7 +271,9 @@
         "hasImage": false,
         "type": "SETTING_CONFIRMATION",
         "sourceEvidenceRefs": [
-          "RE_TROPHY_6"
+          "RE_TROPHY_6",
+          "RE_PAYOUT_6",
+          "RE_WINDOW_6"
         ]
       }
     ],
@@ -237,6 +291,7 @@
     "sections": [
       {
         "id": "AUTO_PRIMARY",
+        "title": "ボーナス・CZ初当り",
         "displayOrder": 1,
         "items": [
           {
@@ -260,9 +315,28 @@
         ]
       },
       {
+        "id": "AUTO_PREDECESSOR",
+        "title": "着席時データ",
+        "displayOrder": 2,
+        "items": [
+          {
+            "type": "input",
+            "inputId": "INP_SEATED_GAMES",
+            "label": "着席時ゲーム数",
+            "widget": "number"
+          },
+          {
+            "type": "input",
+            "inputId": "INP_SEATED_BONUS_COUNT",
+            "label": "着席時ボーナス初当り回数",
+            "widget": "counter"
+          }
+        ]
+      },
+      {
         "id": "AUTO_EVIDENCE",
         "title": "設定確定・否定情報",
-        "displayOrder": 2,
+        "displayOrder": 3,
         "items": [
           {
             "type": "input",
@@ -276,8 +350,8 @@
   },
   "selectionSummary": {
     "schemaVersion": "selection-summary-v1",
-    "evaluatedCount": 3,
-    "selectedCount": 2,
+    "evaluatedCount": 4,
+    "selectedCount": 3,
     "rejectedCount": 1,
     "selected": [
       {
@@ -287,6 +361,15 @@
         "requiredTrials": {
           "value": 8649,
           "unit": "通常ゲーム"
+        }
+      },
+      {
+        "featureId": "FEAT_BONUS_PREDECESSOR",
+        "name": "着席前ボーナス初当り",
+        "reason": "カウンター仕様が適切なら着席前ボーナスを補助利用。",
+        "requiredTrials": {
+          "value": 8649,
+          "unit": "データカウンターゲーム"
         }
       },
       {
