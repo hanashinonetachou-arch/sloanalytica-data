@@ -45,12 +45,33 @@
         "minimum": 0
       },
       {
+        "id": "INP_SEATED_GAMES",
+        "name": "着席時ゲーム数",
+        "type": "integer",
+        "category": "PREDECESSOR",
+        "unit": "G",
+        "displayOrder": 10,
+        "description": "データカウンター仕様が公開ART初当り確率と合う場合のみ入力。",
+        "defaultValue": 0,
+        "minimum": 0
+      },
+      {
+        "id": "INP_SEATED_ART_COUNT",
+        "name": "着席時ART初当り回数",
+        "type": "counter",
+        "category": "PREDECESSOR",
+        "unit": "回",
+        "displayOrder": 11,
+        "defaultValue": 0,
+        "minimum": 0
+      },
+      {
         "id": "INP_ROLE_GAMES",
         "name": "小役集計ゲーム数",
         "type": "integer",
         "category": "ROLE",
         "unit": "G",
-        "displayOrder": 10,
+        "displayOrder": 20,
         "description": "共通コインを集計したゲーム数。筐体メニューの遊技情報集計機能を利用できます。",
         "defaultValue": 0,
         "minimum": 0
@@ -61,7 +82,7 @@
         "type": "counter",
         "category": "ROLE",
         "unit": "回",
-        "displayOrder": 11,
+        "displayOrder": 21,
         "description": "筐体メニューの遊技情報集計機能で自動確認可能です。",
         "defaultValue": 0,
         "minimum": 0
@@ -141,6 +162,33 @@
         ]
       },
       {
+        "featureId": "FEAT_ART_PREDECESSOR",
+        "name": "着席前ART初当り",
+        "adoptionCategory": "INCLUDE_SUPPORT",
+        "calculationRole": "PROBABILITY",
+        "probabilityEngineUsage": true,
+        "modelType": "binomial",
+        "minimumSample": 1,
+        "sampleRecommendation": 1000,
+        "reliabilityProfile": {
+          "weight": 1
+        },
+        "displayFormat": "ratio_1_over_n",
+        "numeratorInputId": "INP_SEATED_ART_COUNT",
+        "denominatorInputId": "INP_SEATED_GAMES",
+        "probabilities": {
+          "SET_1": 0.002839,
+          "SET_2": 0.002981,
+          "SET_3": 0.003366,
+          "SET_4": 0.003713,
+          "SET_5": 0.003931,
+          "SET_6": 0.004409
+        },
+        "sourceEvidenceRefs": [
+          "SRC_MAGI8_NANA"
+        ]
+      },
+      {
         "featureId": "FEAT_COMMON_COIN",
         "name": "共通コイン",
         "adoptionCategory": "INCLUDE_SUPPORT",
@@ -189,7 +237,10 @@
         "hasImage": false,
         "type": "SETTING_CONFIRMATION",
         "sourceEvidenceRefs": [
-          "RE_TROPHY_2PLUS"
+          "RE_TROPHY_2PLUS",
+          "RE_PAYOUT_2PLUS",
+          "RE_ALICE_END_2PLUS",
+          "RE_ART_END_2PLUS"
         ]
       },
       {
@@ -226,7 +277,9 @@
         "hasImage": false,
         "type": "SETTING_CONFIRMATION",
         "sourceEvidenceRefs": [
-          "RE_TROPHY_4PLUS"
+          "RE_TROPHY_4PLUS",
+          "RE_PAYOUT_4PLUS",
+          "RE_ART_END_4PLUS"
         ]
       },
       {
@@ -243,7 +296,8 @@
         "hasImage": false,
         "type": "SETTING_CONFIRMATION",
         "sourceEvidenceRefs": [
-          "RE_TROPHY_5PLUS"
+          "RE_TROPHY_5PLUS",
+          "RE_ALICE_BOTH_5PLUS"
         ]
       },
       {
@@ -259,7 +313,9 @@
         "hasImage": false,
         "type": "SETTING_CONFIRMATION",
         "sourceEvidenceRefs": [
-          "RE_TROPHY_6"
+          "RE_TROPHY_6",
+          "RE_PAYOUT_6",
+          "RE_ART_END_6"
         ]
       }
     ],
@@ -277,6 +333,13 @@
         "pageName": "マジカルハロウィン8 トロフィー",
         "url": "https://nana-press.com/kaiseki/machine/627/18090/",
         "checkedAt": "2026-08-18"
+      },
+      {
+        "id": "SRC_MAGI8_DOKOMAJI",
+        "classification": "ANALYSIS",
+        "pageName": "マジカルハロウィン8 まじかるちゃんす（どこまじ）",
+        "url": "https://nana-press.com/kaiseki/machine/627/18071/",
+        "checkedAt": "2026-08-18"
       }
     ]
   },
@@ -284,6 +347,7 @@
     "sections": [
       {
         "id": "AUTO_PRIMARY",
+        "title": "ART初当り",
         "displayOrder": 1,
         "items": [
           {
@@ -301,9 +365,28 @@
         ]
       },
       {
+        "id": "AUTO_PREDECESSOR",
+        "title": "着席時データ",
+        "displayOrder": 2,
+        "items": [
+          {
+            "type": "input",
+            "inputId": "INP_SEATED_GAMES",
+            "label": "着席時ゲーム数",
+            "widget": "number"
+          },
+          {
+            "type": "input",
+            "inputId": "INP_SEATED_ART_COUNT",
+            "label": "着席時ART初当り回数",
+            "widget": "counter"
+          }
+        ]
+      },
+      {
         "id": "AUTO_ROLE",
         "title": "小役",
-        "displayOrder": 2,
+        "displayOrder": 3,
         "items": [
           {
             "type": "input",
@@ -322,7 +405,7 @@
       {
         "id": "AUTO_EVIDENCE",
         "title": "設定確定・否定情報",
-        "displayOrder": 3,
+        "displayOrder": 4,
         "items": [
           {
             "type": "input",
@@ -336,9 +419,9 @@
   },
   "selectionSummary": {
     "schemaVersion": "selection-summary-v1",
-    "evaluatedCount": 2,
-    "selectedCount": 2,
-    "rejectedCount": 0,
+    "evaluatedCount": 4,
+    "selectedCount": 3,
+    "rejectedCount": 1,
     "selected": [
       {
         "featureId": "FEAT_ART_INITIAL",
@@ -347,6 +430,15 @@
         "requiredTrials": {
           "value": 10611,
           "unit": "通常ゲーム"
+        }
+      },
+      {
+        "featureId": "FEAT_ART_PREDECESSOR",
+        "name": "着席前ART初当り",
+        "reason": "カウンター仕様が適切なら着席前ART初当りも補助利用。",
+        "requiredTrials": {
+          "value": 10611,
+          "unit": "データカウンターゲーム"
         }
       },
       {
@@ -359,7 +451,17 @@
         }
       }
     ],
-    "rejected": []
+    "rejected": [
+      {
+        "featureId": "FEAT_DOKOMAJI",
+        "name": "どこまじ当選率",
+        "reason": "設定差は非常に大きいが、高確・超高確中は設定に関係なく発生し得る。内部状態を正確に除外できない実戦では母数条件を保証できないため不採用。",
+        "requiredTrials": {
+          "value": 13,
+          "unit": "通常時ボーナス"
+        }
+      }
+    ]
   },
   "reliability": {},
   "metadata": {
