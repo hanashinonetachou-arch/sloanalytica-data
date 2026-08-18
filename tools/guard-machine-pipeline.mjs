@@ -2,7 +2,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
-import { validateSelectionEvidenceCoverage } from './batch-completeness-gates.mjs';
+import { validateResearchCompleteness, validateSelectionEvidenceCoverage } from './batch-completeness-gates.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const mode = process.argv[2];
@@ -43,11 +43,16 @@ for (const id of collectIds()) {
   const research = readJson(researchPath);
   if (!research.researchCompleteness) continue; // legacy data remains backward compatible
   const selection = readJson(selectionPath);
-  const result = validateSelectionEvidenceCoverage(selection, research, { required: true });
-  for (const error of result.errors) errors.push(`${id}: ${error}`);
+
+  const researchResult = validateResearchCompleteness(research, { required: true });
+  for (const error of researchResult.errors) errors.push(`${id}: ${error}`);
+  for (const unresolved of researchResult.unresolved) errors.push(`${id}: research completeness unresolved ${unresolved}`);
+
+  const evidenceResult = validateSelectionEvidenceCoverage(selection, research, { required: true });
+  for (const error of evidenceResult.errors) errors.push(`${id}: ${error}`);
 }
 if (errors.length) {
-  for (const error of errors) console.error(`ERROR [machine evidence completeness guard] ${error}`);
+  for (const error of errors) console.error(`ERROR [machine completeness guard] ${error}`);
   process.exit(1);
 }
 
