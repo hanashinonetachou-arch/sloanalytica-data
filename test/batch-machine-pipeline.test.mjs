@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { normalizeMachineIds, classifyMachineQuality, deriveOverallStatus } from '../tools/batch-machine-pipeline.mjs';
+import { normalizeMachineIds, classifyMachineQuality, deriveOverallStatus, generatedPaths } from '../tools/batch-machine-pipeline.mjs';
 
 test('batch normalizes unique machine IDs', () => {
   assert.deepEqual(normalizeMachineIds(['A_ONE,B_TWO', 'A_ONE', 'C_THREE']), ['A_ONE', 'B_TWO', 'C_THREE']);
@@ -12,6 +12,11 @@ test('batch rejects invalid machine IDs', () => {
 
 test('batch enforces 10-machine safety limit', () => {
   assert.throws(() => normalizeMachineIds(Array.from({ length: 11 }, (_, i) => `M_${i}`)), /batch size exceeds 10/);
+});
+
+test('batch rollback snapshot includes machine registry', () => {
+  const paths = generatedPaths(['A_ONE']).map(p => p.replaceAll('\\', '/'));
+  assert.ok(paths.some(p => p.endsWith('/machine-registry.json')));
 });
 
 test('clean validations classify PASS', () => {
