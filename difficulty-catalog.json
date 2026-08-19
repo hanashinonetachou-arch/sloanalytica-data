@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-08-19T01:40:12.210Z",
+  "generatedAt": "2026-08-19T02:56:17.485Z",
   "status": "provisional",
   "scoreDisplayVersion": "difficulty-display-score-v3",
   "entries": [
@@ -115,6 +115,27 @@
             "requiredTrials": 24324,
             "requiredTrialsUnit": "通常ゲーム",
             "metricStatus": "COMPUTED"
+          },
+          {
+            "name": "成立役別の内部状態移行抽選",
+            "reason": "弱チェリー・スイカなどからの状態移行に設定差がありますが、通常・高確・超高確を完全に観測できません。状態誤認を含む母数は設定差より大きな偏りを作り得るため不採用です。",
+            "requiredTrials": null,
+            "requiredTrialsUnit": "G",
+            "metricStatus": "NOT_COMPUTABLE"
+          },
+          {
+            "name": "内部状態別の成立役初当り抽選",
+            "reason": "高確中の強レア役などに大きな設定差がありますが、前提となる内部状態を確実に分類できません。条件付き確率の分母を正しく作れないため、合算初当りへ集約しています。",
+            "requiredTrials": null,
+            "requiredTrialsUnit": "G",
+            "metricStatus": "NOT_COMPUTABLE"
+          },
+          {
+            "name": "月見酒ボーナス経由の前兆ステージからのAT直撃",
+            "reason": "設定差があるとされていますが、月見酒ボーナス経由という限定条件で試行機会が少なく、1日の実戦で安定した母数を作りにくいため数値Featureにはしていません。",
+            "requiredTrials": null,
+            "requiredTrialsUnit": "G",
+            "metricStatus": "NOT_COMPUTABLE"
           }
         ]
       }
@@ -169,7 +190,51 @@
           }
         ],
         "displayScoreSource": "CALIBRATED_FROM_RAW",
-        "calibrationVersion": "difficulty-calibration-display-v3"
+        "calibrationVersion": "difficulty-calibration-display-v3",
+        "rejectedFeatures": [
+          {
+            "name": "ボーナス確率・特定ボーナス確率",
+            "reason": "設定差はありますが、ART初当りやどこまじと同じボーナス経路の情報を多く共有します。契機別まで細分化すると1日の各カテゴリ試行も少なくなるため、現構成では独立尤度として重ねず不採用です。",
+            "requiredTrials": null,
+            "requiredTrialsUnit": "G",
+            "metricStatus": "NOT_COMPUTABLE"
+          },
+          {
+            "name": "リプレイ＋ボーナス同時当選期待度",
+            "reason": "設定差は0.7%〜1.0%と小さく、同時当選を十分な精度で分離するには非常に多くのリプレイ観測が必要です。入力負荷に対する追加情報量が小さいため不採用です。",
+            "requiredTrials": null,
+            "requiredTrialsUnit": "G",
+            "metricStatus": "NOT_COMPUTABLE"
+          },
+          {
+            "name": "50枚あたりのゲーム数",
+            "reason": "高設定ほど高ベースですが、主因は採用済みの共通コイン確率です。同じコイン持ち情報を二重計上するため独立Featureにはしません。",
+            "requiredTrials": null,
+            "requiredTrialsUnit": "G",
+            "metricStatus": "NOT_COMPUTABLE"
+          },
+          {
+            "name": "まじかるちゃんす発生率（状態・契機別）",
+            "reason": "大きな設定差を持つ条件がありますが、低確/通常/高確など内部状態とボーナス契機を正確に分類する必要があります。状態誤認を含む母数は尤度を大きく歪めるため、現時点では観測条件を絞れる『どこまじ』を優先しています。",
+            "requiredTrials": null,
+            "requiredTrialsUnit": "G",
+            "metricStatus": "NOT_COMPUTABLE"
+          },
+          {
+            "name": "詠唱チャレンジ終了時の通常モード抽選",
+            "reason": "ART当選有無など条件別に設定差がありますが、選択された内部モードそのものを直接観測できません。結果からモードを推定して再び設定推測へ使う循環を避けるため不採用です。",
+            "requiredTrials": null,
+            "requiredTrialsUnit": "G",
+            "metricStatus": "NOT_COMPUTABLE"
+          },
+          {
+            "name": "エンカウントゾーン出現率",
+            "reason": "設定差はありますが発生機会が限定され、1日で十分な独立試行を得にくい要素です。ART初当り・共通コイン・規定撃破数など、より直接かつ高情報量の要素を優先します。",
+            "requiredTrials": null,
+            "requiredTrialsUnit": "G",
+            "metricStatus": "NOT_COMPUTABLE"
+          }
+        ]
       }
     },
     {
@@ -222,7 +287,23 @@
           }
         ],
         "displayScoreSource": "CALIBRATED_FROM_RAW",
-        "calibrationVersion": "difficulty-calibration-display-v3"
+        "calibrationVersion": "difficulty-calibration-display-v3",
+        "rejectedFeatures": [
+          {
+            "name": "AT終了後の即優出突入率",
+            "reason": "設定1の1.6%から設定6の3.7%まで差がありますが、絶対確率が低くAT終了1回につき1試行です。設定1対6でも概算400回前後のAT終了試行が必要となるため、1日実戦の数値推測には不採用です。",
+            "requiredTrials": 412,
+            "requiredTrialsUnit": "AT終了回数",
+            "metricStatus": "COMPUTED"
+          },
+          {
+            "name": "ライバルモード移行率",
+            "reason": "蒲生モードなどに設定差がありますが、内部モードを常に直接観測できず、ヘルメットや挙動からの推定を母数に混ぜると観測バイアスが生じます。確実に分類できる入力契約を作れないため不採用です。",
+            "requiredTrials": null,
+            "requiredTrialsUnit": "G",
+            "metricStatus": "NOT_COMPUTABLE"
+          }
+        ]
       }
     },
     {
@@ -283,6 +364,34 @@
             "requiredTrials": 466,
             "requiredTrialsUnit": "非レア役成立の菊チャンス",
             "metricStatus": "COMPUTED"
+          },
+          {
+            "name": "内部状態・状態移行率",
+            "reason": "状態別の滞在率や黒チェリーからの高確移行率に設定差がありますが、通常・高確などの内部状態を完全には観測できません。状態誤認による分母汚染を避けるため不採用です。",
+            "requiredTrials": null,
+            "requiredTrialsUnit": "G",
+            "metricStatus": "NOT_COMPUTABLE"
+          },
+          {
+            "name": "通常状態での成立役別ボーナス当選率",
+            "reason": "青/黒チェリー・スイカ・チャンス目からの当選率に設定差がありますが、前提となる『通常状態滞在』を確実に判別できないため正しい条件付き母数を作れません。",
+            "requiredTrials": null,
+            "requiredTrialsUnit": "G",
+            "metricStatus": "NOT_COMPUTABLE"
+          },
+          {
+            "name": "リーチ目高確移行率",
+            "reason": "設定差はありますが、移行契機と内部状態を継続的に正確分類する必要があり、1日の実戦入力として観測誤差が大きくなりやすいため不採用です。",
+            "requiredTrials": null,
+            "requiredTrialsUnit": "G",
+            "metricStatus": "NOT_COMPUTABLE"
+          },
+          {
+            "name": "ボーナス・ST終了後のボーナス間天井振り分け",
+            "reason": "設定差はありますが、独立サンプルはボーナス/ST終了ごとに1回で、1日に得られる回数が少ないうえ、途中当選で選択された天井を観測できないケースが多いため不採用です。",
+            "requiredTrials": null,
+            "requiredTrialsUnit": "G",
+            "metricStatus": "NOT_COMPUTABLE"
           }
         ]
       }
@@ -390,7 +499,37 @@
           }
         ],
         "displayScoreSource": "CALIBRATED_FROM_RAW",
-        "calibrationVersion": "difficulty-calibration-display-v3"
+        "calibrationVersion": "difficulty-calibration-display-v3",
+        "rejectedFeatures": [
+          {
+            "name": "設定変更後のCZ継続率抽選",
+            "reason": "設定差はありますが、設定変更後に原則1回しか得られないリセット依存サンプルです。1日実戦で試行回数を増やせず、据え置き判定も絡むため数値推測Featureには使用しません。",
+            "requiredTrials": null,
+            "requiredTrialsUnit": "G",
+            "metricStatus": "NOT_COMPUTABLE"
+          },
+          {
+            "name": "BIGボーナス間の規定G数振り分け",
+            "reason": "設定差はありますが、1日に観測できる独立したBIG間区間が少なく、着席時点で前回BIGからのゲーム数を正確に引き継げない場合もあります。サンプル不足と開始条件の不確実性から不採用です。",
+            "requiredTrials": null,
+            "requiredTrialsUnit": "G",
+            "metricStatus": "NOT_COMPUTABLE"
+          },
+          {
+            "name": "ソウルジェム点灯抽選",
+            "reason": "通常時・まどかチャンス中、成立役や状況ごとに条件付き抽選が分かれます。同一条件の母数を実戦で漏れなく作る入力負荷が高く、条件混在による観測誤差を避けるため不採用です。",
+            "requiredTrials": null,
+            "requiredTrialsUnit": "G",
+            "metricStatus": "NOT_COMPUTABLE"
+          },
+          {
+            "name": "CZ終了時の次回CZ継続率加算抽選",
+            "reason": "終了時の継続率50〜80%など内部条件ごとに抽選値が異なります。元の内部継続率を直接観測できないため正しい条件付き分母を作れず、不採用です。",
+            "requiredTrials": null,
+            "requiredTrialsUnit": "G",
+            "metricStatus": "NOT_COMPUTABLE"
+          }
+        ]
       }
     },
     {
@@ -451,6 +590,20 @@
             "requiredTrials": 3434,
             "requiredTrialsUnit": "ボーナス",
             "metricStatus": "COMPUTED"
+          },
+          {
+            "name": "通常時ハズレからの前兆移行率",
+            "reason": "内部状態ごとに設定差がありますが、通常・高確・超高確を実戦中に完全には観測できません。状態を誤分類した母数を混ぜると設定差より大きなバイアスを作り得るため不採用です。",
+            "requiredTrials": null,
+            "requiredTrialsUnit": "G",
+            "metricStatus": "NOT_COMPUTABLE"
+          },
+          {
+            "name": "通常モードの天国移行率",
+            "reason": "通常A・B・Cごとに設定差がありますが、元の滞在モードを直接観測できないため、正しい条件付き母数を作れません。潜在状態を推定して数える方式は推測ロジックを二重に含むため不採用です。",
+            "requiredTrials": null,
+            "requiredTrialsUnit": "G",
+            "metricStatus": "NOT_COMPUTABLE"
           }
         ]
       }
@@ -513,6 +666,27 @@
             "requiredTrials": 21041,
             "requiredTrialsUnit": "通常ゲーム",
             "metricStatus": "COMPUTED"
+          },
+          {
+            "name": "とあるガールズコレクション当選率",
+            "reason": "弱レア役からの当選率などに設定差がありますが、サポートキャラや成立条件ごとに抽選条件が変わり、実戦で同一条件の母数を継続して作る負担が大きいため不採用です。CZ初当りと重なる情報も含むため、現状は主軸CZを優先します。",
+            "requiredTrials": null,
+            "requiredTrialsUnit": "G",
+            "metricStatus": "NOT_COMPUTABLE"
+          },
+          {
+            "name": "成立役別のCZ抽選",
+            "reason": "ハズレ・弱チェリー・スイカなどに設定差がありますが、滞在サポートキャラやゲーム数帯で当選率が変わります。内部条件を正しく分類できない観測を混ぜると尤度が歪むため、実戦入力Featureにはしていません。",
+            "requiredTrials": null,
+            "requiredTrialsUnit": "G",
+            "metricStatus": "NOT_COMPUTABLE"
+          },
+          {
+            "name": "スペシャルエピソード・エピソードバトル合算当選率",
+            "reason": "設定1から設定6で大きな差がありますが、設定1では約1/9000級と発生自体が重く、1日の実戦では0〜数回に偏りやすいため不採用です。強い設定差でも絶対発生率が低すぎる要素は主推測に使いません。",
+            "requiredTrials": null,
+            "requiredTrialsUnit": "G",
+            "metricStatus": "NOT_COMPUTABLE"
           }
         ]
       }
@@ -575,6 +749,34 @@
             "requiredTrials": 59580,
             "requiredTrialsUnit": "小役集計ゲーム",
             "metricStatus": "COMPUTED"
+          },
+          {
+            "name": "確定役確率",
+            "reason": "設定1の約1/5041から設定6の約1/3277まで差がありますが、1日7000Gでも期待出現回数は約1〜2回です。大半の実戦でサンプル不足となるため推測計算には使用しません。",
+            "requiredTrials": null,
+            "requiredTrialsUnit": "G",
+            "metricStatus": "NOT_COMPUTABLE"
+          },
+          {
+            "name": "スイカ＋ボーナス同時当選率",
+            "reason": "設定差はありますが5.2%前後でほぼ横ばいで、設定1と6の差は非常に小さいです。スイカ成立回数そのものを使う方が情報効率が高いため不採用です。",
+            "requiredTrials": null,
+            "requiredTrialsUnit": "G",
+            "metricStatus": "NOT_COMPUTABLE"
+          },
+          {
+            "name": "1枚役B＋ボーナス同時当選率",
+            "reason": "同時当選率にも設定差はありますが8.2〜8.7%程度と差が小さく、さらに1枚役Bの正確な停止形判別が必要です。観測負荷に対して追加情報量が小さいため不採用です。",
+            "requiredTrials": null,
+            "requiredTrialsUnit": "G",
+            "metricStatus": "NOT_COMPUTABLE"
+          },
+          {
+            "name": "REG中BAR揃い・カットイン期待度",
+            "reason": "高設定ほど優遇されていますが、BAR揃いは約1/136〜1/128、カットイン期待度の差も数ポイント以内です。1日に得られるREG消化ゲームでは設定間のばらつきを十分分離しにくいため不採用です。",
+            "requiredTrials": null,
+            "requiredTrialsUnit": "G",
+            "metricStatus": "NOT_COMPUTABLE"
           }
         ]
       }
