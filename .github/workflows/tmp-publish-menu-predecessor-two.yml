@@ -1,0 +1,34 @@
+name: Temporary publish menu predecessor two machines
+on:
+  push:
+    branches: [feature/publish-menu-predecessor-two-machines]
+    paths: [.github/workflows/tmp-publish-menu-predecessor-two.yml]
+permissions:
+  contents: write
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: feature/publish-menu-predecessor-two-machines
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Publish both machine packages
+        run: |
+          npm run machine:publish -- approve L_MONKEY_TURN5_CE machines/L_MONKEY_TURN5_CE/machine-package.json
+          npm run machine:publish -- publish L_MONKEY_TURN5_CE --apply
+          npm run machine:publish -- approve S_REVUE_STARLIGHT_CX machines/S_REVUE_STARLIGHT_CX/machine-package.json
+          npm run machine:publish -- publish S_REVUE_STARLIGHT_CX --apply
+          npm run audit
+      - name: Commit catalog update
+        run: |
+          rm -rf build/L_MONKEY_TURN5_CE build/S_REVUE_STARLIGHT_CX
+          rm .github/workflows/tmp-publish-menu-predecessor-two.yml
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git add catalog.json machine-registry.json .github/workflows/tmp-publish-menu-predecessor-two.yml
+          git commit -m "Publish menu predecessor updates" || exit 0
+          git push origin HEAD:feature/publish-menu-predecessor-two-machines
