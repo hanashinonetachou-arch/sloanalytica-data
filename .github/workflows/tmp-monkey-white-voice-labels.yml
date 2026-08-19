@@ -1,0 +1,39 @@
+name: Temporary Monkey V white voice label update
+on:
+  push:
+    branches: [feature/monkey-v-white-voice-labels]
+    paths: [.github/workflows/tmp-monkey-white-voice-labels.yml]
+permissions:
+  contents: write
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: feature/monkey-v-white-voice-labels
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Update labels
+        run: |
+          node <<'NODE'
+          const fs = require('fs');
+          const p = 'research/L_MONKEY_TURN5_CE/selection-data.json';
+          const d = JSON.parse(fs.readFileSync(p, 'utf8'));
+          const base = d.inputs.find(x => x.id === 'INP_WHITE_VOICE_BASE');
+          const even = d.inputs.find(x => x.id === 'INP_WHITE_VOICE_EVEN');
+          if (!base || !even) throw new Error('white voice inputs not found');
+          base.name = '落ち着くんだ…';
+          base.description = '激走チャージ終了時、白文字「落ち着くんだ憲二…」を確認した回数。';
+          even.name = 'この気配は!?';
+          even.description = '激走チャージ終了時、白文字「この気配は!?」を確認した回数。';
+          fs.writeFileSync(p, JSON.stringify(d, null, 2) + '\n');
+          NODE
+      - name: Commit
+        run: |
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git add research/L_MONKEY_TURN5_CE/selection-data.json
+          git commit -m "Use Monkey V white voice text labels"
+          git push origin HEAD:feature/monkey-v-white-voice-labels
