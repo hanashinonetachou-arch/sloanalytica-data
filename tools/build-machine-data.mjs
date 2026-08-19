@@ -120,6 +120,9 @@ function buildFeature(rf,sf,inputIds){
     if(orderedInputIds.length!==cats.length) fail(`${sf.featureId}: numeratorInputId + categoryInputIds must match explicit categories`);
     if(orderedInputIds.some(id=>!inputIds.has(id))) fail(`${sf.featureId}: unknown multinomial input`);
     if(sf.numeratorInputId) base.numeratorInputId=sf.numeratorInputId;
+    if(base.inputTransform==="sum_inputs_to_trials" && !sf.denominatorInputIds){
+      base.denominatorInputIds=[...orderedInputIds];
+    }
     if(sf.denominatorInputId){
       if(!inputIds.has(sf.denominatorInputId)) fail(`${sf.featureId}: unknown denominator input`);
       base.denominatorInputId=sf.denominatorInputId;
@@ -167,6 +170,7 @@ function buildSelectionSummary(research,selection,statistics=null){
   const rfs=new Map((research.features??[]).map(f=>[f.researchFeatureId,f]));
   const statsById=new Map((statistics?.features??[]).map(f=>[f.researchFeatureId,f]));
   const selected=[],rejected=[];
+  const selectedResearchIds=new Set((selection.features??[]).map(sf=>sf.researchFeatureId).filter(Boolean));
   for(const sf of selection.features??[]){
     // DISPLAY_ONLY is a legacy compatibility state. It is intentionally omitted
     // until the machine is migrated to selected/rejected under the current policy.
@@ -191,6 +195,22 @@ function buildSelectionSummary(research,selection,statistics=null){
     if(sf.adoptionCategory==="EXCLUDE") rejected.push(item);
     else if(sf.adoptionCategory==="INCLUDE_PRIMARY" || sf.adoptionCategory==="INCLUDE_SUPPORT") selected.push(item);
   }
+
+  // ResearchDataで検証済みなのにSelectionDataへ明示されなかった候補も、
+  // ユーザー向け説明から消さない。事実説明と「現行Selectionでは未採用」を分けて表示する。
+  for(const rf of research.features??[]){
+    if(!rf?.researchFeatureId || selectedResearchIds.has(rf.researchFeatureId) || rf.factStatus!=="verified") continue;
+    const fact=String(rf.notes??"").trim();
+    const reason=fact
+      ? `${fact} 現行Selectionでは採用条件が確定していないため、推測計算には使用していません。`
+      : "調査済みの設定差候補ですが、現行Selectionでは採用条件が確定していないため、推測計算には使用していません。";
+    rejected.push({
+      featureId:`REJECTED_${rf.researchFeatureId}`,
+      name:rf.name,
+      reason
+    });
+  }
+
   return {
     schemaVersion:"selection-summary-v1",
     evaluatedCount:selected.length+rejected.length,
