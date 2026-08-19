@@ -50,6 +50,10 @@ export function npmSpawnSpec(args, platform = process.platform, comspec = proces
   return { command: "npm", args };
 }
 
+export function publishApplyArgs(id) {
+  return ["publish", id, "--apply", "--defer-audit"];
+}
+
 function readMachineIdsFromFile(file) {
   const p = path.resolve(file);
   if (!fs.existsSync(p)) throw new Error(`batch file not found: ${p}`);
@@ -143,7 +147,10 @@ function publishOne(id, apply) {
   runNode("publish-machine-data.mjs", ["approve", id, source]);
   runNode("publish-machine-data.mjs", ["publish", id]);
   if (apply) {
-    runNode("publish-machine-data.mjs", ["publish", id, "--apply"]);
+    // IMPORTANT: do not audit after each machine. Other target machine packages may
+    // already contain new bytes while catalog.json still has their old SHA. The
+    // batch must first update every target catalog entry, then audit the repository once.
+    runNode("publish-machine-data.mjs", publishApplyArgs(id));
     runNode("sync-machine-difficulty-catalog.mjs", [id]);
   }
 }
@@ -167,8 +174,8 @@ Default:
 
 --apply:
   Up to 10 machines are published as one atomic batch:
-  approve -> dry-run -> publish apply -> Difficulty sync (per machine)
-  -> machine registry sync (once per batch)
+  approve -> dry-run -> publish apply with per-machine audit deferred
+  -> Difficulty sync (per machine) -> machine registry sync (once per batch)
   -> repository tests/audit/service-name audit (once per batch).
   Any failure restores catalog.json, difficulty-catalog.json, machine-registry.json
   and all target machine packages to their pre-batch bytes.
@@ -176,6 +183,7 @@ Default:
 Safety:
   - Maximum 10 unique machineIds.
   - Existing single-machine fixed-SHA approval/publish contract is reused.
+  - Full-repository audit is intentionally deferred until all target catalog SHAs are updated.
   - build/<MACHINE_ID>/ approval artifacts are removed by default after the run.
   - Publish approval is still explicit: --apply is required for tracked public-data mutation.
   - Use --keep-build only when approval artifacts are needed for debugging.`);
