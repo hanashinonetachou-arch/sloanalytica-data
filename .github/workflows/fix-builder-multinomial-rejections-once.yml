@@ -1,0 +1,88 @@
+name: Fix builder multinomial and rejection summary once
+
+on:
+  push:
+    branches: [prototype-multi-machine]
+    paths:
+      - .github/workflows/fix-builder-multinomial-rejections-once.yml
+
+permissions:
+  contents: write
+
+jobs:
+  fix:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: prototype-multi-machine
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Patch builder contracts
+        run: |
+          node <<'NODE'
+          const fs=require('fs');
+          const p='tools/build-machine-data.mjs';
+          let s=fs.readFileSync(p,'utf8');
+
+          const old=`    if(sf.numeratorInputId) base.numeratorInputId=sf.numeratorInputId;\n    if(sf.denominatorInputId){`;
+          const neu=`    if(sf.numeratorInputId) base.numeratorInputId=sf.numeratorInputId;\n    if(base.inputTransform==="sum_inputs_to_trials" && !sf.denominatorInputIds){\n      base.denominatorInputIds=[...orderedInputIds];\n    }\n    if(sf.denominatorInputId){`;
+          if(!s.includes(old)) throw new Error('multinomial denominator anchor not found');
+          s=s.replace(old,neu);
+
+          const old2=`  const selected=[],rejected=[];\n  for(const sf of selection.features??[]){`;
+          const neu2=`  const selected=[],rejected=[];\n  const selectedResearchIds=new Set((selection.features??[]).map(sf=>sf.researchFeatureId).filter(Boolean));\n  for(const sf of selection.features??[]){`;
+          if(!s.includes(old2)) throw new Error('selection summary anchor 1 not found');
+          s=s.replace(old2,neu2);
+
+          const old3=`  return {\n    schemaVersion:"selection-summary-v1",\n    evaluatedCount:selected.length+rejected.length,\n    selectedCount:selected.length,\n    rejectedCount:rejected.length,\n    selected,rejected\n  };`;
+          const neu3=`  for(const rf of research.features??[]){\n    if(!rf?.researchFeatureId || selectedResearchIds.has(rf.researchFeatureId) || rf.factStatus!=="verified") continue;\n    const fact=String(rf.notes??"").trim();\n    const reason=fact\n      ? \\`${'${fact}'} 現行Selectionでは採用条件が確定していないため、推測計算には使用していません。\\`\n      : "調査済みの設定差候補ですが、現行Selectionでは採用条件が確定していないため、推測計算には使用していません。";\n    rejected.push({featureId:\\`REJECTED_${'${rf.researchFeatureId}'}\\`,name:rf.name,reason});\n  }\n  return {\n    schemaVersion:"selection-summary-v1",\n    evaluatedCount:selected.length+rejected.length,\n    selectedCount:selected.length,\n    rejectedCount:rejected.length,\n    selected,rejected\n  };`;
+          if(!s.includes(old3)) throw new Error('selection summary anchor 2 not found');
+          s=s.replace(old3,neu3);
+          fs.writeFileSync(p,s,'utf8');
+          NODE
+
+      - name: Regenerate affected batch
+        run: |
+          set -euo pipefail
+          ids=(
+            L_TOARU_INDEX_JC
+            L_MADOKA_FORTE_UU
+            L_RING_NI_KAKERO1_FS
+            L_MONKEY_TURN5_CE
+            L_MAGICAL_HALLOWEEN8_FE
+            L_HIGURASHI_GOU_SS
+            L_GEN_CHOMUGEN_PH
+            L_KENGAN_ASHURA_ND
+            L_KEIJI_SADO_ER
+            L_BASILISK_KIZUNA2_TENZEN_ZN
+          )
+          for id in "${ids[@]}"; do
+            npm run selection:validate -- "research/$id/selection-data.json"
+            npm run machine:build -- "$id"
+            npm run difficulty:evaluate -- "$id"
+          done
+          npm test
+          npm run audit
+          npm run audit:ui-service-names
+
+      - name: Publish affected batch
+        run: |
+          set -euo pipefail
+          ids=(L_TOARU_INDEX_JC L_MADOKA_FORTE_UU L_RING_NI_KAKERO1_FS L_MONKEY_TURN5_CE L_MAGICAL_HALLOWEEN8_FE L_HIGURASHI_GOU_SS L_GEN_CHOMUGEN_PH L_KENGAN_ASHURA_ND L_KEIJI_SADO_ER L_BASILISK_KIZUNA2_TENZEN_ZN)
+          for id in "${ids[@]}"; do
+            npm run machine:publish -- approve "$id"
+            npm run machine:publish -- publish "$id"
+          done
+          npm run audit
+
+      - name: Commit generated artifacts
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add tools/build-machine-data.mjs research machines build catalog.json reports machine-registry.json difficulty-catalog.json 2>/dev/null || true
+          git commit -m 'fix: builder multinomial trials and rejected-feature summary'
+          git push origin prototype-multi-machine
