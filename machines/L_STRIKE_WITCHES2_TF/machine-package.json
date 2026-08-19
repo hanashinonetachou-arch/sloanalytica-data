@@ -35,12 +35,13 @@
         "minimum": 0
       },
       {
-        "id": "INP_STRIKE_BONUS",
-        "name": "ストライクボーナス回数",
+        "id": "INP_DIRECT_BONUS",
+        "name": "ストライクボーナス直撃回数",
         "type": "counter",
         "category": "PRIMARY",
         "unit": "回",
         "displayOrder": 2,
+        "description": "通常時の毎ゲーム抽選によるストライクボーナス直撃回数。",
         "defaultValue": 0,
         "minimum": 0
       },
@@ -92,27 +93,27 @@
     "schemaVersion": "2.0.0",
     "features": [
       {
-        "featureId": "FEAT_STRIKE_BONUS",
-        "name": "ストライクボーナス",
+        "featureId": "FEAT_DIRECT_BONUS",
+        "name": "ストライクボーナス直撃",
         "adoptionCategory": "INCLUDE_PRIMARY",
         "calculationRole": "PROBABILITY",
         "probabilityEngineUsage": true,
         "modelType": "binomial",
         "minimumSample": 1,
-        "sampleRecommendation": 5000,
+        "sampleRecommendation": 7000,
         "reliabilityProfile": {
           "weight": 1
         },
         "displayFormat": "ratio_1_over_n",
-        "numeratorInputId": "INP_STRIKE_BONUS",
+        "numeratorInputId": "INP_DIRECT_BONUS",
         "denominatorInputId": "INP_NORMAL_GAMES",
         "probabilities": {
-          "SET_1": 0.0023121387283236996,
-          "SET_2": 0.002376990729736154,
-          "SET_3": 0.00244140625,
-          "SET_4": 0.0025700334104343356,
-          "SET_5": 0.002702702702702703,
-          "SET_6": 0.00286286859433152
+          "SET_1": 0.00011444096162451235,
+          "SET_2": 0.00017166144243676852,
+          "SET_3": 0.0002288816613146505,
+          "SET_4": 0.00034332288487353704,
+          "SET_5": 0.00045776437036799673,
+          "SET_6": 0.0005722034984521895
         },
         "sourceEvidenceRefs": [
           "SRC_SW2_NANA"
@@ -247,8 +248,8 @@
           },
           {
             "type": "input",
-            "inputId": "INP_STRIKE_BONUS",
-            "label": "ストライクボーナス回数",
+            "inputId": "INP_DIRECT_BONUS",
+            "label": "ストライクボーナス直撃回数",
             "widget": "counter"
           }
         ]
@@ -275,16 +276,25 @@
     "rejectedCount": 4,
     "selected": [
       {
-        "featureId": "FEAT_STRIKE_BONUS",
-        "name": "ストライクボーナス",
-        "reason": "ストライクボーナスは通常ゲームを分母に追え、直撃より十分な試行数を得られるため主軸採用。",
+        "featureId": "FEAT_DIRECT_BONUS",
+        "name": "ストライクボーナス直撃",
+        "reason": "設定1→6で約5倍の差があり、極端設定間の80%分離目安は約1.05万G。7000Gでも総ボーナスより情報効率が高いため主軸採用。",
         "requiredTrials": {
-          "value": 62197,
+          "value": 10478,
           "unit": "通常ゲーム"
         }
       }
     ],
     "rejected": [
+      {
+        "featureId": "FEAT_STRIKE_BONUS",
+        "name": "ストライクボーナス",
+        "reason": "直撃より設定差が小さく、直撃を同時採用すると包含関係による二重計上になるため不採用。",
+        "requiredTrials": {
+          "value": 62197,
+          "unit": "通常ゲーム"
+        }
+      },
       {
         "featureId": "FEAT_CZ",
         "name": "撃墜チャレンジ",
@@ -295,23 +305,14 @@
         }
       },
       {
-        "featureId": "FEAT_DIRECT_BONUS",
-        "name": "ストライクボーナス直撃",
-        "reason": "設定差倍率は大きいが低頻度で、ストライクボーナス全体の内数でもあるため同時採用では二重計上しやすい。",
-        "requiredTrials": {
-          "value": 10478,
-          "unit": "通常ゲーム"
-        }
-      },
-      {
         "featureId": "REJECTED_CZ_SMALL_DIFF",
         "name": "撃墜チャレンジ",
         "reason": "設定差が小さく、1日の試行量では判別情報がほとんど増えないため不採用です。"
       },
       {
-        "featureId": "REJECTED_DIRECT_LOW_FREQ",
-        "name": "ストライクボーナス直撃",
-        "reason": "大きな設定差はありますが低頻度かつボーナス全体と重複するため不採用です。"
+        "featureId": "REJECTED_PREDECESSOR_DENOMINATOR",
+        "name": "着席時データ",
+        "reason": "店舗データカウンターの総ゲーム数は公開解析の通常ゲーム数と集計区間が一致する保証がないため、前任者区間の設定推測には使用しません。実機メニュー等で分子・分母を同一区間で直接取得できる場合のみ個別採用します。"
       }
     ]
   },

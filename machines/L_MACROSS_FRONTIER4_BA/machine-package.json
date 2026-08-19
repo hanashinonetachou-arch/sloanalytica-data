@@ -72,6 +72,33 @@
             "key": "SET_5_OR_HIGHER",
             "label": "設定5以上",
             "value": "SET_5_OR_HIGHER"
+          },
+          {
+            "key": "SET_6",
+            "label": "設定6",
+            "value": "SET_6"
+          }
+        ],
+        "defaultValue": "__UNSET__"
+      },
+      {
+        "id": "INP_EVI_SETTING_DENIAL",
+        "name": "確認した設定否定",
+        "type": "enum",
+        "category": "EVIDENCE",
+        "unit": "",
+        "displayOrder": 101,
+        "inferenceRole": "INCLUDE_SUPPORT",
+        "options": [
+          {
+            "key": "__UNSET__",
+            "label": "未選択",
+            "value": "__UNSET__"
+          },
+          {
+            "key": "DENY_SET_2",
+            "label": "設定2否定",
+            "value": "DENY_SET_2"
           }
         ],
         "defaultValue": "__UNSET__"
@@ -130,7 +157,8 @@
         "hasImage": false,
         "type": "SETTING_CONFIRMATION",
         "sourceEvidenceRefs": [
-          "RE_BONUS_CHAR_2PLUS"
+          "RE_BONUS_CHAR_2PLUS",
+          "RE_UTAHIME_END_2PLUS"
         ]
       },
       {
@@ -166,6 +194,38 @@
         "type": "SETTING_CONFIRMATION",
         "sourceEvidenceRefs": [
           "RE_BONUS_CHAR_5PLUS"
+        ]
+      },
+      {
+        "id": "EVI_SETTING_FLOOR_SET_6",
+        "name": "設定6",
+        "displayName": "設定6",
+        "inputId": "INP_EVI_SETTING_FLOOR",
+        "triggerValue": "SET_6",
+        "confirmedSettings": [
+          "SET_6"
+        ],
+        "deniedSettings": [],
+        "hasImage": false,
+        "type": "SETTING_CONFIRMATION",
+        "sourceEvidenceRefs": [
+          "RE_UTAHIME_END_6"
+        ]
+      },
+      {
+        "id": "EVI_SETTING_DENIAL_DENY_SET_2",
+        "name": "設定2否定",
+        "displayName": "設定2否定",
+        "inputId": "INP_EVI_SETTING_DENIAL",
+        "triggerValue": "DENY_SET_2",
+        "confirmedSettings": [],
+        "deniedSettings": [
+          "SET_2"
+        ],
+        "hasImage": false,
+        "type": "SETTING_DENIAL",
+        "sourceEvidenceRefs": [
+          "RE_UTAHIME_END_2_DENIED"
         ]
       }
     ],
@@ -217,6 +277,12 @@
             "inputId": "INP_EVI_SETTING_FLOOR",
             "label": "確認した設定下限",
             "widget": "select"
+          },
+          {
+            "type": "input",
+            "inputId": "INP_EVI_SETTING_DENIAL",
+            "label": "確認した設定否定",
+            "widget": "select"
           }
         ]
       }
@@ -224,9 +290,9 @@
   },
   "selectionSummary": {
     "schemaVersion": "selection-summary-v1",
-    "evaluatedCount": 3,
+    "evaluatedCount": 7,
     "selectedCount": 1,
-    "rejectedCount": 2,
+    "rejectedCount": 6,
     "selected": [
       {
         "featureId": "FEAT_AT",
@@ -249,9 +315,37 @@
         }
       },
       {
+        "featureId": "FEAT_8_BELL",
+        "name": "8枚ベル（上段ベル）",
+        "reason": "設定1→6の差が約1/17.2→1/16.4と小さく、80%分離目安は約5.1万試行。終日では約400回程度しか成立せず不採用。",
+        "requiredTrials": {
+          "value": 51039,
+          "unit": "小役集計ゲーム"
+        }
+      },
+      {
+        "featureId": "FEAT_CHANCE_COMBINED",
+        "name": "チャンス目A・B合算",
+        "reason": "設定1→6で約1/41→1/36だが80%分離目安は約1.62万試行。7000Gでは成立回数が約170～194回に留まるため不採用。",
+        "requiredTrials": {
+          "value": 16211,
+          "unit": "小役集計ゲーム"
+        }
+      },
+      {
         "featureId": "REJECTED_UTAHIME_OVERLAP",
         "name": "歌姫BONUS初当り",
         "reason": "ATとの観測重複が強いため不採用。"
+      },
+      {
+        "featureId": "REJECTED_UTAHIME_END_SOFT_DISTRIBUTION",
+        "name": "歌姫ボーナス終了画面の高設定示唆（弱・強）出現割合",
+        "reason": "出現率が消化ゲーム数帯で変化し、終日の歌姫ボーナス回数も数十回程度のため、単一分布としての尤度計算には不採用。設定2以上・設定2否定・設定6の確定系だけEvidenceとして採用します。"
+      },
+      {
+        "featureId": "REJECTED_PREDECESSOR_DENOMINATOR",
+        "name": "着席時データ",
+        "reason": "店舗データカウンターの総ゲーム数は公開解析の通常ゲーム数と集計区間が一致する保証がないため、前任者区間の設定推測には使用しません。実機メニュー等で分子・分母を同一区間で直接取得できる場合のみ個別採用します。"
       }
     ]
   },
