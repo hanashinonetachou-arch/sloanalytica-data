@@ -289,8 +289,10 @@ export function buildMachineData(research,selection,statistics=null){
       id:`AUTO_${cat}`.replace(/[^A-Z0-9_]/gi,"_").toUpperCase(),
       ...(categoryTitle?{title:categoryTitle}:{}),
       displayOrder:order++,
+      ...(selection.uiCategoryDescriptions?.[cat]?{description:selection.uiCategoryDescriptions[cat]}:{}),
       items:items.sort((a,b)=>a.displayOrder-b.displayOrder).map(i=>({
         type:"input",inputId:i.id,label:i.name,
+        ...(i.uiGridSpan?{gridSpan:i.uiGridSpan}:{}),
         widget:i.type==="counter"?"counter":i.type==="boolean"?"boolean":i.type==="enum"?"select":i.type==="multi_enum"?"multi_select":"number"
       }))
     });
