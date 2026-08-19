@@ -1,0 +1,59 @@
+name: Monkey EX Stepper Data One Shot
+
+on:
+  push:
+    branches:
+      - feature/monkey-v-ex-stepper-only
+
+permissions:
+  contents: write
+
+jobs:
+  update:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: feature/monkey-v-ex-stepper-only
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Apply stepper-only metadata support
+        run: |
+          node - <<'NODE'
+          const fs=require('fs');
+          const builder='tools/build-machine-data.mjs';
+          let b=fs.readFileSync(builder,'utf8');
+          const old=`items:items.sort((a,b)=>a.displayOrder-b.displayOrder).map(i=>({\n        type:"input",inputId:i.id,label:i.name,\n        widget:i.type==="counter"?"counter":i.type==="boolean"?"boolean":i.type==="enum"?"select":i.type==="multi_enum"?"multi_select":"number"\n      }))`;
+          const repl=`items:items.sort((a,b)=>a.displayOrder-b.displayOrder).map(i=>({\n        type:"input",inputId:i.id,label:i.name,\n        ...(i.uiGridSpan?{gridSpan:i.uiGridSpan}:{}),\n        ...(i.uiDirectInput===false?{config:{directInput:false}}:{}),\n        widget:i.type==="counter"?"counter":i.type==="boolean"?"boolean":i.type==="enum"?"select":i.type==="multi_enum"?"multi_select":"number"\n      }))`;
+          if(!b.includes(old)) throw new Error('builder anchor not found');
+          b=b.replace(old,repl);
+          fs.writeFileSync(builder,b);
+
+          const selPath='research/L_MONKEY_TURN5_CE/selection-data.json';
+          const s=JSON.parse(fs.readFileSync(selPath,'utf8'));
+          const ids=new Set(['INP_EX_WEAK_TRIALS','INP_EX_WEAK_HITS','INP_EX_WEAK_CHANCE_TRIALS','INP_EX_WEAK_CHANCE_HITS','INP_EX_STRONG_CHANCE_TRIALS','INP_EX_STRONG_CHANCE_HITS']);
+          for(const i of s.inputs){ if(ids.has(i.id)) i.uiDirectInput=false; }
+          fs.writeFileSync(selPath,JSON.stringify(s,null,2)+'\n');
+          NODE
+      - name: Rebuild and validate
+        run: npm run machine:batch -- L_MONKEY_TURN5_CE
+      - name: Verify contract
+        run: |
+          node - <<'NODE'
+          const fs=require('fs');
+          const p=JSON.parse(fs.readFileSync('machines/L_MONKEY_TURN5_CE/machine-package.json','utf8'));
+          const s=(p.ui?.sections??[]).find(x=>x.id==='AUTO_GEKSOU_EX_ITEM');
+          if(!s) throw new Error('section missing');
+          if((s.items??[]).some(i=>i.gridSpan!==6 || i.config?.directInput!==false)) throw new Error('stepper-only contract missing');
+          NODE
+      - name: Commit generated changes
+        run: |
+          rm .github/workflows/tmp-monkey-stepper-data.yml
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add tools/build-machine-data.mjs research/L_MONKEY_TURN5_CE machines/L_MONKEY_TURN5_CE reports difficulty-catalog.json machine-registry.json .github/workflows/tmp-monkey-stepper-data.yml
+          git commit -m "Use stepper-only Monkey V EX counters" || exit 0
+          git push origin HEAD:feature/monkey-v-ex-stepper-only
