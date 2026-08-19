@@ -35,16 +35,6 @@
         "minimum": 0
       },
       {
-        "id": "INP_INITIAL",
-        "name": "初当り回数",
-        "type": "counter",
-        "category": "PRIMARY",
-        "unit": "回",
-        "displayOrder": 2,
-        "defaultValue": 0,
-        "minimum": 0
-      },
-      {
         "id": "INP_ROLE_GAMES",
         "name": "小役集計ゲーム数",
         "type": "integer",
@@ -61,6 +51,18 @@
         "category": "ROLE",
         "unit": "回",
         "displayOrder": 11,
+        "defaultValue": 0,
+        "description": "通常時、左第1停止の13枚ベルを共通ベルとしてカウントします。",
+        "minimum": 0
+      },
+      {
+        "id": "INP_MYSTERY_AT",
+        "name": "爆走大盤振舞 謎当り回数",
+        "type": "counter",
+        "category": "PRIMARY",
+        "unit": "回",
+        "displayOrder": 2,
+        "description": "規定G数・成立役・天井到達以外の契機で爆走大盤振舞に当選した回数。",
         "defaultValue": 0,
         "minimum": 0
       },
@@ -107,33 +109,6 @@
     "schemaVersion": "2.0.0",
     "features": [
       {
-        "featureId": "FEAT_INITIAL",
-        "name": "初当り",
-        "adoptionCategory": "INCLUDE_PRIMARY",
-        "calculationRole": "PROBABILITY",
-        "probabilityEngineUsage": true,
-        "modelType": "binomial",
-        "minimumSample": 1,
-        "sampleRecommendation": 5000,
-        "reliabilityProfile": {
-          "weight": 1
-        },
-        "displayFormat": "ratio_1_over_n",
-        "numeratorInputId": "INP_INITIAL",
-        "denominatorInputId": "INP_NORMAL_GAMES",
-        "probabilities": {
-          "SET_1": 0.003722,
-          "SET_2": 0.003818,
-          "SET_3": 0.003965,
-          "SET_4": 0.004268,
-          "SET_5": 0.004401,
-          "SET_6": 0.004613
-        },
-        "sourceEvidenceRefs": [
-          "SRC_YR_NANA"
-        ]
-      },
-      {
         "featureId": "FEAT_COMMON_BELL",
         "name": "共通ベル",
         "adoptionCategory": "INCLUDE_SUPPORT",
@@ -155,6 +130,33 @@
           "SET_4": 0.002014,
           "SET_5": 0.002197,
           "SET_6": 0.002503
+        },
+        "sourceEvidenceRefs": [
+          "SRC_YR_NANA"
+        ]
+      },
+      {
+        "featureId": "FEAT_MYSTERY_AT",
+        "name": "爆走大盤振舞 謎当り",
+        "adoptionCategory": "INCLUDE_PRIMARY",
+        "calculationRole": "PROBABILITY",
+        "probabilityEngineUsage": true,
+        "modelType": "binomial",
+        "minimumSample": 1,
+        "sampleRecommendation": 7000,
+        "reliabilityProfile": {
+          "weight": 1
+        },
+        "displayFormat": "ratio_1_over_n",
+        "numeratorInputId": "INP_MYSTERY_AT",
+        "denominatorInputId": "INP_NORMAL_GAMES",
+        "probabilities": {
+          "SET_1": 0.0000951646824830369,
+          "SET_2": 0.00011092254278837088,
+          "SET_3": 0.00018087107509767036,
+          "SET_4": 0.0003202049311559398,
+          "SET_5": 0.00046390796066060494,
+          "SET_6": 0.0006273132174894926
         },
         "sourceEvidenceRefs": [
           "SRC_YR_NANA"
@@ -258,7 +260,7 @@
     "sections": [
       {
         "id": "AUTO_PRIMARY",
-        "title": "初当り",
+        "title": "謎当り",
         "displayOrder": 1,
         "items": [
           {
@@ -269,8 +271,8 @@
           },
           {
             "type": "input",
-            "inputId": "INP_INITIAL",
-            "label": "初当り回数",
+            "inputId": "INP_MYSTERY_AT",
+            "label": "爆走大盤振舞 謎当り回数",
             "widget": "counter"
           }
         ]
@@ -311,19 +313,10 @@
   },
   "selectionSummary": {
     "schemaVersion": "selection-summary-v1",
-    "evaluatedCount": 4,
+    "evaluatedCount": 6,
     "selectedCount": 2,
-    "rejectedCount": 2,
+    "rejectedCount": 4,
     "selected": [
-      {
-        "featureId": "FEAT_INITIAL",
-        "name": "初当り",
-        "reason": "初当りは通常時を通して継続観測でき、設定差もあるため主軸採用。",
-        "requiredTrials": {
-          "value": 38211,
-          "unit": "通常ゲーム"
-        }
-      },
       {
         "featureId": "FEAT_COMMON_BELL",
         "name": "共通ベル",
@@ -332,9 +325,27 @@
           "value": 17603,
           "unit": "小役集計ゲーム"
         }
+      },
+      {
+        "featureId": "FEAT_MYSTERY_AT",
+        "name": "爆走大盤振舞 謎当り",
+        "reason": "低頻度だが設定差が非常に大きく、極端設定間の必要試行量が約7,835Gと終日実戦に近いため主軸採用。",
+        "requiredTrials": {
+          "value": 7835,
+          "unit": "通常ゲーム"
+        }
       }
     ],
     "rejected": [
+      {
+        "featureId": "FEAT_INITIAL",
+        "name": "初当り",
+        "reason": "総初当りは謎当りより終日での情報効率が低く、謎当りを同時採用すると包含関係による二重計上が生じるため不採用。",
+        "requiredTrials": {
+          "value": 38211,
+          "unit": "通常ゲーム"
+        }
+      },
       {
         "featureId": "FEAT_AT",
         "name": "AT初当り",
@@ -348,6 +359,11 @@
         "featureId": "REJECTED_AT_NESTED",
         "name": "AT初当り",
         "reason": "設定差はありますが総初当りと観測が重複するため、二重計上を避けて不採用です。"
+      },
+      {
+        "featureId": "REJECTED_PREDECESSOR_DENOMINATOR",
+        "name": "着席時データ",
+        "reason": "店舗データカウンターの総ゲーム数は公開解析の通常ゲーム数と集計区間が一致する保証がないため、前任者区間の設定推測には使用しません。実機メニュー等で分子・分母を同一区間で直接取得できる場合のみ個別採用します。"
       }
     ]
   },
