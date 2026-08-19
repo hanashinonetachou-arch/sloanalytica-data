@@ -54,7 +54,7 @@ function validateSurfaceGroup(entries, requiredSurfaces, sourceIds, label) {
   return { errors, unresolved };
 }
 
-export function validateResearchCompleteness(research, { required = false } = {}) {
+export function validateResearchCompleteness(research, { required = false, minimumPolicyVersion = 1 } = {}) {
   const errors = [];
   const unresolved = [];
   const completeness = research?.researchCompleteness;
@@ -65,6 +65,8 @@ export function validateResearchCompleteness(research, { required = false } = {}
   const policyVersion = completeness.policyVersion;
   if (!SUPPORTED_RESEARCH_COMPLETENESS_POLICIES.has(policyVersion)) {
     errors.push('researchCompleteness.policyVersion must be 1 or 2');
+  } else if (policyVersion < minimumPolicyVersion) {
+    errors.push(`researchCompleteness.policyVersion must be at least ${minimumPolicyVersion} for this workflow`);
   }
   const requiredNumericSurfaces = policyVersion === 1 ? REQUIRED_NUMERIC_SURFACES_V1 : REQUIRED_NUMERIC_SURFACES_V2;
   const sourceIds = new Set((research?.sources ?? []).map(source => source.sourceId));
