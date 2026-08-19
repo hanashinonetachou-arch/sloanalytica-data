@@ -63,6 +63,14 @@ const selection = {
       userReason: '内訳差が大きいため採用。',
     },
   ],
+  rejectedElements: [
+    {
+      id: 'REJECTED_MANUAL',
+      name: '説明専用の不採用要素',
+      reason: '設定差はあるが、1日の実戦では有効な試行回数を確保しにくいため不採用。',
+      requiredTrials: { value: 40000, unit: 'G' },
+    },
+  ],
   evidence: [],
   evidenceUi: { groups: [] },
 };
@@ -79,4 +87,13 @@ test('verified ResearchData candidates omitted from Selection remain visible as 
   assert.ok(rejected);
   assert.match(rejected.reason, /設定差は確認済みだが観測条件に課題がある/);
   assert.match(rejected.reason, /推測計算には使用していません/);
+});
+
+test('explicit rejectedElements are retained in the user-facing selection summary', () => {
+  const pkg = buildMachineData(research, selection);
+  const rejected = pkg.selectionSummary.rejected.find((item) => item.featureId === 'REJECTED_MANUAL');
+  assert.ok(rejected);
+  assert.equal(rejected.name, '説明専用の不採用要素');
+  assert.equal(rejected.requiredTrials.value, 40000);
+  assert.equal(rejected.requiredTrials.unit, 'G');
 });
