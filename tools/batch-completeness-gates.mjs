@@ -7,7 +7,7 @@ export const REQUIRED_EVIDENCE_SURFACES = [
   'other_setting_evidence',
 ];
 
-export const REQUIRED_NUMERIC_SURFACES = [
+export const REQUIRED_NUMERIC_SURFACES_V1 = [
   'initial_hit',
   'small_role',
   'event_success_rate',
@@ -15,7 +15,17 @@ export const REQUIRED_NUMERIC_SURFACES = [
   'other_numeric',
 ];
 
+export const REQUIRED_NUMERIC_SURFACES_V2 = [
+  ...REQUIRED_NUMERIC_SURFACES_V1,
+  'machine_menu_cumulative',
+];
+
+// Latest contract for newly generated research briefs. Keep the legacy export
+// name so existing callers automatically use the newest research contract.
+export const REQUIRED_NUMERIC_SURFACES = REQUIRED_NUMERIC_SURFACES_V2;
+
 const COVERAGE_STATUSES = new Set(['CHECKED', 'NOT_APPLICABLE', 'UNRESOLVED']);
+const SUPPORTED_RESEARCH_COMPLETENESS_POLICIES = new Set([1, 2]);
 
 function validateSurfaceGroup(entries, requiredSurfaces, sourceIds, label) {
   const errors = [];
@@ -52,10 +62,14 @@ export function validateResearchCompleteness(research, { required = false } = {}
     if (required) errors.push('researchCompleteness is required for batch research ingest');
     return { ok: errors.length === 0, errors, unresolved };
   }
-  if (completeness.policyVersion !== 1) errors.push('researchCompleteness.policyVersion must be 1');
+  const policyVersion = completeness.policyVersion;
+  if (!SUPPORTED_RESEARCH_COMPLETENESS_POLICIES.has(policyVersion)) {
+    errors.push('researchCompleteness.policyVersion must be 1 or 2');
+  }
+  const requiredNumericSurfaces = policyVersion === 1 ? REQUIRED_NUMERIC_SURFACES_V1 : REQUIRED_NUMERIC_SURFACES_V2;
   const sourceIds = new Set((research?.sources ?? []).map(source => source.sourceId));
   const evidence = validateSurfaceGroup(completeness.evidenceSurfaces, REQUIRED_EVIDENCE_SURFACES, sourceIds, 'evidenceSurfaces');
-  const numeric = validateSurfaceGroup(completeness.numericSurfaces, REQUIRED_NUMERIC_SURFACES, sourceIds, 'numericSurfaces');
+  const numeric = validateSurfaceGroup(completeness.numericSurfaces, requiredNumericSurfaces, sourceIds, 'numericSurfaces');
   errors.push(...evidence.errors, ...numeric.errors);
   unresolved.push(...evidence.unresolved, ...numeric.unresolved);
   return { ok: errors.length === 0, errors, unresolved };
