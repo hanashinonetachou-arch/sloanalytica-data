@@ -52,7 +52,7 @@
         "unit": "G",
         "displayOrder": 10,
         "description": "データカウンター仕様が公開ART初当り確率と合う場合のみ入力。",
-        "defaultValue": 0,
+        "defaultValue": "",
         "minimum": 0,
         "observationScope": "PREDECESSOR_SNAPSHOT"
       },
@@ -63,7 +63,7 @@
         "category": "PREDECESSOR",
         "unit": "回",
         "displayOrder": 11,
-        "defaultValue": 0,
+        "defaultValue": "",
         "minimum": 0,
         "observationScope": "PREDECESSOR_SNAPSHOT"
       },
@@ -74,7 +74,7 @@
         "category": "ROLE",
         "unit": "G",
         "displayOrder": 20,
-        "description": "共通コインを集計したゲーム数。筐体メニューの遊技情報集計機能を利用できます。",
+        "description": "実機連動機能を推奨。使用しない場合はARTのゲーム数をカウントします。",
         "defaultValue": 0,
         "minimum": 0
       },
@@ -85,7 +85,7 @@
         "category": "ROLE",
         "unit": "回",
         "displayOrder": 21,
-        "description": "筐体メニューの遊技情報集計機能で自動確認可能です。",
+        "description": "実機連動機能を使用しない場合は、ART中のナビなしベルをカウントします。",
         "defaultValue": 0,
         "minimum": 0
       },
@@ -96,7 +96,7 @@
         "category": "DOKOMAJI",
         "unit": "回",
         "displayOrder": 30,
-        "description": "超高確中と判断できるボーナス、および朝一30G程度のボーナスは除外して入力します。作戦室ステージは超高確濃厚です。",
+        "description": "超高確中と判断できるボーナス、ART中ボーナス、および朝一30G程度のボーナスは除外して入力します。作戦室ステージは超高確濃厚です。",
         "defaultValue": 0,
         "minimum": 0
       },
@@ -108,6 +108,50 @@
         "unit": "回",
         "displayOrder": 31,
         "description": "集計対象ボーナスのうち、通常時にまじかるちゃんすを確認した回数を入力します。内部当選しても演出が出ない場合があるため補助要素として扱います。",
+        "defaultValue": 0,
+        "minimum": 0
+      },
+      {
+        "id": "INP_REG_THRESHOLD_25",
+        "name": "25体規定 回数",
+        "type": "counter",
+        "category": "REG_THRESHOLD",
+        "unit": "回",
+        "displayOrder": 40,
+        "description": "規定撃破数を25体と一意に判別できた殲滅ボーナスのみ入力します。",
+        "defaultValue": 0,
+        "minimum": 0
+      },
+      {
+        "id": "INP_REG_THRESHOLD_50",
+        "name": "50体規定 回数",
+        "type": "counter",
+        "category": "REG_THRESHOLD",
+        "unit": "回",
+        "displayOrder": 41,
+        "description": "規定撃破数を50体と一意に判別できた殲滅ボーナスのみ入力します。",
+        "defaultValue": 0,
+        "minimum": 0
+      },
+      {
+        "id": "INP_REG_THRESHOLD_75",
+        "name": "75体規定 回数",
+        "type": "counter",
+        "category": "REG_THRESHOLD",
+        "unit": "回",
+        "displayOrder": 42,
+        "description": "規定撃破数を75体と一意に判別できた殲滅ボーナスのみ入力します。",
+        "defaultValue": 0,
+        "minimum": 0
+      },
+      {
+        "id": "INP_REG_THRESHOLD_100",
+        "name": "100体規定 回数",
+        "type": "counter",
+        "category": "REG_THRESHOLD",
+        "unit": "回",
+        "displayOrder": 43,
+        "description": "規定撃破数を100体と一意に判別できた殲滅ボーナスのみ入力します。一撃フラグやレア役多数などで規定数を特定できない回は、どの項目にも入力しません。",
         "defaultValue": 0,
         "minimum": 0
       },
@@ -265,6 +309,75 @@
         "sourceEvidenceRefs": [
           "SRC_MAGI8_DOKOMAJI"
         ]
+      },
+      {
+        "featureId": "FEAT_REG_REQUIRED_KILLS",
+        "name": "殲滅ボーナス 規定撃破数",
+        "adoptionCategory": "INCLUDE_SUPPORT",
+        "calculationRole": "PROBABILITY",
+        "probabilityEngineUsage": true,
+        "modelType": "multinomial",
+        "minimumSample": 1,
+        "sampleRecommendation": 5,
+        "reliabilityProfile": {
+          "weight": 0.8
+        },
+        "inputTransform": "sum_inputs_to_trials",
+        "numeratorInputId": "INP_REG_THRESHOLD_25",
+        "categoryInputIds": [
+          "INP_REG_THRESHOLD_50",
+          "INP_REG_THRESHOLD_75",
+          "INP_REG_THRESHOLD_100"
+        ],
+        "probabilities": {},
+        "categoryLabels": [
+          "25体",
+          "50体",
+          "75体",
+          "100体"
+        ],
+        "categoryProbabilities": {
+          "SET_1": [
+            0.0078,
+            0.0625,
+            0.0938,
+            0.8359
+          ],
+          "SET_2": [
+            0.0156,
+            0.125,
+            0.125,
+            0.7344
+          ],
+          "SET_3": [
+            0.0625,
+            0.25,
+            0.1563,
+            0.5312
+          ],
+          "SET_4": [
+            0.3125,
+            0.3125,
+            0.1875,
+            0.1875
+          ],
+          "SET_5": [
+            0.3281,
+            0.3281,
+            0.2188,
+            0.125
+          ],
+          "SET_6": [
+            0.3438,
+            0.3438,
+            0.25,
+            0.0624
+          ]
+        },
+        "sourceEvidenceRefs": [
+          "SRC_MAGI8_REG_THRESHOLD",
+          "SRC_MAGI8_NANA"
+        ]
       }
     ]
   },
@@ -376,21 +489,28 @@
         "classification": "ANALYSIS",
         "pageName": "マジカルハロウィン8 設定判別",
         "url": "https://nana-press.com/kaiseki/machine/627/18063/",
-        "checkedAt": "2026-08-18"
+        "checkedAt": "2026-08-19"
       },
       {
         "id": "SRC_MAGI8_TROPHY",
         "classification": "ANALYSIS",
         "pageName": "マジカルハロウィン8 トロフィー",
         "url": "https://nana-press.com/kaiseki/machine/627/18090/",
-        "checkedAt": "2026-08-18"
+        "checkedAt": "2026-08-19"
       },
       {
         "id": "SRC_MAGI8_DOKOMAJI",
         "classification": "ANALYSIS",
         "pageName": "マジカルハロウィン8 まじかるちゃんす（どこまじ）",
         "url": "https://nana-press.com/kaiseki/machine/627/18071/",
-        "checkedAt": "2026-08-18"
+        "checkedAt": "2026-08-19"
+      },
+      {
+        "id": "SRC_MAGI8_REG_THRESHOLD",
+        "classification": "ANALYSIS",
+        "pageName": "マジカルハロウィン8 殲滅ボーナス 規定撃破数抽選",
+        "url": "https://nana-press.com/kaiseki/machine/627/18076/",
+        "checkedAt": "2026-08-19"
       }
     ]
   },
@@ -473,9 +593,40 @@
         ]
       },
       {
+        "id": "AUTO_REG_THRESHOLD",
+        "title": "REG 規定撃破数",
+        "displayOrder": 5,
+        "items": [
+          {
+            "type": "input",
+            "inputId": "INP_REG_THRESHOLD_25",
+            "label": "25体規定 回数",
+            "widget": "counter"
+          },
+          {
+            "type": "input",
+            "inputId": "INP_REG_THRESHOLD_50",
+            "label": "50体規定 回数",
+            "widget": "counter"
+          },
+          {
+            "type": "input",
+            "inputId": "INP_REG_THRESHOLD_75",
+            "label": "75体規定 回数",
+            "widget": "counter"
+          },
+          {
+            "type": "input",
+            "inputId": "INP_REG_THRESHOLD_100",
+            "label": "100体規定 回数",
+            "widget": "counter"
+          }
+        ]
+      },
+      {
         "id": "AUTO_EVIDENCE",
         "title": "設定確定・否定情報",
-        "displayOrder": 5,
+        "displayOrder": 6,
         "items": [
           {
             "type": "input",
@@ -489,8 +640,8 @@
   },
   "selectionSummary": {
     "schemaVersion": "selection-summary-v1",
-    "evaluatedCount": 4,
-    "selectedCount": 4,
+    "evaluatedCount": 5,
+    "selectedCount": 5,
     "rejectedCount": 0,
     "selected": [
       {
@@ -514,7 +665,7 @@
       {
         "featureId": "FEAT_COMMON_COIN",
         "name": "共通コイン",
-        "reason": "共通コインは高頻度で設定差があり、遊技情報集計機能で入力負荷も低いため採用。",
+        "reason": "共通コインは高頻度で設定差があり、実機連動機能またはART中ナビなしベルで観測できるため採用。",
         "requiredTrials": {
           "value": 1726,
           "unit": "小役集計ゲーム"
@@ -523,10 +674,19 @@
       {
         "featureId": "FEAT_DOKOMAJI",
         "name": "どこまじ当選率",
-        "reason": "どこまじは設定1の1.6%から設定6の23.4%まで大差がある。超高確は作戦室等から実戦上かなり識別できるため、超高確中と朝一30G程度を除外して補助採用する。ただし内部当選してもまじかるちゃんすが必ず表示されるわけではなく、観測漏れがあるため重み0.5として過信を抑える。",
+        "reason": "どこまじは設定1の1.6%から設定6の23.4%まで大差がある。超高確・ART中・朝一30G程度を除外して補助採用する。ただし内部当選しても演出が必ず出るわけではないため重み0.5とする。",
         "requiredTrials": {
           "value": 13,
           "unit": "通常時ボーナス"
+        }
+      },
+      {
+        "featureId": "FEAT_REG_REQUIRED_KILLS",
+        "name": "殲滅ボーナス 規定撃破数",
+        "reason": "殲滅ボーナスの規定撃破数は25・50体を中心に設定差が非常に大きく、少数回でも情報量が高い。一撃フラグやレア役多数などで規定数を一意に特定できない回だけ除外して補助採用する。",
+        "requiredTrials": {
+          "value": 2,
+          "unit": "判別できた殲滅ボーナス"
         }
       }
     ],

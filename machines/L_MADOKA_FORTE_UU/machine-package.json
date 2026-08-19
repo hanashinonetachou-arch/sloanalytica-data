@@ -52,7 +52,7 @@
         "unit": "G",
         "displayOrder": 10,
         "description": "データカウンター仕様が公開ボーナス初当り確率と合う場合のみ入力。",
-        "defaultValue": 0,
+        "defaultValue": "",
         "minimum": 0,
         "observationScope": "PREDECESSOR_SNAPSHOT"
       },
@@ -63,7 +63,7 @@
         "category": "PREDECESSOR",
         "unit": "回",
         "displayOrder": 11,
-        "defaultValue": 0,
+        "defaultValue": "",
         "minimum": 0,
         "observationScope": "PREDECESSOR_SNAPSHOT"
       },
@@ -139,6 +139,28 @@
         "minimum": 0
       },
       {
+        "id": "INP_PETIT_BIG_TRIALS",
+        "name": "BIG昇格抽選 対象回数",
+        "type": "counter",
+        "category": "PETIT_BIG_UPGRADE",
+        "unit": "回",
+        "displayOrder": 40,
+        "description": "まどかチャンス3G目の小役非入賞で、プチボーナス当選対象となった回数を入力します。",
+        "defaultValue": 0,
+        "minimum": 0
+      },
+      {
+        "id": "INP_PETIT_BIG_UPGRADE",
+        "name": "BIG昇格回数",
+        "type": "counter",
+        "category": "PETIT_BIG_UPGRADE",
+        "unit": "回",
+        "displayOrder": 41,
+        "description": "対象ケースからBIGへ昇格した回数を入力します。",
+        "defaultValue": 0,
+        "minimum": 0
+      },
+      {
         "id": "INP_EVI_SETTING_FLOOR",
         "name": "確認した設定下限",
         "type": "enum",
@@ -181,13 +203,50 @@
         "options": [
           {
             "key": "CZ_END_DENY_2",
-            "label": "CZ終了画面 キュゥべえ：設定2否定",
+            "label": "CZ終了時：設定2否定",
             "value": "CZ_END_DENY_2"
           },
           {
             "key": "CZ_END_DENY_1_3",
-            "label": "CZ終了画面 ほむら3人：設定1・3否定",
+            "label": "CZ終了時：設定1・3否定",
             "value": "CZ_END_DENY_1_3"
+          }
+        ],
+        "defaultValue": []
+      },
+      {
+        "id": "INP_EVI_PETIT_CHARACTER_DENIAL",
+        "name": "プチボ中キャラ紹介（設定下限・否定）",
+        "type": "multi_enum",
+        "category": "EVIDENCE",
+        "unit": "",
+        "displayOrder": 102,
+        "inferenceRole": "INCLUDE_SUPPORT",
+        "options": [
+          {
+            "key": "PETIT_2PLUS_DENY3",
+            "label": "設定2以上・設定3否定",
+            "value": "PETIT_2PLUS_DENY3"
+          },
+          {
+            "key": "PETIT_2PLUS_DENY4",
+            "label": "設定2以上・設定4否定",
+            "value": "PETIT_2PLUS_DENY4"
+          },
+          {
+            "key": "PETIT_2PLUS_DENY5",
+            "label": "設定2以上・設定5否定",
+            "value": "PETIT_2PLUS_DENY5"
+          },
+          {
+            "key": "PETIT_3PLUS_DENY4",
+            "label": "設定3以上・設定4否定",
+            "value": "PETIT_3PLUS_DENY4"
+          },
+          {
+            "key": "PETIT_3PLUS_DENY5",
+            "label": "設定3以上・設定5否定",
+            "value": "PETIT_3PLUS_DENY5"
           }
         ],
         "defaultValue": []
@@ -345,6 +404,33 @@
         "sourceEvidenceRefs": [
           "SRC_MADO_NANA"
         ]
+      },
+      {
+        "featureId": "FEAT_PETIT_BIG_UPGRADE",
+        "name": "プチボーナス当選時のBIG昇格",
+        "adoptionCategory": "INCLUDE_SUPPORT",
+        "calculationRole": "PROBABILITY",
+        "probabilityEngineUsage": true,
+        "modelType": "binomial",
+        "minimumSample": 1,
+        "sampleRecommendation": 40,
+        "reliabilityProfile": {
+          "weight": 1
+        },
+        "displayFormat": "percent",
+        "numeratorInputId": "INP_PETIT_BIG_UPGRADE",
+        "denominatorInputId": "INP_PETIT_BIG_TRIALS",
+        "probabilities": {
+          "SET_1": 0.063,
+          "SET_2": 0.094,
+          "SET_3": 0.125,
+          "SET_4": 0.156,
+          "SET_5": 0.18,
+          "SET_6": 0.199
+        },
+        "sourceEvidenceRefs": [
+          "SRC_MADO_PETIT_UPGRADE"
+        ]
       }
     ]
   },
@@ -407,8 +493,8 @@
       },
       {
         "id": "EVI_SETTING_DENIAL_CZ_END_DENY_2",
-        "name": "CZ終了画面 キュゥべえ：設定2否定",
-        "displayName": "CZ終了画面 キュゥべえ：設定2否定",
+        "name": "CZ終了時：設定2否定",
+        "displayName": "CZ終了時：設定2否定",
         "inputId": "INP_EVI_SETTING_DENIAL",
         "triggerValue": "CZ_END_DENY_2",
         "confirmedSettings": [],
@@ -423,8 +509,8 @@
       },
       {
         "id": "EVI_SETTING_DENIAL_CZ_END_DENY_1_3",
-        "name": "CZ終了画面 ほむら3人：設定1・3否定",
-        "displayName": "CZ終了画面 ほむら3人：設定1・3否定",
+        "name": "CZ終了時：設定1・3否定",
+        "displayName": "CZ終了時：設定1・3否定",
         "inputId": "INP_EVI_SETTING_DENIAL",
         "triggerValue": "CZ_END_DENY_1_3",
         "confirmedSettings": [],
@@ -437,6 +523,116 @@
         "sourceEvidenceRefs": [
           "RE_CZ_END_DENY_1_3"
         ]
+      },
+      {
+        "id": "EVI_PETIT_CHARACTER_DENIAL_PETIT_2PLUS_DENY3",
+        "name": "設定2以上・設定3否定",
+        "displayName": "設定2以上・設定3否定",
+        "inputId": "INP_EVI_PETIT_CHARACTER_DENIAL",
+        "triggerValue": "PETIT_2PLUS_DENY3",
+        "confirmedSettings": [
+          "SET_2",
+          "SET_4",
+          "SET_5",
+          "SET_6"
+        ],
+        "deniedSettings": [
+          "SET_1",
+          "SET_3"
+        ],
+        "hasImage": false,
+        "type": "SETTING_CONFIRMATION",
+        "sourceEvidenceRefs": [
+          "RE_PETIT_2PLUS_DENY3"
+        ]
+      },
+      {
+        "id": "EVI_PETIT_CHARACTER_DENIAL_PETIT_2PLUS_DENY4",
+        "name": "設定2以上・設定4否定",
+        "displayName": "設定2以上・設定4否定",
+        "inputId": "INP_EVI_PETIT_CHARACTER_DENIAL",
+        "triggerValue": "PETIT_2PLUS_DENY4",
+        "confirmedSettings": [
+          "SET_2",
+          "SET_3",
+          "SET_5",
+          "SET_6"
+        ],
+        "deniedSettings": [
+          "SET_1",
+          "SET_4"
+        ],
+        "hasImage": false,
+        "type": "SETTING_CONFIRMATION",
+        "sourceEvidenceRefs": [
+          "RE_PETIT_2PLUS_DENY4"
+        ]
+      },
+      {
+        "id": "EVI_PETIT_CHARACTER_DENIAL_PETIT_2PLUS_DENY5",
+        "name": "設定2以上・設定5否定",
+        "displayName": "設定2以上・設定5否定",
+        "inputId": "INP_EVI_PETIT_CHARACTER_DENIAL",
+        "triggerValue": "PETIT_2PLUS_DENY5",
+        "confirmedSettings": [
+          "SET_2",
+          "SET_3",
+          "SET_4",
+          "SET_6"
+        ],
+        "deniedSettings": [
+          "SET_1",
+          "SET_5"
+        ],
+        "hasImage": false,
+        "type": "SETTING_CONFIRMATION",
+        "sourceEvidenceRefs": [
+          "RE_PETIT_2PLUS_DENY5"
+        ]
+      },
+      {
+        "id": "EVI_PETIT_CHARACTER_DENIAL_PETIT_3PLUS_DENY4",
+        "name": "設定3以上・設定4否定",
+        "displayName": "設定3以上・設定4否定",
+        "inputId": "INP_EVI_PETIT_CHARACTER_DENIAL",
+        "triggerValue": "PETIT_3PLUS_DENY4",
+        "confirmedSettings": [
+          "SET_3",
+          "SET_5",
+          "SET_6"
+        ],
+        "deniedSettings": [
+          "SET_1",
+          "SET_2",
+          "SET_4"
+        ],
+        "hasImage": false,
+        "type": "SETTING_CONFIRMATION",
+        "sourceEvidenceRefs": [
+          "RE_PETIT_3PLUS_DENY4"
+        ]
+      },
+      {
+        "id": "EVI_PETIT_CHARACTER_DENIAL_PETIT_3PLUS_DENY5",
+        "name": "設定3以上・設定5否定",
+        "displayName": "設定3以上・設定5否定",
+        "inputId": "INP_EVI_PETIT_CHARACTER_DENIAL",
+        "triggerValue": "PETIT_3PLUS_DENY5",
+        "confirmedSettings": [
+          "SET_3",
+          "SET_4",
+          "SET_6"
+        ],
+        "deniedSettings": [
+          "SET_1",
+          "SET_2",
+          "SET_5"
+        ],
+        "hasImage": false,
+        "type": "SETTING_CONFIRMATION",
+        "sourceEvidenceRefs": [
+          "RE_PETIT_3PLUS_DENY5"
+        ]
       }
     ],
     "sources": [
@@ -445,14 +641,28 @@
         "classification": "ANALYSIS",
         "pageName": "スマスロまどかf-フォルテ- 設定判別",
         "url": "https://nana-press.com/kaiseki/machine/626/17116/",
-        "checkedAt": "2026-08-18"
+        "checkedAt": "2026-08-19"
       },
       {
         "id": "SRC_MADO_CZ",
         "classification": "ANALYSIS",
         "pageName": "スマスロまどかf-フォルテ- CZ終了画面",
         "url": "https://nana-press.com/kaiseki/machine/626/17690/",
-        "checkedAt": "2026-08-18"
+        "checkedAt": "2026-08-19"
+      },
+      {
+        "id": "SRC_MADO_PETIT_UPGRADE",
+        "classification": "ANALYSIS",
+        "pageName": "まどかチャンス中の抽選 プチボからBIGへの昇格",
+        "url": "https://cs62.cs-plaza.com/g/pachi/pla/s_conq/macy_slot/56/tj09.php",
+        "checkedAt": "2026-08-19"
+      },
+      {
+        "id": "SRC_MADO_PETIT_CHAR",
+        "classification": "ANALYSIS",
+        "pageName": "プチボーナス中のキャラ紹介による設定示唆",
+        "url": "https://nana-press.com/kaiseki/machine/626/17767/",
+        "checkedAt": "2026-08-19"
       }
     ]
   },
@@ -553,9 +763,28 @@
         ]
       },
       {
+        "id": "AUTO_PETIT_BIG_UPGRADE",
+        "title": "プチボーナス BIG昇格",
+        "displayOrder": 5,
+        "items": [
+          {
+            "type": "input",
+            "inputId": "INP_PETIT_BIG_TRIALS",
+            "label": "BIG昇格抽選 対象回数",
+            "widget": "counter"
+          },
+          {
+            "type": "input",
+            "inputId": "INP_PETIT_BIG_UPGRADE",
+            "label": "BIG昇格回数",
+            "widget": "counter"
+          }
+        ]
+      },
+      {
         "id": "AUTO_EVIDENCE",
         "title": "設定確定・否定情報",
-        "displayOrder": 5,
+        "displayOrder": 6,
         "items": [
           {
             "type": "input",
@@ -568,6 +797,12 @@
             "inputId": "INP_EVI_SETTING_DENIAL",
             "label": "確認した設定否定",
             "widget": "multi_select"
+          },
+          {
+            "type": "input",
+            "inputId": "INP_EVI_PETIT_CHARACTER_DENIAL",
+            "label": "プチボ中キャラ紹介（設定下限・否定）",
+            "widget": "multi_select"
           }
         ]
       }
@@ -575,8 +810,8 @@
   },
   "selectionSummary": {
     "schemaVersion": "selection-summary-v1",
-    "evaluatedCount": 4,
-    "selectedCount": 4,
+    "evaluatedCount": 5,
+    "selectedCount": 5,
     "rejectedCount": 0,
     "selected": [
       {
@@ -613,6 +848,15 @@
         "requiredTrials": {
           "value": 54,
           "unit": "ボーナス終了時ボイス確認"
+        }
+      },
+      {
+        "featureId": "FEAT_PETIT_BIG_UPGRADE",
+        "name": "プチボーナス当選時のBIG昇格",
+        "reason": "プチボーナス当選時のBIG昇格率は設定1の6.3%から設定6の19.9%まで約3.2倍。対象条件を実戦で判別できるため補助採用。",
+        "requiredTrials": {
+          "value": 42,
+          "unit": "対象プチボーナス当選"
         }
       }
     ],

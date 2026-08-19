@@ -51,7 +51,7 @@
         "unit": "G",
         "displayOrder": 10,
         "description": "データカウンター仕様が公開AT初当り確率と合う場合のみ入力。",
-        "defaultValue": 0,
+        "defaultValue": "",
         "minimum": 0,
         "observationScope": "PREDECESSOR_SNAPSHOT"
       },
@@ -62,7 +62,7 @@
         "category": "PREDECESSOR",
         "unit": "回",
         "displayOrder": 11,
-        "defaultValue": 0,
+        "defaultValue": "",
         "minimum": 0,
         "observationScope": "PREDECESSOR_SNAPSHOT"
       },
@@ -84,6 +84,28 @@
         "category": "AT_DIRECT",
         "unit": "回",
         "displayOrder": 21,
+        "defaultValue": 0,
+        "minimum": 0
+      },
+      {
+        "id": "INP_WHITE_VOICE_BASE",
+        "name": "白：基本パターン",
+        "type": "counter",
+        "category": "GEKSOU_WHITE_VOICE",
+        "unit": "回",
+        "displayOrder": 30,
+        "description": "激走チャージ終了時、白文字の基本パターンを確認した回数。",
+        "defaultValue": 0,
+        "minimum": 0
+      },
+      {
+        "id": "INP_WHITE_VOICE_EVEN",
+        "name": "白：偶数示唆",
+        "type": "counter",
+        "category": "GEKSOU_WHITE_VOICE",
+        "unit": "回",
+        "displayOrder": 31,
+        "description": "激走チャージ終了時、白文字の偶数示唆パターンを確認した回数。",
         "defaultValue": 0,
         "minimum": 0
       },
@@ -201,6 +223,54 @@
         "sourceEvidenceRefs": [
           "SRC_MONKEY_DIRECT"
         ]
+      },
+      {
+        "featureId": "FEAT_GEKSOU_WHITE_VOICE",
+        "name": "激走チャージ終了時 白セリフ内訳",
+        "adoptionCategory": "INCLUDE_SUPPORT",
+        "calculationRole": "PROBABILITY",
+        "probabilityEngineUsage": true,
+        "modelType": "multinomial",
+        "minimumSample": 1,
+        "sampleRecommendation": 20,
+        "reliabilityProfile": {
+          "weight": 1
+        },
+        "inputTransform": "sum_inputs_to_trials",
+        "numeratorInputId": "INP_WHITE_VOICE_BASE",
+        "categoryInputIds": [
+          "INP_WHITE_VOICE_EVEN"
+        ],
+        "probabilities": {},
+        "categoryLabels": [
+          "基本白",
+          "偶数示唆白"
+        ],
+        "categoryProbabilities": {
+          "SET_1": [
+            0.5,
+            0.5
+          ],
+          "SET_2": [
+            0.4,
+            0.6
+          ],
+          "SET_4": [
+            0.4,
+            0.6
+          ],
+          "SET_5": [
+            0.7,
+            0.3
+          ],
+          "SET_6": [
+            0.4,
+            0.6
+          ]
+        },
+        "sourceEvidenceRefs": [
+          "SRC_MONKEY_WHITE_VOICE"
+        ]
       }
     ]
   },
@@ -266,21 +336,28 @@
         "classification": "ANALYSIS",
         "pageName": "スマスロモンキーターンV 設定差・設定示唆",
         "url": "https://nana-press.com/kaiseki/machine/644/18015/",
-        "checkedAt": "2026-08-18"
+        "checkedAt": "2026-08-19"
       },
       {
         "id": "SRC_MONKEY_PAYOUT",
         "classification": "ANALYSIS",
         "pageName": "スマスロモンキーターンV 獲得枚数表示",
         "url": "https://nana-press.com/kaiseki/machine/644/18747/",
-        "checkedAt": "2026-08-18"
+        "checkedAt": "2026-08-19"
       },
       {
         "id": "SRC_MONKEY_DIRECT",
         "classification": "ANALYSIS",
         "pageName": "スマスロモンキーターンV AT直撃抽選",
         "url": "https://nana-press.com/kaiseki/machine/644/31620/",
-        "checkedAt": "2026-08-18"
+        "checkedAt": "2026-08-19"
+      },
+      {
+        "id": "SRC_MONKEY_WHITE_VOICE",
+        "classification": "ANALYSIS",
+        "pageName": "スマスロモンキーターンV 激走チャージ終了時セリフ",
+        "url": "https://nana-press.com/kaiseki/machine/644/18059/",
+        "checkedAt": "2026-08-19"
       }
     ]
   },
@@ -344,9 +421,28 @@
         ]
       },
       {
+        "id": "AUTO_GEKSOU_WHITE_VOICE",
+        "title": "激走チャージ終了時 白セリフ",
+        "displayOrder": 4,
+        "items": [
+          {
+            "type": "input",
+            "inputId": "INP_WHITE_VOICE_BASE",
+            "label": "白：基本パターン",
+            "widget": "counter"
+          },
+          {
+            "type": "input",
+            "inputId": "INP_WHITE_VOICE_EVEN",
+            "label": "白：偶数示唆",
+            "widget": "counter"
+          }
+        ]
+      },
+      {
         "id": "AUTO_EVIDENCE",
         "title": "設定確定・否定情報",
-        "displayOrder": 4,
+        "displayOrder": 5,
         "items": [
           {
             "type": "input",
@@ -360,8 +456,8 @@
   },
   "selectionSummary": {
     "schemaVersion": "selection-summary-v1",
-    "evaluatedCount": 3,
-    "selectedCount": 3,
+    "evaluatedCount": 4,
+    "selectedCount": 4,
     "rejectedCount": 0,
     "selected": [
       {
@@ -389,6 +485,15 @@
         "requiredTrials": {
           "value": 51,
           "unit": "強レア役"
+        }
+      },
+      {
+        "featureId": "FEAT_GEKSOU_WHITE_VOICE",
+        "name": "激走チャージ終了時 白セリフ内訳",
+        "reason": "激走チャージ終了時の白セリフ2種類に観測条件を限定すると、設定5は基本白70%、設定2・4・6は40%と内訳差が大きい。特に設定5と偶数高設定の識別に有効なため補助採用。",
+        "requiredTrials": {
+          "value": 181,
+          "unit": "白セリフ確認"
         }
       }
     ],
