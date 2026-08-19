@@ -7,6 +7,7 @@ import { REQUIRED_EVIDENCE_SURFACES, REQUIRED_NUMERIC_SURFACES, validateResearch
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const ORIGINAL = path.join(ROOT, 'tools', 'batch-research-pipeline.mjs');
 const DEFAULT_REPORT = path.join(ROOT, 'reports', 'batch-research-pipeline-report.json');
+const CURRENT_RESEARCH_COMPLETENESS_POLICY = 2;
 
 function readJson(p) { return JSON.parse(fs.readFileSync(p, 'utf8')); }
 function writeJson(p, value) { fs.writeFileSync(p, JSON.stringify(value, null, 2) + '\n', 'utf8'); }
@@ -34,7 +35,7 @@ function precheckIngest(workspace) {
   const errors = [];
   for (const file of files) {
     const research = readJson(file);
-    const result = validateResearchCompleteness(research, { required: true });
+    const result = validateResearchCompleteness(research, { required: true, minimumPolicyVersion: CURRENT_RESEARCH_COMPLETENESS_POLICY });
     for (const error of result.errors) errors.push(`${path.relative(ROOT, file)}: ${error}`);
     for (const item of result.unresolved) console.warn(`REVIEW [research completeness] ${path.relative(ROOT, file)}: ${item} is UNRESOLVED`);
   }
@@ -50,16 +51,19 @@ function enrichBriefs(reportPath) {
     const brief = readJson(briefPath);
     brief.researchCompletenessContract = {
       requiredForBatchIngest: true,
-      policyVersion: 1,
+      policyVersion: CURRENT_RESEARCH_COMPLETENESS_POLICY,
       statusValues: ['CHECKED', 'NOT_APPLICABLE', 'UNRESOLVED'],
-      instruction: 'Do not omit a surface because no setting difference was found. Record CHECKED/NOT_APPLICABLE/UNRESOLVED explicitly. CHECKED requires sourceRefs. UNRESOLVED must remain explicit and is routed to review.',
+      instruction: 'Do not omit a surface because no setting difference was found. Record CHECKED/NOT_APPLICABLE/UNRESOLVED explicitly. CHECKED requires sourceRefs. UNRESOLVED must remain explicit and is routed to review. For machine_menu_cumulative, explicitly investigate the normal on-machine menu/history screen for cumulative normal games, CZ, AT initial hits, bonuses, small roles, or other setting-relevant cumulative counters. Record whether numerator/denominator observation scopes match published analysis definitions; do not adopt a displayed counter merely because it exists.',
       evidenceSurfaces: REQUIRED_EVIDENCE_SURFACES,
       numericSurfaces: REQUIRED_NUMERIC_SURFACES,
       outputShape: {
         researchCompleteness: {
-          policyVersion: 1,
+          policyVersion: CURRENT_RESEARCH_COMPLETENESS_POLICY,
           evidenceSurfaces: [{ surface: 'end_screen', status: 'CHECKED', sourceRefs: ['SOURCE_ID'], notes: 'what was checked' }],
-          numericSurfaces: [{ surface: 'small_role', status: 'CHECKED', sourceRefs: ['SOURCE_ID'], notes: 'what was checked' }],
+          numericSurfaces: [
+            { surface: 'small_role', status: 'CHECKED', sourceRefs: ['SOURCE_ID'], notes: 'what was checked' },
+            { surface: 'machine_menu_cumulative', status: 'CHECKED', sourceRefs: ['SOURCE_ID'], notes: 'menu/history counters checked, definitions, and whether they are usable as predecessor observations' },
+          ],
         },
       },
     };
