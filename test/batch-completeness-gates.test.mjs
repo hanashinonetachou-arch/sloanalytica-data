@@ -122,11 +122,12 @@ test('every Research Evidence may be UI-referenced or explicitly excluded with r
   assert.deepEqual(result.missing, []);
 });
 
-test('machine guard revalidates both Research completeness and Selection Evidence coverage', () => {
+test('machine guard revalidates Research/Selection but routes UNRESOLVED to review', () => {
   const guard = fs.readFileSync(new URL('../tools/guard-machine-pipeline.mjs', import.meta.url), 'utf8');
   assert.match(guard, /validateResearchCompleteness/);
   assert.match(guard, /validateSelectionEvidenceCoverage/);
-  assert.match(guard, /research completeness unresolved/);
+  assert.match(guard, /REVIEW \[machine completeness guard\].*research completeness unresolved/);
+  assert.doesNotMatch(guard, /errors\.push\([^\n]*research completeness unresolved/);
 });
 
 test('strict research pipeline emits v2 menu completeness contract and gates ingest', () => {
