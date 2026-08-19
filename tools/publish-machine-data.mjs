@@ -77,8 +77,9 @@ function audit(){
  const r=spawnSync(process.execPath,[path.join(ROOT,"tools","audit-public-data.mjs")],{cwd:ROOT,encoding:"utf8"});
  return {ok:r.status===0,stdout:r.stdout??"",stderr:r.stderr??"",status:r.status};
 }
-function publish(id,apply){
+function publish(id,apply,deferAudit=false){
  if(!validId(id)) die("machineIdが不正です。");
+ if(deferAudit && !apply) die("--defer-audit は --apply と同時にのみ使用できます。");
  const p=paths(id);
  if(!exists(p.approved)||!exists(p.approval)) die("approved package / approval.json がありません。先に approve してください。");
  const approval=readJson(p.approval);
@@ -128,6 +129,13 @@ function publish(id,apply){
    fs.mkdirSync(p.targetDir,{recursive:true});
    fs.writeFileSync(p.target,approvedBytes);
    writeJson(CATALOG,nextCatalog);
+   if(deferAudit){
+     writeJson(p.publishReport,{...reportBase,status:"PUBLISHED_PENDING_BATCH_AUDIT",audit:"DEFERRED_TO_BATCH"});
+     console.log(`PUBLISHED_PENDING_BATCH_AUDIT: ${id}`);
+     console.log(`  catalog ${idx>=0?"updated":"added"}`);
+     console.log(`  sha256: ${actualSha}`);
+     return;
+   }
    const result=audit();
    if(!result.ok) throw new Error(`最終Auditor失敗\n${result.stdout}\n${result.stderr}`);
    writeJson(p.publishReport,{...reportBase,status:"PUBLISHED_AND_AUDITED",audit:"PASS"});
@@ -165,12 +173,15 @@ Safety:
   approve  : レビュー済みpackageを固定SHAで承認
   publish  : デフォルトはDRY RUN。公開データは変更しない
   --apply  : machines/反映 + catalog更新 + 最終Auditor
-  Audit失敗時はmachines/catalogを自動ロールバック`);
+  Audit失敗時はmachines/catalogを自動ロールバック
+
+Internal batch option:
+  --defer-audit : --apply時の全体Auditをbatch完了時まで延期する。machine:publish:batch専用。`);
 }
 const args=process.argv.slice(2),cmd=args[0],id=args[1];
 if(!cmd||cmd==="help"||cmd==="--help") help();
 else if(!id) die("machineIdを指定してください。",2);
 else if(cmd==="approve") approve(id,args[2]);
-else if(cmd==="publish") publish(id,args.includes("--apply"));
+else if(cmd==="publish") publish(id,args.includes("--apply"),args.includes("--defer-audit"));
 else if(cmd==="status") status(id);
 else die(`unknown command: ${cmd}`,2);
