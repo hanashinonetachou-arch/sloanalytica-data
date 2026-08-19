@@ -312,6 +312,42 @@
       "displayOrder": 69,
       "inferenceRole": "INCLUDE_SUPPORT",
       "defaultValue": 0
+    },
+    {
+      "id": "INP_SEATED_NORMAL_GAMES",
+      "name": "着席時 通常ゲーム数",
+      "category": "PREDECESSOR",
+      "type": "integer",
+      "unit": "G",
+      "displayOrder": 1,
+      "inferenceRole": "INCLUDE_SUPPORT",
+      "description": "実機メニュー「遊技履歴」の通常ゲーム数を入力してください。",
+      "defaultValue": "",
+      "observationScope": "PREDECESSOR_SNAPSHOT"
+    },
+    {
+      "id": "INP_SEATED_CZ_COUNT",
+      "name": "着席時 Challenge Revue回数",
+      "category": "PREDECESSOR",
+      "type": "counter",
+      "unit": "回",
+      "displayOrder": 2,
+      "inferenceRole": "INCLUDE_SUPPORT",
+      "description": "実機メニュー「遊技履歴」のChallenge Revue累計回数を入力してください。",
+      "defaultValue": "",
+      "observationScope": "PREDECESSOR_SNAPSHOT"
+    },
+    {
+      "id": "INP_SEATED_AT_COUNT",
+      "name": "着席時 STAR LIGHT初当り回数",
+      "category": "PREDECESSOR",
+      "type": "counter",
+      "unit": "回",
+      "displayOrder": 3,
+      "inferenceRole": "INCLUDE_SUPPORT",
+      "description": "実機メニュー「遊技履歴」のSTAR LIGHT累計回数（AT初当り）を入力してください。",
+      "defaultValue": "",
+      "observationScope": "PREDECESSOR_SNAPSHOT"
     }
   ],
   "features": [
@@ -327,11 +363,11 @@
       ],
       "minimumSample": 1000,
       "sampleRecommendation": 6000,
-      "weight": 1.0,
+      "weight": 1,
       "difficultyParticipation": "INCLUDE",
       "difficultyExposure": {
         "mode": "per_game",
-        "factor": 1.0,
+        "factor": 1,
         "quality": "EXACT",
         "basisId": "REVUE_BONUS_ELIGIBLE_GAMES"
       },
@@ -348,7 +384,7 @@
       ],
       "minimumSample": 5,
       "sampleRecommendation": 30,
-      "weight": 1.0,
+      "weight": 1,
       "difficultyParticipation": "INCLUDE",
       "difficultyExposure": {
         "mode": "setting_rate",
@@ -387,7 +423,7 @@
       ],
       "minimumSample": 5,
       "sampleRecommendation": 30,
-      "weight": 1.0,
+      "weight": 1,
       "difficultyParticipation": "INCLUDE",
       "difficultyExposure": {
         "mode": "setting_rate",
@@ -423,11 +459,11 @@
       "denominatorInputId": "INP_CZ_NORMAL_GAMES",
       "minimumSample": 1000,
       "sampleRecommendation": 5000,
-      "weight": 1.0,
+      "weight": 1,
       "difficultyParticipation": "INCLUDE",
       "difficultyExposure": {
         "mode": "per_game",
-        "factor": 1.0,
+        "factor": 1,
         "quality": "ESTIMATED",
         "basisId": "REVUE_BONUS_ELIGIBLE_GAMES",
         "confidence": "MEDIUM",
@@ -449,7 +485,7 @@
       ],
       "minimumSample": 5,
       "sampleRecommendation": 30,
-      "weight": 1.0,
+      "weight": 1,
       "difficultyParticipation": "INCLUDE",
       "difficultyExposure": {
         "mode": "setting_rate",
@@ -488,7 +524,7 @@
       ],
       "minimumSample": 5,
       "sampleRecommendation": 30,
-      "weight": 1.0,
+      "weight": 1,
       "difficultyParticipation": "INCLUDE",
       "difficultyExposure": {
         "mode": "setting_rate",
@@ -510,6 +546,32 @@
         "INP_BIG_END_HIGH_STRONG_COUNT"
       ],
       "residualCategoryLabel": "DEFAULT"
+    },
+    {
+      "researchFeatureId": "RF_REVUE_CZ",
+      "featureId": "FEAT_CZ_PREDECESSOR",
+      "adoptionCategory": "INCLUDE_SUPPORT",
+      "numeratorInputId": "INP_SEATED_CZ_COUNT",
+      "denominatorInputId": "INP_SEATED_NORMAL_GAMES",
+      "minimumSample": 1,
+      "sampleRecommendation": 1000,
+      "weight": 1,
+      "difficultyParticipation": "EXCLUDE",
+      "userReason": "実機メニューから通常ゲーム数とChallenge Revue累計回数を直接取得できるため、着席前区間のCZ初当り観測として採用。",
+      "difficultyExclusionReason": "着席時スナップショットのためDifficultyには含めない。"
+    },
+    {
+      "researchFeatureId": "RF_REVUE_AT",
+      "featureId": "FEAT_AT_PREDECESSOR",
+      "adoptionCategory": "INCLUDE_SUPPORT",
+      "numeratorInputId": "INP_SEATED_AT_COUNT",
+      "denominatorInputId": "INP_SEATED_NORMAL_GAMES",
+      "minimumSample": 1,
+      "sampleRecommendation": 1000,
+      "weight": 1,
+      "difficultyParticipation": "EXCLUDE",
+      "userReason": "実機メニューのSTAR LIGHT累計回数がAT初当り回数として確認でき、通常ゲーム数と同一区間で評価できるため採用。",
+      "difficultyExclusionReason": "着席時スナップショットのためDifficultyには含めない。"
     }
   ],
   "evidence": [
@@ -676,6 +738,7 @@
     "PRIMARY_CZ": "CZ初当り",
     "PRIMARY_CZ_LAMP": "CZ関連終了時のランプ色",
     "PRIMARY_BIG_END": "BIG終了画面",
-    "EVIDENCE": "設定確定情報"
+    "EVIDENCE": "設定確定情報",
+    "PREDECESSOR": "着席時データ"
   }
 }

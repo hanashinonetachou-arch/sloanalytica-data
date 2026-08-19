@@ -363,6 +363,45 @@
         "inferenceRole": "INCLUDE_SUPPORT",
         "defaultValue": 0,
         "minimum": 0
+      },
+      {
+        "id": "INP_SEATED_NORMAL_GAMES",
+        "name": "着席時 通常ゲーム数",
+        "category": "PREDECESSOR",
+        "type": "integer",
+        "unit": "G",
+        "displayOrder": 1,
+        "inferenceRole": "INCLUDE_SUPPORT",
+        "description": "実機メニュー「遊技履歴」の通常ゲーム数を入力してください。",
+        "defaultValue": "",
+        "observationScope": "PREDECESSOR_SNAPSHOT",
+        "minimum": 0
+      },
+      {
+        "id": "INP_SEATED_CZ_COUNT",
+        "name": "着席時 Challenge Revue回数",
+        "category": "PREDECESSOR",
+        "type": "counter",
+        "unit": "回",
+        "displayOrder": 2,
+        "inferenceRole": "INCLUDE_SUPPORT",
+        "description": "実機メニュー「遊技履歴」のChallenge Revue累計回数を入力してください。",
+        "defaultValue": "",
+        "observationScope": "PREDECESSOR_SNAPSHOT",
+        "minimum": 0
+      },
+      {
+        "id": "INP_SEATED_AT_COUNT",
+        "name": "着席時 STAR LIGHT初当り回数",
+        "category": "PREDECESSOR",
+        "type": "counter",
+        "unit": "回",
+        "displayOrder": 3,
+        "inferenceRole": "INCLUDE_SUPPORT",
+        "description": "実機メニュー「遊技履歴」のSTAR LIGHT累計回数（AT初当り）を入力してください。",
+        "defaultValue": "",
+        "observationScope": "PREDECESSOR_SNAPSHOT",
+        "minimum": 0
       }
     ]
   },
@@ -701,6 +740,60 @@
           "SRC_NANA_END",
           "SRC_SNAPSHOT"
         ]
+      },
+      {
+        "featureId": "FEAT_CZ_PREDECESSOR",
+        "name": "CZ初当り",
+        "adoptionCategory": "INCLUDE_SUPPORT",
+        "calculationRole": "PROBABILITY",
+        "probabilityEngineUsage": true,
+        "modelType": "poisson",
+        "minimumSample": 1,
+        "sampleRecommendation": 1000,
+        "reliabilityProfile": {
+          "weight": 1
+        },
+        "numeratorInputId": "INP_SEATED_CZ_COUNT",
+        "denominatorInputId": "INP_SEATED_NORMAL_GAMES",
+        "displayFormat": "ratio_1_over_n",
+        "probabilities": {
+          "SET_1": 0.003760812336,
+          "SET_2": 0.003926187672,
+          "SET_4": 0.004816955684,
+          "SET_5": 0.005254860746,
+          "SET_6": 0.005571030641
+        },
+        "sourceEvidenceRefs": [
+          "SRC_NANA",
+          "SRC_1GEKI",
+          "SRC_SNAPSHOT"
+        ]
+      },
+      {
+        "featureId": "FEAT_AT_PREDECESSOR",
+        "name": "AT初当り",
+        "adoptionCategory": "INCLUDE_SUPPORT",
+        "calculationRole": "PROBABILITY",
+        "probabilityEngineUsage": true,
+        "modelType": "poisson",
+        "minimumSample": 1,
+        "sampleRecommendation": 1000,
+        "reliabilityProfile": {
+          "weight": 1
+        },
+        "numeratorInputId": "INP_SEATED_AT_COUNT",
+        "denominatorInputId": "INP_SEATED_NORMAL_GAMES",
+        "displayFormat": "ratio_1_over_n",
+        "probabilities": {
+          "SET_1": 0.0027808676307007783,
+          "SET_2": 0.0028835063437139563,
+          "SET_4": 0.0036088054853843374,
+          "SET_5": 0.003910833007430583,
+          "SET_6": 0.004301075268817204
+        },
+        "sourceEvidenceRefs": [
+          "SRC_1GEKI"
+        ]
       }
     ]
   },
@@ -883,9 +976,34 @@
   "ui": {
     "sections": [
       {
+        "id": "AUTO_PREDECESSOR",
+        "title": "着席時データ",
+        "displayOrder": 1,
+        "items": [
+          {
+            "type": "input",
+            "inputId": "INP_SEATED_NORMAL_GAMES",
+            "label": "着席時 通常ゲーム数",
+            "widget": "number"
+          },
+          {
+            "type": "input",
+            "inputId": "INP_SEATED_CZ_COUNT",
+            "label": "着席時 Challenge Revue回数",
+            "widget": "counter"
+          },
+          {
+            "type": "input",
+            "inputId": "INP_SEATED_AT_COUNT",
+            "label": "着席時 STAR LIGHT初当り回数",
+            "widget": "counter"
+          }
+        ]
+      },
+      {
         "id": "AUTO_PRIMARY_BONUS",
         "title": "ボーナス",
-        "displayOrder": 1,
+        "displayOrder": 2,
         "items": [
           {
             "type": "input",
@@ -916,7 +1034,7 @@
       {
         "id": "AUTO_PRIMARY_BLUE_CAUSE",
         "title": "青BIGの確定契機",
-        "displayOrder": 2,
+        "displayOrder": 3,
         "items": [
           {
             "type": "input",
@@ -941,7 +1059,7 @@
       {
         "id": "AUTO_PRIMARY_REG_CAUSE",
         "title": "REGの確定契機",
-        "displayOrder": 3,
+        "displayOrder": 4,
         "items": [
           {
             "type": "input",
@@ -972,7 +1090,7 @@
       {
         "id": "AUTO_PRIMARY_CZ",
         "title": "CZ初当り",
-        "displayOrder": 4,
+        "displayOrder": 5,
         "items": [
           {
             "type": "input",
@@ -991,7 +1109,7 @@
       {
         "id": "AUTO_PRIMARY_CZ_LAMP",
         "title": "CZ関連終了時のランプ色",
-        "displayOrder": 5,
+        "displayOrder": 6,
         "items": [
           {
             "type": "input",
@@ -1028,7 +1146,7 @@
       {
         "id": "AUTO_PRIMARY_BIG_END",
         "title": "BIG終了画面",
-        "displayOrder": 6,
+        "displayOrder": 7,
         "items": [
           {
             "type": "input",
@@ -1053,7 +1171,7 @@
       {
         "id": "AUTO_EVIDENCE",
         "title": "設定確定情報",
-        "displayOrder": 7,
+        "displayOrder": 8,
         "items": [
           {
             "type": "input",
@@ -1121,8 +1239,8 @@
   },
   "selectionSummary": {
     "schemaVersion": "selection-summary-v1",
-    "evaluatedCount": 6,
-    "selectedCount": 6,
+    "evaluatedCount": 8,
+    "selectedCount": 8,
     "rejectedCount": 0,
     "selected": [
       {
@@ -1177,6 +1295,24 @@
         "requiredTrials": {
           "value": 57,
           "unit": "BIG終了1回"
+        }
+      },
+      {
+        "featureId": "FEAT_CZ_PREDECESSOR",
+        "name": "CZ初当り",
+        "reason": "実機メニューから通常ゲーム数とChallenge Revue累計回数を直接取得できるため、着席前区間のCZ初当り観測として採用。",
+        "requiredTrials": {
+          "value": 10339,
+          "unit": "CZ集計対象通常時1G"
+        }
+      },
+      {
+        "featureId": "FEAT_AT_PREDECESSOR",
+        "name": "AT初当り",
+        "reason": "実機メニューのSTAR LIGHT累計回数がAT初当り回数として確認でき、通常ゲーム数と同一区間で評価できるため採用。",
+        "requiredTrials": {
+          "value": 11101,
+          "unit": "通常時1G"
         }
       }
     ],
