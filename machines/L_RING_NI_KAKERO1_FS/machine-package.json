@@ -62,7 +62,7 @@
         "unit": "G",
         "displayOrder": 10,
         "description": "データカウンター仕様が公開ボーナス確率と合う場合のみ入力。",
-        "defaultValue": 0,
+        "defaultValue": "",
         "minimum": 0,
         "observationScope": "PREDECESSOR_SNAPSHOT"
       },
@@ -73,7 +73,7 @@
         "category": "PREDECESSOR",
         "unit": "回",
         "displayOrder": 11,
-        "defaultValue": 0,
+        "defaultValue": "",
         "minimum": 0,
         "observationScope": "PREDECESSOR_SNAPSHOT"
       },
@@ -95,6 +95,26 @@
         "category": "BONUS_TYPE",
         "unit": "回",
         "displayOrder": 21,
+        "defaultValue": 0,
+        "minimum": 0
+      },
+      {
+        "id": "INP_KIKU_FAILURES",
+        "name": "菊チャンス失敗回数",
+        "type": "counter",
+        "category": "KIKU_REENTRY",
+        "unit": "回",
+        "displayOrder": 30,
+        "defaultValue": 0,
+        "minimum": 0
+      },
+      {
+        "id": "INP_KIKU_REENTRY",
+        "name": "失敗後の再突入回数",
+        "type": "counter",
+        "category": "KIKU_REENTRY",
+        "unit": "回",
+        "displayOrder": 31,
         "defaultValue": 0,
         "minimum": 0
       },
@@ -252,6 +272,33 @@
         "sourceEvidenceRefs": [
           "SRC_RING_NANA"
         ]
+      },
+      {
+        "featureId": "FEAT_KIKU_REENTRY",
+        "name": "菊チャンス失敗後の再突入",
+        "adoptionCategory": "INCLUDE_SUPPORT",
+        "calculationRole": "PROBABILITY",
+        "probabilityEngineUsage": true,
+        "modelType": "binomial",
+        "minimumSample": 1,
+        "sampleRecommendation": 80,
+        "reliabilityProfile": {
+          "weight": 1
+        },
+        "displayFormat": "percent",
+        "numeratorInputId": "INP_KIKU_REENTRY",
+        "denominatorInputId": "INP_KIKU_FAILURES",
+        "probabilities": {
+          "SET_1": 0.1992,
+          "SET_2": 0.2148,
+          "SET_3": 0.2344,
+          "SET_4": 0.2539,
+          "SET_5": 0.293,
+          "SET_6": 0.332
+        },
+        "sourceEvidenceRefs": [
+          "SRC_RING_NANA"
+        ]
       }
     ]
   },
@@ -358,7 +405,7 @@
         "classification": "ANALYSIS",
         "pageName": "L リングにかけろ1 V 設定判別",
         "url": "https://nana-press.com/kaiseki/machine/652/17934/",
-        "checkedAt": "2026-08-18"
+        "checkedAt": "2026-08-19"
       }
     ]
   },
@@ -428,9 +475,28 @@
         ]
       },
       {
+        "id": "AUTO_KIKU_REENTRY",
+        "title": "菊チャンス 再突入",
+        "displayOrder": 4,
+        "items": [
+          {
+            "type": "input",
+            "inputId": "INP_KIKU_FAILURES",
+            "label": "菊チャンス失敗回数",
+            "widget": "counter"
+          },
+          {
+            "type": "input",
+            "inputId": "INP_KIKU_REENTRY",
+            "label": "失敗後の再突入回数",
+            "widget": "counter"
+          }
+        ]
+      },
+      {
         "id": "AUTO_EVIDENCE",
         "title": "設定確定・否定情報",
-        "displayOrder": 4,
+        "displayOrder": 5,
         "items": [
           {
             "type": "input",
@@ -444,9 +510,9 @@
   },
   "selectionSummary": {
     "schemaVersion": "selection-summary-v1",
-    "evaluatedCount": 4,
-    "selectedCount": 4,
-    "rejectedCount": 0,
+    "evaluatedCount": 6,
+    "selectedCount": 5,
+    "rejectedCount": 1,
     "selected": [
       {
         "featureId": "FEAT_ST",
@@ -483,9 +549,28 @@
           "value": 92,
           "unit": "通常時ボーナス"
         }
+      },
+      {
+        "featureId": "FEAT_KIKU_REENTRY",
+        "name": "菊チャンス失敗後の再突入",
+        "reason": "菊チャンス失敗後の再突入率は設定1の19.92%から設定6の33.20%まで段階的な設定差があり、失敗回数を明確な分母として数えられるため補助採用。",
+        "requiredTrials": {
+          "value": 80,
+          "unit": "菊チャンス失敗"
+        }
       }
     ],
-    "rejected": []
+    "rejected": [
+      {
+        "featureId": "FEAT_KIKU_NONRARE_SUCCESS",
+        "name": "菊チャンス中 非レア役成功",
+        "reason": "設定1対6で4倍の差はありますが、絶対確率が0.39%～1.56%と低く、1日の実戦では有効試行が不足します。概算で数百回規模の対象試行が必要になるため推測計算には不採用とし、複数回確認した場合の参考材料に留めます。",
+        "requiredTrials": {
+          "value": 466,
+          "unit": "非レア役成立の菊チャンス"
+        }
+      }
+    ]
   },
   "reliability": {},
   "metadata": {

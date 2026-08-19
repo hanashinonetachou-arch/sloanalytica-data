@@ -45,16 +45,6 @@
         "minimum": 0
       },
       {
-        "id": "INP_AT_COUNT",
-        "name": "AT初当り回数",
-        "type": "counter",
-        "category": "PRIMARY",
-        "unit": "回",
-        "displayOrder": 3,
-        "defaultValue": 0,
-        "minimum": 0
-      },
-      {
         "id": "INP_SEATED_GAMES",
         "name": "着席時ゲーム数",
         "type": "integer",
@@ -62,7 +52,7 @@
         "unit": "G",
         "displayOrder": 10,
         "description": "データカウンターの集計仕様が公開AT初当り確率と合う場合のみ入力してください。",
-        "defaultValue": 0,
+        "defaultValue": "",
         "minimum": 0,
         "observationScope": "PREDECESSOR_SNAPSHOT"
       },
@@ -73,7 +63,7 @@
         "category": "PREDECESSOR",
         "unit": "回",
         "displayOrder": 11,
-        "defaultValue": 0,
+        "defaultValue": "",
         "minimum": 0,
         "observationScope": "PREDECESSOR_SNAPSHOT"
       },
@@ -146,33 +136,6 @@
           "SET_4": 0.0062073,
           "SET_5": 0.0065531,
           "SET_6": 0.0068166
-        },
-        "sourceEvidenceRefs": [
-          "SRC_TOARU_NANA"
-        ]
-      },
-      {
-        "featureId": "FEAT_AT_INITIAL",
-        "name": "AT初当り",
-        "adoptionCategory": "INCLUDE_SUPPORT",
-        "calculationRole": "PROBABILITY",
-        "probabilityEngineUsage": true,
-        "modelType": "binomial",
-        "minimumSample": 1,
-        "sampleRecommendation": 5000,
-        "reliabilityProfile": {
-          "weight": 0.7
-        },
-        "displayFormat": "ratio_1_over_n",
-        "numeratorInputId": "INP_AT_COUNT",
-        "denominatorInputId": "INP_NORMAL_GAMES",
-        "probabilities": {
-          "SET_1": 0.0026976,
-          "SET_2": 0.0027709,
-          "SET_3": 0.0029104,
-          "SET_4": 0.003319,
-          "SET_5": 0.0035971,
-          "SET_6": 0.0037523
         },
         "sourceEvidenceRefs": [
           "SRC_TOARU_NANA"
@@ -344,7 +307,7 @@
       },
       {
         "id": "AUTO_PRIMARY",
-        "title": "CZ・AT初当り",
+        "title": "CZ初当り",
         "displayOrder": 2,
         "items": [
           {
@@ -357,12 +320,6 @@
             "type": "input",
             "inputId": "INP_CZ_COUNT",
             "label": "CZ初当り回数",
-            "widget": "counter"
-          },
-          {
-            "type": "input",
-            "inputId": "INP_AT_COUNT",
-            "label": "AT初当り回数",
             "widget": "counter"
           }
         ]
@@ -385,8 +342,8 @@
   "selectionSummary": {
     "schemaVersion": "selection-summary-v1",
     "evaluatedCount": 3,
-    "selectedCount": 3,
-    "rejectedCount": 0,
+    "selectedCount": 2,
+    "rejectedCount": 1,
     "selected": [
       {
         "featureId": "FEAT_CZ_INITIAL",
@@ -394,15 +351,6 @@
         "reason": "CZはATより高頻度で設定差も明確なため主軸採用。",
         "requiredTrials": {
           "value": 17108,
-          "unit": "通常ゲーム"
-        }
-      },
-      {
-        "featureId": "FEAT_AT_INITIAL",
-        "name": "AT初当り",
-        "reason": "AT初当りにも設定差があるがCZ経由情報と重複するためDifficultyから除外。",
-        "requiredTrials": {
-          "value": 21041,
           "unit": "通常ゲーム"
         }
       },
@@ -416,7 +364,17 @@
         }
       }
     ],
-    "rejected": []
+    "rejected": [
+      {
+        "featureId": "FEAT_AT_INITIAL",
+        "name": "AT初当り",
+        "reason": "AT初当りにも設定差はありますが、通常時ATの主要経路がCZ成功でCZ初当りと強く相関します。CZ成功率そのものを設定別に分離できる信頼できる公開値がないため、CZとATを独立尤度として二重計上せず、自分区間はCZ初当りのみを推測計算に使用します。",
+        "requiredTrials": {
+          "value": 21041,
+          "unit": "通常ゲーム"
+        }
+      }
+    ]
   },
   "reliability": {},
   "metadata": {
