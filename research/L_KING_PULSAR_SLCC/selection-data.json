@@ -1,0 +1,200 @@
+{
+  "schemaVersion": "selection-data-v1",
+  "machineId": "L_KING_PULSAR_SLCC",
+  "machineDataVersion": "0.1.0",
+  "inputs": [
+    {
+      "id": "INP_NORMAL_GAMES",
+      "name": "通常ゲーム数",
+      "type": "integer",
+      "category": "PRIMARY",
+      "unit": "G",
+      "displayOrder": 1,
+      "defaultValue": 0
+    },
+    {
+      "id": "INP_BIG",
+      "name": "BIG回数",
+      "type": "counter",
+      "category": "PRIMARY",
+      "unit": "回",
+      "displayOrder": 2,
+      "defaultValue": 0
+    },
+    {
+      "id": "INP_REG",
+      "name": "REG回数",
+      "type": "counter",
+      "category": "PRIMARY",
+      "unit": "回",
+      "displayOrder": 3,
+      "defaultValue": 0
+    },
+    {
+      "id": "INP_ROLE_GAMES",
+      "name": "小役集計ゲーム数",
+      "type": "integer",
+      "category": "ROLE",
+      "unit": "G",
+      "displayOrder": 10,
+      "defaultValue": 0
+    },
+    {
+      "id": "INP_ORANGE",
+      "name": "オレンジ回数",
+      "type": "counter",
+      "category": "ROLE",
+      "unit": "回",
+      "displayOrder": 11,
+      "defaultValue": 0
+    }
+  ],
+  "features": [
+    {
+      "researchFeatureId": "RF_BONUS",
+      "featureId": "FEAT_BONUS",
+      "adoptionCategory": "INCLUDE_PRIMARY",
+      "denominatorInputId": "INP_NORMAL_GAMES",
+      "minimumSample": 1,
+      "sampleRecommendation": 5000,
+      "weight": 1,
+      "displayFormat": "ratio_1_over_n",
+      "difficultyExposure": {
+        "mode": "per_game",
+        "factor": 1,
+        "quality": "EXACT",
+        "basisId": "NORMAL_GAMES"
+      },
+      "difficultyParticipation": "INCLUDE",
+      "userReason": "BIG・REGとも段階的な設定差が大きく、終日を通して観測できるため主軸採用。",
+      "numeratorInputId": "INP_BIG",
+      "categoryInputIds": [
+        "INP_REG"
+      ],
+      "residualCategoryLabel": "OTHER"
+    },
+    {
+      "researchFeatureId": "RF_ORANGE",
+      "featureId": "FEAT_ORANGE",
+      "adoptionCategory": "INCLUDE_SUPPORT",
+      "numeratorInputId": "INP_ORANGE",
+      "denominatorInputId": "INP_ROLE_GAMES",
+      "minimumSample": 1,
+      "sampleRecommendation": 5000,
+      "weight": 1,
+      "displayFormat": "ratio_1_over_n",
+      "difficultyExposure": {
+        "mode": "per_game",
+        "factor": 1,
+        "quality": "EXACT",
+        "basisId": "NORMAL_GAMES"
+      },
+      "difficultyParticipation": "INCLUDE",
+      "userReason": "1/136.5から1/110.7で、終日でも十分な試行数を得やすい独立小役として補助採用。"
+    },
+    {
+      "researchFeatureId": "RF_REACHME",
+      "featureId": "FEAT_REACHME",
+      "adoptionCategory": "EXCLUDE",
+      "rejectionReason": "設定差はありますが1/1400～1/1700級と低頻度で、終日の出現回数では補助情報としても弱いため不採用。"
+    },
+    {
+      "researchFeatureId": "RF_CZ",
+      "featureId": "FEAT_CZ",
+      "adoptionCategory": "EXCLUDE",
+      "rejectionReason": "CZ突入差にはオレンジ出現率とCZ抽選が関与し、オレンジと同時採用すると同じ因果を二重計上しやすいため不採用。"
+    },
+    {
+      "researchFeatureId": "RF_BONUS_1COIN_CZ",
+      "featureId": "FEAT_BONUS_1COIN_CZ",
+      "adoptionCategory": "EXCLUDE",
+      "rejectionReason": "設定1・2の1/16384に対して設定6は1/1638.4と差は大きいものの、ボーナス中1枚役の終日試行数では必要試行量に届かないため不採用。"
+    }
+  ],
+  "rejectedElements": [
+    {
+      "id": "REJECTED_PREDECESSOR_DENOMINATOR",
+      "name": "着席時データ",
+      "reason": "店舗データカウンターの総ゲーム数は公開解析の通常ゲーム数と集計区間が一致する保証がないため、前任者区間の設定推測には使用しません。実機メニュー等で分子・分母を同一区間で直接取得できる場合のみ個別採用します。"
+    }
+  ],
+  "evidence": [],
+  "evidenceUi": {
+    "groups": [
+      {
+        "groupId": "SETTING_FLOOR",
+        "label": "確認した設定下限",
+        "selectionMode": "single",
+        "normalizationMode": "ALLOWED_SETTINGS",
+        "options": [
+          {
+            "value": "SET_2_OR_HIGHER",
+            "label": "設定2以上",
+            "allowedSettings": [
+              "SET_2",
+              "SET_4",
+              "SET_5",
+              "SET_6"
+            ],
+            "sourceEvidenceIds": [
+              "RE_TROPHY_2PLUS"
+            ]
+          },
+          {
+            "value": "SET_4_OR_HIGHER",
+            "label": "設定4以上",
+            "allowedSettings": [
+              "SET_4",
+              "SET_5",
+              "SET_6"
+            ],
+            "sourceEvidenceIds": [
+              "RE_TROPHY_4PLUS"
+            ]
+          },
+          {
+            "value": "SET_5_OR_HIGHER",
+            "label": "設定5以上",
+            "allowedSettings": [
+              "SET_5",
+              "SET_6"
+            ],
+            "sourceEvidenceIds": [
+              "RE_TROPHY_5PLUS"
+            ]
+          },
+          {
+            "value": "SET_6",
+            "label": "設定6",
+            "allowedSettings": [
+              "SET_6"
+            ],
+            "sourceEvidenceIds": [
+              "RE_TROPHY_6"
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "evidenceReview": {
+    "policyVersion": 1,
+    "exclusions": []
+  },
+  "uiCategoryLabels": {
+    "PRIMARY": "ボーナス",
+    "ROLE": "小役"
+  },
+  "difficultyAnalysis": {
+    "targetGameBasis": {
+      "basisId": "NORMAL_GAMES",
+      "label": "通常ゲーム数",
+      "quality": "EXACT"
+    },
+    "calibrationAllowedExposureQualities": [
+      "EXACT",
+      "DERIVED",
+      "ESTIMATED"
+    ]
+  }
+}

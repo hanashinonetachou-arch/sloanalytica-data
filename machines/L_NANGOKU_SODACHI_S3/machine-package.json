@@ -1,0 +1,177 @@
+{
+  "schemaVersion": 1,
+  "machine": {
+    "schemaVersion": "2.0.0",
+    "machineId": "L_NANGOKU_SODACHI_S3",
+    "machineDataVersion": "0.1.0",
+    "displayName": "L南国育ち",
+    "modelName": "L南国育ちS3",
+    "manufacturer": "オリンピアエステート",
+    "settings": [
+      "SET_1",
+      "SET_2",
+      "SET_3",
+      "SET_5",
+      "SET_6"
+    ],
+    "packagePolicy": {
+      "offlineCapable": true,
+      "containsImages": false,
+      "containsExecutableCode": false
+    }
+  },
+  "inputs": {
+    "schemaVersion": "2.0.0",
+    "inputs": [
+      {
+        "id": "INP_NORMAL_GAMES",
+        "name": "通常ゲーム数",
+        "type": "integer",
+        "category": "PRIMARY",
+        "unit": "G",
+        "displayOrder": 1,
+        "defaultValue": 0,
+        "minimum": 0
+      },
+      {
+        "id": "INP_INITIAL",
+        "name": "ボーナス初当り回数",
+        "type": "counter",
+        "category": "PRIMARY",
+        "unit": "回",
+        "displayOrder": 2,
+        "defaultValue": 0,
+        "minimum": 0
+      }
+    ]
+  },
+  "features": {
+    "schemaVersion": "2.0.0",
+    "features": [
+      {
+        "featureId": "FEAT_INITIAL",
+        "name": "ボーナス初当り",
+        "adoptionCategory": "INCLUDE_PRIMARY",
+        "calculationRole": "PROBABILITY",
+        "probabilityEngineUsage": true,
+        "modelType": "binomial",
+        "minimumSample": 1,
+        "sampleRecommendation": 7000,
+        "reliabilityProfile": {
+          "weight": 1
+        },
+        "displayFormat": "ratio_1_over_n",
+        "numeratorInputId": "INP_INITIAL",
+        "denominatorInputId": "INP_NORMAL_GAMES",
+        "probabilities": {
+          "SET_1": 0.003336,
+          "SET_2": 0.003436,
+          "SET_3": 0.003741,
+          "SET_5": 0.004191,
+          "SET_6": 0.004789
+        },
+        "sourceEvidenceRefs": [
+          "SRC_NS_TOOL"
+        ]
+      }
+    ]
+  },
+  "evidence": {
+    "version": "1.0.0",
+    "evidences": [],
+    "sources": [
+      {
+        "id": "SRC_NS_PW",
+        "classification": "ANALYSIS",
+        "pageName": "L南国育ち",
+        "url": "https://www.p-world.co.jp/machine/database/9983",
+        "checkedAt": "2026-08-19"
+      },
+      {
+        "id": "SRC_NS_TOOL",
+        "classification": "ANALYSIS",
+        "pageName": "L南国育ち 設定判別",
+        "url": "https://pacnk.com/slot/tools/sh_nangokusodachi.html",
+        "checkedAt": "2026-08-19"
+      }
+    ]
+  },
+  "ui": {
+    "sections": [
+      {
+        "id": "AUTO_PRIMARY",
+        "title": "初当り",
+        "displayOrder": 1,
+        "items": [
+          {
+            "type": "input",
+            "inputId": "INP_NORMAL_GAMES",
+            "label": "通常ゲーム数",
+            "widget": "number"
+          },
+          {
+            "type": "input",
+            "inputId": "INP_INITIAL",
+            "label": "ボーナス初当り回数",
+            "widget": "counter"
+          }
+        ]
+      }
+    ]
+  },
+  "selectionSummary": {
+    "schemaVersion": "selection-summary-v1",
+    "evaluatedCount": 5,
+    "selectedCount": 1,
+    "rejectedCount": 4,
+    "selected": [
+      {
+        "featureId": "FEAT_INITIAL",
+        "name": "ボーナス初当り",
+        "reason": "通常ゲーム数と初当りを終日通して取得でき、設定1から6で約1.44倍の差があるため主軸採用。",
+        "requiredTrials": {
+          "value": 13935,
+          "unit": "通常ゲーム"
+        }
+      }
+    ],
+    "rejected": [
+      {
+        "featureId": "FEAT_BONUS_TYPE",
+        "name": "BIG/REG内訳",
+        "reason": "BIG比率は設定1～3の53.4%に対して設定6でも55.3%と差が小さく、終日のボーナス試行数では情報量が乏しいため不採用。"
+      },
+      {
+        "featureId": "FEAT_ROLE_HIT",
+        "name": "通常A/B滞在時のチェリー・スイカ当選",
+        "reason": "通常A/B滞在時という状態別の分母を正確に取得する必要があり、実戦で観測区間を保証できないため不採用。"
+      },
+      {
+        "featureId": "FEAT_FIRST_MODE",
+        "name": "初代モード移行",
+        "reason": "モード移行機会の分母を正確に数えることが難しく、終日の試行数も不足するため不採用。"
+      },
+      {
+        "featureId": "REJECTED_PREDECESSOR_DENOMINATOR",
+        "name": "着席時データ",
+        "reason": "店舗データカウンターの総ゲーム数は公開解析の通常ゲーム数と集計区間が一致する保証がないため、前任者区間の設定推測には使用しません。実機メニュー等で分子・分母を同一区間で直接取得できる場合のみ個別採用します。"
+      }
+    ]
+  },
+  "reliability": {},
+  "metadata": {
+    "machineId": "L_NANGOKU_SODACHI_S3",
+    "displayName": "L南国育ち",
+    "settings": [
+      "SET_1",
+      "SET_2",
+      "SET_3",
+      "SET_5",
+      "SET_6"
+    ]
+  },
+  "validation": {
+    "cases": []
+  },
+  "statistics": {}
+}
