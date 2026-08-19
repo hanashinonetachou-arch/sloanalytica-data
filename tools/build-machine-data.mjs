@@ -293,6 +293,7 @@ export function buildMachineData(research,selection,statistics=null){
       items:items.sort((a,b)=>a.displayOrder-b.displayOrder).map(i=>({
         type:"input",inputId:i.id,label:i.name,
         ...(i.uiGridSpan?{gridSpan:i.uiGridSpan}:{}),
+        ...(i.uiDirectInput===false?{config:{directInput:false}}:{}),
         widget:i.type==="counter"?"counter":i.type==="boolean"?"boolean":i.type==="enum"?"select":i.type==="multi_enum"?"multi_select":"number"
       }))
     });
