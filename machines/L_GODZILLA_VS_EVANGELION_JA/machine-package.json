@@ -1,0 +1,294 @@
+{
+  "schemaVersion": 1,
+  "machine": {
+    "schemaVersion": "2.0.0",
+    "machineId": "L_GODZILLA_VS_EVANGELION_JA",
+    "machineDataVersion": "0.1.0",
+    "displayName": "L ゴジラ対エヴァンゲリオン",
+    "modelName": "Lゴジラ対エヴァンゲリオンjA",
+    "manufacturer": "ビスティ",
+    "settings": [
+      "SET_1",
+      "SET_2",
+      "SET_4",
+      "SET_5",
+      "SET_6"
+    ],
+    "packagePolicy": {
+      "offlineCapable": true,
+      "containsImages": false,
+      "containsExecutableCode": false
+    }
+  },
+  "inputs": {
+    "schemaVersion": "2.0.0",
+    "inputs": [
+      {
+        "id": "INP_NORMAL_GAMES",
+        "name": "通常ゲーム数",
+        "type": "integer",
+        "category": "PRIMARY",
+        "unit": "G",
+        "displayOrder": 1,
+        "defaultValue": 0,
+        "minimum": 0
+      },
+      {
+        "id": "INP_AT",
+        "name": "AT初当り回数",
+        "type": "counter",
+        "category": "PRIMARY",
+        "unit": "回",
+        "displayOrder": 2,
+        "defaultValue": 0,
+        "minimum": 0
+      },
+      {
+        "id": "INP_EVI_SETTING_FLOOR",
+        "name": "確認した設定下限",
+        "type": "enum",
+        "category": "EVIDENCE",
+        "unit": "",
+        "displayOrder": 100,
+        "inferenceRole": "INCLUDE_SUPPORT",
+        "options": [
+          {
+            "key": "__UNSET__",
+            "label": "未選択",
+            "value": "__UNSET__"
+          },
+          {
+            "key": "SET_2_OR_HIGHER",
+            "label": "設定2以上",
+            "value": "SET_2_OR_HIGHER"
+          },
+          {
+            "key": "SET_4_OR_HIGHER",
+            "label": "設定4以上",
+            "value": "SET_4_OR_HIGHER"
+          },
+          {
+            "key": "SET_5_OR_HIGHER",
+            "label": "設定5以上",
+            "value": "SET_5_OR_HIGHER"
+          },
+          {
+            "key": "SET_6",
+            "label": "設定6",
+            "value": "SET_6"
+          }
+        ],
+        "defaultValue": "__UNSET__"
+      }
+    ]
+  },
+  "features": {
+    "schemaVersion": "2.0.0",
+    "features": [
+      {
+        "featureId": "FEAT_AT",
+        "name": "AT初当り",
+        "adoptionCategory": "INCLUDE_PRIMARY",
+        "calculationRole": "PROBABILITY",
+        "probabilityEngineUsage": true,
+        "modelType": "binomial",
+        "minimumSample": 1,
+        "sampleRecommendation": 5000,
+        "reliabilityProfile": {
+          "weight": 1
+        },
+        "displayFormat": "ratio_1_over_n",
+        "numeratorInputId": "INP_AT",
+        "denominatorInputId": "INP_NORMAL_GAMES",
+        "probabilities": {
+          "SET_1": 0.0017188037126160194,
+          "SET_2": 0.0018092998009770218,
+          "SET_4": 0.002050020500205002,
+          "SET_5": 0.0022411474675033617,
+          "SET_6": 0.0024551927326295114
+        },
+        "sourceEvidenceRefs": [
+          "SRC_GE_NANA"
+        ]
+      }
+    ]
+  },
+  "evidence": {
+    "version": "1.0.0",
+    "evidences": [
+      {
+        "id": "EVI_SETTING_FLOOR_SET_2_OR_HIGHER",
+        "name": "設定2以上",
+        "displayName": "設定2以上",
+        "inputId": "INP_EVI_SETTING_FLOOR",
+        "triggerValue": "SET_2_OR_HIGHER",
+        "confirmedSettings": [
+          "SET_2",
+          "SET_4",
+          "SET_5",
+          "SET_6"
+        ],
+        "deniedSettings": [],
+        "hasImage": false,
+        "type": "SETTING_CONFIRMATION",
+        "sourceEvidenceRefs": [
+          "RE_PAYOUT_2PLUS"
+        ]
+      },
+      {
+        "id": "EVI_SETTING_FLOOR_SET_4_OR_HIGHER",
+        "name": "設定4以上",
+        "displayName": "設定4以上",
+        "inputId": "INP_EVI_SETTING_FLOOR",
+        "triggerValue": "SET_4_OR_HIGHER",
+        "confirmedSettings": [
+          "SET_4",
+          "SET_5",
+          "SET_6"
+        ],
+        "deniedSettings": [],
+        "hasImage": false,
+        "type": "SETTING_CONFIRMATION",
+        "sourceEvidenceRefs": [
+          "RE_PAYOUT_4PLUS",
+          "RE_AT_END_4PLUS"
+        ]
+      },
+      {
+        "id": "EVI_SETTING_FLOOR_SET_5_OR_HIGHER",
+        "name": "設定5以上",
+        "displayName": "設定5以上",
+        "inputId": "INP_EVI_SETTING_FLOOR",
+        "triggerValue": "SET_5_OR_HIGHER",
+        "confirmedSettings": [
+          "SET_5",
+          "SET_6"
+        ],
+        "deniedSettings": [],
+        "hasImage": false,
+        "type": "SETTING_CONFIRMATION",
+        "sourceEvidenceRefs": [
+          "RE_AT_END_5PLUS"
+        ]
+      },
+      {
+        "id": "EVI_SETTING_FLOOR_SET_6",
+        "name": "設定6",
+        "displayName": "設定6",
+        "inputId": "INP_EVI_SETTING_FLOOR",
+        "triggerValue": "SET_6",
+        "confirmedSettings": [
+          "SET_6"
+        ],
+        "deniedSettings": [],
+        "hasImage": false,
+        "type": "SETTING_CONFIRMATION",
+        "sourceEvidenceRefs": [
+          "RE_PAYOUT_6",
+          "RE_AT_END_6"
+        ]
+      }
+    ],
+    "sources": [
+      {
+        "id": "SRC_GE_PW",
+        "classification": "ANALYSIS",
+        "pageName": "L ゴジラ対エヴァンゲリオン 機種情報",
+        "url": "https://www.p-world.co.jp/machine/database/9990",
+        "checkedAt": "2026-08-19"
+      },
+      {
+        "id": "SRC_GE_NANA",
+        "classification": "ANALYSIS",
+        "pageName": "L ゴジラ対エヴァンゲリオン 設定判別",
+        "url": "https://nana-press.com/kaiseki/machine/688/19477/",
+        "checkedAt": "2026-08-19"
+      }
+    ]
+  },
+  "ui": {
+    "sections": [
+      {
+        "id": "AUTO_PRIMARY",
+        "title": "AT初当り",
+        "displayOrder": 1,
+        "items": [
+          {
+            "type": "input",
+            "inputId": "INP_NORMAL_GAMES",
+            "label": "通常ゲーム数",
+            "widget": "number"
+          },
+          {
+            "type": "input",
+            "inputId": "INP_AT",
+            "label": "AT初当り回数",
+            "widget": "counter"
+          }
+        ]
+      },
+      {
+        "id": "AUTO_EVIDENCE",
+        "title": "設定確定・否定情報",
+        "displayOrder": 2,
+        "items": [
+          {
+            "type": "input",
+            "inputId": "INP_EVI_SETTING_FLOOR",
+            "label": "確認した設定下限",
+            "widget": "select"
+          }
+        ]
+      }
+    ]
+  },
+  "selectionSummary": {
+    "schemaVersion": "selection-summary-v1",
+    "evaluatedCount": 3,
+    "selectedCount": 1,
+    "rejectedCount": 2,
+    "selected": [
+      {
+        "featureId": "FEAT_AT",
+        "name": "AT初当り",
+        "reason": "AT初当りは通常ゲームを分母に追え、ボーナスより設定差が大きいため主軸採用。",
+        "requiredTrials": {
+          "value": 27933,
+          "unit": "通常ゲーム"
+        }
+      }
+    ],
+    "rejected": [
+      {
+        "featureId": "FEAT_BONUS",
+        "name": "ボーナス初当り",
+        "reason": "ボーナスとATは当選経路が強く関連し、両方を独立Featureとして採用すると情報重複が生じやすい。",
+        "requiredTrials": {
+          "value": 47975,
+          "unit": "通常ゲーム"
+        }
+      },
+      {
+        "featureId": "REJECTED_BONUS_OVERLAP",
+        "name": "ボーナス初当り",
+        "reason": "AT初当りとの観測重複が強いため、二重計上を避けて不採用です。"
+      }
+    ]
+  },
+  "reliability": {},
+  "metadata": {
+    "machineId": "L_GODZILLA_VS_EVANGELION_JA",
+    "displayName": "L ゴジラ対エヴァンゲリオン",
+    "settings": [
+      "SET_1",
+      "SET_2",
+      "SET_4",
+      "SET_5",
+      "SET_6"
+    ]
+  },
+  "validation": {
+    "cases": []
+  },
+  "statistics": {}
+}

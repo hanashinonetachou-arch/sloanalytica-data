@@ -1,0 +1,395 @@
+{
+  "schemaVersion": 1,
+  "machine": {
+    "schemaVersion": "2.0.0",
+    "machineId": "L_BIOHAZARD_VILLAGE_XA",
+    "machineDataVersion": "0.1.0",
+    "displayName": "スマスロ バイオハザードヴィレッジ",
+    "modelName": "Lバイオハザード ヴィレッジXA",
+    "manufacturer": "アデリオン",
+    "settings": [
+      "SET_1",
+      "SET_2",
+      "SET_3",
+      "SET_4",
+      "SET_5",
+      "SET_6"
+    ],
+    "packagePolicy": {
+      "offlineCapable": true,
+      "containsImages": false,
+      "containsExecutableCode": false
+    }
+  },
+  "inputs": {
+    "schemaVersion": "2.0.0",
+    "inputs": [
+      {
+        "id": "INP_NORMAL_GAMES",
+        "name": "通常ゲーム数",
+        "type": "integer",
+        "category": "PRIMARY",
+        "unit": "G",
+        "displayOrder": 1,
+        "defaultValue": 0,
+        "minimum": 0
+      },
+      {
+        "id": "INP_AT",
+        "name": "AT初当り回数",
+        "type": "counter",
+        "category": "PRIMARY",
+        "unit": "回",
+        "displayOrder": 2,
+        "defaultValue": 0,
+        "minimum": 0
+      },
+      {
+        "id": "INP_ROLE_GAMES",
+        "name": "小役集計ゲーム数",
+        "type": "integer",
+        "category": "ROLE",
+        "unit": "G",
+        "displayOrder": 10,
+        "defaultValue": 0,
+        "minimum": 0
+      },
+      {
+        "id": "INP_WEAK_CHERRY",
+        "name": "弱チェリー回数",
+        "type": "counter",
+        "category": "ROLE",
+        "unit": "回",
+        "displayOrder": 11,
+        "defaultValue": 0,
+        "minimum": 0
+      },
+      {
+        "id": "INP_EVI_SETTING_FLOOR",
+        "name": "確認した設定下限",
+        "type": "enum",
+        "category": "EVIDENCE",
+        "unit": "",
+        "displayOrder": 100,
+        "inferenceRole": "INCLUDE_SUPPORT",
+        "options": [
+          {
+            "key": "__UNSET__",
+            "label": "未選択",
+            "value": "__UNSET__"
+          },
+          {
+            "key": "SET_2_OR_HIGHER",
+            "label": "設定2以上",
+            "value": "SET_2_OR_HIGHER"
+          },
+          {
+            "key": "SET_3_OR_HIGHER",
+            "label": "設定3以上",
+            "value": "SET_3_OR_HIGHER"
+          },
+          {
+            "key": "SET_4_OR_HIGHER",
+            "label": "設定4以上",
+            "value": "SET_4_OR_HIGHER"
+          },
+          {
+            "key": "SET_5_OR_HIGHER",
+            "label": "設定5以上",
+            "value": "SET_5_OR_HIGHER"
+          },
+          {
+            "key": "SET_6",
+            "label": "設定6",
+            "value": "SET_6"
+          }
+        ],
+        "defaultValue": "__UNSET__"
+      }
+    ]
+  },
+  "features": {
+    "schemaVersion": "2.0.0",
+    "features": [
+      {
+        "featureId": "FEAT_AT",
+        "name": "AT初当り",
+        "adoptionCategory": "INCLUDE_PRIMARY",
+        "calculationRole": "PROBABILITY",
+        "probabilityEngineUsage": true,
+        "modelType": "binomial",
+        "minimumSample": 1,
+        "sampleRecommendation": 5000,
+        "reliabilityProfile": {
+          "weight": 1
+        },
+        "displayFormat": "ratio_1_over_n",
+        "numeratorInputId": "INP_AT",
+        "denominatorInputId": "INP_NORMAL_GAMES",
+        "probabilities": {
+          "SET_1": 0.0022456770716370983,
+          "SET_2": 0.0023036166781847498,
+          "SET_3": 0.0024055809477988937,
+          "SET_4": 0.0026816840976133013,
+          "SET_5": 0.0028216704288939053,
+          "SET_6": 0.0029171528588098016
+        },
+        "sourceEvidenceRefs": [
+          "SRC_BIO_NANA"
+        ]
+      },
+      {
+        "featureId": "FEAT_WEAK_CHERRY",
+        "name": "弱チェリー",
+        "adoptionCategory": "INCLUDE_SUPPORT",
+        "calculationRole": "PROBABILITY",
+        "probabilityEngineUsage": true,
+        "modelType": "binomial",
+        "minimumSample": 1,
+        "sampleRecommendation": 5000,
+        "reliabilityProfile": {
+          "weight": 1
+        },
+        "displayFormat": "ratio_1_over_n",
+        "numeratorInputId": "INP_WEAK_CHERRY",
+        "denominatorInputId": "INP_ROLE_GAMES",
+        "probabilities": {
+          "SET_1": 0.010116337885685382,
+          "SET_2": 0.010345541071798055,
+          "SET_3": 0.010497585555322275,
+          "SET_4": 0.011077877478675086,
+          "SET_5": 0.011276499774470004,
+          "SET_6": 0.011474469305794606
+        },
+        "sourceEvidenceRefs": [
+          "SRC_BIO_NANA"
+        ]
+      }
+    ]
+  },
+  "evidence": {
+    "version": "1.0.0",
+    "evidences": [
+      {
+        "id": "EVI_SETTING_FLOOR_SET_2_OR_HIGHER",
+        "name": "設定2以上",
+        "displayName": "設定2以上",
+        "inputId": "INP_EVI_SETTING_FLOOR",
+        "triggerValue": "SET_2_OR_HIGHER",
+        "confirmedSettings": [
+          "SET_2",
+          "SET_3",
+          "SET_4",
+          "SET_5",
+          "SET_6"
+        ],
+        "deniedSettings": [],
+        "hasImage": false,
+        "type": "SETTING_CONFIRMATION",
+        "sourceEvidenceRefs": [
+          "RE_TROPHY_2PLUS"
+        ]
+      },
+      {
+        "id": "EVI_SETTING_FLOOR_SET_3_OR_HIGHER",
+        "name": "設定3以上",
+        "displayName": "設定3以上",
+        "inputId": "INP_EVI_SETTING_FLOOR",
+        "triggerValue": "SET_3_OR_HIGHER",
+        "confirmedSettings": [
+          "SET_3",
+          "SET_4",
+          "SET_5",
+          "SET_6"
+        ],
+        "deniedSettings": [],
+        "hasImage": false,
+        "type": "SETTING_CONFIRMATION",
+        "sourceEvidenceRefs": [
+          "RE_TROPHY_3PLUS"
+        ]
+      },
+      {
+        "id": "EVI_SETTING_FLOOR_SET_4_OR_HIGHER",
+        "name": "設定4以上",
+        "displayName": "設定4以上",
+        "inputId": "INP_EVI_SETTING_FLOOR",
+        "triggerValue": "SET_4_OR_HIGHER",
+        "confirmedSettings": [
+          "SET_4",
+          "SET_5",
+          "SET_6"
+        ],
+        "deniedSettings": [],
+        "hasImage": false,
+        "type": "SETTING_CONFIRMATION",
+        "sourceEvidenceRefs": [
+          "RE_TROPHY_4PLUS"
+        ]
+      },
+      {
+        "id": "EVI_SETTING_FLOOR_SET_5_OR_HIGHER",
+        "name": "設定5以上",
+        "displayName": "設定5以上",
+        "inputId": "INP_EVI_SETTING_FLOOR",
+        "triggerValue": "SET_5_OR_HIGHER",
+        "confirmedSettings": [
+          "SET_5",
+          "SET_6"
+        ],
+        "deniedSettings": [],
+        "hasImage": false,
+        "type": "SETTING_CONFIRMATION",
+        "sourceEvidenceRefs": [
+          "RE_TROPHY_5PLUS"
+        ]
+      },
+      {
+        "id": "EVI_SETTING_FLOOR_SET_6",
+        "name": "設定6",
+        "displayName": "設定6",
+        "inputId": "INP_EVI_SETTING_FLOOR",
+        "triggerValue": "SET_6",
+        "confirmedSettings": [
+          "SET_6"
+        ],
+        "deniedSettings": [],
+        "hasImage": false,
+        "type": "SETTING_CONFIRMATION",
+        "sourceEvidenceRefs": [
+          "RE_TROPHY_6"
+        ]
+      }
+    ],
+    "sources": [
+      {
+        "id": "SRC_BIO_PW",
+        "classification": "ANALYSIS",
+        "pageName": "スマスロ バイオハザード ヴィレッジ 機種情報",
+        "url": "https://www.p-world.co.jp/machine/database/9932",
+        "checkedAt": "2026-08-19"
+      },
+      {
+        "id": "SRC_BIO_NANA",
+        "classification": "ANALYSIS",
+        "pageName": "スマスロ バイオハザード ヴィレッジ 設定判別",
+        "url": "https://nana-press.com/kaiseki/machine/661/18438/",
+        "checkedAt": "2026-08-19"
+      }
+    ]
+  },
+  "ui": {
+    "sections": [
+      {
+        "id": "AUTO_PRIMARY",
+        "title": "AT初当り",
+        "displayOrder": 1,
+        "items": [
+          {
+            "type": "input",
+            "inputId": "INP_NORMAL_GAMES",
+            "label": "通常ゲーム数",
+            "widget": "number"
+          },
+          {
+            "type": "input",
+            "inputId": "INP_AT",
+            "label": "AT初当り回数",
+            "widget": "counter"
+          }
+        ]
+      },
+      {
+        "id": "AUTO_ROLE",
+        "title": "小役",
+        "displayOrder": 2,
+        "items": [
+          {
+            "type": "input",
+            "inputId": "INP_ROLE_GAMES",
+            "label": "小役集計ゲーム数",
+            "widget": "number"
+          },
+          {
+            "type": "input",
+            "inputId": "INP_WEAK_CHERRY",
+            "label": "弱チェリー回数",
+            "widget": "counter"
+          }
+        ]
+      },
+      {
+        "id": "AUTO_EVIDENCE",
+        "title": "設定確定・否定情報",
+        "displayOrder": 3,
+        "items": [
+          {
+            "type": "input",
+            "inputId": "INP_EVI_SETTING_FLOOR",
+            "label": "確認した設定下限",
+            "widget": "select"
+          }
+        ]
+      }
+    ]
+  },
+  "selectionSummary": {
+    "schemaVersion": "selection-summary-v1",
+    "evaluatedCount": 4,
+    "selectedCount": 2,
+    "rejectedCount": 2,
+    "selected": [
+      {
+        "featureId": "FEAT_AT",
+        "name": "AT初当り",
+        "reason": "AT初当りは通常ゲームを分母に継続観測でき、設定差もあるため主軸採用。",
+        "requiredTrials": {
+          "value": 41683,
+          "unit": "通常ゲーム"
+        }
+      },
+      {
+        "featureId": "FEAT_WEAK_CHERRY",
+        "name": "弱チェリー",
+        "reason": "弱チェリーは高頻度で観測でき、AT初当りと異なる情報として補助採用。",
+        "requiredTrials": {
+          "value": 42397,
+          "unit": "小役集計ゲーム"
+        }
+      }
+    ],
+    "rejected": [
+      {
+        "featureId": "FEAT_INITIAL",
+        "name": "初当り",
+        "reason": "初当りとAT初当りは観測経路が重なり、同時採用では情報重複が生じやすい。",
+        "requiredTrials": {
+          "value": 35371,
+          "unit": "通常ゲーム"
+        }
+      },
+      {
+        "featureId": "REJECTED_INITIAL_OVERLAP",
+        "name": "初当り合算",
+        "reason": "AT初当りとの観測重複が強いため、二重計上を避けて不採用です。"
+      }
+    ]
+  },
+  "reliability": {},
+  "metadata": {
+    "machineId": "L_BIOHAZARD_VILLAGE_XA",
+    "displayName": "スマスロ バイオハザードヴィレッジ",
+    "settings": [
+      "SET_1",
+      "SET_2",
+      "SET_3",
+      "SET_4",
+      "SET_5",
+      "SET_6"
+    ]
+  },
+  "validation": {
+    "cases": []
+  },
+  "statistics": {}
+}

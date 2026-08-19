@@ -1,0 +1,363 @@
+{
+  "schemaVersion": 1,
+  "machine": {
+    "schemaVersion": "2.0.0",
+    "machineId": "L_SKY_LOVE_GNB",
+    "machineDataVersion": "0.1.0",
+    "displayName": "Sky Love",
+    "modelName": "LスカイラブGNB",
+    "manufacturer": "カルミナ",
+    "settings": [
+      "SET_1",
+      "SET_2",
+      "SET_3",
+      "SET_4",
+      "SET_5",
+      "SET_6"
+    ],
+    "packagePolicy": {
+      "offlineCapable": true,
+      "containsImages": false,
+      "containsExecutableCode": false
+    }
+  },
+  "inputs": {
+    "schemaVersion": "2.0.0",
+    "inputs": [
+      {
+        "id": "INP_NORMAL_GAMES",
+        "name": "通常ゲーム数",
+        "type": "integer",
+        "category": "PRIMARY",
+        "unit": "G",
+        "displayOrder": 1,
+        "defaultValue": 0,
+        "minimum": 0
+      },
+      {
+        "id": "INP_BONUS",
+        "name": "ボーナス回数",
+        "type": "counter",
+        "category": "PRIMARY",
+        "unit": "回",
+        "displayOrder": 2,
+        "defaultValue": 0,
+        "minimum": 0
+      },
+      {
+        "id": "INP_ROLE_GAMES",
+        "name": "小役集計ゲーム数",
+        "type": "integer",
+        "category": "ROLE",
+        "unit": "G",
+        "displayOrder": 10,
+        "defaultValue": 0,
+        "minimum": 0
+      },
+      {
+        "id": "INP_WEAK_CHERRY",
+        "name": "弱チェリー回数",
+        "type": "counter",
+        "category": "ROLE",
+        "unit": "回",
+        "displayOrder": 11,
+        "defaultValue": 0,
+        "minimum": 0
+      },
+      {
+        "id": "INP_EVI_SETTING_FLOOR",
+        "name": "確認した設定下限",
+        "type": "enum",
+        "category": "EVIDENCE",
+        "unit": "",
+        "displayOrder": 100,
+        "inferenceRole": "INCLUDE_SUPPORT",
+        "options": [
+          {
+            "key": "__UNSET__",
+            "label": "未選択",
+            "value": "__UNSET__"
+          },
+          {
+            "key": "SET_2_OR_HIGHER",
+            "label": "設定2以上",
+            "value": "SET_2_OR_HIGHER"
+          },
+          {
+            "key": "SET_4_OR_HIGHER",
+            "label": "設定4以上",
+            "value": "SET_4_OR_HIGHER"
+          },
+          {
+            "key": "SET_6",
+            "label": "設定6",
+            "value": "SET_6"
+          }
+        ],
+        "defaultValue": "__UNSET__"
+      }
+    ]
+  },
+  "features": {
+    "schemaVersion": "2.0.0",
+    "features": [
+      {
+        "featureId": "FEAT_BONUS_COMBINED",
+        "name": "ボーナス合算",
+        "adoptionCategory": "INCLUDE_PRIMARY",
+        "calculationRole": "PROBABILITY",
+        "probabilityEngineUsage": true,
+        "modelType": "binomial",
+        "minimumSample": 1,
+        "sampleRecommendation": 3000,
+        "reliabilityProfile": {
+          "weight": 1
+        },
+        "displayFormat": "ratio_1_over_n",
+        "numeratorInputId": "INP_BONUS",
+        "denominatorInputId": "INP_NORMAL_GAMES",
+        "probabilities": {
+          "SET_1": 0.005035246727089627,
+          "SET_2": 0.005257623554153523,
+          "SET_3": 0.005564830272676684,
+          "SET_4": 0.006697923643670461,
+          "SET_5": 0.007342143906020559,
+          "SET_6": 0.007616146230007615
+        },
+        "sourceEvidenceRefs": [
+          "SRC_SKY_NANA"
+        ]
+      },
+      {
+        "featureId": "FEAT_WEAK_CHERRY",
+        "name": "弱チェリー",
+        "adoptionCategory": "INCLUDE_SUPPORT",
+        "calculationRole": "PROBABILITY",
+        "probabilityEngineUsage": true,
+        "modelType": "binomial",
+        "minimumSample": 1,
+        "sampleRecommendation": 5000,
+        "reliabilityProfile": {
+          "weight": 1
+        },
+        "displayFormat": "ratio_1_over_n",
+        "numeratorInputId": "INP_WEAK_CHERRY",
+        "denominatorInputId": "INP_ROLE_GAMES",
+        "probabilities": {
+          "SET_1": 0.014492753623188406,
+          "SET_2": 0.014814814814814815,
+          "SET_3": 0.015128593040847203,
+          "SET_4": 0.015455950540958269,
+          "SET_5": 0.015772870662460567,
+          "SET_6": 0.01605136436597111
+        },
+        "sourceEvidenceRefs": [
+          "SRC_SKY_NANA"
+        ]
+      }
+    ]
+  },
+  "evidence": {
+    "version": "1.0.0",
+    "evidences": [
+      {
+        "id": "EVI_SETTING_FLOOR_SET_2_OR_HIGHER",
+        "name": "設定2以上",
+        "displayName": "設定2以上",
+        "inputId": "INP_EVI_SETTING_FLOOR",
+        "triggerValue": "SET_2_OR_HIGHER",
+        "confirmedSettings": [
+          "SET_2",
+          "SET_3",
+          "SET_4",
+          "SET_5",
+          "SET_6"
+        ],
+        "deniedSettings": [],
+        "hasImage": false,
+        "type": "SETTING_CONFIRMATION",
+        "sourceEvidenceRefs": [
+          "RE_FUTURE_A_2PLUS"
+        ]
+      },
+      {
+        "id": "EVI_SETTING_FLOOR_SET_4_OR_HIGHER",
+        "name": "設定4以上",
+        "displayName": "設定4以上",
+        "inputId": "INP_EVI_SETTING_FLOOR",
+        "triggerValue": "SET_4_OR_HIGHER",
+        "confirmedSettings": [
+          "SET_4",
+          "SET_5",
+          "SET_6"
+        ],
+        "deniedSettings": [],
+        "hasImage": false,
+        "type": "SETTING_CONFIRMATION",
+        "sourceEvidenceRefs": [
+          "RE_FUTURE_S_4PLUS"
+        ]
+      },
+      {
+        "id": "EVI_SETTING_FLOOR_SET_6",
+        "name": "設定6",
+        "displayName": "設定6",
+        "inputId": "INP_EVI_SETTING_FLOOR",
+        "triggerValue": "SET_6",
+        "confirmedSettings": [
+          "SET_6"
+        ],
+        "deniedSettings": [],
+        "hasImage": false,
+        "type": "SETTING_CONFIRMATION",
+        "sourceEvidenceRefs": [
+          "RE_FUTURE_SS_6"
+        ]
+      }
+    ],
+    "sources": [
+      {
+        "id": "SRC_SKY_OFF",
+        "classification": "OFFICIAL",
+        "pageName": "Sky Love 公式サイト",
+        "url": "https://slot.carmina-gaming.co.jp/skylove/",
+        "checkedAt": "2026-08-19"
+      },
+      {
+        "id": "SRC_SKY_NANA",
+        "classification": "ANALYSIS",
+        "pageName": "Sky Love 設定判別",
+        "url": "https://nana-press.com/kaiseki/machine/681/19069/",
+        "checkedAt": "2026-08-19"
+      }
+    ]
+  },
+  "ui": {
+    "sections": [
+      {
+        "id": "AUTO_PRIMARY",
+        "title": "ボーナス",
+        "displayOrder": 1,
+        "items": [
+          {
+            "type": "input",
+            "inputId": "INP_NORMAL_GAMES",
+            "label": "通常ゲーム数",
+            "widget": "number"
+          },
+          {
+            "type": "input",
+            "inputId": "INP_BONUS",
+            "label": "ボーナス回数",
+            "widget": "counter"
+          }
+        ]
+      },
+      {
+        "id": "AUTO_ROLE",
+        "title": "小役",
+        "displayOrder": 2,
+        "items": [
+          {
+            "type": "input",
+            "inputId": "INP_ROLE_GAMES",
+            "label": "小役集計ゲーム数",
+            "widget": "number"
+          },
+          {
+            "type": "input",
+            "inputId": "INP_WEAK_CHERRY",
+            "label": "弱チェリー回数",
+            "widget": "counter"
+          }
+        ]
+      },
+      {
+        "id": "AUTO_EVIDENCE",
+        "title": "設定確定・否定情報",
+        "displayOrder": 3,
+        "items": [
+          {
+            "type": "input",
+            "inputId": "INP_EVI_SETTING_FLOOR",
+            "label": "確認した設定下限",
+            "widget": "select"
+          }
+        ]
+      }
+    ]
+  },
+  "selectionSummary": {
+    "schemaVersion": "selection-summary-v1",
+    "evaluatedCount": 6,
+    "selectedCount": 2,
+    "rejectedCount": 4,
+    "selected": [
+      {
+        "featureId": "FEAT_BONUS_COMBINED",
+        "name": "ボーナス合算",
+        "reason": "ボーナス合算は設定差が大きく、通常時を通して十分な回数を観測できるため主軸採用。",
+        "requiredTrials": {
+          "value": 6845,
+          "unit": "通常ゲーム"
+        }
+      },
+      {
+        "featureId": "FEAT_WEAK_CHERRY",
+        "name": "弱チェリー",
+        "reason": "弱チェリーは高頻度で独立して観測できるため補助採用。",
+        "requiredTrials": {
+          "value": 45351,
+          "unit": "小役集計ゲーム"
+        }
+      }
+    ],
+    "rejected": [
+      {
+        "featureId": "FEAT_ST",
+        "name": "ST初当り",
+        "reason": "ST初当りはボーナス経路と強く関連するため、ボーナス合算との同時採用では情報重複が生じやすい。",
+        "requiredTrials": {
+          "value": 23240,
+          "unit": "通常ゲーム"
+        }
+      },
+      {
+        "featureId": "FEAT_CZ",
+        "name": "CZ出現",
+        "reason": "CZとボーナスは当選経路が強く関連し、独立Featureとして同時採用すると二重計上しやすい。",
+        "requiredTrials": {
+          "value": 10656,
+          "unit": "通常ゲーム"
+        }
+      },
+      {
+        "featureId": "REJECTED_ST_OVERLAP",
+        "name": "ST初当り",
+        "reason": "ボーナスとの観測重複が強いため不採用です。"
+      },
+      {
+        "featureId": "REJECTED_CZ_OVERLAP",
+        "name": "CZ初当り",
+        "reason": "ボーナス当選経路との相関が強いため不採用です。"
+      }
+    ]
+  },
+  "reliability": {},
+  "metadata": {
+    "machineId": "L_SKY_LOVE_GNB",
+    "displayName": "Sky Love",
+    "settings": [
+      "SET_1",
+      "SET_2",
+      "SET_3",
+      "SET_4",
+      "SET_5",
+      "SET_6"
+    ]
+  },
+  "validation": {
+    "cases": []
+  },
+  "statistics": {}
+}
