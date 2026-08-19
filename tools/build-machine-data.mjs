@@ -150,7 +150,6 @@ function buildFeature(rf,sf,inputIds){
       if(isConditionalPartial) return [s,probs];
       if(residualCat){
         const residual=Number(dist[residualCat]);
-        // If the residual is omitted from ResearchData, it is the implicit remainder and must not renormalize explicit probabilities.
         if(!Number.isFinite(residual)) return [s,probs];
       }
       const includedProbs=includedCats.map(c=>Number(dist[c]));
@@ -165,15 +164,12 @@ function buildFeature(rf,sf,inputIds){
   return base;
 }
 
-
 function buildSelectionSummary(research,selection,statistics=null){
   const rfs=new Map((research.features??[]).map(f=>[f.researchFeatureId,f]));
   const statsById=new Map((statistics?.features??[]).map(f=>[f.researchFeatureId,f]));
   const selected=[],rejected=[];
   const selectedResearchIds=new Set((selection.features??[]).map(sf=>sf.researchFeatureId).filter(Boolean));
   for(const sf of selection.features??[]){
-    // DISPLAY_ONLY is a legacy compatibility state. It is intentionally omitted
-    // until the machine is migrated to selected/rejected under the current policy.
     if(sf.adoptionCategory==="DISPLAY_ONLY") continue;
     const rf=rfs.get(sf.researchFeatureId);
     if(!rf) continue;
@@ -185,7 +181,6 @@ function buildSelectionSummary(research,selection,statistics=null){
     if(sf.requiredTrials?.value!=null){
       item.requiredTrials={value:sf.requiredTrials.value,unit:sf.requiredTrials.unit??rf.trialUnit??"回"};
     } else {
-      // Selection-aware estimate: category exclusions / conditional normalization must match the actual inference Feature.
       const estimate=estimateRequiredTrials80(rf,sf,research.machine?.settings??[]);
       const statsEstimate=statsById.get(sf.researchFeatureId)?.extremePair80?.requiredTrials80;
       const value=Number.isFinite(estimate)?estimate:statsEstimate;
@@ -196,19 +191,24 @@ function buildSelectionSummary(research,selection,statistics=null){
     else if(sf.adoptionCategory==="INCLUDE_PRIMARY" || sf.adoptionCategory==="INCLUDE_SUPPORT") selected.push(item);
   }
 
-  // ResearchDataで検証済みなのにSelectionDataへ明示されなかった候補も、
-  // ユーザー向け説明から消さない。事実説明と「現行Selectionでは未採用」を分けて表示する。
   for(const rf of research.features??[]){
     if(!rf?.researchFeatureId || selectedResearchIds.has(rf.researchFeatureId) || rf.factStatus!=="verified") continue;
     const fact=String(rf.notes??"").trim();
     const reason=fact
       ? `${fact} 現行Selectionでは採用条件が確定していないため、推測計算には使用していません。`
       : "調査済みの設定差候補ですが、現行Selectionでは採用条件が確定していないため、推測計算には使用していません。";
-    rejected.push({
-      featureId:`REJECTED_${rf.researchFeatureId}`,
-      name:rf.name,
-      reason
-    });
+    rejected.push({featureId:`REJECTED_${rf.researchFeatureId}`,name:rf.name,reason});
+  }
+
+  for(const extra of selection.rejectedElements??[]){
+    if(!extra?.id || !extra?.name || !extra?.reason) fail("rejectedElements requires id, name and reason");
+    if(rejected.some(item=>item.featureId===extra.id)) fail(`duplicate rejected element id: ${extra.id}`);
+    const item={featureId:extra.id,name:extra.name,reason:extra.reason};
+    if(extra.requiredTrials?.value!=null){
+      if(!Number.isFinite(Number(extra.requiredTrials.value)) || Number(extra.requiredTrials.value)<0) fail(`${extra.id}: invalid requiredTrials.value`);
+      item.requiredTrials={value:Number(extra.requiredTrials.value),unit:extra.requiredTrials.unit??"回"};
+    }
+    rejected.push(item);
   }
 
   return {
