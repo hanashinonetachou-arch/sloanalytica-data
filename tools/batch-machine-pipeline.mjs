@@ -57,10 +57,11 @@ function readIdsFromFile(filePath) {
   }
   return text.split(/\r?\n/).map(v => v.trim()).filter(Boolean);
 }
-function generatedPaths(machineIds) {
+export function generatedPaths(machineIds) {
   const paths = [
     path.join(ROOT, 'catalog.json'),
     path.join(ROOT, 'difficulty-catalog.json'),
+    path.join(ROOT, 'machine-registry.json'),
   ];
   for (const machineId of machineIds) {
     paths.push(
