@@ -20,7 +20,14 @@ test('batch guard restores setting-band reports on check or failure', () => {
   const source = readText('tools/guard-machine-pipeline.mjs');
   assert.match(source, /snapshotSettingBandReports/);
   assert.match(source, /restoreSettingBandReports/);
-  assert.match(source, /args\.includes\('--check'\)/);
+  assert.match(source, /checkOnly/);
+});
+
+test('outer guard restores machine registry after check mode', () => {
+  const source = readText('tools/guard-machine-pipeline.mjs');
+  assert.match(source, /machineRegistrySnapshot/);
+  assert.match(source, /fs\.readFileSync\(machineRegistryPath\)/);
+  assert.match(source, /fs\.writeFileSync\(machineRegistryPath, machineRegistrySnapshot\)/);
 });
 
 test('difficulty catalog sync requires and publishes setting-band data', () => {
