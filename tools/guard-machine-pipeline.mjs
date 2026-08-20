@@ -20,7 +20,7 @@ function readMachineIdsFromFile(filePath) {
   if (raw.startsWith('[')) return JSON.parse(raw).map(String);
   if (raw.startsWith('{')) {
     const value = JSON.parse(raw);
-    return (value.machines ?? []).map(item => typeof item === 'string' ? item : item.machineId).filter(Boolean);
+    return (value.machines ?? value.machineIds ?? []).map(item => typeof item === 'string' ? item : item.machineId).filter(Boolean);
   }
   return raw.split(/\r?\n/).map(v => v.trim()).filter(Boolean);
 }
@@ -34,9 +34,26 @@ function collectIds() {
   }
   return [...new Set(ids)];
 }
+function snapshotSettingBandReports(machineIds) {
+  return new Map(machineIds.map(id => {
+    const p = path.join(ROOT, 'research', id, 'setting-band-report.json');
+    return [p, fs.existsSync(p) ? fs.readFileSync(p) : null];
+  }));
+}
+function restoreSettingBandReports(snapshot) {
+  for (const [p, bytes] of snapshot.entries()) {
+    if (bytes === null) {
+      if (fs.existsSync(p)) fs.rmSync(p, { force: true });
+    } else {
+      fs.mkdirSync(path.dirname(p), { recursive: true });
+      fs.writeFileSync(p, bytes);
+    }
+  }
+}
 
+const machineIds = collectIds();
 const errors = [];
-for (const id of collectIds()) {
+for (const id of machineIds) {
   const researchPath = path.join(ROOT, 'research', id, 'research-data.json');
   const selectionPath = path.join(ROOT, 'research', id, 'selection-data.json');
   if (!fs.existsSync(researchPath) || !fs.existsSync(selectionPath)) continue;
@@ -61,7 +78,13 @@ if (errors.length) {
   process.exit(1);
 }
 
+const settingBandSnapshot = mode === 'batch' ? snapshotSettingBandReports(machineIds) : null;
 const target = path.join(ROOT, 'tools', mode === 'single' ? 'machine-pipeline.mjs' : 'batch-machine-pipeline.mjs');
 const r = spawnSync(process.execPath, [target, ...args], { cwd: ROOT, stdio: 'inherit' });
 if (r.error) throw r.error;
+
+if (settingBandSnapshot && (r.status !== 0 || args.includes('--check'))) {
+  restoreSettingBandReports(settingBandSnapshot);
+}
+
 process.exit(r.status ?? 1);
