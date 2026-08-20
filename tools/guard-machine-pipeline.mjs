@@ -58,14 +58,11 @@ for (const id of machineIds) {
   const selectionPath = path.join(ROOT, 'research', id, 'selection-data.json');
   if (!fs.existsSync(researchPath) || !fs.existsSync(selectionPath)) continue;
   const research = readJson(researchPath);
-  if (!research.researchCompleteness) continue; // legacy data remains backward compatible
+  if (!research.researchCompleteness) continue;
   const selection = readJson(selectionPath);
 
   const researchResult = validateResearchCompleteness(research, { required: true });
   for (const error of researchResult.errors) errors.push(`${id}: ${error}`);
-  // UNRESOLVED is deliberate review metadata, not fabricated data and not a schema error.
-  // Keep it visible to the operator, but allow an explicitly marked "未調査版" to be
-  // built so real-device verification can close the gap later.
   for (const unresolved of researchResult.unresolved) {
     console.warn(`REVIEW [machine completeness guard] ${id}: research completeness unresolved ${unresolved}`);
   }
@@ -78,13 +75,26 @@ if (errors.length) {
   process.exit(1);
 }
 
+const checkOnly = args.includes('--check');
 const settingBandSnapshot = mode === 'batch' ? snapshotSettingBandReports(machineIds) : null;
-const target = path.join(ROOT, 'tools', mode === 'single' ? 'machine-pipeline.mjs' : 'batch-machine-pipeline.mjs');
-const r = spawnSync(process.execPath, [target, ...args], { cwd: ROOT, stdio: 'inherit' });
-if (r.error) throw r.error;
+const machineRegistryPath = path.join(ROOT, 'machine-registry.json');
+const machineRegistrySnapshot = checkOnly && fs.existsSync(machineRegistryPath)
+  ? fs.readFileSync(machineRegistryPath)
+  : null;
 
-if (settingBandSnapshot && (r.status !== 0 || args.includes('--check'))) {
-  restoreSettingBandReports(settingBandSnapshot);
+const target = path.join(ROOT, 'tools', mode === 'single' ? 'machine-pipeline.mjs' : 'batch-machine-pipeline.mjs');
+let status = 1;
+try {
+  const r = spawnSync(process.execPath, [target, ...args], { cwd: ROOT, stdio: 'inherit' });
+  if (r.error) throw r.error;
+  status = r.status ?? 1;
+} finally {
+  if (settingBandSnapshot && (status !== 0 || checkOnly)) {
+    restoreSettingBandReports(settingBandSnapshot);
+  }
+  if (machineRegistrySnapshot) {
+    fs.writeFileSync(machineRegistryPath, machineRegistrySnapshot);
+  }
 }
 
-process.exit(r.status ?? 1);
+process.exit(status);
