@@ -14,19 +14,21 @@ const write = (p, v) => fs.writeFileSync(p, JSON.stringify(v, null, 2) + '\n', '
 const catalogPath = path.join(ROOT, 'catalog.json');
 const difficultyCatalogPath = path.join(ROOT, 'difficulty-catalog.json');
 const difficultyPath = path.join(ROOT, 'research', machineId, 'difficulty-report.json');
+const settingBandPath = path.join(ROOT, 'research', machineId, 'setting-band-report.json');
 const machinePath = path.join(ROOT, 'machines', machineId, 'machine-package.json');
 
-for (const p of [catalogPath, difficultyCatalogPath, difficultyPath, machinePath]) {
+for (const p of [catalogPath, difficultyCatalogPath, difficultyPath, settingBandPath, machinePath]) {
   if (!fs.existsSync(p)) throw new Error(`required file not found: ${path.relative(ROOT, p)}`);
 }
 
 const catalog = read(catalogPath);
 const doc = read(difficultyCatalogPath);
 const report = read(difficultyPath);
+const settingBandReport = read(settingBandPath);
 const pkg = read(machinePath);
 const machine = (catalog.machines ?? []).find(m => m.machineId === machineId);
 if (!machine) throw new Error(`${machineId} is not registered in catalog.json`);
-if (report.machineId !== machineId || pkg.machine?.machineId !== machineId) throw new Error('machineId mismatch');
+if (report.machineId !== machineId || settingBandReport.machineId !== machineId || pkg.machine?.machineId !== machineId) throw new Error('machineId mismatch');
 
 const cal = doc.calibration;
 if (!cal || cal.method !== 'FIXED_BENCHMARK_RAW_SCALE') throw new Error('unsupported calibration');
@@ -50,6 +52,18 @@ const rejectedFeatures = (pkg.selectionSummary?.rejected ?? []).map(r => ({
   requiredTrialsUnit: r.requiredTrials?.unit ?? 'G',
   metricStatus: r.requiredTrials?.value != null ? 'COMPUTED' : 'NOT_COMPUTABLE',
 }));
+const settingBandDiscrimination = settingBandReport.status === 'COMPLETE'
+  ? {
+      schemaVersion: 'setting-band-discrimination-g-v1',
+      status: 'COMPLETE',
+      results: (settingBandReport.results ?? []).map(result => ({ threshold: result.threshold, games: result.games })),
+    }
+  : {
+      schemaVersion: 'setting-band-discrimination-g-v1',
+      status: 'NOT_APPLICABLE',
+      reason: settingBandReport.reason ?? 'No adopted numeric inference feature has resolvable game-count exposure for setting-band discrimination.',
+      results: [],
+    };
 
 const difficulty = {
   schemaVersion: 'difficulty-display-v1',
@@ -69,6 +83,7 @@ const difficulty = {
     buttonLabelKey: 'machine_difficulty_guide',
     rangeDisplay: 'WHEN_AVAILABLE',
   },
+  settingBandDiscrimination,
   ...(status === 'SCORED' ? {
     rawScores,
     displayScoreSource: 'CALIBRATED_FROM_RAW',
@@ -96,5 +111,10 @@ console.log(`Difficulty Catalog sync: ${machineId}${changed ? ' (updated)' : ' (
 if (status === 'SCORED') {
   console.log(`  Raw: ${rawScores.map(s => `${s.games}G=${s.rawScore}`).join(' / ')}`);
   console.log(`  Display: ${scores.map(s => `${s.games}G=${s.score}`).join(' / ')}`);
+}
+if (settingBandDiscrimination.status === 'COMPLETE') {
+  console.log(`  Setting Band: ${settingBandDiscrimination.results.map(r => `${Math.round(r.threshold * 100)}%=${r.games}G`).join(' / ')}`);
+} else {
+  console.log(`  Setting Band: NOT_APPLICABLE`);
 }
 console.log(`  status: ${status}`);
