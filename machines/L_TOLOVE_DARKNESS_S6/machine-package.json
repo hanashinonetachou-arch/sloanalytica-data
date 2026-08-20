@@ -1,0 +1,412 @@
+{
+  "schemaVersion": 1,
+  "machine": {
+    "schemaVersion": "2.0.0",
+    "machineId": "L_TOLOVE_DARKNESS_S6",
+    "machineDataVersion": "0.1.0",
+    "displayName": "L ToLOVEるダークネス",
+    "modelName": "LToLOVEるダークネスS6",
+    "manufacturer": "オリンピアエステート",
+    "settings": [
+      "SET_2",
+      "SET_3",
+      "SET_4",
+      "SET_5",
+      "SET_6"
+    ],
+    "packagePolicy": {
+      "offlineCapable": true,
+      "containsImages": false,
+      "containsExecutableCode": false
+    }
+  },
+  "inputs": {
+    "schemaVersion": "2.0.0",
+    "inputs": [
+      {
+        "id": "INP_NORMAL_GAMES",
+        "name": "通常ゲーム数",
+        "type": "integer",
+        "category": "PRIMARY",
+        "displayOrder": 1,
+        "defaultValue": 0,
+        "unit": "G",
+        "minimum": 0
+      },
+      {
+        "id": "INP_AT",
+        "name": "初当り回数",
+        "type": "counter",
+        "category": "PRIMARY",
+        "displayOrder": 2,
+        "defaultValue": 0,
+        "unit": "回",
+        "minimum": 0
+      },
+      {
+        "id": "INP_HAREM_LOVE",
+        "name": "ハーレム報酬 愛すぷRUSH",
+        "type": "counter",
+        "category": "HAREM",
+        "displayOrder": 10,
+        "defaultValue": 0,
+        "unit": "回",
+        "minimum": 0
+      },
+      {
+        "id": "INP_HAREM_WHISPER",
+        "name": "ハーレム報酬 ウィスパー",
+        "type": "counter",
+        "category": "HAREM",
+        "displayOrder": 11,
+        "defaultValue": 0,
+        "unit": "回",
+        "minimum": 0
+      },
+      {
+        "id": "INP_HAREM_EPISODE",
+        "name": "ハーレム報酬 エピソード",
+        "type": "counter",
+        "category": "HAREM",
+        "displayOrder": 12,
+        "defaultValue": 0,
+        "unit": "回",
+        "minimum": 0
+      },
+      {
+        "id": "INP_EVI_SETTING_FLOOR",
+        "name": "確認した設定下限",
+        "type": "enum",
+        "category": "EVIDENCE",
+        "unit": "",
+        "displayOrder": 100,
+        "inferenceRole": "INCLUDE_SUPPORT",
+        "options": [
+          {
+            "key": "__UNSET__",
+            "label": "未選択",
+            "value": "__UNSET__"
+          },
+          {
+            "key": "SET_3_OR_HIGHER",
+            "label": "設定3以上",
+            "value": "SET_3_OR_HIGHER"
+          },
+          {
+            "key": "SET_4_OR_HIGHER",
+            "label": "設定4以上",
+            "value": "SET_4_OR_HIGHER"
+          },
+          {
+            "key": "SET_5_OR_HIGHER",
+            "label": "設定5以上",
+            "value": "SET_5_OR_HIGHER"
+          },
+          {
+            "key": "SET_6",
+            "label": "設定6",
+            "value": "SET_6"
+          }
+        ],
+        "defaultValue": "__UNSET__"
+      }
+    ]
+  },
+  "features": {
+    "schemaVersion": "2.0.0",
+    "features": [
+      {
+        "featureId": "FEAT_AT",
+        "name": "AT初当り",
+        "adoptionCategory": "INCLUDE_PRIMARY",
+        "calculationRole": "PROBABILITY",
+        "probabilityEngineUsage": true,
+        "modelType": "binomial",
+        "minimumSample": 1,
+        "sampleRecommendation": 7000,
+        "reliabilityProfile": {
+          "weight": 1
+        },
+        "displayFormat": "ratio_1_over_n",
+        "numeratorInputId": "INP_AT",
+        "denominatorInputId": "INP_NORMAL_GAMES",
+        "probabilities": {
+          "SET_2": 0.002840909090909091,
+          "SET_3": 0.0028926815157651145,
+          "SET_4": 0.0030450669914738127,
+          "SET_5": 0.0032123353678123997,
+          "SET_6": 0.003214400514304082
+        },
+        "sourceEvidenceRefs": [
+          "SRC_ANALYSIS"
+        ]
+      },
+      {
+        "featureId": "FEAT_HAREM_REWARD",
+        "name": "ハーレムモード中ボーナス報酬",
+        "adoptionCategory": "INCLUDE_SUPPORT",
+        "calculationRole": "PROBABILITY",
+        "probabilityEngineUsage": true,
+        "modelType": "multinomial",
+        "minimumSample": 1,
+        "sampleRecommendation": 20,
+        "reliabilityProfile": {
+          "weight": 1
+        },
+        "inputTransform": "sum_inputs_to_trials",
+        "displayFormat": "percent",
+        "numeratorInputId": "INP_HAREM_LOVE",
+        "denominatorInputIds": [
+          "INP_HAREM_LOVE",
+          "INP_HAREM_WHISPER",
+          "INP_HAREM_EPISODE"
+        ],
+        "categoryInputIds": [
+          "INP_HAREM_WHISPER",
+          "INP_HAREM_EPISODE"
+        ],
+        "probabilities": {},
+        "categoryLabels": [
+          "LOVE_SPA",
+          "WHISPER",
+          "EPISODE"
+        ],
+        "categoryProbabilities": {
+          "SET_2": [
+            0.9620000000000001,
+            0.031,
+            0.006999999999999999
+          ],
+          "SET_3": [
+            0.9570000000000001,
+            0.036000000000000004,
+            0.006999999999999999
+          ],
+          "SET_4": [
+            0.9329999999999999,
+            0.06,
+            0.006999999999999999
+          ],
+          "SET_5": [
+            0.922,
+            0.071,
+            0.006999999999999999
+          ],
+          "SET_6": [
+            0.8740000000000001,
+            0.11900000000000001,
+            0.006999999999999999
+          ]
+        },
+        "sourceEvidenceRefs": [
+          "SRC_ANALYSIS"
+        ]
+      }
+    ]
+  },
+  "evidence": {
+    "version": "1.0.0",
+    "evidences": [
+      {
+        "id": "EVI_SETTING_FLOOR_SET_3_OR_HIGHER",
+        "name": "設定3以上",
+        "displayName": "設定3以上",
+        "inputId": "INP_EVI_SETTING_FLOOR",
+        "triggerValue": "SET_3_OR_HIGHER",
+        "confirmedSettings": [
+          "SET_3",
+          "SET_4",
+          "SET_5",
+          "SET_6"
+        ],
+        "deniedSettings": [],
+        "hasImage": false,
+        "type": "SETTING_CONFIRMATION",
+        "sourceEvidenceRefs": [
+          "RE_3PLUS"
+        ]
+      },
+      {
+        "id": "EVI_SETTING_FLOOR_SET_4_OR_HIGHER",
+        "name": "設定4以上",
+        "displayName": "設定4以上",
+        "inputId": "INP_EVI_SETTING_FLOOR",
+        "triggerValue": "SET_4_OR_HIGHER",
+        "confirmedSettings": [
+          "SET_4",
+          "SET_5",
+          "SET_6"
+        ],
+        "deniedSettings": [],
+        "hasImage": false,
+        "type": "SETTING_CONFIRMATION",
+        "sourceEvidenceRefs": [
+          "RE_4PLUS"
+        ]
+      },
+      {
+        "id": "EVI_SETTING_FLOOR_SET_5_OR_HIGHER",
+        "name": "設定5以上",
+        "displayName": "設定5以上",
+        "inputId": "INP_EVI_SETTING_FLOOR",
+        "triggerValue": "SET_5_OR_HIGHER",
+        "confirmedSettings": [
+          "SET_5",
+          "SET_6"
+        ],
+        "deniedSettings": [],
+        "hasImage": false,
+        "type": "SETTING_CONFIRMATION",
+        "sourceEvidenceRefs": [
+          "RE_5PLUS"
+        ]
+      },
+      {
+        "id": "EVI_SETTING_FLOOR_SET_6",
+        "name": "設定6",
+        "displayName": "設定6",
+        "inputId": "INP_EVI_SETTING_FLOOR",
+        "triggerValue": "SET_6",
+        "confirmedSettings": [
+          "SET_6"
+        ],
+        "deniedSettings": [],
+        "hasImage": false,
+        "type": "SETTING_CONFIRMATION",
+        "sourceEvidenceRefs": [
+          "RE_6"
+        ]
+      }
+    ],
+    "sources": [
+      {
+        "id": "SRC_ID",
+        "classification": "ANALYSIS",
+        "url": "https://www.p-world.co.jp/machine/database/10038",
+        "checkedAt": "2026-08-21"
+      },
+      {
+        "id": "SRC_ANALYSIS",
+        "classification": "ANALYSIS",
+        "url": "https://nana-press.com/kaiseki/machine/752/21705/",
+        "checkedAt": "2026-08-21"
+      },
+      {
+        "id": "SRC_END",
+        "classification": "ANALYSIS",
+        "url": "https://nana-press.com/kaiseki/machine/752/21723/",
+        "checkedAt": "2026-08-21"
+      }
+    ]
+  },
+  "ui": {
+    "sections": [
+      {
+        "id": "AUTO_PRIMARY",
+        "title": "初当り",
+        "displayOrder": 1,
+        "items": [
+          {
+            "type": "input",
+            "inputId": "INP_NORMAL_GAMES",
+            "label": "通常ゲーム数",
+            "widget": "number"
+          },
+          {
+            "type": "input",
+            "inputId": "INP_AT",
+            "label": "初当り回数",
+            "widget": "counter"
+          }
+        ]
+      },
+      {
+        "id": "AUTO_HAREM",
+        "title": "ハーレムモード中の報酬",
+        "displayOrder": 2,
+        "items": [
+          {
+            "type": "input",
+            "inputId": "INP_HAREM_LOVE",
+            "label": "ハーレム報酬 愛すぷRUSH",
+            "widget": "counter"
+          },
+          {
+            "type": "input",
+            "inputId": "INP_HAREM_WHISPER",
+            "label": "ハーレム報酬 ウィスパー",
+            "widget": "counter"
+          },
+          {
+            "type": "input",
+            "inputId": "INP_HAREM_EPISODE",
+            "label": "ハーレム報酬 エピソード",
+            "widget": "counter"
+          }
+        ]
+      },
+      {
+        "id": "AUTO_EVIDENCE",
+        "title": "設定確定・否定情報",
+        "displayOrder": 3,
+        "items": [
+          {
+            "type": "input",
+            "inputId": "INP_EVI_SETTING_FLOOR",
+            "label": "確認した設定下限",
+            "widget": "select"
+          }
+        ]
+      }
+    ]
+  },
+  "selectionSummary": {
+    "schemaVersion": "selection-summary-v1",
+    "evaluatedCount": 3,
+    "selectedCount": 2,
+    "rejectedCount": 1,
+    "selected": [
+      {
+        "featureId": "FEAT_AT",
+        "name": "AT初当り",
+        "reason": "通常時を通して取得できる基本の設定差として主軸採用。",
+        "requiredTrials": {
+          "value": 158467,
+          "unit": "通常ゲーム"
+        }
+      },
+      {
+        "featureId": "FEAT_HAREM_REWARD",
+        "name": "ハーレムモード中ボーナス報酬",
+        "reason": "ウィスパー選択率に大きな設定差があり、報酬構成比として補助採用。",
+        "requiredTrials": {
+          "value": 60,
+          "unit": "ハーレムモード中ボーナス"
+        }
+      }
+    ],
+    "rejected": [
+      {
+        "featureId": "FEAT_REG_GAME",
+        "name": "規定G数からのボーナス当選",
+        "reason": "高設定優遇は判明しているが設定別の完全な数値が未公開。"
+      }
+    ]
+  },
+  "reliability": {},
+  "metadata": {
+    "machineId": "L_TOLOVE_DARKNESS_S6",
+    "displayName": "L ToLOVEるダークネス",
+    "settings": [
+      "SET_2",
+      "SET_3",
+      "SET_4",
+      "SET_5",
+      "SET_6"
+    ]
+  },
+  "validation": {
+    "cases": []
+  },
+  "statistics": {}
+}

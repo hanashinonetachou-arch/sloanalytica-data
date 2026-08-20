@@ -1,0 +1,142 @@
+{
+  "schemaVersion": "selection-data-v1",
+  "machineId": "S_HAIBI_RETURN_PA30",
+  "machineDataVersion": "0.1.0",
+  "inputs": [
+    {
+      "id": "INP_NORMAL_GAMES",
+      "name": "通常ゲーム数",
+      "type": "integer",
+      "category": "PRIMARY",
+      "displayOrder": 1,
+      "defaultValue": 0,
+      "unit": "G"
+    },
+    {
+      "id": "INP_INITIAL",
+      "name": "ボーナス初当り回数",
+      "type": "counter",
+      "category": "PRIMARY",
+      "displayOrder": 2,
+      "defaultValue": 0,
+      "unit": "回"
+    },
+    {
+      "id": "INP_COMMON_BELL",
+      "name": "共通ベル回数",
+      "type": "counter",
+      "category": "SMALL_ROLE",
+      "displayOrder": 10,
+      "defaultValue": 0,
+      "unit": "回"
+    }
+  ],
+  "features": [
+    {
+      "researchFeatureId": "RF_INITIAL",
+      "featureId": "FEAT_INITIAL",
+      "adoptionCategory": "INCLUDE_PRIMARY",
+      "numeratorInputId": "INP_INITIAL",
+      "denominatorInputId": "INP_NORMAL_GAMES",
+      "minimumSample": 1,
+      "sampleRecommendation": 7000,
+      "weight": 1,
+      "displayFormat": "ratio_1_over_n",
+      "difficultyExposure": {
+        "mode": "per_game",
+        "factor": 1,
+        "quality": "EXACT",
+        "basisId": "NORMAL_GAMES"
+      },
+      "difficultyParticipation": "INCLUDE",
+      "userReason": "連チャン中を除いた初当りに段階差があるため主軸採用。"
+    },
+    {
+      "researchFeatureId": "RF_COMMON_BELL",
+      "featureId": "FEAT_COMMON_BELL",
+      "adoptionCategory": "INCLUDE_SUPPORT",
+      "numeratorInputId": "INP_COMMON_BELL",
+      "denominatorInputId": "INP_NORMAL_GAMES",
+      "minimumSample": 1,
+      "sampleRecommendation": 7000,
+      "weight": 1,
+      "displayFormat": "ratio_1_over_n",
+      "difficultyExposure": {
+        "mode": "per_game",
+        "factor": 1,
+        "quality": "EXACT",
+        "basisId": "NORMAL_GAMES"
+      },
+      "difficultyParticipation": "INCLUDE",
+      "userReason": "低頻度だが設定1と6で約1.56倍の差があり、独立した小役情報として採用。"
+    },
+    {
+      "researchFeatureId": "RF_BIG_TOTAL",
+      "featureId": "FEAT_BIG_TOTAL",
+      "adoptionCategory": "EXCLUDE",
+      "rejectionReason": "連チャン中を含むため初当りとゲームフロー上重複する。"
+    },
+    {
+      "researchFeatureId": "RF_REG_TOTAL",
+      "featureId": "FEAT_REG_TOTAL",
+      "adoptionCategory": "EXCLUDE",
+      "rejectionReason": "連チャン中を含むため初当りとゲームフロー上重複する。"
+    }
+  ],
+  "rejectedElements": [],
+  "evidence": [],
+  "evidenceUi": {
+    "groups": [
+      {
+        "groupId": "SETTING_FLOOR",
+        "label": "確認した設定下限",
+        "selectionMode": "single",
+        "normalizationMode": "ALLOWED_SETTINGS",
+        "options": [
+          {
+            "value": "SET_4_OR_HIGHER",
+            "label": "設定4以上",
+            "allowedSettings": [
+              "SET_4",
+              "SET_5",
+              "SET_6"
+            ],
+            "sourceEvidenceIds": [
+              "RE_4PLUS"
+            ]
+          },
+          {
+            "value": "SET_6",
+            "label": "設定6",
+            "allowedSettings": [
+              "SET_6"
+            ],
+            "sourceEvidenceIds": [
+              "RE_6"
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "evidenceReview": {
+    "policyVersion": 1,
+    "exclusions": []
+  },
+  "uiCategoryLabels": {
+    "PRIMARY": "初当り",
+    "SMALL_ROLE": "小役"
+  },
+  "difficultyAnalysis": {
+    "targetGameBasis": {
+      "basisId": "NORMAL_GAMES",
+      "label": "通常ゲーム数",
+      "quality": "EXACT"
+    },
+    "calibrationAllowedExposureQualities": [
+      "EXACT",
+      "DERIVED",
+      "ESTIMATED"
+    ]
+  }
+}

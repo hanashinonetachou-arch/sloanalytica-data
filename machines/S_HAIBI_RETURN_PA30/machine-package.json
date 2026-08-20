@@ -1,0 +1,300 @@
+{
+  "schemaVersion": 1,
+  "machine": {
+    "schemaVersion": "2.0.0",
+    "machineId": "S_HAIBI_RETURN_PA30",
+    "machineDataVersion": "0.1.0",
+    "displayName": "ハイビリターン-30",
+    "modelName": "SハイビリターンPA-30",
+    "manufacturer": "パイオニア",
+    "settings": [
+      "SET_1",
+      "SET_2",
+      "SET_4",
+      "SET_5",
+      "SET_6"
+    ],
+    "packagePolicy": {
+      "offlineCapable": true,
+      "containsImages": false,
+      "containsExecutableCode": false
+    }
+  },
+  "inputs": {
+    "schemaVersion": "2.0.0",
+    "inputs": [
+      {
+        "id": "INP_NORMAL_GAMES",
+        "name": "通常ゲーム数",
+        "type": "integer",
+        "category": "PRIMARY",
+        "displayOrder": 1,
+        "defaultValue": 0,
+        "unit": "G",
+        "minimum": 0
+      },
+      {
+        "id": "INP_INITIAL",
+        "name": "ボーナス初当り回数",
+        "type": "counter",
+        "category": "PRIMARY",
+        "displayOrder": 2,
+        "defaultValue": 0,
+        "unit": "回",
+        "minimum": 0
+      },
+      {
+        "id": "INP_COMMON_BELL",
+        "name": "共通ベル回数",
+        "type": "counter",
+        "category": "SMALL_ROLE",
+        "displayOrder": 10,
+        "defaultValue": 0,
+        "unit": "回",
+        "minimum": 0
+      },
+      {
+        "id": "INP_EVI_SETTING_FLOOR",
+        "name": "確認した設定下限",
+        "type": "enum",
+        "category": "EVIDENCE",
+        "unit": "",
+        "displayOrder": 100,
+        "inferenceRole": "INCLUDE_SUPPORT",
+        "options": [
+          {
+            "key": "__UNSET__",
+            "label": "未選択",
+            "value": "__UNSET__"
+          },
+          {
+            "key": "SET_4_OR_HIGHER",
+            "label": "設定4以上",
+            "value": "SET_4_OR_HIGHER"
+          },
+          {
+            "key": "SET_6",
+            "label": "設定6",
+            "value": "SET_6"
+          }
+        ],
+        "defaultValue": "__UNSET__"
+      }
+    ]
+  },
+  "features": {
+    "schemaVersion": "2.0.0",
+    "features": [
+      {
+        "featureId": "FEAT_INITIAL",
+        "name": "ボーナス初当り",
+        "adoptionCategory": "INCLUDE_PRIMARY",
+        "calculationRole": "PROBABILITY",
+        "probabilityEngineUsage": true,
+        "modelType": "binomial",
+        "minimumSample": 1,
+        "sampleRecommendation": 7000,
+        "reliabilityProfile": {
+          "weight": 1
+        },
+        "displayFormat": "ratio_1_over_n",
+        "numeratorInputId": "INP_INITIAL",
+        "denominatorInputId": "INP_NORMAL_GAMES",
+        "probabilities": {
+          "SET_1": 0.003370407819346141,
+          "SET_2": 0.0034602076124567475,
+          "SET_4": 0.0037119524870081666,
+          "SET_5": 0.003996802557953637,
+          "SET_6": 0.00415282392026578
+        },
+        "sourceEvidenceRefs": [
+          "SRC_ID"
+        ]
+      },
+      {
+        "featureId": "FEAT_COMMON_BELL",
+        "name": "共通ベル",
+        "adoptionCategory": "INCLUDE_SUPPORT",
+        "calculationRole": "PROBABILITY",
+        "probabilityEngineUsage": true,
+        "modelType": "binomial",
+        "minimumSample": 1,
+        "sampleRecommendation": 7000,
+        "reliabilityProfile": {
+          "weight": 1
+        },
+        "displayFormat": "ratio_1_over_n",
+        "numeratorInputId": "INP_COMMON_BELL",
+        "denominatorInputId": "INP_NORMAL_GAMES",
+        "probabilities": {
+          "SET_1": 0.0009765625,
+          "SET_2": 0.0010375596596804318,
+          "SET_4": 0.001098659635245001,
+          "SET_5": 0.0011596892032935174,
+          "SET_6": 0.0015257857796765334
+        },
+        "sourceEvidenceRefs": [
+          "SRC_ID"
+        ]
+      }
+    ]
+  },
+  "evidence": {
+    "version": "1.0.0",
+    "evidences": [
+      {
+        "id": "EVI_SETTING_FLOOR_SET_4_OR_HIGHER",
+        "name": "設定4以上",
+        "displayName": "設定4以上",
+        "inputId": "INP_EVI_SETTING_FLOOR",
+        "triggerValue": "SET_4_OR_HIGHER",
+        "confirmedSettings": [
+          "SET_4",
+          "SET_5",
+          "SET_6"
+        ],
+        "deniedSettings": [],
+        "hasImage": false,
+        "type": "SETTING_CONFIRMATION",
+        "sourceEvidenceRefs": [
+          "RE_4PLUS"
+        ]
+      },
+      {
+        "id": "EVI_SETTING_FLOOR_SET_6",
+        "name": "設定6",
+        "displayName": "設定6",
+        "inputId": "INP_EVI_SETTING_FLOOR",
+        "triggerValue": "SET_6",
+        "confirmedSettings": [
+          "SET_6"
+        ],
+        "deniedSettings": [],
+        "hasImage": false,
+        "type": "SETTING_CONFIRMATION",
+        "sourceEvidenceRefs": [
+          "RE_6"
+        ]
+      }
+    ],
+    "sources": [
+      {
+        "id": "SRC_ID",
+        "classification": "ANALYSIS",
+        "url": "https://www.p-world.co.jp/machine/database/10265",
+        "checkedAt": "2026-08-21"
+      }
+    ]
+  },
+  "ui": {
+    "sections": [
+      {
+        "id": "AUTO_PRIMARY",
+        "title": "初当り",
+        "displayOrder": 1,
+        "items": [
+          {
+            "type": "input",
+            "inputId": "INP_NORMAL_GAMES",
+            "label": "通常ゲーム数",
+            "widget": "number"
+          },
+          {
+            "type": "input",
+            "inputId": "INP_INITIAL",
+            "label": "ボーナス初当り回数",
+            "widget": "counter"
+          }
+        ]
+      },
+      {
+        "id": "AUTO_SMALL_ROLE",
+        "title": "小役",
+        "displayOrder": 2,
+        "items": [
+          {
+            "type": "input",
+            "inputId": "INP_COMMON_BELL",
+            "label": "共通ベル回数",
+            "widget": "counter"
+          }
+        ]
+      },
+      {
+        "id": "AUTO_EVIDENCE",
+        "title": "設定確定・否定情報",
+        "displayOrder": 3,
+        "items": [
+          {
+            "type": "input",
+            "inputId": "INP_EVI_SETTING_FLOOR",
+            "label": "確認した設定下限",
+            "widget": "select"
+          }
+        ]
+      }
+    ]
+  },
+  "selectionSummary": {
+    "schemaVersion": "selection-summary-v1",
+    "evaluatedCount": 4,
+    "selectedCount": 2,
+    "rejectedCount": 2,
+    "selected": [
+      {
+        "featureId": "FEAT_INITIAL",
+        "name": "ボーナス初当り",
+        "reason": "連チャン中を除いた初当りに段階差があるため主軸採用。",
+        "requiredTrials": {
+          "value": 44752,
+          "unit": "通常ゲーム"
+        }
+      },
+      {
+        "featureId": "FEAT_COMMON_BELL",
+        "name": "共通ベル",
+        "reason": "低頻度だが設定1と6で約1.56倍の差があり、独立した小役情報として採用。",
+        "requiredTrials": {
+          "value": 29997,
+          "unit": "通常ゲーム"
+        }
+      }
+    ],
+    "rejected": [
+      {
+        "featureId": "FEAT_BIG_TOTAL",
+        "name": "BIG確率",
+        "reason": "連チャン中を含むため初当りとゲームフロー上重複する。",
+        "requiredTrials": {
+          "value": 55106,
+          "unit": "総遊技区間"
+        }
+      },
+      {
+        "featureId": "FEAT_REG_TOTAL",
+        "name": "REG確率",
+        "reason": "連チャン中を含むため初当りとゲームフロー上重複する。",
+        "requiredTrials": {
+          "value": 57880,
+          "unit": "総遊技区間"
+        }
+      }
+    ]
+  },
+  "reliability": {},
+  "metadata": {
+    "machineId": "S_HAIBI_RETURN_PA30",
+    "displayName": "ハイビリターン-30",
+    "settings": [
+      "SET_1",
+      "SET_2",
+      "SET_4",
+      "SET_5",
+      "SET_6"
+    ]
+  },
+  "validation": {
+    "cases": []
+  },
+  "statistics": {}
+}

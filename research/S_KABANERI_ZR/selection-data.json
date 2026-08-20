@@ -1,0 +1,258 @@
+{
+  "schemaVersion": "selection-data-v1",
+  "machineId": "S_KABANERI_ZR",
+  "machineDataVersion": "0.1.0",
+  "inputs": [
+    {
+      "id": "INP_NORMAL_GAMES",
+      "name": "通常ゲーム数",
+      "type": "integer",
+      "category": "PRIMARY",
+      "displayOrder": 1,
+      "defaultValue": 0,
+      "unit": "G"
+    },
+    {
+      "id": "INP_BONUS",
+      "name": "ボーナス初当り回数",
+      "type": "counter",
+      "category": "PRIMARY",
+      "displayOrder": 2,
+      "defaultValue": 0,
+      "unit": "回"
+    },
+    {
+      "id": "INP_CZ",
+      "name": "CZ初当り回数",
+      "type": "counter",
+      "category": "SUPPORT",
+      "displayOrder": 3,
+      "defaultValue": 0,
+      "unit": "回"
+    },
+    {
+      "id": "INP_COMMON_BELL_GAMES",
+      "name": "共通ベル対象ゲーム数",
+      "type": "integer",
+      "category": "SMALL_ROLE",
+      "displayOrder": 10,
+      "defaultValue": 0,
+      "unit": "G",
+      "description": "通常時・AT中など共通6枚ベルを判別して数えた区間のゲーム数。"
+    },
+    {
+      "id": "INP_COMMON_BELL",
+      "name": "共通6枚ベル回数",
+      "type": "counter",
+      "category": "SMALL_ROLE",
+      "displayOrder": 11,
+      "defaultValue": 0,
+      "unit": "回",
+      "parentInputId": "INP_COMMON_BELL_GAMES"
+    },
+    {
+      "id": "INP_MUMEI_3_TRIALS",
+      "name": "無名CZ 小役3連回数",
+      "type": "integer",
+      "category": "CZ_DETAIL",
+      "displayOrder": 20,
+      "defaultValue": 0,
+      "unit": "回"
+    },
+    {
+      "id": "INP_MUMEI_3_HIT",
+      "name": "うちボーナス当選回数",
+      "type": "counter",
+      "category": "CZ_DETAIL",
+      "displayOrder": 21,
+      "defaultValue": 0,
+      "unit": "回",
+      "parentInputId": "INP_MUMEI_3_TRIALS"
+    }
+  ],
+  "features": [
+    {
+      "researchFeatureId": "RF_BONUS",
+      "featureId": "FEAT_BONUS",
+      "adoptionCategory": "INCLUDE_PRIMARY",
+      "numeratorInputId": "INP_BONUS",
+      "denominatorInputId": "INP_NORMAL_GAMES",
+      "minimumSample": 1,
+      "sampleRecommendation": 7000,
+      "weight": 1,
+      "displayFormat": "ratio_1_over_n",
+      "difficultyExposure": {
+        "mode": "per_game",
+        "factor": 1,
+        "quality": "EXACT",
+        "basisId": "NORMAL_GAMES"
+      },
+      "difficultyParticipation": "INCLUDE",
+      "userReason": "終日を通して取得でき、設定差が大きいため主軸採用。"
+    },
+    {
+      "researchFeatureId": "RF_CZ",
+      "featureId": "FEAT_CZ",
+      "adoptionCategory": "INCLUDE_SUPPORT",
+      "numeratorInputId": "INP_CZ",
+      "denominatorInputId": "INP_NORMAL_GAMES",
+      "minimumSample": 1,
+      "sampleRecommendation": 7000,
+      "weight": 0.6,
+      "displayFormat": "ratio_1_over_n",
+      "difficultyExposure": {
+        "mode": "per_game",
+        "factor": 1,
+        "quality": "EXACT",
+        "basisId": "NORMAL_GAMES"
+      },
+      "difficultyParticipation": "INCLUDE",
+      "userReason": "高頻度で設定差があるがボーナスへつながる中間過程のため相関を考慮して補助採用。"
+    },
+    {
+      "researchFeatureId": "RF_COMMON_BELL",
+      "featureId": "FEAT_COMMON_BELL",
+      "adoptionCategory": "INCLUDE_SUPPORT",
+      "numeratorInputId": "INP_COMMON_BELL",
+      "denominatorInputId": "INP_COMMON_BELL_GAMES",
+      "minimumSample": 1,
+      "sampleRecommendation": 7000,
+      "weight": 1,
+      "displayFormat": "ratio_1_over_n",
+      "difficultyExposure": {
+        "mode": "per_game",
+        "factor": 1,
+        "quality": "DERIVED",
+        "basisId": "NORMAL_GAMES"
+      },
+      "difficultyParticipation": "INCLUDE",
+      "userReason": "独立した小役情報で、比較的多く試行を確保できるため採用。"
+    },
+    {
+      "researchFeatureId": "RF_MUMEI_3CHAIN",
+      "featureId": "FEAT_MUMEI_3CHAIN",
+      "adoptionCategory": "INCLUDE_SUPPORT",
+      "numeratorInputId": "INP_MUMEI_3_HIT",
+      "denominatorInputId": "INP_MUMEI_3_TRIALS",
+      "minimumSample": 1,
+      "sampleRecommendation": 20,
+      "weight": 0.8,
+      "displayFormat": "percent",
+      "difficultyParticipation": "EXCLUDE",
+      "difficultyExclusionReason": "無名CZ内の小役3連試行数を通常Gから一意換算できないため。",
+      "userReason": "明確な試行条件で設定1と6に2倍超の差があるため補助採用。"
+    },
+    {
+      "researchFeatureId": "RF_MUMEI_NAV",
+      "featureId": "FEAT_MUMEI_NAV",
+      "adoptionCategory": "EXCLUDE",
+      "rejectionReason": "同一無名CZ内部の3連成功率と強く関連し、同時採用するとCZ内部挙動を重複評価する。"
+    },
+    {
+      "researchFeatureId": "RF_ST",
+      "featureId": "FEAT_ST",
+      "adoptionCategory": "EXCLUDE",
+      "rejectionReason": "ボーナス当選の下流で、採用済みボーナス初当りと因果的に重複する。"
+    },
+    {
+      "researchFeatureId": "RF_IKOMA_AVOID",
+      "featureId": "FEAT_IKOMA_AVOID",
+      "adoptionCategory": "EXCLUDE",
+      "rejectionReason": "ライフ残量ごとに別分母が必要で、同一CZ内部の挙動を過度に重複評価するため不採用。"
+    }
+  ],
+  "rejectedElements": [
+    {
+      "id": "REJECTED_REG_GAME",
+      "name": "規定G数到達時のボーナス当選率",
+      "reason": "複数ゾーンは前ゾーン非当選を条件に次の試行へ進むため、独立Feature化すると生存条件を無視して情報を水増しします。"
+    },
+    {
+      "id": "REJECTED_CHARACTER_DISTRIBUTION",
+      "name": "カバネリボーナス中キャラ紹介の偶奇傾向",
+      "reason": "示唆要素は把握していますが、全設定別の完全な出現分布を公開情報で安定照合できないため数値Feature化しません。"
+    }
+  ],
+  "evidence": [],
+  "evidenceUi": {
+    "groups": [
+      {
+        "groupId": "SETTING_FLOOR",
+        "label": "確認した設定下限",
+        "selectionMode": "single",
+        "normalizationMode": "ALLOWED_SETTINGS",
+        "options": [
+          {
+            "value": "SET_2_OR_HIGHER",
+            "label": "設定2以上",
+            "allowedSettings": [
+              "SET_2",
+              "SET_3",
+              "SET_4",
+              "SET_5",
+              "SET_6"
+            ],
+            "sourceEvidenceIds": [
+              "RE_2PLUS"
+            ]
+          },
+          {
+            "value": "SET_4_OR_HIGHER",
+            "label": "設定4以上",
+            "allowedSettings": [
+              "SET_4",
+              "SET_5",
+              "SET_6"
+            ],
+            "sourceEvidenceIds": [
+              "RE_4PLUS"
+            ]
+          },
+          {
+            "value": "SET_5_OR_HIGHER",
+            "label": "設定5以上",
+            "allowedSettings": [
+              "SET_5",
+              "SET_6"
+            ],
+            "sourceEvidenceIds": [
+              "RE_5PLUS"
+            ]
+          },
+          {
+            "value": "SET_6",
+            "label": "設定6",
+            "allowedSettings": [
+              "SET_6"
+            ],
+            "sourceEvidenceIds": [
+              "RE_6"
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "evidenceReview": {
+    "policyVersion": 1,
+    "exclusions": []
+  },
+  "uiCategoryLabels": {
+    "PRIMARY": "初当り",
+    "SUPPORT": "CZ",
+    "SMALL_ROLE": "共通6枚ベル",
+    "CZ_DETAIL": "無名CZ"
+  },
+  "difficultyAnalysis": {
+    "targetGameBasis": {
+      "basisId": "NORMAL_GAMES",
+      "label": "通常ゲーム数",
+      "quality": "EXACT"
+    },
+    "calibrationAllowedExposureQualities": [
+      "EXACT",
+      "DERIVED",
+      "ESTIMATED"
+    ]
+  }
+}
