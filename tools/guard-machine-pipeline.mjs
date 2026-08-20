@@ -20,7 +20,7 @@ function readMachineIdsFromFile(filePath) {
   if (raw.startsWith('[')) return JSON.parse(raw).map(String);
   if (raw.startsWith('{')) {
     const value = JSON.parse(raw);
-    return (value.machines ?? []).map(item => typeof item === 'string' ? item : item.machineId).filter(Boolean);
+    return (value.machines ?? value.machineIds ?? []).map(item => typeof item === 'string' ? item : item.machineId).filter(Boolean);
   }
   return raw.split(/\r?\n/).map(v => v.trim()).filter(Boolean);
 }
@@ -34,21 +34,35 @@ function collectIds() {
   }
   return [...new Set(ids)];
 }
+function snapshotSettingBandReports(machineIds) {
+  return new Map(machineIds.map(id => {
+    const p = path.join(ROOT, 'research', id, 'setting-band-report.json');
+    return [p, fs.existsSync(p) ? fs.readFileSync(p) : null];
+  }));
+}
+function restoreSettingBandReports(snapshot) {
+  for (const [p, bytes] of snapshot.entries()) {
+    if (bytes === null) {
+      if (fs.existsSync(p)) fs.rmSync(p, { force: true });
+    } else {
+      fs.mkdirSync(path.dirname(p), { recursive: true });
+      fs.writeFileSync(p, bytes);
+    }
+  }
+}
 
+const machineIds = collectIds();
 const errors = [];
-for (const id of collectIds()) {
+for (const id of machineIds) {
   const researchPath = path.join(ROOT, 'research', id, 'research-data.json');
   const selectionPath = path.join(ROOT, 'research', id, 'selection-data.json');
   if (!fs.existsSync(researchPath) || !fs.existsSync(selectionPath)) continue;
   const research = readJson(researchPath);
-  if (!research.researchCompleteness) continue; // legacy data remains backward compatible
+  if (!research.researchCompleteness) continue;
   const selection = readJson(selectionPath);
 
   const researchResult = validateResearchCompleteness(research, { required: true });
   for (const error of researchResult.errors) errors.push(`${id}: ${error}`);
-  // UNRESOLVED is deliberate review metadata, not fabricated data and not a schema error.
-  // Keep it visible to the operator, but allow an explicitly marked "未調査版" to be
-  // built so real-device verification can close the gap later.
   for (const unresolved of researchResult.unresolved) {
     console.warn(`REVIEW [machine completeness guard] ${id}: research completeness unresolved ${unresolved}`);
   }
@@ -61,7 +75,26 @@ if (errors.length) {
   process.exit(1);
 }
 
+const checkOnly = args.includes('--check');
+const settingBandSnapshot = mode === 'batch' ? snapshotSettingBandReports(machineIds) : null;
+const machineRegistryPath = path.join(ROOT, 'machine-registry.json');
+const machineRegistrySnapshot = checkOnly && fs.existsSync(machineRegistryPath)
+  ? fs.readFileSync(machineRegistryPath)
+  : null;
+
 const target = path.join(ROOT, 'tools', mode === 'single' ? 'machine-pipeline.mjs' : 'batch-machine-pipeline.mjs');
-const r = spawnSync(process.execPath, [target, ...args], { cwd: ROOT, stdio: 'inherit' });
-if (r.error) throw r.error;
-process.exit(r.status ?? 1);
+let status = 1;
+try {
+  const r = spawnSync(process.execPath, [target, ...args], { cwd: ROOT, stdio: 'inherit' });
+  if (r.error) throw r.error;
+  status = r.status ?? 1;
+} finally {
+  if (settingBandSnapshot && (status !== 0 || checkOnly)) {
+    restoreSettingBandReports(settingBandSnapshot);
+  }
+  if (machineRegistrySnapshot) {
+    fs.writeFileSync(machineRegistryPath, machineRegistrySnapshot);
+  }
+}
+
+process.exit(status);

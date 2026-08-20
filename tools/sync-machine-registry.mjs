@@ -5,6 +5,13 @@ const ROOT=path.resolve(path.dirname(fileURLToPath(import.meta.url)),"..");
 const registryPath=path.join(ROOT,"machine-registry.json");
 const catalog=JSON.parse(fs.readFileSync(path.join(ROOT,"catalog.json"),"utf8"));
 const registry=JSON.parse(fs.readFileSync(registryPath,"utf8"));
+const previousGeneratedAt=registry.generatedAt;
+const comparable=value=>{
+ const clone=structuredClone(value);
+ delete clone.generatedAt;
+ return JSON.stringify(clone);
+};
+const beforeComparable=comparable(registry);
 const byId=new Map((registry.machines??[]).map(m=>[m.machineId,m]));
 let added=0,updated=0;
 for(const c of catalog.machines??[]){
@@ -24,7 +31,12 @@ for(const c of catalog.machines??[]){
  };
  if(existing){ Object.assign(existing,base); updated++; } else { registry.machines.push(base); added++; }
 }
-registry.generatedAt=new Date().toISOString();
 registry.machines.sort((a,b)=>a.displayName.localeCompare(b.displayName,"ja"));
-fs.writeFileSync(registryPath,JSON.stringify(registry,null,2)+"\n");
-console.log(`Registry sync: added ${added}, updated ${updated}`);
+const changed=beforeComparable!==comparable(registry);
+if(changed){
+ registry.generatedAt=new Date().toISOString();
+ fs.writeFileSync(registryPath,JSON.stringify(registry,null,2)+"\n");
+}else{
+ registry.generatedAt=previousGeneratedAt;
+}
+console.log(`Registry sync: added ${added}, updated ${updated}${changed?" (changed)":" (unchanged)"}`);
