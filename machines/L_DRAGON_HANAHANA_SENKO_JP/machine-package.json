@@ -53,6 +53,44 @@
         "displayOrder": 3,
         "defaultValue": 0,
         "minimum": 0
+      },
+      {
+        "id": "INP_PREDECESSOR_GAMES",
+        "name": "着席時ゲーム数",
+        "type": "integer",
+        "category": "PREDECESSOR",
+        "unit": "G",
+        "displayOrder": 1,
+        "defaultValue": 0,
+        "observationScope": "PREDECESSOR_SNAPSHOT",
+        "description": "着席時のデータカウンターに表示されている当日累計ゲーム数。同一区間のBIG・REGが確認できる場合のみ入力します。",
+        "minimum": 0
+      },
+      {
+        "id": "INP_PREDECESSOR_BIG",
+        "name": "着席時BIG",
+        "type": "counter",
+        "category": "PREDECESSOR",
+        "unit": "回",
+        "displayOrder": 2,
+        "defaultValue": 0,
+        "observationScope": "PREDECESSOR_SNAPSHOT",
+        "parentInputId": "INP_PREDECESSOR_GAMES",
+        "description": "着席時の当日累計BIG回数。",
+        "minimum": 0
+      },
+      {
+        "id": "INP_PREDECESSOR_REG",
+        "name": "着席時REG",
+        "type": "counter",
+        "category": "PREDECESSOR",
+        "unit": "回",
+        "displayOrder": 3,
+        "defaultValue": 0,
+        "observationScope": "PREDECESSOR_SNAPSHOT",
+        "parentInputId": "INP_PREDECESSOR_GAMES",
+        "description": "着席時の当日累計REG回数。",
+        "minimum": 0
       }
     ]
   },
@@ -76,6 +114,64 @@
         "denominatorInputId": "INP_NORMAL_GAMES",
         "categoryInputIds": [
           "INP_REG"
+        ],
+        "probabilities": {},
+        "categoryLabels": [
+          "BIG",
+          "REG"
+        ],
+        "categoryProbabilities": {
+          "SET_1": [
+            0.00390625,
+            0.001557632398753894
+          ],
+          "SET_2": [
+            0.0040650406504065045,
+            0.0017094017094017094
+          ],
+          "SET_3": [
+            0.004255319148936171,
+            0.0018621973929236501
+          ],
+          "SET_4": [
+            0.004464285714285714,
+            0.002044989775051125
+          ],
+          "SET_5": [
+            0.0047169811320754715,
+            0.0022624434389140274
+          ],
+          "SET_6": [
+            0.0050251256281407045,
+            0.0025062656641604013
+          ]
+        },
+        "categoryConditioning": {
+          "excludedCategories": [],
+          "normalization": "RENORMALIZE_INCLUDED",
+          "residualCategory": "OTHER"
+        },
+        "sourceEvidenceRefs": [
+          "SRC_DH_PW"
+        ]
+      },
+      {
+        "featureId": "FEAT_PREDECESSOR_BONUS",
+        "name": "着席時BIG/REG",
+        "adoptionCategory": "INCLUDE_PRIMARY",
+        "calculationRole": "PROBABILITY",
+        "probabilityEngineUsage": true,
+        "modelType": "multinomial",
+        "minimumSample": 1,
+        "sampleRecommendation": 3000,
+        "reliabilityProfile": {
+          "weight": 1
+        },
+        "displayFormat": "ratio_1_over_n",
+        "numeratorInputId": "INP_PREDECESSOR_BIG",
+        "denominatorInputId": "INP_PREDECESSOR_GAMES",
+        "categoryInputIds": [
+          "INP_PREDECESSOR_REG"
         ],
         "probabilities": {},
         "categoryLabels": [
@@ -142,9 +238,34 @@
   "ui": {
     "sections": [
       {
+        "id": "AUTO_PREDECESSOR",
+        "title": "着席時データ",
+        "displayOrder": 1,
+        "items": [
+          {
+            "type": "input",
+            "inputId": "INP_PREDECESSOR_GAMES",
+            "label": "着席時ゲーム数",
+            "widget": "number"
+          },
+          {
+            "type": "input",
+            "inputId": "INP_PREDECESSOR_BIG",
+            "label": "着席時BIG",
+            "widget": "counter"
+          },
+          {
+            "type": "input",
+            "inputId": "INP_PREDECESSOR_REG",
+            "label": "着席時REG",
+            "widget": "counter"
+          }
+        ]
+      },
+      {
         "id": "AUTO_PRIMARY",
         "title": "ボーナス",
-        "displayOrder": 1,
+        "displayOrder": 2,
         "items": [
           {
             "type": "input",
@@ -171,8 +292,8 @@
   "selectionSummary": {
     "schemaVersion": "selection-summary-v1",
     "evaluatedCount": 6,
-    "selectedCount": 1,
-    "rejectedCount": 5,
+    "selectedCount": 2,
+    "rejectedCount": 4,
     "selected": [
       {
         "featureId": "FEAT_BONUS",
@@ -181,6 +302,15 @@
         "requiredTrials": {
           "value": 9976,
           "unit": "通常ゲーム"
+        }
+      },
+      {
+        "featureId": "FEAT_PREDECESSOR_BONUS",
+        "name": "着席時BIG/REG",
+        "reason": "着席時に当日累計ゲーム数・BIG・REGを同一区間で取得できる場合、前任者区間も独立した設定推測情報として利用できるため採用。入力できない場合は未入力で構いません。",
+        "requiredTrials": {
+          "value": 9976,
+          "unit": "着席前ゲーム"
         }
       }
     ],
@@ -204,11 +334,6 @@
         "featureId": "FEAT_FEATHER",
         "name": "ボーナス後フェザーランプ",
         "reason": "設定示唆の存在は把握していますが、スマスロ版固有の全設定別出現分布を信頼できる形で確定できず、BIG後は朝一1回目の抽選条件も異なるため不採用。"
-      },
-      {
-        "featureId": "REJECTED_PREDECESSOR_DENOMINATOR",
-        "name": "着席時データ",
-        "reason": "店舗データカウンターの総ゲーム数は公開解析の通常ゲーム数と集計区間が一致する保証がないため、前任者区間の設定推測には使用しません。実機メニュー等で分子・分母を同一区間で直接取得できる場合のみ個別採用します。"
       }
     ]
   },

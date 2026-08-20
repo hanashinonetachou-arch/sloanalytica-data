@@ -42,6 +42,28 @@
         "displayOrder": 2,
         "defaultValue": 0,
         "minimum": 0
+      },
+      {
+        "id": "INP_SUNSHINE_TRIALS",
+        "name": "蝶飛翔時の楽曲選択機会",
+        "type": "integer",
+        "category": "BONUS",
+        "unit": "回",
+        "displayOrder": 20,
+        "defaultValue": null,
+        "description": "ボーナス中1G連上乗せ時または赤7BIG先飛翔時など、対象となる楽曲選択機会を数えます。負担なら未入力で構いません。",
+        "minimum": 0
+      },
+      {
+        "id": "INP_SUNSHINE",
+        "name": "感じてSunshine!!",
+        "type": "counter",
+        "category": "BONUS",
+        "unit": "回",
+        "displayOrder": 21,
+        "defaultValue": null,
+        "parentInputId": "INP_SUNSHINE_TRIALS",
+        "minimum": 0
       }
     ]
   },
@@ -73,6 +95,32 @@
         "sourceEvidenceRefs": [
           "SRC_NS_TOOL"
         ]
+      },
+      {
+        "featureId": "FEAT_SUNSHINE",
+        "name": "蝶飛翔時「感じてSunshine!!」選択率",
+        "adoptionCategory": "INCLUDE_SUPPORT",
+        "calculationRole": "PROBABILITY",
+        "probabilityEngineUsage": true,
+        "modelType": "binomial",
+        "minimumSample": 1,
+        "sampleRecommendation": 20,
+        "reliabilityProfile": {
+          "weight": 1
+        },
+        "displayFormat": "percent",
+        "numeratorInputId": "INP_SUNSHINE",
+        "denominatorInputId": "INP_SUNSHINE_TRIALS",
+        "probabilities": {
+          "SET_1": 0.02,
+          "SET_2": 0.04,
+          "SET_3": 0.06,
+          "SET_5": 0.08,
+          "SET_6": 0.1
+        },
+        "sourceEvidenceRefs": [
+          "SRC_NS_CHON"
+        ]
       }
     ]
   },
@@ -93,6 +141,13 @@
         "pageName": "L南国育ち 設定判別",
         "url": "https://pacnk.com/slot/tools/sh_nangokusodachi.html",
         "checkedAt": "2026-08-19"
+      },
+      {
+        "id": "SRC_NS_CHON",
+        "classification": "ANALYSIS",
+        "pageName": "スマスロ 南国育ち 設定判別",
+        "url": "https://chonborista.com/slot/orinpia-slot/205447/",
+        "checkedAt": "2026-08-20"
       }
     ]
   },
@@ -116,13 +171,32 @@
             "widget": "counter"
           }
         ]
+      },
+      {
+        "id": "AUTO_BONUS",
+        "title": "蝶飛翔時BGM",
+        "displayOrder": 2,
+        "items": [
+          {
+            "type": "input",
+            "inputId": "INP_SUNSHINE_TRIALS",
+            "label": "蝶飛翔時の楽曲選択機会",
+            "widget": "number"
+          },
+          {
+            "type": "input",
+            "inputId": "INP_SUNSHINE",
+            "label": "感じてSunshine!!",
+            "widget": "counter"
+          }
+        ]
       }
     ]
   },
   "selectionSummary": {
     "schemaVersion": "selection-summary-v1",
-    "evaluatedCount": 5,
-    "selectedCount": 1,
+    "evaluatedCount": 6,
+    "selectedCount": 2,
     "rejectedCount": 4,
     "selected": [
       {
@@ -132,6 +206,15 @@
         "requiredTrials": {
           "value": 13935,
           "unit": "通常ゲーム"
+        }
+      },
+      {
+        "featureId": "FEAT_SUNSHINE",
+        "name": "蝶飛翔時「感じてSunshine!!」選択率",
+        "reason": "選択率が設定1の2%から設定6の10%まで5倍差あり、対象機会を正確に数えられる場合は序盤から有効な補助材料になるため採用。入力は任意です。",
+        "requiredTrials": {
+          "value": 57,
+          "unit": "楽曲選択機会"
         }
       }
     ],
