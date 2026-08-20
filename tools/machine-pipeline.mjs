@@ -129,13 +129,16 @@ const settingBandPath = path.join(researchDir, 'setting-band-report.json');
 const machinePath = path.join(ROOT, 'machines', machineId, 'machine-package.json');
 const catalogPath = path.join(ROOT, 'catalog.json');
 const difficultyCatalogPath = path.join(ROOT, 'difficulty-catalog.json');
+const machineRegistryPath = path.join(ROOT, 'machine-registry.json');
 let difficultyCatalogBackup = null;
 let catalogBackup = null;
+let machineRegistryBackup = null;
 let settingBandBackup = null;
 
 try {
   if (!fs.existsSync(researchPath)) fail(`ResearchData not found: ${path.relative(ROOT, researchPath)}`);
   if (!fs.existsSync(selectionPath)) fail(`SelectionData not found: ${path.relative(ROOT, selectionPath)}`);
+  if (checkOnly && fs.existsSync(machineRegistryPath)) machineRegistryBackup = fs.readFileSync(machineRegistryPath);
 
   const research = readJson(researchPath);
   const selection = readJson(selectionPath);
@@ -220,6 +223,7 @@ try {
   if (checkOnly) {
     if (difficultyCatalogBackup) fs.writeFileSync(difficultyCatalogPath, difficultyCatalogBackup);
     if (catalogBackup) fs.writeFileSync(catalogPath, catalogBackup);
+    if (machineRegistryBackup) fs.writeFileSync(machineRegistryPath, machineRegistryBackup);
     if (settingBandBackup !== null) fs.writeFileSync(settingBandPath, settingBandBackup);
     else if (fs.existsSync(settingBandPath)) fs.rmSync(settingBandPath);
     for (const p of [statisticsPath, difficultyPath]) {
