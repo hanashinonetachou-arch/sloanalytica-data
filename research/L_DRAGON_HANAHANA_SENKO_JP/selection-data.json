@@ -29,6 +29,41 @@
       "unit": "回",
       "displayOrder": 3,
       "defaultValue": 0
+    },
+    {
+      "id": "INP_PREDECESSOR_GAMES",
+      "name": "着席時ゲーム数",
+      "type": "integer",
+      "category": "PREDECESSOR",
+      "unit": "G",
+      "displayOrder": 1,
+      "defaultValue": 0,
+      "observationScope": "PREDECESSOR_SNAPSHOT",
+      "description": "着席時のデータカウンターに表示されている当日累計ゲーム数。同一区間のBIG・REGが確認できる場合のみ入力します。"
+    },
+    {
+      "id": "INP_PREDECESSOR_BIG",
+      "name": "着席時BIG",
+      "type": "counter",
+      "category": "PREDECESSOR",
+      "unit": "回",
+      "displayOrder": 2,
+      "defaultValue": 0,
+      "observationScope": "PREDECESSOR_SNAPSHOT",
+      "parentInputId": "INP_PREDECESSOR_GAMES",
+      "description": "着席時の当日累計BIG回数。"
+    },
+    {
+      "id": "INP_PREDECESSOR_REG",
+      "name": "着席時REG",
+      "type": "counter",
+      "category": "PREDECESSOR",
+      "unit": "回",
+      "displayOrder": 3,
+      "defaultValue": 0,
+      "observationScope": "PREDECESSOR_SNAPSHOT",
+      "parentInputId": "INP_PREDECESSOR_GAMES",
+      "description": "着席時の当日累計REG回数。"
     }
   ],
   "features": [
@@ -78,15 +113,27 @@
       "featureId": "FEAT_FEATHER",
       "adoptionCategory": "EXCLUDE",
       "rejectionReason": "設定示唆の存在は把握していますが、スマスロ版固有の全設定別出現分布を信頼できる形で確定できず、BIG後は朝一1回目の抽選条件も異なるため不採用。"
-    }
-  ],
-  "rejectedElements": [
+    },
     {
-      "id": "REJECTED_PREDECESSOR_DENOMINATOR",
-      "name": "着席時データ",
-      "reason": "店舗データカウンターの総ゲーム数は公開解析の通常ゲーム数と集計区間が一致する保証がないため、前任者区間の設定推測には使用しません。実機メニュー等で分子・分母を同一区間で直接取得できる場合のみ個別採用します。"
+      "researchFeatureId": "RF_PREDECESSOR_BONUS",
+      "featureId": "FEAT_PREDECESSOR_BONUS",
+      "adoptionCategory": "INCLUDE_PRIMARY",
+      "denominatorInputId": "INP_PREDECESSOR_GAMES",
+      "numeratorInputId": "INP_PREDECESSOR_BIG",
+      "categoryInputIds": [
+        "INP_PREDECESSOR_REG"
+      ],
+      "residualCategoryLabel": "OTHER",
+      "minimumSample": 1,
+      "sampleRecommendation": 3000,
+      "weight": 1,
+      "displayFormat": "ratio_1_over_n",
+      "difficultyParticipation": "EXCLUDE",
+      "userReason": "着席時に当日累計ゲーム数・BIG・REGを同一区間で取得できる場合、前任者区間も独立した設定推測情報として利用できるため採用。入力できない場合は未入力で構いません。",
+      "difficultyExclusionReason": "共通Difficultyは自分が遊技したゲーム数を基準にするため、着席前区間はスコア計算へ含めない。"
     }
   ],
+  "rejectedElements": [],
   "evidence": [],
   "evidenceUi": {
     "groups": []
@@ -96,6 +143,7 @@
     "exclusions": []
   },
   "uiCategoryLabels": {
+    "PREDECESSOR": "着席時データ",
     "PRIMARY": "ボーナス"
   },
   "difficultyAnalysis": {
