@@ -1,0 +1,525 @@
+{
+  "schemaVersion": 1,
+  "machine": {
+    "schemaVersion": "2.0.0",
+    "machineId": "S_KABANERI_ZR",
+    "machineDataVersion": "0.1.0",
+    "displayName": "パチスロ甲鉄城のカバネリ",
+    "modelName": "S パチスロ甲鉄城のカバネリ ZR",
+    "manufacturer": "サミー",
+    "settings": [
+      "SET_1",
+      "SET_2",
+      "SET_3",
+      "SET_4",
+      "SET_5",
+      "SET_6"
+    ],
+    "packagePolicy": {
+      "offlineCapable": true,
+      "containsImages": false,
+      "containsExecutableCode": false
+    }
+  },
+  "inputs": {
+    "schemaVersion": "2.0.0",
+    "inputs": [
+      {
+        "id": "INP_NORMAL_GAMES",
+        "name": "通常ゲーム数",
+        "type": "integer",
+        "category": "PRIMARY",
+        "displayOrder": 1,
+        "defaultValue": 0,
+        "unit": "G",
+        "minimum": 0
+      },
+      {
+        "id": "INP_BONUS",
+        "name": "ボーナス初当り回数",
+        "type": "counter",
+        "category": "PRIMARY",
+        "displayOrder": 2,
+        "defaultValue": 0,
+        "unit": "回",
+        "minimum": 0
+      },
+      {
+        "id": "INP_CZ",
+        "name": "CZ初当り回数",
+        "type": "counter",
+        "category": "SUPPORT",
+        "displayOrder": 3,
+        "defaultValue": 0,
+        "unit": "回",
+        "minimum": 0
+      },
+      {
+        "id": "INP_COMMON_BELL_GAMES",
+        "name": "共通ベル対象ゲーム数",
+        "type": "integer",
+        "category": "SMALL_ROLE",
+        "displayOrder": 10,
+        "defaultValue": 0,
+        "unit": "G",
+        "description": "通常時・AT中など共通6枚ベルを判別して数えた区間のゲーム数。",
+        "minimum": 0
+      },
+      {
+        "id": "INP_COMMON_BELL",
+        "name": "共通6枚ベル回数",
+        "type": "counter",
+        "category": "SMALL_ROLE",
+        "displayOrder": 11,
+        "defaultValue": 0,
+        "unit": "回",
+        "parentInputId": "INP_COMMON_BELL_GAMES",
+        "minimum": 0
+      },
+      {
+        "id": "INP_MUMEI_3_TRIALS",
+        "name": "無名CZ 小役3連回数",
+        "type": "integer",
+        "category": "CZ_DETAIL",
+        "displayOrder": 20,
+        "defaultValue": 0,
+        "unit": "回",
+        "minimum": 0
+      },
+      {
+        "id": "INP_MUMEI_3_HIT",
+        "name": "うちボーナス当選回数",
+        "type": "counter",
+        "category": "CZ_DETAIL",
+        "displayOrder": 21,
+        "defaultValue": 0,
+        "unit": "回",
+        "parentInputId": "INP_MUMEI_3_TRIALS",
+        "minimum": 0
+      },
+      {
+        "id": "INP_EVI_SETTING_FLOOR",
+        "name": "確認した設定下限",
+        "type": "enum",
+        "category": "EVIDENCE",
+        "unit": "",
+        "displayOrder": 100,
+        "inferenceRole": "INCLUDE_SUPPORT",
+        "options": [
+          {
+            "key": "__UNSET__",
+            "label": "未選択",
+            "value": "__UNSET__"
+          },
+          {
+            "key": "SET_2_OR_HIGHER",
+            "label": "設定2以上",
+            "value": "SET_2_OR_HIGHER"
+          },
+          {
+            "key": "SET_4_OR_HIGHER",
+            "label": "設定4以上",
+            "value": "SET_4_OR_HIGHER"
+          },
+          {
+            "key": "SET_5_OR_HIGHER",
+            "label": "設定5以上",
+            "value": "SET_5_OR_HIGHER"
+          },
+          {
+            "key": "SET_6",
+            "label": "設定6",
+            "value": "SET_6"
+          }
+        ],
+        "defaultValue": "__UNSET__"
+      }
+    ]
+  },
+  "features": {
+    "schemaVersion": "2.0.0",
+    "features": [
+      {
+        "featureId": "FEAT_BONUS",
+        "name": "ボーナス合算",
+        "adoptionCategory": "INCLUDE_PRIMARY",
+        "calculationRole": "PROBABILITY",
+        "probabilityEngineUsage": true,
+        "modelType": "binomial",
+        "minimumSample": 1,
+        "sampleRecommendation": 7000,
+        "reliabilityProfile": {
+          "weight": 1
+        },
+        "displayFormat": "ratio_1_over_n",
+        "numeratorInputId": "INP_BONUS",
+        "denominatorInputId": "INP_NORMAL_GAMES",
+        "probabilities": {
+          "SET_1": 0.004219409282700422,
+          "SET_2": 0.004334633723450368,
+          "SET_3": 0.004672897196261682,
+          "SET_4": 0.005361930294906166,
+          "SET_5": 0.005837711617046118,
+          "SET_6": 0.006609385327164573
+        },
+        "sourceEvidenceRefs": [
+          "SRC_ANALYSIS"
+        ]
+      },
+      {
+        "featureId": "FEAT_CZ",
+        "name": "CZ",
+        "adoptionCategory": "INCLUDE_SUPPORT",
+        "calculationRole": "PROBABILITY",
+        "probabilityEngineUsage": true,
+        "modelType": "binomial",
+        "minimumSample": 1,
+        "sampleRecommendation": 7000,
+        "reliabilityProfile": {
+          "weight": 0.6
+        },
+        "displayFormat": "ratio_1_over_n",
+        "numeratorInputId": "INP_CZ",
+        "denominatorInputId": "INP_NORMAL_GAMES",
+        "probabilities": {
+          "SET_1": 0.005577244841048522,
+          "SET_2": 0.005621135469364811,
+          "SET_3": 0.005906674542232723,
+          "SET_4": 0.006313131313131313,
+          "SET_5": 0.006868131868131868,
+          "SET_6": 0.007309941520467836
+        },
+        "sourceEvidenceRefs": [
+          "SRC_ANALYSIS"
+        ]
+      },
+      {
+        "featureId": "FEAT_COMMON_BELL",
+        "name": "共通中段ベル（6枚ベル）",
+        "adoptionCategory": "INCLUDE_SUPPORT",
+        "calculationRole": "PROBABILITY",
+        "probabilityEngineUsage": true,
+        "modelType": "binomial",
+        "minimumSample": 1,
+        "sampleRecommendation": 7000,
+        "reliabilityProfile": {
+          "weight": 1
+        },
+        "displayFormat": "ratio_1_over_n",
+        "numeratorInputId": "INP_COMMON_BELL",
+        "denominatorInputId": "INP_COMMON_BELL_GAMES",
+        "probabilities": {
+          "SET_1": 0.03759398496240601,
+          "SET_2": 0.03759398496240601,
+          "SET_3": 0.03861003861003861,
+          "SET_4": 0.03937007874015748,
+          "SET_5": 0.040160642570281124,
+          "SET_6": 0.04132231404958678
+        },
+        "sourceEvidenceRefs": [
+          "SRC_ANALYSIS"
+        ]
+      },
+      {
+        "featureId": "FEAT_MUMEI_3CHAIN",
+        "name": "無名CZ 小役3連時ボーナス当選",
+        "adoptionCategory": "INCLUDE_SUPPORT",
+        "calculationRole": "PROBABILITY",
+        "probabilityEngineUsage": true,
+        "modelType": "binomial",
+        "minimumSample": 1,
+        "sampleRecommendation": 20,
+        "reliabilityProfile": {
+          "weight": 0.8
+        },
+        "displayFormat": "percent",
+        "numeratorInputId": "INP_MUMEI_3_HIT",
+        "denominatorInputId": "INP_MUMEI_3_TRIALS",
+        "probabilities": {
+          "SET_1": 0.187,
+          "SET_2": 0.188,
+          "SET_3": 0.235,
+          "SET_4": 0.28300000000000003,
+          "SET_5": 0.306,
+          "SET_6": 0.40700000000000003
+        },
+        "sourceEvidenceRefs": [
+          "SRC_ANALYSIS"
+        ]
+      }
+    ]
+  },
+  "evidence": {
+    "version": "1.0.0",
+    "evidences": [
+      {
+        "id": "EVI_SETTING_FLOOR_SET_2_OR_HIGHER",
+        "name": "設定2以上",
+        "displayName": "設定2以上",
+        "inputId": "INP_EVI_SETTING_FLOOR",
+        "triggerValue": "SET_2_OR_HIGHER",
+        "confirmedSettings": [
+          "SET_2",
+          "SET_3",
+          "SET_4",
+          "SET_5",
+          "SET_6"
+        ],
+        "deniedSettings": [],
+        "hasImage": false,
+        "type": "SETTING_CONFIRMATION",
+        "sourceEvidenceRefs": [
+          "RE_2PLUS"
+        ]
+      },
+      {
+        "id": "EVI_SETTING_FLOOR_SET_4_OR_HIGHER",
+        "name": "設定4以上",
+        "displayName": "設定4以上",
+        "inputId": "INP_EVI_SETTING_FLOOR",
+        "triggerValue": "SET_4_OR_HIGHER",
+        "confirmedSettings": [
+          "SET_4",
+          "SET_5",
+          "SET_6"
+        ],
+        "deniedSettings": [],
+        "hasImage": false,
+        "type": "SETTING_CONFIRMATION",
+        "sourceEvidenceRefs": [
+          "RE_4PLUS"
+        ]
+      },
+      {
+        "id": "EVI_SETTING_FLOOR_SET_5_OR_HIGHER",
+        "name": "設定5以上",
+        "displayName": "設定5以上",
+        "inputId": "INP_EVI_SETTING_FLOOR",
+        "triggerValue": "SET_5_OR_HIGHER",
+        "confirmedSettings": [
+          "SET_5",
+          "SET_6"
+        ],
+        "deniedSettings": [],
+        "hasImage": false,
+        "type": "SETTING_CONFIRMATION",
+        "sourceEvidenceRefs": [
+          "RE_5PLUS"
+        ]
+      },
+      {
+        "id": "EVI_SETTING_FLOOR_SET_6",
+        "name": "設定6",
+        "displayName": "設定6",
+        "inputId": "INP_EVI_SETTING_FLOOR",
+        "triggerValue": "SET_6",
+        "confirmedSettings": [
+          "SET_6"
+        ],
+        "deniedSettings": [],
+        "hasImage": false,
+        "type": "SETTING_CONFIRMATION",
+        "sourceEvidenceRefs": [
+          "RE_6"
+        ]
+      }
+    ],
+    "sources": [
+      {
+        "id": "SRC_ID",
+        "classification": "ANALYSIS",
+        "url": "https://www.p-world.co.jp/machine/database/9640",
+        "checkedAt": "2026-08-21"
+      },
+      {
+        "id": "SRC_ANALYSIS",
+        "classification": "ANALYSIS",
+        "url": "https://nana-press.com/kaiseki/machine/384/10347/",
+        "checkedAt": "2026-08-21"
+      }
+    ]
+  },
+  "ui": {
+    "sections": [
+      {
+        "id": "AUTO_PRIMARY",
+        "title": "初当り",
+        "displayOrder": 1,
+        "items": [
+          {
+            "type": "input",
+            "inputId": "INP_NORMAL_GAMES",
+            "label": "通常ゲーム数",
+            "widget": "number"
+          },
+          {
+            "type": "input",
+            "inputId": "INP_BONUS",
+            "label": "ボーナス初当り回数",
+            "widget": "counter"
+          }
+        ]
+      },
+      {
+        "id": "AUTO_SUPPORT",
+        "title": "CZ",
+        "displayOrder": 2,
+        "items": [
+          {
+            "type": "input",
+            "inputId": "INP_CZ",
+            "label": "CZ初当り回数",
+            "widget": "counter"
+          }
+        ]
+      },
+      {
+        "id": "AUTO_SMALL_ROLE",
+        "title": "共通6枚ベル",
+        "displayOrder": 3,
+        "items": [
+          {
+            "type": "input",
+            "inputId": "INP_COMMON_BELL_GAMES",
+            "label": "共通ベル対象ゲーム数",
+            "widget": "number"
+          },
+          {
+            "type": "input",
+            "inputId": "INP_COMMON_BELL",
+            "label": "共通6枚ベル回数",
+            "widget": "counter"
+          }
+        ]
+      },
+      {
+        "id": "AUTO_CZ_DETAIL",
+        "title": "無名CZ",
+        "displayOrder": 4,
+        "items": [
+          {
+            "type": "input",
+            "inputId": "INP_MUMEI_3_TRIALS",
+            "label": "無名CZ 小役3連回数",
+            "widget": "number"
+          },
+          {
+            "type": "input",
+            "inputId": "INP_MUMEI_3_HIT",
+            "label": "うちボーナス当選回数",
+            "widget": "counter"
+          }
+        ]
+      },
+      {
+        "id": "AUTO_EVIDENCE",
+        "title": "設定確定・否定情報",
+        "displayOrder": 5,
+        "items": [
+          {
+            "type": "input",
+            "inputId": "INP_EVI_SETTING_FLOOR",
+            "label": "確認した設定下限",
+            "widget": "select"
+          }
+        ]
+      }
+    ]
+  },
+  "selectionSummary": {
+    "schemaVersion": "selection-summary-v1",
+    "evaluatedCount": 9,
+    "selectedCount": 4,
+    "rejectedCount": 5,
+    "selected": [
+      {
+        "featureId": "FEAT_BONUS",
+        "name": "ボーナス合算",
+        "reason": "終日を通して取得でき、設定差が大きいため主軸採用。",
+        "requiredTrials": {
+          "value": 6826,
+          "unit": "通常ゲーム"
+        }
+      },
+      {
+        "featureId": "FEAT_CZ",
+        "name": "CZ",
+        "reason": "高頻度で設定差があるがボーナスへつながる中間過程のため相関を考慮して補助採用。",
+        "requiredTrials": {
+          "value": 15561,
+          "unit": "通常ゲーム"
+        }
+      },
+      {
+        "featureId": "FEAT_COMMON_BELL",
+        "name": "共通中段ベル（6枚ベル）",
+        "reason": "独立した小役情報で、比較的多く試行を確保できるため採用。",
+        "requiredTrials": {
+          "value": 19976,
+          "unit": "対象ゲーム"
+        }
+      },
+      {
+        "featureId": "FEAT_MUMEI_3CHAIN",
+        "name": "無名CZ 小役3連時ボーナス当選",
+        "reason": "明確な試行条件で設定1と6に2倍超の差があるため補助採用。",
+        "requiredTrials": {
+          "value": 31,
+          "unit": "無名CZ小役3連"
+        }
+      }
+    ],
+    "rejected": [
+      {
+        "featureId": "FEAT_MUMEI_NAV",
+        "name": "無名CZ 2択ナビ出現",
+        "reason": "同一無名CZ内部の3連成功率と強く関連し、同時採用するとCZ内部挙動を重複評価する。",
+        "requiredTrials": {
+          "value": 83,
+          "unit": "無名CZ抽選機会"
+        }
+      },
+      {
+        "featureId": "FEAT_ST",
+        "name": "ST合算",
+        "reason": "ボーナス当選の下流で、採用済みボーナス初当りと因果的に重複する。",
+        "requiredTrials": {
+          "value": 21835,
+          "unit": "通常ゲーム"
+        }
+      },
+      {
+        "featureId": "FEAT_IKOMA_AVOID",
+        "name": "生駒CZハズレ時ライフ減少回避",
+        "reason": "ライフ残量ごとに別分母が必要で、同一CZ内部の挙動を過度に重複評価するため不採用。"
+      },
+      {
+        "featureId": "REJECTED_REG_GAME",
+        "name": "規定G数到達時のボーナス当選率",
+        "reason": "複数ゾーンは前ゾーン非当選を条件に次の試行へ進むため、独立Feature化すると生存条件を無視して情報を水増しします。"
+      },
+      {
+        "featureId": "REJECTED_CHARACTER_DISTRIBUTION",
+        "name": "カバネリボーナス中キャラ紹介の偶奇傾向",
+        "reason": "示唆要素は把握していますが、全設定別の完全な出現分布を公開情報で安定照合できないため数値Feature化しません。"
+      }
+    ]
+  },
+  "reliability": {},
+  "metadata": {
+    "machineId": "S_KABANERI_ZR",
+    "displayName": "パチスロ甲鉄城のカバネリ",
+    "settings": [
+      "SET_1",
+      "SET_2",
+      "SET_3",
+      "SET_4",
+      "SET_5",
+      "SET_6"
+    ]
+  },
+  "validation": {
+    "cases": []
+  },
+  "statistics": {}
+}

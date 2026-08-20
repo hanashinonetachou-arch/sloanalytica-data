@@ -1,0 +1,204 @@
+{
+  "schemaVersion": "selection-data-v1",
+  "machineId": "L_EUREKA_SEVEN4_HIEVO_KX",
+  "machineDataVersion": "0.1.0",
+  "inputs": [
+    {
+      "id": "INP_NORMAL_GAMES",
+      "name": "通常ゲーム数",
+      "type": "integer",
+      "category": "PRIMARY",
+      "displayOrder": 1,
+      "defaultValue": 0,
+      "unit": "G"
+    },
+    {
+      "id": "INP_AT",
+      "name": "AT初当り回数",
+      "type": "counter",
+      "category": "PRIMARY",
+      "displayOrder": 2,
+      "defaultValue": 0,
+      "unit": "回"
+    },
+    {
+      "id": "INP_SC",
+      "name": "セブンチャンス回数",
+      "type": "counter",
+      "category": "SUPPORT",
+      "displayOrder": 10,
+      "defaultValue": 0,
+      "unit": "回"
+    },
+    {
+      "id": "INP_SC_LV12",
+      "name": "初期Lv12回数",
+      "type": "counter",
+      "category": "SUPPORT",
+      "displayOrder": 11,
+      "defaultValue": 0,
+      "unit": "回",
+      "parentInputId": "INP_SC"
+    }
+  ],
+  "features": [
+    {
+      "researchFeatureId": "RF_AT",
+      "featureId": "FEAT_AT",
+      "adoptionCategory": "INCLUDE_PRIMARY",
+      "numeratorInputId": "INP_AT",
+      "denominatorInputId": "INP_NORMAL_GAMES",
+      "minimumSample": 1,
+      "sampleRecommendation": 7000,
+      "weight": 1,
+      "displayFormat": "ratio_1_over_n",
+      "difficultyExposure": {
+        "mode": "per_game",
+        "factor": 1,
+        "quality": "EXACT",
+        "basisId": "NORMAL_GAMES"
+      },
+      "difficultyParticipation": "INCLUDE",
+      "userReason": "終日を通して観測でき、段階的な設定差があるため主軸採用。"
+    },
+    {
+      "researchFeatureId": "RF_SEVEN_CHANCE",
+      "featureId": "FEAT_SEVEN_CHANCE",
+      "adoptionCategory": "INCLUDE_SUPPORT",
+      "numeratorInputId": "INP_SC",
+      "denominatorInputId": "INP_NORMAL_GAMES",
+      "minimumSample": 1,
+      "sampleRecommendation": 7000,
+      "weight": 0.6,
+      "displayFormat": "ratio_1_over_n",
+      "difficultyExposure": {
+        "mode": "per_game",
+        "factor": 1,
+        "quality": "EXACT",
+        "basisId": "NORMAL_GAMES"
+      },
+      "difficultyParticipation": "INCLUDE",
+      "userReason": "高頻度で設定差がある。ATへつながるため相関を考慮して補助採用。"
+    },
+    {
+      "researchFeatureId": "RF_SC_LV12",
+      "featureId": "FEAT_SC_LV12",
+      "adoptionCategory": "INCLUDE_SUPPORT",
+      "numeratorInputId": "INP_SC_LV12",
+      "denominatorInputId": "INP_SC",
+      "minimumSample": 1,
+      "sampleRecommendation": 30,
+      "weight": 0.7,
+      "displayFormat": "percent",
+      "difficultyParticipation": "EXCLUDE",
+      "difficultyExclusionReason": "通常GからLv12判定可能なSC試行数を独立に確定できないため。",
+      "userReason": "SC発生後の条件付き情報として設定差を追加利用できるため補助採用。"
+    },
+    {
+      "researchFeatureId": "RF_AT_DIRECT",
+      "featureId": "FEAT_AT_DIRECT",
+      "adoptionCategory": "EXCLUDE",
+      "rejectionReason": "AT初当りに包含され、同時採用すると二重計上になる。"
+    },
+    {
+      "researchFeatureId": "RF_12_BELL",
+      "featureId": "FEAT_12_BELL",
+      "adoptionCategory": "EXCLUDE",
+      "rejectionReason": "設定差が極小で必要試行量が大きい。"
+    }
+  ],
+  "rejectedElements": [],
+  "evidence": [],
+  "evidenceUi": {
+    "groups": [
+      {
+        "groupId": "SETTING_FLOOR",
+        "label": "確認した設定下限",
+        "selectionMode": "single",
+        "normalizationMode": "ALLOWED_SETTINGS",
+        "options": [
+          {
+            "value": "SET_2_OR_HIGHER",
+            "label": "設定2以上",
+            "allowedSettings": [
+              "SET_2",
+              "SET_3",
+              "SET_4",
+              "SET_5",
+              "SET_6"
+            ],
+            "sourceEvidenceIds": [
+              "RE_2PLUS"
+            ]
+          },
+          {
+            "value": "SET_3_OR_HIGHER",
+            "label": "設定3以上",
+            "allowedSettings": [
+              "SET_3",
+              "SET_4",
+              "SET_5",
+              "SET_6"
+            ],
+            "sourceEvidenceIds": [
+              "RE_3PLUS"
+            ]
+          },
+          {
+            "value": "SET_4_OR_HIGHER",
+            "label": "設定4以上",
+            "allowedSettings": [
+              "SET_4",
+              "SET_5",
+              "SET_6"
+            ],
+            "sourceEvidenceIds": [
+              "RE_4PLUS"
+            ]
+          },
+          {
+            "value": "SET_5_OR_HIGHER",
+            "label": "設定5以上",
+            "allowedSettings": [
+              "SET_5",
+              "SET_6"
+            ],
+            "sourceEvidenceIds": [
+              "RE_5PLUS"
+            ]
+          },
+          {
+            "value": "SET_6",
+            "label": "設定6",
+            "allowedSettings": [
+              "SET_6"
+            ],
+            "sourceEvidenceIds": [
+              "RE_6"
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "evidenceReview": {
+    "policyVersion": 1,
+    "exclusions": []
+  },
+  "uiCategoryLabels": {
+    "PRIMARY": "初当り",
+    "SUPPORT": "セブンチャンス"
+  },
+  "difficultyAnalysis": {
+    "targetGameBasis": {
+      "basisId": "NORMAL_GAMES",
+      "label": "通常ゲーム数",
+      "quality": "EXACT"
+    },
+    "calibrationAllowedExposureQualities": [
+      "EXACT",
+      "DERIVED",
+      "ESTIMATED"
+    ]
+  }
+}

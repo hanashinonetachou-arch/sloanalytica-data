@@ -1,0 +1,192 @@
+{
+  "schemaVersion": "selection-data-v1",
+  "machineId": "L_ENEN_NO_SHOUBOUTAI_JG",
+  "machineDataVersion": "0.1.0",
+  "inputs": [
+    {
+      "id": "INP_NORMAL_GAMES",
+      "name": "通常ゲーム数",
+      "type": "integer",
+      "category": "PRIMARY",
+      "displayOrder": 1,
+      "defaultValue": 0,
+      "unit": "G"
+    },
+    {
+      "id": "INP_INITIAL",
+      "name": "初当り合算回数",
+      "type": "counter",
+      "category": "PRIMARY",
+      "displayOrder": 2,
+      "defaultValue": 0,
+      "unit": "回"
+    },
+    {
+      "id": "INP_BONUS_INITIAL",
+      "name": "初当りボーナス回数",
+      "type": "counter",
+      "category": "SUPPORT",
+      "displayOrder": 10,
+      "defaultValue": 0,
+      "unit": "回",
+      "parentInputId": "INP_INITIAL"
+    },
+    {
+      "id": "INP_EPB",
+      "name": "エピソードボーナス到達回数",
+      "type": "counter",
+      "category": "SUPPORT",
+      "displayOrder": 11,
+      "defaultValue": 0,
+      "unit": "回",
+      "parentInputId": "INP_BONUS_INITIAL"
+    }
+  ],
+  "features": [
+    {
+      "researchFeatureId": "RF_INITIAL",
+      "featureId": "FEAT_INITIAL",
+      "adoptionCategory": "INCLUDE_PRIMARY",
+      "numeratorInputId": "INP_INITIAL",
+      "denominatorInputId": "INP_NORMAL_GAMES",
+      "minimumSample": 1,
+      "sampleRecommendation": 7000,
+      "weight": 1,
+      "displayFormat": "ratio_1_over_n",
+      "difficultyExposure": {
+        "mode": "per_game",
+        "factor": 1,
+        "quality": "EXACT",
+        "basisId": "NORMAL_GAMES"
+      },
+      "difficultyParticipation": "INCLUDE",
+      "userReason": "ボーナス初当りと灰焔騎士団をまとめた全初当りを安定して観測できるため主軸採用。"
+    },
+    {
+      "researchFeatureId": "RF_BONUS_SHARE",
+      "featureId": "FEAT_BONUS_SHARE",
+      "adoptionCategory": "INCLUDE_SUPPORT",
+      "numeratorInputId": "INP_BONUS_INITIAL",
+      "denominatorInputId": "INP_INITIAL",
+      "minimumSample": 1,
+      "sampleRecommendation": 30,
+      "weight": 0.8,
+      "displayFormat": "percent",
+      "difficultyExposure": {
+        "mode": "derived_event_rate",
+        "sourceFeatureId": "FEAT_INITIAL",
+        "eventMultiplier": 1,
+        "quality": "DERIVED",
+        "basisId": "NORMAL_GAMES"
+      },
+      "difficultyParticipation": "INCLUDE",
+      "userReason": "全初当りに対するボーナス構成比として扱えば、初当り合算と二重計上せず追加情報を使える。"
+    },
+    {
+      "researchFeatureId": "RF_EPB_AFTER_INITIAL",
+      "featureId": "FEAT_EPB_AFTER_INITIAL",
+      "adoptionCategory": "INCLUDE_SUPPORT",
+      "numeratorInputId": "INP_EPB",
+      "denominatorInputId": "INP_BONUS_INITIAL",
+      "minimumSample": 1,
+      "sampleRecommendation": 20,
+      "weight": 0.7,
+      "displayFormat": "percent",
+      "difficultyParticipation": "EXCLUDE",
+      "difficultyExclusionReason": "通常GからEPB判定対象となる初当りボーナス試行を直接固定換算しないため。",
+      "userReason": "初当りボーナス後の条件付き成功率として段階差を利用する。"
+    },
+    {
+      "researchFeatureId": "RF_ENEN_INITIAL",
+      "featureId": "FEAT_ENEN_INITIAL",
+      "adoptionCategory": "EXCLUDE",
+      "rejectionReason": "設定6の公開値に出典不一致があり、合算初当りと構成比でも情報を表現できるため不採用。"
+    },
+    {
+      "researchFeatureId": "RF_CROSS_BONUS",
+      "featureId": "FEAT_CROSS_BONUS",
+      "adoptionCategory": "EXCLUDE",
+      "rejectionReason": "初当りボーナスの成立過程を分解した値で、採用済み初当り情報と因果的に重複する。"
+    }
+  ],
+  "rejectedElements": [],
+  "evidence": [],
+  "evidenceUi": {
+    "groups": [
+      {
+        "groupId": "SETTING_FLOOR",
+        "label": "確認した設定下限",
+        "selectionMode": "single",
+        "normalizationMode": "ALLOWED_SETTINGS",
+        "options": [
+          {
+            "value": "SET_2_OR_HIGHER",
+            "label": "設定2以上",
+            "allowedSettings": [
+              "SET_2",
+              "SET_4",
+              "SET_5",
+              "SET_6"
+            ],
+            "sourceEvidenceIds": [
+              "RE_2PLUS"
+            ]
+          },
+          {
+            "value": "SET_4_OR_HIGHER",
+            "label": "設定4以上",
+            "allowedSettings": [
+              "SET_4",
+              "SET_5",
+              "SET_6"
+            ],
+            "sourceEvidenceIds": [
+              "RE_4PLUS"
+            ]
+          },
+          {
+            "value": "SET_5_OR_HIGHER",
+            "label": "設定5以上",
+            "allowedSettings": [
+              "SET_5",
+              "SET_6"
+            ],
+            "sourceEvidenceIds": [
+              "RE_5PLUS"
+            ]
+          },
+          {
+            "value": "SET_6",
+            "label": "設定6",
+            "allowedSettings": [
+              "SET_6"
+            ],
+            "sourceEvidenceIds": [
+              "RE_6"
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "evidenceReview": {
+    "policyVersion": 1,
+    "exclusions": []
+  },
+  "uiCategoryLabels": {
+    "PRIMARY": "初当り",
+    "SUPPORT": "初当り後の構成・到達"
+  },
+  "difficultyAnalysis": {
+    "targetGameBasis": {
+      "basisId": "NORMAL_GAMES",
+      "label": "通常ゲーム数",
+      "quality": "EXACT"
+    },
+    "calibrationAllowedExposureQualities": [
+      "EXACT",
+      "DERIVED",
+      "ESTIMATED"
+    ]
+  }
+}

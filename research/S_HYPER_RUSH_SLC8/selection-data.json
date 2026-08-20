@@ -1,0 +1,205 @@
+{
+  "schemaVersion": "selection-data-v1",
+  "machineId": "S_HYPER_RUSH_SLC8",
+  "machineDataVersion": "0.1.0",
+  "inputs": [
+    {
+      "id": "INP_NORMAL_GAMES",
+      "name": "通常ゲーム数",
+      "type": "integer",
+      "category": "PRIMARY",
+      "displayOrder": 1,
+      "defaultValue": 0,
+      "unit": "G",
+      "description": "実機連動機能で確認できる通常ゲーム数を利用できます。"
+    },
+    {
+      "id": "INP_BIG",
+      "name": "BIG回数",
+      "type": "counter",
+      "category": "PRIMARY",
+      "displayOrder": 2,
+      "defaultValue": 0,
+      "unit": "回"
+    },
+    {
+      "id": "INP_REG",
+      "name": "REG回数",
+      "type": "counter",
+      "category": "PRIMARY",
+      "displayOrder": 3,
+      "defaultValue": 0,
+      "unit": "回"
+    },
+    {
+      "id": "INP_SMALL_GAMES",
+      "name": "小役対象ゲーム数",
+      "type": "integer",
+      "category": "SMALL_ROLE",
+      "displayOrder": 10,
+      "defaultValue": 0,
+      "unit": "G",
+      "description": "実機連動機能で総ゲーム数を確認できる場合は、その集計区間に合わせてください。"
+    },
+    {
+      "id": "INP_BELL_A",
+      "name": "ベルA回数",
+      "type": "counter",
+      "category": "SMALL_ROLE",
+      "displayOrder": 11,
+      "defaultValue": 0,
+      "unit": "回",
+      "parentInputId": "INP_SMALL_GAMES"
+    },
+    {
+      "id": "INP_SUIKA_A",
+      "name": "スイカA回数",
+      "type": "counter",
+      "category": "SMALL_ROLE",
+      "displayOrder": 12,
+      "defaultValue": 0,
+      "unit": "回",
+      "parentInputId": "INP_SMALL_GAMES"
+    }
+  ],
+  "features": [
+    {
+      "researchFeatureId": "RF_BIG",
+      "featureId": "FEAT_BIG",
+      "adoptionCategory": "INCLUDE_PRIMARY",
+      "numeratorInputId": "INP_BIG",
+      "denominatorInputId": "INP_NORMAL_GAMES",
+      "minimumSample": 1,
+      "sampleRecommendation": 7000,
+      "weight": 1,
+      "displayFormat": "ratio_1_over_n",
+      "difficultyExposure": {
+        "mode": "per_game",
+        "factor": 1,
+        "quality": "EXACT",
+        "basisId": "NORMAL_GAMES"
+      },
+      "difficultyParticipation": "INCLUDE",
+      "userReason": "BIG確率に段階差があり通常Gを同一区間で取得できるため採用。"
+    },
+    {
+      "researchFeatureId": "RF_REG",
+      "featureId": "FEAT_REG",
+      "adoptionCategory": "INCLUDE_PRIMARY",
+      "numeratorInputId": "INP_REG",
+      "denominatorInputId": "INP_NORMAL_GAMES",
+      "minimumSample": 1,
+      "sampleRecommendation": 7000,
+      "weight": 1,
+      "displayFormat": "ratio_1_over_n",
+      "difficultyExposure": {
+        "mode": "per_game",
+        "factor": 1,
+        "quality": "EXACT",
+        "basisId": "NORMAL_GAMES"
+      },
+      "difficultyParticipation": "INCLUDE",
+      "userReason": "REG確率に段階差がありBIGとは別カテゴリで観測できるため採用。"
+    },
+    {
+      "researchFeatureId": "RF_BELL_A",
+      "featureId": "FEAT_BELL_A",
+      "adoptionCategory": "INCLUDE_SUPPORT",
+      "numeratorInputId": "INP_BELL_A",
+      "denominatorInputId": "INP_SMALL_GAMES",
+      "minimumSample": 1,
+      "sampleRecommendation": 7000,
+      "weight": 1,
+      "displayFormat": "ratio_1_over_n",
+      "difficultyExposure": {
+        "mode": "per_game",
+        "factor": 1,
+        "quality": "DERIVED",
+        "basisId": "NORMAL_GAMES"
+      },
+      "difficultyParticipation": "INCLUDE",
+      "userReason": "高頻度で設定差があり、実機連動機能の累積条件達成後は自動集計も利用できるため採用。"
+    },
+    {
+      "researchFeatureId": "RF_SUIKA_A",
+      "featureId": "FEAT_SUIKA_A",
+      "adoptionCategory": "INCLUDE_SUPPORT",
+      "numeratorInputId": "INP_SUIKA_A",
+      "denominatorInputId": "INP_SMALL_GAMES",
+      "minimumSample": 1,
+      "sampleRecommendation": 7000,
+      "weight": 1,
+      "displayFormat": "ratio_1_over_n",
+      "difficultyExposure": {
+        "mode": "per_game",
+        "factor": 1,
+        "quality": "DERIVED",
+        "basisId": "NORMAL_GAMES"
+      },
+      "difficultyParticipation": "INCLUDE",
+      "userReason": "ベルとは独立した小役情報として設定差があり、連動機能でも確認可能なため採用。"
+    },
+    {
+      "researchFeatureId": "RF_REACH_FLAGS",
+      "featureId": "FEAT_REACH_FLAGS",
+      "adoptionCategory": "EXCLUDE",
+      "rejectionReason": "各リーチ目フラグはBIG/REG成立契機を分解したもので、同時採用するとボーナス情報を重複計上する。"
+    }
+  ],
+  "rejectedElements": [],
+  "evidence": [],
+  "evidenceUi": {
+    "groups": [
+      {
+        "groupId": "SETTING_FLOOR",
+        "label": "確認した設定下限",
+        "selectionMode": "single",
+        "normalizationMode": "ALLOWED_SETTINGS",
+        "options": [
+          {
+            "value": "SET_4_OR_HIGHER",
+            "label": "設定4以上",
+            "allowedSettings": [
+              "SET_4",
+              "SET_5",
+              "SET_6"
+            ],
+            "sourceEvidenceIds": [
+              "RE_4PLUS"
+            ]
+          },
+          {
+            "value": "SET_6",
+            "label": "設定6",
+            "allowedSettings": [
+              "SET_6"
+            ],
+            "sourceEvidenceIds": [
+              "RE_6"
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "evidenceReview": {
+    "policyVersion": 1,
+    "exclusions": []
+  },
+  "uiCategoryLabels": {
+    "PRIMARY": "ボーナス",
+    "SMALL_ROLE": "小役"
+  },
+  "difficultyAnalysis": {
+    "targetGameBasis": {
+      "basisId": "NORMAL_GAMES",
+      "label": "通常ゲーム数",
+      "quality": "EXACT"
+    },
+    "calibrationAllowedExposureQualities": [
+      "EXACT",
+      "DERIVED",
+      "ESTIMATED"
+    ]
+  }
+}

@@ -1,0 +1,140 @@
+{
+  "schemaVersion": "selection-data-v1",
+  "machineId": "L_ULTRAMAN_TIGA_KA",
+  "machineDataVersion": "0.1.0",
+  "inputs": [
+    {
+      "id": "INP_NORMAL_GAMES",
+      "name": "通常ゲーム数",
+      "type": "integer",
+      "category": "PRIMARY",
+      "displayOrder": 1,
+      "defaultValue": 0,
+      "unit": "G"
+    },
+    {
+      "id": "INP_TC",
+      "name": "ティガチャンス回数",
+      "type": "counter",
+      "category": "PRIMARY",
+      "displayOrder": 2,
+      "defaultValue": 0,
+      "unit": "回"
+    },
+    {
+      "id": "INP_TC36_TRIALS",
+      "name": "3回目・6回目TC試行回数",
+      "type": "integer",
+      "category": "SUPPORT",
+      "displayOrder": 10,
+      "defaultValue": 0,
+      "unit": "回"
+    },
+    {
+      "id": "INP_TC36_PLUS",
+      "name": "うちTC+当選回数",
+      "type": "counter",
+      "category": "SUPPORT",
+      "displayOrder": 11,
+      "defaultValue": 0,
+      "unit": "回",
+      "parentInputId": "INP_TC36_TRIALS"
+    }
+  ],
+  "features": [
+    {
+      "researchFeatureId": "RF_TC",
+      "featureId": "FEAT_TC",
+      "adoptionCategory": "INCLUDE_PRIMARY",
+      "numeratorInputId": "INP_TC",
+      "denominatorInputId": "INP_NORMAL_GAMES",
+      "minimumSample": 1,
+      "sampleRecommendation": 7000,
+      "weight": 1,
+      "displayFormat": "ratio_1_over_n",
+      "difficultyExposure": {
+        "mode": "per_game",
+        "factor": 1,
+        "quality": "EXACT",
+        "basisId": "NORMAL_GAMES"
+      },
+      "difficultyParticipation": "INCLUDE",
+      "userReason": "終日を通して取得でき、段階的な設定差があるため主軸採用。"
+    },
+    {
+      "researchFeatureId": "RF_TC_PLUS_36",
+      "featureId": "FEAT_TC_PLUS_36",
+      "adoptionCategory": "INCLUDE_SUPPORT",
+      "numeratorInputId": "INP_TC36_PLUS",
+      "denominatorInputId": "INP_TC36_TRIALS",
+      "minimumSample": 1,
+      "sampleRecommendation": 20,
+      "weight": 1,
+      "displayFormat": "percent",
+      "difficultyParticipation": "EXCLUDE",
+      "difficultyExclusionReason": "3回目・6回目TCの試行機会を通常Gから一意換算できないため。",
+      "userReason": "明確な試行条件があり、設定差も大きいため補助採用。"
+    },
+    {
+      "researchFeatureId": "RF_CEILING_SELECTION",
+      "featureId": "FEAT_CEILING_SELECTION",
+      "adoptionCategory": "EXCLUDE",
+      "rejectionReason": "内部選択された天井を途中当選時に確定できず、成功カテゴリを安定観測できない。"
+    },
+    {
+      "researchFeatureId": "RF_3_BELL",
+      "featureId": "FEAT_3_BELL",
+      "adoptionCategory": "EXCLUDE",
+      "rejectionReason": "設定1以外の設定別数値が未公開。"
+    }
+  ],
+  "rejectedElements": [],
+  "evidence": [],
+  "evidenceUi": {
+    "groups": [
+      {
+        "groupId": "SETTING_FLOOR",
+        "label": "確認した設定下限",
+        "selectionMode": "single",
+        "normalizationMode": "ALLOWED_SETTINGS",
+        "options": [
+          {
+            "value": "SET_6",
+            "label": "設定6",
+            "allowedSettings": [
+              "SET_6"
+            ],
+            "sourceEvidenceIds": [
+              "RE_TC_TITLE_6",
+              "RE_REG_6",
+              "RE_666_6",
+              "RE_UB_6",
+              "RE_END_6",
+              "RE_TROPHY_6"
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "evidenceReview": {
+    "policyVersion": 1,
+    "exclusions": []
+  },
+  "uiCategoryLabels": {
+    "PRIMARY": "ティガチャンス",
+    "SUPPORT": "TC+抽選"
+  },
+  "difficultyAnalysis": {
+    "targetGameBasis": {
+      "basisId": "NORMAL_GAMES",
+      "label": "通常ゲーム数",
+      "quality": "EXACT"
+    },
+    "calibrationAllowedExposureQualities": [
+      "EXACT",
+      "DERIVED",
+      "ESTIMATED"
+    ]
+  }
+}

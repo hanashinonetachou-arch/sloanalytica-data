@@ -1,0 +1,418 @@
+{
+  "schemaVersion": 1,
+  "machine": {
+    "schemaVersion": "2.0.0",
+    "machineId": "S_HARD_BOILED_XX",
+    "machineDataVersion": "0.1.0",
+    "displayName": "パチスロハードボイルド",
+    "modelName": "S ハードボイルド XX",
+    "manufacturer": "サミー",
+    "settings": [
+      "SET_1",
+      "SET_2",
+      "SET_3",
+      "SET_4",
+      "SET_5",
+      "SET_6"
+    ],
+    "packagePolicy": {
+      "offlineCapable": true,
+      "containsImages": false,
+      "containsExecutableCode": false
+    }
+  },
+  "inputs": {
+    "schemaVersion": "2.0.0",
+    "inputs": [
+      {
+        "id": "INP_NORMAL_GAMES",
+        "name": "通常ゲーム数",
+        "type": "integer",
+        "category": "PRIMARY",
+        "displayOrder": 1,
+        "defaultValue": 0,
+        "unit": "G",
+        "minimum": 0
+      },
+      {
+        "id": "INP_BIG",
+        "name": "BIG初当り回数",
+        "type": "counter",
+        "category": "PRIMARY",
+        "displayOrder": 2,
+        "defaultValue": 0,
+        "unit": "回",
+        "minimum": 0
+      },
+      {
+        "id": "INP_REG",
+        "name": "REG初当り回数",
+        "type": "counter",
+        "category": "PRIMARY",
+        "displayOrder": 3,
+        "defaultValue": 0,
+        "unit": "回",
+        "minimum": 0
+      },
+      {
+        "id": "INP_REG_END_AT",
+        "name": "REG最終ゲームAT当選回数",
+        "type": "counter",
+        "category": "REG_DETAIL",
+        "displayOrder": 10,
+        "defaultValue": 0,
+        "unit": "回",
+        "description": "REG途中でAT告知済みの回は含めません。",
+        "parentInputId": "INP_REG",
+        "minimum": 0
+      },
+      {
+        "id": "INP_BOTTLE_GAMES",
+        "name": "共通ボトルB判別ゲーム数",
+        "type": "integer",
+        "category": "SMALL_ROLE",
+        "displayOrder": 20,
+        "defaultValue": 0,
+        "unit": "G",
+        "minimum": 0
+      },
+      {
+        "id": "INP_BOTTLE_B",
+        "name": "共通ボトルB回数",
+        "type": "counter",
+        "category": "SMALL_ROLE",
+        "displayOrder": 21,
+        "defaultValue": 0,
+        "unit": "回",
+        "parentInputId": "INP_BOTTLE_GAMES",
+        "minimum": 0
+      },
+      {
+        "id": "INP_EVI_SETTING_FLOOR",
+        "name": "確認した設定下限",
+        "type": "enum",
+        "category": "EVIDENCE",
+        "unit": "",
+        "displayOrder": 100,
+        "inferenceRole": "INCLUDE_SUPPORT",
+        "options": [
+          {
+            "key": "__UNSET__",
+            "label": "未選択",
+            "value": "__UNSET__"
+          },
+          {
+            "key": "SET_2_OR_HIGHER",
+            "label": "設定2以上",
+            "value": "SET_2_OR_HIGHER"
+          }
+        ],
+        "defaultValue": "__UNSET__"
+      }
+    ]
+  },
+  "features": {
+    "schemaVersion": "2.0.0",
+    "features": [
+      {
+        "featureId": "FEAT_BIG",
+        "name": "BIG初当り",
+        "adoptionCategory": "INCLUDE_PRIMARY",
+        "calculationRole": "PROBABILITY",
+        "probabilityEngineUsage": true,
+        "modelType": "binomial",
+        "minimumSample": 1,
+        "sampleRecommendation": 7000,
+        "reliabilityProfile": {
+          "weight": 1
+        },
+        "displayFormat": "ratio_1_over_n",
+        "numeratorInputId": "INP_BIG",
+        "denominatorInputId": "INP_NORMAL_GAMES",
+        "probabilities": {
+          "SET_1": 0.0030293850348379276,
+          "SET_2": 0.003041362530413625,
+          "SET_3": 0.0031456432840515887,
+          "SET_4": 0.003355704697986577,
+          "SET_5": 0.003553660270078181,
+          "SET_6": 0.0036271309394269135
+        },
+        "sourceEvidenceRefs": [
+          "SRC_DETAIL"
+        ]
+      },
+      {
+        "featureId": "FEAT_REG",
+        "name": "REG初当り",
+        "adoptionCategory": "INCLUDE_PRIMARY",
+        "calculationRole": "PROBABILITY",
+        "probabilityEngineUsage": true,
+        "modelType": "binomial",
+        "minimumSample": 1,
+        "sampleRecommendation": 7000,
+        "reliabilityProfile": {
+          "weight": 1
+        },
+        "displayFormat": "ratio_1_over_n",
+        "numeratorInputId": "INP_REG",
+        "denominatorInputId": "INP_NORMAL_GAMES",
+        "probabilities": {
+          "SET_1": 0.00227842333105491,
+          "SET_2": 0.0022893772893772895,
+          "SET_3": 0.0023934897079942556,
+          "SET_4": 0.0026028110359187923,
+          "SET_5": 0.0027987685418415895,
+          "SET_6": 0.0028752156411730877
+        },
+        "sourceEvidenceRefs": [
+          "SRC_DETAIL"
+        ]
+      },
+      {
+        "featureId": "FEAT_REG_END_AT",
+        "name": "REG最終ゲームのAT当選",
+        "adoptionCategory": "INCLUDE_SUPPORT",
+        "calculationRole": "PROBABILITY",
+        "probabilityEngineUsage": true,
+        "modelType": "binomial",
+        "minimumSample": 1,
+        "sampleRecommendation": 20,
+        "reliabilityProfile": {
+          "weight": 1
+        },
+        "displayFormat": "percent",
+        "numeratorInputId": "INP_REG_END_AT",
+        "denominatorInputId": "INP_REG",
+        "probabilities": {
+          "SET_1": 0.008,
+          "SET_2": 0.016,
+          "SET_3": 0.039,
+          "SET_4": 0.039,
+          "SET_5": 0.055,
+          "SET_6": 0.063
+        },
+        "sourceEvidenceRefs": [
+          "SRC_ANALYSIS"
+        ]
+      },
+      {
+        "featureId": "FEAT_COMMON_BOTTLE_B",
+        "name": "共通ボトルB",
+        "adoptionCategory": "INCLUDE_SUPPORT",
+        "calculationRole": "PROBABILITY",
+        "probabilityEngineUsage": true,
+        "modelType": "binomial",
+        "minimumSample": 1,
+        "sampleRecommendation": 3000,
+        "reliabilityProfile": {
+          "weight": 1
+        },
+        "displayFormat": "ratio_1_over_n",
+        "numeratorInputId": "INP_BOTTLE_B",
+        "denominatorInputId": "INP_BOTTLE_GAMES",
+        "probabilities": {
+          "SET_1": 0.005035246727089627,
+          "SET_2": 0.005675368898978434,
+          "SET_3": 0.0063171193935565376,
+          "SET_4": 0.006958942240779402,
+          "SET_5": 0.007598784194528876,
+          "SET_6": 0.008517887563884156
+        },
+        "sourceEvidenceRefs": [
+          "SRC_DETAIL"
+        ]
+      }
+    ]
+  },
+  "evidence": {
+    "version": "1.0.0",
+    "evidences": [
+      {
+        "id": "EVI_SETTING_FLOOR_SET_2_OR_HIGHER",
+        "name": "設定2以上",
+        "displayName": "設定2以上",
+        "inputId": "INP_EVI_SETTING_FLOOR",
+        "triggerValue": "SET_2_OR_HIGHER",
+        "confirmedSettings": [
+          "SET_2",
+          "SET_3",
+          "SET_4",
+          "SET_5",
+          "SET_6"
+        ],
+        "deniedSettings": [],
+        "hasImage": false,
+        "type": "SETTING_CONFIRMATION",
+        "sourceEvidenceRefs": [
+          "RE_2PLUS"
+        ]
+      }
+    ],
+    "sources": [
+      {
+        "id": "SRC_ID",
+        "classification": "ANALYSIS",
+        "url": "https://www.p-world.co.jp/machine/database/9693",
+        "checkedAt": "2026-08-21"
+      },
+      {
+        "id": "SRC_ANALYSIS",
+        "classification": "ANALYSIS",
+        "url": "https://p-town.dmm.com/machines/4212",
+        "checkedAt": "2026-08-21"
+      },
+      {
+        "id": "SRC_DETAIL",
+        "classification": "ANALYSIS",
+        "url": "https://slothack.net/matome/87227/",
+        "checkedAt": "2026-08-21"
+      }
+    ]
+  },
+  "ui": {
+    "sections": [
+      {
+        "id": "AUTO_PRIMARY",
+        "title": "ボーナス初当り",
+        "displayOrder": 1,
+        "items": [
+          {
+            "type": "input",
+            "inputId": "INP_NORMAL_GAMES",
+            "label": "通常ゲーム数",
+            "widget": "number"
+          },
+          {
+            "type": "input",
+            "inputId": "INP_BIG",
+            "label": "BIG初当り回数",
+            "widget": "counter"
+          },
+          {
+            "type": "input",
+            "inputId": "INP_REG",
+            "label": "REG初当り回数",
+            "widget": "counter"
+          }
+        ]
+      },
+      {
+        "id": "AUTO_REG_DETAIL",
+        "title": "REG終了時AT",
+        "displayOrder": 2,
+        "items": [
+          {
+            "type": "input",
+            "inputId": "INP_REG_END_AT",
+            "label": "REG最終ゲームAT当選回数",
+            "widget": "counter"
+          }
+        ]
+      },
+      {
+        "id": "AUTO_SMALL_ROLE",
+        "title": "小役",
+        "displayOrder": 3,
+        "items": [
+          {
+            "type": "input",
+            "inputId": "INP_BOTTLE_GAMES",
+            "label": "共通ボトルB判別ゲーム数",
+            "widget": "number"
+          },
+          {
+            "type": "input",
+            "inputId": "INP_BOTTLE_B",
+            "label": "共通ボトルB回数",
+            "widget": "counter"
+          }
+        ]
+      },
+      {
+        "id": "AUTO_EVIDENCE",
+        "title": "設定確定・否定情報",
+        "displayOrder": 4,
+        "items": [
+          {
+            "type": "input",
+            "inputId": "INP_EVI_SETTING_FLOOR",
+            "label": "確認した設定下限",
+            "widget": "select"
+          }
+        ]
+      }
+    ]
+  },
+  "selectionSummary": {
+    "schemaVersion": "selection-summary-v1",
+    "evaluatedCount": 5,
+    "selectedCount": 4,
+    "rejectedCount": 1,
+    "selected": [
+      {
+        "featureId": "FEAT_BIG",
+        "name": "BIG初当り",
+        "reason": "通常時BIG初当りとして段階差があり、REGと別カテゴリで観測できるため採用。",
+        "requiredTrials": {
+          "value": 67918,
+          "unit": "通常ゲーム"
+        }
+      },
+      {
+        "featureId": "FEAT_REG",
+        "name": "REG初当り",
+        "reason": "通常時REG初当りとして段階差があり、BIGと別カテゴリで観測できるため採用。",
+        "requiredTrials": {
+          "value": 52721,
+          "unit": "通常ゲーム"
+        }
+      },
+      {
+        "featureId": "FEAT_REG_END_AT",
+        "name": "REG最終ゲームのAT当選",
+        "reason": "REGを分母とした明確な条件付き抽選で、設定1と6に約8倍の差があるため採用。",
+        "requiredTrials": {
+          "value": 68,
+          "unit": "REG"
+        }
+      },
+      {
+        "featureId": "FEAT_COMMON_BOTTLE_B",
+        "name": "共通ボトルB",
+        "reason": "判別可能区間だけを明示して集計するなら大きな設定差を利用できるため補助採用。",
+        "requiredTrials": {
+          "value": 4000,
+          "unit": "判別可能ゲーム"
+        }
+      }
+    ],
+    "rejected": [
+      {
+        "featureId": "FEAT_REACH_REPLAY",
+        "name": "リーチ目リプレイ",
+        "reason": "BIG/REGを構成する成立契機であり、同時採用すると同じボーナスを二重計上する。",
+        "requiredTrials": {
+          "value": 41058,
+          "unit": "通常ゲーム"
+        }
+      }
+    ]
+  },
+  "reliability": {},
+  "metadata": {
+    "machineId": "S_HARD_BOILED_XX",
+    "displayName": "パチスロハードボイルド",
+    "settings": [
+      "SET_1",
+      "SET_2",
+      "SET_3",
+      "SET_4",
+      "SET_5",
+      "SET_6"
+    ]
+  },
+  "validation": {
+    "cases": []
+  },
+  "statistics": {}
+}

@@ -1,0 +1,177 @@
+{
+  "schemaVersion": "selection-data-v1",
+  "machineId": "L_TOLOVE_DARKNESS_S6",
+  "machineDataVersion": "0.1.0",
+  "inputs": [
+    {
+      "id": "INP_NORMAL_GAMES",
+      "name": "通常ゲーム数",
+      "type": "integer",
+      "category": "PRIMARY",
+      "displayOrder": 1,
+      "defaultValue": 0,
+      "unit": "G"
+    },
+    {
+      "id": "INP_AT",
+      "name": "初当り回数",
+      "type": "counter",
+      "category": "PRIMARY",
+      "displayOrder": 2,
+      "defaultValue": 0,
+      "unit": "回"
+    },
+    {
+      "id": "INP_HAREM_LOVE",
+      "name": "ハーレム報酬 愛すぷRUSH",
+      "type": "counter",
+      "category": "HAREM",
+      "displayOrder": 10,
+      "defaultValue": 0,
+      "unit": "回"
+    },
+    {
+      "id": "INP_HAREM_WHISPER",
+      "name": "ハーレム報酬 ウィスパー",
+      "type": "counter",
+      "category": "HAREM",
+      "displayOrder": 11,
+      "defaultValue": 0,
+      "unit": "回"
+    },
+    {
+      "id": "INP_HAREM_EPISODE",
+      "name": "ハーレム報酬 エピソード",
+      "type": "counter",
+      "category": "HAREM",
+      "displayOrder": 12,
+      "defaultValue": 0,
+      "unit": "回"
+    }
+  ],
+  "features": [
+    {
+      "researchFeatureId": "RF_AT",
+      "featureId": "FEAT_AT",
+      "adoptionCategory": "INCLUDE_PRIMARY",
+      "numeratorInputId": "INP_AT",
+      "denominatorInputId": "INP_NORMAL_GAMES",
+      "minimumSample": 1,
+      "sampleRecommendation": 7000,
+      "weight": 1,
+      "displayFormat": "ratio_1_over_n",
+      "difficultyExposure": {
+        "mode": "per_game",
+        "factor": 1,
+        "quality": "EXACT",
+        "basisId": "NORMAL_GAMES"
+      },
+      "difficultyParticipation": "INCLUDE",
+      "userReason": "通常時を通して取得できる基本の設定差として主軸採用。"
+    },
+    {
+      "researchFeatureId": "RF_HAREM_REWARD",
+      "featureId": "FEAT_HAREM_REWARD",
+      "adoptionCategory": "INCLUDE_SUPPORT",
+      "numeratorInputId": "INP_HAREM_LOVE",
+      "categoryInputIds": [
+        "INP_HAREM_WHISPER",
+        "INP_HAREM_EPISODE"
+      ],
+      "inputTransform": "sum_inputs_to_trials",
+      "minimumSample": 1,
+      "sampleRecommendation": 20,
+      "weight": 1,
+      "displayFormat": "percent",
+      "difficultyParticipation": "EXCLUDE",
+      "difficultyExclusionReason": "上位ST到達とボーナス回数を通常Gから一意換算できないため。",
+      "userReason": "ウィスパー選択率に大きな設定差があり、報酬構成比として補助採用。"
+    },
+    {
+      "researchFeatureId": "RF_REG_GAME",
+      "featureId": "FEAT_REG_GAME",
+      "adoptionCategory": "EXCLUDE",
+      "rejectionReason": "高設定優遇は判明しているが設定別の完全な数値が未公開。"
+    }
+  ],
+  "rejectedElements": [],
+  "evidence": [],
+  "evidenceUi": {
+    "groups": [
+      {
+        "groupId": "SETTING_FLOOR",
+        "label": "確認した設定下限",
+        "selectionMode": "single",
+        "normalizationMode": "ALLOWED_SETTINGS",
+        "options": [
+          {
+            "value": "SET_3_OR_HIGHER",
+            "label": "設定3以上",
+            "allowedSettings": [
+              "SET_3",
+              "SET_4",
+              "SET_5",
+              "SET_6"
+            ],
+            "sourceEvidenceIds": [
+              "RE_3PLUS"
+            ]
+          },
+          {
+            "value": "SET_4_OR_HIGHER",
+            "label": "設定4以上",
+            "allowedSettings": [
+              "SET_4",
+              "SET_5",
+              "SET_6"
+            ],
+            "sourceEvidenceIds": [
+              "RE_4PLUS"
+            ]
+          },
+          {
+            "value": "SET_5_OR_HIGHER",
+            "label": "設定5以上",
+            "allowedSettings": [
+              "SET_5",
+              "SET_6"
+            ],
+            "sourceEvidenceIds": [
+              "RE_5PLUS"
+            ]
+          },
+          {
+            "value": "SET_6",
+            "label": "設定6",
+            "allowedSettings": [
+              "SET_6"
+            ],
+            "sourceEvidenceIds": [
+              "RE_6"
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "evidenceReview": {
+    "policyVersion": 1,
+    "exclusions": []
+  },
+  "uiCategoryLabels": {
+    "PRIMARY": "初当り",
+    "HAREM": "ハーレムモード中の報酬"
+  },
+  "difficultyAnalysis": {
+    "targetGameBasis": {
+      "basisId": "NORMAL_GAMES",
+      "label": "通常ゲーム数",
+      "quality": "EXACT"
+    },
+    "calibrationAllowedExposureQualities": [
+      "EXACT",
+      "DERIVED",
+      "ESTIMATED"
+    ]
+  }
+}

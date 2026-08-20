@@ -1,0 +1,193 @@
+{
+  "schemaVersion": "selection-data-v1",
+  "machineId": "S_HARD_BOILED_XX",
+  "machineDataVersion": "0.1.0",
+  "inputs": [
+    {
+      "id": "INP_NORMAL_GAMES",
+      "name": "通常ゲーム数",
+      "type": "integer",
+      "category": "PRIMARY",
+      "displayOrder": 1,
+      "defaultValue": 0,
+      "unit": "G"
+    },
+    {
+      "id": "INP_BIG",
+      "name": "BIG初当り回数",
+      "type": "counter",
+      "category": "PRIMARY",
+      "displayOrder": 2,
+      "defaultValue": 0,
+      "unit": "回"
+    },
+    {
+      "id": "INP_REG",
+      "name": "REG初当り回数",
+      "type": "counter",
+      "category": "PRIMARY",
+      "displayOrder": 3,
+      "defaultValue": 0,
+      "unit": "回"
+    },
+    {
+      "id": "INP_REG_END_AT",
+      "name": "REG最終ゲームAT当選回数",
+      "type": "counter",
+      "category": "REG_DETAIL",
+      "displayOrder": 10,
+      "defaultValue": 0,
+      "unit": "回",
+      "description": "REG途中でAT告知済みの回は含めません。",
+      "parentInputId": "INP_REG"
+    },
+    {
+      "id": "INP_BOTTLE_GAMES",
+      "name": "共通ボトルB判別ゲーム数",
+      "type": "integer",
+      "category": "SMALL_ROLE",
+      "displayOrder": 20,
+      "defaultValue": 0,
+      "unit": "G"
+    },
+    {
+      "id": "INP_BOTTLE_B",
+      "name": "共通ボトルB回数",
+      "type": "counter",
+      "category": "SMALL_ROLE",
+      "displayOrder": 21,
+      "defaultValue": 0,
+      "unit": "回",
+      "parentInputId": "INP_BOTTLE_GAMES"
+    }
+  ],
+  "features": [
+    {
+      "researchFeatureId": "RF_BIG",
+      "featureId": "FEAT_BIG",
+      "adoptionCategory": "INCLUDE_PRIMARY",
+      "numeratorInputId": "INP_BIG",
+      "denominatorInputId": "INP_NORMAL_GAMES",
+      "minimumSample": 1,
+      "sampleRecommendation": 7000,
+      "weight": 1,
+      "displayFormat": "ratio_1_over_n",
+      "difficultyExposure": {
+        "mode": "per_game",
+        "factor": 1,
+        "quality": "EXACT",
+        "basisId": "NORMAL_GAMES"
+      },
+      "difficultyParticipation": "INCLUDE",
+      "userReason": "通常時BIG初当りとして段階差があり、REGと別カテゴリで観測できるため採用。"
+    },
+    {
+      "researchFeatureId": "RF_REG",
+      "featureId": "FEAT_REG",
+      "adoptionCategory": "INCLUDE_PRIMARY",
+      "numeratorInputId": "INP_REG",
+      "denominatorInputId": "INP_NORMAL_GAMES",
+      "minimumSample": 1,
+      "sampleRecommendation": 7000,
+      "weight": 1,
+      "displayFormat": "ratio_1_over_n",
+      "difficultyExposure": {
+        "mode": "per_game",
+        "factor": 1,
+        "quality": "EXACT",
+        "basisId": "NORMAL_GAMES"
+      },
+      "difficultyParticipation": "INCLUDE",
+      "userReason": "通常時REG初当りとして段階差があり、BIGと別カテゴリで観測できるため採用。"
+    },
+    {
+      "researchFeatureId": "RF_REG_END_AT",
+      "featureId": "FEAT_REG_END_AT",
+      "adoptionCategory": "INCLUDE_SUPPORT",
+      "numeratorInputId": "INP_REG_END_AT",
+      "denominatorInputId": "INP_REG",
+      "minimumSample": 1,
+      "sampleRecommendation": 20,
+      "weight": 1,
+      "displayFormat": "percent",
+      "difficultyExposure": {
+        "mode": "derived_event_rate",
+        "sourceFeatureId": "FEAT_REG",
+        "eventMultiplier": 1,
+        "quality": "DERIVED",
+        "basisId": "NORMAL_GAMES"
+      },
+      "difficultyParticipation": "INCLUDE",
+      "userReason": "REGを分母とした明確な条件付き抽選で、設定1と6に約8倍の差があるため採用。"
+    },
+    {
+      "researchFeatureId": "RF_COMMON_BOTTLE_B",
+      "featureId": "FEAT_COMMON_BOTTLE_B",
+      "adoptionCategory": "INCLUDE_SUPPORT",
+      "numeratorInputId": "INP_BOTTLE_B",
+      "denominatorInputId": "INP_BOTTLE_GAMES",
+      "minimumSample": 1,
+      "sampleRecommendation": 3000,
+      "weight": 1,
+      "displayFormat": "ratio_1_over_n",
+      "difficultyParticipation": "EXCLUDE",
+      "difficultyExclusionReason": "通常時を含めた全Gで完全判別できず、ユーザーごとの観測区間が変わるため。",
+      "userReason": "判別可能区間だけを明示して集計するなら大きな設定差を利用できるため補助採用。"
+    },
+    {
+      "researchFeatureId": "RF_REACH_REPLAY",
+      "featureId": "FEAT_REACH_REPLAY",
+      "adoptionCategory": "EXCLUDE",
+      "rejectionReason": "BIG/REGを構成する成立契機であり、同時採用すると同じボーナスを二重計上する。"
+    }
+  ],
+  "rejectedElements": [],
+  "evidence": [],
+  "evidenceUi": {
+    "groups": [
+      {
+        "groupId": "SETTING_FLOOR",
+        "label": "確認した設定下限",
+        "selectionMode": "single",
+        "normalizationMode": "ALLOWED_SETTINGS",
+        "options": [
+          {
+            "value": "SET_2_OR_HIGHER",
+            "label": "設定2以上",
+            "allowedSettings": [
+              "SET_2",
+              "SET_3",
+              "SET_4",
+              "SET_5",
+              "SET_6"
+            ],
+            "sourceEvidenceIds": [
+              "RE_2PLUS"
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "evidenceReview": {
+    "policyVersion": 1,
+    "exclusions": []
+  },
+  "uiCategoryLabels": {
+    "PRIMARY": "ボーナス初当り",
+    "REG_DETAIL": "REG終了時AT",
+    "SMALL_ROLE": "小役"
+  },
+  "difficultyAnalysis": {
+    "targetGameBasis": {
+      "basisId": "NORMAL_GAMES",
+      "label": "通常ゲーム数",
+      "quality": "EXACT"
+    },
+    "calibrationAllowedExposureQualities": [
+      "EXACT",
+      "DERIVED",
+      "ESTIMATED"
+    ]
+  }
+}

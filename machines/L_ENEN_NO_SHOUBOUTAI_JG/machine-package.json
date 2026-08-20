@@ -1,0 +1,411 @@
+{
+  "schemaVersion": 1,
+  "machine": {
+    "schemaVersion": "2.0.0",
+    "machineId": "L_ENEN_NO_SHOUBOUTAI_JG",
+    "machineDataVersion": "0.1.0",
+    "displayName": "Lパチスロ炎炎ノ消防隊",
+    "modelName": "L炎炎ノ消防隊jG",
+    "manufacturer": "SANKYO",
+    "settings": [
+      "SET_1",
+      "SET_2",
+      "SET_4",
+      "SET_5",
+      "SET_6"
+    ],
+    "packagePolicy": {
+      "offlineCapable": true,
+      "containsImages": false,
+      "containsExecutableCode": false
+    }
+  },
+  "inputs": {
+    "schemaVersion": "2.0.0",
+    "inputs": [
+      {
+        "id": "INP_NORMAL_GAMES",
+        "name": "通常ゲーム数",
+        "type": "integer",
+        "category": "PRIMARY",
+        "displayOrder": 1,
+        "defaultValue": 0,
+        "unit": "G",
+        "minimum": 0
+      },
+      {
+        "id": "INP_INITIAL",
+        "name": "初当り合算回数",
+        "type": "counter",
+        "category": "PRIMARY",
+        "displayOrder": 2,
+        "defaultValue": 0,
+        "unit": "回",
+        "minimum": 0
+      },
+      {
+        "id": "INP_BONUS_INITIAL",
+        "name": "初当りボーナス回数",
+        "type": "counter",
+        "category": "SUPPORT",
+        "displayOrder": 10,
+        "defaultValue": 0,
+        "unit": "回",
+        "parentInputId": "INP_INITIAL",
+        "minimum": 0
+      },
+      {
+        "id": "INP_EPB",
+        "name": "エピソードボーナス到達回数",
+        "type": "counter",
+        "category": "SUPPORT",
+        "displayOrder": 11,
+        "defaultValue": 0,
+        "unit": "回",
+        "parentInputId": "INP_BONUS_INITIAL",
+        "minimum": 0
+      },
+      {
+        "id": "INP_EVI_SETTING_FLOOR",
+        "name": "確認した設定下限",
+        "type": "enum",
+        "category": "EVIDENCE",
+        "unit": "",
+        "displayOrder": 100,
+        "inferenceRole": "INCLUDE_SUPPORT",
+        "options": [
+          {
+            "key": "__UNSET__",
+            "label": "未選択",
+            "value": "__UNSET__"
+          },
+          {
+            "key": "SET_2_OR_HIGHER",
+            "label": "設定2以上",
+            "value": "SET_2_OR_HIGHER"
+          },
+          {
+            "key": "SET_4_OR_HIGHER",
+            "label": "設定4以上",
+            "value": "SET_4_OR_HIGHER"
+          },
+          {
+            "key": "SET_5_OR_HIGHER",
+            "label": "設定5以上",
+            "value": "SET_5_OR_HIGHER"
+          },
+          {
+            "key": "SET_6",
+            "label": "設定6",
+            "value": "SET_6"
+          }
+        ],
+        "defaultValue": "__UNSET__"
+      }
+    ]
+  },
+  "features": {
+    "schemaVersion": "2.0.0",
+    "features": [
+      {
+        "featureId": "FEAT_INITIAL",
+        "name": "初当り合算",
+        "adoptionCategory": "INCLUDE_PRIMARY",
+        "calculationRole": "PROBABILITY",
+        "probabilityEngineUsage": true,
+        "modelType": "binomial",
+        "minimumSample": 1,
+        "sampleRecommendation": 7000,
+        "reliabilityProfile": {
+          "weight": 1
+        },
+        "displayFormat": "ratio_1_over_n",
+        "numeratorInputId": "INP_INITIAL",
+        "denominatorInputId": "INP_NORMAL_GAMES",
+        "probabilities": {
+          "SET_1": 0.005076142131979695,
+          "SET_2": 0.005154639175257732,
+          "SET_4": 0.005494505494505495,
+          "SET_5": 0.005780346820809248,
+          "SET_6": 0.005917159763313609
+        },
+        "sourceEvidenceRefs": [
+          "SRC_SPEC"
+        ]
+      },
+      {
+        "featureId": "FEAT_BONUS_SHARE",
+        "name": "初当り内のボーナス比率",
+        "adoptionCategory": "INCLUDE_SUPPORT",
+        "calculationRole": "PROBABILITY",
+        "probabilityEngineUsage": true,
+        "modelType": "binomial",
+        "minimumSample": 1,
+        "sampleRecommendation": 30,
+        "reliabilityProfile": {
+          "weight": 0.8
+        },
+        "displayFormat": "percent",
+        "numeratorInputId": "INP_BONUS_INITIAL",
+        "denominatorInputId": "INP_INITIAL",
+        "probabilities": {
+          "SET_1": 0.6769759450171822,
+          "SET_2": 0.6879432624113475,
+          "SET_4": 0.708171206225681,
+          "SET_5": 0.7238493723849372,
+          "SET_6": 0.7347826086956522
+        },
+        "sourceEvidenceRefs": [
+          "SRC_SPEC"
+        ]
+      },
+      {
+        "featureId": "FEAT_EPB_AFTER_INITIAL",
+        "name": "初当りボーナス後のエピソードボーナス期待度",
+        "adoptionCategory": "INCLUDE_SUPPORT",
+        "calculationRole": "PROBABILITY",
+        "probabilityEngineUsage": true,
+        "modelType": "binomial",
+        "minimumSample": 1,
+        "sampleRecommendation": 20,
+        "reliabilityProfile": {
+          "weight": 0.7
+        },
+        "displayFormat": "percent",
+        "numeratorInputId": "INP_EPB",
+        "denominatorInputId": "INP_BONUS_INITIAL",
+        "probabilities": {
+          "SET_1": 0.4,
+          "SET_2": 0.41,
+          "SET_4": 0.43,
+          "SET_5": 0.44,
+          "SET_6": 0.45
+        },
+        "sourceEvidenceRefs": [
+          "SRC_ID"
+        ]
+      }
+    ]
+  },
+  "evidence": {
+    "version": "1.0.0",
+    "evidences": [
+      {
+        "id": "EVI_SETTING_FLOOR_SET_2_OR_HIGHER",
+        "name": "設定2以上",
+        "displayName": "設定2以上",
+        "inputId": "INP_EVI_SETTING_FLOOR",
+        "triggerValue": "SET_2_OR_HIGHER",
+        "confirmedSettings": [
+          "SET_2",
+          "SET_4",
+          "SET_5",
+          "SET_6"
+        ],
+        "deniedSettings": [],
+        "hasImage": false,
+        "type": "SETTING_CONFIRMATION",
+        "sourceEvidenceRefs": [
+          "RE_2PLUS"
+        ]
+      },
+      {
+        "id": "EVI_SETTING_FLOOR_SET_4_OR_HIGHER",
+        "name": "設定4以上",
+        "displayName": "設定4以上",
+        "inputId": "INP_EVI_SETTING_FLOOR",
+        "triggerValue": "SET_4_OR_HIGHER",
+        "confirmedSettings": [
+          "SET_4",
+          "SET_5",
+          "SET_6"
+        ],
+        "deniedSettings": [],
+        "hasImage": false,
+        "type": "SETTING_CONFIRMATION",
+        "sourceEvidenceRefs": [
+          "RE_4PLUS"
+        ]
+      },
+      {
+        "id": "EVI_SETTING_FLOOR_SET_5_OR_HIGHER",
+        "name": "設定5以上",
+        "displayName": "設定5以上",
+        "inputId": "INP_EVI_SETTING_FLOOR",
+        "triggerValue": "SET_5_OR_HIGHER",
+        "confirmedSettings": [
+          "SET_5",
+          "SET_6"
+        ],
+        "deniedSettings": [],
+        "hasImage": false,
+        "type": "SETTING_CONFIRMATION",
+        "sourceEvidenceRefs": [
+          "RE_5PLUS"
+        ]
+      },
+      {
+        "id": "EVI_SETTING_FLOOR_SET_6",
+        "name": "設定6",
+        "displayName": "設定6",
+        "inputId": "INP_EVI_SETTING_FLOOR",
+        "triggerValue": "SET_6",
+        "confirmedSettings": [
+          "SET_6"
+        ],
+        "deniedSettings": [],
+        "hasImage": false,
+        "type": "SETTING_CONFIRMATION",
+        "sourceEvidenceRefs": [
+          "RE_6"
+        ]
+      }
+    ],
+    "sources": [
+      {
+        "id": "SRC_ID",
+        "classification": "ANALYSIS",
+        "url": "https://www.p-world.co.jp/machine/database/10042",
+        "checkedAt": "2026-08-21"
+      },
+      {
+        "id": "SRC_SPEC",
+        "classification": "ANALYSIS",
+        "url": "https://pachiseven.jp/machines/6927/cutout/4",
+        "checkedAt": "2026-08-21"
+      },
+      {
+        "id": "SRC_HINT",
+        "classification": "ANALYSIS",
+        "url": "https://nana-press.com/kaiseki/machine/738/21299/",
+        "checkedAt": "2026-08-21"
+      }
+    ]
+  },
+  "ui": {
+    "sections": [
+      {
+        "id": "AUTO_PRIMARY",
+        "title": "初当り",
+        "displayOrder": 1,
+        "items": [
+          {
+            "type": "input",
+            "inputId": "INP_NORMAL_GAMES",
+            "label": "通常ゲーム数",
+            "widget": "number"
+          },
+          {
+            "type": "input",
+            "inputId": "INP_INITIAL",
+            "label": "初当り合算回数",
+            "widget": "counter"
+          }
+        ]
+      },
+      {
+        "id": "AUTO_SUPPORT",
+        "title": "初当り後の構成・到達",
+        "displayOrder": 2,
+        "items": [
+          {
+            "type": "input",
+            "inputId": "INP_BONUS_INITIAL",
+            "label": "初当りボーナス回数",
+            "widget": "counter"
+          },
+          {
+            "type": "input",
+            "inputId": "INP_EPB",
+            "label": "エピソードボーナス到達回数",
+            "widget": "counter"
+          }
+        ]
+      },
+      {
+        "id": "AUTO_EVIDENCE",
+        "title": "設定確定・否定情報",
+        "displayOrder": 3,
+        "items": [
+          {
+            "type": "input",
+            "inputId": "INP_EVI_SETTING_FLOOR",
+            "label": "確認した設定下限",
+            "widget": "select"
+          }
+        ]
+      }
+    ]
+  },
+  "selectionSummary": {
+    "schemaVersion": "selection-summary-v1",
+    "evaluatedCount": 5,
+    "selectedCount": 3,
+    "rejectedCount": 2,
+    "selected": [
+      {
+        "featureId": "FEAT_INITIAL",
+        "name": "初当り合算",
+        "reason": "ボーナス初当りと灰焔騎士団をまとめた全初当りを安定して観測できるため主軸採用。",
+        "requiredTrials": {
+          "value": 56570,
+          "unit": "通常ゲーム"
+        }
+      },
+      {
+        "featureId": "FEAT_BONUS_SHARE",
+        "name": "初当り内のボーナス比率",
+        "reason": "全初当りに対するボーナス構成比として扱えば、初当り合算と二重計上せず追加情報を使える。",
+        "requiredTrials": {
+          "value": 455,
+          "unit": "初当り"
+        }
+      },
+      {
+        "featureId": "FEAT_EPB_AFTER_INITIAL",
+        "name": "初当りボーナス後のエピソードボーナス期待度",
+        "reason": "初当りボーナス後の条件付き成功率として段階差を利用する。",
+        "requiredTrials": {
+          "value": 716,
+          "unit": "初当りボーナス"
+        }
+      }
+    ],
+    "rejected": [
+      {
+        "featureId": "FEAT_ENEN_INITIAL",
+        "name": "炎炎激闘初当り",
+        "reason": "設定6の公開値に出典不一致があり、合算初当りと構成比でも情報を表現できるため不採用。",
+        "requiredTrials": {
+          "value": 47646,
+          "unit": "通常ゲーム"
+        }
+      },
+      {
+        "featureId": "FEAT_CROSS_BONUS",
+        "name": "十字目変換時の初当りボーナス当選",
+        "reason": "初当りボーナスの成立過程を分解した値で、採用済み初当り情報と因果的に重複する。",
+        "requiredTrials": {
+          "value": 145,
+          "unit": "十字目変換"
+        }
+      }
+    ]
+  },
+  "reliability": {},
+  "metadata": {
+    "machineId": "L_ENEN_NO_SHOUBOUTAI_JG",
+    "displayName": "Lパチスロ炎炎ノ消防隊",
+    "settings": [
+      "SET_1",
+      "SET_2",
+      "SET_4",
+      "SET_5",
+      "SET_6"
+    ]
+  },
+  "validation": {
+    "cases": []
+  },
+  "statistics": {}
+}
