@@ -37,11 +37,17 @@ for (const machineId of dirs) {
   }
 
   const report = JSON.parse(fs.readFileSync(path.join(root, outputPath), 'utf8'));
+  const analyzableFeatureCount = report.analyzableFeatureIds?.length ?? 0;
+  const reason = report.reason ?? (
+    report.status === 'NOT_APPLICABLE' && analyzableFeatureCount === 0
+      ? 'No adopted numeric inference feature has resolvable game-count exposure for setting-band discrimination.'
+      : null
+  );
   results.push({
     machineId,
     status: report.status,
-    reason: report.reason ?? null,
-    analyzableFeatureCount: report.analyzableFeatureIds?.length ?? 0,
+    reason,
+    analyzableFeatureCount,
     excludedAdoptedFeatureIds: report.excludedAdoptedFeatureIds ?? [],
     results: report.results ?? [],
   });
