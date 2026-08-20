@@ -125,11 +125,13 @@ const researchPath = path.join(researchDir, 'research-data.json');
 const selectionPath = path.join(researchDir, 'selection-data.json');
 const statisticsPath = path.join(researchDir, 'statistics-report.json');
 const difficultyPath = path.join(researchDir, 'difficulty-report.json');
+const settingBandPath = path.join(researchDir, 'setting-band-report.json');
 const machinePath = path.join(ROOT, 'machines', machineId, 'machine-package.json');
 const catalogPath = path.join(ROOT, 'catalog.json');
 const difficultyCatalogPath = path.join(ROOT, 'difficulty-catalog.json');
 let difficultyCatalogBackup = null;
 let catalogBackup = null;
+let settingBandBackup = null;
 
 try {
   if (!fs.existsSync(researchPath)) fail(`ResearchData not found: ${path.relative(ROOT, researchPath)}`);
@@ -171,6 +173,11 @@ try {
     console.log('CHECK mode: generated artifacts were not written');
   }
 
+  if (checkOnly) settingBandBackup = fs.existsSync(settingBandPath) ? fs.readFileSync(settingBandPath) : null;
+  runNode(['tools/refine-setting-band-games.mjs', researchPath, selectionPath, settingBandPath], 'setting-band refinement');
+  const settingBand = readJson(settingBandPath);
+  console.log(`Setting Band: ${settingBand.status}${settingBand.status === 'COMPLETE' ? ` / ${settingBand.results?.map(r => `${Math.round(r.threshold * 100)}%=${r.games}G`).join(' / ')}` : ''}`);
+
   const catalog = readJson(catalogPath);
   const isPublished = (catalog.machines ?? []).some(m => m.machineId === machineId);
   if (isPublished) {
@@ -186,6 +193,7 @@ try {
     if (checkOnly) console.log('CHECK mode: Catalog metadata and Difficulty Catalog synced temporarily for contract tests');
   } else {
     console.log('Catalog/Difficulty sync skipped: machine is not yet published in catalog.json');
+    console.log('Setting Band report is ready and will be integrated at publish time.');
   }
 
   if (skipRepoChecks) {
@@ -202,6 +210,7 @@ try {
   console.log(`PIPELINE PASS: ${machineId}`);
   console.log(`Raw Score: ${scores || 'N/A'}`);
   console.log(`Difficulty Features: included=${included}, excluded=${excluded}`);
+  console.log(`Setting Band: ${settingBand.status}`);
   console.log(`Mode: ${checkOnly ? 'CHECK' : 'WRITE'}`);
 } catch (error) {
   console.error(`PIPELINE FAILED: ${machineId}`);
@@ -211,6 +220,8 @@ try {
   if (checkOnly) {
     if (difficultyCatalogBackup) fs.writeFileSync(difficultyCatalogPath, difficultyCatalogBackup);
     if (catalogBackup) fs.writeFileSync(catalogPath, catalogBackup);
+    if (settingBandBackup !== null) fs.writeFileSync(settingBandPath, settingBandBackup);
+    else if (fs.existsSync(settingBandPath)) fs.rmSync(settingBandPath);
     for (const p of [statisticsPath, difficultyPath]) {
       if (fs.existsSync(p)) {
         const r = spawnSync('git', ['checkout', '--', path.relative(ROOT, p)], { cwd: ROOT, encoding: 'utf8' });
