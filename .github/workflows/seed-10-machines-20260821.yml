@@ -1,0 +1,85 @@
+name: Seed 10-machine batch 20260821
+
+on:
+  pull_request:
+    branches:
+      - prototype-multi-machine
+    paths:
+      - 'tools/seed-10-machines-20260821.mjs'
+      - '.github/workflows/seed-10-machines-20260821.yml'
+
+jobs:
+  seed-build-audit:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout PR branch
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: ${{ github.event.pull_request.head.ref }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Seed ResearchData and SelectionData
+        run: node tools/seed-10-machines-20260821.mjs
+
+      - name: Validate ResearchData
+        shell: bash
+        run: |
+          set -euo pipefail
+          for f in \
+            research/L_EUREKA_SEVEN4_HIEVO_KX/research-data.json \
+            research/L_ENEN_NO_SHOUBOUTAI_JG/research-data.json \
+            research/L_ULTRAMAN_TIGA_KA/research-data.json \
+            research/L_TOLOVE_DARKNESS_S6/research-data.json \
+            research/S_OKIDOKI_GORGEOUS_GS/research-data.json \
+            research/S_NAMENEKO_QQ/research-data.json \
+            research/S_HAIBI_RETURN_PA30/research-data.json \
+            research/S_KABANERI_ZR/research-data.json \
+            research/S_HARD_BOILED_XX/research-data.json \
+            research/S_HYPER_RUSH_SLC8/research-data.json; do
+            npm run research:validate -- "$f"
+          done
+
+      - name: Run 10-machine pipeline
+        shell: bash
+        run: |
+          cat > /tmp/machine_ids.txt <<'EOF'
+          L_EUREKA_SEVEN4_HIEVO_KX
+          L_ENEN_NO_SHOUBOUTAI_JG
+          L_ULTRAMAN_TIGA_KA
+          L_TOLOVE_DARKNESS_S6
+          S_OKIDOKI_GORGEOUS_GS
+          S_NAMENEKO_QQ
+          S_HAIBI_RETURN_PA30
+          S_KABANERI_ZR
+          S_HARD_BOILED_XX
+          S_HYPER_RUSH_SLC8
+          EOF
+          npm run machine:batch -- --file /tmp/machine_ids.txt
+
+      - name: Full repository tests and audits
+        run: |
+          npm test
+          npm run audit
+          npm run audit:ui-service-names
+
+      - name: Commit generated batch
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add research/L_EUREKA_SEVEN4_HIEVO_KX research/L_ENEN_NO_SHOUBOUTAI_JG research/L_ULTRAMAN_TIGA_KA research/L_TOLOVE_DARKNESS_S6 research/S_OKIDOKI_GORGEOUS_GS research/S_NAMENEKO_QQ research/S_HAIBI_RETURN_PA30 research/S_KABANERI_ZR research/S_HARD_BOILED_XX research/S_HYPER_RUSH_SLC8 catalog.json difficulty-catalog.json machines
+          if git diff --cached --quiet; then
+            echo 'No generated changes.'
+            exit 0
+          fi
+          git commit -m 'data: add researched MachineData for 10 machines'
+          git push origin HEAD:${{ github.event.pull_request.head.ref }}
