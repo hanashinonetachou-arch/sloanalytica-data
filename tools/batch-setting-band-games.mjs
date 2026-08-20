@@ -7,7 +7,7 @@ const researchRoot = path.join(root, 'research');
 const summaryPath = path.join(root, 'reports', 'setting-band-batch-report.json');
 
 const dirs = fs.readdirSync(researchRoot, { withFileTypes: true })
-  .filter(d => d.isDirectory())
+  .filter(d => d.isDirectory() && !d.name.startsWith('_'))
   .map(d => d.name)
   .sort();
 
@@ -40,7 +40,9 @@ for (const machineId of dirs) {
   results.push({
     machineId,
     status: report.status,
+    reason: report.reason ?? null,
     analyzableFeatureCount: report.analyzableFeatureIds?.length ?? 0,
+    excludedAdoptedFeatureIds: report.excludedAdoptedFeatureIds ?? [],
     results: report.results ?? [],
   });
 }
@@ -52,6 +54,7 @@ const counts = results.reduce((acc, r) => {
 const summary = {
   analyzerVersion: 'setting-band-discrimination-g-v1.0-batch',
   generatedAt: new Date().toISOString(),
+  machineCount: results.length,
   counts,
   machines: results,
 };
@@ -59,6 +62,7 @@ fs.mkdirSync(path.dirname(summaryPath), { recursive: true });
 fs.writeFileSync(summaryPath, JSON.stringify(summary, null, 2) + '\n');
 
 console.log('\n=== SETTING BAND BATCH SUMMARY ===');
+console.log(`MACHINES: ${results.length}`);
 for (const [status, count] of Object.entries(counts).sort()) console.log(`${status}: ${count}`);
 console.log(`Report: ${path.relative(root, summaryPath)}`);
 
