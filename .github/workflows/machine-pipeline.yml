@@ -39,6 +39,20 @@ jobs:
           S_AOHARU_MISAO_A2
           S_DANMACHI2_XZ
           EOF
+      - name: Disposition all researched evidence
+        shell: bash
+        run: |
+          node --input-type=module <<'NODE'
+          import fs from 'node:fs';
+          const ids=fs.readFileSync('/tmp/machine_ids.txt','utf8').trim().split(/\r?\n/);
+          for(const id of ids){
+            const rp=`research/${id}/research-data.json`, sp=`research/${id}/selection-data.json`;
+            const r=JSON.parse(fs.readFileSync(rp,'utf8')), s=JSON.parse(fs.readFileSync(sp,'utf8'));
+            const ev=r.evidenceCandidates??[];
+            s.evidenceUi=ev.length?{groups:[{groupId:'SETTING_EVIDENCE',label:'確認した設定確定・否定情報',selectionMode:'single',normalizationMode:'ALLOWED_SETTINGS',options:ev.map((e,i)=>({value:`EVIDENCE_${i+1}`,label:e.name,allowedSettings:e.allowedSettings,sourceEvidenceIds:[e.researchEvidenceId]}))}]}:{groups:[]};
+            fs.writeFileSync(sp,JSON.stringify(s,null,2)+'\n');
+          }
+          NODE
       - name: Validate research
         shell: bash
         run: |
