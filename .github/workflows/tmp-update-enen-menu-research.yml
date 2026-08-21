@@ -1,0 +1,39 @@
+name: TEMP Update Fire Force menu research
+
+on:
+  pull_request:
+    branches:
+      - prototype-multi-machine
+    paths:
+      - 'tools/tmp-update-enen-menu-research.mjs'
+      - '.github/workflows/tmp-update-enen-menu-research.yml'
+
+jobs:
+  update-research:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: ${{ github.head_ref }}
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Update ResearchData
+        run: node tools/tmp-update-enen-menu-research.mjs
+      - name: Validate ResearchData
+        run: npm run research:validate -- research/L_ENEN_NO_SHOUBOUTAI_JG/research-data.json
+      - name: Commit update
+        run: |
+          if git diff --quiet; then
+            echo 'No ResearchData changes.'
+            exit 0
+          fi
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add research/L_ENEN_NO_SHOUBOUTAI_JG/research-data.json
+          git commit -m 'research: verify Fire Force machine menu data'
+          git push origin HEAD:${{ github.head_ref }}
