@@ -1,7 +1,7 @@
 {
   "schemaVersion": "selection-data-v1",
   "machineId": "L_SYMPHOGEAR_SEIGI_JA",
-  "machineDataVersion": "0.1.0",
+  "machineDataVersion": "0.1.1",
   "inputs": [
     {
       "id": "INP_NORMAL_GAMES",
@@ -20,6 +20,56 @@
       "displayOrder": 2,
       "defaultValue": 0,
       "unit": "回"
+    },
+    {
+      "id": "INP_AT_END_DEFAULT",
+      "name": "デフォルト",
+      "type": "counter",
+      "category": "AT_END_SCREEN",
+      "displayOrder": 40,
+      "defaultValue": 0,
+      "unit": "回",
+      "description": "AT終了時に表示された回数を入力。紫・銀・金など設定確定/否定系の画面はここには含めず「設定確定・否定情報」で選択してください。"
+    },
+    {
+      "id": "INP_AT_END_ODD",
+      "name": "奇数示唆",
+      "type": "counter",
+      "category": "AT_END_SCREEN",
+      "displayOrder": 41,
+      "defaultValue": 0,
+      "unit": "回",
+      "description": "AT終了時に表示された回数を入力。紫・銀・金など設定確定/否定系の画面はここには含めず「設定確定・否定情報」で選択してください。"
+    },
+    {
+      "id": "INP_AT_END_EVEN",
+      "name": "偶数示唆",
+      "type": "counter",
+      "category": "AT_END_SCREEN",
+      "displayOrder": 42,
+      "defaultValue": 0,
+      "unit": "回",
+      "description": "AT終了時に表示された回数を入力。紫・銀・金など設定確定/否定系の画面はここには含めず「設定確定・否定情報」で選択してください。"
+    },
+    {
+      "id": "INP_AT_END_HIGH_WEAK",
+      "name": "高設定示唆（弱）",
+      "type": "counter",
+      "category": "AT_END_SCREEN",
+      "displayOrder": 43,
+      "defaultValue": 0,
+      "unit": "回",
+      "description": "AT終了時に表示された回数を入力。紫・銀・金など設定確定/否定系の画面はここには含めず「設定確定・否定情報」で選択してください。"
+    },
+    {
+      "id": "INP_AT_END_HIGH_STRONG",
+      "name": "高設定示唆（強）",
+      "type": "counter",
+      "category": "AT_END_SCREEN",
+      "displayOrder": 44,
+      "defaultValue": 0,
+      "unit": "回",
+      "description": "AT終了時に表示された回数を入力。紫・銀・金など設定確定/否定系の画面はここには含めず「設定確定・否定情報」で選択してください。"
     }
   ],
   "features": [
@@ -65,6 +115,34 @@
       "featureId": "FEAT_XDRIVE",
       "adoptionCategory": "EXCLUDE",
       "rejectionReason": "大差は公開されるが全設定の定量値・条件付き分母の扱いが不十分。"
+    },
+    {
+      "researchFeatureId": "RF_AT_ENDSCREEN_NON_EVIDENCE",
+      "featureId": "FEAT_AT_ENDSCREEN_NON_EVIDENCE",
+      "adoptionCategory": "INCLUDE_SUPPORT",
+      "numeratorInputId": "INP_AT_END_DEFAULT",
+      "denominatorInputId": "INP_AT_END_ODD",
+      "categoryInputIds": [
+        "INP_AT_END_ODD",
+        "INP_AT_END_EVEN",
+        "INP_AT_END_HIGH_WEAK",
+        "INP_AT_END_HIGH_STRONG"
+      ],
+      "inputTransform": "sum_inputs_to_trials",
+      "denominatorInputIds": [
+        "INP_AT_END_DEFAULT",
+        "INP_AT_END_ODD",
+        "INP_AT_END_EVEN",
+        "INP_AT_END_HIGH_WEAK",
+        "INP_AT_END_HIGH_STRONG"
+      ],
+      "minimumSample": 1,
+      "sampleRecommendation": 10,
+      "weight": 1,
+      "modelTypeOverride": "multinomial",
+      "difficultyParticipation": "EXCLUDE",
+      "difficultyExclusionReason": "AT終了回数を通常ゲーム数から一意にExposure化できないため。",
+      "userReason": "AT終了画面は設定別振り分けが公開されているため採用。確定・否定系はEvidenceへ分離して二重計上を避けます。"
     }
   ],
   "rejectedElements": [],
@@ -98,6 +176,79 @@
             "sourceEvidenceIds": [
               "RE_6"
             ]
+          },
+          {
+            "value": "END_2PLUS",
+            "label": "AT終了画面：紫①/②（設定2以上）",
+            "allowedSettings": [
+              "SET_2",
+              "SET_4",
+              "SET_5",
+              "SET_6"
+            ],
+            "sourceEvidenceIds": [
+              "RE_END_2PLUS"
+            ]
+          },
+          {
+            "value": "END_NOT2",
+            "label": "AT終了画面：紫③（設定2否定）",
+            "allowedSettings": [
+              "SET_1",
+              "SET_4",
+              "SET_5",
+              "SET_6"
+            ],
+            "sourceEvidenceIds": [
+              "RE_END_NOT2"
+            ]
+          },
+          {
+            "value": "END_NOT4",
+            "label": "AT終了画面：紫④（設定4否定）",
+            "allowedSettings": [
+              "SET_1",
+              "SET_2",
+              "SET_5",
+              "SET_6"
+            ],
+            "sourceEvidenceIds": [
+              "RE_END_NOT4"
+            ]
+          },
+          {
+            "value": "END_246",
+            "label": "AT終了画面：紫⑤（設定2・4・6）",
+            "allowedSettings": [
+              "SET_2",
+              "SET_4",
+              "SET_6"
+            ],
+            "sourceEvidenceIds": [
+              "RE_END_246"
+            ]
+          },
+          {
+            "value": "END_4PLUS",
+            "label": "AT終了画面：銀（設定4以上）",
+            "allowedSettings": [
+              "SET_4",
+              "SET_5",
+              "SET_6"
+            ],
+            "sourceEvidenceIds": [
+              "RE_END_4PLUS"
+            ]
+          },
+          {
+            "value": "END_6",
+            "label": "AT終了画面：金（設定6）",
+            "allowedSettings": [
+              "SET_6"
+            ],
+            "sourceEvidenceIds": [
+              "RE_END_6"
+            ]
           }
         ]
       }
@@ -108,7 +259,8 @@
     "exclusions": []
   },
   "uiCategoryLabels": {
-    "PRIMARY": "AT初当り"
+    "PRIMARY": "AT初当り",
+    "AT_END_SCREEN": "AT終了画面"
   },
   "difficultyAnalysis": {
     "targetGameBasis": {

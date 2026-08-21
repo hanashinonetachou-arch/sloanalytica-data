@@ -3,7 +3,7 @@
   "machine": {
     "schemaVersion": "2.0.0",
     "machineId": "S_BAHAMA_A3_30",
-    "machineDataVersion": "0.1.0",
+    "machineDataVersion": "0.1.1",
     "displayName": "バハマ",
     "modelName": "SバハマA3-30",
     "manufacturer": "アムテックス",
@@ -79,32 +79,6 @@
     "schemaVersion": "2.0.0",
     "features": [
       {
-        "featureId": "FEAT_BONUS",
-        "name": "ボーナス合成",
-        "adoptionCategory": "INCLUDE_PRIMARY",
-        "calculationRole": "PROBABILITY",
-        "probabilityEngineUsage": true,
-        "modelType": "binomial",
-        "minimumSample": 1,
-        "sampleRecommendation": 7000,
-        "reliabilityProfile": {
-          "weight": 1
-        },
-        "displayFormat": "ratio_1_over_n",
-        "denominatorInputId": "INP_NORMAL_GAMES",
-        "numeratorInputId": "INP_BONUS",
-        "probabilities": {
-          "SET_1": 0.005279831045406547,
-          "SET_2": 0.00554016620498615,
-          "SET_3": 0.0059665871121718375,
-          "SET_5": 0.006591957811470007,
-          "SET_6": 0.007142857142857143
-        },
-        "sourceEvidenceRefs": [
-          "SRC_ANALYSIS"
-        ]
-      },
-      {
         "featureId": "FEAT_CHERRY3",
         "name": "3枚チェリー",
         "adoptionCategory": "INCLUDE_SUPPORT",
@@ -157,26 +131,53 @@
         ]
       },
       {
-        "featureId": "FEAT_FREEZE",
-        "name": "ロングフリーズ",
-        "adoptionCategory": "INCLUDE_SUPPORT",
+        "featureId": "FEAT_BONUS_FREEZE_OUTCOME",
+        "name": "ボーナス内訳（ロングフリーズ/その他）",
+        "adoptionCategory": "INCLUDE_PRIMARY",
         "calculationRole": "PROBABILITY",
         "probabilityEngineUsage": true,
-        "modelType": "binomial",
+        "modelType": "marginal_multinomial",
         "minimumSample": 1,
         "sampleRecommendation": 7000,
         "reliabilityProfile": {
           "weight": 1
         },
-        "displayFormat": "ratio_1_over_n",
-        "denominatorInputId": "INP_NORMAL_GAMES",
         "numeratorInputId": "INP_FREEZE",
-        "probabilities": {
-          "SET_1": 0.00002384188064754548,
-          "SET_2": 0.000028610256777054574,
-          "SET_3": 0.00003755092844670585,
-          "SET_5": 0.00007867820613690008,
-          "SET_6": 0.00012475205529011092
+        "denominatorInputId": "INP_NORMAL_GAMES",
+        "categoryInputIds": [
+          "INP_BONUS"
+        ],
+        "probabilities": {},
+        "categorySubtractInputIds": {
+          "INP_BONUS": [
+            "INP_FREEZE"
+          ]
+        },
+        "categoryLabels": [
+          "FREEZE_BONUS",
+          "OTHER_BONUS"
+        ],
+        "categoryProbabilities": {
+          "SET_1": [
+            0.00002384188064754548,
+            0.0052559891647590016
+          ],
+          "SET_2": [
+            0.000028610256777054574,
+            0.005511555948209095
+          ],
+          "SET_3": [
+            0.00003755092844670585,
+            0.005929036183725132
+          ],
+          "SET_5": [
+            0.00007867820613690008,
+            0.006513279605333107
+          ],
+          "SET_6": [
+            0.00012475205529011092,
+            0.007018105087567032
+          ]
         },
         "sourceEvidenceRefs": [
           "SRC_ANALYSIS"
@@ -259,19 +260,10 @@
   },
   "selectionSummary": {
     "schemaVersion": "selection-summary-v1",
-    "evaluatedCount": 9,
-    "selectedCount": 4,
-    "rejectedCount": 5,
+    "evaluatedCount": 10,
+    "selectedCount": 3,
+    "rejectedCount": 7,
     "selected": [
-      {
-        "featureId": "FEAT_BONUS",
-        "name": "ボーナス合成",
-        "reason": "完全確率型でボーナス合成に段階差があるため採用。",
-        "requiredTrials": {
-          "value": 12963,
-          "unit": "通常ゲーム"
-        }
-      },
       {
         "featureId": "FEAT_CHERRY3",
         "name": "3枚チェリー",
@@ -291,16 +283,34 @@
         }
       },
       {
-        "featureId": "FEAT_FREEZE",
-        "name": "ロングフリーズ",
-        "reason": "極低頻度だが設定差が非常に大きく発生を明確に観測できるため、低頻度だけを理由に除外せず採用。",
+        "featureId": "FEAT_BONUS_FREEZE_OUTCOME",
+        "name": "ボーナス内訳（ロングフリーズ/その他）",
+        "reason": "ボーナス合成とロングフリーズを排他的な内訳として一体評価します。7000Gでも設定6ならフリーズ発生余地はありますが、単独で強い判別要素とはせずボーナス情報の一部として扱います。",
         "requiredTrials": {
-          "value": 46369,
+          "value": 10938,
           "unit": "通常ゲーム"
         }
       }
     ],
     "rejected": [
+      {
+        "featureId": "FEAT_BONUS",
+        "name": "ボーナス合成",
+        "reason": "ロングフリーズを含むボーナス内訳Featureへ統合。",
+        "requiredTrials": {
+          "value": 12963,
+          "unit": "通常ゲーム"
+        }
+      },
+      {
+        "featureId": "FEAT_FREEZE",
+        "name": "ロングフリーズ",
+        "reason": "ボーナス合成に含まれるため単独採用すると二重計上。ボーナス内訳Featureへ統合。",
+        "requiredTrials": {
+          "value": 46369,
+          "unit": "通常ゲーム"
+        }
+      },
       {
         "featureId": "FEAT_BIG",
         "name": "BIG確率",
