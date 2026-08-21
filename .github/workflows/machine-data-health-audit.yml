@@ -1,0 +1,34 @@
+name: MachineData Health Audit
+
+on:
+  pull_request:
+    branches:
+      - prototype-multi-machine
+    paths:
+      - 'machines/**'
+      - 'research/**'
+      - 'tools/audit-machine-data-health.mjs'
+      - '.github/workflows/machine-data-health-audit.yml'
+  workflow_dispatch:
+
+jobs:
+  health-audit:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Run MachineData health audit
+        run: node tools/audit-machine-data-health.mjs . reports/machine-data-health-audit-v2.json reports/machine-data-health-audit-v2.md
+      - name: Show report summary
+        run: cat reports/machine-data-health-audit-v2.md
+      - name: Upload health audit report
+        uses: actions/upload-artifact@v4
+        with:
+          name: machine-data-health-audit-v2
+          path: |
+            reports/machine-data-health-audit-v2.json
+            reports/machine-data-health-audit-v2.md
