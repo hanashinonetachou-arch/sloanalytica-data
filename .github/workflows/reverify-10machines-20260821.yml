@@ -1,0 +1,44 @@
+name: Reverify 10 machines 20260821
+
+on:
+  push:
+    branches:
+      - fix/reverify-10machines-20260821
+    paths:
+      - 'tools/apply-reverify-10machines-20260821.mjs'
+      - '.github/workflows/reverify-10machines-20260821.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  apply-and-validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: fix/reverify-10machines-20260821
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Apply reviewed source updates
+        run: node tools/apply-reverify-10machines-20260821.mjs
+      - name: Validate and regenerate changed machines
+        run: npm run machine:batch -- L_EUREKA_SEVEN4_HIEVO_KX L_ENEN_NO_SHOUBOUTAI_JG S_KABANERI_ZR S_HARD_BOILED_XX S_HYPER_RUSH_SLC8
+      - name: Show builder location for UI section options
+        run: grep -R -n "uiCategoryLabels" tools | head -20 || true
+      - name: Publish changed machines atomically
+        run: npm run machine:publish:batch -- L_EUREKA_SEVEN4_HIEVO_KX L_ENEN_NO_SHOUBOUTAI_JG S_KABANERI_ZR S_HARD_BOILED_XX S_HYPER_RUSH_SLC8 --apply
+      - name: Final audits
+        run: |
+          npm test
+          npm run audit
+          npm run audit:ui-service-names
+      - name: Commit generated changes
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -- research/L_EUREKA_SEVEN4_HIEVO_KX research/L_ENEN_NO_SHOUBOUTAI_JG research/S_KABANERI_ZR research/S_HARD_BOILED_XX research/S_HYPER_RUSH_SLC8 machines/L_EUREKA_SEVEN4_HIEVO_KX machines/L_ENEN_NO_SHOUBOUTAI_JG machines/S_KABANERI_ZR machines/S_HARD_BOILED_XX machines/S_HYPER_RUSH_SLC8 catalog.json difficulty-catalog.json machine-registry.json reports/batch-machine-pipeline-report.json
+          git diff --cached --quiet || git commit -m "Reverify 10-machine setting inference elements"
+          git push origin HEAD:fix/reverify-10machines-20260821
