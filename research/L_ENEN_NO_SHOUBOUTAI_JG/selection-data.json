@@ -1,7 +1,7 @@
 {
   "schemaVersion": "selection-data-v1",
   "machineId": "L_ENEN_NO_SHOUBOUTAI_JG",
-  "machineDataVersion": "0.1.6",
+  "machineDataVersion": "0.1.7",
   "inputs": [
     {
       "id": "INP_NORMAL_GAMES",
@@ -14,23 +14,22 @@
     },
     {
       "id": "INP_INITIAL",
-      "name": "初当り合算回数",
+      "name": "灰焔騎士団の回数",
       "type": "counter",
       "category": "PRIMARY",
       "displayOrder": 2,
       "defaultValue": 0,
-      "unit": "回",
-      "description": "通常時の初当りボーナスと灰焔騎士団の初当りを合計した回数です。"
+      "unit": "回"
     },
     {
       "id": "INP_BONUS_INITIAL",
-      "name": "初当りボーナス回数",
+      "name": "初当りボーナスの回数",
       "type": "counter",
-      "category": "SUPPORT",
+      "category": "PRIMARY",
       "displayOrder": 10,
       "defaultValue": 0,
       "unit": "回",
-      "parentInputId": "INP_INITIAL"
+      "description": "灰焔騎士団からのボーナス当選は除いてください。"
     },
     {
       "id": "INP_ENEN_INITIAL",
@@ -293,7 +292,9 @@
       "displayOrder": 51,
       "defaultValue": null,
       "unit": "回",
-      "uiDirectInput": false
+      "uiDirectInput": false,
+      "uiGridSpan": 6,
+      "uiCompactCounter": true
     },
     {
       "id": "INP_ADORA_JAC_ARTHUR",
@@ -303,7 +304,9 @@
       "displayOrder": 52,
       "defaultValue": null,
       "unit": "回",
-      "uiDirectInput": false
+      "uiDirectInput": false,
+      "uiGridSpan": 6,
+      "uiCompactCounter": true
     },
     {
       "id": "INP_ADORA_JAC_HINAWA",
@@ -313,7 +316,9 @@
       "displayOrder": 53,
       "defaultValue": null,
       "unit": "回",
-      "uiDirectInput": false
+      "uiDirectInput": false,
+      "uiGridSpan": 6,
+      "uiCompactCounter": true
     },
     {
       "id": "INP_ADORA_JAC_MAKI",
@@ -323,7 +328,9 @@
       "displayOrder": 54,
       "defaultValue": null,
       "unit": "回",
-      "uiDirectInput": false
+      "uiDirectInput": false,
+      "uiGridSpan": 6,
+      "uiCompactCounter": true
     },
     {
       "id": "INP_ADORA_JAC_TAMAKI",
@@ -333,7 +340,9 @@
       "displayOrder": 55,
       "defaultValue": null,
       "unit": "回",
-      "uiDirectInput": false
+      "uiDirectInput": false,
+      "uiGridSpan": 6,
+      "uiCompactCounter": true
     },
     {
       "id": "INP_ADORA_JAC_OUBI",
@@ -343,7 +352,9 @@
       "displayOrder": 56,
       "defaultValue": null,
       "unit": "回",
-      "uiDirectInput": false
+      "uiDirectInput": false,
+      "uiGridSpan": 6,
+      "uiCompactCounter": true
     },
     {
       "id": "INP_ADORA_JAC_JOKER",
@@ -353,7 +364,9 @@
       "displayOrder": 57,
       "defaultValue": null,
       "unit": "回",
-      "uiDirectInput": false
+      "uiDirectInput": false,
+      "uiGridSpan": 6,
+      "uiCompactCounter": true
     },
     {
       "id": "INP_ADORA_JAC_BENIMARU",
@@ -363,7 +376,9 @@
       "displayOrder": 58,
       "defaultValue": null,
       "unit": "回",
-      "uiDirectInput": false
+      "uiDirectInput": false,
+      "uiGridSpan": 6,
+      "uiCompactCounter": true
     },
     {
       "id": "INP_ADORA_JAC_IRIS",
@@ -373,7 +388,9 @@
       "displayOrder": 59,
       "defaultValue": null,
       "unit": "回",
-      "uiDirectInput": false
+      "uiDirectInput": false,
+      "uiGridSpan": 6,
+      "uiCompactCounter": true
     }
   ],
   "features": [
@@ -394,14 +411,18 @@
         "basisId": "NORMAL_GAMES"
       },
       "difficultyParticipation": "INCLUDE",
-      "userReason": "ボーナス初当りと灰焔騎士団をまとめた全初当りを安定して観測できるため主軸採用。"
+      "userReason": "ボーナス初当りと灰焔騎士団をまとめた全初当りを安定して観測できるため主軸採用。",
+      "numeratorInputIds": [
+        "INP_INITIAL",
+        "INP_BONUS_INITIAL"
+      ],
+      "inputTransform": "sum_inputs_to_numerator"
     },
     {
       "researchFeatureId": "RF_BONUS_SHARE",
       "featureId": "FEAT_BONUS_SHARE",
       "adoptionCategory": "INCLUDE_SUPPORT",
       "numeratorInputId": "INP_BONUS_INITIAL",
-      "denominatorInputId": "INP_INITIAL",
       "minimumSample": 1,
       "sampleRecommendation": 30,
       "weight": 0.8,
@@ -414,7 +435,12 @@
         "basisId": "NORMAL_GAMES"
       },
       "difficultyParticipation": "INCLUDE",
-      "userReason": "全初当りに対するボーナス構成比として扱えば、初当り合算と二重計上せず追加情報を使える。"
+      "userReason": "全初当りに対するボーナス構成比として扱えば、初当り合算と二重計上せず追加情報を使える。",
+      "denominatorInputIds": [
+        "INP_INITIAL",
+        "INP_BONUS_INITIAL"
+      ],
+      "inputTransform": "sum_inputs_to_trials"
     },
     {
       "researchFeatureId": "RF_ENEN_INITIAL",
@@ -682,6 +708,7 @@
     "REG_SCENARIO": "REG中に表示された5人のキャラ順と一致する項目へ+1してください。11項目の合計を確認回数として自動計算します。",
     "FF_END": "終了画面を確認したら該当する1項目を＋してください。総数は6項目の合計から自動計算します。",
     "REG_END": "終了画面を確認したら該当する1項目を＋してください。総数は6項目の合計から自動計算します。",
-    "ADORA_JAC": "アドラバースト突入時のみ入力してください。JAC開始ごとに該当キャラを＋してください。総数は各キャラの合計から自動計算します。"
+    "ADORA_JAC": "アドラバースト突入時のみ入力してください。JAC開始ごとに該当キャラを＋してください。総数は各キャラの合計から自動計算します。",
+    "PRIMARY": "通常時は「灰焔騎士団」または「初当りボーナス」のどちらかに＋1してください。初当り合算は2項目の合計から自動計算します。"
   }
 }
