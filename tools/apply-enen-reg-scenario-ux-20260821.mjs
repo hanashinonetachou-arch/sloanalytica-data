@@ -30,6 +30,14 @@ const scenarioOrder=[
 ];
 scenarioOrder.forEach((id,i)=>{const x=s.inputs.find(v=>v.id===id); if(x) x.displayOrder=13+i;});
 
+// Auto section order follows first category appearance, so physically move the REG scenario inputs
+// immediately after the 炎炎激闘 initial input rather than relying only on displayOrder.
+const scenarioSet=new Set(scenarioOrder);
+const scenarioInputs=scenarioOrder.map(id=>s.inputs.find(v=>v.id===id)).filter(Boolean);
+s.inputs=s.inputs.filter(v=>!scenarioSet.has(v.id));
+const enenIndex=s.inputs.findIndex(v=>v.id==='INP_ENEN_INITIAL');
+s.inputs.splice(enenIndex+1,0,...scenarioInputs);
+
 s.uiCategoryLabels={
   ...(s.uiCategoryLabels||{}),
   REG_SCENARIO:'REG中キャラ紹介',
