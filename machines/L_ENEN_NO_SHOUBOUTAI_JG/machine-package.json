@@ -3,7 +3,7 @@
   "machine": {
     "schemaVersion": "2.0.0",
     "machineId": "L_ENEN_NO_SHOUBOUTAI_JG",
-    "machineDataVersion": "0.1.6",
+    "machineDataVersion": "0.1.7",
     "displayName": "Lパチスロ炎炎ノ消防隊",
     "modelName": "L炎炎ノ消防隊jG",
     "manufacturer": "SANKYO",
@@ -35,24 +35,23 @@
       },
       {
         "id": "INP_INITIAL",
-        "name": "初当り合算回数",
+        "name": "灰焔騎士団の回数",
         "type": "counter",
         "category": "PRIMARY",
         "displayOrder": 2,
         "defaultValue": 0,
         "unit": "回",
-        "description": "通常時の初当りボーナスと灰焔騎士団の初当りを合計した回数です。",
         "minimum": 0
       },
       {
         "id": "INP_BONUS_INITIAL",
-        "name": "初当りボーナス回数",
+        "name": "初当りボーナスの回数",
         "type": "counter",
-        "category": "SUPPORT",
+        "category": "PRIMARY",
         "displayOrder": 10,
         "defaultValue": 0,
         "unit": "回",
-        "parentInputId": "INP_INITIAL",
+        "description": "灰焔騎士団からのボーナス当選は除いてください。",
         "minimum": 0
       },
       {
@@ -341,6 +340,8 @@
         "defaultValue": null,
         "unit": "回",
         "uiDirectInput": false,
+        "uiGridSpan": 6,
+        "uiCompactCounter": true,
         "minimum": 0
       },
       {
@@ -352,6 +353,8 @@
         "defaultValue": null,
         "unit": "回",
         "uiDirectInput": false,
+        "uiGridSpan": 6,
+        "uiCompactCounter": true,
         "minimum": 0
       },
       {
@@ -363,6 +366,8 @@
         "defaultValue": null,
         "unit": "回",
         "uiDirectInput": false,
+        "uiGridSpan": 6,
+        "uiCompactCounter": true,
         "minimum": 0
       },
       {
@@ -374,6 +379,8 @@
         "defaultValue": null,
         "unit": "回",
         "uiDirectInput": false,
+        "uiGridSpan": 6,
+        "uiCompactCounter": true,
         "minimum": 0
       },
       {
@@ -385,6 +392,8 @@
         "defaultValue": null,
         "unit": "回",
         "uiDirectInput": false,
+        "uiGridSpan": 6,
+        "uiCompactCounter": true,
         "minimum": 0
       },
       {
@@ -396,6 +405,8 @@
         "defaultValue": null,
         "unit": "回",
         "uiDirectInput": false,
+        "uiGridSpan": 6,
+        "uiCompactCounter": true,
         "minimum": 0
       },
       {
@@ -407,6 +418,8 @@
         "defaultValue": null,
         "unit": "回",
         "uiDirectInput": false,
+        "uiGridSpan": 6,
+        "uiCompactCounter": true,
         "minimum": 0
       },
       {
@@ -418,6 +431,8 @@
         "defaultValue": null,
         "unit": "回",
         "uiDirectInput": false,
+        "uiGridSpan": 6,
+        "uiCompactCounter": true,
         "minimum": 0
       },
       {
@@ -429,6 +444,8 @@
         "defaultValue": null,
         "unit": "回",
         "uiDirectInput": false,
+        "uiGridSpan": 6,
+        "uiCompactCounter": true,
         "minimum": 0
       },
       {
@@ -485,9 +502,14 @@
         "reliabilityProfile": {
           "weight": 1
         },
+        "inputTransform": "sum_inputs_to_numerator",
         "displayFormat": "ratio_1_over_n",
-        "numeratorInputId": "INP_INITIAL",
+        "numeratorInputIds": [
+          "INP_INITIAL",
+          "INP_BONUS_INITIAL"
+        ],
         "denominatorInputId": "INP_NORMAL_GAMES",
+        "numeratorInputId": "INP_INITIAL",
         "probabilities": {
           "SET_1": 0.005076142131979695,
           "SET_2": 0.005154639175257732,
@@ -511,9 +533,13 @@
         "reliabilityProfile": {
           "weight": 0.8
         },
+        "inputTransform": "sum_inputs_to_trials",
         "displayFormat": "percent",
+        "denominatorInputIds": [
+          "INP_INITIAL",
+          "INP_BONUS_INITIAL"
+        ],
         "numeratorInputId": "INP_BONUS_INITIAL",
-        "denominatorInputId": "INP_INITIAL",
         "probabilities": {
           "SET_1": 0.6769759450171822,
           "SET_2": 0.6879432624113475,
@@ -538,8 +564,8 @@
           "weight": 0.7
         },
         "displayFormat": "ratio_1_over_n",
-        "numeratorInputId": "INP_ENEN_INITIAL",
         "denominatorInputId": "INP_NORMAL_GAMES",
+        "numeratorInputId": "INP_ENEN_INITIAL",
         "probabilities": {
           "SET_1": 0.0012658227848101266,
           "SET_2": 0.0013227513227513227,
@@ -1076,6 +1102,7 @@
         "id": "AUTO_PRIMARY",
         "title": "初当り",
         "displayOrder": 1,
+        "description": "通常時は「灰焔騎士団」または「初当りボーナス」のどちらかに＋1してください。初当り合算は2項目の合計から自動計算します。",
         "items": [
           {
             "type": "input",
@@ -1086,20 +1113,13 @@
           {
             "type": "input",
             "inputId": "INP_INITIAL",
-            "label": "初当り合算回数",
+            "label": "灰焔騎士団の回数",
             "widget": "counter"
-          }
-        ]
-      },
-      {
-        "id": "AUTO_SUPPORT",
-        "title": "初当り後の構成・到達",
-        "displayOrder": 2,
-        "items": [
+          },
           {
             "type": "input",
             "inputId": "INP_BONUS_INITIAL",
-            "label": "初当りボーナス回数",
+            "label": "初当りボーナスの回数",
             "widget": "counter"
           }
         ]
@@ -1107,7 +1127,7 @@
       {
         "id": "AUTO_ENEN_INITIAL",
         "title": "炎炎激闘初当り",
-        "displayOrder": 3,
+        "displayOrder": 2,
         "items": [
           {
             "type": "input",
@@ -1120,7 +1140,7 @@
       {
         "id": "AUTO_REG_SCENARIO",
         "title": "REG中キャラ紹介",
-        "displayOrder": 4,
+        "displayOrder": 3,
         "description": "REG中に表示された5人のキャラ順と一致する項目へ+1してください。11項目の合計を確認回数として自動計算します。",
         "collapsible": true,
         "defaultExpanded": false,
@@ -1196,7 +1216,7 @@
       {
         "id": "AUTO_FF_END",
         "title": "炎炎ボーナス終了画面",
-        "displayOrder": 5,
+        "displayOrder": 4,
         "description": "終了画面を確認したら該当する1項目を＋してください。総数は6項目の合計から自動計算します。",
         "collapsible": true,
         "defaultExpanded": false,
@@ -1272,7 +1292,7 @@
       {
         "id": "AUTO_REG_END",
         "title": "REG終了画面",
-        "displayOrder": 6,
+        "displayOrder": 5,
         "description": "終了画面を確認したら該当する1項目を＋してください。総数は6項目の合計から自動計算します。",
         "collapsible": true,
         "defaultExpanded": false,
@@ -1348,7 +1368,7 @@
       {
         "id": "AUTO_ADORA_JAC",
         "title": "アドラバースト中 炎炎JAC開始キャラ",
-        "displayOrder": 7,
+        "displayOrder": 6,
         "description": "アドラバースト突入時のみ使用します。低頻度のため通常は閉じています。",
         "collapsible": true,
         "defaultExpanded": false,
@@ -1357,8 +1377,10 @@
             "type": "input",
             "inputId": "INP_ADORA_JAC_SHINRA",
             "label": "シンラ",
+            "gridSpan": 6,
             "config": {
-              "directInput": false
+              "directInput": false,
+              "compact": true
             },
             "widget": "counter"
           },
@@ -1366,8 +1388,10 @@
             "type": "input",
             "inputId": "INP_ADORA_JAC_ARTHUR",
             "label": "アーサー",
+            "gridSpan": 6,
             "config": {
-              "directInput": false
+              "directInput": false,
+              "compact": true
             },
             "widget": "counter"
           },
@@ -1375,8 +1399,10 @@
             "type": "input",
             "inputId": "INP_ADORA_JAC_HINAWA",
             "label": "ヒナワ",
+            "gridSpan": 6,
             "config": {
-              "directInput": false
+              "directInput": false,
+              "compact": true
             },
             "widget": "counter"
           },
@@ -1384,8 +1410,10 @@
             "type": "input",
             "inputId": "INP_ADORA_JAC_MAKI",
             "label": "マキ",
+            "gridSpan": 6,
             "config": {
-              "directInput": false
+              "directInput": false,
+              "compact": true
             },
             "widget": "counter"
           },
@@ -1393,8 +1421,10 @@
             "type": "input",
             "inputId": "INP_ADORA_JAC_TAMAKI",
             "label": "タマキ",
+            "gridSpan": 6,
             "config": {
-              "directInput": false
+              "directInput": false,
+              "compact": true
             },
             "widget": "counter"
           },
@@ -1402,8 +1432,10 @@
             "type": "input",
             "inputId": "INP_ADORA_JAC_OUBI",
             "label": "オウビ",
+            "gridSpan": 6,
             "config": {
-              "directInput": false
+              "directInput": false,
+              "compact": true
             },
             "widget": "counter"
           },
@@ -1411,8 +1443,10 @@
             "type": "input",
             "inputId": "INP_ADORA_JAC_JOKER",
             "label": "ジョーカー",
+            "gridSpan": 6,
             "config": {
-              "directInput": false
+              "directInput": false,
+              "compact": true
             },
             "widget": "counter"
           },
@@ -1420,8 +1454,10 @@
             "type": "input",
             "inputId": "INP_ADORA_JAC_BENIMARU",
             "label": "紅丸",
+            "gridSpan": 6,
             "config": {
-              "directInput": false
+              "directInput": false,
+              "compact": true
             },
             "widget": "counter"
           },
@@ -1429,8 +1465,10 @@
             "type": "input",
             "inputId": "INP_ADORA_JAC_IRIS",
             "label": "アイリス",
+            "gridSpan": 6,
             "config": {
-              "directInput": false
+              "directInput": false,
+              "compact": true
             },
             "widget": "counter"
           }
@@ -1439,7 +1477,7 @@
       {
         "id": "AUTO_EVIDENCE",
         "title": "設定確定・否定情報",
-        "displayOrder": 8,
+        "displayOrder": 7,
         "items": [
           {
             "type": "input",

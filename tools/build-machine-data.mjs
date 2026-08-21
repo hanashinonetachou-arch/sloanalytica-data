@@ -92,9 +92,23 @@ function buildFeature(rf,sf,inputIds){
     base.denominatorAdjustments=sf.denominatorAdjustments;
   }
   if(rf.candidateModel==="binomial" || rf.candidateModel==="poisson"){
-    if(!sf.numeratorInputId||!sf.denominatorInputId) fail(`${sf.featureId}: numeratorInputId/denominatorInputId required`);
-    if(!inputIds.has(sf.numeratorInputId)||!inputIds.has(sf.denominatorInputId)) fail(`${sf.featureId}: unknown input mapping`);
-    base.numeratorInputId=sf.numeratorInputId; base.denominatorInputId=sf.denominatorInputId;
+    const numeratorInputIds=Array.isArray(sf.numeratorInputIds)?sf.numeratorInputIds:[];
+    const usesNumeratorSum=sf.inputTransform==="sum_inputs_to_numerator";
+    const usesDenominatorSum=sf.inputTransform==="sum_inputs_to_trials";
+    if(!sf.numeratorInputId) fail(`${sf.featureId}: numeratorInputId required`);
+    if(!inputIds.has(sf.numeratorInputId)) fail(`${sf.featureId}: unknown numerator input`);
+    if(usesNumeratorSum){
+      if(numeratorInputIds.length<2||numeratorInputIds.some(id=>!inputIds.has(id))) fail(`${sf.featureId}: invalid numeratorInputIds`);
+      base.numeratorInputIds=[...numeratorInputIds];
+    }
+    if(usesDenominatorSum){
+      if(!Array.isArray(sf.denominatorInputIds)||sf.denominatorInputIds.length<2||sf.denominatorInputIds.some(id=>!inputIds.has(id))) fail(`${sf.featureId}: invalid denominatorInputIds`);
+      base.denominatorInputIds=[...sf.denominatorInputIds];
+    } else {
+      if(!sf.denominatorInputId||!inputIds.has(sf.denominatorInputId)) fail(`${sf.featureId}: denominatorInputId required/unknown`);
+      base.denominatorInputId=sf.denominatorInputId;
+    }
+    base.numeratorInputId=sf.numeratorInputId;
     if(base.displayFormat==null) base.displayFormat="ratio_1_over_n";
     base.probabilities=Object.fromEntries(Object.entries(rf.settingValues??{}).map(([s,v])=>[s,v.probability]).filter(([,p])=>Number.isFinite(p)));
   } else if(rf.candidateModel==="multinomial"){
