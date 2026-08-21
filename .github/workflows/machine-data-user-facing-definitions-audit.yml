@@ -1,0 +1,31 @@
+name: MachineData User-facing Definitions Audit
+
+on:
+  pull_request:
+    branches:
+      - prototype-multi-machine
+    paths:
+      - 'research/**/selection-data.json'
+      - 'machines/**/machine-package.json'
+      - 'tools/audit-machine-data-user-facing-definitions.mjs'
+      - '.github/workflows/machine-data-user-facing-definitions-audit.yml'
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Run advisory audit
+        run: |
+          node tools/audit-machine-data-user-facing-definitions.mjs
+          cat reports/machine-data-user-facing-definitions-audit-v1.md
+      - name: Upload audit report
+        uses: actions/upload-artifact@v4
+        with:
+          name: machine-data-user-facing-definitions-audit
+          path: |
+            reports/machine-data-user-facing-definitions-audit-v1.json
+            reports/machine-data-user-facing-definitions-audit-v1.md
