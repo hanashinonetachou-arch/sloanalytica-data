@@ -1,7 +1,7 @@
 {
   "schemaVersion": "selection-data-v1",
   "machineId": "S_BAHAMA_A3_30",
-  "machineDataVersion": "0.1.0",
+  "machineDataVersion": "0.1.1",
   "inputs": [
     {
       "id": "INP_NORMAL_GAMES",
@@ -53,21 +53,12 @@
     {
       "researchFeatureId": "RF_BONUS",
       "featureId": "FEAT_BONUS",
-      "adoptionCategory": "INCLUDE_PRIMARY",
-      "numeratorInputId": "INP_BONUS",
-      "denominatorInputId": "INP_NORMAL_GAMES",
+      "adoptionCategory": "EXCLUDE",
       "minimumSample": 1,
       "sampleRecommendation": 7000,
       "weight": 1,
       "displayFormat": "ratio_1_over_n",
-      "difficultyExposure": {
-        "mode": "per_game",
-        "factor": 1,
-        "quality": "EXACT",
-        "basisId": "NORMAL_GAMES"
-      },
-      "difficultyParticipation": "INCLUDE",
-      "userReason": "完全確率型でボーナス合成に段階差があるため採用。"
+      "rejectionReason": "ロングフリーズを含むボーナス内訳Featureへ統合。"
     },
     {
       "researchFeatureId": "RF_CHERRY3",
@@ -110,21 +101,12 @@
     {
       "researchFeatureId": "RF_FREEZE",
       "featureId": "FEAT_FREEZE",
-      "adoptionCategory": "INCLUDE_SUPPORT",
-      "numeratorInputId": "INP_FREEZE",
-      "denominatorInputId": "INP_NORMAL_GAMES",
+      "adoptionCategory": "EXCLUDE",
       "minimumSample": 1,
       "sampleRecommendation": 7000,
       "weight": 1,
       "displayFormat": "ratio_1_over_n",
-      "difficultyExposure": {
-        "mode": "per_game",
-        "factor": 1,
-        "quality": "EXACT",
-        "basisId": "NORMAL_GAMES"
-      },
-      "difficultyParticipation": "INCLUDE",
-      "userReason": "極低頻度だが設定差が非常に大きく発生を明確に観測できるため、低頻度だけを理由に除外せず採用。"
+      "rejectionReason": "ボーナス合成に含まれるため単独採用すると二重計上。ボーナス内訳Featureへ統合。"
     },
     {
       "researchFeatureId": "RF_BIG",
@@ -149,6 +131,33 @@
       "featureId": "FEAT_COMMON1",
       "adoptionCategory": "EXCLUDE",
       "rejectionReason": "停止形だけでの継続的な正確カウントが難しい。"
+    },
+    {
+      "researchFeatureId": "RF_BONUS_FREEZE_OUTCOME",
+      "featureId": "FEAT_BONUS_FREEZE_OUTCOME",
+      "adoptionCategory": "INCLUDE_PRIMARY",
+      "numeratorInputId": "INP_FREEZE",
+      "denominatorInputId": "INP_NORMAL_GAMES",
+      "categoryInputIds": [
+        "INP_BONUS"
+      ],
+      "categorySubtractInputIds": {
+        "INP_BONUS": [
+          "INP_FREEZE"
+        ]
+      },
+      "minimumSample": 1,
+      "sampleRecommendation": 7000,
+      "weight": 1,
+      "modelTypeOverride": "marginal_multinomial",
+      "difficultyParticipation": "INCLUDE",
+      "difficultyExposure": {
+        "mode": "per_game",
+        "factor": 1,
+        "quality": "EXACT",
+        "basisId": "NORMAL_GAMES"
+      },
+      "userReason": "ボーナス合成とロングフリーズを排他的な内訳として一体評価します。7000Gでも設定6ならフリーズ発生余地はありますが、単独で強い判別要素とはせずボーナス情報の一部として扱います。"
     }
   ],
   "rejectedElements": [
