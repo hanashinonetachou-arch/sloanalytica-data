@@ -36,23 +36,6 @@ jobs:
         with:
           node-version: '22'
 
-      - name: Apply Fire Force ending-screen migration
-        if: github.event_name == 'pull_request' && github.event.pull_request.head.ref == 'fix/enen-ending-explicit-default-20260821'
-        shell: bash
-        run: |
-          set -euo pipefail
-          node tools/apply-enen-ending-explicit-default-20260821.mjs
-          npm run machine:batch -- L_ENEN_NO_SHOUBOUTAI_JG
-          npm run machine:publish:batch -- L_ENEN_NO_SHOUBOUTAI_JG --apply
-          npm test
-          npm run audit
-          npm run audit:ui-service-names
-          git config user.name 'github-actions[bot]'
-          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add -- research/L_ENEN_NO_SHOUBOUTAI_JG/selection-data.json research/L_ENEN_NO_SHOUBOUTAI_JG/statistics-report.json research/L_ENEN_NO_SHOUBOUTAI_JG/difficulty-report.json machines/L_ENEN_NO_SHOUBOUTAI_JG/machine-package.json tools/build-machine-data.mjs catalog.json difficulty-catalog.json machine-registry.json reports/batch-machine-pipeline-report.json
-          git diff --cached --quiet || git commit -m 'Refine Fire Force ending-screen inputs'
-          git push origin HEAD:${{ github.event.pull_request.head.ref }}
-
       - name: Resolve changed stages
         id: stages
         shell: bash
