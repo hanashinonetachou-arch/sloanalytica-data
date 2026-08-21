@@ -52,7 +52,8 @@
         "displayOrder": 10,
         "description": "着席時にデータカウンターで確認した累計ゲーム数です。店舗・カウンター仕様がBB中を通常ゲームとして加算するなど、公開BB初当り確率の分母と合わないと判断した場合は入力しないでください。",
         "defaultValue": 0,
-        "minimum": 0
+        "minimum": 0,
+        "observationScope": "PREDECESSOR_SNAPSHOT"
       },
       {
         "id": "INP_SEATED_BB_COUNT",
@@ -63,7 +64,8 @@
         "displayOrder": 11,
         "description": "着席時にデータカウンターで確認したBB初当り回数を入力します。",
         "defaultValue": 0,
-        "minimum": 0
+        "minimum": 0,
+        "observationScope": "PREDECESSOR_SNAPSHOT"
       },
       {
         "id": "INP_ROLE_GAMES",
@@ -188,8 +190,8 @@
           "weight": 1
         },
         "displayFormat": "ratio_1_over_n",
-        "numeratorInputId": "INP_AT_INITIAL_COUNT",
         "denominatorInputId": "INP_NORMAL_GAMES",
+        "numeratorInputId": "INP_AT_INITIAL_COUNT",
         "probabilities": {
           "SET_1": 0.002608242044861763,
           "SET_2": 0.002699055330634278,
@@ -215,8 +217,8 @@
           "weight": 1
         },
         "displayFormat": "ratio_1_over_n",
-        "numeratorInputId": "INP_SEATED_BB_COUNT",
         "denominatorInputId": "INP_SEATED_GAMES",
+        "numeratorInputId": "INP_SEATED_BB_COUNT",
         "probabilities": {
           "SET_1": 0.002608242044861763,
           "SET_2": 0.002699055330634278,
@@ -239,11 +241,11 @@
         "minimumSample": 1,
         "sampleRecommendation": 7000,
         "reliabilityProfile": {
-          "weight": 0.8
+          "weight": 1
         },
         "displayFormat": "ratio_1_over_n",
-        "numeratorInputId": "INP_WATERMELON_COUNT",
         "denominatorInputId": "INP_ROLE_GAMES",
+        "numeratorInputId": "INP_WATERMELON_COUNT",
         "probabilities": {
           "SET_1": 0.011614401858304297,
           "SET_2": 0.011668611435239206,
@@ -422,27 +424,9 @@
   "ui": {
     "sections": [
       {
-        "id": "AUTO_PRIMARY",
-        "displayOrder": 1,
-        "items": [
-          {
-            "type": "input",
-            "inputId": "INP_NORMAL_GAMES",
-            "label": "通常ゲーム数",
-            "widget": "number"
-          },
-          {
-            "type": "input",
-            "inputId": "INP_AT_INITIAL_COUNT",
-            "label": "バトルボーナス初当り回数",
-            "widget": "counter"
-          }
-        ]
-      },
-      {
         "id": "AUTO_PREDECESSOR",
         "title": "着席時データ",
-        "displayOrder": 2,
+        "displayOrder": 1,
         "items": [
           {
             "type": "input",
@@ -454,6 +438,24 @@
             "type": "input",
             "inputId": "INP_SEATED_BB_COUNT",
             "label": "着席時バトルボーナス初当り回数",
+            "widget": "counter"
+          }
+        ]
+      },
+      {
+        "id": "AUTO_PRIMARY",
+        "displayOrder": 2,
+        "items": [
+          {
+            "type": "input",
+            "inputId": "INP_NORMAL_GAMES",
+            "label": "通常ゲーム数",
+            "widget": "number"
+          },
+          {
+            "type": "input",
+            "inputId": "INP_AT_INITIAL_COUNT",
+            "label": "バトルボーナス初当り回数",
             "widget": "counter"
           }
         ]
@@ -556,7 +558,7 @@
       {
         "featureId": "FEAT_WATERMELON_COMBINED",
         "name": "弱・強スイカ合算",
-        "reason": "実機連動機能から確認しやすく、長時間ほど情報が蓄積するため補助採用。",
+        "reason": "実機連動機能で継続的に取得できる小役出現率で、専用の集計ゲーム数を分母として直接評価できるため採用。",
         "requiredTrials": {
           "value": 38434,
           "unit": "遊技ゲーム"
