@@ -1,0 +1,224 @@
+{
+  "schemaVersion": "selection-data-v1",
+  "machineId": "L_BOFURI_FN",
+  "machineDataVersion": "0.1.0",
+  "inputs": [
+    {
+      "id": "INP_NORMAL_GAMES",
+      "name": "通常ゲーム数",
+      "type": "integer",
+      "category": "PRIMARY",
+      "displayOrder": 1,
+      "defaultValue": 0,
+      "unit": "G"
+    },
+    {
+      "id": "INP_INITIAL",
+      "name": "ボーナス初当り回数",
+      "type": "counter",
+      "category": "PRIMARY",
+      "displayOrder": 2,
+      "defaultValue": 0,
+      "unit": "回"
+    },
+    {
+      "id": "INP_BELL_GAMES",
+      "name": "上段5枚ベル対象ゲーム数",
+      "type": "integer",
+      "category": "SMALL_ROLE",
+      "displayOrder": 10,
+      "defaultValue": 0,
+      "unit": "G",
+      "description": "擬似遊技を含む総Gをそのまま分母にしないでください。"
+    },
+    {
+      "id": "INP_UPPER_BELL",
+      "name": "上段5枚ベル回数",
+      "type": "counter",
+      "category": "SMALL_ROLE",
+      "displayOrder": 11,
+      "defaultValue": 0,
+      "unit": "回"
+    },
+    {
+      "id": "INP_HYDRA_DIRECT",
+      "name": "ヒドラ目契機EPBB直撃回数",
+      "type": "counter",
+      "category": "DIRECT",
+      "displayOrder": 20,
+      "defaultValue": 0,
+      "unit": "回"
+    },
+    {
+      "id": "INP_BET_TRIALS",
+      "name": "BET高確抽選対象の初当り回数",
+      "type": "counter",
+      "category": "BET",
+      "displayOrder": 30,
+      "defaultValue": 0,
+      "unit": "回",
+      "description": "最大天井契機・EPBB後など設定差抽選の対象外を除外。"
+    },
+    {
+      "id": "INP_BET_HIGH",
+      "name": "BET高確当選回数",
+      "type": "counter",
+      "category": "BET",
+      "displayOrder": 31,
+      "defaultValue": 0,
+      "unit": "回"
+    }
+  ],
+  "features": [
+    {
+      "researchFeatureId": "RF_INITIAL",
+      "featureId": "FEAT_INITIAL",
+      "adoptionCategory": "INCLUDE_PRIMARY",
+      "numeratorInputId": "INP_INITIAL",
+      "denominatorInputId": "INP_NORMAL_GAMES",
+      "minimumSample": 1,
+      "sampleRecommendation": 7000,
+      "weight": 1,
+      "displayFormat": "ratio_1_over_n",
+      "difficultyExposure": {
+        "mode": "per_game",
+        "factor": 1,
+        "quality": "EXACT",
+        "basisId": "NORMAL_GAMES"
+      },
+      "difficultyParticipation": "INCLUDE",
+      "userReason": "初当りに大きな段階差があるため採用。"
+    },
+    {
+      "researchFeatureId": "RF_UPPER_BELL",
+      "featureId": "FEAT_UPPER_BELL",
+      "adoptionCategory": "INCLUDE_SUPPORT",
+      "numeratorInputId": "INP_UPPER_BELL",
+      "denominatorInputId": "INP_BELL_GAMES",
+      "minimumSample": 1,
+      "sampleRecommendation": 7000,
+      "weight": 1,
+      "displayFormat": "ratio_1_over_n",
+      "userReason": "高頻度で高設定ほど優遇され、十分な試行を得やすいため採用。"
+    },
+    {
+      "researchFeatureId": "RF_HYDRA_DIRECT",
+      "featureId": "FEAT_HYDRA_DIRECT",
+      "adoptionCategory": "INCLUDE_SUPPORT",
+      "numeratorInputId": "INP_HYDRA_DIRECT",
+      "denominatorInputId": "INP_NORMAL_GAMES",
+      "minimumSample": 1,
+      "sampleRecommendation": 7000,
+      "weight": 1,
+      "displayFormat": "ratio_1_over_n",
+      "difficultyExposure": {
+        "mode": "per_game",
+        "factor": 1,
+        "quality": "EXACT",
+        "basisId": "NORMAL_GAMES"
+      },
+      "difficultyParticipation": "INCLUDE",
+      "userReason": "低頻度だが設定差が非常に大きく、発生時に明確に識別できるため採用。"
+    },
+    {
+      "researchFeatureId": "RF_BET_HIGH",
+      "featureId": "FEAT_BET_HIGH",
+      "adoptionCategory": "INCLUDE_SUPPORT",
+      "numeratorInputId": "INP_BET_HIGH",
+      "denominatorInputId": "INP_BET_TRIALS",
+      "minimumSample": 1,
+      "sampleRecommendation": 7000,
+      "weight": 1,
+      "displayFormat": "percent",
+      "userReason": "対象条件を除外して数えれば初当り後の条件付き設定差として有用。"
+    },
+    {
+      "researchFeatureId": "RF_CZ_LENGTH",
+      "featureId": "FEAT_CZ_LENGTH",
+      "adoptionCategory": "EXCLUDE",
+      "rejectionReason": "20G/30G選択に設定差。無限や早期当選による観測打ち切りを含むため単純集計は不可。"
+    },
+    {
+      "researchFeatureId": "RF_ZONE_CZ",
+      "featureId": "FEAT_ZONE_CZ",
+      "adoptionCategory": "EXCLUDE",
+      "rejectionReason": "初当りと同一フローを分解した情報で、同時採用は二重計上になる。"
+    },
+    {
+      "researchFeatureId": "RF_300_INFINITY",
+      "featureId": "FEAT_300_INFINITY",
+      "adoptionCategory": "EXCLUDE",
+      "rejectionReason": "CZ中の早期ボーナスで無限か判別できないケースがある。"
+    },
+    {
+      "researchFeatureId": "RF_HIGH_RARE_CZ",
+      "featureId": "FEAT_HIGH_RARE_CZ",
+      "adoptionCategory": "EXCLUDE",
+      "rejectionReason": "内部高確の正確な滞在ゲーム・成立役分母が必要。"
+    },
+    {
+      "researchFeatureId": "RF_MIDDLE_CHERRY",
+      "featureId": "FEAT_MIDDLE_CHERRY",
+      "adoptionCategory": "EXCLUDE",
+      "rejectionReason": "複数公開ソースで設定3～5の数値に競合があり未解決。"
+    }
+  ],
+  "rejectedElements": [],
+  "evidence": [],
+  "evidenceUi": {
+    "groups": [
+      {
+        "groupId": "SETTING_EVIDENCE",
+        "label": "確認した設定確定・否定情報",
+        "selectionMode": "single",
+        "normalizationMode": "ALLOWED_SETTINGS",
+        "options": [
+          {
+            "value": "EVIDENCE_1",
+            "label": "ボーナス終了画面・キャラ紹介等の設定4以上系",
+            "allowedSettings": [
+              "SET_4",
+              "SET_5",
+              "SET_6"
+            ],
+            "sourceEvidenceIds": [
+              "RE_456"
+            ]
+          },
+          {
+            "value": "EVIDENCE_2",
+            "label": "虹系/設定6確定パターン",
+            "allowedSettings": [
+              "SET_6"
+            ],
+            "sourceEvidenceIds": [
+              "RE_6"
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "evidenceReview": {
+    "policyVersion": 1,
+    "exclusions": []
+  },
+  "uiCategoryLabels": {
+    "PRIMARY": "初当り",
+    "SMALL_ROLE": "小役",
+    "DIRECT": "直撃",
+    "BET": "BET高確"
+  },
+  "difficultyAnalysis": {
+    "targetGameBasis": {
+      "basisId": "NORMAL_GAMES",
+      "label": "通常ゲーム数",
+      "quality": "EXACT"
+    },
+    "calibrationAllowedExposureQualities": [
+      "EXACT",
+      "DERIVED",
+      "ESTIMATED"
+    ]
+  }
+}
