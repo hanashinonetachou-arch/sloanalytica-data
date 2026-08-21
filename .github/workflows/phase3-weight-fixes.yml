@@ -1,0 +1,47 @@
+name: Phase 3 Weight Fixes
+
+on:
+  pull_request:
+    branches:
+      - prototype-multi-machine
+    paths:
+      - 'scripts/apply-phase3-weight-fixes.mjs'
+      - '.github/workflows/phase3-weight-fixes.yml'
+
+jobs:
+  apply-and-verify:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: ${{ github.event.pull_request.head.ref }}
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Apply weight fixes
+        run: node scripts/apply-phase3-weight-fixes.mjs
+      - name: Build affected machines
+        run: |
+          printf '%s\n' L_HOKUTO_AD_XR L_SAO_B2 S_KABANERI_ZR L_MUSHOKU_TENSEI_NM > /tmp/machine_ids.txt
+          npm run machine:batch -- --file /tmp/machine_ids.txt
+      - name: Verify repository
+        run: |
+          npm test
+          npm run audit
+          npm run audit:ui-service-names
+          node tools/audit-machine-data-statistics-v3.mjs . reports/machine-data-statistical-audit-after-phase3-weights.json reports/machine-data-statistical-audit-after-phase3-weights.md
+          node tools/audit-machine-data-nondefault-weights.mjs
+          cat reports/machine-data-nondefault-weight-audit-v2.md
+      - name: Commit generated changes
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add research machines catalog.json difficulty-catalog.json reports/machine-data-statistical-audit-after-phase3-weights.json reports/machine-data-statistical-audit-after-phase3-weights.md
+          if git diff --cached --quiet; then exit 0; fi
+          git commit -m 'fix: apply Phase 3 weight corrections'
+          git push origin HEAD:${{ github.event.pull_request.head.ref }}
