@@ -1,20 +1,178 @@
 {
-  "schemaVersion":"selection-data-v1",
-  "machineId":"L_BAKI_L3",
-  "machineDataVersion":"0.1.0",
-  "inputs":[
-    {"id":"INP_NORMAL_GAMES","name":"通常ゲーム数","type":"integer","category":"PRIMARY","unit":"G","displayOrder":1,"defaultValue":0},
-    {"id":"INP_AT_INITIAL_COUNT","name":"AT初当り回数","type":"counter","category":"PRIMARY","unit":"回","displayOrder":2,"defaultValue":0},
-    {"id":"INP_HANMA5_TRIAL_COUNT","name":"範馬メーター5個点灯回数","type":"counter","category":"HANMA","unit":"回","displayOrder":10,"defaultValue":0},
-    {"id":"INP_HANMA5_CZ_COUNT","name":"5個点灯からCZ当選回数","type":"counter","category":"HANMA","unit":"回","displayOrder":11,"defaultValue":0}
+  "schemaVersion": "selection-data-v1",
+  "machineId": "L_BAKI_L3",
+  "machineDataVersion": "0.1.1",
+  "inputs": [
+    {
+      "id": "INP_NORMAL_GAMES",
+      "name": "通常ゲーム数",
+      "type": "integer",
+      "category": "PRIMARY",
+      "unit": "G",
+      "displayOrder": 1,
+      "defaultValue": 0
+    },
+    {
+      "id": "INP_AT_INITIAL_COUNT",
+      "name": "AT初当り回数",
+      "type": "counter",
+      "category": "PRIMARY",
+      "unit": "回",
+      "displayOrder": 2,
+      "defaultValue": 0
+    },
+    {
+      "id": "INP_HANMA5_TRIAL_COUNT",
+      "name": "範馬メーター5個点灯回数",
+      "type": "counter",
+      "category": "HANMA",
+      "unit": "回",
+      "displayOrder": 10,
+      "defaultValue": 0
+    },
+    {
+      "id": "INP_HANMA5_CZ_COUNT",
+      "name": "5個点灯からCZ当選回数",
+      "type": "counter",
+      "category": "HANMA",
+      "unit": "回",
+      "displayOrder": 11,
+      "defaultValue": 0
+    }
   ],
-  "features":[
-    {"researchFeatureId":"RF_CZ_INITIAL","featureId":"FEAT_CZ_INITIAL","adoptionCategory":"EXCLUDE","rejectionReason":"AT初当りと重複し、設定差も小さい。"},
-    {"researchFeatureId":"RF_AT_INITIAL","featureId":"FEAT_AT_INITIAL","adoptionCategory":"INCLUDE_PRIMARY","numeratorInputId":"INP_AT_INITIAL_COUNT","denominatorInputId":"INP_NORMAL_GAMES","minimumSample":1,"sampleRecommendation":7000,"weight":1.0,"displayFormat":"ratio_1_over_n","difficultyExposure":{"mode":"per_game","factor":1.0,"quality":"ESTIMATED","basisId":"NORMAL_GAMES"},"difficultyParticipation":"INCLUDE","userReason":"AT初当りを主軸として採用。"},
-    {"researchFeatureId":"RF_HANMA5_CZ","featureId":"FEAT_HANMA5_CZ","adoptionCategory":"INCLUDE_PRIMARY","numeratorInputId":"INP_HANMA5_CZ_COUNT","denominatorInputId":"INP_HANMA5_TRIAL_COUNT","minimumSample":1,"sampleRecommendation":20,"weight":1.0,"displayFormat":"percentage","difficultyParticipation":"INCLUDE","userReason":"設定1と6で20%→35%と差が大きい条件付き抽選を採用。"},
-    {"researchFeatureId":"RF_AT_DIRECT","featureId":"FEAT_AT_DIRECT","adoptionCategory":"EXCLUDE","rejectionReason":"設定差は大きいが極端に低頻度。"}
+  "features": [
+    {
+      "researchFeatureId": "RF_CZ_INITIAL",
+      "featureId": "FEAT_CZ_INITIAL",
+      "adoptionCategory": "EXCLUDE",
+      "rejectionReason": "AT初当りと重複し、設定差も小さい。"
+    },
+    {
+      "researchFeatureId": "RF_AT_INITIAL",
+      "featureId": "FEAT_AT_INITIAL",
+      "adoptionCategory": "INCLUDE_PRIMARY",
+      "numeratorInputId": "INP_AT_INITIAL_COUNT",
+      "denominatorInputId": "INP_NORMAL_GAMES",
+      "minimumSample": 1,
+      "sampleRecommendation": 7000,
+      "weight": 1,
+      "displayFormat": "ratio_1_over_n",
+      "difficultyExposure": {
+        "mode": "per_game",
+        "factor": 1,
+        "quality": "ESTIMATED",
+        "basisId": "NORMAL_GAMES"
+      },
+      "difficultyParticipation": "INCLUDE",
+      "userReason": "AT初当りを主軸として採用。"
+    },
+    {
+      "researchFeatureId": "RF_HANMA5_CZ",
+      "featureId": "FEAT_HANMA5_CZ",
+      "adoptionCategory": "INCLUDE_PRIMARY",
+      "numeratorInputId": "INP_HANMA5_CZ_COUNT",
+      "denominatorInputId": "INP_HANMA5_TRIAL_COUNT",
+      "minimumSample": 1,
+      "sampleRecommendation": 20,
+      "weight": 1,
+      "displayFormat": "percentage",
+      "difficultyParticipation": "EXCLUDE",
+      "userReason": "設定1と6で20%→35%と差が大きい条件付き抽選を採用。",
+      "difficultyExclusionReason": "範馬メーター5個到達という抽選機会をゲーム数から一意に導出できないため。"
+    },
+    {
+      "researchFeatureId": "RF_AT_DIRECT",
+      "featureId": "FEAT_AT_DIRECT",
+      "adoptionCategory": "EXCLUDE",
+      "rejectionReason": "設定差は大きいが極端に低頻度。"
+    }
   ],
-  "evidence":[],
-  "evidenceUi":{"groups":[{"groupId":"SETTING_FLOOR","label":"確認した設定下限","selectionMode":"single","normalizationMode":"ALLOWED_SETTINGS","options":[{"value":"SET_2_OR_HIGHER","label":"設定2以上","allowedSettings":["SET_2","SET_3","SET_4","SET_5","SET_6"],"sourceEvidenceIds":["RE_AT_END_2PLUS"]},{"value":"SET_3_OR_HIGHER","label":"設定3以上","allowedSettings":["SET_3","SET_4","SET_5","SET_6"],"sourceEvidenceIds":["RE_PAYOUT_333_3PLUS"]},{"value":"SET_4_OR_HIGHER","label":"設定4以上","allowedSettings":["SET_4","SET_5","SET_6"],"sourceEvidenceIds":["RE_PAYOUT_456_4PLUS","RE_AT_END_4PLUS"]},{"value":"SET_5_OR_HIGHER","label":"設定5以上","allowedSettings":["SET_5","SET_6"],"sourceEvidenceIds":["RE_PAYOUT_555_5PLUS","RE_AT_END_5PLUS"]},{"value":"SET_6","label":"設定6","allowedSettings":["SET_6"],"sourceEvidenceIds":["RE_PAYOUT_666_6","RE_AT_END_6"]}]}]},
-  "difficultyAnalysis":{"targetGameBasis":{"basisId":"NORMAL_GAMES","label":"通常ゲーム数","quality":"ESTIMATED"},"calibrationAllowedExposureQualities":["EXACT","DERIVED","ESTIMATED"]}
+  "evidence": [],
+  "evidenceUi": {
+    "groups": [
+      {
+        "groupId": "SETTING_FLOOR",
+        "label": "確認した設定下限",
+        "selectionMode": "single",
+        "normalizationMode": "ALLOWED_SETTINGS",
+        "options": [
+          {
+            "value": "SET_2_OR_HIGHER",
+            "label": "設定2以上",
+            "allowedSettings": [
+              "SET_2",
+              "SET_3",
+              "SET_4",
+              "SET_5",
+              "SET_6"
+            ],
+            "sourceEvidenceIds": [
+              "RE_AT_END_2PLUS"
+            ]
+          },
+          {
+            "value": "SET_3_OR_HIGHER",
+            "label": "設定3以上",
+            "allowedSettings": [
+              "SET_3",
+              "SET_4",
+              "SET_5",
+              "SET_6"
+            ],
+            "sourceEvidenceIds": [
+              "RE_PAYOUT_333_3PLUS"
+            ]
+          },
+          {
+            "value": "SET_4_OR_HIGHER",
+            "label": "設定4以上",
+            "allowedSettings": [
+              "SET_4",
+              "SET_5",
+              "SET_6"
+            ],
+            "sourceEvidenceIds": [
+              "RE_PAYOUT_456_4PLUS",
+              "RE_AT_END_4PLUS"
+            ]
+          },
+          {
+            "value": "SET_5_OR_HIGHER",
+            "label": "設定5以上",
+            "allowedSettings": [
+              "SET_5",
+              "SET_6"
+            ],
+            "sourceEvidenceIds": [
+              "RE_PAYOUT_555_5PLUS",
+              "RE_AT_END_5PLUS"
+            ]
+          },
+          {
+            "value": "SET_6",
+            "label": "設定6",
+            "allowedSettings": [
+              "SET_6"
+            ],
+            "sourceEvidenceIds": [
+              "RE_PAYOUT_666_6",
+              "RE_AT_END_6"
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "difficultyAnalysis": {
+    "targetGameBasis": {
+      "basisId": "NORMAL_GAMES",
+      "label": "通常ゲーム数",
+      "quality": "ESTIMATED"
+    },
+    "calibrationAllowedExposureQualities": [
+      "EXACT",
+      "DERIVED",
+      "ESTIMATED"
+    ]
+  }
 }

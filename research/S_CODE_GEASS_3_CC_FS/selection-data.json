@@ -1,7 +1,7 @@
 {
   "schemaVersion": "selection-data-v1",
   "machineId": "S_CODE_GEASS_3_CC_FS",
-  "machineDataVersion": "0.1.7",
+  "machineDataVersion": "0.1.8",
   "inputs": [
     {
       "id": "INP_NORMAL_GAMES",
@@ -98,13 +98,14 @@
     },
     {
       "id": "INP_AT_END_SET2_COUNT",
-      "name": "設定2以上濃厚",
+      "name": "設定1否定",
       "category": "PRIMARY_AT_END",
       "type": "counter",
       "unit": "回",
       "displayOrder": 34,
       "inferenceRole": "INCLUDE_SUPPORT",
-      "defaultValue": 0
+      "defaultValue": 0,
+      "description": "ナナリー・スザク・ルルーシュの終了画面が出た回数。1回でも出現すれば設定1を否定します。"
     },
     {
       "id": "INP_AT_END_SET4_COUNT",
@@ -114,7 +115,8 @@
       "unit": "回",
       "displayOrder": 35,
       "inferenceRole": "INCLUDE_SUPPORT",
-      "defaultValue": 0
+      "defaultValue": 0,
+      "description": "ルルーシュ＋ヒロイン3人の終了画面が出た回数。1回でも出現すれば設定4以上。"
     },
     {
       "id": "INP_AT_END_SET5_COUNT",
@@ -124,7 +126,8 @@
       "unit": "回",
       "displayOrder": 36,
       "inferenceRole": "INCLUDE_SUPPORT",
-      "defaultValue": 0
+      "defaultValue": 0,
+      "description": "黒の騎士団の終了画面が出た回数。1回でも出現すれば設定5以上。"
     },
     {
       "id": "INP_AT_END_SET6_COUNT",
@@ -134,7 +137,8 @@
       "unit": "回",
       "displayOrder": 37,
       "inferenceRole": "INCLUDE_SUPPORT",
-      "defaultValue": 0
+      "defaultValue": 0,
+      "description": "亡国のアキトの終了画面が出た回数。1回でも出現すれば設定6。"
     },
     {
       "id": "INP_TROPHY_SETTING_FLOOR",
@@ -204,7 +208,7 @@
       ],
       "difficultyExposure": {
         "mode": "per_game",
-        "factor": 1.0,
+        "factor": 1,
         "quality": "EXACT",
         "basisId": "NORMAL_AT_GAMES"
       },
@@ -224,28 +228,13 @@
       "numeratorInputId": "INP_INFINITE_AT_CC_COUNT",
       "denominatorInputId": "INP_RB_CC_HIGH_GAMES",
       "displayFormat": "ratio_1_over_n",
-      "difficultyParticipation": "INCLUDE",
-      "difficultyExposure": {
-        "mode": "setting_rate",
-        "trialsPerGameBySetting": {
-          "SET_1": 0.08919312498101709,
-          "SET_2": 0.09031662726454365,
-          "SET_3": 0.09445815088465273,
-          "SET_4": 0.1086588110775137,
-          "SET_5": 0.11933907164394388,
-          "SET_6": 0.12672908375856531
-        },
-        "quality": "ESTIMATED",
-        "basisId": "NORMAL_AT_GAMES",
-        "confidence": "MEDIUM",
-        "estimationBasis": "RB rate × expected usable portion of nominal 50G C.C.-high interval, truncated by intervening bonus using the setting-specific total bonus rate.",
-        "uncertaintyNote": "Exact interruption/reset behavior and any nonstandard continuation can shift eligible high-game exposure."
-      },
+      "difficultyParticipation": "EXCLUDE",
       "userReason": "設定1の1/993.0から設定6の1/331.0まで大きな設定差がある。",
       "requiredTrials": {
         "value": 3389,
         "unit": "RB後C.C.高確対象ゲーム"
-      }
+      },
+      "difficultyExclusionReason": "RB後C.C.高確の有効対象Gはゲーム数から一意に導出できないため。"
     },
     {
       "researchFeatureId": "RF04",
@@ -257,45 +246,22 @@
       "denominatorInputId": "INP_AT_END_DEFAULT_COUNT",
       "categoryInputIds": [
         "INP_AT_END_HIGH_WEAK_COUNT",
-        "INP_AT_END_HIGH_STRONG_COUNT",
-        "INP_AT_END_SET2_COUNT",
-        "INP_AT_END_SET4_COUNT",
-        "INP_AT_END_SET5_COUNT",
-        "INP_AT_END_SET6_COUNT"
+        "INP_AT_END_HIGH_STRONG_COUNT"
       ],
       "inputTransform": "sum_inputs_to_trials",
-      "difficultyParticipation": "INCLUDE",
-      "difficultyExposure": {
-        "mode": "setting_rate",
-        "trialsPerGameBySetting": {
-          "SET_1": 0.002984426194163184,
-          "SET_2": 0.0030119146257467705,
-          "SET_3": 0.0030856263892033364,
-          "SET_4": 0.0032590196883212673,
-          "SET_5": 0.0033923376923333717,
-          "SET_6": 0.0034854622987264775
-        },
-        "quality": "ESTIMATED",
-        "basisId": "NORMAL_AT_GAMES",
-        "confidence": "LOW_MEDIUM",
-        "estimationBasis": "Renewal approximation: each BB/HBB (~150G AT) or RB (~50G AT) is counted as an AT-session end only when no subsequent bonus occurs during its awarded AT window.",
-        "uncertaintyNote": "AT extension/carry-over details are simplified; this remains an estimated trial-rate model."
-      },
-      "userReason": "設定別の全分類振り分けが公開され、偶数示唆と高設定示唆の出現頻度を利用できる。",
+      "difficultyParticipation": "EXCLUDE",
+      "userReason": "AT終了画面のうち、デフォルト・偶数示唆・高設定示唆弱・強の4種類を条件付きMultinomialで評価。設定否定・設定確定画面はEvidenceへ分離し二重計上しません。",
       "denominatorInputIds": [
         "INP_AT_END_DEFAULT_COUNT",
         "INP_AT_END_EVEN_COUNT",
         "INP_AT_END_HIGH_WEAK_COUNT",
-        "INP_AT_END_HIGH_STRONG_COUNT",
-        "INP_AT_END_SET2_COUNT",
-        "INP_AT_END_SET4_COUNT",
-        "INP_AT_END_SET5_COUNT",
-        "INP_AT_END_SET6_COUNT"
+        "INP_AT_END_HIGH_STRONG_COUNT"
       ],
       "requiredTrials": {
         "value": 16,
         "unit": "AT終了画面"
-      }
+      },
+      "difficultyExclusionReason": "AT終了画面の試行回数はAT終了回数であり、ゲーム数から一意に導出できないため。"
     }
   ],
   "evidence": [
@@ -371,18 +337,14 @@
     },
     {
       "evidenceId": "EVI_AT_END_SET2",
-      "name": "終了画面：設定2以上",
-      "displayName": "終了画面で設定2以上濃厚を確認",
+      "name": "終了画面：設定1否定",
+      "displayName": "終了画面で設定1否定を確認",
       "inputId": "INP_AT_END_SET2_COUNT",
       "triggerValue": null,
-      "confirmedSettings": [
-        "SET_2",
-        "SET_3",
-        "SET_4",
-        "SET_5",
-        "SET_6"
+      "confirmedSettings": [],
+      "deniedSettings": [
+        "SET_1"
       ],
-      "deniedSettings": [],
       "legacyContractSource": "published_machine_data"
     },
     {
