@@ -1,3 +1,4 @@
+// trigger 2
 import fs from 'node:fs';
 const p='research/L_ENEN_NO_SHOUBOUTAI_JG/selection-data.json';
 const s=JSON.parse(fs.readFileSync(p,'utf8'));
