@@ -4,9 +4,6 @@ on:
   push:
     branches:
       - fix/reverify-10machines-20260821
-    paths:
-      - 'tools/apply-reverify-10machines-20260821.mjs'
-      - '.github/workflows/reverify-10machines-20260821.yml'
   pull_request:
     branches:
       - prototype-multi-machine
@@ -25,10 +22,10 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
-      - name: Inspect auto UI builder context
-        run: sed -n '680,725p' tools/build-machine-data.mjs
       - name: Apply reviewed source updates
         run: node tools/apply-reverify-10machines-20260821.mjs
+      - name: Apply permanent builder support
+        run: node tools/patch-builder-section-options-20260821.mjs
       - name: Validate and regenerate changed machines
         run: npm run machine:batch -- L_EUREKA_SEVEN4_HIEVO_KX L_ENEN_NO_SHOUBOUTAI_JG S_KABANERI_ZR S_HARD_BOILED_XX S_HYPER_RUSH_SLC8
       - name: Publish changed machines atomically
@@ -38,11 +35,11 @@ jobs:
           npm test
           npm run audit
           npm run audit:ui-service-names
-      - name: Commit generated changes
-        if: github.event_name != 'pull_request'
+      - name: Commit reviewed changes
+        if: github.event_name == 'push'
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add -- research/L_EUREKA_SEVEN4_HIEVO_KX research/L_ENEN_NO_SHOUBOUTAI_JG research/S_KABANERI_ZR research/S_HARD_BOILED_XX research/S_HYPER_RUSH_SLC8 machines/L_EUREKA_SEVEN4_HIEVO_KX machines/L_ENEN_NO_SHOUBOUTAI_JG machines/S_KABANERI_ZR machines/S_HARD_BOILED_XX machines/S_HYPER_RUSH_SLC8 catalog.json difficulty-catalog.json machine-registry.json reports/batch-machine-pipeline-report.json
+          git add -- tools/build-machine-data.mjs research/L_EUREKA_SEVEN4_HIEVO_KX research/L_ENEN_NO_SHOUBOUTAI_JG research/S_KABANERI_ZR research/S_HARD_BOILED_XX research/S_HYPER_RUSH_SLC8 machines/L_EUREKA_SEVEN4_HIEVO_KX machines/L_ENEN_NO_SHOUBOUTAI_JG machines/S_KABANERI_ZR machines/S_HARD_BOILED_XX machines/S_HYPER_RUSH_SLC8 catalog.json difficulty-catalog.json machine-registry.json reports/batch-machine-pipeline-report.json
           git diff --cached --quiet || git commit -m "Reverify 10-machine setting inference elements"
           git push origin HEAD:fix/reverify-10machines-20260821
