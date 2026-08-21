@@ -1,21 +1,13 @@
 import fs from 'node:fs';
 import path from 'node:path';
-import { execFileSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
-const BUILD = path.join(ROOT, 'build');
+const MACHINES = path.join(ROOT, 'machines');
 const REPORT_PATH = process.argv.includes('--json-out')
   ? path.resolve(ROOT, process.argv[process.argv.indexOf('--json-out') + 1])
   : null;
 
-const SERIOUS = new Set([
-  'DUPLICATE_NUMERATOR_DENOMINATOR',
-  'EVIDENCE_PROBABILITY_INPUT_OVERLAP',
-  'PREDECESSOR_DIFFICULTY_PARTICIPATION',
-]);
-
-const jp = x => JSON.stringify(x ?? '');
 const textOf = x => {
   if (x == null) return '';
   if (typeof x === 'string') return x;
@@ -25,14 +17,12 @@ const textOf = x => {
   return '';
 };
 
+const catalog = JSON.parse(fs.readFileSync(path.join(ROOT, 'catalog.json'), 'utf8'));
+const catalogById = new Map((catalog.machines ?? []).map((m, i) => [m.machineId, { ...m, catalogIndex:i }]));
 function registrationEpoch(machineId) {
-  const rel = `build/${machineId}`;
-  try {
-    const out = execFileSync('git', ['log', '--diff-filter=A', '--follow', '--format=%ct', '--', rel], {
-      cwd: ROOT, encoding: 'utf8', stdio: ['ignore','pipe','ignore'],
-    }).trim().split(/\r?\n/).filter(Boolean);
-    return out.length ? Number(out[out.length - 1]) : null;
-  } catch { return null; }
+  const addedAt = catalogById.get(machineId)?.addedAt;
+  const t = addedAt ? Date.parse(addedAt) : NaN;
+  return Number.isFinite(t) ? Math.floor(t / 1000) : null;
 }
 
 function probabilityValues(feature) {
@@ -68,7 +58,7 @@ function auditPackage(pkg, packagePath) {
   const findings = [];
   const add = (code, severity, feature, detail, confidence='HEURISTIC') => findings.push({code,severity,featureId:feature?.featureId ?? null,featureName:feature?.name ?? null,detail,confidence});
 
-  // 1) exact duplicate numerator/denominator pairs: same observed event effectively enters likelihood twice.
+  // Structural: exact same observed numerator/denominator enters the likelihood twice.
   const pairMap = new Map();
   for (const f of features.filter(x => x.probabilityEngineUsage !== false)) {
     const n = f.numeratorInputId ?? null;
@@ -79,14 +69,14 @@ function auditPackage(pkg, packagePath) {
     else pairMap.set(key, f.featureId ?? f.name ?? key);
   }
 
-  // 2) Evidence input reused inside a probability feature: strong same-observation double-counting risk.
+  // Structural: same input is both hard Evidence and part of a probability feature.
   for (const f of features.filter(x => x.probabilityEngineUsage !== false)) {
     for (const id of inputIdsReferenced(f)) {
       if (evidenceInputIds.has(id)) add('EVIDENCE_PROBABILITY_INPUT_OVERLAP','HIGH',f,`evidence input ${id} is referenced by probability feature`,'STRUCTURAL');
     }
   }
 
-  // 3) Aggregate/breakdown on same denominator. Name-based because valid independent categories also share exposure.
+  // Heuristic: aggregate and breakdown may be using the same exposure.
   const byDen = new Map();
   for (const f of features.filter(x => x.probabilityEngineUsage !== false && x.denominatorInputId)) {
     if (!byDen.has(f.denominatorInputId)) byDen.set(f.denominatorInputId, []);
@@ -102,7 +92,7 @@ function auditPackage(pkg, packagePath) {
     }
   }
 
-  // 4) Low-frequency, game-exposure features. We only use direct G denominator and direct scalar probabilities.
+  // Quantitative heuristic: direct per-game features that remain unlikely to appear even in 7000G.
   for (const f of features.filter(x => x.probabilityEngineUsage !== false)) {
     const den = inputById.get(f.denominatorInputId);
     const vals = probabilityValues(f).filter(v => v > 0);
@@ -110,12 +100,12 @@ function auditPackage(pkg, packagePath) {
     const denText = `${den.name ?? ''} ${den.unit ?? ''} ${den.id ?? ''}`;
     if (!/(ゲーム|G|GAME)/i.test(denText)) continue;
     const maxP = Math.max(...vals);
-    if (maxP >= 0.02) continue; // avoid multinomial percentages and common events
+    if (maxP >= 0.02) continue;
     const p7000 = 1 - Math.pow(1 - maxP, 7000);
     if (p7000 < 0.5) add('LOW_FREQUENCY_7000G','REVIEW',f,`best-setting P(>=1 by 7000G)≈${p7000.toFixed(3)} (max per-G p=${maxP})`,'QUANTITATIVE_HEURISTIC');
   }
 
-  // 5) Undefined first-hit semantics.
+  // Manifest v1.1: “initial hit” must say what actually counts.
   for (const f of features.filter(x => /初当り/.test(x.name ?? ''))) {
     const n = inputById.get(f.numeratorInputId);
     const combined = `${textOf(f)} ${textOf(n)}`;
@@ -123,7 +113,7 @@ function auditPackage(pkg, packagePath) {
     if (!hasDefinition) add('FIRST_HIT_UNDEFINED','REVIEW',f,'“初当り” is used without an explicit counting/inclusion/exclusion definition in the input/feature contract','HEURISTIC');
   }
 
-  // 6) Vague denominator wording without supporting instruction.
+  // Manifest v1.1: vague exposure needs explicit scope, not only a short label.
   for (const f of features.filter(x => x.probabilityEngineUsage !== false && x.denominatorInputId)) {
     const den = inputById.get(f.denominatorInputId);
     if (!den) continue;
@@ -133,7 +123,7 @@ function auditPackage(pkg, packagePath) {
     if (supportive.trim().length < 12) add('DENOMINATOR_EXPLANATION_WEAK','REVIEW',f,`denominator “${nm}” has little/no explicit scope explanation`,'HEURISTIC');
   }
 
-  // 7) State-dependent feature with a generic game denominator.
+  // State/condition terms paired with a generic G denominator deserve manual verification.
   for (const f of features.filter(x => x.probabilityEngineUsage !== false && x.denominatorInputId)) {
     const den = inputById.get(f.denominatorInputId);
     if (!den) continue;
@@ -144,7 +134,7 @@ function auditPackage(pkg, packagePath) {
     }
   }
 
-  // 8) Difficulty participation: only flag explicitly suspicious predecessor/seat-start observations that are not excluded.
+  // Predecessor/seat-start data must not define intrinsic machine Difficulty.
   for (const f of features) {
     const t = `${f.name ?? ''} ${f.featureId ?? ''} ${textOf(f)}`;
     if (!/(前任者|着席時|PREDECESSOR|SEAT_START)/i.test(t)) continue;
@@ -152,7 +142,7 @@ function auditPackage(pkg, packagePath) {
     if (dp && !/EXCLUDE/i.test(String(dp))) add('PREDECESSOR_DIFFICULTY_PARTICIPATION','HIGH',f,`predecessor/seat-start feature has difficulty participation=${dp}`,'STRUCTURAL');
   }
 
-  // 9) Weight inventory: unusual weights are not defects, but old policy drift should be visible.
+  // Policy inventory only: non-standard weights can be valid, but should have an intentional rationale.
   for (const f of features.filter(x => x.probabilityEngineUsage !== false)) {
     const w = f.reliabilityProfile?.weight;
     if (typeof w === 'number' && Number.isFinite(w) && ![0.35,0.5,0.8,0.9,1].includes(w)) {
@@ -162,11 +152,13 @@ function auditPackage(pkg, packagePath) {
 
   const highCount = findings.filter(x => x.severity === 'HIGH').length;
   const reviewCount = findings.filter(x => x.severity === 'REVIEW').length;
+  const machineId = machine.machineId ?? path.basename(path.dirname(packagePath));
   return {
-    machineId: machine.machineId ?? path.basename(path.dirname(packagePath)),
-    displayName: machine.displayName ?? machine.machineId ?? path.basename(path.dirname(packagePath)),
+    machineId,
+    displayName: machine.displayName ?? machineId,
     machineDataVersion: machine.machineDataVersion ?? null,
-    registeredAtEpoch: registrationEpoch(machine.machineId ?? path.basename(path.dirname(packagePath))),
+    registeredAtEpoch: registrationEpoch(machineId),
+    addedAt: catalogById.get(machineId)?.addedAt ?? null,
     featureCount: features.length,
     evidenceCount: evidences.length,
     classification: highCount ? 'HIGH_RISK' : reviewCount ? 'REVIEW' : 'PASS',
@@ -175,11 +167,11 @@ function auditPackage(pkg, packagePath) {
 }
 
 function findPackages() {
-  if (!fs.existsSync(BUILD)) return [];
+  if (!fs.existsSync(MACHINES)) return [];
   const out = [];
-  for (const ent of fs.readdirSync(BUILD, {withFileTypes:true})) {
+  for (const ent of fs.readdirSync(MACHINES, {withFileTypes:true})) {
     if (!ent.isDirectory()) continue;
-    const p = path.join(BUILD, ent.name, 'machine-package.approved.json');
+    const p = path.join(MACHINES, ent.name, 'machine-package.json');
     if (fs.existsSync(p)) out.push(p);
   }
   return out.sort();
@@ -206,12 +198,13 @@ const report = {
   schemaVersion:'machine-data-health-v2',
   manifestBaseline:'SloAnalytica New Machine Research Manifest v1.1',
   generatedAt:new Date().toISOString(),
-  scope:'build/*/machine-package.approved.json',
+  scope:'machines/*/machine-package.json (catalog-published set)',
   note:'Audit-only. Heuristic findings require review and do not mutate MachineData.',
   machineCount:machines.length,
+  catalogMachineCount:(catalog.machines ?? []).length,
   counts,
   flagCounts:Object.fromEntries(Object.entries(flagCounts).sort((a,b)=>b[1]-a[1])),
-  priority:priority.map(x=>({machineId:x.machineId,displayName:x.displayName,classification:x.classification,registrationRank:x.registrationRank,highCount:x.highCount,reviewCount:x.reviewCount,flags:[...new Set(x.findings.map(f=>f.code))]})),
+  priority:priority.map(x=>({machineId:x.machineId,displayName:x.displayName,classification:x.classification,registrationRank:x.registrationRank,addedAt:x.addedAt,highCount:x.highCount,reviewCount:x.reviewCount,flags:[...new Set(x.findings.map(f=>f.code))]})),
   machines,
 };
 
@@ -219,7 +212,7 @@ if (REPORT_PATH) {
   fs.mkdirSync(path.dirname(REPORT_PATH), {recursive:true});
   fs.writeFileSync(REPORT_PATH, JSON.stringify(report,null,2)+'\n');
 }
-console.log(`[health-v2] machines=${machines.length} PASS=${counts.PASS} REVIEW=${counts.REVIEW} HIGH_RISK=${counts.HIGH_RISK}`);
+console.log(`[health-v2] machines=${machines.length}/${report.catalogMachineCount} PASS=${counts.PASS} REVIEW=${counts.REVIEW} HIGH_RISK=${counts.HIGH_RISK}`);
 console.log(`[health-v2] flags=${JSON.stringify(report.flagCounts)}`);
 for (const m of priority.filter(x=>x.classification!=='PASS')) {
   console.log(`[health-v2] ${m.classification} rank=${m.registrationRank ?? '-'} ${m.machineId} ${m.displayName} high=${m.highCount} review=${m.reviewCount} flags=${[...new Set(m.findings.map(f=>f.code))].join(',')}`);
