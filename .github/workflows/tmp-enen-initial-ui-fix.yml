@@ -1,0 +1,29 @@
+name: Temp Fire Force initial UI fix
+on:
+  push:
+    branches: [fix/enen-reg-sequence-labels-20260821]
+  workflow_dispatch:
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: fix/enen-reg-sequence-labels-20260821
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: node tools/tmp-enen-initial-ui-fix.mjs
+      - run: npm run machine:pipeline -- L_ENEN_NO_SHOUBOUTAI_JG
+      - run: npm test
+      - run: npm run audit
+      - run: npm run audit:ui-service-names
+      - name: Commit generated data
+        run: |
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git add tools/build-machine-data.mjs tools/validate-selection-data.mjs research/L_ENEN_NO_SHOUBOUTAI_JG/selection-data.json research/L_ENEN_NO_SHOUBOUTAI_JG/statistics-report.json research/L_ENEN_NO_SHOUBOUTAI_JG/difficulty-report.json research/L_ENEN_NO_SHOUBOUTAI_JG/setting-band-report.json machines/L_ENEN_NO_SHOUBOUTAI_JG/machine-package.json catalog.json difficulty-catalog.json machine-registry.json
+          git diff --cached --quiet || git commit -m 'fix: split Fire Force initial inputs and compact JAC counters'
+          git push
