@@ -5,13 +5,11 @@ on:
     branches:
       - prototype-multi-machine
     paths:
-      - 'research/**/research-data.json'
-      - 'research/**/selection-data.json'
-      - 'scripts/apply-recheck-20260822.mjs'
+      - 'scripts/apply-phase1-statistical-fixes.mjs'
       - '.github/workflows/machine-pipeline.yml'
 
 jobs:
-  targeted-recheck:
+  phase1-statistical-fixes:
     if: github.actor != 'github-actions[bot]'
     runs-on: ubuntu-latest
     permissions:
@@ -26,29 +24,27 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '22'
-      - name: Apply recheck migration
-        run: node scripts/apply-recheck-20260822.mjs
-      - name: Validate ResearchData
-        run: |
-          npm run research:validate -- research/L_BOFURI_FN/research-data.json
-          npm run research:validate -- research/L_SYMPHOGEAR_SEIGI_JA/research-data.json
-          npm run research:validate -- research/L_HOKUTO_MUSOU_FS/research-data.json
-          npm run research:validate -- research/S_BAHAMA_A3_30/research-data.json
+      - name: Apply Phase 1 fixes
+        run: node scripts/apply-phase1-statistical-fixes.mjs
+      - name: Validate changed ResearchData
+        run: npm run research:validate -- research/S_CODE_GEASS_3_CC_FS/research-data.json
       - name: Build changed machines
         run: |
-          printf '%s\n' L_BOFURI_FN L_SYMPHOGEAR_SEIGI_JA L_HOKUTO_MUSOU_FS S_BAHAMA_A3_30 S_OKIDOKI_BLACK_EP > /tmp/machine_ids.txt
+          printf '%s\n' S_CODE_GEASS_3_CC_FS L_TOKYO_GHOUL L_MUSHOKU_TENSEI_NM L_BAKI_L3 L_BIOHAZARD_VENDETTA_FK L_HEY_ELITE_SALARYMAN_KAGAMI_PA4 > /tmp/machine_ids.txt
           npm run machine:batch -- --file /tmp/machine_ids.txt
       - name: Full tests and audits
         run: |
           npm test
           npm run audit
           npm run audit:ui-service-names
+          node tools/audit-machine-data-statistics-v3.mjs . reports/machine-data-statistical-audit-after-phase1-fixes.json reports/machine-data-statistical-audit-after-phase1-fixes.md
+          cat reports/machine-data-statistical-audit-after-phase1-fixes.md
       - name: Commit migration and generated artifacts
         run: |
           set -euo pipefail
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add research machines catalog.json difficulty-catalog.json
+          git add research machines catalog.json difficulty-catalog.json reports/machine-data-statistical-audit-after-phase1-fixes.json reports/machine-data-statistical-audit-after-phase1-fixes.md
           if git diff --cached --quiet; then exit 0; fi
-          git commit -m 'fix: apply setting-element recheck updates'
+          git commit -m 'fix: apply Phase 1 statistical audit corrections'
           git push origin HEAD:${{ github.event.pull_request.head.ref }}
