@@ -3,7 +3,7 @@
   "machine": {
     "schemaVersion": "2.0.0",
     "machineId": "S_KABANERI_ZR",
-    "machineDataVersion": "0.1.0",
+    "machineDataVersion": "0.1.1",
     "displayName": "パチスロ甲鉄城のカバネリ",
     "modelName": "S パチスロ甲鉄城のカバネリ ZR",
     "manufacturer": "サミー",
@@ -79,7 +79,7 @@
       {
         "id": "INP_MUMEI_3_TRIALS",
         "name": "無名CZ 小役3連回数",
-        "type": "integer",
+        "type": "counter",
         "category": "CZ_DETAIL",
         "displayOrder": 20,
         "defaultValue": 0,
@@ -95,6 +95,28 @@
         "defaultValue": 0,
         "unit": "回",
         "parentInputId": "INP_MUMEI_3_TRIALS",
+        "minimum": 0
+      },
+      {
+        "id": "INP_ST_END_TOTAL",
+        "name": "ST終了画面確認回数",
+        "type": "integer",
+        "category": "ST_END",
+        "displayOrder": 30,
+        "defaultValue": null,
+        "unit": "回",
+        "description": "ST終了時に確認した画面を集計します。公開解析では駆け抜け時除外の条件を確認できていないため、現時点では全ST終了画面を対象とします。",
+        "minimum": 0
+      },
+      {
+        "id": "INP_ST_END_HIGH",
+        "name": "高設定示唆（菖蒲）",
+        "type": "counter",
+        "category": "ST_END",
+        "displayOrder": 31,
+        "defaultValue": null,
+        "unit": "回",
+        "parentInputId": "INP_ST_END_TOTAL",
         "minimum": 0
       },
       {
@@ -246,6 +268,33 @@
         "sourceEvidenceRefs": [
           "SRC_ANALYSIS"
         ]
+      },
+      {
+        "featureId": "FEAT_ST_END_SCREEN",
+        "name": "ST終了画面",
+        "adoptionCategory": "INCLUDE_SUPPORT",
+        "calculationRole": "PROBABILITY",
+        "probabilityEngineUsage": true,
+        "modelType": "binomial",
+        "minimumSample": 1,
+        "sampleRecommendation": 20,
+        "reliabilityProfile": {
+          "weight": 1
+        },
+        "displayFormat": "percent",
+        "numeratorInputId": "INP_ST_END_HIGH",
+        "denominatorInputId": "INP_ST_END_TOTAL",
+        "probabilities": {
+          "SET_1": 0.012,
+          "SET_2": 0.018,
+          "SET_3": 0.018,
+          "SET_4": 0.046,
+          "SET_5": 0.053,
+          "SET_6": 0.061
+        },
+        "sourceEvidenceRefs": [
+          "SRC_ST_END"
+        ]
       }
     ]
   },
@@ -336,6 +385,12 @@
         "classification": "ANALYSIS",
         "url": "https://nana-press.com/kaiseki/machine/384/10347/",
         "checkedAt": "2026-08-21"
+      },
+      {
+        "id": "SRC_ST_END",
+        "classification": "ANALYSIS",
+        "url": "https://nana-press.com/kaiseki/machine/384/10347/",
+        "checkedAt": "2026-08-21"
       }
     ]
   },
@@ -401,7 +456,7 @@
             "type": "input",
             "inputId": "INP_MUMEI_3_TRIALS",
             "label": "無名CZ 小役3連回数",
-            "widget": "number"
+            "widget": "counter"
           },
           {
             "type": "input",
@@ -412,9 +467,28 @@
         ]
       },
       {
+        "id": "AUTO_ST_END",
+        "title": "ST終了画面",
+        "displayOrder": 5,
+        "items": [
+          {
+            "type": "input",
+            "inputId": "INP_ST_END_TOTAL",
+            "label": "ST終了画面確認回数",
+            "widget": "number"
+          },
+          {
+            "type": "input",
+            "inputId": "INP_ST_END_HIGH",
+            "label": "高設定示唆（菖蒲）",
+            "widget": "counter"
+          }
+        ]
+      },
+      {
         "id": "AUTO_EVIDENCE",
         "title": "設定確定・否定情報",
-        "displayOrder": 5,
+        "displayOrder": 6,
         "items": [
           {
             "type": "input",
@@ -428,8 +502,8 @@
   },
   "selectionSummary": {
     "schemaVersion": "selection-summary-v1",
-    "evaluatedCount": 9,
-    "selectedCount": 4,
+    "evaluatedCount": 10,
+    "selectedCount": 5,
     "rejectedCount": 5,
     "selected": [
       {
@@ -466,6 +540,15 @@
         "requiredTrials": {
           "value": 31,
           "unit": "無名CZ小役3連"
+        }
+      },
+      {
+        "featureId": "FEAT_ST_END_SCREEN",
+        "name": "ST終了画面",
+        "reason": "ST終了画面の高設定示唆選択率は設定1の1.2%から設定6の6.1%まで差があり、条件付き情報として採用。",
+        "requiredTrials": {
+          "value": 94,
+          "unit": "ST終了画面1回"
         }
       }
     ],

@@ -1,7 +1,7 @@
 {
   "schemaVersion": "selection-data-v1",
   "machineId": "L_EUREKA_SEVEN4_HIEVO_KX",
-  "machineDataVersion": "0.1.0",
+  "machineDataVersion": "0.1.1",
   "inputs": [
     {
       "id": "INP_NORMAL_GAMES",
@@ -38,7 +38,47 @@
       "displayOrder": 11,
       "defaultValue": 0,
       "unit": "回",
-      "parentInputId": "INP_SC"
+      "parentInputId": "INP_SC",
+      "description": "初期Lvが12だった場合は、セブンチャンス回数と初期Lv12回数の両方に+1をしてください。"
+    },
+    {
+      "id": "INP_BIG_END_TOTAL",
+      "name": "BIG終了画面確認回数",
+      "type": "integer",
+      "category": "BIG_END_SCREEN",
+      "displayOrder": 30,
+      "defaultValue": null,
+      "unit": "回"
+    },
+    {
+      "id": "INP_BIG_END_FOUR",
+      "name": "4人画面",
+      "type": "counter",
+      "category": "BIG_END_SCREEN",
+      "displayOrder": 31,
+      "defaultValue": null,
+      "unit": "回",
+      "parentInputId": "INP_BIG_END_TOTAL"
+    },
+    {
+      "id": "INP_BIG_END_SIX",
+      "name": "6人画面",
+      "type": "counter",
+      "category": "BIG_END_SCREEN",
+      "displayOrder": 32,
+      "defaultValue": null,
+      "unit": "回",
+      "parentInputId": "INP_BIG_END_TOTAL"
+    },
+    {
+      "id": "INP_BIG_END_EIGHT",
+      "name": "8人画面",
+      "type": "counter",
+      "category": "BIG_END_SCREEN",
+      "displayOrder": 33,
+      "defaultValue": null,
+      "unit": "回",
+      "parentInputId": "INP_BIG_END_TOTAL"
     }
   ],
   "features": [
@@ -92,7 +132,12 @@
       "displayFormat": "percent",
       "difficultyParticipation": "EXCLUDE",
       "difficultyExclusionReason": "通常GからLv12判定可能なSC試行数を独立に確定できないため。",
-      "userReason": "SC発生後の条件付き情報として設定差を追加利用できるため補助採用。"
+      "userReason": "SC発生後の条件付き情報として設定差を追加利用できるため補助採用。",
+      "categorySubtractInputIds": {
+        "INP_SC": [
+          "INP_SC_LV12"
+        ]
+      }
     },
     {
       "researchFeatureId": "RF_AT_DIRECT",
@@ -105,6 +150,25 @@
       "featureId": "FEAT_12_BELL",
       "adoptionCategory": "EXCLUDE",
       "rejectionReason": "設定差が極小で必要試行量が大きい。"
+    },
+    {
+      "researchFeatureId": "RF_BIG_END_SCREEN",
+      "featureId": "FEAT_BIG_END_SCREEN",
+      "adoptionCategory": "INCLUDE_SUPPORT",
+      "denominatorInputId": "INP_BIG_END_TOTAL",
+      "numeratorInputId": "INP_BIG_END_FOUR",
+      "categoryInputIds": [
+        "INP_BIG_END_SIX",
+        "INP_BIG_END_EIGHT"
+      ],
+      "residualCategoryLabel": "TWO",
+      "minimumSample": 1,
+      "sampleRecommendation": 20,
+      "weight": 1,
+      "displayFormat": "percent",
+      "difficultyParticipation": "EXCLUDE",
+      "difficultyExclusionReason": "通常ゲーム数からこの演出の確認試行数を正確に換算できないため共通Difficultyには含めない。",
+      "userReason": "BIG終了画面の設定別振り分けが公開され、4人・6人・8人の構成に段階差があるため補助採用。入力は任意です。"
     }
   ],
   "rejectedElements": [],
@@ -187,7 +251,8 @@
   },
   "uiCategoryLabels": {
     "PRIMARY": "初当り",
-    "SUPPORT": "セブンチャンス"
+    "SUPPORT": "セブンチャンス",
+    "BIG_END_SCREEN": "BIG終了画面"
   },
   "difficultyAnalysis": {
     "targetGameBasis": {

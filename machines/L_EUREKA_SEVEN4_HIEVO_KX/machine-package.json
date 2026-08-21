@@ -3,7 +3,7 @@
   "machine": {
     "schemaVersion": "2.0.0",
     "machineId": "L_EUREKA_SEVEN4_HIEVO_KX",
-    "machineDataVersion": "0.1.0",
+    "machineDataVersion": "0.1.1",
     "displayName": "スマスロ交響詩篇エウレカセブン4 HI-EVOLUTION",
     "modelName": "L エウレカセブン4 HIEVO KX",
     "manufacturer": "サミー",
@@ -63,6 +63,50 @@
         "defaultValue": 0,
         "unit": "回",
         "parentInputId": "INP_SC",
+        "description": "初期Lvが12だった場合は、セブンチャンス回数と初期Lv12回数の両方に+1をしてください。",
+        "minimum": 0
+      },
+      {
+        "id": "INP_BIG_END_TOTAL",
+        "name": "BIG終了画面確認回数",
+        "type": "integer",
+        "category": "BIG_END_SCREEN",
+        "displayOrder": 30,
+        "defaultValue": null,
+        "unit": "回",
+        "minimum": 0
+      },
+      {
+        "id": "INP_BIG_END_FOUR",
+        "name": "4人画面",
+        "type": "counter",
+        "category": "BIG_END_SCREEN",
+        "displayOrder": 31,
+        "defaultValue": null,
+        "unit": "回",
+        "parentInputId": "INP_BIG_END_TOTAL",
+        "minimum": 0
+      },
+      {
+        "id": "INP_BIG_END_SIX",
+        "name": "6人画面",
+        "type": "counter",
+        "category": "BIG_END_SCREEN",
+        "displayOrder": 32,
+        "defaultValue": null,
+        "unit": "回",
+        "parentInputId": "INP_BIG_END_TOTAL",
+        "minimum": 0
+      },
+      {
+        "id": "INP_BIG_END_EIGHT",
+        "name": "8人画面",
+        "type": "counter",
+        "category": "BIG_END_SCREEN",
+        "displayOrder": 33,
+        "defaultValue": null,
+        "unit": "回",
+        "parentInputId": "INP_BIG_END_TOTAL",
         "minimum": 0
       },
       {
@@ -192,6 +236,72 @@
         "sourceEvidenceRefs": [
           "SRC_ANALYSIS"
         ]
+      },
+      {
+        "featureId": "FEAT_BIG_END_SCREEN",
+        "name": "BIG終了画面",
+        "adoptionCategory": "INCLUDE_SUPPORT",
+        "calculationRole": "PROBABILITY",
+        "probabilityEngineUsage": true,
+        "modelType": "multinomial",
+        "minimumSample": 1,
+        "sampleRecommendation": 20,
+        "reliabilityProfile": {
+          "weight": 1
+        },
+        "displayFormat": "percent",
+        "numeratorInputId": "INP_BIG_END_FOUR",
+        "denominatorInputId": "INP_BIG_END_TOTAL",
+        "categoryInputIds": [
+          "INP_BIG_END_SIX",
+          "INP_BIG_END_EIGHT"
+        ],
+        "probabilities": {},
+        "categoryLabels": [
+          "FOUR",
+          "SIX",
+          "EIGHT"
+        ],
+        "categoryProbabilities": {
+          "SET_1": [
+            0.0625,
+            0.001,
+            0
+          ],
+          "SET_2": [
+            0.0625,
+            0.005,
+            0
+          ],
+          "SET_3": [
+            0.0625,
+            0.005,
+            0
+          ],
+          "SET_4": [
+            0.125,
+            0.01,
+            0.001
+          ],
+          "SET_5": [
+            0.125,
+            0.01,
+            0.0025
+          ],
+          "SET_6": [
+            0.125,
+            0.01,
+            0.005
+          ]
+        },
+        "categoryConditioning": {
+          "excludedCategories": [],
+          "normalization": "RENORMALIZE_INCLUDED",
+          "residualCategory": "TWO"
+        },
+        "sourceEvidenceRefs": [
+          "SRC_END_SCREEN"
+        ]
       }
     ]
   },
@@ -301,6 +411,12 @@
         "classification": "ANALYSIS",
         "url": "https://nana-press.com/kaiseki/machine/741/21203/",
         "checkedAt": "2026-08-21"
+      },
+      {
+        "id": "SRC_END_SCREEN",
+        "classification": "ANALYSIS",
+        "url": "https://nana-press.com/kaiseki/machine/741/21430/",
+        "checkedAt": "2026-08-21"
       }
     ]
   },
@@ -345,9 +461,40 @@
         ]
       },
       {
+        "id": "AUTO_BIG_END_SCREEN",
+        "title": "BIG終了画面",
+        "displayOrder": 3,
+        "items": [
+          {
+            "type": "input",
+            "inputId": "INP_BIG_END_TOTAL",
+            "label": "BIG終了画面確認回数",
+            "widget": "number"
+          },
+          {
+            "type": "input",
+            "inputId": "INP_BIG_END_FOUR",
+            "label": "4人画面",
+            "widget": "counter"
+          },
+          {
+            "type": "input",
+            "inputId": "INP_BIG_END_SIX",
+            "label": "6人画面",
+            "widget": "counter"
+          },
+          {
+            "type": "input",
+            "inputId": "INP_BIG_END_EIGHT",
+            "label": "8人画面",
+            "widget": "counter"
+          }
+        ]
+      },
+      {
         "id": "AUTO_EVIDENCE",
         "title": "設定確定・否定情報",
-        "displayOrder": 3,
+        "displayOrder": 4,
         "items": [
           {
             "type": "input",
@@ -361,8 +508,8 @@
   },
   "selectionSummary": {
     "schemaVersion": "selection-summary-v1",
-    "evaluatedCount": 5,
-    "selectedCount": 3,
+    "evaluatedCount": 6,
+    "selectedCount": 4,
     "rejectedCount": 2,
     "selected": [
       {
@@ -390,6 +537,15 @@
         "requiredTrials": {
           "value": 454,
           "unit": "セブンチャンス"
+        }
+      },
+      {
+        "featureId": "FEAT_BIG_END_SCREEN",
+        "name": "BIG終了画面",
+        "reason": "BIG終了画面の設定別振り分けが公開され、4人・6人・8人の構成に段階差があるため補助採用。入力は任意です。",
+        "requiredTrials": {
+          "value": 83,
+          "unit": "BIG終了画面1回"
         }
       }
     ],
