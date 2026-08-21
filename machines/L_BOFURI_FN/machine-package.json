@@ -3,7 +3,7 @@
   "machine": {
     "schemaVersion": "2.0.0",
     "machineId": "L_BOFURI_FN",
-    "machineDataVersion": "0.1.0",
+    "machineDataVersion": "0.1.1",
     "displayName": "スマスロ痛いのは嫌なので防御力に極振りしたいと思います。",
     "modelName": "L 防振り FN",
     "manufacturer": "サミー",
@@ -24,6 +24,31 @@
   "inputs": {
     "schemaVersion": "2.0.0",
     "inputs": [
+      {
+        "id": "INP_PREDECESSOR_COUNTER_GAMES",
+        "name": "着席時累計ゲーム数",
+        "type": "integer",
+        "category": "PREDECESSOR",
+        "displayOrder": 1,
+        "defaultValue": 0,
+        "unit": "G",
+        "observationScope": "PREDECESSOR_SNAPSHOT",
+        "description": "着席時にデータカウンタへ表示されている累計ゲーム数を入力します。前任者区間のトータルボーナス合算評価に使用します。",
+        "minimum": 0
+      },
+      {
+        "id": "INP_PREDECESSOR_COUNTER_BONUS",
+        "name": "着席時ボーナス回数",
+        "type": "counter",
+        "category": "PREDECESSOR",
+        "displayOrder": 2,
+        "defaultValue": 0,
+        "unit": "回",
+        "observationScope": "PREDECESSOR_SNAPSHOT",
+        "parentInputId": "INP_PREDECESSOR_COUNTER_GAMES",
+        "description": "着席時のデータカウンタ上のボーナス回数を入力します。機種内のボーナス種別を分けず、カウンタのトータル回数を使用します。",
+        "minimum": 0
+      },
       {
         "id": "INP_NORMAL_GAMES",
         "name": "通常ゲーム数",
@@ -52,7 +77,7 @@
         "displayOrder": 10,
         "defaultValue": 0,
         "unit": "G",
-        "description": "擬似遊技を含む総Gをそのまま分母にしないでください。",
+        "description": "上段5枚ベルを実際に観測した対象ゲーム数を入力します。実機連動機能の総Gには擬似遊技が含まれるため、その総Gを分母へ直接入力しないでください。",
         "minimum": 0
       },
       {
@@ -128,6 +153,33 @@
   "features": {
     "schemaVersion": "2.0.0",
     "features": [
+      {
+        "featureId": "FEAT_PREDECESSOR_COUNTER_BONUS",
+        "name": "データカウンタ上のトータルボーナス合算",
+        "adoptionCategory": "INCLUDE_SUPPORT",
+        "calculationRole": "PROBABILITY",
+        "probabilityEngineUsage": true,
+        "modelType": "binomial",
+        "minimumSample": 300,
+        "sampleRecommendation": 3000,
+        "reliabilityProfile": {
+          "weight": 1
+        },
+        "displayFormat": "ratio_1_over_n",
+        "denominatorInputId": "INP_PREDECESSOR_COUNTER_GAMES",
+        "numeratorInputId": "INP_PREDECESSOR_COUNTER_BONUS",
+        "probabilities": {
+          "SET_1": 0.008169934640522876,
+          "SET_2": 0.008361204013377926,
+          "SET_3": 0.008688097306689836,
+          "SET_4": 0.009727626459143969,
+          "SET_5": 0.01044932079414838,
+          "SET_6": 0.011111111111111112
+        },
+        "sourceEvidenceRefs": [
+          "SRC_ALT"
+        ]
+      },
       {
         "featureId": "FEAT_INITIAL",
         "name": "ボーナス初当り",
@@ -300,9 +352,28 @@
   "ui": {
     "sections": [
       {
+        "id": "AUTO_PREDECESSOR",
+        "title": "着席時データ",
+        "displayOrder": 1,
+        "items": [
+          {
+            "type": "input",
+            "inputId": "INP_PREDECESSOR_COUNTER_GAMES",
+            "label": "着席時累計ゲーム数",
+            "widget": "number"
+          },
+          {
+            "type": "input",
+            "inputId": "INP_PREDECESSOR_COUNTER_BONUS",
+            "label": "着席時ボーナス回数",
+            "widget": "counter"
+          }
+        ]
+      },
+      {
         "id": "AUTO_PRIMARY",
         "title": "初当り",
-        "displayOrder": 1,
+        "displayOrder": 2,
         "items": [
           {
             "type": "input",
@@ -321,7 +392,7 @@
       {
         "id": "AUTO_SMALL_ROLE",
         "title": "小役",
-        "displayOrder": 2,
+        "displayOrder": 3,
         "items": [
           {
             "type": "input",
@@ -340,7 +411,7 @@
       {
         "id": "AUTO_DIRECT",
         "title": "直撃",
-        "displayOrder": 3,
+        "displayOrder": 4,
         "items": [
           {
             "type": "input",
@@ -353,7 +424,7 @@
       {
         "id": "AUTO_BET",
         "title": "BET高確",
-        "displayOrder": 4,
+        "displayOrder": 5,
         "items": [
           {
             "type": "input",
@@ -372,7 +443,7 @@
       {
         "id": "AUTO_EVIDENCE",
         "title": "設定確定・否定情報",
-        "displayOrder": 5,
+        "displayOrder": 6,
         "items": [
           {
             "type": "input",
@@ -386,10 +457,19 @@
   },
   "selectionSummary": {
     "schemaVersion": "selection-summary-v1",
-    "evaluatedCount": 9,
-    "selectedCount": 4,
+    "evaluatedCount": 10,
+    "selectedCount": 5,
     "rejectedCount": 5,
     "selected": [
+      {
+        "featureId": "FEAT_PREDECESSOR_COUNTER_BONUS",
+        "name": "データカウンタ上のトータルボーナス合算",
+        "reason": "データカウンタ上のトータルボーナス合算に設定差があり、着席前の区間を独立した観測として利用できるため採用。",
+        "requiredTrials": {
+          "value": 8044,
+          "unit": "データカウンタ累計ゲーム"
+        }
+      },
       {
         "featureId": "FEAT_INITIAL",
         "name": "ボーナス初当り",

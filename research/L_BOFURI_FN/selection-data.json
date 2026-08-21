@@ -1,8 +1,31 @@
 {
   "schemaVersion": "selection-data-v1",
   "machineId": "L_BOFURI_FN",
-  "machineDataVersion": "0.1.0",
+  "machineDataVersion": "0.1.1",
   "inputs": [
+    {
+      "id": "INP_PREDECESSOR_COUNTER_GAMES",
+      "name": "着席時累計ゲーム数",
+      "type": "integer",
+      "category": "PREDECESSOR",
+      "displayOrder": 1,
+      "defaultValue": 0,
+      "unit": "G",
+      "observationScope": "PREDECESSOR_SNAPSHOT",
+      "description": "着席時にデータカウンタへ表示されている累計ゲーム数を入力します。前任者区間のトータルボーナス合算評価に使用します。"
+    },
+    {
+      "id": "INP_PREDECESSOR_COUNTER_BONUS",
+      "name": "着席時ボーナス回数",
+      "type": "counter",
+      "category": "PREDECESSOR",
+      "displayOrder": 2,
+      "defaultValue": 0,
+      "unit": "回",
+      "observationScope": "PREDECESSOR_SNAPSHOT",
+      "parentInputId": "INP_PREDECESSOR_COUNTER_GAMES",
+      "description": "着席時のデータカウンタ上のボーナス回数を入力します。機種内のボーナス種別を分けず、カウンタのトータル回数を使用します。"
+    },
     {
       "id": "INP_NORMAL_GAMES",
       "name": "通常ゲーム数",
@@ -29,7 +52,7 @@
       "displayOrder": 10,
       "defaultValue": 0,
       "unit": "G",
-      "description": "擬似遊技を含む総Gをそのまま分母にしないでください。"
+      "description": "上段5枚ベルを実際に観測した対象ゲーム数を入力します。実機連動機能の総Gには擬似遊技が含まれるため、その総Gを分母へ直接入力しないでください。"
     },
     {
       "id": "INP_UPPER_BELL",
@@ -70,6 +93,20 @@
     }
   ],
   "features": [
+    {
+      "researchFeatureId": "RF_PREDECESSOR_COUNTER_BONUS",
+      "featureId": "FEAT_PREDECESSOR_COUNTER_BONUS",
+      "adoptionCategory": "INCLUDE_SUPPORT",
+      "numeratorInputId": "INP_PREDECESSOR_COUNTER_BONUS",
+      "denominatorInputId": "INP_PREDECESSOR_COUNTER_GAMES",
+      "minimumSample": 300,
+      "sampleRecommendation": 3000,
+      "weight": 1,
+      "displayFormat": "ratio_1_over_n",
+      "difficultyParticipation": "EXCLUDE",
+      "userReason": "データカウンタ上のトータルボーナス合算に設定差があり、着席前の区間を独立した観測として利用できるため採用。",
+      "difficultyExclusionReason": "共通Difficultyは自分が遊技したゲーム数のみを評価するため、着席前の前任者区間は含めない。"
+    },
     {
       "researchFeatureId": "RF_INITIAL",
       "featureId": "FEAT_INITIAL",
@@ -204,6 +241,7 @@
     "exclusions": []
   },
   "uiCategoryLabels": {
+    "PREDECESSOR": "着席時データ",
     "PRIMARY": "初当り",
     "SMALL_ROLE": "小役",
     "DIRECT": "直撃",
