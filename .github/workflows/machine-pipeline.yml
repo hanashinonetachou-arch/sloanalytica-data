@@ -5,11 +5,13 @@ on:
     branches:
       - prototype-multi-machine
     paths:
+      - 'research/**/research-data.json'
+      - 'research/**/selection-data.json'
+      - 'scripts/apply-recheck-20260822.mjs'
       - '.github/workflows/machine-pipeline.yml'
-      - 'tools/audit-machine-data-statistics-v3.mjs'
 
 jobs:
-  machine-statistical-audit-phase1:
+  targeted-recheck:
     if: github.actor != 'github-actions[bot]'
     runs-on: ubuntu-latest
     permissions:
@@ -24,19 +26,29 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '22'
-      - name: Run statistical audit v3
-        run: node tools/audit-machine-data-statistics-v3.mjs . reports/machine-data-statistical-audit-v3.json reports/machine-data-statistical-audit-v3.md
-      - name: Existing full tests and audits
+      - name: Apply recheck migration
+        run: node scripts/apply-recheck-20260822.mjs
+      - name: Validate ResearchData
+        run: |
+          npm run research:validate -- research/L_BOFURI_FN/research-data.json
+          npm run research:validate -- research/L_SYMPHOGEAR_SEIGI_JA/research-data.json
+          npm run research:validate -- research/L_HOKUTO_MUSOU_FS/research-data.json
+          npm run research:validate -- research/S_BAHAMA_A3_30/research-data.json
+      - name: Build changed machines
+        run: |
+          printf '%s\n' L_BOFURI_FN L_SYMPHOGEAR_SEIGI_JA L_HOKUTO_MUSOU_FS S_BAHAMA_A3_30 S_OKIDOKI_BLACK_EP > /tmp/machine_ids.txt
+          npm run machine:batch -- --file /tmp/machine_ids.txt
+      - name: Full tests and audits
         run: |
           npm test
           npm run audit
           npm run audit:ui-service-names
-      - name: Commit statistical audit report
+      - name: Commit migration and generated artifacts
         run: |
           set -euo pipefail
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add reports/machine-data-statistical-audit-v3.json reports/machine-data-statistical-audit-v3.md
+          git add research machines catalog.json difficulty-catalog.json
           if git diff --cached --quiet; then exit 0; fi
-          git commit -m 'audit: generate statistical MachineData report v3'
+          git commit -m 'fix: apply setting-element recheck updates'
           git push origin HEAD:${{ github.event.pull_request.head.ref }}
