@@ -1,0 +1,39 @@
+name: Fire Force compact input UX 20260821
+
+on:
+  push:
+    branches:
+      - fix/enen-compact-input-ux-20260821
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  apply-and-validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: fix/enen-compact-input-ux-20260821
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Apply compact UX update
+        run: node tools/apply-enen-input-compact-ux-20260821.mjs
+      - name: Regenerate Fire Force
+        run: npm run machine:batch -- L_ENEN_NO_SHOUBOUTAI_JG
+      - name: Publish Fire Force
+        run: npm run machine:publish:batch -- L_ENEN_NO_SHOUBOUTAI_JG --apply
+      - name: Final audits
+        run: |
+          npm test
+          npm run audit
+          npm run audit:ui-service-names
+      - name: Commit generated changes
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -- research/L_ENEN_NO_SHOUBOUTAI_JG machines/L_ENEN_NO_SHOUBOUTAI_JG catalog.json difficulty-catalog.json machine-registry.json reports/batch-machine-pipeline-report.json
+          git diff --cached --quiet || git commit -m "Compact Fire Force input UX"
+          git push origin HEAD:fix/enen-compact-input-ux-20260821
