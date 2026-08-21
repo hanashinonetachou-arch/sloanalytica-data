@@ -1,4 +1,4 @@
-name: MachineData Health Audit
+name: MachineData Statistical Audit
 
 on:
   pull_request:
@@ -6,13 +6,13 @@ on:
       - prototype-multi-machine
     paths:
       - 'machines/**'
-      - 'research/**'
-      - 'tools/audit-machine-data-health.mjs'
+      - 'research/**/selection-data.json'
+      - 'tools/audit-machine-data-statistics.mjs'
       - '.github/workflows/machine-data-health-audit.yml'
   workflow_dispatch:
 
 jobs:
-  health-audit:
+  statistical-audit:
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -21,14 +21,14 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 22
-      - name: Run MachineData health audit
-        run: node tools/audit-machine-data-health.mjs . reports/machine-data-health-audit-v2.json reports/machine-data-health-audit-v2.md
+      - name: Run statistical MachineData audit
+        run: node tools/audit-machine-data-statistics.mjs . reports/machine-data-statistical-audit-v1.json reports/machine-data-statistical-audit-v1.md
       - name: Show report summary
-        run: cat reports/machine-data-health-audit-v2.md
-      - name: Upload health audit report
+        run: cat reports/machine-data-statistical-audit-v1.md
+      - name: Upload statistical audit report
         uses: actions/upload-artifact@v4
         with:
-          name: machine-data-health-audit-v2
+          name: machine-data-statistical-audit-v1
           path: |
-            reports/machine-data-health-audit-v2.json
-            reports/machine-data-health-audit-v2.md
+            reports/machine-data-statistical-audit-v1.json
+            reports/machine-data-statistical-audit-v1.md
