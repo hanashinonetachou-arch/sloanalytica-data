@@ -284,12 +284,17 @@ export function buildMachineData(research,selection,statistics=null){
   for(const [cat,items] of orderedCategories){
     const defaultCategoryLabels={CZ:"CZ",ZONE:"100G以内のゲーム数解除",AT_RETURN:"AT引き戻し",EVIDENCE:"設定確定・否定情報"};
     const categoryTitle=selection.uiCategoryLabels?.[cat]??defaultCategoryLabels[cat]??(cat==="PRIMARY"?null:cat);
+    const sectionOptions=selection.uiSectionOptions?.[cat]??{};
     if(categoryTitle && /^(?:AUTO_|PRIMARY(?:_|$)|PREDECESSOR$|SELF_PLAY$|DISPLAY_ONLY(?:_|$)|REFERENCE_TOTAL$)/.test(categoryTitle)) fail(`ui category title must be user-facing: ${cat}`);
     sections.push({
       id:`AUTO_${cat}`.replace(/[^A-Z0-9_]/gi,"_").toUpperCase(),
       ...(categoryTitle?{title:categoryTitle}:{}),
       displayOrder:order++,
       ...(selection.uiCategoryDescriptions?.[cat]?{description:selection.uiCategoryDescriptions[cat]}:{}),
+      ...(typeof sectionOptions.description==="string"&&sectionOptions.description?{description:sectionOptions.description}:{}),
+      ...(typeof sectionOptions.collapsible==="boolean"?{collapsible:sectionOptions.collapsible}:{}),
+      ...(typeof sectionOptions.defaultExpanded==="boolean"?{defaultExpanded:sectionOptions.defaultExpanded}:{}),
+      ...(Array.isArray(sectionOptions.summaryInputIds)?{summaryInputIds:sectionOptions.summaryInputIds}:{}),
       items:items.sort((a,b)=>a.displayOrder-b.displayOrder).map(i=>({
         type:"input",inputId:i.id,label:i.name,
         ...(i.uiGridSpan?{gridSpan:i.uiGridSpan}:{}),

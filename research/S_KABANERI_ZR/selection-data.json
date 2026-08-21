@@ -1,7 +1,7 @@
 {
   "schemaVersion": "selection-data-v1",
   "machineId": "S_KABANERI_ZR",
-  "machineDataVersion": "0.1.0",
+  "machineDataVersion": "0.1.1",
   "inputs": [
     {
       "id": "INP_NORMAL_GAMES",
@@ -53,7 +53,7 @@
     {
       "id": "INP_MUMEI_3_TRIALS",
       "name": "無名CZ 小役3連回数",
-      "type": "integer",
+      "type": "counter",
       "category": "CZ_DETAIL",
       "displayOrder": 20,
       "defaultValue": 0,
@@ -68,6 +68,26 @@
       "defaultValue": 0,
       "unit": "回",
       "parentInputId": "INP_MUMEI_3_TRIALS"
+    },
+    {
+      "id": "INP_ST_END_TOTAL",
+      "name": "ST終了画面確認回数",
+      "type": "integer",
+      "category": "ST_END",
+      "displayOrder": 30,
+      "defaultValue": null,
+      "unit": "回",
+      "description": "ST終了時に確認した画面を集計します。公開解析では駆け抜け時除外の条件を確認できていないため、現時点では全ST終了画面を対象とします。"
+    },
+    {
+      "id": "INP_ST_END_HIGH",
+      "name": "高設定示唆（菖蒲）",
+      "type": "counter",
+      "category": "ST_END",
+      "displayOrder": 31,
+      "defaultValue": null,
+      "unit": "回",
+      "parentInputId": "INP_ST_END_TOTAL"
     }
   ],
   "features": [
@@ -140,7 +160,12 @@
       "displayFormat": "percent",
       "difficultyParticipation": "EXCLUDE",
       "difficultyExclusionReason": "無名CZ内の小役3連試行数を通常Gから一意換算できないため。",
-      "userReason": "明確な試行条件で設定1と6に2倍超の差があるため補助採用。"
+      "userReason": "明確な試行条件で設定1と6に2倍超の差があるため補助採用。",
+      "categorySubtractInputIds": {
+        "INP_MUMEI_3_TRIALS": [
+          "INP_MUMEI_3_HIT"
+        ]
+      }
     },
     {
       "researchFeatureId": "RF_MUMEI_NAV",
@@ -159,6 +184,20 @@
       "featureId": "FEAT_IKOMA_AVOID",
       "adoptionCategory": "EXCLUDE",
       "rejectionReason": "ライフ残量ごとに別分母が必要で、同一CZ内部の挙動を過度に重複評価するため不採用。"
+    },
+    {
+      "researchFeatureId": "RF_ST_END_SCREEN",
+      "featureId": "FEAT_ST_END_SCREEN",
+      "adoptionCategory": "INCLUDE_SUPPORT",
+      "numeratorInputId": "INP_ST_END_HIGH",
+      "denominatorInputId": "INP_ST_END_TOTAL",
+      "minimumSample": 1,
+      "sampleRecommendation": 20,
+      "weight": 1,
+      "displayFormat": "percent",
+      "difficultyParticipation": "EXCLUDE",
+      "difficultyExclusionReason": "通常GからST終了画面の試行数を一意換算できないため。",
+      "userReason": "ST終了画面の高設定示唆選択率は設定1の1.2%から設定6の6.1%まで差があり、条件付き情報として採用。"
     }
   ],
   "rejectedElements": [
@@ -241,7 +280,8 @@
     "PRIMARY": "初当り",
     "SUPPORT": "CZ",
     "SMALL_ROLE": "共通6枚ベル",
-    "CZ_DETAIL": "無名CZ"
+    "CZ_DETAIL": "無名CZ",
+    "ST_END": "ST終了画面"
   },
   "difficultyAnalysis": {
     "targetGameBasis": {
