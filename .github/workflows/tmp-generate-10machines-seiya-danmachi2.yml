@@ -1,0 +1,62 @@
+name: TEMP Generate Seiya to Danmachi2 batch
+
+on:
+  push:
+    branches:
+      - feature/add-10-machines-seiya-to-danmachi2-20260821
+    paths:
+      - 'tools/tmp-generate-10machines-seiya-danmachi2.mjs'
+      - '.github/workflows/tmp-generate-10machines-seiya-danmachi2.yml'
+
+jobs:
+  generate:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Generate ResearchData and SelectionData
+        run: node tools/tmp-generate-10machines-seiya-danmachi2.mjs
+      - name: Validate ResearchData
+        shell: bash
+        run: |
+          set -euo pipefail
+          ids=(L_SEIYA_KAIOU_ED L_STREET_FIGHTER5_ZD L_BOFURI_FN L_SYMPHOGEAR_SEIGI_JA L_HOKUTO_MUSOU_FS S_KIN_NO_KABOCHA_AA S_BAHAMA_A3_30 S_OKIDOKI_BLACK_EP S_AOHARU_MISAO_A2 S_DANMACHI2_XZ)
+          for id in "${ids[@]}"; do npm run research:validate -- "research/$id/research-data.json"; done
+      - name: Build full batch
+        shell: bash
+        run: |
+          cat > /tmp/machine_ids.txt <<'EOF'
+          L_SEIYA_KAIOU_ED
+          L_STREET_FIGHTER5_ZD
+          L_BOFURI_FN
+          L_SYMPHOGEAR_SEIGI_JA
+          L_HOKUTO_MUSOU_FS
+          S_KIN_NO_KABOCHA_AA
+          S_BAHAMA_A3_30
+          S_OKIDOKI_BLACK_EP
+          S_AOHARU_MISAO_A2
+          S_DANMACHI2_XZ
+          EOF
+          npm run machine:batch -- --file /tmp/machine_ids.txt
+      - name: Publish atomic batch
+        run: npm run machine:publish:batch -- --apply --file /tmp/machine_ids.txt
+      - name: Commit persistent generated data
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          ids=(L_SEIYA_KAIOU_ED L_STREET_FIGHTER5_ZD L_BOFURI_FN L_SYMPHOGEAR_SEIGI_JA L_HOKUTO_MUSOU_FS S_KIN_NO_KABOCHA_AA S_BAHAMA_A3_30 S_OKIDOKI_BLACK_EP S_AOHARU_MISAO_A2 S_DANMACHI2_XZ)
+          git add -- catalog.json difficulty-catalog.json machine-registry.json
+          for id in "${ids[@]}"; do
+            git add -- "research/$id/research-data.json" "research/$id/selection-data.json" "research/$id/statistics-report.json" "research/$id/difficulty-report.json" "research/$id/setting-band-report.json" "machines/$id/machine-package.json"
+          done
+          if git diff --cached --quiet; then echo 'No persistent changes'; exit 0; fi
+          git commit -m 'feat: add research and MachineData for 10 machines'
+          git push origin HEAD:feature/add-10-machines-seiya-to-danmachi2-20260821
