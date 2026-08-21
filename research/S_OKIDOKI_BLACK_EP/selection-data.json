@@ -1,0 +1,147 @@
+{
+  "schemaVersion": "selection-data-v1",
+  "machineId": "S_OKIDOKI_BLACK_EP",
+  "machineDataVersion": "0.1.0",
+  "inputs": [
+    {
+      "id": "INP_NORMAL_GAMES",
+      "name": "通常ゲーム数",
+      "type": "integer",
+      "category": "PRIMARY",
+      "displayOrder": 1,
+      "defaultValue": 0,
+      "unit": "G"
+    },
+    {
+      "id": "INP_INITIAL",
+      "name": "ボーナス初当り回数",
+      "type": "counter",
+      "category": "PRIMARY",
+      "displayOrder": 2,
+      "defaultValue": 0,
+      "unit": "回"
+    },
+    {
+      "id": "INP_CHERRY_B",
+      "name": "チェリーB回数",
+      "type": "counter",
+      "category": "SMALL_ROLE",
+      "displayOrder": 10,
+      "defaultValue": 0,
+      "unit": "回",
+      "description": "停止形でチェリーBを判別できた場合のみ入力。"
+    },
+    {
+      "id": "INP_KAKUTEI_B",
+      "name": "確定役B回数",
+      "type": "counter",
+      "category": "SMALL_ROLE",
+      "displayOrder": 11,
+      "defaultValue": 0,
+      "unit": "回",
+      "description": "左リール第1停止で判別できた場合のみ入力。"
+    }
+  ],
+  "features": [
+    {
+      "researchFeatureId": "RF_INITIAL",
+      "featureId": "FEAT_INITIAL",
+      "adoptionCategory": "INCLUDE_PRIMARY",
+      "numeratorInputId": "INP_INITIAL",
+      "denominatorInputId": "INP_NORMAL_GAMES",
+      "minimumSample": 1,
+      "sampleRecommendation": 7000,
+      "weight": 1,
+      "displayFormat": "ratio_1_over_n",
+      "difficultyExposure": {
+        "mode": "per_game",
+        "factor": 1,
+        "quality": "EXACT",
+        "basisId": "NORMAL_GAMES"
+      },
+      "difficultyParticipation": "INCLUDE",
+      "userReason": "天国連を含む総BB/REGではなく、設定差のある初当りを主軸として採用。"
+    },
+    {
+      "researchFeatureId": "RF_CHERRY_B",
+      "featureId": "FEAT_CHERRY_B",
+      "adoptionCategory": "INCLUDE_SUPPORT",
+      "numeratorInputId": "INP_CHERRY_B",
+      "denominatorInputId": "INP_NORMAL_GAMES",
+      "minimumSample": 1,
+      "sampleRecommendation": 7000,
+      "weight": 1,
+      "displayFormat": "ratio_1_over_n",
+      "difficultyExposure": {
+        "mode": "per_game",
+        "factor": 1,
+        "quality": "EXACT",
+        "basisId": "NORMAL_GAMES"
+      },
+      "difficultyParticipation": "INCLUDE",
+      "userReason": "停止形で判別可能かつ設定差があるため採用。"
+    },
+    {
+      "researchFeatureId": "RF_KAKUTEI_B",
+      "featureId": "FEAT_KAKUTEI_B",
+      "adoptionCategory": "INCLUDE_SUPPORT",
+      "numeratorInputId": "INP_KAKUTEI_B",
+      "denominatorInputId": "INP_NORMAL_GAMES",
+      "minimumSample": 1,
+      "sampleRecommendation": 7000,
+      "weight": 1,
+      "displayFormat": "ratio_1_over_n",
+      "difficultyExposure": {
+        "mode": "per_game",
+        "factor": 1,
+        "quality": "EXACT",
+        "basisId": "NORMAL_GAMES"
+      },
+      "difficultyParticipation": "INCLUDE",
+      "userReason": "左第1停止時に判別可能で設定差が大きいため採用。"
+    },
+    {
+      "researchFeatureId": "RF_BB",
+      "featureId": "FEAT_BB",
+      "adoptionCategory": "EXCLUDE",
+      "rejectionReason": "初当りと天国連を含む総ボーナスフローが重なり、同時採用すると同じ当選を重複評価する。"
+    },
+    {
+      "researchFeatureId": "RF_RB",
+      "featureId": "FEAT_RB",
+      "adoptionCategory": "EXCLUDE",
+      "rejectionReason": "初当りと天国連を含む総ボーナスフローが重なり、同時採用すると同じ当選を重複評価する。"
+    },
+    {
+      "researchFeatureId": "RF_CHERRY_COMBINED",
+      "featureId": "FEAT_CHERRY_COMBINED",
+      "adoptionCategory": "EXCLUDE",
+      "rejectionReason": "チェリーBを包含するため同時採用は重複。"
+    }
+  ],
+  "rejectedElements": [],
+  "evidence": [],
+  "evidenceUi": {
+    "groups": []
+  },
+  "evidenceReview": {
+    "policyVersion": 1,
+    "exclusions": []
+  },
+  "uiCategoryLabels": {
+    "PRIMARY": "初当り",
+    "SMALL_ROLE": "小役"
+  },
+  "difficultyAnalysis": {
+    "targetGameBasis": {
+      "basisId": "NORMAL_GAMES",
+      "label": "通常ゲーム数",
+      "quality": "EXACT"
+    },
+    "calibrationAllowedExposureQualities": [
+      "EXACT",
+      "DERIVED",
+      "ESTIMATED"
+    ]
+  }
+}

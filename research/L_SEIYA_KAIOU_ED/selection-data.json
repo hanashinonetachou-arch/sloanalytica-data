@@ -1,0 +1,204 @@
+{
+  "schemaVersion": "selection-data-v1",
+  "machineId": "L_SEIYA_KAIOU_ED",
+  "machineDataVersion": "0.1.0",
+  "inputs": [
+    {
+      "id": "INP_NORMAL_GAMES",
+      "name": "通常ゲーム数",
+      "type": "integer",
+      "category": "PRIMARY",
+      "displayOrder": 1,
+      "defaultValue": 0,
+      "unit": "G"
+    },
+    {
+      "id": "INP_GB",
+      "name": "GB初当り回数",
+      "type": "counter",
+      "category": "PRIMARY",
+      "displayOrder": 2,
+      "defaultValue": 0,
+      "unit": "回"
+    },
+    {
+      "id": "INP_WEAK_CHERRY",
+      "name": "弱チェリー回数",
+      "type": "counter",
+      "category": "SMALL_ROLE",
+      "displayOrder": 10,
+      "defaultValue": 0,
+      "unit": "回"
+    },
+    {
+      "id": "INP_AT_DIRECT_GAMES",
+      "name": "SPモードを除く通常/SP準備ゲーム数",
+      "type": "integer",
+      "category": "DIRECT",
+      "displayOrder": 20,
+      "defaultValue": 0,
+      "unit": "G",
+      "description": "SPモード滞在中は除外してください。"
+    },
+    {
+      "id": "INP_AT_DIRECT",
+      "name": "AT直撃回数",
+      "type": "counter",
+      "category": "DIRECT",
+      "displayOrder": 21,
+      "defaultValue": 0,
+      "unit": "回",
+      "description": "SPモード中の直撃は除外してください。"
+    }
+  ],
+  "features": [
+    {
+      "researchFeatureId": "RF_GB",
+      "featureId": "FEAT_GB",
+      "adoptionCategory": "INCLUDE_PRIMARY",
+      "numeratorInputId": "INP_GB",
+      "denominatorInputId": "INP_NORMAL_GAMES",
+      "minimumSample": 1,
+      "sampleRecommendation": 7000,
+      "weight": 1,
+      "displayFormat": "ratio_1_over_n",
+      "difficultyExposure": {
+        "mode": "per_game",
+        "factor": 1,
+        "quality": "EXACT",
+        "basisId": "NORMAL_GAMES"
+      },
+      "difficultyParticipation": "INCLUDE",
+      "userReason": "GB初当りに段階差があり通常Gで観測できるため採用。"
+    },
+    {
+      "researchFeatureId": "RF_WEAK_CHERRY",
+      "featureId": "FEAT_WEAK_CHERRY",
+      "adoptionCategory": "INCLUDE_SUPPORT",
+      "numeratorInputId": "INP_WEAK_CHERRY",
+      "denominatorInputId": "INP_NORMAL_GAMES",
+      "minimumSample": 1,
+      "sampleRecommendation": 7000,
+      "weight": 1,
+      "displayFormat": "ratio_1_over_n",
+      "difficultyExposure": {
+        "mode": "per_game",
+        "factor": 1,
+        "quality": "EXACT",
+        "basisId": "NORMAL_GAMES"
+      },
+      "difficultyParticipation": "INCLUDE",
+      "userReason": "高頻度で設定差が大きく、遊技履歴でも確認可能なため採用。"
+    },
+    {
+      "researchFeatureId": "RF_AT_DIRECT",
+      "featureId": "FEAT_AT_DIRECT",
+      "adoptionCategory": "INCLUDE_SUPPORT",
+      "numeratorInputId": "INP_AT_DIRECT",
+      "denominatorInputId": "INP_AT_DIRECT_GAMES",
+      "minimumSample": 1,
+      "sampleRecommendation": 7000,
+      "weight": 1,
+      "displayFormat": "ratio_1_over_n",
+      "userReason": "SPモードを除外できる区間では設定差が非常に大きいため採用。"
+    },
+    {
+      "researchFeatureId": "RF_RARE_COMBINED",
+      "featureId": "FEAT_RARE_COMBINED",
+      "adoptionCategory": "EXCLUDE",
+      "rejectionReason": "弱チェリーを包含するため弱チェリーと同時採用すると重複。"
+    },
+    {
+      "researchFeatureId": "RF_GB_LEVEL_RESET",
+      "featureId": "FEAT_GB_LEVEL_RESET",
+      "adoptionCategory": "EXCLUDE",
+      "rejectionReason": "設定変更直後限定かつ内部レベルを確実に観測できない。"
+    },
+    {
+      "researchFeatureId": "RF_WEAK_CHERRY_HIGH",
+      "featureId": "FEAT_WEAK_CHERRY_HIGH",
+      "adoptionCategory": "EXCLUDE",
+      "rejectionReason": "内部状態の正確な判定が必要。"
+    },
+    {
+      "researchFeatureId": "RF_RARE_GB",
+      "featureId": "FEAT_RARE_GB",
+      "adoptionCategory": "EXCLUDE",
+      "rejectionReason": "状態・モード別の条件付き抽選で分母管理が複雑。"
+    },
+    {
+      "researchFeatureId": "RF_COSMO1000_GB",
+      "featureId": "FEAT_COSMO1000_GB",
+      "adoptionCategory": "EXCLUDE",
+      "rejectionReason": "モード等との包含・条件分岐があり単純合算不可。"
+    },
+    {
+      "researchFeatureId": "RF_GB_LEVEL_UP",
+      "featureId": "FEAT_GB_LEVEL_UP",
+      "adoptionCategory": "EXCLUDE",
+      "rejectionReason": "内部GBレベルを一意に観測できない。"
+    },
+    {
+      "researchFeatureId": "RF_BC_REWARD",
+      "featureId": "FEAT_BC_REWARD",
+      "adoptionCategory": "EXCLUDE",
+      "rejectionReason": "設定差は小さく、BC成功という条件付き分布。"
+    }
+  ],
+  "rejectedElements": [],
+  "evidence": [],
+  "evidenceUi": {
+    "groups": [
+      {
+        "groupId": "SETTING_EVIDENCE",
+        "label": "確認した設定確定・否定情報",
+        "selectionMode": "single",
+        "normalizationMode": "ALLOWED_SETTINGS",
+        "options": [
+          {
+            "value": "EVIDENCE_1",
+            "label": "GBラウンド画面 カノン",
+            "allowedSettings": [
+              "SET_5",
+              "SET_6"
+            ],
+            "sourceEvidenceIds": [
+              "RE_5PLUS"
+            ]
+          },
+          {
+            "value": "EVIDENCE_2",
+            "label": "アンコウ座/666pt/ブロンズ5人+沙織/虹系",
+            "allowedSettings": [
+              "SET_6"
+            ],
+            "sourceEvidenceIds": [
+              "RE_6"
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "evidenceReview": {
+    "policyVersion": 1,
+    "exclusions": []
+  },
+  "uiCategoryLabels": {
+    "PRIMARY": "初当り",
+    "SMALL_ROLE": "小役",
+    "DIRECT": "AT直撃"
+  },
+  "difficultyAnalysis": {
+    "targetGameBasis": {
+      "basisId": "NORMAL_GAMES",
+      "label": "通常ゲーム数",
+      "quality": "EXACT"
+    },
+    "calibrationAllowedExposureQualities": [
+      "EXACT",
+      "DERIVED",
+      "ESTIMATED"
+    ]
+  }
+}
