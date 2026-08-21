@@ -5,13 +5,12 @@ on:
     branches:
       - prototype-multi-machine
     paths:
-      - 'research/**/research-data.json'
-      - 'research/**/selection-data.json'
-      - 'scripts/apply-recheck-20260822.mjs'
       - '.github/workflows/machine-pipeline.yml'
+      - 'tools/audit-machine-data-health.mjs'
+      - 'research/_audit-trigger.txt'
 
 jobs:
-  targeted-recheck:
+  machine-health-phase1:
     if: github.actor != 'github-actions[bot]'
     runs-on: ubuntu-latest
     permissions:
@@ -26,29 +25,19 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '22'
-      - name: Apply recheck migration
-        run: node scripts/apply-recheck-20260822.mjs
-      - name: Validate ResearchData
-        run: |
-          npm run research:validate -- research/L_BOFURI_FN/research-data.json
-          npm run research:validate -- research/L_SYMPHOGEAR_SEIGI_JA/research-data.json
-          npm run research:validate -- research/L_HOKUTO_MUSOU_FS/research-data.json
-          npm run research:validate -- research/S_BAHAMA_A3_30/research-data.json
-      - name: Build changed machines
-        run: |
-          printf '%s\n' L_BOFURI_FN L_SYMPHOGEAR_SEIGI_JA L_HOKUTO_MUSOU_FS S_BAHAMA_A3_30 S_OKIDOKI_BLACK_EP > /tmp/machine_ids.txt
-          npm run machine:batch -- --file /tmp/machine_ids.txt
-      - name: Full tests and audits
+      - name: Run health audit
+        run: node tools/audit-machine-data-health.mjs . reports/machine-data-health-audit-v2.json reports/machine-data-health-audit-v2.md
+      - name: Existing full tests and audits
         run: |
           npm test
           npm run audit
           npm run audit:ui-service-names
-      - name: Commit migration and generated artifacts
+      - name: Commit health audit report
         run: |
           set -euo pipefail
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add research machines catalog.json difficulty-catalog.json
+          git add reports/machine-data-health-audit-v2.json reports/machine-data-health-audit-v2.md
           if git diff --cached --quiet; then exit 0; fi
-          git commit -m 'fix: apply setting-element recheck updates'
+          git commit -m 'audit: generate MachineData health report'
           git push origin HEAD:${{ github.event.pull_request.head.ref }}
