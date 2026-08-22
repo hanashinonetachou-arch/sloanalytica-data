@@ -1,0 +1,381 @@
+{
+  "schemaVersion": 1,
+  "machine": {
+    "schemaVersion": "2.0.0",
+    "machineId": "S_FIRE_DRIFT",
+    "machineDataVersion": "0.1.0",
+    "displayName": "パチスロ ファイヤードリフト",
+    "modelName": "S ファイヤードリフト FX",
+    "manufacturer": "ロデオ / Sammy",
+    "settings": [
+      "SET_1",
+      "SET_2",
+      "SET_3",
+      "SET_4",
+      "SET_5",
+      "SET_6"
+    ],
+    "packagePolicy": {
+      "offlineCapable": true,
+      "containsImages": false,
+      "containsExecutableCode": false
+    }
+  },
+  "inputs": {
+    "schemaVersion": "2.0.0",
+    "inputs": [
+      {
+        "id": "INP_NORMAL_GAMES",
+        "name": "通常時ゲーム数",
+        "type": "integer",
+        "category": "PRIMARY",
+        "unit": "G",
+        "displayOrder": 1,
+        "description": "ボーナス中を除く通常時の集計ゲーム数を入力してください。実機メニューとの定義一致は要確認です。",
+        "defaultValue": 0,
+        "minimum": 0
+      },
+      {
+        "id": "INP_BONUS_COUNT",
+        "name": "ボーナス初当り回数",
+        "type": "counter",
+        "category": "PRIMARY",
+        "unit": "回",
+        "displayOrder": 2,
+        "defaultValue": 0,
+        "minimum": 0
+      },
+      {
+        "id": "INP_WEAK_CHERRY_COUNT",
+        "name": "弱チェリー回数",
+        "type": "counter",
+        "category": "ROLE",
+        "unit": "回",
+        "displayOrder": 10,
+        "defaultValue": 0,
+        "minimum": 0
+      },
+      {
+        "id": "INP_EVI_SETTING_FLOOR",
+        "name": "確認した設定下限",
+        "type": "enum",
+        "category": "EVIDENCE",
+        "unit": "",
+        "displayOrder": 100,
+        "inferenceRole": "INCLUDE_SUPPORT",
+        "options": [
+          {
+            "key": "__UNSET__",
+            "label": "未選択",
+            "value": "__UNSET__"
+          },
+          {
+            "key": "SET_2_OR_HIGHER",
+            "label": "設定2以上",
+            "value": "SET_2_OR_HIGHER"
+          },
+          {
+            "key": "SET_3_OR_HIGHER",
+            "label": "設定3以上",
+            "value": "SET_3_OR_HIGHER"
+          },
+          {
+            "key": "SET_4_OR_HIGHER",
+            "label": "設定4以上",
+            "value": "SET_4_OR_HIGHER"
+          },
+          {
+            "key": "SET_5_OR_HIGHER",
+            "label": "設定5以上",
+            "value": "SET_5_OR_HIGHER"
+          },
+          {
+            "key": "SET_6",
+            "label": "設定6",
+            "value": "SET_6"
+          }
+        ],
+        "defaultValue": "__UNSET__"
+      }
+    ]
+  },
+  "features": {
+    "schemaVersion": "2.0.0",
+    "features": [
+      {
+        "featureId": "FEAT_BONUS",
+        "name": "ボーナス初当り",
+        "adoptionCategory": "INCLUDE_PRIMARY",
+        "calculationRole": "PROBABILITY",
+        "probabilityEngineUsage": true,
+        "modelType": "binomial",
+        "minimumSample": 1,
+        "sampleRecommendation": 5000,
+        "reliabilityProfile": {
+          "weight": 1
+        },
+        "displayFormat": "ratio_1_over_n",
+        "denominatorInputId": "INP_NORMAL_GAMES",
+        "numeratorInputId": "INP_BONUS_COUNT",
+        "probabilities": {
+          "SET_1": 0.004004805766920304,
+          "SET_2": 0.004071661237785016,
+          "SET_3": 0.004378283712784588,
+          "SET_4": 0.004824891461649783,
+          "SET_5": 0.005170630816959669,
+          "SET_6": 0.005461496450027307
+        },
+        "sourceEvidenceRefs": [
+          "SRC_1GEKI",
+          "SRC_NANA"
+        ]
+      },
+      {
+        "featureId": "FEAT_WEAK_CHERRY",
+        "name": "弱チェリー",
+        "adoptionCategory": "INCLUDE_PRIMARY",
+        "calculationRole": "PROBABILITY",
+        "probabilityEngineUsage": true,
+        "modelType": "binomial",
+        "minimumSample": 1,
+        "sampleRecommendation": 3000,
+        "reliabilityProfile": {
+          "weight": 1
+        },
+        "displayFormat": "ratio_1_over_n",
+        "denominatorInputId": "INP_NORMAL_GAMES",
+        "numeratorInputId": "INP_WEAK_CHERRY_COUNT",
+        "probabilities": {
+          "SET_1": 0.018315018315018316,
+          "SET_2": 0.01838235294117647,
+          "SET_3": 0.01953125,
+          "SET_4": 0.020833333333333332,
+          "SET_5": 0.021413276231263382,
+          "SET_6": 0.022026431718061675
+        },
+        "sourceEvidenceRefs": [
+          "SRC_1GEKI",
+          "SRC_NANA"
+        ]
+      }
+    ]
+  },
+  "evidence": {
+    "version": "1.0.0",
+    "evidences": [
+      {
+        "id": "EVI_SETTING_FLOOR_SET_2_OR_HIGHER",
+        "name": "設定2以上",
+        "displayName": "設定2以上",
+        "inputId": "INP_EVI_SETTING_FLOOR",
+        "triggerValue": "SET_2_OR_HIGHER",
+        "confirmedSettings": [
+          "SET_2",
+          "SET_3",
+          "SET_4",
+          "SET_5",
+          "SET_6"
+        ],
+        "deniedSettings": [],
+        "hasImage": false,
+        "type": "SETTING_CONFIRMATION",
+        "sourceEvidenceRefs": [
+          "EV_JAC_2PLUS",
+          "EV_TROPHY_2PLUS"
+        ]
+      },
+      {
+        "id": "EVI_SETTING_FLOOR_SET_3_OR_HIGHER",
+        "name": "設定3以上",
+        "displayName": "設定3以上",
+        "inputId": "INP_EVI_SETTING_FLOOR",
+        "triggerValue": "SET_3_OR_HIGHER",
+        "confirmedSettings": [
+          "SET_3",
+          "SET_4",
+          "SET_5",
+          "SET_6"
+        ],
+        "deniedSettings": [],
+        "hasImage": false,
+        "type": "SETTING_CONFIRMATION",
+        "sourceEvidenceRefs": [
+          "EV_TROPHY_3PLUS"
+        ]
+      },
+      {
+        "id": "EVI_SETTING_FLOOR_SET_4_OR_HIGHER",
+        "name": "設定4以上",
+        "displayName": "設定4以上",
+        "inputId": "INP_EVI_SETTING_FLOOR",
+        "triggerValue": "SET_4_OR_HIGHER",
+        "confirmedSettings": [
+          "SET_4",
+          "SET_5",
+          "SET_6"
+        ],
+        "deniedSettings": [],
+        "hasImage": false,
+        "type": "SETTING_CONFIRMATION",
+        "sourceEvidenceRefs": [
+          "EV_JAC_4PLUS",
+          "EV_TROPHY_4PLUS"
+        ]
+      },
+      {
+        "id": "EVI_SETTING_FLOOR_SET_5_OR_HIGHER",
+        "name": "設定5以上",
+        "displayName": "設定5以上",
+        "inputId": "INP_EVI_SETTING_FLOOR",
+        "triggerValue": "SET_5_OR_HIGHER",
+        "confirmedSettings": [
+          "SET_5",
+          "SET_6"
+        ],
+        "deniedSettings": [],
+        "hasImage": false,
+        "type": "SETTING_CONFIRMATION",
+        "sourceEvidenceRefs": [
+          "EV_JAC_5PLUS",
+          "EV_TROPHY_5PLUS"
+        ]
+      },
+      {
+        "id": "EVI_SETTING_FLOOR_SET_6",
+        "name": "設定6",
+        "displayName": "設定6",
+        "inputId": "INP_EVI_SETTING_FLOOR",
+        "triggerValue": "SET_6",
+        "confirmedSettings": [
+          "SET_6"
+        ],
+        "deniedSettings": [],
+        "hasImage": false,
+        "type": "SETTING_CONFIRMATION",
+        "sourceEvidenceRefs": [
+          "EV_JAC_6",
+          "EV_TROPHY_6"
+        ]
+      }
+    ],
+    "sources": [
+      {
+        "id": "SRC_1GEKI",
+        "classification": "ANALYSIS",
+        "pageName": "パチスロファイヤードリフト 設定判別",
+        "url": "https://1geki.jp/slot/s_firedrift/0/",
+        "checkedAt": "2026-08-22"
+      },
+      {
+        "id": "SRC_NANA",
+        "classification": "ANALYSIS",
+        "pageName": "パチスロ ファイヤードリフト 設定差まとめ",
+        "url": "https://nana-press.com/kaiseki/machine/648/18390/",
+        "checkedAt": "2026-08-22"
+      }
+    ]
+  },
+  "ui": {
+    "sections": [
+      {
+        "id": "AUTO_PRIMARY",
+        "title": "基本集計",
+        "displayOrder": 1,
+        "items": [
+          {
+            "type": "input",
+            "inputId": "INP_NORMAL_GAMES",
+            "label": "通常時ゲーム数",
+            "widget": "number"
+          },
+          {
+            "type": "input",
+            "inputId": "INP_BONUS_COUNT",
+            "label": "ボーナス初当り回数",
+            "widget": "counter"
+          }
+        ]
+      },
+      {
+        "id": "AUTO_ROLE",
+        "title": "小役",
+        "displayOrder": 2,
+        "items": [
+          {
+            "type": "input",
+            "inputId": "INP_WEAK_CHERRY_COUNT",
+            "label": "弱チェリー回数",
+            "widget": "counter"
+          }
+        ]
+      },
+      {
+        "id": "AUTO_EVIDENCE",
+        "title": "設定確定・否定情報",
+        "displayOrder": 3,
+        "items": [
+          {
+            "type": "input",
+            "inputId": "INP_EVI_SETTING_FLOOR",
+            "label": "確認した設定下限",
+            "widget": "select"
+          }
+        ]
+      }
+    ]
+  },
+  "selectionSummary": {
+    "schemaVersion": "selection-summary-v1",
+    "evaluatedCount": 3,
+    "selectedCount": 2,
+    "rejectedCount": 1,
+    "selected": [
+      {
+        "featureId": "FEAT_BONUS",
+        "name": "ボーナス初当り",
+        "reason": "ボーナス初当りは1/249.7～1/183.1と段階差があり観測しやすいため採用。",
+        "requiredTrials": {
+          "value": 16177,
+          "unit": "通常時ゲーム"
+        }
+      },
+      {
+        "featureId": "FEAT_WEAK_CHERRY",
+        "name": "弱チェリー",
+        "reason": "弱チェリーは1/54.6～1/45.4で継続的に観測でき、ボーナス初当りとは別の成立情報として採用。",
+        "requiredTrials": {
+          "value": 10496,
+          "unit": "通常時ゲーム"
+        }
+      }
+    ],
+    "rejected": [
+      {
+        "featureId": "FEAT_REPLAY3_HIGH",
+        "name": "リプレイ3連→ミッション高確",
+        "reason": "設定差はあるが高確移行結果の観測定義を安全に固定できないため不採用。",
+        "requiredTrials": {
+          "value": 90,
+          "unit": "リプレイ3連成立回数"
+        }
+      }
+    ]
+  },
+  "reliability": {},
+  "metadata": {
+    "machineId": "S_FIRE_DRIFT",
+    "displayName": "パチスロ ファイヤードリフト",
+    "settings": [
+      "SET_1",
+      "SET_2",
+      "SET_3",
+      "SET_4",
+      "SET_5",
+      "SET_6"
+    ]
+  },
+  "validation": {
+    "cases": []
+  },
+  "statistics": {}
+}

@@ -17,8 +17,13 @@ test('Phase 9 dependency audit has no unresolved or high-risk double counting', 
   assert.equal(r.status, 0, `${r.stdout}\n${r.stderr}`);
   const report = JSON.parse(fs.readFileSync(out, 'utf8'));
   fs.rmSync(out, { force: true });
-  assert.equal(report.summary.machineCount, 101);
+
+  // Phase 12 fixes 101 published machines as the audited baseline, but a
+  // pre-publish batch may legitimately generate additional machine packages.
+  // This audit must therefore cover every package currently present rather
+  // than hard-code the historical baseline count.
+  assert.ok(report.summary.machineCount >= 101);
   assert.equal(report.summary.HIGH_RISK, 0);
   assert.equal(report.summary.REVIEW, 0);
-  assert.equal(report.summary.PASS, 101);
+  assert.equal(report.summary.PASS, report.summary.machineCount);
 });

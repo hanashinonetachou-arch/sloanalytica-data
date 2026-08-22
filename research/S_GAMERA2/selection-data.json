@@ -1,0 +1,172 @@
+{
+  "schemaVersion": "selection-data-v1",
+  "machineId": "S_GAMERA2",
+  "machineDataVersion": "0.1.0",
+  "uiCategoryLabels": {
+    "PRIMARY": "実機連動データ"
+  },
+  "inputs": [
+    {
+      "id": "INP_NORMAL_GAMES",
+      "name": "通常時ゲーム数",
+      "type": "integer",
+      "category": "PRIMARY",
+      "unit": "G",
+      "displayOrder": 1,
+      "description": "実機連動機能で確認できる通常時の集計ゲーム数を入力してください。ボーナス中等を含む総回転数とは区別してください。",
+      "defaultValue": 0
+    },
+    {
+      "id": "INP_REACHME_CDEF_COUNT",
+      "name": "リーチ目リプレイC/D/E/F回数",
+      "type": "counter",
+      "category": "PRIMARY",
+      "unit": "回",
+      "displayOrder": 2,
+      "description": "実機連動機能の小役・フラグ集計で確認できるリーチ目リプレイC/D/E/Fの合計回数を入力してください。",
+      "defaultValue": 0
+    }
+  ],
+  "features": [
+    {
+      "researchFeatureId": "RF_BB",
+      "featureId": "FEAT_BB",
+      "adoptionCategory": "EXCLUDE",
+      "rejectionReason": "リーチ目成立事象と強く重複し、現Research構造のままC/D/E/Fと併用すると同じボーナス契機を二重評価する可能性がある。",
+      "userReason": "BIGはリーチ目Featureとの重複を避けるため初版では不採用。"
+    },
+    {
+      "researchFeatureId": "RF_RB",
+      "featureId": "FEAT_RB",
+      "adoptionCategory": "EXCLUDE",
+      "rejectionReason": "ボーナス初当りとリーチ目系Featureを安全に排他的分解できる構造を初版では採らないため。",
+      "userReason": "REGもボーナス/リーチ目の依存整理を優先し初版では不採用。"
+    },
+    {
+      "researchFeatureId": "RF_UPPER_GYAOS",
+      "featureId": "FEAT_UPPER_GYAOS",
+      "adoptionCategory": "EXCLUDE",
+      "rejectionReason": "有用な設定差はあるが、同一ゲーム母集団上の複数小役・リーチ目を個別Binomialで並べず、将来の排他的Multinomial化を優先するため初版では不採用。",
+      "userReason": "上段ギャオスは設定差があるが、複数フラグを安全にまとめるMultinomial化前のため初版では不採用。"
+    },
+    {
+      "researchFeatureId": "RF_REACHME_ALL",
+      "featureId": "FEAT_REACHME_ALL",
+      "adoptionCategory": "EXCLUDE",
+      "rejectionReason": "C/D/E/Fを包含する合算値であり、C/D/E/Fと同時採用すると重複する。",
+      "userReason": "リーチ目全合算はC/D/E/Fと重複するため不採用。"
+    },
+    {
+      "researchFeatureId": "RF_REACHME_CDEF",
+      "featureId": "FEAT_REACHME_CDEF",
+      "adoptionCategory": "INCLUDE_PRIMARY",
+      "numeratorInputId": "INP_REACHME_CDEF_COUNT",
+      "denominatorInputId": "INP_NORMAL_GAMES",
+      "minimumSample": 1,
+      "sampleRecommendation": 7000,
+      "weight": 1,
+      "displayFormat": "ratio_1_over_n",
+      "difficultyExposure": {
+        "mode": "per_game",
+        "factor": 1,
+        "quality": "DERIVED",
+        "basisId": "MYSLO_NORMAL_GAME_BASIS",
+        "confidence": "MEDIUM",
+        "estimationBasis": "マイスロのマイカウンターでC/D/E/F内訳を取得し、通常時ゲーム数を母数とする。",
+        "uncertaintyNote": "マイスロ表示の集計ゲーム数と解析上の通常時分母の最終一致は実機確認候補。"
+      },
+      "difficultyParticipation": "INCLUDE",
+      "userReason": "C/D/E/F合算は1/2048.0～1/936.2と設定差が大きく、実機連動機能で内訳を取得できるため採用。"
+    }
+  ],
+  "evidence": [],
+  "evidenceUi": {
+    "groups": [
+      {
+        "groupId": "SETTING_FLOOR",
+        "label": "確認した設定下限",
+        "selectionMode": "single",
+        "normalizationMode": "ALLOWED_SETTINGS",
+        "options": [
+          {
+            "value": "SET_2_OR_HIGHER",
+            "label": "設定2以上",
+            "allowedSettings": [
+              "SET_2",
+              "SET_3",
+              "SET_4",
+              "SET_5",
+              "SET_6"
+            ],
+            "sourceEvidenceIds": [
+              "EV_BB_NOT_BAD"
+            ]
+          },
+          {
+            "value": "SET_4_OR_HIGHER",
+            "label": "設定4以上",
+            "allowedSettings": [
+              "SET_4",
+              "SET_5",
+              "SET_6"
+            ],
+            "sourceEvidenceIds": [
+              "EV_456"
+            ]
+          },
+          {
+            "value": "SET_5_OR_HIGHER",
+            "label": "設定5以上",
+            "allowedSettings": [
+              "SET_5",
+              "SET_6"
+            ],
+            "sourceEvidenceIds": [
+              "EV_REG_MONSTERS"
+            ]
+          },
+          {
+            "value": "SET_6",
+            "label": "設定6",
+            "allowedSettings": [
+              "SET_6"
+            ],
+            "sourceEvidenceIds": [
+              "EV_BB_GAMERA",
+              "EV_REG_NO1",
+              "EV_666"
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "evidenceReview": {
+    "policyVersion": 1,
+    "exclusions": []
+  },
+  "difficultyAnalysis": {
+    "targetGames": [
+      1500,
+      3000,
+      7000
+    ],
+    "simulationsPerSetting": 4000,
+    "seed": 20260822,
+    "targetGameBasis": {
+      "basisId": "SELF_PLAY_STANDARD_GAMES",
+      "label": "ユーザー自身の標準実戦ゲーム数",
+      "quality": "DERIVED"
+    },
+    "calibrationAllowedExposureQualities": [
+      "EXACT",
+      "DERIVED",
+      "ESTIMATED"
+    ]
+  },
+  "selectionNotes": [
+    "ガメラ2はマイスロのマイカウンターをMachine Observationの中核として扱う。",
+    "BIG/REG・上段ギャオス・複数リーチ目を個別Binomialで一斉採用せず、初版は設定差が大きく観測可能なC/D/E/Fへ絞る。",
+    "BIG終了画面・REG中キャラの設定別出現率は条件付きMultinomial化の余地があるためResearchに残す。"
+  ]
+}
