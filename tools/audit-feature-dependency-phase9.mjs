@@ -12,7 +12,15 @@ const read = p => JSON.parse(fs.readFileSync(p,'utf8'));
 const active = f => ACTIVE.has(f?.adoptionCategory) && f?.calculationRole !== 'DISPLAY_ONLY' && f?.probabilityEngineUsage !== false;
 
 function eventInputs(f){
-  return uniq([f?.numeratorInputId, ...arr(f?.categoryInputIds), ...arr(f?.optionalCategoryInputIds)]);
+  const residualBases = new Set(Object.keys(obj(f?.categorySubtractInputIds) ? f.categorySubtractInputIds : {}));
+  const xs = [f?.numeratorInputId];
+  for (const id of [...arr(f?.categoryInputIds), ...arr(f?.optionalCategoryInputIds)]) {
+    // A category equal to the denominator and used only as the base of a residual
+    // (e.g. REG total - cherry REG = single REG) is not an independent event.
+    if (id === f?.denominatorInputId && residualBases.has(id)) continue;
+    xs.push(id);
+  }
+  return uniq(xs);
 }
 function denominatorInputs(f){
   return uniq([f?.denominatorInputId, ...arr(f?.denominatorInputIds), ...arr(f?.trialInputIds), f?.trialCountInputId, f?.conditionedOnInputId]);
@@ -34,18 +42,12 @@ function overlapType(a,b){
   const sharedEvents = [...ae].filter(x=>be.has(x));
   if (sharedEvents.length) return {code:'DUPLICATE_EVENT', severity:suppressionSafe(a,b)?'REVIEW':'HIGH_RISK', sharedInputs:sharedEvents};
 
-  const aNum=a?.numeratorInputId, bNum=b?.numeratorInputId;
-  if (aNum && denominatorInputs(b).includes(aNum)) {
-    return {code:'HIERARCHICAL_CONDITIONAL', severity:conditionalSafe(a,b)?'SAFE':'REVIEW', parent:a.featureId, child:b.featureId, sharedInputs:[aNum]};
-  }
-  if (bNum && denominatorInputs(a).includes(bNum)) {
-    return {code:'HIERARCHICAL_CONDITIONAL', severity:conditionalSafe(b,a)?'SAFE':'REVIEW', parent:b.featureId, child:a.featureId, sharedInputs:[bNum]};
-  }
-
-  const aEvents=eventInputs(a), bEvents=eventInputs(b);
-  const aDen=new Set(denominatorInputs(a)), bDen=new Set(denominatorInputs(b));
-  const cross=uniq([...aEvents.filter(x=>bDen.has(x)), ...bEvents.filter(x=>aDen.has(x))]);
-  if(cross.length) return {code:'CROSS_EVENT_DENOMINATOR',severity:'REVIEW',sharedInputs:cross};
+  const aEvents = eventInputs(a), bEvents = eventInputs(b);
+  const aDen = new Set(denominatorInputs(a)), bDen = new Set(denominatorInputs(b));
+  const aToB = aEvents.filter(x=>bDen.has(x));
+  const bToA = bEvents.filter(x=>aDen.has(x));
+  if (aToB.length) return {code:'HIERARCHICAL_CONDITIONAL',severity:conditionalSafe(a,b)?'SAFE':'REVIEW',parent:a.featureId,child:b.featureId,sharedInputs:aToB};
+  if (bToA.length) return {code:'HIERARCHICAL_CONDITIONAL',severity:conditionalSafe(b,a)?'SAFE':'REVIEW',parent:b.featureId,child:a.featureId,sharedInputs:bToA};
   return null;
 }
 
@@ -72,7 +74,6 @@ for(const ent of fs.readdirSync(machineRoot,{withFileTypes:true}).filter(e=>e.is
     const ids=featureInputIds.get(e?.inputId)??[];
     if(ids.length) issues.push({severity:'HIGH_RISK',code:'EVIDENCE_FEATURE_OVERLAP',featureIds:ids,evidenceId:e.id,inputId:e.inputId});
   }
-  // Exact same binomial contract is always duplicate unless explicit suppression exists.
   const contracts=new Map();
   for(const f of fsActive){
     if(!f?.numeratorInputId || !f?.denominatorInputId) continue;
@@ -84,7 +85,6 @@ for(const ent of fs.readdirSync(machineRoot,{withFileTypes:true}).filter(e=>e.is
     const safe=features.some((a,i)=>features.some((b,j)=>i<j&&suppressionSafe(a,b)));
     issues.push({severity:safe?'REVIEW':'HIGH_RISK',code:'DUPLICATE_BINOMIAL_CONTRACT',featureIds:features.map(f=>f.featureId),contract});
   }
-  // De-duplicate issue identities.
   const seen=new Set();
   const dedup=issues.filter(x=>{const k=JSON.stringify([x.code,[...(x.featureIds??[])].sort(),x.inputId??'',x.contract??'',x.sharedInputs??[]]);if(seen.has(k))return false;seen.add(k);return true;});
   const status=dedup.some(x=>x.severity==='HIGH_RISK')?'HIGH_RISK':dedup.some(x=>x.severity==='REVIEW')?'REVIEW':'PASS';
@@ -94,7 +94,7 @@ const counts={PASS:0,REVIEW:0,HIGH_RISK:0};
 for(const r of rows) counts[r.status]=(counts[r.status]??0)+1;
 const issueCounts={};
 for(const r of rows) for(const i of r.issues) issueCounts[i.code]=(issueCounts[i.code]??0)+1;
-const report={schemaVersion:'phase9-feature-dependency-audit-v1',generatedAt:new Date().toISOString(),summary:{machineCount:rows.length,...counts,issueCounts},machines:rows};
+const report={schemaVersion:'phase9-feature-dependency-audit-v1.1',generatedAt:new Date().toISOString(),summary:{machineCount:rows.length,...counts,issueCounts},machines:rows};
 fs.mkdirSync(path.dirname(OUT),{recursive:true});
 fs.writeFileSync(OUT,JSON.stringify(report,null,2)+'\n');
 console.log(`Phase 9 Feature Dependency Audit: PASS ${counts.PASS} / REVIEW ${counts.REVIEW} / HIGH_RISK ${counts.HIGH_RISK} / TOTAL ${rows.length}`);
