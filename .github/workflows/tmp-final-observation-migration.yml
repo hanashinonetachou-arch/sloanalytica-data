@@ -1,0 +1,35 @@
+name: Temporary Final Observation Migration
+
+on:
+  pull_request:
+    branches:
+      - prototype-multi-machine
+
+permissions:
+  contents: write
+
+jobs:
+  migrate:
+    if: github.head_ref == 'research/observation-final-legacy-migration-20260822'
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: research/observation-final-legacy-migration-20260822
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Migrate remaining legacy observations
+        run: node tools/migrate-final-legacy-observations.mjs
+      - name: Validate observation files
+        run: node tools/validate-machine-observation-data.mjs
+      - name: Audit observation inventory
+        run: node tools/audit-machine-observation-research.mjs --json-out=reports/machine-observation-research-audit.json
+      - name: Commit migrated observation files
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add research/*/machine-observation-data.json
+          git diff --cached --quiet && exit 0
+          git commit -m "research: migrate final legacy Machine Observation data [skip ci]"
+          git push origin HEAD:research/observation-final-legacy-migration-20260822
