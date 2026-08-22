@@ -1,0 +1,49 @@
+name: Phase 5b Shinobidamashii Exposure Fix
+
+on:
+  pull_request:
+    branches:
+      - prototype-multi-machine
+    paths:
+      - 'scripts/apply-phase5b-shinobidamashii-exposure-fix.mjs'
+      - '.github/workflows/phase5b-shinobidamashii-exposure-fix.yml'
+
+jobs:
+  apply-and-verify:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: ${{ github.event.pull_request.head.ref }}
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Apply exposure fix
+        run: node scripts/apply-phase5b-shinobidamashii-exposure-fix.mjs
+      - name: Validate SelectionData
+        run: npm run selection:validate -- research/L_SHINOBIDAMASHII3_A3/selection-data.json research/L_SHINOBIDAMASHII3_A3/research-data.json
+      - name: Rebuild affected machine
+        run: npm run machine:batch -- L_SHINOBIDAMASHII3_A3
+      - name: Verify repository and audits
+        run: |
+          npm test
+          npm run audit
+          npm run audit:ui-service-names
+          node tools/audit-machine-data-statistics-v3.mjs . reports/machine-data-statistical-audit-after-phase5b.json reports/machine-data-statistical-audit-after-phase5b.md
+          node tools/audit-estimated-difficulty-exposure.mjs
+          node tools/audit-estimated-exposure-review-priority.mjs
+          cat reports/estimated-difficulty-exposure-audit-v1.md
+          cat reports/estimated-exposure-review-priority-v1.md
+      - name: Commit generated changes
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add research machines catalog.json difficulty-catalog.json reports/machine-data-statistical-audit-after-phase5b.json reports/machine-data-statistical-audit-after-phase5b.md
+          if git diff --cached --quiet; then exit 0; fi
+          git commit -m 'fix: apply Shinobidamashii Difficulty exposure correction'
+          git push origin HEAD:${{ github.event.pull_request.head.ref }}
