@@ -1,1 +1,292 @@
-{"schemaVersion":"selection-data-v1","machineId":"L_ZOMBIE_LAND_SAGA","machineDataVersion":"0.1.0","uiCategoryLabels":{"PRIMARY":"初当り"},"inputs":[{"id":"INP_INITIAL_GAMES","name":"初当り集計ゲーム数","type":"integer","category":"PRIMARY","unit":"G","displayOrder":1,"description":"公開の通常時初当り合算と同じ集計範囲のゲーム数を入力してください。実機表示Gとの定義一致は未確認です。","defaultValue":0},{"id":"INP_INITIAL_COUNT","name":"初当り回数","type":"counter","category":"PRIMARY","unit":"回","displayOrder":2,"description":"徒花ボーナス・ST初当りを含む公開初当り合算と同じ定義で数えてください。","defaultValue":0}],"features":[{"researchFeatureId":"RF_INITIAL_COMBINED","featureId":"FEAT_INITIAL_COMBINED","adoptionCategory":"INCLUDE_PRIMARY","numeratorInputId":"INP_INITIAL_COUNT","denominatorInputId":"INP_INITIAL_GAMES","minimumSample":1,"sampleRecommendation":5000,"weight":1,"displayFormat":"ratio_1_over_n","difficultyExposure":{"mode":"per_game","factor":1,"quality":"ESTIMATED","basisId":"INITIAL_GAME_BASIS","confidence":"LOW","estimationBasis":"公開通常時初当り合算をユーザー自身の通常実戦ゲーム基準へ接続する暫定Exposure。","uncertaintyNote":"解析集計範囲と実機表示Gの完全一致は未確認。"},"difficultyParticipation":"INCLUDE","userReason":"徒花ボーナスとST初当りを含む初当り合算は1/159.0～1/127.9で、現時点で経路重複なく最も安全に継続観測できるため採用。"},{"researchFeatureId":"RF_ADABANA_BONUS","featureId":"FEAT_ADABANA_BONUS","adoptionCategory":"EXCLUDE","rejectionReason":"採用する通常時初当り合算の部分集合であり、そのまま併用すると同じ初当り事象を二重評価する。","userReason":"徒花ボーナスは初当り合算に含まれるため単独Featureには採用しない。"},{"researchFeatureId":"RF_SAGA_LOW","featureId":"FEAT_SAGA_LOW","adoptionCategory":"EXCLUDE","rejectionReason":"SAGA低確時のみを分母とする必要があるが、低確滞在ゲーム数を実戦中に正確に取得できるMachine Observation契約を公開情報だけでは固定できない。","userReason":"設定差はあるがSAGA低確滞在Gを正確に取得できないため不採用。"}],"evidence":[],"evidenceUi":{"groups":[{"groupId":"SETTING_FLOOR","label":"確認した設定下限","selectionMode":"single","normalizationMode":"ALLOWED_SETTINGS","options":[{"value":"SET_2_OR_HIGHER","label":"設定2以上","allowedSettings":["SET_2","SET_3","SET_4","SET_5","SET_6"],"sourceEvidenceIds":["EV_ST_END_2PLUS"]},{"value":"SET_4_OR_HIGHER","label":"設定4以上","allowedSettings":["SET_4","SET_5","SET_6"],"sourceEvidenceIds":["EV_ST_END_4PLUS","EV_ENDING_4PLUS"]},{"value":"SET_5_OR_HIGHER","label":"設定5以上","allowedSettings":["SET_5","SET_6"],"sourceEvidenceIds":["EV_ST_END_5PLUS","EV_ENDING_5PLUS"]},{"value":"SET_6","label":"設定6","allowedSettings":["SET_6"],"sourceEvidenceIds":["EV_ST_END_6","EV_ENDING_6"]}]}]},"evidenceReview":{"policyVersion":1,"exclusions":[]},"difficultyAnalysis":{"targetGames":[1500,3000,7000],"simulationsPerSetting":4000,"seed":20260822,"targetGameBasis":{"basisId":"SELF_PLAY_STANDARD_GAMES","label":"ユーザー自身の標準実戦ゲーム数","quality":"ESTIMATED"},"calibrationAllowedExposureQualities":["EXACT","DERIVED","ESTIMATED"]},"selectionNotes":["ST初当り・ST直撃・CZ成功率・徒花終了後移行先などはResearch済みだが、現ResearchDataでは全設定値と安全な分母契約をFeatureとして揃え切れていないため初版Selectionへ無理に追加しない。","将来、徒花/STを排他的Multinomialまたは条件付き構造で安全に分解できれば合算Featureから置換する。","数値非公開のキャラ示唆は尤度化しない。"]}
+{
+  "schemaVersion": "selection-data-v1",
+  "machineId": "L_ZOMBIE_LAND_SAGA",
+  "machineDataVersion": "0.1.1",
+  "uiCategoryLabels": {
+    "CZ": "CZ",
+    "WAF": "We Are Franchouchou",
+    "CZ_HIGH": "100G消化時のCZ高確"
+  },
+  "inputs": [
+    {
+      "id": "INP_NORMAL_GAMES",
+      "name": "通常時ゲーム数",
+      "type": "integer",
+      "category": "CZ",
+      "unit": "G",
+      "displayOrder": 1,
+      "description": "CZ初当りを集計する通常時ゲーム数を入力してください。",
+      "defaultValue": 0
+    },
+    {
+      "id": "INP_CZ_WAF",
+      "name": "We Are Franchouchou回数",
+      "type": "counter",
+      "category": "CZ",
+      "unit": "回",
+      "displayOrder": 2,
+      "defaultValue": 0,
+      "uiQuickAdd": 1
+    },
+    {
+      "id": "INP_CZ_HOUSE",
+      "name": "絶叫ゾンビ屋敷回数",
+      "type": "counter",
+      "category": "CZ",
+      "unit": "回",
+      "displayOrder": 3,
+      "defaultValue": 0,
+      "uiQuickAdd": 1
+    },
+    {
+      "id": "INP_CZ_SAGA_ROCK",
+      "name": "SAGAロックチャレンジ回数",
+      "type": "counter",
+      "category": "CZ",
+      "unit": "回",
+      "displayOrder": 4,
+      "defaultValue": 0,
+      "uiQuickAdd": 1
+    },
+    {
+      "id": "INP_WAF_ST_SUCCESS",
+      "name": "ST当選回数",
+      "type": "counter",
+      "category": "WAF",
+      "unit": "回",
+      "displayOrder": 10,
+      "defaultValue": 0,
+      "uiQuickAdd": 1,
+      "description": "We Are Franchouchouから最終的にSTへ当選した回数を数えてください。"
+    },
+    {
+      "id": "INP_CZ_HIGH_20",
+      "name": "20G",
+      "type": "counter",
+      "category": "CZ_HIGH",
+      "unit": "回",
+      "displayOrder": 20,
+      "defaultValue": 0,
+      "uiQuickAdd": 1
+    },
+    {
+      "id": "INP_CZ_HIGH_30",
+      "name": "30G",
+      "type": "counter",
+      "category": "CZ_HIGH",
+      "unit": "回",
+      "displayOrder": 21,
+      "defaultValue": 0,
+      "uiQuickAdd": 1
+    },
+    {
+      "id": "INP_CZ_HIGH_50",
+      "name": "50G",
+      "type": "counter",
+      "category": "CZ_HIGH",
+      "unit": "回",
+      "displayOrder": 22,
+      "defaultValue": 0,
+      "uiQuickAdd": 1
+    }
+  ],
+  "features": [
+    {
+      "researchFeatureId": "RF_ADABANA_BONUS",
+      "featureId": "FEAT_ADABANA_BONUS",
+      "adoptionCategory": "EXCLUDE",
+      "rejectionReason": "採用する通常時初当り合算の部分集合であり、そのまま併用すると同じ初当り事象を二重評価する。",
+      "userReason": "徒花ボーナスは初当り合算に含まれるため単独Featureには採用しない。"
+    },
+    {
+      "researchFeatureId": "RF_SAGA_LOW",
+      "featureId": "FEAT_SAGA_LOW",
+      "adoptionCategory": "EXCLUDE",
+      "rejectionReason": "SAGA低確時のみを分母とする必要があるが、低確滞在ゲーム数を実戦中に正確に取得できるMachine Observation契約を公開情報だけでは固定できない。",
+      "userReason": "設定差はあるがSAGA低確滞在Gを正確に取得できないため不採用。"
+    },
+    {
+      "researchFeatureId": "RF_INITIAL_COMBINED",
+      "featureId": "FEAT_INITIAL_COMBINED",
+      "adoptionCategory": "EXCLUDE",
+      "rejectionReason": "CZ3種の出現率を採用する改訂版では同じ通常時進行から生じる初当り合算を重ねず、CZ側を優先する。",
+      "userReason": "通常時初当り合算はCZ初当りと経路情報が重なるため、改訂版では不採用。"
+    },
+    {
+      "researchFeatureId": "RF_CZ_COMBINED",
+      "featureId": "FEAT_CZ_COMBINED",
+      "adoptionCategory": "INCLUDE_PRIMARY",
+      "numeratorInputId": "INP_CZ_WAF",
+      "numeratorInputIds": [
+        "INP_CZ_WAF",
+        "INP_CZ_HOUSE",
+        "INP_CZ_SAGA_ROCK"
+      ],
+      "denominatorInputId": "INP_NORMAL_GAMES",
+      "inputTransform": "sum_inputs_to_numerator",
+      "minimumSample": 1,
+      "sampleRecommendation": 5000,
+      "weight": 1,
+      "displayFormat": "ratio_1_over_n",
+      "difficultyParticipation": "INCLUDE",
+      "difficultyExposure": {
+        "mode": "per_game",
+        "factor": 1,
+        "quality": "ESTIMATED",
+        "basisId": "NORMAL_GAME_BASIS",
+        "confidence": "MEDIUM",
+        "estimationBasis": "通常時ゲームに対する3種CZ合算。",
+        "uncertaintyNote": "CZ中など非通常区間の除外は入力定義に従う。"
+      },
+      "userReason": "WAF・絶叫ゾンビ屋敷・SAGAロックチャレンジを合算すれば個別CZを二重評価せず、1/196.6～1/157.3の設定差を利用できるため採用。"
+    },
+    {
+      "researchFeatureId": "RF_CZ_WAF",
+      "featureId": "FEAT_RF_CZ_WAF",
+      "adoptionCategory": "EXCLUDE",
+      "rejectionReason": "採用するCZ3種合算の構成要素であり、個別確率を同時採用すると同じCZ当選を二重評価する。",
+      "userReason": "WAFの個別出現率は調査済みだが、CZ合算に含めて評価するため単独Featureには採用しない。"
+    },
+    {
+      "researchFeatureId": "RF_CZ_HOUSE",
+      "featureId": "FEAT_RF_CZ_HOUSE",
+      "adoptionCategory": "EXCLUDE",
+      "rejectionReason": "採用するCZ3種合算の構成要素であり、個別確率を同時採用すると同じCZ当選を二重評価する。",
+      "userReason": "絶叫ゾンビ屋敷の個別出現率は調査済みだが、CZ合算に含めて評価するため単独Featureには採用しない。"
+    },
+    {
+      "researchFeatureId": "RF_CZ_SAGA",
+      "featureId": "FEAT_RF_CZ_SAGA",
+      "adoptionCategory": "EXCLUDE",
+      "rejectionReason": "採用するCZ3種合算の構成要素であり、個別確率を同時採用すると同じCZ当選を二重評価する。",
+      "userReason": "SAGAロックチャレンジの個別出現率は調査済みだが、CZ合算に含めて評価するため単独Featureには採用しない。"
+    },
+    {
+      "researchFeatureId": "RF_WAF_SUCCESS",
+      "featureId": "FEAT_WAF_SUCCESS",
+      "adoptionCategory": "INCLUDE_SUPPORT",
+      "numeratorInputId": "INP_WAF_ST_SUCCESS",
+      "denominatorInputId": "INP_CZ_WAF",
+      "minimumSample": 1,
+      "sampleRecommendation": 30,
+      "weight": 1,
+      "displayFormat": "percentage",
+      "difficultyParticipation": "EXCLUDE",
+      "userReason": "WAFの最終成功期待度は25.4%～36.1%で設定差があり、WAF回数とST当選回数から直接観測できるため採用。"
+    },
+    {
+      "researchFeatureId": "RF_WAF_START",
+      "featureId": "FEAT_WAF_START",
+      "adoptionCategory": "EXCLUDE",
+      "rejectionReason": "開始時の内部当選は後のSAGA揃いによる成功書き換えと通常遊技から区別できず、正しい分子を直接観測できない。",
+      "userReason": "開始時ST当選率には設定差があるが、実戦では開始時当選か途中書き換えかを判別できないため不採用。代わりに直接観測できる最終成功期待度を採用。"
+    },
+    {
+      "researchFeatureId": "RF_CZ_HIGH_LENGTH",
+      "featureId": "FEAT_CZ_HIGH_LENGTH",
+      "adoptionCategory": "INCLUDE_SUPPORT",
+      "numeratorInputId": "INP_CZ_HIGH_20",
+      "categoryInputIds": [
+        "INP_CZ_HIGH_30",
+        "INP_CZ_HIGH_50"
+      ],
+      "inputTransform": "sum_inputs_to_trials",
+      "minimumSample": 1,
+      "sampleRecommendation": 10,
+      "weight": 1,
+      "difficultyParticipation": "EXCLUDE",
+      "userReason": "100G消化契機のCZ高確は20/30/50Gの振り分けに設定差があり、パジャマステージ滞在から継続Gを観測できるため採用。リプレイ契機との重複など判別が曖昧な回は入力しない。"
+    }
+  ],
+  "evidence": [],
+  "evidenceUi": {
+    "groups": [
+      {
+        "groupId": "SETTING_FLOOR",
+        "label": "確認した設定下限",
+        "selectionMode": "single",
+        "normalizationMode": "ALLOWED_SETTINGS",
+        "options": [
+          {
+            "value": "SET_2_OR_HIGHER",
+            "label": "設定2以上",
+            "allowedSettings": [
+              "SET_2",
+              "SET_3",
+              "SET_4",
+              "SET_5",
+              "SET_6"
+            ],
+            "sourceEvidenceIds": [
+              "EV_ST_END_2PLUS"
+            ]
+          },
+          {
+            "value": "SET_4_OR_HIGHER",
+            "label": "設定4以上",
+            "allowedSettings": [
+              "SET_4",
+              "SET_5",
+              "SET_6"
+            ],
+            "sourceEvidenceIds": [
+              "EV_ST_END_4PLUS",
+              "EV_ENDING_4PLUS"
+            ]
+          },
+          {
+            "value": "SET_5_OR_HIGHER",
+            "label": "設定5以上",
+            "allowedSettings": [
+              "SET_5",
+              "SET_6"
+            ],
+            "sourceEvidenceIds": [
+              "EV_ST_END_5PLUS",
+              "EV_ENDING_5PLUS"
+            ]
+          },
+          {
+            "value": "SET_6",
+            "label": "設定6",
+            "allowedSettings": [
+              "SET_6"
+            ],
+            "sourceEvidenceIds": [
+              "EV_ST_END_6",
+              "EV_ENDING_6"
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "evidenceReview": {
+    "policyVersion": 1,
+    "exclusions": []
+  },
+  "difficultyAnalysis": {
+    "targetGames": [
+      1500,
+      3000,
+      7000
+    ],
+    "simulationsPerSetting": 4000,
+    "seed": 20260822,
+    "targetGameBasis": {
+      "basisId": "SELF_PLAY_STANDARD_GAMES",
+      "label": "ユーザー自身の標準実戦ゲーム数",
+      "quality": "ESTIMATED"
+    },
+    "calibrationAllowedExposureQualities": [
+      "EXACT",
+      "DERIVED",
+      "ESTIMATED"
+    ]
+  },
+  "selectionNotes": [
+    "ST初当り・ST直撃・CZ成功率・徒花終了後移行先などはResearch済みだが、現ResearchDataでは全設定値と安全な分母契約をFeatureとして揃え切れていないため初版Selectionへ無理に追加しない。",
+    "将来、徒花/STを排他的Multinomialまたは条件付き構造で安全に分解できれば合算Featureから置換する。",
+    "数値非公開のキャラ示唆は尤度化しない。"
+  ]
+}

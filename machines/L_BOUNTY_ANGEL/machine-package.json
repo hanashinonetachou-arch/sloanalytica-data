@@ -3,7 +3,7 @@
   "machine": {
     "schemaVersion": "2.0.0",
     "machineId": "L_BOUNTY_ANGEL",
-    "machineDataVersion": "0.1.0",
+    "machineDataVersion": "0.1.1",
     "displayName": "賞金首Angel",
     "modelName": null,
     "manufacturer": "NET",
@@ -42,6 +42,29 @@
         "unit": "回",
         "displayOrder": 2,
         "defaultValue": 0,
+        "minimum": 0
+      },
+      {
+        "id": "INP_RESET_TRIALS",
+        "name": "設定変更を確認できた実戦回数",
+        "type": "counter",
+        "category": "RESET",
+        "unit": "回",
+        "displayOrder": 10,
+        "defaultValue": 0,
+        "uiQuickAdd": 1,
+        "minimum": 0
+      },
+      {
+        "id": "INP_RESET_AT_DIRECT",
+        "name": "そのうちAT直撃",
+        "type": "counter",
+        "category": "RESET",
+        "unit": "回",
+        "displayOrder": 11,
+        "defaultValue": 0,
+        "uiQuickAdd": 1,
+        "parentInputId": "INP_RESET_TRIALS",
         "minimum": 0
       },
       {
@@ -97,6 +120,32 @@
           "SET_4": 0.0022222222222222222,
           "SET_5": 0.002544529262086514,
           "SET_6": 0.0028011204481792717
+        },
+        "sourceEvidenceRefs": [
+          "SRC_NANA"
+        ]
+      },
+      {
+        "featureId": "FEAT_RESET_AT_DIRECT",
+        "name": "設定変更時のAT直撃割合",
+        "adoptionCategory": "INCLUDE_SUPPORT",
+        "calculationRole": "PROBABILITY",
+        "probabilityEngineUsage": true,
+        "modelType": "binomial",
+        "minimumSample": 1,
+        "sampleRecommendation": 20,
+        "reliabilityProfile": {
+          "weight": 1
+        },
+        "displayFormat": "percentage",
+        "denominatorInputId": "INP_RESET_TRIALS",
+        "numeratorInputId": "INP_RESET_AT_DIRECT",
+        "probabilities": {
+          "SET_1": 0.109,
+          "SET_2": 0.134,
+          "SET_4": 0.15,
+          "SET_5": 0.246,
+          "SET_6": 0.321
         },
         "sourceEvidenceRefs": [
           "SRC_NANA"
@@ -182,9 +231,34 @@
         ]
       },
       {
+        "id": "AUTO_RESET",
+        "title": "設定変更時",
+        "displayOrder": 2,
+        "items": [
+          {
+            "type": "input",
+            "inputId": "INP_RESET_TRIALS",
+            "label": "設定変更を確認できた実戦回数",
+            "config": {
+              "quickAdd": 1
+            },
+            "widget": "counter"
+          },
+          {
+            "type": "input",
+            "inputId": "INP_RESET_AT_DIRECT",
+            "label": "そのうちAT直撃",
+            "config": {
+              "quickAdd": 1
+            },
+            "widget": "counter"
+          }
+        ]
+      },
+      {
         "id": "AUTO_EVIDENCE",
         "title": "設定確定・否定情報",
-        "displayOrder": 2,
+        "displayOrder": 3,
         "items": [
           {
             "type": "input",
@@ -198,9 +272,9 @@
   },
   "selectionSummary": {
     "schemaVersion": "selection-summary-v1",
-    "evaluatedCount": 3,
-    "selectedCount": 1,
-    "rejectedCount": 2,
+    "evaluatedCount": 5,
+    "selectedCount": 2,
+    "rejectedCount": 3,
     "selected": [
       {
         "featureId": "FEAT_AT",
@@ -209,6 +283,15 @@
         "requiredTrials": {
           "value": 20308,
           "unit": "通常時ゲーム"
+        }
+      },
+      {
+        "featureId": "FEAT_RESET_AT_DIRECT",
+        "name": "設定変更時のAT直撃割合",
+        "reason": "設定変更後のAT直撃割合は10.9%～32.1%と差が大きい。設定変更を確認できた実戦だけに限定すれば正しい条件付きFeatureとして扱えるため採用。",
+        "requiredTrials": {
+          "value": 26,
+          "unit": "設定変更を確認できた実戦"
         }
       }
     ],
@@ -229,6 +312,15 @@
         "requiredTrials": {
           "value": 25532,
           "unit": "通常時ゲーム"
+        }
+      },
+      {
+        "featureId": "FEAT_CZ_REVIVE",
+        "name": "CZ敗北後の復活当選率",
+        "reason": "CZ敗北後の復活率は設定差を確認済みだが、必要試行が約729回と極端に重く天井CZ除外も必要なため不採用。",
+        "requiredTrials": {
+          "value": 729,
+          "unit": "CZ敗北回数"
         }
       }
     ]

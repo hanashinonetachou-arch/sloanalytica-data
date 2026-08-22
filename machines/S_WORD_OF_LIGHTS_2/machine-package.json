@@ -3,7 +3,7 @@
   "machine": {
     "schemaVersion": "2.0.0",
     "machineId": "S_WORD_OF_LIGHTS_2",
-    "machineDataVersion": "0.1.0",
+    "machineDataVersion": "0.1.1",
     "displayName": "ワードオブライツⅡ",
     "modelName": "S／ワードオブライツII／WF",
     "manufacturer": "エレコ",
@@ -41,7 +41,117 @@
         "unit": "回",
         "displayOrder": 2,
         "description": "実機連動機能で確認できる4枚役A（チェリー）の回数を入力してください。",
+        "defaultValue": "",
+        "minimum": 0
+      },
+      {
+        "id": "INP_BIG_COUNT",
+        "name": "BIG回数",
+        "type": "counter",
+        "category": "BONUS",
+        "unit": "回",
+        "displayOrder": 10,
         "defaultValue": 0,
+        "uiQuickAdd": 1,
+        "minimum": 0
+      },
+      {
+        "id": "INP_BIG_END_TEMOYAN",
+        "name": "テモヤン",
+        "type": "counter",
+        "category": "BIG_END",
+        "unit": "回",
+        "displayOrder": 20,
+        "defaultValue": 0,
+        "uiQuickAdd": 1,
+        "minimum": 0
+      },
+      {
+        "id": "INP_BIG_END_HETARE",
+        "name": "ヘターレ",
+        "type": "counter",
+        "category": "BIG_END",
+        "unit": "回",
+        "displayOrder": 21,
+        "defaultValue": 0,
+        "uiQuickAdd": 1,
+        "minimum": 0
+      },
+      {
+        "id": "INP_BIG_END_HEIBON",
+        "name": "ヘーボン",
+        "type": "counter",
+        "category": "BIG_END",
+        "unit": "回",
+        "displayOrder": 22,
+        "defaultValue": 0,
+        "uiQuickAdd": 1,
+        "minimum": 0
+      },
+      {
+        "id": "INP_BIG_END_SUNRISE",
+        "name": "サンライズ",
+        "type": "counter",
+        "category": "BIG_END",
+        "unit": "回",
+        "displayOrder": 23,
+        "defaultValue": 0,
+        "uiQuickAdd": 1,
+        "minimum": 0
+      },
+      {
+        "id": "INP_MAGIC_FLAME",
+        "name": "Flame",
+        "type": "counter",
+        "category": "MAGIC",
+        "unit": "回",
+        "displayOrder": 30,
+        "defaultValue": 0,
+        "uiQuickAdd": 1,
+        "minimum": 0
+      },
+      {
+        "id": "INP_MAGIC_BLIZZARD",
+        "name": "Blizzard",
+        "type": "counter",
+        "category": "MAGIC",
+        "unit": "回",
+        "displayOrder": 31,
+        "defaultValue": 0,
+        "uiQuickAdd": 1,
+        "minimum": 0
+      },
+      {
+        "id": "INP_MAGIC_METEO",
+        "name": "Meteo",
+        "type": "counter",
+        "category": "MAGIC",
+        "unit": "回",
+        "displayOrder": 32,
+        "defaultValue": 0,
+        "uiQuickAdd": 1,
+        "minimum": 0
+      },
+      {
+        "id": "INP_MAGIC_WORD",
+        "name": "WARD OF LIGHTS",
+        "type": "counter",
+        "category": "MAGIC",
+        "unit": "回",
+        "displayOrder": 33,
+        "defaultValue": 0,
+        "uiQuickAdd": 1,
+        "minimum": 0
+      },
+      {
+        "id": "INP_MAGIC_THUNDER",
+        "name": "THUNDER V",
+        "type": "counter",
+        "category": "MAGIC",
+        "unit": "回",
+        "displayOrder": 34,
+        "defaultValue": 0,
+        "uiQuickAdd": 1,
         "minimum": 0
       }
     ]
@@ -49,6 +159,35 @@
   "features": {
     "schemaVersion": "2.0.0",
     "features": [
+      {
+        "featureId": "FEAT_BIG",
+        "name": "BIG初当り",
+        "adoptionCategory": "INCLUDE_SUPPORT",
+        "calculationRole": "PROBABILITY",
+        "probabilityEngineUsage": true,
+        "modelType": "binomial",
+        "minimumSample": 1,
+        "sampleRecommendation": 5000,
+        "reliabilityProfile": {
+          "weight": 1
+        },
+        "suppressedByFeatureIds": [
+          "FEAT_ROLE_4A"
+        ],
+        "displayFormat": "ratio_1_over_n",
+        "denominatorInputId": "INP_NORMAL_GAMES",
+        "numeratorInputId": "INP_BIG_COUNT",
+        "probabilities": {
+          "SET_1": 0.004464285714285714,
+          "SET_2": 0.004784688995215311,
+          "SET_5": 0.005154639175257732,
+          "SET_6": 0.00558659217877095
+        },
+        "sourceEvidenceRefs": [
+          "SRC_PWORLD",
+          "SRC_NANA"
+        ]
+      },
       {
         "featureId": "FEAT_ROLE_4A",
         "name": "4枚役A",
@@ -74,12 +213,194 @@
           "SRC_PWORLD",
           "SRC_HISSHO"
         ]
+      },
+      {
+        "featureId": "FEAT_BIG_END_SCREEN",
+        "name": "BIG後CTルーレット失敗画面",
+        "adoptionCategory": "INCLUDE_SUPPORT",
+        "calculationRole": "PROBABILITY",
+        "probabilityEngineUsage": true,
+        "modelType": "multinomial",
+        "minimumSample": 1,
+        "sampleRecommendation": 20,
+        "reliabilityProfile": {
+          "weight": 1
+        },
+        "inputTransform": "sum_inputs_to_trials",
+        "numeratorInputId": "INP_BIG_END_TEMOYAN",
+        "denominatorInputIds": [
+          "INP_BIG_END_TEMOYAN",
+          "INP_BIG_END_HETARE",
+          "INP_BIG_END_HEIBON"
+        ],
+        "categoryInputIds": [
+          "INP_BIG_END_HETARE",
+          "INP_BIG_END_HEIBON"
+        ],
+        "probabilities": {},
+        "categoryLabels": [
+          "TEMOYAN",
+          "HETARE",
+          "HEIBON"
+        ],
+        "categoryProbabilities": {
+          "SET_1": [
+            0.547,
+            0.328,
+            0.125
+          ],
+          "SET_2": [
+            0.31931931931931934,
+            0.5325325325325325,
+            0.14814814814814814
+          ],
+          "SET_5": [
+            0.3085655314757482,
+            0.5139318885448917,
+            0.17750257997936017
+          ],
+          "SET_6": [
+            0.4989669421487603,
+            0.29958677685950413,
+            0.20144628099173553
+          ]
+        },
+        "categoryConditioning": {
+          "excludedCategories": [
+            "SUNRISE"
+          ],
+          "normalization": "RENORMALIZE_INCLUDED"
+        },
+        "sourceEvidenceRefs": [
+          "SRC_NANA"
+        ]
+      },
+      {
+        "featureId": "FEAT_ADJUST_MAGIC",
+        "name": "枚数調整成功時の魔法",
+        "adoptionCategory": "INCLUDE_SUPPORT",
+        "calculationRole": "PROBABILITY",
+        "probabilityEngineUsage": true,
+        "modelType": "multinomial",
+        "minimumSample": 1,
+        "sampleRecommendation": 10,
+        "reliabilityProfile": {
+          "weight": 1
+        },
+        "inputTransform": "sum_inputs_to_trials",
+        "numeratorInputId": "INP_MAGIC_FLAME",
+        "denominatorInputIds": [
+          "INP_MAGIC_FLAME",
+          "INP_MAGIC_BLIZZARD"
+        ],
+        "categoryInputIds": [
+          "INP_MAGIC_BLIZZARD"
+        ],
+        "probabilities": {},
+        "categoryLabels": [
+          "FLAME",
+          "BLIZZARD"
+        ],
+        "categoryProbabilities": {
+          "SET_1": [
+            0.5,
+            0.5
+          ],
+          "SET_2": [
+            0.4250764525993884,
+            0.5749235474006116
+          ],
+          "SET_5": [
+            0.5750000000000001,
+            0.425
+          ],
+          "SET_6": [
+            0.425,
+            0.5750000000000001
+          ]
+        },
+        "categoryConditioning": {
+          "excludedCategories": [
+            "METEO",
+            "WORD",
+            "THUNDER"
+          ],
+          "normalization": "RENORMALIZE_INCLUDED"
+        },
+        "sourceEvidenceRefs": [
+          "SRC_NANA"
+        ]
       }
     ]
   },
   "evidence": {
     "version": "1.0.0",
-    "evidences": [],
+    "evidences": [
+      {
+        "id": "EVI_SUNRISE",
+        "name": "BIG後CTルーレット失敗画面 サンライズ",
+        "displayName": "BIG後CTルーレット失敗画面 サンライズ",
+        "inputId": "INP_BIG_END_SUNRISE",
+        "confirmedSettings": [
+          "SET_5",
+          "SET_6"
+        ],
+        "deniedSettings": [
+          "SET_1",
+          "SET_2"
+        ],
+        "hasImage": false,
+        "type": "SETTING_CONFIRMATION"
+      },
+      {
+        "id": "EVI_METEO",
+        "name": "枚数調整 Meteo",
+        "displayName": "枚数調整 Meteo",
+        "inputId": "INP_MAGIC_METEO",
+        "confirmedSettings": [
+          "SET_2",
+          "SET_5",
+          "SET_6"
+        ],
+        "deniedSettings": [
+          "SET_1"
+        ],
+        "hasImage": false,
+        "type": "SETTING_CONFIRMATION"
+      },
+      {
+        "id": "EVI_WORD",
+        "name": "枚数調整 WARD OF LIGHTS",
+        "displayName": "枚数調整 WARD OF LIGHTS",
+        "inputId": "INP_MAGIC_WORD",
+        "confirmedSettings": [
+          "SET_1",
+          "SET_5",
+          "SET_6"
+        ],
+        "deniedSettings": [
+          "SET_2"
+        ],
+        "hasImage": false,
+        "type": "SETTING_CONFIRMATION"
+      },
+      {
+        "id": "EVI_THUNDER",
+        "name": "枚数調整 THUNDER V",
+        "displayName": "枚数調整 THUNDER V",
+        "inputId": "INP_MAGIC_THUNDER",
+        "confirmedSettings": [
+          "SET_6"
+        ],
+        "deniedSettings": [
+          "SET_1",
+          "SET_2",
+          "SET_5"
+        ],
+        "hasImage": false,
+        "type": "SETTING_CONFIRMATION"
+      }
+    ],
     "sources": [
       {
         "id": "SRC_PWORLD",
@@ -124,15 +445,135 @@
             "widget": "counter"
           }
         ]
+      },
+      {
+        "id": "AUTO_BONUS",
+        "title": "ボーナス",
+        "displayOrder": 2,
+        "items": [
+          {
+            "type": "input",
+            "inputId": "INP_BIG_COUNT",
+            "label": "BIG回数",
+            "config": {
+              "quickAdd": 1
+            },
+            "widget": "counter"
+          }
+        ]
+      },
+      {
+        "id": "AUTO_BIG_END",
+        "title": "BIG後CTルーレット失敗画面",
+        "displayOrder": 3,
+        "items": [
+          {
+            "type": "input",
+            "inputId": "INP_BIG_END_TEMOYAN",
+            "label": "テモヤン",
+            "config": {
+              "quickAdd": 1
+            },
+            "widget": "counter"
+          },
+          {
+            "type": "input",
+            "inputId": "INP_BIG_END_HETARE",
+            "label": "ヘターレ",
+            "config": {
+              "quickAdd": 1
+            },
+            "widget": "counter"
+          },
+          {
+            "type": "input",
+            "inputId": "INP_BIG_END_HEIBON",
+            "label": "ヘーボン",
+            "config": {
+              "quickAdd": 1
+            },
+            "widget": "counter"
+          },
+          {
+            "type": "input",
+            "inputId": "INP_BIG_END_SUNRISE",
+            "label": "サンライズ",
+            "config": {
+              "quickAdd": 1
+            },
+            "widget": "counter"
+          }
+        ]
+      },
+      {
+        "id": "AUTO_MAGIC",
+        "title": "枚数調整成功時の魔法",
+        "displayOrder": 4,
+        "items": [
+          {
+            "type": "input",
+            "inputId": "INP_MAGIC_FLAME",
+            "label": "Flame",
+            "config": {
+              "quickAdd": 1
+            },
+            "widget": "counter"
+          },
+          {
+            "type": "input",
+            "inputId": "INP_MAGIC_BLIZZARD",
+            "label": "Blizzard",
+            "config": {
+              "quickAdd": 1
+            },
+            "widget": "counter"
+          },
+          {
+            "type": "input",
+            "inputId": "INP_MAGIC_METEO",
+            "label": "Meteo",
+            "config": {
+              "quickAdd": 1
+            },
+            "widget": "counter"
+          },
+          {
+            "type": "input",
+            "inputId": "INP_MAGIC_WORD",
+            "label": "WARD OF LIGHTS",
+            "config": {
+              "quickAdd": 1
+            },
+            "widget": "counter"
+          },
+          {
+            "type": "input",
+            "inputId": "INP_MAGIC_THUNDER",
+            "label": "THUNDER V",
+            "config": {
+              "quickAdd": 1
+            },
+            "widget": "counter"
+          }
+        ]
       }
     ]
   },
   "selectionSummary": {
     "schemaVersion": "selection-summary-v1",
-    "evaluatedCount": 6,
-    "selectedCount": 1,
-    "rejectedCount": 5,
+    "evaluatedCount": 8,
+    "selectedCount": 4,
+    "rejectedCount": 4,
     "selected": [
+      {
+        "featureId": "FEAT_BIG",
+        "name": "BIG初当り",
+        "reason": "BIGは設定差があり、実機連動小役を利用しない場合のフォールバックとして採用。4枚役Aが利用できる場合は重複を避けるため自動停止する。",
+        "requiredTrials": {
+          "value": 29009,
+          "unit": "通常時ゲーム"
+        }
+      },
       {
         "featureId": "FEAT_ROLE_4A",
         "name": "4枚役A",
@@ -141,18 +582,27 @@
           "value": 127555,
           "unit": "通常時ゲーム"
         }
+      },
+      {
+        "featureId": "FEAT_BIG_END_SCREEN",
+        "name": "BIG後CTルーレット失敗画面",
+        "reason": "CTルーレット失敗画面は設定別振り分けが公開されており、設定5以上のサンライズをEvidenceへ分離して残り3種を数値推測に採用。",
+        "requiredTrials": {
+          "value": 169,
+          "unit": "CTルーレット失敗画面"
+        }
+      },
+      {
+        "featureId": "FEAT_ADJUST_MAGIC",
+        "name": "枚数調整成功時の魔法",
+        "reason": "枚数調整成功時の魔法は設定別振り分けが公開されている。確定・否定系3種をEvidenceへ分離し、Flame/Blizzardの振り分けを数値推測に採用。",
+        "requiredTrials": {
+          "value": 324,
+          "unit": "枚数調整成功回数"
+        }
       }
     ],
     "rejected": [
-      {
-        "featureId": "FEAT_BIG",
-        "name": "BIG初当り",
-        "reason": "BIGは設定差小役との依存を安全に分解するまで初版では不採用。",
-        "requiredTrials": {
-          "value": 29009,
-          "unit": "通常時ゲーム"
-        }
-      },
       {
         "featureId": "FEAT_AT",
         "name": "AT初当り",

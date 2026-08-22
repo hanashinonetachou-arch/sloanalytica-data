@@ -3,7 +3,7 @@
   "machine": {
     "schemaVersion": "2.0.0",
     "machineId": "S_NINJA_JAJAMARU",
-    "machineDataVersion": "0.1.0",
+    "machineDataVersion": "0.1.1",
     "displayName": "SLOT忍者じゃじゃ丸くん",
     "modelName": null,
     "manufacturer": "エレコ / ユニバーサルエンターテインメント",
@@ -30,7 +30,7 @@
         "category": "PRIMARY",
         "unit": "G",
         "displayOrder": 1,
-        "description": "公開REG初当り確率と同じ集計範囲のゲーム数を入力してください。実機表示Gとの定義一致は未確認です。",
+        "description": "公開REG初当り確率と同じ集計範囲のゲーム数を入力してください。",
         "defaultValue": 0,
         "minimum": 0
       },
@@ -42,6 +42,29 @@
         "unit": "回",
         "displayOrder": 2,
         "defaultValue": 0,
+        "minimum": 0
+      },
+      {
+        "id": "INP_SAKURA_MISS_TRIALS",
+        "name": "ランプ点灯中のハズレ回数",
+        "type": "counter",
+        "category": "SAKURA",
+        "unit": "回",
+        "displayOrder": 3,
+        "description": "CZ中を除き、さくらランプ点灯中にハズレが成立した回数を数えてください。",
+        "defaultValue": 0,
+        "minimum": 0
+      },
+      {
+        "id": "INP_SAKURA_CLEAR_COUNT",
+        "name": "ハズレ時のランプ消灯回数",
+        "type": "counter",
+        "category": "SAKURA",
+        "unit": "回",
+        "displayOrder": 4,
+        "description": "上の試行のうち、ハズレ成立時に見た目上さくらランプが消灯した回数を数えてください。",
+        "defaultValue": 0,
+        "parentInputId": "INP_SAKURA_MISS_TRIALS",
         "minimum": 0
       },
       {
@@ -102,6 +125,33 @@
           "SRC_PWORLD",
           "SRC_NANA"
         ]
+      },
+      {
+        "featureId": "FEAT_SAKURA_VISIBLE_CLEAR",
+        "name": "ハズレ時のさくらランプ消灯率",
+        "adoptionCategory": "INCLUDE_SUPPORT",
+        "calculationRole": "PROBABILITY",
+        "probabilityEngineUsage": true,
+        "modelType": "binomial",
+        "minimumSample": 1,
+        "sampleRecommendation": 100,
+        "reliabilityProfile": {
+          "weight": 1
+        },
+        "displayFormat": "percent",
+        "denominatorInputId": "INP_SAKURA_MISS_TRIALS",
+        "numeratorInputId": "INP_SAKURA_CLEAR_COUNT",
+        "probabilities": {
+          "SET_1": 0.813,
+          "SET_2": 0.797,
+          "SET_3": 0.781,
+          "SET_5": 0.766,
+          "SET_6": 0.75
+        },
+        "sourceEvidenceRefs": [
+          "SRC_PWORLD",
+          "SRC_1GEKI"
+        ]
       }
     ]
   },
@@ -156,6 +206,13 @@
         "pageName": "SLOT忍者じゃじゃ丸くん 設定判別",
         "url": "https://nana-press.com/kaiseki/machine/721/20062/",
         "checkedAt": "2026-08-22"
+      },
+      {
+        "id": "SRC_1GEKI",
+        "classification": "ANALYSIS",
+        "pageName": "SLOT忍者じゃじゃ丸くん 設定差・設定判別",
+        "url": "https://1geki.jp/slot/s_jajamarukun_ha/0/",
+        "checkedAt": "2026-08-22"
       }
     ]
   },
@@ -181,9 +238,28 @@
         ]
       },
       {
+        "id": "AUTO_SAKURA",
+        "title": "さくらランプ",
+        "displayOrder": 2,
+        "items": [
+          {
+            "type": "input",
+            "inputId": "INP_SAKURA_MISS_TRIALS",
+            "label": "ランプ点灯中のハズレ回数",
+            "widget": "counter"
+          },
+          {
+            "type": "input",
+            "inputId": "INP_SAKURA_CLEAR_COUNT",
+            "label": "ハズレ時のランプ消灯回数",
+            "widget": "counter"
+          }
+        ]
+      },
+      {
         "id": "AUTO_EVIDENCE",
         "title": "設定確定・否定情報",
-        "displayOrder": 2,
+        "displayOrder": 3,
         "items": [
           {
             "type": "input",
@@ -197,17 +273,26 @@
   },
   "selectionSummary": {
     "schemaVersion": "selection-summary-v1",
-    "evaluatedCount": 4,
-    "selectedCount": 1,
+    "evaluatedCount": 5,
+    "selectedCount": 2,
     "rejectedCount": 3,
     "selected": [
       {
         "featureId": "FEAT_REG",
         "name": "REG初当り",
-        "reason": "REGは1/362.0～1/256.2とBIGより相対設定差が大きく、初版の単一ボーナスFeatureとして採用。",
+        "reason": "REGは1/362.0～1/256.2とBIGより相対設定差が大きく、継続観測しやすいため採用。",
         "requiredTrials": {
           "value": 18573,
           "unit": "ボーナス初当り集計ゲーム"
+        }
+      },
+      {
+        "featureId": "FEAT_SAKURA_VISIBLE_CLEAR",
+        "name": "ハズレ時のさくらランプ消灯率",
+        "reason": "ハズレ時の見た目上の消灯率は81.3%～75.0%と設定差があり、CZ中を除けば分子・分母を直接数えられるため採用。Difficultyは標準実戦Gから対象ハズレ試行数を安全に換算しにくいため除外。",
+        "requiredTrials": {
+          "value": 314,
+          "unit": "さくらランプ点灯中のハズレ成立回数"
         }
       }
     ],
@@ -215,7 +300,7 @@
       {
         "featureId": "FEAT_BIG",
         "name": "BIG初当り",
-        "reason": "BIGはREGとの排他的Multinomial化を優先し、初版では単独採用しない。",
+        "reason": "BIGはREGとの排他的Multinomial化を優先し、単独採用しない。",
         "requiredTrials": {
           "value": 14370,
           "unit": "ボーナス初当り集計ゲーム"
