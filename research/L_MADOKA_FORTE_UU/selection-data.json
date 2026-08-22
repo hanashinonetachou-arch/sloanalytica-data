@@ -1,1 +1,424 @@
-{"schemaVersion":"selection-data-v1","machineId":"L_MADOKA_FORTE_UU","machineDataVersion":"0.1.0","inputs":[{"id":"INP_NORMAL_GAMES","name":"通常ゲーム数","type":"integer","category":"PRIMARY","unit":"G","displayOrder":1,"defaultValue":0},{"id":"INP_BONUS_COUNT","name":"ボーナス初当り回数","type":"counter","category":"PRIMARY","unit":"回","displayOrder":2,"defaultValue":0},{"id":"INP_SEATED_GAMES","name":"着席時ゲーム数","type":"integer","category":"PREDECESSOR","unit":"G","displayOrder":10,"description":"データカウンター仕様が公開ボーナス初当り確率と合う場合のみ入力。","defaultValue":""},{"id":"INP_SEATED_BONUS_COUNT","name":"着席時ボーナス初当り回数","type":"counter","category":"PREDECESSOR","unit":"回","displayOrder":11,"defaultValue":""},{"id":"INP_ROLE_GAMES","name":"小役集計ゲーム数","type":"integer","category":"ROLE","unit":"G","displayOrder":20,"defaultValue":0},{"id":"INP_WEAK_CHERRY","name":"弱チェリー回数","type":"counter","category":"ROLE","unit":"回","displayOrder":21,"defaultValue":0},{"id":"INP_BONUS_VOICE_TRIALS","name":"ボイス確認回数","type":"counter","category":"BONUS_END_VOICE","unit":"回","displayOrder":30,"description":"BIG・プチ・エピソードボーナス終了時にサブ液晶をタッチして確認した回数。","defaultValue":0},{"id":"INP_VOICE_EVEN","name":"どうなることやら","type":"counter","category":"BONUS_END_VOICE","unit":"回","displayOrder":31,"defaultValue":0},{"id":"INP_VOICE_HIGH_WEAK","name":"僕たちのノルマに近づいたかな","type":"counter","category":"BONUS_END_VOICE","unit":"回","displayOrder":32,"defaultValue":0},{"id":"INP_VOICE_HIGH_STRONG","name":"魔法少女になる決心がついたら…","type":"counter","category":"BONUS_END_VOICE","unit":"回","displayOrder":33,"defaultValue":0},{"id":"INP_VOICE_SET6","name":"私、魔法少女になって人の役に立てるっていうのが、とっても嬉しい","type":"counter","category":"BONUS_END_VOICE","unit":"回","displayOrder":34,"defaultValue":0},{"id":"INP_PETIT_BIG_TRIALS","name":"BIG昇格抽選 対象回数","type":"counter","category":"PETIT_BIG_UPGRADE","unit":"回","displayOrder":40,"description":"まどかチャンス3G目の小役非入賞で、プチボーナス当選対象となった回数を入力します。","defaultValue":0},{"id":"INP_PETIT_BIG_UPGRADE","name":"BIG昇格回数","type":"counter","category":"PETIT_BIG_UPGRADE","unit":"回","displayOrder":41,"description":"対象ケースからBIGへ昇格した回数を入力します。","defaultValue":0}],"features":[{"researchFeatureId":"RF_BONUS_INITIAL","featureId":"FEAT_BONUS_INITIAL","adoptionCategory":"INCLUDE_PRIMARY","numeratorInputId":"INP_BONUS_COUNT","denominatorInputId":"INP_NORMAL_GAMES","minimumSample":1,"sampleRecommendation":5000,"weight":1,"displayFormat":"ratio_1_over_n","difficultyExposure":{"mode":"per_game","factor":1,"quality":"ESTIMATED","basisId":"NORMAL_GAMES"},"difficultyParticipation":"INCLUDE","userReason":"ボーナス初当りは設定差が大きく主軸採用。"},{"researchFeatureId":"RF_BONUS_PREDECESSOR","featureId":"FEAT_BONUS_PREDECESSOR","adoptionCategory":"INCLUDE_SUPPORT","numeratorInputId":"INP_SEATED_BONUS_COUNT","denominatorInputId":"INP_SEATED_GAMES","minimumSample":1,"sampleRecommendation":1000,"weight":1,"displayFormat":"ratio_1_over_n","difficultyParticipation":"EXCLUDE","userReason":"カウンター仕様が適切なら着席前ボーナスを補助利用。"},{"researchFeatureId":"RF_WEAK_CHERRY","featureId":"FEAT_WEAK_CHERRY","adoptionCategory":"INCLUDE_SUPPORT","numeratorInputId":"INP_WEAK_CHERRY","denominatorInputId":"INP_ROLE_GAMES","minimumSample":1,"sampleRecommendation":5000,"weight":1,"displayFormat":"ratio_1_over_n","difficultyExposure":{"mode":"per_game","factor":1,"quality":"ESTIMATED","basisId":"ROLE_GAMES"},"difficultyParticipation":"INCLUDE","userReason":"弱チェリーは高頻度で継続観測できるため補助採用。"},{"researchFeatureId":"RF_BONUS_END_VOICE","featureId":"FEAT_BONUS_END_VOICE","adoptionCategory":"INCLUDE_SUPPORT","categoryInputIds":["INP_VOICE_EVEN","INP_VOICE_HIGH_WEAK","INP_VOICE_HIGH_STRONG","INP_VOICE_SET6"],"denominatorInputId":"INP_BONUS_VOICE_TRIALS","residualCategoryLabel":"むにゃむにゃ","minimumSample":1,"sampleRecommendation":20,"weight":1,"difficultyParticipation":"EXCLUDE","userReason":"終了ボイスは設定別の全分布が公開され、奇偶・高設定傾向を一回ごとに利用できるため採用。通常Gからボイス試行数を固定換算しないためDifficultyは除外。"},{"researchFeatureId":"RF_PETIT_BIG_UPGRADE","featureId":"FEAT_PETIT_BIG_UPGRADE","adoptionCategory":"INCLUDE_SUPPORT","numeratorInputId":"INP_PETIT_BIG_UPGRADE","denominatorInputId":"INP_PETIT_BIG_TRIALS","minimumSample":1,"sampleRecommendation":40,"weight":1,"displayFormat":"percent","difficultyParticipation":"EXCLUDE","userReason":"プチボーナス当選時のBIG昇格率は設定1の6.3%から設定6の19.9%まで約3.2倍。対象条件を実戦で判別できるため補助採用。","difficultyExclusionReason":"対象ケースの発生回数を通常ゲーム数へ安定換算できないためDifficultyには含めない。"}],"rejectedElements":[{"id":"REJECTED_RESET_CZ_CONTINUATION","name":"設定変更後のCZ継続率抽選","reason":"設定差はありますが、設定変更後に原則1回しか得られないリセット依存サンプルです。1日実戦で試行回数を増やせず、据え置き判定も絡むため数値推測Featureには使用しません。"},{"id":"REJECTED_BIG_CEILING","name":"BIGボーナス間の規定G数振り分け","reason":"設定差はありますが、1日に観測できる独立したBIG間区間が少なく、着席時点で前回BIGからのゲーム数を正確に引き継げない場合もあります。サンプル不足と開始条件の不確実性から不採用です。"},{"id":"REJECTED_SOUL_GEM_LIGHTING","name":"ソウルジェム点灯抽選","reason":"通常時・まどかチャンス中、成立役や状況ごとに条件付き抽選が分かれます。同一条件の母数を実戦で漏れなく作る入力負荷が高く、条件混在による観測誤差を避けるため不採用です。"},{"id":"REJECTED_CZ_NEXT_ADD","name":"CZ終了時の次回CZ継続率加算抽選","reason":"終了時の継続率50〜80%など内部条件ごとに抽選値が異なります。元の内部継続率を直接観測できないため正しい条件付き分母を作れず、不採用です。"}],"evidence":[],"evidenceUi":{"groups":[{"groupId":"SETTING_FLOOR","label":"確認した設定下限","selectionMode":"single","normalizationMode":"ALLOWED_SETTINGS","options":[{"value":"SET_2_OR_HIGHER","label":"設定2以上","allowedSettings":["SET_2","SET_3","SET_4","SET_5","SET_6"],"sourceEvidenceIds":["RE_PETIT_HOMURA_2PLUS"]},{"value":"SET_5_OR_HIGHER","label":"設定5以上","allowedSettings":["SET_5","SET_6"],"sourceEvidenceIds":["RE_PETIT_KYUBEY_5PLUS"]},{"value":"SET_6","label":"設定6","allowedSettings":["SET_6"],"sourceEvidenceIds":["RE_PETIT_ULTIMATE_6","RE_VOICE_6"]}]},{"groupId":"SETTING_DENIAL","label":"確認した設定否定","selectionMode":"multi","normalizationMode":"ALLOWED_SETTINGS","options":[{"value":"CZ_END_DENY_2","label":"CZ終了時：設定2否定","excludedSettings":["SET_2"],"sourceEvidenceIds":["RE_CZ_END_DENY_2"]},{"value":"CZ_END_DENY_1_3","label":"CZ終了時：設定1・3否定","excludedSettings":["SET_1","SET_3"],"sourceEvidenceIds":["RE_CZ_END_DENY_1_3"]}]},{"groupId":"PETIT_CHARACTER_DENIAL","label":"プチボ中キャラ紹介（設定下限・否定）","selectionMode":"multi","normalizationMode":"ALLOWED_SETTINGS","options":[{"value":"PETIT_2PLUS_DENY3","label":"設定2以上・設定3否定","allowedSettings":["SET_2","SET_4","SET_5","SET_6"],"excludedSettings":["SET_1","SET_3"],"sourceEvidenceIds":["RE_PETIT_2PLUS_DENY3"]},{"value":"PETIT_2PLUS_DENY4","label":"設定2以上・設定4否定","allowedSettings":["SET_2","SET_3","SET_5","SET_6"],"excludedSettings":["SET_1","SET_4"],"sourceEvidenceIds":["RE_PETIT_2PLUS_DENY4"]},{"value":"PETIT_2PLUS_DENY5","label":"設定2以上・設定5否定","allowedSettings":["SET_2","SET_3","SET_4","SET_6"],"excludedSettings":["SET_1","SET_5"],"sourceEvidenceIds":["RE_PETIT_2PLUS_DENY5"]},{"value":"PETIT_3PLUS_DENY4","label":"設定3以上・設定4否定","allowedSettings":["SET_3","SET_5","SET_6"],"excludedSettings":["SET_1","SET_2","SET_4"],"sourceEvidenceIds":["RE_PETIT_3PLUS_DENY4"]},{"value":"PETIT_3PLUS_DENY5","label":"設定3以上・設定5否定","allowedSettings":["SET_3","SET_4","SET_6"],"excludedSettings":["SET_1","SET_2","SET_5"],"sourceEvidenceIds":["RE_PETIT_3PLUS_DENY5"]}]}]},"evidenceReview":{"policyVersion":1,"exclusions":[]},"uiCategoryLabels":{"PRIMARY":"ボーナス初当り","PREDECESSOR":"着席時データ","ROLE":"小役","BONUS_END_VOICE":"ボーナス終了時ボイス","PETIT_BIG_UPGRADE":"プチボーナス BIG昇格"},"difficultyAnalysis":{"targetGameBasis":{"basisId":"NORMAL_GAMES","label":"通常ゲーム数","quality":"ESTIMATED"},"calibrationAllowedExposureQualities":["EXACT","DERIVED","ESTIMATED"]}}
+{
+  "schemaVersion": "selection-data-v1",
+  "machineId": "L_MADOKA_FORTE_UU",
+  "machineDataVersion": "0.1.0",
+  "inputs": [
+    {
+      "id": "INP_NORMAL_GAMES",
+      "name": "通常ゲーム数",
+      "type": "integer",
+      "category": "PRIMARY",
+      "unit": "G",
+      "displayOrder": 1,
+      "defaultValue": 0
+    },
+    {
+      "id": "INP_BONUS_COUNT",
+      "name": "ボーナス初当り回数",
+      "type": "counter",
+      "category": "PRIMARY",
+      "unit": "回",
+      "displayOrder": 2,
+      "defaultValue": 0
+    },
+    {
+      "id": "INP_SEATED_GAMES",
+      "name": "着席時ゲーム数",
+      "type": "integer",
+      "category": "PREDECESSOR",
+      "unit": "G",
+      "displayOrder": 10,
+      "description": "データカウンター仕様が公開ボーナス初当り確率と合う場合のみ入力。",
+      "defaultValue": ""
+    },
+    {
+      "id": "INP_SEATED_BONUS_COUNT",
+      "name": "着席時ボーナス初当り回数",
+      "type": "counter",
+      "category": "PREDECESSOR",
+      "unit": "回",
+      "displayOrder": 11,
+      "defaultValue": ""
+    },
+    {
+      "id": "INP_ROLE_GAMES",
+      "name": "小役集計ゲーム数",
+      "type": "integer",
+      "category": "ROLE",
+      "unit": "G",
+      "displayOrder": 20,
+      "defaultValue": 0
+    },
+    {
+      "id": "INP_WEAK_CHERRY",
+      "name": "弱チェリー回数",
+      "type": "counter",
+      "category": "ROLE",
+      "unit": "回",
+      "displayOrder": 21,
+      "defaultValue": 0
+    },
+    {
+      "id": "INP_BONUS_VOICE_TRIALS",
+      "name": "ボイス確認回数",
+      "type": "counter",
+      "category": "BONUS_END_VOICE",
+      "unit": "回",
+      "displayOrder": 30,
+      "description": "BIG・プチ・エピソードボーナス終了時にサブ液晶をタッチして確認した回数。",
+      "defaultValue": 0
+    },
+    {
+      "id": "INP_VOICE_EVEN",
+      "name": "どうなることやら",
+      "type": "counter",
+      "category": "BONUS_END_VOICE",
+      "unit": "回",
+      "displayOrder": 31,
+      "defaultValue": 0
+    },
+    {
+      "id": "INP_VOICE_HIGH_WEAK",
+      "name": "僕たちのノルマに近づいたかな",
+      "type": "counter",
+      "category": "BONUS_END_VOICE",
+      "unit": "回",
+      "displayOrder": 32,
+      "defaultValue": 0
+    },
+    {
+      "id": "INP_VOICE_HIGH_STRONG",
+      "name": "魔法少女になる決心がついたら…",
+      "type": "counter",
+      "category": "BONUS_END_VOICE",
+      "unit": "回",
+      "displayOrder": 33,
+      "defaultValue": 0
+    },
+    {
+      "id": "INP_VOICE_SET6",
+      "name": "私、魔法少女になって人の役に立てるっていうのが、とっても嬉しい",
+      "type": "counter",
+      "category": "BONUS_END_VOICE",
+      "unit": "回",
+      "displayOrder": 34,
+      "defaultValue": 0
+    },
+    {
+      "id": "INP_PETIT_BIG_TRIALS",
+      "name": "BIG昇格抽選 対象回数",
+      "type": "counter",
+      "category": "PETIT_BIG_UPGRADE",
+      "unit": "回",
+      "displayOrder": 40,
+      "description": "まどかチャンス3G目の小役非入賞で、プチボーナス当選対象となった回数を入力します。",
+      "defaultValue": 0
+    },
+    {
+      "id": "INP_PETIT_BIG_UPGRADE",
+      "name": "BIG昇格回数",
+      "type": "counter",
+      "category": "PETIT_BIG_UPGRADE",
+      "unit": "回",
+      "displayOrder": 41,
+      "description": "対象ケースからBIGへ昇格した回数を入力します。",
+      "defaultValue": 0
+    }
+  ],
+  "features": [
+    {
+      "researchFeatureId": "RF_BONUS_INITIAL",
+      "featureId": "FEAT_BONUS_INITIAL",
+      "adoptionCategory": "INCLUDE_PRIMARY",
+      "numeratorInputId": "INP_BONUS_COUNT",
+      "denominatorInputId": "INP_NORMAL_GAMES",
+      "minimumSample": 1,
+      "sampleRecommendation": 5000,
+      "weight": 1,
+      "displayFormat": "ratio_1_over_n",
+      "difficultyExposure": {
+        "mode": "per_game",
+        "factor": 1,
+        "quality": "ESTIMATED",
+        "basisId": "NORMAL_GAMES"
+      },
+      "difficultyParticipation": "INCLUDE",
+      "userReason": "ボーナス初当りは設定差が大きく主軸採用。"
+    },
+    {
+      "researchFeatureId": "RF_BONUS_PREDECESSOR",
+      "featureId": "FEAT_BONUS_PREDECESSOR",
+      "adoptionCategory": "INCLUDE_SUPPORT",
+      "numeratorInputId": "INP_SEATED_BONUS_COUNT",
+      "denominatorInputId": "INP_SEATED_GAMES",
+      "minimumSample": 1,
+      "sampleRecommendation": 1000,
+      "weight": 1,
+      "displayFormat": "ratio_1_over_n",
+      "difficultyParticipation": "EXCLUDE",
+      "userReason": "カウンター仕様が適切なら着席前ボーナスを補助利用。"
+    },
+    {
+      "researchFeatureId": "RF_WEAK_CHERRY",
+      "featureId": "FEAT_WEAK_CHERRY",
+      "adoptionCategory": "INCLUDE_SUPPORT",
+      "numeratorInputId": "INP_WEAK_CHERRY",
+      "denominatorInputId": "INP_ROLE_GAMES",
+      "minimumSample": 1,
+      "sampleRecommendation": 5000,
+      "weight": 1,
+      "displayFormat": "ratio_1_over_n",
+      "difficultyParticipation": "EXCLUDE",
+      "userReason": "弱チェリーは高頻度で継続観測できるため補助採用。",
+      "difficultyExclusionReason": "専用の小役集計ゲーム数と設定帯判別Gの対応率を公開情報から一意に導出できないため、ゲーム数ベースDifficultyから除外。推測計算には採用する。"
+    },
+    {
+      "researchFeatureId": "RF_BONUS_END_VOICE",
+      "featureId": "FEAT_BONUS_END_VOICE",
+      "adoptionCategory": "INCLUDE_SUPPORT",
+      "categoryInputIds": [
+        "INP_VOICE_EVEN",
+        "INP_VOICE_HIGH_WEAK",
+        "INP_VOICE_HIGH_STRONG",
+        "INP_VOICE_SET6"
+      ],
+      "denominatorInputId": "INP_BONUS_VOICE_TRIALS",
+      "residualCategoryLabel": "むにゃむにゃ",
+      "minimumSample": 1,
+      "sampleRecommendation": 20,
+      "weight": 1,
+      "difficultyParticipation": "EXCLUDE",
+      "userReason": "終了ボイスは設定別の全分布が公開され、奇偶・高設定傾向を一回ごとに利用できるため採用。通常Gからボイス試行数を固定換算しないためDifficultyは除外。"
+    },
+    {
+      "researchFeatureId": "RF_PETIT_BIG_UPGRADE",
+      "featureId": "FEAT_PETIT_BIG_UPGRADE",
+      "adoptionCategory": "INCLUDE_SUPPORT",
+      "numeratorInputId": "INP_PETIT_BIG_UPGRADE",
+      "denominatorInputId": "INP_PETIT_BIG_TRIALS",
+      "minimumSample": 1,
+      "sampleRecommendation": 40,
+      "weight": 1,
+      "displayFormat": "percent",
+      "difficultyParticipation": "EXCLUDE",
+      "userReason": "プチボーナス当選時のBIG昇格率は設定1の6.3%から設定6の19.9%まで約3.2倍。対象条件を実戦で判別できるため補助採用。",
+      "difficultyExclusionReason": "対象ケースの発生回数を通常ゲーム数へ安定換算できないためDifficultyには含めない。"
+    }
+  ],
+  "rejectedElements": [
+    {
+      "id": "REJECTED_RESET_CZ_CONTINUATION",
+      "name": "設定変更後のCZ継続率抽選",
+      "reason": "設定差はありますが、設定変更後に原則1回しか得られないリセット依存サンプルです。1日実戦で試行回数を増やせず、据え置き判定も絡むため数値推測Featureには使用しません。"
+    },
+    {
+      "id": "REJECTED_BIG_CEILING",
+      "name": "BIGボーナス間の規定G数振り分け",
+      "reason": "設定差はありますが、1日に観測できる独立したBIG間区間が少なく、着席時点で前回BIGからのゲーム数を正確に引き継げない場合もあります。サンプル不足と開始条件の不確実性から不採用です。"
+    },
+    {
+      "id": "REJECTED_SOUL_GEM_LIGHTING",
+      "name": "ソウルジェム点灯抽選",
+      "reason": "通常時・まどかチャンス中、成立役や状況ごとに条件付き抽選が分かれます。同一条件の母数を実戦で漏れなく作る入力負荷が高く、条件混在による観測誤差を避けるため不採用です。"
+    },
+    {
+      "id": "REJECTED_CZ_NEXT_ADD",
+      "name": "CZ終了時の次回CZ継続率加算抽選",
+      "reason": "終了時の継続率50〜80%など内部条件ごとに抽選値が異なります。元の内部継続率を直接観測できないため正しい条件付き分母を作れず、不採用です。"
+    }
+  ],
+  "evidence": [],
+  "evidenceUi": {
+    "groups": [
+      {
+        "groupId": "SETTING_FLOOR",
+        "label": "確認した設定下限",
+        "selectionMode": "single",
+        "normalizationMode": "ALLOWED_SETTINGS",
+        "options": [
+          {
+            "value": "SET_2_OR_HIGHER",
+            "label": "設定2以上",
+            "allowedSettings": [
+              "SET_2",
+              "SET_3",
+              "SET_4",
+              "SET_5",
+              "SET_6"
+            ],
+            "sourceEvidenceIds": [
+              "RE_PETIT_HOMURA_2PLUS"
+            ]
+          },
+          {
+            "value": "SET_5_OR_HIGHER",
+            "label": "設定5以上",
+            "allowedSettings": [
+              "SET_5",
+              "SET_6"
+            ],
+            "sourceEvidenceIds": [
+              "RE_PETIT_KYUBEY_5PLUS"
+            ]
+          },
+          {
+            "value": "SET_6",
+            "label": "設定6",
+            "allowedSettings": [
+              "SET_6"
+            ],
+            "sourceEvidenceIds": [
+              "RE_PETIT_ULTIMATE_6",
+              "RE_VOICE_6"
+            ]
+          }
+        ]
+      },
+      {
+        "groupId": "SETTING_DENIAL",
+        "label": "確認した設定否定",
+        "selectionMode": "multi",
+        "normalizationMode": "ALLOWED_SETTINGS",
+        "options": [
+          {
+            "value": "CZ_END_DENY_2",
+            "label": "CZ終了時：設定2否定",
+            "excludedSettings": [
+              "SET_2"
+            ],
+            "sourceEvidenceIds": [
+              "RE_CZ_END_DENY_2"
+            ]
+          },
+          {
+            "value": "CZ_END_DENY_1_3",
+            "label": "CZ終了時：設定1・3否定",
+            "excludedSettings": [
+              "SET_1",
+              "SET_3"
+            ],
+            "sourceEvidenceIds": [
+              "RE_CZ_END_DENY_1_3"
+            ]
+          }
+        ]
+      },
+      {
+        "groupId": "PETIT_CHARACTER_DENIAL",
+        "label": "プチボ中キャラ紹介（設定下限・否定）",
+        "selectionMode": "multi",
+        "normalizationMode": "ALLOWED_SETTINGS",
+        "options": [
+          {
+            "value": "PETIT_2PLUS_DENY3",
+            "label": "設定2以上・設定3否定",
+            "allowedSettings": [
+              "SET_2",
+              "SET_4",
+              "SET_5",
+              "SET_6"
+            ],
+            "excludedSettings": [
+              "SET_1",
+              "SET_3"
+            ],
+            "sourceEvidenceIds": [
+              "RE_PETIT_2PLUS_DENY3"
+            ]
+          },
+          {
+            "value": "PETIT_2PLUS_DENY4",
+            "label": "設定2以上・設定4否定",
+            "allowedSettings": [
+              "SET_2",
+              "SET_3",
+              "SET_5",
+              "SET_6"
+            ],
+            "excludedSettings": [
+              "SET_1",
+              "SET_4"
+            ],
+            "sourceEvidenceIds": [
+              "RE_PETIT_2PLUS_DENY4"
+            ]
+          },
+          {
+            "value": "PETIT_2PLUS_DENY5",
+            "label": "設定2以上・設定5否定",
+            "allowedSettings": [
+              "SET_2",
+              "SET_3",
+              "SET_4",
+              "SET_6"
+            ],
+            "excludedSettings": [
+              "SET_1",
+              "SET_5"
+            ],
+            "sourceEvidenceIds": [
+              "RE_PETIT_2PLUS_DENY5"
+            ]
+          },
+          {
+            "value": "PETIT_3PLUS_DENY4",
+            "label": "設定3以上・設定4否定",
+            "allowedSettings": [
+              "SET_3",
+              "SET_5",
+              "SET_6"
+            ],
+            "excludedSettings": [
+              "SET_1",
+              "SET_2",
+              "SET_4"
+            ],
+            "sourceEvidenceIds": [
+              "RE_PETIT_3PLUS_DENY4"
+            ]
+          },
+          {
+            "value": "PETIT_3PLUS_DENY5",
+            "label": "設定3以上・設定5否定",
+            "allowedSettings": [
+              "SET_3",
+              "SET_4",
+              "SET_6"
+            ],
+            "excludedSettings": [
+              "SET_1",
+              "SET_2",
+              "SET_5"
+            ],
+            "sourceEvidenceIds": [
+              "RE_PETIT_3PLUS_DENY5"
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "evidenceReview": {
+    "policyVersion": 1,
+    "exclusions": []
+  },
+  "uiCategoryLabels": {
+    "PRIMARY": "ボーナス初当り",
+    "PREDECESSOR": "着席時データ",
+    "ROLE": "小役",
+    "BONUS_END_VOICE": "ボーナス終了時ボイス",
+    "PETIT_BIG_UPGRADE": "プチボーナス BIG昇格"
+  },
+  "difficultyAnalysis": {
+    "targetGameBasis": {
+      "basisId": "NORMAL_GAMES",
+      "label": "通常ゲーム数",
+      "quality": "ESTIMATED"
+    },
+    "calibrationAllowedExposureQualities": [
+      "EXACT",
+      "DERIVED",
+      "ESTIMATED"
+    ]
+  }
+}
