@@ -29,7 +29,12 @@ function normalizeV1(block) {
   const s = String(block?.status ?? '').trim().toUpperCase();
   return ['CHECKED','NOT_AVAILABLE','UNRESOLVED'].includes(s) ? s : (s ? `OTHER:${s}` : 'PRESENT_STATUS_MISSING');
 }
-function countData(block) { return Array.isArray(block?.availableData) ? block.availableData.length : 0; }
+function dataItems(block) {
+  if (!block || typeof block !== 'object') return [];
+  for (const key of ['availableData','retrievableItems','availableItems','displayItems']) if (Array.isArray(block[key])) return block[key];
+  return [];
+}
+function countData(block) { return dataItems(block).length; }
 function legacyPredecessorExplicit(research) {
   const direct = ['predecessorDataResearch','seatedStartDataResearch','predecessorResearch','seatStartResearch'];
   if (direct.some((k) => research?.[k] && typeof research[k] === 'object')) return true;
@@ -84,9 +89,9 @@ for (const entry of fs.readdirSync(researchRoot, { withFileTypes: true })) {
 }
 
 rows.sort((a,b) => b.score - a.score || String(a.researchedAt ?? '').localeCompare(String(b.researchedAt ?? '')) || a.machineId.localeCompare(b.machineId));
-const summary = { schemaVersion: 'machine-observation-migration-plan-v2', generatedAt: new Date().toISOString(), migrationDebtCount: rows.length, priorityCounts: Object.fromEntries(['P0','P1','P2','P3'].map((p) => [p, rows.filter((r) => r.priority === p).length])) };
+const summary = { schemaVersion: 'machine-observation-migration-plan-v2.1', generatedAt: new Date().toISOString(), migrationDebtCount: rows.length, priorityCounts: Object.fromEntries(['P0','P1','P2','P3'].map((p) => [p, rows.filter((r) => r.priority === p).length])) };
 const result = { summary, machines: rows };
-console.log('Machine Observation migration priority v2');
+console.log('Machine Observation migration priority v2.1');
 console.log(JSON.stringify(summary, null, 2));
 for (const row of rows) console.log(`- ${row.priority} ${String(row.score).padStart(3)} | ${row.machineId} | ${row.displayName} | ${row.reasons.join(', ')}`);
 if (outPath) { const absolute = path.resolve(root, outPath); fs.mkdirSync(path.dirname(absolute), {recursive:true}); fs.writeFileSync(absolute, `${JSON.stringify(result,null,2)}\n`); console.log(`report: ${path.relative(root,absolute)}`); }
