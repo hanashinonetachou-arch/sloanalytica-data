@@ -9,15 +9,11 @@ const reportPathArg = process.argv.find((arg) => arg.startsWith('--json-out='));
 const reportPath = reportPathArg ? reportPathArg.slice('--json-out='.length) : null;
 
 const CHECKED_STATUS = new Set(['checked', 'available', 'confirmed']);
-const NOT_AVAILABLE_STATUS = new Set([
-  'not_available', 'not-available', 'unavailable', 'none', 'unavailable_or_ended',
-]);
-const UNRESOLVED_STATUS = new Set([
-  'unresolved', 'unknown', 'pending', 'not_checked', 'not-checked', 'not_confirmed',
-]);
+const NOT_AVAILABLE_STATUS = new Set(['not_available', 'not-available', 'unavailable', 'none', 'unavailable_or_ended']);
+const UNRESOLVED_STATUS = new Set(['unresolved', 'unknown', 'pending', 'not_checked', 'not-checked', 'not_confirmed']);
 const PARTIAL_STATUS = new Set(['partially_confirmed', 'partial', 'partially_checked']);
 
-function normalizeStatus(block) {
+function normalizeLegacyStatus(block) {
   if (!block || typeof block !== 'object') return 'MISSING';
   const raw = String(block.status ?? '').trim().toLowerCase();
   if (!raw) return 'PRESENT_STATUS_MISSING';
@@ -28,19 +24,19 @@ function normalizeStatus(block) {
   return `OTHER:${raw}`;
 }
 
+function normalizeV1Status(block) {
+  const raw = String(block?.status ?? '').trim().toUpperCase();
+  if (['CHECKED', 'NOT_AVAILABLE', 'UNRESOLVED'].includes(raw)) return raw;
+  return raw ? `OTHER:${raw}` : 'PRESENT_STATUS_MISSING';
+}
+
 function countAvailableData(block) {
   return Array.isArray(block?.availableData) ? block.availableData.length : 0;
 }
 
-function hasExplicitPredecessorAssessment(data) {
-  const directKeys = [
-    'predecessorDataResearch',
-    'seatedStartDataResearch',
-    'predecessorResearch',
-    'seatStartResearch',
-  ];
+function hasExplicitLegacyPredecessorAssessment(data) {
+  const directKeys = ['predecessorDataResearch', 'seatedStartDataResearch', 'predecessorResearch', 'seatStartResearch'];
   if (directKeys.some((key) => data?.[key] && typeof data[key] === 'object')) return true;
-
   const observationText = JSON.stringify({
     machineMenuResearch: data?.machineMenuResearch ?? null,
     linkedMachineServiceResearch: data?.linkedMachineServiceResearch ?? null,
@@ -52,16 +48,21 @@ function hasExplicitPredecessorAssessment(data) {
 function classify(machine) {
   const menu = machine.menuStatus;
   const service = machine.serviceStatus;
+  const predecessor = machine.predecessorStatus;
+
+  if (machine.sourceType === 'OBSERVATION_V1') {
+    const severe = [menu, service, predecessor].some((s) => s === 'PRESENT_STATUS_MISSING' || s.startsWith('OTHER:'));
+    if (severe) return 'REVIEW_SCHEMA';
+    if ([menu, service, predecessor].includes('UNRESOLVED')) return 'UNRESOLVED';
+    return 'RESOLVED';
+  }
+
   const bothMissing = menu === 'MISSING' && service === 'MISSING';
   if (bothMissing) return 'LEGACY_UNAUDITED';
-
   const severe = [menu, service].some((s) => s === 'PRESENT_STATUS_MISSING' || s.startsWith('OTHER:'));
   if (severe) return 'REVIEW_SCHEMA';
-
   if (menu === 'MISSING' || service === 'MISSING') return 'PARTIAL_LEGACY';
-  if (menu === 'UNRESOLVED' || service === 'UNRESOLVED' || menu === 'PARTIALLY_CHECKED' || service === 'PARTIALLY_CHECKED') {
-    return 'UNRESOLVED';
-  }
+  if (menu === 'UNRESOLVED' || service === 'UNRESOLVED' || menu === 'PARTIALLY_CHECKED' || service === 'PARTIALLY_CHECKED') return 'UNRESOLVED';
   if (!machine.predecessorAssessmentExplicit) return 'OBSERVATION_RESOLVED_PREDECESSOR_UNASSESSED';
   return 'RESOLVED';
 }
@@ -81,76 +82,95 @@ for (const machineId of machineDirs) {
   const researchPath = path.join(researchRoot, machineId, 'research-data.json');
   if (!fs.existsSync(researchPath)) continue;
 
-  let data;
+  let research;
   try {
-    data = JSON.parse(fs.readFileSync(researchPath, 'utf8'));
+    research = JSON.parse(fs.readFileSync(researchPath, 'utf8'));
   } catch (error) {
-    machines.push({
-      machineId,
-      displayName: machineId,
-      classification: 'INVALID_RESEARCH_JSON',
-      error: String(error?.message ?? error),
-    });
+    machines.push({ machineId, displayName: machineId, classification: 'INVALID_RESEARCH_JSON', error: String(error?.message ?? error) });
     continue;
   }
 
-  const machine = {
-    machineId,
-    displayName: data?.machine?.displayName ?? machineId,
-    researchedAt: data?.researchedAt ?? null,
-    menuStatus: normalizeStatus(data?.machineMenuResearch),
-    menuAvailableDataCount: countAvailableData(data?.machineMenuResearch),
-    serviceStatus: normalizeStatus(data?.linkedMachineServiceResearch),
-    serviceAvailableDataCount: countAvailableData(data?.linkedMachineServiceResearch),
-    predecessorAssessmentExplicit: hasExplicitPredecessorAssessment(data),
-  };
+  const observationPath = path.join(researchRoot, machineId, 'machine-observation-data.json');
+  let machine;
+  if (fs.existsSync(observationPath)) {
+    try {
+      const observation = JSON.parse(fs.readFileSync(observationPath, 'utf8'));
+      machine = {
+        machineId,
+        displayName: observation.displayName ?? research?.machine?.displayName ?? machineId,
+        researchedAt: observation.researchedAt ?? null,
+        sourceType: 'OBSERVATION_V1',
+        menuStatus: normalizeV1Status(observation.machineMenu),
+        menuAvailableDataCount: countAvailableData(observation.machineMenu),
+        serviceStatus: normalizeV1Status(observation.linkedService),
+        serviceAvailableDataCount: countAvailableData(observation.linkedService),
+        predecessorStatus: normalizeV1Status(observation.predecessorData),
+        predecessorAssessmentExplicit: true,
+      };
+    } catch (error) {
+      machine = {
+        machineId,
+        displayName: research?.machine?.displayName ?? machineId,
+        sourceType: 'OBSERVATION_V1',
+        menuStatus: 'OTHER:INVALID_JSON',
+        serviceStatus: 'OTHER:INVALID_JSON',
+        predecessorStatus: 'OTHER:INVALID_JSON',
+        predecessorAssessmentExplicit: true,
+      };
+    }
+  } else {
+    const explicit = hasExplicitLegacyPredecessorAssessment(research);
+    machine = {
+      machineId,
+      displayName: research?.machine?.displayName ?? machineId,
+      researchedAt: research?.researchedAt ?? null,
+      sourceType: 'LEGACY_RESEARCH_DATA',
+      menuStatus: normalizeLegacyStatus(research?.machineMenuResearch),
+      menuAvailableDataCount: countAvailableData(research?.machineMenuResearch),
+      serviceStatus: normalizeLegacyStatus(research?.linkedMachineServiceResearch),
+      serviceAvailableDataCount: countAvailableData(research?.linkedMachineServiceResearch),
+      predecessorStatus: explicit ? 'LEGACY_EXPLICIT' : 'UNASSESSED',
+      predecessorAssessmentExplicit: explicit,
+    };
+  }
   machine.classification = classify(machine);
   machines.push(machine);
 }
 
-const classificationOrder = [
-  'INVALID_RESEARCH_JSON',
-  'LEGACY_UNAUDITED',
-  'REVIEW_SCHEMA',
-  'PARTIAL_LEGACY',
-  'UNRESOLVED',
-  'OBSERVATION_RESOLVED_PREDECESSOR_UNASSESSED',
-  'RESOLVED',
-];
+const classificationOrder = ['INVALID_RESEARCH_JSON', 'LEGACY_UNAUDITED', 'REVIEW_SCHEMA', 'PARTIAL_LEGACY', 'UNRESOLVED', 'OBSERVATION_RESOLVED_PREDECESSOR_UNASSESSED', 'RESOLVED'];
 const counts = Object.fromEntries(classificationOrder.map((key) => [key, 0]));
 for (const machine of machines) counts[machine.classification] = (counts[machine.classification] ?? 0) + 1;
 
 const summary = {
-  schemaVersion: 'machine-observation-research-audit-v2',
+  schemaVersion: 'machine-observation-research-audit-v3',
   generatedAt: new Date().toISOString(),
   machineCount: machines.length,
+  standaloneObservationFiles: machines.filter((m) => m.sourceType === 'OBSERVATION_V1').length,
+  legacyResearchFallback: machines.filter((m) => m.sourceType === 'LEGACY_RESEARCH_DATA').length,
   counts,
   menuStatusCounts: {},
   serviceStatusCounts: {},
-  predecessorAssessment: {
-    explicit: machines.filter((m) => m.predecessorAssessmentExplicit).length,
-    unassessed: machines.filter((m) => !m.predecessorAssessmentExplicit).length,
-  },
+  predecessorStatusCounts: {},
 };
 for (const machine of machines) {
   summary.menuStatusCounts[machine.menuStatus] = (summary.menuStatusCounts[machine.menuStatus] ?? 0) + 1;
   summary.serviceStatusCounts[machine.serviceStatus] = (summary.serviceStatusCounts[machine.serviceStatus] ?? 0) + 1;
+  summary.predecessorStatusCounts[machine.predecessorStatus] = (summary.predecessorStatusCounts[machine.predecessorStatus] ?? 0) + 1;
 }
 
 const report = { summary, machines };
-
 console.log('Machine Observation Research Audit');
 console.log(`machines: ${summary.machineCount}`);
+console.log(`standalone observation files: ${summary.standaloneObservationFiles}`);
+console.log(`legacy research fallback: ${summary.legacyResearchFallback}`);
 for (const key of classificationOrder) console.log(`${key}: ${counts[key] ?? 0}`);
-console.log(`predecessor assessment explicit: ${summary.predecessorAssessment.explicit}`);
-console.log(`predecessor assessment unassessed: ${summary.predecessorAssessment.unassessed}`);
 
 for (const key of classificationOrder) {
   const rows = machines.filter((m) => m.classification === key);
   if (rows.length === 0 || key === 'RESOLVED') continue;
   console.log(`\n[${key}]`);
   for (const row of rows) {
-    console.log(`- ${row.machineId} | ${row.displayName} | menu=${row.menuStatus} | service=${row.serviceStatus} | predecessor=${row.predecessorAssessmentExplicit ? 'EXPLICIT' : 'UNASSESSED'}`);
+    console.log(`- ${row.machineId} | ${row.displayName} | source=${row.sourceType} | menu=${row.menuStatus} | service=${row.serviceStatus} | predecessor=${row.predecessorStatus}`);
   }
 }
 
@@ -161,6 +181,4 @@ if (reportPath) {
   console.log(`\nreport: ${path.relative(root, absolute)}`);
 }
 
-if ((counts.INVALID_RESEARCH_JSON ?? 0) > 0 || (counts.REVIEW_SCHEMA ?? 0) > 0) {
-  process.exitCode = 1;
-}
+if ((counts.INVALID_RESEARCH_JSON ?? 0) > 0 || (counts.REVIEW_SCHEMA ?? 0) > 0) process.exitCode = 1;
