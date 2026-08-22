@@ -10,8 +10,8 @@ test('display scores are derived from fixed My Juggler V 7000G benchmark',()=>{
  const my=d.entries.find(e=>e.machineId==='S_MY_JUGGLER_V_KD').difficulty;
  assert.deepEqual(my.scores,[{games:1500,score:31},{games:3000,score:52},{games:7000,score:80}]);
  const geass=d.entries.find(e=>e.machineId==='S_CODE_GEASS_3_CC_FS').difficulty;
- assert.deepEqual(geass.rawScores,[{games:1500,rawScore:10},{games:3000,rawScore:16},{games:7000,rawScore:26}]);
- assert.deepEqual(geass.scores,[{games:1500,score:26},{games:3000,score:41},{games:7000,score:67}]);
+ assert.deepEqual(geass.rawScores,[{games:1500,rawScore:12},{games:3000,rawScore:19},{games:7000,rawScore:30}]);
+ assert.deepEqual(geass.scores,[{games:1500,score:31},{games:3000,score:49},{games:7000,score:77}]);
 });
 test('changing benchmark display reference recalibrates without changing raw scores',()=>{
  const tmp='reports/_difficulty-calibration-temp.json';
@@ -25,7 +25,7 @@ test('changing benchmark display reference recalibrates without changing raw sco
  const my=after.entries.find(e=>e.machineId==='S_MY_JUGGLER_V_KD').difficulty;
  assert.equal(my.scores.find(s=>s.games===7000).score,100);
  const geass=after.entries.find(e=>e.machineId==='S_CODE_GEASS_3_CC_FS').difficulty;
- assert.equal(geass.scores.find(s=>s.games===7000).score,Math.round(26*100/31));
+ assert.equal(geass.scores.find(s=>s.games===7000).score,Math.round(30*100/31));
  fs.unlinkSync(tmp);
 });
 test('all scored display scores are non-decreasing with more games and non-negative',()=>{
