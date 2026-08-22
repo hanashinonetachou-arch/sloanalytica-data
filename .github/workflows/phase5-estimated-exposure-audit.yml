@@ -1,0 +1,30 @@
+name: Phase 5 Estimated Exposure Audit
+
+on:
+  pull_request:
+    branches:
+      - prototype-multi-machine
+    paths:
+      - 'research/**/selection-data.json'
+      - 'research/**/research-data.json'
+      - 'tools/audit-estimated-difficulty-exposure.mjs'
+      - '.github/workflows/phase5-estimated-exposure-audit.yml'
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Audit ESTIMATED Difficulty exposure quality
+        run: |
+          node tools/audit-estimated-difficulty-exposure.mjs
+          cat reports/estimated-difficulty-exposure-audit-v1.md
+      - uses: actions/upload-artifact@v4
+        with:
+          name: estimated-difficulty-exposure-audit
+          path: |
+            reports/estimated-difficulty-exposure-audit-v1.json
+            reports/estimated-difficulty-exposure-audit-v1.md
