@@ -93,6 +93,11 @@ export function validateSelectionEvidenceCoverage(selection, research, { require
       for (const id of option.sourceEvidenceIds ?? []) referenced.add(id);
     }
   }
+  for (const evidence of selection?.evidence ?? []) {
+    if (!evidence?.researchEvidenceId) continue;
+    if (!researchIds.has(evidence.researchEvidenceId)) errors.push(`evidenceReview: unknown researchEvidenceId ${evidence.researchEvidenceId}`);
+    referenced.add(evidence.researchEvidenceId);
+  }
 
   const excluded = new Set();
   for (const item of review.exclusions ?? []) {
