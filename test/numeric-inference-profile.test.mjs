@@ -12,7 +12,7 @@ test('Kaguya is evidence-dominant and rejected BONUS initial exposes required tr
   assert.equal(p.summary.adoptedNumericFeatureCount,0);
   assert.ok(p.summary.hardEvidenceCount>0);
   const bonus=p.rejectedFeatures.find(x=>x.featureId==='FEAT_KAGUYA_BONUS_INITIAL');
-  assert.equal(bonus.rejectionReason,'設定差が小さい。');
+  assert.equal(bonus.rejectionReason,'BONUS初当りは1/362～1/335と設定差が小さいうえ、公開情報では確率に対応する厳密な集計区間を確認できず分母定義が暫定のため、数値Featureには不採用。');
   assert.ok(bonus.requiredTrials80>400000);
   assert.equal(bonus.requiredTrialsUnit,'G');
   assert.equal(bonus.metricStatus,'COMPUTED');
