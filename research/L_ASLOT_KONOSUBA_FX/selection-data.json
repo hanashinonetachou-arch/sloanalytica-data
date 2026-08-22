@@ -1,0 +1,43 @@
+{
+  "schemaVersion":"selection-data-v1",
+  "machineId":"L_ASLOT_KONOSUBA_FX",
+  "machineDataVersion":"0.1.0",
+  "uiCategoryLabels":{"BONUS":"ボーナス","ROLE":"小役","EVIDENCE":"設定確定情報"},
+  "inputs":[
+    {"id":"INP_TOTAL_GAMES","name":"遊技ゲーム数","type":"integer","category":"BONUS","unit":"G","displayOrder":10,"inferenceRole":"INCLUDE_PRIMARY","defaultValue":0},
+    {"id":"INP_COMMON_BELL","name":"共通ベル","type":"counter","category":"ROLE","unit":"回","displayOrder":20,"inferenceRole":"INCLUDE_PRIMARY","defaultValue":null,"parentInputId":"INP_TOTAL_GAMES"},
+    {"id":"INP_CHERRY","name":"チェリー","type":"counter","category":"ROLE","unit":"回","displayOrder":21,"inferenceRole":"INCLUDE_PRIMARY","defaultValue":null,"parentInputId":"INP_TOTAL_GAMES","description":"実機連動機能の表示値を利用できます。"},
+    {"id":"INP_WATERMELON","name":"スイカ","type":"counter","category":"ROLE","unit":"回","displayOrder":22,"inferenceRole":"INCLUDE_PRIMARY","defaultValue":null,"parentInputId":"INP_TOTAL_GAMES","description":"実機連動機能の表示値を利用できます。"},
+    {"id":"INP_CHANCE","name":"チャンス目","type":"counter","category":"ROLE","unit":"回","displayOrder":23,"inferenceRole":"INCLUDE_PRIMARY","defaultValue":null,"parentInputId":"INP_TOTAL_GAMES","description":"実機連動機能に表示されない場合は自己カウントします。"},
+    {"id":"INP_SUCCUBUS","name":"サキュバス目","type":"counter","category":"ROLE","unit":"回","displayOrder":24,"inferenceRole":"INCLUDE_PRIMARY","defaultValue":null,"parentInputId":"INP_TOTAL_GAMES","description":"実機連動機能に表示されない場合は自己カウントします。"}
+  ],
+  "features":[
+    {"researchFeatureId":"RF_SMALL_ROLE","featureId":"FEAT_SMALL_ROLE","adoptionCategory":"INCLUDE_PRIMARY","denominatorInputId":"INP_TOTAL_GAMES","numeratorInputId":"INP_COMMON_BELL","categoryInputIds":["INP_CHERRY","INP_WATERMELON","INP_CHANCE","INP_SUCCUBUS"],"residualCategoryLabel":"RESIDUAL","minimumSample":100,"sampleRecommendation":3000,"difficultyExposure":{"mode":"per_game","factor":1,"quality":"EXACT"},"userReason":"複数小役の設定差を構成全体で利用し、実機連動機能の取得可能項目も活用できる。"},
+    {"researchFeatureId":"RF_BONUS_OUTCOME","featureId":"FEAT_BONUS_OUTCOME","adoptionCategory":"EXCLUDE","rejectionReason":"BIG/REGには設定差があるが、小役・重複契機とのdependency整理前に併用すると同一ボーナス情報を重ねる可能性があるため現版では不採用。","userReason":"小役・重複契機との二重評価を避ける。"},
+    {"researchFeatureId":"RF_BONUS_DETAIL","featureId":"FEAT_BONUS_DETAIL","adoptionCategory":"EXCLUDE","rejectionReason":"図柄別・重複契機別の設定差は重要だが、BIG/REGと小役の双方に依存するため統合モデル確定までResearch保持。","userReason":"dependency未解決。"}
+  ],
+  "evidence":[],
+  "evidenceUi":{"groups":[
+    {"groupId":"KONOSUBA_TROPHY","label":"サミートロフィー（BIG終了時）","selectionMode":"single","normalizationMode":"ALLOWED_SETTINGS_INTERSECTION","displayOrder":100,"options":[
+      {"value":"BRONZE","label":"銅","allowedSettings":["SET_2","SET_3","SET_4","SET_5","SET_6"],"sourceEvidenceIds":["RE_TROPHY_2PLUS"]},
+      {"value":"SILVER","label":"銀","allowedSettings":["SET_3","SET_4","SET_5","SET_6"],"sourceEvidenceIds":["RE_TROPHY_3PLUS"]},
+      {"value":"GOLD","label":"金","allowedSettings":["SET_4","SET_5","SET_6"],"sourceEvidenceIds":["RE_TROPHY_4PLUS"]},
+      {"value":"KIRIN","label":"キリン柄","allowedSettings":["SET_5","SET_6"],"sourceEvidenceIds":["RE_TROPHY_5PLUS"]},
+      {"value":"RAINBOW","label":"虹","allowedSettings":["SET_6"],"sourceEvidenceIds":["RE_TROPHY_6"]}
+    ]},
+    {"groupId":"KONOSUBA_BIG_END","label":"BIG終了画面","selectionMode":"single","normalizationMode":"ALLOWED_SETTINGS_INTERSECTION","displayOrder":110,"options":[
+      {"value":"MITSURUGI","label":"ミツルギ","allowedSettings":["SET_2","SET_3","SET_4","SET_5","SET_6"],"sourceEvidenceIds":["RE_BIG_END_2PLUS"]},
+      {"value":"BELDIA","label":"ベルディア","allowedSettings":["SET_3","SET_4","SET_5","SET_6"],"sourceEvidenceIds":["RE_BIG_END_3PLUS"]},
+      {"value":"AQUA_SLEEP","label":"寝ているアクア","allowedSettings":["SET_4","SET_5","SET_6"],"sourceEvidenceIds":["RE_BIG_END_4PLUS"]},
+      {"value":"ERIS","label":"4人を見ているエリス","allowedSettings":["SET_5","SET_6"],"sourceEvidenceIds":["RE_BIG_END_5PLUS"]},
+      {"value":"COPYRIGHT","label":"4人の版権絵","allowedSettings":["SET_6"],"sourceEvidenceIds":["RE_BIG_END_6"]}
+    ]},
+    {"groupId":"KONOSUBA_BLESS_STAMP","label":"祝福カットイン スタンプ","selectionMode":"single","normalizationMode":"ALLOWED_SETTINGS_INTERSECTION","displayOrder":120,"description":"実機連動機能の祝福カットインカスタムがプレミア/超プレミアの場合は設定に関係なく出現するため、確定情報として入力しません。","options":[
+      {"value":"GOLD","label":"金","allowedSettings":["SET_2","SET_3","SET_4","SET_5","SET_6"],"sourceEvidenceIds":["RE_BLESS_GOLD_2PLUS"]},
+      {"value":"RAINBOW","label":"虹","allowedSettings":["SET_6"],"sourceEvidenceIds":["RE_BLESS_RAINBOW_6"]}
+    ]},
+    {"groupId":"KONOSUBA_REG_CHAR","label":"REG中キャラ紹介","selectionMode":"single","normalizationMode":"ALLOWED_SETTINGS_INTERSECTION","displayOrder":130,"options":[
+      {"value":"GODDESS_AQUA","label":"女神アクア","allowedSettings":["SET_6"],"sourceEvidenceIds":["RE_REG_GODDESS_AQUA_6"]}
+    ]}
+  ]}
+}
