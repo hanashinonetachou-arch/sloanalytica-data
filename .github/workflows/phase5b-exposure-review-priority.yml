@@ -1,0 +1,30 @@
+name: Phase 5b Exposure Review Priority
+
+on:
+  pull_request:
+    branches:
+      - prototype-multi-machine
+    paths:
+      - 'research/**/selection-data.json'
+      - 'research/**/research-data.json'
+      - 'tools/audit-estimated-exposure-review-priority.mjs'
+      - '.github/workflows/phase5b-exposure-review-priority.yml'
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Classify remaining ESTIMATED exposure reviews
+        run: |
+          node tools/audit-estimated-exposure-review-priority.mjs
+          cat reports/estimated-exposure-review-priority-v1.md
+      - uses: actions/upload-artifact@v4
+        with:
+          name: estimated-exposure-review-priority
+          path: |
+            reports/estimated-exposure-review-priority-v1.json
+            reports/estimated-exposure-review-priority-v1.md
