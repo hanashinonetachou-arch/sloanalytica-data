@@ -1,0 +1,65 @@
+name: Phase 10 Difficulty Final Audit
+
+on:
+  push:
+    branches: [prototype-multi-machine]
+    paths:
+      - 'research/**/research-data.json'
+      - 'research/**/selection-data.json'
+      - 'tools/evaluate-machine-difficulty.mjs'
+      - 'tools/refine-setting-band-games.mjs'
+      - 'tools/batch-setting-band-games.mjs'
+      - 'tools/sync-machine-difficulty-catalog.mjs'
+      - 'tools/audit-difficulty-phase10.mjs'
+      - '.github/workflows/phase10-difficulty-final-audit.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: prototype-multi-machine
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Recalculate difficulty reports
+        shell: bash
+        run: |
+          set -euo pipefail
+          for dir in research/*; do
+            [ -d "$dir" ] || continue
+            [ -f "$dir/research-data.json" ] || continue
+            [ -f "$dir/selection-data.json" ] || continue
+            node tools/windows-safe-cli.mjs difficulty:evaluate "$dir/research-data.json" "$dir/selection-data.json" "$dir/difficulty-report.json"
+          done
+      - name: Recalculate setting-band reports
+        run: node tools/batch-setting-band-games.mjs
+      - name: Sync difficulty catalog
+        shell: bash
+        run: |
+          set -euo pipefail
+          for dir in research/*; do
+            [ -d "$dir" ] || continue
+            id="$(basename "$dir")"
+            [ -f "$dir/difficulty-report.json" ] || continue
+            [ -f "$dir/setting-band-report.json" ] || continue
+            [ -f "machines/$id/machine-package.json" ] || continue
+            node tools/sync-machine-difficulty-catalog.mjs "$id"
+          done
+      - name: Run Phase 10 audit
+        run: node tools/audit-difficulty-phase10.mjs . reports/phase10-difficulty-final-audit.json
+      - name: Commit recalculated reports and audit
+        shell: bash
+        run: |
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git add difficulty-catalog.json reports/setting-band-batch-report.json reports/phase10-difficulty-final-audit.json research/*/difficulty-report.json research/*/setting-band-report.json
+          if git diff --cached --quiet; then exit 0; fi
+          git commit -m "audit: refresh Phase 10 difficulty results [skip ci]"
+          git push
