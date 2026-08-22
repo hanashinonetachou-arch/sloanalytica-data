@@ -61,6 +61,15 @@ export function auditUserVerifiedUxContracts({ machineIds = null } = {}) {
       }
     }
 
+    for (const forbiddenInput of contract.forbiddenInputs ?? []) {
+      const inputId = typeof forbiddenInput === 'string' ? forbiddenInput : forbiddenInput.inputId;
+      if (!inputId) continue;
+      if (inputs.has(inputId)) {
+        const reason = typeof forbiddenInput === 'object' && forbiddenInput.reason ? `; ${forbiddenInput.reason}` : '';
+        errors.push(`${machineId}/${inputId}: user-verified forbidden input reappeared${reason}`);
+      }
+    }
+
     for (const requirement of contract.historicalRequirements ?? []) {
       if (requirement.status === 'UNRESOLVED') {
         reviews.push(`${machineId}/${requirement.requirementId}: ${requirement.kind} is known historical UX but exact contract is unresolved`);
