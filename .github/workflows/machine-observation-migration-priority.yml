@@ -1,0 +1,36 @@
+name: Machine Observation Migration Priority
+
+on:
+  pull_request:
+    branches:
+      - prototype-multi-machine
+    paths:
+      - 'research/**/research-data.json'
+      - 'research/**/machine-package.generated.json'
+      - 'research/**/machine-observation-data.json'
+      - 'ux-contracts/**'
+      - 'tools/plan-machine-observation-migration.mjs'
+      - '.github/workflows/machine-observation-migration-priority.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  plan:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Build priority report
+        run: node tools/plan-machine-observation-migration.mjs --json-out=reports/machine-observation-migration-priority.json
+      - name: Upload report
+        uses: actions/upload-artifact@v4
+        with:
+          name: machine-observation-migration-priority
+          path: reports/machine-observation-migration-priority.json
+          if-no-files-found: error
