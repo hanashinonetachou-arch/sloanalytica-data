@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+// Phase 10 final Difficulty / setting-band audit gate.
 import fs from 'node:fs';
 import path from 'node:path';
 
