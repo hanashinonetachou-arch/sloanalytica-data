@@ -1,0 +1,38 @@
+name: User-verified UX contract audit
+
+on:
+  push:
+    branches:
+      - prototype-multi-machine
+    paths:
+      - 'ux-contracts/**'
+      - 'machines/**/machine-package.json'
+      - 'tools/audit-user-verified-ux-contracts.mjs'
+      - 'test/user-verified-ux-contracts.test.mjs'
+      - '.github/workflows/user-verified-ux-contract-audit.yml'
+  pull_request:
+    paths:
+      - 'ux-contracts/**'
+      - 'machines/**/machine-package.json'
+      - 'tools/audit-user-verified-ux-contracts.mjs'
+      - 'test/user-verified-ux-contracts.test.mjs'
+      - '.github/workflows/user-verified-ux-contract-audit.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  ux-contract-audit:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Audit restored UX contracts
+        run: npm run ux-contract:audit
+      - name: Run UX contract regression tests
+        run: node --test --test-concurrency=1 test/user-verified-ux-contracts.test.mjs
