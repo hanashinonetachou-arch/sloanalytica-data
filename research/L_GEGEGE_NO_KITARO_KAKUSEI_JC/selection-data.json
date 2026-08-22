@@ -1,89 +1,34 @@
 {
-  "schemaVersion": "selection-data-v1",
-  "machineId": "L_GEGEGE_NO_KITARO_KAKUSEI_JC",
-  "machineDataVersion": "0.1.0",
-  "uiCategoryLabels": {
-    "NORMAL": "通常時",
-    "ROLE": "小役"
-  },
-  "inputs": [
-    {
-      "id": "INP_NORMAL_GAMES",
-      "name": "通常ゲーム数",
-      "type": "integer",
-      "category": "NORMAL",
-      "unit": "G",
-      "displayOrder": 10,
-      "inferenceRole": "INCLUDE_PRIMARY",
-      "defaultValue": 0
-    },
-    {
-      "id": "INP_AT_FIRST",
-      "name": "AT初当り",
-      "type": "counter",
-      "category": "NORMAL",
-      "unit": "回",
-      "displayOrder": 11,
-      "inferenceRole": "INCLUDE_PRIMARY",
-      "defaultValue": null,
-      "parentInputId": "INP_NORMAL_GAMES"
-    },
-    {
-      "id": "INP_COMMON_3",
-      "name": "共通3枚ベル",
-      "type": "counter",
-      "category": "ROLE",
-      "unit": "回",
-      "displayOrder": 20,
-      "inferenceRole": "INCLUDE_PRIMARY",
-      "defaultValue": null,
-      "parentInputId": "INP_NORMAL_GAMES"
-    },
-    {
-      "id": "INP_COMMON_13",
-      "name": "共通13枚ベル",
-      "type": "counter",
-      "category": "ROLE",
-      "unit": "回",
-      "displayOrder": 21,
-      "inferenceRole": "INCLUDE_PRIMARY",
-      "defaultValue": null,
-      "parentInputId": "INP_NORMAL_GAMES"
-    }
+  "schemaVersion":"selection-data-v1",
+  "machineId":"L_GEGEGE_NO_KITARO_KAKUSEI_JC",
+  "machineDataVersion":"0.1.0",
+  "uiCategoryLabels":{"NORMAL":"通常時","ROLE":"小役","EVIDENCE":"設定確定情報"},
+  "inputs":[
+    {"id":"INP_NORMAL_GAMES","name":"通常ゲーム数","type":"integer","category":"NORMAL","unit":"G","displayOrder":10,"inferenceRole":"INCLUDE_PRIMARY","defaultValue":0},
+    {"id":"INP_AT_FIRST","name":"AT初当り","type":"counter","category":"NORMAL","unit":"回","displayOrder":11,"inferenceRole":"INCLUDE_PRIMARY","defaultValue":null,"parentInputId":"INP_NORMAL_GAMES"},
+    {"id":"INP_COMMON_3","name":"共通3枚ベル","type":"counter","category":"ROLE","unit":"回","displayOrder":20,"inferenceRole":"INCLUDE_PRIMARY","defaultValue":null,"parentInputId":"INP_NORMAL_GAMES"},
+    {"id":"INP_COMMON_13","name":"共通13枚ベル","type":"counter","category":"ROLE","unit":"回","displayOrder":21,"inferenceRole":"INCLUDE_PRIMARY","defaultValue":null,"parentInputId":"INP_NORMAL_GAMES"}
   ],
-  "features": [
-    {
-      "researchFeatureId": "RF_AT_FIRST",
-      "featureId": "FEAT_AT_FIRST",
-      "adoptionCategory": "INCLUDE_PRIMARY",
-      "denominatorInputId": "INP_NORMAL_GAMES",
-      "numeratorInputId": "INP_AT_FIRST",
-      "minimumSample": 100,
-      "sampleRecommendation": 3000,
-      "difficultyExposure": {
-        "mode": "per_game",
-        "factor": 1,
-        "quality": "EXACT"
-      }
-    },
-    {
-      "researchFeatureId": "RF_COMMON_BELL",
-      "featureId": "FEAT_COMMON_BELL",
-      "adoptionCategory": "INCLUDE_PRIMARY",
-      "denominatorInputId": "INP_NORMAL_GAMES",
-      "numeratorInputId": "INP_COMMON_3",
-      "categoryInputIds": [
-        "INP_COMMON_13"
-      ],
-      "residualCategoryLabel": "RESIDUAL",
-      "minimumSample": 100,
-      "sampleRecommendation": 3000,
-      "difficultyExposure": {
-        "mode": "per_game",
-        "factor": 1,
-        "quality": "EXACT"
-      }
-    }
+  "features":[
+    {"researchFeatureId":"RF_AT_FIRST","featureId":"FEAT_AT_FIRST","adoptionCategory":"INCLUDE_PRIMARY","denominatorInputId":"INP_NORMAL_GAMES","numeratorInputId":"INP_AT_FIRST","minimumSample":100,"sampleRecommendation":3000,"difficultyExposure":{"mode":"per_game","factor":1,"quality":"EXACT"},"userReason":"AT初当りを継続観測でき、設定差がある。"},
+    {"researchFeatureId":"RF_COMMON_BELL","featureId":"FEAT_COMMON_BELL","adoptionCategory":"INCLUDE_PRIMARY","denominatorInputId":"INP_NORMAL_GAMES","numeratorInputId":"INP_COMMON_3","categoryInputIds":["INP_COMMON_13"],"residualCategoryLabel":"RESIDUAL","minimumSample":100,"sampleRecommendation":3000,"difficultyExposure":{"mode":"per_game","factor":1,"quality":"EXACT"},"userReason":"3枚共通ベルは高設定ほど減り、13枚共通ベルは高設定ほど増えるため構成全体を使う。"},
+    {"researchFeatureId":"RF_AT_DIRECT","featureId":"FEAT_AT_DIRECT","adoptionCategory":"EXCLUDE","rejectionReason":"設定差は大きいが超低頻度で、通常の1日実戦では試行量が不足する。","userReason":"超低頻度。"},
+    {"researchFeatureId":"RF_CZ_CHAIN","featureId":"FEAT_CZ_CHAIN","adoptionCategory":"EXCLUDE","rejectionReason":"CZ・妖気pt・百鬼夜行など複数の依存した抽選を含み、現時点では重複なく観測する契約を確定できない。","userReason":"dependency未解決。"}
   ],
-  "evidence": []
+  "evidence":[],
+  "evidenceUi":{"groups":[
+    {"groupId":"KITARO_CZ_VOICE","label":"ゲゲゲBATTLE失敗時 PUSHボイス","selectionMode":"single","normalizationMode":"ALLOWED_SETTINGS_INTERSECTION","displayOrder":100,"options":[
+      {"value":"2PLUS","label":"『お化けや妖怪はね…』","allowedSettings":["SET_2","SET_3","SET_4","SET_5","SET_6"],"sourceEvidenceIds":["RE_CZ_VOICE_2PLUS"]},
+      {"value":"4PLUS","label":"『見えてる世界が全てじゃない…』","allowedSettings":["SET_4","SET_5","SET_6"],"sourceEvidenceIds":["RE_CZ_VOICE_4PLUS"]},
+      {"value":"6","label":"『ゲゲゲの鬼太郎だ』","allowedSettings":["SET_6"],"sourceEvidenceIds":["RE_CZ_VOICE_6"]}
+    ]},
+    {"groupId":"KITARO_PAYOUT","label":"AT中 獲得枚数表示","selectionMode":"single","normalizationMode":"ALLOWED_SETTINGS_INTERSECTION","displayOrder":110,"options":[
+      {"value":"174","label":"174枚OVER","allowedSettings":["SET_2","SET_3","SET_4","SET_5","SET_6"],"sourceEvidenceIds":["RE_PAYOUT_174"]},
+      {"value":"246","label":"246枚OVER","allowedSettings":["SET_2","SET_4","SET_6"],"sourceEvidenceIds":["RE_PAYOUT_246"]},
+      {"value":"456","label":"456枚OVER","allowedSettings":["SET_4","SET_5","SET_6"],"sourceEvidenceIds":["RE_PAYOUT_456"]},
+      {"value":"220","label":"220枚OVER","allowedSettings":["SET_6"],"sourceEvidenceIds":["RE_PAYOUT_220_6"]},
+      {"value":"666","label":"666枚OVER","allowedSettings":["SET_6"],"sourceEvidenceIds":["RE_PAYOUT_666_6"]},
+      {"value":"777","label":"777枚OVER","allowedSettings":["SET_6"],"sourceEvidenceIds":["RE_PAYOUT_777_6"]}
+    ]}
+  ]}
 }
