@@ -9,6 +9,13 @@ const dirs=fs.readdirSync(machinesDir,{withFileTypes:true}).filter(d=>d.isDirect
 const rows=[];
 const badLabel=/^(input|counter|games?|count|value|feature|item|項目|入力|カウント)$/i;
 const vagueReason=/^(低頻度|設定差が小さい|必要試行量が多い|参考|不採用)[。.]?$/;
+const needsStandaloneDenominator=f=>{
+ const model=String(f.modelType??'').toLowerCase();
+ if(['multinomial','marginal_multinomial','conditional_partial_multinomial','categoricalselector','categorical_selector'].includes(model)) return false;
+ if(f.inputTransform==='sum_inputs_to_trials') return false;
+ if(Array.isArray(f.denominatorInputIds)&&f.denominatorInputIds.length>0) return false;
+ return true;
+};
 for(const machineId of dirs){
  const file=path.join(machinesDir,machineId,'machine-package.json'); if(!fs.existsSync(file)) continue;
  const p=JSON.parse(fs.readFileSync(file,'utf8')); const errors=[]; const reviews=[];
@@ -24,12 +31,14 @@ for(const machineId of dirs){
  const sum=p.selectionSummary??{};
  for(const x of sum.selected??[]){ if(!String(x.reason??'').trim()) errors.push(`selected ${x.featureId}: missing reason`); }
  for(const x of sum.rejected??[]){ const r=String(x.reason??'').trim(); if(!r) errors.push(`rejected ${x.featureId}: missing reason`); else if(vagueReason.test(r)) reviews.push(`rejected ${x.featureId}: reason may be too generic: ${r}`); }
- // Terms whose denominator/scope commonly confuse users. Require semantic human review unless wording itself is explicit.
+ // Only models that truly use one independent denominator require denominatorInputId.
+ // Multinomial/category-sum models derive trials from their category counts and must not be false-positive REVIEWs.
  for(const f of p.features?.features??[]){
-   const n=String(f.name??''); const denom=inputMap.get(f.denominatorInputId)?.name??'';
-   if(/初当り|当選|直撃|引き戻し|小役|ベル|チェリー|スイカ|ボーナス|BONUS|CZ|AT|REG|BIG/i.test(n)){
-     if(!String(denom).trim()) reviews.push(`feature ${f.featureId}: denominator label not directly resolvable`);
-   }
+   const n=String(f.name??'');
+   if(!/初当り|当選|直撃|引き戻し|小役|ベル|チェリー|スイカ|ボーナス|BONUS|CZ|AT|REG|BIG/i.test(n)) continue;
+   if(!needsStandaloneDenominator(f)) continue;
+   const denom=inputMap.get(f.denominatorInputId)?.name??'';
+   if(!String(denom).trim()) reviews.push(`feature ${f.featureId}: denominator label not directly resolvable`);
  }
  rows.push({machineId,displayName:p.machine?.displayName??machineId,status:errors.length?'ERROR':reviews.length?'REVIEW':'PASS',errors,reviews});
 }
