@@ -142,7 +142,7 @@ function parseArgs(argv) {
 }
 
 function printHelp() {
-  console.log(`SloAnalytica Batch End-to-End Orchestrator v1\n\nStatus only (default):\n  npm run batch:e2e -- MACHINE_1 MACHINE_2\n  npm run batch:e2e -- --file batch.txt\n\nSafely advance available stages:\n  npm run batch:e2e -- MACHINE_1 MACHINE_2 --advance\n\nOptions:\n  --check          status-only alias; no stage workspaces/generation\n  --advance        prepare Research/Selection workspaces and run Machine Batch in --check mode\n  --file <path>    newline or JSON list, maximum ${MAX_BATCH}\n  --report <path>  unified JSON report\n\nSafety:\n  - never invents machineId, probabilities, Selection decisions, mappings, weights, or exposure\n  - REVIEW/BLOCKED stages are not auto-advanced\n  - Machine stage is CHECK only; generated MachineData/catalog changes are rolled back\n  - publish/approve is intentionally outside this orchestrator\n`);
+  console.log(`SloAnalytica Batch End-to-End Orchestrator v2\n\nStatus only (default):\n  npm run batch:e2e -- MACHINE_1 MACHINE_2\n  npm run batch:e2e -- --file batch.txt\n\nSafely advance available stages:\n  npm run batch:e2e -- MACHINE_1 MACHINE_2 --advance\n\nOptions:\n  --check          status-only alias; no stage workspaces/generation\n  --advance        prepare Research/Selection workspaces and run Machine Batch in --check mode\n  --file <path>    newline or JSON list, maximum ${MAX_BATCH}\n  --report <path>  unified JSON report\n\nSafety:\n  - Research advance is routed through strict Research Completeness v2 / Machine Observation gates\n  - Selection advance is routed through strict evidence-coverage gates and Policy-v2 validation\n  - never invents machineId, probabilities, Selection decisions, mappings, weights, or exposure\n  - REVIEW/BLOCKED stages are not auto-advanced\n  - Machine stage is CHECK only; generated MachineData/catalog changes are rolled back\n  - publish/approve is intentionally outside this orchestrator\n`);
 }
 
 function main() {
@@ -161,8 +161,8 @@ function main() {
       const researchRequests = before.filter(r => r.stage === 'RESEARCH_REQUIRED').map(r => r.request);
       const selectionIds = before.filter(r => r.stage === 'SELECTION_REQUIRED').map(r => r.machineId).filter(Boolean);
       const machineIds = before.filter(r => r.stage === 'READY_FOR_MACHINE').map(r => r.machineId).filter(Boolean);
-      if (researchRequests.length) actions.push(runNode('batch-research-pipeline.mjs', researchRequests));
-      if (selectionIds.length) actions.push(runNode('batch-selection-pipeline.mjs', selectionIds));
+      if (researchRequests.length) actions.push(runNode('strict-batch-research-pipeline.mjs', researchRequests));
+      if (selectionIds.length) actions.push(runNode('strict-batch-selection-pipeline.mjs', selectionIds));
       if (machineIds.length) actions.push(runNode('batch-machine-pipeline.mjs', [...machineIds, '--check']));
     }
 
@@ -170,17 +170,18 @@ function main() {
     const counts = {};
     for (const result of after) counts[result.stage] = (counts[result.stage] ?? 0) + 1;
     const report = {
-      schemaVersion: 'batch-e2e-orchestrator-report-v1',
+      schemaVersion: 'batch-e2e-orchestrator-report-v2',
       generatedAt: new Date().toISOString(),
       mode: args.advance ? 'ADVANCE_SAFE' : 'STATUS',
       maxBatchSize: MAX_BATCH,
+      policyBaseline: 'PHASE12_101_MACHINE_AUDITED_BASELINE',
       overallStatus: deriveOverallStatus(after),
       counts,
       requests,
       before,
       actions,
       results: after,
-      safety: { reviewAutoAdvance: false, machineWrite: false, publishIncluded: false },
+      safety: { researchCompletenessV2: true, machineObservationRequired: true, featureSelectionPolicyV2: true, userVerifiedUxProtected: true, reviewAutoAdvance: false, machineWrite: false, publishIncluded: false },
       durationMs: Date.now() - startedAt,
     };
     writeJson(args.report, report);
