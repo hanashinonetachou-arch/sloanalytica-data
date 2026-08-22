@@ -1,0 +1,34 @@
+name: Temporary Partial Observation Migration
+
+on:
+  push:
+    branches:
+      - research/observation-partial-legacy-migration-20260822
+
+permissions:
+  contents: write
+
+jobs:
+  migrate:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: research/observation-partial-legacy-migration-20260822
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Migrate PARTIAL_LEGACY observations
+        run: node tools/migrate-partial-legacy-observations.mjs
+      - name: Validate observation files
+        run: node tools/validate-machine-observation-data.mjs
+      - name: Audit observation inventory
+        run: node tools/audit-machine-observation-research.mjs --json-out=reports/machine-observation-research-audit.json
+      - name: Commit migrated observation files
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add research/*/machine-observation-data.json
+          git diff --cached --quiet && exit 0
+          git commit -m "research: migrate partial legacy Machine Observation data [skip ci]"
+          git push origin HEAD:research/observation-partial-legacy-migration-20260822
