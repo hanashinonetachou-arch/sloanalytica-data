@@ -10,10 +10,11 @@ const entries=Array.isArray(catalog.entries)?catalog.entries:[];
 const expectedGames=[1500,3000,7000];
 const expectedAccuracy=[60,70,80];
 const rows=[];const globalErrors=[];
-const finite=n=>Number.isFinite(Number(n));
+// Deliberately reject null/undefined/empty-string instead of coercing them to 0.
+const finite=n=>typeof n==='number'&&Number.isFinite(n);
 for(const e of entries){
  const d=e.difficulty??{};const errors=[];const reviews=[];
- const scoreMap=new Map((d.scores??[]).map(x=>[Number(x.games),Number(x.score)]));
+ const scoreMap=new Map((d.scores??[]).map(x=>[Number(x.games),typeof x.score==='number'?x.score:null]));
  if(d.status==='SCORED'){
   for(const g of expectedGames) if(!finite(scoreMap.get(g))) errors.push(`missing ${g}G score`);
   const vals=expectedGames.map(g=>scoreMap.get(g));
@@ -25,7 +26,8 @@ for(const e of entries){
  if(band.status==='COMPLETE'){
   const src=band.thresholds??band.results??[];
   bandGames=expectedAccuracy.map(a=>{
-   const x=src.find(v=>Number(v.accuracy)===a||Math.round(Number(v.threshold)*100)===a);return x?Number(x.games):null;
+   const x=src.find(v=>Number(v.accuracy)===a||Math.round(Number(v.threshold)*100)===a);
+   return x&&typeof x.games==='number'?x.games:null;
   });
   if(bandGames.some(v=>!finite(v)||v<0)) errors.push('setting-band 60/70/80 missing or invalid');
   if(bandGames.every(finite)&&!(bandGames[0]<=bandGames[1]&&bandGames[1]<=bandGames[2])) errors.push('setting-band games are not monotonic');
