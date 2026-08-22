@@ -5,7 +5,8 @@ on:
 permissions:
   contents: write
 jobs:
-  generate-and-validate:
+  generate-and-persist:
+    if: ${{ !contains(github.event.head_commit.message, '[generated-batch]') }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -16,23 +17,11 @@ jobs:
         with:
           node-version: 22
       - name: Generate research batch
-        run: node tools/run-user-batch-20260822-ryujin-d4dj.mjs
-      - name: Build machines
-        run: |
-          for id in S_RYUJIN_RZ30_SUIKA_VERSION S_DIGISLO_JACK_GB1 S_SUHANA_RISING_PC30 S_MOECHIBA_GNC30 S_KIZUMONOGATARI_FS L_D4DJ_KB L_GEGEGE_NO_KITARO_JG L_SENRAN_KAGURA2_L9 LB_KONOSUBA_ASLOT_XR; do
-            npm run machine:pipeline -- "$id"
-          done
-      - name: Publish batch to prototype
-        run: npm run machine:publish:batch -- --apply S_RYUJIN_RZ30_SUIKA_VERSION S_DIGISLO_JACK_GB1 S_SUHANA_RISING_PC30 S_MOECHIBA_GNC30 S_KIZUMONOGATARI_FS L_D4DJ_KB L_GEGEGE_NO_KITARO_JG L_SENRAN_KAGURA2_L9 LB_KONOSUBA_ASLOT_XR
-      - name: Final checks
-        run: |
-          npm test
-          npm run audit
-          npm run phase12:baseline
-      - name: Commit generated files
+        run: node tools/apply-user-batch-20260822-ryujin-d4dj.mjs
+      - name: Persist research inputs
         run: |
           git config user.name github-actions[bot]
           git config user.email 41898282+github-actions[bot]@users.noreply.github.com
-          git add research build machines catalog.json difficulty-catalog.json machine-registry.json reports
-          git diff --cached --quiet || git commit -m "data: add 20260822 researched machine batch"
+          git add research reports
+          git diff --cached --quiet || git commit -m "data: persist 20260822 research batch [generated-batch]"
           git push origin HEAD:work/manifest-v4-batch-ryujin-d4dj
