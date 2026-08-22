@@ -1,0 +1,30 @@
+name: Phase 5c Target Game Basis Audit
+
+on:
+  pull_request:
+    branches:
+      - prototype-multi-machine
+    paths:
+      - 'research/**/selection-data.json'
+      - 'research/**/research-data.json'
+      - 'tools/audit-target-game-basis-comparability.mjs'
+      - '.github/workflows/phase5c-target-game-basis-audit.yml'
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Audit target game basis comparability
+        run: |
+          node tools/audit-target-game-basis-comparability.mjs
+          cat reports/target-game-basis-comparability-v1.md
+      - uses: actions/upload-artifact@v4
+        with:
+          name: target-game-basis-comparability
+          path: |
+            reports/target-game-basis-comparability-v1.json
+            reports/target-game-basis-comparability-v1.md
