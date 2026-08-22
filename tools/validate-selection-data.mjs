@@ -16,6 +16,10 @@ export function validateSelectionData(s,research=null){
    if(!/^INP_[A-Z0-9_]+$/.test(i.id??"")) errors.push(`invalid input id: ${i.id}`);
    if(!i.name||!i.type||!i.category||!Number.isInteger(i.displayOrder)) errors.push(`incomplete input: ${i.id}`);
    if(i.parentInputId && !idset.has(i.parentInputId)) errors.push(`${i.id}: unknown parentInputId ${i.parentInputId}`);
+   if(i.uiQuickAdd!==undefined){
+     const values=Array.isArray(i.uiQuickAdd)?i.uiQuickAdd:[i.uiQuickAdd];
+     if(values.length===0||values.some(v=>!Number.isFinite(Number(v))||Number(v)<=0)) errors.push(`${i.id}: uiQuickAdd must be a positive number or non-empty positive-number array`);
+   }
  }
  const featIds=features.map(x=>x.featureId), featSet=new Set(featIds);
  if(featSet.size!==featIds.length) errors.push("duplicate featureId");
