@@ -8,20 +8,23 @@ const researchRoot = path.join(root, 'research');
 const reportPathArg = process.argv.find((arg) => arg.startsWith('--json-out='));
 const reportPath = reportPathArg ? reportPathArg.slice('--json-out='.length) : null;
 
-const RESOLVED_STATUS = new Set([
-  'checked', 'available', 'not_available', 'not-available', 'unavailable', 'none', 'confirmed',
+const CHECKED_STATUS = new Set(['checked', 'available', 'confirmed']);
+const NOT_AVAILABLE_STATUS = new Set([
+  'not_available', 'not-available', 'unavailable', 'none', 'unavailable_or_ended',
 ]);
-const UNRESOLVED_STATUS = new Set(['unresolved', 'unknown', 'pending', 'not_checked', 'not-checked']);
+const UNRESOLVED_STATUS = new Set([
+  'unresolved', 'unknown', 'pending', 'not_checked', 'not-checked', 'not_confirmed',
+]);
+const PARTIAL_STATUS = new Set(['partially_confirmed', 'partial', 'partially_checked']);
 
 function normalizeStatus(block) {
   if (!block || typeof block !== 'object') return 'MISSING';
   const raw = String(block.status ?? '').trim().toLowerCase();
   if (!raw) return 'PRESENT_STATUS_MISSING';
+  if (CHECKED_STATUS.has(raw)) return 'CHECKED';
+  if (NOT_AVAILABLE_STATUS.has(raw)) return 'NOT_AVAILABLE';
   if (UNRESOLVED_STATUS.has(raw)) return 'UNRESOLVED';
-  if (RESOLVED_STATUS.has(raw)) {
-    if (raw.includes('not') || raw === 'unavailable' || raw === 'none') return 'NOT_AVAILABLE';
-    return 'CHECKED';
-  }
+  if (PARTIAL_STATUS.has(raw)) return 'PARTIALLY_CHECKED';
   return `OTHER:${raw}`;
 }
 
@@ -56,7 +59,9 @@ function classify(machine) {
   if (severe) return 'REVIEW_SCHEMA';
 
   if (menu === 'MISSING' || service === 'MISSING') return 'PARTIAL_LEGACY';
-  if (menu === 'UNRESOLVED' || service === 'UNRESOLVED') return 'UNRESOLVED';
+  if (menu === 'UNRESOLVED' || service === 'UNRESOLVED' || menu === 'PARTIALLY_CHECKED' || service === 'PARTIALLY_CHECKED') {
+    return 'UNRESOLVED';
+  }
   if (!machine.predecessorAssessmentExplicit) return 'OBSERVATION_RESOLVED_PREDECESSOR_UNASSESSED';
   return 'RESOLVED';
 }
@@ -67,7 +72,7 @@ if (!fs.existsSync(researchRoot)) {
 }
 
 const machineDirs = fs.readdirSync(researchRoot, { withFileTypes: true })
-  .filter((entry) => entry.isDirectory())
+  .filter((entry) => entry.isDirectory() && !entry.name.startsWith('_'))
   .map((entry) => entry.name)
   .sort();
 
@@ -116,7 +121,7 @@ const counts = Object.fromEntries(classificationOrder.map((key) => [key, 0]));
 for (const machine of machines) counts[machine.classification] = (counts[machine.classification] ?? 0) + 1;
 
 const summary = {
-  schemaVersion: 'machine-observation-research-audit-v1',
+  schemaVersion: 'machine-observation-research-audit-v2',
   generatedAt: new Date().toISOString(),
   machineCount: machines.length,
   counts,
