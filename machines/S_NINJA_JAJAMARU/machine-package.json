@@ -1,0 +1,260 @@
+{
+  "schemaVersion": 1,
+  "machine": {
+    "schemaVersion": "2.0.0",
+    "machineId": "S_NINJA_JAJAMARU",
+    "machineDataVersion": "0.1.0",
+    "displayName": "SLOT忍者じゃじゃ丸くん",
+    "modelName": null,
+    "manufacturer": "エレコ / ユニバーサルエンターテインメント",
+    "settings": [
+      "SET_1",
+      "SET_2",
+      "SET_3",
+      "SET_5",
+      "SET_6"
+    ],
+    "packagePolicy": {
+      "offlineCapable": true,
+      "containsImages": false,
+      "containsExecutableCode": false
+    }
+  },
+  "inputs": {
+    "schemaVersion": "2.0.0",
+    "inputs": [
+      {
+        "id": "INP_BONUS_GAMES",
+        "name": "ボーナス集計ゲーム数",
+        "type": "integer",
+        "category": "PRIMARY",
+        "unit": "G",
+        "displayOrder": 1,
+        "description": "公開REG初当り確率と同じ集計範囲のゲーム数を入力してください。実機表示Gとの定義一致は未確認です。",
+        "defaultValue": 0,
+        "minimum": 0
+      },
+      {
+        "id": "INP_REG_COUNT",
+        "name": "REG回数",
+        "type": "counter",
+        "category": "PRIMARY",
+        "unit": "回",
+        "displayOrder": 2,
+        "defaultValue": 0,
+        "minimum": 0
+      },
+      {
+        "id": "INP_EVI_SETTING_FLOOR",
+        "name": "確認した設定下限",
+        "type": "enum",
+        "category": "EVIDENCE",
+        "unit": "",
+        "displayOrder": 100,
+        "inferenceRole": "INCLUDE_SUPPORT",
+        "options": [
+          {
+            "key": "__UNSET__",
+            "label": "未選択",
+            "value": "__UNSET__"
+          },
+          {
+            "key": "SET_5_OR_HIGHER",
+            "label": "設定5以上",
+            "value": "SET_5_OR_HIGHER"
+          },
+          {
+            "key": "SET_6",
+            "label": "設定6",
+            "value": "SET_6"
+          }
+        ],
+        "defaultValue": "__UNSET__"
+      }
+    ]
+  },
+  "features": {
+    "schemaVersion": "2.0.0",
+    "features": [
+      {
+        "featureId": "FEAT_REG",
+        "name": "REG初当り",
+        "adoptionCategory": "INCLUDE_PRIMARY",
+        "calculationRole": "PROBABILITY",
+        "probabilityEngineUsage": true,
+        "modelType": "binomial",
+        "minimumSample": 1,
+        "sampleRecommendation": 5000,
+        "reliabilityProfile": {
+          "weight": 1
+        },
+        "displayFormat": "ratio_1_over_n",
+        "denominatorInputId": "INP_BONUS_GAMES",
+        "numeratorInputId": "INP_REG_COUNT",
+        "probabilities": {
+          "SET_1": 0.0027624309392265192,
+          "SET_2": 0.002872737719046251,
+          "SET_3": 0.0030978934324659233,
+          "SET_5": 0.003590664272890485,
+          "SET_6": 0.0039032006245121
+        },
+        "sourceEvidenceRefs": [
+          "SRC_PWORLD",
+          "SRC_NANA"
+        ]
+      }
+    ]
+  },
+  "evidence": {
+    "version": "1.0.0",
+    "evidences": [
+      {
+        "id": "EVI_SETTING_FLOOR_SET_5_OR_HIGHER",
+        "name": "設定5以上",
+        "displayName": "設定5以上",
+        "inputId": "INP_EVI_SETTING_FLOOR",
+        "triggerValue": "SET_5_OR_HIGHER",
+        "confirmedSettings": [
+          "SET_5",
+          "SET_6"
+        ],
+        "deniedSettings": [],
+        "hasImage": false,
+        "type": "SETTING_CONFIRMATION",
+        "sourceEvidenceRefs": [
+          "EV_REG_PURPLE_5PLUS"
+        ]
+      },
+      {
+        "id": "EVI_SETTING_FLOOR_SET_6",
+        "name": "設定6",
+        "displayName": "設定6",
+        "inputId": "INP_EVI_SETTING_FLOOR",
+        "triggerValue": "SET_6",
+        "confirmedSettings": [
+          "SET_6"
+        ],
+        "deniedSettings": [],
+        "hasImage": false,
+        "type": "SETTING_CONFIRMATION",
+        "sourceEvidenceRefs": [
+          "EV_BIG_THREE_CHAR_6"
+        ]
+      }
+    ],
+    "sources": [
+      {
+        "id": "SRC_PWORLD",
+        "classification": "ANALYSIS",
+        "pageName": "SLOT忍者じゃじゃ丸くん 機種情報・設定推測",
+        "url": "https://www.p-world.co.jp/machine/database/9991",
+        "checkedAt": "2026-08-22"
+      },
+      {
+        "id": "SRC_NANA",
+        "classification": "ANALYSIS",
+        "pageName": "SLOT忍者じゃじゃ丸くん 設定判別",
+        "url": "https://nana-press.com/kaiseki/machine/721/20062/",
+        "checkedAt": "2026-08-22"
+      }
+    ]
+  },
+  "ui": {
+    "sections": [
+      {
+        "id": "AUTO_PRIMARY",
+        "title": "ボーナス",
+        "displayOrder": 1,
+        "items": [
+          {
+            "type": "input",
+            "inputId": "INP_BONUS_GAMES",
+            "label": "ボーナス集計ゲーム数",
+            "widget": "number"
+          },
+          {
+            "type": "input",
+            "inputId": "INP_REG_COUNT",
+            "label": "REG回数",
+            "widget": "counter"
+          }
+        ]
+      },
+      {
+        "id": "AUTO_EVIDENCE",
+        "title": "設定確定・否定情報",
+        "displayOrder": 2,
+        "items": [
+          {
+            "type": "input",
+            "inputId": "INP_EVI_SETTING_FLOOR",
+            "label": "確認した設定下限",
+            "widget": "select"
+          }
+        ]
+      }
+    ]
+  },
+  "selectionSummary": {
+    "schemaVersion": "selection-summary-v1",
+    "evaluatedCount": 4,
+    "selectedCount": 1,
+    "rejectedCount": 3,
+    "selected": [
+      {
+        "featureId": "FEAT_REG",
+        "name": "REG初当り",
+        "reason": "REGは1/362.0～1/256.2とBIGより相対設定差が大きく、初版の単一ボーナスFeatureとして採用。",
+        "requiredTrials": {
+          "value": 18573,
+          "unit": "ボーナス初当り集計ゲーム"
+        }
+      }
+    ],
+    "rejected": [
+      {
+        "featureId": "FEAT_BIG",
+        "name": "BIG初当り",
+        "reason": "BIGはREGとの排他的Multinomial化を優先し、初版では単独採用しない。",
+        "requiredTrials": {
+          "value": 14370,
+          "unit": "ボーナス初当り集計ゲーム"
+        }
+      },
+      {
+        "featureId": "FEAT_DIRECT_NORMAL",
+        "name": "通常A/B・さくら滞在時ボーナス直撃",
+        "reason": "設定差は大きいが内部モード分母を取得できないため不採用。",
+        "requiredTrials": {
+          "value": 20818,
+          "unit": "対象モード滞在ゲーム"
+        }
+      },
+      {
+        "featureId": "FEAT_SCROLL_CZ_NONCHAIN",
+        "name": "非連戦モード中の巻物→CZ",
+        "reason": "非連戦モードの正しい試行母数を取得できないため不採用。",
+        "requiredTrials": {
+          "value": 230,
+          "unit": "非連戦モード中の巻物成立回数"
+        }
+      }
+    ]
+  },
+  "reliability": {},
+  "metadata": {
+    "machineId": "S_NINJA_JAJAMARU",
+    "displayName": "SLOT忍者じゃじゃ丸くん",
+    "settings": [
+      "SET_1",
+      "SET_2",
+      "SET_3",
+      "SET_5",
+      "SET_6"
+    ]
+  },
+  "validation": {
+    "cases": []
+  },
+  "statistics": {}
+}

@@ -1,0 +1,209 @@
+{
+  "schemaVersion": 1,
+  "machine": {
+    "schemaVersion": "2.0.0",
+    "machineId": "S_WORD_OF_LIGHTS_2",
+    "machineDataVersion": "0.1.0",
+    "displayName": "ワードオブライツⅡ",
+    "modelName": "S／ワードオブライツII／WF",
+    "manufacturer": "エレコ",
+    "settings": [
+      "SET_1",
+      "SET_2",
+      "SET_5",
+      "SET_6"
+    ],
+    "packagePolicy": {
+      "offlineCapable": true,
+      "containsImages": false,
+      "containsExecutableCode": false
+    }
+  },
+  "inputs": {
+    "schemaVersion": "2.0.0",
+    "inputs": [
+      {
+        "id": "INP_NORMAL_GAMES",
+        "name": "通常時ゲーム数",
+        "type": "integer",
+        "category": "ROLE",
+        "unit": "G",
+        "displayOrder": 1,
+        "description": "実機連動機能の設定差小役と同じ通常時集計ゲーム数を入力してください。",
+        "defaultValue": 0,
+        "minimum": 0
+      },
+      {
+        "id": "INP_ROLE_4A_COUNT",
+        "name": "4枚役A回数",
+        "type": "counter",
+        "category": "ROLE",
+        "unit": "回",
+        "displayOrder": 2,
+        "description": "実機連動機能で確認できる4枚役A（チェリー）の回数を入力してください。",
+        "defaultValue": 0,
+        "minimum": 0
+      }
+    ]
+  },
+  "features": {
+    "schemaVersion": "2.0.0",
+    "features": [
+      {
+        "featureId": "FEAT_ROLE_4A",
+        "name": "4枚役A",
+        "adoptionCategory": "INCLUDE_PRIMARY",
+        "calculationRole": "PROBABILITY",
+        "probabilityEngineUsage": true,
+        "modelType": "binomial",
+        "minimumSample": 1,
+        "sampleRecommendation": 5000,
+        "reliabilityProfile": {
+          "weight": 1
+        },
+        "displayFormat": "ratio_1_over_n",
+        "denominatorInputId": "INP_NORMAL_GAMES",
+        "numeratorInputId": "INP_ROLE_4A_COUNT",
+        "probabilities": {
+          "SET_1": 0.020833333333333332,
+          "SET_2": 0.0211864406779661,
+          "SET_5": 0.021551724137931036,
+          "SET_6": 0.021929824561403508
+        },
+        "sourceEvidenceRefs": [
+          "SRC_PWORLD",
+          "SRC_HISSHO"
+        ]
+      }
+    ]
+  },
+  "evidence": {
+    "version": "1.0.0",
+    "evidences": [],
+    "sources": [
+      {
+        "id": "SRC_PWORLD",
+        "classification": "ANALYSIS",
+        "pageName": "ワードオブライツII 機種情報・設定推測",
+        "url": "https://www.p-world.co.jp/machine/database/9967",
+        "checkedAt": "2026-08-22"
+      },
+      {
+        "id": "SRC_NANA",
+        "classification": "ANALYSIS",
+        "pageName": "ワードオブライツⅡ 設定判別",
+        "url": "https://nana-press.com/kaiseki/machine/694/19526/",
+        "checkedAt": "2026-08-22"
+      },
+      {
+        "id": "SRC_HISSHO",
+        "classification": "ANALYSIS",
+        "pageName": "ワードオブライツⅡ 小役確率・ユニメモカウント",
+        "url": "https://p.hisshobon.jp/machine/4232/1/101728",
+        "checkedAt": "2026-08-22"
+      }
+    ]
+  },
+  "ui": {
+    "sections": [
+      {
+        "id": "AUTO_ROLE",
+        "title": "実機連動データ",
+        "displayOrder": 1,
+        "items": [
+          {
+            "type": "input",
+            "inputId": "INP_NORMAL_GAMES",
+            "label": "通常時ゲーム数",
+            "widget": "number"
+          },
+          {
+            "type": "input",
+            "inputId": "INP_ROLE_4A_COUNT",
+            "label": "4枚役A回数",
+            "widget": "counter"
+          }
+        ]
+      }
+    ]
+  },
+  "selectionSummary": {
+    "schemaVersion": "selection-summary-v1",
+    "evaluatedCount": 6,
+    "selectedCount": 1,
+    "rejectedCount": 5,
+    "selected": [
+      {
+        "featureId": "FEAT_ROLE_4A",
+        "name": "4枚役A",
+        "reason": "4枚役Aは実機連動機能で直接取得でき、正しい分子を手動判別せず継続観測できるため採用。",
+        "requiredTrials": {
+          "value": 127555,
+          "unit": "通常時ゲーム"
+        }
+      }
+    ],
+    "rejected": [
+      {
+        "featureId": "FEAT_BIG",
+        "name": "BIG初当り",
+        "reason": "BIGは設定差小役との依存を安全に分解するまで初版では不採用。",
+        "requiredTrials": {
+          "value": 29009,
+          "unit": "通常時ゲーム"
+        }
+      },
+      {
+        "featureId": "FEAT_AT",
+        "name": "AT初当り",
+        "reason": "ATはボーナス経路との依存整理を優先し初版では不採用。",
+        "requiredTrials": {
+          "value": 113126,
+          "unit": "通常時ゲーム"
+        }
+      },
+      {
+        "featureId": "FEAT_ROLE_4B",
+        "name": "4枚役B",
+        "reason": "4枚役Bは4枚役A等とのMultinomial化まで初版では不採用。",
+        "requiredTrials": {
+          "value": 247070,
+          "unit": "通常時ゲーム"
+        }
+      },
+      {
+        "featureId": "FEAT_ROLE_5A",
+        "name": "5枚役A",
+        "reason": "5枚役Aは実機連動機能での個別分離可否が未確定のため不採用。",
+        "requiredTrials": {
+          "value": 18030,
+          "unit": "通常時ゲーム"
+        }
+      },
+      {
+        "featureId": "FEAT_ROLE_5B",
+        "name": "5枚役B",
+        "reason": "5枚役Bは実機連動機能での個別分離可否が未確定のため不採用。",
+        "requiredTrials": {
+          "value": 33934,
+          "unit": "通常時ゲーム"
+        }
+      }
+    ]
+  },
+  "reliability": {},
+  "metadata": {
+    "machineId": "S_WORD_OF_LIGHTS_2",
+    "displayName": "ワードオブライツⅡ",
+    "settings": [
+      "SET_1",
+      "SET_2",
+      "SET_5",
+      "SET_6"
+    ]
+  },
+  "validation": {
+    "cases": []
+  },
+  "statistics": {}
+}

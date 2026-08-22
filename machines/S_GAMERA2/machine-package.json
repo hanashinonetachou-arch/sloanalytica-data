@@ -1,0 +1,336 @@
+{
+  "schemaVersion": 1,
+  "machine": {
+    "schemaVersion": "2.0.0",
+    "machineId": "S_GAMERA2",
+    "machineDataVersion": "0.1.0",
+    "displayName": "パチスロ ガメラ2",
+    "modelName": null,
+    "manufacturer": "サミー",
+    "settings": [
+      "SET_1",
+      "SET_2",
+      "SET_3",
+      "SET_4",
+      "SET_5",
+      "SET_6"
+    ],
+    "packagePolicy": {
+      "offlineCapable": true,
+      "containsImages": false,
+      "containsExecutableCode": false
+    }
+  },
+  "inputs": {
+    "schemaVersion": "2.0.0",
+    "inputs": [
+      {
+        "id": "INP_NORMAL_GAMES",
+        "name": "通常時ゲーム数",
+        "type": "integer",
+        "category": "PRIMARY",
+        "unit": "G",
+        "displayOrder": 1,
+        "description": "実機連動機能で確認できる通常時の集計ゲーム数を入力してください。ボーナス中等を含む総回転数とは区別してください。",
+        "defaultValue": 0,
+        "minimum": 0
+      },
+      {
+        "id": "INP_REACHME_CDEF_COUNT",
+        "name": "リーチ目リプレイC/D/E/F回数",
+        "type": "counter",
+        "category": "PRIMARY",
+        "unit": "回",
+        "displayOrder": 2,
+        "description": "実機連動機能の小役・フラグ集計で確認できるリーチ目リプレイC/D/E/Fの合計回数を入力してください。",
+        "defaultValue": 0,
+        "minimum": 0
+      },
+      {
+        "id": "INP_EVI_SETTING_FLOOR",
+        "name": "確認した設定下限",
+        "type": "enum",
+        "category": "EVIDENCE",
+        "unit": "",
+        "displayOrder": 100,
+        "inferenceRole": "INCLUDE_SUPPORT",
+        "options": [
+          {
+            "key": "__UNSET__",
+            "label": "未選択",
+            "value": "__UNSET__"
+          },
+          {
+            "key": "SET_2_OR_HIGHER",
+            "label": "設定2以上",
+            "value": "SET_2_OR_HIGHER"
+          },
+          {
+            "key": "SET_4_OR_HIGHER",
+            "label": "設定4以上",
+            "value": "SET_4_OR_HIGHER"
+          },
+          {
+            "key": "SET_5_OR_HIGHER",
+            "label": "設定5以上",
+            "value": "SET_5_OR_HIGHER"
+          },
+          {
+            "key": "SET_6",
+            "label": "設定6",
+            "value": "SET_6"
+          }
+        ],
+        "defaultValue": "__UNSET__"
+      }
+    ]
+  },
+  "features": {
+    "schemaVersion": "2.0.0",
+    "features": [
+      {
+        "featureId": "FEAT_REACHME_CDEF",
+        "name": "リーチ目リプレイC/D/E/F合算",
+        "adoptionCategory": "INCLUDE_PRIMARY",
+        "calculationRole": "PROBABILITY",
+        "probabilityEngineUsage": true,
+        "modelType": "binomial",
+        "minimumSample": 1,
+        "sampleRecommendation": 7000,
+        "reliabilityProfile": {
+          "weight": 1
+        },
+        "displayFormat": "ratio_1_over_n",
+        "denominatorInputId": "INP_NORMAL_GAMES",
+        "numeratorInputId": "INP_REACHME_CDEF_COUNT",
+        "probabilities": {
+          "SET_1": 0.00048828125,
+          "SET_2": 0.0005493298176225005,
+          "SET_3": 0.0006103515625,
+          "SET_4": 0.000671366230278617,
+          "SET_5": 0.000946073793755913,
+          "SET_6": 0.0010681478316599017
+        },
+        "sourceEvidenceRefs": [
+          "SRC_SETTING"
+        ]
+      }
+    ]
+  },
+  "evidence": {
+    "version": "1.0.0",
+    "evidences": [
+      {
+        "id": "EVI_SETTING_FLOOR_SET_2_OR_HIGHER",
+        "name": "設定2以上",
+        "displayName": "設定2以上",
+        "inputId": "INP_EVI_SETTING_FLOOR",
+        "triggerValue": "SET_2_OR_HIGHER",
+        "confirmedSettings": [
+          "SET_2",
+          "SET_3",
+          "SET_4",
+          "SET_5",
+          "SET_6"
+        ],
+        "deniedSettings": [],
+        "hasImage": false,
+        "type": "SETTING_CONFIRMATION",
+        "sourceEvidenceRefs": [
+          "EV_BB_NOT_BAD"
+        ]
+      },
+      {
+        "id": "EVI_SETTING_FLOOR_SET_4_OR_HIGHER",
+        "name": "設定4以上",
+        "displayName": "設定4以上",
+        "inputId": "INP_EVI_SETTING_FLOOR",
+        "triggerValue": "SET_4_OR_HIGHER",
+        "confirmedSettings": [
+          "SET_4",
+          "SET_5",
+          "SET_6"
+        ],
+        "deniedSettings": [],
+        "hasImage": false,
+        "type": "SETTING_CONFIRMATION",
+        "sourceEvidenceRefs": [
+          "EV_456"
+        ]
+      },
+      {
+        "id": "EVI_SETTING_FLOOR_SET_5_OR_HIGHER",
+        "name": "設定5以上",
+        "displayName": "設定5以上",
+        "inputId": "INP_EVI_SETTING_FLOOR",
+        "triggerValue": "SET_5_OR_HIGHER",
+        "confirmedSettings": [
+          "SET_5",
+          "SET_6"
+        ],
+        "deniedSettings": [],
+        "hasImage": false,
+        "type": "SETTING_CONFIRMATION",
+        "sourceEvidenceRefs": [
+          "EV_REG_MONSTERS"
+        ]
+      },
+      {
+        "id": "EVI_SETTING_FLOOR_SET_6",
+        "name": "設定6",
+        "displayName": "設定6",
+        "inputId": "INP_EVI_SETTING_FLOOR",
+        "triggerValue": "SET_6",
+        "confirmedSettings": [
+          "SET_6"
+        ],
+        "deniedSettings": [],
+        "hasImage": false,
+        "type": "SETTING_CONFIRMATION",
+        "sourceEvidenceRefs": [
+          "EV_BB_GAMERA",
+          "EV_REG_NO1",
+          "EV_666"
+        ]
+      }
+    ],
+    "sources": [
+      {
+        "id": "SRC_ID",
+        "classification": "ANALYSIS",
+        "pageName": "パチスロ ガメラ2 機種情報",
+        "url": "https://www.p-world.co.jp/machine/database/9972",
+        "checkedAt": "2026-08-22"
+      },
+      {
+        "id": "SRC_SETTING",
+        "classification": "ANALYSIS",
+        "pageName": "パチスロ ガメラ2 設定判別",
+        "url": "https://nana-press.com/kaiseki/machine/695/19832/",
+        "checkedAt": "2026-08-22"
+      },
+      {
+        "id": "SRC_1GEKI",
+        "classification": "ANALYSIS",
+        "pageName": "ガメラ2 設定差・設定判別",
+        "url": "https://1geki.jp/slot/s_gamera2xr/0/",
+        "checkedAt": "2026-08-22"
+      },
+      {
+        "id": "SRC_LINKED",
+        "classification": "ANALYSIS",
+        "pageName": "ガメラ2 マイスロ・マイカウンター",
+        "url": "https://slonuu.com/pg/gamera2myslo",
+        "checkedAt": "2026-08-22"
+      }
+    ]
+  },
+  "ui": {
+    "sections": [
+      {
+        "id": "AUTO_PRIMARY",
+        "title": "実機連動データ",
+        "displayOrder": 1,
+        "items": [
+          {
+            "type": "input",
+            "inputId": "INP_NORMAL_GAMES",
+            "label": "通常時ゲーム数",
+            "widget": "number"
+          },
+          {
+            "type": "input",
+            "inputId": "INP_REACHME_CDEF_COUNT",
+            "label": "リーチ目リプレイC/D/E/F回数",
+            "widget": "counter"
+          }
+        ]
+      },
+      {
+        "id": "AUTO_EVIDENCE",
+        "title": "設定確定・否定情報",
+        "displayOrder": 2,
+        "items": [
+          {
+            "type": "input",
+            "inputId": "INP_EVI_SETTING_FLOOR",
+            "label": "確認した設定下限",
+            "widget": "select"
+          }
+        ]
+      }
+    ]
+  },
+  "selectionSummary": {
+    "schemaVersion": "selection-summary-v1",
+    "evaluatedCount": 5,
+    "selectedCount": 1,
+    "rejectedCount": 4,
+    "selected": [
+      {
+        "featureId": "FEAT_REACHME_CDEF",
+        "name": "リーチ目リプレイC/D/E/F合算",
+        "reason": "C/D/E/F合算は1/2048.0～1/936.2と設定差が大きく、実機連動機能で内訳を取得できるため採用。",
+        "requiredTrials": {
+          "value": 16343,
+          "unit": "通常時ゲーム"
+        }
+      }
+    ],
+    "rejected": [
+      {
+        "featureId": "FEAT_BB",
+        "name": "BIG",
+        "reason": "BIGはリーチ目Featureとの重複を避けるため初版では不採用。",
+        "requiredTrials": {
+          "value": 67696,
+          "unit": "通常時ゲーム"
+        }
+      },
+      {
+        "featureId": "FEAT_RB",
+        "name": "REG",
+        "reason": "REGもボーナス/リーチ目の依存整理を優先し初版では不採用。",
+        "requiredTrials": {
+          "value": 224015,
+          "unit": "通常時ゲーム"
+        }
+      },
+      {
+        "featureId": "FEAT_UPPER_GYAOS",
+        "name": "上段ギャオス揃い",
+        "reason": "上段ギャオスは設定差があるが、複数フラグを安全にまとめるMultinomial化前のため初版では不採用。",
+        "requiredTrials": {
+          "value": 17927,
+          "unit": "通常時ゲーム"
+        }
+      },
+      {
+        "featureId": "FEAT_REACHME_ALL",
+        "name": "リーチ目全合算",
+        "reason": "リーチ目全合算はC/D/E/Fと重複するため不採用。",
+        "requiredTrials": {
+          "value": 35294,
+          "unit": "通常時ゲーム"
+        }
+      }
+    ]
+  },
+  "reliability": {},
+  "metadata": {
+    "machineId": "S_GAMERA2",
+    "displayName": "パチスロ ガメラ2",
+    "settings": [
+      "SET_1",
+      "SET_2",
+      "SET_3",
+      "SET_4",
+      "SET_5",
+      "SET_6"
+    ]
+  },
+  "validation": {
+    "cases": []
+  },
+  "statistics": {}
+}
