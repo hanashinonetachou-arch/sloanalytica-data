@@ -1,7 +1,7 @@
 {
   "schemaVersion": "selection-data-v1",
   "machineId": "S_CODE_GEASS_3_CC_FS",
-  "machineDataVersion": "0.1.8",
+  "machineDataVersion": "0.1.9",
   "inputs": [
     {
       "id": "INP_NORMAL_GAMES",
@@ -23,6 +23,18 @@
       "parentInputId": "INP_NORMAL_GAMES",
       "inferenceRole": "INCLUDE_PRIMARY",
       "defaultValue": 0
+    },
+    {
+      "id": "INP_CHERRY_RB_COUNT",
+      "name": "チェリー＋RB回数",
+      "category": "PRIMARY_SMALL_ROLE",
+      "type": "counter",
+      "unit": "回",
+      "displayOrder": 13,
+      "parentInputId": "INP_CHERRY_COUNT",
+      "inferenceRole": "INCLUDE_SUPPORT",
+      "defaultValue": 0,
+      "description": "チェリー成立を契機に赤赤白RBへ当選した回数を、チェリー回数と同じ集計区間で入力します。ボーナス当選契機は入賞時のPUSHで確認できます。"
     },
     {
       "id": "INP_WATERMELON_COUNT",
@@ -189,7 +201,7 @@
       "adoptionCategory": "EXCLUDE",
       "minimumSample": 500,
       "sampleRecommendation": 5000,
-      "rejectionReason": "必要試行量が多い。",
+      "rejectionReason": "ボーナス内訳には有用な設定差がありますが、チェリー＋RBなどが採用中の小役Featureと同じ成立事象を共有し、独立Featureとして加えると二重計上になります。フル内訳は不採用とし、重複せず分解できるチェリー＋RBだけを条件付きFeatureとして採用します。",
       "requiredTrials": {
         "value": 8619,
         "unit": "通常・ATゲーム"
@@ -217,6 +229,31 @@
       "requiredTrials": {
         "value": 6162,
         "unit": "通常・ATゲーム"
+      }
+    },
+    {
+      "researchFeatureId": "RF05_CHERRY_RB_GIVEN_CHERRY",
+      "featureId": "FEAT_CHERRY_RB_GIVEN_CHERRY",
+      "adoptionCategory": "INCLUDE_SUPPORT",
+      "minimumSample": 20,
+      "sampleRecommendation": 100,
+      "weight": 1,
+      "numeratorInputId": "INP_CHERRY_RB_COUNT",
+      "denominatorInputId": "INP_CHERRY_COUNT",
+      "displayFormat": "percent",
+      "difficultyParticipation": "INCLUDE",
+      "difficultyExposure": {
+        "mode": "derived_event_rate",
+        "sourceFeatureId": "FEAT_CHERRY_WATERMELON_MULTINOMIAL",
+        "sourceCategoryId": "CAT_1_INP_CHERRY_COUNT",
+        "eventMultiplier": 1,
+        "quality": "DERIVED",
+        "basisId": "NORMAL_AT_GAMES"
+      },
+      "userReason": "チェリー成立率とは条件付きに分解できるため二重計上せず併用できます。チェリーから赤赤白RBへ当選する割合は高設定ほど大きく、既存の小役情報に追加の判別材料を与えるため補助採用します。",
+      "requiredTrials": {
+        "value": 367,
+        "unit": "チェリー成立回数"
       }
     },
     {
