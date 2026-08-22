@@ -6,6 +6,15 @@ const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const MACHINES_DIR = path.join(ROOT, 'machines');
 const SERVICE_NAME_RE = /(?:ユニメモ|打-WIN|打ＷＩＮ|スロプラ\s*NEXT|マイスロ)/i;
 
+function isApprovedException(machineId, pointer, value) {
+  // Gamera2: users must know that the detailed reach-me flag counter is only
+  // available after the linked counter reaches level 4. Keep this exception
+  // narrow so other service-name leakage remains blocked.
+  return machineId === 'S_GAMERA2'
+    && pointer.startsWith('/inputs/')
+    && value.includes('マイスロのマイカウンターLv4');
+}
+
 function visit(value, pointer, findings) {
   if (typeof value === 'string') {
     if (SERVICE_NAME_RE.test(value)) findings.push({ pointer, value });
@@ -21,6 +30,7 @@ function visit(value, pointer, findings) {
 }
 
 const failures = [];
+const approved = [];
 
 for (const entry of fs.readdirSync(MACHINES_DIR, { withFileTypes: true })) {
   if (!entry.isDirectory()) continue;
@@ -38,7 +48,10 @@ for (const entry of fs.readdirSync(MACHINES_DIR, { withFileTypes: true })) {
     if (value === undefined) continue;
     const findings = [];
     visit(value, `/${root}`, findings);
-    for (const finding of findings) failures.push({ machineId: entry.name, ...finding });
+    for (const finding of findings) {
+      if (isApprovedException(entry.name, finding.pointer, finding.value)) approved.push({ machineId: entry.name, ...finding });
+      else failures.push({ machineId: entry.name, ...finding });
+    }
   }
 }
 
@@ -48,4 +61,4 @@ if (failures.length) {
   process.exit(1);
 }
 
-console.log('OK: ユーザー向けMachineDataに固有の実機連動サービス名はありません。');
+console.log(`OK: ユーザー向けMachineDataの固有実機連動サービス名を監査しました（承認済み例外 ${approved.length}件）。`);

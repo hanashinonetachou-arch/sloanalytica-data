@@ -1,1 +1,177 @@
-{"schemaVersion":"selection-data-v1","machineId":"L_BOUNTY_ANGEL","machineDataVersion":"0.1.0","uiCategoryLabels":{"PRIMARY":"初当り"},"inputs":[{"id":"INP_AT_TRIAL_GAMES","name":"AT初当り集計ゲーム数","type":"integer","category":"PRIMARY","unit":"G","displayOrder":1,"description":"AT初当り確率と同じ集計範囲のゲーム数を入力してください。実機表示Gとの定義一致は未確認です。","defaultValue":0},{"id":"INP_AT_INITIAL_COUNT","name":"AT初当り回数","type":"counter","category":"PRIMARY","unit":"回","displayOrder":2,"defaultValue":0}],"features":[{"researchFeatureId":"RF_CZ","featureId":"FEAT_CZ","adoptionCategory":"EXCLUDE","rejectionReason":"CZはボーナス/AT到達経路と依存し、現状の公開値だけではAT初当りと二重計上せず安全に分解できない。","userReason":"CZはAT初当りとの経路依存を安全に分解できないため不採用。"},{"researchFeatureId":"RF_BONUS","featureId":"FEAT_BONUS","adoptionCategory":"EXCLUDE","rejectionReason":"ボーナスはAT到達や特殊状態と条件依存し、AT初当りと同時採用する安全な独立構造を現版では確定できない。","userReason":"ボーナス初当りは設定差があるがATとの条件依存を安全に分解できないため不採用。"},{"researchFeatureId":"RF_AT","featureId":"FEAT_AT","adoptionCategory":"INCLUDE_PRIMARY","numeratorInputId":"INP_AT_INITIAL_COUNT","denominatorInputId":"INP_AT_TRIAL_GAMES","minimumSample":1,"sampleRecommendation":7000,"weight":1,"displayFormat":"ratio_1_over_n","difficultyExposure":{"mode":"per_game","factor":1,"quality":"ESTIMATED","basisId":"AT_INITIAL_GAME_BASIS","confidence":"LOW","estimationBasis":"公開AT初当り確率をユーザー自身の通常実戦ゲーム基準へ接続する暫定Exposure。","uncertaintyNote":"実機表示Gと解析上のAT初当り集計範囲の一致は未確認。"},"difficultyParticipation":"INCLUDE","userReason":"AT初当りは1/530～1/357と設定差が大きく、継続観測しやすいため採用。"}],"evidence":[],"evidenceUi":{"groups":[{"groupId":"SETTING_FLOOR","label":"確認した設定下限","selectionMode":"single","normalizationMode":"ALLOWED_SETTINGS","options":[{"value":"SET_4_OR_HIGHER","label":"設定4以上","allowedSettings":["SET_4","SET_5","SET_6"],"sourceEvidenceIds":["EV_COSPLAY_4PLUS"]},{"value":"SET_6","label":"設定6","allowedSettings":["SET_6"],"sourceEvidenceIds":["EV_BONUS_SCREEN_6","EV_ENDING_VOICE_6"]}]}]},"evidenceReview":{"policyVersion":1,"exclusions":[]},"difficultyAnalysis":{"targetGames":[1500,3000,7000],"simulationsPerSetting":4000,"seed":20260822,"targetGameBasis":{"basisId":"SELF_PLAY_STANDARD_GAMES","label":"ユーザー自身の標準実戦ゲーム数","quality":"ESTIMATED"},"calibrationAllowedExposureQualities":["EXACT","DERIVED","ESTIMATED"]},"selectionNotes":["特殊状態中AT直撃は設定差が大きいが特殊状態の試行母数を正確に作れないため不採用。","内部状態昇格も内部状態を完全観測できないため不採用。","CZ敗北後復活はCZ敗北回数を安全に入力できる可能性があり、今後の条件付きFeature候補としてResearchに保持する。"]}
+{
+  "schemaVersion": "selection-data-v1",
+  "machineId": "L_BOUNTY_ANGEL",
+  "machineDataVersion": "0.1.1",
+  "uiCategoryLabels": {
+    "PRIMARY": "初当り",
+    "RESET": "設定変更時"
+  },
+  "inputs": [
+    {
+      "id": "INP_AT_TRIAL_GAMES",
+      "name": "AT初当り集計ゲーム数",
+      "type": "integer",
+      "category": "PRIMARY",
+      "unit": "G",
+      "displayOrder": 1,
+      "description": "AT初当り確率と同じ集計範囲のゲーム数を入力してください。実機表示Gとの定義一致は未確認です。",
+      "defaultValue": 0
+    },
+    {
+      "id": "INP_AT_INITIAL_COUNT",
+      "name": "AT初当り回数",
+      "type": "counter",
+      "category": "PRIMARY",
+      "unit": "回",
+      "displayOrder": 2,
+      "defaultValue": 0
+    },
+    {
+      "id": "INP_RESET_TRIALS",
+      "name": "設定変更を確認できた実戦回数",
+      "type": "counter",
+      "category": "RESET",
+      "unit": "回",
+      "displayOrder": 10,
+      "defaultValue": 0,
+      "uiQuickAdd": 1
+    },
+    {
+      "id": "INP_RESET_AT_DIRECT",
+      "name": "そのうちAT直撃",
+      "type": "counter",
+      "category": "RESET",
+      "unit": "回",
+      "displayOrder": 11,
+      "defaultValue": 0,
+      "uiQuickAdd": 1,
+      "parentInputId": "INP_RESET_TRIALS"
+    }
+  ],
+  "features": [
+    {
+      "researchFeatureId": "RF_CZ",
+      "featureId": "FEAT_CZ",
+      "adoptionCategory": "EXCLUDE",
+      "rejectionReason": "CZはボーナス/AT到達経路と依存し、現状の公開値だけではAT初当りと二重計上せず安全に分解できない。",
+      "userReason": "CZはAT初当りとの経路依存を安全に分解できないため不採用。"
+    },
+    {
+      "researchFeatureId": "RF_BONUS",
+      "featureId": "FEAT_BONUS",
+      "adoptionCategory": "EXCLUDE",
+      "rejectionReason": "ボーナスはAT到達や特殊状態と条件依存し、AT初当りと同時採用する安全な独立構造を現版では確定できない。",
+      "userReason": "ボーナス初当りは設定差があるがATとの条件依存を安全に分解できないため不採用。"
+    },
+    {
+      "researchFeatureId": "RF_AT",
+      "featureId": "FEAT_AT",
+      "adoptionCategory": "INCLUDE_PRIMARY",
+      "numeratorInputId": "INP_AT_INITIAL_COUNT",
+      "denominatorInputId": "INP_AT_TRIAL_GAMES",
+      "minimumSample": 1,
+      "sampleRecommendation": 7000,
+      "weight": 1,
+      "displayFormat": "ratio_1_over_n",
+      "difficultyExposure": {
+        "mode": "per_game",
+        "factor": 1,
+        "quality": "ESTIMATED",
+        "basisId": "AT_INITIAL_GAME_BASIS",
+        "confidence": "LOW",
+        "estimationBasis": "公開AT初当り確率をユーザー自身の通常実戦ゲーム基準へ接続する暫定Exposure。",
+        "uncertaintyNote": "実機表示Gと解析上のAT初当り集計範囲の一致は未確認。"
+      },
+      "difficultyParticipation": "INCLUDE",
+      "userReason": "AT初当りは1/530～1/357と設定差が大きく、継続観測しやすいため採用。"
+    },
+    {
+      "researchFeatureId": "RF_RESET_AT_DIRECT",
+      "featureId": "FEAT_RESET_AT_DIRECT",
+      "adoptionCategory": "INCLUDE_SUPPORT",
+      "numeratorInputId": "INP_RESET_AT_DIRECT",
+      "denominatorInputId": "INP_RESET_TRIALS",
+      "minimumSample": 1,
+      "sampleRecommendation": 20,
+      "weight": 1,
+      "displayFormat": "percentage",
+      "difficultyParticipation": "EXCLUDE",
+      "userReason": "設定変更後のAT直撃割合は10.9%～32.1%と差が大きい。設定変更を確認できた実戦だけに限定すれば正しい条件付きFeatureとして扱えるため採用。"
+    },
+    {
+      "researchFeatureId": "RF_CZ_REVIVE",
+      "featureId": "FEAT_CZ_REVIVE",
+      "adoptionCategory": "EXCLUDE",
+      "rejectionReason": "設定差はあるが1.6%～3.1%と低頻度で、設定1対6でも約729回のCZ敗北試行が80%識別目安。さらに天井到達CZを除外する必要があり実戦的な増分情報が小さい。",
+      "userReason": "CZ敗北後の復活率は設定差を確認済みだが、必要試行が約729回と極端に重く天井CZ除外も必要なため不採用。",
+      "requiredTrials": {
+        "value": 729,
+        "unit": "CZ敗北回数"
+      }
+    }
+  ],
+  "evidence": [],
+  "evidenceUi": {
+    "groups": [
+      {
+        "groupId": "SETTING_FLOOR",
+        "label": "確認した設定下限",
+        "selectionMode": "single",
+        "normalizationMode": "ALLOWED_SETTINGS",
+        "options": [
+          {
+            "value": "SET_4_OR_HIGHER",
+            "label": "設定4以上",
+            "allowedSettings": [
+              "SET_4",
+              "SET_5",
+              "SET_6"
+            ],
+            "sourceEvidenceIds": [
+              "EV_COSPLAY_4PLUS"
+            ]
+          },
+          {
+            "value": "SET_6",
+            "label": "設定6",
+            "allowedSettings": [
+              "SET_6"
+            ],
+            "sourceEvidenceIds": [
+              "EV_BONUS_SCREEN_6",
+              "EV_ENDING_VOICE_6"
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "evidenceReview": {
+    "policyVersion": 1,
+    "exclusions": []
+  },
+  "difficultyAnalysis": {
+    "targetGames": [
+      1500,
+      3000,
+      7000
+    ],
+    "simulationsPerSetting": 4000,
+    "seed": 20260822,
+    "targetGameBasis": {
+      "basisId": "SELF_PLAY_STANDARD_GAMES",
+      "label": "ユーザー自身の標準実戦ゲーム数",
+      "quality": "ESTIMATED"
+    },
+    "calibrationAllowedExposureQualities": [
+      "EXACT",
+      "DERIVED",
+      "ESTIMATED"
+    ]
+  },
+  "selectionNotes": [
+    "特殊状態中AT直撃は設定差が大きいが特殊状態の試行母数を正確に作れないため不採用。",
+    "内部状態昇格も内部状態を完全観測できないため不採用。",
+    "CZ敗北後復活はCZ敗北回数を安全に入力できる可能性があり、今後の条件付きFeature候補としてResearchに保持する。"
+  ]
+}
