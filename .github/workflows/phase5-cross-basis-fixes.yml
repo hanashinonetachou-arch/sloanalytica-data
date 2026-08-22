@@ -1,0 +1,52 @@
+name: Phase 5 Cross-Basis Exposure Fixes
+
+on:
+  pull_request:
+    branches:
+      - prototype-multi-machine
+    paths:
+      - 'scripts/apply-phase5-cross-basis-exposure-fixes.mjs'
+      - '.github/workflows/phase5-cross-basis-fixes.yml'
+
+jobs:
+  apply-and-verify:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: ${{ github.event.pull_request.head.ref }}
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Apply cross-basis fixes
+        run: node scripts/apply-phase5-cross-basis-exposure-fixes.mjs
+      - name: Validate changed SelectionData
+        run: |
+          for id in L_BASILISK_KIZUNA2_TENZEN_ZN L_BIOHAZARD_VILLAGE_XA L_HIGURASHI_GOU_SS L_MADOKA_FORTE_UU L_MAGICAL_HALLOWEEN8_FE L_SAEKANO_SA3 L_SKY_LOVE_GNB L_YOSHIMUNE_RISING_SA2; do
+            npm run selection:validate -- research/$id/selection-data.json research/$id/research-data.json
+          done
+      - name: Rebuild affected machines
+        run: |
+          printf '%s\n' L_BASILISK_KIZUNA2_TENZEN_ZN L_BIOHAZARD_VILLAGE_XA L_HIGURASHI_GOU_SS L_MADOKA_FORTE_UU L_MAGICAL_HALLOWEEN8_FE L_SAEKANO_SA3 L_SKY_LOVE_GNB L_YOSHIMUNE_RISING_SA2 > /tmp/machine_ids.txt
+          npm run machine:batch -- --file /tmp/machine_ids.txt
+      - name: Verify repository and audits
+        run: |
+          npm test
+          npm run audit
+          npm run audit:ui-service-names
+          node tools/audit-machine-data-statistics-v3.mjs . reports/machine-data-statistical-audit-after-phase5.json reports/machine-data-statistical-audit-after-phase5.md
+          node tools/audit-estimated-difficulty-exposure.mjs
+          cat reports/estimated-difficulty-exposure-audit-v1.md
+      - name: Commit generated changes
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add research machines catalog.json difficulty-catalog.json reports/machine-data-statistical-audit-after-phase5.json reports/machine-data-statistical-audit-after-phase5.md
+          if git diff --cached --quiet; then exit 0; fi
+          git commit -m 'fix: apply Phase 5 cross-basis exposure corrections'
+          git push origin HEAD:${{ github.event.pull_request.head.ref }}
