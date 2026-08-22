@@ -1,0 +1,29 @@
+name: Feature Selection Policy v2 Audit
+
+on:
+  pull_request:
+    branches:
+      - prototype-multi-machine
+    paths:
+      - 'tools/audit-feature-selection-policy-v2.mjs'
+      - '.github/workflows/feature-selection-policy-v2-audit.yml'
+      - 'research/**/selection-data.json'
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Audit Feature Selection Policy v2
+        run: |
+          node tools/audit-feature-selection-policy-v2.mjs
+          cat reports/feature-selection-policy-v2-audit.md
+      - uses: actions/upload-artifact@v4
+        with:
+          name: feature-selection-policy-v2-audit
+          path: |
+            reports/feature-selection-policy-v2-audit.json
+            reports/feature-selection-policy-v2-audit.md
