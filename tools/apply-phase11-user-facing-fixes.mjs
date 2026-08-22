@@ -13,7 +13,7 @@ const newMap='const defaultCategoryLabels={PRIMARY:"主要入力",CZ:"CZ",ZONE:"
 if(builder.includes(oldMap)){ builder=builder.replace(oldMap,newMap); fs.writeFileSync(builderPath,builder); }
 else if(!builder.includes(newMap)) throw new Error('Builder defaultCategoryLabels pattern not found; stop without guessing.');
 
-// 2) Replace vague rejection reasons with Policy-v2 reasons grounded in current Research/observation constraints.
+// 2) Replace vague or internal rejection reasons with Policy-v2 user-facing reasons grounded in current Research/observation constraints.
 const reasons={
  'LB_SLOT_GALFY_A4':{
   FEAT_BAR_ROLE_EXCLUDED:'通常時BAR揃いは設定差があるが、1/4096～1/2731と低頻度で、A/Bのどちらか一方しか払い出しをフォローできず実戦カウントの完全性を担保しにくいため不採用。'
@@ -24,7 +24,9 @@ const reasons={
   FEAT_AT_FIRST_MOON:'設定1の0.8%から設定6の3.5%まで差はあるが、対象AT初当り機会が少なく、スイカ抽選・岩城勝利を除外した対象判定も必要で、1日実戦で安定した試行数を確保しにくいため不採用。'
  },
  'L_KAGUYA_SAMA_JA':{
-  FEAT_KAGUYA_BONUS_INITIAL:'BONUS初当りは1/362～1/335と設定差が小さいうえ、公開情報では確率に対応する厳密な集計区間を確認できず分母定義が暫定のため、数値Featureには不採用。'
+  FEAT_KAGUYA_BONUS_INITIAL:'BONUS初当りは1/362～1/335と設定差が小さいうえ、公開情報では確率に対応する厳密な集計区間を確認できず分母定義が暫定のため、数値Featureには不採用。',
+  FEAT_KAGUYA_BONUS_END_FRAME:'紫・銀・金枠は設定下限を直接絞る確定・否定情報として別枠で扱う。赤枠だけを数値化しても低頻度かつ設定差が小さく、同じ終了画面を重複評価するため数値Featureには不採用。',
+  FEAT_KAGUYA_REG_SCENARIO:'設定下限を直接絞るシナリオと次回モード示唆が混在し、全設定の完全な選択率も公開されていないため、数値Featureには不採用。'
  },
  'L_MUSHOKU_TENSEI_NM':{
   FEAT_HITOGAMI_SPACE_ENTRY_RATE:'ヒトガミの空間突入率は単独尤度にせず、突入後の本前兆成功率の試行機会（Exposure）として利用する。同じ突入事象を両方の独立Featureで使うと重複評価になるため不採用。'
@@ -55,4 +57,4 @@ for(const d of fs.readdirSync(path.join(root,'machines'),{withFileTypes:true}).f
  for(const sec of p.ui?.sections??[]){ if(sec.id==='AUTO_PRIMARY'&&!String(sec.title??'').trim()){ sec.title='主要入力'; changed=true; titleFixes++; } }
  if(changed) write(pp,p);
 }
-console.log(`Phase 11 fixes applied. AUTO_PRIMARY titles repaired: ${titleFixes}; vague reason machines: ${Object.keys(reasons).length}`);
+console.log(`Phase 11 fixes applied. AUTO_PRIMARY titles repaired: ${titleFixes}; vague/internal reason machines: ${Object.keys(reasons).length}`);
