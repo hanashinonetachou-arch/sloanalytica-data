@@ -3,6 +3,7 @@ import path from 'node:path';
 import { spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import { validateResearchCompleteness, validateSelectionEvidenceCoverage } from './batch-completeness-gates.mjs';
+import { auditUserVerifiedUxContracts } from './audit-user-verified-ux-contracts.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const mode = process.argv[2];
@@ -88,6 +89,12 @@ try {
   const r = spawnSync(process.execPath, [target, ...args], { cwd: ROOT, stdio: 'inherit' });
   if (r.error) throw r.error;
   status = r.status ?? 1;
+  if(status===0){
+    const ux=auditUserVerifiedUxContracts({ machineIds: machineIds.length ? machineIds : null });
+    for(const review of ux.reviews) console.warn(`REVIEW [user-verified UX] ${review}`);
+    for(const error of ux.errors) console.error(`ERROR [user-verified UX] ${error}`);
+    if(!ux.ok) status=1;
+  }
 } finally {
   if (settingBandSnapshot && (status !== 0 || checkOnly)) {
     restoreSettingBandReports(settingBandSnapshot);
