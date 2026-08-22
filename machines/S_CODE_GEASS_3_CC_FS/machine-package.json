@@ -3,7 +3,7 @@
   "machine": {
     "schemaVersion": "2.0.0",
     "machineId": "S_CODE_GEASS_3_CC_FS",
-    "machineDataVersion": "0.1.8",
+    "machineDataVersion": "0.1.9",
     "displayName": "パチスロ コードギアス 反逆のルルーシュ3 C.C.&Kallen ver.",
     "modelName": "Sコードギアス3C.C. FS",
     "manufacturer": "サミー",
@@ -45,6 +45,19 @@
         "parentInputId": "INP_NORMAL_GAMES",
         "inferenceRole": "INCLUDE_PRIMARY",
         "defaultValue": 0,
+        "minimum": 0
+      },
+      {
+        "id": "INP_CHERRY_RB_COUNT",
+        "name": "チェリー＋RB回数",
+        "category": "PRIMARY_SMALL_ROLE",
+        "type": "counter",
+        "unit": "回",
+        "displayOrder": 13,
+        "parentInputId": "INP_CHERRY_COUNT",
+        "inferenceRole": "INCLUDE_SUPPORT",
+        "defaultValue": 0,
+        "description": "チェリー成立を契機に赤赤白RBへ当選した回数を、チェリー回数と同じ集計区間で入力します。ボーナス当選契機は入賞時のPUSHで確認できます。",
         "minimum": 0
       },
       {
@@ -266,6 +279,36 @@
           ]
         },
         "sourceEvidenceRefs": [
+          "SRC_1GEKI_SMALL_ROLE",
+          "SRC_NANA_SMALL_ROLE"
+        ]
+      },
+      {
+        "featureId": "FEAT_CHERRY_RB_GIVEN_CHERRY",
+        "name": "チェリー成立時の赤赤白RB当選率",
+        "adoptionCategory": "INCLUDE_SUPPORT",
+        "calculationRole": "PROBABILITY",
+        "probabilityEngineUsage": true,
+        "modelType": "binomial",
+        "minimumSample": 20,
+        "sampleRecommendation": 100,
+        "reliabilityProfile": {
+          "weight": 1
+        },
+        "displayFormat": "percent",
+        "denominatorInputId": "INP_CHERRY_COUNT",
+        "numeratorInputId": "INP_CHERRY_RB_COUNT",
+        "probabilities": {
+          "SET_1": 0.028953331349416966,
+          "SET_2": 0.028564235196540957,
+          "SET_3": 0.029736328124904843,
+          "SET_4": 0.05227740901552214,
+          "SET_5": 0.058833223464887584,
+          "SET_6": 0.05728864664203614
+        },
+        "sourceEvidenceRefs": [
+          "SRC_1GEKI_SETTING",
+          "SRC_NANA_SETTING",
           "SRC_1GEKI_SMALL_ROLE",
           "SRC_NANA_SMALL_ROLE"
         ]
@@ -557,6 +600,12 @@
             "inputId": "INP_WATERMELON_COUNT",
             "label": "スイカ回数",
             "widget": "number"
+          },
+          {
+            "type": "input",
+            "inputId": "INP_CHERRY_RB_COUNT",
+            "label": "チェリー＋RB回数",
+            "widget": "counter"
           }
         ]
       },
@@ -651,8 +700,8 @@
   },
   "selectionSummary": {
     "schemaVersion": "selection-summary-v1",
-    "evaluatedCount": 4,
-    "selectedCount": 3,
+    "evaluatedCount": 5,
+    "selectedCount": 4,
     "rejectedCount": 1,
     "selected": [
       {
@@ -662,6 +711,15 @@
         "requiredTrials": {
           "value": 6162,
           "unit": "通常・ATゲーム"
+        }
+      },
+      {
+        "featureId": "FEAT_CHERRY_RB_GIVEN_CHERRY",
+        "name": "チェリー成立時の赤赤白RB当選率",
+        "reason": "チェリー成立率とは条件付きに分解できるため二重計上せず併用できます。チェリーから赤赤白RBへ当選する割合は高設定ほど大きく、既存の小役情報に追加の判別材料を与えるため補助採用します。",
+        "requiredTrials": {
+          "value": 367,
+          "unit": "チェリー成立回数"
         }
       },
       {
@@ -687,7 +745,7 @@
       {
         "featureId": "FEAT_NORMAL_BONUS_DETAIL_MULTINOMIAL",
         "name": "ボーナス内訳（参考）",
-        "reason": "必要試行量が多い。",
+        "reason": "ボーナス内訳には有用な設定差がありますが、チェリー＋RBなどが採用中の小役Featureと同じ成立事象を共有し、独立Featureとして加えると二重計上になります。フル内訳は不採用とし、重複せず分解できるチェリー＋RBだけを条件付きFeatureとして採用します。",
         "requiredTrials": {
           "value": 8619,
           "unit": "通常・ATゲーム"
