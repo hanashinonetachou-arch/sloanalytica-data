@@ -30,8 +30,16 @@ function normalizeV1Status(block) {
   return raw ? `OTHER:${raw}` : 'PRESENT_STATUS_MISSING';
 }
 
+function availableDataItems(block) {
+  if (!block || typeof block !== 'object') return [];
+  for (const key of ['availableData', 'retrievableItems', 'availableItems', 'displayItems']) {
+    if (Array.isArray(block[key])) return block[key];
+  }
+  return [];
+}
+
 function countAvailableData(block) {
-  return Array.isArray(block?.availableData) ? block.availableData.length : 0;
+  return availableDataItems(block).length;
 }
 
 function hasNotes(block) {
@@ -53,17 +61,12 @@ function checkedDetailsMissing(machine) {
   const missing = [];
   if (machine.menuStatus === 'CHECKED' && machine.menuAvailableDataCount === 0) missing.push('MACHINE_MENU_AVAILABLE_DATA');
   if (machine.serviceStatus === 'CHECKED' && machine.serviceAvailableDataCount === 0) missing.push('LINKED_SERVICE_AVAILABLE_DATA');
-  if (machine.sourceType === 'OBSERVATION_V1' && machine.predecessorStatus === 'CHECKED' && machine.predecessorAvailableDataCount === 0 && !machine.predecessorHasNotes) {
-    missing.push('PREDECESSOR_DATA_DETAILS');
-  }
+  if (machine.sourceType === 'OBSERVATION_V1' && machine.predecessorStatus === 'CHECKED' && machine.predecessorAvailableDataCount === 0 && !machine.predecessorHasNotes) missing.push('PREDECESSOR_DATA_DETAILS');
   return missing;
 }
 
 function classify(machine) {
-  const menu = machine.menuStatus;
-  const service = machine.serviceStatus;
-  const predecessor = machine.predecessorStatus;
-
+  const { menuStatus: menu, serviceStatus: service, predecessorStatus: predecessor } = machine;
   if (machine.sourceType === 'OBSERVATION_V1') {
     const severe = [menu, service, predecessor].some((s) => s === 'PRESENT_STATUS_MISSING' || s.startsWith('OTHER:'));
     if (severe) return 'REVIEW_SCHEMA';
@@ -71,9 +74,7 @@ function classify(machine) {
     if (machine.checkedDetailsMissing.length > 0) return 'CHECKED_DETAILS_MISSING';
     return 'RESOLVED';
   }
-
-  const bothMissing = menu === 'MISSING' && service === 'MISSING';
-  if (bothMissing) return 'LEGACY_UNAUDITED';
+  if (menu === 'MISSING' && service === 'MISSING') return 'LEGACY_UNAUDITED';
   const severe = [menu, service].some((s) => s === 'PRESENT_STATUS_MISSING' || s.startsWith('OTHER:'));
   if (severe) return 'REVIEW_SCHEMA';
   if (menu === 'MISSING' || service === 'MISSING') return 'PARTIAL_LEGACY';
@@ -83,141 +84,54 @@ function classify(machine) {
   return 'RESOLVED';
 }
 
-if (!fs.existsSync(researchRoot)) {
-  console.error(`research directory not found: ${researchRoot}`);
-  process.exit(2);
-}
-
-const machineDirs = fs.readdirSync(researchRoot, { withFileTypes: true })
-  .filter((entry) => entry.isDirectory() && !entry.name.startsWith('_'))
-  .map((entry) => entry.name)
-  .sort();
-
+if (!fs.existsSync(researchRoot)) { console.error(`research directory not found: ${researchRoot}`); process.exit(2); }
+const machineDirs = fs.readdirSync(researchRoot, { withFileTypes: true }).filter((e) => e.isDirectory() && !e.name.startsWith('_')).map((e) => e.name).sort();
 const machines = [];
 for (const machineId of machineDirs) {
   const researchPath = path.join(researchRoot, machineId, 'research-data.json');
   if (!fs.existsSync(researchPath)) continue;
-
   let research;
-  try {
-    research = JSON.parse(fs.readFileSync(researchPath, 'utf8'));
-  } catch (error) {
-    machines.push({ machineId, displayName: machineId, classification: 'INVALID_RESEARCH_JSON', error: String(error?.message ?? error) });
-    continue;
-  }
-
+  try { research = JSON.parse(fs.readFileSync(researchPath, 'utf8')); }
+  catch (error) { machines.push({ machineId, displayName: machineId, classification: 'INVALID_RESEARCH_JSON', error: String(error?.message ?? error) }); continue; }
   const observationPath = path.join(researchRoot, machineId, 'machine-observation-data.json');
   let machine;
   if (fs.existsSync(observationPath)) {
     try {
       const observation = JSON.parse(fs.readFileSync(observationPath, 'utf8'));
-      machine = {
-        machineId,
-        displayName: observation.displayName ?? research?.machine?.displayName ?? machineId,
-        researchedAt: observation.researchedAt ?? null,
-        sourceType: 'OBSERVATION_V1',
-        menuStatus: normalizeV1Status(observation.machineMenu),
-        menuAvailableDataCount: countAvailableData(observation.machineMenu),
-        serviceStatus: normalizeV1Status(observation.linkedService),
-        serviceAvailableDataCount: countAvailableData(observation.linkedService),
-        predecessorStatus: normalizeV1Status(observation.predecessorData),
-        predecessorAvailableDataCount: countAvailableData(observation.predecessorData),
-        predecessorHasNotes: hasNotes(observation.predecessorData),
-        predecessorAssessmentExplicit: true,
-      };
-    } catch (error) {
-      machine = {
-        machineId,
-        displayName: research?.machine?.displayName ?? machineId,
-        sourceType: 'OBSERVATION_V1',
-        menuStatus: 'OTHER:INVALID_JSON',
-        menuAvailableDataCount: 0,
-        serviceStatus: 'OTHER:INVALID_JSON',
-        serviceAvailableDataCount: 0,
-        predecessorStatus: 'OTHER:INVALID_JSON',
-        predecessorAvailableDataCount: 0,
-        predecessorHasNotes: false,
-        predecessorAssessmentExplicit: true,
-      };
+      machine = { machineId, displayName: observation.displayName ?? research?.machine?.displayName ?? machineId, researchedAt: observation.researchedAt ?? null, sourceType: 'OBSERVATION_V1', menuStatus: normalizeV1Status(observation.machineMenu), menuAvailableDataCount: countAvailableData(observation.machineMenu), serviceStatus: normalizeV1Status(observation.linkedService), serviceAvailableDataCount: countAvailableData(observation.linkedService), predecessorStatus: normalizeV1Status(observation.predecessorData), predecessorAvailableDataCount: countAvailableData(observation.predecessorData), predecessorHasNotes: hasNotes(observation.predecessorData), predecessorAssessmentExplicit: true };
+    } catch {
+      machine = { machineId, displayName: research?.machine?.displayName ?? machineId, sourceType: 'OBSERVATION_V1', menuStatus: 'OTHER:INVALID_JSON', menuAvailableDataCount: 0, serviceStatus: 'OTHER:INVALID_JSON', serviceAvailableDataCount: 0, predecessorStatus: 'OTHER:INVALID_JSON', predecessorAvailableDataCount: 0, predecessorHasNotes: false, predecessorAssessmentExplicit: true };
     }
   } else {
     const explicit = hasExplicitLegacyPredecessorAssessment(research);
-    machine = {
-      machineId,
-      displayName: research?.machine?.displayName ?? machineId,
-      researchedAt: research?.researchedAt ?? null,
-      sourceType: 'LEGACY_RESEARCH_DATA',
-      menuStatus: normalizeLegacyStatus(research?.machineMenuResearch),
-      menuAvailableDataCount: countAvailableData(research?.machineMenuResearch),
-      serviceStatus: normalizeLegacyStatus(research?.linkedMachineServiceResearch),
-      serviceAvailableDataCount: countAvailableData(research?.linkedMachineServiceResearch),
-      predecessorStatus: explicit ? 'LEGACY_EXPLICIT' : 'UNASSESSED',
-      predecessorAvailableDataCount: 0,
-      predecessorHasNotes: explicit,
-      predecessorAssessmentExplicit: explicit,
-    };
+    machine = { machineId, displayName: research?.machine?.displayName ?? machineId, researchedAt: research?.researchedAt ?? null, sourceType: 'LEGACY_RESEARCH_DATA', menuStatus: normalizeLegacyStatus(research?.machineMenuResearch), menuAvailableDataCount: countAvailableData(research?.machineMenuResearch), serviceStatus: normalizeLegacyStatus(research?.linkedMachineServiceResearch), serviceAvailableDataCount: countAvailableData(research?.linkedMachineServiceResearch), predecessorStatus: explicit ? 'LEGACY_EXPLICIT' : 'UNASSESSED', predecessorAvailableDataCount: 0, predecessorHasNotes: explicit, predecessorAssessmentExplicit: explicit };
   }
   machine.checkedDetailsMissing = checkedDetailsMissing(machine);
   machine.classification = classify(machine);
   machines.push(machine);
 }
 
-const classificationOrder = [
-  'INVALID_RESEARCH_JSON',
-  'LEGACY_UNAUDITED',
-  'REVIEW_SCHEMA',
-  'PARTIAL_LEGACY',
-  'CHECKED_DETAILS_MISSING',
-  'UNRESOLVED',
-  'OBSERVATION_RESOLVED_PREDECESSOR_UNASSESSED',
-  'RESOLVED',
-];
-const counts = Object.fromEntries(classificationOrder.map((key) => [key, 0]));
-for (const machine of machines) counts[machine.classification] = (counts[machine.classification] ?? 0) + 1;
-
-const summary = {
-  schemaVersion: 'machine-observation-research-audit-v4',
-  generatedAt: new Date().toISOString(),
-  machineCount: machines.length,
-  standaloneObservationFiles: machines.filter((m) => m.sourceType === 'OBSERVATION_V1').length,
-  legacyResearchFallback: machines.filter((m) => m.sourceType === 'LEGACY_RESEARCH_DATA').length,
-  counts,
-  menuStatusCounts: {},
-  serviceStatusCounts: {},
-  predecessorStatusCounts: {},
-  checkedDetailsMissingCounts: {},
-};
-for (const machine of machines) {
-  summary.menuStatusCounts[machine.menuStatus] = (summary.menuStatusCounts[machine.menuStatus] ?? 0) + 1;
-  summary.serviceStatusCounts[machine.serviceStatus] = (summary.serviceStatusCounts[machine.serviceStatus] ?? 0) + 1;
-  summary.predecessorStatusCounts[machine.predecessorStatus] = (summary.predecessorStatusCounts[machine.predecessorStatus] ?? 0) + 1;
-  for (const key of machine.checkedDetailsMissing ?? []) {
-    summary.checkedDetailsMissingCounts[key] = (summary.checkedDetailsMissingCounts[key] ?? 0) + 1;
-  }
+const classificationOrder = ['INVALID_RESEARCH_JSON','LEGACY_UNAUDITED','REVIEW_SCHEMA','PARTIAL_LEGACY','CHECKED_DETAILS_MISSING','UNRESOLVED','OBSERVATION_RESOLVED_PREDECESSOR_UNASSESSED','RESOLVED'];
+const counts = Object.fromEntries(classificationOrder.map((k) => [k, 0]));
+for (const m of machines) counts[m.classification] = (counts[m.classification] ?? 0) + 1;
+const summary = { schemaVersion: 'machine-observation-research-audit-v4.1', generatedAt: new Date().toISOString(), machineCount: machines.length, standaloneObservationFiles: machines.filter((m) => m.sourceType === 'OBSERVATION_V1').length, legacyResearchFallback: machines.filter((m) => m.sourceType === 'LEGACY_RESEARCH_DATA').length, counts, menuStatusCounts: {}, serviceStatusCounts: {}, predecessorStatusCounts: {}, checkedDetailsMissingCounts: {} };
+for (const m of machines) {
+  summary.menuStatusCounts[m.menuStatus] = (summary.menuStatusCounts[m.menuStatus] ?? 0) + 1;
+  summary.serviceStatusCounts[m.serviceStatus] = (summary.serviceStatusCounts[m.serviceStatus] ?? 0) + 1;
+  summary.predecessorStatusCounts[m.predecessorStatus] = (summary.predecessorStatusCounts[m.predecessorStatus] ?? 0) + 1;
+  for (const key of m.checkedDetailsMissing ?? []) summary.checkedDetailsMissingCounts[key] = (summary.checkedDetailsMissingCounts[key] ?? 0) + 1;
 }
-
 const report = { summary, machines };
 console.log('Machine Observation Research Audit');
 console.log(`machines: ${summary.machineCount}`);
 console.log(`standalone observation files: ${summary.standaloneObservationFiles}`);
 console.log(`legacy research fallback: ${summary.legacyResearchFallback}`);
 for (const key of classificationOrder) console.log(`${key}: ${counts[key] ?? 0}`);
-
 for (const key of classificationOrder) {
   const rows = machines.filter((m) => m.classification === key);
-  if (rows.length === 0 || key === 'RESOLVED') continue;
+  if (!rows.length || key === 'RESOLVED') continue;
   console.log(`\n[${key}]`);
-  for (const row of rows) {
-    const detail = row.checkedDetailsMissing?.length ? ` | missing=${row.checkedDetailsMissing.join(',')}` : '';
-    console.log(`- ${row.machineId} | ${row.displayName} | source=${row.sourceType} | menu=${row.menuStatus} | service=${row.serviceStatus} | predecessor=${row.predecessorStatus}${detail}`);
-  }
+  for (const row of rows) console.log(`- ${row.machineId} | ${row.displayName} | source=${row.sourceType} | menu=${row.menuStatus} | service=${row.serviceStatus} | predecessor=${row.predecessorStatus}${row.checkedDetailsMissing?.length ? ` | missing=${row.checkedDetailsMissing.join(',')}` : ''}`);
 }
-
-if (reportPath) {
-  const absolute = path.resolve(root, reportPath);
-  fs.mkdirSync(path.dirname(absolute), { recursive: true });
-  fs.writeFileSync(absolute, `${JSON.stringify(report, null, 2)}\n`);
-  console.log(`\nreport: ${path.relative(root, absolute)}`);
-}
-
+if (reportPath) { const absolute = path.resolve(root, reportPath); fs.mkdirSync(path.dirname(absolute), { recursive: true }); fs.writeFileSync(absolute, `${JSON.stringify(report, null, 2)}\n`); console.log(`\nreport: ${path.relative(root, absolute)}`); }
 if ((counts.INVALID_RESEARCH_JSON ?? 0) > 0 || (counts.REVIEW_SCHEMA ?? 0) > 0) process.exitCode = 1;
