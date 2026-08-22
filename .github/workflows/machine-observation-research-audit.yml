@@ -1,0 +1,44 @@
+name: Machine Observation Research Audit
+
+on:
+  pull_request:
+    branches:
+      - prototype-multi-machine
+    paths:
+      - 'research/**/research-data.json'
+      - 'tools/audit-machine-observation-research.mjs'
+      - '.github/workflows/machine-observation-research-audit.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Audit Machine Observation Research
+        run: node tools/audit-machine-observation-research.mjs --json-out=reports/machine-observation-research-audit.json
+
+      - name: Show summary
+        if: always()
+        run: |
+          if [ -f reports/machine-observation-research-audit.json ]; then
+            node -e "const r=require('./reports/machine-observation-research-audit.json'); console.log(JSON.stringify(r.summary,null,2))"
+          fi
+
+      - name: Upload audit report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: machine-observation-research-audit
+          path: reports/machine-observation-research-audit.json
+          if-no-files-found: warn
