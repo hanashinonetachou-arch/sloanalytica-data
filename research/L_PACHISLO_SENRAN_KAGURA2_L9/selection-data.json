@@ -1,99 +1,30 @@
 {
-  "schemaVersion": "selection-data-v1",
-  "machineId": "L_PACHISLO_SENRAN_KAGURA2_L9",
-  "machineDataVersion": "0.1.0",
-  "uiCategoryLabels": {
-    "NORMAL": "通常時",
-    "BONUS": "ボーナス"
-  },
-  "inputs": [
-    {
-      "id": "INP_NORMAL_GAMES",
-      "name": "通常ゲーム数",
-      "type": "integer",
-      "category": "NORMAL",
-      "unit": "G",
-      "displayOrder": 10,
-      "inferenceRole": "INCLUDE_PRIMARY",
-      "defaultValue": 0
-    },
-    {
-      "id": "INP_AT_FIRST",
-      "name": "AT初当り",
-      "type": "counter",
-      "category": "NORMAL",
-      "unit": "回",
-      "displayOrder": 11,
-      "inferenceRole": "INCLUDE_PRIMARY",
-      "defaultValue": null,
-      "parentInputId": "INP_NORMAL_GAMES"
-    },
-    {
-      "id": "INP_TOTAL_GAMES",
-      "name": "遊技ゲーム数",
-      "type": "integer",
-      "category": "BONUS",
-      "unit": "G",
-      "displayOrder": 20,
-      "inferenceRole": "INCLUDE_PRIMARY",
-      "defaultValue": 0
-    },
-    {
-      "id": "INP_HETERO_BONUS",
-      "name": "異色ボーナス",
-      "type": "counter",
-      "category": "BONUS",
-      "unit": "回",
-      "displayOrder": 21,
-      "inferenceRole": "INCLUDE_PRIMARY",
-      "defaultValue": null,
-      "parentInputId": "INP_TOTAL_GAMES"
-    },
-    {
-      "id": "INP_SAME_BONUS",
-      "name": "同色ボーナス",
-      "type": "counter",
-      "category": "BONUS",
-      "unit": "回",
-      "displayOrder": 22,
-      "inferenceRole": "INCLUDE_PRIMARY",
-      "defaultValue": null,
-      "parentInputId": "INP_TOTAL_GAMES"
-    }
+  "schemaVersion":"selection-data-v1",
+  "machineId":"L_PACHISLO_SENRAN_KAGURA2_L9",
+  "machineDataVersion":"0.1.0",
+  "uiCategoryLabels":{"NORMAL":"通常時","BONUS":"ボーナス","EVIDENCE":"設定確定情報"},
+  "inputs":[
+    {"id":"INP_NORMAL_GAMES","name":"通常ゲーム数","type":"integer","category":"NORMAL","unit":"G","displayOrder":10,"inferenceRole":"INCLUDE_PRIMARY","defaultValue":0},
+    {"id":"INP_AT_FIRST","name":"AT初当り","type":"counter","category":"NORMAL","unit":"回","displayOrder":11,"inferenceRole":"INCLUDE_PRIMARY","defaultValue":null,"parentInputId":"INP_NORMAL_GAMES"},
+    {"id":"INP_TOTAL_GAMES","name":"遊技ゲーム数","type":"integer","category":"BONUS","unit":"G","displayOrder":20,"inferenceRole":"INCLUDE_PRIMARY","defaultValue":0},
+    {"id":"INP_HETERO_BONUS","name":"異色ボーナス","type":"counter","category":"BONUS","unit":"回","displayOrder":21,"inferenceRole":"INCLUDE_PRIMARY","defaultValue":null,"parentInputId":"INP_TOTAL_GAMES"},
+    {"id":"INP_SAME_BONUS","name":"同色ボーナス","type":"counter","category":"BONUS","unit":"回","displayOrder":22,"inferenceRole":"INCLUDE_PRIMARY","defaultValue":null,"parentInputId":"INP_TOTAL_GAMES"}
   ],
-  "features": [
-    {
-      "researchFeatureId": "RF_AT_FIRST",
-      "featureId": "FEAT_AT_FIRST",
-      "adoptionCategory": "INCLUDE_PRIMARY",
-      "denominatorInputId": "INP_NORMAL_GAMES",
-      "numeratorInputId": "INP_AT_FIRST",
-      "minimumSample": 100,
-      "sampleRecommendation": 3000,
-      "difficultyExposure": {
-        "mode": "per_game",
-        "factor": 1,
-        "quality": "EXACT"
-      }
-    },
-    {
-      "researchFeatureId": "RF_BONUS_OUTCOME",
-      "featureId": "FEAT_BONUS_OUTCOME",
-      "adoptionCategory": "INCLUDE_PRIMARY",
-      "denominatorInputId": "INP_TOTAL_GAMES",
-      "numeratorInputId": "INP_HETERO_BONUS",
-      "categoryInputIds": [
-        "INP_SAME_BONUS"
-      ],
-      "residualCategoryLabel": "RESIDUAL",
-      "minimumSample": 100,
-      "sampleRecommendation": 3000,
-      "difficultyExposure": {
-        "mode": "per_game",
-        "factor": 1,
-        "quality": "EXACT"
-      }
-    }
+  "features":[
+    {"researchFeatureId":"RF_AT_FIRST","featureId":"FEAT_AT_FIRST","adoptionCategory":"INCLUDE_PRIMARY","denominatorInputId":"INP_NORMAL_GAMES","numeratorInputId":"INP_AT_FIRST","minimumSample":100,"sampleRecommendation":3000,"difficultyExposure":{"mode":"per_game","factor":1,"quality":"EXACT"},"userReason":"AT初当りに設定差がある。"},
+    {"researchFeatureId":"RF_BONUS_OUTCOME","featureId":"FEAT_BONUS_OUTCOME","adoptionCategory":"INCLUDE_PRIMARY","denominatorInputId":"INP_TOTAL_GAMES","numeratorInputId":"INP_HETERO_BONUS","categoryInputIds":["INP_SAME_BONUS"],"residualCategoryLabel":"RESIDUAL","minimumSample":100,"sampleRecommendation":3000,"difficultyExposure":{"mode":"per_game","factor":1,"quality":"EXACT"},"userReason":"異色ボーナス確率に設定差があり、同色を含む構成として評価する。"},
+    {"researchFeatureId":"RF_FAKE_WHITE7","featureId":"FEAT_FAKE_WHITE7","adoptionCategory":"EXCLUDE","rejectionReason":"設定差は4倍あるが1/16384～1/4096と低頻度で、実戦1日では情報量が小さい。","userReason":"超低頻度。"},
+    {"researchFeatureId":"RF_COMMON_BELL","featureId":"FEAT_COMMON_BELL","adoptionCategory":"EXCLUDE","rejectionReason":"設定差の存在は示されているが、設定1以外の確定値を確認できない。","userReason":"全設定値未解決。"},
+    {"researchFeatureId":"RF_HETERO_COLOR","featureId":"FEAT_HETERO_COLOR","adoptionCategory":"EXCLUDE","rejectionReason":"黄頭/青頭の奇偶傾向はあるが、設定別構成比の確定値を確認できない。","userReason":"構成比未解決。"}
   ],
-  "evidence": []
+  "evidence":[],
+  "evidenceUi":{"groups":[
+    {"groupId":"SENRAN_TROPHY","label":"忍トロフィー","selectionMode":"single","normalizationMode":"ALLOWED_SETTINGS_INTERSECTION","displayOrder":100,"options":[
+      {"value":"BRONZE","label":"銅","allowedSettings":["SET_2","SET_3","SET_4","SET_5","SET_6"],"sourceEvidenceIds":["RE_TROPHY_2PLUS"]},
+      {"value":"SILVER","label":"銀","allowedSettings":["SET_3","SET_4","SET_5","SET_6"],"sourceEvidenceIds":["RE_TROPHY_3PLUS"]},
+      {"value":"GOLD","label":"金","allowedSettings":["SET_4","SET_5","SET_6"],"sourceEvidenceIds":["RE_TROPHY_4PLUS"]},
+      {"value":"PURPLE","label":"紫（忍アツ柄）","allowedSettings":["SET_5","SET_6"],"sourceEvidenceIds":["RE_TROPHY_5PLUS"]},
+      {"value":"RAINBOW","label":"虹","allowedSettings":["SET_6"],"sourceEvidenceIds":["RE_TROPHY_6"]}
+    ]}
+  ]}
 }
