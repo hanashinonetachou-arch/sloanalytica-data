@@ -34,6 +34,10 @@ function countAvailableData(block) {
   return Array.isArray(block?.availableData) ? block.availableData.length : 0;
 }
 
+function hasNotes(block) {
+  return typeof block?.notes === 'string' && block.notes.trim().length > 0;
+}
+
 function hasExplicitLegacyPredecessorAssessment(data) {
   const directKeys = ['predecessorDataResearch', 'seatedStartDataResearch', 'predecessorResearch', 'seatStartResearch'];
   if (directKeys.some((key) => data?.[key] && typeof data[key] === 'object')) return true;
@@ -45,6 +49,16 @@ function hasExplicitLegacyPredecessorAssessment(data) {
   return /(着席|前任者|差分|predecessor|seat(?:ed)?\s*start)/i.test(observationText);
 }
 
+function checkedDetailsMissing(machine) {
+  const missing = [];
+  if (machine.menuStatus === 'CHECKED' && machine.menuAvailableDataCount === 0) missing.push('MACHINE_MENU_AVAILABLE_DATA');
+  if (machine.serviceStatus === 'CHECKED' && machine.serviceAvailableDataCount === 0) missing.push('LINKED_SERVICE_AVAILABLE_DATA');
+  if (machine.sourceType === 'OBSERVATION_V1' && machine.predecessorStatus === 'CHECKED' && machine.predecessorAvailableDataCount === 0 && !machine.predecessorHasNotes) {
+    missing.push('PREDECESSOR_DATA_DETAILS');
+  }
+  return missing;
+}
+
 function classify(machine) {
   const menu = machine.menuStatus;
   const service = machine.serviceStatus;
@@ -54,6 +68,7 @@ function classify(machine) {
     const severe = [menu, service, predecessor].some((s) => s === 'PRESENT_STATUS_MISSING' || s.startsWith('OTHER:'));
     if (severe) return 'REVIEW_SCHEMA';
     if ([menu, service, predecessor].includes('UNRESOLVED')) return 'UNRESOLVED';
+    if (machine.checkedDetailsMissing.length > 0) return 'CHECKED_DETAILS_MISSING';
     return 'RESOLVED';
   }
 
@@ -63,6 +78,7 @@ function classify(machine) {
   if (severe) return 'REVIEW_SCHEMA';
   if (menu === 'MISSING' || service === 'MISSING') return 'PARTIAL_LEGACY';
   if (menu === 'UNRESOLVED' || service === 'UNRESOLVED' || menu === 'PARTIALLY_CHECKED' || service === 'PARTIALLY_CHECKED') return 'UNRESOLVED';
+  if (machine.checkedDetailsMissing.length > 0) return 'CHECKED_DETAILS_MISSING';
   if (!machine.predecessorAssessmentExplicit) return 'OBSERVATION_RESOLVED_PREDECESSOR_UNASSESSED';
   return 'RESOLVED';
 }
@@ -105,6 +121,8 @@ for (const machineId of machineDirs) {
         serviceStatus: normalizeV1Status(observation.linkedService),
         serviceAvailableDataCount: countAvailableData(observation.linkedService),
         predecessorStatus: normalizeV1Status(observation.predecessorData),
+        predecessorAvailableDataCount: countAvailableData(observation.predecessorData),
+        predecessorHasNotes: hasNotes(observation.predecessorData),
         predecessorAssessmentExplicit: true,
       };
     } catch (error) {
@@ -113,8 +131,12 @@ for (const machineId of machineDirs) {
         displayName: research?.machine?.displayName ?? machineId,
         sourceType: 'OBSERVATION_V1',
         menuStatus: 'OTHER:INVALID_JSON',
+        menuAvailableDataCount: 0,
         serviceStatus: 'OTHER:INVALID_JSON',
+        serviceAvailableDataCount: 0,
         predecessorStatus: 'OTHER:INVALID_JSON',
+        predecessorAvailableDataCount: 0,
+        predecessorHasNotes: false,
         predecessorAssessmentExplicit: true,
       };
     }
@@ -130,19 +152,31 @@ for (const machineId of machineDirs) {
       serviceStatus: normalizeLegacyStatus(research?.linkedMachineServiceResearch),
       serviceAvailableDataCount: countAvailableData(research?.linkedMachineServiceResearch),
       predecessorStatus: explicit ? 'LEGACY_EXPLICIT' : 'UNASSESSED',
+      predecessorAvailableDataCount: 0,
+      predecessorHasNotes: explicit,
       predecessorAssessmentExplicit: explicit,
     };
   }
+  machine.checkedDetailsMissing = checkedDetailsMissing(machine);
   machine.classification = classify(machine);
   machines.push(machine);
 }
 
-const classificationOrder = ['INVALID_RESEARCH_JSON', 'LEGACY_UNAUDITED', 'REVIEW_SCHEMA', 'PARTIAL_LEGACY', 'UNRESOLVED', 'OBSERVATION_RESOLVED_PREDECESSOR_UNASSESSED', 'RESOLVED'];
+const classificationOrder = [
+  'INVALID_RESEARCH_JSON',
+  'LEGACY_UNAUDITED',
+  'REVIEW_SCHEMA',
+  'PARTIAL_LEGACY',
+  'CHECKED_DETAILS_MISSING',
+  'UNRESOLVED',
+  'OBSERVATION_RESOLVED_PREDECESSOR_UNASSESSED',
+  'RESOLVED',
+];
 const counts = Object.fromEntries(classificationOrder.map((key) => [key, 0]));
 for (const machine of machines) counts[machine.classification] = (counts[machine.classification] ?? 0) + 1;
 
 const summary = {
-  schemaVersion: 'machine-observation-research-audit-v3',
+  schemaVersion: 'machine-observation-research-audit-v4',
   generatedAt: new Date().toISOString(),
   machineCount: machines.length,
   standaloneObservationFiles: machines.filter((m) => m.sourceType === 'OBSERVATION_V1').length,
@@ -151,11 +185,15 @@ const summary = {
   menuStatusCounts: {},
   serviceStatusCounts: {},
   predecessorStatusCounts: {},
+  checkedDetailsMissingCounts: {},
 };
 for (const machine of machines) {
   summary.menuStatusCounts[machine.menuStatus] = (summary.menuStatusCounts[machine.menuStatus] ?? 0) + 1;
   summary.serviceStatusCounts[machine.serviceStatus] = (summary.serviceStatusCounts[machine.serviceStatus] ?? 0) + 1;
   summary.predecessorStatusCounts[machine.predecessorStatus] = (summary.predecessorStatusCounts[machine.predecessorStatus] ?? 0) + 1;
+  for (const key of machine.checkedDetailsMissing ?? []) {
+    summary.checkedDetailsMissingCounts[key] = (summary.checkedDetailsMissingCounts[key] ?? 0) + 1;
+  }
 }
 
 const report = { summary, machines };
@@ -170,7 +208,8 @@ for (const key of classificationOrder) {
   if (rows.length === 0 || key === 'RESOLVED') continue;
   console.log(`\n[${key}]`);
   for (const row of rows) {
-    console.log(`- ${row.machineId} | ${row.displayName} | source=${row.sourceType} | menu=${row.menuStatus} | service=${row.serviceStatus} | predecessor=${row.predecessorStatus}`);
+    const detail = row.checkedDetailsMissing?.length ? ` | missing=${row.checkedDetailsMissing.join(',')}` : '';
+    console.log(`- ${row.machineId} | ${row.displayName} | source=${row.sourceType} | menu=${row.menuStatus} | service=${row.serviceStatus} | predecessor=${row.predecessorStatus}${detail}`);
   }
 }
 
