@@ -7,12 +7,20 @@ on:
     paths:
       - 'research/**/research-data.json'
       - 'research/**/selection-data.json'
-      - 'scripts/apply-recheck-20260822.mjs'
+      - 'tools/**'
+      - 'test/**'
+      - 'package.json'
       - '.github/workflows/machine-pipeline.yml'
+  workflow_dispatch:
+    inputs:
+      machine_id:
+        description: 'Machine ID to validate'
+        required: true
+        type: string
 
 jobs:
-  targeted-recheck:
-    if: github.actor != 'github-actions[bot]'
+  validate-machine-data:
+    if: github.event_name == 'workflow_dispatch' || github.actor != 'github-actions[bot]'
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -21,34 +29,98 @@ jobs:
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
-          ref: ${{ github.event.pull_request.head.ref }}
+          ref: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.ref || github.ref }}
+
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '22'
-      - name: Apply recheck migration
-        run: node scripts/apply-recheck-20260822.mjs
-      - name: Validate ResearchData
-        run: |
-          npm run research:validate -- research/L_BOFURI_FN/research-data.json
-          npm run research:validate -- research/L_SYMPHOGEAR_SEIGI_JA/research-data.json
-          npm run research:validate -- research/L_HOKUTO_MUSOU_FS/research-data.json
-          npm run research:validate -- research/S_BAHAMA_A3_30/research-data.json
-      - name: Build changed machines
-        run: |
-          printf '%s\n' L_BOFURI_FN L_SYMPHOGEAR_SEIGI_JA L_HOKUTO_MUSOU_FS S_BAHAMA_A3_30 S_OKIDOKI_BLACK_EP > /tmp/machine_ids.txt
-          npm run machine:batch -- --file /tmp/machine_ids.txt
-      - name: Full tests and audits
-        run: |
-          npm test
-          npm run audit
-          npm run audit:ui-service-names
-      - name: Commit migration and generated artifacts
+
+      - name: Resolve changed stages
+        id: stages
+        shell: bash
         run: |
           set -euo pipefail
+          : > /tmp/research_files.txt
+          : > /tmp/machine_ids.txt
+
+          if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
+            printf '%s\n' "${{ inputs.machine_id }}" > /tmp/machine_ids.txt
+          else
+            git diff --name-only "${{ github.event.pull_request.base.sha }}" "${{ github.event.pull_request.head.sha }}" \
+              | sed -nE '/^research\/[^/]+\/research-data\.json$/p' \
+              | sort -u > /tmp/research_files.txt
+
+            git diff --name-only "${{ github.event.pull_request.base.sha }}" "${{ github.event.pull_request.head.sha }}" \
+              | sed -nE 's#^research/([^/]+)/selection-data\.json$#\1#p' \
+              | sort -u > /tmp/machine_ids.txt
+          fi
+
+          if [[ -s /tmp/research_files.txt ]]; then
+            echo 'Changed ResearchData:'
+            cat /tmp/research_files.txt
+            echo 'has_research=true' >> "$GITHUB_OUTPUT"
+          else
+            echo 'has_research=false' >> "$GITHUB_OUTPUT"
+          fi
+
+          if [[ -s /tmp/machine_ids.txt ]]; then
+            echo 'Machine IDs ready for full pipeline:'
+            cat /tmp/machine_ids.txt
+            echo 'has_machines=true' >> "$GITHUB_OUTPUT"
+          else
+            echo 'No changed SelectionData; full MachineData generation is not required yet.'
+            echo 'has_machines=false' >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Validate changed ResearchData
+        if: steps.stages.outputs.has_research == 'true'
+        shell: bash
+        run: |
+          set -euo pipefail
+          while IFS= read -r research_file; do
+            echo "::group::${research_file}"
+            npm run research:validate -- "$research_file"
+            echo '::endgroup::'
+          done < /tmp/research_files.txt
+
+      - name: Build and validate changed machines as one batch
+        if: steps.stages.outputs.has_machines == 'true'
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm run machine:batch -- --file /tmp/machine_ids.txt
+
+      - name: Commit generated artifacts
+        if: >-
+          github.event_name == 'pull_request' &&
+          steps.stages.outputs.has_machines == 'true' &&
+          github.event.pull_request.head.repo.full_name == github.repository
+        shell: bash
+        run: |
+          set -euo pipefail
+          if git diff --quiet && [[ -z "$(git status --porcelain)" ]]; then
+            echo 'Generated artifacts are already up to date.'
+            exit 0
+          fi
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add research machines catalog.json difficulty-catalog.json
-          if git diff --cached --quiet; then exit 0; fi
-          git commit -m 'fix: apply setting-element recheck updates'
+          git add catalog.json difficulty-catalog.json research/*/statistics-report.json research/*/difficulty-report.json research/*/setting-band-report.json machines/*/machine-package.json
+          if git diff --cached --quiet; then
+            echo 'No generated artifact changes to commit.'
+            exit 0
+          fi
+          git commit -m 'chore: refresh generated MachineData artifacts'
           git push origin HEAD:${{ github.event.pull_request.head.ref }}
+
+      - name: Repository tests for research-only or infrastructure changes
+        if: steps.stages.outputs.has_machines != 'true'
+        run: npm test
+
+      - name: Repository audit for research-only or infrastructure changes
+        if: steps.stages.outputs.has_machines != 'true'
+        run: npm run audit
+
+      - name: User-facing service-name audit for research-only or infrastructure changes
+        if: steps.stages.outputs.has_machines != 'true'
+        run: npm run audit:ui-service-names
