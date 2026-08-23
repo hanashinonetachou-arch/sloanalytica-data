@@ -2,6 +2,7 @@
 
 import fs from 'node:fs';
 import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 
 const root = process.cwd();
 const researchRoot = path.join(root, 'research');
@@ -89,19 +90,28 @@ export function validateObservationObject(data, rel='machine-observation-data.js
   return {ok:errors.length===0,errors,warnings};
 }
 
-const files=[];
-if (fs.existsSync(researchRoot)) for (const entry of fs.readdirSync(researchRoot,{withFileTypes:true})) {
-  if (!entry.isDirectory() || entry.name.startsWith('_')) continue;
-  const file=path.join(researchRoot,entry.name,'machine-observation-data.json');
-  if (fs.existsSync(file)) files.push(file);
+export function validateObservationRepository({cwd=process.cwd(),emitWarnings=true}={}) {
+  const repoResearchRoot=path.join(cwd,'research');
+  const files=[];
+  if (fs.existsSync(repoResearchRoot)) for (const entry of fs.readdirSync(repoResearchRoot,{withFileTypes:true})) {
+    if (!entry.isDirectory() || entry.name.startsWith('_')) continue;
+    const file=path.join(repoResearchRoot,entry.name,'machine-observation-data.json');
+    if (fs.existsSync(file)) files.push(file);
+  }
+  const errors=[],warnings=[];
+  for (const file of files) {
+    let data; const rel=path.relative(cwd,file);
+    try { data=JSON.parse(fs.readFileSync(file,'utf8')); } catch(e) { errors.push(`${rel}: invalid JSON: ${e.message}`); continue; }
+    const r=validateObservationObject(data,rel); errors.push(...r.errors); warnings.push(...r.warnings);
+  }
+  if (emitWarnings) for (const w of warnings) console.warn(`WARNING: ${w}`);
+  return {ok:errors.length===0,files:files.length,errors,warnings};
 }
-const errors=[],warnings=[];
-for (const file of files) {
-  let data; const rel=path.relative(root,file);
-  try { data=JSON.parse(fs.readFileSync(file,'utf8')); } catch(e) { errors.push(`${rel}: invalid JSON: ${e.message}`); continue; }
-  const r=validateObservationObject(data,rel); errors.push(...r.errors); warnings.push(...r.warnings);
+
+const isDirect = process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url);
+if (isDirect) {
+  const r=validateObservationRepository({cwd:root,emitWarnings:true});
+  console.log(`Machine Observation Data files: ${r.files}`);
+  if (!r.ok) { console.error(`Validation errors: ${r.errors.length}`); for (const e of r.errors) console.error(`- ${e}`); process.exit(1); }
+  console.log(`Machine Observation Data validation: PASS (${r.warnings.length} compatibility warnings)`);
 }
-console.log(`Machine Observation Data files: ${files.length}`);
-for (const w of warnings) console.warn(`WARNING: ${w}`);
-if (errors.length) { console.error(`Validation errors: ${errors.length}`); for (const e of errors) console.error(`- ${e}`); process.exit(1); }
-console.log(`Machine Observation Data validation: PASS (${warnings.length} compatibility warnings)`);
