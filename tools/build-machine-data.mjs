@@ -26,7 +26,6 @@ function researchCategoricalEntries(rf,setting){
       const v=Number(raw[c]);
       entries.push([c,Number.isFinite(v)?v:Math.max(0,1-knownSum)]);
     }
-    // No named category is missing: the residual is an unnamed non-event category.
     if(missing.length===0 && knownSum<1-1e-12) entries.push(["__IMPLICIT_RESIDUAL__",Math.max(0,1-knownSum)]);
     return entries;
   }
@@ -40,7 +39,6 @@ function selectedCategorical(rf,sf,setting){
   if(kept.length<2)return null;
   const probs=kept.map(([,v])=>v),sum=probs.reduce((a,b)=>a+b,0);
   if(sum<=0)return null;
-  // categoryExcludeLabels explicitly conditions on the retained event set.
   return excluded.size?probs.map(v=>v/sum):probs;
 }
 function estimateRequiredTrials80(rf,sf,settings){
@@ -67,7 +65,7 @@ function buildFeature(rf,sf,inputIds){
   const role=sf.adoptionCategory;
   if(role==="EXCLUDE") return null;
   const base={
-    featureId:sf.featureId,name:rf.name,adoptionCategory:role,
+    featureId:sf.featureId,name:sf.nameOverride??rf.name,adoptionCategory:role,
     calculationRole:role==="DISPLAY_ONLY"?"DISPLAY_ONLY":"PROBABILITY",
     probabilityEngineUsage:role!=="DISPLAY_ONLY",
     modelType:sf.modelTypeOverride??rf.candidateModel,
@@ -189,7 +187,7 @@ function buildSelectionSummary(research,selection,statistics=null){
     if(!rf) continue;
     const item={
       featureId:sf.featureId,
-      name:rf.name,
+      name:sf.nameOverride??rf.name,
       reason:sf.userReason ?? sf.rejectionReason ?? (sf.adoptionCategory==="EXCLUDE"?"推測計算には使用していません。":"推測計算に採用しています。")
     };
     if(sf.requiredTrials?.value!=null){
