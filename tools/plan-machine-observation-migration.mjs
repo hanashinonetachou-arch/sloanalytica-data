@@ -29,12 +29,20 @@ function normalizeV1(block) {
   const s = String(block?.status ?? '').trim().toUpperCase();
   return ['CHECKED','NOT_AVAILABLE','UNRESOLVED'].includes(s) ? s : (s ? `OTHER:${s}` : 'PRESENT_STATUS_MISSING');
 }
+function normalizeV2(status) {
+  const s=String(status??'').trim().toUpperCase();
+  if (['FOUND','VERIFIED_ON_MACHINE'].includes(s)) return 'CHECKED';
+  if (s==='CHECKED_NONE') return 'NOT_AVAILABLE';
+  if (s==='UNRESOLVED') return 'UNRESOLVED';
+  return s ? `OTHER:${s}` : 'PRESENT_STATUS_MISSING';
+}
 function dataItems(block) {
   if (!block || typeof block !== 'object') return [];
   for (const key of ['availableData','retrievableItems','availableItems','displayItems']) if (Array.isArray(block[key])) return block[key];
   return [];
 }
 function countData(block) { return dataItems(block).length; }
+function v2ObservationCount(observation, sourceType) { return (observation?.observations??[]).filter(o=>o.sourceType===sourceType && ['FOUND','VERIFIED_ON_MACHINE'].includes(o.status)).length; }
 function legacyPredecessorExplicit(research) {
   const direct = ['predecessorDataResearch','seatedStartDataResearch','predecessorResearch','seatStartResearch'];
   if (direct.some((k) => research?.[k] && typeof research[k] === 'object')) return true;
@@ -49,27 +57,42 @@ for (const entry of fs.readdirSync(researchRoot, { withFileTypes: true })) {
   const research = readJson(path.join(dir, 'research-data.json'));
   if (!research) continue;
   const observation = readJson(path.join(dir, 'machine-observation-data.json'));
-  const sourceType = observation ? 'OBSERVATION_V1' : 'LEGACY_RESEARCH_DATA';
-  const menuBlock = observation?.machineMenu ?? research?.machineMenuResearch;
-  const serviceBlock = observation?.linkedService ?? research?.linkedMachineServiceResearch;
-  const predecessorBlock = observation?.predecessorData;
-  const menuStatus = observation ? normalizeV1(menuBlock) : normalizeLegacy(menuBlock);
-  const serviceStatus = observation ? normalizeV1(serviceBlock) : normalizeLegacy(serviceBlock);
-  const predecessorStatus = observation ? normalizeV1(predecessorBlock) : (legacyPredecessorExplicit(research) ? 'LEGACY_EXPLICIT' : 'UNASSESSED');
-  const menuDataCount = countData(menuBlock);
-  const serviceDataCount = countData(serviceBlock);
+  const isV2=observation?.schemaVersion==='machine-observation-data-v2';
+  const sourceType = isV2 ? 'OBSERVATION_V2' : observation ? 'OBSERVATION_V1' : 'LEGACY_RESEARCH_DATA';
+
+  let menuStatus,serviceStatus,predecessorStatus,menuDataCount,serviceDataCount;
+  if (isV2) {
+    menuStatus=normalizeV2(observation.sourceCoverage?.machineMenu);
+    serviceStatus=normalizeV2(observation.sourceCoverage?.linkedService);
+    predecessorStatus=normalizeV2(observation.sourceCoverage?.seatedState);
+    menuDataCount=v2ObservationCount(observation,'MACHINE_MENU');
+    serviceDataCount=v2ObservationCount(observation,'LINKED_SERVICE');
+  } else {
+    const menuBlock = observation?.machineMenu ?? research?.machineMenuResearch;
+    const serviceBlock = observation?.linkedService ?? research?.linkedMachineServiceResearch;
+    const predecessorBlock = observation?.predecessorData;
+    menuStatus = observation ? normalizeV1(menuBlock) : normalizeLegacy(menuBlock);
+    serviceStatus = observation ? normalizeV1(serviceBlock) : normalizeLegacy(serviceBlock);
+    predecessorStatus = observation ? normalizeV1(predecessorBlock) : (legacyPredecessorExplicit(research) ? 'LEGACY_EXPLICIT' : 'UNASSESSED');
+    menuDataCount = countData(menuBlock);
+    serviceDataCount = countData(serviceBlock);
+  }
 
   const pkg = readJson(path.join(dir, 'machine-package.generated.json'));
   const inputs = pkg?.inputs?.inputs ?? [];
   const observationInputs = inputs.filter((input) => containsSignal(input?.name) || containsSignal(input?.id) || containsSignal(input?.description) || containsSignal(input?.observationScope));
   const hasPredecessorScope = inputs.some((input) => String(input?.observationScope ?? '').toUpperCase() === 'PREDECESSOR_SNAPSHOT');
   const hasUxContract = fs.existsSync(path.join(uxRoot, `${machineId}.json`));
+  const reopenRequired=isV2&&(observation.researchReopenRequests??[]).some(r=>r.status==='RESEARCH_REOPEN_REQUIRED');
+  const fieldWaiting=isV2&&(observation.fieldVerificationItems??[]).some(v=>v.status==='WAITING_FOR_MACHINE');
 
-  const fullyResolved = ['CHECKED','NOT_AVAILABLE'].includes(menuStatus) && ['CHECKED','NOT_AVAILABLE'].includes(serviceStatus) && predecessorStatus !== 'UNASSESSED' && predecessorStatus !== 'UNRESOLVED' && !(menuStatus === 'CHECKED' && menuDataCount === 0) && !(serviceStatus === 'CHECKED' && serviceDataCount === 0);
+  const fullyResolved = ['CHECKED','NOT_AVAILABLE'].includes(menuStatus) && ['CHECKED','NOT_AVAILABLE'].includes(serviceStatus) && ['CHECKED','NOT_AVAILABLE','LEGACY_EXPLICIT'].includes(predecessorStatus) && !(menuStatus === 'CHECKED' && menuDataCount === 0) && !(serviceStatus === 'CHECKED' && serviceDataCount === 0) && !reopenRequired && !fieldWaiting;
   if (fullyResolved) continue;
 
   let score = 0;
   const reasons = [];
+  if (reopenRequired) { score += 200; reasons.push('RESEARCH_REOPEN_REQUIRED'); }
+  if (fieldWaiting) { score += 100; reasons.push('FIELD_VERIFICATION_WAITING'); }
   if (hasUxContract) { score += 120; reasons.push('USER_VERIFIED_UX_CONTRACT'); }
   if (hasPredecessorScope) { score += 80; reasons.push('PREDECESSOR_SNAPSHOT_INPUT'); }
   if (observationInputs.length) { score += 40 + Math.min(observationInputs.length, 10); reasons.push(`OBSERVATION_INPUTS:${observationInputs.length}`); }
@@ -82,6 +105,7 @@ for (const entry of fs.readdirSync(researchRoot, { withFileTypes: true })) {
   if (serviceStatus === 'UNRESOLVED') { score += 20; reasons.push('SERVICE_UNRESOLVED'); }
   if (predecessorStatus === 'UNRESOLVED') { score += 20; reasons.push('PREDECESSOR_UNRESOLVED'); }
   if (sourceType === 'LEGACY_RESEARCH_DATA') { score += 10; reasons.push('LEGACY_RESEARCH_FORMAT'); }
+  if (sourceType === 'OBSERVATION_V1') { score += 5; reasons.push('OBSERVATION_V1_MIGRATION'); }
   if (containsSignal(research?.features) || containsSignal(research?.evidenceCandidates)) { score += 10; reasons.push('RESEARCH_OBSERVATION_SIGNAL'); }
 
   const priority = score >= 120 ? 'P0' : score >= 80 ? 'P1' : score >= 45 ? 'P2' : 'P3';
@@ -89,9 +113,9 @@ for (const entry of fs.readdirSync(researchRoot, { withFileTypes: true })) {
 }
 
 rows.sort((a,b) => b.score - a.score || String(a.researchedAt ?? '').localeCompare(String(b.researchedAt ?? '')) || a.machineId.localeCompare(b.machineId));
-const summary = { schemaVersion: 'machine-observation-migration-plan-v2.1', generatedAt: new Date().toISOString(), migrationDebtCount: rows.length, priorityCounts: Object.fromEntries(['P0','P1','P2','P3'].map((p) => [p, rows.filter((r) => r.priority === p).length])) };
+const summary = { schemaVersion: 'machine-observation-migration-plan-v3', generatedAt: new Date().toISOString(), migrationDebtCount: rows.length, priorityCounts: Object.fromEntries(['P0','P1','P2','P3'].map((p) => [p, rows.filter((r) => r.priority === p).length])) };
 const result = { summary, machines: rows };
-console.log('Machine Observation migration priority v2.1');
+console.log('Machine Observation migration priority v3');
 console.log(JSON.stringify(summary, null, 2));
 for (const row of rows) console.log(`- ${row.priority} ${String(row.score).padStart(3)} | ${row.machineId} | ${row.displayName} | ${row.reasons.join(', ')}`);
 if (outPath) { const absolute = path.resolve(root, outPath); fs.mkdirSync(path.dirname(absolute), {recursive:true}); fs.writeFileSync(absolute, `${JSON.stringify(result,null,2)}\n`); console.log(`report: ${path.relative(root,absolute)}`); }
