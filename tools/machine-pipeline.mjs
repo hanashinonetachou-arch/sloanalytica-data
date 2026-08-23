@@ -16,6 +16,21 @@ function writeJson(p, value) {
   fs.mkdirSync(path.dirname(p), { recursive: true });
   fs.writeFileSync(p, JSON.stringify(value, null, 2) + '\n', 'utf8');
 }
+function applyUiOverrides(selection, researchDir) {
+  const overridePath = path.join(researchDir, 'ui-overrides.json');
+  if (!fs.existsSync(overridePath)) return selection;
+  const overrides = readJson(overridePath);
+  const inputOverrides = overrides.inputs ?? {};
+  const next = {
+    ...selection,
+    ...(overrides.machineDataVersion ? { machineDataVersion: overrides.machineDataVersion } : {}),
+    inputs: (selection.inputs ?? []).map(input => ({ ...input, ...(inputOverrides[input.id] ?? {}) })),
+    uiCategoryLabels: { ...(selection.uiCategoryLabels ?? {}), ...(overrides.uiCategoryLabels ?? {}) },
+    uiCategoryDescriptions: { ...(selection.uiCategoryDescriptions ?? {}), ...(overrides.uiCategoryDescriptions ?? {}) },
+  };
+  console.log(`UI overrides applied: ${path.relative(ROOT, overridePath)}`);
+  return next;
+}
 function withoutGeneratedAt(value) {
   if (Array.isArray(value)) return value.map(withoutGeneratedAt);
   if (value && typeof value === 'object') {
@@ -141,7 +156,7 @@ try {
   if (checkOnly && fs.existsSync(machineRegistryPath)) machineRegistryBackup = fs.readFileSync(machineRegistryPath);
 
   const research = readJson(researchPath);
-  const selection = readJson(selectionPath);
+  const selection = applyUiOverrides(readJson(selectionPath), researchDir);
   if (research.machine?.machineId !== machineId) fail(`ResearchData machineId mismatch: ${research.machine?.machineId}`);
   if (selection.machineId !== machineId) fail(`SelectionData machineId mismatch: ${selection.machineId}`);
 
