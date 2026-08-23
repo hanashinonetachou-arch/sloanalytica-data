@@ -9,8 +9,21 @@ const errors=[];
 const BASELINE_COMMIT='cfac75b0e42f8bacfd08d34a6663a652bd6a7385';
 const BASELINE_COUNT=101;
 
+function showBaselineCatalog(){
+  return spawnSync('git',['show',`${BASELINE_COMMIT}:catalog.json`],{cwd:root,encoding:'utf8'});
+}
 function readBaselineCatalog(){
-  const r=spawnSync('git',['show',`${BASELINE_COMMIT}:catalog.json`],{cwd:root,encoding:'utf8'});
+  let r=showBaselineCatalog();
+  if(r.status!==0){
+    // GitHub Actions regression workflows use shallow checkout. Fetch only the
+    // immutable baseline commit needed by this audit, without changing HEAD.
+    const fetch=spawnSync('git',['fetch','--no-tags','--depth=1','origin',BASELINE_COMMIT],{cwd:root,encoding:'utf8'});
+    if(fetch.status===0) r=showBaselineCatalog();
+    else {
+      errors.push(`cannot fetch Phase 12 baseline commit ${BASELINE_COMMIT}: ${(fetch.stderr??'').trim()}`);
+      return null;
+    }
+  }
   if(r.status!==0){
     errors.push(`cannot read Phase 12 baseline catalog from ${BASELINE_COMMIT}: ${(r.stderr??'').trim()}`);
     return null;
