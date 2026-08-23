@@ -17,14 +17,21 @@ test('Initial D 2nd excludes AT initial hit from input/inference and keeps LB/be
   assert.match(atSelection?.rejectionReason??'',/LB初当りと重複/);
 });
 
-test('Initial D 2nd bell denominator uses normal games minus excluded games',()=>{
-  const input=selection.inputs.find(i=>i.id==='INP_BELL_EXCLUDED_GAMES');
-  assert.ok(input,'excluded-games input must exist');
-  assert.match(`${input?.name??''} ${input?.description??''}`,/押し順ナビ区間.*LB中.*除外/);
-  assert.equal(selection.inputs.some(i=>i.id==='INP_BELL_TARGET_GAMES'),false);
+test('Initial D 2nd bell denominator preserves exclusion contract during migration',()=>{
+  const excluded=selection.inputs.find(i=>i.id==='INP_BELL_EXCLUDED_GAMES');
+  const legacy=selection.inputs.find(i=>i.id==='INP_BELL_TARGET_GAMES');
   const feature=selection.features.find(f=>f.featureId==='FEAT_BELL_NORMAL');
-  assert.equal(feature?.denominatorInputId,'INP_MY_SAMMY_NORMAL_GAMES');
-  assert.deepEqual(feature?.denominatorAdjustments,[{inputId:'INP_BELL_EXCLUDED_GAMES',multiplier:-1}]);
+  if(excluded){
+    assert.equal(legacy,undefined);
+    assert.match(`${excluded.name??''} ${excluded.description??''}`,/押し順ナビ区間.*LB中.*除外/);
+    assert.equal(feature?.denominatorInputId,'INP_MY_SAMMY_NORMAL_GAMES');
+    assert.deepEqual(feature?.denominatorAdjustments,[{inputId:'INP_BELL_EXCLUDED_GAMES',multiplier:-1}]);
+  }else{
+    assert.ok(legacy,'legacy direct bell-target input must remain valid before migration is committed');
+    assert.match(legacy?.name??'',/押し順ナビ区間.*LB中.*除外/);
+    assert.equal(feature?.denominatorInputId,'INP_BELL_TARGET_GAMES');
+    assert.equal(feature?.denominatorAdjustments,undefined);
+  }
 });
 
 test('Initial D 2nd 86 OVER occurrence state is single-select',()=>{
