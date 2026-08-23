@@ -17,9 +17,14 @@ test('Initial D 2nd excludes AT initial hit from input/inference and keeps LB/be
   assert.match(atSelection?.rejectionReason??'',/LB初当りと重複/);
 });
 
-test('Initial D 2nd bell denominator UI preserves nav-exclusion condition',()=>{
-  const input=selection.inputs.find(i=>i.id==='INP_BELL_TARGET_GAMES');
-  assert.match(input?.name??'',/押し順ナビ区間.*LB中.*除外/);
+test('Initial D 2nd bell denominator uses normal games minus excluded games',()=>{
+  const input=selection.inputs.find(i=>i.id==='INP_BELL_EXCLUDED_GAMES');
+  assert.ok(input,'excluded-games input must exist');
+  assert.match(`${input?.name??''} ${input?.description??''}`,/押し順ナビ区間.*LB中.*除外/);
+  assert.equal(selection.inputs.some(i=>i.id==='INP_BELL_TARGET_GAMES'),false);
+  const feature=selection.features.find(f=>f.featureId==='FEAT_BELL_NORMAL');
+  assert.equal(feature?.denominatorInputId,'INP_MY_SAMMY_NORMAL_GAMES');
+  assert.deepEqual(feature?.denominatorAdjustments,[{inputId:'INP_BELL_EXCLUDED_GAMES',multiplier:-1}]);
 });
 
 test('Initial D 2nd 86 OVER occurrence state is single-select',()=>{
@@ -49,13 +54,11 @@ test('Initial D 2nd swimsuit-only feature is excluded because full end-screen di
   assert.match(f?.rejectionReason??'',/終了画面全体/);
 });
 
-
 test('Initial D 2nd conditioned end-screen estimate beats swimsuit-only estimate',()=>{
   const byId=new Map(difficulty.featureTrialEstimates.map(f=>[f.featureId,f]));
   assert.equal(byId.get('FEAT_AT_LB_END_SCREEN')?.requiredTrials80,38);
   assert.equal(byId.get('FEAT_AT_LB_END_SWIMSUIT_ONLY')?.requiredTrials80,59);
 });
-
 
 test('Initial D 2nd LB denominator field verification resolves publish blocker',()=>{
   const research=JSON.parse(fs.readFileSync('research/L_INITIAL_D_2ND/research-data.json','utf8'));
@@ -85,8 +88,6 @@ test('Initial D 2nd exposes an automatic selected/rejected summary',()=>{
   assert.ok(summary?.selected.some(i=>i.name==='通常時レジェンドバトル初当り'));
   assert.ok(summary?.rejected.some(i=>i.name==='ATレジェンドラッシュ初当り' && /LB初当りと重複/.test(i.reason)));
 });
-
-
 
 test('Initial D 2nd selection summary exposes trial-unit-aware required trial estimates',()=>{
   const summary=generated.selectionSummary;
