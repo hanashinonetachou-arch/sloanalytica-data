@@ -24,14 +24,18 @@ Required top-level fields:
 - sectionOrder[]
 - sections{}
 - inputContracts{}
+- optional evidenceContracts{}
 - unresolved[]
 - auditNotes[]
+
+A section always has inputIds[] and may also have evidenceIds[]. Evidence that Selection represents through evidenceUi is not forced into a fake input ID. Instead, evidenceContracts references the Selection evidence group by sourceEvidenceGroupId and normally inherits its options.
 
 ## Responsibilities
 UI Design Engine decides:
 - user-facing section grouping and order
 - input labels based on observable machine terminology
 - input mode: COUNTER, NUMBER, SELECT, EVIDENCE, DERIVED, READ_ONLY
+- Evidence group placement and presentation while preserving Selection semantics
 - directInput true/false
 - compact counter suitability
 - one/two-column semantic layout hint (gridSpan 12/6)
@@ -41,6 +45,7 @@ UI Design Engine decides:
 
 It must not:
 - add/remove Selection features for convenience
+- invent inputs or Evidence groups that do not exist in SelectionData
 - alter probabilities, weights, denominators, Evidence meaning, or Difficulty
 - perform web research as a substitute for missing Observation data
 - overwrite USER_VERIFIED_UI_LOCKED contracts automatically
@@ -50,13 +55,17 @@ It must not:
 1. DIRECT_PLAY + MANUAL_COUNTER => COUNTER candidate.
 2. END_EVENT/VISUAL_EVENT with mutually exclusive categories => compact COUNTER group; gridSpan 6 is preferred when labels remain readable.
 3. AUDIO_EVENT or VISUAL_EVENT Evidence => label by what the player actually hears/sees, with setting meaning as secondary text.
-4. DERIVABLE => avoid duplicate manual entry; use DERIVED when all required source inputs exist.
-5. COMBINABLE => allow multiple observations to construct one Selection statistic; explain source/period boundaries.
-6. SEATED_STATE => dedicated predecessor/seat-time section and explicit result-label distinction from own-play statistics.
-7. Excluded observation conditions must be surfaced in section/input description.
-8. Same observation timing should normally be grouped into one section even when some outcomes are suggestive and others are Evidence.
-9. Optional DATA_COUNTER or LINKED_SERVICE methods must never make a statistically valid manual feature unavailable.
-10. UNRESOLVED Observation may produce PASS_WITH_UNRESOLVED or MANUAL_UI_REVIEW_REQUIRED; it does not reopen Research by itself.
+4. Selection evidenceUi remains an Evidence contract; do not manufacture a normal input only to render it.
+5. DERIVABLE => avoid duplicate manual entry; use DERIVED when all required source inputs exist.
+6. COMBINABLE => allow multiple observations to construct one Selection statistic; explain source/period boundaries.
+7. SEATED_STATE => dedicated predecessor/seat-time section and explicit result-label distinction from own-play statistics.
+8. Excluded observation conditions must be surfaced in section/input description.
+9. Same observation timing should normally be grouped into one section even when some outcomes are suggestive and others are Evidence.
+10. Optional DATA_COUNTER or LINKED_SERVICE methods must never make a statistically valid manual feature unavailable.
+11. UNRESOLVED Observation may produce PASS_WITH_UNRESOLVED or MANUAL_UI_REVIEW_REQUIRED; it does not reopen Research by itself.
+
+## Selection linkage gate
+Every inputContracts key must exist in SelectionData.inputs. Every evidenceContract.sourceEvidenceGroupId must exist in SelectionData.evidenceUi.groups and preserve selectionMode. This prevents UI Design from inventing statistical/evidence concepts.
 
 ## Gate
 PASS: contract is structurally valid and all UI decisions are deterministic.
@@ -67,6 +76,11 @@ RESEARCH_REOPEN_REQUIRED belongs to Machine Observation, not UI Design.
 
 ## Reference machine
 S_REVUE_STARLIGHT_CX is the v1 reference. Its user-verified-ui-lock.json is the golden UX contract. UI Design generation/audit must not mutate the lock. A reference audit compares section order, item membership, derived calculations, user-facing labels, directInput, compact, and gridSpan where the lock specifies them.
+
+## Pilot coverage
+- S_MY_JUGGLER_V_KD: simple A-type plus predecessor snapshot.
+- LB_SLOT_GALFY_A4: BT/A+ pattern, optional predecessor inputs, manual role counters, and Selection evidenceUi.
+- L_INITIAL_D_2ND: smart-slot AT pattern, linked-service statistics, special denominator exclusions, multinomial end-event counters, and multiple independent Evidence groups.
 
 ## Lock policy
 If user-verified-ui-lock.json status is USER_VERIFIED_UI_LOCKED:

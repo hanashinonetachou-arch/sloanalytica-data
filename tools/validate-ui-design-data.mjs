@@ -5,6 +5,7 @@ import { fileURLToPath } from 'node:url';
 
 export const UI_STATUSES=new Set(['DRAFT','PASS','PASS_WITH_UNRESOLVED','MANUAL_UI_REVIEW_REQUIRED','USER_VERIFIED']);
 export const INPUT_MODES=new Set(['COUNTER','NUMBER','SELECT','EVIDENCE','DERIVED','READ_ONLY']);
+export const EVIDENCE_SELECTION_MODES=new Set(['single','multi']);
 
 export function validateUiDesignData(data,{expectedMachineId}={}){
   const errors=[];
@@ -16,17 +17,25 @@ export function validateUiDesignData(data,{expectedMachineId}={}){
   if(!Array.isArray(data.sectionOrder)) errors.push('sectionOrder must be an array');
   if(!data.sections||typeof data.sections!=='object'||Array.isArray(data.sections)) errors.push('sections must be an object');
   if(!data.inputContracts||typeof data.inputContracts!=='object'||Array.isArray(data.inputContracts)) errors.push('inputContracts must be an object');
+  if(data.evidenceContracts!==undefined&&(!data.evidenceContracts||typeof data.evidenceContracts!=='object'||Array.isArray(data.evidenceContracts))) errors.push('evidenceContracts must be an object when present');
   const sectionOrder=Array.isArray(data.sectionOrder)?data.sectionOrder:[];
   if(new Set(sectionOrder).size!==sectionOrder.length) errors.push('sectionOrder contains duplicates');
   const seenInputs=new Set();
+  const seenEvidence=new Set();
   for(const sectionName of sectionOrder){
     const section=data.sections?.[sectionName];
     if(!section){errors.push(`missing section definition: ${sectionName}`);continue;}
-    if(!Array.isArray(section.inputIds)) {errors.push(`${sectionName}: inputIds must be an array`);continue;}
-    for(const id of section.inputIds){
+    if(!Array.isArray(section.inputIds)) errors.push(`${sectionName}: inputIds must be an array`);
+    if(section.evidenceIds!==undefined&&!Array.isArray(section.evidenceIds)) errors.push(`${sectionName}: evidenceIds must be an array when present`);
+    for(const id of section.inputIds??[]){
       if(seenInputs.has(id)) errors.push(`${id}: appears in multiple sections`);
       seenInputs.add(id);
       if(!data.inputContracts?.[id]) errors.push(`${sectionName}: missing input contract ${id}`);
+    }
+    for(const id of section.evidenceIds??[]){
+      if(seenEvidence.has(id)) errors.push(`${id}: evidence appears in multiple sections`);
+      seenEvidence.add(id);
+      if(!data.evidenceContracts?.[id]) errors.push(`${sectionName}: missing evidence contract ${id}`);
     }
   }
   for(const [id,c] of Object.entries(data.inputContracts??{})){
@@ -40,6 +49,12 @@ export function validateUiDesignData(data,{expectedMachineId}={}){
       if(!Array.isArray(c.derivedFromInputIds)||c.derivedFromInputIds.length===0) errors.push(`${id}: DERIVED requires derivedFromInputIds`);
       for(const source of c.derivedFromInputIds??[]) if(!data.inputContracts?.[source]) errors.push(`${id}: unknown derived source ${source}`);
     }
+  }
+  for(const [id,c] of Object.entries(data.evidenceContracts??{})){
+    if(typeof c.label!=='string'||!c.label) errors.push(`${id}: evidence label is required`);
+    if(!EVIDENCE_SELECTION_MODES.has(c.selectionMode)) errors.push(`${id}: invalid evidence selectionMode ${c.selectionMode}`);
+    if(typeof c.sourceEvidenceGroupId!=='string'||!c.sourceEvidenceGroupId) errors.push(`${id}: sourceEvidenceGroupId is required`);
+    if(c.inheritOptions!==true&&(!Array.isArray(c.options)||c.options.length===0)) errors.push(`${id}: provide options or inheritOptions=true`);
   }
   if(!Array.isArray(data.unresolved)) errors.push('unresolved must be an array');
   if(!Array.isArray(data.auditNotes)) errors.push('auditNotes must be an array');
@@ -69,13 +84,14 @@ function walk(root){
 
 function main(){
   const root=path.resolve(process.argv[2]??'.');
+  const files=walk(root);
   let failed=0;
-  for(const [machineId,file] of walk(root)){
+  for(const [machineId,file] of files){
     const data=JSON.parse(fs.readFileSync(file,'utf8'));
     const errors=validateUiDesignData(data,{expectedMachineId:machineId});
     if(errors.length){failed++;for(const e of errors) console.error(`ERROR ${machineId}: ${e}`);}
   }
-  console.log(`UI Design validation: ${failed?'FAIL':'PASS'} / files ${walk(root).length}`);
+  console.log(`UI Design validation: ${failed?'FAIL':'PASS'} / files ${files.length}`);
   if(failed) process.exit(1);
 }
 
