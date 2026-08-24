@@ -57,12 +57,18 @@ It must not:
 3. AUDIO_EVENT or VISUAL_EVENT Evidence => label by what the player actually hears/sees, with setting meaning as secondary text.
 4. Selection evidenceUi remains an Evidence contract; do not manufacture a normal input only to render it.
 5. DERIVABLE => avoid duplicate manual entry; use DERIVED when all required source inputs exist.
-6. COMBINABLE => allow multiple observations to construct one Selection statistic; explain source/period boundaries.
-7. SEATED_STATE => dedicated predecessor/seat-time section and explicit result-label distinction from own-play statistics.
-8. Excluded observation conditions must be surfaced in section/input description.
-9. Same observation timing should normally be grouped into one section even when some outcomes are suggestive and others are Evidence.
-10. Optional DATA_COUNTER or LINKED_SERVICE methods must never make a statistically valid manual feature unavailable.
-11. UNRESOLVED Observation may produce PASS_WITH_UNRESOLVED or MANUAL_UI_REVIEW_REQUIRED; it does not reopen Research by itself.
+6. A DERIVED value may remain inference-only. If the player does not need to see or edit it, keep it hidden (`inputVisible:false`) instead of rendering a redundant total.
+7. COMBINABLE => allow multiple observations to construct one Selection statistic; explain source/period boundaries.
+8. SEATED_STATE => dedicated predecessor/seat-time section and explicit result-label distinction from own-play statistics.
+9. Excluded observation conditions must be surfaced in section/input description.
+10. Same observation timing should normally be grouped into one section even when some outcomes are suggestive and others are Evidence.
+11. Optional DATA_COUNTER or LINKED_SERVICE methods must never make a statistically valid manual feature unavailable.
+12. UNRESOLVED Observation may produce PASS_WITH_UNRESOLVED or MANUAL_UI_REVIEW_REQUIRED; it does not reopen Research by itself.
+13. A game-count field that is accumulated progressively during play may use COUNTER mode with directInput=true, providing direct numeric entry plus +/- controls.
+14. Standard +1 controls should display a simple `+`; explicit numbers are reserved for non-unit quick additions such as +10 or +50.
+15. Compact two-column counters must remain usable for realistic four-digit counts without shrinking the +/- touch targets.
+16. Start/current game inputs should prefer an empty initial field with placeholder `0`, avoiding a required delete-before-entry action.
+17. Session metadata that is normally entered only at the start of play should be collapsible after entry, while retaining a concise closed-state summary.
 
 ## Selection linkage gate
 Every inputContracts key must exist in SelectionData.inputs. Every evidenceContract.sourceEvidenceGroupId must exist in SelectionData.evidenceUi.groups and preserve selectionMode. This prevents UI Design from inventing statistical/evidence concepts.
