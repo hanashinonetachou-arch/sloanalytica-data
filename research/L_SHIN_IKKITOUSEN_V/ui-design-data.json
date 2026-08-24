@@ -3,23 +3,24 @@
   "machineId":"L_SHIN_IKKITOUSEN_V",
   "status":"PASS_WITH_UNRESOLVED",
   "generatedFrom":{"selection":"research/L_SHIN_IKKITOUSEN_V/selection-data.json","observation":"research/L_SHIN_IKKITOUSEN_V/machine-observation-data.json"},
-  "sectionOrder":["遊技情報","小役","AT","設定示唆"],
+  "sectionOrder":["遊技情報","初当り","小役","設定示唆"],
   "sections":{
-    "遊技情報":{"inputIds":["INP_NORMAL_GAMES"],"description":"CZ・ボーナス・AT中を除いた通常ゲーム数を入力します。","observationRole":"SELF_PLAY"},
-    "小役":{"inputIds":["INP_COMMON_BELL"],"description":"通常時に1枚または11枚払い出しとなる共通ベルをカウントします。","observationRole":"DIRECT_PLAY"},
-    "AT":{"inputIds":["INP_AT_FIRST_HIT"],"description":"通常時からのAT初当りだけを記録します。CZ回数は重複回避のため推測入力にしません。","observationRole":"DIRECT_PLAY"},
-    "設定示唆":{"inputIds":[],"evidenceIds":["EV_RUSH_END"],"description":"RUSH終了画面の設定否定・下限・確定パターンを記録します。","observationRole":"END_EVENT"}
+    "遊技情報":{"inputIds":["INP_NORMAL_GAMES"],"description":"通常ゲーム数を入力します。","observationRole":"SELF_PLAY"},
+    "初当り":{"inputIds":["INP_CZ_COUNT","INP_AT_COUNT"],"description":"CZ初当りを主Featureとして採用します。CZはAT初当りより必要試行量が少なく、ATへの主要経路をより上流で観測できるためです。AT初当りはCZを数えていない場合だけ使うFallbackで、両方を二重評価しません。","observationRole":"DIRECT_PLAY"},
+    "小役":{"inputIds":["INP_BELL1","INP_BELL11"],"description":"1枚/11枚共通ベルを記録します。高頻度ですが設定差は小さいため長い試行が必要です。","observationRole":"DIRECT_PLAY"},
+    "設定示唆":{"inputIds":[],"evidenceIds":["EV_TROPHY","EV_MAGATAMA_GUIDE"],"description":"Daiichiトロフィーと、勾玉の導き30G以上の設定下限・確定パターンを記録します。勾玉の導きはCZ失敗後/AT終了後を分けずに入力できます。","observationRole":"END_EVENT"}
   },
   "inputContracts":{
     "INP_NORMAL_GAMES":{"name":"通常ゲーム数","mode":"NUMBER","gridSpan":12,"directInput":true},
-    "INP_COMMON_BELL":{"name":"1枚or11枚ベル","mode":"COUNTER","gridSpan":6,"directInput":true,"compact":true},
-    "INP_AT_FIRST_HIT":{"name":"AT初当り","mode":"COUNTER","gridSpan":6,"directInput":true,"compact":true}
+    "INP_CZ_COUNT":{"name":"CZ初当り","mode":"COUNTER","gridSpan":6,"directInput":true,"compact":true},
+    "INP_AT_COUNT":{"name":"AT初当り（Fallback）","mode":"COUNTER","gridSpan":6,"directInput":true,"compact":true},
+    "INP_BELL1":{"name":"1枚共通ベル","mode":"COUNTER","gridSpan":6,"directInput":true,"compact":true},
+    "INP_BELL11":{"name":"11枚共通ベル","mode":"COUNTER","gridSpan":6,"directInput":true,"compact":true}
   },
-  "evidenceContracts":{"EV_RUSH_END":{"label":"RUSH終了画面","selectionMode":"single","sourceEvidenceGroupId":"EV_RUSH_END","inheritOptions":true}},
-  "unresolved":[
-    {"id":"OBS_MACHINE_MENU","reason":"通常メニュー/履歴から取得できる累計値は未解決。"},
-    {"id":"OBS_LINKED_SERVICE","reason":"実機連動機能の有無と具体項目は未解決。"},
-    {"id":"OBS_SEATED_START","reason":"前任者区間の正しい通常ゲーム分母・共通ベル累計を取得できるか未解決。"}
-  ],
-  "auditNotes":["共通ベルは高頻度Counterとして2列compact候補。","CZ初当りはResearchに残すがAT初当りと重複するためUIへ出さない。","内部モードは示唆から推定入力させない。"]
+  "evidenceContracts":{
+    "EV_TROPHY":{"label":"Daiichiトロフィー","selectionMode":"single","sourceEvidenceGroupId":"EV_TROPHY","inheritOptions":true},
+    "EV_MAGATAMA_GUIDE":{"label":"勾玉の導き 継続ゲーム数","selectionMode":"single","sourceEvidenceGroupId":"EV_MAGATAMA_GUIDE","inheritOptions":true}
+  },
+  "unresolved":[{"id":"OBS_MACHINE_MENU","reason":"筐体標準メニュー/履歴の具体項目は公開情報で未解決。"}],
+  "auditNotes":["CZ初当りを主Feature、AT初当りをFallbackへ変更。","勾玉の導き30G以上は契機共通のEvidenceとして採用。10G/20Gの数値分布はCZ失敗後/AT終了後で異なるため統合Inferenceしない。"]
 }
