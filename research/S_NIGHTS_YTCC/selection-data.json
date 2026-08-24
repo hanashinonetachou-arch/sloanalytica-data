@@ -2,7 +2,7 @@
   "schemaVersion":"selection-data-v1",
   "machineId":"S_NIGHTS_YTCC",
   "machineDataVersion":"0.1.0",
-  "uiCategoryLabels":{"PLAY":"遊技情報","FLAG":"ボーナス契機","EVIDENCE":"設定示唆"},
+  "uiCategoryLabels":{"PLAY":"遊技情報","FLAG":"ボーナス契機","END_SCREEN":"ボーナス終了画面","EVIDENCE":"設定示唆"},
   "inputs":[
     {"id":"INP_NORMAL_GAMES","name":"通常ゲーム数","type":"integer","category":"PLAY","unit":"G","displayOrder":1,"inferenceRole":"INCLUDE_PRIMARY","uiQuickAdd":[50,100]},
     {"id":"INP_FLAG_A","name":"リーチ目フラグA","type":"counter","category":"FLAG","unit":"回","displayOrder":2,"inferenceRole":"INCLUDE_PRIMARY"},
@@ -10,10 +10,15 @@
     {"id":"INP_FLAG_C","name":"リーチ目フラグC","type":"counter","category":"FLAG","unit":"回","displayOrder":4,"inferenceRole":"INCLUDE_PRIMARY"},
     {"id":"INP_FLAG_D","name":"リーチ目フラグD","type":"counter","category":"FLAG","unit":"回","displayOrder":5,"inferenceRole":"INCLUDE_PRIMARY"},
     {"id":"INP_FLAG_E","name":"リーチ目フラグE","type":"counter","category":"FLAG","unit":"回","displayOrder":6,"inferenceRole":"INCLUDE_PRIMARY"},
-    {"id":"INP_FLAG_F","name":"リーチ目フラグF","type":"counter","category":"FLAG","unit":"回","displayOrder":7,"inferenceRole":"INCLUDE_PRIMARY"}
+    {"id":"INP_FLAG_F","name":"リーチ目フラグF","type":"counter","category":"FLAG","unit":"回","displayOrder":7,"inferenceRole":"INCLUDE_PRIMARY"},
+    {"id":"INP_END_DEFAULT","name":"背景のみ","type":"counter","category":"END_SCREEN","unit":"回","displayOrder":20,"inferenceRole":"INCLUDE_SUPPORT"},
+    {"id":"INP_END_OWL","name":"ふくろう","type":"counter","category":"END_SCREEN","unit":"回","displayOrder":21,"inferenceRole":"INCLUDE_SUPPORT"},
+    {"id":"INP_END_WHITE_MOON","name":"白い月","type":"counter","category":"END_SCREEN","unit":"回","displayOrder":22,"inferenceRole":"INCLUDE_SUPPORT"},
+    {"id":"INP_END_RED_MOON","name":"赤い月","type":"counter","category":"END_SCREEN","unit":"回","displayOrder":23,"inferenceRole":"INCLUDE_SUPPORT"}
   ],
   "features":[
-    {"researchFeatureId":"RF_REACH_FLAG_OUTCOME","featureId":"FEAT_REACH_FLAG_OUTCOME","adoptionCategory":"INCLUDE_PRIMARY","numeratorInputId":"INP_FLAG_A","categoryInputIds":["INP_FLAG_B","INP_FLAG_C","INP_FLAG_D","INP_FLAG_E","INP_FLAG_F"],"denominatorInputId":"INP_NORMAL_GAMES","residualCategoryLabel":"OTHER","minimumSample":500,"sampleRecommendation":5000,"difficultyExposure":{"mode":"per_game","factor":1,"quality":"EXACT"},"userReason":"設定差のあるリーチ目フラグA〜Fを、通常ゲーム全体の中の排他的な発生構成として一体評価します。"}
+    {"researchFeatureId":"RF_REACH_FLAG_OUTCOME","featureId":"FEAT_REACH_FLAG_OUTCOME","adoptionCategory":"INCLUDE_PRIMARY","numeratorInputId":"INP_FLAG_A","categoryInputIds":["INP_FLAG_B","INP_FLAG_C","INP_FLAG_D","INP_FLAG_E","INP_FLAG_F"],"denominatorInputId":"INP_NORMAL_GAMES","residualCategoryLabel":"OTHER","minimumSample":500,"sampleRecommendation":5000,"difficultyExposure":{"mode":"per_game","factor":1,"quality":"EXACT"},"userReason":"設定差のあるリーチ目フラグA〜Fを、通常ゲーム全体の中の排他的な発生構成として一体評価します。"},
+    {"researchFeatureId":"RF_BONUS_END_NORMAL_SCREEN","featureId":"FEAT_BONUS_END_NORMAL_SCREEN","adoptionCategory":"INCLUDE_SUPPORT","numeratorInputId":"INP_END_DEFAULT","categoryInputIds":["INP_END_OWL","INP_END_WHITE_MOON","INP_END_RED_MOON"],"inputTransform":"sum_inputs_to_trials","minimumSample":5,"sampleRecommendation":30,"difficultyExposure":{"mode":"event_count","quality":"UNRESOLVED"},"userReason":"追加演出を伴わない通常のボーナス終了画面4種には設定別振り分けが公開されているため採用します。パネルフラッシュ・クレオフ音・ケロットトロフィー発生時はここに数えずEvidence側で扱い、同じ終了契機を二重評価しません。"}
   ],
   "evidence":[],
   "evidenceUi":{"groups":[
@@ -25,10 +30,20 @@
       {"value":"RAINBOW","label":"虹","allowedSettings":["SET_6"],"excludedSettings":["SET_1","SET_2","SET_3","SET_4","SET_5"],"sourceEvidenceIds":["RE_TROPHY_RAINBOW"]}
     ]},
     {"groupId":"EV_END_COMBO","label":"終了画面＋追加演出","options":[
-      {"value":"RED_MOON_PANEL","label":"赤月＋パネルフラッシュ","allowedSettings":["SET_2","SET_3","SET_4","SET_5","SET_6"],"excludedSettings":["SET_1"],"sourceEvidenceIds":["RE_PANEL_RED_MOON"]},
-      {"value":"RED_MOON_CREDIT","label":"赤月＋クレオフ音","allowedSettings":["SET_4","SET_5","SET_6"],"excludedSettings":["SET_1","SET_2","SET_3"],"sourceEvidenceIds":["RE_CREDIT_RED_MOON"]}
+      {"value":"DEFAULT_PANEL","label":"背景のみ＋パネルフラッシュ","allowedSettings":["SET_1","SET_2","SET_3","SET_5","SET_6"],"excludedSettings":["SET_4"],"sourceEvidenceIds":["RE_PANEL_DEFAULT"]},
+      {"value":"OWL_PANEL","label":"ふくろう＋パネルフラッシュ","allowedSettings":["SET_1","SET_2","SET_4","SET_5","SET_6"],"excludedSettings":["SET_3"],"sourceEvidenceIds":["RE_PANEL_OWL"]},
+      {"value":"WHITE_MOON_PANEL","label":"白い月＋パネルフラッシュ","allowedSettings":["SET_1","SET_3","SET_4","SET_5","SET_6"],"excludedSettings":["SET_2"],"sourceEvidenceIds":["RE_PANEL_WHITE_MOON"]},
+      {"value":"RED_MOON_PANEL","label":"赤い月＋パネルフラッシュ","allowedSettings":["SET_2","SET_3","SET_4","SET_5","SET_6"],"excludedSettings":["SET_1"],"sourceEvidenceIds":["RE_PANEL_RED_MOON"]},
+      {"value":"OWL_CREDIT","label":"ふくろう＋クレオフ音","allowedSettings":["SET_3","SET_4","SET_6"],"excludedSettings":["SET_1","SET_2","SET_5"],"sourceEvidenceIds":["RE_CREDIT_OWL"]},
+      {"value":"WHITE_MOON_CREDIT","label":"白い月＋クレオフ音","allowedSettings":["SET_3","SET_5","SET_6"],"excludedSettings":["SET_1","SET_2","SET_4"],"sourceEvidenceIds":["RE_CREDIT_WHITE_MOON"]},
+      {"value":"RED_MOON_CREDIT","label":"赤い月＋クレオフ音","allowedSettings":["SET_4","SET_5","SET_6"],"excludedSettings":["SET_1","SET_2","SET_3"],"sourceEvidenceIds":["RE_CREDIT_RED_MOON"]}
     ]}
   ]},
   "difficultyAnalysis":{"targetGameBasis":{"basisId":"NORMAL_GAMES","label":"通常ゲーム","quality":"EXACT"},"calibrationAllowedExposureQualities":["EXACT","DERIVED"]},
-  "selectionNotes":["A〜Fは同一通常ゲーム内で排他的に成立するリーチ目フラグとしてMultinomial化。","ボーナス合算やHBB/CBB比率を別Featureで加えず、同一成立フラグ情報の二重評価を避ける。"]
+  "selectionNotes":[
+    "A〜Fは同一通常ゲーム内で排他的に成立するリーチ目フラグとしてMultinomial化。",
+    "ボーナス合算やHBB/CBB比率を自分区間で別Featureとして加えず、同一成立フラグ情報の二重評価を避ける。",
+    "通常終了画面4種は追加演出なしの回だけを合計分母として条件付きで評価し、パネフラ・クレオフ・トロフィーはEvidenceへ分離する。",
+    "終了画面Featureは通常GへのExposure換算根拠が未確定のためDifficultyには現時点で参加させない。"
+  ]
 }
