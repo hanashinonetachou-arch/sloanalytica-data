@@ -2,22 +2,47 @@
   "schemaVersion":"selection-data-v1",
   "machineId":"S_GRANBELM_ZX",
   "machineDataVersion":"0.1.0",
-  "uiCategoryLabels":{"PLAY":"遊技情報","AT":"AT","EVIDENCE":"設定示唆"},
+  "uiCategoryLabels":{"PLAY":"遊技情報","INITIAL":"初当り","MB":"ミッドナイトボーナス","EVIDENCE":"設定示唆"},
   "inputs":[
     {"id":"INP_NORMAL_GAMES","name":"通常ゲーム数","type":"integer","category":"PLAY","unit":"G","displayOrder":1,"inferenceRole":"INCLUDE_PRIMARY","uiQuickAdd":[50,100]},
-    {"id":"INP_AT_FIRST_HIT","name":"AT初当り","type":"counter","category":"AT","unit":"回","displayOrder":2,"inferenceRole":"INCLUDE_PRIMARY"}
+    {"id":"INP_AT_COUNT","name":"AT初当り","type":"counter","category":"INITIAL","unit":"回","displayOrder":2,"inferenceRole":"INCLUDE_PRIMARY"},
+    {"id":"INP_MB_FIRST","name":"1stステージ開始","type":"counter","category":"MB","unit":"回","displayOrder":3,"inferenceRole":"INCLUDE_PRIMARY"},
+    {"id":"INP_MB_SECOND","name":"2ndステージ開始","type":"counter","category":"MB","unit":"回","displayOrder":4,"inferenceRole":"INCLUDE_PRIMARY"},
+    {"id":"INP_MB_THIRD","name":"3rdステージ開始","type":"counter","category":"MB","unit":"回","displayOrder":5,"inferenceRole":"INCLUDE_PRIMARY"}
   ],
   "features":[
-    {"researchFeatureId":"RF_AT_FIRST","featureId":"FEAT_AT_FIRST_HIT","adoptionCategory":"INCLUDE_PRIMARY","numeratorInputId":"INP_AT_FIRST_HIT","denominatorInputId":"INP_NORMAL_GAMES","minimumSample":500,"sampleRecommendation":5000,"difficultyExposure":{"mode":"per_game","factor":1,"quality":"EXACT"}},
-    {"researchFeatureId":"RF_CZ_COMBINED","featureId":"FEAT_CZ_COMBINED","adoptionCategory":"EXCLUDE","internalReason":"CZ当選はAT初当り生成過程の上流にあり、AT初当りと単純併用すると同じ初当り過程を重複評価する。","userFacingReason":"AT初当りと重複。"},
-    {"researchFeatureId":"RF_BONUS_COMBINED","featureId":"FEAT_BONUS_COMBINED","adoptionCategory":"EXCLUDE","internalReason":"ボーナス当選はAT初当り生成過程と強く重複し、独立Featureとして単純加算しない。","userFacingReason":"AT初当りと重複。"},
-    {"researchFeatureId":"RF_AT_DIRECT","featureId":"FEAT_AT_DIRECT","adoptionCategory":"EXCLUDE","internalReason":"設定差は大きいが極低頻度かつブラッドムーン非滞在という条件分母を正確に観測しづらい。","userFacingReason":"低頻度で、正確な分母を取得しにくい。"},
-    {"researchFeatureId":"RF_MODE_SELECTION","featureId":"FEAT_MODE_SELECTION","adoptionCategory":"EXCLUDE","internalReason":"内部モードを実戦上確定観測できず、誤分類リスクが高い。","userFacingReason":"状態を正確に判別できない。"},
-    {"researchFeatureId":"RF_MB_START_STAGE","featureId":"FEAT_MB_START_STAGE","adoptionCategory":"EXCLUDE","internalReason":"設定差の存在は確認したが全設定の公開数値を今回確定できていない。","userFacingReason":"公開数値を十分に確認できない。"},
-    {"researchFeatureId":"RF_DESTINY_BATTLE","featureId":"FEAT_DESTINY_BATTLE","adoptionCategory":"EXCLUDE","internalReason":"条件付き分母と全設定数値が未解決。","userFacingReason":"正確な分母を取得できない。"},
-    {"researchFeatureId":"RF_KITA_NO_YU_RETURN","featureId":"FEAT_KITA_NO_YU_RETURN","adoptionCategory":"EXCLUDE","internalReason":"全設定数値の確認が不足しており、現段階では安全に尤度化できない。","userFacingReason":"公開数値を十分に確認できない。"}
+    {"researchFeatureId":"RF_AT_INITIAL","featureId":"FEAT_AT_INITIAL","adoptionCategory":"INCLUDE_PRIMARY","numeratorInputId":"INP_AT_COUNT","denominatorInputId":"INP_NORMAL_GAMES","minimumSample":500,"sampleRecommendation":5000,"difficultyExposure":{"mode":"per_game","factor":1,"quality":"EXACT"},"userReason":"AT初当りは通常ゲーム数を分母に直接観測でき、全設定値も公開されているため主Featureとして採用します。"},
+    {"researchFeatureId":"RF_MB_START_STAGE","featureId":"FEAT_MB_START_STAGE","adoptionCategory":"INCLUDE_PRIMARY","numeratorInputId":"INP_MB_FIRST","categoryInputIds":["INP_MB_SECOND","INP_MB_THIRD"],"denominatorInputId":"INP_MB_FIRST","minimumSample":20,"sampleRecommendation":100,"userReason":"ミッドナイトボーナス開始ステージには明確な設定差があります。赤月点灯などでブラッドムーン滞在濃厚と判明しているボーナスは除外し、通常状態と判断できる回だけを1st/2nd/3rdで記録します。隠れブラッドムーン混入の可能性は残るため補助Featureとして扱います。"}
   ],
   "evidence":[],
+  "evidenceUi":{"groups":[
+    {"groupId":"EV_TROPHY","label":"ケロットトロフィー","options":[
+      {"value":"BRONZE","label":"銅","allowedSettings":["SET_2","SET_3","SET_4","SET_5","SET_6"],"excludedSettings":["SET_1"],"sourceEvidenceIds":["RE_TROPHY_BRONZE"]},
+      {"value":"SILVER","label":"銀","allowedSettings":["SET_3","SET_4","SET_5","SET_6"],"excludedSettings":["SET_1","SET_2"],"sourceEvidenceIds":["RE_TROPHY_SILVER"]},
+      {"value":"GOLD","label":"金","allowedSettings":["SET_4","SET_5","SET_6"],"excludedSettings":["SET_1","SET_2","SET_3"],"sourceEvidenceIds":["RE_TROPHY_GOLD"]},
+      {"value":"KEROT","label":"ケロット柄","allowedSettings":["SET_5","SET_6"],"excludedSettings":["SET_1","SET_2","SET_3","SET_4"],"sourceEvidenceIds":["RE_TROPHY_KEROT"]},
+      {"value":"RAINBOW","label":"虹","allowedSettings":["SET_6"],"excludedSettings":["SET_1","SET_2","SET_3","SET_4","SET_5"],"sourceEvidenceIds":["RE_TROPHY_RAINBOW"]}
+    ]},
+    {"groupId":"EV_END_SCREEN","label":"終了画面（確定・否定系）","options":[
+      {"value":"NO10","label":"No.10 偶数設定","allowedSettings":["SET_2","SET_4","SET_6"],"excludedSettings":["SET_1","SET_3","SET_5"],"sourceEvidenceIds":["RE_END_NO10"]},
+      {"value":"NO13","label":"No.13 設定2以上","allowedSettings":["SET_2","SET_3","SET_4","SET_5","SET_6"],"excludedSettings":["SET_1"],"sourceEvidenceIds":["RE_END_NO13"]},
+      {"value":"NO14","label":"No.14 設定3否定","allowedSettings":["SET_1","SET_2","SET_4","SET_5","SET_6"],"excludedSettings":["SET_3"],"sourceEvidenceIds":["RE_END_NO14"]},
+      {"value":"NO15","label":"No.15 設定5否定","allowedSettings":["SET_1","SET_2","SET_3","SET_4","SET_6"],"excludedSettings":["SET_5"],"sourceEvidenceIds":["RE_END_NO15"]},
+      {"value":"NO16","label":"No.16 設定4以上","allowedSettings":["SET_4","SET_5","SET_6"],"excludedSettings":["SET_1","SET_2","SET_3"],"sourceEvidenceIds":["RE_END_NO16"]},
+      {"value":"NO17","label":"No.17 設定5・6","allowedSettings":["SET_5","SET_6"],"excludedSettings":["SET_1","SET_2","SET_3","SET_4"],"sourceEvidenceIds":["RE_END_NO17"]},
+      {"value":"NO18","label":"No.18 設定6","allowedSettings":["SET_6"],"excludedSettings":["SET_1","SET_2","SET_3","SET_4","SET_5"],"sourceEvidenceIds":["RE_END_NO18"]}
+    ]},
+    {"groupId":"EV_NAKAMIMIERU","label":"ナカミミエール（確定・否定アイコン）","options":[
+      {"value":"DENY1","label":"設定1否定","allowedSettings":["SET_2","SET_3","SET_4","SET_5","SET_6"],"excludedSettings":["SET_1"],"sourceEvidenceIds":["RE_NAKA_DENY1"]},
+      {"value":"DENY2","label":"設定2否定","allowedSettings":["SET_1","SET_3","SET_4","SET_5","SET_6"],"excludedSettings":["SET_2"],"sourceEvidenceIds":["RE_NAKA_DENY2"]},
+      {"value":"DENY3","label":"設定3否定","allowedSettings":["SET_1","SET_2","SET_4","SET_5","SET_6"],"excludedSettings":["SET_3"],"sourceEvidenceIds":["RE_NAKA_DENY3"]},
+      {"value":"DENY4","label":"設定4否定","allowedSettings":["SET_1","SET_2","SET_3","SET_5","SET_6"],"excludedSettings":["SET_4"],"sourceEvidenceIds":["RE_NAKA_DENY4"]},
+      {"value":"DENY5","label":"設定5否定","allowedSettings":["SET_1","SET_2","SET_3","SET_4","SET_6"],"excludedSettings":["SET_5"],"sourceEvidenceIds":["RE_NAKA_DENY5"]},
+      {"value":"SET4PLUS","label":"設定4以上","allowedSettings":["SET_4","SET_5","SET_6"],"excludedSettings":["SET_1","SET_2","SET_3"],"sourceEvidenceIds":["RE_NAKA_4PLUS"]},
+      {"value":"SET5PLUS","label":"設定5以上","allowedSettings":["SET_5","SET_6"],"excludedSettings":["SET_1","SET_2","SET_3","SET_4"],"sourceEvidenceIds":["RE_NAKA_5PLUS"]},
+      {"value":"SET6","label":"設定6","allowedSettings":["SET_6"],"excludedSettings":["SET_1","SET_2","SET_3","SET_4","SET_5"],"sourceEvidenceIds":["RE_NAKA_6"]}
+    ]}
+  ]},
   "difficultyAnalysis":{"targetGameBasis":{"basisId":"NORMAL_GAMES","label":"通常ゲーム","quality":"EXACT"},"calibrationAllowedExposureQualities":["EXACT","DERIVED"]},
-  "selectionNotes":["複雑なCZ・ボーナス・AT経路を同時加算せず、現段階ではAT初当りを代表Featureとする。","未解決候補はResearchから消さず、不採用理由を保持する。"]
+  "selectionNotes":["AT初当りを主Featureとして採用。CZ初当りはATへの主要経路と重複するため不採用。","ミッドナイトボーナス開始ステージはブラッドムーン滞在濃厚と判明した回を除外して補助採用。隠れブラッドムーン混入リスクは残る。","ナカミミエールの『魔/月/希』は周期やモードで振り分けが変わり入力負荷も高いため数値Inferenceには入れず、設定否定・設定4以上等のアラマノクス確定系だけEvidenceとして活用する。","終了画面は示唆強弱の全振り分けを数値加算せず、設定否定・確定系をEvidenceとして採用する。"]
 }
