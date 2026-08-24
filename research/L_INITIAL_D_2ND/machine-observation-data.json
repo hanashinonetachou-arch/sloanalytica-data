@@ -1,8 +1,11 @@
 {
-  "schemaVersion": "machine-observation-data-v1",
+  "schemaVersion": "machine-observation-data-v2",
   "machineId": "L_INITIAL_D_2ND",
   "displayName": "スマスロ頭文字D 2nd",
-  "researchedAt": "2026-08-22",
+  "provisionalRegistrationId": null,
+  "registrationId": null,
+  "releaseDate": null,
+  "researchedAt": "2026-08-24",
   "sources": [
     {
       "sourceId": "OBS_SRC_1GEKI_SETTING",
@@ -21,34 +24,133 @@
       "sourceType": "manufacturer"
     }
   ],
-  "machineMenu": {
-    "status": "UNRESOLVED",
-    "availableData": [],
-    "sourceRefs": [
-      "OBS_SRC_1GEKI_SETTING"
-    ],
-    "notes": "公開解析では『マイスロメニュー画面』から設定推測用の遊技データを確認できることは確認できたが、マイスロとは独立した筐体標準メニュー/遊技履歴の具体項目一覧は今回特定できていない。"
+  "sourceCoverage": {
+    "machineMenu": "UNRESOLVED",
+    "dataCounter": "UNRESOLVED",
+    "linkedService": "VERIFIED_ON_MACHINE",
+    "directPlay": "VERIFIED_ON_MACHINE",
+    "endEvent": "VERIFIED_ON_MACHINE",
+    "seatedState": "UNRESOLVED"
   },
-  "linkedService": {
-    "status": "CHECKED",
-    "availableData": [
-      "マイスロ対応",
-      "通常時レジェンドバトル突入率",
-      "レジェンドラッシュ初当り確率",
-      "チャンスチェリー等の遊技データ確認"
-    ],
-    "sourceRefs": [
-      "OBS_SRC_1GEKI_SETTING",
-      "OBS_SRC_SAMMY_MYSLOT"
-    ],
-    "notes": "一撃はLB突入率・AT初当り確率を正確に確認する際にマイスロメニュー画面を参照するよう明記し、チャンスチェリーもマイスロ確認対象としている。Sammy公式はマイスロ/クイックマイスロで遊技データや履歴を確認できる一般仕様を示している。"
-  },
-  "predecessorData": {
-    "status": "UNRESOLVED",
-    "availableData": [],
-    "sourceRefs": [],
-    "notes": "着席時に前任者区間として安全に取得できる筐体標準/ホール表示項目の正確なセットは今回の公開情報では確定できない。過去の実機調整を推測で置き換えず、前任者Inference利用・自身区間差分利用とも未解決として保持する。",
-    "usableForInference": false,
-    "usableForSelfSessionDelta": false
-  }
+  "observations": [
+    {
+      "observationId": "OBS_INITIALD_LINKED_NORMAL_LB",
+      "sourceType": "LINKED_SERVICE",
+      "observationMode": "LINKED_SERVICE_READ",
+      "status": "VERIFIED_ON_MACHINE",
+      "label": "通常ゲーム数・LB初当り回数",
+      "categories": ["INITIAL_HIT"],
+      "timing": ["実戦中","実戦終了時"],
+      "excludedConditions": [],
+      "sourceRefs": ["OBS_SRC_1GEKI_SETTING","OBS_SRC_SAMMY_MYSLOT"],
+      "notes": "実機連動機能の遊技データで確認し、LB初当り分母へ使用する。"
+    },
+    {
+      "observationId": "OBS_INITIALD_BELL_EXCLUDED_GAMES",
+      "sourceType": "DIRECT_PLAY",
+      "observationMode": "MANUAL_COUNTER",
+      "status": "VERIFIED_ON_MACHINE",
+      "label": "ベル集計から除外するゲーム数",
+      "categories": ["BELL_DENOMINATOR"],
+      "timing": ["LB確定画面","LB中"],
+      "excludedConditions": [],
+      "sourceRefs": [],
+      "notes": "LB確定画面の押し順ナビ区間とLB中のゲーム数を合計して入力する。逐次加算のため直接入力+/-を許可する。"
+    },
+    {
+      "observationId": "OBS_INITIALD_BELL_COUNT",
+      "sourceType": "DIRECT_PLAY",
+      "observationMode": "MANUAL_COUNTER",
+      "status": "VERIFIED_ON_MACHINE",
+      "label": "通常時ベル回数",
+      "categories": ["BELL"],
+      "timing": ["通常時"],
+      "excludedConditions": ["LB確定画面の押し順ナビ区間","LB中"],
+      "sourceRefs": [],
+      "notes": "通常ゲーム数から除外Gを引いた分母で評価する。"
+    },
+    {
+      "observationId": "OBS_INITIALD_AT_END_SCREEN",
+      "sourceType": "END_EVENT",
+      "observationMode": "VISUAL_EVENT",
+      "status": "VERIFIED_ON_MACHINE",
+      "label": "AT終了画面",
+      "categories": ["END_SCREEN"],
+      "timing": ["AT終了時"],
+      "excludedConditions": [],
+      "sourceRefs": ["OBS_SRC_1GEKI_SETTING"],
+      "notes": "デフォルト・奇数示唆・偶数示唆・水着を通常推測用Counterとして記録する。赤・金等の確定系はEvidenceへ分離する。"
+    },
+    {
+      "observationId": "OBS_INITIALD_EVIDENCE_EVENTS",
+      "sourceType": "END_EVENT",
+      "observationMode": "VISUAL_EVENT",
+      "status": "VERIFIED_ON_MACHINE",
+      "label": "設定確定情報",
+      "categories": ["EVIDENCE"],
+      "timing": ["対応イベント発生時"],
+      "excludedConditions": [],
+      "sourceRefs": ["OBS_SRC_1GEKI_SETTING"],
+      "notes": "トロフィー・獲得枚数表示・86枚OVER・AT終了画面確定系を独立Evidenceとして扱う。"
+    }
+  ],
+  "featureMappings": [
+    {
+      "featureId": "FEAT_LB_INITIAL",
+      "mappingType": "EXACT",
+      "observationIds": ["OBS_INITIALD_LINKED_NORMAL_LB"],
+      "collectionMethods": ["LINKED_SERVICE_READ"],
+      "usableForInference": true,
+      "usableForDifficulty": true,
+      "notes": "実機連動機能の通常ゲーム数とLB初当り回数をそのまま使用する。"
+    },
+    {
+      "featureId": "FEAT_BELL_NORMAL",
+      "mappingType": "DERIVABLE",
+      "observationIds": ["OBS_INITIALD_LINKED_NORMAL_LB","OBS_INITIALD_BELL_EXCLUDED_GAMES","OBS_INITIALD_BELL_COUNT"],
+      "collectionMethods": ["LINKED_SERVICE_READ","MANUAL_COUNTER","DERIVED"],
+      "usableForInference": true,
+      "usableForDifficulty": true,
+      "notes": "分母=通常ゲーム数-除外ゲーム数。"
+    },
+    {
+      "featureId": "FEAT_AT_LB_END_SCREEN",
+      "mappingType": "EXACT",
+      "observationIds": ["OBS_INITIALD_AT_END_SCREEN"],
+      "collectionMethods": ["VISUAL_EVENT"],
+      "usableForInference": true,
+      "usableForDifficulty": true,
+      "notes": "AT終了画面の通常示唆構成比を観測する。"
+    }
+  ],
+  "researchReopenRequests": [],
+  "fieldVerificationItems": [
+    {
+      "verificationId": "VERIFY_INITIALD_MACHINE_MENU",
+      "status": "WAITING_FOR_MACHINE",
+      "sourceType": "MACHINE_MENU",
+      "priority": "LOW",
+      "question": "実機連動機能とは独立した筐体標準メニュー/遊技履歴から追加データを取得できるか。",
+      "uiImpact": "LOW",
+      "notes": "現行Selectionには不要。"
+    },
+    {
+      "verificationId": "VERIFY_INITIALD_SEATED_STATE",
+      "status": "WAITING_FOR_MACHINE",
+      "sourceType": "SEATED_STATE",
+      "priority": "MEDIUM",
+      "question": "着席時に前任者区間として安全に利用できるデータカウンター/筐体表示項目の正確なセットは何か。",
+      "uiImpact": "MEDIUM",
+      "notes": "現行Selectionには前任者Featureを採用していないためPublish blockerではない。"
+    },
+    {
+      "verificationId": "VERIFY_INITIALD_LINKED_NORMAL_INTERNAL_SCOPE",
+      "status": "WAITING_FOR_MACHINE",
+      "sourceType": "LINKED_SERVICE",
+      "priority": "MEDIUM",
+      "question": "実機連動機能の通常ゲーム数にLB確定画面・LB中が内部的にどのように加算されるか。",
+      "uiImpact": "LOW",
+      "notes": "ベル分母はユーザーが除外Gを入力するため運用上は成立するが、内部定義を確認待ちとして残す。"
+    }
+  ]
 }
