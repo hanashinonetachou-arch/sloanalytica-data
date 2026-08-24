@@ -8,3 +8,4 @@ if (text.includes('\r\n')) {
   console.log('Normalized CRLF for migration target: tools/build-machine-data.mjs');
 }
 await import('./apply-granbelm-nakamimieru-tabs.mjs');
+await import('./normalize-granbelm-nakamimieru-distributions.mjs');
