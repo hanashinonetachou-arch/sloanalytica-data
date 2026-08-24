@@ -1,65 +1,57 @@
-import fs from "node:fs";
-import path from "node:path";
+import fs from 'node:fs';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 
-function fail(msg){ throw new Error(msg); }
-function readJson(p){ return JSON.parse(fs.readFileSync(p,"utf8")); }
-function unique(xs){ return [...new Set(xs)]; }
-
-const TRIAL_EPS=1e-12;
-function trialClamp(v,a=0,b=1){ return Math.max(a,Math.min(b,Number(v))); }
-function trialClampP(p){ return trialClamp(p,TRIAL_EPS,1-TRIAL_EPS); }
-function trialBcBernoulli(p,q){ p=trialClampP(p); q=trialClampP(q); return Math.sqrt(p*q)+Math.sqrt((1-p)*(1-q)); }
-function trialBcCategorical(p,q){ return p.reduce((sum,v,i)=>sum+Math.sqrt(Math.max(0,v)*Math.max(0,q[i])),0); }
-function trialBcPoisson(a,b){ return Math.exp(-0.5*(Math.sqrt(Math.max(0,a))-Math.sqrt(Math.max(0,b)))**2); }
-function trialCount80(bc){ bc=trialClamp(bc); if(bc>=1-TRIAL_EPS)return null; if(bc<=TRIAL_EPS)return 1; return Math.max(1,Math.ceil(Math.log(0.4)/Math.log(bc))); }
-function researchCategoricalEntries(rf,setting){
-  const cats=Array.isArray(rf.categories)?rf.categories:[]; const raw=rf.settingDistributions?.[setting];
-  if(!raw||cats.length<2)return null;
-  const known=[],missing=[];
-  for(const c of cats){ const v=Number(raw[c]); if(Number.isFinite(v)) known.push([c,v]); else missing.push(c); }
-  if(known.some(([,v])=>v<0||v>1))return null;
-  const knownSum=known.reduce((sum,[,v])=>sum+v,0);
-  if((rf.distributionMode??"complete")==="implicit_residual"){
-    if(knownSum>1+1e-6||missing.length>1)return null;
-    const entries=[];
-    for(const c of cats){
-      const v=Number(raw[c]);
-      entries.push([c,Number.isFinite(v)?v:Math.max(0,1-knownSum)]);
-    }
-    if(missing.length===0 && knownSum<1-1e-12) entries.push(["__IMPLICIT_RESIDUAL__",Math.max(0,1-knownSum)]);
-    return entries;
-  }
-  if(missing.length||Math.abs(knownSum-1)>1e-6)return null;
-  return cats.map(c=>[c,Number(raw[c])]);
-}
-function selectedCategorical(rf,sf,setting){
-  const entries=researchCategoricalEntries(rf,setting); if(!entries)return null;
-  const excluded=new Set(sf.categoryExcludeLabels??[]);
-  const kept=entries.filter(([c])=>!excluded.has(c));
-  if(kept.length<2)return null;
-  const probs=kept.map(([,v])=>v),sum=probs.reduce((a,b)=>a+b,0);
-  if(sum<=0)return null;
-  return excluded.size?probs.map(v=>v/sum):probs;
-}
-function estimateRequiredTrials80(rf,sf,settings){
-  if(!Array.isArray(settings)||settings.length<2)return null; const low=settings[0],high=settings.at(-1);
-  if(rf.candidateModel==="multinomial"){ const p=selectedCategorical(rf,sf,low),q=selectedCategorical(rf,sf,high); return p&&q?trialCount80(trialBcCategorical(p,q)):null; }
-  const p=Number(rf.settingValues?.[low]?.probability),q=Number(rf.settingValues?.[high]?.probability);
-  if(!Number.isFinite(p)||!Number.isFinite(q))return null;
-  return trialCount80(rf.candidateModel==="poisson"?trialBcPoisson(p,q):trialBcBernoulli(p,q));
-}
-
+function fail(message){ throw new Error(message); }
+function readJson(p){ return JSON.parse(fs.readFileSync(p,'utf8')); }
+function writeJson(p,v){ fs.writeFileSync(p,JSON.stringify(v,null,2)+'\n'); }
 function sourceClass(t){
-  if(t==="official") return "OFFICIAL";
-  if(t==="official_derived") return "OFFICIAL_DERIVED";
-  return "ANALYSIS";
+  if(t==='official'||t==='manufacturer') return 'PRIMARY';
+  if(t==='major_analysis'||t==='analysis') return 'ANALYSIS';
+  return 'REFERENCE';
 }
-function inputWithDefaults(x){
-  const defaultValue=x.defaultValue!==undefined?x.defaultValue:
-    x.type==="boolean"?false:x.type==="multi_enum"?[]:x.type==="enum"?"__UNSET__":0;
+function defaultForInput(x){
+  if(x.defaultValue!==undefined) return x.defaultValue;
+  if(x.type==='boolean') return false;
+  if(x.type==='enum') return '__UNSET__';
+  if(x.type==='multi_enum') return [];
+  return 0;
+}
+function normalizeInput(x){
+  const defaultValue=defaultForInput(x);
   const y={...x,defaultValue,minimum:["integer","number","counter"].includes(x.type)?0:undefined,...(x.category==="PREDECESSOR"&&x.observationScope==null?{observationScope:"PREDECESSOR_SNAPSHOT"}:{})};
   for(const k of Object.keys(y)) if(y[k]===undefined) delete y[k];
   return y;
+}
+function normalCdf(x){
+  const t=1/(1+0.2316419*Math.abs(x));
+  const d=0.3989422804014327*Math.exp(-x*x/2);
+  const p=1-d*t*(0.319381530+t*(-0.356563782+t*(1.781477937+t*(-1.821255978+t*1.330274429))));
+  return x>=0?p:1-p;
+}
+function estimateRequiredTrials80(rf,sf,settings){
+  const pair=[settings[0],settings[settings.length-1]];
+  if(pair.some(s=>!s)) return null;
+  if(rf.candidateModel==='binomial'||rf.candidateModel==='poisson'){
+    const p1=Number(rf.settingValues?.[pair[0]]?.probability);
+    const p2=Number(rf.settingValues?.[pair[1]]?.probability);
+    if(!Number.isFinite(p1)||!Number.isFinite(p2)||p1===p2) return null;
+    const q=Math.max(1e-12,Math.min(1-1e-12,(p1+p2)/2));
+    const delta=Math.abs(p2-p1);
+    const z=0.8416212335729143;
+    return Math.ceil(4*z*z*q*(1-q)/(delta*delta));
+  }
+  if(rf.candidateModel==='multinomial'){
+    const cats=(rf.categories??[]).filter(c=>c!==sf.residualCategoryLabel && !(sf.categoryExcludeLabels??[]).includes(c));
+    const d1=rf.settingDistributions?.[pair[0]], d2=rf.settingDistributions?.[pair[1]];
+    if(!d1||!d2||!cats.length) return null;
+    let bc=0;
+    for(const c of cats){ const a=Number(d1[c]),b=Number(d2[c]); if(!Number.isFinite(a)||!Number.isFinite(b)) return null; bc+=Math.sqrt(a*b); }
+    if(sf.residualCategoryLabel){ const a=Number(d1[sf.residualCategoryLabel]),b=Number(d2[sf.residualCategoryLabel]); if(Number.isFinite(a)&&Number.isFinite(b)) bc+=Math.sqrt(a*b); }
+    if(!(bc>0&&bc<1)) return null;
+    return Math.ceil(Math.log(0.6)/(2*Math.log(bc)));
+  }
+  return null;
 }
 function buildFeature(rf,sf,inputIds){
   const role=sf.adoptionCategory;
@@ -201,7 +193,7 @@ function buildSelectionSummary(research,selection,statistics=null){
     }
     if(item.requiredTrials && /既存MachineData定義|existing machine data/i.test(String(item.requiredTrials.unit))) fail(`${sf.featureId}: requiredTrials.unit must be user-facing`);
     if(sf.adoptionCategory==="EXCLUDE") rejected.push(item);
-    else if(sf.adoptionCategory==="INCLUDE_PRIMARY" || sf.adoptionCategory==="INCLUDE_SUPPORT") selected.push(item);
+    else if(sf.adoptionCategory==="INCLUDE_PRIMARY" || sf.adoptionCategory==="INCLUDE_SUPPORT" || sf.adoptionCategory==="INCLUDE_FALLBACK") selected.push(item);
   }
 
   for(const rf of research.features??[]){
@@ -327,32 +319,32 @@ export function buildMachineData(research,selection,statistics=null){
     const confirmed=re?(re.allowedSettings??re.confirmedSettings??[]):(e.confirmedSettings??[]);
     const denied=re?(re.deniedSettings??[]):(e.deniedSettings??[]);
     const name=re?.name??e.name??e.displayName??e.evidenceId;
-    evidences.push({id:e.evidenceId,name,displayName:e.displayName??name,inputId:e.inputId,triggerValue:e.triggerValue,
-      confirmedSettings:confirmed,deniedSettings:denied,hasImage:false,
-      type:(denied.length>0 && confirmed.length===0)?"SETTING_DENIAL":"SETTING_CONFIRMATION"});
+    evidences.push({id:e.evidenceId,name,displayName:e.displayName??name,inputId:e.inputId,triggerValue:e.triggerValue,confirmedSettings:confirmed,deniedSettings:denied,hasImage:false,type:denied.length&&!confirmed.length?"SETTING_DENIAL":"SETTING_CONFIRMATION",sourceEvidenceRefs:re?.sourceRefs??e.sourceEvidenceRefs??[]});
   }
   evidences.push(...generatedEvidence);
   return {
-    schemaVersion:1,machine,
-    inputs:{schemaVersion:"2.0.0",inputs:allInputs.map(inputWithDefaults)},
+    schemaVersion:1,
+    machine,
+    inputs:{schemaVersion:"2.0.0",inputs:allInputs.map(normalizeInput)},
     features:{schemaVersion:"2.0.0",features},
     evidence:{version:"1.0.0",evidences,sources},
-    ui:{sections},selectionSummary,reliability:{},
-    metadata:{machineId:machine.machineId,displayName:machine.displayName,settings:machine.settings},
-    validation:{cases:[]},statistics:{}
+    ui:{schemaVersion:"1.0.0",sections},
+    selectionSummary
   };
 }
-if(import.meta.url===`file://${process.argv[1]}`){
-  const [researchPath,selectionPath,outPath]=process.argv.slice(2);
-  if(!researchPath||!selectionPath||!outPath){
-    console.error("Usage: node tools/build-machine-data.mjs <research-data.json> <selection-data.json> <output-machine-package.json> [statistics-report.json]");
-    process.exit(2);
+
+function main(){
+  const args=process.argv.slice(2);
+  if(args.length<3){
+    console.error('Usage: node tools/build-machine-data.mjs <research.json> <selection.json> <output.json> [statistics.json]');
+    process.exit(1);
   }
-  try{
-    const statisticsPath=process.argv[5];
-    const pkg=buildMachineData(readJson(researchPath),readJson(selectionPath),statisticsPath?readJson(statisticsPath):null);
-    fs.mkdirSync(path.dirname(outPath),{recursive:true});
-    fs.writeFileSync(outPath,JSON.stringify(pkg,null,2)+"\n");
-    console.log(`MachineData draft: ${outPath}`);
-  }catch(e){ console.error(`ERROR: ${e.message}`); process.exit(1); }
+  const [researchPath,selectionPath,outputPath,statisticsPath]=args;
+  const research=readJson(researchPath), selection=readJson(selectionPath), statistics=statisticsPath&&fs.existsSync(statisticsPath)?readJson(statisticsPath):null;
+  const out=buildMachineData(research,selection,statistics);
+  writeJson(outputPath,out);
+  console.log(`MachineData built: ${outputPath}`);
 }
+
+const invoked=process.argv[1]&&path.resolve(process.argv[1])===fileURLToPath(import.meta.url);
+if(invoked){try{main();}catch(e){console.error(`ERROR: ${e.message??e}`);process.exit(1);}}
