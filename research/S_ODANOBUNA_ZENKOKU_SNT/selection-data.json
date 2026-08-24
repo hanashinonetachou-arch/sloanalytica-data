@@ -2,28 +2,19 @@
   "schemaVersion":"selection-data-v1",
   "machineId":"S_ODANOBUNA_ZENKOKU_SNT",
   "machineDataVersion":"0.1.0",
-  "uiCategoryLabels":{"PLAY":"遊技情報","AT":"AT","EVIDENCE":"設定示唆"},
+  "uiCategoryLabels":{"PLAY":"遊技情報","AT":"AT","RUNTHROUGH":"AT駆け抜け","EVIDENCE":"設定示唆"},
   "inputs":[
     {"id":"INP_NORMAL_GAMES","name":"通常ゲーム数","type":"integer","category":"PLAY","unit":"G","displayOrder":1,"inferenceRole":"INCLUDE_PRIMARY","uiQuickAdd":[50,100]},
-    {"id":"INP_AT_FIRST_HIT","name":"AT初当り","type":"counter","category":"AT","unit":"回","displayOrder":2,"inferenceRole":"INCLUDE_PRIMARY"}
+    {"id":"INP_AT_COUNT","name":"AT初当り","type":"counter","category":"AT","unit":"回","displayOrder":2,"inferenceRole":"INCLUDE_PRIMARY"},
+    {"id":"INP_AT_RUNTHROUGH","name":"AT駆け抜け","type":"counter","category":"RUNTHROUGH","unit":"回","displayOrder":3,"inferenceRole":"INCLUDE_PRIMARY"},
+    {"id":"INP_UNIFICATION_ATTACK","name":"天下統一アタック当選","type":"counter","category":"RUNTHROUGH","unit":"回","displayOrder":4,"inferenceRole":"INCLUDE_PRIMARY"}
   ],
   "features":[
-    {"researchFeatureId":"RF_AT_FIRST","featureId":"FEAT_AT_FIRST_HIT","adoptionCategory":"INCLUDE_PRIMARY","numeratorInputId":"INP_AT_FIRST_HIT","denominatorInputId":"INP_NORMAL_GAMES","minimumSample":500,"sampleRecommendation":5000,"difficultyExposure":{"mode":"per_game","factor":1,"quality":"EXACT"}},
-    {"researchFeatureId":"RF_FIRST_STRATEGY_CZ","featureId":"FEAT_FIRST_STRATEGY_CZ","adoptionCategory":"EXCLUDE","internalReason":"設定差は確認したが、全設定数値を今回確定できていない。","userFacingReason":"公開数値を十分に確認できない。"},
-    {"researchFeatureId":"RF_FIRST_BATTLE_REWRITE","featureId":"FEAT_FIRST_BATTLE_REWRITE","adoptionCategory":"EXCLUDE","internalReason":"大きな設定差候補だが、条件付き分母を実戦中に正確に管理する負荷が高く、全設定数値も今回未確定。","userFacingReason":"正確な分母を取得しにくい。"},
-    {"researchFeatureId":"RF_TACTIC_RATE","featureId":"FEAT_TACTIC_RATE","adoptionCategory":"EXCLUDE","internalReason":"抽選対象ゲームの条件管理が細かく、誤入力リスクが高い。","userFacingReason":"正確な分母を取得しにくい。"},
-    {"researchFeatureId":"RF_DAMAGE_AVOID","featureId":"FEAT_DAMAGE_AVOID","adoptionCategory":"EXCLUDE","internalReason":"除外条件を含む条件付き分母を正確に数える必要があり、実戦入力に不向き。","userFacingReason":"正確な分母を取得しにくい。"},
-    {"researchFeatureId":"RF_TENKA_AFTER_NO_GAIN","featureId":"FEAT_TENKA_AFTER_NO_GAIN","adoptionCategory":"EXCLUDE","internalReason":"設定差の存在は確認したが全設定数値が未確定。","userFacingReason":"公開数値を十分に確認できない。"}
+    {"researchFeatureId":"RF_AT_INITIAL","featureId":"FEAT_AT_INITIAL","adoptionCategory":"INCLUDE_PRIMARY","numeratorInputId":"INP_AT_COUNT","denominatorInputId":"INP_NORMAL_GAMES","minimumSample":500,"sampleRecommendation":5000,"difficultyExposure":{"mode":"per_game","factor":1,"quality":"EXACT"},"userReason":"AT初当りは通常ゲーム数を分母に直接観測でき、全設定値が公開されているため採用します。"},
+    {"researchFeatureId":"RF_AT_RUNTHROUGH_ATTACK","featureId":"FEAT_AT_RUNTHROUGH_ATTACK","adoptionCategory":"INCLUDE_PRIMARY","numeratorInputId":"INP_UNIFICATION_ATTACK","denominatorInputId":"INP_AT_RUNTHROUGH","minimumSample":10,"sampleRecommendation":50,"userReason":"AT駆け抜け時の天下統一アタック当選率は設定1の1.4%から設定6の5.3%まで約3.8倍の差があり、駆け抜け回数を明確な条件分母として数えられるため補助Featureとして採用します。"}
   ],
   "evidence":[],
-  "evidenceUi":{"groups":[
-    {"groupId":"EV_AT_END","label":"AT終了画面","options":[
-      {"value":"NOBUNA3","label":"信奈③","allowedSettings":["SET_2","SET_4","SET_5","SET_6"],"excludedSettings":["SET_1"],"sourceEvidenceIds":["RE_END_NOBUNA3"]},
-      {"value":"NOBUNA4","label":"信奈④","allowedSettings":["SET_4","SET_5","SET_6"],"excludedSettings":["SET_1","SET_2"],"sourceEvidenceIds":["RE_END_NOBUNA4"]},
-      {"value":"OATH","label":"信奈&良晴（誓い）","allowedSettings":["SET_5","SET_6"],"excludedSettings":["SET_1","SET_2","SET_4"],"sourceEvidenceIds":["RE_END_OATH"]},
-      {"value":"HAREM","label":"ハーレム","allowedSettings":["SET_6"],"excludedSettings":["SET_1","SET_2","SET_4","SET_5"],"sourceEvidenceIds":["RE_END_HAREM"]}
-    ]}
-  ]},
+  "evidenceUi":{"groups":[{"groupId":"EV_AT_END","label":"AT終了画面","options":[{"value":"SET2PLUS","label":"設定2以上","allowedSettings":["SET_2","SET_3","SET_4","SET_5","SET_6"],"excludedSettings":["SET_1"],"sourceEvidenceIds":["RE_AT_END_2PLUS"]},{"value":"SET4PLUS","label":"設定4以上","allowedSettings":["SET_4","SET_5","SET_6"],"excludedSettings":["SET_1","SET_2","SET_3"],"sourceEvidenceIds":["RE_AT_END_4PLUS"]},{"value":"SET6","label":"設定6","allowedSettings":["SET_6"],"excludedSettings":["SET_1","SET_2","SET_3","SET_4","SET_5"],"sourceEvidenceIds":["RE_AT_END_6"]}]}]},
   "difficultyAnalysis":{"targetGameBasis":{"basisId":"NORMAL_GAMES","label":"通常ゲーム","quality":"EXACT"},"calibrationAllowedExposureQualities":["EXACT","DERIVED"]},
-  "selectionNotes":["実戦性を優先し、現段階の数値InferenceはAT初当りのみ。","細かなCZ内抽選はResearchに残し、数値・分母が解決した際に再評価可能とする。"]
+  "selectionNotes":["AT初当りを通常Gベースの主Featureとして採用。","AT駆け抜け→天下統一アタックはAT終了後の条件付き抽選で、AT初当りとは別の情報として採用する。DifficultyにはAT駆け抜け試行を通常Gへ換算する根拠がないため含めない。","戦略会議・合戦関連は公開数値または条件分母が未確定のため不採用理由を保持する。"]
 }
