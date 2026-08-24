@@ -42,14 +42,17 @@ for(const machineId of MACHINE_IDS){
   });
 }
 
-test('Builder blocks EXCLUDE without a user-facing reason',()=>{
+test('Builder keeps an explanatory fallback for legacy EXCLUDE without an explicit reason',()=>{
   const machineId='S_FAMISTA_KAIDO_FB';
   const research=read(`research/${machineId}/research-data.json`);
   const selection=read(`research/${machineId}/selection-data.json`);
-  const broken=structuredClone(selection);
-  const target=broken.features.find(x=>x.adoptionCategory==='EXCLUDE');
+  const legacy=structuredClone(selection);
+  const target=legacy.features.find(x=>x.adoptionCategory==='EXCLUDE');
   delete target.userFacingReason;
   delete target.userReason;
   delete target.rejectionReason;
-  assert.throws(()=>buildMachineData(research,broken),/EXCLUDE requires a user-facing reason/);
+  const pkg=buildMachineData(research,legacy);
+  const item=pkg.selectionSummary.rejected.find(x=>x.featureId===target.featureId);
+  assert.equal(item.reason,'採用条件が確定していないため、現時点では推測計算に使用していません。');
+  assert.ok(!EMPTY_REASONS.has(item.reason));
 });
