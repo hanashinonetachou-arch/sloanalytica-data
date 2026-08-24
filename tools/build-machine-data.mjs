@@ -299,6 +299,30 @@ export function buildMachineData(research,selection,statistics=null){
     const categoryTitle=selection.uiCategoryLabels?.[cat]??defaultCategoryLabels[cat]??(cat==="PRIMARY"?null:cat);
     const sectionOptions=selection.uiSectionOptions?.[cat]??{};
     if(categoryTitle && /^(?:AUTO_|PRIMARY(?:_|$)|PREDECESSOR$|SELF_PLAY$|DISPLAY_ONLY(?:_|$)|REFERENCE_TOTAL$)/.test(categoryTitle)) fail(`ui category title must be user-facing: ${cat}`);
+    const toUiItem=(i)=>({
+      type:"input",inputId:i.id,label:i.name,
+      ...(i.uiGridSpan?{gridSpan:i.uiGridSpan}:{}),
+      ...((i.uiDirectInput===false||i.uiCompactCounter===true||i.uiQuickAdd!==undefined)?{config:{...(i.uiDirectInput===false?{directInput:false}:{}),...(i.uiCompactCounter===true?{compact:true}:{}),...(i.uiQuickAdd!==undefined?{quickAdd:i.uiQuickAdd}:{})}}:{}),
+      widget:i.type==="counter"?"counter":i.type==="boolean"?"boolean":i.type==="enum"?"select":i.type==="multi_enum"?"multi_select":"number"
+    });
+    const sortedItems=items.sort((a,b)=>a.displayOrder-b.displayOrder);
+    let tabs;
+    if(Array.isArray(sectionOptions.tabs)){
+      const itemById=new Map(sortedItems.map(i=>[i.id,i]));
+      const seen=new Set();
+      tabs=sectionOptions.tabs.map((tab,index)=>{
+        if(!tab||typeof tab.id!=="string"||!tab.id||typeof tab.label!=="string"||!tab.label||!Array.isArray(tab.inputIds)||tab.inputIds.length===0) fail(`${cat}: invalid tab definition at index ${index}`);
+        const tabItems=tab.inputIds.map(id=>{
+          if(seen.has(id)) fail(`${cat}: duplicate tab inputId ${id}`);
+          const input=itemById.get(id);
+          if(!input) fail(`${cat}: unknown tab inputId ${id}`);
+          seen.add(id);
+          return toUiItem(input);
+        });
+        return {id:tab.id,label:tab.label,items:tabItems};
+      });
+      if(seen.size!==sortedItems.length) fail(`${cat}: tab definitions must cover every section input exactly once`);
+    }
     sections.push({
       id:`AUTO_${cat}`.replace(/[^A-Z0-9_]/gi,"_").toUpperCase(),
       ...(categoryTitle?{title:categoryTitle}:{}),
@@ -308,12 +332,8 @@ export function buildMachineData(research,selection,statistics=null){
       ...(typeof sectionOptions.collapsible==="boolean"?{collapsible:sectionOptions.collapsible}:{}),
       ...(typeof sectionOptions.defaultExpanded==="boolean"?{defaultExpanded:sectionOptions.defaultExpanded}:{}),
       ...(Array.isArray(sectionOptions.summaryInputIds)?{summaryInputIds:sectionOptions.summaryInputIds}:{}),
-      items:items.sort((a,b)=>a.displayOrder-b.displayOrder).map(i=>({
-        type:"input",inputId:i.id,label:i.name,
-        ...(i.uiGridSpan?{gridSpan:i.uiGridSpan}:{}),
-        ...((i.uiDirectInput===false||i.uiCompactCounter===true||i.uiQuickAdd!==undefined)?{config:{...(i.uiDirectInput===false?{directInput:false}:{}),...(i.uiCompactCounter===true?{compact:true}:{}),...(i.uiQuickAdd!==undefined?{quickAdd:i.uiQuickAdd}:{})}}:{}),
-        widget:i.type==="counter"?"counter":i.type==="boolean"?"boolean":i.type==="enum"?"select":i.type==="multi_enum"?"multi_select":"number"
-      }))
+      ...(tabs?{tabs}:{}),
+      items:tabs?[]:sortedItems.map(toUiItem)
     });
   }
   const evidences=[];
