@@ -1,0 +1,37 @@
+{
+  "schemaVersion":"selection-data-v1",
+  "machineId":"L_KYOUKARA_OREHA_FE",
+  "machineDataVersion":"0.1.0",
+  "uiCategoryLabels":{"PLAY":"遊技情報","BONUS":"ボーナス","ROLE":"小役","EVIDENCE":"設定示唆"},
+  "inputs":[
+    {"id":"INP_NORMAL_GAMES","name":"通常ゲーム数","type":"integer","category":"PLAY","unit":"G","displayOrder":1,"inferenceRole":"INCLUDE_PRIMARY","uiQuickAdd":[50,100]},
+    {"id":"INP_BIG","name":"BIG","type":"counter","category":"BONUS","unit":"回","displayOrder":2,"inferenceRole":"INCLUDE_PRIMARY"},
+    {"id":"INP_REG","name":"REG","type":"counter","category":"BONUS","unit":"回","displayOrder":3,"inferenceRole":"INCLUDE_PRIMARY"},
+    {"id":"INP_WATERMELON","name":"スイカ","type":"counter","category":"ROLE","unit":"回","displayOrder":4,"inferenceRole":"INCLUDE_PRIMARY"}
+  ],
+  "features":[
+    {"researchFeatureId":"RF_BONUS_OUTCOME","featureId":"FEAT_BONUS_OUTCOME","adoptionCategory":"INCLUDE_PRIMARY","numeratorInputId":"INP_BIG","categoryInputIds":["INP_REG"],"denominatorInputId":"INP_NORMAL_GAMES","residualCategoryLabel":"OTHER","minimumSample":500,"sampleRecommendation":5000,"difficultyExposure":{"mode":"per_game","factor":1,"quality":"EXACT"},"userReason":"BIG・REGを別々の独立Featureにせず、通常ゲーム全体の排他的な結果として一体評価します。"},
+    {"researchFeatureId":"RF_WATERMELON","featureId":"FEAT_WATERMELON","adoptionCategory":"INCLUDE_PRIMARY","numeratorInputId":"INP_WATERMELON","denominatorInputId":"INP_NORMAL_GAMES","minimumSample":500,"sampleRecommendation":3000,"difficultyExposure":{"mode":"per_game","factor":1,"quality":"EXACT"}},
+    {"researchFeatureId":"RF_MODE","featureId":"FEAT_MODE","adoptionCategory":"EXCLUDE","internalReason":"設定差はあるが内部モードを実戦中に確定観測できず、示唆から推定した状態を尤度入力にすると誤分類が大きい。","userFacingReason":"状態を正確に判別できない。"}
+  ],
+  "evidence":[],
+  "evidenceUi":{"groups":[
+    {"groupId":"EV_CZ_END","label":"CZ終了画面","options":[
+      {"value":"GROUP_PHOTO","label":"集合写真","allowedSettings":["SET_4","SET_5","SET_6"],"excludedSettings":["SET_1","SET_2","SET_3"],"sourceEvidenceIds":["RE_CZ_END_4PLUS"]}
+    ]},
+    {"groupId":"EV_REG_CHAR","label":"REG中キャラ","options":[
+      {"value":"IMAI_GOLD","label":"今井（金）","allowedSettings":["SET_2","SET_3","SET_4","SET_5","SET_6"],"excludedSettings":["SET_1"],"sourceEvidenceIds":["RE_REG_2PLUS"]},
+      {"value":"ITO_GOLD","label":"伊藤（金）","allowedSettings":["SET_4","SET_5","SET_6"],"excludedSettings":["SET_1","SET_2","SET_3"],"sourceEvidenceIds":["RE_REG_4PLUS"]},
+      {"value":"MITSUHASHI_GOLD","label":"三橋（金）","allowedSettings":["SET_5","SET_6"],"excludedSettings":["SET_1","SET_2","SET_3","SET_4"],"sourceEvidenceIds":["RE_REG_5PLUS"]},
+      {"value":"ALL_GOLD","label":"全員集合（金）","allowedSettings":["SET_6"],"excludedSettings":["SET_1","SET_2","SET_3","SET_4","SET_5"],"sourceEvidenceIds":["RE_REG_6"]}
+    ]},
+    {"groupId":"EV_BIG_END","label":"BIG終了画面","options":[
+      {"value":"IMAI_TANIGAWA","label":"今井&谷川","allowedSettings":["SET_2","SET_3","SET_4","SET_5","SET_6"],"excludedSettings":["SET_1"],"sourceEvidenceIds":["RE_BIG_2PLUS"]},
+      {"value":"MITSUHASHI_ITO","label":"三橋&伊藤","allowedSettings":["SET_4","SET_5","SET_6"],"excludedSettings":["SET_1","SET_2","SET_3"],"sourceEvidenceIds":["RE_BIG_4PLUS"]},
+      {"value":"RIKO_KYOKO","label":"理子&京子","allowedSettings":["SET_5","SET_6"],"excludedSettings":["SET_1","SET_2","SET_3","SET_4"],"sourceEvidenceIds":["RE_BIG_5PLUS"]},
+      {"value":"ALL_ALLIES","label":"味方キャラ集合","allowedSettings":["SET_6"],"excludedSettings":["SET_1","SET_2","SET_3","SET_4","SET_5"],"sourceEvidenceIds":["RE_BIG_6"]}
+    ]}
+  ]},
+  "difficultyAnalysis":{"targetGameBasis":{"basisId":"NORMAL_GAMES","label":"通常ゲーム","quality":"EXACT"},"calibrationAllowedExposureQualities":["EXACT","DERIVED"]},
+  "selectionNotes":["BIG・REG・合算を三重評価せず、BIG/REG/その他のMultinomialで扱う。","スイカは別の通常時小役生成過程として併用する。","アリストロフィーは本機固有の正式示唆内容が未公表のためEvidence化しない。"]
+}
