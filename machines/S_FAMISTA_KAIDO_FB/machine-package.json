@@ -1,0 +1,448 @@
+{
+  "schemaVersion": 1,
+  "machine": {
+    "schemaVersion": "2.0.0",
+    "machineId": "S_FAMISTA_KAIDO_FB",
+    "machineDataVersion": "0.1.0",
+    "displayName": "ファミスタ回胴版!!",
+    "modelName": "S／ファミスタ回胴版！！／FB",
+    "manufacturer": "ユニバーサルブロス",
+    "settings": [
+      "SET_1",
+      "SET_2",
+      "SET_5",
+      "SET_6"
+    ],
+    "packagePolicy": {
+      "offlineCapable": true,
+      "containsImages": false,
+      "containsExecutableCode": false
+    }
+  },
+  "inputs": {
+    "schemaVersion": "2.0.0",
+    "inputs": [
+      {
+        "id": "INP_GAMES",
+        "name": "ボーナス抽選対象ゲーム数",
+        "type": "integer",
+        "category": "PLAY",
+        "unit": "G",
+        "displayOrder": 1,
+        "inferenceRole": "INCLUDE_PRIMARY",
+        "uiQuickAdd": [
+          50,
+          100
+        ],
+        "defaultValue": 0,
+        "minimum": 0
+      },
+      {
+        "id": "INP_REG",
+        "name": "REG",
+        "type": "counter",
+        "category": "BONUS",
+        "unit": "回",
+        "displayOrder": 2,
+        "inferenceRole": "INCLUDE_PRIMARY",
+        "defaultValue": 0,
+        "minimum": 0
+      },
+      {
+        "id": "INP_CHERRY",
+        "name": "通常時チェリー",
+        "type": "counter",
+        "category": "CT",
+        "unit": "回",
+        "displayOrder": 3,
+        "inferenceRole": "INCLUDE_PRIMARY",
+        "defaultValue": 0,
+        "minimum": 0
+      },
+      {
+        "id": "INP_CHERRY_CT",
+        "name": "チェリー→CT",
+        "type": "counter",
+        "category": "CT",
+        "unit": "回",
+        "displayOrder": 4,
+        "inferenceRole": "INCLUDE_PRIMARY",
+        "parentInputId": "INP_CHERRY",
+        "defaultValue": 0,
+        "minimum": 0
+      },
+      {
+        "id": "INP_WATERMELON",
+        "name": "通常時スイカ",
+        "type": "counter",
+        "category": "CT",
+        "unit": "回",
+        "displayOrder": 5,
+        "inferenceRole": "INCLUDE_PRIMARY",
+        "defaultValue": 0,
+        "minimum": 0
+      },
+      {
+        "id": "INP_WATERMELON_CT",
+        "name": "スイカ→CT",
+        "type": "counter",
+        "category": "CT",
+        "unit": "回",
+        "displayOrder": 6,
+        "inferenceRole": "INCLUDE_PRIMARY",
+        "parentInputId": "INP_WATERMELON",
+        "defaultValue": 0,
+        "minimum": 0
+      },
+      {
+        "id": "INP_EVI_EV_BIG_END",
+        "name": "BIG終了画面",
+        "type": "enum",
+        "category": "EVIDENCE",
+        "unit": "",
+        "displayOrder": 100,
+        "inferenceRole": "INCLUDE_SUPPORT",
+        "options": [
+          {
+            "key": "__UNSET__",
+            "label": "未選択",
+            "value": "__UNSET__"
+          },
+          {
+            "key": "CHEER",
+            "label": "チアガール",
+            "value": "CHEER"
+          }
+        ],
+        "defaultValue": "__UNSET__"
+      },
+      {
+        "id": "INP_EVI_EV_REG_BGM",
+        "name": "REG中BGM",
+        "type": "enum",
+        "category": "EVIDENCE",
+        "unit": "",
+        "displayOrder": 101,
+        "inferenceRole": "INCLUDE_SUPPORT",
+        "options": [
+          {
+            "key": "__UNSET__",
+            "label": "未選択",
+            "value": "__UNSET__"
+          },
+          {
+            "key": "SPECIAL",
+            "label": "特殊BGM",
+            "value": "SPECIAL"
+          }
+        ],
+        "defaultValue": "__UNSET__"
+      }
+    ]
+  },
+  "features": {
+    "schemaVersion": "2.0.0",
+    "features": [
+      {
+        "featureId": "FEAT_REG",
+        "name": "REG確率",
+        "adoptionCategory": "INCLUDE_PRIMARY",
+        "calculationRole": "PROBABILITY",
+        "probabilityEngineUsage": true,
+        "modelType": "binomial",
+        "minimumSample": 500,
+        "sampleRecommendation": 5000,
+        "denominatorInputId": "INP_GAMES",
+        "numeratorInputId": "INP_REG",
+        "displayFormat": "ratio_1_over_n",
+        "probabilities": {
+          "SET_1": 0.00219731927049,
+          "SET_2": 0.00241080038573,
+          "SET_5": 0.00262467191601,
+          "SET_6": 0.00280741156654
+        },
+        "sourceEvidenceRefs": [
+          "SRC_PWORLD",
+          "SRC_PACNK"
+        ]
+      },
+      {
+        "featureId": "FEAT_CHERRY_CT",
+        "name": "通常時チェリー成立時のチャンスタイム移行率",
+        "adoptionCategory": "INCLUDE_PRIMARY",
+        "calculationRole": "PROBABILITY",
+        "probabilityEngineUsage": true,
+        "modelType": "binomial",
+        "minimumSample": 20,
+        "sampleRecommendation": 200,
+        "denominatorInputId": "INP_CHERRY",
+        "numeratorInputId": "INP_CHERRY_CT",
+        "displayFormat": "ratio_1_over_n",
+        "probabilities": {
+          "SET_1": 0.027,
+          "SET_2": 0.035,
+          "SET_5": 0.043,
+          "SET_6": 0.051
+        },
+        "sourceEvidenceRefs": [
+          "SRC_PACNK"
+        ]
+      },
+      {
+        "featureId": "FEAT_WATERMELON_CT",
+        "name": "通常時スイカ成立時のチャンスタイム移行率",
+        "adoptionCategory": "INCLUDE_PRIMARY",
+        "calculationRole": "PROBABILITY",
+        "probabilityEngineUsage": true,
+        "modelType": "binomial",
+        "minimumSample": 10,
+        "sampleRecommendation": 100,
+        "denominatorInputId": "INP_WATERMELON",
+        "numeratorInputId": "INP_WATERMELON_CT",
+        "displayFormat": "ratio_1_over_n",
+        "probabilities": {
+          "SET_1": 0.098,
+          "SET_2": 0.105,
+          "SET_5": 0.133,
+          "SET_6": 0.152
+        },
+        "sourceEvidenceRefs": [
+          "SRC_PACNK"
+        ]
+      }
+    ]
+  },
+  "evidence": {
+    "version": "1.0.0",
+    "evidences": [
+      {
+        "id": "EVI_EV_BIG_END_CHEER",
+        "name": "チアガール",
+        "displayName": "チアガール",
+        "inputId": "INP_EVI_EV_BIG_END",
+        "triggerValue": "CHEER",
+        "confirmedSettings": [
+          "SET_2",
+          "SET_5",
+          "SET_6"
+        ],
+        "deniedSettings": [
+          "SET_1"
+        ],
+        "hasImage": false,
+        "type": "SETTING_CONFIRMATION",
+        "sourceEvidenceRefs": [
+          "RE_BIG_CHEER"
+        ]
+      },
+      {
+        "id": "EVI_EV_REG_BGM_SPECIAL",
+        "name": "特殊BGM",
+        "displayName": "特殊BGM",
+        "inputId": "INP_EVI_EV_REG_BGM",
+        "triggerValue": "SPECIAL",
+        "confirmedSettings": [
+          "SET_5",
+          "SET_6"
+        ],
+        "deniedSettings": [
+          "SET_1",
+          "SET_2"
+        ],
+        "hasImage": false,
+        "type": "SETTING_CONFIRMATION",
+        "sourceEvidenceRefs": [
+          "RE_REG_SPECIAL_BGM"
+        ]
+      }
+    ],
+    "sources": [
+      {
+        "id": "SRC_OFFICIAL",
+        "classification": "OFFICIAL",
+        "pageName": "スロット新機種『ファミスタ回胴版!!』発売のお知らせ",
+        "url": "https://www.universal-777.co.jp/news/20230619001573/",
+        "checkedAt": "2026-08-24"
+      },
+      {
+        "id": "SRC_PWORLD",
+        "classification": "ANALYSIS",
+        "pageName": "ファミスタ回胴版!!",
+        "url": "https://www.p-world.co.jp/machine/database/9866",
+        "checkedAt": "2026-08-24"
+      },
+      {
+        "id": "SRC_PACNK",
+        "classification": "ANALYSIS",
+        "pageName": "ファミスタ回胴版!! 設定判別ツール",
+        "url": "https://pacnk.com/slot/tools/sh_fuamisutakaidoban.html",
+        "checkedAt": "2026-08-24"
+      }
+    ]
+  },
+  "ui": {
+    "sections": [
+      {
+        "id": "AUTO_PLAY",
+        "title": "遊技情報",
+        "displayOrder": 1,
+        "items": [
+          {
+            "type": "input",
+            "inputId": "INP_GAMES",
+            "label": "ボーナス抽選対象ゲーム数",
+            "config": {
+              "quickAdd": [
+                50,
+                100
+              ]
+            },
+            "widget": "number"
+          }
+        ]
+      },
+      {
+        "id": "AUTO_BONUS",
+        "title": "ボーナス",
+        "displayOrder": 2,
+        "items": [
+          {
+            "type": "input",
+            "inputId": "INP_REG",
+            "label": "REG",
+            "widget": "counter"
+          }
+        ]
+      },
+      {
+        "id": "AUTO_CT",
+        "title": "チャンスタイム",
+        "displayOrder": 3,
+        "items": [
+          {
+            "type": "input",
+            "inputId": "INP_CHERRY",
+            "label": "通常時チェリー",
+            "widget": "counter"
+          },
+          {
+            "type": "input",
+            "inputId": "INP_CHERRY_CT",
+            "label": "チェリー→CT",
+            "widget": "counter"
+          },
+          {
+            "type": "input",
+            "inputId": "INP_WATERMELON",
+            "label": "通常時スイカ",
+            "widget": "counter"
+          },
+          {
+            "type": "input",
+            "inputId": "INP_WATERMELON_CT",
+            "label": "スイカ→CT",
+            "widget": "counter"
+          }
+        ]
+      },
+      {
+        "id": "AUTO_EVIDENCE",
+        "title": "設定示唆",
+        "displayOrder": 4,
+        "items": [
+          {
+            "type": "input",
+            "inputId": "INP_EVI_EV_BIG_END",
+            "label": "BIG終了画面",
+            "widget": "select"
+          },
+          {
+            "type": "input",
+            "inputId": "INP_EVI_EV_REG_BGM",
+            "label": "REG中BGM",
+            "widget": "select"
+          }
+        ]
+      }
+    ]
+  },
+  "selectionSummary": {
+    "schemaVersion": "selection-summary-v1",
+    "evaluatedCount": 6,
+    "selectedCount": 3,
+    "rejectedCount": 3,
+    "selected": [
+      {
+        "featureId": "FEAT_REG",
+        "name": "REG確率",
+        "reason": "推測計算に採用しています。",
+        "requiredTrials": {
+          "value": 48975,
+          "unit": "ゲーム"
+        }
+      },
+      {
+        "featureId": "FEAT_CHERRY_CT",
+        "name": "通常時チェリー成立時のチャンスタイム移行率",
+        "reason": "推測計算に採用しています。",
+        "requiredTrials": {
+          "value": 466,
+          "unit": "通常時チェリー成立"
+        }
+      },
+      {
+        "featureId": "FEAT_WATERMELON_CT",
+        "name": "通常時スイカ成立時のチャンスタイム移行率",
+        "reason": "推測計算に採用しています。",
+        "requiredTrials": {
+          "value": 272,
+          "unit": "通常時スイカ成立"
+        }
+      }
+    ],
+    "rejected": [
+      {
+        "featureId": "FEAT_CHERRY_REG",
+        "name": "チェリー＋REG",
+        "reason": "推測計算には使用していません。",
+        "requiredTrials": {
+          "value": 20891,
+          "unit": "ゲーム"
+        }
+      },
+      {
+        "featureId": "FEAT_COMMON_BELL_REG",
+        "name": "共通ベル＋REG",
+        "reason": "推測計算には使用していません。",
+        "requiredTrials": {
+          "value": 87484,
+          "unit": "ゲーム"
+        }
+      },
+      {
+        "featureId": "FEAT_WATERMELONB_FBIG",
+        "name": "スイカB＋F揃いBIG",
+        "reason": "推測計算には使用していません。",
+        "requiredTrials": {
+          "value": 287990,
+          "unit": "ゲーム"
+        }
+      }
+    ]
+  },
+  "reliability": {},
+  "metadata": {
+    "machineId": "S_FAMISTA_KAIDO_FB",
+    "displayName": "ファミスタ回胴版!!",
+    "settings": [
+      "SET_1",
+      "SET_2",
+      "SET_5",
+      "SET_6"
+    ]
+  },
+  "validation": {
+    "cases": []
+  },
+  "statistics": {}
+}

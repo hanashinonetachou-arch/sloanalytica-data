@@ -1,0 +1,28 @@
+{
+  "schemaVersion":"machine-observation-data-v2",
+  "machineId":"S_SENGOKU_KOIHIME_FC",
+  "displayName":"パチスロ 戦国†恋姫",
+  "provisionalRegistrationId":null,
+  "registrationId":null,
+  "releaseDate":"2023-07-18",
+  "researchedAt":"2026-08-24",
+  "sources":[{"sourceId":"OBS_SRC_PWORLD","publisher":"P-WORLD","title":"パチスロ 戦国†恋姫","url":"https://www.p-world.co.jp/machine/database/9854","checkedAt":"2026-08-24","sourceType":"major_analysis"}],
+  "sourceCoverage":{"machineMenu":"UNRESOLVED","dataCounter":"UNRESOLVED","linkedService":"UNRESOLVED","directPlay":"FOUND","endEvent":"FOUND","seatedState":"UNRESOLVED"},
+  "observations":[
+    {"observationId":"OBS_KOIHIME_NORMAL_GAMES","sourceType":"DIRECT_PLAY","observationMode":"MANUAL_COUNTER","status":"FOUND","label":"通常ゲーム数","categories":["SELF_PLAY"],"timing":["実戦中"],"excludedConditions":["ボーナス中"],"sourceRefs":["OBS_SRC_PWORLD"],"notes":"ボーナス構成・スイカの共通分母。"},
+    {"observationId":"OBS_KOIHIME_BIG_REG","sourceType":"DIRECT_PLAY","observationMode":"MANUAL_COUNTER","status":"FOUND","label":"BIG・REG","categories":["SELF_PLAY"],"timing":["ボーナス成立時"],"excludedConditions":[],"sourceRefs":["OBS_SRC_PWORLD"],"notes":"BIG/REGを直接記録し、合算は入力しない。"},
+    {"observationId":"OBS_KOIHIME_WATERMELON","sourceType":"DIRECT_PLAY","observationMode":"MANUAL_COUNTER","status":"FOUND","label":"スイカ","categories":["SELF_PLAY"],"timing":["通常時"],"excludedConditions":["ボーナス中"],"sourceRefs":["OBS_SRC_PWORLD"],"notes":"スイカ成立ごとに記録。"},
+    {"observationId":"OBS_KOIHIME_TRIGGER_CHECK","sourceType":"DIRECT_PLAY","observationMode":"VISUAL_EVENT","status":"FOUND","label":"ボーナス当選契機PUSH確認","categories":["OBSERVATION_ONLY"],"timing":["ボーナス図柄入賞時"],"excludedConditions":[],"sourceRefs":["OBS_SRC_PWORLD"],"notes":"PUSHボタン色で当選契機を判別できるが、現行Inferenceでは重複回避のため直接利用しない。"},
+    {"observationId":"OBS_KOIHIME_END_EVIDENCE","sourceType":"END_EVENT","observationMode":"VISUAL_EVENT","status":"FOUND","label":"BIG/REG終了画面","categories":["END_EVENT","EVIDENCE"],"timing":["BIG終了時","REG終了時"],"excludedConditions":[],"sourceRefs":["OBS_SRC_PWORLD"],"notes":"下限・確定パターン発生時にEvidenceとして記録。"}
+  ],
+  "featureMappings":[
+    {"featureId":"FEAT_BONUS_OUTCOME","mappingType":"COMBINABLE","observationIds":["OBS_KOIHIME_NORMAL_GAMES","OBS_KOIHIME_BIG_REG"],"collectionMethods":["MANUAL_COUNTER","MANUAL_COUNTER"],"usableForInference":true,"usableForDifficulty":true,"notes":"BIG/REG/その他のMultinomial。"},
+    {"featureId":"FEAT_WATERMELON","mappingType":"COMBINABLE","observationIds":["OBS_KOIHIME_NORMAL_GAMES","OBS_KOIHIME_WATERMELON"],"collectionMethods":["MANUAL_COUNTER","MANUAL_COUNTER"],"usableForInference":true,"usableForDifficulty":true,"notes":"高頻度小役。"}
+  ],
+  "researchReopenRequests":[],
+  "fieldVerificationItems":[
+    {"verificationId":"VERIFY_KOIHIME_MENU","status":"WAITING_FOR_MACHINE","sourceType":"MACHINE_MENU","priority":"MEDIUM","question":"実機メニュー/履歴に通常G・BIG・REG・小役累計が表示されるか。","uiImpact":"MEDIUM","notes":"取得できれば入力省力化。"},
+    {"verificationId":"VERIFY_KOIHIME_LINKED","status":"WAITING_FOR_MACHINE","sourceType":"LINKED_SERVICE","priority":"LOW","question":"実機連動機能の有無と具体的取得項目を確認する。","uiImpact":"LOW","notes":"公開情報で確定できず。"},
+    {"verificationId":"VERIFY_KOIHIME_SEATED","status":"WAITING_FOR_MACHINE","sourceType":"SEATED_STATE","priority":"MEDIUM","question":"着席時に前任者区間の通常G・BIG・REGを正しい定義で取得できるか。","uiImpact":"MEDIUM","notes":"取得できればAタイプ寄りの前任者データ活用を検討可能。"}
+  ]
+}

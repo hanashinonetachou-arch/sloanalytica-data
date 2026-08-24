@@ -1,0 +1,28 @@
+{
+  "schemaVersion":"machine-observation-data-v2",
+  "machineId":"S_NIGHTS_YTCC",
+  "displayName":"パチスロナイツ",
+  "provisionalRegistrationId":null,
+  "registrationId":null,
+  "releaseDate":"2023-07-03",
+  "researchedAt":"2026-08-24",
+  "sources":[
+    {"sourceId":"OBS_SRC_P7","publisher":"パチ7","title":"パチスロナイツ リーチ目詳細","url":"https://pachiseven.jp/machines/6777/cutout/1008","checkedAt":"2026-08-24","sourceType":"major_analysis"},
+    {"sourceId":"OBS_SRC_1GEKI","publisher":"一撃","title":"パチスロナイツ 解析攻略","url":"https://1geki.jp/slot/s_pachisuro_nights/","checkedAt":"2026-08-24","sourceType":"major_analysis"}
+  ],
+  "sourceCoverage":{"machineMenu":"UNRESOLVED","dataCounter":"UNRESOLVED","linkedService":"UNRESOLVED","directPlay":"FOUND","endEvent":"FOUND","seatedState":"UNRESOLVED"},
+  "observations":[
+    {"observationId":"OBS_NIGHTS_NORMAL_GAMES","sourceType":"DIRECT_PLAY","observationMode":"MANUAL_COUNTER","status":"FOUND","label":"通常ゲーム数","categories":["SELF_PLAY"],"timing":["実戦中"],"excludedConditions":["ボーナス中"],"sourceRefs":["OBS_SRC_1GEKI"],"notes":"リーチ目フラグA〜Fの共通分母。"},
+    {"observationId":"OBS_NIGHTS_REACH_FLAGS","sourceType":"DIRECT_PLAY","observationMode":"MANUAL_COUNTER","status":"FOUND","label":"当選契機リーチ目フラグA〜F","categories":["SELF_PLAY"],"timing":["ボーナス中"],"excludedConditions":[],"sourceRefs":["OBS_SRC_P7","OBS_SRC_1GEKI"],"notes":"ボーナス中にPUSHすると成立フラグ・停止出目・成立ゲームを確認できるため、A〜Fのみ各1回記録する。"},
+    {"observationId":"OBS_NIGHTS_END_EVIDENCE","sourceType":"END_EVENT","observationMode":"VISUAL_EVENT","status":"FOUND","label":"ボーナス終了画面・パネルフラッシュ・クレオフ音・ケロットトロフィー","categories":["END_EVENT","EVIDENCE"],"timing":["ボーナス終了時"],"excludedConditions":[],"sourceRefs":["OBS_SRC_P7"],"notes":"画面単体と追加演出の組み合わせを混同せず、該当Evidenceとして記録する。"}
+  ],
+  "featureMappings":[
+    {"featureId":"FEAT_REACH_FLAG_OUTCOME","mappingType":"COMBINABLE","observationIds":["OBS_NIGHTS_NORMAL_GAMES","OBS_NIGHTS_REACH_FLAGS"],"collectionMethods":["MANUAL_COUNTER","MANUAL_COUNTER"],"usableForInference":true,"usableForDifficulty":true,"notes":"A〜Fを明示カテゴリ、それ以外の通常ゲームをOTHERとしてMultinomial化。"}
+  ],
+  "researchReopenRequests":[],
+  "fieldVerificationItems":[
+    {"verificationId":"VERIFY_NIGHTS_MENU","status":"WAITING_FOR_MACHINE","sourceType":"MACHINE_MENU","priority":"LOW","question":"実機メニュー/履歴から通常Gやボーナス履歴を取得できるか。","uiImpact":"LOW","notes":"A〜Fはボーナス中PUSHで取得できるため現行UIは成立。"},
+    {"verificationId":"VERIFY_NIGHTS_LINKED","status":"WAITING_FOR_MACHINE","sourceType":"LINKED_SERVICE","priority":"LOW","question":"旧実機連動機能の有無と具体的取得項目を確認する。","uiImpact":"LOW","notes":"公開情報で具体項目を確定できず。"},
+    {"verificationId":"VERIFY_NIGHTS_SEATED","status":"WAITING_FOR_MACHINE","sourceType":"SEATED_STATE","priority":"LOW","question":"着席前区間についてA〜Fの成立内訳を取得できる手段があるか。","uiImpact":"LOW","notes":"取得できない限り前任者ボーナス合算を同じFeatureには使わない。"}
+  ]
+}

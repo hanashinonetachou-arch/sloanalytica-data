@@ -1,0 +1,30 @@
+{
+  "schemaVersion":"selection-data-v1",
+  "machineId":"L_SHIN_IKKITOUSEN_V",
+  "machineDataVersion":"0.1.0",
+  "uiCategoryLabels":{"PLAY":"遊技情報","ROLE":"小役","AT":"AT","EVIDENCE":"設定示唆"},
+  "inputs":[
+    {"id":"INP_NORMAL_GAMES","name":"通常ゲーム数","type":"integer","category":"PLAY","unit":"G","displayOrder":1,"inferenceRole":"INCLUDE_PRIMARY","uiQuickAdd":[50,100]},
+    {"id":"INP_COMMON_BELL","name":"1枚or11枚ベル","type":"counter","category":"ROLE","unit":"回","displayOrder":2,"inferenceRole":"INCLUDE_PRIMARY"},
+    {"id":"INP_AT_FIRST_HIT","name":"AT初当り","type":"counter","category":"AT","unit":"回","displayOrder":3,"inferenceRole":"INCLUDE_PRIMARY"}
+  ],
+  "features":[
+    {"researchFeatureId":"RF_COMMON_BELL","featureId":"FEAT_COMMON_BELL","adoptionCategory":"INCLUDE_PRIMARY","numeratorInputId":"INP_COMMON_BELL","denominatorInputId":"INP_NORMAL_GAMES","minimumSample":300,"sampleRecommendation":3000,"difficultyExposure":{"mode":"per_game","factor":1,"quality":"EXACT"},"userReason":"設定差は小さいものの約1/5で出現し、実戦中に多くの試行を集められます。"},
+    {"researchFeatureId":"RF_AT_FIRST","featureId":"FEAT_AT_FIRST_HIT","adoptionCategory":"INCLUDE_PRIMARY","numeratorInputId":"INP_AT_FIRST_HIT","denominatorInputId":"INP_NORMAL_GAMES","minimumSample":500,"sampleRecommendation":5000,"difficultyExposure":{"mode":"per_game","factor":1,"quality":"EXACT"}},
+    {"researchFeatureId":"RF_CZ_FIRST","featureId":"FEAT_CZ_FIRST","adoptionCategory":"EXCLUDE","internalReason":"闘士決戦はAT初当りの主要生成経路で、両者を独立Featureとして加えるとCZを引けた情報を重ねて評価する。","userFacingReason":"AT初当りと重複。"},
+    {"researchFeatureId":"RF_MODE","featureId":"FEAT_MODE","adoptionCategory":"EXCLUDE","internalReason":"内部モードは実戦中に確定観測できず、示唆からの推定状態を尤度入力にすると誤分類が大きい。","userFacingReason":"状態を正確に判別できない。"}
+  ],
+  "evidence":[],
+  "evidenceUi":{"groups":[
+    {"groupId":"EV_RUSH_END","label":"RUSH終了画面","options":[
+      {"value":"SET2PLUS","label":"孔明","allowedSettings":["SET_2","SET_3","SET_4","SET_5","SET_6"],"excludedSettings":["SET_1"],"sourceEvidenceIds":["RE_END_2PLUS"]},
+      {"value":"SET3PLUS","label":"呂布","allowedSettings":["SET_3","SET_4","SET_5","SET_6"],"excludedSettings":["SET_1","SET_2"],"sourceEvidenceIds":["RE_END_3PLUS"]},
+      {"value":"SET4PLUS","label":"成都学園","allowedSettings":["SET_4","SET_5","SET_6"],"excludedSettings":["SET_1","SET_2","SET_3"],"sourceEvidenceIds":["RE_END_4PLUS"]},
+      {"value":"SET5PLUS","label":"vs大和学院","allowedSettings":["SET_5","SET_6"],"excludedSettings":["SET_1","SET_2","SET_3","SET_4"],"sourceEvidenceIds":["RE_END_5PLUS"]},
+      {"value":"SET6","label":"ウェディング","allowedSettings":["SET_6"],"excludedSettings":["SET_1","SET_2","SET_3","SET_4","SET_5"],"sourceEvidenceIds":["RE_END_6"]},
+      {"value":"SET246","label":"関羽&孫策","allowedSettings":["SET_2","SET_4","SET_6"],"excludedSettings":["SET_1","SET_3","SET_5"],"sourceEvidenceIds":["RE_END_246"]}
+    ]}
+  ]},
+  "difficultyAnalysis":{"targetGameBasis":{"basisId":"NORMAL_GAMES","label":"通常ゲーム","quality":"EXACT"},"calibrationAllowedExposureQualities":["EXACT","DERIVED"]},
+  "selectionNotes":["高頻度の共通ベルはAT初当りとは別系統の観測として併用する。","CZ初当りはAT初当りと重複するため現行Inferenceから除外する。"]
+}

@@ -1,0 +1,32 @@
+{
+  "schemaVersion":"machine-observation-data-v2",
+  "machineId":"L_KYOUKARA_OREHA_FE",
+  "displayName":"今日から俺は!!　パチスロ編",
+  "provisionalRegistrationId":null,
+  "registrationId":null,
+  "releaseDate":"2024-10-07",
+  "researchedAt":"2026-08-24",
+  "sources":[
+    {"sourceId":"OBS_SRC_KONAMI","publisher":"コナミアミューズメント","title":"パチンコ・パチスロ 製品一覧","url":"https://www.konami.com/amusement/psm/ps/","checkedAt":"2026-08-24","sourceType":"manufacturer"},
+    {"sourceId":"OBS_SRC_P7","publisher":"パチ7","title":"今日から俺は!! パチスロ編 設定差","url":"https://pachiseven.jp/machines/7003/cutout/4","checkedAt":"2026-08-24","sourceType":"major_analysis"},
+    {"sourceId":"OBS_SRC_NANA","publisher":"なな徹","title":"今日から俺は!! 設定判別","url":"https://nana-press.com/kaiseki/machine/810/24830/","checkedAt":"2026-08-24","sourceType":"major_analysis"}
+  ],
+  "sourceCoverage":{"machineMenu":"UNRESOLVED","dataCounter":"UNRESOLVED","linkedService":"FOUND","directPlay":"FOUND","endEvent":"FOUND","seatedState":"UNRESOLVED"},
+  "observations":[
+    {"observationId":"OBS_KYOUKARA_NORMAL_GAMES","sourceType":"DIRECT_PLAY","observationMode":"MANUAL_COUNTER","status":"FOUND","label":"通常ゲーム数","categories":["SELF_PLAY"],"timing":["実戦中"],"excludedConditions":["ボーナス中","CZ中"],"sourceRefs":["OBS_SRC_P7"],"notes":"BIG/REG・スイカの共通分母。"},
+    {"observationId":"OBS_KYOUKARA_BIG_REG","sourceType":"DIRECT_PLAY","observationMode":"MANUAL_COUNTER","status":"FOUND","label":"BIG・REG","categories":["SELF_PLAY"],"timing":["ボーナス初当り時"],"excludedConditions":["ボーナス1G連で公開初当り定義に含まれないもの"],"sourceRefs":["OBS_SRC_P7"],"notes":"公開初当り定義に合わせてBIG/REGを個別記録する。"},
+    {"observationId":"OBS_KYOUKARA_WATERMELON","sourceType":"DIRECT_PLAY","observationMode":"MANUAL_COUNTER","status":"FOUND","label":"スイカ","categories":["SELF_PLAY"],"timing":["通常時"],"excludedConditions":["ボーナス中","CZ中"],"sourceRefs":["OBS_SRC_P7"],"notes":"通常時のスイカを直接カウント。"},
+    {"observationId":"OBS_KYOUKARA_LINKED","sourceType":"LINKED_SERVICE","observationMode":"LINKED_SERVICE_READ","status":"FOUND","label":"実機連動機能","categories":["INPUT_ASSIST"],"timing":["遊技中","終了時"],"excludedConditions":[],"sourceRefs":["OBS_SRC_KONAMI"],"notes":"コナミ公式で実機連動対応を確認。BIG/REG・通常G・スイカ等の具体的取得項目は公開確認できず。"},
+    {"observationId":"OBS_KYOUKARA_EVIDENCE","sourceType":"END_EVENT","observationMode":"VISUAL_EVENT","status":"FOUND","label":"CZ終了画面・REGキャラ・BIG終了画面","categories":["END_EVENT","EVIDENCE"],"timing":["CZ終了時","REG中","BIG終了時"],"excludedConditions":[],"sourceRefs":["OBS_SRC_NANA"],"notes":"下限・確定パターン発生時に記録する。"}
+  ],
+  "featureMappings":[
+    {"featureId":"FEAT_BONUS_OUTCOME","mappingType":"COMBINABLE","observationIds":["OBS_KYOUKARA_NORMAL_GAMES","OBS_KYOUKARA_BIG_REG"],"collectionMethods":["MANUAL_COUNTER","MANUAL_COUNTER"],"usableForInference":true,"usableForDifficulty":true,"notes":"BIG/REG/その他のMultinomial。"},
+    {"featureId":"FEAT_WATERMELON","mappingType":"COMBINABLE","observationIds":["OBS_KYOUKARA_NORMAL_GAMES","OBS_KYOUKARA_WATERMELON"],"collectionMethods":["MANUAL_COUNTER","MANUAL_COUNTER"],"usableForInference":true,"usableForDifficulty":true,"notes":"通常時スイカ。"}
+  ],
+  "researchReopenRequests":[],
+  "fieldVerificationItems":[
+    {"verificationId":"VERIFY_KYOUKARA_LINKED_FIELDS","status":"WAITING_FOR_MACHINE","sourceType":"LINKED_SERVICE","priority":"MEDIUM","question":"実機連動機能で通常ゲーム数・BIG・REG・スイカ等の具体的項目を取得できるか。","uiImpact":"MEDIUM","notes":"サービス対応自体は公式確認済み。"},
+    {"verificationId":"VERIFY_KYOUKARA_MENU","status":"WAITING_FOR_MACHINE","sourceType":"MACHINE_MENU","priority":"MEDIUM","question":"通常メニュー/遊技履歴に通常G・BIG・REG等の累計値が表示されるか。","uiImpact":"MEDIUM","notes":"着席時データ活用にも関係。"},
+    {"verificationId":"VERIFY_KYOUKARA_SEATED","status":"WAITING_FOR_MACHINE","sourceType":"SEATED_STATE","priority":"MEDIUM","question":"着席時の通常G・BIG・REGが公開初当り定義と一致して前任者Inferenceへ使えるか。","uiImpact":"MEDIUM","notes":"現段階では前任者区間を推測へ混ぜない。"}
+  ]
+}

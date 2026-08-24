@@ -1,0 +1,27 @@
+{
+  "schemaVersion":"machine-observation-data-v2",
+  "machineId":"S_SUPER_BINGO_NEO_CLASSIC_HH1",
+  "displayName":"スーパービンゴネオクラシック",
+  "provisionalRegistrationId":null,
+  "registrationId":null,
+  "releaseDate":"2023-08-07",
+  "researchedAt":"2026-08-24",
+  "sources":[{"sourceId":"OBS_SRC_PWORLD","publisher":"P-WORLD","title":"スーパービンゴネオクラシック","url":"https://www.p-world.co.jp/machine/database/9860","checkedAt":"2026-08-24","sourceType":"major_analysis"}],
+  "sourceCoverage":{"machineMenu":"UNRESOLVED","dataCounter":"UNRESOLVED","linkedService":"CHECKED_NONE","directPlay":"FOUND","endEvent":"CHECKED_NONE","seatedState":"UNRESOLVED"},
+  "observations":[
+    {"observationId":"OBS_BINGO_NORMAL_GAMES","sourceType":"DIRECT_PLAY","observationMode":"MANUAL_COUNTER","status":"FOUND","label":"通常ゲーム数","categories":["SELF_PLAY"],"timing":["実戦中"],"excludedConditions":["BC中"],"sourceRefs":["OBS_SRC_PWORLD"],"notes":"BC初当りFallback用。BC中を含めない通常ゲーム数。"},
+    {"observationId":"OBS_BINGO_BC_FIRST_HIT","sourceType":"DIRECT_PLAY","observationMode":"MANUAL_COUNTER","status":"FOUND","label":"BC初当り","categories":["SELF_PLAY"],"timing":["BC初当り時"],"excludedConditions":["BC継続"],"sourceRefs":["OBS_SRC_PWORLD"],"notes":"初当りのみ記録する。"},
+    {"observationId":"OBS_BINGO_FIRST_CYCLE","sourceType":"DIRECT_PLAY","observationMode":"MANUAL_COUNTER","status":"FOUND","label":"BC後初回デジ周期到達とBC当選","categories":["SELF_PLAY"],"timing":["BC後初回デジ周期到達時"],"excludedConditions":[],"sourceRefs":["OBS_SRC_PWORLD"],"notes":"初回周期到達を分母、その周期契機のBC当選を分子として記録。"},
+    {"observationId":"OBS_BINGO_LATER_CYCLE","sourceType":"DIRECT_PLAY","observationMode":"MANUAL_COUNTER","status":"FOUND","label":"2回目以降デジ周期到達とBC当選","categories":["SELF_PLAY"],"timing":["2回目以降デジ周期到達時"],"excludedConditions":[],"sourceRefs":["OBS_SRC_PWORLD"],"notes":"初回と混ぜない。"}
+  ],
+  "featureMappings":[
+    {"featureId":"FEAT_CYCLE_FIRST","mappingType":"EXACT","observationIds":["OBS_BINGO_FIRST_CYCLE"],"collectionMethods":["MANUAL_COUNTER"],"usableForInference":true,"usableForDifficulty":false,"notes":"詳細周期入力。"},
+    {"featureId":"FEAT_CYCLE_LATER","mappingType":"EXACT","observationIds":["OBS_BINGO_LATER_CYCLE"],"collectionMethods":["MANUAL_COUNTER"],"usableForInference":true,"usableForDifficulty":false,"notes":"詳細周期入力。"},
+    {"featureId":"FEAT_BC_FIRST_HIT","mappingType":"COMBINABLE","observationIds":["OBS_BINGO_NORMAL_GAMES","OBS_BINGO_BC_FIRST_HIT"],"collectionMethods":["MANUAL_COUNTER","MANUAL_COUNTER"],"usableForInference":true,"usableForDifficulty":true,"notes":"周期詳細がない場合のFallback。"}
+  ],
+  "researchReopenRequests":[],
+  "fieldVerificationItems":[
+    {"verificationId":"VERIFY_BINGO_MENU_CYCLE","status":"WAITING_FOR_MACHINE","sourceType":"MACHINE_MENU","priority":"MEDIUM","question":"筐体メニュー/履歴からデジ周期到達回数やBC初当り回数を取得できるか。","uiImpact":"MEDIUM","notes":"取得できれば手動カウント負荷を軽減できる。"},
+    {"verificationId":"VERIFY_BINGO_SEATED","status":"WAITING_FOR_MACHINE","sourceType":"SEATED_STATE","priority":"LOW","question":"着席時に前任者区間のBC初当りと正しい通常ゲーム分母を取得できるか。","uiImpact":"LOW","notes":"現時点では前任者データをInferenceへ入れない。"}
+  ]
+}

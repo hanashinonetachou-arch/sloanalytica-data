@@ -1,0 +1,38 @@
+{
+  "schemaVersion":"selection-data-v1",
+  "machineId":"L_ONIMUSHA3_XA",
+  "machineDataVersion":"0.1.0",
+  "uiCategoryLabels":{"PLAY":"遊技情報","POINT":"ポイント百鬼","AT":"AT","EVIDENCE":"設定示唆"},
+  "inputs":[
+    {"id":"INP_NORMAL_GAMES","name":"通常ゲーム数","type":"integer","category":"PLAY","unit":"G","displayOrder":1,"inferenceRole":"INCLUDE_FALLBACK","uiQuickAdd":[50,100]},
+    {"id":"INP_POINT_100","name":"100pt","type":"counter","category":"POINT","unit":"回","displayOrder":2,"inferenceRole":"INCLUDE_PRIMARY"},
+    {"id":"INP_POINT_200","name":"200pt","type":"counter","category":"POINT","unit":"回","displayOrder":3,"inferenceRole":"INCLUDE_PRIMARY"},
+    {"id":"INP_POINT_300","name":"300pt","type":"counter","category":"POINT","unit":"回","displayOrder":4,"inferenceRole":"INCLUDE_PRIMARY"},
+    {"id":"INP_POINT_400","name":"400pt","type":"counter","category":"POINT","unit":"回","displayOrder":5,"inferenceRole":"INCLUDE_PRIMARY"},
+    {"id":"INP_POINT_500","name":"500pt","type":"counter","category":"POINT","unit":"回","displayOrder":6,"inferenceRole":"INCLUDE_PRIMARY"},
+    {"id":"INP_AT_FIRST_HIT","name":"AT初当り","type":"counter","category":"AT","unit":"回","displayOrder":7,"inferenceRole":"INCLUDE_FALLBACK"}
+  ],
+  "features":[
+    {"researchFeatureId":"RF_POINT_HYAKKI_THRESHOLD","featureId":"FEAT_POINT_HYAKKI_THRESHOLD","adoptionCategory":"INCLUDE_PRIMARY","numeratorInputId":"INP_POINT_100","categoryInputIds":["INP_POINT_200","INP_POINT_300","INP_POINT_400"],"denominatorInputIds":["INP_POINT_100","INP_POINT_200","INP_POINT_300","INP_POINT_400","INP_POINT_500"],"inputTransform":"sum_inputs_to_trials","residualCategoryLabel":"500PT","minimumSample":5,"sampleRecommendation":30,"userReason":"ポイント百鬼に入った規定ポイントの構成を一体評価します。500ptは公開値の丸め誤差を避けるため残差カテゴリとして扱います。AT初当りとは同時加算しません。"},
+    {"researchFeatureId":"RF_AT_FIRST","featureId":"FEAT_AT_FIRST_HIT","adoptionCategory":"INCLUDE_FALLBACK","numeratorInputId":"INP_AT_FIRST_HIT","denominatorInputId":"INP_NORMAL_GAMES","minimumSample":500,"sampleRecommendation":5000,"suppressedByFeatureIds":["FEAT_POINT_HYAKKI_THRESHOLD"],"difficultyExposure":{"mode":"per_game","factor":1,"quality":"EXACT"}},
+    {"researchFeatureId":"RF_INTERNAL_STATE","featureId":"FEAT_INTERNAL_STATE","adoptionCategory":"EXCLUDE","internalReason":"設定差はあるが内部の通常・高確・超高確を実戦中に確定観測できず、見た目の状態で分類すると誤入力リスクが高い。","userFacingReason":"状態を正確に判別できない。"}
+  ],
+  "evidence":[],
+  "evidenceUi":{"groups":[
+    {"groupId":"EV_BIG_END","label":"BIG・スーパーBIG終了画面","options":[
+      {"value":"SET246","label":"ミシェル（特殊）","allowedSettings":["SET_2","SET_4","SET_6"],"excludedSettings":["SET_1","SET_3","SET_5"],"sourceEvidenceIds":["RE_BIG_246"]},
+      {"value":"SET2PLUS","label":"ギルデンスタン&ベガドンナ&蘭丸","allowedSettings":["SET_2","SET_3","SET_4","SET_5","SET_6"],"excludedSettings":["SET_1"],"sourceEvidenceIds":["RE_BIG_2PLUS"]},
+      {"value":"SET4PLUS","label":"信長&幻魔王 信長","allowedSettings":["SET_4","SET_5","SET_6"],"excludedSettings":["SET_1","SET_2","SET_3"],"sourceEvidenceIds":["RE_BIG_4PLUS"]},
+      {"value":"SET5PLUS","label":"味方集合","allowedSettings":["SET_5","SET_6"],"excludedSettings":["SET_1","SET_2","SET_3","SET_4"],"sourceEvidenceIds":["RE_BIG_5PLUS"]},
+      {"value":"SET6","label":"エンタライオン","allowedSettings":["SET_6"],"excludedSettings":["SET_1","SET_2","SET_3","SET_4","SET_5"],"sourceEvidenceIds":["RE_BIG_6"]}
+    ]},
+    {"groupId":"EV_REG_CHAR","label":"REG中 4人目キャラ","options":[
+      {"value":"SET2PLUS","label":"ガルガント","allowedSettings":["SET_2","SET_3","SET_4","SET_5","SET_6"],"excludedSettings":["SET_1"],"sourceEvidenceIds":["RE_REG_2PLUS"]},
+      {"value":"SET4PLUS","label":"幻魔王 信長","allowedSettings":["SET_4","SET_5","SET_6"],"excludedSettings":["SET_1","SET_2","SET_3"],"sourceEvidenceIds":["RE_REG_4PLUS"]},
+      {"value":"SET5PLUS","label":"ミシェル（特殊）","allowedSettings":["SET_5","SET_6"],"excludedSettings":["SET_1","SET_2","SET_3","SET_4"],"sourceEvidenceIds":["RE_REG_5PLUS"]},
+      {"value":"SET6","label":"エンタライオン","allowedSettings":["SET_6"],"excludedSettings":["SET_1","SET_2","SET_3","SET_4","SET_5"],"sourceEvidenceIds":["RE_REG_6"]}
+    ]}
+  ]},
+  "difficultyAnalysis":{"targetGameBasis":{"basisId":"NORMAL_GAMES","label":"通常ゲーム","quality":"EXACT"},"calibrationAllowedExposureQualities":["EXACT","DERIVED"]},
+  "selectionNotes":["ポイント百鬼の詳細データがある場合はAT初当りをsuppressionし、同じ初当り生成過程を二重評価しない。","ポイント百鬼の1試行あたりゲーム数を安全にDifficultyへ換算できないため、詳細Featureは現段階でDifficulty exposureを設定しない。"]
+}
