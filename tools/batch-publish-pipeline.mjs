@@ -8,6 +8,7 @@ const CATALOG = path.join(ROOT, "catalog.json");
 const DIFFICULTY_CATALOG = path.join(ROOT, "difficulty-catalog.json");
 const MACHINE_REGISTRY = path.join(ROOT, "machine-registry.json");
 const MAX_BATCH = 10;
+const PROTOTYPE_BRANCH = "prototype-multi-machine";
 
 export function validMachineId(id) {
   return typeof id === "string" && /^[A-Z0-9_]+$/.test(id);
@@ -54,6 +55,22 @@ export function publishApplyArgs(id) {
   return ["publish", id, "--apply", "--defer-audit"];
 }
 
+export function machinePackageIdFromPath(filePath) {
+  const normalized = String(filePath ?? "").trim().replaceAll("\\", "/");
+  const match = /^machines\/([^/]+)\/machine-package\.json$/.exec(normalized);
+  return match?.[1] ?? null;
+}
+
+export function unexpectedMachinePackageIds(paths, targetIds) {
+  const targets = new Set(targetIds);
+  const unexpected = new Set();
+  for (const filePath of paths) {
+    const id = machinePackageIdFromPath(filePath);
+    if (id && !targets.has(id)) unexpected.add(id);
+  }
+  return [...unexpected].sort();
+}
+
 function readMachineIdsFromFile(file) {
   const p = path.resolve(file);
   if (!fs.existsSync(p)) throw new Error(`batch file not found: ${p}`);
@@ -80,6 +97,17 @@ function run(command, args, { allowFailure = false } = {}) {
   return r;
 }
 
+function runCapture(command, args, { allowFailure = false } = {}) {
+  const r = spawnSync(command, args, { cwd: ROOT, encoding: "utf8", stdio: "pipe" });
+  if (r.error) {
+    throw new Error(`${path.basename(command)} ${args.join(" ")} failed to start: ${r.error.message}`);
+  }
+  if (!allowFailure && r.status !== 0) {
+    throw new Error(`${path.basename(command)} ${args.join(" ")} failed with exit ${r.status}: ${(r.stderr || "").trim()}`);
+  }
+  return r;
+}
+
 function runNode(script, args = []) {
   return run(process.execPath, [path.join(ROOT, "tools", script), ...args]);
 }
@@ -87,6 +115,50 @@ function runNode(script, args = []) {
 function runNpm(args) {
   const spec = npmSpawnSpec(args);
   return run(spec.command, spec.args);
+}
+
+function gitLines(args, { allowFailure = false } = {}) {
+  const r = runCapture("git", args, { allowFailure });
+  if (r.status !== 0) return null;
+  return String(r.stdout ?? "").split(/\r?\n/).map(x => x.trim()).filter(Boolean);
+}
+
+function currentBranch() {
+  return gitLines(["rev-parse", "--abbrev-ref", "HEAD"])?.[0] ?? null;
+}
+
+function resolvePrototypeMergeBase() {
+  if (currentBranch() === PROTOTYPE_BRANCH) return null;
+  for (const ref of [`origin/${PROTOTYPE_BRANCH}`, PROTOTYPE_BRANCH]) {
+    const lines = gitLines(["merge-base", "HEAD", ref], { allowFailure: true });
+    if (lines?.[0]) return lines[0];
+  }
+  throw new Error(`batch safety: ${PROTOTYPE_BRANCH} とのmerge-baseを解決できません。fetch/pull後に再実行してください。`);
+}
+
+function changedMachinePackagePaths() {
+  const paths = new Set();
+  const baseline = resolvePrototypeMergeBase();
+  const commands = [];
+  if (baseline) commands.push(["diff", "--name-only", `${baseline}...HEAD`, "--", "machines"]);
+  commands.push(
+    ["diff", "--name-only", "--cached", "--", "machines"],
+    ["diff", "--name-only", "--", "machines"],
+    ["ls-files", "--others", "--exclude-standard", "--", "machines"],
+  );
+  for (const args of commands) {
+    for (const filePath of gitLines(args) ?? []) paths.add(filePath);
+  }
+  return [...paths];
+}
+
+function verifyBatchMachineScope(ids) {
+  const unexpected = unexpectedMachinePackageIds(changedMachinePackagePaths(), ids);
+  if (!unexpected.length) return;
+  throw new Error(
+    `batch safety BLOCK: Batch対象外のmachine-package.json差分を検出しました: ${unexpected.join(", ")}。` +
+    ` 対象外MachineDataを復元するか、意図した対象ならBatch IDへ明示追加してください。`,
+  );
 }
 
 function snapshotFile(p) {
@@ -102,10 +174,41 @@ function restoreFile(p, bytes) {
   fs.writeFileSync(p, bytes);
 }
 
-function cleanupBuild(ids) {
+function snapshotDirectory(dir) {
+  if (!fs.existsSync(dir)) return null;
+  const files = new Map();
+  const walk = current => {
+    for (const entry of fs.readdirSync(current, { withFileTypes: true })) {
+      const absolute = path.join(current, entry.name);
+      if (entry.isDirectory()) {
+        walk(absolute);
+      } else if (entry.isFile()) {
+        files.set(path.relative(dir, absolute), fs.readFileSync(absolute));
+      }
+    }
+  };
+  walk(dir);
+  return files;
+}
+
+function restoreDirectory(dir, snapshot) {
+  if (fs.existsSync(dir)) fs.rmSync(dir, { recursive: true, force: true });
+  if (snapshot === null) return;
+  fs.mkdirSync(dir, { recursive: true });
+  for (const [relative, bytes] of snapshot) {
+    const destination = path.join(dir, relative);
+    fs.mkdirSync(path.dirname(destination), { recursive: true });
+    fs.writeFileSync(destination, bytes);
+  }
+}
+
+function snapshotBuild(ids) {
+  return new Map(ids.map(id => [id, snapshotDirectory(path.join(ROOT, "build", id))]));
+}
+
+function restoreBuild(ids, snapshots) {
   for (const id of ids) {
-    const p = path.join(ROOT, "build", id);
-    if (fs.existsSync(p)) fs.rmSync(p, { recursive: true, force: true });
+    restoreDirectory(path.join(ROOT, "build", id), snapshots.get(id) ?? null);
   }
 }
 
@@ -182,9 +285,10 @@ Default:
 
 Safety:
   - Maximum 10 unique machineIds.
+  - Before publish, committed/staged/unstaged/untracked machines/*/machine-package.json changes are checked against the requested Batch IDs. Any out-of-scope MachineData change BLOCKS the batch.
   - Existing single-machine fixed-SHA approval/publish contract is reused.
   - Full-repository audit is intentionally deferred until all target catalog SHAs are updated.
-  - build/<MACHINE_ID>/ approval artifacts are removed by default after the run.
+  - build/<MACHINE_ID>/ is restored to its exact pre-run state by default; tracked artifacts are never deleted as cleanup.
   - Publish approval is still explicit: --apply is required for tracked public-data mutation.
   - Use --keep-build only when approval artifacts are needed for debugging.`);
 }
@@ -198,7 +302,9 @@ export function main(argv = process.argv.slice(2)) {
   const fromFile = parsed.file ? readMachineIdsFromFile(parsed.file) : [];
   const ids = normalizeMachineIds([...fromFile, ...parsed.ids]);
   verifySources(ids);
+  verifyBatchMachineScope(ids);
   const snap = snapshotBatch(ids);
+  const buildSnapshots = snapshotBuild(ids);
   const mode = parsed.apply ? "APPLY" : "DRY_RUN";
   console.log(`BATCH PUBLISH START: ${ids.length} machines / mode=${mode}`);
   try {
@@ -215,7 +321,7 @@ export function main(argv = process.argv.slice(2)) {
     }
     throw e;
   } finally {
-    if (!parsed.keepBuild) cleanupBuild(ids);
+    if (!parsed.keepBuild) restoreBuild(ids, buildSnapshots);
   }
 }
 
