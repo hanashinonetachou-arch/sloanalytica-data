@@ -9,6 +9,21 @@ const catalog = JSON.parse(fs.readFileSync(catalogPath, 'utf8'));
 const batch = JSON.parse(fs.readFileSync(batchPath, 'utf8'));
 const byMachine = new Map((batch.machines ?? []).map((m) => [m.machineId, m]));
 
+function userFacingNotApplicableReason(rawReason) {
+  const reason = String(rawReason ?? '').trim();
+  if (!reason) return '設定帯判別Gに利用できる数値推測要素がありません。';
+  if (/No adopted numeric inference feature has resolvable game-count exposure/i.test(reason)) {
+    return '採用している数値推測要素はありますが、設定帯判別Gに必要なゲーム数換算の根拠が確定していないため算出できません。';
+  }
+  if (/Both low .*high .*setting bands are required/i.test(reason)) {
+    return '低設定帯と高設定帯の両方を構成できない設定構成のため、設定帯判別Gの算出対象外です。';
+  }
+  if (/[A-Za-z]{3,}/.test(reason)) {
+    return '設定帯判別Gに利用できる数値推測要素がありません。';
+  }
+  return reason;
+}
+
 let updated = 0;
 for (const entry of catalog.entries ?? []) {
   const band = byMachine.get(entry.machineId);
@@ -23,7 +38,7 @@ for (const entry of catalog.entries ?? []) {
       const r = results.find((x) => Math.round(Number(x.threshold) * 100) === accuracy);
       return { accuracy, games: Number.isFinite(Number(r?.games)) ? Number(r.games) : null };
     }),
-    reason: band.status === 'COMPLETE' ? null : (band.reason ?? '設定帯判別Gに利用できる数値推測要素がありません。'),
+    reason: band.status === 'COMPLETE' ? null : userFacingNotApplicableReason(band.reason),
   };
   updated++;
 }
