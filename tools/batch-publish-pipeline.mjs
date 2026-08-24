@@ -174,7 +174,7 @@ function restoreFile(p, bytes) {
   fs.writeFileSync(p, bytes);
 }
 
-function snapshotDirectory(dir) {
+export function snapshotDirectory(dir) {
   if (!fs.existsSync(dir)) return null;
   const files = new Map();
   const walk = current => {
@@ -191,7 +191,7 @@ function snapshotDirectory(dir) {
   return files;
 }
 
-function restoreDirectory(dir, snapshot) {
+export function restoreDirectory(dir, snapshot) {
   if (fs.existsSync(dir)) fs.rmSync(dir, { recursive: true, force: true });
   if (snapshot === null) return;
   fs.mkdirSync(dir, { recursive: true });
