@@ -5,11 +5,12 @@
     "machineId": "S_ODANOBUNA_ZENKOKU_SNT",
     "machineDataVersion": "0.1.0",
     "displayName": "S 織田信奈の野望 全国版",
-    "modelName": "UNRESOLVED",
-    "manufacturer": "SNT（新日テクノロジー）",
+    "modelName": "S織田信奈の野望 全国版TA",
+    "manufacturer": "新日テクノロジー",
     "settings": [
       "SET_1",
       "SET_2",
+      "SET_3",
       "SET_4",
       "SET_5",
       "SET_6"
@@ -39,12 +40,34 @@
         "minimum": 0
       },
       {
-        "id": "INP_AT_FIRST_HIT",
+        "id": "INP_AT_COUNT",
         "name": "AT初当り",
         "type": "counter",
         "category": "AT",
         "unit": "回",
         "displayOrder": 2,
+        "inferenceRole": "INCLUDE_PRIMARY",
+        "defaultValue": 0,
+        "minimum": 0
+      },
+      {
+        "id": "INP_AT_RUNTHROUGH",
+        "name": "AT駆け抜け",
+        "type": "counter",
+        "category": "RUNTHROUGH",
+        "unit": "回",
+        "displayOrder": 3,
+        "inferenceRole": "INCLUDE_PRIMARY",
+        "defaultValue": 0,
+        "minimum": 0
+      },
+      {
+        "id": "INP_UNIFICATION_ATTACK",
+        "name": "天下統一アタック当選",
+        "type": "counter",
+        "category": "RUNTHROUGH",
+        "unit": "回",
+        "displayOrder": 4,
         "inferenceRole": "INCLUDE_PRIMARY",
         "defaultValue": 0,
         "minimum": 0
@@ -64,24 +87,19 @@
             "value": "__UNSET__"
           },
           {
-            "key": "NOBUNA3",
-            "label": "信奈③",
-            "value": "NOBUNA3"
+            "key": "SET2PLUS",
+            "label": "設定2以上",
+            "value": "SET2PLUS"
           },
           {
-            "key": "NOBUNA4",
-            "label": "信奈④",
-            "value": "NOBUNA4"
+            "key": "SET4PLUS",
+            "label": "設定4以上",
+            "value": "SET4PLUS"
           },
           {
-            "key": "OATH",
-            "label": "信奈&良晴（誓い）",
-            "value": "OATH"
-          },
-          {
-            "key": "HAREM",
-            "label": "ハーレム",
-            "value": "HAREM"
+            "key": "SET6",
+            "label": "設定6",
+            "value": "SET6"
           }
         ],
         "defaultValue": "__UNSET__"
@@ -92,8 +110,8 @@
     "schemaVersion": "2.0.0",
     "features": [
       {
-        "featureId": "FEAT_AT_FIRST_HIT",
-        "name": "AT初当り確率",
+        "featureId": "FEAT_AT_INITIAL",
+        "name": "AT初当り",
         "adoptionCategory": "INCLUDE_PRIMARY",
         "calculationRole": "PROBABILITY",
         "probabilityEngineUsage": true,
@@ -101,18 +119,44 @@
         "minimumSample": 500,
         "sampleRecommendation": 5000,
         "denominatorInputId": "INP_NORMAL_GAMES",
-        "numeratorInputId": "INP_AT_FIRST_HIT",
+        "numeratorInputId": "INP_AT_COUNT",
         "displayFormat": "ratio_1_over_n",
         "probabilities": {
-          "SET_1": 0.00356379187455,
-          "SET_2": 0.00377643504532,
-          "SET_4": 0.00439947206335,
-          "SET_5": 0.00487189478811,
-          "SET_6": 0.00631313131313
+          "SET_1": 0.002701972439880985,
+          "SET_2": 0.0027533039647577094,
+          "SET_3": 0.0028669724770642203,
+          "SET_4": 0.003071253071253071,
+          "SET_5": 0.0033068783068783067,
+          "SET_6": 0.0035549232484075335
         },
         "sourceEvidenceRefs": [
-          "SRC_1GEKI",
-          "SRC_NANA"
+          "SRC_PWORLD",
+          "SRC_NANATETSU"
+        ]
+      },
+      {
+        "featureId": "FEAT_AT_RUNTHROUGH_ATTACK",
+        "name": "AT駆け抜け時の天下統一アタック当選率",
+        "adoptionCategory": "INCLUDE_PRIMARY",
+        "calculationRole": "PROBABILITY",
+        "probabilityEngineUsage": true,
+        "modelType": "binomial",
+        "minimumSample": 10,
+        "sampleRecommendation": 50,
+        "denominatorInputId": "INP_AT_RUNTHROUGH",
+        "numeratorInputId": "INP_UNIFICATION_ATTACK",
+        "displayFormat": "ratio_1_over_n",
+        "probabilities": {
+          "SET_1": 0.014,
+          "SET_2": 0.018,
+          "SET_3": 0.026,
+          "SET_4": 0.035,
+          "SET_5": 0.042,
+          "SET_6": 0.053
+        },
+        "sourceEvidenceRefs": [
+          "SRC_DMM",
+          "SRC_NANATETSU"
         ]
       }
     ]
@@ -121,13 +165,14 @@
     "version": "1.0.0",
     "evidences": [
       {
-        "id": "EVI_EV_AT_END_NOBUNA3",
-        "name": "信奈③",
-        "displayName": "信奈③",
+        "id": "EVI_EV_AT_END_SET2PLUS",
+        "name": "設定2以上",
+        "displayName": "設定2以上",
         "inputId": "INP_EVI_EV_AT_END",
-        "triggerValue": "NOBUNA3",
+        "triggerValue": "SET2PLUS",
         "confirmedSettings": [
           "SET_2",
+          "SET_3",
           "SET_4",
           "SET_5",
           "SET_6"
@@ -138,15 +183,15 @@
         "hasImage": false,
         "type": "SETTING_CONFIRMATION",
         "sourceEvidenceRefs": [
-          "RE_END_NOBUNA3"
+          "RE_AT_END_2PLUS"
         ]
       },
       {
-        "id": "EVI_EV_AT_END_NOBUNA4",
-        "name": "信奈④",
-        "displayName": "信奈④",
+        "id": "EVI_EV_AT_END_SET4PLUS",
+        "name": "設定4以上",
+        "displayName": "設定4以上",
         "inputId": "INP_EVI_EV_AT_END",
-        "triggerValue": "NOBUNA4",
+        "triggerValue": "SET4PLUS",
         "confirmedSettings": [
           "SET_4",
           "SET_5",
@@ -154,84 +199,58 @@
         ],
         "deniedSettings": [
           "SET_1",
-          "SET_2"
-        ],
-        "hasImage": false,
-        "type": "SETTING_CONFIRMATION",
-        "sourceEvidenceRefs": [
-          "RE_END_NOBUNA4"
-        ]
-      },
-      {
-        "id": "EVI_EV_AT_END_OATH",
-        "name": "信奈&良晴（誓い）",
-        "displayName": "信奈&良晴（誓い）",
-        "inputId": "INP_EVI_EV_AT_END",
-        "triggerValue": "OATH",
-        "confirmedSettings": [
-          "SET_5",
-          "SET_6"
-        ],
-        "deniedSettings": [
-          "SET_1",
           "SET_2",
-          "SET_4"
+          "SET_3"
         ],
         "hasImage": false,
         "type": "SETTING_CONFIRMATION",
         "sourceEvidenceRefs": [
-          "RE_END_OATH"
+          "RE_AT_END_4PLUS"
         ]
       },
       {
-        "id": "EVI_EV_AT_END_HAREM",
-        "name": "ハーレム",
-        "displayName": "ハーレム",
+        "id": "EVI_EV_AT_END_SET6",
+        "name": "設定6",
+        "displayName": "設定6",
         "inputId": "INP_EVI_EV_AT_END",
-        "triggerValue": "HAREM",
+        "triggerValue": "SET6",
         "confirmedSettings": [
           "SET_6"
         ],
         "deniedSettings": [
           "SET_1",
           "SET_2",
+          "SET_3",
           "SET_4",
           "SET_5"
         ],
         "hasImage": false,
         "type": "SETTING_CONFIRMATION",
         "sourceEvidenceRefs": [
-          "RE_END_HAREM"
+          "RE_AT_END_6"
         ]
       }
     ],
     "sources": [
       {
-        "id": "SRC_1GEKI",
+        "id": "SRC_PWORLD",
         "classification": "ANALYSIS",
-        "pageName": "S織田信奈の野望 全国版 解析攻略",
-        "url": "https://1geki.jp/slot/s_odanobuna_zen/",
+        "pageName": "S 織田信奈の野望 全国版",
+        "url": "https://www.p-world.co.jp/machine/database/9874",
         "checkedAt": "2026-08-24"
       },
       {
-        "id": "SRC_1GEKI_SETTING",
+        "id": "SRC_NANATETSU",
         "classification": "ANALYSIS",
-        "pageName": "S織田信奈の野望 全国版 設定判別",
-        "url": "https://1geki.jp/slot/s_odanobuna_zen/0/",
-        "checkedAt": "2026-08-24"
-      },
-      {
-        "id": "SRC_NANA",
-        "classification": "ANALYSIS",
-        "pageName": "パチスロ 織田信奈の野望 全国版 設定差のある要素まとめ",
-        "url": "https://nana-press.com/kaiseki/machine/582/15864/",
+        "pageName": "織田信奈の野望 全国版 設定判別",
+        "url": "https://nana-press.com/kaiseki/machine/567/16556/",
         "checkedAt": "2026-08-24"
       },
       {
         "id": "SRC_DMM",
         "classification": "ANALYSIS",
-        "pageName": "パチスロ織田信奈の野望の設定差はこれを見ればOK",
-        "url": "https://p-town.dmm.com/specials/3109",
+        "pageName": "織田信奈の野望 全国版 設定推測",
+        "url": "https://p-town.dmm.com/machines/4364",
         "checkedAt": "2026-08-24"
       }
     ]
@@ -264,8 +283,27 @@
         "items": [
           {
             "type": "input",
-            "inputId": "INP_AT_FIRST_HIT",
+            "inputId": "INP_AT_COUNT",
             "label": "AT初当り",
+            "widget": "counter"
+          }
+        ]
+      },
+      {
+        "id": "AUTO_RUNTHROUGH",
+        "title": "AT駆け抜け",
+        "displayOrder": 3,
+        "items": [
+          {
+            "type": "input",
+            "inputId": "INP_AT_RUNTHROUGH",
+            "label": "AT駆け抜け",
+            "widget": "counter"
+          },
+          {
+            "type": "input",
+            "inputId": "INP_UNIFICATION_ATTACK",
+            "label": "天下統一アタック当選",
             "widget": "counter"
           }
         ]
@@ -273,7 +311,7 @@
       {
         "id": "AUTO_EVIDENCE",
         "title": "設定示唆",
-        "displayOrder": 3,
+        "displayOrder": 4,
         "items": [
           {
             "type": "input",
@@ -287,47 +325,30 @@
   },
   "selectionSummary": {
     "schemaVersion": "selection-summary-v1",
-    "evaluatedCount": 6,
-    "selectedCount": 1,
-    "rejectedCount": 5,
+    "evaluatedCount": 2,
+    "selectedCount": 2,
+    "rejectedCount": 0,
     "selected": [
       {
-        "featureId": "FEAT_AT_FIRST_HIT",
-        "name": "AT初当り確率",
-        "reason": "推測計算に採用しています。",
+        "featureId": "FEAT_AT_INITIAL",
+        "name": "AT初当り",
+        "reason": "AT初当りは通常ゲーム数を分母に直接観測でき、全設定値が公開されているため採用します。",
         "requiredTrials": {
-          "value": 4672,
+          "value": 31277,
           "unit": "通常ゲーム"
+        }
+      },
+      {
+        "featureId": "FEAT_AT_RUNTHROUGH_ATTACK",
+        "name": "AT駆け抜け時の天下統一アタック当選率",
+        "reason": "AT駆け抜け時の天下統一アタック当選率は設定1の1.4%から設定6の5.3%まで約3.8倍の差があり、駆け抜け回数を明確な条件分母として数えられるため補助Featureとして採用します。",
+        "requiredTrials": {
+          "value": 142,
+          "unit": "AT駆け抜け"
         }
       }
     ],
-    "rejected": [
-      {
-        "featureId": "FEAT_FIRST_STRATEGY_CZ",
-        "name": "初回戦略会議移行時のCZ当選率",
-        "reason": "公開数値を十分に確認できない。"
-      },
-      {
-        "featureId": "FEAT_FIRST_BATTLE_REWRITE",
-        "name": "初回合戦の刻における書き換え抽選",
-        "reason": "正確な分母を取得しにくい。"
-      },
-      {
-        "featureId": "FEAT_TACTIC_RATE",
-        "name": "合戦の刻中の計略発生率",
-        "reason": "正確な分母を取得しにくい。"
-      },
-      {
-        "featureId": "FEAT_DAMAGE_AVOID",
-        "name": "合戦の刻中の被ダメージ回避当選率",
-        "reason": "正確な分母を取得しにくい。"
-      },
-      {
-        "featureId": "FEAT_TENKA_AFTER_NO_GAIN",
-        "name": "AT駆け抜け時の天嫁統一アタック当選率",
-        "reason": "公開数値を十分に確認できない。"
-      }
-    ]
+    "rejected": []
   },
   "reliability": {},
   "metadata": {
@@ -336,6 +357,7 @@
     "settings": [
       "SET_1",
       "SET_2",
+      "SET_3",
       "SET_4",
       "SET_5",
       "SET_6"
