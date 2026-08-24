@@ -185,10 +185,11 @@ function buildSelectionSummary(research,selection,statistics=null){
     if(sf.adoptionCategory==="DISPLAY_ONLY") continue;
     const rf=rfs.get(sf.researchFeatureId);
     if(!rf) continue;
+    const explicitReason=sf.userFacingReason ?? sf.userReason ?? sf.rejectionReason;
     const item={
       featureId:sf.featureId,
       name:sf.nameOverride??rf.name,
-      reason:sf.userReason ?? sf.rejectionReason ?? (sf.adoptionCategory==="EXCLUDE"?"推測計算には使用していません。":"推測計算に採用しています。")
+      reason:(typeof explicitReason==="string"&&explicitReason.trim())?explicitReason.trim():(sf.adoptionCategory==="EXCLUDE"?"採用条件が確定していないため、現時点では推測計算に使用していません。":"推測計算に採用しています。")
     };
     if(sf.requiredTrials?.value!=null){
       item.requiredTrials={value:sf.requiredTrials.value,unit:sf.requiredTrials.unit??rf.trialUnit??"回"};
