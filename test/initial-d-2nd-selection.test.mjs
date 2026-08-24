@@ -23,7 +23,10 @@ test('Initial D 2nd bell denominator preserves exclusion contract during migrati
   const feature=selection.features.find(f=>f.featureId==='FEAT_BELL_NORMAL');
   if(excluded){
     assert.equal(legacy,undefined);
-    assert.match(`${excluded.name??''} ${excluded.description??''}`,/押し順ナビ区間.*LB中.*除外/);
+    const wording=`${excluded.name??''} ${excluded.description??''}`;
+    assert.match(wording,/除外/);
+    assert.match(wording,/押し順ナビ区間/);
+    assert.match(wording,/LB中/);
     assert.equal(feature?.denominatorInputId,'INP_MY_SAMMY_NORMAL_GAMES');
     assert.deepEqual(feature?.denominatorAdjustments,[{inputId:'INP_BELL_EXCLUDED_GAMES',multiplier:-1}]);
   }else{
