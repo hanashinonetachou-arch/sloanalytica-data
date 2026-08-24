@@ -20,6 +20,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -35,8 +37,7 @@ jobs:
           set -euo pipefail
           npm run machine:publish:batch -- L_BAKI_L3 L_HOKUTO_AD_XR
           git diff --exit-code -- catalog.json difficulty-catalog.json machines/
-          test ! -d build/L_BAKI_L3
-          test ! -d build/L_HOKUTO_AD_XR
+          test -z "$(git status --porcelain -- build/L_BAKI_L3 build/L_HOKUTO_AD_XR)"
 
       - name: Verify help
         run: npm run machine:publish:batch -- --help
