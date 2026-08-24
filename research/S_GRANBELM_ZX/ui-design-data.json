@@ -3,20 +3,25 @@
   "machineId":"S_GRANBELM_ZX",
   "status":"PASS_WITH_UNRESOLVED",
   "generatedFrom":{"selection":"research/S_GRANBELM_ZX/selection-data.json","observation":"research/S_GRANBELM_ZX/machine-observation-data.json"},
-  "sectionOrder":["遊技情報","AT"],
+  "sectionOrder":["遊技情報","初当り","ミッドナイトボーナス","設定示唆"],
   "sections":{
-    "遊技情報":{"inputIds":["INP_NORMAL_GAMES"],"description":"CZ・ボーナス・AT中を除いた通常ゲーム数を入力します。総ゲーム数の単純差分は使いません。","observationRole":"SELF_PLAY"},
-    "AT":{"inputIds":["INP_AT_FIRST_HIT"],"description":"AT初当りのみを記録します。CZ・ボーナス等は現段階では重複回避のため推測入力にしません。","observationRole":"DIRECT_PLAY"}
+    "遊技情報":{"inputIds":["INP_NORMAL_GAMES"],"description":"通常ゲーム数を入力します。","observationRole":"SELF_PLAY"},
+    "初当り":{"inputIds":["INP_AT_COUNT"],"description":"AT初当りを記録します。","observationRole":"DIRECT_PLAY"},
+    "ミッドナイトボーナス":{"inputIds":["INP_MB_FIRST","INP_MB_SECOND","INP_MB_THIRD"],"description":"開始ステージを記録します。赤月点灯などでブラッドムーン滞在濃厚と判明しているボーナスは入力しないでください。隠れブラッドムーン混入の可能性があるため補助要素として扱います。","observationRole":"DIRECT_PLAY"},
+    "設定示唆":{"inputIds":[],"evidenceIds":["EV_TROPHY","EV_END_SCREEN","EV_NAKAMIMIERU"],"description":"トロフィー、終了画面の確定・否定系、ナカミミエールのアラマノクス確定・否定アイコンを記録します。","observationRole":"END_EVENT"}
   },
   "inputContracts":{
     "INP_NORMAL_GAMES":{"name":"通常ゲーム数","mode":"NUMBER","gridSpan":12,"directInput":true},
-    "INP_AT_FIRST_HIT":{"name":"AT初当り","mode":"COUNTER","gridSpan":6,"directInput":true,"compact":true}
+    "INP_AT_COUNT":{"name":"AT初当り","mode":"COUNTER","gridSpan":6,"directInput":true,"compact":true},
+    "INP_MB_FIRST":{"name":"1stステージ開始","mode":"COUNTER","gridSpan":6,"directInput":false,"compact":true},
+    "INP_MB_SECOND":{"name":"2ndステージ開始","mode":"COUNTER","gridSpan":6,"directInput":false,"compact":true},
+    "INP_MB_THIRD":{"name":"3rdステージ開始","mode":"COUNTER","gridSpan":6,"directInput":false,"compact":true}
   },
-  "evidenceContracts":{},
-  "unresolved":[
-    {"id":"OBS_MACHINE_MENU","reason":"通常メニュー/遊技履歴の累計項目は一部未解決。"},
-    {"id":"OBS_LINKED_SERVICE","reason":"実機連動サービスの有無と具体項目は未解決。"},
-    {"id":"OBS_SEATED_START","reason":"着席時にAT初当りの正しい通常ゲーム分母を取得できるか未解決。"}
-  ],
-  "auditNotes":["複雑な上流抽選を無理にUIへ露出せず、現行はAT初当りを代表Featureとする。","内部モード示唆はObservation Onlyで、ユーザーに状態確定入力を求めない。"]
+  "evidenceContracts":{
+    "EV_TROPHY":{"label":"ケロットトロフィー","selectionMode":"single","sourceEvidenceGroupId":"EV_TROPHY","inheritOptions":true},
+    "EV_END_SCREEN":{"label":"終了画面（確定・否定系）","selectionMode":"single","sourceEvidenceGroupId":"EV_END_SCREEN","inheritOptions":true},
+    "EV_NAKAMIMIERU":{"label":"ナカミミエール（確定・否定アイコン）","selectionMode":"single","sourceEvidenceGroupId":"EV_NAKAMIMIERU","inheritOptions":true}
+  },
+  "unresolved":[{"id":"OBS_MACHINE_MENU","reason":"筐体標準メニュー/履歴の具体項目は公開情報で未解決。"}],
+  "auditNotes":["ミッドナイトボーナス開始ステージは明確なブラッドムーン滞在回を除外して採用する。","ナカミミエールの魔/月/希は周期依存のため数値Inferenceへ入れず、確定・否定アイコンのみEvidence化する。","終了画面の弱・中・強示唆は入力負荷と条件差を考慮して数値加算せず、確定・否定系のみEvidence化する。"]
 }
