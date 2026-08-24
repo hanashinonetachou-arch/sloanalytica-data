@@ -1,36 +1,15 @@
 {
-  "schemaVersion":"selection-data-v1",
-  "machineId":"L_KOMONCHAMA_TEN_L2",
-  "machineDataVersion":"0.1.0",
-  "uiCategoryLabels":{"PLAY":"遊技情報","LANTERN":"世直し提灯","AT":"AT","EVIDENCE":"設定示唆"},
-  "inputs":[
-    {"id":"INP_NORMAL_GAMES","name":"通常ゲーム数","type":"integer","category":"PLAY","unit":"G","displayOrder":1,"inferenceRole":"INCLUDE_FALLBACK","uiQuickAdd":[50,100]},
-    {"id":"INP_LANTERN_LIGHT","name":"世直し提灯点灯","type":"counter","category":"LANTERN","unit":"回","displayOrder":2,"inferenceRole":"INCLUDE_PRIMARY"},
-    {"id":"INP_LANTERN_AT","name":"提灯点灯→AT","type":"counter","category":"LANTERN","unit":"回","displayOrder":3,"inferenceRole":"INCLUDE_PRIMARY","parentInputId":"INP_LANTERN_LIGHT"},
-    {"id":"INP_AT_FIRST_HIT","name":"AT初当り","type":"counter","category":"AT","unit":"回","displayOrder":4,"inferenceRole":"INCLUDE_FALLBACK"}
-  ],
+  "schemaVersion":"selection-data-v1","machineId":"L_KOMONCHAMA_TEN_L2","machineDataVersion":"0.1.0","uiCategoryLabels":{"PLAY":"遊技情報","LANTERN":"世直し提灯","AT":"AT","EVIDENCE":"設定示唆"},
+  "inputs":[{"id":"INP_NORMAL_GAMES","name":"通常ゲーム数","type":"integer","category":"PLAY","unit":"G","displayOrder":1,"inferenceRole":"INCLUDE_FALLBACK","uiQuickAdd":[50,100]},{"id":"INP_LANTERN_LIGHT","name":"世直し提灯点灯","type":"counter","category":"LANTERN","unit":"回","displayOrder":2,"inferenceRole":"INCLUDE_PRIMARY"},{"id":"INP_LANTERN_AT","name":"提灯点灯→AT","type":"counter","category":"LANTERN","unit":"回","displayOrder":3,"inferenceRole":"INCLUDE_PRIMARY","parentInputId":"INP_LANTERN_LIGHT"},{"id":"INP_AT_FIRST_HIT","name":"AT初当り","type":"counter","category":"AT","unit":"回","displayOrder":4,"inferenceRole":"INCLUDE_FALLBACK"}],
   "features":[
-    {"researchFeatureId":"RF_LANTERN_LIGHT","featureId":"FEAT_LANTERN_LIGHT","adoptionCategory":"INCLUDE_PRIMARY","numeratorInputId":"INP_LANTERN_LIGHT","denominatorInputId":"INP_NORMAL_GAMES","minimumSample":500,"sampleRecommendation":4000,"difficultyExposure":{"mode":"per_game","factor":1,"quality":"EXACT"}},
-    {"researchFeatureId":"RF_LANTERN_AT","featureId":"FEAT_LANTERN_AT","adoptionCategory":"INCLUDE_PRIMARY","numeratorInputId":"INP_LANTERN_AT","denominatorInputId":"INP_LANTERN_LIGHT","minimumSample":10,"sampleRecommendation":50,"difficultyExposure":{"mode":"derived_event_rate","quality":"DERIVED","sourceFeatureId":"FEAT_LANTERN_LIGHT","eventMultiplier":1}},
-    {"researchFeatureId":"RF_AT_FIRST","featureId":"FEAT_AT_FIRST_HIT","adoptionCategory":"INCLUDE_FALLBACK","numeratorInputId":"INP_AT_FIRST_HIT","denominatorInputId":"INP_NORMAL_GAMES","minimumSample":500,"sampleRecommendation":5000,"suppressedByFeatureIds":["FEAT_LANTERN_LIGHT","FEAT_LANTERN_AT"],"difficultyExposure":{"mode":"per_game","factor":1,"quality":"EXACT"}},
-    {"researchFeatureId":"RF_50G_SAKURA","featureId":"FEAT_50G_SAKURA","adoptionCategory":"EXCLUDE","internalReason":"設定差はあるが、世直し提灯・AT初当りの上流状態移行であり、現行Featureと同時採用すると同じ初当り経路を重ねて評価する。","userFacingReason":"世直し提灯・AT初当りと重複。"},
-    {"researchFeatureId":"RF_MYSTERY_AT","featureId":"FEAT_MYSTERY_AT","adoptionCategory":"EXCLUDE","internalReason":"AT初当りの部分集合で、設定1でも1/48782.3・設定6でも1/6715.3と低頻度。","userFacingReason":"AT初当りと重複し、低頻度。"}
+    {"researchFeatureId":"RF_LANTERN_LIGHT","featureId":"FEAT_LANTERN_LIGHT","adoptionCategory":"INCLUDE_PRIMARY","numeratorInputId":"INP_LANTERN_LIGHT","denominatorInputId":"INP_NORMAL_GAMES","minimumSample":500,"sampleRecommendation":4000,"difficultyExposure":{"mode":"per_game","factor":1,"quality":"EXACT"},"userReason":"通常時の世直し提灯点灯率そのものに設定差があり、通常ゲーム数を分母として直接数えられるため採用します。AT初当りより上流の抽選を観測できる主Featureです。"},
+    {"researchFeatureId":"RF_LANTERN_AT","featureId":"FEAT_LANTERN_AT","adoptionCategory":"INCLUDE_PRIMARY","numeratorInputId":"INP_LANTERN_AT","denominatorInputId":"INP_LANTERN_LIGHT","minimumSample":10,"sampleRecommendation":50,"difficultyExposure":{"mode":"derived_event_rate","quality":"DERIVED","sourceFeatureId":"FEAT_LANTERN_LIGHT","eventMultiplier":1},"userReason":"世直し提灯が点灯した後のAT当選率にも設定差があるため、点灯回数を条件分母として採用します。点灯率と点灯後AT当選率を分けることで、どの段階で差が出たかを重複なく評価できます。"},
+    {"researchFeatureId":"RF_AT_FIRST","featureId":"FEAT_AT_FIRST_HIT","adoptionCategory":"INCLUDE_FALLBACK","numeratorInputId":"INP_AT_FIRST_HIT","denominatorInputId":"INP_NORMAL_GAMES","minimumSample":500,"sampleRecommendation":5000,"suppressedByFeatureIds":["FEAT_LANTERN_LIGHT","FEAT_LANTERN_AT"],"difficultyExposure":{"mode":"per_game","factor":1,"quality":"EXACT"},"userReason":"AT初当りにも設定差はありますが、世直し提灯の詳細データと経路が重なるため、提灯を記録していない場合だけ使うFallbackとします。詳細データが有効ならAT初当りは自動的に抑制して二重評価しません。"},
+    {"researchFeatureId":"RF_50G_SAKURA","featureId":"FEAT_50G_SAKURA","adoptionCategory":"EXCLUDE","internalReason":"設定差はあるが、世直し提灯・AT初当りの上流状態移行であり、現行Featureと同時採用すると同じ初当り経路を重ねて評価する。","userFacingReason":"世直し提灯・AT初当りと同じ初当り経路の上流情報で、同時採用すると重複評価になるため不採用。"},
+    {"researchFeatureId":"RF_MYSTERY_AT","featureId":"FEAT_MYSTERY_AT","adoptionCategory":"EXCLUDE","internalReason":"AT初当りの部分集合で、設定1でも1/48782.3・設定6でも1/6715.3と低頻度。","userFacingReason":"AT初当りの一部と重複し、設定6でも約1/6715と低頻度で実戦中に十分な回数を観測しにくいため不採用。"}
   ],
   "evidence":[],
-  "evidenceUi":{"groups":[
-    {"groupId":"EV_STAMP","label":"スタンプ","options":[
-      {"value":"KA","label":"可","allowedSettings":["SET_2","SET_3","SET_4","SET_5","SET_6"],"excludedSettings":["SET_1"],"sourceEvidenceIds":["RE_STAMP_2PLUS"]},
-      {"value":"KICHI","label":"吉","allowedSettings":["SET_3","SET_4","SET_5","SET_6"],"excludedSettings":["SET_1","SET_2"],"sourceEvidenceIds":["RE_STAMP_3PLUS"]},
-      {"value":"RYO","label":"良","allowedSettings":["SET_4","SET_5","SET_6"],"excludedSettings":["SET_1","SET_2","SET_3"],"sourceEvidenceIds":["RE_STAMP_4PLUS"]},
-      {"value":"YU","label":"優","allowedSettings":["SET_5","SET_6"],"excludedSettings":["SET_1","SET_2","SET_3","SET_4"],"sourceEvidenceIds":["RE_STAMP_5PLUS"]},
-      {"value":"GOKU","label":"極","allowedSettings":["SET_6"],"excludedSettings":["SET_1","SET_2","SET_3","SET_4","SET_5"],"sourceEvidenceIds":["RE_STAMP_6"]}
-    ]},
-    {"groupId":"EV_PAYOUT","label":"獲得枚数表示","options":[
-      {"value":"444","label":"444OVER","allowedSettings":["SET_4","SET_5","SET_6"],"excludedSettings":["SET_1","SET_2","SET_3"],"sourceEvidenceIds":["RE_444"]},
-      {"value":"555","label":"555OVER","allowedSettings":["SET_5","SET_6"],"excludedSettings":["SET_1","SET_2","SET_3","SET_4"],"sourceEvidenceIds":["RE_555"]},
-      {"value":"666","label":"666OVER","allowedSettings":["SET_6"],"excludedSettings":["SET_1","SET_2","SET_3","SET_4","SET_5"],"sourceEvidenceIds":["RE_666"]}
-    ]}
-  ]},
+  "evidenceUi":{"groups":[{"groupId":"EV_STAMP","label":"スタンプ","options":[{"value":"KA","label":"可","allowedSettings":["SET_2","SET_3","SET_4","SET_5","SET_6"],"excludedSettings":["SET_1"],"sourceEvidenceIds":["RE_STAMP_2PLUS"]},{"value":"KICHI","label":"吉","allowedSettings":["SET_3","SET_4","SET_5","SET_6"],"excludedSettings":["SET_1","SET_2"],"sourceEvidenceIds":["RE_STAMP_3PLUS"]},{"value":"RYO","label":"良","allowedSettings":["SET_4","SET_5","SET_6"],"excludedSettings":["SET_1","SET_2","SET_3"],"sourceEvidenceIds":["RE_STAMP_4PLUS"]},{"value":"YU","label":"優","allowedSettings":["SET_5","SET_6"],"excludedSettings":["SET_1","SET_2","SET_3","SET_4"],"sourceEvidenceIds":["RE_STAMP_5PLUS"]},{"value":"GOKU","label":"極","allowedSettings":["SET_6"],"excludedSettings":["SET_1","SET_2","SET_3","SET_4","SET_5"],"sourceEvidenceIds":["RE_STAMP_6"]}]},{"groupId":"EV_PAYOUT","label":"獲得枚数表示","options":[{"value":"444","label":"444OVER","allowedSettings":["SET_4","SET_5","SET_6"],"excludedSettings":["SET_1","SET_2","SET_3"],"sourceEvidenceIds":["RE_444"]},{"value":"555","label":"555OVER","allowedSettings":["SET_5","SET_6"],"excludedSettings":["SET_1","SET_2","SET_3","SET_4"],"sourceEvidenceIds":["RE_555"]},{"value":"666","label":"666OVER","allowedSettings":["SET_6"],"excludedSettings":["SET_1","SET_2","SET_3","SET_4","SET_5"],"sourceEvidenceIds":["RE_666"]}]}]},
   "difficultyAnalysis":{"targetGameBasis":{"basisId":"NORMAL_GAMES","label":"通常ゲーム","quality":"EXACT"},"calibrationAllowedExposureQualities":["EXACT","DERIVED"]},
   "selectionNotes":["世直し提灯の点灯率と、点灯を条件としたAT当選率を連鎖的に利用する。","詳細提灯データがある場合はAT初当りFallbackをsuppressionし二重評価しない。"]
 }

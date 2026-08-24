@@ -5,8 +5,8 @@
     "machineId": "L_SHIN_IKKITOUSEN_V",
     "machineDataVersion": "0.1.0",
     "displayName": "L 真・一騎当千",
-    "modelName": "Lパチスロ真・一騎当千V",
-    "manufacturer": "Daiichi（大一商会）",
+    "modelName": "L真・一騎当千V",
+    "manufacturer": "大一商会",
     "settings": [
       "SET_1",
       "SET_2",
@@ -40,10 +40,10 @@
         "minimum": 0
       },
       {
-        "id": "INP_COMMON_BELL",
-        "name": "1枚or11枚ベル",
+        "id": "INP_CZ_COUNT",
+        "name": "CZ初当り",
         "type": "counter",
-        "category": "ROLE",
+        "category": "INITIAL",
         "unit": "回",
         "displayOrder": 2,
         "inferenceRole": "INCLUDE_PRIMARY",
@@ -51,19 +51,41 @@
         "minimum": 0
       },
       {
-        "id": "INP_AT_FIRST_HIT",
+        "id": "INP_AT_COUNT",
         "name": "AT初当り",
         "type": "counter",
-        "category": "AT",
+        "category": "INITIAL",
         "unit": "回",
         "displayOrder": 3,
+        "inferenceRole": "INCLUDE_FALLBACK",
+        "defaultValue": 0,
+        "minimum": 0
+      },
+      {
+        "id": "INP_BELL1",
+        "name": "1枚共通ベル",
+        "type": "counter",
+        "category": "ROLE",
+        "unit": "回",
+        "displayOrder": 4,
         "inferenceRole": "INCLUDE_PRIMARY",
         "defaultValue": 0,
         "minimum": 0
       },
       {
-        "id": "INP_EVI_EV_RUSH_END",
-        "name": "RUSH終了画面",
+        "id": "INP_BELL11",
+        "name": "11枚共通ベル",
+        "type": "counter",
+        "category": "ROLE",
+        "unit": "回",
+        "displayOrder": 5,
+        "inferenceRole": "INCLUDE_PRIMARY",
+        "defaultValue": 0,
+        "minimum": 0
+      },
+      {
+        "id": "INP_EVI_EV_TROPHY",
+        "name": "Daiichiトロフィー",
         "type": "enum",
         "category": "EVIDENCE",
         "unit": "",
@@ -76,34 +98,66 @@
             "value": "__UNSET__"
           },
           {
-            "key": "SET2PLUS",
-            "label": "孔明",
-            "value": "SET2PLUS"
+            "key": "BRONZE",
+            "label": "銅",
+            "value": "BRONZE"
           },
           {
-            "key": "SET3PLUS",
-            "label": "呂布",
-            "value": "SET3PLUS"
+            "key": "SILVER",
+            "label": "銀",
+            "value": "SILVER"
           },
           {
-            "key": "SET4PLUS",
-            "label": "成都学園",
-            "value": "SET4PLUS"
+            "key": "GOLD",
+            "label": "金",
+            "value": "GOLD"
           },
           {
-            "key": "SET5PLUS",
-            "label": "vs大和学院",
-            "value": "SET5PLUS"
+            "key": "RED",
+            "label": "赤",
+            "value": "RED"
           },
           {
-            "key": "SET6",
-            "label": "ウェディング",
-            "value": "SET6"
+            "key": "RAINBOW",
+            "label": "虹",
+            "value": "RAINBOW"
+          }
+        ],
+        "defaultValue": "__UNSET__"
+      },
+      {
+        "id": "INP_EVI_EV_MAGATAMA_GUIDE",
+        "name": "勾玉の導き 継続ゲーム数",
+        "type": "enum",
+        "category": "EVIDENCE",
+        "unit": "",
+        "displayOrder": 101,
+        "inferenceRole": "INCLUDE_SUPPORT",
+        "options": [
+          {
+            "key": "__UNSET__",
+            "label": "未選択",
+            "value": "__UNSET__"
           },
           {
-            "key": "SET246",
-            "label": "関羽&孫策",
-            "value": "SET246"
+            "key": "30G",
+            "label": "30G（設定2以上）",
+            "value": "30G"
+          },
+          {
+            "key": "40G",
+            "label": "40G（設定3以上）",
+            "value": "40G"
+          },
+          {
+            "key": "50G",
+            "label": "50G（設定4以上）",
+            "value": "50G"
+          },
+          {
+            "key": "60G",
+            "label": "60G（設定6）",
+            "value": "60G"
           }
         ],
         "defaultValue": "__UNSET__"
@@ -114,33 +168,8 @@
     "schemaVersion": "2.0.0",
     "features": [
       {
-        "featureId": "FEAT_COMMON_BELL",
-        "name": "1枚or11枚ベル合成確率",
-        "adoptionCategory": "INCLUDE_PRIMARY",
-        "calculationRole": "PROBABILITY",
-        "probabilityEngineUsage": true,
-        "modelType": "binomial",
-        "minimumSample": 300,
-        "sampleRecommendation": 3000,
-        "denominatorInputId": "INP_NORMAL_GAMES",
-        "numeratorInputId": "INP_COMMON_BELL",
-        "displayFormat": "ratio_1_over_n",
-        "probabilities": {
-          "SET_1": 0.1953125,
-          "SET_2": 0.19685039370078738,
-          "SET_3": 0.1984126984126984,
-          "SET_4": 0.20040080160320642,
-          "SET_5": 0.20242914979757085,
-          "SET_6": 0.2044989775051125
-        },
-        "sourceEvidenceRefs": [
-          "SRC_PWORLD",
-          "SRC_NANA"
-        ]
-      },
-      {
-        "featureId": "FEAT_AT_FIRST_HIT",
-        "name": "AT初当り確率",
+        "featureId": "FEAT_CZ_INITIAL",
+        "name": "CZ初当り",
         "adoptionCategory": "INCLUDE_PRIMARY",
         "calculationRole": "PROBABILITY",
         "probabilityEngineUsage": true,
@@ -148,19 +177,94 @@
         "minimumSample": 500,
         "sampleRecommendation": 5000,
         "denominatorInputId": "INP_NORMAL_GAMES",
-        "numeratorInputId": "INP_AT_FIRST_HIT",
+        "numeratorInputId": "INP_CZ_COUNT",
         "displayFormat": "ratio_1_over_n",
         "probabilities": {
-          "SET_1": 0.003112355866791161,
-          "SET_2": 0.0032175032175032173,
-          "SET_3": 0.003429355281207133,
-          "SET_4": 0.00407000407000407,
-          "SET_5": 0.004304778303917348,
-          "SET_6": 0.004502476362899595
+          "SET_1": 0.004032258064516129,
+          "SET_2": 0.004100041000410004,
+          "SET_3": 0.004273504273504274,
+          "SET_4": 0.004604051565377533,
+          "SET_5": 0.005032712631104502,
+          "SET_6": 0.005376344086021506
+        },
+        "sourceEvidenceRefs": [
+          "SRC_PWORLD"
+        ]
+      },
+      {
+        "featureId": "FEAT_AT_INITIAL",
+        "name": "AT初当り",
+        "adoptionCategory": "INCLUDE_FALLBACK",
+        "calculationRole": "PROBABILITY",
+        "probabilityEngineUsage": true,
+        "modelType": "binomial",
+        "minimumSample": 500,
+        "sampleRecommendation": 5000,
+        "suppressedByFeatureIds": [
+          "FEAT_CZ_INITIAL"
+        ],
+        "denominatorInputId": "INP_NORMAL_GAMES",
+        "numeratorInputId": "INP_AT_COUNT",
+        "displayFormat": "ratio_1_over_n",
+        "probabilities": {
+          "SET_1": 0.003741114852225964,
+          "SET_2": 0.0038314176245210726,
+          "SET_3": 0.003965107070578905,
+          "SET_4": 0.004302925989672977,
+          "SET_5": 0.004745069364465603,
+          "SET_6": 0.005076142131979695
         },
         "sourceEvidenceRefs": [
           "SRC_PWORLD",
-          "SRC_NANA"
+          "SRC_NANATETSU"
+        ]
+      },
+      {
+        "featureId": "FEAT_COMMON_BELL_1",
+        "name": "1枚共通ベル",
+        "adoptionCategory": "INCLUDE_PRIMARY",
+        "calculationRole": "PROBABILITY",
+        "probabilityEngineUsage": true,
+        "modelType": "binomial",
+        "minimumSample": 500,
+        "sampleRecommendation": 5000,
+        "denominatorInputId": "INP_NORMAL_GAMES",
+        "numeratorInputId": "INP_BELL1",
+        "displayFormat": "ratio_1_over_n",
+        "probabilities": {
+          "SET_1": 0.10416666666666667,
+          "SET_2": 0.10416666666666667,
+          "SET_3": 0.10526315789473684,
+          "SET_4": 0.10638297872340426,
+          "SET_5": 0.10752688172043011,
+          "SET_6": 0.10869565217391304
+        },
+        "sourceEvidenceRefs": [
+          "SRC_NANATETSU"
+        ]
+      },
+      {
+        "featureId": "FEAT_COMMON_BELL_11",
+        "name": "11枚共通ベル",
+        "adoptionCategory": "INCLUDE_PRIMARY",
+        "calculationRole": "PROBABILITY",
+        "probabilityEngineUsage": true,
+        "modelType": "binomial",
+        "minimumSample": 500,
+        "sampleRecommendation": 5000,
+        "denominatorInputId": "INP_NORMAL_GAMES",
+        "numeratorInputId": "INP_BELL11",
+        "displayFormat": "ratio_1_over_n",
+        "probabilities": {
+          "SET_1": 0.09259259259259259,
+          "SET_2": 0.09259259259259259,
+          "SET_3": 0.09345794392523364,
+          "SET_4": 0.09433962264150944,
+          "SET_5": 0.09523809523809523,
+          "SET_6": 0.09615384615384616
+        },
+        "sourceEvidenceRefs": [
+          "SRC_NANATETSU"
         ]
       }
     ]
@@ -169,11 +273,11 @@
     "version": "1.0.0",
     "evidences": [
       {
-        "id": "EVI_EV_RUSH_END_SET2PLUS",
-        "name": "孔明",
-        "displayName": "孔明",
-        "inputId": "INP_EVI_EV_RUSH_END",
-        "triggerValue": "SET2PLUS",
+        "id": "EVI_EV_TROPHY_BRONZE",
+        "name": "銅",
+        "displayName": "銅",
+        "inputId": "INP_EVI_EV_TROPHY",
+        "triggerValue": "BRONZE",
         "confirmedSettings": [
           "SET_2",
           "SET_3",
@@ -187,15 +291,15 @@
         "hasImage": false,
         "type": "SETTING_CONFIRMATION",
         "sourceEvidenceRefs": [
-          "RE_END_2PLUS"
+          "RE_TROPHY_BRONZE"
         ]
       },
       {
-        "id": "EVI_EV_RUSH_END_SET3PLUS",
-        "name": "呂布",
-        "displayName": "呂布",
-        "inputId": "INP_EVI_EV_RUSH_END",
-        "triggerValue": "SET3PLUS",
+        "id": "EVI_EV_TROPHY_SILVER",
+        "name": "銀",
+        "displayName": "銀",
+        "inputId": "INP_EVI_EV_TROPHY",
+        "triggerValue": "SILVER",
         "confirmedSettings": [
           "SET_3",
           "SET_4",
@@ -209,15 +313,15 @@
         "hasImage": false,
         "type": "SETTING_CONFIRMATION",
         "sourceEvidenceRefs": [
-          "RE_END_3PLUS"
+          "RE_TROPHY_SILVER"
         ]
       },
       {
-        "id": "EVI_EV_RUSH_END_SET4PLUS",
-        "name": "成都学園",
-        "displayName": "成都学園",
-        "inputId": "INP_EVI_EV_RUSH_END",
-        "triggerValue": "SET4PLUS",
+        "id": "EVI_EV_TROPHY_GOLD",
+        "name": "金",
+        "displayName": "金",
+        "inputId": "INP_EVI_EV_TROPHY",
+        "triggerValue": "GOLD",
         "confirmedSettings": [
           "SET_4",
           "SET_5",
@@ -231,15 +335,15 @@
         "hasImage": false,
         "type": "SETTING_CONFIRMATION",
         "sourceEvidenceRefs": [
-          "RE_END_4PLUS"
+          "RE_TROPHY_GOLD"
         ]
       },
       {
-        "id": "EVI_EV_RUSH_END_SET5PLUS",
-        "name": "vs大和学院",
-        "displayName": "vs大和学院",
-        "inputId": "INP_EVI_EV_RUSH_END",
-        "triggerValue": "SET5PLUS",
+        "id": "EVI_EV_TROPHY_RED",
+        "name": "赤",
+        "displayName": "赤",
+        "inputId": "INP_EVI_EV_TROPHY",
+        "triggerValue": "RED",
         "confirmedSettings": [
           "SET_5",
           "SET_6"
@@ -253,15 +357,15 @@
         "hasImage": false,
         "type": "SETTING_CONFIRMATION",
         "sourceEvidenceRefs": [
-          "RE_END_5PLUS"
+          "RE_TROPHY_RED"
         ]
       },
       {
-        "id": "EVI_EV_RUSH_END_SET6",
-        "name": "ウェディング",
-        "displayName": "ウェディング",
-        "inputId": "INP_EVI_EV_RUSH_END",
-        "triggerValue": "SET6",
+        "id": "EVI_EV_TROPHY_RAINBOW",
+        "name": "虹",
+        "displayName": "虹",
+        "inputId": "INP_EVI_EV_TROPHY",
+        "triggerValue": "RAINBOW",
         "confirmedSettings": [
           "SET_6"
         ],
@@ -275,29 +379,95 @@
         "hasImage": false,
         "type": "SETTING_CONFIRMATION",
         "sourceEvidenceRefs": [
-          "RE_END_6"
+          "RE_TROPHY_RAINBOW"
         ]
       },
       {
-        "id": "EVI_EV_RUSH_END_SET246",
-        "name": "関羽&孫策",
-        "displayName": "関羽&孫策",
-        "inputId": "INP_EVI_EV_RUSH_END",
-        "triggerValue": "SET246",
+        "id": "EVI_EV_MAGATAMA_GUIDE_30G",
+        "name": "30G（設定2以上）",
+        "displayName": "30G（設定2以上）",
+        "inputId": "INP_EVI_EV_MAGATAMA_GUIDE",
+        "triggerValue": "30G",
         "confirmedSettings": [
           "SET_2",
+          "SET_3",
           "SET_4",
+          "SET_5",
+          "SET_6"
+        ],
+        "deniedSettings": [
+          "SET_1"
+        ],
+        "hasImage": false,
+        "type": "SETTING_CONFIRMATION",
+        "sourceEvidenceRefs": [
+          "RE_MAGATAMA_30"
+        ]
+      },
+      {
+        "id": "EVI_EV_MAGATAMA_GUIDE_40G",
+        "name": "40G（設定3以上）",
+        "displayName": "40G（設定3以上）",
+        "inputId": "INP_EVI_EV_MAGATAMA_GUIDE",
+        "triggerValue": "40G",
+        "confirmedSettings": [
+          "SET_3",
+          "SET_4",
+          "SET_5",
           "SET_6"
         ],
         "deniedSettings": [
           "SET_1",
+          "SET_2"
+        ],
+        "hasImage": false,
+        "type": "SETTING_CONFIRMATION",
+        "sourceEvidenceRefs": [
+          "RE_MAGATAMA_40"
+        ]
+      },
+      {
+        "id": "EVI_EV_MAGATAMA_GUIDE_50G",
+        "name": "50G（設定4以上）",
+        "displayName": "50G（設定4以上）",
+        "inputId": "INP_EVI_EV_MAGATAMA_GUIDE",
+        "triggerValue": "50G",
+        "confirmedSettings": [
+          "SET_4",
+          "SET_5",
+          "SET_6"
+        ],
+        "deniedSettings": [
+          "SET_1",
+          "SET_2",
+          "SET_3"
+        ],
+        "hasImage": false,
+        "type": "SETTING_CONFIRMATION",
+        "sourceEvidenceRefs": [
+          "RE_MAGATAMA_50"
+        ]
+      },
+      {
+        "id": "EVI_EV_MAGATAMA_GUIDE_60G",
+        "name": "60G（設定6）",
+        "displayName": "60G（設定6）",
+        "inputId": "INP_EVI_EV_MAGATAMA_GUIDE",
+        "triggerValue": "60G",
+        "confirmedSettings": [
+          "SET_6"
+        ],
+        "deniedSettings": [
+          "SET_1",
+          "SET_2",
           "SET_3",
+          "SET_4",
           "SET_5"
         ],
         "hasImage": false,
         "type": "SETTING_CONFIRMATION",
         "sourceEvidenceRefs": [
-          "RE_END_246"
+          "RE_MAGATAMA_60"
         ]
       }
     ],
@@ -306,28 +476,14 @@
         "id": "SRC_PWORLD",
         "classification": "ANALYSIS",
         "pageName": "L 真・一騎当千",
-        "url": "https://www.p-world.co.jp/machine/database/10116",
+        "url": "https://www.p-world.co.jp/machine/database/10086",
         "checkedAt": "2026-08-24"
       },
       {
-        "id": "SRC_NANA",
-        "classification": "ANALYSIS",
-        "pageName": "スマスロ真・一騎当千 設定判別",
-        "url": "https://nana-press.com/kaiseki/machine/815/24357/",
-        "checkedAt": "2026-08-24"
-      },
-      {
-        "id": "SRC_P7",
+        "id": "SRC_NANATETSU",
         "classification": "ANALYSIS",
         "pageName": "L 真・一騎当千 設定判別",
-        "url": "https://pachiseven.jp/machines/7023/cutout/1005",
-        "checkedAt": "2026-08-24"
-      },
-      {
-        "id": "SRC_SM",
-        "classification": "ANALYSIS",
-        "pageName": "真・一騎当千 終了画面&ボーナス中キャラ",
-        "url": "https://pachimaga.com/free/machine/c7265794cbc12bdee6add233fe1321cc646fd6ae.php",
+        "url": "https://nana-press.com/kaiseki/machine/823/25722/",
         "checkedAt": "2026-08-24"
       }
     ]
@@ -354,27 +510,39 @@
         ]
       },
       {
-        "id": "AUTO_ROLE",
-        "title": "小役",
+        "id": "AUTO_INITIAL",
+        "title": "初当り",
         "displayOrder": 2,
         "items": [
           {
             "type": "input",
-            "inputId": "INP_COMMON_BELL",
-            "label": "1枚or11枚ベル",
+            "inputId": "INP_CZ_COUNT",
+            "label": "CZ初当り",
+            "widget": "counter"
+          },
+          {
+            "type": "input",
+            "inputId": "INP_AT_COUNT",
+            "label": "AT初当り",
             "widget": "counter"
           }
         ]
       },
       {
-        "id": "AUTO_AT",
-        "title": "AT",
+        "id": "AUTO_ROLE",
+        "title": "小役",
         "displayOrder": 3,
         "items": [
           {
             "type": "input",
-            "inputId": "INP_AT_FIRST_HIT",
-            "label": "AT初当り",
+            "inputId": "INP_BELL1",
+            "label": "1枚共通ベル",
+            "widget": "counter"
+          },
+          {
+            "type": "input",
+            "inputId": "INP_BELL11",
+            "label": "11枚共通ベル",
             "widget": "counter"
           }
         ]
@@ -386,8 +554,14 @@
         "items": [
           {
             "type": "input",
-            "inputId": "INP_EVI_EV_RUSH_END",
-            "label": "RUSH終了画面",
+            "inputId": "INP_EVI_EV_TROPHY",
+            "label": "Daiichiトロフィー",
+            "widget": "select"
+          },
+          {
+            "type": "input",
+            "inputId": "INP_EVI_EV_MAGATAMA_GUIDE",
+            "label": "勾玉の導き 継続ゲーム数",
             "widget": "select"
           }
         ]
@@ -397,44 +571,47 @@
   "selectionSummary": {
     "schemaVersion": "selection-summary-v1",
     "evaluatedCount": 4,
-    "selectedCount": 2,
-    "rejectedCount": 2,
+    "selectedCount": 4,
+    "rejectedCount": 0,
     "selected": [
       {
-        "featureId": "FEAT_COMMON_BELL",
-        "name": "1枚or11枚ベル合成確率",
-        "reason": "設定差は小さいものの約1/5で出現し、実戦中に多くの試行を集められます。",
+        "featureId": "FEAT_CZ_INITIAL",
+        "name": "CZ初当り",
+        "reason": "CZ初当りは通常ゲーム数を分母に直接観測でき、現行の必要試行量もAT初当りより少ないため主Featureとして採用します。",
         "requiredTrials": {
-          "value": 13891,
+          "value": 18901,
           "unit": "通常ゲーム"
         }
       },
       {
-        "featureId": "FEAT_AT_FIRST_HIT",
-        "name": "AT初当り確率",
-        "reason": "推測計算に採用しています。",
+        "featureId": "FEAT_AT_INITIAL",
+        "name": "AT初当り",
+        "reason": "AT初当りにも設定差はありますが、CZ経由を内包しCZ初当りより必要試行量が多いため、CZを数えていない場合だけ使うFallbackとします。CZ初当りが有効なら二重評価を避けるためAT初当りは抑制します。",
         "requiredTrials": {
-          "value": 14267,
+          "value": 17949,
+          "unit": "通常ゲーム"
+        }
+      },
+      {
+        "featureId": "FEAT_COMMON_BELL_1",
+        "name": "1枚共通ベル",
+        "reason": "設定差は小さいものの高頻度で観測でき、初当り系と独立した小役情報として採用します。",
+        "requiredTrials": {
+          "value": 33984,
+          "unit": "通常ゲーム"
+        }
+      },
+      {
+        "featureId": "FEAT_COMMON_BELL_11",
+        "name": "11枚共通ベル",
+        "reason": "設定差は小さいものの高頻度で観測でき、1枚共通ベルとは別カテゴリの小役情報として採用します。",
+        "requiredTrials": {
+          "value": 49395,
           "unit": "通常ゲーム"
         }
       }
     ],
-    "rejected": [
-      {
-        "featureId": "FEAT_CZ_FIRST",
-        "name": "闘士決戦（CZ）初当り確率",
-        "reason": "AT初当りと重複。",
-        "requiredTrials": {
-          "value": 6490,
-          "unit": "通常ゲーム"
-        }
-      },
-      {
-        "featureId": "FEAT_MODE",
-        "name": "モード移行率",
-        "reason": "状態を正確に判別できない。"
-      }
-    ]
+    "rejected": []
   },
   "reliability": {},
   "metadata": {

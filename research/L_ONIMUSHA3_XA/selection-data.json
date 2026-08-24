@@ -13,9 +13,9 @@
     {"id":"INP_AT_FIRST_HIT","name":"AT初当り","type":"counter","category":"AT","unit":"回","displayOrder":7,"inferenceRole":"INCLUDE_FALLBACK"}
   ],
   "features":[
-    {"researchFeatureId":"RF_POINT_HYAKKI_THRESHOLD","featureId":"FEAT_POINT_HYAKKI_THRESHOLD","adoptionCategory":"INCLUDE_PRIMARY","numeratorInputId":"INP_POINT_100","categoryInputIds":["INP_POINT_200","INP_POINT_300","INP_POINT_400"],"denominatorInputIds":["INP_POINT_100","INP_POINT_200","INP_POINT_300","INP_POINT_400","INP_POINT_500"],"inputTransform":"sum_inputs_to_trials","residualCategoryLabel":"500PT","minimumSample":5,"sampleRecommendation":30,"userReason":"ポイント百鬼に入った規定ポイントの構成を一体評価します。500ptは公開値の丸め誤差を避けるため残差カテゴリとして扱います。AT初当りとは同時加算しません。"},
-    {"researchFeatureId":"RF_AT_FIRST","featureId":"FEAT_AT_FIRST_HIT","adoptionCategory":"INCLUDE_FALLBACK","numeratorInputId":"INP_AT_FIRST_HIT","denominatorInputId":"INP_NORMAL_GAMES","minimumSample":500,"sampleRecommendation":5000,"suppressedByFeatureIds":["FEAT_POINT_HYAKKI_THRESHOLD"],"difficultyExposure":{"mode":"per_game","factor":1,"quality":"EXACT"}},
-    {"researchFeatureId":"RF_INTERNAL_STATE","featureId":"FEAT_INTERNAL_STATE","adoptionCategory":"EXCLUDE","internalReason":"設定差はあるが内部の通常・高確・超高確を実戦中に確定観測できず、見た目の状態で分類すると誤入力リスクが高い。","userFacingReason":"状態を正確に判別できない。"}
+    {"researchFeatureId":"RF_POINT_HYAKKI_THRESHOLD","featureId":"FEAT_POINT_HYAKKI_THRESHOLD","adoptionCategory":"INCLUDE_PRIMARY","numeratorInputId":"INP_POINT_100","categoryInputIds":["INP_POINT_200","INP_POINT_300","INP_POINT_400"],"denominatorInputIds":["INP_POINT_100","INP_POINT_200","INP_POINT_300","INP_POINT_400","INP_POINT_500"],"inputTransform":"sum_inputs_to_trials","residualCategoryLabel":"500PT","minimumSample":5,"sampleRecommendation":30,"userReason":"ポイントごとの百鬼突入には設定差があり、100〜500ptの到達先構成を一体評価できるため主Featureとして採用します。500ptは公開値の丸め誤差を避けるため残差カテゴリとして扱います。"},
+    {"researchFeatureId":"RF_AT_FIRST","featureId":"FEAT_AT_FIRST_HIT","adoptionCategory":"INCLUDE_FALLBACK","numeratorInputId":"INP_AT_FIRST_HIT","denominatorInputId":"INP_NORMAL_GAMES","minimumSample":500,"sampleRecommendation":5000,"suppressedByFeatureIds":["FEAT_POINT_HYAKKI_THRESHOLD"],"difficultyExposure":{"mode":"per_game","factor":1,"quality":"EXACT"},"userReason":"AT初当りにも設定差があり、通常ゲーム数を分母として安定して観測できるため、ポイントごとの百鬼突入を詳細記録しない場合のFallbackとして採用します。ポイント百鬼Featureが有効な場合はAT初当りを抑制し、同じ初当り生成過程を二重評価しません。"},
+    {"researchFeatureId":"RF_INTERNAL_STATE","featureId":"FEAT_INTERNAL_STATE","adoptionCategory":"EXCLUDE","internalReason":"設定差はあるが内部の通常・高確・超高確を実戦中に確定観測できず、見た目の状態で分類すると誤入力リスクが高い。","userFacingReason":"内部の通常・高確・超高確を実戦中に正確に判別できず、見た目で分類すると誤入力リスクが高いため不採用。"}
   ],
   "evidence":[],
   "evidenceUi":{"groups":[
@@ -34,5 +34,5 @@
     ]}
   ]},
   "difficultyAnalysis":{"targetGameBasis":{"basisId":"NORMAL_GAMES","label":"通常ゲーム","quality":"EXACT"},"calibrationAllowedExposureQualities":["EXACT","DERIVED"]},
-  "selectionNotes":["ポイント百鬼の詳細データがある場合はAT初当りをsuppressionし、同じ初当り生成過程を二重評価しない。","ポイント百鬼の1試行あたりゲーム数を安全にDifficultyへ換算できないため、詳細Featureは現段階でDifficulty exposureを設定しない。"]
+  "selectionNotes":["ポイント百鬼の詳細データがある場合はAT初当りをsuppressionし、同じ初当り生成過程を二重評価しない。","ポイント百鬼の1試行あたりゲーム数を安全にDifficultyへ換算できないため、詳細Featureは現段階でDifficulty exposureを設定しない。","Difficultyスコアが準備中なのは採用Feature不足ではなく、主Featureであるポイント百鬼1試行を通常Gへ安全に換算できる公開根拠がないため。"]
 }

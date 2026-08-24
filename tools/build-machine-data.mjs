@@ -201,7 +201,7 @@ function buildSelectionSummary(research,selection,statistics=null){
     }
     if(item.requiredTrials && /既存MachineData定義|existing machine data/i.test(String(item.requiredTrials.unit))) fail(`${sf.featureId}: requiredTrials.unit must be user-facing`);
     if(sf.adoptionCategory==="EXCLUDE") rejected.push(item);
-    else if(sf.adoptionCategory==="INCLUDE_PRIMARY" || sf.adoptionCategory==="INCLUDE_SUPPORT") selected.push(item);
+    else if(sf.adoptionCategory==="INCLUDE_PRIMARY" || sf.adoptionCategory==="INCLUDE_SUPPORT" || sf.adoptionCategory==="INCLUDE_FALLBACK") selected.push(item);
   }
 
   for(const rf of research.features??[]){
