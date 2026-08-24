@@ -3,7 +3,7 @@
   "machine": {
     "schemaVersion": "2.0.0",
     "machineId": "S_MY_JUGGLER_V_KD",
-    "machineDataVersion": "0.3.7",
+    "machineDataVersion": "0.3.8",
     "displayName": "マイジャグラーⅤ",
     "modelName": "SマイジャグラーVKD",
     "manufacturer": "北電子",
@@ -85,15 +85,33 @@
         "minimum": 0
       },
       {
-        "id": "INP_REG_COUNT",
-        "name": "REG合計",
+        "id": "INP_SINGLE_REG_COUNT",
+        "name": "単独REG",
         "category": "SELF_PLAY",
         "type": "counter",
         "unit": "回",
         "displayOrder": 12,
+        "inferenceRole": "INCLUDE_SUPPORT",
+        "observationScope": "SELF_PLAY",
+        "defaultValue": 0,
+        "minimum": 0
+      },
+      {
+        "id": "INP_REG_COUNT",
+        "name": "REG合計（自動計算）",
+        "category": "SELF_PLAY",
+        "type": "counter",
+        "unit": "回",
+        "displayOrder": 15,
         "inferenceRole": "INCLUDE_PRIMARY",
         "observationScope": "SELF_PLAY",
         "defaultValue": 0,
+        "inputVisible": false,
+        "derivedCalculation": "sum",
+        "derivedFromInputIds": [
+          "INP_SINGLE_REG_COUNT",
+          "INP_CHERRY_REG_COUNT"
+        ],
         "minimum": 0
       },
       {
@@ -102,7 +120,7 @@
         "category": "SELF_PLAY",
         "type": "counter",
         "unit": "回",
-        "displayOrder": 13,
+        "displayOrder": 14,
         "inferenceRole": "INCLUDE_PRIMARY",
         "observationScope": "SELF_PLAY",
         "defaultValue": null,
@@ -114,7 +132,7 @@
         "category": "SELF_PLAY",
         "type": "counter",
         "unit": "回",
-        "displayOrder": 14,
+        "displayOrder": 13,
         "inferenceRole": "INCLUDE_SUPPORT",
         "observationScope": "SELF_PLAY",
         "defaultValue": 0,
@@ -257,17 +275,16 @@
         "reliabilityProfile": {
           "weight": 0.35
         },
+        "inputTransform": "sum_inputs_to_trials",
         "numeratorInputId": "INP_CHERRY_REG_COUNT",
-        "denominatorInputId": "INP_REG_COUNT",
+        "denominatorInputIds": [
+          "INP_CHERRY_REG_COUNT",
+          "INP_SINGLE_REG_COUNT"
+        ],
         "categoryInputIds": [
-          "INP_REG_COUNT"
+          "INP_SINGLE_REG_COUNT"
         ],
         "probabilities": {},
-        "categorySubtractInputIds": {
-          "INP_REG_COUNT": [
-            "INP_CHERRY_REG_COUNT"
-          ]
-        },
         "categoryLabels": [
           "CHERRY_REG",
           "SINGLE_REG"
@@ -416,19 +433,8 @@
           },
           {
             "type": "input",
-            "inputId": "INP_REG_COUNT",
-            "label": "REG合計",
-            "widget": "counter",
-            "gridSpan": 6,
-            "config": {
-              "directInput": true,
-              "compact": true
-            }
-          },
-          {
-            "type": "input",
-            "inputId": "INP_GRAPE_COUNT",
-            "label": "ブドウ",
+            "inputId": "INP_SINGLE_REG_COUNT",
+            "label": "単独REG",
             "widget": "counter",
             "gridSpan": 6,
             "config": {
@@ -440,6 +446,17 @@
             "type": "input",
             "inputId": "INP_CHERRY_REG_COUNT",
             "label": "チェリー重複REG",
+            "widget": "counter",
+            "gridSpan": 6,
+            "config": {
+              "directInput": true,
+              "compact": true
+            }
+          },
+          {
+            "type": "input",
+            "inputId": "INP_GRAPE_COUNT",
+            "label": "ブドウ",
             "widget": "counter",
             "gridSpan": 6,
             "config": {
@@ -478,7 +495,7 @@
       {
         "featureId": "FEAT_SINGLE_REG_COMPOSITION",
         "name": "REGの単独・チェリー重複構成",
-        "reason": "チェリー重複REGを直接カウントし、単独REGはREG合計から自動算出してREG内訳の設定差を評価します。入力回数を抑えながら従来と同じ構成情報を利用できます。",
+        "reason": "単独REGとチェリー重複REGをそれぞれ直接カウントし、2項目の合計をREG総数としてREG内訳の設定差を評価します。",
         "requiredTrials": {
           "value": 250,
           "unit": "REG1回"

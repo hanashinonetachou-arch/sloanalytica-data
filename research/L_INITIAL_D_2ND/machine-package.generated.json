@@ -3,7 +3,7 @@
   "machine": {
     "schemaVersion": "2.0.0",
     "machineId": "L_INITIAL_D_2ND",
-    "machineDataVersion": "0.1.5",
+    "machineDataVersion": "0.1.6",
     "displayName": "スマスロ頭文字D 2nd",
     "manufacturer": "サミー",
     "settings": [
@@ -47,14 +47,15 @@
         "minimum": 0
       },
       {
-        "id": "INP_BELL_TARGET_GAMES",
-        "name": "ベル集計対象G（LB確定画面の押し順ナビ区間・LB中を除外）",
+        "id": "INP_BELL_EXCLUDED_GAMES",
+        "name": "ベル集計から除外するゲーム数",
         "category": "PRIMARY_BELL",
         "type": "integer",
         "unit": "G",
         "displayOrder": 10,
         "inferenceRole": "INCLUDE_PRIMARY",
         "defaultValue": 0,
+        "description": "LB確定画面の押し順ナビ区間とLB中のゲーム数を合計して入力してください。",
         "minimum": 0
       },
       {
@@ -64,7 +65,6 @@
         "type": "counter",
         "unit": "回",
         "displayOrder": 11,
-        "parentInputId": "INP_BELL_TARGET_GAMES",
         "inferenceRole": "INCLUDE_PRIMARY",
         "defaultValue": 0,
         "minimum": 0
@@ -288,7 +288,13 @@
           "weight": 1
         },
         "displayFormat": "ratio_1_over_n",
-        "denominatorInputId": "INP_BELL_TARGET_GAMES",
+        "denominatorAdjustments": [
+          {
+            "inputId": "INP_BELL_EXCLUDED_GAMES",
+            "multiplier": -1
+          }
+        ],
+        "denominatorInputId": "INP_MY_SAMMY_NORMAL_GAMES",
         "numeratorInputId": "INP_BELL_COUNT",
         "probabilities": {
           "SET_1": 0.0684931506849315,
@@ -746,12 +752,12 @@
         "id": "UI_DESIGN_2",
         "title": "通常時ベル",
         "displayOrder": 2,
-        "description": "LB確定画面の押し順ナビ区間・LB中を除外した対象Gとベル回数を入力します。",
+        "description": "通常ゲーム数から除外する「LB確定画面の押し順ナビ区間・LB中」のゲーム数と、通常時ベル回数を入力します。ベル対象Gは自動計算します。",
         "items": [
           {
             "type": "input",
-            "inputId": "INP_BELL_TARGET_GAMES",
-            "label": "ベル集計対象G（LB確定画面の押し順ナビ区間・LB中を除外）",
+            "inputId": "INP_BELL_EXCLUDED_GAMES",
+            "label": "ベル集計から除外するゲーム数",
             "widget": "number",
             "gridSpan": 12,
             "config": {
@@ -876,7 +882,7 @@
       {
         "featureId": "FEAT_BELL_NORMAL",
         "name": "通常時ベル",
-        "reason": "試行数を得やすく、実戦中に継続して観測できる。",
+        "reason": "試行数を得やすく、実戦中に継続して観測できる。通常ゲーム数からLB確定画面の押し順ナビ区間・LB中のゲーム数を除外して分母を自動算出します。",
         "requiredTrials": {
           "value": 6084,
           "unit": "押し順ナビ区間を除くゲーム"

@@ -1,7 +1,7 @@
 {
   "schemaVersion": "selection-data-v1",
   "machineId": "S_MY_JUGGLER_V_KD",
-  "machineDataVersion": "0.3.7",
+  "machineDataVersion": "0.3.8",
   "inputs": [
     {
       "id": "INP_PREDECESSOR_GAMES",
@@ -59,15 +59,32 @@
       "defaultValue": 0
     },
     {
-      "id": "INP_REG_COUNT",
-      "name": "REG合計",
+      "id": "INP_SINGLE_REG_COUNT",
+      "name": "単独REG",
       "category": "SELF_PLAY",
       "type": "counter",
       "unit": "回",
       "displayOrder": 12,
-      "inferenceRole": "INCLUDE_PRIMARY",
+      "inferenceRole": "INCLUDE_SUPPORT",
       "observationScope": "SELF_PLAY",
       "defaultValue": 0
+    },
+    {
+      "id": "INP_REG_COUNT",
+      "name": "REG合計（自動計算）",
+      "category": "SELF_PLAY",
+      "type": "counter",
+      "unit": "回",
+      "displayOrder": 15,
+      "inferenceRole": "INCLUDE_PRIMARY",
+      "observationScope": "SELF_PLAY",
+      "defaultValue": 0,
+      "inputVisible": false,
+      "derivedCalculation": "sum",
+      "derivedFromInputIds": [
+        "INP_SINGLE_REG_COUNT",
+        "INP_CHERRY_REG_COUNT"
+      ]
     },
     {
       "id": "INP_GRAPE_COUNT",
@@ -75,7 +92,7 @@
       "category": "SELF_PLAY",
       "type": "counter",
       "unit": "回",
-      "displayOrder": 13,
+      "displayOrder": 14,
       "inferenceRole": "INCLUDE_PRIMARY",
       "observationScope": "SELF_PLAY",
       "defaultValue": null
@@ -86,7 +103,7 @@
       "category": "SELF_PLAY",
       "type": "counter",
       "unit": "回",
-      "displayOrder": 14,
+      "displayOrder": 13,
       "inferenceRole": "INCLUDE_SUPPORT",
       "observationScope": "SELF_PLAY",
       "defaultValue": 0
@@ -140,7 +157,6 @@
       "featureId": "FEAT_SINGLE_REG_COMPOSITION",
       "adoptionCategory": "INCLUDE_SUPPORT",
       "numeratorInputId": "INP_CHERRY_REG_COUNT",
-      "denominatorInputId": "INP_REG_COUNT",
       "minimumSample": 30,
       "sampleRecommendation": 80,
       "weight": 0.35,
@@ -153,15 +169,15 @@
         "sourceCategoryId": "REG",
         "eventMultiplier": 1
       },
-      "userReason": "チェリー重複REGを直接カウントし、単独REGはREG合計から自動算出してREG内訳の設定差を評価します。入力回数を抑えながら従来と同じ構成情報を利用できます。",
+      "userReason": "単独REGとチェリー重複REGをそれぞれ直接カウントし、2項目の合計をREG総数としてREG内訳の設定差を評価します。",
       "categoryInputIds": [
-        "INP_REG_COUNT"
+        "INP_SINGLE_REG_COUNT"
       ],
-      "categorySubtractInputIds": {
-        "INP_REG_COUNT": [
-          "INP_CHERRY_REG_COUNT"
-        ]
-      }
+      "inputTransform": "sum_inputs_to_trials",
+      "denominatorInputIds": [
+        "INP_CHERRY_REG_COUNT",
+        "INP_SINGLE_REG_COUNT"
+      ]
     }
   ],
   "evidence": [],

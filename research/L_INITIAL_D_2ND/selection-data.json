@@ -1,7 +1,7 @@
 {
   "schemaVersion": "selection-data-v1",
   "machineId": "L_INITIAL_D_2ND",
-  "machineDataVersion": "0.1.5",
+  "machineDataVersion": "0.1.6",
   "inputs": [
     {
       "id": "INP_MY_SAMMY_NORMAL_GAMES",
@@ -25,14 +25,15 @@
       "defaultValue": 0
     },
     {
-      "id": "INP_BELL_TARGET_GAMES",
-      "name": "ベル集計対象G（LB確定画面の押し順ナビ区間・LB中を除外）",
+      "id": "INP_BELL_EXCLUDED_GAMES",
+      "name": "ベル集計から除外するゲーム数",
       "category": "PRIMARY_BELL",
       "type": "integer",
       "unit": "G",
       "displayOrder": 10,
       "inferenceRole": "INCLUDE_PRIMARY",
-      "defaultValue": 0
+      "defaultValue": 0,
+      "description": "LB確定画面の押し順ナビ区間とLB中のゲーム数を合計して入力してください。"
     },
     {
       "id": "INP_BELL_COUNT",
@@ -41,7 +42,6 @@
       "type": "counter",
       "unit": "回",
       "displayOrder": 11,
-      "parentInputId": "INP_BELL_TARGET_GAMES",
       "inferenceRole": "INCLUDE_PRIMARY",
       "defaultValue": 0
     },
@@ -142,7 +142,7 @@
       "featureId": "FEAT_BELL_NORMAL",
       "adoptionCategory": "INCLUDE_PRIMARY",
       "numeratorInputId": "INP_BELL_COUNT",
-      "denominatorInputId": "INP_BELL_TARGET_GAMES",
+      "denominatorInputId": "INP_MY_SAMMY_NORMAL_GAMES",
       "minimumSample": 1,
       "sampleRecommendation": 7000,
       "weight": 1,
@@ -152,12 +152,18 @@
         "mode": "per_game",
         "factor": 1,
         "quality": "ESTIMATED",
-        "basisId": "BELL_NAV_EXCLUDED_GAMES",
+        "basisId": "MY_SAMMY_NORMAL_GAMES_MINUS_BELL_EXCLUDED",
         "confidence": "MEDIUM_HIGH",
-        "estimationBasis": "DMM明記の『押し順ナビが出る区間をゲーム数に含めない』条件に合わせ、ベル集計対象Gを1試行/Gとして扱う。",
-        "uncertaintyNote": "ベル集計対象Gとマイスロ通常ゲーム数の完全一致は未確認のため、現時点では別入力とする。"
+        "estimationBasis": "通常ゲーム数から、ベルを数えないLB確定画面の押し順ナビ区間とLB中ゲーム数を減算してベル対象Gを構成する。",
+        "uncertaintyNote": "実機連動機能の通常ゲーム数におけるLB関連区間の内部加算仕様は実機確認待ち。除外Gはユーザーが実戦中に集計する。"
       },
-      "userReason": "試行数を得やすく、実戦中に継続して観測できる。"
+      "userReason": "試行数を得やすく、実戦中に継続して観測できる。通常ゲーム数からLB確定画面の押し順ナビ区間・LB中のゲーム数を除外して分母を自動算出します。",
+      "denominatorAdjustments": [
+        {
+          "inputId": "INP_BELL_EXCLUDED_GAMES",
+          "multiplier": -1
+        }
+      ]
     },
     {
       "researchFeatureId": "RF_CHERRY_LOW_NORMAL_LB",
