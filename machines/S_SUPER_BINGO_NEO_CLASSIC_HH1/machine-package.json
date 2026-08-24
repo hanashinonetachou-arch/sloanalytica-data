@@ -1,0 +1,311 @@
+{
+  "schemaVersion": 1,
+  "machine": {
+    "schemaVersion": "2.0.0",
+    "machineId": "S_SUPER_BINGO_NEO_CLASSIC_HH1",
+    "machineDataVersion": "0.1.0",
+    "displayName": "スーパービンゴネオクラシック",
+    "modelName": "SスーパービンゴHH1",
+    "manufacturer": "ベルコ",
+    "settings": [
+      "SET_1",
+      "SET_2",
+      "SET_3",
+      "SET_4",
+      "SET_6"
+    ],
+    "packagePolicy": {
+      "offlineCapable": true,
+      "containsImages": false,
+      "containsExecutableCode": false
+    }
+  },
+  "inputs": {
+    "schemaVersion": "2.0.0",
+    "inputs": [
+      {
+        "id": "INP_NORMAL_GAMES",
+        "name": "通常ゲーム数",
+        "type": "integer",
+        "category": "PLAY",
+        "unit": "G",
+        "displayOrder": 1,
+        "inferenceRole": "INCLUDE_FALLBACK",
+        "uiQuickAdd": [
+          50,
+          100
+        ],
+        "defaultValue": 0,
+        "minimum": 0
+      },
+      {
+        "id": "INP_BC_FIRST_HIT",
+        "name": "BC初当り",
+        "type": "counter",
+        "category": "BC",
+        "unit": "回",
+        "displayOrder": 2,
+        "inferenceRole": "INCLUDE_FALLBACK",
+        "defaultValue": 0,
+        "minimum": 0
+      },
+      {
+        "id": "INP_CYCLE_FIRST_TRIALS",
+        "name": "BC後初回デジ周期到達",
+        "type": "counter",
+        "category": "CYCLE",
+        "unit": "回",
+        "displayOrder": 3,
+        "inferenceRole": "INCLUDE_PRIMARY",
+        "defaultValue": 0,
+        "minimum": 0
+      },
+      {
+        "id": "INP_CYCLE_FIRST_WINS",
+        "name": "初回周期→BC",
+        "type": "counter",
+        "category": "CYCLE",
+        "unit": "回",
+        "displayOrder": 4,
+        "inferenceRole": "INCLUDE_PRIMARY",
+        "parentInputId": "INP_CYCLE_FIRST_TRIALS",
+        "defaultValue": 0,
+        "minimum": 0
+      },
+      {
+        "id": "INP_CYCLE_LATER_TRIALS",
+        "name": "2回目以降デジ周期到達",
+        "type": "counter",
+        "category": "CYCLE",
+        "unit": "回",
+        "displayOrder": 5,
+        "inferenceRole": "INCLUDE_PRIMARY",
+        "defaultValue": 0,
+        "minimum": 0
+      },
+      {
+        "id": "INP_CYCLE_LATER_WINS",
+        "name": "2回目以降周期→BC",
+        "type": "counter",
+        "category": "CYCLE",
+        "unit": "回",
+        "displayOrder": 6,
+        "inferenceRole": "INCLUDE_PRIMARY",
+        "parentInputId": "INP_CYCLE_LATER_TRIALS",
+        "defaultValue": 0,
+        "minimum": 0
+      }
+    ]
+  },
+  "features": {
+    "schemaVersion": "2.0.0",
+    "features": [
+      {
+        "featureId": "FEAT_CYCLE_FIRST",
+        "name": "BC後初回デジ周期到達時のBC当選率",
+        "adoptionCategory": "INCLUDE_PRIMARY",
+        "calculationRole": "PROBABILITY",
+        "probabilityEngineUsage": true,
+        "modelType": "binomial",
+        "minimumSample": 5,
+        "sampleRecommendation": 30,
+        "denominatorInputId": "INP_CYCLE_FIRST_TRIALS",
+        "numeratorInputId": "INP_CYCLE_FIRST_WINS",
+        "displayFormat": "ratio_1_over_n",
+        "probabilities": {
+          "SET_1": 0.218,
+          "SET_2": 0.251,
+          "SET_3": 0.28,
+          "SET_4": 0.31,
+          "SET_6": 0.341
+        },
+        "sourceEvidenceRefs": [
+          "SRC_PWORLD",
+          "SRC_NANA"
+        ]
+      },
+      {
+        "featureId": "FEAT_CYCLE_LATER",
+        "name": "2回目以降デジ周期到達時のBC当選率",
+        "adoptionCategory": "INCLUDE_PRIMARY",
+        "calculationRole": "PROBABILITY",
+        "probabilityEngineUsage": true,
+        "modelType": "binomial",
+        "minimumSample": 5,
+        "sampleRecommendation": 30,
+        "denominatorInputId": "INP_CYCLE_LATER_TRIALS",
+        "numeratorInputId": "INP_CYCLE_LATER_WINS",
+        "displayFormat": "ratio_1_over_n",
+        "probabilities": {
+          "SET_1": 0.165,
+          "SET_2": 0.19,
+          "SET_3": 0.212,
+          "SET_4": 0.234,
+          "SET_6": 0.257
+        },
+        "sourceEvidenceRefs": [
+          "SRC_PWORLD",
+          "SRC_NANA"
+        ]
+      },
+      {
+        "featureId": "FEAT_BC_FIRST_HIT",
+        "name": "BC初当り確率",
+        "adoptionCategory": "INCLUDE_FALLBACK",
+        "calculationRole": "PROBABILITY",
+        "probabilityEngineUsage": true,
+        "modelType": "binomial",
+        "minimumSample": 500,
+        "sampleRecommendation": 5000,
+        "suppressedByFeatureIds": [
+          "FEAT_CYCLE_FIRST",
+          "FEAT_CYCLE_LATER"
+        ],
+        "denominatorInputId": "INP_NORMAL_GAMES",
+        "numeratorInputId": "INP_BC_FIRST_HIT",
+        "displayFormat": "ratio_1_over_n",
+        "probabilities": {
+          "SET_1": 0.00282007896221,
+          "SET_2": 0.00302938503484,
+          "SET_3": 0.00316656111463,
+          "SET_4": 0.00333667000334,
+          "SET_6": 0.00352360817477
+        },
+        "sourceEvidenceRefs": [
+          "SRC_PWORLD",
+          "SRC_NANA"
+        ]
+      }
+    ]
+  },
+  "evidence": {
+    "version": "1.0.0",
+    "evidences": [],
+    "sources": [
+      {
+        "id": "SRC_PWORLD",
+        "classification": "ANALYSIS",
+        "pageName": "スーパービンゴネオクラシック",
+        "url": "https://www.p-world.co.jp/machine/database/9860",
+        "checkedAt": "2026-08-24"
+      },
+      {
+        "id": "SRC_NANA",
+        "classification": "ANALYSIS",
+        "pageName": "スーパービンゴネオクラシック 設定差のある要素まとめ",
+        "url": "https://nana-press.com/kaiseki/machine/589/16085/",
+        "checkedAt": "2026-08-24"
+      }
+    ]
+  },
+  "ui": {
+    "sections": [
+      {
+        "id": "AUTO_PLAY",
+        "title": "遊技情報",
+        "displayOrder": 1,
+        "items": [
+          {
+            "type": "input",
+            "inputId": "INP_NORMAL_GAMES",
+            "label": "通常ゲーム数",
+            "config": {
+              "quickAdd": [
+                50,
+                100
+              ]
+            },
+            "widget": "number"
+          }
+        ]
+      },
+      {
+        "id": "AUTO_BC",
+        "title": "BC",
+        "displayOrder": 2,
+        "items": [
+          {
+            "type": "input",
+            "inputId": "INP_BC_FIRST_HIT",
+            "label": "BC初当り",
+            "widget": "counter"
+          }
+        ]
+      },
+      {
+        "id": "AUTO_CYCLE",
+        "title": "デジ周期",
+        "displayOrder": 3,
+        "items": [
+          {
+            "type": "input",
+            "inputId": "INP_CYCLE_FIRST_TRIALS",
+            "label": "BC後初回デジ周期到達",
+            "widget": "counter"
+          },
+          {
+            "type": "input",
+            "inputId": "INP_CYCLE_FIRST_WINS",
+            "label": "初回周期→BC",
+            "widget": "counter"
+          },
+          {
+            "type": "input",
+            "inputId": "INP_CYCLE_LATER_TRIALS",
+            "label": "2回目以降デジ周期到達",
+            "widget": "counter"
+          },
+          {
+            "type": "input",
+            "inputId": "INP_CYCLE_LATER_WINS",
+            "label": "2回目以降周期→BC",
+            "widget": "counter"
+          }
+        ]
+      }
+    ]
+  },
+  "selectionSummary": {
+    "schemaVersion": "selection-summary-v1",
+    "evaluatedCount": 2,
+    "selectedCount": 2,
+    "rejectedCount": 0,
+    "selected": [
+      {
+        "featureId": "FEAT_CYCLE_FIRST",
+        "name": "BC後初回デジ周期到達時のBC当選率",
+        "reason": "推測計算に採用しています。",
+        "requiredTrials": {
+          "value": 97,
+          "unit": "BC後初回デジ周期到達"
+        }
+      },
+      {
+        "featureId": "FEAT_CYCLE_LATER",
+        "name": "2回目以降デジ周期到達時のBC当選率",
+        "reason": "推測計算に採用しています。",
+        "requiredTrials": {
+          "value": 143,
+          "unit": "2回目以降デジ周期到達"
+        }
+      }
+    ],
+    "rejected": []
+  },
+  "reliability": {},
+  "metadata": {
+    "machineId": "S_SUPER_BINGO_NEO_CLASSIC_HH1",
+    "displayName": "スーパービンゴネオクラシック",
+    "settings": [
+      "SET_1",
+      "SET_2",
+      "SET_3",
+      "SET_4",
+      "SET_6"
+    ]
+  },
+  "validation": {
+    "cases": []
+  },
+  "statistics": {}
+}
