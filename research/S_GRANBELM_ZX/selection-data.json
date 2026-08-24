@@ -1,0 +1,23 @@
+{
+  "schemaVersion":"selection-data-v1",
+  "machineId":"S_GRANBELM_ZX",
+  "machineDataVersion":"0.1.0",
+  "uiCategoryLabels":{"PLAY":"遊技情報","AT":"AT","EVIDENCE":"設定示唆"},
+  "inputs":[
+    {"id":"INP_NORMAL_GAMES","name":"通常ゲーム数","type":"integer","category":"PLAY","unit":"G","displayOrder":1,"inferenceRole":"INCLUDE_PRIMARY","uiQuickAdd":[50,100]},
+    {"id":"INP_AT_FIRST_HIT","name":"AT初当り","type":"counter","category":"AT","unit":"回","displayOrder":2,"inferenceRole":"INCLUDE_PRIMARY"}
+  ],
+  "features":[
+    {"researchFeatureId":"RF_AT_FIRST","featureId":"FEAT_AT_FIRST_HIT","adoptionCategory":"INCLUDE_PRIMARY","numeratorInputId":"INP_AT_FIRST_HIT","denominatorInputId":"INP_NORMAL_GAMES","minimumSample":500,"sampleRecommendation":5000,"difficultyExposure":{"mode":"per_game","factor":1,"quality":"EXACT"}},
+    {"researchFeatureId":"RF_CZ_COMBINED","featureId":"FEAT_CZ_COMBINED","adoptionCategory":"EXCLUDE","internalReason":"CZ当選はAT初当り生成過程の上流にあり、AT初当りと単純併用すると同じ初当り過程を重複評価する。","userFacingReason":"AT初当りと重複。"},
+    {"researchFeatureId":"RF_BONUS_COMBINED","featureId":"FEAT_BONUS_COMBINED","adoptionCategory":"EXCLUDE","internalReason":"ボーナス当選はAT初当り生成過程と強く重複し、独立Featureとして単純加算しない。","userFacingReason":"AT初当りと重複。"},
+    {"researchFeatureId":"RF_AT_DIRECT","featureId":"FEAT_AT_DIRECT","adoptionCategory":"EXCLUDE","internalReason":"設定差は大きいが極低頻度かつブラッドムーン非滞在という条件分母を正確に観測しづらい。","userFacingReason":"低頻度で、正確な分母を取得しにくい。"},
+    {"researchFeatureId":"RF_MODE_SELECTION","featureId":"FEAT_MODE_SELECTION","adoptionCategory":"EXCLUDE","internalReason":"内部モードを実戦上確定観測できず、誤分類リスクが高い。","userFacingReason":"状態を正確に判別できない。"},
+    {"researchFeatureId":"RF_MB_START_STAGE","featureId":"FEAT_MB_START_STAGE","adoptionCategory":"EXCLUDE","internalReason":"設定差の存在は確認したが全設定の公開数値を今回確定できていない。","userFacingReason":"公開数値を十分に確認できない。"},
+    {"researchFeatureId":"RF_DESTINY_BATTLE","featureId":"FEAT_DESTINY_BATTLE","adoptionCategory":"EXCLUDE","internalReason":"条件付き分母と全設定数値が未解決。","userFacingReason":"正確な分母を取得できない。"},
+    {"researchFeatureId":"RF_KITA_NO_YU_RETURN","featureId":"FEAT_KITA_NO_YU_RETURN","adoptionCategory":"EXCLUDE","internalReason":"全設定数値の確認が不足しており、現段階では安全に尤度化できない。","userFacingReason":"公開数値を十分に確認できない。"}
+  ],
+  "evidence":[],
+  "difficultyAnalysis":{"targetGameBasis":{"basisId":"NORMAL_GAMES","label":"通常ゲーム","quality":"EXACT"},"calibrationAllowedExposureQualities":["EXACT","DERIVED"]},
+  "selectionNotes":["複雑なCZ・ボーナス・AT経路を同時加算せず、現段階ではAT初当りを代表Featureとする。","未解決候補はResearchから消さず、不採用理由を保持する。"]
+}
