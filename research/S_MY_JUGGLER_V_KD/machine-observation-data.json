@@ -1,8 +1,11 @@
 {
-  "schemaVersion": "machine-observation-data-v1",
+  "schemaVersion": "machine-observation-data-v2",
   "machineId": "S_MY_JUGGLER_V_KD",
   "displayName": "マイジャグラーⅤ",
-  "researchedAt": "2026-08-22",
+  "provisionalRegistrationId": null,
+  "registrationId": null,
+  "releaseDate": null,
+  "researchedAt": "2026-08-24",
   "sources": [
     {
       "sourceId": "OBS_SRC_KITAC",
@@ -13,32 +16,112 @@
       "sourceType": "manufacturer"
     }
   ],
-  "machineMenu": {
-    "status": "UNRESOLVED",
-    "availableData": [],
-    "sourceRefs": [
-      "OBS_SRC_KITAC"
-    ],
-    "notes": "筐体標準の遊技履歴メニューとして取得できる項目は公開情報から確定していない。着席時ゲーム数・BIG・REGはホール側データ表示を使う実機検証済み入力として別管理する。"
+  "sourceCoverage": {
+    "machineMenu": "UNRESOLVED",
+    "dataCounter": "VERIFIED_ON_MACHINE",
+    "linkedService": "UNRESOLVED",
+    "directPlay": "VERIFIED_ON_MACHINE",
+    "endEvent": "CHECKED_NONE",
+    "seatedState": "VERIFIED_ON_MACHINE"
   },
-  "linkedService": {
-    "status": "UNRESOLVED",
-    "availableData": [],
-    "sourceRefs": [
-      "OBS_SRC_KITAC"
-    ],
-    "notes": "設定推測入力へ利用できる機種固有の実機連動サービスは今回の公開情報では確定できない。不存在とは断定しない。"
-  },
-  "predecessorData": {
-    "status": "CHECKED",
-    "availableData": [
-      "着席時ゲーム数",
-      "着席時BIG",
-      "着席時REG"
-    ],
-    "sourceRefs": [],
-    "notes": "実機検証済みの着席時3項目。現行MachineDataではPREDECESSOR_SNAPSHOTとして着席前BIG・REG内訳Featureへ参加する。ゲーム数は自身区間の開始値としても利用できるため、このUXを統計Research再生成で削除しない。",
-    "usableForInference": true,
-    "usableForSelfSessionDelta": true
-  }
+  "observations": [
+    {
+      "observationId": "OBS_MYJ5_SEATED_GAMES",
+      "sourceType": "DATA_COUNTER",
+      "observationMode": "DATA_COUNTER_READ",
+      "status": "VERIFIED_ON_MACHINE",
+      "label": "着席時ゲーム数",
+      "categories": ["SEATED_STATE"],
+      "timing": ["着席時"],
+      "excludedConditions": [],
+      "sourceRefs": [],
+      "notes": "店舗データ表示から取得できる場合に入力し、自分区間の開始値にも利用する。"
+    },
+    {
+      "observationId": "OBS_MYJ5_SEATED_BIG_REG",
+      "sourceType": "DATA_COUNTER",
+      "observationMode": "DATA_COUNTER_READ",
+      "status": "VERIFIED_ON_MACHINE",
+      "label": "着席時BIG・REG",
+      "categories": ["SEATED_STATE","PREDECESSOR"],
+      "timing": ["着席時"],
+      "excludedConditions": [],
+      "sourceRefs": [],
+      "notes": "着席前区間のBIG・REGとして推測に利用する。"
+    },
+    {
+      "observationId": "OBS_MYJ5_SELF_GAMES",
+      "sourceType": "DIRECT_PLAY",
+      "observationMode": "DERIVED",
+      "status": "VERIFIED_ON_MACHINE",
+      "label": "自分のゲーム数",
+      "categories": ["SELF_PLAY"],
+      "timing": ["実戦中"],
+      "excludedConditions": [],
+      "sourceRefs": [],
+      "notes": "現在ゲーム数と開始時ゲーム数の差から取得できる。"
+    },
+    {
+      "observationId": "OBS_MYJ5_BIG_REG_GRAPE",
+      "sourceType": "DIRECT_PLAY",
+      "observationMode": "MANUAL_COUNTER",
+      "status": "VERIFIED_ON_MACHINE",
+      "label": "BIG・単独REG・チェリー重複REG・ブドウ",
+      "categories": ["SELF_PLAY"],
+      "timing": ["実戦中"],
+      "excludedConditions": [],
+      "sourceRefs": [],
+      "notes": "REG合計は単独REGとチェリー重複REGの和として内部計算し、ユーザーに二重入力させない。"
+    }
+  ],
+  "featureMappings": [
+    {
+      "featureId": "FEAT_PREDECESSOR_BONUS_OUTCOME",
+      "mappingType": "EXACT",
+      "observationIds": ["OBS_MYJ5_SEATED_GAMES","OBS_MYJ5_SEATED_BIG_REG"],
+      "collectionMethods": ["DATA_COUNTER_READ"],
+      "usableForInference": true,
+      "usableForDifficulty": false,
+      "notes": "着席前区間はInferenceのみ。"
+    },
+    {
+      "featureId": "FEAT_SELF_NORMAL_OUTCOME",
+      "mappingType": "COMBINABLE",
+      "observationIds": ["OBS_MYJ5_SELF_GAMES","OBS_MYJ5_BIG_REG_GRAPE"],
+      "collectionMethods": ["DERIVED","MANUAL_COUNTER"],
+      "usableForInference": true,
+      "usableForDifficulty": true,
+      "notes": "REG合計は観測2項目からderived。"
+    },
+    {
+      "featureId": "FEAT_SINGLE_REG_COMPOSITION",
+      "mappingType": "EXACT",
+      "observationIds": ["OBS_MYJ5_BIG_REG_GRAPE"],
+      "collectionMethods": ["MANUAL_COUNTER"],
+      "usableForInference": true,
+      "usableForDifficulty": true,
+      "notes": "単独REGとチェリー重複REGを直接観測する。"
+    }
+  ],
+  "researchReopenRequests": [],
+  "fieldVerificationItems": [
+    {
+      "verificationId": "VERIFY_MYJ5_MACHINE_MENU",
+      "status": "WAITING_FOR_MACHINE",
+      "sourceType": "MACHINE_MENU",
+      "priority": "LOW",
+      "question": "筐体標準メニューから設定推測に利用できる履歴項目が取得できるか。",
+      "uiImpact": "LOW",
+      "notes": "現行推測には必須ではない。"
+    },
+    {
+      "verificationId": "VERIFY_MYJ5_LINKED_SERVICE",
+      "status": "WAITING_FOR_MACHINE",
+      "sourceType": "LINKED_SERVICE",
+      "priority": "LOW",
+      "question": "機種固有の実機連動機能から設定推測用データを取得できるか。",
+      "uiImpact": "LOW",
+      "notes": "不存在とは断定しない。"
+    }
+  ]
 }
