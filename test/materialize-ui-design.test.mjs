@@ -27,7 +27,8 @@ test('Initial D: compact 2-column end-screen counters are materialized',()=>{
   const pkg=read('machines/L_INITIAL_D_2ND/machine-package.json');
   const design=read('research/L_INITIAL_D_2ND/ui-design-data.json');
   const out=materializeUiDesign(pkg,design);
-  const section=out.ui.sections.find(s=>s.title==='AT中LB終了画面');
+  const section=out.ui.sections.find(s=>s.title==='AT終了画面');
+  assert.ok(section,'field-tested AT終了画面 section exists');
   assert.equal(section.items.length,4);
   for(const item of section.items){
     assert.equal(item.gridSpan,6);
