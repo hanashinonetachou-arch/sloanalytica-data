@@ -14,9 +14,13 @@ test('batch enforces 10-machine safety limit', () => {
   assert.throws(() => normalizeMachineIds(Array.from({ length: 11 }, (_, i) => `M_${i}`)), /batch size exceeds 10/);
 });
 
-test('batch rollback snapshot includes machine registry', () => {
+test('batch rollback snapshot includes machine registry and generated reports', () => {
   const paths = generatedPaths(['A_ONE']).map(p => p.replaceAll('\\', '/'));
   assert.ok(paths.some(p => p.endsWith('/machine-registry.json')));
+  assert.ok(paths.some(p => p.endsWith('/research/A_ONE/statistics-report.json')));
+  assert.ok(paths.some(p => p.endsWith('/research/A_ONE/difficulty-report.json')));
+  assert.ok(paths.some(p => p.endsWith('/research/A_ONE/setting-band-report.json')));
+  assert.ok(paths.some(p => p.endsWith('/machines/A_ONE/machine-package.json')));
 });
 
 test('clean validations and selection quality classify PASS', () => {
