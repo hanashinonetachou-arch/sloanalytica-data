@@ -1,17 +1,27 @@
 {
-  "schemaVersion":"selection-data-v1","machineId":"S_MY_FLOWER_II_EE_30","machineDataVersion":"0.1.0",
-  "uiCategoryLabels":{"PREDECESSOR":"着席時データ","NORMAL":"通常時","SMALL_ROLE":"小役","END_EVENT":"ボーナス・示唆"},
+  "schemaVersion":"selection-data-v1","machineId":"S_MY_FLOWER_II_EE_30","machineDataVersion":"0.1.1",
+  "uiCategoryLabels":{"PREDECESSOR":"着席時データ","NORMAL":"通常時","END_EVENT":"ボーナス終了時"},
   "inputs":[
-    {"id":"INP_PREDECESSOR_GAMES","name":"着席時ゲーム数","type":"integer","category":"PREDECESSOR","unit":"G","displayOrder":1,"inferenceRole":"DISPLAY_ONLY","defaultValue":0,"observationScope":"PREDECESSOR_SNAPSHOT","sessionDifferenceHelper":true},
-    {"id":"INP_CURRENT_GAMES","name":"現在のゲーム数","type":"integer","category":"PREDECESSOR","unit":"G","displayOrder":2,"inferenceRole":"DISPLAY_ONLY","defaultValue":0,"sessionDifferenceHelper":true},
+    {"id":"INP_PREDECESSOR_GAMES","name":"着席時ゲーム数","type":"integer","category":"PREDECESSOR","unit":"G","displayOrder":1,"inferenceRole":"DISPLAY_ONLY","defaultValue":0,"observationScope":"PREDECESSOR_SNAPSHOT","sessionDifferenceHelper":true,"allowReferenceInput":true},
+    {"id":"INP_CURRENT_GAMES","name":"現在のゲーム数","type":"integer","category":"PREDECESSOR","unit":"G","displayOrder":2,"inferenceRole":"DISPLAY_ONLY","defaultValue":0,"sessionDifferenceHelper":true,"allowReferenceInput":true},
     {"id":"INP_NORMAL_GAMES","name":"自身の通常ゲーム数","type":"integer","category":"NORMAL","unit":"G","displayOrder":10,"inferenceRole":"INCLUDE_PRIMARY","defaultValue":0},
-    {"id":"INP_BONUS_INITIAL","name":"ボーナス初当り","type":"counter","category":"NORMAL","unit":"回","displayOrder":11,"inferenceRole":"INCLUDE_PRIMARY","defaultValue":0,"parentInputId":"INP_NORMAL_GAMES"},
-    {"id":"INP_CHERRY","name":"チェリー","type":"counter","category":"SMALL_ROLE","unit":"回","displayOrder":20,"inferenceRole":"DISPLAY_ONLY","defaultValue":null,"parentInputId":"INP_NORMAL_GAMES"},
-    {"id":"INP_CHERRY_BONUS","name":"チェリー契機ボーナス","type":"counter","category":"SMALL_ROLE","unit":"回","displayOrder":21,"inferenceRole":"DISPLAY_ONLY","defaultValue":null,"parentInputId":"INP_CHERRY"}
+    {"id":"INP_BONUS_INITIAL","name":"ボーナス初当り","type":"counter","category":"NORMAL","unit":"回","displayOrder":11,"inferenceRole":"INCLUDE_PRIMARY","defaultValue":0,"parentInputId":"INP_NORMAL_GAMES"}
   ],
   "features":[
-    {"researchFeatureId":"RF_BONUS_INITIAL","featureId":"FEAT_BONUS_INITIAL","adoptionCategory":"INCLUDE_PRIMARY","numeratorInputId":"INP_BONUS_INITIAL","denominatorInputId":"INP_NORMAL_GAMES","minimumSample":300,"sampleRecommendation":4000,"weight":1,"difficultyParticipation":"INCLUDE","difficultyExposure":{"mode":"per_game","factor":1,"quality":"EXACT","basisId":"NORMAL_GAMES"},"userReason":"公式の初当り合算に段階的な設定差があり、32G連・1G連を除いた通常時初当りとして観測しやすいため採用します。"},
-    {"researchFeatureId":"RF_CHERRY","featureId":"FEAT_CHERRY_PENDING","adoptionCategory":"EXCLUDE","rejectionReason":"設定差は確認できるものの全設定の確率表が未補完で、同一条件で比較できないため現時点では不採用です。"},
-    {"researchFeatureId":"RF_CHERRY_BONUS","featureId":"FEAT_CHERRY_BONUS_PENDING","adoptionCategory":"EXCLUDE","rejectionReason":"チェリー同時当選の全設定値とBIG・REG構成が未補完で、条件付き確率を安全に評価できないため現時点では不採用です。"}
+    {"researchFeatureId":"RF_BONUS_INITIAL","featureId":"FEAT_BONUS_INITIAL","adoptionCategory":"INCLUDE_PRIMARY","numeratorInputId":"INP_BONUS_INITIAL","denominatorInputId":"INP_NORMAL_GAMES","minimumSample":300,"sampleRecommendation":4000,"weight":1,"difficultyParticipation":"INCLUDE","difficultyExposure":{"mode":"per_game","factor":1,"quality":"EXACT","basisId":"NORMAL_GAMES"},"userReason":"ボーナス初当りは1/210～1/160と段階的な設定差があり、32G連・1G連を除いた通常時初当りとして直接観測できるため採用します。"},
+    {"researchFeatureId":"RF_CHERRY","featureId":"FEAT_CHERRY_EXCLUDED","adoptionCategory":"EXCLUDE","userReason":"チェリー確率には1/64.0～1/57.3の設定差がありますが差が小さく、初当りと比べて必要試行量が大きい割に実戦中のカウント負荷を増やすため不採用です。"},
+    {"researchFeatureId":"RF_CHERRY_BONUS","featureId":"FEAT_CHERRY_BONUS_EXCLUDED","adoptionCategory":"EXCLUDE","userReason":"チェリー成立時のボーナス当選率は3.0%～4.0%と設定差がありますが、1日実戦ではチェリー重複ボーナス自体が数回程度になりやすく必要試行量が不足するため不採用です。"}
+  ],
+  "evidenceUi":{"groups":[{"groupId":"MYFLOWER_PANEL","label":"ボーナス終了時パネルフラッシュ","category":"END_EVENT","selectionMode":"multi","normalizationMode":"ALLOWED_SETTINGS_INTERSECTION","displayOrder":100,"options":[
+    {"value":"UP_2PLUS","label":"上パネルのみ（設定2以上）","allowedSettings":["SET_2","SET_3","SET_4","SET_5","SET_6"],"sourceEvidenceIds":["RE_PANEL_UP_2PLUS"]},
+    {"value":"DOWN_3PLUS","label":"下パネルのみ（設定3以上）","allowedSettings":["SET_3","SET_4","SET_5","SET_6"],"sourceEvidenceIds":["RE_PANEL_DOWN_3PLUS"]},
+    {"value":"BOTH_5PLUS","label":"上下両方（設定5以上）","allowedSettings":["SET_5","SET_6"],"sourceEvidenceIds":["RE_PANEL_BOTH_5PLUS"]}
+  ]}]},
+  "rejectedElements":[
+    {"id":"REJ_MYFLOWER_BELL","name":"ベル確率","reason":"ベルは1/9.0～1/8.6と設定差がありますが差が非常に小さく、押し順ベルと共通ベルの合算を大量に数える入力負荷に対して得られる判別情報が少ないため不採用です。"},
+    {"id":"REJ_MYFLOWER_WATERMELON","name":"スイカ確率","reason":"スイカは1/102.4～1/96.4と設定差が小さく、7000G程度でも設定差に対する分散が大きいため必要試行量が多く不採用です。"},
+    {"id":"REJ_MYFLOWER_REACH","name":"リーチ目確率","reason":"リーチ目は1/1191.6～1/840.2と差がありますが発生自体が低頻度で、1日実戦では数回程度しか観測できずサンプル不足になりやすいため不採用です。"},
+    {"id":"REJ_MYFLOWER_CHERRY_BR","name":"チェリー重複ボーナスのBIG/REG比率","reason":"REG比率は50.0%～63.0%へ変化しますが、母数となるチェリー重複ボーナスが非常に少なく、通常の1日実戦では構成比を評価できるだけの試行回数が得られないため不採用です。"},
+    {"id":"REJ_MYFLOWER_BIG_LINE","name":"BIG入賞ライン","reason":"右上がりは偶数設定示唆ですが設定別の完全な出現率が公開されておらず数値尤度を作れないため不採用です。"}
   ]
 }
