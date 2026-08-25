@@ -4,10 +4,23 @@ import { spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import { validateResearchData } from './validate-research-data.mjs';
 import { validateSelectionData } from './validate-selection-data.mjs';
+import { assessSelectionQuality } from './selection-quality-gate.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const DEFAULT_REPORT = path.join(ROOT, 'reports', 'batch-machine-pipeline-report.json');
 const MAX_BATCH = 10;
+const SELECTION_QUALITY_ENFORCED_IDS = new Set([
+  'S_FAMISTA_KAIDO_FB',
+  'S_GRANBELM_ZX',
+  'S_SUPER_BINGO_NEO_CLASSIC_HH1',
+  'S_ODANOBUNA_ZENKOKU_SNT',
+  'S_SENGOKU_KOIHIME_FC',
+  'S_NIGHTS_YTCC',
+  'L_KOMONCHAMA_TEN_L2',
+  'L_SHIN_IKKITOUSEN_V',
+  'L_KYOUKARA_OREHA_FE',
+  'L_ONIMUSHA3_XA',
+]);
 
 export function normalizeMachineIds(values) {
   const ids = [];
@@ -23,12 +36,21 @@ export function normalizeMachineIds(values) {
   return ids;
 }
 
-export function classifyMachineQuality({ researchValidation, selectionValidation, research }) {
+export function shouldEnforceSelectionQuality(machineId, root = ROOT) {
+  if (SELECTION_QUALITY_ENFORCED_IDS.has(machineId)) return true;
+  return !fs.existsSync(path.join(root, 'machines', machineId, 'machine-package.json'));
+}
+
+export function classifyMachineQuality({ researchValidation, selectionValidation, selectionQuality, research }) {
   if (researchValidation?.status !== 'PASS') return { status: 'BLOCKED', reasons: ['ResearchData validation failed'] };
   if (!selectionValidation?.ok) return { status: 'BLOCKED', reasons: ['SelectionData validation failed'] };
+  if (selectionQuality?.status === 'BLOCKED') {
+    return { status: 'BLOCKED', reasons: (selectionQuality.blockers ?? []).map(reason => `Selection quality: ${reason}`) };
+  }
   const reasons = [];
   for (const warning of researchValidation?.warnings ?? []) reasons.push(`ResearchData: ${warning.message ?? warning}`);
   for (const warning of selectionValidation?.warnings ?? []) reasons.push(`SelectionData: ${warning}`);
+  for (const review of selectionQuality?.reviews ?? []) reasons.push(`Selection quality: ${review}`);
   if ((research?.conflicts ?? []).length) reasons.push(`Research conflicts: ${research.conflicts.length}`);
   const displayName = String(research?.machine?.displayName ?? '');
   if (/(未調査|暫定|要確認)/.test(displayName)) reasons.push(`provisional displayName: ${displayName}`);
@@ -67,6 +89,7 @@ export function generatedPaths(machineIds) {
     paths.push(
       path.join(ROOT, 'research', machineId, 'statistics-report.json'),
       path.join(ROOT, 'research', machineId, 'difficulty-report.json'),
+      path.join(ROOT, 'research', machineId, 'setting-band-report.json'),
       path.join(ROOT, 'machines', machineId, 'machine-package.json'),
     );
   }
@@ -133,7 +156,10 @@ function preflight(machineId) {
     const selection = readJson(selectionPath);
     const researchValidation = validateResearchData(research);
     const selectionValidation = validateSelectionData(selection, research);
-    return classifyMachineQuality({ researchValidation, selectionValidation, research });
+    const selectionQuality = shouldEnforceSelectionQuality(machineId)
+      ? assessSelectionQuality(research, selection)
+      : { status: 'PASS', blockers: [], reviews: [] };
+    return classifyMachineQuality({ researchValidation, selectionValidation, selectionQuality, research });
   } catch (error) {
     return { status: 'BLOCKED', reasons: [error instanceof Error ? error.message : String(error)] };
   }
@@ -155,7 +181,7 @@ function parseArgs(argv) {
   return { machineArgs, file, report, checkOnly, help };
 }
 function printHelp() {
-  console.log(`SloAnalytica Batch Machine Pipeline v1\nUsage:\n  node tools/batch-machine-pipeline.mjs MACHINE_ID [MACHINE_ID ...] [--check]\n  node tools/batch-machine-pipeline.mjs --file batch.txt [--check]\n  node tools/batch-machine-pipeline.mjs --file batch.json --report reports/custom.json\n\nRules:\n  - maximum ${MAX_BATCH} machines per batch\n  - machine generation/validation runs per machine\n  - repository test/audit/service-name audit run once at batch end\n  - WRITE is atomic: any BLOCKED/repository-check failure rolls back the entire batch\n  - CHECK always restores generated files after validation\n  - report classifies PASS / REVIEW / BLOCKED\n`);
+  console.log(`SloAnalytica Batch Machine Pipeline v1\nUsage:\n  node tools/batch-machine-pipeline.mjs MACHINE_ID [MACHINE_ID ...] [--check]\n  node tools/batch-machine-pipeline.mjs --file batch.txt [--check]\n  node tools/batch-machine-pipeline.mjs --file batch.json --report reports/custom.json\n\nRules:\n  - maximum ${MAX_BATCH} machines per batch\n  - Research/Selection validation runs before generation\n  - Selection Quality Gate is mandatory for new machines and migrated machines; legacy machines remain compatible until migrated\n  - Selection Quality BLOCKED prevents generation; REVIEW is surfaced in the batch result\n  - machine generation/validation runs per machine\n  - repository test/audit/service-name audit run once at batch end\n  - WRITE is atomic: any BLOCKED/repository-check failure rolls back the entire batch\n  - CHECK always restores generated files after validation\n  - report classifies PASS / REVIEW / BLOCKED\n`);
 }
 
 if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
