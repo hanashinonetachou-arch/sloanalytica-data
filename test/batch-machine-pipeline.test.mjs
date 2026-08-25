@@ -19,18 +19,42 @@ test('batch rollback snapshot includes machine registry', () => {
   assert.ok(paths.some(p => p.endsWith('/machine-registry.json')));
 });
 
-test('clean validations classify PASS', () => {
+test('clean validations and selection quality classify PASS', () => {
   assert.deepEqual(classifyMachineQuality({
     researchValidation: { status: 'PASS', warnings: [] },
     selectionValidation: { ok: true, warnings: [] },
+    selectionQuality: { status: 'PASS', blockers: [], reviews: [] },
     research: { machine: { displayName: 'Machine' }, conflicts: [] },
   }), { status: 'PASS', reasons: [] });
+});
+
+test('selection quality blocker classifies BLOCKED before generation', () => {
+  const result = classifyMachineQuality({
+    researchValidation: { status: 'PASS', warnings: [] },
+    selectionValidation: { ok: true, warnings: [] },
+    selectionQuality: { status: 'BLOCKED', blockers: ['unclassified research feature: RF_X'], reviews: [] },
+    research: { machine: { displayName: 'Machine' }, conflicts: [] },
+  });
+  assert.equal(result.status, 'BLOCKED');
+  assert.deepEqual(result.reasons, ['Selection quality: unclassified research feature: RF_X']);
+});
+
+test('selection quality review classifies REVIEW', () => {
+  const result = classifyMachineQuality({
+    researchValidation: { status: 'PASS', warnings: [] },
+    selectionValidation: { ok: true, warnings: [] },
+    selectionQuality: { status: 'REVIEW', blockers: [], reviews: ['selected FEAT_X: reason is too generic'] },
+    research: { machine: { displayName: 'Machine' }, conflicts: [] },
+  });
+  assert.equal(result.status, 'REVIEW');
+  assert.ok(result.reasons.includes('Selection quality: selected FEAT_X: reason is too generic'));
 });
 
 test('warnings or provisional naming classify REVIEW', () => {
   const result = classifyMachineQuality({
     researchValidation: { status: 'PASS', warnings: [{ message: 'check source' }] },
     selectionValidation: { ok: true, warnings: [] },
+    selectionQuality: { status: 'PASS', blockers: [], reviews: [] },
     research: { machine: { displayName: 'Machine（暫定版）' }, conflicts: [] },
   });
   assert.equal(result.status, 'REVIEW');
@@ -41,6 +65,7 @@ test('validation failure classifies BLOCKED', () => {
   assert.equal(classifyMachineQuality({
     researchValidation: { status: 'FAIL', warnings: [] },
     selectionValidation: { ok: true, warnings: [] },
+    selectionQuality: { status: 'PASS', blockers: [], reviews: [] },
     research: {},
   }).status, 'BLOCKED');
 });
