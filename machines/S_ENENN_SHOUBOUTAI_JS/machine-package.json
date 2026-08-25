@@ -1,0 +1,189 @@
+{
+  "schemaVersion": 1,
+  "machine": {
+    "schemaVersion": "2.0.0",
+    "machineId": "S_ENENN_SHOUBOUTAI_JS",
+    "machineDataVersion": "0.1.0",
+    "displayName": "パチスロ 炎炎ノ消防隊",
+    "modelName": "S炎炎ノ消防隊jS",
+    "manufacturer": "SANKYO",
+    "settings": [
+      "SET_1",
+      "SET_2",
+      "SET_4",
+      "SET_5",
+      "SET_6"
+    ],
+    "packagePolicy": {
+      "offlineCapable": true,
+      "containsImages": false,
+      "containsExecutableCode": false
+    }
+  },
+  "inputs": {
+    "schemaVersion": "2.0.0",
+    "inputs": [
+      {
+        "id": "INP_NORMAL_GAMES",
+        "name": "通常ゲーム数",
+        "type": "integer",
+        "category": "NORMAL",
+        "unit": "G",
+        "displayOrder": 10,
+        "inferenceRole": "INCLUDE_PRIMARY",
+        "defaultValue": 0,
+        "observationScope": "SELF_PLAY",
+        "minimum": 0
+      },
+      {
+        "id": "INP_ENEN_GEKKITO_INITIAL",
+        "name": "炎炎激闘 初当り",
+        "type": "counter",
+        "category": "NORMAL",
+        "unit": "回",
+        "displayOrder": 11,
+        "inferenceRole": "INCLUDE_PRIMARY",
+        "defaultValue": 0,
+        "parentInputId": "INP_NORMAL_GAMES",
+        "minimum": 0
+      },
+      {
+        "id": "INP_BONUS_INITIAL",
+        "name": "ボーナス初当り",
+        "type": "counter",
+        "category": "NORMAL",
+        "unit": "回",
+        "displayOrder": 12,
+        "inferenceRole": "DISPLAY_ONLY",
+        "defaultValue": 0,
+        "parentInputId": "INP_NORMAL_GAMES",
+        "minimum": 0
+      }
+    ]
+  },
+  "features": {
+    "schemaVersion": "2.0.0",
+    "features": [
+      {
+        "featureId": "FEAT_ENEN_GEKKITO_INITIAL",
+        "name": "炎炎激闘初当り",
+        "adoptionCategory": "INCLUDE_PRIMARY",
+        "calculationRole": "PROBABILITY",
+        "probabilityEngineUsage": true,
+        "modelType": "binomial",
+        "minimumSample": 300,
+        "sampleRecommendation": 5000,
+        "reliabilityProfile": {
+          "weight": 1
+        },
+        "denominatorInputId": "INP_NORMAL_GAMES",
+        "numeratorInputId": "INP_ENEN_GEKKITO_INITIAL",
+        "displayFormat": "ratio_1_over_n",
+        "probabilities": {
+          "SET_1": 0.0014513788,
+          "SET_2": 0.0015337423,
+          "SET_4": 0.0017211704,
+          "SET_5": 0.0018691589,
+          "SET_6": 0.0020876827
+        },
+        "sourceEvidenceRefs": [
+          "SRC_1GEKI",
+          "SRC_HAZUSE"
+        ]
+      }
+    ]
+  },
+  "evidence": {
+    "version": "1.0.0",
+    "evidences": [],
+    "sources": [
+      {
+        "id": "SRC_1GEKI",
+        "classification": "ANALYSIS",
+        "pageName": "炎炎ノ消防隊 設定差・設定判別要素まとめ",
+        "url": "https://1geki.jp/slot/s_ennenn/0/",
+        "checkedAt": "2026-08-26"
+      },
+      {
+        "id": "SRC_HAZUSE",
+        "classification": "ANALYSIS",
+        "pageName": "パチスロ 炎炎ノ消防隊 設定推測",
+        "url": "https://hazuse.com/machine/pachislot/2S1217/genre/208/",
+        "checkedAt": "2026-08-26"
+      }
+    ]
+  },
+  "ui": {
+    "sections": [
+      {
+        "id": "AUTO_NORMAL",
+        "title": "通常時",
+        "displayOrder": 1,
+        "items": [
+          {
+            "type": "input",
+            "inputId": "INP_NORMAL_GAMES",
+            "label": "通常ゲーム数",
+            "widget": "number"
+          },
+          {
+            "type": "input",
+            "inputId": "INP_ENEN_GEKKITO_INITIAL",
+            "label": "炎炎激闘 初当り",
+            "widget": "counter"
+          },
+          {
+            "type": "input",
+            "inputId": "INP_BONUS_INITIAL",
+            "label": "ボーナス初当り",
+            "widget": "counter"
+          }
+        ]
+      }
+    ]
+  },
+  "selectionSummary": {
+    "schemaVersion": "selection-summary-v1",
+    "evaluatedCount": 2,
+    "selectedCount": 1,
+    "rejectedCount": 1,
+    "selected": [
+      {
+        "featureId": "FEAT_ENEN_GEKKITO_INITIAL",
+        "name": "炎炎激闘初当り",
+        "reason": "炎炎激闘初当りは設定差が比較的大きく、通常ゲーム数を母数に直接観測できるため主軸として採用します。",
+        "requiredTrials": {
+          "value": 31720,
+          "unit": "通常ゲーム"
+        }
+      }
+    ],
+    "rejected": [
+      {
+        "featureId": "FEAT_BONUS_INITIAL_EXCLUDED",
+        "name": "ボーナス初当り",
+        "reason": "ボーナス初当りにも設定差はありますが、炎炎激闘初当りと同じ通常時の初当り挙動を重ねて評価すると過信につながるため主計算では不採用です。",
+        "requiredTrials": {
+          "value": 67797,
+          "unit": "通常ゲーム"
+        }
+      }
+    ]
+  },
+  "reliability": {},
+  "metadata": {
+    "machineId": "S_ENENN_SHOUBOUTAI_JS",
+    "displayName": "パチスロ 炎炎ノ消防隊",
+    "settings": [
+      "SET_1",
+      "SET_2",
+      "SET_4",
+      "SET_5",
+      "SET_6"
+    ]
+  },
+  "validation": {
+    "cases": []
+  },
+  "statistics": {}
+}
