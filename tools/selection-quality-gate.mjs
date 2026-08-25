@@ -2,7 +2,7 @@ const trim = value => typeof value === 'string' ? value.trim() : '';
 
 const GENERIC_SELECTED = /^(採用|主Featureとして採用|補助Featureとして採用|Fallbackとして採用|設定推測に使用|設定差があるため採用)[。.]?$/;
 const GENERIC_REJECTED = /^(低頻度|設定差が小さい|必要試行量が多い|参考|不採用|重複)[。.]?$/;
-const CONCRETE_BASIS = /(分母|観測|判別|設定差|公開|振り分け|独立|重複|二重評価|必要試行|試行量|確率|構成|情報量|確定|否定|示唆|部分集合|低頻度|高頻度|全設定|サンプル|母数|排他|条件|状態|経路|Fallback|抑制)/;
+const CONCRETE_BASIS = /(分母|観測|判別|設定差|公開|振り分け|独立|重複|二重評価|必要試行|試行量|確率|構成|情報量|確定|否定|示唆|部分集合|低頻度|高頻度|全設定|サンプル|母数|排他|条件|状態|経路|Fallback|抑制|内部|入力負荷|手動カウント)/;
 
 function collectEvidenceRefs(selection) {
   const refs = new Set();
@@ -19,6 +19,59 @@ function collectEvidenceRefs(selection) {
     if (decision.researchEvidenceId) refs.add(decision.researchEvidenceId);
   }
   return refs;
+}
+
+function collectRejectedElementIds(selection) {
+  return new Set((selection.rejectedElements ?? []).map(item => item?.id).filter(Boolean));
+}
+
+function assessDiscoveryCoverage(research, selection, featureDecisions, evidenceRefs, blockers) {
+  const inventory = Array.isArray(research.discoveryInventory) ? research.discoveryInventory : [];
+  if (!inventory.length) return { discovered: 0, classified: 0, missing: [] };
+  const researchFeatures = new Set((research.features ?? []).map(item => item?.researchFeatureId).filter(Boolean));
+  const researchEvidence = new Set((research.evidenceCandidates ?? []).map(item => item?.researchEvidenceId).filter(Boolean));
+  const rejectedElements = collectRejectedElementIds(selection);
+  const missing = [];
+  for (const item of inventory) {
+    const id = item?.id ?? '(unknown-discovery)';
+    const target = item?.mappedTo;
+    let classified = false;
+    if (target === 'evidence') {
+      classified = true;
+    } else if (typeof target === 'string' && researchFeatures.has(target)) {
+      classified = featureDecisions.has(target);
+    } else if (typeof target === 'string' && researchEvidence.has(target)) {
+      classified = evidenceRefs.has(target);
+    } else if (typeof target === 'string' && rejectedElements.has(target)) {
+      classified = true;
+    }
+    if (!classified) {
+      missing.push(id);
+      blockers.push(`unmapped discovery candidate: ${id}${target ? ` -> ${target}` : ''}`);
+    }
+  }
+  return { discovered: inventory.length, classified: inventory.length - missing.length, missing };
+}
+
+function assessExcludedInputHygiene(selection, blockers) {
+  const featureByInput = new Map();
+  for (const feature of selection.features ?? []) {
+    const ids = [feature.numeratorInputId, feature.denominatorInputId, feature.trialCountInputId,
+      ...(feature.numeratorInputIds ?? []), ...(feature.categoryInputIds ?? []), ...(feature.denominatorInputIds ?? [])]
+      .filter(Boolean);
+    for (const inputId of ids) {
+      if (!featureByInput.has(inputId)) featureByInput.set(inputId, []);
+      featureByInput.get(inputId).push(feature);
+    }
+  }
+  for (const input of selection.inputs ?? []) {
+    if (input?.inferenceRole !== 'DISPLAY_ONLY') continue;
+    if (input?.allowReferenceInput === true) continue;
+    const owners = featureByInput.get(input.id) ?? [];
+    if (owners.length && owners.every(feature => feature.adoptionCategory === 'EXCLUDE')) {
+      blockers.push(`excluded-only input leaks into UI: ${input.id}`);
+    }
+  }
 }
 
 export function assessSelectionQuality(research, selection) {
@@ -39,6 +92,9 @@ export function assessSelectionQuality(research, selection) {
   const researchEvidenceIds = (research.evidenceCandidates ?? []).map(e => e.researchEvidenceId).filter(Boolean);
   const missingEvidenceDecisions = researchEvidenceIds.filter(id => !evidenceRefs.has(id));
   for (const id of missingEvidenceDecisions) blockers.push(`unclassified research evidence: ${id}`);
+
+  const discoveryCoverage = assessDiscoveryCoverage(research, selection, featureDecisions, evidenceRefs, blockers);
+  assessExcludedInputHygiene(selection, blockers);
 
   for (const feature of selection.features ?? []) {
     const id = feature.featureId ?? feature.researchFeatureId ?? '(unknown)';
@@ -62,6 +118,15 @@ export function assessSelectionQuality(research, selection) {
     }
   }
 
+  for (const item of selection.rejectedElements ?? []) {
+    const id = item?.id ?? '(unknown-rejected-element)';
+    const reason = trim(item?.reason);
+    if (!item?.name || !reason) blockers.push(`rejected element ${id}: missing name/reason`);
+    else if (GENERIC_REJECTED.test(reason) || reason.length < 10 || !CONCRETE_BASIS.test(reason)) {
+      reviews.push(`rejected element ${id}: reason lacks a concrete user-facing basis`);
+    }
+  }
+
   return {
     status: blockers.length ? 'BLOCKED' : reviews.length ? 'REVIEW' : 'PASS',
     blockers,
@@ -71,6 +136,7 @@ export function assessSelectionQuality(research, selection) {
       classifiedFeatures: researchFeatureIds.length - missingFeatureDecisions.length,
       researchEvidence: researchEvidenceIds.length,
       classifiedEvidence: researchEvidenceIds.length - missingEvidenceDecisions.length,
+      discovery: discoveryCoverage,
       missingFeatureDecisions,
       missingEvidenceDecisions,
     },
