@@ -62,3 +62,25 @@ test('evidenceDecisions can explicitly classify evidence that has no input UI', 
   const result = assessSelectionQuality(research, selection);
   assert.equal(result.status, 'PASS');
 });
+
+test('fallback features require a concrete adoption reason', () => {
+  const localResearch = { features: [{ researchFeatureId: 'RF_F' }], evidenceCandidates: [] };
+  const missing = assessSelectionQuality(localResearch, {
+    features: [{ researchFeatureId: 'RF_F', featureId: 'FEAT_F', adoptionCategory: 'INCLUDE_FALLBACK' }],
+  });
+  assert.equal(missing.status, 'BLOCKED');
+  assert.ok(missing.blockers.some(x => x.includes('selected FEAT_F: missing userReason')));
+
+  const explained = assessSelectionQuality(localResearch, {
+    features: [{ researchFeatureId: 'RF_F', featureId: 'FEAT_F', adoptionCategory: 'INCLUDE_FALLBACK', userReason: '主Featureを観測していない場合だけ通常ゲーム数を分母に使うFallbackとし、同時利用時は抑制して二重評価を避けます。' }],
+  });
+  assert.equal(explained.status, 'PASS');
+});
+
+test('inability to discriminate an internal state is a concrete rejection basis', () => {
+  const localResearch = { features: [{ researchFeatureId: 'RF_STATE' }], evidenceCandidates: [] };
+  const result = assessSelectionQuality(localResearch, {
+    features: [{ researchFeatureId: 'RF_STATE', featureId: 'FEAT_STATE', adoptionCategory: 'EXCLUDE', userFacingReason: '内部状態を実戦中に正確に判別できず、見た目で分類すると誤入力リスクが高いため不採用。' }],
+  });
+  assert.equal(result.status, 'PASS');
+});
