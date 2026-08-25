@@ -72,6 +72,7 @@ export function generatedPaths(machineIds) {
     paths.push(
       path.join(ROOT, 'research', machineId, 'statistics-report.json'),
       path.join(ROOT, 'research', machineId, 'difficulty-report.json'),
+      path.join(ROOT, 'research', machineId, 'setting-band-report.json'),
       path.join(ROOT, 'machines', machineId, 'machine-package.json'),
     );
   }
