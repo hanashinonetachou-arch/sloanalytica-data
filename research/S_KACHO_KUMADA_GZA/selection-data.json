@@ -1,6 +1,32 @@
 {
-  "schemaVersion":"selection-data-v1","machineId":"S_KACHO_KUMADA_GZA","machineDataVersion":"0.1.0","uiCategoryLabels":{"NORMAL":"通常時","END_EVENT":"ボーナス終了・示唆"},
-  "inputs":[{"id":"INP_NORMAL_GAMES","name":"通常ゲーム数","type":"integer","category":"NORMAL","unit":"G","displayOrder":10,"inferenceRole":"DISPLAY_ONLY","defaultValue":0},{"id":"INP_BIG_INITIAL","name":"BIG","type":"counter","category":"NORMAL","unit":"回","displayOrder":11,"inferenceRole":"DISPLAY_ONLY","defaultValue":0,"parentInputId":"INP_NORMAL_GAMES"},{"id":"INP_REG_INITIAL","name":"REG","type":"counter","category":"NORMAL","unit":"回","displayOrder":12,"inferenceRole":"DISPLAY_ONLY","defaultValue":0,"parentInputId":"INP_NORMAL_GAMES"}],
-  "features":[{"researchFeatureId":"RF_BIG_INITIAL","featureId":"FEAT_BIG_INITIAL_PENDING","adoptionCategory":"EXCLUDE","rejectionReason":"設定別数値を単一の補助ソースでしか確認できず、大手解析との照合が未完了のため現時点では不採用です。"},{"researchFeatureId":"RF_REG_INITIAL","featureId":"FEAT_REG_INITIAL_PENDING","adoptionCategory":"EXCLUDE","rejectionReason":"設定別数値を単一の補助ソースでしか確認できず、大手解析との照合が未完了のため現時点では不採用です。"}],
-  "evidenceUi":{"groups":[{"groupId":"KUMADA_END","label":"ボーナス終了画面","selectionMode":"multi","normalizationMode":"ALLOWED_SETTINGS_INTERSECTION","displayOrder":100,"options":[{"value":"HAWAII_4PLUS","label":"熊田工作＋ハワイ（設定4以上）","allowedSettings":["SET_4","SET_5","SET_6"],"sourceEvidenceIds":["RE_HAWAII_4PLUS"]}]}]}
+  "schemaVersion":"selection-data-v1","machineId":"S_KACHO_KUMADA_GZA","machineDataVersion":"0.1.1",
+  "uiCategoryLabels":{"NORMAL":"通常時","END_EVENT":"獲得枚数・終了画面"},
+  "inputs":[
+    {"id":"INP_NORMAL_GAMES","name":"通常ゲーム数","type":"integer","category":"NORMAL","unit":"G","displayOrder":10,"inferenceRole":"INCLUDE_PRIMARY","defaultValue":0},
+    {"id":"INP_BONUS_INITIAL","name":"ボーナス初当り","type":"counter","category":"NORMAL","unit":"回","displayOrder":11,"inferenceRole":"INCLUDE_PRIMARY","defaultValue":0,"parentInputId":"INP_NORMAL_GAMES"}
+  ],
+  "features":[
+    {"researchFeatureId":"RF_BONUS_INITIAL","featureId":"FEAT_BONUS_INITIAL","adoptionCategory":"INCLUDE_PRIMARY","numeratorInputId":"INP_BONUS_INITIAL","denominatorInputId":"INP_NORMAL_GAMES","minimumSample":300,"sampleRecommendation":4000,"weight":1,"difficultyParticipation":"INCLUDE","difficultyExposure":{"mode":"per_game","factor":1,"quality":"EXACT","basisId":"NORMAL_GAMES"},"userReason":"32G以内の連チャンを初当りとして重複させない通常時ボーナス初当りは1/248.9～1/194.2の設定差があり、自分区間で直接観測できるため主軸に採用します。"},
+    {"researchFeatureId":"RF_BIG_COUNTER","featureId":"FEAT_BIG_COUNTER_EXCLUDED","adoptionCategory":"EXCLUDE","userReason":"BIG出現率には設定差がありますがデータカウンター値には会議室など32G以内の連チャン分も含まれ、通常時初当りとは異なる生成過程です。初当りと同時採用すると連チャン性能を含めて重複評価するため不採用です。"},
+    {"researchFeatureId":"RF_REG_COUNTER","featureId":"FEAT_REG_COUNTER_EXCLUDED","adoptionCategory":"EXCLUDE","userReason":"REG出現率にも設定差がありますがデータカウンター値には連チャン中のREGが含まれ、通常時初当りの母集団と一致しません。初当りと同時採用した際の重複評価を避けるため不採用です。"}
+  ],
+  "evidenceUi":{"groups":[
+    {"groupId":"KUMADA_PAYOUT","label":"獲得枚数表示","category":"END_EVENT","selectionMode":"multi","normalizationMode":"ALLOWED_SETTINGS_INTERSECTION","displayOrder":90,"options":[
+      {"value":"333_6","label":"333枚OVER（設定6）","allowedSettings":["SET_6"],"sourceEvidenceIds":["RE_PAYOUT_333_6"]},
+      {"value":"444_4PLUS","label":"444枚OVER（設定4以上）","allowedSettings":["SET_4","SET_5","SET_6"],"sourceEvidenceIds":["RE_PAYOUT_444_4PLUS"]},
+      {"value":"456_4PLUS","label":"456枚OVER（設定4以上）","allowedSettings":["SET_4","SET_5","SET_6"],"sourceEvidenceIds":["RE_PAYOUT_456_4PLUS"]},
+      {"value":"555_5PLUS","label":"555枚OVER（設定5以上）","allowedSettings":["SET_5","SET_6"],"sourceEvidenceIds":["RE_PAYOUT_555_5PLUS"]},
+      {"value":"666_6","label":"666枚OVER（設定6）","allowedSettings":["SET_6"],"sourceEvidenceIds":["RE_PAYOUT_666_6"]},
+      {"value":"777_6","label":"777枚OVER（設定6）","allowedSettings":["SET_6"],"sourceEvidenceIds":["RE_PAYOUT_777_6"]},
+      {"value":"3456_4PLUS","label":"3456枚OVER（設定4以上）","allowedSettings":["SET_4","SET_5","SET_6"],"sourceEvidenceIds":["RE_PAYOUT_3456_4PLUS"]}
+    ]},
+    {"groupId":"KUMADA_END","label":"ボーナス終了画面","category":"END_EVENT","selectionMode":"multi","normalizationMode":"ALLOWED_SETTINGS_INTERSECTION","displayOrder":100,"options":[
+      {"value":"HAWAII_4PLUS","label":"熊田工作＋ハワイ（設定4以上）","allowedSettings":["SET_4","SET_5","SET_6"],"sourceEvidenceIds":["RE_HAWAII_4PLUS"]}
+    ]}
+  ]},
+  "rejectedElements":[
+    {"id":"REJ_KUMADA_VOICE_HINT","name":"ボーナス告知時・7テンパイ時のボイス","reason":"OLセリフやしげる松崎ボイスは高設定期待度アップですが設定別出現率が公開されておらず数値尤度を作れません。さらに昇進モード・高継続示唆も兼ねるため設定情報だけを分離できず不採用です。"},
+    {"id":"REJ_KUMADA_PAYOUT_HINT","name":"539枚OVER・ありがとねっと赤などの高設定示唆","reason":"高設定示唆であることは公開されていますが設定別出現率がなく、539枚は高継続示唆も兼ねます。設定4以上・5以上・6を確定できる枚数表示のみEvidenceとして採用します。"},
+    {"id":"REJ_KUMADA_END_HINT","name":"ボーナス終了画面 社長","reason":"社長画面は高設定示唆かつボーナスループ確定ですが設定別出現率がなく、ループ状態の情報も混在するため数値推測には不採用です。ハワイの設定4以上確定のみEvidenceとして採用します。"}
+  ]
 }
