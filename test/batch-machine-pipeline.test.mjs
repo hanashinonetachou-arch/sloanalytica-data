@@ -1,6 +1,9 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { normalizeMachineIds, classifyMachineQuality, deriveOverallStatus, generatedPaths } from '../tools/batch-machine-pipeline.mjs';
+import fs from 'node:fs';
+import os from 'node:os';
+import path from 'node:path';
+import { normalizeMachineIds, shouldEnforceSelectionQuality, classifyMachineQuality, deriveOverallStatus, generatedPaths } from '../tools/batch-machine-pipeline.mjs';
 
 test('batch normalizes unique machine IDs', () => {
   assert.deepEqual(normalizeMachineIds(['A_ONE,B_TWO', 'A_ONE', 'C_THREE']), ['A_ONE', 'B_TWO', 'C_THREE']);
@@ -21,6 +24,20 @@ test('batch rollback snapshot includes machine registry and generated reports', 
   assert.ok(paths.some(p => p.endsWith('/research/A_ONE/difficulty-report.json')));
   assert.ok(paths.some(p => p.endsWith('/research/A_ONE/setting-band-report.json')));
   assert.ok(paths.some(p => p.endsWith('/machines/A_ONE/machine-package.json')));
+});
+
+test('selection quality is mandatory for new machines and calibrated machines, but legacy packages remain compatible', () => {
+  const root = fs.mkdtempSync(path.join(os.tmpdir(), 'sloanalytica-quality-phase-'));
+  try {
+    assert.equal(shouldEnforceSelectionQuality('NEW_MACHINE', root), true);
+    const legacyPackage = path.join(root, 'machines', 'LEGACY_MACHINE', 'machine-package.json');
+    fs.mkdirSync(path.dirname(legacyPackage), { recursive: true });
+    fs.writeFileSync(legacyPackage, '{}\n');
+    assert.equal(shouldEnforceSelectionQuality('LEGACY_MACHINE', root), false);
+    assert.equal(shouldEnforceSelectionQuality('S_GRANBELM_ZX', root), true);
+  } finally {
+    fs.rmSync(root, { recursive: true, force: true });
+  }
 });
 
 test('clean validations and selection quality classify PASS', () => {
