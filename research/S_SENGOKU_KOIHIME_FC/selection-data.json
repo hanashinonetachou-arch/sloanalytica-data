@@ -1,38 +1,298 @@
 {
-  "schemaVersion":"selection-data-v1",
-  "machineId":"S_SENGOKU_KOIHIME_FC",
-  "machineDataVersion":"0.1.0",
-  "uiCategoryLabels":{"PLAY":"遊技情報","BONUS":"ボーナス","ROLE":"小役","EVIDENCE":"設定示唆"},
-  "inputs":[
-    {"id":"INP_NORMAL_GAMES","name":"通常ゲーム数","type":"integer","category":"PLAY","unit":"G","displayOrder":1,"inferenceRole":"INCLUDE_PRIMARY","uiQuickAdd":[50,100]},
-    {"id":"INP_BIG","name":"BIG","type":"counter","category":"BONUS","unit":"回","displayOrder":2,"inferenceRole":"INCLUDE_PRIMARY","uiGridSpan":6,"uiDirectInput":false,"uiCompactCounter":true},
-    {"id":"INP_REG","name":"REG","type":"counter","category":"BONUS","unit":"回","displayOrder":3,"inferenceRole":"INCLUDE_PRIMARY","uiGridSpan":6,"uiDirectInput":false,"uiCompactCounter":true},
-    {"id":"INP_WATERMELON","name":"スイカ","type":"counter","category":"ROLE","unit":"回","displayOrder":4,"inferenceRole":"INCLUDE_PRIMARY"}
+  "schemaVersion": "selection-data-v1",
+  "machineId": "S_SENGOKU_KOIHIME_FC",
+  "machineDataVersion": "0.1.0",
+  "uiCategoryLabels": {
+    "PLAY": "遊技情報",
+    "BONUS": "ボーナス",
+    "ROLE": "小役",
+    "EVIDENCE": "設定示唆"
+  },
+  "inputs": [
+    {
+      "id": "INP_NORMAL_GAMES",
+      "name": "通常ゲーム数",
+      "type": "integer",
+      "category": "PLAY",
+      "unit": "G",
+      "displayOrder": 1,
+      "inferenceRole": "INCLUDE_PRIMARY",
+      "uiQuickAdd": [
+        50,
+        100
+      ]
+    },
+    {
+      "id": "INP_BIG",
+      "name": "BIG",
+      "type": "counter",
+      "category": "BONUS",
+      "unit": "回",
+      "displayOrder": 2,
+      "inferenceRole": "INCLUDE_PRIMARY",
+      "uiGridSpan": 6,
+      "uiDirectInput": false,
+      "uiCompactCounter": true
+    },
+    {
+      "id": "INP_REG",
+      "name": "REG",
+      "type": "counter",
+      "category": "BONUS",
+      "unit": "回",
+      "displayOrder": 3,
+      "inferenceRole": "INCLUDE_PRIMARY",
+      "uiGridSpan": 6,
+      "uiDirectInput": false,
+      "uiCompactCounter": true
+    },
+    {
+      "id": "INP_WATERMELON",
+      "name": "スイカ",
+      "type": "counter",
+      "category": "ROLE",
+      "unit": "回",
+      "displayOrder": 4,
+      "inferenceRole": "INCLUDE_PRIMARY"
+    }
   ],
-  "features":[
-    {"researchFeatureId":"RF_BONUS_OUTCOME","featureId":"FEAT_BONUS_OUTCOME","adoptionCategory":"INCLUDE_PRIMARY","numeratorInputId":"INP_BIG","categoryInputIds":["INP_REG"],"denominatorInputId":"INP_NORMAL_GAMES","residualCategoryLabel":"OTHER","minimumSample":500,"sampleRecommendation":5000,"difficultyExposure":{"mode":"per_game","factor":1,"quality":"EXACT"}},
-    {"researchFeatureId":"RF_WATERMELON","featureId":"FEAT_WATERMELON","adoptionCategory":"INCLUDE_PRIMARY","numeratorInputId":"INP_WATERMELON","denominatorInputId":"INP_NORMAL_GAMES","minimumSample":500,"sampleRecommendation":3000,"difficultyExposure":{"mode":"per_game","factor":1,"quality":"EXACT"}},
-    {"researchFeatureId":"RF_RARE_COMBINED","featureId":"FEAT_RARE_COMBINED","adoptionCategory":"EXCLUDE","internalReason":"設定差の主因がスイカであり、スイカFeatureと同時採用すると同じ小役差を重複評価する。","userFacingReason":"スイカ確率と重複。"},
-    {"researchFeatureId":"RF_CHERRY_BONUS","featureId":"FEAT_CHERRY_BONUS","adoptionCategory":"EXCLUDE","internalReason":"チェリー契機ボーナスはBIG/REG結果の部分集合であり、ボーナス構成と同時利用すると同一ボーナスを二重評価する。","userFacingReason":"ボーナス確率と重複。"},
-    {"researchFeatureId":"RF_WATERMELON_BONUS","featureId":"FEAT_WATERMELON_BONUS","adoptionCategory":"EXCLUDE","internalReason":"スイカ成立とボーナス結果の双方に重なり、採用中のスイカ・ボーナス構成と二重評価になる。","userFacingReason":"スイカ・ボーナス確率と重複。"},
-    {"researchFeatureId":"RF_CHANCE_BONUS","featureId":"FEAT_CHANCE_BONUS","adoptionCategory":"EXCLUDE","internalReason":"ボーナス結果の部分集合で、ボーナス構成に情報が含まれる。","userFacingReason":"ボーナス確率と重複。"},
-    {"researchFeatureId":"RF_MYSTERY_BONUS","featureId":"FEAT_MYSTERY_BONUS","adoptionCategory":"EXCLUDE","internalReason":"ボーナス結果の部分集合かつ1/4369〜1/21845と低頻度。","userFacingReason":"ボーナス確率と重複し、低頻度。"}
+  "features": [
+    {
+      "researchFeatureId": "RF_BONUS_OUTCOME",
+      "featureId": "FEAT_BONUS_OUTCOME",
+      "adoptionCategory": "INCLUDE_PRIMARY",
+      "numeratorInputId": "INP_BIG",
+      "categoryInputIds": [
+        "INP_REG"
+      ],
+      "denominatorInputId": "INP_NORMAL_GAMES",
+      "residualCategoryLabel": "OTHER",
+      "minimumSample": 500,
+      "sampleRecommendation": 5000,
+      "difficultyExposure": {
+        "mode": "per_game",
+        "factor": 1,
+        "quality": "EXACT"
+      },
+      "userReason": "BIG・REG・その他を通常ゲーム全体の排他的な結果としてMultinomialで一体評価でき、同一ボーナスを別Featureで重複評価しないため主Featureとして採用します。"
+    },
+    {
+      "researchFeatureId": "RF_WATERMELON",
+      "featureId": "FEAT_WATERMELON",
+      "adoptionCategory": "INCLUDE_PRIMARY",
+      "numeratorInputId": "INP_WATERMELON",
+      "denominatorInputId": "INP_NORMAL_GAMES",
+      "minimumSample": 500,
+      "sampleRecommendation": 3000,
+      "difficultyExposure": {
+        "mode": "per_game",
+        "factor": 1,
+        "quality": "EXACT"
+      },
+      "userReason": "スイカは通常ゲーム数を分母に高頻度で直接観測でき、ボーナス構成とは別の小役情報として設定差を利用できるため採用します。"
+    },
+    {
+      "researchFeatureId": "RF_RARE_COMBINED",
+      "featureId": "FEAT_RARE_COMBINED",
+      "adoptionCategory": "EXCLUDE",
+      "internalReason": "設定差の主因がスイカであり、スイカFeatureと同時採用すると同じ小役差を重複評価する。",
+      "userFacingReason": "設定差の主因が採用中のスイカに含まれ、同時に使うと同じ小役差を重複評価するため不採用。"
+    },
+    {
+      "researchFeatureId": "RF_CHERRY_BONUS",
+      "featureId": "FEAT_CHERRY_BONUS",
+      "adoptionCategory": "EXCLUDE",
+      "internalReason": "チェリー契機ボーナスはBIG/REG結果の部分集合であり、ボーナス構成と同時利用すると同一ボーナスを二重評価する。",
+      "userFacingReason": "ボーナス確率と重複。"
+    },
+    {
+      "researchFeatureId": "RF_WATERMELON_BONUS",
+      "featureId": "FEAT_WATERMELON_BONUS",
+      "adoptionCategory": "EXCLUDE",
+      "internalReason": "スイカ成立とボーナス結果の双方に重なり、採用中のスイカ・ボーナス構成と二重評価になる。",
+      "userFacingReason": "スイカ・ボーナス確率と重複。"
+    },
+    {
+      "researchFeatureId": "RF_CHANCE_BONUS",
+      "featureId": "FEAT_CHANCE_BONUS",
+      "adoptionCategory": "EXCLUDE",
+      "internalReason": "ボーナス結果の部分集合で、ボーナス構成に情報が含まれる。",
+      "userFacingReason": "ボーナス確率と重複。"
+    },
+    {
+      "researchFeatureId": "RF_MYSTERY_BONUS",
+      "featureId": "FEAT_MYSTERY_BONUS",
+      "adoptionCategory": "EXCLUDE",
+      "internalReason": "ボーナス結果の部分集合かつ1/4369〜1/21845と低頻度。",
+      "userFacingReason": "ボーナス確率と重複し、低頻度。"
+    }
   ],
-  "evidence":[],
-  "evidenceUi":{"groups":[
-    {"groupId":"EV_BIG_END","label":"BIG終了画面","options":[
-      {"value":"SET2PLUS","label":"設定2以上","allowedSettings":["SET_2","SET_3","SET_4","SET_5","SET_6"],"excludedSettings":["SET_1"],"sourceEvidenceIds":["RE_BIG_END_2PLUS"]},
-      {"value":"SET3PLUS","label":"設定3以上","allowedSettings":["SET_3","SET_4","SET_5","SET_6"],"excludedSettings":["SET_1","SET_2"],"sourceEvidenceIds":["RE_BIG_END_3PLUS"]},
-      {"value":"SET4PLUS","label":"設定4以上","allowedSettings":["SET_4","SET_5","SET_6"],"excludedSettings":["SET_1","SET_2","SET_3"],"sourceEvidenceIds":["RE_BIG_END_4PLUS"]},
-      {"value":"SET5PLUS","label":"設定5以上","allowedSettings":["SET_5","SET_6"],"excludedSettings":["SET_1","SET_2","SET_3","SET_4"],"sourceEvidenceIds":["RE_BIG_END_5PLUS"]},
-      {"value":"SET6","label":"設定6","allowedSettings":["SET_6"],"excludedSettings":["SET_1","SET_2","SET_3","SET_4","SET_5"],"sourceEvidenceIds":["RE_BIG_END_6"]}
-    ]},
-    {"groupId":"EV_REG_END","label":"REG終了画面","options":[
-      {"value":"SET2PLUS","label":"設定2以上","allowedSettings":["SET_2","SET_3","SET_4","SET_5","SET_6"],"excludedSettings":["SET_1"],"sourceEvidenceIds":["RE_REG_END_2PLUS"]},
-      {"value":"SET4PLUS","label":"設定4以上","allowedSettings":["SET_4","SET_5","SET_6"],"excludedSettings":["SET_1","SET_2","SET_3"],"sourceEvidenceIds":["RE_REG_END_4PLUS"]},
-      {"value":"SET6","label":"設定6","allowedSettings":["SET_6"],"excludedSettings":["SET_1","SET_2","SET_3","SET_4","SET_5"],"sourceEvidenceIds":["RE_REG_END_6"]}
-    ]}
-  ]},
-  "difficultyAnalysis":{"targetGameBasis":{"basisId":"NORMAL_GAMES","label":"通常ゲーム","quality":"EXACT"},"calibrationAllowedExposureQualities":["EXACT","DERIVED"]},
-  "selectionNotes":["BIG・REG・合算を別FeatureにせずMultinomialで一体評価する。","詳細契機はResearchに保持するが現行Inferenceでは重複回避のため不採用。"]
+  "evidence": [],
+  "evidenceUi": {
+    "groups": [
+      {
+        "groupId": "EV_BIG_END",
+        "label": "BIG終了画面",
+        "options": [
+          {
+            "value": "SET2PLUS",
+            "label": "設定2以上",
+            "allowedSettings": [
+              "SET_2",
+              "SET_3",
+              "SET_4",
+              "SET_5",
+              "SET_6"
+            ],
+            "excludedSettings": [
+              "SET_1"
+            ],
+            "sourceEvidenceIds": [
+              "RE_BIG_END_2PLUS"
+            ]
+          },
+          {
+            "value": "SET3PLUS",
+            "label": "設定3以上",
+            "allowedSettings": [
+              "SET_3",
+              "SET_4",
+              "SET_5",
+              "SET_6"
+            ],
+            "excludedSettings": [
+              "SET_1",
+              "SET_2"
+            ],
+            "sourceEvidenceIds": [
+              "RE_BIG_END_3PLUS"
+            ]
+          },
+          {
+            "value": "SET4PLUS",
+            "label": "設定4以上",
+            "allowedSettings": [
+              "SET_4",
+              "SET_5",
+              "SET_6"
+            ],
+            "excludedSettings": [
+              "SET_1",
+              "SET_2",
+              "SET_3"
+            ],
+            "sourceEvidenceIds": [
+              "RE_BIG_END_4PLUS"
+            ]
+          },
+          {
+            "value": "SET5PLUS",
+            "label": "設定5以上",
+            "allowedSettings": [
+              "SET_5",
+              "SET_6"
+            ],
+            "excludedSettings": [
+              "SET_1",
+              "SET_2",
+              "SET_3",
+              "SET_4"
+            ],
+            "sourceEvidenceIds": [
+              "RE_BIG_END_5PLUS"
+            ]
+          },
+          {
+            "value": "SET6",
+            "label": "設定6",
+            "allowedSettings": [
+              "SET_6"
+            ],
+            "excludedSettings": [
+              "SET_1",
+              "SET_2",
+              "SET_3",
+              "SET_4",
+              "SET_5"
+            ],
+            "sourceEvidenceIds": [
+              "RE_BIG_END_6"
+            ]
+          }
+        ]
+      },
+      {
+        "groupId": "EV_REG_END",
+        "label": "REG終了画面",
+        "options": [
+          {
+            "value": "SET2PLUS",
+            "label": "設定2以上",
+            "allowedSettings": [
+              "SET_2",
+              "SET_3",
+              "SET_4",
+              "SET_5",
+              "SET_6"
+            ],
+            "excludedSettings": [
+              "SET_1"
+            ],
+            "sourceEvidenceIds": [
+              "RE_REG_END_2PLUS"
+            ]
+          },
+          {
+            "value": "SET4PLUS",
+            "label": "設定4以上",
+            "allowedSettings": [
+              "SET_4",
+              "SET_5",
+              "SET_6"
+            ],
+            "excludedSettings": [
+              "SET_1",
+              "SET_2",
+              "SET_3"
+            ],
+            "sourceEvidenceIds": [
+              "RE_REG_END_4PLUS"
+            ]
+          },
+          {
+            "value": "SET6",
+            "label": "設定6",
+            "allowedSettings": [
+              "SET_6"
+            ],
+            "excludedSettings": [
+              "SET_1",
+              "SET_2",
+              "SET_3",
+              "SET_4",
+              "SET_5"
+            ],
+            "sourceEvidenceIds": [
+              "RE_REG_END_6"
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "difficultyAnalysis": {
+    "targetGameBasis": {
+      "basisId": "NORMAL_GAMES",
+      "label": "通常ゲーム",
+      "quality": "EXACT"
+    },
+    "calibrationAllowedExposureQualities": [
+      "EXACT",
+      "DERIVED"
+    ]
+  },
+  "selectionNotes": [
+    "BIG・REG・合算を別FeatureにせずMultinomialで一体評価する。",
+    "詳細契機はResearchに保持するが現行Inferenceでは重複回避のため不採用。"
+  ]
 }

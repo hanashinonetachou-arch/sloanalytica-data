@@ -1,22 +1,141 @@
 {
-  "schemaVersion":"selection-data-v1",
-  "machineId":"S_SUPER_BINGO_NEO_CLASSIC_HH1",
-  "machineDataVersion":"0.1.0",
-  "uiCategoryLabels":{"PLAY":"遊技情報","CYCLE":"デジ周期","BC":"BC"},
-  "inputs":[
-    {"id":"INP_NORMAL_GAMES","name":"通常ゲーム数","type":"integer","category":"PLAY","unit":"G","displayOrder":1,"inferenceRole":"INCLUDE_FALLBACK","uiQuickAdd":[50,100]},
-    {"id":"INP_BC_FIRST_HIT","name":"BC初当り","type":"counter","category":"BC","unit":"回","displayOrder":2,"inferenceRole":"INCLUDE_FALLBACK"},
-    {"id":"INP_CYCLE_FIRST_TRIALS","name":"BC後初回デジ周期到達","type":"counter","category":"CYCLE","unit":"回","displayOrder":3,"inferenceRole":"INCLUDE_PRIMARY"},
-    {"id":"INP_CYCLE_FIRST_WINS","name":"初回周期→BC","type":"counter","category":"CYCLE","unit":"回","displayOrder":4,"inferenceRole":"INCLUDE_PRIMARY","parentInputId":"INP_CYCLE_FIRST_TRIALS","uiGridSpan":12},
-    {"id":"INP_CYCLE_LATER_TRIALS","name":"2回目以降デジ周期到達","type":"counter","category":"CYCLE","unit":"回","displayOrder":5,"inferenceRole":"INCLUDE_PRIMARY"},
-    {"id":"INP_CYCLE_LATER_WINS","name":"2回目以降周期→BC","type":"counter","category":"CYCLE","unit":"回","displayOrder":6,"inferenceRole":"INCLUDE_PRIMARY","parentInputId":"INP_CYCLE_LATER_TRIALS","uiGridSpan":12}
+  "schemaVersion": "selection-data-v1",
+  "machineId": "S_SUPER_BINGO_NEO_CLASSIC_HH1",
+  "machineDataVersion": "0.1.0",
+  "uiCategoryLabels": {
+    "PLAY": "遊技情報",
+    "CYCLE": "デジ周期",
+    "BC": "BC"
+  },
+  "inputs": [
+    {
+      "id": "INP_NORMAL_GAMES",
+      "name": "通常ゲーム数",
+      "type": "integer",
+      "category": "PLAY",
+      "unit": "G",
+      "displayOrder": 1,
+      "inferenceRole": "INCLUDE_FALLBACK",
+      "uiQuickAdd": [
+        50,
+        100
+      ]
+    },
+    {
+      "id": "INP_BC_FIRST_HIT",
+      "name": "BC初当り",
+      "type": "counter",
+      "category": "BC",
+      "unit": "回",
+      "displayOrder": 2,
+      "inferenceRole": "INCLUDE_FALLBACK"
+    },
+    {
+      "id": "INP_CYCLE_FIRST_TRIALS",
+      "name": "BC後初回デジ周期到達",
+      "type": "counter",
+      "category": "CYCLE",
+      "unit": "回",
+      "displayOrder": 3,
+      "inferenceRole": "INCLUDE_PRIMARY"
+    },
+    {
+      "id": "INP_CYCLE_FIRST_WINS",
+      "name": "初回周期→BC",
+      "type": "counter",
+      "category": "CYCLE",
+      "unit": "回",
+      "displayOrder": 4,
+      "inferenceRole": "INCLUDE_PRIMARY",
+      "parentInputId": "INP_CYCLE_FIRST_TRIALS",
+      "uiGridSpan": 12
+    },
+    {
+      "id": "INP_CYCLE_LATER_TRIALS",
+      "name": "2回目以降デジ周期到達",
+      "type": "counter",
+      "category": "CYCLE",
+      "unit": "回",
+      "displayOrder": 5,
+      "inferenceRole": "INCLUDE_PRIMARY"
+    },
+    {
+      "id": "INP_CYCLE_LATER_WINS",
+      "name": "2回目以降周期→BC",
+      "type": "counter",
+      "category": "CYCLE",
+      "unit": "回",
+      "displayOrder": 6,
+      "inferenceRole": "INCLUDE_PRIMARY",
+      "parentInputId": "INP_CYCLE_LATER_TRIALS",
+      "uiGridSpan": 12
+    }
   ],
-  "features":[
-    {"researchFeatureId":"RF_DIGI_CYCLE_FIRST","featureId":"FEAT_CYCLE_FIRST","adoptionCategory":"INCLUDE_PRIMARY","numeratorInputId":"INP_CYCLE_FIRST_WINS","denominatorInputId":"INP_CYCLE_FIRST_TRIALS","minimumSample":5,"sampleRecommendation":30,"difficultyExposure":{"mode":"fixed_rate","trialsPerGame":0,"quality":"PROVISIONAL"}},
-    {"researchFeatureId":"RF_DIGI_CYCLE_LATER","featureId":"FEAT_CYCLE_LATER","adoptionCategory":"INCLUDE_PRIMARY","numeratorInputId":"INP_CYCLE_LATER_WINS","denominatorInputId":"INP_CYCLE_LATER_TRIALS","minimumSample":5,"sampleRecommendation":30,"difficultyExposure":{"mode":"fixed_rate","trialsPerGame":0,"quality":"PROVISIONAL"}},
-    {"researchFeatureId":"RF_BC_FIRST_HIT","featureId":"FEAT_BC_FIRST_HIT","adoptionCategory":"INCLUDE_FALLBACK","numeratorInputId":"INP_BC_FIRST_HIT","denominatorInputId":"INP_NORMAL_GAMES","minimumSample":500,"sampleRecommendation":5000,"suppressedByFeatureIds":["FEAT_CYCLE_FIRST","FEAT_CYCLE_LATER"],"difficultyExposure":{"mode":"per_game","factor":1,"quality":"EXACT"}}
+  "features": [
+    {
+      "researchFeatureId": "RF_DIGI_CYCLE_FIRST",
+      "featureId": "FEAT_CYCLE_FIRST",
+      "adoptionCategory": "INCLUDE_PRIMARY",
+      "numeratorInputId": "INP_CYCLE_FIRST_WINS",
+      "denominatorInputId": "INP_CYCLE_FIRST_TRIALS",
+      "minimumSample": 5,
+      "sampleRecommendation": 30,
+      "difficultyExposure": {
+        "mode": "fixed_rate",
+        "trialsPerGame": 0,
+        "quality": "PROVISIONAL"
+      },
+      "userReason": "BC後初回デジ周期の到達回数を分母にBC当選を直接観測でき、2回目以降とは異なる公開当選率を持つため独立した主Featureとして採用します。"
+    },
+    {
+      "researchFeatureId": "RF_DIGI_CYCLE_LATER",
+      "featureId": "FEAT_CYCLE_LATER",
+      "adoptionCategory": "INCLUDE_PRIMARY",
+      "numeratorInputId": "INP_CYCLE_LATER_WINS",
+      "denominatorInputId": "INP_CYCLE_LATER_TRIALS",
+      "minimumSample": 5,
+      "sampleRecommendation": 30,
+      "difficultyExposure": {
+        "mode": "fixed_rate",
+        "trialsPerGame": 0,
+        "quality": "PROVISIONAL"
+      },
+      "userReason": "2回目以降のデジ周期到達回数を分母にBC当選を直接観測でき、初回周期とは異なる公開当選率を持つため独立した主Featureとして採用します。"
+    },
+    {
+      "researchFeatureId": "RF_BC_FIRST_HIT",
+      "featureId": "FEAT_BC_FIRST_HIT",
+      "adoptionCategory": "INCLUDE_FALLBACK",
+      "numeratorInputId": "INP_BC_FIRST_HIT",
+      "denominatorInputId": "INP_NORMAL_GAMES",
+      "minimumSample": 500,
+      "sampleRecommendation": 5000,
+      "suppressedByFeatureIds": [
+        "FEAT_CYCLE_FIRST",
+        "FEAT_CYCLE_LATER"
+      ],
+      "difficultyExposure": {
+        "mode": "per_game",
+        "factor": 1,
+        "quality": "EXACT"
+      },
+      "userReason": "通常ゲーム数からBC初当りを観測できるため、周期別データを記録していない場合のFallbackとして採用します。周期別Featureが有効な場合は抑制して同じBC生成過程の二重評価を避けます。"
+    }
   ],
-  "evidence":[],
-  "difficultyAnalysis":{"targetGameBasis":{"basisId":"NORMAL_GAMES","label":"通常ゲーム","quality":"EXACT"},"calibrationAllowedExposureQualities":["EXACT","DERIVED"]},
-  "selectionNotes":["デジ周期到達時当選はBC初当りの生成経路を構成するため、詳細周期Featureが有効な場合はBC初当りをsuppressionする。","初回周期と2回目以降は当選率が異なるため別Featureとする。"]
+  "evidence": [],
+  "difficultyAnalysis": {
+    "targetGameBasis": {
+      "basisId": "NORMAL_GAMES",
+      "label": "通常ゲーム",
+      "quality": "EXACT"
+    },
+    "calibrationAllowedExposureQualities": [
+      "EXACT",
+      "DERIVED"
+    ]
+  },
+  "selectionNotes": [
+    "デジ周期到達時当選はBC初当りの生成経路を構成するため、詳細周期Featureが有効な場合はBC初当りをsuppressionする。",
+    "初回周期と2回目以降は当選率が異なるため別Featureとする。"
+  ]
 }

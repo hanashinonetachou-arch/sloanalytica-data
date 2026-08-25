@@ -1,26 +1,323 @@
 {
-  "schemaVersion":"selection-data-v1",
-  "machineId":"L_SHIN_IKKITOUSEN_V",
-  "machineDataVersion":"0.1.0",
-  "uiCategoryLabels":{"PLAY":"遊技情報","INITIAL":"初当り","ROLE":"小役","EVIDENCE":"設定示唆"},
-  "inputs":[
-    {"id":"INP_NORMAL_GAMES","name":"通常ゲーム数","type":"integer","category":"PLAY","unit":"G","displayOrder":1,"inferenceRole":"INCLUDE_PRIMARY","uiQuickAdd":[50,100]},
-    {"id":"INP_CZ_COUNT","name":"CZ初当り","type":"counter","category":"INITIAL","unit":"回","displayOrder":2,"inferenceRole":"INCLUDE_PRIMARY"},
-    {"id":"INP_AT_COUNT","name":"AT初当り","type":"counter","category":"INITIAL","unit":"回","displayOrder":3,"inferenceRole":"INCLUDE_FALLBACK"},
-    {"id":"INP_BELL1","name":"1枚共通ベル","type":"counter","category":"ROLE","unit":"回","displayOrder":4,"inferenceRole":"INCLUDE_PRIMARY"},
-    {"id":"INP_BELL11","name":"11枚共通ベル","type":"counter","category":"ROLE","unit":"回","displayOrder":5,"inferenceRole":"INCLUDE_PRIMARY"}
+  "schemaVersion": "selection-data-v1",
+  "machineId": "L_SHIN_IKKITOUSEN_V",
+  "machineDataVersion": "0.1.0",
+  "uiCategoryLabels": {
+    "PLAY": "遊技情報",
+    "INITIAL": "初当り",
+    "ROLE": "小役",
+    "EVIDENCE": "設定示唆"
+  },
+  "inputs": [
+    {
+      "id": "INP_NORMAL_GAMES",
+      "name": "通常ゲーム数",
+      "type": "integer",
+      "category": "PLAY",
+      "unit": "G",
+      "displayOrder": 1,
+      "inferenceRole": "INCLUDE_PRIMARY",
+      "uiQuickAdd": [
+        50,
+        100
+      ]
+    },
+    {
+      "id": "INP_CZ_COUNT",
+      "name": "CZ初当り",
+      "type": "counter",
+      "category": "INITIAL",
+      "unit": "回",
+      "displayOrder": 2,
+      "inferenceRole": "INCLUDE_PRIMARY"
+    },
+    {
+      "id": "INP_AT_COUNT",
+      "name": "AT初当り",
+      "type": "counter",
+      "category": "INITIAL",
+      "unit": "回",
+      "displayOrder": 3,
+      "inferenceRole": "INCLUDE_FALLBACK"
+    },
+    {
+      "id": "INP_BELL1",
+      "name": "1枚共通ベル",
+      "type": "counter",
+      "category": "ROLE",
+      "unit": "回",
+      "displayOrder": 4,
+      "inferenceRole": "INCLUDE_PRIMARY"
+    },
+    {
+      "id": "INP_BELL11",
+      "name": "11枚共通ベル",
+      "type": "counter",
+      "category": "ROLE",
+      "unit": "回",
+      "displayOrder": 5,
+      "inferenceRole": "INCLUDE_PRIMARY"
+    }
   ],
-  "features":[
-    {"researchFeatureId":"RF_CZ_INITIAL","featureId":"FEAT_CZ_INITIAL","adoptionCategory":"INCLUDE_PRIMARY","numeratorInputId":"INP_CZ_COUNT","denominatorInputId":"INP_NORMAL_GAMES","minimumSample":500,"sampleRecommendation":5000,"difficultyExposure":{"mode":"per_game","factor":1,"quality":"EXACT"},"userReason":"CZ初当りは通常ゲーム数を分母に直接観測でき、現行の必要試行量もAT初当りより少ないため主Featureとして採用します。"},
-    {"researchFeatureId":"RF_AT_INITIAL","featureId":"FEAT_AT_INITIAL","adoptionCategory":"INCLUDE_FALLBACK","numeratorInputId":"INP_AT_COUNT","denominatorInputId":"INP_NORMAL_GAMES","minimumSample":500,"sampleRecommendation":5000,"suppressedByFeatureIds":["FEAT_CZ_INITIAL"],"userReason":"AT初当りにも設定差はありますが、CZ経由を内包しCZ初当りより必要試行量が多いため、CZを数えていない場合だけ使うFallbackとします。CZ初当りが有効なら二重評価を避けるためAT初当りは抑制します。"},
-    {"researchFeatureId":"RF_COMMON_BELL_1","featureId":"FEAT_COMMON_BELL_1","adoptionCategory":"INCLUDE_PRIMARY","numeratorInputId":"INP_BELL1","denominatorInputId":"INP_NORMAL_GAMES","minimumSample":500,"sampleRecommendation":5000,"difficultyExposure":{"mode":"per_game","factor":1,"quality":"EXACT"},"userReason":"設定差は小さいものの高頻度で観測でき、初当り系と独立した小役情報として採用します。"},
-    {"researchFeatureId":"RF_COMMON_BELL_11","featureId":"FEAT_COMMON_BELL_11","adoptionCategory":"INCLUDE_PRIMARY","numeratorInputId":"INP_BELL11","denominatorInputId":"INP_NORMAL_GAMES","minimumSample":500,"sampleRecommendation":5000,"difficultyExposure":{"mode":"per_game","factor":1,"quality":"EXACT"},"userReason":"設定差は小さいものの高頻度で観測でき、1枚共通ベルとは別カテゴリの小役情報として採用します。"}
+  "features": [
+    {
+      "researchFeatureId": "RF_CZ_INITIAL",
+      "featureId": "FEAT_CZ_INITIAL",
+      "adoptionCategory": "INCLUDE_PRIMARY",
+      "numeratorInputId": "INP_CZ_COUNT",
+      "denominatorInputId": "INP_NORMAL_GAMES",
+      "minimumSample": 500,
+      "sampleRecommendation": 5000,
+      "difficultyExposure": {
+        "mode": "per_game",
+        "factor": 1,
+        "quality": "EXACT"
+      },
+      "userReason": "CZ初当りは通常ゲーム数を分母に直接観測でき、現行の必要試行量もAT初当りより少ないため主Featureとして採用します。"
+    },
+    {
+      "researchFeatureId": "RF_AT_INITIAL",
+      "featureId": "FEAT_AT_INITIAL",
+      "adoptionCategory": "INCLUDE_FALLBACK",
+      "numeratorInputId": "INP_AT_COUNT",
+      "denominatorInputId": "INP_NORMAL_GAMES",
+      "minimumSample": 500,
+      "sampleRecommendation": 5000,
+      "suppressedByFeatureIds": [
+        "FEAT_CZ_INITIAL"
+      ],
+      "userReason": "AT初当りにも設定差はありますが、CZ経由を内包しCZ初当りより必要試行量が多いため、CZを数えていない場合だけ使うFallbackとします。CZ初当りが有効なら二重評価を避けるためAT初当りは抑制します。"
+    },
+    {
+      "researchFeatureId": "RF_COMMON_BELL_1",
+      "featureId": "FEAT_COMMON_BELL_1",
+      "adoptionCategory": "INCLUDE_PRIMARY",
+      "numeratorInputId": "INP_BELL1",
+      "denominatorInputId": "INP_NORMAL_GAMES",
+      "minimumSample": 500,
+      "sampleRecommendation": 5000,
+      "difficultyExposure": {
+        "mode": "per_game",
+        "factor": 1,
+        "quality": "EXACT"
+      },
+      "userReason": "設定差は小さいものの高頻度で観測でき、初当り系と独立した小役情報として採用します。"
+    },
+    {
+      "researchFeatureId": "RF_COMMON_BELL_11",
+      "featureId": "FEAT_COMMON_BELL_11",
+      "adoptionCategory": "INCLUDE_PRIMARY",
+      "numeratorInputId": "INP_BELL11",
+      "denominatorInputId": "INP_NORMAL_GAMES",
+      "minimumSample": 500,
+      "sampleRecommendation": 5000,
+      "difficultyExposure": {
+        "mode": "per_game",
+        "factor": 1,
+        "quality": "EXACT"
+      },
+      "userReason": "設定差は小さいものの高頻度で観測でき、1枚共通ベルとは別カテゴリの小役情報として採用します。"
+    },
+    {
+      "researchFeatureId": "RF_MODE",
+      "featureId": "FEAT_MODE",
+      "adoptionCategory": "EXCLUDE",
+      "internalReason": "内部モードは実戦中に直接観測できず、示唆から推定した状態を尤度入力にすると誤分類リスクが高い。",
+      "userFacingReason": "内部モードを実戦中に正確に判別できず、推定状態を数値入力すると誤分類リスクが高いため不採用。"
+    },
+    {
+      "researchFeatureId": "RF_MAGATAMA_GUIDE",
+      "featureId": "FEAT_MAGATAMA_GUIDE_DISTRIBUTION",
+      "adoptionCategory": "EXCLUDE",
+      "internalReason": "10G/20Gの継続振り分けはCZ失敗後とAT終了後で異なるため統合数値Featureにできない。30G以上は設定下限・確定意味が共通なのでEvidenceとして採用する。",
+      "userFacingReason": "CZ失敗後とAT終了後で10G/20Gの振り分けが異なるため数値分布は統合しません。30G以上は設定下限・確定Evidenceとして別に採用します。"
+    }
   ],
-  "evidence":[],
-  "evidenceUi":{"groups":[
-    {"groupId":"EV_TROPHY","label":"Daiichiトロフィー","options":[{"value":"BRONZE","label":"銅","allowedSettings":["SET_2","SET_3","SET_4","SET_5","SET_6"],"excludedSettings":["SET_1"],"sourceEvidenceIds":["RE_TROPHY_BRONZE"]},{"value":"SILVER","label":"銀","allowedSettings":["SET_3","SET_4","SET_5","SET_6"],"excludedSettings":["SET_1","SET_2"],"sourceEvidenceIds":["RE_TROPHY_SILVER"]},{"value":"GOLD","label":"金","allowedSettings":["SET_4","SET_5","SET_6"],"excludedSettings":["SET_1","SET_2","SET_3"],"sourceEvidenceIds":["RE_TROPHY_GOLD"]},{"value":"RED","label":"赤","allowedSettings":["SET_5","SET_6"],"excludedSettings":["SET_1","SET_2","SET_3","SET_4"],"sourceEvidenceIds":["RE_TROPHY_RED"]},{"value":"RAINBOW","label":"虹","allowedSettings":["SET_6"],"excludedSettings":["SET_1","SET_2","SET_3","SET_4","SET_5"],"sourceEvidenceIds":["RE_TROPHY_RAINBOW"]}]},
-    {"groupId":"EV_MAGATAMA_GUIDE","label":"勾玉の導き 継続ゲーム数","options":[{"value":"30G","label":"30G（設定2以上）","allowedSettings":["SET_2","SET_3","SET_4","SET_5","SET_6"],"excludedSettings":["SET_1"],"sourceEvidenceIds":["RE_MAGATAMA_30"]},{"value":"40G","label":"40G（設定3以上）","allowedSettings":["SET_3","SET_4","SET_5","SET_6"],"excludedSettings":["SET_1","SET_2"],"sourceEvidenceIds":["RE_MAGATAMA_40"]},{"value":"50G","label":"50G（設定4以上）","allowedSettings":["SET_4","SET_5","SET_6"],"excludedSettings":["SET_1","SET_2","SET_3"],"sourceEvidenceIds":["RE_MAGATAMA_50"]},{"value":"60G","label":"60G（設定6）","allowedSettings":["SET_6"],"excludedSettings":["SET_1","SET_2","SET_3","SET_4","SET_5"],"sourceEvidenceIds":["RE_MAGATAMA_60"]}]}
-  ]},
-  "difficultyAnalysis":{"targetGameBasis":{"basisId":"NORMAL_GAMES","label":"通常ゲーム","quality":"EXACT"},"calibrationAllowedExposureQualities":["EXACT","DERIVED"]},
-  "selectionNotes":["再検討の結果、必要試行量がAT初当りより少ないCZ初当りを主Featureへ変更。AT初当りはCZ未入力時だけのFallback。","1枚/11枚共通ベルは高頻度の独立情報として継続採用。","勾玉の導きはCZ失敗後とAT終了後で10G/20Gの振り分けが異なるため数値分布を統合しない。一方30G以上の設定下限・確定意味は共通なのでEvidenceとして統合採用する。","内部モードは直接観測できないため不採用。"]
+  "evidence": [],
+  "evidenceUi": {
+    "groups": [
+      {
+        "groupId": "EV_TROPHY",
+        "label": "Daiichiトロフィー",
+        "options": [
+          {
+            "value": "BRONZE",
+            "label": "銅",
+            "allowedSettings": [
+              "SET_2",
+              "SET_3",
+              "SET_4",
+              "SET_5",
+              "SET_6"
+            ],
+            "excludedSettings": [
+              "SET_1"
+            ],
+            "sourceEvidenceIds": [
+              "RE_TROPHY_BRONZE"
+            ]
+          },
+          {
+            "value": "SILVER",
+            "label": "銀",
+            "allowedSettings": [
+              "SET_3",
+              "SET_4",
+              "SET_5",
+              "SET_6"
+            ],
+            "excludedSettings": [
+              "SET_1",
+              "SET_2"
+            ],
+            "sourceEvidenceIds": [
+              "RE_TROPHY_SILVER"
+            ]
+          },
+          {
+            "value": "GOLD",
+            "label": "金",
+            "allowedSettings": [
+              "SET_4",
+              "SET_5",
+              "SET_6"
+            ],
+            "excludedSettings": [
+              "SET_1",
+              "SET_2",
+              "SET_3"
+            ],
+            "sourceEvidenceIds": [
+              "RE_TROPHY_GOLD"
+            ]
+          },
+          {
+            "value": "RED",
+            "label": "赤",
+            "allowedSettings": [
+              "SET_5",
+              "SET_6"
+            ],
+            "excludedSettings": [
+              "SET_1",
+              "SET_2",
+              "SET_3",
+              "SET_4"
+            ],
+            "sourceEvidenceIds": [
+              "RE_TROPHY_RED"
+            ]
+          },
+          {
+            "value": "RAINBOW",
+            "label": "虹",
+            "allowedSettings": [
+              "SET_6"
+            ],
+            "excludedSettings": [
+              "SET_1",
+              "SET_2",
+              "SET_3",
+              "SET_4",
+              "SET_5"
+            ],
+            "sourceEvidenceIds": [
+              "RE_TROPHY_RAINBOW"
+            ]
+          }
+        ]
+      },
+      {
+        "groupId": "EV_MAGATAMA_GUIDE",
+        "label": "勾玉の導き 継続ゲーム数",
+        "options": [
+          {
+            "value": "30G",
+            "label": "30G（設定2以上）",
+            "allowedSettings": [
+              "SET_2",
+              "SET_3",
+              "SET_4",
+              "SET_5",
+              "SET_6"
+            ],
+            "excludedSettings": [
+              "SET_1"
+            ],
+            "sourceEvidenceIds": [
+              "RE_MAGATAMA_30"
+            ]
+          },
+          {
+            "value": "40G",
+            "label": "40G（設定3以上）",
+            "allowedSettings": [
+              "SET_3",
+              "SET_4",
+              "SET_5",
+              "SET_6"
+            ],
+            "excludedSettings": [
+              "SET_1",
+              "SET_2"
+            ],
+            "sourceEvidenceIds": [
+              "RE_MAGATAMA_40"
+            ]
+          },
+          {
+            "value": "50G",
+            "label": "50G（設定4以上）",
+            "allowedSettings": [
+              "SET_4",
+              "SET_5",
+              "SET_6"
+            ],
+            "excludedSettings": [
+              "SET_1",
+              "SET_2",
+              "SET_3"
+            ],
+            "sourceEvidenceIds": [
+              "RE_MAGATAMA_50"
+            ]
+          },
+          {
+            "value": "60G",
+            "label": "60G（設定6）",
+            "allowedSettings": [
+              "SET_6"
+            ],
+            "excludedSettings": [
+              "SET_1",
+              "SET_2",
+              "SET_3",
+              "SET_4",
+              "SET_5"
+            ],
+            "sourceEvidenceIds": [
+              "RE_MAGATAMA_60"
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "difficultyAnalysis": {
+    "targetGameBasis": {
+      "basisId": "NORMAL_GAMES",
+      "label": "通常ゲーム",
+      "quality": "EXACT"
+    },
+    "calibrationAllowedExposureQualities": [
+      "EXACT",
+      "DERIVED"
+    ]
+  },
+  "selectionNotes": [
+    "再検討の結果、必要試行量がAT初当りより少ないCZ初当りを主Featureへ変更。AT初当りはCZ未入力時だけのFallback。",
+    "1枚/11枚共通ベルは高頻度の独立情報として継続採用。",
+    "勾玉の導きはCZ失敗後とAT終了後で10G/20Gの振り分けが異なるため数値分布を統合しない。一方30G以上の設定下限・確定意味は共通なのでEvidenceとして統合採用する。",
+    "内部モードは直接観測できないため不採用。"
+  ]
 }
