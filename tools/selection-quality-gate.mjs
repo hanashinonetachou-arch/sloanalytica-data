@@ -1,8 +1,8 @@
 const trim = value => typeof value === 'string' ? value.trim() : '';
 
-const GENERIC_SELECTED = /^(採用|主Featureとして採用|補助Featureとして採用|設定推測に使用|設定差があるため採用)[。.]?$/;
+const GENERIC_SELECTED = /^(採用|主Featureとして採用|補助Featureとして採用|Fallbackとして採用|設定推測に使用|設定差があるため採用)[。.]?$/;
 const GENERIC_REJECTED = /^(低頻度|設定差が小さい|必要試行量が多い|参考|不採用|重複)[。.]?$/;
-const CONCRETE_BASIS = /(分母|観測|設定差|公開|振り分け|独立|重複|二重評価|必要試行|試行量|確率|構成|情報量|確定|否定|示唆|部分集合|低頻度|高頻度|全設定|サンプル|母数|排他|条件)/;
+const CONCRETE_BASIS = /(分母|観測|判別|設定差|公開|振り分け|独立|重複|二重評価|必要試行|試行量|確率|構成|情報量|確定|否定|示唆|部分集合|低頻度|高頻度|全設定|サンプル|母数|排他|条件|状態|経路|Fallback|抑制)/;
 
 function collectEvidenceRefs(selection) {
   const refs = new Set();
@@ -42,7 +42,7 @@ export function assessSelectionQuality(research, selection) {
 
   for (const feature of selection.features ?? []) {
     const id = feature.featureId ?? feature.researchFeatureId ?? '(unknown)';
-    const included = ['INCLUDE_PRIMARY', 'INCLUDE_SUPPORT'].includes(feature.adoptionCategory);
+    const included = ['INCLUDE_PRIMARY', 'INCLUDE_SUPPORT', 'INCLUDE_FALLBACK'].includes(feature.adoptionCategory);
     const rejected = feature.adoptionCategory === 'EXCLUDE';
     if (included) {
       const reason = trim(feature.userReason);
