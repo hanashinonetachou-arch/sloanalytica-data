@@ -1,0 +1,39 @@
+{
+  "schemaVersion":"selection-data-v1",
+  "machineId":"S_SENGOKU_COLLECTION5_PS",
+  "machineDataVersion":"0.1.0",
+  "uiCategoryLabels":{"NORMAL":"通常時","VACATION":"バカンスルーレット","AT_7":"AT中7揃い","EVIDENCE":"設定確定・否定情報"},
+  "inputs":[
+    {"id":"INP_NORMAL_GAMES","name":"通常ゲーム数","type":"integer","category":"NORMAL","unit":"G","displayOrder":10,"inferenceRole":"INCLUDE_PRIMARY"},
+    {"id":"INP_AT_INITIAL","name":"AT初当り","type":"counter","category":"NORMAL","unit":"回","displayOrder":11,"inferenceRole":"INCLUDE_PRIMARY","parentInputId":"INP_NORMAL_GAMES"},
+    {"id":"INP_VACATION_10PT_TRIAL","name":"10pt到達","type":"counter","category":"VACATION","unit":"回","displayOrder":20,"inferenceRole":"INCLUDE_SUPPORT"},
+    {"id":"INP_VACATION_10PT_HIT","name":"鬼ヶ島バカンス当選","type":"counter","category":"VACATION","unit":"回","displayOrder":21,"inferenceRole":"INCLUDE_SUPPORT","parentInputId":"INP_VACATION_10PT_TRIAL"},
+    {"id":"INP_7_ILLUST_KIMONO","name":"和服2人","type":"counter","category":"AT_7","unit":"回","displayOrder":30,"inferenceRole":"INCLUDE_SUPPORT"},
+    {"id":"INP_7_ILLUST_CHRISTMAS","name":"クリスマス","type":"counter","category":"AT_7","unit":"回","displayOrder":31,"inferenceRole":"INCLUDE_SUPPORT"},
+    {"id":"INP_7_ILLUST_HALLOWEEN","name":"ハロウィン","type":"counter","category":"AT_7","unit":"回","displayOrder":32,"inferenceRole":"INCLUDE_SUPPORT"},
+    {"id":"INP_7_ILLUST_OTHER","name":"その他","type":"counter","category":"AT_7","unit":"回","displayOrder":33,"inferenceRole":"INCLUDE_SUPPORT"}
+  ],
+  "features":[
+    {"researchFeatureId":"RF_AT_INITIAL","featureId":"FEAT_AT_INITIAL","adoptionCategory":"INCLUDE_PRIMARY","numeratorInputId":"INP_AT_INITIAL","denominatorInputId":"INP_NORMAL_GAMES","minimumSample":300,"sampleRecommendation":4000,"weight":1,"difficultyParticipation":"INCLUDE","difficultyExposure":{"mode":"per_game","factor":1,"quality":"EXACT","basisId":"NORMAL_GAMES"},"userReason":"AT初当りは設定1約1/350.1から設定6約1/233.2まで全設定の確率が公開され、通常ゲーム数を分母として直接観測できるため主軸に採用します。"},
+    {"researchFeatureId":"RF_VACATION_10PT","featureId":"FEAT_VACATION_10PT","adoptionCategory":"INCLUDE_SUPPORT","numeratorInputId":"INP_VACATION_10PT_HIT","denominatorInputId":"INP_VACATION_10PT_TRIAL","minimumSample":1,"sampleRecommendation":30,"weight":1,"difficultyParticipation":"EXCLUDE","userReason":"バカンスポイント10pt到達時の鬼ヶ島バカンス当選率は全設定で公開され、10pt到達とルーレット結果を直接観測できるため条件付きの補助Featureとして採用します。"},
+    {"researchFeatureId":"RF_VACATION_RATE_REFERENCE","featureId":"FEAT_VACATION_RATE_EXCLUDED","adoptionCategory":"EXCLUDE","userFacingReason":"鬼ヶ島バカンス実質突入率にも設定差がありますが、10pt時抽選など複数の当選経路を合算した結果であり、採用する10pt条件付き抽選やAT初当りと同じ通常時の好挙動を重複評価しやすいため不採用です。"},
+    {"researchFeatureId":"RF_7_ILLUSTRATION","featureId":"FEAT_7_ILLUSTRATION","adoptionCategory":"INCLUDE_SUPPORT","categoryInputIds":["INP_7_ILLUST_KIMONO","INP_7_ILLUST_CHRISTMAS","INP_7_ILLUST_HALLOWEEN","INP_7_ILLUST_OTHER"],"minimumSample":1,"sampleRecommendation":20,"weight":1,"difficultyParticipation":"EXCLUDE","userReason":"AT中7揃い後の1枚絵は全設定の排他的な振り分けが公開され、1回の7揃いごとに表示カテゴリを直接観測できるためMultinomialの補助Featureとして採用します。"},
+    {"researchFeatureId":"RF_7_FLASH","featureId":"FEAT_7_FLASH_EXCLUDED","adoptionCategory":"EXCLUDE","userFacingReason":"7揃い時バックランプにも設定差がありますが、採用する1枚絵と同じ7揃い1回から同時に発生する情報です。両者の条件付き独立性が公開されておらず、独立Featureとして乗算すると同一試行の情報量を過大評価するため不採用です。"}
+  ],
+  "evidenceUi":{"groups":[
+    {"groupId":"SENGOKU_UI_NUSA","label":"カスタムUI ぬさ","selectionMode":"multi","normalizationMode":"ALLOWED_SETTINGS_INTERSECTION","displayOrder":100,"options":[
+      {"value":"FOX_2PLUS","label":"きつね巫女（設定2以上）","allowedSettings":["SET_2","SET_3","SET_4","SET_5","SET_6"],"excludedSettings":["SET_1"],"sourceEvidenceIds":["RE_UI_FOX_2PLUS"]},
+      {"value":"RABBIT_4PLUS","label":"うさぎ巫女（設定4以上）","allowedSettings":["SET_4","SET_5","SET_6"],"excludedSettings":["SET_1","SET_2","SET_3"],"sourceEvidenceIds":["RE_UI_RABBIT_4PLUS"]},
+      {"value":"CAT_6","label":"ねこ巫女（設定6）","allowedSettings":["SET_6"],"excludedSettings":["SET_1","SET_2","SET_3","SET_4","SET_5"],"sourceEvidenceIds":["RE_UI_CAT_6"]}
+    ]},
+    {"groupId":"SENGOKU_AT_END","label":"AT終了画面","selectionMode":"multi","normalizationMode":"ALLOWED_SETTINGS_INTERSECTION","displayOrder":110,"options":[
+      {"value":"2PLUS","label":"コスプレ2人（設定2以上）","allowedSettings":["SET_2","SET_3","SET_4","SET_5","SET_6"],"excludedSettings":["SET_1"],"sourceEvidenceIds":["RE_AT_END_2PLUS"]},
+      {"value":"4PLUS","label":"白ドレス（設定4以上）","allowedSettings":["SET_4","SET_5","SET_6"],"excludedSettings":["SET_1","SET_2","SET_3"],"sourceEvidenceIds":["RE_AT_END_4PLUS"]},
+      {"value":"6","label":"しずもん絵（設定6）","allowedSettings":["SET_6"],"excludedSettings":["SET_1","SET_2","SET_3","SET_4","SET_5"],"sourceEvidenceIds":["RE_AT_END_6"]}
+    ]}
+  ]},
+  "rejectedElements":[
+    {"id":"evidence_and_reference","name":"AT終了画面の確定系以外のパターン","reason":"コスプレ2人・白ドレス・しずもん絵はEvidenceとして採用しますが、それ以外の終了画面は設定別の完全な出現確率や確定条件が公開されていないため数値Featureには採用しません。"},
+    {"id":"reference","name":"弱チェリー/スイカ契機・モードC/ゾーン・極楽後モード移行・終了時コマンド","reason":"設定判別要素として確認していますが、内部モードの確定観測が必要、または全設定の完全な確率表が公開されていない要素です。正しい分母・分子や尤度を構築できないため推測計算には採用しません。"}
+  ]
+}
