@@ -3,7 +3,7 @@
   "machine": {
     "schemaVersion": "2.0.0",
     "machineId": "S_MY_FLOWER_II_EE_30",
-    "machineDataVersion": "0.1.0",
+    "machineDataVersion": "0.1.1",
     "displayName": "マイフラワー2-30",
     "modelName": "SマイフラワーⅡEE-30",
     "manufacturer": "北電子",
@@ -35,6 +35,7 @@
         "defaultValue": 0,
         "observationScope": "PREDECESSOR_SNAPSHOT",
         "sessionDifferenceHelper": true,
+        "allowReferenceInput": true,
         "minimum": 0
       },
       {
@@ -47,6 +48,7 @@
         "inferenceRole": "DISPLAY_ONLY",
         "defaultValue": 0,
         "sessionDifferenceHelper": true,
+        "allowReferenceInput": true,
         "minimum": 0,
         "observationScope": "PREDECESSOR_SNAPSHOT"
       },
@@ -74,28 +76,31 @@
         "minimum": 0
       },
       {
-        "id": "INP_CHERRY",
-        "name": "チェリー",
-        "type": "counter",
-        "category": "SMALL_ROLE",
-        "unit": "回",
-        "displayOrder": 20,
-        "inferenceRole": "DISPLAY_ONLY",
-        "defaultValue": null,
-        "parentInputId": "INP_NORMAL_GAMES",
-        "minimum": 0
-      },
-      {
-        "id": "INP_CHERRY_BONUS",
-        "name": "チェリー契機ボーナス",
-        "type": "counter",
-        "category": "SMALL_ROLE",
-        "unit": "回",
-        "displayOrder": 21,
-        "inferenceRole": "DISPLAY_ONLY",
-        "defaultValue": null,
-        "parentInputId": "INP_CHERRY",
-        "minimum": 0
+        "id": "INP_EVI_MYFLOWER_PANEL",
+        "name": "ボーナス終了時パネルフラッシュ",
+        "type": "multi_enum",
+        "category": "END_EVENT",
+        "unit": "",
+        "displayOrder": 100,
+        "inferenceRole": "INCLUDE_SUPPORT",
+        "options": [
+          {
+            "key": "UP_2PLUS",
+            "label": "上パネルのみ（設定2以上）",
+            "value": "UP_2PLUS"
+          },
+          {
+            "key": "DOWN_3PLUS",
+            "label": "下パネルのみ（設定3以上）",
+            "value": "DOWN_3PLUS"
+          },
+          {
+            "key": "BOTH_5PLUS",
+            "label": "上下両方（設定5以上）",
+            "value": "BOTH_5PLUS"
+          }
+        ],
+        "defaultValue": []
       }
     ]
   },
@@ -134,7 +139,64 @@
   },
   "evidence": {
     "version": "1.0.0",
-    "evidences": [],
+    "evidences": [
+      {
+        "id": "EVI_MYFLOWER_PANEL_UP_2PLUS",
+        "name": "上パネルのみ（設定2以上）",
+        "displayName": "上パネルのみ（設定2以上）",
+        "inputId": "INP_EVI_MYFLOWER_PANEL",
+        "triggerValue": "UP_2PLUS",
+        "confirmedSettings": [
+          "SET_2",
+          "SET_3",
+          "SET_4",
+          "SET_5",
+          "SET_6"
+        ],
+        "deniedSettings": [],
+        "hasImage": false,
+        "type": "SETTING_CONFIRMATION",
+        "sourceEvidenceRefs": [
+          "RE_PANEL_UP_2PLUS"
+        ]
+      },
+      {
+        "id": "EVI_MYFLOWER_PANEL_DOWN_3PLUS",
+        "name": "下パネルのみ（設定3以上）",
+        "displayName": "下パネルのみ（設定3以上）",
+        "inputId": "INP_EVI_MYFLOWER_PANEL",
+        "triggerValue": "DOWN_3PLUS",
+        "confirmedSettings": [
+          "SET_3",
+          "SET_4",
+          "SET_5",
+          "SET_6"
+        ],
+        "deniedSettings": [],
+        "hasImage": false,
+        "type": "SETTING_CONFIRMATION",
+        "sourceEvidenceRefs": [
+          "RE_PANEL_DOWN_3PLUS"
+        ]
+      },
+      {
+        "id": "EVI_MYFLOWER_PANEL_BOTH_5PLUS",
+        "name": "上下両方（設定5以上）",
+        "displayName": "上下両方（設定5以上）",
+        "inputId": "INP_EVI_MYFLOWER_PANEL",
+        "triggerValue": "BOTH_5PLUS",
+        "confirmedSettings": [
+          "SET_5",
+          "SET_6"
+        ],
+        "deniedSettings": [],
+        "hasImage": false,
+        "type": "SETTING_CONFIRMATION",
+        "sourceEvidenceRefs": [
+          "RE_PANEL_BOTH_5PLUS"
+        ]
+      }
+    ],
     "sources": [
       {
         "id": "SRC_OFFICIAL",
@@ -193,21 +255,15 @@
         ]
       },
       {
-        "id": "AUTO_SMALL_ROLE",
-        "title": "小役",
+        "id": "AUTO_END_EVENT",
+        "title": "ボーナス終了時",
         "displayOrder": 3,
         "items": [
           {
             "type": "input",
-            "inputId": "INP_CHERRY",
-            "label": "チェリー",
-            "widget": "counter"
-          },
-          {
-            "type": "input",
-            "inputId": "INP_CHERRY_BONUS",
-            "label": "チェリー契機ボーナス",
-            "widget": "counter"
+            "inputId": "INP_EVI_MYFLOWER_PANEL",
+            "label": "ボーナス終了時パネルフラッシュ",
+            "widget": "multi_select"
           }
         ]
       }
@@ -215,14 +271,14 @@
   },
   "selectionSummary": {
     "schemaVersion": "selection-summary-v1",
-    "evaluatedCount": 3,
+    "evaluatedCount": 8,
     "selectedCount": 1,
-    "rejectedCount": 2,
+    "rejectedCount": 7,
     "selected": [
       {
         "featureId": "FEAT_BONUS_INITIAL",
         "name": "ボーナス初当り合算",
-        "reason": "公式の初当り合算に段階的な設定差があり、32G連・1G連を除いた通常時初当りとして観測しやすいため採用します。",
+        "reason": "ボーナス初当りは1/210～1/160と段階的な設定差があり、32G連・1G連を除いた通常時初当りとして直接観測できるため採用します。",
         "requiredTrials": {
           "value": 18043,
           "unit": "通常ゲーム"
@@ -231,14 +287,47 @@
     ],
     "rejected": [
       {
-        "featureId": "FEAT_CHERRY_PENDING",
+        "featureId": "FEAT_CHERRY_EXCLUDED",
         "name": "通常時チェリー",
-        "reason": "設定差は確認できるものの全設定の確率表が未補完で、同一条件で比較できないため現時点では不採用です。"
+        "reason": "チェリー確率は1/64.0～1/57.3で設定差が小さく、1日実戦相当の試行量では設定間分布の重なりが大きく判別情報量が限定的なため不採用です。",
+        "requiredTrials": {
+          "value": 35692,
+          "unit": "通常ゲーム"
+        }
       },
       {
-        "featureId": "FEAT_CHERRY_BONUS_PENDING",
+        "featureId": "FEAT_CHERRY_BONUS_EXCLUDED",
         "name": "チェリー成立時ボーナス当選",
-        "reason": "チェリー同時当選の全設定値とBIG・REG構成が未補完で、条件付き確率を安全に評価できないため現時点では不採用です。"
+        "reason": "チェリー成立時のボーナス当選率は3.0%～4.0%と設定差がありますが、1日実戦ではチェリー重複ボーナス自体が数回程度になりやすく必要試行量が不足するため不採用です。",
+        "requiredTrials": {
+          "value": 2464,
+          "unit": "チェリー成立"
+        }
+      },
+      {
+        "featureId": "REJ_MYFLOWER_BELL",
+        "name": "ベル確率",
+        "reason": "ベルは1/9.0～1/8.6と設定差が非常に小さく、1日実戦相当の試行量でも設定間分布の重なりが大きいため判別情報量が少なく不採用です。"
+      },
+      {
+        "featureId": "REJ_MYFLOWER_WATERMELON",
+        "name": "スイカ確率",
+        "reason": "スイカは1/102.4～1/96.4と設定差が小さく、7000G程度でも設定差に対する分散が大きいため必要試行量が多く不採用です。"
+      },
+      {
+        "featureId": "REJ_MYFLOWER_REACH",
+        "name": "リーチ目確率",
+        "reason": "リーチ目は1/1191.6～1/840.2と差がありますが発生自体が低頻度で、1日実戦では数回程度しか観測できずサンプル不足になりやすいため不採用です。"
+      },
+      {
+        "featureId": "REJ_MYFLOWER_CHERRY_BR",
+        "name": "チェリー重複ボーナスのBIG/REG比率",
+        "reason": "REG比率は50.0%～63.0%へ変化しますが、母数となるチェリー重複ボーナスが非常に少なく、通常の1日実戦では構成比を評価できるだけの試行回数が得られないため不採用です。"
+      },
+      {
+        "featureId": "REJ_MYFLOWER_BIG_LINE",
+        "name": "BIG入賞ライン",
+        "reason": "右上がりは偶数設定示唆ですが設定別の完全な出現率が公開されておらず数値尤度を作れないため不採用です。"
       }
     ]
   },

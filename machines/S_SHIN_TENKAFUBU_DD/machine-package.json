@@ -3,7 +3,7 @@
   "machine": {
     "schemaVersion": "2.0.0",
     "machineId": "S_SHIN_TENKAFUBU_DD",
-    "machineDataVersion": "0.1.0",
+    "machineDataVersion": "0.1.1",
     "displayName": "真天下布武",
     "modelName": "S真天下布武DD",
     "manufacturer": "山佐",
@@ -47,34 +47,70 @@
         "minimum": 0
       },
       {
-        "id": "INP_CZ_INITIAL",
-        "name": "CZ「出陣チャレンジ」",
+        "id": "INP_IKKI_NOBUNAGA",
+        "name": "信長",
         "type": "counter",
-        "category": "NORMAL",
+        "category": "IKKIKAKE",
         "unit": "回",
-        "displayOrder": 12,
-        "inferenceRole": "DISPLAY_ONLY",
-        "defaultValue": 0,
-        "parentInputId": "INP_NORMAL_GAMES",
+        "displayOrder": 20,
+        "inferenceRole": "INCLUDE_SUPPORT",
+        "defaultValue": null,
         "minimum": 0
       },
       {
-        "id": "INP_AT_DIRECT",
-        "name": "レア役AT直撃",
+        "id": "INP_IKKI_HIDEYOSHI",
+        "name": "秀吉",
         "type": "counter",
-        "category": "NORMAL",
+        "category": "IKKIKAKE",
         "unit": "回",
-        "displayOrder": 13,
-        "inferenceRole": "DISPLAY_ONLY",
-        "defaultValue": 0,
-        "parentInputId": "INP_NORMAL_GAMES",
+        "displayOrder": 21,
+        "inferenceRole": "INCLUDE_SUPPORT",
+        "defaultValue": null,
         "minimum": 0
+      },
+      {
+        "id": "INP_IKKI_IEYASU",
+        "name": "家康",
+        "type": "counter",
+        "category": "IKKIKAKE",
+        "unit": "回",
+        "displayOrder": 22,
+        "inferenceRole": "INCLUDE_SUPPORT",
+        "defaultValue": null,
+        "minimum": 0
+      },
+      {
+        "id": "INP_EVI_TENKA_END_LAMP",
+        "name": "エンディング中サイドランプ",
+        "type": "multi_enum",
+        "category": "END_EVENT",
+        "unit": "",
+        "displayOrder": 90,
+        "inferenceRole": "INCLUDE_SUPPORT",
+        "options": [
+          {
+            "key": "WEAK_RED_2PLUS",
+            "label": "弱レア役→赤（設定2以上）",
+            "value": "WEAK_RED_2PLUS"
+          },
+          {
+            "key": "WEAK_PURPLE_6",
+            "label": "弱レア役→紫（設定6）",
+            "value": "WEAK_PURPLE_6"
+          },
+          {
+            "key": "CHANCE_PURPLE_4PLUS",
+            "label": "チャンス目→紫（設定4以上）",
+            "value": "CHANCE_PURPLE_4PLUS"
+          }
+        ],
+        "defaultValue": []
       },
       {
         "id": "INP_EVI_TENKAFUBU_TROPHY",
         "name": "ケロットトロフィー",
         "type": "multi_enum",
-        "category": "EVIDENCE",
+        "category": "END_EVENT",
         "unit": "",
         "displayOrder": 100,
         "inferenceRole": "INCLUDE_SUPPORT",
@@ -133,12 +169,125 @@
           "SRC_1GEKI",
           "SRC_NANA"
         ]
+      },
+      {
+        "featureId": "FEAT_IKKIKAKE_WARRIOR",
+        "name": "一騎駆け中の出陣武将",
+        "adoptionCategory": "INCLUDE_SUPPORT",
+        "calculationRole": "PROBABILITY",
+        "probabilityEngineUsage": true,
+        "modelType": "multinomial",
+        "minimumSample": 5,
+        "sampleRecommendation": 20,
+        "reliabilityProfile": {
+          "weight": 1
+        },
+        "inputTransform": "sum_inputs_to_trials",
+        "numeratorInputId": "INP_IKKI_NOBUNAGA",
+        "denominatorInputIds": [
+          "INP_IKKI_NOBUNAGA",
+          "INP_IKKI_HIDEYOSHI",
+          "INP_IKKI_IEYASU"
+        ],
+        "categoryInputIds": [
+          "INP_IKKI_HIDEYOSHI",
+          "INP_IKKI_IEYASU"
+        ],
+        "probabilities": {},
+        "categoryLabels": [
+          "信長",
+          "秀吉",
+          "家康"
+        ],
+        "categoryProbabilities": {
+          "SET_1": [
+            0.4,
+            0.35,
+            0.25
+          ],
+          "SET_2": [
+            0.4,
+            0.35,
+            0.25
+          ],
+          "SET_4": [
+            0.3,
+            0.3,
+            0.4
+          ],
+          "SET_5": [
+            0.3,
+            0.3,
+            0.4
+          ],
+          "SET_6": [
+            0.3,
+            0.3,
+            0.4
+          ]
+        },
+        "sourceEvidenceRefs": [
+          "SRC_NANA"
+        ]
       }
     ]
   },
   "evidence": {
     "version": "1.0.0",
     "evidences": [
+      {
+        "id": "EVI_TENKA_END_LAMP_WEAK_RED_2PLUS",
+        "name": "弱レア役→赤（設定2以上）",
+        "displayName": "弱レア役→赤（設定2以上）",
+        "inputId": "INP_EVI_TENKA_END_LAMP",
+        "triggerValue": "WEAK_RED_2PLUS",
+        "confirmedSettings": [
+          "SET_2",
+          "SET_4",
+          "SET_5",
+          "SET_6"
+        ],
+        "deniedSettings": [],
+        "hasImage": false,
+        "type": "SETTING_CONFIRMATION",
+        "sourceEvidenceRefs": [
+          "RE_END_LAMP_WEAK_RED_2PLUS"
+        ]
+      },
+      {
+        "id": "EVI_TENKA_END_LAMP_WEAK_PURPLE_6",
+        "name": "弱レア役→紫（設定6）",
+        "displayName": "弱レア役→紫（設定6）",
+        "inputId": "INP_EVI_TENKA_END_LAMP",
+        "triggerValue": "WEAK_PURPLE_6",
+        "confirmedSettings": [
+          "SET_6"
+        ],
+        "deniedSettings": [],
+        "hasImage": false,
+        "type": "SETTING_CONFIRMATION",
+        "sourceEvidenceRefs": [
+          "RE_END_LAMP_WEAK_PURPLE_6"
+        ]
+      },
+      {
+        "id": "EVI_TENKA_END_LAMP_CHANCE_PURPLE_4PLUS",
+        "name": "チャンス目→紫（設定4以上）",
+        "displayName": "チャンス目→紫（設定4以上）",
+        "inputId": "INP_EVI_TENKA_END_LAMP",
+        "triggerValue": "CHANCE_PURPLE_4PLUS",
+        "confirmedSettings": [
+          "SET_4",
+          "SET_5",
+          "SET_6"
+        ],
+        "deniedSettings": [],
+        "hasImage": false,
+        "type": "SETTING_CONFIRMATION",
+        "sourceEvidenceRefs": [
+          "RE_END_LAMP_CHANCE_PURPLE_4PLUS"
+        ]
+      },
       {
         "id": "EVI_TENKAFUBU_TROPHY_BRONZE",
         "name": "銅（設定2以上）",
@@ -245,26 +394,45 @@
             "inputId": "INP_AT_INITIAL",
             "label": "AT「覚醒」初当り",
             "widget": "counter"
-          },
+          }
+        ]
+      },
+      {
+        "id": "AUTO_IKKIKAKE",
+        "title": "一騎駆け",
+        "displayOrder": 2,
+        "items": [
           {
             "type": "input",
-            "inputId": "INP_CZ_INITIAL",
-            "label": "CZ「出陣チャレンジ」",
+            "inputId": "INP_IKKI_NOBUNAGA",
+            "label": "信長",
             "widget": "counter"
           },
           {
             "type": "input",
-            "inputId": "INP_AT_DIRECT",
-            "label": "レア役AT直撃",
+            "inputId": "INP_IKKI_HIDEYOSHI",
+            "label": "秀吉",
+            "widget": "counter"
+          },
+          {
+            "type": "input",
+            "inputId": "INP_IKKI_IEYASU",
+            "label": "家康",
             "widget": "counter"
           }
         ]
       },
       {
-        "id": "AUTO_EVIDENCE",
-        "title": "設定確定・否定情報",
-        "displayOrder": 2,
+        "id": "AUTO_END_EVENT",
+        "title": "エンディング・トロフィー",
+        "displayOrder": 3,
         "items": [
+          {
+            "type": "input",
+            "inputId": "INP_EVI_TENKA_END_LAMP",
+            "label": "エンディング中サイドランプ",
+            "widget": "multi_select"
+          },
           {
             "type": "input",
             "inputId": "INP_EVI_TENKAFUBU_TROPHY",
@@ -277,17 +445,26 @@
   },
   "selectionSummary": {
     "schemaVersion": "selection-summary-v1",
-    "evaluatedCount": 3,
-    "selectedCount": 1,
-    "rejectedCount": 2,
+    "evaluatedCount": 7,
+    "selectedCount": 2,
+    "rejectedCount": 5,
     "selected": [
       {
         "featureId": "FEAT_AT_INITIAL",
         "name": "AT覚醒初当り",
-        "reason": "AT初当りの設定差が大きく、通常時の主結果として一体評価できるため採用します。",
+        "reason": "AT初当りは設定差が大きく、通常ゲーム数を分母に直接観測できるため主軸に採用します。",
         "requiredTrials": {
           "value": 2756,
           "unit": "通常ゲーム"
+        }
+      },
+      {
+        "featureId": "FEAT_IKKIKAKE_WARRIOR",
+        "name": "一騎駆け中の出陣武将",
+        "reason": "一騎駆けの出陣武将はその場で信長・秀吉・家康を直接観測でき、設定1・2と設定4以上で振り分けが40/35/25から30/30/40へ明確に変わるためMultinomialの補助Featureとして採用します。",
+        "requiredTrials": {
+          "value": 69,
+          "unit": "一騎駆け出陣"
         }
       }
     ],
@@ -295,7 +472,7 @@
       {
         "featureId": "FEAT_CZ_INITIAL_EXCLUDED",
         "name": "CZ出陣チャレンジ初当り",
-        "reason": "CZはAT初当りに繋がる経路で、AT初当りと同時採用すると通常時の好挙動を重複評価するため不採用です。",
+        "reason": "CZはAT初当りへつながる主要経路で、AT初当りと同時採用すると同じ通常時の好挙動を重複評価するため不採用です。",
         "requiredTrials": {
           "value": 3674,
           "unit": "通常ゲーム"
@@ -304,11 +481,26 @@
       {
         "featureId": "FEAT_AT_DIRECT_EXCLUDED",
         "name": "レア役AT直撃",
-        "reason": "AT直撃はAT初当りの一部なので、AT初当りと同時採用すると同一当選を二重評価するため不採用です。",
+        "reason": "AT直撃はAT初当りの部分集合なので、AT初当りと同時採用すると同じAT当選を二重評価するため不採用です。",
         "requiredTrials": {
           "value": 7795,
           "unit": "通常ゲーム"
         }
+      },
+      {
+        "featureId": "REJ_TENKA_NORMAL_MODE",
+        "name": "通常時のモード移行",
+        "reason": "モード移行に設定差はありますが内部モードを常時確定観測できず、履歴や当選ゲーム数から推定した状態を分母にすると誤分類と循環推論が生じるため不採用です。"
+      },
+      {
+        "featureId": "REJ_TENKA_RESET_HIDEYOSHI",
+        "name": "有利区間リセット時の秀吉モード移行率",
+        "reason": "14.5%～37.5%と大きな設定差がありますが、利用には有利区間リセット契機と移行先モードの双方を確定する必要があります。公開情報では遊技履歴からの確認を推奨していますが、実機での再現性確認前なので数値Featureには採用しません。"
+      },
+      {
+        "featureId": "REJ_TENKA_AT_END_HINT",
+        "name": "AT終了画面の高設定示唆",
+        "reason": "高設定示唆であることは公開されていますが設定別出現率が未公表で数値尤度を作れないため不採用です。ケロットトロフィーとエンディングの設定下限パターンはEvidenceとして別採用します。"
       }
     ]
   },
