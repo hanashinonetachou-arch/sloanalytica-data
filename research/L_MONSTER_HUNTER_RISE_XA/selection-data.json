@@ -2,10 +2,15 @@
   "schemaVersion":"selection-data-v1",
   "machineId":"L_MONSTER_HUNTER_RISE_XA",
   "machineDataVersion":"0.1.1",
-  "uiCategoryLabels":{"NORMAL":"通常時","EVIDENCE":"設定確定・否定情報"},
+  "uiCategoryLabels":{"NORMAL":"通常時","CZ":"規定リプレイ","EVIDENCE":"設定確定・否定情報"},
   "inputs":[
     {"id":"INP_NORMAL_GAMES","name":"通常ゲーム数","type":"integer","category":"NORMAL","unit":"G","displayOrder":10,"inferenceRole":"INCLUDE_PRIMARY","defaultValue":0},
-    {"id":"INP_AT_INITIAL","name":"AT初当り","type":"counter","category":"NORMAL","unit":"回","displayOrder":11,"inferenceRole":"INCLUDE_PRIMARY","defaultValue":0,"parentInputId":"INP_NORMAL_GAMES"}
+    {"id":"INP_AT_INITIAL","name":"AT初当り","type":"counter","category":"NORMAL","unit":"回","displayOrder":11,"inferenceRole":"INCLUDE_PRIMARY","defaultValue":0,"parentInputId":"INP_NORMAL_GAMES"},
+    {"id":"INP_REPLAY_THRESHOLD_40","name":"40回選択","type":"counter","category":"CZ","unit":"回","displayOrder":20,"inferenceRole":"INCLUDE_SUPPORT","defaultValue":0},
+    {"id":"INP_REPLAY_THRESHOLD_80","name":"80回選択","type":"counter","category":"CZ","unit":"回","displayOrder":21,"inferenceRole":"INCLUDE_SUPPORT","defaultValue":0},
+    {"id":"INP_REPLAY_THRESHOLD_120","name":"120回選択","type":"counter","category":"CZ","unit":"回","displayOrder":22,"inferenceRole":"INCLUDE_SUPPORT","defaultValue":0},
+    {"id":"INP_REPLAY_THRESHOLD_160","name":"160回選択","type":"counter","category":"CZ","unit":"回","displayOrder":23,"inferenceRole":"INCLUDE_SUPPORT","defaultValue":0},
+    {"id":"INP_REPLAY_THRESHOLD_200","name":"200回選択","type":"counter","category":"CZ","unit":"回","displayOrder":24,"inferenceRole":"INCLUDE_SUPPORT","defaultValue":0}
   ],
   "features":[
     {"researchFeatureId":"RF_AT_INITIAL","featureId":"FEAT_AT_INITIAL","adoptionCategory":"INCLUDE_PRIMARY","numeratorInputId":"INP_AT_INITIAL","denominatorInputId":"INP_NORMAL_GAMES","minimumSample":300,"sampleRecommendation":4000,"weight":1,"difficultyParticipation":"INCLUDE","difficultyExposure":{"mode":"per_game","factor":1,"quality":"EXACT","basisId":"NORMAL_GAMES"},"userReason":"AT初当りは設定差が大きく、通常ゲーム数を分母に実戦中でも安定して観測できるため主軸に採用します。"},
@@ -13,7 +18,7 @@
     {"researchFeatureId":"RF_RISE_WEAK_NORMAL","featureId":"FEAT_RISE_WEAK_NORMAL_EXCLUDED","adoptionCategory":"EXCLUDE","userReason":"通常滞在時の弱レア役からのRISE ZONE当選率には設定差がありますが、抽選時の内部状態を確定できないため条件付き分母を正確に作れず不採用です。"},
     {"researchFeatureId":"RF_RISE_WEAK_HIGH","featureId":"FEAT_RISE_WEAK_HIGH_EXCLUDED","adoptionCategory":"EXCLUDE","userReason":"高確滞在時の弱レア役からのRISE ZONE当選率には設定差がありますが、高確滞在を確定観測できないため条件付き分母の誤分類を避けて不採用です。"},
     {"researchFeatureId":"RF_RISE_ZONE","featureId":"FEAT_RISE_ZONE_EXCLUDED","adoptionCategory":"EXCLUDE","userReason":"RISE ZONE実質出現率には設定差がありますが、AT初当りへつながる通常時の好挙動の一部でありAT初当りと同時に使うと同一生成過程を重複評価しやすいため不採用です。"},
-    {"researchFeatureId":"RF_REPLAY_THRESHOLD","featureId":"FEAT_REPLAY_THRESHOLD_EXCLUDED","adoptionCategory":"EXCLUDE","userReason":"規定リプレイ回数振り分けには明確な設定差がありますが、液晶のアイルーだるまは正確な累計数の常時数値表示ではなく示唆表示です。利用にはCZ間の全リプレイを手動カウントする必要があり入力負荷が高く、設定変更後初回は内部回数のランダム加算でズレるため現行UIでは不採用です。"},
+    {"researchFeatureId":"RF_REPLAY_THRESHOLD","featureId":"FEAT_REPLAY_THRESHOLD","adoptionCategory":"INCLUDE_SUPPORT","categoryInputIds":["INP_REPLAY_THRESHOLD_40","INP_REPLAY_THRESHOLD_80","INP_REPLAY_THRESHOLD_120","INP_REPLAY_THRESHOLD_160","INP_REPLAY_THRESHOLD_200"],"minimumSample":1,"sampleRecommendation":20,"weight":1,"difficultyParticipation":"EXCLUDE","userReason":"規定リプレイ40/80/120/160/200回の振り分けは設定別分布が公開され、通常のCZ間ではユーザーが各サイクルの到達規定回数を観測できるため補助Featureとして採用します。設定変更後初回は内部リプレイ回数がランダム加算されるため集計対象外です。"},
     {"researchFeatureId":"RF_HYAKURYU_OCCURRENCE","featureId":"FEAT_HYAKURYU_EXCLUDED","adoptionCategory":"EXCLUDE","userReason":"百竜夜行の出現率には設定差がありますが約1/1.8万～1/1.9万と低頻度で、設定間の差も非常に小さいため実戦的な判別情報量がほぼ得られず不採用です。"},
     {"researchFeatureId":"RF_POINT_MODE_TRANSITION","featureId":"FEAT_POINT_MODE_EXCLUDED","adoptionCategory":"EXCLUDE","userReason":"ポイントモード移行率には設定差がありますが、A/B/C/Dの内部滞在モードを実戦中に確定できません。結果から内部モードを推定して入力すると誤分類と循環推論が生じるため不採用です。"},
     {"researchFeatureId":"RF_QUEST_TABLE_TRANSITION","featureId":"FEAT_QUEST_TABLE_EXCLUDED","adoptionCategory":"EXCLUDE","userReason":"クエストテーブル移行率には設定差がありますが、A/B/天国準備/天国の内部テーブルを実戦中に確定判別できないため、正確な移行元・移行先の分母分子を作れず不採用です。"},
