@@ -1,0 +1,152 @@
+{
+  "schemaVersion": "selection-data-v1",
+  "machineId": "S_SLODOL_PK",
+  "machineDataVersion": "0.1.0",
+  "uiCategoryLabels": {
+    "NORMAL": "通常時",
+    "EVIDENCE": "設定確定・否定情報"
+  },
+  "inputs": [
+    {
+      "id": "INP_NORMAL_GAMES",
+      "name": "通常ゲーム数",
+      "type": "integer",
+      "category": "NORMAL",
+      "unit": "G",
+      "displayOrder": 10,
+      "inferenceRole": "INCLUDE_PRIMARY"
+    },
+    {
+      "id": "INP_AT_INITIAL",
+      "name": "AT初当り",
+      "type": "counter",
+      "category": "NORMAL",
+      "unit": "回",
+      "displayOrder": 11,
+      "inferenceRole": "INCLUDE_PRIMARY",
+      "parentInputId": "INP_NORMAL_GAMES"
+    }
+  ],
+  "features": [
+    {
+      "researchFeatureId": "RF_AT_INITIAL",
+      "featureId": "FEAT_AT_INITIAL",
+      "adoptionCategory": "INCLUDE_PRIMARY",
+      "numeratorInputId": "INP_AT_INITIAL",
+      "denominatorInputId": "INP_NORMAL_GAMES",
+      "minimumSample": 300,
+      "sampleRecommendation": 4000,
+      "weight": 1,
+      "difficultyParticipation": "INCLUDE",
+      "difficultyExposure": {
+        "mode": "per_game",
+        "factor": 1,
+        "quality": "EXACT",
+        "basisId": "NORMAL_GAMES"
+      },
+      "userReason": "AT初当りは設定1約1/290.9から設定6約1/208.4まで設定差が公開され、通常ゲーム数を分母として実戦中に直接観測できるため主軸に採用します。"
+    }
+  ],
+  "evidenceUi": {
+    "groups": [
+      {
+        "groupId": "SLODOL_END_SCREEN",
+        "label": "アンコールチャンス終了画面",
+        "selectionMode": "multi",
+        "normalizationMode": "ALLOWED_SETTINGS_INTERSECTION",
+        "displayOrder": 100,
+        "options": [
+          {
+            "value": "SWIM_B_2PLUS",
+            "label": "水着B・赤背景（設定2以上）",
+            "allowedSettings": ["SET_2", "SET_3", "SET_4", "SET_5", "SET_6"],
+            "excludedSettings": ["SET_1"],
+            "sourceEvidenceIds": ["RE_END_SWIM_B_2PLUS"]
+          },
+          {
+            "value": "COSPLAY_4PLUS",
+            "label": "コスプレ（設定4以上）",
+            "allowedSettings": ["SET_4", "SET_5", "SET_6"],
+            "excludedSettings": ["SET_1", "SET_2", "SET_3"],
+            "sourceEvidenceIds": ["RE_END_COSPLAY_4PLUS"]
+          }
+        ]
+      },
+      {
+        "groupId": "SLODOL_PAYOUT",
+        "label": "AT中特定獲得枚数",
+        "selectionMode": "multi",
+        "normalizationMode": "ALLOWED_SETTINGS_INTERSECTION",
+        "displayOrder": 110,
+        "options": [
+          {
+            "value": "222",
+            "label": "222枚OVER（設定2以上）",
+            "allowedSettings": ["SET_2", "SET_3", "SET_4", "SET_5", "SET_6"],
+            "excludedSettings": ["SET_1"],
+            "sourceEvidenceIds": ["RE_PAYOUT_222"]
+          },
+          {
+            "value": "246",
+            "label": "246枚OVER（偶数設定）",
+            "allowedSettings": ["SET_2", "SET_4", "SET_6"],
+            "excludedSettings": ["SET_1", "SET_3", "SET_5"],
+            "sourceEvidenceIds": ["RE_PAYOUT_246"]
+          },
+          {
+            "value": "333",
+            "label": "333枚OVER（設定3以上）",
+            "allowedSettings": ["SET_3", "SET_4", "SET_5", "SET_6"],
+            "excludedSettings": ["SET_1", "SET_2"],
+            "sourceEvidenceIds": ["RE_PAYOUT_333"]
+          },
+          {
+            "value": "444",
+            "label": "444枚OVER（設定4以上）",
+            "allowedSettings": ["SET_4", "SET_5", "SET_6"],
+            "excludedSettings": ["SET_1", "SET_2", "SET_3"],
+            "sourceEvidenceIds": ["RE_PAYOUT_444"]
+          },
+          {
+            "value": "456",
+            "label": "456枚OVER（設定4以上）",
+            "allowedSettings": ["SET_4", "SET_5", "SET_6"],
+            "excludedSettings": ["SET_1", "SET_2", "SET_3"],
+            "sourceEvidenceIds": ["RE_PAYOUT_456"]
+          },
+          {
+            "value": "555",
+            "label": "555枚OVER（設定5以上）",
+            "allowedSettings": ["SET_5", "SET_6"],
+            "excludedSettings": ["SET_1", "SET_2", "SET_3", "SET_4"],
+            "sourceEvidenceIds": ["RE_PAYOUT_555"]
+          },
+          {
+            "value": "666",
+            "label": "666枚OVER（設定6）",
+            "allowedSettings": ["SET_6"],
+            "excludedSettings": ["SET_1", "SET_2", "SET_3", "SET_4", "SET_5"],
+            "sourceEvidenceIds": ["RE_PAYOUT_666"]
+          }
+        ]
+      }
+    ]
+  },
+  "rejectedElements": [
+    {
+      "id": "reference",
+      "name": "アンコールチャンス終了画面の私服A・私服B・水着A",
+      "reason": "奇数設定・偶数設定・高設定の示唆として公開されていますが、設定別の完全な出現確率が公開されていないため数値尤度へ変換できず、設定を確定・否定するEvidenceでもないため推測計算には採用しません。"
+    },
+    {
+      "id": "reference_conditional",
+      "name": "アンコールチャンス終了画面 オールキャスト",
+      "reason": "オールキャストはカリスマモード移行または設定6を示しますが、出現時にどちらの条件で表示されたか判別できません。カリスマモード非移行を確定できない限り設定6確定Evidenceとして扱えないため不採用です。"
+    },
+    {
+      "id": "unresolved_reference",
+      "name": "終了画面でのコマンド入力時ボイス",
+      "reason": "設定示唆候補として確認していますが、設定ごとの示唆内容や確定条件を公開情報から解決できていません。数値確率や確定・否定条件を構築できないため現時点では推測計算に採用しません。"
+    }
+  ]
+}
