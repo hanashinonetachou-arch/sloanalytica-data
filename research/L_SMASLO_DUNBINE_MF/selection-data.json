@@ -1,76 +1,724 @@
 {
-  "schemaVersion":"selection-data-v1",
-  "machineId":"L_SMASLO_DUNBINE_MF",
-  "machineDataVersion":"0.1.0",
-  "uiCategoryLabels":{"NORMAL":"通常時","AURA":"オーラカウンタ","ATTACK":"アタックMODE","BILLBINE":"ビルバインRUSH後","CHAM":"チャムランプ","EVIDENCE":"設定確定・否定情報"},
-  "inputs":[
-    {"id":"INP_NORMAL_GAMES","name":"通常ゲーム数","type":"integer","category":"NORMAL","unit":"G","displayOrder":10,"inferenceRole":"INCLUDE_PRIMARY"},
-    {"id":"INP_BONUS_INITIAL","name":"ボーナス初当り","type":"counter","category":"NORMAL","unit":"回","displayOrder":11,"inferenceRole":"INCLUDE_PRIMARY","parentInputId":"INP_NORMAL_GAMES"},
-    {"id":"INP_AURA_TRIAL","name":"規定pt判別周期","type":"counter","category":"AURA","unit":"回","displayOrder":20,"inferenceRole":"INCLUDE_SUPPORT"},
-    {"id":"INP_AURA_11PT","name":"11pt選択","type":"counter","category":"AURA","unit":"回","displayOrder":21,"inferenceRole":"INCLUDE_SUPPORT","parentInputId":"INP_AURA_TRIAL"},
-    {"id":"INP_ATTACK_HAZURE3","name":"ハズレ3連","type":"counter","category":"ATTACK","unit":"回","displayOrder":30,"inferenceRole":"INCLUDE_SUPPORT"},
-    {"id":"INP_ATTACK_HAZURE3_HIGH","name":"狙え高確移行","type":"counter","category":"ATTACK","unit":"回","displayOrder":31,"inferenceRole":"INCLUDE_SUPPORT","parentInputId":"INP_ATTACK_HAZURE3"},
-    {"id":"INP_BILLBINE_END","name":"ビルバインRUSH終了","type":"counter","category":"BILLBINE","unit":"回","displayOrder":40,"inferenceRole":"INCLUDE_SUPPORT"},
-    {"id":"INP_BILLBINE_CARRY","name":"63G+α超え持ち越し","type":"counter","category":"BILLBINE","unit":"回","displayOrder":41,"inferenceRole":"INCLUDE_SUPPORT","parentInputId":"INP_BILLBINE_END"},
-    {"id":"INP_CHAM_GREEN","name":"緑","type":"counter","category":"CHAM","unit":"回","displayOrder":50,"inferenceRole":"INCLUDE_SUPPORT"},
-    {"id":"INP_CHAM_RED","name":"赤","type":"counter","category":"CHAM","unit":"回","displayOrder":51,"inferenceRole":"INCLUDE_SUPPORT"},
-    {"id":"INP_CHAM_OTHER","name":"その他","type":"counter","category":"CHAM","unit":"回","displayOrder":52,"inferenceRole":"INCLUDE_SUPPORT"}
+  "schemaVersion": "selection-data-v1",
+  "machineId": "L_SMASLO_DUNBINE_MF",
+  "machineDataVersion": "0.1.0",
+  "uiCategoryLabels": {
+    "NORMAL": "通常時",
+    "AURA": "オーラカウンタ",
+    "ATTACK": "アタックMODE",
+    "BILLBINE": "ビルバインRUSH後",
+    "CHAM": "チャムランプ",
+    "EVIDENCE": "設定確定・否定情報"
+  },
+  "inputs": [
+    {
+      "id": "INP_NORMAL_GAMES",
+      "name": "通常ゲーム数",
+      "type": "integer",
+      "category": "NORMAL",
+      "unit": "G",
+      "displayOrder": 10,
+      "inferenceRole": "INCLUDE_PRIMARY"
+    },
+    {
+      "id": "INP_BONUS_INITIAL",
+      "name": "ボーナス初当り",
+      "type": "counter",
+      "category": "NORMAL",
+      "unit": "回",
+      "displayOrder": 11,
+      "inferenceRole": "INCLUDE_PRIMARY",
+      "parentInputId": "INP_NORMAL_GAMES"
+    },
+    {
+      "id": "INP_AURA_TRIAL",
+      "name": "規定pt判別周期",
+      "type": "counter",
+      "category": "AURA",
+      "unit": "回",
+      "displayOrder": 20,
+      "inferenceRole": "INCLUDE_SUPPORT",
+      "description": "規定ptを事後に確定できた周期だけを数えてください。確定できない周期は未入力のままにします。"
+    },
+    {
+      "id": "INP_AURA_11PT",
+      "name": "11pt選択",
+      "type": "counter",
+      "category": "AURA",
+      "unit": "回",
+      "displayOrder": 21,
+      "inferenceRole": "INCLUDE_SUPPORT",
+      "parentInputId": "INP_AURA_TRIAL",
+      "description": "規定ptを確定できた周期のうち、11ptが選択されていた回数を数えてください。"
+    },
+    {
+      "id": "INP_ATTACK_HAZURE3",
+      "name": "ハズレ3連",
+      "type": "counter",
+      "category": "ATTACK",
+      "unit": "回",
+      "displayOrder": 30,
+      "inferenceRole": "INCLUDE_SUPPORT",
+      "description": "アタックMODE中にハズレ3連が成立した回数を数えてください。ハズレ4連は3連を内包するため別評価しません。"
+    },
+    {
+      "id": "INP_ATTACK_HAZURE3_HIGH",
+      "name": "狙え高確移行",
+      "type": "counter",
+      "category": "ATTACK",
+      "unit": "回",
+      "displayOrder": 31,
+      "inferenceRole": "INCLUDE_SUPPORT",
+      "parentInputId": "INP_ATTACK_HAZURE3",
+      "description": "ハズレ3連成立後に狙え高確へ移行した回数を数えてください。"
+    },
+    {
+      "id": "INP_BILLBINE_END",
+      "name": "ビルバインRUSH終了",
+      "type": "counter",
+      "category": "BILLBINE",
+      "unit": "回",
+      "displayOrder": 40,
+      "inferenceRole": "INCLUDE_SUPPORT",
+      "description": "ビルバインRUSH終了回数を数えてください。"
+    },
+    {
+      "id": "INP_BILLBINE_CARRY",
+      "name": "63G+α超え持ち越し",
+      "type": "counter",
+      "category": "BILLBINE",
+      "unit": "回",
+      "displayOrder": 41,
+      "inferenceRole": "INCLUDE_SUPPORT",
+      "parentInputId": "INP_BILLBINE_END",
+      "description": "ビルバインRUSH終了後、63G+αを超えて持ち越した回数を数えてください。"
+    },
+    {
+      "id": "INP_CHAM_GREEN",
+      "name": "緑",
+      "type": "counter",
+      "category": "CHAM",
+      "unit": "回",
+      "displayOrder": 50,
+      "inferenceRole": "INCLUDE_SUPPORT",
+      "description": "設定推測対象のカットイン条件を満たした場合だけ、チャムランプの色を1回につき1つ加算してください。対象条件は実機確認待ちです。"
+    },
+    {
+      "id": "INP_CHAM_RED",
+      "name": "赤",
+      "type": "counter",
+      "category": "CHAM",
+      "unit": "回",
+      "displayOrder": 51,
+      "inferenceRole": "INCLUDE_SUPPORT",
+      "description": "設定推測対象のカットイン条件を満たした場合だけ、チャムランプの色を1回につき1つ加算してください。対象条件は実機確認待ちです。"
+    },
+    {
+      "id": "INP_CHAM_OTHER",
+      "name": "その他",
+      "type": "counter",
+      "category": "CHAM",
+      "unit": "回",
+      "displayOrder": 52,
+      "inferenceRole": "INCLUDE_SUPPORT",
+      "description": "設定推測対象のカットイン条件を満たした場合だけ、チャムランプの色を1回につき1つ加算してください。対象条件は実機確認待ちです。"
+    }
   ],
-  "features":[
-    {"researchFeatureId":"RF_BONUS_INITIAL","featureId":"FEAT_BONUS_INITIAL","adoptionCategory":"INCLUDE_PRIMARY","numeratorInputId":"INP_BONUS_INITIAL","denominatorInputId":"INP_NORMAL_GAMES","minimumSample":300,"sampleRecommendation":4000,"weight":1,"difficultyParticipation":"INCLUDE","difficultyExposure":{"mode":"per_game","factor":1,"quality":"EXACT","basisId":"NORMAL_GAMES"},"userReason":"ボーナス初当りは全設定の確率が公開され、通常ゲーム数を分母として直接観測できます。ST初当りとの内包関係を避け、通常時の主軸Featureとしてこちらだけを採用します。"},
-    {"researchFeatureId":"RF_ST_INITIAL","featureId":"FEAT_ST_INITIAL_EXCLUDED","adoptionCategory":"EXCLUDE","userFacingReason":"ST初当りにも設定差がありますが、ボーナス経由の結果を含み採用するボーナス初当りと同じ初当り系列です。両方を独立に評価すると同一当選経路を重複評価するため不採用です。"},
-    {"researchFeatureId":"RF_CZ_MISSION","featureId":"FEAT_CZ_MISSION_EXCLUDED","adoptionCategory":"EXCLUDE","userFacingReason":"ミッションモード出現率は設定差が小さく、CZ成功がボーナス・ST初当りへつながる生成経路を共有します。採用する初当りと独立評価すると同一好挙動を重複評価しやすいため不採用です。"},
-    {"researchFeatureId":"RF_CZ_ATTACK","featureId":"FEAT_CZ_ATTACK_EXCLUDED","adoptionCategory":"EXCLUDE","userFacingReason":"アタックモード出現率には設定差がありますが、CZ成功後の初当り系列と生成経路を共有します。現行モデルでボーナス初当りと独立に乗算すると重複評価になるため、CZ内の条件付き抽選だけを補助利用します。"},
-    {"researchFeatureId":"RF_STARTUP_MISSION","featureId":"FEAT_STARTUP_MISSION_EXCLUDED","adoptionCategory":"EXCLUDE","userFacingReason":"ダンバイン起動ミッション出現率は全設定で公開されていますが設定差が非常に小さく、CZ合算・初当り系列とも生成経路を共有します。重複評価に対して追加情報量が小さいため不採用です。"},
-    {"researchFeatureId":"RF_MISSION_BATTLE_INITIAL","featureId":"FEAT_MISSION_BATTLE_INITIAL_EXCLUDED","adoptionCategory":"EXCLUDE","userFacingReason":"ミッションMODE経由2Gバトルの突入時勝利抽選には設定差がありますが、消化中のオーラ役による書き換えと最終結果だけから当選経路を常に判別できません。公開確率と同じ分子を安定して観測できないため不採用です。"},
-    {"researchFeatureId":"RF_AURA_11PT","featureId":"FEAT_AURA_11PT","adoptionCategory":"INCLUDE_SUPPORT","numeratorInputId":"INP_AURA_11PT","denominatorInputId":"INP_AURA_TRIAL","minimumSample":1,"sampleRecommendation":40,"weight":1,"difficultyParticipation":"EXCLUDE","userReason":"オーラカウンタ規定11pt選択率は設定1・2の2.0%から設定6の5.1%まで差があり、実際の規定ptを事後確定できた周期だけを分母に限定できるため補助Featureとして採用します。"},
-    {"researchFeatureId":"RF_ATTACK_INITIAL_SUCCESS","featureId":"FEAT_ATTACK_INITIAL_SUCCESS_EXCLUDED","adoptionCategory":"EXCLUDE","userFacingReason":"アタックMODE突入時の初期成功抽選には設定差がありますが、最終成功だけでは突入時抽選・消化中抽選・保証後継続などの当選経路を常に判別できません。観測可能な一部ケースだけでは母集団が偏るため不採用です。"},
-    {"researchFeatureId":"RF_ATTACK_HAZURE3","featureId":"FEAT_ATTACK_HAZURE3","adoptionCategory":"INCLUDE_SUPPORT","numeratorInputId":"INP_ATTACK_HAZURE3_HIGH","denominatorInputId":"INP_ATTACK_HAZURE3","minimumSample":1,"sampleRecommendation":40,"weight":1,"difficultyParticipation":"EXCLUDE","userReason":"アタックMODE中ハズレ3連からの狙え高確移行は設定1の19.9%から設定6の30.1%まで差があり、ハズレ3連と移行結果を直接観測できるため条件付き補助Featureとして採用します。"},
-    {"researchFeatureId":"RF_ATTACK_HAZURE4","featureId":"FEAT_ATTACK_HAZURE4_EXCLUDED","adoptionCategory":"EXCLUDE","userFacingReason":"ハズレ4連からの狙え高確移行にも設定差がありますが、4連成立は必ず3連成立を内包し、採用するハズレ3連Featureと同じ連続事象を再評価します。設定差も3連より小さいため二重評価を避けて不採用です。"},
-    {"researchFeatureId":"RF_BILLBINE_CARRY","featureId":"FEAT_BILLBINE_CARRY","adoptionCategory":"INCLUDE_SUPPORT","numeratorInputId":"INP_BILLBINE_CARRY","denominatorInputId":"INP_BILLBINE_END","minimumSample":1,"sampleRecommendation":10,"weight":1,"difficultyParticipation":"EXCLUDE","userReason":"ビルバインRUSH後の63G+α超え持ち越しは設定1の0.4%から設定6の15.2%まで非常に大きな設定差があり、RUSH終了後の挙動として直接観測できるため、低頻度でも補助Featureとして採用します。"},
-    {"researchFeatureId":"RF_CHAM_LAMP","featureId":"FEAT_CHAM_LAMP","adoptionCategory":"INCLUDE_SUPPORT","numeratorInputId":"INP_CHAM_GREEN","categoryInputIds":["INP_CHAM_RED","INP_CHAM_OTHER"],"inputTransform":"sum_inputs_to_trials","minimumSample":1,"sampleRecommendation":50,"weight":1,"difficultyParticipation":"EXCLUDE","userReason":"ST中ボーナスの対象チャムランプは緑・赤・その他の完全分布が全設定で公開され、対象カットインごとに排他的カテゴリを直接観測できるためMultinomialの補助Featureとして採用します。"}
+  "features": [
+    {
+      "researchFeatureId": "RF_BONUS_INITIAL",
+      "featureId": "FEAT_BONUS_INITIAL",
+      "adoptionCategory": "INCLUDE_PRIMARY",
+      "numeratorInputId": "INP_BONUS_INITIAL",
+      "denominatorInputId": "INP_NORMAL_GAMES",
+      "minimumSample": 300,
+      "sampleRecommendation": 4000,
+      "weight": 1,
+      "difficultyParticipation": "INCLUDE",
+      "difficultyExposure": {
+        "mode": "per_game",
+        "factor": 1,
+        "quality": "EXACT",
+        "basisId": "NORMAL_GAMES"
+      },
+      "userReason": "ボーナス初当りは全設定の確率が公開され、通常ゲーム数を分母として直接観測できます。ST初当りとの内包関係を避け、通常時の主軸Featureとしてこちらだけを採用します。"
+    },
+    {
+      "researchFeatureId": "RF_ST_INITIAL",
+      "featureId": "FEAT_ST_INITIAL_EXCLUDED",
+      "adoptionCategory": "EXCLUDE",
+      "userFacingReason": "ST初当りにも設定差がありますが、ボーナス経由の結果を含み採用するボーナス初当りと同じ初当り系列です。両方を独立に評価すると同一当選経路を重複評価するため不採用です。"
+    },
+    {
+      "researchFeatureId": "RF_CZ_MISSION",
+      "featureId": "FEAT_CZ_MISSION_EXCLUDED",
+      "adoptionCategory": "EXCLUDE",
+      "userFacingReason": "ミッションモード出現率は設定差が小さく、CZ成功がボーナス・ST初当りへつながる生成経路を共有します。採用する初当りと独立評価すると同一好挙動を重複評価しやすいため不採用です。"
+    },
+    {
+      "researchFeatureId": "RF_CZ_ATTACK",
+      "featureId": "FEAT_CZ_ATTACK_EXCLUDED",
+      "adoptionCategory": "EXCLUDE",
+      "userFacingReason": "アタックモード出現率には設定差がありますが、CZ成功後の初当り系列と生成経路を共有します。現行モデルでボーナス初当りと独立に乗算すると重複評価になるため、CZ内の条件付き抽選だけを補助利用します。"
+    },
+    {
+      "researchFeatureId": "RF_STARTUP_MISSION",
+      "featureId": "FEAT_STARTUP_MISSION_EXCLUDED",
+      "adoptionCategory": "EXCLUDE",
+      "userFacingReason": "ダンバイン起動ミッション出現率は全設定で公開されていますが設定差が非常に小さく、CZ合算・初当り系列とも生成経路を共有します。重複評価に対して追加情報量が小さいため不採用です。"
+    },
+    {
+      "researchFeatureId": "RF_MISSION_BATTLE_INITIAL",
+      "featureId": "FEAT_MISSION_BATTLE_INITIAL_EXCLUDED",
+      "adoptionCategory": "EXCLUDE",
+      "userFacingReason": "ミッションMODE経由2Gバトルの突入時勝利抽選には設定差がありますが、消化中のオーラ役による書き換えと最終結果だけから当選経路を常に判別できません。公開確率と同じ分子を安定して観測できないため不採用です。"
+    },
+    {
+      "researchFeatureId": "RF_AURA_11PT",
+      "featureId": "FEAT_AURA_11PT",
+      "adoptionCategory": "INCLUDE_SUPPORT",
+      "numeratorInputId": "INP_AURA_11PT",
+      "denominatorInputId": "INP_AURA_TRIAL",
+      "minimumSample": 1,
+      "sampleRecommendation": 40,
+      "weight": 1,
+      "difficultyParticipation": "EXCLUDE",
+      "userReason": "オーラカウンタ規定11pt選択率は設定1・2の2.0%から設定6の5.1%まで差があり、実際の規定ptを事後確定できた周期だけを分母に限定できるため補助Featureとして採用します。"
+    },
+    {
+      "researchFeatureId": "RF_ATTACK_INITIAL_SUCCESS",
+      "featureId": "FEAT_ATTACK_INITIAL_SUCCESS_EXCLUDED",
+      "adoptionCategory": "EXCLUDE",
+      "userFacingReason": "アタックMODE突入時の初期成功抽選には設定差がありますが、最終成功だけでは突入時抽選・消化中抽選・保証後継続などの当選経路を常に判別できません。観測可能な一部ケースだけでは母集団が偏るため不採用です。"
+    },
+    {
+      "researchFeatureId": "RF_ATTACK_HAZURE3",
+      "featureId": "FEAT_ATTACK_HAZURE3",
+      "adoptionCategory": "INCLUDE_SUPPORT",
+      "numeratorInputId": "INP_ATTACK_HAZURE3_HIGH",
+      "denominatorInputId": "INP_ATTACK_HAZURE3",
+      "minimumSample": 1,
+      "sampleRecommendation": 40,
+      "weight": 1,
+      "difficultyParticipation": "EXCLUDE",
+      "userReason": "アタックMODE中ハズレ3連からの狙え高確移行は設定1の19.9%から設定6の30.1%まで差があり、ハズレ3連と移行結果を直接観測できるため条件付き補助Featureとして採用します。"
+    },
+    {
+      "researchFeatureId": "RF_ATTACK_HAZURE4",
+      "featureId": "FEAT_ATTACK_HAZURE4_EXCLUDED",
+      "adoptionCategory": "EXCLUDE",
+      "userFacingReason": "ハズレ4連からの狙え高確移行にも設定差がありますが、4連成立は必ず3連成立を内包し、採用するハズレ3連Featureと同じ連続事象を再評価します。設定差も3連より小さいため二重評価を避けて不採用です。"
+    },
+    {
+      "researchFeatureId": "RF_BILLBINE_CARRY",
+      "featureId": "FEAT_BILLBINE_CARRY",
+      "adoptionCategory": "INCLUDE_SUPPORT",
+      "numeratorInputId": "INP_BILLBINE_CARRY",
+      "denominatorInputId": "INP_BILLBINE_END",
+      "minimumSample": 1,
+      "sampleRecommendation": 10,
+      "weight": 1,
+      "difficultyParticipation": "EXCLUDE",
+      "userReason": "ビルバインRUSH後の63G+α超え持ち越しは設定1の0.4%から設定6の15.2%まで非常に大きな設定差があり、RUSH終了後の挙動として直接観測できるため、低頻度でも補助Featureとして採用します。"
+    },
+    {
+      "researchFeatureId": "RF_CHAM_LAMP",
+      "featureId": "FEAT_CHAM_LAMP",
+      "adoptionCategory": "INCLUDE_SUPPORT",
+      "numeratorInputId": "INP_CHAM_GREEN",
+      "categoryInputIds": [
+        "INP_CHAM_RED",
+        "INP_CHAM_OTHER"
+      ],
+      "inputTransform": "sum_inputs_to_trials",
+      "minimumSample": 1,
+      "sampleRecommendation": 50,
+      "weight": 1,
+      "difficultyParticipation": "EXCLUDE",
+      "userReason": "ST中ボーナスの対象チャムランプは緑・赤・その他の完全分布が全設定で公開され、対象カットインごとに排他的カテゴリを直接観測できるためMultinomialの補助Featureとして採用します。"
+    }
   ],
-  "evidenceUi":{"groups":[
-    {"groupId":"DUNBINE_STARTUP_REMAIN","label":"起動ミッション 残小Vベル回数","selectionMode":"multi","normalizationMode":"ALLOWED_SETTINGS_INTERSECTION","displayOrder":100,"options":[
-      {"value":"4PLUS","label":"あと4回（設定4以上）","allowedSettings":["SET_4","SET_5","SET_6"],"excludedSettings":["SET_1","SET_2","SET_3"],"sourceEvidenceIds":["RE_REMAIN_4PLUS"]},
-      {"value":"5PLUS","label":"あと5回（設定5以上）","allowedSettings":["SET_5","SET_6"],"excludedSettings":["SET_1","SET_2","SET_3","SET_4"],"sourceEvidenceIds":["RE_REMAIN_5PLUS"]},
-      {"value":"6","label":"あと6回（設定6）","allowedSettings":["SET_6"],"excludedSettings":["SET_1","SET_2","SET_3","SET_4","SET_5"],"sourceEvidenceIds":["RE_REMAIN_6"]}
-    ]},
-    {"groupId":"DUNBINE_ATTACK_SPECIAL","label":"アタックMODE","selectionMode":"multi","normalizationMode":"ALLOWED_SETTINGS_INTERSECTION","displayOrder":110,"options":[
-      {"value":"1001","label":"1001機スタート（設定6）","allowedSettings":["SET_6"],"excludedSettings":["SET_1","SET_2","SET_3","SET_4","SET_5"],"sourceEvidenceIds":["RE_ATTACK_1001_6"]},
-      {"value":"22","label":"22機撃破（設定2以上）","allowedSettings":["SET_2","SET_3","SET_4","SET_5","SET_6"],"excludedSettings":["SET_1"],"sourceEvidenceIds":["RE_KILL_22_2PLUS"]},
-      {"value":"33","label":"33機撃破（設定3以上）","allowedSettings":["SET_3","SET_4","SET_5","SET_6"],"excludedSettings":["SET_1","SET_2"],"sourceEvidenceIds":["RE_KILL_33_3PLUS"]},
-      {"value":"44","label":"44機撃破（設定4以上）","allowedSettings":["SET_4","SET_5","SET_6"],"excludedSettings":["SET_1","SET_2","SET_3"],"sourceEvidenceIds":["RE_KILL_44_4PLUS"]},
-      {"value":"55","label":"55機撃破（設定5以上）","allowedSettings":["SET_5","SET_6"],"excludedSettings":["SET_1","SET_2","SET_3","SET_4"],"sourceEvidenceIds":["RE_KILL_55_5PLUS"]},
-      {"value":"66","label":"66機撃破（設定6）","allowedSettings":["SET_6"],"excludedSettings":["SET_1","SET_2","SET_3","SET_4","SET_5"],"sourceEvidenceIds":["RE_KILL_66_6"]}
-    ]},
-    {"groupId":"DUNBINE_PAYOUT","label":"獲得枚数表示","selectionMode":"multi","normalizationMode":"ALLOWED_SETTINGS_INTERSECTION","displayOrder":120,"options":[
-      {"value":"222","label":"222枚OVER（設定2以上）","allowedSettings":["SET_2","SET_3","SET_4","SET_5","SET_6"],"excludedSettings":["SET_1"],"sourceEvidenceIds":["RE_PAYOUT_222_2PLUS"]},
-      {"value":"333","label":"333枚OVER（設定3以上）","allowedSettings":["SET_3","SET_4","SET_5","SET_6"],"excludedSettings":["SET_1","SET_2"],"sourceEvidenceIds":["RE_PAYOUT_333_3PLUS"]},
-      {"value":"444","label":"444枚OVER（設定4以上）","allowedSettings":["SET_4","SET_5","SET_6"],"excludedSettings":["SET_1","SET_2","SET_3"],"sourceEvidenceIds":["RE_PAYOUT_444_4PLUS"]},
-      {"value":"555","label":"555枚OVER（設定5以上）","allowedSettings":["SET_5","SET_6"],"excludedSettings":["SET_1","SET_2","SET_3","SET_4"],"sourceEvidenceIds":["RE_PAYOUT_555_5PLUS"]},
-      {"value":"666","label":"666枚OVER（設定6）","allowedSettings":["SET_6"],"excludedSettings":["SET_1","SET_2","SET_3","SET_4","SET_5"],"sourceEvidenceIds":["RE_PAYOUT_666_6"]}
-    ]},
-    {"groupId":"DUNBINE_SEISENSHI","label":"聖戦士の道 初期G数","selectionMode":"multi","normalizationMode":"ALLOWED_SETTINGS_INTERSECTION","displayOrder":130,"options":[
-      {"value":"20","label":"20G（設定2以上）","allowedSettings":["SET_2","SET_3","SET_4","SET_5","SET_6"],"excludedSettings":["SET_1"],"sourceEvidenceIds":["RE_SEISENSHI_20_2PLUS"]},
-      {"value":"30","label":"30G（設定3以上）","allowedSettings":["SET_3","SET_4","SET_5","SET_6"],"excludedSettings":["SET_1","SET_2"],"sourceEvidenceIds":["RE_SEISENSHI_30_3PLUS"]}
-    ]},
-    {"groupId":"DUNBINE_END_VOICE","label":"ST終了時PUSHボイス","selectionMode":"multi","normalizationMode":"ALLOWED_SETTINGS_INTERSECTION","displayOrder":140,"options":[
-      {"value":"2PLUS","label":"俺は人は殺さない！その怨念を殺す！（設定2以上）","allowedSettings":["SET_2","SET_3","SET_4","SET_5","SET_6"],"excludedSettings":["SET_1"],"sourceEvidenceIds":["RE_VOICE_2PLUS"]},
-      {"value":"4PLUS","label":"私が欲しいのはLikemeじゃないわ Lovemeよ（設定4以上）","allowedSettings":["SET_4","SET_5","SET_6"],"excludedSettings":["SET_1","SET_2","SET_3"],"sourceEvidenceIds":["RE_VOICE_4PLUS"]},
-      {"value":"6","label":"人々よ！バイストンウェルに帰還します！（設定6）","allowedSettings":["SET_6"],"excludedSettings":["SET_1","SET_2","SET_3","SET_4","SET_5"],"sourceEvidenceIds":["RE_VOICE_6"]}
-    ]},
-    {"groupId":"DUNBINE_TROPHY","label":"サミートロフィー","selectionMode":"multi","normalizationMode":"ALLOWED_SETTINGS_INTERSECTION","displayOrder":150,"options":[
-      {"value":"BRONZE","label":"銅（設定2以上）","allowedSettings":["SET_2","SET_3","SET_4","SET_5","SET_6"],"excludedSettings":["SET_1"],"sourceEvidenceIds":["RE_TROPHY_BRONZE_2PLUS"]},
-      {"value":"SILVER","label":"銀（設定3以上）","allowedSettings":["SET_3","SET_4","SET_5","SET_6"],"excludedSettings":["SET_1","SET_2"],"sourceEvidenceIds":["RE_TROPHY_SILVER_3PLUS"]},
-      {"value":"GOLD","label":"金（設定4以上）","allowedSettings":["SET_4","SET_5","SET_6"],"excludedSettings":["SET_1","SET_2","SET_3"],"sourceEvidenceIds":["RE_TROPHY_GOLD_4PLUS"]},
-      {"value":"KIRIN","label":"キリン柄（設定5以上）","allowedSettings":["SET_5","SET_6"],"excludedSettings":["SET_1","SET_2","SET_3","SET_4"],"sourceEvidenceIds":["RE_TROPHY_KIRIN_5PLUS"]},
-      {"value":"RAINBOW","label":"虹（設定6）","allowedSettings":["SET_6"],"excludedSettings":["SET_1","SET_2","SET_3","SET_4","SET_5"],"sourceEvidenceIds":["RE_TROPHY_RAINBOW_6"]}
-    ]}
-  ]},
-  "rejectedElements":[
-    {"id":"reference_overlap","name":"CZ合算","reason":"ミッションモード・アタックモード・起動ミッションの合算値であり、各CZや初当り系列と同じ事象をまとめ直した値です。同時採用すると同じCZを重複評価するため不採用です。"},
-    {"id":"evidence_and_reference","name":"獲得枚数246枚OVER・ST終了時の非確定ボイス","reason":"確定・下限条件を持つ獲得枚数やボイスはEvidenceとして採用しますが、246枚OVERなどの傾向示唆やその他ボイスは全設定の完全な出現確率が公開されていないため数値推測には採用しません。"},
-    {"id":"linked_service","name":"実機連動機能","reason":"実機連動機能はObservation/UIで遊技データ取得経路として利用候補にしますが、サービス自体は設定差を持つ確率事象ではないため推測Featureにはしません。"}
+  "evidenceUi": {
+    "groups": [
+      {
+        "groupId": "DUNBINE_STARTUP_REMAIN",
+        "label": "起動ミッション 残小Vベル回数",
+        "selectionMode": "multi",
+        "normalizationMode": "ALLOWED_SETTINGS_INTERSECTION",
+        "displayOrder": 100,
+        "options": [
+          {
+            "value": "4PLUS",
+            "label": "あと4回（設定4以上）",
+            "allowedSettings": [
+              "SET_4",
+              "SET_5",
+              "SET_6"
+            ],
+            "excludedSettings": [
+              "SET_1",
+              "SET_2",
+              "SET_3"
+            ],
+            "sourceEvidenceIds": [
+              "RE_REMAIN_4PLUS"
+            ]
+          },
+          {
+            "value": "5PLUS",
+            "label": "あと5回（設定5以上）",
+            "allowedSettings": [
+              "SET_5",
+              "SET_6"
+            ],
+            "excludedSettings": [
+              "SET_1",
+              "SET_2",
+              "SET_3",
+              "SET_4"
+            ],
+            "sourceEvidenceIds": [
+              "RE_REMAIN_5PLUS"
+            ]
+          },
+          {
+            "value": "6",
+            "label": "あと6回（設定6）",
+            "allowedSettings": [
+              "SET_6"
+            ],
+            "excludedSettings": [
+              "SET_1",
+              "SET_2",
+              "SET_3",
+              "SET_4",
+              "SET_5"
+            ],
+            "sourceEvidenceIds": [
+              "RE_REMAIN_6"
+            ]
+          }
+        ]
+      },
+      {
+        "groupId": "DUNBINE_ATTACK_SPECIAL",
+        "label": "アタックMODE",
+        "selectionMode": "multi",
+        "normalizationMode": "ALLOWED_SETTINGS_INTERSECTION",
+        "displayOrder": 110,
+        "options": [
+          {
+            "value": "1001",
+            "label": "1001機スタート（設定6）",
+            "allowedSettings": [
+              "SET_6"
+            ],
+            "excludedSettings": [
+              "SET_1",
+              "SET_2",
+              "SET_3",
+              "SET_4",
+              "SET_5"
+            ],
+            "sourceEvidenceIds": [
+              "RE_ATTACK_1001_6"
+            ]
+          },
+          {
+            "value": "22",
+            "label": "22機撃破（設定2以上）",
+            "allowedSettings": [
+              "SET_2",
+              "SET_3",
+              "SET_4",
+              "SET_5",
+              "SET_6"
+            ],
+            "excludedSettings": [
+              "SET_1"
+            ],
+            "sourceEvidenceIds": [
+              "RE_KILL_22_2PLUS"
+            ]
+          },
+          {
+            "value": "33",
+            "label": "33機撃破（設定3以上）",
+            "allowedSettings": [
+              "SET_3",
+              "SET_4",
+              "SET_5",
+              "SET_6"
+            ],
+            "excludedSettings": [
+              "SET_1",
+              "SET_2"
+            ],
+            "sourceEvidenceIds": [
+              "RE_KILL_33_3PLUS"
+            ]
+          },
+          {
+            "value": "44",
+            "label": "44機撃破（設定4以上）",
+            "allowedSettings": [
+              "SET_4",
+              "SET_5",
+              "SET_6"
+            ],
+            "excludedSettings": [
+              "SET_1",
+              "SET_2",
+              "SET_3"
+            ],
+            "sourceEvidenceIds": [
+              "RE_KILL_44_4PLUS"
+            ]
+          },
+          {
+            "value": "55",
+            "label": "55機撃破（設定5以上）",
+            "allowedSettings": [
+              "SET_5",
+              "SET_6"
+            ],
+            "excludedSettings": [
+              "SET_1",
+              "SET_2",
+              "SET_3",
+              "SET_4"
+            ],
+            "sourceEvidenceIds": [
+              "RE_KILL_55_5PLUS"
+            ]
+          },
+          {
+            "value": "66",
+            "label": "66機撃破（設定6）",
+            "allowedSettings": [
+              "SET_6"
+            ],
+            "excludedSettings": [
+              "SET_1",
+              "SET_2",
+              "SET_3",
+              "SET_4",
+              "SET_5"
+            ],
+            "sourceEvidenceIds": [
+              "RE_KILL_66_6"
+            ]
+          }
+        ]
+      },
+      {
+        "groupId": "DUNBINE_PAYOUT",
+        "label": "獲得枚数表示",
+        "selectionMode": "multi",
+        "normalizationMode": "ALLOWED_SETTINGS_INTERSECTION",
+        "displayOrder": 120,
+        "options": [
+          {
+            "value": "222",
+            "label": "222枚OVER（設定2以上）",
+            "allowedSettings": [
+              "SET_2",
+              "SET_3",
+              "SET_4",
+              "SET_5",
+              "SET_6"
+            ],
+            "excludedSettings": [
+              "SET_1"
+            ],
+            "sourceEvidenceIds": [
+              "RE_PAYOUT_222_2PLUS"
+            ]
+          },
+          {
+            "value": "333",
+            "label": "333枚OVER（設定3以上）",
+            "allowedSettings": [
+              "SET_3",
+              "SET_4",
+              "SET_5",
+              "SET_6"
+            ],
+            "excludedSettings": [
+              "SET_1",
+              "SET_2"
+            ],
+            "sourceEvidenceIds": [
+              "RE_PAYOUT_333_3PLUS"
+            ]
+          },
+          {
+            "value": "444",
+            "label": "444枚OVER（設定4以上）",
+            "allowedSettings": [
+              "SET_4",
+              "SET_5",
+              "SET_6"
+            ],
+            "excludedSettings": [
+              "SET_1",
+              "SET_2",
+              "SET_3"
+            ],
+            "sourceEvidenceIds": [
+              "RE_PAYOUT_444_4PLUS"
+            ]
+          },
+          {
+            "value": "555",
+            "label": "555枚OVER（設定5以上）",
+            "allowedSettings": [
+              "SET_5",
+              "SET_6"
+            ],
+            "excludedSettings": [
+              "SET_1",
+              "SET_2",
+              "SET_3",
+              "SET_4"
+            ],
+            "sourceEvidenceIds": [
+              "RE_PAYOUT_555_5PLUS"
+            ]
+          },
+          {
+            "value": "666",
+            "label": "666枚OVER（設定6）",
+            "allowedSettings": [
+              "SET_6"
+            ],
+            "excludedSettings": [
+              "SET_1",
+              "SET_2",
+              "SET_3",
+              "SET_4",
+              "SET_5"
+            ],
+            "sourceEvidenceIds": [
+              "RE_PAYOUT_666_6"
+            ]
+          }
+        ]
+      },
+      {
+        "groupId": "DUNBINE_SEISENSHI",
+        "label": "聖戦士の道 初期G数",
+        "selectionMode": "multi",
+        "normalizationMode": "ALLOWED_SETTINGS_INTERSECTION",
+        "displayOrder": 130,
+        "options": [
+          {
+            "value": "20",
+            "label": "20G（設定2以上）",
+            "allowedSettings": [
+              "SET_2",
+              "SET_3",
+              "SET_4",
+              "SET_5",
+              "SET_6"
+            ],
+            "excludedSettings": [
+              "SET_1"
+            ],
+            "sourceEvidenceIds": [
+              "RE_SEISENSHI_20_2PLUS"
+            ]
+          },
+          {
+            "value": "30",
+            "label": "30G（設定3以上）",
+            "allowedSettings": [
+              "SET_3",
+              "SET_4",
+              "SET_5",
+              "SET_6"
+            ],
+            "excludedSettings": [
+              "SET_1",
+              "SET_2"
+            ],
+            "sourceEvidenceIds": [
+              "RE_SEISENSHI_30_3PLUS"
+            ]
+          }
+        ]
+      },
+      {
+        "groupId": "DUNBINE_END_VOICE",
+        "label": "ST終了時PUSHボイス",
+        "selectionMode": "multi",
+        "normalizationMode": "ALLOWED_SETTINGS_INTERSECTION",
+        "displayOrder": 140,
+        "options": [
+          {
+            "value": "2PLUS",
+            "label": "俺は人は殺さない！その怨念を殺す！（設定2以上）",
+            "allowedSettings": [
+              "SET_2",
+              "SET_3",
+              "SET_4",
+              "SET_5",
+              "SET_6"
+            ],
+            "excludedSettings": [
+              "SET_1"
+            ],
+            "sourceEvidenceIds": [
+              "RE_VOICE_2PLUS"
+            ]
+          },
+          {
+            "value": "4PLUS",
+            "label": "私が欲しいのはLikemeじゃないわ Lovemeよ（設定4以上）",
+            "allowedSettings": [
+              "SET_4",
+              "SET_5",
+              "SET_6"
+            ],
+            "excludedSettings": [
+              "SET_1",
+              "SET_2",
+              "SET_3"
+            ],
+            "sourceEvidenceIds": [
+              "RE_VOICE_4PLUS"
+            ]
+          },
+          {
+            "value": "6",
+            "label": "人々よ！バイストンウェルに帰還します！（設定6）",
+            "allowedSettings": [
+              "SET_6"
+            ],
+            "excludedSettings": [
+              "SET_1",
+              "SET_2",
+              "SET_3",
+              "SET_4",
+              "SET_5"
+            ],
+            "sourceEvidenceIds": [
+              "RE_VOICE_6"
+            ]
+          }
+        ]
+      },
+      {
+        "groupId": "DUNBINE_TROPHY",
+        "label": "サミートロフィー",
+        "selectionMode": "multi",
+        "normalizationMode": "ALLOWED_SETTINGS_INTERSECTION",
+        "displayOrder": 150,
+        "options": [
+          {
+            "value": "BRONZE",
+            "label": "銅（設定2以上）",
+            "allowedSettings": [
+              "SET_2",
+              "SET_3",
+              "SET_4",
+              "SET_5",
+              "SET_6"
+            ],
+            "excludedSettings": [
+              "SET_1"
+            ],
+            "sourceEvidenceIds": [
+              "RE_TROPHY_BRONZE_2PLUS"
+            ]
+          },
+          {
+            "value": "SILVER",
+            "label": "銀（設定3以上）",
+            "allowedSettings": [
+              "SET_3",
+              "SET_4",
+              "SET_5",
+              "SET_6"
+            ],
+            "excludedSettings": [
+              "SET_1",
+              "SET_2"
+            ],
+            "sourceEvidenceIds": [
+              "RE_TROPHY_SILVER_3PLUS"
+            ]
+          },
+          {
+            "value": "GOLD",
+            "label": "金（設定4以上）",
+            "allowedSettings": [
+              "SET_4",
+              "SET_5",
+              "SET_6"
+            ],
+            "excludedSettings": [
+              "SET_1",
+              "SET_2",
+              "SET_3"
+            ],
+            "sourceEvidenceIds": [
+              "RE_TROPHY_GOLD_4PLUS"
+            ]
+          },
+          {
+            "value": "KIRIN",
+            "label": "キリン柄（設定5以上）",
+            "allowedSettings": [
+              "SET_5",
+              "SET_6"
+            ],
+            "excludedSettings": [
+              "SET_1",
+              "SET_2",
+              "SET_3",
+              "SET_4"
+            ],
+            "sourceEvidenceIds": [
+              "RE_TROPHY_KIRIN_5PLUS"
+            ]
+          },
+          {
+            "value": "RAINBOW",
+            "label": "虹（設定6）",
+            "allowedSettings": [
+              "SET_6"
+            ],
+            "excludedSettings": [
+              "SET_1",
+              "SET_2",
+              "SET_3",
+              "SET_4",
+              "SET_5"
+            ],
+            "sourceEvidenceIds": [
+              "RE_TROPHY_RAINBOW_6"
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "rejectedElements": [
+    {
+      "id": "reference_overlap",
+      "name": "CZ合算",
+      "reason": "ミッションモード・アタックモード・起動ミッションの合算値であり、各CZや初当り系列と同じ事象をまとめ直した値です。同時採用すると同じCZを重複評価するため不採用です。"
+    },
+    {
+      "id": "evidence_and_reference",
+      "name": "獲得枚数246枚OVER・ST終了時の非確定ボイス",
+      "reason": "確定・下限条件を持つ獲得枚数やボイスはEvidenceとして採用しますが、246枚OVERなどの傾向示唆やその他ボイスは全設定の完全な出現確率が公開されていないため数値推測には採用しません。"
+    },
+    {
+      "id": "linked_service",
+      "name": "実機連動機能",
+      "reason": "実機連動機能はObservation/UIで遊技データ取得経路として利用候補にしますが、サービス自体は設定差を持つ確率事象ではないため推測Featureにはしません。"
+    }
   ]
 }

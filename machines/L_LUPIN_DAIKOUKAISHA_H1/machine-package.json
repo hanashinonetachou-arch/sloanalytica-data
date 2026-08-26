@@ -70,12 +70,56 @@
         "minimum": 0
       },
       {
+        "id": "INP_SINGLE7_LUPIN",
+        "name": "ルパンボーナス",
+        "type": "counter",
+        "category": "SINGLE7_TYPE",
+        "unit": "回",
+        "displayOrder": 20,
+        "inferenceRole": "INCLUDE_SUPPORT",
+        "defaultValue": 0,
+        "minimum": 0
+      },
+      {
+        "id": "INP_SINGLE7_JIGEN",
+        "name": "次元ボーナス",
+        "type": "counter",
+        "category": "SINGLE7_TYPE",
+        "unit": "回",
+        "displayOrder": 21,
+        "inferenceRole": "INCLUDE_SUPPORT",
+        "defaultValue": 0,
+        "minimum": 0
+      },
+      {
+        "id": "INP_SINGLE7_GOEMON",
+        "name": "五ェ門ボーナス",
+        "type": "counter",
+        "category": "SINGLE7_TYPE",
+        "unit": "回",
+        "displayOrder": 22,
+        "inferenceRole": "INCLUDE_SUPPORT",
+        "defaultValue": 0,
+        "minimum": 0
+      },
+      {
+        "id": "INP_SINGLE7_FUJIKO",
+        "name": "不二子ボーナス",
+        "type": "counter",
+        "category": "SINGLE7_TYPE",
+        "unit": "回",
+        "displayOrder": 23,
+        "inferenceRole": "INCLUDE_SUPPORT",
+        "defaultValue": 0,
+        "minimum": 0
+      },
+      {
         "id": "INP_AT_GAMES",
         "name": "SUPER HEROゲーム数",
         "type": "integer",
         "category": "AT",
         "unit": "G",
-        "displayOrder": 20,
+        "displayOrder": 30,
         "inferenceRole": "INCLUDE_SUPPORT",
         "defaultValue": 0,
         "minimum": 0
@@ -86,7 +130,7 @@
         "type": "counter",
         "category": "AT",
         "unit": "回",
-        "displayOrder": 21,
+        "displayOrder": 31,
         "inferenceRole": "INCLUDE_SUPPORT",
         "parentInputId": "INP_AT_GAMES",
         "defaultValue": 0,
@@ -295,6 +339,80 @@
         },
         "sourceEvidenceRefs": [
           "SRC_1GEKI"
+        ]
+      },
+      {
+        "featureId": "FEAT_SINGLE7_BONUS_TYPE",
+        "name": "シングル7初当り時のボーナス種別振り分け",
+        "adoptionCategory": "INCLUDE_SUPPORT",
+        "calculationRole": "PROBABILITY",
+        "probabilityEngineUsage": true,
+        "modelType": "multinomial",
+        "minimumSample": 1,
+        "sampleRecommendation": 20,
+        "reliabilityProfile": {
+          "weight": 1
+        },
+        "inputTransform": "sum_inputs_to_trials",
+        "numeratorInputId": "INP_SINGLE7_LUPIN",
+        "denominatorInputIds": [
+          "INP_SINGLE7_LUPIN",
+          "INP_SINGLE7_JIGEN",
+          "INP_SINGLE7_GOEMON",
+          "INP_SINGLE7_FUJIKO"
+        ],
+        "categoryInputIds": [
+          "INP_SINGLE7_JIGEN",
+          "INP_SINGLE7_GOEMON",
+          "INP_SINGLE7_FUJIKO"
+        ],
+        "probabilities": {},
+        "categoryLabels": [
+          "LUPIN",
+          "JIGEN",
+          "GOEMON",
+          "FUJIKO"
+        ],
+        "categoryProbabilities": {
+          "SET_1": [
+            0.943,
+            0.015,
+            0.041,
+            0.001
+          ],
+          "SET_2": [
+            0.943,
+            0.041,
+            0.015,
+            0.001
+          ],
+          "SET_3": [
+            0.906,
+            0.033,
+            0.051,
+            0.01
+          ],
+          "SET_4": [
+            0.853,
+            0.112,
+            0.025,
+            0.01
+          ],
+          "SET_5": [
+            0.854,
+            0.016,
+            0.12,
+            0.01
+          ],
+          "SET_6": [
+            0.825,
+            0.071,
+            0.073,
+            0.031
+          ]
+        },
+        "sourceEvidenceRefs": [
+          "SRC_NANA"
         ]
       },
       {
@@ -732,9 +850,40 @@
         ]
       },
       {
+        "id": "AUTO_SINGLE7_TYPE",
+        "title": "シングル7初当り時の内訳",
+        "displayOrder": 2,
+        "items": [
+          {
+            "type": "input",
+            "inputId": "INP_SINGLE7_LUPIN",
+            "label": "ルパンボーナス",
+            "widget": "counter"
+          },
+          {
+            "type": "input",
+            "inputId": "INP_SINGLE7_JIGEN",
+            "label": "次元ボーナス",
+            "widget": "counter"
+          },
+          {
+            "type": "input",
+            "inputId": "INP_SINGLE7_GOEMON",
+            "label": "五ェ門ボーナス",
+            "widget": "counter"
+          },
+          {
+            "type": "input",
+            "inputId": "INP_SINGLE7_FUJIKO",
+            "label": "不二子ボーナス",
+            "widget": "counter"
+          }
+        ]
+      },
+      {
         "id": "AUTO_AT",
         "title": "SUPER HERO中",
-        "displayOrder": 2,
+        "displayOrder": 3,
         "items": [
           {
             "type": "input",
@@ -753,7 +902,7 @@
       {
         "id": "AUTO_EVIDENCE",
         "title": "設定確定・否定情報",
-        "displayOrder": 3,
+        "displayOrder": 4,
         "items": [
           {
             "type": "input",
@@ -791,8 +940,8 @@
   },
   "selectionSummary": {
     "schemaVersion": "selection-summary-v1",
-    "evaluatedCount": 7,
-    "selectedCount": 2,
+    "evaluatedCount": 8,
+    "selectedCount": 3,
     "rejectedCount": 5,
     "selected": [
       {
@@ -802,6 +951,15 @@
         "requiredTrials": {
           "value": 20929,
           "unit": "通常ゲーム"
+        }
+      },
+      {
+        "featureId": "FEAT_SINGLE7_BONUS_TYPE",
+        "name": "シングル7初当り時のボーナス種別振り分け",
+        "reason": "シングル7初当り時のルパン・次元・五ェ門・不二子の振り分けは全設定の完全分布が公開されています。シングル7が成立した後の条件付き分布として評価するため、通常時初当りFeatureと同時採用しても同じ情報を二重評価しません。消化中に不二子ボーナスへ昇格した場合は対象外とし、初当り時点の種類だけを記録します。",
+        "requiredTrials": {
+          "value": 37,
+          "unit": "シングル7初当り"
         }
       },
       {
