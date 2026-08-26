@@ -84,3 +84,56 @@ test('inability to discriminate an internal state is a concrete rejection basis'
   });
   assert.equal(result.status, 'PASS');
 });
+
+test('discovery inventory blocks a candidate that never reaches Research/Selection classification', () => {
+  const localResearch = {
+    features: [{ researchFeatureId: 'RF_KNOWN' }],
+    evidenceCandidates: [],
+    discoveryInventory: [
+      { id: 'DISC_KNOWN', mappedTo: 'RF_KNOWN' },
+      { id: 'DISC_DROPPED', mappedTo: 'RF_MISSING' },
+    ],
+  };
+  const result = assessSelectionQuality(localResearch, {
+    features: [{ researchFeatureId: 'RF_KNOWN', featureId: 'FEAT_KNOWN', adoptionCategory: 'EXCLUDE', userFacingReason: '内部状態を正確に観測できず、分母を再現できないため不採用です。' }],
+  });
+  assert.equal(result.status, 'BLOCKED');
+  assert.ok(result.blockers.some(x => x.includes('unmapped discovery candidate: DISC_DROPPED')));
+  assert.deepEqual(result.coverage.discovery.missing, ['DISC_DROPPED']);
+});
+
+test('discovery inventory accepts explicit rejectedElements for non-numeric candidates', () => {
+  const localResearch = {
+    features: [{ researchFeatureId: 'RF_KNOWN' }],
+    evidenceCandidates: [],
+    discoveryInventory: [
+      { id: 'DISC_KNOWN', mappedTo: 'RF_KNOWN' },
+      { id: 'DISC_QUALITATIVE', mappedTo: 'REJ_QUALITATIVE' },
+    ],
+  };
+  const result = assessSelectionQuality(localResearch, {
+    features: [{ researchFeatureId: 'RF_KNOWN', featureId: 'FEAT_KNOWN', adoptionCategory: 'EXCLUDE', userFacingReason: '内部状態を正確に観測できず、分母を再現できないため不採用です。' }],
+    rejectedElements: [{ id: 'REJ_QUALITATIVE', name: '高設定示唆', reason: '示唆方向のみ公開され、設定別出現率がなく数値確率へ変換できないため不採用です。' }],
+  });
+  assert.equal(result.status, 'PASS');
+  assert.equal(result.coverage.discovery.classified, 2);
+});
+
+test('excluded-only DISPLAY_ONLY input is blocked from leaking into generated UI', () => {
+  const localResearch = { features: [{ researchFeatureId: 'RF_DROP' }], evidenceCandidates: [] };
+  const result = assessSelectionQuality(localResearch, {
+    inputs: [{ id: 'INP_DROP', inferenceRole: 'DISPLAY_ONLY' }],
+    features: [{ researchFeatureId: 'RF_DROP', featureId: 'FEAT_DROP', adoptionCategory: 'EXCLUDE', numeratorInputId: 'INP_DROP', userFacingReason: '設定差はあるものの主Featureの部分集合で重複評価になるため不採用です。' }],
+  });
+  assert.equal(result.status, 'BLOCKED');
+  assert.ok(result.blockers.some(x => x.includes('excluded-only input leaks into UI: INP_DROP')));
+});
+
+test('explicit reference input is allowed when deliberately retained', () => {
+  const localResearch = { features: [{ researchFeatureId: 'RF_DROP' }], evidenceCandidates: [] };
+  const result = assessSelectionQuality(localResearch, {
+    inputs: [{ id: 'INP_DROP', inferenceRole: 'DISPLAY_ONLY', allowReferenceInput: true }],
+    features: [{ researchFeatureId: 'RF_DROP', featureId: 'FEAT_DROP', adoptionCategory: 'EXCLUDE', numeratorInputId: 'INP_DROP', userFacingReason: '設定差はあるものの主Featureの部分集合で重複評価になるため不採用です。' }],
+  });
+  assert.equal(result.status, 'PASS');
+});

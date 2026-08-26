@@ -1,13 +1,13 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-08-25T23:25:34.796Z",
+  "generatedAt": "2026-08-26T01:43:49.230Z",
   "status": "provisional",
   "scoreDisplayVersion": "difficulty-display-score-v3",
   "entries": [
     {
       "machineId": "L_MONSTER_HUNTER_RISE_XA",
       "displayName": "スマスロ モンスターハンターライズ",
-      "machineDataVersion": "0.1.0",
+      "machineDataVersion": "0.1.1",
       "difficulty": {
         "schemaVersion": "difficulty-display-v1",
         "status": "SCORED",
@@ -75,18 +75,88 @@
         "calibrationVersion": "difficulty-calibration-display-v3",
         "rejectedFeatures": [
           {
+            "name": "3枚ベルからの通常→高確移行率",
+            "reason": "3枚ベルからの高確移行率には設定差がありますが、内部状態が通常だったか、高確へ本当に移行したかを実戦中に確定観測できず、推定状態を入力すると誤分類が大きいため不採用です。",
+            "requiredTrials": 534,
+            "requiredTrialsUnit": "通常滞在中の3枚ベル成立",
+            "metricStatus": "COMPUTED"
+          },
+          {
+            "name": "通常滞在時の弱レア役→RISE ZONE当選率",
+            "reason": "通常滞在時の弱レア役からのRISE ZONE当選率には設定差がありますが、抽選時の内部状態を確定できないため条件付き分母を正確に作れず不採用です。",
+            "requiredTrials": 147,
+            "requiredTrialsUnit": "通常滞在中の弱レア役成立",
+            "metricStatus": "COMPUTED"
+          },
+          {
+            "name": "高確滞在時の弱レア役→RISE ZONE当選率",
+            "reason": "高確滞在時の弱レア役からのRISE ZONE当選率には設定差がありますが、高確滞在を確定観測できないため条件付き分母の誤分類を避けて不採用です。",
+            "requiredTrials": 688,
+            "requiredTrialsUnit": "高確滞在中の弱レア役成立",
+            "metricStatus": "COMPUTED"
+          },
+          {
             "name": "RISE ZONE実質出現率",
-            "reason": "RISE ZONEはAT当選経路の一部でAT初当りと相関するため、同時に主計算へ入れると通常時の好挙動を重複評価しやすく不採用です。",
+            "reason": "RISE ZONE実質出現率には設定差がありますが、AT初当りへつながる通常時の好挙動の一部でありAT初当りと同時に使うと同一生成過程を重複評価しやすいため不採用です。",
             "requiredTrials": 48900,
             "requiredTrialsUnit": "通常ゲーム",
             "metricStatus": "COMPUTED"
           },
           {
+            "name": "上位CZ「百竜夜行」出現率",
+            "reason": "百竜夜行の出現率には設定差がありますが約1/1.8万～1/1.9万と低頻度で、設定間の差も非常に小さいため実戦的な判別情報量がほぼ得られず不採用です。",
+            "requiredTrials": 46049773,
+            "requiredTrialsUnit": "通常ゲーム",
+            "metricStatus": "COMPUTED"
+          },
+          {
+            "name": "ポイントモード移行率",
+            "reason": "ポイントモード移行率には設定差がありますが、A/B/C/Dの内部滞在モードを実戦中に確定できません。結果から内部モードを推定して入力すると誤分類と循環推論が生じるため不採用です。",
+            "requiredTrials": null,
+            "requiredTrialsUnit": "G",
+            "metricStatus": "NOT_COMPUTABLE"
+          },
+          {
+            "name": "クエストテーブル移行率",
+            "reason": "クエストテーブル移行率には設定差がありますが、A/B/天国準備/天国の内部テーブルを実戦中に確定判別できないため、正確な移行元・移行先の分母分子を作れず不採用です。",
+            "requiredTrials": null,
+            "requiredTrialsUnit": "G",
+            "metricStatus": "NOT_COMPUTABLE"
+          },
+          {
             "name": "非前兆中 強レア役AT直撃",
-            "reason": "強レア役AT直撃はAT初当りの一部なので、AT初当りと同時に採用すると同じ当選を二重評価するため不採用です。",
+            "reason": "強レア役AT直撃は設定差が大きいもののAT初当りの部分集合です。AT初当りと同時に採用すると同じAT当選を二重評価するため、現行モデルではAT初当りを主軸としてこちらは不採用です。",
             "requiredTrials": 113,
             "requiredTrialsUnit": "非前兆中の強レア役成立",
             "metricStatus": "COMPUTED"
+          },
+          {
+            "name": "ロングフリーズ確率",
+            "reason": "ロングフリーズ確率には大きな設定差がありますが、設定1でも約1/98.6万、設定6でも約1/49.3万と極端に低頻度です。通常の1日実戦では情報がほぼ得られないため不採用です。",
+            "requiredTrials": 10518319,
+            "requiredTrialsUnit": "抽選条件を満たす通常ゲーム",
+            "metricStatus": "COMPUTED"
+          },
+          {
+            "name": "ボーナス確定画面の奇数/偶数・高設定示唆",
+            "reason": "示唆傾向は公開されていますが設定別出現率がなく、数値尤度にも設定確定Evidenceにも変換できないため参考説明のみとし推測入力には採用しません。",
+            "requiredTrials": null,
+            "requiredTrialsUnit": "G",
+            "metricStatus": "NOT_COMPUTABLE"
+          },
+          {
+            "name": "ボーナス終了画面の奇数/偶数・高設定示唆",
+            "reason": "示唆傾向は公開されていますが設定別出現率がないため確率Featureとして扱えません。確定・否定パターンのみEvidenceとして採用します。",
+            "requiredTrials": null,
+            "requiredTrialsUnit": "G",
+            "metricStatus": "NOT_COMPUTABLE"
+          },
+          {
+            "name": "アイルーおみくじの奇数/偶数・高設定示唆",
+            "reason": "青・緑・赤の傾向示唆は設定別出現率が未公表のため数値評価できません。設定2以上～6の確定系だけEvidenceとして採用します。",
+            "requiredTrials": null,
+            "requiredTrialsUnit": "G",
+            "metricStatus": "NOT_COMPUTABLE"
           }
         ]
       }
@@ -94,7 +164,7 @@
     {
       "machineId": "L_SHIOKININ_KC",
       "displayName": "L 新・必殺仕置人 回胴 CRASH SPEC",
-      "machineDataVersion": "0.1.0",
+      "machineDataVersion": "0.1.1",
       "difficulty": {
         "schemaVersion": "difficulty-display-v1",
         "status": "SCORED",
@@ -163,10 +233,52 @@
         "rejectedFeatures": [
           {
             "name": "ボーナス初当り",
-            "reason": "ボーナス初当りはATへの主要経路を含むため、AT初当りと同時採用すると通常時の好挙動を重複評価しやすく不採用です。",
+            "reason": "ボーナス初当りにも1/230.7～1/169.0の設定差がありますが、ボーナスを経由してATへ至る通常時の当選経路と強く依存し、AT初当りと同時採用すると好挙動を重複評価しやすいため不採用です。",
             "requiredTrials": 14838,
             "requiredTrialsUnit": "通常ゲーム",
             "metricStatus": "COMPUTED"
+          },
+          {
+            "name": "設定変更時の天井短縮率",
+            "reason": "設定変更時に408G天井が選ばれる設定差候補ですが、公開されている具体値は設定1の40.8%のみで全設定の比較表がありません。さらに設定変更を確定できる台だけが母集団になるため数値推測には不採用です。",
+            "requiredTrials": null,
+            "requiredTrialsUnit": "G",
+            "metricStatus": "NOT_COMPUTABLE"
+          },
+          {
+            "name": "非前兆中レア役からのボーナス当選率",
+            "reason": "弱チェリー・チャンス目・強チェリーからのボーナス抽選は公開されていますが具体値は設定1のみで、設定別確率が揃っていないため不採用です。",
+            "requiredTrials": null,
+            "requiredTrialsUnit": "G",
+            "metricStatus": "NOT_COMPUTABLE"
+          },
+          {
+            "name": "非前兆中スイカからの頼み人チャンス当選率",
+            "reason": "スイカからCZを抽選することは公開されていますが設定別の当選率は未公表で、現状は設定1の数値しか比較できないため不採用です。",
+            "requiredTrials": null,
+            "requiredTrialsUnit": "G",
+            "metricStatus": "NOT_COMPUTABLE"
+          },
+          {
+            "name": "456OVERの設定5・6期待度アップ",
+            "reason": "456OVERは設定4以上を確定できるためEvidenceとしては採用しますが、設定5・6が出やすいという追加傾向は設定別出現率がなく数値尤度には使いません。",
+            "requiredTrials": null,
+            "requiredTrialsUnit": "G",
+            "metricStatus": "NOT_COMPUTABLE"
+          },
+          {
+            "name": "極限バトル1G目 3人集合背景",
+            "reason": "3人集合背景は高設定期待度アップですが設定別出現率が公開されていないため数値推測には使いません。金背景の設定4以上だけEvidenceとして採用します。",
+            "requiredTrials": null,
+            "requiredTrialsUnit": "G",
+            "metricStatus": "NOT_COMPUTABLE"
+          },
+          {
+            "name": "終了画面の奇数・偶数・高設定示唆",
+            "reason": "死神・虎などの設定示唆は設定別出現率が公開されていないため数値尤度を作れません。設定2以上・4以上・6を確定できる画面のみEvidenceとして採用します。",
+            "requiredTrials": null,
+            "requiredTrialsUnit": "G",
+            "metricStatus": "NOT_COMPUTABLE"
           }
         ]
       }
@@ -174,7 +286,7 @@
     {
       "machineId": "L_BANDORI_S11",
       "displayName": "Lバンドリ！",
-      "machineDataVersion": "0.1.0",
+      "machineDataVersion": "0.1.1",
       "difficulty": {
         "schemaVersion": "difficulty-display-v1",
         "status": "SCORED",
@@ -242,11 +354,39 @@
         "calibrationVersion": "difficulty-calibration-display-v3",
         "rejectedFeatures": [
           {
-            "name": "ピコアタック当選率",
-            "reason": "成立役や駆け抜け条件で抽選率が変わり、設定差だけの抽選機会を実戦で安定して分離できないため不採用です。",
-            "requiredTrials": 138,
-            "requiredTrialsUnit": "ピコアタック抽選機会",
+            "name": "1周期あたりの初当り当選期待度",
+            "reason": "1周期あたりの当選期待度には27.5%～34.4%の設定差がありますが、ST初当りを生み出す周期抽選そのものなのでST初当りと同時採用すると同じ初当りを重複評価するため不採用です。",
+            "requiredTrials": 328,
+            "requiredTrialsUnit": "周期到達",
             "metricStatus": "COMPUTED"
+          },
+          {
+            "name": "ピコアタック当選率",
+            "reason": "ピコアタック平均当選率には7.7%～14.9%の設定差がありますが、レア役成立時は当選濃厚、ST駆け抜け時は優遇といった設定共通・条件別抽選が混在します。実戦で設定差部分だけの分母を安定して分離できないため不採用です。",
+            "requiredTrials": 138,
+            "requiredTrialsUnit": "ST終了時ピコアタック抽選機会",
+            "metricStatus": "COMPUTED"
+          },
+          {
+            "name": "ST中5枚目以降の黒ディスク出現率",
+            "reason": "黒ディスク出現率には設定差があると公表されていますが、設定2の約20%以外は未公表で全設定の確率表が揃っていないため数値推測に採用できません。",
+            "requiredTrials": null,
+            "requiredTrialsUnit": "G",
+            "metricStatus": "NOT_COMPUTABLE"
+          },
+          {
+            "name": "上位STの84%/93%ループ振り分け",
+            "reason": "高設定ほど93%ループが選ばれやすいことは公表されていますが設定別の選択率が未公表です。実戦結果からループ率を逆算すると展開による誤分類も大きいため不採用です。",
+            "requiredTrials": null,
+            "requiredTrialsUnit": "G",
+            "metricStatus": "NOT_COMPUTABLE"
+          },
+          {
+            "name": "ST終了画面の通常示唆パターン",
+            "reason": "基本画面や一部パターンは示唆内容・設定別出現率が未確定で数値評価できません。良・優・極スタンプの設定下限/確定パターンのみEvidenceとして採用します。",
+            "requiredTrials": null,
+            "requiredTrialsUnit": "G",
+            "metricStatus": "NOT_COMPUTABLE"
           }
         ]
       }
@@ -254,7 +394,7 @@
     {
       "machineId": "L_REZERO_SEASON2_PA5",
       "displayName": "スロット Re:ゼロから始める異世界生活 season2",
-      "machineDataVersion": "0.1.0",
+      "machineDataVersion": "0.1.1",
       "difficulty": {
         "schemaVersion": "difficulty-display-v1",
         "status": "SCORED",
@@ -322,11 +462,18 @@
         "calibrationVersion": "difficulty-calibration-display-v3",
         "rejectedFeatures": [
           {
-            "name": "AT終了後死に戻り発生率",
-            "reason": "設定2〜4の公開数値が未補完で、全設定を同じ条件で比較できないため現時点では不採用です。",
-            "requiredTrials": 96,
-            "requiredTrialsUnit": "AT終了後32Gの死に戻り抽選機会",
-            "metricStatus": "COMPUTED"
+            "name": "規定ポイントの奇数/偶数百ptゾーンAT当選率",
+            "reason": "奇数百ptは1.2%～3.1%、偶数百ptは25.0%～31.3%と設定差がありますが、いずれもAT初当りを生み出す経路の一部です。AT初当りと同時採用すると同じ当選を二重評価するため不採用です。",
+            "requiredTrials": null,
+            "requiredTrialsUnit": "G",
+            "metricStatus": "NOT_COMPUTABLE"
+          },
+          {
+            "name": "AT終了画面の高設定示唆",
+            "reason": "高設定示唆画面は設定別出現率が公開されていないため数値尤度には使えません。設定2以上・4以上・5以上・6の確定系のみEvidenceとして採用します。",
+            "requiredTrials": null,
+            "requiredTrialsUnit": "G",
+            "metricStatus": "NOT_COMPUTABLE"
           }
         ]
       }
@@ -334,7 +481,7 @@
     {
       "machineId": "S_MY_FLOWER_II_EE_30",
       "displayName": "マイフラワー2-30",
-      "machineDataVersion": "0.1.0",
+      "machineDataVersion": "0.1.1",
       "difficulty": {
         "schemaVersion": "difficulty-display-v1",
         "status": "SCORED",
@@ -403,14 +550,49 @@
         "rejectedFeatures": [
           {
             "name": "通常時チェリー",
-            "reason": "設定差は確認できるものの全設定の確率表が未補完で、同一条件で比較できないため現時点では不採用です。",
+            "reason": "チェリー確率は1/64.0～1/57.3で設定差が小さく、1日実戦相当の試行量では設定間分布の重なりが大きく判別情報量が限定的なため不採用です。",
+            "requiredTrials": 35692,
+            "requiredTrialsUnit": "通常ゲーム",
+            "metricStatus": "COMPUTED"
+          },
+          {
+            "name": "チェリー成立時ボーナス当選",
+            "reason": "チェリー成立時のボーナス当選率は3.0%～4.0%と設定差がありますが、1日実戦ではチェリー重複ボーナス自体が数回程度になりやすく必要試行量が不足するため不採用です。",
+            "requiredTrials": 2464,
+            "requiredTrialsUnit": "チェリー成立",
+            "metricStatus": "COMPUTED"
+          },
+          {
+            "name": "ベル確率",
+            "reason": "ベルは1/9.0～1/8.6と設定差が非常に小さく、1日実戦相当の試行量でも設定間分布の重なりが大きいため判別情報量が少なく不採用です。",
             "requiredTrials": null,
             "requiredTrialsUnit": "G",
             "metricStatus": "NOT_COMPUTABLE"
           },
           {
-            "name": "チェリー成立時ボーナス当選",
-            "reason": "チェリー同時当選の全設定値とBIG・REG構成が未補完で、条件付き確率を安全に評価できないため現時点では不採用です。",
+            "name": "スイカ確率",
+            "reason": "スイカは1/102.4～1/96.4と設定差が小さく、7000G程度でも設定差に対する分散が大きいため必要試行量が多く不採用です。",
+            "requiredTrials": null,
+            "requiredTrialsUnit": "G",
+            "metricStatus": "NOT_COMPUTABLE"
+          },
+          {
+            "name": "リーチ目確率",
+            "reason": "リーチ目は1/1191.6～1/840.2と差がありますが発生自体が低頻度で、1日実戦では数回程度しか観測できずサンプル不足になりやすいため不採用です。",
+            "requiredTrials": null,
+            "requiredTrialsUnit": "G",
+            "metricStatus": "NOT_COMPUTABLE"
+          },
+          {
+            "name": "チェリー重複ボーナスのBIG/REG比率",
+            "reason": "REG比率は50.0%～63.0%へ変化しますが、母数となるチェリー重複ボーナスが非常に少なく、通常の1日実戦では構成比を評価できるだけの試行回数が得られないため不採用です。",
+            "requiredTrials": null,
+            "requiredTrialsUnit": "G",
+            "metricStatus": "NOT_COMPUTABLE"
+          },
+          {
+            "name": "BIG入賞ライン",
+            "reason": "右上がりは偶数設定示唆ですが設定別の完全な出現率が公開されておらず数値尤度を作れないため不採用です。",
             "requiredTrials": null,
             "requiredTrialsUnit": "G",
             "metricStatus": "NOT_COMPUTABLE"
@@ -421,16 +603,33 @@
     {
       "machineId": "S_KACHO_KUMADA_GZA",
       "displayName": "課長 熊田工作",
-      "machineDataVersion": "0.1.0",
+      "machineDataVersion": "0.1.1",
       "difficulty": {
         "schemaVersion": "difficulty-display-v1",
-        "status": "EVIDENCE_DOMINANT",
+        "status": "SCORED",
         "isProvisional": true,
         "scoreModelVersion": "difficulty-analyzer-v1.2",
-        "scores": [],
+        "scores": [
+          {
+            "games": 1500,
+            "score": 8
+          },
+          {
+            "games": 3000,
+            "score": 21
+          },
+          {
+            "games": 7000,
+            "score": 36
+          }
+        ],
         "scoreRange": null,
-        "confidence": null,
-        "profile": "EVIDENCE_DOMINANT",
+        "confidence": {
+          "level": "HIGH",
+          "userVisible": false,
+          "basis": "Worst included exposure quality/confidence controls the score confidence; analyzable 1/1."
+        },
+        "profile": "NUMERIC",
         "uiPolicy": {
           "showMachineGuideButton": true,
           "buttonLabelKey": "machine_difficulty_guide",
@@ -438,24 +637,73 @@
         },
         "settingBandDiscrimination": {
           "schemaVersion": "setting-band-discrimination-g-v1",
-          "status": "NOT_APPLICABLE",
-          "reason": "No adopted numeric inference feature has resolvable game-count exposure for setting-band discrimination.",
-          "results": []
+          "status": "COMPLETE",
+          "results": [
+            {
+              "threshold": 0.6,
+              "games": 3500
+            },
+            {
+              "threshold": 0.7,
+              "games": 9500
+            },
+            {
+              "threshold": 0.8,
+              "games": 24700
+            }
+          ]
         },
+        "rawScores": [
+          {
+            "games": 1500,
+            "rawScore": 3
+          },
+          {
+            "games": 3000,
+            "rawScore": 8
+          },
+          {
+            "games": 7000,
+            "rawScore": 14
+          }
+        ],
+        "displayScoreSource": "CALIBRATED_FROM_RAW",
+        "calibrationVersion": "difficulty-calibration-display-v3",
         "rejectedFeatures": [
           {
-            "name": "BIG初当り",
-            "reason": "設定別数値を単一の補助ソースでしか確認できず、大手解析との照合が未完了のため現時点では不採用です。",
+            "name": "データカウンターBIG出現率",
+            "reason": "BIG出現率には設定差がありますがデータカウンター値には会議室など32G以内の連チャン分も含まれ、通常時初当りとは異なる生成過程です。初当りと同時採用すると連チャン性能を含めて重複評価するため不採用です。",
             "requiredTrials": 15802,
-            "requiredTrialsUnit": "通常ゲーム",
+            "requiredTrialsUnit": "総ゲーム",
             "metricStatus": "COMPUTED"
           },
           {
-            "name": "REG初当り",
-            "reason": "設定別数値を単一の補助ソースでしか確認できず、大手解析との照合が未完了のため現時点では不採用です。",
+            "name": "データカウンターREG出現率",
+            "reason": "REG出現率にも設定差がありますがデータカウンター値には連チャン中のREGが含まれ、通常時初当りの母集団と一致しません。初当りと同時採用した際の重複評価を避けるため不採用です。",
             "requiredTrials": 74431,
-            "requiredTrialsUnit": "通常ゲーム",
+            "requiredTrialsUnit": "総ゲーム",
             "metricStatus": "COMPUTED"
+          },
+          {
+            "name": "ボーナス告知時・7テンパイ時のボイス",
+            "reason": "OLセリフやしげる松崎ボイスは高設定期待度アップですが設定別出現率が公開されておらず数値尤度を作れません。さらに昇進モード・高継続示唆も兼ねるため設定情報だけを分離できず不採用です。",
+            "requiredTrials": null,
+            "requiredTrialsUnit": "G",
+            "metricStatus": "NOT_COMPUTABLE"
+          },
+          {
+            "name": "539枚OVER・ありがとねっと赤などの高設定示唆",
+            "reason": "高設定示唆であることは公開されていますが設定別出現率がなく、539枚は高継続示唆も兼ねます。設定4以上・5以上・6を確定できる枚数表示のみEvidenceとして採用します。",
+            "requiredTrials": null,
+            "requiredTrialsUnit": "G",
+            "metricStatus": "NOT_COMPUTABLE"
+          },
+          {
+            "name": "ボーナス終了画面 社長",
+            "reason": "社長画面は高設定示唆かつボーナスループ確定ですが設定別出現率がなく、ループ状態の情報も混在するため数値推測には不採用です。ハワイの設定4以上確定のみEvidenceとして採用します。",
+            "requiredTrials": null,
+            "requiredTrialsUnit": "G",
+            "metricStatus": "NOT_COMPUTABLE"
           }
         ]
       }
@@ -463,7 +711,7 @@
     {
       "machineId": "S_SHIN_TENKAFUBU_DD",
       "displayName": "真天下布武",
-      "machineDataVersion": "0.1.0",
+      "machineDataVersion": "0.1.1",
       "difficulty": {
         "schemaVersion": "difficulty-display-v1",
         "status": "SCORED",
@@ -532,17 +780,38 @@
         "rejectedFeatures": [
           {
             "name": "CZ出陣チャレンジ初当り",
-            "reason": "CZはAT初当りに繋がる経路で、AT初当りと同時採用すると通常時の好挙動を重複評価するため不採用です。",
+            "reason": "CZはAT初当りへつながる主要経路で、AT初当りと同時採用すると同じ通常時の好挙動を重複評価するため不採用です。",
             "requiredTrials": 3674,
             "requiredTrialsUnit": "通常ゲーム",
             "metricStatus": "COMPUTED"
           },
           {
             "name": "レア役AT直撃",
-            "reason": "AT直撃はAT初当りの一部なので、AT初当りと同時採用すると同一当選を二重評価するため不採用です。",
+            "reason": "AT直撃はAT初当りの部分集合なので、AT初当りと同時採用すると同じAT当選を二重評価するため不採用です。",
             "requiredTrials": 7795,
             "requiredTrialsUnit": "通常ゲーム",
             "metricStatus": "COMPUTED"
+          },
+          {
+            "name": "通常時のモード移行",
+            "reason": "モード移行に設定差はありますが内部モードを常時確定観測できず、履歴や当選ゲーム数から推定した状態を分母にすると誤分類と循環推論が生じるため不採用です。",
+            "requiredTrials": null,
+            "requiredTrialsUnit": "G",
+            "metricStatus": "NOT_COMPUTABLE"
+          },
+          {
+            "name": "有利区間リセット時の秀吉モード移行率",
+            "reason": "14.5%～37.5%と大きな設定差がありますが、利用には有利区間リセット契機と移行先モードの双方を確定する必要があります。公開情報では遊技履歴からの確認を推奨していますが、実機での再現性確認前なので数値Featureには採用しません。",
+            "requiredTrials": null,
+            "requiredTrialsUnit": "G",
+            "metricStatus": "NOT_COMPUTABLE"
+          },
+          {
+            "name": "AT終了画面の高設定示唆",
+            "reason": "高設定示唆であることは公開されていますが設定別出現率が未公表で数値尤度を作れないため不採用です。ケロットトロフィーとエンディングの設定下限パターンはEvidenceとして別採用します。",
+            "requiredTrials": null,
+            "requiredTrialsUnit": "G",
+            "metricStatus": "NOT_COMPUTABLE"
           }
         ]
       }
@@ -550,7 +819,7 @@
     {
       "machineId": "S_CHABUDAI_EB6",
       "displayName": "ウルトラちゃぶ台返し",
-      "machineDataVersion": "0.1.0",
+      "machineDataVersion": "0.1.1",
       "difficulty": {
         "schemaVersion": "difficulty-display-v1",
         "status": "SCORED",
@@ -619,7 +888,7 @@
         "rejectedFeatures": [
           {
             "name": "REG中ちゃぶ投げ決まり手の色",
-            "reason": "高設定ほど上位色が出やすい傾向のみ公開され、設定別の振り分け確率がないため数値推測には使えません。",
+            "reason": "REG中の決まり手は高設定ほど上位色が出やすい傾向が公開されていますが、設定別の振り分け確率が未公表で数値尤度を作れないため不採用です。",
             "requiredTrials": null,
             "requiredTrialsUnit": "G",
             "metricStatus": "NOT_COMPUTABLE"
@@ -630,7 +899,7 @@
     {
       "machineId": "S_MADE_IN_ABYSS_EN",
       "displayName": "SLOTメイドインアビス",
-      "machineDataVersion": "0.1.0",
+      "machineDataVersion": "0.1.1",
       "difficulty": {
         "schemaVersion": "difficulty-display-v1",
         "status": "SCORED",
@@ -699,10 +968,59 @@
         "rejectedFeatures": [
           {
             "name": "CZ初当り",
-            "reason": "CZはAT当選経路を内包するため、AT初当りと同時に評価すると同じ通常時挙動を重複評価しやすく、主計算では不採用です。",
+            "reason": "CZ初当りにも設定差がありますがCZはATへの主要経路であり、AT初当りと同時に評価すると同じ通常時の好挙動を二重評価しやすいため不採用です。",
             "requiredTrials": 17594,
             "requiredTrialsUnit": "通常ゲーム",
             "metricStatus": "COMPUTED"
+          },
+          {
+            "name": "始まっていたのですフリーズ",
+            "reason": "設定1の1/32768から設定6の1/4369まで大きな設定差がありますが、AT当選へ直結する非常に低頻度な事象でAT初当りと同時採用すると一部を二重評価します。通常実戦での試行数も少ないため不採用です。",
+            "requiredTrials": null,
+            "requiredTrialsUnit": "G",
+            "metricStatus": "NOT_COMPUTABLE"
+          },
+          {
+            "name": "奈落の探窟域突入率",
+            "reason": "設定差はありますが1/430.2～1/405.0程度で差が小さく、設定4が最大で単調でもありません。必要試行量が大きく判別情報量が低いため不採用です。",
+            "requiredTrials": null,
+            "requiredTrialsUnit": "G",
+            "metricStatus": "NOT_COMPUTABLE"
+          },
+          {
+            "name": "白笛の導き中の笛獲得振り分け",
+            "reason": "赤・蒼・月・黒・白の振り分けに設定差はありますが差が非常に小さく、白笛でも4.60%～3.57%程度です。多数の白笛の導き試行が必要になり実戦的情報量が低いため不採用です。",
+            "requiredTrials": null,
+            "requiredTrialsUnit": "G",
+            "metricStatus": "NOT_COMPUTABLE"
+          },
+          {
+            "name": "安定/勝負選択時の勝率",
+            "reason": "設定差は大きいもののプレイヤーが選んだ『安定/勝負』で母集団が分かれ、結果はAT初当りにも含まれます。選択行動による偏りとAT初当りとの重複評価を避けるため不採用です。",
+            "requiredTrials": null,
+            "requiredTrialsUnit": "G",
+            "metricStatus": "NOT_COMPUTABLE"
+          },
+          {
+            "name": "AT突入時の平均獲得枚数",
+            "reason": "設定差はありますが設定1と6の一部数値しか公開されておらず全設定の尤度を作れません。さらに獲得枚数はAT展開の分散が大きいため推測Featureには不採用です。",
+            "requiredTrials": null,
+            "requiredTrialsUnit": "G",
+            "metricStatus": "NOT_COMPUTABLE"
+          },
+          {
+            "name": "LEDの奇数/偶数/高設定示唆",
+            "reason": "青・黄・緑は示唆方向のみで設定別出現率が公開されていないため数値推測には使いません。赤・紫・虹の設定下限/確定パターンだけEvidenceとして採用します。",
+            "requiredTrials": null,
+            "requiredTrialsUnit": "G",
+            "metricStatus": "NOT_COMPUTABLE"
+          },
+          {
+            "name": "AT終了画面の奇数/偶数/高設定示唆",
+            "reason": "示唆方向のみの画面は設定別出現率がなく数値尤度を作れないため不採用です。設定否定・設定2/5/6・設定4以上・5以上・6の確定系はEvidenceとして採用します。",
+            "requiredTrials": null,
+            "requiredTrialsUnit": "G",
+            "metricStatus": "NOT_COMPUTABLE"
           }
         ]
       }
@@ -710,7 +1028,7 @@
     {
       "machineId": "S_ENENN_SHOUBOUTAI_JS",
       "displayName": "パチスロ 炎炎ノ消防隊",
-      "machineDataVersion": "0.1.0",
+      "machineDataVersion": "0.1.1",
       "difficulty": {
         "schemaVersion": "difficulty-display-v1",
         "status": "SCORED",
@@ -779,10 +1097,59 @@
         "rejectedFeatures": [
           {
             "name": "ボーナス初当り",
-            "reason": "ボーナス初当りにも設定差はありますが、炎炎激闘初当りと同じ通常時の初当り挙動を重ねて評価すると過信につながるため主計算では不採用です。",
+            "reason": "ボーナス初当りにも設定差はありますが、炎炎激闘へ至る通常時の初当り経路と強く依存し、両方を独立Featureとして足すと同じ好挙動を重複評価しやすいため不採用です。",
             "requiredTrials": 67797,
             "requiredTrialsUnit": "通常ゲーム",
             "metricStatus": "COMPUTED"
+          },
+          {
+            "name": "十字目変換時ボーナス当選率",
+            "reason": "十字目変換時のボーナス当選率には設定差がありますが、ボーナス初当りの部分集合で、炎炎激闘へつながる同一生成過程を追加評価することになるため現行モデルでは不採用です。",
+            "requiredTrials": 333,
+            "requiredTrialsUnit": "十字目変換成立",
+            "metricStatus": "COMPUTED"
+          },
+          {
+            "name": "十字リプレイ時ボーナス当選率",
+            "reason": "十字リプレイ時のボーナス当選率は設定差が大きいもののボーナス初当りの部分集合です。主軸の炎炎激闘初当りと合わせたときの依存を安全に分離できないため不採用です。",
+            "requiredTrials": 79,
+            "requiredTrialsUnit": "十字リプレイ成立",
+            "metricStatus": "COMPUTED"
+          },
+          {
+            "name": "初当り+伝導者の影ステージ EPB期待度",
+            "reason": "初当りボーナス+伝導者の影でのEPB期待度には設定差がありますが、初当りボーナス中と伝導者の影中の抽選を合算した値で、実戦中に同じ公開条件の分母を安定して再現しにくいため不採用です。",
+            "requiredTrials": 181,
+            "requiredTrialsUnit": "初当りボーナス+伝導者の影の評価機会",
+            "metricStatus": "COMPUTED"
+          },
+          {
+            "name": "森羅万象成功期待度",
+            "reason": "森羅万象成功率には設定差がありますが27%～31%と差が小さく、森羅万象への到達自体も限定されるため必要試行量が大きく、実戦的な情報量が低いため不採用です。",
+            "requiredTrials": 943,
+            "requiredTrialsUnit": "森羅万象突入",
+            "metricStatus": "COMPUTED"
+          },
+          {
+            "name": "REGキャラ紹介の設定2・5示唆／設定1・4・6示唆",
+            "reason": "特定設定の示唆傾向はありますが設定別出現率が公開されていないため数値尤度には変換できません。否定・下限・確定パターンだけEvidenceとして採用します。",
+            "requiredTrials": null,
+            "requiredTrialsUnit": "G",
+            "metricStatus": "NOT_COMPUTABLE"
+          },
+          {
+            "name": "ボーナス終了画面の高設定示唆（弱/強）",
+            "reason": "高設定示唆であることは公開されていますがメダル機の設定別出現率を推測計算へ安全に用いる契約がないため、設定4以上・5以上・6の確定系のみEvidenceとして採用します。",
+            "requiredTrials": null,
+            "requiredTrialsUnit": "G",
+            "metricStatus": "NOT_COMPUTABLE"
+          },
+          {
+            "name": "炎炎JAC開始画面の設定2・5／1・4・6示唆",
+            "reason": "設定群の示唆はありますが設定別出現率がなく数値尤度を作れないため不採用です。設定2以上・4以上・5以上の下限パターンのみEvidenceとして採用します。",
+            "requiredTrials": null,
+            "requiredTrialsUnit": "G",
+            "metricStatus": "NOT_COMPUTABLE"
           }
         ]
       }

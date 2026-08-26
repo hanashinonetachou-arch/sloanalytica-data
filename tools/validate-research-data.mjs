@@ -84,8 +84,13 @@ export function validateResearchData(data) {
           if (missing.length) warn('MULTINOMIAL_INCOMPLETE', `Feature ${id} / ${settingId} はカテゴリが不足しています: ${missing.join(', ')}`);
           const sum = categories.reduce((acc, category) => acc + (typeof distribution[category] === 'number' && Number.isFinite(distribution[category]) ? distribution[category] : 0), 0);
           const distributionMode = feature.distributionMode ?? 'complete';
-          if (missing.length === 0 && distributionMode === 'complete' && Math.abs(sum - 1) > 1e-6) {
-            err('MULTINOMIAL_SUM', `Feature ${id} / ${settingId} のcompleteカテゴリ確率合計は1である必要があります（実値 ${sum}）。`);
+          if (missing.length === 0 && distributionMode === 'complete') {
+            const delta = Math.abs(sum - 1);
+            if (delta > 0.0025) {
+              err('MULTINOMIAL_SUM', `Feature ${id} / ${settingId} のcompleteカテゴリ確率合計は1である必要があります（実値 ${sum}）。`);
+            } else if (delta > 1e-6) {
+              warn('MULTINOMIAL_ROUNDED_SUM', `Feature ${id} / ${settingId} の公開カテゴリ確率は丸めにより合計が${sum}です。Researchでは原値を保持し、採用時に厳密な確率解決が必要です。`);
+            }
           }
           if (missing.length === 0 && distributionMode === 'implicit_residual' && sum > 1 + 1e-6) {
             err('MULTINOMIAL_SUM', `Feature ${id} / ${settingId} の明示カテゴリ確率合計が1を超えています（実値 ${sum}）。`);

@@ -3,7 +3,7 @@
   "machine": {
     "schemaVersion": "2.0.0",
     "machineId": "L_REZERO_SEASON2_PA5",
-    "machineDataVersion": "0.1.0",
+    "machineDataVersion": "0.1.1",
     "displayName": "スロット Re:ゼロから始める異世界生活 season2",
     "modelName": "L Re:ゼロから始める異世界生活 season 2 PA5",
     "manufacturer": "大都技研",
@@ -50,12 +50,12 @@
       {
         "id": "INP_SHINIMODORI_TRIALS",
         "name": "死に戻り判定回数",
-        "type": "integer",
+        "type": "counter",
         "category": "AFTER_AT",
         "unit": "回",
         "displayOrder": 20,
-        "inferenceRole": "DISPLAY_ONLY",
-        "defaultValue": 0,
+        "inferenceRole": "INCLUDE_SUPPORT",
+        "defaultValue": null,
         "minimum": 0
       },
       {
@@ -65,8 +65,8 @@
         "category": "AFTER_AT",
         "unit": "回",
         "displayOrder": 21,
-        "inferenceRole": "DISPLAY_ONLY",
-        "defaultValue": 0,
+        "inferenceRole": "INCLUDE_SUPPORT",
+        "defaultValue": null,
         "parentInputId": "INP_SHINIMODORI_TRIALS",
         "minimum": 0
       },
@@ -101,6 +101,38 @@
           }
         ],
         "defaultValue": []
+      },
+      {
+        "id": "INP_EVI_REZERO_END",
+        "name": "AT終了画面",
+        "type": "multi_enum",
+        "category": "EVIDENCE",
+        "unit": "",
+        "displayOrder": 110,
+        "inferenceRole": "INCLUDE_SUPPORT",
+        "options": [
+          {
+            "key": "2PLUS",
+            "label": "女性6人（設定2以上）",
+            "value": "2PLUS"
+          },
+          {
+            "key": "4PLUS",
+            "label": "レム&ラム（設定4以上）",
+            "value": "4PLUS"
+          },
+          {
+            "key": "5PLUS",
+            "label": "お茶会（設定5以上）",
+            "value": "5PLUS"
+          },
+          {
+            "key": "6",
+            "label": "温泉（設定6）",
+            "value": "6"
+          }
+        ],
+        "defaultValue": []
       }
     ]
   },
@@ -131,7 +163,36 @@
           "SET_6": 0.0032743942
         },
         "sourceEvidenceRefs": [
-          "SRC_NANA"
+          "SRC_NANA",
+          "SRC_1GEKI"
+        ]
+      },
+      {
+        "featureId": "FEAT_SHINIMODORI",
+        "name": "AT終了後死に戻り発生率",
+        "adoptionCategory": "INCLUDE_SUPPORT",
+        "calculationRole": "PROBABILITY",
+        "probabilityEngineUsage": true,
+        "modelType": "binomial",
+        "minimumSample": 3,
+        "sampleRecommendation": 15,
+        "reliabilityProfile": {
+          "weight": 1
+        },
+        "denominatorInputId": "INP_SHINIMODORI_TRIALS",
+        "numeratorInputId": "INP_SHINIMODORI_HITS",
+        "displayFormat": "ratio_1_over_n",
+        "probabilities": {
+          "SET_1": 0.102,
+          "SET_2": 0.104,
+          "SET_3": 0.139,
+          "SET_4": 0.16,
+          "SET_5": 0.18,
+          "SET_6": 0.2
+        },
+        "sourceEvidenceRefs": [
+          "SRC_NANA",
+          "SRC_1GEKI"
         ]
       }
     ]
@@ -208,6 +269,77 @@
         "sourceEvidenceRefs": [
           "RE_CLOCK_6"
         ]
+      },
+      {
+        "id": "EVI_REZERO_END_2PLUS",
+        "name": "女性6人（設定2以上）",
+        "displayName": "女性6人（設定2以上）",
+        "inputId": "INP_EVI_REZERO_END",
+        "triggerValue": "2PLUS",
+        "confirmedSettings": [
+          "SET_2",
+          "SET_3",
+          "SET_4",
+          "SET_5",
+          "SET_6"
+        ],
+        "deniedSettings": [],
+        "hasImage": false,
+        "type": "SETTING_CONFIRMATION",
+        "sourceEvidenceRefs": [
+          "RE_END_2PLUS"
+        ]
+      },
+      {
+        "id": "EVI_REZERO_END_4PLUS",
+        "name": "レム&ラム（設定4以上）",
+        "displayName": "レム&ラム（設定4以上）",
+        "inputId": "INP_EVI_REZERO_END",
+        "triggerValue": "4PLUS",
+        "confirmedSettings": [
+          "SET_4",
+          "SET_5",
+          "SET_6"
+        ],
+        "deniedSettings": [],
+        "hasImage": false,
+        "type": "SETTING_CONFIRMATION",
+        "sourceEvidenceRefs": [
+          "RE_END_4PLUS"
+        ]
+      },
+      {
+        "id": "EVI_REZERO_END_5PLUS",
+        "name": "お茶会（設定5以上）",
+        "displayName": "お茶会（設定5以上）",
+        "inputId": "INP_EVI_REZERO_END",
+        "triggerValue": "5PLUS",
+        "confirmedSettings": [
+          "SET_5",
+          "SET_6"
+        ],
+        "deniedSettings": [],
+        "hasImage": false,
+        "type": "SETTING_CONFIRMATION",
+        "sourceEvidenceRefs": [
+          "RE_END_5PLUS"
+        ]
+      },
+      {
+        "id": "EVI_REZERO_END_6",
+        "name": "温泉（設定6）",
+        "displayName": "温泉（設定6）",
+        "inputId": "INP_EVI_REZERO_END",
+        "triggerValue": "6",
+        "confirmedSettings": [
+          "SET_6"
+        ],
+        "deniedSettings": [],
+        "hasImage": false,
+        "type": "SETTING_CONFIRMATION",
+        "sourceEvidenceRefs": [
+          "RE_END_6"
+        ]
       }
     ],
     "sources": [
@@ -257,7 +389,7 @@
             "type": "input",
             "inputId": "INP_SHINIMODORI_TRIALS",
             "label": "死に戻り判定回数",
-            "widget": "number"
+            "widget": "counter"
           },
           {
             "type": "input",
@@ -277,6 +409,12 @@
             "inputId": "INP_EVI_REZERO_CLOCK",
             "label": "菜月家ステージ 時計",
             "widget": "multi_select"
+          },
+          {
+            "type": "input",
+            "inputId": "INP_EVI_REZERO_END",
+            "label": "AT終了画面",
+            "widget": "multi_select"
           }
         ]
       }
@@ -284,29 +422,39 @@
   },
   "selectionSummary": {
     "schemaVersion": "selection-summary-v1",
-    "evaluatedCount": 2,
-    "selectedCount": 1,
-    "rejectedCount": 1,
+    "evaluatedCount": 4,
+    "selectedCount": 2,
+    "rejectedCount": 2,
     "selected": [
       {
         "featureId": "FEAT_AT_INITIAL",
         "name": "AT殲滅RUSH初当り",
-        "reason": "AT初当りは全設定の公開値があり、通常時全体を直接評価できるため主軸に採用します。",
+        "reason": "AT初当りは1/417.2～1/305.4の全設定値が公開され、通常時ゲーム数を分母に直接観測できるため主軸に採用します。",
         "requiredTrials": {
           "value": 26759,
           "unit": "通常ゲーム"
+        }
+      },
+      {
+        "featureId": "FEAT_SHINIMODORI",
+        "name": "AT終了後死に戻り発生率",
+        "reason": "死に戻りはAT終了後の別抽選で、判定機会と発生回数を直接観測でき、設定1の10.2%から設定6の20.0%まで約2倍の差があるため補助Featureとして採用します。",
+        "requiredTrials": {
+          "value": 96,
+          "unit": "AT終了後の死に戻り判定機会"
         }
       }
     ],
     "rejected": [
       {
-        "featureId": "FEAT_SHINIMODORI_PENDING",
-        "name": "AT終了後死に戻り発生率",
-        "reason": "設定2〜4の公開数値が未補完で、全設定を同じ条件で比較できないため現時点では不採用です。",
-        "requiredTrials": {
-          "value": 96,
-          "unit": "AT終了後32Gの死に戻り抽選機会"
-        }
+        "featureId": "REJ_REZERO_ZONE",
+        "name": "規定ポイントの奇数/偶数百ptゾーンAT当選率",
+        "reason": "奇数百ptは1.2%～3.1%、偶数百ptは25.0%～31.3%と設定差がありますが、いずれもAT初当りを生み出す経路の一部です。AT初当りと同時採用すると同じ当選を二重評価するため不採用です。"
+      },
+      {
+        "featureId": "REJ_REZERO_END_HINT",
+        "name": "AT終了画面の高設定示唆",
+        "reason": "高設定示唆画面は設定別出現率が公開されていないため数値尤度には使えません。設定2以上・4以上・5以上・6の確定系のみEvidenceとして採用します。"
       }
     ]
   },

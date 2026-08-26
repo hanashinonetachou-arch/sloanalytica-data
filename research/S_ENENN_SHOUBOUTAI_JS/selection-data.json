@@ -1,13 +1,43 @@
 {
-  "schemaVersion":"selection-data-v1","machineId":"S_ENENN_SHOUBOUTAI_JS","machineDataVersion":"0.1.0",
-  "uiCategoryLabels":{"NORMAL":"通常時","END_EVENT":"終了・示唆"},
+  "schemaVersion":"selection-data-v1","machineId":"S_ENENN_SHOUBOUTAI_JS","machineDataVersion":"0.1.1",
+  "uiCategoryLabels":{"NORMAL":"通常時","REG_EVIDENCE":"REG中の設定示唆","END_EVIDENCE":"終了・JAC設定示唆"},
   "inputs":[
     {"id":"INP_NORMAL_GAMES","name":"通常ゲーム数","type":"integer","category":"NORMAL","unit":"G","displayOrder":10,"inferenceRole":"INCLUDE_PRIMARY","defaultValue":0,"observationScope":"SELF_PLAY"},
-    {"id":"INP_ENEN_GEKKITO_INITIAL","name":"炎炎激闘 初当り","type":"counter","category":"NORMAL","unit":"回","displayOrder":11,"inferenceRole":"INCLUDE_PRIMARY","defaultValue":0,"parentInputId":"INP_NORMAL_GAMES"},
-    {"id":"INP_BONUS_INITIAL","name":"ボーナス初当り","type":"counter","category":"NORMAL","unit":"回","displayOrder":12,"inferenceRole":"DISPLAY_ONLY","defaultValue":0,"parentInputId":"INP_NORMAL_GAMES"}
+    {"id":"INP_ENEN_GEKKITO_INITIAL","name":"炎炎激闘 初当り","type":"counter","category":"NORMAL","unit":"回","displayOrder":11,"inferenceRole":"INCLUDE_PRIMARY","defaultValue":0,"parentInputId":"INP_NORMAL_GAMES"}
   ],
   "features":[
-    {"researchFeatureId":"RF_ENEN_GEKKITO_INITIAL","featureId":"FEAT_ENEN_GEKKITO_INITIAL","adoptionCategory":"INCLUDE_PRIMARY","numeratorInputId":"INP_ENEN_GEKKITO_INITIAL","denominatorInputId":"INP_NORMAL_GAMES","minimumSample":300,"sampleRecommendation":5000,"weight":1,"difficultyParticipation":"INCLUDE","difficultyExposure":{"mode":"per_game","factor":1,"quality":"EXACT","basisId":"NORMAL_GAMES"},"userReason":"炎炎激闘初当りは設定差が比較的大きく、通常ゲーム数を母数に直接観測できるため主軸として採用します。"},
-    {"researchFeatureId":"RF_BONUS_INITIAL","featureId":"FEAT_BONUS_INITIAL_EXCLUDED","adoptionCategory":"EXCLUDE","userReason":"ボーナス初当りにも設定差はありますが、炎炎激闘初当りと同じ通常時の初当り挙動を重ねて評価すると過信につながるため主計算では不採用です。"}
+    {"researchFeatureId":"RF_ENEN_GEKKITO_INITIAL","featureId":"FEAT_ENEN_GEKKITO_INITIAL","adoptionCategory":"INCLUDE_PRIMARY","numeratorInputId":"INP_ENEN_GEKKITO_INITIAL","denominatorInputId":"INP_NORMAL_GAMES","minimumSample":300,"sampleRecommendation":5000,"weight":1,"difficultyParticipation":"INCLUDE","difficultyExposure":{"mode":"per_game","factor":1,"quality":"EXACT","basisId":"NORMAL_GAMES"},"userReason":"炎炎激闘初当りは設定差が比較的大きく、通常ゲーム数を分母に直接観測できるため主軸として採用します。"},
+    {"researchFeatureId":"RF_BONUS_INITIAL","featureId":"FEAT_BONUS_INITIAL_EXCLUDED","adoptionCategory":"EXCLUDE","userReason":"ボーナス初当りにも設定差はありますが、炎炎激闘へ至る通常時の初当り経路と強く依存し、両方を独立Featureとして足すと同じ好挙動を重複評価しやすいため不採用です。"},
+    {"researchFeatureId":"RF_CROSS_CHANGE_BONUS","featureId":"FEAT_CROSS_CHANGE_EXCLUDED","adoptionCategory":"EXCLUDE","userReason":"十字目変換時のボーナス当選率には設定差がありますが、ボーナス初当りの部分集合で、炎炎激闘へつながる同一生成過程を追加評価することになるため現行モデルでは不採用です。"},
+    {"researchFeatureId":"RF_CROSS_REPLAY_BONUS","featureId":"FEAT_CROSS_REPLAY_EXCLUDED","adoptionCategory":"EXCLUDE","userReason":"十字リプレイ時のボーナス当選率は設定差が大きいもののボーナス初当りの部分集合です。主軸の炎炎激闘初当りと合わせたときの依存を安全に分離できないため不採用です。"},
+    {"researchFeatureId":"RF_SHADOW_EPB","featureId":"FEAT_SHADOW_EPB_EXCLUDED","adoptionCategory":"EXCLUDE","userReason":"初当りボーナス+伝導者の影でのEPB期待度には設定差がありますが、初当りボーナス中と伝導者の影中の抽選を合算した値で、実戦中に同じ公開条件の分母を安定して再現しにくいため不採用です。"},
+    {"researchFeatureId":"RF_SHINRA_BANSHO_SUCCESS","featureId":"FEAT_SHINRA_SUCCESS_EXCLUDED","adoptionCategory":"EXCLUDE","userReason":"森羅万象成功率には設定差がありますが27%～31%と差が小さく、森羅万象への到達自体も限定されるため必要試行量が大きく、実戦的な情報量が低いため不採用です。"}
+  ],
+  "evidenceUi":{"groups":[
+    {"groupId":"ENEN_REG","label":"REG中キャラ紹介","category":"REG_EVIDENCE","selectionMode":"multi","normalizationMode":"ALLOWED_SETTINGS_INTERSECTION","displayOrder":100,"options":[
+      {"value":"DENY_2","label":"アイリス②（設定2否定）","allowedSettings":["SET_1","SET_4","SET_5","SET_6"],"excludedSettings":["SET_2"],"sourceEvidenceIds":["RE_REG_DENY_2"]},
+      {"value":"DENY_4","label":"アイリス③（設定4否定）","allowedSettings":["SET_1","SET_2","SET_5","SET_6"],"excludedSettings":["SET_4"],"sourceEvidenceIds":["RE_REG_DENY_4"]},
+      {"value":"DENY_5","label":"アイリス④（設定5否定）","allowedSettings":["SET_1","SET_2","SET_4","SET_6"],"excludedSettings":["SET_5"],"sourceEvidenceIds":["RE_REG_DENY_5"]},
+      {"value":"2PLUS","label":"アイリス①（設定2以上）","allowedSettings":["SET_2","SET_4","SET_5","SET_6"],"sourceEvidenceIds":["RE_REG_2PLUS"]},
+      {"value":"4PLUS_A","label":"第8③（設定4以上）","allowedSettings":["SET_4","SET_5","SET_6"],"sourceEvidenceIds":["RE_REG_4PLUS_A"]},
+      {"value":"4PLUS_B","label":"大隊長（設定4以上）","allowedSettings":["SET_4","SET_5","SET_6"],"sourceEvidenceIds":["RE_REG_4PLUS_B"]},
+      {"value":"5PLUS","label":"伝道者②（設定5以上）","allowedSettings":["SET_5","SET_6"],"sourceEvidenceIds":["RE_REG_5PLUS"]},
+      {"value":"6","label":"アイリス⑤（設定6）","allowedSettings":["SET_6"],"sourceEvidenceIds":["RE_REG_6"]}
+    ]},
+    {"groupId":"ENEN_END","label":"ボーナス終了画面","category":"END_EVIDENCE","selectionMode":"multi","normalizationMode":"ALLOWED_SETTINGS_INTERSECTION","displayOrder":110,"options":[
+      {"value":"4PLUS","label":"第8メンバー全員集合（設定4以上）","allowedSettings":["SET_4","SET_5","SET_6"],"sourceEvidenceIds":["RE_END_4PLUS"]},
+      {"value":"5PLUS","label":"赤枠9人（設定5以上）","allowedSettings":["SET_5","SET_6"],"sourceEvidenceIds":["RE_END_5PLUS"]},
+      {"value":"6","label":"仲間全員集合 金枠（設定6）","allowedSettings":["SET_6"],"sourceEvidenceIds":["RE_END_6"]}
+    ]},
+    {"groupId":"ENEN_JAC","label":"炎炎JAC開始画面","category":"END_EVIDENCE","selectionMode":"multi","normalizationMode":"ALLOWED_SETTINGS_INTERSECTION","displayOrder":120,"options":[
+      {"value":"2PLUS","label":"オウビ（設定2以上）","allowedSettings":["SET_2","SET_4","SET_5","SET_6"],"sourceEvidenceIds":["RE_JAC_2PLUS"]},
+      {"value":"4PLUS","label":"紅丸（設定4以上）","allowedSettings":["SET_4","SET_5","SET_6"],"sourceEvidenceIds":["RE_JAC_4PLUS"]},
+      {"value":"5PLUS","label":"アイリス（設定5以上）","allowedSettings":["SET_5","SET_6"],"sourceEvidenceIds":["RE_JAC_5PLUS"]}
+    ]}
+  ]},
+  "rejectedElements":[
+    {"id":"REJ_ENEN_REG_HINT","name":"REGキャラ紹介の設定2・5示唆／設定1・4・6示唆","reason":"特定設定の示唆傾向はありますが設定別出現率が公開されていないため数値尤度には変換できません。否定・下限・確定パターンだけEvidenceとして採用します。"},
+    {"id":"REJ_ENEN_END_HINT","name":"ボーナス終了画面の高設定示唆（弱/強）","reason":"高設定示唆であることは公開されていますがメダル機の設定別出現率を推測計算へ安全に用いる契約がないため、設定4以上・5以上・6の確定系のみEvidenceとして採用します。"},
+    {"id":"REJ_ENEN_JAC_HINT","name":"炎炎JAC開始画面の設定2・5／1・4・6示唆","reason":"設定群の示唆はありますが設定別出現率がなく数値尤度を作れないため不採用です。設定2以上・4以上・5以上の下限パターンのみEvidenceとして採用します。"}
   ]
 }

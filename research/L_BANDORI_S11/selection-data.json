@@ -1,7 +1,35 @@
 {
-  "schemaVersion":"selection-data-v1","machineId":"L_BANDORI_S11","machineDataVersion":"0.1.0","uiCategoryLabels":{"NORMAL":"通常時","ST":"ST・終了時","LINKED":"打-WIN LITE"},
-  "inputs":[{"id":"INP_NORMAL_GAMES","name":"通常ゲーム数","type":"integer","category":"NORMAL","unit":"G","displayOrder":10,"inferenceRole":"INCLUDE_PRIMARY","defaultValue":0},{"id":"INP_ST_INITIAL","name":"ST初当り","type":"counter","category":"NORMAL","unit":"回","displayOrder":11,"inferenceRole":"INCLUDE_PRIMARY","defaultValue":0,"parentInputId":"INP_NORMAL_GAMES"},{"id":"INP_PICO_TRIALS","name":"ピコアタック抽選機会","type":"integer","category":"ST","unit":"回","displayOrder":20,"inferenceRole":"DISPLAY_ONLY","defaultValue":0},{"id":"INP_PICO_HITS","name":"ピコアタック当選","type":"counter","category":"ST","unit":"回","displayOrder":21,"inferenceRole":"DISPLAY_ONLY","defaultValue":0,"parentInputId":"INP_PICO_TRIALS"}],
-  "features":[{"researchFeatureId":"RF_ST_INITIAL","featureId":"FEAT_ST_INITIAL","adoptionCategory":"INCLUDE_PRIMARY","numeratorInputId":"INP_ST_INITIAL","denominatorInputId":"INP_NORMAL_GAMES","minimumSample":300,"sampleRecommendation":4000,"weight":1,"difficultyParticipation":"INCLUDE","difficultyExposure":{"mode":"per_game","factor":1,"quality":"EXACT","basisId":"NORMAL_GAMES"},"userReason":"ST初当りは設定2〜6の全数値が公開され、通常時の主結果として直接評価できるため採用します。"},{"researchFeatureId":"RF_PICO_ATTACK","featureId":"FEAT_PICO_ATTACK_REFERENCE","adoptionCategory":"EXCLUDE","rejectionReason":"成立役や駆け抜け条件で抽選率が変わり、設定差だけの抽選機会を実戦で安定して分離できないため不採用です。"}],
-  "evidenceUi":{"groups":[{"groupId":"BANDORI_STAMP","label":"ST終了画面スタンプ","selectionMode":"multi","normalizationMode":"ALLOWED_SETTINGS_INTERSECTION","displayOrder":100,"options":[{"value":"GOOD_4PLUS","label":"良（設定4以上）","allowedSettings":["SET_4","SET_5","SET_6"],"sourceEvidenceIds":["RE_STAMP_GOOD_4PLUS"]},{"value":"EXCELLENT_5PLUS","label":"優（設定5以上）","allowedSettings":["SET_5","SET_6"],"sourceEvidenceIds":["RE_STAMP_EXCELLENT_5PLUS"]},{"value":"EXTREME_6","label":"極（設定6）","allowedSettings":["SET_6"],"sourceEvidenceIds":["RE_STAMP_EXTREME_6"]}]}]},
-  "evidenceDecisions":[{"researchEvidenceId":"RE_KAKURE_NAGI_BLUE_2PLUS","decision":"REFERENCE","userReason":"他の平和機種を参考にした暫定情報で、本機固有の設定2以上Evidenceとして確定できないため参考扱いです。"}]
+  "schemaVersion":"selection-data-v1","machineId":"L_BANDORI_S11","machineDataVersion":"0.1.1","uiCategoryLabels":{"NORMAL":"通常時","EVIDENCE":"設定確定情報","LINKED":"実機連動機能"},
+  "inputs":[
+    {"id":"INP_NORMAL_GAMES","name":"通常ゲーム数","type":"integer","category":"NORMAL","unit":"G","displayOrder":10,"inferenceRole":"INCLUDE_PRIMARY","defaultValue":0},
+    {"id":"INP_ST_INITIAL","name":"ST初当り","type":"counter","category":"NORMAL","unit":"回","displayOrder":11,"inferenceRole":"INCLUDE_PRIMARY","defaultValue":0,"parentInputId":"INP_NORMAL_GAMES"}
+  ],
+  "features":[
+    {"researchFeatureId":"RF_ST_INITIAL","featureId":"FEAT_ST_INITIAL","adoptionCategory":"INCLUDE_PRIMARY","numeratorInputId":"INP_ST_INITIAL","denominatorInputId":"INP_NORMAL_GAMES","minimumSample":300,"sampleRecommendation":4000,"weight":1,"difficultyParticipation":"INCLUDE","difficultyExposure":{"mode":"per_game","factor":1,"quality":"EXACT","basisId":"NORMAL_GAMES"},"userReason":"ST初当りは設定2～6の全数値が公開され、通常ゲーム数を分母に直接観測できるため主軸に採用します。"},
+    {"researchFeatureId":"RF_CYCLE_EXPECTATION","featureId":"FEAT_CYCLE_EXPECTATION_EXCLUDED","adoptionCategory":"EXCLUDE","userReason":"1周期あたりの当選期待度には27.5%～34.4%の設定差がありますが、ST初当りを生み出す周期抽選そのものなのでST初当りと同時採用すると同じ初当りを重複評価するため不採用です。"},
+    {"researchFeatureId":"RF_PICO_ATTACK","featureId":"FEAT_PICO_ATTACK_EXCLUDED","adoptionCategory":"EXCLUDE","userReason":"ピコアタック平均当選率には7.7%～14.9%の設定差がありますが、レア役成立時は当選濃厚、ST駆け抜け時は優遇といった設定共通・条件別抽選が混在します。実戦で設定差部分だけの分母を安定して分離できないため不採用です。"}
+  ],
+  "evidenceUi":{"groups":[
+    {"groupId":"BANDORI_PAYOUT","label":"獲得枚数表示","category":"EVIDENCE","selectionMode":"multi","normalizationMode":"ALLOWED_SETTINGS_INTERSECTION","displayOrder":90,"options":[
+      {"value":"456_4PLUS","label":"456枚OVER（設定4以上）","allowedSettings":["SET_4","SET_5","SET_6"],"sourceEvidenceIds":["RE_PAYOUT_456_4PLUS"]},
+      {"value":"666_6","label":"666枚OVER（設定6）","allowedSettings":["SET_6"],"sourceEvidenceIds":["RE_PAYOUT_666_6"]}
+    ]},
+    {"groupId":"BANDORI_STAMP","label":"ST終了画面スタンプ","category":"EVIDENCE","selectionMode":"multi","normalizationMode":"ALLOWED_SETTINGS_INTERSECTION","displayOrder":100,"options":[
+      {"value":"GOOD_4PLUS","label":"良（設定4以上）","allowedSettings":["SET_4","SET_5","SET_6"],"sourceEvidenceIds":["RE_STAMP_GOOD_4PLUS"]},
+      {"value":"EXCELLENT_5PLUS","label":"優（設定5以上）","allowedSettings":["SET_5","SET_6"],"sourceEvidenceIds":["RE_STAMP_EXCELLENT_5PLUS"]},
+      {"value":"EXTREME_6","label":"極（設定6）","allowedSettings":["SET_6"],"sourceEvidenceIds":["RE_STAMP_EXTREME_6"]}
+    ]},
+    {"groupId":"BANDORI_NAGI","label":"実機連動機能 隠れ凪","category":"LINKED","selectionMode":"multi","normalizationMode":"ALLOWED_SETTINGS_INTERSECTION","displayOrder":110,"options":[
+      {"value":"GREEN_3PLUS","label":"緑（設定3以上）","allowedSettings":["SET_3","SET_4","SET_5","SET_6"],"sourceEvidenceIds":["RE_NAGI_GREEN_3PLUS"]},
+      {"value":"RED_4PLUS","label":"赤（設定4以上）","allowedSettings":["SET_4","SET_5","SET_6"],"sourceEvidenceIds":["RE_NAGI_RED_4PLUS"]},
+      {"value":"SILVER_5PLUS","label":"銀（設定5以上）","allowedSettings":["SET_5","SET_6"],"sourceEvidenceIds":["RE_NAGI_SILVER_5PLUS"]},
+      {"value":"GOLD_6","label":"金（設定6）","allowedSettings":["SET_6"],"sourceEvidenceIds":["RE_NAGI_GOLD_6"]}
+    ]}
+  ]},
+  "evidenceDecisions":[{"researchEvidenceId":"RE_KAKURE_NAGI_BLUE_2PLUS","decision":"REFERENCE","userReason":"青の設定2以上はなな徹自身が『その他平和機種の示唆内容を参考』としており、本機固有の確定情報として裏付けられていないためEvidenceには採用しません。"}],
+  "rejectedElements":[
+    {"id":"REJ_BANDORI_BLACK_DISC","name":"ST中5枚目以降の黒ディスク出現率","reason":"黒ディスク出現率には設定差があると公表されていますが、設定2の約20%以外は未公表で全設定の確率表が揃っていないため数値推測に採用できません。"},
+    {"id":"REJ_BANDORI_UPPER_LOOP","name":"上位STの84%/93%ループ振り分け","reason":"高設定ほど93%ループが選ばれやすいことは公表されていますが設定別の選択率が未公表です。実戦結果からループ率を逆算すると展開による誤分類も大きいため不採用です。"},
+    {"id":"REJ_BANDORI_ST_END_HINT","name":"ST終了画面の通常示唆パターン","reason":"基本画面や一部パターンは示唆内容・設定別出現率が未確定で数値評価できません。良・優・極スタンプの設定下限/確定パターンのみEvidenceとして採用します。"}
+  ]
 }

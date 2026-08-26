@@ -3,7 +3,7 @@
   "machine": {
     "schemaVersion": "2.0.0",
     "machineId": "S_KACHO_KUMADA_GZA",
-    "machineDataVersion": "0.1.0",
+    "machineDataVersion": "0.1.1",
     "displayName": "課長 熊田工作",
     "modelName": "S課長熊田工作GZA",
     "manufacturer": "ネット",
@@ -30,39 +30,74 @@
         "category": "NORMAL",
         "unit": "G",
         "displayOrder": 10,
-        "inferenceRole": "DISPLAY_ONLY",
+        "inferenceRole": "INCLUDE_PRIMARY",
         "defaultValue": 0,
         "minimum": 0
       },
       {
-        "id": "INP_BIG_INITIAL",
-        "name": "BIG",
+        "id": "INP_BONUS_INITIAL",
+        "name": "ボーナス初当り",
         "type": "counter",
         "category": "NORMAL",
         "unit": "回",
         "displayOrder": 11,
-        "inferenceRole": "DISPLAY_ONLY",
+        "inferenceRole": "INCLUDE_PRIMARY",
         "defaultValue": 0,
         "parentInputId": "INP_NORMAL_GAMES",
         "minimum": 0
       },
       {
-        "id": "INP_REG_INITIAL",
-        "name": "REG",
-        "type": "counter",
-        "category": "NORMAL",
-        "unit": "回",
-        "displayOrder": 12,
-        "inferenceRole": "DISPLAY_ONLY",
-        "defaultValue": 0,
-        "parentInputId": "INP_NORMAL_GAMES",
-        "minimum": 0
+        "id": "INP_EVI_KUMADA_PAYOUT",
+        "name": "獲得枚数表示",
+        "type": "multi_enum",
+        "category": "END_EVENT",
+        "unit": "",
+        "displayOrder": 90,
+        "inferenceRole": "INCLUDE_SUPPORT",
+        "options": [
+          {
+            "key": "333_6",
+            "label": "333枚OVER（設定6）",
+            "value": "333_6"
+          },
+          {
+            "key": "444_4PLUS",
+            "label": "444枚OVER（設定4以上）",
+            "value": "444_4PLUS"
+          },
+          {
+            "key": "456_4PLUS",
+            "label": "456枚OVER（設定4以上）",
+            "value": "456_4PLUS"
+          },
+          {
+            "key": "555_5PLUS",
+            "label": "555枚OVER（設定5以上）",
+            "value": "555_5PLUS"
+          },
+          {
+            "key": "666_6",
+            "label": "666枚OVER（設定6）",
+            "value": "666_6"
+          },
+          {
+            "key": "777_6",
+            "label": "777枚OVER（設定6）",
+            "value": "777_6"
+          },
+          {
+            "key": "3456_4PLUS",
+            "label": "3456枚OVER（設定4以上）",
+            "value": "3456_4PLUS"
+          }
+        ],
+        "defaultValue": []
       },
       {
         "id": "INP_EVI_KUMADA_END",
         "name": "ボーナス終了画面",
         "type": "multi_enum",
-        "category": "EVIDENCE",
+        "category": "END_EVENT",
         "unit": "",
         "displayOrder": 100,
         "inferenceRole": "INCLUDE_SUPPORT",
@@ -79,11 +114,158 @@
   },
   "features": {
     "schemaVersion": "2.0.0",
-    "features": []
+    "features": [
+      {
+        "featureId": "FEAT_BONUS_INITIAL",
+        "name": "通常時ボーナス初当り",
+        "adoptionCategory": "INCLUDE_PRIMARY",
+        "calculationRole": "PROBABILITY",
+        "probabilityEngineUsage": true,
+        "modelType": "binomial",
+        "minimumSample": 300,
+        "sampleRecommendation": 4000,
+        "reliabilityProfile": {
+          "weight": 1
+        },
+        "denominatorInputId": "INP_NORMAL_GAMES",
+        "numeratorInputId": "INP_BONUS_INITIAL",
+        "displayFormat": "ratio_1_over_n",
+        "probabilities": {
+          "SET_1": 0.0040176778,
+          "SET_2": 0.0041528239,
+          "SET_4": 0.0046061723,
+          "SET_5": 0.0049726504,
+          "SET_6": 0.0051493306
+        },
+        "sourceEvidenceRefs": [
+          "SRC_1GEKI",
+          "SRC_NANA"
+        ]
+      }
+    ]
   },
   "evidence": {
     "version": "1.0.0",
     "evidences": [
+      {
+        "id": "EVI_KUMADA_PAYOUT_333_6",
+        "name": "333枚OVER（設定6）",
+        "displayName": "333枚OVER（設定6）",
+        "inputId": "INP_EVI_KUMADA_PAYOUT",
+        "triggerValue": "333_6",
+        "confirmedSettings": [
+          "SET_6"
+        ],
+        "deniedSettings": [],
+        "hasImage": false,
+        "type": "SETTING_CONFIRMATION",
+        "sourceEvidenceRefs": [
+          "RE_PAYOUT_333_6"
+        ]
+      },
+      {
+        "id": "EVI_KUMADA_PAYOUT_444_4PLUS",
+        "name": "444枚OVER（設定4以上）",
+        "displayName": "444枚OVER（設定4以上）",
+        "inputId": "INP_EVI_KUMADA_PAYOUT",
+        "triggerValue": "444_4PLUS",
+        "confirmedSettings": [
+          "SET_4",
+          "SET_5",
+          "SET_6"
+        ],
+        "deniedSettings": [],
+        "hasImage": false,
+        "type": "SETTING_CONFIRMATION",
+        "sourceEvidenceRefs": [
+          "RE_PAYOUT_444_4PLUS"
+        ]
+      },
+      {
+        "id": "EVI_KUMADA_PAYOUT_456_4PLUS",
+        "name": "456枚OVER（設定4以上）",
+        "displayName": "456枚OVER（設定4以上）",
+        "inputId": "INP_EVI_KUMADA_PAYOUT",
+        "triggerValue": "456_4PLUS",
+        "confirmedSettings": [
+          "SET_4",
+          "SET_5",
+          "SET_6"
+        ],
+        "deniedSettings": [],
+        "hasImage": false,
+        "type": "SETTING_CONFIRMATION",
+        "sourceEvidenceRefs": [
+          "RE_PAYOUT_456_4PLUS"
+        ]
+      },
+      {
+        "id": "EVI_KUMADA_PAYOUT_555_5PLUS",
+        "name": "555枚OVER（設定5以上）",
+        "displayName": "555枚OVER（設定5以上）",
+        "inputId": "INP_EVI_KUMADA_PAYOUT",
+        "triggerValue": "555_5PLUS",
+        "confirmedSettings": [
+          "SET_5",
+          "SET_6"
+        ],
+        "deniedSettings": [],
+        "hasImage": false,
+        "type": "SETTING_CONFIRMATION",
+        "sourceEvidenceRefs": [
+          "RE_PAYOUT_555_5PLUS"
+        ]
+      },
+      {
+        "id": "EVI_KUMADA_PAYOUT_666_6",
+        "name": "666枚OVER（設定6）",
+        "displayName": "666枚OVER（設定6）",
+        "inputId": "INP_EVI_KUMADA_PAYOUT",
+        "triggerValue": "666_6",
+        "confirmedSettings": [
+          "SET_6"
+        ],
+        "deniedSettings": [],
+        "hasImage": false,
+        "type": "SETTING_CONFIRMATION",
+        "sourceEvidenceRefs": [
+          "RE_PAYOUT_666_6"
+        ]
+      },
+      {
+        "id": "EVI_KUMADA_PAYOUT_777_6",
+        "name": "777枚OVER（設定6）",
+        "displayName": "777枚OVER（設定6）",
+        "inputId": "INP_EVI_KUMADA_PAYOUT",
+        "triggerValue": "777_6",
+        "confirmedSettings": [
+          "SET_6"
+        ],
+        "deniedSettings": [],
+        "hasImage": false,
+        "type": "SETTING_CONFIRMATION",
+        "sourceEvidenceRefs": [
+          "RE_PAYOUT_777_6"
+        ]
+      },
+      {
+        "id": "EVI_KUMADA_PAYOUT_3456_4PLUS",
+        "name": "3456枚OVER（設定4以上）",
+        "displayName": "3456枚OVER（設定4以上）",
+        "inputId": "INP_EVI_KUMADA_PAYOUT",
+        "triggerValue": "3456_4PLUS",
+        "confirmedSettings": [
+          "SET_4",
+          "SET_5",
+          "SET_6"
+        ],
+        "deniedSettings": [],
+        "hasImage": false,
+        "type": "SETTING_CONFIRMATION",
+        "sourceEvidenceRefs": [
+          "RE_PAYOUT_3456_4PLUS"
+        ]
+      },
       {
         "id": "EVI_KUMADA_END_HAWAII_4PLUS",
         "name": "熊田工作＋ハワイ（設定4以上）",
@@ -112,10 +294,17 @@
         "checkedAt": "2026-08-26"
       },
       {
-        "id": "SRC_PACNK",
+        "id": "SRC_1GEKI",
         "classification": "ANALYSIS",
-        "pageName": "課長 熊田工作 設定判別ツール",
-        "url": "https://pacnk.com/slot/tools/sh_kachokumadakosaku.html",
+        "pageName": "課長 熊田工作 設定判別",
+        "url": "https://1geki.jp/slot/s_kacho_kumakou/0/",
+        "checkedAt": "2026-08-26"
+      },
+      {
+        "id": "SRC_NANA",
+        "classification": "ANALYSIS",
+        "pageName": "課長 熊田工作 設定判別",
+        "url": "https://nana-press.com/kaiseki/machine/541/14981/",
         "checkedAt": "2026-08-26"
       }
     ]
@@ -135,23 +324,23 @@
           },
           {
             "type": "input",
-            "inputId": "INP_BIG_INITIAL",
-            "label": "BIG",
-            "widget": "counter"
-          },
-          {
-            "type": "input",
-            "inputId": "INP_REG_INITIAL",
-            "label": "REG",
+            "inputId": "INP_BONUS_INITIAL",
+            "label": "ボーナス初当り",
             "widget": "counter"
           }
         ]
       },
       {
-        "id": "AUTO_EVIDENCE",
-        "title": "設定確定・否定情報",
+        "id": "AUTO_END_EVENT",
+        "title": "獲得枚数・終了画面",
         "displayOrder": 2,
         "items": [
+          {
+            "type": "input",
+            "inputId": "INP_EVI_KUMADA_PAYOUT",
+            "label": "獲得枚数表示",
+            "widget": "multi_select"
+          },
           {
             "type": "input",
             "inputId": "INP_EVI_KUMADA_END",
@@ -164,28 +353,53 @@
   },
   "selectionSummary": {
     "schemaVersion": "selection-summary-v1",
-    "evaluatedCount": 2,
-    "selectedCount": 0,
-    "rejectedCount": 2,
-    "selected": [],
+    "evaluatedCount": 6,
+    "selectedCount": 1,
+    "rejectedCount": 5,
+    "selected": [
+      {
+        "featureId": "FEAT_BONUS_INITIAL",
+        "name": "通常時ボーナス初当り",
+        "reason": "32G以内の連チャンを初当りとして重複させない通常時ボーナス初当りは1/248.9～1/194.2の設定差があり、自分区間で直接観測できるため主軸に採用します。",
+        "requiredTrials": {
+          "value": 26016,
+          "unit": "通常ゲーム"
+        }
+      }
+    ],
     "rejected": [
       {
-        "featureId": "FEAT_BIG_INITIAL_PENDING",
-        "name": "BIG初当り",
-        "reason": "設定別数値を単一の補助ソースでしか確認できず、大手解析との照合が未完了のため現時点では不採用です。",
+        "featureId": "FEAT_BIG_COUNTER_EXCLUDED",
+        "name": "データカウンターBIG出現率",
+        "reason": "BIG出現率には設定差がありますがデータカウンター値には会議室など32G以内の連チャン分も含まれ、通常時初当りとは異なる生成過程です。初当りと同時採用すると連チャン性能を含めて重複評価するため不採用です。",
         "requiredTrials": {
           "value": 15802,
-          "unit": "通常ゲーム"
+          "unit": "総ゲーム"
         }
       },
       {
-        "featureId": "FEAT_REG_INITIAL_PENDING",
-        "name": "REG初当り",
-        "reason": "設定別数値を単一の補助ソースでしか確認できず、大手解析との照合が未完了のため現時点では不採用です。",
+        "featureId": "FEAT_REG_COUNTER_EXCLUDED",
+        "name": "データカウンターREG出現率",
+        "reason": "REG出現率にも設定差がありますがデータカウンター値には連チャン中のREGが含まれ、通常時初当りの母集団と一致しません。初当りと同時採用した際の重複評価を避けるため不採用です。",
         "requiredTrials": {
           "value": 74431,
-          "unit": "通常ゲーム"
+          "unit": "総ゲーム"
         }
+      },
+      {
+        "featureId": "REJ_KUMADA_VOICE_HINT",
+        "name": "ボーナス告知時・7テンパイ時のボイス",
+        "reason": "OLセリフやしげる松崎ボイスは高設定期待度アップですが設定別出現率が公開されておらず数値尤度を作れません。さらに昇進モード・高継続示唆も兼ねるため設定情報だけを分離できず不採用です。"
+      },
+      {
+        "featureId": "REJ_KUMADA_PAYOUT_HINT",
+        "name": "539枚OVER・ありがとねっと赤などの高設定示唆",
+        "reason": "高設定示唆であることは公開されていますが設定別出現率がなく、539枚は高継続示唆も兼ねます。設定4以上・5以上・6を確定できる枚数表示のみEvidenceとして採用します。"
+      },
+      {
+        "featureId": "REJ_KUMADA_END_HINT",
+        "name": "ボーナス終了画面 社長",
+        "reason": "社長画面は高設定示唆かつボーナスループ確定ですが設定別出現率がなく、ループ状態の情報も混在するため数値推測には不採用です。ハワイの設定4以上確定のみEvidenceとして採用します。"
       }
     ]
   },
