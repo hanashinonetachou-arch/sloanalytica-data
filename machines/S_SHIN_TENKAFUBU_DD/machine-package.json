@@ -3,7 +3,7 @@
   "machine": {
     "schemaVersion": "2.0.0",
     "machineId": "S_SHIN_TENKAFUBU_DD",
-    "machineDataVersion": "0.1.1",
+    "machineDataVersion": "0.1.2",
     "displayName": "真天下布武",
     "modelName": "S真天下布武DD",
     "manufacturer": "山佐",
@@ -75,6 +75,28 @@
         "category": "IKKIKAKE",
         "unit": "回",
         "displayOrder": 22,
+        "inferenceRole": "INCLUDE_SUPPORT",
+        "defaultValue": null,
+        "minimum": 0
+      },
+      {
+        "id": "INP_AT_END_DEFAULT",
+        "name": "三武将のみ（トロフィーなし）",
+        "type": "counter",
+        "category": "AT_END",
+        "unit": "回",
+        "displayOrder": 30,
+        "inferenceRole": "INCLUDE_SUPPORT",
+        "defaultValue": null,
+        "minimum": 0
+      },
+      {
+        "id": "INP_AT_END_WEAPONS",
+        "name": "武具",
+        "type": "counter",
+        "category": "AT_END",
+        "unit": "回",
+        "displayOrder": 31,
         "inferenceRole": "INCLUDE_SUPPORT",
         "defaultValue": null,
         "minimum": 0
@@ -229,6 +251,59 @@
         "sourceEvidenceRefs": [
           "SRC_NANA"
         ]
+      },
+      {
+        "featureId": "FEAT_AT_END_HINT",
+        "name": "AT終了画面（トロフィー非出現時）",
+        "adoptionCategory": "INCLUDE_SUPPORT",
+        "calculationRole": "PROBABILITY",
+        "probabilityEngineUsage": true,
+        "modelType": "multinomial",
+        "minimumSample": 3,
+        "sampleRecommendation": 15,
+        "reliabilityProfile": {
+          "weight": 1
+        },
+        "inputTransform": "sum_inputs_to_trials",
+        "numeratorInputId": "INP_AT_END_DEFAULT",
+        "denominatorInputIds": [
+          "INP_AT_END_DEFAULT",
+          "INP_AT_END_WEAPONS"
+        ],
+        "categoryInputIds": [
+          "INP_AT_END_WEAPONS"
+        ],
+        "probabilities": {},
+        "categoryLabels": [
+          "三武将のみ",
+          "武具"
+        ],
+        "categoryProbabilities": {
+          "SET_1": [
+            0.8,
+            0.2
+          ],
+          "SET_2": [
+            0.777777778,
+            0.222222222
+          ],
+          "SET_4": [
+            0.677419355,
+            0.322580645
+          ],
+          "SET_5": [
+            0.666666667,
+            0.333333333
+          ],
+          "SET_6": [
+            0.666666667,
+            0.333333333
+          ]
+        },
+        "sourceEvidenceRefs": [
+          "SRC_NANA",
+          "SRC_PACHIMAGA"
+        ]
       }
     ]
   },
@@ -373,6 +448,13 @@
         "pageName": "真天下布武 設定差・設定示唆",
         "url": "https://nana-press.com/kaiseki/machine/532/15159/",
         "checkedAt": "2026-08-26"
+      },
+      {
+        "id": "SRC_PACHIMAGA",
+        "classification": "ANALYSIS",
+        "pageName": "真天下布武 AT終了画面",
+        "url": "https://cs62.cs-plaza.com/g/pachi/pla/s_conq/yamasa_slot/249/en04-5.php",
+        "checkedAt": "2026-08-26"
       }
     ]
   },
@@ -423,9 +505,28 @@
         ]
       },
       {
+        "id": "AUTO_AT_END",
+        "title": "AT終了画面",
+        "displayOrder": 3,
+        "items": [
+          {
+            "type": "input",
+            "inputId": "INP_AT_END_DEFAULT",
+            "label": "三武将のみ（トロフィーなし）",
+            "widget": "counter"
+          },
+          {
+            "type": "input",
+            "inputId": "INP_AT_END_WEAPONS",
+            "label": "武具",
+            "widget": "counter"
+          }
+        ]
+      },
+      {
         "id": "AUTO_END_EVENT",
         "title": "エンディング・トロフィー",
-        "displayOrder": 3,
+        "displayOrder": 4,
         "items": [
           {
             "type": "input",
@@ -446,8 +547,8 @@
   "selectionSummary": {
     "schemaVersion": "selection-summary-v1",
     "evaluatedCount": 7,
-    "selectedCount": 2,
-    "rejectedCount": 5,
+    "selectedCount": 3,
+    "rejectedCount": 4,
     "selected": [
       {
         "featureId": "FEAT_AT_INITIAL",
@@ -461,10 +562,19 @@
       {
         "featureId": "FEAT_IKKIKAKE_WARRIOR",
         "name": "一騎駆け中の出陣武将",
-        "reason": "一騎駆けの出陣武将はその場で信長・秀吉・家康を直接観測でき、設定1・2と設定4以上で振り分けが40/35/25から30/30/40へ明確に変わるためMultinomialの補助Featureとして採用します。",
+        "reason": "一騎駆けの出陣武将は直接観測でき、設定1・2と設定4以上で振り分けが明確に変わるためMultinomialの補助Featureとして採用します。",
         "requiredTrials": {
           "value": 69,
           "unit": "一騎駆け出陣"
+        }
+      },
+      {
+        "featureId": "FEAT_AT_END_HINT",
+        "name": "AT終了画面（トロフィー非出現時）",
+        "reason": "AT終了画面は設定別振り分けが公開されているため採用します。トロフィー出現はEvidenceで別処理し、数値Featureはトロフィー非出現時の『三武将のみ／武具』に条件付けて同一画面の二重評価を避けます。",
+        "requiredTrials": {
+          "value": 80,
+          "unit": "トロフィー非出現AT終了画面"
         }
       }
     ],
@@ -481,7 +591,7 @@
       {
         "featureId": "FEAT_AT_DIRECT_EXCLUDED",
         "name": "レア役AT直撃",
-        "reason": "AT直撃はAT初当りの部分集合なので、AT初当りと同時採用すると同じAT当選を二重評価するため不採用です。",
+        "reason": "AT直撃は設定1約1/21845から設定6約1/2048まで大きな設定差がありますが、AT初当りの部分集合です。現行のAT初当りFeatureと独立に加えると同じ直撃ATを二重評価するため不採用です。低頻度や入力負荷を理由に除外しているわけではありません。将来、AT初当りを『直撃／その他AT／非当選』の排他的モデルへ統合する場合は再採用候補です。",
         "requiredTrials": {
           "value": 7795,
           "unit": "通常ゲーム"
@@ -495,12 +605,7 @@
       {
         "featureId": "REJ_TENKA_RESET_HIDEYOSHI",
         "name": "有利区間リセット時の秀吉モード移行率",
-        "reason": "14.5%～37.5%と大きな設定差がありますが、利用には有利区間リセット契機と移行先モードの双方を確定する必要があります。公開情報では遊技履歴からの確認を推奨していますが、実機での再現性確認前なので数値Featureには採用しません。"
-      },
-      {
-        "featureId": "REJ_TENKA_AT_END_HINT",
-        "name": "AT終了画面の高設定示唆",
-        "reason": "高設定示唆であることは公開されていますが設定別出現率が未公表で数値尤度を作れないため不採用です。ケロットトロフィーとエンディングの設定下限パターンはEvidenceとして別採用します。"
+        "reason": "14.5%～37.5%と大きな設定差がありますが、利用には有利区間リセット契機と移行先モードの双方を確定する必要があります。実機での再現性確認前なので数値Featureには採用しません。"
       }
     ]
   },

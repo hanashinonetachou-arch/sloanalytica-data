@@ -1,35 +1,22 @@
 {
-  "schemaVersion":"selection-data-v1","machineId":"S_SHIN_TENKAFUBU_DD","machineDataVersion":"0.1.1",
-  "uiCategoryLabels":{"NORMAL":"通常時","IKKIKAKE":"一騎駆け","END_EVENT":"エンディング・トロフィー"},
+  "schemaVersion":"selection-data-v1","machineId":"S_SHIN_TENKAFUBU_DD","machineDataVersion":"0.1.2",
+  "uiCategoryLabels":{"NORMAL":"通常時","IKKIKAKE":"一騎駆け","AT_END":"AT終了画面","END_EVENT":"エンディング・トロフィー"},
   "inputs":[
     {"id":"INP_NORMAL_GAMES","name":"通常ゲーム数","type":"integer","category":"NORMAL","unit":"G","displayOrder":10,"inferenceRole":"INCLUDE_PRIMARY","defaultValue":0},
     {"id":"INP_AT_INITIAL","name":"AT「覚醒」初当り","type":"counter","category":"NORMAL","unit":"回","displayOrder":11,"inferenceRole":"INCLUDE_PRIMARY","defaultValue":0,"parentInputId":"INP_NORMAL_GAMES"},
-    {"id":"INP_IKKI_NOBUNAGA","name":"信長","type":"counter","category":"IKKIKAKE","unit":"回","displayOrder":20,"inferenceRole":"INCLUDE_SUPPORT","defaultValue":null},
-    {"id":"INP_IKKI_HIDEYOSHI","name":"秀吉","type":"counter","category":"IKKIKAKE","unit":"回","displayOrder":21,"inferenceRole":"INCLUDE_SUPPORT","defaultValue":null},
-    {"id":"INP_IKKI_IEYASU","name":"家康","type":"counter","category":"IKKIKAKE","unit":"回","displayOrder":22,"inferenceRole":"INCLUDE_SUPPORT","defaultValue":null}
+    {"id":"INP_IKKI_NOBUNAGA","name":"信長","type":"counter","category":"IKKIKAKE","unit":"回","displayOrder":20,"inferenceRole":"INCLUDE_SUPPORT","defaultValue":null},{"id":"INP_IKKI_HIDEYOSHI","name":"秀吉","type":"counter","category":"IKKIKAKE","unit":"回","displayOrder":21,"inferenceRole":"INCLUDE_SUPPORT","defaultValue":null},{"id":"INP_IKKI_IEYASU","name":"家康","type":"counter","category":"IKKIKAKE","unit":"回","displayOrder":22,"inferenceRole":"INCLUDE_SUPPORT","defaultValue":null},
+    {"id":"INP_AT_END_DEFAULT","name":"三武将のみ（トロフィーなし）","type":"counter","category":"AT_END","unit":"回","displayOrder":30,"inferenceRole":"INCLUDE_SUPPORT","defaultValue":null},{"id":"INP_AT_END_WEAPONS","name":"武具","type":"counter","category":"AT_END","unit":"回","displayOrder":31,"inferenceRole":"INCLUDE_SUPPORT","defaultValue":null}
   ],
   "features":[
     {"researchFeatureId":"RF_AT_INITIAL","featureId":"FEAT_AT_INITIAL","adoptionCategory":"INCLUDE_PRIMARY","numeratorInputId":"INP_AT_INITIAL","denominatorInputId":"INP_NORMAL_GAMES","minimumSample":300,"sampleRecommendation":4000,"weight":1,"difficultyParticipation":"INCLUDE","difficultyExposure":{"mode":"per_game","factor":1,"quality":"EXACT","basisId":"NORMAL_GAMES"},"userReason":"AT初当りは設定差が大きく、通常ゲーム数を分母に直接観測できるため主軸に採用します。"},
-    {"researchFeatureId":"RF_IKKIKAKE_WARRIOR","featureId":"FEAT_IKKIKAKE_WARRIOR","adoptionCategory":"INCLUDE_SUPPORT","numeratorInputId":"INP_IKKI_NOBUNAGA","categoryInputIds":["INP_IKKI_HIDEYOSHI","INP_IKKI_IEYASU"],"inputTransform":"sum_inputs_to_trials","minimumSample":5,"sampleRecommendation":20,"weight":1,"difficultyParticipation":"EXCLUDE","userReason":"一騎駆けの出陣武将はその場で信長・秀吉・家康を直接観測でき、設定1・2と設定4以上で振り分けが40/35/25から30/30/40へ明確に変わるためMultinomialの補助Featureとして採用します。"},
+    {"researchFeatureId":"RF_IKKIKAKE_WARRIOR","featureId":"FEAT_IKKIKAKE_WARRIOR","adoptionCategory":"INCLUDE_SUPPORT","numeratorInputId":"INP_IKKI_NOBUNAGA","categoryInputIds":["INP_IKKI_HIDEYOSHI","INP_IKKI_IEYASU"],"inputTransform":"sum_inputs_to_trials","minimumSample":5,"sampleRecommendation":20,"weight":1,"difficultyParticipation":"EXCLUDE","userReason":"一騎駆けの出陣武将は直接観測でき、設定1・2と設定4以上で振り分けが明確に変わるためMultinomialの補助Featureとして採用します。"},
+    {"researchFeatureId":"RF_AT_END_HINT","featureId":"FEAT_AT_END_HINT","adoptionCategory":"INCLUDE_SUPPORT","numeratorInputId":"INP_AT_END_DEFAULT","categoryInputIds":["INP_AT_END_WEAPONS"],"inputTransform":"sum_inputs_to_trials","minimumSample":3,"sampleRecommendation":15,"weight":1,"difficultyParticipation":"EXCLUDE","userReason":"AT終了画面は設定別振り分けが公開されているため採用します。トロフィー出現はEvidenceで別処理し、数値Featureはトロフィー非出現時の『三武将のみ／武具』に条件付けて同一画面の二重評価を避けます。"},
     {"researchFeatureId":"RF_CZ_INITIAL","featureId":"FEAT_CZ_INITIAL_EXCLUDED","adoptionCategory":"EXCLUDE","userReason":"CZはAT初当りへつながる主要経路で、AT初当りと同時採用すると同じ通常時の好挙動を重複評価するため不採用です。"},
-    {"researchFeatureId":"RF_AT_DIRECT","featureId":"FEAT_AT_DIRECT_EXCLUDED","adoptionCategory":"EXCLUDE","userReason":"AT直撃はAT初当りの部分集合なので、AT初当りと同時採用すると同じAT当選を二重評価するため不採用です。"}
+    {"researchFeatureId":"RF_AT_DIRECT","featureId":"FEAT_AT_DIRECT_EXCLUDED","adoptionCategory":"EXCLUDE","userReason":"AT直撃は設定1約1/21845から設定6約1/2048まで大きな設定差がありますが、AT初当りの部分集合です。現行のAT初当りFeatureと独立に加えると同じ直撃ATを二重評価するため不採用です。低頻度や入力負荷を理由に除外しているわけではありません。将来、AT初当りを『直撃／その他AT／非当選』の排他的モデルへ統合する場合は再採用候補です。"}
   ],
   "evidenceUi":{"groups":[
-    {"groupId":"TENKA_END_LAMP","label":"エンディング中サイドランプ","category":"END_EVENT","selectionMode":"multi","normalizationMode":"ALLOWED_SETTINGS_INTERSECTION","displayOrder":90,"options":[
-      {"value":"WEAK_RED_2PLUS","label":"弱レア役→赤（設定2以上）","allowedSettings":["SET_2","SET_4","SET_5","SET_6"],"sourceEvidenceIds":["RE_END_LAMP_WEAK_RED_2PLUS"]},
-      {"value":"WEAK_PURPLE_6","label":"弱レア役→紫（設定6）","allowedSettings":["SET_6"],"sourceEvidenceIds":["RE_END_LAMP_WEAK_PURPLE_6"]},
-      {"value":"CHANCE_PURPLE_4PLUS","label":"チャンス目→紫（設定4以上）","allowedSettings":["SET_4","SET_5","SET_6"],"sourceEvidenceIds":["RE_END_LAMP_CHANCE_PURPLE_4PLUS"]}
-    ]},
-    {"groupId":"TENKAFUBU_TROPHY","label":"ケロットトロフィー","category":"END_EVENT","selectionMode":"multi","normalizationMode":"ALLOWED_SETTINGS_INTERSECTION","displayOrder":100,"options":[
-      {"value":"BRONZE","label":"銅（設定2以上）","allowedSettings":["SET_2","SET_4","SET_5","SET_6"],"sourceEvidenceIds":["RE_TROPHY_BRONZE"]},
-      {"value":"GOLD","label":"金（設定4以上）","allowedSettings":["SET_4","SET_5","SET_6"],"sourceEvidenceIds":["RE_TROPHY_GOLD"]},
-      {"value":"KEROT","label":"ケロット柄（設定5以上）","allowedSettings":["SET_5","SET_6"],"sourceEvidenceIds":["RE_TROPHY_KEROT"]},
-      {"value":"RAINBOW","label":"虹（設定6）","allowedSettings":["SET_6"],"sourceEvidenceIds":["RE_TROPHY_RAINBOW"]}
-    ]}
+    {"groupId":"TENKA_END_LAMP","label":"エンディング中サイドランプ","category":"END_EVENT","selectionMode":"multi","normalizationMode":"ALLOWED_SETTINGS_INTERSECTION","displayOrder":90,"options":[{"value":"WEAK_RED_2PLUS","label":"弱レア役→赤（設定2以上）","allowedSettings":["SET_2","SET_4","SET_5","SET_6"],"sourceEvidenceIds":["RE_END_LAMP_WEAK_RED_2PLUS"]},{"value":"WEAK_PURPLE_6","label":"弱レア役→紫（設定6）","allowedSettings":["SET_6"],"sourceEvidenceIds":["RE_END_LAMP_WEAK_PURPLE_6"]},{"value":"CHANCE_PURPLE_4PLUS","label":"チャンス目→紫（設定4以上）","allowedSettings":["SET_4","SET_5","SET_6"],"sourceEvidenceIds":["RE_END_LAMP_CHANCE_PURPLE_4PLUS"]}]},
+    {"groupId":"TENKAFUBU_TROPHY","label":"ケロットトロフィー","category":"END_EVENT","selectionMode":"multi","normalizationMode":"ALLOWED_SETTINGS_INTERSECTION","displayOrder":100,"options":[{"value":"BRONZE","label":"銅（設定2以上）","allowedSettings":["SET_2","SET_4","SET_5","SET_6"],"sourceEvidenceIds":["RE_TROPHY_BRONZE"]},{"value":"GOLD","label":"金（設定4以上）","allowedSettings":["SET_4","SET_5","SET_6"],"sourceEvidenceIds":["RE_TROPHY_GOLD"]},{"value":"KEROT","label":"ケロット柄（設定5以上）","allowedSettings":["SET_5","SET_6"],"sourceEvidenceIds":["RE_TROPHY_KEROT"]},{"value":"RAINBOW","label":"虹（設定6）","allowedSettings":["SET_6"],"sourceEvidenceIds":["RE_TROPHY_RAINBOW"]}]}
   ]},
-  "rejectedElements":[
-    {"id":"REJ_TENKA_NORMAL_MODE","name":"通常時のモード移行","reason":"モード移行に設定差はありますが内部モードを常時確定観測できず、履歴や当選ゲーム数から推定した状態を分母にすると誤分類と循環推論が生じるため不採用です。"},
-    {"id":"REJ_TENKA_RESET_HIDEYOSHI","name":"有利区間リセット時の秀吉モード移行率","reason":"14.5%～37.5%と大きな設定差がありますが、利用には有利区間リセット契機と移行先モードの双方を確定する必要があります。公開情報では遊技履歴からの確認を推奨していますが、実機での再現性確認前なので数値Featureには採用しません。"},
-    {"id":"REJ_TENKA_AT_END_HINT","name":"AT終了画面の高設定示唆","reason":"高設定示唆であることは公開されていますが設定別出現率が未公表で数値尤度を作れないため不採用です。ケロットトロフィーとエンディングの設定下限パターンはEvidenceとして別採用します。"}
-  ]
+  "rejectedElements":[{"id":"REJ_TENKA_NORMAL_MODE","name":"通常時のモード移行","reason":"モード移行に設定差はありますが内部モードを常時確定観測できず、履歴や当選ゲーム数から推定した状態を分母にすると誤分類と循環推論が生じるため不採用です。"},{"id":"REJ_TENKA_RESET_HIDEYOSHI","name":"有利区間リセット時の秀吉モード移行率","reason":"14.5%～37.5%と大きな設定差がありますが、利用には有利区間リセット契機と移行先モードの双方を確定する必要があります。実機での再現性確認前なので数値Featureには採用しません。"}]
 }
