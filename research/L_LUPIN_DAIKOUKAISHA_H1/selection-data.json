@@ -2,47 +2,32 @@
   "schemaVersion":"selection-data-v1",
   "machineId":"L_LUPIN_DAIKOUKAISHA_H1",
   "machineDataVersion":"0.1.0",
-  "uiCategoryLabels":{"NORMAL":"通常時","AT":"SUPER HERO中","EVIDENCE":"設定確定・否定情報"},
+  "uiCategoryLabels":{"NORMAL":"通常時","SINGLE7_TYPE":"シングル7初当り時の内訳","AT":"SUPER HERO中","EVIDENCE":"設定確定・否定情報"},
   "inputs":[
     {"id":"INP_NORMAL_GAMES","name":"通常ゲーム数","type":"integer","category":"NORMAL","unit":"G","displayOrder":10,"inferenceRole":"INCLUDE_PRIMARY"},
     {"id":"INP_SINGLE7","name":"シングル7初当り","type":"counter","category":"NORMAL","unit":"回","displayOrder":11,"inferenceRole":"INCLUDE_PRIMARY"},
     {"id":"INP_DOUBLE7","name":"ダブル7初当り","type":"counter","category":"NORMAL","unit":"回","displayOrder":12,"inferenceRole":"INCLUDE_PRIMARY"},
     {"id":"INP_NO_INITIAL","name":"初当り非当選G","type":"integer","category":"NORMAL","unit":"G","displayOrder":19,"inferenceRole":"INCLUDE_PRIMARY","inputVisible":false},
-    {"id":"INP_AT_GAMES","name":"SUPER HEROゲーム数","type":"integer","category":"AT","unit":"G","displayOrder":20,"inferenceRole":"INCLUDE_SUPPORT"},
-    {"id":"INP_LUPIN_GAME","name":"ルパンゲーム","type":"counter","category":"AT","unit":"回","displayOrder":21,"inferenceRole":"INCLUDE_SUPPORT","parentInputId":"INP_AT_GAMES"}
+    {"id":"INP_SINGLE7_LUPIN","name":"ルパンボーナス","type":"counter","category":"SINGLE7_TYPE","unit":"回","displayOrder":20,"inferenceRole":"INCLUDE_SUPPORT"},
+    {"id":"INP_SINGLE7_JIGEN","name":"次元ボーナス","type":"counter","category":"SINGLE7_TYPE","unit":"回","displayOrder":21,"inferenceRole":"INCLUDE_SUPPORT"},
+    {"id":"INP_SINGLE7_GOEMON","name":"五ェ門ボーナス","type":"counter","category":"SINGLE7_TYPE","unit":"回","displayOrder":22,"inferenceRole":"INCLUDE_SUPPORT"},
+    {"id":"INP_SINGLE7_FUJIKO","name":"不二子ボーナス","type":"counter","category":"SINGLE7_TYPE","unit":"回","displayOrder":23,"inferenceRole":"INCLUDE_SUPPORT"},
+    {"id":"INP_AT_GAMES","name":"SUPER HEROゲーム数","type":"integer","category":"AT","unit":"G","displayOrder":30,"inferenceRole":"INCLUDE_SUPPORT"},
+    {"id":"INP_LUPIN_GAME","name":"ルパンゲーム","type":"counter","category":"AT","unit":"回","displayOrder":31,"inferenceRole":"INCLUDE_SUPPORT","parentInputId":"INP_AT_GAMES"}
   ],
   "features":[
     {"researchFeatureId":"RF_INITIAL_OUTCOME","featureId":"FEAT_INITIAL_OUTCOME","adoptionCategory":"INCLUDE_PRIMARY","numeratorInputId":"INP_SINGLE7","categoryInputIds":["INP_DOUBLE7","INP_NO_INITIAL"],"inputTransform":"sum_inputs_to_trials","minimumSample":300,"sampleRecommendation":4000,"weight":1,"difficultyParticipation":"INCLUDE","difficultyExposure":{"mode":"per_game","factor":1,"quality":"EXACT","basisId":"NORMAL_GAMES"},"userReason":"通常時初当りはシングル7・ダブル7・非当選の排他的結果として全設定の分布が公開されています。合算初当りを別Featureにせず、非当選Gを通常Gから内部計算して1つのMultinomialで評価します。"},
+    {"researchFeatureId":"RF_SINGLE7_BONUS_TYPE","featureId":"FEAT_SINGLE7_BONUS_TYPE","adoptionCategory":"INCLUDE_SUPPORT","numeratorInputId":"INP_SINGLE7_LUPIN","categoryInputIds":["INP_SINGLE7_JIGEN","INP_SINGLE7_GOEMON","INP_SINGLE7_FUJIKO"],"inputTransform":"sum_inputs_to_trials","minimumSample":1,"sampleRecommendation":20,"weight":1,"difficultyParticipation":"EXCLUDE","userReason":"シングル7初当り時のルパン・次元・五ェ門・不二子の振り分けは全設定の完全分布が公開されています。シングル7が成立した後の条件付き分布として評価するため、通常時初当りFeatureと同時採用しても同じ情報を二重評価しません。消化中に不二子ボーナスへ昇格した場合は対象外とし、初当り時点の種類だけを記録します。"},
     {"researchFeatureId":"RF_STRONG_CHERRY_OUTCOME","featureId":"FEAT_STRONG_CHERRY_OUTCOME_EXCLUDED","adoptionCategory":"EXCLUDE","userFacingReason":"強チェリー成立時のシングル7・ダブル7直撃には設定差がありますが、いずれも採用する初当り内訳の部分集合です。同じ初当りを契機別でも評価すると二重評価になるため、現行モデルでは不採用です。"},
     {"researchFeatureId":"RF_CZ_RATE_REFERENCE","featureId":"FEAT_CZ_RATE_EXCLUDED","adoptionCategory":"EXCLUDE","userFacingReason":"ICPOチャレンジ出現率と成功率には設定差がありますが、CZ成功が初当りへつながる同一生成経路の一部です。採用する初当り内訳と独立Featureとして乗算するとCZ経由の好挙動を重複評価しやすいため不採用です。"},
     {"researchFeatureId":"RF_LUPIN_GAME","featureId":"FEAT_LUPIN_GAME","adoptionCategory":"INCLUDE_SUPPORT","numeratorInputId":"INP_LUPIN_GAME","denominatorInputId":"INP_AT_GAMES","minimumSample":100,"sampleRecommendation":1500,"weight":1,"difficultyParticipation":"EXCLUDE","userReason":"AT中ルパンゲーム突入率は全設定の確率が公開され、通常時初当りとは別のAT中試行区間です。抽選対象のSUPER HEROゲーム数を正確に観測できる場合に独立した補助Featureとして利用できるため採用します。"}
   ],
   "evidenceUi":{"groups":[
-    {"groupId":"LUPIN_AT_END_STAMP","label":"AT終了画面スタンプ","selectionMode":"multi","normalizationMode":"ALLOWED_SETTINGS_INTERSECTION","displayOrder":100,"options":[
-      {"value":"KA","label":"可（設定2以上）","allowedSettings":["SET_2","SET_3","SET_4","SET_5","SET_6"],"excludedSettings":["SET_1"],"sourceEvidenceIds":["RE_STAMP_2PLUS"]},
-      {"value":"KICHI","label":"吉（設定3以上）","allowedSettings":["SET_3","SET_4","SET_5","SET_6"],"excludedSettings":["SET_1","SET_2"],"sourceEvidenceIds":["RE_STAMP_3PLUS"]},
-      {"value":"RYO","label":"良（設定4以上）","allowedSettings":["SET_4","SET_5","SET_6"],"excludedSettings":["SET_1","SET_2","SET_3"],"sourceEvidenceIds":["RE_STAMP_4PLUS"]},
-      {"value":"YU","label":"優（設定5以上）","allowedSettings":["SET_5","SET_6"],"excludedSettings":["SET_1","SET_2","SET_3","SET_4"],"sourceEvidenceIds":["RE_STAMP_5PLUS"]},
-      {"value":"KYOKU","label":"極（設定6）","allowedSettings":["SET_6"],"excludedSettings":["SET_1","SET_2","SET_3","SET_4","SET_5"],"sourceEvidenceIds":["RE_STAMP_6"]}
-    ]},
-    {"groupId":"LUPIN_TV_STAMP","label":"ルパンTVスタンプ","selectionMode":"multi","normalizationMode":"ALLOWED_SETTINGS_INTERSECTION","displayOrder":110,"options":[
-      {"value":"KA","label":"可（設定2以上）","allowedSettings":["SET_2","SET_3","SET_4","SET_5","SET_6"],"excludedSettings":["SET_1"],"sourceEvidenceIds":["RE_STAMP_2PLUS"]},
-      {"value":"KICHI","label":"吉（設定3以上）","allowedSettings":["SET_3","SET_4","SET_5","SET_6"],"excludedSettings":["SET_1","SET_2"],"sourceEvidenceIds":["RE_STAMP_3PLUS"]},
-      {"value":"RYO","label":"良（設定4以上）","allowedSettings":["SET_4","SET_5","SET_6"],"excludedSettings":["SET_1","SET_2","SET_3"],"sourceEvidenceIds":["RE_STAMP_4PLUS"]},
-      {"value":"YU","label":"優（設定5以上）","allowedSettings":["SET_5","SET_6"],"excludedSettings":["SET_1","SET_2","SET_3","SET_4"],"sourceEvidenceIds":["RE_STAMP_5PLUS"]},
-      {"value":"KYOKU","label":"極（設定6）","allowedSettings":["SET_6"],"excludedSettings":["SET_1","SET_2","SET_3","SET_4","SET_5"],"sourceEvidenceIds":["RE_STAMP_6"]}
-    ]},
-    {"groupId":"LUPIN_HARURUNA","label":"ハルルナPUSH","selectionMode":"multi","normalizationMode":"ALLOWED_SETTINGS_INTERSECTION","displayOrder":120,"options":[
-      {"value":"4PLUS","label":"出現（設定4以上）","allowedSettings":["SET_4","SET_5","SET_6"],"excludedSettings":["SET_1","SET_2","SET_3"],"sourceEvidenceIds":["RE_HARURUNA_4PLUS"]}
-    ]},
-    {"groupId":"LUPIN_BONUS_VOICE","label":"シングルボーナス終了時PUSHボイス","selectionMode":"multi","normalizationMode":"ALLOWED_SETTINGS_INTERSECTION","displayOrder":130,"options":[
-      {"value":"RED_4PLUS","label":"赤文字ボイス（設定4以上）","allowedSettings":["SET_4","SET_5","SET_6"],"excludedSettings":["SET_1","SET_2","SET_3"],"sourceEvidenceIds":["RE_BONUS_VOICE_4PLUS"]},
-      {"value":"PURPLE_6","label":"紫文字ボイス（設定6）","allowedSettings":["SET_6"],"excludedSettings":["SET_1","SET_2","SET_3","SET_4","SET_5"],"sourceEvidenceIds":["RE_BONUS_VOICE_6"]}
-    ]},
-    {"groupId":"LUPIN_ROUND","label":"SUPER HEROセット開始画面","selectionMode":"multi","normalizationMode":"ALLOWED_SETTINGS_INTERSECTION","displayOrder":140,"options":[
-      {"value":"ZENIGATA_5PLUS","label":"初代銭形（設定5以上）","allowedSettings":["SET_5","SET_6"],"excludedSettings":["SET_1","SET_2","SET_3","SET_4"],"sourceEvidenceIds":["RE_ROUND_5PLUS"]},
-      {"value":"FUJIKO_6","label":"不二子2（設定6）","allowedSettings":["SET_6"],"excludedSettings":["SET_1","SET_2","SET_3","SET_4","SET_5"],"sourceEvidenceIds":["RE_ROUND_6"]}
-    ]}
+    {"groupId":"LUPIN_AT_END_STAMP","label":"AT終了画面スタンプ","selectionMode":"multi","normalizationMode":"ALLOWED_SETTINGS_INTERSECTION","displayOrder":100,"options":[{"value":"KA","label":"可（設定2以上）","allowedSettings":["SET_2","SET_3","SET_4","SET_5","SET_6"],"excludedSettings":["SET_1"],"sourceEvidenceIds":["RE_STAMP_2PLUS"]},{"value":"KICHI","label":"吉（設定3以上）","allowedSettings":["SET_3","SET_4","SET_5","SET_6"],"excludedSettings":["SET_1","SET_2"],"sourceEvidenceIds":["RE_STAMP_3PLUS"]},{"value":"RYO","label":"良（設定4以上）","allowedSettings":["SET_4","SET_5","SET_6"],"excludedSettings":["SET_1","SET_2","SET_3"],"sourceEvidenceIds":["RE_STAMP_4PLUS"]},{"value":"YU","label":"優（設定5以上）","allowedSettings":["SET_5","SET_6"],"excludedSettings":["SET_1","SET_2","SET_3","SET_4"],"sourceEvidenceIds":["RE_STAMP_5PLUS"]},{"value":"KYOKU","label":"極（設定6）","allowedSettings":["SET_6"],"excludedSettings":["SET_1","SET_2","SET_3","SET_4","SET_5"],"sourceEvidenceIds":["RE_STAMP_6"]}]},
+    {"groupId":"LUPIN_TV_STAMP","label":"ルパンTVスタンプ","selectionMode":"multi","normalizationMode":"ALLOWED_SETTINGS_INTERSECTION","displayOrder":110,"options":[{"value":"KA","label":"可（設定2以上）","allowedSettings":["SET_2","SET_3","SET_4","SET_5","SET_6"],"excludedSettings":["SET_1"],"sourceEvidenceIds":["RE_STAMP_2PLUS"]},{"value":"KICHI","label":"吉（設定3以上）","allowedSettings":["SET_3","SET_4","SET_5","SET_6"],"excludedSettings":["SET_1","SET_2"],"sourceEvidenceIds":["RE_STAMP_3PLUS"]},{"value":"RYO","label":"良（設定4以上）","allowedSettings":["SET_4","SET_5","SET_6"],"excludedSettings":["SET_1","SET_2","SET_3"],"sourceEvidenceIds":["RE_STAMP_4PLUS"]},{"value":"YU","label":"優（設定5以上）","allowedSettings":["SET_5","SET_6"],"excludedSettings":["SET_1","SET_2","SET_3","SET_4"],"sourceEvidenceIds":["RE_STAMP_5PLUS"]},{"value":"KYOKU","label":"極（設定6）","allowedSettings":["SET_6"],"excludedSettings":["SET_1","SET_2","SET_3","SET_4","SET_5"],"sourceEvidenceIds":["RE_STAMP_6"]}]},
+    {"groupId":"LUPIN_HARURUNA","label":"ハルルナPUSH","selectionMode":"multi","normalizationMode":"ALLOWED_SETTINGS_INTERSECTION","displayOrder":120,"options":[{"value":"4PLUS","label":"出現（設定4以上）","allowedSettings":["SET_4","SET_5","SET_6"],"excludedSettings":["SET_1","SET_2","SET_3"],"sourceEvidenceIds":["RE_HARURUNA_4PLUS"]}]},
+    {"groupId":"LUPIN_BONUS_VOICE","label":"シングルボーナス終了時PUSHボイス","selectionMode":"multi","normalizationMode":"ALLOWED_SETTINGS_INTERSECTION","displayOrder":130,"options":[{"value":"RED_4PLUS","label":"赤文字ボイス（設定4以上）","allowedSettings":["SET_4","SET_5","SET_6"],"excludedSettings":["SET_1","SET_2","SET_3"],"sourceEvidenceIds":["RE_BONUS_VOICE_4PLUS"]},{"value":"PURPLE_6","label":"紫文字ボイス（設定6）","allowedSettings":["SET_6"],"excludedSettings":["SET_1","SET_2","SET_3","SET_4","SET_5"],"sourceEvidenceIds":["RE_BONUS_VOICE_6"]}]},
+    {"groupId":"LUPIN_ROUND","label":"SUPER HEROセット開始画面","selectionMode":"multi","normalizationMode":"ALLOWED_SETTINGS_INTERSECTION","displayOrder":140,"options":[{"value":"ZENIGATA_5PLUS","label":"初代銭形（設定5以上）","allowedSettings":["SET_5","SET_6"],"excludedSettings":["SET_1","SET_2","SET_3","SET_4"],"sourceEvidenceIds":["RE_ROUND_5PLUS"]},{"value":"FUJIKO_6","label":"不二子2（設定6）","allowedSettings":["SET_6"],"excludedSettings":["SET_1","SET_2","SET_3","SET_4","SET_5"],"sourceEvidenceIds":["RE_ROUND_6"]}]}
   ]},
   "rejectedElements":[
     {"id":"evidence_and_reference","name":"ボーナス終了時PUSHボイスの白・青・緑パターン","reason":"赤文字の設定4以上と紫文字の設定6はEvidenceとして採用しますが、白・青・緑の示唆は設定別の完全な出現確率が公開されておらず数値尤度に変換できないため推測計算には採用しません。"},
