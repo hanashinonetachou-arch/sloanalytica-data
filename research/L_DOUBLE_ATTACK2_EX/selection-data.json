@@ -1,0 +1,34 @@
+{
+  "schemaVersion":"selection-data-v1",
+  "machineId":"L_DOUBLE_ATTACK2_EX",
+  "machineDataVersion":"0.1.0",
+  "uiCategoryLabels":{"NORMAL":"通常時","EVIDENCE":"設定確定・否定情報"},
+  "inputs":[
+    {"id":"INP_NORMAL_GAMES","name":"通常ゲーム数","type":"integer","category":"NORMAL","unit":"G","displayOrder":10,"inferenceRole":"INCLUDE_PRIMARY"},
+    {"id":"INP_AT_INITIAL","name":"AT初当り","type":"counter","category":"NORMAL","unit":"回","displayOrder":11,"inferenceRole":"INCLUDE_PRIMARY","parentInputId":"INP_NORMAL_GAMES"}
+  ],
+  "features":[
+    {"researchFeatureId":"RF_AT_INITIAL","featureId":"FEAT_AT_INITIAL","adoptionCategory":"INCLUDE_PRIMARY","numeratorInputId":"INP_AT_INITIAL","denominatorInputId":"INP_NORMAL_GAMES","minimumSample":300,"sampleRecommendation":4000,"weight":1,"difficultyParticipation":"INCLUDE","difficultyExposure":{"mode":"per_game","factor":1,"quality":"EXACT","basisId":"NORMAL_GAMES"},"userReason":"AT初当りは設定1約1/259.9から設定6約1/189.5まで全設定の確率が公開され、通常ゲーム数を分母として直接観測できるため主軸に採用します。"},
+    {"researchFeatureId":"RF_CZ_LOW","featureId":"FEAT_CZ_LOW_EXCLUDED","adoptionCategory":"EXCLUDE","userFacingReason":"CHANCE ZONE SEVEN出現率には設定差がありますが、CZ成功がAT初当りへつながる同一生成経路の一部です。AT初当りと独立に評価するとCZ由来の好挙動を重複評価しやすいため現行モデルでは不採用です。"},
+    {"researchFeatureId":"RF_CZ_HIGH","featureId":"FEAT_CZ_HIGH_EXCLUDED","adoptionCategory":"EXCLUDE","userFacingReason":"BIGPOT CHANCE SEVEN出現率には設定差がありますが、設定1でも約1/1.35万と低頻度で、CZ・AT初当りと同じ通常時の当選経路に属します。同時採用による重複評価を避けるため不採用です。"},
+    {"researchFeatureId":"RF_CHANCE_TO_CZ_NORMAL","featureId":"FEAT_CHANCE_TO_CZ_NORMAL_EXCLUDED","adoptionCategory":"EXCLUDE","userFacingReason":"通常滞在時のチャンス目からCZ当選には設定差がありますが、抽選時に内部状態が通常だったことを確定観測できず、正しい条件付き分母を作れないため不採用です。"},
+    {"researchFeatureId":"RF_CHANCE_TO_CZ_HIGH","featureId":"FEAT_CHANCE_TO_CZ_HIGH_EXCLUDED","adoptionCategory":"EXCLUDE","userFacingReason":"高確滞在時のチャンス目からCZ当選には設定差がありますが、高確という内部状態を毎回確定観測できず、通常・高確・超高確の誤分類を避けられないため不採用です。"},
+    {"researchFeatureId":"RF_SYMBOL_THRESHOLD","featureId":"FEAT_SYMBOL_THRESHOLD_EXCLUDED","adoptionCategory":"EXCLUDE","userFacingReason":"モード別のシンボル規定回数は解析されていますが、各モード内の振り分け自体は全設定共通で、設定差は内部モード移行側にあります。内部モードを確定できないため単独の設定判別Featureとしては不採用です。"},
+    {"researchFeatureId":"RF_MODE_TRANSITION","featureId":"FEAT_MODE_TRANSITION_EXCLUDED","adoptionCategory":"EXCLUDE","userFacingReason":"設定変更時・AT終了後のモード移行には設定差がありますが、移行先が内部モードで直接観測しづらく、全設定の完全な数値分布もResearchへ収録できていないため不採用です。"}
+  ],
+  "evidenceUi":{"groups":[
+    {"groupId":"DA2_COIN","label":"AT終了画面 コインくん","selectionMode":"multi","normalizationMode":"ALLOWED_SETTINGS_INTERSECTION","displayOrder":100,"options":[
+      {"value":"BRONZE","label":"ブロンズ（設定2以上）","allowedSettings":["SET_2","SET_3","SET_4","SET_5","SET_6"],"excludedSettings":["SET_1"],"sourceEvidenceIds":["RE_COIN_2PLUS"]},
+      {"value":"SILVER","label":"シルバー（設定3以上）","allowedSettings":["SET_3","SET_4","SET_5","SET_6"],"excludedSettings":["SET_1","SET_2"],"sourceEvidenceIds":["RE_COIN_3PLUS"]},
+      {"value":"GOLD","label":"ゴールド（設定4以上）","allowedSettings":["SET_4","SET_5","SET_6"],"excludedSettings":["SET_1","SET_2","SET_3"],"sourceEvidenceIds":["RE_COIN_4PLUS"]},
+      {"value":"FEATHER","label":"羽柄（設定5以上）","allowedSettings":["SET_5","SET_6"],"excludedSettings":["SET_1","SET_2","SET_3","SET_4"],"sourceEvidenceIds":["RE_COIN_5PLUS"]},
+      {"value":"RAINBOW","label":"レインボー（設定6）","allowedSettings":["SET_6"],"excludedSettings":["SET_1","SET_2","SET_3","SET_4","SET_5"],"sourceEvidenceIds":["RE_COIN_6"]}
+    ]},
+    {"groupId":"DA2_ENDING","label":"エンディング中ボイス・エフェクト","selectionMode":"multi","normalizationMode":"ALLOWED_SETTINGS_INTERSECTION","displayOrder":110,"options":[
+      {"value":"4PLUS","label":"赤／このビッグチャンスをものにせよ！（設定4以上）","allowedSettings":["SET_4","SET_5","SET_6"],"excludedSettings":["SET_1","SET_2","SET_3"],"sourceEvidenceIds":["RE_ED_4PLUS"]},
+      {"value":"5PLUS","label":"紫／炎上確定！！（設定5以上）","allowedSettings":["SET_5","SET_6"],"excludedSettings":["SET_1","SET_2","SET_3","SET_4"],"sourceEvidenceIds":["RE_ED_5PLUS"]},
+      {"value":"6","label":"虹／コーングラーチュレーション！！！（設定6）","allowedSettings":["SET_6"],"excludedSettings":["SET_1","SET_2","SET_3","SET_4","SET_5"],"sourceEvidenceIds":["RE_ED_6"]}
+    ]}
+  ]},
+  "rejectedElements":[]
+}
