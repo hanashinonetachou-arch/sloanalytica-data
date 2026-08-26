@@ -1,0 +1,81 @@
+{
+  "schemaVersion": "selection-data-v1",
+  "machineId": "S_OVERLORD_II_SX",
+  "machineDataVersion": "0.1.0",
+  "uiCategoryLabels": {
+    "NORMAL": "通常時",
+    "TA": "タイムアクセラレータ",
+    "EVIDENCE": "設定確定・否定情報"
+  },
+  "inputs": [
+    {"id":"INP_NORMAL_GAMES","name":"通常ゲーム数","type":"integer","category":"NORMAL","unit":"G","displayOrder":10,"inferenceRole":"INCLUDE_PRIMARY"},
+    {"id":"INP_AT_INITIAL","name":"AT初当り","type":"counter","category":"NORMAL","unit":"回","displayOrder":11,"inferenceRole":"INCLUDE_PRIMARY","parentInputId":"INP_NORMAL_GAMES"},
+    {"id":"INP_EX_BELL","name":"EXベル","type":"counter","category":"NORMAL","unit":"回","displayOrder":12,"inferenceRole":"INCLUDE_SUPPORT","parentInputId":"INP_NORMAL_GAMES"},
+    {"id":"INP_TA_THRESHOLD_3","name":"3回選択","type":"counter","category":"TA","unit":"回","displayOrder":20,"inferenceRole":"INCLUDE_SUPPORT"},
+    {"id":"INP_TA_THRESHOLD_6","name":"6回選択","type":"counter","category":"TA","unit":"回","displayOrder":21,"inferenceRole":"INCLUDE_SUPPORT"},
+    {"id":"INP_TA_THRESHOLD_10","name":"10回選択","type":"counter","category":"TA","unit":"回","displayOrder":22,"inferenceRole":"INCLUDE_SUPPORT"}
+  ],
+  "features": [
+    {
+      "researchFeatureId":"RF_AT_INITIAL","featureId":"FEAT_AT_INITIAL","adoptionCategory":"INCLUDE_PRIMARY",
+      "numeratorInputId":"INP_AT_INITIAL","denominatorInputId":"INP_NORMAL_GAMES","minimumSample":300,"sampleRecommendation":4000,"weight":1,
+      "difficultyParticipation":"INCLUDE","difficultyExposure":{"mode":"per_game","factor":1,"quality":"EXACT","basisId":"NORMAL_GAMES"},
+      "userReason":"AT初当りは設定別確率が全設定で公開され、AT抽選対象の通常ゲーム数を分母として直接観測できるため主軸に採用します。"
+    },
+    {
+      "researchFeatureId":"RF_CZ_INITIAL","featureId":"FEAT_CZ_INITIAL_EXCLUDED","adoptionCategory":"EXCLUDE",
+      "userFacingReason":"PKチャンス出現率には設定差がありますが、PKチャンス成功はAT初当りへつながる同一生成経路の一部です。AT初当りと独立Featureとして同時評価するとCZ由来の好挙動を重複評価しやすいため、現行モデルではAT初当りを優先して不採用です。"
+    },
+    {
+      "researchFeatureId":"RF_WEAK_RARE_COMBINED","featureId":"FEAT_WEAK_RARE_COMBINED_EXCLUDED","adoptionCategory":"EXCLUDE",
+      "userFacingReason":"弱レア役3役合算には設定差がありますが、採用するEXベルと同じ通常ゲームを分母にした排他的な役構成です。現行の独立Binomialとして両方を同時採用すると同一試行を独立とみなして情報量を過大評価するため、より頻度と判別情報量を確保しやすいEXベルを優先します。"
+    },
+    {
+      "researchFeatureId":"RF_EX_BELL_COMBINED","featureId":"FEAT_EX_BELL_COMBINED","adoptionCategory":"INCLUDE_SUPPORT",
+      "numeratorInputId":"INP_EX_BELL","denominatorInputId":"INP_NORMAL_GAMES","minimumSample":300,"sampleRecommendation":4000,"weight":1,
+      "difficultyParticipation":"INCLUDE","difficultyExposure":{"mode":"per_game","factor":1,"quality":"EXACT","basisId":"NORMAL_GAMES"},
+      "userReason":"EXベルは約1/8.1～1/7.5と高頻度で全設定の確率が公開され、通常ゲーム数を分母として観測可能です。弱レア役との同一試行重複を避け、通常時小役の補助Featureとしてこちらだけを採用します。"
+    },
+    {
+      "researchFeatureId":"RF_TA_WEAK_RARE_NORMAL","featureId":"FEAT_TA_WEAK_RARE_NORMAL_EXCLUDED","adoptionCategory":"EXCLUDE",
+      "userFacingReason":"弱レア役からのタイムアクセラレータ当選には設定差がありますが、抽選時の内部状態が通常だったことを確定観測できず、全設定の完全な確率表もResearchへ収録できていないため正しい条件付き分母を作れず不採用です。"
+    },
+    {
+      "researchFeatureId":"RF_TA_THRESHOLD","featureId":"FEAT_TA_THRESHOLD","adoptionCategory":"INCLUDE_SUPPORT",
+      "categoryInputIds":["INP_TA_THRESHOLD_3","INP_TA_THRESHOLD_6","INP_TA_THRESHOLD_10"],"minimumSample":1,"sampleRecommendation":20,"weight":1,
+      "difficultyParticipation":"EXCLUDE",
+      "userReason":"タイムアクセラレータの規定3回・6回・10回は全設定の排他的な振り分けが公開され、周期ごとの選択値を判別できた場合にMultinomialとして利用できるため補助Featureに採用します。公開丸めによる微小な合計誤差は計算用分布で比例正規化します。"
+    },
+    {
+      "researchFeatureId":"RF_PK_WEAK_RARE_NORMAL","featureId":"FEAT_PK_WEAK_RARE_NORMAL_EXCLUDED","adoptionCategory":"EXCLUDE",
+      "userFacingReason":"弱レア役からのPKチャンス当選には設定差がありますが、抽選時の内部状態を確定できず、設定別の完全な確率表もResearchへ収録できていません。さらにCZ初当り・AT初当りと生成経路が重なるため現行モデルでは不採用です。"
+    },
+    {
+      "researchFeatureId":"RF_AT_DIRECT_WEAK","featureId":"FEAT_AT_DIRECT_WEAK_EXCLUDED","adoptionCategory":"EXCLUDE",
+      "userFacingReason":"弱レア役からのAT直撃には強い設定差がありますが、AT直撃は採用するAT初当りの部分集合です。同じATを初当りと直撃の両方で評価すると二重評価になるため、排他的な初当り契機モデルを構築できるまでは不採用です。"
+    }
+  ],
+  "evidenceUi": {"groups":[
+    {"groupId":"OVERLORD_SET_START","label":"ATセット開始画面","selectionMode":"multi","normalizationMode":"ALLOWED_SETTINGS_INTERSECTION","displayOrder":100,"options":[
+      {"value":"246","label":"蒼薔薇集合（偶数設定）","allowedSettings":["SET_2","SET_4","SET_6"],"excludedSettings":["SET_1","SET_3","SET_5"],"sourceEvidenceIds":["RE_SET_START_246"]},
+      {"value":"2PLUS","label":"ハムスケ（設定2以上）","allowedSettings":["SET_2","SET_3","SET_4","SET_5","SET_6"],"excludedSettings":["SET_1"],"sourceEvidenceIds":["RE_SET_START_2PLUS"]},
+      {"value":"4PLUS","label":"モモン（設定4以上）","allowedSettings":["SET_4","SET_5","SET_6"],"excludedSettings":["SET_1","SET_2","SET_3"],"sourceEvidenceIds":["RE_SET_START_4PLUS"]},
+      {"value":"6","label":"アインズ（設定6）","allowedSettings":["SET_6"],"excludedSettings":["SET_1","SET_2","SET_3","SET_4","SET_5"],"sourceEvidenceIds":["RE_SET_START_6"]}
+    ]},
+    {"groupId":"OVERLORD_PAYOUT","label":"獲得枚数表示","selectionMode":"multi","normalizationMode":"ALLOWED_SETTINGS_INTERSECTION","displayOrder":110,"options":[
+      {"value":"222","label":"222枚OVER（設定2以上）","allowedSettings":["SET_2","SET_3","SET_4","SET_5","SET_6"],"excludedSettings":["SET_1"],"sourceEvidenceIds":["RE_PAYOUT_222"]},
+      {"value":"456","label":"456枚OVER（設定4以上）","allowedSettings":["SET_4","SET_5","SET_6"],"excludedSettings":["SET_1","SET_2","SET_3"],"sourceEvidenceIds":["RE_PAYOUT_456"]},
+      {"value":"666","label":"666枚OVER（設定6）","allowedSettings":["SET_6"],"excludedSettings":["SET_1","SET_2","SET_3","SET_4","SET_5"],"sourceEvidenceIds":["RE_PAYOUT_666"]}
+    ]},
+    {"groupId":"OVERLORD_ENDING","label":"エンディング中テロップ","selectionMode":"multi","normalizationMode":"ALLOWED_SETTINGS_INTERSECTION","displayOrder":120,"options":[
+      {"value":"2PLUS","label":"緑テロップ①（設定2以上）","allowedSettings":["SET_2","SET_3","SET_4","SET_5","SET_6"],"excludedSettings":["SET_1"],"sourceEvidenceIds":["RE_ENDING_2PLUS"]},
+      {"value":"3PLUS","label":"緑テロップ②（設定3以上）","allowedSettings":["SET_3","SET_4","SET_5","SET_6"],"excludedSettings":["SET_1","SET_2"],"sourceEvidenceIds":["RE_ENDING_3PLUS"]},
+      {"value":"4PLUS","label":"赤テロップ①（設定4以上）","allowedSettings":["SET_4","SET_5","SET_6"],"excludedSettings":["SET_1","SET_2","SET_3"],"sourceEvidenceIds":["RE_ENDING_4PLUS"]},
+      {"value":"5PLUS","label":"赤テロップ②（設定5以上）","allowedSettings":["SET_5","SET_6"],"excludedSettings":["SET_1","SET_2","SET_3","SET_4"],"sourceEvidenceIds":["RE_ENDING_5PLUS"]},
+      {"value":"6","label":"金テロップ（設定6）","allowedSettings":["SET_6"],"excludedSettings":["SET_1","SET_2","SET_3","SET_4","SET_5"],"sourceEvidenceIds":["RE_ENDING_6"]}
+    ]}
+  ]},
+  "rejectedElements":[
+    {"id":"reference","name":"CZ/AT終了時のアイキャッチ","reason":"設定示唆として公開されていますが、全設定の完全な出現振り分けが公開されておらず、確定・否定条件にも該当しないため数値FeatureやEvidenceには採用しません。"}
+  ]
+}
