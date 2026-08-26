@@ -2,7 +2,8 @@ const trim = value => typeof value === 'string' ? value.trim() : '';
 
 const GENERIC_SELECTED = /^(採用|主Featureとして採用|補助Featureとして採用|Fallbackとして採用|設定推測に使用|設定差があるため採用)[。.]?$/;
 const GENERIC_REJECTED = /^(低頻度|設定差が小さい|必要試行量が多い|参考|不採用|重複)[。.]?$/;
-const CONCRETE_BASIS = /(分母|観測|判別|設定差|公開|振り分け|独立|重複|二重評価|必要試行|試行量|確率|構成|情報量|確定|否定|示唆|部分集合|低頻度|高頻度|全設定|サンプル|母数|排他|条件|状態|経路|Fallback|抑制|内部|入力負荷|手動カウント)/;
+const CONCRETE_BASIS = /(分母|観測|判別|設定差|公開|振り分け|独立|重複|二重評価|必要試行|試行量|確率|構成|情報量|確定|否定|示唆|部分集合|低頻度|高頻度|全設定|サンプル|母数|排他|条件|状態|経路|Fallback|抑制|内部)/;
+const PROHIBITED_REJECTION_BASIS = /(入力負荷|手動カウント|入力が大変|入力の手間|数えるのが大変|カウントが大変|操作が大変)/;
 
 function collectEvidenceRefs(selection) {
   const refs = new Set();
@@ -112,6 +113,7 @@ export function assessSelectionQuality(research, selection) {
       const reason = trim(feature.userFacingReason) || trim(feature.userReason) || trim(feature.rejectionReason);
       if (!reason) blockers.push(`rejected ${id}: missing user-facing reason`);
       else {
+        if (PROHIBITED_REJECTION_BASIS.test(reason)) blockers.push(`rejected ${id}: input burden/manual counting must not be used as a rejection basis`);
         if (GENERIC_REJECTED.test(reason) || reason.length < 10) reviews.push(`rejected ${id}: reason is too generic: ${reason}`);
         if (!CONCRETE_BASIS.test(reason)) reviews.push(`rejected ${id}: reason lacks a concrete basis`);
       }
@@ -122,8 +124,11 @@ export function assessSelectionQuality(research, selection) {
     const id = item?.id ?? '(unknown-rejected-element)';
     const reason = trim(item?.reason);
     if (!item?.name || !reason) blockers.push(`rejected element ${id}: missing name/reason`);
-    else if (GENERIC_REJECTED.test(reason) || reason.length < 10 || !CONCRETE_BASIS.test(reason)) {
-      reviews.push(`rejected element ${id}: reason lacks a concrete user-facing basis`);
+    else {
+      if (PROHIBITED_REJECTION_BASIS.test(reason)) blockers.push(`rejected element ${id}: input burden/manual counting must not be used as a rejection basis`);
+      if (GENERIC_REJECTED.test(reason) || reason.length < 10 || !CONCRETE_BASIS.test(reason)) {
+        reviews.push(`rejected element ${id}: reason lacks a concrete user-facing basis`);
+      }
     }
   }
 
