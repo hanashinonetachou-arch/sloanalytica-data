@@ -1,0 +1,149 @@
+{
+  "schemaVersion": "selection-data-v1",
+  "machineId": "S_ANOTHER_GOD_HADES_SL",
+  "machineDataVersion": "0.1.0",
+  "uiCategoryLabels": {
+    "NORMAL": "通常時",
+    "EVIDENCE": "設定確定・否定情報"
+  },
+  "inputs": [
+    {
+      "id": "INP_NORMAL_GAMES",
+      "name": "通常ゲーム数",
+      "type": "integer",
+      "category": "NORMAL",
+      "unit": "G",
+      "displayOrder": 10,
+      "inferenceRole": "INCLUDE_PRIMARY"
+    },
+    {
+      "id": "INP_GG_INITIAL",
+      "name": "GG初当り",
+      "type": "counter",
+      "category": "NORMAL",
+      "unit": "回",
+      "displayOrder": 11,
+      "inferenceRole": "INCLUDE_PRIMARY",
+      "parentInputId": "INP_NORMAL_GAMES"
+    }
+  ],
+  "features": [
+    {
+      "researchFeatureId": "RF_GG_INITIAL",
+      "featureId": "FEAT_GG_INITIAL",
+      "adoptionCategory": "INCLUDE_PRIMARY",
+      "numeratorInputId": "INP_GG_INITIAL",
+      "denominatorInputId": "INP_NORMAL_GAMES",
+      "minimumSample": 300,
+      "sampleRecommendation": 4000,
+      "weight": 1,
+      "difficultyParticipation": "INCLUDE",
+      "difficultyExposure": {
+        "mode": "per_game",
+        "factor": 1,
+        "quality": "EXACT",
+        "basisId": "NORMAL_GAMES"
+      },
+      "userReason": "GG初当りは設定1約1/510.9から設定6約1/224.2まで大きな設定差があり、GG抽選対象の通常ゲーム数を分母として実戦中に直接観測できるため主軸に採用します。"
+    },
+    {
+      "researchFeatureId": "RF_MODE_A_TO_B",
+      "featureId": "FEAT_MODE_A_TO_B_EXCLUDED",
+      "adoptionCategory": "EXCLUDE",
+      "userFacingReason": "通常Aから通常Bへの移行率には大きな設定差がありますが、抽選時に通常Aへ滞在していたことと移行先が通常Bであることを実戦中に確定観測できず、正しい分母・分子を作れないため不採用です。"
+    },
+    {
+      "researchFeatureId": "RF_MODE_A_TO_MEIKAI",
+      "featureId": "FEAT_MODE_A_TO_MEIKAI_EXCLUDED",
+      "adoptionCategory": "EXCLUDE",
+      "userFacingReason": "通常A中のリプレイから冥界への移行率には設定差がありますが、通常A滞在と冥界移行という内部状態を確定観測できず、条件付き確率の分母・分子を正確に作れないため不採用です。"
+    },
+    {
+      "researchFeatureId": "RF_MODE_B_TRANSITION",
+      "featureId": "FEAT_MODE_B_TRANSITION_EXCLUDED",
+      "adoptionCategory": "EXCLUDE",
+      "userFacingReason": "通常Bからのモード移行には設定差がありますが、実戦中に通常B滞在と移行先を確定観測できず、さらに全設定を計算に使える完全な確率分布としてResearchへ収録できていないため不採用です。"
+    },
+    {
+      "researchFeatureId": "RF_HEAVEN_TRANSITION",
+      "featureId": "FEAT_HEAVEN_TRANSITION_EXCLUDED",
+      "adoptionCategory": "EXCLUDE",
+      "userFacingReason": "天国滞在時のモード移行には設定差がありますが、天国滞在と移行先を確定観測できず、全設定の完全な確率分布も公開値から構築できないため不採用です。"
+    },
+    {
+      "researchFeatureId": "RF_HISTORY_JM_HIT",
+      "featureId": "FEAT_HISTORY_JM_HIT_EXCLUDED",
+      "adoptionCategory": "EXCLUDE",
+      "userFacingReason": "小役履歴成立後のGG抽選には設定差がありますが、レア役2連時は履歴抽選に加えて2連目のレア役自身によるGG抽選も行われ、実際のGG当選がどちらの経路か判別できません。公開確率と同じ分子を観測できないため不採用です。"
+    },
+    {
+      "researchFeatureId": "RF_KERBEROS_SPECIAL_END",
+      "featureId": "FEAT_KERBEROS_SPECIAL_END_EXCLUDED",
+      "adoptionCategory": "EXCLUDE",
+      "userFacingReason": "特殊ケルベロス終了画面は出現した時点で設定2以上が確定します。設定2～6では公開出現率が同一で、Evidence適用後の設定判別情報を増やさず、同一画面を数値Featureでも評価すると二重評価になるため数値Featureには採用しません。"
+    },
+    {
+      "researchFeatureId": "RF_PERSEPHONE_SPECIAL_END",
+      "featureId": "FEAT_PERSEPHONE_SPECIAL_END_EXCLUDED",
+      "adoptionCategory": "EXCLUDE",
+      "userFacingReason": "特殊ペルセポネ終了画面は出現した時点で設定4以上が確定します。設定4～6では公開出現率が同一で、Evidence適用後の設定判別情報を増やさず、同一画面の二重評価を避けるため数値Featureには採用しません。"
+    },
+    {
+      "researchFeatureId": "RF_HADES_SPECIAL_END",
+      "featureId": "FEAT_HADES_SPECIAL_END_EXCLUDED",
+      "adoptionCategory": "EXCLUDE",
+      "userFacingReason": "特殊ハーデス終了画面は設定6確定Evidenceそのものです。同じ出現を数値Featureとしても評価すると設定6確定情報を二重評価するため、数値Featureには採用しません。"
+    }
+  ],
+  "evidenceUi": {
+    "groups": [
+      {
+        "groupId": "HADES_JM_END",
+        "label": "JM特殊終了画面",
+        "selectionMode": "multi",
+        "normalizationMode": "ALLOWED_SETTINGS_INTERSECTION",
+        "displayOrder": 100,
+        "options": [
+          {
+            "value": "KERBEROS_2PLUS",
+            "label": "特殊ケルベロス（設定2以上）",
+            "allowedSettings": ["SET_2", "SET_3", "SET_4", "SET_5", "SET_6"],
+            "excludedSettings": ["SET_1"],
+            "sourceEvidenceIds": ["RE_KERBEROS_2PLUS"]
+          },
+          {
+            "value": "PERSEPHONE_4PLUS",
+            "label": "特殊ペルセポネ（設定4以上）",
+            "allowedSettings": ["SET_4", "SET_5", "SET_6"],
+            "excludedSettings": ["SET_1", "SET_2", "SET_3"],
+            "sourceEvidenceIds": ["RE_PERSEPHONE_4PLUS"]
+          },
+          {
+            "value": "HADES_6",
+            "label": "特殊ハーデス（設定6）",
+            "allowedSettings": ["SET_6"],
+            "excludedSettings": ["SET_1", "SET_2", "SET_3", "SET_4", "SET_5"],
+            "sourceEvidenceIds": ["RE_HADES_6"]
+          }
+        ]
+      },
+      {
+        "groupId": "HADES_ANOTHER_LEGEND_START",
+        "label": "アナザーレジェンド開始画面",
+        "selectionMode": "multi",
+        "normalizationMode": "ALLOWED_SETTINGS_INTERSECTION",
+        "displayOrder": 110,
+        "options": [
+          {
+            "value": "BABY_4PLUS",
+            "label": "ベビーステージ（設定4以上）",
+            "allowedSettings": ["SET_4", "SET_5", "SET_6"],
+            "excludedSettings": ["SET_1", "SET_2", "SET_3"],
+            "sourceEvidenceIds": ["RE_ANOTHER_LEGEND_BABY_4PLUS"]
+          }
+        ]
+      }
+    ]
+  },
+  "rejectedElements": []
+}
