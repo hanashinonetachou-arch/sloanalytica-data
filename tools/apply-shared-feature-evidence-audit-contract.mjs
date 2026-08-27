@@ -35,17 +35,17 @@ writeJson(selPath,sel);
 // 2) Builder: preserve the explicit contract in MachinePackage Evidence.
 const builderPath=path.join(ROOT,'tools/build-machine-data.mjs');
 let builder=read(builderPath);
-const oldBuilder='''    evidences.push({id:e.evidenceId,name,displayName:e.displayName??name,inputId:e.inputId,triggerValue:e.triggerValue,\n      confirmedSettings:confirmed,deniedSettings:denied,hasImage:false,\n      type:(denied.length>0 && confirmed.length===0)?\\"SETTING_DENIAL\\":\\"SETTING_CONFIRMATION\\"});'''.replace(/\\"/g,'"');
-const newBuilder='''    evidences.push({id:e.evidenceId,name,displayName:e.displayName??name,inputId:e.inputId,triggerValue:e.triggerValue,\n      confirmedSettings:confirmed,deniedSettings:denied,hasImage:false,\n      ...(Array.isArray(e.sharedFeatureIds)&&e.sharedFeatureIds.length?{sharedFeatureIds:[...e.sharedFeatureIds]}:{}),\n      type:(denied.length>0 && confirmed.length===0)?\\"SETTING_DENIAL\\":\\"SETTING_CONFIRMATION\\"});'''.replace(/\\"/g,'"');
+const oldBuilder=`    evidences.push({id:e.evidenceId,name,displayName:e.displayName??name,inputId:e.inputId,triggerValue:e.triggerValue,\n      confirmedSettings:confirmed,deniedSettings:denied,hasImage:false,\n      type:(denied.length>0 && confirmed.length===0)?"SETTING_DENIAL":"SETTING_CONFIRMATION"});`;
+const newBuilder=`    evidences.push({id:e.evidenceId,name,displayName:e.displayName??name,inputId:e.inputId,triggerValue:e.triggerValue,\n      confirmedSettings:confirmed,deniedSettings:denied,hasImage:false,\n      ...(Array.isArray(e.sharedFeatureIds)&&e.sharedFeatureIds.length?{sharedFeatureIds:[...e.sharedFeatureIds]}:{}),\n      type:(denied.length>0 && confirmed.length===0)?"SETTING_DENIAL":"SETTING_CONFIRMATION"});`;
 if(!builder.includes('sharedFeatureIds:[...e.sharedFeatureIds]')) builder=replaceOnce(builder,oldBuilder,newBuilder,'build-machine-data');
 write(builderPath,builder);
 
 // 3) Phase 9 audit: only an explicitly declared event-input share is safe.
 const auditPath=path.join(ROOT,'tools/audit-feature-dependency-phase9.mjs');
 let audit=read(auditPath);
-const oldAudit='''  for(const e of arr(pkg?.evidence?.evidences)){\n    const ids=featureInputIds.get(e?.inputId)??[];\n    if(ids.length) issues.push({severity:'HIGH_RISK',code:'EVIDENCE_FEATURE_OVERLAP',featureIds:ids,evidenceId:e.id,inputId:e.inputId});\n  }''';
-const newAudit='''  for(const e of arr(pkg?.evidence?.evidences)){\n    const ids=featureInputIds.get(e?.inputId)??[];\n    if(!ids.length) continue;\n    const declared=uniq(arr(e?.sharedFeatureIds));\n    const activeById=new Map(fsActive.map(f=>[f.featureId,f]));\n    const declaredValid=declared.length>0 && ids.every(id=>declared.includes(id)) && declared.every(id=>{\n      const f=activeById.get(id);\n      return f && eventInputs(f).includes(e.inputId);\n    });\n    if(declaredValid) continue;\n    issues.push({\n      severity:'HIGH_RISK',\n      code:declared.length?'INVALID_SHARED_FEATURE_EVIDENCE_CONTRACT':'EVIDENCE_FEATURE_OVERLAP',\n      featureIds:ids,evidenceId:e.id,inputId:e.inputId,sharedFeatureIds:declared\n    });\n  }''';
-if(!audit.includes("INVALID_SHARED_FEATURE_EVIDENCE_CONTRACT")) audit=replaceOnce(audit,oldAudit,newAudit,'phase9 audit');
+const oldAudit=`  for(const e of arr(pkg?.evidence?.evidences)){\n    const ids=featureInputIds.get(e?.inputId)??[];\n    if(ids.length) issues.push({severity:'HIGH_RISK',code:'EVIDENCE_FEATURE_OVERLAP',featureIds:ids,evidenceId:e.id,inputId:e.inputId});\n  }`;
+const newAudit=`  for(const e of arr(pkg?.evidence?.evidences)){\n    const ids=featureInputIds.get(e?.inputId)??[];\n    if(!ids.length) continue;\n    const declared=uniq(arr(e?.sharedFeatureIds));\n    const activeById=new Map(fsActive.map(f=>[f.featureId,f]));\n    const declaredValid=declared.length>0 && ids.every(id=>declared.includes(id)) && declared.every(id=>{\n      const f=activeById.get(id);\n      return f && eventInputs(f).includes(e.inputId);\n    });\n    if(declaredValid) continue;\n    issues.push({\n      severity:'HIGH_RISK',\n      code:declared.length?'INVALID_SHARED_FEATURE_EVIDENCE_CONTRACT':'EVIDENCE_FEATURE_OVERLAP',\n      featureIds:ids,evidenceId:e.id,inputId:e.inputId,sharedFeatureIds:declared\n    });\n  }`;
+if(!audit.includes('INVALID_SHARED_FEATURE_EVIDENCE_CONTRACT')) audit=replaceOnce(audit,oldAudit,newAudit,'phase9 audit');
 write(auditPath,audit);
 
 // 4) Reference fix tool: make reruns preserve the explicit sharing contract.
