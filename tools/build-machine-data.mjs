@@ -284,6 +284,7 @@ export function buildMachineData(research,selection,statistics=null){
     schemaVersion:"2.0.0",machineId:research.machine.machineId,machineDataVersion:selection.machineDataVersion,
     displayName:research.machine.displayName,modelName:research.machine.modelNumber,manufacturer:research.machine.manufacturer,
     settings:research.machine.settings,
+    ...(Array.isArray(research.machine.inferenceSettings)?{inferenceSettings:research.machine.inferenceSettings}:{}),
     packagePolicy:{offlineCapable:true,containsImages:false,containsExecutableCode:false}
   };
   const sections=[];

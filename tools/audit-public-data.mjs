@@ -103,6 +103,12 @@ function validateMachineData(machineData, result, machineId, filePath) {
   const settings = machineData.machine.settings;
   if (!Array.isArray(settings) || settings.length === 0 || settings.some(value => !isNonEmptyString(value))) issue(result, 'error', scope, 'machine.settingsは空でない設定ID配列である必要があります');
   else for (const duplicate of duplicateValues(settings)) issue(result, 'error', scope, `machine.settingsが重複しています: ${duplicate}`);
+  const inferenceSettings = machineData.machine.inferenceSettings ?? settings;
+  if (!Array.isArray(inferenceSettings) || inferenceSettings.length === 0 || inferenceSettings.some(value => !isNonEmptyString(value))) issue(result, 'error', scope, 'machine.inferenceSettingsは空でない設定ID配列である必要があります');
+  else {
+    for (const duplicate of duplicateValues(inferenceSettings)) issue(result, 'error', scope, `machine.inferenceSettingsが重複しています: ${duplicate}`);
+    for (const setting of inferenceSettings) if (!settings.includes(setting)) issue(result, 'error', scope, `machine.inferenceSettingsにmachine.settings未定義の設定があります: ${setting}`);
+  }
   const inputs = machineData.inputs?.inputs;
   if (!Array.isArray(inputs)) { issue(result, 'error', scope, 'inputs.inputsが配列ではありません'); return new Set(); }
   const ids = inputs.map(input => input?.id).filter(isNonEmptyString);
@@ -134,7 +140,7 @@ function validateMachineData(machineData, result, machineId, filePath) {
         }
       }
       const map = feature?.categoryProbabilities ?? feature?.probabilities;
-      validateSettingProbabilityMap(map, Array.isArray(settings) ? settings : [], result, featureScope, feature?.calculationRole !== 'DISPLAY_ONLY');
+      validateSettingProbabilityMap(map, Array.isArray(inferenceSettings) ? inferenceSettings : [], result, featureScope, feature?.calculationRole !== 'DISPLAY_ONLY');
     }
   }
   const evidences = machineData.evidence?.evidences;
