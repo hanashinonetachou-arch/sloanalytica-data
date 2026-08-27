@@ -3,6 +3,7 @@ import path from 'node:path';
 import { spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import { validateSelectionEvidenceCoverage } from './batch-completeness-gates.mjs';
+import { assessSelectionQuality } from './selection-quality-gate.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const ORIGINAL = path.join(ROOT, 'tools', 'batch-selection-pipeline.mjs');
@@ -33,8 +34,10 @@ function precheckIngest(workspace) {
     if (!fs.existsSync(selectionPath) || !fs.existsSync(researchPath)) continue;
     const selection = readJson(selectionPath);
     const research = readJson(researchPath);
-    const result = validateSelectionEvidenceCoverage(selection, research, { required: true });
-    for (const error of result.errors) errors.push(`${id}: ${error}`);
+    const evidenceResult = validateSelectionEvidenceCoverage(selection, research, { required: true });
+    for (const error of evidenceResult.errors) errors.push(`${id}: ${error}`);
+    const quality = assessSelectionQuality(research, selection);
+    for (const blocker of quality.blockers ?? []) errors.push(`${id}: ${blocker}`);
   }
   return errors;
 }
@@ -58,6 +61,10 @@ function enrichBriefs(reportPath) {
         },
       },
     };
+    brief.featureDispositionContract = {
+      requiredForBatchIngest: true,
+      rule: 'Every ResearchData feature must have exactly one explicit SelectionData feature decision. INCLUDE or EXCLUDE is required; silent omission is forbidden.',
+    };
     writeJson(briefPath, brief);
   }
 }
@@ -67,7 +74,7 @@ const ingest = argValue(args, '--ingest');
 if (ingest) {
   const errors = precheckIngest(path.resolve(ROOT, ingest));
   if (errors.length) {
-    for (const error of errors) console.error(`ERROR [batch selection evidence coverage] ${error}`);
+    for (const error of errors) console.error(`ERROR [batch selection completeness] ${error}`);
     process.exit(1);
   }
   process.exit(runOriginal(args));
