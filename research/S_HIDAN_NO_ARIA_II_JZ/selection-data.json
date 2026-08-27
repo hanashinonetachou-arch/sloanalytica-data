@@ -1,7 +1,7 @@
 {
   "schemaVersion": "selection-data-v1",
   "machineId": "S_HIDAN_NO_ARIA_II_JZ",
-  "machineDataVersion": "0.1.1",
+  "machineDataVersion": "0.1.2",
   "inputs": [
     {
       "id": "INP_NORMAL_GAMES",
@@ -26,15 +26,32 @@
       "defaultValue": 0
     },
     {
+      "id": "INP_AT_GAMES",
+      "name": "AT中ゲーム数",
+      "category": "SMALL_ROLE",
+      "type": "integer",
+      "unit": "G",
+      "displayOrder": 19,
+      "inferenceRole": "INCLUDE_PRIMARY",
+      "observationScope": "SELF_PLAY",
+      "defaultValue": 0
+    },
+    {
       "id": "INP_COMMON_BELL_GAMES",
-      "name": "共通ベル観測ゲーム数",
+      "name": "共通ベル観測ゲーム数（自動）",
       "category": "SMALL_ROLE",
       "type": "integer",
       "unit": "G",
       "displayOrder": 20,
       "inferenceRole": "INCLUDE_PRIMARY",
       "observationScope": "SELF_PLAY",
-      "defaultValue": 0
+      "defaultValue": 0,
+      "inputVisible": false,
+      "derivedCalculation": "sum",
+      "derivedFromInputIds": [
+        "INP_NORMAL_GAMES",
+        "INP_AT_GAMES"
+      ]
     },
     {
       "id": "INP_COMMON_BELL_COUNT",
@@ -78,8 +95,8 @@
       "sampleRecommendation": 5000,
       "weight": 1,
       "difficultyParticipation": "EXCLUDE",
-      "difficultyExclusionReason": "通常時とAT中をまたぐ独立の観測ゲーム数を分母とするため、通常ゲーム数ベースのDifficultyへ直接換算しない。",
-      "userReason": "共通ベルは設定差があり、下段15枚ベルを正しく識別できる場合は独立した数値情報として利用できます。"
+      "difficultyExclusionReason": "通常時とAT中を合算した観測ゲーム数を分母とするため、通常ゲーム数ベースのDifficultyへ直接換算しない。",
+      "userReason": "共通ベルは設定差があり、通常時は左第1停止の15枚ベル、AT中はナビなし15枚ベルとして識別できます。分母は通常ゲーム数＋AT中ゲーム数を自動合算します。"
     }
   ],
   "evidence": [],
