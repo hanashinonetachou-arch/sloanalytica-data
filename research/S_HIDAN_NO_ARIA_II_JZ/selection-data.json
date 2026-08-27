@@ -1,0 +1,35 @@
+{
+  "schemaVersion": "selection-data-v1",
+  "machineId": "S_HIDAN_NO_ARIA_II_JZ",
+  "machineDataVersion": "0.1.0",
+  "inputs": [
+    {"id":"INP_NORMAL_GAMES","name":"通常ゲーム数","category":"SELF_PLAY","type":"integer","unit":"G","displayOrder":10,"inferenceRole":"INCLUDE_PRIMARY","observationScope":"SELF_PLAY","defaultValue":0},
+    {"id":"INP_AT_INITIAL_COUNT","name":"AT初当り","category":"SELF_PLAY","type":"counter","unit":"回","displayOrder":11,"inferenceRole":"INCLUDE_PRIMARY","observationScope":"SELF_PLAY","defaultValue":0},
+    {"id":"INP_COMMON_BELL_GAMES","name":"共通ベル観測ゲーム数","category":"SMALL_ROLE","type":"integer","unit":"G","displayOrder":20,"inferenceRole":"INCLUDE_PRIMARY","observationScope":"OBSERVED_PLAY","defaultValue":0},
+    {"id":"INP_COMMON_BELL_COUNT","name":"共通ベル","category":"SMALL_ROLE","type":"counter","unit":"回","displayOrder":21,"inferenceRole":"INCLUDE_PRIMARY","observationScope":"OBSERVED_PLAY","defaultValue":0,"uiQuickAdd":1}
+  ],
+  "features": [
+    {"researchFeatureId":"RF_AT_INITIAL","featureId":"FEAT_AT_INITIAL","adoptionCategory":"INCLUDE_PRIMARY","numeratorInputId":"INP_AT_INITIAL_COUNT","denominatorInputId":"INP_NORMAL_GAMES","minimumSample":1000,"sampleRecommendation":5000,"weight":1,"difficultyParticipation":"INCLUDE","difficultyExposure":{"mode":"per_game","factor":1,"quality":"EXACT","basisId":"SELF_NORMAL_PLAY_GAMES"},"userReason":"通常ゲーム数に対するAT初当りには設定差が大きく、実戦中に継続して観測できます。"},
+    {"researchFeatureId":"RF_COMMON_BELL","featureId":"FEAT_COMMON_BELL","adoptionCategory":"INCLUDE_PRIMARY","numeratorInputId":"INP_COMMON_BELL_COUNT","denominatorInputId":"INP_COMMON_BELL_GAMES","minimumSample":1000,"sampleRecommendation":5000,"weight":1,"difficultyParticipation":"EXCLUDE","difficultyExclusionReason":"通常時とAT中をまたぐ独立の観測ゲーム数を分母とするため、通常ゲーム数ベースのDifficultyへ直接換算しない。","userReason":"共通ベルは設定差があり、下段15枚ベルを正しく識別できる場合は独立した数値情報として利用できます。"}
+  ],
+  "evidence": [],
+  "evidenceUi": {
+    "groups": [
+      {"groupId":"EVID_PREMIUM_AT","label":"プレミアムAT中の示唆","options":[
+        {"value":"REKI_EVEN","label":"レキ『風が狂い始めている』","allowedSettings":["SET_2","SET_4","SET_6"],"excludedSettings":["SET_1","SET_5"],"sourceEvidenceIds":["RE_PREMIUM_EVEN"]},
+        {"value":"KINJI_2PLUS","label":"キンジ『時間だ、お姫様』","allowedSettings":["SET_2","SET_4","SET_5","SET_6"],"excludedSettings":["SET_1"],"sourceEvidenceIds":["RE_PREMIUM_SET2_PLUS_KINJI"]},
+        {"value":"ARIA_2PLUS","label":"アリア『風穴フェスティバル！』","allowedSettings":["SET_2","SET_4","SET_5","SET_6"],"excludedSettings":["SET_1"],"sourceEvidenceIds":["RE_PREMIUM_SET2_PLUS_ARIA"]},
+        {"value":"ARIA_BIGBANG_6","label":"アリア『風穴ビッグバーン！』","allowedSettings":["SET_6"],"excludedSettings":["SET_1","SET_2","SET_4","SET_5"],"sourceEvidenceIds":["RE_PREMIUM_BIGBANG"]},
+        {"value":"RAINBOW_PANEL_6","label":"虹パネル（アリア）","allowedSettings":["SET_6"],"excludedSettings":["SET_1","SET_2","SET_4","SET_5"],"sourceEvidenceIds":["RE_PREMIUM_RAINBOW"]}
+      ]},
+      {"groupId":"EVID_AT_END","label":"AT終了画面","options":[
+        {"value":"ARIA_KINJI_4PLUS","label":"アリア＆キンジ","allowedSettings":["SET_4","SET_5","SET_6"],"excludedSettings":["SET_1","SET_2"],"sourceEvidenceIds":["RE_AT_END_ARIA_KINJI"]},
+        {"value":"HILDA_PRADO_4PLUS","label":"ヒルダ＆プラド","allowedSettings":["SET_4","SET_5","SET_6"],"excludedSettings":["SET_1","SET_2"],"sourceEvidenceIds":["RE_AT_END_HILDA_PRADO"]},
+        {"value":"SHERLOCK_ARIA_6","label":"シャーロック＆アリア","allowedSettings":["SET_6"],"excludedSettings":["SET_1","SET_2","SET_4","SET_5"],"sourceEvidenceIds":["RE_AT_END_SHERLOCK"]}
+      ]}
+    ]
+  },
+  "evidenceReview": {"policyVersion":1,"exclusions":[]},
+  "difficultyAnalysis": {"targetGames":[1500,3000,7000],"simulationsPerSetting":4000,"seed":20260827,"targetGameBasis":{"basisId":"SELF_NORMAL_PLAY_GAMES","label":"ユーザー自身の通常遊技ゲーム数","quality":"EXACT","crossMachineComparable":true,"note":"共通ベルは観測範囲が通常時+AT中のためDifficultyから除外。"},"calibrationAllowedExposureQualities":["EXACT","DERIVED"]},
+  "uiCategoryLabels": {"SELF_PLAY":"通常時","SMALL_ROLE":"小役"}
+}
