@@ -131,19 +131,24 @@ const decisions = {
   }
 };
 
-function inputTypeForFeature(rf){ return rf.candidateModel === 'multinomial' ? 'counter' : 'counter'; }
-function safeId(s){ return String(s).replace(/^RF_/, '').replace(/[^A-Z0-9_]/g,'_'); }
+function safeId(s){ return String(s).replace(/^RF_/, '').replace(/[^A-Z0-9_]/g,'_').replace(/_+/g,'_').replace(/^_|_$/g,''); }
 function ensureInput(inputs, spec){ if(!inputs.some(x=>x.id===spec.id)) inputs.push(spec); }
+function denominatorKey(rf){
+  const trial=String(rf.trialUnit||'');
+  if(trial.includes('通常ゲーム')) return ['NORMAL_GAMES','通常ゲーム数','G'];
+  if(trial.includes('ATゲーム')) return ['AT_GAMES','ATゲーム数','G'];
+  return [`${safeId(rf.researchFeatureId)}_TRIALS`,rf.denominatorDefinition||rf.trialUnit||'試行回数','回'];
+}
 
 function buildSelection(research, cfg){
   const inputs=[]; const features=[]; let order=10;
   const categoryLabels={NUMERIC:'設定推測要素'};
   const denomByKey=new Map();
   const makeDenom=(rf)=>{
-    const key=rf.trialUnit||rf.denominatorDefinition||'試行回数';
+    const [key,name,unit]=denominatorKey(rf);
     if(denomByKey.has(key)) return denomByKey.get(key);
-    const id=`INP_${safeId(key.normalize('NFKC').toUpperCase()).slice(0,45)}_TRIALS`.replace(/_+/g,'_');
-    ensureInput(inputs,{id,name:rf.denominatorDefinition||rf.trialUnit||'試行回数',type:'integer',category:'NUMERIC',unit:(String(rf.trialUnit||'').includes('ゲーム')?'G':'回'),displayOrder:order++,inferenceRole:'INCLUDE_PRIMARY',defaultValue:null,observationScope:'SELF_PLAY'});
+    const id=`INP_${key}`;
+    ensureInput(inputs,{id,name,type:'integer',category:'NUMERIC',unit,displayOrder:order++,inferenceRole:'INCLUDE_PRIMARY',defaultValue:null,observationScope:'SELF_PLAY'});
     denomByKey.set(key,id); return id;
   };
   for(const rf of research.features??[]){
@@ -152,12 +157,12 @@ function buildSelection(research, cfg){
     const [category, reason]=inc;
     if(rf.candidateModel==='binomial'){
       const den=makeDenom(rf), num=`INP_${safeId(rf.researchFeatureId)}_COUNT`;
-      ensureInput(inputs,{id:num,name:rf.name,type:inputTypeForFeature(rf),category:'NUMERIC',unit:'回',displayOrder:order++,inferenceRole:category==='INCLUDE_PRIMARY'?'INCLUDE_PRIMARY':'INCLUDE_SUPPORT',defaultValue:null,parentInputId:den});
+      ensureInput(inputs,{id:num,name:rf.name,type:'counter',category:'NUMERIC',unit:'回',displayOrder:order++,inferenceRole:category==='INCLUDE_PRIMARY'?'INCLUDE_PRIMARY':'INCLUDE_SUPPORT',defaultValue:null,parentInputId:den});
       const perGame=String(rf.trialUnit||'').includes('通常ゲーム');
       features.push({researchFeatureId:rf.researchFeatureId,featureId:`FEAT_${safeId(rf.researchFeatureId)}`,adoptionCategory:category,numeratorInputId:num,denominatorInputId:den,weight:1,difficultyParticipation:perGame?'INCLUDE':'EXCLUDE',...(perGame?{difficultyExposure:{mode:'per_game',factor:1,quality:'EXACT',basisId:'NORMAL_GAMES'}}:{}),userReason:reason});
     } else if(rf.candidateModel==='multinomial'){
       const cats=rf.categories??[];
-      const ids=cats.map((c,i)=>{const id=`INP_${safeId(rf.researchFeatureId)}_${safeId(c)}`;ensureInput(inputs,{id,name:`${rf.name} ${c}`,type:'counter',category:'NUMERIC',unit:'回',displayOrder:order++,inferenceRole:category==='INCLUDE_PRIMARY'?'INCLUDE_PRIMARY':'INCLUDE_SUPPORT',defaultValue:null});return id;});
+      const ids=cats.map((c)=>{const id=`INP_${safeId(rf.researchFeatureId)}_${safeId(c)}`;ensureInput(inputs,{id,name:`${rf.name} ${c}`,type:'counter',category:'NUMERIC',unit:'回',displayOrder:order++,inferenceRole:category==='INCLUDE_PRIMARY'?'INCLUDE_PRIMARY':'INCLUDE_SUPPORT',defaultValue:null});return id;});
       features.push({researchFeatureId:rf.researchFeatureId,featureId:`FEAT_${safeId(rf.researchFeatureId)}`,adoptionCategory:category,numeratorInputId:ids[0],categoryInputIds:ids.slice(1),inputTransform:'sum_inputs_to_trials',weight:1,difficultyParticipation:'EXCLUDE',userReason:reason});
     }
   }
