@@ -34,7 +34,11 @@ for (const ent of fs.readdirSync(path.join(root, 'research'), { withFileTypes: t
       errors.push(`${machineId}: ${id} references unknown evidence group ${contract.sourceEvidenceGroupId}`);
       continue;
     }
-    if (contract.selectionMode !== group.selectionMode) {
+    // selection-data-v1 historically allowed evidence groups without an explicit selectionMode.
+    // Existing UI contracts use multi for those groups, so preserve backward compatibility while
+    // still detecting an explicit incompatible mode when SelectionData provides one.
+    const groupSelectionMode = group.selectionMode ?? 'multi';
+    if (contract.selectionMode !== groupSelectionMode) {
       errors.push(`${machineId}: ${id} selectionMode differs from SelectionData`);
     }
     if (contract.label !== group.label) {
