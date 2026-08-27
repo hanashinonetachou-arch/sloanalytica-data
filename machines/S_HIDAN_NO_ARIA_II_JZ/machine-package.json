@@ -1,0 +1,551 @@
+{
+  "schemaVersion": 1,
+  "machine": {
+    "schemaVersion": "2.0.0",
+    "machineId": "S_HIDAN_NO_ARIA_II_JZ",
+    "machineDataVersion": "0.1.0",
+    "displayName": "パチスロ 緋弾のアリアⅡ",
+    "modelName": "S緋弾のアリアII JZ",
+    "manufacturer": "JFJ",
+    "settings": [
+      "SET_1",
+      "SET_2",
+      "SET_4",
+      "SET_5",
+      "SET_6"
+    ],
+    "packagePolicy": {
+      "offlineCapable": true,
+      "containsImages": false,
+      "containsExecutableCode": false
+    }
+  },
+  "inputs": {
+    "schemaVersion": "2.0.0",
+    "inputs": [
+      {
+        "id": "INP_NORMAL_GAMES",
+        "name": "通常ゲーム数",
+        "category": "SELF_PLAY",
+        "type": "integer",
+        "unit": "G",
+        "displayOrder": 10,
+        "inferenceRole": "INCLUDE_PRIMARY",
+        "observationScope": "SELF_PLAY",
+        "defaultValue": 0,
+        "minimum": 0
+      },
+      {
+        "id": "INP_AT_INITIAL_COUNT",
+        "name": "AT初当り",
+        "category": "SELF_PLAY",
+        "type": "counter",
+        "unit": "回",
+        "displayOrder": 11,
+        "inferenceRole": "INCLUDE_PRIMARY",
+        "observationScope": "SELF_PLAY",
+        "defaultValue": 0,
+        "minimum": 0
+      },
+      {
+        "id": "INP_COMMON_BELL_GAMES",
+        "name": "共通ベル観測ゲーム数",
+        "category": "SMALL_ROLE",
+        "type": "integer",
+        "unit": "G",
+        "displayOrder": 20,
+        "inferenceRole": "INCLUDE_PRIMARY",
+        "observationScope": "OBSERVED_PLAY",
+        "defaultValue": 0,
+        "minimum": 0
+      },
+      {
+        "id": "INP_COMMON_BELL_COUNT",
+        "name": "共通ベル",
+        "category": "SMALL_ROLE",
+        "type": "counter",
+        "unit": "回",
+        "displayOrder": 21,
+        "inferenceRole": "INCLUDE_PRIMARY",
+        "observationScope": "OBSERVED_PLAY",
+        "defaultValue": 0,
+        "uiQuickAdd": 1,
+        "minimum": 0
+      },
+      {
+        "id": "INP_EVI_EVID_PREMIUM_AT",
+        "name": "プレミアムAT中の示唆",
+        "type": "enum",
+        "category": "EVIDENCE",
+        "unit": "",
+        "displayOrder": 100,
+        "inferenceRole": "INCLUDE_SUPPORT",
+        "options": [
+          {
+            "key": "__UNSET__",
+            "label": "未選択",
+            "value": "__UNSET__"
+          },
+          {
+            "key": "REKI_EVEN",
+            "label": "レキ『風が狂い始めている』",
+            "value": "REKI_EVEN"
+          },
+          {
+            "key": "KINJI_2PLUS",
+            "label": "キンジ『時間だ、お姫様』",
+            "value": "KINJI_2PLUS"
+          },
+          {
+            "key": "ARIA_2PLUS",
+            "label": "アリア『風穴フェスティバル！』",
+            "value": "ARIA_2PLUS"
+          },
+          {
+            "key": "ARIA_BIGBANG_6",
+            "label": "アリア『風穴ビッグバーン！』",
+            "value": "ARIA_BIGBANG_6"
+          },
+          {
+            "key": "RAINBOW_PANEL_6",
+            "label": "虹パネル（アリア）",
+            "value": "RAINBOW_PANEL_6"
+          }
+        ],
+        "defaultValue": "__UNSET__"
+      },
+      {
+        "id": "INP_EVI_EVID_AT_END",
+        "name": "AT終了画面",
+        "type": "enum",
+        "category": "EVIDENCE",
+        "unit": "",
+        "displayOrder": 101,
+        "inferenceRole": "INCLUDE_SUPPORT",
+        "options": [
+          {
+            "key": "__UNSET__",
+            "label": "未選択",
+            "value": "__UNSET__"
+          },
+          {
+            "key": "ARIA_KINJI_4PLUS",
+            "label": "アリア＆キンジ",
+            "value": "ARIA_KINJI_4PLUS"
+          },
+          {
+            "key": "HILDA_PRADO_4PLUS",
+            "label": "ヒルダ＆プラド",
+            "value": "HILDA_PRADO_4PLUS"
+          },
+          {
+            "key": "SHERLOCK_ARIA_6",
+            "label": "シャーロック＆アリア",
+            "value": "SHERLOCK_ARIA_6"
+          }
+        ],
+        "defaultValue": "__UNSET__"
+      }
+    ]
+  },
+  "features": {
+    "schemaVersion": "2.0.0",
+    "features": [
+      {
+        "featureId": "FEAT_AT_INITIAL",
+        "name": "AT初当り",
+        "adoptionCategory": "INCLUDE_PRIMARY",
+        "calculationRole": "PROBABILITY",
+        "probabilityEngineUsage": true,
+        "modelType": "binomial",
+        "minimumSample": 1000,
+        "sampleRecommendation": 5000,
+        "reliabilityProfile": {
+          "weight": 1
+        },
+        "denominatorInputId": "INP_NORMAL_GAMES",
+        "numeratorInputId": "INP_AT_INITIAL_COUNT",
+        "displayFormat": "ratio_1_over_n",
+        "probabilities": {
+          "SET_1": 0.0022461814914645105,
+          "SET_2": 0.002550369803621525,
+          "SET_4": 0.0031220730565095223,
+          "SET_5": 0.003664345914254306,
+          "SET_6": 0.004108463434675432
+        },
+        "sourceEvidenceRefs": [
+          "SRC_NANA",
+          "SRC_PWORLD"
+        ]
+      },
+      {
+        "featureId": "FEAT_COMMON_BELL",
+        "name": "共通ベル",
+        "adoptionCategory": "INCLUDE_PRIMARY",
+        "calculationRole": "PROBABILITY",
+        "probabilityEngineUsage": true,
+        "modelType": "binomial",
+        "minimumSample": 1000,
+        "sampleRecommendation": 5000,
+        "reliabilityProfile": {
+          "weight": 1
+        },
+        "denominatorInputId": "INP_COMMON_BELL_GAMES",
+        "numeratorInputId": "INP_COMMON_BELL_COUNT",
+        "displayFormat": "ratio_1_over_n",
+        "probabilities": {
+          "SET_1": 0.009433962264150943,
+          "SET_2": 0.00992063492063492,
+          "SET_4": 0.01040582726326743,
+          "SET_5": 0.011135857461024499,
+          "SET_6": 0.011876484560570071
+        },
+        "sourceEvidenceRefs": [
+          "SRC_NANA",
+          "SRC_PWORLD"
+        ]
+      }
+    ]
+  },
+  "evidence": {
+    "version": "1.0.0",
+    "evidences": [
+      {
+        "id": "EVI_EVID_PREMIUM_AT_REKI_EVEN",
+        "name": "レキ『風が狂い始めている』",
+        "displayName": "レキ『風が狂い始めている』",
+        "inputId": "INP_EVI_EVID_PREMIUM_AT",
+        "triggerValue": "REKI_EVEN",
+        "confirmedSettings": [
+          "SET_2",
+          "SET_4",
+          "SET_6"
+        ],
+        "deniedSettings": [
+          "SET_1",
+          "SET_5"
+        ],
+        "hasImage": false,
+        "type": "SETTING_CONFIRMATION",
+        "sourceEvidenceRefs": [
+          "RE_PREMIUM_EVEN"
+        ]
+      },
+      {
+        "id": "EVI_EVID_PREMIUM_AT_KINJI_2PLUS",
+        "name": "キンジ『時間だ、お姫様』",
+        "displayName": "キンジ『時間だ、お姫様』",
+        "inputId": "INP_EVI_EVID_PREMIUM_AT",
+        "triggerValue": "KINJI_2PLUS",
+        "confirmedSettings": [
+          "SET_2",
+          "SET_4",
+          "SET_5",
+          "SET_6"
+        ],
+        "deniedSettings": [
+          "SET_1"
+        ],
+        "hasImage": false,
+        "type": "SETTING_CONFIRMATION",
+        "sourceEvidenceRefs": [
+          "RE_PREMIUM_SET2_PLUS_KINJI"
+        ]
+      },
+      {
+        "id": "EVI_EVID_PREMIUM_AT_ARIA_2PLUS",
+        "name": "アリア『風穴フェスティバル！』",
+        "displayName": "アリア『風穴フェスティバル！』",
+        "inputId": "INP_EVI_EVID_PREMIUM_AT",
+        "triggerValue": "ARIA_2PLUS",
+        "confirmedSettings": [
+          "SET_2",
+          "SET_4",
+          "SET_5",
+          "SET_6"
+        ],
+        "deniedSettings": [
+          "SET_1"
+        ],
+        "hasImage": false,
+        "type": "SETTING_CONFIRMATION",
+        "sourceEvidenceRefs": [
+          "RE_PREMIUM_SET2_PLUS_ARIA"
+        ]
+      },
+      {
+        "id": "EVI_EVID_PREMIUM_AT_ARIA_BIGBANG_6",
+        "name": "アリア『風穴ビッグバーン！』",
+        "displayName": "アリア『風穴ビッグバーン！』",
+        "inputId": "INP_EVI_EVID_PREMIUM_AT",
+        "triggerValue": "ARIA_BIGBANG_6",
+        "confirmedSettings": [
+          "SET_6"
+        ],
+        "deniedSettings": [
+          "SET_1",
+          "SET_2",
+          "SET_4",
+          "SET_5"
+        ],
+        "hasImage": false,
+        "type": "SETTING_CONFIRMATION",
+        "sourceEvidenceRefs": [
+          "RE_PREMIUM_BIGBANG"
+        ]
+      },
+      {
+        "id": "EVI_EVID_PREMIUM_AT_RAINBOW_PANEL_6",
+        "name": "虹パネル（アリア）",
+        "displayName": "虹パネル（アリア）",
+        "inputId": "INP_EVI_EVID_PREMIUM_AT",
+        "triggerValue": "RAINBOW_PANEL_6",
+        "confirmedSettings": [
+          "SET_6"
+        ],
+        "deniedSettings": [
+          "SET_1",
+          "SET_2",
+          "SET_4",
+          "SET_5"
+        ],
+        "hasImage": false,
+        "type": "SETTING_CONFIRMATION",
+        "sourceEvidenceRefs": [
+          "RE_PREMIUM_RAINBOW"
+        ]
+      },
+      {
+        "id": "EVI_EVID_AT_END_ARIA_KINJI_4PLUS",
+        "name": "アリア＆キンジ",
+        "displayName": "アリア＆キンジ",
+        "inputId": "INP_EVI_EVID_AT_END",
+        "triggerValue": "ARIA_KINJI_4PLUS",
+        "confirmedSettings": [
+          "SET_4",
+          "SET_5",
+          "SET_6"
+        ],
+        "deniedSettings": [
+          "SET_1",
+          "SET_2"
+        ],
+        "hasImage": false,
+        "type": "SETTING_CONFIRMATION",
+        "sourceEvidenceRefs": [
+          "RE_AT_END_ARIA_KINJI"
+        ]
+      },
+      {
+        "id": "EVI_EVID_AT_END_HILDA_PRADO_4PLUS",
+        "name": "ヒルダ＆プラド",
+        "displayName": "ヒルダ＆プラド",
+        "inputId": "INP_EVI_EVID_AT_END",
+        "triggerValue": "HILDA_PRADO_4PLUS",
+        "confirmedSettings": [
+          "SET_4",
+          "SET_5",
+          "SET_6"
+        ],
+        "deniedSettings": [
+          "SET_1",
+          "SET_2"
+        ],
+        "hasImage": false,
+        "type": "SETTING_CONFIRMATION",
+        "sourceEvidenceRefs": [
+          "RE_AT_END_HILDA_PRADO"
+        ]
+      },
+      {
+        "id": "EVI_EVID_AT_END_SHERLOCK_ARIA_6",
+        "name": "シャーロック＆アリア",
+        "displayName": "シャーロック＆アリア",
+        "inputId": "INP_EVI_EVID_AT_END",
+        "triggerValue": "SHERLOCK_ARIA_6",
+        "confirmedSettings": [
+          "SET_6"
+        ],
+        "deniedSettings": [
+          "SET_1",
+          "SET_2",
+          "SET_4",
+          "SET_5"
+        ],
+        "hasImage": false,
+        "type": "SETTING_CONFIRMATION",
+        "sourceEvidenceRefs": [
+          "RE_AT_END_SHERLOCK"
+        ]
+      }
+    ],
+    "sources": [
+      {
+        "id": "SRC_PWORLD",
+        "classification": "ANALYSIS",
+        "pageName": "パチスロ 緋弾のアリアⅡ",
+        "url": "https://www.p-world.co.jp/machine/database/9775",
+        "checkedAt": "2026-08-27"
+      },
+      {
+        "id": "SRC_NANA",
+        "classification": "ANALYSIS",
+        "pageName": "緋弾のアリアⅡ 設定判別",
+        "url": "https://nana-press.com/kaiseki/machine/502/13456/",
+        "checkedAt": "2026-08-27"
+      }
+    ]
+  },
+  "ui": {
+    "sections": [
+      {
+        "id": "UI_01____",
+        "title": "通常時",
+        "displayOrder": 1,
+        "description": "自分で消化した通常ゲーム数とAT初当りを記録します。",
+        "collapsible": true,
+        "items": [
+          {
+            "type": "input",
+            "inputId": "INP_NORMAL_GAMES",
+            "label": "通常ゲーム数",
+            "widget": "number",
+            "gridSpan": 12
+          },
+          {
+            "type": "input",
+            "inputId": "INP_AT_INITIAL_COUNT",
+            "label": "AT初当り",
+            "widget": "counter",
+            "gridSpan": 12,
+            "config": {
+              "compact": true,
+              "quickAdd": 1
+            }
+          }
+        ]
+      },
+      {
+        "id": "UI_02_____",
+        "title": "共通ベル",
+        "displayOrder": 2,
+        "description": "共通ベルを正しく判別できる区間だけを対象に、観測ゲーム数と共通ベル回数を記録します。通常時とAT中をまたぐため、通常ゲーム数とは分けて入力します。",
+        "collapsible": true,
+        "items": [
+          {
+            "type": "input",
+            "inputId": "INP_COMMON_BELL_GAMES",
+            "label": "共通ベル観測ゲーム数",
+            "widget": "number",
+            "gridSpan": 6
+          },
+          {
+            "type": "input",
+            "inputId": "INP_COMMON_BELL_COUNT",
+            "label": "共通ベル",
+            "widget": "counter",
+            "gridSpan": 6,
+            "config": {
+              "compact": true,
+              "quickAdd": 1
+            }
+          }
+        ]
+      },
+      {
+        "id": "UI_03______AT____",
+        "title": "プレミアムAT中の示唆",
+        "displayOrder": 3,
+        "description": "プレミアムAT中に設定が確定・限定されるボイスや虹パネルが出た場合に選択します。",
+        "collapsible": true,
+        "items": [
+          {
+            "type": "input",
+            "inputId": "INP_EVI_EVID_PREMIUM_AT",
+            "label": "プレミアムAT中の示唆",
+            "widget": "multi_select",
+            "gridSpan": 12
+          }
+        ]
+      },
+      {
+        "id": "UI_04_AT____",
+        "title": "AT終了画面",
+        "displayOrder": 4,
+        "description": "設定4以上・設定6が確定する終了画面が出た場合に選択します。",
+        "collapsible": true,
+        "items": [
+          {
+            "type": "input",
+            "inputId": "INP_EVI_EVID_AT_END",
+            "label": "AT終了画面",
+            "widget": "multi_select",
+            "gridSpan": 12
+          }
+        ]
+      }
+    ],
+    "quickInputContract": {
+      "enabled": true,
+      "selectableSections": [
+        "通常時",
+        "共通ベル"
+      ],
+      "inputIds": [
+        "INP_AT_INITIAL_COUNT",
+        "INP_COMMON_BELL_COUNT"
+      ],
+      "unsetDisplayAsZero": true,
+      "preserveUnobservedUntilIncrement": true,
+      "returnToSectionSelectionAfterIncrement": false
+    },
+    "designContract": {
+      "schemaVersion": "ui-design-data-v1",
+      "status": "PASS_WITH_UNRESOLVED",
+      "source": "research/S_HIDAN_NO_ARIA_II_JZ/ui-design-data.json"
+    }
+  },
+  "selectionSummary": {
+    "schemaVersion": "selection-summary-v1",
+    "evaluatedCount": 2,
+    "selectedCount": 2,
+    "rejectedCount": 0,
+    "selected": [
+      {
+        "featureId": "FEAT_AT_INITIAL",
+        "name": "AT初当り",
+        "reason": "通常ゲーム数に対するAT初当りには設定差が大きく、実戦中に継続して観測できます。",
+        "requiredTrials": {
+          "value": 6548,
+          "unit": "通常ゲーム"
+        }
+      },
+      {
+        "featureId": "FEAT_COMMON_BELL",
+        "name": "共通ベル",
+        "reason": "共通ベルは設定差があり、下段15枚ベルを正しく識別できる場合は独立した数値情報として利用できます。",
+        "requiredTrials": {
+          "value": 12910,
+          "unit": "通常ゲーム"
+        }
+      }
+    ],
+    "rejected": []
+  },
+  "reliability": {},
+  "metadata": {
+    "machineId": "S_HIDAN_NO_ARIA_II_JZ",
+    "displayName": "パチスロ 緋弾のアリアⅡ",
+    "settings": [
+      "SET_1",
+      "SET_2",
+      "SET_4",
+      "SET_5",
+      "SET_6"
+    ]
+  },
+  "validation": {
+    "cases": []
+  },
+  "statistics": {}
+}

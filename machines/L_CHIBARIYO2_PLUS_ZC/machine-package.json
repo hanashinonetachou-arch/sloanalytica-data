@@ -1,0 +1,229 @@
+{
+  "schemaVersion": 1,
+  "machine": {
+    "schemaVersion": "2.0.0",
+    "machineId": "L_CHIBARIYO2_PLUS_ZC",
+    "machineDataVersion": "0.1.0",
+    "displayName": "チバリヨ2プラス",
+    "modelName": "Lチバリヨ2プラスZC",
+    "manufacturer": "NET / オーゼキ",
+    "settings": [
+      "SET_1",
+      "SET_2",
+      "SET_4",
+      "SET_5",
+      "SET_6"
+    ],
+    "packagePolicy": {
+      "offlineCapable": true,
+      "containsImages": false,
+      "containsExecutableCode": false
+    }
+  },
+  "inputs": {
+    "schemaVersion": "2.0.0",
+    "inputs": [
+      {
+        "id": "INP_NORMAL_GAMES",
+        "name": "通常ゲーム数",
+        "category": "SELF_PLAY",
+        "type": "integer",
+        "unit": "G",
+        "displayOrder": 10,
+        "inferenceRole": "INCLUDE_PRIMARY",
+        "observationScope": "SELF_PLAY",
+        "defaultValue": 0,
+        "minimum": 0
+      },
+      {
+        "id": "INP_BONUS_TOTAL_COUNT",
+        "name": "ボーナス回数",
+        "category": "SELF_PLAY",
+        "type": "counter",
+        "unit": "回",
+        "displayOrder": 11,
+        "inferenceRole": "INCLUDE_PRIMARY",
+        "observationScope": "SELF_PLAY",
+        "defaultValue": 0,
+        "minimum": 0
+      }
+    ]
+  },
+  "features": {
+    "schemaVersion": "2.0.0",
+    "features": [
+      {
+        "featureId": "FEAT_BONUS_TOTAL",
+        "name": "ボーナス合算",
+        "adoptionCategory": "INCLUDE_PRIMARY",
+        "calculationRole": "PROBABILITY",
+        "probabilityEngineUsage": true,
+        "modelType": "binomial",
+        "minimumSample": 1000,
+        "sampleRecommendation": 5000,
+        "reliabilityProfile": {
+          "weight": 1
+        },
+        "denominatorInputId": "INP_NORMAL_GAMES",
+        "numeratorInputId": "INP_BONUS_TOTAL_COUNT",
+        "displayFormat": "ratio_1_over_n",
+        "probabilities": {
+          "SET_1": 0.00922509225092251,
+          "SET_2": 0.009596928982725527,
+          "SET_4": 0.010672358591248666,
+          "SET_5": 0.011918951132300357,
+          "SET_6": 0.013368983957219251
+        },
+        "sourceEvidenceRefs": [
+          "SRC_NANA"
+        ]
+      }
+    ]
+  },
+  "evidence": {
+    "version": "1.0.0",
+    "evidences": [],
+    "sources": [
+      {
+        "id": "SRC_NET",
+        "classification": "OFFICIAL",
+        "pageName": "チバリヨ2プラス 公式",
+        "url": "https://www.net-fun.co.jp/chibariyo2PLUS/",
+        "checkedAt": "2026-08-27"
+      },
+      {
+        "id": "SRC_PWORLD",
+        "classification": "ANALYSIS",
+        "pageName": "チバリヨ2プラス",
+        "url": "https://www.p-world.co.jp/machine/database/10180",
+        "checkedAt": "2026-08-27"
+      },
+      {
+        "id": "SRC_NANA",
+        "classification": "ANALYSIS",
+        "pageName": "チバリヨ2プラス 設定判別",
+        "url": "https://nana-press.com/kaiseki/machine/858/26541/",
+        "checkedAt": "2026-08-27"
+      }
+    ]
+  },
+  "ui": {
+    "sections": [
+      {
+        "id": "UI_01____",
+        "title": "通常時",
+        "displayOrder": 1,
+        "description": "自分で消化した通常ゲーム数とボーナス回数を記録します。初当りやチェリー契機は重複評価を避けるため入力しません。",
+        "collapsible": true,
+        "items": [
+          {
+            "type": "input",
+            "inputId": "INP_NORMAL_GAMES",
+            "label": "通常ゲーム数",
+            "widget": "number",
+            "gridSpan": 12
+          },
+          {
+            "type": "input",
+            "inputId": "INP_BONUS_TOTAL_COUNT",
+            "label": "ボーナス回数",
+            "widget": "counter",
+            "gridSpan": 12,
+            "config": {
+              "compact": true,
+              "quickAdd": 1
+            }
+          }
+        ]
+      }
+    ],
+    "quickInputContract": {
+      "enabled": true,
+      "selectableSections": [
+        "通常時"
+      ],
+      "inputIds": [
+        "INP_BONUS_TOTAL_COUNT"
+      ],
+      "unsetDisplayAsZero": true,
+      "preserveUnobservedUntilIncrement": true,
+      "returnToSectionSelectionAfterIncrement": false
+    },
+    "designContract": {
+      "schemaVersion": "ui-design-data-v1",
+      "status": "PASS_WITH_UNRESOLVED",
+      "source": "research/L_CHIBARIYO2_PLUS_ZC/ui-design-data.json"
+    }
+  },
+  "selectionSummary": {
+    "schemaVersion": "selection-summary-v1",
+    "evaluatedCount": 5,
+    "selectedCount": 1,
+    "rejectedCount": 4,
+    "selected": [
+      {
+        "featureId": "FEAT_BONUS_TOTAL",
+        "name": "ボーナス合算",
+        "reason": "ボーナス合算は通常ゲーム数あたりの全設定値が揃い、初当り単独より設定1と6の差が大きいため主Featureとして採用します。",
+        "requiredTrials": {
+          "value": 4728,
+          "unit": "通常ゲーム"
+        }
+      }
+    ],
+    "rejected": [
+      {
+        "featureId": "FEAT_INITIAL_EXCLUDED",
+        "name": "初当り",
+        "reason": "ボーナス合算を同一通常G分母の代表Featureとして採用しており、この候補を追加すると初当り・チェリー契機の同一当選系列を重複評価するため不採用です。",
+        "requiredTrials": {
+          "value": 13569,
+          "unit": "通常ゲーム"
+        }
+      },
+      {
+        "featureId": "FEAT_WEAK_CHERRY_BONUS_EXCLUDED",
+        "name": "弱チェリー成立時ボーナス当選",
+        "reason": "ボーナス合算を同一通常G分母の代表Featureとして採用しており、この候補を追加すると初当り・チェリー契機の同一当選系列を重複評価するため不採用です。",
+        "requiredTrials": {
+          "value": 4484,
+          "unit": "弱チェリー成立"
+        }
+      },
+      {
+        "featureId": "FEAT_STRONG_CHERRY_BONUS_EXCLUDED",
+        "name": "強チェリー成立時ボーナス当選",
+        "reason": "ボーナス合算を同一通常G分母の代表Featureとして採用しており、この候補を追加すると初当り・チェリー契機の同一当選系列を重複評価するため不採用です。",
+        "requiredTrials": {
+          "value": 2316,
+          "unit": "強チェリー成立"
+        }
+      },
+      {
+        "featureId": "FEAT_WEAK_CHERRY_DIRECT_EXCLUDED",
+        "name": "弱チェリー成立時直撃",
+        "reason": "ボーナス合算を同一通常G分母の代表Featureとして採用しており、この候補を追加すると初当り・チェリー契機の同一当選系列を重複評価するため不採用です。",
+        "requiredTrials": {
+          "value": 9478,
+          "unit": "弱チェリー成立"
+        }
+      }
+    ]
+  },
+  "reliability": {},
+  "metadata": {
+    "machineId": "L_CHIBARIYO2_PLUS_ZC",
+    "displayName": "チバリヨ2プラス",
+    "settings": [
+      "SET_1",
+      "SET_2",
+      "SET_4",
+      "SET_5",
+      "SET_6"
+    ]
+  },
+  "validation": {
+    "cases": []
+  },
+  "statistics": {}
+}
