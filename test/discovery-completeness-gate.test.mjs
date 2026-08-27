@@ -48,3 +48,14 @@ test('package exposes research:gate0 command', () => {
   const pkg = JSON.parse(fs.readFileSync(new URL('../package.json', import.meta.url), 'utf8'));
   assert.match(pkg.scripts['research:gate0'], /discovery-completeness-gate/);
 });
+
+test('research:batch is wired through strict pipeline with mandatory Gate 0 ingest', () => {
+  const pkg = JSON.parse(fs.readFileSync(new URL('../package.json', import.meta.url), 'utf8'));
+  assert.match(pkg.scripts['research:batch'], /strict-batch-research-pipeline/);
+
+  const strictPipeline = fs.readFileSync(new URL('../tools/strict-batch-research-pipeline.mjs', import.meta.url), 'utf8');
+  assert.match(strictPipeline, /validateDiscoveryCompleteness/);
+  assert.match(strictPipeline, /validateDiscoveryCompleteness\(research, \{ required: true \}\)/);
+  assert.match(strictPipeline, /discoveryCompletenessContract/);
+  assert.match(strictPipeline, /Legacy MachineData without discoveryInventory remains supported outside new Research batch ingest/);
+});
