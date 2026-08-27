@@ -1,0 +1,37 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import fs from 'node:fs';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
+import { buildMachineData } from '../tools/build-machine-data.mjs';
+
+const ROOT=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
+const read=p=>JSON.parse(fs.readFileSync(p,'utf8'));
+
+test('Shin Eva shares one observation input between numeric Feature and Evidence',()=>{
+  const research=read(path.join(ROOT,'research/L_SHIN_EVANGELION/research-data.json'));
+  const selection=read(path.join(ROOT,'research/L_SHIN_EVANGELION/selection-data.json'));
+  const pkg=buildMachineData(research,selection,null);
+
+  const rei=pkg.features.features.find(f=>f.featureId==='FEAT_REI_CHANCE_PICTURE');
+  const bonus=pkg.features.features.find(f=>f.featureId==='FEAT_BONUS_END_SCREEN');
+  assert.ok(rei,'Rei success picture must be a numeric Feature');
+  assert.ok(bonus,'Bonus end screen must be a numeric Feature');
+
+  const eviById=new Map(pkg.evidence.evidences.map(e=>[e.id,e]));
+  assert.equal(eviById.get('EVI_REI_MOON')?.inputId,'INP_REI_PIC_MOON');
+  assert.equal(eviById.get('EVI_REI_LONG_HAIR')?.inputId,'INP_REI_PIC_LONG_HAIR');
+  assert.equal(eviById.get('EVI_BONUS_END_NOT_1')?.inputId,'INP_BONUS_END_PURPLE1');
+  assert.equal(eviById.get('EVI_BONUS_END_SILVER')?.inputId,'INP_BONUS_END_SILVER');
+  assert.equal(eviById.get('EVI_BONUS_END_GOLD')?.inputId,'INP_BONUS_END_GOLD');
+  assert.equal(eviById.get('EVI_BONUS_END_RAINBOW')?.inputId,'INP_BONUS_END_RAINBOW');
+
+  const inputById=new Map(pkg.inputs.inputs.map(i=>[i.id,i]));
+  assert.equal(inputById.get('INP_REI_NAV_FOUR_CHOICE')?.name,'4択ナビ');
+  assert.equal(inputById.get('INP_REI_NAV_TWO_CHOICE')?.name,'2択ナビ');
+  assert.equal(inputById.get('INP_REI_NAV_FULL_NAV')?.name,'全ナビ');
+
+  const sectionTitles=pkg.ui.sections.map(s=>s.title);
+  assert.ok(sectionTitles.includes('レイチャンス成功画面'));
+  assert.ok(sectionTitles.includes('ボーナス終了画面'));
+});
