@@ -34,6 +34,20 @@ function normalizeDiscoveryItem(item) {
   };
 }
 
+function targetIsClassified(target, researchFeatures, researchEvidence, featureDecisions, evidenceRefs, rejectedElements) {
+  if (Array.isArray(target)) {
+    return target.length > 0 && target.every(item =>
+      targetIsClassified(item, researchFeatures, researchEvidence, featureDecisions, evidenceRefs, rejectedElements)
+    );
+  }
+  if (target === 'evidence') return true;
+  if (typeof target !== 'string') return false;
+  if (researchFeatures.has(target)) return featureDecisions.has(target);
+  if (researchEvidence.has(target)) return evidenceRefs.has(target);
+  if (rejectedElements.has(target)) return true;
+  return false;
+}
+
 function assessDiscoveryCoverage(research, selection, featureDecisions, evidenceRefs, blockers) {
   const inventory = Array.isArray(research.discoveryInventory) ? research.discoveryInventory : [];
   if (!inventory.length) return { discovered: 0, classified: 0, missing: [] };
@@ -50,19 +64,13 @@ function assessDiscoveryCoverage(research, selection, featureDecisions, evidence
     // reclassified as vanished by the downstream Selection Quality Gate.
     if (['UNRESOLVED', 'REFERENCE', 'EXCLUDE'].includes(transferStatus)) {
       classified = true;
-    } else if (target === 'evidence') {
-      classified = true;
-    } else if (typeof target === 'string' && researchFeatures.has(target)) {
-      classified = featureDecisions.has(target);
-    } else if (typeof target === 'string' && researchEvidence.has(target)) {
-      classified = evidenceRefs.has(target);
-    } else if (typeof target === 'string' && rejectedElements.has(target)) {
-      classified = true;
+    } else {
+      classified = targetIsClassified(target, researchFeatures, researchEvidence, featureDecisions, evidenceRefs, rejectedElements);
     }
 
     if (!classified) {
       missing.push(id);
-      blockers.push(`unmapped discovery candidate: ${id}${target ? ` -> ${target}` : ''}`);
+      blockers.push(`unmapped discovery candidate: ${id}${target ? ` -> ${Array.isArray(target) ? target.join(',') : target}` : ''}`);
     }
   }
 
