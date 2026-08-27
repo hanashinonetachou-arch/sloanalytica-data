@@ -1,0 +1,304 @@
+{
+  "schemaVersion": "selection-data-v1",
+  "machineId": "L_SHIN_EVANGELION",
+  "machineDataVersion": "0.1.0",
+  "uiCategoryLabels": {
+    "NUMERIC": "設定推測要素",
+    "EVIDENCE": "設定確定・示唆"
+  },
+  "inputs": [
+    {
+      "id": "INP_NORMAL_GAMES",
+      "name": "通常ゲーム数",
+      "type": "integer",
+      "category": "NUMERIC",
+      "unit": "G",
+      "displayOrder": 10,
+      "inferenceRole": "INCLUDE_PRIMARY",
+      "defaultValue": null,
+      "observationScope": "SELF_PLAY"
+    },
+    {
+      "id": "INP_FIRST_HIT_COUNT",
+      "name": "初当り合算",
+      "type": "counter",
+      "category": "NUMERIC",
+      "unit": "回",
+      "displayOrder": 11,
+      "inferenceRole": "INCLUDE_PRIMARY",
+      "defaultValue": null,
+      "parentInputId": "INP_NORMAL_GAMES"
+    },
+    {
+      "id": "INP_REI_NAV_FOUR_CHOICE",
+      "name": "レイチャンス ナビ種別振り分け FOUR_CHOICE",
+      "type": "counter",
+      "category": "NUMERIC",
+      "unit": "回",
+      "displayOrder": 12,
+      "inferenceRole": "INCLUDE_SUPPORT",
+      "defaultValue": null
+    },
+    {
+      "id": "INP_REI_NAV_TWO_CHOICE",
+      "name": "レイチャンス ナビ種別振り分け TWO_CHOICE",
+      "type": "counter",
+      "category": "NUMERIC",
+      "unit": "回",
+      "displayOrder": 13,
+      "inferenceRole": "INCLUDE_SUPPORT",
+      "defaultValue": null
+    },
+    {
+      "id": "INP_REI_NAV_FULL_NAV",
+      "name": "レイチャンス ナビ種別振り分け FULL_NAV",
+      "type": "counter",
+      "category": "NUMERIC",
+      "unit": "回",
+      "displayOrder": 14,
+      "inferenceRole": "INCLUDE_SUPPORT",
+      "defaultValue": null
+    }
+  ],
+  "features": [
+    {
+      "researchFeatureId": "RF_FIRST_HIT",
+      "featureId": "FEAT_FIRST_HIT",
+      "adoptionCategory": "INCLUDE_PRIMARY",
+      "numeratorInputId": "INP_FIRST_HIT_COUNT",
+      "denominatorInputId": "INP_NORMAL_GAMES",
+      "weight": 1,
+      "difficultyParticipation": "INCLUDE",
+      "difficultyExposure": {
+        "mode": "per_game",
+        "factor": 1,
+        "quality": "EXACT",
+        "basisId": "NORMAL_GAMES"
+      },
+      "userReason": "初当り合算は通常ゲーム数を分母に直接観測でき、設定1から6へ一貫した設定差があるため主軸として採用します。"
+    },
+    {
+      "researchFeatureId": "RF_INTERNAL_STATE_TRANSITION",
+      "featureId": "FEAT_INTERNAL_STATE_TRANSITION_EXCLUDED",
+      "adoptionCategory": "EXCLUDE",
+      "userReason": "公開条件・観測分母・依存関係のいずれかが現行推測モデルで安全に再現できないため不採用です。"
+    },
+    {
+      "researchFeatureId": "RF_STATE_ROLE_FIRST_HIT",
+      "featureId": "FEAT_STATE_ROLE_FIRST_HIT_EXCLUDED",
+      "adoptionCategory": "EXCLUDE",
+      "userReason": "公開条件・観測分母・依存関係のいずれかが現行推測モデルで安全に再現できないため不採用です。"
+    },
+    {
+      "researchFeatureId": "RF_WITHIN_150G_HIT",
+      "featureId": "FEAT_WITHIN_150G_HIT_EXCLUDED",
+      "adoptionCategory": "EXCLUDE",
+      "userReason": "150G以内初当りは初当りタイミングの情報で主軸初当りと同じ当選過程を共有し、独立尤度として加えると二重評価になるため不採用です。"
+    },
+    {
+      "researchFeatureId": "RF_ST_MISS_MODE_1",
+      "featureId": "FEAT_ST_MISS_MODE_1_EXCLUDED",
+      "adoptionCategory": "EXCLUDE",
+      "userReason": "公開条件・観測分母・依存関係のいずれかが現行推測モデルで安全に再現できないため不採用です。"
+    },
+    {
+      "researchFeatureId": "RF_ST_MISS_MODE_2_3",
+      "featureId": "FEAT_ST_MISS_MODE_2_3_EXCLUDED",
+      "adoptionCategory": "EXCLUDE",
+      "userReason": "公開条件・観測分母・依存関係のいずれかが現行推測モデルで安全に再現できないため不採用です。"
+    },
+    {
+      "researchFeatureId": "RF_ST_MISS_MODE_4PLUS",
+      "featureId": "FEAT_ST_MISS_MODE_4PLUS_EXCLUDED",
+      "adoptionCategory": "EXCLUDE",
+      "userReason": "公開条件・観測分母・依存関係のいずれかが現行推測モデルで安全に再現できないため不採用です。"
+    },
+    {
+      "researchFeatureId": "RF_ST_MISS_HEAVEN",
+      "featureId": "FEAT_ST_MISS_HEAVEN_EXCLUDED",
+      "adoptionCategory": "EXCLUDE",
+      "userReason": "公開条件・観測分母・依存関係のいずれかが現行推測モデルで安全に再現できないため不採用です。"
+    },
+    {
+      "researchFeatureId": "RF_REI_NAV",
+      "featureId": "FEAT_REI_NAV",
+      "adoptionCategory": "INCLUDE_SUPPORT",
+      "numeratorInputId": "INP_REI_NAV_FOUR_CHOICE",
+      "categoryInputIds": [
+        "INP_REI_NAV_TWO_CHOICE",
+        "INP_REI_NAV_FULL_NAV"
+      ],
+      "inputTransform": "sum_inputs_to_trials",
+      "weight": 1,
+      "difficultyParticipation": "EXCLUDE",
+      "userReason": "レイチャンスのナビ種別は成功時ごとに排他的に観測でき、設定別の完全分布が公開されているため補助採用します。"
+    },
+    {
+      "researchFeatureId": "RF_REI_CHANCE_PICTURE",
+      "featureId": "FEAT_REI_CHANCE_PICTURE_EXCLUDED",
+      "adoptionCategory": "EXCLUDE",
+      "userReason": "レイチャンス成功画面は設定差がありますが月背景・ロングヘアが設定下限・確定Evidenceと同一観測なので、Evidenceを優先して数値分布は不採用です。"
+    },
+    {
+      "researchFeatureId": "RF_BONUS_END_SCREEN",
+      "featureId": "FEAT_BONUS_END_SCREEN_EXCLUDED",
+      "adoptionCategory": "EXCLUDE",
+      "userReason": "ボーナス終了画面は設定別振り分けのResearch数値が未整備で、確定枠はEvidenceとして扱えるものの非確定部分の尤度を再現できないため数値Featureには不採用です。"
+    }
+  ],
+  "evidenceUi": {
+    "groups": [
+      {
+        "groupId": "SETTING_EVIDENCE",
+        "label": "設定確定・設定下限情報",
+        "category": "EVIDENCE",
+        "selectionMode": "multi",
+        "normalizationMode": "ALLOWED_SETTINGS_INTERSECTION",
+        "displayOrder": 100,
+        "options": [
+          {
+            "value": "EV_1",
+            "label": "レイチャンス成功画面 月背景",
+            "allowedSettings": [
+              "SET_4",
+              "SET_5",
+              "SET_6"
+            ],
+            "excludedSettings": [
+              "SET_1",
+              "SET_2",
+              "SET_3"
+            ],
+            "sourceEvidenceIds": [
+              "RE_REI_MOON"
+            ]
+          },
+          {
+            "value": "EV_2",
+            "label": "レイチャンス成功画面 ロングヘア",
+            "allowedSettings": [
+              "SET_6"
+            ],
+            "excludedSettings": [
+              "SET_1",
+              "SET_2",
+              "SET_3",
+              "SET_4",
+              "SET_5"
+            ],
+            "sourceEvidenceIds": [
+              "RE_REI_LONG_HAIR"
+            ]
+          },
+          {
+            "value": "EV_3",
+            "label": "456枚OVER",
+            "allowedSettings": [
+              "SET_4",
+              "SET_5",
+              "SET_6"
+            ],
+            "excludedSettings": [
+              "SET_1",
+              "SET_2",
+              "SET_3"
+            ],
+            "sourceEvidenceIds": [
+              "RE_456_OVER"
+            ]
+          },
+          {
+            "value": "EV_4",
+            "label": "555枚OVER",
+            "allowedSettings": [
+              "SET_5",
+              "SET_6"
+            ],
+            "excludedSettings": [
+              "SET_1",
+              "SET_2",
+              "SET_3",
+              "SET_4"
+            ],
+            "sourceEvidenceIds": [
+              "RE_555_OVER"
+            ]
+          },
+          {
+            "value": "EV_5",
+            "label": "666枚OVER",
+            "allowedSettings": [
+              "SET_6"
+            ],
+            "excludedSettings": [
+              "SET_1",
+              "SET_2",
+              "SET_3",
+              "SET_4",
+              "SET_5"
+            ],
+            "sourceEvidenceIds": [
+              "RE_666_OVER"
+            ]
+          },
+          {
+            "value": "EV_6",
+            "label": "ボーナス終了画面 銀枠",
+            "allowedSettings": [
+              "SET_4",
+              "SET_5",
+              "SET_6"
+            ],
+            "excludedSettings": [
+              "SET_1",
+              "SET_2",
+              "SET_3"
+            ],
+            "sourceEvidenceIds": [
+              "RE_BONUS_END_SILVER"
+            ]
+          },
+          {
+            "value": "EV_7",
+            "label": "ボーナス終了画面 金枠",
+            "allowedSettings": [
+              "SET_5",
+              "SET_6"
+            ],
+            "excludedSettings": [
+              "SET_1",
+              "SET_2",
+              "SET_3",
+              "SET_4"
+            ],
+            "sourceEvidenceIds": [
+              "RE_BONUS_END_GOLD"
+            ]
+          },
+          {
+            "value": "EV_8",
+            "label": "ボーナス終了画面 レインボー枠",
+            "allowedSettings": [
+              "SET_6"
+            ],
+            "excludedSettings": [
+              "SET_1",
+              "SET_2",
+              "SET_3",
+              "SET_4",
+              "SET_5"
+            ],
+            "sourceEvidenceIds": [
+              "RE_BONUS_END_RAINBOW"
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "rejectedElements": [],
+  "evidenceReview": {
+    "policyVersion": 1,
+    "exclusions": []
+  }
+}

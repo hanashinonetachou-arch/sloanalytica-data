@@ -1,0 +1,197 @@
+{
+  "schemaVersion": "selection-data-v1",
+  "machineId": "L_NYANKO_DAISENSO_CHOSHINSOKU_KB",
+  "machineDataVersion": "0.1.0",
+  "uiCategoryLabels": {
+    "NUMERIC": "設定推測要素",
+    "EVIDENCE": "設定確定・示唆"
+  },
+  "inputs": [
+    {
+      "id": "INP_NORMAL_GAMES",
+      "name": "通常ゲーム数",
+      "type": "integer",
+      "category": "NUMERIC",
+      "unit": "G",
+      "displayOrder": 10,
+      "inferenceRole": "INCLUDE_PRIMARY",
+      "defaultValue": null,
+      "observationScope": "SELF_PLAY"
+    },
+    {
+      "id": "INP_AT_FIRST_HIT_COUNT",
+      "name": "AT初当り",
+      "type": "counter",
+      "category": "NUMERIC",
+      "unit": "回",
+      "displayOrder": 11,
+      "inferenceRole": "INCLUDE_PRIMARY",
+      "defaultValue": null,
+      "parentInputId": "INP_NORMAL_GAMES"
+    }
+  ],
+  "features": [
+    {
+      "researchFeatureId": "RF_AT_FIRST_HIT",
+      "featureId": "FEAT_AT_FIRST_HIT",
+      "adoptionCategory": "INCLUDE_PRIMARY",
+      "numeratorInputId": "INP_AT_FIRST_HIT_COUNT",
+      "denominatorInputId": "INP_NORMAL_GAMES",
+      "weight": 1,
+      "difficultyParticipation": "INCLUDE",
+      "difficultyExposure": {
+        "mode": "per_game",
+        "factor": 1,
+        "quality": "EXACT",
+        "basisId": "NORMAL_GAMES"
+      },
+      "userReason": "AT初当りは通常ゲーム数を分母に直接観測でき、設定間で一貫した差があるため主軸として採用します。"
+    },
+    {
+      "researchFeatureId": "RF_NORMAL_MODE_AT",
+      "featureId": "FEAT_NORMAL_MODE_AT_EXCLUDED",
+      "adoptionCategory": "EXCLUDE",
+      "userReason": "通常モード滞在時AT当選率は設定差が大きいものの、内部モード滞在ゲーム数を実戦で直接判別できず公開分母を再現できないため不採用です。"
+    },
+    {
+      "researchFeatureId": "RF_CZ_FIRST_HIT",
+      "featureId": "FEAT_CZ_FIRST_HIT_EXCLUDED",
+      "adoptionCategory": "EXCLUDE",
+      "userReason": "大狂乱のネコ島初当りは設定差が小さく、AT初当りへ追加する情報量が限定的なため不採用です。"
+    },
+    {
+      "researchFeatureId": "RF_KYORAN_HIGH_LOWER_BELL",
+      "featureId": "FEAT_KYORAN_HIGH_LOWER_BELL_EXCLUDED",
+      "adoptionCategory": "EXCLUDE",
+      "userReason": "下段ベルからの狂乱高確移行は状態移行の判定条件が複雑で、公開条件と同じ試行母数を安定して再現しにくいため不採用です。"
+    },
+    {
+      "researchFeatureId": "RF_KYORAN_HIGH_UPPER_RIGHT_BELL",
+      "featureId": "FEAT_KYORAN_HIGH_UPPER_RIGHT_BELL_EXCLUDED",
+      "adoptionCategory": "EXCLUDE",
+      "userReason": "右上がりベルからの狂乱高確移行は状態移行の判定条件が複雑で、公開条件と同じ試行母数を安定して再現しにくいため不採用です。"
+    },
+    {
+      "researchFeatureId": "RF_222G_CEILING",
+      "featureId": "FEAT_222G_CEILING_EXCLUDED",
+      "adoptionCategory": "EXCLUDE",
+      "userReason": "222G天井選択は高設定示唆とされるものの設定別選択率が公開されておらず、数値尤度を構成できないため不採用です。"
+    },
+    {
+      "researchFeatureId": "RF_MUSO_EARLY",
+      "featureId": "FEAT_MUSO_EARLY_EXCLUDED",
+      "adoptionCategory": "EXCLUDE",
+      "userReason": "夢想への早期移行は高設定ほど優遇されるものの具体的な全設定振り分けが公開されておらず、定量化できないため不採用です。"
+    },
+    {
+      "researchFeatureId": "RF_KAMISAMA_BGM",
+      "featureId": "FEAT_KAMISAMA_BGM_EXCLUDED",
+      "adoptionCategory": "EXCLUDE",
+      "userReason": "神さま勝撫中の楽曲変化は高設定示唆の存在のみで設定別発生率が公開されておらず、数値推測には不採用です。"
+    }
+  ],
+  "evidenceUi": {
+    "groups": [
+      {
+        "groupId": "SETTING_EVIDENCE",
+        "label": "設定確定・設定下限情報",
+        "category": "EVIDENCE",
+        "selectionMode": "multi",
+        "normalizationMode": "ALLOWED_SETTINGS_INTERSECTION",
+        "displayOrder": 100,
+        "options": [
+          {
+            "value": "EV_1",
+            "label": "玉ちゃんトロフィー銅",
+            "allowedSettings": [
+              "SET_2",
+              "SET_4",
+              "SET_5",
+              "SET_6"
+            ],
+            "excludedSettings": [
+              "SET_1",
+              "SET_L"
+            ],
+            "sourceEvidenceIds": [
+              "RE_TAMACHAN_COPPER"
+            ]
+          },
+          {
+            "value": "EV_2",
+            "label": "玉ちゃんトロフィー銀",
+            "allowedSettings": [
+              "SET_4",
+              "SET_5",
+              "SET_6"
+            ],
+            "excludedSettings": [
+              "SET_1",
+              "SET_2",
+              "SET_L"
+            ],
+            "sourceEvidenceIds": [
+              "RE_TAMACHAN_SILVER"
+            ]
+          },
+          {
+            "value": "EV_3",
+            "label": "玉ちゃんトロフィー金",
+            "allowedSettings": [
+              "SET_4",
+              "SET_5",
+              "SET_6"
+            ],
+            "excludedSettings": [
+              "SET_1",
+              "SET_2",
+              "SET_L"
+            ],
+            "sourceEvidenceIds": [
+              "RE_TAMACHAN_GOLD"
+            ]
+          },
+          {
+            "value": "EV_4",
+            "label": "玉ちゃんトロフィーゼブラ",
+            "allowedSettings": [
+              "SET_5",
+              "SET_6"
+            ],
+            "excludedSettings": [
+              "SET_1",
+              "SET_2",
+              "SET_4",
+              "SET_L"
+            ],
+            "sourceEvidenceIds": [
+              "RE_TAMACHAN_ZEBRA"
+            ]
+          },
+          {
+            "value": "EV_5",
+            "label": "玉ちゃんトロフィー虹",
+            "allowedSettings": [
+              "SET_6"
+            ],
+            "excludedSettings": [
+              "SET_1",
+              "SET_2",
+              "SET_4",
+              "SET_5",
+              "SET_L"
+            ],
+            "sourceEvidenceIds": [
+              "RE_TAMACHAN_RAINBOW"
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "rejectedElements": [],
+  "evidenceReview": {
+    "policyVersion": 1,
+    "exclusions": []
+  }
+}

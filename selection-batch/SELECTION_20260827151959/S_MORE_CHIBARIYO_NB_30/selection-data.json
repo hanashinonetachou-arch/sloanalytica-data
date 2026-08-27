@@ -1,0 +1,70 @@
+{
+  "schemaVersion": "selection-data-v1",
+  "machineId": "S_MORE_CHIBARIYO_NB_30",
+  "machineDataVersion": "0.1.0",
+  "uiCategoryLabels": {
+    "NUMERIC": "設定推測要素"
+  },
+  "inputs": [
+    {
+      "id": "INP_NORMAL_GAMES",
+      "name": "通常ゲーム数",
+      "type": "integer",
+      "category": "NUMERIC",
+      "unit": "G",
+      "displayOrder": 10,
+      "inferenceRole": "INCLUDE_PRIMARY",
+      "defaultValue": null,
+      "observationScope": "SELF_PLAY"
+    },
+    {
+      "id": "INP_BONUS_FIRST_HIT_COUNT",
+      "name": "ボーナス初当り",
+      "type": "counter",
+      "category": "NUMERIC",
+      "unit": "回",
+      "displayOrder": 11,
+      "inferenceRole": "INCLUDE_PRIMARY",
+      "defaultValue": null,
+      "parentInputId": "INP_NORMAL_GAMES"
+    }
+  ],
+  "features": [
+    {
+      "researchFeatureId": "RF_BONUS_FIRST_HIT",
+      "featureId": "FEAT_BONUS_FIRST_HIT",
+      "adoptionCategory": "INCLUDE_PRIMARY",
+      "numeratorInputId": "INP_BONUS_FIRST_HIT_COUNT",
+      "denominatorInputId": "INP_NORMAL_GAMES",
+      "weight": 1,
+      "difficultyParticipation": "INCLUDE",
+      "difficultyExposure": {
+        "mode": "per_game",
+        "factor": 1,
+        "quality": "EXACT",
+        "basisId": "NORMAL_GAMES"
+      },
+      "userReason": "ボーナス初当りはデータカウンターから自然に観測でき、設定差は弱いものの低負担で継続的な母数を確保できるため主軸として採用します。"
+    },
+    {
+      "researchFeatureId": "RF_WEAK_CHERRY_BONUS",
+      "featureId": "FEAT_WEAK_CHERRY_BONUS_EXCLUDED",
+      "adoptionCategory": "EXCLUDE",
+      "userReason": "弱チェリー契機当選は設定差が非常に小さく必要試行量が大きいうえ、疑似遊技チェリーと実ゲーム数の分母定義に注意が必要なため不採用です。"
+    },
+    {
+      "researchFeatureId": "RF_TEMPAI_VOICE",
+      "featureId": "FEAT_TEMPAI_VOICE_EXCLUDED",
+      "adoptionCategory": "EXCLUDE",
+      "userReason": "テンパイボイスは高設定示唆の存在のみ公開され、設定別出現率が公開されていないため数値推測には不採用です。"
+    }
+  ],
+  "evidenceUi": {
+    "groups": []
+  },
+  "rejectedElements": [],
+  "evidenceReview": {
+    "policyVersion": 1,
+    "exclusions": []
+  }
+}

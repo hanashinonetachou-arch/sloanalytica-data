@@ -1,0 +1,277 @@
+{
+  "schemaVersion": "selection-data-v1",
+  "machineId": "S_MOMOKYUN_SWORD_DX",
+  "machineDataVersion": "0.1.0",
+  "uiCategoryLabels": {
+    "NUMERIC": "設定推測要素",
+    "EVIDENCE": "設定確定・示唆"
+  },
+  "inputs": [
+    {
+      "id": "INP_NORMAL_GAMES",
+      "name": "通常ゲーム数",
+      "type": "integer",
+      "category": "NUMERIC",
+      "unit": "G",
+      "displayOrder": 10,
+      "inferenceRole": "INCLUDE_PRIMARY",
+      "defaultValue": null,
+      "observationScope": "SELF_PLAY"
+    },
+    {
+      "id": "INP_AT_FIRST_HIT_COUNT",
+      "name": "AT初当り",
+      "type": "counter",
+      "category": "NUMERIC",
+      "unit": "回",
+      "displayOrder": 11,
+      "inferenceRole": "INCLUDE_PRIMARY",
+      "defaultValue": null,
+      "parentInputId": "INP_NORMAL_GAMES"
+    },
+    {
+      "id": "INP_AT_GAMES",
+      "name": "ATゲーム数",
+      "type": "integer",
+      "category": "NUMERIC",
+      "unit": "G",
+      "displayOrder": 12,
+      "inferenceRole": "INCLUDE_PRIMARY",
+      "defaultValue": null,
+      "observationScope": "SELF_PLAY"
+    },
+    {
+      "id": "INP_AT_MOMOKEN_BONUS_COUNT",
+      "name": "AT中 桃剣BONUS",
+      "type": "counter",
+      "category": "NUMERIC",
+      "unit": "回",
+      "displayOrder": 13,
+      "inferenceRole": "INCLUDE_SUPPORT",
+      "defaultValue": null,
+      "parentInputId": "INP_AT_GAMES"
+    },
+    {
+      "id": "INP_MOMOKEN_ATTACK_COUNT",
+      "name": "桃剣ATTACK当選",
+      "type": "counter",
+      "category": "NUMERIC",
+      "unit": "回",
+      "displayOrder": 14,
+      "inferenceRole": "INCLUDE_SUPPORT",
+      "defaultValue": null,
+      "parentInputId": "INP_AT_GAMES"
+    }
+  ],
+  "features": [
+    {
+      "researchFeatureId": "RF_NORMAL_MOMOKEN_BONUS",
+      "featureId": "FEAT_NORMAL_MOMOKEN_BONUS_EXCLUDED",
+      "adoptionCategory": "EXCLUDE",
+      "userReason": "通常時桃剣BONUSは公開設定差が小さく、設定1対6でも必要試行量が非常に大きいため情報量が低く不採用です。"
+    },
+    {
+      "researchFeatureId": "RF_AT_FIRST_HIT",
+      "featureId": "FEAT_AT_FIRST_HIT",
+      "adoptionCategory": "INCLUDE_PRIMARY",
+      "numeratorInputId": "INP_AT_FIRST_HIT_COUNT",
+      "denominatorInputId": "INP_NORMAL_GAMES",
+      "weight": 1,
+      "difficultyParticipation": "INCLUDE",
+      "difficultyExposure": {
+        "mode": "per_game",
+        "factor": 1,
+        "quality": "EXACT",
+        "basisId": "NORMAL_GAMES"
+      },
+      "userReason": "AT初当りは設定1と設定6で約1.67倍の設定差があり、通常ゲーム数を分母に直接観測できるため主軸として採用します。"
+    },
+    {
+      "researchFeatureId": "RF_AT_MOMOKEN_BONUS",
+      "featureId": "FEAT_AT_MOMOKEN_BONUS",
+      "adoptionCategory": "INCLUDE_SUPPORT",
+      "numeratorInputId": "INP_AT_MOMOKEN_BONUS_COUNT",
+      "denominatorInputId": "INP_AT_GAMES",
+      "weight": 1,
+      "difficultyParticipation": "EXCLUDE",
+      "userReason": "AT中桃剣BONUSは設定間の確率差が大きく、ATゲーム数を分母に独立したAT中事象として観測できるため補助採用します。"
+    },
+    {
+      "researchFeatureId": "RF_SUIKA",
+      "featureId": "FEAT_SUIKA_EXCLUDED",
+      "adoptionCategory": "EXCLUDE",
+      "userReason": "スイカは全設定で確率差が小さく、単独で必要となる試行量が大きいため主推測への追加情報量が小さく不採用です。"
+    },
+    {
+      "researchFeatureId": "RF_HYOI_DOG",
+      "featureId": "FEAT_HYOI_DOG_EXCLUDED",
+      "adoptionCategory": "EXCLUDE",
+      "userReason": "公開条件・観測分母・依存関係のいずれかが現行推測モデルで安全に再現できないため不採用です。"
+    },
+    {
+      "researchFeatureId": "RF_HYOI_MONKEY",
+      "featureId": "FEAT_HYOI_MONKEY_EXCLUDED",
+      "adoptionCategory": "EXCLUDE",
+      "userReason": "公開条件・観測分母・依存関係のいずれかが現行推測モデルで安全に再現できないため不採用です。"
+    },
+    {
+      "researchFeatureId": "RF_HYOI_BIRD",
+      "featureId": "FEAT_HYOI_BIRD_EXCLUDED",
+      "adoptionCategory": "EXCLUDE",
+      "userReason": "公開条件・観測分母・依存関係のいずれかが現行推測モデルで安全に再現できないため不採用です。"
+    },
+    {
+      "researchFeatureId": "RF_HYOI_DOG_MONKEY",
+      "featureId": "FEAT_HYOI_DOG_MONKEY_EXCLUDED",
+      "adoptionCategory": "EXCLUDE",
+      "userReason": "公開条件・観測分母・依存関係のいずれかが現行推測モデルで安全に再現できないため不採用です。"
+    },
+    {
+      "researchFeatureId": "RF_HYOI_DOG_BIRD",
+      "featureId": "FEAT_HYOI_DOG_BIRD_EXCLUDED",
+      "adoptionCategory": "EXCLUDE",
+      "userReason": "公開条件・観測分母・依存関係のいずれかが現行推測モデルで安全に再現できないため不採用です。"
+    },
+    {
+      "researchFeatureId": "RF_HYOI_MONKEY_BIRD",
+      "featureId": "FEAT_HYOI_MONKEY_BIRD_EXCLUDED",
+      "adoptionCategory": "EXCLUDE",
+      "userReason": "公開条件・観測分母・依存関係のいずれかが現行推測モデルで安全に再現できないため不採用です。"
+    },
+    {
+      "researchFeatureId": "RF_HYOI_ALL",
+      "featureId": "FEAT_HYOI_ALL_EXCLUDED",
+      "adoptionCategory": "EXCLUDE",
+      "userReason": "公開条件・観測分母・依存関係のいずれかが現行推測モデルで安全に再現できないため不採用です。"
+    },
+    {
+      "researchFeatureId": "RF_DAILY_BATTLE",
+      "featureId": "FEAT_DAILY_BATTLE_EXCLUDED",
+      "adoptionCategory": "EXCLUDE",
+      "userReason": "日常対決は鬼決戦1戦目集計に含まれる関係があり、同じ勝敗情報を二重評価しないため数値推測には不採用です。"
+    },
+    {
+      "researchFeatureId": "RF_ONI_BATTLE_R1",
+      "featureId": "FEAT_ONI_BATTLE_R1_EXCLUDED",
+      "adoptionCategory": "EXCLUDE",
+      "userReason": "鬼決戦1戦目は設定差が小さいうえ日常対決を含む集計で、日常対決との重複を安全に分離できないため不採用です。"
+    },
+    {
+      "researchFeatureId": "RF_ONI_BATTLE_R2",
+      "featureId": "FEAT_ONI_BATTLE_R2_EXCLUDED",
+      "adoptionCategory": "EXCLUDE",
+      "userReason": "鬼決戦2戦目は到達条件付きで設定差も小さく、有効試行数が限られ情報量が低いため不採用です。"
+    },
+    {
+      "researchFeatureId": "RF_ONI_BATTLE_R3",
+      "featureId": "FEAT_ONI_BATTLE_R3_EXCLUDED",
+      "adoptionCategory": "EXCLUDE",
+      "userReason": "鬼決戦3戦目は到達条件付きで設定差も小さく、有効試行数が限られ情報量が低いため不採用です。"
+    },
+    {
+      "researchFeatureId": "RF_ONI_BATTLE_R4",
+      "featureId": "FEAT_ONI_BATTLE_R4_EXCLUDED",
+      "adoptionCategory": "EXCLUDE",
+      "userReason": "鬼決戦4戦目は到達条件付きで設定差も小さく、有効試行数が限られ情報量が低いため不採用です。"
+    },
+    {
+      "researchFeatureId": "RF_AT_DIRECT",
+      "featureId": "FEAT_AT_DIRECT_EXCLUDED",
+      "adoptionCategory": "EXCLUDE",
+      "userReason": "AT直撃は全設定の確率差がごく小さく、通常ゲーム数に対する単独情報量が低いため不採用です。"
+    },
+    {
+      "researchFeatureId": "RF_MOMOKEN_ATTACK",
+      "featureId": "FEAT_MOMOKEN_ATTACK",
+      "adoptionCategory": "INCLUDE_SUPPORT",
+      "numeratorInputId": "INP_MOMOKEN_ATTACK_COUNT",
+      "denominatorInputId": "INP_AT_GAMES",
+      "weight": 1,
+      "difficultyParticipation": "EXCLUDE",
+      "userReason": "桃剣ATTACKは設定間の発生率差が大きく、ATゲーム数に対する別事象として観測できるため補助採用します。"
+    }
+  ],
+  "evidenceUi": {
+    "groups": [
+      {
+        "groupId": "SETTING_EVIDENCE",
+        "label": "設定確定・設定下限情報",
+        "category": "EVIDENCE",
+        "selectionMode": "multi",
+        "normalizationMode": "ALLOWED_SETTINGS_INTERSECTION",
+        "displayOrder": 100,
+        "options": [
+          {
+            "value": "EV_1",
+            "label": "AT終了画面 妖鬼&幻鬼&艶鬼&鉄鬼",
+            "allowedSettings": [
+              "SET_2",
+              "SET_4",
+              "SET_5",
+              "SET_6"
+            ],
+            "excludedSettings": [
+              "SET_1"
+            ],
+            "sourceEvidenceIds": [
+              "RE_AT_END_2PLUS"
+            ]
+          },
+          {
+            "value": "EV_2",
+            "label": "AT終了画面 桃子&鬼姫",
+            "allowedSettings": [
+              "SET_5",
+              "SET_6"
+            ],
+            "excludedSettings": [
+              "SET_1",
+              "SET_2",
+              "SET_4"
+            ],
+            "sourceEvidenceIds": [
+              "RE_AT_END_5PLUS"
+            ]
+          },
+          {
+            "value": "EV_3",
+            "label": "AT終了画面 皇天女",
+            "allowedSettings": [
+              "SET_2",
+              "SET_4",
+              "SET_6"
+            ],
+            "excludedSettings": [
+              "SET_1",
+              "SET_5"
+            ],
+            "sourceEvidenceIds": [
+              "RE_AT_END_EVEN"
+            ]
+          },
+          {
+            "value": "EV_4",
+            "label": "AT終了画面 邪鬼王",
+            "allowedSettings": [
+              "SET_1",
+              "SET_5"
+            ],
+            "excludedSettings": [
+              "SET_2",
+              "SET_4",
+              "SET_6"
+            ],
+            "sourceEvidenceIds": [
+              "RE_AT_END_1_OR_5"
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "rejectedElements": [],
+  "evidenceReview": {
+    "policyVersion": 1,
+    "exclusions": []
+  }
+}

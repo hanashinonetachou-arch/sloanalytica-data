@@ -1,0 +1,306 @@
+{
+  "schemaVersion": "selection-data-v1",
+  "machineId": "L_SALARYMAN_KINTARO_ET",
+  "machineDataVersion": "0.1.0",
+  "uiCategoryLabels": {
+    "NUMERIC": "設定推測要素",
+    "EVIDENCE": "設定確定・示唆"
+  },
+  "inputs": [
+    {
+      "id": "INP_NORMAL_GAMES",
+      "name": "通常ゲーム数",
+      "type": "integer",
+      "category": "NUMERIC",
+      "unit": "G",
+      "displayOrder": 10,
+      "inferenceRole": "INCLUDE_PRIMARY",
+      "defaultValue": null,
+      "observationScope": "SELF_PLAY"
+    },
+    {
+      "id": "INP_AT_FIRST_HIT_COUNT",
+      "name": "金太郎チャンス初当り",
+      "type": "counter",
+      "category": "NUMERIC",
+      "unit": "回",
+      "displayOrder": 11,
+      "inferenceRole": "INCLUDE_PRIMARY",
+      "defaultValue": null,
+      "parentInputId": "INP_NORMAL_GAMES"
+    }
+  ],
+  "features": [
+    {
+      "researchFeatureId": "RF_BONUS_FIRST_HIT",
+      "featureId": "FEAT_BONUS_FIRST_HIT_EXCLUDED",
+      "adoptionCategory": "EXCLUDE",
+      "userReason": "BONUS初当りは設定差が小さく、AT初当りと同じ通常時の当選経路に強く依存するため二重評価を避けて不採用です。"
+    },
+    {
+      "researchFeatureId": "RF_AT_FIRST_HIT",
+      "featureId": "FEAT_AT_FIRST_HIT",
+      "adoptionCategory": "INCLUDE_PRIMARY",
+      "numeratorInputId": "INP_AT_FIRST_HIT_COUNT",
+      "denominatorInputId": "INP_NORMAL_GAMES",
+      "weight": 1,
+      "difficultyParticipation": "INCLUDE",
+      "difficultyExposure": {
+        "mode": "per_game",
+        "factor": 1,
+        "quality": "EXACT",
+        "basisId": "NORMAL_GAMES"
+      },
+      "userReason": "金太郎チャンス初当りは設定差が比較的大きく、通常ゲーム数を分母に直接観測できるため主軸として採用します。"
+    },
+    {
+      "researchFeatureId": "RF_CHANCE_ME",
+      "featureId": "FEAT_CHANCE_ME_EXCLUDED",
+      "adoptionCategory": "EXCLUDE",
+      "userReason": "チャンス目合算は全設定で確率差がごく小さく、単独情報量が低いため不採用です。"
+    },
+    {
+      "researchFeatureId": "RF_SINGLE_BONUS_AT_NORMAL",
+      "featureId": "FEAT_SINGLE_BONUS_AT_NORMAL_EXCLUDED",
+      "adoptionCategory": "EXCLUDE",
+      "userReason": "シングルBONUS中AT当選はAT初当りの部分集合で、主軸AT初当りと同時採用すると同じAT当選を重複評価するため不採用です。"
+    },
+    {
+      "researchFeatureId": "RF_CHANCE_ME_BONUS_NORMAL",
+      "featureId": "FEAT_CHANCE_ME_BONUS_NORMAL_EXCLUDED",
+      "adoptionCategory": "EXCLUDE",
+      "userReason": "通常滞在時チャンス目からのBONUS当選はBONUS初当りの条件付き内訳で、AT初当りを含む通常時当選経路との依存を安全に分離しない現行構成では不採用です。"
+    },
+    {
+      "researchFeatureId": "RF_CHANCE_ME_AT_NORMAL",
+      "featureId": "FEAT_CHANCE_ME_AT_NORMAL_EXCLUDED",
+      "adoptionCategory": "EXCLUDE",
+      "userReason": "通常滞在時チャンス目からのAT当選はAT初当りの部分集合で、主軸AT初当りとの二重評価を避けるため不採用です。"
+    },
+    {
+      "researchFeatureId": "RF_CHANCE_ME_BONUS_HIGH",
+      "featureId": "FEAT_CHANCE_ME_BONUS_HIGH_EXCLUDED",
+      "adoptionCategory": "EXCLUDE",
+      "userReason": "高確滞在時チャンス目からのBONUS当選は内部状態の正確な判別が必要で、公開条件と同じ分母を安定して再現できないため不採用です。"
+    },
+    {
+      "researchFeatureId": "RF_CHANCE_ME_AT_HIGH",
+      "featureId": "FEAT_CHANCE_ME_AT_HIGH_EXCLUDED",
+      "adoptionCategory": "EXCLUDE",
+      "userReason": "高確滞在時チャンス目からのAT当選は内部状態判別が必要かつAT初当りの部分集合で、二重評価と分母誤認を避けるため不採用です。"
+    },
+    {
+      "researchFeatureId": "RF_MYSTERY_HIT",
+      "featureId": "FEAT_MYSTERY_HIT_EXCLUDED",
+      "adoptionCategory": "EXCLUDE",
+      "userReason": "謎当りは設定差の存在は確認できるものの全設定の公開確率がなく、尤度を定量化できないため不採用です。"
+    },
+    {
+      "researchFeatureId": "RF_GAME_COUNT_AT",
+      "featureId": "FEAT_GAME_COUNT_AT_EXCLUDED",
+      "adoptionCategory": "EXCLUDE",
+      "userReason": "公開条件・観測分母・依存関係のいずれかが現行推測モデルで安全に再現できないため不採用です。"
+    },
+    {
+      "researchFeatureId": "RF_AT_STOCK_COUNT",
+      "featureId": "FEAT_AT_STOCK_COUNT_EXCLUDED",
+      "adoptionCategory": "EXCLUDE",
+      "userReason": "公開条件・観測分母・依存関係のいずれかが現行推測モデルで安全に再現できないため不採用です。"
+    },
+    {
+      "researchFeatureId": "RF_AT_CHERRY_NAV_COUNT",
+      "featureId": "FEAT_AT_CHERRY_NAV_COUNT_EXCLUDED",
+      "adoptionCategory": "EXCLUDE",
+      "userReason": "公開条件・観測分母・依存関係のいずれかが現行推測モデルで安全に再現できないため不採用です。"
+    }
+  ],
+  "evidenceUi": {
+    "groups": [
+      {
+        "groupId": "SETTING_EVIDENCE",
+        "label": "設定確定・設定下限情報",
+        "category": "EVIDENCE",
+        "selectionMode": "multi",
+        "normalizationMode": "ALLOWED_SETTINGS_INTERSECTION",
+        "displayOrder": 100,
+        "options": [
+          {
+            "value": "EV_1",
+            "label": "ギンちゃんトロフィー銅",
+            "allowedSettings": [
+              "SET_2",
+              "SET_3",
+              "SET_4",
+              "SET_5",
+              "SET_6"
+            ],
+            "excludedSettings": [
+              "SET_1"
+            ],
+            "sourceEvidenceIds": [
+              "RE_GIN_TROPHY_COPPER"
+            ]
+          },
+          {
+            "value": "EV_2",
+            "label": "ギンちゃんトロフィー銀",
+            "allowedSettings": [
+              "SET_3",
+              "SET_4",
+              "SET_5",
+              "SET_6"
+            ],
+            "excludedSettings": [
+              "SET_1",
+              "SET_2"
+            ],
+            "sourceEvidenceIds": [
+              "RE_GIN_TROPHY_SILVER"
+            ]
+          },
+          {
+            "value": "EV_3",
+            "label": "ギンちゃんトロフィー金",
+            "allowedSettings": [
+              "SET_4",
+              "SET_5",
+              "SET_6"
+            ],
+            "excludedSettings": [
+              "SET_1",
+              "SET_2",
+              "SET_3"
+            ],
+            "sourceEvidenceIds": [
+              "RE_GIN_TROPHY_GOLD"
+            ]
+          },
+          {
+            "value": "EV_4",
+            "label": "ギンちゃんトロフィー虎",
+            "allowedSettings": [
+              "SET_5",
+              "SET_6"
+            ],
+            "excludedSettings": [
+              "SET_1",
+              "SET_2",
+              "SET_3",
+              "SET_4"
+            ],
+            "sourceEvidenceIds": [
+              "RE_GIN_TROPHY_TIGER"
+            ]
+          },
+          {
+            "value": "EV_5",
+            "label": "ギンちゃんトロフィーレインボー",
+            "allowedSettings": [
+              "SET_6"
+            ],
+            "excludedSettings": [
+              "SET_1",
+              "SET_2",
+              "SET_3",
+              "SET_4",
+              "SET_5"
+            ],
+            "sourceEvidenceIds": [
+              "RE_GIN_TROPHY_RAINBOW"
+            ]
+          },
+          {
+            "value": "EV_6",
+            "label": "RANK IN 赤文字",
+            "allowedSettings": [
+              "SET_2",
+              "SET_3",
+              "SET_4",
+              "SET_5",
+              "SET_6"
+            ],
+            "excludedSettings": [
+              "SET_1"
+            ],
+            "sourceEvidenceIds": [
+              "RE_RANK_RED"
+            ]
+          },
+          {
+            "value": "EV_7",
+            "label": "RANK IN 金文字",
+            "allowedSettings": [
+              "SET_4",
+              "SET_5",
+              "SET_6"
+            ],
+            "excludedSettings": [
+              "SET_1",
+              "SET_2",
+              "SET_3"
+            ],
+            "sourceEvidenceIds": [
+              "RE_RANK_GOLD"
+            ]
+          },
+          {
+            "value": "EV_8",
+            "label": "RANK IN 虎文字",
+            "allowedSettings": [
+              "SET_6"
+            ],
+            "excludedSettings": [
+              "SET_1",
+              "SET_2",
+              "SET_3",
+              "SET_4",
+              "SET_5"
+            ],
+            "sourceEvidenceIds": [
+              "RE_RANK_TIGER"
+            ]
+          },
+          {
+            "value": "EV_9",
+            "label": "EDボイス『心臓がドキドキして…』",
+            "allowedSettings": [
+              "SET_5",
+              "SET_6"
+            ],
+            "excludedSettings": [
+              "SET_1",
+              "SET_2",
+              "SET_3",
+              "SET_4"
+            ],
+            "sourceEvidenceIds": [
+              "RE_ENDING_VOICE_5PLUS"
+            ]
+          },
+          {
+            "value": "EV_10",
+            "label": "EDボイス『金ちゃんの奥さんに…』",
+            "allowedSettings": [
+              "SET_6"
+            ],
+            "excludedSettings": [
+              "SET_1",
+              "SET_2",
+              "SET_3",
+              "SET_4",
+              "SET_5"
+            ],
+            "sourceEvidenceIds": [
+              "RE_ENDING_VOICE_6"
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "rejectedElements": [],
+  "evidenceReview": {
+    "policyVersion": 1,
+    "exclusions": []
+  }
+}
