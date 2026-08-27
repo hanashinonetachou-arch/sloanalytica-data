@@ -2,7 +2,14 @@
 import fs from 'node:fs';
 import path from 'node:path';
 
-const root = path.resolve(process.argv[2] ?? '.');
+const args = process.argv.slice(2);
+let root = process.cwd();
+let ids = [];
+if (args.length && (args[0] === '.' || args[0] === '..' || args[0].includes('/') || args[0].includes('\\'))) {
+  root = path.resolve(args.shift());
+}
+ids = args.filter(a => !a.startsWith('--'));
+const targetIds = ids.length ? new Set(ids) : null;
 const errors = [];
 const warnings = [];
 let checked = 0;
@@ -10,6 +17,7 @@ let checked = 0;
 for (const ent of fs.readdirSync(path.join(root, 'research'), { withFileTypes: true })) {
   if (!ent.isDirectory()) continue;
   const machineId = ent.name;
+  if (targetIds && !targetIds.has(machineId)) continue;
   const dir = path.join(root, 'research', machineId);
   const designPath = path.join(dir, 'ui-design-data.json');
   if (!fs.existsSync(designPath)) continue;
@@ -34,16 +42,20 @@ for (const ent of fs.readdirSync(path.join(root, 'research'), { withFileTypes: t
       errors.push(`${machineId}: ${id} references unknown evidence group ${contract.sourceEvidenceGroupId}`);
       continue;
     }
-    // selection-data-v1 historically allowed evidence groups without an explicit selectionMode.
-    // Existing UI contracts use multi for those groups, so preserve backward compatibility while
-    // still detecting an explicit incompatible mode when SelectionData provides one.
-    const groupSelectionMode = group.selectionMode ?? 'multi';
-    if (contract.selectionMode !== groupSelectionMode) {
+    const selectionMode = group.selectionMode ?? 'multi';
+    if (contract.selectionMode !== selectionMode) {
       errors.push(`${machineId}: ${id} selectionMode differs from SelectionData`);
     }
     if (contract.label !== group.label) {
       warnings.push(`${machineId}: ${id} label differs from SelectionData`);
     }
+  }
+}
+
+if (targetIds) {
+  for (const machineId of targetIds) {
+    const dir = path.join(root, 'research', machineId);
+    if (!fs.existsSync(path.join(dir, 'ui-design-data.json'))) errors.push(`${machineId}: missing ui-design-data.json`);
   }
 }
 
