@@ -26,6 +26,14 @@ function collectRejectedElementIds(selection) {
   return new Set((selection.rejectedElements ?? []).map(item => item?.id).filter(Boolean));
 }
 
+function normalizeDiscoveryItem(item) {
+  return {
+    id: item?.discoveryCandidateId ?? item?.id ?? '(unknown-discovery)',
+    target: item?.researchTarget ?? item?.mappedTo ?? null,
+    transferStatus: item?.transferStatus ?? null,
+  };
+}
+
 function assessDiscoveryCoverage(research, selection, featureDecisions, evidenceRefs, blockers) {
   const inventory = Array.isArray(research.discoveryInventory) ? research.discoveryInventory : [];
   if (!inventory.length) return { discovered: 0, classified: 0, missing: [] };
@@ -33,11 +41,16 @@ function assessDiscoveryCoverage(research, selection, featureDecisions, evidence
   const researchEvidence = new Set((research.evidenceCandidates ?? []).map(item => item?.researchEvidenceId).filter(Boolean));
   const rejectedElements = collectRejectedElementIds(selection);
   const missing = [];
-  for (const item of inventory) {
-    const id = item?.id ?? '(unknown-discovery)';
-    const target = item?.mappedTo;
+
+  for (const raw of inventory) {
+    const { id, target, transferStatus } = normalizeDiscoveryItem(raw);
     let classified = false;
-    if (target === 'evidence') {
+
+    // Gate 0 permits explicit tracked non-transfer outcomes; these must not be
+    // reclassified as vanished by the downstream Selection Quality Gate.
+    if (['UNRESOLVED', 'REFERENCE', 'EXCLUDE'].includes(transferStatus)) {
+      classified = true;
+    } else if (target === 'evidence') {
       classified = true;
     } else if (typeof target === 'string' && researchFeatures.has(target)) {
       classified = featureDecisions.has(target);
@@ -46,20 +59,27 @@ function assessDiscoveryCoverage(research, selection, featureDecisions, evidence
     } else if (typeof target === 'string' && rejectedElements.has(target)) {
       classified = true;
     }
+
     if (!classified) {
       missing.push(id);
       blockers.push(`unmapped discovery candidate: ${id}${target ? ` -> ${target}` : ''}`);
     }
   }
+
   return { discovered: inventory.length, classified: inventory.length - missing.length, missing };
 }
 
 function assessExcludedInputHygiene(selection, blockers) {
   const featureByInput = new Map();
   for (const feature of selection.features ?? []) {
-    const ids = [feature.numeratorInputId, feature.denominatorInputId, feature.trialCountInputId,
-      ...(feature.numeratorInputIds ?? []), ...(feature.categoryInputIds ?? []), ...(feature.denominatorInputIds ?? [])]
-      .filter(Boolean);
+    const ids = [
+      feature.numeratorInputId,
+      feature.denominatorInputId,
+      feature.trialCountInputId,
+      ...(feature.numeratorInputIds ?? []),
+      ...(feature.categoryInputIds ?? []),
+      ...(feature.denominatorInputIds ?? []),
+    ].filter(Boolean);
     for (const inputId of ids) {
       if (!featureByInput.has(inputId)) featureByInput.set(inputId, []);
       featureByInput.get(inputId).push(feature);
@@ -79,6 +99,7 @@ export function assessSelectionQuality(research, selection) {
   const blockers = [];
   const reviews = [];
   const featureDecisions = new Map();
+
   for (const feature of selection.features ?? []) {
     if (!feature.researchFeatureId) continue;
     if (featureDecisions.has(feature.researchFeatureId)) blockers.push(`duplicate feature decision: ${feature.researchFeatureId}`);
