@@ -1,0 +1,565 @@
+{
+  "schemaVersion": 1,
+  "machine": {
+    "schemaVersion": "2.0.0",
+    "machineId": "L_DISCUP_ULTRA_REMIX_XR",
+    "machineDataVersion": "0.1.0",
+    "displayName": "A-SLOT+ ディスクアップ ULTRAREMIX",
+    "modelName": "L DISCUPウルトラリミックス XR",
+    "manufacturer": "サミー",
+    "settings": [
+      "SET_1",
+      "SET_2",
+      "SET_5",
+      "SET_6"
+    ],
+    "packagePolicy": {
+      "offlineCapable": true,
+      "containsImages": false,
+      "containsExecutableCode": false
+    }
+  },
+  "inputs": {
+    "schemaVersion": "2.0.0",
+    "inputs": [
+      {
+        "id": "INP_BONUS_OUTCOME_BIG",
+        "name": "BIG・REG内訳 BIG",
+        "type": "counter",
+        "category": "NUMERIC",
+        "unit": "回",
+        "displayOrder": 10,
+        "inferenceRole": "INCLUDE_PRIMARY",
+        "defaultValue": null,
+        "minimum": 0
+      },
+      {
+        "id": "INP_BONUS_OUTCOME_REG",
+        "name": "BIG・REG内訳 REG",
+        "type": "counter",
+        "category": "NUMERIC",
+        "unit": "回",
+        "displayOrder": 11,
+        "inferenceRole": "INCLUDE_PRIMARY",
+        "defaultValue": null,
+        "minimum": 0
+      },
+      {
+        "id": "INP_NORMAL_GAMES",
+        "name": "通常ゲーム数",
+        "type": "integer",
+        "category": "NUMERIC",
+        "unit": "G",
+        "displayOrder": 13,
+        "inferenceRole": "INCLUDE_PRIMARY",
+        "defaultValue": null,
+        "observationScope": "SELF_PLAY",
+        "minimum": 0
+      },
+      {
+        "id": "INP_THREE_COIN_COUNT",
+        "name": "3枚役",
+        "type": "counter",
+        "category": "NUMERIC",
+        "unit": "回",
+        "displayOrder": 14,
+        "inferenceRole": "INCLUDE_SUPPORT",
+        "defaultValue": null,
+        "parentInputId": "INP_NORMAL_GAMES",
+        "minimum": 0
+      },
+      {
+        "id": "INP_EVI_SETTING_EVIDENCE",
+        "name": "設定確定・設定下限情報",
+        "type": "multi_enum",
+        "category": "EVIDENCE",
+        "unit": "",
+        "displayOrder": 100,
+        "inferenceRole": "INCLUDE_SUPPORT",
+        "options": [
+          {
+            "key": "EV_1",
+            "label": "サミートロフィー銅",
+            "value": "EV_1"
+          },
+          {
+            "key": "EV_2",
+            "label": "サミートロフィーキリン",
+            "value": "EV_2"
+          },
+          {
+            "key": "EV_3",
+            "label": "サミートロフィーレインボー",
+            "value": "EV_3"
+          },
+          {
+            "key": "EV_4",
+            "label": "REG中 2以上確定パターン",
+            "value": "EV_4"
+          },
+          {
+            "key": "EV_5",
+            "label": "REG中 5以上確定パターン",
+            "value": "EV_5"
+          },
+          {
+            "key": "EV_6",
+            "label": "REG中 設定6確定パターン",
+            "value": "EV_6"
+          }
+        ],
+        "defaultValue": []
+      }
+    ]
+  },
+  "features": {
+    "schemaVersion": "2.0.0",
+    "features": [
+      {
+        "featureId": "FEAT_BONUS_OUTCOME",
+        "name": "BIG・REG内訳",
+        "adoptionCategory": "INCLUDE_PRIMARY",
+        "calculationRole": "PROBABILITY",
+        "probabilityEngineUsage": true,
+        "modelType": "multinomial",
+        "minimumSample": 1,
+        "sampleRecommendation": 1,
+        "reliabilityProfile": {
+          "weight": 1
+        },
+        "numeratorInputId": "INP_BONUS_OUTCOME_BIG",
+        "denominatorInputId": "INP_NORMAL_GAMES",
+        "categoryInputIds": [
+          "INP_BONUS_OUTCOME_REG"
+        ],
+        "probabilities": {},
+        "categoryLabels": [
+          "BIG",
+          "REG"
+        ],
+        "categoryProbabilities": {
+          "SET_1": [
+            0.003481894150417827,
+            0.002018978397409651
+          ],
+          "SET_2": [
+            0.003517411185367569,
+            0.00209555741827326
+          ],
+          "SET_5": [
+            0.0036523009495982466,
+            0.002508780732563973
+          ],
+          "SET_6": [
+            0.0038328861632815152,
+            0.0029931158335827577
+          ]
+        },
+        "categoryConditioning": {
+          "excludedCategories": [],
+          "normalization": "RENORMALIZE_INCLUDED",
+          "residualCategory": "NO_BONUS"
+        },
+        "sourceEvidenceRefs": [
+          "SRC_DMM",
+          "SRC_NANAPRESS"
+        ]
+      },
+      {
+        "featureId": "FEAT_THREE_COIN",
+        "name": "3枚役",
+        "adoptionCategory": "INCLUDE_SUPPORT",
+        "calculationRole": "PROBABILITY",
+        "probabilityEngineUsage": true,
+        "modelType": "binomial",
+        "minimumSample": 1,
+        "sampleRecommendation": 1,
+        "reliabilityProfile": {
+          "weight": 1
+        },
+        "denominatorInputId": "INP_NORMAL_GAMES",
+        "numeratorInputId": "INP_THREE_COIN_COUNT",
+        "displayFormat": "ratio_1_over_n",
+        "probabilities": {
+          "SET_1": 0.072992700729927,
+          "SET_2": 0.07462686567164178,
+          "SET_5": 0.07751937984496124,
+          "SET_6": 0.07936507936507936
+        },
+        "sourceEvidenceRefs": [
+          "SRC_NANAPRESS"
+        ]
+      }
+    ]
+  },
+  "evidence": {
+    "version": "1.0.0",
+    "evidences": [
+      {
+        "id": "EVI_SETTING_EVIDENCE_EV_1",
+        "name": "サミートロフィー銅",
+        "displayName": "サミートロフィー銅",
+        "inputId": "INP_EVI_SETTING_EVIDENCE",
+        "triggerValue": "EV_1",
+        "confirmedSettings": [
+          "SET_2",
+          "SET_5",
+          "SET_6"
+        ],
+        "deniedSettings": [
+          "SET_1"
+        ],
+        "hasImage": false,
+        "type": "SETTING_CONFIRMATION",
+        "sourceEvidenceRefs": [
+          "RE_TROPHY_COPPER"
+        ]
+      },
+      {
+        "id": "EVI_SETTING_EVIDENCE_EV_2",
+        "name": "サミートロフィーキリン",
+        "displayName": "サミートロフィーキリン",
+        "inputId": "INP_EVI_SETTING_EVIDENCE",
+        "triggerValue": "EV_2",
+        "confirmedSettings": [
+          "SET_5",
+          "SET_6"
+        ],
+        "deniedSettings": [
+          "SET_1",
+          "SET_2"
+        ],
+        "hasImage": false,
+        "type": "SETTING_CONFIRMATION",
+        "sourceEvidenceRefs": [
+          "RE_TROPHY_KIRIN"
+        ]
+      },
+      {
+        "id": "EVI_SETTING_EVIDENCE_EV_3",
+        "name": "サミートロフィーレインボー",
+        "displayName": "サミートロフィーレインボー",
+        "inputId": "INP_EVI_SETTING_EVIDENCE",
+        "triggerValue": "EV_3",
+        "confirmedSettings": [
+          "SET_6"
+        ],
+        "deniedSettings": [
+          "SET_1",
+          "SET_2",
+          "SET_5"
+        ],
+        "hasImage": false,
+        "type": "SETTING_CONFIRMATION",
+        "sourceEvidenceRefs": [
+          "RE_TROPHY_RAINBOW"
+        ]
+      },
+      {
+        "id": "EVI_SETTING_EVIDENCE_EV_4",
+        "name": "REG中 2以上確定パターン",
+        "displayName": "REG中 2以上確定パターン",
+        "inputId": "INP_EVI_SETTING_EVIDENCE",
+        "triggerValue": "EV_4",
+        "confirmedSettings": [
+          "SET_2",
+          "SET_5",
+          "SET_6"
+        ],
+        "deniedSettings": [
+          "SET_1"
+        ],
+        "hasImage": false,
+        "type": "SETTING_CONFIRMATION",
+        "sourceEvidenceRefs": [
+          "RE_REG_2PLUS"
+        ]
+      },
+      {
+        "id": "EVI_SETTING_EVIDENCE_EV_5",
+        "name": "REG中 5以上確定パターン",
+        "displayName": "REG中 5以上確定パターン",
+        "inputId": "INP_EVI_SETTING_EVIDENCE",
+        "triggerValue": "EV_5",
+        "confirmedSettings": [
+          "SET_5",
+          "SET_6"
+        ],
+        "deniedSettings": [
+          "SET_1",
+          "SET_2"
+        ],
+        "hasImage": false,
+        "type": "SETTING_CONFIRMATION",
+        "sourceEvidenceRefs": [
+          "RE_REG_5PLUS"
+        ]
+      },
+      {
+        "id": "EVI_SETTING_EVIDENCE_EV_6",
+        "name": "REG中 設定6確定パターン",
+        "displayName": "REG中 設定6確定パターン",
+        "inputId": "INP_EVI_SETTING_EVIDENCE",
+        "triggerValue": "EV_6",
+        "confirmedSettings": [
+          "SET_6"
+        ],
+        "deniedSettings": [
+          "SET_1",
+          "SET_2",
+          "SET_5"
+        ],
+        "hasImage": false,
+        "type": "SETTING_CONFIRMATION",
+        "sourceEvidenceRefs": [
+          "RE_REG_6"
+        ]
+      }
+    ],
+    "sources": [
+      {
+        "id": "SRC_DMM",
+        "classification": "ANALYSIS",
+        "pageName": "A-SLOT+ ディスクアップ ULTRAREMIX",
+        "url": "https://p-town.dmm.com/machines/4702",
+        "checkedAt": "2026-08-27"
+      },
+      {
+        "id": "SRC_SAMMY",
+        "classification": "OFFICIAL",
+        "pageName": "A-SLOT+ ディスクアップ ULTRAREMIX 発売のお知らせ",
+        "url": "https://new.sammy.co.jp/japanese/news/detail/?id=150",
+        "checkedAt": "2026-08-27"
+      },
+      {
+        "id": "SRC_PACHIBEE",
+        "classification": "ANALYSIS",
+        "pageName": "ディスクアップ ULTRAREMIX 攻略情報",
+        "url": "https://www.pachibee.jp/machines/kouryaku/224120006",
+        "checkedAt": "2026-08-27"
+      },
+      {
+        "id": "SRC_NANAPRESS",
+        "classification": "ANALYSIS",
+        "pageName": "ディスクアップ ULTRAREMIX 設定判別",
+        "url": "https://nana-press.com/kaiseki/machine/883/27467/",
+        "checkedAt": "2026-08-27"
+      },
+      {
+        "id": "SRC_NANAPRESS_REG",
+        "classification": "ANALYSIS",
+        "pageName": "ディスクアップ ULTRAREMIX REG中の設定示唆",
+        "url": "https://nana-press.com/kaiseki/machine/883/26929/",
+        "checkedAt": "2026-08-27"
+      }
+    ]
+  },
+  "ui": {
+    "sections": [
+      {
+        "id": "AUTO_NUMERIC",
+        "title": "設定推測要素",
+        "displayOrder": 1,
+        "items": [
+          {
+            "type": "input",
+            "inputId": "INP_BONUS_OUTCOME_BIG",
+            "label": "BIG・REG内訳 BIG",
+            "widget": "counter"
+          },
+          {
+            "type": "input",
+            "inputId": "INP_BONUS_OUTCOME_REG",
+            "label": "BIG・REG内訳 REG",
+            "widget": "counter"
+          },
+          {
+            "type": "input",
+            "inputId": "INP_NORMAL_GAMES",
+            "label": "通常ゲーム数",
+            "widget": "number"
+          },
+          {
+            "type": "input",
+            "inputId": "INP_THREE_COIN_COUNT",
+            "label": "3枚役",
+            "widget": "counter"
+          }
+        ]
+      },
+      {
+        "id": "AUTO_EVIDENCE",
+        "title": "設定確定・示唆",
+        "displayOrder": 2,
+        "items": [
+          {
+            "type": "input",
+            "inputId": "INP_EVI_SETTING_EVIDENCE",
+            "label": "設定確定・設定下限情報",
+            "widget": "multi_select"
+          }
+        ]
+      }
+    ]
+  },
+  "selectionSummary": {
+    "schemaVersion": "selection-summary-v1",
+    "evaluatedCount": 15,
+    "selectedCount": 2,
+    "rejectedCount": 13,
+    "selected": [
+      {
+        "featureId": "FEAT_BONUS_OUTCOME",
+        "name": "BIG・REG内訳",
+        "reason": "BIG・REG内訳は通常ゲーム数に対して自然に観測でき、特にREG確率に設定差があるため主軸として採用します。",
+        "requiredTrials": {
+          "value": 17546,
+          "unit": "通常ゲーム"
+        }
+      },
+      {
+        "featureId": "FEAT_THREE_COIN",
+        "name": "3枚役",
+        "reason": "3枚役は高頻度で遊技データから観測しやすく、ボーナスとは別の成立役情報として独立に追加できるため補助採用します。",
+        "requiredTrials": {
+          "value": 12699,
+          "unit": "通常ゲーム"
+        }
+      }
+    ],
+    "rejected": [
+      {
+        "featureId": "FEAT_WATERMELON_A_EXCLUDED",
+        "name": "スイカA",
+        "reason": "スイカAは設定差が小さく、3枚役を採用した後の追加情報量が限定的なため不採用です。",
+        "requiredTrials": {
+          "value": 49194,
+          "unit": "通常ゲーム"
+        }
+      },
+      {
+        "featureId": "FEAT_REACH_T2_EXCLUDED",
+        "name": "リーチ目役T2",
+        "reason": "リーチ目役T2は低頻度で、BIG・REG主軸へ追加する実戦範囲の情報量が限定的なため不採用です。",
+        "requiredTrials": {
+          "value": 38134,
+          "unit": "通常ゲーム"
+        }
+      },
+      {
+        "featureId": "FEAT_REACH_T3_EXCLUDED",
+        "name": "リーチ目役T3",
+        "reason": "リーチ目役T3は極端に低頻度で実戦範囲の母数を得にくいため不採用です。",
+        "requiredTrials": {
+          "value": 56021,
+          "unit": "通常ゲーム"
+        }
+      },
+      {
+        "featureId": "FEAT_REACH_A2_EXCLUDED",
+        "name": "リーチ目役A2",
+        "reason": "リーチ目役A2は極端に低頻度で実戦範囲の母数を得にくいため不採用です。",
+        "requiredTrials": {
+          "value": 56021,
+          "unit": "通常ゲーム"
+        }
+      },
+      {
+        "featureId": "FEAT_REACH_D2_EXCLUDED",
+        "name": "リーチ目役D2",
+        "reason": "リーチ目役D2は低頻度で、成立後ボーナス内訳とも依存するため現行構成では不採用です。",
+        "requiredTrials": {
+          "value": 84875,
+          "unit": "通常ゲーム"
+        }
+      },
+      {
+        "featureId": "FEAT_REACH_G2_EXCLUDED",
+        "name": "リーチ目役G2",
+        "reason": "リーチ目役G2は低頻度で、成立後ボーナス内訳とも依存するため現行構成では不採用です。",
+        "requiredTrials": {
+          "value": 178841,
+          "unit": "通常ゲーム"
+        }
+      },
+      {
+        "featureId": "FEAT_CONFIRMED_CHERRY_EXCLUDED",
+        "name": "確定チェリー",
+        "reason": "確定チェリーは低頻度で、成立後ボーナス内訳とも依存するため実戦範囲では不採用です。",
+        "requiredTrials": {
+          "value": 65016,
+          "unit": "通常ゲーム"
+        }
+      },
+      {
+        "featureId": "FEAT_D2_BONUS_TYPE_EXCLUDED",
+        "name": "D2成立時ボーナス種別",
+        "reason": "D2成立時ボーナス種別はD2成立率と条件付きで安全に構成できますが、D2自体が低頻度で実戦内母数が少ないため不採用です。",
+        "requiredTrials": {
+          "value": 70,
+          "unit": "D2成立1回"
+        }
+      },
+      {
+        "featureId": "FEAT_G2_BONUS_TYPE_EXCLUDED",
+        "name": "G2成立時ボーナス種別",
+        "reason": "G2成立時ボーナス種別はG2自体が低頻度で実戦内母数が少ないため不採用です。",
+        "requiredTrials": {
+          "value": 108,
+          "unit": "G2成立1回"
+        }
+      },
+      {
+        "featureId": "FEAT_T2_BONUS_TYPE_EXCLUDED",
+        "name": "T2成立時ボーナス種別",
+        "reason": "T2成立時ボーナス種別はT2成立回数を十分に得にくく、主軸ボーナス内訳への追加情報量が限定的なため不採用です。",
+        "requiredTrials": {
+          "value": 112,
+          "unit": "T2成立1回"
+        }
+      },
+      {
+        "featureId": "FEAT_CONFIRMED_CHERRY_BONUS_TYPE_EXCLUDED",
+        "name": "確定チェリー成立時ボーナス種別",
+        "reason": "確定チェリー成立時ボーナス種別は確定チェリー自体が低頻度で、十分な条件付き母数を得にくいため不採用です。",
+        "requiredTrials": {
+          "value": 41,
+          "unit": "確定チェリー成立1回"
+        }
+      },
+      {
+        "featureId": "FEAT_BIG_SUIKA_ULTRA_EXCLUDED",
+        "name": "BIG中スイカからのULTRA上乗せ",
+        "reason": "BIG中スイカからのULTRA上乗せは極端に低頻度で、実戦範囲では有効な母数を得にくいため不採用です。",
+        "requiredTrials": {
+          "value": 1685,
+          "unit": "BIG中スイカ1回"
+        }
+      },
+      {
+        "featureId": "FEAT_REG_HINT_MODE_EXCLUDED",
+        "name": "REG中設定示唆カテゴリ",
+        "reason": "REG中示唆カテゴリは設定下限・確定パターンと同一観測内で重なるため、確定情報をEvidenceとして優先し数値分布は二重評価防止のため不採用です。",
+        "requiredTrials": {
+          "value": 92,
+          "unit": "REG1回"
+        }
+      }
+    ]
+  },
+  "reliability": {},
+  "metadata": {
+    "machineId": "L_DISCUP_ULTRA_REMIX_XR",
+    "displayName": "A-SLOT+ ディスクアップ ULTRAREMIX",
+    "settings": [
+      "SET_1",
+      "SET_2",
+      "SET_5",
+      "SET_6"
+    ]
+  },
+  "validation": {
+    "cases": []
+  },
+  "statistics": {}
+}

@@ -1,0 +1,551 @@
+{
+  "schemaVersion": 1,
+  "machine": {
+    "schemaVersion": "2.0.0",
+    "machineId": "S_MOMOKYUN_SWORD_DX",
+    "machineDataVersion": "0.1.0",
+    "displayName": "SモモキュンソードDX",
+    "modelName": "SモモキュンソードDX",
+    "manufacturer": "西陣",
+    "settings": [
+      "SET_1",
+      "SET_2",
+      "SET_4",
+      "SET_5",
+      "SET_6"
+    ],
+    "packagePolicy": {
+      "offlineCapable": true,
+      "containsImages": false,
+      "containsExecutableCode": false
+    }
+  },
+  "inputs": {
+    "schemaVersion": "2.0.0",
+    "inputs": [
+      {
+        "id": "INP_NORMAL_GAMES",
+        "name": "通常ゲーム数",
+        "type": "integer",
+        "category": "NUMERIC",
+        "unit": "G",
+        "displayOrder": 10,
+        "inferenceRole": "INCLUDE_PRIMARY",
+        "defaultValue": null,
+        "observationScope": "SELF_PLAY",
+        "minimum": 0
+      },
+      {
+        "id": "INP_AT_FIRST_HIT_COUNT",
+        "name": "AT初当り",
+        "type": "counter",
+        "category": "NUMERIC",
+        "unit": "回",
+        "displayOrder": 11,
+        "inferenceRole": "INCLUDE_PRIMARY",
+        "defaultValue": null,
+        "parentInputId": "INP_NORMAL_GAMES",
+        "minimum": 0
+      },
+      {
+        "id": "INP_AT_GAMES",
+        "name": "ATゲーム数",
+        "type": "integer",
+        "category": "NUMERIC",
+        "unit": "G",
+        "displayOrder": 12,
+        "inferenceRole": "INCLUDE_PRIMARY",
+        "defaultValue": null,
+        "observationScope": "SELF_PLAY",
+        "minimum": 0
+      },
+      {
+        "id": "INP_AT_MOMOKEN_BONUS_COUNT",
+        "name": "AT中 桃剣BONUS",
+        "type": "counter",
+        "category": "NUMERIC",
+        "unit": "回",
+        "displayOrder": 13,
+        "inferenceRole": "INCLUDE_SUPPORT",
+        "defaultValue": null,
+        "parentInputId": "INP_AT_GAMES",
+        "minimum": 0
+      },
+      {
+        "id": "INP_MOMOKEN_ATTACK_COUNT",
+        "name": "桃剣ATTACK当選",
+        "type": "counter",
+        "category": "NUMERIC",
+        "unit": "回",
+        "displayOrder": 14,
+        "inferenceRole": "INCLUDE_SUPPORT",
+        "defaultValue": null,
+        "parentInputId": "INP_AT_GAMES",
+        "minimum": 0
+      },
+      {
+        "id": "INP_EVI_SETTING_EVIDENCE",
+        "name": "設定確定・設定下限情報",
+        "type": "multi_enum",
+        "category": "EVIDENCE",
+        "unit": "",
+        "displayOrder": 100,
+        "inferenceRole": "INCLUDE_SUPPORT",
+        "options": [
+          {
+            "key": "EV_1",
+            "label": "AT終了画面 妖鬼&幻鬼&艶鬼&鉄鬼",
+            "value": "EV_1"
+          },
+          {
+            "key": "EV_2",
+            "label": "AT終了画面 桃子&鬼姫",
+            "value": "EV_2"
+          },
+          {
+            "key": "EV_3",
+            "label": "AT終了画面 皇天女",
+            "value": "EV_3"
+          },
+          {
+            "key": "EV_4",
+            "label": "AT終了画面 邪鬼王",
+            "value": "EV_4"
+          }
+        ],
+        "defaultValue": []
+      }
+    ]
+  },
+  "features": {
+    "schemaVersion": "2.0.0",
+    "features": [
+      {
+        "featureId": "FEAT_AT_FIRST_HIT",
+        "name": "AT初当り",
+        "adoptionCategory": "INCLUDE_PRIMARY",
+        "calculationRole": "PROBABILITY",
+        "probabilityEngineUsage": true,
+        "modelType": "binomial",
+        "minimumSample": 1,
+        "sampleRecommendation": 1,
+        "reliabilityProfile": {
+          "weight": 1
+        },
+        "denominatorInputId": "INP_NORMAL_GAMES",
+        "numeratorInputId": "INP_AT_FIRST_HIT_COUNT",
+        "displayFormat": "ratio_1_over_n",
+        "probabilities": {
+          "SET_1": 0.002623294858342077,
+          "SET_2": 0.002916302128900554,
+          "SET_4": 0.003442340791738382,
+          "SET_5": 0.003971405877680699,
+          "SET_6": 0.004378283712784588
+        },
+        "sourceEvidenceRefs": [
+          "SRC_HAZUSE",
+          "SRC_NANAPRESS"
+        ]
+      },
+      {
+        "featureId": "FEAT_AT_MOMOKEN_BONUS",
+        "name": "AT中 桃剣BONUS",
+        "adoptionCategory": "INCLUDE_SUPPORT",
+        "calculationRole": "PROBABILITY",
+        "probabilityEngineUsage": true,
+        "modelType": "binomial",
+        "minimumSample": 1,
+        "sampleRecommendation": 1,
+        "reliabilityProfile": {
+          "weight": 1
+        },
+        "denominatorInputId": "INP_AT_GAMES",
+        "numeratorInputId": "INP_AT_MOMOKEN_BONUS_COUNT",
+        "displayFormat": "ratio_1_over_n",
+        "probabilities": {
+          "SET_1": 0.0016265452187703318,
+          "SET_2": 0.0013708019191226869,
+          "SET_4": 0.0009864851533984416,
+          "SET_5": 0.0006907988945111242,
+          "SET_6": 0.0005366250335305064
+        },
+        "sourceEvidenceRefs": [
+          "SRC_HAZUSE"
+        ]
+      },
+      {
+        "featureId": "FEAT_MOMOKEN_ATTACK",
+        "name": "桃剣ATTACK当選",
+        "adoptionCategory": "INCLUDE_SUPPORT",
+        "calculationRole": "PROBABILITY",
+        "probabilityEngineUsage": true,
+        "modelType": "binomial",
+        "minimumSample": 1,
+        "sampleRecommendation": 1,
+        "reliabilityProfile": {
+          "weight": 1
+        },
+        "denominatorInputId": "INP_AT_GAMES",
+        "numeratorInputId": "INP_MOMOKEN_ATTACK_COUNT",
+        "displayFormat": "ratio_1_over_n",
+        "probabilities": {
+          "SET_1": 0.0007552870090634441,
+          "SET_2": 0.0006177796997590658,
+          "SET_4": 0.00040842999509884006,
+          "SET_5": 0.0002437538086532602,
+          "SET_6": 0.00015728463800940564
+        },
+        "sourceEvidenceRefs": [
+          "SRC_NANAPRESS"
+        ]
+      }
+    ]
+  },
+  "evidence": {
+    "version": "1.0.0",
+    "evidences": [
+      {
+        "id": "EVI_SETTING_EVIDENCE_EV_1",
+        "name": "AT終了画面 妖鬼&幻鬼&艶鬼&鉄鬼",
+        "displayName": "AT終了画面 妖鬼&幻鬼&艶鬼&鉄鬼",
+        "inputId": "INP_EVI_SETTING_EVIDENCE",
+        "triggerValue": "EV_1",
+        "confirmedSettings": [
+          "SET_2",
+          "SET_4",
+          "SET_5",
+          "SET_6"
+        ],
+        "deniedSettings": [
+          "SET_1"
+        ],
+        "hasImage": false,
+        "type": "SETTING_CONFIRMATION",
+        "sourceEvidenceRefs": [
+          "RE_AT_END_2PLUS"
+        ]
+      },
+      {
+        "id": "EVI_SETTING_EVIDENCE_EV_2",
+        "name": "AT終了画面 桃子&鬼姫",
+        "displayName": "AT終了画面 桃子&鬼姫",
+        "inputId": "INP_EVI_SETTING_EVIDENCE",
+        "triggerValue": "EV_2",
+        "confirmedSettings": [
+          "SET_5",
+          "SET_6"
+        ],
+        "deniedSettings": [
+          "SET_1",
+          "SET_2",
+          "SET_4"
+        ],
+        "hasImage": false,
+        "type": "SETTING_CONFIRMATION",
+        "sourceEvidenceRefs": [
+          "RE_AT_END_5PLUS"
+        ]
+      },
+      {
+        "id": "EVI_SETTING_EVIDENCE_EV_3",
+        "name": "AT終了画面 皇天女",
+        "displayName": "AT終了画面 皇天女",
+        "inputId": "INP_EVI_SETTING_EVIDENCE",
+        "triggerValue": "EV_3",
+        "confirmedSettings": [
+          "SET_2",
+          "SET_4",
+          "SET_6"
+        ],
+        "deniedSettings": [
+          "SET_1",
+          "SET_5"
+        ],
+        "hasImage": false,
+        "type": "SETTING_CONFIRMATION",
+        "sourceEvidenceRefs": [
+          "RE_AT_END_EVEN"
+        ]
+      },
+      {
+        "id": "EVI_SETTING_EVIDENCE_EV_4",
+        "name": "AT終了画面 邪鬼王",
+        "displayName": "AT終了画面 邪鬼王",
+        "inputId": "INP_EVI_SETTING_EVIDENCE",
+        "triggerValue": "EV_4",
+        "confirmedSettings": [
+          "SET_1",
+          "SET_5"
+        ],
+        "deniedSettings": [
+          "SET_2",
+          "SET_4",
+          "SET_6"
+        ],
+        "hasImage": false,
+        "type": "SETTING_CONFIRMATION",
+        "sourceEvidenceRefs": [
+          "RE_AT_END_1_OR_5"
+        ]
+      }
+    ],
+    "sources": [
+      {
+        "id": "SRC_HAZUSE",
+        "classification": "ANALYSIS",
+        "pageName": "SモモキュンソードDX 設定推測",
+        "url": "https://hazuse.com/machine/pachislot/2S0223/genre/208/",
+        "checkedAt": "2026-08-27"
+      },
+      {
+        "id": "SRC_NANAPRESS",
+        "classification": "ANALYSIS",
+        "pageName": "SモモキュンソードDX 設定差のある要素や設定示唆演出まとめ",
+        "url": "https://nana-press.com/kaiseki/machine/487/13099/",
+        "checkedAt": "2026-08-27"
+      }
+    ]
+  },
+  "ui": {
+    "sections": [
+      {
+        "id": "AUTO_NUMERIC",
+        "title": "設定推測要素",
+        "displayOrder": 1,
+        "items": [
+          {
+            "type": "input",
+            "inputId": "INP_NORMAL_GAMES",
+            "label": "通常ゲーム数",
+            "widget": "number"
+          },
+          {
+            "type": "input",
+            "inputId": "INP_AT_FIRST_HIT_COUNT",
+            "label": "AT初当り",
+            "widget": "counter"
+          },
+          {
+            "type": "input",
+            "inputId": "INP_AT_GAMES",
+            "label": "ATゲーム数",
+            "widget": "number"
+          },
+          {
+            "type": "input",
+            "inputId": "INP_AT_MOMOKEN_BONUS_COUNT",
+            "label": "AT中 桃剣BONUS",
+            "widget": "counter"
+          },
+          {
+            "type": "input",
+            "inputId": "INP_MOMOKEN_ATTACK_COUNT",
+            "label": "桃剣ATTACK当選",
+            "widget": "counter"
+          }
+        ]
+      },
+      {
+        "id": "AUTO_EVIDENCE",
+        "title": "設定確定・示唆",
+        "displayOrder": 2,
+        "items": [
+          {
+            "type": "input",
+            "inputId": "INP_EVI_SETTING_EVIDENCE",
+            "label": "設定確定・設定下限情報",
+            "widget": "multi_select"
+          }
+        ]
+      }
+    ]
+  },
+  "selectionSummary": {
+    "schemaVersion": "selection-summary-v1",
+    "evaluatedCount": 18,
+    "selectedCount": 3,
+    "rejectedCount": 15,
+    "selected": [
+      {
+        "featureId": "FEAT_AT_FIRST_HIT",
+        "name": "AT初当り",
+        "reason": "AT初当りは設定1と設定6で約1.67倍の設定差があり、通常ゲーム数を分母に直接観測できるため主軸として採用します。",
+        "requiredTrials": {
+          "value": 8171,
+          "unit": "通常ゲーム"
+        }
+      },
+      {
+        "featureId": "FEAT_AT_MOMOKEN_BONUS",
+        "name": "AT中 桃剣BONUS",
+        "reason": "AT中桃剣BONUSは設定間の確率差が大きく、ATゲーム数を分母に独立したAT中事象として観測できるため補助採用します。",
+        "requiredTrials": {
+          "value": 6213,
+          "unit": "ATゲーム"
+        }
+      },
+      {
+        "featureId": "FEAT_MOMOKEN_ATTACK",
+        "name": "桃剣ATTACK当選",
+        "reason": "桃剣ATTACKは設定間の発生率差が大きく、ATゲーム数に対する別事象として観測できるため補助採用します。",
+        "requiredTrials": {
+          "value": 8206,
+          "unit": "ATゲーム"
+        }
+      }
+    ],
+    "rejected": [
+      {
+        "featureId": "FEAT_NORMAL_MOMOKEN_BONUS_EXCLUDED",
+        "name": "通常時 桃剣BONUS",
+        "reason": "通常時桃剣BONUSは公開設定差が小さく、設定1対6でも必要試行量が非常に大きいため情報量が低く不採用です。",
+        "requiredTrials": {
+          "value": 103606,
+          "unit": "通常ゲーム"
+        }
+      },
+      {
+        "featureId": "FEAT_SUIKA_EXCLUDED",
+        "name": "スイカ",
+        "reason": "スイカは全設定で確率差が小さく、単独で必要となる試行量が大きいため主推測への追加情報量が小さく不採用です。",
+        "requiredTrials": {
+          "value": 1384296,
+          "unit": "通常ゲーム"
+        }
+      },
+      {
+        "featureId": "FEAT_HYOI_DOG_EXCLUDED",
+        "name": "憑依玉 犬神時勝率",
+        "reason": "公開条件・観測分母・依存関係のいずれかが現行推測モデルで安全に再現できないため不採用です。",
+        "requiredTrials": {
+          "value": 1211,
+          "unit": "犬神のみ取得した鬼決戦1回"
+        }
+      },
+      {
+        "featureId": "FEAT_HYOI_MONKEY_EXCLUDED",
+        "name": "憑依玉 猿神時勝率",
+        "reason": "公開条件・観測分母・依存関係のいずれかが現行推測モデルで安全に再現できないため不採用です。",
+        "requiredTrials": {
+          "value": 1892,
+          "unit": "猿神のみ取得した鬼決戦1回"
+        }
+      },
+      {
+        "featureId": "FEAT_HYOI_BIRD_EXCLUDED",
+        "name": "憑依玉 雉神時勝率",
+        "reason": "公開条件・観測分母・依存関係のいずれかが現行推測モデルで安全に再現できないため不採用です。",
+        "requiredTrials": {
+          "value": 7230,
+          "unit": "雉神のみ取得した鬼決戦1回"
+        }
+      },
+      {
+        "featureId": "FEAT_HYOI_DOG_MONKEY_EXCLUDED",
+        "name": "憑依玉 犬神&猿神時勝率",
+        "reason": "公開条件・観測分母・依存関係のいずれかが現行推測モデルで安全に再現できないため不採用です。",
+        "requiredTrials": {
+          "value": 2461,
+          "unit": "犬神&猿神取得の鬼決戦1回"
+        }
+      },
+      {
+        "featureId": "FEAT_HYOI_DOG_BIRD_EXCLUDED",
+        "name": "憑依玉 犬神&雉神時勝率",
+        "reason": "公開条件・観測分母・依存関係のいずれかが現行推測モデルで安全に再現できないため不採用です。",
+        "requiredTrials": {
+          "value": 3452,
+          "unit": "犬神&雉神取得の鬼決戦1回"
+        }
+      },
+      {
+        "featureId": "FEAT_HYOI_MONKEY_BIRD_EXCLUDED",
+        "name": "憑依玉 猿神&雉神時勝率",
+        "reason": "公開条件・観測分母・依存関係のいずれかが現行推測モデルで安全に再現できないため不採用です。",
+        "requiredTrials": {
+          "value": 5604,
+          "unit": "猿神&雉神取得の鬼決戦1回"
+        }
+      },
+      {
+        "featureId": "FEAT_HYOI_ALL_EXCLUDED",
+        "name": "憑依玉 犬神&猿神&雉神時勝率",
+        "reason": "公開条件・観測分母・依存関係のいずれかが現行推測モデルで安全に再現できないため不採用です。",
+        "requiredTrials": {
+          "value": 13853,
+          "unit": "3種全取得の鬼決戦1回"
+        }
+      },
+      {
+        "featureId": "FEAT_DAILY_BATTLE_EXCLUDED",
+        "name": "日常対決勝率",
+        "reason": "日常対決は鬼決戦1戦目集計に含まれる関係があり、同じ勝敗情報を二重評価しないため数値推測には不採用です。",
+        "requiredTrials": {
+          "value": 204,
+          "unit": "日常対決1回"
+        }
+      },
+      {
+        "featureId": "FEAT_ONI_BATTLE_R1_EXCLUDED",
+        "name": "CZ鬼決戦 1戦目勝率",
+        "reason": "鬼決戦1戦目は設定差が小さいうえ日常対決を含む集計で、日常対決との重複を安全に分離できないため不採用です。",
+        "requiredTrials": {
+          "value": 2269,
+          "unit": "鬼決戦1戦目"
+        }
+      },
+      {
+        "featureId": "FEAT_ONI_BATTLE_R2_EXCLUDED",
+        "name": "CZ鬼決戦 2戦目勝率",
+        "reason": "鬼決戦2戦目は到達条件付きで設定差も小さく、有効試行数が限られ情報量が低いため不採用です。",
+        "requiredTrials": {
+          "value": 3417,
+          "unit": "鬼決戦2戦目"
+        }
+      },
+      {
+        "featureId": "FEAT_ONI_BATTLE_R3_EXCLUDED",
+        "name": "CZ鬼決戦 3戦目勝率",
+        "reason": "鬼決戦3戦目は到達条件付きで設定差も小さく、有効試行数が限られ情報量が低いため不採用です。",
+        "requiredTrials": {
+          "value": 11373,
+          "unit": "鬼決戦3戦目"
+        }
+      },
+      {
+        "featureId": "FEAT_ONI_BATTLE_R4_EXCLUDED",
+        "name": "CZ鬼決戦 4戦目勝率",
+        "reason": "鬼決戦4戦目は到達条件付きで設定差も小さく、有効試行数が限られ情報量が低いため不採用です。",
+        "requiredTrials": {
+          "value": 14032,
+          "unit": "鬼決戦4戦目"
+        }
+      },
+      {
+        "featureId": "FEAT_AT_DIRECT_EXCLUDED",
+        "name": "AT直撃",
+        "reason": "AT直撃は全設定の確率差がごく小さく、通常ゲーム数に対する単独情報量が低いため不採用です。",
+        "requiredTrials": {
+          "value": 6995960,
+          "unit": "通常ゲーム"
+        }
+      }
+    ]
+  },
+  "reliability": {},
+  "metadata": {
+    "machineId": "S_MOMOKYUN_SWORD_DX",
+    "displayName": "SモモキュンソードDX",
+    "settings": [
+      "SET_1",
+      "SET_2",
+      "SET_4",
+      "SET_5",
+      "SET_6"
+    ]
+  },
+  "validation": {
+    "cases": []
+  },
+  "statistics": {}
+}

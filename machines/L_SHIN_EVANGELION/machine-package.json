@@ -1,0 +1,625 @@
+{
+  "schemaVersion": 1,
+  "machine": {
+    "schemaVersion": "2.0.0",
+    "machineId": "L_SHIN_EVANGELION",
+    "machineDataVersion": "0.1.0",
+    "displayName": "L パチスロ シン・エヴァンゲリオン",
+    "modelName": "Lシン・エヴァンゲリオン",
+    "manufacturer": "ビスティ",
+    "settings": [
+      "SET_1",
+      "SET_2",
+      "SET_3",
+      "SET_4",
+      "SET_5",
+      "SET_6"
+    ],
+    "packagePolicy": {
+      "offlineCapable": true,
+      "containsImages": false,
+      "containsExecutableCode": false
+    }
+  },
+  "inputs": {
+    "schemaVersion": "2.0.0",
+    "inputs": [
+      {
+        "id": "INP_NORMAL_GAMES",
+        "name": "通常ゲーム数",
+        "type": "integer",
+        "category": "NUMERIC",
+        "unit": "G",
+        "displayOrder": 10,
+        "inferenceRole": "INCLUDE_PRIMARY",
+        "defaultValue": null,
+        "observationScope": "SELF_PLAY",
+        "minimum": 0
+      },
+      {
+        "id": "INP_FIRST_HIT_COUNT",
+        "name": "初当り合算",
+        "type": "counter",
+        "category": "NUMERIC",
+        "unit": "回",
+        "displayOrder": 11,
+        "inferenceRole": "INCLUDE_PRIMARY",
+        "defaultValue": null,
+        "parentInputId": "INP_NORMAL_GAMES",
+        "minimum": 0
+      },
+      {
+        "id": "INP_REI_NAV_FOUR_CHOICE",
+        "name": "レイチャンス ナビ種別振り分け FOUR_CHOICE",
+        "type": "counter",
+        "category": "NUMERIC",
+        "unit": "回",
+        "displayOrder": 12,
+        "inferenceRole": "INCLUDE_SUPPORT",
+        "defaultValue": null,
+        "minimum": 0
+      },
+      {
+        "id": "INP_REI_NAV_TWO_CHOICE",
+        "name": "レイチャンス ナビ種別振り分け TWO_CHOICE",
+        "type": "counter",
+        "category": "NUMERIC",
+        "unit": "回",
+        "displayOrder": 13,
+        "inferenceRole": "INCLUDE_SUPPORT",
+        "defaultValue": null,
+        "minimum": 0
+      },
+      {
+        "id": "INP_REI_NAV_FULL_NAV",
+        "name": "レイチャンス ナビ種別振り分け FULL_NAV",
+        "type": "counter",
+        "category": "NUMERIC",
+        "unit": "回",
+        "displayOrder": 14,
+        "inferenceRole": "INCLUDE_SUPPORT",
+        "defaultValue": null,
+        "minimum": 0
+      },
+      {
+        "id": "INP_EVI_SETTING_EVIDENCE",
+        "name": "設定確定・設定下限情報",
+        "type": "multi_enum",
+        "category": "EVIDENCE",
+        "unit": "",
+        "displayOrder": 100,
+        "inferenceRole": "INCLUDE_SUPPORT",
+        "options": [
+          {
+            "key": "EV_1",
+            "label": "レイチャンス成功画面 月背景",
+            "value": "EV_1"
+          },
+          {
+            "key": "EV_2",
+            "label": "レイチャンス成功画面 ロングヘア",
+            "value": "EV_2"
+          },
+          {
+            "key": "EV_3",
+            "label": "456枚OVER",
+            "value": "EV_3"
+          },
+          {
+            "key": "EV_4",
+            "label": "555枚OVER",
+            "value": "EV_4"
+          },
+          {
+            "key": "EV_5",
+            "label": "666枚OVER",
+            "value": "EV_5"
+          },
+          {
+            "key": "EV_6",
+            "label": "ボーナス終了画面 銀枠",
+            "value": "EV_6"
+          },
+          {
+            "key": "EV_7",
+            "label": "ボーナス終了画面 金枠",
+            "value": "EV_7"
+          },
+          {
+            "key": "EV_8",
+            "label": "ボーナス終了画面 レインボー枠",
+            "value": "EV_8"
+          }
+        ],
+        "defaultValue": []
+      }
+    ]
+  },
+  "features": {
+    "schemaVersion": "2.0.0",
+    "features": [
+      {
+        "featureId": "FEAT_FIRST_HIT",
+        "name": "初当り合算",
+        "adoptionCategory": "INCLUDE_PRIMARY",
+        "calculationRole": "PROBABILITY",
+        "probabilityEngineUsage": true,
+        "modelType": "binomial",
+        "minimumSample": 1,
+        "sampleRecommendation": 1,
+        "reliabilityProfile": {
+          "weight": 1
+        },
+        "denominatorInputId": "INP_NORMAL_GAMES",
+        "numeratorInputId": "INP_FIRST_HIT_COUNT",
+        "displayFormat": "ratio_1_over_n",
+        "probabilities": {
+          "SET_1": 0.003435245619031261,
+          "SET_2": 0.003527336860670194,
+          "SET_3": 0.00378128911153119,
+          "SET_4": 0.004228329809725159,
+          "SET_5": 0.004450378282153983,
+          "SET_6": 0.004705882352941176
+        },
+        "sourceEvidenceRefs": [
+          "SRC_BISTY",
+          "SRC_PWORLD",
+          "SRC_NANAPRESS",
+          "SRC_1GEKI"
+        ]
+      },
+      {
+        "featureId": "FEAT_REI_NAV",
+        "name": "レイチャンス ナビ種別振り分け",
+        "adoptionCategory": "INCLUDE_SUPPORT",
+        "calculationRole": "PROBABILITY",
+        "probabilityEngineUsage": true,
+        "modelType": "multinomial",
+        "minimumSample": 1,
+        "sampleRecommendation": 1,
+        "reliabilityProfile": {
+          "weight": 1
+        },
+        "inputTransform": "sum_inputs_to_trials",
+        "numeratorInputId": "INP_REI_NAV_FOUR_CHOICE",
+        "denominatorInputIds": [
+          "INP_REI_NAV_FOUR_CHOICE",
+          "INP_REI_NAV_TWO_CHOICE",
+          "INP_REI_NAV_FULL_NAV"
+        ],
+        "categoryInputIds": [
+          "INP_REI_NAV_TWO_CHOICE",
+          "INP_REI_NAV_FULL_NAV"
+        ],
+        "probabilities": {},
+        "categoryLabels": [
+          "FOUR_CHOICE",
+          "TWO_CHOICE",
+          "FULL_NAV"
+        ],
+        "categoryProbabilities": {
+          "SET_1": [
+            0.875,
+            0.102,
+            0.023
+          ],
+          "SET_2": [
+            0.867,
+            0.105,
+            0.027
+          ],
+          "SET_3": [
+            0.859,
+            0.109,
+            0.031
+          ],
+          "SET_4": [
+            0.836,
+            0.129,
+            0.035
+          ],
+          "SET_5": [
+            0.797,
+            0.148,
+            0.055
+          ],
+          "SET_6": [
+            0.75,
+            0.172,
+            0.078
+          ]
+        },
+        "sourceEvidenceRefs": [
+          "SRC_DMM",
+          "SRC_NANAPRESS_REI",
+          "SRC_1GEKI"
+        ]
+      }
+    ]
+  },
+  "evidence": {
+    "version": "1.0.0",
+    "evidences": [
+      {
+        "id": "EVI_SETTING_EVIDENCE_EV_1",
+        "name": "レイチャンス成功画面 月背景",
+        "displayName": "レイチャンス成功画面 月背景",
+        "inputId": "INP_EVI_SETTING_EVIDENCE",
+        "triggerValue": "EV_1",
+        "confirmedSettings": [
+          "SET_4",
+          "SET_5",
+          "SET_6"
+        ],
+        "deniedSettings": [
+          "SET_1",
+          "SET_2",
+          "SET_3"
+        ],
+        "hasImage": false,
+        "type": "SETTING_CONFIRMATION",
+        "sourceEvidenceRefs": [
+          "RE_REI_MOON"
+        ]
+      },
+      {
+        "id": "EVI_SETTING_EVIDENCE_EV_2",
+        "name": "レイチャンス成功画面 ロングヘア",
+        "displayName": "レイチャンス成功画面 ロングヘア",
+        "inputId": "INP_EVI_SETTING_EVIDENCE",
+        "triggerValue": "EV_2",
+        "confirmedSettings": [
+          "SET_6"
+        ],
+        "deniedSettings": [
+          "SET_1",
+          "SET_2",
+          "SET_3",
+          "SET_4",
+          "SET_5"
+        ],
+        "hasImage": false,
+        "type": "SETTING_CONFIRMATION",
+        "sourceEvidenceRefs": [
+          "RE_REI_LONG_HAIR"
+        ]
+      },
+      {
+        "id": "EVI_SETTING_EVIDENCE_EV_3",
+        "name": "456枚OVER",
+        "displayName": "456枚OVER",
+        "inputId": "INP_EVI_SETTING_EVIDENCE",
+        "triggerValue": "EV_3",
+        "confirmedSettings": [
+          "SET_4",
+          "SET_5",
+          "SET_6"
+        ],
+        "deniedSettings": [
+          "SET_1",
+          "SET_2",
+          "SET_3"
+        ],
+        "hasImage": false,
+        "type": "SETTING_CONFIRMATION",
+        "sourceEvidenceRefs": [
+          "RE_456_OVER"
+        ]
+      },
+      {
+        "id": "EVI_SETTING_EVIDENCE_EV_4",
+        "name": "555枚OVER",
+        "displayName": "555枚OVER",
+        "inputId": "INP_EVI_SETTING_EVIDENCE",
+        "triggerValue": "EV_4",
+        "confirmedSettings": [
+          "SET_5",
+          "SET_6"
+        ],
+        "deniedSettings": [
+          "SET_1",
+          "SET_2",
+          "SET_3",
+          "SET_4"
+        ],
+        "hasImage": false,
+        "type": "SETTING_CONFIRMATION",
+        "sourceEvidenceRefs": [
+          "RE_555_OVER"
+        ]
+      },
+      {
+        "id": "EVI_SETTING_EVIDENCE_EV_5",
+        "name": "666枚OVER",
+        "displayName": "666枚OVER",
+        "inputId": "INP_EVI_SETTING_EVIDENCE",
+        "triggerValue": "EV_5",
+        "confirmedSettings": [
+          "SET_6"
+        ],
+        "deniedSettings": [
+          "SET_1",
+          "SET_2",
+          "SET_3",
+          "SET_4",
+          "SET_5"
+        ],
+        "hasImage": false,
+        "type": "SETTING_CONFIRMATION",
+        "sourceEvidenceRefs": [
+          "RE_666_OVER"
+        ]
+      },
+      {
+        "id": "EVI_SETTING_EVIDENCE_EV_6",
+        "name": "ボーナス終了画面 銀枠",
+        "displayName": "ボーナス終了画面 銀枠",
+        "inputId": "INP_EVI_SETTING_EVIDENCE",
+        "triggerValue": "EV_6",
+        "confirmedSettings": [
+          "SET_4",
+          "SET_5",
+          "SET_6"
+        ],
+        "deniedSettings": [
+          "SET_1",
+          "SET_2",
+          "SET_3"
+        ],
+        "hasImage": false,
+        "type": "SETTING_CONFIRMATION",
+        "sourceEvidenceRefs": [
+          "RE_BONUS_END_SILVER"
+        ]
+      },
+      {
+        "id": "EVI_SETTING_EVIDENCE_EV_7",
+        "name": "ボーナス終了画面 金枠",
+        "displayName": "ボーナス終了画面 金枠",
+        "inputId": "INP_EVI_SETTING_EVIDENCE",
+        "triggerValue": "EV_7",
+        "confirmedSettings": [
+          "SET_5",
+          "SET_6"
+        ],
+        "deniedSettings": [
+          "SET_1",
+          "SET_2",
+          "SET_3",
+          "SET_4"
+        ],
+        "hasImage": false,
+        "type": "SETTING_CONFIRMATION",
+        "sourceEvidenceRefs": [
+          "RE_BONUS_END_GOLD"
+        ]
+      },
+      {
+        "id": "EVI_SETTING_EVIDENCE_EV_8",
+        "name": "ボーナス終了画面 レインボー枠",
+        "displayName": "ボーナス終了画面 レインボー枠",
+        "inputId": "INP_EVI_SETTING_EVIDENCE",
+        "triggerValue": "EV_8",
+        "confirmedSettings": [
+          "SET_6"
+        ],
+        "deniedSettings": [
+          "SET_1",
+          "SET_2",
+          "SET_3",
+          "SET_4",
+          "SET_5"
+        ],
+        "hasImage": false,
+        "type": "SETTING_CONFIRMATION",
+        "sourceEvidenceRefs": [
+          "RE_BONUS_END_RAINBOW"
+        ]
+      }
+    ],
+    "sources": [
+      {
+        "id": "SRC_BISTY",
+        "classification": "OFFICIAL",
+        "pageName": "Lパチスロ シン・エヴァンゲリオン",
+        "url": "https://www.sankyo-fever.jp/collection/973/",
+        "checkedAt": "2026-08-27"
+      },
+      {
+        "id": "SRC_PWORLD",
+        "classification": "ANALYSIS",
+        "pageName": "Lパチスロ シン・エヴァンゲリオン",
+        "url": "https://www.p-world.co.jp/machine/database/10196",
+        "checkedAt": "2026-08-27"
+      },
+      {
+        "id": "SRC_DMM",
+        "classification": "ANALYSIS",
+        "pageName": "L パチスロ シン・エヴァンゲリオン",
+        "url": "https://p-town.dmm.com/machines/4730",
+        "checkedAt": "2026-08-27"
+      },
+      {
+        "id": "SRC_NANAPRESS",
+        "classification": "ANALYSIS",
+        "pageName": "シンエヴァ スマスロ 設定判別",
+        "url": "https://nana-press.com/kaiseki/machine/893/26802/",
+        "checkedAt": "2026-08-27"
+      },
+      {
+        "id": "SRC_NANAPRESS_REI",
+        "classification": "ANALYSIS",
+        "pageName": "シンエヴァ レイチャンス設定示唆",
+        "url": "https://nana-press.com/kaiseki/machine/893/26829/",
+        "checkedAt": "2026-08-27"
+      },
+      {
+        "id": "SRC_1GEKI",
+        "classification": "ANALYSIS",
+        "pageName": "シンエヴァ 設定差・設定判別要素まとめ",
+        "url": "https://1geki.jp/slot/l_shin_eva/0/",
+        "checkedAt": "2026-08-27"
+      }
+    ]
+  },
+  "ui": {
+    "sections": [
+      {
+        "id": "AUTO_NUMERIC",
+        "title": "設定推測要素",
+        "displayOrder": 1,
+        "items": [
+          {
+            "type": "input",
+            "inputId": "INP_NORMAL_GAMES",
+            "label": "通常ゲーム数",
+            "widget": "number"
+          },
+          {
+            "type": "input",
+            "inputId": "INP_FIRST_HIT_COUNT",
+            "label": "初当り合算",
+            "widget": "counter"
+          },
+          {
+            "type": "input",
+            "inputId": "INP_REI_NAV_FOUR_CHOICE",
+            "label": "レイチャンス ナビ種別振り分け FOUR_CHOICE",
+            "widget": "counter"
+          },
+          {
+            "type": "input",
+            "inputId": "INP_REI_NAV_TWO_CHOICE",
+            "label": "レイチャンス ナビ種別振り分け TWO_CHOICE",
+            "widget": "counter"
+          },
+          {
+            "type": "input",
+            "inputId": "INP_REI_NAV_FULL_NAV",
+            "label": "レイチャンス ナビ種別振り分け FULL_NAV",
+            "widget": "counter"
+          }
+        ]
+      },
+      {
+        "id": "AUTO_EVIDENCE",
+        "title": "設定確定・示唆",
+        "displayOrder": 2,
+        "items": [
+          {
+            "type": "input",
+            "inputId": "INP_EVI_SETTING_EVIDENCE",
+            "label": "設定確定・設定下限情報",
+            "widget": "multi_select"
+          }
+        ]
+      }
+    ]
+  },
+  "selectionSummary": {
+    "schemaVersion": "selection-summary-v1",
+    "evaluatedCount": 11,
+    "selectedCount": 2,
+    "rejectedCount": 9,
+    "selected": [
+      {
+        "featureId": "FEAT_FIRST_HIT",
+        "name": "初当り合算",
+        "reason": "初当り合算は通常ゲーム数を分母に直接観測でき、設定1から6へ一貫した設定差があるため主軸として採用します。",
+        "requiredTrials": {
+          "value": 18294,
+          "unit": "通常ゲーム"
+        }
+      },
+      {
+        "featureId": "FEAT_REI_NAV",
+        "name": "レイチャンス ナビ種別振り分け",
+        "reason": "レイチャンスのナビ種別は成功時ごとに排他的に観測でき、設定別の完全分布が公開されているため補助採用します。",
+        "requiredTrials": {
+          "value": 61,
+          "unit": "作戦中レイチャンス発生1回"
+        }
+      }
+    ],
+    "rejected": [
+      {
+        "featureId": "FEAT_INTERNAL_STATE_TRANSITION_EXCLUDED",
+        "name": "内部状態移行抽選",
+        "reason": "公開条件・観測分母・依存関係のいずれかが現行推測モデルで安全に再現できないため不採用です。"
+      },
+      {
+        "featureId": "FEAT_STATE_ROLE_FIRST_HIT_EXCLUDED",
+        "name": "状態別レア役による初当り抽選",
+        "reason": "公開条件・観測分母・依存関係のいずれかが現行推測モデルで安全に再現できないため不採用です。"
+      },
+      {
+        "featureId": "FEAT_WITHIN_150G_HIT_EXCLUDED",
+        "name": "150G以内の初当り当選",
+        "reason": "150G以内初当りは初当りタイミングの情報で主軸初当りと同じ当選過程を共有し、独立尤度として加えると二重評価になるため不採用です。",
+        "requiredTrials": {
+          "value": 148,
+          "unit": "初当り後の有効区間1回"
+        }
+      },
+      {
+        "featureId": "FEAT_ST_MISS_MODE_1_EXCLUDED",
+        "name": "作戦ST 1スルー後モードB/C振り分け",
+        "reason": "公開条件・観測分母・依存関係のいずれかが現行推測モデルで安全に再現できないため不採用です。"
+      },
+      {
+        "featureId": "FEAT_ST_MISS_MODE_2_3_EXCLUDED",
+        "name": "作戦ST 2～3スルー後モードB/C振り分け",
+        "reason": "公開条件・観測分母・依存関係のいずれかが現行推測モデルで安全に再現できないため不採用です。",
+        "requiredTrials": {
+          "value": 148580,
+          "unit": "作戦ST2～3スルー到達1回"
+        }
+      },
+      {
+        "featureId": "FEAT_ST_MISS_MODE_4PLUS_EXCLUDED",
+        "name": "作戦ST 4スルー以上後モードB/C振り分け",
+        "reason": "公開条件・観測分母・依存関係のいずれかが現行推測モデルで安全に再現できないため不採用です。"
+      },
+      {
+        "featureId": "FEAT_ST_MISS_HEAVEN_EXCLUDED",
+        "name": "作戦ST駆け抜け時150G以内天国当選",
+        "reason": "公開条件・観測分母・依存関係のいずれかが現行推測モデルで安全に再現できないため不採用です。",
+        "requiredTrials": {
+          "value": 1685811,
+          "unit": "作戦ST駆け抜け1回"
+        }
+      },
+      {
+        "featureId": "FEAT_REI_CHANCE_PICTURE_EXCLUDED",
+        "name": "レイチャンス成功時1枚絵",
+        "reason": "レイチャンス成功画面は設定差がありますが月背景・ロングヘアが設定下限・確定Evidenceと同一観測なので、Evidenceを優先して数値分布は不採用です。",
+        "requiredTrials": {
+          "value": 8,
+          "unit": "レイチャンス成功1回"
+        }
+      },
+      {
+        "featureId": "FEAT_BONUS_END_SCREEN_EXCLUDED",
+        "name": "ボーナス終了画面",
+        "reason": "ボーナス終了画面は設定別振り分けのResearch数値が未整備で、確定枠はEvidenceとして扱えるものの非確定部分の尤度を再現できないため数値Featureには不採用です。"
+      }
+    ]
+  },
+  "reliability": {},
+  "metadata": {
+    "machineId": "L_SHIN_EVANGELION",
+    "displayName": "L パチスロ シン・エヴァンゲリオン",
+    "settings": [
+      "SET_1",
+      "SET_2",
+      "SET_3",
+      "SET_4",
+      "SET_5",
+      "SET_6"
+    ]
+  },
+  "validation": {
+    "cases": []
+  },
+  "statistics": {}
+}
