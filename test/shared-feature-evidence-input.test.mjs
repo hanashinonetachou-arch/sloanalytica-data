@@ -25,6 +25,8 @@ test('Shin Eva shares one observation input between numeric Feature and Evidence
   assert.equal(eviById.get('EVI_BONUS_END_SILVER')?.inputId,'INP_BONUS_END_SILVER');
   assert.equal(eviById.get('EVI_BONUS_END_GOLD')?.inputId,'INP_BONUS_END_GOLD');
   assert.equal(eviById.get('EVI_BONUS_END_RAINBOW')?.inputId,'INP_BONUS_END_RAINBOW');
+  assert.deepEqual(eviById.get('EVI_REI_MOON')?.sharedFeatureIds,['FEAT_REI_CHANCE_PICTURE']);
+  assert.deepEqual(eviById.get('EVI_BONUS_END_SILVER')?.sharedFeatureIds,['FEAT_BONUS_END_SCREEN']);
 
   const inputById=new Map(pkg.inputs.inputs.map(i=>[i.id,i]));
   assert.equal(inputById.get('INP_REI_NAV_FOUR_CHOICE')?.name,'4択ナビ');

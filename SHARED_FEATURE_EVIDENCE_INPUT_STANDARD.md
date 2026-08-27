@@ -69,3 +69,7 @@ The shared-input contract must preserve this distinction for both Feature infere
 Research -> Selection -> Observation -> UI Design -> MachinePackage must preserve the shared inputIds.
 
 A later compile stage must not split one shared observation into duplicate Feature/Evidence inputs.
+
+## 監査契約
+
+Feature と Evidence が同じ入力を共有する場合、Selection Evidence に `sharedFeatureIds` を明示する。MachinePackageへ伝播した同契約が、対象Featureのイベント入力（分子/カテゴリ）と一致する場合のみPhase 9依存監査で安全な共有として扱う。フラグなし、別Feature指定、分母のみの共有は従来どおりHIGH_RISKとする。

@@ -350,6 +350,7 @@ export function buildMachineData(research,selection,statistics=null){
     const name=re?.name??e.name??e.displayName??e.evidenceId;
     evidences.push({id:e.evidenceId,name,displayName:e.displayName??name,inputId:e.inputId,triggerValue:e.triggerValue,
       confirmedSettings:confirmed,deniedSettings:denied,hasImage:false,
+      ...(Array.isArray(e.sharedFeatureIds)&&e.sharedFeatureIds.length?{sharedFeatureIds:[...e.sharedFeatureIds]}:{}),
       type:(denied.length>0 && confirmed.length===0)?"SETTING_DENIAL":"SETTING_CONFIRMATION"});
   }
   evidences.push(...generatedEvidence);

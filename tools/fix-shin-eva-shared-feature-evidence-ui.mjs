@@ -110,14 +110,14 @@ selection.features=[...byRf.values()];
 
 // 5) Direct Evidence: same numeric counter -> EvidenceEngine. No duplicate Evidence UI entry.
 selection.evidence=[
-  {researchEvidenceId:'RE_REI_MOON',evidenceId:'EVI_REI_MOON',inputId:'INP_REI_PIC_MOON'},
-  {researchEvidenceId:'RE_REI_LONG_HAIR',evidenceId:'EVI_REI_LONG_HAIR',inputId:'INP_REI_PIC_LONG_HAIR'},
-  {researchEvidenceId:'RE_BONUS_END_NOT_1',evidenceId:'EVI_BONUS_END_NOT_1',inputId:'INP_BONUS_END_PURPLE1'},
-  {researchEvidenceId:'RE_BONUS_END_NOT_2',evidenceId:'EVI_BONUS_END_NOT_2',inputId:'INP_BONUS_END_PURPLE2'},
-  {researchEvidenceId:'RE_BONUS_END_NOT_3',evidenceId:'EVI_BONUS_END_NOT_3',inputId:'INP_BONUS_END_PURPLE3'},
-  {researchEvidenceId:'RE_BONUS_END_SILVER',evidenceId:'EVI_BONUS_END_SILVER',inputId:'INP_BONUS_END_SILVER'},
-  {researchEvidenceId:'RE_BONUS_END_GOLD',evidenceId:'EVI_BONUS_END_GOLD',inputId:'INP_BONUS_END_GOLD'},
-  {researchEvidenceId:'RE_BONUS_END_RAINBOW',evidenceId:'EVI_BONUS_END_RAINBOW',inputId:'INP_BONUS_END_RAINBOW'},
+  {researchEvidenceId:'RE_REI_MOON',evidenceId:'EVI_REI_MOON',inputId:'INP_REI_PIC_MOON',sharedFeatureIds:['FEAT_REI_CHANCE_PICTURE']},
+  {researchEvidenceId:'RE_REI_LONG_HAIR',evidenceId:'EVI_REI_LONG_HAIR',inputId:'INP_REI_PIC_LONG_HAIR',sharedFeatureIds:['FEAT_REI_CHANCE_PICTURE']},
+  {researchEvidenceId:'RE_BONUS_END_NOT_1',evidenceId:'EVI_BONUS_END_NOT_1',inputId:'INP_BONUS_END_PURPLE1',sharedFeatureIds:['FEAT_BONUS_END_SCREEN']},
+  {researchEvidenceId:'RE_BONUS_END_NOT_2',evidenceId:'EVI_BONUS_END_NOT_2',inputId:'INP_BONUS_END_PURPLE2',sharedFeatureIds:['FEAT_BONUS_END_SCREEN']},
+  {researchEvidenceId:'RE_BONUS_END_NOT_3',evidenceId:'EVI_BONUS_END_NOT_3',inputId:'INP_BONUS_END_PURPLE3',sharedFeatureIds:['FEAT_BONUS_END_SCREEN']},
+  {researchEvidenceId:'RE_BONUS_END_SILVER',evidenceId:'EVI_BONUS_END_SILVER',inputId:'INP_BONUS_END_SILVER',sharedFeatureIds:['FEAT_BONUS_END_SCREEN']},
+  {researchEvidenceId:'RE_BONUS_END_GOLD',evidenceId:'EVI_BONUS_END_GOLD',inputId:'INP_BONUS_END_GOLD',sharedFeatureIds:['FEAT_BONUS_END_SCREEN']},
+  {researchEvidenceId:'RE_BONUS_END_RAINBOW',evidenceId:'EVI_BONUS_END_RAINBOW',inputId:'INP_BONUS_END_RAINBOW',sharedFeatureIds:['FEAT_BONUS_END_SCREEN']},
 ];
 
 // Keep only genuinely separate Evidence in the generic Evidence group (payout displays).

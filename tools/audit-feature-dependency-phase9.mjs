@@ -72,7 +72,19 @@ for(const ent of fs.readdirSync(machineRoot,{withFileTypes:true}).filter(e=>e.is
   }
   for(const e of arr(pkg?.evidence?.evidences)){
     const ids=featureInputIds.get(e?.inputId)??[];
-    if(ids.length) issues.push({severity:'HIGH_RISK',code:'EVIDENCE_FEATURE_OVERLAP',featureIds:ids,evidenceId:e.id,inputId:e.inputId});
+    if(!ids.length) continue;
+    const declared=uniq(arr(e?.sharedFeatureIds));
+    const activeById=new Map(fsActive.map(f=>[f.featureId,f]));
+    const declaredValid=declared.length>0 && ids.every(id=>declared.includes(id)) && declared.every(id=>{
+      const f=activeById.get(id);
+      return f && eventInputs(f).includes(e.inputId);
+    });
+    if(declaredValid) continue;
+    issues.push({
+      severity:'HIGH_RISK',
+      code:declared.length?'INVALID_SHARED_FEATURE_EVIDENCE_CONTRACT':'EVIDENCE_FEATURE_OVERLAP',
+      featureIds:ids,evidenceId:e.id,inputId:e.inputId,sharedFeatureIds:declared
+    });
   }
   const contracts=new Map();
   for(const f of fsActive){
