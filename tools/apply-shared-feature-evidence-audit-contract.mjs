@@ -7,8 +7,10 @@ const read=p=>fs.readFileSync(p,'utf8');
 const write=(p,s)=>fs.writeFileSync(p,s,'utf8');
 const readJson=p=>JSON.parse(read(p));
 const writeJson=(p,v)=>write(p,JSON.stringify(v,null,2)+'\n');
-const must=(s,needle,label)=>{if(!s.includes(needle)) throw new Error(`${label}: expected text not found`);};
-const replaceOnce=(s,from,to,label)=>{must(s,from,label); return s.replace(from,to);};
+const replaceRegexOnce=(s,re,to,label)=>{
+  if(!re.test(s)) throw new Error(`${label}: expected pattern not found`);
+  return s.replace(re,to);
+};
 
 // 1) SelectionData: explicitly declare which Feature is intentionally sharing each Evidence counter.
 const selPath=path.join(ROOT,'research/L_SHIN_EVANGELION/selection-data.json');
@@ -35,17 +37,27 @@ writeJson(selPath,sel);
 // 2) Builder: preserve the explicit contract in MachinePackage Evidence.
 const builderPath=path.join(ROOT,'tools/build-machine-data.mjs');
 let builder=read(builderPath);
-const oldBuilder=`    evidences.push({id:e.evidenceId,name,displayName:e.displayName??name,inputId:e.inputId,triggerValue:e.triggerValue,\n      confirmedSettings:confirmed,deniedSettings:denied,hasImage:false,\n      type:(denied.length>0 && confirmed.length===0)?"SETTING_DENIAL":"SETTING_CONFIRMATION"});`;
-const newBuilder=`    evidences.push({id:e.evidenceId,name,displayName:e.displayName??name,inputId:e.inputId,triggerValue:e.triggerValue,\n      confirmedSettings:confirmed,deniedSettings:denied,hasImage:false,\n      ...(Array.isArray(e.sharedFeatureIds)&&e.sharedFeatureIds.length?{sharedFeatureIds:[...e.sharedFeatureIds]}:{}),\n      type:(denied.length>0 && confirmed.length===0)?"SETTING_DENIAL":"SETTING_CONFIRMATION"});`;
-if(!builder.includes('sharedFeatureIds:[...e.sharedFeatureIds]')) builder=replaceOnce(builder,oldBuilder,newBuilder,'build-machine-data');
+if(!builder.includes('sharedFeatureIds:[...e.sharedFeatureIds]')){
+  builder=replaceRegexOnce(
+    builder,
+    /(confirmedSettings:confirmed,deniedSettings:denied,hasImage:false,\r?\n\s*)(type:\(denied\.length>0 && confirmed\.length===0\)\?"SETTING_DENIAL":"SETTING_CONFIRMATION"\}\);)/,
+    `$1...(Array.isArray(e.sharedFeatureIds)&&e.sharedFeatureIds.length?{sharedFeatureIds:[...e.sharedFeatureIds]}:{}),\n      $2`,
+    'build-machine-data'
+  );
+}
 write(builderPath,builder);
 
 // 3) Phase 9 audit: only an explicitly declared event-input share is safe.
 const auditPath=path.join(ROOT,'tools/audit-feature-dependency-phase9.mjs');
 let audit=read(auditPath);
-const oldAudit=`  for(const e of arr(pkg?.evidence?.evidences)){\n    const ids=featureInputIds.get(e?.inputId)??[];\n    if(ids.length) issues.push({severity:'HIGH_RISK',code:'EVIDENCE_FEATURE_OVERLAP',featureIds:ids,evidenceId:e.id,inputId:e.inputId});\n  }`;
-const newAudit=`  for(const e of arr(pkg?.evidence?.evidences)){\n    const ids=featureInputIds.get(e?.inputId)??[];\n    if(!ids.length) continue;\n    const declared=uniq(arr(e?.sharedFeatureIds));\n    const activeById=new Map(fsActive.map(f=>[f.featureId,f]));\n    const declaredValid=declared.length>0 && ids.every(id=>declared.includes(id)) && declared.every(id=>{\n      const f=activeById.get(id);\n      return f && eventInputs(f).includes(e.inputId);\n    });\n    if(declaredValid) continue;\n    issues.push({\n      severity:'HIGH_RISK',\n      code:declared.length?'INVALID_SHARED_FEATURE_EVIDENCE_CONTRACT':'EVIDENCE_FEATURE_OVERLAP',\n      featureIds:ids,evidenceId:e.id,inputId:e.inputId,sharedFeatureIds:declared\n    });\n  }`;
-if(!audit.includes('INVALID_SHARED_FEATURE_EVIDENCE_CONTRACT')) audit=replaceOnce(audit,oldAudit,newAudit,'phase9 audit');
+if(!audit.includes('INVALID_SHARED_FEATURE_EVIDENCE_CONTRACT')){
+  audit=replaceRegexOnce(
+    audit,
+    /  for\(const e of arr\(pkg\?\.evidence\?\.evidences\)\)\{\r?\n\s*const ids=featureInputIds\.get\(e\?\.inputId\)\?\?\[\];\r?\n\s*if\(ids\.length\) issues\.push\(\{severity:'HIGH_RISK',code:'EVIDENCE_FEATURE_OVERLAP',featureIds:ids,evidenceId:e\.id,inputId:e\.inputId\}\);\r?\n\s*\}/,
+    `  for(const e of arr(pkg?.evidence?.evidences)){\n    const ids=featureInputIds.get(e?.inputId)??[];\n    if(!ids.length) continue;\n    const declared=uniq(arr(e?.sharedFeatureIds));\n    const activeById=new Map(fsActive.map(f=>[f.featureId,f]));\n    const declaredValid=declared.length>0 && ids.every(id=>declared.includes(id)) && declared.every(id=>{\n      const f=activeById.get(id);\n      return f && eventInputs(f).includes(e.inputId);\n    });\n    if(declaredValid) continue;\n    issues.push({\n      severity:'HIGH_RISK',\n      code:declared.length?'INVALID_SHARED_FEATURE_EVIDENCE_CONTRACT':'EVIDENCE_FEATURE_OVERLAP',\n      featureIds:ids,evidenceId:e.id,inputId:e.inputId,sharedFeatureIds:declared\n    });\n  }`,
+    'phase9 audit'
+  );
+}
 write(auditPath,audit);
 
 // 4) Reference fix tool: make reruns preserve the explicit sharing contract.
@@ -67,9 +79,14 @@ write(fixPath,fix);
 // 5) Regression test: require the explicit contract to survive compilation.
 const testPath=path.join(ROOT,'test/shared-feature-evidence-input.test.mjs');
 let test=read(testPath);
-const anchor="  assert.equal(eviById.get('EVI_BONUS_END_RAINBOW')?.inputId,'INP_BONUS_END_RAINBOW');\n";
-const addition="  assert.deepEqual(eviById.get('EVI_REI_MOON')?.sharedFeatureIds,['FEAT_REI_CHANCE_PICTURE']);\n  assert.deepEqual(eviById.get('EVI_BONUS_END_SILVER')?.sharedFeatureIds,['FEAT_BONUS_END_SCREEN']);\n";
-if(!test.includes('sharedFeatureIds')) test=replaceOnce(test,anchor,anchor+addition,'shared feature/evidence test');
+if(!test.includes('sharedFeatureIds')){
+  test=replaceRegexOnce(
+    test,
+    /(\s*assert\.equal\(eviById\.get\('EVI_BONUS_END_RAINBOW'\)\?\.inputId,'INP_BONUS_END_RAINBOW'\);\r?\n)/,
+    `$1  assert.deepEqual(eviById.get('EVI_REI_MOON')?.sharedFeatureIds,['FEAT_REI_CHANCE_PICTURE']);\n  assert.deepEqual(eviById.get('EVI_BONUS_END_SILVER')?.sharedFeatureIds,['FEAT_BONUS_END_SCREEN']);\n`,
+    'shared feature/evidence test'
+  );
+}
 write(testPath,test);
 
 // 6) Standard doc: record that safe sharing must be explicit/auditable.
