@@ -1,7 +1,7 @@
 {
   "schemaVersion": "selection-data-v1",
   "machineId": "S_MILKY_HOMES_GNB",
-  "machineDataVersion": "0.1.0",
+  "machineDataVersion": "0.1.1",
   "inputs": [
     {
       "id": "INP_NORMAL_GAMES",
@@ -45,6 +45,65 @@
       "unit": "回",
       "displayOrder": 12,
       "inferenceRole": "INCLUDE_PRIMARY",
+      "observationScope": "SELF_PLAY",
+      "defaultValue": 0,
+      "uiQuickAdd": 1
+    },
+    {
+      "id": "INP_BONUS_GAMES",
+      "name": "ボーナス中消化ゲーム数",
+      "category": "BONUS",
+      "type": "integer",
+      "unit": "G",
+      "displayOrder": 30,
+      "inferenceRole": "INCLUDE_SUPPORT",
+      "observationScope": "SELF_PLAY",
+      "defaultValue": 0
+    },
+    {
+      "id": "INP_COMMON_BELL_COUNT",
+      "name": "共通ベル",
+      "category": "BONUS",
+      "type": "counter",
+      "unit": "回",
+      "displayOrder": 31,
+      "inferenceRole": "INCLUDE_SUPPORT",
+      "observationScope": "SELF_PLAY",
+      "defaultValue": 0,
+      "uiQuickAdd": 1
+    },
+    {
+      "id": "INP_END_WHITE1",
+      "name": "白1",
+      "category": "SETTING_SIGNAL",
+      "type": "counter",
+      "unit": "回",
+      "displayOrder": 60,
+      "inferenceRole": "INCLUDE_SUPPORT",
+      "observationScope": "SELF_PLAY",
+      "defaultValue": 0,
+      "uiQuickAdd": 1
+    },
+    {
+      "id": "INP_END_WHITE2",
+      "name": "白2",
+      "category": "SETTING_SIGNAL",
+      "type": "counter",
+      "unit": "回",
+      "displayOrder": 61,
+      "inferenceRole": "INCLUDE_SUPPORT",
+      "observationScope": "SELF_PLAY",
+      "defaultValue": 0,
+      "uiQuickAdd": 1
+    },
+    {
+      "id": "INP_END_WHITE3",
+      "name": "白3",
+      "category": "SETTING_SIGNAL",
+      "type": "counter",
+      "unit": "回",
+      "displayOrder": 62,
+      "inferenceRole": "INCLUDE_SUPPORT",
       "observationScope": "SELF_PLAY",
       "defaultValue": 0,
       "uiQuickAdd": 1
@@ -142,12 +201,6 @@
       "userFacingReason": "ボーナス合算・弱スイカ・通常時押し順ナビを独立した代表Featureとして採用しており、この候補は同一ボーナス系列の内訳、低頻度事象、または示唆分布として既採用情報と重複するため数値推測には追加採用しません。"
     },
     {
-      "researchFeatureId": "RF_COMMON_BELL",
-      "featureId": "FEAT_COMMON_BELL_EXCLUDED",
-      "adoptionCategory": "EXCLUDE",
-      "userFacingReason": "ボーナス合算・弱スイカ・通常時押し順ナビを独立した代表Featureとして採用しており、この候補は同一ボーナス系列の内訳、低頻度事象、または示唆分布として既採用情報と重複するため数値推測には追加採用しません。"
-    },
-    {
       "researchFeatureId": "RF_NORMAL_BONUS_TYPE",
       "featureId": "FEAT_NORMAL_BONUS_TYPE_EXCLUDED",
       "adoptionCategory": "EXCLUDE",
@@ -178,12 +231,6 @@
       "userFacingReason": "ボーナス合算・弱スイカ・通常時押し順ナビを独立した代表Featureとして採用しており、この候補は同一ボーナス系列の内訳、低頻度事象、または示唆分布として既採用情報と重複するため数値推測には追加採用しません。"
     },
     {
-      "researchFeatureId": "RF_BONUS_END",
-      "featureId": "FEAT_BONUS_END_EXCLUDED",
-      "adoptionCategory": "EXCLUDE",
-      "userFacingReason": "ボーナス合算・弱スイカ・通常時押し順ナビを独立した代表Featureとして採用しており、この候補は同一ボーナス系列の内訳、低頻度事象、または示唆分布として既採用情報と重複するため数値推測には追加採用しません。"
-    },
-    {
       "researchFeatureId": "RF_SMART_A",
       "featureId": "FEAT_SMART_A_EXCLUDED",
       "adoptionCategory": "EXCLUDE",
@@ -206,6 +253,40 @@
       "featureId": "FEAT_GACHA_EXCLUDED",
       "adoptionCategory": "EXCLUDE",
       "userFacingReason": "ボーナス合算・弱スイカ・通常時押し順ナビを独立した代表Featureとして採用しており、この候補は同一ボーナス系列の内訳、低頻度事象、または示唆分布として既採用情報と重複するため数値推測には追加採用しません。"
+    },
+    {
+      "adoptionCategory": "INCLUDE_SUPPORT",
+      "minimumSample": 1,
+      "sampleRecommendation": 300,
+      "weight": 1,
+      "difficultyParticipation": "EXCLUDE",
+      "researchFeatureId": "RF_COMMON_BELL",
+      "featureId": "FEAT_COMMON_BELL",
+      "numeratorInputId": "INP_COMMON_BELL_COUNT",
+      "denominatorInputId": "INP_BONUS_GAMES",
+      "userReason": "ボーナス中限定で観測できる共通ベルは、ボーナス初当りとは別の小役成立確率です。ボーナス中消化Gを専用分母として採用します。"
+    },
+    {
+      "researchFeatureId": "RF_BONUS_END",
+      "featureId": "FEAT_BONUS_END_NON_EVIDENCE",
+      "adoptionCategory": "INCLUDE_SUPPORT",
+      "numeratorInputId": "INP_END_WHITE1",
+      "categoryInputIds": [
+        "INP_END_WHITE2",
+        "INP_END_WHITE3"
+      ],
+      "inputTransform": "sum_inputs_to_trials",
+      "categoryExcludeLabels": [
+        "COPPER",
+        "GOLD",
+        "STAR",
+        "RAINBOW"
+      ],
+      "minimumSample": 1,
+      "sampleRecommendation": 20,
+      "weight": 1,
+      "difficultyParticipation": "EXCLUDE",
+      "userReason": "銅・金・星・虹など設定を限定する画面はEvidenceへ分離し、白①～③だけを条件付き分布として数値推測に利用します。"
     }
   ],
   "evidence": [],

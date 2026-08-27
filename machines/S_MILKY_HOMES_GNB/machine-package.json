@@ -3,7 +3,7 @@
   "machine": {
     "schemaVersion": "2.0.0",
     "machineId": "S_MILKY_HOMES_GNB",
-    "machineDataVersion": "0.1.0",
+    "machineDataVersion": "0.1.1",
     "displayName": "パチスロ 探偵オペラ ミルキィホームズR 大収穫祭!!!!",
     "modelName": "SパチスロミルキィホームズGNB",
     "manufacturer": "カルミナ / ネット",
@@ -69,6 +69,70 @@
         "unit": "回",
         "displayOrder": 12,
         "inferenceRole": "INCLUDE_PRIMARY",
+        "observationScope": "SELF_PLAY",
+        "defaultValue": 0,
+        "uiQuickAdd": 1,
+        "minimum": 0
+      },
+      {
+        "id": "INP_BONUS_GAMES",
+        "name": "ボーナス中消化ゲーム数",
+        "category": "BONUS",
+        "type": "integer",
+        "unit": "G",
+        "displayOrder": 30,
+        "inferenceRole": "INCLUDE_SUPPORT",
+        "observationScope": "SELF_PLAY",
+        "defaultValue": 0,
+        "minimum": 0
+      },
+      {
+        "id": "INP_COMMON_BELL_COUNT",
+        "name": "共通ベル",
+        "category": "BONUS",
+        "type": "counter",
+        "unit": "回",
+        "displayOrder": 31,
+        "inferenceRole": "INCLUDE_SUPPORT",
+        "observationScope": "SELF_PLAY",
+        "defaultValue": 0,
+        "uiQuickAdd": 1,
+        "minimum": 0
+      },
+      {
+        "id": "INP_END_WHITE1",
+        "name": "白1",
+        "category": "SETTING_SIGNAL",
+        "type": "counter",
+        "unit": "回",
+        "displayOrder": 60,
+        "inferenceRole": "INCLUDE_SUPPORT",
+        "observationScope": "SELF_PLAY",
+        "defaultValue": 0,
+        "uiQuickAdd": 1,
+        "minimum": 0
+      },
+      {
+        "id": "INP_END_WHITE2",
+        "name": "白2",
+        "category": "SETTING_SIGNAL",
+        "type": "counter",
+        "unit": "回",
+        "displayOrder": 61,
+        "inferenceRole": "INCLUDE_SUPPORT",
+        "observationScope": "SELF_PLAY",
+        "defaultValue": 0,
+        "uiQuickAdd": 1,
+        "minimum": 0
+      },
+      {
+        "id": "INP_END_WHITE3",
+        "name": "白3",
+        "category": "SETTING_SIGNAL",
+        "type": "counter",
+        "unit": "回",
+        "displayOrder": 62,
+        "inferenceRole": "INCLUDE_SUPPORT",
         "observationScope": "SELF_PLAY",
         "defaultValue": 0,
         "uiQuickAdd": 1,
@@ -336,6 +400,107 @@
           "SET_4": 0.001388888888888889,
           "SET_5": 0.001388888888888889,
           "SET_6": 0.08064516129032258
+        },
+        "sourceEvidenceRefs": [
+          "SRC_NANA"
+        ]
+      },
+      {
+        "featureId": "FEAT_COMMON_BELL",
+        "name": "共通ベル",
+        "adoptionCategory": "INCLUDE_SUPPORT",
+        "calculationRole": "PROBABILITY",
+        "probabilityEngineUsage": true,
+        "modelType": "binomial",
+        "minimumSample": 1,
+        "sampleRecommendation": 300,
+        "reliabilityProfile": {
+          "weight": 1
+        },
+        "denominatorInputId": "INP_BONUS_GAMES",
+        "numeratorInputId": "INP_COMMON_BELL_COUNT",
+        "displayFormat": "ratio_1_over_n",
+        "probabilities": {
+          "SET_1": 0.016,
+          "SET_2": 0.018115942028985508,
+          "SET_3": 0.019417475728155338,
+          "SET_4": 0.020618556701030927,
+          "SET_5": 0.024509803921568627,
+          "SET_6": 0.03067484662576687
+        },
+        "sourceEvidenceRefs": [
+          "SRC_NANA"
+        ]
+      },
+      {
+        "featureId": "FEAT_BONUS_END_NON_EVIDENCE",
+        "name": "ボーナス終了画面",
+        "adoptionCategory": "INCLUDE_SUPPORT",
+        "calculationRole": "PROBABILITY",
+        "probabilityEngineUsage": true,
+        "modelType": "multinomial",
+        "minimumSample": 1,
+        "sampleRecommendation": 20,
+        "reliabilityProfile": {
+          "weight": 1
+        },
+        "inputTransform": "sum_inputs_to_trials",
+        "numeratorInputId": "INP_END_WHITE1",
+        "denominatorInputIds": [
+          "INP_END_WHITE1",
+          "INP_END_WHITE2",
+          "INP_END_WHITE3"
+        ],
+        "categoryInputIds": [
+          "INP_END_WHITE2",
+          "INP_END_WHITE3"
+        ],
+        "probabilities": {},
+        "categoryLabels": [
+          "WHITE1",
+          "WHITE2",
+          "WHITE3"
+        ],
+        "categoryProbabilities": {
+          "SET_1": [
+            0.725,
+            0.25,
+            0.025
+          ],
+          "SET_2": [
+            0.7066666666666667,
+            0.26666666666666666,
+            0.026666666666666665
+          ],
+          "SET_3": [
+            0.6777202072538859,
+            0.29015544041450775,
+            0.03212435233160622
+          ],
+          "SET_4": [
+            0.6255230125523012,
+            0.303347280334728,
+            0.07112970711297072
+          ],
+          "SET_5": [
+            0.6035940803382663,
+            0.3171247357293869,
+            0.07928118393234672
+          ],
+          "SET_6": [
+            0.725,
+            0.25,
+            0.025
+          ]
+        },
+        "categoryConditioning": {
+          "excludedCategories": [
+            "COPPER",
+            "GOLD",
+            "STAR",
+            "RAINBOW"
+          ],
+          "normalization": "RENORMALIZE_INCLUDED"
         },
         "sourceEvidenceRefs": [
           "SRC_NANA"
@@ -935,18 +1100,93 @@
             "gridSpan": 12
           }
         ]
+      },
+      {
+        "id": "UI_08________",
+        "title": "ボーナス中小役",
+        "displayOrder": 8,
+        "description": "ボーナス中のみカウントします。押し順ナビ時にセグ表示「00」なら共通ベルです。ボーナス中の消化ゲーム数を分母として入力してください。",
+        "collapsible": true,
+        "items": [
+          {
+            "type": "input",
+            "inputId": "INP_BONUS_GAMES",
+            "label": "ボーナス中消化ゲーム数",
+            "widget": "number",
+            "gridSpan": 12
+          },
+          {
+            "type": "input",
+            "inputId": "INP_COMMON_BELL_COUNT",
+            "label": "共通ベル",
+            "widget": "counter",
+            "gridSpan": 12,
+            "config": {
+              "compact": true,
+              "quickAdd": 1
+            }
+          }
+        ]
+      },
+      {
+        "id": "UI_09_____________",
+        "title": "ボーナス終了画面（割合）",
+        "displayOrder": 9,
+        "description": "白①・白②・白③の出現回数を入力します。設定確定・限定画面は下のEvidenceで入力し、割合計算には重複利用しません。",
+        "collapsible": true,
+        "items": [
+          {
+            "type": "input",
+            "inputId": "INP_END_WHITE1",
+            "label": "白1",
+            "widget": "counter",
+            "gridSpan": 12,
+            "config": {
+              "compact": true,
+              "quickAdd": 1
+            }
+          },
+          {
+            "type": "input",
+            "inputId": "INP_END_WHITE2",
+            "label": "白2",
+            "widget": "counter",
+            "gridSpan": 12,
+            "config": {
+              "compact": true,
+              "quickAdd": 1
+            }
+          },
+          {
+            "type": "input",
+            "inputId": "INP_END_WHITE3",
+            "label": "白3",
+            "widget": "counter",
+            "gridSpan": 12,
+            "config": {
+              "compact": true,
+              "quickAdd": 1
+            }
+          }
+        ]
       }
     ],
     "quickInputContract": {
       "enabled": true,
       "selectableSections": [
         "通常時",
-        "小役"
+        "小役",
+        "ボーナス中小役",
+        "ボーナス終了画面（割合）"
       ],
       "inputIds": [
         "INP_BONUS_TOTAL_COUNT",
         "INP_PUSH_NAV_COUNT",
-        "INP_WEAK_WATER_COUNT"
+        "INP_WEAK_WATER_COUNT",
+        "INP_COMMON_BELL_COUNT",
+        "INP_END_WHITE1",
+        "INP_END_WHITE2",
+        "INP_END_WHITE3"
       ],
       "unsetDisplayAsZero": true,
       "preserveUnobservedUntilIncrement": true,
@@ -961,8 +1201,8 @@
   "selectionSummary": {
     "schemaVersion": "selection-summary-v1",
     "evaluatedCount": 20,
-    "selectedCount": 3,
-    "rejectedCount": 17,
+    "selectedCount": 5,
+    "rejectedCount": 15,
     "selected": [
       {
         "featureId": "FEAT_BONUS_TOTAL",
@@ -990,6 +1230,20 @@
           "value": 29,
           "unit": "通常ゲーム"
         }
+      },
+      {
+        "featureId": "FEAT_COMMON_BELL",
+        "name": "共通ベル",
+        "reason": "ボーナス中限定で観測できる共通ベルは、ボーナス初当りとは別の小役成立確率です。ボーナス中消化Gを専用分母として採用します。",
+        "requiredTrials": {
+          "value": 757,
+          "unit": "ボーナス中判別可能ゲーム"
+        }
+      },
+      {
+        "featureId": "FEAT_BONUS_END_NON_EVIDENCE",
+        "name": "ボーナス終了画面",
+        "reason": "銅・金・星・虹など設定を限定する画面はEvidenceへ分離し、白①～③だけを条件付き分布として数値推測に利用します。"
       }
     ],
     "rejected": [
@@ -1048,15 +1302,6 @@
         }
       },
       {
-        "featureId": "FEAT_COMMON_BELL_EXCLUDED",
-        "name": "共通ベル",
-        "reason": "ボーナス合算・弱スイカ・通常時押し順ナビを独立した代表Featureとして採用しており、この候補は同一ボーナス系列の内訳、低頻度事象、または示唆分布として既採用情報と重複するため数値推測には追加採用しません。",
-        "requiredTrials": {
-          "value": 757,
-          "unit": "ボーナス中判別可能ゲーム"
-        }
-      },
-      {
         "featureId": "FEAT_NORMAL_BONUS_TYPE_EXCLUDED",
         "name": "通常時ボーナス種別比率",
         "reason": "ボーナス合算・弱スイカ・通常時押し順ナビを独立した代表Featureとして採用しており、この候補は同一ボーナス系列の内訳、低頻度事象、または示唆分布として既採用情報と重複するため数値推測には追加採用しません。",
@@ -1091,11 +1336,6 @@
       {
         "featureId": "FEAT_MB_CHAR_EXCLUDED",
         "name": "MB中キャラ紹介",
-        "reason": "ボーナス合算・弱スイカ・通常時押し順ナビを独立した代表Featureとして採用しており、この候補は同一ボーナス系列の内訳、低頻度事象、または示唆分布として既採用情報と重複するため数値推測には追加採用しません。"
-      },
-      {
-        "featureId": "FEAT_BONUS_END_EXCLUDED",
-        "name": "ボーナス終了画面",
         "reason": "ボーナス合算・弱スイカ・通常時押し順ナビを独立した代表Featureとして採用しており、この候補は同一ボーナス系列の内訳、低頻度事象、または示唆分布として既採用情報と重複するため数値推測には追加採用しません。"
       },
       {

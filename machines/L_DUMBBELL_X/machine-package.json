@@ -3,7 +3,7 @@
   "machine": {
     "schemaVersion": "2.0.0",
     "machineId": "L_DUMBBELL_X",
-    "machineDataVersion": "0.1.0",
+    "machineDataVersion": "0.1.1",
     "displayName": "Lパチスロ ダンベル何キロ持てる？",
     "modelName": "Lダンベル何キロ持てる？X",
     "manufacturer": "SANKYO",
@@ -46,6 +46,58 @@
         "inferenceRole": "INCLUDE_PRIMARY",
         "observationScope": "SELF_PLAY",
         "defaultValue": 0,
+        "minimum": 0
+      },
+      {
+        "id": "INP_TOP_END_AYAKA_AKEMI",
+        "name": "奇数示唆",
+        "category": "SETTING_SIGNAL",
+        "type": "counter",
+        "unit": "回",
+        "displayOrder": 60,
+        "inferenceRole": "INCLUDE_SUPPORT",
+        "observationScope": "SELF_PLAY",
+        "defaultValue": 0,
+        "uiQuickAdd": 1,
+        "minimum": 0
+      },
+      {
+        "id": "INP_TOP_END_GINA_SATOMI",
+        "name": "偶数示唆",
+        "category": "SETTING_SIGNAL",
+        "type": "counter",
+        "unit": "回",
+        "displayOrder": 61,
+        "inferenceRole": "INCLUDE_SUPPORT",
+        "observationScope": "SELF_PLAY",
+        "defaultValue": 0,
+        "uiQuickAdd": 1,
+        "minimum": 0
+      },
+      {
+        "id": "INP_UPPER_AT_CHEER_TRIALS",
+        "name": "上位AT中100枚獲得チェック回数",
+        "category": "UPPER_AT",
+        "type": "counter",
+        "unit": "回",
+        "displayOrder": 50,
+        "inferenceRole": "INCLUDE_SUPPORT",
+        "observationScope": "SELF_PLAY",
+        "defaultValue": 0,
+        "uiQuickAdd": 1,
+        "minimum": 0
+      },
+      {
+        "id": "INP_UPPER_AT_CHEER_2",
+        "name": "2人合いの手",
+        "category": "UPPER_AT",
+        "type": "counter",
+        "unit": "回",
+        "displayOrder": 51,
+        "inferenceRole": "INCLUDE_SUPPORT",
+        "observationScope": "SELF_PLAY",
+        "defaultValue": 0,
+        "uiQuickAdd": 1,
         "minimum": 0
       },
       {
@@ -182,6 +234,96 @@
           "SRC_PWORLD",
           "SRC_NANA",
           "SRC_1GEKI"
+        ]
+      },
+      {
+        "featureId": "FEAT_TOP_AT_END_NON_EVIDENCE",
+        "name": "上位AT終了画面",
+        "adoptionCategory": "INCLUDE_SUPPORT",
+        "calculationRole": "PROBABILITY",
+        "probabilityEngineUsage": true,
+        "modelType": "multinomial",
+        "minimumSample": 1,
+        "sampleRecommendation": 10,
+        "reliabilityProfile": {
+          "weight": 1
+        },
+        "inputTransform": "sum_inputs_to_trials",
+        "numeratorInputId": "INP_TOP_END_AYAKA_AKEMI",
+        "denominatorInputIds": [
+          "INP_TOP_END_AYAKA_AKEMI",
+          "INP_TOP_END_GINA_SATOMI"
+        ],
+        "categoryInputIds": [
+          "INP_TOP_END_GINA_SATOMI"
+        ],
+        "probabilities": {},
+        "categoryLabels": [
+          "AYAKA_AKEMI",
+          "GINA_SATOMI"
+        ],
+        "categoryProbabilities": {
+          "SET_1": [
+            0.65,
+            0.35
+          ],
+          "SET_2": [
+            0.35,
+            0.65
+          ],
+          "SET_3": [
+            0.65,
+            0.35
+          ],
+          "SET_4": [
+            0.35714285714285715,
+            0.6428571428571429
+          ],
+          "SET_5": [
+            0.6428571428571429,
+            0.35714285714285715
+          ],
+          "SET_6": [
+            0.5,
+            0.5
+          ]
+        },
+        "categoryConditioning": {
+          "excludedCategories": [
+            "HIBIKI",
+            "MACHIO"
+          ],
+          "normalization": "RENORMALIZE_INCLUDED"
+        },
+        "sourceEvidenceRefs": [
+          "SRC_PWORLD"
+        ]
+      },
+      {
+        "featureId": "FEAT_UPPER_AT_CHEER_2",
+        "name": "上位AT中100枚ごとの2人合いの手出現率",
+        "adoptionCategory": "INCLUDE_SUPPORT",
+        "calculationRole": "PROBABILITY",
+        "probabilityEngineUsage": true,
+        "modelType": "binomial",
+        "minimumSample": 1,
+        "sampleRecommendation": 30,
+        "reliabilityProfile": {
+          "weight": 0.6
+        },
+        "denominatorInputId": "INP_UPPER_AT_CHEER_TRIALS",
+        "numeratorInputId": "INP_UPPER_AT_CHEER_2",
+        "displayFormat": "ratio_1_over_n",
+        "probabilities": {
+          "SET_1": 0.02,
+          "SET_2": 0.02,
+          "SET_3": 0.02,
+          "SET_4": 0.05,
+          "SET_5": 0.05,
+          "SET_6": 0.05
+        },
+        "sourceEvidenceRefs": [
+          "SRC_NANA_CHEER"
         ]
       }
     ]
@@ -438,6 +580,13 @@
         "pageName": "Lダンベル何キロ持てる？ 設定判別",
         "url": "https://1geki.jp/slot/l_dumbbell/0/",
         "checkedAt": "2026-08-27"
+      },
+      {
+        "id": "SRC_NANA_CHEER",
+        "classification": "ANALYSIS",
+        "pageName": "合いの手演出による設定示唆",
+        "url": "https://nana-press.com/kaiseki/machine/855/26478/",
+        "checkedAt": "2026-08-27"
       }
     ]
   },
@@ -517,15 +666,82 @@
             "gridSpan": 12
           }
         ]
+      },
+      {
+        "id": "UI_05___AT________",
+        "title": "上位AT終了画面（割合）",
+        "displayOrder": 5,
+        "collapsible": true,
+        "items": [
+          {
+            "type": "input",
+            "inputId": "INP_TOP_END_AYAKA_AKEMI",
+            "label": "奇数示唆",
+            "widget": "counter",
+            "gridSpan": 12,
+            "config": {
+              "compact": true,
+              "quickAdd": 1
+            }
+          },
+          {
+            "type": "input",
+            "inputId": "INP_TOP_END_GINA_SATOMI",
+            "label": "偶数示唆",
+            "widget": "counter",
+            "gridSpan": 12,
+            "config": {
+              "compact": true,
+              "quickAdd": 1
+            }
+          }
+        ]
+      },
+      {
+        "id": "UI_06___AT______",
+        "title": "上位AT中 合いの手",
+        "displayOrder": 6,
+        "description": "上位AT「金肉ボーナス」中、100枚獲得ごとの合いの手を対象にします。2人を数値推測に使用し、5人は低設定側の完全確率が非公開のため数値推測には使用しません。",
+        "collapsible": true,
+        "items": [
+          {
+            "type": "input",
+            "inputId": "INP_UPPER_AT_CHEER_TRIALS",
+            "label": "100枚獲得チェック回数",
+            "widget": "counter",
+            "gridSpan": 12,
+            "config": {
+              "compact": true,
+              "quickAdd": 1
+            }
+          },
+          {
+            "type": "input",
+            "inputId": "INP_UPPER_AT_CHEER_2",
+            "label": "2人合いの手",
+            "widget": "counter",
+            "gridSpan": 12,
+            "config": {
+              "compact": true,
+              "quickAdd": 1
+            }
+          }
+        ]
       }
     ],
     "quickInputContract": {
       "enabled": true,
       "selectableSections": [
-        "通常時"
+        "通常時",
+        "上位AT終了画面（割合）",
+        "上位AT中 合いの手"
       ],
       "inputIds": [
-        "INP_AT_INITIAL_COUNT"
+        "INP_AT_INITIAL_COUNT",
+        "INP_TOP_END_AYAKA_AKEMI",
+        "INP_TOP_END_GINA_SATOMI",
+        "INP_UPPER_AT_CHEER_TRIALS",
+        "INP_UPPER_AT_CHEER_2"
       ],
       "unsetDisplayAsZero": true,
       "preserveUnobservedUntilIncrement": true,
@@ -539,8 +755,8 @@
   },
   "selectionSummary": {
     "schemaVersion": "selection-summary-v1",
-    "evaluatedCount": 7,
-    "selectedCount": 1,
+    "evaluatedCount": 9,
+    "selectedCount": 3,
     "rejectedCount": 6,
     "selected": [
       {
@@ -550,6 +766,24 @@
         "requiredTrials": {
           "value": 157399,
           "unit": "通常ゲーム"
+        }
+      },
+      {
+        "featureId": "FEAT_TOP_AT_END_NON_EVIDENCE",
+        "name": "上位AT終了画面",
+        "reason": "設定4以上・設定6の確定画面はEvidenceへ分離し、奇数/偶数示唆など残り画面の条件付き分布を数値推測に採用します。",
+        "requiredTrials": {
+          "value": 79,
+          "unit": "上位AT終了1回"
+        }
+      },
+      {
+        "featureId": "FEAT_UPPER_AT_CHEER_2",
+        "name": "上位AT中100枚ごとの2人合いの手出現率",
+        "reason": "上位AT中100枚獲得ごとに必ず観測機会があり、2人出現率は設定1～3約2%・設定4～6約5%と公開されています。約表記のため重みを0.6に抑えて採用します。",
+        "requiredTrials": {
+          "value": 262,
+          "unit": "上位AT中100枚獲得チェックポイント1回"
         }
       }
     ],
@@ -600,13 +834,9 @@
         }
       },
       {
-        "featureId": "FEAT_TOP_AT_END_EXCLUDED",
-        "name": "上位AT終了画面",
-        "reason": "AT初当りを通常G基準の代表Featureとして採用しており、CZ成功・上位CZ・終了時分布など同一当選過程の上流または下流情報を独立に加えると二重評価になるため不採用です。",
-        "requiredTrials": {
-          "value": 29,
-          "unit": "上位AT終了1回"
-        }
+        "featureId": "REJ_UPPER_AT_CHEER_5",
+        "name": "上位AT中 5人合いの手",
+        "reason": "高設定示唆（強）ですが、設定1～3は「低確率」としか公開されておらず設定別の完全な数値がないため、数値尤度には不採用です。"
       }
     ]
   },

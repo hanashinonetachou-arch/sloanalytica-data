@@ -1,13 +1,289 @@
 {
-  "schemaVersion":"ui-design-data-v1",
-  "machineId":"S_MHW_ICEBORNE_ZF",
-  "status":"PASS_WITH_UNRESOLVED",
-  "generatedFrom":{"selection":"research/S_MHW_ICEBORNE_ZF/selection-data.json","observation":"research/S_MHW_ICEBORNE_ZF/machine-observation-data.json"},
-  "sectionOrder":["通常時","特殊契機・昇格チャレンジ","ボーナス確定・終了画面"],
-  "sections":{"通常時":{"inputIds":["INP_NORMAL_GAMES","INP_CZ_TOTAL_COUNT"],"evidenceIds":[],"description":"自分で消化した通常ゲーム数とCZ合算を記録します。CZ種類別・状態別レア役抽選・AT初当りは重複評価を避けるため入力しません。","observationRole":"DIRECT_PLAY","collapsible":true,"quickInputEligible":true},"特殊契機・昇格チャレンジ":{"inputIds":[],"evidenceIds":["EVID_SPECIAL"],"description":"レイア希少種パネル、BAR狙え以外からのAT直撃・ロングフリーズ、高確弱レア役からのセリエナ防衛戦など、設定下限が確定する事象が出た場合に選択します。","observationRole":"END_EVENT","collapsible":true,"quickInputEligible":false},"ボーナス確定・終了画面":{"inputIds":[],"evidenceIds":["EVID_CONFIRM_END"],"description":"ボーナス確定画面・終了画面で設定下限や設定6が確定するパターンが出た場合に選択します。","observationRole":"END_EVENT","collapsible":true,"quickInputEligible":false}},
-  "inputContracts":{"INP_NORMAL_GAMES":{"name":"通常ゲーム数","mode":"NUMBER","gridSpan":12,"directInput":true,"placeholder":0,"quickInput":false},"INP_CZ_TOTAL_COUNT":{"name":"CZ合算","mode":"COUNTER","gridSpan":12,"directInput":true,"compact":true,"placeholder":0,"quickInput":true,"quickStep":1}},
-  "evidenceContracts":{"EVID_SPECIAL":{"label":"特殊契機・昇格チャレンジ","selectionMode":"multi","sourceEvidenceGroupId":"EVID_SPECIAL","inheritOptions":true},"EVID_CONFIRM_END":{"label":"ボーナス確定・終了画面","selectionMode":"multi","sourceEvidenceGroupId":"EVID_CONFIRM_END","inheritOptions":true}},
-  "quickInputContract":{"enabled":true,"selectableSections":["通常時"],"inputIds":["INP_CZ_TOTAL_COUNT"],"unsetDisplayAsZero":true,"preserveUnobservedUntilIncrement":true,"returnToSectionSelectionAfterIncrement":false},
-  "unresolved":["実機メニュー、データカウンター、連動機能、着席時CZ累計の取得可否は実機確認待ち。"],
-  "auditNotes":["SelectionとObservation v2を正式参照。","状態別CZ抽選、小役、AT直撃率、ボーナス分布はSelection不採用のため通常入力UIへ露出しない。"]
+  "schemaVersion": "ui-design-data-v1",
+  "machineId": "S_MHW_ICEBORNE_ZF",
+  "status": "PASS_WITH_UNRESOLVED",
+  "generatedFrom": {
+    "selection": "research/S_MHW_ICEBORNE_ZF/selection-data.json",
+    "observation": "research/S_MHW_ICEBORNE_ZF/machine-observation-data.json"
+  },
+  "sectionOrder": [
+    "通常時",
+    "特殊契機・昇格チャレンジ",
+    "ボーナス確定・終了画面",
+    "通常時小役",
+    "ボーナス確定画面（割合）",
+    "ボーナス絵柄"
+  ],
+  "sections": {
+    "通常時": {
+      "inputIds": [
+        "INP_NORMAL_GAMES",
+        "INP_CZ_TOTAL_COUNT"
+      ],
+      "evidenceIds": [],
+      "description": "自分で消化した通常ゲーム数とCZ合算を記録します。CZ種類別・状態別レア役抽選・AT初当りは重複評価を避けるため入力しません。",
+      "observationRole": "DIRECT_PLAY",
+      "collapsible": true,
+      "quickInputEligible": true
+    },
+    "特殊契機・昇格チャレンジ": {
+      "inputIds": [],
+      "evidenceIds": [
+        "EVID_SPECIAL"
+      ],
+      "description": "レイア希少種パネル、BAR狙え以外からのAT直撃・ロングフリーズ、高確弱レア役からのセリエナ防衛戦など、設定下限が確定する事象が出た場合に選択します。",
+      "observationRole": "END_EVENT",
+      "collapsible": true,
+      "quickInputEligible": false
+    },
+    "ボーナス確定・終了画面": {
+      "inputIds": [],
+      "evidenceIds": [
+        "EVID_CONFIRM_END"
+      ],
+      "description": "ボーナス確定画面・終了画面で設定下限や設定6が確定するパターンが出た場合に選択します。",
+      "observationRole": "END_EVENT",
+      "collapsible": true,
+      "quickInputEligible": false
+    },
+    "通常時小役": {
+      "inputIds": [
+        "INP_SMALLROLE_COMMON_BELL",
+        "INP_SMALLROLE_WEAK_CHANCE",
+        "INP_SMALLROLE_WATERMELON"
+      ],
+      "evidenceIds": [],
+      "description": "通常時の共通ベル・弱チャンス目・スイカを記録します。 「その他」は通常ゲーム数から対象小役回数を差し引いて自動的に残差として扱うため入力不要です。",
+      "observationRole": "DIRECT_PLAY",
+      "collapsible": true,
+      "quickInputEligible": true
+    },
+    "ボーナス確定画面（割合）": {
+      "inputIds": [
+        "INP_CONFIRM_EVEN_A",
+        "INP_CONFIRM_EVEN_B",
+        "INP_CONFIRM_EVEN_C",
+        "INP_CONFIRM_EVEN_D",
+        "INP_CONFIRM_ODD_A",
+        "INP_CONFIRM_ODD_B",
+        "INP_CONFIRM_YOU"
+      ],
+      "evidenceIds": [],
+      "description": "設定確定画面はEvidenceへ入力し、それ以外の確定画面キャラの出現回数を割合用に入力します。",
+      "observationRole": "DIRECT_PLAY",
+      "collapsible": true,
+      "quickInputEligible": true
+    },
+    "ボーナス絵柄": {
+      "inputIds": [
+        "INP_BONUS_SYMBOL_BAR",
+        "INP_BONUS_SYMBOL_RED7",
+        "INP_BONUS_SYMBOL_BLUE7"
+      ],
+      "evidenceIds": [],
+      "description": "",
+      "observationRole": "DIRECT_PLAY",
+      "collapsible": true,
+      "quickInputEligible": true
+    }
+  },
+  "inputContracts": {
+    "INP_NORMAL_GAMES": {
+      "name": "通常ゲーム数",
+      "mode": "NUMBER",
+      "gridSpan": 12,
+      "directInput": true,
+      "placeholder": 0,
+      "quickInput": false
+    },
+    "INP_CZ_TOTAL_COUNT": {
+      "name": "CZ合算",
+      "mode": "COUNTER",
+      "gridSpan": 12,
+      "directInput": true,
+      "compact": true,
+      "placeholder": 0,
+      "quickInput": true,
+      "quickStep": 1
+    },
+    "INP_SMALLROLE_COMMON_BELL": {
+      "name": "共通ベル",
+      "mode": "COUNTER",
+      "gridSpan": 12,
+      "directInput": true,
+      "compact": true,
+      "placeholder": 0,
+      "quickInput": true,
+      "quickStep": 1
+    },
+    "INP_SMALLROLE_WEAK_CHANCE": {
+      "name": "弱チャンス目",
+      "mode": "COUNTER",
+      "gridSpan": 12,
+      "directInput": true,
+      "compact": true,
+      "placeholder": 0,
+      "quickInput": true,
+      "quickStep": 1
+    },
+    "INP_SMALLROLE_WATERMELON": {
+      "name": "スイカ",
+      "mode": "COUNTER",
+      "gridSpan": 12,
+      "directInput": true,
+      "compact": true,
+      "placeholder": 0,
+      "quickInput": true,
+      "quickStep": 1
+    },
+    "INP_CONFIRM_EVEN_A": {
+      "name": "メイメイ",
+      "mode": "COUNTER",
+      "gridSpan": 12,
+      "directInput": true,
+      "compact": true,
+      "placeholder": 0,
+      "quickInput": true,
+      "quickStep": 1
+    },
+    "INP_CONFIRM_EVEN_B": {
+      "name": "♡あゃ♡",
+      "mode": "COUNTER",
+      "gridSpan": 12,
+      "directInput": true,
+      "compact": true,
+      "placeholder": 0,
+      "quickInput": true,
+      "quickStep": 1
+    },
+    "INP_CONFIRM_EVEN_C": {
+      "name": "Elly",
+      "mode": "COUNTER",
+      "gridSpan": 12,
+      "directInput": true,
+      "compact": true,
+      "placeholder": 0,
+      "quickInput": true,
+      "quickStep": 1
+    },
+    "INP_CONFIRM_EVEN_D": {
+      "name": "碧",
+      "mode": "COUNTER",
+      "gridSpan": 12,
+      "directInput": true,
+      "compact": true,
+      "placeholder": 0,
+      "quickInput": true,
+      "quickStep": 1
+    },
+    "INP_CONFIRM_ODD_A": {
+      "name": "Dr.D",
+      "mode": "COUNTER",
+      "gridSpan": 12,
+      "directInput": true,
+      "compact": true,
+      "placeholder": 0,
+      "quickInput": true,
+      "quickStep": 1
+    },
+    "INP_CONFIRM_ODD_B": {
+      "name": "アルバーノ",
+      "mode": "COUNTER",
+      "gridSpan": 12,
+      "directInput": true,
+      "compact": true,
+      "placeholder": 0,
+      "quickInput": true,
+      "quickStep": 1
+    },
+    "INP_CONFIRM_YOU": {
+      "name": "YOU",
+      "mode": "COUNTER",
+      "gridSpan": 12,
+      "directInput": true,
+      "compact": true,
+      "placeholder": 0,
+      "quickInput": true,
+      "quickStep": 1
+    },
+    "INP_BONUS_SYMBOL_BAR": {
+      "name": "BAR",
+      "mode": "COUNTER",
+      "gridSpan": 12,
+      "directInput": true,
+      "compact": true,
+      "placeholder": 0,
+      "quickInput": true,
+      "quickStep": 1
+    },
+    "INP_BONUS_SYMBOL_RED7": {
+      "name": "赤7",
+      "mode": "COUNTER",
+      "gridSpan": 12,
+      "directInput": true,
+      "compact": true,
+      "placeholder": 0,
+      "quickInput": true,
+      "quickStep": 1
+    },
+    "INP_BONUS_SYMBOL_BLUE7": {
+      "name": "青7",
+      "mode": "COUNTER",
+      "gridSpan": 12,
+      "directInput": true,
+      "compact": true,
+      "placeholder": 0,
+      "quickInput": true,
+      "quickStep": 1
+    }
+  },
+  "evidenceContracts": {
+    "EVID_SPECIAL": {
+      "label": "特殊契機・昇格チャレンジ",
+      "selectionMode": "multi",
+      "sourceEvidenceGroupId": "EVID_SPECIAL",
+      "inheritOptions": true
+    },
+    "EVID_CONFIRM_END": {
+      "label": "ボーナス確定・終了画面",
+      "selectionMode": "multi",
+      "sourceEvidenceGroupId": "EVID_CONFIRM_END",
+      "inheritOptions": true
+    }
+  },
+  "quickInputContract": {
+    "enabled": true,
+    "selectableSections": [
+      "通常時",
+      "通常時小役",
+      "ボーナス確定画面（割合）",
+      "ボーナス絵柄"
+    ],
+    "inputIds": [
+      "INP_CZ_TOTAL_COUNT",
+      "INP_SMALLROLE_COMMON_BELL",
+      "INP_SMALLROLE_WEAK_CHANCE",
+      "INP_SMALLROLE_WATERMELON",
+      "INP_CONFIRM_EVEN_A",
+      "INP_CONFIRM_EVEN_B",
+      "INP_CONFIRM_EVEN_C",
+      "INP_CONFIRM_EVEN_D",
+      "INP_CONFIRM_ODD_A",
+      "INP_CONFIRM_ODD_B",
+      "INP_CONFIRM_YOU",
+      "INP_BONUS_SYMBOL_BAR",
+      "INP_BONUS_SYMBOL_RED7",
+      "INP_BONUS_SYMBOL_BLUE7"
+    ],
+    "unsetDisplayAsZero": true,
+    "preserveUnobservedUntilIncrement": true,
+    "returnToSectionSelectionAfterIncrement": false
+  },
+  "unresolved": [
+    "実機メニュー、データカウンター、連動機能、着席時CZ累計の取得可否は実機確認待ち。"
+  ],
+  "auditNotes": [
+    "SelectionとObservation v2を正式参照。",
+    "状態別CZ抽選、小役、AT直撃率、ボーナス分布はSelection不採用のため通常入力UIへ露出しない。"
+  ]
 }

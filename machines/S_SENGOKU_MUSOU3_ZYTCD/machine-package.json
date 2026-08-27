@@ -3,7 +3,7 @@
   "machine": {
     "schemaVersion": "2.0.0",
     "machineId": "S_SENGOKU_MUSOU3_ZYTCD",
-    "machineDataVersion": "0.1.0",
+    "machineDataVersion": "0.1.1",
     "displayName": "パチスロ戦国無双3",
     "modelName": "Sパチスロ戦国無双3ZYTCD",
     "manufacturer": "山佐ネクスト",
@@ -45,6 +45,32 @@
         "inferenceRole": "INCLUDE_PRIMARY",
         "observationScope": "SELF_PLAY",
         "defaultValue": 0,
+        "minimum": 0
+      },
+      {
+        "id": "INP_BIG_GAUGE3_TRIALS",
+        "name": "無双ゲージ3個点灯で終了した初当りBIG",
+        "category": "BONUS",
+        "type": "counter",
+        "unit": "回",
+        "displayOrder": 30,
+        "inferenceRole": "INCLUDE_SUPPORT",
+        "observationScope": "SELF_PLAY",
+        "defaultValue": 0,
+        "uiQuickAdd": 1,
+        "minimum": 0
+      },
+      {
+        "id": "INP_BIG_GAUGE3_AT",
+        "name": "うちAT当選",
+        "category": "BONUS",
+        "type": "counter",
+        "unit": "回",
+        "displayOrder": 31,
+        "inferenceRole": "INCLUDE_SUPPORT",
+        "observationScope": "SELF_PLAY",
+        "defaultValue": 0,
+        "uiQuickAdd": 1,
         "minimum": 0
       },
       {
@@ -270,6 +296,34 @@
         "sourceEvidenceRefs": [
           "SRC_PWORLD",
           "SRC_1GEKI"
+        ]
+      },
+      {
+        "featureId": "FEAT_BIG_GAUGE3_AT",
+        "name": "初当りBIG 無双ゲージ3個点灯時AT当選",
+        "adoptionCategory": "INCLUDE_SUPPORT",
+        "calculationRole": "PROBABILITY",
+        "probabilityEngineUsage": true,
+        "modelType": "binomial",
+        "minimumSample": 1,
+        "sampleRecommendation": 20,
+        "reliabilityProfile": {
+          "weight": 1
+        },
+        "denominatorInputId": "INP_BIG_GAUGE3_TRIALS",
+        "numeratorInputId": "INP_BIG_GAUGE3_AT",
+        "displayFormat": "ratio_1_over_n",
+        "probabilities": {
+          "SET_1": 0.168,
+          "SET_2": 0.223,
+          "SET_4": 0.273,
+          "SET_5": 0.301,
+          "SET_6": 0.336
+        },
+        "sourceEvidenceRefs": [
+          "SRC_PWORLD",
+          "SRC_1GEKI",
+          "SRC_NANA"
         ]
       }
     ]
@@ -926,15 +980,49 @@
             "gridSpan": 12
           }
         ]
+      },
+      {
+        "id": "UI_06_BIG_______3_",
+        "title": "BIG中 無双ゲージ3個",
+        "displayOrder": 6,
+        "description": "通常時の初当りBIGが無双ゲージ3個点灯で終了したケースだけを母数にします。4個以上・2個以下は含めません。",
+        "collapsible": true,
+        "items": [
+          {
+            "type": "input",
+            "inputId": "INP_BIG_GAUGE3_TRIALS",
+            "label": "3個点灯で終了した初当りBIG",
+            "widget": "counter",
+            "gridSpan": 12,
+            "config": {
+              "compact": true,
+              "quickAdd": 1
+            }
+          },
+          {
+            "type": "input",
+            "inputId": "INP_BIG_GAUGE3_AT",
+            "label": "うちAT当選",
+            "widget": "counter",
+            "gridSpan": 12,
+            "config": {
+              "compact": true,
+              "quickAdd": 1
+            }
+          }
+        ]
       }
     ],
     "quickInputContract": {
       "enabled": true,
       "selectableSections": [
-        "通常時"
+        "通常時",
+        "BIG中 無双ゲージ3個"
       ],
       "inputIds": [
-        "INP_BONUS_COUNT"
+        "INP_BONUS_COUNT",
+        "INP_BIG_GAUGE3_TRIALS",
+        "INP_BIG_GAUGE3_AT"
       ],
       "unsetDisplayAsZero": true,
       "preserveUnobservedUntilIncrement": true,
@@ -949,8 +1037,8 @@
   "selectionSummary": {
     "schemaVersion": "selection-summary-v1",
     "evaluatedCount": 7,
-    "selectedCount": 1,
-    "rejectedCount": 6,
+    "selectedCount": 2,
+    "rejectedCount": 5,
     "selected": [
       {
         "featureId": "FEAT_BONUS_TOTAL",
@@ -959,6 +1047,15 @@
         "requiredTrials": {
           "value": 2350,
           "unit": "通常ゲーム"
+        }
+      },
+      {
+        "featureId": "FEAT_BIG_GAUGE3_AT",
+        "name": "初当りBIG 無双ゲージ3個点灯時AT当選",
+        "reason": "初当りBIGが無双ゲージ3個で終了した場合に条件を限定したAT当選率で、通常Gあたりの初当りボーナスとは条件付き分解できる別軸の情報です。",
+        "requiredTrials": {
+          "value": 48,
+          "unit": "無双ゲージ3個点灯で終了した初当りBIG1回"
         }
       }
     ],
@@ -982,15 +1079,6 @@
         }
       },
       {
-        "featureId": "FEAT_BIG_GAUGE3_AT_EXCLUDED",
-        "name": "初当りBIG 無双ゲージ3個点灯時AT当選",
-        "reason": "初当りボーナスを通常G基準の代表Featureとして採用しており、AT初当り・ボーナス内訳・BIG/REG中の条件付き事象やボイス分布を独立に加えると同一当選系列を重複評価するため不採用です。",
-        "requiredTrials": {
-          "value": 48,
-          "unit": "無双ゲージ3個点灯で終了した初当りBIG1回"
-        }
-      },
-      {
         "featureId": "FEAT_REG_NOBUNAGA_BATTLE_EXCLUDED",
         "name": "初当りREG 信長バトル発生",
         "reason": "初当りボーナスを通常G基準の代表Featureとして採用しており、AT初当り・ボーナス内訳・BIG/REG中の条件付き事象やボイス分布を独立に加えると同一当選系列を重複評価するため不採用です。",
@@ -1000,18 +1088,18 @@
         }
       },
       {
-        "featureId": "FEAT_RED_BIG_VOICE_EXCLUDED",
+        "featureId": "FEAT_RF_RED_BIG_VOICE_EXCLUDED",
         "name": "赤7BIGテンパイボイス",
-        "reason": "初当りボーナスを通常G基準の代表Featureとして採用しており、AT初当り・ボーナス内訳・BIG/REG中の条件付き事象やボイス分布を独立に加えると同一当選系列を重複評価するため不採用です。",
+        "reason": "初当りボーナスとは別軸ですが、設定差のある稲姫・慶次ボイス自体が設定限定Evidenceです。同じボイス発生をEvidenceと数値尤度で二重評価するため、数値Featureには追加採用しません。",
         "requiredTrials": {
           "value": 10,
           "unit": "該当BIG1回"
         }
       },
       {
-        "featureId": "FEAT_WHITE_BIG_VOICE_EXCLUDED",
+        "featureId": "FEAT_RF_WHITE_BIG_VOICE_EXCLUDED",
         "name": "白7BIGテンパイボイス",
-        "reason": "初当りボーナスを通常G基準の代表Featureとして採用しており、AT初当り・ボーナス内訳・BIG/REG中の条件付き事象やボイス分布を独立に加えると同一当選系列を重複評価するため不採用です。",
+        "reason": "初当りボーナスとは別軸ですが、設定差のある稲姫・慶次ボイス自体が設定限定Evidenceです。同じボイス発生をEvidenceと数値尤度で二重評価するため、数値Featureには追加採用しません。",
         "requiredTrials": {
           "value": 7,
           "unit": "該当BIG1回"
