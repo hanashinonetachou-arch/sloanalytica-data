@@ -1,0 +1,51 @@
+{
+  "schemaVersion": "selection-data-v1",
+  "machineId": "S_MILKY_HOMES_GNB",
+  "machineDataVersion": "0.1.0",
+  "inputs": [
+    {"id":"INP_NORMAL_GAMES","name":"通常ゲーム数","category":"SELF_PLAY","type":"integer","unit":"G","displayOrder":10,"inferenceRole":"INCLUDE_PRIMARY","observationScope":"SELF_PLAY","defaultValue":0},
+    {"id":"INP_BONUS_TOTAL_COUNT","name":"ボーナス合算","category":"SELF_PLAY","type":"counter","unit":"回","displayOrder":11,"inferenceRole":"INCLUDE_PRIMARY","observationScope":"SELF_PLAY","defaultValue":0},
+    {"id":"INP_WEAK_WATER_COUNT","name":"弱スイカ","category":"SMALL_ROLE","type":"counter","unit":"回","displayOrder":20,"inferenceRole":"INCLUDE_PRIMARY","observationScope":"SELF_PLAY","defaultValue":0,"uiQuickAdd":1},
+    {"id":"INP_PUSH_NAV_COUNT","name":"通常時押し順ナビ","category":"SELF_PLAY","type":"counter","unit":"回","displayOrder":12,"inferenceRole":"INCLUDE_PRIMARY","observationScope":"SELF_PLAY","defaultValue":0,"uiQuickAdd":1}
+  ],
+  "features": [
+    {"researchFeatureId":"RF_BONUS_TOTAL","featureId":"FEAT_BONUS_TOTAL","adoptionCategory":"INCLUDE_PRIMARY","numeratorInputId":"INP_BONUS_TOTAL_COUNT","denominatorInputId":"INP_NORMAL_GAMES","minimumSample":1000,"sampleRecommendation":5000,"weight":1,"difficultyParticipation":"INCLUDE","difficultyExposure":{"mode":"per_game","factor":1,"quality":"EXACT","basisId":"SELF_NORMAL_PLAY_GAMES"},"userReason":"MMB・MB個別当選率と重複させず、通常ゲームに対するボーナス合算を代表値として利用します。"},
+    {"researchFeatureId":"RF_WEAK_WATER","featureId":"FEAT_WEAK_WATER","adoptionCategory":"INCLUDE_PRIMARY","numeratorInputId":"INP_WEAK_WATER_COUNT","denominatorInputId":"INP_NORMAL_GAMES","minimumSample":1000,"sampleRecommendation":5000,"weight":1,"difficultyParticipation":"INCLUDE","difficultyExposure":{"mode":"per_game","factor":1,"quality":"EXACT","basisId":"SELF_NORMAL_PLAY_GAMES"},"userReason":"弱スイカは通常ゲームで直接カウントでき、特に設定6と他設定の差が非常に大きいため採用します。"},
+    {"researchFeatureId":"RF_PUSH_NAV","featureId":"FEAT_PUSH_NAV","adoptionCategory":"INCLUDE_PRIMARY","numeratorInputId":"INP_PUSH_NAV_COUNT","denominatorInputId":"INP_NORMAL_GAMES","minimumSample":100,"sampleRecommendation":1000,"weight":1,"difficultyParticipation":"INCLUDE","difficultyExposure":{"mode":"per_game","factor":1,"quality":"EXACT","basisId":"SELF_NORMAL_PLAY_GAMES"},"userReason":"通常時押し順ナビは設定6だけ出現率が大幅に高く、実戦中に直接観測できる強い判別材料です。"}
+  ],
+  "evidence": [],
+  "evidenceUi": {"groups":[
+    {"groupId":"EVID_TOUCH","label":"通常時キャラタッチボイス","options":[
+      {"value":"SET2_5","label":"設定2・3・4・5確定群","allowedSettings":["SET_2","SET_3","SET_4","SET_5"],"excludedSettings":["SET_1","SET_6"],"sourceEvidenceIds":["RE_TOUCH_2_5"]},
+      {"value":"SET3_5","label":"設定3・4・5確定群","allowedSettings":["SET_3","SET_4","SET_5"],"excludedSettings":["SET_1","SET_2","SET_6"],"sourceEvidenceIds":["RE_TOUCH_3_5"]},
+      {"value":"SET4_5","label":"設定4・5確定群","allowedSettings":["SET_4","SET_5"],"excludedSettings":["SET_1","SET_2","SET_3","SET_6"],"sourceEvidenceIds":["RE_TOUCH_4_5"]},
+      {"value":"SET5","label":"設定5確定群","allowedSettings":["SET_5"],"excludedSettings":["SET_1","SET_2","SET_3","SET_4","SET_6"],"sourceEvidenceIds":["RE_TOUCH_5"]}
+    ]},
+    {"groupId":"EVID_MMB_ROULETTE","label":"MMB・ミルキィルーレット","options":[
+      {"value":"MMB_RED","label":"MMB技術介入パネル 赤","allowedSettings":["SET_3","SET_4","SET_5"],"excludedSettings":["SET_1","SET_2","SET_6"],"sourceEvidenceIds":["RE_MMB_RED"]},
+      {"value":"MMB_RAINBOW","label":"MMB技術介入パネル 虹","allowedSettings":["SET_5"],"excludedSettings":["SET_1","SET_2","SET_3","SET_4","SET_6"],"sourceEvidenceIds":["RE_MMB_RAINBOW"]},
+      {"value":"ROULETTE_3_ADD","label":"ルーレット1～3回目すべて上乗せ","allowedSettings":["SET_2","SET_3","SET_4","SET_5"],"excludedSettings":["SET_1","SET_6"],"sourceEvidenceIds":["RE_ROULETTE_3_ADD"]}
+    ]},
+    {"groupId":"EVID_END","label":"ボーナス終了画面","options":[
+      {"value":"COPPER","label":"銅","allowedSettings":["SET_2","SET_3","SET_4","SET_5"],"excludedSettings":["SET_1","SET_6"],"sourceEvidenceIds":["RE_END_COPPER"]},
+      {"value":"GOLD","label":"金","allowedSettings":["SET_3","SET_4","SET_5"],"excludedSettings":["SET_1","SET_2","SET_6"],"sourceEvidenceIds":["RE_END_GOLD"]},
+      {"value":"STAR","label":"星","allowedSettings":["SET_4","SET_5"],"excludedSettings":["SET_1","SET_2","SET_3","SET_6"],"sourceEvidenceIds":["RE_END_STAR"]},
+      {"value":"RAINBOW","label":"虹","allowedSettings":["SET_5"],"excludedSettings":["SET_1","SET_2","SET_3","SET_4","SET_6"],"sourceEvidenceIds":["RE_END_RAINBOW"]}
+    ]},
+    {"groupId":"EVID_SMART_TALK","label":"スマTALK","options":[
+      {"value":"A_RED","label":"質問A 赤","allowedSettings":["SET_3","SET_4","SET_5"],"excludedSettings":["SET_1","SET_2","SET_6"],"sourceEvidenceIds":["RE_SMART_A_RED"]},
+      {"value":"B_BLUE","label":"質問B 青","allowedSettings":["SET_2","SET_3","SET_4","SET_5"],"excludedSettings":["SET_1","SET_6"],"sourceEvidenceIds":["RE_SMART_B_BLUE"]},
+      {"value":"B_RED","label":"質問B 赤","allowedSettings":["SET_4","SET_5"],"excludedSettings":["SET_1","SET_2","SET_3","SET_6"],"sourceEvidenceIds":["RE_SMART_B_RED"]},
+      {"value":"C_BLUE","label":"質問C 青","allowedSettings":["SET_3","SET_4","SET_5"],"excludedSettings":["SET_1","SET_2","SET_6"],"sourceEvidenceIds":["RE_SMART_C_BLUE"]},
+      {"value":"C_RED","label":"質問C 赤","allowedSettings":["SET_5"],"excludedSettings":["SET_1","SET_2","SET_3","SET_4","SET_6"],"sourceEvidenceIds":["RE_SMART_C_RED"]}
+    ]},
+    {"groupId":"EVID_GACHA","label":"スマコレ・ガチャ","options":[
+      {"value":"A","label":"A1/A2/A3","allowedSettings":["SET_2","SET_3","SET_4","SET_5"],"excludedSettings":["SET_1","SET_6"],"sourceEvidenceIds":["RE_GACHA_A"]},
+      {"value":"S","label":"S","allowedSettings":["SET_3","SET_4","SET_5"],"excludedSettings":["SET_1","SET_2","SET_6"],"sourceEvidenceIds":["RE_GACHA_S"]},
+      {"value":"SS","label":"SS","allowedSettings":["SET_5"],"excludedSettings":["SET_1","SET_2","SET_3","SET_4","SET_6"],"sourceEvidenceIds":["RE_GACHA_SS"]}
+    ]}
+  ]},
+  "evidenceReview": {"policyVersion":1,"exclusions":[]},
+  "difficultyAnalysis": {"targetGames":[1500,3000,7000],"simulationsPerSetting":4000,"seed":20260827,"targetGameBasis":{"basisId":"SELF_NORMAL_PLAY_GAMES","label":"ユーザー自身の通常遊技ゲーム数","quality":"EXACT","crossMachineComparable":true,"note":"通常ゲームから直接得られる3FeatureのみDifficultyへ参加。"},"calibrationAllowedExposureQualities":["EXACT","DERIVED"]},
+  "uiCategoryLabels": {"SELF_PLAY":"通常時","SMALL_ROLE":"小役"}
+}
