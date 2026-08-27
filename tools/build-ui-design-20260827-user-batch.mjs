@@ -28,6 +28,30 @@ function inputMode(inp){
  return 'NUMBER';
 }
 function buildSections(machineId,selection){
+  // Shared Feature + Evidence surfaces must stay together by Selection category.
+  // Shin Eva is the first canonical application of this contract.
+  if(machineId==='L_SHIN_EVANGELION'){
+    const categoryOrder=['NUMERIC','REI_NAV','REI_SUCCESS','BONUS_END'];
+    const sections={}; const order=[];
+    for(const category of categoryOrder){
+      const ids=(selection.inputs??[])
+        .filter(inp=>inp.category===category)
+        .sort((a,b)=>(a.displayOrder??0)-(b.displayOrder??0))
+        .map(inp=>inp.id);
+      if(!ids.length) continue;
+      const label=selection.uiCategoryLabels?.[category] ?? category;
+      order.push(label);
+      sections[label]={inputIds:ids,observationRole:'DIRECT_PLAY'};
+    }
+    const evidenceGroups=selection.evidenceUi?.groups??[];
+    if(evidenceGroups.length){
+      const label=selection.uiCategoryLabels?.EVIDENCE ?? '設定確定・示唆';
+      order.push(label);
+      sections[label]={inputIds:[],evidenceIds:evidenceGroups.map((g,i)=>`EVIDENCE_${String(i+1).padStart(2,'0')}`),observationRole:'END_EVENT'};
+    }
+    return {order,sections};
+  }
+
  const rules=SECTION_RULES[machineId]??[['設定推測要素',/.*/]];
  const remaining=new Map((selection.inputs??[]).map(i=>[i.id,i]));
  const sections={}; const order=[];
@@ -59,9 +83,9 @@ for(const machineId of IDS){
    inputContracts[inp.id]={
      name:inp.name,
      mode,
-     gridSpan:mode==='COUNTER'?6:12,
-     directInput:mode==='NUMBER',
-     ...(mode==='COUNTER'?{compact:true}:{}),
+     gridSpan:inp.uiGridSpan ?? (mode==='COUNTER'?6:12),
+     directInput:inp.uiDirectInput ?? (mode==='NUMBER'),
+     ...(mode==='COUNTER'?{compact:inp.uiCompactCounter ?? true}:{}),
      observationSemantics:'blank=unobserved; zero=observed-zero'
    };
  }
@@ -90,7 +114,8 @@ for(const machineId of IDS){
    auditNotes:[
      'Section order follows actual play flow rather than internal Feature classification.',
      'Blank means unobserved and explicit 0 means observed zero; UI must preserve this distinction.',
-     'Only Selection-adopted numeric inputs and Evidence groups are exposed. Observation unresolved items remain field-verification items and are not invented into UI.'
+     'Shared Feature + Evidence observations are entered once in their natural event section and reused by both inference layers.',
+     'Only Selection-adopted numeric inputs and separate Evidence groups are exposed. Observation unresolved items remain field-verification items and are not invented into UI.'
    ]
  };
  write(path.join(dir,'ui-design-data.json'),data);
