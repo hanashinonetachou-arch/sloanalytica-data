@@ -1,27 +1,102 @@
 {
-  "schemaVersion": "machine-observation-data-v1",
+  "schemaVersion": "machine-observation-data-v2",
   "machineId": "L_SKY_LOVE_GNB",
   "displayName": "Sky Love",
-  "researchedAt": "2026-08-22",
-  "sources": [],
-  "machineMenu": {
-    "status": "UNRESOLVED",
-    "availableData": [],
-    "sourceRefs": [],
-    "notes": "通常の実機メニュー／遊技履歴の累計項目は公開情報だけでは確定できないため実機確認対象。"
+  "researchedAt": "2026-08-29",
+  "sources": [
+    {
+      "sourceId": "OBS_SRC_SKY_OFF",
+      "publisher": "カルミナ",
+      "title": "Sky Love 公式サイト",
+      "url": "https://slot.carmina-gaming.co.jp/skylove/",
+      "checkedAt": "2026-08-19",
+      "sourceType": "official"
+    },
+    {
+      "sourceId": "OBS_SRC_SKY_NANA",
+      "publisher": "なな徹",
+      "title": "Sky Love 設定判別",
+      "url": "https://nana-press.com/kaiseki/machine/681/19069/",
+      "checkedAt": "2026-08-19",
+      "sourceType": "major_analysis"
+    }
+  ],
+  "sourceCoverage": {
+    "machineMenu": "UNRESOLVED",
+    "dataCounter": "UNRESOLVED",
+    "linkedService": "UNRESOLVED",
+    "directPlay": "FOUND",
+    "endEvent": "FOUND",
+    "seatedState": "UNRESOLVED"
   },
-  "linkedService": {
-    "status": "UNRESOLVED",
-    "availableData": [],
-    "sourceRefs": [],
-    "notes": "本機固有の外部実機連動サービスを公開情報から確認できない。筐体内機能と外部サービスを混同しない。"
-  },
-  "predecessorData": {
-    "status": "UNRESOLVED",
-    "availableData": [],
-    "sourceRefs": [],
-    "notes": "旧ResearchDataでは着席時／前任者データの取得可否が独立評価されていない。不存在とは判断せず、Machine Observation Researchで再調査する。",
-    "usableForInference": false,
-    "usableForSelfSessionDelta": false
-  }
+  "observations": [
+    {
+      "observationId": "OBS_NORMAL_BONUS_COMBINED",
+      "sourceType": "DIRECT_PLAY",
+      "observationMode": "MANUAL_COUNTER",
+      "status": "FOUND",
+      "label": "自己遊技の通常ゲーム数とボーナス初当り",
+      "categories": ["通常ゲーム数", "各種ボーナス初当り合計"],
+      "timing": ["自己遊技中"],
+      "excludedConditions": ["公開ボーナス合算確率の試行母集団外ゲームを通常ゲーム分母へ含めない"],
+      "sourceRefs": ["OBS_SRC_SKY_NANA"]
+    },
+    {
+      "observationId": "OBS_WEAK_CHERRY_ROLE_GAMES",
+      "sourceType": "DIRECT_PLAY",
+      "observationMode": "MANUAL_COUNTER",
+      "status": "FOUND",
+      "label": "判別可能区間の小役集計ゲーム数と弱チェリー",
+      "categories": ["小役集計ゲーム数", "弱チェリー回数"],
+      "timing": ["弱チェリーを判別できる自己遊技区間"],
+      "excludedConditions": ["弱チェリーを判別していないゲームを小役集計分母へ含めない"],
+      "sourceRefs": ["OBS_SRC_SKY_NANA"]
+    },
+    {
+      "observationId": "OBS_FUTURE_CARD_EVIDENCE",
+      "sourceType": "DIRECT_PLAY",
+      "observationMode": "VISUAL_CONFIRMATION",
+      "status": "FOUND",
+      "label": "ボーナス終了時Futureカード",
+      "categories": ["A", "S", "SS"],
+      "timing": ["ボーナス終了時にFutureカードが出現したとき"],
+      "excludedConditions": [],
+      "sourceRefs": ["OBS_SRC_SKY_NANA"]
+    }
+  ],
+  "featureMappings": [
+    {
+      "featureId": "FEAT_BONUS_COMBINED",
+      "mappingType": "EXACT",
+      "observationIds": ["OBS_NORMAL_BONUS_COMBINED"],
+      "collectionMethods": ["MANUAL_COUNTER"],
+      "usableForInference": true,
+      "usableForDifficulty": true
+    },
+    {
+      "featureId": "FEAT_WEAK_CHERRY",
+      "mappingType": "EXACT",
+      "observationIds": ["OBS_WEAK_CHERRY_ROLE_GAMES"],
+      "collectionMethods": ["MANUAL_COUNTER"],
+      "usableForInference": true,
+      "usableForDifficulty": false
+    }
+  ],
+  "researchReopenRequests": [],
+  "fieldVerificationItems": [
+    {
+      "verificationId": "VFY_SKYLOVE_MACHINE_MENU_ITEMS",
+      "status": "WAITING_FOR_MACHINE",
+      "sourceType": "MACHINE_MENU",
+      "priority": "LOW",
+      "question": "筐体標準メニュー／遊技履歴で確認できる累計項目を次回実機確認時に記録する。現行active Featureは手動の自己遊技観測で成立する。"
+    },
+    {
+      "verificationId": "VFY_SKYLOVE_LINKED_SERVICE",
+      "status": "WAITING_FOR_MACHINE",
+      "sourceType": "LINKED_SERVICE",
+      "priority": "LOW",
+      "question": "機種固有の外部実機連動サービス有無と取得項目を再確認する。現行active Featureはこれに依存しない。"
+    }
+  ]
 }
