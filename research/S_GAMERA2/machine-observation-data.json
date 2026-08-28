@@ -1,0 +1,134 @@
+{
+  "schemaVersion": "machine-observation-data-v2",
+  "machineId": "S_GAMERA2",
+  "displayName": "パチスロ ガメラ2",
+  "researchedAt": "2026-08-29",
+  "sources": [
+    {
+      "sourceId": "SRC_LINKED",
+      "publisher": "すろぬー",
+      "title": "ガメラ2 マイスロ・マイカウンター",
+      "url": "https://slonuu.com/pg/gamera2myslo",
+      "checkedAt": "2026-08-22",
+      "sourceType": "analysis"
+    }
+  ],
+  "sourceCoverage": {
+    "machineMenu": "UNRESOLVED",
+    "dataCounter": "UNRESOLVED",
+    "linkedService": "FOUND",
+    "directPlay": "FOUND",
+    "endEvent": "FOUND",
+    "seatedState": "UNRESOLVED"
+  },
+  "observations": [
+    {
+      "observationId": "OBS_MYSLO_COUNTER",
+      "sourceType": "LINKED_SERVICE",
+      "observationMode": "LINKED_SERVICE_READ",
+      "status": "FOUND",
+      "label": "マイスロ マイカウンターの通常時G・リーチ目リプレイC/D/E/F",
+      "categories": ["NORMAL_GAMES", "REACHME_CDEF"],
+      "timing": ["マイカウンター確認時"],
+      "excludedConditions": [],
+      "sourceRefs": ["SRC_LINKED"],
+      "notes": "INP_NORMAL_GAMESとINP_REACHME_CDEF_COUNTを同じマイカウンター集計範囲から取得する。C/D/E/F内訳が利用できる場合はこちらを主軸とする。"
+    },
+    {
+      "observationId": "OBS_NORMAL_GAMES_MANUAL",
+      "sourceType": "DIRECT_PLAY",
+      "observationMode": "MANUAL_COUNTER",
+      "status": "FOUND",
+      "label": "通常時ゲーム数の手動代替",
+      "categories": ["NORMAL_GAMES"],
+      "timing": ["通常時"],
+      "excludedConditions": ["ボーナス中など公開ボーナス合算の分母に含まれない区間"],
+      "sourceRefs": [],
+      "notes": "マイカウンターを利用できない場合に、公開ボーナス合算と同じ通常時母集団を構成できるときだけINP_NORMAL_GAMESへ入力する代替経路。"
+    },
+    {
+      "observationId": "OBS_BONUS_COUNTS",
+      "sourceType": "DIRECT_PLAY",
+      "observationMode": "MANUAL_COUNTER",
+      "status": "FOUND",
+      "label": "BIG・REG初当り回数",
+      "categories": ["BIG", "REG"],
+      "timing": ["ボーナス初当り成立時"],
+      "excludedConditions": [],
+      "sourceRefs": [],
+      "notes": "INP_BIG_COUNT/INP_REG_COUNTへ対応。C/D/E/Fを利用できる場合はSelectionのsuppressedByFeatureIdsによりボーナス合算Featureを停止する。"
+    },
+    {
+      "observationId": "OBS_BIG_END_SCREEN",
+      "sourceType": "END_EVENT",
+      "observationMode": "VISUAL_EVENT",
+      "status": "FOUND",
+      "label": "BIG終了画面",
+      "categories": ["OTHER", "EVEN", "NOT_BAD", "GAMERA"],
+      "timing": ["BIG終了画面確認時"],
+      "excludedConditions": [],
+      "sourceRefs": [],
+      "notes": "4カテゴリを1回の自然観測として一度だけ入力する。OTHER/EVENは条件付きNumeric分布、NOT BAD/GAMERAは同じ入力からEvidenceへ流す。"
+    },
+    {
+      "observationId": "OBS_REG_MONSTER_FLAGS",
+      "sourceType": "DIRECT_PLAY",
+      "observationMode": "VISUAL_EVENT",
+      "status": "FOUND",
+      "label": "REG中の怪獣紹介",
+      "categories": ["CHILD_JIGER", "BARUGON_EGG", "WHEEL_GAMERA", "PLAY_GAMERA", "SURF_GAMERA", "NAGOYA", "GREAT_GAMERA"],
+      "timing": ["1回のREG中"],
+      "excludedConditions": [],
+      "sourceRefs": [],
+      "notes": "1REG内で複数種類が出現し得るため排他的Multinomialにはしない。各怪獣について『そのREGで1回以上出たか』を同じREG自然観測から記録し、演奏ガメラのみNumeric、他はEvidence入力として共有する。"
+    }
+  ],
+  "featureMappings": [
+    {
+      "featureId": "FEAT_REACHME_CDEF",
+      "mappingType": "EXACT",
+      "observationIds": ["OBS_MYSLO_COUNTER"],
+      "collectionMethods": ["LINKED_SERVICE_READ"],
+      "usableForInference": true,
+      "usableForDifficulty": true,
+      "notes": "同一マイカウンター集計範囲の通常時Gを分母、C/D/E/F合計を分子とする。"
+    },
+    {
+      "featureId": "FEAT_BONUS_FALLBACK",
+      "mappingType": "COMBINABLE",
+      "observationIds": ["OBS_NORMAL_GAMES_MANUAL", "OBS_BONUS_COUNTS"],
+      "collectionMethods": ["MANUAL_COUNTER", "MANUAL_COUNTER"],
+      "usableForInference": true,
+      "usableForDifficulty": false,
+      "notes": "C/D/E/Fを取得できない場合のみ使うフォールバック。通常時Gを正しく構成できない場合は入力しない。"
+    },
+    {
+      "featureId": "FEAT_BIG_END_SCREEN",
+      "mappingType": "EXACT",
+      "observationIds": ["OBS_BIG_END_SCREEN"],
+      "collectionMethods": ["VISUAL_EVENT"],
+      "usableForInference": true,
+      "usableForDifficulty": false,
+      "notes": "4カテゴリを一度だけ観測し、Numeric/Evidenceへ用途分岐する。"
+    },
+    {
+      "featureId": "FEAT_REG_PLAY_GAMERA",
+      "mappingType": "COMBINABLE",
+      "observationIds": ["OBS_BONUS_COUNTS", "OBS_REG_MONSTER_FLAGS"],
+      "collectionMethods": ["MANUAL_COUNTER", "VISUAL_EVENT"],
+      "usableForInference": true,
+      "usableForDifficulty": false,
+      "notes": "REG回数を分母、演奏ガメラが1回以上出たREG回数を分子とする。"
+    }
+  ],
+  "researchReopenRequests": [],
+  "fieldVerificationItems": [
+    {
+      "verificationId": "VERIFY_MYSLO_GAME_BASIS",
+      "status": "WAITING_FOR_MACHINE",
+      "sourceType": "LINKED_SERVICE",
+      "priority": "MEDIUM",
+      "question": "マイスロ表示の通常時ゲーム数と解析上のC/D/E/F分母の除外区間は完全に一致するか。"
+    }
+  ]
+}
