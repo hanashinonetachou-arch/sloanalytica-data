@@ -83,6 +83,16 @@ function migrateOne(root, machineId, config) {
   if (!rf || !sf) throw new Error(`${machineId}/${config.researchFeatureId}: Research or Selection feature missing`);
   if (!arr(rf.categories).length || !rf.settingDistributions) throw new Error(`${machineId}/${config.researchFeatureId}: complete category distribution required`);
 
+  console.log('CATEGORY_DIAGNOSTIC ' + JSON.stringify({
+    machineId,
+    researchFeatureId: config.researchFeatureId,
+    researchCategories: arr(rf.categories),
+    numeratorInputId: sf.numeratorInputId ?? null,
+    categoryInputIds: arr(sf.categoryInputIds),
+    categoryExcludeLabels: arr(sf.categoryExcludeLabels),
+    configuredEvidenceCategories: config.evidenceCategories,
+  }));
+
   const excluded = new Set(arr(sf.categoryExcludeLabels));
   const evidenceIds = new Set(Object.keys(config.evidenceCategories));
   const existingInputs = new Map(arr(selection.inputs).map(i => [i.id, i]));
@@ -139,12 +149,9 @@ function migrateOne(root, machineId, config) {
   rf.notes = rf.notes ? `${rf.notes} ${note}` : note;
   removeEvidenceUiOptions(selection, evidenceIds);
 
-  // Keep legacy observation/feature IDs for compatibility, but reopen their semantics from non-Evidence-only to full distribution.
   for (const obs of arr(observation.observations)) {
     const label = String(obs.label ?? '');
-    const related = label.includes('非Evidence') && (
-      label.includes('終了画面') || label.includes('ボーナス終了')
-    );
+    const related = label.includes('非Evidence') && (label.includes('終了画面') || label.includes('ボーナス終了'));
     if (!related) continue;
     if (machineId === 'L_INUYASHA2_FK') {
       const wantWhite = config.researchFeatureId === 'RF_WHITE_BIG_END' && label.includes('白BIG');
@@ -157,6 +164,14 @@ function migrateOne(root, machineId, config) {
     obs.semanticNote = 'v6.4: Numeric FeatureとEvidenceEngineで同一Observation/inputを共有。legacy observationIdは互換性のため維持。';
   }
 
+  console.log('CATEGORY_RESULT ' + JSON.stringify({
+    machineId,
+    researchFeatureId: config.researchFeatureId,
+    expectedCategoryCount: arr(rf.categories).length,
+    actualInputCount: featureInputIds(sf).length,
+    finalInputIds: featureInputIds(sf),
+  }));
+
   return { researchPath, selectionPath, observationPath, research, selection, observation };
 }
 
@@ -165,7 +180,6 @@ export function migrateBatch1(root = process.cwd(), { apply = false } = {}) {
   for (const [machineId, configs] of Object.entries(TARGETS)) {
     let state = null;
     for (const config of configs) {
-      // Re-read only on first config; subsequent config starts from prior in-memory state by writing to a temp-compatible state.
       if (!state) state = migrateOne(root, machineId, config);
       else {
         write(state.researchPath, state.research);
@@ -189,7 +203,6 @@ function main() {
   const root = path.resolve(process.argv[2] ?? '.');
   const apply = process.argv.includes('--apply');
   if (!apply) {
-    // Use an isolated copy for dry-run validation so no repository file is touched.
     const tmp = fs.mkdtempSync(path.join(process.env.RUNNER_TEMP ?? process.env.TMPDIR ?? '/tmp', 'slo-v64-batch1-'));
     fs.cpSync(root, tmp, { recursive: true, filter: src => !src.includes(`${path.sep}.git${path.sep}`) });
     const result = migrateBatch1(tmp, { apply: true });
