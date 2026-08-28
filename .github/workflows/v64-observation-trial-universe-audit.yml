@@ -36,10 +36,14 @@ jobs:
           import fs from 'node:fs';
           const r=JSON.parse(fs.readFileSync('reports/v64-observation-trial-universe-audit.json','utf8'));
           console.log('SUMMARY',JSON.stringify(r.summary));
+          console.log('SEVERITIES',JSON.stringify(r.severityCounts));
           console.log('ISSUES',JSON.stringify(r.issueCounts));
-          const affected=r.machines.filter(m=>m.status!=='PASS');
-          console.log('AFFECTED_MACHINES',affected.length);
-          for(const m of affected.slice(0,80)) console.log(`${m.status} ${m.machineId} :: ${m.issues.map(i=>i.type).join(', ')}`);
+          const high=r.machines.filter(m=>m.status==='HIGH_RISK');
+          const review=r.machines.filter(m=>m.status==='REVIEW');
+          console.log('HIGH_RISK_MACHINES',high.length);
+          for(const m of high) console.log(`HIGH_RISK ${m.machineId} :: ${m.issues.filter(i=>i.severity!=='DEBT').map(i=>`${i.type}${i.featureId?`(${i.featureId})`:''}`).join(', ')}`);
+          console.log('REVIEW_MACHINES',review.length);
+          for(const m of review.slice(0,80)) console.log(`REVIEW ${m.machineId} :: ${m.issues.filter(i=>i.severity==='REVIEW').map(i=>`${i.type}${i.featureId?`(${i.featureId})`:''}`).join(', ')}`);
           NODE
       - name: Commit audit report
         run: |
