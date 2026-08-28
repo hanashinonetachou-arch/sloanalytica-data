@@ -1,34 +1,105 @@
 {
-  "schemaVersion": "machine-observation-data-v1",
+  "schemaVersion": "machine-observation-data-v2",
   "machineId": "L_EUREKA_SEVEN4_HIEVO_KX",
   "displayName": "スマスロ交響詩篇エウレカセブン4 HI-EVOLUTION",
-  "researchedAt": "2026-08-22",
+  "researchedAt": "2026-08-29",
   "sources": [],
-  "machineMenu": {
-    "status": "CHECKED",
-    "availableData": [
-      "遊技データ・QR表示"
-    ],
-    "sourceRefs": [],
-    "notes": "実機メニューから連動機能の開始・終了操作と遊技履歴確認が可能。"
+  "sourceCoverage": {
+    "machineMenu": "FOUND",
+    "dataCounter": "UNRESOLVED",
+    "linkedService": "FOUND",
+    "directPlay": "FOUND",
+    "endEvent": "FOUND",
+    "seatedState": "UNRESOLVED"
   },
-  "linkedService": {
-    "status": "CHECKED",
-    "availableData": [
-      "通常ゲーム数",
-      "AT初当り",
-      "セブンチャンス",
-      "遊技履歴"
-    ],
-    "sourceRefs": [],
-    "notes": "Research内部では正式サービス名を保持。ユーザー向けMachineDataでは「実機連動機能」と表記する。"
-  },
-  "predecessorData": {
-    "status": "UNRESOLVED",
-    "availableData": [],
-    "sourceRefs": [],
-    "notes": "旧ResearchDataでは着席時／前任者データの取得可否が独立評価されていない。不存在とは判断せず、Machine Observation Researchで再調査する。",
-    "usableForInference": false,
-    "usableForSelfSessionDelta": false
-  }
+  "observations": [
+    {
+      "observationId": "OBS_LINKED_PLAY_DATA",
+      "sourceType": "LINKED_SERVICE",
+      "observationMode": "LINKED_SERVICE_READ",
+      "status": "FOUND",
+      "label": "実機連動機能の通常ゲーム数・AT初当り・セブンチャンス",
+      "categories": ["通常ゲーム数", "AT初当り", "セブンチャンス"],
+      "timing": ["実機連動機能の遊技履歴確認時"],
+      "excludedConditions": ["連動開始前の区間と混在させない"],
+      "sourceRefs": []
+    },
+    {
+      "observationId": "OBS_SC_INITIAL_LEVEL",
+      "sourceType": "DIRECT_PLAY",
+      "observationMode": "VISUAL_CONFIRMATION",
+      "status": "FOUND",
+      "label": "セブンチャンス初期Lv",
+      "categories": ["初期Lv12", "初期Lv12以外"],
+      "timing": ["セブンチャンス開始時"],
+      "excludedConditions": ["分母は初期Lvを確認できたセブンチャンス回数とする"],
+      "sourceRefs": []
+    },
+    {
+      "observationId": "OBS_BIG_END_SCREEN",
+      "sourceType": "DIRECT_PLAY",
+      "observationMode": "VISUAL_CONFIRMATION",
+      "status": "FOUND",
+      "label": "BIG終了画面",
+      "categories": ["2人", "4人", "6人", "8人"],
+      "timing": ["BIG終了時"],
+      "excludedConditions": ["終了画面を確認できなかったBIGは分母へ含めない"],
+      "sourceRefs": []
+    },
+    {
+      "observationId": "OBS_MACHINE_MENU_LINK",
+      "sourceType": "MACHINE_MENU",
+      "observationMode": "VISUAL_CONFIRMATION",
+      "status": "FOUND",
+      "label": "遊技データ・QR表示",
+      "categories": ["遊技データ", "実機連動機能の開始・終了QR"],
+      "timing": ["筐体メニュー確認時"],
+      "excludedConditions": [],
+      "sourceRefs": []
+    }
+  ],
+  "featureMappings": [
+    {
+      "featureId": "FEAT_AT",
+      "mappingType": "EXACT",
+      "observationIds": ["OBS_LINKED_PLAY_DATA"],
+      "collectionMethods": ["LINKED_SERVICE_READ"],
+      "usableForInference": true,
+      "usableForDifficulty": true
+    },
+    {
+      "featureId": "FEAT_SEVEN_CHANCE",
+      "mappingType": "EXACT",
+      "observationIds": ["OBS_LINKED_PLAY_DATA"],
+      "collectionMethods": ["LINKED_SERVICE_READ"],
+      "usableForInference": true,
+      "usableForDifficulty": true
+    },
+    {
+      "featureId": "FEAT_SC_LV12",
+      "mappingType": "CONDITIONAL",
+      "observationIds": ["OBS_LINKED_PLAY_DATA", "OBS_SC_INITIAL_LEVEL"],
+      "collectionMethods": ["LINKED_SERVICE_READ", "VISUAL_CONFIRMATION"],
+      "usableForInference": true,
+      "usableForDifficulty": false
+    },
+    {
+      "featureId": "FEAT_BIG_END_SCREEN",
+      "mappingType": "EXACT",
+      "observationIds": ["OBS_BIG_END_SCREEN"],
+      "collectionMethods": ["VISUAL_CONFIRMATION"],
+      "usableForInference": true,
+      "usableForDifficulty": false
+    }
+  ],
+  "researchReopenRequests": [],
+  "fieldVerificationItems": [
+    {
+      "verificationId": "VFY_EUREKA4_PREDECESSOR_DATA",
+      "status": "WAITING_FOR_MACHINE",
+      "sourceType": "DATA_COUNTER",
+      "priority": "LOW",
+      "question": "着席時に前任者区間の累計G・初当り等を安全に取得できる観測面があるかを次回実機確認時に記録する。現行active Featureはこの項目に依存しない。"
+    }
+  ]
 }
