@@ -1,10 +1,30 @@
 {
-  "schemaVersion": "machine-observation-data-v1",
+  "schemaVersion": "machine-observation-data-v2",
   "machineId": "LB_TOBE_HAREM_ACE_CF",
   "displayName": "翔べ！ハーレムエース",
-  "researchedAt": "2026-08-22",
-  "sources": [],
-  "machineMenu": {"status":"UNRESOLVED","availableData":[],"sourceRefs":[],"notes":"実機調整履歴があるため、旧UIを推測で再構成せず筐体メニュー/遊技履歴の具体項目を再確認する。"},
-  "linkedService": {"status":"UNRESOLVED","availableData":[],"sourceRefs":[],"notes":"機種固有連動機能と取得項目を再調査対象として保持する。"},
-  "predecessorData": {"status":"UNRESOLVED","availableData":[],"sourceRefs":[],"notes":"着席時ボーナス等の過去実機調整をMachine Observationとして再確認するまで未解決。","usableForInference":false,"usableForSelfSessionDelta":false}
+  "researchedAt": "2026-08-29",
+  "sources": [
+    {"sourceId":"OBS_SRC_HAREM_NANAPRESS","publisher":"なな徹","title":"翔べ！ハーレムエース 設定判別","url":"https://nana-press.com/kaiseki/machine/961/30029/","checkedAt":"2026-08-29","sourceType":"analysis"},
+    {"sourceId":"OBS_SRC_HAREM_PWORLD","publisher":"P-WORLD","title":"翔べ!ハーレムエース 機種情報","url":"https://www.p-world.co.jp/machine/database/10250","checkedAt":"2026-08-29","sourceType":"machine_database"}
+  ],
+  "sourceCoverage": {"machineMenu":"UNRESOLVED","dataCounter":"VERIFIED_ON_MACHINE","linkedService":"UNRESOLVED","directPlay":"FOUND","endEvent":"FOUND","seatedState":"VERIFIED_ON_MACHINE"},
+  "observations": [
+    {"observationId":"OBS_PREDECESSOR_DATA_COUNTER","sourceType":"DATA_COUNTER","observationMode":"DATA_COUNTER_READ","status":"VERIFIED_ON_MACHINE","label":"着席時データカウンター","categories":["着席時ゲーム数","着席時BIG合計","着席時REG","判別できる場合のみ着席時ハーレムボーナス"],"timing":["着席直後"],"excludedConditions":["ハーレムボーナスを通常BIGと判別できない場合は内訳入力を空欄にする"],"sourceRefs":[]},
+    {"observationId":"OBS_SELF_NORMAL_BONUS","sourceType":"DIRECT_PLAY","observationMode":"MANUAL_COUNTER","status":"FOUND","label":"自己遊技 通常時ボーナス","categories":["通常時ゲーム数（BT中除外）","通常時ハーレムボーナス","通常時BIG","通常時REG"],"timing":["自己遊技中"],"excludedConditions":["BT中ゲームおよびBT中ボーナスを通常時分母・内訳へ含めない"],"sourceRefs":["OBS_SRC_HAREM_NANAPRESS"]},
+    {"observationId":"OBS_SELF_BT","sourceType":"DIRECT_PLAY","observationMode":"MANUAL_COUNTER","status":"FOUND","label":"自己遊技 BT区間","categories":["BT中ゲーム数","BT中ハーレムボーナス"],"timing":["BT中"],"excludedConditions":["BT中ゲーム数は通常時ゲーム数と分離して手入力する"],"sourceRefs":["OBS_SRC_HAREM_NANAPRESS"]},
+    {"observationId":"OBS_BONUS_CHERRY_STOP","sourceType":"DIRECT_PLAY","observationMode":"MANUAL_COUNTER","status":"FOUND","label":"ボーナス中チェリー停止","categories":["予告音発生時のチェリー停止"],"timing":["HAREM BONUS中","BIG BONUS中","REG BONUS中"],"excludedConditions":["分母はボーナス種別ごとの消化ゲーム数から自動算出する"],"sourceRefs":["OBS_SRC_HAREM_NANAPRESS"]},
+    {"observationId":"OBS_BONUS_HINT_EVIDENCE","sourceType":"DIRECT_PLAY","observationMode":"VISUAL_CONFIRMATION","status":"FOUND","label":"ボーナス中・終了時の設定示唆","categories":["BAR揃い","Z字/V字停止","技術介入成功時ボイス","ボーナス終了画面"],"timing":["ボーナス中","ボーナス終了時"],"excludedConditions":[],"sourceRefs":["OBS_SRC_HAREM_NANAPRESS","OBS_SRC_HAREM_PWORLD"]}
+  ],
+  "featureMappings": [
+    {"featureId":"FEAT_PREDECESSOR_BONUS_COARSE","mappingType":"EXACT","observationIds":["OBS_PREDECESSOR_DATA_COUNTER"],"collectionMethods":["DATA_COUNTER_READ"],"usableForInference":true,"usableForDifficulty":false},
+    {"featureId":"FEAT_PREDECESSOR_HB_SHARE","mappingType":"CONDITIONAL","observationIds":["OBS_PREDECESSOR_DATA_COUNTER"],"collectionMethods":["DATA_COUNTER_READ"],"usableForInference":true,"usableForDifficulty":false},
+    {"featureId":"FEAT_NORMAL_BONUS_OUTCOME","mappingType":"EXACT","observationIds":["OBS_SELF_NORMAL_BONUS"],"collectionMethods":["MANUAL_COUNTER"],"usableForInference":true,"usableForDifficulty":true},
+    {"featureId":"FEAT_BT_HAREM_BONUS","mappingType":"EXACT","observationIds":["OBS_SELF_BT"],"collectionMethods":["MANUAL_COUNTER"],"usableForInference":true,"usableForDifficulty":false},
+    {"featureId":"FEAT_BONUS_CHERRY_STOP","mappingType":"DERIVED_DENOMINATOR","observationIds":["OBS_BONUS_CHERRY_STOP","OBS_SELF_NORMAL_BONUS","OBS_SELF_BT"],"collectionMethods":["MANUAL_COUNTER"],"usableForInference":true,"usableForDifficulty":false}
+  ],
+  "researchReopenRequests": [],
+  "fieldVerificationItems": [
+    {"verificationId":"VFY_HAREM_MACHINE_MENU_ITEMS","status":"WAITING_FOR_MACHINE","sourceType":"MACHINE_MENU","priority":"LOW","question":"筐体標準メニューで確認できる具体項目をデータカウンターと区別して次回実機確認時に記録する。"},
+    {"verificationId":"VFY_HAREM_LINKED_SERVICE","status":"WAITING_FOR_MACHINE","sourceType":"LINKED_SERVICE","priority":"LOW","question":"機種固有の実機連動サービス有無と、存在する場合の取得項目を次回実機確認時に記録する。"}
+  ]
 }
