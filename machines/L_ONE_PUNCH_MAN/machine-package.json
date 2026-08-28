@@ -3,7 +3,7 @@
   "machine": {
     "schemaVersion": "2.0.0",
     "machineId": "L_ONE_PUNCH_MAN",
-    "machineDataVersion": "0.1.1",
+    "machineDataVersion": "0.1.2",
     "displayName": "Lワンパンマン",
     "modelName": "LワンパンマンEY",
     "manufacturer": "EXCITE",
@@ -43,6 +43,41 @@
         "unit": "回",
         "displayOrder": 2,
         "defaultValue": 0,
+        "minimum": 0
+      },
+      {
+        "id": "INP_ROLE_GAMES",
+        "name": "小役集計ゲーム数",
+        "type": "integer",
+        "category": "ROLE",
+        "unit": "G",
+        "displayOrder": 10,
+        "defaultValue": null,
+        "description": "通常時に弱チェリー・スイカを数えたゲーム数を入力してください。",
+        "minimum": 0
+      },
+      {
+        "id": "INP_WEAK_CHERRY",
+        "name": "弱チェリー",
+        "type": "counter",
+        "category": "ROLE",
+        "unit": "回",
+        "displayOrder": 11,
+        "defaultValue": null,
+        "parentInputId": "INP_ROLE_GAMES",
+        "uiQuickAdd": 1,
+        "minimum": 0
+      },
+      {
+        "id": "INP_WATERMELON",
+        "name": "スイカ",
+        "type": "counter",
+        "category": "ROLE",
+        "unit": "回",
+        "displayOrder": 12,
+        "defaultValue": null,
+        "parentInputId": "INP_ROLE_GAMES",
+        "uiQuickAdd": 1,
         "minimum": 0
       },
       {
@@ -122,27 +157,58 @@
     "schemaVersion": "2.0.0",
     "features": [
       {
-        "featureId": "FEAT_AT_INITIAL",
-        "name": "AT初当り",
+        "featureId": "FEAT_SMALL_ROLE_MULTI",
+        "name": "弱チェリー＋スイカ",
         "adoptionCategory": "INCLUDE_PRIMARY",
         "calculationRole": "PROBABILITY",
         "probabilityEngineUsage": true,
-        "modelType": "binomial",
+        "modelType": "multinomial",
         "minimumSample": 1,
-        "sampleRecommendation": 7000,
+        "sampleRecommendation": 3000,
         "reliabilityProfile": {
           "weight": 1
         },
         "displayFormat": "ratio_1_over_n",
-        "denominatorInputId": "INP_AT_GAMES",
-        "numeratorInputId": "INP_AT_COUNT",
-        "probabilities": {
-          "SET_1": 0.0016105653084232566,
-          "SET_2": 0.0016490765171503958,
-          "SET_3": 0.0017082336863682953,
-          "SET_4": 0.0018814675446848542,
-          "SET_5": 0.001986491855383393,
-          "SET_6": 0.0021551724137931034
+        "numeratorInputId": "INP_WEAK_CHERRY",
+        "denominatorInputId": "INP_ROLE_GAMES",
+        "categoryInputIds": [
+          "INP_WATERMELON"
+        ],
+        "probabilities": {},
+        "categoryLabels": [
+          "WEAK_CHERRY",
+          "WATERMELON"
+        ],
+        "categoryProbabilities": {
+          "SET_1": [
+            0.014347202295552369,
+            0.010090817356205855
+          ],
+          "SET_2": [
+            0.014684287812041117,
+            0.01037344398340249
+          ],
+          "SET_3": [
+            0.015037593984962405,
+            0.010660980810234541
+          ],
+          "SET_4": [
+            0.0154320987654321,
+            0.011061946902654867
+          ],
+          "SET_5": [
+            0.016,
+            0.011668611435239206
+          ],
+          "SET_6": [
+            0.016694490818030053,
+            0.01251564455569462
+          ]
+        },
+        "categoryConditioning": {
+          "excludedCategories": [],
+          "normalization": "RENORMALIZE_INCLUDED",
+          "residualCategory": "OTHER"
         },
         "sourceEvidenceRefs": [
           "SRC_NANA"
@@ -425,9 +491,40 @@
         ]
       },
       {
+        "id": "AUTO_ROLE",
+        "title": "小役",
+        "displayOrder": 2,
+        "items": [
+          {
+            "type": "input",
+            "inputId": "INP_ROLE_GAMES",
+            "label": "小役集計ゲーム数",
+            "widget": "number"
+          },
+          {
+            "type": "input",
+            "inputId": "INP_WEAK_CHERRY",
+            "label": "弱チェリー",
+            "config": {
+              "quickAdd": 1
+            },
+            "widget": "counter"
+          },
+          {
+            "type": "input",
+            "inputId": "INP_WATERMELON",
+            "label": "スイカ",
+            "config": {
+              "quickAdd": 1
+            },
+            "widget": "counter"
+          }
+        ]
+      },
+      {
         "id": "AUTO_BEST_SHOT",
         "title": "ベストショット",
-        "displayOrder": 2,
+        "displayOrder": 3,
         "description": "1回のベストショットチャンスごとに3キャラの枚数を数えます。3枚/4枚/5枚でEvidenceが自動反映されます。次のチャンスでは各カウンターを0に戻してください。",
         "items": [
           {
@@ -462,7 +559,7 @@
       {
         "id": "AUTO_EVIDENCE",
         "title": "設定確定・否定情報",
-        "displayOrder": 3,
+        "displayOrder": 4,
         "items": [
           {
             "type": "input",
@@ -481,12 +578,12 @@
     "rejectedCount": 5,
     "selected": [
       {
-        "featureId": "FEAT_AT_INITIAL",
-        "name": "AT初当り",
-        "reason": "AT初当りは1/620.9～1/464.0と設定差があり、経路内訳を重複させず継続観測できるため採用。",
+        "featureId": "FEAT_SMALL_ROLE_MULTI",
+        "name": "弱チェリー＋スイカ",
+        "reason": "弱チェリー・スイカは同じ通常時ゲームを母数に排他的カテゴリとして観測でき、AT初当りより設定1↔6の1Gあたり識別情報が大きいため主軸採用。",
         "requiredTrials": {
-          "value": 46203,
-          "unit": "AT抽選対象ゲーム"
+          "value": 8139,
+          "unit": "通常時ゲーム"
         }
       }
     ],
@@ -510,9 +607,18 @@
         }
       },
       {
+        "featureId": "FEAT_AT_INITIAL",
+        "name": "AT初当り",
+        "reason": "AT初当りには設定差がありますが、公開確率の集計対象ゲームと実機で入力できるゲーム数の定義一致が未確認です。また弱チェリー・スイカを主軸採用する現構成では下流ATと独立尤度として同時評価できないため、現版では推測計算に使用しません。",
+        "requiredTrials": {
+          "value": 46203,
+          "unit": "AT抽選対象ゲーム"
+        }
+      },
+      {
         "featureId": "FEAT_WEAK_CHERRY",
         "name": "弱チェリー",
-        "reason": "弱チェリーは相互の重複だけでなくAT初当りとの因果的重複を避けるため単独採用しない。",
+        "reason": "単独Binomialではなく、弱チェリー・スイカ・その他を同一通常ゲーム上の排他的Multinomialとしてまとめて評価します。",
         "requiredTrials": {
           "value": 20300,
           "unit": "通常時ゲーム"
@@ -521,18 +627,9 @@
       {
         "featureId": "FEAT_WATERMELON",
         "name": "スイカ",
-        "reason": "スイカは相互の重複だけでなくAT初当りとの因果的重複を避けるため単独採用しない。",
+        "reason": "単独Binomialではなく、弱チェリー・スイカ・その他を同一通常ゲーム上の排他的Multinomialとしてまとめて評価します。",
         "requiredTrials": {
           "value": 13893,
-          "unit": "通常時ゲーム"
-        }
-      },
-      {
-        "featureId": "FEAT_SMALL_ROLE_MULTI",
-        "name": "弱チェリー＋スイカ",
-        "reason": "弱チェリー・スイカの設定差は確認済み。ただしAT初当りと因果的に重なるため、独立Featureとして同時採用せず不採用。",
-        "requiredTrials": {
-          "value": 8139,
           "unit": "通常時ゲーム"
         }
       }

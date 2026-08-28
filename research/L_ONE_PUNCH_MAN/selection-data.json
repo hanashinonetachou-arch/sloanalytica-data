@@ -1,10 +1,11 @@
 {
   "schemaVersion": "selection-data-v1",
   "machineId": "L_ONE_PUNCH_MAN",
-  "machineDataVersion": "0.1.1",
+  "machineDataVersion": "0.1.2",
   "uiCategoryLabels": {
     "PRIMARY": "初当り",
-    "BEST_SHOT": "ベストショット"
+    "BEST_SHOT": "ベストショット",
+    "ROLE": "小役"
   },
   "inputs": [
     {
@@ -25,6 +26,38 @@
       "unit": "回",
       "displayOrder": 2,
       "defaultValue": 0
+    },
+    {
+      "id": "INP_ROLE_GAMES",
+      "name": "小役集計ゲーム数",
+      "type": "integer",
+      "category": "ROLE",
+      "unit": "G",
+      "displayOrder": 10,
+      "defaultValue": null,
+      "description": "通常時に弱チェリー・スイカを数えたゲーム数を入力してください。"
+    },
+    {
+      "id": "INP_WEAK_CHERRY",
+      "name": "弱チェリー",
+      "type": "counter",
+      "category": "ROLE",
+      "unit": "回",
+      "displayOrder": 11,
+      "defaultValue": null,
+      "parentInputId": "INP_ROLE_GAMES",
+      "uiQuickAdd": 1
+    },
+    {
+      "id": "INP_WATERMELON",
+      "name": "スイカ",
+      "type": "counter",
+      "category": "ROLE",
+      "unit": "回",
+      "displayOrder": 12,
+      "defaultValue": null,
+      "parentInputId": "INP_ROLE_GAMES",
+      "uiQuickAdd": 1
     },
     {
       "id": "INP_BEST_LILY",
@@ -81,45 +114,43 @@
     {
       "researchFeatureId": "RF_AT_INITIAL",
       "featureId": "FEAT_AT_INITIAL",
-      "adoptionCategory": "INCLUDE_PRIMARY",
-      "numeratorInputId": "INP_AT_COUNT",
-      "denominatorInputId": "INP_AT_GAMES",
-      "minimumSample": 1,
-      "sampleRecommendation": 7000,
-      "weight": 1,
-      "displayFormat": "ratio_1_over_n",
-      "difficultyExposure": {
-        "mode": "per_game",
-        "factor": 1,
-        "quality": "ESTIMATED",
-        "basisId": "AT_INITIAL_GAME_BASIS",
-        "confidence": "LOW",
-        "estimationBasis": "公開AT初当り確率をユーザー自身の通常実戦ゲーム基準へ接続する暫定Exposure。",
-        "uncertaintyNote": "解析集計範囲と実機表示Gの一致は未確認。"
-      },
-      "difficultyParticipation": "INCLUDE",
-      "userReason": "AT初当りは1/620.9～1/464.0と設定差があり、経路内訳を重複させず継続観測できるため採用。"
+      "adoptionCategory": "EXCLUDE",
+      "userFacingReason": "AT初当りには設定差がありますが、公開確率の集計対象ゲームと実機で入力できるゲーム数の定義一致が未確認です。また弱チェリー・スイカを主軸採用する現構成では下流ATと独立尤度として同時評価できないため、現版では推測計算に使用しません。"
     },
     {
       "researchFeatureId": "RF_WEAK_CHERRY",
       "featureId": "FEAT_WEAK_CHERRY",
       "adoptionCategory": "EXCLUDE",
-      "rejectionReason": "弱チェリーは相互の重複だけでなくAT初当りとの因果的重複を避けるため単独採用しない。",
-      "userReason": "弱チェリーは相互の重複だけでなくAT初当りとの因果的重複を避けるため単独採用しない。"
+      "userFacingReason": "単独Binomialではなく、弱チェリー・スイカ・その他を同一通常ゲーム上の排他的Multinomialとしてまとめて評価します。"
     },
     {
       "researchFeatureId": "RF_WATERMELON",
       "featureId": "FEAT_WATERMELON",
       "adoptionCategory": "EXCLUDE",
-      "rejectionReason": "スイカは相互の重複だけでなくAT初当りとの因果的重複を避けるため単独採用しない。",
-      "userReason": "スイカは相互の重複だけでなくAT初当りとの因果的重複を避けるため単独採用しない。"
+      "userFacingReason": "単独Binomialではなく、弱チェリー・スイカ・その他を同一通常ゲーム上の排他的Multinomialとしてまとめて評価します。"
     },
     {
       "researchFeatureId": "RF_SMALL_ROLE_MULTI",
       "featureId": "FEAT_SMALL_ROLE_MULTI",
-      "adoptionCategory": "EXCLUDE",
-      "rejectionReason": "弱チェリーとスイカ同士はMultinomialで安全にまとめられるが、採用中のAT初当りはこれら小役を経由して生じる下流事象でもあり、周辺AT確率と小役確率を独立に掛けると設定情報を二重評価する可能性がある。ATを捨てて小役だけに置換するほどの情報量もないため現版では不採用。",
-      "userReason": "弱チェリー・スイカの設定差は確認済み。ただしAT初当りと因果的に重なるため、独立Featureとして同時採用せず不採用。"
+      "adoptionCategory": "INCLUDE_PRIMARY",
+      "denominatorInputId": "INP_ROLE_GAMES",
+      "numeratorInputId": "INP_WEAK_CHERRY",
+      "categoryInputIds": [
+        "INP_WATERMELON"
+      ],
+      "residualCategoryLabel": "OTHER",
+      "minimumSample": 1,
+      "sampleRecommendation": 3000,
+      "weight": 1,
+      "displayFormat": "ratio_1_over_n",
+      "difficultyExposure": {
+        "mode": "per_game",
+        "factor": 1,
+        "quality": "EXACT",
+        "basisId": "NORMAL_GAMES"
+      },
+      "difficultyParticipation": "INCLUDE",
+      "userReason": "弱チェリー・スイカは同じ通常時ゲームを母数に排他的カテゴリとして観測でき、AT初当りより設定1↔6の1Gあたり識別情報が大きいため主軸採用。"
     }
   ],
   "evidence": [
@@ -239,9 +270,9 @@
     "simulationsPerSetting": 4000,
     "seed": 20260822,
     "targetGameBasis": {
-      "basisId": "SELF_PLAY_STANDARD_GAMES",
-      "label": "ユーザー自身の標準実戦ゲーム数",
-      "quality": "ESTIMATED"
+      "basisId": "NORMAL_GAMES",
+      "label": "通常ゲーム数",
+      "quality": "EXACT"
     },
     "calibrationAllowedExposureQualities": [
       "EXACT",
@@ -250,9 +281,9 @@
     ]
   },
   "selectionNotes": [
-    "弱チェリー/スイカはどちらも有用な設定差があるためResearchには保持し、将来は残余カテゴリを含む排他的Multinomialとして安全に追加する。",
-    "通常滞在時レア役→CZは中間設定の全公開値を確定できておらず、内部状態観測も必要なため尤度化しない。",
-    "ヒーローストック状態選択・ロゴ点灯チャレンジ・CZ/AT終了時モード移行も条件付きFeature候補としてResearchに保持する。"
+    "弱チェリー/スイカは残余カテゴリを含む排他的Multinomialとして主軸採用する。",
+    "AT初当りは公開確率の分母定義と実機入力Gの一致が未確認で、小役主軸とのjoint likelihoodも未定義のため現版では推測不参加。",
+    "通常滞在時レア役→CZなど内部状態を必要とする条件付きFeatureはResearchに保持する。"
   ],
   "uiSectionOptions": {
     "BEST_SHOT": {
