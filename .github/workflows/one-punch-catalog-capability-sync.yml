@@ -31,10 +31,12 @@ jobs:
           const list=Array.isArray(c)?c:(c.machines??c.items??[]);
           const item=list.find(x=>x.machineId==='L_ONE_PUNCH_MAN');
           if(!item) throw new Error('catalog entry missing');
-          const p=JSON.parse(fs.readFileSync(item.dataPath,'utf8'));
-          const models=new Set((p.features?.features??[]).filter(f=>f.probabilityEngineUsage!==false).map(f=>f.modelType));
+          const packagePath='machines/L_ONE_PUNCH_MAN/machine-package.json';
+          const p=JSON.parse(fs.readFileSync(packagePath,'utf8'));
+          const features=Array.isArray(p.features)?p.features:(p.features?.features??[]);
+          const models=new Set(features.filter(f=>f.probabilityEngineUsage!==false).map(f=>f.modelType).filter(Boolean));
           if(item.requiredCapabilities.includes('binomial')) throw new Error('stale binomial remains');
-          if(!item.requiredCapabilities.includes('multinomial')||!models.has('multinomial')) throw new Error('multinomial contract missing');
+          if(!item.requiredCapabilities.includes('multinomial')||!models.has('multinomial')) throw new Error(`multinomial contract missing: ${JSON.stringify([...models])}`);
           console.log('One Punch models:',[...models]);
           NODE
       - name: Run full tests
