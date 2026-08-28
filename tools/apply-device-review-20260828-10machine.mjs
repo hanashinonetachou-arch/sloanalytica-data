@@ -59,10 +59,10 @@ function patchDiscup(){
     selection.inputs.push(games);
   }
   selection.uiCategoryLabels={...(selection.uiCategoryLabels??{}),THREE_COIN:'3枚役'};
-  selection.uiCategoryDescriptions={...(selection.uiCategoryDescriptions??{}),THREE_COIN:'マイスロ利用時は、マイスロで取得した3枚役回数と、その集計に対応するマイスロ上のゲーム数をセットで入力してください。自身でカウントする場合は、3枚役回数とデータカウンター上のゲーム数をセットで入力してください（ボーナス中はカウントせず、AT中をカウントする一般的なデータカウンター仕様を想定）。異なる集計方法の分子・分母を混在させないでください。'};
+  selection.uiCategoryDescriptions={...(selection.uiCategoryDescriptions??{}),THREE_COIN:'実機連動サービスを利用する場合は、サービス上で取得した3枚役回数と、その集計に対応するサービス上のゲーム数をセットで入力してください。自身でカウントする場合は、3枚役回数とデータカウンター上のゲーム数をセットで入力してください（ボーナス中はカウントせず、AT中をカウントする一般的なデータカウンター仕様を想定）。異なる集計方法の分子・分母を混在させないでください。'};
   const sf=req(selection.features,x=>x.researchFeatureId==='RF_THREE_COIN','Disc RF_THREE_COIN missing');
   sf.denominatorInputId='INP_THREE_COIN_GAMES';
-  sf.userReason='3枚役は比較的高頻度で設定差があり、マイスロまたは自力カウントで観測できるため補助採用します。分母はボーナス推測用の通常ゲーム数と共用せず、3枚役の集計方法に対応する専用ゲーム数を使用します。';
+  sf.userReason='3枚役は比較的高頻度で設定差があり、実機連動サービスまたは自力カウントで観測できるため補助採用します。分母はボーナス推測用の通常ゲーム数と共用せず、3枚役の集計方法に対応する専用ゲーム数を使用します。';
 
   const rf=req(research.features,x=>x.researchFeatureId==='RF_THREE_COIN','Disc research RF_THREE_COIN missing');
   rf.denominatorDefinition='3枚役の集計方法に対応する判別用ゲーム数。マイスロ利用時はマイスロで3枚役と対応して表示されるゲーム数、自力カウント時はボーナス中を除外しAT中を含むデータカウンター上のゲーム数。';
