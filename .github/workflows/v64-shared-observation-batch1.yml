@@ -12,16 +12,51 @@ permissions:
   contents: write
 
 jobs:
-  validate:
+  apply-and-validate:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
         with:
           ref: prototype-multi-machine
+          fetch-depth: 0
       - uses: actions/setup-node@v4
         with:
           node-version: 20
-      - name: Validate migration without touching repository
+      - name: Dry-run migration
         run: node tools/migrate-v64-shared-observation-batch1.mjs .
-      - name: Run semantic audit regression tests
+      - name: Apply migration
+        run: node tools/migrate-v64-shared-observation-batch1.mjs . --apply
+      - name: Rebuild target machine packages
+        run: |
+          npm run machine:pipeline -- L_INUYASHA2_FK --skip-repo-checks
+          npm run machine:pipeline -- S_MILKY_HOMES_GNB --skip-repo-checks
+      - name: Run target semantic regression tests
         run: node --test test/v64-cross-machine-semantic-audit.test.mjs
+      - name: Run full test suite
+        run: npm test
+      - name: Run public-data audit
+        run: npm run audit
+      - name: Run UI service-name audit
+        run: npm run audit:ui-service-names
+      - name: Run Observation linkage audit
+        run: npm run observation:selection:audit
+      - name: Run four-layer gate
+        run: npm run pipeline:four-layer:gate
+      - name: Run v6.4 cross-machine semantic audit
+        run: node tools/audit-v64-cross-machine-semantic.mjs . reports/v64-cross-machine-semantic-audit.json
+      - name: Show semantic diff
+        run: |
+          git status --short
+          git --no-pager diff --stat
+          git --no-pager diff -- research/L_INUYASHA2_FK/selection-data.json research/L_INUYASHA2_FK/machine-observation-data.json research/S_MILKY_HOMES_GNB/selection-data.json research/S_MILKY_HOMES_GNB/machine-observation-data.json
+      - name: Commit validated batch
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add research/L_INUYASHA2_FK research/S_MILKY_HOMES_GNB machines/L_INUYASHA2_FK machines/S_MILKY_HOMES_GNB catalog.json difficulty-catalog.json reports/v64-cross-machine-semantic-audit.json 2>/dev/null || true
+          if git diff --cached --quiet; then
+            echo "No validated changes to commit"
+          else
+            git commit -m "fix: share Evidence inputs with numeric distributions batch1"
+            git push origin HEAD:prototype-multi-machine
+          fi
