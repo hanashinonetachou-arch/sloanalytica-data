@@ -1,7 +1,7 @@
 {
   "schemaVersion": "selection-data-v1",
   "machineId": "S_MHW_ICEBORNE_ZF",
-  "machineDataVersion": "0.1.3",
+  "machineDataVersion": "0.1.4",
   "inputs": [
     {
       "id": "INP_NORMAL_GAMES",
@@ -143,6 +143,18 @@
       "inferenceRole": "INCLUDE_SUPPORT",
       "observationScope": "SELF_PLAY",
       "defaultValue": 0,
+      "uiQuickAdd": 1
+    },
+    {
+      "id": "INP_CONFIRM_MORA",
+      "name": "モラ・ガラテア&ひろし&BJ（設定4以上）",
+      "category": "SETTING_SIGNAL",
+      "type": "counter",
+      "unit": "回",
+      "displayOrder": 67,
+      "inferenceRole": "INCLUDE_SUPPORT",
+      "observationScope": "SELF_PLAY",
+      "defaultValue": null,
       "uiQuickAdd": 1
     },
     {
@@ -370,7 +382,7 @@
     },
     {
       "researchFeatureId": "RF_CONFIRM_SCREEN",
-      "featureId": "FEAT_CONFIRM_SCREEN_NON_EVIDENCE",
+      "featureId": "FEAT_CONFIRM_SCREEN",
       "adoptionCategory": "INCLUDE_SUPPORT",
       "numeratorInputId": "INP_CONFIRM_EVEN_A",
       "categoryInputIds": [
@@ -379,17 +391,15 @@
         "INP_CONFIRM_EVEN_D",
         "INP_CONFIRM_ODD_A",
         "INP_CONFIRM_ODD_B",
-        "INP_CONFIRM_YOU"
+        "INP_CONFIRM_YOU",
+        "INP_CONFIRM_MORA"
       ],
       "inputTransform": "sum_inputs_to_trials",
-      "categoryExcludeLabels": [
-        "MORA"
-      ],
       "minimumSample": 1,
       "sampleRecommendation": 20,
       "weight": 1,
       "difficultyParticipation": "EXCLUDE",
-      "userReason": "モラ・ガラテア&ひろし&BJは設定4以上Evidenceとして分離し、それ以外の奇偶・高設定示唆画面を条件付き分布として利用します。"
+      "userReason": "ボーナス確定画面は8カテゴリの完全分布として評価します。モラ・ガラテア&ひろし&BJは同じカウンター入力を設定4以上Evidenceにも共有し、二重入力せず割合推測と確定判定の両方に利用します。"
     },
     {
       "researchFeatureId": "RF_BONUS_AVG_TYPE",
@@ -420,7 +430,16 @@
       "userFacingReason": "ボーナス絵柄の設定差は採用しますが、平均振り分けと初当り時/2連目以降を同時に使うと同じボーナスを重複評価するため、平均振り分けへ統合します。"
     }
   ],
-  "evidence": [],
+  "evidence": [
+    {
+      "researchEvidenceId": "RE_CONFIRM_MORA",
+      "evidenceId": "EVI_CONFIRM_MORA",
+      "inputId": "INP_CONFIRM_MORA",
+      "sharedFeatureIds": [
+        "FEAT_CONFIRM_SCREEN"
+      ]
+    }
+  ],
   "evidenceUi": {
     "groups": [
       {
@@ -484,23 +503,6 @@
         "groupId": "EVID_CONFIRM_END",
         "label": "ボーナス確定・終了画面",
         "options": [
-          {
-            "value": "MORA",
-            "label": "確定画面 モラ&ヒロシ&BJ",
-            "allowedSettings": [
-              "SET_4",
-              "SET_5",
-              "SET_6"
-            ],
-            "excludedSettings": [
-              "SET_1",
-              "SET_2",
-              "SET_3"
-            ],
-            "sourceEvidenceIds": [
-              "RE_CONFIRM_MORA"
-            ]
-          },
           {
             "value": "HEART_AYA",
             "label": "終了画面 ハート&アヤ",
