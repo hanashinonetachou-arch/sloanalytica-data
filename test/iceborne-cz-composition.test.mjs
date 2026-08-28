@@ -7,6 +7,7 @@ const root=path.resolve('.');
 const read=p=>JSON.parse(fs.readFileSync(p,'utf8'));
 const research=read(path.join(root,'research/S_MHW_ICEBORNE_ZF/research-data.json'));
 const selection=read(path.join(root,'research/S_MHW_ICEBORNE_ZF/selection-data.json'));
+const observation=read(path.join(root,'research/S_MHW_ICEBORNE_ZF/machine-observation-data.json'));
 const rf=id=>(research.features??[]).find(f=>f.researchFeatureId===id);
 const sf=id=>(selection.features??[]).find(f=>f.researchFeatureId===id);
 
@@ -45,6 +46,20 @@ test('CZ type inputs preserve unobserved versus observed-zero semantics',()=>{
     assert.ok(input,id);
     assert.equal(input.defaultValue,null,`${id} defaultValue`);
   }
+});
+
+test('CZ type composition has an explicit Observation v2 mapping',()=>{
+  assert.equal(observation.schemaVersion,'machine-observation-data-v2');
+  const obs=(observation.observations??[]).find(x=>x.observationId==='OBS_CZ_TYPE_DIRECT');
+  assert.ok(obs);
+  assert.equal(obs.status,'FOUND');
+  assert.match(obs.label,/CZ種類別/);
+  const mapping=(observation.featureMappings??[]).find(x=>x.featureId==='FEAT_CZ_TYPE_COMPOSITION');
+  assert.ok(mapping);
+  assert.equal(mapping.mappingType,'COMBINABLE');
+  assert.deepEqual(mapping.observationIds,['OBS_CZ_TYPE_DIRECT']);
+  assert.equal(mapping.usableForInference,true);
+  assert.equal(mapping.usableForDifficulty,true);
 });
 
 test('state-dependent and downstream candidates retain explicit non-causal blockers',()=>{
