@@ -39,11 +39,11 @@ test('clean v2 active Feature mapping passes',()=>{
   assert.equal(r.summary.HIGH_RISK,0);
 });
 
-test('legacy v1 is REVIEW, not HIGH_RISK',()=>{
+test('legacy v1 is REVIEW, while unresolved legacy surfaces are debt',()=>{
   const r=auditV64ObservationTrialUniverse(fixture({schema:'v1'}));
   assert.equal(r.summary.REVIEW,1);
-  assert.ok(r.machines[0].issues.some(x=>x.type==='OBSERVATION_V1_COMPATIBILITY'));
-  assert.ok(r.machines[0].issues.some(x=>x.type==='LEGACY_SOURCE_SCOPE_UNRESOLVED'));
+  assert.ok(r.machines[0].issues.some(x=>x.type==='OBSERVATION_V1_COMPATIBILITY'&&x.severity==='REVIEW'));
+  assert.ok(r.machines[0].issues.some(x=>x.type==='LEGACY_SOURCE_SCOPE_UNRESOLVED'&&x.severity==='DEBT'));
 });
 
 test('missing active Feature mapping is REVIEW',()=>{
@@ -64,10 +64,18 @@ test('missing referenced Observation is HIGH_RISK',()=>{
   assert.ok(r.machines[0].issues.some(x=>x.type==='ACTIVE_FEATURE_OBSERVATION_MISSING'));
 });
 
-test('unresolved active source and high-priority field check are REVIEW',()=>{
+test('unresolved active Observation remains REVIEW even when general coverage debt also exists',()=>{
   const r=auditV64ObservationTrialUniverse(fixture({observationStatus:'UNRESOLVED',sourceUnresolved:true,highPriorityPending:true}));
   assert.equal(r.summary.REVIEW,1);
-  assert.ok(r.machines[0].issues.some(x=>x.type==='ACTIVE_FEATURE_SOURCE_UNRESOLVED'));
-  assert.ok(r.machines[0].issues.some(x=>x.type==='SOURCE_COVERAGE_UNRESOLVED'));
-  assert.ok(r.machines[0].issues.some(x=>x.type==='HIGH_PRIORITY_FIELD_VERIFICATION_PENDING'));
+  assert.ok(r.machines[0].issues.some(x=>x.type==='ACTIVE_FEATURE_SOURCE_UNRESOLVED'&&x.severity==='REVIEW'));
+  assert.ok(r.machines[0].issues.some(x=>x.type==='SOURCE_COVERAGE_UNRESOLVED'&&x.severity==='DEBT'));
+  assert.ok(r.machines[0].issues.some(x=>x.type==='HIGH_PRIORITY_FIELD_VERIFICATION_PENDING'&&x.severity==='DEBT'));
+});
+
+test('unresolved unrelated source coverage alone is debt and does not fail active inference linkage',()=>{
+  const r=auditV64ObservationTrialUniverse(fixture({sourceUnresolved:true,highPriorityPending:true}));
+  assert.equal(r.summary.PASS,1);
+  assert.equal(r.summary.debtMachineCount,1);
+  assert.equal(r.machines[0].status,'PASS');
+  assert.ok(r.machines[0].issues.every(x=>x.severity==='DEBT'));
 });
