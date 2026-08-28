@@ -42,6 +42,15 @@ function fixture({exclude=true, declareShared=false, zeroSentinel=false}={}) {
   return root;
 }
 
+function simpleRoot(research,selection,pkg={features:{features:[]},evidence:{evidences:[]}}){
+  const root=fs.mkdtempSync(path.join(os.tmpdir(),'slo-v64-audit-'));
+  const machineId='TEST_MACHINE';
+  writeJson(path.join(root,'research',machineId,'research-data.json'),{machine:{machineId,displayName:'Test'},discoveryInventory:[],evidenceCandidates:[],...research});
+  writeJson(path.join(root,'research',machineId,'selection-data.json'),{machineId,inputs:[],features:[],evidence:[],...selection});
+  writeJson(path.join(root,'machines',machineId,'machine-package.json'),pkg);
+  return root;
+}
+
 test('finds legacy evidence-overlap numeric rejection even on old schema',()=>{
   const root=fixture({exclude:true});
   const r=auditV64CrossMachine(root);
@@ -55,6 +64,31 @@ test('all-zero pseudo probabilities used only as Evidence sentinel are not numer
   const r=auditV64CrossMachine(root);
   assert.equal(r.summary.PASS,1);
   assert.equal(r.machines[0].issues.length,0);
+});
+
+test('generic BIG/REG wording alone does not imply same observation as ending-screen Evidence',()=>{
+  const root=simpleRoot({
+    features:[{researchFeatureId:'RF_BONUS_OUTCOME',name:'BIG・REG',candidateModel:'multinomial',distributionMode:'explicit_complete',categories:['BIG','REG'],settingDistributions:{SET_1:{BIG:.6,REG:.4},SET_6:{BIG:.5,REG:.5}}}],
+    evidenceCandidates:[{researchEvidenceId:'RE_BIG_END_6',name:'BIG終了画面 設定6',allowedSettings:['SET_6']}]
+  },{
+    features:[{researchFeatureId:'RF_BONUS_OUTCOME',featureId:'FEAT_BONUS_OUTCOME',adoptionCategory:'EXCLUDE',userFacingReason:'別Featureと重複。'}]
+  });
+  const r=auditV64CrossMachine(root);
+  assert.equal(r.summary.PASS,1);
+});
+
+test('missing legacy scalar feature is treated as consolidated when its input is owned by an active composite',()=>{
+  const root=simpleRoot({
+    features:[
+      {researchFeatureId:'RF_BELL',name:'通常時 ベル',candidateModel:'binomial',numeratorDefinition:'通常時ベル回数',settingValues:{SET_1:{probability:.1},SET_6:{probability:.2}}},
+      {researchFeatureId:'RF_SMALL_ROLE_OUTCOME',name:'通常時小役構成',candidateModel:'multinomial',distributionMode:'explicit_complete',categories:['BELL','CHERRY'],settingDistributions:{SET_1:{BELL:.1,CHERRY:.05},SET_6:{BELL:.2,CHERRY:.08}}}
+    ]
+  },{
+    inputs:[{id:'INP_BELL',name:'ベル'},{id:'INP_CHERRY',name:'チェリー'}],
+    features:[{researchFeatureId:'RF_SMALL_ROLE_OUTCOME',featureId:'FEAT_SMALL_ROLE_OUTCOME',adoptionCategory:'INCLUDE_PRIMARY',numeratorInputId:'INP_BELL',categoryInputIds:['INP_CHERRY']}]
+  });
+  const r=auditV64CrossMachine(root);
+  assert.equal(r.summary.PASS,1);
 });
 
 test('undeclared package feature/evidence overlap is HIGH_RISK',()=>{
