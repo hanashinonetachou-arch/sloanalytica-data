@@ -1,0 +1,72 @@
+name: v6.4 Active Feature Mappings Batch 1
+
+on:
+  push:
+    branches: [prototype-multi-machine]
+    paths:
+      - 'tools/migrate-v64-active-feature-mappings-batch1.mjs'
+      - 'test/v64-active-feature-mappings-batch1.test.mjs'
+      - '.github/workflows/v64-active-feature-mappings-batch1.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  migrate-and-validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: prototype-multi-machine
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Apply Observation mapping migration
+        run: node tools/migrate-v64-active-feature-mappings-batch1.mjs
+      - name: Validate Observation files
+        run: node tools/validate-machine-observation-data.mjs
+      - name: Run mapping regression
+        run: node --test test/v64-active-feature-mappings-batch1.test.mjs test/v64-observation-trial-universe-audit.test.mjs
+      - name: Run target four-layer gates
+        run: |
+          for m in L_MONSTER_HUNTER_RISE_XA L_SHIN_IKKITOUSEN_V S_GRANBELM_ZX S_ODANOBUNA_ZENKOKU_SNT; do
+            npm run pipeline:four-layer:gate -- "$m"
+          done
+      - name: Run full tests
+        run: npm test
+      - name: Run public audit and require zero warnings
+        run: |
+          set -o pipefail
+          npm run audit 2>&1 | tee /tmp/audit.log
+          if grep -q '^WARNING' /tmp/audit.log; then cat /tmp/audit.log; exit 1; fi
+      - name: Run semantic audit and require 170 PASS
+        run: |
+          node tools/audit-v64-cross-machine-semantic.mjs . reports/v64-cross-machine-semantic-audit.json
+          node --input-type=module - <<'NODE'
+          import fs from 'node:fs';
+          const r=JSON.parse(fs.readFileSync('reports/v64-cross-machine-semantic-audit.json','utf8'));
+          if(r.summary?.PASS!==170||r.summary?.REVIEW!==0||r.summary?.HIGH_RISK!==0) throw new Error(JSON.stringify(r.summary));
+          NODE
+      - name: Run observation/trial-universe audit
+        run: node tools/audit-v64-observation-trial-universe.mjs . reports/v64-observation-trial-universe-audit.json
+      - name: Require mapping-missing and HIGH_RISK zero
+        run: |
+          node --input-type=module - <<'NODE'
+          import fs from 'node:fs';
+          const r=JSON.parse(fs.readFileSync('reports/v64-observation-trial-universe-audit.json','utf8'));
+          console.log(JSON.stringify(r.summary));
+          console.log(JSON.stringify(r.issueCounts));
+          if(r.summary?.HIGH_RISK!==0) throw new Error('Observation HIGH_RISK remains');
+          if((r.issueCounts?.ACTIVE_FEATURE_MAPPING_MISSING??0)!==0) throw new Error(`ACTIVE_FEATURE_MAPPING_MISSING remains: ${r.issueCounts?.ACTIVE_FEATURE_MAPPING_MISSING}`);
+          NODE
+      - name: Commit validated Observation mappings
+        run: |
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git add -A
+          if ! git diff --cached --quiet; then
+            git commit -m "fix: align active Features with Observation mappings [skip ci]"
+            git pull --rebase origin prototype-multi-machine
+            git push origin prototype-multi-machine
+          fi
