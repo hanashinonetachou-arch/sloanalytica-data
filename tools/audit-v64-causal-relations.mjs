@@ -8,11 +8,9 @@ const read=p=>JSON.parse(fs.readFileSync(p,'utf8'));
 // Human-reviewed v6.4 semantic classifications. This is intentionally explicit:
 // relation type cannot be inferred safely from causal wording alone.
 const REVIEWED = {
-  'L_SHINOBIDAMASHII3_A3/RF_CZ': ['CAUSALLY_RELATED_BUT_DISTINCT_OBSERVATION','REOPEN_SELECTION_DEPENDENCY_REVIEW','CZ and AT initial hits are different observations. Small setting difference may still justify exclusion, but causal overlap alone does not.'],
-
   // Resolved rejection-reason candidates are intentionally absent from this map.
-  // Accelerator, Fire Force, Garupan and King Pulsar now state their actual blockers
-  // instead of treating causal relation itself as duplicate evidence.
+  // Accelerator, Fire Force, Garupan, King Pulsar and Shinobi now state their actual
+  // blockers instead of treating causal relation itself as duplicate evidence.
   // One Punch Man weak cherry/watermelon are resolved by adopting the existing
   // mutually-exclusive small-role multinomial as the primary numeric feature and
   // excluding downstream AT from the same likelihood product.
