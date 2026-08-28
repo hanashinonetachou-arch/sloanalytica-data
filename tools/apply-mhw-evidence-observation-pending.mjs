@@ -1,7 +1,7 @@
 import fs from 'node:fs';
 
-const path = 'research/S_MHW_ICEBORNE_ZF/selection-data.json';
-const s = JSON.parse(fs.readFileSync(path, 'utf8'));
+const selectionPath = 'research/S_MHW_ICEBORNE_ZF/selection-data.json';
+const s = JSON.parse(fs.readFileSync(selectionPath, 'utf8'));
 const group = s.evidenceUi?.groups?.find(g => g.groupId === 'EVID_SPECIAL');
 if (!group) throw new Error('EVID_SPECIAL not found');
 const before = group.options.length;
@@ -21,6 +21,16 @@ if (!exclusions.some(x => x.researchEvidenceId === 'RE_HIGH_WEAK_SELIANA')) {
 const notes = s.selectionNotes ??= [];
 const note = 'RE_HIGH_WEAK_SELIANAはResearch候補として保持し、通常/高確のObservation識別条件が確定するまでevidenceReviewで明示的に非公開とする。';
 if (!notes.includes(note)) notes.push(note);
+fs.writeFileSync(selectionPath, JSON.stringify(s, null, 2) + '\n');
+console.log('UPDATED', selectionPath);
 
-fs.writeFileSync(path, JSON.stringify(s, null, 2) + '\n');
-console.log('UPDATED', path);
+const uiPath = 'research/S_MHW_ICEBORNE_ZF/ui-design-data.json';
+const ui = JSON.parse(fs.readFileSync(uiPath, 'utf8'));
+const special = ui.sections?.['特殊契機・昇格チャレンジ'];
+if (!special) throw new Error('UI special evidence section not found');
+special.description = 'レイア希少種パネル、BAR狙え以外からのAT直撃・ロングフリーズなど、Observation条件が確認済みの設定下限確定事象が出た場合に選択します。';
+const auditNotes = ui.auditNotes ??= [];
+const uiNote = '高確弱レア役からセリエナ防衛戦はResearch候補として保持するが、通常/高確の識別条件が未確定のため現版のEvidence UIには露出しない。';
+if (!auditNotes.includes(uiNote)) auditNotes.push(uiNote);
+fs.writeFileSync(uiPath, JSON.stringify(ui, null, 2) + '\n');
+console.log('UPDATED', uiPath);
