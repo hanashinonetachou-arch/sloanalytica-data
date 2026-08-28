@@ -55,6 +55,17 @@
         "minimum": 0
       },
       {
+        "id": "INP_EPB_AFTER_INITIAL",
+        "name": "エピソードボーナス到達",
+        "type": "counter",
+        "category": "EPB_AFTER_INITIAL",
+        "displayOrder": 11,
+        "defaultValue": null,
+        "unit": "回",
+        "description": "初当りボーナス後にエピソードボーナスへ到達した回数を入力してください。",
+        "minimum": 0
+      },
+      {
         "id": "INP_ENEN_INITIAL",
         "name": "炎炎激闘初当り",
         "type": "counter",
@@ -549,6 +560,32 @@
         },
         "sourceEvidenceRefs": [
           "SRC_SPEC"
+        ]
+      },
+      {
+        "featureId": "FEAT_EPB_AFTER_INITIAL",
+        "name": "初当りボーナス後のエピソードボーナス期待度",
+        "adoptionCategory": "INCLUDE_SUPPORT",
+        "calculationRole": "PROBABILITY",
+        "probabilityEngineUsage": true,
+        "modelType": "binomial",
+        "minimumSample": 1,
+        "sampleRecommendation": 1,
+        "reliabilityProfile": {
+          "weight": 1
+        },
+        "displayFormat": "percent",
+        "denominatorInputId": "INP_BONUS_INITIAL",
+        "numeratorInputId": "INP_EPB_AFTER_INITIAL",
+        "probabilities": {
+          "SET_1": 0.4,
+          "SET_2": 0.41,
+          "SET_4": 0.43,
+          "SET_5": 0.44,
+          "SET_6": 0.45
+        },
+        "sourceEvidenceRefs": [
+          "SRC_ID"
         ]
       },
       {
@@ -1093,6 +1130,18 @@
         "classification": "ANALYSIS",
         "url": "https://nana-press.com/kaiseki/machine/738/21320/",
         "checkedAt": "2026-08-21"
+      },
+      {
+        "id": "SRC_MENU_HAZUSE",
+        "classification": "ANALYSIS",
+        "url": "https://hazuse.com/machine/pachislot/2S0167/",
+        "checkedAt": "2026-08-21"
+      },
+      {
+        "id": "SRC_MENU_PACHIMAGA",
+        "classification": "ANALYSIS",
+        "url": "https://cs62.cs-plaza.com/g/pachi/pla/s_conq/sankyo_slot/79/kh02.php",
+        "checkedAt": "2026-08-21"
       }
     ]
   },
@@ -1125,9 +1174,22 @@
         ]
       },
       {
+        "id": "AUTO_EPB_AFTER_INITIAL",
+        "title": "エピソードボーナス",
+        "displayOrder": 2,
+        "items": [
+          {
+            "type": "input",
+            "inputId": "INP_EPB_AFTER_INITIAL",
+            "label": "エピソードボーナス到達",
+            "widget": "counter"
+          }
+        ]
+      },
+      {
         "id": "AUTO_ENEN_INITIAL",
         "title": "炎炎激闘初当り",
-        "displayOrder": 2,
+        "displayOrder": 3,
         "items": [
           {
             "type": "input",
@@ -1140,7 +1202,7 @@
       {
         "id": "AUTO_REG_SCENARIO",
         "title": "REG中キャラ紹介",
-        "displayOrder": 3,
+        "displayOrder": 4,
         "description": "REG中に表示された5人のキャラ順と一致する項目へ+1してください。11項目の合計を確認回数として自動計算します。",
         "collapsible": true,
         "defaultExpanded": false,
@@ -1216,7 +1278,7 @@
       {
         "id": "AUTO_FF_END",
         "title": "炎炎ボーナス終了画面",
-        "displayOrder": 4,
+        "displayOrder": 5,
         "description": "終了画面を確認したら該当する1項目を＋してください。総数は6項目の合計から自動計算します。",
         "collapsible": true,
         "defaultExpanded": false,
@@ -1292,7 +1354,7 @@
       {
         "id": "AUTO_REG_END",
         "title": "REG終了画面",
-        "displayOrder": 5,
+        "displayOrder": 6,
         "description": "終了画面を確認したら該当する1項目を＋してください。総数は6項目の合計から自動計算します。",
         "collapsible": true,
         "defaultExpanded": false,
@@ -1368,7 +1430,7 @@
       {
         "id": "AUTO_ADORA_JAC",
         "title": "アドラバースト中 炎炎JAC開始キャラ",
-        "displayOrder": 6,
+        "displayOrder": 7,
         "description": "アドラバースト突入時のみ使用します。低頻度のため通常は閉じています。",
         "collapsible": true,
         "defaultExpanded": false,
@@ -1477,7 +1539,7 @@
       {
         "id": "AUTO_EVIDENCE",
         "title": "設定確定・否定情報",
-        "displayOrder": 7,
+        "displayOrder": 8,
         "items": [
           {
             "type": "input",
@@ -1492,8 +1554,8 @@
   "selectionSummary": {
     "schemaVersion": "selection-summary-v1",
     "evaluatedCount": 9,
-    "selectedCount": 7,
-    "rejectedCount": 2,
+    "selectedCount": 8,
+    "rejectedCount": 1,
     "selected": [
       {
         "featureId": "FEAT_INITIAL",
@@ -1511,6 +1573,15 @@
         "requiredTrials": {
           "value": 455,
           "unit": "初当り"
+        }
+      },
+      {
+        "featureId": "FEAT_EPB_AFTER_INITIAL",
+        "name": "初当りボーナス後のエピソードボーナス期待度",
+        "reason": "初当りボーナスを母数にEPB到達率を条件付きで評価でき、初当り率・ボーナス比率と階層的に分解できるため補助採用。",
+        "requiredTrials": {
+          "value": 716,
+          "unit": "初当りボーナス"
         }
       },
       {
@@ -1568,11 +1639,6 @@
           "value": 145,
           "unit": "十字目変換"
         }
-      },
-      {
-        "featureId": "REJECTED_RF_EPB_AFTER_INITIAL",
-        "name": "初当りボーナス後のエピソードボーナス期待度",
-        "reason": "調査済みの設定差候補ですが、現行Selectionでは採用条件が確定していないため、推測計算には使用していません。"
       }
     ]
   },
