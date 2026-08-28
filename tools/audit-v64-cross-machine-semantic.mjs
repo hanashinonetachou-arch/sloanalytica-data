@@ -5,7 +5,12 @@ import path from 'node:path';
 const INCLUDE = new Set(['INCLUDE_PRIMARY', 'INCLUDE_SUPPORT', 'INCLUDE_FALLBACK']);
 const EVIDENCE_REASON = /(Evidence|evidence|確定情報|確定系|確定演出|設定確定|設定否定|示唆.*優先|優先.*示唆)/u;
 const OVERLAP_REASON = /(重複|二重評価|二重計上|同じ観測|同一観測|同じ事象|同一事象|同一演出|同じ演出|重なる)/u;
-const GENERIC_CONTEXT = new Set(['RF','RE','FEAT','EVI','SCREEN','PICTURE','IMAGE','RESULT','OUTCOME','SETTING','SET','COUNT','RATE','COMPOSITION','DISTRIBUTION','HINT','INDICATION']);
+const GENERIC_CONTEXT = new Set([
+  'RF','RE','FEAT','EVI','SCREEN','PICTURE','IMAGE','RESULT','OUTCOME','SETTING','SET','COUNT','RATE','COMPOSITION','DISTRIBUTION','HINT','INDICATION',
+  'BIG','REG','AT','CZ','ST','ART','BT','RB','BB','LB','BONUS','END','START','初当り','終了','開始','画面','ボーナス'
+]);
+const GENERIC_CATEGORY = new Set(['RED','BLUE','GREEN','YELLOW','WHITE','BLACK','GOLD','SILVER','PURPLE','RAINBOW','虹','赤','青','緑','黄','白','黒','金','銀','紫']);
+const ALLOWED_SINGLE_CONTEXT = new Set(['A','B','C']);
 const arr = v => Array.isArray(v) ? v : [];
 const obj = v => v && typeof v === 'object' && !Array.isArray(v);
 const uniq = xs => [...new Set(xs.filter(Boolean))];
@@ -17,7 +22,7 @@ function normTokens(value) {
     .replace(/[＋+／/・（）()\[\]【】「」『』:：,，.。\-]/gu, '_')
     .split(/[_\s]+/u)
     .map(x => x.trim())
-    .filter(x => x.length >= 2 && !GENERIC_CONTEXT.has(x)));
+    .filter(x => (x.length >= 2 || ALLOWED_SINGLE_CONTEXT.has(x)) && !GENERIC_CONTEXT.has(x)));
 }
 function eventInputs(f) {
   return uniq([f?.numeratorInputId, ...arr(f?.numeratorInputIds), ...arr(f?.categoryInputIds), ...arr(f?.optionalCategoryInputIds)]);
@@ -44,7 +49,7 @@ function numericCoverage(feature) {
     settingCount: settings.length,
     hasNumeric: settings.length >= 2 && hasSettingVariation,
     hasSettingVariation,
-    completeDistribution: feature?.distributionMode === 'complete' && dists.length >= 2 && hasSettingVariation,
+    completeDistribution: /complete/i.test(String(feature?.distributionMode ?? '')) && dists.length >= 2 && hasSettingVariation,
     multinomialLike: /multinomial/i.test(String(feature?.candidateModel ?? '')) || arr(feature?.categories).length >= 2 || dists.length >= 2,
   };
 }
@@ -75,11 +80,35 @@ function relation(feature, evidence, explicitPairs) {
   const featureTokens = new Set([...normTokens(feature?.researchFeatureId), ...normTokens(feature?.name)]);
   const categoryHit = [...categoryTokens].filter(t => evidenceTokens.has(t));
   const contextHit = [...featureTokens].filter(t => evidenceTokens.has(t));
+  const distinctiveCategoryHit = categoryHit.filter(t => !GENERIC_CATEGORY.has(t));
 
-  // Evidence often names one category of a complete screen/card/voice distribution.
-  if (categoryHit.length && contextHit.length) return { confidence: 'HIGH', basis: ['CATEGORY_TOKEN_MATCH','CONTEXT_TOKEN_MATCH'], categoryHit, contextHit };
-  if (categoryHit.length) return { confidence: 'MEDIUM', basis: ['CATEGORY_TOKEN_MATCH'], categoryHit };
+  // Never infer SAME EVENT from a generic pachislot acronym or color alone.
+  // A category match needs at least one family/context token; context-only needs >=2 tokens.
+  if (categoryHit.length && contextHit.length >= 2) return { confidence: 'HIGH', basis: ['CATEGORY_TOKEN_MATCH','CONTEXT_TOKEN_MATCH'], categoryHit, contextHit };
+  if (categoryHit.length && contextHit.length === 1) {
+    return { confidence: distinctiveCategoryHit.length ? 'HIGH' : 'MEDIUM', basis: ['CATEGORY_TOKEN_MATCH','CONTEXT_TOKEN_MATCH'], categoryHit, contextHit };
+  }
   if (contextHit.length >= 2) return { confidence: 'MEDIUM', basis: ['CONTEXT_TOKEN_MATCH'], contextHit };
+  return null;
+}
+function normalizedText(value) {
+  return String(value ?? '').toUpperCase().replace(/[^A-Z0-9\p{Script=Han}\p{Script=Hiragana}\p{Script=Katakana}]+/gu, '');
+}
+function likelyConsolidatedByActiveInput(rf, selection) {
+  const featureName = normalizedText(rf?.name);
+  const numerator = normalizedText(rf?.numeratorDefinition);
+  const candidates = arr(selection?.inputs).filter(input => {
+    const inputName = normalizedText(input?.name);
+    if (!inputName) return false;
+    return (featureName && (featureName.includes(inputName) || inputName.includes(featureName))) ||
+      (numerator && numerator.includes(inputName));
+  });
+  if (!candidates.length) return null;
+  const activeFeatures = arr(selection?.features).filter(f => INCLUDE.has(f?.adoptionCategory));
+  for (const input of candidates) {
+    const owner = activeFeatures.find(f => eventInputs(f).includes(input.id));
+    if (owner) return { inputId: input.id, featureId: owner.featureId, researchFeatureId: owner.researchFeatureId };
+  }
   return null;
 }
 function machineStatus(issues) {
@@ -125,7 +154,10 @@ export function auditV64CrossMachine(root = process.cwd()) {
       if (!cov.hasNumeric) continue;
       const sf = sfByResearch.get(rf.researchFeatureId);
       if (!sf) {
-        issues.push({severity:'REVIEW', code:'RESEARCH_NUMERIC_FEATURE_MISSING_FROM_SELECTION', researchFeatureId:rf.researchFeatureId, name:rf.name, settingCount:cov.settingCount});
+        const consolidated = likelyConsolidatedByActiveInput(rf, selection);
+        if (!consolidated) {
+          issues.push({severity:'REVIEW', code:'RESEARCH_NUMERIC_FEATURE_MISSING_FROM_SELECTION', researchFeatureId:rf.researchFeatureId, name:rf.name, settingCount:cov.settingCount});
+        }
         continue;
       }
       const relatedEvidence = [];
@@ -133,7 +165,7 @@ export function auditV64CrossMachine(root = process.cwd()) {
         const rel = relation(rf, re, explicitPairs);
         if (rel) relatedEvidence.push({researchEvidenceId:re.researchEvidenceId, name:re.name, ...rel});
       }
-      const reason = String(sf.rejectionReason ?? sf.userReason ?? '');
+      const reason = String(sf.rejectionReason ?? sf.userReason ?? sf.userFacingReason ?? '');
       if (!INCLUDE.has(sf.adoptionCategory) && relatedEvidence.length) {
         const overlapWording = EVIDENCE_REASON.test(reason) || OVERLAP_REASON.test(reason);
         const strongest = relatedEvidence.some(x => x.confidence === 'HIGH') ? 'HIGH' : 'MEDIUM';
@@ -182,7 +214,6 @@ export function auditV64CrossMachine(root = process.cwd()) {
       }
     }
 
-    // Evidence selected from Research but still lacking an input/contract is reviewable, not automatically wrong.
     for (const re of arr(research.evidenceCandidates)) {
       const se = evidenceByResearch.get(re.researchEvidenceId);
       if (se && !se.inputId) issues.push({severity:'REVIEW', code:'SELECTED_EVIDENCE_WITHOUT_INPUT_ID', researchEvidenceId:re.researchEvidenceId, evidenceId:se.evidenceId ?? null});
@@ -196,7 +227,7 @@ export function auditV64CrossMachine(root = process.cwd()) {
     summary[m.status]++;
     for (const i of m.issues) summary.issueCounts[i.code] = (summary.issueCounts[i.code] ?? 0) + 1;
   }
-  return {schemaVersion:'v6.4-cross-machine-semantic-audit-v1.1', generatedAt:new Date().toISOString(), summary, machines};
+  return {schemaVersion:'v6.4-cross-machine-semantic-audit-v1.2', generatedAt:new Date().toISOString(), summary, machines};
 }
 
 function main() {
