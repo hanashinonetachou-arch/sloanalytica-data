@@ -5,28 +5,11 @@ import path from 'node:path';
 const arr=v=>Array.isArray(v)?v:[];
 const read=p=>JSON.parse(fs.readFileSync(p,'utf8'));
 
-// Human-reviewed v6.4 semantic classifications. This is intentionally explicit:
-// relation type cannot be inferred safely from causal wording alone.
-const REVIEWED = {
-  // Resolved rejection-reason candidates are intentionally absent from this map.
-  // Accelerator, Fire Force, Garupan, King Pulsar, Shinobi and Kabaneri now state
-  // their actual blockers instead of treating causal relation itself as duplicate evidence.
-  // One Punch Man weak cherry/watermelon are resolved by adopting the existing
-  // mutually-exclusive small-role multinomial as the primary numeric feature and
-  // excluding downstream AT from the same likelihood product.
-
-  'S_MHW_ICEBORNE_ZF/RF_AT_INITIAL': ['CAUSALLY_RELATED_BUT_DISTINCT_OBSERVATION','REOPEN_SELECTION_DEPENDENCY_REVIEW','AT initial hit is distinct from CZ entry; assess path dependence rather than treating all upstream/downstream events as duplicates.'],
-  'S_MHW_ICEBORNE_ZF/RF_CZ_QUEST': ['MUTUALLY_EXCLUSIVE_COMPOSITION','KEEP_COMPONENT_EXCLUDED_PREFER_COMPOSITION','Quest is one CZ type under the same normal-game trial universe as aggregate CZ.'],
-  'S_MHW_ICEBORNE_ZF/RF_CZ_AIROU': ['MUTUALLY_EXCLUSIVE_COMPOSITION','KEEP_COMPONENT_EXCLUDED_PREFER_COMPOSITION','Airou BINGO is one CZ type under the same normal-game trial universe as aggregate CZ.'],
-  'S_MHW_ICEBORNE_ZF/RF_CZ_SELIANA': ['MUTUALLY_EXCLUSIVE_COMPOSITION','KEEP_COMPONENT_EXCLUDED_PREFER_COMPOSITION','Seliana defense is one CZ type under the same normal-game trial universe as aggregate CZ.'],
-  'S_MHW_ICEBORNE_ZF/RF_HIGH_FALL': ['CAUSALLY_RELATED_BUT_DISTINCT_OBSERVATION','REOPEN_SELECTION_DEPENDENCY_REVIEW','High-state fall is a state-transition observation, not a CZ occurrence.'],
-  'S_MHW_ICEBORNE_ZF/RF_NORMAL_WEAK_CZ': ['CONDITIONAL_COMPOSITION','KEEP_EXCLUDED_PENDING_JOINT_MODEL','CZ outcome conditional on normal-state weak rare-role opportunities; aggregate CZ already contains resulting CZ events.'],
-  'S_MHW_ICEBORNE_ZF/RF_NORMAL_STRONG_CZ': ['CONDITIONAL_COMPOSITION','KEEP_EXCLUDED_PENDING_JOINT_MODEL','CZ outcome conditional on normal-state strong rare-role opportunities; aggregate CZ already contains resulting CZ events.'],
-  'S_MHW_ICEBORNE_ZF/RF_HIGH_WEAK_CZ': ['CONDITIONAL_COMPOSITION','KEEP_EXCLUDED_PENDING_JOINT_MODEL','CZ outcome conditional on high-state weak rare-role opportunities; aggregate CZ already contains resulting CZ events.'],
-  'S_MHW_ICEBORNE_ZF/RF_HIGH_STRONG_CZ': ['CONDITIONAL_COMPOSITION','KEEP_EXCLUDED_PENDING_JOINT_MODEL','CZ outcome conditional on high-state strong rare-role opportunities; aggregate CZ already contains resulting CZ events.'],
-  'S_MHW_ICEBORNE_ZF/RF_AT_DIRECT': ['CAUSALLY_RELATED_BUT_DISTINCT_OBSERVATION','REOPEN_SELECTION_DEPENDENCY_REVIEW','Direct AT is not a CZ occurrence. It is also a subset/pathway of AT initial hits, so any adoption must model that secondary relation explicitly.','SUBSET_OF_AT_INITIAL'],
-  'S_MHW_ICEBORNE_ZF/RF_LONG_FREEZE': ['CAUSALLY_RELATED_BUT_DISTINCT_OBSERVATION','REVIEW_OTHER_REJECTION_REASON','Long freeze is a distinct rare event; causal overlap with CZ is not sufficient rejection, but extreme rarity may independently justify exclusion.'],
-};
+// Human-reviewed v6.4 semantic classifications.
+// All candidates found in the original pass have now been resolved into explicit
+// Selection contracts, structural compositions, Observation blockers, subset rules,
+// or independent practical rejection reasons. A new candidate is therefore drift.
+const REVIEWED = {};
 
 export function auditCausalRelations(root=process.cwd()) {
   const semanticPath=path.join(root,'reports','v64-cross-machine-semantic-audit.json');
@@ -64,7 +47,7 @@ export function auditCausalRelations(root=process.cwd()) {
   return {
     schemaVersion:'v6.4-causal-relation-review-v1',generatedAt:new Date().toISOString(),
     summary:{candidateCount:rows.length,machineCount:machines.length,relationCounts:countBy('relation'),actionCounts:countBy('action')},
-    policyNote:'CAUSALLY_RELATED_BUT_DISTINCT_OBSERVATION does not imply independent likelihoods. Reopen dependency analysis before adoption; conditional or joint modeling may still be required.',
+    policyNote:'Causal wording is not itself a valid rejection criterion. Reopened candidates must be resolved through an explicit likelihood, composition, subset, Observation, or practical-information contract.',
     candidates:rows,
   };
 }
