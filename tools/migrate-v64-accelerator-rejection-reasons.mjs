@@ -27,21 +27,22 @@ export function migrate(root=process.cwd(),{apply=false}={}){
     delete sf.userReason;
     sf.userFacingReason=reason;
   }
-  observation.researchReopenRequests ??=[];
-  const requests=[
-    {requestId:'RR_ACCEL_AT_INITIAL_MODEL',researchFeatureId:'RF_AT_INITIAL',status:'RESEARCH_REOPEN_REQUIRED',reason:'CZ合算とAT初当りを同時利用するjoint/conditional likelihood contractを設計する。'},
-    {requestId:'RR_ACCEL_SHUTTER_OPEN_OBSERVATION',researchFeatureId:'RF_SHUTTER_OPEN',status:'RESEARCH_REOPEN_REQUIRED',reason:'チャンス目成立回数を実戦中に正確に継続取得できるか確認する。'},
-    {requestId:'RR_ACCEL_SHUTTER_DURATION_OBSERVATION',researchFeatureId:'RF_SHUTTER_DURATION',status:'RESEARCH_REOPEN_REQUIRED',reason:'18G/23G/33Gの継続Gを毎回判別・記録できる入力設計を確認する。'},
-    {requestId:'RR_ACCEL_SHUTTER_ROLE_CZ_CONDITIONAL',researchFeatureId:'RF_SHUTTER_ROLE_CZ',status:'RESEARCH_REOPEN_REQUIRED',reason:'対応役成立回数の機会分母取得と条件付き尤度契約を確認する。'},
-    {requestId:'RR_ACCEL_SHUTTER_NONROLE_CZ_CONDITIONAL',researchFeatureId:'RF_SHUTTER_NONROLE_CZ',status:'RESEARCH_REOPEN_REQUIRED',reason:'非対応役成立回数の機会分母取得と条件付き尤度契約を確認する。'},
-    {requestId:'RR_ACCEL_CHANCE3_CZ_TYPE_CONDITIONAL',researchFeatureId:'RF_CHANCE3_CZ_TYPE',status:'RESEARCH_REOPEN_REQUIRED',reason:'3連チャンス目機会数の取得とCZ種類構成との条件付き併用契約を確認する。'},
-  ];
-  for(const req of requests){
-    const idx=observation.researchReopenRequests.findIndex(x=>x.requestId===req.requestId || x.researchFeatureId===req.researchFeatureId);
-    if(idx>=0) observation.researchReopenRequests[idx]=req; else observation.researchReopenRequests.push(req);
-  }
+
+  // researchReopenRequests is a blocking four-layer contract. These are future
+  // reconsideration candidates, not evidence that the current MachineData is invalid,
+  // so do not create RESEARCH_REOPEN_REQUIRED records here.
+  const ids=new Set([
+    'RR_ACCEL_AT_INITIAL_MODEL',
+    'RR_ACCEL_SHUTTER_OPEN_OBSERVATION',
+    'RR_ACCEL_SHUTTER_DURATION_OBSERVATION',
+    'RR_ACCEL_SHUTTER_ROLE_CZ_CONDITIONAL',
+    'RR_ACCEL_SHUTTER_NONROLE_CZ_CONDITIONAL',
+    'RR_ACCEL_CHANCE3_CZ_TYPE_CONDITIONAL',
+  ]);
+  observation.researchReopenRequests=(observation.researchReopenRequests??[]).filter(r=>!ids.has(r.requestId) && !Object.hasOwn(REASONS,r.researchFeatureId));
+
   if(apply){write(sp,selection);write(op,observation);}
-  return {machineId:MACHINE_ID,updated:Object.keys(REASONS)};
+  return {machineId:MACHINE_ID,updated:Object.keys(REASONS),blockingReopenRequestsAdded:0};
 }
 
 const root=path.resolve(process.argv[2]??'.');
