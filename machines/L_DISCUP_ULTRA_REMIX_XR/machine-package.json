@@ -3,7 +3,7 @@
   "machine": {
     "schemaVersion": "2.0.0",
     "machineId": "L_DISCUP_ULTRA_REMIX_XR",
-    "machineDataVersion": "0.1.0",
+    "machineDataVersion": "0.1.2",
     "displayName": "A-SLOT+ ディスクアップ ULTRAREMIX",
     "modelName": "L DISCUPウルトラリミックス XR",
     "manufacturer": "サミー",
@@ -24,7 +24,7 @@
     "inputs": [
       {
         "id": "INP_BONUS_OUTCOME_BIG",
-        "name": "BIG・REG内訳 BIG",
+        "name": "BIG",
         "type": "counter",
         "category": "NUMERIC",
         "unit": "回",
@@ -35,7 +35,7 @@
       },
       {
         "id": "INP_BONUS_OUTCOME_REG",
-        "name": "BIG・REG内訳 REG",
+        "name": "REG",
         "type": "counter",
         "category": "NUMERIC",
         "unit": "回",
@@ -60,12 +60,77 @@
         "id": "INP_THREE_COIN_COUNT",
         "name": "3枚役",
         "type": "counter",
-        "category": "NUMERIC",
+        "category": "THREE_COIN",
         "unit": "回",
-        "displayOrder": 14,
+        "displayOrder": 31,
         "inferenceRole": "INCLUDE_SUPPORT",
         "defaultValue": null,
-        "parentInputId": "INP_NORMAL_GAMES",
+        "minimum": 0
+      },
+      {
+        "id": "INP_THREE_COIN_GAMES",
+        "name": "3枚役 判別用ゲーム数",
+        "type": "integer",
+        "category": "THREE_COIN",
+        "unit": "G",
+        "displayOrder": 30,
+        "inferenceRole": "INCLUDE_SUPPORT",
+        "defaultValue": null,
+        "minimum": 0
+      },
+      {
+        "id": "INP_REG_HINT_ODD",
+        "name": "奇数設定示唆",
+        "type": "counter",
+        "category": "REG_HINT",
+        "unit": "回",
+        "displayOrder": 40,
+        "inferenceRole": "INCLUDE_SUPPORT",
+        "defaultValue": null,
+        "minimum": 0
+      },
+      {
+        "id": "INP_REG_HINT_EVEN",
+        "name": "偶数設定示唆",
+        "type": "counter",
+        "category": "REG_HINT",
+        "unit": "回",
+        "displayOrder": 41,
+        "inferenceRole": "INCLUDE_SUPPORT",
+        "defaultValue": null,
+        "minimum": 0
+      },
+      {
+        "id": "INP_REG_HINT_2PLUS",
+        "name": "設定2以上",
+        "type": "counter",
+        "category": "REG_HINT",
+        "unit": "回",
+        "displayOrder": 42,
+        "inferenceRole": "INCLUDE_SUPPORT",
+        "defaultValue": null,
+        "minimum": 0
+      },
+      {
+        "id": "INP_REG_HINT_5PLUS",
+        "name": "設定5以上",
+        "type": "counter",
+        "category": "REG_HINT",
+        "unit": "回",
+        "displayOrder": 43,
+        "inferenceRole": "INCLUDE_SUPPORT",
+        "defaultValue": null,
+        "minimum": 0
+      },
+      {
+        "id": "INP_REG_HINT_6",
+        "name": "設定6",
+        "type": "counter",
+        "category": "REG_HINT",
+        "unit": "回",
+        "displayOrder": 44,
+        "inferenceRole": "INCLUDE_SUPPORT",
+        "defaultValue": null,
         "minimum": 0
       },
       {
@@ -91,21 +156,6 @@
             "key": "EV_3",
             "label": "サミートロフィーレインボー",
             "value": "EV_3"
-          },
-          {
-            "key": "EV_4",
-            "label": "REG中 2以上確定パターン",
-            "value": "EV_4"
-          },
-          {
-            "key": "EV_5",
-            "label": "REG中 5以上確定パターン",
-            "value": "EV_5"
-          },
-          {
-            "key": "EV_6",
-            "label": "REG中 設定6確定パターン",
-            "value": "EV_6"
           }
         ],
         "defaultValue": []
@@ -177,7 +227,7 @@
         "reliabilityProfile": {
           "weight": 1
         },
-        "denominatorInputId": "INP_NORMAL_GAMES",
+        "denominatorInputId": "INP_THREE_COIN_GAMES",
         "numeratorInputId": "INP_THREE_COIN_COUNT",
         "displayFormat": "ratio_1_over_n",
         "probabilities": {
@@ -189,12 +239,138 @@
         "sourceEvidenceRefs": [
           "SRC_NANAPRESS"
         ]
+      },
+      {
+        "featureId": "FEAT_REG_HINT_MODE",
+        "name": "REG中設定示唆カテゴリ",
+        "adoptionCategory": "INCLUDE_SUPPORT",
+        "calculationRole": "PROBABILITY",
+        "probabilityEngineUsage": true,
+        "modelType": "multinomial",
+        "minimumSample": 1,
+        "sampleRecommendation": 1,
+        "reliabilityProfile": {
+          "weight": 1
+        },
+        "inputTransform": "sum_inputs_to_trials",
+        "numeratorInputId": "INP_REG_HINT_ODD",
+        "denominatorInputIds": [
+          "INP_REG_HINT_ODD",
+          "INP_REG_HINT_EVEN",
+          "INP_REG_HINT_2PLUS",
+          "INP_REG_HINT_5PLUS",
+          "INP_REG_HINT_6"
+        ],
+        "categoryInputIds": [
+          "INP_REG_HINT_EVEN",
+          "INP_REG_HINT_2PLUS",
+          "INP_REG_HINT_5PLUS",
+          "INP_REG_HINT_6"
+        ],
+        "probabilities": {},
+        "categoryLabels": [
+          "ODD",
+          "EVEN",
+          "SET2PLUS",
+          "SET5PLUS",
+          "SET6"
+        ],
+        "categoryProbabilities": {
+          "SET_1": [
+            0.55,
+            0.45,
+            0,
+            0,
+            0
+          ],
+          "SET_2": [
+            0.45,
+            0.539,
+            0.011,
+            0,
+            0
+          ],
+          "SET_5": [
+            0.5749425057494251,
+            0.39566043395660433,
+            0.0201979802019798,
+            0.0091990800919908,
+            0
+          ],
+          "SET_6": [
+            0.4614538546145386,
+            0.49995000499950004,
+            0.0201979802019798,
+            0.0091990800919908,
+            0.0091990800919908
+          ]
+        },
+        "sourceEvidenceRefs": [
+          "SRC_NANAPRESS_REG"
+        ]
       }
     ]
   },
   "evidence": {
     "version": "1.0.0",
     "evidences": [
+      {
+        "id": "EVI_REG_HINT_2PLUS",
+        "name": "REG中 2以上確定パターン",
+        "displayName": "REG中 2以上確定パターン",
+        "inputId": "INP_REG_HINT_2PLUS",
+        "confirmedSettings": [
+          "SET_2",
+          "SET_5",
+          "SET_6"
+        ],
+        "deniedSettings": [
+          "SET_1"
+        ],
+        "hasImage": false,
+        "sharedFeatureIds": [
+          "FEAT_REG_HINT_MODE"
+        ],
+        "type": "SETTING_CONFIRMATION"
+      },
+      {
+        "id": "EVI_REG_HINT_5PLUS",
+        "name": "REG中 5以上確定パターン",
+        "displayName": "REG中 5以上確定パターン",
+        "inputId": "INP_REG_HINT_5PLUS",
+        "confirmedSettings": [
+          "SET_5",
+          "SET_6"
+        ],
+        "deniedSettings": [
+          "SET_1",
+          "SET_2"
+        ],
+        "hasImage": false,
+        "sharedFeatureIds": [
+          "FEAT_REG_HINT_MODE"
+        ],
+        "type": "SETTING_CONFIRMATION"
+      },
+      {
+        "id": "EVI_REG_HINT_6",
+        "name": "REG中 設定6確定パターン",
+        "displayName": "REG中 設定6確定パターン",
+        "inputId": "INP_REG_HINT_6",
+        "confirmedSettings": [
+          "SET_6"
+        ],
+        "deniedSettings": [
+          "SET_1",
+          "SET_2",
+          "SET_5"
+        ],
+        "hasImage": false,
+        "sharedFeatureIds": [
+          "FEAT_REG_HINT_MODE"
+        ],
+        "type": "SETTING_CONFIRMATION"
+      },
       {
         "id": "EVI_SETTING_EVIDENCE_EV_1",
         "name": "サミートロフィー銅",
@@ -254,66 +430,6 @@
         "sourceEvidenceRefs": [
           "RE_TROPHY_RAINBOW"
         ]
-      },
-      {
-        "id": "EVI_SETTING_EVIDENCE_EV_4",
-        "name": "REG中 2以上確定パターン",
-        "displayName": "REG中 2以上確定パターン",
-        "inputId": "INP_EVI_SETTING_EVIDENCE",
-        "triggerValue": "EV_4",
-        "confirmedSettings": [
-          "SET_2",
-          "SET_5",
-          "SET_6"
-        ],
-        "deniedSettings": [
-          "SET_1"
-        ],
-        "hasImage": false,
-        "type": "SETTING_CONFIRMATION",
-        "sourceEvidenceRefs": [
-          "RE_REG_2PLUS"
-        ]
-      },
-      {
-        "id": "EVI_SETTING_EVIDENCE_EV_5",
-        "name": "REG中 5以上確定パターン",
-        "displayName": "REG中 5以上確定パターン",
-        "inputId": "INP_EVI_SETTING_EVIDENCE",
-        "triggerValue": "EV_5",
-        "confirmedSettings": [
-          "SET_5",
-          "SET_6"
-        ],
-        "deniedSettings": [
-          "SET_1",
-          "SET_2"
-        ],
-        "hasImage": false,
-        "type": "SETTING_CONFIRMATION",
-        "sourceEvidenceRefs": [
-          "RE_REG_5PLUS"
-        ]
-      },
-      {
-        "id": "EVI_SETTING_EVIDENCE_EV_6",
-        "name": "REG中 設定6確定パターン",
-        "displayName": "REG中 設定6確定パターン",
-        "inputId": "INP_EVI_SETTING_EVIDENCE",
-        "triggerValue": "EV_6",
-        "confirmedSettings": [
-          "SET_6"
-        ],
-        "deniedSettings": [
-          "SET_1",
-          "SET_2",
-          "SET_5"
-        ],
-        "hasImage": false,
-        "type": "SETTING_CONFIRMATION",
-        "sourceEvidenceRefs": [
-          "RE_REG_6"
-        ]
       }
     ],
     "sources": [
@@ -364,19 +480,33 @@
           {
             "type": "input",
             "inputId": "INP_BONUS_OUTCOME_BIG",
-            "label": "BIG・REG内訳 BIG",
+            "label": "BIG",
             "widget": "counter"
           },
           {
             "type": "input",
             "inputId": "INP_BONUS_OUTCOME_REG",
-            "label": "BIG・REG内訳 REG",
+            "label": "REG",
             "widget": "counter"
           },
           {
             "type": "input",
             "inputId": "INP_NORMAL_GAMES",
             "label": "通常ゲーム数",
+            "widget": "number"
+          }
+        ]
+      },
+      {
+        "id": "AUTO_THREE_COIN",
+        "title": "3枚役",
+        "displayOrder": 2,
+        "description": "実機連動サービスを利用する場合は、サービス上で取得した3枚役回数と、その集計に対応するサービス上のゲーム数をセットで入力してください。自身でカウントする場合は、3枚役回数とデータカウンター上のゲーム数をセットで入力してください（ボーナス中はカウントせず、AT中をカウントする一般的なデータカウンター仕様を想定）。異なる集計方法の分子・分母を混在させないでください。",
+        "items": [
+          {
+            "type": "input",
+            "inputId": "INP_THREE_COIN_GAMES",
+            "label": "3枚役 判別用ゲーム数",
             "widget": "number"
           },
           {
@@ -388,9 +518,47 @@
         ]
       },
       {
+        "id": "AUTO_REG_HINT",
+        "title": "REG中設定示唆",
+        "displayOrder": 3,
+        "description": "REG1回につき、最終的に確認できた示唆区分を1つだけ入力してください。「設定2以上」「設定5以上」「設定6」は、この同じ入力が割合推測と設定確定Evidenceの両方に反映されます。",
+        "items": [
+          {
+            "type": "input",
+            "inputId": "INP_REG_HINT_ODD",
+            "label": "奇数設定示唆",
+            "widget": "counter"
+          },
+          {
+            "type": "input",
+            "inputId": "INP_REG_HINT_EVEN",
+            "label": "偶数設定示唆",
+            "widget": "counter"
+          },
+          {
+            "type": "input",
+            "inputId": "INP_REG_HINT_2PLUS",
+            "label": "設定2以上",
+            "widget": "counter"
+          },
+          {
+            "type": "input",
+            "inputId": "INP_REG_HINT_5PLUS",
+            "label": "設定5以上",
+            "widget": "counter"
+          },
+          {
+            "type": "input",
+            "inputId": "INP_REG_HINT_6",
+            "label": "設定6",
+            "widget": "counter"
+          }
+        ]
+      },
+      {
         "id": "AUTO_EVIDENCE",
         "title": "設定確定・示唆",
-        "displayOrder": 2,
+        "displayOrder": 4,
         "items": [
           {
             "type": "input",
@@ -404,9 +572,9 @@
   },
   "selectionSummary": {
     "schemaVersion": "selection-summary-v1",
-    "evaluatedCount": 15,
-    "selectedCount": 2,
-    "rejectedCount": 13,
+    "evaluatedCount": 8,
+    "selectedCount": 3,
+    "rejectedCount": 5,
     "selected": [
       {
         "featureId": "FEAT_BONUS_OUTCOME",
@@ -420,10 +588,19 @@
       {
         "featureId": "FEAT_THREE_COIN",
         "name": "3枚役",
-        "reason": "3枚役は高頻度で遊技データから観測しやすく、ボーナスとは別の成立役情報として独立に追加できるため補助採用します。",
+        "reason": "3枚役は比較的高頻度で設定差があり、実機連動サービスまたは自力カウントで観測できるため補助採用します。分母はボーナス推測用の通常ゲーム数と共用せず、3枚役の集計方法に対応する専用ゲーム数を使用します。",
         "requiredTrials": {
           "value": 12699,
           "unit": "通常ゲーム"
+        }
+      },
+      {
+        "featureId": "FEAT_REG_HINT_MODE",
+        "name": "REG中設定示唆カテゴリ",
+        "reason": "REG中設定示唆は各REGで排他的に観測でき、演出モード共通の設定別トータル選択率が公開されているため補助採用します。設定下限・確定カテゴリは同じ入力をEvidenceにも共用し、二重入力せず割合推測と確定判定の両方に利用します。",
+        "requiredTrials": {
+          "value": 42,
+          "unit": "REG1回"
         }
       }
     ],
@@ -438,84 +615,12 @@
         }
       },
       {
-        "featureId": "FEAT_REACH_T2_EXCLUDED",
-        "name": "リーチ目役T2",
-        "reason": "リーチ目役T2は低頻度で、BIG・REG主軸へ追加する実戦範囲の情報量が限定的なため不採用です。",
-        "requiredTrials": {
-          "value": 38134,
-          "unit": "通常ゲーム"
-        }
-      },
-      {
-        "featureId": "FEAT_REACH_T3_EXCLUDED",
-        "name": "リーチ目役T3",
-        "reason": "リーチ目役T3は極端に低頻度で実戦範囲の母数を得にくいため不採用です。",
-        "requiredTrials": {
-          "value": 56021,
-          "unit": "通常ゲーム"
-        }
-      },
-      {
-        "featureId": "FEAT_REACH_A2_EXCLUDED",
-        "name": "リーチ目役A2",
-        "reason": "リーチ目役A2は極端に低頻度で実戦範囲の母数を得にくいため不採用です。",
-        "requiredTrials": {
-          "value": 56021,
-          "unit": "通常ゲーム"
-        }
-      },
-      {
-        "featureId": "FEAT_REACH_D2_EXCLUDED",
-        "name": "リーチ目役D2",
-        "reason": "リーチ目役D2は低頻度で、成立後ボーナス内訳とも依存するため現行構成では不採用です。",
-        "requiredTrials": {
-          "value": 84875,
-          "unit": "通常ゲーム"
-        }
-      },
-      {
-        "featureId": "FEAT_REACH_G2_EXCLUDED",
-        "name": "リーチ目役G2",
-        "reason": "リーチ目役G2は低頻度で、成立後ボーナス内訳とも依存するため現行構成では不採用です。",
-        "requiredTrials": {
-          "value": 178841,
-          "unit": "通常ゲーム"
-        }
-      },
-      {
         "featureId": "FEAT_CONFIRMED_CHERRY_EXCLUDED",
         "name": "確定チェリー",
         "reason": "確定チェリーは低頻度で、成立後ボーナス内訳とも依存するため実戦範囲では不採用です。",
         "requiredTrials": {
           "value": 65016,
           "unit": "通常ゲーム"
-        }
-      },
-      {
-        "featureId": "FEAT_D2_BONUS_TYPE_EXCLUDED",
-        "name": "D2成立時ボーナス種別",
-        "reason": "D2成立時ボーナス種別はD2成立率と条件付きで安全に構成できますが、D2自体が低頻度で実戦内母数が少ないため不採用です。",
-        "requiredTrials": {
-          "value": 70,
-          "unit": "D2成立1回"
-        }
-      },
-      {
-        "featureId": "FEAT_G2_BONUS_TYPE_EXCLUDED",
-        "name": "G2成立時ボーナス種別",
-        "reason": "G2成立時ボーナス種別はG2自体が低頻度で実戦内母数が少ないため不採用です。",
-        "requiredTrials": {
-          "value": 108,
-          "unit": "G2成立1回"
-        }
-      },
-      {
-        "featureId": "FEAT_T2_BONUS_TYPE_EXCLUDED",
-        "name": "T2成立時ボーナス種別",
-        "reason": "T2成立時ボーナス種別はT2成立回数を十分に得にくく、主軸ボーナス内訳への追加情報量が限定的なため不採用です。",
-        "requiredTrials": {
-          "value": 112,
-          "unit": "T2成立1回"
         }
       },
       {
@@ -537,13 +642,9 @@
         }
       },
       {
-        "featureId": "FEAT_REG_HINT_MODE_EXCLUDED",
-        "name": "REG中設定示唆カテゴリ",
-        "reason": "REG中示唆カテゴリは設定下限・確定パターンと同一観測内で重なるため、確定情報をEvidenceとして優先し数値分布は二重評価防止のため不採用です。",
-        "requiredTrials": {
-          "value": 92,
-          "unit": "REG1回"
-        }
+        "featureId": "REJECTED_REACH_ROLE_GROUP",
+        "name": "リーチ目役関連",
+        "reason": "各リーチ目役の出現率や成立時ボーナス種別には設定差がありますが、個別役が低頻度で実戦範囲の母数を得にくく、ボーナス内訳との依存もあるため現行推測ではまとめて不採用としています。"
       }
     ]
   },

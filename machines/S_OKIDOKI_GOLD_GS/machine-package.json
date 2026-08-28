@@ -3,7 +3,7 @@
   "machine": {
     "schemaVersion": "2.0.0",
     "machineId": "S_OKIDOKI_GOLD_GS",
-    "machineDataVersion": "0.1.0",
+    "machineDataVersion": "0.1.1",
     "displayName": "沖ドキ！GOLD",
     "modelName": "S／沖ドキ！GOLD／GS",
     "manufacturer": "株式会社ユニバーサルブロス",
@@ -54,6 +54,18 @@
         "defaultValue": null,
         "parentInputId": "INP_NORMAL_GAMES",
         "minimum": 0
+      },
+      {
+        "id": "INP_CHERRY_B_COUNT",
+        "name": "チェリーB（判別できる場合のみ）",
+        "type": "counter",
+        "category": "CHERRY_B",
+        "unit": "回",
+        "displayOrder": 20,
+        "inferenceRole": "INCLUDE_SUPPORT",
+        "defaultValue": null,
+        "parentInputId": "INP_NORMAL_GAMES",
+        "minimum": 0
       }
     ]
   },
@@ -86,6 +98,35 @@
           "SRC_HAZUSE",
           "SRC_NANAPRESS",
           "SRC_1GEKI"
+        ]
+      },
+      {
+        "featureId": "FEAT_CHERRY_B",
+        "name": "チェリーB",
+        "adoptionCategory": "INCLUDE_SUPPORT",
+        "calculationRole": "PROBABILITY",
+        "probabilityEngineUsage": true,
+        "modelType": "binomial",
+        "minimumSample": 1,
+        "sampleRecommendation": 1,
+        "reliabilityProfile": {
+          "weight": 1
+        },
+        "denominatorInputId": "INP_NORMAL_GAMES",
+        "numeratorInputId": "INP_CHERRY_B_COUNT",
+        "displayFormat": "ratio_1_over_n",
+        "probabilities": {
+          "SET_1": 0.005952380952380952,
+          "SET_2": 0.006561679790026247,
+          "SET_3": 0.006868131868131868,
+          "SET_5": 0.007326007326007326,
+          "SET_6": 0.0078125
+        },
+        "sourceEvidenceRefs": [
+          "SRC_HAZUSE",
+          "SRC_NANAPRESS",
+          "SRC_1GEKI",
+          "SRC_DMM_STOP"
         ]
       }
     ]
@@ -158,14 +199,28 @@
             "widget": "counter"
           }
         ]
+      },
+      {
+        "id": "AUTO_CHERRY_B",
+        "title": "チェリーB",
+        "displayOrder": 2,
+        "description": "停止形でチェリーA/Bを正確に判別できる場合のみ入力してください。判別できない場合は空欄のままにしてください。",
+        "items": [
+          {
+            "type": "input",
+            "inputId": "INP_CHERRY_B_COUNT",
+            "label": "チェリーB（判別できる場合のみ）",
+            "widget": "counter"
+          }
+        ]
       }
     ]
   },
   "selectionSummary": {
     "schemaVersion": "selection-summary-v1",
     "evaluatedCount": 10,
-    "selectedCount": 1,
-    "rejectedCount": 9,
+    "selectedCount": 2,
+    "rejectedCount": 8,
     "selected": [
       {
         "featureId": "FEAT_BONUS_FIRST_HIT",
@@ -175,18 +230,18 @@
           "value": 35380,
           "unit": "通常ゲーム"
         }
-      }
-    ],
-    "rejected": [
+      },
       {
-        "featureId": "FEAT_CHERRY_B_EXCLUDED",
+        "featureId": "FEAT_CHERRY_B",
         "name": "チェリーB",
-        "reason": "チェリーBには設定差がありますが、停止形でA/Bを正確に判別する必要があり、単独情報量に対して誤分類リスクが大きいため不採用です。",
+        "reason": "チェリーBは停止形でA/Bを判別でき、設定1の1/168.0から設定6の1/128.0まで継続的な設定差があり、実戦でも母数を得やすいため補助採用します。停止形を判別できない場合は入力せず、推測にも参加させません。",
         "requiredTrials": {
           "value": 14415,
           "unit": "通常ゲーム"
         }
-      },
+      }
+    ],
+    "rejected": [
       {
         "featureId": "FEAT_CONFIRMED_ROLE_B_EXCLUDED",
         "name": "確定役B",

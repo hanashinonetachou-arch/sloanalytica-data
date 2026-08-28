@@ -182,7 +182,7 @@ function buildSelectionSummary(research,selection,statistics=null){
   const selected=[],rejected=[];
   const selectedResearchIds=new Set((selection.features??[]).map(sf=>sf.researchFeatureId).filter(Boolean));
   for(const sf of selection.features??[]){
-    if(sf.adoptionCategory==="DISPLAY_ONLY") continue;
+    if(sf.adoptionCategory==="DISPLAY_ONLY" || sf.summarySuppressed===true) continue;
     const rf=rfs.get(sf.researchFeatureId);
     if(!rf) continue;
     const explicitReason=sf.userFacingReason ?? sf.userReason ?? sf.rejectionReason;

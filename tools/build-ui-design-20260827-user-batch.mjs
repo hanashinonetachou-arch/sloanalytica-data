@@ -17,7 +17,7 @@ const SECTION_RULES={
  L_SALARYMAN_KINTARO_ET:[['通常時',/通常ゲーム|AT初当り|金太郎チャンス/]],
  L_NYANKO_DAISENSO_CHOSHINSOKU_KB:[['通常時',/通常ゲーム|AT初当り/]],
  L_NANATSU_NO_MAKEN_PU:[['通常時',/通常ゲーム|ST初当り/]],
- L_DISCUP_ULTRA_REMIX_XR:[['通常時',/通常ゲーム/],['小役',/3枚役/],['ボーナス',/BIG|REG/]],
+ L_DISCUP_ULTRA_REMIX_XR:[['通常時',/通常ゲーム/],['小役',/3枚役/],['ボーナス',/BIG|REG/],['REG中設定示唆',/奇数設定示唆|偶数設定示唆|設定2以上|設定5以上|設定6/]],
  L_STAR_HANAHANA_MX:[['通常時',/通常ゲーム/],['ボーナス',/BIG|REG/]],
  L_SHIN_EVANGELION:[['通常時',/通常ゲーム|初当り|150G/],['レイチャンス',/レイ|ナビ/],['終了・示唆',/終了画面|成功画面/]]
 };

@@ -37,3 +37,31 @@ test('Shin Eva shares one observation input between numeric Feature and Evidence
   assert.ok(sectionTitles.includes('レイチャンス成功画面'));
   assert.ok(sectionTitles.includes('ボーナス終了画面'));
 });
+
+
+test('Discup REG hint shares one observation input between numeric Feature and Evidence',()=>{
+  const research=read(path.join(ROOT,'research/L_DISCUP_ULTRA_REMIX_XR/research-data.json'));
+  const selection=read(path.join(ROOT,'research/L_DISCUP_ULTRA_REMIX_XR/selection-data.json'));
+  const pkg=buildMachineData(research,selection,null);
+
+  const feature=pkg.features.features.find(f=>f.featureId==='FEAT_REG_HINT_MODE');
+  assert.ok(feature,'REG hint must be a numeric Feature');
+  assert.deepEqual(feature.categoryLabels,['ODD','EVEN','SET2PLUS','SET5PLUS','SET6']);
+  for(const probs of Object.values(feature.categoryProbabilities)){
+    const sum=probs.reduce((a,b)=>a+b,0);
+    assert.ok(Math.abs(sum-1)<1e-9,'REG hint probabilities must sum to 1');
+  }
+
+  const evidence=new Map(pkg.evidence.evidences.map(e=>[e.id,e]));
+  assert.equal(evidence.get('EVI_REG_HINT_2PLUS')?.inputId,'INP_REG_HINT_2PLUS');
+  assert.equal(evidence.get('EVI_REG_HINT_5PLUS')?.inputId,'INP_REG_HINT_5PLUS');
+  assert.equal(evidence.get('EVI_REG_HINT_6')?.inputId,'INP_REG_HINT_6');
+  assert.deepEqual(evidence.get('EVI_REG_HINT_2PLUS')?.sharedFeatureIds,['FEAT_REG_HINT_MODE']);
+  assert.deepEqual(evidence.get('EVI_REG_HINT_5PLUS')?.sharedFeatureIds,['FEAT_REG_HINT_MODE']);
+  assert.deepEqual(evidence.get('EVI_REG_HINT_6')?.sharedFeatureIds,['FEAT_REG_HINT_MODE']);
+
+  const inputById=new Map(pkg.inputs.inputs.map(i=>[i.id,i]));
+  assert.equal(inputById.get('INP_REG_HINT_ODD')?.name,'奇数設定示唆');
+  assert.equal(inputById.get('INP_REG_HINT_EVEN')?.name,'偶数設定示唆');
+  assert.equal(inputById.get('INP_REG_HINT_2PLUS')?.name,'設定2以上');
+});
