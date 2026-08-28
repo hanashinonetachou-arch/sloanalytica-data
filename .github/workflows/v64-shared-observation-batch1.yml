@@ -1,0 +1,27 @@
+name: v6.4 Shared Observation Batch1
+
+on:
+  push:
+    branches: [prototype-multi-machine]
+    paths:
+      - 'tools/migrate-v64-shared-observation-batch1.mjs'
+      - '.github/workflows/v64-shared-observation-batch1.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: prototype-multi-machine
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Validate migration without touching repository
+        run: node tools/migrate-v64-shared-observation-batch1.mjs .
+      - name: Run semantic audit regression tests
+        run: node --test test/v64-cross-machine-semantic-audit.test.mjs
