@@ -3,6 +3,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 
 const MACHINE_ID = 'L_TOARU_ACCELERATOR_RZ';
+const COMPONENT_TOTAL_ROUNDING_TOLERANCE = 0.000004;
 const read = p => JSON.parse(fs.readFileSync(p, 'utf8'));
 const write = (p, v) => fs.writeFileSync(p, JSON.stringify(v, null, 2) + '\n');
 const arr = v => Array.isArray(v) ? v : [];
@@ -69,7 +70,7 @@ export function migrate(root = process.cwd(), { apply = false } = {}) {
       ...arr(feature(research, 'RF_CZ_DUAL').sourceRefs),
     ]),
     crossSourceStatus: 'derived_from_resolved_components',
-    notes: '3種類の通常GあたりCZ確率を、CZ当選を条件とする構成比へ正規化した派生Feature。CZ総数のBinomialと種類構成のMultinomialを分解して評価し、同じCZ情報を独立に二重計上しない。更新前セッションでは種類不明の既存CZを構成比の分母に含めない。'
+    notes: '3種類の通常GあたりCZ確率を、CZ当選を条件とする構成比へ正規化した派生Feature。CZ総数のBinomialと種類構成のMultinomialを分解して評価し、同じCZ情報を独立に二重計上しない。更新前セッションでは種類不明の既存CZを構成比の分母に含めない。公開1/○○値の成分和とCZ合算には最大約3.11e-6の丸め差があるため4e-6以内を整合とする。'
   };
   const existingResearchIndex = arr(research.features).findIndex(f => f.researchFeatureId === compositionId);
   if (existingResearchIndex >= 0) research.features[existingResearchIndex] = composition;
@@ -180,7 +181,7 @@ export function migrate(root = process.cwd(), { apply = false } = {}) {
       d: feature(research, 'RF_CZ_DUAL').settingValues[setting].probability,
     }).reduce((a, b) => a + Number(b), 0);
     const totalP = Number(total.settingValues[setting].probability);
-    if (Math.abs(componentSum - totalP) > 0.000002) throw new Error(`${setting}: CZ component/total mismatch ${componentSum} vs ${totalP}`);
+    if (Math.abs(componentSum - totalP) > COMPONENT_TOTAL_ROUNDING_TOLERANCE) throw new Error(`${setting}: CZ component/total mismatch ${componentSum} vs ${totalP}`);
   }
 
   if (apply) {
