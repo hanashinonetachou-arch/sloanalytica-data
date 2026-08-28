@@ -9,13 +9,11 @@ const read=p=>JSON.parse(fs.readFileSync(p,'utf8'));
 // relation type cannot be inferred safely from causal wording alone.
 const REVIEWED = {
   // Resolved rejection-reason candidates are intentionally absent from this map.
-  // Accelerator, Fire Force, Garupan, King Pulsar and Shinobi now state their actual
-  // blockers instead of treating causal relation itself as duplicate evidence.
+  // Accelerator, Fire Force, Garupan, King Pulsar, Shinobi and Kabaneri now state
+  // their actual blockers instead of treating causal relation itself as duplicate evidence.
   // One Punch Man weak cherry/watermelon are resolved by adopting the existing
   // mutually-exclusive small-role multinomial as the primary numeric feature and
   // excluding downstream AT from the same likelihood product.
-
-  'S_KABANERI_ZR/RF_ST': ['CAUSALLY_RELATED_BUT_DISTINCT_OBSERVATION','REOPEN_SELECTION_DEPENDENCY_REVIEW','ST occurrence is downstream of bonus progression but is not the same natural observation as bonus initial hit.'],
 
   'S_MHW_ICEBORNE_ZF/RF_AT_INITIAL': ['CAUSALLY_RELATED_BUT_DISTINCT_OBSERVATION','REOPEN_SELECTION_DEPENDENCY_REVIEW','AT initial hit is distinct from CZ entry; assess path dependence rather than treating all upstream/downstream events as duplicates.'],
   'S_MHW_ICEBORNE_ZF/RF_CZ_QUEST': ['MUTUALLY_EXCLUSIVE_COMPOSITION','KEEP_COMPONENT_EXCLUDED_PREFER_COMPOSITION','Quest is one CZ type under the same normal-game trial universe as aggregate CZ.'],
