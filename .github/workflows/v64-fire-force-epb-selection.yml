@@ -1,0 +1,80 @@
+name: v6.4 Fire Force EPB Selection
+
+on:
+  push:
+    branches: [prototype-multi-machine]
+    paths:
+      - 'tools/migrate-v64-fire-force-epb-selection.mjs'
+      - 'test/fire-force-epb-selection.test.mjs'
+      - '.github/workflows/v64-fire-force-epb-selection.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  apply-and-validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: prototype-multi-machine
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Dry-run EPB selection migration
+        run: node tools/migrate-v64-fire-force-epb-selection.mjs .
+      - name: Apply EPB selection migration
+        run: node tools/migrate-v64-fire-force-epb-selection.mjs . --apply
+      - name: Run EPB regression
+        run: node --test test/fire-force-epb-selection.test.mjs
+      - name: Rebuild Fire Force package
+        run: npm run machine:pipeline -- L_ENEN_NO_SHOUBOUTAI_JG --skip-repo-checks
+      - name: Refresh semantic audit
+        run: node tools/audit-v64-cross-machine-semantic.mjs . reports/v64-cross-machine-semantic-audit.json
+      - name: Assert missing-Selection issue is resolved
+        run: |
+          node --input-type=module - <<'NODE'
+          import fs from 'node:fs';
+          const report=JSON.parse(fs.readFileSync('reports/v64-cross-machine-semantic-audit.json','utf8'));
+          const m=report.machines.find(x=>x.machineId==='L_ENEN_NO_SHOUBOUTAI_JG');
+          const missing=(m?.issues??[]).filter(x=>x.code==='RESEARCH_NUMERIC_FEATURE_MISSING_FROM_SELECTION');
+          if(missing.length) throw new Error(`Fire Force still has ${missing.length} Research numeric feature(s) missing from Selection`);
+          console.log('PASS Fire Force Research numeric features are explicitly classified in Selection');
+          NODE
+      - name: Run full test suite
+        run: npm test
+      - name: Run public-data audit
+        run: npm run audit
+      - name: Run Observation linkage target check
+        run: |
+          set +e
+          npm run observation:selection:audit 2>&1 | tee /tmp/observation-linkage.log
+          status=${PIPESTATUS[0]}
+          set -e
+          if grep -E '^ERROR: L_ENEN_NO_SHOUBOUTAI_JG:' /tmp/observation-linkage.log; then
+            echo 'Fire Force introduced an Observation -> Selection linkage error.' >&2
+            exit 1
+          fi
+          if [ "$status" -ne 0 ]; then
+            echo 'Global Observation linkage audit still has pre-existing errors outside this batch; recorded as REVIEW.'
+          fi
+      - name: Run four-layer gate
+        run: npm run pipeline:four-layer:gate -- L_ENEN_NO_SHOUBOUTAI_JG
+      - name: Show diff
+        run: |
+          git status --short
+          git --no-pager diff --stat
+          git --no-pager diff -- research/L_ENEN_NO_SHOUBOUTAI_JG/selection-data.json machines/L_ENEN_NO_SHOUBOUTAI_JG catalog.json difficulty-catalog.json reports/v64-cross-machine-semantic-audit.json
+      - name: Commit validated EPB selection
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add research/L_ENEN_NO_SHOUBOUTAI_JG machines/L_ENEN_NO_SHOUBOUTAI_JG catalog.json difficulty-catalog.json reports/v64-cross-machine-semantic-audit.json 2>/dev/null || true
+          if git diff --cached --quiet; then
+            echo "No validated changes to commit"
+          else
+            git commit -m "fix: select Fire Force EPB conditional feature"
+            git push origin HEAD:prototype-multi-machine
+          fi
