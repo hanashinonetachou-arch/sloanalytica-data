@@ -1,8 +1,69 @@
 {
   "schemaVersion": "selection-data-v1",
   "machineId": "L_KAGUYA_SAMA_JA",
-  "machineDataVersion": "0.1.2",
-  "inputs": [],
+  "machineDataVersion": "0.1.3",
+  "inputs": [
+    {
+      "id": "INP_KAGUYA_END_RED",
+      "name": "赤枠",
+      "category": "BONUS_END_FRAME",
+      "type": "counter",
+      "unit": "回",
+      "displayOrder": 20,
+      "inferenceRole": "INCLUDE_SUPPORT",
+      "observationScope": "SELF_PLAY",
+      "defaultValue": null,
+      "uiQuickAdd": 1
+    },
+    {
+      "id": "INP_KAGUYA_END_PURPLE",
+      "name": "紫枠（設定2以上）",
+      "category": "BONUS_END_FRAME",
+      "type": "counter",
+      "unit": "回",
+      "displayOrder": 21,
+      "inferenceRole": "INCLUDE_SUPPORT",
+      "observationScope": "SELF_PLAY",
+      "defaultValue": null,
+      "uiQuickAdd": 1
+    },
+    {
+      "id": "INP_KAGUYA_END_SILVER",
+      "name": "銀枠（設定4以上）",
+      "category": "BONUS_END_FRAME",
+      "type": "counter",
+      "unit": "回",
+      "displayOrder": 22,
+      "inferenceRole": "INCLUDE_SUPPORT",
+      "observationScope": "SELF_PLAY",
+      "defaultValue": null,
+      "uiQuickAdd": 1
+    },
+    {
+      "id": "INP_KAGUYA_END_GOLD",
+      "name": "金枠（設定6）",
+      "category": "BONUS_END_FRAME",
+      "type": "counter",
+      "unit": "回",
+      "displayOrder": 23,
+      "inferenceRole": "INCLUDE_SUPPORT",
+      "observationScope": "SELF_PLAY",
+      "defaultValue": null,
+      "uiQuickAdd": 1
+    },
+    {
+      "id": "INP_KAGUYA_END_OTHER",
+      "name": "その他",
+      "category": "BONUS_END_FRAME",
+      "type": "counter",
+      "unit": "回",
+      "displayOrder": 24,
+      "inferenceRole": "INCLUDE_SUPPORT",
+      "observationScope": "SELF_PLAY",
+      "defaultValue": null,
+      "uiQuickAdd": 1
+    }
+  ],
   "features": [
     {
       "researchFeatureId": "RF_KAGUYA_BONUS_INITIAL",
@@ -14,9 +75,20 @@
     {
       "researchFeatureId": "RF_KAGUYA_BONUS_END_FRAME",
       "featureId": "FEAT_KAGUYA_BONUS_END_FRAME",
-      "adoptionCategory": "EXCLUDE",
-      "rejectionReason": "紫・銀・金枠は設定下限を直接絞る確定・否定情報として別枠で扱う。赤枠だけを数値化しても低頻度かつ設定差が小さく、同じ終了画面を重複評価するため数値Featureには不採用。",
-      "userReason": "紫・銀・金枠は設定下限を直接絞る確定・否定情報として別枠で扱う。赤枠だけを数値化しても低頻度かつ設定差が小さく、同じ終了画面を重複評価するため数値Featureには不採用。"
+      "adoptionCategory": "INCLUDE_SUPPORT",
+      "userReason": "BONUS終了画面は赤・紫・銀・金・その他の完全分布として補助推測に利用します。紫・銀・金は同じカウンター入力を設定下限Evidenceにも共有するため、1回の観測を二重入力しません。",
+      "numeratorInputId": "INP_KAGUYA_END_RED",
+      "categoryInputIds": [
+        "INP_KAGUYA_END_PURPLE",
+        "INP_KAGUYA_END_SILVER",
+        "INP_KAGUYA_END_GOLD",
+        "INP_KAGUYA_END_OTHER"
+      ],
+      "inputTransform": "sum_inputs_to_trials",
+      "minimumSample": 1,
+      "sampleRecommendation": 30,
+      "weight": 1,
+      "difficultyParticipation": "EXCLUDE"
     },
     {
       "researchFeatureId": "RF_KAGUYA_REG_SCENARIO",
@@ -26,7 +98,32 @@
       "userReason": "設定下限を直接絞るシナリオと次回モード示唆が混在し、全設定の完全な選択率も公開されていないため、数値Featureには不採用。"
     }
   ],
-  "evidence": [],
+  "evidence": [
+    {
+      "researchEvidenceId": "RE_KAGUYA_END_PURPLE",
+      "evidenceId": "EVI_KAGUYA_END_PURPLE",
+      "inputId": "INP_KAGUYA_END_PURPLE",
+      "sharedFeatureIds": [
+        "FEAT_KAGUYA_BONUS_END_FRAME"
+      ]
+    },
+    {
+      "researchEvidenceId": "RE_KAGUYA_END_SILVER",
+      "evidenceId": "EVI_KAGUYA_END_SILVER",
+      "inputId": "INP_KAGUYA_END_SILVER",
+      "sharedFeatureIds": [
+        "FEAT_KAGUYA_BONUS_END_FRAME"
+      ]
+    },
+    {
+      "researchEvidenceId": "RE_KAGUYA_END_GOLD",
+      "evidenceId": "EVI_KAGUYA_END_GOLD",
+      "inputId": "INP_KAGUYA_END_GOLD",
+      "sharedFeatureIds": [
+        "FEAT_KAGUYA_BONUS_END_FRAME"
+      ]
+    }
+  ],
   "difficultyAnalysis": {
     "targetGames": [
       1500,
@@ -49,42 +146,6 @@
         "normalizationMode": "ALLOWED_SETTINGS_INTERSECTION",
         "displayOrder": 100,
         "options": [
-          {
-            "value": "PURPLE",
-            "label": "BONUS終了画面 紫枠",
-            "allowedSettings": [
-              "SET_2",
-              "SET_3",
-              "SET_4",
-              "SET_5",
-              "SET_6"
-            ],
-            "sourceEvidenceIds": [
-              "RE_KAGUYA_END_PURPLE"
-            ]
-          },
-          {
-            "value": "SILVER",
-            "label": "BONUS終了画面 銀枠",
-            "allowedSettings": [
-              "SET_4",
-              "SET_5",
-              "SET_6"
-            ],
-            "sourceEvidenceIds": [
-              "RE_KAGUYA_END_SILVER"
-            ]
-          },
-          {
-            "value": "GOLD",
-            "label": "BONUS終了画面 金枠",
-            "allowedSettings": [
-              "SET_6"
-            ],
-            "sourceEvidenceIds": [
-              "RE_KAGUYA_END_GOLD"
-            ]
-          },
           {
             "value": "SHIROGANE_KAGUYA_DENIED",
             "label": "白銀＆かぐや後に1G連・引き戻し両方否定",
@@ -237,6 +298,17 @@
     ]
   },
   "uiCategoryLabels": {
-    "EVIDENCE": "設定確定情報"
-  }
+    "EVIDENCE": "設定確定情報",
+    "BONUS_END_FRAME": "BONUS終了画面（割合・設定確定）"
+  },
+  "evidenceReview": {
+    "policyVersion": 1,
+    "exclusions": []
+  },
+  "uiCategoryDescriptions": {
+    "BONUS_END_FRAME": "確認したBONUS終了画面を5カテゴリのいずれかとして1回入力します。紫・銀・金は、この入力が割合推測と設定Evidenceの両方に反映されます。"
+  },
+  "selectionNotes": [
+    "BONUS終了画面は公開4枠＋派生OTHERの完全Multinomialへ移行し、紫・銀・金の入力をNumeric FeatureとEvidenceで共有する。"
+  ]
 }
