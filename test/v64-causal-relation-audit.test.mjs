@@ -6,10 +6,10 @@ import { auditCausalRelations } from '../tools/audit-v64-causal-relations.mjs';
 test('all current causal-review candidates have explicit semantic classification',()=>{
   const root=path.resolve('.');
   const report=auditCausalRelations(root);
-  assert.equal(report.summary.candidateCount,15);
-  assert.equal(report.summary.machineCount,4);
+  assert.equal(report.summary.candidateCount,13);
+  assert.equal(report.summary.machineCount,3);
   assert.deepEqual(report.summary.relationCounts,{
-    CAUSALLY_RELATED_BUT_DISTINCT_OBSERVATION:8,
+    CAUSALLY_RELATED_BUT_DISTINCT_OBSERVATION:6,
     MUTUALLY_EXCLUSIVE_COMPOSITION:3,
     CONDITIONAL_COMPOSITION:4,
   });
@@ -20,6 +20,7 @@ test('all current causal-review candidates have explicit semantic classification
   assert.equal(report.candidates.some(x=>x.machineId==='L_ENEN_NO_SHOUBOUTAI_JG'&&x.researchFeatureId==='RF_CROSS_BONUS'),false,'Fire Force RF_CROSS_BONUS should no longer be a causal-reason review candidate');
   assert.equal(report.candidates.some(x=>x.machineId==='L_GIRLS_UND_PANZER_FINALE_H1'&&x.researchFeatureId==='RF_CZ'),false,'Garupan RF_CZ should no longer be a causal-reason review candidate');
   assert.equal(report.candidates.some(x=>x.machineId==='L_KING_PULSAR_SLCC'&&x.researchFeatureId==='RF_CZ'),false,'King Pulsar RF_CZ should no longer be a causal-reason review candidate');
+  assert.equal(report.candidates.some(x=>x.machineId==='L_ONE_PUNCH_MAN'),false,'One Punch Man should no longer have causal-reason review candidates');
 });
 
 test('review retains structural Research definitions for every candidate',()=>{
