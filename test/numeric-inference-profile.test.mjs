@@ -3,14 +3,17 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import { buildNumericInferenceProfile } from '../tools/build-numeric-inference-profile.mjs';
 
-test('Kaguya is evidence-dominant and rejected BONUS initial exposes required trials',()=>{
+test('Kaguya has one limited ending-frame numeric Feature while BONUS initial remains rejected',()=>{
   const r=JSON.parse(fs.readFileSync('research/L_KAGUYA_SAMA_JA/research-data.json','utf8'));
   const s=JSON.parse(fs.readFileSync('research/L_KAGUYA_SAMA_JA/selection-data.json','utf8'));
   const p=buildNumericInferenceProfile(r,s);
-  assert.equal(p.profile,'EVIDENCE_DOMINANT');
-  assert.equal(p.presentationMode,'REJECTED_FEATURES_FIRST');
-  assert.equal(p.summary.adoptedNumericFeatureCount,0);
+  assert.equal(p.profile,'LIMITED');
+  assert.equal(p.presentationMode,'STANDARD_WITH_LIMITATION');
+  assert.equal(p.summary.adoptedNumericFeatureCount,1);
   assert.ok(p.summary.hardEvidenceCount>0);
+  assert.equal(p.adoptedNumericFeatures[0]?.featureId,'FEAT_KAGUYA_BONUS_END_FRAME');
+  const frame=s.features.find(x=>x.featureId==='FEAT_KAGUYA_BONUS_END_FRAME');
+  assert.equal(frame?.difficultyParticipation,'EXCLUDE');
   const bonus=p.rejectedFeatures.find(x=>x.featureId==='FEAT_KAGUYA_BONUS_INITIAL');
   assert.equal(bonus.rejectionReason,'BONUS初当りは1/362～1/335と設定差が小さいうえ、公開情報では確率に対応する厳密な集計区間を確認できず分母定義が暫定のため、数値Featureには不採用。');
   assert.ok(bonus.requiredTrials80>400000);
