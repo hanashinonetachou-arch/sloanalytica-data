@@ -29,15 +29,15 @@ export function migrate(root=process.cwd(),{apply=false}={}){
   }
   observation.researchReopenRequests ??=[];
   const requests=[
-    {researchFeatureId:'RF_AT_INITIAL',status:'WAITING_MODEL',reason:'CZ合算とAT初当りを同時利用するjoint/conditional likelihood contractを設計する。'},
-    {researchFeatureId:'RF_SHUTTER_OPEN',status:'WAITING_OBSERVATION',reason:'チャンス目成立回数を実戦中に正確に継続取得できるか確認する。'},
-    {researchFeatureId:'RF_SHUTTER_DURATION',status:'WAITING_OBSERVATION',reason:'18G/23G/33Gの継続Gを毎回判別・記録できる入力設計を確認する。'},
-    {researchFeatureId:'RF_SHUTTER_ROLE_CZ',status:'WAITING_OBSERVATION_AND_MODEL',reason:'対応役成立回数の機会分母取得と条件付き尤度契約を確認する。'},
-    {researchFeatureId:'RF_SHUTTER_NONROLE_CZ',status:'WAITING_OBSERVATION_AND_MODEL',reason:'非対応役成立回数の機会分母取得と条件付き尤度契約を確認する。'},
-    {researchFeatureId:'RF_CHANCE3_CZ_TYPE',status:'WAITING_OBSERVATION_AND_MODEL',reason:'3連チャンス目機会数の取得とCZ種類構成との条件付き併用契約を確認する。'},
+    {requestId:'RR_ACCEL_AT_INITIAL_MODEL',researchFeatureId:'RF_AT_INITIAL',status:'RESEARCH_REOPEN_REQUIRED',reason:'CZ合算とAT初当りを同時利用するjoint/conditional likelihood contractを設計する。'},
+    {requestId:'RR_ACCEL_SHUTTER_OPEN_OBSERVATION',researchFeatureId:'RF_SHUTTER_OPEN',status:'RESEARCH_REOPEN_REQUIRED',reason:'チャンス目成立回数を実戦中に正確に継続取得できるか確認する。'},
+    {requestId:'RR_ACCEL_SHUTTER_DURATION_OBSERVATION',researchFeatureId:'RF_SHUTTER_DURATION',status:'RESEARCH_REOPEN_REQUIRED',reason:'18G/23G/33Gの継続Gを毎回判別・記録できる入力設計を確認する。'},
+    {requestId:'RR_ACCEL_SHUTTER_ROLE_CZ_CONDITIONAL',researchFeatureId:'RF_SHUTTER_ROLE_CZ',status:'RESEARCH_REOPEN_REQUIRED',reason:'対応役成立回数の機会分母取得と条件付き尤度契約を確認する。'},
+    {requestId:'RR_ACCEL_SHUTTER_NONROLE_CZ_CONDITIONAL',researchFeatureId:'RF_SHUTTER_NONROLE_CZ',status:'RESEARCH_REOPEN_REQUIRED',reason:'非対応役成立回数の機会分母取得と条件付き尤度契約を確認する。'},
+    {requestId:'RR_ACCEL_CHANCE3_CZ_TYPE_CONDITIONAL',researchFeatureId:'RF_CHANCE3_CZ_TYPE',status:'RESEARCH_REOPEN_REQUIRED',reason:'3連チャンス目機会数の取得とCZ種類構成との条件付き併用契約を確認する。'},
   ];
   for(const req of requests){
-    const idx=observation.researchReopenRequests.findIndex(x=>x.researchFeatureId===req.researchFeatureId);
+    const idx=observation.researchReopenRequests.findIndex(x=>x.requestId===req.requestId || x.researchFeatureId===req.researchFeatureId);
     if(idx>=0) observation.researchReopenRequests[idx]=req; else observation.researchReopenRequests.push(req);
   }
   if(apply){write(sp,selection);write(op,observation);}
