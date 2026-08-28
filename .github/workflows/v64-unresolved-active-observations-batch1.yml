@@ -5,6 +5,7 @@ on:
     branches: [prototype-multi-machine]
     paths:
       - 'tools/migrate-v64-unresolved-active-observations-batch1.mjs'
+      - 'tools/sync-v64-unresolved-observation-capabilities-batch1.mjs'
       - 'test/v64-unresolved-active-observation-disposition.test.mjs'
       - '.github/workflows/v64-unresolved-active-observations-batch1.yml'
   workflow_dispatch:
@@ -35,6 +36,25 @@ jobs:
           for m in L_MOMOTARO_DENTETSU_TEIBAN_PU L_SMASLO_DUNBINE_MF S_OVERLORD_II_SX; do
             npm run machine:pipeline -- "$m" --skip-repo-checks
           done
+      - name: Remove stale catalog model capabilities
+        run: node tools/sync-v64-unresolved-observation-capabilities-batch1.mjs
+      - name: Verify catalog capabilities against generated packages
+        run: |
+          node --input-type=module - <<'NODE'
+          import fs from 'node:fs';
+          const catalog=JSON.parse(fs.readFileSync('catalog.json','utf8'));
+          const list=Array.isArray(catalog)?catalog:(catalog.machines??catalog.items??[]);
+          for(const machineId of ['L_MOMOTARO_DENTETSU_TEIBAN_PU','L_SMASLO_DUNBINE_MF','S_OVERLORD_II_SX']){
+            const item=list.find(x=>x.machineId===machineId);
+            const pkg=JSON.parse(fs.readFileSync(`machines/${machineId}/machine-package.json`,'utf8'));
+            const features=Array.isArray(pkg.features)?pkg.features:(pkg.features?.features??[]);
+            const models=new Set(features.filter(f=>f.probabilityEngineUsage!==false).map(f=>f.modelType).filter(Boolean));
+            for(const cap of ['binomial','multinomial']){
+              if((item.requiredCapabilities??[]).includes(cap)!==models.has(cap)) throw new Error(`${machineId}: ${cap} mismatch catalog=${(item.requiredCapabilities??[]).includes(cap)} package=${models.has(cap)}`);
+            }
+            console.log(machineId,[...models],item.requiredCapabilities);
+          }
+          NODE
       - name: Run disposition regression
         run: node --test test/v64-unresolved-active-observation-disposition.test.mjs
       - name: Run full tests
