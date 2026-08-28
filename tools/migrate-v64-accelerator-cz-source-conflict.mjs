@@ -47,6 +47,7 @@ export function migrate(root = process.cwd(), { apply = false } = {}) {
     conflictId,
     subject: 'RF_CZ_DUAL SET_3 一方通行＆打ち止めCZ確率',
     status: 'RESOLVED',
+    sourceRefs: ['SRC_NANA', 'SRC_1GEKI_CZ'],
     candidates: [
       { sourceRef: 'SRC_NANA', rawDisplay: '1/1058.9' },
       { sourceRef: 'SRC_1GEKI_CZ', rawDisplay: '1/1182.1' }
