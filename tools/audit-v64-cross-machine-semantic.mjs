@@ -5,6 +5,8 @@ import path from 'node:path';
 const INCLUDE = new Set(['INCLUDE_PRIMARY', 'INCLUDE_SUPPORT', 'INCLUDE_FALLBACK']);
 const EVIDENCE_REASON = /(Evidence|evidence|確定情報|確定系|確定演出|設定確定|設定否定|示唆.*優先|優先.*示唆)/u;
 const OVERLAP_REASON = /(重複|二重評価|二重計上|同じ観測|同一観測|同じ事象|同一事象|同一演出|同じ演出|重なる)/u;
+const SUBSET_REASON = /(部分集合|内包|親Feature|全体の分布|全体分布|同じ連続事象|必ず.*成立を内包)/u;
+const CAUSAL_REASON = /(上流下流|因果|成立過程|当選系列の上流|当選系列.*下流)/u;
 const GENERIC_CONTEXT = new Set([
   'RF','RE','FEAT','EVI','SCREEN','PICTURE','IMAGE','RESULT','OUTCOME','SETTING','SET','COUNT','RATE','COMPOSITION','DISTRIBUTION','HINT','INDICATION',
   'BIG','REG','AT','CZ','ST','ART','BT','RB','BB','LB','BONUS','END','START','初当り','終了','開始','画面','ボーナス'
@@ -44,12 +46,13 @@ function numericCoverage(feature) {
   const settings = uniq([...values.map(([k]) => k), ...dists.map(([k]) => k)]);
   const signatures = new Set([...values.map(([, ,sig]) => sig), ...dists.map(([, ,sig]) => sig)]);
   const hasSettingVariation = signatures.size >= 2;
+  const mode = String(feature?.distributionMode ?? '');
   return {
     settings,
     settingCount: settings.length,
     hasNumeric: settings.length >= 2 && hasSettingVariation,
     hasSettingVariation,
-    completeDistribution: /complete/i.test(String(feature?.distributionMode ?? '')) && dists.length >= 2 && hasSettingVariation,
+    completeDistribution: /(complete|implicit_residual)/i.test(mode) && dists.length >= 2 && hasSettingVariation,
     multinomialLike: /multinomial/i.test(String(feature?.candidateModel ?? '')) || arr(feature?.categories).length >= 2 || dists.length >= 2,
   };
 }
@@ -70,6 +73,11 @@ function collectExplicitPairs(research) {
   walk(research?.discoveryInventory ?? []);
   return pairs;
 }
+function discriminatorMismatch(featureTokens, evidenceTokens) {
+  const f = [...featureTokens].filter(t => ALLOWED_SINGLE_CONTEXT.has(t));
+  const e = [...evidenceTokens].filter(t => ALLOWED_SINGLE_CONTEXT.has(t));
+  return f.length && e.length && !f.some(t => e.includes(t));
+}
 function relation(feature, evidence, explicitPairs) {
   const fid = feature?.researchFeatureId;
   const eid = evidence?.researchEvidenceId;
@@ -78,12 +86,11 @@ function relation(feature, evidence, explicitPairs) {
   const categoryTokens = new Set(arr(feature?.categories).flatMap(normTokens));
   const evidenceTokens = new Set([...normTokens(evidence?.researchEvidenceId), ...normTokens(evidence?.name)]);
   const featureTokens = new Set([...normTokens(feature?.researchFeatureId), ...normTokens(feature?.name)]);
+  if (discriminatorMismatch(featureTokens, evidenceTokens)) return null;
   const categoryHit = [...categoryTokens].filter(t => evidenceTokens.has(t));
   const contextHit = [...featureTokens].filter(t => evidenceTokens.has(t));
   const distinctiveCategoryHit = categoryHit.filter(t => !GENERIC_CATEGORY.has(t));
 
-  // Never infer SAME EVENT from a generic pachislot acronym or color alone.
-  // A category match needs at least one family/context token; context-only needs >=2 tokens.
   if (categoryHit.length && contextHit.length >= 2) return { confidence: 'HIGH', basis: ['CATEGORY_TOKEN_MATCH','CONTEXT_TOKEN_MATCH'], categoryHit, contextHit };
   if (categoryHit.length && contextHit.length === 1) {
     return { confidence: distinctiveCategoryHit.length ? 'HIGH' : 'MEDIUM', basis: ['CATEGORY_TOKEN_MATCH','CONTEXT_TOKEN_MATCH'], categoryHit, contextHit };
@@ -110,6 +117,9 @@ function likelyConsolidatedByActiveInput(rf, selection) {
     if (owner) return { inputId: input.id, featureId: owner.featureId, researchFeatureId: owner.researchFeatureId };
   }
   return null;
+}
+function evidenceUiIds(selection) {
+  return new Set(arr(selection?.evidenceUi?.groups).flatMap(g => arr(g?.options)).flatMap(o => arr(o?.sourceEvidenceIds)));
 }
 function machineStatus(issues) {
   return issues.some(x => x.severity === 'HIGH_RISK') ? 'HIGH_RISK' : issues.some(x => x.severity === 'REVIEW') ? 'REVIEW' : 'PASS';
@@ -148,6 +158,7 @@ export function auditV64CrossMachine(root = process.cwd()) {
     const featureById = new Map(arr(selection.features).filter(x => x?.featureId).map(x => [x.featureId, x]));
     const evidenceByResearch = new Map(arr(selection.evidence).filter(x => x?.researchEvidenceId).map(x => [x.researchEvidenceId, x]));
     const explicitPairs = collectExplicitPairs(research);
+    const uiEvidence = evidenceUiIds(selection);
 
     for (const rf of arr(research.features)) {
       const cov = numericCoverage(rf);
@@ -166,27 +177,54 @@ export function auditV64CrossMachine(root = process.cwd()) {
         if (rel) relatedEvidence.push({researchEvidenceId:re.researchEvidenceId, name:re.name, ...rel});
       }
       const reason = String(sf.rejectionReason ?? sf.userReason ?? sf.userFacingReason ?? '');
-      if (!INCLUDE.has(sf.adoptionCategory) && relatedEvidence.length) {
-        const overlapWording = EVIDENCE_REASON.test(reason) || OVERLAP_REASON.test(reason);
-        const strongest = relatedEvidence.some(x => x.confidence === 'HIGH') ? 'HIGH' : 'MEDIUM';
-        issues.push({
-          severity:'REVIEW',
-          code: overlapWording ? 'LEGACY_EVIDENCE_OVERLAP_REJECT_CANDIDATE' : 'EXCLUDED_NUMERIC_FEATURE_WITH_RELATED_EVIDENCE',
-          researchFeatureId:rf.researchFeatureId,
-          featureId:sf.featureId ?? null,
-          name:rf.name,
-          adoptionCategory:sf.adoptionCategory,
-          candidateModel:rf.candidateModel ?? null,
-          completeDistribution:cov.completeDistribution,
-          settingCount:cov.settingCount,
-          relationConfidence:strongest,
-          reason,
-          relatedEvidence,
-        });
+
+      if (!INCLUDE.has(sf.adoptionCategory)) {
+        if (CAUSAL_REASON.test(reason) && !SUBSET_REASON.test(reason)) {
+          issues.push({severity:'REVIEW', code:'CAUSAL_RELATION_REJECT_CANDIDATE', researchFeatureId:rf.researchFeatureId, featureId:sf.featureId ?? null, name:rf.name, reason, settingCount:cov.settingCount});
+          continue;
+        }
+        if (SUBSET_REASON.test(reason)) continue;
+        if (relatedEvidence.length) {
+          const overlapWording = EVIDENCE_REASON.test(reason) || OVERLAP_REASON.test(reason);
+          const strongest = relatedEvidence.some(x => x.confidence === 'HIGH') ? 'HIGH' : 'MEDIUM';
+          issues.push({
+            severity:'REVIEW',
+            code: overlapWording ? 'LEGACY_EVIDENCE_OVERLAP_REJECT_CANDIDATE' : 'EXCLUDED_NUMERIC_FEATURE_WITH_RELATED_EVIDENCE',
+            researchFeatureId:rf.researchFeatureId,
+            featureId:sf.featureId ?? null,
+            name:rf.name,
+            adoptionCategory:sf.adoptionCategory,
+            candidateModel:rf.candidateModel ?? null,
+            completeDistribution:cov.completeDistribution,
+            settingCount:cov.settingCount,
+            relationConfidence:strongest,
+            reason,
+            relatedEvidence,
+          });
+        }
+        continue;
+      }
+
+      // Legacy design may keep the numeric Feature but strip Evidence categories into a separate Evidence UI.
+      const excludedLabels = arr(sf.categoryExcludeLabels);
+      if (excludedLabels.length && cov.multinomialLike) {
+        const splitEvidence = relatedEvidence.filter(e => uiEvidence.has(e.researchEvidenceId));
+        if (splitEvidence.length) {
+          issues.push({
+            severity:'REVIEW',
+            code:'SPLIT_FEATURE_EVIDENCE_INPUT_SURFACE_CANDIDATE',
+            researchFeatureId:rf.researchFeatureId,
+            featureId:sf.featureId ?? null,
+            name:rf.name,
+            completeDistribution:cov.completeDistribution,
+            excludedLabels,
+            relatedEvidence:splitEvidence,
+            reason,
+          });
+        }
       }
     }
 
-    // Validate declared shared contracts in Selection independent of discovery linkage.
     for (const se of arr(selection.evidence)) {
       const declared = uniq(arr(se.sharedFeatureIds));
       if (!declared.length) continue;
@@ -198,7 +236,6 @@ export function auditV64CrossMachine(root = process.cwd()) {
       }
     }
 
-    // Package overlap must be explicitly declared. Only event inputs count here; denominators are not the same event.
     const pkgFeatures = arr(pkg?.features?.features).filter(f => INCLUDE.has(f?.adoptionCategory) && f?.calculationRole !== 'DISPLAY_ONLY' && f?.probabilityEngineUsage !== false);
     const users = new Map();
     for (const f of pkgFeatures) for (const inputId of eventInputs(f)) {
@@ -227,7 +264,7 @@ export function auditV64CrossMachine(root = process.cwd()) {
     summary[m.status]++;
     for (const i of m.issues) summary.issueCounts[i.code] = (summary.issueCounts[i.code] ?? 0) + 1;
   }
-  return {schemaVersion:'v6.4-cross-machine-semantic-audit-v1.2', generatedAt:new Date().toISOString(), summary, machines};
+  return {schemaVersion:'v6.4-cross-machine-semantic-audit-v1.3', generatedAt:new Date().toISOString(), summary, machines};
 }
 
 function main() {
