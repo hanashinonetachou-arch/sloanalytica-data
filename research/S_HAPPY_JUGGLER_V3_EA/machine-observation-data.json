@@ -1,8 +1,8 @@
 {
-  "schemaVersion": "machine-observation-data-v1",
+  "schemaVersion": "machine-observation-data-v2",
   "machineId": "S_HAPPY_JUGGLER_V3_EA",
   "displayName": "ハッピージャグラーVⅢ",
-  "researchedAt": "2026-08-22",
+  "researchedAt": "2026-08-29",
   "sources": [
     {
       "sourceId": "OBS_SRC_KITAC",
@@ -13,32 +13,96 @@
       "sourceType": "manufacturer"
     }
   ],
-  "machineMenu": {
-    "status": "UNRESOLVED",
-    "availableData": [],
-    "sourceRefs": [
-      "OBS_SRC_KITAC"
-    ],
-    "notes": "筐体標準の遊技履歴メニューとして取得できる項目は公開情報から確定していない。着席時ゲーム数・BIG・REGはホール側データ表示を使う実機検証済み入力として別管理する。"
+  "sourceCoverage": {
+    "machineMenu": "UNRESOLVED",
+    "dataCounter": "VERIFIED_ON_MACHINE",
+    "linkedService": "UNRESOLVED",
+    "directPlay": "FOUND",
+    "endEvent": "CHECKED_NONE",
+    "seatedState": "VERIFIED_ON_MACHINE"
   },
-  "linkedService": {
-    "status": "UNRESOLVED",
-    "availableData": [],
-    "sourceRefs": [
-      "OBS_SRC_KITAC"
-    ],
-    "notes": "設定推測入力へ利用できる機種固有の実機連動サービスは今回の公開情報では確定できない。不存在とは断定しない。"
-  },
-  "predecessorData": {
-    "status": "CHECKED",
-    "availableData": [
-      "着席時ゲーム数",
-      "着席時BIG",
-      "着席時REG"
-    ],
-    "sourceRefs": [],
-    "notes": "実機検証済みの着席時3項目。現行MachineDataではPREDECESSOR_SNAPSHOTとして着席時BIG・REG内訳Featureへ参加する。ゲーム数は自身区間の開始値としても利用できるため、このUXを統計Research再生成で削除しない。",
-    "usableForInference": true,
-    "usableForSelfSessionDelta": true
-  }
+  "observations": [
+    {
+      "observationId": "OBS_PREDECESSOR_DATA_COUNTER",
+      "sourceType": "DATA_COUNTER",
+      "observationMode": "DATA_COUNTER_READ",
+      "status": "VERIFIED_ON_MACHINE",
+      "label": "着席時データカウンター",
+      "categories": [
+        "着席時ゲーム数",
+        "着席時BIG",
+        "着席時REG"
+      ],
+      "timing": [
+        "着席直後"
+      ],
+      "excludedConditions": [],
+      "sourceRefs": []
+    },
+    {
+      "observationId": "OBS_SELF_PLAY_COUNTERS",
+      "sourceType": "DIRECT_PLAY",
+      "observationMode": "MANUAL_COUNTER",
+      "status": "FOUND",
+      "label": "自分区間のゲーム数・BIG・REG・ブドウ",
+      "categories": [
+        "自分のゲーム数",
+        "BIG",
+        "REG",
+        "ブドウ"
+      ],
+      "timing": [
+        "自己遊技中"
+      ],
+      "excludedConditions": [
+        "ブドウ未観測時はブドウ入力を空欄のままにする"
+      ],
+      "sourceRefs": [
+        "OBS_SRC_KITAC"
+      ]
+    }
+  ],
+  "featureMappings": [
+    {
+      "featureId": "FEAT_PREDECESSOR_BONUS_OUTCOME",
+      "mappingType": "EXACT",
+      "observationIds": [
+        "OBS_PREDECESSOR_DATA_COUNTER"
+      ],
+      "collectionMethods": [
+        "DATA_COUNTER_READ"
+      ],
+      "usableForInference": true,
+      "usableForDifficulty": false
+    },
+    {
+      "featureId": "FEAT_SELF_BONUS_OUTCOME",
+      "mappingType": "EXACT",
+      "observationIds": [
+        "OBS_SELF_PLAY_COUNTERS"
+      ],
+      "collectionMethods": [
+        "MANUAL_COUNTER"
+      ],
+      "usableForInference": true,
+      "usableForDifficulty": true
+    }
+  ],
+  "researchReopenRequests": [],
+  "fieldVerificationItems": [
+    {
+      "verificationId": "VFY_HJV3_MACHINE_MENU_ITEMS",
+      "status": "WAITING_FOR_MACHINE",
+      "sourceType": "MACHINE_MENU",
+      "priority": "LOW",
+      "question": "筐体標準の遊技履歴メニューで確認できる具体項目を次回実機確認時に記録する。"
+    },
+    {
+      "verificationId": "VFY_HJV3_LINKED_SERVICE",
+      "status": "WAITING_FOR_MACHINE",
+      "sourceType": "LINKED_SERVICE",
+      "priority": "LOW",
+      "question": "設定推測入力へ利用可能な機種固有の実機連動サービス有無と取得項目を再確認する。"
+    }
+  ]
 }
