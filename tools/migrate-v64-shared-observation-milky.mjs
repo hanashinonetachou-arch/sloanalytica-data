@@ -65,8 +65,8 @@ function migrate(root, apply) {
     selection.evidenceUi.groups = selection.evidenceUi.groups.map(g => ({...g, options: arr(g.options).filter(o => !arr(o.sourceEvidenceIds).some(id => evidenceIds.has(id)))})).filter(g => g.options.length);
   }
 
-  const obs = arr(observation.observations).find(x => String(x.label ?? '').includes('ボーナス終了画面') && String(x.label ?? '').includes('非Evidence'));
-  if (!obs) throw new Error('legacy bonus-end observation missing');
+  const obs = arr(observation.observations).find(x => x.observationId === 'OBS_BONUS_END_NON_EVIDENCE');
+  if (!obs) throw new Error('OBS_BONUS_END_NON_EVIDENCE missing');
   obs.label = 'ボーナス終了画面振り分け';
   obs.excludedConditions = arr(obs.excludedConditions).filter(x => !/Evidence/u.test(String(x)));
   obs.categories = uniq([...arr(obs.categories), 'evidence_shared']);
