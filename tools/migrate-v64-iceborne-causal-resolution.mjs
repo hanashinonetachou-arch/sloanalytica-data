@@ -11,8 +11,11 @@ export function migrate(root=process.cwd(),{apply=false}={}){
   const base=path.join(root,'research',MACHINE_ID);
   const researchPath=path.join(base,'research-data.json');
   const selectionPath=path.join(base,'selection-data.json');
+  const observationPath=path.join(base,'machine-observation-data.json');
   const research=read(researchPath);
   const selection=read(selectionPath);
+  const observation=read(observationPath);
+  if(observation.schemaVersion!=='machine-observation-data-v2') throw new Error('Iceborne Observation v2 is required');
   const rf=id=>arr(research.features).find(f=>f.researchFeatureId===id);
   const sf=id=>arr(selection.features).find(f=>f.researchFeatureId===id);
   const total=rf('RF_CZ_TOTAL');
@@ -106,8 +109,26 @@ export function migrate(root=process.cwd(),{apply=false}={}){
     'ロングフリーズ数値率は極低頻度かつ設定差が小さいため不採用。特殊契機Evidenceは維持する。'
   ];
 
-  if(apply){write(researchPath,research);write(selectionPath,selection);}
-  return {machineId:MACHINE_ID,version:'0.1.3',composition:'RF_CZ_TYPE_COMPOSITION',exposure};
+  observation.observations??=[];
+  const typeObservation={
+    observationId:'OBS_CZ_TYPE_DIRECT',sourceType:'DIRECT_PLAY',observationMode:'VISUAL_EVENT',status:'FOUND',
+    label:'CZ種類別回数（クエスト・アイルーBINGO・セリエナ防衛戦）',categories:['numerator','composition'],timing:['各CZ当選時'],
+    excludedConditions:[],sourceRefs:[],semanticNote:'3種類のCZは実戦中の名称・告知で区別できるため、当選ごとに手動カウント可能。内部状態の通常/高確識別は本Observationには不要。'
+  };
+  const oi=observation.observations.findIndex(o=>o.observationId==='OBS_CZ_TYPE_DIRECT');
+  if(oi>=0) observation.observations[oi]=typeObservation; else observation.observations.push(typeObservation);
+  observation.featureMappings??=[];
+  const typeMapping={
+    featureId:'FEAT_CZ_TYPE_COMPOSITION',mappingType:'COMBINABLE',observationIds:['OBS_CZ_TYPE_DIRECT'],
+    collectionMethods:['MANUAL_COUNTER','VISUAL_EVENT'],usableForInference:true,usableForDifficulty:true
+  };
+  const mi=observation.featureMappings.findIndex(m=>m.featureId==='FEAT_CZ_TYPE_COMPOSITION');
+  if(mi>=0) observation.featureMappings[mi]=typeMapping; else observation.featureMappings.push(typeMapping);
+  const totalMapping=observation.featureMappings.find(m=>m.featureId==='FEAT_CZ_TOTAL');
+  if(totalMapping && !totalMapping.observationIds.includes('OBS_CZ_TYPE_DIRECT')) totalMapping.observationIds.splice(1,0,'OBS_CZ_TYPE_DIRECT');
+
+  if(apply){write(researchPath,research);write(selectionPath,selection);write(observationPath,observation);}
+  return {machineId:MACHINE_ID,version:'0.1.3',composition:'RF_CZ_TYPE_COMPOSITION',observation:'OBS_CZ_TYPE_DIRECT',exposure};
 }
 
 const root=path.resolve(process.argv[2]??'.');
