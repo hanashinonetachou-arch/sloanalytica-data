@@ -1,7 +1,7 @@
 {
   "schemaVersion": "selection-data-v1",
   "machineId": "L_INUYASHA2_FK",
-  "machineDataVersion": "0.1.2",
+  "machineDataVersion": "0.1.3",
   "inputs": [
     {
       "id": "INP_NORMAL_GAMES",
@@ -229,6 +229,54 @@
       "observationScope": "SELF_PLAY",
       "defaultValue": 0,
       "uiQuickAdd": 1
+    },
+    {
+      "id": "INP_RF_WHITE_BIG_END_SESSHOMARU",
+      "name": "殺生丸（設定2以上）",
+      "category": "SETTING_SIGNAL",
+      "type": "counter",
+      "unit": "回",
+      "displayOrder": 62,
+      "inferenceRole": "INCLUDE_SUPPORT",
+      "observationScope": "SELF_PLAY",
+      "defaultValue": null,
+      "uiQuickAdd": 1
+    },
+    {
+      "id": "INP_RF_WHITE_BIG_END_PAIR",
+      "name": "犬夜叉&かごめ（設定4以上）",
+      "category": "SETTING_SIGNAL",
+      "type": "counter",
+      "unit": "回",
+      "displayOrder": 63,
+      "inferenceRole": "INCLUDE_SUPPORT",
+      "observationScope": "SELF_PLAY",
+      "defaultValue": null,
+      "uiQuickAdd": 1
+    },
+    {
+      "id": "INP_RF_BLUE_BIG_END_INUYASHA",
+      "name": "犬夜叉（設定2以上）",
+      "category": "SETTING_SIGNAL",
+      "type": "counter",
+      "unit": "回",
+      "displayOrder": 62,
+      "inferenceRole": "INCLUDE_SUPPORT",
+      "observationScope": "SELF_PLAY",
+      "defaultValue": null,
+      "uiQuickAdd": 1
+    },
+    {
+      "id": "INP_RF_BLUE_BIG_END_PAIR",
+      "name": "犬夜叉&かごめ（設定4以上）",
+      "category": "SETTING_SIGNAL",
+      "type": "counter",
+      "unit": "回",
+      "displayOrder": 63,
+      "inferenceRole": "INCLUDE_SUPPORT",
+      "observationScope": "SELF_PLAY",
+      "defaultValue": null,
+      "uiQuickAdd": 1
     }
   ],
   "features": [
@@ -406,44 +454,74 @@
     },
     {
       "researchFeatureId": "RF_WHITE_BIG_END",
-      "featureId": "FEAT_WHITE_BIG_END_NON_EVIDENCE",
+      "featureId": "FEAT_WHITE_BIG_END",
       "adoptionCategory": "INCLUDE_SUPPORT",
       "numeratorInputId": "INP_RF_WHITE_BIG_END_INUYASHA",
       "categoryInputIds": [
-        "INP_RF_WHITE_BIG_END_KIKYO"
+        "INP_RF_WHITE_BIG_END_SESSHOMARU",
+        "INP_RF_WHITE_BIG_END_KIKYO",
+        "INP_RF_WHITE_BIG_END_PAIR"
       ],
       "inputTransform": "sum_inputs_to_trials",
-      "categoryExcludeLabels": [
-        "SESSHOMARU",
-        "PAIR"
-      ],
       "minimumSample": 1,
       "sampleRecommendation": 20,
       "weight": 1,
       "difficultyParticipation": "EXCLUDE",
-      "userReason": "設定を限定する矛盾画面・2人画面はEvidenceへ分離し、デフォルトと桔梗の出現比率を条件付き分布として採用します。"
+      "userReason": "白BIG終了画面は犬夜叉・殺生丸・桔梗・犬夜叉&かごめの完全分布として評価します。殺生丸と2人画面は同じカウンター入力をEvidenceにも共有します。"
     },
     {
       "researchFeatureId": "RF_BLUE_BIG_END",
-      "featureId": "FEAT_BLUE_BIG_END_NON_EVIDENCE",
+      "featureId": "FEAT_BLUE_BIG_END",
       "adoptionCategory": "INCLUDE_SUPPORT",
-      "numeratorInputId": "INP_RF_BLUE_BIG_END_SESSHOMARU",
+      "numeratorInputId": "INP_RF_BLUE_BIG_END_INUYASHA",
       "categoryInputIds": [
-        "INP_RF_BLUE_BIG_END_KIKYO"
+        "INP_RF_BLUE_BIG_END_SESSHOMARU",
+        "INP_RF_BLUE_BIG_END_KIKYO",
+        "INP_RF_BLUE_BIG_END_PAIR"
       ],
       "inputTransform": "sum_inputs_to_trials",
-      "categoryExcludeLabels": [
-        "INUYASHA",
-        "PAIR"
-      ],
       "minimumSample": 1,
       "sampleRecommendation": 20,
       "weight": 1,
       "difficultyParticipation": "EXCLUDE",
-      "userReason": "設定を限定する矛盾画面・2人画面はEvidenceへ分離し、デフォルトと桔梗の出現比率を条件付き分布として採用します。"
+      "userReason": "青7BIG終了画面は犬夜叉・殺生丸・桔梗・犬夜叉&かごめの完全分布として評価します。公開値は設定2・3で丸め合計が1.001のため、Research原値を保持したまま採用時のみ厳密に正規化します。犬夜叉と2人画面は同じカウンター入力をEvidenceにも共有します。",
+      "normalizeRoundedCategoryProbabilities": true
     }
   ],
-  "evidence": [],
+  "evidence": [
+    {
+      "researchEvidenceId": "RE_WHITE_BIG_SESSHOMARU_2PLUS",
+      "evidenceId": "EVI_WHITE_BIG_SESSHOMARU_2PLUS",
+      "inputId": "INP_RF_WHITE_BIG_END_SESSHOMARU",
+      "sharedFeatureIds": [
+        "FEAT_WHITE_BIG_END"
+      ]
+    },
+    {
+      "researchEvidenceId": "RE_BLUE_BIG_INUYASHA_2PLUS",
+      "evidenceId": "EVI_BLUE_BIG_INUYASHA_2PLUS",
+      "inputId": "INP_RF_BLUE_BIG_END_INUYASHA",
+      "sharedFeatureIds": [
+        "FEAT_BLUE_BIG_END"
+      ]
+    },
+    {
+      "researchEvidenceId": "RE_BIG_END_PAIR",
+      "evidenceId": "EVI_WHITE_BIG_PAIR_4PLUS",
+      "inputId": "INP_RF_WHITE_BIG_END_PAIR",
+      "sharedFeatureIds": [
+        "FEAT_WHITE_BIG_END"
+      ]
+    },
+    {
+      "researchEvidenceId": "RE_BIG_END_PAIR",
+      "evidenceId": "EVI_BLUE_BIG_PAIR_4PLUS",
+      "inputId": "INP_RF_BLUE_BIG_END_PAIR",
+      "sharedFeatureIds": [
+        "FEAT_BLUE_BIG_END"
+      ]
+    }
+  ],
   "evidenceUi": {
     "groups": [
       {
@@ -559,23 +637,6 @@
             ]
           },
           {
-            "value": "BIG_PAIR",
-            "label": "BIG終了 犬夜叉&かごめ",
-            "allowedSettings": [
-              "SET_4",
-              "SET_5",
-              "SET_6"
-            ],
-            "excludedSettings": [
-              "SET_1",
-              "SET_2",
-              "SET_3"
-            ],
-            "sourceEvidenceIds": [
-              "RE_BIG_END_PAIR"
-            ]
-          },
-          {
             "value": "AT_BLUE_C_2PLUS",
             "label": "AT終了 青③（おすわり）",
             "allowedSettings": [
@@ -590,40 +651,6 @@
             ],
             "sourceEvidenceIds": [
               "RE_AT_BLUE_C_2PLUS"
-            ]
-          },
-          {
-            "value": "WHITE_BIG_SESSHOMARU_2PLUS",
-            "label": "白BIG終了 殺生丸（矛盾）",
-            "allowedSettings": [
-              "SET_2",
-              "SET_3",
-              "SET_4",
-              "SET_5",
-              "SET_6"
-            ],
-            "excludedSettings": [
-              "SET_1"
-            ],
-            "sourceEvidenceIds": [
-              "RE_WHITE_BIG_SESSHOMARU_2PLUS"
-            ]
-          },
-          {
-            "value": "BLUE_BIG_INUYASHA_2PLUS",
-            "label": "青7BIG終了 犬夜叉（矛盾）",
-            "allowedSettings": [
-              "SET_2",
-              "SET_3",
-              "SET_4",
-              "SET_5",
-              "SET_6"
-            ],
-            "excludedSettings": [
-              "SET_1"
-            ],
-            "sourceEvidenceIds": [
-              "RE_BLUE_BIG_INUYASHA_2PLUS"
             ]
           }
         ]
