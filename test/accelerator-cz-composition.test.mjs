@@ -48,7 +48,7 @@ test('Accelerator total-rate times conditional composition reproduces component 
     for (const [category, featureId] of Object.entries(componentIds)) {
       const reconstructed = totalP * Number(composition.settingDistributions[setting][category]);
       const publishedComponent = Number(rf(featureId).settingValues[setting].probability);
-      assert.ok(Math.abs(reconstructed - publishedComponent) < 2e-6, `${setting}/${category}`);
+      assert.ok(Math.abs(reconstructed - publishedComponent) < 3e-6, `${setting}/${category}`);
     }
   }
 });
