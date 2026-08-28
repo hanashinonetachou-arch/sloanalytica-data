@@ -9,16 +9,20 @@ function writeJson(p, value) {
   fs.mkdirSync(path.dirname(p), {recursive:true});
   fs.writeFileSync(p, JSON.stringify(value, null, 2));
 }
-function fixture({exclude=true, declareShared=false}={}) {
+function fixture({exclude=true, declareShared=false, zeroSentinel=false}={}) {
   const root = fs.mkdtempSync(path.join(os.tmpdir(), 'slo-v64-audit-'));
   const machineId='TEST_MACHINE';
+  const feature=zeroSentinel ? {
+    researchFeatureId:'RF_END_SCREEN',name:'終了画面',candidateModel:'binomial',
+    settingValues:{SET_1:{probability:0,rawDisplay:'設定2以上濃厚'},SET_6:{probability:0,rawDisplay:'設定2以上濃厚'}}
+  } : {
+    researchFeatureId:'RF_END_SCREEN',name:'終了画面',candidateModel:'multinomial',distributionMode:'complete',
+    categories:['WHITE','GOLD'],settingDistributions:{SET_1:{WHITE:1,GOLD:0},SET_6:{WHITE:0.8,GOLD:0.2}}
+  };
   const research={
     machine:{machineId,displayName:'Test'},
     discoveryInventory:[{discoveryCandidateId:'D1',name:'終了画面',researchTarget:['RF_END_SCREEN','RE_END_GOLD']}],
-    features:[{
-      researchFeatureId:'RF_END_SCREEN',name:'終了画面',candidateModel:'multinomial',distributionMode:'complete',
-      categories:['WHITE','GOLD'],settingDistributions:{SET_1:{WHITE:1,GOLD:0},SET_6:{WHITE:0.8,GOLD:0.2}}
-    }],
+    features:[feature],
     evidenceCandidates:[{researchEvidenceId:'RE_END_GOLD',name:'終了画面 GOLD',allowedSettings:['SET_6'],deniedSettings:['SET_1']}]
   };
   const selection={
@@ -44,6 +48,13 @@ test('finds legacy evidence-overlap numeric rejection even on old schema',()=>{
   assert.equal(r.summary.machineCount,1);
   assert.equal(r.summary.REVIEW,1);
   assert.ok(r.machines[0].issues.some(x=>x.code==='LEGACY_EVIDENCE_OVERLAP_REJECT_CANDIDATE'));
+});
+
+test('all-zero pseudo probabilities used only as Evidence sentinel are not numeric candidates',()=>{
+  const root=fixture({exclude:true,zeroSentinel:true});
+  const r=auditV64CrossMachine(root);
+  assert.equal(r.summary.PASS,1);
+  assert.equal(r.machines[0].issues.length,0);
 });
 
 test('undeclared package feature/evidence overlap is HIGH_RISK',()=>{
