@@ -3,7 +3,7 @@
   "machine": {
     "schemaVersion": "2.0.0",
     "machineId": "L_TOARU_ACCELERATOR_RZ",
-    "machineDataVersion": "0.1.0",
+    "machineDataVersion": "0.1.1",
     "displayName": "スマスロ 一方通行 とある魔術の禁書目録",
     "modelName": "Lとある魔術の禁書目録 一方通行RZ",
     "manufacturer": "オレンジ",
@@ -38,7 +38,7 @@
       },
       {
         "id": "INP_CZ_TOTAL_COUNT",
-        "name": "CZ合算",
+        "name": "CZ合算（旧履歴互換）",
         "category": "SELF_PLAY",
         "type": "counter",
         "unit": "回",
@@ -46,6 +46,89 @@
         "inferenceRole": "INCLUDE_PRIMARY",
         "observationScope": "SELF_PLAY",
         "defaultValue": 0,
+        "inputVisible": false,
+        "description": "v6.4以前の保存済みセッション互換用。新規入力では種類別CZカウンターから自動合算します。",
+        "minimum": 0
+      },
+      {
+        "id": "INP_CZ_ACCEL_COUNT",
+        "name": "一方通行CZ",
+        "category": "SELF_PLAY",
+        "type": "counter",
+        "unit": "回",
+        "displayOrder": 11,
+        "inferenceRole": "INCLUDE_SUPPORT",
+        "observationScope": "SELF_PLAY",
+        "defaultValue": null,
+        "uiQuickAdd": 1,
+        "description": "通常時に一方通行CZへ当選した回数。",
+        "minimum": 0
+      },
+      {
+        "id": "INP_CZ_LASTORDER_COUNT",
+        "name": "打ち止めCZ",
+        "category": "SELF_PLAY",
+        "type": "counter",
+        "unit": "回",
+        "displayOrder": 12,
+        "inferenceRole": "INCLUDE_SUPPORT",
+        "observationScope": "SELF_PLAY",
+        "defaultValue": null,
+        "uiQuickAdd": 1,
+        "description": "通常時に打ち止めCZへ当選した回数。",
+        "minimum": 0
+      },
+      {
+        "id": "INP_CZ_DUAL_COUNT",
+        "name": "一方通行＆打ち止めCZ",
+        "category": "SELF_PLAY",
+        "type": "counter",
+        "unit": "回",
+        "displayOrder": 13,
+        "inferenceRole": "INCLUDE_SUPPORT",
+        "observationScope": "SELF_PLAY",
+        "defaultValue": null,
+        "uiQuickAdd": 1,
+        "description": "通常時に一方通行＆打ち止めCZへ当選した回数。",
+        "minimum": 0
+      },
+      {
+        "id": "INP_CZ_TYPED_TOTAL",
+        "name": "種類判別済みCZ合計",
+        "category": "SELF_PLAY",
+        "type": "integer",
+        "unit": "回",
+        "displayOrder": 90,
+        "inferenceRole": "INCLUDE_SUPPORT",
+        "observationScope": "SELF_PLAY",
+        "defaultValue": null,
+        "inputVisible": false,
+        "derivedCalculation": "sum",
+        "derivedFromInputIds": [
+          "INP_CZ_ACCEL_COUNT",
+          "INP_CZ_LASTORDER_COUNT",
+          "INP_CZ_DUAL_COUNT"
+        ],
+        "minimum": 0
+      },
+      {
+        "id": "INP_CZ_TOTAL_RESOLVED",
+        "name": "CZ合算（互換統合値）",
+        "category": "SELF_PLAY",
+        "type": "integer",
+        "unit": "回",
+        "displayOrder": 91,
+        "inferenceRole": "INCLUDE_PRIMARY",
+        "observationScope": "SELF_PLAY",
+        "defaultValue": null,
+        "inputVisible": false,
+        "derivedCalculation": "sum",
+        "derivedFromInputIds": [
+          "INP_CZ_TOTAL_COUNT",
+          "INP_CZ_ACCEL_COUNT",
+          "INP_CZ_LASTORDER_COUNT",
+          "INP_CZ_DUAL_COUNT"
+        ],
         "minimum": 0
       },
       {
@@ -140,7 +223,7 @@
           "weight": 1
         },
         "denominatorInputId": "INP_NORMAL_GAMES",
-        "numeratorInputId": "INP_CZ_TOTAL_COUNT",
+        "numeratorInputId": "INP_CZ_TOTAL_RESOLVED",
         "displayFormat": "ratio_1_over_n",
         "probabilities": {
           "SET_1": 0.007012622720897616,
@@ -152,6 +235,67 @@
         },
         "sourceEvidenceRefs": [
           "SRC_NANA"
+        ]
+      },
+      {
+        "featureId": "FEAT_CZ_TYPE_COMPOSITION",
+        "name": "CZ当選時の種類構成",
+        "adoptionCategory": "INCLUDE_SUPPORT",
+        "calculationRole": "PROBABILITY",
+        "probabilityEngineUsage": true,
+        "modelType": "multinomial",
+        "minimumSample": 1,
+        "sampleRecommendation": 30,
+        "reliabilityProfile": {
+          "weight": 1
+        },
+        "numeratorInputId": "INP_CZ_ACCEL_COUNT",
+        "denominatorInputId": "INP_CZ_TYPED_TOTAL",
+        "categoryInputIds": [
+          "INP_CZ_LASTORDER_COUNT",
+          "INP_CZ_DUAL_COUNT"
+        ],
+        "probabilities": {},
+        "categoryLabels": [
+          "ACCEL_CZ",
+          "LASTORDER_CZ",
+          "DUAL_CZ"
+        ],
+        "categoryProbabilities": {
+          "SET_1": [
+            0.8455039244315005,
+            0.043967976342157794,
+            0.11052809922634181
+          ],
+          "SET_2": [
+            0.8439317655333104,
+            0.04380177100252858,
+            0.11226646346416115
+          ],
+          "SET_3": [
+            0.8402065652436211,
+            0.04635382066883816,
+            0.11343961408754076
+          ],
+          "SET_4": [
+            0.8146146269118164,
+            0.06775899056403913,
+            0.1176263825241446
+          ],
+          "SET_5": [
+            0.7927235307264073,
+            0.08504112196467763,
+            0.12223534730891507
+          ],
+          "SET_6": [
+            0.7898293135573543,
+            0.08492992618718724,
+            0.12524076025545844
+          ]
+        },
+        "sourceEvidenceRefs": [
+          "SRC_NANA",
+          "SRC_1GEKI_CZ"
         ]
       }
     ]
@@ -366,6 +510,7 @@
         "id": "AUTO_SELF_PLAY",
         "title": "通常時",
         "displayOrder": 1,
+        "description": "通常ゲーム数と、当選したCZの種類を記録します。CZ合算は種類別入力から自動集計され、旧履歴の合算値も内部で引き継ぎます。",
         "items": [
           {
             "type": "input",
@@ -376,8 +521,47 @@
           {
             "type": "input",
             "inputId": "INP_CZ_TOTAL_COUNT",
-            "label": "CZ合算",
+            "label": "CZ合算（旧履歴互換）",
             "widget": "counter"
+          },
+          {
+            "type": "input",
+            "inputId": "INP_CZ_ACCEL_COUNT",
+            "label": "一方通行CZ",
+            "config": {
+              "quickAdd": 1
+            },
+            "widget": "counter"
+          },
+          {
+            "type": "input",
+            "inputId": "INP_CZ_LASTORDER_COUNT",
+            "label": "打ち止めCZ",
+            "config": {
+              "quickAdd": 1
+            },
+            "widget": "counter"
+          },
+          {
+            "type": "input",
+            "inputId": "INP_CZ_DUAL_COUNT",
+            "label": "一方通行＆打ち止めCZ",
+            "config": {
+              "quickAdd": 1
+            },
+            "widget": "counter"
+          },
+          {
+            "type": "input",
+            "inputId": "INP_CZ_TYPED_TOTAL",
+            "label": "種類判別済みCZ合計",
+            "widget": "number"
+          },
+          {
+            "type": "input",
+            "inputId": "INP_CZ_TOTAL_RESOLVED",
+            "label": "CZ合算（互換統合値）",
+            "widget": "number"
           }
         ]
       },
@@ -404,17 +588,26 @@
   },
   "selectionSummary": {
     "schemaVersion": "selection-summary-v1",
-    "evaluatedCount": 11,
-    "selectedCount": 1,
+    "evaluatedCount": 12,
+    "selectedCount": 2,
     "rejectedCount": 10,
     "selected": [
       {
         "featureId": "FEAT_CZ_TOTAL",
         "name": "CZ合算",
-        "reason": "CZ種類別・シャッター関連の上流抽選と重複評価せず、通常ゲームに対するCZ合算を代表Featureとして利用します。",
+        "reason": "CZ合算は通常ゲーム数に対する総当選率として採用します。v6.4以前の旧CZ合算値と、更新後に入力した3種類のCZ回数を内部で自動合算するため、既存履歴を失わず継続できます。",
         "requiredTrials": {
           "value": 10073,
           "unit": "通常ゲーム"
+        }
+      },
+      {
+        "featureId": "FEAT_CZ_TYPE_COMPOSITION",
+        "name": "CZ当選時の種類構成",
+        "reason": "CZ総数とは別に、種類まで判別できたCZだけを母数として3種類の構成比を評価します。総CZ確率と条件付き種類構成へ数学的に分解するため、同じCZを二重評価しません。旧履歴の種類不明CZはこの構成比には混ぜません。",
+        "requiredTrials": {
+          "value": 227,
+          "unit": "種類を判別したCZ当選1回"
         }
       }
     ],
@@ -422,7 +615,7 @@
       {
         "featureId": "FEAT_CZ_ACCEL_EXCLUDED",
         "name": "一方通行CZ",
-        "reason": "CZ合算を通常G基準の代表Featureとして採用しており、CZ種類別・AT初当り・シャッター関連抽選など同一CZ生成経路の上流下流を独立に加えると二重評価になるため不採用です。",
+        "reason": "単独BinomialではCZ合算と包含関係になるため不採用。3種類をまとめた条件付き構成Featureとして利用します。",
         "requiredTrials": {
           "value": 20764,
           "unit": "通常ゲーム"
@@ -431,7 +624,7 @@
       {
         "featureId": "FEAT_CZ_LASTORDER_EXCLUDED",
         "name": "打ち止めCZ",
-        "reason": "CZ合算を通常G基準の代表Featureとして採用しており、CZ種類別・AT初当り・シャッター関連抽選など同一CZ生成経路の上流下流を独立に加えると二重評価になるため不採用です。",
+        "reason": "単独BinomialではCZ合算と包含関係になるため不採用。3種類をまとめた条件付き構成Featureとして利用します。",
         "requiredTrials": {
           "value": 15820,
           "unit": "通常ゲーム"
@@ -440,7 +633,7 @@
       {
         "featureId": "FEAT_CZ_DUAL_EXCLUDED",
         "name": "一方通行＆打ち止めCZ",
-        "reason": "CZ合算を通常G基準の代表Featureとして採用しており、CZ種類別・AT初当り・シャッター関連抽選など同一CZ生成経路の上流下流を独立に加えると二重評価になるため不採用です。",
+        "reason": "単独BinomialではCZ合算と包含関係になるため不採用。3種類をまとめた条件付き構成Featureとして利用します。",
         "requiredTrials": {
           "value": 42675,
           "unit": "通常ゲーム"
@@ -449,7 +642,7 @@
       {
         "featureId": "FEAT_CZ_OUTCOME_EXCLUDED",
         "name": "CZ種類別アウトカム",
-        "reason": "CZ合算を通常G基準の代表Featureとして採用しており、CZ種類別・AT初当り・シャッター関連抽選など同一CZ生成経路の上流下流を独立に加えると二重評価になるため不採用です。",
+        "reason": "通常Gあたりの種類別確率をそのままCZ合算と併用すると重複するため不採用。代わりにCZ当選を条件とした種類構成へ変換したFeatureを採用します。",
         "requiredTrials": {
           "value": 7394,
           "unit": "通常ゲーム"
