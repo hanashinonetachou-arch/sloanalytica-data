@@ -1,0 +1,92 @@
+{
+  "schemaVersion": "machine-observation-data-v2",
+  "machineId": "L_ZOMBIE_LAND_SAGA",
+  "displayName": "Lゾンビランドサガ",
+  "researchedAt": "2026-08-29",
+  "sources": [],
+  "sourceCoverage": {
+    "machineMenu": "UNRESOLVED",
+    "dataCounter": "UNRESOLVED",
+    "linkedService": "UNRESOLVED",
+    "directPlay": "FOUND",
+    "endEvent": "FOUND",
+    "seatedState": "UNRESOLVED"
+  },
+  "observations": [
+    {
+      "observationId": "OBS_NORMAL_GAMES",
+      "sourceType": "DIRECT_PLAY",
+      "observationMode": "MANUAL_COUNTER",
+      "status": "FOUND",
+      "label": "CZ初当り集計の通常時ゲーム数",
+      "categories": ["SELF_PLAY"],
+      "timing": ["CZ初当りを集計する通常時"],
+      "excludedConditions": ["CZ中", "その他の非通常区間"],
+      "sourceRefs": [],
+      "notes": "SelectionのINP_NORMAL_GAMESへ対応。CZ3種合算の共通分母。"
+    },
+    {
+      "observationId": "OBS_CZ_EVENT",
+      "sourceType": "DIRECT_PLAY",
+      "observationMode": "VISUAL_EVENT",
+      "status": "FOUND",
+      "label": "CZ種類とWAF最終結果",
+      "categories": ["WAF_SUCCESS", "WAF_FAIL", "HOUSE", "SAGA_ROCK"],
+      "timing": ["CZ当選時", "WAF終了時"],
+      "excludedConditions": [],
+      "sourceRefs": [],
+      "notes": "1回のCZをWAF/絶叫ゾンビ屋敷/SAGAロックチャレンジとして重複なく分類する。WAFだけは最終的なST当選有無まで同じ自然観測で記録する。INP_CZ_WAFはWAF_SUCCESS+WAF_FAIL、INP_WAF_ST_SUCCESSはWAF_SUCCESS。"
+    },
+    {
+      "observationId": "OBS_CZ_HIGH_LENGTH_100G",
+      "sourceType": "DIRECT_PLAY",
+      "observationMode": "VISUAL_EVENT",
+      "status": "FOUND",
+      "label": "100G消化契機CZ高確の継続ゲーム数",
+      "categories": ["20G", "30G", "50G"],
+      "timing": ["100G消化を契機にCZ高確へ移行したと判別できる回"],
+      "excludedConditions": ["リプレイ契機との重複など100G消化契機と判別できない回"],
+      "sourceRefs": [],
+      "notes": "パジャマステージ滞在等から20/30/50Gを判別できた回だけを1試行として排他的に記録する。曖昧な回は入力しない。"
+    }
+  ],
+  "featureMappings": [
+    {
+      "featureId": "FEAT_CZ_COMBINED",
+      "mappingType": "COMBINABLE",
+      "observationIds": ["OBS_NORMAL_GAMES", "OBS_CZ_EVENT"],
+      "collectionMethods": ["MANUAL_COUNTER", "VISUAL_EVENT"],
+      "usableForInference": true,
+      "usableForDifficulty": true,
+      "notes": "WAF・HOUSE・SAGA_ROCKを合算して通常時ゲーム数で割る。WAF_SUCCESS/FAILは合算時にはどちらもWAF1回として扱う。"
+    },
+    {
+      "featureId": "FEAT_WAF_SUCCESS",
+      "mappingType": "EXACT",
+      "observationIds": ["OBS_CZ_EVENT"],
+      "collectionMethods": ["VISUAL_EVENT"],
+      "usableForInference": true,
+      "usableForDifficulty": false,
+      "notes": "WAFだけを条件母集団とし、最終的なST当選を成功として評価する。開始時内部当選か途中書き換えかは区別しない。"
+    },
+    {
+      "featureId": "FEAT_CZ_HIGH_LENGTH",
+      "mappingType": "EXACT",
+      "observationIds": ["OBS_CZ_HIGH_LENGTH_100G"],
+      "collectionMethods": ["VISUAL_EVENT"],
+      "usableForInference": true,
+      "usableForDifficulty": false,
+      "notes": "100G消化契機と判別できたCZ高確だけを20/30/50Gの排他的分布として扱う。"
+    }
+  ],
+  "researchReopenRequests": [],
+  "fieldVerificationItems": [
+    {
+      "verificationId": "VERIFY_NORMAL_GAME_BASIS",
+      "status": "WAITING_FOR_MACHINE",
+      "sourceType": "MACHINE_MENU",
+      "priority": "MEDIUM",
+      "question": "実機メニュー等の通常時ゲーム数を、CZ3種合算のINP_NORMAL_GAMESへそのまま利用できるか。"
+    }
+  ]
+}
