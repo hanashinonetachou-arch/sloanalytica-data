@@ -1,0 +1,83 @@
+{
+  "schemaVersion": "machine-observation-data-v2",
+  "machineId": "L_BOUNTY_ANGEL",
+  "displayName": "L BOUNTY ANGEL",
+  "researchedAt": "2026-08-29",
+  "sources": [],
+  "sourceCoverage": {
+    "machineMenu": "UNRESOLVED",
+    "dataCounter": "UNRESOLVED",
+    "linkedService": "UNRESOLVED",
+    "directPlay": "FOUND",
+    "endEvent": "FOUND",
+    "seatedState": "FOUND"
+  },
+  "observations": [
+    {
+      "observationId": "OBS_AT_TRIAL_GAMES",
+      "sourceType": "DIRECT_PLAY",
+      "observationMode": "MANUAL_COUNTER",
+      "status": "FOUND",
+      "label": "AT初当り集計ゲーム数",
+      "categories": ["SELF_PLAY"],
+      "timing": ["公開AT初当り確率と同じ集計対象区間"],
+      "excludedConditions": ["公開AT初当り確率の集計対象外区間"],
+      "sourceRefs": [],
+      "notes": "SelectionのINP_AT_TRIAL_GAMESへ対応。実機表示Gとの定義一致は別途確認する。"
+    },
+    {
+      "observationId": "OBS_AT_INITIAL",
+      "sourceType": "DIRECT_PLAY",
+      "observationMode": "MANUAL_COUNTER",
+      "status": "FOUND",
+      "label": "AT初当り",
+      "categories": ["AT_INITIAL"],
+      "timing": ["AT初当り成立時"],
+      "excludedConditions": [],
+      "sourceRefs": [],
+      "notes": "SelectionのINP_AT_INITIAL_COUNTへ対応。"
+    },
+    {
+      "observationId": "OBS_RESET_AT_DIRECT_OUTCOME",
+      "sourceType": "SEATED_STATE",
+      "observationMode": "MANUAL_COUNTER",
+      "status": "FOUND",
+      "label": "設定変更確認済み実戦のAT直撃結果",
+      "categories": ["AT_DIRECT", "NO_AT_DIRECT"],
+      "timing": ["設定変更を独立に確認できた実戦ごと"],
+      "excludedConditions": ["設定変更を確認できない実戦", "据え置きの可能性を排除できない実戦"],
+      "sourceRefs": [],
+      "notes": "設定変更を推測して試行へ入れない。独立に設定変更を確認できた実戦だけを1試行とし、AT直撃の有無を排他的に記録する。INP_RESET_TRIALSが総試行、INP_RESET_AT_DIRECTがAT_DIRECT回数。"
+    }
+  ],
+  "featureMappings": [
+    {
+      "featureId": "FEAT_AT",
+      "mappingType": "COMBINABLE",
+      "observationIds": ["OBS_AT_TRIAL_GAMES", "OBS_AT_INITIAL"],
+      "collectionMethods": ["MANUAL_COUNTER", "MANUAL_COUNTER"],
+      "usableForInference": true,
+      "usableForDifficulty": true,
+      "notes": "公開AT初当りと同じゲーム母集団を分母にする。"
+    },
+    {
+      "featureId": "FEAT_RESET_AT_DIRECT",
+      "mappingType": "EXACT",
+      "observationIds": ["OBS_RESET_AT_DIRECT_OUTCOME"],
+      "collectionMethods": ["MANUAL_COUNTER"],
+      "usableForInference": true,
+      "usableForDifficulty": false,
+      "notes": "設定変更確認済み実戦のみを条件付き母集団とする。通常AT初当りのゲーム分母と混合しない。"
+    }
+  ],
+  "researchReopenRequests": [],
+  "fieldVerificationItems": [
+    {
+      "verificationId": "VERIFY_AT_GAME_BASIS",
+      "status": "WAITING_FOR_MACHINE",
+      "sourceType": "MACHINE_MENU",
+      "priority": "HIGH",
+      "question": "実機表示ゲーム数は公開AT初当り確率の集計範囲と一致し、INP_AT_TRIAL_GAMESへそのまま利用できるか。"
+    }
+  ]
+}
