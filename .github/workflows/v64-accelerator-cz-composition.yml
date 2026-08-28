@@ -32,6 +32,8 @@ jobs:
         run: node --test test/accelerator-cz-consistency.test.mjs test/accelerator-cz-composition.test.mjs
       - name: Rebuild target machine package
         run: npm run machine:pipeline -- L_TOARU_ACCELERATOR_RZ --skip-repo-checks
+      - name: Refresh v6.4 semantic audit before full tests
+        run: node tools/audit-v64-cross-machine-semantic.mjs . reports/v64-cross-machine-semantic-audit.json
       - name: Run full test suite
         run: npm test
       - name: Run public-data audit
@@ -53,8 +55,6 @@ jobs:
           fi
       - name: Run four-layer gate
         run: npm run pipeline:four-layer:gate -- L_TOARU_ACCELERATOR_RZ
-      - name: Run v6.4 semantic audit
-        run: node tools/audit-v64-cross-machine-semantic.mjs . reports/v64-cross-machine-semantic-audit.json
       - name: Run v6.4 causal relation review
         run: node tools/audit-v64-causal-relations.mjs . reports/v64-causal-relation-review.json
       - name: Show semantic diff
