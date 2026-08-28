@@ -1,0 +1,65 @@
+name: One Punch Catalog Capability Sync
+
+on:
+  push:
+    branches: [prototype-multi-machine]
+    paths:
+      - 'tools/apply-one-punch-catalog-capability-sync.mjs'
+      - '.github/workflows/one-punch-catalog-capability-sync.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: prototype-multi-machine
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Apply catalog sync
+        run: node tools/apply-one-punch-catalog-capability-sync.mjs
+      - name: Verify package model capabilities
+        run: |
+          node --input-type=module - <<'NODE'
+          import fs from 'node:fs';
+          const c=JSON.parse(fs.readFileSync('catalog.json','utf8'));
+          const list=Array.isArray(c)?c:(c.machines??c.items??[]);
+          const item=list.find(x=>x.machineId==='L_ONE_PUNCH_MAN');
+          if(!item) throw new Error('catalog entry missing');
+          const p=JSON.parse(fs.readFileSync(item.dataPath,'utf8'));
+          const models=new Set((p.features?.features??[]).filter(f=>f.probabilityEngineUsage!==false).map(f=>f.modelType));
+          if(item.requiredCapabilities.includes('binomial')) throw new Error('stale binomial remains');
+          if(!item.requiredCapabilities.includes('multinomial')||!models.has('multinomial')) throw new Error('multinomial contract missing');
+          console.log('One Punch models:',[...models]);
+          NODE
+      - name: Run full tests
+        run: npm test
+      - name: Run public audit and require zero warnings
+        run: |
+          set -o pipefail
+          npm run audit 2>&1 | tee /tmp/audit.log
+          if grep -q '^WARNING' /tmp/audit.log; then cat /tmp/audit.log; exit 1; fi
+      - name: Run semantic audit
+        run: node tools/audit-v64-cross-machine-semantic.mjs . reports/v64-cross-machine-semantic-audit.json
+      - name: Assert semantic 170 PASS
+        run: |
+          node --input-type=module - <<'NODE'
+          import fs from 'node:fs';
+          const a=JSON.parse(fs.readFileSync('reports/v64-cross-machine-semantic-audit.json','utf8'));
+          if(a.summary?.PASS!==170||a.summary?.REVIEW!==0||a.summary?.HIGH_RISK!==0) throw new Error(JSON.stringify(a.summary));
+          NODE
+      - name: Commit validated sync
+        run: |
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git add -A
+          if ! git diff --cached --quiet; then
+            git commit -m "fix: sync One Punch catalog capabilities [skip ci]"
+            git pull --rebase origin prototype-multi-machine
+            git push origin prototype-multi-machine
+          fi
