@@ -22,17 +22,29 @@ function normTokens(value) {
 function eventInputs(f) {
   return uniq([f?.numeratorInputId, ...arr(f?.numeratorInputIds), ...arr(f?.categoryInputIds), ...arr(f?.optionalCategoryInputIds)]);
 }
+function numericSignature(v) {
+  if (!obj(v)) return null;
+  const scalar = [v.probability, v.rate, v.value].find(Number.isFinite);
+  if (Number.isFinite(scalar)) return `scalar:${scalar}`;
+  const pairs = Object.entries(v).filter(([,x]) => Number.isFinite(x)).sort(([a],[b]) => a.localeCompare(b));
+  return pairs.length ? `dist:${JSON.stringify(pairs)}` : null;
+}
 function numericCoverage(feature) {
   const values = Object.entries(obj(feature?.settingValues) ? feature.settingValues : {})
-    .filter(([,v]) => obj(v) && (Number.isFinite(v.probability) || Number.isFinite(v.rate) || Number.isFinite(v.value)));
+    .map(([k,v]) => [k,v,numericSignature(v)])
+    .filter(([, ,sig]) => sig);
   const dists = Object.entries(obj(feature?.settingDistributions) ? feature.settingDistributions : {})
-    .filter(([,v]) => obj(v) && Object.values(v).some(Number.isFinite));
+    .map(([k,v]) => [k,v,numericSignature(v)])
+    .filter(([, ,sig]) => sig);
   const settings = uniq([...values.map(([k]) => k), ...dists.map(([k]) => k)]);
+  const signatures = new Set([...values.map(([, ,sig]) => sig), ...dists.map(([, ,sig]) => sig)]);
+  const hasSettingVariation = signatures.size >= 2;
   return {
     settings,
     settingCount: settings.length,
-    hasNumeric: settings.length >= 2,
-    completeDistribution: feature?.distributionMode === 'complete' && dists.length >= 2,
+    hasNumeric: settings.length >= 2 && hasSettingVariation,
+    hasSettingVariation,
+    completeDistribution: feature?.distributionMode === 'complete' && dists.length >= 2 && hasSettingVariation,
     multinomialLike: /multinomial/i.test(String(feature?.candidateModel ?? '')) || arr(feature?.categories).length >= 2 || dists.length >= 2,
   };
 }
@@ -184,7 +196,7 @@ export function auditV64CrossMachine(root = process.cwd()) {
     summary[m.status]++;
     for (const i of m.issues) summary.issueCounts[i.code] = (summary.issueCounts[i.code] ?? 0) + 1;
   }
-  return {schemaVersion:'v6.4-cross-machine-semantic-audit-v1', generatedAt:new Date().toISOString(), summary, machines};
+  return {schemaVersion:'v6.4-cross-machine-semantic-audit-v1.1', generatedAt:new Date().toISOString(), summary, machines};
 }
 
 function main() {
