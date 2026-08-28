@@ -1,8 +1,8 @@
 {
-  "schemaVersion": "machine-observation-data-v1",
+  "schemaVersion": "machine-observation-data-v2",
   "machineId": "L_G1_YUSHUN_CLUB_GOLD_KD",
   "displayName": "GI優駿倶楽部黄金",
-  "researchedAt": "2026-08-22",
+  "researchedAt": "2026-08-29",
   "sources": [
     {
       "sourceId": "OBS_SRC_G1GOLD_NANA_LINKED",
@@ -13,30 +13,54 @@
       "sourceType": "major_analysis"
     }
   ],
-  "machineMenu": {
-    "status": "UNRESOLVED",
-    "availableData": [],
-    "sourceRefs": [],
-    "notes": "通常の実機メニュー／遊技履歴画面で確認できる累計項目は、今回の公開情報再調査でも確定できなかった。実機連動サービスで取得できる情報と筐体内メニュー表示は分けて扱う。"
+  "sourceCoverage": {
+    "machineMenu": "UNRESOLVED",
+    "dataCounter": "UNRESOLVED",
+    "linkedService": "FOUND",
+    "directPlay": "FOUND",
+    "endEvent": "FOUND",
+    "seatedState": "UNRESOLVED"
   },
-  "linkedService": {
-    "status": "CHECKED",
-    "availableData": [
-      "設定示唆演出の出現回数",
-      "AT突入回数",
-      "AT継続回数"
-    ],
-    "sourceRefs": [
-      "OBS_SRC_G1GOLD_NANA_LINKED"
-    ],
-    "notes": "なな徹の機種別解析で、コナミアミューズメントの『実機連動サービス』から設定示唆演出の出現回数、AT突入回数、AT継続回数を確認できることを明示確認。既存Researchではサービス名を『e-slot+』、取得項目をゲーム数・ボーナス等まで拡張していたが、今回確認した公開根拠ではそこまで特定できないため、独立Observationには確認できた事実だけを記録する。"
-  },
-  "predecessorData": {
-    "status": "UNRESOLVED",
-    "availableData": [],
-    "sourceRefs": [],
-    "notes": "実機連動サービスの具体項目は確認できたが、空き台へ着席した時点で前任者区間のデータを取得できるか、取得できる場合にどの値がSloAnalyticaのFeature分子・分母へ対応するかは公開情報から確認できていない。",
-    "usableForInference": false,
-    "usableForSelfSessionDelta": false
-  }
+  "observations": [
+    {
+      "observationId": "OBS_LINKED_SERVICE_COUNTS",
+      "sourceType": "LINKED_SERVICE",
+      "observationMode": "LINKED_SERVICE_READ",
+      "status": "FOUND",
+      "label": "実機連動サービスの確認済み集計項目",
+      "categories": ["設定示唆演出の出現回数", "AT突入回数", "AT継続回数"],
+      "timing": ["実機連動サービスの遊技履歴確認時"],
+      "excludedConditions": ["公開根拠で確認できていないゲーム数・ボーナス回数等は取得可能とみなさない"],
+      "sourceRefs": ["OBS_SRC_G1GOLD_NANA_LINKED"]
+    },
+    {
+      "observationId": "OBS_SETTING_FLOOR_EVIDENCE",
+      "sourceType": "DIRECT_PLAY",
+      "observationMode": "VISUAL_CONFIRMATION",
+      "status": "FOUND",
+      "label": "設定下限の確定演出",
+      "categories": ["トロフィー", "終了画面による設定4以上", "終了画面による設定6"],
+      "timing": ["各設定示唆・終了画面出現時"],
+      "excludedConditions": [],
+      "sourceRefs": ["OBS_SRC_G1GOLD_NANA_LINKED"]
+    }
+  ],
+  "featureMappings": [],
+  "researchReopenRequests": [],
+  "fieldVerificationItems": [
+    {
+      "verificationId": "VFY_G1GOLD_MACHINE_MENU_ITEMS",
+      "status": "WAITING_FOR_MACHINE",
+      "sourceType": "MACHINE_MENU",
+      "priority": "LOW",
+      "question": "筐体標準メニュー／遊技履歴で確認できる累計項目を、実機連動サービスの項目と区別して記録する。"
+    },
+    {
+      "verificationId": "VFY_G1GOLD_PREDECESSOR_UNIVERSE",
+      "status": "WAITING_FOR_MACHINE",
+      "sourceType": "DATA_COUNTER",
+      "priority": "LOW",
+      "question": "着席時に前任者区間の分子・分母を同一区間で取得できる観測面があるか確認する。現行Selectionは前任者数値推測を採用していない。"
+    }
+  ]
 }
