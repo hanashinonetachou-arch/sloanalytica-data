@@ -1,8 +1,8 @@
 {
-  "schemaVersion": "machine-observation-data-v1",
+  "schemaVersion": "machine-observation-data-v2",
   "machineId": "LB_FUJIKO_M2",
   "displayName": "L不二子BT",
-  "researchedAt": "2026-08-22",
+  "researchedAt": "2026-08-29",
   "sources": [
     {
       "sourceId": "OBS_SRC_PWORLD",
@@ -13,40 +13,191 @@
       "sourceType": "major_analysis"
     }
   ],
-  "machineMenu": {
-    "status": "CHECKED",
-    "availableData": [
-      "TOTAL GAME",
-      "BIG BONUS回数（SUPER BIGを除く）",
-      "REGULAR BONUS回数"
-    ],
-    "sourceRefs": [],
-    "notes": "現行MachineDataの実機検証済みPREDECESSOR_SNAPSHOT入力をMachine Observationへ移管。各入力説明でも遊技開始前の台メニュー確認を前提としている。統計Featureの再調査でこの観測契約を削除しない。"
+  "sourceCoverage": {
+    "machineMenu": "VERIFIED_ON_MACHINE",
+    "dataCounter": "CHECKED_NONE",
+    "linkedService": "FOUND",
+    "directPlay": "FOUND",
+    "endEvent": "UNRESOLVED",
+    "seatedState": "VERIFIED_ON_MACHINE"
   },
-  "linkedService": {
-    "status": "CHECKED",
-    "availableData": [
-      "打-WIN LITE",
-      "通常ゲーム数",
-      "通常中ボーナス詳細情報",
-      "通常時小役詳細情報",
-      "BIG中小役情報"
-    ],
-    "sourceRefs": [
-      "OBS_SRC_PWORLD"
-    ],
-    "notes": "P-WORLDで打-WIN LITEにより設定差小役等の出現率を確認できることを確認。現行MachineDataでも通常ゲーム数・BIG/REG・通常時プラム・BIG中プラムを打-WIN LITE入力として使用している。"
-  },
-  "predecessorData": {
-    "status": "CHECKED",
-    "availableData": [
-      "着席時 TOTAL GAME",
-      "着席時 BIG",
-      "着席時 REG"
-    ],
-    "sourceRefs": [],
-    "notes": "現行MachineDataでは3項目がPREDECESSOR_SNAPSHOTとして保持され、着席時BIG・REGのmarginal_multinomial Featureに参加する。自身区間の通常ゲーム数は打-WIN LITEを使用するため、TOTAL GAME差分を自身分母へ代用しない。",
-    "usableForInference": true,
-    "usableForSelfSessionDelta": false
-  }
+  "observations": [
+    {
+      "observationId": "OBS_MACHINE_MENU_PREDECESSOR",
+      "sourceType": "MACHINE_MENU",
+      "observationMode": "MENU_READ",
+      "status": "VERIFIED_ON_MACHINE",
+      "label": "遊技開始前の台メニュー",
+      "categories": [
+        "TOTAL GAME",
+        "BIG BONUS回数（SUPER BIGを除く）",
+        "REGULAR BONUS回数"
+      ],
+      "timing": [
+        "遊技開始前"
+      ],
+      "excludedConditions": [
+        "SUPER BIGをBIG回数へ含める場合"
+      ],
+      "sourceRefs": []
+    },
+    {
+      "observationId": "OBS_UCHWIN_NORMAL_BONUS",
+      "sourceType": "LINKED_SERVICE",
+      "observationMode": "LINKED_SERVICE_READ",
+      "status": "FOUND",
+      "label": "打-WIN LITE 通常ゲーム数・通常中ボーナス詳細",
+      "categories": [
+        "通常ゲーム数",
+        "BIG BONUS回数（SUPER BIGを除く）",
+        "REG BONUS回数"
+      ],
+      "timing": [
+        "実戦中または実戦終了時"
+      ],
+      "excludedConditions": [
+        "不二子TIME中・ボーナス中ゲーム",
+        "実機連動を開始していない区間"
+      ],
+      "sourceRefs": [
+        "OBS_SRC_PWORLD"
+      ]
+    },
+    {
+      "observationId": "OBS_UCHWIN_NORMAL_PLUM",
+      "sourceType": "LINKED_SERVICE",
+      "observationMode": "LINKED_SERVICE_READ",
+      "status": "FOUND",
+      "label": "打-WIN LITE 通常時小役詳細",
+      "categories": [
+        "平行プラム（プラムA）",
+        "斜めプラム（プラムB）"
+      ],
+      "timing": [
+        "実戦中または実戦終了時"
+      ],
+      "excludedConditions": [
+        "実機連動を開始していない区間"
+      ],
+      "sourceRefs": [
+        "OBS_SRC_PWORLD"
+      ]
+    },
+    {
+      "observationId": "OBS_UCHWIN_BIG_PLUM",
+      "sourceType": "LINKED_SERVICE",
+      "observationMode": "LINKED_SERVICE_READ",
+      "status": "FOUND",
+      "label": "打-WIN LITE BIG中小役情報",
+      "categories": [
+        "BIG BONUS中 平行プラム",
+        "BIG BONUS中 斜めプラム"
+      ],
+      "timing": [
+        "実戦中または実戦終了時"
+      ],
+      "excludedConditions": [
+        "実機連動を開始していない区間"
+      ],
+      "sourceRefs": [
+        "OBS_SRC_PWORLD"
+      ]
+    },
+    {
+      "observationId": "OBS_BIG_VOICE_1G_DIRECT",
+      "sourceType": "DIRECT_PLAY",
+      "observationMode": "AUDIO_EVENT",
+      "status": "FOUND",
+      "label": "（SUPER）BIG 1G目枚数調整成功時ボイス",
+      "categories": [
+        "ルパン",
+        "次元",
+        "銭形",
+        "五ェ門",
+        "不二子"
+      ],
+      "timing": [
+        "（SUPER）BIGの1G目に枚数調整成功時"
+      ],
+      "excludedConditions": [
+        "2G目以降の枚数調整成功時ボイス"
+      ],
+      "sourceRefs": [
+        "OBS_SRC_PWORLD"
+      ]
+    }
+  ],
+  "featureMappings": [
+    {
+      "featureId": "FEAT_PREDECESSOR_BONUS",
+      "mappingType": "EXACT",
+      "observationIds": [
+        "OBS_MACHINE_MENU_PREDECESSOR"
+      ],
+      "collectionMethods": [
+        "MENU_READ"
+      ],
+      "usableForInference": true,
+      "usableForDifficulty": false
+    },
+    {
+      "featureId": "FEAT_BONUS_OUTCOME",
+      "mappingType": "EXACT",
+      "observationIds": [
+        "OBS_UCHWIN_NORMAL_BONUS"
+      ],
+      "collectionMethods": [
+        "LINKED_SERVICE_READ"
+      ],
+      "usableForInference": true,
+      "usableForDifficulty": true
+    },
+    {
+      "featureId": "FEAT_NORMAL_PLUM",
+      "mappingType": "COMBINABLE",
+      "observationIds": [
+        "OBS_UCHWIN_NORMAL_BONUS",
+        "OBS_UCHWIN_NORMAL_PLUM"
+      ],
+      "collectionMethods": [
+        "LINKED_SERVICE_READ"
+      ],
+      "usableForInference": true,
+      "usableForDifficulty": true
+    },
+    {
+      "featureId": "FEAT_BIG_DIAGONAL_PLUM",
+      "mappingType": "EXACT",
+      "observationIds": [
+        "OBS_UCHWIN_BIG_PLUM"
+      ],
+      "collectionMethods": [
+        "LINKED_SERVICE_READ"
+      ],
+      "usableForInference": true,
+      "usableForDifficulty": false
+    },
+    {
+      "featureId": "FEAT_BIG_VOICE_1G",
+      "mappingType": "EXACT",
+      "observationIds": [
+        "OBS_BIG_VOICE_1G_DIRECT"
+      ],
+      "collectionMethods": [
+        "AUDIO_EVENT"
+      ],
+      "usableForInference": true,
+      "usableForDifficulty": false
+    }
+  ],
+  "researchReopenRequests": [],
+  "fieldVerificationItems": [
+    {
+      "verificationId": "VFY_FUJIKO_END_EVENT_SCOPE",
+      "status": "WAITING_FOR_MACHINE",
+      "sourceType": "END_EVENT",
+      "priority": "LOW",
+      "question": "（SUPER）BIG終了画面やREG中キャラ紹介などEvidenceの実機観測タイミングをObservation v2へ追加する際に再確認する。"
+    }
+  ]
 }
