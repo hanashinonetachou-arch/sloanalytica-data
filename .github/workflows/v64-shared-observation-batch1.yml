@@ -5,6 +5,7 @@ on:
     branches: [prototype-multi-machine]
     paths:
       - 'tools/migrate-v64-shared-observation-milky.mjs'
+      - 'tools/apply-rounded-multinomial-builder-support.mjs'
       - '.github/workflows/v64-shared-observation-batch1.yml'
   workflow_dispatch:
 
@@ -22,6 +23,10 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 20
+      - name: Apply rounded multinomial builder support
+        run: node tools/apply-rounded-multinomial-builder-support.mjs .
+      - name: Run rounded multinomial regression
+        run: node --test test/rounded-multinomial-builder.test.mjs
       - name: Dry-run migration
         run: node tools/migrate-v64-shared-observation-milky.mjs .
       - name: Apply migration
@@ -46,12 +51,12 @@ jobs:
         run: |
           git status --short
           git --no-pager diff --stat
-          git --no-pager diff -- research/S_MILKY_HOMES_GNB/selection-data.json research/S_MILKY_HOMES_GNB/machine-observation-data.json
+          git --no-pager diff -- tools/build-machine-data.mjs test/rounded-multinomial-builder.test.mjs research/S_MILKY_HOMES_GNB/selection-data.json research/S_MILKY_HOMES_GNB/machine-observation-data.json
       - name: Commit validated batch
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add research/S_MILKY_HOMES_GNB machines/S_MILKY_HOMES_GNB catalog.json difficulty-catalog.json reports/v64-cross-machine-semantic-audit.json 2>/dev/null || true
+          git add tools/build-machine-data.mjs test/rounded-multinomial-builder.test.mjs research/S_MILKY_HOMES_GNB machines/S_MILKY_HOMES_GNB catalog.json difficulty-catalog.json reports/v64-cross-machine-semantic-audit.json 2>/dev/null || true
           if git diff --cached --quiet; then
             echo "No validated changes to commit"
           else
