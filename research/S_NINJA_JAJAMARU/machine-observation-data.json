@@ -1,0 +1,83 @@
+{
+  "schemaVersion": "machine-observation-data-v2",
+  "machineId": "S_NINJA_JAJAMARU",
+  "displayName": "忍者じゃじゃ丸くん",
+  "researchedAt": "2026-08-29",
+  "sources": [],
+  "sourceCoverage": {
+    "machineMenu": "UNRESOLVED",
+    "dataCounter": "UNRESOLVED",
+    "linkedService": "UNRESOLVED",
+    "directPlay": "FOUND",
+    "endEvent": "FOUND",
+    "seatedState": "UNRESOLVED"
+  },
+  "observations": [
+    {
+      "observationId": "OBS_BONUS_GAMES",
+      "sourceType": "DIRECT_PLAY",
+      "observationMode": "MANUAL_COUNTER",
+      "status": "FOUND",
+      "label": "REG初当り集計ゲーム数",
+      "categories": ["SELF_PLAY"],
+      "timing": ["公開REG初当り確率と同じ集計対象区間"],
+      "excludedConditions": ["公開REG初当り確率の集計対象外区間"],
+      "sourceRefs": [],
+      "notes": "SelectionのINP_BONUS_GAMESへ対応。"
+    },
+    {
+      "observationId": "OBS_REG_INITIAL",
+      "sourceType": "DIRECT_PLAY",
+      "observationMode": "MANUAL_COUNTER",
+      "status": "FOUND",
+      "label": "REG初当り",
+      "categories": ["REG_INITIAL"],
+      "timing": ["REG初当り成立時"],
+      "excludedConditions": [],
+      "sourceRefs": [],
+      "notes": "SelectionのINP_REG_COUNTへ対応。"
+    },
+    {
+      "observationId": "OBS_SAKURA_MISS_CLEAR",
+      "sourceType": "DIRECT_PLAY",
+      "observationMode": "VISUAL_EVENT",
+      "status": "FOUND",
+      "label": "さくらランプ点灯中ハズレ時の見た目消灯",
+      "categories": ["CLEAR", "KEEP_LIT"],
+      "timing": ["CZ中を除く、さくらランプ点灯中のハズレ成立時"],
+      "excludedConditions": ["CZ中", "ハズレ以外"],
+      "sourceRefs": [],
+      "notes": "1回のハズレ成立を1試行として、見た目上消灯したか点灯継続したかを排他的に観測する。内部的な点灯継続状態の推測は不要。INP_SAKURA_MISS_TRIALSが総試行、INP_SAKURA_CLEAR_COUNTがCLEAR回数。"
+    }
+  ],
+  "featureMappings": [
+    {
+      "featureId": "FEAT_REG",
+      "mappingType": "COMBINABLE",
+      "observationIds": ["OBS_BONUS_GAMES", "OBS_REG_INITIAL"],
+      "collectionMethods": ["MANUAL_COUNTER", "MANUAL_COUNTER"],
+      "usableForInference": true,
+      "usableForDifficulty": true,
+      "notes": "公開REG初当りと同じゲーム母集団を分母にする。"
+    },
+    {
+      "featureId": "FEAT_SAKURA_VISIBLE_CLEAR",
+      "mappingType": "EXACT",
+      "observationIds": ["OBS_SAKURA_MISS_CLEAR"],
+      "collectionMethods": ["VISUAL_EVENT"],
+      "usableForInference": true,
+      "usableForDifficulty": false,
+      "notes": "CZ中を除くランプ点灯中ハズレだけを試行とし、見た目消灯を成功として直接集計する条件付きFeature。"
+    }
+  ],
+  "researchReopenRequests": [],
+  "fieldVerificationItems": [
+    {
+      "verificationId": "VERIFY_REG_GAME_BASIS",
+      "status": "WAITING_FOR_MACHINE",
+      "sourceType": "MACHINE_MENU",
+      "priority": "MEDIUM",
+      "question": "実機メニュー等のゲーム数を公開REG初当り確率と同じ分母として代用できるか。"
+    }
+  ]
+}
