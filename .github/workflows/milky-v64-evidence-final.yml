@@ -1,0 +1,73 @@
+name: Milky v6.4 Final Evidence
+
+on:
+  push:
+    branches: [prototype-multi-machine]
+    paths:
+      - 'tools/apply-milky-v64-evidence-final.mjs'
+      - '.github/workflows/milky-v64-evidence-final.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  migrate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: prototype-multi-machine
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Apply migration
+        run: node tools/apply-milky-v64-evidence-final.mjs
+      - name: Validate Evidence disposition
+        run: |
+          node --input-type=module - <<'NODE'
+          import fs from 'node:fs';
+          import { validateSelectionEvidenceCoverage } from './tools/batch-completeness-gates.mjs';
+          const s=JSON.parse(fs.readFileSync('research/S_MILKY_HOMES_GNB/selection-data.json','utf8'));
+          const r=JSON.parse(fs.readFileSync('research/S_MILKY_HOMES_GNB/research-data.json','utf8'));
+          const v=validateSelectionEvidenceCoverage(s,r,{required:true});
+          if(!v.ok) throw new Error(v.errors.join('\n'));
+          const mmb=s.features.find(f=>f.featureId==='FEAT_MMB_PANEL');
+          if(!mmb||mmb.adoptionCategory!=='INCLUDE_SUPPORT') throw new Error('MMB shared feature missing');
+          NODE
+      - name: Rebuild target machine
+        run: npm run machine:pipeline -- S_MILKY_HOMES_GNB --skip-repo-checks
+      - name: Refresh semantic audit before tests
+        run: node tools/audit-v64-cross-machine-semantic.mjs . reports/v64-cross-machine-semantic-audit.json
+      - name: Run full tests
+        run: npm test
+      - name: Run public audit
+        run: npm run audit
+      - name: Run UI service-name audit
+        run: npm run audit:ui-service-names
+      - name: Run strict Observation linkage
+        run: node tools/audit-observation-selection-linkage.mjs S_MILKY_HOMES_GNB --strict-v2
+      - name: Run four-layer gate
+        run: node tools/four-layer-pipeline-gate.mjs S_MILKY_HOMES_GNB
+      - name: Run causal audit
+        run: node tools/audit-v64-causal-relations.mjs . reports/v64-causal-relation-review.json
+      - name: Verify all 170 semantic PASS
+        run: |
+          node --input-type=module - <<'NODE'
+          import fs from 'node:fs';
+          const a=JSON.parse(fs.readFileSync('reports/v64-cross-machine-semantic-audit.json','utf8'));
+          if(a.summary?.HIGH_RISK!==0||a.summary?.REVIEW!==0||a.summary?.PASS!==170) throw new Error(`semantic summary ${JSON.stringify(a.summary)}`);
+          const milky=a.machines.find(x=>x.machineId==='S_MILKY_HOMES_GNB');
+          if(!milky||milky.status!=='PASS') throw new Error(`Milky semantic status ${milky?.status}`);
+          console.log('Semantic PASS 170/170');
+          NODE
+      - name: Commit validated migration
+        run: |
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git add -A
+          if ! git diff --cached --quiet; then
+            git commit -m "fix: finalize Milky v6.4 Evidence semantics [skip ci]"
+            git pull --rebase origin prototype-multi-machine
+            git push origin prototype-multi-machine
+          fi
