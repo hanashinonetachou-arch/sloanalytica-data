@@ -8,14 +8,14 @@ const read=p=>JSON.parse(fs.readFileSync(p,'utf8'));
 // Human-reviewed v6.4 semantic classifications. This is intentionally explicit:
 // relation type cannot be inferred safely from causal wording alone.
 const REVIEWED = {
-  'L_ONE_PUNCH_MAN/RF_WEAK_CHERRY': ['CAUSALLY_RELATED_BUT_DISTINCT_OBSERVATION','REOPEN_AS_COMPOSITE_CANDIDATE','Weak cherry is distinct from AT occurrence; with watermelon it belongs in the existing mutually-exclusive small-role multinomial, not as an independent scalar.','MUTUALLY_EXCLUSIVE_COMPOSITION'],
-  'L_ONE_PUNCH_MAN/RF_WATERMELON': ['CAUSALLY_RELATED_BUT_DISTINCT_OBSERVATION','REOPEN_AS_COMPOSITE_CANDIDATE','Watermelon is distinct from AT occurrence; with weak cherry it belongs in the existing mutually-exclusive small-role multinomial, not as an independent scalar.','MUTUALLY_EXCLUSIVE_COMPOSITION'],
   'L_SHINOBIDAMASHII3_A3/RF_CZ': ['CAUSALLY_RELATED_BUT_DISTINCT_OBSERVATION','REOPEN_SELECTION_DEPENDENCY_REVIEW','CZ and AT initial hits are different observations. Small setting difference may still justify exclusion, but causal overlap alone does not.'],
 
   // Resolved rejection-reason candidates are intentionally absent from this map.
   // Accelerator, Fire Force, Garupan and King Pulsar now state their actual blockers
-  // (information strength, opportunity observation, or joint/conditional likelihood contract)
   // instead of treating causal relation itself as duplicate evidence.
+  // One Punch Man weak cherry/watermelon are resolved by adopting the existing
+  // mutually-exclusive small-role multinomial as the primary numeric feature and
+  // excluding downstream AT from the same likelihood product.
 
   'S_KABANERI_ZR/RF_ST': ['CAUSALLY_RELATED_BUT_DISTINCT_OBSERVATION','REOPEN_SELECTION_DEPENDENCY_REVIEW','ST occurrence is downstream of bonus progression but is not the same natural observation as bonus initial hit.'],
 
