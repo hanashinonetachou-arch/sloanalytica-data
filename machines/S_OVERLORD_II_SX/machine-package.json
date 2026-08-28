@@ -60,39 +60,6 @@
         "minimum": 0
       },
       {
-        "id": "INP_TA_THRESHOLD_3",
-        "name": "3回選択",
-        "type": "counter",
-        "category": "TA",
-        "unit": "回",
-        "displayOrder": 20,
-        "inferenceRole": "INCLUDE_SUPPORT",
-        "defaultValue": 0,
-        "minimum": 0
-      },
-      {
-        "id": "INP_TA_THRESHOLD_6",
-        "name": "6回選択",
-        "type": "counter",
-        "category": "TA",
-        "unit": "回",
-        "displayOrder": 21,
-        "inferenceRole": "INCLUDE_SUPPORT",
-        "defaultValue": 0,
-        "minimum": 0
-      },
-      {
-        "id": "INP_TA_THRESHOLD_10",
-        "name": "10回選択",
-        "type": "counter",
-        "category": "TA",
-        "unit": "回",
-        "displayOrder": 22,
-        "inferenceRole": "INCLUDE_SUPPORT",
-        "defaultValue": 0,
-        "minimum": 0
-      },
-      {
         "id": "INP_EVI_OVERLORD_SET_START",
         "name": "ATセット開始画面",
         "type": "multi_enum",
@@ -247,65 +214,6 @@
         "sourceEvidenceRefs": [
           "SRC_1GEKI",
           "SRC_NANA"
-        ]
-      },
-      {
-        "featureId": "FEAT_TA_THRESHOLD",
-        "name": "タイムアクセラレータ規定回数振り分け",
-        "adoptionCategory": "INCLUDE_SUPPORT",
-        "calculationRole": "PROBABILITY",
-        "probabilityEngineUsage": true,
-        "modelType": "multinomial",
-        "minimumSample": 1,
-        "sampleRecommendation": 20,
-        "reliabilityProfile": {
-          "weight": 1
-        },
-        "categoryInputIds": [
-          "INP_TA_THRESHOLD_3",
-          "INP_TA_THRESHOLD_6",
-          "INP_TA_THRESHOLD_10"
-        ],
-        "probabilities": {},
-        "categoryLabels": [
-          "3",
-          "6",
-          "10"
-        ],
-        "categoryProbabilities": {
-          "SET_1": [
-            0.008,
-            0.012,
-            0.98
-          ],
-          "SET_2": [
-            0.007992007992007992,
-            0.01998001998001998,
-            0.972027972027972
-          ],
-          "SET_3": [
-            0.02,
-            0.031,
-            0.949
-          ],
-          "SET_4": [
-            0.039,
-            0.039,
-            0.922
-          ],
-          "SET_5": [
-            0.039,
-            0.063,
-            0.898
-          ],
-          "SET_6": [
-            0.039,
-            0.086,
-            0.875
-          ]
-        },
-        "sourceEvidenceRefs": [
-          "SRC_1GEKI"
         ]
       }
     ]
@@ -631,35 +539,9 @@
         ]
       },
       {
-        "id": "AUTO_TA",
-        "title": "タイムアクセラレータ天井",
-        "displayOrder": 2,
-        "description": "天井発動時はタイムアクセラレータ終了時にATへ入ります。ただし、下記条件を満たした場合はサンプルから除外してください。\n・強レア小役を引いた\n・全点灯した\n・紫時計を獲得",
-        "items": [
-          {
-            "type": "input",
-            "inputId": "INP_TA_THRESHOLD_3",
-            "label": "3回選択",
-            "widget": "counter"
-          },
-          {
-            "type": "input",
-            "inputId": "INP_TA_THRESHOLD_6",
-            "label": "6回選択",
-            "widget": "counter"
-          },
-          {
-            "type": "input",
-            "inputId": "INP_TA_THRESHOLD_10",
-            "label": "10回選択",
-            "widget": "counter"
-          }
-        ]
-      },
-      {
         "id": "AUTO_EVIDENCE",
         "title": "設定確定・否定情報",
-        "displayOrder": 3,
+        "displayOrder": 2,
         "items": [
           {
             "type": "input",
@@ -686,8 +568,8 @@
   "selectionSummary": {
     "schemaVersion": "selection-summary-v1",
     "evaluatedCount": 9,
-    "selectedCount": 3,
-    "rejectedCount": 6,
+    "selectedCount": 2,
+    "rejectedCount": 7,
     "selected": [
       {
         "featureId": "FEAT_AT_INITIAL",
@@ -705,15 +587,6 @@
         "requiredTrials": {
           "value": 8407,
           "unit": "通常ゲーム"
-        }
-      },
-      {
-        "featureId": "FEAT_TA_THRESHOLD",
-        "name": "タイムアクセラレータ規定回数振り分け",
-        "reason": "タイムアクセラレータの規定3回・6回・10回は全設定の排他的な振り分けが公開され、周期ごとの選択値を判別できた場合にMultinomialとして利用できるため補助Featureに採用します。公開丸めによる微小な合計誤差は計算用分布で比例正規化します。",
-        "requiredTrials": {
-          "value": 38,
-          "unit": "規定回数選択"
         }
       }
     ],
@@ -740,6 +613,15 @@
         "featureId": "FEAT_TA_WEAK_RARE_NORMAL_EXCLUDED",
         "name": "通常滞在時・弱レア役からのタイムアクセラレータ当選",
         "reason": "弱レア役からのタイムアクセラレータ当選には設定差がありますが、抽選時の内部状態が通常だったことを確定観測できず、全設定の完全な確率表もResearchへ収録できていないため正しい条件付き分母を作れず不採用です。"
+      },
+      {
+        "featureId": "FEAT_TA_THRESHOLD",
+        "name": "タイムアクセラレータ規定回数振り分け",
+        "reason": "タイムアクセラレータ規定3回・6回・10回の選択値を実戦中に確定できる条件が実機未確認で、Observationでも推測利用不可です。公開分布と同じ周期だけを数えられることを確認するまで現版から除外します。",
+        "requiredTrials": {
+          "value": 38,
+          "unit": "規定回数選択"
+        }
       },
       {
         "featureId": "FEAT_PK_WEAK_RARE_NORMAL_EXCLUDED",
