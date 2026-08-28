@@ -1,0 +1,65 @@
+name: v6.4 Garupan CZ Reason
+
+on:
+  push:
+    branches: [prototype-multi-machine]
+    paths:
+      - 'tools/migrate-v64-garupan-cz-reason.mjs'
+      - 'tools/audit-v64-causal-relations.mjs'
+      - 'test/v64-causal-relation-audit.test.mjs'
+      - '.github/workflows/v64-garupan-cz-reason.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  apply-and-validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: prototype-multi-machine
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Dry-run reason migration
+        run: node tools/migrate-v64-garupan-cz-reason.mjs .
+      - name: Apply reason migration
+        run: node tools/migrate-v64-garupan-cz-reason.mjs . --apply
+      - name: Rebuild Garupan package
+        run: npm run machine:pipeline -- L_GIRLS_UND_PANZER_FINALE_H1 --skip-repo-checks
+      - name: Refresh semantic audit
+        run: node tools/audit-v64-cross-machine-semantic.mjs . reports/v64-cross-machine-semantic-audit.json
+      - name: Refresh causal review
+        run: node tools/audit-v64-causal-relations.mjs . reports/v64-causal-relation-review.json
+      - name: Run causal regression
+        run: node --test test/v64-causal-relation-audit.test.mjs
+      - name: Assert Garupan leaves causal review
+        run: |
+          node --input-type=module - <<'NODE'
+          import fs from 'node:fs';
+          const semantic=JSON.parse(fs.readFileSync('reports/v64-cross-machine-semantic-audit.json','utf8'));
+          const m=semantic.machines.find(x=>x.machineId==='L_GIRLS_UND_PANZER_FINALE_H1');
+          const causal=(m?.issues??[]).filter(x=>x.code==='CAUSAL_RELATION_REJECT_CANDIDATE');
+          if(causal.length) throw new Error(`Garupan still has ${causal.length} causal candidate(s)`);
+          const causalReport=JSON.parse(fs.readFileSync('reports/v64-causal-relation-review.json','utf8'));
+          if(causalReport.summary.candidateCount!==16 || causalReport.summary.machineCount!==5) throw new Error(`unexpected causal baseline ${JSON.stringify(causalReport.summary)}`);
+          console.log('PASS Garupan causal-reason cleanup');
+          NODE
+      - name: Run full test suite
+        run: npm test
+      - name: Run public-data audit
+        run: npm run audit
+      - name: Commit validated cleanup
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add research/L_GIRLS_UND_PANZER_FINALE_H1 machines/L_GIRLS_UND_PANZER_FINALE_H1 catalog.json difficulty-catalog.json reports/v64-cross-machine-semantic-audit.json reports/v64-causal-relation-review.json 2>/dev/null || true
+          if git diff --cached --quiet; then
+            echo "No validated changes to commit"
+          else
+            git commit -m "audit: clarify Garupan CZ exclusion"
+            git push origin HEAD:prototype-multi-machine
+          fi
