@@ -1,14 +1,16 @@
 {
-  "schemaVersion": "v6.4-cross-machine-semantic-audit-v1.2",
-  "generatedAt": "2026-08-28T14:26:30.961Z",
+  "schemaVersion": "v6.4-cross-machine-semantic-audit-v1.3",
+  "generatedAt": "2026-08-28T14:28:29.156Z",
   "summary": {
     "machineCount": 170,
-    "PASS": 165,
-    "REVIEW": 5,
+    "PASS": 159,
+    "REVIEW": 11,
     "HIGH_RISK": 0,
     "issueCounts": {
       "RESEARCH_NUMERIC_FEATURE_MISSING_FROM_SELECTION": 1,
-      "LEGACY_EVIDENCE_OVERLAP_REJECT_CANDIDATE": 10
+      "CAUSAL_RELATION_REJECT_CANDIDATE": 28,
+      "SPLIT_FEATURE_EVIDENCE_INPUT_SURFACE_CANDIDATE": 4,
+      "LEGACY_EVIDENCE_OVERLAP_REJECT_CANDIDATE": 6
     }
   },
   "machines": [
@@ -149,6 +151,15 @@
           "researchFeatureId": "RF_EPB_AFTER_INITIAL",
           "name": "初当りボーナス後のエピソードボーナス期待度",
           "settingCount": 5
+        },
+        {
+          "severity": "REVIEW",
+          "code": "CAUSAL_RELATION_REJECT_CANDIDATE",
+          "researchFeatureId": "RF_CROSS_BONUS",
+          "featureId": "FEAT_CROSS_BONUS",
+          "name": "十字目変換時の初当りボーナス当選",
+          "reason": "初当りボーナスの成立過程を分解した値で、採用済み初当り情報と因果的に重複する。",
+          "settingCount": 5
         }
       ]
     },
@@ -185,8 +196,18 @@
     {
       "machineId": "L_GIRLS_UND_PANZER_FINALE_H1",
       "displayName": "Lパチスロガールズ＆パンツァー 最終章",
-      "status": "PASS",
-      "issues": []
+      "status": "REVIEW",
+      "issues": [
+        {
+          "severity": "REVIEW",
+          "code": "CAUSAL_RELATION_REJECT_CANDIDATE",
+          "researchFeatureId": "RF_CZ",
+          "featureId": "FEAT_CZ",
+          "name": "CZ初当り",
+          "reason": "AT初当りより設定差が小さく、AT当選と因果的に重複するため不採用。",
+          "settingCount": 6
+        }
+      ]
     },
     {
       "machineId": "L_GOD_EATER_RESURRECTION",
@@ -245,8 +266,69 @@
     {
       "machineId": "L_INUYASHA2_FK",
       "displayName": "Ｌ 犬夜叉2",
-      "status": "PASS",
-      "issues": []
+      "status": "REVIEW",
+      "issues": [
+        {
+          "severity": "REVIEW",
+          "code": "SPLIT_FEATURE_EVIDENCE_INPUT_SURFACE_CANDIDATE",
+          "researchFeatureId": "RF_WHITE_BIG_END",
+          "featureId": "FEAT_WHITE_BIG_END_NON_EVIDENCE",
+          "name": "白BIG終了画面振り分け",
+          "completeDistribution": true,
+          "excludedLabels": [
+            "SESSHOMARU",
+            "PAIR"
+          ],
+          "relatedEvidence": [
+            {
+              "researchEvidenceId": "RE_WHITE_BIG_SESSHOMARU_2PLUS",
+              "name": "白BIG終了 殺生丸",
+              "confidence": "HIGH",
+              "basis": [
+                "CATEGORY_TOKEN_MATCH",
+                "CONTEXT_TOKEN_MATCH"
+              ],
+              "categoryHit": [
+                "SESSHOMARU"
+              ],
+              "contextHit": [
+                "WHITE"
+              ]
+            }
+          ],
+          "reason": "設定を限定する矛盾画面・2人画面はEvidenceへ分離し、デフォルトと桔梗の出現比率を条件付き分布として採用します。"
+        },
+        {
+          "severity": "REVIEW",
+          "code": "SPLIT_FEATURE_EVIDENCE_INPUT_SURFACE_CANDIDATE",
+          "researchFeatureId": "RF_BLUE_BIG_END",
+          "featureId": "FEAT_BLUE_BIG_END_NON_EVIDENCE",
+          "name": "青7BIG終了画面振り分け",
+          "completeDistribution": true,
+          "excludedLabels": [
+            "INUYASHA",
+            "PAIR"
+          ],
+          "relatedEvidence": [
+            {
+              "researchEvidenceId": "RE_BLUE_BIG_INUYASHA_2PLUS",
+              "name": "青7BIG終了 犬夜叉",
+              "confidence": "HIGH",
+              "basis": [
+                "CATEGORY_TOKEN_MATCH",
+                "CONTEXT_TOKEN_MATCH"
+              ],
+              "categoryHit": [
+                "INUYASHA"
+              ],
+              "contextHit": [
+                "BLUE"
+              ]
+            }
+          ],
+          "reason": "設定を限定する矛盾画面・2人画面はEvidenceへ分離し、デフォルトと桔梗の出現比率を条件付き分布として採用します。"
+        }
+      ]
     },
     {
       "machineId": "L_KAGUYA_SAMA_JA",
@@ -261,7 +343,7 @@
           "name": "BONUS終了画面・枠付き設定示唆",
           "adoptionCategory": "EXCLUDE",
           "candidateModel": "multinomial",
-          "completeDistribution": false,
+          "completeDistribution": true,
           "settingCount": 6,
           "relationConfidence": "HIGH",
           "reason": "紫・銀・金枠は設定下限を直接絞る確定・否定情報として別枠で扱う。赤枠だけを数値化しても低頻度かつ設定差が小さく、同じ終了画面を重複評価するため数値Featureには不採用。",
@@ -345,8 +427,18 @@
     {
       "machineId": "L_KING_PULSAR_SLCC",
       "displayName": "スマスロキングパルサー",
-      "status": "PASS",
-      "issues": []
+      "status": "REVIEW",
+      "issues": [
+        {
+          "severity": "REVIEW",
+          "code": "CAUSAL_RELATION_REJECT_CANDIDATE",
+          "researchFeatureId": "RF_CZ",
+          "featureId": "FEAT_CZ",
+          "name": "CZ突入",
+          "reason": "CZ突入差にはオレンジ出現率とCZ抽選が関与し、オレンジと同時採用すると同じ因果を二重計上しやすいため不採用。",
+          "settingCount": 5
+        }
+      ]
     },
     {
       "machineId": "L_KINNIKUMAN4_SLDC",
@@ -459,8 +551,27 @@
     {
       "machineId": "L_ONE_PUNCH_MAN",
       "displayName": "Lワンパンマン",
-      "status": "PASS",
-      "issues": []
+      "status": "REVIEW",
+      "issues": [
+        {
+          "severity": "REVIEW",
+          "code": "CAUSAL_RELATION_REJECT_CANDIDATE",
+          "researchFeatureId": "RF_WEAK_CHERRY",
+          "featureId": "FEAT_WEAK_CHERRY",
+          "name": "弱チェリー",
+          "reason": "弱チェリーは相互の重複だけでなくAT初当りとの因果的重複を避けるため単独採用しない。",
+          "settingCount": 6
+        },
+        {
+          "severity": "REVIEW",
+          "code": "CAUSAL_RELATION_REJECT_CANDIDATE",
+          "researchFeatureId": "RF_WATERMELON",
+          "featureId": "FEAT_WATERMELON",
+          "name": "スイカ",
+          "reason": "スイカは相互の重複だけでなくAT初当りとの因果的重複を避けるため単独採用しない。",
+          "settingCount": 6
+        }
+      ]
     },
     {
       "machineId": "L_ONIMUSHA3_XA",
@@ -549,8 +660,18 @@
     {
       "machineId": "L_SHINOBIDAMASHII3_A3",
       "displayName": "忍魂参 ～奥義皆伝ノ章～",
-      "status": "PASS",
-      "issues": []
+      "status": "REVIEW",
+      "issues": [
+        {
+          "severity": "REVIEW",
+          "code": "CAUSAL_RELATION_REJECT_CANDIDATE",
+          "researchFeatureId": "RF_CZ",
+          "featureId": "FEAT_CZ",
+          "name": "CZ突入",
+          "reason": "1/147.0から1/132.0と設定差が小さく、AT初当りと因果的にも重複するため不採用。",
+          "settingCount": 6
+        }
+      ]
     },
     {
       "machineId": "L_SHIOKININ_KC",
@@ -573,36 +694,8 @@
     {
       "machineId": "L_SMASLO_DUNBINE_MF",
       "displayName": "スマスロ 聖戦士ダンバイン",
-      "status": "REVIEW",
-      "issues": [
-        {
-          "severity": "REVIEW",
-          "code": "LEGACY_EVIDENCE_OVERLAP_REJECT_CANDIDATE",
-          "researchFeatureId": "RF_ATTACK_HAZURE4",
-          "featureId": "FEAT_ATTACK_HAZURE4_EXCLUDED",
-          "name": "アタックMODE ハズレ4連から狙え高確移行",
-          "adoptionCategory": "EXCLUDE",
-          "candidateModel": "binomial",
-          "completeDistribution": false,
-          "settingCount": 6,
-          "relationConfidence": "MEDIUM",
-          "reason": "ハズレ4連からの狙え高確移行にも設定差がありますが、4連成立は必ず3連成立を内包し、採用するハズレ3連Featureと同じ連続事象を再評価します。設定差も3連より小さいため二重評価を避けて不採用です。",
-          "relatedEvidence": [
-            {
-              "researchEvidenceId": "RE_ATTACK_1001_6",
-              "name": "アタックMODE 1001機スタート",
-              "confidence": "MEDIUM",
-              "basis": [
-                "CONTEXT_TOKEN_MATCH"
-              ],
-              "contextHit": [
-                "ATTACK",
-                "アタックMODE"
-              ]
-            }
-          ]
-        }
-      ]
+      "status": "PASS",
+      "issues": []
     },
     {
       "machineId": "L_STAR_HANAHANA_MX",
@@ -649,8 +742,99 @@
     {
       "machineId": "L_TOARU_ACCELERATOR_RZ",
       "displayName": "スマスロ 一方通行 とある魔術の禁書目録",
-      "status": "PASS",
-      "issues": []
+      "status": "REVIEW",
+      "issues": [
+        {
+          "severity": "REVIEW",
+          "code": "CAUSAL_RELATION_REJECT_CANDIDATE",
+          "researchFeatureId": "RF_CZ_ACCEL",
+          "featureId": "FEAT_CZ_ACCEL_EXCLUDED",
+          "name": "一方通行CZ",
+          "reason": "CZ合算を通常G基準の代表Featureとして採用しており、CZ種類別・AT初当り・シャッター関連抽選など同一CZ生成経路の上流下流を独立に加えると二重評価になるため不採用です。",
+          "settingCount": 6
+        },
+        {
+          "severity": "REVIEW",
+          "code": "CAUSAL_RELATION_REJECT_CANDIDATE",
+          "researchFeatureId": "RF_CZ_LASTORDER",
+          "featureId": "FEAT_CZ_LASTORDER_EXCLUDED",
+          "name": "打ち止めCZ",
+          "reason": "CZ合算を通常G基準の代表Featureとして採用しており、CZ種類別・AT初当り・シャッター関連抽選など同一CZ生成経路の上流下流を独立に加えると二重評価になるため不採用です。",
+          "settingCount": 6
+        },
+        {
+          "severity": "REVIEW",
+          "code": "CAUSAL_RELATION_REJECT_CANDIDATE",
+          "researchFeatureId": "RF_CZ_DUAL",
+          "featureId": "FEAT_CZ_DUAL_EXCLUDED",
+          "name": "一方通行＆打ち止めCZ",
+          "reason": "CZ合算を通常G基準の代表Featureとして採用しており、CZ種類別・AT初当り・シャッター関連抽選など同一CZ生成経路の上流下流を独立に加えると二重評価になるため不採用です。",
+          "settingCount": 6
+        },
+        {
+          "severity": "REVIEW",
+          "code": "CAUSAL_RELATION_REJECT_CANDIDATE",
+          "researchFeatureId": "RF_CZ_OUTCOME",
+          "featureId": "FEAT_CZ_OUTCOME_EXCLUDED",
+          "name": "CZ種類別アウトカム",
+          "reason": "CZ合算を通常G基準の代表Featureとして採用しており、CZ種類別・AT初当り・シャッター関連抽選など同一CZ生成経路の上流下流を独立に加えると二重評価になるため不採用です。",
+          "settingCount": 6
+        },
+        {
+          "severity": "REVIEW",
+          "code": "CAUSAL_RELATION_REJECT_CANDIDATE",
+          "researchFeatureId": "RF_AT_INITIAL",
+          "featureId": "FEAT_AT_INITIAL_EXCLUDED",
+          "name": "AT初当り",
+          "reason": "CZ合算を通常G基準の代表Featureとして採用しており、CZ種類別・AT初当り・シャッター関連抽選など同一CZ生成経路の上流下流を独立に加えると二重評価になるため不採用です。",
+          "settingCount": 6
+        },
+        {
+          "severity": "REVIEW",
+          "code": "CAUSAL_RELATION_REJECT_CANDIDATE",
+          "researchFeatureId": "RF_SHUTTER_OPEN",
+          "featureId": "FEAT_SHUTTER_OPEN_EXCLUDED",
+          "name": "チャンス目成立時シャッター開放",
+          "reason": "CZ合算を通常G基準の代表Featureとして採用しており、CZ種類別・AT初当り・シャッター関連抽選など同一CZ生成経路の上流下流を独立に加えると二重評価になるため不採用です。",
+          "settingCount": 6
+        },
+        {
+          "severity": "REVIEW",
+          "code": "CAUSAL_RELATION_REJECT_CANDIDATE",
+          "researchFeatureId": "RF_SHUTTER_DURATION",
+          "featureId": "FEAT_SHUTTER_DURATION_EXCLUDED",
+          "name": "シャッター開放状態の継続G数",
+          "reason": "CZ合算を通常G基準の代表Featureとして採用しており、CZ種類別・AT初当り・シャッター関連抽選など同一CZ生成経路の上流下流を独立に加えると二重評価になるため不採用です。",
+          "settingCount": 6
+        },
+        {
+          "severity": "REVIEW",
+          "code": "CAUSAL_RELATION_REJECT_CANDIDATE",
+          "researchFeatureId": "RF_SHUTTER_ROLE_CZ",
+          "featureId": "FEAT_SHUTTER_ROLE_CZ_EXCLUDED",
+          "name": "シャッター開放中・対応役成立時CZ結果",
+          "reason": "CZ合算を通常G基準の代表Featureとして採用しており、CZ種類別・AT初当り・シャッター関連抽選など同一CZ生成経路の上流下流を独立に加えると二重評価になるため不採用です。",
+          "settingCount": 6
+        },
+        {
+          "severity": "REVIEW",
+          "code": "CAUSAL_RELATION_REJECT_CANDIDATE",
+          "researchFeatureId": "RF_SHUTTER_NONROLE_CZ",
+          "featureId": "FEAT_SHUTTER_NONROLE_CZ_EXCLUDED",
+          "name": "シャッター開放中・非対応役成立時打ち止めCZ",
+          "reason": "CZ合算を通常G基準の代表Featureとして採用しており、CZ種類別・AT初当り・シャッター関連抽選など同一CZ生成経路の上流下流を独立に加えると二重評価になるため不採用です。",
+          "settingCount": 6
+        },
+        {
+          "severity": "REVIEW",
+          "code": "CAUSAL_RELATION_REJECT_CANDIDATE",
+          "researchFeatureId": "RF_CHANCE3_CZ_TYPE",
+          "featureId": "FEAT_CHANCE3_CZ_TYPE_EXCLUDED",
+          "name": "3連チャンス目成立時CZ種別",
+          "reason": "CZ合算を通常G基準の代表Featureとして採用しており、CZ種類別・AT初当り・シャッター関連抽選など同一CZ生成経路の上流下流を独立に加えると二重評価になるため不採用です。",
+          "settingCount": 6
+        }
+      ]
     },
     {
       "machineId": "L_TOARU_INDEX_JC",
@@ -925,8 +1109,18 @@
     {
       "machineId": "S_KABANERI_ZR",
       "displayName": "パチスロ甲鉄城のカバネリ",
-      "status": "PASS",
-      "issues": []
+      "status": "REVIEW",
+      "issues": [
+        {
+          "severity": "REVIEW",
+          "code": "CAUSAL_RELATION_REJECT_CANDIDATE",
+          "researchFeatureId": "RF_ST",
+          "featureId": "FEAT_ST",
+          "name": "ST合算",
+          "reason": "ボーナス当選の下流で、採用済みボーナス初当りと因果的に重複する。",
+          "settingCount": 6
+        }
+      ]
     },
     {
       "machineId": "S_KACHO_KUMADA_GZA",
@@ -959,94 +1153,131 @@
       "issues": [
         {
           "severity": "REVIEW",
-          "code": "LEGACY_EVIDENCE_OVERLAP_REJECT_CANDIDATE",
+          "code": "CAUSAL_RELATION_REJECT_CANDIDATE",
+          "researchFeatureId": "RF_AT_INITIAL",
+          "featureId": "FEAT_AT_INITIAL_EXCLUDED",
+          "name": "AT初当り",
+          "reason": "CZ合算を通常G基準の代表Featureとして採用しており、CZ種類別・状態別レア役抽選・AT直撃・ボーナス内訳など同一当選系列の上流下流を独立に加えると重複評価になるため不採用です。",
+          "settingCount": 6
+        },
+        {
+          "severity": "REVIEW",
+          "code": "CAUSAL_RELATION_REJECT_CANDIDATE",
+          "researchFeatureId": "RF_CZ_QUEST",
+          "featureId": "FEAT_CZ_QUEST_EXCLUDED",
+          "name": "CZ クエスト",
+          "reason": "CZ合算を通常G基準の代表Featureとして採用しており、CZ種類別・状態別レア役抽選・AT直撃・ボーナス内訳など同一当選系列の上流下流を独立に加えると重複評価になるため不採用です。",
+          "settingCount": 6
+        },
+        {
+          "severity": "REVIEW",
+          "code": "CAUSAL_RELATION_REJECT_CANDIDATE",
+          "researchFeatureId": "RF_CZ_AIROU",
+          "featureId": "FEAT_CZ_AIROU_EXCLUDED",
+          "name": "CZ アイルーBINGO",
+          "reason": "CZ合算を通常G基準の代表Featureとして採用しており、CZ種類別・状態別レア役抽選・AT直撃・ボーナス内訳など同一当選系列の上流下流を独立に加えると重複評価になるため不採用です。",
+          "settingCount": 6
+        },
+        {
+          "severity": "REVIEW",
+          "code": "CAUSAL_RELATION_REJECT_CANDIDATE",
+          "researchFeatureId": "RF_CZ_SELIANA",
+          "featureId": "FEAT_CZ_SELIANA_EXCLUDED",
+          "name": "CZ セリエナ防衛戦",
+          "reason": "CZ合算を通常G基準の代表Featureとして採用しており、CZ種類別・状態別レア役抽選・AT直撃・ボーナス内訳など同一当選系列の上流下流を独立に加えると重複評価になるため不採用です。",
+          "settingCount": 6
+        },
+        {
+          "severity": "REVIEW",
+          "code": "CAUSAL_RELATION_REJECT_CANDIDATE",
+          "researchFeatureId": "RF_HIGH_FALL",
+          "featureId": "FEAT_HIGH_FALL_EXCLUDED",
+          "name": "高確滞在時状態転落",
+          "reason": "CZ合算を通常G基準の代表Featureとして採用しており、CZ種類別・状態別レア役抽選・AT直撃・ボーナス内訳など同一当選系列の上流下流を独立に加えると重複評価になるため不採用です。",
+          "settingCount": 6
+        },
+        {
+          "severity": "REVIEW",
+          "code": "CAUSAL_RELATION_REJECT_CANDIDATE",
           "researchFeatureId": "RF_NORMAL_WEAK_CZ",
           "featureId": "FEAT_NORMAL_WEAK_CZ_EXCLUDED",
           "name": "通常滞在・弱レア役CZ結果",
-          "adoptionCategory": "EXCLUDE",
-          "candidateModel": "multinomial",
-          "completeDistribution": false,
-          "settingCount": 6,
-          "relationConfidence": "HIGH",
           "reason": "CZ合算を通常G基準の代表Featureとして採用しており、CZ種類別・状態別レア役抽選・AT直撃・ボーナス内訳など同一当選系列の上流下流を独立に加えると重複評価になるため不採用です。",
-          "relatedEvidence": [
-            {
-              "researchEvidenceId": "RE_HIGH_WEAK_SELIANA",
-              "name": "高確弱レア役からセリエナ防衛戦",
-              "confidence": "HIGH",
-              "basis": [
-                "CATEGORY_TOKEN_MATCH",
-                "CONTEXT_TOKEN_MATCH"
-              ],
-              "categoryHit": [
-                "SELIANA"
-              ],
-              "contextHit": [
-                "WEAK"
-              ]
-            }
-          ]
+          "settingCount": 6
         },
         {
           "severity": "REVIEW",
-          "code": "LEGACY_EVIDENCE_OVERLAP_REJECT_CANDIDATE",
+          "code": "CAUSAL_RELATION_REJECT_CANDIDATE",
+          "researchFeatureId": "RF_NORMAL_STRONG_CZ",
+          "featureId": "FEAT_NORMAL_STRONG_CZ_EXCLUDED",
+          "name": "通常滞在・強レア役CZ結果",
+          "reason": "CZ合算を通常G基準の代表Featureとして採用しており、CZ種類別・状態別レア役抽選・AT直撃・ボーナス内訳など同一当選系列の上流下流を独立に加えると重複評価になるため不採用です。",
+          "settingCount": 6
+        },
+        {
+          "severity": "REVIEW",
+          "code": "CAUSAL_RELATION_REJECT_CANDIDATE",
           "researchFeatureId": "RF_HIGH_WEAK_CZ",
           "featureId": "FEAT_HIGH_WEAK_CZ_EXCLUDED",
           "name": "高確滞在・弱レア役CZ結果",
-          "adoptionCategory": "EXCLUDE",
-          "candidateModel": "multinomial",
-          "completeDistribution": false,
-          "settingCount": 6,
-          "relationConfidence": "HIGH",
           "reason": "CZ合算を通常G基準の代表Featureとして採用しており、CZ種類別・状態別レア役抽選・AT直撃・ボーナス内訳など同一当選系列の上流下流を独立に加えると重複評価になるため不採用です。",
-          "relatedEvidence": [
-            {
-              "researchEvidenceId": "RE_HIGH_WEAK_SELIANA",
-              "name": "高確弱レア役からセリエナ防衛戦",
-              "confidence": "HIGH",
-              "basis": [
-                "CATEGORY_TOKEN_MATCH",
-                "CONTEXT_TOKEN_MATCH"
-              ],
-              "categoryHit": [
-                "SELIANA"
-              ],
-              "contextHit": [
-                "HIGH",
-                "WEAK"
-              ]
-            }
-          ]
+          "settingCount": 6
         },
         {
           "severity": "REVIEW",
-          "code": "LEGACY_EVIDENCE_OVERLAP_REJECT_CANDIDATE",
+          "code": "CAUSAL_RELATION_REJECT_CANDIDATE",
           "researchFeatureId": "RF_HIGH_STRONG_CZ",
           "featureId": "FEAT_HIGH_STRONG_CZ_EXCLUDED",
           "name": "高確滞在・強レア役CZ結果",
-          "adoptionCategory": "EXCLUDE",
-          "candidateModel": "multinomial",
-          "completeDistribution": false,
-          "settingCount": 6,
-          "relationConfidence": "HIGH",
           "reason": "CZ合算を通常G基準の代表Featureとして採用しており、CZ種類別・状態別レア役抽選・AT直撃・ボーナス内訳など同一当選系列の上流下流を独立に加えると重複評価になるため不採用です。",
+          "settingCount": 6
+        },
+        {
+          "severity": "REVIEW",
+          "code": "CAUSAL_RELATION_REJECT_CANDIDATE",
+          "researchFeatureId": "RF_AT_DIRECT",
+          "featureId": "FEAT_AT_DIRECT_EXCLUDED",
+          "name": "AT直撃",
+          "reason": "CZ合算を通常G基準の代表Featureとして採用しており、CZ種類別・状態別レア役抽選・AT直撃・ボーナス内訳など同一当選系列の上流下流を独立に加えると重複評価になるため不採用です。",
+          "settingCount": 6
+        },
+        {
+          "severity": "REVIEW",
+          "code": "CAUSAL_RELATION_REJECT_CANDIDATE",
+          "researchFeatureId": "RF_LONG_FREEZE",
+          "featureId": "FEAT_LONG_FREEZE_EXCLUDED",
+          "name": "ロングフリーズ",
+          "reason": "CZ合算を通常G基準の代表Featureとして採用しており、CZ種類別・状態別レア役抽選・AT直撃・ボーナス内訳など同一当選系列の上流下流を独立に加えると重複評価になるため不採用です。",
+          "settingCount": 6
+        },
+        {
+          "severity": "REVIEW",
+          "code": "SPLIT_FEATURE_EVIDENCE_INPUT_SURFACE_CANDIDATE",
+          "researchFeatureId": "RF_CONFIRM_SCREEN",
+          "featureId": "FEAT_CONFIRM_SCREEN_NON_EVIDENCE",
+          "name": "ボーナス確定画面振り分け",
+          "completeDistribution": true,
+          "excludedLabels": [
+            "MORA"
+          ],
           "relatedEvidence": [
             {
-              "researchEvidenceId": "RE_HIGH_WEAK_SELIANA",
-              "name": "高確弱レア役からセリエナ防衛戦",
+              "researchEvidenceId": "RE_CONFIRM_MORA",
+              "name": "ボーナス確定画面 モラ&ヒロシ&BJ",
               "confidence": "HIGH",
               "basis": [
                 "CATEGORY_TOKEN_MATCH",
                 "CONTEXT_TOKEN_MATCH"
               ],
               "categoryHit": [
-                "SELIANA"
+                "MORA"
               ],
               "contextHit": [
-                "HIGH"
+                "CONFIRM"
               ]
             }
-          ]
+          ],
+          "reason": "モラ・ガラテア&ひろし&BJは設定4以上Evidenceとして分離し、それ以外の奇偶・高設定示唆画面を条件付き分布として利用します。"
         }
       ]
     },
@@ -1102,6 +1333,83 @@
         },
         {
           "severity": "REVIEW",
+          "code": "SPLIT_FEATURE_EVIDENCE_INPUT_SURFACE_CANDIDATE",
+          "researchFeatureId": "RF_BONUS_END",
+          "featureId": "FEAT_BONUS_END_NON_EVIDENCE",
+          "name": "ボーナス終了画面",
+          "completeDistribution": true,
+          "excludedLabels": [
+            "COPPER",
+            "GOLD",
+            "STAR",
+            "RAINBOW"
+          ],
+          "relatedEvidence": [
+            {
+              "researchEvidenceId": "RE_END_COPPER",
+              "name": "ボーナス終了画面 銅",
+              "confidence": "HIGH",
+              "basis": [
+                "CATEGORY_TOKEN_MATCH",
+                "CONTEXT_TOKEN_MATCH"
+              ],
+              "categoryHit": [
+                "COPPER"
+              ],
+              "contextHit": [
+                "ボーナス終了画面"
+              ]
+            },
+            {
+              "researchEvidenceId": "RE_END_GOLD",
+              "name": "ボーナス終了画面 金",
+              "confidence": "MEDIUM",
+              "basis": [
+                "CATEGORY_TOKEN_MATCH",
+                "CONTEXT_TOKEN_MATCH"
+              ],
+              "categoryHit": [
+                "GOLD"
+              ],
+              "contextHit": [
+                "ボーナス終了画面"
+              ]
+            },
+            {
+              "researchEvidenceId": "RE_END_STAR",
+              "name": "ボーナス終了画面 星",
+              "confidence": "HIGH",
+              "basis": [
+                "CATEGORY_TOKEN_MATCH",
+                "CONTEXT_TOKEN_MATCH"
+              ],
+              "categoryHit": [
+                "STAR"
+              ],
+              "contextHit": [
+                "ボーナス終了画面"
+              ]
+            },
+            {
+              "researchEvidenceId": "RE_END_RAINBOW",
+              "name": "ボーナス終了画面 虹",
+              "confidence": "MEDIUM",
+              "basis": [
+                "CATEGORY_TOKEN_MATCH",
+                "CONTEXT_TOKEN_MATCH"
+              ],
+              "categoryHit": [
+                "RAINBOW"
+              ],
+              "contextHit": [
+                "ボーナス終了画面"
+              ]
+            }
+          ],
+          "reason": "銅・金・星・虹など設定を限定する画面はEvidenceへ分離し、白①～③だけを条件付き分布として数値推測に利用します。"
+        },
+        {
+          "severity": "REVIEW",
           "code": "LEGACY_EVIDENCE_OVERLAP_REJECT_CANDIDATE",
           "researchFeatureId": "RF_SMART_A",
           "featureId": "FEAT_SMART_A_EXCLUDED",
@@ -1129,66 +1437,6 @@
                 "A",
                 "スマTALK質問A"
               ]
-            },
-            {
-              "researchEvidenceId": "RE_SMART_B_BLUE",
-              "name": "スマTALK質問B 青",
-              "confidence": "MEDIUM",
-              "basis": [
-                "CATEGORY_TOKEN_MATCH",
-                "CONTEXT_TOKEN_MATCH"
-              ],
-              "categoryHit": [
-                "BLUE"
-              ],
-              "contextHit": [
-                "SMART"
-              ]
-            },
-            {
-              "researchEvidenceId": "RE_SMART_B_RED",
-              "name": "スマTALK質問B 赤",
-              "confidence": "MEDIUM",
-              "basis": [
-                "CATEGORY_TOKEN_MATCH",
-                "CONTEXT_TOKEN_MATCH"
-              ],
-              "categoryHit": [
-                "RED"
-              ],
-              "contextHit": [
-                "SMART"
-              ]
-            },
-            {
-              "researchEvidenceId": "RE_SMART_C_BLUE",
-              "name": "スマTALK質問C 青",
-              "confidence": "MEDIUM",
-              "basis": [
-                "CATEGORY_TOKEN_MATCH",
-                "CONTEXT_TOKEN_MATCH"
-              ],
-              "categoryHit": [
-                "BLUE"
-              ],
-              "contextHit": [
-                "SMART"
-              ]
-            },
-            {
-              "researchEvidenceId": "RE_SMART_C_RED",
-              "name": "スマTALK質問C 赤",
-              "confidence": "MEDIUM",
-              "basis": [
-                "CATEGORY_TOKEN_MATCH",
-                "CONTEXT_TOKEN_MATCH"
-              ],
-              "categoryHit": [
-                "RED"
-              ],
-              "contextHit": [
-                "SMART"
-              ]
             }
           ]
         },
@@ -1206,21 +1454,6 @@
           "reason": "ボーナス合算・弱スイカ・通常時押し順ナビを独立した代表Featureとして採用しており、この候補は同一ボーナス系列の内訳、低頻度事象、または示唆分布として既採用情報と重複するため数値推測には追加採用しません。",
           "relatedEvidence": [
             {
-              "researchEvidenceId": "RE_SMART_A_RED",
-              "name": "スマTALK質問A 赤",
-              "confidence": "MEDIUM",
-              "basis": [
-                "CATEGORY_TOKEN_MATCH",
-                "CONTEXT_TOKEN_MATCH"
-              ],
-              "categoryHit": [
-                "RED"
-              ],
-              "contextHit": [
-                "SMART"
-              ]
-            },
-            {
               "researchEvidenceId": "RE_SMART_B_BLUE",
               "name": "スマTALK質問B 青",
               "confidence": "HIGH",
@@ -1252,36 +1485,6 @@
                 "SMART",
                 "B",
                 "スマTALK質問B"
-              ]
-            },
-            {
-              "researchEvidenceId": "RE_SMART_C_BLUE",
-              "name": "スマTALK質問C 青",
-              "confidence": "MEDIUM",
-              "basis": [
-                "CATEGORY_TOKEN_MATCH",
-                "CONTEXT_TOKEN_MATCH"
-              ],
-              "categoryHit": [
-                "BLUE"
-              ],
-              "contextHit": [
-                "SMART"
-              ]
-            },
-            {
-              "researchEvidenceId": "RE_SMART_C_RED",
-              "name": "スマTALK質問C 赤",
-              "confidence": "MEDIUM",
-              "basis": [
-                "CATEGORY_TOKEN_MATCH",
-                "CONTEXT_TOKEN_MATCH"
-              ],
-              "categoryHit": [
-                "RED"
-              ],
-              "contextHit": [
-                "SMART"
               ]
             }
           ]
@@ -1299,51 +1502,6 @@
           "relationConfidence": "HIGH",
           "reason": "ボーナス合算・弱スイカ・通常時押し順ナビを独立した代表Featureとして採用しており、この候補は同一ボーナス系列の内訳、低頻度事象、または示唆分布として既採用情報と重複するため数値推測には追加採用しません。",
           "relatedEvidence": [
-            {
-              "researchEvidenceId": "RE_SMART_A_RED",
-              "name": "スマTALK質問A 赤",
-              "confidence": "MEDIUM",
-              "basis": [
-                "CATEGORY_TOKEN_MATCH",
-                "CONTEXT_TOKEN_MATCH"
-              ],
-              "categoryHit": [
-                "RED"
-              ],
-              "contextHit": [
-                "SMART"
-              ]
-            },
-            {
-              "researchEvidenceId": "RE_SMART_B_BLUE",
-              "name": "スマTALK質問B 青",
-              "confidence": "MEDIUM",
-              "basis": [
-                "CATEGORY_TOKEN_MATCH",
-                "CONTEXT_TOKEN_MATCH"
-              ],
-              "categoryHit": [
-                "BLUE"
-              ],
-              "contextHit": [
-                "SMART"
-              ]
-            },
-            {
-              "researchEvidenceId": "RE_SMART_B_RED",
-              "name": "スマTALK質問B 赤",
-              "confidence": "MEDIUM",
-              "basis": [
-                "CATEGORY_TOKEN_MATCH",
-                "CONTEXT_TOKEN_MATCH"
-              ],
-              "categoryHit": [
-                "RED"
-              ],
-              "contextHit": [
-                "SMART"
-              ]
-            },
             {
               "researchEvidenceId": "RE_SMART_C_BLUE",
               "name": "スマTALK質問C 青",
