@@ -1,8 +1,8 @@
 {
-  "schemaVersion": "machine-observation-data-v1",
+  "schemaVersion": "machine-observation-data-v2",
   "machineId": "LB_ISEKAI_QUARTET_KR",
   "displayName": "A-SLOT+ 異世界かるてっと BT",
-  "researchedAt": "2026-08-22",
+  "researchedAt": "2026-08-29",
   "sources": [
     {
       "sourceId": "OBS_SRC_KAKU6",
@@ -21,35 +21,185 @@
       "sourceType": "manufacturer"
     }
   ],
-  "machineMenu": {
-    "status": "UNRESOLVED",
-    "availableData": [],
-    "sourceRefs": [],
-    "notes": "前任者情報はデータカウンター利用を前提とした実機検証済み入力として存在するが、筐体標準メニュー/履歴画面の具体項目一覧は今回確定していない。"
+  "sourceCoverage": {
+    "machineMenu": "UNRESOLVED",
+    "dataCounter": "VERIFIED_ON_MACHINE",
+    "linkedService": "FOUND",
+    "directPlay": "FOUND",
+    "endEvent": "UNRESOLVED",
+    "seatedState": "VERIFIED_ON_MACHINE"
   },
-  "linkedService": {
-    "status": "CHECKED",
-    "availableData": [
-      "マイスロ対応",
-      "通常時小役カウント",
-      "BIG種別回数",
-      "BT中小役カウント"
-    ],
-    "sourceRefs": [
-      "OBS_SRC_KAKU6",
-      "OBS_SRC_SAMMY_MYSLOT"
-    ],
-    "notes": "公開解析で通常時小役をマイスロでカウントできることを確認。現行MachineDataでも黒BAR BIG、赤7/青7 BIG、BT中特殊7枚役、規定数2枚スイカ等をマイスロ由来入力として使用する。"
-  },
-  "predecessorData": {
-    "status": "CHECKED",
-    "availableData": [
-      "着席時 総ゲーム数",
-      "着席時 初当り回数"
-    ],
-    "sourceRefs": [],
-    "notes": "現行MachineDataの実機検証済みPREDECESSOR_SNAPSHOT。データカウンターで『初当り回数』を正確に確認できる場合だけ利用し、BIG/REGや総ボーナス回数を代用しない。前任者FeatureはInferenceに参加するが、自分区間はマイスロ由来データを使用するため総G差分を自身分母へ代用しない。",
-    "usableForInference": true,
-    "usableForSelfSessionDelta": false
-  }
+  "observations": [
+    {
+      "observationId": "OBS_PREDECESSOR_DATA_COUNTER",
+      "sourceType": "DATA_COUNTER",
+      "observationMode": "DATA_COUNTER_READ",
+      "status": "VERIFIED_ON_MACHINE",
+      "label": "着席時データカウンター",
+      "categories": [
+        "着席時 総ゲーム数",
+        "着席時 初当り回数"
+      ],
+      "timing": [
+        "着席直後"
+      ],
+      "excludedConditions": [
+        "初当り回数をBIG・REGや総ボーナス回数で代用する場合"
+      ],
+      "sourceRefs": []
+    },
+    {
+      "observationId": "OBS_MYSLOT_NORMAL_ROLES",
+      "sourceType": "LINKED_SERVICE",
+      "observationMode": "LINKED_SERVICE_READ",
+      "status": "FOUND",
+      "label": "マイスロ 通常時規定数3枚小役",
+      "categories": [
+        "ベル（規定数3枚）",
+        "ベル表示確率 1/○○",
+        "スイカ（規定数3枚）",
+        "チェリー（規定数3枚）",
+        "特殊15枚役（規定数3枚）"
+      ],
+      "timing": [
+        "実戦中または実戦終了時のマイスロ確認"
+      ],
+      "excludedConditions": [
+        "実機連動を開始していない区間"
+      ],
+      "sourceRefs": [
+        "OBS_SRC_KAKU6",
+        "OBS_SRC_SAMMY_MYSLOT"
+      ]
+    },
+    {
+      "observationId": "OBS_MYSLOT_BIG_TYPES",
+      "sourceType": "LINKED_SERVICE",
+      "observationMode": "LINKED_SERVICE_READ",
+      "status": "FOUND",
+      "label": "マイスロ BIG種別回数",
+      "categories": [
+        "黒BAR BIG",
+        "赤7・青7 BIG 合計"
+      ],
+      "timing": [
+        "実戦中または実戦終了時のマイスロ確認"
+      ],
+      "excludedConditions": [
+        "実機連動を開始していない区間"
+      ],
+      "sourceRefs": [
+        "OBS_SRC_KAKU6",
+        "OBS_SRC_SAMMY_MYSLOT"
+      ]
+    },
+    {
+      "observationId": "OBS_BIG_MISS15_DIRECT",
+      "sourceType": "DIRECT_PLAY",
+      "observationMode": "VISUAL_EVENT",
+      "status": "FOUND",
+      "label": "BIG中フラッシュなしバラケ目",
+      "categories": [
+        "フラッシュなしバラケ目"
+      ],
+      "timing": [
+        "BIG消化中"
+      ],
+      "excludedConditions": [],
+      "sourceRefs": [
+        "OBS_SRC_KAKU6"
+      ]
+    },
+    {
+      "observationId": "OBS_MYSLOT_BT_ROLES",
+      "sourceType": "LINKED_SERVICE",
+      "observationMode": "LINKED_SERVICE_READ",
+      "status": "FOUND",
+      "label": "マイスロ BT中規定数2枚小役",
+      "categories": [
+        "特殊7枚役（規定数2枚）",
+        "スイカ（規定数2枚）",
+        "スイカ表示確率 1/○○"
+      ],
+      "timing": [
+        "実戦中または実戦終了時のマイスロ確認"
+      ],
+      "excludedConditions": [
+        "実機連動を開始していない区間"
+      ],
+      "sourceRefs": [
+        "OBS_SRC_KAKU6",
+        "OBS_SRC_SAMMY_MYSLOT"
+      ]
+    }
+  ],
+  "featureMappings": [
+    {
+      "featureId": "FEAT_PREDECESSOR_BONUS_INITIAL",
+      "mappingType": "EXACT",
+      "observationIds": [
+        "OBS_PREDECESSOR_DATA_COUNTER"
+      ],
+      "collectionMethods": [
+        "DATA_COUNTER_READ"
+      ],
+      "usableForInference": true,
+      "usableForDifficulty": false
+    },
+    {
+      "featureId": "FEAT_NORMAL_3COIN_SMALL_ROLES",
+      "mappingType": "EXACT",
+      "observationIds": [
+        "OBS_MYSLOT_NORMAL_ROLES"
+      ],
+      "collectionMethods": [
+        "LINKED_SERVICE_READ"
+      ],
+      "usableForInference": true,
+      "usableForDifficulty": true
+    },
+    {
+      "featureId": "FEAT_BIG_MISS_15",
+      "mappingType": "COMBINABLE",
+      "observationIds": [
+        "OBS_MYSLOT_BIG_TYPES",
+        "OBS_BIG_MISS15_DIRECT"
+      ],
+      "collectionMethods": [
+        "LINKED_SERVICE_READ",
+        "VISUAL_EVENT"
+      ],
+      "usableForInference": true,
+      "usableForDifficulty": false
+    },
+    {
+      "featureId": "FEAT_BT_SPECIAL_7",
+      "mappingType": "EXACT",
+      "observationIds": [
+        "OBS_MYSLOT_BT_ROLES"
+      ],
+      "collectionMethods": [
+        "LINKED_SERVICE_READ"
+      ],
+      "usableForInference": true,
+      "usableForDifficulty": false
+    }
+  ],
+  "researchReopenRequests": [],
+  "fieldVerificationItems": [
+    {
+      "verificationId": "VFY_ISEKARU_MACHINE_MENU_ITEMS",
+      "status": "WAITING_FOR_MACHINE",
+      "sourceType": "MACHINE_MENU",
+      "priority": "LOW",
+      "question": "筐体標準メニュー/履歴画面で確認できる具体項目を次回実機確認時に記録する。"
+    },
+    {
+      "verificationId": "VFY_ISEKARU_END_EVENT_SCOPE",
+      "status": "WAITING_FOR_MACHINE",
+      "sourceType": "END_EVENT",
+      "priority": "LOW",
+      "question": "終了画面・トロフィーの実機観測タイミングをObservation v2へ追加する際に再確認する。"
+    }
+  ]
 }
