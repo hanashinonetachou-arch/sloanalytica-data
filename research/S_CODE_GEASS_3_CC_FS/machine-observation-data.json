@@ -1,8 +1,8 @@
 {
-  "schemaVersion": "machine-observation-data-v1",
+  "schemaVersion": "machine-observation-data-v2",
   "machineId": "S_CODE_GEASS_3_CC_FS",
   "displayName": "パチスロ コードギアス 反逆のルルーシュ3 C.C.&Kallen ver.",
-  "researchedAt": "2026-08-22",
+  "researchedAt": "2026-08-29",
   "sources": [
     {
       "sourceId": "OBS_SRC_SAMMY_MYSLOT",
@@ -29,38 +29,131 @@
       "sourceType": "hall_data"
     }
   ],
-  "machineMenu": {
-    "status": "UNRESOLVED",
-    "availableData": [],
-    "sourceRefs": [],
-    "notes": "筐体内メニュー/遊技履歴画面で着席時に確認できる具体項目は、今回の公開情報再調査でも復元できなかった。過去の実機検証で着席時データ入力を採用していた事実があるため、存在しないとは扱わず未解決として保持する。"
+  "sourceCoverage": {
+    "machineMenu": "UNRESOLVED",
+    "dataCounter": "UNRESOLVED",
+    "linkedService": "FOUND",
+    "directPlay": "FOUND",
+    "endEvent": "FOUND",
+    "seatedState": "UNRESOLVED"
   },
-  "linkedService": {
-    "status": "CHECKED",
-    "availableData": [
-      "マイスロ対応機種であること",
-      "マイスロ起動中はチェリーを自動カウントできる",
-      "マイスロ起動中はスイカを自動カウントできる"
-    ],
-    "sourceRefs": [
-      "OBS_SRC_SAMMY_MYSLOT",
-      "OBS_SRC_PWORLD_CC_KALLEN"
-    ],
-    "notes": "Sammy公式でC.C.&Kallen ver.のマイスロ対応を確認。P-WORLDの機種別解析では、設定差のあるチェリー・スイカはマイスロ起動中に自動カウントされることが明記されている。公開情報で確認できた具体項目だけをCHECKEDとして記録し、未確認の取得項目は補完しない。"
-  },
-  "predecessorData": {
-    "status": "CHECKED",
-    "availableData": [
-      "ホール側データ表示が利用できる環境ではBB回数を確認できるケースがある",
-      "ホール側データ表示が利用できる環境ではRB回数を確認できるケースがある",
-      "ホール側データ表示が利用できる環境では総スタートを確認できるケースがある",
-      "ホール側データ表示が利用できる環境では最終スタートを確認できるケースがある"
-    ],
-    "sourceRefs": [
-      "OBS_SRC_PAPIMO"
-    ],
-    "notes": "Layer 2は筐体だけでなく周辺の遊技環境も観測対象とするため、PAPIMOの台データ例で実際に確認できるホール側累計値を条件付き観測としてCHECKEDへ整理した。店舗・データカウンター依存であり、これらの値がSloAnalyticaの公開Featureと同一の分子・分母を保証するわけではないため、Inferenceおよび自分区間差分には現時点で使用しない。過去に実機確認済みだった着席時UIの正確な項目構成はLayer 3の復元課題として別管理し、ここから推測で再構築しない。",
-    "usableForInference": false,
-    "usableForSelfSessionDelta": false
-  }
+  "observations": [
+    {
+      "observationId": "OBS_SELF_NORMAL_AT_GAMES",
+      "sourceType": "DIRECT_PLAY",
+      "observationMode": "MANUAL_COUNTER",
+      "status": "FOUND",
+      "label": "自己遊技の通常・ATゲーム数",
+      "categories": ["通常・ATゲーム数"],
+      "timing": ["自己遊技中"],
+      "excludedConditions": [],
+      "sourceRefs": []
+    },
+    {
+      "observationId": "OBS_MYSLOT_SMALL_ROLES",
+      "sourceType": "LINKED_SERVICE",
+      "observationMode": "LINKED_SERVICE_READ",
+      "status": "FOUND",
+      "label": "マイスロのチェリー・スイカ回数",
+      "categories": ["チェリー", "スイカ"],
+      "timing": ["マイスロ起動中", "遊技履歴確認時"],
+      "excludedConditions": ["マイスロ未起動区間と混在させない"],
+      "sourceRefs": ["OBS_SRC_SAMMY_MYSLOT", "OBS_SRC_PWORLD_CC_KALLEN"]
+    },
+    {
+      "observationId": "OBS_CHERRY_RB_TRIGGER",
+      "sourceType": "DIRECT_PLAY",
+      "observationMode": "VISUAL_CONFIRMATION",
+      "status": "FOUND",
+      "label": "チェリー成立から赤赤白RB当選の契機確認",
+      "categories": ["チェリー＋赤赤白RB"],
+      "timing": ["ボーナス入賞時のPUSHによる契機確認"],
+      "excludedConditions": ["チェリー回数と同じ遊技区間だけを集計する"],
+      "sourceRefs": ["OBS_SRC_PWORLD_CC_KALLEN"]
+    },
+    {
+      "observationId": "OBS_RB_CC_HIGH_GAMES",
+      "sourceType": "DIRECT_PLAY",
+      "observationMode": "MANUAL_COUNTER",
+      "status": "FOUND",
+      "label": "RB後C.C.高確の対象ゲームと無限AT移行C.C.揃い",
+      "categories": ["RB後C.C.高確対象ゲーム数", "無限AT移行C.C.揃い"],
+      "timing": ["RB後C.C.高確中"],
+      "excludedConditions": ["対象高確を実際に消化したゲームだけを分母へ加える"],
+      "sourceRefs": ["OBS_SRC_PWORLD_CC_KALLEN"]
+    },
+    {
+      "observationId": "OBS_AT_END_SCREEN",
+      "sourceType": "DIRECT_PLAY",
+      "observationMode": "VISUAL_CONFIRMATION",
+      "status": "FOUND",
+      "label": "AT終了画面",
+      "categories": ["基本画面", "偶数設定示唆", "高設定示唆・弱", "高設定示唆・強", "設定1否定", "設定4以上", "設定5以上", "設定6"],
+      "timing": ["AT終了時"],
+      "excludedConditions": [],
+      "sourceRefs": ["OBS_SRC_PWORLD_CC_KALLEN"]
+    },
+    {
+      "observationId": "OBS_TROPHY",
+      "sourceType": "DIRECT_PLAY",
+      "observationMode": "VISUAL_CONFIRMATION",
+      "status": "FOUND",
+      "label": "サミートロフィー",
+      "categories": ["設定2以上", "設定3以上", "設定4以上", "設定5以上", "設定6"],
+      "timing": ["トロフィー出現時"],
+      "excludedConditions": [],
+      "sourceRefs": ["OBS_SRC_SAMMY_MYSLOT", "OBS_SRC_PWORLD_CC_KALLEN"]
+    }
+  ],
+  "featureMappings": [
+    {
+      "featureId": "FEAT_CHERRY_WATERMELON_MULTINOMIAL",
+      "mappingType": "EXACT",
+      "observationIds": ["OBS_SELF_NORMAL_AT_GAMES", "OBS_MYSLOT_SMALL_ROLES"],
+      "collectionMethods": ["MANUAL_COUNTER", "LINKED_SERVICE_READ"],
+      "usableForInference": true,
+      "usableForDifficulty": true
+    },
+    {
+      "featureId": "FEAT_CHERRY_RB_GIVEN_CHERRY",
+      "mappingType": "CONDITIONAL",
+      "observationIds": ["OBS_MYSLOT_SMALL_ROLES", "OBS_CHERRY_RB_TRIGGER"],
+      "collectionMethods": ["LINKED_SERVICE_READ", "VISUAL_CONFIRMATION"],
+      "usableForInference": true,
+      "usableForDifficulty": true
+    },
+    {
+      "featureId": "FEAT_RB_INFINITE_AT_BINOMIAL",
+      "mappingType": "EXACT",
+      "observationIds": ["OBS_RB_CC_HIGH_GAMES"],
+      "collectionMethods": ["MANUAL_COUNTER"],
+      "usableForInference": true,
+      "usableForDifficulty": false
+    },
+    {
+      "featureId": "FEAT_AT_END_SCREEN_MULTINOMIAL",
+      "mappingType": "EXACT",
+      "observationIds": ["OBS_AT_END_SCREEN"],
+      "collectionMethods": ["VISUAL_CONFIRMATION"],
+      "usableForInference": true,
+      "usableForDifficulty": false
+    }
+  ],
+  "researchReopenRequests": [],
+  "fieldVerificationItems": [
+    {
+      "verificationId": "VFY_CC_MACHINE_MENU_ITEMS",
+      "status": "WAITING_FOR_MACHINE",
+      "sourceType": "MACHINE_MENU",
+      "priority": "LOW",
+      "question": "筐体内メニュー／遊技履歴で確認できる具体項目を次回実機確認時に記録する。"
+    },
+    {
+      "verificationId": "VFY_CC_SEATED_DATA_SECTION",
+      "status": "WAITING_FOR_MACHINE",
+      "sourceType": "DATA_COUNTER",
+      "priority": "LOW",
+      "question": "過去に実機確認済みだった着席時データ入力の正確な項目構成を復元する。現行active Featureはこの未解決項目に依存しない。"
+    }
+  ]
 }
