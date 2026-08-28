@@ -1,0 +1,82 @@
+name: v6.4 Fire Force Cross Bonus Reason
+
+on:
+  push:
+    branches: [prototype-multi-machine]
+    paths:
+      - 'tools/migrate-v64-fire-force-cross-bonus-reason.mjs'
+      - 'tools/audit-v64-causal-relations.mjs'
+      - 'test/v64-causal-relation-audit.test.mjs'
+      - '.github/workflows/v64-fire-force-cross-bonus-reason.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  apply-and-validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: prototype-multi-machine
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Dry-run reason migration
+        run: node tools/migrate-v64-fire-force-cross-bonus-reason.mjs .
+      - name: Apply reason migration
+        run: node tools/migrate-v64-fire-force-cross-bonus-reason.mjs . --apply
+      - name: Rebuild Fire Force package
+        run: npm run machine:pipeline -- L_ENEN_NO_SHOUBOUTAI_JG --skip-repo-checks
+      - name: Refresh semantic audit
+        run: node tools/audit-v64-cross-machine-semantic.mjs . reports/v64-cross-machine-semantic-audit.json
+      - name: Refresh causal review
+        run: node tools/audit-v64-causal-relations.mjs . reports/v64-causal-relation-review.json
+      - name: Run causal regression
+        run: node --test test/v64-causal-relation-audit.test.mjs
+      - name: Assert Fire Force leaves causal review
+        run: |
+          node --input-type=module - <<'NODE'
+          import fs from 'node:fs';
+          const semantic=JSON.parse(fs.readFileSync('reports/v64-cross-machine-semantic-audit.json','utf8'));
+          const m=semantic.machines.find(x=>x.machineId==='L_ENEN_NO_SHOUBOUTAI_JG');
+          const causal=(m?.issues??[]).filter(x=>x.code==='CAUSAL_RELATION_REJECT_CANDIDATE');
+          if(causal.length) throw new Error(`Fire Force still has ${causal.length} causal candidate(s)`);
+          const causalReport=JSON.parse(fs.readFileSync('reports/v64-causal-relation-review.json','utf8'));
+          if(causalReport.summary.candidateCount!==17 || causalReport.summary.machineCount!==6) throw new Error(`unexpected causal baseline ${JSON.stringify(causalReport.summary)}`);
+          console.log('PASS Fire Force causal-reason cleanup');
+          NODE
+      - name: Run full test suite
+        run: npm test
+      - name: Run public-data audit
+        run: npm run audit
+      - name: Check legacy four-layer baseline
+        run: |
+          set +e
+          npm run pipeline:four-layer:gate -- L_ENEN_NO_SHOUBOUTAI_JG 2>&1 | tee /tmp/four-layer.log
+          status=${PIPESTATUS[0]}
+          set -e
+          if [ "$status" -eq 0 ]; then
+            echo 'Four-layer gate now passes.'
+          else
+            error_count=$(grep -c '^ERROR:' /tmp/four-layer.log || true)
+            if [ "$error_count" -ne 1 ] || ! grep -Fq 'ERROR: L_ENEN_NO_SHOUBOUTAI_JG: missing ui layer' /tmp/four-layer.log; then
+              echo 'Unexpected Fire Force four-layer regression.' >&2
+              cat /tmp/four-layer.log >&2
+              exit 1
+            fi
+            echo 'REVIEW: pre-existing Fire Force UI Design migration remains outstanding.'
+          fi
+      - name: Commit validated cleanup
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add research/L_ENEN_NO_SHOUBOUTAI_JG machines/L_ENEN_NO_SHOUBOUTAI_JG catalog.json difficulty-catalog.json reports/v64-cross-machine-semantic-audit.json reports/v64-causal-relation-review.json 2>/dev/null || true
+          if git diff --cached --quiet; then
+            echo "No validated changes to commit"
+          else
+            git commit -m "audit: clarify Fire Force cross-bonus exclusion"
+            git push origin HEAD:prototype-multi-machine
+          fi
