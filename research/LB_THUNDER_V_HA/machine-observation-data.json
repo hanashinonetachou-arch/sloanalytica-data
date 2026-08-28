@@ -1,10 +1,28 @@
 {
-  "schemaVersion": "machine-observation-data-v1",
+  "schemaVersion": "machine-observation-data-v2",
   "machineId": "LB_THUNDER_V_HA",
   "displayName": "スマスロ サンダーV",
-  "researchedAt": "2026-08-22",
-  "sources": [],
-  "machineMenu": {"status":"UNRESOLVED","availableData":[],"sourceRefs":[],"notes":"過去実機確認済みの着席時BIG/REG等を含め、観測UIの正確な契約を再確認するまで未解決とする。"},
-  "linkedService": {"status":"UNRESOLVED","availableData":[],"sourceRefs":[],"notes":"機種固有の実機連動機能と取得項目は未解決。"},
-  "predecessorData": {"status":"UNRESOLVED","availableData":[],"sourceRefs":[],"notes":"過去実機検証済み入力を統計Research再生成で上書きしない。正確な着席時項目を再確認後にCHECKEDへ昇格する。","usableForInference":false,"usableForSelfSessionDelta":false}
+  "researchedAt": "2026-08-29",
+  "sources": [
+    {"sourceId":"OBS_SRC_THUNDER_NANAPRESS","publisher":"なな徹","title":"スマスロ サンダーV 設定差・設定示唆まとめ","url":"https://nana-press.com/kaiseki/machine/1106/35480/","checkedAt":"2026-08-29","sourceType":"analysis"},
+    {"sourceId":"OBS_SRC_THUNDER_HISSHOBON","publisher":"パチ＆スロ必勝本","title":"スマスロ サンダーV 小役確率&コイン持ち","url":"https://hisshobon.com/machineinfo/89158/","checkedAt":"2026-08-29","sourceType":"analysis"}
+  ],
+  "sourceCoverage": {"machineMenu":"UNRESOLVED","dataCounter":"VERIFIED_ON_MACHINE","linkedService":"FOUND","directPlay":"FOUND","endEvent":"FOUND","seatedState":"VERIFIED_ON_MACHINE"},
+  "observations": [
+    {"observationId":"OBS_PREDECESSOR_DATA_COUNTER","sourceType":"DATA_COUNTER","observationMode":"DATA_COUNTER_READ","status":"VERIFIED_ON_MACHINE","label":"着席時データカウンター","categories":["着席時ゲーム数","着席時BIG","着席時REG"],"timing":["着席直後"],"excludedConditions":[],"sourceRefs":[]},
+    {"observationId":"OBS_SELF_BONUS_COUNTERS","sourceType":"DIRECT_PLAY","observationMode":"MANUAL_COUNTER","status":"FOUND","label":"自分区間の通常ゲーム数・BIG・REG","categories":["通常ゲーム数","BIG","REG"],"timing":["自己遊技中"],"excludedConditions":["雷神ループによる追加BONUS GAMEは通常時BIGへ含めない"],"sourceRefs":[]},
+    {"observationId":"OBS_YUNIMEMO_NORMAL_ROLES","sourceType":"LINKED_SERVICE","observationMode":"LINKED_SERVICE_READ","status":"FOUND","label":"ユニメモ 通常時小役","categories":["ベルA","ベルB","スイカA","スイカB","チェリーB"],"timing":["ユニメモ遊技履歴確認時"],"excludedConditions":["未取得項目は0回ではなく未観測として扱う"],"sourceRefs":["OBS_SRC_THUNDER_HISSHOBON"]},
+    {"observationId":"OBS_YUNIMEMO_BIG_ROLES","sourceType":"LINKED_SERVICE","observationMode":"LINKED_SERVICE_READ","status":"FOUND","label":"ユニメモ BIG中3連V狙い停止形","categories":["BIG中ベルB","BIG中ベルC","BIG中リーチ目"],"timing":["BIG BONUS GAME前半","雷神ループ後BONUS GAME"],"excludedConditions":["分母は実際に3連V狙いで判別したゲーム数を使用する"],"sourceRefs":["OBS_SRC_THUNDER_NANAPRESS"]},
+    {"observationId":"OBS_BONUS_END_EVIDENCE","sourceType":"DIRECT_PLAY","observationMode":"VISUAL_CONFIRMATION","status":"FOUND","label":"ボーナス終了画面","categories":["BIG終了画面","REG終了画面","1G連BIG終了画面"],"timing":["各ボーナス終了時"],"excludedConditions":[],"sourceRefs":["OBS_SRC_THUNDER_NANAPRESS"]}
+  ],
+  "featureMappings": [
+    {"featureId":"FEAT_PREDECESSOR_BONUS_OUTCOME","mappingType":"EXACT","observationIds":["OBS_PREDECESSOR_DATA_COUNTER"],"collectionMethods":["DATA_COUNTER_READ"],"usableForInference":true,"usableForDifficulty":false},
+    {"featureId":"FEAT_BONUS_OUTCOME","mappingType":"EXACT","observationIds":["OBS_SELF_BONUS_COUNTERS"],"collectionMethods":["MANUAL_COUNTER"],"usableForInference":true,"usableForDifficulty":false},
+    {"featureId":"FEAT_SMALL_ROLE_OUTCOME","mappingType":"EXACT","observationIds":["OBS_YUNIMEMO_NORMAL_ROLES"],"collectionMethods":["LINKED_SERVICE_READ"],"usableForInference":true,"usableForDifficulty":true},
+    {"featureId":"FEAT_BIG_GAME_OUTCOME","mappingType":"EXACT","observationIds":["OBS_YUNIMEMO_BIG_ROLES"],"collectionMethods":["LINKED_SERVICE_READ"],"usableForInference":true,"usableForDifficulty":false}
+  ],
+  "researchReopenRequests": [],
+  "fieldVerificationItems": [
+    {"verificationId":"VFY_THUNDER_MACHINE_MENU_ITEMS","status":"WAITING_FOR_MACHINE","sourceType":"MACHINE_MENU","priority":"LOW","question":"筐体標準メニューで確認できる具体項目を、データカウンターおよびユニメモと区別して次回実機確認時に記録する。"}
+  ]
 }
