@@ -55,9 +55,10 @@ function migrate(root, apply) {
   }
 
   delete sf.categoryExcludeLabels;
-  sf.userReason = 'ボーナス終了画面は全カテゴリを同じ入力で記録し、完全分布の数値推測とEvidence判定に共有します。二重入力は不要です。';
+  sf.normalizeRoundedCategoryProbabilities = true;
+  sf.userReason = 'ボーナス終了画面は全カテゴリを同じ入力で記録し、公開丸め値は採用時に正規化した完全分布として数値推測へ利用します。銅・金・星・虹は同じ入力をEvidenceEngineにも共有するため、二重入力は不要です。';
   delete sf.userFacingReason;
-  const note = 'v6.4再監査: Evidenceカテゴリも完全分布へ戻し、同一inputをNumeric FeatureとEvidenceEngineで共有。';
+  const note = 'v6.4再監査: Evidenceカテゴリも完全分布へ戻し、同一inputをNumeric FeatureとEvidenceEngineで共有。公開丸め値はResearch原値を保持し、Selection採用時に厳密確率へ正規化する。';
   rf.notes = rf.notes ? `${rf.notes} ${note}` : note;
 
   const evidenceIds = new Set(Object.keys(MAP));
