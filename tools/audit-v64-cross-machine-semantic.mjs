@@ -159,6 +159,7 @@ export function auditV64CrossMachine(root = process.cwd()) {
     const evidenceByResearch = new Map(arr(selection.evidence).filter(x => x?.researchEvidenceId).map(x => [x.researchEvidenceId, x]));
     const explicitPairs = collectExplicitPairs(research);
     const uiEvidence = evidenceUiIds(selection);
+    const selectedEvidence = new Set([...uiEvidence, ...arr(selection.evidence).map(x => x?.researchEvidenceId).filter(Boolean)]);
 
     for (const rf of arr(research.features)) {
       const cov = numericCoverage(rf);
@@ -176,6 +177,7 @@ export function auditV64CrossMachine(root = process.cwd()) {
         const rel = relation(rf, re, explicitPairs);
         if (rel) relatedEvidence.push({researchEvidenceId:re.researchEvidenceId, name:re.name, ...rel});
       }
+      const selectedRelatedEvidence = relatedEvidence.filter(e => selectedEvidence.has(e.researchEvidenceId));
       const reason = String(sf.rejectionReason ?? sf.userReason ?? sf.userFacingReason ?? '');
 
       if (!INCLUDE.has(sf.adoptionCategory)) {
@@ -184,9 +186,9 @@ export function auditV64CrossMachine(root = process.cwd()) {
           continue;
         }
         if (SUBSET_REASON.test(reason)) continue;
-        if (relatedEvidence.length) {
+        if (selectedRelatedEvidence.length) {
           const overlapWording = EVIDENCE_REASON.test(reason) || OVERLAP_REASON.test(reason);
-          const strongest = relatedEvidence.some(x => x.confidence === 'HIGH') ? 'HIGH' : 'MEDIUM';
+          const strongest = selectedRelatedEvidence.some(x => x.confidence === 'HIGH') ? 'HIGH' : 'MEDIUM';
           issues.push({
             severity:'REVIEW',
             code: overlapWording ? 'LEGACY_EVIDENCE_OVERLAP_REJECT_CANDIDATE' : 'EXCLUDED_NUMERIC_FEATURE_WITH_RELATED_EVIDENCE',
@@ -199,7 +201,7 @@ export function auditV64CrossMachine(root = process.cwd()) {
             settingCount:cov.settingCount,
             relationConfidence:strongest,
             reason,
-            relatedEvidence,
+            relatedEvidence:selectedRelatedEvidence,
           });
         }
         continue;
