@@ -49,7 +49,10 @@ jobs:
         run: |
           git config user.name github-actions[bot]
           git config user.email 41898282+github-actions[bot]@users.noreply.github.com
-          git add research/L_MAGICAL_HALLOWEEN8_FE/selection-data.json research/L_MAGICAL_HALLOWEEN8_FE/machine-observation-data.json machines/L_MAGICAL_HALLOWEEN8_FE catalog.json difficulty-catalog.json machine-registry.json reports/v64-observation-trial-universe-audit.json reports 2>/dev/null || true
+          # The permanent Observation workflow owns the cross-machine report; keep it out of this migration commit.
+          git restore reports/v64-observation-trial-universe-audit.json 2>/dev/null || true
+          # Stage every tracked artifact changed by the target pipeline without adding transient untracked build output.
+          git add -u
           if ! git diff --cached --quiet; then
             git commit -m "fix: gate Magihallo8 predecessor observation [skip ci]"
             git pull --rebase origin prototype-multi-machine
