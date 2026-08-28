@@ -1,0 +1,134 @@
+{
+  "schemaVersion": "machine-observation-data-v2",
+  "machineId": "S_WORD_OF_LIGHTS_2",
+  "displayName": "ワードオブライツⅡ",
+  "researchedAt": "2026-08-29",
+  "sources": [
+    {
+      "sourceId": "SRC_HISSHO",
+      "publisher": "パチ＆スロ必勝本",
+      "title": "ワードオブライツⅡ 小役確率・ユニメモカウント",
+      "url": "https://p.hisshobon.jp/machine/4232/1/101728",
+      "checkedAt": "2026-08-22",
+      "sourceType": "analysis"
+    }
+  ],
+  "sourceCoverage": {
+    "machineMenu": "UNRESOLVED",
+    "dataCounter": "UNRESOLVED",
+    "linkedService": "FOUND",
+    "directPlay": "FOUND",
+    "endEvent": "FOUND",
+    "seatedState": "UNRESOLVED"
+  },
+  "observations": [
+    {
+      "observationId": "OBS_UNIMEMO_COUNTER",
+      "sourceType": "LINKED_SERVICE",
+      "observationMode": "LINKED_SERVICE_READ",
+      "status": "FOUND",
+      "label": "ユニメモの通常時G・4枚役A",
+      "categories": ["NORMAL_GAMES", "ROLE_4A"],
+      "timing": ["ユニメモ確認時"],
+      "excludedConditions": [],
+      "sourceRefs": ["SRC_HISSHO"],
+      "notes": "INP_NORMAL_GAMESとINP_ROLE_4A_COUNTを同じユニメモ集計範囲から取得する。4枚役Aが利用できる場合はこちらを主軸とする。"
+    },
+    {
+      "observationId": "OBS_NORMAL_GAMES_MANUAL",
+      "sourceType": "DIRECT_PLAY",
+      "observationMode": "MANUAL_COUNTER",
+      "status": "FOUND",
+      "label": "通常時ゲーム数の手動代替",
+      "categories": ["NORMAL_GAMES"],
+      "timing": ["通常時"],
+      "excludedConditions": ["BIG中・CT中など公開BIG初当りの分母に含まれない区間"],
+      "sourceRefs": [],
+      "notes": "ユニメモの4枚役Aを利用できない場合に、公開BIG初当りと同じ通常時母集団を構成できるときだけINP_NORMAL_GAMESへ入力するフォールバック経路。"
+    },
+    {
+      "observationId": "OBS_BIG_INITIAL",
+      "sourceType": "DIRECT_PLAY",
+      "observationMode": "MANUAL_COUNTER",
+      "status": "FOUND",
+      "label": "BIG初当り",
+      "categories": ["BIG_INITIAL"],
+      "timing": ["BIG初当り成立時"],
+      "excludedConditions": [],
+      "sourceRefs": [],
+      "notes": "INP_BIG_COUNTへ対応。FEAT_ROLE_4Aが利用できる場合はSelectionのsuppressedByFeatureIdsによりBIG fallbackを停止する。"
+    },
+    {
+      "observationId": "OBS_BIG_END_SCREEN",
+      "sourceType": "END_EVENT",
+      "observationMode": "VISUAL_EVENT",
+      "status": "FOUND",
+      "label": "BIG後CTルーレット失敗画面",
+      "categories": ["TEMOYAN", "HETARE", "HEIBON", "SUNRISE"],
+      "timing": ["BIG後CTルーレット失敗画面確認時"],
+      "excludedConditions": [],
+      "sourceRefs": [],
+      "notes": "4カテゴリを1回の自然観測として一度だけ入力する。TEMOYAN/HETARE/HEIBONはNumeric、SUNRISEは同じ入力から設定5以上Evidenceへ流す。"
+    },
+    {
+      "observationId": "OBS_ADJUST_MAGIC",
+      "sourceType": "DIRECT_PLAY",
+      "observationMode": "VISUAL_EVENT",
+      "status": "FOUND",
+      "label": "枚数調整成功時の魔法",
+      "categories": ["FLAME", "BLIZZARD", "METEO", "WORD", "THUNDER"],
+      "timing": ["BIG中の枚数調整成功時"],
+      "excludedConditions": ["枚数調整失敗時"],
+      "sourceRefs": [],
+      "notes": "5カテゴリを1回の自然観測として一度だけ入力する。FLAME/BLIZZARDはNumeric、METEO/WORD/THUNDERは同じ入力からEvidenceへ流す。"
+    }
+  ],
+  "featureMappings": [
+    {
+      "featureId": "FEAT_ROLE_4A",
+      "mappingType": "EXACT",
+      "observationIds": ["OBS_UNIMEMO_COUNTER"],
+      "collectionMethods": ["LINKED_SERVICE_READ"],
+      "usableForInference": true,
+      "usableForDifficulty": true,
+      "notes": "同一ユニメモ集計範囲の通常時Gを分母、4枚役Aを分子とする主軸Feature。"
+    },
+    {
+      "featureId": "FEAT_BIG",
+      "mappingType": "COMBINABLE",
+      "observationIds": ["OBS_NORMAL_GAMES_MANUAL", "OBS_BIG_INITIAL"],
+      "collectionMethods": ["MANUAL_COUNTER", "MANUAL_COUNTER"],
+      "usableForInference": true,
+      "usableForDifficulty": false,
+      "notes": "4枚役Aを取得できない場合だけ使うフォールバック。公開BIG初当りと同じ通常時分母を構成できない場合は入力しない。"
+    },
+    {
+      "featureId": "FEAT_BIG_END_SCREEN",
+      "mappingType": "EXACT",
+      "observationIds": ["OBS_BIG_END_SCREEN"],
+      "collectionMethods": ["VISUAL_EVENT"],
+      "usableForInference": true,
+      "usableForDifficulty": false,
+      "notes": "4カテゴリを一度だけ観測し、Numeric/Evidenceへ用途分岐する。"
+    },
+    {
+      "featureId": "FEAT_ADJUST_MAGIC",
+      "mappingType": "EXACT",
+      "observationIds": ["OBS_ADJUST_MAGIC"],
+      "collectionMethods": ["VISUAL_EVENT"],
+      "usableForInference": true,
+      "usableForDifficulty": false,
+      "notes": "5カテゴリを一度だけ観測し、Numeric/Evidenceへ用途分岐する。"
+    }
+  ],
+  "researchReopenRequests": [],
+  "fieldVerificationItems": [
+    {
+      "verificationId": "VERIFY_UNIMEMO_GAME_BASIS",
+      "status": "WAITING_FOR_MACHINE",
+      "sourceType": "LINKED_SERVICE",
+      "priority": "MEDIUM",
+      "question": "ユニメモ表示の通常時ゲーム数は解析上の4枚役A分母の除外区間と完全に一致するか。"
+    }
+  ]
+}
