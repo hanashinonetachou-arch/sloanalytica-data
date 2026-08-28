@@ -1,7 +1,7 @@
 {
   "schemaVersion": "selection-data-v1",
   "machineId": "S_MHW_ICEBORNE_ZF",
-  "machineDataVersion": "0.1.2",
+  "machineDataVersion": "0.1.3",
   "inputs": [
     {
       "id": "INP_NORMAL_GAMES",
@@ -180,6 +180,42 @@
       "observationScope": "SELF_PLAY",
       "defaultValue": 0,
       "uiQuickAdd": 1
+    },
+    {
+      "id": "INP_CZ_QUEST_COUNT",
+      "name": "クエスト",
+      "category": "CZ_TYPE",
+      "type": "counter",
+      "unit": "回",
+      "displayOrder": 20,
+      "inferenceRole": "INCLUDE_SUPPORT",
+      "observationScope": "SELF_PLAY",
+      "defaultValue": null,
+      "uiQuickAdd": 1
+    },
+    {
+      "id": "INP_CZ_AIROU_COUNT",
+      "name": "アイルーBINGO",
+      "category": "CZ_TYPE",
+      "type": "counter",
+      "unit": "回",
+      "displayOrder": 21,
+      "inferenceRole": "INCLUDE_SUPPORT",
+      "observationScope": "SELF_PLAY",
+      "defaultValue": null,
+      "uiQuickAdd": 1
+    },
+    {
+      "id": "INP_CZ_SELIANA_COUNT",
+      "name": "セリエナ防衛戦",
+      "category": "CZ_TYPE",
+      "type": "counter",
+      "unit": "回",
+      "displayOrder": 22,
+      "inferenceRole": "INCLUDE_SUPPORT",
+      "observationScope": "SELF_PLAY",
+      "defaultValue": null,
+      "uiQuickAdd": 1
     }
   ],
   "features": [
@@ -202,70 +238,100 @@
       "userReason": "CZ種類別の合計を代表Featureとして利用し、CZ種類別・状態別レア役抽選・AT初当りとの重複評価を避けます。"
     },
     {
+      "researchFeatureId": "RF_CZ_TYPE_COMPOSITION",
+      "featureId": "FEAT_CZ_TYPE_COMPOSITION",
+      "adoptionCategory": "INCLUDE_SUPPORT",
+      "numeratorInputId": "INP_CZ_QUEST_COUNT",
+      "categoryInputIds": [
+        "INP_CZ_AIROU_COUNT",
+        "INP_CZ_SELIANA_COUNT"
+      ],
+      "inputTransform": "sum_inputs_to_trials",
+      "minimumSample": 1,
+      "sampleRecommendation": 30,
+      "weight": 1,
+      "displayFormat": "percent",
+      "difficultyExposure": {
+        "mode": "setting_rate",
+        "trialsPerGameBySetting": {
+          "SET_1": 0.008006405124099279,
+          "SET_2": 0.00835421888053467,
+          "SET_3": 0.008688097306689836,
+          "SET_4": 0.009551098376313277,
+          "SET_5": 0.009823182711198428,
+          "SET_6": 0.010559662090813094
+        },
+        "quality": "DERIVED",
+        "basisId": "SELF_NORMAL_PLAY_GAMES"
+      },
+      "difficultyParticipation": "INCLUDE",
+      "userReason": "CZ合算の発生率に加え、発生したCZがクエスト・アイルーBINGO・セリエナ防衛戦のどれだったかを条件付き構成として評価します。合算率との積は種類別CZの完全な確率分解になるため、同じCZを二重に数えません。"
+    },
+    {
       "researchFeatureId": "RF_AT_INITIAL",
       "featureId": "FEAT_AT_INITIAL_EXCLUDED",
       "adoptionCategory": "EXCLUDE",
-      "userFacingReason": "CZ合算を通常G基準の代表Featureとして採用しており、CZ種類別・状態別レア役抽選・AT直撃・ボーナス内訳など同一当選系列の上流下流を独立に加えると重複評価になるため不採用です。"
+      "userFacingReason": "AT初当りには設定差がありますが、採用済みCZ合算と同じ通常ゲームから生じる関連観測です。CZ合算とAT初当りを同時利用するjoint likelihood contractを現Engineで定義していないため、現版ではCZ合算を代表指標としてAT初当りは推測計算に使用しません。"
     },
     {
       "researchFeatureId": "RF_CZ_QUEST",
       "featureId": "FEAT_CZ_QUEST_EXCLUDED",
       "adoptionCategory": "EXCLUDE",
-      "userFacingReason": "CZ合算を通常G基準の代表Featureとして採用しており、CZ種類別・状態別レア役抽選・AT直撃・ボーナス内訳など同一当選系列の上流下流を独立に加えると重複評価になるため不採用です。"
+      "userFacingReason": "クエストの通常G基準単独確率は、CZ合算の発生率と新設したCZ種類構成へ分解して評価します。単独Binomialでは使用しません。"
     },
     {
       "researchFeatureId": "RF_CZ_AIROU",
       "featureId": "FEAT_CZ_AIROU_EXCLUDED",
       "adoptionCategory": "EXCLUDE",
-      "userFacingReason": "CZ合算を通常G基準の代表Featureとして採用しており、CZ種類別・状態別レア役抽選・AT直撃・ボーナス内訳など同一当選系列の上流下流を独立に加えると重複評価になるため不採用です。"
+      "userFacingReason": "アイルーBINGOの通常G基準単独確率は、CZ合算の発生率と新設したCZ種類構成へ分解して評価します。単独Binomialでは使用しません。"
     },
     {
       "researchFeatureId": "RF_CZ_SELIANA",
       "featureId": "FEAT_CZ_SELIANA_EXCLUDED",
       "adoptionCategory": "EXCLUDE",
-      "userFacingReason": "CZ合算を通常G基準の代表Featureとして採用しており、CZ種類別・状態別レア役抽選・AT直撃・ボーナス内訳など同一当選系列の上流下流を独立に加えると重複評価になるため不採用です。"
+      "userFacingReason": "セリエナ防衛戦の通常G基準単独確率は、CZ合算の発生率と新設したCZ種類構成へ分解して評価します。単独Binomialでは使用しません。"
     },
     {
       "researchFeatureId": "RF_HIGH_FALL",
       "featureId": "FEAT_HIGH_FALL_EXCLUDED",
       "adoptionCategory": "EXCLUDE",
-      "userFacingReason": "CZ合算を通常G基準の代表Featureとして採用しており、CZ種類別・状態別レア役抽選・AT直撃・ボーナス内訳など同一当選系列の上流下流を独立に加えると重複評価になるため不採用です。"
+      "userFacingReason": "高確中の状態転落率には設定差がありますが、通常/高確を実戦中に確実に識別して転落抽選の対象回数を数えられるかが未解決です。Observation条件が確定するまで推測計算に使用しません。"
     },
     {
       "researchFeatureId": "RF_NORMAL_WEAK_CZ",
       "featureId": "FEAT_NORMAL_WEAK_CZ_EXCLUDED",
       "adoptionCategory": "EXCLUDE",
-      "userFacingReason": "CZ合算を通常G基準の代表Featureとして採用しており、CZ種類別・状態別レア役抽選・AT直撃・ボーナス内訳など同一当選系列の上流下流を独立に加えると重複評価になるため不採用です。"
+      "userFacingReason": "状態別レア役からのCZ結果には設定差がありますが、通常/高確の実戦識別条件が未解決です。またCZ合算と同時利用する条件付きjoint likelihood contractも現Engineで定義していないため、現版では推測計算に使用しません。"
     },
     {
       "researchFeatureId": "RF_NORMAL_STRONG_CZ",
       "featureId": "FEAT_NORMAL_STRONG_CZ_EXCLUDED",
       "adoptionCategory": "EXCLUDE",
-      "userFacingReason": "CZ合算を通常G基準の代表Featureとして採用しており、CZ種類別・状態別レア役抽選・AT直撃・ボーナス内訳など同一当選系列の上流下流を独立に加えると重複評価になるため不採用です。"
+      "userFacingReason": "状態別レア役からのCZ結果には設定差がありますが、通常/高確の実戦識別条件が未解決です。またCZ合算と同時利用する条件付きjoint likelihood contractも現Engineで定義していないため、現版では推測計算に使用しません。"
     },
     {
       "researchFeatureId": "RF_HIGH_WEAK_CZ",
       "featureId": "FEAT_HIGH_WEAK_CZ_EXCLUDED",
       "adoptionCategory": "EXCLUDE",
-      "userFacingReason": "CZ合算を通常G基準の代表Featureとして採用しており、CZ種類別・状態別レア役抽選・AT直撃・ボーナス内訳など同一当選系列の上流下流を独立に加えると重複評価になるため不採用です。"
+      "userFacingReason": "状態別レア役からのCZ結果には設定差がありますが、通常/高確の実戦識別条件が未解決です。またCZ合算と同時利用する条件付きjoint likelihood contractも現Engineで定義していないため、現版では推測計算に使用しません。"
     },
     {
       "researchFeatureId": "RF_HIGH_STRONG_CZ",
       "featureId": "FEAT_HIGH_STRONG_CZ_EXCLUDED",
       "adoptionCategory": "EXCLUDE",
-      "userFacingReason": "CZ合算を通常G基準の代表Featureとして採用しており、CZ種類別・状態別レア役抽選・AT直撃・ボーナス内訳など同一当選系列の上流下流を独立に加えると重複評価になるため不採用です。"
+      "userFacingReason": "状態別レア役からのCZ結果には設定差がありますが、通常/高確の実戦識別条件が未解決です。またCZ合算と同時利用する条件付きjoint likelihood contractも現Engineで定義していないため、現版では推測計算に使用しません。"
     },
     {
       "researchFeatureId": "RF_AT_DIRECT",
       "featureId": "FEAT_AT_DIRECT_EXCLUDED",
       "adoptionCategory": "EXCLUDE",
-      "userFacingReason": "CZ合算を通常G基準の代表Featureとして採用しており、CZ種類別・状態別レア役抽選・AT直撃・ボーナス内訳など同一当選系列の上流下流を独立に加えると重複評価になるため不採用です。"
+      "userFacingReason": "AT直撃はAT初当りの部分集合で、設定差は大きい一方で設定1でも約1/6万と低頻度です。親となるAT初当りを採用していない現構成でも、CZ合算と経路別に結合する尤度契約を定義していないため数値Featureには使用しません。特殊な告知契機による設定下限はEvidenceとして別に扱います。"
     },
     {
       "researchFeatureId": "RF_LONG_FREEZE",
       "featureId": "FEAT_LONG_FREEZE_EXCLUDED",
       "adoptionCategory": "EXCLUDE",
-      "userFacingReason": "CZ合算を通常G基準の代表Featureとして採用しており、CZ種類別・状態別レア役抽選・AT直撃・ボーナス内訳など同一当選系列の上流下流を独立に加えると重複評価になるため不採用です。"
+      "userFacingReason": "ロングフリーズは約1/17万～1/18万と極端に低頻度で、設定間の確率差もごく小さいため終日実戦の数値Featureとして識別力がありません。特殊な告知契機による設定下限はEvidenceとして別に扱います。"
     },
     {
       "researchFeatureId": "RF_COMMON_BELL",
@@ -549,6 +615,13 @@
     ]
   },
   "uiCategoryLabels": {
-    "SELF_PLAY": "通常時"
-  }
+    "SELF_PLAY": "通常時",
+    "CZ_TYPE": "CZ種類"
+  },
+  "selectionNotes": [
+    "CZは「合算発生率」と「発生時の種類構成」に因数分解して評価する。",
+    "状態別レア役CZ・高確転落は通常/高確の実戦識別条件が未解決のためObservation確定待ち。",
+    "AT初当り・AT直撃はCZとのjoint likelihood contractを実装するまで独立Feature化しない。",
+    "ロングフリーズ数値率は極低頻度かつ設定差が小さいため不採用。特殊契機Evidenceは維持する。"
+  ]
 }

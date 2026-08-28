@@ -3,7 +3,7 @@
   "machine": {
     "schemaVersion": "2.0.0",
     "machineId": "S_MHW_ICEBORNE_ZF",
-    "machineDataVersion": "0.1.2",
+    "machineDataVersion": "0.1.3",
     "displayName": "パチスロ モンスターハンターワールド：アイスボーンTM",
     "modelName": "S MHWアイスボーンZF",
     "manufacturer": "エンターライズ",
@@ -218,6 +218,45 @@
         "minimum": 0
       },
       {
+        "id": "INP_CZ_QUEST_COUNT",
+        "name": "クエスト",
+        "category": "CZ_TYPE",
+        "type": "counter",
+        "unit": "回",
+        "displayOrder": 20,
+        "inferenceRole": "INCLUDE_SUPPORT",
+        "observationScope": "SELF_PLAY",
+        "defaultValue": null,
+        "uiQuickAdd": 1,
+        "minimum": 0
+      },
+      {
+        "id": "INP_CZ_AIROU_COUNT",
+        "name": "アイルーBINGO",
+        "category": "CZ_TYPE",
+        "type": "counter",
+        "unit": "回",
+        "displayOrder": 21,
+        "inferenceRole": "INCLUDE_SUPPORT",
+        "observationScope": "SELF_PLAY",
+        "defaultValue": null,
+        "uiQuickAdd": 1,
+        "minimum": 0
+      },
+      {
+        "id": "INP_CZ_SELIANA_COUNT",
+        "name": "セリエナ防衛戦",
+        "category": "CZ_TYPE",
+        "type": "counter",
+        "unit": "回",
+        "displayOrder": 22,
+        "inferenceRole": "INCLUDE_SUPPORT",
+        "observationScope": "SELF_PLAY",
+        "defaultValue": null,
+        "uiQuickAdd": 1,
+        "minimum": 0
+      },
+      {
         "id": "INP_EVI_EVID_SPECIAL",
         "name": "特殊契機・昇格チャレンジ",
         "type": "enum",
@@ -323,6 +362,72 @@
           "SET_4": 0.009551098376313277,
           "SET_5": 0.009823182711198428,
           "SET_6": 0.010559662090813094
+        },
+        "sourceEvidenceRefs": [
+          "SRC_NANA"
+        ]
+      },
+      {
+        "featureId": "FEAT_CZ_TYPE_COMPOSITION",
+        "name": "CZ種類構成（クエスト・アイルーBINGO・セリエナ防衛戦）",
+        "adoptionCategory": "INCLUDE_SUPPORT",
+        "calculationRole": "PROBABILITY",
+        "probabilityEngineUsage": true,
+        "modelType": "multinomial",
+        "minimumSample": 1,
+        "sampleRecommendation": 30,
+        "reliabilityProfile": {
+          "weight": 1
+        },
+        "inputTransform": "sum_inputs_to_trials",
+        "displayFormat": "percent",
+        "numeratorInputId": "INP_CZ_QUEST_COUNT",
+        "denominatorInputIds": [
+          "INP_CZ_QUEST_COUNT",
+          "INP_CZ_AIROU_COUNT",
+          "INP_CZ_SELIANA_COUNT"
+        ],
+        "categoryInputIds": [
+          "INP_CZ_AIROU_COUNT",
+          "INP_CZ_SELIANA_COUNT"
+        ],
+        "probabilities": {},
+        "categoryLabels": [
+          "QUEST",
+          "AIROU",
+          "SELIANA"
+        ],
+        "categoryProbabilities": {
+          "SET_1": [
+            0.9058228156754167,
+            0.08394688594196235,
+            0.010230298382620942
+          ],
+          "SET_2": [
+            0.9072853888414614,
+            0.08164206766829633,
+            0.011072543490242209
+          ],
+          "SET_3": [
+            0.9045088142713197,
+            0.08302317879586656,
+            0.012468006932813736
+          ],
+          "SET_4": [
+            0.9040231790766956,
+            0.07869935659079938,
+            0.01727746433250505
+          ],
+          "SET_5": [
+            0.9031399590035517,
+            0.08011954768553232,
+            0.016740493310915983
+          ],
+          "SET_6": [
+            0.9016441597024669,
+            0.082495691812248,
+            0.01586014848528499
+          ]
         },
         "sourceEvidenceRefs": [
           "SRC_NANA"
@@ -803,272 +908,207 @@
   "ui": {
     "sections": [
       {
-        "id": "UI_01____",
+        "id": "AUTO_SELF_PLAY",
         "title": "通常時",
         "displayOrder": 1,
-        "description": "自分で消化した通常ゲーム数とCZ合算を記録します。CZ種類別・状態別レア役抽選・AT初当りは重複評価を避けるため入力しません。",
-        "collapsible": true,
         "items": [
           {
             "type": "input",
             "inputId": "INP_NORMAL_GAMES",
             "label": "通常ゲーム数",
-            "widget": "number",
-            "gridSpan": 12
+            "widget": "number"
           },
           {
             "type": "input",
             "inputId": "INP_CZ_TOTAL_COUNT",
             "label": "CZ合算",
-            "widget": "counter",
-            "gridSpan": 12,
-            "config": {
-              "compact": true,
-              "quickAdd": 1
-            }
+            "widget": "counter"
           }
         ]
       },
       {
-        "id": "UI_02______",
-        "title": "通常時小役",
+        "id": "AUTO_SETTING_SIGNAL",
+        "title": "SETTING_SIGNAL",
         "displayOrder": 2,
-        "description": "通常時の共通ベル・弱チャンス目・スイカを記録します。 「その他」は通常ゲーム数から対象小役回数を差し引いて自動的に残差として扱うため入力不要です。",
-        "collapsible": true,
         "items": [
           {
             "type": "input",
             "inputId": "INP_SMALLROLE_COMMON_BELL",
             "label": "共通ベル",
-            "widget": "counter",
-            "gridSpan": 12,
             "config": {
-              "compact": true,
               "quickAdd": 1
-            }
+            },
+            "widget": "counter"
+          },
+          {
+            "type": "input",
+            "inputId": "INP_CONFIRM_EVEN_A",
+            "label": "メイメイ",
+            "config": {
+              "quickAdd": 1
+            },
+            "widget": "counter"
+          },
+          {
+            "type": "input",
+            "inputId": "INP_BONUS_SYMBOL_BAR",
+            "label": "BAR",
+            "config": {
+              "quickAdd": 1
+            },
+            "widget": "counter"
           },
           {
             "type": "input",
             "inputId": "INP_SMALLROLE_WEAK_CHANCE",
             "label": "弱チャンス目",
-            "widget": "counter",
-            "gridSpan": 12,
             "config": {
-              "compact": true,
               "quickAdd": 1
-            }
-          },
-          {
-            "type": "input",
-            "inputId": "INP_SMALLROLE_WATERMELON",
-            "label": "スイカ",
-            "widget": "counter",
-            "gridSpan": 12,
-            "config": {
-              "compact": true,
-              "quickAdd": 1
-            }
-          }
-        ]
-      },
-      {
-        "id": "UI_03_____________",
-        "title": "ボーナス確定画面（割合）",
-        "displayOrder": 3,
-        "description": "設定確定画面はEvidenceへ入力し、それ以外の確定画面キャラの出現回数を割合用に入力します。",
-        "collapsible": true,
-        "items": [
-          {
-            "type": "input",
-            "inputId": "INP_CONFIRM_EVEN_A",
-            "label": "メイメイ",
-            "widget": "counter",
-            "gridSpan": 12,
-            "config": {
-              "compact": true,
-              "quickAdd": 1
-            }
+            },
+            "widget": "counter"
           },
           {
             "type": "input",
             "inputId": "INP_CONFIRM_EVEN_B",
             "label": "♡あゃ♡",
-            "widget": "counter",
-            "gridSpan": 12,
             "config": {
-              "compact": true,
               "quickAdd": 1
-            }
-          },
-          {
-            "type": "input",
-            "inputId": "INP_CONFIRM_EVEN_C",
-            "label": "Elly",
-            "widget": "counter",
-            "gridSpan": 12,
-            "config": {
-              "compact": true,
-              "quickAdd": 1
-            }
-          },
-          {
-            "type": "input",
-            "inputId": "INP_CONFIRM_EVEN_D",
-            "label": "碧",
-            "widget": "counter",
-            "gridSpan": 12,
-            "config": {
-              "compact": true,
-              "quickAdd": 1
-            }
-          },
-          {
-            "type": "input",
-            "inputId": "INP_CONFIRM_ODD_A",
-            "label": "Dr.D",
-            "widget": "counter",
-            "gridSpan": 12,
-            "config": {
-              "compact": true,
-              "quickAdd": 1
-            }
-          },
-          {
-            "type": "input",
-            "inputId": "INP_CONFIRM_ODD_B",
-            "label": "アルバーノ",
-            "widget": "counter",
-            "gridSpan": 12,
-            "config": {
-              "compact": true,
-              "quickAdd": 1
-            }
-          },
-          {
-            "type": "input",
-            "inputId": "INP_CONFIRM_YOU",
-            "label": "YOU",
-            "widget": "counter",
-            "gridSpan": 12,
-            "config": {
-              "compact": true,
-              "quickAdd": 1
-            }
-          }
-        ]
-      },
-      {
-        "id": "UI_04_______",
-        "title": "ボーナス絵柄",
-        "displayOrder": 4,
-        "collapsible": true,
-        "items": [
-          {
-            "type": "input",
-            "inputId": "INP_BONUS_SYMBOL_BAR",
-            "label": "BAR",
-            "widget": "counter",
-            "gridSpan": 12,
-            "config": {
-              "compact": true,
-              "quickAdd": 1
-            }
+            },
+            "widget": "counter"
           },
           {
             "type": "input",
             "inputId": "INP_BONUS_SYMBOL_RED7",
             "label": "赤7",
-            "widget": "counter",
-            "gridSpan": 12,
             "config": {
-              "compact": true,
               "quickAdd": 1
-            }
+            },
+            "widget": "counter"
+          },
+          {
+            "type": "input",
+            "inputId": "INP_SMALLROLE_WATERMELON",
+            "label": "スイカ",
+            "config": {
+              "quickAdd": 1
+            },
+            "widget": "counter"
+          },
+          {
+            "type": "input",
+            "inputId": "INP_CONFIRM_EVEN_C",
+            "label": "Elly",
+            "config": {
+              "quickAdd": 1
+            },
+            "widget": "counter"
           },
           {
             "type": "input",
             "inputId": "INP_BONUS_SYMBOL_BLUE7",
             "label": "青7",
-            "widget": "counter",
-            "gridSpan": 12,
             "config": {
-              "compact": true,
               "quickAdd": 1
-            }
+            },
+            "widget": "counter"
+          },
+          {
+            "type": "input",
+            "inputId": "INP_CONFIRM_EVEN_D",
+            "label": "碧",
+            "config": {
+              "quickAdd": 1
+            },
+            "widget": "counter"
+          },
+          {
+            "type": "input",
+            "inputId": "INP_CONFIRM_ODD_A",
+            "label": "Dr.D",
+            "config": {
+              "quickAdd": 1
+            },
+            "widget": "counter"
+          },
+          {
+            "type": "input",
+            "inputId": "INP_CONFIRM_ODD_B",
+            "label": "アルバーノ",
+            "config": {
+              "quickAdd": 1
+            },
+            "widget": "counter"
+          },
+          {
+            "type": "input",
+            "inputId": "INP_CONFIRM_YOU",
+            "label": "YOU",
+            "config": {
+              "quickAdd": 1
+            },
+            "widget": "counter"
           }
         ]
       },
       {
-        "id": "UI_05_____________",
-        "title": "特殊契機・昇格チャレンジ",
-        "displayOrder": 5,
-        "description": "レイア希少種パネル、BAR狙え以外からのAT直撃・ロングフリーズ、高確弱レア役からのセリエナ防衛戦など、設定下限が確定する事象が出た場合に選択します。",
-        "collapsible": true,
+        "id": "AUTO_CZ_TYPE",
+        "title": "CZ種類",
+        "displayOrder": 3,
+        "items": [
+          {
+            "type": "input",
+            "inputId": "INP_CZ_QUEST_COUNT",
+            "label": "クエスト",
+            "config": {
+              "quickAdd": 1
+            },
+            "widget": "counter"
+          },
+          {
+            "type": "input",
+            "inputId": "INP_CZ_AIROU_COUNT",
+            "label": "アイルーBINGO",
+            "config": {
+              "quickAdd": 1
+            },
+            "widget": "counter"
+          },
+          {
+            "type": "input",
+            "inputId": "INP_CZ_SELIANA_COUNT",
+            "label": "セリエナ防衛戦",
+            "config": {
+              "quickAdd": 1
+            },
+            "widget": "counter"
+          }
+        ]
+      },
+      {
+        "id": "AUTO_EVIDENCE",
+        "title": "設定確定・否定情報",
+        "displayOrder": 4,
         "items": [
           {
             "type": "input",
             "inputId": "INP_EVI_EVID_SPECIAL",
             "label": "特殊契機・昇格チャレンジ",
-            "widget": "multi_select",
-            "gridSpan": 12
-          }
-        ]
-      },
-      {
-        "id": "UI_06____________",
-        "title": "ボーナス確定・終了画面",
-        "displayOrder": 6,
-        "description": "ボーナス確定画面・終了画面で設定下限や設定6が確定するパターンが出た場合に選択します。",
-        "collapsible": true,
-        "items": [
+            "widget": "select"
+          },
           {
             "type": "input",
             "inputId": "INP_EVI_EVID_CONFIRM_END",
             "label": "ボーナス確定・終了画面",
-            "widget": "multi_select",
-            "gridSpan": 12
+            "widget": "select"
           }
         ]
       }
-    ],
-    "quickInputContract": {
-      "enabled": true,
-      "selectableSections": [
-        "通常時",
-        "通常時小役",
-        "ボーナス確定画面（割合）",
-        "ボーナス絵柄"
-      ],
-      "inputIds": [
-        "INP_CZ_TOTAL_COUNT",
-        "INP_SMALLROLE_COMMON_BELL",
-        "INP_SMALLROLE_WEAK_CHANCE",
-        "INP_SMALLROLE_WATERMELON",
-        "INP_CONFIRM_EVEN_A",
-        "INP_CONFIRM_EVEN_B",
-        "INP_CONFIRM_EVEN_C",
-        "INP_CONFIRM_EVEN_D",
-        "INP_CONFIRM_ODD_A",
-        "INP_CONFIRM_ODD_B",
-        "INP_CONFIRM_YOU",
-        "INP_BONUS_SYMBOL_BAR",
-        "INP_BONUS_SYMBOL_RED7",
-        "INP_BONUS_SYMBOL_BLUE7"
-      ],
-      "unsetDisplayAsZero": true,
-      "preserveUnobservedUntilIncrement": true,
-      "returnToSectionSelectionAfterIncrement": false
-    },
-    "designContract": {
-      "schemaVersion": "ui-design-data-v1",
-      "status": "PASS_WITH_UNRESOLVED",
-      "source": "research/S_MHW_ICEBORNE_ZF/ui-design-data.json"
-    }
+    ]
   },
   "selectionSummary": {
     "schemaVersion": "selection-summary-v1",
-    "evaluatedCount": 20,
-    "selectedCount": 4,
+    "evaluatedCount": 21,
+    "selectedCount": 5,
     "rejectedCount": 16,
     "selected": [
       {
@@ -1078,6 +1118,15 @@
         "requiredTrials": {
           "value": 10293,
           "unit": "通常ゲーム"
+        }
+      },
+      {
+        "featureId": "FEAT_CZ_TYPE_COMPOSITION",
+        "name": "CZ種類構成（クエスト・アイルーBINGO・セリエナ防衛戦）",
+        "reason": "CZ合算の発生率に加え、発生したCZがクエスト・アイルーBINGO・セリエナ防衛戦のどれだったかを条件付き構成として評価します。合算率との積は種類別CZの完全な確率分解になるため、同じCZを二重に数えません。",
+        "requiredTrials": {
+          "value": 2928,
+          "unit": "CZ初当り1回"
         }
       },
       {
@@ -1104,7 +1153,7 @@
       {
         "featureId": "FEAT_AT_INITIAL_EXCLUDED",
         "name": "AT初当り",
-        "reason": "CZ合算を通常G基準の代表Featureとして採用しており、CZ種類別・状態別レア役抽選・AT直撃・ボーナス内訳など同一当選系列の上流下流を独立に加えると重複評価になるため不採用です。",
+        "reason": "AT初当りには設定差がありますが、採用済みCZ合算と同じ通常ゲームから生じる関連観測です。CZ合算とAT初当りを同時利用するjoint likelihood contractを現Engineで定義していないため、現版ではCZ合算を代表指標としてAT初当りは推測計算に使用しません。",
         "requiredTrials": {
           "value": 21563,
           "unit": "通常ゲーム"
@@ -1113,7 +1162,7 @@
       {
         "featureId": "FEAT_CZ_QUEST_EXCLUDED",
         "name": "CZ クエスト",
-        "reason": "CZ合算を通常G基準の代表Featureとして採用しており、CZ種類別・状態別レア役抽選・AT直撃・ボーナス内訳など同一当選系列の上流下流を独立に加えると重複評価になるため不採用です。",
+        "reason": "クエストの通常G基準単独確率は、CZ合算の発生率と新設したCZ種類構成へ分解して評価します。単独Binomialでは使用しません。",
         "requiredTrials": {
           "value": 11844,
           "unit": "通常ゲーム"
@@ -1122,7 +1171,7 @@
       {
         "featureId": "FEAT_CZ_AIROU_EXCLUDED",
         "name": "CZ アイルーBINGO",
-        "reason": "CZ合算を通常G基準の代表Featureとして採用しており、CZ種類別・状態別レア役抽選・AT直撃・ボーナス内訳など同一当選系列の上流下流を独立に加えると重複評価になるため不採用です。",
+        "reason": "アイルーBINGOの通常G基準単独確率は、CZ合算の発生率と新設したCZ種類構成へ分解して評価します。単独Binomialでは使用しません。",
         "requiredTrials": {
           "value": 142775,
           "unit": "通常ゲーム"
@@ -1131,7 +1180,7 @@
       {
         "featureId": "FEAT_CZ_SELIANA_EXCLUDED",
         "name": "CZ セリエナ防衛戦",
-        "reason": "CZ合算を通常G基準の代表Featureとして採用しており、CZ種類別・状態別レア役抽選・AT直撃・ボーナス内訳など同一当選系列の上流下流を独立に加えると重複評価になるため不採用です。",
+        "reason": "セリエナ防衛戦の通常G基準単独確率は、CZ合算の発生率と新設したCZ種類構成へ分解して評価します。単独Binomialでは使用しません。",
         "requiredTrials": {
           "value": 121265,
           "unit": "通常ゲーム"
@@ -1140,7 +1189,7 @@
       {
         "featureId": "FEAT_HIGH_FALL_EXCLUDED",
         "name": "高確滞在時状態転落",
-        "reason": "CZ合算を通常G基準の代表Featureとして採用しており、CZ種類別・状態別レア役抽選・AT直撃・ボーナス内訳など同一当選系列の上流下流を独立に加えると重複評価になるため不採用です。",
+        "reason": "高確中の状態転落率には設定差がありますが、通常/高確を実戦中に確実に識別して転落抽選の対象回数を数えられるかが未解決です。Observation条件が確定するまで推測計算に使用しません。",
         "requiredTrials": {
           "value": 131,
           "unit": "高確中の転落抽選対象1回"
@@ -1149,7 +1198,7 @@
       {
         "featureId": "FEAT_NORMAL_WEAK_CZ_EXCLUDED",
         "name": "通常滞在・弱レア役CZ結果",
-        "reason": "CZ合算を通常G基準の代表Featureとして採用しており、CZ種類別・状態別レア役抽選・AT直撃・ボーナス内訳など同一当選系列の上流下流を独立に加えると重複評価になるため不採用です。",
+        "reason": "状態別レア役からのCZ結果には設定差がありますが、通常/高確の実戦識別条件が未解決です。またCZ合算と同時利用する条件付きjoint likelihood contractも現Engineで定義していないため、現版では推測計算に使用しません。",
         "requiredTrials": {
           "value": 163,
           "unit": "通常滞在中弱レア役1回"
@@ -1158,7 +1207,7 @@
       {
         "featureId": "FEAT_NORMAL_STRONG_CZ_EXCLUDED",
         "name": "通常滞在・強レア役CZ結果",
-        "reason": "CZ合算を通常G基準の代表Featureとして採用しており、CZ種類別・状態別レア役抽選・AT直撃・ボーナス内訳など同一当選系列の上流下流を独立に加えると重複評価になるため不採用です。",
+        "reason": "状態別レア役からのCZ結果には設定差がありますが、通常/高確の実戦識別条件が未解決です。またCZ合算と同時利用する条件付きjoint likelihood contractも現Engineで定義していないため、現版では推測計算に使用しません。",
         "requiredTrials": {
           "value": 967,
           "unit": "通常滞在中強レア役1回"
@@ -1167,7 +1216,7 @@
       {
         "featureId": "FEAT_HIGH_WEAK_CZ_EXCLUDED",
         "name": "高確滞在・弱レア役CZ結果",
-        "reason": "CZ合算を通常G基準の代表Featureとして採用しており、CZ種類別・状態別レア役抽選・AT直撃・ボーナス内訳など同一当選系列の上流下流を独立に加えると重複評価になるため不採用です。",
+        "reason": "状態別レア役からのCZ結果には設定差がありますが、通常/高確の実戦識別条件が未解決です。またCZ合算と同時利用する条件付きjoint likelihood contractも現Engineで定義していないため、現版では推測計算に使用しません。",
         "requiredTrials": {
           "value": 182,
           "unit": "高確滞在中弱レア役1回"
@@ -1176,7 +1225,7 @@
       {
         "featureId": "FEAT_HIGH_STRONG_CZ_EXCLUDED",
         "name": "高確滞在・強レア役CZ結果",
-        "reason": "CZ合算を通常G基準の代表Featureとして採用しており、CZ種類別・状態別レア役抽選・AT直撃・ボーナス内訳など同一当選系列の上流下流を独立に加えると重複評価になるため不採用です。",
+        "reason": "状態別レア役からのCZ結果には設定差がありますが、通常/高確の実戦識別条件が未解決です。またCZ合算と同時利用する条件付きjoint likelihood contractも現Engineで定義していないため、現版では推測計算に使用しません。",
         "requiredTrials": {
           "value": 92,
           "unit": "高確滞在中強レア役1回"
@@ -1185,7 +1234,7 @@
       {
         "featureId": "FEAT_AT_DIRECT_EXCLUDED",
         "name": "AT直撃",
-        "reason": "CZ合算を通常G基準の代表Featureとして採用しており、CZ種類別・状態別レア役抽選・AT直撃・ボーナス内訳など同一当選系列の上流下流を独立に加えると重複評価になるため不採用です。",
+        "reason": "AT直撃はAT初当りの部分集合で、設定差は大きい一方で設定1でも約1/6万と低頻度です。親となるAT初当りを採用していない現構成でも、CZ合算と経路別に結合する尤度契約を定義していないため数値Featureには使用しません。特殊な告知契機による設定下限はEvidenceとして別に扱います。",
         "requiredTrials": {
           "value": 34780,
           "unit": "通常ゲーム"
@@ -1194,7 +1243,7 @@
       {
         "featureId": "FEAT_LONG_FREEZE_EXCLUDED",
         "name": "ロングフリーズ",
-        "reason": "CZ合算を通常G基準の代表Featureとして採用しており、CZ種類別・状態別レア役抽選・AT直撃・ボーナス内訳など同一当選系列の上流下流を独立に加えると重複評価になるため不採用です。",
+        "reason": "ロングフリーズは約1/17万～1/18万と極端に低頻度で、設定間の確率差もごく小さいため終日実戦の数値Featureとして識別力がありません。特殊な告知契機による設定下限はEvidenceとして別に扱います。",
         "requiredTrials": {
           "value": 361178004,
           "unit": "通常ゲーム"
