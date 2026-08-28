@@ -168,9 +168,10 @@ function buildFeature(rf,sf,inputIds){
       if(includedProbs.some(p=>!Number.isFinite(p)||p<0)) fail(`${sf.featureId}: invalid included category probability for ${s}`);
       const includedSum=includedProbs.reduce((a,b)=>a+b,0);
       if(includedSum<=0) fail(`${sf.featureId}: included category probability sum must be > 0 for ${s}`);
-      return [s,(excludedCats.size||residualCat)?probs.map(p=>p/includedSum):probs];
+      if(sf.normalizeRoundedCategoryProbabilities===true && Math.abs(includedSum-1)>0.005) fail(`${sf.featureId}: rounded category normalization exceeds 0.5% for ${s}: ${includedSum}`);
+      return [s,(excludedCats.size||residualCat||sf.normalizeRoundedCategoryProbabilities===true)?probs.map(p=>p/includedSum):probs];
     }));
-    if(!isConditionalPartial && (excludedCats.size || (residualCat && Object.values(rf.settingDistributions??{}).every(dist=>Number.isFinite(Number(dist?.[residualCat])))))) base.categoryConditioning={excludedCategories:[...excludedCats],normalization:"RENORMALIZE_INCLUDED",...(residualCat?{residualCategory:residualCat}:{})};
+    if(!isConditionalPartial && (excludedCats.size || sf.normalizeRoundedCategoryProbabilities===true || (residualCat && Object.values(rf.settingDistributions??{}).every(dist=>Number.isFinite(Number(dist?.[residualCat])))))) base.categoryConditioning={excludedCategories:[...excludedCats],normalization:"RENORMALIZE_INCLUDED",...(residualCat?{residualCategory:residualCat}:{}),...(sf.normalizeRoundedCategoryProbabilities===true?{roundingNormalization:true}:{})};
   } else fail(`${sf.featureId}: unsupported candidateModel ${rf.candidateModel}`);
   base.sourceEvidenceRefs=rf.sourceRefs??[];
   return base;
