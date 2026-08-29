@@ -1,0 +1,65 @@
+name: Temporary user10 data-counter policy migration
+
+on:
+  push:
+    branches:
+      - prototype-multi-machine
+    paths:
+      - '.github/workflows/tmp-user10-data-counter-policy.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  migrate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          ref: prototype-multi-machine
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Apply policy migration
+        run: node tools/apply-user10-data-counter-policy.mjs
+
+      - name: Validate Observation repository
+        run: npm run observation:validate
+
+      - name: Assert user10 data-counter independence
+        run: |
+          node --input-type=module <<'NODE'
+          import fs from 'node:fs';
+          const ids = ['S_YOUJO_SENKI_ZR','S_HAIYORE_NYARUKO_SAN_Y','S_TOARU_RAILGUN_FB','S_TEKKEN4_ULTIMATE_DEVIL_TCD','S_DANMACHI_GAIDEN_XR','S_MAHOIKU_NB','L_SHIMAMUSUME_L2','L_SUPER_BLACKJACK_SLDC','L_SHAMANKING_SS','L_ARIFURETA_JA'];
+          for (const id of ids) {
+            const d=JSON.parse(fs.readFileSync(`research/${id}/machine-observation-data.json`,'utf8'));
+            if (d.sourceCoverage?.dataCounter !== 'NOT_REQUIRED') throw new Error(`${id}: dataCounter not NOT_REQUIRED`);
+            if ((d.fieldVerificationItems??[]).some(v=>v.sourceType==='DATA_COUNTER')) throw new Error(`${id}: DATA_COUNTER verification remains`);
+            if ((d.observations??[]).some(o=>o.sourceType==='DATA_COUNTER'||o.observationMode==='DATA_COUNTER_READ')) throw new Error(`${id}: DATA_COUNTER observation remains`);
+            if ((d.featureMappings??[]).some(m=>(m.collectionMethods??[]).includes('DATA_COUNTER_READ'))) throw new Error(`${id}: DATA_COUNTER mapping remains`);
+          }
+          console.log(`PASS: ${ids.length} machines are data-counter independent`);
+          NODE
+
+      - name: Run Observation gate
+        run: npm run observation:gate
+
+      - name: Run tests and public-data audit
+        run: |
+          npm test
+          npm run audit
+          npm run audit:ui-service-names
+          npm run registry:validate
+
+      - name: Commit migration result
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add tools/validate-machine-observation-data.mjs research/*/machine-observation-data.json reports/v65-user10-real-machine-verification-checklist.md
+          git diff --cached --stat
+          git commit -m "observation: stop treating store data counters as formal sources" || exit 0
+          git push origin HEAD:prototype-multi-machine
