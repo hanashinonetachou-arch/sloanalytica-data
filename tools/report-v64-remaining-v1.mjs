@@ -1,7 +1,7 @@
 import fs from 'node:fs';
 const ACTIVE=new Set(['INCLUDE_PRIMARY','INCLUDE_SUPPORT','INCLUDE_FALLBACK']);
 const read=p=>JSON.parse(fs.readFileSync(p,'utf8'));
-const refs=f=>[f.numeratorInputId,f.denominatorInputId,f.trialCountInputId,f.conditionedOnInputId,...(f.categoryInputIds??[]),...(f.denominatorInputIds??[]),...(f.optionalCategoryInputIds??[])].filter(Boolean);
+const refs=f=>{const ids=[f.numeratorInputId,f.denominatorInputId,f.trialCountInputId,f.conditionedOnInputId,...(f.categoryInputIds??[]),...(f.denominatorInputIds??[]),...(f.optionalCategoryInputIds??[])].filter(Boolean);if(f.categorySubtractInputIds)for(const [k,v] of Object.entries(f.categorySubtractInputIds)){ids.push(k,...(v??[]));}return ids;};
 const rows=[];
 for(const de of fs.readdirSync('research',{withFileTypes:true}).filter(x=>x.isDirectory())){
  const mid=de.name,op=`research/${mid}/machine-observation-data.json`,sp=`research/${mid}/selection-data.json`; if(!fs.existsSync(op)||!fs.existsSync(sp))continue;
