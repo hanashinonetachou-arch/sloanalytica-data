@@ -1,34 +1,20 @@
 {
-  "schemaVersion": "machine-observation-data-v1",
+  "schemaVersion": "machine-observation-data-v2",
   "machineId": "L_STREET_FIGHTER5_ZD",
   "displayName": "スマスロ ストリートファイターV 挑戦者の道",
-  "researchedAt": "2026-08-22",
+  "researchedAt": "2026-08-29",
   "sources": [],
-  "machineMenu": {
-    "status": "CHECKED",
-    "availableData": [
-      "総ゲーム数",
-      "現在ゲーム数",
-      "ワールドチャレンジ回数",
-      "総目押し回数",
-      "EXCELLENT/GREAT/MISS",
-      "ボーナス直撃の確認"
-    ],
-    "sourceRefs": [],
-    "notes": "再調査で筐体の遊技データ画面を確認。総G差分は自分区間ゲーム数入力の補助に利用できる。直撃情報はメニュー確認可能だが、前任者区間の完全な回数・分母として使えるとは断定しない。"
-  },
-  "linkedService": {
-    "status": "UNRESOLVED",
-    "availableData": [],
-    "sourceRefs": [],
-    "notes": "専用連動サービスの具体的取得項目は未確定。内部確認項目として保持。"
-  },
-  "predecessorData": {
-    "status": "UNRESOLVED",
-    "availableData": [],
-    "sourceRefs": [],
-    "notes": "旧ResearchDataには着席時／前任者データへの言及があるが、具体的な取得項目・取得元・Feature分子/分母との同値性はこの構造移行では確定しない。Machine Observation Researchで個別再調査する。",
-    "usableForInference": false,
-    "usableForSelfSessionDelta": false
-  }
+  "sourceCoverage": {"machineMenu":"FOUND","dataCounter":"UNRESOLVED","linkedService":"UNRESOLVED","directPlay":"FOUND","endEvent":"FOUND","seatedState":"UNRESOLVED"},
+  "observations": [
+    {"observationId":"OBS_SELF_BONUS","sourceType":"DIRECT_PLAY","observationMode":"MANUAL_COUNTER","status":"FOUND","label":"自己遊技の通常ゲーム数とボーナス","categories":["通常ゲーム数","ボーナス回数"],"timing":["自己遊技の通常時"],"excludedConditions":["前任者区間を混在させない","筐体総ゲーム数と通常Gの範囲が異なる場合は総G差分をそのまま分母にしない"],"sourceRefs":[]},
+    {"observationId":"OBS_SUIKA_DIRECT","sourceType":"DIRECT_PLAY","observationMode":"MANUAL_COUNTER","status":"FOUND","label":"自己区間のスイカからのボーナス直撃","categories":["スイカ回数","スイカからのボーナス直撃回数"],"timing":["自己遊技の通常時・スイカ成立ごと"],"excludedConditions":["着席前の直撃履歴を成功数へ混在させない","スイカ以外からの直撃を含めない"],"sourceRefs":[]},
+    {"observationId":"OBS_MACHINE_PLAY_DATA","sourceType":"MACHINE_MENU","observationMode":"MACHINE_MENU_READ","status":"FOUND","label":"筐体遊技データの確認済み項目","categories":["総ゲーム数","現在ゲーム数","ワールドチャレンジ回数","総目押し回数","EXCELLENT","GREAT","MISS","ボーナス直撃の確認"],"timing":["筐体遊技データ確認時"],"excludedConditions":["総G差分を通常ゲーム数へ無条件流用しない","前任者直撃の完全な分子・分母として扱わない"],"sourceRefs":[]},
+    {"observationId":"OBS_SFV_EVIDENCE","sourceType":"END_EVENT","observationMode":"VISUAL_CONFIRMATION","status":"FOUND","label":"トロフィーEvidence","categories":["設定2以上","設定3以上","設定4以上","設定5以上","設定6"],"timing":["トロフィー確認時"],"excludedConditions":[],"sourceRefs":[]}
+  ],
+  "featureMappings": [
+    {"featureId":"FEAT_BONUS","mappingType":"EXACT","observationIds":["OBS_SELF_BONUS"],"collectionMethods":["MANUAL_COUNTER"],"usableForInference":true,"usableForDifficulty":true},
+    {"featureId":"FEAT_SUIKA_DIRECT","mappingType":"CONDITIONAL","observationIds":["OBS_SUIKA_DIRECT"],"collectionMethods":["MANUAL_COUNTER"],"usableForInference":true,"usableForDifficulty":false,"notes":"スイカ成立1回を1試行とし、ボーナス直撃を成功とする。"}
+  ],
+  "researchReopenRequests": [],
+  "fieldVerificationItems": [{"verificationId":"VFY_SFV_LINKED_AND_SEATED","status":"WAITING_FOR_MACHINE","sourceType":"LINKED_SERVICE","priority":"LOW","question":"専用連動サービスの取得項目と、着席時に前任者区間として安全に取得できる項目を確認する。現行Featureは自己区間の直接観測で成立するため、確認前に流用しない。"}]
 }
