@@ -1,0 +1,816 @@
+{
+  "schemaVersion": 1,
+  "machine": {
+    "schemaVersion": "2.0.0",
+    "machineId": "L_SUPER_BLACKJACK_SLDC",
+    "machineDataVersion": "0.1.0",
+    "displayName": "スマスロスーパーブラックジャック",
+    "modelName": "LスーパーブラックジャックSLDC",
+    "manufacturer": "セブンリーグ",
+    "settings": [
+      "SET_1",
+      "SET_2",
+      "SET_3",
+      "SET_4",
+      "SET_5",
+      "SET_6"
+    ],
+    "packagePolicy": {
+      "offlineCapable": true,
+      "containsImages": false,
+      "containsExecutableCode": false
+    }
+  },
+  "inputs": {
+    "schemaVersion": "2.0.0",
+    "inputs": [
+      {
+        "id": "INP_NORMAL_GAMES",
+        "name": "通常ゲーム数",
+        "type": "integer",
+        "category": "NUMERIC",
+        "unit": "G",
+        "displayOrder": 10,
+        "inferenceRole": "INCLUDE_PRIMARY",
+        "defaultValue": null,
+        "observationScope": "SELF_PLAY",
+        "minimum": 0
+      },
+      {
+        "id": "INP_BONUS_FIRST_HIT",
+        "name": "ボーナス初当り",
+        "type": "counter",
+        "category": "NUMERIC",
+        "unit": "回",
+        "displayOrder": 11,
+        "inferenceRole": "INCLUDE_PRIMARY",
+        "defaultValue": null,
+        "parentInputId": "INP_NORMAL_GAMES",
+        "uiQuickAdd": 1,
+        "minimum": 0
+      },
+      {
+        "id": "INP_TOTAL_GAMES",
+        "name": "総ゲーム数",
+        "type": "integer",
+        "category": "NUMERIC",
+        "unit": "G",
+        "displayOrder": 12,
+        "inferenceRole": "INCLUDE_SUPPORT",
+        "defaultValue": null,
+        "observationScope": "SELF_PLAY",
+        "minimum": 0
+      },
+      {
+        "id": "INP_DIAGONAL_SUIKA",
+        "name": "斜めスイカ",
+        "type": "counter",
+        "category": "NUMERIC",
+        "unit": "回",
+        "displayOrder": 13,
+        "inferenceRole": "INCLUDE_SUPPORT",
+        "defaultValue": null,
+        "parentInputId": "INP_TOTAL_GAMES",
+        "uiQuickAdd": 1,
+        "minimum": 0
+      },
+      {
+        "id": "INP_EVI_SETTING_EVIDENCE",
+        "name": "設定確定・否定",
+        "type": "multi_enum",
+        "category": "EVIDENCE",
+        "unit": "",
+        "displayOrder": 100,
+        "inferenceRole": "INCLUDE_SUPPORT",
+        "options": [
+          {
+            "key": "DICE2",
+            "label": "ダイス：設定2以上",
+            "value": "DICE2"
+          },
+          {
+            "key": "DICE3",
+            "label": "ダイス：設定3以上",
+            "value": "DICE3"
+          },
+          {
+            "key": "DICE4",
+            "label": "ダイス：設定4以上",
+            "value": "DICE4"
+          },
+          {
+            "key": "DICE5",
+            "label": "ダイス：設定5以上",
+            "value": "DICE5"
+          },
+          {
+            "key": "DICE6",
+            "label": "ダイス：設定6",
+            "value": "DICE6"
+          },
+          {
+            "key": "HAWAII2",
+            "label": "ハワイ告知：設定2以上",
+            "value": "HAWAII2"
+          },
+          {
+            "key": "HAWAII3",
+            "label": "ハワイ告知：設定3以上",
+            "value": "HAWAII3"
+          },
+          {
+            "key": "HAWAII4",
+            "label": "ハワイ告知：設定4以上",
+            "value": "HAWAII4"
+          },
+          {
+            "key": "HAWAII5",
+            "label": "ハワイ告知：設定5以上",
+            "value": "HAWAII5"
+          },
+          {
+            "key": "HAWAII6",
+            "label": "ハワイ告知：設定6",
+            "value": "HAWAII6"
+          },
+          {
+            "key": "CARD5",
+            "label": "終了カード：設定5以上",
+            "value": "CARD5"
+          },
+          {
+            "key": "CARD6",
+            "label": "終了カード：設定6",
+            "value": "CARD6"
+          },
+          {
+            "key": "KEROT2",
+            "label": "ケロットトロフィー：銅",
+            "value": "KEROT2"
+          },
+          {
+            "key": "KEROT3",
+            "label": "ケロットトロフィー：銀",
+            "value": "KEROT3"
+          },
+          {
+            "key": "KEROT4",
+            "label": "ケロットトロフィー：金",
+            "value": "KEROT4"
+          },
+          {
+            "key": "KEROT5",
+            "label": "ケロットトロフィー：ケロット柄",
+            "value": "KEROT5"
+          },
+          {
+            "key": "KEROT6",
+            "label": "ケロットトロフィー：虹",
+            "value": "KEROT6"
+          }
+        ],
+        "defaultValue": []
+      }
+    ]
+  },
+  "features": {
+    "schemaVersion": "2.0.0",
+    "features": [
+      {
+        "featureId": "FEAT_BONUS_FIRST_HIT",
+        "name": "ボーナス初当り",
+        "adoptionCategory": "INCLUDE_PRIMARY",
+        "calculationRole": "PROBABILITY",
+        "probabilityEngineUsage": true,
+        "modelType": "binomial",
+        "minimumSample": 1,
+        "sampleRecommendation": 1,
+        "reliabilityProfile": {
+          "weight": 1
+        },
+        "denominatorInputId": "INP_NORMAL_GAMES",
+        "numeratorInputId": "INP_BONUS_FIRST_HIT",
+        "displayFormat": "ratio_1_over_n",
+        "probabilities": {
+          "SET_1": 0.004137360364087712,
+          "SET_2": 0.004187604690117253,
+          "SET_3": 0.00423908435777872,
+          "SET_4": 0.004955401387512388,
+          "SET_5": 0.00513083632632119,
+          "SET_6": 0.005515719801434087
+        },
+        "sourceEvidenceRefs": [
+          "SRC_1GEKI",
+          "SRC_NANA"
+        ]
+      },
+      {
+        "featureId": "FEAT_DIAGONAL_SUIKA",
+        "name": "斜めスイカ確率",
+        "adoptionCategory": "INCLUDE_SUPPORT",
+        "calculationRole": "PROBABILITY",
+        "probabilityEngineUsage": true,
+        "modelType": "binomial",
+        "minimumSample": 1,
+        "sampleRecommendation": 1,
+        "reliabilityProfile": {
+          "weight": 1
+        },
+        "denominatorInputId": "INP_TOTAL_GAMES",
+        "numeratorInputId": "INP_DIAGONAL_SUIKA",
+        "displayFormat": "ratio_1_over_n",
+        "probabilities": {
+          "SET_1": 0.01001001001001001,
+          "SET_2": 0.010976948408342482,
+          "SET_3": 0.011402508551881414,
+          "SET_4": 0.011534025374855825,
+          "SET_5": 0.011764705882352941,
+          "SET_6": 0.011918951132300357
+        },
+        "sourceEvidenceRefs": [
+          "SRC_1GEKI",
+          "SRC_NANA"
+        ]
+      }
+    ]
+  },
+  "evidence": {
+    "version": "1.0.0",
+    "evidences": [
+      {
+        "id": "EVI_SETTING_EVIDENCE_DICE2",
+        "name": "ダイス：設定2以上",
+        "displayName": "ダイス：設定2以上",
+        "inputId": "INP_EVI_SETTING_EVIDENCE",
+        "triggerValue": "DICE2",
+        "confirmedSettings": [
+          "SET_2",
+          "SET_3",
+          "SET_4",
+          "SET_5",
+          "SET_6"
+        ],
+        "deniedSettings": [
+          "SET_1"
+        ],
+        "hasImage": false,
+        "type": "SETTING_CONFIRMATION",
+        "sourceEvidenceRefs": [
+          "RE_DICE_2PLUS"
+        ]
+      },
+      {
+        "id": "EVI_SETTING_EVIDENCE_DICE3",
+        "name": "ダイス：設定3以上",
+        "displayName": "ダイス：設定3以上",
+        "inputId": "INP_EVI_SETTING_EVIDENCE",
+        "triggerValue": "DICE3",
+        "confirmedSettings": [
+          "SET_3",
+          "SET_4",
+          "SET_5",
+          "SET_6"
+        ],
+        "deniedSettings": [
+          "SET_1",
+          "SET_2"
+        ],
+        "hasImage": false,
+        "type": "SETTING_CONFIRMATION",
+        "sourceEvidenceRefs": [
+          "RE_DICE_3PLUS"
+        ]
+      },
+      {
+        "id": "EVI_SETTING_EVIDENCE_DICE4",
+        "name": "ダイス：設定4以上",
+        "displayName": "ダイス：設定4以上",
+        "inputId": "INP_EVI_SETTING_EVIDENCE",
+        "triggerValue": "DICE4",
+        "confirmedSettings": [
+          "SET_4",
+          "SET_5",
+          "SET_6"
+        ],
+        "deniedSettings": [
+          "SET_1",
+          "SET_2",
+          "SET_3"
+        ],
+        "hasImage": false,
+        "type": "SETTING_CONFIRMATION",
+        "sourceEvidenceRefs": [
+          "RE_DICE_4PLUS"
+        ]
+      },
+      {
+        "id": "EVI_SETTING_EVIDENCE_DICE5",
+        "name": "ダイス：設定5以上",
+        "displayName": "ダイス：設定5以上",
+        "inputId": "INP_EVI_SETTING_EVIDENCE",
+        "triggerValue": "DICE5",
+        "confirmedSettings": [
+          "SET_5",
+          "SET_6"
+        ],
+        "deniedSettings": [
+          "SET_1",
+          "SET_2",
+          "SET_3",
+          "SET_4"
+        ],
+        "hasImage": false,
+        "type": "SETTING_CONFIRMATION",
+        "sourceEvidenceRefs": [
+          "RE_DICE_5PLUS"
+        ]
+      },
+      {
+        "id": "EVI_SETTING_EVIDENCE_DICE6",
+        "name": "ダイス：設定6",
+        "displayName": "ダイス：設定6",
+        "inputId": "INP_EVI_SETTING_EVIDENCE",
+        "triggerValue": "DICE6",
+        "confirmedSettings": [
+          "SET_6"
+        ],
+        "deniedSettings": [
+          "SET_1",
+          "SET_2",
+          "SET_3",
+          "SET_4",
+          "SET_5"
+        ],
+        "hasImage": false,
+        "type": "SETTING_CONFIRMATION",
+        "sourceEvidenceRefs": [
+          "RE_DICE_6"
+        ]
+      },
+      {
+        "id": "EVI_SETTING_EVIDENCE_HAWAII2",
+        "name": "ハワイ告知：設定2以上",
+        "displayName": "ハワイ告知：設定2以上",
+        "inputId": "INP_EVI_SETTING_EVIDENCE",
+        "triggerValue": "HAWAII2",
+        "confirmedSettings": [
+          "SET_2",
+          "SET_3",
+          "SET_4",
+          "SET_5",
+          "SET_6"
+        ],
+        "deniedSettings": [
+          "SET_1"
+        ],
+        "hasImage": false,
+        "type": "SETTING_CONFIRMATION",
+        "sourceEvidenceRefs": [
+          "RE_HAWAII_2PLUS"
+        ]
+      },
+      {
+        "id": "EVI_SETTING_EVIDENCE_HAWAII3",
+        "name": "ハワイ告知：設定3以上",
+        "displayName": "ハワイ告知：設定3以上",
+        "inputId": "INP_EVI_SETTING_EVIDENCE",
+        "triggerValue": "HAWAII3",
+        "confirmedSettings": [
+          "SET_3",
+          "SET_4",
+          "SET_5",
+          "SET_6"
+        ],
+        "deniedSettings": [
+          "SET_1",
+          "SET_2"
+        ],
+        "hasImage": false,
+        "type": "SETTING_CONFIRMATION",
+        "sourceEvidenceRefs": [
+          "RE_HAWAII_3PLUS"
+        ]
+      },
+      {
+        "id": "EVI_SETTING_EVIDENCE_HAWAII4",
+        "name": "ハワイ告知：設定4以上",
+        "displayName": "ハワイ告知：設定4以上",
+        "inputId": "INP_EVI_SETTING_EVIDENCE",
+        "triggerValue": "HAWAII4",
+        "confirmedSettings": [
+          "SET_4",
+          "SET_5",
+          "SET_6"
+        ],
+        "deniedSettings": [
+          "SET_1",
+          "SET_2",
+          "SET_3"
+        ],
+        "hasImage": false,
+        "type": "SETTING_CONFIRMATION",
+        "sourceEvidenceRefs": [
+          "RE_HAWAII_4PLUS"
+        ]
+      },
+      {
+        "id": "EVI_SETTING_EVIDENCE_HAWAII5",
+        "name": "ハワイ告知：設定5以上",
+        "displayName": "ハワイ告知：設定5以上",
+        "inputId": "INP_EVI_SETTING_EVIDENCE",
+        "triggerValue": "HAWAII5",
+        "confirmedSettings": [
+          "SET_5",
+          "SET_6"
+        ],
+        "deniedSettings": [
+          "SET_1",
+          "SET_2",
+          "SET_3",
+          "SET_4"
+        ],
+        "hasImage": false,
+        "type": "SETTING_CONFIRMATION",
+        "sourceEvidenceRefs": [
+          "RE_HAWAII_5PLUS"
+        ]
+      },
+      {
+        "id": "EVI_SETTING_EVIDENCE_HAWAII6",
+        "name": "ハワイ告知：設定6",
+        "displayName": "ハワイ告知：設定6",
+        "inputId": "INP_EVI_SETTING_EVIDENCE",
+        "triggerValue": "HAWAII6",
+        "confirmedSettings": [
+          "SET_6"
+        ],
+        "deniedSettings": [
+          "SET_1",
+          "SET_2",
+          "SET_3",
+          "SET_4",
+          "SET_5"
+        ],
+        "hasImage": false,
+        "type": "SETTING_CONFIRMATION",
+        "sourceEvidenceRefs": [
+          "RE_HAWAII_6"
+        ]
+      },
+      {
+        "id": "EVI_SETTING_EVIDENCE_CARD5",
+        "name": "終了カード：設定5以上",
+        "displayName": "終了カード：設定5以上",
+        "inputId": "INP_EVI_SETTING_EVIDENCE",
+        "triggerValue": "CARD5",
+        "confirmedSettings": [
+          "SET_5",
+          "SET_6"
+        ],
+        "deniedSettings": [
+          "SET_1",
+          "SET_2",
+          "SET_3",
+          "SET_4"
+        ],
+        "hasImage": false,
+        "type": "SETTING_CONFIRMATION",
+        "sourceEvidenceRefs": [
+          "RE_REG_CARD_5PLUS"
+        ]
+      },
+      {
+        "id": "EVI_SETTING_EVIDENCE_CARD6",
+        "name": "終了カード：設定6",
+        "displayName": "終了カード：設定6",
+        "inputId": "INP_EVI_SETTING_EVIDENCE",
+        "triggerValue": "CARD6",
+        "confirmedSettings": [
+          "SET_6"
+        ],
+        "deniedSettings": [
+          "SET_1",
+          "SET_2",
+          "SET_3",
+          "SET_4",
+          "SET_5"
+        ],
+        "hasImage": false,
+        "type": "SETTING_CONFIRMATION",
+        "sourceEvidenceRefs": [
+          "RE_REG_CARD_6"
+        ]
+      },
+      {
+        "id": "EVI_SETTING_EVIDENCE_KEROT2",
+        "name": "ケロットトロフィー：銅",
+        "displayName": "ケロットトロフィー：銅",
+        "inputId": "INP_EVI_SETTING_EVIDENCE",
+        "triggerValue": "KEROT2",
+        "confirmedSettings": [
+          "SET_2",
+          "SET_3",
+          "SET_4",
+          "SET_5",
+          "SET_6"
+        ],
+        "deniedSettings": [
+          "SET_1"
+        ],
+        "hasImage": false,
+        "type": "SETTING_CONFIRMATION",
+        "sourceEvidenceRefs": [
+          "RE_KEROT_BRONZE"
+        ]
+      },
+      {
+        "id": "EVI_SETTING_EVIDENCE_KEROT3",
+        "name": "ケロットトロフィー：銀",
+        "displayName": "ケロットトロフィー：銀",
+        "inputId": "INP_EVI_SETTING_EVIDENCE",
+        "triggerValue": "KEROT3",
+        "confirmedSettings": [
+          "SET_3",
+          "SET_4",
+          "SET_5",
+          "SET_6"
+        ],
+        "deniedSettings": [
+          "SET_1",
+          "SET_2"
+        ],
+        "hasImage": false,
+        "type": "SETTING_CONFIRMATION",
+        "sourceEvidenceRefs": [
+          "RE_KEROT_SILVER"
+        ]
+      },
+      {
+        "id": "EVI_SETTING_EVIDENCE_KEROT4",
+        "name": "ケロットトロフィー：金",
+        "displayName": "ケロットトロフィー：金",
+        "inputId": "INP_EVI_SETTING_EVIDENCE",
+        "triggerValue": "KEROT4",
+        "confirmedSettings": [
+          "SET_4",
+          "SET_5",
+          "SET_6"
+        ],
+        "deniedSettings": [
+          "SET_1",
+          "SET_2",
+          "SET_3"
+        ],
+        "hasImage": false,
+        "type": "SETTING_CONFIRMATION",
+        "sourceEvidenceRefs": [
+          "RE_KEROT_GOLD"
+        ]
+      },
+      {
+        "id": "EVI_SETTING_EVIDENCE_KEROT5",
+        "name": "ケロットトロフィー：ケロット柄",
+        "displayName": "ケロットトロフィー：ケロット柄",
+        "inputId": "INP_EVI_SETTING_EVIDENCE",
+        "triggerValue": "KEROT5",
+        "confirmedSettings": [
+          "SET_5",
+          "SET_6"
+        ],
+        "deniedSettings": [
+          "SET_1",
+          "SET_2",
+          "SET_3",
+          "SET_4"
+        ],
+        "hasImage": false,
+        "type": "SETTING_CONFIRMATION",
+        "sourceEvidenceRefs": [
+          "RE_KEROT_PATTERN"
+        ]
+      },
+      {
+        "id": "EVI_SETTING_EVIDENCE_KEROT6",
+        "name": "ケロットトロフィー：虹",
+        "displayName": "ケロットトロフィー：虹",
+        "inputId": "INP_EVI_SETTING_EVIDENCE",
+        "triggerValue": "KEROT6",
+        "confirmedSettings": [
+          "SET_6"
+        ],
+        "deniedSettings": [
+          "SET_1",
+          "SET_2",
+          "SET_3",
+          "SET_4",
+          "SET_5"
+        ],
+        "hasImage": false,
+        "type": "SETTING_CONFIRMATION",
+        "sourceEvidenceRefs": [
+          "RE_KEROT_RAINBOW"
+        ]
+      }
+    ],
+    "sources": [
+      {
+        "id": "SRC_1GEKI",
+        "classification": "ANALYSIS",
+        "pageName": "スーパーブラックジャック 設定差・設定判別要素まとめ",
+        "url": "https://1geki.jp/slot/l_sbj/0/",
+        "checkedAt": "2026-08-30"
+      },
+      {
+        "id": "SRC_NANA",
+        "classification": "ANALYSIS",
+        "pageName": "スマスロスーパーブラックジャック 設定判別",
+        "url": "https://nana-press.com/kaiseki/machine/876/27136/",
+        "checkedAt": "2026-08-30"
+      },
+      {
+        "id": "SRC_SLOPLANEXT",
+        "classification": "OFFICIAL",
+        "pageName": "スマスロ スーパーブラックジャック スロプラNEXT",
+        "url": "https://www.yamasa-next.co.jp/slp/model/03/",
+        "checkedAt": "2026-08-30"
+      }
+    ]
+  },
+  "ui": {
+    "sections": [
+      {
+        "id": "AUTO_NUMERIC",
+        "title": "数値要素",
+        "displayOrder": 1,
+        "items": [
+          {
+            "type": "input",
+            "inputId": "INP_NORMAL_GAMES",
+            "label": "通常ゲーム数",
+            "widget": "number"
+          },
+          {
+            "type": "input",
+            "inputId": "INP_BONUS_FIRST_HIT",
+            "label": "ボーナス初当り",
+            "config": {
+              "quickAdd": 1
+            },
+            "widget": "counter"
+          },
+          {
+            "type": "input",
+            "inputId": "INP_TOTAL_GAMES",
+            "label": "総ゲーム数",
+            "widget": "number"
+          },
+          {
+            "type": "input",
+            "inputId": "INP_DIAGONAL_SUIKA",
+            "label": "斜めスイカ",
+            "config": {
+              "quickAdd": 1
+            },
+            "widget": "counter"
+          }
+        ]
+      },
+      {
+        "id": "AUTO_EVIDENCE",
+        "title": "設定確定・否定",
+        "displayOrder": 2,
+        "items": [
+          {
+            "type": "input",
+            "inputId": "INP_EVI_SETTING_EVIDENCE",
+            "label": "設定確定・否定",
+            "widget": "multi_select"
+          }
+        ]
+      }
+    ]
+  },
+  "selectionSummary": {
+    "schemaVersion": "selection-summary-v1",
+    "evaluatedCount": 12,
+    "selectedCount": 2,
+    "rejectedCount": 10,
+    "selected": [
+      {
+        "featureId": "FEAT_BONUS_FIRST_HIT",
+        "name": "ボーナス初当り",
+        "reason": "ボーナス初当りは通常ゲーム数を分母に直接観測でき、設定4以上で明確に上昇するため主軸採用します。",
+        "requiredTrials": {
+          "value": 18438,
+          "unit": "通常ゲーム"
+        }
+      },
+      {
+        "featureId": "FEAT_DIAGONAL_SUIKA",
+        "name": "斜めスイカ確率",
+        "reason": "斜めスイカは成立回数を直接観測でき、設定1約1/99.9から設定6約1/83.9まで設定差があるため補助採用します。",
+        "requiredTrials": {
+          "value": 21773,
+          "unit": "ゲーム"
+        }
+      }
+    ],
+    "rejected": [
+      {
+        "featureId": "FEAT_SUIKA_ST_DIRECT_EXCLUDED",
+        "name": "斜めスイカからのST直撃率",
+        "reason": "斜めスイカからのST直撃は斜めスイカ成立の条件付き部分事象で、斜めスイカFeatureと独立に加えると同一小役情報を重ねて評価するため不採用です。",
+        "requiredTrials": {
+          "value": 454,
+          "unit": "通常時の斜めスイカ成立1回"
+        }
+      },
+      {
+        "featureId": "FEAT_CHANCE_BONUS_DIRECT_EXCLUDED",
+        "name": "チャンス目成立時ボーナス直撃率",
+        "reason": "チャンス目からのボーナス直撃はボーナス初当りの部分集合で、主軸初当りと独立に加えると同じボーナス当選を二重評価するため不採用です。",
+        "requiredTrials": {
+          "value": 554,
+          "unit": "通常またはチャイナ滞在中のチャンス目成立1回"
+        }
+      },
+      {
+        "featureId": "FEAT_BONUS_HIGH_ENTRY_EXCLUDED",
+        "name": "ボーナス高確移行率",
+        "reason": "ボーナス高確は初当りへ至る内部経路で、滞在・移行状態を独立に積むとボーナス初当りの原因側を重ねて評価するため不採用です。",
+        "requiredTrials": {
+          "value": 12896,
+          "unit": "通常ゲーム"
+        }
+      },
+      {
+        "featureId": "FEAT_BONUS_HIGH_EXPECTATION_EXCLUDED",
+        "name": "ボーナス高確移行時ボーナス期待度",
+        "reason": "ボーナス高確中の当選期待度はボーナス初当り経路の条件付き結果で、主軸初当りと強く依存するため不採用です。",
+        "requiredTrials": {
+          "value": 351,
+          "unit": "ボーナス高確移行1回"
+        }
+      },
+      {
+        "featureId": "FEAT_CHANCE_TO_HIGH_EXCLUDED",
+        "name": "通常滞在時チャンス目からのボーナス高確移行率",
+        "reason": "チャンス目からの高確移行はボーナス初当りの原因側となる中間事象で、主軸初当りと別尤度にすると経路を重複評価するため不採用です。",
+        "requiredTrials": {
+          "value": 48,
+          "unit": "通常滞在時チャンス目成立1回"
+        }
+      },
+      {
+        "featureId": "FEAT_RIO_HIGH_EXCLUDED",
+        "name": "RC高確突入率",
+        "reason": "RC高確はボーナス・STへつながる内部経路で、初当り系Featureと独立に積むと同じ当選過程の情報を重ねるため不採用です。",
+        "requiredTrials": {
+          "value": 31066,
+          "unit": "通常ゲーム"
+        }
+      },
+      {
+        "featureId": "FEAT_BB_THROUGH_MAX_EXCLUDED",
+        "name": "BBスルー最大規定回数振り分け",
+        "reason": "最大規定スルー回数は内部で選ばれる潜在値で、実際に早く当選した場合は選択された最大回数を直接観測できないため不採用です。",
+        "requiredTrials": {
+          "value": 10,
+          "unit": "BBスルー最大規定回数決定1回"
+        }
+      },
+      {
+        "featureId": "FEAT_STOCK_TIME_EXCLUDED",
+        "name": "ストックタイム初当り",
+        "reason": "設定差候補ですが設定2～6の具体確率がResearchで未解決で、全設定の尤度を構成できないため不採用です。"
+      },
+      {
+        "featureId": "FEAT_JOKER_MODE_EXCLUDED",
+        "name": "ジョーカーモード突入率",
+        "reason": "設定1以外の具体確率がResearchで未解決で、全設定の尤度を構成できないため不採用です。"
+      },
+      {
+        "featureId": "FEAT_JAC_CARD_EXCLUDED",
+        "name": "JAC中トランプ構成",
+        "reason": "トランプのカテゴリ別回数は観測できますが、設定別の完全な出現分布が未解決でmultinomial尤度を構成できないため不採用です。"
+      }
+    ]
+  },
+  "reliability": {},
+  "metadata": {
+    "machineId": "L_SUPER_BLACKJACK_SLDC",
+    "displayName": "スマスロスーパーブラックジャック",
+    "settings": [
+      "SET_1",
+      "SET_2",
+      "SET_3",
+      "SET_4",
+      "SET_5",
+      "SET_6"
+    ]
+  },
+  "validation": {
+    "cases": []
+  },
+  "statistics": {}
+}

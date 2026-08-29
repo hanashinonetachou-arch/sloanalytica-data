@@ -1,0 +1,662 @@
+{
+  "schemaVersion": 1,
+  "machine": {
+    "schemaVersion": "2.0.0",
+    "machineId": "L_ARIFURETA_JA",
+    "machineDataVersion": "0.1.0",
+    "displayName": "Lパチスロ ありふれた職業で世界最強",
+    "modelName": "Lありふれた職業で世界最強jA",
+    "manufacturer": "SANKYO",
+    "settings": [
+      "SET_1",
+      "SET_2",
+      "SET_3",
+      "SET_4",
+      "SET_5",
+      "SET_6"
+    ],
+    "packagePolicy": {
+      "offlineCapable": true,
+      "containsImages": false,
+      "containsExecutableCode": false
+    }
+  },
+  "inputs": {
+    "schemaVersion": "2.0.0",
+    "inputs": [
+      {
+        "id": "INP_NORMAL_GAMES",
+        "name": "通常ゲーム数",
+        "type": "integer",
+        "category": "NUMERIC",
+        "unit": "G",
+        "displayOrder": 10,
+        "inferenceRole": "INCLUDE_PRIMARY",
+        "defaultValue": null,
+        "observationScope": "SELF_PLAY",
+        "minimum": 0
+      },
+      {
+        "id": "INP_COMBINED_FIRST_HIT",
+        "name": "ミュウボーナス+AT初当り",
+        "type": "counter",
+        "category": "NUMERIC",
+        "unit": "回",
+        "displayOrder": 11,
+        "inferenceRole": "INCLUDE_PRIMARY",
+        "defaultValue": null,
+        "parentInputId": "INP_NORMAL_GAMES",
+        "minimum": 0
+      },
+      {
+        "id": "INP_AWAKENING_TRIALS",
+        "name": "覚醒チャレンジ回数",
+        "type": "counter",
+        "category": "NUMERIC",
+        "unit": "回",
+        "displayOrder": 20,
+        "inferenceRole": "INCLUDE_SUPPORT",
+        "defaultValue": null,
+        "minimum": 0
+      },
+      {
+        "id": "INP_AWAKENING_SUCCESS",
+        "name": "覚醒チャレンジ成功",
+        "type": "counter",
+        "category": "NUMERIC",
+        "unit": "回",
+        "displayOrder": 21,
+        "inferenceRole": "INCLUDE_SUPPORT",
+        "defaultValue": null,
+        "parentInputId": "INP_AWAKENING_TRIALS",
+        "minimum": 0
+      },
+      {
+        "id": "INP_EVI_SETTING_EVIDENCE",
+        "name": "設定確定・否定",
+        "type": "multi_enum",
+        "category": "EVIDENCE",
+        "unit": "",
+        "displayOrder": 100,
+        "inferenceRole": "INCLUDE_SUPPORT",
+        "options": [
+          {
+            "key": "MYU_4PLUS",
+            "label": "ミュウ特殊キャラ 香織（使徒の姿）",
+            "value": "MYU_4PLUS"
+          },
+          {
+            "key": "MYU_5PLUS",
+            "label": "ミュウ特殊キャラ ユエ（吸血姫）",
+            "value": "MYU_5PLUS"
+          },
+          {
+            "key": "MYU_6",
+            "label": "ミュウ特殊キャラ ハジメ（学生）",
+            "value": "MYU_6"
+          },
+          {
+            "key": "PAY_456",
+            "label": "456 OVER",
+            "value": "PAY_456"
+          },
+          {
+            "key": "PAY_666",
+            "label": "666 OVER",
+            "value": "PAY_666"
+          },
+          {
+            "key": "END_4PLUS",
+            "label": "エンディング一枚絵 銀枠ハジメ",
+            "value": "END_4PLUS"
+          },
+          {
+            "key": "END_5PLUS",
+            "label": "エンディング一枚絵 金枠ユエ",
+            "value": "END_5PLUS"
+          },
+          {
+            "key": "END_6",
+            "label": "エンディング一枚絵 虹枠ミュウ",
+            "value": "END_6"
+          },
+          {
+            "key": "ATEND_4PLUS",
+            "label": "大迷宮RUSH終了 ハジメ",
+            "value": "ATEND_4PLUS"
+          },
+          {
+            "key": "ATEND_5PLUS",
+            "label": "大迷宮RUSH終了 ユエ",
+            "value": "ATEND_5PLUS"
+          },
+          {
+            "key": "ATEND_6",
+            "label": "大迷宮RUSH終了 レミア・ミュウ・ユエ",
+            "value": "ATEND_6"
+          }
+        ],
+        "defaultValue": []
+      }
+    ]
+  },
+  "features": {
+    "schemaVersion": "2.0.0",
+    "features": [
+      {
+        "featureId": "FEAT_COMBINED_FIRST_HIT",
+        "name": "ミュウボーナス+AT初当り合算",
+        "adoptionCategory": "INCLUDE_PRIMARY",
+        "calculationRole": "PROBABILITY",
+        "probabilityEngineUsage": true,
+        "modelType": "binomial",
+        "minimumSample": 1,
+        "sampleRecommendation": 1,
+        "reliabilityProfile": {
+          "weight": 1
+        },
+        "denominatorInputId": "INP_NORMAL_GAMES",
+        "numeratorInputId": "INP_COMBINED_FIRST_HIT",
+        "displayFormat": "ratio_1_over_n",
+        "probabilities": {
+          "SET_1": 0.00398406374501992,
+          "SET_2": 0.004081632653061225,
+          "SET_3": 0.00425531914893617,
+          "SET_4": 0.004545454545454545,
+          "SET_5": 0.0047169811320754715,
+          "SET_6": 0.00510204081632653
+        },
+        "sourceEvidenceRefs": [
+          "SRC_NANA"
+        ]
+      },
+      {
+        "featureId": "FEAT_AWAKENING",
+        "name": "覚醒チャレンジ成功期待度",
+        "adoptionCategory": "INCLUDE_SUPPORT",
+        "calculationRole": "PROBABILITY",
+        "probabilityEngineUsage": true,
+        "modelType": "binomial",
+        "minimumSample": 1,
+        "sampleRecommendation": 1,
+        "reliabilityProfile": {
+          "weight": 1
+        },
+        "denominatorInputId": "INP_AWAKENING_TRIALS",
+        "numeratorInputId": "INP_AWAKENING_SUCCESS",
+        "displayFormat": "ratio_1_over_n",
+        "probabilities": {
+          "SET_1": 0.44,
+          "SET_2": 0.45,
+          "SET_3": 0.48,
+          "SET_4": 0.53,
+          "SET_5": 0.54,
+          "SET_6": 0.57
+        },
+        "sourceEvidenceRefs": [
+          "SRC_NANA"
+        ]
+      }
+    ]
+  },
+  "evidence": {
+    "version": "1.0.0",
+    "evidences": [
+      {
+        "id": "EVI_SETTING_EVIDENCE_MYU_4PLUS",
+        "name": "ミュウ特殊キャラ 香織（使徒の姿）",
+        "displayName": "ミュウ特殊キャラ 香織（使徒の姿）",
+        "inputId": "INP_EVI_SETTING_EVIDENCE",
+        "triggerValue": "MYU_4PLUS",
+        "confirmedSettings": [
+          "SET_4",
+          "SET_5",
+          "SET_6"
+        ],
+        "deniedSettings": [
+          "SET_1",
+          "SET_2",
+          "SET_3"
+        ],
+        "hasImage": false,
+        "type": "SETTING_CONFIRMATION",
+        "sourceEvidenceRefs": [
+          "RE_MYU_SPECIAL_4PLUS"
+        ]
+      },
+      {
+        "id": "EVI_SETTING_EVIDENCE_MYU_5PLUS",
+        "name": "ミュウ特殊キャラ ユエ（吸血姫）",
+        "displayName": "ミュウ特殊キャラ ユエ（吸血姫）",
+        "inputId": "INP_EVI_SETTING_EVIDENCE",
+        "triggerValue": "MYU_5PLUS",
+        "confirmedSettings": [
+          "SET_5",
+          "SET_6"
+        ],
+        "deniedSettings": [
+          "SET_1",
+          "SET_2",
+          "SET_3",
+          "SET_4"
+        ],
+        "hasImage": false,
+        "type": "SETTING_CONFIRMATION",
+        "sourceEvidenceRefs": [
+          "RE_MYU_SPECIAL_5PLUS"
+        ]
+      },
+      {
+        "id": "EVI_SETTING_EVIDENCE_MYU_6",
+        "name": "ミュウ特殊キャラ ハジメ（学生）",
+        "displayName": "ミュウ特殊キャラ ハジメ（学生）",
+        "inputId": "INP_EVI_SETTING_EVIDENCE",
+        "triggerValue": "MYU_6",
+        "confirmedSettings": [
+          "SET_6"
+        ],
+        "deniedSettings": [
+          "SET_1",
+          "SET_2",
+          "SET_3",
+          "SET_4",
+          "SET_5"
+        ],
+        "hasImage": false,
+        "type": "SETTING_CONFIRMATION",
+        "sourceEvidenceRefs": [
+          "RE_MYU_SPECIAL_6"
+        ]
+      },
+      {
+        "id": "EVI_SETTING_EVIDENCE_PAY_456",
+        "name": "456 OVER",
+        "displayName": "456 OVER",
+        "inputId": "INP_EVI_SETTING_EVIDENCE",
+        "triggerValue": "PAY_456",
+        "confirmedSettings": [
+          "SET_4",
+          "SET_5",
+          "SET_6"
+        ],
+        "deniedSettings": [
+          "SET_1",
+          "SET_2",
+          "SET_3"
+        ],
+        "hasImage": false,
+        "type": "SETTING_CONFIRMATION",
+        "sourceEvidenceRefs": [
+          "RE_PAYOUT_456"
+        ]
+      },
+      {
+        "id": "EVI_SETTING_EVIDENCE_PAY_666",
+        "name": "666 OVER",
+        "displayName": "666 OVER",
+        "inputId": "INP_EVI_SETTING_EVIDENCE",
+        "triggerValue": "PAY_666",
+        "confirmedSettings": [
+          "SET_6"
+        ],
+        "deniedSettings": [
+          "SET_1",
+          "SET_2",
+          "SET_3",
+          "SET_4",
+          "SET_5"
+        ],
+        "hasImage": false,
+        "type": "SETTING_CONFIRMATION",
+        "sourceEvidenceRefs": [
+          "RE_PAYOUT_666"
+        ]
+      },
+      {
+        "id": "EVI_SETTING_EVIDENCE_END_4PLUS",
+        "name": "エンディング一枚絵 銀枠ハジメ",
+        "displayName": "エンディング一枚絵 銀枠ハジメ",
+        "inputId": "INP_EVI_SETTING_EVIDENCE",
+        "triggerValue": "END_4PLUS",
+        "confirmedSettings": [
+          "SET_4",
+          "SET_5",
+          "SET_6"
+        ],
+        "deniedSettings": [
+          "SET_1",
+          "SET_2",
+          "SET_3"
+        ],
+        "hasImage": false,
+        "type": "SETTING_CONFIRMATION",
+        "sourceEvidenceRefs": [
+          "RE_ENDING_4PLUS"
+        ]
+      },
+      {
+        "id": "EVI_SETTING_EVIDENCE_END_5PLUS",
+        "name": "エンディング一枚絵 金枠ユエ",
+        "displayName": "エンディング一枚絵 金枠ユエ",
+        "inputId": "INP_EVI_SETTING_EVIDENCE",
+        "triggerValue": "END_5PLUS",
+        "confirmedSettings": [
+          "SET_5",
+          "SET_6"
+        ],
+        "deniedSettings": [
+          "SET_1",
+          "SET_2",
+          "SET_3",
+          "SET_4"
+        ],
+        "hasImage": false,
+        "type": "SETTING_CONFIRMATION",
+        "sourceEvidenceRefs": [
+          "RE_ENDING_5PLUS"
+        ]
+      },
+      {
+        "id": "EVI_SETTING_EVIDENCE_END_6",
+        "name": "エンディング一枚絵 虹枠ミュウ",
+        "displayName": "エンディング一枚絵 虹枠ミュウ",
+        "inputId": "INP_EVI_SETTING_EVIDENCE",
+        "triggerValue": "END_6",
+        "confirmedSettings": [
+          "SET_6"
+        ],
+        "deniedSettings": [
+          "SET_1",
+          "SET_2",
+          "SET_3",
+          "SET_4",
+          "SET_5"
+        ],
+        "hasImage": false,
+        "type": "SETTING_CONFIRMATION",
+        "sourceEvidenceRefs": [
+          "RE_ENDING_6"
+        ]
+      },
+      {
+        "id": "EVI_SETTING_EVIDENCE_ATEND_4PLUS",
+        "name": "大迷宮RUSH終了 ハジメ",
+        "displayName": "大迷宮RUSH終了 ハジメ",
+        "inputId": "INP_EVI_SETTING_EVIDENCE",
+        "triggerValue": "ATEND_4PLUS",
+        "confirmedSettings": [
+          "SET_4",
+          "SET_5",
+          "SET_6"
+        ],
+        "deniedSettings": [
+          "SET_1",
+          "SET_2",
+          "SET_3"
+        ],
+        "hasImage": false,
+        "type": "SETTING_CONFIRMATION",
+        "sourceEvidenceRefs": [
+          "RE_AT_END_4PLUS"
+        ]
+      },
+      {
+        "id": "EVI_SETTING_EVIDENCE_ATEND_5PLUS",
+        "name": "大迷宮RUSH終了 ユエ",
+        "displayName": "大迷宮RUSH終了 ユエ",
+        "inputId": "INP_EVI_SETTING_EVIDENCE",
+        "triggerValue": "ATEND_5PLUS",
+        "confirmedSettings": [
+          "SET_5",
+          "SET_6"
+        ],
+        "deniedSettings": [
+          "SET_1",
+          "SET_2",
+          "SET_3",
+          "SET_4"
+        ],
+        "hasImage": false,
+        "type": "SETTING_CONFIRMATION",
+        "sourceEvidenceRefs": [
+          "RE_AT_END_5PLUS"
+        ]
+      },
+      {
+        "id": "EVI_SETTING_EVIDENCE_ATEND_6",
+        "name": "大迷宮RUSH終了 レミア・ミュウ・ユエ",
+        "displayName": "大迷宮RUSH終了 レミア・ミュウ・ユエ",
+        "inputId": "INP_EVI_SETTING_EVIDENCE",
+        "triggerValue": "ATEND_6",
+        "confirmedSettings": [
+          "SET_6"
+        ],
+        "deniedSettings": [
+          "SET_1",
+          "SET_2",
+          "SET_3",
+          "SET_4",
+          "SET_5"
+        ],
+        "hasImage": false,
+        "type": "SETTING_CONFIRMATION",
+        "sourceEvidenceRefs": [
+          "RE_AT_END_6"
+        ]
+      }
+    ],
+    "sources": [
+      {
+        "id": "SRC_OFFICIAL",
+        "classification": "OFFICIAL",
+        "pageName": "Lパチスロ ありふれた職業で世界最強 スペック",
+        "url": "https://www.sankyo-fever.jp/products/machine_list/sbq/spec/",
+        "checkedAt": "2026-08-30"
+      },
+      {
+        "id": "SRC_NANA",
+        "classification": "ANALYSIS",
+        "pageName": "ありふれた職業で世界最強 設定判別",
+        "url": "https://nana-press.com/kaiseki/machine/885/27304/",
+        "checkedAt": "2026-08-30"
+      }
+    ]
+  },
+  "ui": {
+    "sections": [
+      {
+        "id": "AUTO_NUMERIC",
+        "title": "初当り・成功率",
+        "displayOrder": 1,
+        "items": [
+          {
+            "type": "input",
+            "inputId": "INP_NORMAL_GAMES",
+            "label": "通常ゲーム数",
+            "widget": "number"
+          },
+          {
+            "type": "input",
+            "inputId": "INP_COMBINED_FIRST_HIT",
+            "label": "ミュウボーナス+AT初当り",
+            "widget": "counter"
+          },
+          {
+            "type": "input",
+            "inputId": "INP_AWAKENING_TRIALS",
+            "label": "覚醒チャレンジ回数",
+            "widget": "counter"
+          },
+          {
+            "type": "input",
+            "inputId": "INP_AWAKENING_SUCCESS",
+            "label": "覚醒チャレンジ成功",
+            "widget": "counter"
+          }
+        ]
+      },
+      {
+        "id": "AUTO_EVIDENCE",
+        "title": "設定確定・否定",
+        "displayOrder": 2,
+        "items": [
+          {
+            "type": "input",
+            "inputId": "INP_EVI_SETTING_EVIDENCE",
+            "label": "設定確定・否定",
+            "widget": "multi_select"
+          }
+        ]
+      }
+    ]
+  },
+  "selectionSummary": {
+    "schemaVersion": "selection-summary-v1",
+    "evaluatedCount": 14,
+    "selectedCount": 2,
+    "rejectedCount": 12,
+    "selected": [
+      {
+        "featureId": "FEAT_COMBINED_FIRST_HIT",
+        "name": "ミュウボーナス+AT初当り合算",
+        "reason": "ミュウボーナスとATを重複なく合算し、通常ゲーム数を分母に直接観測でき、全設定の公開確率も揃っているため主軸として採用します。",
+        "requiredTrials": {
+          "value": 26423,
+          "unit": "通常ゲーム"
+        }
+      },
+      {
+        "featureId": "FEAT_AWAKENING",
+        "name": "覚醒チャレンジ成功期待度",
+        "reason": "覚醒チャレンジは突入回数を分母、成功回数を分子として結果を直接観測でき、全設定の成功期待度が公開されているため補助採用します。",
+        "requiredTrials": {
+          "value": 108,
+          "unit": "覚醒チャレンジ1回"
+        }
+      }
+    ],
+    "rejected": [
+      {
+        "featureId": "FEAT_MYU_BONUS_EXCLUDED",
+        "name": "ミュウボーナス初当り",
+        "reason": "初当り合算の内訳であり、同時に独立尤度へ加えると同じ初当り情報を二重評価するため不採用です。",
+        "requiredTrials": {
+          "value": 71195,
+          "unit": "通常ゲーム"
+        }
+      },
+      {
+        "featureId": "FEAT_AT_FIRST_HIT_EXCLUDED",
+        "name": "AT初当り",
+        "reason": "初当り合算の内訳であり、同時に独立尤度へ加えると同じ初当り情報を二重評価するため不採用です。",
+        "requiredTrials": {
+          "value": 15752,
+          "unit": "通常ゲーム"
+        }
+      },
+      {
+        "featureId": "FEAT_UPPER_AT_EXCLUDED",
+        "name": "上位AT初当り",
+        "reason": "AT初当りの一部を構成する低頻度な部分集合で、初当り合算と併用すると同じ当選経路を二重評価するため不採用です。",
+        "requiredTrials": {
+          "value": 74557,
+          "unit": "通常ゲーム"
+        }
+      },
+      {
+        "featureId": "FEAT_HIGH_TRANSITION_EXCLUDED",
+        "name": "設定変更時/AT・上位AT終了時 高確移行率",
+        "reason": "設定変更時とAT終了時が混在し、内部高確への移行を毎回確定観測できないため正確な分母を取得できず不採用です。",
+        "requiredTrials": {
+          "value": 106,
+          "unit": "対象終了・設定変更1回"
+        }
+      },
+      {
+        "featureId": "FEAT_TRIGGER_HIGH_SUIKA_EXCLUDED",
+        "name": "高確中スイカからの引鉄高確移行率",
+        "reason": "高確滞在を内部状態として確定判別できないため、対象スイカだけの正確な分母を観測できず不採用です。",
+        "requiredTrials": {
+          "value": 16,
+          "unit": "高確中スイカ成立1回"
+        }
+      },
+      {
+        "featureId": "FEAT_TRIGGER_HIGH_WEAK_CHERRY_EXCLUDED",
+        "name": "弱チェリーからの引鉄高確移行率",
+        "reason": "引鉄高確への移行を実戦中に毎回確定判別できず、当選/非当選の正確な観測が成立しないため不採用です。",
+        "requiredTrials": {
+          "value": 276,
+          "unit": "弱チェリー成立1回"
+        }
+      },
+      {
+        "featureId": "FEAT_TRIGGER_HIGH_WEAK_CHANCE_EXCLUDED",
+        "name": "弱チャンス目からの引鉄高確移行率",
+        "reason": "引鉄高確への移行を実戦中に毎回確定判別できず、当選/非当選の正確な観測が成立しないため不採用です。",
+        "requiredTrials": {
+          "value": 181,
+          "unit": "弱チャンス目成立1回"
+        }
+      },
+      {
+        "featureId": "FEAT_HEAVEN_AFTER_AT_EXCLUDED",
+        "name": "設定変更時/AT終了時 天国移行率",
+        "reason": "天国モードは内部状態であり移行結果をその場で確定観測できないため、設定別尤度に使える正確な分母・結果を取得できず不採用です。",
+        "requiredTrials": {
+          "value": 224,
+          "unit": "設定変更またはAT終了1回"
+        }
+      },
+      {
+        "featureId": "FEAT_HEAVEN_AFTER_UPPER_EXCLUDED",
+        "name": "上位AT終了時 天国移行率",
+        "reason": "上位AT終了後の天国移行は内部状態を確定観測できず、低頻度な条件付き抽選でもあるため正確な観測が成立せず不採用です。",
+        "requiredTrials": {
+          "value": 22,
+          "unit": "上位AT終了1回"
+        }
+      },
+      {
+        "featureId": "FEAT_CZ_ZONE_EXCLUDED",
+        "name": "CZモードのゾーン",
+        "reason": "公開Researchで全設定の具体的確率が未解決であり、現時点では設定別尤度を構成できないため不採用です。"
+      },
+      {
+        "featureId": "FEAT_MYU_TO_AT_EXCLUDED",
+        "name": "ミュウボーナス開始時AT当選率",
+        "reason": "AT当選には開始時抽選以外のスルー天井・消化中抽選もあり、開始時当選だけを正確に判別できないため不採用です。",
+        "requiredTrials": {
+          "value": 18,
+          "unit": "ミュウボーナス開始1回"
+        }
+      },
+      {
+        "featureId": "FEAT_BTA_CONTINUE_EXCLUDED",
+        "name": "ビッグトリガーアタック継続率振り分け",
+        "reason": "実戦結果から選択された内部継続率10%・56%・73%を確定判別できず、カテゴリ構成を直接観測できないため不採用です。",
+        "requiredTrials": {
+          "value": 4,
+          "unit": "ビッグトリガーアタック開始1回"
+        }
+      }
+    ]
+  },
+  "reliability": {},
+  "metadata": {
+    "machineId": "L_ARIFURETA_JA",
+    "displayName": "Lパチスロ ありふれた職業で世界最強",
+    "settings": [
+      "SET_1",
+      "SET_2",
+      "SET_3",
+      "SET_4",
+      "SET_5",
+      "SET_6"
+    ]
+  },
+  "validation": {
+    "cases": []
+  },
+  "statistics": {}
+}

@@ -1,0 +1,610 @@
+{
+  "schemaVersion": 1,
+  "machine": {
+    "schemaVersion": "2.0.0",
+    "machineId": "S_MAHOIKU_NB",
+    "machineDataVersion": "0.1.0",
+    "displayName": "パチスロ 魔法少女育成計画",
+    "modelName": "SまほいくNB",
+    "manufacturer": "カルミナ",
+    "settings": [
+      "SET_1",
+      "SET_2",
+      "SET_3",
+      "SET_4",
+      "SET_5",
+      "SET_6"
+    ],
+    "packagePolicy": {
+      "offlineCapable": true,
+      "containsImages": false,
+      "containsExecutableCode": false
+    }
+  },
+  "inputs": {
+    "schemaVersion": "2.0.0",
+    "inputs": [
+      {
+        "id": "INP_NORMAL_GAMES",
+        "name": "通常ゲーム数",
+        "type": "integer",
+        "category": "NUMERIC",
+        "unit": "G",
+        "displayOrder": 10,
+        "inferenceRole": "INCLUDE_PRIMARY",
+        "defaultValue": null,
+        "observationScope": "SELF_PLAY",
+        "minimum": 0
+      },
+      {
+        "id": "INP_ART_FIRST_HIT",
+        "name": "ART初当り",
+        "type": "counter",
+        "category": "NUMERIC",
+        "unit": "回",
+        "displayOrder": 11,
+        "inferenceRole": "INCLUDE_PRIMARY",
+        "defaultValue": null,
+        "parentInputId": "INP_NORMAL_GAMES",
+        "uiQuickAdd": 1,
+        "minimum": 0
+      },
+      {
+        "id": "INP_TOTAL_GAMES",
+        "name": "総ゲーム数",
+        "type": "integer",
+        "category": "NUMERIC",
+        "unit": "G",
+        "displayOrder": 12,
+        "inferenceRole": "INCLUDE_SUPPORT",
+        "defaultValue": null,
+        "observationScope": "SELF_PLAY",
+        "minimum": 0
+      },
+      {
+        "id": "INP_ORDER_BELL",
+        "name": "押し順ベル",
+        "type": "counter",
+        "category": "NUMERIC",
+        "unit": "回",
+        "displayOrder": 13,
+        "inferenceRole": "INCLUDE_SUPPORT",
+        "defaultValue": null,
+        "parentInputId": "INP_TOTAL_GAMES",
+        "uiQuickAdd": 1,
+        "minimum": 0
+      },
+      {
+        "id": "INP_EVI_SETTING_EVIDENCE",
+        "name": "設定確定・否定",
+        "type": "multi_enum",
+        "category": "EVIDENCE",
+        "unit": "",
+        "displayOrder": 100,
+        "inferenceRole": "INCLUDE_SUPPORT",
+        "options": [
+          {
+            "key": "CAB_BLUE",
+            "label": "青筐体",
+            "value": "CAB_BLUE"
+          },
+          {
+            "key": "CAB_RED",
+            "label": "赤筐体",
+            "value": "CAB_RED"
+          },
+          {
+            "key": "BONUS3",
+            "label": "ボーナス終了：設定3以上",
+            "value": "BONUS3"
+          },
+          {
+            "key": "BONUS5",
+            "label": "ボーナス終了：設定5以上",
+            "value": "BONUS5"
+          },
+          {
+            "key": "ART3",
+            "label": "ART終了：設定3以上",
+            "value": "ART3"
+          },
+          {
+            "key": "ART5",
+            "label": "ART終了：設定5以上",
+            "value": "ART5"
+          }
+        ],
+        "defaultValue": []
+      }
+    ]
+  },
+  "features": {
+    "schemaVersion": "2.0.0",
+    "features": [
+      {
+        "featureId": "FEAT_ART_FIRST_HIT",
+        "name": "ART初当り",
+        "adoptionCategory": "INCLUDE_PRIMARY",
+        "calculationRole": "PROBABILITY",
+        "probabilityEngineUsage": true,
+        "modelType": "binomial",
+        "minimumSample": 1,
+        "sampleRecommendation": 1,
+        "reliabilityProfile": {
+          "weight": 1
+        },
+        "denominatorInputId": "INP_NORMAL_GAMES",
+        "numeratorInputId": "INP_ART_FIRST_HIT",
+        "displayFormat": "ratio_1_over_n",
+        "probabilities": {
+          "SET_1": 0.004110152075626798,
+          "SET_2": 0.004214075010535188,
+          "SET_3": 0.004336513443191674,
+          "SET_4": 0.004464285714285714,
+          "SET_5": 0.004610419548178884,
+          "SET_6": 0.004721435316336166
+        },
+        "sourceEvidenceRefs": [
+          "SRC_NANA",
+          "SRC_PWORLD"
+        ]
+      },
+      {
+        "featureId": "FEAT_ORDER_BELL",
+        "name": "押し順ベル",
+        "adoptionCategory": "INCLUDE_SUPPORT",
+        "calculationRole": "PROBABILITY",
+        "probabilityEngineUsage": true,
+        "modelType": "binomial",
+        "minimumSample": 1,
+        "sampleRecommendation": 1,
+        "reliabilityProfile": {
+          "weight": 1
+        },
+        "denominatorInputId": "INP_TOTAL_GAMES",
+        "numeratorInputId": "INP_ORDER_BELL",
+        "displayFormat": "ratio_1_over_n",
+        "probabilities": {
+          "SET_1": 0.24390243902439027,
+          "SET_2": 0.24390243902439027,
+          "SET_3": 0.23809523809523808,
+          "SET_4": 0.23255813953488372,
+          "SET_5": 0.22727272727272727,
+          "SET_6": 0.11363636363636363
+        },
+        "sourceEvidenceRefs": [
+          "SRC_NANA",
+          "SRC_PWORLD"
+        ]
+      }
+    ]
+  },
+  "evidence": {
+    "version": "1.0.0",
+    "evidences": [
+      {
+        "id": "EVI_SETTING_EVIDENCE_CAB_BLUE",
+        "name": "青筐体",
+        "displayName": "青筐体",
+        "inputId": "INP_EVI_SETTING_EVIDENCE",
+        "triggerValue": "CAB_BLUE",
+        "confirmedSettings": [
+          "SET_1",
+          "SET_3",
+          "SET_5"
+        ],
+        "deniedSettings": [
+          "SET_2",
+          "SET_4",
+          "SET_6"
+        ],
+        "hasImage": false,
+        "type": "SETTING_CONFIRMATION",
+        "sourceEvidenceRefs": [
+          "RE_CABINET_BLUE"
+        ]
+      },
+      {
+        "id": "EVI_SETTING_EVIDENCE_CAB_RED",
+        "name": "赤筐体",
+        "displayName": "赤筐体",
+        "inputId": "INP_EVI_SETTING_EVIDENCE",
+        "triggerValue": "CAB_RED",
+        "confirmedSettings": [
+          "SET_2",
+          "SET_4",
+          "SET_6"
+        ],
+        "deniedSettings": [
+          "SET_1",
+          "SET_3",
+          "SET_5"
+        ],
+        "hasImage": false,
+        "type": "SETTING_CONFIRMATION",
+        "sourceEvidenceRefs": [
+          "RE_CABINET_RED"
+        ]
+      },
+      {
+        "id": "EVI_SETTING_EVIDENCE_BONUS3",
+        "name": "ボーナス終了：設定3以上",
+        "displayName": "ボーナス終了：設定3以上",
+        "inputId": "INP_EVI_SETTING_EVIDENCE",
+        "triggerValue": "BONUS3",
+        "confirmedSettings": [
+          "SET_3",
+          "SET_4",
+          "SET_5",
+          "SET_6"
+        ],
+        "deniedSettings": [
+          "SET_1",
+          "SET_2"
+        ],
+        "hasImage": false,
+        "type": "SETTING_CONFIRMATION",
+        "sourceEvidenceRefs": [
+          "RE_BONUS_END_3PLUS"
+        ]
+      },
+      {
+        "id": "EVI_SETTING_EVIDENCE_BONUS5",
+        "name": "ボーナス終了：設定5以上",
+        "displayName": "ボーナス終了：設定5以上",
+        "inputId": "INP_EVI_SETTING_EVIDENCE",
+        "triggerValue": "BONUS5",
+        "confirmedSettings": [
+          "SET_5",
+          "SET_6"
+        ],
+        "deniedSettings": [
+          "SET_1",
+          "SET_2",
+          "SET_3",
+          "SET_4"
+        ],
+        "hasImage": false,
+        "type": "SETTING_CONFIRMATION",
+        "sourceEvidenceRefs": [
+          "RE_BONUS_END_5PLUS"
+        ]
+      },
+      {
+        "id": "EVI_SETTING_EVIDENCE_ART3",
+        "name": "ART終了：設定3以上",
+        "displayName": "ART終了：設定3以上",
+        "inputId": "INP_EVI_SETTING_EVIDENCE",
+        "triggerValue": "ART3",
+        "confirmedSettings": [
+          "SET_3",
+          "SET_4",
+          "SET_5",
+          "SET_6"
+        ],
+        "deniedSettings": [
+          "SET_1",
+          "SET_2"
+        ],
+        "hasImage": false,
+        "type": "SETTING_CONFIRMATION",
+        "sourceEvidenceRefs": [
+          "RE_ART_END_3PLUS"
+        ]
+      },
+      {
+        "id": "EVI_SETTING_EVIDENCE_ART5",
+        "name": "ART終了：設定5以上",
+        "displayName": "ART終了：設定5以上",
+        "inputId": "INP_EVI_SETTING_EVIDENCE",
+        "triggerValue": "ART5",
+        "confirmedSettings": [
+          "SET_5",
+          "SET_6"
+        ],
+        "deniedSettings": [
+          "SET_1",
+          "SET_2",
+          "SET_3",
+          "SET_4"
+        ],
+        "hasImage": false,
+        "type": "SETTING_CONFIRMATION",
+        "sourceEvidenceRefs": [
+          "RE_ART_END_5PLUS"
+        ]
+      }
+    ],
+    "sources": [
+      {
+        "id": "SRC_OFFICIAL",
+        "classification": "OFFICIAL",
+        "pageName": "パチスロ 魔法少女育成計画",
+        "url": "https://slot.carmina-gaming.co.jp/mahoiku/",
+        "checkedAt": "2026-08-30"
+      },
+      {
+        "id": "SRC_NANA",
+        "classification": "ANALYSIS",
+        "pageName": "パチスロ 魔法少女育成計画 設定差のある要素や設定示唆演出まとめ",
+        "url": "https://nana-press.com/kaiseki/machine/441/12151/",
+        "checkedAt": "2026-08-30"
+      },
+      {
+        "id": "SRC_PWORLD",
+        "classification": "ANALYSIS",
+        "pageName": "パチスロ 魔法少女育成計画",
+        "url": "https://www.p-world.co.jp/machine/database/9707",
+        "checkedAt": "2026-08-30"
+      },
+      {
+        "id": "SRC_1GEKI",
+        "classification": "ANALYSIS",
+        "pageName": "パチスロ 魔法少女育成計画 設定判別 終了画面",
+        "url": "https://1geki.jp/slot/s_mahoiku/0/",
+        "checkedAt": "2026-08-30"
+      }
+    ]
+  },
+  "ui": {
+    "sections": [
+      {
+        "id": "AUTO_NUMERIC",
+        "title": "数値要素",
+        "displayOrder": 1,
+        "items": [
+          {
+            "type": "input",
+            "inputId": "INP_NORMAL_GAMES",
+            "label": "通常ゲーム数",
+            "widget": "number"
+          },
+          {
+            "type": "input",
+            "inputId": "INP_ART_FIRST_HIT",
+            "label": "ART初当り",
+            "config": {
+              "quickAdd": 1
+            },
+            "widget": "counter"
+          },
+          {
+            "type": "input",
+            "inputId": "INP_TOTAL_GAMES",
+            "label": "総ゲーム数",
+            "widget": "number"
+          },
+          {
+            "type": "input",
+            "inputId": "INP_ORDER_BELL",
+            "label": "押し順ベル",
+            "config": {
+              "quickAdd": 1
+            },
+            "widget": "counter"
+          }
+        ]
+      },
+      {
+        "id": "AUTO_EVIDENCE",
+        "title": "設定確定・否定",
+        "displayOrder": 2,
+        "items": [
+          {
+            "type": "input",
+            "inputId": "INP_EVI_SETTING_EVIDENCE",
+            "label": "設定確定・否定",
+            "widget": "multi_select"
+          }
+        ]
+      }
+    ]
+  },
+  "selectionSummary": {
+    "schemaVersion": "selection-summary-v1",
+    "evaluatedCount": 20,
+    "selectedCount": 2,
+    "rejectedCount": 18,
+    "selected": [
+      {
+        "featureId": "FEAT_ART_FIRST_HIT",
+        "name": "ART初当り",
+        "reason": "ART初当りは通常ゲーム数を分母に直接観測でき、設定1約1/243から設定6約1/212まで一貫した設定差があるため主軸採用します。",
+        "requiredTrials": {
+          "value": 86140,
+          "unit": "通常ゲーム"
+        }
+      },
+      {
+        "featureId": "FEAT_ORDER_BELL",
+        "name": "押し順ベル",
+        "reason": "押し順ベルは高頻度で観測でき、設定1～5の約1/4台に対して設定6は約1/8.8と非常に大きな設定差があるため補助採用します。",
+        "requiredTrials": {
+          "value": 62,
+          "unit": "ゲーム"
+        }
+      }
+    ],
+    "rejected": [
+      {
+        "featureId": "FEAT_BONUS_BIG_EXCLUDED",
+        "name": "BIG確率",
+        "reason": "BIGはボーナス合算の構成要素で、REGや合算と独立に積むと同じボーナス成立情報を重複評価するため不採用です。",
+        "requiredTrials": {
+          "value": 39870,
+          "unit": "ゲーム"
+        }
+      },
+      {
+        "featureId": "FEAT_BONUS_REG_EXCLUDED",
+        "name": "REG確率",
+        "reason": "REGはボーナス合算の構成要素で、BIGや合算と独立に積むと同じボーナス成立情報を重複評価するため不採用です。",
+        "requiredTrials": {
+          "value": 29385,
+          "unit": "ゲーム"
+        }
+      },
+      {
+        "featureId": "FEAT_BONUS_COMBINED_EXCLUDED",
+        "name": "ボーナス合算",
+        "reason": "設定6で大きく低下する有力情報ですがART当選経路と依存し、ART初当りと別尤度で併用すると同一遊技結果の依存を強く残すため不採用です。",
+        "requiredTrials": {
+          "value": 19208,
+          "unit": "ゲーム"
+        }
+      },
+      {
+        "featureId": "FEAT_WEAK_SUIKA_EXCLUDED",
+        "name": "弱スイカ",
+        "reason": "全設定の確率差が非常に小さく、同じ総ゲーム分母の押し順ベルより追加情報量が大幅に少ないため不採用です。",
+        "requiredTrials": {
+          "value": 1087971,
+          "unit": "ゲーム"
+        }
+      },
+      {
+        "featureId": "FEAT_WEAK_CHERRY_EXCLUDED",
+        "name": "弱チェリー",
+        "reason": "全設定の確率差が非常に小さく、同じ総ゲーム分母の押し順ベルより追加情報量が大幅に少ないため不採用です。",
+        "requiredTrials": {
+          "value": 946193,
+          "unit": "ゲーム"
+        }
+      },
+      {
+        "featureId": "FEAT_WEAK_CHANCE_EXCLUDED",
+        "name": "弱チャンス目",
+        "reason": "設定1～5の確率差がほぼなく設定6だけ僅かに異なる程度で、必要試行量が長いため不採用です。",
+        "requiredTrials": {
+          "value": 337197,
+          "unit": "ゲーム"
+        }
+      },
+      {
+        "featureId": "FEAT_STRONG_CHANCE_A_EXCLUDED",
+        "name": "強チャンス目A",
+        "reason": "低頻度で設定1～5の確率差がほぼなく、設定6との差も押し順ベルより情報量が小さいため不採用です。",
+        "requiredTrials": {
+          "value": 178309,
+          "unit": "ゲーム"
+        }
+      },
+      {
+        "featureId": "FEAT_WEAK_SUIKA_BONUS_EXCLUDED",
+        "name": "弱スイカ同時当選",
+        "reason": "弱スイカ成立とボーナス成立の両方に含まれる条件付き部分事象で、個別小役・ボーナス情報との依存が強いため不採用です。",
+        "requiredTrials": {
+          "value": 265,
+          "unit": "弱スイカ成立1回"
+        }
+      },
+      {
+        "featureId": "FEAT_WEAK_CHERRY_BONUS_EXCLUDED",
+        "name": "弱チェリー同時当選",
+        "reason": "弱チェリー成立とボーナス成立の両方に含まれる条件付き部分事象で、個別小役・ボーナス情報との依存が強いため不採用です。",
+        "requiredTrials": {
+          "value": 566,
+          "unit": "弱チェリー成立1回"
+        }
+      },
+      {
+        "featureId": "FEAT_WEAK_CHANCE_BONUS_EXCLUDED",
+        "name": "弱チャンス目同時当選",
+        "reason": "弱チャンス目成立とボーナス成立の両方に含まれる条件付き部分事象で、個別小役・ボーナス情報との依存が強いため不採用です。",
+        "requiredTrials": {
+          "value": 150,
+          "unit": "弱チャンス目成立1回"
+        }
+      },
+      {
+        "featureId": "FEAT_STRONG_CHANCE_A_BONUS_EXCLUDED",
+        "name": "強チャンス目A同時当選",
+        "reason": "強チャンス目A成立とボーナス成立の両方に含まれる条件付き部分事象で、低頻度かつ依存が強いため不採用です。",
+        "requiredTrials": {
+          "value": 126,
+          "unit": "強チャンス目A成立1回"
+        }
+      },
+      {
+        "featureId": "FEAT_REEL_LOCK_EXCLUDED",
+        "name": "リールロック合算発生率",
+        "reason": "設定1～5の発生率がほぼ同一で設定6との差も小さく、実戦範囲の必要試行量が長いため不採用です。",
+        "requiredTrials": {
+          "value": 202406,
+          "unit": "ゲーム"
+        }
+      },
+      {
+        "featureId": "FEAT_LONG_FREEZE_EXCLUDED",
+        "name": "ロングフリーズ発生率",
+        "reason": "約1/14万前後の極端な低頻度で設定差もほぼなく、設定推測に必要な試行数が実戦範囲を大きく超えるため不採用です。",
+        "requiredTrials": {
+          "value": 10853478793,
+          "unit": "ゲーム"
+        }
+      },
+      {
+        "featureId": "FEAT_NEGAPOSI_NORMAL_EXCLUDED",
+        "name": "通常時ネガポジフリーズ発生率",
+        "reason": "ボーナス関連の内部抽選と依存し、設定1～5の差が小さいうえ設定6のみ逆方向の差で、ART主軸への追加情報量が限定的なため不採用です。",
+        "requiredTrials": {
+          "value": 31104,
+          "unit": "通常ゲーム"
+        }
+      },
+      {
+        "featureId": "FEAT_NEGAPOSI_EPISODE_EXCLUDED",
+        "name": "エピソード中ネガポジフリーズ発生率",
+        "reason": "エピソード中という限定分母で発生率も極めて低く、実戦範囲の必要試行量が長すぎるため不採用です。",
+        "requiredTrials": {
+          "value": 434142,
+          "unit": "エピソードゲーム"
+        }
+      },
+      {
+        "featureId": "FEAT_ART_STOCK_EXCLUDED",
+        "name": "クラムベリーステージ外ボーナス時ART当選",
+        "reason": "クラムベリーステージ外のボーナス当選という条件付き分母でART初当り経路の一部でもあり、主軸ARTと二重評価になるため不採用です。",
+        "requiredTrials": {
+          "value": 51,
+          "unit": "対象ボーナス当選1回"
+        }
+      },
+      {
+        "featureId": "FEAT_CZ_ART_TYPE_EXCLUDED",
+        "name": "CZ成功時ART種別（5の倍数セット以外）",
+        "reason": "5の倍数セット以外という条件管理が必要で、BATTLE選択率自体も低く実戦サンプルで得られる情報量が小さいため不採用です。",
+        "requiredTrials": {
+          "value": 159,
+          "unit": "5の倍数セット以外のCZ成功1回"
+        }
+      },
+      {
+        "featureId": "FEAT_RAGING_ZONE_EXCLUDED",
+        "name": "レイジングゾーン発生率",
+        "reason": "発生率が約1/5万～1/12万と極端に低頻度で、必要試行数が実戦範囲を大きく超えるため不採用です。",
+        "requiredTrials": {
+          "value": 763122,
+          "unit": "通常ゲーム"
+        }
+      }
+    ]
+  },
+  "reliability": {},
+  "metadata": {
+    "machineId": "S_MAHOIKU_NB",
+    "displayName": "パチスロ 魔法少女育成計画",
+    "settings": [
+      "SET_1",
+      "SET_2",
+      "SET_3",
+      "SET_4",
+      "SET_5",
+      "SET_6"
+    ]
+  },
+  "validation": {
+    "cases": []
+  },
+  "statistics": {}
+}

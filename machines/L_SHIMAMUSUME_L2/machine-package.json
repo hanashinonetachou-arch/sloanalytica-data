@@ -1,0 +1,243 @@
+{
+  "schemaVersion": 1,
+  "machine": {
+    "schemaVersion": "2.0.0",
+    "machineId": "L_SHIMAMUSUME_L2",
+    "machineDataVersion": "0.1.0",
+    "displayName": "L島娘",
+    "modelName": "L島娘L2",
+    "manufacturer": "オリンピア",
+    "settings": [
+      "SET_1",
+      "SET_2",
+      "SET_3",
+      "SET_5",
+      "SET_6"
+    ],
+    "packagePolicy": {
+      "offlineCapable": true,
+      "containsImages": false,
+      "containsExecutableCode": false
+    }
+  },
+  "inputs": {
+    "schemaVersion": "2.0.0",
+    "inputs": [
+      {
+        "id": "INP_NORMAL_GAMES",
+        "name": "通常ゲーム数",
+        "type": "integer",
+        "category": "NUMERIC",
+        "unit": "G",
+        "displayOrder": 10,
+        "inferenceRole": "INCLUDE_PRIMARY",
+        "defaultValue": null,
+        "observationScope": "SELF_PLAY",
+        "minimum": 0
+      },
+      {
+        "id": "INP_FIRST_HIT_COUNT",
+        "name": "ボーナス初当り",
+        "type": "counter",
+        "category": "NUMERIC",
+        "unit": "回",
+        "displayOrder": 11,
+        "inferenceRole": "INCLUDE_PRIMARY",
+        "defaultValue": null,
+        "parentInputId": "INP_NORMAL_GAMES",
+        "uiQuickAdd": 1,
+        "minimum": 0
+      }
+    ]
+  },
+  "features": {
+    "schemaVersion": "2.0.0",
+    "features": [
+      {
+        "featureId": "FEAT_FIRST_HIT",
+        "name": "ボーナス初当り",
+        "adoptionCategory": "INCLUDE_PRIMARY",
+        "calculationRole": "PROBABILITY",
+        "probabilityEngineUsage": true,
+        "modelType": "binomial",
+        "minimumSample": 1,
+        "sampleRecommendation": 1,
+        "reliabilityProfile": {
+          "weight": 1
+        },
+        "denominatorInputId": "INP_NORMAL_GAMES",
+        "numeratorInputId": "INP_FIRST_HIT_COUNT",
+        "displayFormat": "ratio_1_over_n",
+        "probabilities": {
+          "SET_1": 0.00506842372022301,
+          "SET_2": 0.005175983436853002,
+          "SET_3": 0.005521811154058531,
+          "SET_5": 0.00608272506082725,
+          "SET_6": 0.006527415143603134
+        },
+        "sourceEvidenceRefs": [
+          "SRC_NANA",
+          "SRC_HAZUSE"
+        ]
+      }
+    ]
+  },
+  "evidence": {
+    "version": "1.0.0",
+    "evidences": [],
+    "sources": [
+      {
+        "id": "SRC_NANA",
+        "classification": "ANALYSIS",
+        "pageName": "L島娘 設定判別",
+        "url": "https://nana-press.com/kaiseki/machine/901/26985/",
+        "checkedAt": "2026-08-30"
+      },
+      {
+        "id": "SRC_HAZUSE",
+        "classification": "ANALYSIS",
+        "pageName": "L島娘 天井・設定判別・機械割",
+        "url": "https://hazuse.com/machine/pachislot/SX0095/",
+        "checkedAt": "2026-08-30"
+      }
+    ]
+  },
+  "ui": {
+    "sections": [
+      {
+        "id": "AUTO_NUMERIC",
+        "title": "初当り",
+        "displayOrder": 1,
+        "items": [
+          {
+            "type": "input",
+            "inputId": "INP_NORMAL_GAMES",
+            "label": "通常ゲーム数",
+            "widget": "number"
+          },
+          {
+            "type": "input",
+            "inputId": "INP_FIRST_HIT_COUNT",
+            "label": "ボーナス初当り",
+            "config": {
+              "quickAdd": 1
+            },
+            "widget": "counter"
+          }
+        ]
+      }
+    ]
+  },
+  "selectionSummary": {
+    "schemaVersion": "selection-summary-v1",
+    "evaluatedCount": 10,
+    "selectedCount": 1,
+    "rejectedCount": 9,
+    "selected": [
+      {
+        "featureId": "FEAT_FIRST_HIT",
+        "name": "ボーナス初当り",
+        "reason": "ボーナス初当りは通常ゲーム数を分母に直接観測でき、設定1の約1/197から設定6の約1/153まで一貫した設定差があるため主軸採用します。",
+        "requiredTrials": {
+          "value": 19772,
+          "unit": "通常ゲーム"
+        }
+      }
+    ],
+    "rejected": [
+      {
+        "featureId": "FEAT_MODE_NORMAL_EXCLUDED",
+        "name": "通常モード初当り",
+        "reason": "通常モード滞在ゲーム数という分母を実戦中に確定観測できず、内部モード推定を分母に使うと尤度の前提が崩れるため不採用です。",
+        "requiredTrials": {
+          "value": 22310,
+          "unit": "通常モード滞在ゲーム"
+        }
+      },
+      {
+        "featureId": "FEAT_MODE_CHANCE_EXCLUDED",
+        "name": "チャンスモード初当り",
+        "reason": "チャンスモード滞在ゲーム数という分母を実戦中に確定観測できず、内部モード推定を分母に使うと尤度の前提が崩れるため不採用です。",
+        "requiredTrials": {
+          "value": 809893,
+          "unit": "チャンスモード滞在ゲーム"
+        }
+      },
+      {
+        "featureId": "FEAT_MODE_HIGH_EXCLUDED",
+        "name": "高確モード初当り",
+        "reason": "高確モード滞在ゲーム数という分母を実戦中に確定観測できず、内部モード推定を分母に使うと尤度の前提が崩れるため不採用です。",
+        "requiredTrials": {
+          "value": 17632,
+          "unit": "高確モード滞在ゲーム"
+        }
+      },
+      {
+        "featureId": "FEAT_MODE_BIG_PREP_EXCLUDED",
+        "name": "BIG準備モード初当り",
+        "reason": "BIG準備モード滞在ゲーム数という分母を実戦中に確定観測できず、内部モード推定を分母に使うと尤度の前提が崩れるため不採用です。",
+        "requiredTrials": {
+          "value": 12587,
+          "unit": "BIG準備モード滞在ゲーム"
+        }
+      },
+      {
+        "featureId": "FEAT_CHERRY_HIT_EXCLUDED",
+        "name": "チェリー契機ボーナス当選率",
+        "reason": "引き戻しモード以外のチェリー成立回数が正確な分母ですが、内部モードを確定判別できず有効試行数を安全に取得できないため不採用です。",
+        "requiredTrials": {
+          "value": 687,
+          "unit": "引き戻しモード以外のチェリー成立1回"
+        }
+      },
+      {
+        "featureId": "FEAT_BIG_DIRECT_EXCLUDED",
+        "name": "BIG直撃当選率",
+        "reason": "BIG直撃はボーナス初当りに含まれる部分集合で、初当りFeatureと独立に加えると同じ当選情報を二重評価するため不採用です。",
+        "requiredTrials": {
+          "value": 134378,
+          "unit": "通常ゲーム"
+        }
+      },
+      {
+        "featureId": "FEAT_BIG_PREP_INITIAL_EXCLUDED",
+        "name": "初回REG終了後BIG準備モード移行率",
+        "reason": "公開値が設定1の一部値に限られ、全設定の尤度を構成できないうえ次回BIG準備モードも確定観測できないため不採用です。"
+      },
+      {
+        "featureId": "FEAT_BIG_PREP_5THROUGH_EXCLUDED",
+        "name": "REG5スルー時BIG準備モード移行率",
+        "reason": "REG5スルー到達後のBIG準備モード移行は内部状態で、移行したかを実戦中に確定観測できず正確な成功回数を取得できないため不採用です。",
+        "requiredTrials": {
+          "value": 1391,
+          "unit": "REG5スルー到達1回"
+        }
+      },
+      {
+        "featureId": "FEAT_BIG_PREP_10THROUGH_EXCLUDED",
+        "name": "REG10スルー時BIG準備モード移行率",
+        "reason": "REG10スルー到達後のBIG準備モード移行は内部状態で、移行したかを実戦中に確定観測できず正確な成功回数を取得できないため不採用です。",
+        "requiredTrials": {
+          "value": 47,
+          "unit": "REG10スルー到達1回"
+        }
+      }
+    ]
+  },
+  "reliability": {},
+  "metadata": {
+    "machineId": "L_SHIMAMUSUME_L2",
+    "displayName": "L島娘",
+    "settings": [
+      "SET_1",
+      "SET_2",
+      "SET_3",
+      "SET_5",
+      "SET_6"
+    ]
+  },
+  "validation": {
+    "cases": []
+  },
+  "statistics": {}
+}
