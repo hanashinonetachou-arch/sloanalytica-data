@@ -1,27 +1,70 @@
 {
-  "schemaVersion": "machine-observation-data-v1",
+  "schemaVersion": "machine-observation-data-v2",
   "machineId": "L_NYANKO_BIGBANG_MK",
   "displayName": "ぱちスロ にゃんこ大戦争 BIGBANG",
-  "researchedAt": "2026-08-22",
-  "sources": [],
-  "machineMenu": {
-    "status": "UNRESOLVED",
-    "availableData": [],
-    "sourceRefs": [],
-    "notes": "旧ResearchDataでは実機メニュー／遊技履歴の独立調査ブロックが未記録。不存在とは判断せず、Machine Observation Researchで再調査する。"
+  "researchedAt": "2026-08-29",
+  "sources": [
+    {"sourceId":"SRC_NYANKO_PWORLD","publisher":"P-WORLD","title":"ぱちスロ にゃんこ大戦争 BIGBANG 機種情報","url":"https://www.p-world.co.jp/machine/database/9845","checkedAt":"2026-08-29","sourceType":"major_analysis"},
+    {"sourceId":"SRC_NYANKO_NANA_SETTING","publisher":"なな徹","title":"ぱちスロ にゃんこ大戦争 BIGBANG 設定判別","url":"https://nana-press.com/kaiseki/machine/563/15307/","checkedAt":"2026-08-29","sourceType":"major_analysis"},
+    {"sourceId":"SRC_NYANKO_NANA_TROPHY","publisher":"なな徹","title":"ぱちスロ にゃんこ大戦争 BIGBANG 玉ちゃんトロフィー","url":"https://nana-press.com/kaiseki/machine/563/15325/","checkedAt":"2026-08-29","sourceType":"major_analysis"}
+  ],
+  "sourceCoverage": {
+    "machineMenu": "UNRESOLVED",
+    "dataCounter": "UNRESOLVED",
+    "linkedService": "UNRESOLVED",
+    "directPlay": "FOUND",
+    "endEvent": "FOUND",
+    "seatedState": "UNRESOLVED"
   },
-  "linkedService": {
-    "status": "UNRESOLVED",
-    "availableData": [],
-    "sourceRefs": [],
-    "notes": "今回確認した公開情報では、設定推測用の具体的な実機データ連携サービス・カウンタを確認できなかった。"
-  },
-  "predecessorData": {
-    "status": "UNRESOLVED",
-    "availableData": [],
-    "sourceRefs": [],
-    "notes": "旧ResearchDataでは着席時／前任者データの取得可否が独立評価されていない。不存在とは判断せず、Machine Observation Researchで再調査する。",
-    "usableForInference": false,
-    "usableForSelfSessionDelta": false
-  }
+  "observations": [
+    {
+      "observationId": "OBS_NYANKO_AT_INITIAL",
+      "sourceType": "DIRECT_PLAY",
+      "observationMode": "MANUAL_COUNTER",
+      "status": "FOUND",
+      "label": "自己遊技の通常ゲーム数とATビッグバンゲーム初当り",
+      "categories": ["通常ゲーム数", "ATビッグバンゲーム初当り回数"],
+      "timing": ["自己遊技の通常時"],
+      "excludedConditions": ["前任者区間を混在させない", "CZ初当りをAT初当りへ含めない"],
+      "sourceRefs": ["SRC_NYANKO_PWORLD", "SRC_NYANKO_NANA_SETTING"]
+    },
+    {
+      "observationId": "OBS_NYANKO_END_EVIDENCE",
+      "sourceType": "END_EVENT",
+      "observationMode": "VISUAL_CONFIRMATION",
+      "status": "FOUND",
+      "label": "AT終了時の玉ちゃんトロフィー・終了画面Evidence",
+      "categories": ["ブロンズ", "シルバー", "ゼブラ", "レインボー", "神さま（覚醒前）", "神さま（キラカード）"],
+      "timing": ["AT終了時の該当表示確認"],
+      "excludedConditions": [],
+      "sourceRefs": ["SRC_NYANKO_NANA_SETTING", "SRC_NYANKO_NANA_TROPHY"]
+    }
+  ],
+  "featureMappings": [
+    {
+      "featureId": "FEAT_AT_INITIAL",
+      "mappingType": "EXACT",
+      "observationIds": ["OBS_NYANKO_AT_INITIAL"],
+      "collectionMethods": ["MANUAL_COUNTER"],
+      "usableForInference": true,
+      "usableForDifficulty": true
+    }
+  ],
+  "researchReopenRequests": [],
+  "fieldVerificationItems": [
+    {
+      "verificationId": "VFY_NYANKO_MACHINE_SURFACES",
+      "status": "WAITING_FOR_MACHINE",
+      "sourceType": "MACHINE_MENU",
+      "priority": "LOW",
+      "question": "筐体メニュー・店舗データカウンター・着席時に取得できる具体項目を確認する。現行active Featureは自己遊技の直接観測で成立するため、未確認の前任者値は推測へ利用しない。"
+    },
+    {
+      "verificationId": "VFY_NYANKO_LINKED_SERVICE",
+      "status": "WAITING_FOR_MACHINE",
+      "sourceType": "LINKED_SERVICE",
+      "priority": "LOW",
+      "question": "本機固有の実機連動サービスと設定推測に利用できる具体項目が存在するか確認する。確認できるまで存在・不存在を断定しない。"
+    }
+  ]
 }
