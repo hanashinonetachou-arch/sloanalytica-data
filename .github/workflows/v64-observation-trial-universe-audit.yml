@@ -64,3 +64,14 @@ jobs:
             git commit -m "audit: refresh v6.4 observation trial-universe report"
             git push origin HEAD:prototype-multi-machine
           fi
+      - name: Refresh and commit debt classification from latest branch
+        run: |
+          git fetch origin prototype-multi-machine
+          git reset --hard origin/prototype-multi-machine
+          node --test test/v64-observation-debt-classification.test.mjs
+          node tools/classify-v64-observation-debt.mjs
+          git add reports/v64-observation-debt-classification.json
+          if ! git diff --cached --quiet; then
+            git commit -m "audit: update v6.4 observation debt classification"
+            git push origin HEAD:prototype-multi-machine
+          fi
