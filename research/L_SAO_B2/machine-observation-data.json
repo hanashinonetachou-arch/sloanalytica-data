@@ -1,30 +1,27 @@
 {
-  "schemaVersion": "machine-observation-data-v1",
+  "schemaVersion": "machine-observation-data-v2",
   "machineId": "L_SAO_B2",
   "displayName": "スロット ソードアート・オンライン",
-  "researchedAt": "2026-08-22",
+  "researchedAt": "2026-08-29",
   "sources": [],
-  "machineMenu": {
-    "status": "UNRESOLVED",
-    "availableData": [],
-    "sourceRefs": [],
-    "notes": "旧ResearchDataでは実機メニュー／遊技履歴の独立調査ブロックが未記録。不存在とは判断せず、Machine Observation Researchで再調査する。"
-  },
-  "linkedService": {
-    "status": "CHECKED",
-    "availableData": [
-      "総ゲーム数",
-      "共通ベル成立回数"
-    ],
-    "sourceRefs": [],
-    "notes": "実機連動データで総ゲーム数・共通ベルを扱えることを確認。ユーザー向け表示では固有サービス名を使用しない。"
-  },
-  "predecessorData": {
-    "status": "UNRESOLVED",
-    "availableData": [],
-    "sourceRefs": [],
-    "notes": "旧ResearchDataでは着席時／前任者データの取得可否が独立評価されていない。不存在とは判断せず、Machine Observation Researchで再調査する。",
-    "usableForInference": false,
-    "usableForSelfSessionDelta": false
-  }
+  "sourceCoverage": {"machineMenu":"UNRESOLVED","dataCounter":"UNRESOLVED","linkedService":"FOUND","directPlay":"FOUND","endEvent":"FOUND","seatedState":"UNRESOLVED"},
+  "observations": [
+    {"observationId":"OBS_SELF_CZ_BONUS_INITIAL","sourceType":"DIRECT_PLAY","observationMode":"MANUAL_COUNTER","status":"FOUND","label":"自己遊技の通常ゲーム数・CZ初当り・ボーナス初当り","categories":["通常ゲーム数","CZ初当り回数","ボーナス初当り回数"],"timing":["自己遊技の通常時"],"excludedConditions":["前任者区間を混在させない"],"sourceRefs":[]},
+    {"observationId":"OBS_LINKED_COMMON_BELL","sourceType":"LINKED_SERVICE","observationMode":"LINKED_SERVICE_READ","status":"FOUND","label":"実機連動の総ゲーム数と共通ベル","categories":["総ゲーム数","共通ベル成立回数"],"timing":["実機連動データ確認時"],"excludedConditions":["通常ゲーム数と1:1対応すると仮定してDifficultyへ流用しない"],"sourceRefs":[]},
+    {"observationId":"OBS_SAO_BONUS_SWIPE","sourceType":"END_EVENT","observationMode":"VISUAL_CONFIRMATION","status":"FOUND","label":"SAO・エピソードボーナス終了時ミニキャラ","categories":["リズベット","シリカ","アスナ","ユイ","サチ","茅場"],"timing":["SAO・エピソードボーナス終了時のスワイプ確認"],"excludedConditions":["ALOボーナス終了時を混在させない"],"sourceRefs":[]},
+    {"observationId":"OBS_ALO_BONUS_SWIPE","sourceType":"END_EVENT","observationMode":"VISUAL_CONFIRMATION","status":"FOUND","label":"ALOボーナス終了時ミニキャラ","categories":["リズベット","シリカ","アスナ","ユイ","リーファ","茅場"],"timing":["ALOボーナス終了時のスワイプ確認"],"excludedConditions":["SAO・エピソードボーナス終了時を混在させない"],"sourceRefs":[]},
+    {"observationId":"OBS_SAO_EVIDENCE","sourceType":"END_EVENT","observationMode":"VISUAL_CONFIRMATION","status":"FOUND","label":"ボスバトル終了画面の設定下限Evidence","categories":["設定2以上","設定3以上","設定4以上","設定5以上","設定6"],"timing":["ボスバトル終了画面確認時"],"excludedConditions":[],"sourceRefs":[]}
+  ],
+  "featureMappings": [
+    {"featureId":"FEAT_CZ_INITIAL","mappingType":"EXACT","observationIds":["OBS_SELF_CZ_BONUS_INITIAL"],"collectionMethods":["MANUAL_COUNTER"],"usableForInference":true,"usableForDifficulty":true},
+    {"featureId":"FEAT_BONUS_INITIAL","mappingType":"EXACT","observationIds":["OBS_SELF_CZ_BONUS_INITIAL"],"collectionMethods":["MANUAL_COUNTER"],"usableForInference":true,"usableForDifficulty":true},
+    {"featureId":"FEAT_COMMON_BELL","mappingType":"EXACT","observationIds":["OBS_LINKED_COMMON_BELL"],"collectionMethods":["LINKED_SERVICE_READ"],"usableForInference":true,"usableForDifficulty":false},
+    {"featureId":"FEAT_SAO_BONUS_SWIPE","mappingType":"EXACT","observationIds":["OBS_SAO_BONUS_SWIPE"],"collectionMethods":["VISUAL_CONFIRMATION"],"usableForInference":true,"usableForDifficulty":false},
+    {"featureId":"FEAT_ALO_BONUS_SWIPE","mappingType":"EXACT","observationIds":["OBS_ALO_BONUS_SWIPE"],"collectionMethods":["VISUAL_CONFIRMATION"],"usableForInference":true,"usableForDifficulty":false}
+  ],
+  "researchReopenRequests": [],
+  "fieldVerificationItems": [
+    {"verificationId":"VFY_SAO_MACHINE_MENU","status":"WAITING_FOR_MACHINE","sourceType":"MACHINE_MENU","priority":"LOW","question":"筐体標準メニューで取得できる具体項目を確認する。現行active Featureは直接観測と確認済み実機連動データで成立するため、確認前に流用しない。"},
+    {"verificationId":"VFY_SAO_SEATED_STATE","status":"WAITING_FOR_MACHINE","sourceType":"SEATED_STATE","priority":"LOW","question":"着席時に前任者区間として安全に取得できる項目があるか確認する。現行Selectionには前任者Featureを追加しない。"}
+  ]
 }
