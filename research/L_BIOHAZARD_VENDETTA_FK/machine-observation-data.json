@@ -1,31 +1,22 @@
 {
-  "schemaVersion": "machine-observation-data-v1",
-  "machineId": "L_BIOHAZARD_VENDETTA_FK",
-  "displayName": "スマスロ バイオハザード:ヴェンデッタ",
-  "researchedAt": "2026-08-22",
-  "sources": [],
-  "machineMenu": {
-    "status": "UNRESOLVED",
-    "availableData": [],
-    "sourceRefs": [],
-    "notes": "旧ResearchDataでは実機メニュー／遊技履歴の独立調査ブロックが未記録。不存在とは判断せず、Machine Observation Researchで再調査する。"
-  },
-  "linkedService": {
-    "status": "CHECKED",
-    "availableData": [
-      "弱チェリー出現率",
-      "スイカ出現率",
-      "サイレントモード関連を含む実戦データ"
-    ],
-    "sourceRefs": [],
-    "notes": "サミー公式マイスロで本機の機種別サイトを確認。クイックマイスロで弱レア小役などの実戦データを利用できる。"
-  },
-  "predecessorData": {
-    "status": "UNRESOLVED",
-    "availableData": [],
-    "sourceRefs": [],
-    "notes": "旧ResearchDataでは着席時／前任者データの取得可否が独立評価されていない。不存在とは判断せず、Machine Observation Researchで再調査する。",
-    "usableForInference": false,
-    "usableForSelfSessionDelta": false
-  }
+  "schemaVersion":"machine-observation-data-v2",
+  "machineId":"L_BIOHAZARD_VENDETTA_FK",
+  "displayName":"スマスロ バイオハザード:ヴェンデッタ",
+  "researchedAt":"2026-08-29",
+  "sources":[],
+  "sourceCoverage":{"machineMenu":"UNRESOLVED","dataCounter":"UNRESOLVED","linkedService":"FOUND","directPlay":"FOUND","endEvent":"FOUND","seatedState":"UNRESOLVED"},
+  "observations":[
+    {"observationId":"OBS_VENDETTA_NORMAL_EVENTS","sourceType":"DIRECT_PLAY","observationMode":"MANUAL_COUNTER","status":"FOUND","label":"自己遊技の通常ゲーム数・AT初当り・サイレントモード移行","categories":["通常ゲーム数","AT初当り回数","サイレントモード移行回数"],"timing":["自己遊技の通常時"],"excludedConditions":["前任者区間を混在させない"],"sourceRefs":[]},
+    {"observationId":"OBS_VENDETTA_MYSLOT_WEAK_RARES","sourceType":"LINKED_SERVICE","observationMode":"LINKED_COUNTER","status":"FOUND","label":"マイスロ遊技データの弱レア役","categories":["遊技データ集計ゲーム数","弱チェリー回数","スイカ回数"],"timing":["自分のマイスロ遊技区間"],"excludedConditions":["弱チェリーとスイカは同一区間の表示値を合算する","通常ゲーム数へ無条件に読み替えない"],"sourceRefs":[]},
+    {"observationId":"OBS_VENDETTA_SILENT_RESULT","sourceType":"DIRECT_PLAY","observationMode":"MANUAL_COUNTER","status":"FOUND","label":"サイレントモードからのAT当選結果","categories":["サイレントモード移行回数","サイレントモードからAT当選回数"],"timing":["サイレントモード1回ごとの結果確定時"],"excludedConditions":["サイレントモードを経由しないATを成功数へ含めない"],"sourceRefs":[]},
+    {"observationId":"OBS_VENDETTA_PAYOUT_EVIDENCE","sourceType":"END_EVENT","observationMode":"VISUAL_CONFIRMATION","status":"FOUND","label":"獲得枚数による設定下限Evidence","categories":["222枚","333枚","444枚","555枚","666枚"],"timing":["該当枚数表示確認時"],"excludedConditions":[],"sourceRefs":[]}
+  ],
+  "featureMappings":[
+    {"featureId":"FEAT_AT_INITIAL","mappingType":"EXACT","observationIds":["OBS_VENDETTA_NORMAL_EVENTS"],"collectionMethods":["MANUAL_COUNTER"],"usableForInference":true,"usableForDifficulty":true},
+    {"featureId":"FEAT_WEAK_RARE_COMBINED","mappingType":"EXACT","observationIds":["OBS_VENDETTA_MYSLOT_WEAK_RARES"],"collectionMethods":["LINKED_COUNTER"],"usableForInference":true,"usableForDifficulty":false},
+    {"featureId":"FEAT_SILENT_MODE_INITIAL","mappingType":"EXACT","observationIds":["OBS_VENDETTA_NORMAL_EVENTS"],"collectionMethods":["MANUAL_COUNTER"],"usableForInference":true,"usableForDifficulty":true},
+    {"featureId":"FEAT_SILENT_MODE_AT_SUCCESS","mappingType":"EXACT","observationIds":["OBS_VENDETTA_SILENT_RESULT"],"collectionMethods":["MANUAL_COUNTER"],"usableForInference":true,"usableForDifficulty":false}
+  ],
+  "researchReopenRequests":[],
+  "fieldVerificationItems":[{"verificationId":"VFY_VENDETTA_MACHINE_SURFACES","status":"WAITING_FOR_MACHINE","sourceType":"MACHINE_MENU","priority":"LOW","question":"筐体メニュー・店舗データカウンター・着席時に取得できる具体項目と観測区間を確認する。現行active Featureは自己遊技とマイスロで成立するため、未確認の前任者値は推測へ利用しない。"}]
 }
