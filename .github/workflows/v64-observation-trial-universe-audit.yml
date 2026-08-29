@@ -14,6 +14,10 @@ on:
 permissions:
   contents: write
 
+concurrency:
+  group: v64-observation-trial-universe-audit
+  cancel-in-progress: false
+
 jobs:
   audit:
     runs-on: ubuntu-latest
@@ -30,7 +34,6 @@ jobs:
         run: npm test
       - name: Generate 170-machine observation/trial-universe report
         run: |
-          # Exit code 2 means HIGH_RISK candidates were found; report generation itself still succeeded.
           node tools/audit-v64-observation-trial-universe.mjs . reports/v64-observation-trial-universe-audit.json || code=$?
           if [ "${code:-0}" -ne 0 ] && [ "${code:-0}" -ne 2 ]; then exit "$code"; fi
       - name: Print review summary
@@ -48,13 +51,16 @@ jobs:
           console.log('REVIEW_MACHINES',review.length);
           for(const m of review.slice(0,80)) console.log(`REVIEW ${m.machineId} :: ${m.issues.filter(i=>i.severity==='REVIEW').map(i=>`${i.type}${i.featureId?`(${i.featureId})`:''}`).join(', ')}`);
           NODE
-      - name: Commit audit report
+      - name: Refresh and commit audit report from latest branch
         run: |
           git config user.name github-actions[bot]
           git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git fetch origin prototype-multi-machine
+          git reset --hard origin/prototype-multi-machine
+          node tools/audit-v64-observation-trial-universe.mjs . reports/v64-observation-trial-universe-audit.json || code=$?
+          if [ "${code:-0}" -ne 0 ] && [ "${code:-0}" -ne 2 ]; then exit "$code"; fi
           git add reports/v64-observation-trial-universe-audit.json
           if ! git diff --cached --quiet; then
-            git commit -m "audit: add v6.4 observation trial-universe report [skip ci]"
-            git pull --rebase origin prototype-multi-machine
-            git push origin prototype-multi-machine
+            git commit -m "audit: refresh v6.4 observation trial-universe report [skip ci]"
+            git push origin HEAD:prototype-multi-machine
           fi
