@@ -3,161 +3,46 @@
   "machineId": "S_ULTRA_MIRACLE_JUGGLER_KT",
   "machineDataVersion": "0.1.0",
   "inputs": [
-    {
-      "id": "INP_PREDECESSOR_GAMES",
-      "name": "着席時ゲーム数",
-      "category": "PREDECESSOR",
-      "type": "integer",
-      "unit": "G",
-      "displayOrder": 1,
-      "inferenceRole": "INCLUDE_PRIMARY",
-      "observationScope": "PREDECESSOR_SNAPSHOT",
-      "defaultValue": 0
-    },
-    {
-      "id": "INP_PREDECESSOR_BIG_COUNT",
-      "name": "着席時BIG",
-      "category": "PREDECESSOR",
-      "type": "counter",
-      "unit": "回",
-      "displayOrder": 2,
-      "inferenceRole": "INCLUDE_PRIMARY",
-      "observationScope": "PREDECESSOR_SNAPSHOT",
-      "defaultValue": 0
-    },
-    {
-      "id": "INP_PREDECESSOR_REG_COUNT",
-      "name": "着席時REG",
-      "category": "PREDECESSOR",
-      "type": "counter",
-      "unit": "回",
-      "displayOrder": 3,
-      "inferenceRole": "INCLUDE_PRIMARY",
-      "observationScope": "PREDECESSOR_SNAPSHOT",
-      "defaultValue": 0
-    },
-    {
-      "id": "INP_NORMAL_GAMES",
-      "name": "自分のゲーム数",
-      "category": "SELF_PLAY",
-      "type": "integer",
-      "unit": "G",
-      "displayOrder": 10,
-      "inferenceRole": "INCLUDE_PRIMARY",
-      "observationScope": "SELF_PLAY",
-      "defaultValue": 0
-    },
-    {
-      "id": "INP_BIG_COUNT",
-      "name": "BIG",
-      "category": "SELF_PLAY",
-      "type": "counter",
-      "unit": "回",
-      "displayOrder": 11,
-      "inferenceRole": "INCLUDE_PRIMARY",
-      "observationScope": "SELF_PLAY",
-      "defaultValue": 0
-    },
-    {
-      "id": "INP_REG_COUNT",
-      "name": "REG",
-      "category": "SELF_PLAY",
-      "type": "counter",
-      "unit": "回",
-      "displayOrder": 12,
-      "inferenceRole": "INCLUDE_PRIMARY",
-      "observationScope": "SELF_PLAY",
-      "defaultValue": 0
-    }
+    {"id":"INP_PREDECESSOR_GAMES","name":"着席時ゲーム数","category":"PREDECESSOR","type":"integer","unit":"G","displayOrder":1,"inferenceRole":"INCLUDE_PRIMARY","observationScope":"PREDECESSOR_SNAPSHOT","defaultValue":0},
+    {"id":"INP_PREDECESSOR_BIG_COUNT","name":"着席時BIG","category":"PREDECESSOR","type":"counter","unit":"回","displayOrder":2,"inferenceRole":"INCLUDE_PRIMARY","observationScope":"PREDECESSOR_SNAPSHOT","defaultValue":0},
+    {"id":"INP_PREDECESSOR_REG_COUNT","name":"着席時REG","category":"PREDECESSOR","type":"counter","unit":"回","displayOrder":3,"inferenceRole":"INCLUDE_PRIMARY","observationScope":"PREDECESSOR_SNAPSHOT","defaultValue":0},
+    {"id":"INP_NORMAL_GAMES","name":"自分のゲーム数","category":"SELF_PLAY","type":"integer","unit":"G","displayOrder":10,"inferenceRole":"INCLUDE_PRIMARY","observationScope":"SELF_PLAY","defaultValue":0},
+    {"id":"INP_BIG_COUNT","name":"BIG","category":"SELF_PLAY","type":"counter","unit":"回","displayOrder":11,"inferenceRole":"INCLUDE_PRIMARY","observationScope":"SELF_PLAY","defaultValue":0},
+    {"id":"INP_REG_COUNT","name":"REG","category":"SELF_PLAY","type":"counter","unit":"回","displayOrder":12,"inferenceRole":"INCLUDE_PRIMARY","observationScope":"SELF_PLAY","defaultValue":0}
   ],
   "features": [
     {
-      "researchFeatureId": "RF_UMJ_PREDECESSOR_BONUS_OUTCOME",
-      "featureId": "FEAT_PREDECESSOR_BONUS_OUTCOME",
-      "adoptionCategory": "INCLUDE_PRIMARY",
-      "numeratorInputId": "INP_PREDECESSOR_BIG_COUNT",
-      "denominatorInputId": "INP_PREDECESSOR_GAMES",
-      "categoryInputIds": [
-        "INP_PREDECESSOR_REG_COUNT"
-      ],
-      "minimumSample": 1000,
-      "sampleRecommendation": 10000,
-      "weight": 1.0,
-      "difficultyParticipation": "EXCLUDE",
-      "difficultyExclusionReason": "着席前データはユーザー自身のtargetGamesから発生する情報ではないため。",
-      "userReason": "着席時のBIG・REGも公式確率と同じ遊技区間の観測値として利用できます。",
-      "requiredTrials": {
-        "value": 10115,
-        "unit": "着席時ゲーム"
-      }
+      "researchFeatureId":"RF_UMJ_PREDECESSOR_BONUS_OUTCOME",
+      "featureId":"FEAT_PREDECESSOR_BONUS_OUTCOME",
+      "adoptionCategory":"EXCLUDE",
+      "rejectionReason":"この機種固有の着席時データカウンターでゲーム数・BIG・REGを同一区間として観測できることが実機未確認のため、確認完了まで推測には使用しません。"
     },
     {
-      "researchFeatureId": "RF_UMJ_SELF_BONUS_OUTCOME",
-      "featureId": "FEAT_SELF_BONUS_OUTCOME",
-      "adoptionCategory": "INCLUDE_PRIMARY",
-      "numeratorInputId": "INP_BIG_COUNT",
-      "denominatorInputId": "INP_NORMAL_GAMES",
-      "categoryInputIds": [
-        "INP_REG_COUNT"
-      ],
-      "minimumSample": 1000,
-      "sampleRecommendation": 10000,
-      "weight": 1.0,
-      "difficultyParticipation": "INCLUDE",
-      "difficultyExposure": {
-        "mode": "per_game",
-        "factor": 1.0,
-        "quality": "EXACT",
-        "basisId": "SELF_NORMAL_PLAY_GAMES"
-      },
-      "userReason": "BIG・REG・非ボーナスを一体で評価し、合算の二重計上を避けます。",
-      "requiredTrials": {
-        "value": 10115,
-        "unit": "自分のゲーム"
-      }
+      "researchFeatureId":"RF_UMJ_SELF_BONUS_OUTCOME",
+      "featureId":"FEAT_SELF_BONUS_OUTCOME",
+      "adoptionCategory":"INCLUDE_PRIMARY",
+      "numeratorInputId":"INP_BIG_COUNT",
+      "denominatorInputId":"INP_NORMAL_GAMES",
+      "categoryInputIds":["INP_REG_COUNT"],
+      "minimumSample":1000,
+      "sampleRecommendation":10000,
+      "weight":1.0,
+      "difficultyParticipation":"INCLUDE",
+      "difficultyExposure":{"mode":"per_game","factor":1.0,"quality":"EXACT","basisId":"SELF_NORMAL_PLAY_GAMES"},
+      "userReason":"BIG・REG・非ボーナスを一体で評価し、合算の二重計上を避けます。",
+      "requiredTrials":{"value":10115,"unit":"自分のゲーム"}
     },
-    {
-      "researchFeatureId": "RF_UMJ_GRAPE_CANDIDATE",
-      "featureId": "FEAT_MRJ_GRAPE_CANDIDATE",
-      "adoptionCategory": "EXCLUDE",
-      "rejectionReason": "公式の設定別解析値として確認できない。"
-    },
-    {
-      "researchFeatureId": "RF_UMJ_SINGLE_REG_CANDIDATE",
-      "featureId": "FEAT_MRJ_SINGLE_REG_CANDIDATE",
-      "adoptionCategory": "EXCLUDE",
-      "rejectionReason": "REG全体と重複し、設定別確定値が未確認。"
-    },
-    {
-      "researchFeatureId": "RF_UMJ_CHERRY_REG_CANDIDATE",
-      "featureId": "FEAT_MRJ_CHERRY_REG_CANDIDATE",
-      "adoptionCategory": "EXCLUDE",
-      "rejectionReason": "REG全体と重複し、設定別確定値が未確認。"
-    }
+    {"researchFeatureId":"RF_UMJ_GRAPE_CANDIDATE","featureId":"FEAT_MRJ_GRAPE_CANDIDATE","adoptionCategory":"EXCLUDE","rejectionReason":"公式の設定別解析値として確認できない。"},
+    {"researchFeatureId":"RF_UMJ_SINGLE_REG_CANDIDATE","featureId":"FEAT_MRJ_SINGLE_REG_CANDIDATE","adoptionCategory":"EXCLUDE","rejectionReason":"REG全体と重複し、設定別確定値が未確認。"},
+    {"researchFeatureId":"RF_UMJ_CHERRY_REG_CANDIDATE","featureId":"FEAT_MRJ_CHERRY_REG_CANDIDATE","adoptionCategory":"EXCLUDE","rejectionReason":"REG全体と重複し、設定別確定値が未確認。"}
   ],
   "evidence": [],
   "difficultyAnalysis": {
-    "targetGames": [
-      1500,
-      3000,
-      7000
-    ],
-    "simulationsPerSetting": 4000,
-    "seed": 20260814,
-    "targetGameBasis": {
-      "basisId": "SELF_NORMAL_PLAY_GAMES",
-      "label": "ユーザー自身の通常遊技ゲーム数",
-      "quality": "EXACT",
-      "crossMachineComparable": true,
-      "note": "着席時データはDifficultyスコアから除外。"
-    },
-    "calibrationAllowedExposureQualities": [
-      "EXACT",
-      "DERIVED"
-    ]
+    "targetGames":[1500,3000,7000],
+    "simulationsPerSetting":4000,
+    "seed":20260814,
+    "targetGameBasis":{"basisId":"SELF_NORMAL_PLAY_GAMES","label":"ユーザー自身の通常遊技ゲーム数","quality":"EXACT","crossMachineComparable":true,"note":"着席時データはDifficultyスコアから除外。"},
+    "calibrationAllowedExposureQualities":["EXACT","DERIVED"]
   },
-  "uiCategoryLabels": {
-    "PREDECESSOR": "着席時データ",
-    "SELF_PLAY": "自分の区間"
-  }
+  "uiCategoryLabels":{"PREDECESSOR":"着席時データ","SELF_PLAY":"自分の区間"}
 }
