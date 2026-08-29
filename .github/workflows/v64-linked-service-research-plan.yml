@@ -9,6 +9,9 @@ on:
       - '.github/workflows/v64-linked-service-research-plan.yml'
 permissions:
   contents: write
+concurrency:
+  group: v64-linked-service-research-plan
+  cancel-in-progress: false
 jobs:
   plan:
     runs-on: ubuntu-latest
@@ -18,12 +21,15 @@ jobs:
       - uses: actions/setup-node@v4
         with: {node-version: 22}
       - run: node tools/plan-v64-linked-service-research.mjs
-      - name: Commit report
+      - name: Refresh and commit report from latest branch
         run: |
-          if [ -z "$(git status --porcelain -- reports/v64-linked-service-research-plan.json)" ]; then exit 0; fi
           git config user.name github-actions[bot]
           git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git fetch origin prototype-multi-machine
+          git reset --hard origin/prototype-multi-machine
+          node tools/plan-v64-linked-service-research.mjs
           git add reports/v64-linked-service-research-plan.json
-          git commit -m "audit: update linked-service research plan"
-          git pull --rebase origin prototype-multi-machine
-          git push origin HEAD:prototype-multi-machine
+          if ! git diff --cached --quiet; then
+            git commit -m "audit: update linked-service research plan"
+            git push origin HEAD:prototype-multi-machine
+          fi
