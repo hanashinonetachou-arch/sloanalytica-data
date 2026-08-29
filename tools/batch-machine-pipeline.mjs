@@ -41,17 +41,33 @@ export function shouldEnforceSelectionQuality(machineId, root = ROOT) {
   return !fs.existsSync(path.join(root, 'machines', machineId, 'machine-package.json'));
 }
 
-export function classifyMachineQuality({ researchValidation, selectionValidation, selectionQuality, research }) {
+export function shouldSurfaceResearchWarning(warning, selection) {
+  if (warning?.code !== 'MULTINOMIAL_ROUNDED_SUM') return true;
+  const match = String(warning?.message ?? '').match(/^Feature ([A-Z0-9_]+)/);
+  if (!match) return true;
+  const selected = (selection?.features ?? []).find(feature => feature?.researchFeatureId === match[1]);
+  if (!selected) return true;
+  if (selected.adoptionCategory === 'EXCLUDE') return false;
+  if (selected.normalizeRoundedCategoryProbabilities === true) return false;
+  return true;
+}
+
+export function shouldSurfaceResearchConflict(conflict) {
+  return !String(conflict?.resolution ?? '').trim();
+}
+
+export function classifyMachineQuality({ researchValidation, selectionValidation, selectionQuality, research, selection }) {
   if (researchValidation?.status !== 'PASS') return { status: 'BLOCKED', reasons: ['ResearchData validation failed'] };
   if (!selectionValidation?.ok) return { status: 'BLOCKED', reasons: ['SelectionData validation failed'] };
   if (selectionQuality?.status === 'BLOCKED') {
     return { status: 'BLOCKED', reasons: (selectionQuality.blockers ?? []).map(reason => `Selection quality: ${reason}`) };
   }
   const reasons = [];
-  for (const warning of researchValidation?.warnings ?? []) reasons.push(`ResearchData: ${warning.message ?? warning}`);
+  for (const warning of researchValidation?.warnings ?? []) if (shouldSurfaceResearchWarning(warning, selection)) reasons.push(`ResearchData: ${warning.message ?? warning}`);
   for (const warning of selectionValidation?.warnings ?? []) reasons.push(`SelectionData: ${warning}`);
   for (const review of selectionQuality?.reviews ?? []) reasons.push(`Selection quality: ${review}`);
-  if ((research?.conflicts ?? []).length) reasons.push(`Research conflicts: ${research.conflicts.length}`);
+  const unresolvedConflicts = (research?.conflicts ?? []).filter(shouldSurfaceResearchConflict);
+  if (unresolvedConflicts.length) reasons.push(`Research conflicts: ${unresolvedConflicts.length}`);
   const displayName = String(research?.machine?.displayName ?? '');
   if (/(未調査|暫定|要確認)/.test(displayName)) reasons.push(`provisional displayName: ${displayName}`);
   return { status: reasons.length ? 'REVIEW' : 'PASS', reasons };
@@ -159,7 +175,7 @@ function preflight(machineId) {
     const selectionQuality = shouldEnforceSelectionQuality(machineId)
       ? assessSelectionQuality(research, selection)
       : { status: 'PASS', blockers: [], reviews: [] };
-    return classifyMachineQuality({ researchValidation, selectionValidation, selectionQuality, research });
+    return classifyMachineQuality({ researchValidation, selectionValidation, selectionQuality, research, selection });
   } catch (error) {
     return { status: 'BLOCKED', reasons: [error instanceof Error ? error.message : String(error)] };
   }
