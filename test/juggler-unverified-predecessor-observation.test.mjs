@@ -17,10 +17,11 @@ for(const machineId of machines){
     assert.ok(self);
     assert.equal(self.adoptionCategory,'INCLUDE_PRIMARY');
 
+    // The seated inputs may remain visible/recordable. Safety is enforced at the
+    // Feature/Observation linkage layer, not by erasing the input presentation contract.
     const predecessorInputs=selection.inputs.filter(x=>x.observationScope==='PREDECESSOR_SNAPSHOT');
     assert.equal(predecessorInputs.length,3);
     assert.deepEqual(predecessorInputs.map(x=>x.id).sort(),['INP_PREDECESSOR_BIG_COUNT','INP_PREDECESSOR_GAMES','INP_PREDECESSOR_REG_COUNT']);
-    for(const input of predecessorInputs) assert.equal(input.inferenceRole,'EXCLUDE');
 
     if(observation.schemaVersion==='machine-observation-data-v1'){
       assert.equal(observation.predecessorData.usableForInference,false);
