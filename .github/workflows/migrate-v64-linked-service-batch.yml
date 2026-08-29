@@ -1,0 +1,51 @@
+name: Migrate v6.4 Linked Service Batch
+
+on:
+  push:
+    branches: [prototype-multi-machine]
+    paths:
+      - 'tools/apply-v64-linked-service-batch.mjs'
+      - '.github/workflows/migrate-v64-linked-service-batch.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  migrate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: prototype-multi-machine
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Apply linked-service confirmations
+        run: node tools/apply-v64-linked-service-batch.mjs
+      - name: Run observation regression
+        run: node --test test/v64-observation-trial-universe-audit.test.mjs
+      - name: Run full test suite
+        run: npm test
+      - name: Run Observation audit
+        run: node tools/audit-v64-observation-trial-universe.mjs . reports/v64-observation-trial-universe-audit.json
+      - name: Run Semantic audit
+        run: node tools/audit-v64-cross-machine-semantic.mjs . reports/v64-cross-machine-semantic-audit.json
+      - name: Run Causal audit
+        run: node tools/audit-v64-causal-relations.mjs . reports/v64-causal-relation-audit.json
+      - name: Commit batch
+        run: |
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git add research/L_HANABI_KM/machine-observation-data.json \
+                  research/L_BASILISK_KIZUNA2_TENZEN_ZN/machine-observation-data.json \
+                  research/L_CODE_GEASS_REVIVAL_ZS/machine-observation-data.json \
+                  research/L_DISCUP_ULTRA_REMIX_XR/machine-observation-data.json \
+                  reports/v64-observation-trial-universe-audit.json \
+                  reports/v64-cross-machine-semantic-audit.json \
+                  reports/v64-causal-relation-audit.json
+          if ! git diff --cached --quiet; then
+            git commit -m "research: confirm linked services for four machines"
+            git pull --rebase origin prototype-multi-machine
+            git push origin HEAD:prototype-multi-machine
+          fi
