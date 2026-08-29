@@ -1,27 +1,122 @@
 {
-  "schemaVersion": "machine-observation-data-v1",
+  "schemaVersion": "machine-observation-data-v2",
   "machineId": "L_KENGAN_ASHURA_ND",
   "displayName": "パチスロ ケンガンアシュラ",
-  "researchedAt": "2026-08-22",
+  "researchedAt": "2026-08-29",
   "sources": [],
-  "machineMenu": {
-    "status": "UNRESOLVED",
-    "availableData": [],
-    "sourceRefs": [],
-    "notes": "旧ResearchDataでは実機メニュー／遊技履歴の独立調査ブロックが未記録。不存在とは判断せず、Machine Observation Researchで再調査する。"
+  "sourceCoverage": {
+    "machineMenu": "UNRESOLVED",
+    "dataCounter": "UNRESOLVED",
+    "linkedService": "UNRESOLVED",
+    "directPlay": "FOUND",
+    "endEvent": "FOUND",
+    "seatedState": "UNRESOLVED"
   },
-  "linkedService": {
-    "status": "UNRESOLVED",
-    "availableData": [],
-    "sourceRefs": [],
-    "notes": "取得項目未確定。"
-  },
-  "predecessorData": {
-    "status": "UNRESOLVED",
-    "availableData": [],
-    "sourceRefs": [],
-    "notes": "旧ResearchDataには着席時／前任者データへの言及があるが、具体的な取得項目・取得元・Feature分子/分母との同値性はこの構造移行では確定しない。Machine Observation Researchで個別再調査する。",
-    "usableForInference": false,
-    "usableForSelfSessionDelta": false
-  }
+  "observations": [
+    {
+      "observationId": "OBS_KENGAN_AT",
+      "sourceType": "DIRECT_PLAY",
+      "observationMode": "MANUAL_COUNT",
+      "status": "FOUND",
+      "label": "通常ゲーム・AT初当り",
+      "categories": [
+        "通常ゲーム数",
+        "AT初当り"
+      ],
+      "timing": [
+        "自己実戦の通常時"
+      ],
+      "excludedConditions": [
+        "着席前データを混ぜない"
+      ],
+      "sourceRefs": [
+        "SRC_KENGAN_1GEKI"
+      ]
+    },
+    {
+      "observationId": "OBS_KENGAN_CZ",
+      "sourceType": "DIRECT_PLAY",
+      "observationMode": "MANUAL_COUNT",
+      "status": "FOUND",
+      "label": "通常ゲーム・CZ初当り",
+      "categories": [
+        "通常ゲーム数",
+        "CZ初当り"
+      ],
+      "timing": [
+        "自己実戦の通常時"
+      ],
+      "excludedConditions": [
+        "着席前データを混ぜない"
+      ],
+      "sourceRefs": [
+        "SRC_KENGAN_1GEKI"
+      ]
+    },
+    {
+      "observationId": "OBS_KENGAN_EVIDENCE",
+      "sourceType": "END_EVENT",
+      "observationMode": "VISUAL_CONFIRMATION",
+      "status": "FOUND",
+      "label": "終了示唆",
+      "categories": [
+        "設定2以上",
+        "設定4以上",
+        "設定6"
+      ],
+      "timing": [
+        "エンディング/AT終了画面/扉絵確認時"
+      ],
+      "excludedConditions": [
+        "未確認を非発生とみなさない"
+      ],
+      "sourceRefs": [
+        "SRC_KENGAN_1GEKI"
+      ]
+    }
+  ],
+  "featureMappings": [
+    {
+      "featureId": "FEAT_AT_INITIAL",
+      "mappingType": "EXACT",
+      "observationIds": [
+        "OBS_KENGAN_AT"
+      ],
+      "collectionMethods": [
+        "MANUAL_COUNT"
+      ],
+      "usableForInference": true,
+      "usableForDifficulty": true
+    },
+    {
+      "featureId": "FEAT_CZ_INITIAL",
+      "mappingType": "EXACT",
+      "observationIds": [
+        "OBS_KENGAN_CZ"
+      ],
+      "collectionMethods": [
+        "MANUAL_COUNT"
+      ],
+      "usableForInference": true,
+      "usableForDifficulty": false,
+      "notes": "AT経路と情報が重なるため既存SelectionどおりDifficulty不参加。"
+    }
+  ],
+  "researchReopenRequests": [],
+  "fieldVerificationItems": [
+    {
+      "verificationId": "VFY_KENGAN_PREDECESSOR_COUNTER",
+      "status": "WAITING_FOR_MACHINE",
+      "sourceType": "SEATED_STATE",
+      "priority": "HIGH",
+      "question": "この機種固有のデータカウンターで着席時ゲーム数・AT初当り回数を取得でき、公開AT初当り確率の通常ゲーム試行区間と同値か確認する。確認完了まで前任者Featureは推測不参加。"
+    },
+    {
+      "verificationId": "VFY_KENGAN_LINKED_SERVICE",
+      "status": "WAITING_FOR_MACHINE",
+      "sourceType": "LINKED_SERVICE",
+      "priority": "LOW",
+      "question": "実機連動機能の有無と取得項目を確認する。"
+    }
+  ]
 }
