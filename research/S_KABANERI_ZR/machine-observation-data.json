@@ -1,32 +1,140 @@
 {
-  "schemaVersion": "machine-observation-data-v1",
+  "schemaVersion": "machine-observation-data-v2",
   "machineId": "S_KABANERI_ZR",
   "displayName": "パチスロ甲鉄城のカバネリ",
-  "researchedAt": "2026-08-22",
-  "sources": [],
-  "machineMenu": {
-    "status": "CHECKED",
-    "availableData": [
-      "遊技履歴・QR表示"
-    ],
-    "sourceRefs": [],
-    "notes": "連動機能の履歴確認は可能だが、共通6枚ベルは別途手動カウントが必要。"
+  "researchedAt": "2026-08-29",
+  "sources": [
+    {
+      "sourceId": "OBS_SRC_KABANERI_ANALYSIS",
+      "publisher": "なな徹",
+      "title": "パチスロ甲鉄城のカバネリ 設定判別",
+      "url": "https://nana-press.com/kaiseki/machine/384/10347/",
+      "checkedAt": "2026-08-21",
+      "sourceType": "major_analysis"
+    }
+  ],
+  "sourceCoverage": {
+    "machineMenu": "FOUND",
+    "dataCounter": "UNRESOLVED",
+    "linkedService": "FOUND",
+    "directPlay": "FOUND",
+    "endEvent": "FOUND",
+    "seatedState": "UNRESOLVED"
   },
-  "linkedService": {
-    "status": "CHECKED",
-    "availableData": [
-      "遊技履歴",
-      "通常ゲーム数相当の履歴情報"
-    ],
-    "sourceRefs": [],
-    "notes": "実機連動機能の存在は確認。旧カバネリでMachineDataに必要な通常G・CZ・共通6枚ベル・無名CZ3連の具体的取得可否は公開根拠を十分確認できず、実機確認候補。ユーザー向けでは固有サービス名を使用しない。"
-  },
-  "predecessorData": {
-    "status": "UNRESOLVED",
-    "availableData": [],
-    "sourceRefs": [],
-    "notes": "旧ResearchDataでは着席時／前任者データの取得可否が独立評価されていない。不存在とは判断せず、Machine Observation Researchで再調査する。",
-    "usableForInference": false,
-    "usableForSelfSessionDelta": false
-  }
+  "observations": [
+    {
+      "observationId": "OBS_SELF_INITIALS",
+      "sourceType": "DIRECT_PLAY",
+      "observationMode": "MANUAL_COUNTER",
+      "status": "FOUND",
+      "label": "自己遊技の通常ゲーム数・ボーナス初当り・CZ初当り",
+      "categories": ["通常ゲーム数", "ボーナス初当り", "CZ初当り"],
+      "timing": ["自己遊技の通常時"],
+      "excludedConditions": ["前任者区間を混在させない"],
+      "sourceRefs": ["OBS_SRC_KABANERI_ANALYSIS"]
+    },
+    {
+      "observationId": "OBS_COMMON_6_BELL",
+      "sourceType": "DIRECT_PLAY",
+      "observationMode": "MANUAL_COUNTER",
+      "status": "FOUND",
+      "label": "共通6枚ベルと判別対象ゲーム数",
+      "categories": ["共通6枚ベル判別対象ゲーム数", "共通6枚ベル"],
+      "timing": ["共通6枚ベルを判別して数える区間の各ゲーム"],
+      "excludedConditions": ["共通6枚ベルを判別していない区間を分母に含めない"],
+      "sourceRefs": ["OBS_SRC_KABANERI_ANALYSIS"]
+    },
+    {
+      "observationId": "OBS_MUMEI_3CHAIN",
+      "sourceType": "DIRECT_PLAY",
+      "observationMode": "MANUAL_COUNTER",
+      "status": "FOUND",
+      "label": "無名CZ小役3連時のボーナス当選",
+      "categories": ["無名CZ小役3連成立", "3連後ボーナス当選"],
+      "timing": ["無名CZ中に小役3連が成立した時", "対応する当選結果確認時"],
+      "excludedConditions": ["無名CZ以外の小役3連を分母に含めない", "契機を一意に判別できない当選は分子に含めない"],
+      "sourceRefs": ["OBS_SRC_KABANERI_ANALYSIS"]
+    },
+    {
+      "observationId": "OBS_ST_END_SCREEN",
+      "sourceType": "END_EVENT",
+      "observationMode": "VISUAL_CONFIRMATION",
+      "status": "FOUND",
+      "label": "ST終了画面と菖蒲高設定示唆",
+      "categories": ["ST終了画面確認", "高設定示唆（菖蒲）"],
+      "timing": ["ST終了画面確認時"],
+      "excludedConditions": ["終了画面を確認できなかったSTは分母に含めない"],
+      "sourceRefs": ["OBS_SRC_KABANERI_ANALYSIS"]
+    },
+    {
+      "observationId": "OBS_LINKED_HISTORY_SCOPE",
+      "sourceType": "LINKED_SERVICE",
+      "observationMode": "LINKED_SERVICE_READ",
+      "status": "FOUND",
+      "label": "実機連動機能の遊技履歴",
+      "categories": ["遊技履歴", "通常ゲーム数相当の履歴情報"],
+      "timing": ["連動履歴確認時"],
+      "excludedConditions": ["共通6枚ベルは連動履歴へ依存せず手動カウントする", "CZ・無名CZ詳細の具体的取得可否を未確認のまま補完しない"],
+      "sourceRefs": []
+    }
+  ],
+  "featureMappings": [
+    {
+      "featureId": "FEAT_BONUS",
+      "mappingType": "EXACT",
+      "observationIds": ["OBS_SELF_INITIALS"],
+      "collectionMethods": ["MANUAL_COUNTER"],
+      "usableForInference": true,
+      "usableForDifficulty": true
+    },
+    {
+      "featureId": "FEAT_CZ",
+      "mappingType": "EXACT",
+      "observationIds": ["OBS_SELF_INITIALS"],
+      "collectionMethods": ["MANUAL_COUNTER"],
+      "usableForInference": true,
+      "usableForDifficulty": true
+    },
+    {
+      "featureId": "FEAT_COMMON_BELL",
+      "mappingType": "EXACT",
+      "observationIds": ["OBS_COMMON_6_BELL"],
+      "collectionMethods": ["MANUAL_COUNTER"],
+      "usableForInference": true,
+      "usableForDifficulty": true
+    },
+    {
+      "featureId": "FEAT_MUMEI_3CHAIN",
+      "mappingType": "EXACT",
+      "observationIds": ["OBS_MUMEI_3CHAIN"],
+      "collectionMethods": ["MANUAL_COUNTER"],
+      "usableForInference": true,
+      "usableForDifficulty": false
+    },
+    {
+      "featureId": "FEAT_ST_END_SCREEN",
+      "mappingType": "EXACT",
+      "observationIds": ["OBS_ST_END_SCREEN"],
+      "collectionMethods": ["VISUAL_CONFIRMATION"],
+      "usableForInference": true,
+      "usableForDifficulty": false
+    }
+  ],
+  "researchReopenRequests": [],
+  "fieldVerificationItems": [
+    {
+      "verificationId": "VFY_KABANERI_LINKED_ITEMS",
+      "status": "WAITING_FOR_MACHINE",
+      "sourceType": "LINKED_SERVICE",
+      "priority": "LOW",
+      "question": "実機連動履歴で通常G・CZ・無名CZ詳細のどこまで取得できるか確認する。現行active Featureは自己遊技の直接観測で成立するため、未確認項目を自動入力へ流用しない。"
+    },
+    {
+      "verificationId": "VFY_KABANERI_PREDECESSOR_SCOPE",
+      "status": "WAITING_FOR_MACHINE",
+      "sourceType": "SEATED_STATE",
+      "priority": "LOW",
+      "question": "着席時に取得できる履歴値と公開通常ゲーム母集団との同値性を確認する。確認までは前任者区間を推測に使用しない。"
+    }
+  ]
 }
