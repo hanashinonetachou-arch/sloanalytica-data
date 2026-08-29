@@ -33,17 +33,15 @@ jobs:
         run: node tools/audit-v64-cross-machine-semantic.mjs . reports/v64-cross-machine-semantic-audit.json
       - name: Run Causal audit
         run: node tools/audit-v64-causal-relations.mjs . reports/v64-causal-relation-audit.json
-      - name: Commit batch
+      - name: Commit research changes
         run: |
           git config user.name github-actions[bot]
           git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git restore reports/v64-observation-trial-universe-audit.json reports/v64-cross-machine-semantic-audit.json reports/v64-causal-relation-audit.json || true
           git add research/L_HANABI_KM/machine-observation-data.json \
                   research/L_BASILISK_KIZUNA2_TENZEN_ZN/machine-observation-data.json \
                   research/L_CODE_GEASS_REVIVAL_ZS/machine-observation-data.json \
-                  research/L_DISCUP_ULTRA_REMIX_XR/machine-observation-data.json \
-                  reports/v64-observation-trial-universe-audit.json \
-                  reports/v64-cross-machine-semantic-audit.json \
-                  reports/v64-causal-relation-audit.json
+                  research/L_DISCUP_ULTRA_REMIX_XR/machine-observation-data.json
           if ! git diff --cached --quiet; then
             git commit -m "research: confirm linked services for four machines"
             git pull --rebase origin prototype-multi-machine
