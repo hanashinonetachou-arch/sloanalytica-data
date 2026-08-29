@@ -1,0 +1,47 @@
+name: v6.4 Linked Service Batch Apply
+
+on:
+  push:
+    branches: [prototype-multi-machine]
+    paths:
+      - 'reports/v64-linked-service-audit-batch.json'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: v64-linked-service-batch-apply
+  cancel-in-progress: false
+
+jobs:
+  apply:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: prototype-multi-machine
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Dry-run linked-service batch
+        run: node tools/apply-observation-linked-service-audit.mjs reports/v64-linked-service-audit-batch.json
+      - name: Apply linked-service batch
+        run: node tools/apply-observation-linked-service-audit.mjs reports/v64-linked-service-audit-batch.json --apply
+      - name: Validate observation contracts
+        run: |
+          npm run observation:validate
+          npm run observation:selection:audit
+      - name: Commit observation updates from latest branch
+        run: |
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          changed=$(git diff --name-only -- 'research/*/machine-observation-data.json')
+          if [ -z "$changed" ]; then
+            echo "No observation changes to commit."
+            exit 0
+          fi
+          git add research/*/machine-observation-data.json
+          git commit -m "research: apply linked-service audit batch"
+          git pull --rebase origin prototype-multi-machine
+          git push origin HEAD:prototype-multi-machine
