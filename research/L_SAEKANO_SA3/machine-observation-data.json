@@ -1,42 +1,25 @@
 {
-  "schemaVersion": "machine-observation-data-v1",
+  "schemaVersion": "machine-observation-data-v2",
   "machineId": "L_SAEKANO_SA3",
   "displayName": "スロット 冴えない彼女の育てかた",
-  "researchedAt": "2026-08-22",
+  "researchedAt": "2026-08-29",
   "sources": [
-    {
-      "sourceId": "OBS_SRC_SAEKANO_1GEKI_DAITOMO",
-      "publisher": "一撃",
-      "title": "スロット 冴えない彼女の育てかた カスタム＆アプリ連動",
-      "url": "https://1geki.jp/slot/l_sae_kano/",
-      "checkedAt": "2026-08-22",
-      "sourceType": "major_analysis"
-    }
+    {"sourceId":"OBS_SRC_SAEKANO_1GEKI_DAITOMO","publisher":"一撃","title":"スロット 冴えない彼女の育てかた カスタム＆アプリ連動","url":"https://1geki.jp/slot/l_sae_kano/","checkedAt":"2026-08-22","sourceType":"major_analysis"}
   ],
-  "machineMenu": {
-    "status": "UNRESOLVED",
-    "availableData": [],
-    "sourceRefs": [],
-    "notes": "通常の実機メニュー／遊技履歴の累計項目は公開情報だけでは確定できないため、実機確認または追加資料待ち。ダイトモの遊技履歴とは分けて扱う。"
-  },
-  "linkedService": {
-    "status": "CHECKED",
-    "availableData": [
-      "ミッション",
-      "遊技履歴",
-      "カスタム解放状況"
-    ],
-    "sourceRefs": [
-      "OBS_SRC_SAEKANO_1GEKI_DAITOMO"
-    ],
-    "notes": "一撃が実機連動サービス『ダイトモ』でミッションや遊技履歴を確認でき、ヒロイン等のカスタム解放状況を保存できることを明記。遊技履歴内の全数値項目や、SloAnalyticaの各Feature分母と同一の観測区間かまでは公開情報から確定できないため、確認できた範囲のみ記録する。"
-  },
-  "predecessorData": {
-    "status": "UNRESOLVED",
-    "availableData": [],
-    "sourceRefs": [],
-    "notes": "ダイトモはユーザー自身の連動遊技履歴として確認できるが、空き台着席時に前任者の連動履歴を取得するものではない。ホールデータカウンター等から取得できる前任者区間の具体項目とFeature分母との同値性は別途確認する。",
-    "usableForInference": false,
-    "usableForSelfSessionDelta": false
-  }
+  "sourceCoverage": {"machineMenu":"UNRESOLVED","dataCounter":"UNRESOLVED","linkedService":"FOUND","directPlay":"FOUND","endEvent":"FOUND","seatedState":"UNRESOLVED"},
+  "observations": [
+    {"observationId":"OBS_SELF_BONUS_INITIAL","sourceType":"DIRECT_PLAY","observationMode":"MANUAL_COUNTER","status":"FOUND","label":"自己遊技の通常ゲーム数とボーナス初当り","categories":["通常ゲーム数","ボーナス初当り回数"],"timing":["自己遊技の通常時"],"excludedConditions":["前任者区間を混在させない"],"sourceRefs":[]},
+    {"observationId":"OBS_WATERMELON_INTERVAL","sourceType":"DIRECT_PLAY","observationMode":"MANUAL_COUNTER","status":"FOUND","label":"小役集計区間のスイカ","categories":["小役集計ゲーム数","スイカ回数"],"timing":["自己遊技でスイカを判別して集計した区間"],"excludedConditions":["小役を数えていないゲームを分母へ含めない"],"sourceRefs":[]},
+    {"observationId":"OBS_DAITOMO_CONFIRMED","sourceType":"LINKED_SERVICE","observationMode":"LINKED_SERVICE_READ","status":"FOUND","label":"ダイトモの確認済み機能","categories":["ミッション","遊技履歴","カスタム解放状況"],"timing":["ダイトモ連動遊技中・終了後"],"excludedConditions":["遊技履歴の未確認数値項目をFeatureへ自動流用しない","前任者区間の履歴として扱わない"],"sourceRefs":["OBS_SRC_SAEKANO_1GEKI_DAITOMO"]},
+    {"observationId":"OBS_SAEKANO_EVIDENCE","sourceType":"END_EVENT","observationMode":"VISUAL_CONFIRMATION","status":"FOUND","label":"ぷちキャラ終了画面Evidence","categories":["設定2以上","設定4以上","設定6"],"timing":["該当終了画面確認時"],"excludedConditions":[],"sourceRefs":[]}
+  ],
+  "featureMappings": [
+    {"featureId":"FEAT_INITIAL","mappingType":"EXACT","observationIds":["OBS_SELF_BONUS_INITIAL"],"collectionMethods":["MANUAL_COUNTER"],"usableForInference":true,"usableForDifficulty":true},
+    {"featureId":"FEAT_WATERMELON","mappingType":"EXACT","observationIds":["OBS_WATERMELON_INTERVAL"],"collectionMethods":["MANUAL_COUNTER"],"usableForInference":true,"usableForDifficulty":false}
+  ],
+  "researchReopenRequests": [],
+  "fieldVerificationItems": [
+    {"verificationId":"VFY_SAEKANO_DAITOMO_FIELDS","status":"WAITING_FOR_MACHINE","sourceType":"LINKED_SERVICE","priority":"LOW","question":"ダイトモ遊技履歴の全数値項目と各項目の集計区間を実機で確認する。確認前に現行Featureの自動入力元へしない。"},
+    {"verificationId":"VFY_SAEKANO_SEATED","status":"WAITING_FOR_MACHINE","sourceType":"SEATED_STATE","priority":"LOW","question":"空き台着席時に前任者区間として安全に取得できる項目があるか確認する。現行Selectionでは前任者Featureを不採用のまま維持する。"}
+  ]
 }
