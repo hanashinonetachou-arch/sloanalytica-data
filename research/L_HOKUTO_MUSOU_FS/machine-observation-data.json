@@ -1,29 +1,21 @@
 {
-  "schemaVersion": "machine-observation-data-v1",
+  "schemaVersion": "machine-observation-data-v2",
   "machineId": "L_HOKUTO_MUSOU_FS",
   "displayName": "スマスロ真・北斗無双",
-  "researchedAt": "2026-08-22",
+  "researchedAt": "2026-08-29",
   "sources": [],
-  "machineMenu": {
-    "status": "UNRESOLVED",
-    "availableData": [],
-    "sourceRefs": [],
-    "notes": "筐体内累計項目は未確定。ホールカウンタ情報と混同しない。"
-  },
-  "linkedService": {
-    "status": "CHECKED",
-    "availableData": [
-      "スイカ回数/確率の自動集計"
-    ],
-    "sourceRefs": [],
-    "notes": "マイスロ対応およびスイカ自動集計を確認。自分のマイスロ区間の値として利用し、前任者区間データとはみなさない。"
-  },
-  "predecessorData": {
-    "status": "UNRESOLVED",
-    "availableData": [],
-    "sourceRefs": [],
-    "notes": "旧ResearchDataには着席時／前任者データへの言及があるが、具体的な取得項目・取得元・Feature分子/分母との同値性はこの構造移行では確定しない。Machine Observation Researchで個別再調査する。",
-    "usableForInference": false,
-    "usableForSelfSessionDelta": false
-  }
+  "sourceCoverage": {"machineMenu":"UNRESOLVED","dataCounter":"UNRESOLVED","linkedService":"FOUND","directPlay":"FOUND","endEvent":"FOUND","seatedState":"UNRESOLVED"},
+  "observations": [
+    {"observationId":"OBS_HOKUTO_MUSOU_NORMAL_DIRECT","sourceType":"DIRECT_PLAY","observationMode":"MANUAL_COUNTER","status":"FOUND","label":"自己遊技の通常ゲーム数・初当り・無双役","categories":["通常ゲーム数","ボーナス初当り回数","無双チェリー・無双スイカ回数"],"timing":["自己遊技の通常時"],"excludedConditions":["前任者区間を混在させない"],"sourceRefs":[]},
+    {"observationId":"OBS_HOKUTO_MUSOU_MYSLOT_SUIKA","sourceType":"LINKED_SERVICE","observationMode":"LINKED_COUNTER","status":"FOUND","label":"マイスロのスイカ自動集計","categories":["スイカ回数","スイカ確率"],"timing":["自分のマイスロ遊技区間"],"excludedConditions":["前任者区間を含めない","マイスロ区間と通常ゲーム数の集計範囲を揃える"],"sourceRefs":[]},
+    {"observationId":"OBS_HOKUTO_MUSOU_ST_END","sourceType":"END_EVENT","observationMode":"VISUAL_CONFIRMATION","status":"FOUND","label":"ST終了画面","categories":["キャラ集合","ケンシロウ","北斗四兄弟","女性キャラ4人","設定確定系画面"],"timing":["ST終了時PUSH確認"],"excludedConditions":["設定確定系画面を非Evidence分布カウンタへ含めない"],"sourceRefs":[]}
+  ],
+  "featureMappings": [
+    {"featureId":"FEAT_INITIAL","mappingType":"EXACT","observationIds":["OBS_HOKUTO_MUSOU_NORMAL_DIRECT"],"collectionMethods":["MANUAL_COUNTER"],"usableForInference":true,"usableForDifficulty":true},
+    {"featureId":"FEAT_SUIKA","mappingType":"COMBINABLE","observationIds":["OBS_HOKUTO_MUSOU_NORMAL_DIRECT","OBS_HOKUTO_MUSOU_MYSLOT_SUIKA"],"collectionMethods":["MANUAL_COUNTER","LINKED_COUNTER"],"usableForInference":true,"usableForDifficulty":true},
+    {"featureId":"FEAT_MUSOU_ROLE","mappingType":"EXACT","observationIds":["OBS_HOKUTO_MUSOU_NORMAL_DIRECT"],"collectionMethods":["MANUAL_COUNTER"],"usableForInference":true,"usableForDifficulty":true},
+    {"featureId":"FEAT_ST_ENDSCREEN_NON_EVIDENCE","mappingType":"EXACT","observationIds":["OBS_HOKUTO_MUSOU_ST_END"],"collectionMethods":["VISUAL_CONFIRMATION"],"usableForInference":true,"usableForDifficulty":false}
+  ],
+  "researchReopenRequests": [],
+  "fieldVerificationItems": [{"verificationId":"VFY_HOKUTO_MUSOU_MACHINE_SURFACES","status":"WAITING_FOR_MACHINE","sourceType":"MACHINE_MENU","priority":"LOW","question":"筐体メニュー・店舗データカウンター・着席時に取得できる具体項目と観測区間を確認する。現行active Featureは自己遊技/マイスロ/終了画面で成立するため、未確認情報を前任者推測へ流用しない。"}]
 }
