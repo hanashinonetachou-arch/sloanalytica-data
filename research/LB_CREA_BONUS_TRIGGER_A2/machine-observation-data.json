@@ -1,10 +1,110 @@
 {
-  "schemaVersion": "machine-observation-data-v1",
+  "schemaVersion": "machine-observation-data-v2",
   "machineId": "LB_CREA_BONUS_TRIGGER_A2",
   "displayName": "クレアの秘宝伝 〜はじまりの扉と太陽の石〜 ボーナストリガーver.",
-  "researchedAt": "2026-08-22",
-  "sources": [],
-  "machineMenu": {"status":"UNRESOLVED","availableData":[],"sourceRefs":[],"notes":"筐体メニュー/遊技履歴の具体項目を再調査対象として独立管理する。"},
-  "linkedService": {"status":"UNRESOLVED","availableData":[],"sourceRefs":[],"notes":"実機連動機能の有無と取得項目は未解決。"},
-  "predecessorData": {"status":"UNRESOLVED","availableData":[],"sourceRefs":[],"notes":"着席時・前任者データの取得可能項目と利用可否は未評価。","usableForInference":false,"usableForSelfSessionDelta":false}
+  "researchedAt": "2026-08-29",
+  "sources": [
+    {"sourceId":"SRC_DAITOMO_OFFICIAL","publisher":"株式会社パオン・ディーピー","title":"大都技研の実機連動サービス ダイトモ","url":"https://paon-dp.com/products/daitomo/","checkedAt":"2026-08-29","sourceType":"official"},
+    {"sourceId":"SRC_NANAPRESS","publisher":"なな徹","title":"クレアの秘宝伝BT 設定判別・設定差まとめ","url":"https://nana-press.com/kaiseki/machine/1006/31590/","checkedAt":"2026-08-29","sourceType":"analysis"},
+    {"sourceId":"SRC_SEVEN_NOOR","publisher":"セブンノア","title":"クレアの秘宝伝BT 設定判別ツール・推測基準値","url":"https://seven.noor.jp/judge?debug=1&s=bt_crea","checkedAt":"2026-08-29","sourceType":"analysis"}
+  ],
+  "sourceCoverage": {
+    "machineMenu": "UNRESOLVED",
+    "dataCounter": "UNRESOLVED",
+    "linkedService": "FOUND",
+    "directPlay": "FOUND",
+    "endEvent": "FOUND",
+    "seatedState": "UNRESOLVED"
+  },
+  "observations": [
+    {
+      "observationId": "OBS_CREA_DAITOMO_PLAY_BONUS",
+      "sourceType": "LINKED_SERVICE",
+      "observationMode": "LINKED_SERVICE_READ",
+      "status": "FOUND",
+      "label": "ダイトモの総プレイ数・BIG・REG",
+      "categories": ["総プレイ数", "BIG回数", "REG回数"],
+      "timing": ["自己遊技のダイトモ遊技データ確認時"],
+      "excludedConditions": ["前任者区間を混在させない"],
+      "sourceRefs": ["SRC_DAITOMO_OFFICIAL", "SRC_NANAPRESS"]
+    },
+    {
+      "observationId": "OBS_CREA_DAITOMO_SMALL_ROLES",
+      "sourceType": "LINKED_SERVICE",
+      "observationMode": "DERIVED_COUNTER",
+      "status": "FOUND",
+      "label": "ダイトモ表示から導出する単独共通ベル・単独スイカ・単独滑りスイカ",
+      "categories": ["共通ベル", "スイカ", "滑りスイカ", "ベル＋ボーナス", "スイカ＋ボーナス", "滑りスイカ＋ボーナス"],
+      "timing": ["同一ダイトモ遊技区間のデータ確認時"],
+      "excludedConditions": ["各小役のボーナス同時当選分を差し引いて単独成立回数にする", "数えていない小役を0として扱わない"],
+      "sourceRefs": ["SRC_DAITOMO_OFFICIAL", "SRC_NANAPRESS", "SRC_SEVEN_NOOR"]
+    },
+    {
+      "observationId": "OBS_CREA_DAITOMO_BONUS_TRIGGER",
+      "sourceType": "LINKED_SERVICE",
+      "observationMode": "LINKED_SERVICE_READ",
+      "status": "FOUND",
+      "label": "ダイトモのボーナス当選契機内訳",
+      "categories": ["チャンス目＋BIG", "チャンス目＋REG", "チェリー＋BIG", "チェリー＋REG", "その他ボーナス"],
+      "timing": ["同一自己遊技区間のボーナス当選契機確認時"],
+      "excludedConditions": ["分母は同一区間のBIG＋REG総回数", "前任者区間を混在させない"],
+      "sourceRefs": ["SRC_DAITOMO_OFFICIAL", "SRC_NANAPRESS", "SRC_SEVEN_NOOR"]
+    },
+    {
+      "observationId": "OBS_CREA_BT_JACIN",
+      "sourceType": "LINKED_SERVICE",
+      "observationMode": "LINKED_SERVICE_READ",
+      "status": "FOUND",
+      "label": "BT中の通常JACIN回数",
+      "categories": ["通常JACIN"],
+      "timing": ["自己遊技BT区間"],
+      "excludedConditions": ["通常時の役回数を混在させない"],
+      "sourceRefs": ["SRC_DAITOMO_OFFICIAL", "SRC_NANAPRESS"]
+    },
+    {
+      "observationId": "OBS_CREA_BT_MISS",
+      "sourceType": "DIRECT_PLAY",
+      "observationMode": "MANUAL_COUNTER",
+      "status": "FOUND",
+      "label": "BT中の純ハズレ",
+      "categories": ["BAR図柄を狙え非発生かつ小役非成立の純ハズレ"],
+      "timing": ["自己遊技BT区間"],
+      "excludedConditions": ["BAR図柄を狙え発生ゲームを純ハズレに含めない", "小役成立ゲームを純ハズレに含めない"],
+      "sourceRefs": ["SRC_NANAPRESS", "SRC_SEVEN_NOOR"]
+    },
+    {
+      "observationId": "OBS_CREA_EVIDENCE",
+      "sourceType": "END_EVENT",
+      "observationMode": "VISUAL_CONFIRMATION",
+      "status": "FOUND",
+      "label": "BIG終了時コパンダトロフィー・REG中キャラカードEvidence",
+      "categories": ["銅", "銀", "金", "イナズマ", "虹", "REG赤カード1回", "REG銀・金カードのみ", "REG赤カード2回"],
+      "timing": ["BIG終了時またはREG中の該当表示確認時"],
+      "excludedConditions": [],
+      "sourceRefs": ["SRC_NANAPRESS"]
+    }
+  ],
+  "featureMappings": [
+    {"featureId":"FEAT_BONUS_OUTCOME","mappingType":"EXACT","observationIds":["OBS_CREA_DAITOMO_PLAY_BONUS"],"collectionMethods":["LINKED_SERVICE_READ"],"usableForInference":true,"usableForDifficulty":true},
+    {"featureId":"FEAT_STANDALONE_SMALL_ROLE_OUTCOME","mappingType":"EXACT","observationIds":["OBS_CREA_DAITOMO_PLAY_BONUS","OBS_CREA_DAITOMO_SMALL_ROLES"],"collectionMethods":["LINKED_SERVICE_READ","DERIVED_COUNTER"],"usableForInference":true,"usableForDifficulty":true},
+    {"featureId":"FEAT_BONUS_TRIGGER_COMPOSITION","mappingType":"EXACT","observationIds":["OBS_CREA_DAITOMO_PLAY_BONUS","OBS_CREA_DAITOMO_BONUS_TRIGGER"],"collectionMethods":["LINKED_SERVICE_READ"],"usableForInference":true,"usableForDifficulty":false},
+    {"featureId":"FEAT_BT_MISS_SHARE","mappingType":"COMBINABLE","observationIds":["OBS_CREA_BT_JACIN","OBS_CREA_BT_MISS"],"collectionMethods":["LINKED_SERVICE_READ","MANUAL_COUNTER"],"usableForInference":true,"usableForDifficulty":false}
+  ],
+  "researchReopenRequests": [],
+  "fieldVerificationItems": [
+    {
+      "verificationId": "VFY_CREA_PREDECESSOR_COUNTER",
+      "status": "WAITING_FOR_MACHINE",
+      "sourceType": "SEATED_STATE",
+      "priority": "HIGH",
+      "question": "この機種固有の店舗データカウンターで、着席時総ゲーム数・BIG・REGを同一区間として観測できるか確認する。確認完了まで前任者Featureは推測不参加とする。"
+    },
+    {
+      "verificationId": "VFY_CREA_MACHINE_MENU",
+      "status": "WAITING_FOR_MACHINE",
+      "sourceType": "MACHINE_MENU",
+      "priority": "LOW",
+      "question": "筐体標準メニューで取得できる累計・遊技履歴項目を確認する。ダイトモ観測と混同しない。"
+    }
+  ]
 }
