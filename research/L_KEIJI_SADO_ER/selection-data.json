@@ -1,1 +1,216 @@
-{"schemaVersion":"selection-data-v1","machineId":"L_KEIJI_SADO_ER","machineDataVersion":"0.1.0","inputs":[{"id":"INP_NORMAL_GAMES","name":"通常ゲーム数","type":"integer","category":"PRIMARY","unit":"G","displayOrder":1,"defaultValue":0},{"id":"INP_INITIAL_COUNT","name":"ボーナス・AT初当り回数","type":"counter","category":"PRIMARY","unit":"回","displayOrder":2,"defaultValue":0},{"id":"INP_SEATED_GAMES","name":"着席時ゲーム数","type":"integer","category":"PREDECESSOR","unit":"G","displayOrder":10,"description":"データカウンター仕様が公開AT初当り確率と合う場合のみ入力。","defaultValue":""},{"id":"INP_SEATED_AT_COUNT","name":"着席時AT初当り回数","type":"counter","category":"PREDECESSOR","unit":"回","displayOrder":11,"defaultValue":""}],"features":[{"researchFeatureId":"RF_INITIAL_COMBINED","featureId":"FEAT_INITIAL_COMBINED","adoptionCategory":"INCLUDE_PRIMARY","numeratorInputId":"INP_INITIAL_COUNT","denominatorInputId":"INP_NORMAL_GAMES","minimumSample":1,"sampleRecommendation":5000,"weight":1,"displayFormat":"ratio_1_over_n","difficultyExposure":{"mode":"per_game","factor":1,"quality":"ESTIMATED","basisId":"NORMAL_GAMES"},"difficultyParticipation":"INCLUDE","userReason":"ボーナス+AT合算初当りが最も高頻度で追いやすいため主軸採用。"},{"researchFeatureId":"RF_AT_INITIAL","featureId":"FEAT_AT_INITIAL","adoptionCategory":"EXCLUDE","rejectionReason":"AT初当りには設定差がありますが、合算初当りの部分集合で同じ当選情報を二重に数えることになります。さらにAT単体は試行数も少ないため、自分区間では高頻度な合算初当りを優先して不採用です。"},{"researchFeatureId":"RF_AT_PREDECESSOR","featureId":"FEAT_AT_PREDECESSOR","adoptionCategory":"INCLUDE_SUPPORT","numeratorInputId":"INP_SEATED_AT_COUNT","denominatorInputId":"INP_SEATED_GAMES","minimumSample":1,"sampleRecommendation":1000,"weight":1,"displayFormat":"ratio_1_over_n","difficultyParticipation":"EXCLUDE","userReason":"着席時にAT初当りが取得でき、カウンター仕様が適切なら前任者区間の補助情報として利用。"}],"rejectedElements":[{"id":"REJECTED_STATE_TRANSITION","name":"成立役別の内部状態移行抽選","reason":"弱チェリー・スイカなどからの状態移行に設定差がありますが、通常・高確・超高確を完全に観測できません。状態誤認を含む母数は設定差より大きな偏りを作り得るため不採用です。"},{"id":"REJECTED_STATE_INITIAL_HIT","name":"内部状態別の成立役初当り抽選","reason":"高確中の強レア役などに大きな設定差がありますが、前提となる内部状態を確実に分類できません。条件付き確率の分母を正しく作れないため、合算初当りへ集約しています。"},{"id":"REJECTED_TSUKIMIZAKE_DIRECT","name":"月見酒ボーナス経由の前兆ステージからのAT直撃","reason":"設定差があるとされていますが、月見酒ボーナス経由という限定条件で試行機会が少なく、1日の実戦で安定した母数を作りにくいため数値Featureにはしていません。"}],"evidence":[],"evidenceUi":{"groups":[{"groupId":"SETTING_FLOOR","label":"確認した設定下限","selectionMode":"single","normalizationMode":"ALLOWED_SETTINGS","options":[{"value":"SET_4_OR_HIGHER","label":"設定4以上","allowedSettings":["SET_4","SET_5","SET_6"],"sourceEvidenceIds":["RE_AT_END_4PLUS","RE_UI_4PLUS","RE_PAYOUT_4PLUS"]},{"value":"SET_5_OR_HIGHER","label":"設定5以上","allowedSettings":["SET_5","SET_6"],"sourceEvidenceIds":["RE_AT_END_5PLUS","RE_UI_5PLUS","RE_PAYOUT_5PLUS"]},{"value":"SET_6","label":"設定6","allowedSettings":["SET_6"],"sourceEvidenceIds":["RE_PAYOUT_6","RE_OMIKUJI_6"]}]},{"groupId":"SETTING_DENIAL","label":"確認した設定否定","selectionMode":"multi","normalizationMode":"ALLOWED_SETTINGS","options":[{"value":"AT_END_DENY_1","label":"AT終了時：設定1否定","excludedSettings":["SET_1"],"sourceEvidenceIds":["RE_AT_END_DENY_1"]},{"value":"AT_END_DENY_3","label":"AT終了時：設定3否定","excludedSettings":["SET_3"],"sourceEvidenceIds":["RE_AT_END_DENY_3"]}]},{"groupId":"SETTING_SUBSET","label":"確認した設定限定","selectionMode":"multi","normalizationMode":"ALLOWED_SETTINGS","options":[{"value":"PAYOUT_246","label":"246枚：設定2・4・6","allowedSettings":["SET_2","SET_4","SET_6"],"sourceEvidenceIds":["RE_PAYOUT_246"]}]}]},"evidenceReview":{"policyVersion":1,"exclusions":[]},"uiCategoryLabels":{"PRIMARY":"ボーナス・AT初当り","PREDECESSOR":"着席時データ"},"difficultyAnalysis":{"targetGameBasis":{"basisId":"NORMAL_GAMES","label":"通常ゲーム数","quality":"ESTIMATED"},"calibrationAllowedExposureQualities":["EXACT","DERIVED","ESTIMATED"]}}
+{
+  "schemaVersion": "selection-data-v1",
+  "machineId": "L_KEIJI_SADO_ER",
+  "machineDataVersion": "0.1.0",
+  "inputs": [
+    {
+      "id": "INP_NORMAL_GAMES",
+      "name": "通常ゲーム数",
+      "type": "integer",
+      "category": "PRIMARY",
+      "unit": "G",
+      "displayOrder": 1,
+      "defaultValue": 0
+    },
+    {
+      "id": "INP_INITIAL_COUNT",
+      "name": "ボーナス・AT初当り回数",
+      "type": "counter",
+      "category": "PRIMARY",
+      "unit": "回",
+      "displayOrder": 2,
+      "defaultValue": 0
+    },
+    {
+      "id": "INP_SEATED_GAMES",
+      "name": "着席時ゲーム数",
+      "type": "integer",
+      "category": "PREDECESSOR",
+      "unit": "G",
+      "displayOrder": 10,
+      "description": "データカウンター仕様が公開AT初当り確率と合う場合のみ入力。",
+      "defaultValue": "",
+      "inferenceRole": "EXCLUDE"
+    },
+    {
+      "id": "INP_SEATED_AT_COUNT",
+      "name": "着席時AT初当り回数",
+      "type": "counter",
+      "category": "PREDECESSOR",
+      "unit": "回",
+      "displayOrder": 11,
+      "defaultValue": "",
+      "inferenceRole": "EXCLUDE"
+    }
+  ],
+  "features": [
+    {
+      "researchFeatureId": "RF_INITIAL_COMBINED",
+      "featureId": "FEAT_INITIAL_COMBINED",
+      "adoptionCategory": "INCLUDE_PRIMARY",
+      "numeratorInputId": "INP_INITIAL_COUNT",
+      "denominatorInputId": "INP_NORMAL_GAMES",
+      "minimumSample": 1,
+      "sampleRecommendation": 5000,
+      "weight": 1,
+      "displayFormat": "ratio_1_over_n",
+      "difficultyExposure": {
+        "mode": "per_game",
+        "factor": 1,
+        "quality": "ESTIMATED",
+        "basisId": "NORMAL_GAMES"
+      },
+      "difficultyParticipation": "INCLUDE",
+      "userReason": "ボーナス+AT合算初当りが最も高頻度で追いやすいため主軸採用。"
+    },
+    {
+      "researchFeatureId": "RF_AT_INITIAL",
+      "featureId": "FEAT_AT_INITIAL",
+      "adoptionCategory": "EXCLUDE",
+      "rejectionReason": "AT初当りには設定差がありますが、合算初当りの部分集合で同じ当選情報を二重に数えることになります。さらにAT単体は試行数も少ないため、自分区間では高頻度な合算初当りを優先して不採用です。"
+    },
+    {
+      "researchFeatureId": "RF_AT_PREDECESSOR",
+      "featureId": "FEAT_AT_PREDECESSOR",
+      "adoptionCategory": "EXCLUDE",
+      "rejectionReason": "機種固有の着席時データの取得元と公開確率の試行区間との同値性が実機未確認のため、確認完了まで推測には使用しません。",
+      "userReason": "着席時入力欄は記録用として残しますが、機種固有の実機確認完了まで前任者Featureは推測不参加とします。"
+    }
+  ],
+  "rejectedElements": [
+    {
+      "id": "REJECTED_STATE_TRANSITION",
+      "name": "成立役別の内部状態移行抽選",
+      "reason": "弱チェリー・スイカなどからの状態移行に設定差がありますが、通常・高確・超高確を完全に観測できません。状態誤認を含む母数は設定差より大きな偏りを作り得るため不採用です。"
+    },
+    {
+      "id": "REJECTED_STATE_INITIAL_HIT",
+      "name": "内部状態別の成立役初当り抽選",
+      "reason": "高確中の強レア役などに大きな設定差がありますが、前提となる内部状態を確実に分類できません。条件付き確率の分母を正しく作れないため、合算初当りへ集約しています。"
+    },
+    {
+      "id": "REJECTED_TSUKIMIZAKE_DIRECT",
+      "name": "月見酒ボーナス経由の前兆ステージからのAT直撃",
+      "reason": "設定差があるとされていますが、月見酒ボーナス経由という限定条件で試行機会が少なく、1日の実戦で安定した母数を作りにくいため数値Featureにはしていません。"
+    }
+  ],
+  "evidence": [],
+  "evidenceUi": {
+    "groups": [
+      {
+        "groupId": "SETTING_FLOOR",
+        "label": "確認した設定下限",
+        "selectionMode": "single",
+        "normalizationMode": "ALLOWED_SETTINGS",
+        "options": [
+          {
+            "value": "SET_4_OR_HIGHER",
+            "label": "設定4以上",
+            "allowedSettings": [
+              "SET_4",
+              "SET_5",
+              "SET_6"
+            ],
+            "sourceEvidenceIds": [
+              "RE_AT_END_4PLUS",
+              "RE_UI_4PLUS",
+              "RE_PAYOUT_4PLUS"
+            ]
+          },
+          {
+            "value": "SET_5_OR_HIGHER",
+            "label": "設定5以上",
+            "allowedSettings": [
+              "SET_5",
+              "SET_6"
+            ],
+            "sourceEvidenceIds": [
+              "RE_AT_END_5PLUS",
+              "RE_UI_5PLUS",
+              "RE_PAYOUT_5PLUS"
+            ]
+          },
+          {
+            "value": "SET_6",
+            "label": "設定6",
+            "allowedSettings": [
+              "SET_6"
+            ],
+            "sourceEvidenceIds": [
+              "RE_PAYOUT_6",
+              "RE_OMIKUJI_6"
+            ]
+          }
+        ]
+      },
+      {
+        "groupId": "SETTING_DENIAL",
+        "label": "確認した設定否定",
+        "selectionMode": "multi",
+        "normalizationMode": "ALLOWED_SETTINGS",
+        "options": [
+          {
+            "value": "AT_END_DENY_1",
+            "label": "AT終了時：設定1否定",
+            "excludedSettings": [
+              "SET_1"
+            ],
+            "sourceEvidenceIds": [
+              "RE_AT_END_DENY_1"
+            ]
+          },
+          {
+            "value": "AT_END_DENY_3",
+            "label": "AT終了時：設定3否定",
+            "excludedSettings": [
+              "SET_3"
+            ],
+            "sourceEvidenceIds": [
+              "RE_AT_END_DENY_3"
+            ]
+          }
+        ]
+      },
+      {
+        "groupId": "SETTING_SUBSET",
+        "label": "確認した設定限定",
+        "selectionMode": "multi",
+        "normalizationMode": "ALLOWED_SETTINGS",
+        "options": [
+          {
+            "value": "PAYOUT_246",
+            "label": "246枚：設定2・4・6",
+            "allowedSettings": [
+              "SET_2",
+              "SET_4",
+              "SET_6"
+            ],
+            "sourceEvidenceIds": [
+              "RE_PAYOUT_246"
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "evidenceReview": {
+    "policyVersion": 1,
+    "exclusions": []
+  },
+  "uiCategoryLabels": {
+    "PRIMARY": "ボーナス・AT初当り",
+    "PREDECESSOR": "着席時データ"
+  },
+  "difficultyAnalysis": {
+    "targetGameBasis": {
+      "basisId": "NORMAL_GAMES",
+      "label": "通常ゲーム数",
+      "quality": "ESTIMATED"
+    },
+    "calibrationAllowedExposureQualities": [
+      "EXACT",
+      "DERIVED",
+      "ESTIMATED"
+    ]
+  }
+}

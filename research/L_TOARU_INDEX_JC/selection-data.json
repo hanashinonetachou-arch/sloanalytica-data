@@ -1,1 +1,193 @@
-{"schemaVersion":"selection-data-v1","machineId":"L_TOARU_INDEX_JC","machineDataVersion":"0.1.0","inputs":[{"id":"INP_NORMAL_GAMES","name":"通常ゲーム数","type":"integer","category":"PRIMARY","unit":"G","displayOrder":1,"defaultValue":0},{"id":"INP_CZ_COUNT","name":"CZ初当り回数","type":"counter","category":"PRIMARY","unit":"回","displayOrder":2,"defaultValue":0},{"id":"INP_SEATED_GAMES","name":"着席時ゲーム数","type":"integer","category":"PREDECESSOR","unit":"G","displayOrder":10,"description":"データカウンターの集計仕様が公開AT初当り確率と合う場合のみ入力してください。","defaultValue":""},{"id":"INP_SEATED_AT_COUNT","name":"着席時AT初当り回数","type":"counter","category":"PREDECESSOR","unit":"回","displayOrder":11,"defaultValue":""}],"features":[{"researchFeatureId":"RF_CZ_INITIAL","featureId":"FEAT_CZ_INITIAL","adoptionCategory":"INCLUDE_PRIMARY","numeratorInputId":"INP_CZ_COUNT","denominatorInputId":"INP_NORMAL_GAMES","minimumSample":1,"sampleRecommendation":5000,"weight":1,"displayFormat":"ratio_1_over_n","difficultyExposure":{"mode":"per_game","factor":1,"quality":"ESTIMATED","basisId":"NORMAL_GAMES"},"difficultyParticipation":"INCLUDE","userReason":"CZはATより高頻度で設定差も明確なため主軸採用。"},{"researchFeatureId":"RF_AT_INITIAL","featureId":"FEAT_AT_INITIAL","adoptionCategory":"EXCLUDE","rejectionReason":"AT初当りにも設定差はありますが、通常時ATの主要経路がCZ成功でCZ初当りと強く相関します。CZ成功率そのものを設定別に分離できる信頼できる公開値がないため、CZとATを独立尤度として二重計上せず、自分区間はCZ初当りのみを推測計算に使用します。"},{"researchFeatureId":"RF_AT_PREDECESSOR","featureId":"FEAT_AT_PREDECESSOR","adoptionCategory":"INCLUDE_SUPPORT","numeratorInputId":"INP_SEATED_AT_COUNT","denominatorInputId":"INP_SEATED_GAMES","minimumSample":1,"sampleRecommendation":1000,"weight":0.7,"displayFormat":"ratio_1_over_n","difficultyParticipation":"EXCLUDE","userReason":"データカウンター仕様が適切なら着席前AT初当りも補助情報として利用できる。"}],"rejectedElements":[{"id":"REJECTED_GIRLS_COLLECTION","name":"とあるガールズコレクション当選率","reason":"弱レア役からの当選率などに設定差がありますが、サポートキャラや成立条件ごとに抽選条件が変わり、実戦で同一条件の母数を継続して作る負担が大きいため不採用です。CZ初当りと重なる情報も含むため、現状は主軸CZを優先します。"},{"id":"REJECTED_STATE_CZ","name":"成立役別のCZ抽選","reason":"ハズレ・弱チェリー・スイカなどに設定差がありますが、滞在サポートキャラやゲーム数帯で当選率が変わります。内部条件を正しく分類できない観測を混ぜると尤度が歪むため、実戦入力Featureにはしていません。"},{"id":"REJECTED_SP_EP","name":"スペシャルエピソード・エピソードバトル合算当選率","reason":"設定1から設定6で大きな差がありますが、設定1では約1/9000級と発生自体が重く、1日の実戦では0〜数回に偏りやすいため不採用です。強い設定差でも絶対発生率が低すぎる要素は主推測に使いません。"}],"evidence":[],"evidenceUi":{"groups":[{"groupId":"SETTING_FLOOR","label":"確認した設定下限","selectionMode":"single","normalizationMode":"ALLOWED_SETTINGS","options":[{"value":"SET_2_OR_HIGHER","label":"設定2以上","allowedSettings":["SET_2","SET_3","SET_4","SET_5","SET_6"],"sourceEvidenceIds":["RE_COIN_2PLUS"]},{"value":"SET_3_OR_HIGHER","label":"設定3以上","allowedSettings":["SET_3","SET_4","SET_5","SET_6"],"sourceEvidenceIds":["RE_COIN_3PLUS"]},{"value":"SET_4_OR_HIGHER","label":"設定4以上","allowedSettings":["SET_4","SET_5","SET_6"],"sourceEvidenceIds":["RE_PAYOUT_4PLUS","RE_COIN_4PLUS"]},{"value":"SET_5_OR_HIGHER","label":"設定5以上","allowedSettings":["SET_5","SET_6"],"sourceEvidenceIds":["RE_AT_END_5PLUS","RE_COIN_5PLUS"]},{"value":"SET_6","label":"設定6","allowedSettings":["SET_6"],"sourceEvidenceIds":["RE_AT_END_6","RE_COIN_6"]}]}]},"evidenceReview":{"policyVersion":1,"exclusions":[]},"uiCategoryLabels":{"PRIMARY":"CZ初当り","PREDECESSOR":"着席時データ"},"difficultyAnalysis":{"targetGameBasis":{"basisId":"NORMAL_GAMES","label":"通常ゲーム数","quality":"ESTIMATED"},"calibrationAllowedExposureQualities":["EXACT","DERIVED","ESTIMATED"]}}
+{
+  "schemaVersion": "selection-data-v1",
+  "machineId": "L_TOARU_INDEX_JC",
+  "machineDataVersion": "0.1.0",
+  "inputs": [
+    {
+      "id": "INP_NORMAL_GAMES",
+      "name": "通常ゲーム数",
+      "type": "integer",
+      "category": "PRIMARY",
+      "unit": "G",
+      "displayOrder": 1,
+      "defaultValue": 0
+    },
+    {
+      "id": "INP_CZ_COUNT",
+      "name": "CZ初当り回数",
+      "type": "counter",
+      "category": "PRIMARY",
+      "unit": "回",
+      "displayOrder": 2,
+      "defaultValue": 0
+    },
+    {
+      "id": "INP_SEATED_GAMES",
+      "name": "着席時ゲーム数",
+      "type": "integer",
+      "category": "PREDECESSOR",
+      "unit": "G",
+      "displayOrder": 10,
+      "description": "データカウンターの集計仕様が公開AT初当り確率と合う場合のみ入力してください。",
+      "defaultValue": "",
+      "inferenceRole": "EXCLUDE"
+    },
+    {
+      "id": "INP_SEATED_AT_COUNT",
+      "name": "着席時AT初当り回数",
+      "type": "counter",
+      "category": "PREDECESSOR",
+      "unit": "回",
+      "displayOrder": 11,
+      "defaultValue": "",
+      "inferenceRole": "EXCLUDE"
+    }
+  ],
+  "features": [
+    {
+      "researchFeatureId": "RF_CZ_INITIAL",
+      "featureId": "FEAT_CZ_INITIAL",
+      "adoptionCategory": "INCLUDE_PRIMARY",
+      "numeratorInputId": "INP_CZ_COUNT",
+      "denominatorInputId": "INP_NORMAL_GAMES",
+      "minimumSample": 1,
+      "sampleRecommendation": 5000,
+      "weight": 1,
+      "displayFormat": "ratio_1_over_n",
+      "difficultyExposure": {
+        "mode": "per_game",
+        "factor": 1,
+        "quality": "ESTIMATED",
+        "basisId": "NORMAL_GAMES"
+      },
+      "difficultyParticipation": "INCLUDE",
+      "userReason": "CZはATより高頻度で設定差も明確なため主軸採用。"
+    },
+    {
+      "researchFeatureId": "RF_AT_INITIAL",
+      "featureId": "FEAT_AT_INITIAL",
+      "adoptionCategory": "EXCLUDE",
+      "rejectionReason": "AT初当りにも設定差はありますが、通常時ATの主要経路がCZ成功でCZ初当りと強く相関します。CZ成功率そのものを設定別に分離できる信頼できる公開値がないため、CZとATを独立尤度として二重計上せず、自分区間はCZ初当りのみを推測計算に使用します。"
+    },
+    {
+      "researchFeatureId": "RF_AT_PREDECESSOR",
+      "featureId": "FEAT_AT_PREDECESSOR",
+      "adoptionCategory": "EXCLUDE",
+      "rejectionReason": "機種固有の着席時データの取得元と公開確率の試行区間との同値性が実機未確認のため、確認完了まで推測には使用しません。",
+      "userReason": "着席時入力欄は記録用として残しますが、機種固有の実機確認完了まで前任者Featureは推測不参加とします。"
+    }
+  ],
+  "rejectedElements": [
+    {
+      "id": "REJECTED_GIRLS_COLLECTION",
+      "name": "とあるガールズコレクション当選率",
+      "reason": "弱レア役からの当選率などに設定差がありますが、サポートキャラや成立条件ごとに抽選条件が変わり、実戦で同一条件の母数を継続して作る負担が大きいため不採用です。CZ初当りと重なる情報も含むため、現状は主軸CZを優先します。"
+    },
+    {
+      "id": "REJECTED_STATE_CZ",
+      "name": "成立役別のCZ抽選",
+      "reason": "ハズレ・弱チェリー・スイカなどに設定差がありますが、滞在サポートキャラやゲーム数帯で当選率が変わります。内部条件を正しく分類できない観測を混ぜると尤度が歪むため、実戦入力Featureにはしていません。"
+    },
+    {
+      "id": "REJECTED_SP_EP",
+      "name": "スペシャルエピソード・エピソードバトル合算当選率",
+      "reason": "設定1から設定6で大きな差がありますが、設定1では約1/9000級と発生自体が重く、1日の実戦では0〜数回に偏りやすいため不採用です。強い設定差でも絶対発生率が低すぎる要素は主推測に使いません。"
+    }
+  ],
+  "evidence": [],
+  "evidenceUi": {
+    "groups": [
+      {
+        "groupId": "SETTING_FLOOR",
+        "label": "確認した設定下限",
+        "selectionMode": "single",
+        "normalizationMode": "ALLOWED_SETTINGS",
+        "options": [
+          {
+            "value": "SET_2_OR_HIGHER",
+            "label": "設定2以上",
+            "allowedSettings": [
+              "SET_2",
+              "SET_3",
+              "SET_4",
+              "SET_5",
+              "SET_6"
+            ],
+            "sourceEvidenceIds": [
+              "RE_COIN_2PLUS"
+            ]
+          },
+          {
+            "value": "SET_3_OR_HIGHER",
+            "label": "設定3以上",
+            "allowedSettings": [
+              "SET_3",
+              "SET_4",
+              "SET_5",
+              "SET_6"
+            ],
+            "sourceEvidenceIds": [
+              "RE_COIN_3PLUS"
+            ]
+          },
+          {
+            "value": "SET_4_OR_HIGHER",
+            "label": "設定4以上",
+            "allowedSettings": [
+              "SET_4",
+              "SET_5",
+              "SET_6"
+            ],
+            "sourceEvidenceIds": [
+              "RE_PAYOUT_4PLUS",
+              "RE_COIN_4PLUS"
+            ]
+          },
+          {
+            "value": "SET_5_OR_HIGHER",
+            "label": "設定5以上",
+            "allowedSettings": [
+              "SET_5",
+              "SET_6"
+            ],
+            "sourceEvidenceIds": [
+              "RE_AT_END_5PLUS",
+              "RE_COIN_5PLUS"
+            ]
+          },
+          {
+            "value": "SET_6",
+            "label": "設定6",
+            "allowedSettings": [
+              "SET_6"
+            ],
+            "sourceEvidenceIds": [
+              "RE_AT_END_6",
+              "RE_COIN_6"
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "evidenceReview": {
+    "policyVersion": 1,
+    "exclusions": []
+  },
+  "uiCategoryLabels": {
+    "PRIMARY": "CZ初当り",
+    "PREDECESSOR": "着席時データ"
+  },
+  "difficultyAnalysis": {
+    "targetGameBasis": {
+      "basisId": "NORMAL_GAMES",
+      "label": "通常ゲーム数",
+      "quality": "ESTIMATED"
+    },
+    "calibrationAllowedExposureQualities": [
+      "EXACT",
+      "DERIVED",
+      "ESTIMATED"
+    ]
+  }
+}

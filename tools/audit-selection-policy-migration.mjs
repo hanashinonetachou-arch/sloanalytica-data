@@ -24,7 +24,17 @@ const REVIEWED_ACTIVE_FEATURE_REMOVALS={
   L_HIGURASHI_GOU_SS:{featureIds:['FEAT_BONUS_PREDECESSOR'],reason:'機種固有の着席時ゲーム数・ボーナス回数の観測元と試行区間同値性が実機未確認のため、確認完了まで前任者Featureを推測不参加とした。'},
   L_HOKUTO_AD_XR:{featureIds:['FEAT_AT_INITIAL_PREDECESSOR'],reason:'機種固有の着席時ゲーム数・BB初当り回数の観測元と試行区間同値性が実機未確認のため、確認完了まで前任者Featureを推測不参加とした。'},
   L_KING_PULSAR_SLCC:{featureIds:['FEAT_PREDECESSOR_BONUS'],reason:'機種固有の着席時ゲーム数・BIG・REGの観測元と試行区間同値性が実機未確認のため、確認完了まで前任者Featureを推測不参加とした。'},
-  L_HANABI_KM:{featureIds:['FEAT_PREDECESSOR_BONUS_OUTCOME'],reason:'機種固有の着席時ゲーム数・BIG・REGの観測元と試行区間同値性が実機未確認のため、確認完了まで前任者Featureを推測不参加とした。'}
+  L_HANABI_KM:{featureIds:['FEAT_PREDECESSOR_BONUS_OUTCOME'],reason:'機種固有の着席時ゲーム数・BIG・REGの観測元と試行区間同値性が実機未確認のため、確認完了まで前任者Featureを推測不参加とした。'},
+  L_BASILISK_KIZUNA2_TENZEN_ZN:{featureIds:["FEAT_BT_PREDECESSOR"],reason:'機種固有の着席時データの観測元と試行区間同値性が実機未確認のため、確認完了まで前任者Featureを推測不参加とした。'},
+  L_BOFURI_FN:{featureIds:["FEAT_PREDECESSOR_COUNTER_BONUS"],reason:'機種固有の着席時データの観測元と試行区間同値性が実機未確認のため、確認完了まで前任者Featureを推測不参加とした。'},
+  L_DRAGON_HANAHANA_SENKO_JP:{featureIds:["FEAT_PREDECESSOR_BONUS"],reason:'機種固有の着席時データの観測元と試行区間同値性が実機未確認のため、確認完了まで前任者Featureを推測不参加とした。'},
+  L_GEN_CHOMUGEN_PH:{featureIds:["FEAT_BONUS_PREDECESSOR"],reason:'機種固有の着席時データの観測元と試行区間同値性が実機未確認のため、確認完了まで前任者Featureを推測不参加とした。'},
+  L_KEIJI_SADO_ER:{featureIds:["FEAT_AT_PREDECESSOR"],reason:'機種固有の着席時データの観測元と試行区間同値性が実機未確認のため、確認完了まで前任者Featureを推測不参加とした。'},
+  L_TOARU_INDEX_JC:{featureIds:["FEAT_AT_PREDECESSOR"],reason:'機種固有の着席時データの観測元と試行区間同値性が実機未確認のため、確認完了まで前任者Featureを推測不参加とした。'},
+  S_GOGO_JUGGLER_3_KA:{featureIds:["FEAT_PREDECESSOR_BONUS_OUTCOME"],reason:'機種固有の着席時データの観測元と試行区間同値性が実機未確認のため、確認完了まで前任者Featureを推測不参加とした。'},
+  S_JUGGLER_GIRLS_SS_KH:{featureIds:["FEAT_PREDECESSOR_BONUS_OUTCOME"],reason:'機種固有の着席時データの観測元と試行区間同値性が実機未確認のため、確認完了まで前任者Featureを推測不参加とした。'},
+  S_MR_JUGGLER_KK:{featureIds:["FEAT_PREDECESSOR_BONUS_OUTCOME"],reason:'機種固有の着席時データの観測元と試行区間同値性が実機未確認のため、確認完了まで前任者Featureを推測不参加とした。'},
+  S_REVUE_STARLIGHT_CX:{featureIds:["FEAT_AT_PREDECESSOR","FEAT_CZ_PREDECESSOR"],reason:'機種固有の着席時データの観測元と試行区間同値性が実機未確認のため、確認完了まで前任者Featureを推測不参加とした。'}
 };
 
 function reviewActiveSetDiff(machineId,diff){
