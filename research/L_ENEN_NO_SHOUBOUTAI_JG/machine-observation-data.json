@@ -1,31 +1,213 @@
 {
-  "schemaVersion": "machine-observation-data-v1",
+  "schemaVersion": "machine-observation-data-v2",
   "machineId": "L_ENEN_NO_SHOUBOUTAI_JG",
   "displayName": "Lパチスロ炎炎ノ消防隊",
-  "researchedAt": "2026-08-22",
-  "sources": [],
-  "machineMenu": {
-    "status": "CHECKED",
-    "availableData": [
-      "ゲーム数",
-      "炎炎激闘回数",
-      "歴代最大連続回数"
-    ],
-    "sourceRefs": [],
-    "notes": "公開解析でメニュー画面のゲーム数・炎炎激闘回数・歴代最大連続回数を確認。ゲーム数と炎炎激闘回数は設定変更・電源OFF/ONでリセットされ、歴代最大連続回数は引き継がれる。短時間の電源OFFでは保持される場合があるため、着席時データを推測Featureへ機械的に流用しない。"
+  "researchedAt": "2026-08-29",
+  "sources": [
+    {
+      "sourceId": "OBS_SRC_ENEN_SPEC",
+      "publisher": "パチ7 / P-WORLD・HAZUSE",
+      "title": "Lパチスロ炎炎ノ消防隊 初当り・炎炎激闘解析",
+      "url": "https://pachiseven.jp/machines/6927/cutout/4",
+      "checkedAt": "2026-08-21",
+      "sourceType": "major_analysis"
+    },
+    {
+      "sourceId": "OBS_SRC_ENEN_END",
+      "publisher": "なな徹",
+      "title": "Lパチスロ炎炎ノ消防隊 終了画面・JAC・REGシナリオ解析",
+      "url": "https://nana-press.com/kaiseki/machine/738/21320/",
+      "checkedAt": "2026-08-21",
+      "sourceType": "major_analysis"
+    },
+    {
+      "sourceId": "OBS_SRC_ENEN_MENU",
+      "publisher": "HAZUSE / パチマガスロマガ",
+      "title": "Lパチスロ炎炎ノ消防隊 メニュー表示項目",
+      "url": "https://hazuse.com/machine/pachislot/2S0167/",
+      "checkedAt": "2026-08-21",
+      "sourceType": "major_analysis"
+    }
+  ],
+  "sourceCoverage": {
+    "machineMenu": "FOUND",
+    "dataCounter": "UNRESOLVED",
+    "linkedService": "UNRESOLVED",
+    "directPlay": "FOUND",
+    "endEvent": "FOUND",
+    "seatedState": "UNRESOLVED"
   },
-  "linkedService": {
-    "status": "UNRESOLVED",
-    "availableData": [],
-    "sourceRefs": [],
-    "notes": "公開情報から具体的な実機連動機能の取得項目を確定できず。実機確認候補。"
-  },
-  "predecessorData": {
-    "status": "UNRESOLVED",
-    "availableData": [],
-    "sourceRefs": [],
-    "notes": "旧ResearchDataには着席時／前任者データへの言及があるが、具体的な取得項目・取得元・Feature分子/分母との同値性はこの構造移行では確定しない。Machine Observation Researchで個別再調査する。",
-    "usableForInference": false,
-    "usableForSelfSessionDelta": false
-  }
+  "observations": [
+    {
+      "observationId": "OBS_SELF_INITIAL_BREAKDOWN",
+      "sourceType": "DIRECT_PLAY",
+      "observationMode": "MANUAL_COUNTER",
+      "status": "FOUND",
+      "label": "自己遊技の通常ゲーム数と初当り内訳",
+      "categories": ["通常ゲーム数", "灰焔騎士団初当り", "初当りボーナス"],
+      "timing": ["自己遊技の通常時"],
+      "excludedConditions": ["前任者区間を混在させない"],
+      "sourceRefs": ["OBS_SRC_ENEN_SPEC"]
+    },
+    {
+      "observationId": "OBS_EPB_AFTER_INITIAL",
+      "sourceType": "DIRECT_PLAY",
+      "observationMode": "MANUAL_COUNTER",
+      "status": "FOUND",
+      "label": "初当りボーナス後のエピソードボーナス到達",
+      "categories": ["初当りボーナス", "EPB到達"],
+      "timing": ["初当りボーナス消化後、EPB到達可否を確認した時"],
+      "excludedConditions": ["初当りボーナス以外を分母に含めない"],
+      "sourceRefs": ["OBS_SRC_ENEN_SPEC"]
+    },
+    {
+      "observationId": "OBS_ENEN_INITIAL",
+      "sourceType": "DIRECT_PLAY",
+      "observationMode": "MANUAL_COUNTER",
+      "status": "FOUND",
+      "label": "炎炎激闘初当り",
+      "categories": ["通常ゲーム数", "炎炎激闘初当り"],
+      "timing": ["自己遊技の通常時"],
+      "excludedConditions": ["灰焔騎士団は炎炎激闘初当り回数に含めない", "前任者区間を混在させない"],
+      "sourceRefs": ["OBS_SRC_ENEN_SPEC"]
+    },
+    {
+      "observationId": "OBS_FF_BONUS_END_FULL",
+      "sourceType": "END_EVENT",
+      "observationMode": "VISUAL_CONFIRMATION",
+      "status": "FOUND",
+      "label": "炎炎ボーナス終了画面6カテゴリ",
+      "categories": ["デフォルト", "正面", "左向き", "全員集合", "赤枠9人", "金枠"],
+      "timing": ["炎炎ボーナス終了画面確認時"],
+      "excludedConditions": ["終了画面を確認できなかった回は分母に含めない"],
+      "sourceRefs": ["OBS_SRC_ENEN_END"]
+    },
+    {
+      "observationId": "OBS_REG_END_FULL",
+      "sourceType": "END_EVENT",
+      "observationMode": "VISUAL_CONFIRMATION",
+      "status": "FOUND",
+      "label": "REG終了画面6カテゴリ",
+      "categories": ["デフォルト", "正面", "左向き", "全員集合", "赤枠9人", "金枠"],
+      "timing": ["REG終了画面確認時"],
+      "excludedConditions": ["終了画面を確認できなかった回は分母に含めない"],
+      "sourceRefs": ["OBS_SRC_ENEN_END"]
+    },
+    {
+      "observationId": "OBS_ADORA_JAC_CHAR_FULL",
+      "sourceType": "DIRECT_PLAY",
+      "observationMode": "VISUAL_CONFIRMATION",
+      "status": "FOUND",
+      "label": "アドラバーストJACキャラ",
+      "categories": ["シンラ", "アーサー", "ヒナワ", "マキ", "タマキ", "オウビ", "ジョーカー", "紅丸", "アイリス"],
+      "timing": ["アドラバースト中の各JACキャラ確認時"],
+      "excludedConditions": ["キャラを確認できなかったJACは分母に含めない"],
+      "sourceRefs": ["OBS_SRC_ENEN_END"]
+    },
+    {
+      "observationId": "OBS_REG_SCENARIO_FULL",
+      "sourceType": "DIRECT_PLAY",
+      "observationMode": "VISUAL_CONFIRMATION",
+      "status": "FOUND",
+      "label": "REG中キャラ紹介シナリオ",
+      "categories": ["第8特殊消防隊系", "アイリス系", "伝導者系", "隊長集合系"],
+      "timing": ["REG中のキャラ紹介完了時"],
+      "excludedConditions": ["5人の並びを最後まで確認できないREGは分母に含めない"],
+      "sourceRefs": ["OBS_SRC_ENEN_END"]
+    },
+    {
+      "observationId": "OBS_MACHINE_MENU_CURRENT",
+      "sourceType": "MACHINE_MENU",
+      "observationMode": "MACHINE_MENU_READ",
+      "status": "FOUND",
+      "label": "筐体メニューの確認済み項目",
+      "categories": ["ゲーム数", "炎炎激闘回数", "歴代最大連続回数"],
+      "timing": ["筐体メニュー確認時"],
+      "excludedConditions": ["歴代最大連続回数は設定変更後も引き継がれるため現行Featureへ使用しない", "短時間の電源OFF保持を前任者推測へ流用しない"],
+      "sourceRefs": ["OBS_SRC_ENEN_MENU"]
+    }
+  ],
+  "featureMappings": [
+    {
+      "featureId": "FEAT_INITIAL",
+      "mappingType": "EXACT",
+      "observationIds": ["OBS_SELF_INITIAL_BREAKDOWN"],
+      "collectionMethods": ["MANUAL_COUNTER"],
+      "usableForInference": true,
+      "usableForDifficulty": true
+    },
+    {
+      "featureId": "FEAT_BONUS_SHARE",
+      "mappingType": "EXACT",
+      "observationIds": ["OBS_SELF_INITIAL_BREAKDOWN"],
+      "collectionMethods": ["MANUAL_COUNTER"],
+      "usableForInference": true,
+      "usableForDifficulty": true
+    },
+    {
+      "featureId": "FEAT_EPB_AFTER_INITIAL",
+      "mappingType": "EXACT",
+      "observationIds": ["OBS_EPB_AFTER_INITIAL"],
+      "collectionMethods": ["MANUAL_COUNTER"],
+      "usableForInference": true,
+      "usableForDifficulty": false
+    },
+    {
+      "featureId": "FEAT_ENEN_INITIAL",
+      "mappingType": "EXACT",
+      "observationIds": ["OBS_ENEN_INITIAL"],
+      "collectionMethods": ["MANUAL_COUNTER"],
+      "usableForInference": true,
+      "usableForDifficulty": false
+    },
+    {
+      "featureId": "FEAT_FF_BONUS_END",
+      "mappingType": "EXACT",
+      "observationIds": ["OBS_FF_BONUS_END_FULL"],
+      "collectionMethods": ["VISUAL_CONFIRMATION"],
+      "usableForInference": true,
+      "usableForDifficulty": false
+    },
+    {
+      "featureId": "FEAT_REG_END",
+      "mappingType": "EXACT",
+      "observationIds": ["OBS_REG_END_FULL"],
+      "collectionMethods": ["VISUAL_CONFIRMATION"],
+      "usableForInference": true,
+      "usableForDifficulty": false
+    },
+    {
+      "featureId": "FEAT_ADORA_JAC_CHAR",
+      "mappingType": "EXACT",
+      "observationIds": ["OBS_ADORA_JAC_CHAR_FULL"],
+      "collectionMethods": ["VISUAL_CONFIRMATION"],
+      "usableForInference": true,
+      "usableForDifficulty": false
+    },
+    {
+      "featureId": "FEAT_REG_SCENARIO",
+      "mappingType": "EXACT",
+      "observationIds": ["OBS_REG_SCENARIO_FULL"],
+      "collectionMethods": ["VISUAL_CONFIRMATION"],
+      "usableForInference": true,
+      "usableForDifficulty": false
+    }
+  ],
+  "researchReopenRequests": [],
+  "fieldVerificationItems": [
+    {
+      "verificationId": "VFY_ENEN_PREDECESSOR_SCOPE",
+      "status": "WAITING_FOR_MACHINE",
+      "sourceType": "SEATED_STATE",
+      "priority": "LOW",
+      "question": "着席時に確認可能なゲーム数・炎炎激闘回数のリセット境界と、公開確率の通常ゲーム母集団との同値性を確認する。現行active Featureは自己区間入力で成立するため、確認までは前任者推測に使用しない。"
+    },
+    {
+      "verificationId": "VFY_ENEN_LINKED_SERVICE",
+      "status": "WAITING_FOR_MACHINE",
+      "sourceType": "LINKED_SERVICE",
+      "priority": "LOW",
+      "question": "本機固有の実機連動サービス有無と取得項目を確認する。現行active Featureはこれに依存しない。"
+    }
+  ]
 }
