@@ -1,0 +1,119 @@
+name: v6.5 User10 Linked Service Correction
+
+on:
+  push:
+    branches: [prototype-multi-machine]
+    paths:
+      - '.github/workflows/v65-user10-linked-service-correction.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: v65-user10-linked-service-correction
+  cancel-in-progress: false
+
+jobs:
+  verify-rebuild-publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: prototype-multi-machine
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Assert linked-service coverage for all 10
+        run: |
+          node --input-type=module - <<'NODE'
+          import fs from 'node:fs';
+          const expected = {
+            S_YOUJO_SENKI_ZR:'FOUND',
+            S_HAIYORE_NYARUKO_SAN_Y:'CHECKED_NONE',
+            S_TOARU_RAILGUN_FB:'CHECKED_NONE',
+            S_TEKKEN4_ULTIMATE_DEVIL_TCD:'CHECKED_NONE',
+            S_DANMACHI_GAIDEN_XR:'CHECKED_NONE',
+            S_MAHOIKU_NB:'CHECKED_NONE',
+            L_SHIMAMUSUME_L2:'CHECKED_NONE',
+            L_SUPER_BLACKJACK_SLDC:'FOUND',
+            L_SHAMANKING_SS:'FOUND',
+            L_ARIFURETA_JA:'CHECKED_NONE'
+          };
+          for (const [id,want] of Object.entries(expected)) {
+            const p=`research/${id}/machine-observation-data.json`;
+            const o=JSON.parse(fs.readFileSync(p,'utf8'));
+            const got=o.sourceCoverage?.linkedService;
+            console.log(`${id}: linkedService=${got}`);
+            if(got!==want) throw new Error(`${id}: expected ${want}, got ${got}`);
+            if(want==='CHECKED_NONE') {
+              const badObs=(o.observations??[]).filter(x=>x.sourceType==='LINKED_SERVICE');
+              const badVfy=(o.fieldVerificationItems??[]).filter(x=>x.sourceType==='LINKED_SERVICE');
+              if(badObs.length||badVfy.length) throw new Error(`${id}: CHECKED_NONE must not retain linked-service observation/verification debt`);
+            }
+          }
+          NODE
+
+      - name: Validate corrected Observation files
+        run: |
+          node --input-type=module - <<'NODE'
+          import fs from 'node:fs';
+          import { validateObservationData } from './tools/validate-machine-observation-data.mjs';
+          for (const id of ['S_TOARU_RAILGUN_FB','L_SUPER_BLACKJACK_SLDC']) {
+            const o=JSON.parse(fs.readFileSync(`research/${id}/machine-observation-data.json`,'utf8'));
+            const r=validateObservationData(o);
+            console.log(id, JSON.stringify(r));
+            if(r.status==='FAIL'||(r.errors??[]).length) process.exitCode=1;
+          }
+          NODE
+
+      - name: Four-layer gate corrected machines
+        run: npm run pipeline:four-layer:gate -- S_TOARU_RAILGUN_FB L_SUPER_BLACKJACK_SLDC
+
+      - name: Rebuild corrected MachineData
+        run: npm run machine:batch -- S_TOARU_RAILGUN_FB L_SUPER_BLACKJACK_SLDC --report reports/v65-linked-correction-machine-write.json
+
+      - name: Assert rebuild PASS=2
+        run: |
+          node --input-type=module - <<'NODE'
+          import fs from 'node:fs';
+          const r=JSON.parse(fs.readFileSync('reports/v65-linked-correction-machine-write.json','utf8'));
+          console.log(JSON.stringify({overallStatus:r.overallStatus,counts:r.counts,rolledBack:r.rolledBack},null,2));
+          if(r.overallStatus!=='PASS'||r.counts?.PASS!==2||r.counts?.REVIEW!==0||r.counts?.BLOCKED!==0||r.rolledBack!==false) process.exit(1);
+          NODE
+
+      - name: Commit rebuilt artifacts
+        run: |
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git add \
+            machine-registry.json \
+            research/S_TOARU_RAILGUN_FB/statistics-report.json research/S_TOARU_RAILGUN_FB/difficulty-report.json research/S_TOARU_RAILGUN_FB/setting-band-report.json machines/S_TOARU_RAILGUN_FB/machine-package.json \
+            research/L_SUPER_BLACKJACK_SLDC/statistics-report.json research/L_SUPER_BLACKJACK_SLDC/difficulty-report.json research/L_SUPER_BLACKJACK_SLDC/setting-band-report.json machines/L_SUPER_BLACKJACK_SLDC/machine-package.json
+          if ! git diff --cached --quiet; then
+            git commit -m "build: refresh Railgun and SBJ after observation correction [skip ci]"
+            git push origin HEAD:prototype-multi-machine
+          fi
+
+      - name: Publish correction DRY RUN
+        run: npm run machine:publish:batch -- S_TOARU_RAILGUN_FB L_SUPER_BLACKJACK_SLDC
+
+      - name: Publish correction APPLY
+        run: npm run machine:publish:batch -- --apply S_TOARU_RAILGUN_FB L_SUPER_BLACKJACK_SLDC
+
+      - name: Final full-repository audit
+        run: |
+          npm test
+          npm run audit
+          npm run audit:ui-service-names
+          npm run registry:validate
+
+      - name: Commit correction publish metadata
+        run: |
+          git add catalog.json difficulty-catalog.json machine-registry.json machines/S_TOARU_RAILGUN_FB/machine-package.json machines/L_SUPER_BLACKJACK_SLDC/machine-package.json
+          if ! git diff --cached --quiet; then
+            git commit -m "publish: refresh Railgun and SBJ observation correction [skip ci]"
+            git push origin HEAD:prototype-multi-machine
+          fi
