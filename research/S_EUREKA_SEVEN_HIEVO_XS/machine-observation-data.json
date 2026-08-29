@@ -1,8 +1,8 @@
 {
-  "schemaVersion": "machine-observation-data-v1",
+  "schemaVersion": "machine-observation-data-v2",
   "machineId": "S_EUREKA_SEVEN_HIEVO_XS",
   "displayName": "パチスロ交響詩篇エウレカセブン HI-EVOLUTION ZERO TYPE-ART",
-  "researchedAt": "2026-08-22",
+  "researchedAt": "2026-08-29",
   "sources": [
     {
       "sourceId": "OBS_SRC_NANA_MYSLOT",
@@ -13,31 +13,94 @@
       "sourceType": "major_analysis"
     }
   ],
-  "machineMenu": {
-    "status": "UNRESOLVED",
-    "availableData": [],
-    "sourceRefs": [],
-    "notes": "マイスロのマイカウンターは確認できるが、マイスロとは独立した筐体標準メニュー/遊技履歴画面の具体項目一覧は今回確定していない。"
+  "sourceCoverage": {
+    "machineMenu": "UNRESOLVED",
+    "dataCounter": "UNRESOLVED",
+    "linkedService": "FOUND",
+    "directPlay": "FOUND",
+    "endEvent": "UNRESOLVED",
+    "seatedState": "UNRESOLVED"
   },
-  "linkedService": {
-    "status": "CHECKED",
-    "availableData": [
-      "マイスロ対応",
-      "マイカウンターで設定差のある小役確率を確認可能",
-      "共通7枚ベルの回数/表示確率を設定推測入力へ利用可能",
-      "その他小役確率やボーナス当選率の記録"
-    ],
-    "sourceRefs": [
-      "OBS_SRC_NANA_MYSLOT"
-    ],
-    "notes": "なな徹が設定差のある小役確率をマイスロ『マイカウンター』で確認可能と明記。現行MachineDataの共通7枚ベル回数と『マイスロ表示確率の分母』入力をObservation契約として正式化する。"
-  },
-  "predecessorData": {
-    "status": "UNRESOLVED",
-    "availableData": [],
-    "sourceRefs": [],
-    "notes": "マイスロは基本的に自身の遊技区間データであり、着席前の前任者データを取得する観測源としては扱わない。ホール/筐体側から安全に前任者ART初当り等を取得できる項目は今回確定していない。",
-    "usableForInference": false,
-    "usableForSelfSessionDelta": false
-  }
+  "observations": [
+    {
+      "observationId": "OBS_ART_INITIAL_BINOMIAL",
+      "sourceType": "DIRECT_PLAY",
+      "observationMode": "MANUAL_OR_LINKED_READ",
+      "status": "FOUND",
+      "label": "ART初当り回数・ART初当り対象ゲーム数",
+      "categories": [
+        "ART初当り回数",
+        "ART初当り対象ゲーム数"
+      ],
+      "timing": [
+        "自己実戦の該当条件中"
+      ],
+      "excludedConditions": [
+        "着席前累積値を混ぜない",
+        "条件外ゲームを分母に混ぜない",
+        "未取得の任意入力を観測済み0として扱わない"
+      ],
+      "sourceRefs": [],
+      "notes": "SelectionData FEAT_ART_INITIAL_BINOMIAL の既存入力契約を保持する。"
+    },
+    {
+      "observationId": "OBS_COMMON_7_BELL_BINOMIAL",
+      "sourceType": "DIRECT_PLAY",
+      "observationMode": "MANUAL_OR_LINKED_READ",
+      "status": "FOUND",
+      "label": "共通7枚ベル回数・表示確率の分母",
+      "categories": [
+        "共通7枚ベル回数",
+        "表示確率の分母"
+      ],
+      "timing": [
+        "自己実戦の該当条件中"
+      ],
+      "excludedConditions": [
+        "着席前累積値を混ぜない",
+        "条件外ゲームを分母に混ぜない",
+        "未取得の任意入力を観測済み0として扱わない"
+      ],
+      "sourceRefs": [],
+      "notes": "SelectionData FEAT_COMMON_7_BELL_BINOMIAL の既存入力契約を保持する。"
+    }
+  ],
+  "featureMappings": [
+    {
+      "featureId": "FEAT_ART_INITIAL_BINOMIAL",
+      "mappingType": "EXACT",
+      "observationIds": [
+        "OBS_ART_INITIAL_BINOMIAL"
+      ],
+      "collectionMethods": [
+        "MANUAL_OR_LINKED_READ"
+      ],
+      "usableForInference": true,
+      "usableForDifficulty": true,
+      "notes": "SelectionDataの分子・分母・カテゴリ・条件付き試行をそのままObservationへ固定する。"
+    },
+    {
+      "featureId": "FEAT_COMMON_7_BELL_BINOMIAL",
+      "mappingType": "COMBINABLE",
+      "observationIds": [
+        "OBS_COMMON_7_BELL_BINOMIAL"
+      ],
+      "collectionMethods": [
+        "MANUAL_OR_LINKED_READ"
+      ],
+      "usableForInference": true,
+      "usableForDifficulty": true,
+      "notes": "SelectionDataの分子・分母・カテゴリ・条件付き試行をそのままObservationへ固定する。"
+    }
+  ],
+  "researchReopenRequests": [],
+  "fieldVerificationItems": [
+    {
+      "verificationId": "VFY_S_EUREKA_SEVEN_HIEVO_XS_SOURCE_FIELDS",
+      "status": "WAITING_FOR_MACHINE",
+      "sourceType": "MACHINE_MENU",
+      "priority": "LOW",
+      "question": "筐体メニュー・データカウンター・実機連動機能の具体項目を確認する。現行active Featureは自己実戦の直接観測で成立する。"
+    }
+  ]
 }

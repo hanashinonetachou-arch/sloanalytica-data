@@ -1,32 +1,115 @@
 {
-  "schemaVersion": "machine-observation-data-v1",
+  "schemaVersion": "machine-observation-data-v2",
   "machineId": "L_TOLOVE_DARKNESS_S6",
   "displayName": "L ToLOVEるダークネス",
-  "researchedAt": "2026-08-22",
+  "researchedAt": "2026-08-29",
   "sources": [],
-  "machineMenu": {
-    "status": "CHECKED",
-    "availableData": [
-      "実機連動機能の開始・履歴確認"
-    ],
-    "sourceRefs": [],
-    "notes": "メニューから遊技連動を開始し履歴を確認可能。"
+  "sourceCoverage": {
+    "machineMenu": "FOUND",
+    "dataCounter": "UNRESOLVED",
+    "linkedService": "FOUND",
+    "directPlay": "FOUND",
+    "endEvent": "FOUND",
+    "seatedState": "UNRESOLVED"
   },
-  "linkedService": {
-    "status": "CHECKED",
-    "availableData": [
-      "遊技履歴",
-      "累積ゲーム数に応じた設定示唆情報"
-    ],
-    "sourceRefs": [],
-    "notes": "Research内部のみ正式サービス名を保持。ユーザー向けは「実機連動機能」と表記。"
-  },
-  "predecessorData": {
-    "status": "UNRESOLVED",
-    "availableData": [],
-    "sourceRefs": [],
-    "notes": "旧ResearchDataでは着席時／前任者データの取得可否が独立評価されていない。不存在とは判断せず、Machine Observation Researchで再調査する。",
-    "usableForInference": false,
-    "usableForSelfSessionDelta": false
-  }
+  "observations": [
+    {
+      "observationId": "OBS_AT",
+      "sourceType": "DIRECT_PLAY",
+      "observationMode": "MANUAL_OR_LINKED_READ",
+      "status": "FOUND",
+      "label": "初当り回数・通常ゲーム数",
+      "categories": [
+        "初当り回数",
+        "通常ゲーム数"
+      ],
+      "timing": [
+        "自己実戦の該当条件中"
+      ],
+      "excludedConditions": [
+        "着席前累積値を混ぜない",
+        "条件外ゲームを分母に混ぜない",
+        "未取得の任意入力を観測済み0として扱わない"
+      ],
+      "sourceRefs": [],
+      "notes": "SelectionData FEAT_AT の既存入力契約を保持する。"
+    },
+    {
+      "observationId": "OBS_HAREM_REWARD",
+      "sourceType": "DIRECT_PLAY",
+      "observationMode": "MANUAL_OR_LINKED_READ",
+      "status": "FOUND",
+      "label": "ハーレム報酬 愛すぷRUSH・ハーレム報酬 ウィスパー・ハーレム報酬 エピソード",
+      "categories": [
+        "ハーレム報酬 愛すぷRUSH",
+        "ハーレム報酬 ウィスパー",
+        "ハーレム報酬 エピソード"
+      ],
+      "timing": [
+        "自己実戦の該当条件中"
+      ],
+      "excludedConditions": [
+        "着席前累積値を混ぜない",
+        "条件外ゲームを分母に混ぜない",
+        "未取得の任意入力を観測済み0として扱わない"
+      ],
+      "sourceRefs": [],
+      "notes": "SelectionData FEAT_HAREM_REWARD の既存入力契約を保持する。"
+    },
+    {
+      "observationId": "OBS_SETTING_EVIDENCE",
+      "sourceType": "END_EVENT",
+      "observationMode": "VISUAL_CONFIRMATION",
+      "status": "FOUND",
+      "label": "設定確定・設定下限Evidence",
+      "categories": [
+        "確認した設定下限"
+      ],
+      "timing": [
+        "該当示唆を実際に確認した時"
+      ],
+      "excludedConditions": [
+        "未確認を非発生とみなさない"
+      ],
+      "sourceRefs": []
+    }
+  ],
+  "featureMappings": [
+    {
+      "featureId": "FEAT_AT",
+      "mappingType": "EXACT",
+      "observationIds": [
+        "OBS_AT"
+      ],
+      "collectionMethods": [
+        "MANUAL_OR_LINKED_READ"
+      ],
+      "usableForInference": true,
+      "usableForDifficulty": true,
+      "notes": "SelectionDataの分子・分母・カテゴリ・条件付き試行をそのままObservationへ固定する。"
+    },
+    {
+      "featureId": "FEAT_HAREM_REWARD",
+      "mappingType": "COMBINABLE",
+      "observationIds": [
+        "OBS_HAREM_REWARD"
+      ],
+      "collectionMethods": [
+        "MANUAL_OR_LINKED_READ"
+      ],
+      "usableForInference": true,
+      "usableForDifficulty": false,
+      "notes": "SelectionDataの分子・分母・カテゴリ・条件付き試行をそのままObservationへ固定する。"
+    }
+  ],
+  "researchReopenRequests": [],
+  "fieldVerificationItems": [
+    {
+      "verificationId": "VFY_L_TOLOVE_DARKNESS_S6_SOURCE_FIELDS",
+      "status": "WAITING_FOR_MACHINE",
+      "sourceType": "MACHINE_MENU",
+      "priority": "LOW",
+      "question": "筐体メニュー・データカウンター・実機連動機能の具体項目を確認する。現行active Featureは自己実戦の直接観測で成立する。"
+    }
+  ]
 }

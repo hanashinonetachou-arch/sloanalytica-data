@@ -1,8 +1,8 @@
 {
-  "schemaVersion": "machine-observation-data-v1",
+  "schemaVersion": "machine-observation-data-v2",
   "machineId": "L_URUSEI_YATSURA_EV",
   "displayName": "Lパチスロうる星やつら",
-  "researchedAt": "2026-08-22",
+  "researchedAt": "2026-08-29",
   "sources": [
     {
       "sourceId": "OBS_SRC_URUSEI_PWORLD_MENU_CARD",
@@ -21,29 +21,77 @@
       "sourceType": "major_analysis"
     }
   ],
-  "machineMenu": {
-    "status": "CHECKED",
-    "availableData": [
-      "モード示唆カード"
-    ],
-    "sourceRefs": [
-      "OBS_SRC_URUSEI_PWORLD_MENU_CARD",
-      "OBS_SRC_URUSEI_PACHISEVEN_MENU_CARD"
-    ],
-    "notes": "PUSHボタンで表示するメニュー画面にモード示唆カードが出現することを複数解析で確認。カードは有利区間移行時・友引WARS終了時・ボーナス準備中のゲーム数経過時などに更新される。累計ゲーム数・初当り回数等の数値カウンターを同メニューから取得できるかは確認できていないため、推測で追加しない。"
+  "sourceCoverage": {
+    "machineMenu": "FOUND",
+    "dataCounter": "UNRESOLVED",
+    "linkedService": "UNRESOLVED",
+    "directPlay": "FOUND",
+    "endEvent": "FOUND",
+    "seatedState": "UNRESOLVED"
   },
-  "linkedService": {
-    "status": "UNRESOLVED",
-    "availableData": [],
-    "sourceRefs": [],
-    "notes": "本機固有の実機連動機能は今回の公開情報再調査でも確定できなかった。確認できないことを不存在とは扱わない。"
-  },
-  "predecessorData": {
-    "status": "UNRESOLVED",
-    "availableData": [],
-    "sourceRefs": [],
-    "notes": "PUSHメニューのモード示唆カードは確認できたが、空き台着席時に利用できる累計数値データやホールデータカウンターの具体項目は未確認。前任者Featureや自分区間差分には現時点で使用しない。",
-    "usableForInference": false,
-    "usableForSelfSessionDelta": false
-  }
+  "observations": [
+    {
+      "observationId": "OBS_AT",
+      "sourceType": "DIRECT_PLAY",
+      "observationMode": "MANUAL_OR_LINKED_READ",
+      "status": "FOUND",
+      "label": "AT初当り回数・通常ゲーム数",
+      "categories": [
+        "AT初当り回数",
+        "通常ゲーム数"
+      ],
+      "timing": [
+        "自己実戦の該当条件中"
+      ],
+      "excludedConditions": [
+        "着席前累積値を混ぜない",
+        "条件外ゲームを分母に混ぜない",
+        "未取得の任意入力を観測済み0として扱わない"
+      ],
+      "sourceRefs": [],
+      "notes": "SelectionData FEAT_AT の既存入力契約を保持する。"
+    },
+    {
+      "observationId": "OBS_SETTING_EVIDENCE",
+      "sourceType": "END_EVENT",
+      "observationMode": "VISUAL_CONFIRMATION",
+      "status": "FOUND",
+      "label": "設定確定・設定下限Evidence",
+      "categories": [
+        "確認した設定確定・否定"
+      ],
+      "timing": [
+        "該当示唆を実際に確認した時"
+      ],
+      "excludedConditions": [
+        "未確認を非発生とみなさない"
+      ],
+      "sourceRefs": []
+    }
+  ],
+  "featureMappings": [
+    {
+      "featureId": "FEAT_AT",
+      "mappingType": "EXACT",
+      "observationIds": [
+        "OBS_AT"
+      ],
+      "collectionMethods": [
+        "MANUAL_OR_LINKED_READ"
+      ],
+      "usableForInference": true,
+      "usableForDifficulty": true,
+      "notes": "SelectionDataの分子・分母・カテゴリ・条件付き試行をそのままObservationへ固定する。"
+    }
+  ],
+  "researchReopenRequests": [],
+  "fieldVerificationItems": [
+    {
+      "verificationId": "VFY_L_URUSEI_YATSURA_EV_SOURCE_FIELDS",
+      "status": "WAITING_FOR_MACHINE",
+      "sourceType": "MACHINE_MENU",
+      "priority": "LOW",
+      "question": "筐体メニュー・データカウンター・実機連動機能の具体項目を確認する。現行active Featureは自己実戦の直接観測で成立する。"
+    }
+  ]
 }
