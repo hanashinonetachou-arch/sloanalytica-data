@@ -1,0 +1,104 @@
+name: v6.5 UI Design User10 Generate
+
+on:
+  push:
+    branches: [prototype-multi-machine]
+    paths:
+      - 'tools/generate-v65-ui-design-user10.mjs'
+      - '.github/workflows/v65-ui-design-user10-generate.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: v65-ui-design-user10-generate
+  cancel-in-progress: false
+
+jobs:
+  generate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: prototype-multi-machine
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Generate scoped UI Design
+        run: node tools/generate-v65-ui-design-user10.mjs
+      - name: Validate scoped UI Design objects
+        run: |
+          node --input-type=module - <<'NODE'
+          import fs from 'node:fs';
+          import { validateUiDesignData, gateUiDesignData } from './tools/validate-ui-design-data.mjs';
+          const ids = [
+            'S_YOUJO_SENKI_ZR','S_HAIYORE_NYARUKO_SAN_Y','S_TOARU_RAILGUN_FB',
+            'S_TEKKEN4_ULTIMATE_DEVIL_TCD','S_DANMACHI_GAIDEN_XR','S_MAHOIKU_NB',
+            'L_SHIMAMUSUME_L2','L_SUPER_BLACKJACK_SLDC','L_SHAMANKING_SS','L_ARIFURETA_JA'
+          ];
+          let failed=false;
+          for(const id of ids){
+            const ui=JSON.parse(fs.readFileSync(`research/${id}/ui-design-data.json`,'utf8'));
+            const errors=validateUiDesignData(ui,{expectedMachineId:id});
+            const gate=gateUiDesignData(ui);
+            console.log(`${id}: validation=${errors.length?'FAIL':'PASS'} gate=${gate.gate} unresolved=${ui.unresolved.length}`);
+            for(const e of errors){failed=true;console.error(`${id}: ${e}`);}
+            if(gate.gate==='FAIL'||gate.gate==='DRAFT'||gate.gate==='MANUAL_UI_REVIEW_REQUIRED'){failed=true;console.error(`${id}: UI gate ${gate.gate}`);}
+          }
+          if(failed) process.exit(1);
+          NODE
+      - name: Validate UI layer linkages and four-layer gate
+        run: |
+          node tools/audit-ui-design-selection-linkage.mjs . \
+            S_YOUJO_SENKI_ZR \
+            S_HAIYORE_NYARUKO_SAN_Y \
+            S_TOARU_RAILGUN_FB \
+            S_TEKKEN4_ULTIMATE_DEVIL_TCD \
+            S_DANMACHI_GAIDEN_XR \
+            S_MAHOIKU_NB \
+            L_SHIMAMUSUME_L2 \
+            L_SUPER_BLACKJACK_SLDC \
+            L_SHAMANKING_SS \
+            L_ARIFURETA_JA
+          node tools/audit-ui-design-observation-linkage.mjs --strict-v2 \
+            S_YOUJO_SENKI_ZR \
+            S_HAIYORE_NYARUKO_SAN_Y \
+            S_TOARU_RAILGUN_FB \
+            S_TEKKEN4_ULTIMATE_DEVIL_TCD \
+            S_DANMACHI_GAIDEN_XR \
+            S_MAHOIKU_NB \
+            L_SHIMAMUSUME_L2 \
+            L_SUPER_BLACKJACK_SLDC \
+            L_SHAMANKING_SS \
+            L_ARIFURETA_JA
+          node tools/four-layer-pipeline-gate.mjs \
+            S_YOUJO_SENKI_ZR \
+            S_HAIYORE_NYARUKO_SAN_Y \
+            S_TOARU_RAILGUN_FB \
+            S_TEKKEN4_ULTIMATE_DEVIL_TCD \
+            S_DANMACHI_GAIDEN_XR \
+            S_MAHOIKU_NB \
+            L_SHIMAMUSUME_L2 \
+            L_SUPER_BLACKJACK_SLDC \
+            L_SHAMANKING_SS \
+            L_ARIFURETA_JA
+      - name: Commit scoped UI Design
+        run: |
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git add \
+            research/S_YOUJO_SENKI_ZR/ui-design-data.json \
+            research/S_HAIYORE_NYARUKO_SAN_Y/ui-design-data.json \
+            research/S_TOARU_RAILGUN_FB/ui-design-data.json \
+            research/S_TEKKEN4_ULTIMATE_DEVIL_TCD/ui-design-data.json \
+            research/S_DANMACHI_GAIDEN_XR/ui-design-data.json \
+            research/S_MAHOIKU_NB/ui-design-data.json \
+            research/L_SHIMAMUSUME_L2/ui-design-data.json \
+            research/L_SUPER_BLACKJACK_SLDC/ui-design-data.json \
+            research/L_SHAMANKING_SS/ui-design-data.json \
+            research/L_ARIFURETA_JA/ui-design-data.json
+          if ! git diff --cached --quiet; then
+            git commit -m "ui-design: add v6.5 user10 contracts [skip ci]"
+            git push origin HEAD:prototype-multi-machine
+          fi
