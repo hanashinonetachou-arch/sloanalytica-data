@@ -1,0 +1,36 @@
+name: v6.4 Observation Debt Classification
+on:
+  workflow_dispatch:
+  push:
+    branches: [prototype-multi-machine]
+    paths:
+      - 'tools/classify-v64-observation-debt.mjs'
+      - 'test/v64-observation-debt-classification.test.mjs'
+      - 'reports/v64-observation-trial-universe-audit.json'
+      - '.github/workflows/v64-observation-debt-classification.yml'
+permissions:
+  contents: write
+concurrency:
+  group: v64-observation-debt-classification
+  cancel-in-progress: false
+jobs:
+  classify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: prototype-multi-machine
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: node --test test/v64-observation-debt-classification.test.mjs
+      - run: node tools/classify-v64-observation-debt.mjs
+      - name: Commit report
+        run: |
+          if git diff --quiet -- reports/v64-observation-debt-classification.json; then exit 0; fi
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git add reports/v64-observation-debt-classification.json
+          git commit -m "audit: update v6.4 observation debt classification"
+          git pull --rebase origin prototype-multi-machine
+          git push origin HEAD:prototype-multi-machine
