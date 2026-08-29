@@ -9,11 +9,11 @@ test('selection policy migration audit confirms all machines preserve inference 
   const r=auditSelectionPolicyMigration(root);
   assert.equal(r.summary.blocked,0);
   assert.equal(r.summary.review,0);
-  assert.equal(r.summary.reviewedSafetyChanges,5);
+  assert.equal(r.summary.reviewedSafetyChanges,6);
   const byId=new Map(r.machines.map(x=>[x.machineId,x]));
   for(const id of byId.keys()) assert.equal(byId.get(id)?.status,'PASS');
 
-  const expected=['LB_AREX_BRIGHT_BA','LB_CREA_BONUS_TRIGGER_A2','LB_MAGICAL_HALLOWEEN_GS','S_NEO_IM_JUGGLER_EX_KK','S_ULTRA_MIRACLE_JUGGLER_KT'];
+  const expected=['LB_AREX_BRIGHT_BA','LB_CREA_BONUS_TRIGGER_A2','LB_MAGICAL_HALLOWEEN_GS','LB_SHAKE_BONUS_TRIGGER_A1','S_NEO_IM_JUGGLER_EX_KK','S_ULTRA_MIRACLE_JUGGLER_KT'];
   const reviewed=r.machines.filter(x=>x.reviewedDiffs?.length).map(x=>x.machineId).sort();
   assert.deepEqual(reviewed,expected);
   for(const id of expected){
