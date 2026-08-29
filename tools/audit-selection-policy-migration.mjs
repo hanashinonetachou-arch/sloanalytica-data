@@ -14,7 +14,8 @@ const REVIEWED_ACTIVE_FEATURE_REMOVALS={
   S_ULTRA_MIRACLE_JUGGLER_KT:{featureIds:['FEAT_PREDECESSOR_BONUS_OUTCOME'],reason:'機種固有の着席時ゲーム数・BIG・REGの観測元が実機未確認のため、確認完了まで前任者Featureを推測不参加とした。'},
   S_NEO_IM_JUGGLER_EX_KK:{featureIds:['FEAT_PREDECESSOR_BONUS_OUTCOME'],reason:'機種固有の着席時ゲーム数・BIG・REGの観測元が実機未確認のため、確認完了まで前任者Featureを推測不参加とした。'},
   LB_CREA_BONUS_TRIGGER_A2:{featureIds:['FEAT_PREDECESSOR_BONUS_OUTCOME'],reason:'機種固有の着席時総ゲーム数・BIG・REGの観測元が実機未確認のため、確認完了まで前任者Featureを推測不参加とした。'},
-  LB_MAGICAL_HALLOWEEN_GS:{featureIds:['FEAT_PREDECESSOR_BONUS_OUTCOME'],reason:'機種固有の着席時ゲーム数・BIG・REGの観測元が実機未確認のため、確認完了まで前任者Featureを推測不参加とした。'}
+  LB_MAGICAL_HALLOWEEN_GS:{featureIds:['FEAT_PREDECESSOR_BONUS_OUTCOME'],reason:'機種固有の着席時ゲーム数・BIG・REGの観測元が実機未確認のため、確認完了まで前任者Featureを推測不参加とした。'},
+  LB_AREX_BRIGHT_BA:{featureIds:['FEAT_PREDECESSOR_BONUS_OUTCOME'],reason:'機種固有の着席時ゲーム数・BIG・REGの観測元が実機未確認のため、確認完了まで前任者Featureを推測不参加とした。'}
 };
 
 function reviewActiveSetDiff(machineId,diff){
