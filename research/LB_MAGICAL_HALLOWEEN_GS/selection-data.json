@@ -9,9 +9,9 @@
     "EVIDENCE": "設定確定情報"
   },
   "inputs": [
-    {"id":"INP_PREDECESSOR_GAMES","name":"着席時ゲーム数","type":"integer","category":"PREDECESSOR","unit":"G","displayOrder":1,"inferenceRole":"INCLUDE_PRIMARY","defaultValue":0,"observationScope":"PREDECESSOR_SNAPSHOT","sessionDifferenceHelper":false,"description":"着席時にデータカウンターへ表示されている累計ゲーム数を入力します。"},
-    {"id":"INP_PREDECESSOR_BIG_COUNT","name":"着席時BIG","type":"counter","category":"PREDECESSOR","unit":"回","displayOrder":2,"inferenceRole":"INCLUDE_PRIMARY","defaultValue":0,"observationScope":"PREDECESSOR_SNAPSHOT","parentInputId":"INP_PREDECESSOR_GAMES","description":"着席時のBIG回数を入力します。"},
-    {"id":"INP_PREDECESSOR_REG_COUNT","name":"着席時REG","type":"counter","category":"PREDECESSOR","unit":"回","displayOrder":3,"inferenceRole":"INCLUDE_PRIMARY","defaultValue":0,"observationScope":"PREDECESSOR_SNAPSHOT","parentInputId":"INP_PREDECESSOR_GAMES","description":"着席時のREG回数を入力します。"},
+    {"id":"INP_PREDECESSOR_GAMES","name":"着席時ゲーム数","type":"integer","category":"PREDECESSOR","unit":"G","displayOrder":1,"inferenceRole":"REFERENCE","defaultValue":0,"observationScope":"PREDECESSOR_SNAPSHOT","sessionDifferenceHelper":false,"description":"着席時にデータカウンターへ表示されている累計ゲーム数を入力します。機種固有の観測元が実機確認されるまでは推測計算に使用しません。"},
+    {"id":"INP_PREDECESSOR_BIG_COUNT","name":"着席時BIG","type":"counter","category":"PREDECESSOR","unit":"回","displayOrder":2,"inferenceRole":"REFERENCE","defaultValue":0,"observationScope":"PREDECESSOR_SNAPSHOT","parentInputId":"INP_PREDECESSOR_GAMES","description":"着席時のBIG回数を入力します。機種固有の観測元が実機確認されるまでは推測計算に使用しません。"},
+    {"id":"INP_PREDECESSOR_REG_COUNT","name":"着席時REG","type":"counter","category":"PREDECESSOR","unit":"回","displayOrder":3,"inferenceRole":"REFERENCE","defaultValue":0,"observationScope":"PREDECESSOR_SNAPSHOT","parentInputId":"INP_PREDECESSOR_GAMES","description":"着席時のREG回数を入力します。機種固有の観測元が実機確認されるまでは推測計算に使用しません。"},
     {"id":"INP_NORMAL_GAMES","name":"実戦ゲーム数","type":"integer","category":"NORMAL","unit":"G","displayOrder":10,"inferenceRole":"INCLUDE_PRIMARY","defaultValue":0,"observationScope":"SELF_PLAY","sessionDifferenceHelper":false,"description":"実戦ゲーム数を入力します。実機連動機能を使用する場合は表示された値をそのまま入れてください。"},
     {"id":"INP_BIG_COUNT","name":"BIG","type":"counter","category":"NORMAL","unit":"回","displayOrder":11,"inferenceRole":"INCLUDE_PRIMARY","defaultValue":0,"parentInputId":"INP_NORMAL_GAMES","description":"実戦中のBIG回数を入力します。"},
     {"id":"INP_REG_COUNT","name":"REG","type":"counter","category":"NORMAL","unit":"回","displayOrder":12,"inferenceRole":"INCLUDE_PRIMARY","defaultValue":0,"parentInputId":"INP_NORMAL_GAMES","description":"実戦中のREG回数を入力します。"},
@@ -19,11 +19,8 @@
   ],
   "features": [
     {
-      "researchFeatureId":"RF_PREDECESSOR_BONUS_OUTCOME","featureId":"FEAT_PREDECESSOR_BONUS_OUTCOME","adoptionCategory":"INCLUDE_PRIMARY","minimumSample":300,"sampleRecommendation":5000,"weight":1.0,
-      "numeratorInputId":"INP_PREDECESSOR_BIG_COUNT","denominatorInputId":"INP_PREDECESSOR_GAMES","categoryInputIds":["INP_PREDECESSOR_REG_COUNT"],"residualCategoryLabel":"NO_BONUS",
-      "difficultyParticipation":"EXCLUDE",
-      "userReason":"着席前のゲーム数・BIG・REGは自己実戦区間と独立しているため、前任者区間の推測情報として採用します。",
-      "difficultyExclusionReason":"Difficultyは自分が遊技した1500G・3000G・7000Gを評価するため、着席前区間は含めません。"
+      "researchFeatureId":"RF_PREDECESSOR_BONUS_OUTCOME","featureId":"FEAT_PREDECESSOR_BONUS_OUTCOME","adoptionCategory":"EXCLUDE",
+      "rejectionReason":"機種固有の着席時ゲーム数・BIG・REGの観測元が実機未確認のため、確認完了まで推測不参加。"
     },
     {
       "researchFeatureId":"RF_BONUS_OUTCOME","featureId":"FEAT_BONUS_OUTCOME","adoptionCategory":"INCLUDE_PRIMARY","minimumSample":300,"sampleRecommendation":5000,"weight":1.0,
