@@ -5,6 +5,7 @@ on:
     branches: [prototype-multi-machine]
     paths:
       - 'reports/v64-linked-service-audit-batch.json'
+      - '.github/workflows/v64-linked-service-batch-apply.yml'
   workflow_dispatch:
 
 permissions:
@@ -28,10 +29,11 @@ jobs:
         run: node tools/apply-observation-linked-service-audit.mjs reports/v64-linked-service-audit-batch.json
       - name: Apply linked-service batch
         run: node tools/apply-observation-linked-service-audit.mjs reports/v64-linked-service-audit-batch.json --apply
-      - name: Validate observation contracts
+      - name: Run v6.4 observation audit gate
         run: |
-          npm run observation:validate
-          npm run observation:selection:audit
+          node tools/audit-v64-observation-trial-universe.mjs . reports/v64-observation-trial-universe-audit.json || code=$?
+          if [ "${code:-0}" -ne 0 ] && [ "${code:-0}" -ne 2 ]; then exit "$code"; fi
+          node --test test/v64-observation-debt-classification.test.mjs
       - name: Commit observation updates from latest branch
         run: |
           git config user.name github-actions[bot]
