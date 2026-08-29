@@ -1,32 +1,155 @@
 {
-  "schemaVersion": "machine-observation-data-v1",
+  "schemaVersion": "machine-observation-data-v2",
   "machineId": "L_HOKUTO_AD_XR",
   "displayName": "スマスロ北斗の拳",
-  "researchedAt": "2026-08-22",
+  "researchedAt": "2026-08-29",
   "sources": [],
-  "machineMenu": {
-    "status": "UNRESOLVED",
-    "availableData": [],
-    "sourceRefs": [],
-    "notes": "旧ResearchDataでは実機メニュー／遊技履歴の独立調査ブロックが未記録。不存在とは判断せず、Machine Observation Researchで再調査する。"
+  "sourceCoverage": {
+    "machineMenu": "UNRESOLVED",
+    "dataCounter": "UNRESOLVED",
+    "linkedService": "FOUND",
+    "directPlay": "FOUND",
+    "endEvent": "FOUND",
+    "seatedState": "UNRESOLVED"
   },
-  "linkedService": {
-    "status": "CHECKED",
-    "availableData": [
-      "小役出現確率",
-      "弱スイカ（遊技終了時は個別）",
-      "強スイカA/B合算",
-      "中段チェリーA/B合算"
-    ],
-    "sourceRefs": [],
-    "notes": "機種別の実機連動データで、途中経過はスイカ・中段チェリーが合算、遊技終了時は弱スイカのみ個別表示されることを確認。ユーザー向け表示では固有サービス名ではなく「実機連動機能」を用いる。"
-  },
-  "predecessorData": {
-    "status": "UNRESOLVED",
-    "availableData": [],
-    "sourceRefs": [],
-    "notes": "旧ResearchDataには着席時／前任者データへの言及があるが、具体的な取得項目・取得元・Feature分子/分母との同値性はこの構造移行では確定しない。Machine Observation Researchで個別再調査する。",
-    "usableForInference": false,
-    "usableForSelfSessionDelta": false
-  }
+  "observations": [
+    {
+      "observationId": "OBS_AT_INITIAL",
+      "sourceType": "DIRECT_PLAY",
+      "observationMode": "MANUAL_OR_LINKED_READ",
+      "status": "FOUND",
+      "label": "バトルボーナス初当り回数・通常ゲーム数",
+      "categories": [
+        "バトルボーナス初当り回数",
+        "通常ゲーム数"
+      ],
+      "timing": [
+        "自己実戦の該当条件中"
+      ],
+      "excludedConditions": [
+        "着席前の累積値を混ぜない",
+        "未取得の任意入力を観測済み0として扱わない"
+      ],
+      "sourceRefs": [],
+      "notes": "SelectionData FEAT_AT_INITIAL の入力契約をそのまま観測する。分子・分母・条件付き試行の定義を別のゲーム数へ置換しない。"
+    },
+    {
+      "observationId": "OBS_WATERMELON_COMBINED",
+      "sourceType": "DIRECT_PLAY",
+      "observationMode": "MANUAL_OR_LINKED_READ",
+      "status": "FOUND",
+      "label": "スイカ合算回数・小役集計ゲーム数",
+      "categories": [
+        "スイカ合算回数",
+        "小役集計ゲーム数"
+      ],
+      "timing": [
+        "自己実戦の該当条件中"
+      ],
+      "excludedConditions": [
+        "着席前の累積値を混ぜない",
+        "未取得の任意入力を観測済み0として扱わない"
+      ],
+      "sourceRefs": [],
+      "notes": "SelectionData FEAT_WATERMELON_COMBINED の入力契約をそのまま観測する。分子・分母・条件付き試行の定義を別のゲーム数へ置換しない。"
+    },
+    {
+      "observationId": "OBS_BB_END_VOICE_NON_1G",
+      "sourceType": "DIRECT_PLAY",
+      "observationMode": "MANUAL_OR_LINKED_READ",
+      "status": "FOUND",
+      "label": "シン・ボイス確認回数・サウザー・ジャギ・アミバ",
+      "categories": [
+        "シン",
+        "ボイス確認回数",
+        "サウザー",
+        "ジャギ",
+        "アミバ"
+      ],
+      "timing": [
+        "自己実戦の該当条件中"
+      ],
+      "excludedConditions": [
+        "着席前の累積値を混ぜない",
+        "未取得の任意入力を観測済み0として扱わない"
+      ],
+      "sourceRefs": [],
+      "notes": "SelectionData FEAT_BB_END_VOICE_NON_1G の入力契約をそのまま観測する。分子・分母・条件付き試行の定義を別のゲーム数へ置換しない。"
+    },
+    {
+      "observationId": "OBS_SETTING_EVIDENCE",
+      "sourceType": "END_EVENT",
+      "observationMode": "VISUAL_CONFIRMATION",
+      "status": "FOUND",
+      "label": "設定確定・設定下限Evidence",
+      "categories": [
+        "確認した設定下限"
+      ],
+      "timing": [
+        "該当示唆を実際に確認した時"
+      ],
+      "excludedConditions": [
+        "未確認を非発生とみなさない"
+      ],
+      "sourceRefs": []
+    }
+  ],
+  "featureMappings": [
+    {
+      "featureId": "FEAT_AT_INITIAL",
+      "mappingType": "EXACT",
+      "observationIds": [
+        "OBS_AT_INITIAL"
+      ],
+      "collectionMethods": [
+        "MANUAL_OR_LINKED_READ"
+      ],
+      "usableForInference": true,
+      "usableForDifficulty": true,
+      "notes": "SelectionDataの既存分子・分母・カテゴリ契約を保持する。"
+    },
+    {
+      "featureId": "FEAT_WATERMELON_COMBINED",
+      "mappingType": "EXACT",
+      "observationIds": [
+        "OBS_WATERMELON_COMBINED"
+      ],
+      "collectionMethods": [
+        "MANUAL_OR_LINKED_READ"
+      ],
+      "usableForInference": true,
+      "usableForDifficulty": false,
+      "notes": "SelectionDataの既存分子・分母・カテゴリ契約を保持する。"
+    },
+    {
+      "featureId": "FEAT_BB_END_VOICE_NON_1G",
+      "mappingType": "EXACT",
+      "observationIds": [
+        "OBS_BB_END_VOICE_NON_1G"
+      ],
+      "collectionMethods": [
+        "MANUAL_OR_LINKED_READ"
+      ],
+      "usableForInference": true,
+      "usableForDifficulty": false,
+      "notes": "SelectionDataの既存分子・分母・カテゴリ契約を保持する。"
+    }
+  ],
+  "researchReopenRequests": [],
+  "fieldVerificationItems": [
+    {
+      "verificationId": "VFY_L_HOKUTO_AD_XR_PREDECESSOR",
+      "status": "WAITING_FOR_MACHINE",
+      "sourceType": "SEATED_STATE",
+      "priority": "HIGH",
+      "question": "スマスロ北斗の拳で、着席時データの取得元と公開確率の試行区間が同値か実機確認する。確認完了までFEAT_AT_INITIAL_PREDECESSORは推測不参加とする。"
+    },
+    {
+      "verificationId": "VFY_L_HOKUTO_AD_XR_SOURCE_FIELDS",
+      "status": "WAITING_FOR_MACHINE",
+      "sourceType": "MACHINE_MENU",
+      "priority": "LOW",
+      "question": "筐体メニュー・データカウンター・実機連動機能で取得できる具体項目を確認する。現行の自己実戦FeatureはSelectionDataの直接観測契約で成立する。"
+    }
+  ]
 }

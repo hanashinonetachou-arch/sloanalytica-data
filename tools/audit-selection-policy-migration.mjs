@@ -19,7 +19,12 @@ const REVIEWED_ACTIVE_FEATURE_REMOVALS={
   LB_SHAKE_BONUS_TRIGGER_A1:{featureIds:['FEAT_PREDECESSOR_BONUS_OUTCOME'],reason:'機種固有の着席時ゲーム数・BIG・REGの観測元が実機未確認のため、確認完了まで前任者Featureを推測不参加とした。'},
   L_RING_NI_KAKERO1_FS:{featureIds:['FEAT_BONUS_PREDECESSOR'],reason:'機種固有の着席時ゲーム数・ボーナス回数の観測元と試行区間同値性が実機未確認のため、確認完了まで前任者Featureを推測不参加とした。'},
   L_MADOKA_FORTE_UU:{featureIds:['FEAT_BONUS_PREDECESSOR'],reason:'機種固有の着席時ゲーム数・ボーナス初当り回数の観測元と試行区間同値性が実機未確認のため、確認完了まで前任者Featureを推測不参加とした。'},
-  L_KENGAN_ASHURA_ND:{featureIds:['FEAT_AT_PREDECESSOR'],reason:'機種固有の着席時ゲーム数・AT初当り回数の観測元と試行区間同値性が実機未確認のため、確認完了まで前任者Featureを推測不参加とした。'}
+  L_KENGAN_ASHURA_ND:{featureIds:['FEAT_AT_PREDECESSOR'],reason:'機種固有の着席時ゲーム数・AT初当り回数の観測元と試行区間同値性が実機未確認のため、確認完了まで前任者Featureを推測不参加とした。'},
+  L_MONKEY_TURN5_CE:{featureIds:['FEAT_AT_PREDECESSOR'],reason:'機種固有の着席時通常ゲーム数・SGラッシュ回数の観測元と試行区間同値性が実機未確認のため、確認完了まで前任者Featureを推測不参加とした。'},
+  L_HIGURASHI_GOU_SS:{featureIds:['FEAT_BONUS_PREDECESSOR'],reason:'機種固有の着席時ゲーム数・ボーナス回数の観測元と試行区間同値性が実機未確認のため、確認完了まで前任者Featureを推測不参加とした。'},
+  L_HOKUTO_AD_XR:{featureIds:['FEAT_AT_INITIAL_PREDECESSOR'],reason:'機種固有の着席時ゲーム数・BB初当り回数の観測元と試行区間同値性が実機未確認のため、確認完了まで前任者Featureを推測不参加とした。'},
+  L_KING_PULSAR_SLCC:{featureIds:['FEAT_PREDECESSOR_BONUS'],reason:'機種固有の着席時ゲーム数・BIG・REGの観測元と試行区間同値性が実機未確認のため、確認完了まで前任者Featureを推測不参加とした。'},
+  L_HANABI_KM:{featureIds:['FEAT_PREDECESSOR_BONUS_OUTCOME'],reason:'機種固有の着席時ゲーム数・BIG・REGの観測元と試行区間同値性が実機未確認のため、確認完了まで前任者Featureを推測不参加とした。'}
 };
 
 function reviewActiveSetDiff(machineId,diff){
