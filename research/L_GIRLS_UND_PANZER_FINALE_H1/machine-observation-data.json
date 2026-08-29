@@ -1,9 +1,17 @@
 {
-  "schemaVersion": "machine-observation-data-v1",
+  "schemaVersion": "machine-observation-data-v2",
   "machineId": "L_GIRLS_UND_PANZER_FINALE_H1",
   "displayName": "Lパチスロガールズ＆パンツァー 最終章",
-  "researchedAt": "2026-08-22",
+  "researchedAt": "2026-08-29",
   "sources": [
+    {
+      "sourceId": "OBS_SRC_GP_AT",
+      "publisher": "P-WORLD",
+      "title": "Lパチスロガールズ＆パンツァー 最終章 AT初当り",
+      "url": "https://www.p-world.co.jp/machine/database/9959",
+      "checkedAt": "2026-08-19",
+      "sourceType": "machine_database"
+    },
     {
       "sourceId": "OBS_SRC_GP_NANA_MENU",
       "publisher": "なな徹",
@@ -21,44 +29,89 @@
       "sourceType": "major_analysis"
     }
   ],
-  "machineMenu": {
-    "status": "CHECKED",
-    "availableData": [
-      "CZ間ゲーム数",
-      "CZスルー回数",
-      "前回ATの戦績",
-      "打-WIN LITEの開始・途中確認・終了用QRコード"
-    ],
-    "sourceRefs": [
-      "OBS_SRC_GP_NANA_MENU",
-      "OBS_SRC_GP_1GEKI_DARWIN"
-    ],
-    "notes": "メニュー画面からCZ間ゲーム数、CZスルー回数、前回ATの戦績を確認できる。打-WIN LITEもメニューから開始・途中確認・終了できる。これらはMachine Observation情報であり、取得可能であることだけを理由にStatistical Featureへ自動採用しない。"
+  "sourceCoverage": {
+    "machineMenu": "FOUND",
+    "dataCounter": "UNRESOLVED",
+    "linkedService": "FOUND",
+    "directPlay": "FOUND",
+    "endEvent": "FOUND",
+    "seatedState": "FOUND"
   },
-  "linkedService": {
-    "status": "CHECKED",
-    "availableData": [
-      "打-WIN LITEのQRコードによる遊技データ確認",
-      "1000G消化ごとに抽選される隠れ凪の設定示唆セリフ"
-    ],
-    "sourceRefs": [
-      "OBS_SRC_GP_NANA_MENU",
-      "OBS_SRC_GP_1GEKI_DARWIN"
-    ],
-    "notes": "打-WIN LITE対応を確認。QRコードで遊技に関する情報を確認でき、開始後は1000G消化ごとに抽選された隠れ凪の示唆をQR読取時に確認できる。公開ページでは遊技データの全項目一覧までは示されていないため、ここに列挙した確認済み項目以外を推測で追加しない。"
-  },
-  "predecessorData": {
-    "status": "CHECKED",
-    "availableData": [
-      "着席時点のCZ間ゲーム数",
-      "着席時点のCZスルー回数",
-      "前回ATの戦績"
-    ],
-    "sourceRefs": [
-      "OBS_SRC_GP_NANA_MENU"
-    ],
-    "notes": "メニュー画面を開けば着席時点でも確認可能な状態情報として記録する。ただし、これらは前任者の標準的な総試行量を表すデータではなく、現行Featureの分子・分母と一致することも保証できないため、前任者Inferenceや自身区間ゲーム数の差分計算には自動利用しない。",
-    "usableForInference": false,
-    "usableForSelfSessionDelta": false
-  }
+  "observations": [
+    {
+      "observationId": "OBS_AT_INITIAL_SELF",
+      "sourceType": "DIRECT_PLAY",
+      "observationMode": "MANUAL_COUNTER",
+      "status": "FOUND",
+      "label": "自己遊技の通常ゲーム数とAT初当り",
+      "categories": ["通常ゲーム数", "AT初当り"],
+      "timing": ["自己遊技の通常時"],
+      "excludedConditions": ["前任者区間を混在させない"],
+      "sourceRefs": ["OBS_SRC_GP_AT"]
+    },
+    {
+      "observationId": "OBS_MACHINE_MENU_STATE",
+      "sourceType": "MACHINE_MENU",
+      "observationMode": "MACHINE_MENU_READ",
+      "status": "FOUND",
+      "label": "筐体メニューの状態情報",
+      "categories": ["CZ間ゲーム数", "CZスルー回数", "前回ATの戦績", "打-WIN LITE用QRコード"],
+      "timing": ["筐体メニュー確認時"],
+      "excludedConditions": ["CZ間ゲーム数・CZスルー回数・前回AT戦績をAT初当りFeatureの分子分母へ自動流用しない"],
+      "sourceRefs": ["OBS_SRC_GP_NANA_MENU", "OBS_SRC_GP_1GEKI_DARWIN"]
+    },
+    {
+      "observationId": "OBS_LINKED_SERVICE_DATA",
+      "sourceType": "LINKED_SERVICE",
+      "observationMode": "LINKED_SERVICE_READ",
+      "status": "FOUND",
+      "label": "打-WIN LITEの確認済み情報",
+      "categories": ["遊技データ確認", "1000G消化ごとの隠れ凪示唆"],
+      "timing": ["打-WIN LITE開始後の途中確認または終了時"],
+      "excludedConditions": ["公開ページで確認できていない遊技データ項目を推測で追加しない"],
+      "sourceRefs": ["OBS_SRC_GP_NANA_MENU", "OBS_SRC_GP_1GEKI_DARWIN"]
+    },
+    {
+      "observationId": "OBS_AT_END_EVIDENCE",
+      "sourceType": "END_EVENT",
+      "observationMode": "VISUAL_CONFIRMATION",
+      "status": "FOUND",
+      "label": "AT終了画面の設定下限Evidence",
+      "categories": ["設定2以上", "設定3以上", "設定4以上", "設定5以上", "設定6"],
+      "timing": ["AT終了画面確認時"],
+      "excludedConditions": [],
+      "sourceRefs": ["OBS_SRC_GP_NANA_MENU"]
+    },
+    {
+      "observationId": "OBS_SEATED_STATE_MENU",
+      "sourceType": "SEATED_STATE",
+      "observationMode": "MACHINE_MENU_READ",
+      "status": "FOUND",
+      "label": "着席時点で確認可能な状態情報",
+      "categories": ["CZ間ゲーム数", "CZスルー回数", "前回ATの戦績"],
+      "timing": ["着席直後のメニュー確認時"],
+      "excludedConditions": ["前任者の総通常ゲーム数・AT初当り回数として扱わない", "自己区間ゲーム数の差分計算へ自動使用しない"],
+      "sourceRefs": ["OBS_SRC_GP_NANA_MENU"]
+    }
+  ],
+  "featureMappings": [
+    {
+      "featureId": "FEAT_AT",
+      "mappingType": "EXACT",
+      "observationIds": ["OBS_AT_INITIAL_SELF"],
+      "collectionMethods": ["MANUAL_COUNTER"],
+      "usableForInference": true,
+      "usableForDifficulty": true
+    }
+  ],
+  "researchReopenRequests": [],
+  "fieldVerificationItems": [
+    {
+      "verificationId": "VFY_GP_LINKED_DATA_ITEMS",
+      "status": "WAITING_FOR_MACHINE",
+      "sourceType": "LINKED_SERVICE",
+      "priority": "LOW",
+      "question": "打-WIN LITEで確認できる遊技データの完全な項目一覧を実機で確認する。現行active Featureは自己遊技の直接入力で成立するため、未確認項目を自動入力へ流用しない。"
+    }
+  ]
 }
