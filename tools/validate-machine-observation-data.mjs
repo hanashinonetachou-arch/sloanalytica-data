@@ -7,7 +7,8 @@ import { fileURLToPath } from 'node:url';
 const root = process.cwd();
 const researchRoot = path.join(root, 'research');
 const V1_STATUS = new Set(['CHECKED', 'NOT_AVAILABLE', 'UNRESOLVED']);
-const V2_STATUS = new Set(['FOUND','CHECKED_NONE','UNRESOLVED','VERIFIED_ON_MACHINE']);
+const V2_COVERAGE_STATUS = new Set(['FOUND','CHECKED_NONE','UNRESOLVED','VERIFIED_ON_MACHINE','NOT_REQUIRED']);
+const V2_OBSERVATION_STATUS = new Set(['FOUND','CHECKED_NONE','UNRESOLVED','VERIFIED_ON_MACHINE']);
 const COVERAGE_KEYS = ['machineMenu','dataCounter','linkedService','directPlay','endEvent','seatedState'];
 const SOURCE_TYPES = new Set(['MACHINE_MENU','DATA_COUNTER','LINKED_SERVICE','DIRECT_PLAY','END_EVENT','SEATED_STATE']);
 const MODES = new Set(['MANUAL_COUNTER','MENU_READ','DATA_COUNTER_READ','LINKED_SERVICE_READ','DERIVED','VISUAL_EVENT','AUDIO_EVENT']);
@@ -43,7 +44,7 @@ export function validateObservationObject(data, rel='machine-observation-data.js
   if (!/^\d{4}-\d{2}-\d{2}$/.test(data.researchedAt??'')) errors.push(`${rel}: researchedAt must be YYYY-MM-DD`);
   if (!Array.isArray(data.sources)) errors.push(`${rel}: sources must be an array`);
   if (!data.sourceCoverage || typeof data.sourceCoverage !== 'object') errors.push(`${rel}: sourceCoverage required`);
-  else for (const key of COVERAGE_KEYS) if (!V2_STATUS.has(data.sourceCoverage[key])) errors.push(`${rel}: sourceCoverage.${key} invalid: ${data.sourceCoverage[key]}`);
+  else for (const key of COVERAGE_KEYS) if (!V2_COVERAGE_STATUS.has(data.sourceCoverage[key])) errors.push(`${rel}: sourceCoverage.${key} invalid: ${data.sourceCoverage[key]}`);
 
   const observationIds=new Set();
   if (!Array.isArray(data.observations)) errors.push(`${rel}: observations must be an array`);
@@ -52,7 +53,7 @@ export function validateObservationObject(data, rel='machine-observation-data.js
     if (!o?.observationId) errors.push(`${p}.observationId required`); else if (observationIds.has(o.observationId)) errors.push(`${rel}: duplicate observationId ${o.observationId}`); else observationIds.add(o.observationId);
     if (!SOURCE_TYPES.has(o?.sourceType)) errors.push(`${p}.sourceType invalid: ${o?.sourceType}`);
     if (!MODES.has(o?.observationMode)) errors.push(`${p}.observationMode invalid: ${o?.observationMode}`);
-    if (!V2_STATUS.has(o?.status)) errors.push(`${p}.status invalid: ${o?.status}`);
+    if (!V2_OBSERVATION_STATUS.has(o?.status)) errors.push(`${p}.status invalid: ${o?.status}`);
     if (!o?.label) errors.push(`${p}.label required`);
     for (const key of ['categories','timing','excludedConditions','sourceRefs']) if (o?.[key] != null && !Array.isArray(o[key])) errors.push(`${p}.${key} must be an array`);
   }
