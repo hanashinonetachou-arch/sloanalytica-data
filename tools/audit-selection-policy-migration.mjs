@@ -16,7 +16,8 @@ const REVIEWED_ACTIVE_FEATURE_REMOVALS={
   LB_CREA_BONUS_TRIGGER_A2:{featureIds:['FEAT_PREDECESSOR_BONUS_OUTCOME'],reason:'機種固有の着席時総ゲーム数・BIG・REGの観測元が実機未確認のため、確認完了まで前任者Featureを推測不参加とした。'},
   LB_MAGICAL_HALLOWEEN_GS:{featureIds:['FEAT_PREDECESSOR_BONUS_OUTCOME'],reason:'機種固有の着席時ゲーム数・BIG・REGの観測元が実機未確認のため、確認完了まで前任者Featureを推測不参加とした。'},
   LB_AREX_BRIGHT_BA:{featureIds:['FEAT_PREDECESSOR_BONUS_OUTCOME'],reason:'機種固有の着席時ゲーム数・BIG・REGの観測元が実機未確認のため、確認完了まで前任者Featureを推測不参加とした。'},
-  LB_SHAKE_BONUS_TRIGGER_A1:{featureIds:['FEAT_PREDECESSOR_BONUS_OUTCOME'],reason:'機種固有の着席時ゲーム数・BIG・REGの観測元が実機未確認のため、確認完了まで前任者Featureを推測不参加とした。'}
+  LB_SHAKE_BONUS_TRIGGER_A1:{featureIds:['FEAT_PREDECESSOR_BONUS_OUTCOME'],reason:'機種固有の着席時ゲーム数・BIG・REGの観測元が実機未確認のため、確認完了まで前任者Featureを推測不参加とした。'},
+  L_RING_NI_KAKERO1_FS:{featureIds:['FEAT_BONUS_PREDECESSOR'],reason:'機種固有の着席時ゲーム数・ボーナス回数の観測元と試行区間同値性が実機未確認のため、確認完了まで前任者Featureを推測不参加とした。'}
 };
 
 function reviewActiveSetDiff(machineId,diff){
