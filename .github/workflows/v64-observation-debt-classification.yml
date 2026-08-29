@@ -6,8 +6,10 @@ on:
     paths:
       - 'tools/classify-v64-observation-debt.mjs'
       - 'test/v64-observation-debt-classification.test.mjs'
-      - 'reports/v64-observation-trial-universe-audit.json'
       - '.github/workflows/v64-observation-debt-classification.yml'
+  workflow_run:
+    workflows: ['v6.4 Observation Trial Universe Audit']
+    types: [completed]
 permissions:
   contents: write
 concurrency:
@@ -15,6 +17,7 @@ concurrency:
   cancel-in-progress: false
 jobs:
   classify:
+    if: ${{ github.event_name != 'workflow_run' || (github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.head_branch == 'prototype-multi-machine') }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
