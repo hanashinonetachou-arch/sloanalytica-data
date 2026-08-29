@@ -1,8 +1,8 @@
 {
-  "schemaVersion": "machine-observation-data-v1",
+  "schemaVersion": "machine-observation-data-v2",
   "machineId": "LB_EVA_PROMISE_DOOR_SR",
   "displayName": "LBパチスロ ヱヴァンゲリヲン ～約束の扉～",
-  "researchedAt": "2026-08-22",
+  "researchedAt": "2026-08-29",
   "sources": [
     {
       "sourceId": "OBS_SRC_USER_MENU",
@@ -21,39 +21,77 @@
       "sourceType": "major_analysis"
     }
   ],
-  "machineMenu": {
-    "status": "CHECKED",
-    "availableData": [
-      "PUSH『遊技データ』の総ゲーム数",
-      "赤SBB累積回数",
-      "青SBB累積回数",
-      "黄BIG累積回数",
-      "暴走モード累積回数",
-      "REG累積回数"
-    ],
-    "sourceRefs": [
-      "OBS_SRC_USER_MENU",
-      "OBS_SRC_1GEKI_SETTING"
-    ],
-    "notes": "実機確認済みのPUSH『遊技データ』当日累積値。現行MachineDataはこの表示を通常時ボーナス詳細Featureへ直接使用している。統計Researchの再生成でこの観測契約を削除しない。"
+  "sourceCoverage": {
+    "machineMenu": "VERIFIED_ON_MACHINE",
+    "dataCounter": "UNRESOLVED",
+    "linkedService": "UNRESOLVED",
+    "directPlay": "FOUND",
+    "endEvent": "FOUND",
+    "seatedState": "VERIFIED_ON_MACHINE"
   },
-  "linkedService": {
-    "status": "UNRESOLVED",
-    "availableData": [],
-    "sourceRefs": [],
-    "notes": "今回のObservation移行では、機種固有の外部連動サービスと取得項目は確定していない。PUSH遊技データは筐体メニューとして別管理する。"
-  },
-  "predecessorData": {
-    "status": "CHECKED",
-    "availableData": [
-      "着席時点での総ゲーム数",
-      "着席時点での赤SBB・青SBB・黄BIG・暴走モード・REG累積回数"
-    ],
-    "sourceRefs": [
-      "OBS_SRC_USER_MENU"
-    ],
-    "notes": "同じ当日累積値を着席時と現在で取得できるため、観測上は自身区間差分を構成可能。ただし現行MachineDataには着席時スナップショットUIがなく、現在は当日累積値を直接Featureへ使用している。今回はFeature/UIを変更せず、将来の差分利用可能性だけObservationへ記録する。",
-    "usableForInference": false,
-    "usableForSelfSessionDelta": true
-  }
+  "observations": [
+    {
+      "observationId": "OBS_PUSH_DAILY_PLAY_DATA",
+      "sourceType": "MACHINE_MENU",
+      "observationMode": "MACHINE_MENU_READ",
+      "status": "VERIFIED_ON_MACHINE",
+      "label": "PUSH『遊技データ』当日累積値",
+      "categories": ["総ゲーム数", "赤SBB", "青SBB", "黄BIG", "暴走モード", "REG"],
+      "timing": ["実戦中にPUSH『遊技データ』を開いた時"],
+      "excludedConditions": ["着席時スナップショットとの差分へ自動変換しない", "外部連動サービスの値として扱わない"],
+      "sourceRefs": ["OBS_SRC_USER_MENU", "OBS_SRC_1GEKI_SETTING"],
+      "notes": "現行MachineDataは実機確認済みの当日累積値をそのまま1つのmultinomial Featureへ使用する。"
+    },
+    {
+      "observationId": "OBS_PUSH_SEATED_SNAPSHOT",
+      "sourceType": "MACHINE_MENU",
+      "observationMode": "MACHINE_MENU_READ",
+      "status": "VERIFIED_ON_MACHINE",
+      "label": "着席時PUSH『遊技データ』スナップショット",
+      "categories": ["総ゲーム数", "赤SBB", "青SBB", "黄BIG", "暴走モード", "REG"],
+      "timing": ["着席時"],
+      "excludedConditions": ["現行Featureの分母・分子には使用しない"],
+      "sourceRefs": ["OBS_SRC_USER_MENU"],
+      "notes": "同一当日累積値の差分を構成できることは実機確認済みだが、現行UIに着席時スナップショット入力はない。将来拡張用の観測可能性として保持する。"
+    },
+    {
+      "observationId": "OBS_EVA_DIRECT_EVIDENCE",
+      "sourceType": "END_EVENT",
+      "observationMode": "VISUAL_CONFIRMATION",
+      "status": "FOUND",
+      "label": "実戦中に直接確認する設定Evidence",
+      "categories": ["ボーナス終了画面", "REG中キャラ紹介", "BT中プレミアムムービー", "ベル＋黄BIG", "単独暴走モード"],
+      "timing": ["各該当イベント発生時"],
+      "excludedConditions": ["未確認イベントを0回または非発生と推定しない"],
+      "sourceRefs": ["OBS_SRC_1GEKI_SETTING"]
+    }
+  ],
+  "featureMappings": [
+    {
+      "featureId": "FEAT_DAILY_BONUS_DETAIL",
+      "mappingType": "EXACT",
+      "observationIds": ["OBS_PUSH_DAILY_PLAY_DATA"],
+      "collectionMethods": ["MACHINE_MENU_READ"],
+      "usableForInference": true,
+      "usableForDifficulty": true,
+      "notes": "総ゲーム数を分母、赤SBB・青SBB・黄BIG・暴走モード・REGを完全カテゴリとして当日累積値のまま評価する。"
+    }
+  ],
+  "researchReopenRequests": [],
+  "fieldVerificationItems": [
+    {
+      "verificationId": "VFY_EVA_LINKED_SERVICE",
+      "status": "WAITING_FOR_MACHINE",
+      "sourceType": "LINKED_SERVICE",
+      "priority": "LOW",
+      "question": "本機固有の外部連動サービスが存在する場合、その名称と取得可能項目を確認する。現行active FeatureはPUSH遊技データだけで成立するため、確認前に自動取得扱いしない。"
+    },
+    {
+      "verificationId": "VFY_EVA_HALL_DATA_COUNTER",
+      "status": "WAITING_FOR_MACHINE",
+      "sourceType": "DATA_COUNTER",
+      "priority": "LOW",
+      "question": "ホール側データカウンターで確認できる項目とPUSH遊技データとの差異を確認する。現行Inferenceには使用しない。"
+    }
+  ]
 }
