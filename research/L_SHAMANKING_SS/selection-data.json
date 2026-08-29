@@ -1,55 +1,515 @@
 {
-  "schemaVersion":"selection-data-v1","machineId":"L_SHAMANKING_SS","machineDataVersion":"0.1.0",
-  "uiCategoryLabels":{"NUMERIC":"数値要素","EVIDENCE":"設定確定・否定"},
-  "inputs":[
-    {"id":"INP_NORMAL_GAMES","name":"通常ゲーム数","type":"integer","category":"NUMERIC","unit":"G","displayOrder":10,"inferenceRole":"INCLUDE_PRIMARY","defaultValue":null,"observationScope":"SELF_PLAY"},
-    {"id":"INP_FIRST_HIT","name":"通常時初当り","type":"counter","category":"NUMERIC","unit":"回","displayOrder":11,"inferenceRole":"INCLUDE_PRIMARY","defaultValue":null,"parentInputId":"INP_NORMAL_GAMES","uiQuickAdd":1},
-    {"id":"INP_TOTAL_GAMES","name":"総ゲーム数","type":"integer","category":"NUMERIC","unit":"G","displayOrder":12,"inferenceRole":"INCLUDE_SUPPORT","defaultValue":null,"observationScope":"SELF_PLAY"},
-    {"id":"INP_COMMON_BELL_A","name":"共通ベルA","type":"counter","category":"NUMERIC","unit":"回","displayOrder":13,"inferenceRole":"INCLUDE_SUPPORT","defaultValue":null,"parentInputId":"INP_TOTAL_GAMES","uiQuickAdd":1}
+  "schemaVersion": "selection-data-v1",
+  "machineId": "L_SHAMANKING_SS",
+  "machineDataVersion": "0.1.0",
+  "uiCategoryLabels": {
+    "NUMERIC": "数値要素",
+    "EVIDENCE": "設定確定・否定"
+  },
+  "inputs": [
+    {
+      "id": "INP_NORMAL_GAMES",
+      "name": "通常ゲーム数",
+      "type": "integer",
+      "category": "NUMERIC",
+      "unit": "G",
+      "displayOrder": 10,
+      "inferenceRole": "INCLUDE_PRIMARY",
+      "defaultValue": null,
+      "observationScope": "SELF_PLAY"
+    },
+    {
+      "id": "INP_FIRST_HIT",
+      "name": "通常時初当り",
+      "type": "counter",
+      "category": "NUMERIC",
+      "unit": "回",
+      "displayOrder": 11,
+      "inferenceRole": "INCLUDE_PRIMARY",
+      "defaultValue": null,
+      "parentInputId": "INP_NORMAL_GAMES",
+      "uiQuickAdd": 1
+    },
+    {
+      "id": "INP_TOTAL_GAMES",
+      "name": "総ゲーム数",
+      "type": "integer",
+      "category": "NUMERIC",
+      "unit": "G",
+      "displayOrder": 12,
+      "inferenceRole": "INCLUDE_SUPPORT",
+      "defaultValue": null,
+      "observationScope": "SELF_PLAY"
+    },
+    {
+      "id": "INP_COMMON_BELL_A",
+      "name": "共通ベルA",
+      "type": "counter",
+      "category": "NUMERIC",
+      "unit": "回",
+      "displayOrder": 13,
+      "inferenceRole": "INCLUDE_SUPPORT",
+      "defaultValue": null,
+      "parentInputId": "INP_TOTAL_GAMES",
+      "uiQuickAdd": 1
+    }
   ],
-  "features":[
-    {"researchFeatureId":"RF_FIRST_HIT","featureId":"FEAT_FIRST_HIT","adoptionCategory":"INCLUDE_PRIMARY","numeratorInputId":"INP_FIRST_HIT","denominatorInputId":"INP_NORMAL_GAMES","weight":1,"difficultyParticipation":"INCLUDE","difficultyExposure":{"mode":"per_game","factor":1,"quality":"EXACT","basisId":"NORMAL_GAMES"},"userReason":"通常時初当りは通常ゲーム数を分母に直接観測でき、設定1約1/288から設定6約1/207まで一貫した設定差があるため主軸採用します。"},
-    {"researchFeatureId":"RF_AT_FIRST_HIT","featureId":"FEAT_AT_FIRST_HIT_EXCLUDED","adoptionCategory":"EXCLUDE","userFacingReason":"AT初当りは通常時初当りに含まれるボーナス非経由ATなど同一の初当り経路と重なり、主軸初当りと独立尤度で併用すると二重評価になるため不採用です。"},
-    {"researchFeatureId":"RF_COMMON_BELL_A","featureId":"FEAT_COMMON_BELL_A","adoptionCategory":"INCLUDE_SUPPORT","numeratorInputId":"INP_COMMON_BELL_A","denominatorInputId":"INP_TOTAL_GAMES","weight":1,"difficultyParticipation":"INCLUDE","difficultyExposure":{"mode":"per_game","factor":1,"quality":"EXACT","basisId":"TOTAL_GAMES"},"userReason":"共通ベルAは設定1約1/48.0から設定6約1/31.8まで大きな設定差があり、成立回数を独立して観測できるため補助採用します。"},
-    {"researchFeatureId":"RF_HIGH_TRANSITION","featureId":"FEAT_HIGH_TRANSITION_EXCLUDED","adoptionCategory":"EXCLUDE","userFacingReason":"ボーナス高確移行は初当りの原因側となる内部状態で、主軸初当りと独立に積むと同一当選経路を重ねて評価するため不採用です。"},
-    {"researchFeatureId":"RF_REPLAY_COUNTER","featureId":"FEAT_REPLAY_COUNTER_EXCLUDED","adoptionCategory":"EXCLUDE","userFacingReason":"規定リプレイカウンタは内部で選択される潜在値で、途中で別契機に当選した場合は選択された規定値を直接観測できないため不採用です。"},
-    {"researchFeatureId":"RF_NIGHT_BONUS_EXPECTATION","featureId":"FEAT_NIGHT_BONUS_EXCLUDED","adoptionCategory":"EXCLUDE","userFacingReason":"夜ステージ中ボーナス期待度は全設定約51%で差がほぼなく、設定推測の追加情報量が実質的にないため不採用です。"},
-    {"researchFeatureId":"RF_OS_AT_DIRECT","featureId":"FEAT_OS_AT_DIRECT_EXCLUDED","adoptionCategory":"EXCLUDE","userFacingReason":"OS揃い役からのAT直撃はAT・通常時初当りの部分集合で、主軸初当りと独立に加えると同じAT当選を二重評価するため不採用です。"},
-    {"researchFeatureId":"RF_CZ_ABOVE","featureId":"FEAT_CZ_ABOVE_EXCLUDED","adoptionCategory":"EXCLUDE","userFacingReason":"CZ以上当選は通常時初当りへつながる中間経路で、初当りFeatureと独立に加えると同じ当選過程を重ねて評価するため不採用です。"},
-    {"researchFeatureId":"RF_POSSESSION_POINT_EXPECTATION","featureId":"FEAT_POINT_EXPECTATION_EXCLUDED","adoptionCategory":"EXCLUDE","userFacingReason":"憑依ポイント帯ごとに別分布で、各帯の前兆移行回数という専用分母を分離して記録する必要があり、現Researchの単一Featureでは尤度を安全に構成できないため不採用です。"},
-    {"researchFeatureId":"RF_CZ_TYPE","featureId":"FEAT_CZ_TYPE_EXCLUDED","adoptionCategory":"EXCLUDE","userFacingReason":"CZ種別分布はポイント帯によって別分布で、帯を混ぜた単一multinomialにはできないため現形では不採用です。"},
-    {"researchFeatureId":"RF_POSSESSION_BATTLE_WIN","featureId":"FEAT_BATTLE_WIN_EXCLUDED","adoptionCategory":"EXCLUDE","userFacingReason":"憑依合体バトル勝利はAT初当りへつながる中間事象で、対戦相手構成の設定差も内包し、主軸初当りと別尤度にすると経路を重複評価するため不採用です。"},
-    {"researchFeatureId":"RF_BATTLE_FINISH_WIN","featureId":"FEAT_BATTLE_FINISH_EXCLUDED","adoptionCategory":"EXCLUDE","userFacingReason":"残HP帯ごとに別の勝利率で専用分母が必要ですが、現Researchでは帯別Featureに分解されておらず安全な尤度を構成できないため不採用です。"},
-    {"researchFeatureId":"RF_TAMAO_REWARD","featureId":"FEAT_TAMAO_REWARD_EXCLUDED","adoptionCategory":"EXCLUDE","userFacingReason":"報酬振り分けの設定差が非常に小さく、発生機会も限定されるため実戦範囲の追加情報量がほぼないため不採用です。"},
-    {"researchFeatureId":"RF_PRELIMINARY_WIN","featureId":"FEAT_PRELIMINARY_WIN_EXCLUDED","adoptionCategory":"EXCLUDE","userFacingReason":"対戦相手と成立役ごとに別抽選で、条件別の正確な分母が必要なうえAT初当り経路の中間事象でもあるため不採用です。"},
-    {"researchFeatureId":"RF_EPISODE_BONUS","featureId":"FEAT_EPISODE_BONUS_EXCLUDED","adoptionCategory":"EXCLUDE","userFacingReason":"エピソードボーナスは通常時初当りの部分集合で、主軸初当りと独立に加えると同じ初当りを二重評価するため不採用です。"}
+  "features": [
+    {
+      "researchFeatureId": "RF_FIRST_HIT",
+      "featureId": "FEAT_FIRST_HIT",
+      "adoptionCategory": "INCLUDE_PRIMARY",
+      "numeratorInputId": "INP_FIRST_HIT",
+      "denominatorInputId": "INP_NORMAL_GAMES",
+      "weight": 1,
+      "difficultyParticipation": "INCLUDE",
+      "difficultyExposure": {
+        "mode": "per_game",
+        "factor": 1,
+        "quality": "EXACT",
+        "basisId": "NORMAL_GAMES"
+      },
+      "userReason": "通常時初当りは通常ゲーム数を分母に直接観測でき、設定1約1/288から設定6約1/207まで一貫した設定差があるため主軸採用します。"
+    },
+    {
+      "researchFeatureId": "RF_AT_FIRST_HIT",
+      "featureId": "FEAT_AT_FIRST_HIT_EXCLUDED",
+      "adoptionCategory": "EXCLUDE",
+      "userFacingReason": "AT初当りは通常時初当りに含まれるボーナス非経由ATなど同一の初当り経路と重なり、主軸初当りと独立尤度で併用すると二重評価になるため不採用です。"
+    },
+    {
+      "researchFeatureId": "RF_COMMON_BELL_A",
+      "featureId": "FEAT_COMMON_BELL_A",
+      "adoptionCategory": "INCLUDE_SUPPORT",
+      "numeratorInputId": "INP_COMMON_BELL_A",
+      "denominatorInputId": "INP_TOTAL_GAMES",
+      "weight": 1,
+      "difficultyParticipation": "INCLUDE",
+      "difficultyExposure": {
+        "mode": "per_game",
+        "factor": 1,
+        "quality": "EXACT",
+        "basisId": "TOTAL_GAMES"
+      },
+      "userReason": "共通ベルAは設定1約1/48.0から設定6約1/31.8まで大きな設定差があり、成立回数を独立して観測できるため補助採用します。"
+    },
+    {
+      "researchFeatureId": "RF_HIGH_TRANSITION",
+      "featureId": "FEAT_HIGH_TRANSITION_EXCLUDED",
+      "adoptionCategory": "EXCLUDE",
+      "userFacingReason": "ボーナス高確移行は初当りの原因側となる内部状態で、主軸初当りと独立に積むと同一当選経路を重ねて評価するため不採用です。"
+    },
+    {
+      "researchFeatureId": "RF_REPLAY_COUNTER",
+      "featureId": "FEAT_REPLAY_COUNTER_EXCLUDED",
+      "adoptionCategory": "EXCLUDE",
+      "userFacingReason": "規定リプレイカウンタは内部で選択される潜在値で、途中で別契機に当選した場合は選択された規定値を直接観測できないため不採用です。"
+    },
+    {
+      "researchFeatureId": "RF_NIGHT_BONUS_EXPECTATION",
+      "featureId": "FEAT_NIGHT_BONUS_EXCLUDED",
+      "adoptionCategory": "EXCLUDE",
+      "userFacingReason": "夜ステージ中ボーナス期待度は全設定約51%で差がほぼなく、設定推測の追加情報量が実質的にないため不採用です。"
+    },
+    {
+      "researchFeatureId": "RF_OS_AT_DIRECT",
+      "featureId": "FEAT_OS_AT_DIRECT_EXCLUDED",
+      "adoptionCategory": "EXCLUDE",
+      "userFacingReason": "OS揃い役からのAT直撃はAT・通常時初当りの部分集合で、主軸初当りと独立に加えると同じAT当選を二重評価するため不採用です。"
+    },
+    {
+      "researchFeatureId": "RF_CZ_ABOVE",
+      "featureId": "FEAT_CZ_ABOVE_EXCLUDED",
+      "adoptionCategory": "EXCLUDE",
+      "userFacingReason": "CZ以上当選は通常時初当りへつながる中間経路で、初当りFeatureと独立に加えると同じ当選過程を重ねて評価するため不採用です。"
+    },
+    {
+      "researchFeatureId": "RF_POSSESSION_POINT_EXPECTATION",
+      "featureId": "FEAT_POINT_EXPECTATION_EXCLUDED",
+      "adoptionCategory": "EXCLUDE",
+      "userFacingReason": "憑依ポイント帯ごとに別分布で、各帯の前兆移行回数という専用分母を分離して記録する必要があり、現Researchの単一Featureでは尤度を安全に構成できないため不採用です。"
+    },
+    {
+      "researchFeatureId": "RF_CZ_TYPE",
+      "featureId": "FEAT_CZ_TYPE_EXCLUDED",
+      "adoptionCategory": "EXCLUDE",
+      "userFacingReason": "CZ種別はポイント帯ごとに公開分布が異なり、内部ポイント帯を含む条件別の正確な分母を実戦中に独立観測できないため不採用です。"
+    },
+    {
+      "researchFeatureId": "RF_POSSESSION_BATTLE_WIN",
+      "featureId": "FEAT_BATTLE_WIN_EXCLUDED",
+      "adoptionCategory": "EXCLUDE",
+      "userFacingReason": "憑依合体バトル勝利はAT初当りへつながる中間事象で、対戦相手構成の設定差も内包し、主軸初当りと別尤度にすると経路を重複評価するため不採用です。"
+    },
+    {
+      "researchFeatureId": "RF_BATTLE_FINISH_WIN",
+      "featureId": "FEAT_BATTLE_FINISH_EXCLUDED",
+      "adoptionCategory": "EXCLUDE",
+      "userFacingReason": "残HP帯ごとに別の勝利率で専用分母が必要ですが、現Researchでは帯別Featureに分解されておらず安全な尤度を構成できないため不採用です。"
+    },
+    {
+      "researchFeatureId": "RF_TAMAO_REWARD",
+      "featureId": "FEAT_TAMAO_REWARD_EXCLUDED",
+      "adoptionCategory": "EXCLUDE",
+      "userFacingReason": "報酬振り分けの設定差が非常に小さく、発生機会も限定されるため実戦範囲の追加情報量がほぼないため不採用です。"
+    },
+    {
+      "researchFeatureId": "RF_PRELIMINARY_WIN",
+      "featureId": "FEAT_PRELIMINARY_WIN_EXCLUDED",
+      "adoptionCategory": "EXCLUDE",
+      "userFacingReason": "対戦相手と成立役ごとに別抽選で、条件別の正確な分母が必要なうえAT初当り経路の中間事象でもあるため不採用です。"
+    },
+    {
+      "researchFeatureId": "RF_EPISODE_BONUS",
+      "featureId": "FEAT_EPISODE_BONUS_EXCLUDED",
+      "adoptionCategory": "EXCLUDE",
+      "userFacingReason": "エピソードボーナスは通常時初当りの部分集合で、主軸初当りと独立に加えると同じ初当りを二重評価するため不採用です。"
+    }
   ],
-  "evidenceUi":{"groups":[{"groupId":"SETTING_EVIDENCE","label":"設定確定・否定","category":"EVIDENCE","selectionMode":"multi","normalizationMode":"ALLOWED_SETTINGS_INTERSECTION","displayOrder":100,"options":[
-    {"value":"KOKKURI_EVEN","label":"こっくりさん：偶・数","allowedSettings":["SET_2","SET_4","SET_6"],"excludedSettings":["SET_1","SET_3","SET_5"],"sourceEvidenceIds":["RE_KOKKURI_EVEN"]},
-    {"value":"KOKKURI4","label":"こっくりさん：終・日","allowedSettings":["SET_4","SET_5","SET_6"],"excludedSettings":["SET_1","SET_2","SET_3"],"sourceEvidenceIds":["RE_KOKKURI_4PLUS"]},
-    {"value":"KOKKURI6","label":"こっくりさん：ろ・く","allowedSettings":["SET_6"],"excludedSettings":["SET_1","SET_2","SET_3","SET_4","SET_5"],"sourceEvidenceIds":["RE_KOKKURI_6"]},
-    {"value":"PAY555","label":"555 OVER","allowedSettings":["SET_5","SET_6"],"excludedSettings":["SET_1","SET_2","SET_3","SET_4"],"sourceEvidenceIds":["RE_PAYOUT_555"]},
-    {"value":"PAY666","label":"666 OVER","allowedSettings":["SET_6"],"excludedSettings":["SET_1","SET_2","SET_3","SET_4","SET_5"],"sourceEvidenceIds":["RE_PAYOUT_666"]},
-    {"value":"AT2","label":"AT終了：パッチ族","allowedSettings":["SET_2","SET_3","SET_4","SET_5","SET_6"],"excludedSettings":["SET_1"],"sourceEvidenceIds":["RE_AT_PATCH"]},
-    {"value":"AT4","label":"AT終了：葉＆アンナ","allowedSettings":["SET_4","SET_5","SET_6"],"excludedSettings":["SET_1","SET_2","SET_3"],"sourceEvidenceIds":["RE_AT_YOH_ANNA"]},
-    {"value":"AT5","label":"AT終了：ハオ","allowedSettings":["SET_5","SET_6"],"excludedSettings":["SET_1","SET_2","SET_3","SET_4"],"sourceEvidenceIds":["RE_AT_HAO"]},
-    {"value":"AT6","label":"AT終了：全員集合","allowedSettings":["SET_6"],"excludedSettings":["SET_1","SET_2","SET_3","SET_4","SET_5"],"sourceEvidenceIds":["RE_AT_ALL"]},
-    {"value":"END2","label":"Congratulations：銅","allowedSettings":["SET_2","SET_3","SET_4","SET_5","SET_6"],"excludedSettings":["SET_1"],"sourceEvidenceIds":["RE_END_BRONZE"]},
-    {"value":"END3","label":"Congratulations：銀","allowedSettings":["SET_3","SET_4","SET_5","SET_6"],"excludedSettings":["SET_1","SET_2"],"sourceEvidenceIds":["RE_END_SILVER"]},
-    {"value":"END4","label":"Congratulations：金","allowedSettings":["SET_4","SET_5","SET_6"],"excludedSettings":["SET_1","SET_2","SET_3"],"sourceEvidenceIds":["RE_END_GOLD"]},
-    {"value":"END5","label":"Congratulations：花火柄","allowedSettings":["SET_5","SET_6"],"excludedSettings":["SET_1","SET_2","SET_3","SET_4"],"sourceEvidenceIds":["RE_END_FIREWORKS"]},
-    {"value":"END6","label":"Congratulations：虹","allowedSettings":["SET_6"],"excludedSettings":["SET_1","SET_2","SET_3","SET_4","SET_5"],"sourceEvidenceIds":["RE_END_RAINBOW"]},
-    {"value":"SUB2","label":"サブ液晶：ゴルドバ","allowedSettings":["SET_2","SET_3","SET_4","SET_5","SET_6"],"excludedSettings":["SET_1"],"sourceEvidenceIds":["RE_SUB_GORUDOVA"]},
-    {"value":"SUB4","label":"サブ液晶：葉＆アンナ","allowedSettings":["SET_4","SET_5","SET_6"],"excludedSettings":["SET_1","SET_2","SET_3"],"sourceEvidenceIds":["RE_SUB_YOH_ANNA"]},
-    {"value":"SUB5","label":"サブ液晶：ハオ","allowedSettings":["SET_5","SET_6"],"excludedSettings":["SET_1","SET_2","SET_3","SET_4"],"sourceEvidenceIds":["RE_SUB_HAO"]},
-    {"value":"SUB6","label":"サブ液晶：葉＆ハオ","allowedSettings":["SET_6"],"excludedSettings":["SET_1","SET_2","SET_3","SET_4","SET_5"],"sourceEvidenceIds":["RE_SUB_YOH_HAO"]}
-  ]}]},
-  "evidenceDecisions":[
-    {"researchEvidenceId":"RE_AT_HINTS","decision":"EXCLUDE","reason":"X-LAWS・花組・ゴーレムは奇偶/高設定示唆で確定条件ではなく、設定別出現分布を尤度化していないため除外します。"},
-    {"researchEvidenceId":"RE_SUB_HINTS","decision":"EXCLUDE","reason":"サブ液晶の奇偶/高設定示唆群は確定条件ではなく、設定別出現分布を尤度化していないため除外します。"}
+  "evidenceUi": {
+    "groups": [
+      {
+        "groupId": "SETTING_EVIDENCE",
+        "label": "設定確定・否定",
+        "category": "EVIDENCE",
+        "selectionMode": "multi",
+        "normalizationMode": "ALLOWED_SETTINGS_INTERSECTION",
+        "displayOrder": 100,
+        "options": [
+          {
+            "value": "KOKKURI_EVEN",
+            "label": "こっくりさん：偶・数",
+            "allowedSettings": [
+              "SET_2",
+              "SET_4",
+              "SET_6"
+            ],
+            "excludedSettings": [
+              "SET_1",
+              "SET_3",
+              "SET_5"
+            ],
+            "sourceEvidenceIds": [
+              "RE_KOKKURI_EVEN"
+            ]
+          },
+          {
+            "value": "KOKKURI4",
+            "label": "こっくりさん：終・日",
+            "allowedSettings": [
+              "SET_4",
+              "SET_5",
+              "SET_6"
+            ],
+            "excludedSettings": [
+              "SET_1",
+              "SET_2",
+              "SET_3"
+            ],
+            "sourceEvidenceIds": [
+              "RE_KOKKURI_4PLUS"
+            ]
+          },
+          {
+            "value": "KOKKURI6",
+            "label": "こっくりさん：ろ・く",
+            "allowedSettings": [
+              "SET_6"
+            ],
+            "excludedSettings": [
+              "SET_1",
+              "SET_2",
+              "SET_3",
+              "SET_4",
+              "SET_5"
+            ],
+            "sourceEvidenceIds": [
+              "RE_KOKKURI_6"
+            ]
+          },
+          {
+            "value": "PAY555",
+            "label": "555 OVER",
+            "allowedSettings": [
+              "SET_5",
+              "SET_6"
+            ],
+            "excludedSettings": [
+              "SET_1",
+              "SET_2",
+              "SET_3",
+              "SET_4"
+            ],
+            "sourceEvidenceIds": [
+              "RE_PAYOUT_555"
+            ]
+          },
+          {
+            "value": "PAY666",
+            "label": "666 OVER",
+            "allowedSettings": [
+              "SET_6"
+            ],
+            "excludedSettings": [
+              "SET_1",
+              "SET_2",
+              "SET_3",
+              "SET_4",
+              "SET_5"
+            ],
+            "sourceEvidenceIds": [
+              "RE_PAYOUT_666"
+            ]
+          },
+          {
+            "value": "AT2",
+            "label": "AT終了：パッチ族",
+            "allowedSettings": [
+              "SET_2",
+              "SET_3",
+              "SET_4",
+              "SET_5",
+              "SET_6"
+            ],
+            "excludedSettings": [
+              "SET_1"
+            ],
+            "sourceEvidenceIds": [
+              "RE_AT_PATCH"
+            ]
+          },
+          {
+            "value": "AT4",
+            "label": "AT終了：葉＆アンナ",
+            "allowedSettings": [
+              "SET_4",
+              "SET_5",
+              "SET_6"
+            ],
+            "excludedSettings": [
+              "SET_1",
+              "SET_2",
+              "SET_3"
+            ],
+            "sourceEvidenceIds": [
+              "RE_AT_YOH_ANNA"
+            ]
+          },
+          {
+            "value": "AT5",
+            "label": "AT終了：ハオ",
+            "allowedSettings": [
+              "SET_5",
+              "SET_6"
+            ],
+            "excludedSettings": [
+              "SET_1",
+              "SET_2",
+              "SET_3",
+              "SET_4"
+            ],
+            "sourceEvidenceIds": [
+              "RE_AT_HAO"
+            ]
+          },
+          {
+            "value": "AT6",
+            "label": "AT終了：全員集合",
+            "allowedSettings": [
+              "SET_6"
+            ],
+            "excludedSettings": [
+              "SET_1",
+              "SET_2",
+              "SET_3",
+              "SET_4",
+              "SET_5"
+            ],
+            "sourceEvidenceIds": [
+              "RE_AT_ALL"
+            ]
+          },
+          {
+            "value": "END2",
+            "label": "Congratulations：銅",
+            "allowedSettings": [
+              "SET_2",
+              "SET_3",
+              "SET_4",
+              "SET_5",
+              "SET_6"
+            ],
+            "excludedSettings": [
+              "SET_1"
+            ],
+            "sourceEvidenceIds": [
+              "RE_END_BRONZE"
+            ]
+          },
+          {
+            "value": "END3",
+            "label": "Congratulations：銀",
+            "allowedSettings": [
+              "SET_3",
+              "SET_4",
+              "SET_5",
+              "SET_6"
+            ],
+            "excludedSettings": [
+              "SET_1",
+              "SET_2"
+            ],
+            "sourceEvidenceIds": [
+              "RE_END_SILVER"
+            ]
+          },
+          {
+            "value": "END4",
+            "label": "Congratulations：金",
+            "allowedSettings": [
+              "SET_4",
+              "SET_5",
+              "SET_6"
+            ],
+            "excludedSettings": [
+              "SET_1",
+              "SET_2",
+              "SET_3"
+            ],
+            "sourceEvidenceIds": [
+              "RE_END_GOLD"
+            ]
+          },
+          {
+            "value": "END5",
+            "label": "Congratulations：花火柄",
+            "allowedSettings": [
+              "SET_5",
+              "SET_6"
+            ],
+            "excludedSettings": [
+              "SET_1",
+              "SET_2",
+              "SET_3",
+              "SET_4"
+            ],
+            "sourceEvidenceIds": [
+              "RE_END_FIREWORKS"
+            ]
+          },
+          {
+            "value": "END6",
+            "label": "Congratulations：虹",
+            "allowedSettings": [
+              "SET_6"
+            ],
+            "excludedSettings": [
+              "SET_1",
+              "SET_2",
+              "SET_3",
+              "SET_4",
+              "SET_5"
+            ],
+            "sourceEvidenceIds": [
+              "RE_END_RAINBOW"
+            ]
+          },
+          {
+            "value": "SUB2",
+            "label": "サブ液晶：ゴルドバ",
+            "allowedSettings": [
+              "SET_2",
+              "SET_3",
+              "SET_4",
+              "SET_5",
+              "SET_6"
+            ],
+            "excludedSettings": [
+              "SET_1"
+            ],
+            "sourceEvidenceIds": [
+              "RE_SUB_GORUDOVA"
+            ]
+          },
+          {
+            "value": "SUB4",
+            "label": "サブ液晶：葉＆アンナ",
+            "allowedSettings": [
+              "SET_4",
+              "SET_5",
+              "SET_6"
+            ],
+            "excludedSettings": [
+              "SET_1",
+              "SET_2",
+              "SET_3"
+            ],
+            "sourceEvidenceIds": [
+              "RE_SUB_YOH_ANNA"
+            ]
+          },
+          {
+            "value": "SUB5",
+            "label": "サブ液晶：ハオ",
+            "allowedSettings": [
+              "SET_5",
+              "SET_6"
+            ],
+            "excludedSettings": [
+              "SET_1",
+              "SET_2",
+              "SET_3",
+              "SET_4"
+            ],
+            "sourceEvidenceIds": [
+              "RE_SUB_HAO"
+            ]
+          },
+          {
+            "value": "SUB6",
+            "label": "サブ液晶：葉＆ハオ",
+            "allowedSettings": [
+              "SET_6"
+            ],
+            "excludedSettings": [
+              "SET_1",
+              "SET_2",
+              "SET_3",
+              "SET_4",
+              "SET_5"
+            ],
+            "sourceEvidenceIds": [
+              "RE_SUB_YOH_HAO"
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "evidenceDecisions": [
+    {
+      "researchEvidenceId": "RE_AT_HINTS",
+      "decision": "EXCLUDE",
+      "reason": "X-LAWS・花組・ゴーレムは奇偶/高設定示唆で確定条件ではなく、設定別出現分布を尤度化していないため除外します。"
+    },
+    {
+      "researchEvidenceId": "RE_SUB_HINTS",
+      "decision": "EXCLUDE",
+      "reason": "サブ液晶の奇偶/高設定示唆群は確定条件ではなく、設定別出現分布を尤度化していないため除外します。"
+    }
   ],
-  "evidenceReview":{"policyVersion":1,"exclusions":[
-    {"researchEvidenceId":"RE_AT_HINTS","reason":"奇偶・高設定示唆で確定条件ではない。"},
-    {"researchEvidenceId":"RE_SUB_HINTS","reason":"示唆群で設定別分布未登録。"}
-  ]},"rejectedElements":[]
+  "evidenceReview": {
+    "policyVersion": 1,
+    "exclusions": [
+      {
+        "researchEvidenceId": "RE_AT_HINTS",
+        "reason": "奇偶・高設定示唆で確定条件ではない。"
+      },
+      {
+        "researchEvidenceId": "RE_SUB_HINTS",
+        "reason": "示唆群で設定別分布未登録。"
+      }
+    ]
+  },
+  "rejectedElements": []
 }
