@@ -1,1 +1,165 @@
-{"schemaVersion":"selection-data-v1","machineId":"L_ANOTHER_RINO_HEAVEN_CC","machineDataVersion":"0.1.1","uiCategoryLabels":{"PREDECESSOR":"着席時データ","NORMAL":"通常時","EVIDENCE":"設定確定情報"},"inputs":[{"id":"INP_PREDECESSOR_GAMES","name":"着席時ゲーム数","type":"integer","category":"PREDECESSOR","unit":"G","displayOrder":1,"inferenceRole":"INCLUDE_PRIMARY","defaultValue":0,"observationScope":"PREDECESSOR_SNAPSHOT","description":"着席時にデータカウンターへ表示されている累計ゲーム数を入力します。自分のゲーム数の開始値として使用します。"},{"id":"INP_NORMAL_GAMES","name":"自分のゲーム数","type":"integer","category":"NORMAL","unit":"G","displayOrder":10,"inferenceRole":"INCLUDE_PRIMARY","defaultValue":0,"observationScope":"SELF_PLAY","sessionDifferenceHelper":true,"description":"現在のデータカウンターゲーム数－着席時ゲーム数で自動計算します。本MachineDataではデータカウンターのゲーム数に疑似ボーナス消化中のゲーム数は含まれない前提で扱います。"},{"id":"INP_INITIAL_BONUS_COUNT","name":"ボーナス初当り","type":"counter","category":"NORMAL","unit":"回","displayOrder":11,"inferenceRole":"INCLUDE_PRIMARY","defaultValue":0,"observationScope":"SELF_PLAY","parentInputId":"INP_NORMAL_GAMES","description":"着席後のボーナス初当り回数を入力します。32G以内の天国連チャン分は含めません。"},{"id":"INP_3COIN_BELL","name":"3枚ベル","type":"counter","category":"NORMAL","unit":"回","displayOrder":12,"inferenceRole":"INCLUDE_PRIMARY","defaultValue":null,"observationScope":"SELF_PLAY","parentInputId":"INP_NORMAL_GAMES","description":"通常時に成立した3枚ベル回数を入力します。ボーナス中は含めません。数えていない場合は空欄のままにしてください。"}],"features":[{"researchFeatureId":"RF_BONUS_INITIAL","featureId":"FEAT_BONUS_INITIAL","adoptionCategory":"INCLUDE_PRIMARY","minimumSample":500,"sampleRecommendation":5000,"weight":1.0,"numeratorInputId":"INP_INITIAL_BONUS_COUNT","denominatorInputId":"INP_NORMAL_GAMES","difficultyParticipation":"INCLUDE","difficultyExposure":{"mode":"per_game","factor":1.0,"quality":"ESTIMATED","basisId":"SELF_PLAY_GAMES"},"userReason":"ボーナス初当りは高設定ほど明確に優遇され、モード移行差の影響を避けて設定差そのものを見やすいため採用します。"},{"researchFeatureId":"RF_NORMAL_3COIN_BELL","featureId":"FEAT_NORMAL_3COIN_BELL","adoptionCategory":"INCLUDE_PRIMARY","minimumSample":500,"sampleRecommendation":5000,"weight":1.0,"numeratorInputId":"INP_3COIN_BELL","denominatorInputId":"INP_NORMAL_GAMES","difficultyParticipation":"INCLUDE","difficultyExposure":{"mode":"per_game","factor":1.0,"quality":"ESTIMATED","basisId":"SELF_PLAY_GAMES"},"userReason":"通常時3枚ベルは高頻度で継続観測でき、設定1から6まで段階的な差があるため採用します。"},{"researchFeatureId":"RF_BONUS_COMBINED","featureId":"FEAT_BONUS_COMBINED_EXCLUDED","adoptionCategory":"EXCLUDE","userReason":"ボーナス初当りと情報が重複し、設定差のない天国ループも含むため不採用です。"}],"evidenceUi":{"groups":[{"groupId":"RINO_TROPHY","label":"ボーナス終了時 ケロットトロフィー","selectionMode":"multi","normalizationMode":"ALLOWED_SETTINGS_INTERSECTION","displayOrder":100,"options":[{"value":"BRONZE_2PLUS","label":"銅（設定2以上）","allowedSettings":["SET_2","SET_4","SET_5","SET_6"],"sourceEvidenceIds":["RE_TROPHY_BRONZE_2PLUS"]},{"value":"GOLD_4PLUS","label":"金（設定4以上）","allowedSettings":["SET_4","SET_5","SET_6"],"sourceEvidenceIds":["RE_TROPHY_GOLD_4PLUS"]},{"value":"KEROT_5PLUS","label":"ケロット柄（設定5以上）","allowedSettings":["SET_5","SET_6"],"sourceEvidenceIds":["RE_TROPHY_KEROT_5PLUS"]},{"value":"RAINBOW_6","label":"虹（設定6）","allowedSettings":["SET_6"],"sourceEvidenceIds":["RE_TROPHY_RAINBOW_6"]}]}]},"difficultyAnalysis":{"targetGames":[1500,3000,7000],"simulationsPerSetting":4000,"seed":20260818,"targetGameBasis":{"basisId":"SELF_PLAY_GAMES","label":"ユーザー自身の遊技ゲーム数","quality":"ESTIMATED","crossMachineComparable":false,"note":"実機連動機能は前提とせず、現在G－着席時Gの差を試行量として使用する。本MachineDataではデータカウンターのゲーム数に疑似ボーナス消化中のゲーム数は含まれない前提で扱う。"},"calibrationAllowedExposureQualities":["EXACT","DERIVED","ESTIMATED"]}}
+{
+  "schemaVersion": "selection-data-v1",
+  "machineId": "L_ANOTHER_RINO_HEAVEN_CC",
+  "machineDataVersion": "0.1.1",
+  "uiCategoryLabels": {
+    "PREDECESSOR": "着席時データ",
+    "NORMAL": "通常時",
+    "EVIDENCE": "設定確定情報"
+  },
+  "inputs": [
+    {
+      "id": "INP_PREDECESSOR_GAMES",
+      "name": "着席時ゲーム数",
+      "type": "integer",
+      "category": "PREDECESSOR",
+      "unit": "G",
+      "displayOrder": 1,
+      "inferenceRole": "EXCLUDE",
+      "defaultValue": 0,
+      "observationScope": "PREDECESSOR_SNAPSHOT",
+      "description": "着席時にデータカウンターへ表示されている累計ゲーム数を入力します。自分のゲーム数の開始値として使用します。"
+    },
+    {
+      "id": "INP_NORMAL_GAMES",
+      "name": "自分のゲーム数",
+      "type": "integer",
+      "category": "NORMAL",
+      "unit": "G",
+      "displayOrder": 10,
+      "inferenceRole": "EXCLUDE",
+      "defaultValue": 0,
+      "observationScope": "SELF_PLAY",
+      "sessionDifferenceHelper": true,
+      "description": "現在のデータカウンターゲーム数－着席時ゲーム数で自動計算します。本MachineDataではデータカウンターのゲーム数に疑似ボーナス消化中のゲーム数は含まれない前提で扱います。"
+    },
+    {
+      "id": "INP_INITIAL_BONUS_COUNT",
+      "name": "ボーナス初当り",
+      "type": "counter",
+      "category": "NORMAL",
+      "unit": "回",
+      "displayOrder": 11,
+      "inferenceRole": "EXCLUDE",
+      "defaultValue": 0,
+      "observationScope": "SELF_PLAY",
+      "parentInputId": "INP_NORMAL_GAMES",
+      "description": "着席後のボーナス初当り回数を入力します。32G以内の天国連チャン分は含めません。"
+    },
+    {
+      "id": "INP_3COIN_BELL",
+      "name": "3枚ベル",
+      "type": "counter",
+      "category": "NORMAL",
+      "unit": "回",
+      "displayOrder": 12,
+      "inferenceRole": "EXCLUDE",
+      "defaultValue": null,
+      "observationScope": "SELF_PLAY",
+      "parentInputId": "INP_NORMAL_GAMES",
+      "description": "通常時に成立した3枚ベル回数を入力します。ボーナス中は含めません。数えていない場合は空欄のままにしてください。"
+    }
+  ],
+  "features": [
+    {
+      "researchFeatureId": "RF_BONUS_INITIAL",
+      "featureId": "FEAT_BONUS_INITIAL",
+      "adoptionCategory": "EXCLUDE",
+      "rejectionReason": "自己実戦の試行分母が「現在のデータカウンター－着席時データ」の差分に依存する一方、この機種固有のカウンター項目と公開確率の試行区間との同値性が実機未確認のため、確認完了まで推測には使用しません。",
+      "userReason": "入力欄は記録用として残しますが、自己区間分母の実機確認完了までNumeric Featureは推測不参加とします。"
+    },
+    {
+      "researchFeatureId": "RF_NORMAL_3COIN_BELL",
+      "featureId": "FEAT_NORMAL_3COIN_BELL",
+      "adoptionCategory": "EXCLUDE",
+      "rejectionReason": "自己実戦の試行分母が「現在のデータカウンター－着席時データ」の差分に依存する一方、この機種固有のカウンター項目と公開確率の試行区間との同値性が実機未確認のため、確認完了まで推測には使用しません。",
+      "userReason": "入力欄は記録用として残しますが、自己区間分母の実機確認完了までNumeric Featureは推測不参加とします。"
+    },
+    {
+      "researchFeatureId": "RF_BONUS_COMBINED",
+      "featureId": "FEAT_BONUS_COMBINED_EXCLUDED",
+      "adoptionCategory": "EXCLUDE",
+      "userReason": "ボーナス初当りと情報が重複し、設定差のない天国ループも含むため不採用です。"
+    }
+  ],
+  "evidenceUi": {
+    "groups": [
+      {
+        "groupId": "RINO_TROPHY",
+        "label": "ボーナス終了時 ケロットトロフィー",
+        "selectionMode": "multi",
+        "normalizationMode": "ALLOWED_SETTINGS_INTERSECTION",
+        "displayOrder": 100,
+        "options": [
+          {
+            "value": "BRONZE_2PLUS",
+            "label": "銅（設定2以上）",
+            "allowedSettings": [
+              "SET_2",
+              "SET_4",
+              "SET_5",
+              "SET_6"
+            ],
+            "sourceEvidenceIds": [
+              "RE_TROPHY_BRONZE_2PLUS"
+            ]
+          },
+          {
+            "value": "GOLD_4PLUS",
+            "label": "金（設定4以上）",
+            "allowedSettings": [
+              "SET_4",
+              "SET_5",
+              "SET_6"
+            ],
+            "sourceEvidenceIds": [
+              "RE_TROPHY_GOLD_4PLUS"
+            ]
+          },
+          {
+            "value": "KEROT_5PLUS",
+            "label": "ケロット柄（設定5以上）",
+            "allowedSettings": [
+              "SET_5",
+              "SET_6"
+            ],
+            "sourceEvidenceIds": [
+              "RE_TROPHY_KEROT_5PLUS"
+            ]
+          },
+          {
+            "value": "RAINBOW_6",
+            "label": "虹（設定6）",
+            "allowedSettings": [
+              "SET_6"
+            ],
+            "sourceEvidenceIds": [
+              "RE_TROPHY_RAINBOW_6"
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "difficultyAnalysis": {
+    "targetGames": [
+      1500,
+      3000,
+      7000
+    ],
+    "simulationsPerSetting": 4000,
+    "seed": 20260818,
+    "targetGameBasis": {
+      "basisId": "SELF_PLAY_GAMES",
+      "label": "ユーザー自身の遊技ゲーム数",
+      "quality": "ESTIMATED",
+      "crossMachineComparable": false,
+      "note": "実機連動機能は前提とせず、現在G－着席時Gの差を試行量として使用する。本MachineDataではデータカウンターのゲーム数に疑似ボーナス消化中のゲーム数は含まれない前提で扱う。"
+    },
+    "calibrationAllowedExposureQualities": [
+      "EXACT",
+      "DERIVED",
+      "ESTIMATED"
+    ]
+  }
+}

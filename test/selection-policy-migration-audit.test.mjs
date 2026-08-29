@@ -9,7 +9,7 @@ test('selection policy migration audit confirms all machines preserve inference 
   const r=auditSelectionPolicyMigration(root);
   assert.equal(r.summary.blocked,0);
   assert.equal(r.summary.review,0);
-  assert.equal(r.summary.reviewedSafetyChanges,24);
+  assert.equal(r.summary.reviewedSafetyChanges,26);
   const byId=new Map(r.machines.map(x=>[x.machineId,x]));
   for(const id of byId.keys()) assert.equal(byId.get(id)?.status,'PASS');
 
@@ -21,6 +21,8 @@ test('selection policy migration audit confirms all machines preserve inference 
     L_RING_NI_KAKERO1_FS:['FEAT_BONUS_PREDECESSOR'],
     L_MADOKA_FORTE_UU:['FEAT_BONUS_PREDECESSOR'],
     L_KENGAN_ASHURA_ND:['FEAT_AT_PREDECESSOR'],
+    LB_NEW_KING_HANAHANA_V_PF:["FEAT_BONUS_OUTCOME","FEAT_PREDECESSOR_BONUS_OUTCOME"],
+    L_ANOTHER_RINO_HEAVEN_CC:["FEAT_BONUS_INITIAL","FEAT_NORMAL_3COIN_BELL"],
     L_BASILISK_KIZUNA2_TENZEN_ZN:["FEAT_BT_PREDECESSOR"],
     L_BOFURI_FN:["FEAT_PREDECESSOR_COUNTER_BONUS"],
     L_DRAGON_HANAHANA_SENKO_JP:["FEAT_PREDECESSOR_BONUS"],

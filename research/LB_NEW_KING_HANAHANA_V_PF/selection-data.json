@@ -14,7 +14,7 @@
       "category": "PREDECESSOR",
       "unit": "G",
       "displayOrder": 1,
-      "inferenceRole": "INCLUDE_PRIMARY",
+      "inferenceRole": "EXCLUDE",
       "defaultValue": 0,
       "observationScope": "PREDECESSOR_SNAPSHOT",
       "description": "着席時にデータカウンターへ表示されている累計ゲーム数を入力します。自分のゲーム数の開始値にも自動反映されます。"
@@ -26,7 +26,7 @@
       "category": "PREDECESSOR",
       "unit": "回",
       "displayOrder": 2,
-      "inferenceRole": "INCLUDE_PRIMARY",
+      "inferenceRole": "EXCLUDE",
       "defaultValue": 0,
       "observationScope": "PREDECESSOR_SNAPSHOT",
       "parentInputId": "INP_PREDECESSOR_GAMES",
@@ -39,7 +39,7 @@
       "category": "PREDECESSOR",
       "unit": "回",
       "displayOrder": 3,
-      "inferenceRole": "INCLUDE_PRIMARY",
+      "inferenceRole": "EXCLUDE",
       "defaultValue": 0,
       "observationScope": "PREDECESSOR_SNAPSHOT",
       "parentInputId": "INP_PREDECESSOR_GAMES",
@@ -52,7 +52,7 @@
       "category": "SELF_PLAY",
       "unit": "G",
       "displayOrder": 10,
-      "inferenceRole": "INCLUDE_PRIMARY",
+      "inferenceRole": "EXCLUDE",
       "defaultValue": 0,
       "observationScope": "SELF_PLAY",
       "sessionDifferenceHelper": true,
@@ -65,7 +65,7 @@
       "category": "SELF_PLAY",
       "unit": "回",
       "displayOrder": 11,
-      "inferenceRole": "INCLUDE_PRIMARY",
+      "inferenceRole": "EXCLUDE",
       "defaultValue": 0,
       "observationScope": "SELF_PLAY",
       "parentInputId": "INP_NORMAL_GAMES",
@@ -78,7 +78,7 @@
       "category": "SELF_PLAY",
       "unit": "回",
       "displayOrder": 12,
-      "inferenceRole": "INCLUDE_PRIMARY",
+      "inferenceRole": "EXCLUDE",
       "defaultValue": 0,
       "observationScope": "SELF_PLAY",
       "parentInputId": "INP_NORMAL_GAMES",
@@ -89,37 +89,16 @@
     {
       "researchFeatureId": "RF_PREDECESSOR_BONUS_OUTCOME",
       "featureId": "FEAT_PREDECESSOR_BONUS_OUTCOME",
-      "adoptionCategory": "INCLUDE_PRIMARY",
-      "minimumSample": 300,
-      "sampleRecommendation": 5000,
-      "weight": 1.0,
-      "numeratorInputId": "INP_PREDECESSOR_BIG_COUNT",
-      "denominatorInputId": "INP_PREDECESSOR_GAMES",
-      "categoryInputIds": ["INP_PREDECESSOR_REG_COUNT"],
-      "residualCategoryLabel": "NO_BONUS",
-      "difficultyParticipation": "EXCLUDE",
-      "userReason": "着席前の累計ゲーム数・BIG・REGは自分の遊技区間と重ならない独立した観測値なので、前任者区間の設定推測情報として採用します。",
-      "difficultyExclusionReason": "共通Difficultyはユーザー自身が1500G・3000G・7000G遊技した条件を評価するため、着席前の前任者区間は含めません。"
+      "adoptionCategory": "EXCLUDE",
+      "rejectionReason": "自己実戦の試行分母が「現在のデータカウンター－着席時データ」の差分に依存する一方、この機種固有のカウンター項目と公開確率の試行区間との同値性が実機未確認のため、確認完了まで推測には使用しません。",
+      "userReason": "入力欄は記録用として残しますが、自己区間分母の実機確認完了までNumeric Featureは推測不参加とします。"
     },
     {
       "researchFeatureId": "RF_BONUS_OUTCOME",
       "featureId": "FEAT_BONUS_OUTCOME",
-      "adoptionCategory": "INCLUDE_PRIMARY",
-      "minimumSample": 300,
-      "sampleRecommendation": 5000,
-      "weight": 1.0,
-      "numeratorInputId": "INP_BIG_COUNT",
-      "denominatorInputId": "INP_NORMAL_GAMES",
-      "categoryInputIds": ["INP_REG_COUNT"],
-      "residualCategoryLabel": "NO_BONUS",
-      "difficultyParticipation": "INCLUDE",
-      "difficultyExposure": {
-        "mode": "per_game",
-        "factor": 1.0,
-        "quality": "EXACT",
-        "basisId": "SELF_NORMAL_PLAY_GAMES"
-      },
-      "userReason": "BIG・REGには設定差があり、データカウンターだけで継続して正確に取得できます。自分のゲーム数は現在G－着席時Gで自動算出します。"
+      "adoptionCategory": "EXCLUDE",
+      "rejectionReason": "自己実戦の試行分母が「現在のデータカウンター－着席時データ」の差分に依存する一方、この機種固有のカウンター項目と公開確率の試行区間との同値性が実機未確認のため、確認完了まで推測には使用しません。",
+      "userReason": "入力欄は記録用として残しますが、自己区間分母の実機確認完了までNumeric Featureは推測不参加とします。"
     },
     {
       "researchFeatureId": "RF_BIG_FIRST_HALF_WATERMELON",
@@ -154,7 +133,11 @@
   ],
   "evidence": [],
   "difficultyAnalysis": {
-    "targetGames": [1500, 3000, 7000],
+    "targetGames": [
+      1500,
+      3000,
+      7000
+    ],
     "simulationsPerSetting": 4000,
     "seed": 20260817,
     "targetGameBasis": {
@@ -164,6 +147,9 @@
       "crossMachineComparable": true,
       "note": "着席時ゲーム数と現在のゲーム数の差分を自分の通常遊技ゲーム数として使用し、着席前データはDifficultyから除外します。"
     },
-    "calibrationAllowedExposureQualities": ["EXACT", "DERIVED"]
+    "calibrationAllowedExposureQualities": [
+      "EXACT",
+      "DERIVED"
+    ]
   }
 }
