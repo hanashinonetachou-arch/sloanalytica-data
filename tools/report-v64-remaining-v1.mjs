@@ -14,5 +14,5 @@ for(const de of fs.readdirSync('research',{withFileTypes:true}).filter(x=>x.isDi
 }
 rows.sort((a,b)=>a.class.localeCompare(b.class)||a.machineId.localeCompare(b.machineId));
 const classes={};for(const r of rows)classes[r.class]=(classes[r.class]??0)+1;
-fs.writeFileSync('reports/v64-remaining-v1-candidates.json',JSON.stringify({generatedAt:new Date().toISOString(),summary:{count:rows.length,classes},machines:rows},null,2)+'\n');
-console.log(JSON.stringify({count:rows.length,classes}));
+fs.writeFileSync('reports/v64-remaining-v1-candidates.json',JSON.stringify({generatedAt:new Date().toISOString(),summary:{count:rows.length,classes,machineIds:rows.map(r=>r.machineId)},machines:rows},null,2)+'\n');
+console.log(JSON.stringify({count:rows.length,classes,machineIds:rows.map(r=>r.machineId)}));
