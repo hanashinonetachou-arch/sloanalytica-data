@@ -83,3 +83,11 @@ for (const machineId of IDS) {
   fs.writeFileSync(file, JSON.stringify(research, null, 2) + '\n', 'utf8');
   console.log(`UPDATED ${machineId}`);
 }
+
+const shamanSelectionPath = path.join(ROOT, 'research', 'L_SHAMANKING_SS', 'selection-data.json');
+const shamanSelection = JSON.parse(fs.readFileSync(shamanSelectionPath, 'utf8'));
+const shamanCzType = (shamanSelection.features ?? []).find(feature => feature.featureId === 'FEAT_CZ_TYPE_EXCLUDED');
+if (!shamanCzType) throw new Error('L_SHAMANKING_SS: FEAT_CZ_TYPE_EXCLUDED missing');
+shamanCzType.userFacingReason = 'CZ種別はポイント帯ごとに公開分布が異なり、内部ポイント帯を含む条件別の正確な分母を実戦中に独立観測できないため不採用です。';
+fs.writeFileSync(shamanSelectionPath, JSON.stringify(shamanSelection, null, 2) + '\n', 'utf8');
+console.log('UPDATED L_SHAMANKING_SS selection review reason');
