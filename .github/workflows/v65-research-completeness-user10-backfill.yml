@@ -57,7 +57,46 @@ jobs:
           }
           if (failed) process.exit(1);
           NODE
-      - name: Validate Research and Selection files
+      - name: Validate scoped Research Selection Observation
+        run: |
+          node --input-type=module - <<'NODE'
+          import fs from 'node:fs';
+          import { validateSelectionData } from './tools/validate-selection-data.mjs';
+          import { validateObservationObject } from './tools/validate-machine-observation-data.mjs';
+          import { validateSelectionEvidenceCoverage } from './tools/batch-completeness-gates.mjs';
+          import { assessSelectionQuality } from './tools/selection-quality-gate.mjs';
+          const ids = [
+            'S_YOUJO_SENKI_ZR','S_HAIYORE_NYARUKO_SAN_Y','S_TOARU_RAILGUN_FB',
+            'S_TEKKEN4_ULTIMATE_DEVIL_TCD','S_DANMACHI_GAIDEN_XR','S_MAHOIKU_NB',
+            'L_SHIMAMUSUME_L2','L_SUPER_BLACKJACK_SLDC','L_SHAMANKING_SS','L_ARIFURETA_JA'
+          ];
+          let failed = false;
+          for (const id of ids) {
+            const research = JSON.parse(fs.readFileSync(`research/${id}/research-data.json`, 'utf8'));
+            const selection = JSON.parse(fs.readFileSync(`research/${id}/selection-data.json`, 'utf8'));
+            const observation = JSON.parse(fs.readFileSync(`research/${id}/machine-observation-data.json`, 'utf8'));
+            const sv = validateSelectionData(selection, research);
+            const ev = validateSelectionEvidenceCoverage(selection, research, { required: true });
+            const sq = assessSelectionQuality(research, selection);
+            const ov = validateObservationObject(observation, `research/${id}/machine-observation-data.json`);
+            console.log(`${id}: selection=${sv.ok?'PASS':'FAIL'} evidence=${ev.ok?'PASS':'FAIL'} quality=${sq.status} observation=${ov.ok?'PASS':'FAIL'}`);
+            for (const e of [...sv.errors, ...ev.errors, ...sq.blockers, ...ov.errors]) { failed = true; console.error(`${id}: ${e}`); }
+            for (const r of sq.reviews ?? []) console.warn(`${id}: REVIEW ${r}`);
+          }
+          if (failed) process.exit(1);
+          NODE
+          node tools/audit-observation-selection-linkage.mjs --strict-v2 \
+            S_YOUJO_SENKI_ZR \
+            S_HAIYORE_NYARUKO_SAN_Y \
+            S_TOARU_RAILGUN_FB \
+            S_TEKKEN4_ULTIMATE_DEVIL_TCD \
+            S_DANMACHI_GAIDEN_XR \
+            S_MAHOIKU_NB \
+            L_SHIMAMUSUME_L2 \
+            L_SUPER_BLACKJACK_SLDC \
+            L_SHAMANKING_SS \
+            L_ARIFURETA_JA
+      - name: Validate scoped ResearchData schema
         run: |
           for id in \
             S_YOUJO_SENKI_ZR \
@@ -72,8 +111,6 @@ jobs:
             L_ARIFURETA_JA
           do
             node tools/validate-research-data.mjs "research/$id/research-data.json"
-            node tools/validate-selection-data.mjs "research/$id/selection-data.json" "research/$id/research-data.json"
-            node tools/validate-machine-observation-data.mjs "research/$id/machine-observation-data.json"
           done
       - name: Commit only scoped Research backfill
         run: |
