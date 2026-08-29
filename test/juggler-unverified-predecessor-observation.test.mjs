@@ -18,5 +18,8 @@ for(const machineId of machines){
     assert.equal(self.adoptionCategory,'INCLUDE_PRIMARY');
     assert.equal(observation.schemaVersion,'machine-observation-data-v1');
     assert.equal(observation.predecessorData.usableForInference,false);
+    const predecessorInputs=selection.inputs.filter(x=>x.observationScope==='PREDECESSOR_SNAPSHOT');
+    assert.equal(predecessorInputs.length,3);
+    assert.deepEqual(predecessorInputs.map(x=>x.id).sort(),['INP_PREDECESSOR_BIG_COUNT','INP_PREDECESSOR_GAMES','INP_PREDECESSOR_REG_COUNT']);
   });
 }
