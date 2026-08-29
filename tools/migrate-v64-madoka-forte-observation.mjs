@@ -1,0 +1,25 @@
+import fs from 'node:fs';
+const read=p=>JSON.parse(fs.readFileSync(p,'utf8'));
+const write=(p,v)=>fs.writeFileSync(p,JSON.stringify(v,null,2)+'\n');
+const mid='L_MADOKA_FORTE_UU';
+const sp=`research/${mid}/selection-data.json`,op=`research/${mid}/machine-observation-data.json`;
+const s=read(sp);
+for(const id of ['INP_SEATED_GAMES','INP_SEATED_BONUS_COUNT']){const x=s.inputs.find(v=>v.id===id);if(x)x.inferenceRole='EXCLUDE';}
+const pred=s.features.find(x=>x.featureId==='FEAT_BONUS_PREDECESSOR');
+if(!pred) throw new Error('missing predecessor feature');
+for(const k of Object.keys(pred)) if(!['researchFeatureId','featureId'].includes(k)) delete pred[k];
+pred.adoptionCategory='EXCLUDE';
+pred.rejectionReason='この機種固有の着席時ゲーム数・ボーナス初当り回数を公開初当り確率と同じ試行区間として観測できることが実機未確認のため、確認完了まで推測には使用しません。';
+pred.userReason='着席時入力欄は記録用として残しますが、データカウンター仕様の実機確認完了まで前任者Featureは推測不参加とします。';
+write(sp,s);
+write(op,{schemaVersion:'machine-observation-data-v2',machineId:mid,displayName:'スマスロ劇場版 魔法少女まどか☆マギカ[前編]始まりの物語／[後編]永遠の物語f-フォルテ-',researchedAt:'2026-08-29',sources:[],sourceCoverage:{machineMenu:'UNRESOLVED',dataCounter:'UNRESOLVED',linkedService:'UNRESOLVED',directPlay:'FOUND',endEvent:'FOUND',seatedState:'UNRESOLVED'},observations:[{observationId:'OBS_MADOKA_BONUS_INITIAL',sourceType:'DIRECT_PLAY',observationMode:'MANUAL_COUNT',status:'FOUND',label:'通常ゲーム数・ボーナス初当り',categories:['通常ゲーム数','ボーナス初当り'],timing:['自己実戦中'],excludedConditions:['着席前累積値を混ぜない'],sourceRefs:[],notes:'自己実戦の通常ゲーム数を分母にボーナス初当りを計数する。'},{observationId:'OBS_MADOKA_WEAK_CHERRY',sourceType:'DIRECT_PLAY',observationMode:'MANUAL_COUNT',status:'FOUND',label:'小役集計ゲーム数・弱チェリー',categories:['小役集計ゲーム数','弱チェリー'],timing:['小役を継続集計した自己実戦区間'],excludedConditions:['小役未集計区間を分母に含めない'],sourceRefs:[],notes:'小役を実際に集計したゲーム数だけを分母に弱チェリーを数える。'},{observationId:'OBS_MADOKA_BONUS_VOICE',sourceType:'END_EVENT',observationMode:'VISUAL_CONFIRMATION',status:'FOUND',label:'ボーナス終了時サブ液晶タッチボイス',categories:['むにゃむにゃ','どうなることやら','僕たちのノルマに近づいたかな','魔法少女になる決心がついたら…','設定6ボイス'],timing:['BIG・プチ・エピソードボーナス終了時にサブ液晶をタッチした時'],excludedConditions:['ボイスを確認しなかったボーナスを試行に含めない'],sourceRefs:[],notes:'ボイス確認1回を1試行として全カテゴリ構成を数える。'},{observationId:'OBS_MADOKA_PETIT_BIG_UPGRADE',sourceType:'DIRECT_PLAY',observationMode:'MANUAL_COUNT',status:'FOUND',label:'プチボーナス当選時BIG昇格抽選',categories:['対象ケース','BIG昇格','非昇格'],timing:['まどかチャンス3G目の小役非入賞でプチボーナス当選対象となった時'],excludedConditions:['対象条件外のプチボーナスを試行に含めない'],sourceRefs:[],notes:'対象ケース1回を1試行としてBIG昇格を数える。'},{observationId:'OBS_MADOKA_EVIDENCE',sourceType:'END_EVENT',observationMode:'VISUAL_CONFIRMATION',status:'FOUND',label:'設定下限・設定否定Evidence',categories:['設定2以上','設定5以上','設定6','設定否定'],timing:['該当示唆の確認時'],excludedConditions:['未確認を非発生とみなさない'],sourceRefs:[]}],featureMappings:[{featureId:'FEAT_BONUS_INITIAL',mappingType:'EXACT',observationIds:['OBS_MADOKA_BONUS_INITIAL'],collectionMethods:['MANUAL_COUNT'],usableForInference:true,usableForDifficulty:true,notes:'自己実戦通常ゲーム数を分母にボーナス初当りを評価する。'},{featureId:'FEAT_WEAK_CHERRY',mappingType:'EXACT',observationIds:['OBS_MADOKA_WEAK_CHERRY'],collectionMethods:['MANUAL_COUNT'],usableForInference:true,usableForDifficulty:false,notes:'小役集計ゲーム数を分母に弱チェリーを評価する。'},{featureId:'FEAT_BONUS_END_VOICE',mappingType:'EXACT',observationIds:['OBS_MADOKA_BONUS_VOICE'],collectionMethods:['VISUAL_CONFIRMATION'],usableForInference:true,usableForDifficulty:false,notes:'ボイス確認回数を分母に終了ボイス全分布を評価する。'},{featureId:'FEAT_PETIT_BIG_UPGRADE',mappingType:'EXACT',observationIds:['OBS_MADOKA_PETIT_BIG_UPGRADE'],collectionMethods:['MANUAL_COUNT'],usableForInference:true,usableForDifficulty:false,notes:'対象ケースを分母にBIG昇格回数を評価する。'}],researchReopenRequests:[],fieldVerificationItems:[{verificationId:'VFY_MADOKA_FORTE_PREDECESSOR_COUNTER',status:'WAITING_FOR_MACHINE',sourceType:'SEATED_STATE',priority:'HIGH',question:'この機種固有のデータカウンターで、着席時ゲーム数・ボーナス初当り回数が公開ボーナス初当り確率と同じ試行区間を表すか確認する。確認完了までFEAT_BONUS_PREDECESSORは推測不参加とする。'},{verificationId:'VFY_MADOKA_FORTE_LINKED_SERVICE',status:'WAITING_FOR_MACHINE',sourceType:'LINKED_SERVICE',priority:'LOW',question:'実機連動機能の有無と取得可能項目を確認する。現行active Featureは手動/画面確認で成立する。'}]});
+let a=fs.readFileSync('tools/audit-selection-policy-migration.mjs','utf8');
+const anchor="  L_RING_NI_KAKERO1_FS:{featureIds:['FEAT_BONUS_PREDECESSOR'],reason:'機種固有の着席時ゲーム数・ボーナス回数の観測元と試行区間同値性が実機未確認のため、確認完了まで前任者Featureを推測不参加とした。'}";
+if(!a.includes('L_MADOKA_FORTE_UU:{')) a=a.replace(anchor,anchor+",\n  L_MADOKA_FORTE_UU:{featureIds:['FEAT_BONUS_PREDECESSOR'],reason:'機種固有の着席時ゲーム数・ボーナス初当り回数の観測元と試行区間同値性が実機未確認のため、確認完了まで前任者Featureを推測不参加とした。'}");
+fs.writeFileSync('tools/audit-selection-policy-migration.mjs',a);
+let t=fs.readFileSync('test/selection-policy-migration-audit.test.mjs','utf8');
+t=t.replace('assert.equal(r.summary.reviewedSafetyChanges,7);','assert.equal(r.summary.reviewedSafetyChanges,8);');
+const anchorTest="    L_RING_NI_KAKERO1_FS:['FEAT_BONUS_PREDECESSOR'],";
+if(!t.includes("L_MADOKA_FORTE_UU:['FEAT_BONUS_PREDECESSOR']")) t=t.replace(anchorTest,anchorTest+"\n    L_MADOKA_FORTE_UU:['FEAT_BONUS_PREDECESSOR'],");
+fs.writeFileSync('test/selection-policy-migration-audit.test.mjs',t);
+console.log('migrated',mid);
