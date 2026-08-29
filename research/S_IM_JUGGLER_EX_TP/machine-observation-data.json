@@ -1,8 +1,8 @@
 {
-  "schemaVersion": "machine-observation-data-v1",
+  "schemaVersion": "machine-observation-data-v2",
   "machineId": "S_IM_JUGGLER_EX_TP",
   "displayName": "アイムジャグラーEX",
-  "researchedAt": "2026-08-22",
+  "researchedAt": "2026-08-29",
   "sources": [
     {
       "sourceId": "OBS_SRC_KITAC",
@@ -13,32 +13,61 @@
       "sourceType": "manufacturer"
     }
   ],
-  "machineMenu": {
-    "status": "UNRESOLVED",
-    "availableData": [],
-    "sourceRefs": [
-      "OBS_SRC_KITAC"
-    ],
-    "notes": "現行MachineDataは総ゲーム数・BIG回数・REG回数を入力するが、それらが筐体標準メニュー由来かホールデータカウンター由来かをResearchDataから確定できない。既存UIを推測で着席時/自分区間へ再分類せず未解決として保持する。"
+  "sourceCoverage": {
+    "machineMenu": "UNRESOLVED",
+    "dataCounter": "UNRESOLVED",
+    "linkedService": "UNRESOLVED",
+    "directPlay": "FOUND",
+    "endEvent": "UNRESOLVED",
+    "seatedState": "UNRESOLVED"
   },
-  "linkedService": {
-    "status": "UNRESOLVED",
-    "availableData": [],
-    "sourceRefs": [
-      "OBS_SRC_KITAC"
-    ],
-    "notes": "設定推測入力へ利用できる機種固有の実機連動サービスと取得項目は今回の公開情報では確定できない。不存在とは断定しない。"
-  },
-  "predecessorData": {
-    "status": "UNRESOLVED",
-    "availableData": [
-      "総ゲーム数",
-      "BIG回数",
-      "REG回数"
-    ],
-    "sourceRefs": [],
-    "notes": "現行入力3項目は前任者込みのホール表示から取得可能なケースがあるが、現行MachineDataにはPREDECESSOR_SNAPSHOT契約がない。初回公開機種の既存UXを勝手に変更せず、着席時スナップショット化・自身区間差分化は別途実機確認後に判断する。",
-    "usableForInference": false,
-    "usableForSelfSessionDelta": false
-  }
+  "observations": [
+    {
+      "observationId": "OBS_BONUS_OUTCOME_MULTINOMIAL",
+      "sourceType": "DIRECT_PLAY",
+      "observationMode": "MANUAL_OR_LINKED_READ",
+      "status": "FOUND",
+      "label": "BIG回数・総ゲーム数・REG回数",
+      "categories": [
+        "BIG回数",
+        "総ゲーム数",
+        "REG回数"
+      ],
+      "timing": [
+        "自己実戦の該当条件中"
+      ],
+      "excludedConditions": [
+        "着席前累積値を混ぜない",
+        "条件外ゲームを分母に混ぜない",
+        "未取得の任意入力を観測済み0として扱わない"
+      ],
+      "sourceRefs": [],
+      "notes": "SelectionData FEAT_BONUS_OUTCOME_MULTINOMIAL の既存入力契約を保持する。"
+    }
+  ],
+  "featureMappings": [
+    {
+      "featureId": "FEAT_BONUS_OUTCOME_MULTINOMIAL",
+      "mappingType": "EXACT",
+      "observationIds": [
+        "OBS_BONUS_OUTCOME_MULTINOMIAL"
+      ],
+      "collectionMethods": [
+        "MANUAL_OR_LINKED_READ"
+      ],
+      "usableForInference": true,
+      "usableForDifficulty": true,
+      "notes": "SelectionDataの分子・分母・カテゴリ・条件付き試行をそのままObservationへ固定する。"
+    }
+  ],
+  "researchReopenRequests": [],
+  "fieldVerificationItems": [
+    {
+      "verificationId": "VFY_S_IM_JUGGLER_EX_TP_SOURCE_FIELDS",
+      "status": "WAITING_FOR_MACHINE",
+      "sourceType": "MACHINE_MENU",
+      "priority": "LOW",
+      "question": "筐体メニュー・データカウンター・実機連動機能の具体項目を確認する。現行active Featureは自己実戦の直接観測で成立する。"
+    }
+  ]
 }

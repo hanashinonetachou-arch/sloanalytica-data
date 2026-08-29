@@ -1,8 +1,8 @@
 {
-  "schemaVersion": "machine-observation-data-v1",
+  "schemaVersion": "machine-observation-data-v2",
   "machineId": "S_RYUJIN_RZ30_SUIKA_VERSION",
   "displayName": "パチスロ琉神−30 スイカバージョン",
-  "researchedAt": "2026-08-22",
+  "researchedAt": "2026-08-29",
   "sources": [
     {
       "sourceId": "SRC_OFF",
@@ -21,24 +21,61 @@
       "sourceType": "analysis"
     }
   ],
-  "machineMenu": {
-    "status": "UNRESOLVED",
-    "availableData": [],
-    "notes": "着席時の累計G/BIG/REG取得可否を実機・一次情報で未確定。",
-    "sourceRefs": []
+  "sourceCoverage": {
+    "machineMenu": "UNRESOLVED",
+    "dataCounter": "UNRESOLVED",
+    "linkedService": "UNRESOLVED",
+    "directPlay": "FOUND",
+    "endEvent": "UNRESOLVED",
+    "seatedState": "UNRESOLVED"
   },
-  "linkedService": {
-    "status": "UNRESOLVED",
-    "availableData": [],
-    "notes": "機種固有の実機連動機能を未確定。",
-    "sourceRefs": []
-  },
-  "predecessorData": {
-    "status": "UNRESOLVED",
-    "availableData": [],
-    "sourceRefs": [],
-    "notes": "着席時の前任者区間利用は実機メニュー/店舗データカウンター契約を確認後にCHECKEDへ昇格する。",
-    "usableForInference": false,
-    "usableForSelfSessionDelta": false
-  }
+  "observations": [
+    {
+      "observationId": "OBS_BONUS_OUTCOME",
+      "sourceType": "DIRECT_PLAY",
+      "observationMode": "MANUAL_OR_LINKED_READ",
+      "status": "FOUND",
+      "label": "BIG初当り・通常ゲーム数・REG初当り",
+      "categories": [
+        "BIG初当り",
+        "通常ゲーム数",
+        "REG初当り"
+      ],
+      "timing": [
+        "自己実戦の該当条件中"
+      ],
+      "excludedConditions": [
+        "着席前累積値を混ぜない",
+        "条件外ゲームを分母に混ぜない",
+        "未取得の任意入力を観測済み0として扱わない"
+      ],
+      "sourceRefs": [],
+      "notes": "SelectionData FEAT_BONUS_OUTCOME の既存入力契約を保持する。"
+    }
+  ],
+  "featureMappings": [
+    {
+      "featureId": "FEAT_BONUS_OUTCOME",
+      "mappingType": "EXACT",
+      "observationIds": [
+        "OBS_BONUS_OUTCOME"
+      ],
+      "collectionMethods": [
+        "MANUAL_OR_LINKED_READ"
+      ],
+      "usableForInference": true,
+      "usableForDifficulty": false,
+      "notes": "SelectionDataの分子・分母・カテゴリ・条件付き試行をそのままObservationへ固定する。"
+    }
+  ],
+  "researchReopenRequests": [],
+  "fieldVerificationItems": [
+    {
+      "verificationId": "VFY_S_RYUJIN_RZ30_SUIKA_VERSION_SOURCE_FIELDS",
+      "status": "WAITING_FOR_MACHINE",
+      "sourceType": "MACHINE_MENU",
+      "priority": "LOW",
+      "question": "筐体メニュー・データカウンター・実機連動機能の具体項目を確認する。現行active Featureは自己実戦の直接観測で成立する。"
+    }
+  ]
 }
