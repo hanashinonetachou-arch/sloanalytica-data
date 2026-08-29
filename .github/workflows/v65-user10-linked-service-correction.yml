@@ -43,8 +43,7 @@ jobs:
             L_ARIFURETA_JA:'CHECKED_NONE'
           };
           for (const [id,want] of Object.entries(expected)) {
-            const p=`research/${id}/machine-observation-data.json`;
-            const o=JSON.parse(fs.readFileSync(p,'utf8'));
+            const o=JSON.parse(fs.readFileSync(`research/${id}/machine-observation-data.json`,'utf8'));
             const got=o.sourceCoverage?.linkedService;
             console.log(`${id}: linkedService=${got}`);
             if(got!==want) throw new Error(`${id}: expected ${want}, got ${got}`);
@@ -60,12 +59,13 @@ jobs:
         run: |
           node --input-type=module - <<'NODE'
           import fs from 'node:fs';
-          import { validateObservationData } from './tools/validate-machine-observation-data.mjs';
+          import { validateObservationObject } from './tools/validate-machine-observation-data.mjs';
           for (const id of ['S_TOARU_RAILGUN_FB','L_SUPER_BLACKJACK_SLDC']) {
-            const o=JSON.parse(fs.readFileSync(`research/${id}/machine-observation-data.json`,'utf8'));
-            const r=validateObservationData(o);
+            const rel=`research/${id}/machine-observation-data.json`;
+            const o=JSON.parse(fs.readFileSync(rel,'utf8'));
+            const r=validateObservationObject(o,rel);
             console.log(id, JSON.stringify(r));
-            if(r.status==='FAIL'||(r.errors??[]).length) process.exitCode=1;
+            if(!r.ok) process.exitCode=1;
           }
           NODE
 
