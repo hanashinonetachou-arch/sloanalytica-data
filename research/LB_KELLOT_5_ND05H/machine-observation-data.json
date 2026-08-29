@@ -1,10 +1,104 @@
 {
-  "schemaVersion": "machine-observation-data-v1",
+  "schemaVersion": "machine-observation-data-v2",
   "machineId": "LB_KELLOT_5_ND05H",
   "displayName": "スマスロケロット5BT（スロプラNEXT未調査）",
-  "researchedAt": "2026-08-22",
+  "researchedAt": "2026-08-29",
   "sources": [],
-  "machineMenu": {"status":"UNRESOLVED","availableData":[],"sourceRefs":[],"notes":"旧ResearchDataにMachine Observation専用記録がないため、筐体メニュー/遊技履歴の具体項目を未解決として移管する。"},
-  "linkedService": {"status":"UNRESOLVED","availableData":[],"sourceRefs":[],"notes":"スロプラNEXTを含む連動機能の有無・機種固有取得項目を再調査対象として保持する。不存在とは扱わない。"},
-  "predecessorData": {"status":"UNRESOLVED","availableData":[],"sourceRefs":[],"notes":"着席時・前任者データの取得可能項目と利用可否は未評価。推測でUI/Inferenceを追加しない。","usableForInference":false,"usableForSelfSessionDelta":false}
+  "sourceCoverage": {
+    "machineMenu": "UNRESOLVED",
+    "dataCounter": "UNRESOLVED",
+    "linkedService": "UNRESOLVED",
+    "directPlay": "FOUND",
+    "endEvent": "FOUND",
+    "seatedState": "UNRESOLVED"
+  },
+  "observations": [
+    {
+      "observationId": "OBS_SELF_NORMAL_BONUS",
+      "sourceType": "DIRECT_PLAY",
+      "observationMode": "MANUAL_COUNTER",
+      "status": "FOUND",
+      "label": "自己遊技の通常ゲーム数とボーナス",
+      "categories": ["通常ゲーム数", "SBB＋BB", "REG"],
+      "timing": ["自己遊技の通常時"],
+      "excludedConditions": ["前任者区間を混在させない"],
+      "sourceRefs": []
+    },
+    {
+      "observationId": "OBS_SELF_SMALL_ROLES",
+      "sourceType": "DIRECT_PLAY",
+      "observationMode": "MANUAL_COUNTER",
+      "status": "FOUND",
+      "label": "通常時に手動で数えた小役",
+      "categories": ["ベル", "チェリー", "平行オレンジ", "斜めオレンジ"],
+      "timing": ["自己遊技の通常時"],
+      "excludedConditions": ["数えていない小役を0回として扱わない", "未観測項目は空欄のまま保持する"],
+      "sourceRefs": []
+    },
+    {
+      "observationId": "OBS_BONUS_COLOR",
+      "sourceType": "DIRECT_PLAY",
+      "observationMode": "MANUAL_COUNTER",
+      "status": "FOUND",
+      "label": "成立ボーナスの7頭色構成",
+      "categories": ["赤7頭ボーナス", "白7頭ボーナス"],
+      "timing": ["SBB・BB・REG入賞時"],
+      "excludedConditions": ["頭色を確認していないボーナスを推測で補完しない"],
+      "sourceRefs": []
+    },
+    {
+      "observationId": "OBS_DIRECT_EVIDENCE",
+      "sourceType": "END_EVENT",
+      "observationMode": "VISUAL_CONFIRMATION",
+      "status": "FOUND",
+      "label": "実戦中に直接確認する設定Evidence",
+      "categories": ["BIG終了画面", "REG目押し成功時カットイン", "ケロットトロフィー", "ロングフリーズ"],
+      "timing": ["各該当イベント発生時"],
+      "excludedConditions": ["スロプラNEXT未調査項目を自動取得扱いしない"],
+      "sourceRefs": []
+    }
+  ],
+  "featureMappings": [
+    {
+      "featureId": "FEAT_BONUS_OUTCOME",
+      "mappingType": "EXACT",
+      "observationIds": ["OBS_SELF_NORMAL_BONUS"],
+      "collectionMethods": ["MANUAL_COUNTER"],
+      "usableForInference": true,
+      "usableForDifficulty": false
+    },
+    {
+      "featureId": "FEAT_SMALL_ROLE_OUTCOME",
+      "mappingType": "COMBINABLE",
+      "observationIds": ["OBS_SELF_NORMAL_BONUS", "OBS_SELF_SMALL_ROLES"],
+      "collectionMethods": ["MANUAL_COUNTER"],
+      "usableForInference": true,
+      "usableForDifficulty": true
+    },
+    {
+      "featureId": "FEAT_BONUS_COLOR",
+      "mappingType": "EXACT",
+      "observationIds": ["OBS_BONUS_COLOR"],
+      "collectionMethods": ["MANUAL_COUNTER"],
+      "usableForInference": true,
+      "usableForDifficulty": false
+    }
+  ],
+  "researchReopenRequests": [],
+  "fieldVerificationItems": [
+    {
+      "verificationId": "VFY_KELLOT5_SLOPLA_NEXT_ITEMS",
+      "status": "WAITING_FOR_MACHINE",
+      "sourceType": "LINKED_SERVICE",
+      "priority": "LOW",
+      "question": "スロプラNEXTの対応有無と、本機で取得できる具体的な遊技データ項目を実機で確認する。現行active Featureは手動観測で成立するため、確認前に自動入力へ流用しない。"
+    },
+    {
+      "verificationId": "VFY_KELLOT5_MACHINE_MENU_AND_SEATED",
+      "status": "WAITING_FOR_MACHINE",
+      "sourceType": "MACHINE_MENU",
+      "priority": "LOW",
+      "question": "筐体メニュー・ホールデータカウンター・着席時に確認できる項目を実機で確認する。前任者Featureは現Selectionにないため、確認前に推測入力を追加しない。"
+    }
+  ]
 }
