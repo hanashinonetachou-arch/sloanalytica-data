@@ -63,8 +63,8 @@ if (!fs.existsSync(manifestPath)) {
     }
 
     const current = after.sourceCoverage.linkedService;
-    if (entry.expectedCurrent && current !== entry.expectedCurrent) {
-      fail(`${machineId}: expected linkedService=${entry.expectedCurrent}, found ${current}`);
+    if (entry.expectedCurrent && current !== entry.expectedCurrent && current !== entry.linkedService) {
+      fail(`${machineId}: expected linkedService=${entry.expectedCurrent} or already-applied ${entry.linkedService}, found ${current}`);
       continue;
     }
     if (current !== "UNRESOLVED" && current !== entry.linkedService) {
