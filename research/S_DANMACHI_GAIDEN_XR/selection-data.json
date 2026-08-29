@@ -1,0 +1,41 @@
+{
+  "schemaVersion":"selection-data-v1","machineId":"S_DANMACHI_GAIDEN_XR","machineDataVersion":"0.1.0",
+  "uiCategoryLabels":{"NUMERIC":"初当り","EVIDENCE":"設定確定・否定"},
+  "inputs":[{"id":"INP_NORMAL_GAMES","name":"通常ゲーム数","type":"integer","category":"NUMERIC","unit":"G","displayOrder":10,"inferenceRole":"INCLUDE_PRIMARY","defaultValue":null,"observationScope":"SELF_PLAY"},{"id":"INP_AT_FIRST_HIT","name":"AT初当り","type":"counter","category":"NUMERIC","unit":"回","displayOrder":11,"inferenceRole":"INCLUDE_PRIMARY","defaultValue":null,"parentInputId":"INP_NORMAL_GAMES","uiQuickAdd":1}],
+  "features":[
+    {"researchFeatureId":"RF_CZ_FIRST_HIT","featureId":"FEAT_CZ_FIRST_HIT_EXCLUDED","adoptionCategory":"EXCLUDE","userFacingReason":"CZ初当りはAT初当りの主要経路を形成し、両方を独立尤度として併用するとCZ経由の当選情報を二重評価するため不採用です。"},
+    {"researchFeatureId":"RF_AT_FIRST_HIT","featureId":"FEAT_AT_FIRST_HIT","adoptionCategory":"INCLUDE_PRIMARY","numeratorInputId":"INP_AT_FIRST_HIT","denominatorInputId":"INP_NORMAL_GAMES","weight":1,"difficultyParticipation":"INCLUDE","difficultyExposure":{"mode":"per_game","factor":1,"quality":"EXACT","basisId":"NORMAL_GAMES"},"userReason":"AT初当りは通常ゲーム数を分母に直接観測でき、設定1の約1/379から設定6の約1/252まで一貫した設定差があるため主軸採用します。"},
+    {"researchFeatureId":"RF_AT_DIRECT","featureId":"FEAT_AT_DIRECT_EXCLUDED","adoptionCategory":"EXCLUDE","userFacingReason":"CZ非経由AT直撃はAT初当りの部分集合で、AT初当りと独立Featureとして加えると同じAT当選を二重評価するため不採用です。"},
+    {"researchFeatureId":"RF_STRONG_CHERRY","featureId":"FEAT_STRONG_CHERRY_EXCLUDED","adoptionCategory":"EXCLUDE","userFacingReason":"設定差はあるものの約1/400～1/328と低頻度で設定差も小さく、実戦範囲の必要試行量が長いため数値推測には不採用です。"},
+    {"researchFeatureId":"RF_LOKI_MUSOU","featureId":"FEAT_LOKI_MUSOU_EXCLUDED","adoptionCategory":"EXCLUDE","userFacingReason":"約1/138～1/128と設定差が小さく、実戦サンプルで得られる追加情報量が乏しいため数値推測には不採用です。"}
+  ],
+  "evidenceUi":{"groups":[{"groupId":"SETTING_EVIDENCE","label":"設定確定・否定","category":"EVIDENCE","selectionMode":"multi","normalizationMode":"ALLOWED_SETTINGS_INTERSECTION","displayOrder":100,"options":[
+    {"value":"LOKI_NO1","label":"ロキ夢想：設定1否定","allowedSettings":["SET_2","SET_3","SET_4","SET_5","SET_6"],"excludedSettings":["SET_1"],"sourceEvidenceIds":["RE_LOKI_1_DENY"]},
+    {"value":"LOKI4","label":"ロキ夢想：設定4以上","allowedSettings":["SET_4","SET_5","SET_6"],"excludedSettings":["SET_1","SET_2","SET_3"],"sourceEvidenceIds":["RE_LOKI_4PLUS"]},
+    {"value":"LOKI6","label":"ロキ夢想：設定6","allowedSettings":["SET_6"],"excludedSettings":["SET_1","SET_2","SET_3","SET_4","SET_5"],"sourceEvidenceIds":["RE_LOKI_6"]},
+    {"value":"PAY44","label":"ディヴァインジャッジ：44枚","allowedSettings":["SET_4","SET_5","SET_6"],"excludedSettings":["SET_1","SET_2","SET_3"],"sourceEvidenceIds":["RE_PAYOUT_44"]},
+    {"value":"PAY55","label":"ディヴァインジャッジ：55枚","allowedSettings":["SET_5","SET_6"],"excludedSettings":["SET_1","SET_2","SET_3","SET_4"],"sourceEvidenceIds":["RE_PAYOUT_55"]},
+    {"value":"PAY66","label":"ディヴァインジャッジ：66枚","allowedSettings":["SET_6"],"excludedSettings":["SET_1","SET_2","SET_3","SET_4","SET_5"],"sourceEvidenceIds":["RE_PAYOUT_66"]},
+    {"value":"V256","label":"256OVER+リューボイス","allowedSettings":["SET_2","SET_5","SET_6"],"excludedSettings":["SET_1","SET_3","SET_4"],"sourceEvidenceIds":["RE_VOICE_256"]},
+    {"value":"V456","label":"456OVER+フィルヴィスボイス","allowedSettings":["SET_4","SET_5","SET_6"],"excludedSettings":["SET_1","SET_2","SET_3"],"sourceEvidenceIds":["RE_VOICE_456"]},
+    {"value":"V555","label":"555OVER+ロキボイス","allowedSettings":["SET_5","SET_6"],"excludedSettings":["SET_1","SET_2","SET_3","SET_4"],"sourceEvidenceIds":["RE_VOICE_555"]},
+    {"value":"V666","label":"666OVER+ヘスティアボイス","allowedSettings":["SET_6"],"excludedSettings":["SET_1","SET_2","SET_3","SET_4","SET_5"],"sourceEvidenceIds":["RE_VOICE_666"]},
+    {"value":"BONUS2","label":"ボーナス確定：レフィーヤ","allowedSettings":["SET_2","SET_3","SET_4","SET_5","SET_6"],"excludedSettings":["SET_1"],"sourceEvidenceIds":["RE_BONUS_SCREEN_2PLUS"]},
+    {"value":"BONUS4","label":"ボーナス確定：アイズ特殊","allowedSettings":["SET_4","SET_5","SET_6"],"excludedSettings":["SET_1","SET_2","SET_3"],"sourceEvidenceIds":["RE_BONUS_SCREEN_4PLUS"]}
+  ]}]},
+  "evidenceDecisions":[
+    {"researchEvidenceId":"RE_EMBLEM","decision":"EXCLUDE","reason":"奇偶・高設定示唆のみで設定別出現確率が確定しておらずEvidence Engineの確定条件として扱えないため除外します。"},
+    {"researchEvidenceId":"RE_ENDING_FLOWER","decision":"EXCLUDE","reason":"公開情報が設定1否定『!?』表記で確定条件として断定できないためEvidence Engineから除外します。"},
+    {"researchEvidenceId":"RE_ENDING_SWIMSUIT","decision":"EXCLUDE","reason":"公開情報が偶数設定濃厚『!?』表記で確定条件として断定できないためEvidence Engineから除外します。"},
+    {"researchEvidenceId":"RE_ENDING_CHIBI","decision":"EXCLUDE","reason":"公開情報が設定4以上濃厚『!?』表記で確定条件として断定できないためEvidence Engineから除外します。"},
+    {"researchEvidenceId":"RE_HUG_CHARE_PUSH","decision":"EXCLUDE","reason":"具体的な設定確定パターンがResearchで未解決のためEvidence Engineへ安全に変換できず除外します。"}
+  ],
+  "rejectedElements":[],
+  "evidenceReview":{"policyVersion":1,"exclusions":[
+    {"researchEvidenceId":"RE_EMBLEM","reason":"設定別出現確率が未解決の示唆系。"},
+    {"researchEvidenceId":"RE_ENDING_FLOWER","reason":"『設定1否定!?』で確定条件ではない。"},
+    {"researchEvidenceId":"RE_ENDING_SWIMSUIT","reason":"『偶数設定濃厚!?』で確定条件ではない。"},
+    {"researchEvidenceId":"RE_ENDING_CHIBI","reason":"『設定4以上濃厚!?』で確定条件ではない。"},
+    {"researchEvidenceId":"RE_HUG_CHARE_PUSH","reason":"具体パターン未解決。"}
+  ]}
+}
