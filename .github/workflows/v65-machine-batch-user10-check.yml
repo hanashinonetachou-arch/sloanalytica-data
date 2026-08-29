@@ -1,0 +1,48 @@
+name: v6.5 Machine Batch User10 Check
+
+on:
+  push:
+    branches: [prototype-multi-machine]
+    paths:
+      - '.github/workflows/v65-machine-batch-user10-check.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: prototype-multi-machine
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Run atomic batch machine CHECK
+        run: |
+          npm run machine:batch -- \
+            S_YOUJO_SENKI_ZR \
+            S_HAIYORE_NYARUKO_SAN_Y \
+            S_TOARU_RAILGUN_FB \
+            S_TEKKEN4_ULTIMATE_DEVIL_TCD \
+            S_DANMACHI_GAIDEN_XR \
+            S_MAHOIKU_NB \
+            L_SHIMAMUSUME_L2 \
+            L_SUPER_BLACKJACK_SLDC \
+            L_SHAMANKING_SS \
+            L_ARIFURETA_JA \
+            --check \
+            --report reports/v65-user10-machine-check.json
+      - name: Assert batch report
+        run: |
+          node --input-type=module - <<'NODE'
+          import fs from 'node:fs';
+          const r=JSON.parse(fs.readFileSync('reports/v65-user10-machine-check.json','utf8'));
+          console.log(JSON.stringify({overallStatus:r.overallStatus,counts:r.counts,rolledBack:r.rolledBack,repositoryChecks:r.repositoryChecks.map(x=>({script:x.script,ok:x.ok}))},null,2));
+          if(r.overallStatus!=='PASS') process.exit(1);
+          if(r.counts?.PASS!==10||r.counts?.REVIEW!==0||r.counts?.BLOCKED!==0) process.exit(1);
+          if(r.rolledBack!==true) process.exit(1);
+          if(!(r.repositoryChecks??[]).every(x=>x.ok)) process.exit(1);
+          NODE
