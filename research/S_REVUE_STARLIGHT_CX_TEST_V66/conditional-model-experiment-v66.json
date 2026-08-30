@@ -1,0 +1,50 @@
+{
+  "schemaVersion": "conditional-model-experiment-v1",
+  "machineId": "S_REVUE_STARLIGHT_CX_TEST_V66",
+  "sourceMachineId": "S_REVUE_STARLIGHT_CX",
+  "status": "ACTIVE_TEST_MACHINE_RESEARCH",
+  "createdAt": "2026-08-30",
+  "purpose": "【テスト版】Machine上でv6.6 Dependency Review・conditional/joint候補・UI変更を実機比較する。原機種は変更しない。",
+  "dependencyGraph": {
+    "nodes": [
+      {"id": "NORMAL_GAMES", "label": "通常時ゲーム"},
+      {"id": "CZ_ENTRY", "label": "Challenge Revue初当り"},
+      {"id": "CZ_INTERNAL", "label": "CZ内部構成・後半発展先"},
+      {"id": "CZ_SUCCESS", "label": "CZ成功→AT"},
+      {"id": "BONUS_PATH", "label": "ボーナス経由AT"},
+      {"id": "DIRECT_AT_HIGH", "label": "AT直撃高確経由"},
+      {"id": "DIRECT_AT_RARE", "label": "高確/通常時REG後の強チェリー・チャンス目直撃"},
+      {"id": "AT_FIRST", "label": "AT初当り"}
+    ],
+    "edges": [
+      {"from": "NORMAL_GAMES", "to": "CZ_ENTRY", "settingSensitive": true, "sourceStatus": "FULL_SETTING_VALUES"},
+      {"from": "CZ_ENTRY", "to": "CZ_INTERNAL", "settingSensitive": true, "sourceStatus": "PARTIAL_PUBLIC"},
+      {"from": "CZ_INTERNAL", "to": "CZ_SUCCESS", "settingSensitive": true, "sourceStatus": "PARTIAL_PUBLIC", "note": "平均成功期待度だけを全設定共通conditional probabilityとして使用しない。"},
+      {"from": "NORMAL_GAMES", "to": "DIRECT_AT_HIGH", "settingSensitive": false, "sourceStatus": "PARTIAL_PUBLIC"},
+      {"from": "NORMAL_GAMES", "to": "DIRECT_AT_RARE", "settingSensitive": true, "sourceStatus": "FULL_SETTING_VALUES_FOR_CONDITIONAL_TRIGGER"},
+      {"from": "BONUS_PATH", "to": "AT_FIRST", "settingSensitive": "UNRESOLVED", "sourceStatus": "PATH_EXISTS"},
+      {"from": "CZ_SUCCESS", "to": "AT_FIRST", "settingSensitive": false, "sourceStatus": "DETERMINISTIC_PATH"},
+      {"from": "DIRECT_AT_HIGH", "to": "AT_FIRST", "settingSensitive": false, "sourceStatus": "PATH_EXISTS"},
+      {"from": "DIRECT_AT_RARE", "to": "AT_FIRST", "settingSensitive": true, "sourceStatus": "PATH_EXISTS"}
+    ]
+  },
+  "selectionExperiment": {
+    "baseline": "原機種のFeature/UIを初期比較基準とする。",
+    "rules": [
+      "CZ初当りとaggregate AT初当りを同一区間で無条件に独立尤度積しない。",
+      "全設定conditional probabilityが不足する段階では推定値を捏造しない。",
+      "上流CZ代表モデル・現行モデル・conditional候補を同一データで比較する。",
+      "UI変更はこのテストMachineのみで行う。"
+    ]
+  },
+  "uiChangeCandidates": [
+    {"id": "UI_CZ_RESULT_COUNTS", "priority": "HIGH", "proposal": "CZ成功回数/失敗回数を観測入力として追加する。推測利用はconditional source coverage確定後に判断する。"},
+    {"id": "UI_AT_CONTEXT", "priority": "HIGH", "proposal": "AT初当りの観測値と推測参加状態を明示し、CZとの二重評価を避ける。"},
+    {"id": "UI_DIRECT_AT", "priority": "MEDIUM", "proposal": "判別可能なAT直撃経路を分離入力できるか検証する。"}
+  ],
+  "openDebts": [
+    "CZ成功抽選の全設定条件付き値を追加探索する。",
+    "CZ成功/失敗のObservation契約を確定する。",
+    "BIG経由AT・直撃ATをaggregate ATから分離可能か調査する。"
+  ]
+}
