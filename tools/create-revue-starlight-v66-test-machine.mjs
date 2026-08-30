@@ -81,6 +81,7 @@ for (const name of generatedCoreFiles) {
     data.conflicts.push({
       conflictId: 'TEST_V66_DEPENDENCY_REVIEW',
       status: 'OPEN_FOR_EXPERIMENT',
+      sourceRefs: ['SRC_NANA', 'SRC_1GEKI'],
       note: 'v6.6 Dependency Review用の別Machine。原機種の公開データは変更せず、CZ→AT生成経路とconditional/joint候補を検証する。'
     });
   }
