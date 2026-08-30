@@ -1,0 +1,29 @@
+{
+  "schemaVersion":"machine-observation-data-v2",
+  "machineId":"S_PERSONA5_FR",
+  "displayName":"パチスロペルソナ5",
+  "provisionalRegistrationId":null,
+  "registrationId":null,
+  "releaseDate":"2022-09-05",
+  "researchedAt":"2026-08-31",
+  "sources":[
+    {"sourceId":"SRC_1GEKI","publisher":"一撃","title":"パチスロペルソナ5 設定差・設定判別要素まとめ","url":"https://1geki.jp/slot/s_persona5/0/","sourceType":"major_analysis"},
+    {"sourceId":"SRC_NANA","publisher":"なな徹","title":"ペルソナ5 設定差のある要素や設定示唆演出まとめ","url":"https://nana-press.com/kaiseki/machine/407/11555/","sourceType":"major_analysis"}
+  ],
+  "sourceCoverage":{"machineMenu":"UNRESOLVED","dataCounter":"UNRESOLVED","linkedService":"FOUND","directPlay":"FOUND","endEvent":"FOUND","seatedState":"UNRESOLVED"},
+  "observations":[
+    {"observationId":"OBS_NORMAL_GAMES","sourceType":"DIRECT_PLAY","observationMode":"MANUAL_COUNTER","status":"FOUND","label":"通常ゲーム数","categories":[],"timing":["通常時に随時更新"],"excludedConditions":["ボーナス・AT中など通常ゲームに含めない区間"],"sourceRefs":[],"notes":"PC初当りとスイカの共通分母。空欄=未観測、0=観測済み0。"},
+    {"observationId":"OBS_PC_FIRST_HIT","sourceType":"DIRECT_PLAY","observationMode":"MANUAL_COUNTER","status":"FOUND","label":"PERSONA CHANCE初当り","categories":[],"timing":["PERSONA CHANCE初当り成立時"],"excludedConditions":["同一初当りの重複カウント"],"sourceRefs":["SRC_1GEKI","SRC_NANA"],"notes":"初当り1件につき1回。"},
+    {"observationId":"OBS_WATERMELON_MANUAL","sourceType":"DIRECT_PLAY","observationMode":"MANUAL_COUNTER","status":"FOUND","label":"スイカ成立回数","categories":[],"timing":["通常時のスイカ成立時"],"excludedConditions":["通常ゲーム分母に含めない区間の成立"],"sourceRefs":["SRC_1GEKI","SRC_NANA"],"notes":"手動カウント経路。"},
+    {"observationId":"OBS_WATERMELON_MYSLOT","sourceType":"LINKED_SERVICE","observationMode":"LINKED_SERVICE_READ","status":"FOUND","label":"マイスロのスイカ回数","categories":[],"timing":["マイスロ遊技結果確認時"],"excludedConditions":[],"sourceRefs":["SRC_1GEKI"],"notes":"解析側でマイスロによるスイカカウントが案内されている。手動値と二重加算せず同一入力値の取得経路として扱う。"},
+    {"observationId":"OBS_SAMMY_TROPHY","sourceType":"END_EVENT","observationMode":"VISUAL_EVENT","status":"FOUND","label":"サミートロフィー","categories":["銅","銀","金","キリン","虹"],"timing":["トロフィー出現時"],"excludedConditions":[],"sourceRefs":["SRC_1GEKI","SRC_NANA"],"notes":"Evidence専用。同一トロフィーを複数回入力しない。"}
+  ],
+  "featureMappings":[
+    {"featureId":"FEAT_PC_FIRST_HIT","mappingType":"EXACT","observationIds":["OBS_PC_FIRST_HIT","OBS_NORMAL_GAMES"],"collectionMethods":["MANUAL_COUNTER"],"usableForInference":true,"usableForDifficulty":true},
+    {"featureId":"FEAT_WATERMELON","mappingType":"COMBINABLE","observationIds":["OBS_WATERMELON_MANUAL","OBS_WATERMELON_MYSLOT","OBS_NORMAL_GAMES"],"collectionMethods":["MANUAL_COUNTER","LINKED_SERVICE_READ"],"usableForInference":true,"usableForDifficulty":true,"notes":"手動またはマイスロのどちらかを同一入力に反映し、両者を加算しない。"}
+  ],
+  "researchReopenRequests":[],
+  "fieldVerificationItems":[
+    {"verificationId":"VERIFY_MYSLOT_RESULT_FIELDS","status":"WAITING_FOR_MACHINE","sourceType":"LINKED_SERVICE","priority":"LOW","question":"実機連動結果画面で通常ゲーム数とスイカ回数の表示範囲・リセット境界を確認できるか。"}
+  ]
+}
