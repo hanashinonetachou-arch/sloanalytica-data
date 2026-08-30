@@ -8,5 +8,7 @@ ui.sections['着席時データ'].description = description;
 write('ui-design-data.json', ui);
 const lock = read('user-verified-ui-lock.json');
 lock.sectionDescriptions['着席時データ'] = description;
+lock.inputContracts.INP_SEATED_NORMAL_GAMES = { name: '着席時 通常ゲーム数' };
+lock.inputContracts.INP_SEATED_CZ_COUNT = { name: '着席時 Challenge Revue回数' };
 write('user-verified-ui-lock.json', lock);
-console.log('SYNCED Revue seated description with generic materialized UI contract');
+console.log('SYNCED Revue seated description and pending lock with materialized UI contract');
