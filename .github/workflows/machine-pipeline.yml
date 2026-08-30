@@ -30,21 +30,20 @@ jobs:
         with:
           fetch-depth: 0
           ref: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.ref || github.ref }}
+
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '22'
+
       - name: Apply Phase 12 batch 01 generic UI wording
         if: github.event_name == 'pull_request'
         run: node tools/apply-phase12-batch01-ui-wording.mjs
+
       - name: Refresh legacy Initial D package after wording migration
         if: github.event_name == 'pull_request'
         run: npm run machine:pipeline -- L_INITIAL_D_2ND --skip-repo-checks
-      - name: Apply Revue seated CZ-only migration
-        if: github.event_name == 'pull_request' && github.event.pull_request.head.ref == 'fix/revue-seated-cz-only'
-        run: |
-          node tools/apply-revue-seated-cz-only.mjs
-          node tools/apply-revue-seated-cz-lock-sync.mjs
+
       - name: Resolve changed stages
         id: stages
         shell: bash
@@ -52,49 +51,84 @@ jobs:
           set -euo pipefail
           : > /tmp/research_files.txt
           : > /tmp/machine_ids.txt
+
           if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
             printf '%s\n' "${{ inputs.machine_id }}" > /tmp/machine_ids.txt
-          elif [[ "${{ github.event.pull_request.head.ref }}" == "fix/revue-seated-cz-only" ]]; then
-            printf '%s\n' 'research/S_REVUE_STARLIGHT_CX/research-data.json' > /tmp/research_files.txt
-            printf '%s\n' 'S_REVUE_STARLIGHT_CX' > /tmp/machine_ids.txt
           else
-            git diff --name-only "${{ github.event.pull_request.base.sha }}" "${{ github.event.pull_request.head.sha }}" | sed -nE '/^research\/[^/]+\/research-data\.json$/p' | sort -u > /tmp/research_files.txt
-            git diff --name-only "${{ github.event.pull_request.base.sha }}" "${{ github.event.pull_request.head.sha }}" | sed -nE 's#^research/([^/]+)/selection-data\.json$#\1#p' | sort -u > /tmp/machine_ids.txt
+            git diff --name-only "${{ github.event.pull_request.base.sha }}" "${{ github.event.pull_request.head.sha }}" \
+              | sed -nE '/^research\/[^/]+\/research-data\.json$/p' \
+              | sort -u > /tmp/research_files.txt
+
+            git diff --name-only "${{ github.event.pull_request.base.sha }}" "${{ github.event.pull_request.head.sha }}" \
+              | sed -nE 's#^research/([^/]+)/selection-data\.json$#\1#p' \
+              | sort -u > /tmp/machine_ids.txt
           fi
-          if [[ -s /tmp/research_files.txt ]]; then echo 'has_research=true' >> "$GITHUB_OUTPUT"; else echo 'has_research=false' >> "$GITHUB_OUTPUT"; fi
-          if [[ -s /tmp/machine_ids.txt ]]; then echo 'has_machines=true' >> "$GITHUB_OUTPUT"; else echo 'has_machines=false' >> "$GITHUB_OUTPUT"; fi
+
+          if [[ -s /tmp/research_files.txt ]]; then
+            echo 'Changed ResearchData:'
+            cat /tmp/research_files.txt
+            echo 'has_research=true' >> "$GITHUB_OUTPUT"
+          else
+            echo 'has_research=false' >> "$GITHUB_OUTPUT"
+          fi
+
+          if [[ -s /tmp/machine_ids.txt ]]; then
+            echo 'Machine IDs ready for full pipeline:'
+            cat /tmp/machine_ids.txt
+            echo 'has_machines=true' >> "$GITHUB_OUTPUT"
+          else
+            echo 'No changed SelectionData; full MachineData generation is not required yet.'
+            echo 'has_machines=false' >> "$GITHUB_OUTPUT"
+          fi
+
       - name: Validate changed ResearchData
         if: steps.stages.outputs.has_research == 'true'
         shell: bash
         run: |
           set -euo pipefail
-          while IFS= read -r research_file; do npm run research:validate -- "$research_file"; done < /tmp/research_files.txt
+          while IFS= read -r research_file; do
+            echo "::group::${research_file}"
+            npm run research:validate -- "$research_file"
+            echo '::endgroup::'
+          done < /tmp/research_files.txt
+
       - name: Build and validate changed machines as one batch
         if: steps.stages.outputs.has_machines == 'true'
-        run: npm run machine:batch -- --file /tmp/machine_ids.txt
-      - name: Commit generated artifacts
-        if: >-
-          github.event_name == 'pull_request' && steps.stages.outputs.has_machines == 'true' && github.event.pull_request.head.repo.full_name == github.repository
         shell: bash
         run: |
           set -euo pipefail
-          if git diff --quiet && [[ -z "$(git status --porcelain)" ]]; then exit 0; fi
+          npm run machine:batch -- --file /tmp/machine_ids.txt
+
+      - name: Commit generated artifacts
+        if: >-
+          github.event_name == 'pull_request' &&
+          steps.stages.outputs.has_machines == 'true' &&
+          github.event.pull_request.head.repo.full_name == github.repository
+        shell: bash
+        run: |
+          set -euo pipefail
+          if git diff --quiet && [[ -z "$(git status --porcelain)" ]]; then
+            echo 'Generated artifacts are already up to date.'
+            exit 0
+          fi
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          if [[ "${{ github.event.pull_request.head.ref }}" == "fix/revue-seated-cz-only" ]]; then
-            git add catalog.json difficulty-catalog.json machine-registry.json machines/S_REVUE_STARLIGHT_CX/machine-package.json research/S_REVUE_STARLIGHT_CX/*.json
-          else
-            git add catalog.json difficulty-catalog.json research/*/selection-data.json research/*/statistics-report.json research/*/difficulty-report.json research/*/setting-band-report.json machines/*/machine-package.json machine-registry.json
+          git add catalog.json difficulty-catalog.json research/*/selection-data.json research/*/statistics-report.json research/*/difficulty-report.json research/*/setting-band-report.json machines/*/machine-package.json machine-registry.json
+          if git diff --cached --quiet; then
+            echo 'No generated artifact changes to commit.'
+            exit 0
           fi
-          if git diff --cached --quiet; then exit 0; fi
           git commit -m 'chore: refresh generated MachineData artifacts'
           git push origin HEAD:${{ github.event.pull_request.head.ref }}
+
       - name: Repository tests for research-only or infrastructure changes
         if: steps.stages.outputs.has_machines != 'true'
         run: npm test
+
       - name: Repository audit for research-only or infrastructure changes
         if: steps.stages.outputs.has_machines != 'true'
         run: npm run audit
+
       - name: User-facing service-name audit for research-only or infrastructure changes
         if: steps.stages.outputs.has_machines != 'true'
         run: npm run audit:ui-service-names
