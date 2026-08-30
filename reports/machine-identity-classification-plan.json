@@ -1,0 +1,49 @@
+{
+  "schemaVersion": "machine-identity-classification-plan-v1",
+  "createdAt": "2026-08-31",
+  "baseBranch": "prototype-multi-machine",
+  "status": "IN_PROGRESS",
+  "purpose": "Audit all registered machines before adding common Machine Identity metadata. Keep progress recoverable from GitHub rather than chat history.",
+  "targetFields": {
+    "introductionDate": {
+      "format": "YYYY-MM-DD",
+      "usage": ["sort by introduction date", "derive introduction year for filtering and year-over-year analysis"]
+    },
+    "machineType": {
+      "allowedValues": ["SMART_SLOT", "MEDAL"],
+      "usage": ["filter"]
+    },
+    "gameType": {
+      "allowedValues": ["A_TYPE", "AT", "A_AT", "A_ART", "BT"],
+      "usage": ["filter"]
+    }
+  },
+  "rules": {
+    "introductionYearStored": false,
+    "introductionYearRule": "derive from introductionDate",
+    "onePrimaryGameTypePerMachine": true,
+    "doNotInferMachineTypeFromMachineIdPrefixAlone": true,
+    "ambiguousValues": "UNRESOLVED until corroborated",
+    "preferredSources": [
+      "manufacturer/official source when available",
+      "Pachislot Summit ONLINE",
+      "major analysis databases",
+      "cross-source corroboration"
+    ]
+  },
+  "workflow": [
+    "enumerate catalog machines",
+    "exclude explicit test-only machine IDs from production backfill",
+    "collect introductionDate/machineType/gameType in batches",
+    "cross-check ambiguous classifications",
+    "persist resolved and unresolved audit results",
+    "review schema/tool compatibility before MachineData mutation",
+    "apply backfill in batch",
+    "run full repository audits/pipelines"
+  ],
+  "notes": [
+    "catalog.addedAt is SloAnalytica registration time and must not be used as introductionDate",
+    "introductionDate is a base identity fact; year filters are derived dynamically",
+    "BT is treated as the primary user-facing gameType in this taxonomy"
+  ]
+}
