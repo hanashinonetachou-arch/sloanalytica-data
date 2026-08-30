@@ -1,5 +1,6 @@
 import fs from 'node:fs';
 import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 
 const ROOT = process.cwd();
 const MACHINE_ID = 'S_REVUE_STARLIGHT_CX_TEST_V66';
@@ -22,18 +23,15 @@ for (const rel of [`research/${MACHINE_ID}`, `generated/${MACHINE_ID}`, `build/$
   if (fs.existsSync(abs)) fs.rmSync(abs, { recursive: true, force: true });
 }
 
-for (const rel of ['tools/revue-overdispersion-sensitivity.mjs']) {
-  const abs = path.join(ROOT, rel);
-  if (fs.existsSync(abs)) fs.rmSync(abs, { force: true });
-}
+const sensitivityTool = path.join(ROOT, 'tools/revue-overdispersion-sensitivity.mjs');
+if (fs.existsSync(sensitivityTool)) fs.rmSync(sensitivityTool, { force: true });
 
 const pkg = readJson('package.json');
 if (pkg.scripts?.['stats:revue-overdispersion']) delete pkg.scripts['stats:revue-overdispersion'];
 if (pkg.scripts?.['test-machine:remove:revue-v66']) delete pkg.scripts['test-machine:remove:revue-v66'];
 writeJson('package.json', pkg);
 
-// Remove this one-shot cleanup script last. Git records the deletion when the user commits.
-fs.rmSync(new URL(import.meta.url), { force: true });
+fs.rmSync(fileURLToPath(import.meta.url), { force: true });
 
 console.log(`Removed ${MACHINE_ID}, all generated/published artifacts, catalog/difficulty/registry references, and experiment-only tooling.`);
 console.log('Original S_REVUE_STARLIGHT_CX remains untouched.');
