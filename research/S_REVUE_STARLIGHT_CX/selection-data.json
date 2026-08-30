@@ -1,7 +1,7 @@
 {
   "schemaVersion": "selection-data-v1",
   "machineId": "S_REVUE_STARLIGHT_CX",
-  "machineDataVersion": "0.1.8",
+  "machineDataVersion": "0.1.9",
   "inputs": [
     {
       "id": "INP_LAMP_WHITE_COUNT",
@@ -384,28 +384,15 @@
       "defaultValue": 0
     },
     {
-      "id": "INP_SEATED_TOTAL_GAMES",
-      "name": "着席時 総ゲーム数",
+      "id": "INP_SEATED_NORMAL_GAMES",
+      "name": "着席時 通常ゲーム数",
       "category": "PREDECESSOR",
       "type": "integer",
       "unit": "G",
       "displayOrder": 1,
       "inferenceRole": "INCLUDE_PRIMARY",
       "defaultValue": "",
-      "description": "実機メニュー「遊技履歴」の総ゲーム数を入力してください。リアルボーナスはAT中も抽選されるため、着席時REGの分母には総ゲーム数を使用します。",
-      "observationScope": "PREDECESSOR_SNAPSHOT",
-      "sessionDifferenceHelper": false
-    },
-    {
-      "id": "INP_SEATED_NORMAL_GAMES",
-      "name": "着席時 通常ゲーム数",
-      "category": "PREDECESSOR",
-      "type": "integer",
-      "unit": "G",
-      "displayOrder": 2,
-      "inferenceRole": "EXCLUDE",
-      "defaultValue": "",
-      "description": "実機メニュー「遊技履歴」の通常ゲーム数を入力してください。着席時CZ・ATの観測区間を表す分母です。",
+      "description": "実機メニュー「遊技履歴」の通常ゲーム数を入力してください。着席前Challenge Revueの推測分母として使用します。",
       "observationScope": "PREDECESSOR_SNAPSHOT"
     },
     {
@@ -414,38 +401,12 @@
       "category": "PREDECESSOR",
       "type": "counter",
       "unit": "回",
-      "displayOrder": 4,
-      "inferenceRole": "EXCLUDE",
-      "defaultValue": "",
-      "description": "実機メニュー「遊技履歴」のChallenge Revue累計回数を入力してください。",
-      "observationScope": "PREDECESSOR_SNAPSHOT",
-      "parentInputId": "INP_SEATED_NORMAL_GAMES"
-    },
-    {
-      "id": "INP_SEATED_AT_COUNT",
-      "name": "着席時 STAR LIGHT初当り回数",
-      "category": "PREDECESSOR",
-      "type": "counter",
-      "unit": "回",
-      "displayOrder": 5,
-      "inferenceRole": "EXCLUDE",
-      "defaultValue": "",
-      "description": "実機メニュー「遊技履歴」のSTAR LIGHT累計回数（AT初当り）を入力してください。",
-      "observationScope": "PREDECESSOR_SNAPSHOT",
-      "parentInputId": "INP_SEATED_NORMAL_GAMES"
-    },
-    {
-      "id": "INP_SEATED_REG_COUNT",
-      "name": "着席時 REG回数",
-      "category": "PREDECESSOR",
-      "type": "counter",
-      "unit": "回",
-      "displayOrder": 3,
+      "displayOrder": 2,
       "inferenceRole": "INCLUDE_PRIMARY",
       "defaultValue": "",
-      "description": "実機メニュー「遊技履歴」のREG累計回数を入力してください。着席時総ゲーム数と同じ着席前区間として評価します。",
+      "description": "実機メニュー「遊技履歴」のChallenge Revue累計回数を入力してください。着席時通常ゲーム数と同じ着席前区間として推測に使用します。",
       "observationScope": "PREDECESSOR_SNAPSHOT",
-      "parentInputId": "INP_SEATED_TOTAL_GAMES"
+      "parentInputId": "INP_SEATED_NORMAL_GAMES"
     }
   ],
   "features": [
@@ -646,24 +607,17 @@
       "residualCategoryLabel": "DEFAULT"
     },
     {
-      "researchFeatureId": "RF_REVUE_PREDECESSOR_REG",
-      "featureId": "FEAT_REG_PREDECESSOR",
-      "adoptionCategory": "INCLUDE_PRIMARY",
-      "numeratorInputId": "INP_SEATED_REG_COUNT",
-      "denominatorInputId": "INP_SEATED_TOTAL_GAMES",
-      "minimumSample": 1000,
-      "sampleRecommendation": 6000,
-      "weight": 1,
-      "difficultyParticipation": "EXCLUDE",
-      "userReason": "着席前のREGは自己実戦とは別区間の独立観測で、REGには設定差があります。本機はリアルボーナスのためAT中も抽選されるので、通常ゲーム数ではなく着席時総ゲーム数を分母にして評価します。",
-      "difficultyExclusionReason": "共通Difficultyは自分が遊技した1500G・3000G・7000Gを評価するため、前任者区間は試行量へ含めません。"
-    },
-    {
       "researchFeatureId": "RF_REVUE_CZ",
       "featureId": "FEAT_CZ_PREDECESSOR",
-      "adoptionCategory": "EXCLUDE",
-      "rejectionReason": "機種固有の着席時データの取得元と公開確率の試行区間との同値性が実機未確認のため、確認完了まで推測には使用しません。",
-      "userReason": "着席時入力欄は記録用として残しますが、機種固有の実機確認完了まで前任者Featureは推測不参加とします。"
+      "adoptionCategory": "INCLUDE_PRIMARY",
+      "userReason": "着席前の通常ゲーム数とChallenge Revue累計回数は実機メニューで同一区間として取得でき、公開CZ確率と同じ通常ゲーム基準で評価できます。CZは着席判断としてREGより判別効率が高く、AT初当りの主要経路でもあるため前任者情報はCZを代表Featureとして使用します。",
+      "numeratorInputId": "INP_SEATED_CZ_COUNT",
+      "denominatorInputId": "INP_SEATED_NORMAL_GAMES",
+      "minimumSample": 1000,
+      "sampleRecommendation": 5000,
+      "weight": 1,
+      "difficultyParticipation": "EXCLUDE",
+      "difficultyExclusionReason": "共通Difficultyは自分が遊技した1500G・3000G・7000Gを評価するため、前任者区間は試行量へ含めません。"
     },
     {
       "researchFeatureId": "RF_REVUE_AT",

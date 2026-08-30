@@ -1,0 +1,14 @@
+import fs from 'node:fs';
+const dir = 'research/S_REVUE_STARLIGHT_CX';
+const read = (name) => JSON.parse(fs.readFileSync(`${dir}/${name}`, 'utf8'));
+const write = (name, value) => fs.writeFileSync(`${dir}/${name}`, `${JSON.stringify(value, null, 2)}\n`);
+const description = '実機メニューの遊技履歴から取得した着席前区間のデータです。結果画面では「着席前」と明記して、自分で遊技した区間と区別します。';
+const ui = read('ui-design-data.json');
+ui.sections['着席時データ'].description = description;
+write('ui-design-data.json', ui);
+const lock = read('user-verified-ui-lock.json');
+lock.sectionDescriptions['着席時データ'] = description;
+lock.inputContracts.INP_SEATED_NORMAL_GAMES = { name: '着席時 通常ゲーム数' };
+lock.inputContracts.INP_SEATED_CZ_COUNT = { name: '着席時 Challenge Revue回数' };
+write('user-verified-ui-lock.json', lock);
+console.log('SYNCED Revue seated description and pending lock with materialized UI contract');
