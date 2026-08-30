@@ -1,0 +1,50 @@
+name: Machine identity backfill
+
+on:
+  push:
+    branches:
+      - audit/machine-identity-classification
+    paths:
+      - reports/machine-identity-backfill-trigger.json
+
+permissions:
+  contents: write
+
+jobs:
+  apply-and-verify:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout audit branch
+        uses: actions/checkout@v4
+        with:
+          ref: audit/machine-identity-classification
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Apply machine identity metadata
+        run: node tools/apply-machine-identity-classification.mjs --apply
+
+      - name: Verify machine identity metadata
+        run: node tools/apply-machine-identity-classification.mjs --verify
+
+      - name: Public data audit
+        run: node tools/audit-public-data.mjs
+
+      - name: Diff sanity check
+        run: git diff --check
+
+      - name: Commit generated backfill
+        run: |
+          if git diff --quiet; then
+            echo "No generated changes to commit."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add catalog.json machine-identity-metadata.json machines
+          git commit -m "data: backfill machine identity metadata"
+          git push origin HEAD:audit/machine-identity-classification
