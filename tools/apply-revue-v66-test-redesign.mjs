@@ -80,6 +80,22 @@ for (const input of [
   }
 ]) upsertBy(selection.inputs, 'id', input);
 
+// MachineData Builder generates sections from Selection categories. Keep the test section
+// directly after CZ first-hit and give the category a user-facing title/description.
+const testOutcomeInputIds = new Set(['INP_CZ_SUCCESS_COUNT','INP_CZ_FAILURE_COUNT','INP_AT_FIRST_SELF_COUNT']);
+const testOutcomeInputs = selection.inputs.filter(input => testOutcomeInputIds.has(input.id));
+selection.inputs = selection.inputs.filter(input => !testOutcomeInputIds.has(input.id));
+const czFirstIndex = selection.inputs.findIndex(input => input.id === 'INP_CZ_FIRST_COUNT');
+selection.inputs.splice(czFirstIndex >= 0 ? czFirstIndex + 1 : selection.inputs.length, 0, ...testOutcomeInputs);
+selection.uiCategoryLabels = {
+  ...(selection.uiCategoryLabels ?? {}),
+  TEST_CZ_AT_OUTCOME: 'CZ・AT結果（検証用）'
+};
+selection.uiCategoryDescriptions = {
+  ...(selection.uiCategoryDescriptions ?? {}),
+  TEST_CZ_AT_OUTCOME: 'CZ突破の引き強・引き弱とAT初当りを記録して現行方式と比較するためのテスト項目です。現時点ではこの3項目を設定推測へ直接加算しません。'
+};
+
 selection.features ??= [];
 upsertBy(selection.features, 'featureId', {
   researchFeatureId: 'RF_REVUE_AT',
@@ -122,7 +138,7 @@ observation.notes = [
   'TEST_V66 dependency policy: CZ初当りを代表Featureとし、aggregate AT初当りは同一区間で独立加算しない。CZ成功/失敗と自己実戦AT初当りは比較検証用に保存する。'
 ];
 
-// UI: add a dedicated test-only outcome section immediately after CZ first-hit inputs.
+// UI Design layer keeps the same explicit test-only section contract for four-layer review.
 ui.sectionOrder ??= [];
 ui.sections ??= {};
 ui.inputContracts ??= {};
@@ -166,6 +182,7 @@ writeJson(files.experiment, experiment);
 
 console.log(`REVUE V6.6 TEST REDESIGN APPLIED: ${ID}`);
 console.log('Policy: CZ first-hit remains representative; aggregate AT and CZ outcomes are record-only for comparison.');
+console.log('UI: test outcome section is generated from Selection as CZ・AT結果（検証用）, directly after CZ初当り.');
 console.log('Added researched candidate: conditional direct AT after high-state/normal-REG rare role, excluded until denominator observation is solved.');
 console.log('Next: npm run pipeline:four-layer:gate -- S_REVUE_STARLIGHT_CX_TEST_V66');
 console.log('Then: npm run machine:pipeline -- S_REVUE_STARLIGHT_CX_TEST_V66 --skip-repo-checks');
