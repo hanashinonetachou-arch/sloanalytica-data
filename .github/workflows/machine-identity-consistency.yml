@@ -1,0 +1,36 @@
+name: Machine identity consistency
+
+on:
+  pull_request:
+    branches:
+      - prototype-multi-machine
+    paths:
+      - catalog.json
+      - machine-identity-metadata.json
+      - machines/**/machine-package.json
+      - reports/machine-identity-classification-*.json
+      - tools/apply-machine-identity-classification.mjs
+  push:
+    branches:
+      - prototype-multi-machine
+      - audit/machine-identity-classification
+    paths:
+      - catalog.json
+      - machine-identity-metadata.json
+      - machines/**/machine-package.json
+      - reports/machine-identity-classification-*.json
+      - tools/apply-machine-identity-classification.mjs
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Verify machine identity metadata
+        run: node tools/apply-machine-identity-classification.mjs --verify
