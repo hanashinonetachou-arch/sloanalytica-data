@@ -1,6 +1,5 @@
 import fs from 'node:fs';
 import path from 'node:path';
-import { fileURLToPath } from 'node:url';
 
 const ROOT = process.cwd();
 const MACHINE_ID = 'S_REVUE_STARLIGHT_CX_TEST_V66';
@@ -28,10 +27,8 @@ if (fs.existsSync(sensitivityTool)) fs.rmSync(sensitivityTool, { force: true });
 
 const pkg = readJson('package.json');
 if (pkg.scripts?.['stats:revue-overdispersion']) delete pkg.scripts['stats:revue-overdispersion'];
-if (pkg.scripts?.['test-machine:remove:revue-v66']) delete pkg.scripts['test-machine:remove:revue-v66'];
 writeJson('package.json', pkg);
 
-fs.rmSync(fileURLToPath(import.meta.url), { force: true });
-
-console.log(`Removed ${MACHINE_ID}, all generated/published artifacts, catalog/difficulty/registry references, and experiment-only tooling.`);
+console.log(`Removed ${MACHINE_ID}, all generated/published artifacts, catalog/difficulty/registry references, and experiment-only sensitivity tooling.`);
 console.log('Original S_REVUE_STARLIGHT_CX remains untouched.');
+console.log('After verification, remove this one-shot cleanup script and its npm command before final merge.');
