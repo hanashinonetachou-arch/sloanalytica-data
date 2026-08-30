@@ -31,6 +31,23 @@ function retargetIdentity(value) {
   }
   return value;
 }
+function normalizeObservationV2Modes(data) {
+  // Legacy migration helper: MANUAL_OR_LINKED_READ is not a valid v2 observationMode.
+  // The source machine currently uses it as a convenience label. For the isolated test
+  // clone, normalize direct-play observations to the concrete MANUAL_COUNTER mode so the
+  // formal v2 validator can evaluate the four-layer contract without mutating production.
+  for (const observation of data.observations ?? []) {
+    if (observation.observationMode === 'MANUAL_OR_LINKED_READ') {
+      observation.observationMode = 'MANUAL_COUNTER';
+      observation.notes = `${observation.notes ?? ''}${observation.notes ? ' ' : ''}TEST_V66 migration: legacy MANUAL_OR_LINKED_READ normalized to MANUAL_COUNTER; linked/menu source coverage remains separately represented.`;
+    }
+  }
+  for (const mapping of data.featureMappings ?? []) {
+    if (Array.isArray(mapping.collectionMethods)) {
+      mapping.collectionMethods = mapping.collectionMethods.map(method => method === 'MANUAL_OR_LINKED_READ' ? 'MANUAL_COUNTER' : method);
+    }
+  }
+}
 
 const force = process.argv.includes('--force');
 const branch = branchName();
@@ -77,9 +94,11 @@ for (const name of generatedCoreFiles) {
   }
   if (name === 'machine-observation-data.json') {
     data.researchedAt = '2026-08-30';
+    normalizeObservationV2Modes(data);
     data.notes = [
       ...(Array.isArray(data.notes) ? data.notes : []),
-      'TEST_V66: 原機種のObservation v2を初期ベースラインとして複製。CZ成功/失敗・AT経路の追加観測はDependency Review後にこのテスト機種のみへ追加する。'
+      'TEST_V66: 原機種のObservation v2を初期ベースラインとして複製。CZ成功/失敗・AT経路の追加観測はDependency Review後にこのテスト機種のみへ追加する。',
+      'TEST_V66: source側のlegacy MANUAL_OR_LINKED_READはv2 validator非対応のため、テスト版ではMANUAL_COUNTERへ正規化した。'
     ];
   }
   if (name === 'ui-design-data.json') {
