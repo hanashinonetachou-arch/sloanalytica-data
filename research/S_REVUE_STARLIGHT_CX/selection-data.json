@@ -1,7 +1,7 @@
 {
   "schemaVersion": "selection-data-v1",
   "machineId": "S_REVUE_STARLIGHT_CX",
-  "machineDataVersion": "0.1.6",
+  "machineDataVersion": "0.1.7",
   "inputs": [
     {
       "id": "INP_LAMP_WHITE_COUNT",
@@ -384,16 +384,17 @@
       "defaultValue": 0
     },
     {
-      "id": "INP_SEATED_NORMAL_GAMES",
-      "name": "着席時 通常ゲーム数",
+      "id": "INP_SEATED_TOTAL_GAMES",
+      "name": "着席時 総ゲーム数",
       "category": "PREDECESSOR",
       "type": "integer",
       "unit": "G",
       "displayOrder": 1,
-      "inferenceRole": "EXCLUDE",
+      "inferenceRole": "INCLUDE_PRIMARY",
       "defaultValue": "",
-      "description": "実機メニュー「遊技履歴」の通常ゲーム数を入力してください。",
-      "observationScope": "PREDECESSOR_SNAPSHOT"
+      "description": "実機メニュー「遊技履歴」の総ゲーム数を入力してください。リアルボーナスはAT中も抽選されるため、着席時REGの分母には通常ゲーム数ではなく総ゲーム数を使用します。",
+      "observationScope": "PREDECESSOR_SNAPSHOT",
+      "sessionDifferenceHelper": false
     },
     {
       "id": "INP_SEATED_CZ_COUNT",
@@ -401,7 +402,7 @@
       "category": "PREDECESSOR",
       "type": "counter",
       "unit": "回",
-      "displayOrder": 2,
+      "displayOrder": 3,
       "inferenceRole": "EXCLUDE",
       "defaultValue": "",
       "description": "実機メニュー「遊技履歴」のChallenge Revue累計回数を入力してください。",
@@ -413,11 +414,24 @@
       "category": "PREDECESSOR",
       "type": "counter",
       "unit": "回",
-      "displayOrder": 3,
+      "displayOrder": 4,
       "inferenceRole": "EXCLUDE",
       "defaultValue": "",
       "description": "実機メニュー「遊技履歴」のSTAR LIGHT累計回数（AT初当り）を入力してください。",
       "observationScope": "PREDECESSOR_SNAPSHOT"
+    },
+    {
+      "id": "INP_SEATED_REG_COUNT",
+      "name": "着席時 REG回数",
+      "category": "PREDECESSOR",
+      "type": "counter",
+      "unit": "回",
+      "displayOrder": 2,
+      "inferenceRole": "INCLUDE_PRIMARY",
+      "defaultValue": "",
+      "description": "実機メニュー「遊技履歴」のREG累計回数を入力してください。着席時総ゲーム数と同じ着席前区間として評価します。",
+      "observationScope": "PREDECESSOR_SNAPSHOT",
+      "parentInputId": "INP_SEATED_TOTAL_GAMES"
     }
   ],
   "features": [
@@ -616,6 +630,19 @@
         "INP_BIG_END_HIGH_STRONG_COUNT"
       ],
       "residualCategoryLabel": "DEFAULT"
+    },
+    {
+      "researchFeatureId": "RF_REVUE_PREDECESSOR_REG",
+      "featureId": "FEAT_REG_PREDECESSOR",
+      "adoptionCategory": "INCLUDE_PRIMARY",
+      "numeratorInputId": "INP_SEATED_REG_COUNT",
+      "denominatorInputId": "INP_SEATED_TOTAL_GAMES",
+      "minimumSample": 1000,
+      "sampleRecommendation": 6000,
+      "weight": 1,
+      "difficultyParticipation": "EXCLUDE",
+      "userReason": "着席前のREGは自己実戦とは別区間の独立観測で、REGには設定差があります。本機はリアルボーナスのためAT中も抽選されるので、通常ゲーム数ではなく着席時総ゲーム数を分母にして評価します。",
+      "difficultyExclusionReason": "共通Difficultyは自分が遊技した1500G・3000G・7000Gを評価するため、前任者区間は試行量へ含めません。"
     },
     {
       "researchFeatureId": "RF_REVUE_CZ",

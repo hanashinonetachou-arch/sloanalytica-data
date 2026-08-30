@@ -9,7 +9,7 @@ test('selection policy migration audit confirms all machines preserve inference 
   const r=auditSelectionPolicyMigration(root);
   assert.equal(r.summary.blocked,0);
   assert.equal(r.summary.review,0);
-  assert.equal(r.summary.reviewedSafetyChanges,26);
+  assert.equal(r.summary.reviewedSafetyChanges,25);
   const byId=new Map(r.machines.map(x=>[x.machineId,x]));
   for(const id of byId.keys()) assert.equal(byId.get(id)?.status,'PASS');
 
@@ -32,7 +32,6 @@ test('selection policy migration audit confirms all machines preserve inference 
     S_GOGO_JUGGLER_3_KA:["FEAT_PREDECESSOR_BONUS_OUTCOME"],
     S_JUGGLER_GIRLS_SS_KH:["FEAT_PREDECESSOR_BONUS_OUTCOME"],
     S_MR_JUGGLER_KK:["FEAT_PREDECESSOR_BONUS_OUTCOME"],
-    S_REVUE_STARLIGHT_CX:["FEAT_AT_PREDECESSOR","FEAT_CZ_PREDECESSOR"],
     L_MONKEY_TURN5_CE:['FEAT_AT_PREDECESSOR'],
     L_HIGURASHI_GOU_SS:['FEAT_BONUS_PREDECESSOR'],
     L_HOKUTO_AD_XR:['FEAT_AT_INITIAL_PREDECESSOR'],
