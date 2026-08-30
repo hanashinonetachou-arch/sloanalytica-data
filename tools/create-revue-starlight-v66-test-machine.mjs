@@ -36,17 +36,23 @@ const force = process.argv.includes('--force');
 const branch = branchName();
 if (branch === 'main') die('mainではテスト機種を生成しません。prototype/experiment branchで実行してください。');
 if (!fs.existsSync(sourceDir)) die(`source research directory not found: ${SOURCE_ID}`);
-if (fs.existsSync(targetDir) && !force) die(`${TEST_ID} already exists. Re-run with --force only when intentionally rebuilding the test clone.`);
-if (fs.existsSync(targetDir) && force) fs.rmSync(targetDir, { recursive: true, force: true });
-fs.mkdirSync(targetDir, { recursive: true });
 
-const files = [
+const generatedCoreFiles = [
   'research-data.json',
   'selection-data.json',
   'machine-observation-data.json',
   'ui-design-data.json'
 ];
-for (const name of files) {
+const existingCoreFiles = generatedCoreFiles.filter(name => fs.existsSync(path.join(targetDir, name)));
+if (existingCoreFiles.length && !force) {
+  die(`${TEST_ID} core scaffold already exists (${existingCoreFiles.join(', ')}). Re-run with --force only when intentionally rebuilding the test clone.`);
+}
+if (fs.existsSync(targetDir) && force) {
+  for (const name of generatedCoreFiles) fs.rmSync(path.join(targetDir, name), { force: true });
+}
+fs.mkdirSync(targetDir, { recursive: true });
+
+for (const name of generatedCoreFiles) {
   const source = path.join(sourceDir, name);
   if (!fs.existsSync(source)) die(`required source file missing: ${source}`);
   const data = retargetIdentity(readJson(source));
