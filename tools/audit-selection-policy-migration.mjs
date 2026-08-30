@@ -34,7 +34,6 @@ const REVIEWED_ACTIVE_FEATURE_REMOVALS={
   S_GOGO_JUGGLER_3_KA:{featureIds:["FEAT_PREDECESSOR_BONUS_OUTCOME"],reason:'機種固有の着席時データの観測元と試行区間同値性が実機未確認のため、確認完了まで前任者Featureを推測不参加とした。'},
   S_JUGGLER_GIRLS_SS_KH:{featureIds:["FEAT_PREDECESSOR_BONUS_OUTCOME"],reason:'機種固有の着席時データの観測元と試行区間同値性が実機未確認のため、確認完了まで前任者Featureを推測不参加とした。'},
   S_MR_JUGGLER_KK:{featureIds:["FEAT_PREDECESSOR_BONUS_OUTCOME"],reason:'機種固有の着席時データの観測元と試行区間同値性が実機未確認のため、確認完了まで前任者Featureを推測不参加とした。'},
-  S_REVUE_STARLIGHT_CX:{featureIds:["FEAT_AT_PREDECESSOR","FEAT_CZ_PREDECESSOR"],reason:'機種固有の着席時データの観測元と試行区間同値性が実機未確認のため、確認完了まで前任者Featureを推測不参加とした。'},
   LB_NEW_KING_HANAHANA_V_PF:{featureIds:["FEAT_BONUS_OUTCOME","FEAT_PREDECESSOR_BONUS_OUTCOME"],reason:'機種固有の着席時・現在値差分が公開確率の試行区間と同値か実機未確認のため、確認完了まで当該Numeric Featureを推測不参加とした。'},
   L_ANOTHER_RINO_HEAVEN_CC:{featureIds:["FEAT_BONUS_INITIAL","FEAT_NORMAL_3COIN_BELL"],reason:'機種固有の着席時・現在値差分が公開確率の試行区間と同値か実機未確認のため、確認完了まで当該Numeric Featureを推測不参加とした。'}
 };

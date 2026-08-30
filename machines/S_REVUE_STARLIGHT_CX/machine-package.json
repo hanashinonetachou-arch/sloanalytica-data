@@ -3,7 +3,7 @@
   "machine": {
     "schemaVersion": "2.0.0",
     "machineId": "S_REVUE_STARLIGHT_CX",
-    "machineDataVersion": "0.1.6",
+    "machineDataVersion": "0.1.7",
     "displayName": "L少女☆歌劇 レヴュースタァライト -The SLOT-",
     "modelName": "LレヴュースタァライトCX",
     "manufacturer": "オーイズミ",
@@ -435,16 +435,17 @@
         "minimum": 0
       },
       {
-        "id": "INP_SEATED_NORMAL_GAMES",
-        "name": "着席時 通常ゲーム数",
+        "id": "INP_SEATED_TOTAL_GAMES",
+        "name": "着席時 総ゲーム数",
         "category": "PREDECESSOR",
         "type": "integer",
         "unit": "G",
         "displayOrder": 1,
-        "inferenceRole": "INCLUDE_SUPPORT",
+        "inferenceRole": "INCLUDE_PRIMARY",
         "defaultValue": "",
-        "description": "実機メニュー「遊技履歴」の通常ゲーム数を入力してください。",
+        "description": "実機メニュー「遊技履歴」の総ゲーム数を入力してください。リアルボーナスはAT中も抽選されるため、着席時REGの分母には通常ゲーム数ではなく総ゲーム数を使用します。",
         "observationScope": "PREDECESSOR_SNAPSHOT",
+        "sessionDifferenceHelper": false,
         "minimum": 0
       },
       {
@@ -453,8 +454,8 @@
         "category": "PREDECESSOR",
         "type": "counter",
         "unit": "回",
-        "displayOrder": 2,
-        "inferenceRole": "INCLUDE_SUPPORT",
+        "displayOrder": 3,
+        "inferenceRole": "EXCLUDE",
         "defaultValue": "",
         "description": "実機メニュー「遊技履歴」のChallenge Revue累計回数を入力してください。",
         "observationScope": "PREDECESSOR_SNAPSHOT",
@@ -466,11 +467,25 @@
         "category": "PREDECESSOR",
         "type": "counter",
         "unit": "回",
-        "displayOrder": 3,
-        "inferenceRole": "INCLUDE_SUPPORT",
+        "displayOrder": 4,
+        "inferenceRole": "EXCLUDE",
         "defaultValue": "",
         "description": "実機メニュー「遊技履歴」のSTAR LIGHT累計回数（AT初当り）を入力してください。",
         "observationScope": "PREDECESSOR_SNAPSHOT",
+        "minimum": 0
+      },
+      {
+        "id": "INP_SEATED_REG_COUNT",
+        "name": "着席時 REG回数",
+        "category": "PREDECESSOR",
+        "type": "counter",
+        "unit": "回",
+        "displayOrder": 2,
+        "inferenceRole": "INCLUDE_PRIMARY",
+        "defaultValue": "",
+        "description": "実機メニュー「遊技履歴」のREG累計回数を入力してください。着席時総ゲーム数と同じ着席前区間として評価します。",
+        "observationScope": "PREDECESSOR_SNAPSHOT",
+        "parentInputId": "INP_SEATED_TOTAL_GAMES",
         "minimum": 0
       }
     ]
@@ -812,57 +827,31 @@
         ]
       },
       {
-        "featureId": "FEAT_CZ_PREDECESSOR",
-        "name": "CZ初当り（着席前）",
-        "adoptionCategory": "INCLUDE_SUPPORT",
+        "featureId": "FEAT_REG_PREDECESSOR",
+        "name": "着席前REG出現率",
+        "adoptionCategory": "INCLUDE_PRIMARY",
         "calculationRole": "PROBABILITY",
         "probabilityEngineUsage": true,
         "modelType": "poisson",
-        "minimumSample": 1,
-        "sampleRecommendation": 1000,
+        "minimumSample": 1000,
+        "sampleRecommendation": 6000,
         "reliabilityProfile": {
           "weight": 1
         },
-        "denominatorInputId": "INP_SEATED_NORMAL_GAMES",
-        "numeratorInputId": "INP_SEATED_CZ_COUNT",
+        "denominatorInputId": "INP_SEATED_TOTAL_GAMES",
+        "numeratorInputId": "INP_SEATED_REG_COUNT",
         "displayFormat": "ratio_1_over_n",
         "probabilities": {
-          "SET_1": 0.003760812336,
-          "SET_2": 0.003926187672,
-          "SET_4": 0.004816955684,
-          "SET_5": 0.005254860746,
-          "SET_6": 0.005571030641
+          "SET_1": 0.001607975559,
+          "SET_2": 0.001654807215,
+          "SET_4": 0.001900057002,
+          "SET_5": 0.00200120072,
+          "SET_6": 0.002150537634
         },
         "sourceEvidenceRefs": [
           "SRC_NANA",
           "SRC_1GEKI",
           "SRC_SNAPSHOT"
-        ]
-      },
-      {
-        "featureId": "FEAT_AT_PREDECESSOR",
-        "name": "AT初当り（着席前）",
-        "adoptionCategory": "INCLUDE_SUPPORT",
-        "calculationRole": "PROBABILITY",
-        "probabilityEngineUsage": true,
-        "modelType": "poisson",
-        "minimumSample": 1,
-        "sampleRecommendation": 1000,
-        "reliabilityProfile": {
-          "weight": 1
-        },
-        "denominatorInputId": "INP_SEATED_NORMAL_GAMES",
-        "numeratorInputId": "INP_SEATED_AT_COUNT",
-        "displayFormat": "ratio_1_over_n",
-        "probabilities": {
-          "SET_1": 0.0027808676307007783,
-          "SET_2": 0.0028835063437139563,
-          "SET_4": 0.0036088054853843374,
-          "SET_5": 0.003910833007430583,
-          "SET_6": 0.004301075268817204
-        },
-        "sourceEvidenceRefs": [
-          "SRC_1GEKI"
         ]
       }
     ]
@@ -1053,9 +1042,15 @@
         "items": [
           {
             "type": "input",
-            "inputId": "INP_SEATED_NORMAL_GAMES",
-            "label": "着席時 通常ゲーム数",
+            "inputId": "INP_SEATED_TOTAL_GAMES",
+            "label": "着席時 総ゲーム数",
             "widget": "number"
+          },
+          {
+            "type": "input",
+            "inputId": "INP_SEATED_REG_COUNT",
+            "label": "着席時 REG回数",
+            "widget": "counter"
           },
           {
             "type": "input",
@@ -1408,9 +1403,9 @@
   },
   "selectionSummary": {
     "schemaVersion": "selection-summary-v1",
-    "evaluatedCount": 8,
-    "selectedCount": 8,
-    "rejectedCount": 0,
+    "evaluatedCount": 9,
+    "selectedCount": 7,
+    "rejectedCount": 2,
     "selected": [
       {
         "featureId": "FEAT_BONUS_OCCURRENCE_MULTINOMIAL",
@@ -1467,9 +1462,20 @@
         }
       },
       {
+        "featureId": "FEAT_REG_PREDECESSOR",
+        "name": "着席前REG出現率",
+        "reason": "着席前のREGは自己実戦とは別区間の独立観測で、REGには設定差があります。本機はリアルボーナスのためAT中も抽選されるので、通常ゲーム数ではなく着席時総ゲーム数を分母にして評価します。",
+        "requiredTrials": {
+          "value": 46552,
+          "unit": "着席前の総ゲーム数1G（AT中を含むリアルボーナス抽選対象区間）"
+        }
+      }
+    ],
+    "rejected": [
+      {
         "featureId": "FEAT_CZ_PREDECESSOR",
-        "name": "CZ初当り（着席前）",
-        "reason": "実機メニューから通常ゲーム数とChallenge Revue累計回数を直接取得できるため、着席前区間のCZ初当り観測として採用。",
+        "name": "CZ初当り",
+        "reason": "着席時入力欄は記録用として残しますが、機種固有の実機確認完了まで前任者Featureは推測不参加とします。",
         "requiredTrials": {
           "value": 10339,
           "unit": "CZ集計対象通常時1G"
@@ -1477,15 +1483,14 @@
       },
       {
         "featureId": "FEAT_AT_PREDECESSOR",
-        "name": "AT初当り（着席前）",
-        "reason": "実機メニューのSTAR LIGHT累計回数がAT初当り回数として確認でき、通常ゲーム数と同一区間で評価できるため採用。",
+        "name": "AT初当り",
+        "reason": "着席時入力欄は記録用として残しますが、機種固有の実機確認完了まで前任者Featureは推測不参加とします。",
         "requiredTrials": {
           "value": 11101,
           "unit": "通常時1G"
         }
       }
-    ],
-    "rejected": []
+    ]
   },
   "reliability": {},
   "metadata": {
