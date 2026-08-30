@@ -1,0 +1,43 @@
+name: Apply Arifureta Reselection
+
+on:
+  push:
+    branches: [prototype-multi-machine]
+    paths:
+      - 'tools/apply-arifureta-reselection-20260830.mjs'
+      - '.github/workflows/arifureta-reselection-apply.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  apply:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: prototype-multi-machine
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Apply migration
+        run: node tools/apply-arifureta-reselection-20260830.mjs
+      - name: Validate Research
+        run: npm run research:validate -- research/L_ARIFURETA_JA/research-data.json
+      - name: Validate Selection
+        run: node tools/validate-selection-data.mjs research/L_ARIFURETA_JA/selection-data.json research/L_ARIFURETA_JA/research-data.json
+      - name: Validate target Observation
+        run: node -e "import('./tools/validate-machine-observation-data.mjs').then(m=>{const fs=require('fs');const p='research/L_ARIFURETA_JA/machine-observation-data.json';const r=m.validateObservationObject(JSON.parse(fs.readFileSync(p,'utf8')),p);if(!r.ok){console.error(r.errors.join('\\n'));process.exit(1)}console.log('Target Observation PASS')})"
+      - name: Validate UI Design
+        run: npm run ui-design:validate
+      - name: Commit reselection data
+        shell: bash
+        run: |
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git add research/L_ARIFURETA_JA/research-data.json research/L_ARIFURETA_JA/selection-data.json research/L_ARIFURETA_JA/machine-observation-data.json research/L_ARIFURETA_JA/ui-design-data.json
+          if git diff --cached --quiet; then exit 0; fi
+          git commit -m "data: adopt Arifureta scenario and end-screen inference"
+          git push
