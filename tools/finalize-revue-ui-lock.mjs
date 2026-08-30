@@ -1,5 +1,6 @@
 import fs from 'node:fs';
 
+// Finalize after 2026-08-30 physical-device verification.
 const path = 'research/S_REVUE_STARLIGHT_CX/user-verified-ui-lock.json';
 const data = JSON.parse(fs.readFileSync(path, 'utf8'));
 data.status = 'USER_VERIFIED_UI_LOCKED';
