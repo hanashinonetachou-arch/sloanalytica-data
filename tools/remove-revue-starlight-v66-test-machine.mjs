@@ -31,4 +31,3 @@ writeJson('package.json', pkg);
 
 console.log(`Removed ${MACHINE_ID}, all generated/published artifacts, catalog/difficulty/registry references, and experiment-only sensitivity tooling.`);
 console.log('Original S_REVUE_STARLIGHT_CX remains untouched.');
-console.log('After verification, remove this one-shot cleanup script and its npm command before final merge.');
