@@ -42,11 +42,11 @@ Numeric/distribution candidates:
 Evidence/reference candidates:
 - Story start episode/order odd/even, setting-denial, 5-or-6 patterns.
 - Story character-introduction scenarios.
-- BIG end screens including setting 5+ / 6 patterns.
+- BIG end screens including setting 2+ / 4+ / 5+ / 6 patterns.
 - AT end screens including setting 6 pattern.
 - Ending cards including setting 4+ pattern.
-Observation/service candidate: UniMemo is supported; concrete obtainable fields remain under item-level verification.
-Sources: https://nana-press.com/kaiseki/machine/914/28425/ ; https://1geki.jp/slot/l_magireco/99/ ; https://www.universal-777.com/fun/unimemo/
+Observation/service: UniMemo support and machine-specific play-history use verified; Research/Observation still must distinguish which counters correspond exactly to each selected denominator.
+Sources: nana-press setting/mode/state/BIG/Mitama pages; 1geki setting/tool pages; Universal UniMemo official page.
 
 ### L_GODZILLA_NS
 Numeric/distribution candidates:
@@ -60,26 +60,29 @@ Evidence/reference candidates:
 - Godzilla Bonus / EX Bonus end screens.
 - EX Bonus movie patterns.
 - Gin-chan trophy.
-Sources: https://nana-press.com/kaiseki/machine/919/28861/ ; https://1geki.jp/slot/l_godzilla/0/
+Sources: nana-press and 1geki setting pages.
 
 ### L_USHIO_TORA_HAKUMEN_VH
 Numeric candidates:
 - CZ first-hit probability.
 - AT first-hit probability.
 - Role/state-specific CZ lottery probabilities where public values are setting-dependent.
-- Setting-change AT ceiling shortening (reference/context candidate, not automatically inference).
+- Setting-change AT ceiling distribution.
+- Ushitora mode distribution.
 Evidence candidates:
 - Dynamite trophy (2+/3+/4+/5+/6).
 - Payout-count displays (222, 246, 333, 456, 555, 666 etc.).
-Sources: https://1geki.jp/slot/l_ushiototora/0/ ; https://nana-press.com/kaiseki/machine/918/
+Sources: 1geki and nana-press setting/reset/mode/payout pages.
 
 ### L_AMAZING_LIVE_PD
 Numeric candidates:
-- Bonus outcome as BB/RB/no-bonus multinomial per game.
-- Bonus combined first-hit probability only as a dependency/fallback view; it reuses the same BB/RB events and must not be independent evidence.
+- Bonus combined first-hit probability with its verified normal-game denominator.
+- Published BB rate and RB rate as separate Research candidates while their public denominator / interval semantics remain unresolved.
+Dependency rule:
+- Do NOT model BB/RB/no-bonus as one per-normal-game multinomial unless a later source proves the BB and RB published rates use the same normal-game event population as the combined first-hit table. The current public numbers are numerically incompatible with that assumption.
 Evidence/reference candidates:
 - Continue checking public pages for any setting-specific lamp/end-screen/voice distributions; none promoted to verified candidate yet.
-Sources: https://1geki.jp/slot/l_amazinglive/ ; https://1geki.jp/slot/l_amazinglive/0/
+Sources: 1geki Amazing Live machine/setting pages and other machine-specific public analysis.
 
 ### L_YOSHIMUNE_SC2
 Numeric candidates:
@@ -88,36 +91,40 @@ Numeric candidates:
 - Normal-time reach-pattern probability (public practical/field value; source-quality tag required).
 - Mode transition rate (public practical/field value; source-quality tag required).
 Evidence/reference candidates:
-- Bonus-end hanafuda patterns (4+/5+/6 etc.).
-- Bonus-end voice patterns.
-Sources: https://nana-press.com/kaiseki/machine/920/29003/ ; https://nana-press.com/kaiseki/machine/920/
+- Bonus-end hanafuda patterns.
+- Bonus-end voice patterns are mode/天国/鷹狩り/1G連 hints and are REFERENCE rather than setting Evidence.
+Observation/service: Daito-mo machine-specific analysis confirms small-role probabilities and initial-hit triggers/history can be checked, but an exact official machine-specific obtainable-item inventory remains unresolved.
 
 ### L_MAHJONG_MONOGATARI_S2
 Numeric candidates:
-- Main initial-hit probability / AT-related first hit as publicly defined.
-- Koutei Kessen appearance probability.
-- Direct AT probability.
-- Direct bonus probability.
-- Direct-AT probability including and excluding precursor/promotion where both public definitions exist; these are alternate definitions of overlapping event structure and require dependency resolution before Selection.
+- Normal bonus first-hit probability.
+- AT total first-hit probability.
+- Bonus-or-AT combined first-hit probability.
+- Koutei appearance probability.
+- Direct AT probability excluding precursor promotion.
+- Effective direct AT probability including precursor promotion; alternate overlapping definition requiring dependency resolution.
+- Mahjong Ranbu kill-count bonus-hit probability if complete setting table becomes public.
+- Mashirock seven-align probability if complete setting table becomes public.
 Evidence/reference candidates:
-- Mahjong Bonus end screen.
-- Payout-count displays.
-- End voice patterns.
-Sources to cross-check: 1geki / nana-press / P-WORLD machine pages for L麻雀物語.
+- End-screen stamps 2+/4+/5+/6.
+- Last Judge HaruLuna PUSH 4+.
+- AT add 44G=4+, 55G=5+, 66G=6, excluding after-add displays.
+- End voices are qualitative high-setting hints only (REFERENCE).
+- Payout-count mappings are prediction-based (REFERENCE).
+Observation/service: 打-WIN LITE QR linkage and hidden-Nagi 1000G update cadence are machine-specific; hidden-Nagi setting mappings remain prediction/reference, not hard Evidence.
 
 ### L_IDOLMASTER_MILLION_LIVE_HC
 Numeric candidates:
 - CZ first-hit probability.
 - Bonus first-hit probability.
-- Direct-high-state transition probability.
-- Direct-high-state dwell-game distribution/expectation if setting-specific public values are available.
-- Heaven-mode selection probability.
-- 300G bonus-hit probability.
+- Direct-high-state transition probability (qualitative-only if no full setting table).
+- Direct-high-state dwell-game distribution/expectation (qualitative-only if no full table).
+- Heaven-mode selection probability (qualitative-only if no full table).
+- 300G bonus-hit probability (qualitative-only if no full table).
 Evidence candidates:
-- Bonus-end screen / frame patterns.
-- Kerot trophy.
-Observation/service: SLOT+NEXT / スロプラNEXT machine support verified; concrete play-information fields are being enumerated before FOUND item-level completion.
-Sources: https://nana-press.com/kaiseki/machine/921/29067/ ; https://1geki.jp/slot/l_idlmst_mlnp/0/ ; https://www.yamasa-next.co.jp/slp/model/01
+- Bonus-end screen / frame hard patterns.
+- Kerot trophy mapping where source confidence permits; prediction-based mappings remain REFERENCE.
+Observation/service: SloPla NEXT support verified with concrete play-information items including total/normal games, bonus first hits, CZ/live counts, cherry, watermelon, chance bell, Duo A/B/C, Mirishita-eye and bonus/live outcomes.
 
 ### L_YOUJITSU_DE
 Numeric/distribution candidates:
@@ -133,7 +140,7 @@ Evidence candidates:
 - Youjitsu BONUS end screens.
 - AT end screens.
 - Ending Bonus eye-stop-success voice / setting-hint voice.
-Sources: https://nana-press.com/kaiseki/machine/935/29484/ ; https://1geki.jp/slot/l_youjitsu/0/
+Sources: nana-press, 1geki, and machine-specific DAXEL/攻略 pages.
 
 ### L_MIDORI_DON_5_FY
 Numeric candidates:
@@ -145,11 +152,11 @@ Numeric candidates:
 - High-state transition probability from non-replay/non-push-order-bell group, with setting grouping.
 - Role x normal/high-state bonus-hit probabilities where setting-dependent.
 Evidence candidates:
-- Bonus-end screens.
-- XR Challenge failure/end voice patterns.
-- Ending/Yukemuri Bonus trick-introduction patterns.
-Observation/service: UniMemo support verified; concrete counters must be enumerated before Selection/Observation lock.
-Sources: https://nana-press.com/kaiseki/machine/936/29335/ ; https://1geki.jp/slot/l_mdn/0/ ; https://www.universal-777.com/fun/unimemo/
+- Bonus-end hard screens.
+- XR Challenge failure/end hard voice patterns.
+- Ending/Yukemuri Bonus trick-introduction hard patterns.
+Observation/service: UniMemo support is official. Machine-specific public material confirms weak cherry and weak wave are automatically counted; public play reports also confirm UniMemo session use. Full machine-specific counter inventory is not yet recovered, so item-detail status remains partial rather than falsely complete.
+Sources: nana-press setting page; Universal official product/UniMemo pages; machine-specific public analysis/実戦 reports.
 
 ### L_GUNDAM_SEED_G
 Numeric candidates:
@@ -159,15 +166,15 @@ Numeric candidates:
 - Reset/ST-end 50-99G CZ-or-bonus hit probability.
 Dependency note: early-zone hit outcomes are downstream/subset-related to aggregate CZ/AT/bonus outcomes and must not be naively independent.
 Evidence candidates:
-- CZ end screens.
-- ST end screens.
-- Ending end screens.
-Sources: https://nana-press.com/kaiseki/machine/930/29292/ ; 1geki machine setting page.
+- CZ/ST end screens: hard even-setting, setting1 denial, setting2 denial, setting3 denial, setting4+, setting6 constraints separated from soft odd/even/high-setting hints.
+- Ending end screen setting6.
+Sources: nana-press and 1geki setting pages.
 
 ## 3. Gate-0 blockers / remaining discovery work
 
-- Cross-source numeric transcription is not yet complete for all candidates.
-- Machine-linked service status must be resolved per machine to FOUND / CHECKED_NONE / UNRESOLVED, with concrete obtainable items for FOUND.
-- L麻雀物語 and アメイジングライブ need another targeted source sweep to ensure no numeric or evidence candidate is missed.
-- Identity model-number/manufacturer strings must be checked against registry/catalog naming before final machineId assignment.
-- Gate 0 is NOT PASS yet. Required condition remains: Discovery candidate missing from Research = 0.
+- Explicit Web-to-Discovery exhaustiveness review still needs to be closed across all 10 after the latest transfers.
+- Machine-linked services still UNRESOLVED for Lゴジラ / Lうしおととら / アメイジングライブ / 吉宗 exact Daito-mo item inventory / よう実 / ガンダムSEED. Lack of a search hit is not CHECKED_NONE.
+- 緑ドン UniMemo is FOUND with weakチェリー/弱波 automatic counters confirmed, but complete machine-specific counter inventory is still only partially resolved.
+- L麻雀物語: complete setting tables for Mahjong Ranbu kill-count bonus and Mashirock seven-align remain unresolved; checked public pages expose insufficient full-setting numeric data.
+- Lゴジラ replay-point CZ and Lうしおととら role/state CZ remain public-numeric-incomplete.
+- Gate 0 is NOT PASS yet. Required condition remains: Discovery candidate missing from Research = 0 plus explicit Web-to-Discovery exhaustiveness review.
