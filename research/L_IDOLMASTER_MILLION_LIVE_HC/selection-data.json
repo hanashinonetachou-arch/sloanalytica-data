@@ -1,0 +1,51 @@
+{
+  "schemaVersion": "selection-data-v1",
+  "machineId": "L_IDOLMASTER_MILLION_LIVE_HC",
+  "machineDataVersion": "0.1.0",
+  "uiCategoryLabels": {
+    "NORMAL": "通常時",
+    "EVIDENCE": "設定確定情報"
+  },
+  "inputs": [
+    {"id":"INP_NORMAL_GAMES","name":"通常ゲーム数","type":"integer","category":"NORMAL","unit":"G","displayOrder":10,"inferenceRole":"INCLUDE_PRIMARY","defaultValue":0,"observationScope":"SELF_PLAY","description":"自分が遊技した通常ゲーム数を入力します。スロプラNEXTの通常ゲーム数を利用できます。"},
+    {"id":"INP_BONUS_INITIAL","name":"ボーナス初当り","type":"counter","category":"NORMAL","unit":"回","displayOrder":11,"inferenceRole":"INCLUDE_PRIMARY","defaultValue":null,"parentInputId":"INP_NORMAL_GAMES","description":"通常時からのボーナス初当り回数を入力します。スロプラNEXTのボーナス初当り記録を利用できます。"}
+  ],
+  "features": [
+    {
+      "researchFeatureId":"RF_CZ_INITIAL",
+      "featureId":"FEAT_CZ_INITIAL_EXCLUDED",
+      "adoptionCategory":"EXCLUDE",
+      "userFacingReason":"CZ初当りとボーナス初当りは同じ通常ゲーム分母を共有する競合する初当り事象で、別々の二項尤度にすると非当選ゲームを重複評価するため不採用です。"
+    },
+    {
+      "researchFeatureId":"RF_BONUS_INITIAL",
+      "featureId":"FEAT_BONUS_INITIAL",
+      "adoptionCategory":"INCLUDE_PRIMARY",
+      "minimumSample":300,
+      "sampleRecommendation":5000,
+      "weight":1,
+      "numeratorInputId":"INP_BONUS_INITIAL",
+      "denominatorInputId":"INP_NORMAL_GAMES",
+      "difficultyParticipation":"INCLUDE",
+      "difficultyExposure":{"mode":"per_game","factor":1,"quality":"EXACT","basisId":"NORMAL_GAMES"},
+      "userReason":"通常ゲームを分母にした全設定の公開確率が揃い、CZ初当りより発生頻度が高く、スロプラNEXTでも初当りを観測できるため主Featureとして採用します。"
+    }
+  ],
+  "evidenceUi": {
+    "groups": [
+      {"groupId":"IDOLMASTER_BONUS_END","label":"ボーナス終了画面","selectionMode":"multi","displayOrder":100,"options":[
+        {"value":"RED_2PLUS","label":"赤枠（設定2以上）","allowedSettings":["SET_2","SET_3","SET_4","SET_5","SET_6"],"excludedSettings":["SET_1"],"sourceEvidenceIds":["RE_END_RED_2PLUS"]},
+        {"value":"SILVER_3PLUS","label":"銀枠（設定3以上）","allowedSettings":["SET_3","SET_4","SET_5","SET_6"],"excludedSettings":["SET_1","SET_2"],"sourceEvidenceIds":["RE_END_SILVER_3PLUS"]},
+        {"value":"GOLD4_4PLUS","label":"金枠・指が4（設定4以上）","allowedSettings":["SET_4","SET_5","SET_6"],"excludedSettings":["SET_1","SET_2","SET_3"],"sourceEvidenceIds":["RE_END_GOLD4_4PLUS"]},
+        {"value":"GOLD5_5PLUS","label":"金枠・ケーキ5（設定5以上）","allowedSettings":["SET_5","SET_6"],"excludedSettings":["SET_1","SET_2","SET_3","SET_4"],"sourceEvidenceIds":["RE_END_GOLD5_5PLUS"]},
+        {"value":"RAINBOW_6","label":"虹枠（設定6）","allowedSettings":["SET_6"],"excludedSettings":["SET_1","SET_2","SET_3","SET_4","SET_5"],"sourceEvidenceIds":["RE_END_RAINBOW_6"]}
+      ]}
+    ]
+  },
+  "evidenceReview":{"policyVersion":1,"exclusions":[]},
+  "difficultyAnalysis":{"targetGameBasis":{"basisId":"NORMAL_GAMES","label":"自分の通常ゲーム数","quality":"EXACT"},"calibrationAllowedExposureQualities":["EXACT","DERIVED"]},
+  "selectionNotes":[
+    "CZ初当りとボーナス初当りを独立二項尤度として同時採用しない。",
+    "将来、CZ/ボーナス/その他を同一試行の排他カテゴリとして構築できる根拠が揃えばjoint/multinomial化を再検討する。"
+  ]
+}
