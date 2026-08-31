@@ -65,13 +65,23 @@ A further public-source pass was performed before sending anything to real-devic
 - Persona5: the analysis source explicitly recommends counting the state-independent watermelon with MySlot. Public material still does not establish the exact result-screen range/reset boundary, so that boundary remains a field-only verification item; the same watermelon observation must not be double-counted through manual and MySlot paths.
 - L 仮面ライダー電王: KYORAKU's official ぱちログweb page confirms this machine is supported and states that the machine QR code can be read to view the play result. The public page does not enumerate machine-specific result fields, so exact Selection-compatible counters remain unresolved instead of being guessed.
 - スーパーリオエース (2022): the current official スロプラNEXT service started in 2024 and its Rio entry is the separate 2026 machine `スマスロスーパーリオエース2`. No support basis for the 2022 original machine was found. Its Observation `linkedService` coverage is therefore resolved to `CHECKED_NONE`; the 2026 service fields must not be projected backward.
-- バイオハザード RE:2: the manufacturer official machine site was located, but no machine-specific linked-service result contract was established from the public material checked. Linked-service coverage remains unresolved rather than being inferred from manufacturer-family services.
+- バイオハザード RE:2: a public real-play source explicitly shows the machine's sub-LCD `遊技履歴` and `フィギュアコレクション` surfaces. Observation `machineMenu` and the Figure Collection observation are therefore resolved to `FOUND`. Only the collection's persistence scope (same-day/cumulative) and reset boundary remain field-only. Linked-service coverage remains unresolved because no machine-specific linked-service contract was established.
+- Sister Quest: public instructions confirm SmartTALK is operated inside `スマコレ（メニュー）`, with a selected question answered after the prescribed game count and the message viewable again from SmartTALK. The remaining question is only how far question/answer history persists and where it resets.
+
+## Field verification bundle
+
+The remaining genuinely field-only Observation questions are consolidated in `reports/batch-20260831-field-verification-bundle.md` instead of requesting machine-by-machine checks. Current bundle:
+- HIGH: BIG島唄30 chain-region boundary.
+- MEDIUM: 笑ゥせぇるすまん4 CZ entry-success vs self-success distinction; 電王 ぱちログweb machine-specific result fields; Biohazard5 middle/diagonal AT classification and Infection pairing.
+- LOW: Persona5 MySlot result scope/reset; Sister Quest SmartTALK history/reset; RE:2 Figure Collection persistence/reset.
+
+スーパーリオエース, BOØWY, and てぃだどんどん currently have no adopted inference Feature blocked by unresolved machine-menu/service behavior.
 
 ## Remaining gates before publication
 
 The batch is no longer blocked by Research / Selection / Observation / UI construction or batch-local MachineData validation. Remaining work is:
 
-1. Continue resolving web-solvable machine-menu / linked-service Observation debt; keep only genuinely field-only items for real-device review.
+1. Continue resolving any newly discoverable web-solvable machine-menu / linked-service debt, but do not convert absence of search hits into invented CHECKED_NONE/FOUND claims.
 2. Run batch publish preparation. On an applied publish, allow the formal registry sync to allocate immutable provisional registration IDs after catalog insertion; do not preassign them manually.
-3. Bundle the genuinely field-only verification items into one real-device verification pass.
+3. Execute the consolidated field-verification bundle once for genuinely field-only items.
 4. Keep PR #148 draft until publication and real-device gates are intentionally cleared.
