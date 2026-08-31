@@ -1,0 +1,49 @@
+name: Batch 20260901 Selection Prep
+
+on:
+  push:
+    branches:
+      - batch/20260901-user-selected-10
+    paths:
+      - 'research/**'
+      - 'tools/batch-selection-pipeline.mjs'
+      - 'tools/strict-batch-selection-pipeline.mjs'
+      - 'tools/evaluate-research-statistics.mjs'
+      - 'tools/validate-selection-data.mjs'
+      - '.github/workflows/batch-20260901-selection-prep.yml'
+  workflow_dispatch:
+
+jobs:
+  selection-prep:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Prepare Selection workspace for 10 machines
+        run: >-
+          npm run selection:batch --
+          L_MAGIA_RECORD_RN
+          L_GODZILLA_NS
+          L_USHIO_TORA_HAKUMEN_VH
+          L_AMAZING_LIVE_PD
+          L_YOSHIMUNE_SC2
+          L_MAHJONG_MONOGATARI_S2
+          L_IDOLMASTER_MILLION_LIVE_HC
+          L_YOUJITSU_DE
+          L_MIDORI_DON_5_FY
+          L_GUNDAM_SEED_G
+      - name: Show batch report
+        shell: bash
+        run: |
+          set -euo pipefail
+          cat reports/batch-selection-pipeline-report.json
+      - name: Upload Selection workspace
+        uses: actions/upload-artifact@v4
+        with:
+          name: selection-prep-20260901
+          path: |
+            selection-batch/**
+            reports/batch-selection-pipeline-report.json
+          if-no-files-found: error
