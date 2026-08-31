@@ -1,0 +1,54 @@
+{
+  "schemaVersion":"selection-data-v1",
+  "machineId":"L_MAGIA_RECORD_RN",
+  "machineDataVersion":"0.1.0",
+  "uiCategoryLabels":{"NORMAL":"通常時","SMALL_ROLE":"小役","CONDITIONAL":"条件付き推測","EPISODE":"エピソードボーナス","EVIDENCE":"設定確定情報"},
+  "inputs":[
+    {"id":"INP_NORMAL_GAMES","name":"通常ゲーム数","type":"integer","category":"NORMAL","unit":"G","displayOrder":10,"inferenceRole":"INCLUDE_FALLBACK","defaultValue":0,"observationScope":"SELF_PLAY","description":"自分が遊技した通常ゲーム数を入力します。"},
+    {"id":"INP_BONUS_INITIAL","name":"ボーナス初当り","type":"counter","category":"NORMAL","unit":"回","displayOrder":11,"inferenceRole":"INCLUDE_FALLBACK","defaultValue":null,"parentInputId":"INP_NORMAL_GAMES","description":"通常時からのボーナス初当り回数を入力します。弱チェリーを取得していない場合のフォールバックに使用します。"},
+    {"id":"INP_ALL_GAMES","name":"全ゲーム数","type":"integer","category":"SMALL_ROLE","unit":"G","displayOrder":20,"inferenceRole":"INCLUDE_PRIMARY","defaultValue":null,"observationScope":"SELF_PLAY","description":"ユニメモ等で確認できる全ゲーム数を入力します。"},
+    {"id":"INP_WEAK_CHERRY","name":"弱チェリー","type":"counter","category":"SMALL_ROLE","unit":"回","displayOrder":21,"inferenceRole":"INCLUDE_PRIMARY","defaultValue":null,"parentInputId":"INP_ALL_GAMES","description":"弱チェリー回数を入力します。ユニメモ利用時は自動記録値を利用できます。"},
+    {"id":"INP_WATERMELON_ELIGIBLE","name":"対象スイカ成立回数","type":"integer","category":"CONDITIONAL","unit":"回","displayOrder":30,"inferenceRole":"INCLUDE_SUPPORT","defaultValue":null,"observationScope":"SELF_PLAY","description":"さなモード以外の通常時に成立したスイカ回数を入力します。状態を判別できないスイカは含めません。"},
+    {"id":"INP_MAGIA_CHALLENGE_FROM_WATERMELON","name":"マギアチャレンジ当選","type":"counter","category":"CONDITIONAL","unit":"回","displayOrder":31,"inferenceRole":"INCLUDE_SUPPORT","defaultValue":null,"parentInputId":"INP_WATERMELON_ELIGIBLE","description":"対象スイカからマギアチャレンジに当選した回数を入力します。"},
+    {"id":"INP_EPISODE_HINT_TOTAL","name":"対象エピソード回数","type":"integer","category":"EPISODE","unit":"回","displayOrder":40,"inferenceRole":"INCLUDE_SUPPORT","defaultValue":null,"observationScope":"SELF_PLAY","description":"黒江チャレンジ経由、ドッペルモードのいろは、ロングフリーズのういを除く設定示唆対象エピソードボーナス回数です。"},
+    {"id":"INP_EPISODE_YACHIYO","name":"やちよ","type":"counter","category":"EPISODE","unit":"回","displayOrder":41,"inferenceRole":"INCLUDE_SUPPORT","defaultValue":null,"parentInputId":"INP_EPISODE_HINT_TOTAL","description":"対象エピソードのうちやちよ回数です。"},
+    {"id":"INP_EPISODE_TSURUNO","name":"鶴乃","type":"counter","category":"EPISODE","unit":"回","displayOrder":42,"inferenceRole":"INCLUDE_SUPPORT","defaultValue":null,"parentInputId":"INP_EPISODE_HINT_TOTAL","description":"対象エピソードのうち鶴乃回数です。"},
+    {"id":"INP_EPISODE_SANA","name":"さな","type":"counter","category":"EPISODE","unit":"回","displayOrder":43,"inferenceRole":"INCLUDE_SUPPORT","defaultValue":null,"parentInputId":"INP_EPISODE_HINT_TOTAL","description":"対象エピソードのうちさな回数です。"},
+    {"id":"INP_EPISODE_FELICIA","name":"フェリシア","type":"counter","category":"EPISODE","unit":"回","displayOrder":44,"inferenceRole":"INCLUDE_SUPPORT","defaultValue":null,"parentInputId":"INP_EPISODE_HINT_TOTAL","description":"対象エピソードのうちフェリシア回数です。"},
+    {"id":"INP_EPISODE_KUROE","name":"黒江","type":"counter","category":"EPISODE","unit":"回","displayOrder":45,"inferenceRole":"INCLUDE_SUPPORT","defaultValue":null,"parentInputId":"INP_EPISODE_HINT_TOTAL","description":"黒江チャレンジ非経由の対象エピソードで黒江だった回数です。"}
+  ],
+  "features":[
+    {"researchFeatureId":"RF_BONUS_INITIAL","featureId":"FEAT_BONUS_INITIAL","adoptionCategory":"INCLUDE_FALLBACK","minimumSample":300,"sampleRecommendation":5000,"weight":1,"numeratorInputId":"INP_BONUS_INITIAL","denominatorInputId":"INP_NORMAL_GAMES","difficultyParticipation":"EXCLUDE","suppressedByFeatureIds":["FEAT_WEAK_CHERRY"],"userReason":"通常ゲームとボーナス初当りだけで観測できるため、ユニメモ等で弱チェリーを取得できない実戦向けフォールバックとして採用し、弱チェリー入力時は同一遊技区間の過信を避けて停止します。","difficultyExclusionReason":"共通Difficultyでは弱チェリー取得を前提とし、フォールバック初当りを同時加算しないため除外します。"},
+    {"researchFeatureId":"RF_AT_INITIAL","featureId":"FEAT_AT_INITIAL_EXCLUDED","adoptionCategory":"EXCLUDE","userFacingReason":"AT初当りはボーナス/CZ等の下流経路を集約し、通常時の設定差小役やボーナス初当りと独立に加えると同じ因果経路を重複評価するため不採用です。"},
+    {"researchFeatureId":"RF_WEAK_CHERRY","featureId":"FEAT_WEAK_CHERRY","adoptionCategory":"INCLUDE_PRIMARY","minimumSample":500,"sampleRecommendation":5000,"weight":1,"numeratorInputId":"INP_WEAK_CHERRY","denominatorInputId":"INP_ALL_GAMES","difficultyParticipation":"INCLUDE","difficultyExposure":{"mode":"per_game","factor":1,"quality":"EXACT","basisId":"ALL_GAMES"},"userReason":"全ゲーム分母の設定別確率が明確で約1/50～1/60と高頻度、さらにユニメモで小役確率を取得できるため、誤分類の少ない主Featureとして採用します。"},
+    {"researchFeatureId":"RF_WATERMELON_MAGIA_CHALLENGE","featureId":"FEAT_WATERMELON_MAGIA_CHALLENGE","adoptionCategory":"INCLUDE_SUPPORT","minimumSample":10,"sampleRecommendation":100,"weight":1,"numeratorInputId":"INP_MAGIA_CHALLENGE_FROM_WATERMELON","denominatorInputId":"INP_WATERMELON_ELIGIBLE","difficultyParticipation":"EXCLUDE","userReason":"さなモード以外のスイカ成立を専用分母にした条件付きCZ当選率で、対象状態と契機を判別できた試行だけなら小役頻度とは別の情報として評価できるため補助採用します。","difficultyExclusionReason":"通常ゲーム数から対象スイカ試行数を正確に導出できないため共通Difficultyでは除外します。"},
+    {"researchFeatureId":"RF_WATERMELON_KUROE_CHALLENGE","featureId":"FEAT_WATERMELON_KUROE_CHALLENGE_EXCLUDED","adoptionCategory":"EXCLUDE","userFacingReason":"マギアチャレンジと同じ対象スイカ分母上の競合当選で、別々の二項尤度にすると同じスイカ試行を二重評価するうえ出現率0.4～0.8%と低いため不採用です。"},
+    {"researchFeatureId":"RF_MAGICAL_GIRL_MODE_RESET_AT_END_DIST","featureId":"FEAT_MAGICAL_GIRL_MODE_RESET_AT_END_DIST_EXCLUDED","adoptionCategory":"EXCLUDE","userFacingReason":"有利区間移行/AT終了時に内部選択される魔法少女モードの完全カテゴリを毎回確実に観測できる公開契約がなく、潜在状態の誤分類を避けて不採用です。"},
+    {"researchFeatureId":"RF_MAGICAL_GIRL_MODE_BONUS_END_DIST","featureId":"FEAT_MAGICAL_GIRL_MODE_BONUS_END_DIST_EXCLUDED","adoptionCategory":"EXCLUDE","userFacingReason":"AT非当選ボーナス終了時かついろはモードという内部条件を正確に判定して全移行先を観測する必要があり、公開multinomialの分母を安定再現できないため不採用です。"},
+    {"researchFeatureId":"RF_HIGH_STATE_RESET_AT_END_DIST","featureId":"FEAT_HIGH_STATE_RESET_AT_END_DIST_EXCLUDED","adoptionCategory":"EXCLUDE","userFacingReason":"高確非移行/10G/20G/30Gという内部状態の選択結果を毎回完全に識別する必要があり、公開分布と同じ試行を実戦で確実に再現できないため不採用です。"},
+    {"researchFeatureId":"RF_HIGH_STATE_BIG_END_DIST","featureId":"FEAT_HIGH_STATE_BIG_END_DIST_EXCLUDED","adoptionCategory":"EXCLUDE","userFacingReason":"BIG終了後の高確G数は内部状態の完全識別が必要で、非移行を含む全カテゴリを誤分類なく観測する契約がないため不採用です。"},
+    {"researchFeatureId":"RF_EPISODE_BONUS_CHARACTER_DIST","featureId":"FEAT_EPISODE_BONUS_CHARACTER_DIST","adoptionCategory":"INCLUDE_SUPPORT","minimumSample":2,"sampleRecommendation":20,"weight":1,"numeratorInputId":"INP_EPISODE_YACHIYO","denominatorInputId":"INP_EPISODE_HINT_TOTAL","categoryInputIds":["INP_EPISODE_TSURUNO","INP_EPISODE_SANA","INP_EPISODE_FELICIA","INP_EPISODE_KUROE"],"difficultyParticipation":"EXCLUDE","userReason":"除外条件を満たした設定示唆系エピソードボーナスではキャラクターを直接観測でき、対象エピソード総数を専用分母とする完全分布なので補助Featureとして採用します。","difficultyExclusionReason":"通常ゲーム数から対象エピソード発生試行数を厳密に導出できないため共通Difficultyでは除外します。"},
+    {"researchFeatureId":"RF_MITAMA_REWARD_L2_AT","featureId":"FEAT_MITAMA_REWARD_L2_AT_EXCLUDED","adoptionCategory":"EXCLUDE","userFacingReason":"公開確率の分母は内部報酬レベル2のウワサバトル発展ですが、画面表示から内部レベル2を確実に識別できる契約が未解決のため不採用です。"},
+    {"researchFeatureId":"RF_MITAMA_REWARD_L3_AT","featureId":"FEAT_MITAMA_REWARD_L3_AT_EXCLUDED","adoptionCategory":"EXCLUDE","userFacingReason":"公開確率の分母は内部報酬レベル3のウワサバトル発展ですが、画面表示から内部レベル3を確実に識別できる契約が未解決のため不採用です。"}
+  ],
+  "evidenceUi":{"groups":[
+    {"groupId":"MAGIA_STORY","label":"ストーリー中キャラ紹介","selectionMode":"multi","displayOrder":100,"options":[
+      {"value":"C5","label":"最後が小さいキュゥべえ（設定5以上）","allowedSettings":["SET_5","SET_6"],"excludedSettings":["SET_1","SET_2","SET_3","SET_4"],"sourceEvidenceIds":["RE_CHAR_INTRO_5PLUS"]}
+    ]},
+    {"groupId":"MAGIA_BIG_END","label":"BIG終了画面","selectionMode":"multi","displayOrder":110,"options":[
+      {"value":"B2","label":"水着みかづき荘（設定2以上）","allowedSettings":["SET_2","SET_3","SET_4","SET_5","SET_6"],"excludedSettings":["SET_1"],"sourceEvidenceIds":["RE_BIG_END_2PLUS"]},
+      {"value":"B4","label":"2nd Seasonキービジュアル（設定4以上）","allowedSettings":["SET_4","SET_5","SET_6"],"excludedSettings":["SET_1","SET_2","SET_3"],"sourceEvidenceIds":["RE_BIG_END_4PLUS"]},
+      {"value":"B5","label":"1st Seasonキービジュアル（設定5以上）","allowedSettings":["SET_5","SET_6"],"excludedSettings":["SET_1","SET_2","SET_3","SET_4"],"sourceEvidenceIds":["RE_BIG_END_5PLUS"]},
+      {"value":"B6","label":"小さいキュゥべえ（設定6）","allowedSettings":["SET_6"],"excludedSettings":["SET_1","SET_2","SET_3","SET_4","SET_5"],"sourceEvidenceIds":["RE_BIG_END_6"]}
+    ]},
+    {"groupId":"MAGIA_AT_END","label":"AT終了画面","selectionMode":"multi","displayOrder":120,"options":[
+      {"value":"A6","label":"まどか＆いろは（設定6）","allowedSettings":["SET_6"],"excludedSettings":["SET_1","SET_2","SET_3","SET_4","SET_5"],"sourceEvidenceIds":["RE_AT_END_6"]}
+    ]},
+    {"groupId":"MAGIA_ENDING_CARD","label":"エンディング中カード","selectionMode":"multi","displayOrder":130,"options":[
+      {"value":"E4","label":"金枠・舞台装置の魔女（設定4以上）","allowedSettings":["SET_4","SET_5","SET_6"],"excludedSettings":["SET_1","SET_2","SET_3"],"sourceEvidenceIds":["RE_ENDING_CARD_4PLUS"]}
+    ]}
+  ]},
+  "evidenceReview":{"policyVersion":1,"exclusions":[]},
+  "difficultyAnalysis":{"targetGameBasis":{"basisId":"ALL_GAMES","label":"自分の全ゲーム数","quality":"EXACT"},"calibrationAllowedExposureQualities":["EXACT","DERIVED"]},
+  "selectionNotes":["弱チェリー取得時はボーナス初当りフォールバックを停止する。","同じ対象スイカ分母のマギアチャレンジと黒江チャレンジを独立二項尤度で重ねず、より頻度の高いマギアチャレンジのみ採用する。","内部モード・高確G数・みたま内部報酬レベルはObservation契約が解決するまで推測UIへ出さない。"]
+}
