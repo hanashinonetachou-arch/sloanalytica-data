@@ -1,0 +1,67 @@
+{
+  "schemaVersion": "selection-data-v1",
+  "machineId": "L_GUNDAM_SEED_G",
+  "machineDataVersion": "0.1.0",
+  "uiCategoryLabels": {
+    "NORMAL": "通常時",
+    "EVIDENCE": "設定確定情報"
+  },
+  "inputs": [
+    {"id":"INP_NORMAL_GAMES","name":"通常ゲーム数","type":"integer","category":"NORMAL","unit":"G","displayOrder":10,"inferenceRole":"INCLUDE_PRIMARY","defaultValue":0,"observationScope":"SELF_PLAY","description":"自分が遊技した通常ゲーム数を入力します。"},
+    {"id":"INP_AT_INITIAL","name":"AT初当り","type":"counter","category":"NORMAL","unit":"回","displayOrder":11,"inferenceRole":"INCLUDE_PRIMARY","defaultValue":null,"parentInputId":"INP_NORMAL_GAMES","description":"通常時からのAT初当り回数を入力します。"}
+  ],
+  "features": [
+    {
+      "researchFeatureId":"RF_CZ_INITIAL",
+      "featureId":"FEAT_CZ_INITIAL_EXCLUDED",
+      "adoptionCategory":"EXCLUDE",
+      "userFacingReason":"CZ初当りとAT初当りは同じ通常ゲーム区間の下流関係を含み、別々の二項尤度で使うと同じ遊技経路を重複評価するため不採用です。"
+    },
+    {
+      "researchFeatureId":"RF_AT_INITIAL",
+      "featureId":"FEAT_AT_INITIAL",
+      "adoptionCategory":"INCLUDE_PRIMARY",
+      "minimumSample":300,
+      "sampleRecommendation":5000,
+      "weight":1,
+      "numeratorInputId":"INP_AT_INITIAL",
+      "denominatorInputId":"INP_NORMAL_GAMES",
+      "difficultyParticipation":"INCLUDE",
+      "difficultyExposure":{"mode":"per_game","factor":1,"quality":"EXACT","basisId":"NORMAL_GAMES"},
+      "userReason":"通常ゲームを分母にした全設定の公開確率が揃い、設定1対6の識別情報もCZ初当りより大きいため、重複を避けてAT初当りへ一本化します。"
+    },
+    {
+      "researchFeatureId":"RF_EARLY_0_49_HIT",
+      "featureId":"FEAT_EARLY_0_49_HIT_EXCLUDED",
+      "adoptionCategory":"EXCLUDE",
+      "userFacingReason":"リセット/ST終了後という限定区間のCZまたはボーナス当選は総初当り系列の部分集合で、AT初当りと独立ではないため二重評価防止で不採用です。"
+    },
+    {
+      "researchFeatureId":"RF_EARLY_50_99_HIT",
+      "featureId":"FEAT_EARLY_50_99_HIT_EXCLUDED",
+      "adoptionCategory":"EXCLUDE",
+      "userFacingReason":"総初当り系列の部分集合であるうえ、公開50～99G率の条件付き分母か区間寄与率かが未解決のため、正しい尤度を構築できず不採用です。"
+    }
+  ],
+  "evidenceUi": {
+    "groups": [
+      {"groupId":"GUNDAM_CZ_ST_END","label":"CZ/ST終了画面","selectionMode":"multi","displayOrder":100,"options":[
+        {"value":"EVEN","label":"紫枠・偶数設定濃厚","allowedSettings":["SET_2","SET_4","SET_6"],"excludedSettings":["SET_1","SET_3","SET_5"],"sourceEvidenceIds":["RE_CZ_ST_END_EVEN"]},
+        {"value":"NOT_1","label":"紫枠・設定1否定","allowedSettings":["SET_2","SET_3","SET_4","SET_5","SET_6"],"excludedSettings":["SET_1"],"sourceEvidenceIds":["RE_CZ_ST_END_NOT_1"]},
+        {"value":"NOT_2","label":"紫枠・設定2否定","allowedSettings":["SET_1","SET_3","SET_4","SET_5","SET_6"],"excludedSettings":["SET_2"],"sourceEvidenceIds":["RE_CZ_ST_END_NOT_2"]},
+        {"value":"NOT_3","label":"紫枠・設定3否定","allowedSettings":["SET_1","SET_2","SET_4","SET_5","SET_6"],"excludedSettings":["SET_3"],"sourceEvidenceIds":["RE_CZ_ST_END_NOT_3"]},
+        {"value":"FOUR_PLUS","label":"銀枠（設定4以上）","allowedSettings":["SET_4","SET_5","SET_6"],"excludedSettings":["SET_1","SET_2","SET_3"],"sourceEvidenceIds":["RE_CZ_ST_END_4PLUS"]},
+        {"value":"SIX","label":"金枠（設定6）","allowedSettings":["SET_6"],"excludedSettings":["SET_1","SET_2","SET_3","SET_4","SET_5"],"sourceEvidenceIds":["RE_CZ_ST_END_6"]}
+      ]},
+      {"groupId":"GUNDAM_ENDING_END","label":"エンディング終了画面","selectionMode":"multi","displayOrder":110,"options":[
+        {"value":"SIX","label":"金枠（設定6）","allowedSettings":["SET_6"],"excludedSettings":["SET_1","SET_2","SET_3","SET_4","SET_5"],"sourceEvidenceIds":["RE_ENDING_END_6"]}
+      ]}
+    ]
+  },
+  "evidenceReview":{"policyVersion":1,"exclusions":[]},
+  "difficultyAnalysis":{"targetGameBasis":{"basisId":"NORMAL_GAMES","label":"自分の通常ゲーム数","quality":"EXACT"},"calibrationAllowedExposureQualities":["EXACT","DERIVED"]},
+  "selectionNotes":[
+    "CZ初当り・AT初当り・早期区間当選を独立尤度として重ねない。",
+    "早期区間率は将来、分母契約と総初当りとのconditional関係が解決した場合のみSelectionを再オープンする。"
+  ]
+}
