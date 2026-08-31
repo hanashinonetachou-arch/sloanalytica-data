@@ -1,0 +1,92 @@
+{
+  "schemaVersion": "selection-data-v1",
+  "machineId": "L_GODZILLA_NS",
+  "machineDataVersion": "0.1.0",
+  "uiCategoryLabels": {
+    "NORMAL": "通常時",
+    "CZ": "襲来ZONE",
+    "EVIDENCE": "設定確定情報"
+  },
+  "inputs": [
+    {"id":"INP_NORMAL_GAMES","name":"通常ゲーム数","type":"integer","category":"NORMAL","unit":"G","displayOrder":10,"inferenceRole":"INCLUDE_PRIMARY","defaultValue":0,"observationScope":"SELF_PLAY","description":"自分が遊技した通常ゲーム数を入力します。"},
+    {"id":"INP_AT_INITIAL","name":"AT初当り","type":"counter","category":"NORMAL","unit":"回","displayOrder":11,"inferenceRole":"INCLUDE_PRIMARY","defaultValue":null,"parentInputId":"INP_NORMAL_GAMES","description":"通常時からのAT初当り回数を入力します。"},
+    {"id":"INP_SHURAI_TOTAL","name":"襲来ZONE回数","type":"integer","category":"CZ","unit":"回","displayOrder":20,"inferenceRole":"INCLUDE_SUPPORT","defaultValue":null,"observationScope":"SELF_PLAY","description":"対戦怪獣を確認できた襲来ZONEの総回数を入力します。"},
+    {"id":"INP_SHURAI_RADON","name":"ラドン","type":"counter","category":"CZ","unit":"回","displayOrder":21,"inferenceRole":"INCLUDE_SUPPORT","defaultValue":null,"parentInputId":"INP_SHURAI_TOTAL","description":"襲来ZONEでラドンが選ばれた回数を入力します。"},
+    {"id":"INP_SHURAI_GIGAN","name":"ガイガン","type":"counter","category":"CZ","unit":"回","displayOrder":22,"inferenceRole":"INCLUDE_SUPPORT","defaultValue":null,"parentInputId":"INP_SHURAI_TOTAL","description":"襲来ZONEでガイガンが選ばれた回数を入力します。"},
+    {"id":"INP_SHURAI_BIOLLANTE","name":"ビオランテ","type":"counter","category":"CZ","unit":"回","displayOrder":23,"inferenceRole":"INCLUDE_SUPPORT","defaultValue":null,"parentInputId":"INP_SHURAI_TOTAL","description":"襲来ZONEでビオランテが選ばれた回数を入力します。"},
+    {"id":"INP_SHURAI_DESTOROYAH","name":"デストロイア","type":"counter","category":"CZ","unit":"回","displayOrder":24,"inferenceRole":"INCLUDE_SUPPORT","defaultValue":null,"parentInputId":"INP_SHURAI_TOTAL","description":"襲来ZONEでデストロイアが選ばれた回数を入力します。"},
+    {"id":"INP_SHURAI_KING_GHIDORAH","name":"キングギドラ","type":"counter","category":"CZ","unit":"回","displayOrder":25,"inferenceRole":"INCLUDE_SUPPORT","defaultValue":null,"parentInputId":"INP_SHURAI_TOTAL","description":"襲来ZONEでキングギドラが選ばれた回数を入力します。"}
+  ],
+  "features": [
+    {
+      "researchFeatureId":"RF_CZ_INITIAL",
+      "featureId":"FEAT_CZ_INITIAL_EXCLUDED",
+      "adoptionCategory":"EXCLUDE",
+      "userFacingReason":"CZ初当りは設定差が非常に小さく、AT初当りへ連なる同一遊技経路も含むため、AT初当りとの二重評価を避けて不採用です。"
+    },
+    {
+      "researchFeatureId":"RF_AT_INITIAL",
+      "featureId":"FEAT_AT_INITIAL",
+      "adoptionCategory":"INCLUDE_PRIMARY",
+      "minimumSample":300,
+      "sampleRecommendation":5000,
+      "weight":1,
+      "numeratorInputId":"INP_AT_INITIAL",
+      "denominatorInputId":"INP_NORMAL_GAMES",
+      "difficultyParticipation":"INCLUDE",
+      "difficultyExposure":{"mode":"per_game","factor":1,"quality":"EXACT","basisId":"NORMAL_GAMES"},
+      "userReason":"通常ゲームを分母にしたAT初当りは全設定の公開確率が揃い、CZ初当りより設定差が大きく情報量も高いため主Featureとして採用します。"
+    },
+    {
+      "researchFeatureId":"RF_SHURAI_MONSTER_DIST",
+      "featureId":"FEAT_SHURAI_MONSTER_DIST",
+      "adoptionCategory":"INCLUDE_SUPPORT",
+      "minimumSample":10,
+      "sampleRecommendation":50,
+      "weight":1,
+      "numeratorInputId":"INP_SHURAI_RADON",
+      "denominatorInputId":"INP_SHURAI_TOTAL",
+      "categoryInputIds":["INP_SHURAI_GIGAN","INP_SHURAI_BIOLLANTE","INP_SHURAI_DESTOROYAH","INP_SHURAI_KING_GHIDORAH"],
+      "difficultyParticipation":"EXCLUDE",
+      "userReason":"襲来ZONE当選後の対戦怪獣という条件付き構成比で、通常ゲーム当りAT初当りとは異なる観測単位を持つため補助Featureとして採用します。",
+      "difficultyExclusionReason":"通常ゲーム数から襲来ZONE試行数を正確に導出できる公開根拠がないため共通Difficultyでは除外します。"
+    }
+  ],
+  "evidenceUi": {
+    "groups": [
+      {"groupId":"GODZILLA_MENU","label":"メニュー画面","selectionMode":"multi","displayOrder":100,"options":[
+        {"value":"MENU_2PLUS","label":"轟天号（設定2以上）","allowedSettings":["SET_2","SET_3","SET_4","SET_5","SET_6"],"excludedSettings":["SET_1"],"sourceEvidenceIds":["RE_MENU_2PLUS"]},
+        {"value":"MENU_4PLUS","label":"スーパーXⅢ（設定4以上）","allowedSettings":["SET_4","SET_5","SET_6"],"excludedSettings":["SET_1","SET_2","SET_3"],"sourceEvidenceIds":["RE_MENU_4PLUS"]},
+        {"value":"MENU_6","label":"3式機龍（設定6）","allowedSettings":["SET_6"],"excludedSettings":["SET_1","SET_2","SET_3","SET_4","SET_5"],"sourceEvidenceIds":["RE_MENU_6"]}
+      ]},
+      {"groupId":"GODZILLA_OPERATOR","label":"オペレーターセリフ","selectionMode":"multi","displayOrder":110,"options":[
+        {"value":"OP_2PLUS","label":"設定2以上セリフ","allowedSettings":["SET_2","SET_3","SET_4","SET_5","SET_6"],"excludedSettings":["SET_1"],"sourceEvidenceIds":["RE_OPERATOR_2PLUS"]},
+        {"value":"OP_3PLUS","label":"設定3以上セリフ","allowedSettings":["SET_3","SET_4","SET_5","SET_6"],"excludedSettings":["SET_1","SET_2"],"sourceEvidenceIds":["RE_OPERATOR_3PLUS"]},
+        {"value":"OP_4PLUS","label":"設定4以上セリフ","allowedSettings":["SET_4","SET_5","SET_6"],"excludedSettings":["SET_1","SET_2","SET_3"],"sourceEvidenceIds":["RE_OPERATOR_4PLUS"]},
+        {"value":"OP_5PLUS","label":"設定5以上セリフ","allowedSettings":["SET_5","SET_6"],"excludedSettings":["SET_1","SET_2","SET_3","SET_4"],"sourceEvidenceIds":["RE_OPERATOR_5PLUS"]},
+        {"value":"OP_6","label":"設定6セリフ","allowedSettings":["SET_6"],"excludedSettings":["SET_1","SET_2","SET_3","SET_4","SET_5"],"sourceEvidenceIds":["RE_OPERATOR_6"]}
+      ]},
+      {"groupId":"GODZILLA_BONUS_END","label":"ボーナス終了画面","selectionMode":"multi","displayOrder":120,"options":[
+        {"value":"BONUS_4PLUS","label":"キングギドラ（設定4以上）","allowedSettings":["SET_4","SET_5","SET_6"],"excludedSettings":["SET_1","SET_2","SET_3"],"sourceEvidenceIds":["RE_BONUS_END_4PLUS"]},
+        {"value":"BONUS_5PLUS","label":"ゴジラ・赤（設定5以上）","allowedSettings":["SET_5","SET_6"],"excludedSettings":["SET_1","SET_2","SET_3","SET_4"],"sourceEvidenceIds":["RE_BONUS_END_5PLUS"]},
+        {"value":"BONUS_6","label":"ゴジラ・白黒（設定6）","allowedSettings":["SET_6"],"excludedSettings":["SET_1","SET_2","SET_3","SET_4","SET_5"],"sourceEvidenceIds":["RE_BONUS_END_6"]}
+      ]},
+      {"groupId":"GODZILLA_EX_MOVIE","label":"EXボーナス中ムービー","selectionMode":"multi","displayOrder":130,"options":[
+        {"value":"MOVIE_5PLUS","label":"ムービー5（設定5以上）","allowedSettings":["SET_5","SET_6"],"excludedSettings":["SET_1","SET_2","SET_3","SET_4"],"sourceEvidenceIds":["RE_EX_MOVIE_5PLUS"]}
+      ]},
+      {"groupId":"GODZILLA_TROPHY","label":"ギンちゃんトロフィー","selectionMode":"multi","displayOrder":140,"options":[
+        {"value":"TROPHY_2PLUS","label":"銅（設定2以上）","allowedSettings":["SET_2","SET_3","SET_4","SET_5","SET_6"],"excludedSettings":["SET_1"],"sourceEvidenceIds":["RE_TROPHY_2PLUS"]},
+        {"value":"TROPHY_3PLUS","label":"銀（設定3以上）","allowedSettings":["SET_3","SET_4","SET_5","SET_6"],"excludedSettings":["SET_1","SET_2"],"sourceEvidenceIds":["RE_TROPHY_3PLUS"]},
+        {"value":"TROPHY_4PLUS","label":"金（設定4以上）","allowedSettings":["SET_4","SET_5","SET_6"],"excludedSettings":["SET_1","SET_2","SET_3"],"sourceEvidenceIds":["RE_TROPHY_4PLUS"]},
+        {"value":"TROPHY_5PLUS","label":"トラ柄（設定5以上）","allowedSettings":["SET_5","SET_6"],"excludedSettings":["SET_1","SET_2","SET_3","SET_4"],"sourceEvidenceIds":["RE_TROPHY_5PLUS"]},
+        {"value":"TROPHY_6","label":"虹（設定6）","allowedSettings":["SET_6"],"excludedSettings":["SET_1","SET_2","SET_3","SET_4","SET_5"],"sourceEvidenceIds":["RE_TROPHY_6"]}
+      ]}
+    ]
+  },
+  "evidenceReview":{"policyVersion":1,"exclusions":[]},
+  "difficultyAnalysis":{"targetGameBasis":{"basisId":"NORMAL_GAMES","label":"自分の通常ゲーム数","quality":"EXACT"},"calibrationAllowedExposureQualities":["EXACT","DERIVED"]},
+  "selectionNotes":[
+    "CZ初当りとAT初当りを同時採用せず、より大きな設定差を持つAT初当りへ一本化する。",
+    "襲来ZONE対戦怪獣はCZ当選後の条件付き構成として別Feature化する。"
+  ]
+}
