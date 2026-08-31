@@ -2,13 +2,18 @@
 
 ## Status
 
-This checkpoint records the final Web/GitHub-side review state after batch publish generation and the first real-device feedback pass. PR #148 must remain Draft until the remaining field-only checks and resulting real-device/UI lock are intentionally completed.
+This checkpoint records the current final Web/GitHub-side review state after batch publication, Red Team corrections, field verification, and the consolidated 10-machine real-device UI smoke pass.
+
+- Active field-only blockers for adopted inference/UI: **0**.
+- Deferred supplemental field debt: **3**.
+- Consolidated 10-machine real-device UI smoke test: **PASS (user quick pass; no obvious issues found)**.
+- PR #148 remains Draft pending an intentional merge decision; the quick smoke pass must not be misrepresented as exhaustive per-control verification.
 
 ## Registration / publication state
 
 - Batch publish APPLY completed for all 10 machines.
 - Catalog entries are available at MachineData version 0.1.0 and Difficulty entries are SCORED.
-- Formal provisionalRegistrationId allocation completed as one contiguous registry sequence:
+- provisionalRegistrationId allocation is contiguous:
   - 181 L_BIOHAZARD5_ZE
   - 182 L_TIDADONDON_PA5
   - 183 L_SISTER_QUEST_CA
@@ -19,94 +24,106 @@ This checkpoint records the final Web/GitHub-side review state after batch publi
   - 188 S_BOOWY_SV
   - 189 S_SUPER_RIO_ACE_CC
   - 190 S_PERSONA5_FR
-- Machine Identity classification is complete for 190 production machines with one explicit test-only machine excluded.
-- Generated MachineData was refreshed after the final Persona5 source-layer correction before this checkpoint commit.
-- A regeneration-order defect was found and fixed: rebuilding a published MachineData package could previously drop the formal `introductionDate`, `machineType`, and `gameType` fields that had been applied after publication. `machine-pipeline.mjs` now merges the canonical entry from `machine-identity-metadata.json` into each generated package before writing/syncing it. Pre-publication machines without an identity-metadata entry remain buildable. A regression test locks both behaviors.
+- Machine Identity classification is complete for 190 production machines with one explicit test-only exclusion.
+- The MachineData regeneration path preserves canonical `introductionDate`, `machineType`, and `gameType` via `machine-identity-metadata.json`; regression coverage is in place.
 
-## Red Team conclusions
+## Final Red Team / field conclusions
 
 ### パチスロペルソナ5
 
-- Corrected a semantic defect in the initial-hit candidate: the published 1/127.5 through 1/111.0 values are PERSONA CHANCE + AT combined initial-hit rates, not PERSONA CHANCE-only rates.
-- Research, Selection, Observation, UI Design, and generated MachineData now use `PC＋AT 初当り合算` consistently.
-- AT first hit is a subset of that selected combined observation and is therefore not independently multiplied into the likelihood.
-- PC ending-screen red/purple cues were decomposed instead of being discarded as an undifferentiated hint:
-  - red + revival denied + next PC does not hit AT => setting 2 or higher;
-  - purple + revival denied + next PC does not hit AT => setting 4 or higher.
-- Color appearance alone is explicitly not Hard Evidence.
-- Direct-AT setting values are publicly known. They remain excluded from numeric inference because low-state and high/super-high probabilities require separate internal-state game denominators that cannot be safely and exactly observed during normal play. The exclusion is not based on missing public numbers.
-- Remaining field-only item is limited to MySlot result scope/reset boundary.
+- The selected published 1/127.5 through 1/111.0 candidate is `PC＋AT 初当り合算`, not PC-only.
+- AT first hit is a subset and remains excluded from independent likelihood multiplication.
+- Red/purple PC ending cues are delayed conditional Hard Evidence only when revival denial and the next-PC AT non-hit condition are also confirmed.
+- Direct-AT setting values are public but excluded because the required internal-state-specific game denominators are not safely observable.
+- MySlot result scope/reset boundary remains deferred LOW debt and is not assumed.
 
 ### スーパーリオエース
 
-- AT first hit remains the primary numeric Feature.
-- Bonus first hit is intentionally not multiplied alongside AT first hit because it gives weaker incremental separation within the same outcome process.
-- Rare-role AT-draw candidates remain excluded because a defensible practical observation contract was not established.
-- The current スロプラNEXT Rio support applies to the separate 2026 スマスロスーパーリオエース2 and is not projected onto the original 2022 machine.
-
-### Sister Quest
-
 - AT first hit remains primary.
-- CZ first hit is not independently combined with AT first hit because of causal/downstream overlap.
-- Monster ZONE stock remains a conditional support Feature.
-- AT-ending screen is retained as the full multinomial observation with explicit bounded normalization for published rounding only.
-- SmartTALK is a built-in machine-menu function rather than an external linked-account service; only history/reset persistence remains field-only.
+- Bonus first hit and rare-role AT-draw candidates remain excluded under the finalized dependency/observation policy.
+- Current スロプラNEXT Rio support for the separate 2026 machine is not projected onto the 2022 original.
 
-### スマスロ バイオハザード5
+### パチスロ BOØWY
 
-- AT first hit remains primary.
-- Panic Zone / total CZ rates are not independently stacked with AT first hit.
-- Infection entry is used only as the conditional middle-line AT-initial-hit composition.
-- Total Infection rate is not separately multiplied because it would reuse the same starting observation and mix the diagonal component.
-- Real-device verification confirms that middle-line and diagonal AT initial symbol hits can be reliably distinguished when watched, and subsequent Infection entry/non-entry can be paired with the corresponding hit. The conditional Feature remains valid.
+- AT first hit remains the selected numeric Feature.
+- Hard end-event Evidence and SET_L operational handling remain valid.
+- SET_L is not an inference hypothesis.
+
+### S BIG島唄30
+
+- Non-chain bonus first hit remains selected.
+- Real-device verification established **BIG後32G** as the chain region boundary used to exclude chain games from the denominator.
+- The former HIGH field blocker is resolved.
 
 ### S笑ゥせぇるすまん4
 
 - Bonus first hit remains primary.
-- Return-inclusive appearance probability is not separately multiplied.
-- Real-device verification determined that a CZ already successful at 審判ノ刻 entry cannot be reliably distinguished from a success achieved during CZ play.
-- Therefore the entry-time immediate-success Feature is no longer observable with a correct numerator and has been changed from conditional support to EXCLUDE.
-- Its dedicated input surface has been removed from UI Design so a rejected Feature cannot leak into the app UI.
+- Real-device verification established that a CZ already successful at 審判ノ刻 entry cannot be reliably distinguished from self-success during CZ play.
+- The entry-time immediate-success Feature is therefore EXCLUDE and its dedicated UI input surface has been removed.
 
-### Setting L machines
+### パチスロ バイオハザード RE:2
 
-- パチスロ BOØWY, S BIG島唄30, and S笑ゥせぇるすまん4 retain SET_L in `machine.settings` for identity/operational handling.
+- AT first hit + Figure Evidence remain valid.
+- Real-device verification confirms Figure Collection survives power OFF/ON and clears on setting change/reset.
+
+### L 仮面ライダー電王
+
+- Bonus first hit remains selected.
+- `manufacturer: 京楽` is retained for repository convention consistency while public legal-manufacturer material may identify SUN SUN SUN.
+- Official ぱちログweb support is confirmed; exact machine-specific result fields remain deferred MEDIUM debt and are not promoted to inference inputs.
+
+### Sister Quest
+
+- AT first hit remains primary.
+- Monster ZONE stock and AT-ending multinomial remain valid support Features.
+- SmartTALK is built-in machine-menu functionality, not an external linked-account service.
+- SmartTALK history/reset persistence remains deferred LOW debt.
+
+### てぃだどんどん
+
+- Bonus first hit and BIG-entry 7-segment Evidence remain valid and do not depend on unresolved service behavior.
+
+### スマスロ バイオハザード5
+
+- AT first hit remains primary.
+- Infection is used only as the conditional middle-line AT-initial-hit composition.
+- Real-device verification confirms middle-line/diagonal AT initial symbol hits can be distinguished when watched and Infection entry/non-entry can be paired with the corresponding hit.
+- The conditional Feature remains adopted.
+
+## SET_L policy
+
+- BOØWY, BIG島唄30, and 笑ゥ4 retain SET_L in `machine.settings` for identity/operational handling.
 - `machine.inferenceSettings` explicitly excludes SET_L.
-- No SET_L numeric probabilities are invented or synthesized.
-- SET_L-only visual/operational cues remain Evidence/operational information and must not appear as an ordinary posterior hypothesis.
+- No SET_L numeric probabilities are invented.
 
-### L 仮面ライダー電王 manufacturer convention
+## Deferred field-only debt
 
-- Public material can distinguish the 京楽 brand from the legal manufacturing entity SUN SUN SUN.
-- The current SloAnalytica catalog convention already uses 京楽 / 京楽産業． for multiple machines in this manufacturer family, including other recent KYORAKU-branded slots.
-- Therefore `manufacturer: 京楽` is retained for Den-O for repository consistency; this does not assert that SUN SUN SUN is not the legal manufacturing entity.
-- Official ぱちログweb support is confirmed, while the exact machine-specific result fields remain field-only.
+The remaining three items are intentionally deferred and are **not blockers for the current batch**:
 
-### Other batch machines
+1. MEDIUM — L 仮面ライダー電王 — exact ぱちログweb machine-specific result fields.
+2. LOW — パチスロペルソナ5 — MySlot result range/reset boundary.
+3. LOW — Sister Quest — SmartTALK history retention/reset boundary.
 
-- パチスロ バイオハザード RE:2: AT first hit + Figure Evidence remain valid. Real-device verification confirms that Figure Collection survives power OFF/ON and is cleared by setting change/reset, establishing the persistence boundary.
-- S BIG島唄30: non-chain bonus first hit remains selected; reliable operational identification of the chain-region boundary is still the highest-priority field check.
-- パチスロ BOØWY: adopted AT first hit and hard end-event Evidence do not depend on unresolved machine-menu/service behavior.
-- てぃだどんどん: adopted bonus first hit and BIG-entry 7-segment Evidence do not depend on unresolved machine-menu/service behavior.
+These routes remain unresolved and must not be treated as verified or used as inference inputs until later field verification.
 
-## Remaining field-only verification bundle
+## Real-device UI smoke pass
 
-Four items remain:
+A dedicated App test branch and isolated 10-machine catalog were used so the Data Draft PR did not need to be merged for device testing.
 
-1. HIGH — S BIG島唄30 — chain-region start/end boundary.
-2. MEDIUM — L 仮面ライダー電王 — actual ぱちログweb machine-specific result fields.
-3. LOW — パチスロペルソナ5 — MySlot result range/reset boundary.
-4. LOW — Sister Quest — SmartTALK history retention/reset boundary.
+The initial device-test delivery path exposed two infrastructure issues that were corrected during the pass:
 
-Resolved in the current field pass:
+- GitHub Pages deployment does not publish arbitrary `device-test/**` paths from the prototype source.
+- `vite.config.ts` hard-coded the prototype catalog URL, so `.env.prototype` overrides were ineffective.
 
-- S笑ゥせぇるすまん4 — entry-success vs self-success: not reliably distinguishable; Feature excluded and UI removed.
-- スマスロ バイオハザード5 — middle/diagonal classification and Infection pairing: reliably observable; Feature retained.
-- パチスロ バイオハザード RE:2 — Figure Collection persistence: power cycle retains; setting change/reset clears.
+The App test branch was corrected to use the isolated batch catalog at build time. After rebuilding and syncing Android, all 10 machines appeared in the catalog.
+
+The user then performed a quick cross-machine visual/UI pass and reported no obvious issues. Record this as **10/10 real-device UI smoke PASS**, with the explicit limitation that it was a quick smoke pass rather than exhaustive per-control validation.
 
 ## Merge gate
 
-- Web-solvable Red Team corrections identified in this pass have been applied.
-- The MachineData regeneration path now preserves formal Machine Identity instead of requiring a manual post-generation identity re-apply.
-- This checkpoint does not authorize merge.
-- Keep PR #148 Draft until the four remaining field-only checks are resolved/reclassified, generated artifacts are refreshed after the Warau4 Selection/UI change, CI is green on the stable final head, and the user-verified UI lock is completed.
+- Web-solvable Red Team corrections: complete.
+- Active field-only blockers for adopted inference/UI: 0.
+- Remaining field debt: 3 intentionally deferred supplemental routes.
+- 10-machine real-device UI smoke pass: PASS.
+- No device finding currently requires reopening Selection / Observation / UI.
+- PR #148 remains Draft until the merge is intentionally authorized; do not describe the quick smoke pass as a full exhaustive UI audit.
