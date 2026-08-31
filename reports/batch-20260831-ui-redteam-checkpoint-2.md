@@ -50,12 +50,28 @@ The Batch Machine Pipeline Regression rerun completed successfully after this ch
 
 The repository test suite in that regression completed 410/410 PASS, including the selection-policy migration invariant and the current-schema Research conflict tests.
 
+## Registration metadata contract confirmed
+
+The repository's formal registry flow was checked rather than assigning provisional IDs manually.
+
+`sync-machine-registry.mjs` defines `provisionalRegistrationId` as an immutable development-time sequence. Existing assigned IDs are preserved; future catalog machines receive the current maximum + 1. The batch publish pipeline adds/updates every requested catalog entry first and then executes machine-registry sync once for the whole batch.
+
+Therefore these 10 new machines should not receive guessed/manual provisional IDs before publication. Their IDs are allocated deterministically by the formal registry sync during an applied batch publish, after catalog insertion. `registrationId` remains separate and nullable.
+
+## Observation web-debt follow-up
+
+A further public-source pass was performed before sending anything to real-device verification.
+
+- Persona5: the analysis source explicitly recommends counting the state-independent watermelon with MySlot. Public material still does not establish the exact result-screen range/reset boundary, so that boundary remains a field-only verification item; the same watermelon observation must not be double-counted through manual and MySlot paths.
+- L 仮面ライダー電王: KYORAKU's official ぱちログweb page confirms this machine is supported and states that the machine QR code can be read to view the play result. The public page does not enumerate machine-specific result fields, so exact Selection-compatible counters remain unresolved instead of being guessed.
+- スーパーリオエース (2022): the current official スロプラNEXT service started in 2024 and its Rio entry is the separate 2026 machine `スマスロスーパーリオエース2`. No support basis for the 2022 original machine was found. Its Observation `linkedService` coverage is therefore resolved to `CHECKED_NONE`; the 2026 service fields must not be projected backward.
+- バイオハザード RE:2: the manufacturer official machine site was located, but no machine-specific linked-service result contract was established from the public material checked. Linked-service coverage remains unresolved rather than being inferred from manufacturer-family services.
+
 ## Remaining gates before publication
 
 The batch is no longer blocked by Research / Selection / Observation / UI construction or batch-local MachineData validation. Remaining work is:
 
-1. Resolve/confirm provisional registration metadata using the repository's formal registration process; do not invent IDs.
-2. Exhaust any remaining web-solvable linked-service / machine-menu Observation debt.
-3. Perform publish preparation and catalog/registry integration only after registration metadata is settled.
-4. Bundle the genuinely field-only verification items into one real-device verification pass.
-5. Keep PR #148 draft until publication and real-device gates are intentionally cleared.
+1. Continue resolving web-solvable machine-menu / linked-service Observation debt; keep only genuinely field-only items for real-device review.
+2. Run batch publish preparation. On an applied publish, allow the formal registry sync to allocate immutable provisional registration IDs after catalog insertion; do not preassign them manually.
+3. Bundle the genuinely field-only verification items into one real-device verification pass.
+4. Keep PR #148 draft until publication and real-device gates are intentionally cleared.
