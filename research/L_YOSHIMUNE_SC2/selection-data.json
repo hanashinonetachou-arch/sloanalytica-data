@@ -1,0 +1,28 @@
+{
+  "schemaVersion":"selection-data-v1",
+  "machineId":"L_YOSHIMUNE_SC2",
+  "machineDataVersion":"0.1.0",
+  "uiCategoryLabels":{"NORMAL":"通常時","SMALL_ROLE":"小役","EVIDENCE":"設定確定情報"},
+  "inputs":[
+    {"id":"INP_NORMAL_GAMES","name":"通常ゲーム数","type":"integer","category":"NORMAL","unit":"G","displayOrder":10,"inferenceRole":"INCLUDE_PRIMARY","defaultValue":0,"observationScope":"SELF_PLAY","description":"自分が遊技した通常ゲーム数を入力します。"},
+    {"id":"INP_INITIAL_HIT","name":"BIG/REG初当り","type":"counter","category":"NORMAL","unit":"回","displayOrder":11,"inferenceRole":"INCLUDE_FALLBACK","defaultValue":null,"parentInputId":"INP_NORMAL_GAMES","description":"通常時からのBIG/REG初当り回数を入力します。共通俵を取得していない場合のフォールバックに使用します。"},
+    {"id":"INP_ALL_GAMES","name":"全状態ゲーム数","type":"integer","category":"SMALL_ROLE","unit":"G","displayOrder":20,"inferenceRole":"INCLUDE_PRIMARY","defaultValue":null,"observationScope":"SELF_PLAY","description":"共通俵の公開確率と同じ、全状態を含む消化ゲーム数を入力します。ダイトモの遊技履歴利用を推奨します。"},
+    {"id":"INP_COMMON_TAWARA","name":"共通俵","type":"counter","category":"SMALL_ROLE","unit":"回","displayOrder":21,"inferenceRole":"INCLUDE_PRIMARY","defaultValue":null,"parentInputId":"INP_ALL_GAMES","description":"共通俵回数を入力します。未取得の場合は空欄のままにしてください。"}
+  ],
+  "features":[
+    {"researchFeatureId":"RF_INITIAL_HIT","featureId":"FEAT_INITIAL_HIT","adoptionCategory":"INCLUDE_FALLBACK","minimumSample":300,"sampleRecommendation":5000,"weight":1,"numeratorInputId":"INP_INITIAL_HIT","denominatorInputId":"INP_NORMAL_GAMES","difficultyParticipation":"EXCLUDE","suppressedByFeatureIds":["FEAT_COMMON_TAWARA"],"userReason":"通常ゲームとBIG/REG初当りだけで観測できるため、共通俵を取得できない実戦でも使えるフォールバックとして採用し、共通俵入力時は重複する同一遊技区間の評価を抑制します。","difficultyExclusionReason":"共通Difficultyでは情報量の高い共通俵取得を前提とし、フォールバック初当りを同時加算しないため除外します。"},
+    {"researchFeatureId":"RF_COMMON_TAWARA","featureId":"FEAT_COMMON_TAWARA","adoptionCategory":"INCLUDE_PRIMARY","minimumSample":500,"sampleRecommendation":5000,"weight":1,"numeratorInputId":"INP_COMMON_TAWARA","denominatorInputId":"INP_ALL_GAMES","difficultyParticipation":"INCLUDE","difficultyExposure":{"mode":"per_game","factor":1,"quality":"EXACT","basisId":"ALL_GAMES"},"userReason":"設定1から6で共通俵確率が約1.8倍変化し、ダイトモで小役確率を観測でき、全状態ゲーム数という公開分母も明確なため主Featureとして採用します。"},
+    {"researchFeatureId":"RF_REACH_PATTERN","featureId":"FEAT_REACH_PATTERN_EXCLUDED","adoptionCategory":"EXCLUDE","userFacingReason":"設定差は大きいものの最良の設定6でも約1/3121と低頻度で、さらに高確率・鷹狩り・連続演出を除外した専用分母を正確に観測する必要があるため、通常実戦の独立Featureとしては不採用です。"},
+    {"researchFeatureId":"RF_PURE_MISS_PRECURSOR_COMBINED","featureId":"FEAT_PURE_MISS_PRECURSOR_EXCLUDED","adoptionCategory":"EXCLUDE","userFacingReason":"最良でも約1/4096と低頻度で、純ハズレ契機を通常実戦で確実に識別して初当り経路から分離する必要があるため、誤分類と下流イベント重複を避けて不採用です。"}
+  ],
+  "evidenceUi":{"groups":[{"groupId":"YOSHIMUNE_HANAFUDA","label":"ボーナス終了時花札","selectionMode":"multi","displayOrder":100,"options":[
+    {"value":"H2","label":"銅枠（設定2以上）","allowedSettings":["SET_2","SET_3","SET_4","SET_5","SET_6"],"excludedSettings":["SET_1"],"sourceEvidenceIds":["RE_HANAFUDA_2PLUS"]},
+    {"value":"H3","label":"銀枠（設定3以上）","allowedSettings":["SET_3","SET_4","SET_5","SET_6"],"excludedSettings":["SET_1","SET_2"],"sourceEvidenceIds":["RE_HANAFUDA_3PLUS"]},
+    {"value":"H4","label":"金枠（設定4以上）","allowedSettings":["SET_4","SET_5","SET_6"],"excludedSettings":["SET_1","SET_2","SET_3"],"sourceEvidenceIds":["RE_HANAFUDA_4PLUS"]},
+    {"value":"H5","label":"ピンク/紫枠（設定5以上）","allowedSettings":["SET_5","SET_6"],"excludedSettings":["SET_1","SET_2","SET_3","SET_4"],"sourceEvidenceIds":["RE_HANAFUDA_5PLUS"]},
+    {"value":"H6","label":"虹枠（設定6）","allowedSettings":["SET_6"],"excludedSettings":["SET_1","SET_2","SET_3","SET_4","SET_5"],"sourceEvidenceIds":["RE_HANAFUDA_6"]}
+  ]}]},
+  "evidenceReview":{"policyVersion":1,"exclusions":[]},
+  "difficultyAnalysis":{"targetGameBasis":{"basisId":"ALL_GAMES","label":"自分の全状態ゲーム数","quality":"EXACT"},"calibrationAllowedExposureQualities":["EXACT","DERIVED"]},
+  "selectionNotes":["共通俵取得時は初当りフォールバックを停止して同一遊技区間の過信を防ぐ。","リーチ目・純ハズレ前兆は設定差だけで採らず、頻度・分母・誤分類・下流イベント再利用を含めて除外する。","花札の設定5以上/6の実機表示名はObservationで最終固定する。"]
+}
