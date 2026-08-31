@@ -21,6 +21,7 @@ This checkpoint records the final Web/GitHub-side review state after batch publi
   - 190 S_PERSONA5_FR
 - Machine Identity classification is complete for 190 production machines with one explicit test-only machine excluded.
 - Generated MachineData was refreshed after the final Persona5 source-layer correction before this checkpoint commit.
+- A regeneration-order defect was found and fixed: rebuilding a published MachineData package could previously drop the formal `introductionDate`, `machineType`, and `gameType` fields that had been applied after publication. `machine-pipeline.mjs` now merges the canonical entry from `machine-identity-metadata.json` into each generated package before writing/syncing it. Pre-publication machines without an identity-metadata entry remain buildable. A regression test locks both behaviors.
 
 ## Red Team conclusions
 
@@ -102,5 +103,6 @@ Seven items remain and should be verified as one consolidated real-device pass r
 ## Merge gate
 
 - Web-solvable Red Team corrections identified in this pass have been applied.
+- The MachineData regeneration path now preserves formal Machine Identity instead of requiring a manual post-generation identity re-apply.
 - This checkpoint does not authorize merge.
 - Keep PR #148 Draft until the seven field-only checks are resolved/reclassified, the generated artifacts are refreshed if any finding changes Selection/Observation/UI, CI is green on the stable final head, and the user-verified UI lock is completed.
