@@ -2,7 +2,7 @@
 
 ## Status
 
-This checkpoint records the final Web/GitHub-side review state after batch publish generation and before the remaining field/device verification bundle. PR #148 must remain Draft until the field-only checks and resulting real-device/UI lock are intentionally completed.
+This checkpoint records the final Web/GitHub-side review state after batch publish generation and the first real-device feedback pass. PR #148 must remain Draft until the remaining field-only checks and resulting real-device/UI lock are intentionally completed.
 
 ## Registration / publication state
 
@@ -58,14 +58,15 @@ This checkpoint records the final Web/GitHub-side review state after batch publi
 - Panic Zone / total CZ rates are not independently stacked with AT first hit.
 - Infection entry is used only as the conditional middle-line AT-initial-hit composition.
 - Total Infection rate is not separately multiplied because it would reuse the same starting observation and mix the diagonal component.
-- Practical middle-line/diagonal classification and pairing remains field-only.
+- Real-device verification confirms that middle-line and diagonal AT initial symbol hits can be reliably distinguished when watched, and subsequent Infection entry/non-entry can be paired with the corresponding hit. The conditional Feature remains valid.
 
 ### S笑ゥせぇるすまん4
 
 - Bonus first hit remains primary.
 - Return-inclusive appearance probability is not separately multiplied.
-- 審判ノ刻 entry-time immediate-success draw remains conditional support rather than a second copy of CZ/bonus outcome information.
-- Practical discrimination of entry-time success versus self-success remains field-only.
+- Real-device verification determined that a CZ already successful at 審判ノ刻 entry cannot be reliably distinguished from a success achieved during CZ play.
+- Therefore the entry-time immediate-success Feature is no longer observable with a correct numerator and has been changed from conditional support to EXCLUDE.
+- Its dedicated input surface has been removed from UI Design so a rejected Feature cannot leak into the app UI.
 
 ### Setting L machines
 
@@ -83,26 +84,29 @@ This checkpoint records the final Web/GitHub-side review state after batch publi
 
 ### Other batch machines
 
-- パチスロ バイオハザード RE:2: AT first hit + Figure Evidence remain valid; Figure Collection surface is publicly confirmed and only persistence/reset scope remains field-only.
+- パチスロ バイオハザード RE:2: AT first hit + Figure Evidence remain valid. Real-device verification confirms that Figure Collection survives power OFF/ON and is cleared by setting change/reset, establishing the persistence boundary.
 - S BIG島唄30: non-chain bonus first hit remains selected; reliable operational identification of the chain-region boundary is still the highest-priority field check.
 - パチスロ BOØWY: adopted AT first hit and hard end-event Evidence do not depend on unresolved machine-menu/service behavior.
 - てぃだどんどん: adopted bonus first hit and BIG-entry 7-segment Evidence do not depend on unresolved machine-menu/service behavior.
 
 ## Remaining field-only verification bundle
 
-Seven items remain and should be verified as one consolidated real-device pass rather than piecemeal:
+Four items remain:
 
 1. HIGH — S BIG島唄30 — chain-region start/end boundary.
-2. MEDIUM — S笑ゥせぇるすまん4 — 審判ノ刻 entry-success versus self-success identification.
-3. MEDIUM — L 仮面ライダー電王 — actual ぱちログweb machine-specific result fields.
-4. MEDIUM — スマスロ バイオハザード5 — middle-line/diagonal AT-initial-hit classification and Infection pairing.
-5. LOW — パチスロペルソナ5 — MySlot result range/reset boundary.
-6. LOW — Sister Quest — SmartTALK history retention/reset boundary.
-7. LOW — パチスロ バイオハザード RE:2 — Figure Collection persistence/reset scope.
+2. MEDIUM — L 仮面ライダー電王 — actual ぱちログweb machine-specific result fields.
+3. LOW — パチスロペルソナ5 — MySlot result range/reset boundary.
+4. LOW — Sister Quest — SmartTALK history retention/reset boundary.
+
+Resolved in the current field pass:
+
+- S笑ゥせぇるすまん4 — entry-success vs self-success: not reliably distinguishable; Feature excluded and UI removed.
+- スマスロ バイオハザード5 — middle/diagonal classification and Infection pairing: reliably observable; Feature retained.
+- パチスロ バイオハザード RE:2 — Figure Collection persistence: power cycle retains; setting change/reset clears.
 
 ## Merge gate
 
 - Web-solvable Red Team corrections identified in this pass have been applied.
 - The MachineData regeneration path now preserves formal Machine Identity instead of requiring a manual post-generation identity re-apply.
 - This checkpoint does not authorize merge.
-- Keep PR #148 Draft until the seven field-only checks are resolved/reclassified, the generated artifacts are refreshed if any finding changes Selection/Observation/UI, CI is green on the stable final head, and the user-verified UI lock is completed.
+- Keep PR #148 Draft until the four remaining field-only checks are resolved/reclassified, generated artifacts are refreshed after the Warau4 Selection/UI change, CI is green on the stable final head, and the user-verified UI lock is completed.
