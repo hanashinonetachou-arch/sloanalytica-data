@@ -1,0 +1,230 @@
+{
+  "schemaVersion": 1,
+  "machine": {
+    "schemaVersion": "2.0.0",
+    "machineId": "S_BIG_SHIMAUTA_E2_30",
+    "machineDataVersion": "0.1.0",
+    "displayName": "S BIG島唄30",
+    "modelName": "SBIG島唄E2-30",
+    "manufacturer": "オリンピアエステート",
+    "settings": [
+      "SET_1",
+      "SET_2",
+      "SET_3",
+      "SET_5",
+      "SET_6",
+      "SET_L"
+    ],
+    "packagePolicy": {
+      "offlineCapable": true,
+      "containsImages": false,
+      "containsExecutableCode": false
+    }
+  },
+  "inputs": {
+    "schemaVersion": "2.0.0",
+    "inputs": [
+      {
+        "id": "INP_EFFECTIVE_NORMAL_GAMES",
+        "name": "連チャン区間を除く通常ゲーム数",
+        "type": "integer",
+        "category": "NUMERIC",
+        "unit": "G",
+        "displayOrder": 10,
+        "inferenceRole": "INCLUDE_PRIMARY",
+        "defaultValue": 0,
+        "minimum": 0
+      },
+      {
+        "id": "INP_BONUS_FIRST_HIT",
+        "name": "ボーナス初当り",
+        "type": "counter",
+        "category": "NUMERIC",
+        "unit": "回",
+        "displayOrder": 11,
+        "inferenceRole": "INCLUDE_PRIMARY",
+        "parentInputId": "INP_EFFECTIVE_NORMAL_GAMES",
+        "defaultValue": 0,
+        "minimum": 0
+      },
+      {
+        "id": "INP_EVI_SETTING_L_WARNING",
+        "name": "設定L判別",
+        "type": "enum",
+        "category": "EVIDENCE",
+        "unit": "",
+        "displayOrder": 100,
+        "inferenceRole": "INCLUDE_SUPPORT",
+        "options": [
+          {
+            "key": "__UNSET__",
+            "label": "未選択",
+            "value": "__UNSET__"
+          },
+          {
+            "key": "PANEL_OFF",
+            "label": "下パネル消灯（設定L）",
+            "value": "PANEL_OFF"
+          }
+        ],
+        "defaultValue": "__UNSET__"
+      }
+    ]
+  },
+  "features": {
+    "schemaVersion": "2.0.0",
+    "features": [
+      {
+        "featureId": "FEAT_BONUS_FIRST_HIT",
+        "name": "連チャン区間を除いたボーナス初当り",
+        "adoptionCategory": "INCLUDE_PRIMARY",
+        "calculationRole": "PROBABILITY",
+        "probabilityEngineUsage": true,
+        "modelType": "binomial",
+        "minimumSample": 1,
+        "sampleRecommendation": 1,
+        "reliabilityProfile": {
+          "weight": 1
+        },
+        "denominatorInputId": "INP_EFFECTIVE_NORMAL_GAMES",
+        "numeratorInputId": "INP_BONUS_FIRST_HIT",
+        "displayFormat": "ratio_1_over_n",
+        "probabilities": {
+          "SET_1": 0.0031397174,
+          "SET_2": 0.0032583904,
+          "SET_3": 0.0034904014,
+          "SET_5": 0.0039872408,
+          "SET_6": 0.0044903458
+        },
+        "sourceEvidenceRefs": [
+          "SRC_NANA",
+          "SRC_1GEKI"
+        ]
+      }
+    ]
+  },
+  "evidence": {
+    "version": "1.0.0",
+    "evidences": [
+      {
+        "id": "EVI_SETTING_L_WARNING_PANEL_OFF",
+        "name": "下パネル消灯（設定L）",
+        "displayName": "下パネル消灯（設定L）",
+        "inputId": "INP_EVI_SETTING_L_WARNING",
+        "triggerValue": "PANEL_OFF",
+        "confirmedSettings": [
+          "SET_L"
+        ],
+        "deniedSettings": [],
+        "hasImage": false,
+        "type": "SETTING_CONFIRMATION",
+        "sourceEvidenceRefs": [
+          "RE_SETTING_L_PANEL"
+        ]
+      }
+    ],
+    "sources": [
+      {
+        "id": "SRC_NANA",
+        "classification": "ANALYSIS",
+        "pageName": "S BIG島唄30 設定示唆・判別要素まとめ",
+        "url": "https://nana-press.com/kaiseki/machine/430/11985/",
+        "checkedAt": "2026-08-31"
+      },
+      {
+        "id": "SRC_1GEKI",
+        "classification": "ANALYSIS",
+        "pageName": "SBIG島唄30 設定判別・立ち回りポイント",
+        "url": "https://1geki.jp/slot/s_big_shimauta30/0/",
+        "checkedAt": "2026-08-31"
+      }
+    ]
+  },
+  "ui": {
+    "sections": [
+      {
+        "id": "AUTO_NUMERIC",
+        "title": "ボーナス初当り",
+        "displayOrder": 1,
+        "items": [
+          {
+            "type": "input",
+            "inputId": "INP_EFFECTIVE_NORMAL_GAMES",
+            "label": "連チャン区間を除く通常ゲーム数",
+            "widget": "number"
+          },
+          {
+            "type": "input",
+            "inputId": "INP_BONUS_FIRST_HIT",
+            "label": "ボーナス初当り",
+            "widget": "counter"
+          }
+        ]
+      },
+      {
+        "id": "AUTO_EVIDENCE",
+        "title": "設定L判別",
+        "displayOrder": 2,
+        "items": [
+          {
+            "type": "input",
+            "inputId": "INP_EVI_SETTING_L_WARNING",
+            "label": "設定L判別",
+            "widget": "select"
+          }
+        ]
+      }
+    ]
+  },
+  "selectionSummary": {
+    "schemaVersion": "selection-summary-v1",
+    "evaluatedCount": 4,
+    "selectedCount": 1,
+    "rejectedCount": 3,
+    "selected": [
+      {
+        "featureId": "FEAT_BONUS_FIRST_HIT",
+        "name": "連チャン区間を除いたボーナス初当り",
+        "reason": "連チャン区間を除外した初当りは設定差が明確で、公開定義に合わせた分母を作れるため主軸採用します。",
+        "requiredTrials": {
+          "value": 15152,
+          "unit": "通常ゲーム"
+        }
+      }
+    ],
+    "rejected": [
+      {
+        "featureId": "FEAT_BONUS_TYPE_BY_TRIGGER_EXCLUDED",
+        "name": "当選契機別BIG/シーサーBIG振り分け",
+        "reason": "シーサーBIG比率には設定差がありますが、当選契機ごとに別分母が必要です。まず初当り分母の実機観測を確定させ、契機別入力はObservation v2で安全に分離できた場合に再採用します。"
+      },
+      {
+        "featureId": "FEAT_NORMAL_MODE_WEAK_ROLE_HIT_EXCLUDED",
+        "name": "通常A/B・天国準備A滞在時のレア役/非レア役当選",
+        "reason": "内部モードA/B・天国準備Aを正確に確定できないと正しい分母を作れないため不採用です。"
+      },
+      {
+        "featureId": "FEAT_WATERMELON_CEILING_MODE_EXCLUDED",
+        "name": "スイカ回数天井・モード移行候補",
+        "reason": "設定差と観測可能性が未解決で、設定別尤度を構成できないため不採用です。"
+      }
+    ]
+  },
+  "reliability": {},
+  "metadata": {
+    "machineId": "S_BIG_SHIMAUTA_E2_30",
+    "displayName": "S BIG島唄30",
+    "settings": [
+      "SET_1",
+      "SET_2",
+      "SET_3",
+      "SET_5",
+      "SET_6",
+      "SET_L"
+    ]
+  },
+  "validation": {
+    "cases": []
+  },
+  "statistics": {}
+}

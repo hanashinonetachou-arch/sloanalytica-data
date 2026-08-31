@@ -1,0 +1,417 @@
+{
+  "schemaVersion": 1,
+  "machine": {
+    "schemaVersion": "2.0.0",
+    "machineId": "S_PERSONA5_FR",
+    "machineDataVersion": "0.1.0",
+    "displayName": "パチスロペルソナ5",
+    "modelName": "Sパチスロペルソナ5FR",
+    "manufacturer": "ロデオ",
+    "settings": [
+      "SET_1",
+      "SET_2",
+      "SET_3",
+      "SET_4",
+      "SET_5",
+      "SET_6"
+    ],
+    "packagePolicy": {
+      "offlineCapable": true,
+      "containsImages": false,
+      "containsExecutableCode": false
+    }
+  },
+  "inputs": {
+    "schemaVersion": "2.0.0",
+    "inputs": [
+      {
+        "id": "INP_NORMAL_GAMES",
+        "name": "通常ゲーム数",
+        "type": "integer",
+        "category": "NUMERIC",
+        "unit": "G",
+        "displayOrder": 10,
+        "inferenceRole": "INCLUDE_PRIMARY",
+        "defaultValue": null,
+        "observationScope": "SELF_PLAY",
+        "minimum": 0
+      },
+      {
+        "id": "INP_PC_COUNT",
+        "name": "PERSONA CHANCE 初当り",
+        "type": "counter",
+        "category": "NUMERIC",
+        "unit": "回",
+        "displayOrder": 11,
+        "inferenceRole": "INCLUDE_PRIMARY",
+        "defaultValue": null,
+        "parentInputId": "INP_NORMAL_GAMES",
+        "minimum": 0
+      },
+      {
+        "id": "INP_WATERMELON",
+        "name": "スイカ",
+        "type": "counter",
+        "category": "NUMERIC",
+        "unit": "回",
+        "displayOrder": 12,
+        "inferenceRole": "INCLUDE_SUPPORT",
+        "defaultValue": null,
+        "parentInputId": "INP_NORMAL_GAMES",
+        "minimum": 0
+      },
+      {
+        "id": "INP_EVI_SAMMY_TROPHY",
+        "name": "サミートロフィー",
+        "type": "multi_enum",
+        "category": "EVIDENCE",
+        "unit": "",
+        "displayOrder": 100,
+        "inferenceRole": "INCLUDE_SUPPORT",
+        "options": [
+          {
+            "key": "BRONZE",
+            "label": "銅（設定2以上）",
+            "value": "BRONZE"
+          },
+          {
+            "key": "SILVER",
+            "label": "銀（設定3以上）",
+            "value": "SILVER"
+          },
+          {
+            "key": "GOLD",
+            "label": "金（設定4以上）",
+            "value": "GOLD"
+          },
+          {
+            "key": "KIRIN",
+            "label": "キリン（設定5以上）",
+            "value": "KIRIN"
+          },
+          {
+            "key": "RAINBOW",
+            "label": "虹（設定6）",
+            "value": "RAINBOW"
+          }
+        ],
+        "defaultValue": []
+      }
+    ]
+  },
+  "features": {
+    "schemaVersion": "2.0.0",
+    "features": [
+      {
+        "featureId": "FEAT_PC_FIRST_HIT",
+        "name": "PERSONA CHANCE初当り",
+        "adoptionCategory": "INCLUDE_PRIMARY",
+        "calculationRole": "PROBABILITY",
+        "probabilityEngineUsage": true,
+        "modelType": "binomial",
+        "minimumSample": 1,
+        "sampleRecommendation": 1,
+        "reliabilityProfile": {
+          "weight": 1
+        },
+        "denominatorInputId": "INP_NORMAL_GAMES",
+        "numeratorInputId": "INP_PC_COUNT",
+        "displayFormat": "ratio_1_over_n",
+        "probabilities": {
+          "SET_1": 0.007843137254902,
+          "SET_2": 0.007987220447284,
+          "SET_3": 0.008196721311475,
+          "SET_4": 0.008431703204047,
+          "SET_5": 0.008620689655172,
+          "SET_6": 0.009009009009009
+        },
+        "sourceEvidenceRefs": [
+          "SRC_1GEKI",
+          "SRC_NANA"
+        ]
+      },
+      {
+        "featureId": "FEAT_WATERMELON",
+        "name": "スイカ確率",
+        "adoptionCategory": "INCLUDE_SUPPORT",
+        "calculationRole": "PROBABILITY",
+        "probabilityEngineUsage": true,
+        "modelType": "binomial",
+        "minimumSample": 1,
+        "sampleRecommendation": 1,
+        "reliabilityProfile": {
+          "weight": 1
+        },
+        "denominatorInputId": "INP_NORMAL_GAMES",
+        "numeratorInputId": "INP_WATERMELON",
+        "displayFormat": "ratio_1_over_n",
+        "probabilities": {
+          "SET_1": 0.0083892617,
+          "SET_2": 0.0085470085,
+          "SET_3": 0.0087108014,
+          "SET_4": 0.0088652482,
+          "SET_5": 0.0090171326,
+          "SET_6": 0.0091827365
+        },
+        "sourceEvidenceRefs": [
+          "SRC_1GEKI",
+          "SRC_NANA"
+        ]
+      }
+    ]
+  },
+  "evidence": {
+    "version": "1.0.0",
+    "evidences": [
+      {
+        "id": "EVI_SAMMY_TROPHY_BRONZE",
+        "name": "銅（設定2以上）",
+        "displayName": "銅（設定2以上）",
+        "inputId": "INP_EVI_SAMMY_TROPHY",
+        "triggerValue": "BRONZE",
+        "confirmedSettings": [
+          "SET_2",
+          "SET_3",
+          "SET_4",
+          "SET_5",
+          "SET_6"
+        ],
+        "deniedSettings": [],
+        "hasImage": false,
+        "type": "SETTING_CONFIRMATION",
+        "sourceEvidenceRefs": [
+          "RE_TROPHY_2_PLUS"
+        ]
+      },
+      {
+        "id": "EVI_SAMMY_TROPHY_SILVER",
+        "name": "銀（設定3以上）",
+        "displayName": "銀（設定3以上）",
+        "inputId": "INP_EVI_SAMMY_TROPHY",
+        "triggerValue": "SILVER",
+        "confirmedSettings": [
+          "SET_3",
+          "SET_4",
+          "SET_5",
+          "SET_6"
+        ],
+        "deniedSettings": [],
+        "hasImage": false,
+        "type": "SETTING_CONFIRMATION",
+        "sourceEvidenceRefs": [
+          "RE_TROPHY_3_PLUS"
+        ]
+      },
+      {
+        "id": "EVI_SAMMY_TROPHY_GOLD",
+        "name": "金（設定4以上）",
+        "displayName": "金（設定4以上）",
+        "inputId": "INP_EVI_SAMMY_TROPHY",
+        "triggerValue": "GOLD",
+        "confirmedSettings": [
+          "SET_4",
+          "SET_5",
+          "SET_6"
+        ],
+        "deniedSettings": [],
+        "hasImage": false,
+        "type": "SETTING_CONFIRMATION",
+        "sourceEvidenceRefs": [
+          "RE_TROPHY_4_PLUS"
+        ]
+      },
+      {
+        "id": "EVI_SAMMY_TROPHY_KIRIN",
+        "name": "キリン（設定5以上）",
+        "displayName": "キリン（設定5以上）",
+        "inputId": "INP_EVI_SAMMY_TROPHY",
+        "triggerValue": "KIRIN",
+        "confirmedSettings": [
+          "SET_5",
+          "SET_6"
+        ],
+        "deniedSettings": [],
+        "hasImage": false,
+        "type": "SETTING_CONFIRMATION",
+        "sourceEvidenceRefs": [
+          "RE_TROPHY_5_PLUS"
+        ]
+      },
+      {
+        "id": "EVI_SAMMY_TROPHY_RAINBOW",
+        "name": "虹（設定6）",
+        "displayName": "虹（設定6）",
+        "inputId": "INP_EVI_SAMMY_TROPHY",
+        "triggerValue": "RAINBOW",
+        "confirmedSettings": [
+          "SET_6"
+        ],
+        "deniedSettings": [],
+        "hasImage": false,
+        "type": "SETTING_CONFIRMATION",
+        "sourceEvidenceRefs": [
+          "RE_TROPHY_6"
+        ]
+      }
+    ],
+    "sources": [
+      {
+        "id": "SRC_1GEKI",
+        "classification": "ANALYSIS",
+        "pageName": "パチスロペルソナ5 設定差・設定判別要素まとめ",
+        "url": "https://1geki.jp/slot/s_persona5/0/",
+        "checkedAt": "2026-08-31"
+      },
+      {
+        "id": "SRC_NANA",
+        "classification": "ANALYSIS",
+        "pageName": "ペルソナ5 設定差のある要素や設定示唆演出まとめ",
+        "url": "https://nana-press.com/kaiseki/machine/407/11555/",
+        "checkedAt": "2026-08-31"
+      },
+      {
+        "id": "SRC_NANA_SPEC",
+        "classification": "ANALYSIS",
+        "pageName": "ペルソナ5 AT初当たり確率/PC確率/機械割/小役確率",
+        "url": "https://nana-press.com/kaiseki/machine/407/10251/",
+        "checkedAt": "2026-08-31"
+      }
+    ]
+  },
+  "ui": {
+    "sections": [
+      {
+        "id": "AUTO_NUMERIC",
+        "title": "通常時",
+        "displayOrder": 1,
+        "items": [
+          {
+            "type": "input",
+            "inputId": "INP_NORMAL_GAMES",
+            "label": "通常ゲーム数",
+            "widget": "number"
+          },
+          {
+            "type": "input",
+            "inputId": "INP_PC_COUNT",
+            "label": "PERSONA CHANCE 初当り",
+            "widget": "counter"
+          },
+          {
+            "type": "input",
+            "inputId": "INP_WATERMELON",
+            "label": "スイカ",
+            "widget": "counter"
+          }
+        ]
+      },
+      {
+        "id": "AUTO_EVIDENCE",
+        "title": "設定確定・示唆",
+        "displayOrder": 2,
+        "items": [
+          {
+            "type": "input",
+            "inputId": "INP_EVI_SAMMY_TROPHY",
+            "label": "サミートロフィー",
+            "widget": "multi_select"
+          }
+        ]
+      }
+    ]
+  },
+  "selectionSummary": {
+    "schemaVersion": "selection-summary-v1",
+    "evaluatedCount": 11,
+    "selectedCount": 2,
+    "rejectedCount": 9,
+    "selected": [
+      {
+        "featureId": "FEAT_PC_FIRST_HIT",
+        "name": "PERSONA CHANCE初当り",
+        "reason": "PERSONA CHANCEは設定差が連続的で発生頻度もAT初当りより高く、通常ゲーム数を分母に直接観測できるため主軸に採用します。",
+        "requiredTrials": {
+          "value": 45005,
+          "unit": "通常ゲーム"
+        }
+      },
+      {
+        "featureId": "FEAT_WATERMELON",
+        "name": "スイカ確率",
+        "reason": "スイカは内部ボーナス状態に左右されず、実機連動機能でもカウント可能とされ、通常ゲーム数に対して一貫して観測できるため補助採用します。",
+        "requiredTrials": {
+          "value": 101344,
+          "unit": "ゲーム"
+        }
+      }
+    ],
+    "rejected": [
+      {
+        "featureId": "FEAT_AT_FIRST_HIT_EXCLUDED",
+        "name": "AT TAKE YOUR HEART初当り",
+        "reason": "AT初当りにも強い設定差がありますが、PC経由のATが含まれます。PC初当りを主軸にする現構成では独立尤度として重ねず、将来PC→AT成功と直撃ATを条件分解できた場合に再評価します。",
+        "requiredTrials": {
+          "value": 23973,
+          "unit": "通常ゲーム"
+        }
+      },
+      {
+        "featureId": "FEAT_DIRECT_AT_EXCLUDED",
+        "name": "通常時AT直撃",
+        "reason": "直撃ATは有望ですが、現時点では全設定の確率表を安全に構成できないため推測計算には入れません。"
+      },
+      {
+        "featureId": "FEAT_REAL_BONUS_OVERLAP_EXCLUDED",
+        "name": "リアルボーナス重複・同時成立",
+        "reason": "設定差はありますが、対象役ごとに別分母で管理する必要があり、実戦入力の誤分類リスクが高いため不採用です。"
+      },
+      {
+        "featureId": "FEAT_PSEUDO_BONUS_HIT_BY_STATE_EXCLUDED",
+        "name": "内部状態別 擬似ボーナス当選",
+        "reason": "内部状態別の抽選値には設定差がありますが、状態を確定観測できないため実戦Featureにはしません。"
+      },
+      {
+        "featureId": "FEAT_PSEUDO_BONUS_TYPE_EXCLUDED",
+        "name": "擬似ボーナス当選時ボーナス振り分け",
+        "reason": "ボーナス振り分けは候補として保持しますが、全設定分布を完全収録するまで計算には入れません。"
+      },
+      {
+        "featureId": "FEAT_REACHME_REPLAY_BONUS_TYPE_EXCLUDED",
+        "name": "リーチ目リプレイ成立時ボーナス比率",
+        "reason": "リーチ目リプレイ成立時の振り分けは設定差候補ですが、実戦サンプルが集まりにくく、現Researchも完全分布未収録のため不採用です。"
+      },
+      {
+        "featureId": "FEAT_STRONG_ROLE_EFFECTIVE_HIT_EXCLUDED",
+        "name": "強チェリー・チャンス目成立時の実質当選",
+        "reason": "強チェリー・チャンス目後の当選は複数の当選系統を含み、PC初当りとも重なるため独立Featureにはしません。"
+      },
+      {
+        "featureId": "FEAT_CHERRY_BY_STATE_EXCLUDED",
+        "name": "内部ボーナス状態別チェリー確率",
+        "reason": "チェリー自体には設定差がありますが、内部ボーナス状態によって確率が変化するため、誤った分母を使う危険が大きく不採用です。"
+      },
+      {
+        "featureId": "FEAT_HIGH_STATE_TRANSITION_EXCLUDED",
+        "name": "高確移行抽選",
+        "reason": "高確移行抽選には設定差がありますが、内部状態を確定できないため推測計算には使いません。"
+      }
+    ]
+  },
+  "reliability": {},
+  "metadata": {
+    "machineId": "S_PERSONA5_FR",
+    "displayName": "パチスロペルソナ5",
+    "settings": [
+      "SET_1",
+      "SET_2",
+      "SET_3",
+      "SET_4",
+      "SET_5",
+      "SET_6"
+    ]
+  },
+  "validation": {
+    "cases": []
+  },
+  "statistics": {}
+}
