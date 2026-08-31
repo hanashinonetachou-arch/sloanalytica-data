@@ -201,7 +201,7 @@ function parseArgs(argv) {
   return { machineArgs, file, report, checkOnly, help };
 }
 function printHelp() {
-  console.log(`SloAnalytica Batch Machine Pipeline v1\nUsage:\n  node tools/batch-machine-pipeline.mjs MACHINE_ID [MACHINE_ID ...] [--check]\n  node tools/batch-machine-pipeline.mjs --file batch.txt [--check]\n  node tools/batch-machine-pipeline.mjs --file batch.json --report reports/custom.json\n\nRules:\n  - maximum ${MAX_BATCH} machines per batch\n  - Research/Selection validation runs before generation\n  - Selection Quality Gate is mandatory for new machines and migrated machines; legacy machines remain compatible until migrated\n  - Selection Quality BLOCKED prevents generation; REVIEW is surfaced in the batch result\n  - machine generation/validation runs per machine\n  - repository test/audit/service-name audit run once at batch end\n  - WRITE is atomic: any BLOCKED/repository-check failure rolls back the entire batch\n  - CHECK always restores generated files after validation\n  - report classifies PASS / REVIEW / BLOCKED\n`);
+  console.log(`SloAnalytica Batch Machine Pipeline v1\nUsage:\n  node tools/batch-machine-pipeline.mjs MACHINE_ID [MACHINE_ID ...] [--check]\n  node tools/batch-machine-pipeline.mjs --file batch.txt [--check]\n  node tools/batch-machine-pipeline.mjs --file batch.json --report reports/custom.json\n\nRules:\n  - maximum ${MAX_BATCH} machines per batch\n  - Research/Selection validation runs before generation\n  - Selection Quality Gate is mandatory for new machines and migrated machines; legacy machines remain compatible until migrated\n  - Selection Quality BLOCKED prevents generation; REVIEW is surfaced in the batch result\n  - machine generation/validation runs per machine\n  - repository test/audit/service-name audit run once at batch end\n  - WRITE is atomic: any BLOCKED/repository-check failure rolls back the entire batch\n  - CHECK restores generated files before repository-wide checks so transient generation cannot contaminate global invariants\n  - report classifies PASS / REVIEW / BLOCKED\n`);
 }
 
 if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
@@ -212,6 +212,7 @@ if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.me
   }
 
   let snapshot = null;
+  let restoredForCheck = false;
   try {
     const inputValues = [...args.machineArgs, ...(args.file ? readIdsFromFile(args.file) : [])];
     const machineIds = normalizeMachineIds(inputValues);
@@ -240,6 +241,11 @@ if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.me
     const machinePhaseBlocked = results.some(result => result.status === 'BLOCKED');
     const repositoryChecks = [];
     if (!machinePhaseBlocked) {
+      if (args.checkOnly) {
+        restoreFiles(snapshot);
+        restoredForCheck = true;
+        console.log('\nCHECK mode: restored generated files before repository-wide checks.');
+      }
       console.log('\n=== REPOSITORY CHECKS (ONCE PER BATCH) ===');
       for (const script of ['test', 'audit', 'audit:ui-service-names']) {
         const check = runRepositoryCheck(script);
@@ -255,7 +261,7 @@ if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.me
     for (const result of results) counts[result.status] += 1;
     const overallStatus = deriveOverallStatus(results, repositoryChecksOk);
     const shouldRollback = args.checkOnly || overallStatus === 'BLOCKED';
-    if (shouldRollback) restoreFiles(snapshot);
+    if (shouldRollback && !restoredForCheck) restoreFiles(snapshot);
 
     const report = {
       schemaVersion: 'batch-machine-pipeline-report-v1',
