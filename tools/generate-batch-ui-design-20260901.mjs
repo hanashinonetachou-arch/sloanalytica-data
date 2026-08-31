@@ -62,10 +62,12 @@ for (const id of ids) {
   }
 
   const waiting = (observation.fieldVerificationItems ?? []).filter(x => x.status === 'WAITING_FOR_MACHINE');
-  const unresolvedCoverage = Object.entries(observation.sourceCoverage ?? {}).filter(([,v]) => v === 'UNRESOLVED').map(([k]) => k);
+  const unresolvedCoverage = Object.entries(observation.sourceCoverage ?? {})
+    .filter(([,v]) => v === 'UNRESOLVED')
+    .map(([key]) => key);
   const unresolved = [
     ...waiting.map(x => ({ type:'FIELD_VERIFICATION', id:x.verificationId, priority:x.priority, question:x.question })),
-    ...unresolvedCoverage.map(x => ({ type:'SOURCE_COVERAGE', source:k }))
+    ...unresolvedCoverage.map(key => ({ type:'SOURCE_COVERAGE', source:key }))
   ];
 
   const design = {
