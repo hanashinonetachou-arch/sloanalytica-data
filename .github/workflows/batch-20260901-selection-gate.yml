@@ -1,0 +1,64 @@
+name: Batch 20260901 Selection Gate
+
+on:
+  push:
+    branches:
+      - batch/20260901-user-selected-10
+    paths:
+      - 'research/L_MAGIA_RECORD_RN/selection-data.json'
+      - 'research/L_GODZILLA_NS/selection-data.json'
+      - 'research/L_USHIO_TORA_HAKUMEN_VH/selection-data.json'
+      - 'research/L_AMAZING_LIVE_PD/selection-data.json'
+      - 'research/L_YOSHIMUNE_SC2/selection-data.json'
+      - 'research/L_MAHJONG_MONOGATARI_S2/selection-data.json'
+      - 'research/L_IDOLMASTER_MILLION_LIVE_HC/selection-data.json'
+      - 'research/L_YOUJITSU_DE/selection-data.json'
+      - 'research/L_MIDORI_DON_5_FY/selection-data.json'
+      - 'research/L_GUNDAM_SEED_G/selection-data.json'
+      - '.github/workflows/batch-20260901-selection-gate.yml'
+
+jobs:
+  selection-gate:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Validate existing SelectionData and quality
+        shell: bash
+        run: |
+          set -euo pipefail
+          ids=(
+            L_MAGIA_RECORD_RN
+            L_GODZILLA_NS
+            L_USHIO_TORA_HAKUMEN_VH
+            L_AMAZING_LIVE_PD
+            L_YOSHIMUNE_SC2
+            L_MAHJONG_MONOGATARI_S2
+            L_IDOLMASTER_MILLION_LIVE_HC
+            L_YOUJITSU_DE
+            L_MIDORI_DON_5_FY
+            L_GUNDAM_SEED_G
+          )
+          for id in "${ids[@]}"; do
+            sel="research/$id/selection-data.json"
+            research="research/$id/research-data.json"
+            if [[ ! -f "$sel" ]]; then
+              echo "SKIP $id: SelectionData not created yet"
+              continue
+            fi
+            echo "=== selection:validate $id ==="
+            node tools/validate-selection-data.mjs "$sel" "$research"
+            echo "=== selection:quality $id ==="
+            ID="$id" node --input-type=module - <<'NODE'
+          import fs from 'node:fs';
+          import { assessSelectionQuality } from './tools/selection-quality-gate.mjs';
+          const id = process.env.ID;
+          const research = JSON.parse(fs.readFileSync(`research/${id}/research-data.json`, 'utf8'));
+          const selection = JSON.parse(fs.readFileSync(`research/${id}/selection-data.json`, 'utf8'));
+          const result = assessSelectionQuality(research, selection);
+          console.log(JSON.stringify(result, null, 2));
+          if (result.blockers.length) process.exit(1);
+          NODE
+          done
