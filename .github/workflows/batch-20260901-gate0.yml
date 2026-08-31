@@ -1,0 +1,54 @@
+name: Batch 20260901 Research Gate 0
+
+on:
+  push:
+    branches:
+      - batch/20260901-user-selected-10
+    paths:
+      - 'research/**'
+      - 'tools/validate-research-data.mjs'
+      - 'tools/discovery-completeness-gate.mjs'
+      - '.github/workflows/batch-20260901-gate0.yml'
+  workflow_dispatch:
+
+jobs:
+  research-gate0:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Validate 10 ResearchData files
+        shell: bash
+        run: |
+          set -euo pipefail
+          ids=(
+            L_MAGIA_RECORD_RN
+            L_GODZILLA_NS
+            L_USHIO_TORA_HAKUMEN_VH
+            L_AMAZING_LIVE_PD
+            L_YOSHIMUNE_SC2
+            L_MAHJONG_MONOGATARI_S2
+            L_IDOLMASTER_MILLION_LIVE_HC
+            L_YOUJITSU_DE
+            L_MIDORI_DON_5_FY
+            L_GUNDAM_SEED_G
+          )
+          for id in "${ids[@]}"; do
+            echo "=== research:validate $id ==="
+            node tools/validate-research-data.mjs "research/$id/research-data.json"
+          done
+      - name: Run Discovery Completeness Gate 0
+        run: >-
+          node tools/discovery-completeness-gate.mjs
+          L_MAGIA_RECORD_RN
+          L_GODZILLA_NS
+          L_USHIO_TORA_HAKUMEN_VH
+          L_AMAZING_LIVE_PD
+          L_YOSHIMUNE_SC2
+          L_MAHJONG_MONOGATARI_S2
+          L_IDOLMASTER_MILLION_LIVE_HC
+          L_YOUJITSU_DE
+          L_MIDORI_DON_5_FY
+          L_GUNDAM_SEED_G
