@@ -53,7 +53,11 @@ export function shouldSurfaceResearchWarning(warning, selection) {
 }
 
 export function shouldSurfaceResearchConflict(conflict) {
-  return !String(conflict?.resolution ?? '').trim();
+  const resolutionStatus = String(conflict?.resolutionStatus ?? '').trim().toLowerCase();
+  if (resolutionStatus === 'resolved') return false;
+  // Legacy compatibility: older ResearchData/tests may carry a free-text `resolution` field.
+  if (String(conflict?.resolution ?? '').trim()) return false;
+  return true;
 }
 
 export function classifyMachineQuality({ researchValidation, selectionValidation, selectionQuality, research, selection }) {
