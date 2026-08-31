@@ -224,6 +224,7 @@ if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.me
         results.push({ machineId, status: 'BLOCKED', reasons: quality.reasons, pipeline: null });
         continue;
       }
+      if (quality.status === 'REVIEW') console.log(`REVIEW: ${quality.reasons.join(' / ')}`);
       const pipeline = runPipeline(machineId);
       if (pipeline.stdout) process.stdout.write(pipeline.stdout);
       if (pipeline.stderr) process.stderr.write(pipeline.stderr);
@@ -267,16 +268,15 @@ if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.me
       results,
     };
     writeJson(args.report, report);
-
     console.log(`\nBATCH ${overallStatus}: PASS=${counts.PASS} REVIEW=${counts.REVIEW} BLOCKED=${counts.BLOCKED}`);
-    console.log(`Repository checks: ${repositoryChecksOk ? 'PASS' : 'NOT PASS'}`);
+    console.log(`Repository checks: ${repositoryChecksOk ? 'PASS' : 'FAIL/SKIPPED'}`);
     console.log(`Rolled back: ${shouldRollback ? 'yes' : 'no'}`);
     console.log(`Duration: ${report.durationMs}ms`);
     console.log(`Report: ${path.relative(ROOT, args.report)}`);
-    if (overallStatus === 'BLOCKED') process.exitCode = 1;
+    if (overallStatus === 'BLOCKED') process.exit(1);
   } catch (error) {
     if (snapshot) restoreFiles(snapshot);
-    console.error(`BATCH FAILED: ${error instanceof Error ? error.message : String(error)}`);
-    process.exitCode = 2;
+    console.error(error instanceof Error ? error.message : String(error));
+    process.exit(1);
   }
 }
