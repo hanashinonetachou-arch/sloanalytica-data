@@ -112,13 +112,18 @@ test('unresolved selected rounded multinomial warning remains REVIEW', () => {
   }).status,'REVIEW');
 });
 
-test('research conflict with explicit resolution is not surfaced as REVIEW', () => {
-  const conflict={ conflictId:'CF_RESOLVED', resolution:'Use value supported by multiple primary sources; retain minority discrepancy.' };
+test('research conflict with current-schema resolved status is not surfaced as REVIEW', () => {
+  const conflict={ conflictId:'CF_RESOLVED', resolutionStatus:'resolved', resolutionNote:'Use value supported by multiple primary sources; retain minority discrepancy.' };
   assert.equal(shouldSurfaceResearchConflict(conflict),false);
   assert.equal(classifyMachineQuality({
     researchValidation:{status:'PASS',warnings:[]}, selectionValidation:{ok:true,warnings:[]},
     selectionQuality:{status:'PASS',blockers:[],reviews:[]}, research:{machine:{displayName:'Machine'},conflicts:[conflict]}, selection:{features:[]}
   }).status,'PASS');
+});
+
+test('legacy research conflict with explicit resolution is not surfaced as REVIEW', () => {
+  const conflict={ conflictId:'CF_RESOLVED_LEGACY', resolution:'Use value supported by multiple primary sources; retain minority discrepancy.' };
+  assert.equal(shouldSurfaceResearchConflict(conflict),false);
 });
 
 test('research conflict without resolution remains REVIEW', () => {
