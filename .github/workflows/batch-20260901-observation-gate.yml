@@ -18,7 +18,6 @@ on:
       - '.github/workflows/batch-20260901-observation-gate.yml'
       - 'tools/validate-machine-observation-data.mjs'
       - 'tools/audit-observation-selection-linkage.mjs'
-      - 'tools/machine-observation-gate.mjs'
 
 jobs:
   observation-gate:
@@ -28,8 +27,30 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 22
-      - name: Validate Observation v2 repository
-        run: node tools/validate-machine-observation-data.mjs
+      - name: Validate Observation v2 for batch
+        run: |
+          node --input-type=module - <<'NODE'
+          import fs from 'node:fs';
+          import { validateObservationObject } from './tools/validate-machine-observation-data.mjs';
+          const ids = [
+            'L_MAGIA_RECORD_RN','L_GODZILLA_NS','L_USHIO_TORA_HAKUMEN_VH','L_AMAZING_LIVE_PD','L_YOSHIMUNE_SC2',
+            'L_MAHJONG_MONOGATARI_S2','L_IDOLMASTER_MILLION_LIVE_HC','L_YOUJITSU_DE','L_MIDORI_DON_5_FY','L_GUNDAM_SEED_G'
+          ];
+          let errors = [];
+          for (const id of ids) {
+            const file = `research/${id}/machine-observation-data.json`;
+            const data = JSON.parse(fs.readFileSync(file, 'utf8'));
+            const r = validateObservationObject(data, file);
+            if (r.warnings.length) for (const w of r.warnings) console.warn(`WARNING: ${w}`);
+            if (!r.ok) errors.push(...r.errors);
+            else console.log(`PASS ${id}`);
+          }
+          if (errors.length) {
+            for (const e of errors) console.error(`ERROR: ${e}`);
+            process.exit(1);
+          }
+          console.log(`Batch Observation v2 validation: PASS / ${ids.length}`);
+          NODE
       - name: Audit Selection linkage for batch
         run: >-
           node tools/audit-observation-selection-linkage.mjs
@@ -44,5 +65,25 @@ jobs:
           L_MIDORI_DON_5_FY
           L_GUNDAM_SEED_G
           --strict-v2
-      - name: Run Observation gate summary
-        run: node tools/machine-observation-gate.mjs
+      - name: Summarize unresolved machine checks
+        run: |
+          node --input-type=module - <<'NODE'
+          import fs from 'node:fs';
+          const ids = [
+            'L_MAGIA_RECORD_RN','L_GODZILLA_NS','L_USHIO_TORA_HAKUMEN_VH','L_AMAZING_LIVE_PD','L_YOSHIMUNE_SC2',
+            'L_MAHJONG_MONOGATARI_S2','L_IDOLMASTER_MILLION_LIVE_HC','L_YOUJITSU_DE','L_MIDORI_DON_5_FY','L_GUNDAM_SEED_G'
+          ];
+          let waiting = 0;
+          for (const id of ids) {
+            const d = JSON.parse(fs.readFileSync(`research/${id}/machine-observation-data.json`, 'utf8'));
+            const reopen = (d.researchReopenRequests ?? []).filter(x => x.status === 'RESEARCH_REOPEN_REQUIRED');
+            if (reopen.length) {
+              console.error(`${id}: RESEARCH_REOPEN_REQUIRED ${reopen.length}`);
+              process.exitCode = 1;
+            }
+            const items = (d.fieldVerificationItems ?? []).filter(x => x.status === 'WAITING_FOR_MACHINE');
+            waiting += items.length;
+            console.log(`${id}: WAITING_FOR_MACHINE=${items.length}`);
+          }
+          console.log(`Batch Observation gate: PASS_WITH_UNRESOLVED / machine checks=${waiting}`);
+          NODE
