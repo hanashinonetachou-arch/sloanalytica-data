@@ -1,0 +1,113 @@
+name: Batch 20260901 Machine Build Gate
+
+on:
+  push:
+    branches:
+      - batch/20260901-user-selected-10
+    paths:
+      - '.github/workflows/batch-20260901-machine-build-gate.yml'
+      - 'research/L_MAGIA_RECORD_RN/**'
+      - 'research/L_GODZILLA_NS/**'
+      - 'research/L_USHIO_TORA_HAKUMEN_VH/**'
+      - 'research/L_AMAZING_LIVE_PD/**'
+      - 'research/L_YOSHIMUNE_SC2/**'
+      - 'research/L_MAHJONG_MONOGATARI_S2/**'
+      - 'research/L_IDOLMASTER_MILLION_LIVE_HC/**'
+      - 'research/L_YOUJITSU_DE/**'
+      - 'research/L_MIDORI_DON_5_FY/**'
+      - 'research/L_GUNDAM_SEED_G/**'
+      - 'tools/build-machine-data.mjs'
+      - 'tools/machine-pipeline.mjs'
+      - 'tools/batch-machine-pipeline.mjs'
+      - 'tools/apply-ui-design-to-machine-package.mjs'
+      - 'tools/audit-ui-design-machine-package-linkage.mjs'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: batch-20260901-machine-build-gate
+  cancel-in-progress: false
+
+jobs:
+  machine-build-gate:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Build 10 MachineData packages atomically
+        run: >-
+          node tools/guard-machine-pipeline.mjs batch
+          L_MAGIA_RECORD_RN
+          L_GODZILLA_NS
+          L_USHIO_TORA_HAKUMEN_VH
+          L_AMAZING_LIVE_PD
+          L_YOSHIMUNE_SC2
+          L_MAHJONG_MONOGATARI_S2
+          L_IDOLMASTER_MILLION_LIVE_HC
+          L_YOUJITSU_DE
+          L_MIDORI_DON_5_FY
+          L_GUNDAM_SEED_G
+          --report reports/batch-20260901-machine-build-report.json
+
+      - name: Apply UI Design contracts to MachinePackage
+        run: >-
+          node tools/apply-ui-design-to-machine-package.mjs
+          L_MAGIA_RECORD_RN
+          L_GODZILLA_NS
+          L_USHIO_TORA_HAKUMEN_VH
+          L_AMAZING_LIVE_PD
+          L_YOSHIMUNE_SC2
+          L_MAHJONG_MONOGATARI_S2
+          L_IDOLMASTER_MILLION_LIVE_HC
+          L_YOUJITSU_DE
+          L_MIDORI_DON_5_FY
+          L_GUNDAM_SEED_G
+
+      - name: Audit UI Design to MachinePackage linkage
+        run: >-
+          node tools/audit-ui-design-machine-package-linkage.mjs
+          L_MAGIA_RECORD_RN
+          L_GODZILLA_NS
+          L_USHIO_TORA_HAKUMEN_VH
+          L_AMAZING_LIVE_PD
+          L_YOSHIMUNE_SC2
+          L_MAHJONG_MONOGATARI_S2
+          L_IDOLMASTER_MILLION_LIVE_HC
+          L_YOUJITSU_DE
+          L_MIDORI_DON_5_FY
+          L_GUNDAM_SEED_G
+
+      - name: Re-run repository tests after UI mutation
+        run: npm test
+      - name: Re-run public data audit after UI mutation
+        run: npm run audit
+      - name: Re-run user-facing service name audit
+        run: npm run audit:ui-service-names
+
+      - name: Commit finalized pre-publish artifacts
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add \
+            research/L_MAGIA_RECORD_RN/statistics-report.json research/L_MAGIA_RECORD_RN/difficulty-report.json research/L_MAGIA_RECORD_RN/setting-band-report.json machines/L_MAGIA_RECORD_RN/machine-package.json \
+            research/L_GODZILLA_NS/statistics-report.json research/L_GODZILLA_NS/difficulty-report.json research/L_GODZILLA_NS/setting-band-report.json machines/L_GODZILLA_NS/machine-package.json \
+            research/L_USHIO_TORA_HAKUMEN_VH/statistics-report.json research/L_USHIO_TORA_HAKUMEN_VH/difficulty-report.json research/L_USHIO_TORA_HAKUMEN_VH/setting-band-report.json machines/L_USHIO_TORA_HAKUMEN_VH/machine-package.json \
+            research/L_AMAZING_LIVE_PD/statistics-report.json research/L_AMAZING_LIVE_PD/difficulty-report.json research/L_AMAZING_LIVE_PD/setting-band-report.json machines/L_AMAZING_LIVE_PD/machine-package.json \
+            research/L_YOSHIMUNE_SC2/statistics-report.json research/L_YOSHIMUNE_SC2/difficulty-report.json research/L_YOSHIMUNE_SC2/setting-band-report.json machines/L_YOSHIMUNE_SC2/machine-package.json \
+            research/L_MAHJONG_MONOGATARI_S2/statistics-report.json research/L_MAHJONG_MONOGATARI_S2/difficulty-report.json research/L_MAHJONG_MONOGATARI_S2/setting-band-report.json machines/L_MAHJONG_MONOGATARI_S2/machine-package.json \
+            research/L_IDOLMASTER_MILLION_LIVE_HC/statistics-report.json research/L_IDOLMASTER_MILLION_LIVE_HC/difficulty-report.json research/L_IDOLMASTER_MILLION_LIVE_HC/setting-band-report.json machines/L_IDOLMASTER_MILLION_LIVE_HC/machine-package.json \
+            research/L_YOUJITSU_DE/statistics-report.json research/L_YOUJITSU_DE/difficulty-report.json research/L_YOUJITSU_DE/setting-band-report.json machines/L_YOUJITSU_DE/machine-package.json \
+            research/L_MIDORI_DON_5_FY/statistics-report.json research/L_MIDORI_DON_5_FY/difficulty-report.json research/L_MIDORI_DON_5_FY/setting-band-report.json machines/L_MIDORI_DON_5_FY/machine-package.json \
+            research/L_GUNDAM_SEED_G/statistics-report.json research/L_GUNDAM_SEED_G/difficulty-report.json research/L_GUNDAM_SEED_G/setting-band-report.json machines/L_GUNDAM_SEED_G/machine-package.json
+          if git diff --cached --quiet; then
+            echo "No finalized MachineData changes"
+          else
+            git commit -m "build: finalize batch 20260901 machine packages"
+            git push
+          fi
