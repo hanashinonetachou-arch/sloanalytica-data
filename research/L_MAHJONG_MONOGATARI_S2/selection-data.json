@@ -1,0 +1,37 @@
+{
+  "schemaVersion":"selection-data-v1",
+  "machineId":"L_MAHJONG_MONOGATARI_S2",
+  "machineDataVersion":"0.1.0",
+  "uiCategoryLabels":{"NORMAL":"通常時","EVIDENCE":"設定確定情報"},
+  "inputs":[
+    {"id":"INP_NORMAL_GAMES","name":"通常ゲーム数","type":"integer","category":"NORMAL","unit":"G","displayOrder":10,"inferenceRole":"INCLUDE_PRIMARY","defaultValue":0,"observationScope":"SELF_PLAY","description":"自分が遊技した通常ゲーム数を入力します。"},
+    {"id":"INP_INITIAL_COMBINED","name":"ボーナスまたはAT初当り","type":"counter","category":"NORMAL","unit":"回","displayOrder":11,"inferenceRole":"INCLUDE_PRIMARY","defaultValue":null,"parentInputId":"INP_NORMAL_GAMES","description":"通常時からボーナスまたはATのどちらかに初当りした回数を合算して入力します。同一初当りを重複して数えません。"}
+  ],
+  "features":[
+    {"researchFeatureId":"RF_BONUS_INITIAL","featureId":"FEAT_BONUS_INITIAL_EXCLUDED","adoptionCategory":"EXCLUDE","userFacingReason":"ボーナス初当りは公開のボーナス+AT合算初当りに含まれる部分集合で、別々に使うと同じ通常ゲームの非当選試行と当選事象を重複評価するため不採用です。"},
+    {"researchFeatureId":"RF_AT_INITIAL_TOTAL","featureId":"FEAT_AT_INITIAL_TOTAL_EXCLUDED","adoptionCategory":"EXCLUDE","userFacingReason":"AT初当りは合算初当りに含まれるうえAT直撃候補も内包するため、独立尤度として併用すると複数段階で二重評価になるため不採用です。"},
+    {"researchFeatureId":"RF_INITIAL_COMBINED","featureId":"FEAT_INITIAL_COMBINED","adoptionCategory":"INCLUDE_PRIMARY","minimumSample":300,"sampleRecommendation":5000,"weight":1,"numeratorInputId":"INP_INITIAL_COMBINED","denominatorInputId":"INP_NORMAL_GAMES","difficultyParticipation":"INCLUDE","difficultyExposure":{"mode":"per_game","factor":1,"quality":"EXACT","basisId":"NORMAL_GAMES"},"userReason":"通常ゲームを分母にボーナスまたはATの初当りを1つの排他的な合算事象として扱えるため、個別初当りの重複を避けながら公開設定差を利用できる主Featureとして採用します。"},
+    {"researchFeatureId":"RF_KOUTEI_APPEARANCE","featureId":"FEAT_KOUTEI_APPEARANCE_EXCLUDED","adoptionCategory":"EXCLUDE","userFacingReason":"煌帝出現率は最良でも約1/748と低頻度で、公開1/○○の正確なAT中対戦機会分母を実戦で再現できる契約が未解決のため不採用です。"},
+    {"researchFeatureId":"RF_AT_DIRECT_BASE","featureId":"FEAT_AT_DIRECT_BASE_EXCLUDED","adoptionCategory":"EXCLUDE","userFacingReason":"前兆中昇格を除くAT直撃はAT初当りの部分集合で最良でも約1/4632と低頻度のため、合算初当りとの下流事象の二重評価を避けて不採用です。"},
+    {"researchFeatureId":"RF_AT_DIRECT_EFFECTIVE","featureId":"FEAT_AT_DIRECT_EFFECTIVE_EXCLUDED","adoptionCategory":"EXCLUDE","userFacingReason":"前兆中昇格込みAT直撃はAT初当りの部分集合かつ直撃基本定義とも重複し、最良でも約1/3707と低頻度なので独立Featureとしては不採用です。"}
+  ],
+  "evidenceUi":{"groups":[
+    {"groupId":"MAHJONG_STAMP","label":"終了画面スタンプ","selectionMode":"multi","displayOrder":100,"options":[
+      {"value":"S2","label":"可（設定2以上）","allowedSettings":["SET_2","SET_3","SET_4","SET_5","SET_6"],"excludedSettings":["SET_1"],"sourceEvidenceIds":["RE_STAMP_2PLUS"]},
+      {"value":"S4","label":"良（設定4以上）","allowedSettings":["SET_4","SET_5","SET_6"],"excludedSettings":["SET_1","SET_2","SET_3"],"sourceEvidenceIds":["RE_STAMP_4PLUS"]},
+      {"value":"S5","label":"優（設定5以上）","allowedSettings":["SET_5","SET_6"],"excludedSettings":["SET_1","SET_2","SET_3","SET_4"],"sourceEvidenceIds":["RE_STAMP_5PLUS"]},
+      {"value":"S6","label":"極（設定6）","allowedSettings":["SET_6"],"excludedSettings":["SET_1","SET_2","SET_3","SET_4","SET_5"],"sourceEvidenceIds":["RE_STAMP_6"]}
+    ]},
+    {"groupId":"MAHJONG_LAST_JUDGE","label":"AT終了時ラストジャッジ","selectionMode":"multi","displayOrder":110,"options":[
+      {"value":"HARULUNA_4PLUS","label":"ハルルナPUSH（設定4以上）","allowedSettings":["SET_4","SET_5","SET_6"],"excludedSettings":["SET_1","SET_2","SET_3"],"sourceEvidenceIds":["RE_LAST_JUDGE_4PLUS"]}
+    ]},
+    {"groupId":"MAHJONG_ADD_GAMES","label":"AT中上乗せG数","selectionMode":"multi","displayOrder":120,"options":[
+      {"value":"A44","label":"44G（設定4以上）","allowedSettings":["SET_4","SET_5","SET_6"],"excludedSettings":["SET_1","SET_2","SET_3"],"sourceEvidenceIds":["RE_ADD_44G_4PLUS"]},
+      {"value":"A55","label":"55G（設定5以上）","allowedSettings":["SET_5","SET_6"],"excludedSettings":["SET_1","SET_2","SET_3","SET_4"],"sourceEvidenceIds":["RE_ADD_55G_5PLUS"]},
+      {"value":"A66","label":"66G（設定6）","allowedSettings":["SET_6"],"excludedSettings":["SET_1","SET_2","SET_3","SET_4","SET_5"],"sourceEvidenceIds":["RE_ADD_66G_6"]}
+    ]}
+  ]},
+  "evidenceReview":{"policyVersion":1,"exclusions":[]},
+  "difficultyAnalysis":{"targetGameBasis":{"basisId":"NORMAL_GAMES","label":"自分の通常ゲーム数","quality":"EXACT"},"calibrationAllowedExposureQualities":["EXACT","DERIVED"]},
+  "selectionNotes":["ボーナス初当り・AT初当り・合算初当りの三重使用を禁止し、合算へ一本化する。","AT直撃2定義は互いにも総AT初当りにも包含関係があるため独立採用しない。","煌帝は正しい試行分母がObservationで解決した場合のみ再検討する。"]
+}
