@@ -1,0 +1,91 @@
+{
+  "schemaVersion": "selection-data-v1",
+  "machineId": "L_AMAZING_LIVE_PD",
+  "machineDataVersion": "0.1.0",
+  "uiCategoryLabels": {
+    "NORMAL": "通常時"
+  },
+  "inputs": [
+    {
+      "id": "INP_NORMAL_GAMES",
+      "name": "通常ゲーム数",
+      "type": "integer",
+      "category": "NORMAL",
+      "unit": "G",
+      "displayOrder": 10,
+      "inferenceRole": "INCLUDE_PRIMARY",
+      "defaultValue": 0,
+      "observationScope": "SELF_PLAY",
+      "description": "自分が遊技した通常ゲーム数を入力します。"
+    },
+    {
+      "id": "INP_BONUS_INITIAL_HIT",
+      "name": "ボーナス初当り",
+      "type": "counter",
+      "category": "NORMAL",
+      "unit": "回",
+      "displayOrder": 11,
+      "inferenceRole": "INCLUDE_PRIMARY",
+      "defaultValue": null,
+      "parentInputId": "INP_NORMAL_GAMES",
+      "description": "通常時からのボーナス初当り回数を入力します。BB/RBの総出現回数ではなく、公開解析の『ボーナス初当り』に対応する回数です。"
+    }
+  ],
+  "features": [
+    {
+      "researchFeatureId": "RF_BONUS_INITIAL_HIT",
+      "featureId": "FEAT_BONUS_INITIAL_HIT",
+      "adoptionCategory": "INCLUDE_PRIMARY",
+      "minimumSample": 300,
+      "sampleRecommendation": 5000,
+      "weight": 1,
+      "numeratorInputId": "INP_BONUS_INITIAL_HIT",
+      "denominatorInputId": "INP_NORMAL_GAMES",
+      "difficultyParticipation": "INCLUDE",
+      "difficultyExposure": {
+        "mode": "per_game",
+        "factor": 1,
+        "quality": "EXACT",
+        "basisId": "NORMAL_GAMES"
+      },
+      "userReason": "通常ゲームを分母にしたボーナス初当りとして公開定義が明確で、全設定の確率差を同じ観測単位で評価できるため主Featureとして採用します。"
+    },
+    {
+      "researchFeatureId": "RF_BB_PUBLISHED_RATE",
+      "featureId": "FEAT_BB_PUBLISHED_RATE_EXCLUDED",
+      "adoptionCategory": "EXCLUDE",
+      "userFacingReason": "公開BB出現率は初当りと同じ通常ゲーム分母ではないことが数値上明らかで、現時点では正しい観測分母を再現できないため不採用です。"
+    },
+    {
+      "researchFeatureId": "RF_RB_PUBLISHED_RATE",
+      "featureId": "FEAT_RB_PUBLISHED_RATE_EXCLUDED",
+      "adoptionCategory": "EXCLUDE",
+      "userFacingReason": "公開RB出現率は初当りと同じ通常ゲーム分母ではないことが数値上明らかで、現時点では正しい観測分母を再現できないため不採用です。"
+    },
+    {
+      "researchFeatureId": "RF_BONUS_APPEARANCE_COMBINED",
+      "featureId": "FEAT_BONUS_APPEARANCE_COMBINED_EXCLUDED",
+      "adoptionCategory": "EXCLUDE",
+      "userFacingReason": "BB・RB公開出現率の集約値であり独立情報ではなく、さらに厳密な分母区間も未解決なので二重評価防止のため不採用です。"
+    }
+  ],
+  "evidenceUi": {
+    "groups": []
+  },
+  "evidenceReview": {
+    "policyVersion": 1,
+    "exclusions": []
+  },
+  "difficultyAnalysis": {
+    "targetGameBasis": {
+      "basisId": "NORMAL_GAMES",
+      "label": "自分の通常ゲーム数",
+      "quality": "EXACT"
+    },
+    "calibrationAllowedExposureQualities": ["EXACT", "DERIVED"]
+  },
+  "selectionNotes": [
+    "公開のボーナス初当りとBB/RB/合算出現率は同一イベント集合として扱わない。",
+    "BB/RB/合算の正しい分母・区間が将来解決した場合はSelectionを再オープンする。"
+  ]
+}
