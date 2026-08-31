@@ -238,7 +238,7 @@ try {
       }
     }
     if (fs.existsSync(machinePath)) {
-      const r = spawnSync('git', ['checkout', '--', path.relative(ROOT, p)], { cwd: ROOT, encoding: 'utf8' });
+      const r = spawnSync('git', ['checkout', '--', path.relative(ROOT, machinePath)], { cwd: ROOT, encoding: 'utf8' });
       if (r.status !== 0 && fs.existsSync(machinePath)) fs.rmSync(machinePath);
     }
   }
