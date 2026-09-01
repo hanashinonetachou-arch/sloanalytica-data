@@ -1,0 +1,76 @@
+name: Batch 20260901 Gate D UI MachineData
+
+on:
+  push:
+    branches:
+      - batch/20260901-magia-gundamseed
+    paths:
+      - tools/generate-batch-20260901-gate-d-ui.mjs
+      - .github/workflows/batch-20260901-gate-d-ui-machine.yml
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  generate-validate-build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: batch/20260901-magia-gundamseed
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Generate Gate D UI Design
+        run: node tools/generate-batch-20260901-gate-d-ui.mjs
+      - name: Validate UI Design
+        run: npm run ui-design:validate
+      - name: Audit UI Selection linkage
+        run: |
+          npm run ui-design:linkage:audit -- . \
+            L_MAGIA_RECORD_RN L_GODZILLA_NS L_USHIO_TORA_HAKUMEN_VH L_AMAZING_LIVE_PD L_YOSHIMUNE_SC2 \
+            L_MAHJONG_MONOGATARI_S2 L_IDOLMASTER_MILLION_LIVE_HC L_YOUJITSU_DE L_MIDORIDON_VIVA_REVIVAL_FY L_GUNDAM_SEED_G
+      - name: Audit UI Observation linkage
+        run: |
+          npm run ui-design:observation:audit -- \
+            L_MAGIA_RECORD_RN L_GODZILLA_NS L_USHIO_TORA_HAKUMEN_VH L_AMAZING_LIVE_PD L_YOSHIMUNE_SC2 \
+            L_MAHJONG_MONOGATARI_S2 L_IDOLMASTER_MILLION_LIVE_HC L_YOUJITSU_DE L_MIDORIDON_VIVA_REVIVAL_FY L_GUNDAM_SEED_G --strict-v2
+      - name: Four-layer Gate
+        run: |
+          npm run pipeline:four-layer:gate -- \
+            L_MAGIA_RECORD_RN L_GODZILLA_NS L_USHIO_TORA_HAKUMEN_VH L_AMAZING_LIVE_PD L_YOSHIMUNE_SC2 \
+            L_MAHJONG_MONOGATARI_S2 L_IDOLMASTER_MILLION_LIVE_HC L_YOUJITSU_DE L_MIDORIDON_VIVA_REVIVAL_FY L_GUNDAM_SEED_G
+      - name: Build MachineData batch
+        run: |
+          npm run machine:batch -- \
+            L_MAGIA_RECORD_RN L_GODZILLA_NS L_USHIO_TORA_HAKUMEN_VH L_AMAZING_LIVE_PD L_YOSHIMUNE_SC2 \
+            L_MAHJONG_MONOGATARI_S2 L_IDOLMASTER_MILLION_LIVE_HC L_YOUJITSU_DE L_MIDORIDON_VIVA_REVIVAL_FY L_GUNDAM_SEED_G --skip-repo-checks
+      - name: Write Gate D baseline report
+        run: |
+          mkdir -p reports
+          {
+            echo '# 20260901 Gate D UI Design / MachineData baseline'
+            echo
+            echo '- UI Design: generated 10/10 from finalized SelectionData + Machine Observation Data v2'
+            echo '- UI validation: PASS'
+            echo '- Selection linkage: PASS'
+            echo '- Observation linkage strict-v2: PASS'
+            echo '- Four-layer gate: PASS (tracked Observation unresolved may remain)'
+            echo '- MachineData batch construction: PASS'
+            echo '- Gate E / Publish: NOT RUN'
+            echo '- Semantic locks are retained in ui-design-data auditNotes and generator policy.'
+          } > reports/batch-20260901-gate-d-baseline.md
+      - name: Commit Gate D baseline
+        run: |
+          if [ -z "$(git status --porcelain)" ]; then
+            echo 'No generated changes.'
+            exit 0
+          fi
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add research machines reports difficulty-catalog.json machine-registry.json catalog.json 2>/dev/null || true
+          git add reports/batch-20260901-gate-d-baseline.md
+          git commit -m 'machine-data: generate 20260901 Gate D baseline'
+          git push origin HEAD:batch/20260901-magia-gundamseed
