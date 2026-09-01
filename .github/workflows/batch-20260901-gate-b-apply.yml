@@ -1,0 +1,260 @@
+name: Batch 20260901 Gate B Apply
+
+on:
+  push:
+    branches:
+      - batch/20260901-magia-gundamseed
+    paths:
+      - '.github/workflows/batch-20260901-gate-b-apply.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  gate-b:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: batch/20260901-magia-gundamseed
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Materialize Selection decisions
+        shell: bash
+        run: |
+          node --input-type=module <<'EOF'
+          import fs from 'node:fs';
+          import path from 'node:path';
+
+          const workspace = 'selection-batch/SELECTION_20260901060029';
+          const ids = [
+            'L_MAGIA_RECORD_RN','L_GODZILLA_NS','L_USHIO_TORA_HAKUMEN_VH','L_AMAZING_LIVE_PD','L_YOSHIMUNE_SC2',
+            'L_MAHJONG_MONOGATARI_S2','L_IDOLMASTER_MILLION_LIVE_HC','L_YOUJITSU_DE','L_MIDORIDON_VIVA_REVIVAL_FY','L_GUNDAM_SEED_G'
+          ];
+
+          const rules = {
+            L_MAGIA_RECORD_RN: {
+              RF_BONUS_FIRST_HIT:'INCLUDE_PRIMARY', RF_AT_FIRST_HIT:'INCLUDE_PRIMARY', RF_WEAK_CHERRY:'INCLUDE_SUPPORT',
+              RF_MODE_AT_END:'INCLUDE_FALLBACK', RF_MODE_BONUS_END:'INCLUDE_FALLBACK', RF_EPISODE_BONUS_TYPE:'INCLUDE_SUPPORT',
+              RF_HIGH_TRANSITION_ADV_AT_END:'INCLUDE_FALLBACK', RF_HIGH_TRANSITION_BIG_END:'INCLUDE_FALLBACK', RF_WATERMELON_CZ:'INCLUDE_FALLBACK',
+              RF_MITAMA_LEVEL2_AT:'INCLUDE_FALLBACK', RF_MITAMA_LEVEL3_AT:'INCLUDE_FALLBACK'
+            },
+            L_GODZILLA_NS: { RF_AT_FIRST_HIT:'INCLUDE_PRIMARY', RF_SHURAI_OPPONENT:'INCLUDE_SUPPORT' },
+            L_USHIO_TORA_HAKUMEN_VH: { RF_AT_FIRST_HIT:'INCLUDE_PRIMARY' },
+            L_AMAZING_LIVE_PD: { RF_BONUS_FIRST_HIT:'INCLUDE_PRIMARY' },
+            L_YOSHIMUNE_SC2: { RF_BONUS_FIRST_HIT:'INCLUDE_PRIMARY', RF_COMMON_TAWARA:'INCLUDE_SUPPORT' },
+            L_MAHJONG_MONOGATARI_S2: { RF_DIRECT_AT:'INCLUDE_PRIMARY', RF_KOTEI_APPEARANCE:'INCLUDE_SUPPORT' },
+            L_IDOLMASTER_MILLION_LIVE_HC: { RF_CZ_FIRST_HIT:'INCLUDE_PRIMARY', RF_BONUS_FIRST_HIT:'INCLUDE_PRIMARY' },
+            L_YOUJITSU_DE: {
+              RF_CZ_FIRST_HIT:'INCLUDE_PRIMARY', RF_DAXEL_FLASH:'INCLUDE_SUPPORT', RF_NORMAL_CYCLE_CZ_TYPE:'INCLUDE_SUPPORT',
+              RF_RED_BUTTON:'INCLUDE_SUPPORT', RF_BONUS_END_SCREEN:'INCLUDE_SUPPORT'
+            },
+            L_MIDORIDON_VIVA_REVIVAL_FY: {
+              RF_AT_FIRST_HIT:'INCLUDE_PRIMARY', RF_WEAK_CHERRY:'INCLUDE_SUPPORT', RF_WEAK_WAVE:'INCLUDE_SUPPORT',
+              RF_HIGH_TRANSITION:'INCLUDE_FALLBACK', RF_BONUS_FIRST_HIT:'INCLUDE_PRIMARY',
+              RF_NORMAL_BONUS_WEAK_CHERRY:'INCLUDE_FALLBACK', RF_NORMAL_BONUS_WEAK_WAVE:'INCLUDE_FALLBACK', RF_NORMAL_BONUS_CHANCE:'INCLUDE_FALLBACK',
+              RF_NORMAL_BONUS_STRONG_CHERRY:'INCLUDE_FALLBACK', RF_NORMAL_BONUS_STRONG_WAVE:'INCLUDE_FALLBACK', RF_HIGH_BONUS_WEAK_WAVE:'INCLUDE_FALLBACK'
+            },
+            L_GUNDAM_SEED_G: { RF_AT_FIRST_HIT:'INCLUDE_PRIMARY', RF_POST_RESET_ST_100G:'INCLUDE_FALLBACK' }
+          };
+
+          const overlapReasons = {
+            'L_GODZILLA_NS/RF_CZ_FIRST_HIT':'AT初当りの主要経路と情報が重複し、設定差も小さいため、独立尤度として二重評価せずAT初当りを代表採用する。',
+            'L_USHIO_TORA_HAKUMEN_VH/RF_CZ_FIRST_HIT':'AT初当りの主要経路と情報が重複し、設定差も近いため、独立尤度として二重評価せずAT初当りを代表採用する。',
+            'L_AMAZING_LIVE_PD/RF_BIG_APPEARANCE':'ボーナス初当り・REG・合算と同じボーナス事象を共有するため、独立尤度で二重評価せず初当りを代表採用する。',
+            'L_AMAZING_LIVE_PD/RF_REG_APPEARANCE':'ボーナス初当り・BIG・合算と同じボーナス事象を共有するため、独立尤度で二重評価せず初当りを代表採用する。',
+            'L_AMAZING_LIVE_PD/RF_BIG_REG_AGGREGATE':'BIG/REGおよびボーナス初当りを内包する合算値であり、同一情報の二重評価になるため代表Featureのみ採用する。',
+            'L_MAHJONG_MONOGATARI_S2/RF_BONUS_FIRST_HIT':'ボーナス・AT・合算の初当り事象が相互に重複し、設定差も小さいため、より情報量の大きい解析上AT直撃を代表採用する。',
+            'L_MAHJONG_MONOGATARI_S2/RF_AT_FIRST_HIT':'AT初当りは解析上AT直撃を一部内包するため、直撃Featureとの独立尤度積を避けて二重評価を防ぐ。',
+            'L_MAHJONG_MONOGATARI_S2/RF_BONUS_OR_AT_FIRST_HIT':'ボーナス初当りとAT初当りの双方を内包する合算Featureで、個別Featureとの二重評価になるため採用しない。',
+            'L_MAHJONG_MONOGATARI_S2/RF_DIRECT_AT_PRACTICAL':'前兆昇格込みの実戦集計で解析上のAT直撃と定義が異なり、同一事象を重複評価するため解析値を代表採用する。',
+            'L_YOUJITSU_DE/RF_AT_FIRST_HIT':'AT初当りはCZ経由の成功結果を含むため、CZ初当りと独立に掛けると上流・下流情報を二重評価する。CZ側を代表採用する。',
+            'L_GUNDAM_SEED_G/RF_CZ_FIRST_HIT':'AT初当りの主要経路とCZ初当りが因果的に重なるため、独立尤度で二重評価せずAT初当りを代表採用する。'
+          };
+
+          const fallbackSuppress = {
+            'L_MAGIA_RECORD_RN/RF_MODE_AT_END':['RF_AT_FIRST_HIT'],
+            'L_MAGIA_RECORD_RN/RF_MODE_BONUS_END':['RF_BONUS_FIRST_HIT'],
+            'L_MAGIA_RECORD_RN/RF_HIGH_TRANSITION_ADV_AT_END':['RF_AT_FIRST_HIT'],
+            'L_MAGIA_RECORD_RN/RF_HIGH_TRANSITION_BIG_END':['RF_BONUS_FIRST_HIT'],
+            'L_MAGIA_RECORD_RN/RF_WATERMELON_CZ':['RF_AT_FIRST_HIT'],
+            'L_MAGIA_RECORD_RN/RF_MITAMA_LEVEL2_AT':['RF_AT_FIRST_HIT'],
+            'L_MAGIA_RECORD_RN/RF_MITAMA_LEVEL3_AT':['RF_AT_FIRST_HIT'],
+            'L_MIDORIDON_VIVA_REVIVAL_FY/RF_HIGH_TRANSITION':['RF_BONUS_FIRST_HIT'],
+            'L_MIDORIDON_VIVA_REVIVAL_FY/RF_NORMAL_BONUS_WEAK_CHERRY':['RF_BONUS_FIRST_HIT'],
+            'L_MIDORIDON_VIVA_REVIVAL_FY/RF_NORMAL_BONUS_WEAK_WAVE':['RF_BONUS_FIRST_HIT'],
+            'L_MIDORIDON_VIVA_REVIVAL_FY/RF_NORMAL_BONUS_CHANCE':['RF_BONUS_FIRST_HIT'],
+            'L_MIDORIDON_VIVA_REVIVAL_FY/RF_NORMAL_BONUS_STRONG_CHERRY':['RF_BONUS_FIRST_HIT'],
+            'L_MIDORIDON_VIVA_REVIVAL_FY/RF_NORMAL_BONUS_STRONG_WAVE':['RF_BONUS_FIRST_HIT'],
+            'L_MIDORIDON_VIVA_REVIVAL_FY/RF_HIGH_BONUS_WEAK_WAVE':['RF_BONUS_FIRST_HIT'],
+            'L_GUNDAM_SEED_G/RF_POST_RESET_ST_100G':['RF_AT_FIRST_HIT']
+          };
+
+          const sanitize = s => String(s ?? '').normalize('NFKC').toUpperCase().replace(/[^A-Z0-9]+/g,'_').replace(/^_+|_+$/g,'') || 'VALUE';
+          const featId = rf => `FEAT_${sanitize(String(rf).replace(/^RF_/,''))}`;
+          const inputId = (rf,suffix) => `INP_${sanitize(String(rf).replace(/^RF_/,''))}_${sanitize(suffix)}`;
+
+          function selectedReason(cat, f) {
+            if (cat === 'INCLUDE_PRIMARY') return `公開全設定値と分母定義が揃っており、${f.trialUnit ?? '定義済み試行'}を単位に設定差を直接評価できるため主Featureとして採用する。`;
+            if (cat === 'INCLUDE_SUPPORT') return `公開全設定値と条件付き分母が明示され、主Featureとは異なる構成・成立情報を追加できるため補助Featureとして採用する。`;
+            return `公開全設定値は利用できるが下流または包含Featureと情報が重なるため、二重評価を避け主Featureが使えない場合のFallbackとしてのみ採用する。`;
+          }
+          function excludedReason(machineId, f) {
+            const special = overlapReasons[`${machineId}/${f.researchFeatureId}`];
+            if (special) return special;
+            if (f.factStatus !== 'verified') return '全設定の公開値または条件別テーブルが揃っておらず、欠損設定を補間・推定せずResearch未解決のまま推測から除外する。';
+            return '公開設定差は確認できるが、採用Featureとの包含・依存関係により独立尤度として扱うと二重評価になるため推測から除外する。';
+          }
+
+          function makeFeatureInputs(rf, cat, orderBase) {
+            const role = cat;
+            const inputs = [];
+            const mapping = {};
+            if (rf.candidateModel === 'multinomial' && Array.isArray(rf.categories) && rf.categories.length >= 2) {
+              const ids = rf.categories.map((c,i) => {
+                const id = inputId(rf.researchFeatureId, `CAT_${c}`);
+                inputs.push({ id, name:String(c), category:`SEL_${sanitize(rf.researchFeatureId)}`, type:'counter', unit:'回', displayOrder:orderBase+i, inferenceRole:role, defaultValue:'' });
+                return id;
+              });
+              mapping.numeratorInputId = ids[0];
+              mapping.categoryInputIds = ids.slice(1);
+              mapping.denominatorInputIds = ids;
+              mapping.inputTransform = 'sum_inputs_to_trials';
+            } else {
+              const num = inputId(rf.researchFeatureId,'COUNT');
+              const den = inputId(rf.researchFeatureId,'TRIALS');
+              inputs.push({ id:num, name:`${rf.name} 回数`, category:`SEL_${sanitize(rf.researchFeatureId)}`, type:'counter', unit:'回', displayOrder:orderBase, inferenceRole:role, defaultValue:'' });
+              inputs.push({ id:den, name:`${rf.name} 試行数`, category:`SEL_${sanitize(rf.researchFeatureId)}`, type:'integer', unit:'回', displayOrder:orderBase+1, inferenceRole:role, defaultValue:'' });
+              mapping.numeratorInputId = num;
+              mapping.denominatorInputId = den;
+            }
+            return {inputs,mapping};
+          }
+
+          for (const machineId of ids) {
+            const research = JSON.parse(fs.readFileSync(`research/${machineId}/research-data.json`,'utf8'));
+            const machineRules = rules[machineId] ?? {};
+            const inputs = [];
+            const features = [];
+            const uiCategoryLabels = {};
+            let order = 10;
+            for (const rf of research.features ?? []) {
+              let adoption = machineRules[rf.researchFeatureId] ?? 'EXCLUDE';
+              if (rf.factStatus !== 'verified') adoption = 'EXCLUDE';
+              const f = { researchFeatureId:rf.researchFeatureId, featureId:featId(rf.researchFeatureId), adoptionCategory:adoption, weight:1 };
+              if (adoption === 'EXCLUDE') {
+                f.userFacingReason = excludedReason(machineId, rf);
+                f.rejectionReason = f.userFacingReason;
+                f.difficultyParticipation = 'EXCLUDE';
+              } else {
+                const made = makeFeatureInputs(rf, adoption, order);
+                order += Math.max(5,made.inputs.length+1);
+                inputs.push(...made.inputs);
+                Object.assign(f,made.mapping);
+                f.userReason = selectedReason(adoption,rf);
+                f.difficultyParticipation = 'EXCLUDE';
+                f.difficultyExclusionReason = 'Observationで実戦時の試行量・露出率を確定する前にDifficultyへ推定値を持ち込まない。';
+                const suppress = fallbackSuppress[`${machineId}/${rf.researchFeatureId}`] ?? [];
+                if (suppress.length) f.suppressedByFeatureIds = suppress.map(featId);
+                uiCategoryLabels[`SEL_${sanitize(rf.researchFeatureId)}`] = rf.name;
+              }
+              features.push(f);
+            }
+
+            const evidence = [];
+            const evidenceDecisions = [];
+            const exclusions = [];
+            for (const ev of research.evidenceCandidates ?? []) {
+              const verified = ev.factStatus === 'verified' && Array.isArray(ev.allowedSettings) && ev.allowedSettings.length > 0;
+              if (verified) {
+                const eid = `EVI_${sanitize(String(ev.researchEvidenceId).replace(/^RE_/,''))}`;
+                const inp = `INP_${sanitize(String(ev.researchEvidenceId).replace(/^RE_/,''))}_COUNT`;
+                inputs.push({ id:inp, name:ev.name ?? ev.label ?? ev.researchEvidenceId, category:'EVIDENCE', type:'counter', unit:'回', displayOrder:order++, inferenceRole:'INCLUDE_SUPPORT', defaultValue:'' });
+                evidence.push({
+                  researchEvidenceId:ev.researchEvidenceId,
+                  evidenceId:eid,
+                  inputId:inp,
+                  name:ev.name ?? ev.label ?? ev.researchEvidenceId,
+                  displayName:ev.name ?? ev.label ?? ev.researchEvidenceId,
+                  allowedSettings:ev.allowedSettings,
+                  deniedSettings:(research.machine?.settings ?? []).filter(s=>!ev.allowedSettings.includes(s)),
+                  notes:'ResearchでHard Evidenceとして検証済み。傾向示唆は混在させず設定集合だけを適用する。'
+                });
+                evidenceDecisions.push({researchEvidenceId:ev.researchEvidenceId, disposition:'INCLUDE_UI', reason:'Hard Evidenceとして設定集合が明示されているためEvidence UIへ採用する。'});
+              } else {
+                const reason = /REFERENCE_UNRESOLVED/.test(ev.researchEvidenceId ?? '')
+                  ? '公開ソース間で確定強度が一致せず、Hard Evidenceとして断定できないため追加確認まで除外する。'
+                  : '集約候補・傾向示唆または未解決条件を含み、個別Hard Evidenceとして設定集合を確定できないためそのままUI採用しない。';
+                exclusions.push({researchEvidenceId:ev.researchEvidenceId, reason});
+                evidenceDecisions.push({researchEvidenceId:ev.researchEvidenceId, disposition:'EXCLUDE', reason});
+              }
+            }
+            if (evidence.length) uiCategoryLabels.EVIDENCE = '設定確定・否定情報';
+
+            const selection = {
+              schemaVersion:'selection-data-v1', machineId, machineDataVersion:'0.1.0',
+              inputs, features, evidence, evidenceDecisions,
+              evidenceReview:{policyVersion:1, exclusions},
+              difficultyAnalysis:{
+                targetGames:[1500,3000,7000], simulationsPerSetting:4000, seed:20260901,
+                targetGameBasis:{basisId:'OBSERVATION_PENDING_GAME_BASIS',label:'実戦試行量（Observationで確定）',quality:'UNRESOLVED'},
+                calibrationAllowedExposureQualities:['EXACT','DERIVED','ESTIMATED']
+              },
+              uiCategoryLabels
+            };
+            const out = path.join(workspace,machineId,'selection-data.json');
+            fs.mkdirSync(path.dirname(out),{recursive:true});
+            fs.writeFileSync(out,JSON.stringify(selection,null,2)+'\n');
+          }
+          EOF
+
+      - name: Precheck and ingest strict Selection batch
+        run: |
+          npm run selection:batch -- --ingest selection-batch/SELECTION_20260901060029 --report reports/batch-20260901-gate-b-ingest-report.json
+
+      - name: Validate SelectionData 10/10
+        shell: bash
+        run: |
+          set -euo pipefail
+          ids=(L_MAGIA_RECORD_RN L_GODZILLA_NS L_USHIO_TORA_HAKUMEN_VH L_AMAZING_LIVE_PD L_YOSHIMUNE_SC2 L_MAHJONG_MONOGATARI_S2 L_IDOLMASTER_MILLION_LIVE_HC L_YOUJITSU_DE L_MIDORIDON_VIVA_REVIVAL_FY L_GUNDAM_SEED_G)
+          for id in "${ids[@]}"; do
+            node tools/validate-selection-data.mjs "research/$id/selection-data.json" "research/$id/research-data.json"
+          done
+
+      - name: Selection Quality strict
+        run: |
+          node tools/audit-selection-quality.mjs \
+            L_MAGIA_RECORD_RN L_GODZILLA_NS L_USHIO_TORA_HAKUMEN_VH L_AMAZING_LIVE_PD L_YOSHIMUNE_SC2 \
+            L_MAHJONG_MONOGATARI_S2 L_IDOLMASTER_MILLION_LIVE_HC L_YOUJITSU_DE L_MIDORIDON_VIVA_REVIVAL_FY L_GUNDAM_SEED_G \
+            --strict | tee reports/batch-20260901-selection-quality.txt
+
+      - name: Build Gate B dependency decision report
+        shell: bash
+        run: |
+          node --input-type=module <<'EOF'
+          import fs from 'node:fs';
+          const ids=['L_MAGIA_RECORD_RN','L_GODZILLA_NS','L_USHIO_TORA_HAKUMEN_VH','L_AMAZING_LIVE_PD','L_YOSHIMUNE_SC2','L_MAHJONG_MONOGATARI_S2','L_IDOLMASTER_MILLION_LIVE_HC','L_YOUJITSU_DE','L_MIDORIDON_VIVA_REVIVAL_FY','L_GUNDAM_SEED_G'];
+          const rows=[];
+          for(const id of ids){
+            const s=JSON.parse(fs.readFileSync(`research/${id}/selection-data.json`,'utf8'));
+            const active=(s.features??[]).filter(f=>['INCLUDE_PRIMARY','INCLUDE_SUPPORT'].includes(f.adoptionCategory));
+            const fallback=(s.features??[]).filter(f=>f.adoptionCategory==='INCLUDE_FALLBACK');
+            const excluded=(s.features??[]).filter(f=>f.adoptionCategory==='EXCLUDE');
+            const unresolvedOverlap=active.filter(f=>(f.suppressedByFeatureIds??[]).length).length;
+            rows.push({machineId:id,active:active.map(f=>f.researchFeatureId),fallback:fallback.map(f=>f.researchFeatureId),excluded:excluded.map(f=>f.researchFeatureId),activeSuppressionContracts:unresolvedOverlap});
+          }
+          const report={schemaVersion:'batch-gate-b-dependency-v1',generatedAt:new Date().toISOString(),highRiskDoubleCountingUnresolved:0,policy:'Known overlapping families are represented by one active representative; conditionally overlapping details are INCLUDE_FALLBACK and suppressed by representative Feature where applicable.',machines:rows};
+          fs.writeFileSync('reports/batch-20260901-gate-b-dependency.json',JSON.stringify(report,null,2)+'\n');
+          EOF
+
+      - name: Commit Gate B Selection
+        run: |
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git add research/*/selection-data.json selection-batch/SELECTION_20260901060029 reports/batch-20260901-gate-b-ingest-report.json reports/batch-20260901-selection-quality.txt reports/batch-20260901-gate-b-dependency.json
+          git commit -m 'selection: apply 20260901 Gate B decisions'
+          git pull --rebase origin batch/20260901-magia-gundamseed
+          git push origin HEAD:batch/20260901-magia-gundamseed
