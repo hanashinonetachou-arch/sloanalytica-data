@@ -122,3 +122,35 @@ Do not promote these seven to CHECKED_NONE without machine-specific primary evid
 8. Run SelectionData validator, evidence completeness, Selection Quality Gate and dependency/double-counting audit across all 10.
 9. Gate B may pass only when undispositioned Research/Discovery candidates = 0, missing user-facing reject reason = 0, input-burden-only rejects = 0, and unresolved HIGH_RISK double-counting = 0.
 10. At Gate B completion, update this checkpoint/PR with exact SHA and audit results and STOP to output the next-chat prompt for Observation / Gate C.
+## Gate B checkpoint
+
+Gate B: **PASS_WITH_TRACKED_SELECTION_DEBT**.
+
+- strict workspace: `SELECTION_20260901060029`
+- GitHub Actions apply run: `33476178188` — SUCCESS on Node 22
+- SelectionData: PASS 10/10
+- Selection Quality: PASS 10 / REVIEW 0 / BLOCKED 0
+- Features: 64/64 disposed — PRIMARY 13, SUPPORT 11, FALLBACK 15, EXCLUDE 25
+- Evidence: 100/100 disposed — UI 90, explicit exclusion 10
+- missing Feature/Evidence/Discovery disposition: 0
+- missing user-facing reject reason: 0
+- input-burden-only reject: 0
+- EXCLUDE-only input leakage: 0
+- unresolved HIGH_RISK double-counting: 0
+- completion: `reports/batch-20260901-gate-b-completion.md`
+- final audit: `reports/batch-20260901-gate-b-final-audit.json`
+
+### Observation-critical handoff
+
+- Amazing Live: Bonus first-hit is representative; BIG/REG/aggregate remain excluded from independent likelihood.
+- Mahjong: analysis direct AT is representative; practical promotion-inclusive direct AT and overlapping first-hit aggregates remain excluded.
+- Ushio: reset-only distributions require confirmed-reset populations; incomplete tables remain unresolved/excluded.
+- Youjitsu: CZ type, DAXEL flash and red-button keep their conditional denominators.
+- Midoridon: high-state/state×role statistics keep eligible state/trigger denominators and are Fallbacks where overlapping.
+- Gundam SEED: 100G window is per reset/ST-end opportunity and remains Fallback.
+- Magia Record, Idolmaster and Midoridon linked-service FOUND status must be investigated down to obtainable counters; the other seven remain UNRESOLVED unless machine-specific evidence resolves them.
+- All ten require Machine Observation Data v2.
+
+### Stop rule
+
+Gate B is complete. Do not continue automatically into Observation in this chat. Next stage is **Observation / Gate C**.
