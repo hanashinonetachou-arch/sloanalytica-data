@@ -16,72 +16,84 @@ Latest Library-confirmed standards:
 
 ## Dependency / registration
 
-PR #148 remains the stacked predecessor. Its production batch owns provisional IDs 181-190. Current registry also assigns ID 191 to test-only `S_REVUE_STARLIGHT_CX_TEST_V66`, therefore this production batch uses **192-201**. Registry validator requires provisional IDs to be unique.
+PR #148 remains the stacked predecessor. Its production batch owns provisional IDs 181-190. Registry ID 191 is already assigned to test-only `S_REVUE_STARLIGHT_CX_TEST_V66`; this production batch therefore uses **192-201**.
 
 ## Gate status
 
 Gate 0: `PASS_WITH_TRACKED_DISCOVERY_DEBT`.
-Gate A / Research: **IN PROGRESS — 10/10 ResearchData materialized**.
-
-Persistent artifacts:
-- `reports/batch-20260901-gate-a-research-checkpoint.md`
-- `reports/batch-20260901-gate-a-provenance-matrix.md`
+Gate A / Research: **PASS_WITH_TRACKED_RESEARCH_DEBT**.
+Next stage: Selection / Gate B.
 
 ## Machines / ResearchData
 
-192 — `L_MAGIA_RECORD_RN` — `research/L_MAGIA_RECORD_RN/research-data.json`
-193 — `L_GODZILLA_NS` — `research/L_GODZILLA_NS/research-data.json`
-194 — `L_USHIO_TORA_HAKUMEN_VH` — `research/L_USHIO_TORA_HAKUMEN_VH/research-data.json`
-195 — `L_AMAZING_LIVE_PD` — `research/L_AMAZING_LIVE_PD/research-data.json`
-196 — `L_YOSHIMUNE_SC2` — `research/L_YOSHIMUNE_SC2/research-data.json`
-197 — `L_MAHJONG_MONOGATARI_S2` — `research/L_MAHJONG_MONOGATARI_S2/research-data.json`
-198 — `L_IDOLMASTER_MILLION_LIVE_HC` — `research/L_IDOLMASTER_MILLION_LIVE_HC/research-data.json`
-199 — `L_YOUJITSU_DE` — `research/L_YOUJITSU_DE/research-data.json`
-200 — `L_MIDORIDON_VIVA_REVIVAL_FY` — `research/L_MIDORIDON_VIVA_REVIVAL_FY/research-data.json`
-201 — `L_GUNDAM_SEED_G` — `research/L_GUNDAM_SEED_G/research-data.json`
+192 — `L_MAGIA_RECORD_RN`
+193 — `L_GODZILLA_NS`
+194 — `L_USHIO_TORA_HAKUMEN_VH`
+195 — `L_AMAZING_LIVE_PD`
+196 — `L_YOSHIMUNE_SC2`
+197 — `L_MAHJONG_MONOGATARI_S2`
+198 — `L_IDOLMASTER_MILLION_LIVE_HC`
+199 — `L_YOUJITSU_DE`
+200 — `L_MIDORIDON_VIVA_REVIVAL_FY`
+201 — `L_GUNDAM_SEED_G`
 
-Machine IDs were collision-searched before materialization.
+All ten have `research/<machineId>/research-data.json` and an explicit `discoveryInventory`.
+
+## Gate A runtime audit
+
+GitHub Actions run `33473996001` completed successfully on Node 22.
+
+- ResearchData validation: PASS 10/10.
+- Discovery → Research completeness: PASS.
+- Discovery candidates: 85.
+- Transferred/accounted: 85.
+- Missing: 0.
+- Runtime audit: `reports/batch-20260901-gate-a-runtime-audit.json`.
+- Actions-generated inventory/validation commit: `899a1acc`.
+- Gate A completion record: `reports/batch-20260901-gate-a-completion.md`.
+
+Expected warnings only:
+- Magia `RF_MODE_AT_END`: 4 `MULTINOMIAL_ROUNDED_SUM` warnings from published rounded category percentages.
+- L Godzilla `RF_SHURAI_OPPONENT`: 4 `MULTINOMIAL_ROUNDED_SUM` warnings from published rounded category percentages.
+Research raw published values remain unchanged; Selection must decide normalization only under the formal normalization contract.
+
+## Web → Discovery exhaustiveness
+
+Cross-source distribution-table sweep completed for the current public source universe. Setting-specific initial-hit/appearance rates, small-role rates, allocations/selections, conditional state/role lotteries, mode/reset/post-ST distributions, screens/characters/voices/cards/trophies/payouts, and linked-service surfaces were reviewed. Known incomplete tables remain explicit `pending` Research candidates rather than being interpolated or dropped.
+
+Gate-A interpretation:
+- Unreviewed statistical categories = 0 for the current discovered universe.
+- Discovery candidate missing from Research = 0.
+- Future newly published/publicly discovered data reopens the affected Research layer.
 
 ## Linked-service state
 
-- Magia Record: **FOUND — UniMemo**. Universal official supported-machine list contains this machine; machine-specific analysis confirms weak-cherry counting. Full result-field inventory remains Observation field-list debt.
-- Idolmaster: **FOUND — SloPla NEXT**. Official machine/result surface exposes total/normal games, initial hits, CZ, rare-role raw counts and many bonus/live counters. Removed rare-role probability display must not be reconstructed as official probability.
-- Midoridon: **FOUND — UniMemo**. Universal official supported-machine list contains this machine; machine-specific analysis confirms weak cherry / weak wave / reach-eye replay counting candidates. Full result-field inventory remains Observation field-list debt.
-- Other seven: **UNRESOLVED** unless machine-specific primary evidence proves CHECKED_NONE. General manufacturer apps, guides or simulators do not prove either support or absence.
+FOUND:
+- Magia Record — UniMemo. Official Universal supported-machine list + machine-specific weak-cherry counting evidence.
+- Idolmaster — SloPla NEXT. Official machine/result surface with total/normal games, initial-hit/CZ, raw rare-role and bonus/live counters.
+- Midoridon — UniMemo. Official Universal supported-machine list + machine-specific weak-cherry/weak-wave/reach-eye counting evidence.
 
-## Research corrections completed after first materialization
+UNRESOLVED:
+- L Godzilla
+- L Ushio & Tora Hakumen Kessen
+- Amazing Live
+- Yoshimune
+- L Mahjong Monogatari
+- Classroom of the Elite
+- Gundam SEED
 
-- Amazing Live: added BIG+REG aggregate candidate so the Discovery candidate is not silently dropped.
-- Mahjong Monogatari: added practical direct-AT and Kotei appearance candidates; preserved different definitions and overlap warnings.
-- Youjitsu: added successful-CZ DAXEL flash with successful-CZ denominator.
-- Ushio & Tora: added `246枚突破` as even-setting set Evidence (2/4/6 allowed; 1/3/5 denied), distinct from lower-bound Evidence.
-- Magia / Midoridon: official UniMemo support moved to FOUND with official provenance.
+Do not promote these seven to CHECKED_NONE without machine-specific primary evidence. General manufacturer apps, simulators, QR/member services, or family-level services are insufficient.
 
-## Semantic locks
+## Selection-critical semantic locks
 
-- Amazing Live: settings 1/2/4/5/6 plus operational SET_L. Never synthesize SET_3. First-hit, BIG, REG and aggregate observations share information and require Selection dependency resolution.
-- Mahjong: Bonus first-hit, AT first-hit and Bonus-or-AT aggregate overlap. Direct-AT analysis value and practical promotion-inclusive value have different definitions.
-- Ushio & Tora: reset-only ceiling/mode distributions require known-reset trial populations.
-- Youjitsu: CZ-type, DAXEL flash and red-button observations retain conditional event denominators.
-- Midoridon: high-state transition and state-specific bonus lotteries use eligible trigger/state denominators, not total normal games.
+- Amazing Live: settings 1/2/4/5/6 plus operational SET_L only; never synthesize SET_3. Bonus first-hit, BIG, REG and BIG+REG aggregate share information.
+- Mahjong: Bonus first-hit, AT first-hit and Bonus-or-AT aggregate overlap. Analysis direct-AT and practical promotion-inclusive direct-AT have different definitions.
+- Ushio: reset-only ceiling/mode distributions require a known-reset population. `246枚突破` is even-setting set Evidence, not lower-bound Evidence.
+- Youjitsu: CZ-type, DAXEL flash and red-button observations retain their conditional event denominators.
+- Midoridon: high-state transition/state-specific bonus lotteries use eligible trigger/state denominators, not total normal games.
 - Gundam SEED: 100G-window distribution is per reset/ST-end opportunity, not per-game.
-- Incomplete public setting tables remain incomplete; values are never interpolated or fabricated.
+- Missing settings in partial public tables remain unresolved; never interpolate or fabricate.
 
-## Formal audit discovery
+## Next action — Selection / Gate B
 
-`tools/discovery-completeness-gate.mjs` was inspected. Formal Gate-0 transfer validation requires a `discoveryInventory` array inside each ResearchData. Every discovery candidate must map to an existing Research Feature/Evidence or be explicitly `UNRESOLVED` / `REFERENCE`.
-
-The newly materialized 10 ResearchData files do not yet contain `discoveryInventory`; therefore the formal Discovery→Research gate cannot honestly be claimed PASS yet. This is now the principal Gate-A closure blocker.
-
-`tools/validate-research-data.mjs` was also inspected. The current files were authored against its required schema, but the Node validator has **not yet been executed**: this stacked PR does not trigger the existing prototype-targeted research workflow, no Actions runs exist for this branch, and the working container cannot resolve GitHub for a clone. Do not report runtime validation as completed until an actual execution path succeeds.
-
-## Remaining Gate-A closure work
-
-1. Add exhaustive `discoveryInventory` to all 10 ResearchData files and map every known candidate.
-2. Re-audit public distribution tables for candidate omissions before treating inventory as exhaustive.
-3. Normalize remaining true Hard Evidence where exact public wording is sufficiently strong; leave tendency cues non-Evidence.
-4. Execute `research:validate` and `research:gate0` through a real repository execution path.
-5. Update Gate-A checkpoint and PR #149 with exact audit results and final head SHA.
-6. Only then mark Gate A PASS and begin Selection.
-
-No Selection decision has been made yet.
+For every Research Feature and Evidence candidate, assign an explicit Selection disposition. Resolve dependency/high-risk overlap before any likelihood combination. Preserve correct trial units. Do not reject solely due input burden. Keep unresolved-public-table candidates explicit. After 10/10 Selection, run Selection validation and Quality/Dependency audit, update checkpoint, then decide whether context still safely fits Observation / Gate C.
