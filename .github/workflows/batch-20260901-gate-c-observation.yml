@@ -1,0 +1,68 @@
+name: Batch 20260901 Gate C Observation
+
+on:
+  push:
+    branches:
+      - batch/20260901-magia-gundamseed
+    paths:
+      - tools/generate-batch-20260901-observation-v2.mjs
+      - .github/workflows/batch-20260901-gate-c-observation.yml
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  generate-validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: batch/20260901-magia-gundamseed
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Generate Observation v2
+        run: node tools/generate-batch-20260901-observation-v2.mjs
+      - name: Validate Observation files
+        run: |
+          node tools/validate-machine-observation-data.mjs \
+            research/L_MAGIA_RECORD_RN/machine-observation-data.json \
+            research/L_GODZILLA_NS/machine-observation-data.json \
+            research/L_USHIO_TORA_HAKUMEN_VH/machine-observation-data.json \
+            research/L_AMAZING_LIVE_PD/machine-observation-data.json \
+            research/L_YOSHIMUNE_SC2/machine-observation-data.json \
+            research/L_MAHJONG_MONOGATARI_S2/machine-observation-data.json \
+            research/L_IDOLMASTER_MILLION_LIVE_HC/machine-observation-data.json \
+            research/L_YOUJITSU_DE/machine-observation-data.json \
+            research/L_MIDORIDON_VIVA_REVIVAL_FY/machine-observation-data.json \
+            research/L_GUNDAM_SEED_G/machine-observation-data.json
+      - name: Audit Selection linkage
+        run: |
+          node tools/audit-observation-selection-linkage.mjs --strict-v2 \
+            L_MAGIA_RECORD_RN L_GODZILLA_NS L_USHIO_TORA_HAKUMEN_VH L_AMAZING_LIVE_PD L_YOSHIMUNE_SC2 \
+            L_MAHJONG_MONOGATARI_S2 L_IDOLMASTER_MILLION_LIVE_HC L_YOUJITSU_DE L_MIDORIDON_VIVA_REVIVAL_FY L_GUNDAM_SEED_G
+      - name: Write Gate C baseline report
+        run: |
+          mkdir -p reports
+          {
+            echo '# 20260901 Gate C Observation baseline'
+            echo
+            echo '- Machine Observation Data v2: generated 10/10'
+            echo '- Validation: PASS'
+            echo '- Selection linkage strict-v2: PASS'
+            echo '- This is a Gate C baseline, not Gate C completion.'
+            echo '- DATA_COUNTER / SEATED_STATE / unresolved linked-service and machine-menu coverage remain open until source research is exhausted.'
+          } > reports/batch-20260901-gate-c-observation-baseline.md
+      - name: Commit generated baseline
+        run: |
+          if git diff --quiet -- research reports/batch-20260901-gate-c-observation-baseline.md; then
+            echo 'No generated changes.'
+            exit 0
+          fi
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add research/*/machine-observation-data.json reports/batch-20260901-gate-c-observation-baseline.md
+          git commit -m 'observation: generate 20260901 Gate C baseline'
+          git push origin HEAD:batch/20260901-magia-gundamseed
