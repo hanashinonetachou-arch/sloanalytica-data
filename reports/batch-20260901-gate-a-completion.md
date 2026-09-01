@@ -9,52 +9,42 @@ Formal standards: Core Policy v1.7 / RSO v6.9 / UX v6.9
 
 **Gate A — Statistical Research Completeness: PASS_WITH_TRACKED_RESEARCH_DEBT**
 
-This result means the known public setting-difference candidate universe has been reviewed and transferred into Research for all 10 machines. It does **not** mean every public source exposes a complete all-setting numeric table, and it does not make any Selection decision.
+This is the final Gate-A result after two additional distribution/evidence red-team sweeps. The first 85-candidate audit was superseded because the red-team discovered further public setting-difference candidates; Research was correctly reopened, expanded, and revalidated before Selection.
 
-## Runtime validation
+## Final runtime validation
 
-GitHub Actions run `33473996001` executed on Node 22 and completed successfully.
+GitHub Actions run `33474602519` executed on Node 22 and completed successfully.
 
 - ResearchData validation: PASS — 10/10
 - Discovery → Research completeness: PASS
-- discovered candidates: 85
-- transferred candidates: 85
-- missing: 0
-- generated runtime report: `reports/batch-20260901-gate-a-runtime-audit.json`
-- generated ResearchData/inventory commit: `899a1acc`
+- discovered candidates: **172**
+- transferred/accounted candidates: **172**
+- missing: **0**
+- Research Feature candidates: **64**
+- Research Evidence candidates: **100**
+- final runtime report: `reports/batch-20260901-gate-a-final-runtime-audit.json`
+- final Actions-generated Research commit: `261268b0119f941169646322a1d3482679109afb`
 
-Expected Research warnings only:
-- Magia `RF_MODE_AT_END`: four `MULTINOMIAL_ROUNDED_SUM` warnings caused by published rounded category percentages.
-- L Godzilla `RF_SHURAI_OPPONENT`: four `MULTINOMIAL_ROUNDED_SUM` warnings caused by published rounded category percentages.
-- No ResearchData validation errors.
+Expected warnings are published multinomial rounding only. Research keeps the public rounded source values unchanged; any strict normalization belongs to downstream Selection/MachineData under the formal normalization contract.
 
-Research preserves those published rounded values unchanged. Any normalization decision belongs to Selection/MachineData and may occur only under the manifest normalization contract.
+## Web → Discovery exhaustiveness
 
-## Web → Discovery exhaustiveness review
+The batch received an initial source sweep plus two explicit distribution-table/evidence red-team sweeps. The final Research universe includes numeric candidates, incomplete numeric candidates, conditional distributions, hard Evidence, tendency/reference candidates and linked-service findings discovered in the checked public sources.
 
-A separate cross-source sweep was performed before materialization. The review covered identity/official pages and major analysis pages and explicitly searched for setting-specific:
-- initial-hit / appearance rates;
-- small-role rates;
-- selection/allocation rates;
-- state/role conditional lotteries;
-- mode distributions;
-- reset-only / post-ST distributions;
-- screen / character / voice / card / trophy / payout cues;
-- linked-service support and machine-specific counters.
-
-Known incomplete public tables are present in Research as `pending` candidates rather than being silently omitted or interpolated. Therefore:
-- Unreviewed statistical categories = 0 for the current discovered universe.
+Final Gate-A interpretation:
+- Unreviewed statistical categories = 0 for the current checked public universe.
 - Discovery candidate missing from Research = 0.
-- Web → Discovery exhaustiveness review = completed for Gate A.
+- Web → Discovery exhaustiveness review = completed for this Gate.
+- Newly published or later-discovered public data reopens the affected Research layer.
 
-This is an exhaustiveness review of the public sources checked in this batch, not a claim that no future source can publish additional data. Later discoveries must reopen the affected Research layer.
+Notable red-team additions include Magia mode/episode/high-state/CZ/AT conditional tables and decomposed hard Evidence, Godzilla cue decomposition, Ushio trophy decomposition, Mahjong missing hard cues, Idolmaster hard ending patterns, Youjitsu ending distribution/hard cues, Midoridon bonus-first-hit/state-role bonus tables and hard cues, and Gundam SEED setting-denial screen evidence.
 
 ## Linked services
 
 FOUND:
-- Magia Record — UniMemo. Official Universal supported-machine list confirms support; machine-specific analysis confirms weak-cherry counting. Full result-field inventory remains downstream field-list debt.
-- Idolmaster Million Live! Next Prologue — SloPla NEXT. Official machine/result surface exposes total/normal games, initial-hit/CZ, rare-role raw counts and multiple bonus/live counters.
-- Midoridon VIVA REVIVAL — UniMemo. Official Universal supported-machine list confirms support; machine-specific analysis supports weak-cherry / weak-wave / reach-eye replay counting. Full result-field inventory remains downstream field-list debt.
+- Magia Record — UniMemo.
+- Idolmaster Million Live! Next Prologue — SloPla NEXT.
+- Midoridon VIVA REVIVAL — UniMemo.
 
 UNRESOLVED:
 - L Godzilla
@@ -65,25 +55,25 @@ UNRESOLVED:
 - Classroom of the Elite
 - Gundam SEED
 
-These seven are not promoted to CHECKED_NONE without machine-specific primary evidence proving absence. General manufacturer apps, simulators, QR/member services, or family-level services are insufficient.
+Do not promote the seven unresolved machines to CHECKED_NONE without machine-specific primary evidence. General manufacturer apps, simulators, QR/member services or family-level services are insufficient.
 
-## Tracked Research debt carried into Selection/Observation
+## Selection-critical semantic locks
 
-- Magia: several state/trigger conditional tables are represented as pending grouped candidates; do not flatten to normal-game rates.
-- Godzilla: Exploration Zone middle-setting values and replay-point CZ full table remain incomplete publicly in the checked sources.
-- Ushio: reset distributions are conditional on known reset; state/role CZ full all-setting table remains incomplete.
-- Amazing Live: setting-different small-role table remains unresolved; settings are 1/2/4/5/6 plus operational SET_L only.
-- Yoshimune: practical mode/zone observations are not promoted to official exact probabilities; setting vs mode voice semantics require separation.
-- Mahjong: partial conditional tables remain unresolved; Bonus/AT/aggregate and direct/practical-direct dependencies are explicit.
-- Idolmaster: direct-high/heaven/300G full tables unresolved in checked sources; SloPla raw counters remain Observation candidates.
-- Youjitsu: mode-3 role-specific CZ table remains conditional/incomplete.
-- Midoridon: reach-eye even-setting values and state/role bonus complete table remain unresolved; exact eligible denominators preserved.
-- Gundam SEED: nested route-specific lottery tables remain pending; 100G distribution is opportunity-level, not per-game.
+- Amazing Live: settings 1/2/4/5/6 plus operational SET_L; never synthesize SET_3. Bonus first-hit, BIG, REG and aggregate observations overlap.
+- Mahjong: Bonus first-hit, AT first-hit and aggregate overlap; analysis direct-AT and promotion-inclusive practical direct-AT have different definitions.
+- Ushio: reset-only ceiling/mode distributions require known-reset populations.
+- Youjitsu: CZ type, DAXEL flash and red-button observations preserve conditional event denominators.
+- Midoridon: state/role bonus and high-state transition candidates preserve eligible state/trigger denominators rather than total normal games.
+- Gundam SEED: 100G-window distribution is per reset/ST-end opportunity, not a per-game rate.
+- Missing public settings in partial tables remain unresolved; never interpolate or fabricate.
+- A hard Evidence cue and a tendency cue are not interchangeable.
 
 ## Registration
 
-Correct production provisional IDs for this batch are 192-201. ID 191 is already occupied by test-only `S_REVUE_STARLIGHT_CX_TEST_V66`; no production artifact was written using the invalid earlier 191-200 allocation.
+Correct production provisional IDs are **192-201**. ID 191 is occupied by test-only `S_REVUE_STARLIGHT_CX_TEST_V66`.
 
 ## Next stage
 
-Proceed to Selection / Gate B. Every Research Feature and Evidence candidate must receive an explicit disposition. Dependency/high-risk overlap resolution is especially required for Amazing Live and Mahjong Monogatari, and conditional denominators must be preserved for Ushio, Youjitsu, Midoridon and Gundam SEED.
+Proceed to Selection / Gate B in the next chat. The previously prepared Selection workspace `SELECTION_20260901053510` predates the final Research red-team expansion and must be treated as stale; regenerate the Selection workspace from final Research before making or ingesting Selection decisions.
+
+Every one of the 64 Research Feature candidates and 100 Research Evidence candidates must receive an explicit disposition. Selection Quality Gate requires no undispositioned Research/Discovery candidates, no missing user-facing rejection reason, no input-burden-only rejection, and no unresolved high-risk double counting.
