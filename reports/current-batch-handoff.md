@@ -7,47 +7,99 @@ Stacked base: `batch/20260831-persona5-to-bio5`
 Draft PR: #149
 Target integration: `prototype-multi-machine`
 
-Formal standards: Core Policy v1.7 / RSO Manifest v6.9 / MachineData UX Manifest v6.9. Re-check Library at next chat start.
+Formal standards: Core Policy v1.7 / RSO Manifest v6.9 / MachineData UX Manifest v6.9. Re-check Library at next chat start and prefer any newer formal version if present.
 
 ## Gate status
+
 Gate 0 `PASS_WITH_TRACKED_DISCOVERY_DEBT`
 Gate A `PASS_WITH_TRACKED_RESEARCH_DEBT`
 Gate B `PASS_WITH_TRACKED_SELECTION_DEBT`
 Gate C `PASS_WITH_TRACKED_OBSERVATION_DEBT`
-Gate D **`PASS_WITH_TRACKED_OBSERVATION_DEBT`**
-Gate E `NOT_STARTED`
+Gate D `PASS_WITH_TRACKED_OBSERVATION_DEBT`
+Gate E **`PASS_WITH_TRACKED_OBSERVATION_DEBT`**
+Publish **`NOT_STARTED`**
 
-Next stage: **Automated Quality Gate / Gate E**. Do not Publish automatically.
+Next stage: **Publish / next Gate**. Stop at this handoff; do not Publish from the Gate E chat.
 
 ## Batch
+
 192 `L_MAGIA_RECORD_RN`; 193 `L_GODZILLA_NS`; 194 `L_USHIO_TORA_HAKUMEN_VH`; 195 `L_AMAZING_LIVE_PD`; 196 `L_YOSHIMUNE_SC2`; 197 `L_MAHJONG_MONOGATARI_S2`; 198 `L_IDOLMASTER_MILLION_LIVE_HC`; 199 `L_YOUJITSU_DE`; 200 `L_MIDORIDON_VIVA_REVIVAL_FY`; 201 `L_GUNDAM_SEED_G`.
 
-PR #149 stays stacked on PR #148 / `batch/20260831-persona5-to-bio5`; do not retarget automatically.
+PR #149 remains intentionally stacked on PR #148 / `batch/20260831-persona5-to-bio5`. **Do not retarget automatically.**
 
-## Gate D checkpoint
-Gate D work-product HEAD before checkpoint metadata: `4fc52e27e80fab06dcb113cf93263e7a0bac2c84`.
-Gate D workflow `33479229058`: SUCCESS.
-User-verified UX contract audit `33479232696`: SUCCESS.
-Completion metadata commit: `e8dbf4563bafd4f9fc1da0da2c152ca128c400bb`.
-Current-state checkpoint commit immediately before this handoff write: `07b3b066d6b4f57171bbbfa29eb8df2eaa9b918d`.
+## Gate E checkpoint
+
+Gate E validated work-product HEAD: `0d137539a6cf38b6cc1c58b5e1f1c1a0e1239687`.
+Final Gate E Automated Quality Gate workflow: `33482322177` — SUCCESS.
+Gate E completion metadata commit: `91bdb6d8f69dc9f3c489a706c0721303b38faab2`.
+Current-state checkpoint commit immediately before this handoff write: `f0854ccd4e73742548935177d8fbe288f73c14f6`.
 Exact post-checkpoint branch HEAD is recorded in PR #149 after this handoff write.
 
-UI Design `10/10`; MachineData construction `10/10`; Selection↔UI linkage PASS; UI↔Observation strict-v2 linkage PASS; Four-layer Gate PASS. UI Design → MachineData materialization PASS `10/10`, and a second dry-run reported `changed=0` for all 10 machines.
+Completion record: `reports/batch-20260901-gate-e-completion.md`.
+Current machine-readable state: `reports/current-batch-state.json`.
 
-The Gate D workflow also passed UI Design regression tests, Difficulty exposure audit, repository tests, public-data audit and user-facing service-name audit. Gate E and Publish were not run.
+## Automated Quality Gate summary
 
-Artifacts: `reports/batch-20260901-gate-d-baseline.md`, `reports/batch-20260901-gate-d-completion.md`, `reports/current-batch-state.json`, `reports/current-batch-handoff.md`.
+Research validation PASS 10/10. Research retained only rounded multinomial warnings where published category values round away from exactly 1.000.
 
-## UI / input contract carried into MachineData
-Only finalized SelectionData inputs are exposed; EXCLUDE-only inputs are not revived. Observation refs and acquisition sources are attached where concrete. Counter inputs carry counter/quick-add contracts. Empty means unobserved; numeric 0 means observed zero. Evidence remains in a separate `設定示唆・確定情報` section and separate Evidence mapping. Derived values are not duplicated as manual inputs. linked-service and machine-menu acquisition remain optional rather than mandatory.
+Selection validation PASS 10/10, warnings 0. Selection Quality strict PASS 10 / REVIEW 0 / BLOCKED 0. Repository dependency/suppression regression also passed.
 
-Predecessor and self-play intervals are not merged. Because SEATED_START remains unresolved where field verification is required, Gate D did not fabricate seated/predecessor input fields. Difficulty exposure is not invented from unsupported Observation sources.
+Observation v2 PASS 10/10, compatibility warnings 0. Selection↔Observation strict-v2 linkage PASS 10/10, warnings 0.
 
-## Gate D semantic locks
-Amazing Live: Bonus first-hit remains sole overlap representative; no independent BIG/REG/aggregate; SET_L retained; SET_3 not generated. Mahjong: analysis direct AT excludes promotion and overlap aggregates stay suppressed. Ushio: reset-only populations require confirmed-reset opportunities. Youjitsu conditional denominators remain exact. Midoridon state×role×opportunity denominator and overlap suppression remain exact. Gundam 100G = one reset/ST-end opportunity, never per-game. Magia conditional populations remain conditional. Hard Evidence ≠ tendency cues. Empty ≠ observed zero.
+UI Design validation PASS. Selection↔UI PASS 10/10 warnings 0. UI↔Observation strict-v2 PASS 10/10 warnings 0. Four-layer Pipeline Gate PASS 10/10 while preserving tracked UNRESOLVED acquisition debt.
 
-## Tracked debt carried to Gate E
-Hall-specific DATA_COUNTER fields/semantics; SEATED_START snapshots/previous-player alignment; Godzilla PUSH `当日の遊技履歴` exact numeric fields; Amazing Live Bonus-first-hit boundary/chain exclusion/obtainable display; machine-specific linked-service/QR UNRESOLVED for Godzilla/Ushio/Amazing Live/Yoshimune/Mahjong/Gundam SEED. These are acquisition/source-coverage debts, not adopted-Feature route gaps; all adopted Features retain direct/manual Observation routes.
+UI Design → MachineData materialization stability PASS 10/10; final `--require-unchanged` dry-run remained `changed=0`.
 
-## Gate E entry
-Start from the committed Gate D `ui-design-data.json` and materialized MachineData. First re-check Library latest standards, actual GitHub branch/PR/base/HEAD, and `reports/current-batch-state.json`. Use current `package.json` / tools for Automated Quality Gate commands; do not blindly use historical Manifest command names. Preserve all Semantic Locks and explicit Observation debt. Do not re-decide Selection during Gate E. Stop at the Gate E checkpoint before Publish unless the current formal policy explicitly defines a separate safe next step.
+No standalone `denominator-resolution*.json` or `evidence-ui.json` files exist for this batch. Validators requiring those path arguments were therefore not invoked without inputs. Denominator/Evidence semantics remain covered by Selection, Observation, strict linkage, UI mapping, materialized MachineData and regression tests.
+
+Quick Input, empty/unobserved vs observed-zero, derived/manual separation, predecessor/self interval separation, Evidence separation and user-facing service-name contracts all passed their applicable materialized/repository checks.
+
+Difficulty event-exposure tests PASS 3/3. The repository Difficulty exposure audit also passed; its configured reference set is not misrepresented as a direct per-machine audit of all 10 new machines.
+
+Registry validation PASS warnings 0. Repository-wide tests **415/415 PASS**.
+
+Public-data audit PASS with **10 expected pre-Publish warnings**: the 10 new MachineData directories are intentionally not yet present in `catalog.json`. Do not “fix” these ad hoc during Gate E. Formal Publish owns catalog registration.
+
+The first Gate E drift attempt exposed a timestamp-only mutation of legacy `reports/v64-observation-debt-classification.json` caused by repo-wide audit/tests. The Gate was corrected to restore that committed legacy report before drift comparison. The final Gate E run then passed cleanly; batch MachineData materialization itself remained unchanged.
+
+User-Verified UX contract audit finished with ERROR 0. One historical REVIEW remains for `S_CODE_GEASS_3_CC_FS/C_CC_SEATED_DATA_SECTION`; it is outside this 10-machine batch and is not a blocker for this batch.
+
+## Semantic locks carried into Publish
+
+Amazing Live: Bonus first-hit is the sole active overlap representative; BIG/REG/aggregate remain suppressed; `SET_L` stays; no `SET_3`.
+
+Mahjong: analysis direct AT excludes promotion; promotion-inclusive practical direct AT and overlapping aggregates remain suppressed.
+
+Ushio: reset-only populations require confirmed-reset opportunity.
+
+Youjitsu: DAXEL flash denominator = CZ successes; normal-cycle CZ-type denominator = eligible normal-cycle CZ wins excluding rare-role promotion; red-button denominator = applicable continuous-performance successes. Do not flatten to total normal games.
+
+Midoridon: state × role × opportunity semantics and Bonus-first-hit overlap suppression remain exact.
+
+Gundam SEED: 100G window = one opportunity after reset/ST end, never a per-game probability.
+
+Magia Record: conditional Fallback populations remain conditional; UniMemo/linked-service values require Selection denominator agreement.
+
+Hard Evidence and tendency cues remain separate. EXCLUDE-only inputs stay absent. Empty means unobserved; 0 means observed zero. Derived values are not reintroduced as duplicate manual input. Predecessor and self-play intervals are not merged.
+
+## Tracked debt carried beyond Gate E
+
+Hall-specific DATA_COUNTER fields/semantics; SEATED_START snapshot/previous-player alignment; Godzilla PUSH `当日の遊技履歴` exact numeric fields; Amazing Live Bonus-first-hit boundary/chain exclusion/obtainable display; machine-specific linked-service/QR UNRESOLVED for Godzilla/Ushio/Amazing Live/Yoshimune/Mahjong/Gundam SEED.
+
+These are acquisition/source-coverage / field-verification debts, **not adopted-Feature route gaps**. Gate E did not convert them to FOUND merely because automated tests passed.
+
+## Publish entry conditions / blockers
+
+Before Publish:
+
+1. Re-check Library formal standards and actual GitHub branch/PR/base/HEAD.
+2. Re-check PR #148 / stacked-base dependency. Do not automatically retarget #149.
+3. Confirm Gate E completion report and current-batch-state are still current.
+4. Use the current repository Publish CLI contracts rather than historical command assumptions.
+5. Formal Publish must register provisional production IDs 192-201 and resolve the 10 expected catalog warnings through the normal publish path.
+6. Preserve all Gate E semantic locks and tracked Observation debt.
+7. Do not treat field-verification debt as a Publish-data inference problem.
+
+## Next chat
+
+Start from **Gate E complete → Publish / next Gate**. Re-check dependency and Publish entry contract first, then perform the formal Publish stage only if its current gate conditions are satisfied.
