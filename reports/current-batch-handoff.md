@@ -35,12 +35,14 @@ Next stage: **UI Design / MachineData / Gate D**.
 
 PR #149 remains intentionally stacked on PR #148 dependency; do not retarget automatically.
 
-## Gate A/B baseline retained
+## Gate A/B retained baseline
 
-Research: 172 discovered / 172 accounted / 0 missing; 64 Feature candidates / 100 Evidence candidates.
-Selection: PRIMARY 13 / SUPPORT 11 / FALLBACK 15 / EXCLUDE 25; Evidence UI 90 / excluded 10; all disposition/reject/dependency quality debts required by Gate B are zero. Canonical Selection workspace is `selection-batch/SELECTION_20260901060029`; `SELECTION_20260901053510` is stale.
+Research: 172 discovered / 172 accounted / 0 missing; 64 Feature / 100 Evidence candidates.
+Selection: PRIMARY 13 / SUPPORT 11 / FALLBACK 15 / EXCLUDE 25; Evidence UI 90 / excluded 10; Gate-B required missing/reject/dependency counts are zero. Canonical workspace `SELECTION_20260901060029`; `SELECTION_20260901053510` is stale.
 
 ## Gate C completion
+
+Result: **PASS_WITH_TRACKED_OBSERVATION_DEBT**.
 
 - Machine Observation Data v2: 10/10
 - Observation validator: PASS 10/10
@@ -50,48 +52,30 @@ Selection: PRIMARY 13 / SUPPORT 11 / FALLBACK 15 / EXCLUDE 25; Evidence UI 90 / 
 - source-enrichment workflow `33477244869`: SUCCESS / Node 22
 - enriched Observation generation commit: `6c832af36759a78a81ec64890c0507d44c46e958`
 - Gate C completion metadata commit: `0e70a2e7209c22d9db2e826c786818cbd16aaac7`
-- Gate C current-state metadata commit before this handoff write: `7ebab20ec3ae0b1d05a890a4820e93071f9af44b`
+- current-state sync commit before this handoff write: `bff9f85520d5442239795241e945d316843f2648`
 
-Artifacts:
-`reports/batch-20260901-gate-c-observation-baseline.md`
-`reports/batch-20260901-observation-source-research.md`
-`reports/batch-20260901-gate-c-completion.md`
-`reports/current-batch-state.json`
-`reports/current-batch-handoff.md`
+Artifacts: `reports/batch-20260901-gate-c-observation-baseline.md`, `reports/batch-20260901-observation-source-research.md`, `reports/batch-20260901-gate-c-completion.md`, `reports/current-batch-state.json`, `reports/current-batch-handoff.md`.
 
 ## Source coverage
 
-Web-resolved:
-- Magia Record: UniMemo; concrete total/normal play, bonus/AT play, bonus, small-role and CZ-related history examples.
-- Idolmaster: SloPla NEXT; concrete total/normal games, bonus first-hit, Grow Up Challenge and role counters.
-- Midoridon: UniMemo; weak cherry and weak wave counting.
-- Godzilla: PUSH menu and current-day play-history area; exact numeric fields still field verification.
-- Youjitsu: current-day menu history including total/normal games, CZ, AT and rare-role probabilities.
-- Yoshimune: target is 2025 `L／ヨシムネS／SC2`; simulator apps are not machine-linked services.
+Web-resolved: Magia Record UniMemo; Idolmaster SloPla NEXT; Midoridon UniMemo weak cherry/weak wave; Godzilla PUSH current-day play-history area; Youjitsu current-day menu history fields; exact Yoshimune identity `L／ヨシムネS／SC2`.
 
-Tracked field/debt after Web research:
-- hall-specific DATA_COUNTER fields/semantics.
-- SEATED_START snapshots and previous-player interval alignment.
-- Godzilla menu-history exact numeric fields.
-- Amazing Live first-hit boundary / chain exclusion.
-- linked-service/QR remains UNRESOLVED for Godzilla, Ushio, Amazing Live, Yoshimune, Mahjong and Gundam SEED.
-- menu/history inventories not exposed publicly.
+Tracked field debt after Web research: hall-specific DATA_COUNTER fields/semantics; SEATED_START snapshots and previous-player alignment; Godzilla menu-history exact fields; Amazing Live first-hit boundary/chain exclusion; linked-service/QR remains UNRESOLVED for Godzilla/Ushio/Amazing Live/Yoshimune/Mahjong/Gundam SEED; public-unexposed menu/history inventories.
 
-Every adopted Selection Feature has a direct/manual Observation route; the above are acquisition improvements/field-verification debt, not missing routes.
+Every adopted Selection Feature has a direct/manual Observation route; these are acquisition improvements/field-verification debt, not missing routes.
 
 ## Semantic locks for Gate D
 
-Amazing Live: Bonus first-hit remains sole overlap representative; BIG/REG/aggregate not independently revived; SET_L retained; no SET_3.
-Mahjong: analysis direct AT excludes promotion; never merge promotion-inclusive practical direct AT or overlapping aggregates.
+Amazing Live: Bonus first-hit sole overlap representative; no independent BIG/REG/aggregate; SET_L retained; no SET_3.
+Mahjong: analysis direct AT excludes promotion; do not merge practical promotion-inclusive direct AT/aggregates.
 Ushio: reset-only populations require confirmed-reset opportunities.
 Youjitsu: DAXEL flash denominator = successful CZ count; normal-cycle CZ type = normal-cycle CZ hits excluding rare-role promotion; red-button = successful target continuous演出 count.
-Midoridon: state×role Fallbacks retain eligible state/role/opportunity denominators and suppression against overlapping Bonus first-hit.
+Midoridon: state×role Fallbacks retain eligible state/role/opportunity denominators and overlap suppression.
 Gundam SEED: reset/ST-end 100G = one opportunity per reset/ST-end, never per-game.
-Magia conditional Fallbacks retain true conditional populations.
-Hard Evidence and tendency cues stay separate. Empty = unobserved; zero = observed zero.
+Magia conditional Fallbacks retain true conditional populations. Hard Evidence and tendencies stay separate. Empty = unobserved; zero = observed zero.
 
 ## Gate D entry
 
-Use finalized SelectionData + Machine Observation Data v2 as formal inputs. Build UI Design/MachineData without re-deciding Selection, exposing EXCLUDE-only inputs, fabricating unresolved machine fields, flattening conditional populations, or making optional source routes mandatory. Difficulty exposure must come from actual Observation exposure semantics.
+Use finalized SelectionData + Machine Observation Data v2. Do not re-decide Selection, expose EXCLUDE-only inputs, fabricate unresolved machine fields, flatten conditional populations, or make optional sources mandatory. Difficulty exposure must follow actual Observation semantics.
 
-At Gate D completion update checkpoint and STOP before Automated Quality Gate / Publish.
+At Gate D completion update checkpoint and STOP before Automated Quality Gate / Publish. Exact branch HEAD after this final branch write is recorded in PR #149 metadata, not self-referentially inside this file.
