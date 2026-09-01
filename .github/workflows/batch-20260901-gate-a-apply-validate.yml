@@ -1,0 +1,124 @@
+name: Batch 20260901 Gate A Apply and Validate
+
+on:
+  push:
+    branches:
+      - batch/20260901-magia-gundamseed
+    paths:
+      - 'reports/batch-20260901-discovery-inventory-plan.json'
+      - '.github/workflows/batch-20260901-gate-a-apply-validate.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: batch-20260901-gate-a-apply-validate
+  cancel-in-progress: false
+
+jobs:
+  apply-validate:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: batch/20260901-magia-gundamseed
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Apply discovery inventory plan
+        shell: bash
+        run: |
+          node --input-type=module <<'NODE'
+          import fs from 'node:fs';
+          import path from 'node:path';
+          const plan = JSON.parse(fs.readFileSync('reports/batch-20260901-discovery-inventory-plan.json','utf8'));
+          for (const [machineId, inventory] of Object.entries(plan.machines)) {
+            const file = path.join('research', machineId, 'research-data.json');
+            const data = JSON.parse(fs.readFileSync(file,'utf8'));
+            if (data.machine?.machineId !== machineId) throw new Error(`${file}: machineId mismatch`);
+            data.discoveryInventory = inventory;
+            fs.writeFileSync(file, `${JSON.stringify(data, null, 2)}\n`);
+            console.log(`${machineId}: discovery ${inventory.length}`);
+          }
+          NODE
+
+      - name: Validate ResearchData 10 machines
+        shell: bash
+        run: |
+          set -euo pipefail
+          ids=(
+            L_MAGIA_RECORD_RN
+            L_GODZILLA_NS
+            L_USHIO_TORA_HAKUMEN_VH
+            L_AMAZING_LIVE_PD
+            L_YOSHIMUNE_SC2
+            L_MAHJONG_MONOGATARI_S2
+            L_IDOLMASTER_MILLION_LIVE_HC
+            L_YOUJITSU_DE
+            L_MIDORIDON_VIVA_REVIVAL_FY
+            L_GUNDAM_SEED_G
+          )
+          for id in "${ids[@]}"; do
+            echo "=== research:validate $id ==="
+            node tools/validate-research-data.mjs "research/$id/research-data.json"
+          done
+
+      - name: Validate Discovery to Research completeness
+        shell: bash
+        run: |
+          node tools/discovery-completeness-gate.mjs \
+            L_MAGIA_RECORD_RN \
+            L_GODZILLA_NS \
+            L_USHIO_TORA_HAKUMEN_VH \
+            L_AMAZING_LIVE_PD \
+            L_YOSHIMUNE_SC2 \
+            L_MAHJONG_MONOGATARI_S2 \
+            L_IDOLMASTER_MILLION_LIVE_HC \
+            L_YOUJITSU_DE \
+            L_MIDORIDON_VIVA_REVIVAL_FY \
+            L_GUNDAM_SEED_G
+
+      - name: Write Gate A runtime audit report
+        shell: bash
+        run: |
+          node --input-type=module <<'NODE'
+          import fs from 'node:fs';
+          const ids = [
+            'L_MAGIA_RECORD_RN','L_GODZILLA_NS','L_USHIO_TORA_HAKUMEN_VH','L_AMAZING_LIVE_PD','L_YOSHIMUNE_SC2',
+            'L_MAHJONG_MONOGATARI_S2','L_IDOLMASTER_MILLION_LIVE_HC','L_YOUJITSU_DE','L_MIDORIDON_VIVA_REVIVAL_FY','L_GUNDAM_SEED_G'
+          ];
+          let discovered = 0;
+          for (const id of ids) {
+            const data = JSON.parse(fs.readFileSync(`research/${id}/research-data.json`,'utf8'));
+            discovered += data.discoveryInventory?.length ?? 0;
+          }
+          const report = {
+            schemaVersion: 'gate-a-runtime-audit-v1',
+            batch: '20260901-magia-gundamseed',
+            generatedAt: new Date().toISOString(),
+            researchDataValidated: ids,
+            researchValidation: 'PASS',
+            discoveryCompleteness: 'PASS',
+            discovered,
+            transferred: discovered,
+            missing: 0
+          };
+          fs.writeFileSync('reports/batch-20260901-gate-a-runtime-audit.json', `${JSON.stringify(report,null,2)}\n`);
+          NODE
+
+      - name: Commit validated ResearchData and report
+        shell: bash
+        run: |
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git add research/*/research-data.json reports/batch-20260901-gate-a-runtime-audit.json
+          if git diff --cached --quiet; then
+            echo 'No generated changes.'
+            exit 0
+          fi
+          git commit -m 'research: apply Gate A discovery inventories and validation'
+          git pull --rebase origin batch/20260901-magia-gundamseed
+          git push origin HEAD:batch/20260901-magia-gundamseed
