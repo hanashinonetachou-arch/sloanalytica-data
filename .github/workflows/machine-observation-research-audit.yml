@@ -21,17 +21,66 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
           node-version: '22'
 
+      - name: Resolve changed Observation files
+        if: github.event_name == 'pull_request'
+        shell: bash
+        run: |
+          set -euo pipefail
+          git diff --name-only "${{ github.event.pull_request.base.sha }}" "${{ github.event.pull_request.head.sha }}" \
+            | sed -nE '/^research\/[^/]+\/machine-observation-data\.json$/p' \
+            | sort -u > /tmp/observation_files.txt
+          sed -nE 's#^research/([^/]+)/machine-observation-data\.json$#\1#p' /tmp/observation_files.txt \
+            | sort -u > /tmp/observation_machine_ids.txt
+          echo 'Changed Observation files:'
+          cat /tmp/observation_files.txt || true
+
       - name: Validate standalone Machine Observation Data
-        run: node tools/validate-machine-observation-data.mjs
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [[ "${{ github.event_name }}" == "pull_request" ]]; then
+            if [[ -s /tmp/observation_files.txt ]]; then
+              mapfile -t files < /tmp/observation_files.txt
+              node tools/validate-machine-observation-data.mjs "${files[@]}"
+            else
+              echo 'No changed Machine Observation Data files.'
+            fi
+          else
+            node tools/validate-machine-observation-data.mjs
+          fi
 
       - name: Audit Machine Observation Research
-        run: node tools/audit-machine-observation-research.mjs --json-out=reports/machine-observation-research-audit.json
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [[ "${{ github.event_name }}" == "pull_request" ]]; then
+            node tools/audit-machine-observation-research.mjs --json-out=reports/machine-observation-research-audit.json || true
+            node --input-type=module - <<'NODE'
+          import fs from 'node:fs';
+          const ids = new Set(fs.existsSync('/tmp/observation_machine_ids.txt')
+            ? fs.readFileSync('/tmp/observation_machine_ids.txt','utf8').split(/\r?\n/).filter(Boolean)
+            : []);
+          const report = JSON.parse(fs.readFileSync('reports/machine-observation-research-audit.json','utf8'));
+          const scoped = (report.machines ?? []).filter(machine => ids.has(machine.machineId));
+          const blockers = scoped.filter(machine => ['INVALID_RESEARCH_JSON','REVIEW_SCHEMA'].includes(machine.classification));
+          console.log(`Scoped Observation research audit: ${scoped.length} changed machines`);
+          for (const machine of scoped) console.log(`${machine.machineId}: ${machine.classification}`);
+          if (blockers.length) {
+            console.error(`Batch-local Observation research blockers: ${blockers.length}`);
+            process.exit(1);
+          }
+          NODE
+          else
+            node tools/audit-machine-observation-research.mjs --json-out=reports/machine-observation-research-audit.json
+          fi
 
       - name: Show summary
         if: always()

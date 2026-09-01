@@ -1,0 +1,284 @@
+{
+  "schemaVersion": 1,
+  "machine": {
+    "schemaVersion": "2.0.0",
+    "machineId": "S_BOOWY_SV",
+    "machineDataVersion": "0.1.0",
+    "displayName": "パチスロ BOØWY",
+    "modelName": "SパチスロBOOWY SV",
+    "manufacturer": "ディ・ライト",
+    "settings": [
+      "SET_1",
+      "SET_2",
+      "SET_4",
+      "SET_5",
+      "SET_6",
+      "SET_L"
+    ],
+    "inferenceSettings": [
+      "SET_1",
+      "SET_2",
+      "SET_4",
+      "SET_5",
+      "SET_6"
+    ],
+    "packagePolicy": {
+      "offlineCapable": true,
+      "containsImages": false,
+      "containsExecutableCode": false
+    },
+    "introductionDate": "2022-09-20",
+    "machineType": "MEDAL",
+    "gameType": "AT"
+  },
+  "inputs": {
+    "schemaVersion": "2.0.0",
+    "inputs": [
+      {
+        "id": "INP_NORMAL_GAMES",
+        "name": "通常ゲーム数",
+        "type": "integer",
+        "category": "NUMERIC",
+        "unit": "G",
+        "displayOrder": 10,
+        "inferenceRole": "INCLUDE_PRIMARY",
+        "defaultValue": 0,
+        "minimum": 0
+      },
+      {
+        "id": "INP_AT_FIRST_HIT",
+        "name": "AT初当り",
+        "type": "counter",
+        "category": "NUMERIC",
+        "unit": "回",
+        "displayOrder": 11,
+        "inferenceRole": "INCLUDE_PRIMARY",
+        "parentInputId": "INP_NORMAL_GAMES",
+        "defaultValue": 0,
+        "minimum": 0
+      },
+      {
+        "id": "INP_EVI_AT_END_HARD",
+        "name": "AT終了画面（確定・否定のみ）",
+        "type": "multi_enum",
+        "category": "EVIDENCE",
+        "unit": "",
+        "displayOrder": 100,
+        "inferenceRole": "INCLUDE_SUPPORT",
+        "options": [
+          {
+            "key": "SET1_DENIED",
+            "label": "氷室1人（影）・設定1否定",
+            "value": "SET1_DENIED"
+          },
+          {
+            "key": "SET6",
+            "label": "全員集合・設定6",
+            "value": "SET6"
+          }
+        ],
+        "defaultValue": []
+      },
+      {
+        "id": "INP_EVI_SETTING_L_WARNING",
+        "name": "設定L判別",
+        "type": "enum",
+        "category": "EVIDENCE",
+        "unit": "",
+        "displayOrder": 110,
+        "inferenceRole": "INCLUDE_SUPPORT",
+        "options": [
+          {
+            "key": "__UNSET__",
+            "label": "未選択",
+            "value": "__UNSET__"
+          },
+          {
+            "key": "PANEL_OFF",
+            "label": "デモ画面で下パネル消灯（設定L）",
+            "value": "PANEL_OFF"
+          }
+        ],
+        "defaultValue": "__UNSET__"
+      }
+    ]
+  },
+  "features": {
+    "schemaVersion": "2.0.0",
+    "features": [
+      {
+        "featureId": "FEAT_AT_FIRST_HIT",
+        "name": "AT初当り",
+        "adoptionCategory": "INCLUDE_PRIMARY",
+        "calculationRole": "PROBABILITY",
+        "probabilityEngineUsage": true,
+        "modelType": "binomial",
+        "minimumSample": 1,
+        "sampleRecommendation": 1,
+        "reliabilityProfile": {
+          "weight": 1
+        },
+        "denominatorInputId": "INP_NORMAL_GAMES",
+        "numeratorInputId": "INP_AT_FIRST_HIT",
+        "displayFormat": "ratio_1_over_n",
+        "probabilities": {
+          "SET_1": 0.0020080321,
+          "SET_2": 0.0021551724,
+          "SET_4": 0.0026525199,
+          "SET_5": 0.0030769231,
+          "SET_6": 0.0034013605
+        },
+        "sourceEvidenceRefs": [
+          "SRC_NANA",
+          "SRC_1GEKI"
+        ]
+      }
+    ]
+  },
+  "evidence": {
+    "version": "1.0.0",
+    "evidences": [
+      {
+        "id": "EVI_AT_END_HARD_SET1_DENIED",
+        "name": "氷室1人（影）・設定1否定",
+        "displayName": "氷室1人（影）・設定1否定",
+        "inputId": "INP_EVI_AT_END_HARD",
+        "triggerValue": "SET1_DENIED",
+        "confirmedSettings": [],
+        "deniedSettings": [
+          "SET_1"
+        ],
+        "hasImage": false,
+        "type": "SETTING_DENIAL",
+        "sourceEvidenceRefs": [
+          "RE_AT_END_SCREEN"
+        ]
+      },
+      {
+        "id": "EVI_AT_END_HARD_SET6",
+        "name": "全員集合・設定6",
+        "displayName": "全員集合・設定6",
+        "inputId": "INP_EVI_AT_END_HARD",
+        "triggerValue": "SET6",
+        "confirmedSettings": [
+          "SET_6"
+        ],
+        "deniedSettings": [],
+        "hasImage": false,
+        "type": "SETTING_CONFIRMATION",
+        "sourceEvidenceRefs": [
+          "RE_AT_END_SCREEN"
+        ]
+      },
+      {
+        "id": "EVI_SETTING_L_WARNING_PANEL_OFF",
+        "name": "デモ画面で下パネル消灯（設定L）",
+        "displayName": "デモ画面で下パネル消灯（設定L）",
+        "inputId": "INP_EVI_SETTING_L_WARNING",
+        "triggerValue": "PANEL_OFF",
+        "confirmedSettings": [
+          "SET_L"
+        ],
+        "deniedSettings": [],
+        "hasImage": false,
+        "type": "SETTING_CONFIRMATION",
+        "sourceEvidenceRefs": [
+          "RE_SETTING_L_PANEL"
+        ]
+      }
+    ],
+    "sources": [
+      {
+        "id": "SRC_NANA",
+        "classification": "ANALYSIS",
+        "pageName": "BOØWY 設定判別・推測ポイント",
+        "url": "https://nana-press.com/kaiseki/machine/421/11869/",
+        "checkedAt": "2026-08-31"
+      },
+      {
+        "id": "SRC_1GEKI",
+        "classification": "ANALYSIS",
+        "pageName": "パチスロBOØWY 解析・設定差",
+        "url": "https://1geki.jp/slot/s_boowy/",
+        "checkedAt": "2026-08-31"
+      }
+    ]
+  },
+  "ui": {
+    "sections": [
+      {
+        "id": "AUTO_NUMERIC",
+        "title": "AT初当り",
+        "displayOrder": 1,
+        "items": [
+          {
+            "type": "input",
+            "inputId": "INP_NORMAL_GAMES",
+            "label": "通常ゲーム数",
+            "widget": "number"
+          },
+          {
+            "type": "input",
+            "inputId": "INP_AT_FIRST_HIT",
+            "label": "AT初当り",
+            "widget": "counter"
+          }
+        ]
+      },
+      {
+        "id": "AUTO_EVIDENCE",
+        "title": "設定確定・否定",
+        "displayOrder": 2,
+        "items": [
+          {
+            "type": "input",
+            "inputId": "INP_EVI_AT_END_HARD",
+            "label": "AT終了画面（確定・否定のみ）",
+            "widget": "multi_select"
+          },
+          {
+            "type": "input",
+            "inputId": "INP_EVI_SETTING_L_WARNING",
+            "label": "設定L判別",
+            "widget": "select"
+          }
+        ]
+      }
+    ]
+  },
+  "selectionSummary": {
+    "schemaVersion": "selection-summary-v1",
+    "evaluatedCount": 1,
+    "selectedCount": 1,
+    "rejectedCount": 0,
+    "selected": [
+      {
+        "featureId": "FEAT_AT_FIRST_HIT",
+        "name": "AT初当り",
+        "reason": "公開されている主要な数値設定差で、通常ゲーム数を分母に直接観測できるため主軸採用します。",
+        "requiredTrials": {
+          "value": 10014,
+          "unit": "通常ゲーム"
+        }
+      }
+    ],
+    "rejected": []
+  },
+  "reliability": {},
+  "metadata": {
+    "machineId": "S_BOOWY_SV",
+    "displayName": "パチスロ BOØWY",
+    "settings": [
+      "SET_1",
+      "SET_2",
+      "SET_4",
+      "SET_5",
+      "SET_6",
+      "SET_L"
+    ]
+  },
+  "validation": {
+    "cases": []
+  },
+  "statistics": {}
+}

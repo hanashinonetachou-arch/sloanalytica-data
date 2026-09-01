@@ -1,0 +1,45 @@
+{
+  "schemaVersion":"selection-data-v1",
+  "machineId":"L_SISTER_QUEST_CA",
+  "machineDataVersion":"0.1.0",
+  "uiCategoryLabels":{"NUMERIC":"数値入力","MONSTER_ZONE":"モンスターZONE","AT_END":"AT終了画面","EVIDENCE":"設定確定・示唆"},
+  "inputs":[
+    {"id":"INP_NORMAL_GAMES","name":"通常ゲーム数","type":"integer","category":"NUMERIC","unit":"G","displayOrder":10,"inferenceRole":"INCLUDE_PRIMARY","defaultValue":null,"observationScope":"SELF_PLAY"},
+    {"id":"INP_AT_FIRST_HIT","name":"冒険RUSH 初当り","type":"counter","category":"NUMERIC","unit":"回","displayOrder":11,"inferenceRole":"INCLUDE_PRIMARY","defaultValue":null,"parentInputId":"INP_NORMAL_GAMES"},
+    {"id":"INP_MONSTER_ZONE_TRIALS","name":"モンスターZONE突入","type":"counter","category":"MONSTER_ZONE","unit":"回","displayOrder":20,"inferenceRole":"INCLUDE_SUPPORT","defaultValue":null},
+    {"id":"INP_MONSTER_ZONE_STOCK","name":"ストック当選","type":"counter","category":"MONSTER_ZONE","unit":"回","displayOrder":21,"inferenceRole":"INCLUDE_SUPPORT","defaultValue":null,"parentInputId":"INP_MONSTER_ZONE_TRIALS"},
+    {"id":"INP_AT_END_DEFAULT","name":"デフォルト","type":"counter","category":"AT_END","unit":"回","displayOrder":30,"inferenceRole":"INCLUDE_SUPPORT","defaultValue":null,"uiGridSpan":6,"uiCompactCounter":true},
+    {"id":"INP_AT_END_EVEN","name":"偶数設定示唆","type":"counter","category":"AT_END","unit":"回","displayOrder":31,"inferenceRole":"INCLUDE_SUPPORT","defaultValue":null,"uiGridSpan":6,"uiCompactCounter":true},
+    {"id":"INP_AT_END_HIGH_WEAK","name":"高設定示唆・弱","type":"counter","category":"AT_END","unit":"回","displayOrder":32,"inferenceRole":"INCLUDE_SUPPORT","defaultValue":null,"uiGridSpan":6,"uiCompactCounter":true},
+    {"id":"INP_AT_END_HIGH_STRONG","name":"高設定示唆・強","type":"counter","category":"AT_END","unit":"回","displayOrder":33,"inferenceRole":"INCLUDE_SUPPORT","defaultValue":null,"uiGridSpan":6,"uiCompactCounter":true},
+    {"id":"INP_AT_END_2PLUS","name":"設定2以上","type":"counter","category":"AT_END","unit":"回","displayOrder":34,"inferenceRole":"INCLUDE_SUPPORT","defaultValue":null,"uiGridSpan":6,"uiCompactCounter":true},
+    {"id":"INP_AT_END_4PLUS","name":"設定4以上","type":"counter","category":"AT_END","unit":"回","displayOrder":35,"inferenceRole":"INCLUDE_SUPPORT","defaultValue":null,"uiGridSpan":6,"uiCompactCounter":true},
+    {"id":"INP_AT_END_6","name":"設定6","type":"counter","category":"AT_END","unit":"回","displayOrder":36,"inferenceRole":"INCLUDE_SUPPORT","defaultValue":null,"uiGridSpan":6,"uiCompactCounter":true}
+  ],
+  "features":[
+    {"researchFeatureId":"RF_CZ_FIRST_HIT","featureId":"FEAT_CZ_FIRST_HIT_EXCLUDED","adoptionCategory":"EXCLUDE","difficultyParticipation":"EXCLUDE","rejectionReason":"AT初当りと因果的に強く重複するため独立尤度で同時採用しません。","userReason":"CZには設定差がありますが、AT初当りにCZ経由の当選が含まれるため、両方を独立に加えると同じ設定差を二重評価しやすくなります。今回は差がより大きく、最終的なAT当選を直接観測できるAT初当りを主軸にします。"},
+    {"researchFeatureId":"RF_AT_FIRST_HIT","featureId":"FEAT_AT_FIRST_HIT","adoptionCategory":"INCLUDE_PRIMARY","numeratorInputId":"INP_AT_FIRST_HIT","denominatorInputId":"INP_NORMAL_GAMES","weight":1,"difficultyParticipation":"INCLUDE","difficultyExposure":{"mode":"per_game","factor":1,"quality":"EXACT","basisId":"NORMAL_GAMES"},"userReason":"通常ゲーム数とAT初当り回数を直接観測でき、設定1の1/470.0から設定6の1/367.0まで一貫した設定差があるため主軸に採用します。"},
+    {"researchFeatureId":"RF_MONSTER_ZONE_STOCK","featureId":"FEAT_MONSTER_ZONE_STOCK","adoptionCategory":"INCLUDE_SUPPORT","numeratorInputId":"INP_MONSTER_ZONE_STOCK","denominatorInputId":"INP_MONSTER_ZONE_TRIALS","weight":1,"difficultyParticipation":"EXCLUDE","difficultyExclusionReason":"通常ゲーム当たりのモンスターZONE到達頻度を正確に確定できないため横断Difficultyには含めません。","userReason":"モンスターZONE突入時という明確な条件付き分母で、設定1の7.0%から設定6の12.5%まで差があるため補助採用します。AT初当りとは異なる条件付き抽選として扱います。"},
+    {"researchFeatureId":"RF_AT_END_SCREEN_DISTRIBUTION","featureId":"FEAT_AT_END_SCREEN_DISTRIBUTION","adoptionCategory":"INCLUDE_SUPPORT","numeratorInputId":"INP_AT_END_DEFAULT","categoryInputIds":["INP_AT_END_EVEN","INP_AT_END_HIGH_WEAK","INP_AT_END_HIGH_STRONG","INP_AT_END_2PLUS","INP_AT_END_4PLUS","INP_AT_END_6"],"inputTransform":"sum_inputs_to_trials","weight":1,"normalizeRoundedCategoryProbabilities":true,"difficultyParticipation":"EXCLUDE","difficultyExclusionReason":"AT終了回数のゲーム当たり曝露量を現在の公開値だけで厳密に横断換算しないため。","userReason":"AT終了画面は設定別のカテゴリ出現率が公開されており、単発の確定画面だけでなく通常画面・示唆画面を含む分布全体を利用できるためMultinomial補助Featureとして採用します。"},
+    {"researchFeatureId":"RF_AT_CEILING_DISTRIBUTION","featureId":"FEAT_AT_CEILING_DISTRIBUTION_EXCLUDED","adoptionCategory":"EXCLUDE","difficultyParticipation":"EXCLUDE","rejectionReason":"AT間天井の選択を実戦ごとに確定観測できるケースが限定され、AT初当り間隔とも情報が重複するため。","userReason":"設定差候補ですが、天井到達前の自力当選では選択された天井を確定できず、完全な分母を作りにくいため不採用です。"},
+    {"researchFeatureId":"RF_MONSTER_COMPOSITION","featureId":"FEAT_MONSTER_COMPOSITION_EXCLUDED","adoptionCategory":"EXCLUDE","difficultyParticipation":"EXCLUDE","rejectionReason":"Researchにカテゴリ別全設定分布をまだ収録できていないため。","userReason":"設定示唆要素として有望ですが、現Researchでは全カテゴリの設定別確率表を完全収録できていないため、数値が揃うまで推測計算には入れません。"}
+  ],
+  "evidenceUi":{"groups":[
+    {"groupId":"PAYOUT","label":"獲得枚数表示","selectionMode":"multi","normalizationMode":"ALLOWED_SETTINGS_INTERSECTION","displayOrder":100,"options":[
+      {"value":"222","label":"222枚OVER（設定2以上）","allowedSettings":["SET_2","SET_3","SET_4","SET_5","SET_6"],"sourceEvidenceIds":["RE_PAYOUT_222"]},
+      {"value":"456","label":"456枚OVER（設定4以上）","allowedSettings":["SET_4","SET_5","SET_6"],"sourceEvidenceIds":["RE_PAYOUT_456"]},
+      {"value":"666","label":"666枚OVER（設定6）","allowedSettings":["SET_6"],"sourceEvidenceIds":["RE_PAYOUT_666"]}
+    ]},
+    {"groupId":"GACHA","label":"ガチャカード","selectionMode":"multi","normalizationMode":"ALLOWED_SETTINGS_INTERSECTION","displayOrder":110,"options":[
+      {"value":"A","label":"Aランク（設定2以上）","allowedSettings":["SET_2","SET_3","SET_4","SET_5","SET_6"],"sourceEvidenceIds":["RE_GACHA_A"]},
+      {"value":"S","label":"Sランク（設定4以上）","allowedSettings":["SET_4","SET_5","SET_6"],"sourceEvidenceIds":["RE_GACHA_S"]},
+      {"value":"SS","label":"SSランク（設定6）","allowedSettings":["SET_6"],"sourceEvidenceIds":["RE_GACHA_SS"]}
+    ]},
+    {"groupId":"SMARTALK","label":"スマTALK","selectionMode":"multi","normalizationMode":"ALLOWED_SETTINGS_INTERSECTION","displayOrder":120,"options":[
+      {"value":"TODAY_RED","label":"今日の調子は？ 赤（設定4以上）","allowedSettings":["SET_4","SET_5","SET_6"],"sourceEvidenceIds":["RE_SMATALK_TODAY_RED"]},
+      {"value":"CONTINUE_RED","label":"続けた方がいい？ 赤（設定5以上）","allowedSettings":["SET_5","SET_6"],"sourceEvidenceIds":["RE_SMATALK_CONTINUE_RED"]},
+      {"value":"SPIRIT_RED","label":"今日の意気込みは？ 赤（設定6）","allowedSettings":["SET_6"],"sourceEvidenceIds":["RE_SMATALK_SPIRIT_RED"]}
+    ]}
+  ]},
+  "difficultyAnalysis":{"targetGames":[1500,3000,7000],"simulationsPerSetting":10000,"seed":20260831,"targetGameBasis":{"basisId":"NORMAL_GAMES","label":"通常ゲーム数","quality":"EXACT","crossMachineComparable":true},"calibrationAllowedExposureQualities":["EXACT","DERIVED"]}
+}

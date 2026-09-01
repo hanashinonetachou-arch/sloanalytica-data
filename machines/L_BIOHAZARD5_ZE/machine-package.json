@@ -1,0 +1,650 @@
+{
+  "schemaVersion": 1,
+  "machine": {
+    "schemaVersion": "2.0.0",
+    "machineId": "L_BIOHAZARD5_ZE",
+    "machineDataVersion": "0.1.0",
+    "displayName": "スマスロ バイオハザード5",
+    "modelName": "Lバイオハザード5ZE",
+    "manufacturer": "エンターライズ",
+    "settings": [
+      "SET_1",
+      "SET_2",
+      "SET_3",
+      "SET_4",
+      "SET_5",
+      "SET_6"
+    ],
+    "packagePolicy": {
+      "offlineCapable": true,
+      "containsImages": false,
+      "containsExecutableCode": false
+    },
+    "introductionDate": "2025-03-03",
+    "machineType": "SMART_SLOT",
+    "gameType": "AT"
+  },
+  "inputs": {
+    "schemaVersion": "2.0.0",
+    "inputs": [
+      {
+        "id": "INP_NORMAL_GAMES",
+        "name": "通常ゲーム数",
+        "type": "integer",
+        "category": "NUMERIC",
+        "unit": "G",
+        "displayOrder": 10,
+        "inferenceRole": "INCLUDE_PRIMARY",
+        "defaultValue": null,
+        "observationScope": "SELF_PLAY",
+        "minimum": 0
+      },
+      {
+        "id": "INP_AT_FIRST_HIT",
+        "name": "AT ハザードラッシュ初当り",
+        "type": "counter",
+        "category": "NUMERIC",
+        "unit": "回",
+        "displayOrder": 11,
+        "inferenceRole": "INCLUDE_PRIMARY",
+        "defaultValue": null,
+        "parentInputId": "INP_NORMAL_GAMES",
+        "minimum": 0
+      },
+      {
+        "id": "INP_AT_MIDDLE_LINE",
+        "name": "AT初当り 中段揃い",
+        "type": "counter",
+        "category": "INFECTION",
+        "unit": "回",
+        "displayOrder": 20,
+        "inferenceRole": "INCLUDE_SUPPORT",
+        "defaultValue": null,
+        "minimum": 0
+      },
+      {
+        "id": "INP_INFECTION_FROM_MIDDLE",
+        "name": "中段揃い→インフェクション",
+        "type": "counter",
+        "category": "INFECTION",
+        "unit": "回",
+        "displayOrder": 21,
+        "inferenceRole": "INCLUDE_SUPPORT",
+        "defaultValue": null,
+        "parentInputId": "INP_AT_MIDDLE_LINE",
+        "minimum": 0
+      },
+      {
+        "id": "INP_EVI_PAYOUT",
+        "name": "獲得枚数表示",
+        "type": "multi_enum",
+        "category": "EVIDENCE",
+        "unit": "",
+        "displayOrder": 100,
+        "inferenceRole": "INCLUDE_SUPPORT",
+        "options": [
+          {
+            "key": "256",
+            "label": "256枚OVER（設定2・5・6）",
+            "value": "256"
+          },
+          {
+            "key": "456",
+            "label": "456枚OVER（設定4以上）",
+            "value": "456"
+          },
+          {
+            "key": "810",
+            "label": "810枚OVER（設定5以上）",
+            "value": "810"
+          },
+          {
+            "key": "666",
+            "label": "666枚OVER（設定6）",
+            "value": "666"
+          }
+        ],
+        "defaultValue": []
+      },
+      {
+        "id": "INP_EVI_TROPHY",
+        "name": "エンタトロフィー",
+        "type": "multi_enum",
+        "category": "EVIDENCE",
+        "unit": "",
+        "displayOrder": 110,
+        "inferenceRole": "INCLUDE_SUPPORT",
+        "options": [
+          {
+            "key": "BRONZE",
+            "label": "銅（設定2以上）",
+            "value": "BRONZE"
+          },
+          {
+            "key": "SILVER",
+            "label": "銀（設定3以上）",
+            "value": "SILVER"
+          },
+          {
+            "key": "GOLD",
+            "label": "金（設定4以上）",
+            "value": "GOLD"
+          },
+          {
+            "key": "MAPLE",
+            "label": "紅葉（設定5以上）",
+            "value": "MAPLE"
+          },
+          {
+            "key": "RAINBOW",
+            "label": "虹（設定6）",
+            "value": "RAINBOW"
+          }
+        ],
+        "defaultValue": []
+      },
+      {
+        "id": "INP_EVI_AT_END",
+        "name": "AT終了画面",
+        "type": "multi_enum",
+        "category": "EVIDENCE",
+        "unit": "",
+        "displayOrder": 120,
+        "inferenceRole": "INCLUDE_SUPPORT",
+        "options": [
+          {
+            "key": "CONGRATS",
+            "label": "Congratulations!（設定5以上）",
+            "value": "CONGRATS"
+          },
+          {
+            "key": "ENTERLION",
+            "label": "エンタライオン（設定6）",
+            "value": "ENTERLION"
+          }
+        ],
+        "defaultValue": []
+      },
+      {
+        "id": "INP_EVI_ENDING",
+        "name": "エンディング中セリフ",
+        "type": "multi_enum",
+        "category": "EVIDENCE",
+        "unit": "",
+        "displayOrder": 130,
+        "inferenceRole": "INCLUDE_SUPPORT",
+        "options": [
+          {
+            "key": "MAJINI",
+            "label": "マジニ（設定5以上）",
+            "value": "MAJINI"
+          },
+          {
+            "key": "ENTERLION",
+            "label": "エンタライオン（設定6）",
+            "value": "ENTERLION"
+          }
+        ],
+        "defaultValue": []
+      }
+    ]
+  },
+  "features": {
+    "schemaVersion": "2.0.0",
+    "features": [
+      {
+        "featureId": "FEAT_AT_FIRST_HIT",
+        "name": "ATハザードラッシュ初当り",
+        "adoptionCategory": "INCLUDE_PRIMARY",
+        "calculationRole": "PROBABILITY",
+        "probabilityEngineUsage": true,
+        "modelType": "binomial",
+        "minimumSample": 1,
+        "sampleRecommendation": 1,
+        "reliabilityProfile": {
+          "weight": 1
+        },
+        "denominatorInputId": "INP_NORMAL_GAMES",
+        "numeratorInputId": "INP_AT_FIRST_HIT",
+        "displayFormat": "ratio_1_over_n",
+        "probabilities": {
+          "SET_1": 0.003069367710252,
+          "SET_2": 0.003180661577608,
+          "SET_3": 0.003353454057679,
+          "SET_4": 0.003684598378777,
+          "SET_5": 0.00400641025641,
+          "SET_6": 0.004233700254022
+        },
+        "sourceEvidenceRefs": [
+          "SRC_NANA",
+          "SRC_NANA_TOOL"
+        ]
+      },
+      {
+        "featureId": "FEAT_INFECTION_MIDDLE_ENTRY",
+        "name": "AT初当り中段揃い時インフェクション突入率",
+        "adoptionCategory": "INCLUDE_SUPPORT",
+        "calculationRole": "PROBABILITY",
+        "probabilityEngineUsage": true,
+        "modelType": "binomial",
+        "minimumSample": 1,
+        "sampleRecommendation": 1,
+        "reliabilityProfile": {
+          "weight": 1
+        },
+        "denominatorInputId": "INP_AT_MIDDLE_LINE",
+        "numeratorInputId": "INP_INFECTION_FROM_MIDDLE",
+        "displayFormat": "ratio_1_over_n",
+        "probabilities": {
+          "SET_1": 0.167,
+          "SET_2": 0.167,
+          "SET_3": 0.175,
+          "SET_4": 0.198,
+          "SET_5": 0.202,
+          "SET_6": 0.218
+        },
+        "sourceEvidenceRefs": [
+          "SRC_NANA"
+        ]
+      }
+    ]
+  },
+  "evidence": {
+    "version": "1.0.0",
+    "evidences": [
+      {
+        "id": "EVI_PAYOUT_256",
+        "name": "256枚OVER（設定2・5・6）",
+        "displayName": "256枚OVER（設定2・5・6）",
+        "inputId": "INP_EVI_PAYOUT",
+        "triggerValue": "256",
+        "confirmedSettings": [
+          "SET_2",
+          "SET_5",
+          "SET_6"
+        ],
+        "deniedSettings": [],
+        "hasImage": false,
+        "type": "SETTING_CONFIRMATION",
+        "sourceEvidenceRefs": [
+          "RE_PAYOUT_256"
+        ]
+      },
+      {
+        "id": "EVI_PAYOUT_456",
+        "name": "456枚OVER（設定4以上）",
+        "displayName": "456枚OVER（設定4以上）",
+        "inputId": "INP_EVI_PAYOUT",
+        "triggerValue": "456",
+        "confirmedSettings": [
+          "SET_4",
+          "SET_5",
+          "SET_6"
+        ],
+        "deniedSettings": [],
+        "hasImage": false,
+        "type": "SETTING_CONFIRMATION",
+        "sourceEvidenceRefs": [
+          "RE_PAYOUT_456"
+        ]
+      },
+      {
+        "id": "EVI_PAYOUT_810",
+        "name": "810枚OVER（設定5以上）",
+        "displayName": "810枚OVER（設定5以上）",
+        "inputId": "INP_EVI_PAYOUT",
+        "triggerValue": "810",
+        "confirmedSettings": [
+          "SET_5",
+          "SET_6"
+        ],
+        "deniedSettings": [],
+        "hasImage": false,
+        "type": "SETTING_CONFIRMATION",
+        "sourceEvidenceRefs": [
+          "RE_PAYOUT_810"
+        ]
+      },
+      {
+        "id": "EVI_PAYOUT_666",
+        "name": "666枚OVER（設定6）",
+        "displayName": "666枚OVER（設定6）",
+        "inputId": "INP_EVI_PAYOUT",
+        "triggerValue": "666",
+        "confirmedSettings": [
+          "SET_6"
+        ],
+        "deniedSettings": [],
+        "hasImage": false,
+        "type": "SETTING_CONFIRMATION",
+        "sourceEvidenceRefs": [
+          "RE_PAYOUT_666"
+        ]
+      },
+      {
+        "id": "EVI_TROPHY_BRONZE",
+        "name": "銅（設定2以上）",
+        "displayName": "銅（設定2以上）",
+        "inputId": "INP_EVI_TROPHY",
+        "triggerValue": "BRONZE",
+        "confirmedSettings": [
+          "SET_2",
+          "SET_3",
+          "SET_4",
+          "SET_5",
+          "SET_6"
+        ],
+        "deniedSettings": [],
+        "hasImage": false,
+        "type": "SETTING_CONFIRMATION",
+        "sourceEvidenceRefs": [
+          "RE_TROPHY_BRONZE"
+        ]
+      },
+      {
+        "id": "EVI_TROPHY_SILVER",
+        "name": "銀（設定3以上）",
+        "displayName": "銀（設定3以上）",
+        "inputId": "INP_EVI_TROPHY",
+        "triggerValue": "SILVER",
+        "confirmedSettings": [
+          "SET_3",
+          "SET_4",
+          "SET_5",
+          "SET_6"
+        ],
+        "deniedSettings": [],
+        "hasImage": false,
+        "type": "SETTING_CONFIRMATION",
+        "sourceEvidenceRefs": [
+          "RE_TROPHY_SILVER"
+        ]
+      },
+      {
+        "id": "EVI_TROPHY_GOLD",
+        "name": "金（設定4以上）",
+        "displayName": "金（設定4以上）",
+        "inputId": "INP_EVI_TROPHY",
+        "triggerValue": "GOLD",
+        "confirmedSettings": [
+          "SET_4",
+          "SET_5",
+          "SET_6"
+        ],
+        "deniedSettings": [],
+        "hasImage": false,
+        "type": "SETTING_CONFIRMATION",
+        "sourceEvidenceRefs": [
+          "RE_TROPHY_GOLD"
+        ]
+      },
+      {
+        "id": "EVI_TROPHY_MAPLE",
+        "name": "紅葉（設定5以上）",
+        "displayName": "紅葉（設定5以上）",
+        "inputId": "INP_EVI_TROPHY",
+        "triggerValue": "MAPLE",
+        "confirmedSettings": [
+          "SET_5",
+          "SET_6"
+        ],
+        "deniedSettings": [],
+        "hasImage": false,
+        "type": "SETTING_CONFIRMATION",
+        "sourceEvidenceRefs": [
+          "RE_TROPHY_MAPLE"
+        ]
+      },
+      {
+        "id": "EVI_TROPHY_RAINBOW",
+        "name": "虹（設定6）",
+        "displayName": "虹（設定6）",
+        "inputId": "INP_EVI_TROPHY",
+        "triggerValue": "RAINBOW",
+        "confirmedSettings": [
+          "SET_6"
+        ],
+        "deniedSettings": [],
+        "hasImage": false,
+        "type": "SETTING_CONFIRMATION",
+        "sourceEvidenceRefs": [
+          "RE_TROPHY_RAINBOW"
+        ]
+      },
+      {
+        "id": "EVI_AT_END_CONGRATS",
+        "name": "Congratulations!（設定5以上）",
+        "displayName": "Congratulations!（設定5以上）",
+        "inputId": "INP_EVI_AT_END",
+        "triggerValue": "CONGRATS",
+        "confirmedSettings": [
+          "SET_5",
+          "SET_6"
+        ],
+        "deniedSettings": [],
+        "hasImage": false,
+        "type": "SETTING_CONFIRMATION",
+        "sourceEvidenceRefs": [
+          "RE_AT_END_5_PLUS"
+        ]
+      },
+      {
+        "id": "EVI_AT_END_ENTERLION",
+        "name": "エンタライオン（設定6）",
+        "displayName": "エンタライオン（設定6）",
+        "inputId": "INP_EVI_AT_END",
+        "triggerValue": "ENTERLION",
+        "confirmedSettings": [
+          "SET_6"
+        ],
+        "deniedSettings": [],
+        "hasImage": false,
+        "type": "SETTING_CONFIRMATION",
+        "sourceEvidenceRefs": [
+          "RE_AT_END_6"
+        ]
+      },
+      {
+        "id": "EVI_ENDING_MAJINI",
+        "name": "マジニ（設定5以上）",
+        "displayName": "マジニ（設定5以上）",
+        "inputId": "INP_EVI_ENDING",
+        "triggerValue": "MAJINI",
+        "confirmedSettings": [
+          "SET_5",
+          "SET_6"
+        ],
+        "deniedSettings": [],
+        "hasImage": false,
+        "type": "SETTING_CONFIRMATION",
+        "sourceEvidenceRefs": [
+          "RE_ENDING_5_PLUS"
+        ]
+      },
+      {
+        "id": "EVI_ENDING_ENTERLION",
+        "name": "エンタライオン（設定6）",
+        "displayName": "エンタライオン（設定6）",
+        "inputId": "INP_EVI_ENDING",
+        "triggerValue": "ENTERLION",
+        "confirmedSettings": [
+          "SET_6"
+        ],
+        "deniedSettings": [],
+        "hasImage": false,
+        "type": "SETTING_CONFIRMATION",
+        "sourceEvidenceRefs": [
+          "RE_ENDING_6"
+        ]
+      }
+    ],
+    "sources": [
+      {
+        "id": "SRC_DMM",
+        "classification": "ANALYSIS",
+        "pageName": "スマスロ バイオハザード5",
+        "url": "https://p-town.dmm.com/machines/4754",
+        "checkedAt": "2026-08-31"
+      },
+      {
+        "id": "SRC_NANA",
+        "classification": "ANALYSIS",
+        "pageName": "スマスロ バイオ5 設定判別",
+        "url": "https://nana-press.com/kaiseki/machine/904/27840/",
+        "checkedAt": "2026-08-31"
+      },
+      {
+        "id": "SRC_NANA_TOOL",
+        "classification": "ANALYSIS",
+        "pageName": "スマスロ バイオ5 設定推測ツール",
+        "url": "https://nana-press.com/kaiseki/machine/904/suisoku2/",
+        "checkedAt": "2026-08-31"
+      }
+    ]
+  },
+  "ui": {
+    "sections": [
+      {
+        "id": "AUTO_NUMERIC",
+        "title": "通常時",
+        "displayOrder": 1,
+        "items": [
+          {
+            "type": "input",
+            "inputId": "INP_NORMAL_GAMES",
+            "label": "通常ゲーム数",
+            "widget": "number"
+          },
+          {
+            "type": "input",
+            "inputId": "INP_AT_FIRST_HIT",
+            "label": "AT ハザードラッシュ初当り",
+            "widget": "counter"
+          }
+        ]
+      },
+      {
+        "id": "AUTO_INFECTION",
+        "title": "インフェクション",
+        "displayOrder": 2,
+        "items": [
+          {
+            "type": "input",
+            "inputId": "INP_AT_MIDDLE_LINE",
+            "label": "AT初当り 中段揃い",
+            "widget": "counter"
+          },
+          {
+            "type": "input",
+            "inputId": "INP_INFECTION_FROM_MIDDLE",
+            "label": "中段揃い→インフェクション",
+            "widget": "counter"
+          }
+        ]
+      },
+      {
+        "id": "AUTO_EVIDENCE",
+        "title": "設定確定・示唆",
+        "displayOrder": 3,
+        "items": [
+          {
+            "type": "input",
+            "inputId": "INP_EVI_PAYOUT",
+            "label": "獲得枚数表示",
+            "widget": "multi_select"
+          },
+          {
+            "type": "input",
+            "inputId": "INP_EVI_TROPHY",
+            "label": "エンタトロフィー",
+            "widget": "multi_select"
+          },
+          {
+            "type": "input",
+            "inputId": "INP_EVI_AT_END",
+            "label": "AT終了画面",
+            "widget": "multi_select"
+          },
+          {
+            "type": "input",
+            "inputId": "INP_EVI_ENDING",
+            "label": "エンディング中セリフ",
+            "widget": "multi_select"
+          }
+        ]
+      }
+    ]
+  },
+  "selectionSummary": {
+    "schemaVersion": "selection-summary-v1",
+    "evaluatedCount": 5,
+    "selectedCount": 2,
+    "rejectedCount": 3,
+    "selected": [
+      {
+        "featureId": "FEAT_AT_FIRST_HIT",
+        "name": "ATハザードラッシュ初当り",
+        "reason": "AT初当りは設定1の1/325.8から設定6の1/236.2まで明確な設定差があり、通常ゲーム数を分母に直接観測できるため主軸に採用します。",
+        "requiredTrials": {
+          "value": 19547,
+          "unit": "通常ゲーム"
+        }
+      },
+      {
+        "featureId": "FEAT_INFECTION_MIDDLE_ENTRY",
+        "name": "AT初当り中段揃い時インフェクション突入率",
+        "reason": "AT初当り中段揃い時という明確な条件付き分母で16.7%から21.8%の設定差があり、斜め揃い100%という無情報部分を除外できるため補助採用します。",
+        "requiredTrials": {
+          "value": 437,
+          "unit": "AT初当り中段揃い1回"
+        }
+      }
+    ],
+    "rejected": [
+      {
+        "featureId": "FEAT_PANIC_ZONE_EXCLUDED",
+        "name": "パニックZONE出現率",
+        "reason": "パニックZONEには設定差がありますが、CZ合算の一部でありAT初当りにもつながるため、独立Featureとして重ねません。",
+        "requiredTrials": {
+          "value": 28526,
+          "unit": "通常ゲーム"
+        }
+      },
+      {
+        "featureId": "FEAT_CZ_TOTAL_EXCLUDED",
+        "name": "CZ合算出現率",
+        "reason": "CZ合算は観測しやすいものの、AT初当りを主軸とした場合に同じ設定差を重ねて評価しやすいため不採用です。将来CZ成功率を条件分解できる場合は再評価します。",
+        "requiredTrials": {
+          "value": 27695,
+          "unit": "通常ゲーム"
+        }
+      },
+      {
+        "featureId": "FEAT_INFECTION_TOTAL_ENTRY_EXCLUDED",
+        "name": "AT初当り時インフェクション総突入率",
+        "reason": "総突入率にも設定差はありますが、中段揃い条件付きFeatureと観測が重複し、設定差のない斜め揃いも含むため不採用です。",
+        "requiredTrials": {
+          "value": 557,
+          "unit": "AT初当り1回"
+        }
+      }
+    ]
+  },
+  "reliability": {},
+  "metadata": {
+    "machineId": "L_BIOHAZARD5_ZE",
+    "displayName": "スマスロ バイオハザード5",
+    "settings": [
+      "SET_1",
+      "SET_2",
+      "SET_3",
+      "SET_4",
+      "SET_5",
+      "SET_6"
+    ]
+  },
+  "validation": {
+    "cases": []
+  },
+  "statistics": {}
+}

@@ -1,0 +1,43 @@
+{
+  "schemaVersion":"selection-data-v1",
+  "machineId":"L_BIOHAZARD5_ZE",
+  "machineDataVersion":"0.1.0",
+  "uiCategoryLabels":{"NUMERIC":"通常時","INFECTION":"インフェクション","EVIDENCE":"設定確定・示唆"},
+  "inputs":[
+    {"id":"INP_NORMAL_GAMES","name":"通常ゲーム数","type":"integer","category":"NUMERIC","unit":"G","displayOrder":10,"inferenceRole":"INCLUDE_PRIMARY","defaultValue":null,"observationScope":"SELF_PLAY"},
+    {"id":"INP_AT_FIRST_HIT","name":"AT ハザードラッシュ初当り","type":"counter","category":"NUMERIC","unit":"回","displayOrder":11,"inferenceRole":"INCLUDE_PRIMARY","defaultValue":null,"parentInputId":"INP_NORMAL_GAMES"},
+    {"id":"INP_AT_MIDDLE_LINE","name":"AT初当り 中段揃い","type":"counter","category":"INFECTION","unit":"回","displayOrder":20,"inferenceRole":"INCLUDE_SUPPORT","defaultValue":null},
+    {"id":"INP_INFECTION_FROM_MIDDLE","name":"中段揃い→インフェクション","type":"counter","category":"INFECTION","unit":"回","displayOrder":21,"inferenceRole":"INCLUDE_SUPPORT","defaultValue":null,"parentInputId":"INP_AT_MIDDLE_LINE"}
+  ],
+  "features":[
+    {"researchFeatureId":"RF_AT_FIRST_HIT","featureId":"FEAT_AT_FIRST_HIT","adoptionCategory":"INCLUDE_PRIMARY","numeratorInputId":"INP_AT_FIRST_HIT","denominatorInputId":"INP_NORMAL_GAMES","weight":1,"difficultyParticipation":"INCLUDE","difficultyExposure":{"mode":"per_game","factor":1,"quality":"EXACT","basisId":"NORMAL_GAMES"},"userReason":"AT初当りは設定1の1/325.8から設定6の1/236.2まで明確な設定差があり、通常ゲーム数を分母に直接観測できるため主軸に採用します。"},
+    {"researchFeatureId":"RF_PANIC_ZONE","featureId":"FEAT_PANIC_ZONE_EXCLUDED","adoptionCategory":"EXCLUDE","difficultyParticipation":"EXCLUDE","rejectionReason":"CZ合算の部分集合であり、AT初当りとも因果的に関連するため独立尤度の追加は二重評価リスクがある。","userReason":"パニックZONEには設定差がありますが、CZ合算の一部でありAT初当りにもつながるため、独立Featureとして重ねません。"},
+    {"researchFeatureId":"RF_CZ_TOTAL","featureId":"FEAT_CZ_TOTAL_EXCLUDED","adoptionCategory":"EXCLUDE","difficultyParticipation":"EXCLUDE","rejectionReason":"AT初当りと因果的に強く関連し、同一遊技区間の当選過程を重複評価しやすいため。","userReason":"CZ合算は観測しやすいものの、AT初当りを主軸とした場合に同じ設定差を重ねて評価しやすいため不採用です。将来CZ成功率を条件分解できる場合は再評価します。"},
+    {"researchFeatureId":"RF_INFECTION_MIDDLE_ENTRY","featureId":"FEAT_INFECTION_MIDDLE_ENTRY","adoptionCategory":"INCLUDE_SUPPORT","numeratorInputId":"INP_INFECTION_FROM_MIDDLE","denominatorInputId":"INP_AT_MIDDLE_LINE","weight":1,"difficultyParticipation":"EXCLUDE","difficultyExclusionReason":"AT初当り中段揃いのゲーム当たり曝露頻度を横断比較できる公表値がないため。","userReason":"AT初当り中段揃い時という明確な条件付き分母で16.7%から21.8%の設定差があり、斜め揃い100%という無情報部分を除外できるため補助採用します。"},
+    {"researchFeatureId":"RF_INFECTION_TOTAL_ENTRY","featureId":"FEAT_INFECTION_TOTAL_ENTRY_EXCLUDED","adoptionCategory":"EXCLUDE","difficultyParticipation":"EXCLUDE","rejectionReason":"中段揃い条件付き率と同じAT初当り観測を共有し、斜め揃い100%の設定差なし成分を含むため。","userReason":"総突入率にも設定差はありますが、中段揃い条件付きFeatureと観測が重複し、設定差のない斜め揃いも含むため不採用です。"}
+  ],
+  "evidenceUi":{"groups":[
+    {"groupId":"PAYOUT","label":"獲得枚数表示","selectionMode":"multi","normalizationMode":"ALLOWED_SETTINGS_INTERSECTION","displayOrder":100,"options":[
+      {"value":"256","label":"256枚OVER（設定2・5・6）","allowedSettings":["SET_2","SET_5","SET_6"],"sourceEvidenceIds":["RE_PAYOUT_256"]},
+      {"value":"456","label":"456枚OVER（設定4以上）","allowedSettings":["SET_4","SET_5","SET_6"],"sourceEvidenceIds":["RE_PAYOUT_456"]},
+      {"value":"810","label":"810枚OVER（設定5以上）","allowedSettings":["SET_5","SET_6"],"sourceEvidenceIds":["RE_PAYOUT_810"]},
+      {"value":"666","label":"666枚OVER（設定6）","allowedSettings":["SET_6"],"sourceEvidenceIds":["RE_PAYOUT_666"]}
+    ]},
+    {"groupId":"TROPHY","label":"エンタトロフィー","selectionMode":"multi","normalizationMode":"ALLOWED_SETTINGS_INTERSECTION","displayOrder":110,"options":[
+      {"value":"BRONZE","label":"銅（設定2以上）","allowedSettings":["SET_2","SET_3","SET_4","SET_5","SET_6"],"sourceEvidenceIds":["RE_TROPHY_BRONZE"]},
+      {"value":"SILVER","label":"銀（設定3以上）","allowedSettings":["SET_3","SET_4","SET_5","SET_6"],"sourceEvidenceIds":["RE_TROPHY_SILVER"]},
+      {"value":"GOLD","label":"金（設定4以上）","allowedSettings":["SET_4","SET_5","SET_6"],"sourceEvidenceIds":["RE_TROPHY_GOLD"]},
+      {"value":"MAPLE","label":"紅葉（設定5以上）","allowedSettings":["SET_5","SET_6"],"sourceEvidenceIds":["RE_TROPHY_MAPLE"]},
+      {"value":"RAINBOW","label":"虹（設定6）","allowedSettings":["SET_6"],"sourceEvidenceIds":["RE_TROPHY_RAINBOW"]}
+    ]},
+    {"groupId":"AT_END","label":"AT終了画面","selectionMode":"multi","normalizationMode":"ALLOWED_SETTINGS_INTERSECTION","displayOrder":120,"options":[
+      {"value":"CONGRATS","label":"Congratulations!（設定5以上）","allowedSettings":["SET_5","SET_6"],"sourceEvidenceIds":["RE_AT_END_5_PLUS"]},
+      {"value":"ENTERLION","label":"エンタライオン（設定6）","allowedSettings":["SET_6"],"sourceEvidenceIds":["RE_AT_END_6"]}
+    ]},
+    {"groupId":"ENDING","label":"エンディング中セリフ","selectionMode":"multi","normalizationMode":"ALLOWED_SETTINGS_INTERSECTION","displayOrder":130,"options":[
+      {"value":"MAJINI","label":"マジニ（設定5以上）","allowedSettings":["SET_5","SET_6"],"sourceEvidenceIds":["RE_ENDING_5_PLUS"]},
+      {"value":"ENTERLION","label":"エンタライオン（設定6）","allowedSettings":["SET_6"],"sourceEvidenceIds":["RE_ENDING_6"]}
+    ]}
+  ]},
+  "difficultyAnalysis":{"targetGames":[1500,3000,7000],"simulationsPerSetting":10000,"seed":20260831,"targetGameBasis":{"basisId":"NORMAL_GAMES","label":"通常ゲーム数","quality":"EXACT","crossMachineComparable":true},"calibrationAllowedExposureQualities":["EXACT","DERIVED"]}
+}

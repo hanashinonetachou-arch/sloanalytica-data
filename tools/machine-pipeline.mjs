@@ -8,6 +8,7 @@ import { validateSelectionData } from './validate-selection-data.mjs';
 import { evaluateResearchData } from './evaluate-research-statistics.mjs';
 import { buildMachineData } from './build-machine-data.mjs';
 import { evaluateMachineDifficulty } from './evaluate-machine-difficulty.mjs';
+import { mergeCanonicalMachineIdentity } from './merge-canonical-machine-identity.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 
@@ -162,7 +163,11 @@ try {
   console.log(`PASS SelectionData (${selectionValidation.warnings?.length ?? 0} warnings)`);
 
   let statistics = evaluateResearchData(research);
-  const machinePackage = buildMachineData(research, selection, statistics);
+  const machinePackage = mergeCanonicalMachineIdentity(
+    buildMachineData(research, selection, statistics),
+    machineId,
+    ROOT,
+  );
   let difficulty = evaluateMachineDifficulty(research, selection);
   statistics = preserveGeneratedAtIfEquivalent(statisticsPath, statistics);
   difficulty = preserveGeneratedAtIfEquivalent(difficultyPath, difficulty);
