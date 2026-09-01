@@ -1,0 +1,48 @@
+name: Magia Prototype Integration
+
+on:
+  push:
+    branches:
+      - integrate/20260901-magia-reaudit-prototype
+    paths:
+      - .github/workflows/magia-prototype-integration.yml
+
+permissions:
+  contents: write
+
+jobs:
+  build-validate-persist:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: integrate/20260901-magia-reaudit-prototype
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Validate semantic sources
+        run: |
+          node tools/validate-research-data.mjs research/L_MAGIA_RECORD_RN/research-data.json
+          node tools/validate-selection-data.mjs research/L_MAGIA_RECORD_RN/selection-data.json research/L_MAGIA_RECORD_RN/research-data.json
+          node tools/validate-machine-observation-data.mjs research/L_MAGIA_RECORD_RN/machine-observation-data.json
+          node tools/validate-ui-design-data.mjs .
+      - name: Machine pipeline
+        run: npm run machine:pipeline -- L_MAGIA_RECORD_RN --skip-repo-checks
+      - name: Full tests
+        run: npm test
+      - name: Repository audit
+        run: npm run audit
+      - name: Persist generated changes
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -u
+          if [ -d build/L_MAGIA_RECORD_RN ]; then git add build/L_MAGIA_RECORD_RN; fi
+          if git diff --cached --quiet; then
+            echo "No generated changes to commit"
+          else
+            git commit -m "build: regenerate Magia on current prototype"
+            git push origin HEAD:integrate/20260901-magia-reaudit-prototype
+          fi
+          git status --short
