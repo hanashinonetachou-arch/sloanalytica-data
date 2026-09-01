@@ -1,0 +1,140 @@
+{
+  "schemaVersion": "selection-data-v1",
+  "machineId": "L_AMAZING_LIVE_PD",
+  "machineDataVersion": "0.1.0",
+  "inputs": [
+    {
+      "id": "INP_BONUS_FIRST_HIT_COUNT",
+      "name": "ボーナス初当り 回数",
+      "category": "SEL_RF_BONUS_FIRST_HIT",
+      "type": "counter",
+      "unit": "回",
+      "displayOrder": 10,
+      "inferenceRole": "INCLUDE_PRIMARY",
+      "defaultValue": ""
+    },
+    {
+      "id": "INP_BONUS_FIRST_HIT_TRIALS",
+      "name": "ボーナス初当り 試行数",
+      "category": "SEL_RF_BONUS_FIRST_HIT",
+      "type": "integer",
+      "unit": "回",
+      "displayOrder": 11,
+      "inferenceRole": "INCLUDE_PRIMARY",
+      "defaultValue": ""
+    },
+    {
+      "id": "INP_SET_L_PANEL_COUNT",
+      "name": "設定L 下パネル常時点滅",
+      "category": "EVIDENCE",
+      "type": "counter",
+      "unit": "回",
+      "displayOrder": 15,
+      "inferenceRole": "INCLUDE_SUPPORT",
+      "defaultValue": ""
+    }
+  ],
+  "features": [
+    {
+      "researchFeatureId": "RF_BONUS_FIRST_HIT",
+      "featureId": "FEAT_BONUS_FIRST_HIT",
+      "adoptionCategory": "INCLUDE_PRIMARY",
+      "weight": 1,
+      "numeratorInputId": "INP_BONUS_FIRST_HIT_COUNT",
+      "denominatorInputId": "INP_BONUS_FIRST_HIT_TRIALS",
+      "userReason": "公開全設定値と分母定義が揃っており、初当り抽選対象ゲームを単位に設定差を直接評価できるため主Featureとして採用する。",
+      "difficultyParticipation": "EXCLUDE",
+      "difficultyExclusionReason": "Observationで実戦時の試行量・露出率を確定する前にDifficultyへ推定値を持ち込まない。"
+    },
+    {
+      "researchFeatureId": "RF_BIG_APPEARANCE",
+      "featureId": "FEAT_BIG_APPEARANCE",
+      "adoptionCategory": "EXCLUDE",
+      "weight": 1,
+      "userFacingReason": "ボーナス初当り・REG・合算と同じボーナス事象を共有するため、独立尤度で二重評価せず初当りを代表採用する。",
+      "rejectionReason": "ボーナス初当り・REG・合算と同じボーナス事象を共有するため、独立尤度で二重評価せず初当りを代表採用する。",
+      "difficultyParticipation": "EXCLUDE"
+    },
+    {
+      "researchFeatureId": "RF_REG_APPEARANCE",
+      "featureId": "FEAT_REG_APPEARANCE",
+      "adoptionCategory": "EXCLUDE",
+      "weight": 1,
+      "userFacingReason": "ボーナス初当り・BIG・合算と同じボーナス事象を共有するため、独立尤度で二重評価せず初当りを代表採用する。",
+      "rejectionReason": "ボーナス初当り・BIG・合算と同じボーナス事象を共有するため、独立尤度で二重評価せず初当りを代表採用する。",
+      "difficultyParticipation": "EXCLUDE"
+    },
+    {
+      "researchFeatureId": "RF_BIG_REG_AGGREGATE",
+      "featureId": "FEAT_BIG_REG_AGGREGATE",
+      "adoptionCategory": "EXCLUDE",
+      "weight": 1,
+      "userFacingReason": "BIG/REGおよびボーナス初当りを内包する合算値であり、同一情報の二重評価になるため代表Featureのみ採用する。",
+      "rejectionReason": "BIG/REGおよびボーナス初当りを内包する合算値であり、同一情報の二重評価になるため代表Featureのみ採用する。",
+      "difficultyParticipation": "EXCLUDE"
+    },
+    {
+      "researchFeatureId": "RF_SMALL_ROLES",
+      "featureId": "FEAT_SMALL_ROLES",
+      "adoptionCategory": "EXCLUDE",
+      "weight": 1,
+      "userFacingReason": "全設定の公開値または条件別テーブルが揃っておらず、欠損設定を補間・推定せずResearch未解決のまま推測から除外する。",
+      "rejectionReason": "全設定の公開値または条件別テーブルが揃っておらず、欠損設定を補間・推定せずResearch未解決のまま推測から除外する。",
+      "difficultyParticipation": "EXCLUDE"
+    }
+  ],
+  "evidence": [
+    {
+      "researchEvidenceId": "RE_SET_L_PANEL",
+      "evidenceId": "EVI_SET_L_PANEL",
+      "inputId": "INP_SET_L_PANEL_COUNT",
+      "name": "設定L 下パネル常時点滅",
+      "displayName": "設定L 下パネル常時点滅",
+      "allowedSettings": [
+        "SET_L"
+      ],
+      "deniedSettings": [
+        "SET_1",
+        "SET_2",
+        "SET_4",
+        "SET_5",
+        "SET_6"
+      ],
+      "notes": "ResearchでHard Evidenceとして検証済み。傾向示唆は混在させず設定集合だけを適用する。"
+    }
+  ],
+  "evidenceDecisions": [
+    {
+      "researchEvidenceId": "RE_SET_L_PANEL",
+      "disposition": "INCLUDE_UI",
+      "reason": "Hard Evidenceとして設定集合が明示されているためEvidence UIへ採用する。"
+    }
+  ],
+  "evidenceReview": {
+    "policyVersion": 1,
+    "exclusions": []
+  },
+  "difficultyAnalysis": {
+    "targetGames": [
+      1500,
+      3000,
+      7000
+    ],
+    "simulationsPerSetting": 4000,
+    "seed": 20260901,
+    "targetGameBasis": {
+      "basisId": "OBSERVATION_PENDING_GAME_BASIS",
+      "label": "実戦試行量（Observationで確定）",
+      "quality": "UNRESOLVED"
+    },
+    "calibrationAllowedExposureQualities": [
+      "EXACT",
+      "DERIVED",
+      "ESTIMATED"
+    ]
+  },
+  "uiCategoryLabels": {
+    "SEL_RF_BONUS_FIRST_HIT": "ボーナス初当り",
+    "EVIDENCE": "設定確定・否定情報"
+  }
+}

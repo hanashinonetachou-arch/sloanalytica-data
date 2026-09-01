@@ -1,0 +1,308 @@
+{
+  "schemaVersion": "selection-data-v1",
+  "machineId": "L_GUNDAM_SEED_G",
+  "machineDataVersion": "0.1.0",
+  "inputs": [
+    {
+      "id": "INP_AT_FIRST_HIT_COUNT",
+      "name": "AT初当り 回数",
+      "category": "SEL_RF_AT_FIRST_HIT",
+      "type": "counter",
+      "unit": "回",
+      "displayOrder": 10,
+      "inferenceRole": "INCLUDE_PRIMARY",
+      "defaultValue": ""
+    },
+    {
+      "id": "INP_AT_FIRST_HIT_TRIALS",
+      "name": "AT初当り 試行数",
+      "category": "SEL_RF_AT_FIRST_HIT",
+      "type": "integer",
+      "unit": "回",
+      "displayOrder": 11,
+      "inferenceRole": "INCLUDE_PRIMARY",
+      "defaultValue": ""
+    },
+    {
+      "id": "INP_POST_RESET_ST_100G_CAT_G0_49",
+      "name": "G0_49",
+      "category": "SEL_RF_POST_RESET_ST_100G",
+      "type": "counter",
+      "unit": "回",
+      "displayOrder": 15,
+      "inferenceRole": "INCLUDE_FALLBACK",
+      "defaultValue": ""
+    },
+    {
+      "id": "INP_POST_RESET_ST_100G_CAT_G50_99",
+      "name": "G50_99",
+      "category": "SEL_RF_POST_RESET_ST_100G",
+      "type": "counter",
+      "unit": "回",
+      "displayOrder": 16,
+      "inferenceRole": "INCLUDE_FALLBACK",
+      "defaultValue": ""
+    },
+    {
+      "id": "INP_POST_RESET_ST_100G_CAT_G100_PLUS",
+      "name": "G100_PLUS",
+      "category": "SEL_RF_POST_RESET_ST_100G",
+      "type": "counter",
+      "unit": "回",
+      "displayOrder": 17,
+      "inferenceRole": "INCLUDE_FALLBACK",
+      "defaultValue": ""
+    },
+    {
+      "id": "INP_CZ_ST_END_4PLUS_COUNT",
+      "name": "CZ・ST終了画面 銀枠 アスラン＆キラ",
+      "category": "EVIDENCE",
+      "type": "counter",
+      "unit": "回",
+      "displayOrder": 20,
+      "inferenceRole": "INCLUDE_SUPPORT",
+      "defaultValue": ""
+    },
+    {
+      "id": "INP_CZ_ST_END_6_COUNT",
+      "name": "CZ・ST終了画面 金枠",
+      "category": "EVIDENCE",
+      "type": "counter",
+      "unit": "回",
+      "displayOrder": 21,
+      "inferenceRole": "INCLUDE_SUPPORT",
+      "defaultValue": ""
+    },
+    {
+      "id": "INP_ENDING_END_6_COUNT",
+      "name": "エンディング終了画面 金枠",
+      "category": "EVIDENCE",
+      "type": "counter",
+      "unit": "回",
+      "displayOrder": 22,
+      "inferenceRole": "INCLUDE_SUPPORT",
+      "defaultValue": ""
+    },
+    {
+      "id": "INP_CZ_ST_DENY3_COUNT",
+      "name": "CZ・ST終了画面 紫枠 クルーゼ＆ムウ",
+      "category": "EVIDENCE",
+      "type": "counter",
+      "unit": "回",
+      "displayOrder": 23,
+      "inferenceRole": "INCLUDE_SUPPORT",
+      "defaultValue": ""
+    },
+    {
+      "id": "INP_CZ_ST_DENY2_COUNT",
+      "name": "CZ・ST終了画面 紫枠 マリュー＆ムウ",
+      "category": "EVIDENCE",
+      "type": "counter",
+      "unit": "回",
+      "displayOrder": 24,
+      "inferenceRole": "INCLUDE_SUPPORT",
+      "defaultValue": ""
+    }
+  ],
+  "features": [
+    {
+      "researchFeatureId": "RF_CZ_FIRST_HIT",
+      "featureId": "FEAT_CZ_FIRST_HIT",
+      "adoptionCategory": "EXCLUDE",
+      "weight": 1,
+      "userFacingReason": "AT初当りの主要経路とCZ初当りが因果的に重なるため、独立尤度で二重評価せずAT初当りを代表採用する。",
+      "rejectionReason": "AT初当りの主要経路とCZ初当りが因果的に重なるため、独立尤度で二重評価せずAT初当りを代表採用する。",
+      "difficultyParticipation": "EXCLUDE"
+    },
+    {
+      "researchFeatureId": "RF_AT_FIRST_HIT",
+      "featureId": "FEAT_AT_FIRST_HIT",
+      "adoptionCategory": "INCLUDE_PRIMARY",
+      "weight": 1,
+      "numeratorInputId": "INP_AT_FIRST_HIT_COUNT",
+      "denominatorInputId": "INP_AT_FIRST_HIT_TRIALS",
+      "userReason": "公開全設定値と分母定義が揃っており、有効通常ゲームを単位に設定差を直接評価できるため主Featureとして採用する。",
+      "difficultyParticipation": "EXCLUDE",
+      "difficultyExclusionReason": "Observationで実戦時の試行量・露出率を確定する前にDifficultyへ推定値を持ち込まない。"
+    },
+    {
+      "researchFeatureId": "RF_POST_RESET_ST_100G",
+      "featureId": "FEAT_POST_RESET_ST_100G",
+      "adoptionCategory": "INCLUDE_FALLBACK",
+      "weight": 1,
+      "numeratorInputId": "INP_POST_RESET_ST_100G_CAT_G0_49",
+      "categoryInputIds": [
+        "INP_POST_RESET_ST_100G_CAT_G50_99",
+        "INP_POST_RESET_ST_100G_CAT_G100_PLUS"
+      ],
+      "denominatorInputIds": [
+        "INP_POST_RESET_ST_100G_CAT_G0_49",
+        "INP_POST_RESET_ST_100G_CAT_G50_99",
+        "INP_POST_RESET_ST_100G_CAT_G100_PLUS"
+      ],
+      "inputTransform": "sum_inputs_to_trials",
+      "userReason": "公開全設定値は利用できるが下流または包含Featureと情報が重なるため、二重評価を避け主Featureが使えない場合のFallbackとしてのみ採用する。",
+      "difficultyParticipation": "EXCLUDE",
+      "difficultyExclusionReason": "Observationで実戦時の試行量・露出率を確定する前にDifficultyへ推定値を持ち込まない。",
+      "suppressedByFeatureIds": [
+        "FEAT_AT_FIRST_HIT"
+      ]
+    },
+    {
+      "researchFeatureId": "RF_OTHER_ROUTE_LOTTERIES",
+      "featureId": "FEAT_OTHER_ROUTE_LOTTERIES",
+      "adoptionCategory": "EXCLUDE",
+      "weight": 1,
+      "userFacingReason": "全設定の公開値または条件別テーブルが揃っておらず、欠損設定を補間・推定せずResearch未解決のまま推測から除外する。",
+      "rejectionReason": "全設定の公開値または条件別テーブルが揃っておらず、欠損設定を補間・推定せずResearch未解決のまま推測から除外する。",
+      "difficultyParticipation": "EXCLUDE"
+    }
+  ],
+  "evidence": [
+    {
+      "researchEvidenceId": "RE_CZ_ST_END_4PLUS",
+      "evidenceId": "EVI_CZ_ST_END_4PLUS",
+      "inputId": "INP_CZ_ST_END_4PLUS_COUNT",
+      "name": "CZ・ST終了画面 銀枠 アスラン＆キラ",
+      "displayName": "CZ・ST終了画面 銀枠 アスラン＆キラ",
+      "allowedSettings": [
+        "SET_4",
+        "SET_5",
+        "SET_6"
+      ],
+      "deniedSettings": [
+        "SET_1",
+        "SET_2",
+        "SET_3"
+      ],
+      "notes": "ResearchでHard Evidenceとして検証済み。傾向示唆は混在させず設定集合だけを適用する。"
+    },
+    {
+      "researchEvidenceId": "RE_CZ_ST_END_6",
+      "evidenceId": "EVI_CZ_ST_END_6",
+      "inputId": "INP_CZ_ST_END_6_COUNT",
+      "name": "CZ・ST終了画面 金枠",
+      "displayName": "CZ・ST終了画面 金枠",
+      "allowedSettings": [
+        "SET_6"
+      ],
+      "deniedSettings": [
+        "SET_1",
+        "SET_2",
+        "SET_3",
+        "SET_4",
+        "SET_5"
+      ],
+      "notes": "ResearchでHard Evidenceとして検証済み。傾向示唆は混在させず設定集合だけを適用する。"
+    },
+    {
+      "researchEvidenceId": "RE_ENDING_END_6",
+      "evidenceId": "EVI_ENDING_END_6",
+      "inputId": "INP_ENDING_END_6_COUNT",
+      "name": "エンディング終了画面 金枠",
+      "displayName": "エンディング終了画面 金枠",
+      "allowedSettings": [
+        "SET_6"
+      ],
+      "deniedSettings": [
+        "SET_1",
+        "SET_2",
+        "SET_3",
+        "SET_4",
+        "SET_5"
+      ],
+      "notes": "ResearchでHard Evidenceとして検証済み。傾向示唆は混在させず設定集合だけを適用する。"
+    },
+    {
+      "researchEvidenceId": "RE_CZ_ST_DENY3",
+      "evidenceId": "EVI_CZ_ST_DENY3",
+      "inputId": "INP_CZ_ST_DENY3_COUNT",
+      "name": "CZ・ST終了画面 紫枠 クルーゼ＆ムウ",
+      "displayName": "CZ・ST終了画面 紫枠 クルーゼ＆ムウ",
+      "allowedSettings": [
+        "SET_1",
+        "SET_2",
+        "SET_4",
+        "SET_5",
+        "SET_6"
+      ],
+      "deniedSettings": [
+        "SET_3"
+      ],
+      "notes": "ResearchでHard Evidenceとして検証済み。傾向示唆は混在させず設定集合だけを適用する。"
+    },
+    {
+      "researchEvidenceId": "RE_CZ_ST_DENY2",
+      "evidenceId": "EVI_CZ_ST_DENY2",
+      "inputId": "INP_CZ_ST_DENY2_COUNT",
+      "name": "CZ・ST終了画面 紫枠 マリュー＆ムウ",
+      "displayName": "CZ・ST終了画面 紫枠 マリュー＆ムウ",
+      "allowedSettings": [
+        "SET_1",
+        "SET_3",
+        "SET_4",
+        "SET_5",
+        "SET_6"
+      ],
+      "deniedSettings": [
+        "SET_2"
+      ],
+      "notes": "ResearchでHard Evidenceとして検証済み。傾向示唆は混在させず設定集合だけを適用する。"
+    }
+  ],
+  "evidenceDecisions": [
+    {
+      "researchEvidenceId": "RE_CZ_ST_END_4PLUS",
+      "disposition": "INCLUDE_UI",
+      "reason": "Hard Evidenceとして設定集合が明示されているためEvidence UIへ採用する。"
+    },
+    {
+      "researchEvidenceId": "RE_CZ_ST_END_6",
+      "disposition": "INCLUDE_UI",
+      "reason": "Hard Evidenceとして設定集合が明示されているためEvidence UIへ採用する。"
+    },
+    {
+      "researchEvidenceId": "RE_ENDING_END_6",
+      "disposition": "INCLUDE_UI",
+      "reason": "Hard Evidenceとして設定集合が明示されているためEvidence UIへ採用する。"
+    },
+    {
+      "researchEvidenceId": "RE_CZ_ST_DENY3",
+      "disposition": "INCLUDE_UI",
+      "reason": "Hard Evidenceとして設定集合が明示されているためEvidence UIへ採用する。"
+    },
+    {
+      "researchEvidenceId": "RE_CZ_ST_DENY2",
+      "disposition": "INCLUDE_UI",
+      "reason": "Hard Evidenceとして設定集合が明示されているためEvidence UIへ採用する。"
+    }
+  ],
+  "evidenceReview": {
+    "policyVersion": 1,
+    "exclusions": []
+  },
+  "difficultyAnalysis": {
+    "targetGames": [
+      1500,
+      3000,
+      7000
+    ],
+    "simulationsPerSetting": 4000,
+    "seed": 20260901,
+    "targetGameBasis": {
+      "basisId": "OBSERVATION_PENDING_GAME_BASIS",
+      "label": "実戦試行量（Observationで確定）",
+      "quality": "UNRESOLVED"
+    },
+    "calibrationAllowedExposureQualities": [
+      "EXACT",
+      "DERIVED",
+      "ESTIMATED"
+    ]
+  },
+  "uiCategoryLabels": {
+    "SEL_RF_AT_FIRST_HIT": "AT初当り",
+    "SEL_RF_POST_RESET_ST_100G": "リセット後・ST終了後100G以内 CZ or ボーナス初回当選",
+    "EVIDENCE": "設定確定・否定情報"
+  }
+}
