@@ -1,0 +1,229 @@
+{
+  "schemaVersion": 1,
+  "machine": {
+    "schemaVersion": "2.0.0",
+    "machineId": "L_AMAZING_LIVE_PD",
+    "machineDataVersion": "0.1.0",
+    "displayName": "スマート沖スロ アメイジングライブ",
+    "modelName": "LアメイジングライブPD",
+    "manufacturer": "パイオニア",
+    "settings": [
+      "SET_1",
+      "SET_2",
+      "SET_4",
+      "SET_5",
+      "SET_6",
+      "SET_L"
+    ],
+    "packagePolicy": {
+      "offlineCapable": true,
+      "containsImages": false,
+      "containsExecutableCode": false
+    }
+  },
+  "inputs": {
+    "schemaVersion": "2.0.0",
+    "inputs": [
+      {
+        "id": "INP_BONUS_FIRST_HIT_COUNT",
+        "name": "ボーナス初当り 回数",
+        "category": "SEL_RF_BONUS_FIRST_HIT",
+        "type": "counter",
+        "unit": "回",
+        "displayOrder": 10,
+        "inferenceRole": "INCLUDE_PRIMARY",
+        "defaultValue": "",
+        "minimum": 0
+      },
+      {
+        "id": "INP_BONUS_FIRST_HIT_TRIALS",
+        "name": "ボーナス初当り 試行数",
+        "category": "SEL_RF_BONUS_FIRST_HIT",
+        "type": "integer",
+        "unit": "回",
+        "displayOrder": 11,
+        "inferenceRole": "INCLUDE_PRIMARY",
+        "defaultValue": "",
+        "minimum": 0
+      },
+      {
+        "id": "INP_SET_L_PANEL_COUNT",
+        "name": "設定L 下パネル常時点滅",
+        "category": "EVIDENCE",
+        "type": "counter",
+        "unit": "回",
+        "displayOrder": 15,
+        "inferenceRole": "INCLUDE_SUPPORT",
+        "defaultValue": "",
+        "minimum": 0
+      }
+    ]
+  },
+  "features": {
+    "schemaVersion": "2.0.0",
+    "features": [
+      {
+        "featureId": "FEAT_BONUS_FIRST_HIT",
+        "name": "ボーナス初当り",
+        "adoptionCategory": "INCLUDE_PRIMARY",
+        "calculationRole": "PROBABILITY",
+        "probabilityEngineUsage": true,
+        "modelType": "binomial",
+        "minimumSample": 1,
+        "sampleRecommendation": 1,
+        "reliabilityProfile": {
+          "weight": 1
+        },
+        "denominatorInputId": "INP_BONUS_FIRST_HIT_TRIALS",
+        "numeratorInputId": "INP_BONUS_FIRST_HIT_COUNT",
+        "displayFormat": "ratio_1_over_n",
+        "probabilities": {
+          "SET_1": 0.003649635036496,
+          "SET_2": 0.003852080123267,
+          "SET_4": 0.004361098996947,
+          "SET_5": 0.00483325277912,
+          "SET_6": 0.005265929436546
+        },
+        "sourceEvidenceRefs": [
+          "SRC_1GEKI"
+        ]
+      }
+    ]
+  },
+  "evidence": {
+    "version": "1.0.0",
+    "evidences": [
+      {
+        "id": "EVI_SET_L_PANEL",
+        "name": "設定L 下パネル常時点滅",
+        "displayName": "設定L 下パネル常時点滅",
+        "inputId": "INP_SET_L_PANEL_COUNT",
+        "confirmedSettings": [
+          "SET_L"
+        ],
+        "deniedSettings": [
+          "SET_1",
+          "SET_2",
+          "SET_4",
+          "SET_5",
+          "SET_6"
+        ],
+        "hasImage": false,
+        "type": "SETTING_CONFIRMATION"
+      }
+    ],
+    "sources": [
+      {
+        "id": "SRC_1GEKI",
+        "classification": "ANALYSIS",
+        "pageName": "アメイジングライブ（スロット）設定差・設定判別要素まとめ",
+        "url": "https://1geki.jp/slot/l_amazinglive/0/",
+        "checkedAt": "2026-09-01"
+      }
+    ]
+  },
+  "ui": {
+    "sections": [
+      {
+        "id": "AUTO_SEL_RF_BONUS_FIRST_HIT",
+        "title": "ボーナス初当り",
+        "displayOrder": 1,
+        "items": [
+          {
+            "type": "input",
+            "inputId": "INP_BONUS_FIRST_HIT_COUNT",
+            "label": "ボーナス初当り 回数",
+            "widget": "counter"
+          },
+          {
+            "type": "input",
+            "inputId": "INP_BONUS_FIRST_HIT_TRIALS",
+            "label": "ボーナス初当り 試行数",
+            "widget": "number"
+          }
+        ]
+      },
+      {
+        "id": "AUTO_EVIDENCE",
+        "title": "設定確定・否定情報",
+        "displayOrder": 2,
+        "items": [
+          {
+            "type": "input",
+            "inputId": "INP_SET_L_PANEL_COUNT",
+            "label": "設定L 下パネル常時点滅",
+            "widget": "counter"
+          }
+        ]
+      }
+    ]
+  },
+  "selectionSummary": {
+    "schemaVersion": "selection-summary-v1",
+    "evaluatedCount": 5,
+    "selectedCount": 1,
+    "rejectedCount": 4,
+    "selected": [
+      {
+        "featureId": "FEAT_BONUS_FIRST_HIT",
+        "name": "ボーナス初当り",
+        "reason": "公開全設定値と分母定義が揃っており、初当り抽選対象ゲームを単位に設定差を直接評価できるため主Featureとして採用する。",
+        "requiredTrials": {
+          "value": 12350,
+          "unit": "初当り抽選対象ゲーム"
+        }
+      }
+    ],
+    "rejected": [
+      {
+        "featureId": "FEAT_BIG_APPEARANCE",
+        "name": "BIG出現率",
+        "reason": "ボーナス初当り・REG・合算と同じボーナス事象を共有するため、独立尤度で二重評価せず初当りを代表採用する。",
+        "requiredTrials": {
+          "value": 12202,
+          "unit": "ゲーム"
+        }
+      },
+      {
+        "featureId": "FEAT_REG_APPEARANCE",
+        "name": "REG出現率",
+        "reason": "ボーナス初当り・BIG・合算と同じボーナス事象を共有するため、独立尤度で二重評価せず初当りを代表採用する。",
+        "requiredTrials": {
+          "value": 17319,
+          "unit": "ゲーム"
+        }
+      },
+      {
+        "featureId": "FEAT_BIG_REG_AGGREGATE",
+        "name": "BIG+REG出現率合算",
+        "reason": "BIG/REGおよびボーナス初当りを内包する合算値であり、同一情報の二重評価になるため代表Featureのみ採用する。",
+        "requiredTrials": {
+          "value": 7137,
+          "unit": "ゲーム"
+        }
+      },
+      {
+        "featureId": "FEAT_SMALL_ROLES",
+        "name": "設定差小役候補",
+        "reason": "全設定の公開値または条件別テーブルが揃っておらず、欠損設定を補間・推定せずResearch未解決のまま推測から除外する。"
+      }
+    ]
+  },
+  "reliability": {},
+  "metadata": {
+    "machineId": "L_AMAZING_LIVE_PD",
+    "displayName": "スマート沖スロ アメイジングライブ",
+    "settings": [
+      "SET_1",
+      "SET_2",
+      "SET_4",
+      "SET_5",
+      "SET_6",
+      "SET_L"
+    ]
+  },
+  "validation": {
+    "cases": []
+  },
+  "statistics": {}
+}
