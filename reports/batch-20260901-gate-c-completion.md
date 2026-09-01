@@ -19,6 +19,7 @@ Gate C is complete for the formal Observation layer. Do not continue automatical
 - major Selection contradiction discovered by Observation: **0**
 - Gate C source-enrichment workflow: GitHub Actions run `33477244869` — **SUCCESS / Node 22**
 - enriched Observation generation commit: `6c832af36759a78a81ec64890c0507d44c46e958`
+- final Gate C handoff state immediately before this metadata write: `b51f72d077e1f74c293c3ff44e04d2088b7e6c7c`
 
 ## Source coverage resolved on Web
 
@@ -64,4 +65,4 @@ Difficulty exposure may only be resolved from actual Observation acquisition/exp
 
 ## Stop rule
 
-STOP at Gate C checkpoint. Update current-batch state/handoff and PR #149, record the final branch HEAD, then start Gate D in the next chat.
+STOP at Gate C checkpoint. PR #149 records the exact post-checkpoint branch HEAD after the final branch write. Start Gate D in the next chat.
