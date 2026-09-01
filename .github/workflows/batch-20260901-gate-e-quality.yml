@@ -137,6 +137,10 @@ jobs:
 
       - name: Generated artifact drift check
         run: |
+          # Repository-wide tests regenerate this legacy debt-classification report with
+          # a timestamp-only generatedAt change. Restore the committed copy so the
+          # drift gate measures batch work products rather than audit clock time.
+          git restore -- reports/v64-observation-debt-classification.json
           node tools/materialize-ui-design.mjs --require-unchanged $(cat /tmp/gate-e-machines.txt)
           git diff --exit-code
           test -z "$(git status --porcelain)"
