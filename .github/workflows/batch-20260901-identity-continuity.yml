@@ -44,8 +44,17 @@ jobs:
           {
             const path='tools/build-machine-data.mjs';
             let text=fs.readFileSync(path,'utf8');
-            const before='''    settings:research.machine.settings,\n    ...(Array.isArray(research.machine.inferenceSettings)?{inferenceSettings:research.machine.inferenceSettings}:{}),\n    packagePolicy:{offlineCapable:true,containsImages:false,containsExecutableCode:false}\n''';
-            const after='''    settings:research.machine.settings,\n    ...(Array.isArray(research.machine.inferenceSettings)?{inferenceSettings:research.machine.inferenceSettings}:{}),\n    ...(research.machine.introductionDate?{introductionDate:research.machine.introductionDate}:{}),\n    ...(research.machine.machineType?{machineType:research.machine.machineType}:{}),\n    ...(research.machine.gameType?{gameType:research.machine.gameType}:{}),\n    packagePolicy:{offlineCapable:true,containsImages:false,containsExecutableCode:false}\n''';
+            const before=`    settings:research.machine.settings,
+    ...(Array.isArray(research.machine.inferenceSettings)?{inferenceSettings:research.machine.inferenceSettings}:{}),
+    packagePolicy:{offlineCapable:true,containsImages:false,containsExecutableCode:false}
+`;
+            const after=`    settings:research.machine.settings,
+    ...(Array.isArray(research.machine.inferenceSettings)?{inferenceSettings:research.machine.inferenceSettings}:{}),
+    ...(research.machine.introductionDate?{introductionDate:research.machine.introductionDate}:{}),
+    ...(research.machine.machineType?{machineType:research.machine.machineType}:{}),
+    ...(research.machine.gameType?{gameType:research.machine.gameType}:{}),
+    packagePolicy:{offlineCapable:true,containsImages:false,containsExecutableCode:false}
+`;
             if (!text.includes(before)) throw new Error('build-machine-data identity insertion point not found');
             text=text.replace(before,after);
             fs.writeFileSync(path,text);
@@ -54,8 +63,15 @@ jobs:
           {
             const path='tools/publish-machine-data.mjs';
             let text=fs.readFileSync(path,'utf8');
-            const before='''   machineDataVersion:pkg.machine?.machineDataVersion,\n   ...(existing?.minimumAppVersionCode!==undefined?{minimumAppVersionCode:existing.minimumAppVersionCode}:{}),\n''';
-            const after='''   machineDataVersion:pkg.machine?.machineDataVersion,\n   ...((pkg.machine?.introductionDate ?? existing?.introductionDate)?{introductionDate:pkg.machine?.introductionDate ?? existing?.introductionDate}:{}),\n   ...((pkg.machine?.machineType ?? existing?.machineType)?{machineType:pkg.machine?.machineType ?? existing?.machineType}:{}),\n   ...((pkg.machine?.gameType ?? existing?.gameType)?{gameType:pkg.machine?.gameType ?? existing?.gameType}:{}),\n   ...(existing?.minimumAppVersionCode!==undefined?{minimumAppVersionCode:existing.minimumAppVersionCode}:{}),\n''';
+            const before=`   machineDataVersion:pkg.machine?.machineDataVersion,
+   ...(existing?.minimumAppVersionCode!==undefined?{minimumAppVersionCode:existing.minimumAppVersionCode}:{}),
+`;
+            const after=`   machineDataVersion:pkg.machine?.machineDataVersion,
+   ...((pkg.machine?.introductionDate ?? existing?.introductionDate)?{introductionDate:pkg.machine?.introductionDate ?? existing?.introductionDate}:{}),
+   ...((pkg.machine?.machineType ?? existing?.machineType)?{machineType:pkg.machine?.machineType ?? existing?.machineType}:{}),
+   ...((pkg.machine?.gameType ?? existing?.gameType)?{gameType:pkg.machine?.gameType ?? existing?.gameType}:{}),
+   ...(existing?.minimumAppVersionCode!==undefined?{minimumAppVersionCode:existing.minimumAppVersionCode}:{}),
+`;
             if (!text.includes(before)) throw new Error('publish-machine-data identity insertion point not found');
             text=text.replace(before,after);
             fs.writeFileSync(path,text);
