@@ -1,0 +1,60 @@
+name: Magia Record Difficulty Finalize
+
+on:
+  push:
+    branches:
+      - prototype-multi-machine
+    paths:
+      - tools/apply-magia-difficulty-finalization.mjs
+      - .github/workflows/magia-difficulty-finalize.yml
+
+permissions:
+  contents: write
+
+jobs:
+  finalize:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          ref: prototype-multi-machine
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Finalize Magia difficulty
+        run: node tools/apply-magia-difficulty-finalization.mjs
+
+      - name: Validate Selection
+        run: npm run selection:validate -- research/L_MAGIA_RECORD_RN/selection-data.json research/L_MAGIA_RECORD_RN/research-data.json
+
+      - name: Validate difficulty event exposure engine
+        run: npm run difficulty:event-exposure:test
+
+      - name: Run machine pipeline
+        run: npm run machine:pipeline -- L_MAGIA_RECORD_RN --skip-repo-checks
+
+      - name: Run test suite
+        run: npm test
+
+      - name: Run public-data audit
+        run: npm run audit
+
+      - name: Show generated difficulty summary
+        run: |
+          node -e "const r=require('./research/L_MAGIA_RECORD_RN/difficulty-report.json'); console.log(JSON.stringify({status:r.status,confidence:r.scoreConfidence,coverage:r.coverage,targets:r.targets.map(x=>({games:x.games,score:x.score,avgFeatures:x.simulation.averageUsedFeatures}))},null,2))"
+
+      - name: Commit generated data
+        run: |
+          if git diff --quiet; then
+            echo 'No generated changes.'
+            exit 0
+          fi
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add research/L_MAGIA_RECORD_RN/selection-data.json research/L_MAGIA_RECORD_RN/difficulty-report.json
+          git commit -m 'data: finalize Magia Record difficulty calibration'
+          git push origin HEAD:prototype-multi-machine
