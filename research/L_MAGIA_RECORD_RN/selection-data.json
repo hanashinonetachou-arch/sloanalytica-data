@@ -328,7 +328,7 @@
       "denominatorInputId": "INP_NORMAL_GAME_COUNT",
       "userReason": "AT初当りは通常時の主要な最終到達イベントとして全設定値が公開され、直接観測できるため主Featureとして採用する。ボーナス初当りとの同時独立乗算は避ける。",
       "difficultyParticipation": "EXCLUDE",
-      "difficultyExclusionReason": "Observationで実戦時の試行量・露出率を確定する前にDifficultyへ推定値を持ち込まない。"
+      "difficultyExclusionReason": "Difficultyの基準Gは全状態の総プレイG数だが、AT初当りの分母は有効通常ゲーム数。総プレイG→有効通常Gの根拠ある変換率がないためDifficultyでは除外する。"
     },
     {
       "researchFeatureId": "RF_WEAK_CHERRY",
@@ -338,8 +338,13 @@
       "numeratorInputId": "INP_WEAK_CHERRY_COUNT",
       "denominatorInputId": "INP_WEAK_CHERRY_TRIALS",
       "userReason": "通常時・AT中などを含む全状態の総プレイG数に対する弱チェリー成立回数を評価する。初当り系とは別の上流成立事象として正確に観測でき、1ゲーム当たりの情報量も大きいため主Featureとして採用する。",
-      "difficultyParticipation": "EXCLUDE",
-      "difficultyExclusionReason": "Observationで実戦時の試行量・露出率を確定する前にDifficultyへ推定値を持ち込まない。"
+      "difficultyExposure": {
+        "mode": "per_game",
+        "factor": 1,
+        "quality": "EXACT",
+        "confidence": "HIGH",
+        "basisId": "TOTAL_PLAY_GAMES"
+      }
     },
     {
       "researchFeatureId": "RF_MODE_AT_END",
@@ -392,7 +397,7 @@
       "inputTransform": "sum_inputs_to_trials",
       "userReason": "試行回数は多くないが、エピソードの選択比率には設定差があり、特に黒江は高設定ほど大きく出現しやすい。1回ごとの結果だけで強く断定せず、低設定群・高設定群を補強するサポート要素として採用する。固定経路のエピソードは除外する。",
       "difficultyParticipation": "EXCLUDE",
-      "difficultyExclusionReason": "Observationで実戦時の試行量・露出率を確定する前にDifficultyへ推定値を持ち込まない。",
+      "difficultyExclusionReason": "通常抽選エピソードの選択試行回数を総プレイG数から導く根拠ある発生率がないため、Difficultyでは試行回数を仮定せず除外する。",
       "normalizeRoundedCategoryProbabilities": true
     },
     {
@@ -823,18 +828,19 @@
       3000,
       7000
     ],
-    "simulationsPerSetting": 4000,
-    "seed": 20260901,
     "targetGameBasis": {
-      "basisId": "OBSERVATION_PENDING_GAME_BASIS",
-      "label": "実戦試行量（Observationで確定）",
-      "quality": "UNRESOLVED"
+      "basisId": "TOTAL_PLAY_GAMES",
+      "label": "全状態の総プレイゲーム数",
+      "quality": "EXACT",
+      "crossMachineComparable": true
     },
     "calibrationAllowedExposureQualities": [
       "EXACT",
       "DERIVED",
       "ESTIMATED"
-    ]
+    ],
+    "simulationsPerSetting": 4000,
+    "seed": 20260812
   },
   "uiCategoryLabels": {
     "SEL_RF_BONUS_FIRST_HIT": "ボーナス初当り",
