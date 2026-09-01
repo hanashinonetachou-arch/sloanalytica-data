@@ -31,6 +31,7 @@ jobs:
             'L_MAHJONG_MONOGATARI_S2','L_IDOLMASTER_MILLION_LIVE_HC','L_YOUJITSU_DE','L_MIDORIDON_VIVA_REVIVAL_FY','L_GUNDAM_SEED_G'
           ];
           const out = { schemaVersion:'batch-selection-inventory-v1', generatedAt:new Date().toISOString(), machines:[] };
+          const md = ['# Batch 20260901 Selection Decision Sheet',''];
           for (const id of ids) {
             const r = JSON.parse(fs.readFileSync(`research/${id}/research-data.json`, 'utf8'));
             const features = (r.features ?? []).map(f => {
@@ -51,15 +52,28 @@ jobs:
               settingLowerBound:e.settingLowerBound ?? null,settingUpperBound:e.settingUpperBound ?? null,notes:e.notes ?? null,sourceRefs:e.sourceRefs ?? []
             }));
             out.machines.push({ machineId:id, displayName:r.machine?.displayName, featureCount:features.length, evidenceCount:evidence.length, conflicts:r.conflicts ?? [], features, evidence });
+            md.push(`## ${id} — ${r.machine?.displayName ?? ''}`);
+            md.push(`Features ${features.length} / Evidence ${evidence.length} / Conflicts ${(r.conflicts ?? []).length}`);
+            md.push('### Features');
+            for (const f of features) {
+              md.push(`- ${f.id} | ${f.factStatus} | ${f.model} | ${f.name} | trial=${f.trialUnit ?? '-'} | den=${f.denominator ?? '-'} | ratio=${f.ratio == null ? '-' : f.ratio.toFixed(3)}${f.notes ? ` | note=${f.notes}` : ''}`);
+            }
+            md.push('### Evidence');
+            for (const e of evidence) {
+              md.push(`- ${e.id} | ${e.factStatus ?? '-'} | semantic=${e.semantic ?? '-'} | ${e.name ?? '-'} | allowed=${JSON.stringify(e.allowedSettings)} | excluded=${JSON.stringify(e.excludedSettings)} | lower=${e.settingLowerBound ?? '-'} | upper=${e.settingUpperBound ?? '-'}${e.notes ? ` | note=${e.notes}` : ''}`);
+            }
+            if ((r.conflicts ?? []).length) md.push(`### Conflicts\n${JSON.stringify(r.conflicts)}`);
+            md.push('');
           }
           fs.mkdirSync('reports',{recursive:true});
           fs.writeFileSync('reports/batch-20260901-selection-inventory.json', JSON.stringify(out,null,2)+'\n');
+          fs.writeFileSync('reports/batch-20260901-selection-decision-sheet.md', md.join('\n')+'\n');
           EOF
       - name: Commit inventory
         run: |
           git config user.name github-actions[bot]
           git config user.email 41898282+github-actions[bot]@users.noreply.github.com
-          git add reports/batch-20260901-selection-inventory.json
-          git commit -m 'selection: add compact 20260901 candidate inventory'
+          git add reports/batch-20260901-selection-inventory.json reports/batch-20260901-selection-decision-sheet.md
+          git diff --cached --quiet || git commit -m 'selection: refresh 20260901 candidate inventory'
           git pull --rebase origin batch/20260901-magia-gundamseed
           git push origin HEAD:batch/20260901-magia-gundamseed
