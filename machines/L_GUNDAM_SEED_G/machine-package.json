@@ -1,0 +1,439 @@
+{
+  "schemaVersion": 1,
+  "machine": {
+    "schemaVersion": "2.0.0",
+    "machineId": "L_GUNDAM_SEED_G",
+    "machineDataVersion": "0.1.0",
+    "displayName": "Lパチスロ 機動戦士ガンダムSEED",
+    "modelName": "L機動戦士ガンダムSEED G",
+    "manufacturer": "ビスティ",
+    "settings": [
+      "SET_1",
+      "SET_2",
+      "SET_3",
+      "SET_4",
+      "SET_5",
+      "SET_6"
+    ],
+    "packagePolicy": {
+      "offlineCapable": true,
+      "containsImages": false,
+      "containsExecutableCode": false
+    }
+  },
+  "inputs": {
+    "schemaVersion": "2.0.0",
+    "inputs": [
+      {
+        "id": "INP_NORMAL_GAMES",
+        "name": "通常ゲーム数",
+        "type": "integer",
+        "category": "NORMAL",
+        "unit": "G",
+        "displayOrder": 10,
+        "inferenceRole": "INCLUDE_PRIMARY",
+        "defaultValue": 0,
+        "observationScope": "SELF_PLAY",
+        "description": "自分が遊技した通常ゲーム数を入力します。",
+        "minimum": 0
+      },
+      {
+        "id": "INP_AT_INITIAL",
+        "name": "AT初当り",
+        "type": "counter",
+        "category": "NORMAL",
+        "unit": "回",
+        "displayOrder": 11,
+        "inferenceRole": "INCLUDE_PRIMARY",
+        "defaultValue": null,
+        "parentInputId": "INP_NORMAL_GAMES",
+        "description": "通常時からのAT初当り回数を入力します。",
+        "minimum": 0
+      },
+      {
+        "id": "INP_EVI_GUNDAM_CZ_ST_END",
+        "name": "CZ/ST終了画面",
+        "type": "multi_enum",
+        "category": "EVIDENCE",
+        "unit": "",
+        "displayOrder": 100,
+        "inferenceRole": "INCLUDE_SUPPORT",
+        "options": [
+          {
+            "key": "EVEN",
+            "label": "紫枠・偶数設定濃厚",
+            "value": "EVEN"
+          },
+          {
+            "key": "NOT_1",
+            "label": "紫枠・設定1否定",
+            "value": "NOT_1"
+          },
+          {
+            "key": "NOT_2",
+            "label": "紫枠・設定2否定",
+            "value": "NOT_2"
+          },
+          {
+            "key": "NOT_3",
+            "label": "紫枠・設定3否定",
+            "value": "NOT_3"
+          },
+          {
+            "key": "FOUR_PLUS",
+            "label": "銀枠（設定4以上）",
+            "value": "FOUR_PLUS"
+          },
+          {
+            "key": "SIX",
+            "label": "金枠（設定6）",
+            "value": "SIX"
+          }
+        ],
+        "defaultValue": []
+      },
+      {
+        "id": "INP_EVI_GUNDAM_ENDING_END",
+        "name": "エンディング終了画面",
+        "type": "multi_enum",
+        "category": "EVIDENCE",
+        "unit": "",
+        "displayOrder": 110,
+        "inferenceRole": "INCLUDE_SUPPORT",
+        "options": [
+          {
+            "key": "SIX",
+            "label": "金枠（設定6）",
+            "value": "SIX"
+          }
+        ],
+        "defaultValue": []
+      }
+    ]
+  },
+  "features": {
+    "schemaVersion": "2.0.0",
+    "features": [
+      {
+        "featureId": "FEAT_AT_INITIAL",
+        "name": "AT初当り",
+        "adoptionCategory": "INCLUDE_PRIMARY",
+        "calculationRole": "PROBABILITY",
+        "probabilityEngineUsage": true,
+        "modelType": "binomial",
+        "minimumSample": 300,
+        "sampleRecommendation": 5000,
+        "reliabilityProfile": {
+          "weight": 1
+        },
+        "denominatorInputId": "INP_NORMAL_GAMES",
+        "numeratorInputId": "INP_AT_INITIAL",
+        "displayFormat": "ratio_1_over_n",
+        "probabilities": {
+          "SET_1": 0.0021734406,
+          "SET_2": 0.0022376371,
+          "SET_3": 0.0024283633,
+          "SET_4": 0.0027434842,
+          "SET_5": 0.0028121485,
+          "SET_6": 0.0031407035
+        },
+        "sourceEvidenceRefs": [
+          "SRC_NANAPRESS",
+          "SRC_1GEKI"
+        ]
+      }
+    ]
+  },
+  "evidence": {
+    "version": "1.0.0",
+    "evidences": [
+      {
+        "id": "EVI_GUNDAM_CZ_ST_END_EVEN",
+        "name": "紫枠・偶数設定濃厚",
+        "displayName": "紫枠・偶数設定濃厚",
+        "inputId": "INP_EVI_GUNDAM_CZ_ST_END",
+        "triggerValue": "EVEN",
+        "confirmedSettings": [
+          "SET_2",
+          "SET_4",
+          "SET_6"
+        ],
+        "deniedSettings": [
+          "SET_1",
+          "SET_3",
+          "SET_5"
+        ],
+        "hasImage": false,
+        "type": "SETTING_CONFIRMATION",
+        "sourceEvidenceRefs": [
+          "RE_CZ_ST_END_EVEN"
+        ]
+      },
+      {
+        "id": "EVI_GUNDAM_CZ_ST_END_NOT_1",
+        "name": "紫枠・設定1否定",
+        "displayName": "紫枠・設定1否定",
+        "inputId": "INP_EVI_GUNDAM_CZ_ST_END",
+        "triggerValue": "NOT_1",
+        "confirmedSettings": [
+          "SET_2",
+          "SET_3",
+          "SET_4",
+          "SET_5",
+          "SET_6"
+        ],
+        "deniedSettings": [
+          "SET_1"
+        ],
+        "hasImage": false,
+        "type": "SETTING_CONFIRMATION",
+        "sourceEvidenceRefs": [
+          "RE_CZ_ST_END_NOT_1"
+        ]
+      },
+      {
+        "id": "EVI_GUNDAM_CZ_ST_END_NOT_2",
+        "name": "紫枠・設定2否定",
+        "displayName": "紫枠・設定2否定",
+        "inputId": "INP_EVI_GUNDAM_CZ_ST_END",
+        "triggerValue": "NOT_2",
+        "confirmedSettings": [
+          "SET_1",
+          "SET_3",
+          "SET_4",
+          "SET_5",
+          "SET_6"
+        ],
+        "deniedSettings": [
+          "SET_2"
+        ],
+        "hasImage": false,
+        "type": "SETTING_CONFIRMATION",
+        "sourceEvidenceRefs": [
+          "RE_CZ_ST_END_NOT_2"
+        ]
+      },
+      {
+        "id": "EVI_GUNDAM_CZ_ST_END_NOT_3",
+        "name": "紫枠・設定3否定",
+        "displayName": "紫枠・設定3否定",
+        "inputId": "INP_EVI_GUNDAM_CZ_ST_END",
+        "triggerValue": "NOT_3",
+        "confirmedSettings": [
+          "SET_1",
+          "SET_2",
+          "SET_4",
+          "SET_5",
+          "SET_6"
+        ],
+        "deniedSettings": [
+          "SET_3"
+        ],
+        "hasImage": false,
+        "type": "SETTING_CONFIRMATION",
+        "sourceEvidenceRefs": [
+          "RE_CZ_ST_END_NOT_3"
+        ]
+      },
+      {
+        "id": "EVI_GUNDAM_CZ_ST_END_FOUR_PLUS",
+        "name": "銀枠（設定4以上）",
+        "displayName": "銀枠（設定4以上）",
+        "inputId": "INP_EVI_GUNDAM_CZ_ST_END",
+        "triggerValue": "FOUR_PLUS",
+        "confirmedSettings": [
+          "SET_4",
+          "SET_5",
+          "SET_6"
+        ],
+        "deniedSettings": [
+          "SET_1",
+          "SET_2",
+          "SET_3"
+        ],
+        "hasImage": false,
+        "type": "SETTING_CONFIRMATION",
+        "sourceEvidenceRefs": [
+          "RE_CZ_ST_END_4PLUS"
+        ]
+      },
+      {
+        "id": "EVI_GUNDAM_CZ_ST_END_SIX",
+        "name": "金枠（設定6）",
+        "displayName": "金枠（設定6）",
+        "inputId": "INP_EVI_GUNDAM_CZ_ST_END",
+        "triggerValue": "SIX",
+        "confirmedSettings": [
+          "SET_6"
+        ],
+        "deniedSettings": [
+          "SET_1",
+          "SET_2",
+          "SET_3",
+          "SET_4",
+          "SET_5"
+        ],
+        "hasImage": false,
+        "type": "SETTING_CONFIRMATION",
+        "sourceEvidenceRefs": [
+          "RE_CZ_ST_END_6"
+        ]
+      },
+      {
+        "id": "EVI_GUNDAM_ENDING_END_SIX",
+        "name": "金枠（設定6）",
+        "displayName": "金枠（設定6）",
+        "inputId": "INP_EVI_GUNDAM_ENDING_END",
+        "triggerValue": "SIX",
+        "confirmedSettings": [
+          "SET_6"
+        ],
+        "deniedSettings": [
+          "SET_1",
+          "SET_2",
+          "SET_3",
+          "SET_4",
+          "SET_5"
+        ],
+        "hasImage": false,
+        "type": "SETTING_CONFIRMATION",
+        "sourceEvidenceRefs": [
+          "RE_ENDING_END_6"
+        ]
+      }
+    ],
+    "sources": [
+      {
+        "id": "SRC_NANAPRESS",
+        "classification": "ANALYSIS",
+        "pageName": "スマスロ機動戦士ガンダムSEED 設定判別",
+        "url": "https://nana-press.com/kaiseki/machine/930/29292/",
+        "checkedAt": "2026-09-01"
+      },
+      {
+        "id": "SRC_1GEKI",
+        "classification": "ANALYSIS",
+        "pageName": "ガンダムSEED（スマスロ）設定差・終了画面",
+        "url": "https://1geki.jp/slot/l_gundamseed/0/",
+        "checkedAt": "2026-09-01"
+      }
+    ]
+  },
+  "ui": {
+    "sections": [
+      {
+        "id": "UI_01____",
+        "title": "通常時",
+        "displayOrder": 1,
+        "items": [
+          {
+            "type": "input",
+            "inputId": "INP_NORMAL_GAMES",
+            "label": "通常ゲーム数",
+            "widget": "number",
+            "gridSpan": 12
+          },
+          {
+            "type": "input",
+            "inputId": "INP_AT_INITIAL",
+            "label": "AT初当り",
+            "widget": "counter",
+            "gridSpan": 6,
+            "config": {
+              "compact": true
+            }
+          }
+        ]
+      },
+      {
+        "id": "UI_02_______",
+        "title": "設定確定情報",
+        "displayOrder": 2,
+        "items": [
+          {
+            "type": "input",
+            "inputId": "INP_EVI_GUNDAM_CZ_ST_END",
+            "label": "CZ/ST終了画面",
+            "widget": "multi_select",
+            "gridSpan": 12
+          },
+          {
+            "type": "input",
+            "inputId": "INP_EVI_GUNDAM_ENDING_END",
+            "label": "エンディング終了画面",
+            "widget": "multi_select",
+            "gridSpan": 12
+          }
+        ]
+      }
+    ],
+    "designContract": {
+      "schemaVersion": "ui-design-data-v1",
+      "status": "PASS_WITH_UNRESOLVED",
+      "source": "research/L_GUNDAM_SEED_G/ui-design-data.json"
+    }
+  },
+  "selectionSummary": {
+    "schemaVersion": "selection-summary-v1",
+    "evaluatedCount": 4,
+    "selectedCount": 1,
+    "rejectedCount": 3,
+    "selected": [
+      {
+        "featureId": "FEAT_AT_INITIAL",
+        "name": "AT初当り",
+        "reason": "通常ゲームを分母にした全設定の公開確率が揃い、設定1対6の識別情報もCZ初当りより大きいため、重複を避けてAT初当りへ一本化します。",
+        "requiredTrials": {
+          "value": 20590,
+          "unit": "通常ゲーム"
+        }
+      }
+    ],
+    "rejected": [
+      {
+        "featureId": "FEAT_CZ_INITIAL_EXCLUDED",
+        "name": "CZ初当り",
+        "reason": "CZ初当りとAT初当りは同じ通常ゲーム区間の下流関係を含み、別々の二項尤度で使うと同じ遊技経路を重複評価するため不採用です。",
+        "requiredTrials": {
+          "value": 24352,
+          "unit": "通常ゲーム"
+        }
+      },
+      {
+        "featureId": "FEAT_EARLY_0_49_HIT_EXCLUDED",
+        "name": "リセット/ST終了後0～49G CZまたはボーナス当選",
+        "reason": "リセット/ST終了後という限定区間のCZまたはボーナス当選は総初当り系列の部分集合で、AT初当りと独立ではないため二重評価防止で不採用です。",
+        "requiredTrials": {
+          "value": 552,
+          "unit": "リセット後またはST終了後の初回判定区間"
+        }
+      },
+      {
+        "featureId": "FEAT_EARLY_50_99_HIT_EXCLUDED",
+        "name": "リセット/ST終了後50～99G CZまたはボーナス当選",
+        "reason": "総初当り系列の部分集合であるうえ、公開50～99G率の条件付き分母か区間寄与率かが未解決のため、正しい尤度を構築できず不採用です。",
+        "requiredTrials": {
+          "value": 757,
+          "unit": "リセット後またはST終了後の初回判定区間"
+        }
+      }
+    ]
+  },
+  "reliability": {},
+  "metadata": {
+    "machineId": "L_GUNDAM_SEED_G",
+    "displayName": "Lパチスロ 機動戦士ガンダムSEED",
+    "settings": [
+      "SET_1",
+      "SET_2",
+      "SET_3",
+      "SET_4",
+      "SET_5",
+      "SET_6"
+    ]
+  },
+  "validation": {
+    "cases": []
+  },
+  "statistics": {}
+}

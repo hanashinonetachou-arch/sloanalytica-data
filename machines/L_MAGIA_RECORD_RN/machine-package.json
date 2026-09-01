@@ -1,0 +1,970 @@
+{
+  "schemaVersion": 1,
+  "machine": {
+    "schemaVersion": "2.0.0",
+    "machineId": "L_MAGIA_RECORD_RN",
+    "machineDataVersion": "0.1.0",
+    "displayName": "スマスロ マギアレコード 魔法少女まどか☆マギカ外伝",
+    "modelName": "L／スマスロマギアレコード／RN",
+    "manufacturer": "ミズホ",
+    "settings": [
+      "SET_1",
+      "SET_2",
+      "SET_3",
+      "SET_4",
+      "SET_5",
+      "SET_6"
+    ],
+    "packagePolicy": {
+      "offlineCapable": true,
+      "containsImages": false,
+      "containsExecutableCode": false
+    }
+  },
+  "inputs": {
+    "schemaVersion": "2.0.0",
+    "inputs": [
+      {
+        "id": "INP_NORMAL_GAMES",
+        "name": "通常ゲーム数",
+        "type": "integer",
+        "category": "NORMAL",
+        "unit": "G",
+        "displayOrder": 10,
+        "inferenceRole": "INCLUDE_FALLBACK",
+        "defaultValue": 0,
+        "observationScope": "SELF_PLAY",
+        "description": "自分が遊技した通常ゲーム数を入力します。",
+        "minimum": 0
+      },
+      {
+        "id": "INP_BONUS_INITIAL",
+        "name": "ボーナス初当り",
+        "type": "counter",
+        "category": "NORMAL",
+        "unit": "回",
+        "displayOrder": 11,
+        "inferenceRole": "INCLUDE_FALLBACK",
+        "defaultValue": null,
+        "parentInputId": "INP_NORMAL_GAMES",
+        "description": "通常時からのボーナス初当り回数を入力します。弱チェリーを取得していない場合のフォールバックに使用します。",
+        "minimum": 0
+      },
+      {
+        "id": "INP_ALL_GAMES",
+        "name": "全ゲーム数",
+        "type": "integer",
+        "category": "SMALL_ROLE",
+        "unit": "G",
+        "displayOrder": 20,
+        "inferenceRole": "INCLUDE_PRIMARY",
+        "defaultValue": null,
+        "observationScope": "SELF_PLAY",
+        "description": "実機連動機能等で確認できる全ゲーム数を入力します。",
+        "minimum": 0
+      },
+      {
+        "id": "INP_WEAK_CHERRY",
+        "name": "弱チェリー",
+        "type": "counter",
+        "category": "SMALL_ROLE",
+        "unit": "回",
+        "displayOrder": 21,
+        "inferenceRole": "INCLUDE_PRIMARY",
+        "defaultValue": null,
+        "parentInputId": "INP_ALL_GAMES",
+        "description": "弱チェリー回数を入力します。実機連動機能を利用する場合は自動記録値を利用できます。",
+        "minimum": 0
+      },
+      {
+        "id": "INP_WATERMELON_ELIGIBLE",
+        "name": "対象スイカ成立回数",
+        "type": "integer",
+        "category": "CONDITIONAL",
+        "unit": "回",
+        "displayOrder": 30,
+        "inferenceRole": "INCLUDE_SUPPORT",
+        "defaultValue": null,
+        "observationScope": "SELF_PLAY",
+        "description": "さなモード以外の通常時に成立したスイカ回数を入力します。状態を判別できないスイカは含めません。",
+        "minimum": 0
+      },
+      {
+        "id": "INP_MAGIA_CHALLENGE_FROM_WATERMELON",
+        "name": "マギアチャレンジ当選",
+        "type": "counter",
+        "category": "CONDITIONAL",
+        "unit": "回",
+        "displayOrder": 31,
+        "inferenceRole": "INCLUDE_SUPPORT",
+        "defaultValue": null,
+        "parentInputId": "INP_WATERMELON_ELIGIBLE",
+        "description": "対象スイカからマギアチャレンジに当選した回数を入力します。",
+        "minimum": 0
+      },
+      {
+        "id": "INP_EPISODE_HINT_TOTAL",
+        "name": "対象エピソード回数",
+        "type": "integer",
+        "category": "EPISODE",
+        "unit": "回",
+        "displayOrder": 40,
+        "inferenceRole": "INCLUDE_SUPPORT",
+        "defaultValue": null,
+        "observationScope": "SELF_PLAY",
+        "description": "黒江チャレンジ経由、ドッペルモードのいろは、ロングフリーズのういを除く設定示唆対象エピソードボーナス回数です。",
+        "minimum": 0
+      },
+      {
+        "id": "INP_EPISODE_YACHIYO",
+        "name": "やちよ",
+        "type": "counter",
+        "category": "EPISODE",
+        "unit": "回",
+        "displayOrder": 41,
+        "inferenceRole": "INCLUDE_SUPPORT",
+        "defaultValue": null,
+        "parentInputId": "INP_EPISODE_HINT_TOTAL",
+        "description": "対象エピソードのうちやちよ回数です。",
+        "minimum": 0
+      },
+      {
+        "id": "INP_EPISODE_TSURUNO",
+        "name": "鶴乃",
+        "type": "counter",
+        "category": "EPISODE",
+        "unit": "回",
+        "displayOrder": 42,
+        "inferenceRole": "INCLUDE_SUPPORT",
+        "defaultValue": null,
+        "parentInputId": "INP_EPISODE_HINT_TOTAL",
+        "description": "対象エピソードのうち鶴乃回数です。",
+        "minimum": 0
+      },
+      {
+        "id": "INP_EPISODE_SANA",
+        "name": "さな",
+        "type": "counter",
+        "category": "EPISODE",
+        "unit": "回",
+        "displayOrder": 43,
+        "inferenceRole": "INCLUDE_SUPPORT",
+        "defaultValue": null,
+        "parentInputId": "INP_EPISODE_HINT_TOTAL",
+        "description": "対象エピソードのうちさな回数です。",
+        "minimum": 0
+      },
+      {
+        "id": "INP_EPISODE_FELICIA",
+        "name": "フェリシア",
+        "type": "counter",
+        "category": "EPISODE",
+        "unit": "回",
+        "displayOrder": 44,
+        "inferenceRole": "INCLUDE_SUPPORT",
+        "defaultValue": null,
+        "parentInputId": "INP_EPISODE_HINT_TOTAL",
+        "description": "対象エピソードのうちフェリシア回数です。",
+        "minimum": 0
+      },
+      {
+        "id": "INP_EPISODE_KUROE",
+        "name": "黒江",
+        "type": "counter",
+        "category": "EPISODE",
+        "unit": "回",
+        "displayOrder": 45,
+        "inferenceRole": "INCLUDE_SUPPORT",
+        "defaultValue": null,
+        "parentInputId": "INP_EPISODE_HINT_TOTAL",
+        "description": "黒江チャレンジ非経由の対象エピソードで黒江だった回数です。",
+        "minimum": 0
+      },
+      {
+        "id": "INP_EVI_MAGIA_STORY",
+        "name": "ストーリー中キャラ紹介",
+        "type": "multi_enum",
+        "category": "EVIDENCE",
+        "unit": "",
+        "displayOrder": 100,
+        "inferenceRole": "INCLUDE_SUPPORT",
+        "options": [
+          {
+            "key": "C5",
+            "label": "最後が小さいキュゥべえ（設定5以上）",
+            "value": "C5"
+          }
+        ],
+        "defaultValue": []
+      },
+      {
+        "id": "INP_EVI_MAGIA_BIG_END",
+        "name": "BIG終了画面",
+        "type": "multi_enum",
+        "category": "EVIDENCE",
+        "unit": "",
+        "displayOrder": 110,
+        "inferenceRole": "INCLUDE_SUPPORT",
+        "options": [
+          {
+            "key": "B2",
+            "label": "水着みかづき荘（設定2以上）",
+            "value": "B2"
+          },
+          {
+            "key": "B4",
+            "label": "2nd Seasonキービジュアル（設定4以上）",
+            "value": "B4"
+          },
+          {
+            "key": "B5",
+            "label": "1st Seasonキービジュアル（設定5以上）",
+            "value": "B5"
+          },
+          {
+            "key": "B6",
+            "label": "小さいキュゥべえ（設定6）",
+            "value": "B6"
+          }
+        ],
+        "defaultValue": []
+      },
+      {
+        "id": "INP_EVI_MAGIA_AT_END",
+        "name": "AT終了画面",
+        "type": "multi_enum",
+        "category": "EVIDENCE",
+        "unit": "",
+        "displayOrder": 120,
+        "inferenceRole": "INCLUDE_SUPPORT",
+        "options": [
+          {
+            "key": "A6",
+            "label": "まどか＆いろは（設定6）",
+            "value": "A6"
+          }
+        ],
+        "defaultValue": []
+      },
+      {
+        "id": "INP_EVI_MAGIA_ENDING_CARD",
+        "name": "エンディング中カード",
+        "type": "multi_enum",
+        "category": "EVIDENCE",
+        "unit": "",
+        "displayOrder": 130,
+        "inferenceRole": "INCLUDE_SUPPORT",
+        "options": [
+          {
+            "key": "E4",
+            "label": "金枠・舞台装置の魔女（設定4以上）",
+            "value": "E4"
+          }
+        ],
+        "defaultValue": []
+      }
+    ]
+  },
+  "features": {
+    "schemaVersion": "2.0.0",
+    "features": [
+      {
+        "featureId": "FEAT_BONUS_INITIAL",
+        "name": "ボーナス初当り",
+        "adoptionCategory": "INCLUDE_FALLBACK",
+        "calculationRole": "PROBABILITY",
+        "probabilityEngineUsage": true,
+        "modelType": "binomial",
+        "minimumSample": 300,
+        "sampleRecommendation": 5000,
+        "reliabilityProfile": {
+          "weight": 1
+        },
+        "suppressedByFeatureIds": [
+          "FEAT_WEAK_CHERRY"
+        ],
+        "denominatorInputId": "INP_NORMAL_GAMES",
+        "numeratorInputId": "INP_BONUS_INITIAL",
+        "displayFormat": "ratio_1_over_n",
+        "probabilities": {
+          "SET_1": 0.004156275976724855,
+          "SET_2": 0.004235493434985176,
+          "SET_3": 0.004488330341113106,
+          "SET_4": 0.004796163069544364,
+          "SET_5": 0.00512557662737058,
+          "SET_6": 0.005425935973955507
+        },
+        "sourceEvidenceRefs": [
+          "SRC_NANAPRESS",
+          "SRC_1GEKI"
+        ]
+      },
+      {
+        "featureId": "FEAT_WEAK_CHERRY",
+        "name": "弱チェリー",
+        "adoptionCategory": "INCLUDE_PRIMARY",
+        "calculationRole": "PROBABILITY",
+        "probabilityEngineUsage": true,
+        "modelType": "binomial",
+        "minimumSample": 500,
+        "sampleRecommendation": 5000,
+        "reliabilityProfile": {
+          "weight": 1
+        },
+        "denominatorInputId": "INP_ALL_GAMES",
+        "numeratorInputId": "INP_WEAK_CHERRY",
+        "displayFormat": "ratio_1_over_n",
+        "probabilities": {
+          "SET_1": 0.016666666666666666,
+          "SET_2": 0.01733102253032929,
+          "SET_3": 0.018018018018018018,
+          "SET_4": 0.018691588785046728,
+          "SET_5": 0.01934235976789168,
+          "SET_6": 0.02
+        },
+        "sourceEvidenceRefs": [
+          "SRC_NANAPRESS",
+          "SRC_1GEKI",
+          "SRC_1GEKI_TOOL"
+        ]
+      },
+      {
+        "featureId": "FEAT_WATERMELON_MAGIA_CHALLENGE",
+        "name": "スイカ成立時マギアチャレンジ当選",
+        "adoptionCategory": "INCLUDE_SUPPORT",
+        "calculationRole": "PROBABILITY",
+        "probabilityEngineUsage": true,
+        "modelType": "binomial",
+        "minimumSample": 10,
+        "sampleRecommendation": 100,
+        "reliabilityProfile": {
+          "weight": 1
+        },
+        "denominatorInputId": "INP_WATERMELON_ELIGIBLE",
+        "numeratorInputId": "INP_MAGIA_CHALLENGE_FROM_WATERMELON",
+        "displayFormat": "ratio_1_over_n",
+        "probabilities": {
+          "SET_1": 0.199,
+          "SET_2": 0.223,
+          "SET_3": 0.246,
+          "SET_4": 0.273,
+          "SET_5": 0.301,
+          "SET_6": 0.328
+        },
+        "sourceEvidenceRefs": [
+          "SRC_NANAPRESS",
+          "SRC_1GEKI"
+        ]
+      },
+      {
+        "featureId": "FEAT_EPISODE_BONUS_CHARACTER_DIST",
+        "name": "エピソードボーナス キャラクター振り分け（黒江チャレンジ非経由）",
+        "adoptionCategory": "INCLUDE_SUPPORT",
+        "calculationRole": "PROBABILITY",
+        "probabilityEngineUsage": true,
+        "modelType": "multinomial",
+        "minimumSample": 2,
+        "sampleRecommendation": 20,
+        "reliabilityProfile": {
+          "weight": 1
+        },
+        "numeratorInputId": "INP_EPISODE_YACHIYO",
+        "denominatorInputId": "INP_EPISODE_HINT_TOTAL",
+        "categoryInputIds": [
+          "INP_EPISODE_TSURUNO",
+          "INP_EPISODE_SANA",
+          "INP_EPISODE_FELICIA",
+          "INP_EPISODE_KUROE"
+        ],
+        "probabilities": {},
+        "categoryLabels": [
+          "YACHIYO",
+          "TSURUNO",
+          "SANA",
+          "FELICIA",
+          "KUROE"
+        ],
+        "categoryProbabilities": {
+          "SET_1": [
+            0.281,
+            0.281,
+            0.219,
+            0.219,
+            0.001
+          ],
+          "SET_2": [
+            0.327,
+            0.234,
+            0.219,
+            0.219,
+            0.001
+          ],
+          "SET_3": [
+            0.234,
+            0.313,
+            0.219,
+            0.219,
+            0.016
+          ],
+          "SET_4": [
+            0.281,
+            0.156,
+            0.313,
+            0.234,
+            0.016
+          ],
+          "SET_5": [
+            0.172,
+            0.219,
+            0.234,
+            0.313,
+            0.063
+          ],
+          "SET_6": [
+            0.234,
+            0.141,
+            0.313,
+            0.25,
+            0.063
+          ]
+        },
+        "sourceEvidenceRefs": [
+          "SRC_1GEKI",
+          "SRC_1GEKI_TOOL"
+        ]
+      }
+    ]
+  },
+  "evidence": {
+    "version": "1.0.0",
+    "evidences": [
+      {
+        "id": "EVI_MAGIA_STORY_C5",
+        "name": "最後が小さいキュゥべえ（設定5以上）",
+        "displayName": "最後が小さいキュゥべえ（設定5以上）",
+        "inputId": "INP_EVI_MAGIA_STORY",
+        "triggerValue": "C5",
+        "confirmedSettings": [
+          "SET_5",
+          "SET_6"
+        ],
+        "deniedSettings": [
+          "SET_1",
+          "SET_2",
+          "SET_3",
+          "SET_4"
+        ],
+        "hasImage": false,
+        "type": "SETTING_CONFIRMATION",
+        "sourceEvidenceRefs": [
+          "RE_CHAR_INTRO_5PLUS"
+        ]
+      },
+      {
+        "id": "EVI_MAGIA_BIG_END_B2",
+        "name": "水着みかづき荘（設定2以上）",
+        "displayName": "水着みかづき荘（設定2以上）",
+        "inputId": "INP_EVI_MAGIA_BIG_END",
+        "triggerValue": "B2",
+        "confirmedSettings": [
+          "SET_2",
+          "SET_3",
+          "SET_4",
+          "SET_5",
+          "SET_6"
+        ],
+        "deniedSettings": [
+          "SET_1"
+        ],
+        "hasImage": false,
+        "type": "SETTING_CONFIRMATION",
+        "sourceEvidenceRefs": [
+          "RE_BIG_END_2PLUS"
+        ]
+      },
+      {
+        "id": "EVI_MAGIA_BIG_END_B4",
+        "name": "2nd Seasonキービジュアル（設定4以上）",
+        "displayName": "2nd Seasonキービジュアル（設定4以上）",
+        "inputId": "INP_EVI_MAGIA_BIG_END",
+        "triggerValue": "B4",
+        "confirmedSettings": [
+          "SET_4",
+          "SET_5",
+          "SET_6"
+        ],
+        "deniedSettings": [
+          "SET_1",
+          "SET_2",
+          "SET_3"
+        ],
+        "hasImage": false,
+        "type": "SETTING_CONFIRMATION",
+        "sourceEvidenceRefs": [
+          "RE_BIG_END_4PLUS"
+        ]
+      },
+      {
+        "id": "EVI_MAGIA_BIG_END_B5",
+        "name": "1st Seasonキービジュアル（設定5以上）",
+        "displayName": "1st Seasonキービジュアル（設定5以上）",
+        "inputId": "INP_EVI_MAGIA_BIG_END",
+        "triggerValue": "B5",
+        "confirmedSettings": [
+          "SET_5",
+          "SET_6"
+        ],
+        "deniedSettings": [
+          "SET_1",
+          "SET_2",
+          "SET_3",
+          "SET_4"
+        ],
+        "hasImage": false,
+        "type": "SETTING_CONFIRMATION",
+        "sourceEvidenceRefs": [
+          "RE_BIG_END_5PLUS"
+        ]
+      },
+      {
+        "id": "EVI_MAGIA_BIG_END_B6",
+        "name": "小さいキュゥべえ（設定6）",
+        "displayName": "小さいキュゥべえ（設定6）",
+        "inputId": "INP_EVI_MAGIA_BIG_END",
+        "triggerValue": "B6",
+        "confirmedSettings": [
+          "SET_6"
+        ],
+        "deniedSettings": [
+          "SET_1",
+          "SET_2",
+          "SET_3",
+          "SET_4",
+          "SET_5"
+        ],
+        "hasImage": false,
+        "type": "SETTING_CONFIRMATION",
+        "sourceEvidenceRefs": [
+          "RE_BIG_END_6"
+        ]
+      },
+      {
+        "id": "EVI_MAGIA_AT_END_A6",
+        "name": "まどか＆いろは（設定6）",
+        "displayName": "まどか＆いろは（設定6）",
+        "inputId": "INP_EVI_MAGIA_AT_END",
+        "triggerValue": "A6",
+        "confirmedSettings": [
+          "SET_6"
+        ],
+        "deniedSettings": [
+          "SET_1",
+          "SET_2",
+          "SET_3",
+          "SET_4",
+          "SET_5"
+        ],
+        "hasImage": false,
+        "type": "SETTING_CONFIRMATION",
+        "sourceEvidenceRefs": [
+          "RE_AT_END_6"
+        ]
+      },
+      {
+        "id": "EVI_MAGIA_ENDING_CARD_E4",
+        "name": "金枠・舞台装置の魔女（設定4以上）",
+        "displayName": "金枠・舞台装置の魔女（設定4以上）",
+        "inputId": "INP_EVI_MAGIA_ENDING_CARD",
+        "triggerValue": "E4",
+        "confirmedSettings": [
+          "SET_4",
+          "SET_5",
+          "SET_6"
+        ],
+        "deniedSettings": [
+          "SET_1",
+          "SET_2",
+          "SET_3"
+        ],
+        "hasImage": false,
+        "type": "SETTING_CONFIRMATION",
+        "sourceEvidenceRefs": [
+          "RE_ENDING_CARD_4PLUS"
+        ]
+      }
+    ],
+    "sources": [
+      {
+        "id": "SRC_NANAPRESS",
+        "classification": "ANALYSIS",
+        "pageName": "スマスロ マギアレコード 設定判別まとめ",
+        "url": "https://nana-press.com/kaiseki/machine/914/28425/",
+        "checkedAt": "2026-09-01"
+      },
+      {
+        "id": "SRC_NANAPRESS_MODE",
+        "classification": "ANALYSIS",
+        "pageName": "魔法少女モードの種類・移行契機・示唆演出",
+        "url": "https://nana-press.com/kaiseki/machine/914/28434/",
+        "checkedAt": "2026-09-01"
+      },
+      {
+        "id": "SRC_NANAPRESS_STATE",
+        "classification": "ANALYSIS",
+        "pageName": "通常時のゲーム性（内部状態・高確移行抽選）",
+        "url": "https://nana-press.com/kaiseki/machine/914/28431/",
+        "checkedAt": "2026-09-01"
+      },
+      {
+        "id": "SRC_NANAPRESS_BIG",
+        "classification": "ANALYSIS",
+        "pageName": "ビッグボーナス",
+        "url": "https://nana-press.com/kaiseki/machine/914/28442/",
+        "checkedAt": "2026-09-01"
+      },
+      {
+        "id": "SRC_NANAPRESS_MITAMA",
+        "classification": "ANALYSIS",
+        "pageName": "みたまボーナス",
+        "url": "https://nana-press.com/kaiseki/machine/914/28443/",
+        "checkedAt": "2026-09-01"
+      },
+      {
+        "id": "SRC_1GEKI",
+        "classification": "ANALYSIS",
+        "pageName": "マギレコ 設定差・終了画面",
+        "url": "https://1geki.jp/slot/l_magireco/0/",
+        "checkedAt": "2026-09-01"
+      },
+      {
+        "id": "SRC_1GEKI_TOOL",
+        "classification": "ANALYSIS",
+        "pageName": "マギレコ 設定判別ツール",
+        "url": "https://1geki.jp/slot/l_magireco/99/",
+        "checkedAt": "2026-09-01"
+      },
+      {
+        "id": "SRC_UNIMEMO",
+        "classification": "OFFICIAL",
+        "pageName": "ユニメモ",
+        "url": "https://www.universal-777.com/fun/unimemo/",
+        "checkedAt": "2026-09-01"
+      }
+    ]
+  },
+  "ui": {
+    "sections": [
+      {
+        "id": "UI_01____",
+        "title": "通常時",
+        "displayOrder": 1,
+        "items": [
+          {
+            "type": "input",
+            "inputId": "INP_NORMAL_GAMES",
+            "label": "通常ゲーム数",
+            "widget": "number",
+            "gridSpan": 12
+          },
+          {
+            "type": "input",
+            "inputId": "INP_BONUS_INITIAL",
+            "label": "ボーナス初当り",
+            "widget": "counter",
+            "gridSpan": 6,
+            "config": {
+              "compact": true
+            }
+          }
+        ]
+      },
+      {
+        "id": "UI_02___",
+        "title": "小役",
+        "displayOrder": 2,
+        "items": [
+          {
+            "type": "input",
+            "inputId": "INP_ALL_GAMES",
+            "label": "全ゲーム数",
+            "widget": "number",
+            "gridSpan": 12
+          },
+          {
+            "type": "input",
+            "inputId": "INP_WEAK_CHERRY",
+            "label": "弱チェリー",
+            "widget": "counter",
+            "gridSpan": 6,
+            "config": {
+              "compact": true
+            }
+          }
+        ]
+      },
+      {
+        "id": "UI_03_______",
+        "title": "条件付き推測",
+        "displayOrder": 3,
+        "items": [
+          {
+            "type": "input",
+            "inputId": "INP_WATERMELON_ELIGIBLE",
+            "label": "対象スイカ成立回数",
+            "widget": "number",
+            "gridSpan": 12
+          },
+          {
+            "type": "input",
+            "inputId": "INP_MAGIA_CHALLENGE_FROM_WATERMELON",
+            "label": "マギアチャレンジ当選",
+            "widget": "counter",
+            "gridSpan": 6,
+            "config": {
+              "compact": true
+            }
+          }
+        ]
+      },
+      {
+        "id": "UI_04__________",
+        "title": "エピソードボーナス",
+        "displayOrder": 4,
+        "items": [
+          {
+            "type": "input",
+            "inputId": "INP_EPISODE_HINT_TOTAL",
+            "label": "対象エピソード回数",
+            "widget": "number",
+            "gridSpan": 12
+          },
+          {
+            "type": "input",
+            "inputId": "INP_EPISODE_YACHIYO",
+            "label": "やちよ",
+            "widget": "counter",
+            "gridSpan": 6,
+            "config": {
+              "compact": true
+            }
+          },
+          {
+            "type": "input",
+            "inputId": "INP_EPISODE_TSURUNO",
+            "label": "鶴乃",
+            "widget": "counter",
+            "gridSpan": 6,
+            "config": {
+              "compact": true
+            }
+          },
+          {
+            "type": "input",
+            "inputId": "INP_EPISODE_SANA",
+            "label": "さな",
+            "widget": "counter",
+            "gridSpan": 6,
+            "config": {
+              "compact": true
+            }
+          },
+          {
+            "type": "input",
+            "inputId": "INP_EPISODE_FELICIA",
+            "label": "フェリシア",
+            "widget": "counter",
+            "gridSpan": 6,
+            "config": {
+              "compact": true
+            }
+          },
+          {
+            "type": "input",
+            "inputId": "INP_EPISODE_KUROE",
+            "label": "黒江",
+            "widget": "counter",
+            "gridSpan": 6,
+            "config": {
+              "compact": true
+            }
+          }
+        ]
+      },
+      {
+        "id": "UI_05_______",
+        "title": "設定確定情報",
+        "displayOrder": 5,
+        "items": [
+          {
+            "type": "input",
+            "inputId": "INP_EVI_MAGIA_STORY",
+            "label": "ストーリー中キャラ紹介",
+            "widget": "multi_select",
+            "gridSpan": 12
+          },
+          {
+            "type": "input",
+            "inputId": "INP_EVI_MAGIA_BIG_END",
+            "label": "BIG終了画面",
+            "widget": "multi_select",
+            "gridSpan": 12
+          },
+          {
+            "type": "input",
+            "inputId": "INP_EVI_MAGIA_AT_END",
+            "label": "AT終了画面",
+            "widget": "multi_select",
+            "gridSpan": 12
+          },
+          {
+            "type": "input",
+            "inputId": "INP_EVI_MAGIA_ENDING_CARD",
+            "label": "エンディング中カード",
+            "widget": "multi_select",
+            "gridSpan": 12
+          }
+        ]
+      }
+    ],
+    "designContract": {
+      "schemaVersion": "ui-design-data-v1",
+      "status": "PASS_WITH_UNRESOLVED",
+      "source": "research/L_MAGIA_RECORD_RN/ui-design-data.json"
+    }
+  },
+  "selectionSummary": {
+    "schemaVersion": "selection-summary-v1",
+    "evaluatedCount": 12,
+    "selectedCount": 4,
+    "rejectedCount": 8,
+    "selected": [
+      {
+        "featureId": "FEAT_BONUS_INITIAL",
+        "name": "ボーナス初当り",
+        "reason": "通常ゲームとボーナス初当りだけで観測できるため、実機連動機能等で弱チェリーを取得できない実戦向けフォールバックとして採用し、弱チェリー入力時は同一遊技区間の過信を避けて停止します。",
+        "requiredTrials": {
+          "value": 21587,
+          "unit": "通常ゲーム"
+        }
+      },
+      {
+        "featureId": "FEAT_WEAK_CHERRY",
+        "name": "弱チェリー",
+        "reason": "全ゲーム分母の設定別確率が明確で約1/50～1/60と高頻度、さらに実機連動機能で小役確率を取得できるため、誤分類の少ない主Featureとして採用します。",
+        "requiredTrials": {
+          "value": 11849,
+          "unit": "全ゲーム"
+        }
+      },
+      {
+        "featureId": "FEAT_WATERMELON_MAGIA_CHALLENGE",
+        "name": "スイカ成立時マギアチャレンジ当選",
+        "reason": "さなモード以外のスイカ成立を専用分母にした条件付きCZ当選率で、対象状態と契機を判別できた試行だけなら小役頻度とは別の情報として評価できるため補助採用します。",
+        "requiredTrials": {
+          "value": 85,
+          "unit": "さなモード以外の通常時スイカ成立"
+        }
+      },
+      {
+        "featureId": "FEAT_EPISODE_BONUS_CHARACTER_DIST",
+        "name": "エピソードボーナス キャラクター振り分け（黒江チャレンジ非経由）",
+        "reason": "除外条件を満たした設定示唆系エピソードボーナスではキャラクターを直接観測でき、対象エピソード総数を専用分母とする完全分布なので補助Featureとして採用します。",
+        "requiredTrials": {
+          "value": 67,
+          "unit": "黒江チャレンジ非経由の設定示唆系エピソードボーナス1回"
+        }
+      }
+    ],
+    "rejected": [
+      {
+        "featureId": "FEAT_AT_INITIAL_EXCLUDED",
+        "name": "AT初当り",
+        "reason": "AT初当りはボーナス/CZ等の下流経路を集約し、通常時の設定差小役やボーナス初当りと独立に加えると同じ因果経路を重複評価するため不採用です。",
+        "requiredTrials": {
+          "value": 18652,
+          "unit": "通常ゲーム"
+        }
+      },
+      {
+        "featureId": "FEAT_WATERMELON_KUROE_CHALLENGE_EXCLUDED",
+        "name": "スイカ成立時黒江チャレンジ当選",
+        "reason": "マギアチャレンジと同じ対象スイカ分母上の競合当選で、別々の二項尤度にすると同じスイカ試行を二重評価するうえ出現率0.4～0.8%と低いため不採用です。",
+        "requiredTrials": {
+          "value": 2655,
+          "unit": "さなモード以外の通常時スイカ成立"
+        }
+      },
+      {
+        "featureId": "FEAT_MAGICAL_GIRL_MODE_RESET_AT_END_DIST_EXCLUDED",
+        "name": "有利区間移行・AT終了時 魔法少女モード振り分け",
+        "reason": "有利区間移行/AT終了時に内部選択される魔法少女モードの完全カテゴリを毎回確実に観測できる公開契約がなく、潜在状態の誤分類を避けて不採用です。",
+        "requiredTrials": {
+          "value": 239,
+          "unit": "有利区間移行またはAT終了1回"
+        }
+      },
+      {
+        "featureId": "FEAT_MAGICAL_GIRL_MODE_BONUS_END_DIST_EXCLUDED",
+        "name": "AT非当選ボーナス終了時 魔法少女モード振り分け",
+        "reason": "AT非当選ボーナス終了時かついろはモードという内部条件を正確に判定して全移行先を観測する必要があり、公開multinomialの分母を安定再現できないため不採用です。",
+        "requiredTrials": {
+          "value": 106,
+          "unit": "AT非当選ボーナス終了かついろはモード1回"
+        }
+      },
+      {
+        "featureId": "FEAT_HIGH_STATE_RESET_AT_END_DIST_EXCLUDED",
+        "name": "有利区間移行・AT終了時 高確G数振り分け",
+        "reason": "高確非移行/10G/20G/30Gという内部状態の選択結果を毎回完全に識別する必要があり、公開分布と同じ試行を実戦で確実に再現できないため不採用です。",
+        "requiredTrials": {
+          "value": 197,
+          "unit": "有利区間移行またはAT終了1回"
+        }
+      },
+      {
+        "featureId": "FEAT_HIGH_STATE_BIG_END_DIST_EXCLUDED",
+        "name": "BIG終了時 高確G数振り分け",
+        "reason": "BIG終了後の高確G数は内部状態の完全識別が必要で、非移行を含む全カテゴリを誤分類なく観測する契約がないため不採用です。",
+        "requiredTrials": {
+          "value": 63,
+          "unit": "BIG終了1回"
+        }
+      },
+      {
+        "featureId": "FEAT_MITAMA_REWARD_L2_AT_EXCLUDED",
+        "name": "みたまボーナス 報酬レベル2ウワサバトル発展時AT当選",
+        "reason": "公開確率の分母は内部報酬レベル2のウワサバトル発展ですが、画面表示から内部レベル2を確実に識別できる契約が未解決のため不採用です。",
+        "requiredTrials": {
+          "value": 49,
+          "unit": "報酬レベル2でウワサバトル発展1回"
+        }
+      },
+      {
+        "featureId": "FEAT_MITAMA_REWARD_L3_AT_EXCLUDED",
+        "name": "みたまボーナス 報酬レベル3ウワサバトル発展時AT当選",
+        "reason": "公開確率の分母は内部報酬レベル3のウワサバトル発展ですが、画面表示から内部レベル3を確実に識別できる契約が未解決のため不採用です。",
+        "requiredTrials": {
+          "value": 103,
+          "unit": "報酬レベル3でウワサバトル発展1回"
+        }
+      }
+    ]
+  },
+  "reliability": {},
+  "metadata": {
+    "machineId": "L_MAGIA_RECORD_RN",
+    "displayName": "スマスロ マギアレコード 魔法少女まどか☆マギカ外伝",
+    "settings": [
+      "SET_1",
+      "SET_2",
+      "SET_3",
+      "SET_4",
+      "SET_5",
+      "SET_6"
+    ]
+  },
+  "validation": {
+    "cases": []
+  },
+  "statistics": {}
+}

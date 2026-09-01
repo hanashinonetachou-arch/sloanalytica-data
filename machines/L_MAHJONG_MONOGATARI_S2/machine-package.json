@@ -1,0 +1,511 @@
+{
+  "schemaVersion": 1,
+  "machine": {
+    "schemaVersion": "2.0.0",
+    "machineId": "L_MAHJONG_MONOGATARI_S2",
+    "machineDataVersion": "0.1.0",
+    "displayName": "L麻雀物語",
+    "modelName": "L麻雀物語S2",
+    "manufacturer": "オリンピアエステート",
+    "settings": [
+      "SET_1",
+      "SET_2",
+      "SET_3",
+      "SET_4",
+      "SET_5",
+      "SET_6"
+    ],
+    "packagePolicy": {
+      "offlineCapable": true,
+      "containsImages": false,
+      "containsExecutableCode": false
+    }
+  },
+  "inputs": {
+    "schemaVersion": "2.0.0",
+    "inputs": [
+      {
+        "id": "INP_NORMAL_GAMES",
+        "name": "通常ゲーム数",
+        "type": "integer",
+        "category": "NORMAL",
+        "unit": "G",
+        "displayOrder": 10,
+        "inferenceRole": "INCLUDE_PRIMARY",
+        "defaultValue": 0,
+        "observationScope": "SELF_PLAY",
+        "description": "自分が遊技した通常ゲーム数を入力します。",
+        "minimum": 0
+      },
+      {
+        "id": "INP_INITIAL_COMBINED",
+        "name": "ボーナスまたはAT初当り",
+        "type": "counter",
+        "category": "NORMAL",
+        "unit": "回",
+        "displayOrder": 11,
+        "inferenceRole": "INCLUDE_PRIMARY",
+        "defaultValue": null,
+        "parentInputId": "INP_NORMAL_GAMES",
+        "description": "通常時からボーナスまたはATのどちらかに初当りした回数を合算して入力します。同一初当りを重複して数えません。",
+        "minimum": 0
+      },
+      {
+        "id": "INP_EVI_MAHJONG_STAMP",
+        "name": "終了画面スタンプ",
+        "type": "multi_enum",
+        "category": "EVIDENCE",
+        "unit": "",
+        "displayOrder": 100,
+        "inferenceRole": "INCLUDE_SUPPORT",
+        "options": [
+          {
+            "key": "S2",
+            "label": "可（設定2以上）",
+            "value": "S2"
+          },
+          {
+            "key": "S4",
+            "label": "良（設定4以上）",
+            "value": "S4"
+          },
+          {
+            "key": "S5",
+            "label": "優（設定5以上）",
+            "value": "S5"
+          },
+          {
+            "key": "S6",
+            "label": "極（設定6）",
+            "value": "S6"
+          }
+        ],
+        "defaultValue": []
+      },
+      {
+        "id": "INP_EVI_MAHJONG_LAST_JUDGE",
+        "name": "AT終了時ラストジャッジ",
+        "type": "multi_enum",
+        "category": "EVIDENCE",
+        "unit": "",
+        "displayOrder": 110,
+        "inferenceRole": "INCLUDE_SUPPORT",
+        "options": [
+          {
+            "key": "HARULUNA_4PLUS",
+            "label": "ハルルナPUSH（設定4以上）",
+            "value": "HARULUNA_4PLUS"
+          }
+        ],
+        "defaultValue": []
+      },
+      {
+        "id": "INP_EVI_MAHJONG_ADD_GAMES",
+        "name": "AT中上乗せG数",
+        "type": "multi_enum",
+        "category": "EVIDENCE",
+        "unit": "",
+        "displayOrder": 120,
+        "inferenceRole": "INCLUDE_SUPPORT",
+        "options": [
+          {
+            "key": "A44",
+            "label": "44G（設定4以上）",
+            "value": "A44"
+          },
+          {
+            "key": "A55",
+            "label": "55G（設定5以上）",
+            "value": "A55"
+          },
+          {
+            "key": "A66",
+            "label": "66G（設定6）",
+            "value": "A66"
+          }
+        ],
+        "defaultValue": []
+      }
+    ]
+  },
+  "features": {
+    "schemaVersion": "2.0.0",
+    "features": [
+      {
+        "featureId": "FEAT_INITIAL_COMBINED",
+        "name": "通常時ボーナスまたはAT初当り合算",
+        "adoptionCategory": "INCLUDE_PRIMARY",
+        "calculationRole": "PROBABILITY",
+        "probabilityEngineUsage": true,
+        "modelType": "binomial",
+        "minimumSample": 300,
+        "sampleRecommendation": 5000,
+        "reliabilityProfile": {
+          "weight": 1
+        },
+        "denominatorInputId": "INP_NORMAL_GAMES",
+        "numeratorInputId": "INP_INITIAL_COMBINED",
+        "displayFormat": "ratio_1_over_n",
+        "probabilities": {
+          "SET_1": 0.0028240609997175936,
+          "SET_2": 0.00286368843069874,
+          "SET_3": 0.002923121894182987,
+          "SET_4": 0.003041362530413625,
+          "SET_5": 0.003067484662576687,
+          "SET_6": 0.0030883261272390363
+        },
+        "sourceEvidenceRefs": [
+          "SRC_1GEKI",
+          "SRC_NANAPRESS",
+          "SRC_PWORLD"
+        ]
+      }
+    ]
+  },
+  "evidence": {
+    "version": "1.0.0",
+    "evidences": [
+      {
+        "id": "EVI_MAHJONG_STAMP_S2",
+        "name": "可（設定2以上）",
+        "displayName": "可（設定2以上）",
+        "inputId": "INP_EVI_MAHJONG_STAMP",
+        "triggerValue": "S2",
+        "confirmedSettings": [
+          "SET_2",
+          "SET_3",
+          "SET_4",
+          "SET_5",
+          "SET_6"
+        ],
+        "deniedSettings": [
+          "SET_1"
+        ],
+        "hasImage": false,
+        "type": "SETTING_CONFIRMATION",
+        "sourceEvidenceRefs": [
+          "RE_STAMP_2PLUS"
+        ]
+      },
+      {
+        "id": "EVI_MAHJONG_STAMP_S4",
+        "name": "良（設定4以上）",
+        "displayName": "良（設定4以上）",
+        "inputId": "INP_EVI_MAHJONG_STAMP",
+        "triggerValue": "S4",
+        "confirmedSettings": [
+          "SET_4",
+          "SET_5",
+          "SET_6"
+        ],
+        "deniedSettings": [
+          "SET_1",
+          "SET_2",
+          "SET_3"
+        ],
+        "hasImage": false,
+        "type": "SETTING_CONFIRMATION",
+        "sourceEvidenceRefs": [
+          "RE_STAMP_4PLUS"
+        ]
+      },
+      {
+        "id": "EVI_MAHJONG_STAMP_S5",
+        "name": "優（設定5以上）",
+        "displayName": "優（設定5以上）",
+        "inputId": "INP_EVI_MAHJONG_STAMP",
+        "triggerValue": "S5",
+        "confirmedSettings": [
+          "SET_5",
+          "SET_6"
+        ],
+        "deniedSettings": [
+          "SET_1",
+          "SET_2",
+          "SET_3",
+          "SET_4"
+        ],
+        "hasImage": false,
+        "type": "SETTING_CONFIRMATION",
+        "sourceEvidenceRefs": [
+          "RE_STAMP_5PLUS"
+        ]
+      },
+      {
+        "id": "EVI_MAHJONG_STAMP_S6",
+        "name": "極（設定6）",
+        "displayName": "極（設定6）",
+        "inputId": "INP_EVI_MAHJONG_STAMP",
+        "triggerValue": "S6",
+        "confirmedSettings": [
+          "SET_6"
+        ],
+        "deniedSettings": [
+          "SET_1",
+          "SET_2",
+          "SET_3",
+          "SET_4",
+          "SET_5"
+        ],
+        "hasImage": false,
+        "type": "SETTING_CONFIRMATION",
+        "sourceEvidenceRefs": [
+          "RE_STAMP_6"
+        ]
+      },
+      {
+        "id": "EVI_MAHJONG_LAST_JUDGE_HARULUNA_4PLUS",
+        "name": "ハルルナPUSH（設定4以上）",
+        "displayName": "ハルルナPUSH（設定4以上）",
+        "inputId": "INP_EVI_MAHJONG_LAST_JUDGE",
+        "triggerValue": "HARULUNA_4PLUS",
+        "confirmedSettings": [
+          "SET_4",
+          "SET_5",
+          "SET_6"
+        ],
+        "deniedSettings": [
+          "SET_1",
+          "SET_2",
+          "SET_3"
+        ],
+        "hasImage": false,
+        "type": "SETTING_CONFIRMATION",
+        "sourceEvidenceRefs": [
+          "RE_LAST_JUDGE_4PLUS"
+        ]
+      },
+      {
+        "id": "EVI_MAHJONG_ADD_GAMES_A44",
+        "name": "44G（設定4以上）",
+        "displayName": "44G（設定4以上）",
+        "inputId": "INP_EVI_MAHJONG_ADD_GAMES",
+        "triggerValue": "A44",
+        "confirmedSettings": [
+          "SET_4",
+          "SET_5",
+          "SET_6"
+        ],
+        "deniedSettings": [
+          "SET_1",
+          "SET_2",
+          "SET_3"
+        ],
+        "hasImage": false,
+        "type": "SETTING_CONFIRMATION",
+        "sourceEvidenceRefs": [
+          "RE_ADD_44G_4PLUS"
+        ]
+      },
+      {
+        "id": "EVI_MAHJONG_ADD_GAMES_A55",
+        "name": "55G（設定5以上）",
+        "displayName": "55G（設定5以上）",
+        "inputId": "INP_EVI_MAHJONG_ADD_GAMES",
+        "triggerValue": "A55",
+        "confirmedSettings": [
+          "SET_5",
+          "SET_6"
+        ],
+        "deniedSettings": [
+          "SET_1",
+          "SET_2",
+          "SET_3",
+          "SET_4"
+        ],
+        "hasImage": false,
+        "type": "SETTING_CONFIRMATION",
+        "sourceEvidenceRefs": [
+          "RE_ADD_55G_5PLUS"
+        ]
+      },
+      {
+        "id": "EVI_MAHJONG_ADD_GAMES_A66",
+        "name": "66G（設定6）",
+        "displayName": "66G（設定6）",
+        "inputId": "INP_EVI_MAHJONG_ADD_GAMES",
+        "triggerValue": "A66",
+        "confirmedSettings": [
+          "SET_6"
+        ],
+        "deniedSettings": [
+          "SET_1",
+          "SET_2",
+          "SET_3",
+          "SET_4",
+          "SET_5"
+        ],
+        "hasImage": false,
+        "type": "SETTING_CONFIRMATION",
+        "sourceEvidenceRefs": [
+          "RE_ADD_66G_6"
+        ]
+      }
+    ],
+    "sources": [
+      {
+        "id": "SRC_1GEKI",
+        "classification": "ANALYSIS",
+        "pageName": "麻雀物語 設定差・設定判別要素まとめ",
+        "url": "https://1geki.jp/slot/l_mjnmngtr/0/",
+        "checkedAt": "2026-09-01"
+      },
+      {
+        "id": "SRC_NANAPRESS",
+        "classification": "ANALYSIS",
+        "pageName": "スマスロ 麻雀物語 設定判別",
+        "url": "https://nana-press.com/kaiseki/machine/931/29160/",
+        "checkedAt": "2026-09-01"
+      },
+      {
+        "id": "SRC_PWORLD",
+        "classification": "ANALYSIS",
+        "pageName": "L麻雀物語",
+        "url": "https://www.p-world.co.jp/machine/database/10234",
+        "checkedAt": "2026-09-01"
+      }
+    ]
+  },
+  "ui": {
+    "sections": [
+      {
+        "id": "UI_01____",
+        "title": "通常時",
+        "displayOrder": 1,
+        "items": [
+          {
+            "type": "input",
+            "inputId": "INP_NORMAL_GAMES",
+            "label": "通常ゲーム数",
+            "widget": "number",
+            "gridSpan": 12
+          },
+          {
+            "type": "input",
+            "inputId": "INP_INITIAL_COMBINED",
+            "label": "ボーナスまたはAT初当り",
+            "widget": "counter",
+            "gridSpan": 6,
+            "config": {
+              "compact": true
+            }
+          }
+        ]
+      },
+      {
+        "id": "UI_02_______",
+        "title": "設定確定情報",
+        "displayOrder": 2,
+        "items": [
+          {
+            "type": "input",
+            "inputId": "INP_EVI_MAHJONG_STAMP",
+            "label": "終了画面スタンプ",
+            "widget": "multi_select",
+            "gridSpan": 12
+          },
+          {
+            "type": "input",
+            "inputId": "INP_EVI_MAHJONG_LAST_JUDGE",
+            "label": "AT終了時ラストジャッジ",
+            "widget": "multi_select",
+            "gridSpan": 12
+          },
+          {
+            "type": "input",
+            "inputId": "INP_EVI_MAHJONG_ADD_GAMES",
+            "label": "AT中上乗せG数",
+            "widget": "multi_select",
+            "gridSpan": 12
+          }
+        ]
+      }
+    ],
+    "designContract": {
+      "schemaVersion": "ui-design-data-v1",
+      "status": "PASS_WITH_UNRESOLVED",
+      "source": "research/L_MAHJONG_MONOGATARI_S2/ui-design-data.json"
+    }
+  },
+  "selectionSummary": {
+    "schemaVersion": "selection-summary-v1",
+    "evaluatedCount": 6,
+    "selectedCount": 1,
+    "rejectedCount": 5,
+    "selected": [
+      {
+        "featureId": "FEAT_INITIAL_COMBINED",
+        "name": "通常時ボーナスまたはAT初当り合算",
+        "reason": "通常ゲームを分母にボーナスまたはATの初当りを1つの排他的な合算事象として扱えるため、個別初当りの重複を避けながら公開設定差を利用できる主Featureとして採用します。",
+        "requiredTrials": {
+          "value": 309225,
+          "unit": "通常ゲーム"
+        }
+      }
+    ],
+    "rejected": [
+      {
+        "featureId": "FEAT_BONUS_INITIAL_EXCLUDED",
+        "name": "通常時ボーナス初当り",
+        "reason": "ボーナス初当りは公開のボーナス+AT合算初当りに含まれる部分集合で、別々に使うと同じ通常ゲームの非当選試行と当選事象を重複評価するため不採用です。",
+        "requiredTrials": {
+          "value": 1986685,
+          "unit": "通常ゲーム"
+        }
+      },
+      {
+        "featureId": "FEAT_AT_INITIAL_TOTAL_EXCLUDED",
+        "name": "AT初当り（トータル合算）",
+        "reason": "AT初当りは合算初当りに含まれるうえAT直撃候補も内包するため、独立尤度として併用すると複数段階で二重評価になるため不採用です。",
+        "requiredTrials": {
+          "value": 195035,
+          "unit": "通常ゲーム"
+        }
+      },
+      {
+        "featureId": "FEAT_KOUTEI_APPEARANCE_EXCLUDED",
+        "name": "煌帝出現率",
+        "reason": "煌帝出現率は最良でも約1/748と低頻度で、公開1/○○の正確なAT中対戦機会分母を実戦で再現できる契約が未解決のため不採用です。",
+        "requiredTrials": {
+          "value": 193671,
+          "unit": "AT中対戦機会"
+        }
+      },
+      {
+        "featureId": "FEAT_AT_DIRECT_BASE_EXCLUDED",
+        "name": "AT直撃（前兆中昇格を含まない）",
+        "reason": "前兆中昇格を除くAT直撃はAT初当りの部分集合で最良でも約1/4632と低頻度のため、合算初当りとの下流事象の二重評価を避けて不採用です。",
+        "requiredTrials": {
+          "value": 42491,
+          "unit": "通常ゲーム"
+        }
+      },
+      {
+        "featureId": "FEAT_AT_DIRECT_EFFECTIVE_EXCLUDED",
+        "name": "AT直撃（前兆中昇格込み実質）",
+        "reason": "前兆中昇格込みAT直撃はAT初当りの部分集合かつ直撃基本定義とも重複し、最良でも約1/3707と低頻度なので独立Featureとしては不採用です。",
+        "requiredTrials": {
+          "value": 67632,
+          "unit": "通常ゲーム"
+        }
+      }
+    ]
+  },
+  "reliability": {},
+  "metadata": {
+    "machineId": "L_MAHJONG_MONOGATARI_S2",
+    "displayName": "L麻雀物語",
+    "settings": [
+      "SET_1",
+      "SET_2",
+      "SET_3",
+      "SET_4",
+      "SET_5",
+      "SET_6"
+    ]
+  },
+  "validation": {
+    "cases": []
+  },
+  "statistics": {}
+}

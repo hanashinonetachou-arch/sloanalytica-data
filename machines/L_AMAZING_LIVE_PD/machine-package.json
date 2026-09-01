@@ -1,0 +1,208 @@
+{
+  "schemaVersion": 1,
+  "machine": {
+    "schemaVersion": "2.0.0",
+    "machineId": "L_AMAZING_LIVE_PD",
+    "machineDataVersion": "0.1.0",
+    "displayName": "スマート沖スロ アメイジングライブ",
+    "modelName": "LアメイジングライブPD",
+    "manufacturer": "パイオニア",
+    "settings": [
+      "SET_1",
+      "SET_2",
+      "SET_4",
+      "SET_5",
+      "SET_6"
+    ],
+    "packagePolicy": {
+      "offlineCapable": true,
+      "containsImages": false,
+      "containsExecutableCode": false
+    }
+  },
+  "inputs": {
+    "schemaVersion": "2.0.0",
+    "inputs": [
+      {
+        "id": "INP_NORMAL_GAMES",
+        "name": "通常ゲーム数",
+        "type": "integer",
+        "category": "NORMAL",
+        "unit": "G",
+        "displayOrder": 10,
+        "inferenceRole": "INCLUDE_PRIMARY",
+        "defaultValue": 0,
+        "observationScope": "SELF_PLAY",
+        "description": "自分が遊技した通常ゲーム数を入力します。",
+        "minimum": 0
+      },
+      {
+        "id": "INP_BONUS_INITIAL_HIT",
+        "name": "ボーナス初当り",
+        "type": "counter",
+        "category": "NORMAL",
+        "unit": "回",
+        "displayOrder": 11,
+        "inferenceRole": "INCLUDE_PRIMARY",
+        "defaultValue": null,
+        "parentInputId": "INP_NORMAL_GAMES",
+        "description": "通常時からのボーナス初当り回数を入力します。BB/RBの総出現回数ではなく、公開解析の『ボーナス初当り』に対応する回数です。",
+        "minimum": 0
+      }
+    ]
+  },
+  "features": {
+    "schemaVersion": "2.0.0",
+    "features": [
+      {
+        "featureId": "FEAT_BONUS_INITIAL_HIT",
+        "name": "ボーナス初当り",
+        "adoptionCategory": "INCLUDE_PRIMARY",
+        "calculationRole": "PROBABILITY",
+        "probabilityEngineUsage": true,
+        "modelType": "binomial",
+        "minimumSample": 300,
+        "sampleRecommendation": 5000,
+        "reliabilityProfile": {
+          "weight": 1
+        },
+        "denominatorInputId": "INP_NORMAL_GAMES",
+        "numeratorInputId": "INP_BONUS_INITIAL_HIT",
+        "displayFormat": "ratio_1_over_n",
+        "probabilities": {
+          "SET_1": 0.0036496350364963502,
+          "SET_2": 0.0038520801232665635,
+          "SET_4": 0.00436109899694723,
+          "SET_5": 0.004833252779120348,
+          "SET_6": 0.0052659294365455505
+        },
+        "sourceEvidenceRefs": [
+          "SRC_1GEKI",
+          "SRC_YUGI_NIPPON"
+        ]
+      }
+    ]
+  },
+  "evidence": {
+    "version": "1.0.0",
+    "evidences": [],
+    "sources": [
+      {
+        "id": "SRC_PIONEER_OFFICIAL",
+        "classification": "OFFICIAL",
+        "pageName": "パチスロ機種情報2025年",
+        "url": "https://www.slot-pioneer.co.jp/products/2025.html",
+        "checkedAt": "2026-09-01"
+      },
+      {
+        "id": "SRC_1GEKI",
+        "classification": "ANALYSIS",
+        "pageName": "アメイジングライブ（スロット）設定差・設定判別要素まとめ",
+        "url": "https://1geki.jp/slot/l_amazinglive/0/",
+        "checkedAt": "2026-09-01"
+      },
+      {
+        "id": "SRC_YUGI_NIPPON",
+        "classification": "ANALYSIS",
+        "pageName": "スマート沖スロ アメイジングライブ 新機種記事",
+        "url": "https://yugi-nippon.com/pachinko-new-machine/post-69270/",
+        "checkedAt": "2026-09-01"
+      }
+    ]
+  },
+  "ui": {
+    "sections": [
+      {
+        "id": "UI_01____",
+        "title": "通常時",
+        "displayOrder": 1,
+        "items": [
+          {
+            "type": "input",
+            "inputId": "INP_NORMAL_GAMES",
+            "label": "通常ゲーム数",
+            "widget": "number",
+            "gridSpan": 12
+          },
+          {
+            "type": "input",
+            "inputId": "INP_BONUS_INITIAL_HIT",
+            "label": "ボーナス初当り",
+            "widget": "counter",
+            "gridSpan": 6,
+            "config": {
+              "compact": true
+            }
+          }
+        ]
+      }
+    ],
+    "designContract": {
+      "schemaVersion": "ui-design-data-v1",
+      "status": "PASS_WITH_UNRESOLVED",
+      "source": "research/L_AMAZING_LIVE_PD/ui-design-data.json"
+    }
+  },
+  "selectionSummary": {
+    "schemaVersion": "selection-summary-v1",
+    "evaluatedCount": 4,
+    "selectedCount": 1,
+    "rejectedCount": 3,
+    "selected": [
+      {
+        "featureId": "FEAT_BONUS_INITIAL_HIT",
+        "name": "ボーナス初当り",
+        "reason": "通常ゲームを分母にしたボーナス初当りとして公開定義が明確で、全設定の確率差を同じ観測単位で評価できるため主Featureとして採用します。",
+        "requiredTrials": {
+          "value": 12350,
+          "unit": "通常ゲーム"
+        }
+      }
+    ],
+    "rejected": [
+      {
+        "featureId": "FEAT_BB_PUBLISHED_RATE_EXCLUDED",
+        "name": "BB公開出現確率",
+        "reason": "公開BB出現率は初当りと同じ通常ゲーム分母ではないことが数値上明らかで、現時点では正しい観測分母を再現できないため不採用です。",
+        "requiredTrials": {
+          "value": 12202,
+          "unit": "公開BB出現確率の試行単位"
+        }
+      },
+      {
+        "featureId": "FEAT_RB_PUBLISHED_RATE_EXCLUDED",
+        "name": "RB公開出現確率",
+        "reason": "公開RB出現率は初当りと同じ通常ゲーム分母ではないことが数値上明らかで、現時点では正しい観測分母を再現できないため不採用です。",
+        "requiredTrials": {
+          "value": 17319,
+          "unit": "公開RB出現確率の試行単位"
+        }
+      },
+      {
+        "featureId": "FEAT_BONUS_APPEARANCE_COMBINED_EXCLUDED",
+        "name": "BB+RB合算出現確率",
+        "reason": "BB・RB公開出現率の集約値であり独立情報ではなく、さらに厳密な分母区間も未解決なので二重評価防止のため不採用です。",
+        "requiredTrials": {
+          "value": 7137,
+          "unit": "公開ボーナス合算出現確率の試行単位"
+        }
+      }
+    ]
+  },
+  "reliability": {},
+  "metadata": {
+    "machineId": "L_AMAZING_LIVE_PD",
+    "displayName": "スマート沖スロ アメイジングライブ",
+    "settings": [
+      "SET_1",
+      "SET_2",
+      "SET_4",
+      "SET_5",
+      "SET_6"
+    ]
+  },
+  "validation": {
+    "cases": []
+  },
+  "statistics": {}
+}

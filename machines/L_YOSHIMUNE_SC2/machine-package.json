@@ -1,0 +1,472 @@
+{
+  "schemaVersion": 1,
+  "machine": {
+    "schemaVersion": "2.0.0",
+    "machineId": "L_YOSHIMUNE_SC2",
+    "machineDataVersion": "0.1.0",
+    "displayName": "吉宗",
+    "modelName": "L／ヨシムネS／SC2",
+    "manufacturer": "サボハニ",
+    "settings": [
+      "SET_1",
+      "SET_2",
+      "SET_3",
+      "SET_4",
+      "SET_5",
+      "SET_6"
+    ],
+    "packagePolicy": {
+      "offlineCapable": true,
+      "containsImages": false,
+      "containsExecutableCode": false
+    }
+  },
+  "inputs": {
+    "schemaVersion": "2.0.0",
+    "inputs": [
+      {
+        "id": "INP_NORMAL_GAMES",
+        "name": "通常ゲーム数",
+        "type": "integer",
+        "category": "NORMAL",
+        "unit": "G",
+        "displayOrder": 10,
+        "inferenceRole": "INCLUDE_PRIMARY",
+        "defaultValue": 0,
+        "observationScope": "SELF_PLAY",
+        "description": "自分が遊技した通常ゲーム数を入力します。",
+        "minimum": 0
+      },
+      {
+        "id": "INP_INITIAL_HIT",
+        "name": "BIG/REG初当り",
+        "type": "counter",
+        "category": "NORMAL",
+        "unit": "回",
+        "displayOrder": 11,
+        "inferenceRole": "INCLUDE_FALLBACK",
+        "defaultValue": null,
+        "parentInputId": "INP_NORMAL_GAMES",
+        "description": "通常時からのBIG/REG初当り回数を入力します。共通俵を取得していない場合のフォールバックに使用します。",
+        "minimum": 0
+      },
+      {
+        "id": "INP_ALL_GAMES",
+        "name": "全状態ゲーム数",
+        "type": "integer",
+        "category": "SMALL_ROLE",
+        "unit": "G",
+        "displayOrder": 20,
+        "inferenceRole": "INCLUDE_PRIMARY",
+        "defaultValue": null,
+        "observationScope": "SELF_PLAY",
+        "description": "共通俵の公開確率と同じ、全状態を含む消化ゲーム数を入力します。ダイトモの遊技履歴利用を推奨します。",
+        "minimum": 0
+      },
+      {
+        "id": "INP_COMMON_TAWARA",
+        "name": "共通俵",
+        "type": "counter",
+        "category": "SMALL_ROLE",
+        "unit": "回",
+        "displayOrder": 21,
+        "inferenceRole": "INCLUDE_PRIMARY",
+        "defaultValue": null,
+        "parentInputId": "INP_ALL_GAMES",
+        "description": "共通俵回数を入力します。未取得の場合は空欄のままにしてください。",
+        "minimum": 0
+      },
+      {
+        "id": "INP_EVI_YOSHIMUNE_HANAFUDA",
+        "name": "ボーナス終了時花札",
+        "type": "multi_enum",
+        "category": "EVIDENCE",
+        "unit": "",
+        "displayOrder": 100,
+        "inferenceRole": "INCLUDE_SUPPORT",
+        "options": [
+          {
+            "key": "H2",
+            "label": "銅枠（設定2以上）",
+            "value": "H2"
+          },
+          {
+            "key": "H3",
+            "label": "銀枠（設定3以上）",
+            "value": "H3"
+          },
+          {
+            "key": "H4",
+            "label": "金枠（設定4以上）",
+            "value": "H4"
+          },
+          {
+            "key": "H5",
+            "label": "ピンク/紫枠（設定5以上）",
+            "value": "H5"
+          },
+          {
+            "key": "H6",
+            "label": "虹枠（設定6）",
+            "value": "H6"
+          }
+        ],
+        "defaultValue": []
+      }
+    ]
+  },
+  "features": {
+    "schemaVersion": "2.0.0",
+    "features": [
+      {
+        "featureId": "FEAT_INITIAL_HIT",
+        "name": "初当り",
+        "adoptionCategory": "INCLUDE_FALLBACK",
+        "calculationRole": "PROBABILITY",
+        "probabilityEngineUsage": true,
+        "modelType": "binomial",
+        "minimumSample": 300,
+        "sampleRecommendation": 5000,
+        "reliabilityProfile": {
+          "weight": 1
+        },
+        "suppressedByFeatureIds": [
+          "FEAT_COMMON_TAWARA"
+        ],
+        "denominatorInputId": "INP_NORMAL_GAMES",
+        "numeratorInputId": "INP_INITIAL_HIT",
+        "displayFormat": "ratio_1_over_n",
+        "probabilities": {
+          "SET_1": 0.0026392187912377936,
+          "SET_2": 0.0027056277056277055,
+          "SET_3": 0.0027870680044593085,
+          "SET_4": 0.0029841838257236644,
+          "SET_5": 0.0031397174254317113,
+          "SET_6": 0.0034199726402188786
+        },
+        "sourceEvidenceRefs": [
+          "SRC_NANAPRESS",
+          "SRC_NANAPRESS_SPEC",
+          "SRC_NANAPRESS_TOOL",
+          "SRC_1GEKI"
+        ]
+      },
+      {
+        "featureId": "FEAT_COMMON_TAWARA",
+        "name": "共通俵",
+        "adoptionCategory": "INCLUDE_PRIMARY",
+        "calculationRole": "PROBABILITY",
+        "probabilityEngineUsage": true,
+        "modelType": "binomial",
+        "minimumSample": 500,
+        "sampleRecommendation": 5000,
+        "reliabilityProfile": {
+          "weight": 1
+        },
+        "denominatorInputId": "INP_ALL_GAMES",
+        "numeratorInputId": "INP_COMMON_TAWARA",
+        "displayFormat": "ratio_1_over_n",
+        "probabilities": {
+          "SET_1": 0.001220703125,
+          "SET_2": 0.001342822613132805,
+          "SET_3": 0.0014647722279185586,
+          "SET_4": 0.0017091095539224063,
+          "SET_5": 0.001953125,
+          "SET_6": 0.002197319270490002
+        },
+        "sourceEvidenceRefs": [
+          "SRC_NANAPRESS",
+          "SRC_NANAPRESS_SPEC",
+          "SRC_NANAPRESS_TOOL",
+          "SRC_1GEKI"
+        ]
+      }
+    ]
+  },
+  "evidence": {
+    "version": "1.0.0",
+    "evidences": [
+      {
+        "id": "EVI_YOSHIMUNE_HANAFUDA_H2",
+        "name": "銅枠（設定2以上）",
+        "displayName": "銅枠（設定2以上）",
+        "inputId": "INP_EVI_YOSHIMUNE_HANAFUDA",
+        "triggerValue": "H2",
+        "confirmedSettings": [
+          "SET_2",
+          "SET_3",
+          "SET_4",
+          "SET_5",
+          "SET_6"
+        ],
+        "deniedSettings": [
+          "SET_1"
+        ],
+        "hasImage": false,
+        "type": "SETTING_CONFIRMATION",
+        "sourceEvidenceRefs": [
+          "RE_HANAFUDA_2PLUS"
+        ]
+      },
+      {
+        "id": "EVI_YOSHIMUNE_HANAFUDA_H3",
+        "name": "銀枠（設定3以上）",
+        "displayName": "銀枠（設定3以上）",
+        "inputId": "INP_EVI_YOSHIMUNE_HANAFUDA",
+        "triggerValue": "H3",
+        "confirmedSettings": [
+          "SET_3",
+          "SET_4",
+          "SET_5",
+          "SET_6"
+        ],
+        "deniedSettings": [
+          "SET_1",
+          "SET_2"
+        ],
+        "hasImage": false,
+        "type": "SETTING_CONFIRMATION",
+        "sourceEvidenceRefs": [
+          "RE_HANAFUDA_3PLUS"
+        ]
+      },
+      {
+        "id": "EVI_YOSHIMUNE_HANAFUDA_H4",
+        "name": "金枠（設定4以上）",
+        "displayName": "金枠（設定4以上）",
+        "inputId": "INP_EVI_YOSHIMUNE_HANAFUDA",
+        "triggerValue": "H4",
+        "confirmedSettings": [
+          "SET_4",
+          "SET_5",
+          "SET_6"
+        ],
+        "deniedSettings": [
+          "SET_1",
+          "SET_2",
+          "SET_3"
+        ],
+        "hasImage": false,
+        "type": "SETTING_CONFIRMATION",
+        "sourceEvidenceRefs": [
+          "RE_HANAFUDA_4PLUS"
+        ]
+      },
+      {
+        "id": "EVI_YOSHIMUNE_HANAFUDA_H5",
+        "name": "ピンク/紫枠（設定5以上）",
+        "displayName": "ピンク/紫枠（設定5以上）",
+        "inputId": "INP_EVI_YOSHIMUNE_HANAFUDA",
+        "triggerValue": "H5",
+        "confirmedSettings": [
+          "SET_5",
+          "SET_6"
+        ],
+        "deniedSettings": [
+          "SET_1",
+          "SET_2",
+          "SET_3",
+          "SET_4"
+        ],
+        "hasImage": false,
+        "type": "SETTING_CONFIRMATION",
+        "sourceEvidenceRefs": [
+          "RE_HANAFUDA_5PLUS"
+        ]
+      },
+      {
+        "id": "EVI_YOSHIMUNE_HANAFUDA_H6",
+        "name": "虹枠（設定6）",
+        "displayName": "虹枠（設定6）",
+        "inputId": "INP_EVI_YOSHIMUNE_HANAFUDA",
+        "triggerValue": "H6",
+        "confirmedSettings": [
+          "SET_6"
+        ],
+        "deniedSettings": [
+          "SET_1",
+          "SET_2",
+          "SET_3",
+          "SET_4",
+          "SET_5"
+        ],
+        "hasImage": false,
+        "type": "SETTING_CONFIRMATION",
+        "sourceEvidenceRefs": [
+          "RE_HANAFUDA_6"
+        ]
+      }
+    ],
+    "sources": [
+      {
+        "id": "SRC_NANAPRESS",
+        "classification": "ANALYSIS",
+        "pageName": "スマスロ吉宗 設定差・設定示唆演出まとめ",
+        "url": "https://nana-press.com/kaiseki/machine/920/29003/",
+        "checkedAt": "2026-09-01"
+      },
+      {
+        "id": "SRC_NANAPRESS_SPEC",
+        "classification": "ANALYSIS",
+        "pageName": "スマスロ吉宗 初当たり確率/小役確率/機械割",
+        "url": "https://nana-press.com/kaiseki/machine/920/28408/",
+        "checkedAt": "2026-09-01"
+      },
+      {
+        "id": "SRC_NANAPRESS_TOOL",
+        "classification": "ANALYSIS",
+        "pageName": "スマスロ吉宗 設定推測ツール（詳細版）",
+        "url": "https://nana-press.com/kaiseki/machine/920/suisoku/",
+        "checkedAt": "2026-09-01"
+      },
+      {
+        "id": "SRC_NANAPRESS_VOICE",
+        "classification": "ANALYSIS",
+        "pageName": "スマスロ吉宗 ボーナス終了時のボイス（セリフ）による示唆内容",
+        "url": "https://nana-press.com/kaiseki/machine/920/29025/",
+        "checkedAt": "2026-09-01"
+      },
+      {
+        "id": "SRC_1GEKI",
+        "classification": "ANALYSIS",
+        "pageName": "吉宗 設定差・設定判別要素まとめ",
+        "url": "https://1geki.jp/slot/l_yoshimune/0/",
+        "checkedAt": "2026-09-01"
+      }
+    ]
+  },
+  "ui": {
+    "sections": [
+      {
+        "id": "UI_01____",
+        "title": "通常時",
+        "displayOrder": 1,
+        "items": [
+          {
+            "type": "input",
+            "inputId": "INP_NORMAL_GAMES",
+            "label": "通常ゲーム数",
+            "widget": "number",
+            "gridSpan": 12
+          },
+          {
+            "type": "input",
+            "inputId": "INP_INITIAL_HIT",
+            "label": "BIG/REG初当り",
+            "widget": "counter",
+            "gridSpan": 6,
+            "config": {
+              "compact": true
+            }
+          }
+        ]
+      },
+      {
+        "id": "UI_02___",
+        "title": "小役",
+        "displayOrder": 2,
+        "items": [
+          {
+            "type": "input",
+            "inputId": "INP_ALL_GAMES",
+            "label": "全状態ゲーム数",
+            "widget": "number",
+            "gridSpan": 12
+          },
+          {
+            "type": "input",
+            "inputId": "INP_COMMON_TAWARA",
+            "label": "共通俵",
+            "widget": "counter",
+            "gridSpan": 6,
+            "config": {
+              "compact": true
+            }
+          }
+        ]
+      },
+      {
+        "id": "UI_03_______",
+        "title": "設定確定情報",
+        "displayOrder": 3,
+        "items": [
+          {
+            "type": "input",
+            "inputId": "INP_EVI_YOSHIMUNE_HANAFUDA",
+            "label": "ボーナス終了時花札",
+            "widget": "multi_select",
+            "gridSpan": 12
+          }
+        ]
+      }
+    ],
+    "designContract": {
+      "schemaVersion": "ui-design-data-v1",
+      "status": "PASS_WITH_UNRESOLVED",
+      "source": "research/L_YOSHIMUNE_SC2/ui-design-data.json"
+    }
+  },
+  "selectionSummary": {
+    "schemaVersion": "selection-summary-v1",
+    "evaluatedCount": 4,
+    "selectedCount": 2,
+    "rejectedCount": 2,
+    "selected": [
+      {
+        "featureId": "FEAT_INITIAL_HIT",
+        "name": "初当り",
+        "reason": "通常ゲームとBIG/REG初当りだけで観測できるため、共通俵を取得できない実戦でも使えるフォールバックとして採用し、共通俵入力時は重複する同一遊技区間の評価を抑制します。",
+        "requiredTrials": {
+          "value": 36170,
+          "unit": "通常ゲーム"
+        }
+      },
+      {
+        "featureId": "FEAT_COMMON_TAWARA",
+        "name": "共通俵",
+        "reason": "設定1から6で共通俵確率が約1.8倍変化し、ダイトモで小役確率を観測でき、全状態ゲーム数という公開分母も明確なため主Featureとして採用します。",
+        "requiredTrials": {
+          "value": 12839,
+          "unit": "全ゲーム"
+        }
+      }
+    ],
+    "rejected": [
+      {
+        "featureId": "FEAT_REACH_PATTERN_EXCLUDED",
+        "name": "通常時リーチ目出現",
+        "reason": "設定差は大きいものの最良の設定6でも約1/3121と低頻度で、さらに高確率・鷹狩り・連続演出を除外した専用分母を正確に観測する必要があるため、通常実戦の独立Featureとしては不採用です。",
+        "requiredTrials": {
+          "value": 11879,
+          "unit": "高確率・鷹狩り・連続演出中を除く通常ゲーム"
+        }
+      },
+      {
+        "featureId": "FEAT_PURE_MISS_PRECURSOR_EXCLUDED",
+        "name": "純ハズレ契機 前兆合算",
+        "reason": "最良でも約1/4096と低頻度で、純ハズレ契機を通常実戦で確実に識別して初当り経路から分離する必要があるため、誤分類と下流イベント重複を避けて不採用です。",
+        "requiredTrials": {
+          "value": 30021,
+          "unit": "通常ゲーム"
+        }
+      }
+    ]
+  },
+  "reliability": {},
+  "metadata": {
+    "machineId": "L_YOSHIMUNE_SC2",
+    "displayName": "吉宗",
+    "settings": [
+      "SET_1",
+      "SET_2",
+      "SET_3",
+      "SET_4",
+      "SET_5",
+      "SET_6"
+    ]
+  },
+  "validation": {
+    "cases": []
+  },
+  "statistics": {}
+}
