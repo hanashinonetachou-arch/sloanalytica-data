@@ -6,6 +6,7 @@ on:
       - batch/20260901-magia-gundamseed
     paths:
       - tools/generate-batch-20260901-gate-d-ui.mjs
+      - tools/materialize-ui-design.mjs
       - .github/workflows/batch-20260901-gate-d-ui-machine.yml
   workflow_dispatch:
 
@@ -47,6 +48,25 @@ jobs:
           npm run machine:batch -- \
             L_MAGIA_RECORD_RN L_GODZILLA_NS L_USHIO_TORA_HAKUMEN_VH L_AMAZING_LIVE_PD L_YOSHIMUNE_SC2 \
             L_MAHJONG_MONOGATARI_S2 L_IDOLMASTER_MILLION_LIVE_HC L_YOUJITSU_DE L_MIDORIDON_VIVA_REVIVAL_FY L_GUNDAM_SEED_G
+      - name: Materialize UI Design into MachineData
+        run: |
+          node tools/materialize-ui-design.mjs --apply \
+            L_MAGIA_RECORD_RN L_GODZILLA_NS L_USHIO_TORA_HAKUMEN_VH L_AMAZING_LIVE_PD L_YOSHIMUNE_SC2 \
+            L_MAHJONG_MONOGATARI_S2 L_IDOLMASTER_MILLION_LIVE_HC L_YOUJITSU_DE L_MIDORIDON_VIVA_REVIVAL_FY L_GUNDAM_SEED_G
+      - name: Verify materialization is stable
+        run: |
+          node tools/materialize-ui-design.mjs --require-unchanged \
+            L_MAGIA_RECORD_RN L_GODZILLA_NS L_USHIO_TORA_HAKUMEN_VH L_AMAZING_LIVE_PD L_YOSHIMUNE_SC2 \
+            L_MAHJONG_MONOGATARI_S2 L_IDOLMASTER_MILLION_LIVE_HC L_YOUJITSU_DE L_MIDORIDON_VIVA_REVIVAL_FY L_GUNDAM_SEED_G
+      - name: Gate D contract validations
+        run: |
+          npm run ui-design:test
+          npm run denominator:validate
+          npm run evidence-ui:validate
+          npm run difficulty:exposure-audit
+          npm test
+          npm run audit
+          npm run audit:ui-service-names
       - name: Write Gate D baseline report
         run: |
           mkdir -p reports
@@ -59,6 +79,8 @@ jobs:
             echo '- Observation linkage strict-v2: PASS'
             echo '- Four-layer gate: PASS (tracked Observation unresolved may remain)'
             echo '- MachineData batch construction: PASS'
+            echo '- UI Design -> MachineData materialization: PASS / stable 10/10'
+            echo '- Quick input / denominator / Evidence UI / Difficulty exposure / test / audit: PASS'
             echo '- Gate E / Publish: NOT RUN'
             echo '- Semantic locks are retained in ui-design-data auditNotes and generator policy.'
           } > reports/batch-20260901-gate-d-baseline.md
@@ -72,5 +94,5 @@ jobs:
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
           git add research machines reports difficulty-catalog.json machine-registry.json catalog.json 2>/dev/null || true
           git add reports/batch-20260901-gate-d-baseline.md
-          git commit -m 'machine-data: generate 20260901 Gate D baseline'
+          git commit -m 'machine-data: materialize 20260901 Gate D UI contracts'
           git push origin HEAD:batch/20260901-magia-gundamseed
