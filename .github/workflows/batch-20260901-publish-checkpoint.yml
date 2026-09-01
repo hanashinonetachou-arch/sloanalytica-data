@@ -1,0 +1,115 @@
+name: Batch 20260901 Publish Checkpoint
+
+on:
+  push:
+    branches:
+      - batch/20260901-magia-gundamseed
+    paths:
+      - '.github/workflows/batch-20260901-publish-checkpoint.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  checkpoint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: batch/20260901-magia-gundamseed
+      - name: Fetch integration baseline
+        shell: bash
+        run: |
+          set -euo pipefail
+          git fetch origin prototype-multi-machine:refs/remotes/origin/prototype-multi-machine
+          echo "PROTOTYPE_HEAD=$(git rev-parse origin/prototype-multi-machine)" >> "$GITHUB_ENV"
+      - name: Write Publish checkpoint records
+        shell: bash
+        env:
+          PUBLISHED_HEAD: 7161e96acd628219c36e8147ebb2801ddafd12d0
+          PUBLISH_RUN: '33485719583'
+        run: |
+          set -euo pipefail
+          node --input-type=module <<'NODE'
+          import fs from 'node:fs';
+
+          const publishedHead = process.env.PUBLISHED_HEAD;
+          const publishRun = Number(process.env.PUBLISH_RUN);
+          const prototypeHead = process.env.PROTOTYPE_HEAD;
+          const statePath = 'reports/current-batch-state.json';
+          const state = JSON.parse(fs.readFileSync(statePath, 'utf8'));
+          state.updatedAt = '2026-09-01';
+          state.gates.publish = 'PASS_WITH_TRACKED_OBSERVATION_DEBT';
+          state.publish = {
+            status: 'PASS_WITH_TRACKED_OBSERVATION_DEBT',
+            formalPublishWorkflowRunId: publishRun,
+            workflowConclusion: 'SUCCESS',
+            publishedWorkProductHead: publishedHead,
+            dependencyResolution: {
+              priorBatchPullRequest: 148,
+              priorBatchMerged: true,
+              priorBatchIntegrationCommit: '915c6c1904021ad27aa494fda5b7861e3014cec3',
+              normalizedStackBaseHead: '9b7ab872f0328b1b58f9cc57497c4313213c931a',
+              prototypeHeadAtCheckpoint: prototypeHead
+            },
+            sourceContractRepairs: {
+              amazingLive: 'SET_L retained in machine identity/settings but excluded from numeric inferenceSettings because no SET_L likelihood is published for FEAT_BONUS_FIRST_HIT',
+              magiaRecord: 'three rounded public multinomial tables use explicit bounded Selection normalization; public ratios were not invented or replaced',
+              strictAuditRelaxed: false
+            },
+            provisionalRegistrationIds: {
+              L_MAGIA_RECORD_RN: 192,
+              L_GODZILLA_NS: 193,
+              L_USHIO_TORA_HAKUMEN_VH: 194,
+              L_AMAZING_LIVE_PD: 195,
+              L_YOSHIMUNE_SC2: 196,
+              L_MAHJONG_MONOGATARI_S2: 197,
+              L_IDOLMASTER_MILLION_LIVE_HC: 198,
+              L_YOUJITSU_DE: 199,
+              L_MIDORIDON_VIVA_REVIVAL_FY: 200,
+              L_GUNDAM_SEED_G: 201
+            },
+            catalogRegistration: 'PASS_10_OF_10_AVAILABLE',
+            difficultyCatalogLinkage: 'PASS_10_OF_10_VERSION_MATCH',
+            registryValidation: 'PASS_WARNINGS_0',
+            publicDataAudit: 'PASS_201_MACHINES_WARNINGS_0',
+            userFacingServiceNames: 'PASS_APPROVED_EXCEPTIONS_0',
+            repositoryTests: 'PASS_415_OF_415',
+            publishMutationAllowlist: ['catalog.json','difficulty-catalog.json','machine-registry.json'],
+            semanticLocksPreserved: true,
+            trackedObservationDebtPreserved: true,
+            failedAttempts: [
+              'Initial APPLY rolled back automatically after strict audit exposed one Amazing Live SET_L likelihood-domain mismatch and nine Magia rounded multinomial sum errors.',
+              'Second APPLY passed repository checks but custom registration-ID guard stopped before commit because publish order would have reversed provisional IDs; no publish commit was created.'
+            ],
+            completionRecord: 'reports/batch-20260901-publish-completion.md'
+          };
+          state.nextStage = 'Real-device Verification / next Gate';
+          state.nextAction = 'Stop after the Publish checkpoint. In the next chat re-check Library standards, PR #149/current branch HEAD and published catalog/registry state, then perform real-device verification. Do not resolve tracked Observation debt from automated PASS alone.';
+          fs.writeFileSync(statePath, JSON.stringify(state, null, 2) + '\n');
+
+          const completion = `# SloAnalytica 2026-09-01 Batch — Publish Completion\n\nStatus: **PASS_WITH_TRACKED_OBSERVATION_DEBT**\n\n## Formal standards\n- Core Policy v1.7\n- Research / Selection / Observation Manifest v6.9\n- MachineData / UX Construction Manifest v6.9\n\n## Dependency resolution\nPR #148 / batch/20260831-persona5-to-bio5 was integrated before this Publish. Integration commit: \`915c6c1904021ad27aa494fda5b7861e3014cec3\`. The normalized stacked-base head used for this batch is \`9b7ab872f0328b1b58f9cc57497c4313213c931a\`.\n\n## Formal Publish result\n- Workflow: \`${publishRun}\` — SUCCESS\n- Published work-product HEAD: \`${publishedHead}\`\n- Batch Publish APPLY: PASS 10 / 10\n- Catalog registration: PASS 10 / 10, status=available\n- Production provisionalRegistrationId: 192–201 in the approved machine order\n- Difficulty/catalog machineDataVersion linkage: PASS 10 / 10\n- Registry validation: PASS, warnings 0\n- Public-data audit: PASS, 201 machines, warnings 0\n- User-facing service-name audit: PASS\n- Repository regression: 415 / 415 PASS\n- Publish mutation allowlist: catalog.json / difficulty-catalog.json / machine-registry.json only\n\n## Strict Publish findings repaired before publication\nThe initial APPLY was safely rolled back by the batch pipeline when strict public-data audit detected a likelihood-domain mismatch for Amazing Live SET_L and rounded multinomial sums for Magia Record. The audit was not relaxed. Amazing Live now retains SET_L for machine identity/operational semantics while excluding SET_L from numeric inferenceSettings where the adopted Bonus-first-hit likelihood has no SET_L probability. Magia Record uses the existing bounded rounded-category normalization contract for the three affected public multinomial tables. Both affected MachineData packages were rebuilt and the repository regression passed.\n\nA second APPLY was intentionally stopped before commit by the custom provisional-ID guard because normal publish order would have reversed IDs 192–201. The final Publish used reverse insertion order so the final newest-first catalog order preserves the approved mapping exactly.\n\n## Approved ID mapping\n192 L_MAGIA_RECORD_RN\n193 L_GODZILLA_NS\n194 L_USHIO_TORA_HAKUMEN_VH\n195 L_AMAZING_LIVE_PD\n196 L_YOSHIMUNE_SC2\n197 L_MAHJONG_MONOGATARI_S2\n198 L_IDOLMASTER_MILLION_LIVE_HC\n199 L_YOUJITSU_DE\n200 L_MIDORIDON_VIVA_REVIVAL_FY\n201 L_GUNDAM_SEED_G\n\n## Semantic locks\nAll Gate E semantic locks remain active: overlap suppression, conditional/opportunity denominators, reset-only population handling, Evidence/tendency separation, EXCLUDE-only input exclusion, empty-vs-zero semantics, derived/manual separation and predecessor/self interval separation were not relaxed by Publish.\n\n## Remaining Observation / field-verification debt\nThe following remain unresolved and are not promoted to FOUND by automated PASS: hall-specific DATA_COUNTER fields/semantics; SEATED_START snapshot/predecessor alignment; Godzilla PUSH current-day-history exact numeric fields; Amazing Live Bonus-first-hit boundary/chain exclusion/obtainable display; linked-service/QR inventory for Godzilla, Ushio, Amazing Live, Yoshimune, Mahjong and Gundam SEED. All adopted Features still retain direct/manual Observation routes.\n\n## Next stage\n**Publish complete → Real-device Verification / next Gate.** Stop at this checkpoint; do not enter the next Gate automatically.\n`;
+          fs.writeFileSync('reports/batch-20260901-publish-completion.md', completion);
+
+          const handoff = `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\nSloAnalytica 2026-09-01 新規10機種Batch\nPublish完了 → Real-device Verification / 次Gate\n次チャット開始プロンプト\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\nあなたはSloAnalytica（スロアナリカ）の Research / Selection / Observation / MachineData / Quality Audit / Publish / Real-device Verification担当です。\n\nこのチャットでは、2026-09-01開始の新規10機種Batchについて、Gate A〜EおよびFormal Publish完了状態を引き継ぎ、Real-device Verification / 次Gateを進めてください。\n\n正式基準は開始時にLibraryで再確認してください。Publish時点では Core Policy v1.7 / RSO Manifest v6.9 / MachineData UX Manifest v6.9 です。より新しい正式版があればそちらを優先してください。\n\nRepository: hanashinonetachou-arch/sloanalytica-data\nWorking branch: batch/20260901-magia-gundamseed\nPR: #149\nTarget integration branch: prototype-multi-machine\nPublished work-product HEAD: ${publishedHead}\nFormal Publish workflow: ${publishRun} — SUCCESS\n\nPublish結果: 10/10 available、provisionalRegistrationId 192–201を指定順で保持、difficulty/catalog version linkage PASS、registry PASS warnings 0、public-data audit PASS 201 machines warnings 0、service-name audit PASS、repository tests 415/415 PASS。\n\nPublish中にstrict auditでAmazing Live SET_L likelihood-domain mismatchとMagia Record rounded multinomial sum driftを検出したが、監査を緩めず源流契約を修正して再materializeした。Amazing LiveのSET_Lはidentity/operationalとして保持するが数値Likelihood候補から除外。Magiaの対象3 multinomialは既存のbounded rounded-category normalizationを明示。\n\nSemantic Lockを維持すること。Amazing Live overlap代表はBonus初当りのみ、Mahjongのpromotion-inclusive AT直撃やaggregateは復活させない、Ushio reset-onlyはconfirmed reset opportunity必須、Youjitsu条件付き分母を総通常Gへ変換しない、Midoridon state×role×opportunityを維持、Gundam SEED 100G windowをper-game化しない、Magia条件付きFallbackを平坦化しない。Hard Evidenceと傾向示唆を混同せず、EXCLUDE-only入力を復活させず、空欄と観測済み0を区別し、derived二重入力と前任者/自己区間統合を行わない。\n\n残存debtは未解決のまま維持: hall-specific DATA_COUNTER、SEATED_START/前任者区間対応、Godzilla PUSH当日履歴の具体値、Amazing Live Bonus初当り境界/連チャン除外/実表示、Godzilla/Ushio/Amazing/Yoshimune/Mahjong/Gundam SEEDのlinked-service/QR。Automated PASSだけでFOUNDへ変更しない。\n\n次チャット開始時は、Library最新版、PR #149、working branch exact HEAD、catalog/registry published state、Publish completion reportを実際に確認してください。実機でしか確認できない項目をReal-device Verificationとして整理し、ユーザーの実機確認結果をObservation/User-Verified UXへ正しく反映してください。GitHub上で安全に実行できる調査・修正・監査・PR更新は可能な限りAI側で行ってください。\n\nユーザーが「進めてください」「お願いします」と指示した場合は計画だけで止まらず、GitHubの現行状態を確認して実作業まで進めてください。\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n`;
+          fs.writeFileSync('reports/current-batch-handoff.md', handoff);
+          NODE
+      - name: Validate checkpoint contents
+        shell: bash
+        run: |
+          set -euo pipefail
+          node -e "const s=require('./reports/current-batch-state.json'); if(s.gates.publish!=='PASS_WITH_TRACKED_OBSERVATION_DEBT'||s.publish.formalPublishWorkflowRunId!==33485719583||s.nextStage!=='Real-device Verification / next Gate') process.exit(1)"
+          grep -q 'Publish complete → Real-device Verification' reports/batch-20260901-publish-completion.md
+          grep -q 'Publish完了 → Real-device Verification' reports/current-batch-handoff.md
+      - name: Remove temporary diagnostic workflows and commit checkpoint
+        shell: bash
+        run: |
+          set -euo pipefail
+          git rm -f .github/workflows/batch-20260901-publish-diagnostic.yml .github/workflows/batch-20260901-publish-repair.yml .github/workflows/batch-20260901-publish-checkpoint.yml
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add reports/current-batch-state.json reports/current-batch-handoff.md reports/batch-20260901-publish-completion.md
+          git commit -m 'Checkpoint 20260901 formal publish completion'
+          git push origin HEAD:batch/20260901-magia-gundamseed
+          test -z "$(git status --porcelain)"
