@@ -1,0 +1,131 @@
+name: Batch 20260901 Identity Continuity
+
+on:
+  push:
+    branches:
+      - batch/20260901-user-selected-10
+    paths:
+      - '.github/workflows/batch-20260901-identity-continuity.yml'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: batch-20260901-identity-continuity
+  cancel-in-progress: false
+
+jobs:
+  identity-continuity:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Apply canonical identity fields to Research and builders
+        run: |
+          node --input-type=module - <<'NODE'
+          import fs from 'node:fs';
+          const checkpoint = JSON.parse(fs.readFileSync('reports/machine-identity-classification-batch-19.json','utf8'));
+          for (const entry of checkpoint.entries) {
+            const path = `research/${entry.machineId}/research-data.json`;
+            const data = JSON.parse(fs.readFileSync(path,'utf8'));
+            if (data.machine?.introductionDate !== entry.introductionDate) {
+              throw new Error(`${entry.machineId}: Research introductionDate mismatch`);
+            }
+            data.machine.machineType = entry.machineType;
+            data.machine.gameType = entry.gameType;
+            fs.writeFileSync(path, JSON.stringify(data,null,2)+'\n');
+          }
+
+          {
+            const path='tools/build-machine-data.mjs';
+            let text=fs.readFileSync(path,'utf8');
+            const before='''    settings:research.machine.settings,\n    ...(Array.isArray(research.machine.inferenceSettings)?{inferenceSettings:research.machine.inferenceSettings}:{}),\n    packagePolicy:{offlineCapable:true,containsImages:false,containsExecutableCode:false}\n''';
+            const after='''    settings:research.machine.settings,\n    ...(Array.isArray(research.machine.inferenceSettings)?{inferenceSettings:research.machine.inferenceSettings}:{}),\n    ...(research.machine.introductionDate?{introductionDate:research.machine.introductionDate}:{}),\n    ...(research.machine.machineType?{machineType:research.machine.machineType}:{}),\n    ...(research.machine.gameType?{gameType:research.machine.gameType}:{}),\n    packagePolicy:{offlineCapable:true,containsImages:false,containsExecutableCode:false}\n''';
+            if (!text.includes(before)) throw new Error('build-machine-data identity insertion point not found');
+            text=text.replace(before,after);
+            fs.writeFileSync(path,text);
+          }
+
+          {
+            const path='tools/publish-machine-data.mjs';
+            let text=fs.readFileSync(path,'utf8');
+            const before='''   machineDataVersion:pkg.machine?.machineDataVersion,\n   ...(existing?.minimumAppVersionCode!==undefined?{minimumAppVersionCode:existing.minimumAppVersionCode}:{}),\n''';
+            const after='''   machineDataVersion:pkg.machine?.machineDataVersion,\n   ...((pkg.machine?.introductionDate ?? existing?.introductionDate)?{introductionDate:pkg.machine?.introductionDate ?? existing?.introductionDate}:{}),\n   ...((pkg.machine?.machineType ?? existing?.machineType)?{machineType:pkg.machine?.machineType ?? existing?.machineType}:{}),\n   ...((pkg.machine?.gameType ?? existing?.gameType)?{gameType:pkg.machine?.gameType ?? existing?.gameType}:{}),\n   ...(existing?.minimumAppVersionCode!==undefined?{minimumAppVersionCode:existing.minimumAppVersionCode}:{}),\n''';
+            if (!text.includes(before)) throw new Error('publish-machine-data identity insertion point not found');
+            text=text.replace(before,after);
+            fs.writeFileSync(path,text);
+          }
+          NODE
+
+      - name: Validate ResearchData after identity enrichment
+        run: npm run research:validate
+
+      - name: Rebuild batch packages with identity continuity
+        run: >-
+          node tools/guard-machine-pipeline.mjs batch
+          L_MAGIA_RECORD_RN
+          L_GODZILLA_NS
+          L_USHIO_TORA_HAKUMEN_VH
+          L_AMAZING_LIVE_PD
+          L_YOSHIMUNE_SC2
+          L_MAHJONG_MONOGATARI_S2
+          L_IDOLMASTER_MILLION_LIVE_HC
+          L_YOUJITSU_DE
+          L_MIDORI_DON_5_FY
+          L_GUNDAM_SEED_G
+          --report reports/batch-20260901-identity-rebuild-report.json
+
+      - name: Reapply and audit UI Design contracts
+        run: |
+          node tools/apply-ui-design-to-machine-package.mjs L_MAGIA_RECORD_RN L_GODZILLA_NS L_USHIO_TORA_HAKUMEN_VH L_AMAZING_LIVE_PD L_YOSHIMUNE_SC2 L_MAHJONG_MONOGATARI_S2 L_IDOLMASTER_MILLION_LIVE_HC L_YOUJITSU_DE L_MIDORI_DON_5_FY L_GUNDAM_SEED_G
+          node tools/audit-ui-design-machine-package-linkage.mjs L_MAGIA_RECORD_RN L_GODZILLA_NS L_USHIO_TORA_HAKUMEN_VH L_AMAZING_LIVE_PD L_YOSHIMUNE_SC2 L_MAHJONG_MONOGATARI_S2 L_IDOLMASTER_MILLION_LIVE_HC L_YOUJITSU_DE L_MIDORI_DON_5_FY L_GUNDAM_SEED_G
+
+      - name: Republish identity-enriched batch atomically
+        run: >-
+          npm run machine:publish:batch -- --apply
+          L_MAGIA_RECORD_RN
+          L_GODZILLA_NS
+          L_USHIO_TORA_HAKUMEN_VH
+          L_AMAZING_LIVE_PD
+          L_YOSHIMUNE_SC2
+          L_MAHJONG_MONOGATARI_S2
+          L_IDOLMASTER_MILLION_LIVE_HC
+          L_YOUJITSU_DE
+          L_MIDORI_DON_5_FY
+          L_GUNDAM_SEED_G
+
+      - name: Regenerate and verify identity metadata
+        run: |
+          node tools/apply-machine-identity-classification.mjs --apply
+          node tools/apply-machine-identity-classification.mjs --verify
+
+      - name: Final audits
+        run: |
+          npm test
+          npm run audit
+          npm run audit:ui-service-names
+          node tools/apply-machine-identity-classification.mjs --verify
+
+      - name: Commit identity-continuous batch artifacts
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add tools/build-machine-data.mjs tools/publish-machine-data.mjs \
+            research/L_MAGIA_RECORD_RN research/L_GODZILLA_NS research/L_USHIO_TORA_HAKUMEN_VH research/L_AMAZING_LIVE_PD research/L_YOSHIMUNE_SC2 \
+            research/L_MAHJONG_MONOGATARI_S2 research/L_IDOLMASTER_MILLION_LIVE_HC research/L_YOUJITSU_DE research/L_MIDORI_DON_5_FY research/L_GUNDAM_SEED_G \
+            machines/L_MAGIA_RECORD_RN machines/L_GODZILLA_NS machines/L_USHIO_TORA_HAKUMEN_VH machines/L_AMAZING_LIVE_PD machines/L_YOSHIMUNE_SC2 \
+            machines/L_MAHJONG_MONOGATARI_S2 machines/L_IDOLMASTER_MILLION_LIVE_HC machines/L_YOUJITSU_DE machines/L_MIDORI_DON_5_FY machines/L_GUNDAM_SEED_G \
+            build/L_MAGIA_RECORD_RN build/L_GODZILLA_NS build/L_USHIO_TORA_HAKUMEN_VH build/L_AMAZING_LIVE_PD build/L_YOSHIMUNE_SC2 \
+            build/L_MAHJONG_MONOGATARI_S2 build/L_IDOLMASTER_MILLION_LIVE_HC build/L_YOUJITSU_DE build/L_MIDORI_DON_5_FY build/L_GUNDAM_SEED_G \
+            catalog.json difficulty-catalog.json machine-registry.json machine-identity-metadata.json reports/batch-20260901-identity-rebuild-report.json
+          if git diff --cached --quiet; then
+            echo "No identity continuity changes"
+          else
+            git commit -m "fix: preserve batch identity through build and publish"
+            git push
+          fi
