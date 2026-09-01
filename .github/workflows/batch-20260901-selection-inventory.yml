@@ -1,0 +1,65 @@
+name: Batch 20260901 Selection Inventory
+
+on:
+  push:
+    branches:
+      - batch/20260901-magia-gundamseed
+    paths:
+      - '.github/workflows/batch-20260901-selection-inventory.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  inventory:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: batch/20260901-magia-gundamseed
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Build compact Selection inventory
+        shell: bash
+        run: |
+          node --input-type=module <<'EOF'
+          import fs from 'node:fs';
+          const ids = [
+            'L_MAGIA_RECORD_RN','L_GODZILLA_NS','L_USHIO_TORA_HAKUMEN_VH','L_AMAZING_LIVE_PD','L_YOSHIMUNE_SC2',
+            'L_MAHJONG_MONOGATARI_S2','L_IDOLMASTER_MILLION_LIVE_HC','L_YOUJITSU_DE','L_MIDORIDON_VIVA_REVIVAL_FY','L_GUNDAM_SEED_G'
+          ];
+          const out = { schemaVersion:'batch-selection-inventory-v1', generatedAt:new Date().toISOString(), machines:[] };
+          for (const id of ids) {
+            const r = JSON.parse(fs.readFileSync(`research/${id}/research-data.json`, 'utf8'));
+            const features = (r.features ?? []).map(f => {
+              const vals = Object.values(f.settingValues ?? {}).map(v => typeof v === 'number' ? v : v?.probability).filter(Number.isFinite);
+              const dists = f.settingDistributions ?? {};
+              return {
+                id:f.researchFeatureId,name:f.name,factStatus:f.factStatus,model:f.candidateModel,trialUnit:f.trialUnit,
+                numerator:f.numeratorDefinition,denominator:f.denominatorDefinition,categories:f.categories ?? null,
+                distributionMode:f.distributionMode ?? null,settings:Object.keys(f.settingValues ?? {}),
+                min:vals.length?Math.min(...vals):null,max:vals.length?Math.max(...vals):null,
+                ratio:vals.length&&Math.min(...vals)>0?Math.max(...vals)/Math.min(...vals):null,
+                distributionSettings:Object.keys(dists),notes:f.notes ?? null,sourceRefs:f.sourceRefs ?? []
+              };
+            });
+            const evidence = (r.evidenceCandidates ?? r.evidence ?? []).map(e => ({
+              id:e.researchEvidenceId ?? e.evidenceId,name:e.name ?? e.label ?? e.title,factStatus:e.factStatus ?? null,
+              semantic:e.semantic ?? e.evidenceType ?? e.type ?? null,allowedSettings:e.allowedSettings ?? null,excludedSettings:e.excludedSettings ?? null,
+              settingLowerBound:e.settingLowerBound ?? null,settingUpperBound:e.settingUpperBound ?? null,notes:e.notes ?? null,sourceRefs:e.sourceRefs ?? []
+            }));
+            out.machines.push({ machineId:id, displayName:r.machine?.displayName, featureCount:features.length, evidenceCount:evidence.length, conflicts:r.conflicts ?? [], features, evidence });
+          }
+          fs.mkdirSync('reports',{recursive:true});
+          fs.writeFileSync('reports/batch-20260901-selection-inventory.json', JSON.stringify(out,null,2)+'\n');
+          EOF
+      - name: Commit inventory
+        run: |
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git add reports/batch-20260901-selection-inventory.json
+          git commit -m 'selection: add compact 20260901 candidate inventory'
+          git pull --rebase origin batch/20260901-magia-gundamseed
+          git push origin HEAD:batch/20260901-magia-gundamseed
