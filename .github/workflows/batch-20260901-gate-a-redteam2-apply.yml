@@ -1,0 +1,55 @@
+name: Batch 20260901 Gate A Redteam2 Apply
+
+on:
+  push:
+    branches:
+      - batch/20260901-magia-gundamseed
+    paths:
+      - 'tools/apply-batch-20260901-gate-a-redteam2.mjs'
+      - '.github/workflows/batch-20260901-gate-a-redteam2-apply.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  apply-validate:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: batch/20260901-magia-gundamseed
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Apply second distribution sweep
+        run: node tools/apply-batch-20260901-gate-a-redteam2.mjs
+      - name: Validate ResearchData
+        shell: bash
+        run: |
+          set -euo pipefail
+          ids=(L_MAGIA_RECORD_RN L_GODZILLA_NS L_USHIO_TORA_HAKUMEN_VH L_AMAZING_LIVE_PD L_YOSHIMUNE_SC2 L_MAHJONG_MONOGATARI_S2 L_IDOLMASTER_MILLION_LIVE_HC L_YOUJITSU_DE L_MIDORIDON_VIVA_REVIVAL_FY L_GUNDAM_SEED_G)
+          for id in "${ids[@]}"; do node tools/validate-research-data.mjs "research/$id/research-data.json"; done
+      - name: Validate Discovery completeness
+        run: node tools/discovery-completeness-gate.mjs L_MAGIA_RECORD_RN L_GODZILLA_NS L_USHIO_TORA_HAKUMEN_VH L_AMAZING_LIVE_PD L_YOSHIMUNE_SC2 L_MAHJONG_MONOGATARI_S2 L_IDOLMASTER_MILLION_LIVE_HC L_YOUJITSU_DE L_MIDORIDON_VIVA_REVIVAL_FY L_GUNDAM_SEED_G
+      - name: Write final Gate A audit candidate
+        shell: bash
+        run: |
+          node --input-type=module <<'NODE'
+          import fs from 'node:fs';
+          const ids=['L_MAGIA_RECORD_RN','L_GODZILLA_NS','L_USHIO_TORA_HAKUMEN_VH','L_AMAZING_LIVE_PD','L_YOSHIMUNE_SC2','L_MAHJONG_MONOGATARI_S2','L_IDOLMASTER_MILLION_LIVE_HC','L_YOUJITSU_DE','L_MIDORIDON_VIVA_REVIVAL_FY','L_GUNDAM_SEED_G'];
+          let discovered=0,features=0,evidence=0; const machines=[];
+          for(const id of ids){const d=JSON.parse(fs.readFileSync(`research/${id}/research-data.json`,'utf8'));const row={machineId:id,features:d.features.length,evidence:d.evidenceCandidates.length,discovery:d.discoveryInventory.length};machines.push(row);discovered+=row.discovery;features+=row.features;evidence+=row.evidence;}
+          fs.writeFileSync('reports/batch-20260901-gate-a-final-runtime-audit.json',JSON.stringify({schemaVersion:'gate-a-runtime-audit-v3',batch:'20260901-magia-gundamseed',generatedAt:new Date().toISOString(),researchValidation:'PASS',discoveryCompleteness:'PASS',discovered,transferred:discovered,missing:0,featureCandidates:features,evidenceCandidates:evidence,machines},null,2)+'\n');
+          NODE
+      - name: Commit validated Research
+        shell: bash
+        run: |
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git add research reports/batch-20260901-gate-a-final-runtime-audit.json
+          if git diff --cached --quiet; then echo 'No changes'; exit 0; fi
+          git commit -m 'research: complete second Gate A distribution sweep'
+          git pull --rebase origin batch/20260901-magia-gundamseed
+          git push origin HEAD:batch/20260901-magia-gundamseed
