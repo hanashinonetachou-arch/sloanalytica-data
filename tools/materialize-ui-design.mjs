@@ -86,6 +86,7 @@ export function materializeUiDesign(pkg,design){
       ...(typeof section.collapsible==='boolean'?{collapsible:section.collapsible}:{}),
       ...(typeof section.defaultExpanded==='boolean'?{defaultExpanded:section.defaultExpanded}:{}),
       ...(Array.isArray(section.summaryInputIds)?{summaryInputIds:[...section.summaryInputIds]}:{}),
+      ...(Array.isArray(section.subgroups)?{subgroups:section.subgroups.map((group)=>({id:group.id,title:group.title,inputIds:[...(group.inputIds??[])],...(typeof group.collapsible==='boolean'?{collapsible:group.collapsible}:{}),...(typeof group.defaultExpanded==='boolean'?{defaultExpanded:group.defaultExpanded}:{})}))}:{}),
       items,
     });
   }
