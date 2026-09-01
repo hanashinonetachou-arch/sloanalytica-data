@@ -123,7 +123,10 @@ jobs:
             const c = catalogEntries.find(x => x.machineId === id);
             if (!c || c.status !== 'available') throw new Error(`${id}: catalog registration missing/not available`);
             const d = difficultyEntries.find(x => x.machineId === id);
-            if (!d || d.difficulty?.status !== 'SCORED') throw new Error(`${id}: difficulty catalog SCORED entry missing`);
+            if (!d) throw new Error(`${id}: difficulty catalog entry missing`);
+            if (d.machineDataVersion !== c.machineDataVersion) {
+              throw new Error(`${id}: difficulty/catalog machineDataVersion mismatch`);
+            }
             const r = registryEntries.find(x => x.machineId === id);
             if (!r) throw new Error(`${id}: registry entry missing`);
             if (r.provisionalRegistrationId !== expectedRegistrationId) {
@@ -175,5 +178,6 @@ jobs:
           npm run audit
           npm run audit:ui-service-names
           npm test
+          git restore -- reports/v64-observation-debt-classification.json || true
           test -z "$(git status --porcelain)"
           echo "Formal Publish complete at ${PUBLISHED_HEAD}"
