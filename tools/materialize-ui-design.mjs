@@ -11,7 +11,9 @@ function bumpPatch(v){
   if(!m) throw new Error(`machineDataVersion must be semver x.y.z: ${v}`);
   return `${m[1]}.${m[2]}.${Number(m[3])+1}`;
 }
-function widgetFor(input){
+function widgetFor(input,contract){
+  if(contract?.mode==='SELECT') return input.type==='multi_enum'?'multi_select':'select';
+  if(contract?.mode==='COUNTER') return 'counter';
   if(input.type==='enum') return 'select';
   if(input.type==='multi_enum') return 'multi_select';
   if(input.type==='boolean') return 'boolean';
@@ -54,11 +56,16 @@ export function materializeUiDesign(pkg,design){
       const input=inputMap.get(id);
       const c=design.inputContracts?.[id];
       if(!input||!c) throw new Error(`${design.machineId}: invalid section input ${id}`);
+      if(c.inputVisible===false) continue;
       const config={};
       if(c.directInput!==undefined) config.directInput=c.directInput;
       if(c.compact!==undefined) config.compact=c.compact;
       if(c.note) config.note=c.note;
-      const item={type:'input',inputId:id,label:c.name,widget:widgetFor(input)};
+      if(Array.isArray(c.quickAdd)&&c.quickAdd.length) config.quickAdd=[...c.quickAdd];
+      if(c.step!==undefined) config.step=c.step;
+      if(c.emptyMeansUnobserved!==undefined) config.emptyMeansUnobserved=c.emptyMeansUnobserved;
+      if(c.observedZeroAllowed!==undefined) config.observedZeroAllowed=c.observedZeroAllowed;
+      const item={type:'input',inputId:id,label:c.name,widget:widgetFor(input,c)};
       if(c.gridSpan!==undefined) item.gridSpan=c.gridSpan;
       if(Object.keys(config).length) item.config=config;
       items.push(item);
@@ -69,17 +76,21 @@ export function materializeUiDesign(pkg,design){
       const id=evidenceInputId(c.sourceEvidenceGroupId);
       const input=inputMap.get(id);
       if(!input) throw new Error(`${design.machineId}: evidence input missing: ${id}`);
-      items.push({type:'input',inputId:id,label:c.label,widget:widgetFor(input),gridSpan:12});
+      items.push({type:'input',inputId:id,label:c.label,widget:widgetFor(input,c),gridSpan:12});
     }
     sections.push({
       id:`UI_DESIGN_${index+1}`,
       title,
       displayOrder:index+1,
       ...(section.description?{description:section.description}:{}),
+      ...(typeof section.collapsible==='boolean'?{collapsible:section.collapsible}:{}),
+      ...(typeof section.defaultExpanded==='boolean'?{defaultExpanded:section.defaultExpanded}:{}),
+      ...(Array.isArray(section.summaryInputIds)?{summaryInputIds:[...section.summaryInputIds]}:{}),
       items,
     });
   }
   out.ui={...(out.ui??{}),sections};
+  out.metadata={...(out.metadata??{}),uiDesignMaterialized:true,uiDesignSchemaVersion:design.schemaVersion,uiDesignStatus:design.status};
   return out;
 }
 
@@ -116,11 +127,14 @@ function main(){
   const args=process.argv.slice(2);
   const apply=args.includes('--apply');
   const bumpVersion=args.includes('--bump-version');
+  const requireUnchanged=args.includes('--require-unchanged');
   const ids=args.filter(x=>!x.startsWith('--'));
-  if(!ids.length) throw new Error('Usage: materialize-ui-design.mjs [--apply] [--bump-version] MACHINE_ID...');
+  if(!ids.length) throw new Error('Usage: materialize-ui-design.mjs [--apply] [--bump-version] [--require-unchanged] MACHINE_ID...');
   const root=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
-  for(const id of ids) applyOne(root,id,{apply,bumpVersion});
-  console.log(`UI Design materialization ${apply?'APPLY':'DRY_RUN'} PASS: ${ids.length} machine(s)`);
+  let changed=0;
+  for(const id of ids){ const r=applyOne(root,id,{apply,bumpVersion}); if(r.changed) changed++; }
+  if(requireUnchanged&&changed) throw new Error(`UI Design materialization drift: ${changed} machine(s) would change`);
+  console.log(`UI Design materialization ${apply?'APPLY':'DRY_RUN'} PASS: ${ids.length} machine(s) / changed=${changed}`);
 }
 
 const invoked=process.argv[1]&&path.resolve(process.argv[1])===fileURLToPath(import.meta.url);
