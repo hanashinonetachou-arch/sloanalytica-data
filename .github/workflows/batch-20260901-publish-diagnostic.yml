@@ -21,7 +21,7 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
-      - name: Reproduce APPLY and capture failure summary
+      - name: Reproduce APPLY and print audit section only
         shell: bash
         run: |
           set -uo pipefail
@@ -36,10 +36,15 @@ jobs:
             L_IDOLMASTER_MILLION_LIVE_HC \
             L_YOUJITSU_DE \
             L_MIDORIDON_VIVA_REVIVAL_FY \
-            L_GUNDAM_SEED_G 2>&1 | tee /tmp/publish.log
-          status=${PIPESTATUS[0]}
-          echo '===== DIAGNOSTIC MATCHES ====='
-          grep -Ein -C 4 '(^|[^A-Z])(ERROR|FAIL|BLOCK|mismatch|missing|invalid|WARNING)([^A-Z]|$)' /tmp/publish.log | tail -n 240 || true
-          echo '===== FINAL 160 LINES ====='
-          tail -n 160 /tmp/publish.log
+            L_GUNDAM_SEED_G > /tmp/publish.log 2>&1
+          status=$?
+          echo "PUBLISH_EXIT=$status"
+          echo '===== AUDIT SECTION ====='
+          awk '
+            /> sloanalytica-public-data@1.0.0 audit$/ { printing=1 }
+            printing { print }
+            /BATCH ROLLBACK:/ { exit }
+          ' /tmp/publish.log | tail -n 260
+          echo '===== ERROR/WARNING SUMMARY ====='
+          grep -Ein 'ERROR|WARNING|FAIL|BLOCK|mismatch|missing|invalid' /tmp/publish.log | tail -n 120 || true
           exit "$status"
