@@ -4,13 +4,13 @@
   "machineDataVersion":"0.1.0",
   "uiCategoryLabels":{"SMALL_ROLE":"全状態小役","EVIDENCE":"設定確定情報"},
   "inputs":[
-    {"id":"INP_ALL_GAMES","name":"全ゲーム数","type":"integer","category":"SMALL_ROLE","unit":"G","displayOrder":10,"inferenceRole":"INCLUDE_PRIMARY","defaultValue":0,"observationScope":"SELF_PLAY","description":"通常時・ボーナス中・AT中を含む全ゲーム数を入力します。ユニメモの遊技記録を利用できます。"},
-    {"id":"INP_WEAK_CHERRY","name":"弱チェリー","type":"counter","category":"SMALL_ROLE","unit":"回","displayOrder":11,"inferenceRole":"INCLUDE_PRIMARY","defaultValue":null,"parentInputId":"INP_ALL_GAMES","description":"ユニメモ等で確認した弱チェリー回数を入力します。未取得は空欄にしてください。"}
+    {"id":"INP_ALL_GAMES","name":"全ゲーム数","type":"integer","category":"SMALL_ROLE","unit":"G","displayOrder":10,"inferenceRole":"INCLUDE_PRIMARY","defaultValue":0,"observationScope":"SELF_PLAY","description":"通常時・ボーナス中・AT中を含む全ゲーム数を入力します。実機連動機能の遊技記録を利用できます。"},
+    {"id":"INP_WEAK_CHERRY","name":"弱チェリー","type":"counter","category":"SMALL_ROLE","unit":"回","displayOrder":11,"inferenceRole":"INCLUDE_PRIMARY","defaultValue":null,"parentInputId":"INP_ALL_GAMES","description":"実機連動機能等で確認した弱チェリー回数を入力します。未取得は空欄にしてください。"}
   ],
   "features":[
     {"researchFeatureId":"RF_BONUS_INITIAL","featureId":"FEAT_BONUS_INITIAL_EXCLUDED","adoptionCategory":"EXCLUDE","userFacingReason":"ボーナス初当りは小役成立や役別ボーナス当選を下流に含むため、設定差のある弱チェリーと独立二項尤度で同時評価すると同じ因果経路を再利用するため不採用です。"},
     {"researchFeatureId":"RF_AT_INITIAL","featureId":"FEAT_AT_INITIAL_EXCLUDED","adoptionCategory":"EXCLUDE","userFacingReason":"AT初当りは通常時の小役・ボーナス・CZ等の下流結果を集約するため、設定差小役と併用した際の因果重複を避けて不採用です。"},
-    {"researchFeatureId":"RF_WEAK_CHERRY","featureId":"FEAT_WEAK_CHERRY","adoptionCategory":"INCLUDE_PRIMARY","minimumSample":500,"sampleRecommendation":5000,"weight":1,"numeratorInputId":"INP_WEAK_CHERRY","denominatorInputId":"INP_ALL_GAMES","difficultyParticipation":"INCLUDE","difficultyExposure":{"mode":"per_game","factor":1,"quality":"EXACT","basisId":"ALL_GAMES"},"userReason":"全状態ゲームを分母とする設定別確率が明確で発生頻度が高く、ユニメモで自動カウント可能と確認されているため、誤分類の少ない主Featureとして採用します。"},
+    {"researchFeatureId":"RF_WEAK_CHERRY","featureId":"FEAT_WEAK_CHERRY","adoptionCategory":"INCLUDE_PRIMARY","minimumSample":500,"sampleRecommendation":5000,"weight":1,"numeratorInputId":"INP_WEAK_CHERRY","denominatorInputId":"INP_ALL_GAMES","difficultyParticipation":"INCLUDE","difficultyExposure":{"mode":"per_game","factor":1,"quality":"EXACT","basisId":"ALL_GAMES"},"userReason":"全状態ゲームを分母とする設定別確率が明確で発生頻度が高く、実機連動機能で自動カウント可能と確認されているため、誤分類の少ない主Featureとして採用します。"},
     {"researchFeatureId":"RF_WEAK_WAVE","featureId":"FEAT_WEAK_WAVE_EXCLUDED","adoptionCategory":"EXCLUDE","userFacingReason":"弱チェリーと同じ全ゲーム分母上の排他的な小役カテゴリで、別々の二項尤度にすると非該当ゲームを重複評価するため、1G当たり識別情報がより大きい弱チェリーへ一本化します。"},
     {"researchFeatureId":"RF_REACH_REPLAY","featureId":"FEAT_REACH_REPLAY_EXCLUDED","adoptionCategory":"EXCLUDE","userFacingReason":"弱チェリーと同じ全ゲーム分母上の小役カテゴリであるうえ約1/2048～1/2979と低頻度なため、非該当ゲームの二重評価を避けて不採用です。"},
     {"researchFeatureId":"RF_OTHER_TO_HIGH","featureId":"FEAT_OTHER_TO_HIGH_EXCLUDED","adoptionCategory":"EXCLUDE","userFacingReason":"内部の通常滞在を識別し、『その他』成立という複合カテゴリの正しい試行数を数える必要があり、公開分母を実戦で安定再現できないため不採用です。"},
