@@ -1,0 +1,179 @@
+name: Batch 20260901 Formal Publish
+
+on:
+  push:
+    branches:
+      - batch/20260901-magia-gundamseed
+    paths:
+      - '.github/workflows/batch-20260901-publish.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  formal-publish:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout batch branch
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: batch/20260901-magia-gundamseed
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Fetch current integration baseline
+        shell: bash
+        run: |
+          set -euo pipefail
+          git fetch origin prototype-multi-machine:refs/remotes/origin/prototype-multi-machine
+          echo "HEAD=$(git rev-parse HEAD)"
+          echo "PROTOTYPE=$(git rev-parse origin/prototype-multi-machine)"
+          echo "MERGE_BASE=$(git merge-base HEAD origin/prototype-multi-machine)"
+
+      - name: Verify Publish scope and dependency
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse --abbrev-ref HEAD)" = "batch/20260901-magia-gundamseed"
+          test "$(git merge-base HEAD origin/prototype-multi-machine)" = "9b7ab872f0328b1b58f9cc57497c4313213c931a"
+
+          expected=$(cat <<'EOF'
+          L_AMAZING_LIVE_PD
+          L_GODZILLA_NS
+          L_GUNDAM_SEED_G
+          L_IDOLMASTER_MILLION_LIVE_HC
+          L_MAGIA_RECORD_RN
+          L_MAHJONG_MONOGATARI_S2
+          L_MIDORIDON_VIVA_REVIVAL_FY
+          L_USHIO_TORA_HAKUMEN_VH
+          L_YOSHIMUNE_SC2
+          L_YOUJITSU_DE
+          EOF
+          )
+          actual=$(git diff --name-only "$(git merge-base HEAD origin/prototype-multi-machine)"...HEAD -- 'machines/*/machine-package.json' \
+            | sed -nE 's#^machines/([^/]+)/machine-package\.json$#\1#p' \
+            | sort)
+          printf 'Expected machine scope:\n%s\n' "$expected"
+          printf 'Actual machine scope:\n%s\n' "$actual"
+          test "$actual" = "$expected"
+
+      - name: Batch Publish dry run
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm run machine:publish:batch -- \
+            L_MAGIA_RECORD_RN \
+            L_GODZILLA_NS \
+            L_USHIO_TORA_HAKUMEN_VH \
+            L_AMAZING_LIVE_PD \
+            L_YOSHIMUNE_SC2 \
+            L_MAHJONG_MONOGATARI_S2 \
+            L_IDOLMASTER_MILLION_LIVE_HC \
+            L_YOUJITSU_DE \
+            L_MIDORIDON_VIVA_REVIVAL_FY \
+            L_GUNDAM_SEED_G
+
+      - name: Formal Publish APPLY
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm run machine:publish:batch -- --apply \
+            L_MAGIA_RECORD_RN \
+            L_GODZILLA_NS \
+            L_USHIO_TORA_HAKUMEN_VH \
+            L_AMAZING_LIVE_PD \
+            L_YOSHIMUNE_SC2 \
+            L_MAHJONG_MONOGATARI_S2 \
+            L_IDOLMASTER_MILLION_LIVE_HC \
+            L_YOUJITSU_DE \
+            L_MIDORIDON_VIVA_REVIVAL_FY \
+            L_GUNDAM_SEED_G
+
+      - name: Validate registry and publication contracts
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm run registry:validate
+          node --input-type=module <<'NODE'
+          import fs from 'node:fs';
+          const ids = [
+            ['L_MAGIA_RECORD_RN', 192],
+            ['L_GODZILLA_NS', 193],
+            ['L_USHIO_TORA_HAKUMEN_VH', 194],
+            ['L_AMAZING_LIVE_PD', 195],
+            ['L_YOSHIMUNE_SC2', 196],
+            ['L_MAHJONG_MONOGATARI_S2', 197],
+            ['L_IDOLMASTER_MILLION_LIVE_HC', 198],
+            ['L_YOUJITSU_DE', 199],
+            ['L_MIDORIDON_VIVA_REVIVAL_FY', 200],
+            ['L_GUNDAM_SEED_G', 201],
+          ];
+          const catalog = JSON.parse(fs.readFileSync('catalog.json', 'utf8'));
+          const difficulty = JSON.parse(fs.readFileSync('difficulty-catalog.json', 'utf8'));
+          const registry = JSON.parse(fs.readFileSync('machine-registry.json', 'utf8'));
+          const catalogEntries = Array.isArray(catalog) ? catalog : (catalog.machines ?? catalog.entries ?? []);
+          const difficultyEntries = Array.isArray(difficulty) ? difficulty : (difficulty.entries ?? difficulty.machines ?? []);
+          const registryEntries = Array.isArray(registry) ? registry : (registry.machines ?? registry.entries ?? []);
+          for (const [id, expectedRegistrationId] of ids) {
+            const c = catalogEntries.find(x => x.machineId === id);
+            if (!c || c.status !== 'available') throw new Error(`${id}: catalog registration missing/not available`);
+            const d = difficultyEntries.find(x => x.machineId === id);
+            if (!d || d.difficulty?.status !== 'SCORED') throw new Error(`${id}: difficulty catalog SCORED entry missing`);
+            const r = registryEntries.find(x => x.machineId === id);
+            if (!r) throw new Error(`${id}: registry entry missing`);
+            if (r.provisionalRegistrationId !== expectedRegistrationId) {
+              throw new Error(`${id}: provisionalRegistrationId ${r.provisionalRegistrationId} != ${expectedRegistrationId}`);
+            }
+          }
+          console.log('PASS: catalog/difficulty/registry entries verified for provisional IDs 192-201');
+          NODE
+
+      - name: Preserve known timestamp-only legacy report
+        shell: bash
+        run: |
+          set -euo pipefail
+          git restore -- reports/v64-observation-debt-classification.json || true
+
+      - name: Verify Publish mutation allowlist
+        shell: bash
+        run: |
+          set -euo pipefail
+          git status --short
+          unexpected=$(git status --porcelain \
+            | sed -E 's/^...//' \
+            | grep -Ev '^(catalog\.json|difficulty-catalog\.json|machine-registry\.json)$' || true)
+          if [[ -n "$unexpected" ]]; then
+            echo 'Unexpected Publish-side mutation(s):'
+            echo "$unexpected"
+            exit 1
+          fi
+          for f in catalog.json difficulty-catalog.json machine-registry.json; do
+            git diff --quiet -- "$f" && { echo "Expected Publish mutation missing: $f"; exit 1; } || true
+          done
+
+      - name: Commit Formal Publish outputs
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add catalog.json difficulty-catalog.json machine-registry.json
+          git commit -m 'Publish 20260901 Magia Record to Gundam SEED batch'
+          git push origin HEAD:batch/20260901-magia-gundamseed
+          echo "PUBLISHED_HEAD=$(git rev-parse HEAD)" >> "$GITHUB_ENV"
+
+      - name: Final published-state checks
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm run registry:validate
+          npm run audit
+          npm run audit:ui-service-names
+          npm test
+          test -z "$(git status --porcelain)"
+          echo "Formal Publish complete at ${PUBLISHED_HEAD}"
