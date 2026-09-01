@@ -302,7 +302,7 @@
         "SRC_NANA_MODE"
       ],
       "crossSourceStatus": "single_source",
-      "notes": "公開値は丸めを含む。Research原値を保持し、採用時のみ正規化可否を判断する。"
+      "notes": "設定別の内部魔法少女モード振り分け。アイキャッチ・会話は滞在示唆であり、各試行の真のモードを確定観測する表示ではない。公開された示唆挙動から6カテゴリの真値を復元できる完全なemission modelも確認できないため、Selectionではlatent-state observability gateを適用する。"
     },
     {
       "researchFeatureId": "RF_OTHER_CONDITIONAL_LOTTERIES",
@@ -391,16 +391,16 @@
         "SRC_NANA_BIG"
       ],
       "crossSourceStatus": "single_source",
-      "notes": "ボーナス終了時かついろはモードの条件付き分布。AT終了/有利区間移行時のRF_MODE_AT_ENDとは別試行。公開丸め値を保持。"
+      "notes": "ボーナス終了時かついろはモードからの内部昇格分布。画面・会話は滞在示唆であり真の6カテゴリを確定観測できないため、公開分布そのものをユーザー入力カテゴリとして扱わない。"
     },
     {
       "researchFeatureId": "RF_EPISODE_BONUS_TYPE",
       "name": "エピソードボーナス選択率",
       "factStatus": "verified",
       "candidateModel": "multinomial",
-      "trialUnit": "通常条件のエピソードボーナス当選1回",
+      "trialUnit": "通常の設定別エピソード選択抽選が行われた機会1回",
       "numeratorDefinition": "やちよ/鶴乃/さな/フェリシア/黒江各エピソード選択回数",
-      "denominatorDefinition": "黒江チャレンジ経由を除く通常条件のエピソードボーナス当選回数",
+      "denominatorDefinition": "通常の設定別エピソード選択抽選が実際に行われた回数。黒江チャレンジ成功、ドッペルモード、ロングフリーズ、その他選択先固定・強制経路を除外",
       "categories": [
         "YACHIYO",
         "TSURUNO",
@@ -458,7 +458,7 @@
         "SRC_NANA_EP"
       ],
       "crossSourceStatus": "single_source",
-      "notes": "黒江チャレンジ経由は必ず黒江のため除外。公開丸め値をResearch原値として保持。"
+      "notes": "黒江チャレンジ成功時は黒江エピソード固定、ドッペルモードは「いろは」固定、ロングフリーズは「うい」固定で通常の5カテゴリ設定別抽選とは別母集団。強制経路は分母・分子の双方から除外する。公開丸め値はResearch原値として保持。"
     },
     {
       "researchFeatureId": "RF_HIGH_TRANSITION_ADV_AT_END",
@@ -518,7 +518,7 @@
         "SRC_NANA_SETTING_FULL"
       ],
       "crossSourceStatus": "single_source",
-      "notes": "公開トータル25.0～33.7%と整合。"
+      "notes": "有利区間移行・AT終了時の内部高確保証G数振り分け。高確示唆ステージ等は存在するが、各抽選の初期HIGH10/HIGH20/HIGH30/NONEを毎回確定観測できる公開Observationは確認できない。"
     },
     {
       "researchFeatureId": "RF_HIGH_TRANSITION_BIG_END",
@@ -578,7 +578,7 @@
         "SRC_NANA_SETTING_FULL"
       ],
       "crossSourceStatus": "single_source",
-      "notes": "AT非当選BIG終了という条件を維持。公開トータル33.7～50.0%と整合。"
+      "notes": "AT非当選BIG終了時の内部高確保証G数振り分け。レア役等による保証G上乗せもあり、初期HIGH10/HIGH20/HIGH30/NONEを毎回確定分類するObservationは確認できない。"
     },
     {
       "researchFeatureId": "RF_WATERMELON_CZ",
@@ -631,7 +631,7 @@
         "SRC_NANA_SETTING_FULL"
       ],
       "crossSourceStatus": "single_source",
-      "notes": "さなモードは抽選契約が異なるため除外。"
+      "notes": "公開値は「さなモード以外」のスイカ成立を分母とする。さなモード滞在は直接確定できず示唆からの推定になるため、ユーザーが各スイカを正しいtrial universeへ分類できない。現行の条件付きmultinomialはSelectionで不採用。"
     },
     {
       "researchFeatureId": "RF_MITAMA_LEVEL2_AT",
@@ -941,6 +941,82 @@
         "SRC_NANA_ENDING"
       ],
       "notes": "否定Evidenceに高設定示唆も併記されるがHard部分は設定否定のみ。"
+    },
+    {
+      "researchEvidenceId": "RE_STORY_ORDER_DENY1",
+      "name": "ストーリー5話スタート後 設定1否定パターン",
+      "factStatus": "verified",
+      "allowedSettings": [
+        "SET_2",
+        "SET_3",
+        "SET_4",
+        "SET_5",
+        "SET_6"
+      ],
+      "deniedSettings": [
+        "SET_1"
+      ],
+      "sourceRefs": [
+        "SRC_NANA_SETTING_FULL"
+      ],
+      "notes": "1→2→3→4 または 4→3→1→2。後者は高設定示唆も併記されるがHard部分は設定1否定。"
+    },
+    {
+      "researchEvidenceId": "RE_STORY_ORDER_DENY2",
+      "name": "ストーリー5話スタート後 設定2否定パターン",
+      "factStatus": "verified",
+      "allowedSettings": [
+        "SET_1",
+        "SET_3",
+        "SET_4",
+        "SET_5",
+        "SET_6"
+      ],
+      "deniedSettings": [
+        "SET_2"
+      ],
+      "sourceRefs": [
+        "SRC_NANA_SETTING_FULL"
+      ],
+      "notes": "2→1→3→4 または 4→2→1→3。"
+    },
+    {
+      "researchEvidenceId": "RE_STORY_ORDER_DENY3",
+      "name": "ストーリー5話スタート後 設定3否定パターン",
+      "factStatus": "verified",
+      "allowedSettings": [
+        "SET_1",
+        "SET_2",
+        "SET_4",
+        "SET_5",
+        "SET_6"
+      ],
+      "deniedSettings": [
+        "SET_3"
+      ],
+      "sourceRefs": [
+        "SRC_NANA_SETTING_FULL"
+      ],
+      "notes": "3→1→2→4。"
+    },
+    {
+      "researchEvidenceId": "RE_STORY_ORDER_5PLUS",
+      "name": "ストーリー5話スタート後 4→3→2→1",
+      "factStatus": "verified",
+      "allowedSettings": [
+        "SET_5",
+        "SET_6"
+      ],
+      "deniedSettings": [
+        "SET_1",
+        "SET_2",
+        "SET_3",
+        "SET_4"
+      ],
+      "sourceRefs": [
+        "SRC_NANA_SETTING_FULL"
+      ],
+      "notes": "設定5 or 6濃厚。"
     }
   ],
   "linkedServiceResearch": {
@@ -1102,6 +1178,26 @@
       "discoveryCandidateId": "D_MITAMA_LEVEL3_AT_EXACT",
       "name": "みたまLv3ウワサ後AT全設定値",
       "researchTarget": "RF_MITAMA_LEVEL3_AT"
+    },
+    {
+      "discoveryCandidateId": "D_STORY_ORDER_DENY1",
+      "name": "ストーリー5話スタート後 設定1否定パターン",
+      "researchTarget": "RE_STORY_ORDER_DENY1"
+    },
+    {
+      "discoveryCandidateId": "D_STORY_ORDER_DENY2",
+      "name": "ストーリー5話スタート後 設定2否定パターン",
+      "researchTarget": "RE_STORY_ORDER_DENY2"
+    },
+    {
+      "discoveryCandidateId": "D_STORY_ORDER_DENY3",
+      "name": "ストーリー5話スタート後 設定3否定パターン",
+      "researchTarget": "RE_STORY_ORDER_DENY3"
+    },
+    {
+      "discoveryCandidateId": "D_STORY_ORDER_5PLUS",
+      "name": "ストーリー5話スタート後 4→3→2→1",
+      "researchTarget": "RE_STORY_ORDER_5PLUS"
     }
   ]
 }
