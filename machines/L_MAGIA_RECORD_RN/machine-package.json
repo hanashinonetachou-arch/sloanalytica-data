@@ -3,7 +3,7 @@
   "machine": {
     "schemaVersion": "2.0.0",
     "machineId": "L_MAGIA_RECORD_RN",
-    "machineDataVersion": "0.1.1",
+    "machineDataVersion": "0.1.2",
     "displayName": "スマスロ マギアレコード 魔法少女まどか☆マギカ外伝",
     "modelName": "L／スマスロマギアレコード／RN",
     "manufacturer": "ミズホ",
@@ -25,6 +25,17 @@
     "schemaVersion": "2.0.0",
     "inputs": [
       {
+        "id": "INP_NORMAL_GAME_COUNT",
+        "name": "有効通常ゲーム数",
+        "category": "COMMON_NORMAL_GAMES",
+        "type": "integer",
+        "unit": "G",
+        "displayOrder": 5,
+        "inferenceRole": "INCLUDE_PRIMARY",
+        "defaultValue": "",
+        "minimum": 0
+      },
+      {
         "id": "INP_BONUS_FIRST_HIT_COUNT",
         "name": "ボーナス初当り 回数",
         "category": "SEL_RF_BONUS_FIRST_HIT",
@@ -36,34 +47,12 @@
         "minimum": 0
       },
       {
-        "id": "INP_BONUS_FIRST_HIT_TRIALS",
-        "name": "ボーナス初当り 試行数",
-        "category": "SEL_RF_BONUS_FIRST_HIT",
-        "type": "integer",
-        "unit": "回",
-        "displayOrder": 11,
-        "inferenceRole": "INCLUDE_FALLBACK",
-        "defaultValue": "",
-        "minimum": 0
-      },
-      {
         "id": "INP_AT_FIRST_HIT_COUNT",
         "name": "マギアラッシュ初当り 回数",
         "category": "SEL_RF_AT_FIRST_HIT",
         "type": "counter",
         "unit": "回",
         "displayOrder": 15,
-        "inferenceRole": "INCLUDE_PRIMARY",
-        "defaultValue": "",
-        "minimum": 0
-      },
-      {
-        "id": "INP_AT_FIRST_HIT_TRIALS",
-        "name": "マギアラッシュ初当り 試行数",
-        "category": "SEL_RF_AT_FIRST_HIT",
-        "type": "integer",
-        "unit": "回",
-        "displayOrder": 16,
         "inferenceRole": "INCLUDE_PRIMARY",
         "defaultValue": "",
         "minimum": 0
@@ -147,7 +136,7 @@
       },
       {
         "id": "INP_MITAMA_LEVEL2_AT_COUNT",
-        "name": "みたま報酬Lv2 ウワサ発展後AT当選 回数",
+        "name": "Lv2 AT当選",
         "category": "SEL_RF_MITAMA_LEVEL2_AT",
         "type": "counter",
         "unit": "回",
@@ -158,9 +147,9 @@
       },
       {
         "id": "INP_MITAMA_LEVEL2_AT_TRIALS",
-        "name": "みたま報酬Lv2 ウワサ発展後AT当選 試行数",
+        "name": "Lv2 試行",
         "category": "SEL_RF_MITAMA_LEVEL2_AT",
-        "type": "integer",
+        "type": "counter",
         "unit": "回",
         "displayOrder": 61,
         "inferenceRole": "INCLUDE_FALLBACK",
@@ -169,7 +158,7 @@
       },
       {
         "id": "INP_MITAMA_LEVEL3_AT_COUNT",
-        "name": "みたま報酬Lv3 ウワサ発展後AT当選 回数",
+        "name": "Lv3 AT当選",
         "category": "SEL_RF_MITAMA_LEVEL3_AT",
         "type": "counter",
         "unit": "回",
@@ -180,9 +169,9 @@
       },
       {
         "id": "INP_MITAMA_LEVEL3_AT_TRIALS",
-        "name": "みたま報酬Lv3 ウワサ発展後AT当選 試行数",
+        "name": "Lv3 試行",
         "category": "SEL_RF_MITAMA_LEVEL3_AT",
-        "type": "integer",
+        "type": "counter",
         "unit": "回",
         "displayOrder": 66,
         "inferenceRole": "INCLUDE_FALLBACK",
@@ -385,7 +374,7 @@
         "suppressedByFeatureIds": [
           "FEAT_AT_FIRST_HIT"
         ],
-        "denominatorInputId": "INP_BONUS_FIRST_HIT_TRIALS",
+        "denominatorInputId": "INP_NORMAL_GAME_COUNT",
         "numeratorInputId": "INP_BONUS_FIRST_HIT_COUNT",
         "displayFormat": "ratio_1_over_n",
         "probabilities": {
@@ -412,7 +401,7 @@
         "reliabilityProfile": {
           "weight": 1
         },
-        "denominatorInputId": "INP_AT_FIRST_HIT_TRIALS",
+        "denominatorInputId": "INP_NORMAL_GAME_COUNT",
         "numeratorInputId": "INP_AT_FIRST_HIT_COUNT",
         "displayFormat": "ratio_1_over_n",
         "probabilities": {
@@ -981,9 +970,34 @@
     "sections": [
       {
         "id": "UI_DESIGN_1",
-        "title": "ボーナス初当り",
+        "title": "通常ゲーム数",
         "displayOrder": 1,
-        "description": "自己実戦中、SelectionDataで定義された対象試行・対象イベント成立時に更新",
+        "description": "ボーナス初当り・マギアラッシュ初当りの共通分母です。通常時に回した有効ゲーム数を入力します。ボーナス・AT・CZ中など、通常時の初当り抽選を受けていないゲームは含めません。",
+        "collapsible": false,
+        "defaultExpanded": true,
+        "items": [
+          {
+            "type": "input",
+            "inputId": "INP_NORMAL_GAME_COUNT",
+            "label": "有効通常ゲーム数",
+            "widget": "number",
+            "gridSpan": 12,
+            "config": {
+              "directInput": true,
+              "quickAdd": [
+                50
+              ],
+              "emptyMeansUnobserved": true,
+              "observedZeroAllowed": true
+            }
+          }
+        ]
+      },
+      {
+        "id": "UI_DESIGN_2",
+        "title": "ボーナス初当り",
+        "displayOrder": 2,
+        "description": "通常時から当選したボーナス初当り回数。分母は上の「有効通常ゲーム数」を共通利用します。",
         "collapsible": false,
         "defaultExpanded": true,
         "items": [
@@ -1003,29 +1017,14 @@
               "emptyMeansUnobserved": true,
               "observedZeroAllowed": true
             }
-          },
-          {
-            "type": "input",
-            "inputId": "INP_BONUS_FIRST_HIT_TRIALS",
-            "label": "ボーナス初当り 試行数",
-            "widget": "number",
-            "gridSpan": 12,
-            "config": {
-              "directInput": true,
-              "quickAdd": [
-                50
-              ],
-              "emptyMeansUnobserved": true,
-              "observedZeroAllowed": true
-            }
           }
         ]
       },
       {
-        "id": "UI_DESIGN_2",
+        "id": "UI_DESIGN_3",
         "title": "マギアラッシュ初当り",
-        "displayOrder": 2,
-        "description": "自己実戦中、SelectionDataで定義された対象試行・対象イベント成立時に更新",
+        "displayOrder": 3,
+        "description": "通常時から当選したマギアラッシュ初当り回数。分母は上の「有効通常ゲーム数」を共通利用します。",
         "collapsible": false,
         "defaultExpanded": true,
         "items": [
@@ -1045,28 +1044,13 @@
               "emptyMeansUnobserved": true,
               "observedZeroAllowed": true
             }
-          },
-          {
-            "type": "input",
-            "inputId": "INP_AT_FIRST_HIT_TRIALS",
-            "label": "マギアラッシュ初当り 試行数",
-            "widget": "number",
-            "gridSpan": 12,
-            "config": {
-              "directInput": true,
-              "quickAdd": [
-                50
-              ],
-              "emptyMeansUnobserved": true,
-              "observedZeroAllowed": true
-            }
           }
         ]
       },
       {
-        "id": "UI_DESIGN_3",
+        "id": "UI_DESIGN_4",
         "title": "弱チェリー",
-        "displayOrder": 3,
+        "displayOrder": 4,
         "description": "自己実戦中、SelectionDataで定義された対象試行・対象イベント成立時に更新",
         "collapsible": false,
         "defaultExpanded": true,
@@ -1106,9 +1090,9 @@
         ]
       },
       {
-        "id": "UI_DESIGN_4",
+        "id": "UI_DESIGN_5",
         "title": "エピソードボーナス選択率",
-        "displayOrder": 4,
+        "displayOrder": 5,
         "description": "通常の設定別エピソード選択抽選が行われた回だけ入力します。黒江チャレンジ成功、ドッペルモード、ロングフリーズなど、選択先が固定される経路は除外してください。",
         "collapsible": false,
         "defaultExpanded": true,
@@ -1201,61 +1185,19 @@
         ]
       },
       {
-        "id": "UI_DESIGN_5",
-        "title": "みたま報酬Lv2 ウワサ発展後AT当選",
-        "displayOrder": 5,
-        "description": "自己実戦中、SelectionDataで定義された対象試行・対象イベント成立時に更新",
+        "id": "UI_DESIGN_6",
+        "title": "みたま報酬",
+        "displayOrder": 6,
+        "description": "ウワサ発展1回ごとに該当Lvの「試行」を+1。ATに当選した場合は同じLvの「AT当選」も+1します。",
         "collapsible": false,
         "defaultExpanded": true,
         "items": [
-          {
-            "type": "input",
-            "inputId": "INP_MITAMA_LEVEL2_AT_COUNT",
-            "label": "みたま報酬Lv2 ウワサ発展後AT当選 回数",
-            "widget": "counter",
-            "gridSpan": 12,
-            "config": {
-              "directInput": false,
-              "compact": true,
-              "quickAdd": [
-                1
-              ],
-              "step": 1,
-              "emptyMeansUnobserved": true,
-              "observedZeroAllowed": true
-            }
-          },
           {
             "type": "input",
             "inputId": "INP_MITAMA_LEVEL2_AT_TRIALS",
-            "label": "みたま報酬Lv2 ウワサ発展後AT当選 試行数",
-            "widget": "number",
-            "gridSpan": 12,
-            "config": {
-              "directInput": true,
-              "quickAdd": [
-                50
-              ],
-              "emptyMeansUnobserved": true,
-              "observedZeroAllowed": true
-            }
-          }
-        ]
-      },
-      {
-        "id": "UI_DESIGN_6",
-        "title": "みたま報酬Lv3 ウワサ発展後AT当選",
-        "displayOrder": 6,
-        "description": "自己実戦中、SelectionDataで定義された対象試行・対象イベント成立時に更新",
-        "collapsible": false,
-        "defaultExpanded": true,
-        "items": [
-          {
-            "type": "input",
-            "inputId": "INP_MITAMA_LEVEL3_AT_COUNT",
-            "label": "みたま報酬Lv3 ウワサ発展後AT当選 回数",
+            "label": "Lv2 試行",
             "widget": "counter",
-            "gridSpan": 12,
+            "gridSpan": 6,
             "config": {
               "directInput": false,
               "compact": true,
@@ -1270,14 +1212,50 @@
           {
             "type": "input",
             "inputId": "INP_MITAMA_LEVEL3_AT_TRIALS",
-            "label": "みたま報酬Lv3 ウワサ発展後AT当選 試行数",
-            "widget": "number",
-            "gridSpan": 12,
+            "label": "Lv3 試行",
+            "widget": "counter",
+            "gridSpan": 6,
             "config": {
-              "directInput": true,
+              "directInput": false,
+              "compact": true,
               "quickAdd": [
-                50
+                1
               ],
+              "step": 1,
+              "emptyMeansUnobserved": true,
+              "observedZeroAllowed": true
+            }
+          },
+          {
+            "type": "input",
+            "inputId": "INP_MITAMA_LEVEL2_AT_COUNT",
+            "label": "Lv2 AT当選",
+            "widget": "counter",
+            "gridSpan": 6,
+            "config": {
+              "directInput": false,
+              "compact": true,
+              "quickAdd": [
+                1
+              ],
+              "step": 1,
+              "emptyMeansUnobserved": true,
+              "observedZeroAllowed": true
+            }
+          },
+          {
+            "type": "input",
+            "inputId": "INP_MITAMA_LEVEL3_AT_COUNT",
+            "label": "Lv3 AT当選",
+            "widget": "counter",
+            "gridSpan": 6,
+            "config": {
+              "directInput": false,
+              "compact": true,
+              "quickAdd": [
+                1
+              ],
+              "step": 1,
               "emptyMeansUnobserved": true,
               "observedZeroAllowed": true
             }
@@ -1286,69 +1264,11 @@
       },
       {
         "id": "UI_DESIGN_7",
-        "title": "設定示唆・確定情報",
+        "title": "BIG終了画面",
         "displayOrder": 7,
-        "description": "実戦中に確認できた設定示唆・設定確定情報だけを入力します。通常の確率Featureとは区別して扱います。",
+        "description": "BIG終了画面で確認した確定系だけ入力します。",
         "collapsible": false,
         "defaultExpanded": true,
-        "subgroups": [
-          {
-            "id": "BIG_END_SCREEN",
-            "title": "BIG終了画面",
-            "inputIds": [
-              "INP_BIG_END_2PLUS_COUNT",
-              "INP_BIG_END_4PLUS_COUNT",
-              "INP_BIG_END_5PLUS_COUNT",
-              "INP_BIG_END_6_COUNT"
-            ],
-            "collapsible": false,
-            "defaultExpanded": true
-          },
-          {
-            "id": "AT_END_SCREEN",
-            "title": "AT終了画面",
-            "inputIds": [
-              "INP_AT_END_6_COUNT"
-            ],
-            "collapsible": false,
-            "defaultExpanded": true
-          },
-          {
-            "id": "ENDING_CARD",
-            "title": "エンディングカード",
-            "inputIds": [
-              "INP_END_CARD_4PLUS_COUNT",
-              "INP_END_CARD_DENY1_COUNT",
-              "INP_END_CARD_DENY2_COUNT",
-              "INP_END_CARD_DENY3_COUNT",
-              "INP_END_CARD_DENY4_PENDULUM_COUNT",
-              "INP_END_CARD_DENY4_NIGHTJAR_COUNT"
-            ],
-            "collapsible": true,
-            "defaultExpanded": false
-          },
-          {
-            "id": "STORY_COMPLETE",
-            "title": "ストーリーコンプリート",
-            "inputIds": [
-              "INP_STORY_5PLUS_COUNT"
-            ],
-            "collapsible": true,
-            "defaultExpanded": false
-          },
-          {
-            "id": "STORY_ORDER",
-            "title": "ストーリー5話開始",
-            "inputIds": [
-              "INP_STORY_ORDER_DENY1_COUNT",
-              "INP_STORY_ORDER_DENY2_COUNT",
-              "INP_STORY_ORDER_DENY3_COUNT",
-              "INP_STORY_ORDER_5PLUS_COUNT"
-            ],
-            "collapsible": true,
-            "defaultExpanded": false
-          }
-        ],
         "items": [
           {
             "type": "input",
@@ -1417,7 +1337,17 @@
               "emptyMeansUnobserved": true,
               "observedZeroAllowed": true
             }
-          },
+          }
+        ]
+      },
+      {
+        "id": "UI_DESIGN_8",
+        "title": "AT終了画面",
+        "displayOrder": 8,
+        "description": "AT終了画面で確認した確定系だけ入力します。",
+        "collapsible": false,
+        "defaultExpanded": true,
+        "items": [
           {
             "type": "input",
             "inputId": "INP_AT_END_6_COUNT",
@@ -1434,24 +1364,17 @@
               "emptyMeansUnobserved": true,
               "observedZeroAllowed": true
             }
-          },
-          {
-            "type": "input",
-            "inputId": "INP_STORY_5PLUS_COUNT",
-            "label": "シナリオ⑨（小さいキュゥべえ）",
-            "widget": "counter",
-            "gridSpan": 12,
-            "config": {
-              "directInput": false,
-              "compact": true,
-              "quickAdd": [
-                1
-              ],
-              "step": 1,
-              "emptyMeansUnobserved": true,
-              "observedZeroAllowed": true
-            }
-          },
+          }
+        ]
+      },
+      {
+        "id": "UI_DESIGN_9",
+        "title": "エンディングカード",
+        "displayOrder": 9,
+        "description": "エンディングで確認したカードを入力します。",
+        "collapsible": true,
+        "defaultExpanded": false,
+        "items": [
           {
             "type": "input",
             "inputId": "INP_END_CARD_4PLUS_COUNT",
@@ -1553,7 +1476,44 @@
               "emptyMeansUnobserved": true,
               "observedZeroAllowed": true
             }
-          },
+          }
+        ]
+      },
+      {
+        "id": "UI_DESIGN_10",
+        "title": "ストーリーコンプリート",
+        "displayOrder": 10,
+        "description": "ストーリーコンプリート時のキャラ紹介シナリオを入力します。",
+        "collapsible": true,
+        "defaultExpanded": false,
+        "items": [
+          {
+            "type": "input",
+            "inputId": "INP_STORY_5PLUS_COUNT",
+            "label": "シナリオ⑨（小さいキュゥべえ）",
+            "widget": "counter",
+            "gridSpan": 12,
+            "config": {
+              "directInput": false,
+              "compact": true,
+              "quickAdd": [
+                1
+              ],
+              "step": 1,
+              "emptyMeansUnobserved": true,
+              "observedZeroAllowed": true
+            }
+          }
+        ]
+      },
+      {
+        "id": "UI_DESIGN_11",
+        "title": "ストーリー5話開始",
+        "displayOrder": 11,
+        "description": "5話開始時のキャラ紹介順を確認して入力します。",
+        "collapsible": true,
+        "defaultExpanded": false,
+        "items": [
           {
             "type": "input",
             "inputId": "INP_STORY_ORDER_DENY1_COUNT",
