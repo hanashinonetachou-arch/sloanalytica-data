@@ -1,0 +1,52 @@
+name: Magia Device UX2
+on:
+  push:
+    branches: [fix/20260902-magia-device-ux2]
+    paths:
+      - tools/apply-magia-device-ux2.mjs
+      - .github/workflows/magia-device-ux2.yml
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: fix/20260902-magia-device-ux2
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: node tools/apply-magia-device-ux2.mjs
+      - run: npm run ui-design:validate
+      - run: npm run machine:pipeline -- L_MAGIA_RECORD_RN --skip-repo-checks
+      - name: UX contract
+        run: |
+          node - <<'NODE'
+          const fs=require('fs');
+          const p=JSON.parse(fs.readFileSync('machines/L_MAGIA_RECORD_RN/machine-package.json','utf8'));
+          const inputs=p.inputs.inputs; const feat=p.features.features; const ui=p.ui.sections;
+          const normal=inputs.find(i=>i.id==='INP_NORMAL_GAME_COUNT');
+          if(!normal||normal.name!=='有効通常ゲーム数') throw new Error('common normal-game input missing');
+          for(const id of ['FEAT_BONUS_FIRST_HIT','FEAT_AT_FIRST_HIT']) if(feat.find(f=>f.featureId===id)?.denominatorInputId!=='INP_NORMAL_GAME_COUNT') throw new Error(`${id} denominator mismatch`);
+          if(!ui.find(s=>s.title==='エンディングカード')||!ui.find(s=>s.title==='ストーリー5話開始')) throw new Error('evidence UI sections missing');
+          const m=ui.find(s=>s.title==='みたま報酬'); if(!m) throw new Error('Mitama section missing');
+          const ids=m.items.map(x=>x.inputId); const expected=['INP_MITAMA_LEVEL2_AT_TRIALS','INP_MITAMA_LEVEL3_AT_TRIALS','INP_MITAMA_LEVEL2_AT_COUNT','INP_MITAMA_LEVEL3_AT_COUNT'];
+          if(JSON.stringify(ids)!==JSON.stringify(expected)) throw new Error(`Mitama order mismatch ${ids}`);
+          for(const id of expected){const item=m.items.find(x=>x.inputId===id);if(item.gridSpan!==6) throw new Error(`${id} not 6-col`);}
+          for(const id of ['INP_MITAMA_LEVEL2_AT_TRIALS','INP_MITAMA_LEVEL3_AT_TRIALS']) if(inputs.find(i=>i.id===id)?.type!=='counter') throw new Error(`${id} not counter`);
+          console.log('Magia UX2 contract PASS');
+          NODE
+      - run: npm run ui-design:test
+      - run: npm test
+      - run: npm run audit
+      - name: Persist generated changes
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add research/L_MAGIA_RECORD_RN machines/L_MAGIA_RECORD_RN catalog.json difficulty-catalog.json machine-registry.json reports tools/machine-pipeline.mjs tools/materialize-ui-design.mjs 2>/dev/null || true
+          if git diff --cached --quiet; then exit 0; fi
+          git commit -m 'ui: refine Magia device input layout'
+          git push origin HEAD:fix/20260902-magia-device-ux2
