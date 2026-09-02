@@ -14,18 +14,8 @@
       "defaultValue": ""
     },
     {
-      "id": "INP_BONUS_FIRST_HIT_TRIALS",
-      "name": "BIG/REG初当り 試行数",
-      "category": "SEL_RF_BONUS_FIRST_HIT",
-      "type": "integer",
-      "unit": "回",
-      "displayOrder": 11,
-      "inferenceRole": "INCLUDE_PRIMARY",
-      "defaultValue": ""
-    },
-    {
       "id": "INP_COMMON_TAWARA_COUNT",
-      "name": "共通俵 回数",
+      "name": "共通12枚俵 回数",
       "category": "SEL_RF_COMMON_TAWARA",
       "type": "counter",
       "unit": "回",
@@ -35,11 +25,11 @@
     },
     {
       "id": "INP_COMMON_TAWARA_TRIALS",
-      "name": "通常時小役 集計G",
+      "name": "通常プレイ数",
       "category": "SEL_RF_COMMON_TAWARA",
       "type": "integer",
       "unit": "G",
-      "displayOrder": 16,
+      "displayOrder": 17,
       "inferenceRole": "INCLUDE_SUPPORT",
       "defaultValue": ""
     },
@@ -101,10 +91,10 @@
       "adoptionCategory": "INCLUDE_PRIMARY",
       "weight": 1,
       "numeratorInputId": "INP_BONUS_FIRST_HIT_COUNT",
-      "denominatorInputId": "INP_BONUS_FIRST_HIT_TRIALS",
-      "userReason": "公開全設定値と分母定義が揃っており、有効通常ゲームを単位に設定差を直接評価できるため主Featureとして採用する。",
+      "denominatorInputId": "INP_COMMON_TAWARA_TRIALS",
+      "userReason": "ダイトモの初当り回数と通常プレイ数が直接取得でき、BIG/REG個別初当り確率も同じ通常プレイ数を母数としているため主Featureとして採用する。",
       "difficultyParticipation": "EXCLUDE",
-      "difficultyExclusionReason": "Observationで実戦時の試行量・露出率を確定する前にDifficultyへ推定値を持ち込まない。"
+      "difficultyExclusionReason": "推測では有効通常ゲーム数（または初当り抽選対象ゲーム数）を母数に使うが、総プレイGから同じ母集団へ変換する根拠ある固定比率がないためDifficultyには参加させない。"
     },
     {
       "researchFeatureId": "RF_COMMON_TAWARA",
@@ -115,7 +105,7 @@
       "denominatorInputId": "INP_COMMON_TAWARA_TRIALS",
       "userReason": "公開全設定値と条件付き分母が明示され、主Featureとは異なる構成・成立情報を追加できるため補助Featureとして採用する。",
       "difficultyParticipation": "EXCLUDE",
-      "difficultyExclusionReason": "Observationで実戦時の試行量・露出率を確定する前にDifficultyへ推定値を持ち込まない。"
+      "difficultyExclusionReason": "ダイトモの通常プレイ数を母数にするFeatureで、総プレイGから通常プレイ数へ変換する固定比率は機種仕様として確定できないためDifficultyには参加させない。"
     },
     {
       "researchFeatureId": "RF_PRACTICAL_MODE_ZONE",
@@ -269,9 +259,10 @@
     "simulationsPerSetting": 4000,
     "seed": 20260901,
     "targetGameBasis": {
-      "basisId": "OBSERVATION_PENDING_GAME_BASIS",
-      "label": "実戦試行量（Observationで確定）",
-      "quality": "UNRESOLVED"
+      "basisId": "TOTAL_PLAY_GAMES",
+      "label": "全状態の総プレイゲーム数",
+      "quality": "EXACT",
+      "crossMachineComparable": true
     },
     "calibrationAllowedExposureQualities": [
       "EXACT",
@@ -280,8 +271,8 @@
     ]
   },
   "uiCategoryLabels": {
-    "SEL_RF_BONUS_FIRST_HIT": "BIG/REG初当り",
-    "SEL_RF_COMMON_TAWARA": "共通俵",
+    "SEL_RF_BONUS_FIRST_HIT": "通常時データ（ダイトモ）",
+    "SEL_RF_COMMON_TAWARA": "通常時データ（ダイトモ）",
     "EVIDENCE": "設定確定・否定情報"
   }
 }

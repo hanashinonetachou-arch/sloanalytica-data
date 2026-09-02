@@ -25,50 +25,6 @@
     "schemaVersion": "2.0.0",
     "inputs": [
       {
-        "id": "INP_DIRECT_AT_COUNT",
-        "name": "AT直撃（前兆昇格除外） 回数",
-        "category": "SEL_RF_DIRECT_AT",
-        "type": "counter",
-        "unit": "回",
-        "displayOrder": 10,
-        "inferenceRole": "INCLUDE_PRIMARY",
-        "defaultValue": "",
-        "minimum": 0
-      },
-      {
-        "id": "INP_DIRECT_AT_TRIALS",
-        "name": "AT直撃（前兆昇格除外） 試行数",
-        "category": "SEL_RF_DIRECT_AT",
-        "type": "integer",
-        "unit": "回",
-        "displayOrder": 11,
-        "inferenceRole": "INCLUDE_PRIMARY",
-        "defaultValue": "",
-        "minimum": 0
-      },
-      {
-        "id": "INP_KOTEI_APPEARANCE_COUNT",
-        "name": "煌帝出現率 回数",
-        "category": "SEL_RF_KOTEI_APPEARANCE",
-        "type": "counter",
-        "unit": "回",
-        "displayOrder": 15,
-        "inferenceRole": "INCLUDE_SUPPORT",
-        "defaultValue": "",
-        "minimum": 0
-      },
-      {
-        "id": "INP_KOTEI_APPEARANCE_TRIALS",
-        "name": "煌帝出現率 試行数",
-        "category": "SEL_RF_KOTEI_APPEARANCE",
-        "type": "integer",
-        "unit": "回",
-        "displayOrder": 16,
-        "inferenceRole": "INCLUDE_SUPPORT",
-        "defaultValue": "",
-        "minimum": 0
-      },
-      {
         "id": "INP_STAMP_4PLUS_COUNT",
         "name": "終了画面 良スタンプ",
         "category": "EVIDENCE",
@@ -166,6 +122,28 @@
         "inferenceRole": "INCLUDE_SUPPORT",
         "defaultValue": "",
         "minimum": 0
+      },
+      {
+        "id": "INP_AT_FIRST_HIT_COUNT",
+        "name": "AT初当り 回数",
+        "category": "SEL_RF_AT_FIRST_HIT",
+        "type": "counter",
+        "unit": "回",
+        "displayOrder": 10,
+        "inferenceRole": "INCLUDE_PRIMARY",
+        "defaultValue": "",
+        "minimum": 0
+      },
+      {
+        "id": "INP_AT_FIRST_HIT_TRIALS",
+        "name": "有効通常ゲーム数",
+        "category": "SEL_RF_AT_FIRST_HIT",
+        "type": "integer",
+        "unit": "G",
+        "displayOrder": 11,
+        "inferenceRole": "INCLUDE_PRIMARY",
+        "defaultValue": "",
+        "minimum": 0
       }
     ]
   },
@@ -173,8 +151,8 @@
     "schemaVersion": "2.0.0",
     "features": [
       {
-        "featureId": "FEAT_DIRECT_AT",
-        "name": "AT直撃（前兆昇格除外）",
+        "featureId": "FEAT_AT_FIRST_HIT",
+        "name": "AT初当りトータル",
         "adoptionCategory": "INCLUDE_PRIMARY",
         "calculationRole": "PROBABILITY",
         "probabilityEngineUsage": true,
@@ -184,43 +162,16 @@
         "reliabilityProfile": {
           "weight": 1
         },
-        "denominatorInputId": "INP_DIRECT_AT_TRIALS",
-        "numeratorInputId": "INP_DIRECT_AT_COUNT",
+        "denominatorInputId": "INP_AT_FIRST_HIT_TRIALS",
+        "numeratorInputId": "INP_AT_FIRST_HIT_COUNT",
         "displayFormat": "ratio_1_over_n",
         "probabilities": {
-          "SET_1": 0.00006603973822,
-          "SET_2": 0.000093310556278,
-          "SET_3": 0.000119745000599,
-          "SET_4": 0.000193618145911,
-          "SET_5": 0.000204661372466,
-          "SET_6": 0.000215894141061
-        },
-        "sourceEvidenceRefs": [
-          "SRC_1GEKI"
-        ]
-      },
-      {
-        "featureId": "FEAT_KOTEI_APPEARANCE",
-        "name": "煌帝出現率",
-        "adoptionCategory": "INCLUDE_SUPPORT",
-        "calculationRole": "PROBABILITY",
-        "probabilityEngineUsage": true,
-        "modelType": "binomial",
-        "minimumSample": 1,
-        "sampleRecommendation": 1,
-        "reliabilityProfile": {
-          "weight": 1
-        },
-        "denominatorInputId": "INP_KOTEI_APPEARANCE_TRIALS",
-        "numeratorInputId": "INP_KOTEI_APPEARANCE_COUNT",
-        "displayFormat": "ratio_1_over_n",
-        "probabilities": {
-          "SET_1": 0.001121704991587,
-          "SET_2": 0.001127395715896,
-          "SET_3": 0.001151145389663,
-          "SET_4": 0.001237470610073,
-          "SET_5": 0.001325205406838,
-          "SET_6": 0.001337077149352
+          "SET_1": 0.001625487646294,
+          "SET_2": 0.001665833749792,
+          "SET_3": 0.001722652885444,
+          "SET_4": 0.001833180568286,
+          "SET_5": 0.001859081613683,
+          "SET_6": 0.001881821603312
         },
         "sourceEvidenceRefs": [
           "SRC_1GEKI"
@@ -436,16 +387,16 @@
     "sections": [
       {
         "id": "UI_DESIGN_1",
-        "title": "AT直撃（前兆昇格除外）",
+        "title": "AT初当り",
         "displayOrder": 1,
-        "description": "実戦中に対象回数と対応する試行数を記録します。対象外の状態・区間は含めません。",
+        "description": "AT初当りトータルと、それを観測できる有効通常ゲーム数を入力します。低頻度のAT直撃はこの初当りに含まれるため別Featureとして重ねません。",
         "collapsible": false,
         "defaultExpanded": true,
         "items": [
           {
             "type": "input",
-            "inputId": "INP_DIRECT_AT_COUNT",
-            "label": "AT直撃（前兆昇格除外） 回数",
+            "inputId": "INP_AT_FIRST_HIT_COUNT",
+            "label": "AT初当り 回数",
             "widget": "counter",
             "gridSpan": 6,
             "config": {
@@ -461,8 +412,8 @@
           },
           {
             "type": "input",
-            "inputId": "INP_DIRECT_AT_TRIALS",
-            "label": "AT直撃（前兆昇格除外） 試行数",
+            "inputId": "INP_AT_FIRST_HIT_TRIALS",
+            "label": "有効通常ゲーム数",
             "widget": "number",
             "gridSpan": 12,
             "config": {
@@ -478,50 +429,8 @@
       },
       {
         "id": "UI_DESIGN_2",
-        "title": "煌帝出現率",
-        "displayOrder": 2,
-        "description": "実戦中に対象回数と対応する試行数を記録します。対象外の状態・区間は含めません。",
-        "collapsible": false,
-        "defaultExpanded": true,
-        "items": [
-          {
-            "type": "input",
-            "inputId": "INP_KOTEI_APPEARANCE_COUNT",
-            "label": "煌帝出現率 回数",
-            "widget": "counter",
-            "gridSpan": 6,
-            "config": {
-              "directInput": false,
-              "compact": true,
-              "quickAdd": [
-                1
-              ],
-              "step": 1,
-              "emptyMeansUnobserved": true,
-              "observedZeroAllowed": true
-            }
-          },
-          {
-            "type": "input",
-            "inputId": "INP_KOTEI_APPEARANCE_TRIALS",
-            "label": "煌帝出現率 試行数",
-            "widget": "number",
-            "gridSpan": 12,
-            "config": {
-              "directInput": true,
-              "quickAdd": [
-                50
-              ],
-              "emptyMeansUnobserved": true,
-              "observedZeroAllowed": true
-            }
-          }
-        ]
-      },
-      {
-        "id": "UI_DESIGN_3",
         "title": "その他の設定示唆",
-        "displayOrder": 3,
+        "displayOrder": 2,
         "description": "このタイミングで確認できた設定示唆・設定確定パターンを記録します。",
         "collapsible": true,
         "defaultExpanded": false,
@@ -580,9 +489,9 @@
         ]
       },
       {
-        "id": "UI_DESIGN_4",
+        "id": "UI_DESIGN_3",
         "title": "Last Judge",
-        "displayOrder": 4,
+        "displayOrder": 3,
         "description": "このタイミングで確認できた設定示唆・設定確定パターンを記録します。",
         "collapsible": true,
         "defaultExpanded": false,
@@ -607,9 +516,9 @@
         ]
       },
       {
-        "id": "UI_DESIGN_5",
+        "id": "UI_DESIGN_4",
         "title": "隠し示唆",
-        "displayOrder": 5,
+        "displayOrder": 4,
         "description": "このタイミングで確認できた設定示唆・設定確定パターンを記録します。",
         "collapsible": true,
         "defaultExpanded": false,
@@ -634,9 +543,9 @@
         ]
       },
       {
-        "id": "UI_DESIGN_6",
+        "id": "UI_DESIGN_5",
         "title": "終了画面・スタンプ",
-        "displayOrder": 6,
+        "displayOrder": 5,
         "description": "このタイミングで確認できた設定示唆・設定確定パターンを記録します。",
         "collapsible": true,
         "defaultExpanded": false,
@@ -716,25 +625,16 @@
   "selectionSummary": {
     "schemaVersion": "selection-summary-v1",
     "evaluatedCount": 7,
-    "selectedCount": 2,
-    "rejectedCount": 5,
+    "selectedCount": 1,
+    "rejectedCount": 6,
     "selected": [
       {
-        "featureId": "FEAT_DIRECT_AT",
-        "name": "AT直撃（前兆昇格除外）",
-        "reason": "公開全設定値と分母定義が揃っており、公開直撃抽選対象ゲームを単位に設定差を直接評価できるため主Featureとして採用する。",
+        "featureId": "FEAT_AT_FIRST_HIT",
+        "name": "AT初当りトータル",
+        "reason": "AT初当りトータルは全設定値が公開され、直撃よりはるかに高頻度で実戦情報量が大きい。AT直撃を内包するため直撃とは同時に独立乗算せず、こちらを代表採用する。",
         "requiredTrials": {
-          "value": 42491,
-          "unit": "公開直撃抽選対象ゲーム"
-        }
-      },
-      {
-        "featureId": "FEAT_KOTEI_APPEARANCE",
-        "name": "煌帝出現率",
-        "reason": "公開全設定値と条件付き分母が明示され、主Featureとは異なる構成・成立情報を追加できるため補助Featureとして採用する。",
-        "requiredTrials": {
-          "value": 193671,
-          "unit": "公開集計対象ゲーム"
+          "value": 195035,
+          "unit": "有効通常ゲーム"
         }
       }
     ],
@@ -749,15 +649,6 @@
         }
       },
       {
-        "featureId": "FEAT_AT_FIRST_HIT",
-        "name": "AT初当りトータル",
-        "reason": "AT初当りは解析上AT直撃を一部内包するため、直撃Featureとの独立尤度積を避けて二重評価を防ぐ。",
-        "requiredTrials": {
-          "value": 195035,
-          "unit": "有効通常ゲーム"
-        }
-      },
-      {
         "featureId": "FEAT_BONUS_OR_AT_FIRST_HIT",
         "name": "通常時ボーナスorAT初当り合算",
         "reason": "ボーナス初当りとAT初当りの双方を内包する合算Featureで、個別Featureとの二重評価になるため採用しない。",
@@ -767,12 +658,30 @@
         }
       },
       {
+        "featureId": "FEAT_DIRECT_AT",
+        "name": "AT直撃（前兆昇格除外）",
+        "reason": "AT直撃はAT初当りトータルに含まれる低頻度な部分事象です。両方を独立に掛けると同じ直撃当選を二重評価するため、より高頻度で実用情報量の大きいAT初当りトータルを代表採用します。",
+        "requiredTrials": {
+          "value": 42491,
+          "unit": "公開直撃抽選対象ゲーム"
+        }
+      },
+      {
         "featureId": "FEAT_DIRECT_AT_PRACTICAL",
         "name": "AT直撃 実戦集計（前兆昇格込み）",
         "reason": "前兆昇格込みの実戦集計で解析上のAT直撃と定義が異なり、同一事象を重複評価するため解析値を代表採用する。",
         "requiredTrials": {
           "value": 67632,
           "unit": "実戦集計通常ゲーム"
+        }
+      },
+      {
+        "featureId": "FEAT_KOTEI_APPEARANCE",
+        "name": "煌帝出現率",
+        "reason": "公開されている煌帝出現率にはAT中の通常選択だけでなく、エンディング後など必ず出現する経路や進行上の強制出現が混在します。設定差も小さく、強制出現を除いた設定別の条件付き確率が公開されていないため、独立した設定推測要素としては採用しません。",
+        "requiredTrials": {
+          "value": 193671,
+          "unit": "公開集計対象ゲーム"
         }
       },
       {
