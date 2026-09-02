@@ -1,0 +1,45 @@
+{
+  "schemaVersion": "inference-profile-candidate-v1",
+  "machineId": "L_IDOLMASTER_MILLION_LIVE_HC",
+  "status": "RESEARCH_REQUIRED",
+  "candidateModel": "CONDITIONAL",
+  "currentSafePolicy": {
+    "primaryFeatureId": "FEAT_BONUS_FIRST_HIT",
+    "fallbackFeatureId": "FEAT_CZ_FIRST_HIT",
+    "reason": "ボーナス初当りの一部がCZ成功経由であり、現行の独立尤度積では同じ生成経路を部分的に二重評価するため、現時点ではCZをFallbackとして抑制する。"
+  },
+  "dependencyHypothesis": {
+    "parent": "CZ発生/当選機会",
+    "downstream": "ボーナス初当り",
+    "relation": "PARTIAL_PATH_DEPENDENCY",
+    "knownRouteBalance": "公開解説ではボーナス当選契機が規定ゲーム数・CZ・レア小役に分かれ、CZだけが下流結果を支配する構造ではない。"
+  },
+  "requiredForActivation": [
+    "設定別CZ発生確率を同一Observation universeで定義できること",
+    "CZ成功からボーナスへ至る条件付き確率が設定別に必要なら、その表が公開されていること",
+    "CZ以外のボーナス初当り経路を同一母集団上で直接定義または安全に分解できること",
+    "aggregate bonus probabilityから不足するconditional tableを逆算・補間しないこと",
+    "Observationで親事象・子事象・非CZ経路を実戦中に区別可能であること"
+  ],
+  "proposedProfile": {
+    "schemaVersion": "inference-profile-v2",
+    "groups": [
+      {
+        "groupId": "CZ_BONUS_PATH",
+        "type": "CONDITIONAL",
+        "parentFeatureId": "FEAT_CZ_FIRST_HIT",
+        "childFeatureIds": [
+          "FEAT_BONUS_FROM_CZ"
+        ],
+        "standaloneFeatureIds": [
+          "FEAT_BONUS_NON_CZ"
+        ]
+      }
+    ]
+  },
+  "activation": false,
+  "notes": [
+    "candidate-only。production selection-data / machine-packageは変更しない。",
+    "必要な設定別conditional probabilityが揃わない場合は現行PRIMARY/FALLBACKを維持する。"
+  ]
+}
