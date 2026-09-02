@@ -8,8 +8,8 @@
   },
   "sectionOrder": [
     "AT初当り",
-    "G0_49 / G50_99 / G100_PLUS",
-    "設定示唆・確定情報"
+    "リセット後・ST終了後の初回CZ/ボーナス",
+    "その他の設定示唆"
   ],
   "sections": {
     "AT初当り": {
@@ -17,7 +17,7 @@
         "INP_AT_FIRST_HIT_COUNT",
         "INP_AT_FIRST_HIT_TRIALS"
       ],
-      "description": "自己実戦中、SelectionDataで定義された対象試行・対象イベント成立時に更新",
+      "description": "実戦中に対象回数と対応する試行数を記録します。対象外の状態・区間は含めません。",
       "observationRole": "DIRECT_PLAY",
       "observationRefs": [
         "OBS_AT_FIRST_HIT"
@@ -28,13 +28,27 @@
       "collapsible": false,
       "defaultExpanded": true
     },
-    "G0_49 / G50_99 / G100_PLUS": {
+    "その他の設定示唆": {
+      "inputIds": [
+        "INP_CZ_ST_END_4PLUS_COUNT",
+        "INP_CZ_ST_END_6_COUNT",
+        "INP_ENDING_END_6_COUNT",
+        "INP_CZ_ST_DENY3_COUNT",
+        "INP_CZ_ST_DENY2_COUNT"
+      ],
+      "description": "このタイミングで確認できた設定示唆・設定確定パターンを記録します。",
+      "observationRefs": [],
+      "acquisitionSources": [],
+      "collapsible": true,
+      "defaultExpanded": false
+    },
+    "リセット後・ST終了後の初回CZ/ボーナス": {
       "inputIds": [
         "INP_POST_RESET_ST_100G_CAT_G0_49",
         "INP_POST_RESET_ST_100G_CAT_G50_99",
         "INP_POST_RESET_ST_100G_CAT_G100_PLUS"
       ],
-      "description": "自己実戦中、SelectionDataで定義された対象試行・対象イベント成立時に更新",
+      "description": "リセット後またはST終了後を1回の機会として、最初のCZまたはボーナス当選が0〜49G・50〜99G・100G以上のどこだったかを1つだけカウントします。1Gごとの確率ではありません。",
       "observationRole": "DIRECT_PLAY",
       "observationRefs": [
         "OBS_POST_RESET_ST_100G"
@@ -44,20 +58,6 @@
       ],
       "collapsible": false,
       "defaultExpanded": true
-    },
-    "設定示唆・確定情報": {
-      "inputIds": [
-        "INP_CZ_ST_END_4PLUS_COUNT",
-        "INP_CZ_ST_END_6_COUNT",
-        "INP_ENDING_END_6_COUNT",
-        "INP_CZ_ST_DENY3_COUNT",
-        "INP_CZ_ST_DENY2_COUNT"
-      ],
-      "description": "実戦中に確認できた設定示唆・設定確定情報だけを入力します。通常の確率Featureとは区別して扱います。",
-      "observationRefs": [],
-      "acquisitionSources": [],
-      "collapsible": true,
-      "defaultExpanded": false
     }
   },
   "inputContracts": {
@@ -90,7 +90,7 @@
       "observedZeroAllowed": true
     },
     "INP_POST_RESET_ST_100G_CAT_G0_49": {
-      "name": "G0_49",
+      "name": "0〜49Gで初回当選",
       "mode": "COUNTER",
       "gridSpan": 6,
       "directInput": false,
@@ -105,7 +105,7 @@
       "observedZeroAllowed": true
     },
     "INP_POST_RESET_ST_100G_CAT_G50_99": {
-      "name": "G50_99",
+      "name": "50〜99Gで初回当選",
       "mode": "COUNTER",
       "gridSpan": 6,
       "directInput": false,
@@ -120,7 +120,7 @@
       "observedZeroAllowed": true
     },
     "INP_POST_RESET_ST_100G_CAT_G100_PLUS": {
-      "name": "G100_PLUS",
+      "name": "100G以上で初回当選",
       "mode": "COUNTER",
       "gridSpan": 6,
       "directInput": false,
@@ -218,11 +218,18 @@
     "実機確認待ち"
   ],
   "auditNotes": [
-    "Selection EXCLUDE-only inputは生成しない。SelectionData inputsに存在する正式入力だけをUI化する。",
     "空欄=未観測、0=観測済み0回を維持する。",
     "前任者区間と自己実戦区間はObservationで明示された場合のみ接続し、UNRESOLVEDから架空の着席時入力を生成しない。",
     "linked-service / machine-menuは補助取得元であり必須入力にしない。",
     "100G windowはresetまたはST終了後1 opportunity単位",
-    "per-game probabilityへ変換しない"
+    "per-game probabilityへ変換しない",
+    "空欄は未観測、0は観測済み0回として区別します。",
+    "着席前の値は、取得元とリセット境界が確認できた場合だけ自己実戦との差分計算に使用します。",
+    "空欄は未観測、0は観測済み0回として区別します。",
+    "着席前の値は、取得元とリセット境界が確認できた場合だけ自己実戦との差分計算に使用します。",
+    "空欄は未観測、0は観測済み0回として区別します。",
+    "着席前の値は、取得元とリセット境界が確認できた場合だけ自己実戦との差分計算に使用します。",
+    "空欄は未観測、0は観測済み0回として区別します。",
+    "着席前の値は、取得元とリセット境界が確認できた場合だけ自己実戦との差分計算に使用します。"
   ]
 }

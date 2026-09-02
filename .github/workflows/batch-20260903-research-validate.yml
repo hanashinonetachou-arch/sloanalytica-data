@@ -1,0 +1,42 @@
+name: Batch 20260903 Research Validate
+
+on:
+  push:
+    branches:
+      - batch/20260903-hanagasa-ultraman
+    paths:
+      - 'research/**/research-data.json'
+      - '.github/workflows/batch-20260903-research-validate.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Validate ResearchData 10 machines
+        shell: bash
+        run: |
+          set -euo pipefail
+          ids=(
+            L_HANAGASA_NA
+            L_TOLOVE_DARKNESS_S8
+            LB_PREMIUM_UMAIBO_S1
+            LB_NEW_PULSAR_BT_C9
+            S_KABANERI_ZR
+            L_DMC5_ST_XA
+            LB_1000CHAN_ALPHA_L3
+            LB_JACKPOT_CY1
+            L_GUILTY_CROWN_2_XF
+            L_ULTRAMAN_KE
+          )
+          for id in "${ids[@]}"; do
+            echo "=== research:validate $id ==="
+            node tools/validate-research-data.mjs "research/$id/research-data.json"
+          done

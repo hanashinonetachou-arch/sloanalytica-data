@@ -1,0 +1,107 @@
+name: Batch 20260903 Publish Diagnostic
+
+on:
+  push:
+    branches:
+      - batch/20260903-hanagasa-ultraman
+    paths:
+      - '.github/workflows/batch-20260903-publish-diagnostic.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  diagnose:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: batch/20260903-hanagasa-ultraman
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Verify baseline
+        run: |
+          set -euo pipefail
+          git fetch origin prototype-multi-machine:refs/remotes/origin/prototype-multi-machine
+          test "$(git rev-parse origin/prototype-multi-machine)" = "a38288daa1055065dcf15c65bd8d49e246f32e82"
+          git merge-base --is-ancestor 7161e96acd628219c36e8147ebb2801ddafd12d0 HEAD
+      - name: Apply ULTRAMAN
+        run: |
+          node tools/publish-machine-data.mjs approve L_ULTRAMAN_KE machines/L_ULTRAMAN_KE/machine-package.json
+          node tools/publish-machine-data.mjs publish L_ULTRAMAN_KE
+          node tools/publish-machine-data.mjs publish L_ULTRAMAN_KE --apply --defer-audit
+          node tools/sync-machine-difficulty-catalog.mjs L_ULTRAMAN_KE
+      - name: Apply Guilty Crown 2
+        run: |
+          node tools/publish-machine-data.mjs approve L_GUILTY_CROWN_2_XF machines/L_GUILTY_CROWN_2_XF/machine-package.json
+          node tools/publish-machine-data.mjs publish L_GUILTY_CROWN_2_XF
+          node tools/publish-machine-data.mjs publish L_GUILTY_CROWN_2_XF --apply --defer-audit
+          node tools/sync-machine-difficulty-catalog.mjs L_GUILTY_CROWN_2_XF
+      - name: Apply Jackpot
+        run: |
+          node tools/publish-machine-data.mjs approve LB_JACKPOT_CY1 machines/LB_JACKPOT_CY1/machine-package.json
+          node tools/publish-machine-data.mjs publish LB_JACKPOT_CY1
+          node tools/publish-machine-data.mjs publish LB_JACKPOT_CY1 --apply --defer-audit
+          node tools/sync-machine-difficulty-catalog.mjs LB_JACKPOT_CY1
+      - name: Apply 1000chan
+        run: |
+          node tools/publish-machine-data.mjs approve LB_1000CHAN_ALPHA_L3 machines/LB_1000CHAN_ALPHA_L3/machine-package.json
+          node tools/publish-machine-data.mjs publish LB_1000CHAN_ALPHA_L3
+          node tools/publish-machine-data.mjs publish LB_1000CHAN_ALPHA_L3 --apply --defer-audit
+          node tools/sync-machine-difficulty-catalog.mjs LB_1000CHAN_ALPHA_L3
+      - name: Apply DMC5
+        run: |
+          node tools/publish-machine-data.mjs approve L_DMC5_ST_XA machines/L_DMC5_ST_XA/machine-package.json
+          node tools/publish-machine-data.mjs publish L_DMC5_ST_XA
+          node tools/publish-machine-data.mjs publish L_DMC5_ST_XA --apply --defer-audit
+          node tools/sync-machine-difficulty-catalog.mjs L_DMC5_ST_XA
+      - name: Apply Kabaneri
+        run: |
+          node tools/publish-machine-data.mjs approve S_KABANERI_ZR machines/S_KABANERI_ZR/machine-package.json
+          node tools/publish-machine-data.mjs publish S_KABANERI_ZR
+          node tools/publish-machine-data.mjs publish S_KABANERI_ZR --apply --defer-audit
+          node tools/sync-machine-difficulty-catalog.mjs S_KABANERI_ZR
+      - name: Apply New Pulsar BT
+        run: |
+          node tools/publish-machine-data.mjs approve LB_NEW_PULSAR_BT_C9 machines/LB_NEW_PULSAR_BT_C9/machine-package.json
+          node tools/publish-machine-data.mjs publish LB_NEW_PULSAR_BT_C9
+          node tools/publish-machine-data.mjs publish LB_NEW_PULSAR_BT_C9 --apply --defer-audit
+          node tools/sync-machine-difficulty-catalog.mjs LB_NEW_PULSAR_BT_C9
+      - name: Apply Premium Umaibo
+        run: |
+          node tools/publish-machine-data.mjs approve LB_PREMIUM_UMAIBO_S1 machines/LB_PREMIUM_UMAIBO_S1/machine-package.json
+          node tools/publish-machine-data.mjs publish LB_PREMIUM_UMAIBO_S1
+          node tools/publish-machine-data.mjs publish LB_PREMIUM_UMAIBO_S1 --apply --defer-audit
+          node tools/sync-machine-difficulty-catalog.mjs LB_PREMIUM_UMAIBO_S1
+      - name: Apply ToLOVE S8
+        run: |
+          node tools/publish-machine-data.mjs approve L_TOLOVE_DARKNESS_S8 machines/L_TOLOVE_DARKNESS_S8/machine-package.json
+          node tools/publish-machine-data.mjs publish L_TOLOVE_DARKNESS_S8
+          node tools/publish-machine-data.mjs publish L_TOLOVE_DARKNESS_S8 --apply --defer-audit
+          node tools/sync-machine-difficulty-catalog.mjs L_TOLOVE_DARKNESS_S8
+      - name: Apply Hanagasa
+        run: |
+          node tools/publish-machine-data.mjs approve L_HANAGASA_NA machines/L_HANAGASA_NA/machine-package.json
+          node tools/publish-machine-data.mjs publish L_HANAGASA_NA
+          node tools/publish-machine-data.mjs publish L_HANAGASA_NA --apply --defer-audit
+          node tools/sync-machine-difficulty-catalog.mjs L_HANAGASA_NA
+      - name: Sync registry
+        run: node tools/sync-machine-registry.mjs
+      - name: Repository tests after publish mutation
+        run: npm test
+      - name: Public-data audit after publish mutation
+        run: npm run audit
+      - name: Service-name audit after publish mutation
+        run: npm run audit:ui-service-names
+      - name: Verify registration order
+        run: |
+          node --input-type=module <<'NODE'
+          import fs from 'node:fs';
+          const r=JSON.parse(fs.readFileSync('machine-registry.json','utf8')).machines;
+          const expected=[['L_HANAGASA_NA',202],['L_TOLOVE_DARKNESS_S8',203],['LB_PREMIUM_UMAIBO_S1',204],['LB_NEW_PULSAR_BT_C9',205],['S_KABANERI_ZR',206],['L_DMC5_ST_XA',207],['LB_1000CHAN_ALPHA_L3',208],['LB_JACKPOT_CY1',209],['L_GUILTY_CROWN_2_XF',210],['L_ULTRAMAN_KE',211]];
+          for(const [id,n] of expected){const x=r.find(v=>v.machineId===id); if(!x||x.provisionalRegistrationId!==n) throw new Error(`${id}: ${x?.provisionalRegistrationId} != ${n}`)}
+          console.log('PASS registration order 202-211');
+          NODE

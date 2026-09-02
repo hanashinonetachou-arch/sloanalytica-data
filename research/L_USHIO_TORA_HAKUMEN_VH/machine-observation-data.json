@@ -3,37 +3,61 @@
   "machineId": "L_USHIO_TORA_HAKUMEN_VH",
   "displayName": "Lうしおととら 白面決戦",
   "provisionalRegistrationId": 194,
-  "researchedAt": "2026-09-01",
+  "researchedAt": "2026-09-02",
   "sources": [],
   "sourceCoverage": {
-    "machineMenu": "UNRESOLVED",
+    "machineMenu": "FOUND",
     "dataCounter": "UNRESOLVED",
     "linkedService": "UNRESOLVED",
     "directPlay": "FOUND",
     "endEvent": "FOUND",
-    "seatedState": "UNRESOLVED"
+    "seatedState": "FOUND"
   },
   "observations": [
     {
       "observationId": "OBS_AT_FIRST_HIT",
-      "sourceType": "DIRECT_PLAY",
-      "observationMode": "MANUAL_COUNTER",
+      "sourceType": "MACHINE_MENU",
+      "observationMode": "MENU_READ",
       "status": "FOUND",
-      "label": "AT初当り 回数・AT初当り 試行数",
+      "label": "AT初当り・通常ゲーム数",
       "categories": [
         "AT初当り 回数",
-        "AT初当り 試行数"
+        "通常ゲーム数"
       ],
       "timing": [
-        "自己実戦中、SelectionDataで定義された対象試行・対象イベント成立時に更新"
+        "PUSHメニューの当選履歴を確認し、表示区間の履歴から再構成"
       ],
       "excludedConditions": [
-        "SelectionDataの分母定義外の遊技状態・試行を混ぜない",
-        "着席前累積値を自己実戦値へ混ぜない",
+        "履歴表示範囲外の区間を推測で補わない",
+        "着席時スナップショットを取らずに前任者区間と自己実戦区間を混ぜない",
         "未観測を観測済み0として扱わない"
       ],
       "sourceRefs": [],
-      "notes": "Selection FEAT_AT_FIRST_HIT (INCLUDE_PRIMARY) の入力契約を保持。公開全設定値と分母定義が揃っており、有効通常ゲームを単位に設定差を直接評価できるため主Featureとして採用する。"
+      "notes": "提供されたWeb画像でPUSHメニューにうしとらチャンス確率、BONUS間ゲーム数、当選履歴と当選ゲーム数が表示されることを確認。ユーザー確認ではAT直撃はなく、天井・ロングフリーズも成功確定CZを経由するため、成功CZをAT初当りとして扱える。履歴の当選ゲーム数を対象区間で合算して通常ゲーム数を再構成する。"
+    },
+    {
+      "observationId": "OBS_MACHINE_MENU_HISTORY",
+      "sourceType": "MACHINE_MENU",
+      "observationMode": "MENU_READ",
+      "status": "FOUND",
+      "label": "PUSHメニュー当選履歴",
+      "categories": [
+        "うしとらチャンス確率",
+        "BONUS間ゲーム数",
+        "当選履歴",
+        "うしとらチャンス当選ゲーム数",
+        "うしとらBONUS当選ゲーム数・連数"
+      ],
+      "timing": [
+        "着席時および遊技中にPUSHメニューの当選履歴を確認"
+      ],
+      "excludedConditions": [
+        "表示履歴のリセット境界をまたいだ値を合算しない",
+        "電源OFF/ONまたは設定変更をまたいで履歴が残る前提を置かない",
+        "履歴に表示されない区間を推定で補完しない"
+      ],
+      "sourceRefs": [],
+      "notes": "ユーザー提供のインターネット画像でPUSHメニューの当選履歴表示を確認。ユーザー機種知識によりAT直撃はなく、天井・ロングフリーズも成功確定CZを経由するため、表示範囲内ではCZ当選ゲーム数の合計から通常ゲーム数、成功CZ数からAT初当りを再構成できる。実機撮影ではないためMACHINE_VERIFIEDには昇格しない。"
     },
     {
       "observationId": "OBS_HARD_EVIDENCE_EVENTS",
@@ -55,14 +79,13 @@
         "ダイナマイトトロフィー 虹"
       ],
       "timing": [
-        "各Evidenceの成立タイミングで即時確認"
+        "設定確定・否定情報の成立時に確認"
       ],
       "excludedConditions": [
-        "傾向示唆をHard Evidenceへ昇格させない",
-        "同一表示のHard部分以外を設定確定情報として扱わない"
+        "傾向示唆を設定確定情報へ昇格させない"
       ],
       "sourceRefs": [],
-      "notes": "SelectionData evidenceに採用済みのHard Evidenceのみ。"
+      "notes": "確定・否定条件として採用済みの情報のみ。"
     }
   ],
   "featureMappings": [
@@ -70,45 +93,33 @@
       "featureId": "FEAT_AT_FIRST_HIT",
       "mappingType": "EXACT",
       "observationIds": [
-        "OBS_AT_FIRST_HIT"
+        "OBS_AT_FIRST_HIT",
+        "OBS_MACHINE_MENU_HISTORY"
       ],
       "collectionMethods": [
+        "MENU_READ",
         "MANUAL_COUNTER"
       ],
       "usableForInference": true,
       "usableForDifficulty": false,
-      "notes": "Gate C写像。Difficulty exposureは取得単位・event exposureを確定するまで未参加。"
+      "notes": "自己実戦の手動カウントに加え、PUSHメニュー当選履歴の表示範囲から通常ゲーム数とAT初当りを再構成可能。"
     }
   ],
   "researchReopenRequests": [],
   "fieldVerificationItems": [
     {
-      "verificationId": "VFY_L_USHIO_TORA_HAKUMEN_VH_MACHINE_MENU",
+      "verificationId": "VFY_L_USHIO_TORA_HAKUMEN_VH_MENU_HISTORY_LIMIT",
       "status": "WAITING_FOR_MACHINE",
       "sourceType": "MACHINE_MENU",
-      "priority": "MEDIUM",
-      "question": "Web調査で具体項目を確定できなかった筐体メニュー/遊技履歴について、総G・通常G・CZ・Bonus・AT・小役・履歴項目を実機で確認する。"
-    },
-    {
-      "verificationId": "VFY_L_USHIO_TORA_HAKUMEN_VH_DATA_COUNTER",
-      "status": "WAITING_FOR_MACHINE",
-      "sourceType": "DATA_COUNTER",
-      "priority": "HIGH",
-      "question": "ホールのデータカウンターで総G・現在G・Bonus・AT・CZ・初当り・履歴のどこまで取得でき、公開解析の分母と一致するか確認する。ホール設備依存のためWebだけでは最終確定しない。"
-    },
-    {
-      "verificationId": "VFY_L_USHIO_TORA_HAKUMEN_VH_SEATED_STATE",
-      "status": "WAITING_FOR_MACHINE",
-      "sourceType": "SEATED_STATE",
-      "priority": "HIGH",
-      "question": "着席直後に実機メニュー/データカウンターから取得できる累積値を確認し、前任者区間を安全に利用可能なSelection Featureがあるか判定する。"
+      "priority": "LOW",
+      "question": "機会があればPUSHメニュー当選履歴の最大表示件数のみ確認する。"
     },
     {
       "verificationId": "VFY_L_USHIO_TORA_HAKUMEN_VH_LINKED_SERVICE",
       "status": "WAITING_FOR_MACHINE",
       "sourceType": "LINKED_SERVICE",
-      "priority": "MEDIUM",
-      "question": "Web調査では機種固有の実機連動サービス/QR機能を確定できていない。実機メニュー上のQR/連動導線の有無を確認する。一般的な系列サービスの存在だけでFOUNDにしない。"
+      "priority": "LOW",
+      "question": "機種固有の連動サービスが確認できた場合のみ取得項目を追加する。"
     }
   ]
 }

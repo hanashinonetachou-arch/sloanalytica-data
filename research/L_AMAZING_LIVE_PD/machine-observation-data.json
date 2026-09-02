@@ -3,13 +3,13 @@
   "machineId": "L_AMAZING_LIVE_PD",
   "displayName": "スマート沖スロ アメイジングライブ",
   "provisionalRegistrationId": 195,
-  "researchedAt": "2026-09-01",
+  "researchedAt": "2026-09-02",
   "sources": [],
   "sourceCoverage": {
-    "machineMenu": "UNRESOLVED",
+    "machineMenu": "CHECKED_NONE",
     "dataCounter": "UNRESOLVED",
     "linkedService": "UNRESOLVED",
-    "directPlay": "FOUND",
+    "directPlay": "VERIFIED_ON_MACHINE",
     "endEvent": "FOUND",
     "seatedState": "UNRESOLVED"
   },
@@ -18,25 +18,24 @@
       "observationId": "OBS_BONUS_FIRST_HIT",
       "sourceType": "DIRECT_PLAY",
       "observationMode": "MANUAL_COUNTER",
-      "status": "FOUND",
-      "label": "ボーナス初当り 回数・ボーナス初当り 試行数",
+      "status": "VERIFIED_ON_MACHINE",
+      "label": "ボーナス初当り 回数・初当り対象ゲーム数",
       "categories": [
         "ボーナス初当り 回数",
-        "ボーナス初当り 試行数"
+        "初当り対象ゲーム数"
       ],
       "timing": [
-        "自己実戦中、SelectionDataで定義された対象試行・対象イベント成立時に更新"
+        "自己実戦中、前回ボーナス後34G以降で最初に成立したボーナスを初当りとして更新"
       ],
       "excludedConditions": [
-        "SelectionDataの分母定義外の遊技状態・試行を混ぜない",
+        "前回ボーナス後1〜33Gの連チャンゾーン中の当りを初当りへ含めない",
+        "初当り対象ゲーム数にも1〜33Gの連チャンゾーンを含めない",
+        "BIG/REG種別やBIG+REG合算回数を初当り回数の代用にしない",
         "着席前累積値を自己実戦値へ混ぜない",
-        "未観測を観測済み0として扱わない",
-        "BIG出現率・REG出現率・BIG+REG合算を独立尤度として併用しない",
-        "初当りの境界と連チャン除外条件が不明なままデータカウンターのボーナス回数を流用しない",
-        "設定Lを運用設定として保持し、存在しない設定3を生成しない"
+        "未観測を観測済み0として扱わない"
       ],
       "sourceRefs": [],
-      "notes": "Selection FEAT_BONUS_FIRST_HIT (INCLUDE_PRIMARY) の入力契約を保持。公開全設定値と分母定義が揃っており、初当り抽選対象ゲームを単位に設定差を直接評価できるため主Featureとして採用する。"
+      "notes": "液晶非搭載で筐体メニュー/遊技履歴画面なし。33Gまでを連チャンゾーンとし、34G以降の最初のボーナスを初当りとして数える。分母も同じ初当り抽選対象ゲームのみ。"
     },
     {
       "observationId": "OBS_HARD_EVIDENCE_EVENTS",
@@ -48,14 +47,13 @@
         "設定L 下パネル常時点滅"
       ],
       "timing": [
-        "各Evidenceの成立タイミングで即時確認"
+        "設定確定・否定情報の成立時に確認"
       ],
       "excludedConditions": [
-        "傾向示唆をHard Evidenceへ昇格させない",
-        "同一表示のHard部分以外を設定確定情報として扱わない"
+        "傾向示唆を設定確定情報へ昇格させない"
       ],
       "sourceRefs": [],
-      "notes": "SelectionData evidenceに採用済みのHard Evidenceのみ。"
+      "notes": "確定・否定条件として採用済みの情報のみ。"
     }
   ],
   "featureMappings": [
@@ -70,45 +68,31 @@
       ],
       "usableForInference": true,
       "usableForDifficulty": false,
-      "notes": "Gate C写像。Difficulty exposureは取得単位・event exposureを確定するまで未参加。"
+      "notes": "34G以降の初当りと、同じ母集団の対象ゲーム数を使用する。"
     }
   ],
   "researchReopenRequests": [],
   "fieldVerificationItems": [
     {
-      "verificationId": "VFY_L_AMAZING_LIVE_PD_MACHINE_MENU",
-      "status": "WAITING_FOR_MACHINE",
-      "sourceType": "MACHINE_MENU",
-      "priority": "MEDIUM",
-      "question": "Web調査で具体項目を確定できなかった筐体メニュー/遊技履歴について、総G・通常G・CZ・Bonus・AT・小役・履歴項目を実機で確認する。"
-    },
-    {
       "verificationId": "VFY_L_AMAZING_LIVE_PD_DATA_COUNTER",
       "status": "WAITING_FOR_MACHINE",
       "sourceType": "DATA_COUNTER",
-      "priority": "HIGH",
-      "question": "ホールのデータカウンターで総G・現在G・Bonus・AT・CZ・初当り・履歴のどこまで取得でき、公開解析の分母と一致するか確認する。ホール設備依存のためWebだけでは最終確定しない。"
+      "priority": "LOW",
+      "question": "ホール設備側で33G以内の連チャンと34G以降の初当りを分離できる場合のみ補助取得元として評価する。"
     },
     {
       "verificationId": "VFY_L_AMAZING_LIVE_PD_SEATED_STATE",
       "status": "WAITING_FOR_MACHINE",
       "sourceType": "SEATED_STATE",
-      "priority": "HIGH",
-      "question": "着席直後に実機メニュー/データカウンターから取得できる累積値を確認し、前任者区間を安全に利用可能なSelection Featureがあるか判定する。"
+      "priority": "LOW",
+      "question": "ホール設備から初当り対象区間を安全に復元できる場合のみ着席時利用を検討する。"
     },
     {
       "verificationId": "VFY_L_AMAZING_LIVE_PD_LINKED_SERVICE",
       "status": "WAITING_FOR_MACHINE",
       "sourceType": "LINKED_SERVICE",
-      "priority": "MEDIUM",
-      "question": "Web調査では機種固有の実機連動サービス/QR機能を確定できていない。実機メニュー上のQR/連動導線の有無を確認する。一般的な系列サービスの存在だけでFOUNDにしない。"
-    },
-    {
-      "verificationId": "VFY_L_AMAZING_LIVE_PD_FIRST_HIT_BOUNDARY",
-      "status": "WAITING_FOR_MACHINE",
-      "sourceType": "MACHINE_MENU",
-      "priority": "HIGH",
-      "question": "ボーナス初当りの実機上の境界、連チャン扱い/除外条件、および初当り回数を取得できる表示の有無を確認する。BIG/REG/合算回数を代用しない。"
+      "priority": "LOW",
+      "question": "機種固有の連動サービスが確認できた場合のみ取得項目を追加する。"
     }
   ]
 }

@@ -1,0 +1,79 @@
+name: Batch 20260903 DMC Observation Reopen
+
+on:
+  push:
+    branches:
+      - batch/20260903-hanagasa-ultraman
+    paths:
+      - '.github/workflows/batch-20260903-dmc-observation-reopen.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  reopen:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: batch/20260903-hanagasa-ultraman
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Reopen Discovery/Research/Selection for observable upper-ST outcome
+        shell: bash
+        run: |
+          node --input-type=module <<'NODE'
+          import fs from 'node:fs';
+          const id='L_DMC5_ST_XA';
+          const planPath='reports/batch-20260903-discovery-inventory-plan.json';
+          const plan=JSON.parse(fs.readFileSync(planPath,'utf8'));
+          const inv=plan.machines[id];
+          if(!inv.some(x=>x.discoveryCandidateId==='D_UPPER_ST_100G_HIT')) inv.push({discoveryCandidateId:'D_UPPER_ST_100G_HIT',name:'上位ST終了後100G+α以内ボーナス当選',researchTarget:'RF_UPPER_ST_100G_HIT'});
+          fs.writeFileSync(planPath,JSON.stringify(plan,null,2)+'\n');
+          const rPath=`research/${id}/research-data.json`,r=JSON.parse(fs.readFileSync(rPath,'utf8'));
+          if(!r.sources.some(x=>x.sourceId==='SRC_SLOMAG_R4')) r.sources.push({sourceId:'SRC_SLOMAG_R4',publisher:'パチマガスロマガ',title:'上位ST「Devils Never Cry」 上位ST後モード・100G+α当選率',url:'https://cs62.cs-plaza.com/g/pachi/pla/s_conq/aderion_slot/06/at08.php',checkedAt:'2026-09-03',sourceType:'major_analysis'});
+          const refs=r.sources.map(x=>x.sourceId);
+          if(!r.features.some(x=>x.researchFeatureId==='RF_UPPER_ST_100G_HIT')) r.features.push({researchFeatureId:'RF_UPPER_ST_100G_HIT',name:'上位ST終了後100G+α以内ボーナス当選',factStatus:'verified',candidateModel:'binomial',trialUnit:'上位ST終了1回',numeratorDefinition:'上位ST終了後100G+α以内にボーナス当選した回数',denominatorDefinition:'上位ST終了回数',settingValues:{SET_1:{probability:.408,rawDisplay:'40.8%'},SET_2:{probability:.453,rawDisplay:'45.3%'},SET_3:{probability:.532,rawDisplay:'53.2%'},SET_4:{probability:.624,rawDisplay:'62.4%'},SET_5:{probability:.638,rawDisplay:'63.8%'},SET_6:{probability:.748,rawDisplay:'74.8%'}},sourceRefs:refs,crossSourceStatus:'cross_checked',notes:'上位ST後の潜在モード（通常C/天国）そのものではなく、実戦で直接確認できる100G+α以内ボーナス当選結果を用いる。100G+α以内でもDMCボーナスなら天国否定だが、本Featureは公開された総合当選率をそのまま観測する。'});
+          r.discoveryInventory=inv;fs.writeFileSync(rPath,JSON.stringify(r,null,2)+'\n');
+          const sPath=`research/${id}/selection-data.json`,s=JSON.parse(fs.readFileSync(sPath,'utf8'));
+          const old=s.features.find(x=>x.researchFeatureId==='RF_UPPER_ST_HEAVEN'); if(old){old.adoptionCategory='EXCLUDE';old.userFacingReason='上位ST後の通常C/天国は内部モードであり、移行先そのものを実戦で直接確定できないため潜在状態を観測値として扱わない。代わりに公開されている直接観測可能な100G+α以内ボーナス当選率を採用する。';old.rejectionReason=old.userFacingReason;delete old.numeratorInputId;delete old.denominatorInputId;delete old.categoryInputIds;delete old.denominatorInputIds;delete old.inputTransform;old.difficultyParticipation='EXCLUDE';delete old.difficultyExclusionReason;}
+          const oldPrefix='INP_UPPER_ST_HEAVEN_';s.inputs=s.inputs.filter(x=>!x.id.startsWith(oldPrefix));delete s.uiCategoryLabels.SEL_RF_UPPER_ST_HEAVEN;
+          if(!s.features.some(x=>x.researchFeatureId==='RF_UPPER_ST_100G_HIT')){
+            s.features.push({researchFeatureId:'RF_UPPER_ST_100G_HIT',featureId:'FEAT_UPPER_ST_100G_HIT',adoptionCategory:'INCLUDE_SUPPORT',weight:1,numeratorInputId:'INP_UPPER_ST_100G_HIT_COUNT',denominatorInputId:'INP_UPPER_ST_100G_HIT_TRIALS',userReason:'上位ST終了を試行単位として100G+α以内のボーナス当選を直接観測でき、潜在モードを推定せず大きな設定差を利用できるため補助Featureとして採用する。',difficultyParticipation:'EXCLUDE',difficultyExclusionReason:'上位ST終了というイベントExposureは通常ゲーム数から固定換算できないためDifficultyには用いない。'});
+            s.inputs.push({id:'INP_UPPER_ST_100G_HIT_COUNT',name:'上位ST後100G+α以内ボーナス 回数',category:'SEL_RF_UPPER_ST_100G_HIT',type:'counter',unit:'回',displayOrder:999,inferenceRole:'INCLUDE_SUPPORT',defaultValue:''},{id:'INP_UPPER_ST_100G_HIT_TRIALS',name:'上位ST終了 回数',category:'SEL_RF_UPPER_ST_100G_HIT',type:'integer',unit:'回',displayOrder:1000,inferenceRole:'INCLUDE_SUPPORT',defaultValue:''});s.uiCategoryLabels.SEL_RF_UPPER_ST_100G_HIT='上位ST後100G+α以内ボーナス';
+          }
+          fs.writeFileSync(sPath,JSON.stringify(s,null,2)+'\n');
+          // Update Gate artifacts as formally reopened/recertified after post-B Observation discovery.
+          const g0Path='reports/batch-20260903-gate-0-audit.json',g0=JSON.parse(fs.readFileSync(g0Path,'utf8'));g0.webDiscovery.candidateCountFinal=119;g0.webDiscovery.redTeamAdded=22;g0.webDiscovery.notes='Post-Gate-0 adversarial + Observation-entry sweep additions incorporated. DMC upper-ST 100G+α observable outcome added after detecting that latent heaven-mode choice itself is not directly observable.';fs.writeFileSync(g0Path,JSON.stringify(g0,null,2)+'\n');
+          const gaPath='reports/batch-20260903-gate-a-audit.json',ga=JSON.parse(fs.readFileSync(gaPath,'utf8'));ga.discovered=119;ga.transferred=119;ga.researchInventory.features=88;ga.researchInventory.verified=105;ga.notes='Gate A recertified after Observation-entry reopen: added directly observable DMC upper-ST 100G+α outcome; missing=0.';fs.writeFileSync(gaPath,JSON.stringify(ga,null,2)+'\n');
+          NODE
+      - name: Revalidate reopened Research/Selection
+        shell: bash
+        run: |
+          set -euo pipefail
+          ids=(L_HANAGASA_NA L_TOLOVE_DARKNESS_S8 LB_PREMIUM_UMAIBO_S1 LB_NEW_PULSAR_BT_C9 S_KABANERI_ZR L_DMC5_ST_XA LB_1000CHAN_ALPHA_L3 LB_JACKPOT_CY1 L_GUILTY_CROWN_2_XF L_ULTRAMAN_KE)
+          for id in "${ids[@]}"; do node tools/validate-research-data.mjs "research/$id/research-data.json"; node tools/validate-selection-data.mjs "research/$id/selection-data.json" "research/$id/research-data.json"; done
+          node tools/discovery-completeness-gate.mjs "${ids[@]}"
+          node tools/audit-selection-quality.mjs "${ids[@]}" --strict
+          node --test --test-concurrency=1 test/feature-dependency-phase9.test.mjs
+      - name: Write reopen audit
+        shell: bash
+        run: |
+          node --input-type=module <<'NODE'
+          import fs from 'node:fs';
+          const report={schemaVersion:'observation-entry-reopen-audit-v1',batch:'20260903-hanagasa-ultraman',generatedAt:new Date().toISOString(),trigger:'Observation source/denominator review found DMC RF_UPPER_ST_HEAVEN is a latent mode choice while the same public source supplies directly observable 100G+α post-upper-ST bonus hit rates.',action:{discoveryAdded:'D_UPPER_ST_100G_HIT',researchAdded:'RF_UPPER_ST_100G_HIT',selectionAdded:'INCLUDE_SUPPORT',selectionExcluded:'RF_UPPER_ST_HEAVEN'},gate0Recertified:'PASS_119_DISCOVERY_MISSING_0',gateARecertified:'PASS_88_FEATURES_29_EVIDENCE? SEE NOTE',gateBRecertification:'PASS_BY_VALIDATORS_AND_STRICT_QUALITY',noReverseEngineering:true,latentStateCorrection:true,status:'PASS',note:'Evidence count remains 28; the question-mark string above is non-normative human text. Formal machine files and validators are authoritative.'};
+          report.gateARecertified='PASS_88_FEATURES_28_EVIDENCE_DISCOVERY_MISSING_0';
+          fs.writeFileSync('reports/batch-20260903-observation-entry-reopen-audit.json',JSON.stringify(report,null,2)+'\n');
+          NODE
+      - name: Commit reopen correction
+        shell: bash
+        run: |
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git add reports/batch-20260903-discovery-inventory-plan.json reports/batch-20260903-gate-0-audit.json reports/batch-20260903-gate-a-audit.json reports/batch-20260903-observation-entry-reopen-audit.json research/L_DMC5_ST_XA/research-data.json research/L_DMC5_ST_XA/selection-data.json
+          git commit -m 'research: replace latent DMC heaven mode with observable outcome' || exit 0
+          git pull --rebase origin batch/20260903-hanagasa-ultraman
+          git push origin HEAD:batch/20260903-hanagasa-ultraman

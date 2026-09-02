@@ -3,12 +3,29 @@
   "machineId": "L_MAHJONG_MONOGATARI_S2",
   "displayName": "L麻雀物語",
   "provisionalRegistrationId": 197,
-  "researchedAt": "2026-09-01",
-  "sources": [],
+  "researchedAt": "2026-09-02",
+  "sources": [
+    {
+      "sourceId": "SRC_NANA_DARWIN_LITE",
+      "publisher": "なな徹",
+      "title": "スマスロ 麻雀物語 打-WIN LITE（隠れ凪）の設定示唆",
+      "url": "https://nana-press.com/kaiseki/machine/931/29536/",
+      "checkedAt": "2026-09-02",
+      "sourceType": "major_analysis"
+    },
+    {
+      "sourceId": "SRC_PACHIMAGA_DARWIN_LITE",
+      "publisher": "パチマガスロマガ",
+      "title": "L麻雀物語 打-WIN LITE 隠れ凪のセリフ",
+      "url": "https://cs62.cs-plaza.com/g/pachi/pla/s_conq/olympiaestate_slot/06/en04.php",
+      "checkedAt": "2026-09-02",
+      "sourceType": "major_analysis"
+    }
+  ],
   "sourceCoverage": {
-    "machineMenu": "UNRESOLVED",
+    "machineMenu": "FOUND",
     "dataCounter": "UNRESOLVED",
-    "linkedService": "UNRESOLVED",
+    "linkedService": "FOUND",
     "directPlay": "FOUND",
     "endEvent": "FOUND",
     "seatedState": "UNRESOLVED"
@@ -19,24 +36,21 @@
       "sourceType": "DIRECT_PLAY",
       "observationMode": "MANUAL_COUNTER",
       "status": "FOUND",
-      "label": "AT直撃（前兆昇格除外） 回数・AT直撃（前兆昇格除外） 試行数",
+      "label": "AT直撃（前兆昇格除外） 回数・AT直撃 試行数",
       "categories": [
         "AT直撃（前兆昇格除外） 回数",
-        "AT直撃（前兆昇格除外） 試行数"
+        "AT直撃 試行数"
       ],
       "timing": [
-        "自己実戦中、SelectionDataで定義された対象試行・対象イベント成立時に更新"
+        "自己実戦中、解析上のAT直撃対象区間で更新"
       ],
       "excludedConditions": [
-        "SelectionDataの分母定義外の遊技状態・試行を混ぜない",
-        "着席前累積値を自己実戦値へ混ぜない",
-        "未観測を観測済み0として扱わない",
-        "解析定義のAT直撃は前兆昇格を除外する",
-        "前兆昇格込みの実戦AT直撃を同一Featureへ混在させない",
-        "Bonus初当り・AT初当りトータル・Bonus-or-AT合算を独立尤度として併用しない"
+        "前兆昇格込みの実戦AT直撃を混在させない",
+        "Bonus初当り・AT初当りトータル・Bonus-or-AT合算を独立評価しない",
+        "未観測を観測済み0として扱わない"
       ],
       "sourceRefs": [],
-      "notes": "Selection FEAT_DIRECT_AT (INCLUDE_PRIMARY) の入力契約を保持。公開全設定値と分母定義が揃っており、公開直撃抽選対象ゲームを単位に設定差を直接評価できるため主Featureとして採用する。"
+      "notes": "解析定義に一致するAT直撃のみを使用する。"
     },
     {
       "observationId": "OBS_KOTEI_APPEARANCE",
@@ -49,15 +63,38 @@
         "煌帝出現率 試行数"
       ],
       "timing": [
-        "自己実戦中、SelectionDataで定義された対象試行・対象イベント成立時に更新"
+        "対象イベント成立時に更新"
       ],
       "excludedConditions": [
-        "SelectionDataの分母定義外の遊技状態・試行を混ぜない",
-        "着席前累積値を自己実戦値へ混ぜない",
+        "条件付き分母を通常ゲーム数へ置換しない",
         "未観測を観測済み0として扱わない"
       ],
       "sourceRefs": [],
-      "notes": "Selection FEAT_KOTEI_APPEARANCE (INCLUDE_SUPPORT) の入力契約を保持。公開全設定値と条件付き分母が明示され、主Featureとは異なる構成・成立情報を追加できるため補助Featureとして採用する。"
+      "notes": "公開定義の条件付き母集団を維持する。"
+    },
+    {
+      "observationId": "OBS_DARWIN_LITE",
+      "sourceType": "LINKED_SERVICE",
+      "observationMode": "LINKED_SERVICE_READ",
+      "status": "FOUND",
+      "label": "打-WIN LITE遊技データ",
+      "categories": [
+        "総ゲーム数",
+        "通常ゲーム数",
+        "麻雀乱舞回数・確率",
+        "マシロ潜入ミッション回数・確率",
+        "麻雀ボーナス回数（通常中）・確率",
+        "麻雀闘牌回数・確率"
+      ],
+      "timing": [
+        "打-WIN LITEの遊技データ確認時"
+      ],
+      "excludedConditions": [
+        "各表示確率の分母を一律に通常ゲーム数とみなさない",
+        "打-WIN LITE表示だけからAT直撃（前兆昇格除外）の分子を構成しない"
+      ],
+      "sourceRefs": [],
+      "notes": "Web上の打-WIN LITE画面画像で、総ゲーム数・通常ゲーム数と通常時詳細情報を確認。画像例では通常ゲーム4934G、麻雀乱舞28回・1/176.2で通常ゲーム数との整合を確認できる一方、麻雀ボーナス14回・1/401.6は4934G単純分母と一致しないため、項目別の有効分母を保持する。"
     },
     {
       "observationId": "OBS_HARD_EVIDENCE_EVENTS",
@@ -77,14 +114,56 @@
         "隠しナギ 金"
       ],
       "timing": [
-        "各Evidenceの成立タイミングで即時確認"
+        "設定確定・否定情報の成立時に確認"
       ],
       "excludedConditions": [
-        "傾向示唆をHard Evidenceへ昇格させない",
-        "同一表示のHard部分以外を設定確定情報として扱わない"
+        "傾向示唆を設定確定情報へ昇格させない"
       ],
       "sourceRefs": [],
-      "notes": "SelectionData evidenceに採用済みのHard Evidenceのみ。"
+      "notes": "確定・否定条件として採用済みの情報のみ。"
+    },
+    {
+      "observationId": "OBS_DARWIN_LITE_NAGI",
+      "sourceType": "LINKED_SERVICE",
+      "observationMode": "LINKED_SERVICE_READ",
+      "status": "FOUND",
+      "label": "打-WIN LITE 隠れ凪",
+      "categories": [
+        "隠れ凪のセリフ"
+      ],
+      "timing": [
+        "打-WIN LITE開始後、QRコード読取時",
+        "1000G消化ごとの更新タイミング"
+      ],
+      "excludedConditions": [
+        "打-WIN LITE開始前の遊技区間を同じセッションの観測として扱わない",
+        "隠れ凪のセリフをAT直撃回数・煌帝回数・各試行数の代用にしない"
+      ],
+      "sourceRefs": [
+        "SRC_NANA_DARWIN_LITE",
+        "SRC_PACHIMAGA_DARWIN_LITE"
+      ],
+      "notes": "打-WIN LITEの存在とL麻雀物語固有の隠れ凪表示はWebで確認済み。数値推測要素の自動取得元としては未確認のため確定・否定情報補助取得に限定する。"
+    },
+    {
+      "observationId": "OBS_AT_FIRST_HIT",
+      "sourceType": "DIRECT_PLAY",
+      "observationMode": "MANUAL_COUNTER",
+      "status": "FOUND",
+      "label": "AT初当り 回数・有効通常ゲーム数",
+      "categories": [
+        "AT初当り 回数",
+        "有効通常ゲーム数"
+      ],
+      "timing": [
+        "自己実戦中にAT初当りと有効通常ゲーム数を更新"
+      ],
+      "excludedConditions": [
+        "AT直撃を別推測要素として重ねない",
+        "未観測を0として扱わない"
+      ],
+      "sourceRefs": [],
+      "notes": "AT初当りトータルを代表採用。"
     }
   ],
   "featureMappings": [
@@ -97,9 +176,9 @@
       "collectionMethods": [
         "MANUAL_COUNTER"
       ],
-      "usableForInference": true,
+      "usableForInference": false,
       "usableForDifficulty": false,
-      "notes": "Gate C写像。Difficulty exposureは取得単位・event exposureを確定するまで未参加。"
+      "notes": "前兆昇格除外の定義を維持。"
     },
     {
       "featureId": "FEAT_KOTEI_APPEARANCE",
@@ -110,40 +189,39 @@
       "collectionMethods": [
         "MANUAL_COUNTER"
       ],
+      "usableForInference": false,
+      "usableForDifficulty": false,
+      "notes": "強制出現を含む公開率のため設定推測不採用。"
+    },
+    {
+      "featureId": "FEAT_AT_FIRST_HIT",
+      "mappingType": "EXACT",
+      "observationIds": [
+        "OBS_AT_FIRST_HIT"
+      ],
+      "collectionMethods": [
+        "MANUAL_COUNTER"
+      ],
       "usableForInference": true,
       "usableForDifficulty": false,
-      "notes": "Gate C写像。Difficulty exposureは取得単位・event exposureを確定するまで未参加。"
+      "notes": "AT初当りトータルを代表採用。"
     }
   ],
   "researchReopenRequests": [],
   "fieldVerificationItems": [
     {
-      "verificationId": "VFY_L_MAHJONG_MONOGATARI_S2_MACHINE_MENU",
-      "status": "WAITING_FOR_MACHINE",
-      "sourceType": "MACHINE_MENU",
-      "priority": "MEDIUM",
-      "question": "Web調査で具体項目を確定できなかった筐体メニュー/遊技履歴について、総G・通常G・CZ・Bonus・AT・小役・履歴項目を実機で確認する。"
+      "verificationId": "VFY_L_MAHJONG_MONOGATARI_S2_DARWIN_DENOMINATORS",
+      "status": "NOT_REQUIRED",
+      "sourceType": "LINKED_SERVICE",
+      "priority": "LOW",
+      "question": "現在採用している数値Featureへ直接接続しないため追加実機確認は不要。将来、打-WIN LITEの詳細項目を推測へ採用する場合のみ項目別の分母定義を再確認する。"
     },
     {
       "verificationId": "VFY_L_MAHJONG_MONOGATARI_S2_DATA_COUNTER",
       "status": "WAITING_FOR_MACHINE",
       "sourceType": "DATA_COUNTER",
-      "priority": "HIGH",
-      "question": "ホールのデータカウンターで総G・現在G・Bonus・AT・CZ・初当り・履歴のどこまで取得でき、公開解析の分母と一致するか確認する。ホール設備依存のためWebだけでは最終確定しない。"
-    },
-    {
-      "verificationId": "VFY_L_MAHJONG_MONOGATARI_S2_SEATED_STATE",
-      "status": "WAITING_FOR_MACHINE",
-      "sourceType": "SEATED_STATE",
-      "priority": "HIGH",
-      "question": "着席直後に実機メニュー/データカウンターから取得できる累積値を確認し、前任者区間を安全に利用可能なSelection Featureがあるか判定する。"
-    },
-    {
-      "verificationId": "VFY_L_MAHJONG_MONOGATARI_S2_LINKED_SERVICE",
-      "status": "WAITING_FOR_MACHINE",
-      "sourceType": "LINKED_SERVICE",
-      "priority": "MEDIUM",
-      "question": "Web調査では機種固有の実機連動サービス/QR機能を確定できていない。実機メニュー上のQR/連動導線の有無を確認する。一般的な系列サービスの存在だけでFOUNDにしない。"
+      "priority": "LOW",
+      "question": "ホール設備固有の取得項目は必要時のみ確認する。"
     }
   ]
 }

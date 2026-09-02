@@ -1,0 +1,96 @@
+name: Batch 20260903 Gate D UI MachineData
+
+on:
+  push:
+    branches:
+      - batch/20260903-hanagasa-ultraman
+    paths:
+      - 'tools/generate-batch-20260903-gate-d-ui.mjs'
+      - '.github/workflows/batch-20260903-gate-d-ui-machine.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  generate-validate-build:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: batch/20260903-hanagasa-ultraman
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Generate Gate D UI Design
+        run: node tools/generate-batch-20260903-gate-d-ui.mjs
+      - name: Validate UI Design
+        run: npm run ui-design:validate
+      - name: Audit UI Selection linkage
+        run: |
+          npm run ui-design:linkage:audit -- . \
+            L_HANAGASA_NA L_TOLOVE_DARKNESS_S8 LB_PREMIUM_UMAIBO_S1 LB_NEW_PULSAR_BT_C9 S_KABANERI_ZR \
+            L_DMC5_ST_XA LB_1000CHAN_ALPHA_L3 LB_JACKPOT_CY1 L_GUILTY_CROWN_2_XF L_ULTRAMAN_KE
+      - name: Audit UI Observation linkage
+        run: |
+          npm run ui-design:observation:audit -- \
+            L_HANAGASA_NA L_TOLOVE_DARKNESS_S8 LB_PREMIUM_UMAIBO_S1 LB_NEW_PULSAR_BT_C9 S_KABANERI_ZR \
+            L_DMC5_ST_XA LB_1000CHAN_ALPHA_L3 LB_JACKPOT_CY1 L_GUILTY_CROWN_2_XF L_ULTRAMAN_KE --strict-v2
+      - name: Four-layer Gate
+        run: |
+          npm run pipeline:four-layer:gate -- \
+            L_HANAGASA_NA L_TOLOVE_DARKNESS_S8 LB_PREMIUM_UMAIBO_S1 LB_NEW_PULSAR_BT_C9 S_KABANERI_ZR \
+            L_DMC5_ST_XA LB_1000CHAN_ALPHA_L3 LB_JACKPOT_CY1 L_GUILTY_CROWN_2_XF L_ULTRAMAN_KE
+      - name: Build MachineData batch
+        run: |
+          npm run machine:batch -- \
+            L_HANAGASA_NA L_TOLOVE_DARKNESS_S8 LB_PREMIUM_UMAIBO_S1 LB_NEW_PULSAR_BT_C9 S_KABANERI_ZR \
+            L_DMC5_ST_XA LB_1000CHAN_ALPHA_L3 LB_JACKPOT_CY1 L_GUILTY_CROWN_2_XF L_ULTRAMAN_KE
+      - name: Materialize UI Design into MachineData
+        run: |
+          node tools/materialize-ui-design.mjs --apply \
+            L_HANAGASA_NA L_TOLOVE_DARKNESS_S8 LB_PREMIUM_UMAIBO_S1 LB_NEW_PULSAR_BT_C9 S_KABANERI_ZR \
+            L_DMC5_ST_XA LB_1000CHAN_ALPHA_L3 LB_JACKPOT_CY1 L_GUILTY_CROWN_2_XF L_ULTRAMAN_KE
+      - name: Verify materialization is stable
+        run: |
+          node tools/materialize-ui-design.mjs --require-unchanged \
+            L_HANAGASA_NA L_TOLOVE_DARKNESS_S8 LB_PREMIUM_UMAIBO_S1 LB_NEW_PULSAR_BT_C9 S_KABANERI_ZR \
+            L_DMC5_ST_XA LB_1000CHAN_ALPHA_L3 LB_JACKPOT_CY1 L_GUILTY_CROWN_2_XF L_ULTRAMAN_KE
+      - name: Gate D contract validations
+        run: |
+          npm run ui-design:test
+          npm run difficulty:exposure-audit
+          npm test
+          npm run audit
+          npm run audit:ui-service-names
+      - name: Write Gate D baseline report
+        run: |
+          mkdir -p reports
+          cat > reports/batch-20260903-gate-d-baseline.md <<'EOF'
+          # 20260903 Gate D UI Design / MachineData baseline
+
+          - UI Design: generated 10/10 from finalized SelectionData + Machine Observation Data v2
+          - UI validation: PASS
+          - Selection linkage: PASS
+          - Observation linkage strict-v2: PASS
+          - Four-layer gate: PASS (tracked MACHINE_REQUIRED Observation debt may remain)
+          - MachineData batch construction: PASS
+          - UI Design -> MachineData materialization: PASS / stable 10/10
+          - EXCLUDE-only inputs are not generated.
+          - Blank=unobserved / 0=observed zero semantics preserved.
+          - Conditional-population features demoted at Observation entry are not reintroduced.
+          - Quick input uses the same underlying input value and does not create a second counter.
+          - Difficulty exposure / tests / audits: PASS
+          - Gate E / Publish: NOT RUN
+          EOF
+      - name: Commit Gate D baseline
+        run: |
+          if [ -z "$(git status --porcelain)" ]; then echo 'No generated changes.'; exit 0; fi
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git add research machines reports difficulty-catalog.json machine-registry.json catalog.json 2>/dev/null || true
+          git add reports/batch-20260903-gate-d-baseline.md
+          git commit -m 'machine-data: materialize 20260903 Gate D UI contracts'
+          git pull --rebase origin batch/20260903-hanagasa-ultraman
+          git push origin HEAD:batch/20260903-hanagasa-ultraman

@@ -1,0 +1,97 @@
+{
+  "schemaVersion": "inference-profile-candidate-v1",
+  "machineId": "L_HEY_ELITE_SALARYMAN_KAGAMI_PA4",
+  "status": "RESEARCH_REQUIRED",
+  "candidateModel": "MIXED_INDEPENDENT_CONDITIONAL",
+  "currentProductionFeatures": [
+    "FEAT_INITIAL_COMBINED",
+    "FEAT_AT_PULLBACK",
+    "FEAT_TRUNK_LFW"
+  ],
+  "dependencyHypothesis": {
+    "aggregateOutcome": "FEAT_INITIAL_COMBINED",
+    "knownInitialHitRoutes": [
+      "規定ゲーム数",
+      "レア小役",
+      "CZ成功",
+      "AT直撃",
+      "フリーズ"
+    ],
+    "potentialUpstreamFeatures": [
+      "トランク成立時CZ抽選",
+      "レア小役成立時ボーナス抽選",
+      "AT直撃抽選"
+    ],
+    "risk": "初当り合算と、その初当りを生成する部分経路を独立Featureとして単純乗算すると、同じ下流初当り情報を再利用する可能性がある。"
+  },
+  "safeIndependentCandidate": {
+    "featureId": "FEAT_AT_PULLBACK",
+    "reason": "AT終了を親試行とする別Observation universeであり、通常時初当り生成経路とは分けて評価できる可能性が高い。最終採用時はAT初当り回数とのsubset/dependencyを再監査する。"
+  },
+  "conditionalCandidates": [
+    {
+      "name": "トランク→ラブフォースワン",
+      "currentFeatureId": "FEAT_TRUNK_LFW",
+      "parentTrial": "抽選対象トランク成立",
+      "childOutcome": "ラブフォースワン当選",
+      "publishedSettingDifference": true,
+      "activationConstraint": "このCZ情報を初当り合算と同時利用する場合、CZ成功→初当りまで含めた因果分解または非重複factorizationが必要。"
+    },
+    {
+      "name": "AT直撃",
+      "parentTrial": "通常時ハズレ等の直撃抽選機会",
+      "childOutcome": "AT直撃",
+      "publishedSettingDifference": true,
+      "activationConstraint": "初当り合算の部分集合として扱う場合、aggregateとの単純乗算は禁止。"
+    }
+  ],
+  "requiredForActivation": [
+    "初当り各経路の設定別確率・条件付き確率を同一母集団で整合させること",
+    "モード/内部状態で条件付けされた公開値を使う場合はLatent Internal State Observability Gateを満たすこと",
+    "実戦で経路別の親試行と子結果を観測できること",
+    "aggregate initial-hit probabilityとroute/subset probabilityを二重計上しないfactorizationを定義すること",
+    "不足するroute probabilityをaggregateとの差し引きだけで生成しないこと"
+  ],
+  "proposedProfile": {
+    "schemaVersion": "inference-profile-v2",
+    "groups": [
+      {
+        "groupId": "AT_PULLBACK",
+        "type": "INDEPENDENT",
+        "featureIds": [
+          "FEAT_AT_PULLBACK"
+        ]
+      },
+      {
+        "groupId": "INITIAL_HIT_GENERATION",
+        "type": "CONDITIONAL",
+        "parentFeatureId": "FEAT_INITIAL_ROUTE_OPPORTUNITY",
+        "childFeatureIds": [
+          "FEAT_INITIAL_BY_CZ",
+          "FEAT_INITIAL_BY_RARE_ROLE",
+          "FEAT_AT_DIRECT"
+        ],
+        "standaloneFeatureIds": [
+          "FEAT_INITIAL_BY_GAME_COUNT"
+        ]
+      }
+    ]
+  },
+  "activation": false,
+  "sources": [
+    {
+      "classification": "ANALYSIS",
+      "url": "https://nana-press.com/kaiseki/machine/465/12693/",
+      "supports": "初当り合算の複数経路、トランク成立時CZ抽選、AT直撃、AT引き戻し等の設定差"
+    },
+    {
+      "classification": "ANALYSIS",
+      "url": "https://1geki.jp/slot/s_hey_eskagami/0/",
+      "supports": "設定判別要素とAT直撃・引き戻し・CZ等の設定差"
+    }
+  ],
+  "notes": [
+    "candidate-only。production selection-data / machine-packageは変更しない。",
+    "現行packageの初当り合算・AT引き戻し・トランクCZはそのまま維持し、Profile v2のResearch完了までは挙動を変えない。"
+  ]
+}

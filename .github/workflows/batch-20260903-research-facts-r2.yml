@@ -1,0 +1,105 @@
+name: Batch 20260903 Research Facts R2
+
+on:
+  push:
+    branches:
+      - batch/20260903-hanagasa-ultraman
+    paths:
+      - '.github/workflows/batch-20260903-research-facts-r2.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  apply:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: batch/20260903-hanagasa-ultraman
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Apply Research facts R2
+        shell: bash
+        run: |
+          node --input-type=module <<'NODE'
+          import fs from 'node:fs';
+          const load=id=>JSON.parse(fs.readFileSync(`research/${id}/research-data.json`,'utf8'));
+          const save=(id,d)=>fs.writeFileSync(`research/${id}/research-data.json`,JSON.stringify(d,null,2)+'\n');
+          const feature=(d,id)=>{const x=d.features.find(x=>x.researchFeatureId===id);if(!x)throw new Error(`missing feature ${id}`);return x};
+          const ev=(d,id)=>{const x=d.evidenceCandidates.find(x=>x.researchEvidenceId===id);if(!x)throw new Error(`missing evidence ${id}`);return x};
+          const addSource=(d,s)=>{if(!d.sources.some(x=>x.sourceId===s.sourceId))d.sources.push(s)};
+          const pct=(settings,vals)=>Object.fromEntries(settings.map((s,i)=>[s,{probability:vals[i]/100,rawDisplay:`${vals[i]}%`}]))
+          // Premium Umaibo: close the two remaining public tables.
+          {
+            const id='LB_PREMIUM_UMAIBO_S1',d=load(id);
+            const cr=feature(d,'RF_CHERRY_REG'); cr.factStatus='verified'; cr.trialUnit='通常時ゲーム'; cr.numeratorDefinition='チェリー同時当選REG回数'; cr.denominatorDefinition='通常時ゲーム数'; cr.settingValues={SET_1:{probability:1/1560.4,rawDisplay:'1/1560.4'},SET_2:{probability:1/1524.1,rawDisplay:'1/1524.1'},SET_5:{probability:1/1489.5,rawDisplay:'1/1489.5'},SET_6:{probability:1/1456.4,rawDisplay:'1/1456.4'}}; cr.notes='なな徹・複数解析で設定別一致。単独REGやREG合算との包含関係はSelectionで重複評価する。';
+            const rr=feature(d,'RF_RARE_CHERRY_BIG'); rr.factStatus='verified'; rr.trialUnit='通常時ゲーム'; rr.numeratorDefinition='レアチェリー同時当選BIG回数'; rr.denominatorDefinition='通常時ゲーム数'; rr.settingValues={SET_1:{probability:1/3276.8,rawDisplay:'1/3276.8'},SET_2:{probability:1/3276.8,rawDisplay:'1/3276.8'},SET_5:{probability:1/3276.8,rawDisplay:'1/3276.8'},SET_6:{probability:1/3276.8,rawDisplay:'1/3276.8'}}; rr.notes='全設定共通1/3276.8（レアチェリーはBIG濃厚）。設定差なしのためSelectionでは情報量0候補だがResearchには公開事実として保持。';
+            save(id,d);
+          }
+          // Kabaneri: conditional tables and evidence families.
+          {
+            const id='S_KABANERI_ZR',d=load(id); addSource(d,{sourceId:'SRC_NANA_R2',publisher:'なな徹',title:'甲鉄城のカバネリ 設定判別・抽選値',url:'https://nana-press.com/kaiseki/machine/384/10347/',checkedAt:'2026-09-03',sourceType:'major_analysis'}); addSource(d,{sourceId:'SRC_TROPHY_R2',publisher:'なな徹',title:'甲鉄城のカバネリ サミートロフィー',url:'https://nana-press.com/kaiseki/machine/384/10344/',checkedAt:'2026-09-03',sourceType:'major_analysis'}); const refs=d.sources.map(s=>s.sourceId);
+            const bell=feature(d,'RF_COMMON_6_BELL'); bell.factStatus='verified'; bell.trialUnit='トータルゲーム'; bell.numeratorDefinition='共通中段ベル（6枚ベル）回数'; bell.denominatorDefinition='トータルゲーム数'; bell.settingValues={SET_1:{probability:1/26.6,rawDisplay:'1/26.6'},SET_2:{probability:1/26.6,rawDisplay:'1/26.6'},SET_3:{probability:1/25.9,rawDisplay:'1/25.9'},SET_4:{probability:1/25.4,rawDisplay:'1/25.4'},SET_5:{probability:1/24.9,rawDisplay:'1/24.9'},SET_6:{probability:1/24.2,rawDisplay:'1/24.2'}}; bell.sourceRefs=refs; bell.crossSourceStatus='cross_checked'; bell.notes='共通6枚ベルは通常時のみではなくトータルゲームを分母とする公開カウント仕様。';
+            const chain=feature(d,'RF_MUMEI_3CHAIN'); chain.factStatus='verified'; chain.trialUnit='無名CZ中の小役3連成立1回'; chain.numeratorDefinition='小役3連からボーナス成功した回数'; chain.denominatorDefinition='無名CZ中に小役3連が成立した回数'; chain.settingValues=pct(d.machine.settings,[18.7,18.8,23.5,28.3,30.6,40.7]); chain.sourceRefs=refs; chain.crossSourceStatus='cross_checked'; chain.notes='無名CZ内の条件付き成功率。通常G分母とは独立に扱わない。';
+            const nav=feature(d,'RF_MUMEI_NAV'); nav.factStatus='verified'; nav.trialUnit='無名CZ中の2択ナビ抽選対象ゲーム'; nav.numeratorDefinition='2択ナビ出現回数'; nav.denominatorDefinition='無名CZ中の2択ナビ抽選対象ゲーム数'; nav.settingValues=pct(d.machine.settings,[48.1,48.1,50.3,53.9,56.2,62.8]); nav.sourceRefs=refs; nav.crossSourceStatus='cross_checked'; nav.notes='公開値は無名CZ中2択ナビ出現率。Observationで抽選対象ゲームの実機上カウント可能性を確認する。';
+            const life=feature(d,'RF_IKOMA_LIFE_AVOID'); life.factStatus='verified'; life.candidateModel='binomial'; life.trialUnit='生駒CZ中、該当残りライフでハズレ成立1回'; life.numeratorDefinition='ライフ減少を回避した回数'; life.denominatorDefinition='該当残りライフでハズレが成立した回数'; life.settingValues={}; life.conditionalProbabilities={life4:pct(d.machine.settings,[12.4,12.4,12.2,12.2,12.1,11.9]),life3:pct(d.machine.settings,[33.2,33.2,34.9,37.8,39.2,45.0]),life2:pct(d.machine.settings,[55.8,55.8,57.6,59.7,61.2,65.5]),life1:pct(d.machine.settings,[60.2,60.2,62.0,64.1,65.6,69.2])}; life.sourceRefs=refs; life.crossSourceStatus='cross_checked'; life.notes='残りライフごとに別条件。状態を混ぜた単一成功率へ集約しない。';
+            const zone=feature(d,'RF_GAME_ZONE'); zone.factStatus='verified'; zone.trialUnit='各規定ゲーム数への到達1回'; zone.numeratorDefinition='規定G到達時のボーナス当選回数'; zone.denominatorDefinition='該当規定Gへ到達した回数'; zone.settingValues={}; zone.conditionalProbabilities={G100:pct(d.machine.settings,[35.3,35.7,36.1,36.6,37.0,37.4]),G250:pct(d.machine.settings,[33.1,37.3,37.7,42.7,43.1,44.8]),G450:pct(d.machine.settings,[13.9,13.9,15.6,22.2,22.7,23.1]),G650:pct(d.machine.settings,[37.8,39.9,40.3,43.6,46.1,49.9]),G1000:pct(d.machine.settings,[100,100,100,100,100,100])}; zone.sourceRefs=refs; zone.crossSourceStatus='cross_checked'; zone.notes='規定Gごとの条件付き当選率。各ゾーンは到達者集合が異なるため、通常G分母や互いに独立な5本の尤度へ変換しない。';
+            const rank=feature(d,'RF_CZ_FAIL_RANKUP'); rank.factStatus='verified'; rank.candidateModel='multinomial'; rank.trialUnit='無名CZまたは生駒CZ失敗1回'; rank.numeratorDefinition='失敗時BBランク昇格段階別回数'; rank.denominatorDefinition='無名CZまたは生駒CZ失敗回数'; rank.categories=['noUp','up1','up3']; rank.settingValues={}; const up1=[20,30,30,45,45.4,49.6],up3=[.4,.4,.4,.4,.4,.4]; rank.settingDistributions=Object.fromEntries(d.machine.settings.map((s,i)=>[s,{noUp:1-(up1[i]+up3[i])/100,up1:up1[i]/100,up3:up3[i]/100}])); rank.distributionMode='complete'; rank.sourceRefs=refs; rank.crossSourceStatus='cross_checked'; rank.notes='無名CZ/生駒CZ失敗時。2段階UPは公開表に無く、残余を昇格なしとして3カテゴリ化。美馬CZ失敗時は別の設定共通抽選で混ぜない。';
+            const om=ev(d,'RE_OMIKUJI'); om.factStatus='verified'; om.variants=[{label:'小吉（銅）',allowedSettings:['SET_2','SET_3','SET_4','SET_5','SET_6']},{label:'中吉（銀）',allowedSettings:['SET_4','SET_5','SET_6']},{label:'大吉（金）',allowedSettings:['SET_6']}]; om.sourceRefs=refs; om.notes='おみくじ示唆。公開出現率は通常時消化Gを分母とするため、示唆発生機会数を分母にしない。';
+            const ma=ev(d,'RE_MUMEI_PAYOUT'); ma.factStatus='verified'; ma.variants=[{label:'+44枚',allowedSettings:['SET_4','SET_5','SET_6']},{label:'+55枚',allowedSettings:['SET_5','SET_6']},{label:'+66枚',allowedSettings:['SET_6']},{label:'+77枚',allowedSettings:['SET_6']},{label:'+331枚',allowedSettings:['SET_6']}]; ma.sourceRefs=refs; ma.notes='カバネリアタック無名の特定上乗せ。示唆合算出現率は設定4=1/544、5=1/537、6=1/614（無名アタック単位）。';
+            const pay=ev(d,'RE_PAYOUT'); pay.factStatus='verified'; pay.variants=[{label:'456枚OVER',allowedSettings:['SET_4','SET_5','SET_6']},{label:'666枚OVER',allowedSettings:['SET_6']}]; pay.sourceRefs=refs; pay.notes='カバネリ/エピソードボーナス中。公開出現率：設定4/5の456=1/131、設定6の456=1/218・666=1/327。';
+            const st=ev(d,'RE_ST_END'); st.factStatus='verified'; st.variants=[{label:'通常',semantic:'基本'},{label:'菖蒲',semantic:'高設定示唆'}]; st.sourceRefs=refs; st.notes='ST終了画面。菖蒲の公開出現率は設定1/2/3/4/5/6=1.2/1.8/1.8/4.6/5.3/6.1%。確定Evidenceではなく分布型示唆。';
+            const tr=ev(d,'RE_SAMMY_TROPHY'); tr.factStatus='verified'; tr.variants=[{label:'銅',allowedSettings:['SET_2','SET_3','SET_4','SET_5','SET_6']},{label:'銀',allowedSettings:['SET_3','SET_4','SET_5','SET_6']},{label:'金',allowedSettings:['SET_4','SET_5','SET_6']},{label:'キリン',allowedSettings:['SET_5','SET_6']},{label:'虹',allowedSettings:['SET_6']}]; tr.sourceRefs=refs; tr.notes='出現契機はST非当選駿城ボーナス終了/ST終了/エンディングボーナス終了。出現率は1日総G数帯（～5000、5001～7000、7001～）および店長カスタムで変化するため、無条件の確率Evidenceにしない。';
+            const bc=ev(d,'RE_BONUS_CHARACTER'); bc.factStatus='verified'; bc.variants=[{label:'男性紹介',semantic:'奇数設定寄り'},{label:'女性紹介',semantic:'偶数設定寄り'},{label:'エピソード7',allowedSettings:['SET_4','SET_5','SET_6']}]; bc.sourceRefs=refs; bc.notes='残り50枚付近のキャラ紹介は男/女比が設定1:60/40,2:40/60,3:60/40,4:40/60,5:60/40,6:40/60。エピソード紹介は話数が大きいほど高設定示唆、7話は4+。';
+            const init=feature(d,'RF_INITIAL_BB_RANK'); init.factStatus='public_partial'; init.settingValues={SET_1:{probability:1,rawDisplay:'Rank1 21.1 / R2 13.6 / R3 11.0 / R4 52.3 / R5 0.6 / R6 1.3%'}}; init.sourceRefs=refs; init.crossSourceStatus='cross_checked'; init.notes='設定差ありと公表されるが、確認できた設定別分布は設定1のみ。欠損設定を逆算・推定しない。Selection入力前に「公開不完全」として扱う。';
+            save(id,d);
+          }
+          // DMC5 remaining high-confidence facts/evidence.
+          {
+            const id='L_DMC5_ST_XA',d=load(id); addSource(d,{sourceId:'SRC_NANA_R2',publisher:'なな徹',title:'DMC5 設定差・設定示唆/上位ST解析',url:'https://nana-press.com/kaiseki/machine/959/29918/',checkedAt:'2026-09-03',sourceType:'major_analysis'}); addSource(d,{sourceId:'SRC_PWORLD_R2',publisher:'P-WORLD',title:'DMC5 設定推測・終了画面',url:'https://www.p-world.co.jp/machine/database/10277',checkedAt:'2026-09-03',sourceType:'major_analysis'}); const refs=d.sources.map(s=>s.sourceId);
+            const h=feature(d,'RF_UPPER_ST_HEAVEN'); h.factStatus='verified'; h.trialUnit='上位ST終了1回'; h.numeratorDefinition='天国モード選択回数'; h.denominatorDefinition='上位ST終了後モード選択回数'; h.settingValues=pct(d.machine.settings,[5.5,12.5,25.0,35.2,37.1,54.7]); h.sourceRefs=refs; h.crossSourceStatus='cross_checked'; h.notes='上位ST終了後は通常C以上。天国選択率を二項で表現可能。';
+            const mystery=feature(d,'RF_MYSTERY_DANTE'); mystery.factStatus='verified'; mystery.trialUnit='通常時ゲーム'; mystery.numeratorDefinition='CZ周期到達やチャンス目契機ではない「謎ダンテ」出現回数'; mystery.denominatorDefinition='通常時ゲーム数'; mystery.settingValues={SET_1:{probability:1/21238.7,rawDisplay:'1/21238.7'},SET_2:{probability:1/17505.5,rawDisplay:'1/17505.5'},SET_3:{probability:1/14672.2,rawDisplay:'1/14672.2'},SET_4:{probability:1/10405.1,rawDisplay:'1/10405.1'},SET_5:{probability:1/9631.4,rawDisplay:'1/9631.4'},SET_6:{probability:1/9079.6,rawDisplay:'1/9079.6'}}; mystery.sourceRefs=refs; mystery.crossSourceStatus='cross_checked'; mystery.notes='周期到達/チャンス目契機と無関係に突然ダンテCZへ入る事象。実機で契機識別可能かObservationで確認。';
+            const tro=ev(d,'RE_ENTA_TROPHY'); tro.factStatus='verified'; tro.variants=[{label:'銅',allowedSettings:['SET_2','SET_3','SET_4','SET_5','SET_6']},{label:'銀',allowedSettings:['SET_3','SET_4','SET_5','SET_6']},{label:'金',allowedSettings:['SET_4','SET_5','SET_6']},{label:'紅葉',allowedSettings:['SET_5','SET_6']},{label:'虹',allowedSettings:['SET_6']}]; tro.sourceRefs=refs; tro.notes='ST終了時エンタトロフィー。';
+            const pay=ev(d,'RE_PAYOUT'); pay.factStatus='verified'; pay.variants=[{label:'222枚OVER',allowedSettings:['SET_2','SET_3','SET_4','SET_5','SET_6']},{label:'456枚OVER',allowedSettings:['SET_4','SET_5','SET_6']},{label:'555枚OVER',allowedSettings:['SET_5','SET_6']},{label:'666枚OVER',allowedSettings:['SET_6']}]; pay.sourceRefs=refs; pay.notes='ST中。通常時ロングフリーズ等の上位ST直行では500枚OVER以降が表示されないため、発生可能性の母集団に経路条件あり。';
+            const voice=ev(d,'RE_UPPER_ST_VOICE'); voice.factStatus='verified'; voice.variants=[{label:'2点リードだ!',allowedSettings:['SET_2','SET_3','SET_4','SET_5','SET_6']},{label:'3点リードだ!',allowedSettings:['SET_3','SET_4','SET_5','SET_6']},{label:'4点リードだ!',allowedSettings:['SET_4','SET_5','SET_6']},{label:'5点リードだ!',allowedSettings:['SET_5','SET_6']},{label:'6点リードだ!',allowedSettings:['SET_6']}]; voice.sourceRefs=refs; voice.notes='上位ST中バージルバトル勝利時のダンテセリフ。1点は基本。';
+            const end=ev(d,'RE_DMC_END'); end.factStatus='verified'; end.variants=[{label:'ライブラリー',semantic:'奇数設定示唆'},{label:'マーケット',semantic:'偶数設定示唆'},{label:'ストリート',semantic:'高設定示唆弱'},{label:'カタコンベ',semantic:'高設定示唆強'},{label:'ブラッディパレス低層',deniedSettings:['SET_3']},{label:'ブラッディパレス中層',deniedSettings:['SET_2']},{label:'ブラッディパレス高層',allowedSettings:['SET_2','SET_3','SET_4','SET_5','SET_6']},{label:'魔界',allowedSettings:['SET_4','SET_5','SET_6']},{label:'全員集合',allowedSettings:['SET_5','SET_6']},{label:'エンタライオン',allowedSettings:['SET_6']}]; end.sourceRefs=refs; end.notes='DMCボーナス終了画面。スーパーネロ等のモード/ゾーン示唆は設定Evidenceから分離。';
+            save(id,d);
+          }
+          // 1000chan A evidence + H special behavior.
+          {
+            const id='LB_1000CHAN_ALPHA_L3',d=load(id); addSource(d,{sourceId:'SRC_NANA_R2',publisher:'なな徹',title:'1000ちゃんA 設定判別・設定示唆',url:'https://nana-press.com/kaiseki/machine/945/',checkedAt:'2026-09-03',sourceType:'major_analysis'}); const refs=d.sources.map(s=>s.sourceId);
+            const cv=ev(d,'RE_CONFIRM_VOICE'); cv.factStatus='verified'; cv.variants=[{label:'キャスターA（1000☆ボーナス除外）',allowedSettings:['SET_2','SET_5','SET_6','SET_H']},{label:'運太郎（1000☆ボーナス除外）',allowedSettings:['SET_5','SET_6','SET_H']},{label:'営子（1000☆ボーナス除外）',allowedSettings:['SET_5','SET_6','SET_H']},{label:'3人（1000☆ボーナス除外）',allowedSettings:['SET_6','SET_H']}]; cv.sourceRefs=refs; cv.notes='ボーナス確定画面移行時。1000ちゃん/ミリオ/プリマは対応ボーナスとの組合せにより高設定示唆で、確定系と混同しない。設定Hの包含は特殊設定につきSelectionで別扱い。';
+            const bv=ev(d,'RE_BB_END_VOICE'); bv.factStatus='verified'; bv.variants=[{label:'B',semantic:'偶数設定示唆'},{label:'C',semantic:'高設定示唆弱'},{label:'D',semantic:'高設定示唆強'},{label:'E',allowedSettings:['SET_6','SET_H']},{label:'F',allowedSettings:['SET_2','SET_5','SET_6','SET_H']},{label:'G',allowedSettings:['SET_5','SET_6','SET_H']}]; bv.sourceRefs=refs; bv.notes='BB終了時PUSHボイス。Aは基本。Hは通常序列と分離する。';
+            const h=ev(d,'RE_SET_H'); h.factStatus='verified'; h.allowedSettings=['SET_H']; h.deniedSettings=['SET_1','SET_2','SET_5','SET_6']; h.sourceRefs=refs; h.notes='設定Hは約7710.1G/50枚とほぼメダルが減らない特殊挙動。通常設定は約38.8G/50枚。1000☆PARTY初当りは複数ソース一致で1/10922.7（1/10992.7表記は誤記扱い）。通常の高低設定推測と同一軸で扱わない。';
+            save(id,d);
+          }
+          NODE
+      - name: Validate ResearchData and Discovery transfer
+        shell: bash
+        run: |
+          set -euo pipefail
+          ids=(L_HANAGASA_NA L_TOLOVE_DARKNESS_S8 LB_PREMIUM_UMAIBO_S1 LB_NEW_PULSAR_BT_C9 S_KABANERI_ZR L_DMC5_ST_XA LB_1000CHAN_ALPHA_L3 LB_JACKPOT_CY1 L_GUILTY_CROWN_2_XF L_ULTRAMAN_KE)
+          for id in "${ids[@]}"; do node tools/validate-research-data.mjs "research/$id/research-data.json"; done
+          node tools/discovery-completeness-gate.mjs "${ids[@]}"
+      - name: Refresh Research inventory
+        shell: bash
+        run: |
+          node --input-type=module <<'NODE'
+          import fs from 'node:fs';
+          const ids=['L_HANAGASA_NA','L_TOLOVE_DARKNESS_S8','LB_PREMIUM_UMAIBO_S1','LB_NEW_PULSAR_BT_C9','S_KABANERI_ZR','L_DMC5_ST_XA','LB_1000CHAN_ALPHA_L3','LB_JACKPOT_CY1','L_GUILTY_CROWN_2_XF','L_ULTRAMAN_KE']; const machines=[]; const totals={features:0,evidence:0,verified:0,pending:0,public_partial:0,conflict:0,reference:0,discovery:0};
+          for(const id of ids){const d=JSON.parse(fs.readFileSync(`research/${id}/research-data.json`,'utf8'));const all=[...(d.features??[]),...(d.evidenceCandidates??[])],state=all.reduce((m,x)=>(m[x.factStatus]=(m[x.factStatus]??0)+1,m),{});const row={machineId:id,displayName:d.machine.displayName,discovery:(d.discoveryInventory??[]).length,features:(d.features??[]).length,evidence:(d.evidenceCandidates??[]).length,verified:state.verified??0,pending:state.pending??0,public_partial:state.public_partial??0,conflict:state.conflict??0,reference:(d.discoveryInventory??[]).filter(x=>x.transferStatus==='REFERENCE').length,openConflicts:(d.conflicts??[]).filter(x=>x.status!=='RESOLVED').map(x=>x.conflictId),pendingIds:all.filter(x=>x.factStatus==='pending').map(x=>x.researchFeatureId??x.researchEvidenceId),partialIds:all.filter(x=>x.factStatus==='public_partial').map(x=>x.researchFeatureId??x.researchEvidenceId)};machines.push(row);for(const k of Object.keys(totals))if(k in row)totals[k]+=row[k];}
+          fs.writeFileSync('reports/batch-20260903-research-inventory.json',JSON.stringify({schemaVersion:'batch-research-inventory-v1',batch:'20260903-hanagasa-ultraman',generatedAt:new Date().toISOString(),totals,machines},null,2)+'\n');
+          NODE
+      - name: Commit Research facts R2
+        shell: bash
+        run: |
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git add research/*/research-data.json reports/batch-20260903-research-inventory.json
+          git commit -m 'research: verify 20260903 facts r2' || exit 0
+          git pull --rebase origin batch/20260903-hanagasa-ultraman
+          git push origin HEAD:batch/20260903-hanagasa-ultraman

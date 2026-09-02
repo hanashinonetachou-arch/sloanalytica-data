@@ -1,0 +1,124 @@
+name: Batch 20260903 Research Facts R1
+
+on:
+  push:
+    branches:
+      - batch/20260903-hanagasa-ultraman
+    paths:
+      - '.github/workflows/batch-20260903-research-facts-r1.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  apply:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: batch/20260903-hanagasa-ultraman
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Apply cross-checked Research facts
+        shell: bash
+        run: |
+          node --input-type=module <<'NODE'
+          import fs from 'node:fs';
+          const load=id=>JSON.parse(fs.readFileSync(`research/${id}/research-data.json`,'utf8'));
+          const save=(id,d)=>fs.writeFileSync(`research/${id}/research-data.json`,JSON.stringify(d,null,2)+'\n');
+          const feature=(d,id)=>{const x=d.features.find(x=>x.researchFeatureId===id); if(!x) throw new Error(`missing ${id}`); return x};
+          const ev=(d,id)=>{const x=d.evidenceCandidates.find(x=>x.researchEvidenceId===id); if(!x) throw new Error(`missing ${id}`); return x};
+          // Jackpot: resolve typo conflict by two-source agreement + aggregate identity.
+          {
+            const id='LB_JACKPOT_CY1',d=load(id),f=feature(d,'RF_BIG');
+            f.factStatus='verified'; f.crossSourceStatus='cross_checked';
+            f.settingValues.SET_1={probability:1/348.6,rawDisplay:'1/348.6'};
+            f.notes='一撃・なな徹は設定1 BIG=1/348.6で一致。REG=1/524.3との合算は約1/209.4となり公表合算とも整合する。P-WORLD/HAZUSEの1/384.6表記は合算と数学的に不整合のため誤記と判定。';
+            const c=(d.conflicts??[]).find(x=>x.conflictId==='CF_BIG_SET1'); if(c){c.status='RESOLVED';c.resolution='1/348.6を採用。二系統一致かつREGとの合算1/209.4に整合。1/384.6は合算不整合。'}
+            save(id,d);
+          }
+          // ToLOVE TRANCE: public confirmation/hint families.
+          {
+            const id='L_TOLOVE_DARKNESS_S8',d=load(id);
+            const st=ev(d,'RE_ST_END'); st.factStatus='verified'; st.variants=[
+              {label:'吉スタンプ（ネメシス）',allowedSettings:['SET_3','SET_4','SET_5','SET_6']},
+              {label:'良スタンプ（ヤミ＆美柑）',allowedSettings:['SET_4','SET_5','SET_6']},
+              {label:'優スタンプ（ララ＆ナナ＆モモ）',allowedSettings:['SET_5','SET_6']},
+              {label:'極スタンプ（ヒロイン集合）',allowedSettings:['SET_6']},
+              {label:'美柑・スタンプなし',semantic:'高設定示唆'},
+              {label:'黒咲芽亜',semantic:'設定5期待度大幅アップ'}
+            ]; st.notes='ST終了画面は複数パターンのEvidence family。確定系はvariants.allowedSettingsに保持し、黒咲芽亜は5確ではなく期待度大幅アップ。';
+            const p=ev(d,'RE_PAYOUT'); p.factStatus='verified'; p.variants=[{label:'456枚OVER',allowedSettings:['SET_4','SET_5','SET_6']},{label:'555枚OVER',allowedSettings:['SET_5','SET_6']},{label:'666枚OVER',allowedSettings:['SET_6']}]; p.notes='特定獲得枚数の設定下限/設定6確定系。';
+            const b=ev(d,'RE_BLACK_MEA'); b.factStatus='verified'; b.notes='黒咲芽亜終了画面は設定5確定ではなく「設定5の期待度大幅アップ」。Evidenceでは確定排除に使わない。';
+            const n=ev(d,'RE_DARWIN_HIDDEN_NAGI'); n.factStatus='verified'; n.variants=[{label:'緑',allowedSettings:['SET_3','SET_4','SET_5','SET_6']},{label:'赤',allowedSettings:['SET_4','SET_5','SET_6']},{label:'銀',allowedSettings:['SET_5','SET_6']},{label:'金',allowedSettings:['SET_6']}]; n.notes='打-WIN LITE開始後、1000G消化ごとに抽選。QR読取時の隠れ凪セリフ。';
+            save(id,d);
+          }
+          // 1000chan: full standard-setting bonus-trigger distribution.
+          {
+            const id='LB_1000CHAN_ALPHA_L3',d=load(id),f=feature(d,'RF_BONUS_TRIGGER_DISTRIBUTION');
+            f.factStatus='verified'; f.candidateModel='multinomial'; f.trialUnit='通常時ボーナス当選1回'; f.numeratorDefinition='各当選契機でのボーナス当選回数'; f.denominatorDefinition='当選契機を確認できた通常時ボーナス総当選回数';
+            f.categories=['solo','replay','bell','cherry','watermelon','weakChance','strongChance','reach','confirmedRole','confirmedReplay'];
+            f.settingDistributions={
+              SET_1:{solo:.028,replay:.018,bell:.049,cherry:.290,watermelon:.064,weakChance:.141,strongChance:.333,reach:.056,confirmedRole:.003,confirmedReplay:.018},
+              SET_2:{solo:.029,replay:.017,bell:.054,cherry:.294,watermelon:.069,weakChance:.143,strongChance:.321,reach:.054,confirmedRole:.002,confirmedReplay:.017},
+              SET_5:{solo:.024,replay:.016,bell:.056,cherry:.322,watermelon:.070,weakChance:.151,strongChance:.293,reach:.050,confirmedRole:.002,confirmedReplay:.016},
+              SET_6:{solo:.024,replay:.015,bell:.059,cherry:.333,watermelon:.072,weakChance:.160,strongChance:.274,reach:.046,confirmedRole:.002,confirmedReplay:.015}
+            }; f.distributionMode='complete'; f.settingValues={}; f.notes='通常設定1/2/5/6のボーナス当選契機内訳。公開値は丸め。設定Hは特殊挙動で同表の通常設定分布に混ぜない。';
+            const r=feature(d,'RF_ROLE_BONUS_OVERLAP'); r.factStatus='verified'; r.notes='小役成立時のボーナス期待度：リプレイ0.1%共通、ベル0.3/0.3/0.4/0.4%、チェリー6.9/7.2/8.6/9.4%、スイカ2.9/3.3/3.6/4.0%、弱チャンス目8.4/8.8/10.0/11.2%、強チャンス目30.5%共通（設定1/2/5/6）。条件別表なので単純な通常G分母の独立Featureとして扱わずSelectionで構造化する。';
+            save(id,d);
+          }
+          // DMC5: verify tables whose condition and trial universe are explicit.
+          {
+            const id='L_DMC5_ST_XA',d=load(id);
+            const cyc=feature(d,'RF_CYCLE_CZ'); cyc.factStatus='verified'; cyc.notes='1/4/7周期までにCZ当選する累積率：設定1 33.2/68.5/85.1%、2 33.6/69.2/85.7、3 34.0/69.8/86.2、4 37.5/75.7/90.5、5 39.1/77.3/91.6、6 41.0/79.4/92.8。通常周期当選も加味した累積値のため3本を独立尤度化しない。';
+            const init=feature(d,'RF_INITIAL_BONUS_LEVEL'); init.factStatus='verified'; init.candidateModel='multinomial'; init.trialUnit='設定変更時（有利区間移行時）またはST/上位ST終了時の初期レベル決定1回'; init.numeratorDefinition='初期ボーナスレベル別選択回数'; init.denominatorDefinition='初期ボーナスレベル決定回数'; init.categories=['LV1','LV2','LV3','LV4','LV5','LV6']; init.settingValues={}; init.settingDistributions={
+              SET_1:{LV1:.410,LV2:.238,LV3:.180,LV4:.137,LV5:.023,LV6:.012},SET_2:{LV1:.398,LV2:.234,LV3:.184,LV4:.141,LV5:.027,LV6:.016},SET_3:{LV1:.387,LV2:.227,LV3:.188,LV4:.145,LV5:.035,LV6:.020},SET_4:{LV1:.332,LV2:.211,LV3:.211,LV4:.168,LV5:.055,LV6:.023},SET_5:{LV1:.313,LV2:.207,LV3:.219,LV4:.172,LV5:.063,LV6:.027},SET_6:{LV1:.273,LV2:.195,LV3:.234,LV4:.180,LV5:.086,LV6:.031}}; init.distributionMode='complete'; init.notes='公開6カテゴリ分布。丸め誤差を原値のまま保持。';
+            const up=feature(d,'RF_BONUS_LEVEL_UP'); up.factStatus='verified'; up.notes='条件別抽選。ネロ/V CZ失敗後・DMCボーナス終了後の1段階UP=43.8/44.5/46.1/50.0/53.1/58.2%。ダンテCZ失敗後は1段階/2段階=56.2/43.8,55.5/44.5,53.9/46.1,50/50,46.9/53.1,41.8/58.2%。条件を混ぜない。';
+            const bb=feature(d,'RF_BLOODY_BATTLE_ENTRY'); bb.factStatus='verified'; bb.notes='DMCボーナス中の成立役別抽選。その他=1.0/1.0/1.6/1.6/2.4/2.4%、シングル=21.8/21.8/22.6/22.6/28.2/28.2%、ダブル/トリプル=全設定100%。成立役別の条件付き試行。';
+            const bw=feature(d,'RF_BLOODY_BATTLE_WIN'); bw.factStatus='verified'; bw.notes='当選契機別勝利期待度。その他・シングル=全設定50%、ダブル=60.9/60.9/62.5/62.5/75/75%、トリプル=全設定100%。内部敗北時のチャンス目書換も同数値と公開。';
+            const j=feature(d,'RF_ST_PRE_JCB_PROMOTE'); j.factStatus='verified'; j.notes='ST本前兆中JCB昇格：シングル=2.3/2.7/3.1/3.5/3.9/4.3%、ダブル=25.0/25.4/25.8/26.2/26.6/27.3%、トリプル=100%。本前兆中かつ成立役別の条件付き試行。';
+            const e=feature(d,'RF_ST_EMBLEM_TYPE'); e.factStatus='verified'; e.notes='ST開始時の獲得エンブレム種別：通常STの金=27.3/28.9/29.7/30.9/32.0/33.2%、上位STの金=33/34/34/44/44/44%。通常STと上位STは異なる条件なので別母集団として扱う。';
+            const ec=feature(d,'RF_UPPER_ST_EMBLEM_COUNT'); ec.factStatus='verified'; ec.candidateModel='binomial'; ec.trialUnit='上位STセット開始1回'; ec.numeratorDefinition='エンブレム3個選択回数'; ec.denominatorDefinition='上位STセット開始回数'; ec.settingValues={SET_1:{probability:.531,rawDisplay:'53.1%'},SET_2:{probability:.547,rawDisplay:'54.7%'},SET_3:{probability:.555,rawDisplay:'55.5%'},SET_4:{probability:.562,rawDisplay:'56.2%'},SET_5:{probability:.586,rawDisplay:'58.6%'},SET_6:{probability:.641,rawDisplay:'64.1%'}}; ec.notes='上位STセット開始ごとに2個/3個を抽選。3個選択率をbinomialで表現可能。';
+            save(id,d);
+          }
+          // Guilty Crown 2: verify evidence families and the AT-set stock lottery.
+          {
+            const id='L_GUILTY_CROWN_2_XF',d=load(id);
+            const w=ev(d,'RE_CONFIRM_WATER'); w.factStatus='verified'; w.allowedSettings=['SET_1','SET_4','SET_5','SET_6']; w.deniedSettings=['SET_2','SET_3']; w.notes='BIG確定画面「水着」：設定2・3否定かつ高設定示唆。';
+            const s=ev(d,'RE_BONUS_END_SUBLCD'); s.factStatus='verified'; s.variants=[{label:'集＆涯',allowedSettings:['SET_3','SET_4','SET_5','SET_6']},{label:'いのり＆真名',allowedSettings:['SET_5','SET_6']},{label:'GC黒',semantic:'設定2・5示唆'},{label:'GC白',semantic:'設定3・6示唆'}]; s.notes='BIG/BBエクストラ終了時サブ液晶タッチ。';
+            const a=ev(d,'RE_AT_END'); a.factStatus='verified'; a.variants=[{label:'綾瀬＆ツグミ',allowedSettings:['SET_2','SET_3','SET_4','SET_5','SET_6']},{label:'羽根つき',allowedSettings:['SET_4','SET_5','SET_6']},{label:'ライブ',allowedSettings:['SET_6']}]; a.notes='AT終了画面の設定下限・設定6確定系。';
+            const ap=feature(d,'RF_APOCALYPSE_TIMING'); ap.factStatus='verified'; ap.trialUnit='ATセット開始1回'; ap.numeratorDefinition='四度目の黙示録ストック当選回数'; ap.denominatorDefinition='ATセット開始回数（ストック最大1個の保持条件を考慮）'; ap.settingValues={SET_1:{probability:.008,rawDisplay:'0.8%'},SET_2:{probability:.009,rawDisplay:'0.9%'},SET_3:{probability:.011,rawDisplay:'1.1%'},SET_4:{probability:.013,rawDisplay:'1.3%'},SET_5:{probability:.015,rawDisplay:'1.5%'},SET_6:{probability:.016,rawDisplay:'1.6%'}}; ap.notes='ATセット開始時のストック抽選。ストックは最大1個のため、既保有時を単純に追加試行として扱わない。';
+            const ae=feature(d,'RF_APOCALYPSE_ENDING'); ae.factStatus='pending'; ae.settingValues={SET_1:{probability:.167,rawDisplay:'弱レア/赤7フェイク 16.7%（設定1）'}}; ae.notes='設定差ありと公開されるが検索時点で設定1表のみ確認。強スイカ33.4%、強レア50.1%も設定1。全設定表の有無を継続調査。';
+            const ac=feature(d,'RF_APOCALYPSE_CONTINUE'); ac.factStatus='pending'; ac.settingValues={SET_1:{probability:.501,rawDisplay:'50.1%（設定1）'}}; ac.notes='設定差ありと公開されるが検索時点で設定1値のみ確認。全設定表を継続調査。';
+            save(id,d);
+          }
+          NODE
+      - name: Validate ResearchData
+        shell: bash
+        run: |
+          set -euo pipefail
+          ids=(L_HANAGASA_NA L_TOLOVE_DARKNESS_S8 LB_PREMIUM_UMAIBO_S1 LB_NEW_PULSAR_BT_C9 S_KABANERI_ZR L_DMC5_ST_XA LB_1000CHAN_ALPHA_L3 LB_JACKPOT_CY1 L_GUILTY_CROWN_2_XF L_ULTRAMAN_KE)
+          for id in "${ids[@]}"; do node tools/validate-research-data.mjs "research/$id/research-data.json"; done
+          node tools/discovery-completeness-gate.mjs "${ids[@]}"
+      - name: Refresh Research inventory
+        shell: bash
+        run: |
+          node --input-type=module <<'NODE'
+          import fs from 'node:fs';
+          const ids=['L_HANAGASA_NA','L_TOLOVE_DARKNESS_S8','LB_PREMIUM_UMAIBO_S1','LB_NEW_PULSAR_BT_C9','S_KABANERI_ZR','L_DMC5_ST_XA','LB_1000CHAN_ALPHA_L3','LB_JACKPOT_CY1','L_GUILTY_CROWN_2_XF','L_ULTRAMAN_KE'];
+          const machines=[]; let totals={features:0,evidence:0,verified:0,pending:0,conflict:0,reference:0,discovery:0};
+          for(const id of ids){const d=JSON.parse(fs.readFileSync(`research/${id}/research-data.json`,'utf8')); const all=[...(d.features??[]),...(d.evidenceCandidates??[])],state=all.reduce((m,x)=>(m[x.factStatus]=(m[x.factStatus]??0)+1,m),{}); const row={machineId:id,displayName:d.machine.displayName,discovery:(d.discoveryInventory??[]).length,features:(d.features??[]).length,evidence:(d.evidenceCandidates??[]).length,verified:state.verified??0,pending:state.pending??0,conflict:state.conflict??0,reference:(d.discoveryInventory??[]).filter(x=>x.transferStatus==='REFERENCE').length,openConflicts:(d.conflicts??[]).filter(x=>x.status!=='RESOLVED').map(x=>x.conflictId),pendingIds:all.filter(x=>x.factStatus==='pending').map(x=>x.researchFeatureId??x.researchEvidenceId)};machines.push(row);for(const k of ['features','evidence','verified','pending','conflict','reference','discovery'])totals[k]+=row[k];}
+          fs.writeFileSync('reports/batch-20260903-research-inventory.json',JSON.stringify({schemaVersion:'batch-research-inventory-v1',batch:'20260903-hanagasa-ultraman',generatedAt:new Date().toISOString(),totals,machines},null,2)+'\n');
+          NODE
+      - name: Commit Research facts R1
+        shell: bash
+        run: |
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git add research/*/research-data.json reports/batch-20260903-research-inventory.json
+          git commit -m 'research: verify cross-checked 20260903 facts r1' || exit 0
+          git pull --rebase origin batch/20260903-hanagasa-ultraman
+          git push origin HEAD:batch/20260903-hanagasa-ultraman

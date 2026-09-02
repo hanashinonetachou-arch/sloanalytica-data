@@ -1,0 +1,46 @@
+name: Batch 20260903 Selection Inventory
+
+on:
+  push:
+    branches:
+      - batch/20260903-hanagasa-ultraman
+    paths:
+      - '.github/workflows/batch-20260903-selection-inventory.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  inventory:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: batch/20260903-hanagasa-ultraman
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Build compact Selection candidate inventory
+        shell: bash
+        run: |
+          node --input-type=module <<'NODE'
+          import fs from 'node:fs';
+          const ids=['L_HANAGASA_NA','L_TOLOVE_DARKNESS_S8','LB_PREMIUM_UMAIBO_S1','LB_NEW_PULSAR_BT_C9','S_KABANERI_ZR','L_DMC5_ST_XA','LB_1000CHAN_ALPHA_L3','LB_JACKPOT_CY1','L_GUILTY_CROWN_2_XF','L_ULTRAMAN_KE'];
+          const machines=[];
+          for(const id of ids){
+            const d=JSON.parse(fs.readFileSync(`research/${id}/research-data.json`,'utf8'));
+            machines.push({machineId:id,displayName:d.machine.displayName,settings:d.machine.settings,features:(d.features??[]).map(x=>({id:x.researchFeatureId,name:x.name,status:x.factStatus,model:x.candidateModel,trialUnit:x.trialUnit,numerator:x.numeratorDefinition,denominator:x.denominatorDefinition,settingValueCount:Object.keys(x.settingValues??{}).length,hasDistribution:!!x.settingDistributions,hasConditional:!!(x.conditionalProbabilities||x.conditionalDistributions),notes:x.notes})),evidence:(d.evidenceCandidates??[]).map(x=>({id:x.researchEvidenceId,name:x.name,status:x.factStatus,allowedSettings:x.allowedSettings??[],deniedSettings:x.deniedSettings??[],variantCount:(x.variants??[]).length,notes:x.notes}))});
+          }
+          fs.writeFileSync('reports/batch-20260903-selection-candidate-inventory.json',JSON.stringify({schemaVersion:'selection-candidate-inventory-v1',batch:'20260903-hanagasa-ultraman',generatedAt:new Date().toISOString(),machines},null,2)+'\n');
+          NODE
+      - name: Commit inventory
+        shell: bash
+        run: |
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git add reports/batch-20260903-selection-candidate-inventory.json
+          git commit -m 'selection: add 20260903 candidate inventory' || exit 0
+          git pull --rebase origin batch/20260903-hanagasa-ultraman
+          git push origin HEAD:batch/20260903-hanagasa-ultraman

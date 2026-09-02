@@ -1,0 +1,330 @@
+{
+  "schemaVersion": "selection-data-v1",
+  "machineId": "L_TOLOVE_DARKNESS_S8",
+  "machineDataVersion": "0.1.0",
+  "inputs": [
+    {
+      "id": "INP_AT_FIRST_HIT_COUNT",
+      "name": "AT初当り 回数",
+      "category": "SEL_RF_AT_FIRST_HIT",
+      "type": "counter",
+      "unit": "回",
+      "displayOrder": 10,
+      "inferenceRole": "INCLUDE_PRIMARY",
+      "defaultValue": ""
+    },
+    {
+      "id": "INP_AT_FIRST_HIT_TRIALS",
+      "name": "AT初当り 試行数",
+      "category": "SEL_RF_AT_FIRST_HIT",
+      "type": "integer",
+      "unit": "回",
+      "displayOrder": 11,
+      "inferenceRole": "INCLUDE_PRIMARY",
+      "defaultValue": ""
+    },
+    {
+      "id": "INP_HAREM_EVENT_DISTRIBUTION_CAT_AISURUSH",
+      "name": "aisuRUSH",
+      "category": "SEL_RF_HAREM_EVENT_DISTRIBUTION",
+      "type": "counter",
+      "unit": "回",
+      "displayOrder": 15,
+      "inferenceRole": "INCLUDE_SUPPORT",
+      "defaultValue": ""
+    },
+    {
+      "id": "INP_HAREM_EVENT_DISTRIBUTION_CAT_WHISPER",
+      "name": "whisper",
+      "category": "SEL_RF_HAREM_EVENT_DISTRIBUTION",
+      "type": "counter",
+      "unit": "回",
+      "displayOrder": 16,
+      "inferenceRole": "INCLUDE_SUPPORT",
+      "defaultValue": ""
+    },
+    {
+      "id": "INP_HAREM_EVENT_DISTRIBUTION_CAT_EPISODE",
+      "name": "episode",
+      "category": "SEL_RF_HAREM_EVENT_DISTRIBUTION",
+      "type": "counter",
+      "unit": "回",
+      "displayOrder": 17,
+      "inferenceRole": "INCLUDE_SUPPORT",
+      "defaultValue": ""
+    }
+  ],
+  "features": [
+    {
+      "researchFeatureId": "RF_AT_FIRST_HIT",
+      "featureId": "FEAT_AT_FIRST_HIT",
+      "adoptionCategory": "INCLUDE_PRIMARY",
+      "weight": 1,
+      "numeratorInputId": "INP_AT_FIRST_HIT_COUNT",
+      "denominatorInputId": "INP_AT_FIRST_HIT_TRIALS",
+      "userReason": "公開全設定値と正しい有効通常ゲームが揃い、他の主要候補の代表として設定差を直接評価できるため主Featureとして採用する。",
+      "difficultyParticipation": "EXCLUDE",
+      "difficultyExclusionReason": "Observationで実機から取得できる試行数・除外区間・Exposureを確定する前にDifficultyへ仮の換算を持ち込まない。"
+    },
+    {
+      "researchFeatureId": "RF_HAREM_EVENT_DISTRIBUTION",
+      "featureId": "FEAT_HAREM_EVENT_DISTRIBUTION",
+      "adoptionCategory": "INCLUDE_SUPPORT",
+      "weight": 1,
+      "numeratorInputId": "INP_HAREM_EVENT_DISTRIBUTION_CAT_AISURUSH",
+      "categoryInputIds": [
+        "INP_HAREM_EVENT_DISTRIBUTION_CAT_WHISPER",
+        "INP_HAREM_EVENT_DISTRIBUTION_CAT_EPISODE"
+      ],
+      "denominatorInputIds": [
+        "INP_HAREM_EVENT_DISTRIBUTION_CAT_AISURUSH",
+        "INP_HAREM_EVENT_DISTRIBUTION_CAT_WHISPER",
+        "INP_HAREM_EVENT_DISTRIBUTION_CAT_EPISODE"
+      ],
+      "inputTransform": "sum_inputs_to_trials",
+      "userReason": "公開全設定値または完全分布とハーレムモード中のとらぶるボーナス当選1回が定義され、代表Featureとは異なる条件・構成情報を追加できるため補助Featureとして採用する。",
+      "difficultyParticipation": "EXCLUDE",
+      "difficultyExclusionReason": "Observationで実機から取得できる試行数・除外区間・Exposureを確定する前にDifficultyへ仮の換算を持ち込まない。"
+    },
+    {
+      "researchFeatureId": "RF_GAME_BONUS_250_650",
+      "featureId": "FEAT_GAME_BONUS_250_650",
+      "adoptionCategory": "EXCLUDE",
+      "weight": 1,
+      "userFacingReason": "全設定の公開値または条件別テーブルが揃っておらず、欠損設定を補間・逆算せず推測から除外する。",
+      "rejectionReason": "全設定の公開値または条件別テーブルが揃っておらず、欠損設定を補間・逆算せず推測から除外する。",
+      "difficultyParticipation": "EXCLUDE"
+    }
+  ],
+  "evidence": [],
+  "evidenceDecisions": [
+    {
+      "researchEvidenceId": "RE_ST_END",
+      "disposition": "INCLUDE_UI",
+      "reason": "Researchで確定した設定下限・設定否定・設定確定のHard EvidenceだけをUI候補として採用し、傾向示唆は排除条件に使わない。"
+    },
+    {
+      "researchEvidenceId": "RE_PAYOUT",
+      "disposition": "INCLUDE_UI",
+      "reason": "Researchで確定した設定下限・設定否定・設定確定のHard EvidenceだけをUI候補として採用し、傾向示唆は排除条件に使わない。"
+    },
+    {
+      "researchEvidenceId": "RE_BLACK_MEA",
+      "disposition": "EXCLUDE",
+      "reason": "高設定示唆・奇偶示唆など傾向情報のみで設定集合を確定できず、現行Hard Evidenceの排除ロジックには入れない。"
+    },
+    {
+      "researchEvidenceId": "RE_SET_L",
+      "disposition": "EXCLUDE",
+      "reason": "公開条件または設定集合が未完備で、欠損を推定せずEvidenceから除外する。"
+    },
+    {
+      "researchEvidenceId": "RE_DARWIN_HIDDEN_NAGI",
+      "disposition": "INCLUDE_UI",
+      "reason": "Researchで確定した設定下限・設定否定・設定確定のHard EvidenceだけをUI候補として採用し、傾向示唆は排除条件に使わない。"
+    }
+  ],
+  "evidenceReview": {
+    "policyVersion": 1,
+    "exclusions": [
+      {
+        "researchEvidenceId": "RE_BLACK_MEA",
+        "reason": "高設定示唆・奇偶示唆など傾向情報のみで設定集合を確定できず、現行Hard Evidenceの排除ロジックには入れない。"
+      },
+      {
+        "researchEvidenceId": "RE_SET_L",
+        "reason": "公開条件または設定集合が未完備で、欠損を推定せずEvidenceから除外する。"
+      }
+    ]
+  },
+  "evidenceUi": {
+    "groups": [
+      {
+        "groupId": "EVG_ST_END",
+        "label": "ST終了画面",
+        "selectionMode": "multi",
+        "normalizationMode": "ALLOWED_SETTINGS_INTERSECTION",
+        "displayOrder": 100,
+        "options": [
+          {
+            "value": "V1_VALUE",
+            "label": "吉スタンプ（ネメシス）",
+            "allowedSettings": [
+              "SET_3",
+              "SET_4",
+              "SET_5",
+              "SET_6"
+            ],
+            "excludedSettings": [],
+            "sourceEvidenceIds": [
+              "RE_ST_END"
+            ]
+          },
+          {
+            "value": "V2_VALUE",
+            "label": "良スタンプ（ヤミ＆美柑）",
+            "allowedSettings": [
+              "SET_4",
+              "SET_5",
+              "SET_6"
+            ],
+            "excludedSettings": [],
+            "sourceEvidenceIds": [
+              "RE_ST_END"
+            ]
+          },
+          {
+            "value": "V3_VALUE",
+            "label": "優スタンプ（ララ＆ナナ＆モモ）",
+            "allowedSettings": [
+              "SET_5",
+              "SET_6"
+            ],
+            "excludedSettings": [],
+            "sourceEvidenceIds": [
+              "RE_ST_END"
+            ]
+          },
+          {
+            "value": "V4_VALUE",
+            "label": "極スタンプ（ヒロイン集合）",
+            "allowedSettings": [
+              "SET_6"
+            ],
+            "excludedSettings": [],
+            "sourceEvidenceIds": [
+              "RE_ST_END"
+            ]
+          }
+        ]
+      },
+      {
+        "groupId": "EVG_PAYOUT",
+        "label": "特定獲得枚数表示",
+        "selectionMode": "multi",
+        "normalizationMode": "ALLOWED_SETTINGS_INTERSECTION",
+        "displayOrder": 101,
+        "options": [
+          {
+            "value": "V1_456_OVER",
+            "label": "456枚OVER",
+            "allowedSettings": [
+              "SET_4",
+              "SET_5",
+              "SET_6"
+            ],
+            "excludedSettings": [],
+            "sourceEvidenceIds": [
+              "RE_PAYOUT"
+            ]
+          },
+          {
+            "value": "V2_555_OVER",
+            "label": "555枚OVER",
+            "allowedSettings": [
+              "SET_5",
+              "SET_6"
+            ],
+            "excludedSettings": [],
+            "sourceEvidenceIds": [
+              "RE_PAYOUT"
+            ]
+          },
+          {
+            "value": "V3_666_OVER",
+            "label": "666枚OVER",
+            "allowedSettings": [
+              "SET_6"
+            ],
+            "excludedSettings": [],
+            "sourceEvidenceIds": [
+              "RE_PAYOUT"
+            ]
+          }
+        ]
+      },
+      {
+        "groupId": "EVG_DARWIN_HIDDEN_NAGI",
+        "label": "隠れ凪（1000Gごと）",
+        "selectionMode": "multi",
+        "normalizationMode": "ALLOWED_SETTINGS_INTERSECTION",
+        "displayOrder": 102,
+        "options": [
+          {
+            "value": "V1_VALUE",
+            "label": "緑",
+            "allowedSettings": [
+              "SET_3",
+              "SET_4",
+              "SET_5",
+              "SET_6"
+            ],
+            "excludedSettings": [],
+            "sourceEvidenceIds": [
+              "RE_DARWIN_HIDDEN_NAGI"
+            ]
+          },
+          {
+            "value": "V2_VALUE",
+            "label": "赤",
+            "allowedSettings": [
+              "SET_4",
+              "SET_5",
+              "SET_6"
+            ],
+            "excludedSettings": [],
+            "sourceEvidenceIds": [
+              "RE_DARWIN_HIDDEN_NAGI"
+            ]
+          },
+          {
+            "value": "V3_VALUE",
+            "label": "銀",
+            "allowedSettings": [
+              "SET_5",
+              "SET_6"
+            ],
+            "excludedSettings": [],
+            "sourceEvidenceIds": [
+              "RE_DARWIN_HIDDEN_NAGI"
+            ]
+          },
+          {
+            "value": "V4_VALUE",
+            "label": "金",
+            "allowedSettings": [
+              "SET_6"
+            ],
+            "excludedSettings": [],
+            "sourceEvidenceIds": [
+              "RE_DARWIN_HIDDEN_NAGI"
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "uiCategoryLabels": {
+    "SEL_RF_AT_FIRST_HIT": "AT初当り",
+    "SEL_RF_HAREM_EVENT_DISTRIBUTION": "ハーレムモード中ウィスパー演出・愛すぷRUSH・ToLOVEるエピソード振り分け",
+    "EVIDENCE": "設定確定情報"
+  },
+  "difficultyAnalysis": {
+    "targetGames": [
+      1500,
+      3000,
+      7000
+    ],
+    "targetGameBasis": {
+      "basisId": "UNRESOLVED_OBSERVATION",
+      "label": "Observationで確定する実戦Exposure",
+      "quality": "UNRESOLVED",
+      "crossMachineComparable": false,
+      "note": "Gate BではSelectionのみ確定し、実機取得可能な正しい分母とExposureはGate Cで確定する。"
+    },
+    "calibrationAllowedExposureQualities": [
+      "EXACT",
+      "DERIVED"
+    ]
+  }
+}

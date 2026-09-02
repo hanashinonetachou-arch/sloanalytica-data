@@ -4,46 +4,6 @@
   "machineDataVersion": "0.1.0",
   "inputs": [
     {
-      "id": "INP_DIRECT_AT_COUNT",
-      "name": "AT直撃（前兆昇格除外） 回数",
-      "category": "SEL_RF_DIRECT_AT",
-      "type": "counter",
-      "unit": "回",
-      "displayOrder": 10,
-      "inferenceRole": "INCLUDE_PRIMARY",
-      "defaultValue": ""
-    },
-    {
-      "id": "INP_DIRECT_AT_TRIALS",
-      "name": "AT直撃（前兆昇格除外） 試行数",
-      "category": "SEL_RF_DIRECT_AT",
-      "type": "integer",
-      "unit": "回",
-      "displayOrder": 11,
-      "inferenceRole": "INCLUDE_PRIMARY",
-      "defaultValue": ""
-    },
-    {
-      "id": "INP_KOTEI_APPEARANCE_COUNT",
-      "name": "煌帝出現率 回数",
-      "category": "SEL_RF_KOTEI_APPEARANCE",
-      "type": "counter",
-      "unit": "回",
-      "displayOrder": 15,
-      "inferenceRole": "INCLUDE_SUPPORT",
-      "defaultValue": ""
-    },
-    {
-      "id": "INP_KOTEI_APPEARANCE_TRIALS",
-      "name": "煌帝出現率 試行数",
-      "category": "SEL_RF_KOTEI_APPEARANCE",
-      "type": "integer",
-      "unit": "回",
-      "displayOrder": 16,
-      "inferenceRole": "INCLUDE_SUPPORT",
-      "defaultValue": ""
-    },
-    {
       "id": "INP_STAMP_4PLUS_COUNT",
       "name": "終了画面 良スタンプ",
       "category": "EVIDENCE",
@@ -132,6 +92,26 @@
       "displayOrder": 28,
       "inferenceRole": "INCLUDE_SUPPORT",
       "defaultValue": ""
+    },
+    {
+      "id": "INP_AT_FIRST_HIT_COUNT",
+      "name": "AT初当り 回数",
+      "category": "SEL_RF_AT_FIRST_HIT",
+      "type": "counter",
+      "unit": "回",
+      "displayOrder": 10,
+      "inferenceRole": "INCLUDE_PRIMARY",
+      "defaultValue": ""
+    },
+    {
+      "id": "INP_AT_FIRST_HIT_TRIALS",
+      "name": "有効通常ゲーム数",
+      "category": "SEL_RF_AT_FIRST_HIT",
+      "type": "integer",
+      "unit": "G",
+      "displayOrder": 11,
+      "inferenceRole": "INCLUDE_PRIMARY",
+      "defaultValue": ""
     }
   ],
   "features": [
@@ -147,11 +127,13 @@
     {
       "researchFeatureId": "RF_AT_FIRST_HIT",
       "featureId": "FEAT_AT_FIRST_HIT",
-      "adoptionCategory": "EXCLUDE",
+      "adoptionCategory": "INCLUDE_PRIMARY",
       "weight": 1,
-      "userFacingReason": "AT初当りは解析上AT直撃を一部内包するため、直撃Featureとの独立尤度積を避けて二重評価を防ぐ。",
-      "rejectionReason": "AT初当りは解析上AT直撃を一部内包するため、直撃Featureとの独立尤度積を避けて二重評価を防ぐ。",
-      "difficultyParticipation": "EXCLUDE"
+      "difficultyParticipation": "EXCLUDE",
+      "numeratorInputId": "INP_AT_FIRST_HIT_COUNT",
+      "denominatorInputId": "INP_AT_FIRST_HIT_TRIALS",
+      "userReason": "AT初当りトータルは全設定値が公開され、直撃よりはるかに高頻度で実戦情報量が大きい。AT直撃を内包するため直撃とは同時に独立乗算せず、こちらを代表採用する。",
+      "difficultyExclusionReason": "推測では有効通常ゲーム数を母数に使うが、共通Difficultyの基準である総プレイGから有効通常Gへ変換する根拠ある固定比率がないためDifficultyには参加させない。"
     },
     {
       "researchFeatureId": "RF_BONUS_OR_AT_FIRST_HIT",
@@ -165,13 +147,13 @@
     {
       "researchFeatureId": "RF_DIRECT_AT",
       "featureId": "FEAT_DIRECT_AT",
-      "adoptionCategory": "INCLUDE_PRIMARY",
+      "adoptionCategory": "EXCLUDE",
       "weight": 1,
-      "numeratorInputId": "INP_DIRECT_AT_COUNT",
-      "denominatorInputId": "INP_DIRECT_AT_TRIALS",
       "userReason": "公開全設定値と分母定義が揃っており、公開直撃抽選対象ゲームを単位に設定差を直接評価できるため主Featureとして採用する。",
       "difficultyParticipation": "EXCLUDE",
-      "difficultyExclusionReason": "Observationで実戦時の試行量・露出率を確定する前にDifficultyへ推定値を持ち込まない。"
+      "difficultyExclusionReason": "Observationで実戦時の試行量・露出率を確定する前にDifficultyへ推定値を持ち込まない。",
+      "userFacingReason": "AT直撃はAT初当りトータルに含まれる低頻度な部分事象です。両方を独立に掛けると同じ直撃当選を二重評価するため、より高頻度で実用情報量の大きいAT初当りトータルを代表採用します。",
+      "rejectionReason": "AT直撃はAT初当りトータルの厳密な部分集合かつ低頻度。joint/conditional分解用の公開分布がないため独立尤度積を避ける。"
     },
     {
       "researchFeatureId": "RF_DIRECT_AT_PRACTICAL",
@@ -185,13 +167,13 @@
     {
       "researchFeatureId": "RF_KOTEI_APPEARANCE",
       "featureId": "FEAT_KOTEI_APPEARANCE",
-      "adoptionCategory": "INCLUDE_SUPPORT",
+      "adoptionCategory": "EXCLUDE",
       "weight": 1,
-      "numeratorInputId": "INP_KOTEI_APPEARANCE_COUNT",
-      "denominatorInputId": "INP_KOTEI_APPEARANCE_TRIALS",
       "userReason": "公開全設定値と条件付き分母が明示され、主Featureとは異なる構成・成立情報を追加できるため補助Featureとして採用する。",
       "difficultyParticipation": "EXCLUDE",
-      "difficultyExclusionReason": "Observationで実戦時の試行量・露出率を確定する前にDifficultyへ推定値を持ち込まない。"
+      "difficultyExclusionReason": "Observationで実戦時の試行量・露出率を確定する前にDifficultyへ推定値を持ち込まない。",
+      "userFacingReason": "公開されている煌帝出現率にはAT中の通常選択だけでなく、エンディング後など必ず出現する経路や進行上の強制出現が混在します。設定差も小さく、強制出現を除いた設定別の条件付き確率が公開されていないため、独立した設定推測要素としては採用しません。",
+      "rejectionReason": "AT内の非定常・条件付き生成と強制出現を混在した公開率。強制経路を除外した全設定conditional分布がなく、単純binomial化できない。"
     },
     {
       "researchFeatureId": "RF_OTHER_PARTIAL",
@@ -446,9 +428,10 @@
     "simulationsPerSetting": 4000,
     "seed": 20260901,
     "targetGameBasis": {
-      "basisId": "OBSERVATION_PENDING_GAME_BASIS",
-      "label": "実戦試行量（Observationで確定）",
-      "quality": "UNRESOLVED"
+      "basisId": "TOTAL_PLAY_GAMES",
+      "label": "全状態の総プレイゲーム数",
+      "quality": "EXACT",
+      "crossMachineComparable": true
     },
     "calibrationAllowedExposureQualities": [
       "EXACT",
@@ -459,6 +442,7 @@
   "uiCategoryLabels": {
     "SEL_RF_DIRECT_AT": "AT直撃（前兆昇格除外）",
     "SEL_RF_KOTEI_APPEARANCE": "煌帝出現率",
-    "EVIDENCE": "設定確定・否定情報"
+    "EVIDENCE": "設定確定・否定情報",
+    "SEL_RF_AT_FIRST_HIT": "AT初当り"
   }
 }

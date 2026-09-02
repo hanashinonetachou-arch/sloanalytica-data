@@ -1,0 +1,75 @@
+name: Batch8 Latest Manifest Remediation
+
+on:
+  push:
+    branches: [prototype-multi-machine]
+    paths:
+      - '.github/workflows/batch8-latest-manifest-remediation.yml'
+      - 'tools/apply-mahjong-linked-service-remediation.mjs'
+      - 'tools/apply-batch8-real-device-confirmations.mjs'
+  pull_request:
+    branches: [prototype-multi-machine]
+    paths:
+      - '.github/batch8-web-debt-trigger.txt'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: batch8-latest-manifest-remediation
+  cancel-in-progress: false
+
+jobs:
+  remediate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          ref: prototype-multi-machine
+          fetch-depth: 0
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Apply latest-manifest remediation
+        run: |
+          node tools/apply-batch8-latest-manifest-remediation.mjs
+          node tools/fix-green-don-latent-ui.mjs
+          node tools/apply-batch8-web-debt-remediation.mjs
+          node tools/apply-mahjong-linked-service-remediation.mjs
+          node tools/apply-batch8-real-device-confirmations.mjs
+      - name: Validate Selection
+        shell: bash
+        run: |
+          set -e
+          IDS=(L_USHIO_TORA_HAKUMEN_VH L_AMAZING_LIVE_PD L_YOSHIMUNE_SC2 L_MAHJONG_MONOGATARI_S2 L_IDOLMASTER_MILLION_LIVE_HC L_YOUJITSU_DE L_MIDORIDON_VIVA_REVIVAL_FY L_GUNDAM_SEED_G)
+          for id in "${IDS[@]}"; do
+            npm run selection:validate -- "research/$id/selection-data.json" "research/$id/research-data.json"
+          done
+      - name: Validate Observation
+        run: npm run observation:validate -- research/L_USHIO_TORA_HAKUMEN_VH/machine-observation-data.json research/L_AMAZING_LIVE_PD/machine-observation-data.json research/L_YOSHIMUNE_SC2/machine-observation-data.json research/L_MAHJONG_MONOGATARI_S2/machine-observation-data.json research/L_IDOLMASTER_MILLION_LIVE_HC/machine-observation-data.json research/L_YOUJITSU_DE/machine-observation-data.json research/L_MIDORIDON_VIVA_REVIVAL_FY/machine-observation-data.json research/L_GUNDAM_SEED_G/machine-observation-data.json
+      - name: Validate UI Design
+        run: npm run ui-design:validate -- research/L_USHIO_TORA_HAKUMEN_VH/ui-design-data.json research/L_AMAZING_LIVE_PD/ui-design-data.json research/L_YOSHIMUNE_SC2/ui-design-data.json research/L_MAHJONG_MONOGATARI_S2/ui-design-data.json research/L_IDOLMASTER_MILLION_LIVE_HC/ui-design-data.json research/L_YOUJITSU_DE/ui-design-data.json research/L_MIDORIDON_VIVA_REVIVAL_FY/ui-design-data.json research/L_GUNDAM_SEED_G/ui-design-data.json
+      - name: Regenerate 8 machine packages
+        run: npm run machine:batch -- L_USHIO_TORA_HAKUMEN_VH L_AMAZING_LIVE_PD L_YOSHIMUNE_SC2 L_MAHJONG_MONOGATARI_S2 L_IDOLMASTER_MILLION_LIVE_HC L_YOUJITSU_DE L_MIDORIDON_VIVA_REVIVAL_FY L_GUNDAM_SEED_G
+      - name: Run latest-manifest semantic audit
+        run: node tools/audit-batch8-latest-manifest.mjs
+      - name: Run full test suite
+        run: npm test
+      - name: Run public-data audit
+        run: npm run audit
+      - name: Commit remediation
+        shell: bash
+        run: |
+          if git diff --quiet; then
+            echo 'No remediation changes.'
+            exit 0
+          fi
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add research/L_USHIO_TORA_HAKUMEN_VH research/L_AMAZING_LIVE_PD research/L_YOSHIMUNE_SC2 research/L_MAHJONG_MONOGATARI_S2 research/L_IDOLMASTER_MILLION_LIVE_HC research/L_YOUJITSU_DE research/L_MIDORIDON_VIVA_REVIVAL_FY research/L_GUNDAM_SEED_G machines/L_USHIO_TORA_HAKUMEN_VH machines/L_AMAZING_LIVE_PD machines/L_YOSHIMUNE_SC2 machines/L_MAHJONG_MONOGATARI_S2 machines/L_IDOLMASTER_MILLION_LIVE_HC machines/L_YOUJITSU_DE machines/L_MIDORIDON_VIVA_REVIVAL_FY machines/L_GUNDAM_SEED_G tools/audit-batch8-latest-manifest.mjs catalog.json difficulty-catalog.json reports/batch8-latest-manifest-audit.json machine-registry.json reports/batch-machine-pipeline-report.json 2>/dev/null || true
+          git commit -m 'fix: apply batch8 real-device confirmations'
+          git push origin HEAD:prototype-multi-machine
+
+# Finalization retry: serialized full-history checkout, 2026-09-02 16:18 JST

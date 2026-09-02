@@ -1,0 +1,92 @@
+name: Batch 20260903 Research Facts R3 Retry
+
+on:
+  push:
+    branches:
+      - batch/20260903-hanagasa-ultraman
+    paths:
+      - '.github/workflows/batch-20260903-research-facts-r3-retry.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  apply:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: batch/20260903-hanagasa-ultraman
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Re-run R3 payload with conditional-model correction
+        shell: bash
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          src=Path('.github/workflows/batch-20260903-research-facts-r3.yml').read_text()
+          marker="          node --input-type=module <<'NODE'\n"
+          start=src.index(marker)+len(marker)
+          end=src.index("\n          NODE",start)
+          js=src[start:end]
+          # YAML block scalar indentation -> executable JS.
+          js='\n'.join(line[10:] if line.startswith('          ') else line for line in js.splitlines())+'\n'
+          old="x.factStatus='verified';x.candidateModel='multinomial';x.trialUnit='CZポイント減算対象のチャンス目成立1回'"
+          new="x.factStatus='verified';x.candidateModel='conditional_multinomial';x.trialUnit='CZポイント減算対象のチャンス目成立1回'"
+          if old not in js:
+              raise SystemExit('R3 Kabaneri model pattern not found')
+          js=js.replace(old,new,1)
+          Path('/tmp/r3-fixed.mjs').write_text(js)
+          PY
+          node /tmp/r3-fixed.mjs
+      - name: Correct Kabaneri Mumei-nav trial universe
+        shell: bash
+        run: |
+          node --input-type=module <<'NODE'
+          import fs from 'node:fs';
+          const file='research/S_KABANERI_ZR/research-data.json';
+          const d=JSON.parse(fs.readFileSync(file,'utf8'));
+          const nav=d.features.find(x=>x.researchFeatureId==='RF_MUMEI_NAV');
+          if(!nav) throw new Error('RF_MUMEI_NAV missing');
+          nav.trialUnit='無名CZ連撃中（1連撃以上）の押し順ベル・非小役対象1回';
+          nav.numeratorDefinition='2択ナビ発生回数';
+          nav.denominatorDefinition='無名CZ連撃中（1連撃以上）かつ押し順ベル・非小役の対象成立回数';
+          nav.notes='2択ナビ抽選は連撃中（1連撃以上）かつ押し順ベル・非小役成立時のみ。その他小役は対象外。通常GやCZ総Gを分母にしない。';
+          fs.writeFileSync(file,JSON.stringify(d,null,2)+'\n');
+          NODE
+      - name: Validate ResearchData and Discovery transfer
+        shell: bash
+        run: |
+          set -euo pipefail
+          ids=(L_HANAGASA_NA L_TOLOVE_DARKNESS_S8 LB_PREMIUM_UMAIBO_S1 LB_NEW_PULSAR_BT_C9 S_KABANERI_ZR L_DMC5_ST_XA LB_1000CHAN_ALPHA_L3 LB_JACKPOT_CY1 L_GUILTY_CROWN_2_XF L_ULTRAMAN_KE)
+          for id in "${ids[@]}"; do node tools/validate-research-data.mjs "research/$id/research-data.json"; done
+          node tools/discovery-completeness-gate.mjs "${ids[@]}"
+      - name: Refresh Research inventory
+        shell: bash
+        run: |
+          node --input-type=module <<'NODE'
+          import fs from 'node:fs';
+          const ids=['L_HANAGASA_NA','L_TOLOVE_DARKNESS_S8','LB_PREMIUM_UMAIBO_S1','LB_NEW_PULSAR_BT_C9','S_KABANERI_ZR','L_DMC5_ST_XA','LB_1000CHAN_ALPHA_L3','LB_JACKPOT_CY1','L_GUILTY_CROWN_2_XF','L_ULTRAMAN_KE'];
+          const statuses=['verified','pending','public_partial','low_priority_hold','conflict'];
+          const totals={features:0,evidence:0,reference:0,discovery:0,...Object.fromEntries(statuses.map(x=>[x,0]))},machines=[];
+          for(const id of ids){
+            const d=JSON.parse(fs.readFileSync(`research/${id}/research-data.json`,'utf8'));
+            const all=[...(d.features??[]),...(d.evidenceCandidates??[])];
+            const st=all.reduce((m,x)=>(m[x.factStatus]=(m[x.factStatus]??0)+1,m),{});
+            const row={machineId:id,displayName:d.machine.displayName,discovery:(d.discoveryInventory??[]).length,features:(d.features??[]).length,evidence:(d.evidenceCandidates??[]).length,reference:(d.discoveryInventory??[]).filter(x=>x.transferStatus==='REFERENCE').length,...Object.fromEntries(statuses.map(x=>[x,st[x]??0])),openConflicts:(d.conflicts??[]).filter(x=>x.status!=='RESOLVED').map(x=>x.conflictId),pendingIds:all.filter(x=>x.factStatus==='pending').map(x=>x.researchFeatureId??x.researchEvidenceId),partialIds:all.filter(x=>x.factStatus==='public_partial').map(x=>x.researchFeatureId??x.researchEvidenceId),holdIds:all.filter(x=>x.factStatus==='low_priority_hold').map(x=>x.researchFeatureId??x.researchEvidenceId)};
+            machines.push(row); for(const k of Object.keys(totals)) if(k in row) totals[k]+=row[k];
+          }
+          fs.writeFileSync('reports/batch-20260903-research-inventory.json',JSON.stringify({schemaVersion:'batch-research-inventory-v1',batch:'20260903-hanagasa-ultraman',generatedAt:new Date().toISOString(),totals,machines},null,2)+'\n');
+          NODE
+      - name: Commit Research facts R3
+        shell: bash
+        run: |
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git add research/*/research-data.json reports/batch-20260903-research-inventory.json
+          git commit -m 'research: verify and classify 20260903 facts r3' || exit 0
+          git pull --rebase origin batch/20260903-hanagasa-ultraman
+          git push origin HEAD:batch/20260903-hanagasa-ultraman

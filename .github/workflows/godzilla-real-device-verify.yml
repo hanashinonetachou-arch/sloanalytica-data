@@ -1,0 +1,77 @@
+name: L Godzilla Real-device Verification
+
+on:
+  push:
+    branches:
+      - prototype-multi-machine
+    paths:
+      - tools/apply-godzilla-real-device-verification.mjs
+      - tools/finalize-godzilla-real-device-meta.mjs
+      - .github/workflows/godzilla-real-device-verify.yml
+  pull_request:
+    branches:
+      - godzilla-real-device-runner-base
+    paths:
+      - .github/godzilla-real-device-run-trigger.txt
+
+permissions:
+  contents: write
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout target data branch
+        uses: actions/checkout@v4
+        with:
+          ref: prototype-multi-machine
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Apply real-device findings
+        run: node tools/apply-godzilla-real-device-verification.mjs
+
+      - name: Finalize verification metadata
+        run: node tools/finalize-godzilla-real-device-meta.mjs
+
+      - name: Validate Selection
+        run: npm run selection:validate -- research/L_GODZILLA_NS/selection-data.json research/L_GODZILLA_NS/research-data.json
+
+      - name: Validate Observation
+        run: npm run observation:validate -- research/L_GODZILLA_NS/machine-observation-data.json
+
+      - name: Validate UI design
+        run: npm run ui-design:validate -- research/L_GODZILLA_NS/ui-design-data.json
+
+      - name: Audit Observation/Selection linkage
+        run: npm run observation:selection:audit -- L_GODZILLA_NS
+
+      - name: Audit UI/Selection linkage
+        run: npm run ui-design:linkage:audit -- L_GODZILLA_NS
+
+      - name: Audit UI/Observation linkage
+        run: npm run ui-design:observation:audit -- L_GODZILLA_NS
+
+      - name: Run machine pipeline
+        run: npm run machine:pipeline -- L_GODZILLA_NS --skip-repo-checks
+
+      - name: Run test suite
+        run: npm test
+
+      - name: Run public-data audit
+        run: npm run audit
+
+      - name: Commit verified artifacts
+        run: |
+          if git diff --quiet; then
+            echo 'No generated changes.'
+            exit 0
+          fi
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add research/L_GODZILLA_NS/selection-data.json research/L_GODZILLA_NS/machine-observation-data.json research/L_GODZILLA_NS/ui-design-data.json machines/L_GODZILLA_NS/machine-package.json research/L_GODZILLA_NS/difficulty-report.json research/L_GODZILLA_NS/setting-band-report.json research/L_GODZILLA_NS/statistics-report.json catalog.json difficulty-catalog.json machine-registry.json || true
+          git commit -m 'data: apply L Godzilla real-device verification'
+          git push origin HEAD:prototype-multi-machine
