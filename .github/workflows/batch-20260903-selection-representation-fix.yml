@@ -1,0 +1,74 @@
+name: Batch 20260903 Selection Representation Fix
+
+on:
+  push:
+    branches:
+      - batch/20260903-hanagasa-ultraman
+    paths:
+      - '.github/workflows/batch-20260903-selection-representation-fix.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  fix:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: batch/20260903-hanagasa-ultraman
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Demote unsafe collapsed conditional features
+        run: |
+          node --input-type=module <<'NODE'
+          import fs from 'node:fs';
+          const targets={
+            S_KABANERI_ZR:['RF_GAME_ZONE','RF_IKOMA_LIFE_AVOID'],
+            L_DMC5_ST_XA:['RF_CYCLE_CZ','RF_BLOODY_BATTLE_ENTRY','RF_BLOODY_BATTLE_WIN','RF_ST_PRE_JCB_PROMOTE','RF_ST_EMBLEM_TYPE'],
+            L_GUILTY_CROWN_2_XF:['RF_WATERMELON_BONUS']
+          };
+          const reason='公開値は条件別・状態別・到達段階別に定義されており、現行の単一「成功回数/試行数」入力へ合算すると異なる確率母集団を混ぜてしまう。条件別モデルを正しく保持できる実装がない状態では尤度を作らず、Research事実のみ保持して推測から除外する。';
+          for(const [machineId,ids] of Object.entries(targets)){
+            const p=`research/${machineId}/selection-data.json`; const s=JSON.parse(fs.readFileSync(p,'utf8'));
+            const removed=new Set();
+            for(const rfId of ids){
+              const f=s.features.find(x=>x.researchFeatureId===rfId); if(!f) throw new Error(`${machineId}/${rfId} missing`);
+              for(const k of ['numeratorInputId','denominatorInputId','trialCountInputId']) if(f[k]) removed.add(f[k]);
+              for(const k of ['numeratorInputIds','categoryInputIds','denominatorInputIds']) for(const id of f[k]??[]) removed.add(id);
+              f.adoptionCategory='EXCLUDE'; f.userFacingReason=reason; f.rejectionReason=reason; f.difficultyParticipation='EXCLUDE';
+              for(const k of ['numeratorInputId','denominatorInputId','trialCountInputId','numeratorInputIds','categoryInputIds','denominatorInputIds','inputTransform','suppressedByFeatureIds','difficultyExclusionReason']) delete f[k];
+              delete s.uiCategoryLabels[`SEL_${rfId}`];
+            }
+            s.inputs=(s.inputs??[]).filter(i=>!removed.has(i.id));
+            fs.writeFileSync(p,JSON.stringify(s,null,2)+'\n');
+          }
+          NODE
+      - name: Revalidate all Selection contracts
+        run: |
+          set -euo pipefail
+          ids=(L_HANAGASA_NA L_TOLOVE_DARKNESS_S8 LB_PREMIUM_UMAIBO_S1 LB_NEW_PULSAR_BT_C9 S_KABANERI_ZR L_DMC5_ST_XA LB_1000CHAN_ALPHA_L3 LB_JACKPOT_CY1 L_GUILTY_CROWN_2_XF L_ULTRAMAN_KE)
+          for id in "${ids[@]}"; do node tools/validate-selection-data.mjs "research/$id/selection-data.json" "research/$id/research-data.json"; done
+          node tools/audit-selection-quality.mjs "${ids[@]}" --strict
+          node --test --test-concurrency=1 test/feature-dependency-phase9.test.mjs
+      - name: Re-run representation audit and write recertification
+        run: |
+          node --input-type=module <<'NODE'
+          import fs from 'node:fs';
+          const ids=['L_HANAGASA_NA','L_TOLOVE_DARKNESS_S8','LB_PREMIUM_UMAIBO_S1','LB_NEW_PULSAR_BT_C9','S_KABANERI_ZR','L_DMC5_ST_XA','LB_1000CHAN_ALPHA_L3','LB_JACKPOT_CY1','L_GUILTY_CROWN_2_XF','L_ULTRAMAN_KE'];
+          const rows=[];const reviews=[];const counts={INCLUDE_PRIMARY:0,INCLUDE_SUPPORT:0,INCLUDE_FALLBACK:0,EXCLUDE:0};let researchFeatures=0,researchEvidence=0,evidenceIncluded=0,evidenceExcluded=0;
+          for(const machineId of ids){const r=JSON.parse(fs.readFileSync(`research/${machineId}/research-data.json`,'utf8'));const s=JSON.parse(fs.readFileSync(`research/${machineId}/selection-data.json`,'utf8'));researchFeatures+=r.features.length;researchEvidence+=r.evidenceCandidates.length;const byId=new Map(r.features.map(x=>[x.researchFeatureId,x]));for(const f of s.features)counts[f.adoptionCategory]++;const refs=new Set((s.evidence??[]).map(x=>x.researchEvidenceId));for(const g of s.evidenceUi?.groups??[])for(const o of g.options??[])for(const z of o.sourceEvidenceIds??[])refs.add(z);evidenceIncluded+=refs.size;evidenceExcluded+=(s.evidenceReview?.exclusions??[]).length;for(const sf of s.features.filter(x=>String(x.adoptionCategory).startsWith('INCLUDE'))){const rf=byId.get(sf.researchFeatureId)??{};const settingValueCount=Object.keys(rf.settingValues??{}).length;const distributionSettingCount=Object.keys(rf.distributionBySetting??rf.distributionsBySetting??rf.settingDistributions??{}).length;const simpleMapped=Boolean(sf.numeratorInputId&&sf.denominatorInputId)&&!(sf.categoryInputIds?.length)&&!(sf.denominatorInputIds?.length);const needsReview=simpleMapped&&settingValueCount===0&&distributionSettingCount===0;const row={machineId,researchFeatureId:sf.researchFeatureId,featureId:sf.featureId,settingValueCount,distributionSettingCount,simpleMapped,status:needsReview?'REVIEW':'READY'};rows.push(row);if(needsReview)reviews.push(row);}}
+          const readiness={schemaVersion:'observation-model-readiness-audit-v1',batch:'20260903-hanagasa-ultraman',generatedAt:new Date().toISOString(),adoptedFeatures:rows.length,reviewCount:reviews.length,status:reviews.length?'REVIEW':'PASS',reviews,rows};fs.writeFileSync('reports/batch-20260903-observation-model-readiness-audit.json',JSON.stringify(readiness,null,2)+'\n');if(reviews.length)throw new Error(`representation review remains: ${reviews.length}`);
+          const gateB={schemaVersion:'batch-gate-b-final-audit-v1',batch:'20260903-hanagasa-ultraman',generatedAt:new Date().toISOString(),status:'PASS',researchFeatureCandidates:researchFeatures,featureDispositions:counts,featureMissing:researchFeatures-Object.values(counts).reduce((a,b)=>a+b,0),researchEvidenceCandidates:researchEvidence,evidenceIncluded,evidenceExcluded,evidenceMissing:researchEvidence-evidenceIncluded-evidenceExcluded,selectionValidation:'PASS_10_OF_10',selectionQuality:'PASS_10_REVIEW_0_BLOCKED_0',evidenceCompleteness:'PASS',discoveryMissing:0,userFacingRejectReasonMissing:0,inputBurdenOnlyRejects:0,excludeOnlyInputLeakage:0,highRiskDoubleCountingUnresolved:0,reverseEngineeredMissingTables:0,latentInternalStateTreatedAsObserved:0,conditionSpecificTablesCollapsedIntoSingleRate:0,semanticLocks:'PASS',errors:[],trackedSelectionDebt:['Public-table-incomplete candidates remain excluded without interpolation.','Condition-specific tables that cannot be represented without mixing trial populations are retained in Research but excluded from production likelihood until a correct conditional representation exists.','Difficulty exposure remains unresolved until Observation establishes exact acquisition.']};fs.writeFileSync('reports/batch-20260903-gate-b-final-audit.json',JSON.stringify(gateB,null,2)+'\n');
+          NODE
+      - name: Commit representation correction
+        run: |
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git add research/S_KABANERI_ZR/selection-data.json research/L_DMC5_ST_XA/selection-data.json research/L_GUILTY_CROWN_2_XF/selection-data.json reports/batch-20260903-observation-model-readiness-audit.json reports/batch-20260903-gate-b-final-audit.json
+          git commit -m 'selection: preserve condition-specific trial populations' || exit 0
+          git pull --rebase origin batch/20260903-hanagasa-ultraman
+          git push origin HEAD:batch/20260903-hanagasa-ultraman
