@@ -102,9 +102,12 @@ for (const machineId of ids) {
     }
 
     if ((section?.inputIds?.length ?? 0) > 1) {
-      const firstId = section.inputIds[0];
-      const firstName = ui.inputContracts?.[firstId]?.name ?? inputById.get(firstId)?.name ?? '';
-      if (firstName && (title === firstName || firstName.startsWith(`${title} `) || title === firstName.replace(/\s+(回数|試行数)$/,''))) {
+      const names = section.inputIds.map(id => ui.inputContracts?.[id]?.name ?? inputById.get(id)?.name ?? '').filter(Boolean);
+      const stripMeasure = (name) => name.replace(/\s+(回数|試行数)$/,'').trim();
+      const stems = [...new Set(names.map(stripMeasure))];
+      const pairedMeasureGroup = stems.length === 1 && stems[0] === title;
+      const firstName = names[0] ?? '';
+      if (!pairedMeasureGroup && firstName && (title === firstName || firstName.startsWith(`${title} `) || title === stripMeasure(firstName))) {
         add(result, 'REVIEW', 'FIRST_ITEM_SECTION_TITLE_RISK', `Section title may be derived from the first input rather than the semantic group: ${title}`, { section: title, firstInput: firstName });
       }
     }
