@@ -49,12 +49,35 @@ const replacements = [
   ['NO_CZ', 'CZ非当選'],
 ];
 
+const userFacingKeys = new Set([
+  'label', 'categories', 'timing', 'excludedConditions', 'notes', 'description',
+  'reason', 'details', 'instructions', 'acquisition', 'acquisitionNotes',
+]);
+
+function cleanText(value) {
+  let out = value;
+  for (const [from, to] of replacements) out = out.split(from).join(to);
+  return out;
+}
+
+function cleanUserFacingFields(value) {
+  if (Array.isArray(value)) return value.map(cleanUserFacingFields);
+  if (!value || typeof value !== 'object') return value;
+  for (const [key, child] of Object.entries(value)) {
+    if (userFacingKeys.has(key)) {
+      if (typeof child === 'string') value[key] = cleanText(child);
+      else if (Array.isArray(child)) value[key] = child.map((item) => typeof item === 'string' ? cleanText(item) : cleanUserFacingFields(item));
+      else value[key] = cleanUserFacingFields(child);
+    } else if (child && typeof child === 'object') {
+      cleanUserFacingFields(child);
+    }
+  }
+  return value;
+}
+
 for (const id of ids) {
   const file = `research/${id}/machine-observation-data.json`;
-  const data = JSON.parse(fs.readFileSync(file, 'utf8'));
-  let text = JSON.stringify(data, null, 2);
-  for (const [from, to] of replacements) text = text.split(from).join(to);
-  const out = JSON.parse(text);
+  const out = cleanUserFacingFields(JSON.parse(fs.readFileSync(file, 'utf8')));
 
   if (id === 'L_YOUJITSU_DE') {
     const cz = out.observations.find((x) => x.observationId === 'OBS_NORMAL_CYCLE_CZ_TYPE');
