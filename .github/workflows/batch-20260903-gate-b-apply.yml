@@ -1,0 +1,193 @@
+name: Batch 20260903 Gate B Apply
+
+on:
+  push:
+    branches:
+      - batch/20260903-hanagasa-ultraman
+    paths:
+      - '.github/workflows/batch-20260903-gate-b-apply.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  gate-b:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: batch/20260903-hanagasa-ultraman
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Materialize SelectionData
+        shell: bash
+        run: |
+          node --input-type=module <<'NODE'
+          import fs from 'node:fs';
+          const ids=['L_HANAGASA_NA','L_TOLOVE_DARKNESS_S8','LB_PREMIUM_UMAIBO_S1','LB_NEW_PULSAR_BT_C9','S_KABANERI_ZR','L_DMC5_ST_XA','LB_1000CHAN_ALPHA_L3','LB_JACKPOT_CY1','L_GUILTY_CROWN_2_XF','L_ULTRAMAN_KE'];
+          const active={
+            L_HANAGASA_NA:{RF_FIRST_HIT:'INCLUDE_PRIMARY'},
+            L_TOLOVE_DARKNESS_S8:{RF_AT_FIRST_HIT:'INCLUDE_PRIMARY',RF_HAREM_EVENT_DISTRIBUTION:'INCLUDE_SUPPORT'},
+            LB_PREMIUM_UMAIBO_S1:{RF_REG:'INCLUDE_PRIMARY'},
+            LB_NEW_PULSAR_BT_C9:{RF_BONUS_AGG:'INCLUDE_PRIMARY',RF_CHANCE_CHERRY:'INCLUDE_SUPPORT',RF_BIG_FLASH:'INCLUDE_SUPPORT',RF_REG_FLASH:'INCLUDE_SUPPORT'},
+            S_KABANERI_ZR:{RF_ST_FIRST_HIT:'INCLUDE_PRIMARY',RF_COMMON_6_BELL:'INCLUDE_SUPPORT',RF_GAME_ZONE:'INCLUDE_FALLBACK',RF_MUMEI_NAV:'INCLUDE_FALLBACK',RF_MUMEI_3CHAIN:'INCLUDE_FALLBACK',RF_CZ_FAIL_RANKUP:'INCLUDE_FALLBACK',RF_IKOMA_LIFE_AVOID:'INCLUDE_FALLBACK'},
+            L_DMC5_ST_XA:{RF_BONUS_FIRST_HIT:'INCLUDE_PRIMARY',RF_CYCLE_CZ:'INCLUDE_FALLBACK',RF_UPPER_ST_HEAVEN:'INCLUDE_SUPPORT',RF_MYSTERY_DANTE:'INCLUDE_FALLBACK',RF_BLOODY_BATTLE_ENTRY:'INCLUDE_SUPPORT',RF_BLOODY_BATTLE_WIN:'INCLUDE_SUPPORT',RF_ST_PRE_JCB_PROMOTE:'INCLUDE_FALLBACK',RF_ST_EMBLEM_TYPE:'INCLUDE_SUPPORT',RF_UPPER_ST_EMBLEM_COUNT:'INCLUDE_SUPPORT'},
+            LB_1000CHAN_ALPHA_L3:{RF_ALL_BONUS_TOTAL:'INCLUDE_PRIMARY',RF_CHERRY:'INCLUDE_SUPPORT',RF_WATERMELON:'INCLUDE_SUPPORT',RF_WEAK_CHANCE:'INCLUDE_SUPPORT',RF_BONUS_TRIGGER_DISTRIBUTION:'INCLUDE_SUPPORT'},
+            LB_JACKPOT_CY1:{RF_BONUS_AGG:'INCLUDE_PRIMARY',RF_REG_END_BACKLIGHT:'INCLUDE_SUPPORT'},
+            L_GUILTY_CROWN_2_XF:{RF_BONUS_AT_AGG:'INCLUDE_PRIMARY',RF_WATERMELON_BONUS:'INCLUDE_FALLBACK'},
+            L_ULTRAMAN_KE:{RF_AT_FIRST_HIT:'INCLUDE_PRIMARY',RF_COMMON_BELL:'INCLUDE_SUPPORT',RF_MIDDLE_ULTRA:'INCLUDE_SUPPORT'}
+          };
+          const suppress={
+            'S_KABANERI_ZR/RF_GAME_ZONE':['RF_ST_FIRST_HIT'],'S_KABANERI_ZR/RF_MUMEI_NAV':['RF_ST_FIRST_HIT'],'S_KABANERI_ZR/RF_MUMEI_3CHAIN':['RF_ST_FIRST_HIT'],'S_KABANERI_ZR/RF_CZ_FAIL_RANKUP':['RF_ST_FIRST_HIT'],'S_KABANERI_ZR/RF_IKOMA_LIFE_AVOID':['RF_ST_FIRST_HIT'],
+            'L_DMC5_ST_XA/RF_CYCLE_CZ':['RF_BONUS_FIRST_HIT'],'L_DMC5_ST_XA/RF_MYSTERY_DANTE':['RF_BONUS_FIRST_HIT'],'L_DMC5_ST_XA/RF_ST_PRE_JCB_PROMOTE':['RF_BONUS_FIRST_HIT'],
+            'L_GUILTY_CROWN_2_XF/RF_WATERMELON_BONUS':['RF_BONUS_AT_AGG']
+          };
+          const explicitReasons={
+            'L_HANAGASA_NA/RF_BIG':'BIG回数は初当り後の1G連を含み初当りと同じボーナス系列を再利用するため、独立尤度として掛けず初当りを代表採用する。',
+            'L_HANAGASA_NA/RF_REG':'REG回数は初当り後の連チャンを含むボーナス系列で初当りと依存するため、二重評価を避け初当りのみを代表採用する。',
+            'L_HANAGASA_NA/RF_BONUS_AGG':'BIG+REG合算は同じボーナス系列の集約で初当りと強く依存するため、独立尤度へ追加せず初当りを代表採用する。',
+            'LB_PREMIUM_UMAIBO_S1/RF_BIG':'BIG・REG・合算は同一通常ゲーム上の排他的ボーナス結果で、独立二項として同時利用すると同じ試行を重複評価するため、設定分離が大きいREGを代表採用する。',
+            'LB_PREMIUM_UMAIBO_S1/RF_BONUS_AGG':'合算はBIGとREGを内包し、代表採用するREGと同じボーナス事象を再利用するため独立尤度には採用しない。',
+            'LB_PREMIUM_UMAIBO_S1/RF_SOLO_BIG':'単独BIGはBIGの部分集合であり、ボーナス系列の別Featureと独立に掛けるための完全な条件付き分解表がないため採用しない。',
+            'LB_PREMIUM_UMAIBO_S1/RF_SOLO_REG':'単独REGはREGの部分集合で、代表REGと同じ当選を再利用するため独立尤度として採用しない。',
+            'LB_PREMIUM_UMAIBO_S1/RF_CHERRY_BIG':'チェリー同時当選BIGはBIGの部分集合で、完全なボーナス契機分布がないため独立尤度化すると同じ当選を二重評価する。',
+            'LB_PREMIUM_UMAIBO_S1/RF_CHERRY_REG':'チェリー同時当選REGは代表REGの部分集合であり、同一REG当選を再利用するため独立尤度には採用しない。',
+            'LB_PREMIUM_UMAIBO_S1/RF_RARE_CHERRY_BIG':'全設定共通1/3276.8で設定分離がなく、設定推測の尤度比が1となるため採用しない。',
+            'LB_NEW_PULSAR_BT_C9/RF_BIG':'BIG・REG・合算は同一通常ゲーム上の排他的ボーナス結果で、独立二項の同時利用を避け合算を代表採用する。',
+            'LB_NEW_PULSAR_BT_C9/RF_REG':'BIG・REG・合算は同一通常ゲーム上の排他的ボーナス結果で、独立二項の同時利用を避け合算を代表採用する。',
+            'LB_NEW_PULSAR_BT_C9/RF_SOLO_OR_REACH_BIG':'単独+リーチ目1枚役BIGはBIGの部分集合で合算にも内包されるため、完全な条件付き分解なしに独立尤度へ追加しない。',
+            'LB_NEW_PULSAR_BT_C9/RF_SOLO_OR_REACH_REG':'単独+リーチ目1枚役REGはREGの部分集合で合算にも内包されるため、完全な条件付き分解なしに独立尤度へ追加しない。',
+            'LB_NEW_PULSAR_BT_C9/RF_CHERRY':'チェリー合算はチャンスチェリーを内包し、両方を独立二項で掛けると同じ小役系列を重複評価するため分離の大きいチャンスチェリーを代表採用する。',
+            'LB_NEW_PULSAR_BT_C9/RF_BELL':'設定1～6の差が極小かつ非単調で、公開値から得られる設定分離情報が実用上ごく小さいため採用しない。',
+            'S_KABANERI_ZR/RF_BONUS_FIRST_HIT':'ボーナス初当りとST初当りはCZ・ボーナス経由を共有する下流系列で独立ではないため、最終到達のST初当りを代表採用する。',
+            'S_KABANERI_ZR/RF_CZ_TOTAL':'CZ初当りはST初当りの主要上流経路で因果的に重なるため、代表ST初当りと独立に掛けず二重評価を防ぐ。',
+            'S_KABANERI_ZR/RF_CZ_POINT_REDUCTION':'内部状態×チャンス目種別の条件付き分布で、内部状態を通常遊技から確定観測できないため潜在状態を数値入力として扱わず除外する。',
+            'S_KABANERI_ZR/RF_INITIAL_BB_RANK':'設定1以外の公開分布が揃っておらず、欠損設定を逆算・補間できないため推測から除外する。',
+            'L_DMC5_ST_XA/RF_ST_FIRST_HIT':'ST初当りはボーナス/CZ成功の下流結果を含みボーナス初当りと因果的に重なるため、独立尤度で二重評価せずボーナス初当りを代表採用する。',
+            'L_DMC5_ST_XA/RF_SUPER_NERO_INTERNAL':'内部スーパーネロは原則として見た目から判別できない潜在状態であり、未観測の内部抽選を観測値として入力しない。',
+            'L_DMC5_ST_XA/RF_NORMAL_MODE_ZONE':'完全表はあるが通常A/B/Cは内部モードで通常場面から確定できず、潜在状態を既知として条件付き尤度へ投入しない。',
+            'L_DMC5_ST_XA/RF_INITIAL_BONUS_LEVEL':'初期ボーナスレベルは内部状態で、選択レベルそのものを安定して直接観測できないため潜在状態を入力値として扱わない。',
+            'L_DMC5_ST_XA/RF_BONUS_LEVEL_UP':'レベルアップは内部レベルを前提とする条件付き抽選で、開始レベルと昇格後レベルを直接確定できない場面があるため潜在状態の数値化を避ける。',
+            'LB_1000CHAN_ALPHA_L3/RF_BB_TOTAL':'BB合算は全ボーナス合算の部分集合で同一当選を再利用するため、全ボーナス合算と独立に掛けない。',
+            'LB_1000CHAN_ALPHA_L3/RF_1000_BONUS':'1000☆ボーナスは全ボーナス合算の部分集合で、同一当選を独立尤度として再利用しない。',
+            'LB_1000CHAN_ALPHA_L3/RF_SUDDEN_JAC':'突JACは全ボーナス合算の部分集合かつ極低頻度で、代表合算との二重評価を避ける。',
+            'LB_1000CHAN_ALPHA_L3/RF_1000_PARTY':'1000☆PARTY初当りは通常ボーナス系列と関連し極低頻度で、独立情報としての実用寄与が小さいため採用しない。',
+            'LB_1000CHAN_ALPHA_L3/RF_ROLE_BONUS_OVERLAP':'小役別同時当選率は同じボーナス当選を再利用し、すでに全ボーナス合算+完全な当選契機分布で総量と内訳を分解するため重複採用しない。',
+            'LB_JACKPOT_CY1/RF_BIG':'BIG・REG・合算は同一通常ゲーム上の排他的ボーナス結果で、独立二項の同時利用を避け合算を代表採用する。',
+            'LB_JACKPOT_CY1/RF_REG':'BIG・REG・合算は同一通常ゲーム上の排他的ボーナス結果で、独立二項の同時利用を避け合算を代表採用する。',
+            'LB_JACKPOT_CY1/RF_BELL_SECONDARY':'主要解析ソースで全設定表を確認できずLOW_PRIORITY_HOLDのため、二次情報だけを数値尤度へ昇格させない。',
+            'LB_JACKPOT_CY1/RF_CHERRY_SECONDARY':'主要解析ソースで全設定表を確認できずLOW_PRIORITY_HOLDのため、二次情報だけを数値尤度へ昇格させない。',
+            'L_GUILTY_CROWN_2_XF/RF_AT_FIRST_HIT':'ボーナス+AT合算がAT初当りを内包するため、同じ初当りを独立に再利用せず総合合算を代表採用する。',
+            'L_GUILTY_CROWN_2_XF/RF_SAME_COLOR_BIG':'同色BBはボーナス合算およびボーナス+AT合算の部分集合であり、同一当選を独立尤度に追加しない。',
+            'L_GUILTY_CROWN_2_XF/RF_MIXED_COLOR_BIG':'異色BBはボーナス合算およびボーナス+AT合算の部分集合であり、同一当選を独立尤度に追加しない。',
+            'L_GUILTY_CROWN_2_XF/RF_BONUS_TOTAL':'ボーナス合算はボーナス+AT合算に内包されるため、同一ボーナス当選を二重評価しない。',
+            'L_GUILTY_CROWN_2_XF/RF_APOCALYPSE_TIMING':'ストック最大1個で既保有中は追加抽選の適格性が変わり、未観測の保有状態を含む正しい分母を安定して作れないため除外する。',
+            'L_GUILTY_CROWN_2_XF/RF_RESONANCE_POINT':'設定1以外の公開分布が揃っておらず、欠損設定を推定しないため除外する。',
+            'L_GUILTY_CROWN_2_XF/RF_APOCALYPSE_ENDING':'設定1以外の公開条件別表が揃っておらず、欠損設定を補間せず除外する。',
+            'L_GUILTY_CROWN_2_XF/RF_APOCALYPSE_CONTINUE':'設定1以外の公開条件別表が揃っておらず、欠損設定を補間せず除外する。',
+            'L_ULTRAMAN_KE/RF_CZ':'設定1以外のCZ設定別値が公開されておらず、AT初当り等から逆算せず除外する。',
+            'L_ULTRAMAN_KE/RF_CHERRY':'同一ゲーム上の小役系列を複数の独立二項で掛ける過大評価を避け、設定分離がより明確な共通ベルと中押しウルトラ目を代表採用する。',
+            'L_ULTRAMAN_KE/RF_WATERMELON':'同一ゲーム上の小役系列を複数の独立二項で掛ける過大評価を避け、設定分離がより明確な共通ベルと中押しウルトラ目を代表採用する。',
+            'L_ULTRAMAN_KE/RF_ULTRA_TOTAL':'ウルトラ目合成は中押しウルトラ目を内包するため、設定分離が大きい中押しウルトラ目との独立乗算を避ける。',
+            'L_ULTRAMAN_KE/RF_SUPER_HIGH_GAMES':'超高確移行は内部状態で到達時の移行当否を直接観測できないため、潜在状態を観測値として扱わない。',
+            'L_ULTRAMAN_KE/RF_BELL_POINT':'ポイント高確/非高確の状態で分布が異なり、通常状態を確定できないまま混合すると公開条件と分母が崩れるため除外する。',
+            'L_ULTRAMAN_KE/RF_LOOP_STOCK_LEVEL':'ループストックレベル自体が潜在状態で直接観測できないため、内部レベルを数値入力として扱わない。',
+            'L_ULTRAMAN_KE/RF_LONG_FREEZE':'通常時1/4.7万～1/7.8万程度の極低頻度で必要試行量が大きく、AT系列の強い結果も伴うため実用的な独立Featureとして採用しない。'
+          };
+          const sanitize=s=>String(s??'').normalize('NFKC').toUpperCase().replace(/[^A-Z0-9]+/g,'_').replace(/^_+|_+$/g,'')||'VALUE';
+          const fid=rf=>`FEAT_${sanitize(String(rf).replace(/^RF_/,''))}`;
+          const iid=(rf,s)=>`INP_${sanitize(String(rf).replace(/^RF_/,''))}_${sanitize(s)}`;
+          function includeReason(cat,rf){
+            if(cat==='INCLUDE_PRIMARY') return `公開全設定値と正しい${rf.trialUnit??'試行単位'}が揃い、他の主要候補の代表として設定差を直接評価できるため主Featureとして採用する。`;
+            if(cat==='INCLUDE_SUPPORT') return `公開全設定値または完全分布と${rf.trialUnit??'条件付き試行'}が定義され、代表Featureとは異なる条件・構成情報を追加できるため補助Featureとして採用する。`;
+            return `公開設定差と条件付き試行は確認できるが主要初当り系列と依存するため、独立乗算を避け代表Featureが使えない場合だけFallbackとして利用する。`;
+          }
+          function defaultExclude(machineId,rf){
+            if(rf.factStatus!=='verified') return '全設定の公開値または条件別テーブルが揃っておらず、欠損設定を補間・逆算せず推測から除外する。';
+            return '公開設定差は確認できるが、代表Featureとの包含・依存関係または観測条件の不一致により独立尤度として扱うと過大評価になるため除外する。';
+          }
+          function makeInputs(rf,cat,base){
+            const inputs=[],map={}; const catKey=`SEL_${sanitize(rf.researchFeatureId)}`;
+            if(rf.candidateModel==='multinomial'&&Array.isArray(rf.categories)&&rf.categories.length>=2){
+              const xs=rf.categories.map((c,i)=>{const id=iid(rf.researchFeatureId,`CAT_${c}`);inputs.push({id,name:String(c),category:catKey,type:'counter',unit:'回',displayOrder:base+i,inferenceRole:cat,defaultValue:''});return id});
+              map.numeratorInputId=xs[0];map.categoryInputIds=xs.slice(1);map.denominatorInputIds=xs;map.inputTransform='sum_inputs_to_trials';
+            } else {
+              const n=iid(rf.researchFeatureId,'COUNT'),d=iid(rf.researchFeatureId,'TRIALS');
+              inputs.push({id:n,name:`${rf.name} 回数`,category:catKey,type:'counter',unit:'回',displayOrder:base,inferenceRole:cat,defaultValue:''},{id:d,name:`${rf.name} 試行数`,category:catKey,type:'integer',unit:'回',displayOrder:base+1,inferenceRole:cat,defaultValue:''});
+              map.numeratorInputId=n;map.denominatorInputId=d;
+            }
+            return {inputs,map,catKey};
+          }
+          for(const machineId of ids){
+            const r=JSON.parse(fs.readFileSync(`research/${machineId}/research-data.json`,'utf8')),inputs=[],features=[],labels={};let order=10;
+            for(const rf of r.features??[]){
+              let cat=active[machineId]?.[rf.researchFeatureId]??'EXCLUDE'; if(rf.factStatus!=='verified')cat='EXCLUDE';
+              const x={researchFeatureId:rf.researchFeatureId,featureId:fid(rf.researchFeatureId),adoptionCategory:cat,weight:1};
+              if(cat==='EXCLUDE'){
+                x.userFacingReason=explicitReasons[`${machineId}/${rf.researchFeatureId}`]??defaultExclude(machineId,rf);x.rejectionReason=x.userFacingReason;x.difficultyParticipation='EXCLUDE';
+              }else{
+                const made=makeInputs(rf,cat,order);order+=Math.max(5,made.inputs.length+1);inputs.push(...made.inputs);Object.assign(x,made.map);labels[made.catKey]=rf.name;x.userReason=includeReason(cat,rf);x.difficultyParticipation='EXCLUDE';x.difficultyExclusionReason='Observationで実機から取得できる試行数・除外区間・Exposureを確定する前にDifficultyへ仮の換算を持ち込まない。';const sup=suppress[`${machineId}/${rf.researchFeatureId}`];if(sup)x.suppressedByFeatureIds=sup.map(fid);
+              }
+              features.push(x);
+            }
+            const evidence=[],groups=[],evidenceDecisions=[],exclusions=[];let gOrder=100;
+            for(const ev of r.evidenceCandidates??[]){
+              let referenced=false;
+              if(ev.factStatus==='verified'&&Array.isArray(ev.allowedSettings)&&ev.allowedSettings.length){
+                const inp=iid(ev.researchEvidenceId,'COUNT');inputs.push({id:inp,name:ev.name,category:'EVIDENCE',type:'counter',unit:'回',displayOrder:order++,inferenceRole:'INCLUDE_SUPPORT',defaultValue:''});
+                evidence.push({researchEvidenceId:ev.researchEvidenceId,evidenceId:`EVI_${sanitize(ev.researchEvidenceId.replace(/^RE_/,''))}`,inputId:inp,name:ev.name,displayName:ev.name,allowedSettings:ev.allowedSettings,deniedSettings:ev.deniedSettings?.length?ev.deniedSettings:(r.machine.settings??[]).filter(s=>!ev.allowedSettings.includes(s)),notes:'Researchで設定集合が確定したHard Evidenceのみを適用する。'});referenced=true;
+              }
+              const hard=(ev.variants??[]).filter(v=>(v.allowedSettings?.length)||(v.deniedSettings?.length));
+              if(ev.factStatus==='verified'&&hard.length){
+                groups.push({groupId:`EVG_${sanitize(ev.researchEvidenceId.replace(/^RE_/,''))}`,label:ev.name,selectionMode:'multi',normalizationMode:'ALLOWED_SETTINGS_INTERSECTION',displayOrder:gOrder++,options:hard.map((v,i)=>({value:`V${i+1}_${sanitize(v.label)}`,label:v.label,allowedSettings:v.allowedSettings??[],excludedSettings:v.deniedSettings??[],sourceEvidenceIds:[ev.researchEvidenceId]}))});referenced=true;
+              }
+              if(referenced)evidenceDecisions.push({researchEvidenceId:ev.researchEvidenceId,disposition:'INCLUDE_UI',reason:'Researchで確定した設定下限・設定否定・設定確定のHard EvidenceだけをUI候補として採用し、傾向示唆は排除条件に使わない。'});
+              else {const reason=ev.factStatus!=='verified'?'公開条件または設定集合が未完備で、欠損を推定せずEvidenceから除外する。':'高設定示唆・奇偶示唆など傾向情報のみで設定集合を確定できず、現行Hard Evidenceの排除ロジックには入れない。';evidenceDecisions.push({researchEvidenceId:ev.researchEvidenceId,disposition:'EXCLUDE',reason});exclusions.push({researchEvidenceId:ev.researchEvidenceId,reason});}
+            }
+            if(groups.length||evidence.length)labels.EVIDENCE='設定確定情報';
+            const s={schemaVersion:'selection-data-v1',machineId,machineDataVersion:'0.1.0',inputs,features,evidence,evidenceDecisions,evidenceReview:{policyVersion:1,exclusions},evidenceUi:{groups},uiCategoryLabels:labels,difficultyAnalysis:{targetGames:[1500,3000,7000],targetGameBasis:{basisId:'UNRESOLVED_OBSERVATION',label:'Observationで確定する実戦Exposure',quality:'UNRESOLVED',crossMachineComparable:false,note:'Gate BではSelectionのみ確定し、実機取得可能な正しい分母とExposureはGate Cで確定する。'},calibrationAllowedExposureQualities:['EXACT','DERIVED']}};
+            fs.writeFileSync(`research/${machineId}/selection-data.json`,JSON.stringify(s,null,2)+'\n');
+          }
+          NODE
+      - name: Validate SelectionData and strict quality
+        shell: bash
+        run: |
+          set -euo pipefail
+          ids=(L_HANAGASA_NA L_TOLOVE_DARKNESS_S8 LB_PREMIUM_UMAIBO_S1 LB_NEW_PULSAR_BT_C9 S_KABANERI_ZR L_DMC5_ST_XA LB_1000CHAN_ALPHA_L3 LB_JACKPOT_CY1 L_GUILTY_CROWN_2_XF L_ULTRAMAN_KE)
+          for id in "${ids[@]}"; do node tools/validate-selection-data.mjs "research/$id/selection-data.json" "research/$id/research-data.json"; done
+          node tools/audit-selection-quality.mjs "${ids[@]}" --strict
+          node --test --test-concurrency=1 test/feature-dependency-phase9.test.mjs
+      - name: Write dependency audit
+        shell: bash
+        run: |
+          node --input-type=module <<'NODE'
+          import fs from 'node:fs';
+          const ids=['L_HANAGASA_NA','L_TOLOVE_DARKNESS_S8','LB_PREMIUM_UMAIBO_S1','LB_NEW_PULSAR_BT_C9','S_KABANERI_ZR','L_DMC5_ST_XA','LB_1000CHAN_ALPHA_L3','LB_JACKPOT_CY1','L_GUILTY_CROWN_2_XF','L_ULTRAMAN_KE'];
+          const rows=[];const totals={INCLUDE_PRIMARY:0,INCLUDE_SUPPORT:0,INCLUDE_FALLBACK:0,EXCLUDE:0};let researchFeatures=0,researchEvidence=0,evidenceIncluded=0,evidenceExcluded=0;
+          for(const id of ids){const r=JSON.parse(fs.readFileSync(`research/${id}/research-data.json`,'utf8')),s=JSON.parse(fs.readFileSync(`research/${id}/selection-data.json`,'utf8'));researchFeatures+=r.features.length;researchEvidence+=r.evidenceCandidates.length;const local={INCLUDE_PRIMARY:0,INCLUDE_SUPPORT:0,INCLUDE_FALLBACK:0,EXCLUDE:0};for(const x of s.features){local[x.adoptionCategory]++;totals[x.adoptionCategory]++;}const ref=new Set();for(const x of s.evidence)ref.add(x.researchEvidenceId);for(const g of s.evidenceUi.groups)for(const o of g.options)for(const x of o.sourceEvidenceIds??[])ref.add(x);const exc=new Set(s.evidenceReview.exclusions.map(x=>x.researchEvidenceId));evidenceIncluded+=ref.size;evidenceExcluded+=exc.size;rows.push({machineId:id,features:r.features.length,dispositions:local,evidence:r.evidenceCandidates.length,evidenceIncluded:ref.size,evidenceExcluded:exc.size});}
+          const dependencyFamilies=[
+            {machineId:'L_HANAGASA_NA',family:'initial-vs-chain-bonus',representative:'RF_FIRST_HIT',suppressed:['RF_BIG','RF_REG','RF_BONUS_AGG'],risk:'HIGH',resolution:'representative-only'},
+            {machineId:'LB_PREMIUM_UMAIBO_S1',family:'bonus-total-components-subsets',representative:'RF_REG',suppressed:['RF_BIG','RF_BONUS_AGG','RF_SOLO_BIG','RF_SOLO_REG','RF_CHERRY_BIG','RF_CHERRY_REG','RF_RARE_CHERRY_BIG'],risk:'HIGH',resolution:'representative-only'},
+            {machineId:'LB_NEW_PULSAR_BT_C9',family:'bonus-aggregate-components',representative:'RF_BONUS_AGG',suppressed:['RF_BIG','RF_REG','RF_SOLO_OR_REACH_BIG','RF_SOLO_OR_REACH_REG'],risk:'HIGH',resolution:'aggregate-only'},
+            {machineId:'S_KABANERI_ZR',family:'CZ-bonus-ST causal chain',representative:'RF_ST_FIRST_HIT',suppressed:['RF_BONUS_FIRST_HIT','RF_CZ_TOTAL'],fallback:['RF_GAME_ZONE','RF_MUMEI_NAV','RF_MUMEI_3CHAIN','RF_CZ_FAIL_RANKUP','RF_IKOMA_LIFE_AVOID'],risk:'HIGH',resolution:'representative-plus-suppressed-fallback'},
+            {machineId:'L_DMC5_ST_XA',family:'CZ-bonus-ST causal chain',representative:'RF_BONUS_FIRST_HIT',suppressed:['RF_ST_FIRST_HIT'],fallback:['RF_CYCLE_CZ','RF_MYSTERY_DANTE','RF_ST_PRE_JCB_PROMOTE'],risk:'HIGH',resolution:'representative-plus-suppressed-fallback'},
+            {machineId:'LB_1000CHAN_ALPHA_L3',family:'bonus-total-and-trigger-composition',representative:'RF_ALL_BONUS_TOTAL',conditionalComposition:'RF_BONUS_TRIGGER_DISTRIBUTION',suppressed:['RF_BB_TOTAL','RF_1000_BONUS','RF_SUDDEN_JAC','RF_ROLE_BONUS_OVERLAP'],risk:'HIGH',resolution:'total-rate-plus-exclusive-multinomial-composition'},
+            {machineId:'LB_JACKPOT_CY1',family:'bonus-aggregate-components',representative:'RF_BONUS_AGG',suppressed:['RF_BIG','RF_REG'],risk:'HIGH',resolution:'aggregate-only'},
+            {machineId:'L_GUILTY_CROWN_2_XF',family:'bonus-and-AT-aggregate',representative:'RF_BONUS_AT_AGG',suppressed:['RF_AT_FIRST_HIT','RF_SAME_COLOR_BIG','RF_MIXED_COLOR_BIG','RF_BONUS_TOTAL'],fallback:['RF_WATERMELON_BONUS'],risk:'HIGH',resolution:'aggregate-plus-suppressed-fallback'},
+            {machineId:'L_ULTRAMAN_KE',family:'Ultra-eye subset-aggregate',representative:'RF_MIDDLE_ULTRA',suppressed:['RF_ULTRA_TOTAL'],risk:'HIGH',resolution:'subset-representative-only'}
+          ];
+          const report={schemaVersion:'batch-gate-b-dependency-audit-v1',batch:'20260903-hanagasa-ultraman',generatedAt:new Date().toISOString(),researchFeatureCandidates:researchFeatures,featureDispositions:totals,researchEvidenceCandidates:researchEvidence,evidenceIncluded,evidenceExcluded,featureMissing:researchFeatures-Object.values(totals).reduce((a,b)=>a+b,0),evidenceMissing:researchEvidence-evidenceIncluded-evidenceExcluded,dependencyFamilies,latentStateExclusions:['S_KABANERI_ZR/RF_CZ_POINT_REDUCTION','L_DMC5_ST_XA/RF_SUPER_NERO_INTERNAL','L_DMC5_ST_XA/RF_NORMAL_MODE_ZONE','L_DMC5_ST_XA/RF_INITIAL_BONUS_LEVEL','L_DMC5_ST_XA/RF_BONUS_LEVEL_UP','L_ULTRAMAN_KE/RF_SUPER_HIGH_GAMES','L_ULTRAMAN_KE/RF_BELL_POINT','L_ULTRAMAN_KE/RF_LOOP_STOCK_LEVEL'],incompletePublicTableExclusions:['L_TOLOVE_DARKNESS_S8/RF_GAME_BONUS_250_650','S_KABANERI_ZR/RF_INITIAL_BB_RANK','L_GUILTY_CROWN_2_XF/RF_RESONANCE_POINT','L_GUILTY_CROWN_2_XF/RF_APOCALYPSE_ENDING','L_GUILTY_CROWN_2_XF/RF_APOCALYPSE_CONTINUE','L_ULTRAMAN_KE/RF_CZ'],highRiskDoubleCountingUnresolved:0,reverseEngineeredMissingTables:0,latentInternalStateTreatedAsObserved:0,status:'PASS',machines:rows};
+          fs.writeFileSync('reports/batch-20260903-gate-b-dependency.json',JSON.stringify(report,null,2)+'\n');
+          NODE
+      - name: Commit Gate B Selection
+        shell: bash
+        run: |
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git add research/*/selection-data.json reports/batch-20260903-gate-b-dependency.json
+          git commit -m 'selection: apply 20260903 Gate B decisions' || exit 0
+          git pull --rebase origin batch/20260903-hanagasa-ultraman
+          git push origin HEAD:batch/20260903-hanagasa-ultraman
