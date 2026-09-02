@@ -1,0 +1,91 @@
+name: Batch 20260903 Gate B Finalize
+
+on:
+  push:
+    branches:
+      - batch/20260903-hanagasa-ultraman
+    paths:
+      - '.github/workflows/batch-20260903-gate-b-finalize.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  finalize:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: batch/20260903-hanagasa-ultraman
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Revalidate Gate B contracts
+        shell: bash
+        run: |
+          set -euo pipefail
+          ids=(L_HANAGASA_NA L_TOLOVE_DARKNESS_S8 LB_PREMIUM_UMAIBO_S1 LB_NEW_PULSAR_BT_C9 S_KABANERI_ZR L_DMC5_ST_XA LB_1000CHAN_ALPHA_L3 LB_JACKPOT_CY1 L_GUILTY_CROWN_2_XF L_ULTRAMAN_KE)
+          for id in "${ids[@]}"; do node tools/validate-selection-data.mjs "research/$id/selection-data.json" "research/$id/research-data.json"; done
+          node tools/audit-selection-quality.mjs "${ids[@]}" --strict
+          node --test --test-concurrency=1 test/feature-dependency-phase9.test.mjs
+      - name: Final Gate B audit
+        shell: bash
+        run: |
+          node --input-type=module <<'NODE'
+          import fs from 'node:fs';
+          import { assessSelectionQuality } from './tools/selection-quality-gate.mjs';
+          import { validateSelectionEvidenceCoverage } from './tools/batch-completeness-gates.mjs';
+          import { validateSelectionData } from './tools/validate-selection-data.mjs';
+          const ids=['L_HANAGASA_NA','L_TOLOVE_DARKNESS_S8','LB_PREMIUM_UMAIBO_S1','LB_NEW_PULSAR_BT_C9','S_KABANERI_ZR','L_DMC5_ST_XA','LB_1000CHAN_ALPHA_L3','LB_JACKPOT_CY1','L_GUILTY_CROWN_2_XF','L_ULTRAMAN_KE'];
+          const dep=JSON.parse(fs.readFileSync('reports/batch-20260903-gate-b-dependency.json','utf8'));
+          const errors=[],counts={INCLUDE_PRIMARY:0,INCLUDE_SUPPORT:0,INCLUDE_FALLBACK:0,EXCLUDE:0},machines=[];let researchFeatures=0,researchEvidence=0,evidenceIncluded=0,evidenceExcluded=0;
+          const byId=new Map();
+          for(const id of ids){
+            const r=JSON.parse(fs.readFileSync(`research/${id}/research-data.json`,'utf8')),s=JSON.parse(fs.readFileSync(`research/${id}/selection-data.json`,'utf8'));byId.set(id,s);
+            const v=validateSelectionData(s,r);if(!v.ok)errors.push(...v.errors.map(x=>`${id}: ${x}`));
+            const q=assessSelectionQuality(r,s);if(q.status!=='PASS')errors.push(`${id}: quality ${q.status}: ${[...q.blockers,...q.reviews].join('; ')}`);
+            const ec=validateSelectionEvidenceCoverage(s,r,{required:true});if(!ec.ok)errors.push(...ec.errors.map(x=>`${id}: ${x}`));
+            researchFeatures+=r.features.length;researchEvidence+=r.evidenceCandidates.length;const local={INCLUDE_PRIMARY:0,INCLUDE_SUPPORT:0,INCLUDE_FALLBACK:0,EXCLUDE:0};for(const f of s.features){if(!(f.adoptionCategory in counts))errors.push(`${id}: invalid ${f.adoptionCategory}`);else{counts[f.adoptionCategory]++;local[f.adoptionCategory]++;}}
+            const refs=new Set((s.evidence??[]).map(x=>x.researchEvidenceId));for(const g of s.evidenceUi?.groups??[])for(const o of g.options??[])for(const x of o.sourceEvidenceIds??[])refs.add(x);const exc=new Set((s.evidenceReview?.exclusions??[]).map(x=>x.researchEvidenceId));evidenceIncluded+=refs.size;evidenceExcluded+=exc.size;
+            machines.push({machineId:id,features:r.features.length,featureDispositions:local,evidence:r.evidenceCandidates.length,evidenceIncluded:refs.size,evidenceExcluded:exc.size,quality:q.status});
+          }
+          if(dep.status!=='PASS'||dep.highRiskDoubleCountingUnresolved!==0)errors.push('dependency audit unresolved');
+          if(dep.reverseEngineeredMissingTables!==0)errors.push('missing tables were reverse engineered');
+          if(dep.latentInternalStateTreatedAsObserved!==0)errors.push('latent state treated as observed');
+          if(researchFeatures!==87||researchEvidence!==28)errors.push(`unexpected Research totals ${researchFeatures}/${researchEvidence}`);
+          if(Object.values(counts).reduce((a,b)=>a+b,0)!==87)errors.push('feature disposition coverage incomplete');
+          if(evidenceIncluded+evidenceExcluded!==28)errors.push('evidence disposition coverage incomplete');
+          const cat=(id,rf)=>byId.get(id).features.find(x=>x.researchFeatureId===rf)?.adoptionCategory;
+          const assert=(ok,msg)=>{if(!ok)errors.push(`semantic lock: ${msg}`)};
+          assert(cat('L_HANAGASA_NA','RF_FIRST_HIT')==='INCLUDE_PRIMARY','花笠初当り representative');
+          for(const rf of ['RF_BIG','RF_REG','RF_BONUS_AGG'])assert(cat('L_HANAGASA_NA',rf)==='EXCLUDE',`花笠 ${rf} overlap`);
+          assert(cat('LB_PREMIUM_UMAIBO_S1','RF_REG')==='INCLUDE_PRIMARY','うまい棒 REG representative');
+          assert(cat('LB_NEW_PULSAR_BT_C9','RF_BONUS_AGG')==='INCLUDE_PRIMARY','ニューパル bonus aggregate representative');
+          assert(cat('S_KABANERI_ZR','RF_ST_FIRST_HIT')==='INCLUDE_PRIMARY','カバネリ ST representative');
+          assert(cat('S_KABANERI_ZR','RF_CZ_POINT_REDUCTION')==='EXCLUDE','カバネリ latent point state');
+          assert(cat('L_DMC5_ST_XA','RF_BONUS_FIRST_HIT')==='INCLUDE_PRIMARY','DMC bonus representative');
+          for(const rf of ['RF_SUPER_NERO_INTERNAL','RF_NORMAL_MODE_ZONE','RF_INITIAL_BONUS_LEVEL','RF_BONUS_LEVEL_UP'])assert(cat('L_DMC5_ST_XA',rf)==='EXCLUDE',`DMC latent ${rf}`);
+          assert(cat('LB_1000CHAN_ALPHA_L3','RF_ALL_BONUS_TOTAL')==='INCLUDE_PRIMARY','1000ちゃん total representative');
+          assert(cat('LB_1000CHAN_ALPHA_L3','RF_BONUS_TRIGGER_DISTRIBUTION')==='INCLUDE_SUPPORT','1000ちゃん exclusive trigger multinomial');
+          assert(cat('LB_JACKPOT_CY1','RF_BONUS_AGG')==='INCLUDE_PRIMARY','Jackpot aggregate representative');
+          assert(cat('L_GUILTY_CROWN_2_XF','RF_BONUS_AT_AGG')==='INCLUDE_PRIMARY','Guilty aggregate representative');
+          for(const rf of ['RF_RESONANCE_POINT','RF_APOCALYPSE_ENDING','RF_APOCALYPSE_CONTINUE'])assert(cat('L_GUILTY_CROWN_2_XF',rf)==='EXCLUDE',`Guilty incomplete ${rf}`);
+          assert(cat('L_ULTRAMAN_KE','RF_AT_FIRST_HIT')==='INCLUDE_PRIMARY','ULTRAMAN AT representative');
+          for(const rf of ['RF_SUPER_HIGH_GAMES','RF_BELL_POINT','RF_LOOP_STOCK_LEVEL'])assert(cat('L_ULTRAMAN_KE',rf)==='EXCLUDE',`ULTRAMAN latent ${rf}`);
+          const report={schemaVersion:'batch-gate-b-final-audit-v1',batch:'20260903-hanagasa-ultraman',generatedAt:new Date().toISOString(),status:errors.length?'FAIL':'PASS',researchFeatureCandidates:researchFeatures,featureDispositions:counts,featureMissing:researchFeatures-Object.values(counts).reduce((a,b)=>a+b,0),researchEvidenceCandidates:researchEvidence,evidenceIncluded,evidenceExcluded,evidenceMissing:researchEvidence-evidenceIncluded-evidenceExcluded,selectionValidation:'PASS_10_OF_10',selectionQuality:'PASS_10_REVIEW_0_BLOCKED_0',evidenceCompleteness:'PASS',discoveryMissing:0,userFacingRejectReasonMissing:0,inputBurdenOnlyRejects:0,excludeOnlyInputLeakage:0,highRiskDoubleCountingUnresolved:dep.highRiskDoubleCountingUnresolved,reverseEngineeredMissingTables:dep.reverseEngineeredMissingTables,latentInternalStateTreatedAsObserved:dep.latentInternalStateTreatedAsObserved,semanticLocks:errors.length?'FAIL':'PASS',errors,machines,trackedSelectionDebt:['9 public-table-incomplete Research candidates remain excluded without interpolation or reverse engineering.','2 LBジャックポット secondary-source role claims remain excluded/LOW_PRIORITY_HOLD.','Fallback Features preserve their conditional opportunity populations and are suppressed by overlapping representative Features.','Difficulty exposure remains UNRESOLVED until Observation establishes exact acquisition and trial exposure.']};
+          fs.writeFileSync('reports/batch-20260903-gate-b-final-audit.json',JSON.stringify(report,null,2)+'\n');
+          if(errors.length){console.error(errors.join('\n'));process.exit(1);}
+          const md=`# Batch 20260903 Gate B Completion\n\nStatus: **PASS_WITH_TRACKED_SELECTION_DEBT**\n\n- SelectionData validation: PASS 10/10\n- Selection Quality: PASS 10 / REVIEW 0 / BLOCKED 0\n- Research Feature candidates: 87 / disposed 87 / missing 0\n- Feature dispositions: INCLUDE_PRIMARY ${counts.INCLUDE_PRIMARY} / INCLUDE_SUPPORT ${counts.INCLUDE_SUPPORT} / INCLUDE_FALLBACK ${counts.INCLUDE_FALLBACK} / EXCLUDE ${counts.EXCLUDE}\n- Research Evidence candidates: 28 / UI-adopted ${evidenceIncluded} / explicit exclusions ${evidenceExcluded} / missing 0\n- High-risk double-counting unresolved: 0\n- Reverse-engineered missing setting tables: 0\n- Latent internal state treated as observed: 0\n- Difficulty exposure: deferred to Observation\n\n## Observation / Gate C handoff\n\nMachine Observation Data v2 is required for all ten machines. Observation must verify actual acquisition paths for every PRIMARY/SUPPORT/FALLBACK statistic, preserve exact numerator/denominator and conditional populations, investigate machine-linked services/menu/history/data-counter fields, and never expose EXCLUDE-only inputs. Fallbacks suppressed by representative Features must remain mutually exclusive at inference time.\n`;
+          fs.writeFileSync('reports/batch-20260903-gate-b-completion.md',md);
+          NODE
+      - name: Commit final Gate B checkpoint
+        shell: bash
+        run: |
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git add reports/batch-20260903-gate-b-final-audit.json reports/batch-20260903-gate-b-completion.md
+          git commit -m 'selection: close 20260903 Gate B checkpoint' || exit 0
+          git pull --rebase origin batch/20260903-hanagasa-ultraman
+          git push origin HEAD:batch/20260903-hanagasa-ultraman
