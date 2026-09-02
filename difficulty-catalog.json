@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-09-02T15:54:08.663Z",
+  "generatedAt": "2026-09-02T23:18:04.363Z",
   "status": "provisional",
   "scoreDisplayVersion": "difficulty-display-score-v3",
   "entries": [
@@ -11485,33 +11485,16 @@
     {
       "machineId": "S_KABANERI_ZR",
       "displayName": "パチスロ甲鉄城のカバネリ",
-      "machineDataVersion": "0.1.1",
+      "machineDataVersion": "0.1.0",
       "difficulty": {
         "schemaVersion": "difficulty-display-v1",
-        "status": "SCORED",
+        "status": "EVIDENCE_DOMINANT",
         "isProvisional": true,
         "scoreModelVersion": "difficulty-analyzer-v1.2",
-        "scores": [
-          {
-            "games": 1500,
-            "score": 36
-          },
-          {
-            "games": 3000,
-            "score": 57
-          },
-          {
-            "games": 7000,
-            "score": 85
-          }
-        ],
+        "scores": [],
         "scoreRange": null,
-        "confidence": {
-          "level": "MEDIUM_HIGH",
-          "userVisible": false,
-          "basis": "Worst included exposure quality/confidence controls the score confidence; analyzable 3/3."
-        },
-        "profile": "NUMERIC",
+        "confidence": null,
+        "profile": "EVIDENCE_DOMINANT",
         "uiPolicy": {
           "showMachineGuideButton": true,
           "buttonLabelKey": "machine_difficulty_guide",
@@ -11519,70 +11502,56 @@
         },
         "settingBandDiscrimination": {
           "schemaVersion": "setting-band-discrimination-g-v1",
-          "status": "COMPLETE",
-          "results": [
-            {
-              "threshold": 0.6,
-              "games": 600
-            },
-            {
-              "threshold": 0.7,
-              "games": 2000
-            },
-            {
-              "threshold": 0.8,
-              "games": 5300
-            }
-          ]
+          "status": "NOT_APPLICABLE",
+          "reason": "No adopted numeric inference feature has resolvable game-count exposure for setting-band discrimination.",
+          "results": []
         },
-        "rawScores": [
-          {
-            "games": 1500,
-            "rawScore": 14
-          },
-          {
-            "games": 3000,
-            "rawScore": 22
-          },
-          {
-            "games": 7000,
-            "rawScore": 33
-          }
-        ],
-        "displayScoreSource": "CALIBRATED_FROM_RAW",
-        "calibrationVersion": "difficulty-calibration-display-v3",
         "rejectedFeatures": [
           {
-            "name": "無名CZ 2択ナビ出現",
-            "reason": "同一無名CZ内部の3連成功率と強く関連し、同時採用するとCZ内部挙動を重複評価する。",
-            "requiredTrials": 83,
-            "requiredTrialsUnit": "無名CZ抽選機会",
+            "name": "ボーナス初当り",
+            "reason": "ボーナス初当りとST初当りはCZ・ボーナス経由を共有する下流系列で独立ではないため、最終到達のST初当りを代表採用する。",
+            "requiredTrials": 6826,
+            "requiredTrialsUnit": "有効通常ゲーム",
             "metricStatus": "COMPUTED"
           },
           {
-            "name": "ST合算",
-            "reason": "ST初当りには設定差がありますが、採用済みボーナス初当りより1Gあたりの識別情報が弱い下流指標です。ボーナス初当りとST初当りを同時利用するjoint/conditional likelihood contractを現Engineで定義していないため、独立尤度として重ねず現版では推測計算に使用しません。",
-            "requiredTrials": 21835,
-            "requiredTrialsUnit": "通常ゲーム",
+            "name": "CZトータル当選率",
+            "reason": "CZ初当りはST初当りの主要上流経路で因果的に重なるため、代表ST初当りと独立に掛けず二重評価を防ぐ。",
+            "requiredTrials": 15561,
+            "requiredTrialsUnit": "有効通常ゲーム",
             "metricStatus": "COMPUTED"
           },
           {
-            "name": "生駒CZハズレ時ライフ減少回避",
-            "reason": "ライフ残量ごとに別分母が必要で、同一CZ内部の挙動を過度に重複評価するため不採用。",
+            "name": "規定ゲーム数によるボーナス当選",
+            "reason": "公開値は条件別・状態別・到達段階別に定義されており、現行の単一「成功回数/試行数」入力へ合算すると異なる確率母集団を混ぜてしまう。条件別モデルを正しく保持できる実装がない状態では尤度を作らず、Research事実のみ保持して推測から除外する。",
             "requiredTrials": null,
             "requiredTrialsUnit": "G",
             "metricStatus": "NOT_COMPUTABLE"
           },
           {
-            "name": "規定G数到達時のボーナス当選率",
-            "reason": "複数ゾーンは前ゾーン非当選を条件に次の試行へ進むため、独立Feature化すると生存条件を無視して情報を水増しします。",
+            "name": "CZポイント減算数",
+            "reason": "内部状態×チャンス目種別の条件付き分布で、内部状態を通常遊技から確定観測できないため潜在状態を数値入力として扱わず除外する。",
             "requiredTrials": null,
             "requiredTrialsUnit": "G",
             "metricStatus": "NOT_COMPUTABLE"
           },
           {
-            "name": "カバネリボーナス中キャラ紹介の偶奇傾向",
-            "reason": "示唆要素は把握していますが、全設定別の完全な出現分布を公開情報で安定照合できないため数値Feature化しません。",
+            "name": "無名CZ・生駒CZ失敗時BBランク昇格",
+            "reason": "CZ失敗時のBBランク昇格抽選は公開値があるが、昇格結果そのものは内部ランクであり、100Gキリ番演出や駿城ボーナス終了画面はランクの示唆に留まる。実際の昇格段階を直接観測できないため、潜在状態を入力値として扱わない。",
+            "requiredTrials": 18,
+            "requiredTrialsUnit": "無名CZまたは生駒CZ失敗1回",
+            "metricStatus": "COMPUTED"
+          },
+          {
+            "name": "初期BBランク振り分け",
+            "reason": "設定1以外の公開分布が揃っておらず、欠損設定を逆算・補間できないため推測から除外する。",
+            "requiredTrials": null,
+            "requiredTrialsUnit": "G",
+            "metricStatus": "NOT_COMPUTABLE"
+          },
+          {
+            "name": "生駒CZ残りライフ別減算回避抽選",
+            "reason": "公開値は条件別・状態別・到達段階別に定義されており、現行の単一「成功回数/試行数」入力へ合算すると異なる確率母集団を混ぜてしまう。条件別モデルを正しく保持できる実装がない状態では尤度を作らず、Research事実のみ保持して推測から除外する。",
             "requiredTrials": null,
             "requiredTrialsUnit": "G",
             "metricStatus": "NOT_COMPUTABLE"

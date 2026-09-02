@@ -6,7 +6,7 @@ const ROOT=path.resolve(path.dirname(new URL(import.meta.url).pathname),'..');
 const IDS=['L_HANAGASA_NA','L_TOLOVE_DARKNESS_S8','LB_PREMIUM_UMAIBO_S1','LB_NEW_PULSAR_BT_C9','S_KABANERI_ZR','L_DMC5_ST_XA','LB_1000CHAN_ALPHA_L3','LB_JACKPOT_CY1','L_GUILTY_CROWN_2_XF','L_ULTRAMAN_KE'];
 const semanticLocks={
   L_HANAGASA_NA:['BIG/REG/合算を初当りと独立に掛け直さない。'],
-  L_TOLOVE_DARKNESS_S8:['ハーレムモード中の報酬3カテゴリは同一抽選の排他的分布として一体入力する。','250G/650G未公開設定差をUIへ露出しない。','打-WIN LITEの隠れ凪は確認タイミングを案内するが、Hard確定情報と傾向示唆を混同しない。'],
+  L_TOLOVE_DARKNESS_S8:['ハーレムモード中の報酬3カテゴリは同一抽選の排他的分布として一体入力する。','250G/650G未公開設定差をUIへ露出しない。','隠れ凪は1000Gごとの確認タイミングを案内するが、設定確定情報と傾向示唆を混同しない。'],
   LB_PREMIUM_UMAIBO_S1:['REGを代表採用し、BIG/合算/単独/チェリー重複を独立尤度として復活させない。'],
   LB_NEW_PULSAR_BT_C9:['ボーナス合算を代表採用しBIG/REG内訳を独立尤度として復活させない。','スロプラNEXT表示値はResearchの分母定義と一致する項目だけ補助取得元として使う。'],
   S_KABANERI_ZR:['CZ失敗時BBランク昇格を入力させない。内部ランク示唆を昇格結果として扱わない。','無名CZ 2択ナビは連撃中1連撃以上かつ押し順ベル・非小役対象成立時だけを分母にする。','共通6枚ベルはトータルゲームを分母にする。'],
