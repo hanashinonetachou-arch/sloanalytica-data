@@ -1,0 +1,85 @@
+name: Batch 20260903 Gate D Service Label Fix
+
+on:
+  push:
+    branches:
+      - batch/20260903-hanagasa-ultraman
+    paths:
+      - '.github/workflows/batch-20260903-gate-d-service-label-fix.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  fix-and-build:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: batch/20260903-hanagasa-ultraman
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Remove machine-linked service name from user-facing UI
+        run: |
+          node --input-type=module <<'NODE'
+          import fs from 'node:fs';
+          const p='research/L_TOLOVE_DARKNESS_S8/selection-data.json';
+          const s=JSON.parse(fs.readFileSync(p,'utf8'));
+          const g=(s.evidenceUi?.groups??[]).find(x=>x.groupId==='EVG_DARWIN_HIDDEN_NAGI');
+          if(!g) throw new Error('EVG_DARWIN_HIDDEN_NAGI missing');
+          g.label='隠れ凪（1000Gごと）';
+          fs.writeFileSync(p,JSON.stringify(s,null,2)+'\n');
+          const gp='tools/generate-batch-20260903-gate-d-ui.mjs';
+          let src=fs.readFileSync(gp,'utf8');
+          src=src.replace('打-WIN LITEの隠れ凪は確認タイミングを案内するが、Hard確定情報と傾向示唆を混同しない。','隠れ凪は1000Gごとの確認タイミングを案内するが、設定確定情報と傾向示唆を混同しない。');
+          fs.writeFileSync(gp,src);
+          NODE
+      - name: Revalidate Selection and UI Design
+        run: |
+          node tools/validate-selection-data.mjs research/L_TOLOVE_DARKNESS_S8/selection-data.json research/L_TOLOVE_DARKNESS_S8/research-data.json
+          node tools/audit-selection-quality.mjs L_TOLOVE_DARKNESS_S8 --strict
+          node tools/generate-batch-20260903-gate-d-ui.mjs
+          npm run ui-design:validate
+          npm run ui-design:linkage:audit -- . L_HANAGASA_NA L_TOLOVE_DARKNESS_S8 LB_PREMIUM_UMAIBO_S1 LB_NEW_PULSAR_BT_C9 S_KABANERI_ZR L_DMC5_ST_XA LB_1000CHAN_ALPHA_L3 LB_JACKPOT_CY1 L_GUILTY_CROWN_2_XF L_ULTRAMAN_KE
+          npm run ui-design:observation:audit -- L_HANAGASA_NA L_TOLOVE_DARKNESS_S8 LB_PREMIUM_UMAIBO_S1 LB_NEW_PULSAR_BT_C9 S_KABANERI_ZR L_DMC5_ST_XA LB_1000CHAN_ALPHA_L3 LB_JACKPOT_CY1 L_GUILTY_CROWN_2_XF L_ULTRAMAN_KE --strict-v2
+          npm run pipeline:four-layer:gate -- L_HANAGASA_NA L_TOLOVE_DARKNESS_S8 LB_PREMIUM_UMAIBO_S1 LB_NEW_PULSAR_BT_C9 S_KABANERI_ZR L_DMC5_ST_XA LB_1000CHAN_ALPHA_L3 LB_JACKPOT_CY1 L_GUILTY_CROWN_2_XF L_ULTRAMAN_KE
+      - name: Build MachineData batch
+        run: npm run machine:batch -- L_HANAGASA_NA L_TOLOVE_DARKNESS_S8 LB_PREMIUM_UMAIBO_S1 LB_NEW_PULSAR_BT_C9 S_KABANERI_ZR L_DMC5_ST_XA LB_1000CHAN_ALPHA_L3 LB_JACKPOT_CY1 L_GUILTY_CROWN_2_XF L_ULTRAMAN_KE
+      - name: Materialize and verify UI
+        run: |
+          node tools/materialize-ui-design.mjs --apply L_HANAGASA_NA L_TOLOVE_DARKNESS_S8 LB_PREMIUM_UMAIBO_S1 LB_NEW_PULSAR_BT_C9 S_KABANERI_ZR L_DMC5_ST_XA LB_1000CHAN_ALPHA_L3 LB_JACKPOT_CY1 L_GUILTY_CROWN_2_XF L_ULTRAMAN_KE
+          node tools/materialize-ui-design.mjs --require-unchanged L_HANAGASA_NA L_TOLOVE_DARKNESS_S8 LB_PREMIUM_UMAIBO_S1 LB_NEW_PULSAR_BT_C9 S_KABANERI_ZR L_DMC5_ST_XA LB_1000CHAN_ALPHA_L3 LB_JACKPOT_CY1 L_GUILTY_CROWN_2_XF L_ULTRAMAN_KE
+      - name: Gate D validations
+        run: |
+          npm run ui-design:test
+          npm run difficulty:exposure-audit
+          npm test
+          npm run audit
+          npm run audit:ui-service-names
+      - name: Write Gate D baseline
+        run: |
+          cat > reports/batch-20260903-gate-d-baseline.md <<'EOF'
+          # 20260903 Gate D UI Design / MachineData baseline
+
+          - UI Design generated 10/10 from finalized SelectionData + Machine Observation Data v2.
+          - UI validation, Selection linkage, Observation linkage strict-v2, Four-layer gate: PASS.
+          - MachineData batch construction and UI materialization: PASS 10/10.
+          - User-facing machine-linked service name audit: PASS.
+          - EXCLUDE-only inputs are not generated.
+          - Blank=unobserved / 0=observed zero semantics are preserved.
+          - Conditional-population and latent-state candidates demoted during Observation are not reintroduced.
+          - Quick input updates the same underlying value; no duplicate counter is created.
+          - Repository tests, data audit and Difficulty exposure audit: PASS.
+          - Gate E / Publish: NOT RUN.
+          EOF
+      - name: Commit Gate D baseline
+        run: |
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git add research tools/generate-batch-20260903-gate-d-ui.mjs reports/batch-20260903-gate-d-baseline.md catalog.json difficulty-catalog.json machine-registry.json machines 2>/dev/null || true
+          git commit -m 'machine-data: complete 20260903 Gate D baseline' || exit 0
+          git pull --rebase origin batch/20260903-hanagasa-ultraman
+          git push origin HEAD:batch/20260903-hanagasa-ultraman
