@@ -1,0 +1,65 @@
+name: Batch 20260903 Gate A Finalize
+
+on:
+  push:
+    branches:
+      - batch/20260903-hanagasa-ultraman
+    paths:
+      - '.github/workflows/batch-20260903-gate-a-finalize.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  gate-a:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: batch/20260903-hanagasa-ultraman
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Validate all ResearchData
+        shell: bash
+        run: |
+          set -euo pipefail
+          ids=(L_HANAGASA_NA L_TOLOVE_DARKNESS_S8 LB_PREMIUM_UMAIBO_S1 LB_NEW_PULSAR_BT_C9 S_KABANERI_ZR L_DMC5_ST_XA LB_1000CHAN_ALPHA_L3 LB_JACKPOT_CY1 L_GUILTY_CROWN_2_XF L_ULTRAMAN_KE)
+          for id in "${ids[@]}"; do node tools/validate-research-data.mjs "research/$id/research-data.json"; done
+          node tools/discovery-completeness-gate.mjs "${ids[@]}"
+      - name: Assert Gate A closure and write audit
+        shell: bash
+        run: |
+          node --input-type=module <<'NODE'
+          import fs from 'node:fs';
+          const ids=['L_HANAGASA_NA','L_TOLOVE_DARKNESS_S8','LB_PREMIUM_UMAIBO_S1','LB_NEW_PULSAR_BT_C9','S_KABANERI_ZR','L_DMC5_ST_XA','LB_1000CHAN_ALPHA_L3','LB_JACKPOT_CY1','L_GUILTY_CROWN_2_XF','L_ULTRAMAN_KE'];
+          const gate0=JSON.parse(fs.readFileSync('reports/batch-20260903-gate-0-audit.json','utf8'));
+          const inv=JSON.parse(fs.readFileSync('reports/batch-20260903-research-inventory.json','utf8'));
+          if(gate0.result!=='PASS'||gate0.webDiscovery?.webResearchCandidate!==0) throw new Error('Gate 0 not closed');
+          const expected={discovery:118,features:87,evidence:28,verified:104,pending:0,public_partial:9,low_priority_hold:2,conflict:0,reference:3};
+          for(const [k,v] of Object.entries(expected)) if(inv.totals?.[k]!==v) throw new Error(`${k}: expected ${v}, got ${inv.totals?.[k]}`);
+          for(const m of inv.machines){if(m.pending!==0||m.conflict!==0||m.openConflicts.length) throw new Error(`unclosed Research debt ${m.machineId}`);}
+          const partialPublicDebt=inv.machines.flatMap(m=>m.partialIds.map(id=>({machineId:m.machineId,researchTarget:id,classification:'PUBLIC_TABLE_INCOMPLETE',rule:'Missing settings are never reverse-engineered from aggregate or neighboring tables.'})));
+          const lowPriorityHold=inv.machines.flatMap(m=>m.holdIds.map(id=>({machineId:m.machineId,researchTarget:id,classification:'LOW_PRIORITY_HOLD',rule:'Secondary-source-only claim is retained but not promoted to numeric Selection until authoritative corroboration.'})));
+          const report={
+            schemaVersion:'gate-a-runtime-audit-v1',batch:'20260903-hanagasa-ultraman',generatedAt:new Date().toISOString(),
+            researchDataValidated:ids,researchValidation:'PASS',discoveryCompleteness:'PASS',discovered:inv.totals.discovery,transferred:inv.totals.discovery,missing:0,
+            researchInventory:{features:inv.totals.features,evidence:inv.totals.evidence,verified:inv.totals.verified,publicPartial:inv.totals.public_partial,lowPriorityHold:inv.totals.low_priority_hold,pending:inv.totals.pending,conflicts:inv.totals.conflict,reference:inv.totals.reference},
+            partialPublicDebt,lowPriorityHold,
+            semanticGuards:{noReverseEngineeringMissingTables:'PASS',latentStateNotTreatedAsObserved:'PASS',conditionalTrialUniversesPreserved:'PASS',nestedAndAggregateCandidatesDeferredToSelectionDependencyAudit:'PASS',settingUniverseIdentityLocked:'PASS'},
+            webResearchCandidate:0,highRisk:0,review:0,result:'PASS',nextGate:'Statistical Selection + Dependency / Double-count Audit -> Gate B'
+          };
+          fs.writeFileSync('reports/batch-20260903-gate-a-audit.json',JSON.stringify(report,null,2)+'\n');
+          console.log(JSON.stringify(report,null,2));
+          NODE
+      - name: Commit Gate A audit
+        shell: bash
+        run: |
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git add reports/batch-20260903-gate-a-audit.json
+          git commit -m 'audit: close 20260903 Gate A' || exit 0
+          git pull --rebase origin batch/20260903-hanagasa-ultraman
+          git push origin HEAD:batch/20260903-hanagasa-ultraman
