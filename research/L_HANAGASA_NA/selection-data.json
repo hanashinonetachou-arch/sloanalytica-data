@@ -1,0 +1,117 @@
+{
+  "schemaVersion": "selection-data-v1",
+  "machineId": "L_HANAGASA_NA",
+  "machineDataVersion": "0.1.0",
+  "inputs": [
+    {
+      "id": "INP_FIRST_HIT_COUNT",
+      "name": "初当り確率 回数",
+      "category": "SEL_RF_FIRST_HIT",
+      "type": "counter",
+      "unit": "回",
+      "displayOrder": 10,
+      "inferenceRole": "INCLUDE_PRIMARY",
+      "defaultValue": ""
+    },
+    {
+      "id": "INP_FIRST_HIT_TRIALS",
+      "name": "初当り確率 試行数",
+      "category": "SEL_RF_FIRST_HIT",
+      "type": "integer",
+      "unit": "回",
+      "displayOrder": 11,
+      "inferenceRole": "INCLUDE_PRIMARY",
+      "defaultValue": ""
+    }
+  ],
+  "features": [
+    {
+      "researchFeatureId": "RF_FIRST_HIT",
+      "featureId": "FEAT_FIRST_HIT",
+      "adoptionCategory": "INCLUDE_PRIMARY",
+      "weight": 1,
+      "numeratorInputId": "INP_FIRST_HIT_COUNT",
+      "denominatorInputId": "INP_FIRST_HIT_TRIALS",
+      "userReason": "公開全設定値と正しい有効通常ゲームが揃い、他の主要候補の代表として設定差を直接評価できるため主Featureとして採用する。",
+      "difficultyParticipation": "EXCLUDE",
+      "difficultyExclusionReason": "Observationで実機から取得できる試行数・除外区間・Exposureを確定する前にDifficultyへ仮の換算を持ち込まない。"
+    },
+    {
+      "researchFeatureId": "RF_BIG",
+      "featureId": "FEAT_BIG",
+      "adoptionCategory": "EXCLUDE",
+      "weight": 1,
+      "userFacingReason": "BIG回数は初当り後の1G連を含み初当りと同じボーナス系列を再利用するため、独立尤度として掛けず初当りを代表採用する。",
+      "rejectionReason": "BIG回数は初当り後の1G連を含み初当りと同じボーナス系列を再利用するため、独立尤度として掛けず初当りを代表採用する。",
+      "difficultyParticipation": "EXCLUDE"
+    },
+    {
+      "researchFeatureId": "RF_REG",
+      "featureId": "FEAT_REG",
+      "adoptionCategory": "EXCLUDE",
+      "weight": 1,
+      "userFacingReason": "REG回数は初当り後の連チャンを含むボーナス系列で初当りと依存するため、二重評価を避け初当りのみを代表採用する。",
+      "rejectionReason": "REG回数は初当り後の連チャンを含むボーナス系列で初当りと依存するため、二重評価を避け初当りのみを代表採用する。",
+      "difficultyParticipation": "EXCLUDE"
+    },
+    {
+      "researchFeatureId": "RF_BONUS_AGG",
+      "featureId": "FEAT_BONUS_AGG",
+      "adoptionCategory": "EXCLUDE",
+      "weight": 1,
+      "userFacingReason": "BIG+REG合算は同じボーナス系列の集約で初当りと強く依存するため、独立尤度へ追加せず初当りを代表採用する。",
+      "rejectionReason": "BIG+REG合算は同じボーナス系列の集約で初当りと強く依存するため、独立尤度へ追加せず初当りを代表採用する。",
+      "difficultyParticipation": "EXCLUDE"
+    }
+  ],
+  "evidence": [],
+  "evidenceDecisions": [
+    {
+      "researchEvidenceId": "RE_BONUS_VOICE",
+      "disposition": "EXCLUDE",
+      "reason": "高設定示唆・奇偶示唆など傾向情報のみで設定集合を確定できず、現行Hard Evidenceの排除ロジックには入れない。"
+    },
+    {
+      "researchEvidenceId": "RE_SET_L",
+      "disposition": "EXCLUDE",
+      "reason": "公開条件または設定集合が未完備で、欠損を推定せずEvidenceから除外する。"
+    }
+  ],
+  "evidenceReview": {
+    "policyVersion": 1,
+    "exclusions": [
+      {
+        "researchEvidenceId": "RE_BONUS_VOICE",
+        "reason": "高設定示唆・奇偶示唆など傾向情報のみで設定集合を確定できず、現行Hard Evidenceの排除ロジックには入れない。"
+      },
+      {
+        "researchEvidenceId": "RE_SET_L",
+        "reason": "公開条件または設定集合が未完備で、欠損を推定せずEvidenceから除外する。"
+      }
+    ]
+  },
+  "evidenceUi": {
+    "groups": []
+  },
+  "uiCategoryLabels": {
+    "SEL_RF_FIRST_HIT": "初当り確率"
+  },
+  "difficultyAnalysis": {
+    "targetGames": [
+      1500,
+      3000,
+      7000
+    ],
+    "targetGameBasis": {
+      "basisId": "UNRESOLVED_OBSERVATION",
+      "label": "Observationで確定する実戦Exposure",
+      "quality": "UNRESOLVED",
+      "crossMachineComparable": false,
+      "note": "Gate BではSelectionのみ確定し、実機取得可能な正しい分母とExposureはGate Cで確定する。"
+    },
+    "calibrationAllowedExposureQualities": [
+      "EXACT",
+      "DERIVED"
+    ]
+  }
+}
