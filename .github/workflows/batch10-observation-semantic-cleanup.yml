@@ -1,0 +1,55 @@
+name: Batch10 Observation Semantic Cleanup
+
+on:
+  push:
+    branches: [fix/batch10-observation-semantic-cleanup]
+    paths:
+      - 'tools/cleanup-batch10-observation-semantics.mjs'
+      - '.github/workflows/batch10-observation-semantic-cleanup.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  cleanup:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: fix/batch10-observation-semantic-cleanup
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Apply semantic cleanup
+        run: node tools/cleanup-batch10-observation-semantics.mjs
+      - name: Validate batch10 Observation and UI
+        shell: bash
+        run: |
+          set -euo pipefail
+          IDS=(L_MAGIA_RECORD_RN L_GODZILLA_NS L_USHIO_TORA_HAKUMEN_VH L_AMAZING_LIVE_PD L_YOSHIMUNE_SC2 L_MAHJONG_MONOGATARI_S2 L_IDOLMASTER_MILLION_LIVE_HC L_YOUJITSU_DE L_MIDORIDON_VIVA_REVIVAL_FY L_GUNDAM_SEED_G)
+          for id in "${IDS[@]}"; do
+            npm run observation:validate -- "research/$id/machine-observation-data.json"
+            npm run ui-design:validate -- "research/$id/ui-design-data.json"
+          done
+      - name: Assert user-facing semantic cleanup
+        shell: bash
+        run: |
+          set -euo pipefail
+          f=research/L_YOUJITSU_DE/machine-observation-data.json
+          ! grep -E 'SelectionData|INCLUDE_PRIMARY|INCLUDE_SUPPORT|GIRLS_CHALLENGE|MERITOCRACY_ZONE|GROUP_PICTURE|KUSHIDA' "$f"
+      - name: Full tests and audits
+        run: |
+          npm test
+          npm run audit
+          npm run audit:ui-service-names
+      - name: Commit generated cleanup
+        shell: bash
+        run: |
+          if git diff --quiet; then echo 'No generated changes'; exit 0; fi
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git add research/L_YOUJITSU_DE/machine-observation-data.json
+          git commit -m 'fix: clean user-facing observation semantics'
+          git push
