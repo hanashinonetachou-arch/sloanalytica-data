@@ -5,6 +5,7 @@ on:
     branches: [fix/batch10-real-device-r2]
     paths:
       - 'tools/apply-batch10-real-device-r2.mjs'
+      - 'tools/reconcile-batch10-difficulty-r2.mjs'
       - '.github/workflows/batch10-real-device-r2.yml'
   workflow_dispatch:
 
@@ -27,7 +28,9 @@ jobs:
         with:
           node-version: '22'
       - name: Apply real-device corrections
-        run: node tools/apply-batch10-real-device-r2.mjs
+        run: |
+          node tools/apply-batch10-real-device-r2.mjs
+          node tools/reconcile-batch10-difficulty-r2.mjs
       - name: Validate Selection
         shell: bash
         run: |
@@ -39,7 +42,6 @@ jobs:
         run: |
           set -euo pipefail
           IDS=(L_MAGIA_RECORD_RN L_GODZILLA_NS L_USHIO_TORA_HAKUMEN_VH L_AMAZING_LIVE_PD L_YOSHIMUNE_SC2 L_MAHJONG_MONOGATARI_S2 L_IDOLMASTER_MILLION_LIVE_HC L_YOUJITSU_DE L_MIDORIDON_VIVA_REVIVAL_FY L_GUNDAM_SEED_G)
-          npm run observation:validate -- ${IDS[@]/#/research/} 2>/dev/null || true
           for id in "${IDS[@]}"; do npm run observation:validate -- "research/$id/machine-observation-data.json"; npm run ui-design:validate -- "research/$id/ui-design-data.json"; done
       - name: Regenerate all 10 packages and difficulty outputs
         run: npm run machine:batch -- L_MAGIA_RECORD_RN L_GODZILLA_NS L_USHIO_TORA_HAKUMEN_VH L_AMAZING_LIVE_PD L_YOSHIMUNE_SC2 L_MAHJONG_MONOGATARI_S2 L_IDOLMASTER_MILLION_LIVE_HC L_YOUJITSU_DE L_MIDORIDON_VIVA_REVIVAL_FY L_GUNDAM_SEED_G
@@ -49,10 +51,14 @@ jobs:
           node <<'NODE'
           const fs=require('fs');
           const ids=['L_MAGIA_RECORD_RN','L_GODZILLA_NS','L_USHIO_TORA_HAKUMEN_VH','L_AMAZING_LIVE_PD','L_YOSHIMUNE_SC2','L_MAHJONG_MONOGATARI_S2','L_IDOLMASTER_MILLION_LIVE_HC','L_YOUJITSU_DE','L_MIDORIDON_VIVA_REVIVAL_FY','L_GUNDAM_SEED_G'];
-          const rows=ids.map(id=>{const r=JSON.parse(fs.readFileSync(`research/${id}/difficulty-report.json`,'utf8')); return {machineId:id,status:r.status,targetGameBasis:r.targetGameBasis,targets:r.targets??[],coverage:r.coverage,reason:r.settingBandDiscrimination?.reason??null};});
+          const rows=ids.map(id=>{const r=JSON.parse(fs.readFileSync(`research/${id}/difficulty-report.json`,'utf8')); return {machineId:id,status:r.status,targetGameBasis:r.targetGameBasis,targets:r.targets??[],coverage:r.coverage};});
           fs.mkdirSync('reports',{recursive:true}); fs.writeFileSync('reports/batch10-difficulty-computability.json',JSON.stringify({generatedAt:new Date().toISOString(),rows},null,2)+'\n');
           for(const r of rows) console.log(r.machineId,r.status,(r.targets??[]).map(x=>`${x.games}:${x.score}`).join(','));
           for(const must of ['L_MAGIA_RECORD_RN','L_MIDORIDON_VIVA_REVIVAL_FY']) { const r=rows.find(x=>x.machineId===must); if(r.status!=='COMPLETE'||r.targets.length!==3) throw new Error(`${must}: expected computable Difficulty after Observation reconciliation`); }
+          for(const r of rows.filter(x=>x.status!=='COMPLETE')) {
+            const stale=(r.coverage?.explicitlyExcludedNumericFeatures??[]).some(x=>String(x.reason).includes('Observationで実戦時'));
+            if(stale) throw new Error(`${r.machineId}: stale pre-Observation Difficulty exclusion reason remains`);
+          }
           NODE
       - name: Latest-manifest semantic audit
         run: node tools/audit-batch8-latest-manifest.mjs
