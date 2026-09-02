@@ -1,22 +1,52 @@
 {
   "schemaVersion": "inference-profile-candidate-v1",
   "machineId": "L_IDOLMASTER_MILLION_LIVE_HC",
-  "status": "RESEARCH_REQUIRED",
+  "status": "BLOCKED_MISSING_CONDITIONAL_TABLES",
   "candidateModel": "CONDITIONAL",
+  "researchedAt": "2026-09-02",
   "currentSafePolicy": {
     "primaryFeatureId": "FEAT_BONUS_FIRST_HIT",
     "fallbackFeatureId": "FEAT_CZ_FIRST_HIT",
-    "reason": "ボーナス初当りの一部がCZ成功経由であり、現行の独立尤度積では同じ生成経路を部分的に二重評価するため、現時点ではCZをFallbackとして抑制する。"
+    "reason": "ボーナス初当りの一部がCZ成功経由であり、現行の独立尤度積では同じ生成経路を部分的に二重評価するため、CZをFallbackとして抑制する。"
   },
   "dependencyHypothesis": {
     "parent": "CZ発生/当選機会",
     "downstream": "ボーナス初当り",
     "relation": "PARTIAL_PATH_DEPENDENCY",
-    "knownRouteBalance": "公開解説ではボーナス当選契機が規定ゲーム数・CZ・レア小役に分かれ、CZだけが下流結果を支配する構造ではない。"
+    "knownRouteBalance": "公開解説ではボーナス当選契機が規定ゲーム数・CZ・レア小役に分かれ、概ね6:3:1。したがってCZだけがボーナス初当りを支配する構造ではない。"
+  },
+  "researchFindings": {
+    "settingBySettingCzRate": {
+      "SET_1": "1/428.0",
+      "SET_2": "1/415.5",
+      "SET_3": "1/378.4",
+      "SET_4": "1/353.8",
+      "SET_5": "1/322.7",
+      "SET_6": "1/306.2"
+    },
+    "settingBySettingBonusFirstHitRate": {
+      "SET_1": "1/347.0",
+      "SET_2": "1/337.4",
+      "SET_3": "1/314.0",
+      "SET_4": "1/280.6",
+      "SET_5": "1/256.8",
+      "SET_6": "1/242.0"
+    },
+    "bonusRoutes": [
+      "規定ゲーム数到達時の一部",
+      "CZ成功",
+      "直撃高確中などのレア小役による直撃"
+    ],
+    "missingForExactFactorization": [
+      "設定別 P(ボーナス | CZ) または設定別CZ成功率",
+      "設定別のCZ経由ボーナス初当り率",
+      "設定別の非CZボーナス初当り率を直接定義できる公開表"
+    ],
+    "prohibitedDerivation": "CZ合算率・ボーナス初当り合算率・全体の6:3:1比率から不足する設定別conditional probabilityを逆算しない。6:3:1が設定別に不変である根拠がなく、経路依存を誤って固定してしまうため。"
   },
   "requiredForActivation": [
     "設定別CZ発生確率を同一Observation universeで定義できること",
-    "CZ成功からボーナスへ至る条件付き確率が設定別に必要なら、その表が公開されていること",
+    "設定別 P(ボーナス | CZ) または同値なCZ成功率テーブルを取得できること",
     "CZ以外のボーナス初当り経路を同一母集団上で直接定義または安全に分解できること",
     "aggregate bonus probabilityから不足するconditional tableを逆算・補間しないこと",
     "Observationで親事象・子事象・非CZ経路を実戦中に区別可能であること"
@@ -37,9 +67,35 @@
       }
     ]
   },
+  "sources": [
+    {
+      "id": "SRC_IDOL_NANA_GAMEPLAY",
+      "url": "https://nana-press.com/kaiseki/machine/921/29073/",
+      "supports": [
+        "ボーナス当選契機は規定ゲーム数・CZ成功・レア小役直撃",
+        "当選契機比率は概ねゲーム数:CZ:レア小役=6:3:1"
+      ]
+    },
+    {
+      "id": "SRC_IDOL_NANA_SETTING",
+      "url": "https://nana-press.com/kaiseki/machine/921/29067/",
+      "supports": [
+        "設定別CZ合算率",
+        "設定別ボーナス初当り率"
+      ]
+    },
+    {
+      "id": "SRC_IDOL_1GEKI_BASIC",
+      "url": "https://1geki.jp/slot/l_idlmst_mlnp/41/",
+      "supports": [
+        "通常時ボーナスへの複数経路"
+      ]
+    }
+  ],
   "activation": false,
   "notes": [
     "candidate-only。production selection-data / machine-packageは変更しない。",
-    "必要な設定別conditional probabilityが揃わない場合は現行PRIMARY/FALLBACKを維持する。"
+    "現時点の公開情報ではexact conditional factorizationに必要な設定別テーブルが不足しているため、現行PRIMARY/FALLBACKを維持する。",
+    "条件付き確率が将来公開された場合、再Researchしてactivation gateを再評価する。"
   ]
 }
