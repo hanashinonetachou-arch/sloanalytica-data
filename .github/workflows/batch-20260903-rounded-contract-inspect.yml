@@ -1,0 +1,31 @@
+name: Batch 20260903 Rounded Contract Inspect
+on:
+  push:
+    branches: [batch/20260903-hanagasa-ultraman]
+    paths: ['.github/workflows/batch-20260903-rounded-contract-inspect.yml']
+permissions:
+  contents: write
+jobs:
+  inspect:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with: {ref: batch/20260903-hanagasa-ultraman}
+      - name: Capture existing normalization contracts
+        shell: bash
+        run: |
+          set -euo pipefail
+          {
+            echo '=== tools ==='
+            grep -RniE 'rounded|normaliz|category.*sum|sum.*category' tools test 2>/dev/null | head -300 || true
+            echo '=== Magia package ==='
+            grep -niE -C 6 'rounded|normaliz|categoryProbabilities' machines/L_MAGIA_RECORD_RN/machine-package.json 2>/dev/null | head -300 || true
+            echo '=== Amazing Live inferenceSettings ==='
+            grep -niE -C 3 'inferenceSettings' machines/L_AMAZING_LIVE_PD/machine-package.json || true
+          } > reports/batch-20260903-rounded-contract-inspect.log
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add reports/batch-20260903-rounded-contract-inspect.log
+          git commit -m 'audit: inspect rounded multinomial contract'
+          git pull --rebase origin batch/20260903-hanagasa-ultraman
+          git push origin HEAD:batch/20260903-hanagasa-ultraman
