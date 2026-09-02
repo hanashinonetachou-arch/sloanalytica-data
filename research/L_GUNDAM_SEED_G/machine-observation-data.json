@@ -20,9 +20,18 @@
       "observationMode": "MANUAL_COUNTER",
       "status": "FOUND",
       "label": "AT初当り 回数・AT初当り 試行数",
-      "categories": ["AT初当り 回数", "AT初当り 試行数"],
-      "timing": ["自己実戦中、AT初当りの対象区間で更新"],
-      "excludedConditions": ["筐体のBONUS回数や上位AT回数をAT初当り回数へ読み替えない", "着席前累積値を自己実戦値へ混ぜない", "未観測を観測済み0として扱わない"],
+      "categories": [
+        "AT初当り 回数",
+        "AT初当り 試行数"
+      ],
+      "timing": [
+        "自己実戦中、AT初当りの対象区間で更新"
+      ],
+      "excludedConditions": [
+        "筐体のBONUS回数や上位AT回数をAT初当り回数へ読み替えない",
+        "着席前累積値を自己実戦値へ混ぜない",
+        "未観測を観測済み0として扱わない"
+      ],
       "sourceRefs": [],
       "notes": "AT初当りは自己実戦中に対象区間を手動記録する。"
     },
@@ -32,9 +41,18 @@
       "observationMode": "MANUAL_COUNTER",
       "status": "FOUND",
       "label": "ST終了後100G以内の当選区分",
-      "categories": ["G0_49", "G50_99", "G100_PLUS"],
-      "timing": ["リセットまたはST終了後の対象機会ごとに更新"],
-      "excludedConditions": ["0-49G・50-99G・100G以降を1Gごとの確率へ変換しない", "AT初当りが利用可能な区間では二重評価しない"],
+      "categories": [
+        "G0_49",
+        "G50_99",
+        "G100_PLUS"
+      ],
+      "timing": [
+        "リセットまたはST終了後の対象機会ごとに更新"
+      ],
+      "excludedConditions": [
+        "0-49G・50-99G・100G以降を1Gごとの確率へ変換しない",
+        "AT初当りが利用可能な区間では二重評価しない"
+      ],
       "sourceRefs": [],
       "notes": "AT初当りと重なる区間では補助扱いとする。"
     },
@@ -44,9 +62,20 @@
       "observationMode": "MENU_READ",
       "status": "VERIFIED_ON_MACHINE",
       "label": "筐体遊技データ",
-      "categories": ["総ゲーム数", "STRIKE ATTACK回数", "BONUS回数", "上位AT回数"],
-      "timing": ["筐体メニュー表示時に確認"],
-      "excludedConditions": ["BONUS回数をAT初当り回数として扱わない", "STRIKE ATTACK回数を種類別CZへ分解しない", "上位AT回数を通常AT初当りへ加算しない"],
+      "categories": [
+        "総ゲーム数",
+        "STRIKE ATTACK回数",
+        "BONUS回数",
+        "上位AT回数"
+      ],
+      "timing": [
+        "筐体メニュー表示時に確認"
+      ],
+      "excludedConditions": [
+        "BONUS回数をAT初当り回数として扱わない",
+        "STRIKE ATTACK回数を種類別CZへ分解しない",
+        "上位AT回数を通常AT初当りへ加算しない"
+      ],
       "sourceRefs": [],
       "notes": "実機確認により表示4項目を確認。表示値の意味を推測で拡張しない。"
     },
@@ -56,20 +85,89 @@
       "observationMode": "VISUAL_EVENT",
       "status": "FOUND",
       "label": "設定確定・否定情報",
-      "categories": ["CZ・ST終了画面 銀枠 アスラン＆キラ", "CZ・ST終了画面 金枠", "エンディング終了画面 金枠", "CZ・ST終了画面 紫枠 クルーゼ＆ムウ", "CZ・ST終了画面 紫枠 マリュー＆ムウ"],
-      "timing": ["設定確定・否定情報の成立時に確認"],
-      "excludedConditions": ["傾向示唆を設定確定情報へ昇格させない"],
+      "categories": [
+        "CZ・ST終了画面 銀枠 アスラン＆キラ",
+        "CZ・ST終了画面 金枠",
+        "エンディング終了画面 金枠",
+        "CZ・ST終了画面 紫枠 クルーゼ＆ムウ",
+        "CZ・ST終了画面 紫枠 マリュー＆ムウ"
+      ],
+      "timing": [
+        "設定確定・否定情報の成立時に確認"
+      ],
+      "excludedConditions": [
+        "傾向示唆を設定確定情報へ昇格させない"
+      ],
       "sourceRefs": [],
       "notes": "確定・否定条件として採用済みの情報のみ。"
+    },
+    {
+      "observationId": "OBS_MACHINE_MENU_HISTORY",
+      "sourceType": "MACHINE_MENU",
+      "observationMode": "MENU_READ",
+      "status": "VERIFIED_ON_MACHINE",
+      "label": "筐体メニュー遊技データ",
+      "categories": [
+        "総ゲーム数",
+        "STRIKE ATTACK回数",
+        "BONUS回数",
+        "上位AT回数"
+      ],
+      "timing": [
+        "遊技中に筐体メニューを確認"
+      ],
+      "excludedConditions": [
+        "BONUS回数をAT初当り回数へ自動変換しない",
+        "STRIKE ATTACK回数を種類別CZ回数として扱わない",
+        "電源OFF/ONまたは設定変更をまたいで履歴が残る前提を置かない"
+      ],
+      "sourceRefs": [],
+      "notes": "ユーザー実機確認で総ゲーム数、STRIKE ATTACK回数、BONUS回数、上位AT回数の表示を確認。表示単位をそのままObservationとして保持する。"
     }
   ],
   "featureMappings": [
-    {"featureId":"FEAT_AT_FIRST_HIT","mappingType":"EXACT","observationIds":["OBS_AT_FIRST_HIT"],"collectionMethods":["MANUAL_COUNTER"],"usableForInference":true,"usableForDifficulty":false,"notes":"AT初当りの対象区間を使用。"},
-    {"featureId":"FEAT_POST_RESET_ST_100G","mappingType":"COMBINABLE","observationIds":["OBS_POST_RESET_ST_100G"],"collectionMethods":["MANUAL_COUNTER"],"usableForInference":true,"usableForDifficulty":false,"notes":"主AT初当りと二重評価しない。"}
+    {
+      "featureId": "FEAT_AT_FIRST_HIT",
+      "mappingType": "EXACT",
+      "observationIds": [
+        "OBS_AT_FIRST_HIT"
+      ],
+      "collectionMethods": [
+        "MANUAL_COUNTER"
+      ],
+      "usableForInference": true,
+      "usableForDifficulty": false,
+      "notes": "AT初当りの対象区間を使用。"
+    },
+    {
+      "featureId": "FEAT_POST_RESET_ST_100G",
+      "mappingType": "COMBINABLE",
+      "observationIds": [
+        "OBS_POST_RESET_ST_100G"
+      ],
+      "collectionMethods": [
+        "MANUAL_COUNTER"
+      ],
+      "usableForInference": true,
+      "usableForDifficulty": false,
+      "notes": "主AT初当りと二重評価しない。"
+    }
   ],
   "researchReopenRequests": [],
   "fieldVerificationItems": [
-    {"verificationId":"VFY_L_GUNDAM_SEED_G_DATA_COUNTER","status":"WAITING_FOR_MACHINE","sourceType":"DATA_COUNTER","priority":"LOW","question":"ホール設備固有の取得項目は必要時のみ確認する。"},
-    {"verificationId":"VFY_L_GUNDAM_SEED_G_LINKED_SERVICE","status":"WAITING_FOR_MACHINE","sourceType":"LINKED_SERVICE","priority":"LOW","question":"機種固有の連動サービスが確認できた場合のみ取得項目を追加する。"}
+    {
+      "verificationId": "VFY_L_GUNDAM_SEED_G_DATA_COUNTER",
+      "status": "WAITING_FOR_MACHINE",
+      "sourceType": "DATA_COUNTER",
+      "priority": "LOW",
+      "question": "ホール設備固有の取得項目は必要時のみ確認する。"
+    },
+    {
+      "verificationId": "VFY_L_GUNDAM_SEED_G_LINKED_SERVICE",
+      "status": "WAITING_FOR_MACHINE",
+      "sourceType": "LINKED_SERVICE",
+      "priority": "LOW",
+      "question": "機種固有の連動サービスが確認できた場合のみ取得項目を追加する。"
+    }
   ]
 }

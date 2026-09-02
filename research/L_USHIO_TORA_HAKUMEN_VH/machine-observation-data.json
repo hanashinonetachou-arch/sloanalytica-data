@@ -20,9 +20,18 @@
       "observationMode": "MENU_READ",
       "status": "FOUND",
       "label": "AT初当り・通常ゲーム数",
-      "categories": ["AT初当り 回数", "通常ゲーム数"],
-      "timing": ["PUSHメニューの当選履歴を確認し、表示区間の履歴から再構成"],
-      "excludedConditions": ["履歴表示範囲外の区間を推測で補わない", "着席時スナップショットを取らずに前任者区間と自己実戦区間を混ぜない", "未観測を観測済み0として扱わない"],
+      "categories": [
+        "AT初当り 回数",
+        "通常ゲーム数"
+      ],
+      "timing": [
+        "PUSHメニューの当選履歴を確認し、表示区間の履歴から再構成"
+      ],
+      "excludedConditions": [
+        "履歴表示範囲外の区間を推測で補わない",
+        "着席時スナップショットを取らずに前任者区間と自己実戦区間を混ぜない",
+        "未観測を観測済み0として扱わない"
+      ],
       "sourceRefs": [],
       "notes": "提供されたWeb画像でPUSHメニューにうしとらチャンス確率、BONUS間ゲーム数、当選履歴と当選ゲーム数が表示されることを確認。ユーザー確認ではAT直撃はなく、天井・ロングフリーズも成功確定CZを経由するため、成功CZをAT初当りとして扱える。履歴の当選ゲーム数を対象区間で合算して通常ゲーム数を再構成する。"
     },
@@ -32,11 +41,23 @@
       "observationMode": "MENU_READ",
       "status": "FOUND",
       "label": "PUSHメニュー当選履歴",
-      "categories": ["うしとらチャンス確率", "BONUS間ゲーム数", "当選履歴", "当選ゲーム数", "連数"],
-      "timing": ["PUSHメニュー表示時に確認"],
-      "excludedConditions": ["Web画像だけから履歴表示件数上限を確定しない", "画像注釈を筐体仕様として扱わない"],
+      "categories": [
+        "うしとらチャンス確率",
+        "BONUS間ゲーム数",
+        "当選履歴",
+        "うしとらチャンス当選ゲーム数",
+        "うしとらBONUS当選ゲーム数・連数"
+      ],
+      "timing": [
+        "着席時および遊技中にPUSHメニューの当選履歴を確認"
+      ],
+      "excludedConditions": [
+        "表示履歴のリセット境界をまたいだ値を合算しない",
+        "電源OFF/ONまたは設定変更をまたいで履歴が残る前提を置かない",
+        "履歴に表示されない区間を推定で補完しない"
+      ],
       "sourceRefs": [],
-      "notes": "インターネット上の筐体画像による確認のためVERIFIED_ON_MACHINEではなくFOUND。"
+      "notes": "ユーザー提供のインターネット画像でPUSHメニューの当選履歴表示を確認。ユーザー機種知識によりAT直撃はなく、天井・ロングフリーズも成功確定CZを経由するため、表示範囲内ではCZ当選ゲーム数の合計から通常ゲーム数、成功CZ数からAT初当りを再構成できる。実機撮影ではないためMACHINE_VERIFIEDには昇格しない。"
     },
     {
       "observationId": "OBS_HARD_EVIDENCE_EVENTS",
@@ -44,19 +65,61 @@
       "observationMode": "VISUAL_EVENT",
       "status": "FOUND",
       "label": "設定確定・否定情報",
-      "categories": ["222枚突破", "246枚突破", "333枚突破", "456枚突破", "555枚突破", "666枚突破", "ダイナマイトトロフィー 銅", "ダイナマイトトロフィー 銀", "ダイナマイトトロフィー 金", "ダイナマイトトロフィー てんとう虫", "ダイナマイトトロフィー 虹"],
-      "timing": ["設定確定・否定情報の成立時に確認"],
-      "excludedConditions": ["傾向示唆を設定確定情報へ昇格させない"],
+      "categories": [
+        "222枚突破",
+        "246枚突破",
+        "333枚突破",
+        "456枚突破",
+        "555枚突破",
+        "666枚突破",
+        "ダイナマイトトロフィー 銅",
+        "ダイナマイトトロフィー 銀",
+        "ダイナマイトトロフィー 金",
+        "ダイナマイトトロフィー てんとう虫",
+        "ダイナマイトトロフィー 虹"
+      ],
+      "timing": [
+        "設定確定・否定情報の成立時に確認"
+      ],
+      "excludedConditions": [
+        "傾向示唆を設定確定情報へ昇格させない"
+      ],
       "sourceRefs": [],
       "notes": "確定・否定条件として採用済みの情報のみ。"
     }
   ],
   "featureMappings": [
-    {"featureId":"FEAT_AT_FIRST_HIT","mappingType":"EXACT","observationIds":["OBS_AT_FIRST_HIT"],"collectionMethods":["MENU_READ","MANUAL_COUNTER"],"usableForInference":true,"usableForDifficulty":false,"notes":"PUSHメニュー履歴または自己実戦カウントからAT初当りと対応する通常ゲーム数を構成する。"}
+    {
+      "featureId": "FEAT_AT_FIRST_HIT",
+      "mappingType": "EXACT",
+      "observationIds": [
+        "OBS_AT_FIRST_HIT",
+        "OBS_MACHINE_MENU_HISTORY"
+      ],
+      "collectionMethods": [
+        "MENU_READ",
+        "MANUAL_COUNTER"
+      ],
+      "usableForInference": true,
+      "usableForDifficulty": false,
+      "notes": "自己実戦の手動カウントに加え、PUSHメニュー当選履歴の表示範囲から通常ゲーム数とAT初当りを再構成可能。"
+    }
   ],
   "researchReopenRequests": [],
   "fieldVerificationItems": [
-    {"verificationId":"VFY_L_USHIO_TORA_HAKUMEN_VH_MENU_HISTORY_LIMIT","status":"WAITING_FOR_MACHINE","sourceType":"MACHINE_MENU","priority":"LOW","question":"機会があればPUSHメニュー当選履歴の最大表示件数のみ確認する。"},
-    {"verificationId":"VFY_L_USHIO_TORA_HAKUMEN_VH_LINKED_SERVICE","status":"WAITING_FOR_MACHINE","sourceType":"LINKED_SERVICE","priority":"LOW","question":"機種固有の連動サービスが確認できた場合のみ取得項目を追加する。"}
+    {
+      "verificationId": "VFY_L_USHIO_TORA_HAKUMEN_VH_MENU_HISTORY_LIMIT",
+      "status": "WAITING_FOR_MACHINE",
+      "sourceType": "MACHINE_MENU",
+      "priority": "LOW",
+      "question": "機会があればPUSHメニュー当選履歴の最大表示件数のみ確認する。"
+    },
+    {
+      "verificationId": "VFY_L_USHIO_TORA_HAKUMEN_VH_LINKED_SERVICE",
+      "status": "WAITING_FOR_MACHINE",
+      "sourceType": "LINKED_SERVICE",
+      "priority": "LOW",
+      "question": "機種固有の連動サービスが確認できた場合のみ取得項目を追加する。"
+    }
   ]
 }
