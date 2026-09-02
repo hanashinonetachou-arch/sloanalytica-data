@@ -3,7 +3,7 @@ name: Batch 20260903 Publish Diagnostic
 on:
   push:
     branches:
-      - batch/20260903-hanagasa-ultraman
+      - integration/20260903-publish-stack
     paths:
       - '.github/workflows/batch-20260903-publish-diagnostic.yml'
   workflow_dispatch:
@@ -17,17 +17,26 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          ref: batch/20260903-hanagasa-ultraman
+          ref: integration/20260903-publish-stack
           fetch-depth: 0
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
-      - name: Verify baseline
+      - name: Verify stacked baseline
         run: |
           set -euo pipefail
           git fetch origin prototype-multi-machine:refs/remotes/origin/prototype-multi-machine
           test "$(git rev-parse origin/prototype-multi-machine)" = "a38288daa1055065dcf15c65bd8d49e246f32e82"
           git merge-base --is-ancestor 7161e96acd628219c36e8147ebb2801ddafd12d0 HEAD
+          node --input-type=module <<'NODE'
+          import fs from 'node:fs';
+          const r=JSON.parse(fs.readFileSync('machine-registry.json','utf8')).machines;
+          const prior=[['L_MAGIA_RECORD_RN',192],['L_GODZILLA_NS',193],['L_USHIO_TORA_HAKUMEN_VH',194],['L_AMAZING_LIVE_PD',195],['L_YOSHIMUNE_SC2',196],['L_MAHJONG_MONOGATARI_S2',197],['L_IDOLMASTER_MILLION_LIVE_HC',198],['L_YOUJITSU_DE',199],['L_MIDORIDON_VIVA_REVIVAL_FY',200],['L_GUNDAM_SEED_G',201]];
+          for(const [id,n] of prior){const x=r.find(v=>v.machineId===id); if(!x||x.provisionalRegistrationId!==n) throw new Error(`${id}: prior published registration dependency mismatch`)}
+          const max=Math.max(...r.map(x=>Number(x.provisionalRegistrationId)||0));
+          if(max!==201) throw new Error(`expected pre-publish max 201, got ${max}`);
+          console.log('PASS stacked prior registration 192-201; next range 202-211 free');
+          NODE
       - name: Apply ULTRAMAN
         run: |
           node tools/publish-machine-data.mjs approve L_ULTRAMAN_KE machines/L_ULTRAMAN_KE/machine-package.json
