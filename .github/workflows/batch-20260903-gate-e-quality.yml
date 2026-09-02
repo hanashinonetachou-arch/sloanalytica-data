@@ -1,0 +1,148 @@
+name: Batch 20260903 Gate E Automated Quality Gate
+
+on:
+  push:
+    branches:
+      - batch/20260903-hanagasa-ultraman
+    paths:
+      - .github/workflows/batch-20260903-gate-e-quality.yml
+      - tools/**
+      - research/**
+      - machines/**
+      - catalog.json
+      - machine-registry.json
+      - difficulty-catalog.json
+      - package.json
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  gate-e:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: batch/20260903-hanagasa-ultraman
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Define batch machines
+        run: |
+          cat > /tmp/gate-e-machines.txt <<'EOF'
+          L_HANAGASA_NA
+          L_TOLOVE_DARKNESS_S8
+          LB_PREMIUM_UMAIBO_S1
+          LB_NEW_PULSAR_BT_C9
+          S_KABANERI_ZR
+          L_DMC5_ST_XA
+          LB_1000CHAN_ALPHA_L3
+          LB_JACKPOT_CY1
+          L_GUILTY_CROWN_2_XF
+          L_ULTRAMAN_KE
+          EOF
+
+      - name: Research validation 10/10
+        run: |
+          while read -r id; do
+            npm run research:validate -- "research/$id/research-data.json"
+          done < /tmp/gate-e-machines.txt
+
+      - name: Selection validation 10/10
+        run: |
+          while read -r id; do
+            npm run selection:validate -- "research/$id/selection-data.json" "research/$id/research-data.json"
+          done < /tmp/gate-e-machines.txt
+
+      - name: Selection Quality strict
+        run: |
+          node tools/audit-selection-quality.mjs $(cat /tmp/gate-e-machines.txt) --strict
+
+      - name: Observation v2 validation 10/10
+        run: |
+          args=()
+          while read -r id; do args+=("research/$id/machine-observation-data.json"); done < /tmp/gate-e-machines.txt
+          npm run observation:validate -- "${args[@]}"
+
+      - name: Selection Observation strict linkage
+        run: |
+          npm run observation:selection:audit -- $(cat /tmp/gate-e-machines.txt) --strict-v2
+
+      - name: UI Design validation
+        run: npm run ui-design:validate
+
+      - name: Selection UI linkage
+        run: |
+          npm run ui-design:linkage:audit -- . $(cat /tmp/gate-e-machines.txt)
+
+      - name: UI Observation strict-v2 linkage
+        run: |
+          npm run ui-design:observation:audit -- $(cat /tmp/gate-e-machines.txt) --strict-v2
+
+      - name: Four-layer Pipeline Gate
+        run: |
+          npm run pipeline:four-layer:gate -- $(cat /tmp/gate-e-machines.txt)
+
+      - name: MachineData materialization stability
+        run: |
+          node tools/materialize-ui-design.mjs --require-unchanged $(cat /tmp/gate-e-machines.txt)
+
+      - name: Optional denominator-resolution contracts
+        run: |
+          found=0
+          while read -r id; do
+            while IFS= read -r f; do
+              [ -n "$f" ] || continue
+              found=1
+              npm run denominator:validate -- "$f"
+            done < <(find "research/$id" -type f -name 'denominator-resolution*.json' -print 2>/dev/null || true)
+          done < /tmp/gate-e-machines.txt
+          echo "denominator contract files checked: $found"
+
+      - name: Optional Evidence UI contracts
+        run: |
+          found=0
+          while read -r id; do
+            for f in "research/$id/evidence-ui.json" "machines/$id/evidence-ui.json"; do
+              if [ -f "$f" ]; then
+                found=1
+                npm run evidence-ui:validate -- "$f" "research/$id/research-data.json"
+              fi
+            done
+          done < /tmp/gate-e-machines.txt
+          echo "evidence-ui contract files checked: $found"
+
+      - name: UI and difficulty contract tests
+        run: |
+          npm run ui-design:test
+          npm run difficulty:event-exposure:test
+          npm run difficulty:exposure-audit
+
+      - name: User-facing and UX contract audits
+        run: |
+          npm run audit:ui-service-names
+          npm run ux-contract:audit
+
+      - name: Registry consistency
+        run: npm run registry:validate
+
+      - name: Repository-wide tests
+        run: npm test
+
+      - name: Public-data audit
+        run: npm run audit
+
+      - name: Generated artifact drift check
+        run: |
+          git restore -- reports/v64-observation-debt-classification.json
+          node tools/materialize-ui-design.mjs --require-unchanged $(cat /tmp/gate-e-machines.txt)
+          git diff --exit-code
+          test -z "$(git status --porcelain)"
+
+      - name: Gate E summary
+        run: |
+          echo 'Gate E Automated Quality Gate: PASS'
+          echo 'Publish: NOT RUN'
