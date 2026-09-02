@@ -3,15 +3,15 @@
   "machineId": "L_GUNDAM_SEED_G",
   "displayName": "Lパチスロ 機動戦士ガンダムSEED",
   "provisionalRegistrationId": 201,
-  "researchedAt": "2026-09-01",
+  "researchedAt": "2026-09-02",
   "sources": [],
   "sourceCoverage": {
-    "machineMenu": "UNRESOLVED",
+    "machineMenu": "VERIFIED_ON_MACHINE",
     "dataCounter": "UNRESOLVED",
     "linkedService": "UNRESOLVED",
     "directPlay": "FOUND",
     "endEvent": "FOUND",
-    "seatedState": "UNRESOLVED"
+    "seatedState": "FOUND"
   },
   "observations": [
     {
@@ -20,46 +20,35 @@
       "observationMode": "MANUAL_COUNTER",
       "status": "FOUND",
       "label": "AT初当り 回数・AT初当り 試行数",
-      "categories": [
-        "AT初当り 回数",
-        "AT初当り 試行数"
-      ],
-      "timing": [
-        "自己実戦中、SelectionDataで定義された対象試行・対象イベント成立時に更新"
-      ],
-      "excludedConditions": [
-        "SelectionDataの分母定義外の遊技状態・試行を混ぜない",
-        "着席前累積値を自己実戦値へ混ぜない",
-        "未観測を観測済み0として扱わない"
-      ],
+      "categories": ["AT初当り 回数", "AT初当り 試行数"],
+      "timing": ["自己実戦中、AT初当りの対象区間で更新"],
+      "excludedConditions": ["筐体のBONUS回数や上位AT回数をAT初当り回数へ読み替えない", "着席前累積値を自己実戦値へ混ぜない", "未観測を観測済み0として扱わない"],
       "sourceRefs": [],
-      "notes": "Selection FEAT_AT_FIRST_HIT (INCLUDE_PRIMARY) の入力契約を保持。公開全設定値と分母定義が揃っており、有効通常ゲームを単位に設定差を直接評価できるため主Featureとして採用する。"
+      "notes": "AT初当りは自己実戦中に対象区間を手動記録する。"
     },
     {
       "observationId": "OBS_POST_RESET_ST_100G",
       "sourceType": "DIRECT_PLAY",
       "observationMode": "MANUAL_COUNTER",
       "status": "FOUND",
-      "label": "G0_49・G50_99・G100_PLUS",
-      "categories": [
-        "G0_49",
-        "G50_99",
-        "G100_PLUS"
-      ],
-      "timing": [
-        "自己実戦中、SelectionDataで定義された対象試行・対象イベント成立時に更新"
-      ],
-      "excludedConditions": [
-        "SelectionDataの分母定義外の遊技状態・試行を混ぜない",
-        "着席前累積値を自己実戦値へ混ぜない",
-        "未観測を観測済み0として扱わない",
-        "条件付き母集団を総通常ゲームへ平坦化しない",
-        "resetまたはST終了後を1 opportunityとして数える",
-        "0-49G・50-99G・100G以降のカテゴリ試行をper-game probabilityへ変換しない",
-        "AT初当りが利用可能な区間ではSelectionのsuppression契約を保持する"
-      ],
+      "label": "ST終了後100G以内の当選区分",
+      "categories": ["G0_49", "G50_99", "G100_PLUS"],
+      "timing": ["リセットまたはST終了後の対象機会ごとに更新"],
+      "excludedConditions": ["0-49G・50-99G・100G以降を1Gごとの確率へ変換しない", "AT初当りが利用可能な区間では二重評価しない"],
       "sourceRefs": [],
-      "notes": "Selection FEAT_POST_RESET_ST_100G (INCLUDE_FALLBACK) の入力契約を保持。公開全設定値は利用できるが下流または包含Featureと情報が重なるため、二重評価を避け主Featureが使えない場合のFallbackとしてのみ採用する。"
+      "notes": "AT初当りと重なる区間では補助扱いとする。"
+    },
+    {
+      "observationId": "OBS_MACHINE_MENU",
+      "sourceType": "MACHINE_MENU",
+      "observationMode": "MENU_READ",
+      "status": "VERIFIED_ON_MACHINE",
+      "label": "筐体遊技データ",
+      "categories": ["総ゲーム数", "STRIKE ATTACK回数", "BONUS回数", "上位AT回数"],
+      "timing": ["筐体メニュー表示時に確認"],
+      "excludedConditions": ["BONUS回数をAT初当り回数として扱わない", "STRIKE ATTACK回数を種類別CZへ分解しない", "上位AT回数を通常AT初当りへ加算しない"],
+      "sourceRefs": [],
+      "notes": "実機確認により表示4項目を確認。表示値の意味を推測で拡張しない。"
     },
     {
       "observationId": "OBS_HARD_EVIDENCE_EVENTS",
@@ -67,81 +56,20 @@
       "observationMode": "VISUAL_EVENT",
       "status": "FOUND",
       "label": "設定確定・否定情報",
-      "categories": [
-        "CZ・ST終了画面 銀枠 アスラン＆キラ",
-        "CZ・ST終了画面 金枠",
-        "エンディング終了画面 金枠",
-        "CZ・ST終了画面 紫枠 クルーゼ＆ムウ",
-        "CZ・ST終了画面 紫枠 マリュー＆ムウ"
-      ],
-      "timing": [
-        "各Evidenceの成立タイミングで即時確認"
-      ],
-      "excludedConditions": [
-        "傾向示唆をHard Evidenceへ昇格させない",
-        "同一表示のHard部分以外を設定確定情報として扱わない"
-      ],
+      "categories": ["CZ・ST終了画面 銀枠 アスラン＆キラ", "CZ・ST終了画面 金枠", "エンディング終了画面 金枠", "CZ・ST終了画面 紫枠 クルーゼ＆ムウ", "CZ・ST終了画面 紫枠 マリュー＆ムウ"],
+      "timing": ["設定確定・否定情報の成立時に確認"],
+      "excludedConditions": ["傾向示唆を設定確定情報へ昇格させない"],
       "sourceRefs": [],
-      "notes": "SelectionData evidenceに採用済みのHard Evidenceのみ。"
+      "notes": "確定・否定条件として採用済みの情報のみ。"
     }
   ],
   "featureMappings": [
-    {
-      "featureId": "FEAT_AT_FIRST_HIT",
-      "mappingType": "EXACT",
-      "observationIds": [
-        "OBS_AT_FIRST_HIT"
-      ],
-      "collectionMethods": [
-        "MANUAL_COUNTER"
-      ],
-      "usableForInference": true,
-      "usableForDifficulty": false,
-      "notes": "Gate C写像。Difficulty exposureは取得単位・event exposureを確定するまで未参加。"
-    },
-    {
-      "featureId": "FEAT_POST_RESET_ST_100G",
-      "mappingType": "COMBINABLE",
-      "observationIds": [
-        "OBS_POST_RESET_ST_100G"
-      ],
-      "collectionMethods": [
-        "MANUAL_COUNTER"
-      ],
-      "usableForInference": true,
-      "usableForDifficulty": false,
-      "notes": "Gate C写像。Difficulty exposureは取得単位・event exposureを確定するまで未参加。"
-    }
+    {"featureId":"FEAT_AT_FIRST_HIT","mappingType":"EXACT","observationIds":["OBS_AT_FIRST_HIT"],"collectionMethods":["MANUAL_COUNTER"],"usableForInference":true,"usableForDifficulty":false,"notes":"AT初当りの対象区間を使用。"},
+    {"featureId":"FEAT_POST_RESET_ST_100G","mappingType":"COMBINABLE","observationIds":["OBS_POST_RESET_ST_100G"],"collectionMethods":["MANUAL_COUNTER"],"usableForInference":true,"usableForDifficulty":false,"notes":"主AT初当りと二重評価しない。"}
   ],
   "researchReopenRequests": [],
   "fieldVerificationItems": [
-    {
-      "verificationId": "VFY_L_GUNDAM_SEED_G_MACHINE_MENU",
-      "status": "WAITING_FOR_MACHINE",
-      "sourceType": "MACHINE_MENU",
-      "priority": "MEDIUM",
-      "question": "Web調査で具体項目を確定できなかった筐体メニュー/遊技履歴について、総G・通常G・CZ・Bonus・AT・小役・履歴項目を実機で確認する。"
-    },
-    {
-      "verificationId": "VFY_L_GUNDAM_SEED_G_DATA_COUNTER",
-      "status": "WAITING_FOR_MACHINE",
-      "sourceType": "DATA_COUNTER",
-      "priority": "HIGH",
-      "question": "ホールのデータカウンターで総G・現在G・Bonus・AT・CZ・初当り・履歴のどこまで取得でき、公開解析の分母と一致するか確認する。ホール設備依存のためWebだけでは最終確定しない。"
-    },
-    {
-      "verificationId": "VFY_L_GUNDAM_SEED_G_SEATED_STATE",
-      "status": "WAITING_FOR_MACHINE",
-      "sourceType": "SEATED_STATE",
-      "priority": "HIGH",
-      "question": "着席直後に実機メニュー/データカウンターから取得できる累積値を確認し、前任者区間を安全に利用可能なSelection Featureがあるか判定する。"
-    },
-    {
-      "verificationId": "VFY_L_GUNDAM_SEED_G_LINKED_SERVICE",
-      "status": "WAITING_FOR_MACHINE",
-      "sourceType": "LINKED_SERVICE",
-      "priority": "MEDIUM",
-      "question": "Web調査では機種固有の実機連動サービス/QR機能を確定できていない。実機メニュー上のQR/連動導線の有無を確認する。一般的な系列サービスの存在だけでFOUNDにしない。"
-    }
+    {"verificationId":"VFY_L_GUNDAM_SEED_G_DATA_COUNTER","status":"WAITING_FOR_MACHINE","sourceType":"DATA_COUNTER","priority":"LOW","question":"ホール設備固有の取得項目は必要時のみ確認する。"},
+    {"verificationId":"VFY_L_GUNDAM_SEED_G_LINKED_SERVICE","status":"WAITING_FOR_MACHINE","sourceType":"LINKED_SERVICE","priority":"LOW","question":"機種固有の連動サービスが確認できた場合のみ取得項目を追加する。"}
   ]
 }
