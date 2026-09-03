@@ -1,0 +1,84 @@
+name: Batch 20260904 Identity Audit Reconcile
+
+on:
+  push:
+    branches:
+      - research/20260903-batch10-next
+    paths:
+      - '.github/workflows/batch-20260904-identity-audit-reconcile.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  reconcile:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: research/20260903-batch10-next
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Reconcile identity checkpoints from already-published package metadata
+        run: |
+          node <<'NODE'
+          const fs=require('fs');
+          const path=require('path');
+          const catalog=JSON.parse(fs.readFileSync('catalog.json','utf8'));
+          const auditPath='reports/machine-identity-classification-audit.json';
+          const audit=JSON.parse(fs.readFileSync(auditPath,'utf8'));
+          const testOnly=new Set(['S_REVUE_STARLIGHT_CX_TEST_V66']);
+          const covered=new Set();
+          for(const rel of audit.checkpointFiles||[]){
+            const cp=JSON.parse(fs.readFileSync(rel,'utf8'));
+            for(const e of cp.entries||[]) covered.add(e.machineId);
+          }
+          const production=(catalog.machines||[]).filter(m=>!testOnly.has(m.machineId));
+          const missing=[];
+          for(const m of production){
+            if(covered.has(m.machineId)) continue;
+            const p=`machines/${m.machineId}/machine-package.json`;
+            if(!fs.existsSync(p)) throw new Error(`missing package ${m.machineId}`);
+            const pkg=JSON.parse(fs.readFileSync(p,'utf8'));
+            const pm=pkg.machine||{};
+            for(const key of ['introductionDate','machineType','gameType']){
+              if(!m[key] || !pm[key]) throw new Error(`missing ${key} for ${m.machineId}`);
+              if(m[key]!==pm[key]) throw new Error(`${key} mismatch catalog/package for ${m.machineId}: ${m[key]} vs ${pm[key]}`);
+            }
+            if(!/^\d{4}-\d{2}-\d{2}$/.test(m.introductionDate)) throw new Error(`invalid introductionDate ${m.machineId}`);
+            if(!['SMART_SLOT','MEDAL'].includes(m.machineType)) throw new Error(`invalid machineType ${m.machineId}`);
+            if(!['A_TYPE','AT','A_AT','A_ART','BT'].includes(m.gameType)) throw new Error(`invalid gameType ${m.machineId}`);
+            missing.push({machineId:m.machineId,introductionDate:m.introductionDate,machineType:m.machineType,gameType:m.gameType});
+          }
+          if(!missing.length){ console.log('No missing identity entries.'); process.exit(0); }
+          const nums=(audit.checkpointFiles||[]).map(x=>Number((x.match(/batch-(\d+)\.json$/)||[])[1])).filter(Number.isFinite);
+          const n=Math.max(0,...nums)+1;
+          const nn=String(n).padStart(2,'0');
+          const rel=`reports/machine-identity-classification-batch-${nn}.json`;
+          if(fs.existsSync(rel)) throw new Error(`checkpoint already exists ${rel}`);
+          const cp={schemaVersion:'machine-identity-classification-checkpoint-v1',batch:n,createdAt:'2026-09-04',source:'catalog/package reconciliation after prior batch integration',entries:missing};
+          fs.writeFileSync(rel,JSON.stringify(cp,null,2)+'\n');
+          audit.updatedAt='2026-09-04';
+          audit.progress.resolvedProductionMachines=production.length;
+          audit.progress.unresolvedProductionMachines=0;
+          audit.progress.completedBatches=[...(audit.progress.completedBatches||[]),n];
+          audit.checkpointFiles=[...(audit.checkpointFiles||[]),rel];
+          audit.notes=[...(audit.notes||[]),`Batch ${n} reconciles ${missing.length} already-published catalog machines whose package identity metadata is complete and exactly matches catalog metadata; no identity values were inferred or changed.`];
+          fs.writeFileSync(auditPath,JSON.stringify(audit,null,2)+'\n');
+          console.log(`Created ${rel} with ${missing.length} entries; production=${production.length}`);
+          console.log(missing.map(x=>x.machineId).join('\n'));
+          NODE
+      - name: Verify identity consistency
+        run: node tools/apply-machine-identity-classification.mjs --verify
+      - name: Commit reconciliation
+        run: |
+          if [ -z "$(git status --porcelain reports/machine-identity-classification-*.json)" ]; then echo 'No reconciliation changes.'; exit 0; fi
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git add reports/machine-identity-classification-*.json
+          git commit -m 'audit: reconcile machine identity checkpoints after batch integration'
+          git pull --rebase origin research/20260903-batch10-next
+          git push origin HEAD:research/20260903-batch10-next
