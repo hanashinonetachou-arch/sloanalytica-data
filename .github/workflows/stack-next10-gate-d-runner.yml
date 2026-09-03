@@ -1,0 +1,130 @@
+name: Stack Next10 Gate D Runner
+
+on:
+  pull_request:
+    branches:
+      - stack/20260904-next10-base
+    types: [opened, reopened, synchronize]
+
+permissions:
+  contents: write
+
+jobs:
+  gate-d:
+    if: github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-24.04
+    concurrency:
+      group: stack-next10-gate-d-${{ github.event.pull_request.number }}
+      cancel-in-progress: true
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.ref }}
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Assert expected PR and atomic machine set
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "${{ github.event.pull_request.number }}" = "171"
+          cat > /tmp/next10.txt <<'EOF'
+          L_IZA_BANCHO_SB8
+          L_ZETTAI_SHOGEKI_PLATONIC_HEART_TK
+          L_WATASHI_NO_SHIAWASE_NA_KEKKON_PN
+          LB_TRIPLE_CROWN_SF4
+          LB_MATADOR_3_TT
+          L_TENSEI_SHITARA_KEN_DESHITA_GT
+          L_DARLING_IN_THE_FRANXX_SA
+          L_SAKI_CHOJO_KESSEN_YR
+          S_KONOSUBA_ZR
+          S_RAKUEN_TSUHO_FS
+          EOF
+          test "$(wc -l < /tmp/next10.txt)" -eq 10
+      - name: Materialize Gate B/C reference and hard Evidence contracts
+        run: |
+          node tools/materialize-next10-reference-layer.mjs
+          node tools/materialize-next10-hard-evidence.mjs
+      - name: Validate Research Selection Observation
+        shell: bash
+        run: |
+          set -euo pipefail
+          while IFS= read -r id; do
+            npm run research:validate -- "research/$id/research-data.json"
+            npm run selection:validate -- "research/$id/selection-data.json" "research/$id/research-data.json"
+            npm run observation:validate -- "research/$id/machine-observation-data.json"
+          done < /tmp/next10.txt
+          npm run observation:selection:audit -- $(cat /tmp/next10.txt) --strict-v2
+      - name: Generate and validate UI Design
+        shell: bash
+        run: |
+          set -euo pipefail
+          node tools/generate-next10-gate-d-ui.mjs
+          while IFS= read -r id; do
+            npm run ui-design:validate -- "research/$id/ui-design-data.json"
+          done < /tmp/next10.txt
+          npm run ui-design:linkage:audit -- . $(cat /tmp/next10.txt)
+          npm run ui-design:observation:audit -- $(cat /tmp/next10.txt) --strict-v2
+          npm run pipeline:four-layer:gate -- $(cat /tmp/next10.txt)
+      - name: Evidence and denominator semantic guards
+        run: |
+          node <<'NODE'
+          const fs=require('fs');
+          const ids=fs.readFileSync('/tmp/next10.txt','utf8').trim().split(/\s+/);
+          for(const id of ids){
+            const s=JSON.parse(fs.readFileSync(`research/${id}/selection-data.json`));
+            const o=JSON.parse(fs.readFileSync(`research/${id}/machine-observation-data.json`));
+            const u=JSON.parse(fs.readFileSync(`research/${id}/ui-design-data.json`));
+            for(const f of s.features.filter(x=>String(x.adoptionCategory).startsWith('INCLUDE_'))){if(!f.numeratorInputId||!f.denominatorInputId)throw new Error(`${id}: active input mapping missing ${f.featureId}`)}
+            for(const f of s.features.filter(x=>String(x.researchFeatureId).startsWith('RF_REF_'))){if(f.adoptionCategory!=='EXCLUDE'||f.numeratorInputId||f.denominatorInputId)throw new Error(`${id}: REFERENCE leaked into active input ${f.featureId}`)}
+            if((s.evidenceUi?.groups??[]).length){const hard=(o.observations??[]).filter(x=>x.observationId==='OBS_HARD_EVIDENCE_EVENTS');if(hard.length!==1)throw new Error(`${id}: hard Evidence observation count ${hard.length}`)}
+            if(/自動生成|AI生成|暫定生成/.test(JSON.stringify(u)))throw new Error(`${id}: internal generation wording leaked to UI`);
+          }
+          const rak=JSON.parse(fs.readFileSync('research/S_RAKUEN_TSUHO_FS/selection-data.json'));const bell=rak.features.find(x=>x.featureId==='FEAT_COMMON_BELL');if(bell?.denominatorInputId!=='INP_MY_SLOT_TOTAL_GAMES')throw new Error('Rakuen common-bell denominator regression');const den=rak.inputs.find(x=>x.id==='INP_MY_SLOT_TOTAL_GAMES');if(!String(den?.name).includes('同じマイスロ結果画面のゲーム数'))throw new Error('Rakuen denominator wording regression');
+          const mat=JSON.parse(fs.readFileSync('research/LB_MATADOR_3_TT/selection-data.json'));if((mat.evidenceUi?.groups??[]).length!==0)throw new Error('Matador tendency-only evidence became hard Evidence');
+          console.log('PASS Gate D semantic guards');
+          NODE
+      - name: Build MachineData atomic 10-machine batch
+        run: npm run machine:batch -- --file /tmp/next10.txt
+      - name: Materialize UI Design into MachineData
+        run: |
+          node tools/materialize-ui-design.mjs --apply $(cat /tmp/next10.txt)
+          node tools/materialize-ui-design.mjs --require-unchanged $(cat /tmp/next10.txt)
+      - name: Gate D repository validations
+        run: |
+          npm run registry:validate
+          npm run ui-design:test
+          npm run audit:ui-service-names
+          npm test
+      - name: Write Gate D runner report
+        run: |
+          mkdir -p reports
+          cat > reports/batch-20260904-next10-gate-d-runner.md <<'EOF'
+          # 2026-09-04 next10 Gate D runner
+
+          - stacked dependency base: PR #169 head lineage
+          - atomic target: 10 machines only
+          - Research / Selection / Observation validation: PASS
+          - REFERENCE / EXCLUDE materialization: PASS
+          - Hard Evidence normalization: PASS
+          - UI Design validation/linkage: PASS
+          - Observation linkage strict-v2: PASS
+          - four-layer gate: PASS
+          - MachineData atomic batch build: PASS
+          - UI materialization stability: PASS
+          - registry / UI tests / service-name audit / repository tests: PASS
+          - public main: untouched
+          - Gate E / Formal Publish: NOT RUN
+          EOF
+      - name: Commit Gate D materialization to PR head
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [ -z "$(git status --porcelain)" ]; then echo 'No generated changes.'; exit 0; fi
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git add research machines reports catalog.json difficulty-catalog.json machine-registry.json 2>/dev/null || true
+          git commit -m 'machine-data: materialize next10 Gate D stack'
+          git pull --rebase origin "${{ github.event.pull_request.head.ref }}"
+          git push origin HEAD:"${{ github.event.pull_request.head.ref }}"

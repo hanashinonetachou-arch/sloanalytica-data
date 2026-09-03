@@ -1,0 +1,57 @@
+name: Batch 20260904 Next10 Reference Layer
+
+on:
+  push:
+    branches:
+      - research/20260903-batch10-next
+    paths:
+      - 'tools/materialize-next10-reference-layer.mjs'
+      - '.github/workflows/batch-20260904-next10-reference-layer.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  materialize-validate:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: research/20260903-batch10-next
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Materialize REFERENCE / EXCLUDE decisions
+        run: node tools/materialize-next10-reference-layer.mjs
+      - name: Validate structured layers
+        shell: bash
+        run: |
+          set -euo pipefail
+          ids=(L_IZA_BANCHO_SB8 L_ZETTAI_SHOGEKI_PLATONIC_HEART_TK L_WATASHI_NO_SHIAWASE_NA_KEKKON_PN LB_TRIPLE_CROWN_SF4 LB_MATADOR_3_TT L_TENSEI_SHITARA_KEN_DESHITA_GT L_DARLING_IN_THE_FRANXX_SA L_SAKI_CHOJO_KESSEN_YR S_KONOSUBA_ZR S_RAKUEN_TSUHO_FS)
+          for id in "${ids[@]}"; do
+            node tools/validate-research-data.mjs "research/$id/research-data.json"
+            node tools/validate-selection-data.mjs "research/$id/selection-data.json" "research/$id/research-data.json"
+            node tools/validate-machine-observation-data.mjs "research/$id/machine-observation-data.json"
+          done
+      - name: Reference semantic guard
+        run: |
+          node <<'NODE'
+          const fs=require('fs');
+          const ids=['L_IZA_BANCHO_SB8','L_ZETTAI_SHOGEKI_PLATONIC_HEART_TK','L_WATASHI_NO_SHIAWASE_NA_KEKKON_PN','LB_TRIPLE_CROWN_SF4','LB_MATADOR_3_TT','L_TENSEI_SHITARA_KEN_DESHITA_GT','L_DARLING_IN_THE_FRANXX_SA','L_SAKI_CHOJO_KESSEN_YR','S_KONOSUBA_ZR','S_RAKUEN_TSUHO_FS'];
+          for(const id of ids){const s=JSON.parse(fs.readFileSync(`research/${id}/selection-data.json`));const refs=s.features.filter(x=>x.researchFeatureId.startsWith('RF_REF_'));if(!refs.length)throw new Error(`${id}: no reference trace`);for(const f of refs){if(f.adoptionCategory!=='EXCLUDE'||f.numeratorInputId||f.denominatorInputId)throw new Error(`${id}: reference became active ${f.featureId}`);}}
+          const iza=JSON.parse(fs.readFileSync('research/L_IZA_BANCHO_SB8/selection-data.json'));if(!iza.features.some(x=>x.researchFeatureId==='RF_REF_DIRECT_BIG'&&x.adoptionCategory==='EXCLUDE'))throw new Error('Iza direct BIG reference missing');
+          const tri=JSON.parse(fs.readFileSync('research/LB_TRIPLE_CROWN_SF4/selection-data.json'));if(!tri.features.some(x=>x.researchFeatureId==='RF_REF_BONUS_TOTAL'&&x.adoptionCategory==='EXCLUDE'))throw new Error('Triple Crown aggregate exclusion missing');
+          const rak=JSON.parse(fs.readFileSync('research/S_RAKUEN_TSUHO_FS/selection-data.json'));if(!rak.features.some(x=>x.researchFeatureId==='RF_REF_RD_INITIAL'&&x.adoptionCategory==='EXCLUDE'))throw new Error('Rakuen component exclusion missing');
+          console.log('PASS reference semantic guard');
+          NODE
+      - name: Commit validated reference layer
+        run: |
+          if [ -z "$(git status --porcelain research reports/batch-20260904-next10-reference-materialization.json)" ]; then echo 'No generated changes.'; exit 0; fi
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git add research/L_IZA_BANCHO_SB8 research/L_ZETTAI_SHOGEKI_PLATONIC_HEART_TK research/L_WATASHI_NO_SHIAWASE_NA_KEKKON_PN research/LB_TRIPLE_CROWN_SF4 research/LB_MATADOR_3_TT research/L_TENSEI_SHITARA_KEN_DESHITA_GT research/L_DARLING_IN_THE_FRANXX_SA research/L_SAKI_CHOJO_KESSEN_YR research/S_KONOSUBA_ZR research/S_RAKUEN_TSUHO_FS reports/batch-20260904-next10-reference-materialization.json
+          git commit -m 'selection: materialize next10 reference decisions'
+          git pull --rebase origin research/20260903-batch10-next
+          git push origin HEAD:research/20260903-batch10-next

@@ -1,0 +1,69 @@
+name: Batch 20260904 Next10 Gate D Numeric Core
+
+on:
+  push:
+    branches:
+      - research/20260903-batch10-next
+    paths:
+      - 'tools/generate-next10-gate-d-numeric-core.mjs'
+      - '.github/workflows/batch-20260904-next10-gate-d-numeric-core.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  generate-validate:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: research/20260903-batch10-next
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Generate numeric structured core
+        run: node tools/generate-next10-gate-d-numeric-core.mjs
+      - name: Validate Research Selection Observation
+        shell: bash
+        run: |
+          set -euo pipefail
+          ids=(L_IZA_BANCHO_SB8 L_ZETTAI_SHOGEKI_PLATONIC_HEART_TK L_WATASHI_NO_SHIAWASE_NA_KEKKON_PN LB_TRIPLE_CROWN_SF4 LB_MATADOR_3_TT L_TENSEI_SHITARA_KEN_DESHITA_GT L_DARLING_IN_THE_FRANXX_SA L_SAKI_CHOJO_KESSEN_YR S_KONOSUBA_ZR S_RAKUEN_TSUHO_FS)
+          for id in "${ids[@]}"; do
+            node tools/validate-research-data.mjs "research/$id/research-data.json"
+            node tools/validate-selection-data.mjs "research/$id/selection-data.json" "research/$id/research-data.json"
+            node tools/validate-machine-observation-data.mjs "research/$id/machine-observation-data.json"
+          done
+      - name: Targeted semantic guards
+        run: |
+          node <<'NODE'
+          const fs=require('fs');
+          const ids=['L_IZA_BANCHO_SB8','L_ZETTAI_SHOGEKI_PLATONIC_HEART_TK','L_WATASHI_NO_SHIAWASE_NA_KEKKON_PN','LB_TRIPLE_CROWN_SF4','LB_MATADOR_3_TT','L_TENSEI_SHITARA_KEN_DESHITA_GT','L_DARLING_IN_THE_FRANXX_SA','L_SAKI_CHOJO_KESSEN_YR','S_KONOSUBA_ZR','S_RAKUEN_TSUHO_FS'];
+          for(const id of ids){
+            const r=JSON.parse(fs.readFileSync(`research/${id}/research-data.json`));
+            const s=JSON.parse(fs.readFileSync(`research/${id}/selection-data.json`));
+            const o=JSON.parse(fs.readFileSync(`research/${id}/machine-observation-data.json`));
+            const active=new Set(s.features.filter(x=>x.adoptionCategory.startsWith('INCLUDE_')).map(x=>x.featureId));
+            for(const f of o.featureMappings) if(f.usableForInference&&!active.has(f.featureId)) throw new Error(`${id}: observation maps non-active feature ${f.featureId}`);
+            for(const f of s.features){if(!f.numeratorInputId||!f.denominatorInputId) throw new Error(`${id}: missing input mapping ${f.featureId}`)}
+            if(r.machine.machineId!==id||s.machineId!==id||o.machineId!==id) throw new Error(`${id}: layer machineId mismatch`);
+          }
+          const rb=JSON.parse(fs.readFileSync('research/S_RAKUEN_TSUHO_FS/selection-data.json'));
+          const bell=rb.features.find(x=>x.featureId==='FEAT_COMMON_BELL');
+          if(bell.denominatorInputId!=='INP_MY_SLOT_TOTAL_GAMES') throw new Error('Rakuen common bell denominator regression');
+          const den=rb.inputs.find(x=>x.id==='INP_MY_SLOT_TOTAL_GAMES');
+          if(!den?.name.includes('同じマイスロ結果画面のゲーム数')) throw new Error('Rakuen denominator label must say same My Slot screen game count');
+          const iza=JSON.parse(fs.readFileSync('research/L_IZA_BANCHO_SB8/selection-data.json'));
+          if(iza.features.some(x=>x.featureId.includes('DIRECT_BIG'))) throw new Error('Iza direct BIG must remain REFERENCE and absent from active numeric core');
+          console.log('PASS targeted Gate D numeric semantic guards');
+          NODE
+      - name: Commit validated numeric core
+        run: |
+          if [ -z "$(git status --porcelain research reports/batch-20260904-next10-gate-d-numeric-core.json)" ]; then echo 'No generated changes.'; exit 0; fi
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git add research/L_IZA_BANCHO_SB8 research/L_ZETTAI_SHOGEKI_PLATONIC_HEART_TK research/L_WATASHI_NO_SHIAWASE_NA_KEKKON_PN research/LB_TRIPLE_CROWN_SF4 research/LB_MATADOR_3_TT research/L_TENSEI_SHITARA_KEN_DESHITA_GT research/L_DARLING_IN_THE_FRANXX_SA research/L_SAKI_CHOJO_KESSEN_YR research/S_KONOSUBA_ZR research/S_RAKUEN_TSUHO_FS reports/batch-20260904-next10-gate-d-numeric-core.json
+          git commit -m 'research: materialize next10 validated numeric core'
+          git pull --rebase origin research/20260903-batch10-next
+          git push origin HEAD:research/20260903-batch10-next

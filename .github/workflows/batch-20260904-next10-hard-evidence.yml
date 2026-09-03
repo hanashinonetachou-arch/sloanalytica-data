@@ -1,0 +1,92 @@
+name: Batch 20260904 Next10 Hard Evidence
+
+on:
+  push:
+    branches:
+      - research/20260903-batch10-next
+    paths:
+      - 'tools/materialize-next10-hard-evidence.mjs'
+      - '.github/workflows/batch-20260904-next10-hard-evidence.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  materialize-validate:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: research/20260903-batch10-next
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Materialize source-backed hard Evidence
+        run: node tools/materialize-next10-hard-evidence.mjs
+      - name: Validate Research and Selection
+        run: |
+          npm run research:validate
+          npm run selection:validate -- .
+      - name: Validate Observation v2 and linkage
+        run: |
+          npm run observation:validate
+          npm run observation:selection:audit -- \
+            L_IZA_BANCHO_SB8 L_ZETTAI_SHOGEKI_PLATONIC_HEART_TK L_WATASHI_NO_SHIAWASE_NA_KEKKON_PN \
+            LB_TRIPLE_CROWN_SF4 LB_MATADOR_3_TT L_TENSEI_SHITARA_KEN_DESHITA_GT \
+            L_DARLING_IN_THE_FRANXX_SA L_SAKI_CHOJO_KESSEN_YR S_KONOSUBA_ZR S_RAKUEN_TSUHO_FS --strict-v2
+      - name: Evidence semantic audit
+        run: |
+          node <<'NODE'
+          const fs=require('fs');
+          const ids=['L_IZA_BANCHO_SB8','L_ZETTAI_SHOGEKI_PLATONIC_HEART_TK','L_WATASHI_NO_SHIAWASE_NA_KEKKON_PN','LB_TRIPLE_CROWN_SF4','LB_MATADOR_3_TT','L_TENSEI_SHITARA_KEN_DESHITA_GT','L_DARLING_IN_THE_FRANXX_SA','L_SAKI_CHOJO_KESSEN_YR','S_KONOSUBA_ZR','S_RAKUEN_TSUHO_FS'];
+          for(const id of ids){
+            const r=JSON.parse(fs.readFileSync(`research/${id}/research-data.json`));
+            const s=JSON.parse(fs.readFileSync(`research/${id}/selection-data.json`));
+            const all=new Set(r.machine.settings);
+            for(const e of r.evidenceCandidates||[]){
+              if(!String(e.researchEvidenceId).startsWith('RE_GATE_D_')) continue;
+              for(const x of e.allowedSettings||[]) if(!all.has(x)) throw new Error(`${id}: invalid allowed setting ${x}`);
+            }
+            for(const g of s.evidenceUi?.groups||[]){
+              for(const o of g.options||[]){
+                if(!(o.allowedSettings||[]).length) throw new Error(`${id}: empty hard evidence allowed set ${g.groupId}/${o.value}`);
+              }
+            }
+          }
+          const mat=JSON.parse(fs.readFileSync('research/LB_MATADOR_3_TT/selection-data.json'));
+          if((mat.evidenceUi?.groups||[]).length!==0) throw new Error('Matador tendency evidence leaked into Hard Evidence UI');
+          const z=JSON.parse(fs.readFileSync('research/L_ZETTAI_SHOGEKI_PLATONIC_HEART_TK/selection-data.json'));
+          const move=z.evidenceUi.groups.find(x=>x.label.includes('必殺技'));
+          if(!move) throw new Error('Zettai special-move hard evidence missing');
+          const iza=JSON.parse(fs.readFileSync('research/L_IZA_BANCHO_SB8/selection-data.json'));
+          const blue=iza.evidenceUi.groups.flatMap(x=>x.options).find(x=>x.label.includes('青龍'));
+          if(JSON.stringify(blue?.allowedSettings)!==JSON.stringify(['SET_3','SET_4','SET_6'])) throw new Error('Iza non-contiguous setting set lost');
+          const kono=JSON.parse(fs.readFileSync('research/S_KONOSUBA_ZR/selection-data.json'));
+          const even=kono.evidenceUi.groups.flatMap(x=>x.options).find(x=>x.label.includes('246'));
+          if(JSON.stringify(even?.allowedSettings)!==JSON.stringify(['SET_2','SET_4','SET_6'])) throw new Error('KonoSuba even-only hard evidence lost');
+          console.log('PASS hard Evidence semantic audit');
+          NODE
+      - name: Write Evidence report
+        run: |
+          mkdir -p reports
+          cat > reports/batch-20260904-next10-hard-evidence.md <<'EOF'
+          # 20260904 Next10 Hard Evidence materialization
+
+          - Source-backed Hard Evidence categories materialized for 9/10 machines.
+          - マタドールⅢ has published high-setting tendency signals only in the captured source; they are retained in Research/Selection explanation but excluded from hard setting intersection.
+          - Non-contiguous setting sets are preserved (e.g. いざ！番長 青龍=3/4/6; このすば 246万エリス=2/4/6).
+          - Suggestive odd/even/high-setting tendencies are never strengthened into hard exclusions.
+          - One physical hard-evidence event maps through one `OBS_HARD_EVIDENCE_EVENTS` surface per machine.
+          - Gate D remains IN_PROGRESS until UI Design / MachineData materialization and full quality audits pass.
+          EOF
+      - name: Commit Evidence materialization
+        run: |
+          if [ -z "$(git status --porcelain research reports/batch-20260904-next10-hard-evidence.md)" ]; then echo 'No generated changes.'; exit 0; fi
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git add research reports/batch-20260904-next10-hard-evidence.md
+          git commit -m 'research: materialize next10 source-backed hard evidence'
+          git pull --rebase origin research/20260903-batch10-next
+          git push origin HEAD:research/20260903-batch10-next

@@ -1,0 +1,185 @@
+{
+  "schemaVersion": "machine-observation-data-v2",
+  "machineId": "L_IZA_BANCHO_SB8",
+  "displayName": "いざ！番長",
+  "provisionalRegistrationId": 211,
+  "registrationId": null,
+  "releaseDate": "2025-06-02",
+  "researchedAt": "2026-09-04",
+  "sources": [
+    {
+      "sourceId": "SRC_1GEKI",
+      "publisher": "一撃",
+      "title": "設定判別・解析",
+      "url": "https://1geki.jp/slot/l_bancho_iza/0/",
+      "checkedAt": "2026-09-04",
+      "sourceType": "major_analysis"
+    },
+    {
+      "sourceId": "SRC_NANA",
+      "publisher": "なな徹",
+      "title": "設定判別・解析",
+      "url": "https://nana-press.com/kaiseki/machine/946/29280/",
+      "checkedAt": "2026-09-04",
+      "sourceType": "major_analysis"
+    },
+    {
+      "sourceId": "SRC_EVIDENCE_NANA",
+      "publisher": "なな徹",
+      "title": "いざ番長 AT終了画面の設定示唆・出現率",
+      "url": "https://nana-press.com/kaiseki/machine/946/29803/",
+      "checkedAt": "2026-09-04",
+      "sourceType": "major_analysis"
+    }
+  ],
+  "sourceCoverage": {
+    "machineMenu": "UNRESOLVED",
+    "dataCounter": "UNRESOLVED",
+    "linkedService": "FOUND",
+    "directPlay": "FOUND",
+    "endEvent": "FOUND",
+    "seatedState": "UNRESOLVED"
+  },
+  "observations": [
+    {
+      "observationId": "OBS_AT_INITIAL",
+      "sourceType": "DIRECT_PLAY",
+      "observationMode": "MANUAL_COUNTER",
+      "status": "FOUND",
+      "label": "AT初当り",
+      "categories": [
+        "AT初当り 回数",
+        "AT初当りの対象となる通常時ゲーム"
+      ],
+      "timing": [
+        "自己実戦中に「AT初当りの対象となる通常時ゲーム」を単位として記録"
+      ],
+      "excludedConditions": [
+        "Researchで定義した「AT初当りの対象となる通常時ゲーム」以外を分母へ混ぜない",
+        "着席前累積値を自己実戦値へ混ぜない",
+        "未観測を観測済み0として扱わない"
+      ],
+      "sourceRefs": [
+        "SRC_1GEKI",
+        "SRC_NANA"
+      ],
+      "notes": "分子・分母を同一の観測試行母集団で記録する。"
+    },
+    {
+      "observationId": "OBS_COMMON_BELL_A",
+      "sourceType": "DIRECT_PLAY",
+      "observationMode": "MANUAL_COUNTER",
+      "status": "FOUND",
+      "label": "共通ベルA",
+      "categories": [
+        "共通ベルA 回数",
+        "共通ベルAを数える対象ゲーム"
+      ],
+      "timing": [
+        "自己実戦中に「共通ベルAを数える対象ゲーム」を単位として記録"
+      ],
+      "excludedConditions": [
+        "Researchで定義した「共通ベルAを数える対象ゲーム」以外を分母へ混ぜない",
+        "着席前累積値を自己実戦値へ混ぜない",
+        "未観測を観測済み0として扱わない"
+      ],
+      "sourceRefs": [
+        "SRC_1GEKI",
+        "SRC_NANA"
+      ],
+      "notes": "ダイトモ自動カウントと手動観測は別取得経路。分子・分母を異なる経路から混在させない。"
+    },
+    {
+      "observationId": "OBS_COMMON_BELL_A_DAITOMO",
+      "sourceType": "LINKED_SERVICE",
+      "observationMode": "LINKED_SERVICE_READ",
+      "status": "FOUND",
+      "label": "共通ベルA（ダイトモ）",
+      "categories": [
+        "共通ベルA 回数",
+        "共通ベルAを数える対象ゲーム"
+      ],
+      "timing": [
+        "ダイトモの同一遊技セッションで共通ベルAの自動カウント値を確認"
+      ],
+      "excludedConditions": [
+        "手動カウントの分子とダイトモ側の分母を混在させない",
+        "ダイトモの対象ゲーム定義が不明な値を自己実戦分母へ合算しない"
+      ],
+      "sourceRefs": [
+        "SRC_1GEKI",
+        "SRC_NANA"
+      ],
+      "notes": "手動観測とは別provenanceの代替取得経路。UI入力面は増やさず、同じFeatureの値としてどちらか一方の一貫した経路を使う。"
+    },
+    {
+      "observationId": "OBS_HARD_EVIDENCE_EVENTS",
+      "sourceType": "END_EVENT",
+      "observationMode": "VISUAL_EVENT",
+      "status": "FOUND",
+      "label": "設定示唆・確定情報",
+      "categories": [
+        "AT終了画面: 刺客襲来",
+        "AT終了画面: 小太郎日記",
+        "AT終了画面: 青龍（武蔵）",
+        "AT終了画面: 朱雀（小次郎）",
+        "AT終了画面: 温泉（おみさ＆コパンダ）"
+      ],
+      "timing": [
+        "該当する終了画面・ランプ・トロフィー・音声・獲得枚数などを実戦中に確認した時"
+      ],
+      "excludedConditions": [
+        "傾向示唆を設定確定・設定否定へ昇格させない",
+        "表示条件・復活条件など追加条件がある場合は条件成立を確認してから記録する",
+        "未確認の表示を推測で入力しない"
+      ],
+      "sourceRefs": [
+        "SRC_EVIDENCE_NANA"
+      ],
+      "notes": "SelectionでINCLUDE_UIとしたHard Evidenceのみ。1回の物理観測を重複入力しない。"
+    }
+  ],
+  "featureMappings": [
+    {
+      "featureId": "FEAT_AT_INITIAL",
+      "mappingType": "EXACT",
+      "observationIds": [
+        "OBS_AT_INITIAL"
+      ],
+      "collectionMethods": [
+        "MANUAL_COUNTER"
+      ],
+      "usableForInference": true,
+      "usableForDifficulty": false,
+      "notes": "Gate Cで確定した観測分母を変更しない。"
+    },
+    {
+      "featureId": "FEAT_COMMON_BELL_A",
+      "mappingType": "OPTIONAL_SOURCE",
+      "observationIds": [
+        "OBS_COMMON_BELL_A",
+        "OBS_COMMON_BELL_A_DAITOMO"
+      ],
+      "collectionMethods": [
+        "MANUAL_COUNTER",
+        "LINKED_SERVICE_READ"
+      ],
+      "usableForInference": true,
+      "usableForDifficulty": false,
+      "notes": "手動またはダイトモの一貫した取得経路を使用し、経路間で分子/分母を混在させない。"
+    }
+  ],
+  "researchReopenRequests": [],
+  "fieldVerificationItems": [
+    {
+      "verificationId": "VFY_L_IZA_BANCHO_SB8_DIRECT_BIG_COMPOSITION",
+      "status": "WAITING_FOR_MACHINE",
+      "sourceType": "DIRECT_PLAY",
+      "priority": "LOW",
+      "question": "将来、直撃BIGを再採用する場合にAT初当りとの包含関係を明示資料または実機仕様で確認する。",
+      "classification": "MACHINE_REQUIRED",
+      "webResearchStatus": "EXHAUSTED_2026-09-04"
+    }
+  ],
+  "fieldVerificationNotes": []
+}

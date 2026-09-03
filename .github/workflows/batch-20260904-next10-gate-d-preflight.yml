@@ -1,0 +1,65 @@
+name: Batch 20260904 Next10 Gate D Preflight
+
+on:
+  push:
+    branches:
+      - research/20260903-batch10-next
+    paths:
+      - 'research/batches/20260903-next10/GATE_D_CONSTRUCTION.md'
+      - 'research/batches/20260903-next10/gate-d-machine-plan.json'
+      - '.github/workflows/batch-20260904-next10-gate-d-preflight.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  preflight:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Validate Gate D machine plan
+        run: |
+          node --input-type=module <<'EOF'
+          import fs from 'node:fs';
+          const plan = JSON.parse(fs.readFileSync('research/batches/20260903-next10/gate-d-machine-plan.json','utf8'));
+          const registry = JSON.parse(fs.readFileSync('machine-registry.json','utf8'));
+          const expectedIds = [
+            'L_IZA_BANCHO_SB8','L_ZETTAI_SHOGEKI_PLATONIC_HEART_TK','L_WATASHI_NO_SHIAWASE_NA_KEKKON_PN',
+            'LB_TRIPLE_CROWN_SF4','LB_MATADOR_3_TT','L_TENSEI_SHITARA_KEN_DESHITA_GT','L_DARLING_IN_THE_FRANXX_SA',
+            'L_SAKI_CHOJO_KESSEN_YR','S_KONOSUBA_ZR','S_RAKUEN_TSUHO_FS'
+          ];
+          if (plan.machines.length !== 10) throw new Error(`expected 10 machines, got ${plan.machines.length}`);
+          if (JSON.stringify(plan.machines.map(x=>x.machineId)) !== JSON.stringify(expectedIds)) throw new Error('machine order/id mismatch');
+          const regs = plan.machines.map(x=>x.provisionalRegistrationId);
+          if (JSON.stringify(regs) !== JSON.stringify([211,212,213,214,215,216,217,218,219,220])) throw new Error('reservation range mismatch');
+          const used = new Set(registry.machines.map(x=>x.provisionalRegistrationId).filter(Number.isInteger));
+          for (const n of regs) if (used.has(n)) throw new Error(`registry collision: ${n}`);
+          if (!used.has(210)) throw new Error('prior batch registration 210 missing after reconciliation');
+          for (const machine of plan.machines) {
+            if (!machine.activeFeatures?.length) throw new Error(`${machine.machineId}: no active Feature`);
+            for (const f of machine.activeFeatures) {
+              if (!f.numeratorInputId || !f.denominatorInputId || !f.trialLabel) throw new Error(`${machine.machineId}/${f.featureId}: incomplete input/denominator contract`);
+            }
+          }
+          const rakuen = plan.machines.find(x=>x.machineId==='S_RAKUEN_TSUHO_FS');
+          const bell = rakuen.activeFeatures.find(x=>x.featureId==='FEAT_COMMON_BELL');
+          if (bell.denominatorInputId !== 'INP_MY_SLOT_TOTAL_GAMES') throw new Error('Rakuen common-bell denominator contract regressed');
+          if (!bell.trialLabel.includes('同じマイスロ結果画面のゲーム数')) throw new Error('Rakuen same-screen denominator label missing');
+          console.log('Gate D plan preflight PASS: 10/10; registrations 211-220 free; Rakuen denominator locked.');
+          EOF
+      - name: Scan user-facing forbidden internal wording
+        run: |
+          node --input-type=module <<'EOF'
+          import fs from 'node:fs';
+          const plan = JSON.parse(fs.readFileSync('research/batches/20260903-next10/gate-d-machine-plan.json','utf8'));
+          const forbidden = ['自動生成','AI生成','暫定生成'];
+          for (const machine of plan.machines) {
+            const userText = [machine.displayName,...(machine.activeFeatures??[]).flatMap(f=>[f.label,f.trialLabel])].join('\n');
+            for (const token of forbidden) if (userText.includes(token)) throw new Error(`${machine.machineId}: forbidden user wording ${token}`);
+          }
+          console.log('User-facing wording preflight PASS');
+          EOF
