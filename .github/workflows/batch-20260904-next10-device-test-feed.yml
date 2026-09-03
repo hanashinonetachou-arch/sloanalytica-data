@@ -1,0 +1,72 @@
+name: Batch 20260904 Next10 Device Test Feed
+
+on:
+  push:
+    branches:
+      - batch/20260904-next10-device
+    paths:
+      - '.github/workflows/batch-20260904-next10-device-test-feed.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build-device-feed:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: batch/20260904-next10-device
+      - name: Build isolated next10 device-test feed
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p device-test/20260904-next10
+          node --input-type=module <<'NODE'
+          import fs from 'node:fs';
+          const branch='batch/20260904-next10-device';
+          const rawBase=`https://raw.githubusercontent.com/hanashinonetachou-arch/sloanalytica-data/${branch}`;
+          const ids=[
+            'L_IZA_BANCHO_SB8','L_ZETTAI_SHOGEKI_PLATONIC_HEART_TK','L_WATASHI_NO_SHIAWASE_NA_KEKKON_PN','LB_TRIPLE_CROWN_SF4','LB_MATADOR_3_TT','L_TENSEI_SHITARA_KEN_DESHITA_GT','L_DARLING_IN_THE_FRANXX_SA','L_SAKI_CHOJO_KESSEN_YR','S_KONOSUBA_ZR','S_RAKUEN_TSUHO_FS'
+          ];
+          const source=JSON.parse(fs.readFileSync('catalog.json','utf8'));
+          const all=source.machines ?? source.entries ?? [];
+          const selected=ids.map(id=>{
+            const m=all.find(x=>x.machineId===id);
+            if(!m) throw new Error(`${id}: missing from source catalog`);
+            return {...m,status:'available',packageUrl:`${rawBase}/machines/${id}/machine-package.json`};
+          });
+          const catalog={...source,machines:selected,difficultyCatalogUrl:`${rawBase}/device-test/20260904-next10/difficulty-catalog.json`};
+          if('entries' in catalog) delete catalog.entries;
+          fs.writeFileSync('device-test/20260904-next10/catalog.json',JSON.stringify(catalog,null,2)+'\n');
+          const dsrc=JSON.parse(fs.readFileSync('difficulty-catalog.json','utf8'));
+          const darr=Array.isArray(dsrc)?dsrc:(dsrc.entries ?? dsrc.machines ?? []);
+          const dsel=ids.map(id=>{
+            const d=darr.find(x=>x.machineId===id);
+            if(!d) throw new Error(`${id}: missing difficulty entry`);
+            return d;
+          });
+          const dout=Array.isArray(dsrc)?dsel:{...dsrc};
+          if(!Array.isArray(dsrc)) {
+            if(Array.isArray(dsrc.entries)) dout.entries=dsel;
+            else dout.machines=dsel;
+          }
+          fs.writeFileSync('device-test/20260904-next10/difficulty-catalog.json',JSON.stringify(dout,null,2)+'\n');
+          if(selected.length!==10 || new Set(selected.map(x=>x.machineId)).size!==10) throw new Error('device catalog must contain exactly 10 unique machines');
+          for(const m of selected) if(!m.packageUrl.includes(`/${branch}/machines/${m.machineId}/`)) throw new Error(`${m.machineId}: packageUrl not isolated`);
+          console.log('PASS: isolated next10 device-test feed contains exactly 10 machines');
+          NODE
+      - name: Commit isolated feed
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add device-test/20260904-next10/catalog.json device-test/20260904-next10/difficulty-catalog.json
+          if git diff --cached --quiet; then
+            echo 'Device feed already current.'
+          else
+            git commit -m 'test: publish isolated 20260904 next10 device feed'
+            git push origin HEAD:batch/20260904-next10-device
+          fi
