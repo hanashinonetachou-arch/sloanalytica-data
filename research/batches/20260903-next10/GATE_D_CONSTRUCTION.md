@@ -125,4 +125,8 @@ Therefore the common-bell MachineData contract is:
 6. Regenerate catalog/difficulty only after all ten MachineData builds pass.
 7. Gate D remains OPEN until generated artifacts and audits pass.
 
+## CI diagnostic checkpoint — 2026-09-04
+
+The first isolated PR171 Gate D runner reached the materialization stage and failed before validation. The prototype-only runner has been split into separate `Materialize REFERENCE layer` and `Materialize hard Evidence` steps so the next synchronize run identifies the exact failing materializer without weakening the repository-wide 10-machine batch guard. Gate D remains OPEN until the isolated run and downstream audits pass.
+
 No public-main mutation is authorized by this contract.
