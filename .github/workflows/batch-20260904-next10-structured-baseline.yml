@@ -1,0 +1,83 @@
+name: Batch 20260904 Next10 Structured Numeric Baseline
+
+on:
+  push:
+    branches:
+      - research/20260903-batch10-next
+    paths:
+      - 'tools/generate-next10-structured-numeric-baseline.mjs'
+      - '.github/workflows/batch-20260904-next10-structured-baseline.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  generate-validate:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: research/20260903-batch10-next
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Generate structured numeric baseline
+        run: node tools/generate-next10-structured-numeric-baseline.mjs
+      - name: Validate ResearchData
+        run: npm run research:validate
+      - name: Validate SelectionData
+        run: npm run selection:validate -- .
+      - name: Validate Observation v2
+        run: npm run observation:validate
+      - name: Audit Selection Observation linkage
+        run: |
+          npm run observation:selection:audit -- \
+            L_IZA_BANCHO_SB8 L_ZETTAI_SHOGEKI_PLATONIC_HEART_TK L_WATASHI_NO_SHIAWASE_NA_KEKKON_PN \
+            LB_TRIPLE_CROWN_SF4 LB_MATADOR_3_TT L_TENSEI_SHITARA_KEN_DESHITA_GT \
+            L_DARLING_IN_THE_FRANXX_SA L_SAKI_CHOJO_KESSEN_YR S_KONOSUBA_ZR S_RAKUEN_TSUHO_FS --strict-v2
+      - name: Guard numeric semantic locks
+        run: |
+          node <<'NODE'
+          const fs=require('fs');
+          const ids=['L_IZA_BANCHO_SB8','L_ZETTAI_SHOGEKI_PLATONIC_HEART_TK','L_WATASHI_NO_SHIAWASE_NA_KEKKON_PN','LB_TRIPLE_CROWN_SF4','LB_MATADOR_3_TT','L_TENSEI_SHITARA_KEN_DESHITA_GT','L_DARLING_IN_THE_FRANXX_SA','L_SAKI_CHOJO_KESSEN_YR','S_KONOSUBA_ZR','S_RAKUEN_TSUHO_FS'];
+          for(const id of ids){for(const f of ['research-data.json','selection-data.json','machine-observation-data.json']){const p=`research/${id}/${f}`;if(!fs.existsSync(p))throw new Error(`missing ${p}`);}}
+          const iza=JSON.parse(fs.readFileSync('research/L_IZA_BANCHO_SB8/selection-data.json'));
+          if(iza.features.find(x=>x.researchFeatureId==='RF_DIRECT_BIG')?.adoptionCategory!=='EXCLUDE') throw new Error('direct BIG reactivated');
+          const tenken=JSON.parse(fs.readFileSync('research/L_TENSEI_SHITARA_KEN_DESHITA_GT/selection-data.json'));
+          for(const id of ['RF_CZ','RF_BONUS_INITIAL']) if(tenken.features.find(x=>x.researchFeatureId===id)?.adoptionCategory!=='EXCLUDE') throw new Error(`TenKen dependency regression ${id}`);
+          const rak=JSON.parse(fs.readFileSync('research/S_RAKUEN_TSUHO_FS/selection-data.json'));
+          const bell=rak.features.find(x=>x.featureId==='FEAT_COMMON_BELL');
+          if(bell?.denominatorInputId!=='INP_MY_SLOT_TOTAL_GAMES') throw new Error('Rakuen common bell denominator regression');
+          const obs=JSON.parse(fs.readFileSync('research/S_RAKUEN_TSUHO_FS/machine-observation-data.json'));
+          const text=JSON.stringify(obs);
+          if(!text.includes('通常ゲーム数')||!text.includes('使わない')) throw new Error('Rakuen denominator prohibition missing');
+          console.log('PASS numeric semantic locks 10/10');
+          NODE
+      - name: Write baseline report
+        run: |
+          mkdir -p reports
+          cat > reports/batch-20260904-next10-structured-numeric-baseline.md <<'EOF'
+          # 20260904 Next10 structured numeric baseline
+
+          Status: PASS if this workflow reaches commit.
+
+          - ResearchData / SelectionData / Machine Observation Data v2 numeric baseline: generated 10/10.
+          - Gate B active numeric decisions preserved.
+          - Gate C active Observation mappings preserved.
+          - いざ！番長 direct BIG remains excluded/reference.
+          - 転剣 CZ / bonus initial hit remain excluded from independent likelihood.
+          - 楽園追放 common bell denominator is same-screen My Slot `ゲーム数`, never `通常ゲーム数`.
+          - Evidence categories are intentionally not fabricated in this numeric step; Gate D remains IN_PROGRESS until Evidence materialization + UI Design + MachineData complete.
+          - No registry/catalog/public-main mutation in this workflow.
+          EOF
+      - name: Commit generated baseline
+        run: |
+          if [ -z "$(git status --porcelain research reports/batch-20260904-next10-structured-numeric-baseline.md)" ]; then echo 'No generated changes.'; exit 0; fi
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git add research reports/batch-20260904-next10-structured-numeric-baseline.md
+          git commit -m 'research: materialize next10 structured numeric baseline'
+          git pull --rebase origin research/20260903-batch10-next
+          git push origin HEAD:research/20260903-batch10-next
