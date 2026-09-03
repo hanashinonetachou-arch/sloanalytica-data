@@ -1,0 +1,242 @@
+{
+  "schemaVersion": 1,
+  "machine": {
+    "schemaVersion": "2.0.0",
+    "machineId": "LB_PREMIUM_UMAIBO_S1",
+    "machineDataVersion": "0.1.0",
+    "displayName": "LBプレミアムうまい棒",
+    "modelName": "LBプレミアムうまい棒S1",
+    "manufacturer": "オリンピアエステート",
+    "settings": [
+      "SET_1",
+      "SET_2",
+      "SET_5",
+      "SET_6"
+    ],
+    "packagePolicy": {
+      "offlineCapable": true,
+      "containsImages": false,
+      "containsExecutableCode": false
+    }
+  },
+  "inputs": {
+    "schemaVersion": "2.0.0",
+    "inputs": [
+      {
+        "id": "INP_REG_COUNT",
+        "name": "REG確率",
+        "category": "SEL_RF_REG",
+        "type": "counter",
+        "unit": "回",
+        "displayOrder": 10,
+        "inferenceRole": "INCLUDE_PRIMARY",
+        "defaultValue": "",
+        "minimum": 0
+      },
+      {
+        "id": "INP_REG_TRIALS",
+        "name": "REG確率 対象",
+        "category": "SEL_RF_REG",
+        "type": "integer",
+        "unit": "回",
+        "displayOrder": 11,
+        "inferenceRole": "INCLUDE_PRIMARY",
+        "defaultValue": "",
+        "minimum": 0
+      }
+    ]
+  },
+  "features": {
+    "schemaVersion": "2.0.0",
+    "features": [
+      {
+        "featureId": "FEAT_REG",
+        "name": "REG確率",
+        "adoptionCategory": "INCLUDE_PRIMARY",
+        "calculationRole": "PROBABILITY",
+        "probabilityEngineUsage": true,
+        "modelType": "binomial",
+        "minimumSample": 1,
+        "sampleRecommendation": 1,
+        "reliabilityProfile": {
+          "weight": 1
+        },
+        "denominatorInputId": "INP_REG_TRIALS",
+        "numeratorInputId": "INP_REG_COUNT",
+        "displayFormat": "ratio_1_over_n",
+        "probabilities": {
+          "SET_1": 0.0021208907741251328,
+          "SET_2": 0.002197319270490002,
+          "SET_5": 0.002960331557134399,
+          "SET_6": 0.0034328870580157913
+        },
+        "sourceEvidenceRefs": [
+          "SRC_1GEKI",
+          "SRC_NANA"
+        ]
+      }
+    ]
+  },
+  "evidence": {
+    "version": "1.0.0",
+    "evidences": [],
+    "sources": [
+      {
+        "id": "SRC_1GEKI",
+        "classification": "ANALYSIS",
+        "pageName": "LBプレミアムうまい棒 設定差・設定判別要素まとめ",
+        "url": "https://1geki.jp/slot/lb_umaibou/0/",
+        "checkedAt": "2026-09-03"
+      },
+      {
+        "id": "SRC_NANA",
+        "classification": "ANALYSIS",
+        "pageName": "LBプレミアムうまい棒 設定判別",
+        "url": "https://nana-press.com/kaiseki/machine/957/30078/",
+        "checkedAt": "2026-09-03"
+      }
+    ]
+  },
+  "ui": {
+    "sections": [
+      {
+        "id": "UI_DESIGN_1",
+        "title": "REG",
+        "displayOrder": 1,
+        "description": "自己実戦中に「通常時ゲーム」を単位として記録",
+        "collapsible": false,
+        "defaultExpanded": true,
+        "items": [
+          {
+            "type": "input",
+            "inputId": "INP_REG_COUNT",
+            "label": "REG確率",
+            "widget": "counter",
+            "gridSpan": 6,
+            "config": {
+              "directInput": false,
+              "compact": true,
+              "quickAdd": [
+                1
+              ],
+              "step": 1,
+              "emptyMeansUnobserved": true,
+              "observedZeroAllowed": true
+            }
+          },
+          {
+            "type": "input",
+            "inputId": "INP_REG_TRIALS",
+            "label": "REG確率 対象",
+            "widget": "number",
+            "gridSpan": 12,
+            "config": {
+              "directInput": true,
+              "quickAdd": [
+                50
+              ],
+              "emptyMeansUnobserved": true,
+              "observedZeroAllowed": true
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "selectionSummary": {
+    "schemaVersion": "selection-summary-v1",
+    "evaluatedCount": 8,
+    "selectedCount": 1,
+    "rejectedCount": 7,
+    "selected": [
+      {
+        "featureId": "FEAT_REG",
+        "name": "REG確率",
+        "reason": "公開全設定値と正しい通常時ゲームが揃い、他の主要候補の代表として設定差を直接評価できるため主Featureとして採用する。",
+        "requiredTrials": {
+          "value": 11626,
+          "unit": "通常時ゲーム"
+        }
+      }
+    ],
+    "rejected": [
+      {
+        "featureId": "FEAT_BIG",
+        "name": "BIG確率",
+        "reason": "BIG・REG・合算は同一通常ゲーム上の排他的ボーナス結果で、独立二項として同時利用すると同じ試行を重複評価するため、設定分離が大きいREGを代表採用する。",
+        "requiredTrials": {
+          "value": 2938737,
+          "unit": "通常時ゲーム"
+        }
+      },
+      {
+        "featureId": "FEAT_BONUS_AGG",
+        "name": "ボーナス合算",
+        "reason": "合算はBIGとREGを内包し、代表採用するREGと同じボーナス事象を再利用するため独立尤度には採用しない。",
+        "requiredTrials": {
+          "value": 22625,
+          "unit": "通常時ゲーム"
+        }
+      },
+      {
+        "featureId": "FEAT_SOLO_BIG",
+        "name": "単独BIG",
+        "reason": "単独BIGはBIGの部分集合であり、ボーナス系列の別Featureと独立に掛けるための完全な条件付き分解表がないため採用しない。",
+        "requiredTrials": {
+          "value": 8496904,
+          "unit": "通常時ゲーム"
+        }
+      },
+      {
+        "featureId": "FEAT_SOLO_REG",
+        "name": "単独REG",
+        "reason": "単独REGはREGの部分集合で、代表REGと同じ当選を再利用するため独立尤度として採用しない。",
+        "requiredTrials": {
+          "value": 9419,
+          "unit": "通常時ゲーム"
+        }
+      },
+      {
+        "featureId": "FEAT_CHERRY_BIG",
+        "name": "チェリー同時当選BIG",
+        "reason": "チェリー同時当選BIGはBIGの部分集合で、完全なボーナス契機分布がないため独立尤度化すると同じ当選を二重評価する。",
+        "requiredTrials": {
+          "value": 2320985,
+          "unit": "通常時ゲーム"
+        }
+      },
+      {
+        "featureId": "FEAT_CHERRY_REG",
+        "name": "チェリー同時当選REG",
+        "reason": "チェリー同時当選REGは代表REGの部分集合であり、同一REG当選を再利用するため独立尤度には採用しない。",
+        "requiredTrials": {
+          "value": 2320985,
+          "unit": "通常時ゲーム"
+        }
+      },
+      {
+        "featureId": "FEAT_RARE_CHERRY_BIG",
+        "name": "レアチェリー同時当選BIG",
+        "reason": "全設定共通1/3276.8で設定分離がなく、設定推測の尤度比が1となるため採用しない。"
+      }
+    ]
+  },
+  "reliability": {},
+  "metadata": {
+    "machineId": "LB_PREMIUM_UMAIBO_S1",
+    "displayName": "LBプレミアムうまい棒",
+    "settings": [
+      "SET_1",
+      "SET_2",
+      "SET_5",
+      "SET_6"
+    ],
+    "uiDesignMaterialized": true,
+    "uiDesignSchemaVersion": "ui-design-data-v1",
+    "uiDesignStatus": "PASS_WITH_UNRESOLVED"
+  },
+  "validation": {
+    "cases": []
+  },
+  "statistics": {}
+}

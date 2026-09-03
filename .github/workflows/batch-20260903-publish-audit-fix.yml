@@ -1,0 +1,82 @@
+name: Batch 20260903 Publish Audit Fix
+on:
+  push:
+    branches: [batch/20260903-hanagasa-ultraman]
+    paths: ['.github/workflows/batch-20260903-publish-audit-fix.yml']
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  fix:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: batch/20260903-hanagasa-ultraman
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Apply source-of-truth fixes
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --input-type=module <<'NODE'
+          import fs from 'node:fs';
+          const rw=(p,fn)=>{const x=JSON.parse(fs.readFileSync(p,'utf8'));fn(x);fs.writeFileSync(p,JSON.stringify(x,null,2)+'\n');};
+          rw('research/L_TOLOVE_DARKNESS_S8/selection-data.json', s => {
+            const f=s.features.find(x=>x.featureId==='FEAT_HAREM_EVENT_DISTRIBUTION');
+            if(!f) throw new Error('ToLOVE harem distribution Selection feature missing');
+            f.normalizeRoundedCategoryProbabilities=true;
+          });
+          rw('research/LB_1000CHAN_ALPHA_L3/research-data.json', r => {
+            const expected=['SET_1','SET_2','SET_5','SET_6','SET_H'];
+            if(JSON.stringify(r.machine.settings)!==JSON.stringify(expected)) throw new Error(`unexpected 1000chan settings ${JSON.stringify(r.machine.settings)}`);
+            r.machine.inferenceSettings=['SET_1','SET_2','SET_5','SET_6'];
+          });
+          NODE
+      - name: Revalidate Research and Selection
+        run: |
+          node tools/validate-research-data.mjs research/LB_1000CHAN_ALPHA_L3/research-data.json
+          node tools/validate-selection-data.mjs research/LB_1000CHAN_ALPHA_L3/selection-data.json research/LB_1000CHAN_ALPHA_L3/research-data.json
+          node tools/validate-selection-data.mjs research/L_TOLOVE_DARKNESS_S8/selection-data.json research/L_TOLOVE_DARKNESS_S8/research-data.json
+          node tools/audit-selection-quality.mjs L_TOLOVE_DARKNESS_S8 LB_1000CHAN_ALPHA_L3 --strict
+      - name: Rebuild affected MachineData
+        run: |
+          npm run machine:batch -- L_TOLOVE_DARKNESS_S8 LB_1000CHAN_ALPHA_L3
+          node tools/materialize-ui-design.mjs --apply L_TOLOVE_DARKNESS_S8 LB_1000CHAN_ALPHA_L3
+          node tools/materialize-ui-design.mjs --require-unchanged L_TOLOVE_DARKNESS_S8 LB_1000CHAN_ALPHA_L3
+      - name: Verify semantic fixes
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --input-type=module <<'NODE'
+          import fs from 'node:fs';
+          const t=JSON.parse(fs.readFileSync('machines/L_TOLOVE_DARKNESS_S8/machine-package.json','utf8'));
+          const tf=t.features.features.find(x=>x.featureId==='FEAT_HAREM_EVENT_DISTRIBUTION');
+          if(tf?.categoryConditioning?.roundingNormalization!==true) throw new Error('ToLOVE rounded normalization contract not materialized');
+          for(const [s,ps] of Object.entries(tf.categoryProbabilities)){const sum=ps.reduce((a,b)=>a+b,0);if(Math.abs(sum-1)>1e-9) throw new Error(`ToLOVE ${s} sum=${sum}`);}
+          const c=JSON.parse(fs.readFileSync('machines/LB_1000CHAN_ALPHA_L3/machine-package.json','utf8'));
+          if(JSON.stringify(c.machine.inferenceSettings)!==JSON.stringify(['SET_1','SET_2','SET_5','SET_6'])) throw new Error('1000chan inferenceSettings mismatch');
+          if(!c.machine.settings.includes('SET_H')) throw new Error('1000chan SET_H identity lost');
+          const e=c.evidence.evidences.some(x=>JSON.stringify(x.confirmedSettings??[]).includes('SET_H')||JSON.stringify(x.deniedSettings??[]).includes('SET_H'));
+          if(!e) console.log('NOTE: SET_H identity retained; dedicated evidence may be represented by non-setting-array contract.');
+          console.log('PASS semantic fixes');
+          NODE
+      - name: Full validation
+        run: |
+          npm run ui-design:test
+          npm run difficulty:exposure-audit
+          npm test
+          npm run audit
+          npm run audit:ui-service-names
+      - name: Commit fixes
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add research/L_TOLOVE_DARKNESS_S8/selection-data.json research/LB_1000CHAN_ALPHA_L3/research-data.json machines/L_TOLOVE_DARKNESS_S8/machine-package.json machines/LB_1000CHAN_ALPHA_L3/machine-package.json
+          git commit -m 'fix: resolve 20260903 publish public-data audit findings'
+          git pull --rebase origin batch/20260903-hanagasa-ultraman
+          git push origin HEAD:batch/20260903-hanagasa-ultraman

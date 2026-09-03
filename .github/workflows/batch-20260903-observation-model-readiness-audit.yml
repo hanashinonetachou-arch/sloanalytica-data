@@ -1,0 +1,57 @@
+name: Batch 20260903 Observation Model Readiness Audit
+
+on:
+  push:
+    branches:
+      - batch/20260903-hanagasa-ultraman
+    paths:
+      - '.github/workflows/batch-20260903-observation-model-readiness-audit.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  audit:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: batch/20260903-hanagasa-ultraman
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Audit adopted feature representation readiness
+        run: |
+          node --input-type=module <<'NODE'
+          import fs from 'node:fs';
+          const ids=['L_HANAGASA_NA','L_TOLOVE_DARKNESS_S8','LB_PREMIUM_UMAIBO_S1','LB_NEW_PULSAR_BT_C9','S_KABANERI_ZR','L_DMC5_ST_XA','LB_1000CHAN_ALPHA_L3','LB_JACKPOT_CY1','L_GUILTY_CROWN_2_XF','L_ULTRAMAN_KE'];
+          const rows=[]; const reviews=[];
+          for(const machineId of ids){
+            const r=JSON.parse(fs.readFileSync(`research/${machineId}/research-data.json`,'utf8'));
+            const s=JSON.parse(fs.readFileSync(`research/${machineId}/selection-data.json`,'utf8'));
+            const byId=new Map((r.features??[]).map(x=>[x.researchFeatureId,x]));
+            for(const sf of (s.features??[]).filter(x=>String(x.adoptionCategory).startsWith('INCLUDE'))){
+              const rf=byId.get(sf.researchFeatureId)??{};
+              const settingValueCount=Object.keys(rf.settingValues??{}).length;
+              const distributionSettingCount=Object.keys(rf.distributionBySetting??rf.distributionsBySetting??{}).length;
+              const conditionalKeys=Object.keys(rf).filter(k=>/condition|distribution|table|variant|breakdown|by/i.test(k));
+              const simpleMapped=Boolean(sf.numeratorInputId&&sf.denominatorInputId)&&!(sf.categoryInputIds?.length)&&!(sf.denominatorInputIds?.length);
+              const needsReview=simpleMapped && settingValueCount===0 && distributionSettingCount===0;
+              const row={machineId,researchFeatureId:sf.researchFeatureId,featureId:sf.featureId,adoptionCategory:sf.adoptionCategory,candidateModel:rf.candidateModel??null,trialUnit:rf.trialUnit??null,settingValueCount,distributionSettingCount,conditionalKeys,simpleMapped,status:needsReview?'REVIEW_REPRESENTATION':'READY_FOR_OBSERVATION_MAPPING'};
+              rows.push(row); if(needsReview) reviews.push(row);
+            }
+          }
+          const report={schemaVersion:'observation-model-readiness-audit-v1',batch:'20260903-hanagasa-ultraman',generatedAt:new Date().toISOString(),adoptedFeatures:rows.length,reviewCount:reviews.length,status:reviews.length?'REVIEW':'PASS',rule:'A simple numerator/denominator Selection mapping must not stand in for a condition-specific table when no top-level settingValues/distributionBySetting exists. Observation must not invent a collapsed probability.',reviews,rows};
+          fs.writeFileSync('reports/batch-20260903-observation-model-readiness-audit.json',JSON.stringify(report,null,2)+'\n');
+          console.log(`adopted=${rows.length} review=${reviews.length}`);
+          NODE
+      - name: Commit audit
+        run: |
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git add reports/batch-20260903-observation-model-readiness-audit.json
+          git commit -m 'audit: report 20260903 Observation model readiness' || exit 0
+          git pull --rebase origin batch/20260903-hanagasa-ultraman
+          git push origin HEAD:batch/20260903-hanagasa-ultraman

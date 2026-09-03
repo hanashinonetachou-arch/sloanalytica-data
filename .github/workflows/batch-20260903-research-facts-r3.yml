@@ -1,0 +1,112 @@
+name: Batch 20260903 Research Facts R3
+
+on:
+  push:
+    branches:
+      - batch/20260903-hanagasa-ultraman
+    paths:
+      - '.github/workflows/batch-20260903-research-facts-r3.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  apply:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: batch/20260903-hanagasa-ultraman
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Apply Research facts R3
+        shell: bash
+        run: |
+          node --input-type=module <<'NODE'
+          import fs from 'node:fs';
+          const load=id=>JSON.parse(fs.readFileSync(`research/${id}/research-data.json`,'utf8'));
+          const save=(id,d)=>fs.writeFileSync(`research/${id}/research-data.json`,JSON.stringify(d,null,2)+'\n');
+          const f=(d,id)=>{const x=d.features.find(x=>x.researchFeatureId===id);if(!x)throw new Error(`missing ${id}`);return x};
+          const e=(d,id)=>{const x=d.evidenceCandidates.find(x=>x.researchEvidenceId===id);if(!x)throw new Error(`missing ${id}`);return x};
+          const src=(d,s)=>{if(!d.sources.some(x=>x.sourceId===s.sourceId))d.sources.push(s)};
+          const pct=(settings,vals)=>Object.fromEntries(settings.map((s,i)=>[s,{probability:vals[i]/100,rawDisplay:`${vals[i]}%`}]))
+          // 花笠: setting-hint voice is public; L exists but quantitative behavior remains unpublished.
+          {
+            const id='L_HANAGASA_NA',d=load(id);src(d,{sourceId:'SRC_PWORLD_R3',publisher:'P-WORLD',title:'花笠 設定推測・ボーナス告知時ボイス',url:'https://www.p-world.co.jp/machine/database/10267',checkedAt:'2026-09-03',sourceType:'major_analysis'});const refs=d.sources.map(s=>s.sourceId);
+            const v=e(d,'RE_BONUS_VOICE');v.factStatus='verified';v.sourceRefs=refs;v.notes='ボーナス告知Gの一部モノマネボイスに高設定示唆（弱）を含む。BIG/次回継続/継続率示唆も同時に含むため、設定確定Evidenceとしては使わず示唆familyとして保持。';v.variants=[{label:'モノマネ系一部',semantic:'高設定示唆（弱）'}];
+            const l=e(d,'RE_SET_L');l.factStatus='public_partial';l.sourceRefs=refs;l.notes='設定L搭載は機種情報で確認。Lの数値・識別挙動は公開解析で調査中のため、通常設定1/2/4/5/6の推測列へ混ぜない。';
+            save(id,d);
+          }
+          // ToLOVE TRANCE: upper-ST reward distribution is complete; zone and L remain public-partial.
+          {
+            const id='L_TOLOVE_DARKNESS_S8',d=load(id);src(d,{sourceId:'SRC_PWORLD_R3',publisher:'P-WORLD',title:'ToLOVEる TRANCE 設定推測・上位ST報酬振り分け',url:'https://www.p-world.co.jp/machine/database/10259',checkedAt:'2026-09-03',sourceType:'major_analysis'});const refs=d.sources.map(s=>s.sourceId);
+            const h=f(d,'RF_HAREM_EVENT_DISTRIBUTION');h.factStatus='verified';h.candidateModel='multinomial';h.trialUnit='ハーレムモード中のとらぶるボーナス当選1回';h.numeratorDefinition='プレゼントちゃんす報酬種別別回数';h.denominatorDefinition='ハーレムモード中とらぶるボーナス当選回数';h.categories=['aisuRUSH','whisper','episode'];h.settingValues={};h.settingDistributions={SET_2:{aisuRUSH:.961,whisper:.032,episode:.007},SET_3:{aisuRUSH:.956,whisper:.038,episode:.007},SET_4:{aisuRUSH:.931,whisper:.062,episode:.007},SET_5:{aisuRUSH:.913,whisper:.080,episode:.007},SET_6:{aisuRUSH:.851,whisper:.142,episode:.007}};h.distributionMode='complete';h.sourceRefs=refs;h.crossSourceStatus='cross_checked';h.notes='高設定ほどウィスパー選択率が上昇。エピソード0.7%は全設定共通。3カテゴリは同一抽選の排他的分布なので独立Feature化しない。丸め誤差を原値のまま保持。';
+            const z=f(d,'RF_GAME_BONUS_250_650');z.factStatus='public_partial';z.sourceRefs=refs;z.notes='250G/650G（設定変更後除外）の規定Gボーナス当選は高設定ほど優遇と公開されるが、設定別数値表は未公表。欠損を逆算しない。';
+            const l=e(d,'RE_SET_L');l.factStatus='public_partial';l.sourceRefs=refs;l.notes='設定L搭載は確認済みだが、公開解析上のAT初当り・出玉率等は調査中。設定2～6の通常推測列へ混ぜない。';
+            save(id,d);
+          }
+          // Kabaneri: close point-reduction as explicit conditional multinomial family.
+          {
+            const id='S_KABANERI_ZR',d=load(id),x=f(d,'RF_CZ_POINT_REDUCTION');const refs=d.sources.map(s=>s.sourceId);x.factStatus='verified';x.candidateModel='multinomial';x.trialUnit='CZポイント減算対象のチャンス目成立1回';x.numeratorDefinition='減算ポイントカテゴリ別回数';x.denominatorDefinition='該当内部状態・チャンス目種別での対象成立回数';x.categories=['15','30','60','120'];x.settingValues={};const base=[[93.3,6.3,.4,0],[93.3,6.3,.4,0],[92.9,6.7,.4,0],[89.6,10,.4,0],[80,19.6,.4,0],[79.6,20,.4,0]];x.conditionalDistributions={normal_compound:Object.fromEntries(d.machine.settings.map((s,i)=>[s,{15:base[i][0]/100,30:base[i][1]/100,60:base[i][2]/100,120:base[i][3]/100}])),high_single:Object.fromEntries(d.machine.settings.map((s,i)=>[s,{15:base[i][0]/100,30:base[i][1]/100,60:base[i][2]/100,120:base[i][3]/100}])),high_compound:Object.fromEntries(d.machine.settings.map((s,i)=>[s,{15:0,30:base[i][0]/100,60:base[i][1]/100,120:base[i][2]/100}]))};x.sourceRefs=refs;x.crossSourceStatus='cross_checked';x.notes='公開表は内部状態×チャンス目種別の条件付き分布。通常状態の単独チャンス目は設定差可能性が示されるが全設定表未公表。内部状態を観測できない場合はSelection/Observationで数値利用不可にする。';
+            save(id,d);
+          }
+          // DMC5: remaining two candidates are public, but one is latent/unobservable.
+          {
+            const id='L_DMC5_ST_XA',d=load(id);src(d,{sourceId:'SRC_NANA_ZONE_R3',publisher:'なな徹',title:'DMC5 モード別ゾーン・内部スーパーネロ',url:'https://nana-press.com/kaiseki/machine/959/29926/',checkedAt:'2026-09-03',sourceType:'major_analysis'});const refs=d.sources.map(s=>s.sourceId);
+            const sn=f(d,'RF_SUPER_NERO_INTERNAL');sn.factStatus='verified';sn.trialUnit='コンボチャンスで見た目ネロが選択された対象1回';sn.numeratorDefinition='内部スーパーネロ選択回数';sn.denominatorDefinition='内部スーパーネロ抽選対象回数';sn.settingValues=pct(d.machine.settings,[.9,1.9,3.2,4.7,5.7,6.9]);sn.sourceRefs=refs;sn.crossSourceStatus='cross_checked';sn.notes='見た目上は通常ネロで、内部スーパーネロは原則判別不能。公開数値はResearchに保持するが、潜在内部状態を観測値としてInferenceへ入れない。限定的な濃厚演出はObservationで別途確認。';
+            const z=f(d,'RF_NORMAL_MODE_ZONE');z.factStatus='verified';z.trialUnit='既知の通常モードで各100G区切りゾーンへ到達1回';z.numeratorDefinition='該当モード・ゾーンで初当りボーナス当選した回数';z.denominatorDefinition='該当モード・ゾーン到達回数';z.settingValues={};z.sourceRefs=refs;z.crossSourceStatus='cross_checked';z.conditionalTableStatus='FULL_PUBLIC_TABLE';z.notes='通常A/B/C×100G刻み×設定1～6の完全公開表あり。モードは内部状態であり、見た目から確定できない通常場面では数値利用しない。高設定ほどゾーン外等が優遇されるが、モード混合の総合値へ逆算しない。';
+            save(id,d);
+          }
+          // Jackpot secondary-role claims remain low-authority and intentionally held.
+          {
+            const id='LB_JACKPOT_CY1',d=load(id);for(const key of ['RF_BELL_SECONDARY','RF_CHERRY_SECONDARY']){const x=f(d,key);x.factStatus='low_priority_hold';x.notes='二次的な非主要ソースに設定別推定値が見られる一方、P-WORLD/なな徹/一撃の設定判別ページでは全設定の当該小役表を確認できない。Research候補は保持するが、一次/主要解析の裏付けが得られるまでSelection数値候補に昇格しない。';}save(id,d);
+          }
+          // Guilty Crown 2: public full watermelon tables; remaining hidden-point / Apocalypse setting tables are partial.
+          {
+            const id='L_GUILTY_CROWN_2_XF',d=load(id);src(d,{sourceId:'SRC_NANA_R3',publisher:'なな徹',title:'ギルティクラウン2 ボーナス同時当選・レゾナンスポイント',url:'https://nana-press.com/kaiseki/machine/962/30536/',checkedAt:'2026-09-03',sourceType:'major_analysis'});const refs=d.sources.map(s=>s.sourceId);
+            const w=f(d,'RF_WATERMELON_BONUS');w.factStatus='verified';w.trialUnit='SB中を除く弱/強スイカ成立1回';w.numeratorDefinition='弱/強スイカからボーナス同時当選した回数';w.denominatorDefinition='SB中を除く該当スイカ成立回数';w.settingValues={};w.conditionalProbabilities={weak:pct(d.machine.settings,[2.0,2.0,2.0,2.7,3.4,4.2]),strong:pct(d.machine.settings,[30.0,30.6,31.1,32.5,34.4,36.1])};w.sourceRefs=refs;w.crossSourceStatus='cross_checked';w.notes='SB中は各フラグ出現率が変化しボーナス期待度100%となるため必ず除外。弱/強スイカを同一成功率へ混ぜない。';
+            const agg=f(d,'RF_BONUS_AT_AGG');agg.factStatus='verified';agg.trialUnit='通常時ゲーム';agg.numeratorDefinition='ボーナスまたはAT初当り回数';agg.denominatorDefinition='通常時ゲーム数';agg.settingValues={SET_1:{probability:1/206.2,rawDisplay:'1/206.2'},SET_2:{probability:1/201.9,rawDisplay:'1/201.9'},SET_3:{probability:1/195.1,rawDisplay:'1/195.1'},SET_4:{probability:1/178.8,rawDisplay:'1/178.8'},SET_5:{probability:1/168.2,rawDisplay:'1/168.2'},SET_6:{probability:1/158.1,rawDisplay:'1/158.1'}};agg.sourceRefs=refs;agg.notes='公開されるボーナス+AT総合合算。構成するボーナス/AT初当りと包含関係にあるためSelectionで同時乗算しない。';
+            const rp=f(d,'RF_RESONANCE_POINT');rp.factStatus='public_partial';rp.settingValues={SET_1:{probability:1,rawDisplay:'1pt89.0/5pt4.7/10pt3.1/20pt1.6/30pt0.8/50pt0.4/100pt0.4%'}};rp.sourceRefs=refs;rp.notes='通常状態チャンス目またはレゾナンスナビCHANCE選択時の獲得ptに設定差あり。ただし全設定で確認できる公開分布は設定1のみ。欠損設定を推定しない。';
+            for(const key of ['RF_APOCALYPSE_ENDING','RF_APOCALYPSE_CONTINUE']){const x=f(d,key);x.factStatus='public_partial';x.sourceRefs=refs;x.notes=(key==='RF_APOCALYPSE_ENDING'?'四度目の黙示録中エンディング移行は設定差ありと公開。設定1は弱レア/赤7フェイク16.7%、強スイカ33.4%、強レア50.1%。全設定表未公表。セット最終Gは抽選外。':'四度目の黙示録セット継続は設定差ありと公開。設定1のレア役以外50.1%、最終Gレア役は継続濃厚。全設定表未公表。');}
+            save(id,d);
+          }
+          // ULTRAMAN: all published full tables + evidence; CZ and L are explicitly partial.
+          {
+            const id='L_ULTRAMAN_KE',d=load(id);src(d,{sourceId:'SRC_NANA_R3',publisher:'なな徹',title:'L ULTRAMAN 設定判別・通常時抽選',url:'https://nana-press.com/kaiseki/machine/947/30100/',checkedAt:'2026-09-03',sourceType:'major_analysis'});src(d,{sourceId:'SRC_NANA_GAME_R3',publisher:'なな徹',title:'L ULTRAMAN ベルポイント・超高確抽選',url:'https://nana-press.com/kaiseki/machine/947/30107/',checkedAt:'2026-09-03',sourceType:'major_analysis'});const refs=d.sources.map(s=>s.sourceId),S=d.machine.settings;
+            const cz=f(d,'RF_CZ');cz.factStatus='public_partial';cz.settingValues={SET_1:{probability:1/408.8,rawDisplay:'1/408.8'}};cz.sourceRefs=refs;cz.notes='レッドゾーン+レナチャンス合算は設定差候補だが、公表値は設定1=1/408.8のみ。他設定は調査中。欠損をAT率等から逆算しない。';
+            const sh=f(d,'RF_SUPER_HIGH_GAMES');sh.factStatus='verified';sh.trialUnit='AT終了/設定変更後の規定G数選択1回';sh.numeratorDefinition='規定G数別の超高確移行選択回数';sh.denominatorDefinition='規定G数選択回数';sh.settingValues={};sh.conditionalProbabilities={G32:pct(S,[7.5,7.6,9.1,9.4,10.5]),G64:pct(S,[1.3,1.4,1.7,1.7,2.0]),G96:pct(S,[12.3,12.5,15.2,15.8,18.0]),G200:pct(S,[.4,.8,1.2,1.6,2.3]),G300:pct(S,[.4,.8,1.6,2.4,3.2]),G400:pct(S,[12.6,13.5,19.3,22.8,29.8]),G500:pct(S,[.9,1.8,3.0,4.2,7.1]),G700:pct(S,[.9,1.9,6.2,13.2,22.8]),G900:pct(S,[100,100,100,100,100])};sh.sourceRefs=refs;sh.crossSourceStatus='cross_checked';sh.notes='超高確は規定G到達で移行しAT当選まで継続。移行しているか基本的に見た目では判別できないため、到達時の内部当否を直接観測できない場合はInferenceへ入れない。';
+            const bp=f(d,'RF_BELL_POINT');bp.factStatus='verified';bp.candidateModel='multinomial';bp.trialUnit='ポイント高確非滞在時のベル成立1回';bp.numeratorDefinition='ベルポイント獲得量別回数';bp.denominatorDefinition='ポイント高確非滞在時のベル成立回数';bp.categories=['1pt','2pt','4pt','6pt'];bp.settingValues={};bp.settingDistributions={SET_1:{'1pt':.881,'2pt':.096,'4pt':.016,'6pt':.008},SET_2:{'1pt':.877,'2pt':.099,'4pt':.016,'6pt':.008},SET_4:{'1pt':.874,'2pt':.103,'4pt':.016,'6pt':.008},SET_5:{'1pt':.870,'2pt':.106,'4pt':.016,'6pt':.008},SET_6:{'1pt':.863,'2pt':.113,'4pt':.016,'6pt':.008}};bp.distributionMode='complete';bp.sourceRefs=refs;bp.crossSourceStatus='cross_checked';bp.notes='ポイント高確中は別の全設定共通分布（2pt89.8/4pt7.8/6pt1.6/10pt0.4/20pt0.4）。状態を混ぜない。通常ポイント状態を実機上識別できるかObservationで確認。';
+            const ls=f(d,'RF_LOOP_STOCK_LEVEL');ls.factStatus='verified';ls.candidateModel='multinomial';ls.trialUnit='AT後96G以内の超高確移行による再抽選1回';ls.numeratorDefinition='再抽選されたループストックレベル別回数';ls.denominatorDefinition='AT後96G以内の超高確移行による再抽選回数';ls.categories=['LV1','LV2','LV3','LV4'];ls.settingValues={};ls.settingDistributions={SET_1:{LV1:.500,LV2:.383,LV3:.109,LV4:.008},SET_2:{LV1:.484,LV2:.391,LV3:.109,LV4:.016},SET_4:{LV1:.328,LV2:.398,LV3:.234,LV4:.039},SET_5:{LV1:.180,LV2:.406,LV3:.336,LV4:.078},SET_6:{LV1:.125,LV2:.414,LV3:.367,LV4:.094}};ls.distributionMode='complete';ls.sourceRefs=refs;ls.crossSourceStatus='cross_checked';ls.notes='AT後96G以内の超高確移行時のみ設定差がある再抽選。ループストックレベル自体は潜在状態のため直接観測扱いしない。';
+            const timer=e(d,'RE_RED_ZONE_TIMER');timer.factStatus='verified';timer.variants=[{label:'04:56',allowedSettings:['SET_4','SET_5','SET_6']},{label:'05:55',allowedSettings:['SET_5','SET_6']},{label:'06:66',allowedSettings:['SET_6']}];timer.sourceRefs=refs;timer.notes='CZレッドゾーン後半タイマー。主要複数ソースで04:56/05:55/06:66一致。';
+            const pay=e(d,'RE_PAYOUT');pay.factStatus='verified';pay.variants=[{label:'222枚OVER',allowedSettings:['SET_2','SET_4','SET_5','SET_6']},{label:'456枚OVER',allowedSettings:['SET_4','SET_5','SET_6']},{label:'555枚OVER',allowedSettings:['SET_5','SET_6']},{label:'666枚OVER',allowedSettings:['SET_6']}];pay.sourceRefs=refs;
+            const end=e(d,'RE_AT_END');end.factStatus='verified';end.variants=[{label:'諸星',semantic:'偶数設定示唆'},{label:'北斗',semantic:'奇数設定示唆'},{label:'レナ',semantic:'高設定示唆弱'},{label:'ベムラー',semantic:'高設定示唆強'},{label:'ウルトラマン',deniedSettings:['SET_1']},{label:'セブン',deniedSettings:['SET_2']},{label:'エース',deniedSettings:['SET_4']},{label:'対峙',allowedSettings:['SET_4','SET_5','SET_6']},{label:'初代ウルトラマン',allowedSettings:['SET_5','SET_6']},{label:'2Dキャラ',allowedSettings:['SET_6']}];end.sourceRefs=refs;end.notes='設定3非搭載。奇数/偶数示唆は実在設定集合1/2/4/5/6上で解釈する。';
+            const tr=e(d,'RE_TAMA_TROPHY');tr.factStatus='verified';tr.variants=[{label:'銅',allowedSettings:['SET_2','SET_4','SET_5','SET_6']},{label:'銀',allowedSettings:['SET_4','SET_5','SET_6']},{label:'金',allowedSettings:['SET_4','SET_5','SET_6'],semantic:'設定4以上かつ設定5以上期待大'},{label:'ゼブラ',allowedSettings:['SET_5','SET_6']},{label:'虹',allowedSettings:['SET_6']}];tr.sourceRefs=refs;
+            const l=e(d,'RE_SET_L');l.factStatus='public_partial';l.sourceRefs=refs;l.notes='設定L搭載はP-WORLD等で確認。LのAT確率・出玉率・具体的識別挙動は調査中のため通常設定1/2/4/5/6へ混ぜない。';
+            save(id,d);
+          }
+          NODE
+      - name: Validate ResearchData and Discovery transfer
+        shell: bash
+        run: |
+          set -euo pipefail
+          ids=(L_HANAGASA_NA L_TOLOVE_DARKNESS_S8 LB_PREMIUM_UMAIBO_S1 LB_NEW_PULSAR_BT_C9 S_KABANERI_ZR L_DMC5_ST_XA LB_1000CHAN_ALPHA_L3 LB_JACKPOT_CY1 L_GUILTY_CROWN_2_XF L_ULTRAMAN_KE)
+          for id in "${ids[@]}"; do node tools/validate-research-data.mjs "research/$id/research-data.json"; done
+          node tools/discovery-completeness-gate.mjs "${ids[@]}"
+      - name: Refresh Research inventory
+        shell: bash
+        run: |
+          node --input-type=module <<'NODE'
+          import fs from 'node:fs';const ids=['L_HANAGASA_NA','L_TOLOVE_DARKNESS_S8','LB_PREMIUM_UMAIBO_S1','LB_NEW_PULSAR_BT_C9','S_KABANERI_ZR','L_DMC5_ST_XA','LB_1000CHAN_ALPHA_L3','LB_JACKPOT_CY1','L_GUILTY_CROWN_2_XF','L_ULTRAMAN_KE'];const statuses=['verified','pending','public_partial','low_priority_hold','conflict'];const totals={features:0,evidence:0,reference:0,discovery:0,...Object.fromEntries(statuses.map(x=>[x,0]))},machines=[];for(const id of ids){const d=JSON.parse(fs.readFileSync(`research/${id}/research-data.json`,'utf8')),all=[...(d.features??[]),...(d.evidenceCandidates??[])],st=all.reduce((m,x)=>(m[x.factStatus]=(m[x.factStatus]??0)+1,m),{}),row={machineId:id,displayName:d.machine.displayName,discovery:(d.discoveryInventory??[]).length,features:(d.features??[]).length,evidence:(d.evidenceCandidates??[]).length,reference:(d.discoveryInventory??[]).filter(x=>x.transferStatus==='REFERENCE').length,...Object.fromEntries(statuses.map(x=>[x,st[x]??0])),openConflicts:(d.conflicts??[]).filter(x=>x.status!=='RESOLVED').map(x=>x.conflictId),pendingIds:all.filter(x=>x.factStatus==='pending').map(x=>x.researchFeatureId??x.researchEvidenceId),partialIds:all.filter(x=>x.factStatus==='public_partial').map(x=>x.researchFeatureId??x.researchEvidenceId),holdIds:all.filter(x=>x.factStatus==='low_priority_hold').map(x=>x.researchFeatureId??x.researchEvidenceId)};machines.push(row);for(const k of Object.keys(totals))if(k in row)totals[k]+=row[k];}fs.writeFileSync('reports/batch-20260903-research-inventory.json',JSON.stringify({schemaVersion:'batch-research-inventory-v1',batch:'20260903-hanagasa-ultraman',generatedAt:new Date().toISOString(),totals,machines},null,2)+'\n');
+          NODE
+      - name: Commit Research facts R3
+        shell: bash
+        run: |
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git add research/*/research-data.json reports/batch-20260903-research-inventory.json
+          git commit -m 'research: verify and classify 20260903 facts r3' || exit 0
+          git pull --rebase origin batch/20260903-hanagasa-ultraman
+          git push origin HEAD:batch/20260903-hanagasa-ultraman

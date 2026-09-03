@@ -1,0 +1,60 @@
+name: Batch 20260903 Publish Audit Fix Commit
+on:
+  push:
+    branches: [batch/20260903-hanagasa-ultraman]
+    paths: ['.github/workflows/batch-20260903-publish-audit-fix-commit.yml']
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  fix-commit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: batch/20260903-hanagasa-ultraman
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Apply validated source fixes and rebuild
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --input-type=module <<'NODE'
+          import fs from 'node:fs';
+          const rw=(p,fn)=>{const x=JSON.parse(fs.readFileSync(p,'utf8'));fn(x);fs.writeFileSync(p,JSON.stringify(x,null,2)+'\n');};
+          rw('research/L_TOLOVE_DARKNESS_S8/selection-data.json', s => {
+            const f=s.features.find(x=>x.featureId==='FEAT_HAREM_EVENT_DISTRIBUTION');
+            if(!f) throw new Error('ToLOVE feature missing');
+            f.normalizeRoundedCategoryProbabilities=true;
+          });
+          rw('research/LB_1000CHAN_ALPHA_L3/research-data.json', r => {
+            r.machine.inferenceSettings=['SET_1','SET_2','SET_5','SET_6'];
+          });
+          NODE
+          node tools/validate-research-data.mjs research/LB_1000CHAN_ALPHA_L3/research-data.json
+          node tools/validate-selection-data.mjs research/LB_1000CHAN_ALPHA_L3/selection-data.json research/LB_1000CHAN_ALPHA_L3/research-data.json
+          node tools/validate-selection-data.mjs research/L_TOLOVE_DARKNESS_S8/selection-data.json research/L_TOLOVE_DARKNESS_S8/research-data.json
+          node tools/audit-selection-quality.mjs L_TOLOVE_DARKNESS_S8 LB_1000CHAN_ALPHA_L3 --strict
+          npm run machine:batch -- L_TOLOVE_DARKNESS_S8 LB_1000CHAN_ALPHA_L3
+          node tools/materialize-ui-design.mjs --apply L_TOLOVE_DARKNESS_S8 LB_1000CHAN_ALPHA_L3
+          node tools/materialize-ui-design.mjs --require-unchanged L_TOLOVE_DARKNESS_S8 LB_1000CHAN_ALPHA_L3
+          npm test
+          npm run audit
+          npm run audit:ui-service-names
+      - name: Commit only validated semantic outputs
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add research/L_TOLOVE_DARKNESS_S8/selection-data.json \
+                  research/LB_1000CHAN_ALPHA_L3/research-data.json \
+                  machines/L_TOLOVE_DARKNESS_S8/machine-package.json \
+                  machines/LB_1000CHAN_ALPHA_L3/machine-package.json
+          git diff --cached --quiet && { echo 'Expected validated fix diff is empty'; exit 1; }
+          git stash push --keep-index --include-untracked -m 'temporary validation side effects' || true
+          git commit -m 'fix: resolve 20260903 publish public-data audit findings'
+          git pull --rebase origin batch/20260903-hanagasa-ultraman
+          git push origin HEAD:batch/20260903-hanagasa-ultraman

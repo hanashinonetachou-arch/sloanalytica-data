@@ -1,0 +1,51 @@
+name: Batch 20260903 Publish Audit Capture
+
+on:
+  push:
+    branches:
+      - batch/20260903-hanagasa-ultraman
+    paths:
+      - '.github/workflows/batch-20260903-publish-audit-capture.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  capture:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: batch/20260903-hanagasa-ultraman
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Reproduce publish state and capture strict audit output
+        shell: bash
+        run: |
+          set -uo pipefail
+          base_head=$(git rev-parse HEAD)
+          ids=(L_ULTRAMAN_KE L_GUILTY_CROWN_2_XF LB_JACKPOT_CY1 LB_1000CHAN_ALPHA_L3 L_DMC5_ST_XA S_KABANERI_ZR LB_NEW_PULSAR_BT_C9 LB_PREMIUM_UMAIBO_S1 L_TOLOVE_DARKNESS_S8 L_HANAGASA_NA)
+          for id in "${ids[@]}"; do
+            node tools/publish-machine-data.mjs approve "$id" "machines/$id/machine-package.json" || exit 21
+            node tools/publish-machine-data.mjs publish "$id" || exit 22
+            node tools/publish-machine-data.mjs publish "$id" --apply --defer-audit || exit 23
+            node tools/sync-machine-difficulty-catalog.mjs "$id" || exit 24
+          done
+          node tools/sync-machine-registry.mjs || exit 25
+          set +e
+          npm run audit > /tmp/publish-audit.log 2>&1
+          audit_status=$?
+          set -e
+          cp /tmp/publish-audit.log /tmp/publish-audit.saved
+          git reset --hard "$base_head"
+          cp /tmp/publish-audit.saved reports/batch-20260903-publish-audit-failure.log
+          printf '\nAUDIT_EXIT_STATUS=%s\n' "$audit_status" >> reports/batch-20260903-publish-audit-failure.log
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add reports/batch-20260903-publish-audit-failure.log
+          git commit -m 'audit: capture 20260903 publish failure details'
+          git pull --rebase origin batch/20260903-hanagasa-ultraman
+          git push origin HEAD:batch/20260903-hanagasa-ultraman

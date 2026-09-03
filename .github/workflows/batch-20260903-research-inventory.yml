@@ -1,0 +1,52 @@
+name: Batch 20260903 Research Inventory
+
+on:
+  push:
+    branches:
+      - batch/20260903-hanagasa-ultraman
+    paths:
+      - '.github/workflows/batch-20260903-research-inventory.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  inventory:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: batch/20260903-hanagasa-ultraman
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Build Research inventory
+        shell: bash
+        run: |
+          node --input-type=module <<'NODE'
+          import fs from 'node:fs';
+          const ids=['L_HANAGASA_NA','L_TOLOVE_DARKNESS_S8','LB_PREMIUM_UMAIBO_S1','LB_NEW_PULSAR_BT_C9','S_KABANERI_ZR','L_DMC5_ST_XA','LB_1000CHAN_ALPHA_L3','LB_JACKPOT_CY1','L_GUILTY_CROWN_2_XF','L_ULTRAMAN_KE'];
+          const machines=[]; let totals={features:0,evidence:0,verified:0,pending:0,conflict:0,reference:0,discovery:0};
+          for(const id of ids){
+            const d=JSON.parse(fs.readFileSync(`research/${id}/research-data.json`,'utf8'));
+            const features=d.features??[], evidence=d.evidenceCandidates??[], discovery=d.discoveryInventory??[];
+            const states=[...features,...evidence].reduce((m,x)=>(m[x.factStatus]=(m[x.factStatus]??0)+1,m),{});
+            const refs=discovery.filter(x=>x.transferStatus==='REFERENCE').length;
+            const row={machineId:id,displayName:d.machine.displayName,discovery:discovery.length,features:features.length,evidence:evidence.length,verified:states.verified??0,pending:states.pending??0,conflict:states.conflict??0,reference:refs,openConflicts:(d.conflicts??[]).filter(x=>x.status!=='RESOLVED').map(x=>x.conflictId),pendingIds:[...features.filter(x=>x.factStatus==='pending').map(x=>x.researchFeatureId),...evidence.filter(x=>x.factStatus==='pending').map(x=>x.researchEvidenceId)]};
+            machines.push(row); for(const k of ['features','evidence','verified','pending','conflict','reference','discovery']) totals[k]+=row[k];
+          }
+          const report={schemaVersion:'batch-research-inventory-v1',batch:'20260903-hanagasa-ultraman',generatedAt:new Date().toISOString(),totals,machines};
+          fs.writeFileSync('reports/batch-20260903-research-inventory.json',JSON.stringify(report,null,2)+'\n');
+          console.table(machines.map(({machineId,discovery,features,evidence,verified,pending,conflict,reference})=>({machineId,discovery,features,evidence,verified,pending,conflict,reference})));
+          NODE
+      - name: Commit inventory
+        shell: bash
+        run: |
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git add reports/batch-20260903-research-inventory.json
+          git commit -m 'audit: add 20260903 Research inventory' || exit 0
+          git pull --rebase origin batch/20260903-hanagasa-ultraman
+          git push origin HEAD:batch/20260903-hanagasa-ultraman
