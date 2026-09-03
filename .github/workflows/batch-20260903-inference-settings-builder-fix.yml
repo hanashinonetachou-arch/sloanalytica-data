@@ -1,0 +1,83 @@
+name: Batch 20260903 Inference Settings Builder Fix
+on:
+  push:
+    branches: [batch/20260903-hanagasa-ultraman]
+    paths: ['.github/workflows/batch-20260903-inference-settings-builder-fix.yml']
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  fix:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: batch/20260903-hanagasa-ultraman
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Make MachineData likelihood generation honor inferenceSettings
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --input-type=module <<'NODE'
+          import fs from 'node:fs';
+          const p='tools/build-machine-data.mjs';
+          let s=fs.readFileSync(p,'utf8');
+          const reps=[
+            ['function buildFeature(rf,sf,inputIds){','function buildFeature(rf,sf,inputIds,inferenceSettings=null){'],
+            ['base.probabilities=Object.fromEntries(Object.entries(rf.settingValues??{}).map(([s,v])=>[s,v.probability]).filter(([,p])=>Number.isFinite(p)));',`base.probabilities=Object.fromEntries(Object.entries(rf.settingValues??{})\n      .filter(([setting])=>!Array.isArray(inferenceSettings)||inferenceSettings.includes(setting))\n      .map(([setting,v])=>[setting,v.probability]).filter(([,p])=>Number.isFinite(p)));`],
+            ['base.categoryProbabilities=Object.fromEntries(Object.entries(rf.settingDistributions??{}).map(([s,dist])=>{',`base.categoryProbabilities=Object.fromEntries(Object.entries(rf.settingDistributions??{})\n      .filter(([setting])=>!Array.isArray(inferenceSettings)||inferenceSettings.includes(setting))\n      .map(([s,dist])=>{`],
+            ['const estimate=estimateRequiredTrials80(rf,sf,research.machine?.settings??[]);',`const estimate=estimateRequiredTrials80(rf,sf,research.machine?.inferenceSettings??research.machine?.settings??[]);`],
+            ['const features=[];\n  for(const sf of selection.features??[]){',`const inferenceSettings=Array.isArray(research.machine?.inferenceSettings)?research.machine.inferenceSettings:research.machine?.settings??[];\n  const features=[];\n  for(const sf of selection.features??[]){`],
+            ['const built=buildFeature(rf,sf,inputIds); if(built) features.push(built);','const built=buildFeature(rf,sf,inputIds,inferenceSettings); if(built) features.push(built);']
+          ];
+          for(const [a,b] of reps){
+            if(!s.includes(a)) throw new Error(`expected builder fragment not found: ${a.slice(0,80)}`);
+            s=s.replace(a,b);
+          }
+          fs.writeFileSync(p,s);
+          NODE
+      - name: Rebuild 1000chan and verify inference subset
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm run machine:batch -- LB_1000CHAN_ALPHA_L3
+          node tools/materialize-ui-design.mjs --apply LB_1000CHAN_ALPHA_L3
+          node tools/materialize-ui-design.mjs --require-unchanged LB_1000CHAN_ALPHA_L3
+          node --input-type=module <<'NODE'
+          import fs from 'node:fs';
+          const m=JSON.parse(fs.readFileSync('machines/LB_1000CHAN_ALPHA_L3/machine-package.json','utf8'));
+          const inference=m.machine.inferenceSettings;
+          if(JSON.stringify(inference)!==JSON.stringify(['SET_1','SET_2','SET_5','SET_6'])) throw new Error(`unexpected inferenceSettings ${JSON.stringify(inference)}`);
+          if(!m.machine.settings.includes('SET_H')) throw new Error('SET_H machine identity was lost');
+          for(const f of m.features.features){
+            const maps=[f.probabilities,f.categoryProbabilities].filter(Boolean);
+            for(const map of maps){
+              for(const setting of Object.keys(map)) if(!inference.includes(setting)) throw new Error(`${f.featureId}: non-inference setting leaked: ${setting}`);
+            }
+          }
+          const all=m.features.features.find(f=>f.featureId==='FEAT_ALL_BONUS_TOTAL');
+          if(!all || Object.hasOwn(all.probabilities,'SET_H')) throw new Error('FEAT_ALL_BONUS_TOTAL SET_H was not filtered');
+          console.log('PASS: SET_H retained as machine identity/evidence setting and excluded from numeric likelihood maps');
+          NODE
+      - name: Full regression and public-data audit
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm test
+          npm run audit
+          npm run audit:ui-service-names
+      - name: Commit validated builder contract and rebuilt package
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add tools/build-machine-data.mjs machines/LB_1000CHAN_ALPHA_L3/machine-package.json
+          git diff --cached --quiet && { echo 'expected fix diff missing'; exit 1; }
+          git stash push --keep-index --include-untracked -m 'temporary builder validation side effects' || true
+          git commit -m 'fix: honor inferenceSettings in MachineData likelihood generation'
+          git pull --rebase origin batch/20260903-hanagasa-ultraman
+          git push origin HEAD:batch/20260903-hanagasa-ultraman
