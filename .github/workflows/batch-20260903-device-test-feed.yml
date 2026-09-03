@@ -28,6 +28,7 @@ jobs:
           const branch='batch/20260903-hanagasa-ultraman';
           const rawBase=`https://raw.githubusercontent.com/hanashinonetachou-arch/sloanalytica-data/${branch}`;
           const catalog=JSON.parse(fs.readFileSync('catalog.json','utf8'));
+          catalog.difficultyCatalogUrl=`${rawBase}/device-test/20260903/difficulty-catalog.json`;
           for(const m of catalog.machines ?? []) {
             if(typeof m.packageUrl==='string') {
               m.packageUrl=`${rawBase}/machines/${m.machineId}/machine-package.json`;
@@ -42,6 +43,7 @@ jobs:
             if(!e||e.status!=='available') throw new Error(`${id}: missing from device feed`);
             if(!String(e.packageUrl).includes(`/${branch}/machines/${id}/`)) throw new Error(`${id}: packageUrl not isolated to batch branch`);
           }
+          if(catalog.difficultyCatalogUrl!==`${rawBase}/device-test/20260903/difficulty-catalog.json`) throw new Error('difficulty catalog is not isolated');
           console.log('PASS: 10-machine isolated device-test catalog ready');
           NODE
       - name: Commit feed
