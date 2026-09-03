@@ -61,7 +61,7 @@ function inputWithDefaults(x){
   for(const k of Object.keys(y)) if(y[k]===undefined) delete y[k];
   return y;
 }
-function buildFeature(rf,sf,inputIds){
+function buildFeature(rf,sf,inputIds,inferenceSettings=null){
   const role=sf.adoptionCategory;
   if(role==="EXCLUDE") return null;
   const base={
@@ -108,7 +108,9 @@ function buildFeature(rf,sf,inputIds){
     }
     base.numeratorInputId=sf.numeratorInputId;
     if(base.displayFormat==null) base.displayFormat="ratio_1_over_n";
-    base.probabilities=Object.fromEntries(Object.entries(rf.settingValues??{}).map(([s,v])=>[s,v.probability]).filter(([,p])=>Number.isFinite(p)));
+    base.probabilities=Object.fromEntries(Object.entries(rf.settingValues??{})
+      .filter(([setting])=>!Array.isArray(inferenceSettings)||inferenceSettings.includes(setting))
+      .map(([setting,v])=>[setting,v.probability]).filter(([,p])=>Number.isFinite(p)));
   } else if(rf.candidateModel==="multinomial"){
     const sourceCats=rf.categories??[];
     if(!sourceCats.length) fail(`${sf.featureId}: categories missing in ResearchData`);
@@ -156,7 +158,9 @@ function buildFeature(rf,sf,inputIds){
       base.categorySubtractInputIds=sf.categorySubtractInputIds;
     }
     base.categoryLabels=cats;
-    base.categoryProbabilities=Object.fromEntries(Object.entries(rf.settingDistributions??{}).map(([s,dist])=>{
+    base.categoryProbabilities=Object.fromEntries(Object.entries(rf.settingDistributions??{})
+      .filter(([setting])=>!Array.isArray(inferenceSettings)||inferenceSettings.includes(setting))
+      .map(([s,dist])=>{
       const probs=cats.map(c=>Number(dist[c]));
       if(probs.some(p=>!Number.isFinite(p)||p<0)) fail(`${sf.featureId}: invalid category probability for ${s}`);
       if(isConditionalPartial) return [s,probs];
@@ -195,7 +199,7 @@ function buildSelectionSummary(research,selection,statistics=null){
     if(sf.requiredTrials?.value!=null){
       item.requiredTrials={value:sf.requiredTrials.value,unit:sf.requiredTrials.unit??rf.trialUnit??"回"};
     } else {
-      const estimate=estimateRequiredTrials80(rf,sf,research.machine?.settings??[]);
+      const estimate=estimateRequiredTrials80(rf,sf,research.machine?.inferenceSettings??research.machine?.settings??[]);
       const statsEstimate=statsById.get(sf.researchFeatureId)?.extremePair80?.requiredTrials80;
       const value=Number.isFinite(estimate)?estimate:statsEstimate;
       if(Number.isFinite(value)) item.requiredTrials={value,unit:rf.trialUnit??"回"};
@@ -272,11 +276,12 @@ export function buildMachineData(research,selection,statistics=null){
   const allInputs=[...(selection.inputs??[]),...generatedInputs];
   const inputIds=new Set(allInputs.map(x=>x.id));
   if(inputIds.size!==allInputs.length) fail("duplicate input id");
+  const inferenceSettings=Array.isArray(research.machine?.inferenceSettings)?research.machine.inferenceSettings:research.machine?.settings??[];
   const features=[];
   for(const sf of selection.features??[]){
     const rf=rfs.get(sf.researchFeatureId);
     if(!rf) fail(`unknown researchFeatureId: ${sf.researchFeatureId}`);
-    const built=buildFeature(rf,sf,inputIds); if(built) features.push(built);
+    const built=buildFeature(rf,sf,inputIds,inferenceSettings); if(built) features.push(built);
   }
   const sources=(research.sources??[]).map(s=>({
     id:s.sourceId,classification:sourceClass(s.sourceType),pageName:s.title,url:s.url,checkedAt:s.checkedAt

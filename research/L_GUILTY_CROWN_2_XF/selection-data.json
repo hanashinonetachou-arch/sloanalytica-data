@@ -1,0 +1,282 @@
+{
+  "schemaVersion": "selection-data-v1",
+  "machineId": "L_GUILTY_CROWN_2_XF",
+  "machineDataVersion": "0.1.0",
+  "inputs": [
+    {
+      "id": "INP_BONUS_AT_AGG_COUNT",
+      "name": "ボーナス+AT合算 回数",
+      "category": "SEL_RF_BONUS_AT_AGG",
+      "type": "counter",
+      "unit": "回",
+      "displayOrder": 15,
+      "inferenceRole": "INCLUDE_PRIMARY",
+      "defaultValue": ""
+    },
+    {
+      "id": "INP_BONUS_AT_AGG_TRIALS",
+      "name": "ボーナス+AT合算 試行数",
+      "category": "SEL_RF_BONUS_AT_AGG",
+      "type": "integer",
+      "unit": "回",
+      "displayOrder": 16,
+      "inferenceRole": "INCLUDE_PRIMARY",
+      "defaultValue": ""
+    },
+    {
+      "id": "INP_RE_CONFIRM_WATER_COUNT",
+      "name": "ボーナス確定画面（水着）",
+      "category": "EVIDENCE",
+      "type": "counter",
+      "unit": "回",
+      "displayOrder": 20,
+      "inferenceRole": "INCLUDE_SUPPORT",
+      "defaultValue": ""
+    }
+  ],
+  "features": [
+    {
+      "researchFeatureId": "RF_AT_FIRST_HIT",
+      "featureId": "FEAT_AT_FIRST_HIT",
+      "adoptionCategory": "EXCLUDE",
+      "weight": 1,
+      "userFacingReason": "ボーナス+AT合算がAT初当りを内包するため、同じ初当りを独立に再利用せず総合合算を代表採用する。",
+      "rejectionReason": "ボーナス+AT合算がAT初当りを内包するため、同じ初当りを独立に再利用せず総合合算を代表採用する。",
+      "difficultyParticipation": "EXCLUDE"
+    },
+    {
+      "researchFeatureId": "RF_SAME_COLOR_BIG",
+      "featureId": "FEAT_SAME_COLOR_BIG",
+      "adoptionCategory": "EXCLUDE",
+      "weight": 1,
+      "userFacingReason": "同色BBはボーナス合算およびボーナス+AT合算の部分集合であり、同一当選を独立尤度に追加しない。",
+      "rejectionReason": "同色BBはボーナス合算およびボーナス+AT合算の部分集合であり、同一当選を独立尤度に追加しない。",
+      "difficultyParticipation": "EXCLUDE"
+    },
+    {
+      "researchFeatureId": "RF_MIXED_COLOR_BIG",
+      "featureId": "FEAT_MIXED_COLOR_BIG",
+      "adoptionCategory": "EXCLUDE",
+      "weight": 1,
+      "userFacingReason": "異色BBはボーナス合算およびボーナス+AT合算の部分集合であり、同一当選を独立尤度に追加しない。",
+      "rejectionReason": "異色BBはボーナス合算およびボーナス+AT合算の部分集合であり、同一当選を独立尤度に追加しない。",
+      "difficultyParticipation": "EXCLUDE"
+    },
+    {
+      "researchFeatureId": "RF_BONUS_TOTAL",
+      "featureId": "FEAT_BONUS_TOTAL",
+      "adoptionCategory": "EXCLUDE",
+      "weight": 1,
+      "userFacingReason": "ボーナス合算はボーナス+AT合算に内包されるため、同一ボーナス当選を二重評価しない。",
+      "rejectionReason": "ボーナス合算はボーナス+AT合算に内包されるため、同一ボーナス当選を二重評価しない。",
+      "difficultyParticipation": "EXCLUDE"
+    },
+    {
+      "researchFeatureId": "RF_WATERMELON_BONUS",
+      "featureId": "FEAT_WATERMELON_BONUS",
+      "adoptionCategory": "EXCLUDE",
+      "weight": 1,
+      "userReason": "公開設定差と条件付き試行は確認できるが主要初当り系列と依存するため、独立乗算を避け代表Featureが使えない場合だけFallbackとして利用する。",
+      "difficultyParticipation": "EXCLUDE",
+      "userFacingReason": "公開値は条件別・状態別・到達段階別に定義されており、現行の単一「成功回数/試行数」入力へ合算すると異なる確率母集団を混ぜてしまう。条件別モデルを正しく保持できる実装がない状態では尤度を作らず、Research事実のみ保持して推測から除外する。",
+      "rejectionReason": "公開値は条件別・状態別・到達段階別に定義されており、現行の単一「成功回数/試行数」入力へ合算すると異なる確率母集団を混ぜてしまう。条件別モデルを正しく保持できる実装がない状態では尤度を作らず、Research事実のみ保持して推測から除外する。"
+    },
+    {
+      "researchFeatureId": "RF_APOCALYPSE_TIMING",
+      "featureId": "FEAT_APOCALYPSE_TIMING",
+      "adoptionCategory": "EXCLUDE",
+      "weight": 1,
+      "userFacingReason": "ストック最大1個で既保有中は追加抽選の適格性が変わり、未観測の保有状態を含む正しい分母を安定して作れないため除外する。",
+      "rejectionReason": "ストック最大1個で既保有中は追加抽選の適格性が変わり、未観測の保有状態を含む正しい分母を安定して作れないため除外する。",
+      "difficultyParticipation": "EXCLUDE"
+    },
+    {
+      "researchFeatureId": "RF_BONUS_AT_AGG",
+      "featureId": "FEAT_BONUS_AT_AGG",
+      "adoptionCategory": "INCLUDE_PRIMARY",
+      "weight": 1,
+      "numeratorInputId": "INP_BONUS_AT_AGG_COUNT",
+      "denominatorInputId": "INP_BONUS_AT_AGG_TRIALS",
+      "userReason": "公開全設定値と正しい通常時ゲームが揃い、他の主要候補の代表として設定差を直接評価できるため主Featureとして採用する。",
+      "difficultyParticipation": "EXCLUDE",
+      "difficultyExclusionReason": "Observationで実機から取得できる試行数・除外区間・Exposureを確定する前にDifficultyへ仮の換算を持ち込まない。"
+    },
+    {
+      "researchFeatureId": "RF_RESONANCE_POINT",
+      "featureId": "FEAT_RESONANCE_POINT",
+      "adoptionCategory": "EXCLUDE",
+      "weight": 1,
+      "userFacingReason": "設定1以外の公開分布が揃っておらず、欠損設定を推定しないため除外する。",
+      "rejectionReason": "設定1以外の公開分布が揃っておらず、欠損設定を推定しないため除外する。",
+      "difficultyParticipation": "EXCLUDE"
+    },
+    {
+      "researchFeatureId": "RF_APOCALYPSE_ENDING",
+      "featureId": "FEAT_APOCALYPSE_ENDING",
+      "adoptionCategory": "EXCLUDE",
+      "weight": 1,
+      "userFacingReason": "設定1以外の公開条件別表が揃っておらず、欠損設定を補間せず除外する。",
+      "rejectionReason": "設定1以外の公開条件別表が揃っておらず、欠損設定を補間せず除外する。",
+      "difficultyParticipation": "EXCLUDE"
+    },
+    {
+      "researchFeatureId": "RF_APOCALYPSE_CONTINUE",
+      "featureId": "FEAT_APOCALYPSE_CONTINUE",
+      "adoptionCategory": "EXCLUDE",
+      "weight": 1,
+      "userFacingReason": "設定1以外の公開条件別表が揃っておらず、欠損設定を補間せず除外する。",
+      "rejectionReason": "設定1以外の公開条件別表が揃っておらず、欠損設定を補間せず除外する。",
+      "difficultyParticipation": "EXCLUDE"
+    }
+  ],
+  "evidence": [
+    {
+      "researchEvidenceId": "RE_CONFIRM_WATER",
+      "evidenceId": "EVI_CONFIRM_WATER",
+      "inputId": "INP_RE_CONFIRM_WATER_COUNT",
+      "name": "ボーナス確定画面（水着）",
+      "displayName": "ボーナス確定画面（水着）",
+      "allowedSettings": [
+        "SET_1",
+        "SET_4",
+        "SET_5",
+        "SET_6"
+      ],
+      "deniedSettings": [
+        "SET_2",
+        "SET_3"
+      ],
+      "notes": "Researchで設定集合が確定したHard Evidenceのみを適用する。"
+    }
+  ],
+  "evidenceDecisions": [
+    {
+      "researchEvidenceId": "RE_CONFIRM_WATER",
+      "disposition": "INCLUDE_UI",
+      "reason": "Researchで確定した設定下限・設定否定・設定確定のHard EvidenceだけをUI候補として採用し、傾向示唆は排除条件に使わない。"
+    },
+    {
+      "researchEvidenceId": "RE_BONUS_END_SUBLCD",
+      "disposition": "INCLUDE_UI",
+      "reason": "Researchで確定した設定下限・設定否定・設定確定のHard EvidenceだけをUI候補として採用し、傾向示唆は排除条件に使わない。"
+    },
+    {
+      "researchEvidenceId": "RE_AT_END",
+      "disposition": "INCLUDE_UI",
+      "reason": "Researchで確定した設定下限・設定否定・設定確定のHard EvidenceだけをUI候補として採用し、傾向示唆は排除条件に使わない。"
+    }
+  ],
+  "evidenceReview": {
+    "policyVersion": 1,
+    "exclusions": []
+  },
+  "evidenceUi": {
+    "groups": [
+      {
+        "groupId": "EVG_BONUS_END_SUBLCD",
+        "label": "ボーナス終了後サブ液晶",
+        "selectionMode": "multi",
+        "normalizationMode": "ALLOWED_SETTINGS_INTERSECTION",
+        "displayOrder": 100,
+        "options": [
+          {
+            "value": "V1_VALUE",
+            "label": "集＆涯",
+            "allowedSettings": [
+              "SET_3",
+              "SET_4",
+              "SET_5",
+              "SET_6"
+            ],
+            "excludedSettings": [],
+            "sourceEvidenceIds": [
+              "RE_BONUS_END_SUBLCD"
+            ]
+          },
+          {
+            "value": "V2_VALUE",
+            "label": "いのり＆真名",
+            "allowedSettings": [
+              "SET_5",
+              "SET_6"
+            ],
+            "excludedSettings": [],
+            "sourceEvidenceIds": [
+              "RE_BONUS_END_SUBLCD"
+            ]
+          }
+        ]
+      },
+      {
+        "groupId": "EVG_AT_END",
+        "label": "AT終了画面",
+        "selectionMode": "multi",
+        "normalizationMode": "ALLOWED_SETTINGS_INTERSECTION",
+        "displayOrder": 101,
+        "options": [
+          {
+            "value": "V1_VALUE",
+            "label": "綾瀬＆ツグミ",
+            "allowedSettings": [
+              "SET_2",
+              "SET_3",
+              "SET_4",
+              "SET_5",
+              "SET_6"
+            ],
+            "excludedSettings": [],
+            "sourceEvidenceIds": [
+              "RE_AT_END"
+            ]
+          },
+          {
+            "value": "V2_VALUE",
+            "label": "羽根つき",
+            "allowedSettings": [
+              "SET_4",
+              "SET_5",
+              "SET_6"
+            ],
+            "excludedSettings": [],
+            "sourceEvidenceIds": [
+              "RE_AT_END"
+            ]
+          },
+          {
+            "value": "V3_VALUE",
+            "label": "ライブ",
+            "allowedSettings": [
+              "SET_6"
+            ],
+            "excludedSettings": [],
+            "sourceEvidenceIds": [
+              "RE_AT_END"
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "uiCategoryLabels": {
+    "SEL_RF_BONUS_AT_AGG": "ボーナス+AT合算",
+    "EVIDENCE": "設定確定情報"
+  },
+  "difficultyAnalysis": {
+    "targetGames": [
+      1500,
+      3000,
+      7000
+    ],
+    "targetGameBasis": {
+      "basisId": "UNRESOLVED_OBSERVATION",
+      "label": "Observationで確定する実戦Exposure",
+      "quality": "UNRESOLVED",
+      "crossMachineComparable": false,
+      "note": "Gate BではSelectionのみ確定し、実機取得可能な正しい分母とExposureはGate Cで確定する。"
+    },
+    "calibrationAllowedExposureQualities": [
+      "EXACT",
+      "DERIVED"
+    ]
+  }
+}

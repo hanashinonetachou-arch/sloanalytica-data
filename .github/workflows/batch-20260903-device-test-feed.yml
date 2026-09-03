@@ -1,0 +1,62 @@
+name: Batch 20260903 Device Test Feed
+
+on:
+  push:
+    branches:
+      - batch/20260903-hanagasa-ultraman
+    paths:
+      - '.github/workflows/batch-20260903-device-test-feed.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+# Refresh after 2026-09-03 user-feedback round 2.
+jobs:
+  build-device-feed:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: batch/20260903-hanagasa-ultraman
+      - name: Build isolated device-test feed
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p device-test/20260903
+          node --input-type=module <<'NODE'
+          import fs from 'node:fs';
+          const branch='batch/20260903-hanagasa-ultraman';
+          const rawBase=`https://raw.githubusercontent.com/hanashinonetachou-arch/sloanalytica-data/${branch}`;
+          const catalog=JSON.parse(fs.readFileSync('catalog.json','utf8'));
+          catalog.difficultyCatalogUrl=`${rawBase}/device-test/20260903/difficulty-catalog.json`;
+          for(const m of catalog.machines ?? []) {
+            if(typeof m.packageUrl==='string') {
+              m.packageUrl=`${rawBase}/machines/${m.machineId}/machine-package.json`;
+            }
+          }
+          fs.writeFileSync('device-test/20260903/catalog.json',JSON.stringify(catalog,null,2)+'\n');
+          fs.copyFileSync('difficulty-catalog.json','device-test/20260903/difficulty-catalog.json');
+          const ids=['L_HANAGASA_NA','L_TOLOVE_DARKNESS_S8','LB_PREMIUM_UMAIBO_S1','LB_NEW_PULSAR_BT_C9','S_KABANERI_ZR','L_DMC5_ST_XA','LB_1000CHAN_ALPHA_L3','LB_JACKPOT_CY1','L_GUILTY_CROWN_2_XF','L_ULTRAMAN_KE'];
+          const byId=new Map((catalog.machines??[]).map(x=>[x.machineId,x]));
+          for(const id of ids){
+            const e=byId.get(id);
+            if(!e||e.status!=='available') throw new Error(`${id}: missing from device feed`);
+            if(!String(e.packageUrl).includes(`/${branch}/machines/${id}/`)) throw new Error(`${id}: packageUrl not isolated to batch branch`);
+          }
+          if(catalog.difficultyCatalogUrl!==`${rawBase}/device-test/20260903/difficulty-catalog.json`) throw new Error('difficulty catalog is not isolated');
+          console.log('PASS: 10-machine isolated device-test catalog ready');
+          NODE
+      - name: Commit feed
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add device-test/20260903/catalog.json device-test/20260903/difficulty-catalog.json
+          if git diff --cached --quiet; then
+            echo 'Device feed already current.'
+          else
+            git commit -m 'test: publish isolated 20260903 device feed'
+            git push origin HEAD:batch/20260903-hanagasa-ultraman
+          fi

@@ -1,0 +1,212 @@
+{
+  "schemaVersion": 1,
+  "machine": {
+    "schemaVersion": "2.0.0",
+    "machineId": "L_HANAGASA_NA",
+    "machineDataVersion": "0.1.0",
+    "displayName": "花笠",
+    "modelName": "LハナガサNA",
+    "manufacturer": "ネット",
+    "settings": [
+      "SET_1",
+      "SET_2",
+      "SET_4",
+      "SET_5",
+      "SET_6"
+    ],
+    "packagePolicy": {
+      "offlineCapable": true,
+      "containsImages": false,
+      "containsExecutableCode": false
+    }
+  },
+  "inputs": {
+    "schemaVersion": "2.0.0",
+    "inputs": [
+      {
+        "id": "INP_FIRST_HIT_COUNT",
+        "name": "初当り確率",
+        "category": "SEL_RF_FIRST_HIT",
+        "type": "counter",
+        "unit": "回",
+        "displayOrder": 10,
+        "inferenceRole": "INCLUDE_PRIMARY",
+        "defaultValue": "",
+        "minimum": 0
+      },
+      {
+        "id": "INP_FIRST_HIT_TRIALS",
+        "name": "初当り確率 対象",
+        "category": "SEL_RF_FIRST_HIT",
+        "type": "integer",
+        "unit": "回",
+        "displayOrder": 11,
+        "inferenceRole": "INCLUDE_PRIMARY",
+        "defaultValue": "",
+        "minimum": 0
+      }
+    ]
+  },
+  "features": {
+    "schemaVersion": "2.0.0",
+    "features": [
+      {
+        "featureId": "FEAT_FIRST_HIT",
+        "name": "初当り確率",
+        "adoptionCategory": "INCLUDE_PRIMARY",
+        "calculationRole": "PROBABILITY",
+        "probabilityEngineUsage": true,
+        "modelType": "binomial",
+        "minimumSample": 1,
+        "sampleRecommendation": 1,
+        "reliabilityProfile": {
+          "weight": 1
+        },
+        "denominatorInputId": "INP_FIRST_HIT_TRIALS",
+        "numeratorInputId": "INP_FIRST_HIT_COUNT",
+        "displayFormat": "ratio_1_over_n",
+        "probabilities": {
+          "SET_1": 0.005154639175257732,
+          "SET_2": 0.005376344086021506,
+          "SET_4": 0.005847953216374269,
+          "SET_5": 0.006172839506172839,
+          "SET_6": 0.006578947368421052
+        },
+        "sourceEvidenceRefs": [
+          "SRC_PWORLD"
+        ]
+      }
+    ]
+  },
+  "evidence": {
+    "version": "1.0.0",
+    "evidences": [],
+    "sources": [
+      {
+        "id": "SRC_PWORLD",
+        "classification": "ANALYSIS",
+        "pageName": "花笠 機種情報・設定推測",
+        "url": "https://www.p-world.co.jp/machine/database/10267",
+        "checkedAt": "2026-09-03"
+      },
+      {
+        "id": "SRC_PWORLD_R3",
+        "classification": "ANALYSIS",
+        "pageName": "花笠 設定推測・ボーナス告知時ボイス",
+        "url": "https://www.p-world.co.jp/machine/database/10267",
+        "checkedAt": "2026-09-03"
+      }
+    ]
+  },
+  "ui": {
+    "sections": [
+      {
+        "id": "UI_DESIGN_1",
+        "title": "初当り",
+        "displayOrder": 1,
+        "description": "自己実戦中に「有効通常ゲーム」を単位として記録",
+        "collapsible": false,
+        "defaultExpanded": true,
+        "items": [
+          {
+            "type": "input",
+            "inputId": "INP_FIRST_HIT_COUNT",
+            "label": "初当り確率",
+            "widget": "counter",
+            "gridSpan": 6,
+            "config": {
+              "directInput": false,
+              "compact": true,
+              "quickAdd": [
+                1
+              ],
+              "step": 1,
+              "emptyMeansUnobserved": true,
+              "observedZeroAllowed": true
+            }
+          },
+          {
+            "type": "input",
+            "inputId": "INP_FIRST_HIT_TRIALS",
+            "label": "初当り確率 対象",
+            "widget": "number",
+            "gridSpan": 12,
+            "config": {
+              "directInput": true,
+              "quickAdd": [
+                50
+              ],
+              "emptyMeansUnobserved": true,
+              "observedZeroAllowed": true
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "selectionSummary": {
+    "schemaVersion": "selection-summary-v1",
+    "evaluatedCount": 4,
+    "selectedCount": 1,
+    "rejectedCount": 3,
+    "selected": [
+      {
+        "featureId": "FEAT_FIRST_HIT",
+        "name": "初当り確率",
+        "reason": "公開全設定値と正しい有効通常ゲームが揃い、他の主要候補の代表として設定差を直接評価できるため主Featureとして採用する。",
+        "requiredTrials": {
+          "value": 20997,
+          "unit": "有効通常ゲーム"
+        }
+      }
+    ],
+    "rejected": [
+      {
+        "featureId": "FEAT_BIG",
+        "name": "BIG確率",
+        "reason": "BIG回数は初当り後の1G連を含み初当りと同じボーナス系列を再利用するため、独立尤度として掛けず初当りを代表採用する。",
+        "requiredTrials": {
+          "value": 4829,
+          "unit": "通常時ゲーム"
+        }
+      },
+      {
+        "featureId": "FEAT_REG",
+        "name": "REG確率",
+        "reason": "REG回数は初当り後の連チャンを含むボーナス系列で初当りと依存するため、二重評価を避け初当りのみを代表採用する。",
+        "requiredTrials": {
+          "value": 234977,
+          "unit": "通常時ゲーム"
+        }
+      },
+      {
+        "featureId": "FEAT_BONUS_AGG",
+        "name": "BIG+REG合算",
+        "reason": "BIG+REG合算は同じボーナス系列の集約で初当りと強く依存するため、独立尤度へ追加せず初当りを代表採用する。",
+        "requiredTrials": {
+          "value": 6343,
+          "unit": "通常時ゲーム"
+        }
+      }
+    ]
+  },
+  "reliability": {},
+  "metadata": {
+    "machineId": "L_HANAGASA_NA",
+    "displayName": "花笠",
+    "settings": [
+      "SET_1",
+      "SET_2",
+      "SET_4",
+      "SET_5",
+      "SET_6"
+    ],
+    "uiDesignMaterialized": true,
+    "uiDesignSchemaVersion": "ui-design-data-v1",
+    "uiDesignStatus": "PASS_WITH_UNRESOLVED"
+  },
+  "validation": {
+    "cases": []
+  },
+  "statistics": {}
+}

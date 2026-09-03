@@ -1,0 +1,209 @@
+=== tools ===
+tools/batch-publish-pipeline.mjs:17:export function normalizeMachineIds(ids) {
+tools/batch-publish-pipeline.mjs:59:  const normalized = String(filePath ?? "").trim().replaceAll("\\", "/");
+tools/batch-publish-pipeline.mjs:60:  const match = /^machines\/([^/]+)\/machine-package\.json$/.exec(normalized);
+tools/batch-publish-pipeline.mjs:303:  const ids = normalizeMachineIds([...fromFile, ...parsed.ids]);
+tools/fix-real-device-reconsideration-observation-mappings-20260827.mjs:14:  console.log(`${id}: normalized ${changed} DIRECT mapping(s) to EXACT`);
+tools/batch-selection-pipeline.mjs:12:export function normalizeRequests(xs){const out=[];for(const x of xs.map(String).map(x=>x.trim()).filter(Boolean)){if(!out.includes(x))out.push(x);}if(out.length>MAX)throw new Error(`batch limit exceeded: ${out.length} > ${MAX}`);return out;}
+tools/batch-selection-pipeline.mjs:15:function resolveMachine(q){const ids=listResearchIds();if(ids.includes(q))return q;const norm=s=>String(s??'').normalize('NFKC').replace(/[\s・･_\-]/g,'').toLowerCase();for(const id of ids){const r=read(path.join(ROOT,'research',id,'research-data.json'));if(norm(r.machine?.displayName)===norm(q))return id;}return null;}
+tools/batch-selection-pipeline.mjs:23: let requests=[...req];if(opts.file)requests.push(...loadFile(opts.file));requests=normalizeRequests(requests);if(!requests.length){console.error('ERROR: machineId/displayName or --file is required');process.exit(2);}const batchId=`SELECTION_${new Date().toISOString().replace(/[-:.TZ]/g,'').slice(0,14)}`,workspace=path.join(ROOT,'selection-batch',batchId),results=[];for(const q of requests){const id=resolveMachine(q);if(!id){results.push({request:q,machineId:null,status:'BLOCKED',reasons:['ResearchData not found; machine identity is not guessed.']});continue;}const rp=path.join(ROOT,'research',id,'research-data.json');try{const research=read(rp),rv=validateResearchData(research);if(rv.status!=='PASS'){results.push({request:q,machineId:id,status:'BLOCKED',reasons:rv.errors.map(x=>x.message)});continue;}const stats=evaluateResearchData(research),sp=path.join(ROOT,'research',id,'selection-data.json');if(fs.existsSync(sp)){const sv=validateSelectionData(read(sp),research),status=classifySelection(sv,research);results.push({request:q,machineId:id,displayName:research.machine.displayName,status,reasons:[...sv.errors,...sv.warnings],existingSelection:true});}else{results.push({request:q,machineId:id,displayName:research.machine.displayName,status:'SELECTION_REQUIRED',reasons:[],existingSelection:false});if(!opts.check){write(path.join(workspace,id,'statistical-report.json'),stats);write(path.join(workspace,id,'selection-brief.json'),briefFor(research,stats));}}}catch(e){results.push({request:q,machineId:id,status:'BLOCKED',reasons:[e.message]});}}
+tools/fix-granbelm-nakamimieru-settingvalues.mjs:11:console.log(`Granbelm Nakamimieru settingValues normalized: ${changed} feature(s)`);
+tools/audit-user-facing-phase11.mjs:35: // Multinomial/category-sum models derive trials from their category counts and must not be false-positive REVIEWs.
+tools/build-machine-data.mjs:170:      if(includedSum<=0) fail(`${sf.featureId}: included category probability sum must be > 0 for ${s}`);
+tools/build-machine-data.mjs:171:      if(sf.normalizeRoundedCategoryProbabilities===true && Math.abs(includedSum-1)>0.005) fail(`${sf.featureId}: rounded category normalization exceeds 0.5% for ${s}: ${includedSum}`);
+tools/build-machine-data.mjs:172:      return [s,(excludedCats.size||residualCat||sf.normalizeRoundedCategoryProbabilities===true)?probs.map(p=>p/includedSum):probs];
+tools/build-machine-data.mjs:174:    if(!isConditionalPartial && (excludedCats.size || sf.normalizeRoundedCategoryProbabilities===true || (residualCat && Object.values(rf.settingDistributions??{}).every(dist=>Number.isFinite(Number(dist?.[residualCat])))))) base.categoryConditioning={excludedCategories:[...excludedCats],normalization:"RENORMALIZE_INCLUDED",...(residualCat?{residualCategory:residualCat}:{}),...(sf.normalizeRoundedCategoryProbabilities===true?{roundingNormalization:true}:{})};
+tools/build-machine-data.mjs:186:    if(sf.adoptionCategory==="DISPLAY_ONLY" || sf.summarySuppressed===true) continue;
+tools/machine-registry-status.mjs:11:const normalize=s=>String(s??"").normalize("NFKC").replace(/[\s・･\-‐‑–—―~〜]/g,"").toLowerCase();
+tools/machine-registry-status.mjs:12:const registryNames=new Set((registry.machines??[]).map(m=>normalize(m.displayName)));
+tools/machine-registry-status.mjs:13:const unresolved=(snapshot?.machines??[]).filter(m=>!m.registryMachineId&&!registryNames.has(normalize(m.displayName)));
+tools/apply-real-device-reconsideration-20260827.mjs:31:function setMultinomial(s,{researchFeatureId,featureId,ids,exclude=[],reason,weight=1,sample=20}){setSel(s,{researchFeatureId,featureId,adoptionCategory:'INCLUDE_SUPPORT',numeratorInputId:ids[0],categoryInputIds:ids.slice(1),inputTransform:'sum_inputs_to_trials',...(exclude.length?{categoryExcludeLabels:exclude}:{}),minimumSample:1,sampleRecommendation:sample,weight,difficultyParticipation:'EXCLUDE',userReason:reason});}
+tools/apply-arifureta-reselection-20260830.mjs:67: {researchFeatureId:'RF_MYU_SCENARIO_DISTRIBUTION',featureId:'FEAT_MYU_SCENARIO_DISTRIBUTION',adoptionCategory:'INCLUDE_SUPPORT',numeratorInputId:'INP_MYU_SCENARIO_HAJIME',categoryInputIds:myuCats.slice(1).map(c=>`INP_MYU_SCENARIO_${c}`),inputTransform:'sum_inputs_to_trials',weight:1,difficultyParticipation:'EXCLUDE',userReason:'8シナリオを排他的に直接観測でき、全設定の公開振り分けが揃っているため補助採用します。特殊キャラはEvidenceとして別処理します。'},
+tools/apply-arifureta-reselection-20260830.mjs:68: {researchFeatureId:'RF_AT_END_NON_EVIDENCE_U1999',featureId:'FEAT_AT_END_NON_EVIDENCE_U1999',adoptionCategory:'INCLUDE_SUPPORT',numeratorInputId:'INP_AT_END_U1999_GUN',categoryInputIds:['INP_AT_END_U1999_TIO_SHIA_YUE'],inputTransform:'sum_inputs_to_trials',weight:1,difficultyParticipation:'EXCLUDE',userReason:'1999G以下の非Evidence終了画面2種だけを条件付きで比較し、確定画面の不明な1%未満を数値推定せず利用できるため補助採用します。'},
+tools/apply-arifureta-reselection-20260830.mjs:69: {researchFeatureId:'RF_AT_END_NON_EVIDENCE_2000_5999',featureId:'FEAT_AT_END_NON_EVIDENCE_2000_5999',adoptionCategory:'INCLUDE_SUPPORT',numeratorInputId:'INP_AT_END_B2000_5999_GUN',categoryInputIds:['INP_AT_END_B2000_5999_TIO_SHIA_YUE'],inputTransform:'sum_inputs_to_trials',weight:1,difficultyParticipation:'EXCLUDE',userReason:'2000～5999Gの非Evidence終了画面2種を公開比率から条件付き評価し、確定画面はEvidenceのみで処理するため補助採用します。'},
+tools/apply-arifureta-reselection-20260830.mjs:70: {researchFeatureId:'RF_AT_END_NON_EVIDENCE_6000_PLUS',featureId:'FEAT_AT_END_NON_EVIDENCE_6000_PLUS',adoptionCategory:'INCLUDE_SUPPORT',numeratorInputId:'INP_AT_END_B6000_PLUS_GUN',categoryInputIds:['INP_AT_END_B6000_PLUS_TIO_SHIA_YUE'],inputTransform:'sum_inputs_to_trials',weight:1,difficultyParticipation:'EXCLUDE',userReason:'6000G以上の非Evidence終了画面2種を公開比率から条件付き評価し、確定画面はEvidenceのみで処理するため補助採用します。'}
+tools/fix-discup-reg-hint-shared-input-20260828.mjs:25:// Preserve the published values in notes and normalize only the model probabilities to 1.0.
+tools/fix-discup-reg-hint-shared-input-20260828.mjs:106:  testText += `\n\ntest('Discup REG hint shares one observation input between numeric Feature and Evidence',()=>{\n  const research=read(path.join(ROOT,'research/L_DISCUP_ULTRA_REMIX_XR/research-data.json'));\n  const selection=read(path.join(ROOT,'research/L_DISCUP_ULTRA_REMIX_XR/selection-data.json'));\n  const pkg=buildMachineData(research,selection,null);\n\n  const feature=pkg.features.features.find(f=>f.featureId==='FEAT_REG_HINT_MODE');\n  assert.ok(feature,'REG hint must be a numeric Feature');\n  assert.deepEqual(feature.categoryLabels,['ODD','EVEN','SET2PLUS','SET5PLUS','SET6']);\n  for(const probs of Object.values(feature.categoryProbabilities)){\n    const sum=probs.reduce((a,b)=>a+b,0);\n    assert.ok(Math.abs(sum-1)<1e-9,'REG hint probabilities must sum to 1');\n  }\n\n  const evidence=new Map(pkg.evidence.evidences.map(e=>[e.id,e]));\n  assert.equal(evidence.get('EVI_REG_HINT_2PLUS')?.inputId,'INP_REG_HINT_2PLUS');\n  assert.equal(evidence.get('EVI_REG_HINT_5PLUS')?.inputId,'INP_REG_HINT_5PLUS');\n  assert.equal(evidence.get('EVI_REG_HINT_6')?.inputId,'INP_REG_HINT_6');\n  assert.deepEqual(evidence.get('EVI_REG_HINT_2PLUS')?.sharedFeatureIds,['FEAT_REG_HINT_MODE']);\n  assert.deepEqual(evidence.get('EVI_REG_HINT_5PLUS')?.sharedFeatureIds,['FEAT_REG_HINT_MODE']);\n  assert.deepEqual(evidence.get('EVI_REG_HINT_6')?.sharedFeatureIds,['FEAT_REG_HINT_MODE']);\n\n  const inputById=new Map(pkg.inputs.inputs.map(i=>[i.id,i]));\n  assert.equal(inputById.get('INP_REG_HINT_ODD')?.name,'奇数設定示唆');\n  assert.equal(inputById.get('INP_REG_HINT_EVEN')?.name,'偶数設定示唆');\n  assert.equal(inputById.get('INP_REG_HINT_2PLUS')?.name,'設定2以上');\n});\n`;
+tools/prepare-user-selected-research-batch.mjs:8:function normalizeLookup(value) {
+tools/prepare-user-selected-research-batch.mjs:9:  return String(value ?? '').normalize('NFKC').toLowerCase().replace(/[\s　]+/g, '').replace(/[・･\-‐‑‒–—―]/g, '');
+tools/prepare-user-selected-research-batch.mjs:12:export function normalizeRequests(values) {
+tools/prepare-user-selected-research-batch.mjs:17:    if (!out.some(existing => normalizeLookup(existing) === normalizeLookup(value))) out.push(value);
+tools/prepare-user-selected-research-batch.mjs:25:  const normalized = String(value).normalize('NFKC').replace(/[^A-Za-z0-9_-]+/g, '_').replace(/^_+|_+$/g, '');
+tools/prepare-user-selected-research-batch.mjs:26:  return normalized.slice(0, 60) || 'machine';
+tools/prepare-user-selected-research-batch.mjs:81:  return { names: normalizeRequests(names), report, check };
+tools/merge-market-snapshot.mjs:11:const normalize=s=>String(s??"").normalize("NFKC").replace(/[\s・･\-‐‑–—―~〜]/g,"").toLowerCase();
+tools/merge-market-snapshot.mjs:13:for(const m of registry.machines??[]){ const key=normalize(m.displayName); if(key && !byName.has(key)) byName.set(key,m); else if(key) byName.set(key,null); }
+tools/merge-market-snapshot.mjs:18: if(!target){ const hit=byName.get(normalize(market.displayName)); if(hit){target=hit;method="normalizedDisplayName";} else if(hit===null){ambiguous.push(market);continue;} }
+tools/batch-machine-pipeline.mjs:25:export function normalizeMachineIds(values) {
+tools/batch-machine-pipeline.mjs:45:  if (warning?.code !== 'MULTINOMIAL_ROUNDED_SUM') return true;
+tools/batch-machine-pipeline.mjs:51:  if (selected.normalizeRoundedCategoryProbabilities === true) return false;
+tools/batch-machine-pipeline.mjs:218:    const machineIds = normalizeMachineIds(inputValues);
+tools/audit-v64-cross-machine-semantic.mjs:101:function normalizedText(value) {
+tools/audit-v64-cross-machine-semantic.mjs:105:  const featureName = normalizedText(rf?.name);
+tools/audit-v64-cross-machine-semantic.mjs:106:  const numerator = normalizedText(rf?.numeratorDefinition);
+tools/audit-v64-cross-machine-semantic.mjs:108:    const inputName = normalizedText(input?.name);
+tools/create-revue-starlight-v66-test-machine.mjs:34:function normalizeObservationV2Modes(data) {
+tools/create-revue-starlight-v66-test-machine.mjs:37:  // clone, normalize direct-play observations to the concrete MANUAL_COUNTER mode so the
+tools/create-revue-starlight-v66-test-machine.mjs:42:      observation.notes = `${observation.notes ?? ''}${observation.notes ? ' ' : ''}TEST_V66 migration: legacy MANUAL_OR_LINKED_READ normalized to MANUAL_COUNTER; linked/menu source coverage remains separately represented.`;
+tools/create-revue-starlight-v66-test-machine.mjs:98:    normalizeObservationV2Modes(data);
+tools/batch-research-pipeline.mjs:10:export function normalizeLookup(value) {
+tools/batch-research-pipeline.mjs:12:    .normalize('NFKC')
+tools/batch-research-pipeline.mjs:18:export function normalizeRequests(values) {
+tools/batch-research-pipeline.mjs:23:    if (!out.some(v => normalizeLookup(v) === normalizeLookup(value))) out.push(value);
+tools/batch-research-pipeline.mjs:31:  const key = normalizeLookup(request);
+tools/batch-research-pipeline.mjs:36:  ].some(value => value && normalizeLookup(value) === key));
+tools/batch-research-pipeline.mjs:84:  const normalized = String(value).normalize('NFKC').replace(/[^A-Za-z0-9_-]+/g, '_').replace(/^_+|_+$/g, '');
+tools/batch-research-pipeline.mjs:85:  return normalized.slice(0, 60) || 'machine';
+tools/batch-research-pipeline.mjs:209:  const requests = normalizeRequests(rawRequests);
+tools/plan-machine-observation-migration.mjs:19:function normalizeLegacy(block) {
+tools/plan-machine-observation-migration.mjs:28:function normalizeV1(block) {
+tools/plan-machine-observation-migration.mjs:32:function normalizeV2(status) {
+tools/plan-machine-observation-migration.mjs:65:    menuStatus=normalizeV2(observation.sourceCoverage?.machineMenu);
+tools/plan-machine-observation-migration.mjs:66:    serviceStatus=normalizeV2(observation.sourceCoverage?.linkedService);
+tools/plan-machine-observation-migration.mjs:67:    predecessorStatus=normalizeV2(observation.sourceCoverage?.seatedState);
+tools/plan-machine-observation-migration.mjs:74:    menuStatus = observation ? normalizeV1(menuBlock) : normalizeLegacy(menuBlock);
+tools/plan-machine-observation-migration.mjs:75:    serviceStatus = observation ? normalizeV1(serviceBlock) : normalizeLegacy(serviceBlock);
+tools/plan-machine-observation-migration.mjs:76:    predecessorStatus = observation ? normalizeV1(predecessorBlock) : (legacyPredecessorExplicit(research) ? 'LEGACY_EXPLICIT' : 'UNASSESSED');
+tools/run-granbelm-nakamimieru-tabs-windows.mjs:8:  console.log('Normalized CRLF for migration target: tools/build-machine-data.mjs');
+tools/run-granbelm-nakamimieru-tabs-windows.mjs:11:await import('./normalize-granbelm-nakamimieru-distributions.mjs');
+tools/selection-quality-gate.mjs:29:function normalizeDiscoveryItem(item) {
+tools/selection-quality-gate.mjs:60:    const { id, target, transferStatus } = normalizeDiscoveryItem(raw);
+tools/audit-machine-observation-research.mjs:15:function normalizeLegacy(block){
+tools/audit-machine-observation-research.mjs:25:function normalizeV1(block){
+tools/audit-machine-observation-research.mjs:29:function normalizeV2(status){
+tools/audit-machine-observation-research.mjs:99:        m={machineId,displayName:obs.displayName??research?.machine?.displayName??machineId,researchedAt:obs.researchedAt??null,sourceType:'OBSERVATION_V2',menuStatus:normalizeV2(obs.sourceCoverage?.machineMenu),menuAvailableDataCount:v2ObservationCount(obs,'MACHINE_MENU'),serviceStatus:normalizeV2(obs.sourceCoverage?.linkedService),serviceAvailableDataCount:v2ObservationCount(obs,'LINKED_SERVICE'),predecessorStatus:normalizeV2(obs.sourceCoverage?.seatedState),predecessorAvailableDataCount:v2ObservationCount(obs,'SEATED_STATE')+v2ObservationCount(obs,'DATA_COUNTER'),predecessorHasNotes:true,predecessorAssessmentExplicit:true,researchReopenRequired:(obs.researchReopenRequests??[]).some(r=>r.status==='RESEARCH_REOPEN_REQUIRED'),fieldVerificationWaiting:(obs.fieldVerificationItems??[]).some(v=>v.status==='WAITING_FOR_MACHINE')};
+tools/audit-machine-observation-research.mjs:101:        m={machineId,displayName:obs.displayName??research?.machine?.displayName??machineId,researchedAt:obs.researchedAt??null,sourceType:'OBSERVATION_V1',menuStatus:normalizeV1(obs.machineMenu),menuAvailableDataCount:count(obs.machineMenu),serviceStatus:normalizeV1(obs.linkedService),serviceAvailableDataCount:count(obs.linkedService),predecessorStatus:normalizeV1(obs.predecessorData),predecessorAvailableDataCount:count(obs.predecessorData),predecessorHasNotes:hasNotes(obs.predecessorData),predecessorAssessmentExplicit:true,researchReopenRequired:false,fieldVerificationWaiting:false};
+tools/audit-machine-observation-research.mjs:108:    m={machineId,displayName:research?.machine?.displayName??machineId,researchedAt:research?.researchedAt??null,sourceType:'LEGACY_RESEARCH_DATA',menuStatus:normalizeLegacy(research?.machineMenuResearch),menuAvailableDataCount:count(research?.machineMenuResearch),serviceStatus:normalizeLegacy(research?.linkedMachineServiceResearch),serviceAvailableDataCount:count(research?.linkedMachineServiceResearch),predecessorStatus:explicit?'LEGACY_EXPLICIT':'UNASSESSED',predecessorAvailableDataCount:0,predecessorHasNotes:explicit,predecessorAssessmentExplicit:explicit,researchReopenRequired:false,fieldVerificationWaiting:false};
+tools/finalize-batch10-garupan-bancho4.mjs:72: s.evidenceUi={groups:[{groupId:'SETTING_CONSTRAINT',label:'確認した設定確定・否定',selectionMode:'multiple',normalizationMode:'ALLOWED_SETTINGS',options:[
+tools/finalize-batch10-garupan-bancho4.mjs:95: s.evidenceUi={groups:[{groupId:'SETTING_FLOOR',label:'確認した設定下限',selectionMode:'single',normalizationMode:'ALLOWED_SETTINGS',options:[
+tools/finalize-batch10-garupan-bancho4.mjs:119:console.log('OK: batch10 Research/Selection normalization completed.');
+tools/apply-phase12-batch01-reconsideration-post.mjs:43:console.log('Applied batch01 post-cleanup: observation semantics and duplicate Evidence UI are normalized.');
+tools/batch-e2e-orchestrator.mjs:7:import { normalizeLookup, resolveCandidate } from './batch-research-pipeline.mjs';
+tools/batch-e2e-orchestrator.mjs:17:export function normalizeRequests(values) {
+tools/batch-e2e-orchestrator.mjs:22:    if (!out.some(existing => normalizeLookup(existing) === normalizeLookup(value))) out.push(value);
+tools/batch-e2e-orchestrator.mjs:58:  const directId = listResearchIds().find(id => normalizeLookup(id) === normalizeLookup(request));
+tools/batch-e2e-orchestrator.mjs:154:    const requests = normalizeRequests(raw);
+tools/apply-phase11-user-facing-fixes.mjs:16:// 2) Replace vague or internal rejection reasons with Policy-v2 user-facing reasons grounded in current Research/observation constraints.
+tools/fix-word-multinomial-rounding.mjs:26:console.log(`Normalized Word of Lights rounded multinomial distributions: ${changed} setting distributions.`);
+tools/fix-real-device-reconsideration-research-multinomial-shape-20260827.mjs:18:  console.log(`${mid}: normalized multinomial settingValues=${changed}`);
+tools/watch-research-sources.mjs:13:function normalizeBody(s){ return s.replace(/\r\n/g,"\n").replace(/[ \t]+$/gm,"").trim(); }
+tools/watch-research-sources.mjs:48:   contentLength:text.length,bodySha256:sha(normalizeBody(text))
+tools/apply-batch01-machine-check-followup-v2.mjs:87:    normalizationMode: 'ALLOWED_SETTINGS',
+tools/apply-phase12-batch01-reconsideration.mjs:36: upsert(s.features,'researchFeatureId',{researchFeatureId:'RF_BONUS_COMBINED',featureId:'FEAT_BONUS_FALLBACK',adoptionCategory:'INCLUDE_SUPPORT',numeratorInputId:'INP_BIG_COUNT',numeratorInputIds:['INP_BIG_COUNT','INP_REG_COUNT'],denominatorInputId:'INP_NORMAL_GAMES',inputTransform:'sum_inputs_to_numerator',suppressedByFeatureIds:['FEAT_REACHME_CDEF'],minimumSample:1,sampleRecommendation:5000,weight:1,displayFormat:'ratio_1_over_n',difficultyParticipation:'EXCLUDE',userReason:'マイカウンターLv4未到達でもBIG・REG回数は観測できるためフォールバックとして採用。C/D/E/Fが利用できる場合は重複回避のため自動停止する。'});
+tools/apply-phase12-batch01-reconsideration.mjs:37: upsert(s.features,'researchFeatureId',{researchFeatureId:'RF_BIG_END_SCREEN',featureId:'FEAT_BIG_END_SCREEN',adoptionCategory:'INCLUDE_SUPPORT',numeratorInputId:'INP_BIG_END_OTHER',categoryInputIds:['INP_BIG_END_EVEN'],inputTransform:'sum_inputs_to_trials',categoryExcludeLabels:['NOT_BAD','GAMERA'],minimumSample:1,sampleRecommendation:20,weight:1,difficultyParticipation:'EXCLUDE',userReason:'BIG終了画面は設定別振り分けが公開されており、NOT BAD/GAMERAをEvidenceへ分離したうえでその他/EVENの条件付き分布を数値推測に採用。'});
+tools/apply-phase12-batch01-reconsideration.mjs:55: upsert(s.features,'researchFeatureId',{researchFeatureId:'RF_BIG_END_SCREEN',featureId:'FEAT_BIG_END_SCREEN',adoptionCategory:'INCLUDE_SUPPORT',numeratorInputId:'INP_BIG_END_TEMOYAN',categoryInputIds:['INP_BIG_END_HETARE','INP_BIG_END_HEIBON'],inputTransform:'sum_inputs_to_trials',categoryExcludeLabels:['SUNRISE'],minimumSample:1,sampleRecommendation:20,weight:1,difficultyParticipation:'EXCLUDE',userReason:'CTルーレット失敗画面は設定別振り分けが公開されており、設定5以上のサンライズをEvidenceへ分離して残り3種を数値推測に採用。'});
+tools/apply-phase12-batch01-reconsideration.mjs:56: upsert(s.features,'researchFeatureId',{researchFeatureId:'RF_ADJUST_MAGIC',featureId:'FEAT_ADJUST_MAGIC',adoptionCategory:'INCLUDE_SUPPORT',numeratorInputId:'INP_MAGIC_FLAME',categoryInputIds:['INP_MAGIC_BLIZZARD'],inputTransform:'sum_inputs_to_trials',categoryExcludeLabels:['METEO','WORD','THUNDER'],minimumSample:1,sampleRecommendation:10,weight:1,difficultyParticipation:'EXCLUDE',userReason:'枚数調整成功時の魔法は設定別振り分けが公開されている。確定・否定系3種をEvidenceへ分離し、Flame/Blizzardの振り分けを数値推測に採用。'});
+tools/apply-phase12-batch01-reconsideration.mjs:73: upsert(s.features,'researchFeatureId',{researchFeatureId:'RF_CZ_COMBINED',featureId:'FEAT_CZ_COMBINED',adoptionCategory:'INCLUDE_PRIMARY',numeratorInputId:'INP_CZ_WAF',numeratorInputIds:['INP_CZ_WAF','INP_CZ_HOUSE','INP_CZ_SAGA_ROCK'],denominatorInputId:'INP_NORMAL_GAMES',inputTransform:'sum_inputs_to_numerator',minimumSample:1,sampleRecommendation:5000,weight:1,displayFormat:'ratio_1_over_n',difficultyParticipation:'INCLUDE',difficultyExposure:{mode:'per_game',factor:1,quality:'ESTIMATED',basisId:'NORMAL_GAME_BASIS',confidence:'MEDIUM',estimationBasis:'通常時ゲームに対する3種CZ合算。',uncertaintyNote:'CZ中など非通常区間の除外は入力定義に従う。'},userReason:'WAF・絶叫ゾンビ屋敷・SAGAロックチャレンジを合算すれば個別CZを二重評価せず、1/196.6～1/157.3の設定差を利用できるため採用。'});
+tools/apply-phase12-batch01-reconsideration.mjs:77: upsert(s.features,'researchFeatureId',{researchFeatureId:'RF_CZ_HIGH_LENGTH',featureId:'FEAT_CZ_HIGH_LENGTH',adoptionCategory:'INCLUDE_SUPPORT',numeratorInputId:'INP_CZ_HIGH_20',categoryInputIds:['INP_CZ_HIGH_30','INP_CZ_HIGH_50'],inputTransform:'sum_inputs_to_trials',minimumSample:1,sampleRecommendation:10,weight:1,difficultyParticipation:'EXCLUDE',userReason:'100G消化契機のCZ高確は20/30/50Gの振り分けに設定差があり、パジャマステージ滞在から継続Gを観測できるため採用。リプレイ契機との重複など判別が曖昧な回は入力しない。'});
+tools/apply-phase12-batch01-reconsideration.mjs:102: for(const x of [{id:'INP_ROLE_GAMES',name:'小役集計ゲーム数',type:'integer',category:'ROLE',unit:'G',displayOrder:10,defaultValue:0,description:'弱チェリー・スイカを数えた通常時ゲーム数を入力してください。'},{id:'INP_WEAK_CHERRY',name:'弱チェリー',type:'counter',category:'ROLE',unit:'回',displayOrder:11,defaultValue:0,uiQuickAdd:1},{id:'INP_WATERMELON',name:'スイカ',type:'counter',category:'ROLE',unit:'回',displayOrder:12,defaultValue:0,uiQuickAdd:1},...['LILY:リリー','FUBUKI:フブキ','TATSUMAKI:タツマキ'].map((x,i)=>{const[k,n]=x.split(':');return{id:`INP_BEST_${k}`,name:n,type:'counter',category:'BEST_SHOT',unit:'枚',displayOrder:20+i,defaultValue:0,maximum:5,uiQuickAdd:1,description:'1回のベストショットチャンス内でこのキャラが表示された枚数を数えてください。次のチャンスでは0に戻してください。'}})])upsert(s.inputs,'id',x);
+tools/apply-10machine-reverification.mjs:82:  if(!s.evidenceUi.groups.some(g=>g.groupId==='SETTING_DENIAL')) s.evidenceUi.groups.push({groupId:'SETTING_DENIAL',label:'確認した設定否定',selectionMode:'single',normalizationMode:'EXCLUDED_SETTINGS',options:[{value:'DENY_SET_2',label:'設定2否定',excludedSettings:['SET_2'],sourceEvidenceIds:['RE_UTAHIME_END_2_DENIED']}]});
+tools/apply-revue-seated-reg-v66.mjs:45:  crossSourceStatus: bonusResearch.crossSourceStatus ?? 'rounded_match',
+tools/evaluate-machine-difficulty.mjs:195:  const normalizedInformation=K<=1?1:clamp(1-(entropySum/runs)/Math.log(K));
+tools/evaluate-machine-difficulty.mjs:199:  const raw=100*(SCORE_WEIGHTS.information*normalizedInformation+SCORE_WEIGHTS.exact*exactSkill+SCORE_WEIGHTS.distance*distanceSkill);
+tools/evaluate-machine-difficulty.mjs:200:  return {games:targetGames,score:Math.round(raw),components:{normalizedInformation:Number(normalizedInformation.toFixed(6)),exactSettingAccuracy:Number(exactAccuracy.toFixed(6)),exactSettingSkill:Number(exactSkill.toFixed(6)),meanRankDistance:Number(meanRankDistance.toFixed(6)),rankDistanceSkill:Number(distanceSkill.toFixed(6)),meanPosteriorOnTrueSetting:Number((posteriorTrueSum/runs).toFixed(6))},simulation:{runs,simulationsPerSetting,averageUsedFeatures:Number((usedFeatureSum/runs).toFixed(3))}};
+tools/evaluate-machine-difficulty.mjs:230:    scoreDefinition:{range:'0-100 integer; higher is easier to discriminate numerically',evidenceIncluded:false,prior:'uniform over available settings',weights:SCORE_WEIGHTS,components:['normalized posterior information','chance-corrected exact-setting accuracy','chance-corrected ordinal rank-distance'],settingDistance:'ordinal setting order, not numeric label gap'},
+tools/apply-granbelm-nakamimieru-tabs.mjs:18:    const before = `    sections.push({\n      id:\`AUTO_\${cat}\`.replace(/[^A-Z0-9_]/gi,"_").toUpperCase(),\n      ...(categoryTitle?{title:categoryTitle}:{}),\n      displayOrder:order++,\n      ...(selection.uiCategoryDescriptions?.[cat]?{description:selection.uiCategoryDescriptions[cat]}:{}),\n      ...(typeof sectionOptions.description==="string"&&sectionOptions.description?{description:sectionOptions.description}:{}),\n      ...(typeof sectionOptions.collapsible==="boolean"?{collapsible:sectionOptions.collapsible}:{}),\n      ...(typeof sectionOptions.defaultExpanded==="boolean"?{defaultExpanded:sectionOptions.defaultExpanded}:{}),\n      ...(Array.isArray(sectionOptions.summaryInputIds)?{summaryInputIds:sectionOptions.summaryInputIds}:{}),\n      items:items.sort((a,b)=>a.displayOrder-b.displayOrder).map(i=>({\n        type:"input",inputId:i.id,label:i.name,\n        ...(i.uiGridSpan?{gridSpan:i.uiGridSpan}:{}),\n        ...((i.uiDirectInput===false||i.uiCompactCounter===true||i.uiQuickAdd!==undefined)?{config:{...(i.uiDirectInput===false?{directInput:false}:{}),...(i.uiCompactCounter===true?{compact:true}:{}),...(i.uiQuickAdd!==undefined?{quickAdd:i.uiQuickAdd}:{})}}:{}),\n        widget:i.type==="counter"?"counter":i.type==="boolean"?"boolean":i.type==="enum"?"select":i.type==="multi_enum"?"multi_select":"number"\n      }))\n    });`;
+tools/apply-granbelm-nakamimieru-tabs.mjs:19:    const after = `    const toUiItem=(i)=>({\n      type:"input",inputId:i.id,label:i.name,\n      ...(i.uiGridSpan?{gridSpan:i.uiGridSpan}:{}),\n      ...((i.uiDirectInput===false||i.uiCompactCounter===true||i.uiQuickAdd!==undefined)?{config:{...(i.uiDirectInput===false?{directInput:false}:{}),...(i.uiCompactCounter===true?{compact:true}:{}),...(i.uiQuickAdd!==undefined?{quickAdd:i.uiQuickAdd}:{})}}:{}),\n      widget:i.type==="counter"?"counter":i.type==="boolean"?"boolean":i.type==="enum"?"select":i.type==="multi_enum"?"multi_select":"number"\n    });\n    const sortedItems=items.sort((a,b)=>a.displayOrder-b.displayOrder);\n    let tabs;\n    if(Array.isArray(sectionOptions.tabs)){\n      const itemById=new Map(sortedItems.map(i=>[i.id,i]));\n      const seen=new Set();\n      tabs=sectionOptions.tabs.map((tab,index)=>{\n        if(!tab||typeof tab.id!=="string"||!tab.id||typeof tab.label!=="string"||!tab.label||!Array.isArray(tab.inputIds)||tab.inputIds.length===0) fail(\`\${cat}: invalid tab definition at index \${index}\`);\n        const tabItems=tab.inputIds.map(id=>{\n          if(seen.has(id)) fail(\`\${cat}: duplicate tab inputId \${id}\`);\n          const input=itemById.get(id);\n          if(!input) fail(\`\${cat}: unknown tab inputId \${id}\`);\n          seen.add(id);\n          return toUiItem(input);\n        });\n        return {id:tab.id,label:tab.label,items:tabItems};\n      });\n      if(seen.size!==sortedItems.length) fail(\`\${cat}: tab definitions must cover every section input exactly once\`);\n    }\n    sections.push({\n      id:\`AUTO_\${cat}\`.replace(/[^A-Z0-9_]/gi,"_").toUpperCase(),\n      ...(categoryTitle?{title:categoryTitle}:{}),\n      displayOrder:order++,\n      ...(selection.uiCategoryDescriptions?.[cat]?{description:selection.uiCategoryDescriptions[cat]}:{}),\n      ...(typeof sectionOptions.description==="string"&&sectionOptions.description?{description:sectionOptions.description}:{}),\n      ...(typeof sectionOptions.collapsible==="boolean"?{collapsible:sectionOptions.collapsible}:{}),\n      ...(typeof sectionOptions.defaultExpanded==="boolean"?{defaultExpanded:sectionOptions.defaultExpanded}:{}),\n      ...(Array.isArray(sectionOptions.summaryInputIds)?{summaryInputIds:sectionOptions.summaryInputIds}:{}),\n      ...(tabs?{tabs}:{}),\n      items:tabs?[]:sortedItems.map(toUiItem)\n    });`;
+tools/fix-inuyasha-comeback-distribution-rounding-20260827.mjs:21:console.log('Normalized L_INUYASHA2_FK RF_COMEBACK_ZONE setting distributions.');
+tools/normalize-granbelm-nakamimieru-distributions.mjs:18:console.log(`OK: normalized ${touched} Granbelm Nakamimieru setting distributions with residual category.`);
+tools/fix-phase12-batch01-multinomial-setting-values.mjs:35:console.log(`Normalized multinomial ResearchData: ${changedFeatures} features / ${changedFiles} files`);
+tools/apply-selection-20260827-user-batch.mjs:166:      features.push({researchFeatureId:rf.researchFeatureId,featureId:`FEAT_${safeId(rf.researchFeatureId)}`,adoptionCategory:category,numeratorInputId:ids[0],categoryInputIds:ids.slice(1),inputTransform:'sum_inputs_to_trials',weight:1,difficultyParticipation:'EXCLUDE',userReason:reason});
+tools/apply-selection-20260827-user-batch.mjs:170:  const evidenceUi=evidenceOptions.length?{groups:[{groupId:'SETTING_EVIDENCE',label:'設定確定・設定下限情報',category:'EVIDENCE',selectionMode:'multi',normalizationMode:'ALLOWED_SETTINGS_INTERSECTION',displayOrder:100,options:evidenceOptions}]}:{groups:[]};
+tools/validate-research-data.mjs:85:          const sum = categories.reduce((acc, category) => acc + (typeof distribution[category] === 'number' && Number.isFinite(distribution[category]) ? distribution[category] : 0), 0);
+tools/validate-research-data.mjs:92:              warn('MULTINOMIAL_ROUNDED_SUM', `Feature ${id} / ${settingId} の公開カテゴリ確率は丸めにより合計が${sum}です。Researchでは原値を保持し、採用時に厳密な確率解決が必要です。`);
+tools/apply-device-review-20260828-10machine.mjs:106:  const neu='    if(sf.adoptionCategory==="DISPLAY_ONLY" || sf.summarySuppressed===true) continue;';
+test/batch-e2e-orchestrator.test.mjs:3:import { normalizeRequests, deriveStage, deriveOverallStatus } from '../tools/batch-e2e-orchestrator.mjs';
+test/batch-e2e-orchestrator.test.mjs:5:test('normalizes duplicate requests and enforces batch limit', () => {
+test/batch-e2e-orchestrator.test.mjs:6:  assert.deepEqual(normalizeRequests([' スマスロ北斗の拳 ', 'スマスロ　北斗の拳', 'L_TEST']), ['スマスロ北斗の拳', 'L_TEST']);
+test/batch-e2e-orchestrator.test.mjs:7:  assert.throws(() => normalizeRequests(Array.from({length:11},(_,i)=>`L_${i}`)), /batch size exceeds 10/);
+test/prepare-user-selected-research-batch.test.mjs:3:import { normalizeRequests, buildBrief } from '../tools/prepare-user-selected-research-batch.mjs';
+test/prepare-user-selected-research-batch.test.mjs:5:test('user-selected batch keeps explicit names and removes normalized duplicates', () => {
+test/prepare-user-selected-research-batch.test.mjs:6:  assert.deepEqual(normalizeRequests(['Lバキ 強くなりたくば喰らえ!!!', 'Lバキ　強くなりたくば喰らえ!!!', 'スマスロ北斗の拳']), ['Lバキ 強くなりたくば喰らえ!!!', 'スマスロ北斗の拳']);
+test/prepare-user-selected-research-batch.test.mjs:10:  assert.throws(() => normalizeRequests(Array.from({length: 11}, (_, i) => `machine-${i}`)), /batch size exceeds 10/);
+test/source-update-watch.test.mjs:26:test("fetchSnapshot hashes normalized response body",async()=>{
+test/batch-machine-pipeline.test.mjs:6:import { normalizeMachineIds, shouldEnforceSelectionQuality, shouldSurfaceResearchWarning, shouldSurfaceResearchConflict, classifyMachineQuality, deriveOverallStatus, generatedPaths } from '../tools/batch-machine-pipeline.mjs';
+test/batch-machine-pipeline.test.mjs:8:test('batch normalizes unique machine IDs', () => {
+test/batch-machine-pipeline.test.mjs:9:  assert.deepEqual(normalizeMachineIds(['A_ONE,B_TWO', 'A_ONE', 'C_THREE']), ['A_ONE', 'B_TWO', 'C_THREE']);
+test/batch-machine-pipeline.test.mjs:13:  assert.throws(() => normalizeMachineIds(['bad-id']), /invalid machineId/);
+test/batch-machine-pipeline.test.mjs:17:  assert.throws(() => normalizeMachineIds(Array.from({ length: 11 }, (_, i) => `M_${i}`)), /batch size exceeds 10/);
+test/batch-machine-pipeline.test.mjs:85:test('rounded multinomial warning is resolved when Selection excludes the feature', () => {
+test/batch-machine-pipeline.test.mjs:86:  const warning={ code:'MULTINOMIAL_ROUNDED_SUM', message:'Feature RF_ROUNDED / SET_1 の公開カテゴリ確率は丸めにより合計が1.001です。' };
+test/batch-machine-pipeline.test.mjs:87:  const selection={ features:[{ researchFeatureId:'RF_ROUNDED', adoptionCategory:'EXCLUDE' }] };
+test/batch-machine-pipeline.test.mjs:95:test('rounded multinomial warning is resolved by explicit bounded Selection normalization', () => {
+test/batch-machine-pipeline.test.mjs:96:  const warning={ code:'MULTINOMIAL_ROUNDED_SUM', message:'Feature RF_ROUNDED / SET_4 の公開カテゴリ確率は丸めにより合計が1.001です。' };
+test/batch-machine-pipeline.test.mjs:97:  const selection={ features:[{ researchFeatureId:'RF_ROUNDED', adoptionCategory:'INCLUDE_SUPPORT', normalizeRoundedCategoryProbabilities:true }] };
+test/batch-machine-pipeline.test.mjs:105:test('unresolved selected rounded multinomial warning remains REVIEW', () => {
+test/batch-machine-pipeline.test.mjs:106:  const warning={ code:'MULTINOMIAL_ROUNDED_SUM', message:'Feature RF_ROUNDED / SET_4 の公開カテゴリ確率は丸めにより合計が1.001です。' };
+test/batch-machine-pipeline.test.mjs:107:  const selection={ features:[{ researchFeatureId:'RF_ROUNDED', adoptionCategory:'INCLUDE_SUPPORT' }] };
+test/rounded-multinomial-builder.test.mjs:6:  const rounded = tooLarge ? {A:0.5,B:0.3,C:0.22} : {A:0.5,B:0.3,C:0.201};
+test/rounded-multinomial-builder.test.mjs:8:    machine:{machineId:'TEST_ROUNDED_MULTI',displayName:'Test',modelNumber:'Test',manufacturer:'Test',settings:['SET_1','SET_6']},
+test/rounded-multinomial-builder.test.mjs:11:      researchFeatureId:'RF_ROUNDED',name:'丸め分布',factStatus:'verified',candidateModel:'multinomial',
+test/rounded-multinomial-builder.test.mjs:13:      settingDistributions:{SET_1:rounded,SET_6:{A:0.4,B:0.3,C:0.3}}
+test/rounded-multinomial-builder.test.mjs:18:    machineId:'TEST_ROUNDED_MULTI',machineDataVersion:'0.0.1',
+test/rounded-multinomial-builder.test.mjs:25:      researchFeatureId:'RF_ROUNDED',featureId:'FEAT_ROUNDED',adoptionCategory:'INCLUDE_SUPPORT',
+test/rounded-multinomial-builder.test.mjs:26:      numeratorInputId:'INP_A',categoryInputIds:['INP_B','INP_C'],normalizeRoundedCategoryProbabilities:true
+test/rounded-multinomial-builder.test.mjs:33:test('explicit rounded multinomial can be normalized only when Selection explicitly opts in',()=>{
+test/rounded-multinomial-builder.test.mjs:39:  assert.equal(feature.categoryConditioning?.roundingNormalization,true);
+test/rounded-multinomial-builder.test.mjs:42:test('rounded multinomial normalization refuses a deviation above 0.5%',()=>{
+test/rounded-multinomial-builder.test.mjs:44:  assert.throws(()=>buildMachineData(research,selection),/rounded category normalization exceeds 0\.5%/);
+test/inuyasha2-big-end-shared-evidence.test.mjs:12:  const blue=s.features.find(x=>x.featureId==='FEAT_BLUE_BIG_END'); assert.equal(blue.normalizeRoundedCategoryProbabilities,true);
+test/sister-quest-batch-quality-regression.test.mjs:11:test('Sister Quest explicit rounded multinomial normalization clears batch REVIEW', () => {
+test/iceborne-cz-composition.test.mjs:26:test('derived CZ composition exactly normalizes published component rates',()=>{
+test/milky-v64-evidence-final.test.mjs:8:test('Milky MMB panel is a complete shared-input numeric Feature',()=>{ const f=s.features.find(x=>x.featureId==='FEAT_MMB_PANEL'); assert.ok(f); assert.equal(f.adoptionCategory,'INCLUDE_SUPPORT'); assert.equal(f.categoryInputIds.length,5); assert.equal(f.normalizeRoundedCategoryProbabilities,true); for(const id of ['RE_MMB_RED','RE_MMB_RAINBOW']){ const e=s.evidence.find(x=>x.researchEvidenceId===id); assert.ok(e); assert.deepEqual(e.sharedFeatureIds,['FEAT_MMB_PANEL']); }});
+test/batch-research-pipeline.test.mjs:3:import { normalizeLookup, normalizeRequests, resolveCandidate, classifyResearchData } from '../tools/batch-research-pipeline.mjs';
+test/batch-research-pipeline.test.mjs:28:test('lookup normalization handles full-width spaces and punctuation', () => {
+test/batch-research-pipeline.test.mjs:29:  assert.equal(normalizeLookup('スマスロ　テスト・マシン'), normalizeLookup('スマスロ テストマシン'));
+test/batch-research-pipeline.test.mjs:32:test('batch request normalization removes duplicates and enforces max 10', () => {
+test/batch-research-pipeline.test.mjs:33:  assert.deepEqual(normalizeRequests(['A', 'Ａ', 'B']), ['A', 'B']);
+test/batch-research-pipeline.test.mjs:34:  assert.throws(() => normalizeRequests(Array.from({ length: 11 }, (_, i) => `M${i}`)), /batch size exceeds 10/);
+test/evidence-normalization-defaults.test.mjs:7: const p=spawnSync(process.execPath,[path.join(root,"tools","normalize-evidence.mjs"),spec,research,"{}"],{cwd:root,encoding:"utf8"});
+test/evidence-normalization-defaults.test.mjs:14: const p=spawnSync(process.execPath,[path.join(root,"tools","normalize-evidence.mjs"),spec,research,'{"SETTING_FLOOR":"SET_2_OR_HIGHER"}'],{cwd:root,encoding:"utf8"});
+test/batch-selection-pipeline.test.mjs:3:import {normalizeRequests,classifySelection} from '../tools/batch-selection-pipeline.mjs';
+test/batch-selection-pipeline.test.mjs:6:  assert.deepEqual(normalizeRequests(['A','A','B']),['A','B']);
+test/batch-selection-pipeline.test.mjs:7:  assert.throws(()=>normalizeRequests(Array.from({length:11},(_,i)=>`M${i}`)),/batch limit exceeded/);
+test/machine-data-builder.test.mjs:60:  categorySubtractInputIds:{INP_B:["INP_A"]},inputTransform:"sum_inputs_to_trials"}]};
+test/machine-data-builder.test.mjs:90:   {groupId:"SETTING_FLOOR",label:"設定下限",selectionMode:"single",normalizationMode:"ALLOWED_SETTINGS",options:[
+test/machine-data-builder.test.mjs:92:   {groupId:"DENIED_SETTINGS",label:"否定設定",selectionMode:"multi",normalizationMode:"EXCLUDE_SETTINGS",category:"BONUS_HINT",options:[
+test/machine-data-builder.test.mjs:133:  const selection={machineId:'TEST_SUM_TRIALS',machineDataVersion:'0.0.1',inputs:[{id:'INP_A',name:'A',category:'PRIMARY',type:'counter',displayOrder:1},{id:'INP_B',name:'B',category:'PRIMARY',type:'counter',displayOrder:2}],features:[{researchFeatureId:'RF_SUM',featureId:'FEAT_SUM',adoptionCategory:'INCLUDE_PRIMARY',numeratorInputId:'INP_A',denominatorInputId:'INP_A',denominatorInputIds:['INP_A','INP_B'],categoryInputIds:['INP_B'],inputTransform:'sum_inputs_to_trials'}]};
+test/batch-publish-pipeline.test.mjs:9:  normalizeMachineIds,
+test/batch-publish-pipeline.test.mjs:20:test("batch publish normalizes duplicates and preserves order", () => {
+test/batch-publish-pipeline.test.mjs:21:  assert.deepEqual(normalizeMachineIds(["L_BAKI_L3", "L_BAKI_L3", "L_HOKUTO_AD_XR"]), ["L_BAKI_L3", "L_HOKUTO_AD_XR"]);
+test/batch-publish-pipeline.test.mjs:25:  assert.throws(() => normalizeMachineIds(["bad-id"]), /invalid machineId/);
+test/batch-publish-pipeline.test.mjs:30:  assert.throws(() => normalizeMachineIds(ids), /最大10機種/);
+=== Magia package ===
+476-          "YACHIYO",
+477-          "TSURUNO",
+478-          "SANA",
+479-          "FELICIA",
+480-          "KUROE"
+481-        ],
+482:        "categoryProbabilities": {
+483-          "SET_1": [
+484-            0.28071928071928076,
+485-            0.28071928071928076,
+486-            0.2187812187812188,
+487-            0.2187812187812188,
+488-            0.0009990009990009992
+--
+522-            0.2497502497502498,
+523-            0.06293706293706294
+524-          ]
+525-        },
+526-        "categoryConditioning": {
+527-          "excludedCategories": [],
+528:          "normalization": "RENORMALIZE_INCLUDED",
+529:          "roundingNormalization": true
+530-        },
+531-        "sourceEvidenceRefs": [
+532-          "SRC_NANA_EP"
+533-        ]
+534-      },
+535-      {
+=== Amazing Live inferenceSettings ===
+15-      "SET_6",
+16-      "SET_L"
+17-    ],
+18:    "inferenceSettings": [
+19-      "SET_1",
+20-      "SET_2",
+21-      "SET_4",

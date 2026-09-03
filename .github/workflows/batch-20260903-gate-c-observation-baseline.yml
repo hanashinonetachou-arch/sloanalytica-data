@@ -1,0 +1,93 @@
+name: Batch 20260903 Gate C Observation Baseline
+
+on:
+  push:
+    branches:
+      - batch/20260903-hanagasa-ultraman
+    paths:
+      - '.github/workflows/batch-20260903-gate-c-observation-baseline.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  generate:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: batch/20260903-hanagasa-ultraman
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Generate Machine Observation Data v2
+        run: |
+          node --input-type=module <<'NODE'
+          import fs from 'node:fs';
+          const ids=['L_HANAGASA_NA','L_TOLOVE_DARKNESS_S8','LB_PREMIUM_UMAIBO_S1','LB_NEW_PULSAR_BT_C9','S_KABANERI_ZR','L_DMC5_ST_XA','LB_1000CHAN_ALPHA_L3','LB_JACKPOT_CY1','L_GUILTY_CROWN_2_XF','L_ULTRAMAN_KE'];
+          const linked={
+            L_TOLOVE_DARKNESS_S8:{title:'打-WIN LITE',url:'https://1geki.jp/slot/l_toloveru_d_trance/6/',categories:['途中確認QR','遊技終了QR','1000G消化ごとの隠れ凪設定示唆'],notes:'機種メニューから開始し、途中/終了QRで遊技情報を確認できる。隠れ凪は1000G消化ごとの設定示唆。'},
+            LB_NEW_PULSAR_BT_C9:{title:'スロプラNEXT スロかつーる',url:'https://www.yamasa-next.co.jp/slp/slktool/08',categories:['ゲーム数','ボーナス回数','実戦データ保存','リーチ目図鑑'],notes:'公式スロプラNEXTのニューパルサーBT専用スロかつーる。表示項目と推測分母の一致は項目別に確認する。'},
+            L_GUILTY_CROWN_2_XF:{title:'ユニメモ',url:'https://www.universal-777.com/fun/unimemo/',categories:['途中記録','遊技結果','小役/ボーナス関連履歴'],notes:'公式ユニメモ対応機種。途中記録可能。解析上はボーナス当選契機確認にも利用できるが、Selection採用項目と分母一致を確認して使う。'}
+          };
+          const machineMenu={
+            L_DMC5_ST_XA:{title:'筐体メニュー 遊技データ/Devils Midnight Chase履歴',url:'https://1geki.jp/slot/l_dmc5_st/5/',categories:['遊技データ','Devils Midnight Chase履歴','移行ゾーン','DMCステージ中ディスク色'],notes:'メニューから遊技データとDMC履歴を閲覧できる。履歴はモード推測材料であり内部モード確定値としては扱わない。'}
+          };
+          const sanitize=s=>String(s).replace(/^FEAT_/,'').replace(/[^A-Z0-9_]/g,'_');
+          for(const machineId of ids){
+            const r=JSON.parse(fs.readFileSync(`research/${machineId}/research-data.json`,'utf8'));
+            const s=JSON.parse(fs.readFileSync(`research/${machineId}/selection-data.json`,'utf8'));
+            const rfBy=new Map((r.features??[]).map(x=>[x.researchFeatureId,x]));
+            const inputBy=new Map((s.inputs??[]).map(x=>[x.id,x]));
+            const observations=[]; const mappings=[]; const sources=[];
+            for(const f of (s.features??[]).filter(x=>String(x.adoptionCategory).startsWith('INCLUDE'))){
+              const rf=rfBy.get(f.researchFeatureId)??{};
+              const inputIds=[f.numeratorInputId,...(f.categoryInputIds??[]),...(f.numeratorInputIds??[]),f.denominatorInputId,...(f.denominatorInputIds??[])].filter(Boolean);
+              const labels=[...new Set(inputIds.map(id=>inputBy.get(id)?.name??id))];
+              const oid=`OBS_${sanitize(f.featureId)}`;
+              observations.push({observationId:oid,sourceType:'DIRECT_PLAY',observationMode:'MANUAL_COUNTER',status:'FOUND',label:rf.name??f.featureId,categories:labels,timing:[`自己実戦中に「${rf.trialUnit??'Researchで定義した対象試行'}」を単位として記録`],excludedConditions:['Researchで定義された対象外状態を分母へ混ぜない','着席前累積値を自己実戦値へ混ぜない','未観測を観測済み0として扱わない','条件別の公開確率を単一母集団へ合算しない'],sourceRefs:[],notes:`${f.adoptionCategory}。分子=${rf.numeratorDefinition??'Selection入力で定義'} / 分母=${rf.denominatorDefinition??rf.trialUnit??'Selection入力で定義'}。ObservationではResearchの試行母集団を変更しない。`});
+              mappings.push({featureId:f.featureId,mappingType:'EXACT',observationIds:[oid],collectionMethods:['MANUAL_COUNTER'],usableForInference:true,usableForDifficulty:false,notes:'自己実戦中にResearch定義の分子・分母を同じ試行母集団で直接カウントする。Difficultyは総GへのExposure換算を別途確定するまで不参加。'});
+            }
+            const hardNames=[...(s.evidence??[]).map(x=>x.displayName??x.name??x.evidenceId)];
+            for(const g of s.evidenceUi?.groups??[]) for(const o of g.options??[]) hardNames.push(`${g.label}: ${o.label}`);
+            if(hardNames.length) observations.push({observationId:'OBS_HARD_EVIDENCE_EVENTS',sourceType:'END_EVENT',observationMode:'VISUAL_EVENT',status:'FOUND',label:'設定確定・否定情報',categories:[...new Set(hardNames)],timing:['該当する終了画面・獲得枚数・トロフィー・音声・QR結果などの成立時'],excludedConditions:['傾向示唆を設定確定・否定へ昇格させない','ResearchでallowedSettings/excludedSettingsが確定していない表示をHard Evidenceとして扱わない'],sourceRefs:[],notes:'Selectionで採用済みのHard Evidenceのみ。音声/QR由来の項目は表示・再生内容をその場で確認する。'});
+            if(linked[machineId]){const z=linked[machineId];sources.push({sourceId:'OBS_SRC_LINKED_SERVICE',publisher:z.title,title:z.title,url:z.url,checkedAt:'2026-09-03',sourceType:'official_or_major_analysis'});observations.push({observationId:'OBS_LINKED_SERVICE',sourceType:'LINKED_SERVICE',observationMode:'LINKED_SERVICE_READ',status:'FOUND',label:z.title,categories:z.categories,timing:['遊技中または遊技終了時にサービス画面を確認'],excludedConditions:['サービス表示値とResearchの分母定義が一致しない項目を推測へ直結しない','途中記録と終了記録を重複加算しない'],sourceRefs:['OBS_SRC_LINKED_SERVICE'],notes:z.notes});}
+            if(machineMenu[machineId]){const z=machineMenu[machineId];sources.push({sourceId:'OBS_SRC_MACHINE_MENU',publisher:'一撃',title:z.title,url:z.url,checkedAt:'2026-09-03',sourceType:'major_analysis'});observations.push({observationId:'OBS_MACHINE_MENU',sourceType:'MACHINE_MENU',observationMode:'MENU_READ',status:'FOUND',label:z.title,categories:z.categories,timing:['筐体メニューを開いて確認'],excludedConditions:['履歴から推測される内部モードを確定観測値として入力しない'],sourceRefs:['OBS_SRC_MACHINE_MENU'],notes:z.notes});}
+            const sourceCoverage={machineMenu:machineMenu[machineId]?'FOUND':'UNRESOLVED',dataCounter:'UNRESOLVED',linkedService:linked[machineId]?'FOUND':'UNRESOLVED',directPlay:'FOUND',endEvent:hardNames.length?'FOUND':'CHECKED_NONE',seatedState:'UNRESOLVED'};
+            const fieldVerificationItems=[];
+            for(const [key,sourceType,priority,question] of [
+              ['machineMenu','MACHINE_MENU','MEDIUM','筐体メニュー/遊技履歴の具体表示項目と、自己実戦中にリセット可能かを実機で確認する。'],
+              ['dataCounter','DATA_COUNTER','HIGH','ホールのデータカウンターで総G・現在G・Bonus/AT/CZ・履歴のどこまで取得でき、Researchの分母と一致するか確認する。'],
+              ['linkedService','LINKED_SERVICE','MEDIUM','機種固有の連動サービスが現在利用可能か、表示項目と分母定義を実機QR/メニューから確認する。'],
+              ['seatedState','SEATED_STATE','HIGH','着席時に前任者の累積値を取得できるか、当日/前日・リセット境界を安全に分離できるか確認する。']
+            ]) if(sourceCoverage[key]==='UNRESOLVED') fieldVerificationItems.push({verificationId:`VFY_${machineId}_${key.toUpperCase()}`,status:'WAITING_FOR_MACHINE',sourceType,priority,question});
+            const data={schemaVersion:'machine-observation-data-v2',machineId,displayName:r.machine?.displayName??r.machine?.formalName??machineId,researchedAt:'2026-09-03',sources,sourceCoverage,observations,featureMappings:mappings,researchReopenRequests:[],fieldVerificationItems};
+            fs.writeFileSync(`research/${machineId}/machine-observation-data.json`,JSON.stringify(data,null,2)+'\n');
+          }
+          NODE
+      - name: Validate Observation v2 and Selection linkage
+        run: |
+          set -euo pipefail
+          ids=(L_HANAGASA_NA L_TOLOVE_DARKNESS_S8 LB_PREMIUM_UMAIBO_S1 LB_NEW_PULSAR_BT_C9 S_KABANERI_ZR L_DMC5_ST_XA LB_1000CHAN_ALPHA_L3 LB_JACKPOT_CY1 L_GUILTY_CROWN_2_XF L_ULTRAMAN_KE)
+          files=(); for id in "${ids[@]}"; do files+=("research/$id/machine-observation-data.json"); done
+          node tools/validate-machine-observation-data.mjs "${files[@]}"
+          node tools/audit-observation-selection-linkage.mjs --strict-v2 "${ids[@]}"
+      - name: Write Gate C baseline audit
+        run: |
+          node --input-type=module <<'NODE'
+          import fs from 'node:fs';
+          const ids=['L_HANAGASA_NA','L_TOLOVE_DARKNESS_S8','LB_PREMIUM_UMAIBO_S1','LB_NEW_PULSAR_BT_C9','S_KABANERI_ZR','L_DMC5_ST_XA','LB_1000CHAN_ALPHA_L3','LB_JACKPOT_CY1','L_GUILTY_CROWN_2_XF','L_ULTRAMAN_KE'];
+          let mappings=0,unresolvedCoverage=0,fieldItems=0;const machines=[];
+          for(const id of ids){const o=JSON.parse(fs.readFileSync(`research/${id}/machine-observation-data.json`,'utf8'));const unresolved=Object.entries(o.sourceCoverage).filter(([,v])=>v==='UNRESOLVED').map(([k])=>k);mappings+=o.featureMappings.length;unresolvedCoverage+=unresolved.length;fieldItems+=o.fieldVerificationItems.length;machines.push({machineId:id,featureMappings:o.featureMappings.length,sourceCoverage:o.sourceCoverage,unresolved,fieldVerificationItems:o.fieldVerificationItems.length});}
+          const report={schemaVersion:'batch-gate-c-baseline-audit-v1',batch:'20260903-hanagasa-ultraman',generatedAt:new Date().toISOString(),status:'BASELINE_PASS_NOT_GATE_C_COMPLETE',machineObservationDataV2:'PASS_10_OF_10',selectionLinkage:'PASS_STRICT_V2',adoptedFeatureMappings:mappings,modelReadiness:'PASS_REVIEW_0',unresolvedSourceCoverage:unresolvedCoverage,fieldVerificationItems:fieldItems,webResolvedSources:{L_TOLOVE_DARKNESS_S8:'打-WIN LITE',LB_NEW_PULSAR_BT_C9:'スロプラNEXT スロかつーる',L_GUILTY_CROWN_2_XF:'ユニメモ',L_DMC5_ST_XA:'筐体メニュー遊技データ/DMC履歴'},notes:['This is a Gate C baseline, not completion.','Direct-play mappings preserve Research numerator/denominator trial universes.','Data-counter and seated-state remain hall/machine dependent.','Remaining machine-menu/linked-service UNRESOLVED entries require an additional web exhaustiveness sweep before MACHINE_REQUIRED classification.'],machines};fs.writeFileSync('reports/batch-20260903-gate-c-observation-baseline.json',JSON.stringify(report,null,2)+'\n');
+          NODE
+      - name: Commit Gate C baseline
+        run: |
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git add research/*/machine-observation-data.json reports/batch-20260903-gate-c-observation-baseline.json
+          git commit -m 'observation: generate 20260903 Gate C baseline' || exit 0
+          git pull --rebase origin batch/20260903-hanagasa-ultraman
+          git push origin HEAD:batch/20260903-hanagasa-ultraman
