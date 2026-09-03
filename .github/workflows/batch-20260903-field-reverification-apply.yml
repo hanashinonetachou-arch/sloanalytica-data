@@ -1,0 +1,137 @@
+name: Batch 20260903 Field Reverification Apply
+
+on:
+  push:
+    branches:
+      - batch/20260903-hanagasa-ultraman
+    paths:
+      - '.github/workflows/batch-20260903-field-reverification-apply.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  apply:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: batch/20260903-hanagasa-ultraman
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Apply field reverification findings
+        run: |
+          node --input-type=module <<'NODE'
+          import fs from 'node:fs';
+          const load=id=>JSON.parse(fs.readFileSync(`research/${id}/machine-observation-data.json`,'utf8'));
+          const save=(id,o)=>fs.writeFileSync(`research/${id}/machine-observation-data.json`,JSON.stringify(o,null,2)+'\n');
+          const resolveVfy=(o,type,status='VERIFIED_ON_MACHINE',note='2026-09-03 user field verification')=>{
+            for(const v of o.fieldVerificationItems??[]) if(v.sourceType===type){v.status=status;v.fieldVerificationStatus='USER_VERIFIED_2026-09-03';v.resolutionNote=note;}
+          };
+
+          const noneIds=['L_HANAGASA_NA','LB_PREMIUM_UMAIBO_S1','LB_NEW_PULSAR_BT_C9','LB_1000CHAN_ALPHA_L3','LB_JACKPOT_CY1'];
+          for(const id of noneIds){
+            const o=load(id);
+            o.sourceCoverage.machineMenu='CHECKED_NONE';
+            o.sourceCoverage.linkedService='CHECKED_NONE';
+            resolveVfy(o,'MACHINE_MENU','VERIFIED_ON_MACHINE','実機確認で筐体メニュー/遊技履歴なしを確認。');
+            resolveVfy(o,'LINKED_SERVICE','VERIFIED_ON_MACHINE','実機確認で機種固有の実機連動機能なしを確認。');
+            o.fieldVerificationNotes=[...(o.fieldVerificationNotes??[]),'2026-09-03: user verified no machine menu and no machine-linked service.'];
+            save(id,o);
+          }
+
+          {
+            const id='LB_NEW_PULSAR_BT_C9',o=load(id);
+            o.sources=(o.sources??[]).filter(s=>s.sourceId!=='OBS_SRC_LINKED_SERVICE');
+            o.observations=(o.observations??[]).filter(x=>x.observationId!=='OBS_LINKED_SERVICE');
+            o.externalManualTools=[...(o.externalManualTools??[]).filter(x=>x.toolId!=='SLOKATSU_TOOL'),{
+              toolId:'SLOKATSU_TOOL',name:'スロプラNEXT スロかつーる',classification:'MANUAL_RECORDING_TOOL_NOT_MACHINE_LINKED',
+              notes:'実機から自動取得する連動機能ではなく、ユーザー自身が小役等をカウントして実戦記録を残す外部手入力ツール。Observation sourceとして扱わない。',verifiedAt:'2026-09-03'
+            }];
+            save(id,o);
+          }
+
+          {
+            const id='L_TOLOVE_DARKNESS_S8',o=load(id);
+            o.sourceCoverage.machineMenu='VERIFIED_ON_MACHINE';
+            const existing=o.observations.find(x=>x.observationId==='OBS_MACHINE_MENU_FIELD');
+            const menu={observationId:'OBS_MACHINE_MENU_FIELD',sourceType:'MACHINE_MENU',observationMode:'MENU_READ',status:'VERIFIED_ON_MACHINE',label:'筐体メニュー 遊技データ',categories:['TOTAL GAME','チャンスゾーン種別回数（3種）','ボーナス種別回数（3種）','打-WIN LITE開始導線'],timing:['筐体メニューを開いて確認'],excludedConditions:['筐体TOTAL GAMEや各回数をResearchのAT初当り分母・分子へ定義照合なしに直結しない'],sourceRefs:[],notes:'2026-09-03 実機画像で確認。打-WIN LITEの開始導線は確認済みだが、打-WIN LITE結果画面の具体表示項目は未確認。'};
+            if(existing) Object.assign(existing,menu); else o.observations.push(menu);
+            resolveVfy(o,'MACHINE_MENU','VERIFIED_ON_MACHINE','実機画像でTOTAL GAME、CZ種別回数、ボーナス種別回数、打-WIN LITE開始導線を確認。');
+            save(id,o);
+          }
+
+          {
+            const id='L_DMC5_ST_XA',o=load(id);
+            o.sourceCoverage.machineMenu='VERIFIED_ON_MACHINE';
+            const menu=o.observations.find(x=>x.observationId==='OBS_MACHINE_MENU');
+            if(menu){
+              menu.status='VERIFIED_ON_MACHINE';
+              menu.categories=['総ゲーム数','通常総ゲーム数','Devils Never Cry 回数','STYLISH TIME 回数','BONUS 回数','Devils Midnight Chase履歴','現在の通常ゲーム数','100G刻みのDMC履歴'];
+              menu.notes='2026-09-03 実機画像で遊技データとDevils Midnight Chase履歴を確認。通常総ゲーム数は取得できるが、Researchの各Feature分母と完全一致するかは定義照合なしに自動利用しない。履歴から内部モードを確定観測しない。';
+            }
+            o.fieldVerificationNotes=[...(o.fieldVerificationNotes??[]),'2026-09-03: machine menu verified from user-provided machine image.'];
+            save(id,o);
+          }
+
+          {
+            const id='L_GUILTY_CROWN_2_XF',o=load(id);
+            o.sourceCoverage.linkedService='VERIFIED_ON_MACHINE';
+            const u=o.observations.find(x=>x.observationId==='OBS_LINKED_SERVICE');
+            if(u){
+              u.status='VERIFIED_ON_MACHINE';
+              u.categories=['総プレイ数','通常プレイ数','ATプレイ数','総ボーナス','同色BB','異色BB','BBエクストラ突入','VOID CHANCE初当り','rebirth初当り','GUILTY CROWN初当り','小役別回数','ボーナス重複契機履歴','設定示唆/確定関連記録'];
+              u.notes='2026-09-03 ユニメモ実戦画像で具体項目を確認。通常プレイ数・総ボーナス・GUILTY CROWN初当り等を取得可能。現行代表Feature「ボーナス+AT合算」の入力補助候補だが、ユニメモ通常プレイ数とResearchの通常時ゲーム分母が完全同一であることを別途定義確認するまで自動導出・Difficulty換算には使わない。重複Featureを追加尤度として併用しない。';
+            }
+            o.fieldVerificationNotes=[...(o.fieldVerificationNotes??[]),'2026-09-03: UniMemo result screens verified; detailed counters are available. Selection remains representative FEAT_BONUS_AT_AGG to avoid double counting.'];
+            save(id,o);
+          }
+
+          {
+            const id='L_ULTRAMAN_KE',o=load(id);
+            const v=(o.fieldVerificationItems??[]).find(x=>x.sourceType==='MACHINE_MENU');
+            if(v){v.status='NOT_REQUIRED';v.fieldVerificationStatus='PRACTICAL_STOP_2026-09-03';v.resolutionNote='メニュー詳細の追加情報は確認できず、導入店舗が極少で追試困難。推測設計を筐体メニュー情報へ依存させず、将来情報が得られた場合のみ再開する。';}
+            o.fieldVerificationNotes=[...(o.fieldVerificationNotes??[]),'2026-09-03: machine-menu detail search stopped as practically infeasible; official ぱちログ対応の既存根拠は維持。'];
+            save(id,o);
+          }
+
+          const report={
+            schemaVersion:'batch-field-reverification-v1',batch:'20260903-hanagasa-ultraman',verifiedAt:'2026-09-03',status:'APPLIED_PENDING_REAUDIT',
+            decisions:{
+              noMenuOrMachineLinkedService:['L_HANAGASA_NA','LB_PREMIUM_UMAIBO_S1','LB_NEW_PULSAR_BT_C9','LB_1000CHAN_ALPHA_L3','LB_JACKPOT_CY1'],
+              newPulsar:'スロかつーるを実機連動Observationから除外し、外部手入力記録ツールへ再分類。',
+              toLove:'筐体メニューのTOTAL GAME/CZ種別/ボーナス種別/打-WIN LITE開始導線を実機確認済みに更新。打-WIN結果画面は未確認。',
+              dmc5:'総ゲーム数・通常総ゲーム数・DNC/STYLISH TIME/BONUS・DMC履歴を実機確認済みに更新。分母一致未確定のため自動差分入力は保留。',
+              guiltyCrown2:'ユニメモの具体カウンタ群を実機確認済みに更新。代表Feature方針は維持し、通常プレイ数の分母同一性が確定するまで自動導出は保留。',
+              ultraman:'筐体メニュー追試は実務上停止。ぱちログ公式根拠は維持し、推測はメニュー詳細に依存させない。'
+            },
+            selectionDecision:'NO_NUMERIC_SELECTION_CHANGE',
+            rationale:'今回の実機情報は観測可能性と入力UX候補を改善するが、公開確率や依存関係を変更する新事実ではない。特にGC2/DMC5/ToLOVEは分母定義一致が未確定のため、現時点で尤度構造やDifficultyへ新たな自動換算を持ち込まない。'
+          };
+          fs.writeFileSync('reports/batch-20260903-field-reverification.json',JSON.stringify(report,null,2)+'\n');
+          NODE
+      - name: Validate changed Observation data
+        run: |
+          ids=(L_HANAGASA_NA L_TOLOVE_DARKNESS_S8 LB_PREMIUM_UMAIBO_S1 LB_NEW_PULSAR_BT_C9 L_DMC5_ST_XA LB_1000CHAN_ALPHA_L3 LB_JACKPOT_CY1 L_GUILTY_CROWN_2_XF L_ULTRAMAN_KE)
+          files=(); for id in "${ids[@]}"; do files+=("research/$id/machine-observation-data.json"); done
+          node tools/validate-machine-observation-data.mjs "${files[@]}"
+          npm run observation:selection:audit -- L_HANAGASA_NA L_TOLOVE_DARKNESS_S8 LB_PREMIUM_UMAIBO_S1 LB_NEW_PULSAR_BT_C9 S_KABANERI_ZR L_DMC5_ST_XA LB_1000CHAN_ALPHA_L3 LB_JACKPOT_CY1 L_GUILTY_CROWN_2_XF L_ULTRAMAN_KE --strict-v2
+      - name: Re-run quality checks
+        run: |
+          npm run ui-design:observation:audit -- L_HANAGASA_NA L_TOLOVE_DARKNESS_S8 LB_PREMIUM_UMAIBO_S1 LB_NEW_PULSAR_BT_C9 S_KABANERI_ZR L_DMC5_ST_XA LB_1000CHAN_ALPHA_L3 LB_JACKPOT_CY1 L_GUILTY_CROWN_2_XF L_ULTRAMAN_KE --strict-v2
+          npm run pipeline:four-layer:gate -- L_HANAGASA_NA L_TOLOVE_DARKNESS_S8 LB_PREMIUM_UMAIBO_S1 LB_NEW_PULSAR_BT_C9 S_KABANERI_ZR L_DMC5_ST_XA LB_1000CHAN_ALPHA_L3 LB_JACKPOT_CY1 L_GUILTY_CROWN_2_XF L_ULTRAMAN_KE
+          npm run audit:ui-service-names
+          npm run registry:validate
+          npm test
+          npm run audit
+      - name: Commit field reverification
+        run: |
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git add research/*/machine-observation-data.json reports/batch-20260903-field-reverification.json
+          git commit -m 'observation: apply 20260903 field reverification' || exit 0
+          git pull --rebase origin batch/20260903-hanagasa-ultraman
+          git push origin HEAD:batch/20260903-hanagasa-ultraman
