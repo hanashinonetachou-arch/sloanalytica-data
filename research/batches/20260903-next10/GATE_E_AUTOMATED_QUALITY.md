@@ -21,6 +21,12 @@ Target set:
 9. `S_KONOSUBA_ZR`
 10. `S_RAKUEN_TSUHO_FS`
 
+## Retry state
+
+- Gate D re-materialization after the REFERENCE-reason fix completed on head `2468f24fe1646bddd03866ea57dc0c09308fd60e`.
+- Re-run Gate E from this human-authored synchronization commit so the quality workflow evaluates the newly materialized Selection/MachineData state rather than the bot-authored follow-up commit.
+- Do not weaken strict Selection Quality checks; any remaining failure must be fixed at its originating layer.
+
 ## Safety
 
 - PR remains Draft.
