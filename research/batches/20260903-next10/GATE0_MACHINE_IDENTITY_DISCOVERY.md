@@ -23,6 +23,25 @@ The previous candidate duplicates `LBパチスロ ヱヴァンゲリヲン ～�
 
 > IDs 211–220 are batch-local reservations chosen after the previous completed batch used registrations through 210. They are not committed to the shared registry until identity/discovery validation is complete.
 
+## Manufacturer-linked service matrix
+
+User real-machine/domain verification is treated as authoritative Observation input for service existence in this batch. Concrete obtainable fields still require machine-specific Research/Observation tracing.
+
+| ID | machine | linked service | service existence state |
+|---:|---|---|---|
+| 211 | いざ！番長 | ダイトモ | FOUND |
+| 212 | L 絶対衝激～PLATONIC HEART～ | none | CHECKED_NONE |
+| 213 | わたしの幸せな結婚 | eSLOT+ | FOUND |
+| 214 | LBトリプルクラウン | none | CHECKED_NONE |
+| 215 | マタドールⅢ | none | CHECKED_NONE |
+| 216 | パチスロ 転生したら剣でした | eSLOT+ | FOUND |
+| 217 | L ダーリン・イン・ザ・フランキス | none | CHECKED_NONE |
+| 218 | L咲-Saki- 頂上決戦 | none | CHECKED_NONE |
+| 219 | パチスロこの素晴らしい世界に祝福を！ | マイスロ | FOUND |
+| 220 | パチスロ楽園追放 | マイスロ | FOUND |
+
+Important: `CHECKED_NONE` above means no manufacturer-linked service exists for the machine. External/manual web tools must not be promoted to manufacturer-linked service. Machine-menu existence is a separate Observation question and is not inferred from this matrix.
+
 ## Discovery Candidate Universe — seed inventory
 
 This is intentionally broad. Nothing below is adopted/rejected at Gate 0. Research must trace every published setting-difference/evidence candidate and may add candidates found during red-team discovery.
@@ -33,7 +52,8 @@ This is intentionally broad. Nothing below is adopted/rejected at Gate 0. Resear
 - CZ / ボーナス契機別の公開設定差
 - モード・規定G・状態移行関連
 - 終了画面 / 獲得枚数 / トロフィー等の設定示唆・確定情報
-- machine menu / manufacturer-linked service / seat-visible history
+- ダイトモの機種別取得項目
+- machine menu / seat-visible history
 
 ### 212 L 絶対衝激～PLATONIC HEART～
 - リアルボーナス確率
@@ -41,7 +61,8 @@ This is intentionally broad. Nothing below is adopted/rejected at Gate 0. Resear
 - スイカ等成立役からの高確移行・状態依存抽選
 - CZ関連
 - ナミちゃんトロフィーほか設定示唆・確定情報
-- machine menu / linked service / direct manual count
+- manufacturer-linked service: CHECKED_NONE
+- machine menu / direct manual count
 
 ### 213 わたしの幸せな結婚
 - ボーナス初当り
@@ -51,7 +72,8 @@ This is intentionally broad. Nothing below is adopted/rejected at Gate 0. Resear
 - わた婚メドレー背景色 / キャラ紹介
 - AT終了画面（コナミコマンド）
 - アリストロフィー
-- machine menu / linked service / seat-visible history
+- eSLOT+の機種別取得項目
+- machine menu / seat-visible history
 
 ### 214 LBトリプルクラウン
 - BIG / REG / ボーナス合算
@@ -59,7 +81,8 @@ This is intentionally broad. Nothing below is adopted/rejected at Gate 0. Resear
 - BIG中設定示唆
 - REG中設定示唆
 - BT中を含む観測可能項目
-- machine menu / linked service / direct manual count
+- manufacturer-linked service: CHECKED_NONE
+- machine menu / direct manual count
 
 ### 215 マタドールⅢ
 - BIG / REG / ボーナス合算
@@ -67,7 +90,8 @@ This is intentionally broad. Nothing below is adopted/rejected at Gate 0. Resear
 - 枚数調整時コンドルランプ
 - ボーナス終了時パネルフラッシュ
 - 通常時小役 / 同時当選の公開設定差
-- machine menu / linked service / direct manual count
+- manufacturer-linked service: CHECKED_NONE
+- machine menu / direct manual count
 
 ### 216 パチスロ 転生したら剣でした
 - CZ初当り
@@ -76,7 +100,8 @@ This is intentionally broad. Nothing below is adopted/rejected at Gate 0. Resear
 - 規定G / モード / 状態移行
 - CZ種別・成功関連
 - ボーナス / AT / エンディング等の設定示唆・確定情報
-- コナミ系linked serviceを含む取得項目確認
+- eSLOT+の機種別取得項目
+- machine menu / direct manual count
 
 ### 217 L ダーリン・イン・ザ・フランキス
 - CZ（コネクトチャンス等）
@@ -89,7 +114,8 @@ This is intentionally broad. Nothing below is adopted/rejected at Gate 0. Resear
 - ボーナス高確終了画面
 - ナミちゃんトロフィー
 - エンディング示唆
-- machine menu / linked service / direct manual count
+- manufacturer-linked service: CHECKED_NONE
+- machine menu / direct manual count
 
 ### 218 L咲-Saki- 頂上決戦
 - CZ初当り
@@ -97,7 +123,8 @@ This is intentionally broad. Nothing below is adopted/rejected at Gate 0. Resear
 - 周期 / ライバルモード / 状態関連の公開設定差
 - 終了画面・設定示唆画面
 - 獲得枚数 / 確定情報
-- machine menu / linked service / direct manual count
+- manufacturer-linked service: CHECKED_NONE
+- machine menu / direct manual count
 
 ### 219 パチスロこの素晴らしい世界に祝福を！
 - AT初当り
@@ -112,7 +139,7 @@ This is intentionally broad. Nothing below is adopted/rejected at Gate 0. Resear
 - 非有利区間の借金額セリフ
 - 特殊獲得枚数表示
 - サミートロフィー
-- マイスロ等linked serviceの具体的取得項目
+- マイスロの機種別取得項目
 
 ### 220 パチスロ楽園追放
 - RD突入率
@@ -134,7 +161,7 @@ This is intentionally broad. Nothing below is adopted/rejected at Gate 0. Resear
 - [ ] No candidate dropped because effect is weak, rare, correlated, burdensome, or Evidence-only
 - [ ] Every discovered candidate traced into ResearchData or explicitly retained as unresolved discovery debt
 - [ ] Numerator / denominator / condition / trial universe recorded per acquisition method
-- [ ] Linked service classified only as manufacturer-linked; external manual tools kept separate
+- [x] Linked-service existence classified: 5 FOUND / 5 CHECKED_NONE; external manual tools kept separate
 - [ ] Practical 7000G exposure considered later in Selection, not used to delete Discovery candidates
 - [ ] Gate 0 only closes after discovery red-team finds no obvious omitted setting-difference/evidence family
 
@@ -144,7 +171,8 @@ This is intentionally broad. Nothing below is adopted/rejected at Gate 0. Resear
 - Official KONAMI pages confirm the identity/game flow of `わたしの幸せな結婚` and `転生したら剣でした`.
 - Official 北電子 product information confirms `マタドールⅢ` and its setting-specific BB/RB/合算 table.
 - `パチスロ楽園追放` public analysis explicitly states common-bell visual indistinguishability and My Slot counter availability only after the relevant counter level; this is an Observation constraint, not a reason to omit the candidate from Research.
+- Linked-service existence matrix above incorporates user real-machine/domain verification and must not be overwritten by ambiguous web-tool references.
 
 ## Next action
 
-Continue multi-pass web discovery for all 10 machines, expand candidate families, verify linked-service/menu observability, then close Gate 0 only after Discovery Red-Team. No Selection decision is made in this file.
+Continue multi-pass web discovery for all 10 machines, expand candidate families, verify concrete linked-service fields and machine-menu observability, then close Gate 0 only after Discovery Red-Team. No Selection decision is made in this file.
