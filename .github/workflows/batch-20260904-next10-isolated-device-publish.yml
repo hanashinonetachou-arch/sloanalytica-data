@@ -1,0 +1,54 @@
+name: Batch 20260904 Next10 Isolated Device Publish
+
+on:
+  push:
+    branches:
+      - prototype-multi-machine
+    paths:
+      - '.github/workflows/batch-20260904-next10-isolated-device-publish.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  publish-device-branch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: batch/20260904-next10-device
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Verify source Gate E
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse --abbrev-ref HEAD)" = "batch/20260904-next10-device"
+          grep -q 'Status: PASS' research/batches/20260903-next10/GATE_E_AUTOMATED_QUALITY.md
+      - name: Dry run exact next10
+        run: npm run machine:publish:batch -- L_IZA_BANCHO_SB8 L_ZETTAI_SHOGEKI_PLATONIC_HEART_TK L_WATASHI_NO_SHIAWASE_NA_KEKKON_PN LB_TRIPLE_CROWN_SF4 LB_MATADOR_3_TT L_TENSEI_SHITARA_KEN_DESHITA_GT L_DARLING_IN_THE_FRANXX_SA L_SAKI_CHOJO_KESSEN_YR S_KONOSUBA_ZR S_RAKUEN_TSUHO_FS
+      - name: Apply exact next10 on isolated branch
+        run: npm run machine:publish:batch -- --apply S_RAKUEN_TSUHO_FS S_KONOSUBA_ZR L_SAKI_CHOJO_KESSEN_YR L_DARLING_IN_THE_FRANXX_SA L_TENSEI_SHITARA_KEN_DESHITA_GT LB_MATADOR_3_TT LB_TRIPLE_CROWN_SF4 L_WATASHI_NO_SHIAWASE_NA_KEKKON_PN L_ZETTAI_SHOGEKI_PLATONIC_HEART_TK L_IZA_BANCHO_SB8
+      - name: Verify 211-220
+        run: |
+          npm run registry:validate
+          node --input-type=module <<'NODE'
+          import fs from 'node:fs';
+          const ex=[['L_IZA_BANCHO_SB8',211],['L_ZETTAI_SHOGEKI_PLATONIC_HEART_TK',212],['L_WATASHI_NO_SHIAWASE_NA_KEKKON_PN',213],['LB_TRIPLE_CROWN_SF4',214],['LB_MATADOR_3_TT',215],['L_TENSEI_SHITARA_KEN_DESHITA_GT',216],['L_DARLING_IN_THE_FRANXX_SA',217],['L_SAKI_CHOJO_KESSEN_YR',218],['S_KONOSUBA_ZR',219],['S_RAKUEN_TSUHO_FS',220]];
+          const c=JSON.parse(fs.readFileSync('catalog.json')).machines??[]; const r=JSON.parse(fs.readFileSync('machine-registry.json')).machines??[];
+          for(const [id,n] of ex){if(c.find(x=>x.machineId===id)?.status!=='available')throw Error(id+' not available');if(r.find(x=>x.machineId===id)?.provisionalRegistrationId!==n)throw Error(id+' registration mismatch');}
+          console.log('PASS registrations 211-220');
+          NODE
+      - name: Commit isolated publication
+        run: |
+          set -euo pipefail
+          git restore -- reports/v64-observation-debt-classification.json || true
+          unexpected=$(git status --porcelain | sed -E 's/^...//' | grep -Ev '^(catalog\.json|difficulty-catalog\.json|machine-registry\.json)$' || true)
+          test -z "$unexpected" || { echo "$unexpected"; exit 1; }
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add catalog.json difficulty-catalog.json machine-registry.json
+          git commit -m 'test: publish next10 on isolated device branch'
+          git push origin HEAD:batch/20260904-next10-device
