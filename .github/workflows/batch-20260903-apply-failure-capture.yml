@@ -1,0 +1,48 @@
+name: Batch 20260903 Apply Failure Capture
+on:
+  push:
+    branches: [batch/20260903-hanagasa-ultraman]
+    paths: ['.github/workflows/batch-20260903-apply-failure-capture.yml']
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  capture:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: batch/20260903-hanagasa-ultraman
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Capture batch APPLY output without persisting publish mutations
+        shell: bash
+        run: |
+          set -uo pipefail
+          base=$(git rev-parse HEAD)
+          set +e
+          npm run machine:publish:batch -- --apply \
+            L_ULTRAMAN_KE \
+            L_GUILTY_CROWN_2_XF \
+            LB_JACKPOT_CY1 \
+            LB_1000CHAN_ALPHA_L3 \
+            L_DMC5_ST_XA \
+            S_KABANERI_ZR \
+            LB_NEW_PULSAR_BT_C9 \
+            LB_PREMIUM_UMAIBO_S1 \
+            L_TOLOVE_DARKNESS_S8 \
+            L_HANAGASA_NA > /tmp/apply.log 2>&1
+          status=$?
+          set -e
+          cp /tmp/apply.log /tmp/apply.saved
+          git reset --hard "$base"
+          cp /tmp/apply.saved reports/batch-20260903-apply-failure.log
+          printf '\nAPPLY_EXIT_STATUS=%s\n' "$status" >> reports/batch-20260903-apply-failure.log
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add reports/batch-20260903-apply-failure.log
+          git commit -m 'audit: capture 20260903 formal apply failure'
+          git pull --rebase origin batch/20260903-hanagasa-ultraman
+          git push origin HEAD:batch/20260903-hanagasa-ultraman
