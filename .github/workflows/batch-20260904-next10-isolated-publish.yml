@@ -1,0 +1,73 @@
+name: Batch 20260904 Next10 Isolated Publish
+
+on:
+  push:
+    branches:
+      - batch/20260904-next10-device
+    paths:
+      - '.github/workflows/batch-20260904-next10-isolated-publish.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  isolated-publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: batch/20260904-next10-device
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Verify isolated branch and Gate E source
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse --abbrev-ref HEAD)" = "batch/20260904-next10-device"
+          test -f research/batches/20260903-next10/GATE_E_AUTOMATED_QUALITY.md
+          grep -q 'Status: PASS' research/batches/20260903-next10/GATE_E_AUTOMATED_QUALITY.md
+      - name: Publish dry run
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm run machine:publish:batch -- L_IZA_BANCHO_SB8 L_ZETTAI_SHOGEKI_PLATONIC_HEART_TK L_WATASHI_NO_SHIAWASE_NA_KEKKON_PN LB_TRIPLE_CROWN_SF4 LB_MATADOR_3_TT L_TENSEI_SHITARA_KEN_DESHITA_GT L_DARLING_IN_THE_FRANXX_SA L_SAKI_CHOJO_KESSEN_YR S_KONOSUBA_ZR S_RAKUEN_TSUHO_FS
+      - name: Isolated Publish APPLY
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm run machine:publish:batch -- --apply S_RAKUEN_TSUHO_FS S_KONOSUBA_ZR L_SAKI_CHOJO_KESSEN_YR L_DARLING_IN_THE_FRANXX_SA L_TENSEI_SHITARA_KEN_DESHITA_GT LB_MATADOR_3_TT LB_TRIPLE_CROWN_SF4 L_WATASHI_NO_SHIAWASE_NA_KEKKON_PN L_ZETTAI_SHOGEKI_PLATONIC_HEART_TK L_IZA_BANCHO_SB8
+      - name: Validate exact registrations and publication
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm run registry:validate
+          node --input-type=module <<'NODE'
+          import fs from 'node:fs';
+          const expected=[['L_IZA_BANCHO_SB8',211],['L_ZETTAI_SHOGEKI_PLATONIC_HEART_TK',212],['L_WATASHI_NO_SHIAWASE_NA_KEKKON_PN',213],['LB_TRIPLE_CROWN_SF4',214],['LB_MATADOR_3_TT',215],['L_TENSEI_SHITARA_KEN_DESHITA_GT',216],['L_DARLING_IN_THE_FRANXX_SA',217],['L_SAKI_CHOJO_KESSEN_YR',218],['S_KONOSUBA_ZR',219],['S_RAKUEN_TSUHO_FS',220]];
+          const catalog=JSON.parse(fs.readFileSync('catalog.json','utf8')).machines ?? [];
+          const reg=JSON.parse(fs.readFileSync('machine-registry.json','utf8')).machines ?? [];
+          for(const [id,n] of expected){
+            const c=catalog.find(x=>x.machineId===id); if(!c||c.status!=='available') throw new Error(`${id}: not published`);
+            const r=reg.find(x=>x.machineId===id); if(!r||r.provisionalRegistrationId!==n) throw new Error(`${id}: registration ${r?.provisionalRegistrationId} != ${n}`);
+          }
+          console.log('PASS: isolated publication and registrations 211-220 verified');
+          NODE
+      - name: Restrict publish mutations
+        shell: bash
+        run: |
+          set -euo pipefail
+          git restore -- reports/v64-observation-debt-classification.json || true
+          unexpected=$(git status --porcelain | sed -E 's/^...//' | grep -Ev '^(catalog\.json|difficulty-catalog\.json|machine-registry\.json)$' || true)
+          test -z "$unexpected" || { echo "$unexpected"; exit 1; }
+      - name: Commit isolated publication
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add catalog.json difficulty-catalog.json machine-registry.json
+          git commit -m 'test: publish next10 on isolated device branch'
+          git push origin HEAD:batch/20260904-next10-device
