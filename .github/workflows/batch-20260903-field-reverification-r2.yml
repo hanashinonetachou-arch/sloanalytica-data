@@ -1,0 +1,73 @@
+name: Batch 20260903 Field Reverification R2
+
+on:
+  push:
+    branches:
+      - batch/20260903-hanagasa-ultraman
+    paths:
+      - '.github/workflows/batch-20260903-field-reverification-r2.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  apply:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: batch/20260903-hanagasa-ultraman
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Reuse reviewed field-reverification mutation
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          p=Path('.github/workflows/batch-20260903-field-reverification-apply.yml')
+          text=p.read_text(encoding='utf-8')
+          start=text.index("          node --input-type=module <<'NODE'\n") + len("          node --input-type=module <<'NODE'\n")
+          end=text.index("          NODE\n", start)
+          body=text[start:end]
+          lines=[]
+          for line in body.splitlines():
+              lines.append(line[10:] if line.startswith('          ') else line)
+          Path('/tmp/field-reverification.mjs').write_text('\n'.join(lines)+'\n', encoding='utf-8')
+          PY
+          node /tmp/field-reverification.mjs
+      - name: Validate Observation and dependencies
+        run: |
+          ids=(L_HANAGASA_NA L_TOLOVE_DARKNESS_S8 LB_PREMIUM_UMAIBO_S1 LB_NEW_PULSAR_BT_C9 L_DMC5_ST_XA LB_1000CHAN_ALPHA_L3 LB_JACKPOT_CY1 L_GUILTY_CROWN_2_XF L_ULTRAMAN_KE)
+          files=(); for id in "${ids[@]}"; do files+=("research/$id/machine-observation-data.json"); done
+          node tools/validate-machine-observation-data.mjs "${files[@]}"
+          npm run observation:selection:audit -- L_HANAGASA_NA L_TOLOVE_DARKNESS_S8 LB_PREMIUM_UMAIBO_S1 LB_NEW_PULSAR_BT_C9 S_KABANERI_ZR L_DMC5_ST_XA LB_1000CHAN_ALPHA_L3 LB_JACKPOT_CY1 L_GUILTY_CROWN_2_XF L_ULTRAMAN_KE --strict-v2
+          npm run ui-design:observation:audit -- L_HANAGASA_NA L_TOLOVE_DARKNESS_S8 LB_PREMIUM_UMAIBO_S1 LB_NEW_PULSAR_BT_C9 S_KABANERI_ZR L_DMC5_ST_XA LB_1000CHAN_ALPHA_L3 LB_JACKPOT_CY1 L_GUILTY_CROWN_2_XF L_ULTRAMAN_KE --strict-v2
+          npm run pipeline:four-layer:gate -- L_HANAGASA_NA L_TOLOVE_DARKNESS_S8 LB_PREMIUM_UMAIBO_S1 LB_NEW_PULSAR_BT_C9 S_KABANERI_ZR L_DMC5_ST_XA LB_1000CHAN_ALPHA_L3 LB_JACKPOT_CY1 L_GUILTY_CROWN_2_XF L_ULTRAMAN_KE
+          npm run audit:ui-service-names
+          npm run registry:validate
+          npm test
+          npm run audit
+      - name: Commit only reviewed field findings
+        run: |
+          set -euo pipefail
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git add research/L_HANAGASA_NA/machine-observation-data.json \
+                  research/L_TOLOVE_DARKNESS_S8/machine-observation-data.json \
+                  research/LB_PREMIUM_UMAIBO_S1/machine-observation-data.json \
+                  research/LB_NEW_PULSAR_BT_C9/machine-observation-data.json \
+                  research/L_DMC5_ST_XA/machine-observation-data.json \
+                  research/LB_1000CHAN_ALPHA_L3/machine-observation-data.json \
+                  research/LB_JACKPOT_CY1/machine-observation-data.json \
+                  research/L_GUILTY_CROWN_2_XF/machine-observation-data.json \
+                  research/L_ULTRAMAN_KE/machine-observation-data.json \
+                  reports/batch-20260903-field-reverification.json
+          git commit -m 'observation: apply 20260903 field reverification'
+          # Tests/audits can rewrite generated reports. The reviewed changes are already committed;
+          # discard only the remaining unstaged generated noise before rebasing/pushing.
+          git restore --worktree .
+          git clean -fd -- reports/ || true
+          git pull --rebase origin batch/20260903-hanagasa-ultraman
+          git push origin HEAD:batch/20260903-hanagasa-ultraman
