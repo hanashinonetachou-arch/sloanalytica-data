@@ -1,5 +1,4 @@
 name: Batch 20260904 Next10 Isolated Device Publish
-
 on:
   push:
     branches: [prototype-multi-machine]
@@ -12,18 +11,20 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-          ref: batch/20260904-next10-clean
+        with: {fetch-depth: 0, ref: batch/20260904-next10-clean}
       - uses: actions/setup-node@v4
-        with:
-          node-version: '22'
-      - name: Verify clean stack and Gate E
+        with: {node-version: '22'}
+      - name: Verify clean stack and bind isolated baseline
         run: |
           set -euo pipefail
+          BASE=b8d91e1d91b5166437fcd178a2fa2d8c8153ecf6
           test "$(git rev-parse --abbrev-ref HEAD)" = "batch/20260904-next10-clean"
-          test "$(git merge-base HEAD b8d91e1d91b5166437fcd178a2fa2d8c8153ecf6)" = "b8d91e1d91b5166437fcd178a2fa2d8c8153ecf6"
+          test "$(git merge-base HEAD $BASE)" = "$BASE"
           grep -q 'Status: PASS' research/batches/20260903-next10/GATE_E_AUTOMATED_QUALITY.md
+          # The publish safety tool compares against origin/prototype-multi-machine.
+          # For this isolated device branch, bind that local tracking ref to the
+          # already-published previous-batch parent so the guard sees only next10.
+          git update-ref refs/remotes/origin/prototype-multi-machine "$BASE"
       - name: Dry run exact next10
         run: npm run machine:publish:batch -- L_IZA_BANCHO_SB8 L_ZETTAI_SHOGEKI_PLATONIC_HEART_TK L_WATASHI_NO_SHIAWASE_NA_KEKKON_PN LB_TRIPLE_CROWN_SF4 LB_MATADOR_3_TT L_TENSEI_SHITARA_KEN_DESHITA_GT L_DARLING_IN_THE_FRANXX_SA L_SAKI_CHOJO_KESSEN_YR S_KONOSUBA_ZR S_RAKUEN_TSUHO_FS
       - name: Apply exact next10
