@@ -1,0 +1,96 @@
+name: Batch 20260904 Next10 Gate D Registry
+
+on:
+  push:
+    branches:
+      - research/20260903-batch10-next
+    paths:
+      - '.github/workflows/batch-20260904-next10-gate-d-registry.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  materialize-registry:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: research/20260903-batch10-next
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Materialize reserved registrations 211-220
+        run: |
+          node <<'NODE'
+          const fs=require('fs');
+          const p='machine-registry.json';
+          const doc=JSON.parse(fs.readFileSync(p,'utf8'));
+          const rows=[
+            [211,'L_IZA_BANCHO_SB8','いざ！番長','サボハニ','2025-06-02'],
+            [212,'L_ZETTAI_SHOGEKI_PLATONIC_HEART_TK','L 絶対衝激～PLATONIC HEART～','スパイキー','2025-06-16'],
+            [213,'L_WATASHI_NO_SHIAWASE_NA_KEKKON_PN','わたしの幸せな結婚','KPE / コナミアミューズメント','2025-07-07'],
+            [214,'LB_TRIPLE_CROWN_SF4','LBトリプルクラウン','岡崎産業','2025-07-07'],
+            [215,'LB_MATADOR_3_TT','マタドールⅢ','北電子','2025-08-04'],
+            [216,'L_TENSEI_SHITARA_KEN_DESHITA_GT','パチスロ 転生したら剣でした','グレードワン / コナミアミューズメント','2025-08-04'],
+            [217,'L_DARLING_IN_THE_FRANXX_SA','L ダーリン・イン・ザ・フランキス','スパイキー','2025-08-04'],
+            [218,'L_SAKI_CHOJO_KESSEN_YR','L咲-Saki- 頂上決戦','サンスリー / SANYO','2025-08-04'],
+            [219,'S_KONOSUBA_ZR','パチスロこの素晴らしい世界に祝福を！','ロデオ / サミー','2022-04-04'],
+            [220,'S_RAKUEN_TSUHO_FS','パチスロ楽園追放','サミー','2021-09-06']
+          ];
+          const byId=new Map((doc.machines||[]).map(x=>[x.machineId,x]));
+          const byReg=new Map((doc.machines||[]).filter(x=>Number.isInteger(x.provisionalRegistrationId)).map(x=>[x.provisionalRegistrationId,x]));
+          for(const [reg,machineId,displayName,manufacturer,releaseDate] of rows){
+            const idHit=byId.get(machineId);
+            const regHit=byReg.get(reg);
+            if(idHit || regHit){
+              if(!idHit || idHit.provisionalRegistrationId!==reg || (regHit && regHit.machineId!==machineId)){
+                throw new Error(`registration collision ${reg} ${machineId}`);
+              }
+              console.log(`already present ${reg} ${machineId}`);
+              continue;
+            }
+            doc.machines.push({
+              provisionalRegistrationId:reg,
+              registrationId:null,
+              machineId,
+              displayName,
+              manufacturer,
+              releaseDate,
+              releaseDateStatus:'VERIFIED',
+              introducedAt:null,
+              marketStatus:'UNKNOWN',
+              marketLastCheckedAt:null,
+              marketSources:[],
+              appStatus:'RESEARCHING',
+              researchStatus:'NEEDS_UPDATE',
+              fieldTestStatus:'NOT_TESTED',
+              machineDataVersion:'0.1.0',
+              priority:'NONE',
+              notes:'20260903-next10 batch. Gate A/B/C contract complete; structured four-layer data is being materialized in Gate D.'
+            });
+          }
+          doc.generatedAt=new Date().toISOString();
+          fs.writeFileSync(p,JSON.stringify(doc,null,2)+'\n');
+          NODE
+      - name: Validate registry
+        run: npm run registry:validate
+      - name: Verify reserved mapping
+        run: |
+          node <<'NODE'
+          const d=require('./machine-registry.json');
+          const expected=new Map([[211,'L_IZA_BANCHO_SB8'],[212,'L_ZETTAI_SHOGEKI_PLATONIC_HEART_TK'],[213,'L_WATASHI_NO_SHIAWASE_NA_KEKKON_PN'],[214,'LB_TRIPLE_CROWN_SF4'],[215,'LB_MATADOR_3_TT'],[216,'L_TENSEI_SHITARA_KEN_DESHITA_GT'],[217,'L_DARLING_IN_THE_FRANXX_SA'],[218,'L_SAKI_CHOJO_KESSEN_YR'],[219,'S_KONOSUBA_ZR'],[220,'S_RAKUEN_TSUHO_FS']]);
+          for(const [n,id] of expected){const m=d.machines.find(x=>x.provisionalRegistrationId===n);if(!m||m.machineId!==id)throw new Error(`bad mapping ${n}`)}
+          console.log('PASS reserved registrations 211-220');
+          NODE
+      - name: Commit registry foundation
+        run: |
+          if [ -z "$(git status --porcelain machine-registry.json)" ]; then echo 'No registry change.'; exit 0; fi
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git add machine-registry.json
+          git commit -m 'registry: reserve next10 registrations 211-220'
+          git pull --rebase origin research/20260903-batch10-next
+          git push origin HEAD:research/20260903-batch10-next
