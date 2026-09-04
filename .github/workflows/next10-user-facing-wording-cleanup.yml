@@ -1,0 +1,106 @@
+name: Next10 user-facing wording cleanup
+
+on:
+  push:
+    branches:
+      - research/20260903-batch10-next
+    paths:
+      - '.github/workflows/next10-user-facing-wording-cleanup.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  cleanup:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: research/20260903-batch10-next
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Remove internal REFERENCE wording from user-facing reasons
+        shell: bash
+        run: |
+          node --input-type=module <<'NODE'
+          import fs from 'node:fs';
+          const ids=[
+            'L_IZA_BANCHO_SB8','L_ZETTAI_SHOGEKI_PLATONIC_HEART_TK','L_WATASHI_NO_SHIAWASE_NA_KEKKON_PN',
+            'LB_TRIPLE_CROWN_SF4','LB_MATADOR_3_TT','L_TENSEI_SHITARA_KEN_DESHITA_GT',
+            'L_DARLING_IN_THE_FRANXX_SA','L_SAKI_CHOJO_KESSEN_YR','S_KONOSUBA_ZR','S_RAKUEN_TSUHO_FS'
+          ];
+          const clean = (text) => String(text ?? '')
+            .replace(/デフォルト尤度へは入れずREFERENCE。/g,'標準の数値推測には採用しない。')
+            .replace(/ためREFERENCE。/g,'ため数値推測には採用しない。')
+            .replace(/のでREFERENCE。/g,'ので数値推測には採用しない。')
+            .replace(/ずREFERENCE。/g,'ず数値推測には採用しない。')
+            .replace(/REFERENCE。/g,'数値推測には採用しない。')
+            .replace(/REFERENCE/g,'参考扱い');
+          for (const id of ids) {
+            const selectionPath=`research/${id}/selection-data.json`;
+            const selection=JSON.parse(fs.readFileSync(selectionPath,'utf8'));
+            for (const feature of selection.features ?? []) {
+              if ('userFacingReason' in feature) feature.userFacingReason=clean(feature.userFacingReason);
+              if ('rejectionReason' in feature) feature.rejectionReason=clean(feature.rejectionReason);
+              if ('userReason' in feature) feature.userReason=clean(feature.userReason);
+            }
+            fs.writeFileSync(selectionPath,JSON.stringify(selection,null,2)+'\n');
+
+            const packagePath=`machines/${id}/machine-package.json`;
+            if (fs.existsSync(packagePath)) {
+              const pkg=JSON.parse(fs.readFileSync(packagePath,'utf8'));
+              for (const item of pkg.selectionSummary?.rejected ?? []) item.reason=clean(item.reason);
+              for (const item of pkg.selectionSummary?.selected ?? []) item.reason=clean(item.reason);
+              fs.writeFileSync(packagePath,JSON.stringify(pkg,null,2)+'\n');
+            }
+          }
+
+          const generatorPath='tools/materialize-next10-reference-layer.mjs';
+          let generator=fs.readFileSync(generatorPath,'utf8');
+          generator=generator
+            .replace(/デフォルト尤度へは入れずREFERENCE。/g,'標準の数値推測には採用しない。')
+            .replace(/ためREFERENCE。/g,'ため数値推測には採用しない。')
+            .replace(/のでREFERENCE。/g,'ので数値推測には採用しない。')
+            .replace(/ずREFERENCE。/g,'ず数値推測には採用しない。')
+            .replace(/REFERENCE。/g,'数値推測には採用しない。');
+          fs.writeFileSync(generatorPath,generator);
+
+          for (const id of ids) {
+            const s=JSON.parse(fs.readFileSync(`research/${id}/selection-data.json`,'utf8'));
+            for (const f of s.features ?? []) {
+              for (const key of ['userFacingReason','rejectionReason','userReason']) {
+                if (typeof f[key]==='string' && /REFERENCE/.test(f[key])) throw new Error(`${id}: internal term remains in ${key}`);
+              }
+            }
+            const p=JSON.parse(fs.readFileSync(`machines/${id}/machine-package.json`,'utf8'));
+            for (const x of [...(p.selectionSummary?.selected ?? []), ...(p.selectionSummary?.rejected ?? [])]) {
+              if (/REFERENCE/.test(String(x.reason ?? ''))) throw new Error(`${id}: internal term remains in package reason`);
+            }
+          }
+          console.log('PASS: user-facing REFERENCE wording removed');
+          NODE
+      - name: Validate affected data
+        shell: bash
+        run: |
+          set -euo pipefail
+          ids=(L_IZA_BANCHO_SB8 L_ZETTAI_SHOGEKI_PLATONIC_HEART_TK L_WATASHI_NO_SHIAWASE_NA_KEKKON_PN LB_TRIPLE_CROWN_SF4 LB_MATADOR_3_TT L_TENSEI_SHITARA_KEN_DESHITA_GT L_DARLING_IN_THE_FRANXX_SA L_SAKI_CHOJO_KESSEN_YR S_KONOSUBA_ZR S_RAKUEN_TSUHO_FS)
+          for id in "${ids[@]}"; do
+            node tools/validate-selection-data.mjs "research/$id/selection-data.json" "research/$id/research-data.json"
+          done
+          npm test
+      - name: Commit wording cleanup
+        shell: bash
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add research machines tools/materialize-next10-reference-layer.mjs
+          if git diff --cached --quiet; then
+            echo 'No wording changes needed.'
+            exit 0
+          fi
+          git commit -m 'ux: remove internal REFERENCE wording from reasons'
+          git pull --rebase origin research/20260903-batch10-next
+          git push origin HEAD:research/20260903-batch10-next
