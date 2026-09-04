@@ -1,0 +1,78 @@
+name: Resume Iza Bancho reselection
+
+on:
+  push:
+    branches:
+      - research/20260903-batch10-next
+    paths:
+      - 'reports/iza-bancho-resume-trigger.txt'
+
+permissions:
+  contents: write
+
+jobs:
+  resume:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: research/20260903-batch10-next
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Apply existing reviewed Iza reselection script
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          import re
+          text=Path('.github/workflows/iza-bancho-field-reselection.yml').read_text()
+          m=re.search(r"node --input-type=module <<'NODE'\n(.*?)\n\s*NODE", text, re.S)
+          if not m:
+              raise SystemExit('reviewed Iza mutation block not found')
+          lines=m.group(1).splitlines()
+          nonempty=[len(x)-len(x.lstrip()) for x in lines if x.strip()]
+          indent=min(nonempty) if nonempty else 0
+          Path('/tmp/iza-reselection.mjs').write_text('\n'.join(x[indent:] for x in lines)+'\n')
+          PY
+          node /tmp/iza-reselection.mjs
+      - name: Validate source layers
+        run: |
+          set -euo pipefail
+          node tools/validate-research-data.mjs research/L_IZA_BANCHO_SB8/research-data.json
+          node tools/validate-selection-data.mjs research/L_IZA_BANCHO_SB8/selection-data.json research/L_IZA_BANCHO_SB8/research-data.json
+          node tools/validate-machine-observation-data.mjs research/L_IZA_BANCHO_SB8/machine-observation-data.json
+          node tools/validate-ui-design-data.mjs research/L_IZA_BANCHO_SB8/ui-design-data.json
+          npm run observation:selection:audit -- L_IZA_BANCHO_SB8 --strict-v2
+          npm run ui-design:observation:audit -- L_IZA_BANCHO_SB8 --strict-v2
+      - name: Rebuild and reaudit
+        run: |
+          set -euo pipefail
+          npm run machine:batch -- L_IZA_BANCHO_SB8
+          npm run pipeline:four-layer:gate -- L_IZA_BANCHO_SB8
+          npm run registry:validate
+          npm run audit:ui-service-names
+          npm test
+          npm run audit
+      - name: Mark PASS and commit
+        shell: bash
+        run: |
+          node --input-type=module <<'NODE'
+          import fs from 'node:fs';
+          const p='reports/iza-bancho-field-reselection.json';
+          const x=JSON.parse(fs.readFileSync(p,'utf8'));
+          x.status='PASS_REAUDITED';
+          x.reauditedAt=new Date().toISOString();
+          fs.writeFileSync(p,JSON.stringify(x,null,2)+'\n');
+          NODE
+          git config user.name github-actions
+          git config user.email github-actions@github.com
+          git add research/L_IZA_BANCHO_SB8 machines/L_IZA_BANCHO_SB8 reports/iza-bancho-field-reselection.json machine-registry.json catalog.json difficulty-catalog.json 2>/dev/null || true
+          if git diff --cached --quiet; then
+            echo 'No generated changes to commit'
+            exit 0
+          fi
+          git commit -m 'research: finalize Iza Bancho Daito reselection'
+          git pull --rebase origin research/20260903-batch10-next
+          git push origin HEAD:research/20260903-batch10-next
