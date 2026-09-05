@@ -23,7 +23,7 @@ jobs:
           node-version: '22'
       - name: Sync branch before rebuild
         run: git pull --rebase origin research/20260903-batch10-next
-      - name: Execute reselection workflow run blocks except final commit
+      - name: Extract original multiline run blocks
         shell: bash
         run: |
           set -euo pipefail
@@ -44,24 +44,28 @@ jobs:
                       cur=lines[i]
                       if cur.strip() and len(cur)-len(cur.lstrip()) <= indent:
                           break
-                      cut=min(len(cur), indent+2)
+                      cut=indent+2
                       block.append(cur[cut:] if len(cur)>=cut else '')
                       i+=1
                   blocks.append('\n'.join(block)+'\n')
                   continue
               i+=1
-          if len(blocks) < 5:
-              raise SystemExit(f'expected at least 5 run blocks, got {len(blocks)}')
+          if len(blocks) < 4:
+              raise SystemExit(f'expected at least 4 multiline run blocks, got {len(blocks)}')
           out=Path('/tmp/iza-resume')
           out.mkdir(exist_ok=True)
-          for n,b in enumerate(blocks[:4],1):
+          for n,b in enumerate(blocks[:3],1):
               (out/f'block{n}.sh').write_text(b)
-          print(f'extracted {len(blocks)} run blocks; executing first 4')
+          print(f'extracted {len(blocks)} multiline run blocks')
           PY
-          for f in /tmp/iza-resume/block{1..4}.sh; do
-            echo "==> $f"
-            bash -euo pipefail "$f"
-          done
+      - name: Apply Iza Bancho reselection
+        run: bash -euo pipefail /tmp/iza-resume/block1.sh
+      - name: Validate source layers
+        run: bash -euo pipefail /tmp/iza-resume/block2.sh
+      - name: Rebuild Iza MachineData
+        run: npm run machine:batch -- L_IZA_BANCHO_SB8
+      - name: Reaudit
+        run: bash -euo pipefail /tmp/iza-resume/block3.sh
       - name: Mark PASS, commit, rebase and push
         shell: bash
         run: |
