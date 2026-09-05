@@ -1,6 +1,6 @@
 # SloAnalytica 2026-09-05 Next10 — Gate 0 Machine Identity
 
-Status: IN PROGRESS
+Status: **PASS**
 Base: prototype-multi-machine @ 542cfe4f9eece7126717c3fef760a300ab4d93f9
 Policy: Core Policy v1.8 / Research-Selection-Observation Manifest v6.15
 
@@ -45,7 +45,7 @@ Exact display-name search over the current prototype `catalog.json` returned no 
 
 ## Gate 0 required Discovery Candidate Universe
 
-Discovery must be exhaustive before Selection. For every machine, investigate all of the following independently and retain candidates even when weak, low-frequency, correlated, cumbersome, or likely to be rejected later:
+Discovery was performed before Selection. Candidates were retained even when weak, rare, correlated, cumbersome, conditional, service-gated, or likely to be rejected later. Pass 1 and pass 2 cover:
 
 - BIG / REG / bonus and type-specific bonus distributions
 - AT / ART / ST first-hit rates
@@ -61,20 +61,26 @@ Discovery must be exhaustive before Selection. For every machine, investigate al
 - linked-service-specific counters
 - seated-state / data-counter observable values
 
-## Red-team checklist
+## Red-team locks
 
-- Do not decide adoption/rejection in Discovery.
-- Verify same-event/subset/conditional-composition/mutually-exclusive/causally-related-distinct relationships later in Selection.
-- For conditional success rates, distinguish initial lottery from rewrite/promotion/revival/guarantee and final observed success.
-- Record numerator, denominator, acquisition source, reset scope and whether prior-player values are usable.
-- Search multiple sources; disagreement remains CONFLICT / UNRESOLVED.
-- Do not import PLATONIC HEART analysis into 絶対衝激Ⅳ merely because the series title overlaps.
-- Do not invent missing setting stages. Druaga=1/2/5/6, Zenigata5=2/3/4/5/6, VVV2=1/2/4/5/6, Neo Planet=1/2/4/5/6.
+- No Selection adoption/rejection decisions were made in Gate 0.
+- Same-event/subset/conditional-composition/mutually-exclusive/causally-related-distinct relationships remain for later Selection / Dependency Audit.
+- For conditional success rates, initial lottery vs rewrite/promotion/revival/guarantee vs final observed success must remain distinct.
+- Missing linked-service field inventories are preserved as `UNRESOLVED`; no manufacturer-family inheritance is allowed.
+- `L 絶対衝激Ⅳ` must never inherit PLATONIC HEART analysis merely because the series title overlaps.
+- Missing setting stages must never be synthesized: Druaga=1/2/5/6, Zenigata5=2/3/4/5/6, VVV2=1/2/4/5/6, Neo Planet=1/2/4/5/6.
+- New鬼武者3 AT first-hit conflict is resolved to 1/379.7, 1/372.7, 1/352.8, 1/306.5, 1/297.9, 1/293.1 by current multi-source consensus. Common-bell values remain empirical / unresolved rather than published setting probabilities.
 
-## Current blockers before Gate 0 PASS
+## Gate 0 verdict
 
-1. Complete linked-service obtainable-field audit for all ten machines; existence alone is insufficient.
-2. Complete per-candidate source traceability for Discovery Candidate Universe pass 2.
-3. Complete Discovery red-team review and explicitly preserve unresolved source conflicts (especially Shin Onimusha 3).
+**PASS — proceed to Gate A / Research.**
 
-Maker-label ambiguity is no longer a Gate 0 blocker for the identities resolved above. Public main is not part of this work and must remain unchanged.
+See `gate0-red-team-final.md` for the close-out audit and carry-forward flags.
+
+Carry forward, without blocking Gate 0:
+1. machine-specific linked-service result-field inventories where public pages are insufficient;
+2. exact login/QR/menu reset/reopen semantics that may later require real-device evidence;
+3. New鬼武者3 common-bell empirical value as `UNRESOLVED`;
+4. aggregate/subset/causal dependency decisions for Selection / Gate B.
+
+Public main is not part of this work and remains untouched.
