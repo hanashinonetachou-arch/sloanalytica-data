@@ -1,0 +1,122 @@
+name: PR172 Next10 Gate E Automated Quality Gate
+
+on:
+  push:
+    branches:
+      - research/20260905-batch10-next
+    paths:
+      - .github/workflows/pr172-next10-gate-e.yml
+      - machines/**
+      - tools/**
+      - package.json
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  gate-e:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: research/20260905-batch10-next
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Validate Next10 machine-package contracts
+        run: |
+          node <<'NODE'
+          const fs = require('fs');
+          const ids = [
+            'L_AZURLANE_THE_ANIMATION_KN',
+            'L_DRUAGA_NO_TOU_ZA',
+            'L_SMASLO_TOKYO_REVENGERS_ZF',
+            'L_BABEL_BA',
+            'L_SHIN_ONIMUSHA_3_SA',
+            'L_ZENIGATA_5_L2',
+            'L_TOARU_KAGAKU_NO_RAILGUN_2_FV',
+            'L_ZETTAI_SHOGEKI_FORCE_FH',
+            'L_KAKUMEIKI_VALVRAVE_2_JF',
+            'L_NEO_PLANET_SLED'
+          ];
+          const failures = [];
+          for (const id of ids) {
+            const p = `machines/${id}/machine-package.json`;
+            if (!fs.existsSync(p)) { failures.push(`${id}: missing package`); continue; }
+            let pkg;
+            try { pkg = JSON.parse(fs.readFileSync(p, 'utf8')); }
+            catch (e) { failures.push(`${id}: invalid JSON ${e.message}`); continue; }
+            if (pkg?.machine?.machineId !== id) failures.push(`${id}: machineId mismatch`);
+            const settings = new Set(pkg?.machine?.settings || []);
+            const inputs = new Map((pkg?.inputs?.inputs || []).map(x => [x.id, x]));
+            const sourceIds = new Set((pkg?.evidence?.sources || []).map(x => x.id));
+            const optionKeys = new Map();
+            for (const input of inputs.values()) {
+              if (Array.isArray(input.options)) optionKeys.set(input.id, new Set(input.options.map(o => o.value)));
+            }
+            for (const f of pkg?.features?.features || []) {
+              if (!inputs.has(f.numeratorInputId)) failures.push(`${id}/${f.featureId}: missing numerator input`);
+              if (!inputs.has(f.denominatorInputId)) failures.push(`${id}/${f.featureId}: missing denominator input`);
+              const probKeys = Object.keys(f.probabilities || {});
+              for (const s of probKeys) if (!settings.has(s)) failures.push(`${id}/${f.featureId}: probability for nonexistent ${s}`);
+              for (const s of settings) if (!(s in (f.probabilities || {}))) failures.push(`${id}/${f.featureId}: missing probability for ${s}`);
+              for (const r of f.sourceEvidenceRefs || []) if (!sourceIds.has(r)) failures.push(`${id}/${f.featureId}: missing source ${r}`);
+            }
+            for (const e of pkg?.evidence?.evidences || []) {
+              if (!inputs.has(e.inputId)) failures.push(`${id}/${e.id}: missing evidence input`);
+              if (!optionKeys.get(e.inputId)?.has(e.triggerValue)) failures.push(`${id}/${e.id}: trigger not declared in options`);
+              for (const s of [...(e.confirmedSettings || []), ...(e.deniedSettings || [])]) {
+                if (!settings.has(s)) failures.push(`${id}/${e.id}: evidence references nonexistent ${s}`);
+              }
+              for (const r of e.sourceEvidenceRefs || []) if (!sourceIds.has(r)) failures.push(`${id}/${e.id}: missing source ${r}`);
+            }
+            for (const section of pkg?.ui?.sections || []) {
+              for (const item of section.items || []) {
+                if (item.type === 'input' && !inputs.has(item.inputId)) failures.push(`${id}/${section.id}: UI missing input ${item.inputId}`);
+                const input = inputs.get(item.inputId);
+                if (input && ['counter','integer'].includes(input.type)) {
+                  if (item?.config?.emptyMeansUnobserved !== true) failures.push(`${id}/${item.inputId}: emptyMeansUnobserved not true`);
+                  if (item?.config?.observedZeroAllowed !== true) failures.push(`${id}/${item.inputId}: observedZeroAllowed not true`);
+                }
+              }
+            }
+          }
+          if (failures.length) {
+            console.error(failures.join('\n'));
+            process.exit(1);
+          }
+          console.log(`Next10 package contract audit PASS: ${ids.length}/10`);
+          NODE
+
+      - name: Repository-wide guard tests
+        run: npm test
+
+      - name: Public-data audit
+        run: npm run audit
+
+      - name: User-facing service-name audit
+        run: npm run audit:ui-service-names
+
+      - name: User-verified UX contract audit
+        run: npm run ux-contract:audit
+
+      - name: UI design tests
+        run: npm run ui-design:test
+
+      - name: Difficulty event/exposure tests
+        run: |
+          npm run difficulty:event-exposure:test
+          npm run difficulty:exposure-audit
+
+      - name: Registry baseline diagnostic
+        continue-on-error: true
+        run: npm run registry:validate
+
+      - name: Gate E summary
+        run: |
+          echo 'PR172 Next10 Gate E automated checks complete.'
+          echo 'Registry baseline diagnostic is non-blocking here because the existing prototype identity audit has known pre-existing gaps; package IDs are separately checked by this workflow.'
+          echo 'Publish: NOT RUN'
