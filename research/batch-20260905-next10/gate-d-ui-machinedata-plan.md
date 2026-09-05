@@ -1,24 +1,22 @@
 # SloAnalytica 2026-09-05 Next10 — Gate D UI Design + MachineData Plan
 
-Status: STARTED
+Status: PASS
 Date: 2026-09-05
 Prerequisite: Gate C PASS
 
-Gate D will materialize the audited Observation contracts into the repository's current `machine-package.json` structure (`machine`, `inputs`, `features`, `evidence`, `ui`, `selectionSummary`, metadata/validation). This file is an implementation plan; it does not publish to prototype or public main.
+Gate D materialized the audited Observation contracts into the repository's current `machine-package.json` structure (`machine`, `inputs`, `features`, `evidence`, `ui`, `selectionSummary`, metadata/validation). This work remains on the dedicated research branch; it does not publish to prototype or public main.
 
-## Schema/convention baseline confirmed from current prototype
+## Schema/convention baseline
 
 - One `machines/<machineId>/machine-package.json` package per machine.
 - Machine schema `2.0.0`, package wrapper `schemaVersion: 1`.
 - Statistical inputs use stable `INP_*` IDs and `defaultValue: ""`.
-- Shared denominator patterns are allowed: multiple selected features can point to one `INP_NORMAL_GAMES` field when the eligible population is truly identical.
-- UI number/counter widgets explicitly carry `emptyMeansUnobserved: true` and `observedZeroAllowed: true`.
-- Hard evidence uses `multi_enum` plus EvidenceEngine entries mapping `inputId + triggerValue` to confirmed/denied settings.
-- Selection summaries must state why deterministic aggregate/subset alternatives were rejected or retained as reference.
+- Shared denominators are used only where the eligible population is truly identical.
+- UI number/counter widgets carry `emptyMeansUnobserved: true` and `observedZeroAllowed: true`.
+- Hard evidence uses `multi_enum` plus EvidenceEngine mappings from `inputId + triggerValue` to confirmed/denied settings.
+- Missing setting stages are absent rather than interpolated.
 
-## Candidate machine IDs for Gate D packages
-
-These remain implementation candidates until the registry/name audit immediately before package creation:
+## Final machine IDs
 
 1. `L_AZURLANE_THE_ANIMATION_KN`
 2. `L_DRUAGA_NO_TOU_ZA`
@@ -31,59 +29,53 @@ These remain implementation candidates until the registry/name audit immediately
 9. `L_KAKUMEIKI_VALVRAVE_2_JF`
 10. `L_NEO_PLANET_SLED`
 
-Before writing packages, compare these names against current `machine-registry.json` naming conventions and ensure no collision.
+All ten paths were checked for collision against the prototype baseline before creation.
 
-## Materialization order
+## Materialization result
 
-### Wave 1 — simple/shared-denominator packages
-- Druaga: normal games + BIG + REG + one hard BGM evidence input.
-- New Onimusha3: normal games + AT first-hit + hard evidence.
-- Railgun2: normal games + AT first-hit + CZ total + hard evidence.
-- Absolute Impact IV: normal games + AT first-hit + hard evidence.
+### Wave 1
+- Druaga: BIG + REG shared denominator + REG BGM hard evidence.
+- New Onimusha3: AT first-hit + hard evidence; common bell excluded from v1.
+- Railgun2: AT first-hit + CZ total + hard evidence; type-specific CZs not simultaneously active.
+- Absolute Impact IV: AT first-hit + hard evidence; bonus first-hit not simultaneously active.
 
-### Wave 2 — shared denominator + multiple role counters
-- Azur Lane: AT/bonus/small-role core on the audited normal-play interval.
-- Tokyo Revengers: AT first-hit + common bell with explicit normal-play-only UI help.
+### Wave 2
+- Azur Lane: AT/bonus/common-bell/cherry/watermelon core. AT setting5 source conflict resolved to `1/496.4` using newer nana + current P-WORLD + HAZUSE consensus; older isolated `1/469.4` preserved as stale conflict, not averaged.
+- Tokyo Revengers: AT first-hit + normal-play-only common bell + middle cherry. Gate-C conditional middle-cherry vector was resolved without interpolation after complete grouped values were confirmed.
 
-### Wave 3 — conditional denominator packages
-- Babel: weak/strong cherry and scorpion 3rd/6th trial-hit pairs with validation.
-- Zenigata5: Deka-me eligible-trial/direct-hit pair excluding true-foreshadowing periods.
-- Neo Planet: 1G-ren-excluded bonus denominator + reset-only Mode-F gated section.
+### Wave 3
+- Babel: BIG/REG + weak/strong cherry conditional hit pairs + scorpion 3rd/6th conditional hit pair.
+- Zenigata5: initial hit + corrected Deka-me contract. Denominator is non-true-foreshadowing eligible normal games; numerator is Deka-me appearance/direct-hit events. It is not direct hits divided by Deka-me occurrences.
+- Neo Planet: 1G-ren-excluded normal-play bonus-total initial hit + hard evidence. Mode-F high transition remains conditionally selected research material but is not active in v1 because a safe setting-change-only UI gate was not verified.
 
-### Wave 4 — context-sensitive evidence package
-- VVV2: AT first-hit core; hard evidence only. BAR direct-hit stays SUPPORT. Ordinary end-screen distribution remains reference/help unless customization OFF is explicitly represented.
+### Wave 4
+- VVV2: five-stage initial-hit core + hard evidence only. BAR direct hit remains inactive; ordinary CZ/bonus end-screen distribution is not used as likelihood because hall customization can alter it.
 
 ## UI locks
 
-- Do not duplicate a denominator input in multiple sections if the same audited population is used.
-- When populations differ, use separate denominator IDs even if both are expressed in games.
-- Conditional sections must explain exclusions next to the input.
-- `参考` sections must be visually distinguishable and have no active likelihood feature.
-- Evidence inputs should not mix hard confirmation with ordinary indication-only outcomes unless their semantics are represented separately.
-- Missing setting stages must be absent from machine settings and probability tables; never add placeholder probabilities.
-- Manual input must work without linked services.
+- Do not duplicate a denominator input when the same audited population is used.
+- Use separate denominator IDs where populations differ.
+- Conditional sections explain exclusions next to the input.
+- Evidence inputs contain hard lower-bound/exact/denial semantics only; ordinary weak/strong/parity hints are not promoted to EvidenceEngine certainty.
+- Manual input works without linked services.
+- Linked-service values may assist acquisition only when exact field/population/reset semantics match the manual contract.
 
-## Gate D implementation checks per machine
+## Gate D audit result
 
-1. package parses as JSON;
-2. all `numeratorInputId` / `denominatorInputId` references resolve;
-3. every active feature has probabilities only for actual settings;
-4. no active SUPPORT/reference feature leaks into ProbabilityEngine;
-5. evidence trigger values resolve to declared input options;
-6. hard evidence confirmed/denied settings are subsets of machine settings;
-7. conditional numerator <= denominator validation is available or covered by package validation/help contract;
-8. UI has empty/zero semantics on every statistical control;
-9. selectionSummary matches Gate-B final decisions;
-10. sourceEvidenceRefs point only to attached source records.
+Final all-10-machine MachineData head `d9c67cc51f6f9cfc756da15184ddcd3e518779bc` completed:
+- MachineData Statistical Audit: PASS
+- MachineData User-facing Definitions Audit: PASS
+- User-verified UX contract audit: PASS
 
-## Current Gate D blockers
+Machine identity consistency remains FAIL for a pre-existing baseline-wide audit gap. Its log lists 29 already-cataloged machines missing identity-audit entries and does not identify the newly materialized Next10 package IDs as the cause. This baseline failure is preserved rather than hidden through unrelated prototype/main edits.
 
-No user-side blocker at start.
+Detailed corrections and audit notes:
+- `gate-d-source-resolution.md`
+- `gate-d-observation-corrections.md`
+- `gate-d-materialization-audit.md`
 
-AI-side prerequisites before package creation:
-- final registry/naming-convention check;
-- attach exact source rows/probability vectors for every active feature;
-- materialize only hard evidence whose visual label/context is source-traceable;
-- leave device-only service wording/history checks for isolated real-device verification rather than guessing.
+## Gate D verdict
 
-Public `main` is not part of Gate D work.
+**PASS** for Next10 UI Design + MachineData materialization.
+
+Gate E may now begin on the dedicated research branch. Gate E must keep the baseline identity-workflow failure separated from batch-specific quality findings and must not mutate public `main`.
