@@ -1,0 +1,87 @@
+name: Iza Bancho source persist
+
+on:
+  push:
+    branches:
+      - research/20260903-batch10-next
+    paths:
+      - '.github/workflows/iza-bancho-source-persist.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  persist:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: research/20260903-batch10-next
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Sync latest branch
+        run: git pull --rebase origin research/20260903-batch10-next
+      - name: Apply audited Iza Bancho source transformation
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+          lines=Path('.github/workflows/iza-bancho-field-reselection.yml').read_text().splitlines()
+          block=None
+          i=0
+          while i < len(lines):
+              line=lines[i]
+              stripped=line.lstrip()
+              if stripped == 'run: |':
+                  indent=len(line)-len(stripped)
+                  i+=1
+                  out=[]
+                  while i < len(lines):
+                      cur=lines[i]
+                      if cur.strip() and len(cur)-len(cur.lstrip()) <= indent:
+                          break
+                      cut=indent+2
+                      out.append(cur[cut:] if len(cur)>=cut else '')
+                      i+=1
+                  block='\n'.join(out)+'\n'
+                  break
+              i+=1
+          if not block:
+              raise SystemExit('first run block not found')
+          Path('/tmp/iza-source.sh').write_text(block)
+          PY
+          bash -euo pipefail /tmp/iza-source.sh
+      - name: Validate changed source layers
+        run: |
+          set -euo pipefail
+          node tools/validate-research-data.mjs research/L_IZA_BANCHO_SB8/research-data.json
+          node tools/validate-selection-data.mjs research/L_IZA_BANCHO_SB8/selection-data.json research/L_IZA_BANCHO_SB8/research-data.json
+          node tools/validate-machine-observation-data.mjs research/L_IZA_BANCHO_SB8/machine-observation-data.json
+          node tools/validate-ui-design-data.mjs research/L_IZA_BANCHO_SB8/ui-design-data.json
+          npm run observation:selection:audit -- L_IZA_BANCHO_SB8 --strict-v2
+          npm run ui-design:observation:audit -- L_IZA_BANCHO_SB8 --strict-v2
+      - name: Commit source layers
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git add research/L_IZA_BANCHO_SB8 reports/iza-bancho-field-reselection.json
+          git status --short
+          if git diff --cached --quiet; then
+            echo 'No source changes.'
+            exit 0
+          fi
+          git commit -m 'research: persist Iza Bancho Daito reselection sources'
+          for attempt in 1 2 3 4 5; do
+            git fetch origin research/20260903-batch10-next
+            if git rebase origin/research/20260903-batch10-next && git push origin HEAD:research/20260903-batch10-next; then
+              exit 0
+            fi
+            git rebase --abort || true
+            sleep $((attempt * 2))
+          done
+          exit 1
