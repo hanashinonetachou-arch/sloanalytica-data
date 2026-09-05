@@ -30,6 +30,14 @@
       "url": "https://nana-press.com/kaiseki/machine/946/29803/",
       "checkedAt": "2026-09-04",
       "sourceType": "major_analysis"
+    },
+    {
+      "sourceId": "SRC_MIIMO_NANA",
+      "publisher": "なな徹",
+      "title": "いざ番長 設定差・設定示唆演出まとめ（絶頂決戦ミーモ斬シング）",
+      "url": "https://nana-press.com/kaiseki/machine/946/29776/",
+      "checkedAt": "2026-09-04",
+      "sourceType": "major_analysis"
     }
   ],
   "sourceCoverage": {
@@ -137,21 +145,69 @@
         "SRC_EVIDENCE_NANA"
       ],
       "notes": "SelectionでINCLUDE_UIとしたHard Evidenceのみ。1回の物理観測を重複入力しない。"
+    },
+    {
+      "observationId": "OBS_AT_INITIAL_DAITOMO",
+      "sourceType": "LINKED_SERVICE",
+      "observationMode": "LINKED_SERVICE_READ",
+      "status": "FOUND",
+      "label": "AT初当り（ダイトモ）",
+      "categories": [
+        "頂ZBASH突入回数",
+        "通常プレイ数"
+      ],
+      "timing": [
+        "ダイトモの同一遊技結果画面で頂ZBASH突入回数と通常プレイ数を確認"
+      ],
+      "excludedConditions": [
+        "AT中の再突入や上位AT引き戻し等が頂ZBASH突入回数へ含まれる表示条件では使用しない",
+        "別セッションの通常プレイ数と突入回数を混在させない"
+      ],
+      "sourceRefs": [
+        "SRC_1GEKI",
+        "SRC_NANA"
+      ],
+      "notes": "2026-09-04ユーザー実機提供画面で、通常プレイ1527G・頂ZBASH突入4回・表示率1/381.8が一致することを確認。ダイトモ表示内で分子と分母を同一セッションの組として使う。"
+    },
+    {
+      "observationId": "OBS_MIIMO_ZECCHO",
+      "sourceType": "DIRECT_PLAY",
+      "observationMode": "VISUAL_EVENT",
+      "status": "FOUND",
+      "label": "絶頂決戦開始時 ミーモ斬シング",
+      "categories": [
+        "絶頂決戦突入 回数",
+        "ミーモ斬シング発生 回数"
+      ],
+      "timing": [
+        "絶頂決戦へ突入するたび開始時BGMを確認"
+      ],
+      "excludedConditions": [
+        "絶頂決戦開始時以外のBGM変化を数えない",
+        "絶頂決戦に突入していない区間を分母へ入れない",
+        "未観測を0回として扱わない"
+      ],
+      "sourceRefs": [
+        "SRC_MIIMO_NANA"
+      ],
+      "notes": "1回の絶頂決戦突入につき1試行。"
     }
   ],
   "featureMappings": [
     {
       "featureId": "FEAT_AT_INITIAL",
-      "mappingType": "EXACT",
+      "mappingType": "OPTIONAL_SOURCE",
       "observationIds": [
-        "OBS_AT_INITIAL"
+        "OBS_AT_INITIAL",
+        "OBS_AT_INITIAL_DAITOMO"
       ],
       "collectionMethods": [
-        "MANUAL_COUNTER"
+        "MANUAL_COUNTER",
+        "LINKED_SERVICE_READ"
       ],
       "usableForInference": true,
       "usableForDifficulty": false,
-      "notes": "Gate Cで確定した観測分母を変更しない。"
+      "notes": "手動またはダイトモの同一取得経路を使用。ダイトモでは頂ZBASH突入回数と通常プレイ数を同一結果画面の組として使う。"
     },
     {
       "featureId": "FEAT_COMMON_BELL_A",
@@ -167,6 +223,19 @@
       "usableForInference": true,
       "usableForDifficulty": false,
       "notes": "手動またはダイトモの一貫した取得経路を使用し、経路間で分子/分母を混在させない。"
+    },
+    {
+      "featureId": "FEAT_MIIMO_ZECCHO",
+      "mappingType": "EXACT",
+      "observationIds": [
+        "OBS_MIIMO_ZECCHO"
+      ],
+      "collectionMethods": [
+        "VISUAL_EVENT"
+      ],
+      "usableForInference": true,
+      "usableForDifficulty": false,
+      "notes": "絶頂決戦開始時のBGMを毎回確認する。"
     }
   ],
   "researchReopenRequests": [],
@@ -181,5 +250,7 @@
       "webResearchStatus": "EXHAUSTED_2026-09-04"
     }
   ],
-  "fieldVerificationNotes": []
+  "fieldVerificationNotes": [
+    "2026-09-04 ユーザー提供ダイトモ結果画面で、総プレイ数・通常プレイ数・弱チェリー・弁当・強チェリー・チャンス目・共通10枚ベル・刺客ZONE突入/成功・状態別番長ボーナス・頂ZBASH突入/率・決闘勝敗等の自動集計を確認。取得可能であることと数値推測採用は分離して評価した。"
+  ]
 }
