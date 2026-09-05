@@ -1,0 +1,62 @@
+{
+  "schemaVersion": 1,
+  "machine": {
+    "schemaVersion": "2.0.0",
+    "machineId": "L_DRUAGA_NO_TOU_ZA",
+    "machineDataVersion": "0.1.0",
+    "displayName": "スマスロ ドルアーガの塔",
+    "modelName": "Lドルアーガの塔ZA",
+    "manufacturer": "ミズホ",
+    "settings": ["SET_1", "SET_2", "SET_5", "SET_6"],
+    "packagePolicy": {"offlineCapable": true, "containsImages": false, "containsExecutableCode": false}
+  },
+  "inputs": {
+    "schemaVersion": "2.0.0",
+    "inputs": [
+      {"id": "INP_NORMAL_GAMES", "name": "通常ゲーム数", "category": "SEL_FEAT_NORMAL_BONUS", "type": "integer", "unit": "G", "displayOrder": 10, "inferenceRole": "INCLUDE_PRIMARY", "defaultValue": "", "minimum": 0},
+      {"id": "INP_BIG_COUNT", "name": "BIG", "category": "SEL_FEAT_BIG", "type": "counter", "unit": "回", "displayOrder": 11, "inferenceRole": "INCLUDE_PRIMARY", "defaultValue": "", "minimum": 0},
+      {"id": "INP_REG_COUNT", "name": "REG", "category": "SEL_FEAT_REG", "type": "counter", "unit": "回", "displayOrder": 12, "inferenceRole": "INCLUDE_PRIMARY", "defaultValue": "", "minimum": 0},
+      {"id": "INP_EVI_REG_BGM", "name": "REG中BGM", "category": "EVIDENCE", "type": "multi_enum", "unit": "", "displayOrder": 100, "inferenceRole": "INCLUDE_SUPPORT", "options": [{"key": "ISHITAR_NO_FUKKATSU", "label": "『イシターの復活』メインテーマ", "value": "ISHITAR_NO_FUKKATSU"}], "defaultValue": []}
+    ]
+  },
+  "features": {
+    "schemaVersion": "2.0.0",
+    "features": [
+      {"featureId": "FEAT_BIG", "name": "BIG", "adoptionCategory": "INCLUDE_PRIMARY", "calculationRole": "PROBABILITY", "probabilityEngineUsage": true, "modelType": "binomial", "minimumSample": 1, "sampleRecommendation": 1, "reliabilityProfile": {"weight": 1}, "denominatorInputId": "INP_NORMAL_GAMES", "numeratorInputId": "INP_BIG_COUNT", "displayFormat": "ratio_1_over_n", "probabilities": {"SET_1": 0.003341129301704, "SET_2": 0.003432887058016, "SET_5": 0.003570153516601, "SET_6": 0.003753753753754}, "sourceEvidenceRefs": ["SRC_PWORLD", "SRC_1GEKI"]},
+      {"featureId": "FEAT_REG", "name": "REG", "adoptionCategory": "INCLUDE_PRIMARY", "calculationRole": "PROBABILITY", "probabilityEngineUsage": true, "modelType": "binomial", "minimumSample": 1, "sampleRecommendation": 1, "reliabilityProfile": {"weight": 1}, "denominatorInputId": "INP_NORMAL_GAMES", "numeratorInputId": "INP_REG_COUNT", "displayFormat": "ratio_1_over_n", "probabilities": {"SET_1": 0.002227667631989, "SET_2": 0.002288853284504, "SET_5": 0.002380385622471, "SET_6": 0.002502502502503}, "sourceEvidenceRefs": ["SRC_PWORLD", "SRC_1GEKI"]}
+    ]
+  },
+  "evidence": {
+    "version": "1.0.0",
+    "evidences": [
+      {"id": "EVI_REG_BGM_ISHTAR", "name": "『イシターの復活』メインテーマ", "displayName": "『イシターの復活』メインテーマ", "inputId": "INP_EVI_REG_BGM", "triggerValue": "ISHITAR_NO_FUKKATSU", "confirmedSettings": ["SET_2", "SET_5", "SET_6"], "deniedSettings": [], "hasImage": false, "type": "SETTING_CONFIRMATION", "sourceEvidenceRefs": ["SRC_NANA_BGM", "SRC_PWORLD"]}
+    ],
+    "sources": [
+      {"id": "SRC_PWORLD", "classification": "ANALYSIS", "pageName": "スマスロ ドルアーガの塔 機種情報", "url": "https://www.p-world.co.jp/machine/database/10307", "checkedAt": "2026-09-05"},
+      {"id": "SRC_1GEKI", "classification": "ANALYSIS", "pageName": "ドルアーガの塔 設定差・設定判別要素まとめ", "url": "https://1geki.jp/slot/l_druaga/0/", "checkedAt": "2026-09-05"},
+      {"id": "SRC_NANA_BGM", "classification": "ANALYSIS", "pageName": "ドルアーガの塔 REGボーナス中のBGMによる設定示唆", "url": "https://nana-press.com/kaiseki/machine/1012/31671/", "checkedAt": "2026-09-05"}
+    ]
+  },
+  "ui": {
+    "sections": [
+      {"id": "UI_NORMAL_BONUS", "title": "通常時ボーナス", "displayOrder": 1, "description": "BIGとREGは同じ通常ゲーム数を分母として計算します。ボーナス合算は重複評価になるため推測には使用しません。", "collapsible": false, "defaultExpanded": true, "items": [
+        {"type": "input", "inputId": "INP_NORMAL_GAMES", "label": "通常ゲーム数", "widget": "number", "gridSpan": 12, "config": {"directInput": true, "quickAdd": [50], "emptyMeansUnobserved": true, "observedZeroAllowed": true}},
+        {"type": "input", "inputId": "INP_BIG_COUNT", "label": "BIG", "widget": "counter", "gridSpan": 6, "config": {"directInput": false, "compact": true, "quickAdd": [1], "step": 1, "emptyMeansUnobserved": true, "observedZeroAllowed": true}},
+        {"type": "input", "inputId": "INP_REG_COUNT", "label": "REG", "widget": "counter", "gridSpan": 6, "config": {"directInput": false, "compact": true, "quickAdd": [1], "step": 1, "emptyMeansUnobserved": true, "observedZeroAllowed": true}}
+      ]},
+      {"id": "UI_EVIDENCE", "title": "設定確定演出", "displayOrder": 2, "description": "通常時REG中に『イシターの復活』メインテーマが流れた場合は設定2以上濃厚です。", "collapsible": true, "defaultExpanded": false, "items": [{"type": "input", "inputId": "INP_EVI_REG_BGM", "label": "REG中BGM", "widget": "multi_enum", "gridSpan": 12}]}
+    ]
+  },
+  "selectionSummary": {
+    "schemaVersion": "selection-summary-v1", "evaluatedCount": 10, "selectedCount": 2, "rejectedCount": 1,
+    "selected": [
+      {"featureId": "FEAT_BIG", "name": "BIG", "reason": "通常ゲーム数を共通分母として設定差を直接評価できるため採用。"},
+      {"featureId": "FEAT_REG", "name": "REG", "reason": "通常ゲーム数を共通分母として設定差を直接評価できるため採用。"}
+    ],
+    "rejected": [{"featureId": "FEAT_REF_BONUS_TOTAL", "name": "ボーナス合算", "reason": "BIG+REGの派生集計であり同時利用すると重複評価になるため除外。"}]
+  },
+  "reliability": {},
+  "metadata": {"machineId": "L_DRUAGA_NO_TOU_ZA", "displayName": "スマスロ ドルアーガの塔", "settings": ["SET_1", "SET_2", "SET_5", "SET_6"], "uiDesignMaterialized": true, "uiDesignSchemaVersion": "ui-design-data-v1", "uiDesignStatus": "PASS_WITH_UNRESOLVED"},
+  "validation": {"cases": []},
+  "statistics": {}
+}
