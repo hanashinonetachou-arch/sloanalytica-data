@@ -35,12 +35,23 @@ function modeFor(input, item) {
   return 'READ_ONLY';
 }
 
+function normalizedGridSpan(value) {
+  if (value === undefined) return undefined;
+  if (value === 6 || value === 12) return value;
+  // Older Gate D packages could use 4-column thirds. The current UI Design
+  // contract deliberately supports only 6/12, so migrate the legacy third to
+  // the current two-column compact contract instead of weakening validation.
+  if (Number.isFinite(value) && value > 0 && value <= 6) return 6;
+  return 12;
+}
+
 function contractFor(input, item) {
   const c = {
     name: item.label ?? input.name,
     mode: modeFor(input, item),
   };
-  if (item.gridSpan !== undefined) c.gridSpan = item.gridSpan;
+  const gridSpan = normalizedGridSpan(item.gridSpan);
+  if (gridSpan !== undefined) c.gridSpan = gridSpan;
   const cfg = item.config ?? {};
   for (const key of ['directInput','compact','note','step','emptyMeansUnobserved','observedZeroAllowed']) {
     if (cfg[key] !== undefined) c[key] = cfg[key];
@@ -99,6 +110,7 @@ function recoverOne(machineId) {
     unresolved: [],
     auditNotes: [
       `Recovered from Formal Publish ${FORMAL_PUBLISH_COMMIT}; UI semantics are now explicit source data rather than implicit machine-package state.`,
+      'Legacy gridSpan values outside the current 6/12 UI Design contract are normalized to the current compact two-column/full-width layout.',
       'Numeric inputs preserve empty=unobserved and explicit zero where the Formal Publish contract declared those semantics.',
       'This recovery does not copy probabilities, Difficulty values, Research facts, or machine identity from historical output.',
     ],
