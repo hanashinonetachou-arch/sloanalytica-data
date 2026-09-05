@@ -4,20 +4,31 @@ Status: IN PROGRESS
 Base: prototype-multi-machine @ 542cfe4f9eece7126717c3fef760a300ab4d93f9
 Policy: Core Policy v1.8 / Research-Selection-Observation Manifest v6.15
 
+## Registry source-of-truth
+
+- Current source-of-truth: `machine-registry.json` on `prototype-multi-machine`.
+- Current maximum `provisionalRegistrationId`: **229** (`L_ULTRAMAN_KE`).
+- Therefore this batch uses **230–239** as provisional candidates. The earlier 221–230 draft was incorrect and is superseded by this table.
+- `catalog.json` contains 220 currently published prototype machines, but catalog count is not the registration-ID source-of-truth.
+
 ## Requested machines
 
-| provisionalRegistrationId candidate | requested name | canonical identity (initial) | type/model | maker (initial) | introduction | duplicate status |
+| provisionalRegistrationId candidate | requested / canonical name | type/model | maker (identity label) | introduction | setting stages | duplicate status vs current 220-machine catalog |
 |---:|---|---|---|---|---|---|
-| 221 | L アズールレーン THE ANIMATION | L アズールレーン THE ANIMATION | LアズールレーンTHE ANIMATION KN | KYORAKU / オッケー. | 2025-08-04 | pending registry-wide exact check |
-| 222 | スマスロ ドルアーガの塔 | スマスロ ドルアーガの塔 | Lドルアーガの塔ZA | ミズホ | 2025-09-08 | pending registry-wide exact check |
-| 223 | スマスロ 東京リベンジャーズ | スマスロ 東京リベンジャーズ | Lスマスロ東京リベンジャーズZF | サミー | 2025-09-08 | pending registry-wide exact check |
-| 224 | スマスロ バベル | スマスロ バベル | L/バベル/BA | ユニバーサルブロス | 2025-10-06 | pending registry-wide exact check |
-| 225 | スマスロ 新鬼武者3 | スマスロ 新鬼武者3 | L新鬼武者3SA | レオスター / エンターライズ | 2025-10-06 | pending registry-wide exact check |
-| 226 | L主役は銭形5 | L主役は銭形5 | L銭形5L2 | オリンピア | 2025-10-06 | pending registry-wide exact check |
-| 227 | スマスロ とある科学の超電磁砲2 | スマスロ とある科学の超電磁砲2 | Lとある科学の超電磁砲2FV | 藤商事 | 2025-11-04 | pending registry-wide exact check |
-| 228 | L 絶対衝激Ⅳ | L 絶対衝激Ⅳ | L絶対衝激フォースFH | アイドル | 2025-11-04 | pending registry-wide exact check |
-| 229 | Lパチスロ 革命機ヴァルヴレイヴ2 | Lパチスロ 革命機ヴァルヴレイヴ2 | L革命機ヴァルヴレイヴ2jF | SANKYO | 2025-11-04 | pending registry-wide exact check |
-| 230 | スマスロネオプラネット | スマスロネオプラネット | LネオプラネットSLED | SEVEN LEAGUE / 山佐系 | 2025-11-17 | pending registry-wide exact check |
+| 230 | L アズールレーン THE ANIMATION | LアズールレーンTHE ANIMATION KN | KYORAKU（legal/brand label still under convention review with オッケー. references） | 2025-08-04 | 1/2/3/4/5/6 | ABSENT — new identity |
+| 231 | スマスロ ドルアーガの塔 | Lドルアーガの塔ZA | ミズホ | 2025-09-08 | **1/2/5/6** | ABSENT — new identity |
+| 232 | スマスロ 東京リベンジャーズ | Lスマスロ東京リベンジャーズZF | サミー | 2025-09-08 | 1/2/3/4/5/6 | ABSENT — new identity |
+| 233 | スマスロ バベル | L/バベル/BA | ユニバーサルブロス | 2025-10-06 | 1/2/3/4/5/6 | ABSENT — new identity |
+| 234 | スマスロ 新鬼武者3 | L新鬼武者3SA | レオスター / エンターライズ（convention review retained） | 2025-10-06 | 1/2/3/4/5/6 | ABSENT — new identity |
+| 235 | L主役は銭形5 | L銭形5L2 | オリンピア | 2025-10-06 | **2/3/4/5/6（設定1なし）** | ABSENT — new identity |
+| 236 | スマスロ とある科学の超電磁砲2 | Lとある科学の超電磁砲2FV | 藤商事 | 2025-11-04 | 1/2/3/4/5/6 | ABSENT — new identity |
+| 237 | L 絶対衝激Ⅳ | L絶対衝激フォースFH | アイドル | 2025-11-04 | 1/2/3/4/5/6 | ABSENT — **family-name collision only** with existing `L_ZETTAI_SHOGEKI_PLATONIC_HEART_TK`; distinct model/edition |
+| 238 | Lパチスロ 革命機ヴァルヴレイヴ2 | L革命機ヴァルヴレイヴ2jF | SANKYO | 2025-11-04 | 1/2/3/4/5/6 | ABSENT — new identity |
+| 239 | スマスロネオプラネット | LネオプラネットSLED | SEVEN LEAGUE / 山佐系（convention review retained） | 2025-11-17 | **1/2/4/5/6（設定3なし）** | ABSENT — new identity |
+
+## Duplicate audit result
+
+Exact display-name search over the current prototype `catalog.json` returned no hit for all ten requested identities. `L 絶対衝激Ⅳ` is intentionally not treated as a duplicate of the existing `L 絶対衝激～PLATONIC HEART～`: the existing catalog entry is model-family-distinct and must remain separate. Similar sequel/family names must continue to be checked by model number before MachineData creation.
 
 ## Gate 0 required Discovery Candidate Universe
 
@@ -44,12 +55,14 @@ Discovery must be exhaustive before Selection. For every machine, investigate al
 - For conditional success rates, distinguish initial lottery from rewrite/promotion/revival/guarantee and final observed success.
 - Record numerator, denominator, acquisition source, reset scope and whether prior-player values are usable.
 - Search multiple sources; disagreement remains CONFLICT / UNRESOLVED.
+- Do not import PLATONIC HEART analysis into 絶対衝激Ⅳ merely because the series title overlaps.
+- Do not invent missing setting stages. Druaga=1/2/5/6, Zenigata5=2/3/4/5/6, Neo Planet=1/2/4/5/6.
 
 ## Current blockers before Gate 0 PASS
 
-1. Registry-wide duplicate check against the verified 220-machine prototype catalog/registry.
-2. Confirm current maximum provisionalRegistrationId from source-of-truth registry rather than catalog count alone.
-3. Complete per-machine Discovery Candidate Universe with source traceability and red-team review.
-4. Resolve maker-label conventions where brand/manufacturer differs from legal model holder.
+1. Complete linked-service obtainable-field audit for all ten machines; existence alone is insufficient.
+2. Complete Discovery Candidate Universe pass 2 with per-candidate source traceability.
+3. Resolve maker-label conventions for brand/legal-holder differences (especially Azur Lane, Shin Onimusha 3, Neo Planet).
+4. Complete Discovery red-team review and explicitly preserve unresolved source conflicts.
 
 Public main is not part of this work and must remain unchanged.
