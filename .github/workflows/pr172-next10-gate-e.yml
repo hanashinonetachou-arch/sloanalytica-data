@@ -9,6 +9,14 @@ on:
       - machines/**
       - tools/**
       - package.json
+  pull_request:
+    branches:
+      - prototype-multi-machine
+    paths:
+      - .github/workflows/pr172-next10-gate-e.yml
+      - machines/**
+      - tools/**
+      - package.json
   workflow_dispatch:
 
 permissions:
@@ -47,8 +55,8 @@ jobs:
             const p = `machines/${id}/machine-package.json`;
             if (!fs.existsSync(p)) { failures.push(`${id}: missing package`); continue; }
             let pkg;
-            try { pkg = JSON.parse(fs.readFileSync(p, 'utf8')); }
-            catch (e) { failures.push(`${id}: invalid JSON ${e.message}`); continue; }
+            try { pkg = JSON.parse(fs.readFileSync(p, 'utf8'));
+            } catch (e) { failures.push(`${id}: invalid JSON ${e.message}`); continue; }
             if (pkg?.machine?.machineId !== id) failures.push(`${id}: machineId mismatch`);
             const settings = new Set(pkg?.machine?.settings || []);
             const inputs = new Map((pkg?.inputs?.inputs || []).map(x => [x.id, x]));
