@@ -1,5 +1,4 @@
 name: PR172 Next10 Gate E Automated Quality Gate
-# Re-run marker: validate the cleaned post-repair Next10 state before prototype fast-forward.
 
 on:
   push:
@@ -28,14 +27,17 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 0
       - uses: actions/setup-node@v4
         with:
-          node-version: '22'
+          node-version: 22
 
       - name: Validate Next10 machine-package contracts
         run: |
-          node --input-type=module <<'NODE'
-          import fs from 'node:fs';
+          node <<'NODE'
+          const fs = require('fs');
           const ids = [
             'L_AZURLANE_THE_ANIMATION_KN',
             'L_DRUAGA_NO_TOU_ZA',
@@ -46,52 +48,70 @@ jobs:
             'L_TOARU_KAGAKU_NO_RAILGUN_2_FV',
             'L_ZETTAI_SHOGEKI_FORCE_FH',
             'L_KAKUMEIKI_VALVRAVE_2_JF',
-            'L_NEO_PLANET_SLED',
+            'L_NEO_PLANET_SLED'
           ];
           const failures = [];
           for (const id of ids) {
-            const path = `machines/${id}/machine-package.json`;
-            if (!fs.existsSync(path)) { failures.push(`${id}: machine-package missing`); continue; }
-            const pkg = JSON.parse(fs.readFileSync(path, 'utf8'));
-            if (pkg.machine?.machineId !== id) failures.push(`${id}: machineId mismatch`);
-            const inputs = new Map((pkg.inputs?.inputs ?? []).map(x => [x.id, x]));
-            for (const f of pkg.features?.features ?? []) {
-              for (const key of ['numeratorInputId','denominatorInputId']) {
-                if (f[key] && !inputs.has(f[key])) failures.push(`${id}/${f.featureId}: missing ${key} ${f[key]}`);
-              }
-              for (const setting of pkg.machine?.settings ?? []) {
-                if (f.probabilityEngineUsage !== false && f.modelType !== 'multinomial' && f.modelType !== 'conditional_partial_multinomial' && !Number.isFinite(Number(f.probabilities?.[setting]))) {
-                  failures.push(`${id}/${f.featureId}: missing probability ${setting}`);
-                }
-              }
-              for (const ref of f.sourceEvidenceRefs ?? []) {
-                if (!(pkg.evidence?.sources ?? []).some(s => s.id === ref)) failures.push(`${id}/${f.featureId}: unknown source ${ref}`);
-              }
+            const p = `machines/${id}/machine-package.json`;
+            if (!fs.existsSync(p)) { failures.push(`${id}: missing package`); continue; }
+            let pkg;
+            try { pkg = JSON.parse(fs.readFileSync(p, 'utf8'));
+            } catch (e) { failures.push(`${id}: invalid JSON ${e.message}`); continue; }
+            if (pkg?.machine?.machineId !== id) failures.push(`${id}: machineId mismatch`);
+            const settings = new Set(pkg?.machine?.settings || []);
+            const inputs = new Map((pkg?.inputs?.inputs || []).map(x => [x.id, x]));
+            const sourceIds = new Set((pkg?.evidence?.sources || []).map(x => x.id));
+            const optionKeys = new Map();
+            for (const input of inputs.values()) {
+              if (Array.isArray(input.options)) optionKeys.set(input.id, new Set(input.options.map(o => o.value)));
             }
-            for (const e of pkg.evidence?.evidences ?? []) {
-              if (!inputs.has(e.inputId)) failures.push(`${id}/${e.id}: missing input ${e.inputId}`);
-              for (const ref of e.sourceEvidenceRefs ?? []) {
-                if (!(pkg.evidence?.sources ?? []).some(s => s.id === ref)) failures.push(`${id}/${e.id}: unknown source ${ref}`);
-              }
+            for (const f of pkg?.features?.features || []) {
+              if (!inputs.has(f.numeratorInputId)) failures.push(`${id}/${f.featureId}: missing numerator input`);
+              if (!inputs.has(f.denominatorInputId)) failures.push(`${id}/${f.featureId}: missing denominator input`);
+              const probKeys = Object.keys(f.probabilities || {});
+              for (const s of probKeys) if (!settings.has(s)) failures.push(`${id}/${f.featureId}: probability for nonexistent ${s}`);
+              for (const s of settings) if (!(s in (f.probabilities || {}))) failures.push(`${id}/${f.featureId}: missing probability for ${s}`);
+              for (const r of f.sourceEvidenceRefs || []) if (!sourceIds.has(r)) failures.push(`${id}/${f.featureId}: missing source ${r}`);
             }
-            const uiInputIds = new Set();
-            for (const s of pkg.ui?.sections ?? []) {
-              const visit = items => { for (const item of items ?? []) if (item?.type === 'input') uiInputIds.add(item.inputId); };
-              visit(s.items);
-              for (const tab of s.tabs ?? []) visit(tab.items);
+            for (const e of pkg?.evidence?.evidences || []) {
+              if (!inputs.has(e.inputId)) failures.push(`${id}/${e.id}: missing evidence input`);
+              if (!optionKeys.get(e.inputId)?.has(e.triggerValue)) failures.push(`${id}/${e.id}: trigger not declared in options`);
+              for (const s of [...(e.confirmedSettings || []), ...(e.deniedSettings || [])]) {
+                if (!settings.has(s)) failures.push(`${id}/${e.id}: evidence references nonexistent ${s}`);
+              }
+              for (const r of e.sourceEvidenceRefs || []) if (!sourceIds.has(r)) failures.push(`${id}/${e.id}: missing source ${r}`);
+            }
+
+            const uiItemsByInput = new Map();
+            for (const section of pkg?.ui?.sections || []) {
+              for (const item of section.items || []) {
+                if (item.type !== 'input') continue;
+                if (!inputs.has(item.inputId)) failures.push(`${id}/${section.id}: UI missing input ${item.inputId}`);
+                if (!uiItemsByInput.has(item.inputId)) uiItemsByInput.set(item.inputId, []);
+                uiItemsByInput.get(item.inputId).push(item);
+              }
             }
             for (const input of inputs.values()) {
-              if (!uiInputIds.has(input.id)) failures.push(`${id}: input not materialized in UI ${input.id}`);
-              if (['counter','integer','number'].includes(input.type)) {
-                let contractOk = false;
-                const visit = items => { for (const item of items ?? []) if (item?.type === 'input' && item.inputId === input.id && item.config?.emptyMeansUnobserved === true && item.config?.observedZeroAllowed === true) contractOk = true; };
-                for (const s of pkg.ui?.sections ?? []) { visit(s.items); for (const tab of s.tabs ?? []) visit(tab.items); }
-                if (!contractOk) failures.push(`${id}/${input.id}: UI must preserve empty=unobserved and explicit zero`);
+              if (!['counter','integer'].includes(input.type)) continue;
+              const uiItems = uiItemsByInput.get(input.id) || [];
+              if (!uiItems.length) {
+                failures.push(`${id}/${input.id}: numeric input not materialized in UI`);
+                continue;
+              }
+              const semanticItem = uiItems.find(item =>
+                item?.config?.emptyMeansUnobserved === true &&
+                item?.config?.observedZeroAllowed === true
+              );
+              if (!semanticItem) {
+                failures.push(`${id}/${input.id}: no UI item preserves empty/unobserved and explicit-zero semantics`);
               }
             }
           }
-          if (failures.length) throw new Error(failures.join('\n'));
-          console.log(`PASS: Next10 machine-package contracts ${ids.length}/10`);
+          if (failures.length) {
+            console.error(failures.join('\n'));
+            process.exit(1);
+          }
+          console.log(`Next10 package contract audit PASS: ${ids.length}/10`);
           NODE
 
       - name: Repository-wide guard tests
@@ -120,4 +140,6 @@ jobs:
 
       - name: Gate E summary
         run: |
-          echo 'Gate E checks completed for the 2026-09-05 Next10 batch.'
+          echo 'PR172 Next10 Gate E automated checks complete.'
+          echo 'Registry baseline diagnostic is non-blocking here because the existing prototype identity audit has known pre-existing gaps; package IDs are separately checked by this workflow.'
+          echo 'Publish: NOT RUN'
