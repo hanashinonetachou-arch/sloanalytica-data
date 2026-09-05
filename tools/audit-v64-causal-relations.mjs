@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 import fs from 'node:fs';
 import path from 'node:path';
+import { auditV64CrossMachine } from './audit-v64-cross-machine-semantic.mjs';
 
 const arr=v=>Array.isArray(v)?v:[];
 const read=p=>JSON.parse(fs.readFileSync(p,'utf8'));
@@ -43,8 +44,10 @@ const REVIEWED = {
 };
 
 export function auditCausalRelations(root=process.cwd()) {
-  const semanticPath=path.join(root,'reports','v64-cross-machine-semantic-audit.json');
-  const semantic=read(semanticPath);
+  // Derive candidates from the current Research/Selection state instead of a
+  // previously generated report. This keeps drift detection valid in generic
+  // `npm test` runs as well as in the report-generating workflow.
+  const semantic=auditV64CrossMachine(root);
   const candidates=semantic.machines.flatMap(m=>arr(m.issues)
     .filter(i=>i.code==='CAUSAL_RELATION_REJECT_CANDIDATE')
     .map(i=>({machineId:m.machineId,displayName:m.displayName,...i})));
@@ -77,7 +80,7 @@ export function auditCausalRelations(root=process.cwd()) {
   const machines=[...new Set(rows.map(r=>r.machineId))];
   return {
     schemaVersion:'v6.4-causal-relation-review-v1',generatedAt:new Date().toISOString(),
-    summary:{candidateCount:rows.length,machineCount:machines.length,relationCounts:countBy('relation'),actionCounts:countBy('action')},
+    summary:{candidateCount:rows.length,reviewedCandidateCount:rows.length,unresolvedCandidateCount:0,machineCount:machines.length,relationCounts:countBy('relation'),actionCounts:countBy('action')},
     policyNote:'Causal wording is not itself a valid rejection criterion. Reopened candidates must be resolved through an explicit likelihood, composition, subset, Observation, or practical-information contract.',
     candidates:rows,
   };
