@@ -1,0 +1,65 @@
+name: Iza Bancho finalize persisted reselection
+
+on:
+  push:
+    branches:
+      - research/20260903-batch10-next
+    paths:
+      - '.github/workflows/iza-bancho-finalize-persist.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  finalize:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: research/20260903-batch10-next
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Sync latest branch
+        run: git pull --rebase origin research/20260903-batch10-next
+      - name: Rebuild Iza MachineData
+        run: npm run machine:batch -- L_IZA_BANCHO_SB8
+      - name: Reaudit persisted source and generated package
+        run: |
+          set -euo pipefail
+          npm run pipeline:four-layer:gate -- L_IZA_BANCHO_SB8
+          npm run registry:validate
+          npm run audit:ui-service-names
+          npm test
+          npm run audit
+      - name: Mark reselection PASS
+        run: |
+          node --input-type=module <<'NODE'
+          import fs from 'node:fs';
+          const p='reports/iza-bancho-field-reselection.json';
+          const x=JSON.parse(fs.readFileSync(p,'utf8'));
+          x.status='PASS_REAUDITED';
+          x.finalizedAt='2026-09-05';
+          fs.writeFileSync(p,JSON.stringify(x,null,2)+'\n');
+          NODE
+      - name: Commit generated MachineData and PASS report
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git add machines/L_IZA_BANCHO_SB8 reports/iza-bancho-field-reselection.json
+          git status --short
+          if ! git diff --cached --quiet; then
+            git commit -m 'machine-data: finalize Iza Bancho Daito reselection'
+          fi
+          for attempt in 1 2 3 4 5; do
+            git fetch origin research/20260903-batch10-next
+            if git rebase origin/research/20260903-batch10-next && git push origin HEAD:research/20260903-batch10-next; then
+              exit 0
+            fi
+            git rebase --abort || true
+            sleep $((attempt * 2))
+          done
+          exit 1
