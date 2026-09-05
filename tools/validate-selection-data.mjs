@@ -6,6 +6,14 @@ export function validateSelectionData(s,research=null){
  if(s.schemaVersion!=="selection-data-v1") errors.push("schemaVersion must be selection-data-v1");
  if(!s.machineId) errors.push("machineId is required");
  if(!s.machineDataVersion) errors.push("machineDataVersion is required");
+ const summary=s.selectionSummaryContract;
+ if(summary!=null){
+   if(!summary||summary.schemaVersion!=="selection-summary-v1"||!Number.isInteger(summary.evaluatedCount)||!Number.isInteger(summary.selectedCount)||!Number.isInteger(summary.rejectedCount)||!Array.isArray(summary.selected)||!Array.isArray(summary.rejected)) errors.push("invalid selectionSummaryContract");
+   else {
+     if(summary.selectedCount!==summary.selected.length||summary.rejectedCount!==summary.rejected.length||summary.evaluatedCount<summary.selectedCount+summary.rejectedCount) errors.push("selectionSummaryContract count mismatch");
+     for(const item of [...summary.selected,...summary.rejected]) if(!item||typeof item.name!=="string"||!item.name.trim()||typeof item.reason!=="string"||!item.reason.trim()) errors.push("selectionSummaryContract item requires user-facing name/reason");
+   }
+ }
  const inputs=s.inputs??[], features=s.features??[];
  const uiCategoryLabels=s.uiCategoryLabels??{};
  if(uiCategoryLabels===null||Array.isArray(uiCategoryLabels)||typeof uiCategoryLabels!=="object") errors.push("uiCategoryLabels must be an object");
@@ -113,6 +121,11 @@ export function validateSelectionData(s,research=null){
    if(!["EXACT","DERIVED","ESTIMATED","PROVISIONAL","UNRESOLVED"].includes(b.quality)) errors.push(`difficultyAnalysis.targetGameBasis invalid quality ${b.quality}`);
  }
  for(const q of da?.calibrationAllowedExposureQualities??[]) if(!["EXACT","DERIVED","ESTIMATED","PROVISIONAL"].includes(q)) errors.push(`difficultyAnalysis invalid calibration exposure quality ${q}`);
+ const sourceIds=new Set((research?.sources??[]).map(x=>x.sourceId));
+ for(const e of s.evidence??[]){
+   for(const sourceId of e.sourceEvidenceRefs??[]) if(research&&!sourceIds.has(sourceId)) errors.push(`${e.evidenceId}: unknown sourceEvidenceRef ${sourceId}`);
+   if(e.contextNote!=null&&(typeof e.contextNote!=="string"||!e.contextNote.trim())) errors.push(`${e.evidenceId}: contextNote must be non-empty string`);
+ }
  const machineSettings=new Set(research?.machine?.settings??[]);
  const researchEvidenceIds=new Set((research?.evidenceCandidates??[]).map(e=>e.researchEvidenceId));
  const evidenceGroupIds=new Set();

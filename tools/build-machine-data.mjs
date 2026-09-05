@@ -178,6 +178,12 @@ function buildFeature(rf,sf,inputIds,inferenceSettings=null){
 }
 
 function buildSelectionSummary(research,selection,statistics=null){
+  if(selection.selectionSummaryContract!=null){
+    const c=selection.selectionSummaryContract;
+    if(!c||c.schemaVersion!=="selection-summary-v1"||!Number.isInteger(c.evaluatedCount)||!Number.isInteger(c.selectedCount)||!Number.isInteger(c.rejectedCount)||!Array.isArray(c.selected)||!Array.isArray(c.rejected)) fail("invalid selectionSummaryContract");
+    if(c.selectedCount!==c.selected.length||c.rejectedCount!==c.rejected.length||c.evaluatedCount<c.selectedCount+c.rejectedCount) fail("selectionSummaryContract count mismatch");
+    return structuredClone(c);
+  }
   const rfs=new Map((research.features??[]).map(f=>[f.researchFeatureId,f]));
   const statsById=new Map((statistics?.features??[]).map(f=>[f.researchFeatureId,f]));
   const selected=[],rejected=[];
@@ -348,9 +354,12 @@ export function buildMachineData(research,selection,statistics=null){
     if(!re && !directContract) fail(`evidence ${e.evidenceId}: researchEvidenceId or approved legacy contract required`);
     const confirmed=re?(re.allowedSettings??re.confirmedSettings??[]):(e.confirmedSettings??[]);
     const denied=re?(re.deniedSettings??[]):(e.deniedSettings??[]);
-    const name=re?.name??e.name??e.displayName??e.evidenceId;
+    const name=e.name??re?.name??e.displayName??e.evidenceId;
+    const sourceEvidenceRefs=Array.isArray(e.sourceEvidenceRefs)?e.sourceEvidenceRefs:(re?.sourceRefs??[]);
     evidences.push({id:e.evidenceId,name,displayName:e.displayName??name,inputId:e.inputId,triggerValue:e.triggerValue,
       confirmedSettings:confirmed,deniedSettings:denied,hasImage:false,
+      ...(sourceEvidenceRefs.length?{sourceEvidenceRefs:[...sourceEvidenceRefs]}:{}),
+      ...(typeof e.contextNote==="string"&&e.contextNote?{contextNote:e.contextNote}:{}),
       ...(Array.isArray(e.sharedFeatureIds)&&e.sharedFeatureIds.length?{sharedFeatureIds:[...e.sharedFeatureIds]}:{}),
       type:(denied.length>0 && confirmed.length===0)?"SETTING_DENIAL":"SETTING_CONFIRMATION"});
   }
