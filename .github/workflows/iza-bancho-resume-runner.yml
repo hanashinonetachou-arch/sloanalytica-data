@@ -66,10 +66,8 @@ jobs:
         run: npm run machine:batch -- L_IZA_BANCHO_SB8
       - name: Reaudit
         run: bash -euo pipefail /tmp/iza-resume/block3.sh
-      - name: Mark PASS, commit, rebase and push
-        shell: bash
+      - name: Mark PASS
         run: |
-          set -euo pipefail
           node --input-type=module <<'NODE'
           import fs from 'node:fs';
           const p='reports/iza-bancho-field-reselection.json';
@@ -77,14 +75,23 @@ jobs:
           x.status='PASS_REAUDITED';
           fs.writeFileSync(p,JSON.stringify(x,null,2)+'\n');
           NODE
+      - name: Commit generated changes locally
+        shell: bash
+        run: |
+          set -euo pipefail
           git config user.name github-actions[bot]
           git config user.email 41898282+github-actions[bot]@users.noreply.github.com
           git add research/L_IZA_BANCHO_SB8 machines/L_IZA_BANCHO_SB8 reports/iza-bancho-field-reselection.json
+          git status --short
           if git diff --cached --quiet; then
             echo 'No source changes to commit; reselection may already be present.'
           else
             git commit -m 'research: reselect Iza Bancho from Daito field findings'
           fi
+      - name: Rebase onto latest branch
+        run: |
+          set -euo pipefail
           git fetch origin research/20260903-batch10-next
           git rebase origin/research/20260903-batch10-next
-          git push origin HEAD:research/20260903-batch10-next
+      - name: Push reselection result
+        run: git push origin HEAD:research/20260903-batch10-next
