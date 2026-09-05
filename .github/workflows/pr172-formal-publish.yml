@@ -1,0 +1,184 @@
+name: PR172 Next10 Formal Publish
+
+on:
+  push:
+    branches:
+      - research/20260905-batch10-next
+    paths:
+      - '.github/workflows/pr172-formal-publish.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  formal-publish:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout research branch
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: research/20260905-batch10-next
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Verify integration baseline and batch scope
+        shell: bash
+        run: |
+          set -euo pipefail
+          git fetch origin prototype-multi-machine:refs/remotes/origin/prototype-multi-machine
+          test "$(git rev-parse origin/prototype-multi-machine)" = "542cfe4f9eece7126717c3fef760a300ab4d93f9"
+          test "$(git merge-base HEAD origin/prototype-multi-machine)" = "542cfe4f9eece7126717c3fef760a300ab4d93f9"
+          expected=$(cat <<'EOF'
+          L_AZURLANE_THE_ANIMATION_KN
+          L_BABEL_BA
+          L_DRUAGA_NO_TOU_ZA
+          L_KAKUMEIKI_VALVRAVE_2_JF
+          L_NEO_PLANET_SLED
+          L_SHIN_ONIMUSHA_3_SA
+          L_SMASLO_TOKYO_REVENGERS_ZF
+          L_TOARU_KAGAKU_NO_RAILGUN_2_FV
+          L_ZENIGATA_5_L2
+          L_ZETTAI_SHOGEKI_FORCE_FH
+          EOF
+          )
+          actual=$(git diff --name-only "$(git merge-base HEAD origin/prototype-multi-machine)"...HEAD -- 'machines/*/machine-package.json' \
+            | sed -nE 's#^machines/([^/]+)/machine-package\.json$#\1#p' \
+            | sort)
+          printf 'Expected machine scope:\n%s\n' "$expected"
+          printf 'Actual machine scope:\n%s\n' "$actual"
+          test "$actual" = "$expected"
+
+      - name: Generate conservative Difficulty publish reports
+        run: node tools/generate-pr172-conservative-difficulty.mjs
+
+      - name: Validate generated report contracts
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --input-type=module <<'NODE'
+          import fs from 'node:fs';
+          const ids = [
+            'L_AZURLANE_THE_ANIMATION_KN','L_DRUAGA_NO_TOU_ZA','L_SMASLO_TOKYO_REVENGERS_ZF','L_BABEL_BA','L_SHIN_ONIMUSHA_3_SA',
+            'L_ZENIGATA_5_L2','L_TOARU_KAGAKU_NO_RAILGUN_2_FV','L_ZETTAI_SHOGEKI_FORCE_FH','L_KAKUMEIKI_VALVRAVE_2_JF','L_NEO_PLANET_SLED'
+          ];
+          for (const id of ids) {
+            const pkg = JSON.parse(fs.readFileSync(`machines/${id}/machine-package.json`, 'utf8'));
+            const d = JSON.parse(fs.readFileSync(`research/${id}/difficulty-report.json`, 'utf8'));
+            const s = JSON.parse(fs.readFileSync(`research/${id}/setting-band-report.json`, 'utf8'));
+            if (d.machineId !== id || s.machineId !== id) throw new Error(`${id}: report machineId mismatch`);
+            if (d.machineDataVersion !== pkg.machine.machineDataVersion || s.machineDataVersion !== pkg.machine.machineDataVersion) throw new Error(`${id}: report version mismatch`);
+            if (d.targets.length !== 0 || d.coverage.includedNumericFeatureCount !== 0) throw new Error(`${id}: conservative Difficulty contract violated`);
+            if (s.status !== 'NOT_APPLICABLE') throw new Error(`${id}: setting-band must remain NOT_APPLICABLE`);
+          }
+          console.log('PASS: conservative Difficulty/setting-band reports 10/10');
+          NODE
+
+      - name: Batch Publish dry run
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm run machine:publish:batch -- \
+            L_NEO_PLANET_SLED \
+            L_KAKUMEIKI_VALVRAVE_2_JF \
+            L_ZETTAI_SHOGEKI_FORCE_FH \
+            L_TOARU_KAGAKU_NO_RAILGUN_2_FV \
+            L_ZENIGATA_5_L2 \
+            L_SHIN_ONIMUSHA_3_SA \
+            L_BABEL_BA \
+            L_SMASLO_TOKYO_REVENGERS_ZF \
+            L_DRUAGA_NO_TOU_ZA \
+            L_AZURLANE_THE_ANIMATION_KN
+
+      - name: Formal Publish APPLY
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm run machine:publish:batch -- --apply \
+            L_NEO_PLANET_SLED \
+            L_KAKUMEIKI_VALVRAVE_2_JF \
+            L_ZETTAI_SHOGEKI_FORCE_FH \
+            L_TOARU_KAGAKU_NO_RAILGUN_2_FV \
+            L_ZENIGATA_5_L2 \
+            L_SHIN_ONIMUSHA_3_SA \
+            L_BABEL_BA \
+            L_SMASLO_TOKYO_REVENGERS_ZF \
+            L_DRUAGA_NO_TOU_ZA \
+            L_AZURLANE_THE_ANIMATION_KN
+
+      - name: Validate publication contracts and provisional IDs
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm run registry:validate
+          node --input-type=module <<'NODE'
+          import fs from 'node:fs';
+          const ids = [
+            ['L_AZURLANE_THE_ANIMATION_KN',230],
+            ['L_DRUAGA_NO_TOU_ZA',231],
+            ['L_SMASLO_TOKYO_REVENGERS_ZF',232],
+            ['L_BABEL_BA',233],
+            ['L_SHIN_ONIMUSHA_3_SA',234],
+            ['L_ZENIGATA_5_L2',235],
+            ['L_TOARU_KAGAKU_NO_RAILGUN_2_FV',236],
+            ['L_ZETTAI_SHOGEKI_FORCE_FH',237],
+            ['L_KAKUMEIKI_VALVRAVE_2_JF',238],
+            ['L_NEO_PLANET_SLED',239],
+          ];
+          const catalog = JSON.parse(fs.readFileSync('catalog.json','utf8')).machines ?? [];
+          const difficulty = JSON.parse(fs.readFileSync('difficulty-catalog.json','utf8')).entries ?? [];
+          const registryDoc = JSON.parse(fs.readFileSync('machine-registry.json','utf8'));
+          const registry = registryDoc.machines ?? registryDoc.entries ?? [];
+          for (const [id,n] of ids) {
+            const c = catalog.find(x=>x.machineId===id);
+            if (!c || c.status !== 'available') throw new Error(`${id}: catalog missing/not available`);
+            const d = difficulty.find(x=>x.machineId===id);
+            if (!d || d.machineDataVersion !== c.machineDataVersion) throw new Error(`${id}: difficulty catalog mismatch`);
+            const r = registry.find(x=>x.machineId===id);
+            if (!r || r.provisionalRegistrationId !== n) throw new Error(`${id}: provisionalRegistrationId mismatch: ${r?.provisionalRegistrationId}`);
+          }
+          console.log('PASS: catalog/difficulty/registry 10/10 and provisional IDs 230-239');
+          NODE
+
+      - name: Verify publish mutation allowlist
+        shell: bash
+        run: |
+          set -euo pipefail
+          git status --short
+          unexpected=$(git status --porcelain | sed -E 's/^...//' \
+            | grep -Ev '^(catalog\.json|difficulty-catalog\.json|machine-registry\.json|research/L_[A-Z0-9_]+/(difficulty-report|setting-band-report)\.json)$' || true)
+          if [[ -n "$unexpected" ]]; then
+            echo 'Unexpected publish-side mutation(s):'
+            echo "$unexpected"
+            exit 1
+          fi
+          for f in catalog.json difficulty-catalog.json machine-registry.json; do
+            git diff --quiet -- "$f" && { echo "Expected publish mutation missing: $f"; exit 1; } || true
+          done
+
+      - name: Commit Formal Publish outputs
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add catalog.json difficulty-catalog.json machine-registry.json research/L_*/difficulty-report.json research/L_*/setting-band-report.json
+          git commit -m 'publish: formal publish 20260905 Next10'
+          git push origin HEAD:research/20260905-batch10-next
+          echo "PUBLISHED_HEAD=$(git rev-parse HEAD)" >> "$GITHUB_ENV"
+
+      - name: Final published-state checks
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm run registry:validate
+          npm run audit
+          npm run audit:ui-service-names
+          npm run ux-contract:audit
+          npm test
+          test -z "$(git status --porcelain)"
+          echo "Formal Publish complete at ${PUBLISHED_HEAD}"
