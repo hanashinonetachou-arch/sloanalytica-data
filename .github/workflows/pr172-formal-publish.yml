@@ -166,9 +166,9 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          git status --short
-          unexpected=$(git status --porcelain | sed -E 's/^...//' \
-            | grep -Ev '^(catalog\.json|difficulty-catalog\.json|machine-registry\.json|research/L_[A-Z0-9_]+/(research-data|selection-data|difficulty-report|setting-band-report)\.json)$' || true)
+          git status --short --untracked-files=all
+          unexpected=$(git status --porcelain=v1 --untracked-files=all | sed -E 's/^...//' \
+            | grep -Ev '^(catalog\.json|difficulty-catalog\.json|machine-registry\.json|research/L_[A-Z0-9_]+/(research-data|selection-data|difficulty-report|setting-band-report)\.json|machines/(L_AZURLANE_THE_ANIMATION_KN|L_DRUAGA_NO_TOU_ZA|L_SMASLO_TOKYO_REVENGERS_ZF|L_BABEL_BA|L_SHIN_ONIMUSHA_3_SA|L_ZENIGATA_5_L2|L_TOARU_KAGAKU_NO_RAILGUN_2_FV|L_ZETTAI_SHOGEKI_FORCE_FH|L_KAKUMEIKI_VALVRAVE_2_JF|L_NEO_PLANET_SLED)/machine-package\.json)$' || true)
           if [[ -n "$unexpected" ]]; then
             echo 'Unexpected publish-side mutation(s):'
             echo "$unexpected"
@@ -176,6 +176,11 @@ jobs:
           fi
           for f in catalog.json difficulty-catalog.json machine-registry.json; do
             git diff --quiet -- "$f" && { echo "Expected publish mutation missing: $f"; exit 1; } || true
+          done
+          for id in \
+            L_AZURLANE_THE_ANIMATION_KN L_DRUAGA_NO_TOU_ZA L_SMASLO_TOKYO_REVENGERS_ZF L_BABEL_BA L_SHIN_ONIMUSHA_3_SA \
+            L_ZENIGATA_5_L2 L_TOARU_KAGAKU_NO_RAILGUN_2_FV L_ZETTAI_SHOGEKI_FORCE_FH L_KAKUMEIKI_VALVRAVE_2_JF L_NEO_PLANET_SLED; do
+            git diff --quiet -- "machines/${id}/machine-package.json" && { echo "Expected published MachineData mutation missing: ${id}"; exit 1; } || true
           done
 
       - name: Commit Formal Publish outputs
@@ -186,7 +191,17 @@ jobs:
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
           git add catalog.json difficulty-catalog.json machine-registry.json \
             research/L_*/research-data.json research/L_*/selection-data.json \
-            research/L_*/difficulty-report.json research/L_*/setting-band-report.json
+            research/L_*/difficulty-report.json research/L_*/setting-band-report.json \
+            machines/L_AZURLANE_THE_ANIMATION_KN/machine-package.json \
+            machines/L_DRUAGA_NO_TOU_ZA/machine-package.json \
+            machines/L_SMASLO_TOKYO_REVENGERS_ZF/machine-package.json \
+            machines/L_BABEL_BA/machine-package.json \
+            machines/L_SHIN_ONIMUSHA_3_SA/machine-package.json \
+            machines/L_ZENIGATA_5_L2/machine-package.json \
+            machines/L_TOARU_KAGAKU_NO_RAILGUN_2_FV/machine-package.json \
+            machines/L_ZETTAI_SHOGEKI_FORCE_FH/machine-package.json \
+            machines/L_KAKUMEIKI_VALVRAVE_2_JF/machine-package.json \
+            machines/L_NEO_PLANET_SLED/machine-package.json
           git commit -m 'publish: formal publish 20260905 Next10'
           git push origin HEAD:research/20260905-batch10-next
           echo "PUBLISHED_HEAD=$(git rev-parse HEAD)" >> "$GITHUB_ENV"
@@ -200,5 +215,5 @@ jobs:
           npm run audit:ui-service-names
           npm run ux-contract:audit
           npm test
-          test -z "$(git status --porcelain)"
+          test -z "$(git status --porcelain=v1 --untracked-files=all)"
           echo "Formal Publish complete at ${PUBLISHED_HEAD}"
