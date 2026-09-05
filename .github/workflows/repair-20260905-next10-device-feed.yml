@@ -18,96 +18,26 @@ jobs:
         with:
           ref: publish/20260905-next10
           fetch-depth: 0
-      - name: Fetch live prototype baseline
+      - name: Diagnose cumulative catalog candidates
         shell: bash
         run: |
           set -euo pipefail
-          curl -fsSL --retry 3 'https://hanashinonetachou-arch.github.io/sloanalytica-data/prototype/catalog.json' -o /tmp/prototype-catalog.json
-          curl -fsSL --retry 3 'https://hanashinonetachou-arch.github.io/sloanalytica-data/prototype/difficulty-catalog.json' -o /tmp/prototype-difficulty.json
-      - name: Rebuild isolated feed as live prototype plus next10
-        shell: bash
-        run: |
-          set -euo pipefail
-          node --input-type=module <<'NODE'
+          for ref in \
+            origin/prototype-multi-machine \
+            origin/integration/20260903-publish-stack \
+            origin/batch/20260904-next10-clean \
+            origin/batch/20260904-next10-device \
+            origin/research/20260903-batch10-next; do
+            safe=$(echo "$ref" | tr '/:' '__')
+            if git show "$ref:catalog.json" > "/tmp/${safe}.json" 2>/dev/null; then
+              REF="$ref" FILE="/tmp/${safe}.json" node --input-type=module <<'NODE'
           import fs from 'node:fs';
-
-          const ids = [
-            'L_IZA_BANCHO_SB8',
-            'L_ZETTAI_SHOGEKI_PLATONIC_HEART_TK',
-            'L_WATASHI_NO_SHIAWASE_NA_KEKKON_PN',
-            'LB_TRIPLE_CROWN_SF4',
-            'LB_MATADOR_3_TT',
-            'L_TENSEI_SHITARA_KEN_DESHITA_GT',
-            'L_DARLING_IN_THE_FRANXX_SA',
-            'L_SAKI_CHOJO_KESSEN_YR',
-            'S_KONOSUBA_ZR',
-            'S_RAKUEN_TSUHO_FS',
-          ];
-          const priorBatchMustExist = ['L_BIOHAZARD5_ZE', 'L_SISTER_QUEST_CA'];
-          const branch = 'publish/20260905-next10';
-          const rawBase = `https://raw.githubusercontent.com/hanashinonetachou-arch/sloanalytica-data/${branch}`;
-
-          const baseline = JSON.parse(fs.readFileSync('/tmp/prototype-catalog.json', 'utf8'));
-          const source = JSON.parse(fs.readFileSync('catalog.json', 'utf8'));
-          if (!Array.isArray(baseline.machines) || !Array.isArray(source.machines)) throw new Error('catalog schema invalid');
-          console.log(`live prototype baseline count=${baseline.machines.length}`);
-          if (baseline.machines.length !== 211) throw new Error(`expected live prototype baseline=211, got ${baseline.machines.length}`);
-          for (const id of priorBatchMustExist) {
-            if (!baseline.machines.some(x => x.machineId === id)) throw new Error(`${id}: missing from live prototype baseline`);
-          }
-          for (const id of ids) {
-            if (baseline.machines.some(x => x.machineId === id)) throw new Error(`${id}: already exists in live prototype baseline; refusing duplicate merge`);
-          }
-
-          const additions = ids.map(id => {
-            const entry = source.machines.find(x => x.machineId === id);
-            if (!entry || entry.status !== 'available') throw new Error(`${id}: missing from isolated published source catalog`);
-            return { ...entry, packageUrl: `${rawBase}/machines/${id}/machine-package.json` };
-          });
-
-          const mergedMachines = [...additions, ...baseline.machines];
-          const unique = new Set(mergedMachines.map(x => x.machineId));
-          if (mergedMachines.length !== 221 || unique.size !== 221) throw new Error(`expected merged catalog=221 unique machines, got ${mergedMachines.length}/${unique.size}`);
-
-          const out = {
-            ...baseline,
-            generatedAt: new Date().toISOString(),
-            difficultyCatalogUrl: `${rawBase}/device-test/20260905-next10/difficulty-catalog.json`,
-            machines: mergedMachines,
-          };
-          fs.mkdirSync('device-test/20260905-next10', { recursive: true });
-          fs.writeFileSync('device-test/20260905-next10/catalog.json', JSON.stringify(out, null, 2) + '\n');
-
-          const baseDiff = JSON.parse(fs.readFileSync('/tmp/prototype-difficulty.json', 'utf8'));
-          const sourceDiff = JSON.parse(fs.readFileSync('difficulty-catalog.json', 'utf8'));
-          const baseEntries = Array.isArray(baseDiff.entries) ? baseDiff.entries : [];
-          const sourceEntries = Array.isArray(sourceDiff.entries) ? sourceDiff.entries : [];
-          const addEntries = ids.map(id => {
-            const entry = sourceEntries.find(x => x.machineId === id);
-            if (!entry) throw new Error(`${id}: difficulty entry missing from isolated source`);
-            return entry;
-          });
-          const idSet = new Set(ids);
-          const mergedDiff = {
-            ...baseDiff,
-            generatedAt: new Date().toISOString(),
-            entries: [...addEntries, ...baseEntries.filter(x => !idSet.has(x.machineId))],
-          };
-          fs.writeFileSync('device-test/20260905-next10/difficulty-catalog.json', JSON.stringify(mergedDiff, null, 2) + '\n');
-
-          console.log('PASS: device feed rebuilt as 211 live prototype + 10 next10 = 221 machines.');
-          console.log('PASS: prior batch includes Biohazard 5 and Sister Quest.');
+          const c=JSON.parse(fs.readFileSync(process.env.FILE,'utf8'));
+          const ids=new Set((c.machines??[]).map(x=>x.machineId));
+          const checks=['L_BIOHAZARD5_ZE','L_SISTER_QUEST_CA','L_HANAGASA_NA','L_ULTRAMAN_KE','L_IZA_BANCHO_SB8'];
+          console.log(process.env.REF, 'count='+ids.size, checks.map(id=>`${id}=${ids.has(id)}`).join(' '));
           NODE
-      - name: Commit repaired feed
-        shell: bash
-        run: |
-          set -euo pipefail
-          git config user.name github-actions[bot]
-          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
-          git add device-test/20260905-next10/catalog.json device-test/20260905-next10/difficulty-catalog.json
-          if git diff --cached --quiet; then
-            echo 'No feed changes to commit.'
-            exit 0
-          fi
-          git commit -m 'fix: restore live 211-machine prototype baseline in next10 device feed'
-          git push origin HEAD:publish/20260905-next10
+            fi
+          done
+      - name: Stop after diagnosis
+        run: echo 'diagnostic complete'
