@@ -151,6 +151,28 @@
           }
         ],
         "defaultValue": []
+      },
+      {
+        "id": "INP_EMERGENCY_QUEST_TOTAL",
+        "name": "緊急クエスト回数",
+        "category": "SEL_FEAT_EMERGENCY_QUEST",
+        "type": "counter",
+        "unit": "回",
+        "displayOrder": 20,
+        "inferenceRole": "INCLUDE_SUPPORT",
+        "defaultValue": "",
+        "minimum": 0
+      },
+      {
+        "id": "INP_DESTROYER_COUNT",
+        "name": "デストロイヤー回数",
+        "category": "SEL_FEAT_EMERGENCY_QUEST",
+        "type": "counter",
+        "unit": "回",
+        "displayOrder": 21,
+        "inferenceRole": "INCLUDE_SUPPORT",
+        "defaultValue": "",
+        "minimum": 0
       }
     ]
   },
@@ -179,6 +201,34 @@
           "SET_4": 0.004282655246252677,
           "SET_5": 0.004332755632582322,
           "SET_6": 0.004610419548178884
+        },
+        "sourceEvidenceRefs": [
+          "SRC_HAZUSE",
+          "SRC_PACHINAVI"
+        ]
+      },
+      {
+        "featureId": "FEAT_EMERGENCY_QUEST_DESTROYER",
+        "name": "緊急クエスト・デストロイヤー選択率",
+        "adoptionCategory": "INCLUDE_SUPPORT",
+        "calculationRole": "PROBABILITY",
+        "probabilityEngineUsage": true,
+        "modelType": "binomial",
+        "minimumSample": 1,
+        "sampleRecommendation": 20,
+        "reliabilityProfile": {
+          "weight": 0.6
+        },
+        "denominatorInputId": "INP_EMERGENCY_QUEST_TOTAL",
+        "numeratorInputId": "INP_DESTROYER_COUNT",
+        "displayFormat": "percentage",
+        "probabilities": {
+          "SET_1": 0.063,
+          "SET_2": 0.07,
+          "SET_3": 0.117,
+          "SET_4": 0.078,
+          "SET_5": 0.121,
+          "SET_6": 0.125
         },
         "sourceEvidenceRefs": [
           "SRC_HAZUSE",
@@ -508,40 +558,84 @@
             }
           }
         ]
+      },
+      {
+        "id": "UI_EMERGENCY_QUEST",
+        "title": "緊急クエスト 対戦相手",
+        "displayOrder": 20,
+        "description": "緊急クエストに入った回数と、そのうちデストロイヤーだった回数を入力します。設定3・5・6ではデストロイヤーが選ばれやすいため、補助的な設定推測に使用します。",
+        "collapsible": false,
+        "defaultExpanded": true,
+        "items": [
+          {
+            "type": "input",
+            "inputId": "INP_EMERGENCY_QUEST_TOTAL",
+            "label": "緊急クエスト",
+            "widget": "counter",
+            "gridSpan": 6,
+            "config": {
+              "directInput": false,
+              "compact": true,
+              "quickAdd": [
+                1
+              ],
+              "step": 1,
+              "emptyMeansUnobserved": true,
+              "observedZeroAllowed": true
+            }
+          },
+          {
+            "type": "input",
+            "inputId": "INP_DESTROYER_COUNT",
+            "label": "デストロイヤー",
+            "widget": "counter",
+            "gridSpan": 6,
+            "config": {
+              "directInput": false,
+              "compact": true,
+              "quickAdd": [
+                1
+              ],
+              "step": 1,
+              "emptyMeansUnobserved": true,
+              "observedZeroAllowed": true
+            }
+          }
+        ]
       }
     ]
   },
   "selectionSummary": {
     "schemaVersion": "selection-summary-v1",
     "evaluatedCount": 6,
-    "selectedCount": 1,
-    "rejectedCount": 5,
+    "selectedCount": 2,
+    "rejectedCount": 4,
     "selected": [
       {
         "featureId": "FEAT_AT_INITIAL",
         "name": "AT初当り",
-        "reason": "Gate B/Gate Cで採用済み。AT初当りの対象となる通常時ゲームを分母とし、同じ観測経路の分子と組み合わせる。",
+        "reason": "AT初当りの対象となる通常時ゲームを分母とし、同じ観測経路の分子と組み合わせる。",
         "requiredTrials": {
           "value": 49678,
           "unit": "AT初当りの対象となる通常時ゲーム"
         }
+      },
+      {
+        "featureId": "FEAT_EMERGENCY_QUEST_DESTROYER",
+        "name": "緊急クエスト時の対戦相手振り分け",
+        "reason": "デストロイヤー選択率に大きな設定差があり、対戦相手を実戦中に明確に数えられるため補助判別として採用。少数回では振れが大きいため、20回程度から参考度が上がり、30回以上を一つの目安とする。"
       }
     ],
     "rejected": [
       {
-        "featureId": "FEAT_REF_EMERGENCY_QUEST",
-        "name": "緊急クエスト相手振り分け",
-        "reason": "条件付きカテゴリ分布で一日試行数が少なく、標準の数値推測には採用しない。"
-      },
-      {
         "featureId": "FEAT_REF_QUEST_RANK_SUCCESS",
         "name": "クエストランク別成功率",
-        "reason": "ランク別の条件付き分母となるeligible attemptを別々に観測する必要があり、総クエスト数へ集約すると試行母集団が変わるため数値推測には採用しない。"
+        "reason": "0〜39pt・40〜59pt・60〜79ptでは成功率に設定差がある一方、80pt以上には設定差がありません。また連続演出中の書き換え当選を区別しないと、ランク到達時の抽選だけを正しく数えられません。現状の入力仕様では各ランク帯の対象回数と書き換えを一貫して分離記録できないため不採用。"
       },
       {
         "featureId": "FEAT_REF_BATH_INITIAL_POINTS",
         "name": "お風呂ゾーン初期pt",
-        "reason": "条件付きカテゴリ分布で、安定した試行数・完全分布の入力経路が未確立のため数値推測には採用しない。"
+        "reason": "初期2〜5ptの振り分けには設定差がありますが、大半を占める2ptの差は小さく、差が目立つ4pt・5ptは低頻度です。さらに対象となるお風呂ゾーンを漏れなく同じ条件で数える必要があるため、現状の入力仕様では安定した推測材料として扱いにくく不採用。"
       },
       {
         "featureId": "FEAT_REF_BONUS_7_ALIGN",
