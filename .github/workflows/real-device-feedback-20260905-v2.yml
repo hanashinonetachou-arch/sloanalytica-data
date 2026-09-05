@@ -1,0 +1,192 @@
+name: Apply 20260905 Next10 Real Device Feedback v2
+on:
+  push:
+    branches: [publish/20260905-next10]
+    paths: ['.github/workflows/real-device-feedback-20260905-v2.yml']
+permissions:
+  contents: write
+jobs:
+  apply:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: publish/20260905-next10
+          fetch-depth: 0
+      - name: Apply reviewed data and UI corrections
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --input-type=module <<'NODE'
+          import fs from 'node:fs';
+          import crypto from 'node:crypto';
+
+          const ids=['L_IZA_BANCHO_SB8','L_ZETTAI_SHOGEKI_PLATONIC_HEART_TK','L_WATASHI_NO_SHIAWASE_NA_KEKKON_PN','LB_TRIPLE_CROWN_SF4','LB_MATADOR_3_TT','L_TENSEI_SHITARA_KEN_DESHITA_GT','L_DARLING_IN_THE_FRANXX_SA','L_SAKI_CHOJO_KESSEN_YR','S_KONOSUBA_ZR','S_RAKUEN_TSUHO_FS'];
+          const clean=s=>String(s??'')
+            .replace(/Gate\s*[A-E](?:\s*\/\s*Gate\s*[A-E])?/gi,'')
+            .replace(/eligible\s+attempts?/gi,'対象となる試行')
+            .replace(/Hard Evidence/gi,'設定確定情報')
+            .replace(/Exposure/gi,'観測ゲーム数')
+            .replace(/joint model/gi,'依存関係を考慮した統合計算')
+            .replace(/numeric core/gi,'数値推測')
+            .replace(/\s*で採用済み。/g,'採用。')
+            .replace(/^\s*[\/／]\s*/,'')
+            .replace(/^採用。/,'')
+            .trim();
+
+          for(const id of ids){
+            const p=`machines/${id}/machine-package.json`;
+            const j=JSON.parse(fs.readFileSync(p,'utf8'));
+            for(const x of j.selectionSummary?.selected||[]) x.reason=clean(x.reason);
+            for(const x of j.selectionSummary?.rejected||[]) x.reason=clean(x.reason);
+            fs.writeFileSync(p,JSON.stringify(j,null,2)+'\n');
+          }
+
+          // Konosuba: adopt emergency quest opponent distribution as SUPPORT.
+          {
+            const p='machines/S_KONOSUBA_ZR/machine-package.json';
+            const j=JSON.parse(fs.readFileSync(p,'utf8'));
+            j.inputs.inputs=j.inputs.inputs.filter(x=>!['INP_EMERGENCY_QUEST_TOTAL','INP_DESTROYER_COUNT'].includes(x.id));
+            j.inputs.inputs.push(
+              {id:'INP_EMERGENCY_QUEST_TOTAL',name:'緊急クエスト回数',category:'SEL_FEAT_EMERGENCY_QUEST',type:'counter',unit:'回',displayOrder:20,inferenceRole:'INCLUDE_SUPPORT',defaultValue:'',minimum:0},
+              {id:'INP_DESTROYER_COUNT',name:'デストロイヤー回数',category:'SEL_FEAT_EMERGENCY_QUEST',type:'counter',unit:'回',displayOrder:21,inferenceRole:'INCLUDE_SUPPORT',defaultValue:'',minimum:0}
+            );
+            j.features.features=(j.features.features||[]).filter(x=>x.featureId!=='FEAT_EMERGENCY_QUEST_DESTROYER');
+            j.features.features.push({
+              featureId:'FEAT_EMERGENCY_QUEST_DESTROYER',name:'緊急クエスト・デストロイヤー選択率',adoptionCategory:'INCLUDE_SUPPORT',calculationRole:'PROBABILITY',probabilityEngineUsage:true,modelType:'binomial',minimumSample:1,sampleRecommendation:20,reliabilityProfile:{weight:0.6},denominatorInputId:'INP_EMERGENCY_QUEST_TOTAL',numeratorInputId:'INP_DESTROYER_COUNT',displayFormat:'percentage',probabilities:{SET_1:0.063,SET_2:0.070,SET_3:0.117,SET_4:0.078,SET_5:0.121,SET_6:0.125},sourceEvidenceRefs:['SRC_HAZUSE','SRC_PACHINAVI']
+            });
+            j.ui.sections=(j.ui.sections||[]).filter(x=>x.id!=='UI_EMERGENCY_QUEST');
+            j.ui.sections.push({
+              id:'UI_EMERGENCY_QUEST',title:'緊急クエスト 対戦相手',displayOrder:20,description:'緊急クエストに入った回数と、そのうちデストロイヤーだった回数を入力します。設定3・5・6ではデストロイヤーが選ばれやすいため、補助的な設定推測に使用します。',collapsible:false,defaultExpanded:true,
+              items:[
+                {type:'input',inputId:'INP_EMERGENCY_QUEST_TOTAL',label:'緊急クエスト',widget:'counter',gridSpan:6,config:{directInput:false,compact:true,quickAdd:[1],step:1,emptyMeansUnobserved:true,observedZeroAllowed:true}},
+                {type:'input',inputId:'INP_DESTROYER_COUNT',label:'デストロイヤー',widget:'counter',gridSpan:6,config:{directInput:false,compact:true,quickAdd:[1],step:1,emptyMeansUnobserved:true,observedZeroAllowed:true}}
+              ]
+            });
+            j.selectionSummary.rejected=(j.selectionSummary.rejected||[]).filter(x=>x.featureId!=='FEAT_REF_EMERGENCY_QUEST');
+            j.selectionSummary.selected=(j.selectionSummary.selected||[]).filter(x=>x.featureId!=='FEAT_EMERGENCY_QUEST_DESTROYER');
+            j.selectionSummary.selected.push({featureId:'FEAT_EMERGENCY_QUEST_DESTROYER',name:'緊急クエスト時の対戦相手振り分け',reason:'デストロイヤー選択率に大きな設定差があり、対戦相手を実戦中に明確に数えられるため補助判別として採用。少数回では振れが大きいため、20回程度から参考度が上がり、30回以上を一つの目安とする。'});
+            const q=j.selectionSummary.rejected.find(x=>x.featureId==='FEAT_REF_QUEST_RANK_SUCCESS');
+            if(q) q.reason='0〜39pt・40〜59pt・60〜79ptでは成功率に設定差がある一方、80pt以上には設定差がありません。また連続演出中の書き換え当選を区別しないと、ランク到達時の抽選だけを正しく数えられません。現状の入力仕様では各ランク帯の対象回数と書き換えを一貫して分離記録できないため不採用。';
+            const b=j.selectionSummary.rejected.find(x=>x.featureId==='FEAT_REF_BATH_INITIAL_POINTS');
+            if(b) b.reason='初期2〜5ptの振り分けには設定差がありますが、大半を占める2ptの差は小さく、差が目立つ4pt・5ptは低頻度です。さらに対象となるお風呂ゾーンを漏れなく同じ条件で数える必要があるため、現状の入力仕様では安定した推測材料として扱いにくく不採用。';
+            j.selectionSummary.evaluatedCount=j.selectionSummary.selected.length+j.selectionSummary.rejected.length;
+            j.selectionSummary.selectedCount=j.selectionSummary.selected.length;
+            j.selectionSummary.rejectedCount=j.selectionSummary.rejected.length;
+            fs.writeFileSync(p,JSON.stringify(j,null,2)+'\n');
+          }
+
+          // Triple Crown: one shared normal-game denominator and two-column counters.
+          {
+            const p='machines/LB_TRIPLE_CROWN_SF4/machine-package.json';
+            const j=JSON.parse(fs.readFileSync(p,'utf8'));
+            const shared='INP_NORMAL_GAMES';
+            j.inputs.inputs=j.inputs.inputs.filter(x=>!['INP_BIG_GAMES','INP_REG_GAMES','INP_CHERRY_GAMES','INP_PLUM_GAMES',shared].includes(x.id));
+            j.inputs.inputs.push({id:shared,name:'通常時ゲーム数',category:'SEL_FEAT_NORMAL_COUNTS',type:'integer',unit:'G',displayOrder:9,inferenceRole:'INCLUDE_PRIMARY',defaultValue:'',minimum:0});
+            for(const f of j.features.features||[]) if(['FEAT_BIG','FEAT_REG','FEAT_CHERRY','FEAT_PLUM'].includes(f.featureId)) f.denominatorInputId=shared;
+            const counter=(id,label)=>({type:'input',inputId:id,label,widget:'counter',gridSpan:6,config:{directInput:false,compact:true,quickAdd:[1],step:1,emptyMeansUnobserved:true,observedZeroAllowed:true}});
+            j.ui.sections=[{
+              id:'UI_NORMAL_COUNTS',title:'通常時',displayOrder:1,description:'BIG・REG・チェリー・プラムは、すべて同じ通常時ゲーム数を分母として計算します。通常時ゲーム数は1回だけ入力してください。',collapsible:false,defaultExpanded:true,
+              items:[
+                {type:'input',inputId:shared,label:'通常時ゲーム数',widget:'number',gridSpan:12,config:{directInput:true,quickAdd:[50],emptyMeansUnobserved:true,observedZeroAllowed:true}},
+                counter('INP_BIG_COUNT','BIG'),counter('INP_REG_COUNT','REG'),counter('INP_CHERRY_COUNT','チェリー'),counter('INP_PLUM_COUNT','プラム')
+              ]
+            }];
+            for(const x of j.selectionSummary.selected||[]) if(['FEAT_BIG','FEAT_REG','FEAT_CHERRY','FEAT_PLUM'].includes(x.featureId)) x.reason=`${x.name}は通常時ゲーム数を分母として設定差を評価でき、同じ観測区間で継続して数えられるため採用。`;
+            fs.writeFileSync(p,JSON.stringify(j,null,2)+'\n');
+          }
+
+          // Matador: one shared normal-game denominator and two-column counters.
+          {
+            const p='machines/LB_MATADOR_3_TT/machine-package.json';
+            const j=JSON.parse(fs.readFileSync(p,'utf8'));
+            const shared='INP_NORMAL_GAMES';
+            j.inputs.inputs=j.inputs.inputs.filter(x=>!['INP_BB_GAMES','INP_RB_GAMES',shared].includes(x.id));
+            j.inputs.inputs.push({id:shared,name:'通常時ゲーム数',category:'SEL_FEAT_NORMAL_COUNTS',type:'integer',unit:'G',displayOrder:9,inferenceRole:'INCLUDE_PRIMARY',defaultValue:'',minimum:0});
+            for(const f of j.features.features||[]) if(['FEAT_BB','FEAT_RB'].includes(f.featureId)) f.denominatorInputId=shared;
+            const counter=(id,label)=>({type:'input',inputId:id,label,widget:'counter',gridSpan:6,config:{directInput:false,compact:true,quickAdd:[1],step:1,emptyMeansUnobserved:true,observedZeroAllowed:true}});
+            j.ui.sections=[{
+              id:'UI_NORMAL_COUNTS',title:'通常時',displayOrder:1,description:'BBとRBは同じ通常時ゲーム数を分母として計算します。通常時ゲーム数は1回だけ入力してください。',collapsible:false,defaultExpanded:true,
+              items:[
+                {type:'input',inputId:shared,label:'通常時ゲーム数',widget:'number',gridSpan:12,config:{directInput:true,quickAdd:[50],emptyMeansUnobserved:true,observedZeroAllowed:true}},
+                counter('INP_BB_COUNT','BB'),counter('INP_RB_COUNT','RB')
+              ]
+            }];
+            for(const x of j.selectionSummary.selected||[]) if(['FEAT_BB','FEAT_RB'].includes(x.featureId)) x.reason=`${x.name}は通常時ゲーム数を分母として設定差を評価でき、同じ観測区間で継続して数えられるため採用。`;
+            fs.writeFileSync(p,JSON.stringify(j,null,2)+'\n');
+          }
+
+          // Rakuen: plain-language linked-service counter description.
+          {
+            const p='machines/S_RAKUEN_TSUHO_FS/machine-package.json';
+            const j=JSON.parse(fs.readFileSync(p,'utf8'));
+            const i=j.inputs.inputs.find(x=>x.id==='INP_MY_SLOT_TOTAL_GAMES');
+            if(i) i.name='マイスロ結果画面の総ゲーム数';
+            const s=j.ui.sections.find(x=>x.title==='共通ベル');
+            if(s){
+              s.description='マイスロの結果画面に表示された「共通ベル回数」と「総ゲーム数」を、そのままセットで入力してください。この2つは同じ集計範囲の数値を使います。';
+              const it=s.items.find(x=>x.inputId==='INP_MY_SLOT_TOTAL_GAMES');
+              if(it) it.label='マイスロ結果画面の総ゲーム数';
+            }
+            const sel=j.selectionSummary.selected.find(x=>x.featureId==='FEAT_COMMON_BELL');
+            if(sel) sel.reason='マイスロ結果画面で共通ベル回数と総ゲーム数を同じ集計範囲から取得できるため、両方をセットで入力して補助判別に使用する。';
+            fs.writeFileSync(p,JSON.stringify(j,null,2)+'\n');
+          }
+
+          // Refresh hashes and sizes in both branch catalog and isolated device catalog.
+          for(const catPath of ['catalog.json','device-test/20260905-next10/catalog.json']){
+            const cat=JSON.parse(fs.readFileSync(catPath,'utf8'));
+            for(const id of ids){
+              const pkgPath=`machines/${id}/machine-package.json`;
+              const buf=fs.readFileSync(pkgPath);
+              const entry=cat.machines.find(x=>x.machineId===id);
+              if(!entry) throw new Error(`${catPath}: ${id} missing`);
+              entry.sha256=crypto.createHash('sha256').update(buf).digest('hex');
+              entry.packageSizeBytes=buf.length;
+            }
+            cat.generatedAt=new Date().toISOString();
+            fs.writeFileSync(catPath,JSON.stringify(cat,null,2)+'\n');
+          }
+          NODE
+      - name: Validate edited packages and catalogs
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --input-type=module <<'NODE'
+          import fs from 'node:fs';
+          import crypto from 'node:crypto';
+          const ids=['L_IZA_BANCHO_SB8','L_ZETTAI_SHOGEKI_PLATONIC_HEART_TK','L_WATASHI_NO_SHIAWASE_NA_KEKKON_PN','LB_TRIPLE_CROWN_SF4','LB_MATADOR_3_TT','L_TENSEI_SHITARA_KEN_DESHITA_GT','L_DARLING_IN_THE_FRANXX_SA','L_SAKI_CHOJO_KESSEN_YR','S_KONOSUBA_ZR','S_RAKUEN_TSUHO_FS'];
+          for(const id of ids){
+            const p=`machines/${id}/machine-package.json`;
+            const j=JSON.parse(fs.readFileSync(p,'utf8'));
+            const t=JSON.stringify(j.selectionSummary);
+            if(/Gate\s*[A-E]|eligible\s+attempt|Hard Evidence|joint model|numeric core/i.test(t)) throw new Error(`${id}: internal wording remains`);
+          }
+          const k=JSON.parse(fs.readFileSync('machines/S_KONOSUBA_ZR/machine-package.json','utf8'));
+          const f=k.features.features.find(x=>x.featureId==='FEAT_EMERGENCY_QUEST_DESTROYER');
+          if(!f||f.adoptionCategory!=='INCLUDE_SUPPORT'||f.sampleRecommendation!==20) throw new Error('Konosuba emergency quest support feature invalid');
+          if(k.selectionSummary.rejected.some(x=>x.featureId==='FEAT_REF_EMERGENCY_QUEST')) throw new Error('Konosuba emergency quest still rejected');
+          for(const id of ['LB_TRIPLE_CROWN_SF4','LB_MATADOR_3_TT']){
+            const j=JSON.parse(fs.readFileSync(`machines/${id}/machine-package.json`,'utf8'));
+            if(j.ui.sections.length!==1||j.ui.sections[0].id!=='UI_NORMAL_COUNTS') throw new Error(`${id}: UI not merged`);
+            if(!j.inputs.inputs.some(x=>x.id==='INP_NORMAL_GAMES')) throw new Error(`${id}: shared denominator missing`);
+          }
+          const device=JSON.parse(fs.readFileSync('device-test/20260905-next10/catalog.json','utf8'));
+          if(device.machines.length!==220||new Set(device.machines.map(x=>x.machineId)).size!==220) throw new Error('device catalog must remain 220 unique machines');
+          for(const id of ids){
+            const buf=fs.readFileSync(`machines/${id}/machine-package.json`);
+            const e=device.machines.find(x=>x.machineId===id);
+            const hash=crypto.createHash('sha256').update(buf).digest('hex');
+            if(!e||e.sha256!==hash||e.packageSizeBytes!==buf.length) throw new Error(`${id}: device catalog hash/size mismatch`);
+          }
+          console.log('PASS: real-device feedback validation; catalog remains 220 unique machines.');
+          NODE
+      - name: Commit
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git add machines catalog.json device-test/20260905-next10/catalog.json
+          git commit -m 'fix: apply reviewed next10 real-device feedback'
+          git push origin HEAD:publish/20260905-next10
