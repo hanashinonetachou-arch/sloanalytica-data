@@ -1,0 +1,133 @@
+{
+  "schemaVersion": "selection-data-v1",
+  "machineId": "LB_PREMIUM_UMAIBO_S1",
+  "machineDataVersion": "0.1.0",
+  "inputs": [
+    {
+      "id": "INP_REG_COUNT",
+      "name": "REG確率 回数",
+      "category": "SEL_RF_REG",
+      "type": "counter",
+      "unit": "回",
+      "displayOrder": 10,
+      "inferenceRole": "INCLUDE_PRIMARY",
+      "defaultValue": ""
+    },
+    {
+      "id": "INP_REG_TRIALS",
+      "name": "REG確率 試行数",
+      "category": "SEL_RF_REG",
+      "type": "integer",
+      "unit": "回",
+      "displayOrder": 11,
+      "inferenceRole": "INCLUDE_PRIMARY",
+      "defaultValue": ""
+    }
+  ],
+  "features": [
+    {
+      "researchFeatureId": "RF_BIG",
+      "featureId": "FEAT_BIG",
+      "adoptionCategory": "EXCLUDE",
+      "weight": 1,
+      "userFacingReason": "BIG・REG・合算は同一通常ゲーム上の排他的ボーナス結果で、独立二項として同時利用すると同じ試行を重複評価するため、設定分離が大きいREGを代表採用する。",
+      "rejectionReason": "BIG・REG・合算は同一通常ゲーム上の排他的ボーナス結果で、独立二項として同時利用すると同じ試行を重複評価するため、設定分離が大きいREGを代表採用する。",
+      "difficultyParticipation": "EXCLUDE"
+    },
+    {
+      "researchFeatureId": "RF_REG",
+      "featureId": "FEAT_REG",
+      "adoptionCategory": "INCLUDE_PRIMARY",
+      "weight": 1,
+      "numeratorInputId": "INP_REG_COUNT",
+      "denominatorInputId": "INP_REG_TRIALS",
+      "userReason": "公開全設定値と正しい通常時ゲームが揃い、他の主要候補の代表として設定差を直接評価できるため主Featureとして採用する。",
+      "difficultyParticipation": "EXCLUDE",
+      "difficultyExclusionReason": "Observationで実機から取得できる試行数・除外区間・Exposureを確定する前にDifficultyへ仮の換算を持ち込まない。"
+    },
+    {
+      "researchFeatureId": "RF_BONUS_AGG",
+      "featureId": "FEAT_BONUS_AGG",
+      "adoptionCategory": "EXCLUDE",
+      "weight": 1,
+      "userFacingReason": "合算はBIGとREGを内包し、代表採用するREGと同じボーナス事象を再利用するため独立尤度には採用しない。",
+      "rejectionReason": "合算はBIGとREGを内包し、代表採用するREGと同じボーナス事象を再利用するため独立尤度には採用しない。",
+      "difficultyParticipation": "EXCLUDE"
+    },
+    {
+      "researchFeatureId": "RF_SOLO_BIG",
+      "featureId": "FEAT_SOLO_BIG",
+      "adoptionCategory": "EXCLUDE",
+      "weight": 1,
+      "userFacingReason": "単独BIGはBIGの部分集合であり、ボーナス系列の別Featureと独立に掛けるための完全な条件付き分解表がないため採用しない。",
+      "rejectionReason": "単独BIGはBIGの部分集合であり、ボーナス系列の別Featureと独立に掛けるための完全な条件付き分解表がないため採用しない。",
+      "difficultyParticipation": "EXCLUDE"
+    },
+    {
+      "researchFeatureId": "RF_SOLO_REG",
+      "featureId": "FEAT_SOLO_REG",
+      "adoptionCategory": "EXCLUDE",
+      "weight": 1,
+      "userFacingReason": "単独REGはREGの部分集合で、代表REGと同じ当選を再利用するため独立尤度として採用しない。",
+      "rejectionReason": "単独REGはREGの部分集合で、代表REGと同じ当選を再利用するため独立尤度として採用しない。",
+      "difficultyParticipation": "EXCLUDE"
+    },
+    {
+      "researchFeatureId": "RF_CHERRY_BIG",
+      "featureId": "FEAT_CHERRY_BIG",
+      "adoptionCategory": "EXCLUDE",
+      "weight": 1,
+      "userFacingReason": "チェリー同時当選BIGはBIGの部分集合で、完全なボーナス契機分布がないため独立尤度化すると同じ当選を二重評価する。",
+      "rejectionReason": "チェリー同時当選BIGはBIGの部分集合で、完全なボーナス契機分布がないため独立尤度化すると同じ当選を二重評価する。",
+      "difficultyParticipation": "EXCLUDE"
+    },
+    {
+      "researchFeatureId": "RF_CHERRY_REG",
+      "featureId": "FEAT_CHERRY_REG",
+      "adoptionCategory": "EXCLUDE",
+      "weight": 1,
+      "userFacingReason": "チェリー同時当選REGは代表REGの部分集合であり、同一REG当選を再利用するため独立尤度には採用しない。",
+      "rejectionReason": "チェリー同時当選REGは代表REGの部分集合であり、同一REG当選を再利用するため独立尤度には採用しない。",
+      "difficultyParticipation": "EXCLUDE"
+    },
+    {
+      "researchFeatureId": "RF_RARE_CHERRY_BIG",
+      "featureId": "FEAT_RARE_CHERRY_BIG",
+      "adoptionCategory": "EXCLUDE",
+      "weight": 1,
+      "userFacingReason": "全設定共通1/3276.8で設定分離がなく、設定推測の尤度比が1となるため採用しない。",
+      "rejectionReason": "全設定共通1/3276.8で設定分離がなく、設定推測の尤度比が1となるため採用しない。",
+      "difficultyParticipation": "EXCLUDE"
+    }
+  ],
+  "evidence": [],
+  "evidenceDecisions": [],
+  "evidenceReview": {
+    "policyVersion": 1,
+    "exclusions": []
+  },
+  "evidenceUi": {
+    "groups": []
+  },
+  "uiCategoryLabels": {
+    "SEL_RF_REG": "REG確率"
+  },
+  "difficultyAnalysis": {
+    "targetGames": [
+      1500,
+      3000,
+      7000
+    ],
+    "targetGameBasis": {
+      "basisId": "UNRESOLVED_OBSERVATION",
+      "label": "Observationで確定する実戦Exposure",
+      "quality": "UNRESOLVED",
+      "crossMachineComparable": false,
+      "note": "Gate BではSelectionのみ確定し、実機取得可能な正しい分母とExposureはGate Cで確定する。"
+    },
+    "calibrationAllowedExposureQualities": [
+      "EXACT",
+      "DERIVED"
+    ]
+  }
+}

@@ -1,0 +1,543 @@
+{
+  "schemaVersion": "selection-data-v1",
+  "machineId": "L_DMC5_ST_XA",
+  "machineDataVersion": "0.1.0",
+  "inputs": [
+    {
+      "id": "INP_BONUS_FIRST_HIT_COUNT",
+      "name": "ボーナス初当り 回数",
+      "category": "SEL_RF_BONUS_FIRST_HIT",
+      "type": "counter",
+      "unit": "回",
+      "displayOrder": 10,
+      "inferenceRole": "INCLUDE_PRIMARY",
+      "defaultValue": ""
+    },
+    {
+      "id": "INP_BONUS_FIRST_HIT_TRIALS",
+      "name": "ボーナス初当り 試行数",
+      "category": "SEL_RF_BONUS_FIRST_HIT",
+      "type": "integer",
+      "unit": "回",
+      "displayOrder": 11,
+      "inferenceRole": "INCLUDE_PRIMARY",
+      "defaultValue": ""
+    },
+    {
+      "id": "INP_MYSTERY_DANTE_COUNT",
+      "name": "謎ダンテ出現率 回数",
+      "category": "SEL_RF_MYSTERY_DANTE",
+      "type": "counter",
+      "unit": "回",
+      "displayOrder": 25,
+      "inferenceRole": "INCLUDE_FALLBACK",
+      "defaultValue": ""
+    },
+    {
+      "id": "INP_MYSTERY_DANTE_TRIALS",
+      "name": "謎ダンテ出現率 試行数",
+      "category": "SEL_RF_MYSTERY_DANTE",
+      "type": "integer",
+      "unit": "回",
+      "displayOrder": 26,
+      "inferenceRole": "INCLUDE_FALLBACK",
+      "defaultValue": ""
+    }
+  ],
+  "features": [
+    {
+      "researchFeatureId": "RF_BONUS_FIRST_HIT",
+      "featureId": "FEAT_BONUS_FIRST_HIT",
+      "adoptionCategory": "INCLUDE_PRIMARY",
+      "weight": 1,
+      "numeratorInputId": "INP_BONUS_FIRST_HIT_COUNT",
+      "denominatorInputId": "INP_BONUS_FIRST_HIT_TRIALS",
+      "userReason": "公開全設定値と正しい有効通常ゲームが揃い、他の主要候補の代表として設定差を直接評価できるため主Featureとして採用する。",
+      "difficultyParticipation": "EXCLUDE",
+      "difficultyExclusionReason": "Observationで実機から取得できる試行数・除外区間・Exposureを確定する前にDifficultyへ仮の換算を持ち込まない。"
+    },
+    {
+      "researchFeatureId": "RF_ST_FIRST_HIT",
+      "featureId": "FEAT_ST_FIRST_HIT",
+      "adoptionCategory": "EXCLUDE",
+      "weight": 1,
+      "userFacingReason": "ST初当りはボーナス/CZ成功の下流結果を含みボーナス初当りと因果的に重なるため、独立尤度で二重評価せずボーナス初当りを代表採用する。",
+      "rejectionReason": "ST初当りはボーナス/CZ成功の下流結果を含みボーナス初当りと因果的に重なるため、独立尤度で二重評価せずボーナス初当りを代表採用する。",
+      "difficultyParticipation": "EXCLUDE"
+    },
+    {
+      "researchFeatureId": "RF_CYCLE_CZ",
+      "featureId": "FEAT_CYCLE_CZ",
+      "adoptionCategory": "EXCLUDE",
+      "weight": 1,
+      "userReason": "公開設定差と条件付き試行は確認できるが主要初当り系列と依存するため、独立乗算を避け代表Featureが使えない場合だけFallbackとして利用する。",
+      "difficultyParticipation": "EXCLUDE",
+      "userFacingReason": "公開値は条件別・状態別・到達段階別に定義されており、現行の単一「成功回数/試行数」入力へ合算すると異なる確率母集団を混ぜてしまう。条件別モデルを正しく保持できる実装がない状態では尤度を作らず、Research事実のみ保持して推測から除外する。",
+      "rejectionReason": "公開値は条件別・状態別・到達段階別に定義されており、現行の単一「成功回数/試行数」入力へ合算すると異なる確率母集団を混ぜてしまう。条件別モデルを正しく保持できる実装がない状態では尤度を作らず、Research事実のみ保持して推測から除外する。"
+    },
+    {
+      "researchFeatureId": "RF_UPPER_ST_HEAVEN",
+      "featureId": "FEAT_UPPER_ST_HEAVEN",
+      "adoptionCategory": "EXCLUDE",
+      "weight": 1,
+      "userReason": "公開全設定値または完全分布と上位ST終了1回が定義され、代表Featureとは異なる条件・構成情報を追加できるため補助Featureとして採用する。",
+      "difficultyParticipation": "EXCLUDE",
+      "userFacingReason": "上位ST後の通常C/天国は内部モードであり、移行先そのものを実戦で直接確定できないため潜在状態を観測値として扱わない。代わりに公開されている直接観測可能な100G+α以内ボーナス当選率を採用する。",
+      "rejectionReason": "上位ST後の通常C/天国は内部モードであり、移行先そのものを実戦で直接確定できないため潜在状態を観測値として扱わない。代わりに公開されている直接観測可能な100G+α以内ボーナス当選率を採用する。"
+    },
+    {
+      "researchFeatureId": "RF_SUPER_NERO_INTERNAL",
+      "featureId": "FEAT_SUPER_NERO_INTERNAL",
+      "adoptionCategory": "EXCLUDE",
+      "weight": 1,
+      "userFacingReason": "内部スーパーネロは原則として見た目から判別できない潜在状態であり、未観測の内部抽選を観測値として入力しない。",
+      "rejectionReason": "内部スーパーネロは原則として見た目から判別できない潜在状態であり、未観測の内部抽選を観測値として入力しない。",
+      "difficultyParticipation": "EXCLUDE"
+    },
+    {
+      "researchFeatureId": "RF_MYSTERY_DANTE",
+      "featureId": "FEAT_MYSTERY_DANTE",
+      "adoptionCategory": "INCLUDE_FALLBACK",
+      "weight": 1,
+      "numeratorInputId": "INP_MYSTERY_DANTE_COUNT",
+      "denominatorInputId": "INP_MYSTERY_DANTE_TRIALS",
+      "userReason": "公開設定差と条件付き試行は確認できるが主要初当り系列と依存するため、独立乗算を避け代表Featureが使えない場合だけFallbackとして利用する。",
+      "difficultyParticipation": "EXCLUDE",
+      "difficultyExclusionReason": "Observationで実機から取得できる試行数・除外区間・Exposureを確定する前にDifficultyへ仮の換算を持ち込まない。",
+      "suppressedByFeatureIds": [
+        "FEAT_BONUS_FIRST_HIT"
+      ]
+    },
+    {
+      "researchFeatureId": "RF_NORMAL_MODE_ZONE",
+      "featureId": "FEAT_NORMAL_MODE_ZONE",
+      "adoptionCategory": "EXCLUDE",
+      "weight": 1,
+      "userFacingReason": "完全表はあるが通常A/B/Cは内部モードで通常場面から確定できず、潜在状態を既知として条件付き尤度へ投入しない。",
+      "rejectionReason": "完全表はあるが通常A/B/Cは内部モードで通常場面から確定できず、潜在状態を既知として条件付き尤度へ投入しない。",
+      "difficultyParticipation": "EXCLUDE"
+    },
+    {
+      "researchFeatureId": "RF_INITIAL_BONUS_LEVEL",
+      "featureId": "FEAT_INITIAL_BONUS_LEVEL",
+      "adoptionCategory": "EXCLUDE",
+      "weight": 1,
+      "userFacingReason": "初期ボーナスレベルは内部状態で、選択レベルそのものを安定して直接観測できないため潜在状態を入力値として扱わない。",
+      "rejectionReason": "初期ボーナスレベルは内部状態で、選択レベルそのものを安定して直接観測できないため潜在状態を入力値として扱わない。",
+      "difficultyParticipation": "EXCLUDE"
+    },
+    {
+      "researchFeatureId": "RF_BONUS_LEVEL_UP",
+      "featureId": "FEAT_BONUS_LEVEL_UP",
+      "adoptionCategory": "EXCLUDE",
+      "weight": 1,
+      "userFacingReason": "レベルアップは内部レベルを前提とする条件付き抽選で、開始レベルと昇格後レベルを直接確定できない場面があるため潜在状態の数値化を避ける。",
+      "rejectionReason": "レベルアップは内部レベルを前提とする条件付き抽選で、開始レベルと昇格後レベルを直接確定できない場面があるため潜在状態の数値化を避ける。",
+      "difficultyParticipation": "EXCLUDE"
+    },
+    {
+      "researchFeatureId": "RF_BLOODY_BATTLE_ENTRY",
+      "featureId": "FEAT_BLOODY_BATTLE_ENTRY",
+      "adoptionCategory": "EXCLUDE",
+      "weight": 1,
+      "userReason": "公開全設定値または完全分布と公開条件を満たす対象試行が定義され、代表Featureとは異なる条件・構成情報を追加できるため補助Featureとして採用する。",
+      "difficultyParticipation": "EXCLUDE",
+      "userFacingReason": "公開値は条件別・状態別・到達段階別に定義されており、現行の単一「成功回数/試行数」入力へ合算すると異なる確率母集団を混ぜてしまう。条件別モデルを正しく保持できる実装がない状態では尤度を作らず、Research事実のみ保持して推測から除外する。",
+      "rejectionReason": "公開値は条件別・状態別・到達段階別に定義されており、現行の単一「成功回数/試行数」入力へ合算すると異なる確率母集団を混ぜてしまう。条件別モデルを正しく保持できる実装がない状態では尤度を作らず、Research事実のみ保持して推測から除外する。"
+    },
+    {
+      "researchFeatureId": "RF_BLOODY_BATTLE_WIN",
+      "featureId": "FEAT_BLOODY_BATTLE_WIN",
+      "adoptionCategory": "EXCLUDE",
+      "weight": 1,
+      "userReason": "公開全設定値または完全分布と公開条件を満たす対象試行が定義され、代表Featureとは異なる条件・構成情報を追加できるため補助Featureとして採用する。",
+      "difficultyParticipation": "EXCLUDE",
+      "userFacingReason": "公開値は条件別・状態別・到達段階別に定義されており、現行の単一「成功回数/試行数」入力へ合算すると異なる確率母集団を混ぜてしまう。条件別モデルを正しく保持できる実装がない状態では尤度を作らず、Research事実のみ保持して推測から除外する。",
+      "rejectionReason": "公開値は条件別・状態別・到達段階別に定義されており、現行の単一「成功回数/試行数」入力へ合算すると異なる確率母集団を混ぜてしまう。条件別モデルを正しく保持できる実装がない状態では尤度を作らず、Research事実のみ保持して推測から除外する。"
+    },
+    {
+      "researchFeatureId": "RF_ST_PRE_JCB_PROMOTE",
+      "featureId": "FEAT_ST_PRE_JCB_PROMOTE",
+      "adoptionCategory": "EXCLUDE",
+      "weight": 1,
+      "userReason": "公開設定差と条件付き試行は確認できるが主要初当り系列と依存するため、独立乗算を避け代表Featureが使えない場合だけFallbackとして利用する。",
+      "difficultyParticipation": "EXCLUDE",
+      "userFacingReason": "公開値は条件別・状態別・到達段階別に定義されており、現行の単一「成功回数/試行数」入力へ合算すると異なる確率母集団を混ぜてしまう。条件別モデルを正しく保持できる実装がない状態では尤度を作らず、Research事実のみ保持して推測から除外する。",
+      "rejectionReason": "公開値は条件別・状態別・到達段階別に定義されており、現行の単一「成功回数/試行数」入力へ合算すると異なる確率母集団を混ぜてしまう。条件別モデルを正しく保持できる実装がない状態では尤度を作らず、Research事実のみ保持して推測から除外する。"
+    },
+    {
+      "researchFeatureId": "RF_ST_EMBLEM_TYPE",
+      "featureId": "FEAT_ST_EMBLEM_TYPE",
+      "adoptionCategory": "EXCLUDE",
+      "weight": 1,
+      "userReason": "公開全設定値または完全分布と公開条件を満たす対象試行が定義され、代表Featureとは異なる条件・構成情報を追加できるため補助Featureとして採用する。",
+      "difficultyParticipation": "EXCLUDE",
+      "userFacingReason": "公開値は条件別・状態別・到達段階別に定義されており、現行の単一「成功回数/試行数」入力へ合算すると異なる確率母集団を混ぜてしまう。条件別モデルを正しく保持できる実装がない状態では尤度を作らず、Research事実のみ保持して推測から除外する。",
+      "rejectionReason": "公開値は条件別・状態別・到達段階別に定義されており、現行の単一「成功回数/試行数」入力へ合算すると異なる確率母集団を混ぜてしまう。条件別モデルを正しく保持できる実装がない状態では尤度を作らず、Research事実のみ保持して推測から除外する。"
+    },
+    {
+      "researchFeatureId": "RF_UPPER_ST_EMBLEM_COUNT",
+      "featureId": "FEAT_UPPER_ST_EMBLEM_COUNT",
+      "adoptionCategory": "EXCLUDE",
+      "weight": 1,
+      "difficultyParticipation": "EXCLUDE",
+      "userFacingReason": "上位STセット開始時の3個エンブレムには設定差があるが、上位ST自体が終日でも安定して複数回到達できる事象ではない。上位ST1回から得られるセット開始試行も有限で、7000G実戦で安定した判別力を得るだけの試行数を継続的に確保できないため数値推測から除外する。",
+      "rejectionReason": "上位STセット開始時の3個エンブレムには設定差があるが、上位ST自体が終日でも安定して複数回到達できる事象ではない。上位ST1回から得られるセット開始試行も有限で、7000G実戦で安定した判別力を得るだけの試行数を継続的に確保できないため数値推測から除外する。"
+    },
+    {
+      "researchFeatureId": "RF_UPPER_ST_100G_HIT",
+      "featureId": "FEAT_UPPER_ST_100G_HIT",
+      "adoptionCategory": "EXCLUDE",
+      "weight": 1,
+      "difficultyParticipation": "EXCLUDE",
+      "userFacingReason": "上位ST終了後100G+α以内のボーナス当選率は設定差が大きいが、母数は上位ST終了回数であり、7000G実戦でも0～少数回になりやすい。少数の当否を強く評価する危険があるため数値推測から除外する。",
+      "rejectionReason": "上位ST終了後100G+α以内のボーナス当選率は設定差が大きいが、母数は上位ST終了回数であり、7000G実戦でも0～少数回になりやすい。少数の当否を強く評価する危険があるため数値推測から除外する。"
+    }
+  ],
+  "evidence": [],
+  "evidenceDecisions": [
+    {
+      "researchEvidenceId": "RE_DMC_END",
+      "disposition": "INCLUDE_UI",
+      "reason": "Researchで確定した設定下限・設定否定・設定確定のHard EvidenceだけをUI候補として採用し、傾向示唆は排除条件に使わない。"
+    },
+    {
+      "researchEvidenceId": "RE_ENTA_TROPHY",
+      "disposition": "INCLUDE_UI",
+      "reason": "Researchで確定した設定下限・設定否定・設定確定のHard EvidenceだけをUI候補として採用し、傾向示唆は排除条件に使わない。"
+    },
+    {
+      "researchEvidenceId": "RE_PAYOUT",
+      "disposition": "INCLUDE_UI",
+      "reason": "Researchで確定した設定下限・設定否定・設定確定のHard EvidenceだけをUI候補として採用し、傾向示唆は排除条件に使わない。"
+    },
+    {
+      "researchEvidenceId": "RE_UPPER_ST_VOICE",
+      "disposition": "INCLUDE_UI",
+      "reason": "Researchで確定した設定下限・設定否定・設定確定のHard EvidenceだけをUI候補として採用し、傾向示唆は排除条件に使わない。"
+    }
+  ],
+  "evidenceReview": {
+    "policyVersion": 1,
+    "exclusions": []
+  },
+  "evidenceUi": {
+    "groups": [
+      {
+        "groupId": "EVG_DMC_END",
+        "label": "DMCボーナス終了画面",
+        "selectionMode": "multi",
+        "normalizationMode": "ALLOWED_SETTINGS_INTERSECTION",
+        "displayOrder": 100,
+        "options": [
+          {
+            "value": "V1_VALUE",
+            "label": "ブラッディパレス低層",
+            "allowedSettings": [],
+            "excludedSettings": [
+              "SET_3"
+            ],
+            "sourceEvidenceIds": [
+              "RE_DMC_END"
+            ]
+          },
+          {
+            "value": "V2_VALUE",
+            "label": "ブラッディパレス中層",
+            "allowedSettings": [],
+            "excludedSettings": [
+              "SET_2"
+            ],
+            "sourceEvidenceIds": [
+              "RE_DMC_END"
+            ]
+          },
+          {
+            "value": "V3_VALUE",
+            "label": "ブラッディパレス高層",
+            "allowedSettings": [
+              "SET_2",
+              "SET_3",
+              "SET_4",
+              "SET_5",
+              "SET_6"
+            ],
+            "excludedSettings": [],
+            "sourceEvidenceIds": [
+              "RE_DMC_END"
+            ]
+          },
+          {
+            "value": "V4_VALUE",
+            "label": "魔界",
+            "allowedSettings": [
+              "SET_4",
+              "SET_5",
+              "SET_6"
+            ],
+            "excludedSettings": [],
+            "sourceEvidenceIds": [
+              "RE_DMC_END"
+            ]
+          },
+          {
+            "value": "V5_VALUE",
+            "label": "全員集合",
+            "allowedSettings": [
+              "SET_5",
+              "SET_6"
+            ],
+            "excludedSettings": [],
+            "sourceEvidenceIds": [
+              "RE_DMC_END"
+            ]
+          },
+          {
+            "value": "V6_VALUE",
+            "label": "エンタライオン",
+            "allowedSettings": [
+              "SET_6"
+            ],
+            "excludedSettings": [],
+            "sourceEvidenceIds": [
+              "RE_DMC_END"
+            ]
+          }
+        ]
+      },
+      {
+        "groupId": "EVG_ENTA_TROPHY",
+        "label": "エンタトロフィー",
+        "selectionMode": "multi",
+        "normalizationMode": "ALLOWED_SETTINGS_INTERSECTION",
+        "displayOrder": 101,
+        "options": [
+          {
+            "value": "V1_VALUE",
+            "label": "銅",
+            "allowedSettings": [
+              "SET_2",
+              "SET_3",
+              "SET_4",
+              "SET_5",
+              "SET_6"
+            ],
+            "excludedSettings": [],
+            "sourceEvidenceIds": [
+              "RE_ENTA_TROPHY"
+            ]
+          },
+          {
+            "value": "V2_VALUE",
+            "label": "銀",
+            "allowedSettings": [
+              "SET_3",
+              "SET_4",
+              "SET_5",
+              "SET_6"
+            ],
+            "excludedSettings": [],
+            "sourceEvidenceIds": [
+              "RE_ENTA_TROPHY"
+            ]
+          },
+          {
+            "value": "V3_VALUE",
+            "label": "金",
+            "allowedSettings": [
+              "SET_4",
+              "SET_5",
+              "SET_6"
+            ],
+            "excludedSettings": [],
+            "sourceEvidenceIds": [
+              "RE_ENTA_TROPHY"
+            ]
+          },
+          {
+            "value": "V4_VALUE",
+            "label": "紅葉",
+            "allowedSettings": [
+              "SET_5",
+              "SET_6"
+            ],
+            "excludedSettings": [],
+            "sourceEvidenceIds": [
+              "RE_ENTA_TROPHY"
+            ]
+          },
+          {
+            "value": "V5_VALUE",
+            "label": "虹",
+            "allowedSettings": [
+              "SET_6"
+            ],
+            "excludedSettings": [],
+            "sourceEvidenceIds": [
+              "RE_ENTA_TROPHY"
+            ]
+          }
+        ]
+      },
+      {
+        "groupId": "EVG_PAYOUT",
+        "label": "特定獲得枚数表示",
+        "selectionMode": "multi",
+        "normalizationMode": "ALLOWED_SETTINGS_INTERSECTION",
+        "displayOrder": 102,
+        "options": [
+          {
+            "value": "V1_222_OVER",
+            "label": "222枚OVER",
+            "allowedSettings": [
+              "SET_2",
+              "SET_3",
+              "SET_4",
+              "SET_5",
+              "SET_6"
+            ],
+            "excludedSettings": [],
+            "sourceEvidenceIds": [
+              "RE_PAYOUT"
+            ]
+          },
+          {
+            "value": "V2_456_OVER",
+            "label": "456枚OVER",
+            "allowedSettings": [
+              "SET_4",
+              "SET_5",
+              "SET_6"
+            ],
+            "excludedSettings": [],
+            "sourceEvidenceIds": [
+              "RE_PAYOUT"
+            ]
+          },
+          {
+            "value": "V3_555_OVER",
+            "label": "555枚OVER",
+            "allowedSettings": [
+              "SET_5",
+              "SET_6"
+            ],
+            "excludedSettings": [],
+            "sourceEvidenceIds": [
+              "RE_PAYOUT"
+            ]
+          },
+          {
+            "value": "V4_666_OVER",
+            "label": "666枚OVER",
+            "allowedSettings": [
+              "SET_6"
+            ],
+            "excludedSettings": [],
+            "sourceEvidenceIds": [
+              "RE_PAYOUT"
+            ]
+          }
+        ]
+      },
+      {
+        "groupId": "EVG_UPPER_ST_VOICE",
+        "label": "上位ST中バージルバトル勝利時ダンテセリフ",
+        "selectionMode": "multi",
+        "normalizationMode": "ALLOWED_SETTINGS_INTERSECTION",
+        "displayOrder": 103,
+        "options": [
+          {
+            "value": "V1_2",
+            "label": "2点リードだ!",
+            "allowedSettings": [
+              "SET_2",
+              "SET_3",
+              "SET_4",
+              "SET_5",
+              "SET_6"
+            ],
+            "excludedSettings": [],
+            "sourceEvidenceIds": [
+              "RE_UPPER_ST_VOICE"
+            ]
+          },
+          {
+            "value": "V2_3",
+            "label": "3点リードだ!",
+            "allowedSettings": [
+              "SET_3",
+              "SET_4",
+              "SET_5",
+              "SET_6"
+            ],
+            "excludedSettings": [],
+            "sourceEvidenceIds": [
+              "RE_UPPER_ST_VOICE"
+            ]
+          },
+          {
+            "value": "V3_4",
+            "label": "4点リードだ!",
+            "allowedSettings": [
+              "SET_4",
+              "SET_5",
+              "SET_6"
+            ],
+            "excludedSettings": [],
+            "sourceEvidenceIds": [
+              "RE_UPPER_ST_VOICE"
+            ]
+          },
+          {
+            "value": "V4_5",
+            "label": "5点リードだ!",
+            "allowedSettings": [
+              "SET_5",
+              "SET_6"
+            ],
+            "excludedSettings": [],
+            "sourceEvidenceIds": [
+              "RE_UPPER_ST_VOICE"
+            ]
+          },
+          {
+            "value": "V5_6",
+            "label": "6点リードだ!",
+            "allowedSettings": [
+              "SET_6"
+            ],
+            "excludedSettings": [],
+            "sourceEvidenceIds": [
+              "RE_UPPER_ST_VOICE"
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "uiCategoryLabels": {
+    "SEL_RF_BONUS_FIRST_HIT": "ボーナス初当り",
+    "SEL_RF_MYSTERY_DANTE": "謎ダンテ出現率",
+    "SEL_RF_UPPER_ST_EMBLEM_COUNT": "上位STエンブレム個数",
+    "EVIDENCE": "設定確定情報",
+    "SEL_RF_UPPER_ST_100G_HIT": "上位ST後100G+α以内ボーナス"
+  },
+  "difficultyAnalysis": {
+    "targetGames": [
+      1500,
+      3000,
+      7000
+    ],
+    "targetGameBasis": {
+      "basisId": "UNRESOLVED_OBSERVATION",
+      "label": "Observationで確定する実戦Exposure",
+      "quality": "UNRESOLVED",
+      "crossMachineComparable": false,
+      "note": "Gate BではSelectionのみ確定し、実機取得可能な正しい分母とExposureはGate Cで確定する。"
+    },
+    "calibrationAllowedExposureQualities": [
+      "EXACT",
+      "DERIVED"
+    ]
+  }
+}

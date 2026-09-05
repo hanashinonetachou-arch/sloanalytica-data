@@ -22,6 +22,26 @@
       "displayOrder": 11,
       "inferenceRole": "INCLUDE_PRIMARY",
       "defaultValue": ""
+    },
+    {
+      "id": "INP_EMERGENCY_QUEST_TOTAL",
+      "name": "緊急クエスト回数",
+      "category": "SEL_FEAT_EMERGENCY_QUEST",
+      "type": "counter",
+      "unit": "回",
+      "displayOrder": 20,
+      "inferenceRole": "INCLUDE_SUPPORT",
+      "defaultValue": ""
+    },
+    {
+      "id": "INP_DESTROYER_COUNT",
+      "name": "デストロイヤー回数",
+      "category": "SEL_FEAT_EMERGENCY_QUEST",
+      "type": "counter",
+      "unit": "回",
+      "displayOrder": 21,
+      "inferenceRole": "INCLUDE_SUPPORT",
+      "defaultValue": ""
     }
   ],
   "features": [
@@ -32,17 +52,18 @@
       "weight": 1,
       "numeratorInputId": "INP_AT_INITIAL_COUNT",
       "denominatorInputId": "INP_AT_INITIAL_TRIALS",
-      "userReason": "Gate B/Gate Cで採用済み。AT初当りの対象となる通常時ゲームを分母とし、同じ観測経路の分子と組み合わせる。",
+      "userReason": "AT初当りの対象となる通常時ゲームを分母とし、同じ観測経路の分子と組み合わせる。",
       "difficultyParticipation": "EXCLUDE",
-      "difficultyExclusionReason": "Gate D構築時点では実戦総GへのExposure換算を別監査するため、Difficulty校正へはまだ参加させない。"
+      "difficultyExclusionReason": "UI構築構築時点では実戦総Gへの観測量換算を別監査するため、Difficulty校正へはまだ参加させない。"
     },
     {
       "researchFeatureId": "RF_REF_EMERGENCY_QUEST",
-      "featureId": "FEAT_REF_EMERGENCY_QUEST",
-      "adoptionCategory": "EXCLUDE",
-      "weight": 1,
-      "userFacingReason": "条件付きカテゴリ分布で一日試行数が少なく、標準の数値推測には採用しない。",
-      "rejectionReason": "条件付きカテゴリ分布で一日試行数が少なく、標準の数値推測には採用しない。",
+      "featureId": "FEAT_EMERGENCY_QUEST_DESTROYER",
+      "adoptionCategory": "INCLUDE_SUPPORT",
+      "weight": 0.6,
+      "numeratorInputId": "INP_DESTROYER_COUNT",
+      "denominatorInputId": "INP_EMERGENCY_QUEST_TOTAL",
+      "userReason": "デストロイヤー選択率に大きな設定差があり、対戦相手を実戦中に明確に数えられるため補助判別として採用。少数回では振れが大きいため、20回程度から参考度が上がり、30回以上を一つの目安とする。",
       "difficultyParticipation": "EXCLUDE"
     },
     {
@@ -50,8 +71,8 @@
       "featureId": "FEAT_REF_QUEST_RANK_SUCCESS",
       "adoptionCategory": "EXCLUDE",
       "weight": 1,
-      "userFacingReason": "ランク別の条件付き分母となるeligible attemptを別々に観測する必要があり、総クエスト数へ集約すると試行母集団が変わるため数値推測には採用しない。",
-      "rejectionReason": "ランク別の条件付き分母となるeligible attemptを別々に観測する必要があり、総クエスト数へ集約すると試行母集団が変わるため数値推測には採用しない。",
+      "userFacingReason": "0〜39pt・40〜59pt・60〜79ptでは成功率に設定差がある一方、80pt以上には設定差がありません。また連続演出中の書き換え当選を区別しないと、ランク到達時の抽選だけを正しく数えられません。現状の入力仕様では各ランク帯の対象回数と書き換えを一貫して分離記録できないため不採用。",
+      "rejectionReason": "0〜39pt・40〜59pt・60〜79ptでは成功率に設定差がある一方、80pt以上には設定差がありません。また連続演出中の書き換え当選を区別しないと、ランク到達時の抽選だけを正しく数えられません。現状の入力仕様では各ランク帯の対象回数と書き換えを一貫して分離記録できないため不採用。",
       "difficultyParticipation": "EXCLUDE"
     },
     {
@@ -59,8 +80,8 @@
       "featureId": "FEAT_REF_BATH_INITIAL_POINTS",
       "adoptionCategory": "EXCLUDE",
       "weight": 1,
-      "userFacingReason": "条件付きカテゴリ分布で、安定した試行数・完全分布の入力経路が未確立のため数値推測には採用しない。",
-      "rejectionReason": "条件付きカテゴリ分布で、安定した試行数・完全分布の入力経路が未確立のため数値推測には採用しない。",
+      "userFacingReason": "初期2〜5ptの振り分けには設定差がありますが、大半を占める2ptの差は小さく、差が目立つ4pt・5ptは低頻度です。さらに対象となるお風呂ゾーンを漏れなく同じ条件で数える必要があるため、現状の入力仕様では安定した推測材料として扱いにくく不採用。",
+      "rejectionReason": "初期2〜5ptの振り分けには設定差がありますが、大半を占める2ptの差は小さく、差が目立つ4pt・5ptは低頻度です。さらに対象となるお風呂ゾーンを漏れなく同じ条件で数える必要があるため、現状の入力仕様では安定した推測材料として扱いにくく不採用。",
       "difficultyParticipation": "EXCLUDE"
     },
     {
@@ -87,17 +108,17 @@
     {
       "researchEvidenceId": "RE_GATE_D_BONUS_END",
       "disposition": "INCLUDE_UI",
-      "reason": "公開解析で許容設定集合が明示されたHard Evidence。傾向示唆とは分離して設定集合の絞り込みだけに使用する。"
+      "reason": "公開解析で許容設定集合が明示された設定確定情報。傾向示唆とは分離して設定集合の絞り込みだけに使用する。"
     },
     {
       "researchEvidenceId": "RE_GATE_D_AT_END_VOICE",
       "disposition": "INCLUDE_UI",
-      "reason": "公開解析で許容設定集合が明示されたHard Evidence。傾向示唆とは分離して設定集合の絞り込みだけに使用する。"
+      "reason": "公開解析で許容設定集合が明示された設定確定情報。傾向示唆とは分離して設定集合の絞り込みだけに使用する。"
     },
     {
       "researchEvidenceId": "RE_GATE_D_DEBT_LINE",
       "disposition": "INCLUDE_UI",
-      "reason": "公開解析で許容設定集合が明示されたHard Evidence。傾向示唆とは分離して設定集合の絞り込みだけに使用する。"
+      "reason": "公開解析で許容設定集合が明示された設定確定情報。傾向示唆とは分離して設定集合の絞り込みだけに使用する。"
     }
   ],
   "evidenceReview": {
@@ -327,10 +348,10 @@
     ],
     "targetGameBasis": {
       "basisId": "UNRESOLVED_OBSERVATION",
-      "label": "Observationで確定する実戦Exposure",
+      "label": "Observationで確定する実戦観測量",
       "quality": "UNRESOLVED",
       "crossMachineComparable": false,
-      "note": "Gate D numeric coreでは正しい入力分母を固定し、総G換算は別監査で確定する。"
+      "note": "UI構築 数値推測では正しい入力分母を固定し、総G換算は別監査で確定する。"
     },
     "calibrationAllowedExposureQualities": [
       "EXACT",
