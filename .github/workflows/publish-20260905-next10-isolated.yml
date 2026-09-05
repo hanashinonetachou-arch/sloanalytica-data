@@ -1,0 +1,150 @@
+name: Publish 20260905 Next10 Isolated Device Feed
+
+on:
+  push:
+    branches:
+      - publish/20260905-next10
+    paths:
+      - '.github/workflows/publish-20260905-next10-isolated.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  publish-and-feed:
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Checkout clean prototype-based publish branch
+        uses: actions/checkout@v4
+        with:
+          ref: publish/20260905-next10
+          fetch-depth: 0
+      - name: Checkout audited next10 source branch
+        uses: actions/checkout@v4
+        with:
+          ref: research/20260903-batch10-next
+          path: source-next10
+          fetch-depth: 1
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Copy only current next10 source artifacts
+        shell: bash
+        run: |
+          set -euo pipefail
+          ids=(
+            L_IZA_BANCHO_SB8
+            L_ZETTAI_SHOGEKI_PLATONIC_HEART_TK
+            L_WATASHI_NO_SHIAWASE_NA_KEKKON_PN
+            LB_TRIPLE_CROWN_SF4
+            LB_MATADOR_3_TT
+            L_TENSEI_SHITARA_KEN_DESHITA_GT
+            L_DARLING_IN_THE_FRANXX_SA
+            L_SAKI_CHOJO_KESSEN_YR
+            S_KONOSUBA_ZR
+            S_RAKUEN_TSUHO_FS
+          )
+          for id in "${ids[@]}"; do
+            rm -rf "machines/$id" "research/$id"
+            mkdir -p "machines/$id" "research/$id"
+            cp "source-next10/machines/$id/machine-package.json" "machines/$id/machine-package.json"
+            cp -a "source-next10/research/$id/." "research/$id/"
+          done
+      - name: Verify clean integration scope
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --input-type=module <<'NODE'
+          import fs from 'node:fs';
+          const ids=['L_IZA_BANCHO_SB8','L_ZETTAI_SHOGEKI_PLATONIC_HEART_TK','L_WATASHI_NO_SHIAWASE_NA_KEKKON_PN','LB_TRIPLE_CROWN_SF4','LB_MATADOR_3_TT','L_TENSEI_SHITARA_KEN_DESHITA_GT','L_DARLING_IN_THE_FRANXX_SA','L_SAKI_CHOJO_KESSEN_YR','S_KONOSUBA_ZR','S_RAKUEN_TSUHO_FS'];
+          const catalog=JSON.parse(fs.readFileSync('catalog.json','utf8')).machines;
+          for(const id of ids){
+            if(catalog.some(x=>x.machineId===id)) throw new Error(`${id}: unexpectedly already in clean prototype catalog`);
+            const p=JSON.parse(fs.readFileSync(`machines/${id}/machine-package.json`,'utf8'));
+            if(p.machine?.machineId!==id) throw new Error(`${id}: package identity mismatch`);
+            if(!fs.existsSync(`research/${id}/difficulty-report.json`)) throw new Error(`${id}: difficulty report missing`);
+          }
+          console.log('PASS: clean prototype base plus exactly next10 source artifacts.');
+          NODE
+      - name: Batch publish dry run
+        shell: bash
+        run: |
+          set -euo pipefail
+          # Reverse desired registration order because publish inserts newest catalog entry first.
+          npm run machine:publish:batch -- \
+            S_RAKUEN_TSUHO_FS \
+            S_KONOSUBA_ZR \
+            L_SAKI_CHOJO_KESSEN_YR \
+            L_DARLING_IN_THE_FRANXX_SA \
+            L_TENSEI_SHITARA_KEN_DESHITA_GT \
+            LB_MATADOR_3_TT \
+            LB_TRIPLE_CROWN_SF4 \
+            L_WATASHI_NO_SHIAWASE_NA_KEKKON_PN \
+            L_ZETTAI_SHOGEKI_PLATONIC_HEART_TK \
+            L_IZA_BANCHO_SB8
+      - name: Formal Publish APPLY
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm run machine:publish:batch -- --apply \
+            S_RAKUEN_TSUHO_FS \
+            S_KONOSUBA_ZR \
+            L_SAKI_CHOJO_KESSEN_YR \
+            L_DARLING_IN_THE_FRANXX_SA \
+            L_TENSEI_SHITARA_KEN_DESHITA_GT \
+            LB_MATADOR_3_TT \
+            LB_TRIPLE_CROWN_SF4 \
+            L_WATASHI_NO_SHIAWASE_NA_KEKKON_PN \
+            L_ZETTAI_SHOGEKI_PLATONIC_HEART_TK \
+            L_IZA_BANCHO_SB8
+      - name: Validate IDs, catalog hashes and repository
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm run registry:validate
+          npm run audit:ui-service-names
+          npm run audit
+          npm test
+          node --input-type=module <<'NODE'
+          import fs from 'node:fs';import crypto from 'node:crypto';
+          const expected=[['L_IZA_BANCHO_SB8',211],['L_ZETTAI_SHOGEKI_PLATONIC_HEART_TK',212],['L_WATASHI_NO_SHIAWASE_NA_KEKKON_PN',213],['LB_TRIPLE_CROWN_SF4',214],['LB_MATADOR_3_TT',215],['L_TENSEI_SHITARA_KEN_DESHITA_GT',216],['L_DARLING_IN_THE_FRANXX_SA',217],['L_SAKI_CHOJO_KESSEN_YR',218],['S_KONOSUBA_ZR',219],['S_RAKUEN_TSUHO_FS',220]];
+          const c=JSON.parse(fs.readFileSync('catalog.json','utf8')).machines;
+          const r=JSON.parse(fs.readFileSync('machine-registry.json','utf8')).machines;
+          for(const [id,n] of expected){
+            const ce=c.find(x=>x.machineId===id); if(!ce||ce.status!=='available') throw new Error(`${id}: catalog unavailable`);
+            const re=r.find(x=>x.machineId===id); if(!re||re.provisionalRegistrationId!==n) throw new Error(`${id}: expected registry ${n}, got ${re?.provisionalRegistrationId}`);
+            const bytes=fs.readFileSync(`machines/${id}/machine-package.json`);
+            const hash=crypto.createHash('sha256').update(bytes).digest('hex');
+            if(hash!==ce.sha256||bytes.length!==ce.packageSizeBytes) throw new Error(`${id}: catalog hash/size mismatch`);
+          }
+          console.log('PASS: next10 IDs 211-220 and package hash/size contracts verified.');
+          NODE
+      - name: Build isolated device feed
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p device-test/20260905-next10
+          node --input-type=module <<'NODE'
+          import fs from 'node:fs';
+          const branch='publish/20260905-next10';
+          const rawBase=`https://raw.githubusercontent.com/hanashinonetachou-arch/sloanalytica-data/${branch}`;
+          const ids=['L_IZA_BANCHO_SB8','L_ZETTAI_SHOGEKI_PLATONIC_HEART_TK','L_WATASHI_NO_SHIAWASE_NA_KEKKON_PN','LB_TRIPLE_CROWN_SF4','LB_MATADOR_3_TT','L_TENSEI_SHITARA_KEN_DESHITA_GT','L_DARLING_IN_THE_FRANXX_SA','L_SAKI_CHOJO_KESSEN_YR','S_KONOSUBA_ZR','S_RAKUEN_TSUHO_FS'];
+          const catalog=JSON.parse(fs.readFileSync('catalog.json','utf8'));
+          catalog.difficultyCatalogUrl=`${rawBase}/device-test/20260905-next10/difficulty-catalog.json`;
+          for(const m of catalog.machines??[]) m.packageUrl=`${rawBase}/machines/${m.machineId}/machine-package.json`;
+          const byId=new Map((catalog.machines??[]).map(x=>[x.machineId,x]));
+          for(const id of ids){const e=byId.get(id);if(!e||e.status!=='available')throw new Error(`${id}: absent from device feed`);}
+          fs.writeFileSync('device-test/20260905-next10/catalog.json',JSON.stringify(catalog,null,2)+'\n');
+          fs.copyFileSync('difficulty-catalog.json','device-test/20260905-next10/difficulty-catalog.json');
+          console.log('PASS: isolated next10 device feed built.');
+          NODE
+      - name: Commit formal publish and device feed
+        shell: bash
+        run: |
+          set -euo pipefail
+          rm -rf source-next10
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git add catalog.json difficulty-catalog.json machine-registry.json machines research device-test/20260905-next10
+          git commit -m 'publish: prepare 20260905 next10 isolated device feed'
+          git push origin HEAD:publish/20260905-next10
