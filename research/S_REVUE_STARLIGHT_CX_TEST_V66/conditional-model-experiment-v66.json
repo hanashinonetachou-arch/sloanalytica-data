@@ -1,50 +1,39 @@
 {
   "schemaVersion": "conditional-model-experiment-v1",
   "machineId": "S_REVUE_STARLIGHT_CX_TEST_V66",
-  "status": "ACTIVE_TEST_MACHINE_RESEARCH",
+  "status": "ACTIVE_TEST_MACHINE_RESEARCH_REVISED",
   "createdAt": "2026-08-30",
-  "purpose": "【テスト版】Machine上でv6.6 Dependency Review・conditional/joint候補・UI変更を実機比較する。原機種は変更しない。",
+  "revisedAt": "2026-08-30",
+  "purpose": "【テスト版】Machine上でv6.6 Dependency Review・conditional/joint候補・UI変更を実機比較する。原機種は変更しない。今回の再検討では、公開CZ初当り率がAT終了後のテーブル3以上優遇を含むトータル出現率である可能性を前提に、短期実戦でAT回数の偏りがCZ回数の分散を増やす問題を主対象とする。",
+  "revisedConclusion": {
+    "summary": "公表CZ初当り率はAT終了後の高テーブルを含む実戦上のmarginal rateとして扱うのが自然で、AT後CZを機械的に除外しない。一方、AT終了後は必ずCZテーブル3以上濃厚で、テーブル3の10pt到達時CZ当選率50%、テーブル4は100%であるため、短期ではAT回数の偶然の偏りが次のCZ回数を押し上げるフィードバックが存在する。したがって現行Poissonは期待値には整合し得るが、分散を過小評価しposteriorを強くしすぎる可能性がある。",
+    "doNotDo": [
+      "公表CZ率からAT後CZを単純減算しない。",
+      "CZ総数とAT総初当りを独立Poissonとして同一区間で単純積算しない。",
+      "AT後CZを一律50%として補正しない。AT後はテーブル3以上でありテーブル4も存在するため、正確な混合率が不明。",
+      "CZ成功率約37%を正式な全設定共通値と断定しない。テスト仮説としてのみ扱う。"
+    ],
+    "preferredTestDirection": "CZ_MARGINAL_WITH_OVERDISPERSION_REVIEW"
+  },
   "dependencyGraph": {
     "nodes": [
-      {
-        "id": "NORMAL_GAMES",
-        "label": "通常時ゲーム"
-      },
-      {
-        "id": "CZ_ENTRY",
-        "label": "Challenge Revue初当り"
-      },
-      {
-        "id": "CZ_INTERNAL",
-        "label": "CZ内部構成・後半発展先"
-      },
-      {
-        "id": "CZ_SUCCESS",
-        "label": "CZ成功→AT"
-      },
-      {
-        "id": "BONUS_PATH",
-        "label": "ボーナス経由AT"
-      },
-      {
-        "id": "DIRECT_AT_HIGH",
-        "label": "AT直撃高確経由"
-      },
-      {
-        "id": "DIRECT_AT_RARE",
-        "label": "高確/通常時REG後の強チェリー・チャンス目直撃"
-      },
-      {
-        "id": "AT_FIRST",
-        "label": "AT初当り"
-      }
+      {"id": "NORMAL_GAMES", "label": "通常時ゲーム"},
+      {"id": "CZ_TABLE", "label": "CZ抽選テーブル"},
+      {"id": "CZ_ENTRY", "label": "Challenge Revue初当り"},
+      {"id": "CZ_SUCCESS", "label": "CZ成功→AT"},
+      {"id": "AT_FIRST", "label": "AT初当り"},
+      {"id": "AT_END", "label": "AT終了"},
+      {"id": "AT_END_HIGH_TABLE", "label": "AT終了後テーブル3以上"},
+      {"id": "BONUS_PATH", "label": "ボーナス経由AT"},
+      {"id": "DIRECT_AT_HIGH", "label": "AT直撃高確経由"},
+      {"id": "DIRECT_AT_RARE", "label": "高確/通常時REG後の強チェリー・チャンス目直撃"}
     ],
     "edges": [
       {
         "from": "NORMAL_GAMES",
         "to": "CZ_ENTRY",
         "settingSensitive": true,
-        "sourceStatus": "FULL_SETTING_VALUES",
+        "sourceStatus": "FULL_SETTING_MARGINAL_VALUES",
         "values": {
           "SET_1": 0.003760812336,
           "SET_2": 0.003926187672,
@@ -52,28 +41,55 @@
           "SET_5": 0.005254860746,
           "SET_6": 0.005571030641
         },
-        "note": "CZ初当り 1/265.9, 1/254.7, 1/207.6, 1/190.3, 1/179.5。"
+        "note": "公開CZ初当り 1/265.9, 1/254.7, 1/207.6, 1/190.3, 1/179.5。AT終了後優遇を除外した条件付き率は公開確認できていないため、これらは総合marginal rateとして扱う。"
+      },
+      {
+        "from": "CZ_TABLE",
+        "to": "CZ_ENTRY",
+        "settingSensitive": true,
+        "sourceStatus": "PARTIAL_PUBLIC",
+        "note": "高設定ほど高テーブルが選択されやすい。フェイク前兆/CZ終了時LED色分布は全設定値が公開されている。"
       },
       {
         "from": "CZ_ENTRY",
-        "to": "CZ_INTERNAL",
-        "settingSensitive": true,
+        "to": "CZ_SUCCESS",
+        "settingSensitive": "UNRESOLVED_SMALL_OR_NONE_HYPOTHESIS",
         "sourceStatus": "PARTIAL_PUBLIC",
-        "note": "高設定ほど高いCZ抽選テーブルが選択されやすい。終了時LED振り分けは全設定値あり。ただしCZ内部の全生成分布を再構成できる情報ではない。"
+        "note": "CZ平均成功期待度は約37%。実機経験上は設定6でも大きな連続失敗が起こり、成功率の設定差は体感上大きくないという仮説を置く。ただし全設定の条件付き成功率は未公開のため正式確定しない。"
       },
       {
-        "from": "CZ_INTERNAL",
-        "to": "CZ_SUCCESS",
-        "settingSensitive": true,
+        "from": "CZ_SUCCESS",
+        "to": "AT_FIRST",
+        "settingSensitive": false,
+        "sourceStatus": "DETERMINISTIC_PATH",
+        "note": "CZ成功はAT突入経路。"
+      },
+      {
+        "from": "AT_FIRST",
+        "to": "AT_END",
+        "settingSensitive": false,
+        "sourceStatus": "STATE_TRANSITION"
+      },
+      {
+        "from": "AT_END",
+        "to": "AT_END_HIGH_TABLE",
+        "settingSensitive": false,
+        "sourceStatus": "PUBLIC_CONFIRMED",
+        "note": "AT終了後はCZ抽選テーブル3以上濃厚。基本赤、紫ならテーブル4濃厚。"
+      },
+      {
+        "from": "AT_END_HIGH_TABLE",
+        "to": "CZ_ENTRY",
+        "settingSensitive": "MIXTURE_UNRESOLVED",
         "sourceStatus": "PARTIAL_PUBLIC",
-        "note": "CZ平均成功期待度は約37%。後半パート成功抽選には設定差があるとされるが、現時点で全設定の条件付き成功率を安全に構成できない。共通37%として扱わない。"
+        "note": "10pt到達時、テーブル3はCZ当選50.0%、テーブル4は100%。AT終了後のテーブル3/4振り分け全設定値は未確認。この経路によりAT回数の偏りが後続CZ回数の分散を増やす。"
       },
       {
         "from": "NORMAL_GAMES",
         "to": "DIRECT_AT_HIGH",
         "settingSensitive": false,
         "sourceStatus": "PARTIAL_PUBLIC",
-        "note": "300G/600G付近のAT直撃高確。直撃確率そのものには設定差なしと公開されている。移行率は設定1情報のみ確認。"
+        "note": "300G/600G付近のAT直撃高確。直撃確率そのものには設定差なしと公開。移行率は設定1情報のみ確認。"
       },
       {
         "from": "NORMAL_GAMES",
@@ -95,25 +111,6 @@
         "settingSensitive": "UNRESOLVED",
         "sourceStatus": "PATH_EXISTS",
         "note": "BIG中BAR揃い等のAT経路が存在。設定別条件付き分布は未確定。"
-      },
-      {
-        "from": "CZ_SUCCESS",
-        "to": "AT_FIRST",
-        "settingSensitive": false,
-        "sourceStatus": "DETERMINISTIC_PATH",
-        "note": "CZ成功時はAT突入経路。"
-      },
-      {
-        "from": "DIRECT_AT_HIGH",
-        "to": "AT_FIRST",
-        "settingSensitive": false,
-        "sourceStatus": "PATH_EXISTS"
-      },
-      {
-        "from": "DIRECT_AT_RARE",
-        "to": "AT_FIRST",
-        "settingSensitive": true,
-        "sourceStatus": "PATH_EXISTS"
       }
     ]
   },
@@ -133,54 +130,83 @@
       "SET_6": 0.004301075269
     }
   },
+  "modelReview": {
+    "currentPoisson": {
+      "status": "VALID_AS_FIRST_ORDER_MARGINAL_APPROXIMATION",
+      "strength": "公開CZ初当り率そのものを期待値として利用できる。AT後優遇を別途除外する必要がない。",
+      "risk": "AT→AT終了後高テーブル→CZという自己励起的フィードバックにより、短期CZ countは単純Poissonより過分散になる可能性がある。Poissonをそのまま使うと尤度比が鋭くなり、設定推測の自信を過大化する可能性。"
+    },
+    "candidateA": {
+      "name": "Negative Binomial / Gamma-Poisson overdispersion",
+      "status": "PRIORITY_TEST_CANDIDATE",
+      "idea": "設定別平均CZ率は現行値を維持し、分散だけをPoissonより大きくする。AT後優遇など未観測の状態混合を直接捏造せず、有限区間のextra-Poisson variationを吸収する。",
+      "needed": "過分散係数kまたはdispersion parameterの較正。公開値だけでは一意に決まらないため、設定6確定実戦ログや将来投稿データで推定するのが望ましい。"
+    },
+    "candidateB": {
+      "name": "Conditional CZ given AT count",
+      "status": "RESEARCH_ONLY",
+      "idea": "P(CZ | G, AT count, setting)としてAT終了後の高テーブル機会を条件に入れる。",
+      "blockedBy": "AT終了後のテーブル3/4混合、各テーブルでの実際の10pt到達機会、持越しポイント、通常経路との切り分けが不足。現時点で安全な定量化不可。"
+    },
+    "candidateC": {
+      "name": "CZ success conditional binomial",
+      "status": "HYPOTHESIS_ONLY",
+      "idea": "テスト仮説としてCZ成功率37%を全設定共通と置けば、CZ成功/失敗は設定posteriorを動かさず、突破の引き強弱を設定差から切り離せる。",
+      "limitation": "全設定共通37%は公開確定値ではないため、正式Featureにはしない。AT総初当りの独立Poisson追加にも使わない。"
+    }
+  },
   "selectionExperiment": {
-    "currentRisk": "同一区間のCZ初当りとAT初当りを独立Poissonとして積算すると、AT初当りがCZ成功・直撃・ボーナス経由等を含む下流marginalであるため依存を二重評価する。特にCZを多く引いたのに突破が弱い区間で高設定側を過剰に下げる可能性がある。",
+    "currentRisk": "現行自己実戦ではaggregate AT初当りを独立Feature採用していないため、CZ×ATの二重評価は自己実戦側では発生していない。一方、CZ自体のPoisson尤度がAT後優遇による過分散を無視している可能性が新たな主要論点。",
     "candidatePolicy": [
-      "自己実戦・着席前を問わず、CZ初当りとaggregate AT初当りを同一区間で独立Featureとして同時採用しない。",
-      "全設定の条件付き確率が不足している現状では、CZ→ATのconditional likelihoodを推定値で捏造しない。",
-      "当面の代表Feature候補は上流CZ初当り。AT初当りは観測・表示可能だが、同一区間CZが利用可能なら設定推測への独立加算を停止する案を比較する。",
-      "将来、CZ成功数/失敗数と全設定条件付き成功率が揃えば conditional_binomial を追加候補とする。",
-      "高確/REG後の強チェリー・チャンス目直撃は設定差が公開されているが、正しい機会数を観測できる場合に限り別conditional Feature候補とする。"
+      "公開CZ初当り率はAT後優遇を含むmarginal rateとして保持し、AT後CZを単純除外しない。",
+      "自己実戦CZとaggregate AT初当りを独立Poissonとして同時採用しない。",
+      "CZ成功率37%共通はテスト仮説として扱い、正式な設定差Featureにはしない。",
+      "次の定量テストはCZ平均を変えず分散だけを広げるoverdispersion modelを優先する。",
+      "AT回数条件付きCZモデルは公開条件付き値が揃うまでResearch候補に留める。",
+      "高確/REG後の強チェリー・チャンス目直撃は正しい機会数を観測できる場合のみ別conditional Feature候補とする。"
     ],
-    "activeTestPolicy": "CZ_FIRST_REPRESENTATIVE",
+    "activeTestPolicy": "CZ_MARGINAL_KEEP_MEAN_REVIEW_OVERDISPERSION",
     "aggregateAtSelfPlay": "RECORD_ONLY_EXCLUDED_FROM_INFERENCE",
-    "czOutcome": "RECORD_ONLY_UNTIL_FULL_SETTING_CONDITIONAL_VALUES_AVAILABLE",
+    "czOutcome": "RECORD_ONLY_37_PERCENT_COMMON_HYPOTHESIS_FOR_DIAGNOSTICS",
     "directAtHighRegRare": "RESEARCHED_BUT_EXCLUDED_UNTIL_DENOMINATOR_OBSERVABLE"
   },
+  "nextQuantitativeTests": [
+    "同一平均lambdaでPoissonとNegative Binomialのposterior感度を比較する。",
+    "1500G/3000G/7000GでCZ countが平均から±1σ, ±2σ程度外れたケースの設定posteriorとLLRを比較する。",
+    "dispersionを複数仮定し、どの程度で現行推測が過信から安定化するか感度分析する。",
+    "CZ成功率37%共通仮説ではCZ成功/失敗を変えても設定posteriorが変わらないことを確認する。",
+    "AT回数とCZ回数の実戦ログが得られたら、CZ countのconditional varianceと単純Poisson varianceを比較する。"
+  ],
   "uiChangeCandidates": [
     {
       "id": "UI_CZ_RESULT_COUNTS",
       "priority": "HIGH",
-      "proposal": "CZ初当りセクションにCZ成功回数/失敗回数を追加できるか検討する。まず観測可能性と公開条件付き確率を確定し、推測不参加の記録専用から始める選択肢を含む。"
+      "proposal": "CZ成功回数/失敗回数はテスト診断用として記録継続。37%共通仮説では推測値を直接変えない。"
     },
     {
       "id": "UI_AT_CONTEXT",
       "priority": "HIGH",
-      "proposal": "着席時STAR LIGHT初当り回数は実機メニュー観測値として保持するが、CZと同一区間で二重評価しないことが分かる表示/説明へ変更する。"
+      "proposal": "自己実戦AT初当り回数は、AT後高テーブルが後続CZへ与える影響の診断用に記録する。現時点では独立尤度に加えない。"
     },
     {
-      "id": "UI_DIRECT_AT",
+      "id": "UI_AT_END_TABLE_DIAGNOSTIC",
       "priority": "MEDIUM",
-      "proposal": "自己実戦で判別可能なAT直撃契機を分離入力できるか調査する。機会数を正しく数えられない場合は推測Feature化しない。"
-    },
-    {
-      "id": "UI_LOCK_REQUIRES_REVERIFY",
-      "priority": "BLOCKER",
-      "proposal": "既存user-verified-ui-lockを変更する場合は機種単位の明示変更としてlockも更新し、スマホ実機で再確認する。"
+      "proposal": "将来、AT終了後の赤/紫や次回CZ当選を観測できる診断入力を追加し、AT後経路のdispersion推定に利用できるか検討する。"
     }
   ],
   "openDebts": [
-    "CZ後半成功抽選の全設定条件付き値が公開されているか追加探索する。",
-    "CZ成功/失敗を実戦中に一意に数えられるかObservation契約を定義する。",
-    "BIG経由AT・直撃ATをaggregate AT初当りから分離可能か調査する。",
-    "現行Selection/Observationとpublished machine-package v0.1.6の着席前Feature採否不整合を解消する。",
-    "UI修正時はuser-verified-ui-lockを同時更新し再実機確認する。"
+    "AT終了後のテーブル3/4振り分け全設定値が公開されているか追加探索する。",
+    "AT終了後高テーブルから次回CZまでの実戦上の観測単位とポイント持越し影響を整理する。",
+    "CZ成功率の全設定条件付き値が公開されているか継続探索する。",
+    "Negative Binomial等のoverdispersion parameterを何から推定するか決める。",
+    "現行Selection/Observationとpublished machine-package v0.1.6の着席前Feature採否不整合を別途解消する。"
   ],
   "sourceUrls": [
     "https://nana-press.com/kaiseki/machine/886/27699/",
-    "https://nana-press.com/kaiseki/machine/886/27707/",
-    "https://nana-press.com/kaiseki/machine/886/",
-    "https://1geki.jp/slot/l_revuestarlight/0/"
+    "https://nana-press.com/kaiseki/machine/886/32377/",
+    "https://nana-press.com/kaiseki/machine/886/27714/",
+    "https://1geki.jp/slot/l_revuestarlight/0/",
+    "https://1geki.jp/slot/l_revuestarlight/43/"
   ],
   "sourceMachineId": "S_REVUE_STARLIGHT_CX",
   "uiApplied": {
