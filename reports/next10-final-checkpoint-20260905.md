@@ -66,4 +66,4 @@ No additional ten-machine full-device rerun is required unless prototype integra
 
 ## Integration readiness
 
-The final data integration branch was compared against `prototype-multi-machine` after cleanup and is strictly ahead with `behind_by = 0`. Therefore the data prototype can be updated by fast-forward only, without a merge commit or force update. The data branch may be promoted after recording this checkpoint. Do not publish to `main` as part of this batch.
+The final data integration branch was compared against `prototype-multi-machine` after cleanup and is strictly ahead with `behind_by = 0`. The data prototype promotion must therefore be a fast-forward-only branch update, with no force update and no merge commit. `main` remains outside this batch.
