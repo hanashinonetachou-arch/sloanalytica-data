@@ -1,0 +1,111 @@
+name: PR173 Next10 Regeneration Metadata Repair
+
+on:
+  push:
+    branches:
+      - fix/prototype-v64-causal-review-20260906
+    paths:
+      - tools/migrate-next10-regeneration-metadata.mjs
+      - .github/workflows/pr173-next10-regeneration-metadata.yml
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  repair-regeneration-metadata:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: fix/prototype-v64-causal-review-20260906
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Migrate canonical metadata and generator contract
+        run: node tools/migrate-next10-regeneration-metadata.mjs
+
+      - name: Define Next10
+        run: |
+          cat > /tmp/next10.txt <<'EOF'
+          L_AZURLANE_THE_ANIMATION_KN
+          L_DRUAGA_NO_TOU_ZA
+          L_SMASLO_TOKYO_REVENGERS_ZF
+          L_BABEL_BA
+          L_SHIN_ONIMUSHA_3_SA
+          L_ZENIGATA_5_L2
+          L_TOARU_KAGAKU_NO_RAILGUN_2_FV
+          L_ZETTAI_SHOGEKI_FORCE_FH
+          L_KAKUMEIKI_VALVRAVE_2_JF
+          L_NEO_PLANET_SLED
+          EOF
+
+      - name: Validate SelectionData
+        shell: bash
+        run: |
+          set -euo pipefail
+          while read -r id; do
+            node tools/validate-selection-data.mjs "research/$id/selection-data.json" "research/$id/research-data.json"
+          done < /tmp/next10.txt
+
+      - name: Regenerate Next10
+        run: npm run machine:batch -- --file /tmp/next10.txt
+
+      - name: Verify Formal Publish metadata contracts are preserved
+        run: |
+          node --input-type=module <<'NODE'
+          import fs from 'node:fs';
+          import {spawnSync} from 'node:child_process';
+          const formal='431cfcc7a465dcb7c5053f7ca94e5da8ea5cdac2';
+          const ids=fs.readFileSync('/tmp/next10.txt','utf8').trim().split(/\s+/);
+          const failures=[];
+          const show=(spec)=>{const r=spawnSync('git',['show',spec],{encoding:'utf8'});if(r.status!==0)throw new Error(r.stderr);return JSON.parse(r.stdout)};
+          for(const id of ids){
+            const oldPkg=show(`${formal}:machines/${id}/machine-package.json`);
+            const pkg=JSON.parse(fs.readFileSync(`machines/${id}/machine-package.json`,'utf8'));
+            if(JSON.stringify(pkg.selectionSummary)!==JSON.stringify(oldPkg.selectionSummary)) failures.push(`${id}: selectionSummary drift`);
+            const oldEv=new Map((oldPkg.evidence?.evidences??[]).map(e=>[e.id,e]));
+            for(const e of pkg.evidence?.evidences??[]){
+              const old=oldEv.get(e.id); if(!old) continue;
+              if(JSON.stringify(e.sourceEvidenceRefs??[])!==JSON.stringify(old.sourceEvidenceRefs??[])) failures.push(`${id}/${e.id}: sourceEvidenceRefs drift`);
+              if((e.contextNote??null)!==(old.contextNote??null)) failures.push(`${id}/${e.id}: contextNote drift`);
+            }
+            const oldFeatures=new Map((oldPkg.features?.features??[]).map(f=>[f.featureId,f]));
+            for(const f of pkg.features?.features??[]){
+              const old=oldFeatures.get(f.featureId); if(!old){failures.push(`${id}/${f.featureId}: feature added`);continue;}
+              if(JSON.stringify(f.probabilities??null)!==JSON.stringify(old.probabilities??null)) failures.push(`${id}/${f.featureId}: probabilities drift`);
+              if(JSON.stringify(f.categoryProbabilities??null)!==JSON.stringify(old.categoryProbabilities??null)) failures.push(`${id}/${f.featureId}: category probabilities drift`);
+            }
+          }
+          if(failures.length) throw new Error(failures.join('\n'));
+          console.log(`PASS: Formal Publish metadata/probability contracts preserved ${ids.length}/10`);
+          NODE
+
+      - name: Verify UI materialization remains deterministic
+        run: node tools/materialize-ui-design.mjs --require-unchanged $(cat /tmp/next10.txt)
+
+      - name: Repository checks
+        run: |
+          npm test
+          npm run audit
+          npm run audit:ui-service-names
+          npm run ux-contract:audit
+          npm run ui-design:test
+
+      - name: Commit repair and regenerated artifacts
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add tools/build-machine-data.mjs tools/validate-selection-data.mjs \
+            research/*/selection-data.json research/*/statistics-report.json research/*/difficulty-report.json research/*/setting-band-report.json \
+            machines/*/machine-package.json catalog.json difficulty-catalog.json machine-registry.json
+          if git diff --cached --quiet; then
+            echo 'No repair outputs changed.'
+            exit 0
+          fi
+          git commit -m 'pipeline: preserve Next10 selection and evidence metadata'
+          git push origin HEAD:fix/prototype-v64-causal-review-20260906
