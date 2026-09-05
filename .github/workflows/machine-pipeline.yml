@@ -7,6 +7,7 @@ on:
     paths:
       - 'research/**/research-data.json'
       - 'research/**/selection-data.json'
+      - 'research/**/ui-design-data.json'
       - 'tools/**'
       - 'test/**'
       - 'package.json'
@@ -52,7 +53,7 @@ jobs:
               | sort -u > /tmp/research_files.txt
 
             git diff --name-only "${{ github.event.pull_request.base.sha }}" "${{ github.event.pull_request.head.sha }}" \
-              | sed -nE 's#^research/([^/]+)/selection-data\.json$#\1#p' \
+              | sed -nE -e 's#^research/([^/]+)/selection-data\.json$#\1#p' -e 's#^research/([^/]+)/ui-design-data\.json$#\1#p' \
               | sort -u > /tmp/machine_ids.txt
           fi
 
@@ -69,7 +70,7 @@ jobs:
             cat /tmp/machine_ids.txt
             echo 'has_machines=true' >> "$GITHUB_OUTPUT"
           else
-            echo 'No changed SelectionData; full MachineData generation is not required yet.'
+            echo 'No changed SelectionData/UI Design; full MachineData generation is not required yet.'
             echo 'has_machines=false' >> "$GITHUB_OUTPUT"
           fi
 
