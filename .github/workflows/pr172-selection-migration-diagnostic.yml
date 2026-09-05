@@ -1,0 +1,43 @@
+name: PR172 Selection Migration Diagnostic
+
+on:
+  push:
+    branches:
+      - research/20260905-batch10-next
+    paths:
+      - '.github/workflows/pr172-selection-migration-diagnostic.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  diagnose:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: research/20260905-batch10-next
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Generate structured artifacts
+        run: node tools/generate-pr172-structured-research-selection.mjs
+      - name: Remove non-authoritative introductionDate compatibility field
+        run: |
+          node --input-type=module <<'NODE'
+          import fs from 'node:fs';
+          const ids=['L_AZURLANE_THE_ANIMATION_KN','L_DRUAGA_NO_TOU_ZA','L_SMASLO_TOKYO_REVENGERS_ZF','L_BABEL_BA','L_SHIN_ONIMUSHA_3_SA','L_ZENIGATA_5_L2','L_TOARU_KAGAKU_NO_RAILGUN_2_FV','L_ZETTAI_SHOGEKI_FORCE_FH','L_KAKUMEIKI_VALVRAVE_2_JF','L_NEO_PLANET_SLED'];
+          for(const id of ids){const p=`research/${id}/research-data.json`;const j=JSON.parse(fs.readFileSync(p,'utf8'));delete j.machine.introductionDate;fs.writeFileSync(p,JSON.stringify(j,null,2)+'\n');}
+          NODE
+      - name: Run migration audit and print Next10 diffs
+        run: |
+          node tools/audit-selection-policy-migration.mjs . /tmp/pr172-migration.json || true
+          node --input-type=module <<'NODE'
+          import fs from 'node:fs';
+          const ids=new Set(['L_AZURLANE_THE_ANIMATION_KN','L_DRUAGA_NO_TOU_ZA','L_SMASLO_TOKYO_REVENGERS_ZF','L_BABEL_BA','L_SHIN_ONIMUSHA_3_SA','L_ZENIGATA_5_L2','L_TOARU_KAGAKU_NO_RAILGUN_2_FV','L_ZETTAI_SHOGEKI_FORCE_FH','L_KAKUMEIKI_VALVRAVE_2_JF','L_NEO_PLANET_SLED']);
+          const r=JSON.parse(fs.readFileSync('/tmp/pr172-migration.json','utf8'));
+          const rows=r.machines.filter(m=>ids.has(m.machineId));
+          console.log(JSON.stringify(rows,null,2));
+          if(rows.some(m=>m.status!=='PASS')) process.exit(1);
+          NODE
