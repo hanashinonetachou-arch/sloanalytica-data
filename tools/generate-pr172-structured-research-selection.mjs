@@ -91,7 +91,6 @@ function buildResearch(pkg) {
       formalName: pkg.machine.displayName,
       modelNumber: pkg.machine.modelName,
       manufacturer: pkg.machine.manufacturer,
-      introductionDate: '2026-09-05',
       settings: [...pkg.machine.settings],
       identitySourceRefs: [fallbackSource],
     },
@@ -105,33 +104,6 @@ function buildResearch(pkg) {
 }
 
 function buildSelection(pkg, research) {
-  const evidenceByInput = new Map();
-  for (const e of pkg.evidence?.evidences ?? []) {
-    if (!evidenceByInput.has(e.inputId)) evidenceByInput.set(e.inputId, []);
-    evidenceByInput.get(e.inputId).push(e);
-  }
-  const inputById = new Map((pkg.inputs?.inputs ?? []).map(i => [i.id, i]));
-
-  const groups = [];
-  let evidenceOrder = 100;
-  for (const [inputId, evs] of evidenceByInput) {
-    const input = inputById.get(inputId);
-    groups.push({
-      groupId: `EVG_${inputId.replace(/^INP_EVI_/, '')}`,
-      label: input?.name ?? inputId,
-      selectionMode: input?.type === 'enum' ? 'single' : 'multi',
-      normalizationMode: 'ALLOWED_SETTINGS_INTERSECTION',
-      displayOrder: evidenceOrder++,
-      options: evs.map(e => ({
-        value: e.triggerValue,
-        label: e.displayName ?? e.name,
-        allowedSettings: [...(e.confirmedSettings ?? [])],
-        excludedSettings: [...(e.deniedSettings ?? [])],
-        sourceEvidenceIds: [`RE_${e.id}`],
-      })),
-    });
-  }
-
   const features = (pkg.features?.features ?? []).map(f => ({
     researchFeatureId: rfId(f.featureId),
     featureId: f.featureId,
@@ -142,6 +114,15 @@ function buildSelection(pkg, research) {
     userReason: 'Gate Bで採用し、Gate Cの観測契約を経てGate D MachineDataに物質化済み。分子・分母・設定別確率はMachineDataと同一。',
     difficultyParticipation: 'EXCLUDE',
     difficultyExclusionReason: 'Gate E時点では実戦総GへのDifficulty Exposure換算を別監査するため、推測Featureは維持したままDifficulty校正のみ除外する。',
+  }));
+
+  const evidence = (pkg.evidence?.evidences ?? []).map(e => ({
+    researchEvidenceId: `RE_${e.id}`,
+    evidenceId: e.id,
+    inputId: e.inputId,
+    triggerValue: e.triggerValue,
+    displayName: e.displayName ?? e.name,
+    ...(Array.isArray(e.sharedFeatureIds) && e.sharedFeatureIds.length ? { sharedFeatureIds: [...e.sharedFeatureIds] } : {}),
   }));
 
   const evidenceDecisions = (research.evidenceCandidates ?? []).map(e => ({
@@ -162,10 +143,10 @@ function buildSelection(pkg, research) {
     machineDataVersion: pkg.machine.machineDataVersion,
     inputs: (pkg.inputs?.inputs ?? []).map(i => ({ ...i })),
     features,
-    evidence: [],
+    evidence,
     evidenceDecisions,
     evidenceReview: { policyVersion: 1, exclusions: [] },
-    evidenceUi: { groups },
+    evidenceUi: { groups: [] },
     uiCategoryLabels,
     difficultyAnalysis: {
       targetGames: [1500, 3000, 7000],
