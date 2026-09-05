@@ -1,0 +1,31 @@
+name: MachineData Health v2
+
+on:
+  pull_request:
+    branches: [prototype-multi-machine]
+    paths:
+      - 'tools/audit-machine-data-health-v2.mjs'
+      - 'test/machine-data-health-v2.test.mjs'
+      - '.github/workflows/machine-health-v2.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  health-audit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Run Manifest v1.1 MachineData health audit
+        run: node tools/audit-machine-data-health-v2.mjs --json-out reports/machine-data-health-v2.ci.json
+      - name: Run health audit regression test
+        run: node --test --test-concurrency=1 test/machine-data-health-v2.test.mjs
+      - uses: actions/upload-artifact@v4
+        with:
+          name: machine-data-health-v2-report
+          path: reports/machine-data-health-v2.ci.json
