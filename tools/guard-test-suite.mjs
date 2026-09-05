@@ -4,6 +4,7 @@ import { spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
+// Some audit tests intentionally regenerate tracked diagnostics. Restore them after the suite so tests remain side-effect free.
 const guardedPaths = [
   path.join(ROOT, 'machine-registry.json'),
   path.join(ROOT, 'reports', 'v64-observation-debt-classification.json'),
