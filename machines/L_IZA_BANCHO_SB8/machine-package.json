@@ -69,6 +69,28 @@
         "minimum": 0
       },
       {
+        "id": "INP_MIIMO_ZECCHO_COUNT",
+        "name": "ミーモ斬シング発生",
+        "category": "SEL_FEAT_MIIMO_ZECCHO",
+        "type": "counter",
+        "unit": "回",
+        "displayOrder": 20,
+        "inferenceRole": "INCLUDE_SUPPORT",
+        "defaultValue": "",
+        "minimum": 0
+      },
+      {
+        "id": "INP_ZECCHO_BATTLE_TRIALS",
+        "name": "絶頂決戦突入",
+        "category": "SEL_FEAT_MIIMO_ZECCHO",
+        "type": "integer",
+        "unit": "回",
+        "displayOrder": 21,
+        "inferenceRole": "INCLUDE_SUPPORT",
+        "defaultValue": "",
+        "minimum": 0
+      },
+      {
         "id": "INP_EVI_EVG_AT_END_HARD",
         "name": "AT終了画面",
         "type": "multi_enum",
@@ -164,6 +186,33 @@
         "sourceEvidenceRefs": [
           "SRC_1GEKI",
           "SRC_NANA"
+        ]
+      },
+      {
+        "featureId": "FEAT_MIIMO_ZECCHO",
+        "name": "絶頂決戦開始時 ミーモ斬シング発生",
+        "adoptionCategory": "INCLUDE_SUPPORT",
+        "calculationRole": "PROBABILITY",
+        "probabilityEngineUsage": true,
+        "modelType": "binomial",
+        "minimumSample": 1,
+        "sampleRecommendation": 1,
+        "reliabilityProfile": {
+          "weight": 1
+        },
+        "denominatorInputId": "INP_ZECCHO_BATTLE_TRIALS",
+        "numeratorInputId": "INP_MIIMO_ZECCHO_COUNT",
+        "displayFormat": "ratio_1_over_n",
+        "probabilities": {
+          "SET_1": 0.06,
+          "SET_2": 0.06,
+          "SET_3": 0.1,
+          "SET_4": 0.06,
+          "SET_5": 0.16,
+          "SET_6": 0.16
+        },
+        "sourceEvidenceRefs": [
+          "SRC_MIIMO_NANA"
         ]
       }
     ]
@@ -283,6 +332,13 @@
         "pageName": "いざ番長 AT終了画面の設定示唆・出現率",
         "url": "https://nana-press.com/kaiseki/machine/946/29803/",
         "checkedAt": "2026-09-04"
+      },
+      {
+        "id": "SRC_MIIMO_NANA",
+        "classification": "ANALYSIS",
+        "pageName": "いざ番長 設定差・設定示唆演出まとめ（絶頂決戦ミーモ斬シング）",
+        "url": "https://nana-press.com/kaiseki/machine/946/29776/",
+        "checkedAt": "2026-09-04"
       }
     ]
   },
@@ -371,13 +427,55 @@
             }
           }
         ]
+      },
+      {
+        "id": "UI_DESIGN_3",
+        "title": "絶頂決戦 ミーモ斬シング",
+        "displayOrder": 3,
+        "description": "母数には「絶頂決戦突入」を入力します。分子と分母は同じ観測経路・同じ設定区間の値を使います。",
+        "collapsible": false,
+        "defaultExpanded": true,
+        "items": [
+          {
+            "type": "input",
+            "inputId": "INP_MIIMO_ZECCHO_COUNT",
+            "label": "ミーモ斬シング発生",
+            "widget": "counter",
+            "gridSpan": 6,
+            "config": {
+              "directInput": false,
+              "compact": true,
+              "quickAdd": [
+                1
+              ],
+              "step": 1,
+              "emptyMeansUnobserved": true,
+              "observedZeroAllowed": true
+            }
+          },
+          {
+            "type": "input",
+            "inputId": "INP_ZECCHO_BATTLE_TRIALS",
+            "label": "絶頂決戦突入",
+            "widget": "number",
+            "gridSpan": 12,
+            "config": {
+              "directInput": true,
+              "quickAdd": [
+                50
+              ],
+              "emptyMeansUnobserved": true,
+              "observedZeroAllowed": true
+            }
+          }
+        ]
       }
     ]
   },
   "selectionSummary": {
     "schemaVersion": "selection-summary-v1",
-    "evaluatedCount": 5,
-    "selectedCount": 2,
+    "evaluatedCount": 6,
+    "selectedCount": 3,
     "rejectedCount": 3,
     "selected": [
       {
@@ -396,6 +494,15 @@
         "requiredTrials": {
           "value": 7266,
           "unit": "共通ベルAを数える対象ゲーム"
+        }
+      },
+      {
+        "featureId": "FEAT_MIIMO_ZECCHO",
+        "name": "絶頂決戦開始時 ミーモ斬シング発生",
+        "reason": "絶頂決戦突入1回を1試行として開始時のミーモ斬シング発生を観測でき、設定1・2・4の6%に対して設定3は10%、設定5・6は16%と明確な設定差がある。試行機会が少ないため主軸ではなく補助要素として採用する。",
+        "requiredTrials": {
+          "value": 68,
+          "unit": "絶頂決戦突入1回"
         }
       }
     ],
