@@ -10,9 +10,26 @@ function isApprovedException(machineId, pointer, value) {
   // Gamera2: users must know that the detailed reach-me flag counter is only
   // available after the linked counter reaches level 4. Keep this exception
   // narrow so other service-name leakage remains blocked.
-  return machineId === 'S_GAMERA2'
+  if (
+    machineId === 'S_GAMERA2'
     && pointer.startsWith('/inputs/')
-    && value.includes('マイスロのマイカウンターLv4');
+    && value.includes('マイスロのマイカウンターLv4')
+  ) return true;
+
+  // Rakuen Tsuiho: the verified common-bell denominator contract is the
+  // total-game value on the My Slot result screen. The service name is needed
+  // to distinguish this denominator from generic/self-counted normal games.
+  // Keep the exception limited to the four already-verified user-facing fields.
+  if (machineId === 'S_RAKUEN_TSUHO_FS' && value.includes('マイスロ')) {
+    return new Set([
+      '/inputs/inputs/3/name',
+      '/ui/sections/1/description',
+      '/ui/sections/1/items/1/label',
+      '/selectionSummary/selected/1/reason',
+    ]).has(pointer);
+  }
+
+  return false;
 }
 
 function visit(value, pointer, findings) {
