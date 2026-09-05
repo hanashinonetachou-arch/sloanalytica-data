@@ -64,6 +64,6 @@ The user verified all ten machines on the isolated 220-machine build. Follow-up 
 
 No additional ten-machine full-device rerun is required unless prototype integration itself changes runtime behavior.
 
-## Integration rule
+## Integration readiness
 
-This candidate is eligible for a fast-forward-only update of data `prototype-multi-machine` because the integration branch is ahead of the current prototype branch and not behind it. Do not publish to `main` as part of this batch.
+The final data integration branch was compared against `prototype-multi-machine` after cleanup and is strictly ahead with `behind_by = 0`. Therefore the data prototype can be updated by fast-forward only, without a merge commit or force update. The data branch may be promoted after recording this checkpoint. Do not publish to `main` as part of this batch.
