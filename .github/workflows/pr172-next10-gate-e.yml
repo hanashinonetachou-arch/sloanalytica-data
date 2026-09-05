@@ -20,7 +20,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          ref: research/20260905-batch10-next
+          ref: ${{ github.sha }}
           fetch-depth: 0
       - uses: actions/setup-node@v4
         with:
@@ -73,14 +73,29 @@ jobs:
               }
               for (const r of e.sourceEvidenceRefs || []) if (!sourceIds.has(r)) failures.push(`${id}/${e.id}: missing source ${r}`);
             }
+
+            const uiItemsByInput = new Map();
             for (const section of pkg?.ui?.sections || []) {
               for (const item of section.items || []) {
-                if (item.type === 'input' && !inputs.has(item.inputId)) failures.push(`${id}/${section.id}: UI missing input ${item.inputId}`);
-                const input = inputs.get(item.inputId);
-                if (input && ['counter','integer'].includes(input.type)) {
-                  if (item?.config?.emptyMeansUnobserved !== true) failures.push(`${id}/${item.inputId}: emptyMeansUnobserved not true`);
-                  if (item?.config?.observedZeroAllowed !== true) failures.push(`${id}/${item.inputId}: observedZeroAllowed not true`);
-                }
+                if (item.type !== 'input') continue;
+                if (!inputs.has(item.inputId)) failures.push(`${id}/${section.id}: UI missing input ${item.inputId}`);
+                if (!uiItemsByInput.has(item.inputId)) uiItemsByInput.set(item.inputId, []);
+                uiItemsByInput.get(item.inputId).push(item);
+              }
+            }
+            for (const input of inputs.values()) {
+              if (!['counter','integer'].includes(input.type)) continue;
+              const uiItems = uiItemsByInput.get(input.id) || [];
+              if (!uiItems.length) {
+                failures.push(`${id}/${input.id}: numeric input not materialized in UI`);
+                continue;
+              }
+              const semanticItem = uiItems.find(item =>
+                item?.config?.emptyMeansUnobserved === true &&
+                item?.config?.observedZeroAllowed === true
+              );
+              if (!semanticItem) {
+                failures.push(`${id}/${input.id}: no UI item preserves empty/unobserved and explicit-zero semantics`);
               }
             }
           }
