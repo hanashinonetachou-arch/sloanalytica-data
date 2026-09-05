@@ -25,7 +25,7 @@ jobs:
           ref: batch/20260904-next10-clean
           path: prior
           fetch-depth: 1
-      - name: Build cumulative 221-machine device feed
+      - name: Build cumulative 220-machine device feed
         shell: bash
         run: |
           set -euo pipefail
@@ -45,7 +45,7 @@ jobs:
           if(!Array.isArray(prior.machines)||!Array.isArray(latest.machines)) throw new Error('catalog schema invalid');
           const priorIds=new Set(prior.machines.map(x=>x.machineId));
           console.log(`prior verified device baseline count=${priorIds.size}`);
-          if(priorIds.size!==211) throw new Error(`expected prior verified baseline=211, got ${priorIds.size}`);
+          if(priorIds.size!==210) throw new Error(`expected prior verified baseline=210, got ${priorIds.size}`);
           for(const id of mustKeep) if(!priorIds.has(id)) throw new Error(`${id}: missing from prior verified baseline`);
           for(const id of currentIds) if(priorIds.has(id)) throw new Error(`${id}: unexpectedly already present in prior baseline`);
 
@@ -56,7 +56,7 @@ jobs:
           });
           const machines=[...additions,...prior.machines];
           const unique=new Set(machines.map(x=>x.machineId));
-          if(machines.length!==221||unique.size!==221) throw new Error(`expected 221 machines, got ${machines.length}/${unique.size}`);
+          if(machines.length!==220||unique.size!==220) throw new Error(`expected 220 machines, got ${machines.length}/${unique.size}`);
 
           const out={...prior,generatedAt:new Date().toISOString(),difficultyCatalogUrl:`${rawBase}/device-test/20260905-next10/difficulty-catalog.json`,machines};
           fs.mkdirSync('device-test/20260905-next10',{recursive:true});
@@ -75,7 +75,7 @@ jobs:
           const diffOut={...priorDiff,generatedAt:new Date().toISOString(),entries:[...addDiff,...priorEntries.filter(x=>!currentSet.has(x.machineId))]};
           fs.writeFileSync('device-test/20260905-next10/difficulty-catalog.json',JSON.stringify(diffOut,null,2)+'\n');
 
-          console.log('PASS: prior verified 211 + current next10 = 221 unique machines.');
+          console.log('PASS: prior verified 210 + current next10 = 220 unique machines.');
           console.log('PASS: Biohazard 5 / Sister Quest / prior Sep03 batch retained.');
           NODE
       - name: Commit repaired cumulative feed
@@ -86,5 +86,5 @@ jobs:
           git config user.name github-actions[bot]
           git config user.email 41898282+github-actions[bot]@users.noreply.github.com
           git add device-test/20260905-next10/catalog.json device-test/20260905-next10/difficulty-catalog.json
-          git commit -m 'fix: restore prior 211 machines before next10 device verification'
+          git commit -m 'fix: restore prior 210 machines before next10 device verification'
           git push origin HEAD:publish/20260905-next10
