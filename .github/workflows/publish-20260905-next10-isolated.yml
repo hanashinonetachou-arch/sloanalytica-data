@@ -28,28 +28,34 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
-      - name: Copy only current next10 source artifacts
+      - name: Copy next10 artifacts and reserved registry identities
         shell: bash
         run: |
           set -euo pipefail
-          ids=(
-            L_IZA_BANCHO_SB8
-            L_ZETTAI_SHOGEKI_PLATONIC_HEART_TK
-            L_WATASHI_NO_SHIAWASE_NA_KEKKON_PN
-            LB_TRIPLE_CROWN_SF4
-            LB_MATADOR_3_TT
-            L_TENSEI_SHITARA_KEN_DESHITA_GT
-            L_DARLING_IN_THE_FRANXX_SA
-            L_SAKI_CHOJO_KESSEN_YR
-            S_KONOSUBA_ZR
-            S_RAKUEN_TSUHO_FS
-          )
+          ids=(L_IZA_BANCHO_SB8 L_ZETTAI_SHOGEKI_PLATONIC_HEART_TK L_WATASHI_NO_SHIAWASE_NA_KEKKON_PN LB_TRIPLE_CROWN_SF4 LB_MATADOR_3_TT L_TENSEI_SHITARA_KEN_DESHITA_GT L_DARLING_IN_THE_FRANXX_SA L_SAKI_CHOJO_KESSEN_YR S_KONOSUBA_ZR S_RAKUEN_TSUHO_FS)
           for id in "${ids[@]}"; do
             rm -rf "machines/$id" "research/$id"
             mkdir -p "machines/$id" "research/$id"
             cp "source-next10/machines/$id/machine-package.json" "machines/$id/machine-package.json"
             cp -a "source-next10/research/$id/." "research/$id/"
           done
+          node --input-type=module <<'NODE'
+          import fs from 'node:fs';
+          const expected=new Map([['L_IZA_BANCHO_SB8',211],['L_ZETTAI_SHOGEKI_PLATONIC_HEART_TK',212],['L_WATASHI_NO_SHIAWASE_NA_KEKKON_PN',213],['LB_TRIPLE_CROWN_SF4',214],['LB_MATADOR_3_TT',215],['L_TENSEI_SHITARA_KEN_DESHITA_GT',216],['L_DARLING_IN_THE_FRANXX_SA',217],['L_SAKI_CHOJO_KESSEN_YR',218],['S_KONOSUBA_ZR',219],['S_RAKUEN_TSUHO_FS',220]]);
+          const target=JSON.parse(fs.readFileSync('machine-registry.json','utf8'));
+          const source=JSON.parse(fs.readFileSync('source-next10/machine-registry.json','utf8'));
+          const used=new Map((target.machines??[]).filter(x=>Number.isInteger(x.provisionalRegistrationId)).map(x=>[x.provisionalRegistrationId,x.machineId]));
+          for(const [id,n] of expected){
+            if(used.has(n)&&used.get(n)!==id) throw new Error(`reserved ID ${n} collision with ${used.get(n)}`);
+            const s=(source.machines??[]).find(x=>x.machineId===id);
+            if(!s||s.provisionalRegistrationId!==n) throw new Error(`${id}: audited registry identity ${n} missing`);
+            const i=(target.machines??[]).findIndex(x=>x.machineId===id);
+            if(i>=0) target.machines[i]=s; else target.machines.push(s);
+          }
+          target.generatedAt=new Date().toISOString();
+          fs.writeFileSync('machine-registry.json',JSON.stringify(target,null,2)+'\n');
+          console.log('PASS: reserved IDs 211-220 copied from audited research registry.');
+          NODE
       - name: Verify clean integration scope
         shell: bash
         run: |
@@ -58,45 +64,15 @@ jobs:
           import fs from 'node:fs';
           const ids=['L_IZA_BANCHO_SB8','L_ZETTAI_SHOGEKI_PLATONIC_HEART_TK','L_WATASHI_NO_SHIAWASE_NA_KEKKON_PN','LB_TRIPLE_CROWN_SF4','LB_MATADOR_3_TT','L_TENSEI_SHITARA_KEN_DESHITA_GT','L_DARLING_IN_THE_FRANXX_SA','L_SAKI_CHOJO_KESSEN_YR','S_KONOSUBA_ZR','S_RAKUEN_TSUHO_FS'];
           const catalog=JSON.parse(fs.readFileSync('catalog.json','utf8')).machines;
-          for(const id of ids){
-            if(catalog.some(x=>x.machineId===id)) throw new Error(`${id}: unexpectedly already in clean prototype catalog`);
-            const p=JSON.parse(fs.readFileSync(`machines/${id}/machine-package.json`,'utf8'));
-            if(p.machine?.machineId!==id) throw new Error(`${id}: package identity mismatch`);
-            if(!fs.existsSync(`research/${id}/difficulty-report.json`)) throw new Error(`${id}: difficulty report missing`);
-          }
-          console.log('PASS: clean prototype base plus exactly next10 source artifacts.');
+          for(const id of ids){if(catalog.some(x=>x.machineId===id))throw new Error(`${id}: already in clean catalog`);const p=JSON.parse(fs.readFileSync(`machines/${id}/machine-package.json`,'utf8'));if(p.machine?.machineId!==id)throw new Error(`${id}: package identity mismatch`);if(!fs.existsSync(`research/${id}/difficulty-report.json`))throw new Error(`${id}: difficulty missing`);}
+          console.log('PASS: clean prototype base plus next10 artifacts.');
           NODE
       - name: Batch publish dry run
-        shell: bash
         run: |
-          set -euo pipefail
-          # Reverse desired registration order because publish inserts newest catalog entry first.
-          npm run machine:publish:batch -- \
-            S_RAKUEN_TSUHO_FS \
-            S_KONOSUBA_ZR \
-            L_SAKI_CHOJO_KESSEN_YR \
-            L_DARLING_IN_THE_FRANXX_SA \
-            L_TENSEI_SHITARA_KEN_DESHITA_GT \
-            LB_MATADOR_3_TT \
-            LB_TRIPLE_CROWN_SF4 \
-            L_WATASHI_NO_SHIAWASE_NA_KEKKON_PN \
-            L_ZETTAI_SHOGEKI_PLATONIC_HEART_TK \
-            L_IZA_BANCHO_SB8
+          npm run machine:publish:batch -- S_RAKUEN_TSUHO_FS S_KONOSUBA_ZR L_SAKI_CHOJO_KESSEN_YR L_DARLING_IN_THE_FRANXX_SA L_TENSEI_SHITARA_KEN_DESHITA_GT LB_MATADOR_3_TT LB_TRIPLE_CROWN_SF4 L_WATASHI_NO_SHIAWASE_NA_KEKKON_PN L_ZETTAI_SHOGEKI_PLATONIC_HEART_TK L_IZA_BANCHO_SB8
       - name: Formal Publish APPLY
-        shell: bash
         run: |
-          set -euo pipefail
-          npm run machine:publish:batch -- --apply \
-            S_RAKUEN_TSUHO_FS \
-            S_KONOSUBA_ZR \
-            L_SAKI_CHOJO_KESSEN_YR \
-            L_DARLING_IN_THE_FRANXX_SA \
-            L_TENSEI_SHITARA_KEN_DESHITA_GT \
-            LB_MATADOR_3_TT \
-            LB_TRIPLE_CROWN_SF4 \
-            L_WATASHI_NO_SHIAWASE_NA_KEKKON_PN \
-            L_ZETTAI_SHOGEKI_PLATONIC_HEART_TK \
-            L_IZA_BANCHO_SB8
+          npm run machine:publish:batch -- --apply S_RAKUEN_TSUHO_FS S_KONOSUBA_ZR L_SAKI_CHOJO_KESSEN_YR L_DARLING_IN_THE_FRANXX_SA L_TENSEI_SHITARA_KEN_DESHITA_GT LB_MATADOR_3_TT LB_TRIPLE_CROWN_SF4 L_WATASHI_NO_SHIAWASE_NA_KEKKON_PN L_ZETTAI_SHOGEKI_PLATONIC_HEART_TK L_IZA_BANCHO_SB8
       - name: Validate IDs, catalog hashes and repository
         shell: bash
         run: |
@@ -108,15 +84,8 @@ jobs:
           node --input-type=module <<'NODE'
           import fs from 'node:fs';import crypto from 'node:crypto';
           const expected=[['L_IZA_BANCHO_SB8',211],['L_ZETTAI_SHOGEKI_PLATONIC_HEART_TK',212],['L_WATASHI_NO_SHIAWASE_NA_KEKKON_PN',213],['LB_TRIPLE_CROWN_SF4',214],['LB_MATADOR_3_TT',215],['L_TENSEI_SHITARA_KEN_DESHITA_GT',216],['L_DARLING_IN_THE_FRANXX_SA',217],['L_SAKI_CHOJO_KESSEN_YR',218],['S_KONOSUBA_ZR',219],['S_RAKUEN_TSUHO_FS',220]];
-          const c=JSON.parse(fs.readFileSync('catalog.json','utf8')).machines;
-          const r=JSON.parse(fs.readFileSync('machine-registry.json','utf8')).machines;
-          for(const [id,n] of expected){
-            const ce=c.find(x=>x.machineId===id); if(!ce||ce.status!=='available') throw new Error(`${id}: catalog unavailable`);
-            const re=r.find(x=>x.machineId===id); if(!re||re.provisionalRegistrationId!==n) throw new Error(`${id}: expected registry ${n}, got ${re?.provisionalRegistrationId}`);
-            const bytes=fs.readFileSync(`machines/${id}/machine-package.json`);
-            const hash=crypto.createHash('sha256').update(bytes).digest('hex');
-            if(hash!==ce.sha256||bytes.length!==ce.packageSizeBytes) throw new Error(`${id}: catalog hash/size mismatch`);
-          }
+          const c=JSON.parse(fs.readFileSync('catalog.json','utf8')).machines;const r=JSON.parse(fs.readFileSync('machine-registry.json','utf8')).machines;
+          for(const [id,n] of expected){const ce=c.find(x=>x.machineId===id);if(!ce||ce.status!=='available')throw new Error(`${id}: catalog unavailable`);const re=r.find(x=>x.machineId===id);if(!re||re.provisionalRegistrationId!==n)throw new Error(`${id}: registry ID mismatch`);const bytes=fs.readFileSync(`machines/${id}/machine-package.json`);const hash=crypto.createHash('sha256').update(bytes).digest('hex');if(hash!==ce.sha256||bytes.length!==ce.packageSizeBytes)throw new Error(`${id}: catalog hash/size mismatch`);}
           console.log('PASS: next10 IDs 211-220 and package hash/size contracts verified.');
           NODE
       - name: Build isolated device feed
@@ -126,17 +95,7 @@ jobs:
           mkdir -p device-test/20260905-next10
           node --input-type=module <<'NODE'
           import fs from 'node:fs';
-          const branch='publish/20260905-next10';
-          const rawBase=`https://raw.githubusercontent.com/hanashinonetachou-arch/sloanalytica-data/${branch}`;
-          const ids=['L_IZA_BANCHO_SB8','L_ZETTAI_SHOGEKI_PLATONIC_HEART_TK','L_WATASHI_NO_SHIAWASE_NA_KEKKON_PN','LB_TRIPLE_CROWN_SF4','LB_MATADOR_3_TT','L_TENSEI_SHITARA_KEN_DESHITA_GT','L_DARLING_IN_THE_FRANXX_SA','L_SAKI_CHOJO_KESSEN_YR','S_KONOSUBA_ZR','S_RAKUEN_TSUHO_FS'];
-          const catalog=JSON.parse(fs.readFileSync('catalog.json','utf8'));
-          catalog.difficultyCatalogUrl=`${rawBase}/device-test/20260905-next10/difficulty-catalog.json`;
-          for(const m of catalog.machines??[]) m.packageUrl=`${rawBase}/machines/${m.machineId}/machine-package.json`;
-          const byId=new Map((catalog.machines??[]).map(x=>[x.machineId,x]));
-          for(const id of ids){const e=byId.get(id);if(!e||e.status!=='available')throw new Error(`${id}: absent from device feed`);}
-          fs.writeFileSync('device-test/20260905-next10/catalog.json',JSON.stringify(catalog,null,2)+'\n');
-          fs.copyFileSync('difficulty-catalog.json','device-test/20260905-next10/difficulty-catalog.json');
-          console.log('PASS: isolated next10 device feed built.');
+          const branch='publish/20260905-next10';const rawBase=`https://raw.githubusercontent.com/hanashinonetachou-arch/sloanalytica-data/${branch}`;const ids=['L_IZA_BANCHO_SB8','L_ZETTAI_SHOGEKI_PLATONIC_HEART_TK','L_WATASHI_NO_SHIAWASE_NA_KEKKON_PN','LB_TRIPLE_CROWN_SF4','LB_MATADOR_3_TT','L_TENSEI_SHITARA_KEN_DESHITA_GT','L_DARLING_IN_THE_FRANXX_SA','L_SAKI_CHOJO_KESSEN_YR','S_KONOSUBA_ZR','S_RAKUEN_TSUHO_FS'];const catalog=JSON.parse(fs.readFileSync('catalog.json','utf8'));catalog.difficultyCatalogUrl=`${rawBase}/device-test/20260905-next10/difficulty-catalog.json`;for(const m of catalog.machines??[])m.packageUrl=`${rawBase}/machines/${m.machineId}/machine-package.json`;const byId=new Map((catalog.machines??[]).map(x=>[x.machineId,x]));for(const id of ids){const e=byId.get(id);if(!e||e.status!=='available')throw new Error(`${id}: absent from device feed`);}fs.writeFileSync('device-test/20260905-next10/catalog.json',JSON.stringify(catalog,null,2)+'\n');fs.copyFileSync('difficulty-catalog.json','device-test/20260905-next10/difficulty-catalog.json');console.log('PASS: isolated next10 device feed built.');
           NODE
       - name: Commit formal publish and device feed
         shell: bash
