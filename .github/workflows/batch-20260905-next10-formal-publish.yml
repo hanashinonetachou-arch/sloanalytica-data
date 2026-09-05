@@ -1,0 +1,132 @@
+name: Batch 20260905 Next10 Formal Publish
+
+on:
+  push:
+    branches:
+      - research/20260903-batch10-next
+    paths:
+      - '.github/workflows/batch-20260905-next10-formal-publish.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  formal-publish:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: research/20260903-batch10-next
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Sync latest batch branch
+        run: git pull --rebase origin research/20260903-batch10-next
+      - name: Verify batch identity and pre-publish state
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse --abbrev-ref HEAD)" = "research/20260903-batch10-next"
+          node --input-type=module <<'NODE'
+          import fs from 'node:fs';
+          const ids=[
+            ['L_IZA_BANCHO_SB8',211],
+            ['L_ZETTAI_SHOGEKI_PLATONIC_HEART_TK',212],
+            ['L_WATASHI_NO_SHIAWASE_NA_KEKKON_PN',213],
+            ['LB_TRIPLE_CROWN_SF4',214],
+            ['LB_MATADOR_3_TT',215],
+            ['L_TENSEI_SHITARA_KEN_DESHITA_GT',216],
+            ['L_DARLING_IN_THE_FRANXX_SA',217],
+            ['L_SAKI_CHOJO_KESSEN_YR',218],
+            ['S_KONOSUBA_ZR',219],
+            ['S_RAKUEN_TSUHO_FS',220]
+          ];
+          const registry=JSON.parse(fs.readFileSync('machine-registry.json','utf8')).machines;
+          const catalog=JSON.parse(fs.readFileSync('catalog.json','utf8')).machines;
+          for(const [id,n] of ids){
+            const r=registry.find(x=>x.machineId===id);
+            if(!r||r.provisionalRegistrationId!==n) throw new Error(`${id}: expected provisionalRegistrationId ${n}`);
+            if(catalog.some(x=>x.machineId===id)) throw new Error(`${id}: already in catalog before formal publish`);
+            if(!fs.existsSync(`machines/${id}/machine-package.json`)) throw new Error(`${id}: package missing`);
+          }
+          console.log('PASS: next10 IDs 211-220 reserved and absent from catalog pre-publish.');
+          NODE
+      - name: Batch publish dry run
+        run: |
+          npm run machine:publish:batch -- \
+            L_IZA_BANCHO_SB8 \
+            L_ZETTAI_SHOGEKI_PLATONIC_HEART_TK \
+            L_WATASHI_NO_SHIAWASE_NA_KEKKON_PN \
+            LB_TRIPLE_CROWN_SF4 \
+            LB_MATADOR_3_TT \
+            L_TENSEI_SHITARA_KEN_DESHITA_GT \
+            L_DARLING_IN_THE_FRANXX_SA \
+            L_SAKI_CHOJO_KESSEN_YR \
+            S_KONOSUBA_ZR \
+            S_RAKUEN_TSUHO_FS
+      - name: Formal Publish APPLY
+        run: |
+          npm run machine:publish:batch -- --apply \
+            L_IZA_BANCHO_SB8 \
+            L_ZETTAI_SHOGEKI_PLATONIC_HEART_TK \
+            L_WATASHI_NO_SHIAWASE_NA_KEKKON_PN \
+            LB_TRIPLE_CROWN_SF4 \
+            LB_MATADOR_3_TT \
+            L_TENSEI_SHITARA_KEN_DESHITA_GT \
+            L_DARLING_IN_THE_FRANXX_SA \
+            L_SAKI_CHOJO_KESSEN_YR \
+            S_KONOSUBA_ZR \
+            S_RAKUEN_TSUHO_FS
+      - name: Validate publication contracts
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm run registry:validate
+          npm run audit:ui-service-names
+          npm run audit
+          npm test
+          node --input-type=module <<'NODE'
+          import fs from 'node:fs';
+          const ids=[
+            ['L_IZA_BANCHO_SB8',211],['L_ZETTAI_SHOGEKI_PLATONIC_HEART_TK',212],
+            ['L_WATASHI_NO_SHIAWASE_NA_KEKKON_PN',213],['LB_TRIPLE_CROWN_SF4',214],
+            ['LB_MATADOR_3_TT',215],['L_TENSEI_SHITARA_KEN_DESHITA_GT',216],
+            ['L_DARLING_IN_THE_FRANXX_SA',217],['L_SAKI_CHOJO_KESSEN_YR',218],
+            ['S_KONOSUBA_ZR',219],['S_RAKUEN_TSUHO_FS',220]
+          ];
+          const c=JSON.parse(fs.readFileSync('catalog.json','utf8')).machines;
+          const d0=JSON.parse(fs.readFileSync('difficulty-catalog.json','utf8'));
+          const d=Array.isArray(d0)?d0:(d0.entries??d0.machines??[]);
+          const r=JSON.parse(fs.readFileSync('machine-registry.json','utf8')).machines;
+          for(const [id,n] of ids){
+            const ce=c.find(x=>x.machineId===id); if(!ce||ce.status!=='available') throw new Error(`${id}: catalog missing/not available`);
+            const de=d.find(x=>x.machineId===id); if(!de) throw new Error(`${id}: difficulty entry missing`);
+            if(de.machineDataVersion!==ce.machineDataVersion) throw new Error(`${id}: difficulty/catalog version mismatch`);
+            const re=r.find(x=>x.machineId===id); if(!re||re.provisionalRegistrationId!==n) throw new Error(`${id}: registry ID changed`);
+          }
+          console.log('PASS: next10 formal publish contracts verified.');
+          NODE
+      - name: Verify publish mutation allowlist
+        shell: bash
+        run: |
+          set -euo pipefail
+          git status --short
+          unexpected=$(git status --porcelain | sed -E 's/^...//' | grep -Ev '^(catalog\.json|difficulty-catalog\.json|machine-registry\.json)$' || true)
+          if [[ -n "$unexpected" ]]; then echo "Unexpected publish mutation(s):"; echo "$unexpected"; exit 1; fi
+      - name: Commit formal publish outputs
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git add catalog.json difficulty-catalog.json machine-registry.json
+          if git diff --cached --quiet; then echo 'No publish changes to commit.'; exit 0; fi
+          git commit -m 'publish: formal publish 20260905 next10 batch'
+          for attempt in 1 2 3 4 5; do
+            git fetch origin research/20260903-batch10-next
+            if git rebase origin/research/20260903-batch10-next && git push origin HEAD:research/20260903-batch10-next; then exit 0; fi
+            git rebase --abort || true
+            sleep $((attempt*2))
+          done
+          exit 1
