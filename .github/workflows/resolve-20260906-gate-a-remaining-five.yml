@@ -1,0 +1,151 @@
+name: Resolve 20260906 Gate A Remaining Five
+
+on:
+  push:
+    branches:
+      - batch/20260906-next10-gate0
+    paths:
+      - '.github/workflows/resolve-20260906-gate-a-remaining-five.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  resolve:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: batch/20260906-next10-gate0
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: npm ci
+      - name: Resolve researched Discovery candidates
+        shell: bash
+        run: |
+          node --input-type=module <<'NODE'
+          import fs from 'node:fs';
+          const ids=['L_GINGA_EIYUU_DNT_GH','L_HIHODEN_PA7','L_OKIDOKI_DUO_ENCORE_FR','L_HOKUTO_TENSEI_2_MW','L_HANMA_BAKI_L5'];
+          const read=id=>JSON.parse(fs.readFileSync(`research/${id}/research-data.json`,'utf8'));
+          const write=(id,d)=>fs.writeFileSync(`research/${id}/research-data.json`,JSON.stringify(d,null,2)+'\n');
+          const addSource=(d,s)=>{d.sources=d.sources??[];if(!d.sources.some(x=>x.sourceId===s.sourceId))d.sources.push(s)};
+          const addNote=(d,n)=>{d.researchNotes=d.researchNotes??[];if(!d.researchNotes.includes(n))d.researchNotes.push(n)};
+          const setDC=(d,id,patch)=>{const x=d.discoveryInventory.find(x=>x.discoveryCandidateId===id);if(!x)throw new Error(`${d.machine.machineId}: missing ${id}`);Object.assign(x,patch)};
+          const refs=d=>d.evidenceCandidates.map(x=>x.researchEvidenceId);
+
+          // 銀河英雄伝説
+          {
+            const id=ids[0],d=read(id);
+            addSource(d,{sourceId:'SRC_NANA_SETTING_DETAIL',publisher:'nana-press.com',title:'銀河英雄伝説 Die Neue These 設定判別まとめ',url:'https://nana-press.com/kaiseki/machine/1051/33530/',sourceType:'major_analysis',checkedAt:'2026-09-06'});
+            addNote(d,'英雄ポイント100pt到達時CZ当選率は設定1約20%・設定6約26%のみ公開。設定2～5未公開のため全設定尤度FeatureにはせずResearch Reference扱い。');
+            addNote(d,'規定ゲーム数当選は高設定ほど下二桁50側の振り分けが増える傾向が公開されているが、全設定の再現可能な振り分け表が不足するためReference扱い。');
+            addNote(d,'通常ボーナス終了画面は主にモード示唆。ギャラクシーボーナス中のエピソード・キャラ紹介・終了画面は設定示唆を含むが、確率分布が未完のものはEvidence/Referenceとして保持する。');
+            d.linkedServices=d.linkedServices??[];
+            if(!d.linkedServices.some(x=>x.name==='メーカー実機連動サービス'))d.linkedServices.push({name:'メーカー実機連動サービス',status:'NOT_CONFIRMED',sourceRefs:['SRC_IDENTITY'],exactFieldsStatus:'NOT_CONFIRMED',verifiedFields:[],notes:'コナミアミューズメント公式製品情報と主要解析ページで本機専用の遊技結果取得サービスを確認できず。不存在とは断定しない。'});
+            setDC(d,'DC_01',{transferStatus:'RESOLVED',researchTarget:'RF_BONUS_INITIAL',researchNote:'CZは100pt到達時の設定1/6のみ公開のため別Reference。'});
+            setDC(d,'DC_02',{transferStatus:'REFERENCE',researchTarget:'reference',researchReference:'researchNotes[英雄ポイント100pt到達時CZ]'});
+            setDC(d,'DC_03',{transferStatus:'REFERENCE',researchTarget:'reference',researchReference:'researchNotes[規定ゲーム数・モード挙動]'});
+            setDC(d,'DC_04',{transferStatus:'RESOLVED',researchTarget:refs(d),researchNote:'アリストロフィーはHard Evidence候補。ギャラクシーボーナス示唆のうち確率未公開パターンはResearch Reference。'});
+            setDC(d,'DC_05',{transferStatus:'REFERENCE',researchTarget:'reference',researchReference:'linkedServices[メーカー実機連動サービス]'});
+            write(id,d);
+          }
+
+          // 秘宝伝
+          {
+            const id=ids[1],d=read(id);
+            addSource(d,{sourceId:'SRC_1GEKI_RARE',publisher:'1geki.jp',title:'秘宝伝 レア役による抽選',url:'https://1geki.jp/slot/l_hihouden/43/',sourceType:'major_analysis',checkedAt:'2026-09-06'});
+            addSource(d,{sourceId:'SRC_1GEKI_BB_END',publisher:'1geki.jp',title:'秘宝伝 BB終了画面の示唆',url:'https://1geki.jp/slot/l_hihouden/6/',sourceType:'major_analysis',checkedAt:'2026-09-06'});
+            addNote(d,'高確率は主にチャンス目から突入し、チャンス目確率1/124.1は全設定共通。高確率種別・伝説モードはゲーム性/状態依存のため、設定別完全分布が揃わないものはReference扱い。');
+            addNote(d,'BB終了画面の1枚絵は主にオタカラ導・伝説ロング・無限高確率・設定変更示唆であり、設定Evidenceと混同しない。');
+            addNote(d,'直撃候補は契機・状態条件を含めて調査したが、全設定の独立した直撃確率表を確認できないためReference扱い。');
+            d.linkedServices=d.linkedServices??[];
+            if(!d.linkedServices.some(x=>x.name==='ダイトモ/メーカー実機連動サービス'))d.linkedServices.push({name:'ダイトモ/メーカー実機連動サービス',status:'NOT_CONFIRMED',sourceRefs:['SRC_IDENTITY'],exactFieldsStatus:'NOT_CONFIRMED',verifiedFields:[],notes:'大都技研公式製品情報・主要解析ページで本機の遊技結果取得連動サービスと機種固有取得項目を確認できず。名称だけで対応を推定しない。'});
+            setDC(d,'DC_01',{transferStatus:'RESOLVED',researchTarget:'RF_BONUS_INITIAL',researchNote:'高確率はReferenceとして別管理。'});
+            setDC(d,'DC_02',{transferStatus:'REFERENCE',researchTarget:'reference',researchReference:'researchNotes[高確率種別・伝説モード]'});
+            setDC(d,'DC_03',{transferStatus:'REFERENCE',researchTarget:'reference',researchReference:'researchNotes[直撃候補]'});
+            setDC(d,'DC_04',{transferStatus:'RESOLVED',researchTarget:['RF_NORMAL_CHERRY','RF_BONUS_MISS'],researchNote:'通常チェリーとボーナス中ハズレを数値Feature化。チャンス目は全設定共通。'});
+            setDC(d,'DC_05',{transferStatus:'RESOLVED',researchTarget:refs(d),researchNote:'獲得枚数Evidenceを採用候補として保持。BB終了画面は主に状態示唆。'});
+            setDC(d,'DC_06',{transferStatus:'REFERENCE',researchTarget:'reference',researchReference:'linkedServices[ダイトモ/メーカー実機連動サービス]'});
+            write(id,d);
+          }
+
+          // 沖ドキDUOアンコール
+          {
+            const id=ids[2],d=read(id);
+            addNote(d,'BIG/REG種別はゲーム性として存在するが、今回確認した主要設定判別資料では独立した全設定のBB/RB確率表を確認できず、初当りFeatureと重複させないためReference扱い。');
+            addNote(d,'通常A/B滞在時ボーナス確率は設定1～6で1/251.6～1/188.4。引き戻し/チャンスは設定差が小さく、モード判別自体が必要な条件付き観測のためGate Bで採否監査する。');
+            addNote(d,'ハイビスカス点灯パターンの多くはモード示唆。設定示唆のテンパイ音・ボイスはEvidence候補として分離。');
+            addNote(d,'設定4非搭載（設定1/2/3/5/6）をMachine Identityの設定集合として固定。');
+            setDC(d,'DC_01',{transferStatus:'RESOLVED',researchTarget:'RF_BONUS_INITIAL'});
+            setDC(d,'DC_02',{transferStatus:'REFERENCE',researchTarget:'reference',researchReference:'researchNotes[BB/REG種別]'});
+            setDC(d,'DC_03',{transferStatus:'REFERENCE',researchTarget:'reference',researchReference:'researchNotes[通常A/B・引き戻し・チャンス]'});
+            setDC(d,'DC_04',{transferStatus:'REFERENCE',researchTarget:'reference',researchReference:'researchNotes[ハイビスカス点灯パターン]'});
+            setDC(d,'DC_05',{transferStatus:'RESOLVED',researchTarget:refs(d),researchNote:'設定確定/下限制約となるテンパイボイスをEvidence候補として保持。'});
+            setDC(d,'DC_06',{transferStatus:'REFERENCE',researchTarget:'reference',researchReference:'researchNotes[設定4非搭載]'});
+            // DC07 already resolved to Unimemo.
+            write(id,d);
+          }
+
+          // 北斗転生2
+          {
+            const id=ids[3],d=read(id);
+            addSource(d,{sourceId:'SRC_NANA_RESET',publisher:'nana-press.com',title:'北斗の拳 転生の章2 朝一・リセット時の恩恵',url:'https://nana-press.com/kaiseki/machine/1059/33026/',sourceType:'major_analysis',checkedAt:'2026-09-06'});
+            addNote(d,'低確/通常滞在時の弱チェリー・スイカ等からの天破突入率には設定差があるが、内部状態を正しく分類した成立役回数が分母になる条件付き候補。Gate Bで総天破突入率との二重計上を監査する。');
+            addNote(d,'通常小役そのものの出現率について、今回の主要設定判別資料では独立した全設定差Featureとして採用可能な表を確認できずReference扱い。');
+            addNote(d,'AT直撃単独の全設定確率表は今回確認した主要設定判別資料では再現可能な形で確認できずReference扱い。');
+            d.linkedServices=d.linkedServices??[];
+            if(!d.linkedServices.some(x=>x.name==='マイスロ'))d.linkedServices.push({name:'マイスロ',status:'SUPPORTED_BY_SAMMY_ECOSYSTEM_RECHECK_REQUIRED',sourceRefs:['SRC_IDENTITY'],exactFieldsStatus:'MACHINE_SPECIFIC_FIELDS_NOT_ENUMERATED',verifiedFields:[],notes:'サミー機としてマイスロ関連を継続調査。今回Gate Aでは機種固有の取得項目を確定できていないため未列挙のまま保持。'});
+            setDC(d,'DC_01',{transferStatus:'RESOLVED',researchTarget:'RF_AT_INITIAL'});
+            setDC(d,'DC_02',{transferStatus:'RESOLVED',researchTarget:['RF_TENHA_INITIAL','RF_RESET_256_ABESHI','RF_TENGEKI_MISS_SUCCESS'],researchNote:'天破総率・設定変更256あべし・天撃ハズレ成功を構造化。状態別天破は条件付きReference。'});
+            setDC(d,'DC_03',{transferStatus:'REFERENCE',researchTarget:'reference',researchReference:'researchNotes[通常小役出現率]'});
+            setDC(d,'DC_04',{transferStatus:'REFERENCE',researchTarget:'reference',researchReference:'researchNotes[AT直撃]'});
+            setDC(d,'DC_05',{transferStatus:'RESOLVED',researchTarget:refs(d),researchNote:'サミートロフィー/中央ランプHard Evidence候補を保持。店舗カスタム依存は出現率Featureと分離。'});
+            setDC(d,'DC_06',{transferStatus:'REFERENCE',researchTarget:'reference',researchReference:'linkedServices[マイスロ]'});
+            write(id,d);
+          }
+
+          // 範馬刃牙
+          {
+            const id=ids[4],d=read(id);
+            addSource(d,{sourceId:'SRC_1GEKI_ENDORPHIN',publisher:'1geki.jp',title:'範馬刃牙 エンドルフィン目・エンドルフィン効果',url:'https://1geki.jp/slot/l_baki2/6/',sourceType:'major_analysis',checkedAt:'2026-09-06'});
+            addNote(d,'CZ真ッ向勝負ッッは設定1のみ1/345.5が公開、設定2～6は未公開。全設定尤度FeatureにはせずReference扱い。CZ成功期待度53%は全設定共通。');
+            addNote(d,'通常時エンドルフィン目は設定1のみ1/148.7、効果獲得期待度80.4%が公開。設定2～6未公開のため設定推測Feature化せずReference扱い。AT中は1/119.1・98.6%で全設定共通。');
+            setDC(d,'DC_01',{transferStatus:'RESOLVED',researchTarget:'RF_HANMA_BONUS_INITIAL'});
+            setDC(d,'DC_02',{transferStatus:'RESOLVED',researchTarget:'RF_AT_INITIAL_WITH_RETURN',researchNote:'公表AT率は引き戻し込み。引き戻し別Featureとの二重計上禁止。'});
+            setDC(d,'DC_03',{transferStatus:'REFERENCE',researchTarget:'reference',researchReference:'researchNotes[CZ真ッ向勝負ッッ]'});
+            setDC(d,'DC_04',{transferStatus:'REFERENCE',researchTarget:'reference',researchReference:'researchNotes[エンドルフィン目]'});
+            // DC05/DC06 already resolved.
+            write(id,d);
+          }
+          NODE
+      - name: Validate five ResearchData and Discovery completeness
+        shell: bash
+        run: |
+          set -euo pipefail
+          ids=(L_GINGA_EIYUU_DNT_GH L_HIHODEN_PA7 L_OKIDOKI_DUO_ENCORE_FR L_HOKUTO_TENSEI_2_MW L_HANMA_BAKI_L5)
+          for id in "${ids[@]}"; do node tools/validate-research-data.mjs "research/$id/research-data.json"; done
+          node tools/discovery-completeness-gate.mjs "${ids[@]}"
+      - name: Assert no unresolved Discovery in authoritative ten
+        shell: bash
+        run: |
+          node --input-type=module <<'NODE'
+          import fs from 'node:fs';
+          const ids=['L_BURNING_EXPRESS_ZN','L_PRISM_NANA_CC','L_GINGA_EIYUU_DNT_GH','L_HIHODEN_PA7','L_OKIDOKI_DUO_ENCORE_FR','L_HOKUTO_TENSEI_2_MW','L_TEKKEN_6_YD01H','L_HANMA_BAKI_L5','L_GOBLIN_SLAYER_2_JZ','L_GHOST_IN_THE_SHELL_ZS'];
+          const unresolved=[];
+          for(const id of ids){const d=JSON.parse(fs.readFileSync(`research/${id}/research-data.json`,'utf8'));for(const x of d.discoveryInventory??[])if(x.transferStatus==='UNRESOLVED')unresolved.push(`${id}:${x.discoveryCandidateId}:${x.name}`)}
+          if(unresolved.length)throw new Error(`Unresolved Discovery remains:\n${unresolved.join('\n')}`);
+          console.log('PASS: authoritative Next10 Discovery dispositions 61/61 resolved/reference');
+          NODE
+      - name: Commit resolved Gate A Discovery
+        shell: bash
+        run: |
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git add research/L_GINGA_EIYUU_DNT_GH/research-data.json research/L_HIHODEN_PA7/research-data.json research/L_OKIDOKI_DUO_ENCORE_FR/research-data.json research/L_HOKUTO_TENSEI_2_MW/research-data.json research/L_HANMA_BAKI_L5/research-data.json
+          if git diff --cached --quiet; then exit 0; fi
+          git commit -m 'research: resolve remaining Next10 Gate A discovery dispositions'
+          git pull --rebase origin batch/20260906-next10-gate0
+          git push origin HEAD:batch/20260906-next10-gate0
