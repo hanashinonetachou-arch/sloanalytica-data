@@ -1,0 +1,89 @@
+name: Enrich 20260906 Gate A linked services
+
+on:
+  push:
+    branches:
+      - batch/20260906-next10-gate0
+    paths:
+      - '.github/workflows/enrich-20260906-gate-a-linked-services.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  enrich:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: batch/20260906-next10-gate0
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Enrich linked-service research
+        shell: bash
+        run: |
+          node --input-type=module <<'NODE'
+          import fs from 'node:fs';
+          const read=id=>JSON.parse(fs.readFileSync(`research/${id}/research-data.json`,'utf8'));
+          const write=(id,d)=>fs.writeFileSync(`research/${id}/research-data.json`,`${JSON.stringify(d,null,2)}\n`);
+
+          // Tekken 6: official SloPla NEXT machine page exposes the exact play-information inventory.
+          {
+            const id='L_TEKKEN_6_YD01H', d=read(id);
+            d.linkedServices=[{
+              name:'スロプラNEXT', status:'VERIFIED_SUPPORTED', sourceRefs:['SRC_SLOPLA_OFFICIAL'], exactFieldsStatus:'ENUMERATED_OFFICIAL',
+              verifiedFields:[
+                'プレイ日数','総ゲーム数','通常ゲーム数','ボーナス初当たり','鉄拳ラッシュ','デビルラッシュ','エンディング回数','デビルフリーズ回数','最大獲得枚数',
+                '通常時のTR直当たり+TR終了後の引き戻し（20000Gで開放）',
+                'レア役合算','レア役合算(逆押しナビ発生時含む)','弱チェリー','強チェリー','強チェリー(逆押しナビ発生時含む)','スイカ','スイカ(逆押しナビ発生時含む)','チャンス目','チャンス目(逆押しナビ発生時含む)','ブースト目',
+                'CZ合算','ロックオンチャレンジ合算/成功回数','ロックオンチャレンジ シャオユウ/成功回数','ロックオンチャレンジ ラース/成功回数','ロックオンチャレンジ キング/成功回数','一八チャレンジ/成功回数',
+                '通常ビッグボーナス合算','青7ビッグボーナス','赤7ビッグボーナス','赤7BBエピソード発生回数','デビルゾーン/成功回数','クライマックスバトル/勝利回数',
+                '鉄拳ラッシュゲーム数','拳奪バトル/勝利回数','鉄拳チャンス(青)','鉄拳チャンス(赤)','鉄拳チャンス中拳奪バトル/勝利回数','最大ボーナス獲得数',
+                '拳奪バトル合算/勝利回数','VS平八/勝利回数/最大拳球獲得数','VSナンシー/勝利回数/最大拳球獲得数','VSファーカムラム/勝利回数/最大拳球獲得数','VSクラウディオ/勝利回数/最大拳球獲得数','VSニーナ/勝利回数/最大拳球獲得数','VSクマ/勝利回数/最大拳球獲得数','VS金木人/勝利回数/最大拳球獲得数',
+                'ATビッグボーナス合算','ビッグボーナスEXTRA/最大上乗せゲーム数','ビッグボーナスBOOST/最大上乗せゲーム数','ビッグボーナスPERFECT/最大上乗せゲーム数','鉄拳アタック/最大上乗せゲーム数'
+              ],
+              notes:'山佐ネクスト公式スロプラNEXTの鉄拳6機種ページで直接列挙。最大獲得枚数は2026-01-28に計算式修正告知あり。'
+            }];
+            d.discoveryInventory=(d.discoveryInventory??[]).map(x=>x.discoveryCandidateId==='DC_07'?{...x,transferStatus:'REFERENCE',researchTarget:'reference',researchReference:'linkedServices[スロプラNEXT]'}:x);
+            write(id,d);
+          }
+
+          // Hanma Baki: Da-WIN LITE's hidden Nagi quote is observable every 1000G and carries lower-bound evidence.
+          {
+            const id='L_HANMA_BAKI_L5', d=read(id);
+            if(!d.sources.some(s=>s.sourceId==='SRC_NANA_DAWIN')) d.sources.push({sourceId:'SRC_NANA_DAWIN',publisher:'nana-press.com',title:'L範馬刃牙 打-WIN LITE（隠れ凪）の設定示唆',url:'https://nana-press.com/kaiseki/machine/1098/34975/',sourceType:'major_analysis',checkedAt:'2026-09-06'});
+            const settings=d.machine.settings;
+            const evs=[
+              ['EV_DAWIN_NAGI_BLUE','打-WIN LITE 隠れ凪 青「一味違いますね」',['SET_2','SET_3','SET_4','SET_5','SET_6']],
+              ['EV_DAWIN_NAGI_GREEN','打-WIN LITE 隠れ凪 緑「何やら不思議な気配です！」',['SET_3','SET_4','SET_5','SET_6']],
+              ['EV_DAWIN_NAGI_RED','打-WIN LITE 隠れ凪 赤「良い予感がします…！」',['SET_4','SET_5','SET_6']],
+              ['EV_DAWIN_NAGI_SILVER','打-WIN LITE 隠れ凪 銀「遊び尽くしちゃいましょう！」',['SET_5','SET_6']],
+              ['EV_DAWIN_NAGI_GOLD','打-WIN LITE 隠れ凪 金「お肉～♪お肉～♪」',['SET_6']]
+            ];
+            const map=new Map((d.evidenceCandidates??[]).map(e=>[e.researchEvidenceId,e]));
+            for(const [eid,name,allowed] of evs) map.set(eid,{researchEvidenceId:eid,name,allowedSettings:allowed,deniedSettings:settings.filter(s=>!allowed.includes(s)),sourceRefs:['SRC_NANA_DAWIN'],factStatus:'verified',notes:'打-WIN LITE使用中、1000G消化ごとに切り替わる隠れ凪セリフ。'});
+            d.evidenceCandidates=[...map.values()];
+            d.linkedServices=[{name:'打-WIN LITE',status:'VERIFIED_SUPPORTED',sourceRefs:['SRC_NANA_DAWIN'],exactFieldsStatus:'PARTIAL_ENUMERATION',verifiedFields:['隠れ凪セリフ（1000Gごとに切替）'],notes:'遊技データ全項目は追加列挙が必要。設定示唆セリフは明示確認済み。'}];
+            d.discoveryInventory=(d.discoveryInventory??[]).map(x=>x.discoveryCandidateId==='DC_05'?{...x,transferStatus:'RESOLVED',researchTarget:['EV_STAMP_2PLUS','EV_STAMP_3PLUS','EV_STAMP_4PLUS','EV_STAMP_5PLUS','EV_STAMP_6']}:x.discoveryCandidateId==='DC_06'?{...x,transferStatus:'REFERENCE',researchTarget:'reference',researchReference:'linkedServices[打-WIN LITE]'}:x);
+            write(id,d);
+          }
+          NODE
+      - name: Validate enriched ResearchData
+        shell: bash
+        run: |
+          node tools/validate-research-data.mjs research/L_TEKKEN_6_YD01H/research-data.json
+          node tools/validate-research-data.mjs research/L_HANMA_BAKI_L5/research-data.json
+          node tools/discovery-completeness-gate.mjs L_TEKKEN_6_YD01H L_HANMA_BAKI_L5
+      - name: Commit linked-service enrichment
+        shell: bash
+        run: |
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git add research/L_TEKKEN_6_YD01H/research-data.json research/L_HANMA_BAKI_L5/research-data.json
+          if git diff --cached --quiet; then echo 'No changes'; exit 0; fi
+          git commit -m 'research: enumerate Tekken6 SloPla and Baki Da-WIN evidence'
+          git pull --rebase origin batch/20260906-next10-gate0
+          git push origin HEAD:batch/20260906-next10-gate0

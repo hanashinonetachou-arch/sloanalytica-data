@@ -1,0 +1,62 @@
+name: Batch 20260906 Gate C Observation
+
+on:
+  push:
+    branches: [batch/20260906-next10-gate0]
+    paths:
+      - tools/generate-batch-20260906-observation-v2.mjs
+      - .github/workflows/batch-20260906-gate-c-observation.yml
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  generate-validate:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: batch/20260906-next10-gate0
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Generate Observation v2
+        run: node tools/generate-batch-20260906-observation-v2.mjs
+      - name: Validate Observation files
+        run: |
+          node tools/validate-machine-observation-data.mjs \
+            research/L_BURNING_EXPRESS_ZN/machine-observation-data.json \
+            research/L_PRISM_NANA_CC/machine-observation-data.json \
+            research/L_GINGA_EIYUU_DNT_GH/machine-observation-data.json \
+            research/L_HIHODEN_PA7/machine-observation-data.json \
+            research/L_OKIDOKI_DUO_ENCORE_FR/machine-observation-data.json \
+            research/L_HOKUTO_TENSEI_2_MW/machine-observation-data.json \
+            research/L_TEKKEN_6_YD01H/machine-observation-data.json \
+            research/L_HANMA_BAKI_L5/machine-observation-data.json \
+            research/L_GOBLIN_SLAYER_2_JZ/machine-observation-data.json \
+            research/L_GHOST_IN_THE_SHELL_ZS/machine-observation-data.json
+      - name: Audit Selection linkage strict-v2
+        run: |
+          node tools/audit-observation-selection-linkage.mjs --strict-v2 \
+            L_BURNING_EXPRESS_ZN L_PRISM_NANA_CC L_GINGA_EIYUU_DNT_GH L_HIHODEN_PA7 L_OKIDOKI_DUO_ENCORE_FR \
+            L_HOKUTO_TENSEI_2_MW L_TEKKEN_6_YD01H L_HANMA_BAKI_L5 L_GOBLIN_SLAYER_2_JZ L_GHOST_IN_THE_SHELL_ZS | tee reports/batch-20260906-gate-c-linkage.txt
+      - name: Write Gate C baseline report
+        shell: bash
+        run: |
+          node --input-type=module <<'EOF'
+          import fs from 'node:fs';
+          const ids=['L_BURNING_EXPRESS_ZN','L_PRISM_NANA_CC','L_GINGA_EIYUU_DNT_GH','L_HIHODEN_PA7','L_OKIDOKI_DUO_ENCORE_FR','L_HOKUTO_TENSEI_2_MW','L_TEKKEN_6_YD01H','L_HANMA_BAKI_L5','L_GOBLIN_SLAYER_2_JZ','L_GHOST_IN_THE_SHELL_ZS'];
+          const machines=ids.map(id=>{const o=JSON.parse(fs.readFileSync(`research/${id}/machine-observation-data.json`,'utf8'));return {machineId:id,observations:o.observations.length,featureMappings:o.featureMappings.length,sourceCoverage:o.sourceCoverage,fieldVerificationItems:o.fieldVerificationItems.length};});
+          const report={schemaVersion:'batch-gate-c-baseline-v1',generatedAt:new Date().toISOString(),validation:'PASS',selectionLinkageStrictV2:'PASS',baselineComplete:true,gateCCompletion:'PENDING_FIELD_VERIFICATION',machines,notes:['Selection採用FeatureのObservation写像は10/10完了。','条件付き母数とFallback suppressionを保持。','DATA_COUNTER / SEATED_STATE / 未解決MACHINE_MENUは実機確認まで未確定。']};
+          fs.writeFileSync('reports/batch-20260906-gate-c-observation-baseline.json',JSON.stringify(report,null,2)+'\n');
+          EOF
+      - name: Commit generated baseline
+        run: |
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git add research/*/machine-observation-data.json reports/batch-20260906-gate-c-linkage.txt reports/batch-20260906-gate-c-observation-baseline.json
+          git commit -m 'observation: generate 20260906 Gate C baseline'
+          git pull --rebase origin batch/20260906-next10-gate0
+          git push origin HEAD:batch/20260906-next10-gate0

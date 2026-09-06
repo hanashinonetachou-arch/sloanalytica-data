@@ -1,0 +1,53 @@
+name: Fix 20260906 Baki service labels
+
+on:
+  push:
+    branches: [batch/20260906-next10-gate0]
+    paths: ['.github/workflows/fix-20260906-baki-service-labels.yml']
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  fix-validate:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: batch/20260906-next10-gate0
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Remove linked-service name from user-facing Selection labels only
+        shell: bash
+        run: |
+          node --input-type=module <<'EOF'
+          import fs from 'node:fs';
+          const p='research/L_HANMA_BAKI_L5/selection-data.json';
+          const s=JSON.parse(fs.readFileSync(p,'utf8'));
+          const strip=v=>typeof v==='string'?v.replace(/^打-WIN LITE\s+/,''):v;
+          let changed=0;
+          for(const i of s.inputs??[]){const n=strip(i.name);if(n!==i.name){i.name=n;changed++;}}
+          for(const e of s.evidence??[]){for(const k of ['name','displayName']){const n=strip(e[k]);if(n!==e[k]){e[k]=n;changed++;}}}
+          fs.writeFileSync(p,JSON.stringify(s,null,2)+'\n');
+          if(changed!==15) throw new Error(`expected 15 user-facing label rewrites, got ${changed}`);
+          console.log(`rewrote ${changed} Selection user-facing labels; Research provenance untouched`);
+          EOF
+      - name: Validate Selection and UI-service-name policy at source layer
+        run: |
+          node tools/validate-selection-data.mjs research/L_HANMA_BAKI_L5/selection-data.json research/L_HANMA_BAKI_L5/research-data.json
+          if grep -n '"name": "打-WIN LITE\|"displayName": "打-WIN LITE' research/L_HANMA_BAKI_L5/selection-data.json; then
+            echo 'linked service name still leaks into Selection user-facing fields' >&2
+            exit 1
+          fi
+          grep -q '打-WIN LITE' research/L_HANMA_BAKI_L5/research-data.json
+      - name: Commit canonical Selection label fix
+        run: |
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git add research/L_HANMA_BAKI_L5/selection-data.json
+          git commit -m 'selection: remove Baki service name from user-facing evidence labels'
+          git pull --rebase origin batch/20260906-next10-gate0
+          git push origin HEAD:batch/20260906-next10-gate0

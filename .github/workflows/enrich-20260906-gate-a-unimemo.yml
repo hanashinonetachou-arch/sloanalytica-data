@@ -1,0 +1,74 @@
+name: Enrich 20260906 Gate A Unimemo
+
+on:
+  push:
+    branches:
+      - batch/20260906-next10-gate0
+    paths:
+      - '.github/workflows/enrich-20260906-gate-a-unimemo.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  enrich:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: batch/20260906-next10-gate0
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Record official Unimemo support
+        shell: bash
+        run: |
+          node --input-type=module <<'NODE'
+          import fs from 'node:fs';
+          const ids=['L_HANABI_KM','L_OKIDOKI_DUO_ENCORE_FR'];
+          for(const id of ids){
+            const file=`research/${id}/research-data.json`;
+            const d=JSON.parse(fs.readFileSync(file,'utf8'));
+            if(!d.sources.some(s=>s.sourceId==='SRC_UNIMEMO_OFFICIAL_20260906')) d.sources.push({
+              sourceId:'SRC_UNIMEMO_OFFICIAL_20260906',publisher:'ユニバーサルエンターテインメント',title:'ユニメモ 対応機種・利用方法',
+              url:'https://www.universal-777.com/fun/unimemo/',sourceType:'official',checkedAt:'2026-09-06'
+            });
+            const existing=Array.isArray(d.linkedServices)?d.linkedServices.filter(s=>s.name!=='ユニメモ'):[];
+            const common=['総プレイ数','ボーナス回数','途中記録','遊技結果'];
+            const machineFields=id==='L_HANABI_KM'
+              ? ['通常時ゲーム数','BIG','REG','風鈴A','風鈴B','氷A','チェリーA2','チェリーB','BIG中風鈴B（斜め）','BIG中バラケ目','REG中1枚役','REG中バラケ目','花火チャレンジ中ハズレ','花火GAME中ハズレ']
+              : [];
+            d.linkedServices=[...existing,{
+              name:'ユニメモ',status:'VERIFIED_SUPPORTED',sourceRefs:['SRC_UNIMEMO_OFFICIAL_20260906'],
+              exactFieldsStatus:id==='L_HANABI_KM'?'PARTIAL_ENUMERATION_CROSSCHECKED':'GENERIC_OFFICIAL_ONLY',
+              verifiedFields:[...common,...machineFields],
+              notes:id==='L_HANABI_KM'
+                ? '対応機種であることは公式。機種固有カウント項目は既存Researchの複数解析ソースと設定推測ツールで照合済み。公式ページはサービス共通として総プレイ数・ボーナス回数等を説明。'
+                : '対応機種であること、およびサービス共通で総プレイ数・ボーナス回数等を記録できることは公式確認済み。沖ドキDUOアンコール固有の全項目列挙は未完。'
+            }];
+            d.discoveryInventory=(d.discoveryInventory??[]).map(x=>{
+              const name=String(x.name??'').toLowerCase();
+              if(name.includes('linked-service')||name.includes('unimemo')) return {...x,transferStatus:'REFERENCE',researchTarget:'reference',researchReference:'linkedServices[ユニメモ]'};
+              return x;
+            });
+            fs.writeFileSync(file,`${JSON.stringify(d,null,2)}\n`);
+          }
+          NODE
+      - name: Validate
+        shell: bash
+        run: |
+          node tools/validate-research-data.mjs research/L_HANABI_KM/research-data.json
+          node tools/validate-research-data.mjs research/L_OKIDOKI_DUO_ENCORE_FR/research-data.json
+          node tools/discovery-completeness-gate.mjs L_HANABI_KM L_OKIDOKI_DUO_ENCORE_FR
+      - name: Commit
+        shell: bash
+        run: |
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git add research/L_HANABI_KM/research-data.json research/L_OKIDOKI_DUO_ENCORE_FR/research-data.json
+          if git diff --cached --quiet; then echo 'No changes'; exit 0; fi
+          git commit -m 'research: record official Unimemo support for Hanabi and Okidoki'
+          git pull --rebase origin batch/20260906-next10-gate0
+          git push origin HEAD:batch/20260906-next10-gate0

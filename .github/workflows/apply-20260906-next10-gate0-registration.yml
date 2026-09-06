@@ -1,0 +1,54 @@
+name: Apply 20260906 Next10 Gate0 registration
+
+on:
+  push:
+    branches:
+      - batch/20260906-next10-gate0
+    paths:
+      - '.github/workflows/apply-20260906-next10-gate0-registration.yml'
+      - 'tools/apply-20260906-next10-gate0-registration.mjs'
+      - 'research/batches/20260906-next10/gate0-machine-identity.json'
+
+permissions:
+  contents: write
+
+jobs:
+  apply:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: batch/20260906-next10-gate0
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - run: npm ci
+      - name: Apply canonical Gate0 registrations
+        run: node tools/apply-20260906-next10-gate0-registration.mjs
+      - name: Validate registry
+        run: npm run registry:validate
+      - name: Assert exact Gate0 membership
+        run: |
+          node --input-type=module <<'NODE'
+          import fs from 'node:fs';
+          const r=JSON.parse(fs.readFileSync('machine-registry.json','utf8'));
+          const g=JSON.parse(fs.readFileSync('research/batches/20260906-next10/gate0-machine-identity.json','utf8'));
+          const byId=new Map(r.machines.map(x=>[x.machineId,x]));
+          for(const t of g.machines){const x=byId.get(t.machineId);if(!x)throw new Error(`missing ${t.machineId}`);if(x.provisionalRegistrationId!==t.provisionalRegistrationId)throw new Error(`provisional ID mismatch ${t.machineId}`);if(x.appStatus!=='RESEARCHING')throw new Error(`status mismatch ${t.machineId}`)}
+          if(g.status!=='IDENTITY_PASS_DISCOVERY_SEEDED')throw new Error(`Gate0 status=${g.status}`);
+          console.log('PASS exact Gate0 membership 10/10');
+          NODE
+      - name: Commit generated registration state
+        run: |
+          set -euo pipefail
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git add machine-registry.json research/batches/20260906-next10/gate0-machine-identity.json
+          if git diff --cached --quiet; then
+            echo 'No generated changes to commit.'
+          else
+            git commit -m 'Gate0: register 20260906 Next10 machine identities'
+            git push origin HEAD:batch/20260906-next10-gate0
+          fi

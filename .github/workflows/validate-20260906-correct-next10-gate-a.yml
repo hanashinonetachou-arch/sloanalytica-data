@@ -1,0 +1,69 @@
+name: Validate 20260906 Correct Next10 Gate A
+
+on:
+  push:
+    branches:
+      - batch/20260906-next10-gate0
+    paths:
+      - '.github/workflows/validate-20260906-correct-next10-gate-a.yml'
+      - 'research/L_GOBLIN_SLAYER_2_JZ/research-data.json'
+      - 'research/L_GHOST_IN_THE_SHELL_ZS/research-data.json'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  validate:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: batch/20260906-next10-gate0
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: npm ci
+      - name: Validate authoritative 10-machine scope
+        shell: bash
+        run: |
+          set -euo pipefail
+          ids=(
+            L_BURNING_EXPRESS_ZN
+            L_PRISM_NANA_CC
+            L_GINGA_EIYUU_DNT_GH
+            L_HIHODEN_PA7
+            L_OKIDOKI_DUO_ENCORE_FR
+            L_HOKUTO_TENSEI_2_MW
+            L_TEKKEN_6_YD01H
+            L_HANMA_BAKI_L5
+            L_GOBLIN_SLAYER_2_JZ
+            L_GHOST_IN_THE_SHELL_ZS
+          )
+          npm run registry:validate
+          for id in "${ids[@]}"; do
+            echo "=== validate $id ==="
+            node tools/validate-research-data.mjs "research/$id/research-data.json"
+          done
+          node tools/discovery-completeness-gate.mjs "${ids[@]}"
+      - name: Write Gate A progress audit
+        shell: bash
+        run: |
+          node --input-type=module <<'NODE'
+          import fs from 'node:fs';
+          const ids=['L_BURNING_EXPRESS_ZN','L_PRISM_NANA_CC','L_GINGA_EIYUU_DNT_GH','L_HIHODEN_PA7','L_OKIDOKI_DUO_ENCORE_FR','L_HOKUTO_TENSEI_2_MW','L_TEKKEN_6_YD01H','L_HANMA_BAKI_L5','L_GOBLIN_SLAYER_2_JZ','L_GHOST_IN_THE_SHELL_ZS'];
+          const rows=ids.map(id=>{const d=JSON.parse(fs.readFileSync(`research/${id}/research-data.json`,'utf8'));return {machineId:id,stage:d.researchStage??null,features:(d.features??[]).length,evidence:(d.evidenceCandidates??[]).length,discovery:(d.discoveryInventory??[]).length,unresolved:(d.discoveryInventory??[]).filter(x=>x.transferStatus==='UNRESOLVED').length,linkedServices:d.linkedServices??[]};});
+          const report={schemaVersion:'gate-a-progress-audit-v1',batch:'20260906-next10',scope:'AUTHORITATIVE_NEW_10',generatedAt:new Date().toISOString(),validation:'PASS',discoveryCompleteness:'PASS',machines:rows,totalFeatures:rows.reduce((a,x)=>a+x.features,0),totalEvidence:rows.reduce((a,x)=>a+x.evidence,0),totalUnresolved:rows.reduce((a,x)=>a+x.unresolved,0),gateA:'IN_PROGRESS'};
+          fs.writeFileSync('reports/batch-20260906-gate-a-progress-audit.json',JSON.stringify(report,null,2)+'\n');
+          NODE
+      - name: Commit audit report
+        shell: bash
+        run: |
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git add reports/batch-20260906-gate-a-progress-audit.json
+          if git diff --cached --quiet; then exit 0; fi
+          git commit -m 'research: audit corrected Next10 Gate A progress'
+          git pull --rebase origin batch/20260906-next10-gate0
+          git push origin HEAD:batch/20260906-next10-gate0

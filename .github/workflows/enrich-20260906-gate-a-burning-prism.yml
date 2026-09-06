@@ -1,0 +1,95 @@
+name: Enrich 20260906 Gate A Burning Prism
+
+on:
+  push:
+    branches:
+      - batch/20260906-next10-gate0
+    paths:
+      - '.github/workflows/enrich-20260906-gate-a-burning-prism.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  enrich:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: batch/20260906-next10-gate0
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: npm ci
+      - name: Enrich Burning Express and Prism Nana Research dispositions
+        shell: bash
+        run: |
+          node --input-type=module <<'NODE'
+          import fs from 'node:fs';
+
+          function read(id){return JSON.parse(fs.readFileSync(`research/${id}/research-data.json`,'utf8'));}
+          function write(id,d){fs.writeFileSync(`research/${id}/research-data.json`,JSON.stringify(d,null,2)+'\n');}
+          function src(d,s){if(!(d.sources??[]).some(x=>x.sourceId===s.sourceId)) d.sources.push(s);}
+          function ev(d,e){if(!(d.evidenceCandidates??[]).some(x=>x.researchEvidenceId===e.researchEvidenceId)) d.evidenceCandidates.push(e);}
+          function dc(d,id,patch){const x=d.discoveryInventory.find(x=>x.discoveryCandidateId===id); if(!x) throw new Error(`${d.machine.machineId}: ${id} missing`); Object.assign(x,patch);}
+
+          {
+            const id='L_BURNING_EXPRESS_ZN'; const d=read(id);
+            src(d,{sourceId:'SRC_NANA_SETTING_DETAIL',publisher:'nana-press.com',title:'バーニングエクスプレス 設定差のある抽選値まとめ',url:'https://nana-press.com/kaiseki/machine/1057/33308/',sourceType:'major_analysis',checkedAt:'2026-09-06'});
+            d.researchNotes=d.researchNotes??[];
+            const notes=[
+              'バーニングチャレンジ／ターミナルゾーンはゲーム性・継続契機として調査したが、2026-09-06時点の主要設定判別ページでは独立した設定別確率表を確認できないためResearch Reference扱い。',
+              '終了画面・トロフィー等のHard Evidenceは主要設定判別ページで確認できず。主な公開設定差はボーナス初当り、リールロック役別発生率、リールロック時ボーナス期待度、成立役別ボーナス期待度。',
+              '北電子公式製品ページで本機専用の遊技結果連動サービスは確認できず。存在しないと断定せずNOT_CONFIRMEDで保持する。'
+            ];
+            for(const n of notes) if(!d.researchNotes.includes(n)) d.researchNotes.push(n);
+            d.linkedServices=d.linkedServices??[];
+            if(!d.linkedServices.some(x=>x.name==='メーカー実機連動サービス')) d.linkedServices.push({name:'メーカー実機連動サービス',status:'NOT_CONFIRMED',sourceRefs:['SRC_IDENTITY'],exactFieldsStatus:'NOT_CONFIRMED',verifiedFields:[],notes:'北電子公式製品情報・主要解析情報で本機専用の遊技結果取得サービスを確認できず。'});
+            dc(d,'DC_01',{transferStatus:'RESOLVED',researchTarget:['RF_BURNING_BONUS_INITIAL','RF_EXPRESS_BONUS_INITIAL'],researchNote:'合算値は同じ初当り情報の派生値のため、Researchでは2種の初当りを保持しGate Bで総率/内訳の重複を監査する。'});
+            dc(d,'DC_02',{transferStatus:'REFERENCE',researchTarget:'reference',researchReference:'researchNotes[バーニングチャレンジ／ターミナルゾーン]'});
+            dc(d,'DC_03',{transferStatus:'REFERENCE',researchTarget:'reference',researchReference:'researchNotes[Hard Evidence未確認]'});
+            dc(d,'DC_04',{transferStatus:'REFERENCE',researchTarget:'reference',researchReference:'linkedServices[メーカー実機連動サービス]'});
+            write(id,d);
+          }
+
+          {
+            const id='L_PRISM_NANA_CC'; const d=read(id);
+            src(d,{sourceId:'SRC_NANA_MODE',publisher:'nana-press.com',title:'プリズムナナ モード別ゾーン・移行率・示唆一覧',url:'https://nana-press.com/kaiseki/machine/1068/33401/',sourceType:'major_analysis',checkedAt:'2026-09-06'});
+            src(d,{sourceId:'SRC_NANA_SMARTCOLLE',publisher:'nana-press.com',title:'プリズムナナ スマコレ（スマTALK・ガチャ）の設定示唆',url:'https://nana-press.com/kaiseki/machine/1068/34176/',sourceType:'major_analysis',checkedAt:'2026-09-06'});
+            const E=(researchEvidenceId,name,allowed,denied)=>({researchEvidenceId,name,allowedSettings:allowed,deniedSettings:denied,sourceRefs:['SRC_NANA_SETTING'],factStatus:'verified',notes:'通常時会話演出によるResearch Evidence候補。Selection/Evidence UI判断は後段。'});
+            ev(d,E('EV_TALK_CLEAR_SKY','通常時会話「雲ひとつない」',['SET_4','SET_5','SET_6'],['SET_1','SET_2','SET_3']));
+            ev(d,E('EV_TALK_DESTINY','通常時会話「運命の出会い」',['SET_5','SET_6'],['SET_1','SET_2','SET_3','SET_4']));
+            ev(d,E('EV_TALK_RAINBOW','通常時会話「虹」',['SET_6'],['SET_1','SET_2','SET_3','SET_4','SET_5']));
+            d.researchNotes=d.researchNotes??[];
+            for(const n of [
+              '通常モードは通常A/B・チャンス・天国・超天国。周期ゾーンや示唆は立ち回りReferenceとして保持し、設定推測Feature化には設定別移行率と観測母数の整合性確認が必要。',
+              'ST/ボーナス種別・告知モードにはゲーム性上の振り分けがあるが、設定推測として独立採用するには初当りとの因果/重複監査が必要。',
+              'スマコレはスマTALKとガチャで設定示唆を行う機能。遊技結果の自動カウントサービスとは区別する。'
+            ]) if(!d.researchNotes.includes(n)) d.researchNotes.push(n);
+            d.linkedServices=d.linkedServices??[];
+            if(!d.linkedServices.some(x=>x.name==='スマコレ')) d.linkedServices.push({name:'スマコレ',status:'VERIFIED_SUPPORTED',sourceRefs:['SRC_NANA_SMARTCOLLE'],exactFieldsStatus:'SETTING_HINT_FUNCTIONS_ENUMERATED',verifiedFields:['スマTALK（規定G数後の回答・文字色による設定示唆）','ガチャ（カード種類による設定示唆）'],notes:'カルミナ機の機能。遊技結果自動集計サービスではなく、設定示唆機能としてResearchに保持。'});
+            dc(d,'DC_01',{transferStatus:'RESOLVED',researchTarget:'RF_ST_INITIAL'});
+            dc(d,'DC_02',{transferStatus:'REFERENCE',researchTarget:'reference',researchReference:'researchNotes[通常モード・周期ゾーン]'});
+            dc(d,'DC_03',{transferStatus:'REFERENCE',researchTarget:'reference',researchReference:'researchNotes[ST/ボーナス種別・告知モード]'});
+            dc(d,'DC_04',{transferStatus:'RESOLVED',researchTarget:d.evidenceCandidates.map(x=>x.researchEvidenceId)});
+            dc(d,'DC_05',{transferStatus:'REFERENCE',researchTarget:'reference',researchReference:'linkedServices[スマコレ]'});
+            write(id,d);
+          }
+          NODE
+      - name: Validate enriched ResearchData
+        run: |
+          node tools/validate-research-data.mjs research/L_BURNING_EXPRESS_ZN/research-data.json
+          node tools/validate-research-data.mjs research/L_PRISM_NANA_CC/research-data.json
+          node tools/discovery-completeness-gate.mjs L_BURNING_EXPRESS_ZN L_PRISM_NANA_CC
+      - name: Commit enrichment
+        shell: bash
+        run: |
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git add research/L_BURNING_EXPRESS_ZN/research-data.json research/L_PRISM_NANA_CC/research-data.json
+          if git diff --cached --quiet; then exit 0; fi
+          git commit -m 'research: resolve Burning Express and Prism Nana Gate A discovery'
+          git pull --rebase origin batch/20260906-next10-gate0
+          git push origin HEAD:batch/20260906-next10-gate0

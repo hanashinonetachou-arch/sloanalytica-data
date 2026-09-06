@@ -1,0 +1,91 @@
+name: Restore 20260906 user-confirmed Next10 scope
+
+on:
+  push:
+    branches:
+      - batch/20260906-next10-gate0
+    paths:
+      - '.github/workflows/restore-20260906-user-confirmed-scope.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  restore:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: batch/20260906-next10-gate0
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - run: npm ci
+      - name: Restore authoritative user-confirmed scope
+        shell: bash
+        run: |
+          set -euo pipefail
+          GOOD=193558f
+          BASE=d407f03c2235be582d3f3340021e7d360e85b7d2
+
+          # Restore the last known-good Gate0 state containing the ten NEW targets.
+          git checkout "$GOOD" -- machine-registry.json
+          git checkout "$GOOD" -- research/batches/20260906-next10/gate0-machine-identity.json
+          git checkout "$GOOD" -- research/batches/20260906-next10/discovery-candidate-universe.json
+          git checkout "$GOOD" -- research/L_GOBLIN_SLAYER_2_JZ/research-data.json
+          git checkout "$GOOD" -- research/L_GHOST_IN_THE_SHELL_ZS/research-data.json
+
+          # Existing machines were explicitly excluded by the user. Restore their files to the PR base
+          # so this batch contains no Research changes for them.
+          git checkout "$BASE" -- research/LB_NEW_KING_HANAHANA_V_PF/research-data.json
+          git checkout "$BASE" -- research/L_HANABI_KM/research-data.json
+
+          # Remove the erroneous correction workflow so it cannot re-apply the wrong scope.
+          git rm -f .github/workflows/correct-20260906-next10-scope.yml
+
+          # Gate-A aggregate files created after the erroneous scope switch are not authoritative.
+          # Remove them; they will be regenerated from the corrected ten-machine ResearchData.
+          rm -f research/batches/20260906-next10/gate-a-verified-core.json
+
+          node --input-type=module <<'NODE'
+          import fs from 'node:fs';
+          const expected=[
+            'L_BURNING_EXPRESS_ZN','L_PRISM_NANA_CC','L_GINGA_EIYUU_DNT_GH','L_HIHODEN_PA7',
+            'L_OKIDOKI_DUO_ENCORE_FR','L_HOKUTO_TENSEI_2_MW','L_TEKKEN_6_YD01H','L_HANMA_BAKI_L5',
+            'L_GOBLIN_SLAYER_2_JZ','L_GHOST_IN_THE_SHELL_ZS'
+          ];
+          const excluded=['LB_NEW_KING_HANAHANA_V_PF','L_HANABI_KM'];
+          const identity=JSON.parse(fs.readFileSync('research/batches/20260906-next10/gate0-machine-identity.json','utf8'));
+          const got=identity.machines.map(x=>x.machineId);
+          if(JSON.stringify(got)!==JSON.stringify(expected)) throw new Error(`Identity scope mismatch: ${got.join(',')}`);
+          const ids=identity.machines.map(x=>x.provisionalRegistrationId);
+          if(ids.join(',')!=='240,241,242,243,244,245,246,247,248,249') throw new Error(`ID reservation mismatch: ${ids.join(',')}`);
+          const registry=JSON.parse(fs.readFileSync('machine-registry.json','utf8'));
+          const byId=new Map(registry.machines.map(x=>[x.machineId,x]));
+          for(const id of expected) if(!byId.has(id)) throw new Error(`Missing target registry entry: ${id}`);
+          // Excluded machines may exist globally in the registry, but are not batch members.
+          for(const id of excluded) if(got.includes(id)) throw new Error(`Excluded machine leaked into batch: ${id}`);
+          console.log('PASS authoritative scope: 10 new targets / IDs 240-249 / excluded existing machines not in batch');
+          NODE
+      - name: Validate registry and ResearchData
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm run registry:validate
+          ids=(L_BURNING_EXPRESS_ZN L_PRISM_NANA_CC L_GINGA_EIYUU_DNT_GH L_HIHODEN_PA7 L_OKIDOKI_DUO_ENCORE_FR L_HOKUTO_TENSEI_2_MW L_TEKKEN_6_YD01H L_HANMA_BAKI_L5 L_GOBLIN_SLAYER_2_JZ L_GHOST_IN_THE_SHELL_ZS)
+          for id in "${ids[@]}"; do node tools/validate-research-data.mjs "research/$id/research-data.json"; done
+          node tools/discovery-completeness-gate.mjs "${ids[@]}"
+      - name: Commit restored scope
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git add -A
+          if git diff --cached --quiet; then echo 'No changes'; exit 0; fi
+          git commit -m 'fix: restore authoritative Next10 scope'
+          git pull --rebase origin batch/20260906-next10-gate0
+          git push origin HEAD:batch/20260906-next10-gate0
