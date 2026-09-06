@@ -92,6 +92,7 @@ jobs:
           npm run audit:ui-service-names
       - name: Write review report
         run: |
+          mkdir -p reports
           cat > reports/device-review-reselection-20260906.md <<'EOF'
           # 2026-09-06 real-device feedback reselection
 
@@ -107,7 +108,8 @@ jobs:
         run: |
           git config user.name github-actions[bot]
           git config user.email 41898282+github-actions[bot]@users.noreply.github.com
-          git add research machines reports tools/generate-batch-20260906-gate-d-ui.mjs
+          git add research machines tools/generate-batch-20260906-gate-d-ui.mjs
+          if [ -f reports/device-review-reselection-20260906.md ]; then git add -f reports/device-review-reselection-20260906.md; fi
           if git diff --cached --quiet; then echo 'No changes to commit'; exit 0; fi
           git commit -m 'data: apply 20260906 real-device reselection feedback'
           git pull --rebase origin fix/20260906-device-review-reselection
