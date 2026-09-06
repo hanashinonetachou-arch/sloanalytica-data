@@ -1,0 +1,155 @@
+name: Materialize 20260907 Gate B
+
+on:
+  push:
+    branches:
+      - batch/20260907-next10-gateb
+    paths:
+      - '.github/workflows/materialize-20260907-gate-b.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  materialize:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: batch/20260907-next10-gateb
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - run: npm ci
+      - name: Generate semantic SelectionData in prepared workspace
+        shell: bash
+        run: |
+          node --input-type=module <<'NODE'
+          import fs from 'node:fs';
+          import path from 'node:path';
+          const workspace='selection-batch/SELECTION_20260906232107';
+          const decisions={
+            L_FIRE_FORCE_2:{RF_BONUS_INITIAL:'INCLUDE_SUPPORT',RF_ENEN_LOOP_INITIAL:'INCLUDE_PRIMARY',RF_TRAP_SMALLV_CONVERT:'EXCLUDE',RF_TRAP_SMALLV_BONUS_AFTER_CONVERT:'EXCLUDE'},
+            L_UMINEKO_2_A1:{RF_BONUS_INITIAL:'INCLUDE_PRIMARY',RF_REG_INITIAL:'INCLUDE_FALLBACK',RF_REG_DIAG_BLUE7:'INCLUDE_SUPPORT',RF_ART_MISS:'INCLUDE_SUPPORT',RF_LV2_NAV_SAME_BIG:'INCLUDE_SUPPORT',RF_LV2_NAV_MIXED_BIG:'INCLUDE_SUPPORT',RF_LV2_NAV_OTHER:'INCLUDE_SUPPORT'},
+            L_KABANERI_UNATO_KESSEN_XX:{RF_BONUS_INITIAL:'INCLUDE_PRIMARY',RF_ST_INITIAL:'INCLUDE_FALLBACK',RF_LOWER_BELL:'INCLUDE_SUPPORT',RF_CYCLE3_BONUS:'INCLUDE_SUPPORT',RF_CYCLE4_BONUS:'INCLUDE_SUPPORT',RF_SHUNJO_3000PT:'EXCLUDE'},
+            L_JORMUNGAND_ND01G:{RF_CZ_INITIAL:'INCLUDE_PRIMARY',RF_AT_INITIAL:'INCLUDE_FALLBACK',RF_BONUS_END_SCREEN:'INCLUDE_SUPPORT'},
+            LB_TRIPLE_CROWN_SEVEN_FG:{RF_BB_INITIAL:'INCLUDE_PRIMARY',RF_RB_INITIAL:'INCLUDE_SUPPORT',RF_CHERRY:'INCLUDE_SUPPORT',RF_PLUM:'INCLUDE_SUPPORT'},
+            L_SHINUCHI_YOSHIMUNE_A1:{RF_AT_INITIAL:'INCLUDE_PRIMARY',RF_CZ_INITIAL:'INCLUDE_FALLBACK'},
+            L_KYOKOU_SUIRI_ST:{RF_CZ_INITIAL:'INCLUDE_PRIMARY',RF_BONUS_INITIAL:'INCLUDE_FALLBACK',RF_CZ_ONE_SHOT_SUCCESS:'INCLUDE_SUPPORT'},
+            L_AKUDAMA_DRIVE_TP:{RF_CZ_INITIAL:'INCLUDE_PRIMARY',RF_BONUS_INITIAL:'INCLUDE_FALLBACK',RF_AT_INITIAL:'INCLUDE_FALLBACK',RF_ANALYZE_0PT:'INCLUDE_SUPPORT',RF_EPISODE_UPGRADE:'INCLUDE_SUPPORT'},
+            L_MILLION_GOD_KISEKI_CX:{RF_GG_INITIAL:'INCLUDE_PRIMARY',RF_NON_GAIA_ZZONE:'INCLUDE_SUPPORT'},
+            L_GUNDAM_UNICORN_KAKUSEI_DRIVE_2JA:{RF_CZ_INITIAL:'INCLUDE_PRIMARY',RF_AT_INITIAL:'INCLUDE_FALLBACK'}
+          };
+          const suppress={
+            'L_UMINEKO_2_A1:RF_REG_INITIAL':['RF_BONUS_INITIAL'],
+            'L_KABANERI_UNATO_KESSEN_XX:RF_ST_INITIAL':['RF_BONUS_INITIAL'],
+            'L_JORMUNGAND_ND01G:RF_AT_INITIAL':['RF_CZ_INITIAL'],
+            'L_SHINUCHI_YOSHIMUNE_A1:RF_CZ_INITIAL':['RF_AT_INITIAL'],
+            'L_KYOKOU_SUIRI_ST:RF_BONUS_INITIAL':['RF_CZ_INITIAL'],
+            'L_AKUDAMA_DRIVE_TP:RF_BONUS_INITIAL':['RF_CZ_INITIAL'],
+            'L_AKUDAMA_DRIVE_TP:RF_AT_INITIAL':['RF_CZ_INITIAL','RF_BONUS_INITIAL'],
+            'L_GUNDAM_UNICORN_KAKUSEI_DRIVE_2JA:RF_AT_INITIAL':['RF_CZ_INITIAL']
+          };
+          const rejectReasons={
+            'L_FIRE_FORCE_2:RF_TRAP_SMALLV_CONVERT':'設定1と設定4以上の公開確率のみで設定2・3の個別尤度が欠け、全設定を同一基準で比較できないため推測計算には採用しない。',
+            'L_FIRE_FORCE_2:RF_TRAP_SMALLV_BONUS_AFTER_CONVERT':'設定2・3の個別確率が未公表で全設定尤度を構成できず、前段の十字目変換との条件依存も強いため推測計算には採用しない。',
+            'L_KABANERI_UNATO_KESSEN_XX:RF_SHUNJO_3000PT':'設定2〜5が同率で中間設定の判別情報をほぼ持たず、低頻度条件を加えても得られる設定識別情報が限定的なため採用しない。'
+          };
+          const featureId=rid=>'FEAT_'+rid.replace(/^RF_/,'');
+          const token=s=>String(s).replace(/[^A-Za-z0-9_]/g,'_').replace(/_+/g,'_').replace(/^_|_$/g,'').toUpperCase();
+          const includedReason=(rf,cat)=>{
+            if(cat==='INCLUDE_PRIMARY') return `全設定の公開確率と「${rf.denominatorDefinition}」という再現可能な分母が揃い、主要な設定差を直接評価できるため主Featureとして採用する。`;
+            if(cat==='INCLUDE_FALLBACK') return `公開確率は利用できるが主要Featureと経路・包含関係があり同時評価で情報を重複させるため、主要Featureが使えない場合のFallbackとして採用する。`;
+            return `全設定の公開確率と条件付き観測分母が明示され、主要Featureとは異なる確率情報を持つため補助Featureとして採用する。`;
+          };
+          for(const [machineId,map] of Object.entries(decisions)){
+            const research=JSON.parse(fs.readFileSync(`research/${machineId}/research-data.json`,'utf8'));
+            if(research.researchStage!=='GATE_A_PASS') throw new Error(`${machineId}: Gate A not PASS`);
+            if((research.features??[]).length!==Object.keys(map).length) throw new Error(`${machineId}: decision count mismatch`);
+            const inputs=[]; const features=[]; let order=10;
+            const denomByKey=new Map();
+            const addInput=(id,name,type,category,role,unit='回')=>{if(inputs.some(x=>x.id===id))return id;inputs.push({id,name,type,category,unit,displayOrder:order++,inferenceRole:role,defaultValue:''});return id;};
+            const getDenom=(rf,role)=>{
+              const shared=rf.denominatorDefinition==='通常ゲーム';
+              const key=shared?'NORMAL_GAMES':rf.researchFeatureId;
+              if(denomByKey.has(key)) return denomByKey.get(key);
+              const id=shared?'INP_NORMAL_GAMES':`INP_${token(rf.researchFeatureId.replace(/^RF_/,''))}_TRIALS`;
+              addInput(id,rf.denominatorDefinition,rf.denominatorDefinition.includes('ゲーム')?'integer':'counter',shared?'SHARED_DENOM_VALUE':`SEL_${rf.researchFeatureId}`,role,rf.denominatorDefinition.includes('ゲーム')?'G':'回');
+              denomByKey.set(key,id); return id;
+            };
+            for(const rf of research.features??[]){
+              const cat=map[rf.researchFeatureId]; if(!cat) throw new Error(`${machineId}: missing decision ${rf.researchFeatureId}`);
+              const sf={researchFeatureId:rf.researchFeatureId,featureId:featureId(rf.researchFeatureId),adoptionCategory:cat,weight:1,difficultyParticipation:'EXCLUDE',difficultyExclusionReason:'Observationで実戦時の露出率・試行量を確定する前にDifficultyへ推定値を持ち込まない。'};
+              if(cat==='EXCLUDE'){
+                sf.userFacingReason=rejectReasons[`${machineId}:${rf.researchFeatureId}`]??'公開された設定別確率だけでは独立した設定識別情報を安全に構成できないため、推測計算には採用しない。';
+                features.push(sf); continue;
+              }
+              sf.userReason=includedReason(rf,cat);
+              const sup=suppress[`${machineId}:${rf.researchFeatureId}`]; if(sup) sf.suppressedByFeatureIds=sup.map(featureId);
+              if(rf.candidateModel==='binomial'||rf.candidateModel==='poisson'){
+                const base=token(rf.researchFeatureId.replace(/^RF_/,''));
+                sf.numeratorInputId=addInput(`INP_${base}_COUNT`,rf.numeratorDefinition,'counter',`SEL_${rf.researchFeatureId}`,cat,'回');
+                sf.denominatorInputId=getDenom(rf,cat);
+              } else if(rf.candidateModel==='multinomial'){
+                let cats=[...(rf.categories??[])];
+                if(machineId==='L_JORMUNGAND_ND01G'&&rf.researchFeatureId==='RF_BONUS_END_SCREEN'){
+                  sf.categoryExcludeLabels=['HANDGUN_SHELL','OLD_KOKO_TEAM','KASPER','GOLDEN_SCARECROW'];
+                  sf.normalizeRoundedCategoryProbabilities=true;
+                  cats=cats.filter(c=>!sf.categoryExcludeLabels.includes(c));
+                }
+                const ids=cats.map(c=>addInput(`INP_${token(rf.researchFeatureId.replace(/^RF_/,''))}_${token(c)}`,`${rf.name} ${c}`,'counter',`SEL_${rf.researchFeatureId}`,cat,'回'));
+                sf.numeratorInputId=ids[0]; sf.categoryInputIds=ids.slice(1); sf.denominatorInputIds=ids; sf.inputTransform='sum_inputs_to_trials';
+              } else throw new Error(`${machineId}: unsupported model ${rf.candidateModel}`);
+              features.push(sf);
+            }
+            const evidence=[];
+            for(const ev of research.evidenceCandidates??[]){
+              const base=token(ev.researchEvidenceId.replace(/^RE_/,''));
+              const inputId=addInput(`INP_EVIDENCE_${base}`,ev.name,'counter','EVIDENCE','INCLUDE_SUPPORT','回');
+              evidence.push({researchEvidenceId:ev.researchEvidenceId,evidenceId:`EVI_${base}`,inputId,name:ev.name,displayName:ev.name,allowedSettings:[...(ev.allowedSettings??[])],deniedSettings:[...(ev.deniedSettings??[])],notes:'ResearchでHard Evidenceとして検証済み。入力回数は成立有無の記録に使い、同一Evidenceの複数回出現で証拠強度を乗算しない。'});
+            }
+            const selected=features.filter(x=>x.adoptionCategory!=='EXCLUDE');
+            const rejected=features.filter(x=>x.adoptionCategory==='EXCLUDE');
+            const selection={schemaVersion:'selection-data-v1',machineId,machineDataVersion:'0.1.0',inputs,features,evidence,evidenceReview:{policyVersion:1,exclusions:[]},selectionSummaryContract:{schemaVersion:'selection-summary-v1',evaluatedCount:features.length,selectedCount:selected.length,rejectedCount:rejected.length,selected:selected.map(x=>({name:(research.features??[]).find(r=>r.researchFeatureId===x.researchFeatureId)?.name??x.researchFeatureId,reason:x.userReason})),rejected:rejected.map(x=>({name:(research.features??[]).find(r=>r.researchFeatureId===x.researchFeatureId)?.name??x.researchFeatureId,reason:x.userFacingReason}))}};
+            fs.writeFileSync(path.join(workspace,machineId,'selection-data.json'),JSON.stringify(selection,null,2)+'\n');
+          }
+          NODE
+      - name: Strict validate and ingest exact 10
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm run selection:batch -- --ingest selection-batch/SELECTION_20260906232107 --report reports/batch-20260907-gate-b-ingest.json
+      - name: Exact scope and dependency assertions
+        shell: bash
+        run: |
+          node --input-type=module <<'NODE'
+          import fs from 'node:fs';
+          import { assessSelectionQuality } from './tools/selection-quality-gate.mjs';
+          import { validateSelectionEvidenceCoverage } from './tools/batch-completeness-gates.mjs';
+          import { validateSelectionData } from './tools/validate-selection-data.mjs';
+          const ids=['L_FIRE_FORCE_2','L_UMINEKO_2_A1','L_KABANERI_UNATO_KESSEN_XX','L_JORMUNGAND_ND01G','LB_TRIPLE_CROWN_SEVEN_FG','L_SHINUCHI_YOSHIMUNE_A1','L_KYOKOU_SUIRI_ST','L_AKUDAMA_DRIVE_TP','L_MILLION_GOD_KISEKI_CX','L_GUNDAM_UNICORN_KAKUSEI_DRIVE_2JA'];
+          let features=0,evidence=0,selected=0,rejected=0; const errors=[];
+          for(const id of ids){
+            const rp=`research/${id}/research-data.json`,sp=`research/${id}/selection-data.json`;
+            if(!fs.existsSync(sp)){errors.push(`${id}: selection missing`);continue;}
+            const r=JSON.parse(fs.readFileSync(rp)),s=JSON.parse(fs.readFileSync(sp));
+            const v=validateSelectionData(s,r); if(!v.ok)errors.push(...v.errors.map(x=>`${id}: ${x}`));
+            const q=assessSelectionQuality(r,s); if(q.status==='BLOCKED')errors.push(...q.blockers.map(x=>`${id}: ${x}`));
+            const e=validateSelectionEvidenceCoverage(s,r,{required:true}); if(!e.ok)errors.push(...e.errors.map(x=>`${id}: ${x}`));
+            features+=(s.features??[]).length;evidence+=(s.evidence??[]).length;selected+=(s.features??[]).filter(x=>x.adoptionCategory!=='EXCLUDE').length;rejected+=(s.features??[]).filter(x=>x.adoptionCategory==='EXCLUDE').length;
+          }
+          if(features!==38)errors.push(`feature total ${features} != 38`); if(evidence!==95)errors.push(`evidence total ${evidence} != 95`);
+          if(errors.length)throw new Error(errors.join('\n'));
+          fs.writeFileSync('reports/batch-20260907-gate-b-validation.json',JSON.stringify({status:'PASS',machines:10,features,selected,rejected,evidence,scope:ids},null,2)+'\n');
+          console.log(JSON.stringify({machines:10,features,selected,rejected,evidence},null,2));
+          NODE
+      - name: Commit canonical Gate B materialization
+        shell: bash
+        run: |
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git add research/*/selection-data.json selection-batch/SELECTION_20260906232107 reports/batch-20260907-gate-b-ingest.json reports/batch-20260907-gate-b-validation.json
+          git commit -m 'GateB: materialize 20260907 Next10 SelectionData'
+          git push origin HEAD:batch/20260907-next10-gateb
