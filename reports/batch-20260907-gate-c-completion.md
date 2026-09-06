@@ -18,11 +18,15 @@ All selected Features have a v2 Observation mapping. Remaining unresolved items 
 
 ## Confirmed no linked service
 
+User-provided real-machine knowledge confirms no linked play-history function for:
+
 - Lパチスロ 炎炎ノ消防隊2
 - Lパチスロ 機動戦士ガンダムユニコーン 覚醒DRIVE
 - L虚構推理
 - Lアクダマドライブ
 - LBトリプルクラウンセブン
+
+These five linked-service verification items are `NOT_REQUIRED`; they must not be re-opened merely because public web material lacks an explicit non-support statement.
 
 ## Selection reconsideration
 
