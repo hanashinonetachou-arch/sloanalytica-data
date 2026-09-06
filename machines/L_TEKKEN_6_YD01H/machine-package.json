@@ -30,7 +30,7 @@
       {
         "id": "INP_AT_INITIAL_COUNT",
         "name": "AT初当り 回数",
-        "category": "SEL_RF_AT_INITIAL",
+        "category": "SHARED_DENOM_VALUE",
         "type": "counter",
         "unit": "回",
         "displayOrder": 10,
@@ -40,19 +40,20 @@
       },
       {
         "id": "INP_AT_INITIAL_TRIALS",
-        "name": "AT初当り 試行数",
-        "category": "SEL_RF_AT_INITIAL",
+        "name": "通常ゲーム数",
+        "category": "SHARED_DENOM_VALUE",
         "type": "integer",
-        "unit": "回",
+        "unit": "G",
         "displayOrder": 11,
         "inferenceRole": "INCLUDE_PRIMARY",
         "defaultValue": "",
+        "description": "この項目の母数は「通常ゲーム数」です。",
         "minimum": 0
       },
       {
         "id": "INP_BONUS_INITIAL_COUNT",
         "name": "ボーナス初当り 回数",
-        "category": "SEL_RF_BONUS_INITIAL",
+        "category": "SHARED_DENOM_VALUE",
         "type": "counter",
         "unit": "回",
         "displayOrder": 15,
@@ -61,12 +62,35 @@
         "minimum": 0
       },
       {
-        "id": "INP_BONUS_INITIAL_TRIALS",
-        "name": "ボーナス初当り 試行数",
-        "category": "SEL_RF_BONUS_INITIAL",
+        "id": "INP_AT_RETURN_RED_UI_COUNT",
+        "name": "AT終了後の引き戻し（赤UI中） 回数",
+        "category": "SEL_RF_AT_RETURN_RED_UI",
+        "type": "counter",
+        "unit": "回",
+        "displayOrder": 21,
+        "inferenceRole": "INCLUDE_SUPPORT",
+        "defaultValue": "",
+        "minimum": 0
+      },
+      {
+        "id": "INP_AT_RETURN_RED_UI_TRIALS",
+        "name": "コンティニューゾーン失敗後に通常時へ戻ったAT終了回数",
+        "category": "SEL_RF_AT_RETURN_RED_UI",
         "type": "integer",
         "unit": "回",
-        "displayOrder": 16,
+        "displayOrder": 22,
+        "inferenceRole": "INCLUDE_SUPPORT",
+        "defaultValue": "",
+        "description": "この項目の母数は「コンティニューゾーン失敗後に通常時へ戻ったAT終了回数」です。",
+        "minimum": 0
+      },
+      {
+        "id": "INP_CZ_INITIAL_COUNT",
+        "name": "CZ合算（ロックオン＋一八チャレンジ） 回数",
+        "category": "SHARED_DENOM_VALUE",
+        "type": "counter",
+        "unit": "回",
+        "displayOrder": 27,
         "inferenceRole": "INCLUDE_FALLBACK",
         "defaultValue": "",
         "minimum": 0
@@ -119,7 +143,7 @@
         "suppressedByFeatureIds": [
           "FEAT_AT_INITIAL"
         ],
-        "denominatorInputId": "INP_BONUS_INITIAL_TRIALS",
+        "denominatorInputId": "INP_AT_INITIAL_TRIALS",
         "numeratorInputId": "INP_BONUS_INITIAL_COUNT",
         "displayFormat": "ratio_1_over_n",
         "probabilities": {
@@ -132,6 +156,67 @@
         },
         "sourceEvidenceRefs": [
           "SRC_1GEKI_SETTING"
+        ]
+      },
+      {
+        "featureId": "FEAT_AT_RETURN_RED_UI",
+        "name": "AT終了後の引き戻し（赤UI中）",
+        "adoptionCategory": "INCLUDE_SUPPORT",
+        "calculationRole": "PROBABILITY",
+        "probabilityEngineUsage": true,
+        "modelType": "binomial",
+        "minimumSample": 1,
+        "sampleRecommendation": 1,
+        "reliabilityProfile": {
+          "weight": 1
+        },
+        "denominatorInputId": "INP_AT_RETURN_RED_UI_TRIALS",
+        "numeratorInputId": "INP_AT_RETURN_RED_UI_COUNT",
+        "displayFormat": "ratio_1_over_n",
+        "probabilities": {
+          "SET_1": 0.102,
+          "SET_2": 0.109,
+          "SET_3": 0.125,
+          "SET_4": 0.141,
+          "SET_5": 0.164,
+          "SET_6": 0.172
+        },
+        "sourceEvidenceRefs": [
+          "SRC_1GEKI_SETTING",
+          "SRC_NANA_SETTING"
+        ]
+      },
+      {
+        "featureId": "FEAT_CZ_INITIAL",
+        "name": "CZ合算（ロックオン＋一八チャレンジ）",
+        "adoptionCategory": "INCLUDE_FALLBACK",
+        "calculationRole": "PROBABILITY",
+        "probabilityEngineUsage": true,
+        "modelType": "binomial",
+        "minimumSample": 1,
+        "sampleRecommendation": 1,
+        "reliabilityProfile": {
+          "weight": 1
+        },
+        "suppressedByFeatureIds": [
+          "FEAT_AT_INITIAL",
+          "FEAT_BONUS_INITIAL"
+        ],
+        "denominatorInputId": "INP_AT_INITIAL_TRIALS",
+        "numeratorInputId": "INP_CZ_INITIAL_COUNT",
+        "displayFormat": "ratio_1_over_n",
+        "probabilities": {
+          "SET_1": 0.002046663937781416,
+          "SET_2": 0.0020605810838656502,
+          "SET_3": 0.0021253985122210413,
+          "SET_4": 0.0021654395842356,
+          "SET_5": 0.002183406113537118,
+          "SET_6": 0.002208480565371025
+        },
+        "sourceEvidenceRefs": [
+          "SRC_1GEKI_SETTING",
+          "SRC_NANA_SETTING",
+          "SRC_SLOPLA_OFFICIAL"
         ]
       }
     ]
@@ -174,7 +259,7 @@
     "sections": [
       {
         "id": "UI_DESIGN_1",
-        "title": "AT初当り",
+        "title": "通常ゲーム数を共通母数にする項目",
         "displayOrder": 1,
         "description": "自己実戦中、通常ゲーム数の成立時に更新",
         "collapsible": false,
@@ -200,7 +285,7 @@
           {
             "type": "input",
             "inputId": "INP_AT_INITIAL_TRIALS",
-            "label": "AT初当り 試行数",
+            "label": "通常ゲーム数",
             "widget": "number",
             "gridSpan": 12,
             "config": {
@@ -211,17 +296,7 @@
               "emptyMeansUnobserved": true,
               "observedZeroAllowed": true
             }
-          }
-        ]
-      },
-      {
-        "id": "UI_DESIGN_2",
-        "title": "ボーナス初当り",
-        "displayOrder": 2,
-        "description": "自己実戦中、通常ゲーム数の成立時に更新",
-        "collapsible": false,
-        "defaultExpanded": true,
-        "items": [
+          },
           {
             "type": "input",
             "inputId": "INP_BONUS_INITIAL_COUNT",
@@ -241,8 +316,52 @@
           },
           {
             "type": "input",
-            "inputId": "INP_BONUS_INITIAL_TRIALS",
-            "label": "ボーナス初当り 試行数",
+            "inputId": "INP_CZ_INITIAL_COUNT",
+            "label": "CZ合算（ロックオン＋一八チャレンジ） 回数",
+            "widget": "counter",
+            "gridSpan": 12,
+            "config": {
+              "directInput": false,
+              "compact": true,
+              "quickAdd": [
+                1
+              ],
+              "step": 1,
+              "emptyMeansUnobserved": true,
+              "observedZeroAllowed": true
+            }
+          }
+        ]
+      },
+      {
+        "id": "UI_DESIGN_2",
+        "title": "AT終了後の引き戻し（赤UI中）",
+        "displayOrder": 2,
+        "description": "自己実戦中、コンティニューゾーン失敗後に通常時へ戻ったAT終了回数の成立時に更新",
+        "collapsible": false,
+        "defaultExpanded": true,
+        "items": [
+          {
+            "type": "input",
+            "inputId": "INP_AT_RETURN_RED_UI_COUNT",
+            "label": "AT終了後の引き戻し（赤UI中） 回数",
+            "widget": "counter",
+            "gridSpan": 6,
+            "config": {
+              "directInput": false,
+              "compact": true,
+              "quickAdd": [
+                1
+              ],
+              "step": 1,
+              "emptyMeansUnobserved": true,
+              "observedZeroAllowed": true
+            }
+          },
+          {
+            "type": "input",
+            "inputId": "INP_AT_RETURN_RED_UI_TRIALS",
+            "label": "コンティニューゾーン失敗後に通常時へ戻ったAT終了回数",
             "widget": "number",
             "gridSpan": 12,
             "config": {
@@ -260,9 +379,9 @@
   },
   "selectionSummary": {
     "schemaVersion": "selection-summary-v1",
-    "evaluatedCount": 2,
-    "selectedCount": 2,
-    "rejectedCount": 0,
+    "evaluatedCount": 8,
+    "selectedCount": 4,
+    "rejectedCount": 4,
     "selected": [
       {
         "featureId": "FEAT_AT_INITIAL",
@@ -281,9 +400,64 @@
           "value": 47680,
           "unit": "通常ゲーム"
         }
+      },
+      {
+        "featureId": "FEAT_AT_RETURN_RED_UI",
+        "name": "AT終了後の引き戻し（赤UI中）",
+        "reason": "AT終了後という通常時初当りとは別の条件付き段階で、赤UI中の引き戻し判定機会を母数にできるため補助Featureとして採用する。コンティニューゾーン内の即復帰は含めない。",
+        "requiredTrials": {
+          "value": 174,
+          "unit": "AT終了後の引き戻し判定機会"
+        }
+      },
+      {
+        "featureId": "FEAT_CZ_INITIAL",
+        "name": "CZ合算（ロックオン＋一八チャレンジ）",
+        "reason": "CZ合算は設定別数値と観測値が取得できるがAT/ボーナスの上流経路で因果重複するため、AT初当り・ボーナス初当りが利用できない場合だけ使うFallbackとして採用する。",
+        "requiredTrials": {
+          "value": 594127,
+          "unit": "通常ゲーム"
+        }
       }
     ],
-    "rejected": []
+    "rejected": [
+      {
+        "featureId": "FEAT_AT_DIRECT",
+        "name": "通常時AT直撃",
+        "reason": "AT直撃には大きな設定差があるが、現在採用しているAT初当りの内数。同じ通常ゲーム母数でAT初当りと直撃を独立binomialとして同時評価すると直撃ATを二重計上するため、現行の因数分解契約では不採用。",
+        "requiredTrials": {
+          "value": 29870,
+          "unit": "通常ゲーム"
+        }
+      },
+      {
+        "featureId": "FEAT_BONUS_DIRECT_WEAK_GROUP",
+        "name": "弱チェリー・スイカ・チャンス目からのボーナス直撃",
+        "reason": "小役別の直撃当選率には設定差があるが、ボーナス初当りの内数であり、既存ボーナス初当りと独立尤度として同時利用すると同じボーナスを二重評価するため現時点では不採用。",
+        "requiredTrials": {
+          "value": 454,
+          "unit": "対象弱レア役成立"
+        }
+      },
+      {
+        "featureId": "FEAT_BONUS_DIRECT_STRONG_CHERRY",
+        "name": "強チェリーからのボーナス直撃",
+        "reason": "強チェリーからのボーナス直撃には設定差があるが、ボーナス初当りの内数であり、既存ボーナス初当りと独立尤度として同時利用すると同じボーナスを二重評価するため現時点では不採用。",
+        "requiredTrials": {
+          "value": 311,
+          "unit": "強チェリー成立"
+        }
+      },
+      {
+        "featureId": "FEAT_BONUS_DIRECT_TOTAL",
+        "name": "ボーナス直撃合算",
+        "reason": "ボーナス直撃合算は小役別直撃の派生合算で、さらにボーナス初当りにも内包される。同時採用すると同一当選を重複評価するため不採用。",
+        "requiredTrials": {
+          "value": 16649,
+          "unit": "通常ゲーム"
+        }
+      }
+    ]
   },
   "reliability": {},
   "metadata": {

@@ -6,7 +6,7 @@
     {
       "id": "INP_AT_INITIAL_COUNT",
       "name": "AT初当り 回数",
-      "category": "SEL_RF_AT_INITIAL",
+      "category": "SHARED_DENOM_VALUE",
       "type": "counter",
       "unit": "回",
       "displayOrder": 10,
@@ -15,18 +15,19 @@
     },
     {
       "id": "INP_AT_INITIAL_TRIALS",
-      "name": "AT初当り 試行数",
-      "category": "SEL_RF_AT_INITIAL",
+      "name": "通常ゲーム数",
+      "category": "SHARED_DENOM_VALUE",
       "type": "integer",
-      "unit": "回",
+      "unit": "G",
       "displayOrder": 11,
       "inferenceRole": "INCLUDE_PRIMARY",
-      "defaultValue": ""
+      "defaultValue": "",
+      "description": "この項目の母数は「通常ゲーム数」です。"
     },
     {
       "id": "INP_BONUS_INITIAL_COUNT",
       "name": "ボーナス初当り 回数",
-      "category": "SEL_RF_BONUS_INITIAL",
+      "category": "SHARED_DENOM_VALUE",
       "type": "counter",
       "unit": "回",
       "displayOrder": 15,
@@ -34,12 +35,33 @@
       "defaultValue": ""
     },
     {
-      "id": "INP_BONUS_INITIAL_TRIALS",
-      "name": "ボーナス初当り 試行数",
-      "category": "SEL_RF_BONUS_INITIAL",
+      "id": "INP_AT_RETURN_RED_UI_COUNT",
+      "name": "AT終了後の引き戻し（赤UI中） 回数",
+      "category": "SEL_RF_AT_RETURN_RED_UI",
+      "type": "counter",
+      "unit": "回",
+      "displayOrder": 21,
+      "inferenceRole": "INCLUDE_SUPPORT",
+      "defaultValue": ""
+    },
+    {
+      "id": "INP_AT_RETURN_RED_UI_TRIALS",
+      "name": "コンティニューゾーン失敗後に通常時へ戻ったAT終了回数",
+      "category": "SEL_RF_AT_RETURN_RED_UI",
       "type": "integer",
       "unit": "回",
-      "displayOrder": 16,
+      "displayOrder": 22,
+      "inferenceRole": "INCLUDE_SUPPORT",
+      "defaultValue": "",
+      "description": "この項目の母数は「コンティニューゾーン失敗後に通常時へ戻ったAT終了回数」です。"
+    },
+    {
+      "id": "INP_CZ_INITIAL_COUNT",
+      "name": "CZ合算（ロックオン＋一八チャレンジ） 回数",
+      "category": "SHARED_DENOM_VALUE",
+      "type": "counter",
+      "unit": "回",
+      "displayOrder": 27,
       "inferenceRole": "INCLUDE_FALLBACK",
       "defaultValue": ""
     }
@@ -62,12 +84,74 @@
       "adoptionCategory": "INCLUDE_FALLBACK",
       "weight": 1,
       "numeratorInputId": "INP_BONUS_INITIAL_COUNT",
-      "denominatorInputId": "INP_BONUS_INITIAL_TRIALS",
+      "denominatorInputId": "INP_AT_INITIAL_TRIALS",
       "userReason": "公開値は利用可能だが主要Featureとの経路重複または同一事象の包含があるため、二重評価を避け主Featureが使えない場合のFallbackとしてのみ採用する。",
       "difficultyParticipation": "EXCLUDE",
       "difficultyExclusionReason": "Observationで実戦時の試行量・露出率を確定する前にDifficultyへ推定値を持ち込まない。",
       "suppressedByFeatureIds": [
         "FEAT_AT_INITIAL"
+      ]
+    },
+    {
+      "researchFeatureId": "RF_AT_RETURN_RED_UI",
+      "featureId": "FEAT_AT_RETURN_RED_UI",
+      "adoptionCategory": "INCLUDE_SUPPORT",
+      "weight": 1,
+      "numeratorInputId": "INP_AT_RETURN_RED_UI_COUNT",
+      "denominatorInputId": "INP_AT_RETURN_RED_UI_TRIALS",
+      "userReason": "AT終了後という通常時初当りとは別の条件付き段階で、赤UI中の引き戻し判定機会を母数にできるため補助Featureとして採用する。コンティニューゾーン内の即復帰は含めない。",
+      "difficultyParticipation": "EXCLUDE",
+      "difficultyExclusionReason": "今回の実機フィードバック再SelectionではDifficulty再較正前のため推測Featureのみ更新する。"
+    },
+    {
+      "researchFeatureId": "RF_AT_DIRECT",
+      "featureId": "FEAT_AT_DIRECT",
+      "adoptionCategory": "EXCLUDE",
+      "weight": 1,
+      "userFacingReason": "AT直撃には大きな設定差があるが、現在採用しているAT初当りの内数。同じ通常ゲーム母数でAT初当りと直撃を独立binomialとして同時評価すると直撃ATを二重計上するため、現行の因数分解契約では不採用。",
+      "rejectionReason": "AT直撃には大きな設定差があるが、現在採用しているAT初当りの内数。同じ通常ゲーム母数でAT初当りと直撃を独立binomialとして同時評価すると直撃ATを二重計上するため、現行の因数分解契約では不採用。",
+      "difficultyParticipation": "EXCLUDE"
+    },
+    {
+      "researchFeatureId": "RF_BONUS_DIRECT_WEAK_GROUP",
+      "featureId": "FEAT_BONUS_DIRECT_WEAK_GROUP",
+      "adoptionCategory": "EXCLUDE",
+      "weight": 1,
+      "userFacingReason": "小役別の直撃当選率には設定差があるが、ボーナス初当りの内数であり、既存ボーナス初当りと独立尤度として同時利用すると同じボーナスを二重評価するため現時点では不採用。",
+      "rejectionReason": "小役別の直撃当選率には設定差があるが、ボーナス初当りの内数であり、既存ボーナス初当りと独立尤度として同時利用すると同じボーナスを二重評価するため現時点では不採用。",
+      "difficultyParticipation": "EXCLUDE"
+    },
+    {
+      "researchFeatureId": "RF_BONUS_DIRECT_STRONG_CHERRY",
+      "featureId": "FEAT_BONUS_DIRECT_STRONG_CHERRY",
+      "adoptionCategory": "EXCLUDE",
+      "weight": 1,
+      "userFacingReason": "強チェリーからのボーナス直撃には設定差があるが、ボーナス初当りの内数であり、既存ボーナス初当りと独立尤度として同時利用すると同じボーナスを二重評価するため現時点では不採用。",
+      "rejectionReason": "強チェリーからのボーナス直撃には設定差があるが、ボーナス初当りの内数であり、既存ボーナス初当りと独立尤度として同時利用すると同じボーナスを二重評価するため現時点では不採用。",
+      "difficultyParticipation": "EXCLUDE"
+    },
+    {
+      "researchFeatureId": "RF_BONUS_DIRECT_TOTAL",
+      "featureId": "FEAT_BONUS_DIRECT_TOTAL",
+      "adoptionCategory": "EXCLUDE",
+      "weight": 1,
+      "userFacingReason": "ボーナス直撃合算は小役別直撃の派生合算で、さらにボーナス初当りにも内包される。同時採用すると同一当選を重複評価するため不採用。",
+      "rejectionReason": "ボーナス直撃合算は小役別直撃の派生合算で、さらにボーナス初当りにも内包される。同時採用すると同一当選を重複評価するため不採用。",
+      "difficultyParticipation": "EXCLUDE"
+    },
+    {
+      "researchFeatureId": "RF_CZ_INITIAL",
+      "featureId": "FEAT_CZ_INITIAL",
+      "adoptionCategory": "INCLUDE_FALLBACK",
+      "weight": 1,
+      "numeratorInputId": "INP_CZ_INITIAL_COUNT",
+      "denominatorInputId": "INP_AT_INITIAL_TRIALS",
+      "userReason": "CZ合算は設定別数値と観測値が取得できるがAT/ボーナスの上流経路で因果重複するため、AT初当り・ボーナス初当りが利用できない場合だけ使うFallbackとして採用する。",
+      "difficultyParticipation": "EXCLUDE",
+      "difficultyExclusionReason": "今回の実機フィードバック再SelectionではDifficulty再較正前のため推測Featureのみ更新する。",
+      "suppressedByFeatureIds": [
+        "FEAT_AT_INITIAL",
+        "FEAT_BONUS_INITIAL"
       ]
     }
   ],
@@ -98,6 +182,9 @@
   },
   "uiCategoryLabels": {
     "SEL_RF_AT_INITIAL": "AT初当り",
-    "SEL_RF_BONUS_INITIAL": "ボーナス初当り"
+    "SEL_RF_BONUS_INITIAL": "ボーナス初当り",
+    "SEL_RF_AT_RETURN_RED_UI": "AT終了後の引き戻し（赤UI中）",
+    "SEL_RF_CZ_INITIAL": "CZ合算（ロックオン＋一八チャレンジ）",
+    "SHARED_DENOM_VALUE": "通常ゲーム数を共通母数にする項目"
   }
 }
