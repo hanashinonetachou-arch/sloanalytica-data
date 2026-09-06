@@ -1,0 +1,104 @@
+name: Device Review Reselection 20260906
+
+on:
+  push:
+    branches: [fix/20260906-device-review-reselection]
+    paths:
+      - tools/apply-device-review-reselection-20260906.mjs
+      - .github/workflows/device-review-reselection-20260906.yml
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  reselection-audit:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: fix/20260906-device-review-reselection
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Install dependencies
+        run: npm ci
+      - name: Apply post-device reselection
+        run: node tools/apply-device-review-reselection-20260906.mjs
+      - name: Validate SelectionData 10/10
+        shell: bash
+        run: |
+          set -euo pipefail
+          ids=(L_BURNING_EXPRESS_ZN L_PRISM_NANA_CC L_GINGA_EIYUU_DNT_GH L_HIHODEN_PA7 L_OKIDOKI_DUO_ENCORE_FR L_HOKUTO_TENSEI_2_MW L_TEKKEN_6_YD01H L_HANMA_BAKI_L5 L_GOBLIN_SLAYER_2_JZ L_GHOST_IN_THE_SHELL_ZS)
+          for id in "${ids[@]}"; do node tools/validate-selection-data.mjs "research/$id/selection-data.json" "research/$id/research-data.json"; done
+      - name: Selection Quality strict
+        run: node tools/audit-selection-quality.mjs L_BURNING_EXPRESS_ZN L_PRISM_NANA_CC L_GINGA_EIYUU_DNT_GH L_HIHODEN_PA7 L_OKIDOKI_DUO_ENCORE_FR L_HOKUTO_TENSEI_2_MW L_TEKKEN_6_YD01H L_HANMA_BAKI_L5 L_GOBLIN_SLAYER_2_JZ L_GHOST_IN_THE_SHELL_ZS --strict
+      - name: Regenerate Observation v2
+        run: node tools/generate-batch-20260906-observation-v2.mjs
+      - name: Validate Observation and linkage
+        shell: bash
+        run: |
+          set -euo pipefail
+          ids=(L_BURNING_EXPRESS_ZN L_PRISM_NANA_CC L_GINGA_EIYUU_DNT_GH L_HIHODEN_PA7 L_OKIDOKI_DUO_ENCORE_FR L_HOKUTO_TENSEI_2_MW L_TEKKEN_6_YD01H L_HANMA_BAKI_L5 L_GOBLIN_SLAYER_2_JZ L_GHOST_IN_THE_SHELL_ZS)
+          for id in "${ids[@]}"; do node tools/validate-machine-observation-data.mjs "research/$id/machine-observation-data.json"; done
+          node tools/audit-observation-selection-linkage.mjs --strict-v2 "${ids[@]}"
+      - name: Regenerate UI Design
+        run: node tools/generate-batch-20260906-gate-d-ui.mjs
+      - name: Apply device-verified UI notes
+        run: |
+          node --input-type=module <<'EOF'
+          import fs from 'node:fs';
+          const ids=['L_BURNING_EXPRESS_ZN','L_PRISM_NANA_CC','L_GINGA_EIYUU_DNT_GH','L_HIHODEN_PA7','L_OKIDOKI_DUO_ENCORE_FR','L_HOKUTO_TENSEI_2_MW','L_TEKKEN_6_YD01H','L_HANMA_BAKI_L5','L_GOBLIN_SLAYER_2_JZ','L_GHOST_IN_THE_SHELL_ZS'];
+          for(const id of ids){
+            const sp=`research/${id}/selection-data.json`,up=`research/${id}/ui-design-data.json`;const s=JSON.parse(fs.readFileSync(sp,'utf8')),u=JSON.parse(fs.readFileSync(up,'utf8'));const inBy=new Map((s.inputs??[]).map(x=>[x.id,x]));
+            for(const [iid,c] of Object.entries(u.inputContracts??{})){const si=inBy.get(iid);if(si?.description)c.description=si.description;}
+            if(id==='L_HIHODEN_PA7')for(const sec of Object.values(u.sections??{})){if((sec.inputIds??[]).includes('INP_BONUS_MISS_TRIALS'))sec.description='ボーナス中ハズレの母数はボーナス中ゲーム数です。ボーナス中ゲーム数はダイトモで確認できます。';}
+            if(id==='L_GHOST_IN_THE_SHELL_ZS')for(const sec of Object.values(u.sections??{})){if((sec.inputIds??[]).some(x=>x.startsWith('INP_AT_RETURN_STOCK_')))sec.description='AT当選時の引き戻しストック振り分けを「1個・2個・なし」で入力します。内部コード名ではなく実戦で確認する内容を表示しています。';}
+            fs.writeFileSync(up,JSON.stringify(u,null,2)+'\n');
+          }
+          EOF
+      - name: Validate UI and four-layer linkage
+        shell: bash
+        run: |
+          ids=(L_BURNING_EXPRESS_ZN L_PRISM_NANA_CC L_GINGA_EIYUU_DNT_GH L_HIHODEN_PA7 L_OKIDOKI_DUO_ENCORE_FR L_HOKUTO_TENSEI_2_MW L_TEKKEN_6_YD01H L_HANMA_BAKI_L5 L_GOBLIN_SLAYER_2_JZ L_GHOST_IN_THE_SHELL_ZS)
+          npm run ui-design:validate
+          npm run ui-design:linkage:audit -- . "${ids[@]}"
+          npm run ui-design:observation:audit -- "${ids[@]}" --strict-v2
+          npm run pipeline:four-layer:gate -- "${ids[@]}"
+      - name: Build and materialize MachineData
+        shell: bash
+        run: |
+          ids=(L_BURNING_EXPRESS_ZN L_PRISM_NANA_CC L_GINGA_EIYUU_DNT_GH L_HIHODEN_PA7 L_OKIDOKI_DUO_ENCORE_FR L_HOKUTO_TENSEI_2_MW L_TEKKEN_6_YD01H L_HANMA_BAKI_L5 L_GOBLIN_SLAYER_2_JZ L_GHOST_IN_THE_SHELL_ZS)
+          npm run machine:batch -- "${ids[@]}"
+          node tools/materialize-ui-design.mjs --apply "${ids[@]}"
+          node tools/materialize-ui-design.mjs --require-unchanged "${ids[@]}"
+      - name: Repository quality gates
+        run: |
+          npm run ui-design:test
+          npm run difficulty:exposure-audit
+          npm test
+          npm run audit
+          npm run audit:ui-service-names
+      - name: Write review report
+        run: |
+          cat > reports/device-review-reselection-20260906.md <<'EOF'
+          # 2026-09-06 real-device feedback reselection
+
+          - Burning Express: reel-lock aggregate decomposed; near-invariant reach-me lock rejected; non-reach lock retained only as suppressed fallback.
+          - Prism Nana: non-Evidence ending screens, Special Bonus music, stage-specific Puri-Puri touch voices, and non-Evidence conversations added as conditional multinomial support features.
+          - Hihoden: replay-triggered mystery High Probability researched but rejected because exact non-Densetsu eligible-game denominator is not observable; rejection reason retained. Daitomo bonus-game-count guidance added.
+          - Tekken 6: red-UI return rate adopted as conditional support; AT direct and bonus-direct breakdown/aggregate rejected for nested double-count risk; CZ combined added as suppressed fallback.
+          - Global UI: abstract trial-count labels replaced by exact denominator names; identical denominators are shared/grouped.
+          - Ghost in the Shell: STOCK_1/STOCK_2/NONE labels replaced with user-facing Japanese labels.
+          - Public main: untouched.
+          EOF
+      - name: Commit generated remediation
+        run: |
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git add research machines reports tools/generate-batch-20260906-gate-d-ui.mjs
+          if git diff --cached --quiet; then echo 'No changes to commit'; exit 0; fi
+          git commit -m 'data: apply 20260906 real-device reselection feedback'
+          git pull --rebase origin fix/20260906-device-review-reselection
+          git push origin HEAD:fix/20260906-device-review-reselection
