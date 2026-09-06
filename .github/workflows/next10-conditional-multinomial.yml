@@ -1,0 +1,38 @@
+name: Next10 Conditional Multinomial Fix
+
+on:
+  push:
+    branches:
+      - fix/next10-realdevice-selection-review-20260906
+    paths:
+      - .github/workflows/next10-conditional-multinomial.yml
+
+permissions:
+  contents: write
+
+jobs:
+  fix:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Apply conditional factorization
+        run: node tools/fix-next10-conditional-multinomial.mjs
+      - name: Validate affected canonical data
+        run: |
+          npm run research:validate -- research/L_AZURLANE_THE_ANIMATION_KN/research-data.json
+          npm run selection:validate -- research/L_AZURLANE_THE_ANIMATION_KN/selection-data.json
+          npm run research:validate -- research/L_TOARU_KAGAKU_NO_RAILGUN_2_FV/research-data.json
+          npm run selection:validate -- research/L_TOARU_KAGAKU_NO_RAILGUN_2_FV/selection-data.json
+      - name: Commit conditional contracts
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add research/L_AZURLANE_THE_ANIMATION_KN/research-data.json research/L_AZURLANE_THE_ANIMATION_KN/selection-data.json research/L_TOARU_KAGAKU_NO_RAILGUN_2_FV/research-data.json research/L_TOARU_KAGAKU_NO_RAILGUN_2_FV/selection-data.json
+          if git diff --cached --quiet; then exit 0; fi
+          git commit -m "review: condition non-Evidence multinomial distributions"
+          git push
