@@ -1,0 +1,64 @@
+name: Device Feedback Catalog Sync 20260906
+on:
+  push:
+    branches: [fix/device-feedback-catalog-sync-20260906]
+permissions:
+  contents: write
+jobs:
+  sync:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: fix/device-feedback-catalog-sync-20260906
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Sync three catalog entries
+        run: |
+          node <<'NODE'
+          const fs=require('fs');
+          const crypto=require('crypto');
+          const ids=['L_BURNING_EXPRESS_ZN','L_PRISM_NANA_CC','L_TEKKEN_6_YD01H'];
+          const catalog=JSON.parse(fs.readFileSync('catalog.json','utf8'));
+          for(const id of ids){
+            const path=`machines/${id}/machine-package.json`;
+            const buf=fs.readFileSync(path);
+            const pkg=JSON.parse(buf.toString('utf8'));
+            const entry=catalog.machines.find(x=>x.machineId===id);
+            if(!entry) throw new Error(`catalog entry missing: ${id}`);
+            entry.machineDataVersion=pkg.machine.machineDataVersion;
+            entry.sha256=crypto.createHash('sha256').update(buf).digest('hex');
+            entry.packageSizeBytes=buf.length;
+          }
+          catalog.generatedAt=new Date().toISOString();
+          fs.writeFileSync('catalog.json',JSON.stringify(catalog,null,2)+'\n');
+          NODE
+      - name: Validate catalog/package integrity
+        run: |
+          node <<'NODE'
+          const fs=require('fs');
+          const crypto=require('crypto');
+          const ids=['L_BURNING_EXPRESS_ZN','L_PRISM_NANA_CC','L_TEKKEN_6_YD01H'];
+          const catalog=JSON.parse(fs.readFileSync('catalog.json','utf8'));
+          for(const id of ids){
+            const path=`machines/${id}/machine-package.json`;
+            const buf=fs.readFileSync(path);
+            const pkg=JSON.parse(buf.toString('utf8'));
+            const entry=catalog.machines.find(x=>x.machineId===id);
+            const sha=crypto.createHash('sha256').update(buf).digest('hex');
+            if(entry.machineDataVersion!==pkg.machine.machineDataVersion) throw new Error(`${id}: version mismatch`);
+            if(entry.sha256!==sha) throw new Error(`${id}: sha mismatch`);
+            if(entry.packageSizeBytes!==buf.length) throw new Error(`${id}: size mismatch`);
+            if(entry.machineDataVersion!=='0.1.1') throw new Error(`${id}: expected 0.1.1`);
+            console.log(`PASS ${id} version=${entry.machineDataVersion} size=${entry.packageSizeBytes} sha=${entry.sha256}`);
+          }
+          NODE
+      - name: Commit catalog sync
+        run: |
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git add catalog.json
+          git commit -m 'fix: sync device feedback catalog metadata' || exit 0
+          git push origin HEAD:fix/device-feedback-catalog-sync-20260906
