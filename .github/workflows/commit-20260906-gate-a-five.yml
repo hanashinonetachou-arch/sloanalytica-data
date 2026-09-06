@@ -1,0 +1,53 @@
+name: Commit 20260906 Gate A Five
+
+on:
+  push:
+    branches:
+      - batch/20260906-next10-gate0
+    paths:
+      - '.github/workflows/commit-20260906-gate-a-five.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  commit-five:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: batch/20260906-next10-gate0
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: npm ci
+      - name: Reapply validated five-machine transformation
+        shell: bash
+        run: |
+          awk '/node --input-type=module <<'"'"'NODE'"'"'/{flag=1;next} flag && /^[[:space:]]*NODE[[:space:]]*$/{exit} flag{sub(/^[[:space:]]{10}/,"");print}' .github/workflows/resolve-20260906-gate-a-remaining-five.yml > /tmp/reapply-five.mjs
+          node /tmp/reapply-five.mjs
+      - name: Validate five
+        shell: bash
+        run: |
+          set -euo pipefail
+          ids=(L_GINGA_EIYUU_DNT_GH L_HIHODEN_PA7 L_OKIDOKI_DUO_ENCORE_FR L_HOKUTO_TENSEI_2_MW L_HANMA_BAKI_L5)
+          for id in "${ids[@]}"; do node tools/validate-research-data.mjs "research/$id/research-data.json"; done
+          node tools/discovery-completeness-gate.mjs "${ids[@]}"
+          node --input-type=module <<'NODE'
+          import fs from 'node:fs';
+          const ids=['L_GINGA_EIYUU_DNT_GH','L_HIHODEN_PA7','L_OKIDOKI_DUO_ENCORE_FR','L_HOKUTO_TENSEI_2_MW','L_HANMA_BAKI_L5'];
+          const u=[];for(const id of ids){const d=JSON.parse(fs.readFileSync(`research/${id}/research-data.json`));for(const x of d.discoveryInventory??[])if(x.transferStatus==='UNRESOLVED')u.push(`${id}:${x.discoveryCandidateId}`)}
+          if(u.length)throw new Error(`unresolved in five: ${u.join(',')}`);
+          console.log('PASS: five machines unresolved=0');
+          NODE
+      - name: Commit five
+        shell: bash
+        run: |
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git add research/L_GINGA_EIYUU_DNT_GH/research-data.json research/L_HIHODEN_PA7/research-data.json research/L_OKIDOKI_DUO_ENCORE_FR/research-data.json research/L_HOKUTO_TENSEI_2_MW/research-data.json research/L_HANMA_BAKI_L5/research-data.json
+          git commit -m 'research: commit remaining five Gate A dispositions'
+          git pull --rebase origin batch/20260906-next10-gate0
+          git push origin HEAD:batch/20260906-next10-gate0
