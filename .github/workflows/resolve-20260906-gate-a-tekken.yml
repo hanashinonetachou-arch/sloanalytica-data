@@ -1,0 +1,69 @@
+name: Resolve 20260906 Gate A Tekken6
+
+on:
+  push:
+    branches:
+      - batch/20260906-next10-gate0
+    paths:
+      - '.github/workflows/resolve-20260906-gate-a-tekken.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  resolve:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: batch/20260906-next10-gate0
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: npm ci
+      - name: Resolve Tekken6 Discovery without weakening trophy conflict
+        shell: bash
+        run: |
+          node --input-type=module <<'NODE'
+          import fs from 'node:fs';
+          const file='research/L_TEKKEN_6_YD01H/research-data.json';
+          const d=JSON.parse(fs.readFileSync(file,'utf8'));
+          const note=n=>{d.researchNotes=d.researchNotes??[];if(!d.researchNotes.includes(n))d.researchNotes.push(n)};
+          const set=(id,patch)=>{const x=d.discoveryInventory.find(x=>x.discoveryCandidateId===id);if(!x)throw new Error(`missing ${id}`);Object.assign(x,patch)};
+          note('CZはスロプラNEXTで種類別/成功回数を取得できるが、今回Gate Aで全設定の独立したCZ初当り確率表を確定していないため、AT/ボーナス初当りFeatureとは分離してReference扱い。');
+          note('弱チェリー・強チェリー・スイカ・チャンス目・ブースト目等はスロプラNEXTで取得可能。設定推測Feature化は全設定の解析値が揃った項目に限定する。');
+          note('通常時AT直当たり+AT終了後引き戻しはスロプラNEXTで20000G到達後に表示されるが、直撃と引き戻しが合算された取得項目であり、独立尤度Feature化には分解可能性/母数監査が必要。');
+          note('CZモード/種類別成功回数は取得可能だが、候補ごとのeligible denominatorと全設定分布を確定するまでReference扱い。');
+          note('ケロットトロフィーは1gekiが設定2+/3+/4+/5+/6濃厚として掲載する一方、なな徹側に従来機種からの予想・調査中表現が残るため、Hard Evidence化せずconflictを維持する。');
+          set('DC_01',{transferStatus:'RESOLVED',researchTarget:['RF_AT_INITIAL','RF_BONUS_INITIAL'],researchNote:'AT/ボーナス初当りを数値Feature化。CZは別Reference。'});
+          set('DC_02',{transferStatus:'REFERENCE',researchTarget:'reference',researchReference:'researchNotes[スロプラNEXT小役取得項目]'});
+          set('DC_03',{transferStatus:'REFERENCE',researchTarget:'reference',researchReference:'researchNotes[AT直当たり+引き戻し合算]'});
+          set('DC_04',{transferStatus:'REFERENCE',researchTarget:'reference',researchReference:'researchNotes[CZモード/種類別eligible denominator]'});
+          set('DC_05',{transferStatus:'REFERENCE',researchTarget:'reference',researchReference:'researchNotes[AT直当たり+引き戻し合算]'});
+          set('DC_06',{transferStatus:'REFERENCE',researchTarget:'reference',researchReference:'conflicts[CF_KEROT_TROPHY_AUTHORITY]'});
+          // DC07 is already linked to the enumerated official SloPla NEXT inventory.
+          fs.writeFileSync(file,JSON.stringify(d,null,2)+'\n');
+          NODE
+      - name: Validate Tekken6
+        run: |
+          node tools/validate-research-data.mjs research/L_TEKKEN_6_YD01H/research-data.json
+          node tools/discovery-completeness-gate.mjs L_TEKKEN_6_YD01H
+          node --input-type=module <<'NODE'
+          import fs from 'node:fs';
+          const d=JSON.parse(fs.readFileSync('research/L_TEKKEN_6_YD01H/research-data.json'));
+          const u=(d.discoveryInventory??[]).filter(x=>x.transferStatus==='UNRESOLVED');
+          if(u.length)throw new Error(`Tekken unresolved=${u.length}`);
+          if(!(d.conflicts??[]).some(x=>x.conflictId==='CF_KEROT_TROPHY_AUTHORITY'))throw new Error('Kerotto conflict was lost');
+          console.log('PASS Tekken6 unresolved=0 / Kerotto conflict preserved');
+          NODE
+      - name: Commit Tekken6
+        shell: bash
+        run: |
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git add research/L_TEKKEN_6_YD01H/research-data.json
+          git commit -m 'research: resolve Tekken6 Gate A discovery with trophy conflict preserved'
+          git pull --rebase origin batch/20260906-next10-gate0
+          git push origin HEAD:batch/20260906-next10-gate0
