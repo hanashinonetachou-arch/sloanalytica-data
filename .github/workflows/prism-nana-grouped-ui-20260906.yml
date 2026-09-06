@@ -127,11 +127,15 @@ jobs:
             if (d.inputContracts[id]) d.inputContracts[id].gridSpan = 6;
           }
 
-          const serialized = JSON.stringify(d, null, 2) + '\n';
-          if (/\bFeature\b|\bEvidence\b/.test(serialized)) {
-            throw new Error('internal terminology remains in canonical UI');
+          const userFacing = [
+            ...d.sectionOrder,
+            ...Object.entries(d.sections).flatMap(([name, s]) => [name, s.description || '']),
+            ...Object.values(d.inputContracts).flatMap(c => [c.name || '', c.description || ''])
+          ].join('\n');
+          if (/\bFeature\b|\bEvidence\b/.test(userFacing)) {
+            throw new Error('internal terminology remains in user-facing canonical UI');
           }
-          fs.writeFileSync(p, serialized);
+          fs.writeFileSync(p, JSON.stringify(d, null, 2) + '\n');
           NODE
       - name: Validate grouped UI contract
         run: |
@@ -143,8 +147,12 @@ jobs:
           if (d.sections['プリプリゾーン終了時 タッチボイス'].inputIds.length !== 10) throw new Error('touch voice grouping mismatch');
           if (!d.sections['ボーナス終了画面'].inputIds.includes('INP_END_UNIFORM_COUNT')) throw new Error('bonus-end evidence not colocated');
           if (!d.sections['通常時の特定会話'].inputIds.includes('INP_TALK_RAINBOW_COUNT')) throw new Error('talk evidence not colocated');
-          const s = JSON.stringify(d);
-          if (/\bFeature\b|\bEvidence\b/.test(s)) throw new Error('internal terminology leak');
+          const userFacing = [
+            ...d.sectionOrder,
+            ...Object.entries(d.sections).flatMap(([name, s]) => [name, s.description || '']),
+            ...Object.values(d.inputContracts).flatMap(c => [c.name || '', c.description || ''])
+          ].join('\n');
+          if (/\bFeature\b|\bEvidence\b/.test(userFacing)) throw new Error('internal terminology leak');
           console.log('Prism Nana grouped canonical UI: PASS');
           NODE
       - name: Commit canonical UI
