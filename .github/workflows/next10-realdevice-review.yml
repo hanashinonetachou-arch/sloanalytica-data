@@ -1,0 +1,59 @@
+name: Next10 Real-device Review 20260906
+
+on:
+  push:
+    branches:
+      - fix/next10-realdevice-selection-review-20260906
+    paths:
+      - .github/workflows/next10-realdevice-review.yml
+
+permissions:
+  contents: write
+
+jobs:
+  apply-review:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - name: Install dependencies
+        run: npm ci
+      - name: Apply review
+        run: node tools/run-next10-realdevice-review.mjs
+      - name: Validate canonical layers
+        shell: bash
+        run: |
+          set -euo pipefail
+          ids=(
+            L_AZURLANE_THE_ANIMATION_KN
+            L_DRUAGA_NO_TOU_ZA
+            L_SMASLO_TOKYO_REVENGERS_ZF
+            L_BABEL_BA
+            L_SHIN_ONIMUSHA_3_SA
+            L_TOARU_KAGAKU_NO_RAILGUN_2_FV
+            L_ZETTAI_SHOGEKI_FORCE_FH
+            L_KAKUMEIKI_VALVRAVE_2_JF
+          )
+          for id in "${ids[@]}"; do
+            npm run research:validate -- "research/$id/research-data.json"
+            npm run selection:validate -- "research/$id/selection-data.json"
+            npm run ui-design:validate -- "research/$id/ui-design-data.json"
+          done
+      - name: Commit canonical review changes
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add research/L_AZURLANE_THE_ANIMATION_KN research/L_DRUAGA_NO_TOU_ZA research/L_SMASLO_TOKYO_REVENGERS_ZF research/L_BABEL_BA research/L_SHIN_ONIMUSHA_3_SA research/L_TOARU_KAGAKU_NO_RAILGUN_2_FV research/L_ZETTAI_SHOGEKI_FORCE_FH research/L_KAKUMEIKI_VALVRAVE_2_JF
+          if git diff --cached --quiet; then
+            echo "No canonical changes to commit."
+            exit 0
+          fi
+          git commit -m "review: apply Next10 real-device inference feedback"
+          git push
