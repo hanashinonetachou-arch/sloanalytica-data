@@ -20,14 +20,18 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
-      - name: Generate guarded checkpoints 20-25
+      - name: Generate guarded checkpoints 20-24 from verified structured sources
         shell: bash
         run: |
           node --input-type=module <<'EOF'
           import fs from 'node:fs';
           const auditPath='reports/machine-identity-classification-audit.json';
+          const diagnosticPath='reports/machine-identity-gap-diagnostic-20260906.json';
           const audit=JSON.parse(fs.readFileSync(auditPath,'utf8'));
+          const diagnostic=JSON.parse(fs.readFileSync(diagnosticPath,'utf8'));
           const catalog=JSON.parse(fs.readFileSync('catalog.json','utf8'));
+          const registry=JSON.parse(fs.readFileSync('machine-registry.json','utf8'));
+          const registryBy=new Map((registry.machines??[]).map(x=>[x.machineId,x]));
           const existing=[];
           for(const rel of audit.checkpointFiles??[]){
             const cp=JSON.parse(fs.readFileSync(rel,'utf8'));
@@ -36,48 +40,70 @@ jobs:
           const seen=new Set(existing);
           const production=(catalog.machines??[]).filter(m=>m.machineId!=='S_REVUE_STARLIGHT_CX_TEST_V66');
           const missing=production.filter(m=>!seen.has(m.machineId));
-          if(missing.length!==59) throw new Error(`expected 59 unaudited production machines, got ${missing.length}`);
+          if(missing.length!==49) throw new Error(`expected current audited gap of 49 production machines, got ${missing.length}`);
+          if(diagnostic.missingCount!==49) throw new Error(`diagnostic missingCount drift: ${diagnostic.missingCount}`);
+          const diagnosticBy=new Map((diagnostic.rows??[]).map(x=>[x.machineId,x]));
           const validMachine=new Set(['SMART_SLOT','MEDAL']);
           const validGame=new Set(['A_TYPE','AT','A_AT','A_ART','BT']);
           const entries=[];
+          const unresolved=[];
           for(const c of missing){
-            const p=`machines/${c.machineId}/machine-package.json`;
-            if(!fs.existsSync(p)) throw new Error(`${c.machineId}: package missing`);
-            const pkg=JSON.parse(fs.readFileSync(p,'utf8'));
-            const m=pkg.machine??{};
-            if(m.machineId!==c.machineId) throw new Error(`${c.machineId}: package machineId mismatch`);
-            for(const key of ['introductionDate','machineType','gameType']){
-              if(c[key]!==m[key]) throw new Error(`${c.machineId}: catalog/package ${key} mismatch: ${c[key]} vs ${m[key]}`);
+            const row=diagnosticBy.get(c.machineId);
+            const reg=registryBy.get(c.machineId);
+            if(!row||!reg){unresolved.push(`${c.machineId}: missing diagnostic/registry row`);continue;}
+            if(reg.releaseDateStatus!=='VERIFIED'||!/^\d{4}-\d{2}-\d{2}$/.test(reg.releaseDate??'')){
+              unresolved.push(`${c.machineId}: registry releaseDate not VERIFIED (${reg.releaseDateStatus}:${reg.releaseDate})`);continue;
             }
-            if(!/^\d{4}-\d{2}-\d{2}$/.test(c.introductionDate??'')) throw new Error(`${c.machineId}: invalid introductionDate`);
-            if(!validMachine.has(c.machineType)) throw new Error(`${c.machineId}: invalid machineType ${c.machineType}`);
-            if(!validGame.has(c.gameType)) throw new Error(`${c.machineId}: invalid gameType ${c.gameType}`);
-            entries.push({machineId:c.machineId,displayName:c.displayName??m.displayName??c.machineId,introductionDate:c.introductionDate,machineType:c.machineType,gameType:c.gameType,sources:['Canonical catalog + machine-package identity, established by prior batch Machine Identity/Gate0; 2026-09-06 audit-ledger backfill']});
+            const full=(row.structuredCandidates??[]).filter(x=>
+              /^\d{4}-\d{2}-\d{2}$/.test(x.introductionDate??'')&&validMachine.has(x.machineType)&&validGame.has(x.gameType)
+            );
+            const unique=new Map(full.map(x=>[`${x.introductionDate}|${x.machineType}|${x.gameType}`,x]));
+            if(unique.size!==1){
+              unresolved.push(`${c.machineId}: expected one unique full structured identity triple, got ${unique.size}: ${[...unique.keys()].join(', ')}`);continue;
+            }
+            const [key,src]=[...unique.entries()][0];
+            if(src.introductionDate!==reg.releaseDate){
+              unresolved.push(`${c.machineId}: structured date ${src.introductionDate} != VERIFIED registry date ${reg.releaseDate}`);continue;
+            }
+            const packagePath=`machines/${c.machineId}/machine-package.json`;
+            if(!fs.existsSync(packagePath)){unresolved.push(`${c.machineId}: package missing`);continue;}
+            const pkg=JSON.parse(fs.readFileSync(packagePath,'utf8'));
+            if(pkg?.machine?.machineId!==c.machineId){unresolved.push(`${c.machineId}: package machineId mismatch`);continue;}
+            entries.push({
+              machineId:c.machineId,
+              displayName:c.displayName??pkg.machine?.displayName??c.machineId,
+              introductionDate:src.introductionDate,
+              machineType:src.machineType,
+              gameType:src.gameType,
+              sources:[src.path,`machine-registry.json releaseDate VERIFIED (${reg.releaseDate})`]
+            });
           }
-          entries.sort((a,b)=>{
-            const ca=production.findIndex(x=>x.machineId===a.machineId), cb=production.findIndex(x=>x.machineId===b.machineId);return ca-cb;
-          });
+          if(unresolved.length){console.error('BLOCK identity checkpoint backfill:\n'+unresolved.join('\n'));process.exit(1);}
+          if(entries.length!==49) throw new Error(`expected 49 resolved entries, got ${entries.length}`);
           const chunks=[]; for(let i=0;i<entries.length;i+=10) chunks.push(entries.slice(i,i+10));
-          if(chunks.length!==6) throw new Error(`expected 6 checkpoint chunks, got ${chunks.length}`);
+          if(chunks.length!==5||chunks.at(-1).length!==9) throw new Error(`unexpected checkpoint chunking: ${chunks.map(x=>x.length).join(',')}`);
           const newFiles=[];
           chunks.forEach((chunk,i)=>{
-            const batch=20+i; const rel=`reports/machine-identity-classification-batch-${String(batch).padStart(2,'0')}.json`;
+            const batch=20+i;
+            const rel=`reports/machine-identity-classification-batch-${String(batch).padStart(2,'0')}.json`;
             const doc={schemaVersion:'machine-identity-classification-batch-v1',batch,resolved:chunk.length,unresolved:0,entries:chunk};
-            fs.writeFileSync(rel,JSON.stringify(doc,null,2)+'\n'); newFiles.push(rel);
+            fs.writeFileSync(rel,JSON.stringify(doc,null,2)+'\n');
+            newFiles.push(rel);
           });
           audit.updatedAt='2026-09-06';
+          audit.progress.catalogEnumeration='COMPLETE';
           audit.progress.resolvedProductionMachines=production.length;
           audit.progress.unresolvedProductionMachines=0;
-          audit.progress.completedBatches=[...Array(25)].map((_,i)=>i+1);
-          audit.checkpointFiles=[...(audit.checkpointFiles??[]).filter(x=>!newFiles.includes(x)),...newFiles];
+          audit.progress.completedBatches=[...Array(24)].map((_,i)=>i+1);
+          audit.checkpointFiles=[...(audit.checkpointFiles??[]).filter(x=>!/^reports\/machine-identity-classification-batch-(20|21|22|23|24)\.json$/.test(x)),...newFiles];
           audit.notes=[
-            `Catalog enumeration refreshed through 2026-09-06: all ${production.length} production machine IDs are covered by checkpoints 01-25, with 0 unresolved values and 1 explicit test-only machine excluded.`,
-            'Checkpoints 20-25 backfill the 59 production machines published after the previous 2026-08-31 / 190-machine identity-audit snapshot.',
-            'Backfill was accepted only where catalog.json and machine-package.json matched exactly on introductionDate, machineType, and gameType.',
-            ...(audit.notes??[]).filter(n=>!String(n).startsWith('Catalog enumeration is complete:')&&!String(n).startsWith('All completed batches'))
+            `Catalog enumeration refreshed through 2026-09-06: all ${production.length} production machine IDs are covered by checkpoints 01-24, with 0 unresolved values and 1 explicit test-only machine excluded.`,
+            'Checkpoints 20-24 backfill the 49 production machines published after the previous 2026-08-31 / 190-machine identity-audit snapshot.',
+            'Each backfilled identity required exactly one unique full structured identity triple (introductionDate, machineType, gameType) already present in repository research/batch artifacts, plus an exactly matching VERIFIED machine-registry releaseDate.',
+            ...(audit.notes??[]).filter(n=>!String(n).startsWith('Catalog enumeration is complete:')&&!String(n).startsWith('All completed batches')&&!String(n).startsWith('Catalog enumeration refreshed through')&&!String(n).startsWith('Checkpoints 20-'))
           ];
           fs.writeFileSync(auditPath,JSON.stringify(audit,null,2)+'\n');
-          console.log(`PASS generated ${entries.length} identity entries in checkpoints 20-25; production=${production.length}`);
+          console.log(`PASS resolved ${entries.length} identity entries; checkpoints=${chunks.map((x,i)=>`${20+i}:${x.length}`).join(', ')} production=${production.length}`);
           EOF
       - name: Apply canonical identity metadata and verify
         run: |
@@ -88,21 +114,22 @@ jobs:
           npm run registry:validate
           npm run audit
           npm test
-      - name: Assert no unexpected identity rewrite
+      - name: Assert mutation allowlist
         shell: bash
         run: |
           git status --short
           node --input-type=module <<'EOF'
           import {execFileSync} from 'node:child_process';
-          const changed=execFileSync('git',['status','--porcelain'],{encoding:'utf8'}).trim().split('\n').filter(Boolean).map(x=>x.slice(3));
-          const bad=changed.filter(p=>!(p==='catalog.json'||p==='machine-identity-metadata.json'||p==='reports/machine-identity-classification-audit.json'||/^reports\/machine-identity-classification-batch-(20|21|22|23|24|25)\.json$/.test(p)||/^machines\/[^/]+\/machine-package\.json$/.test(p)));
+          const raw=execFileSync('git',['status','--porcelain'],{encoding:'utf8'}).trim();
+          const changed=raw?raw.split('\n').map(x=>x.slice(3)):[];
+          const bad=changed.filter(p=>!(p==='catalog.json'||p==='machine-identity-metadata.json'||p==='reports/machine-identity-classification-audit.json'||/^reports\/machine-identity-classification-batch-(20|21|22|23|24)\.json$/.test(p)||/^machines\/[^/]+\/machine-package\.json$/.test(p)));
           if(bad.length) throw new Error(`unexpected files: ${bad.join(', ')}`);
           EOF
       - name: Commit backfill
         run: |
           git config user.name github-actions[bot]
           git config user.email 41898282+github-actions[bot]@users.noreply.github.com
-          git add catalog.json machine-identity-metadata.json reports/machine-identity-classification-audit.json reports/machine-identity-classification-batch-{20,21,22,23,24,25}.json machines/*/machine-package.json
-          git commit -m 'audit: backfill machine identity checkpoints 20-25'
+          git add catalog.json machine-identity-metadata.json reports/machine-identity-classification-audit.json reports/machine-identity-classification-batch-{20,21,22,23,24}.json machines/*/machine-package.json
+          git commit -m 'audit: backfill machine identity checkpoints 20-24'
           git pull --rebase origin fix/identity-audit-backfill-20260906
           git push origin HEAD:fix/identity-audit-backfill-20260906
