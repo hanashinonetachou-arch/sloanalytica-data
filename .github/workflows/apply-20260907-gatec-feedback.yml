@@ -1,0 +1,124 @@
+name: Apply 20260907 Gate C feedback
+
+on:
+  push:
+    branches:
+      - batch/20260907-next10-gatec
+    paths:
+      - '.github/workflows/apply-20260907-gatec-feedback.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  apply:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: batch/20260907-next10-gatec
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - run: npm ci
+      - name: Apply linked-service confirmations and Triple Crown Selection reconsideration
+        shell: bash
+        run: |
+          node --input-type=module <<'NODE'
+          import fs from 'node:fs';
+          const noLinked=['L_FIRE_FORCE_2','L_GUNDAM_UNICORN_KAKUSEI_DRIVE_2JA','L_KYOKOU_SUIRI_ST','L_AKUDAMA_DRIVE_TP','LB_TRIPLE_CROWN_SEVEN_FG'];
+          for(const id of noLinked){
+            const p=`research/${id}/machine-observation-data.json`;
+            const o=JSON.parse(fs.readFileSync(p,'utf8'));
+            o.sourceCoverage.linkedService='CHECKED_NONE';
+            const v=(o.fieldVerificationItems??[]).find(x=>x.sourceType==='LINKED_SERVICE');
+            if(v){
+              v.status='NOT_REQUIRED';
+              v.priority='LOW';
+              v.question='実機確認により、本機に実機連動機能がないことを確認済み。追加の連動サービス確認は不要。';
+            }
+            fs.writeFileSync(p,JSON.stringify(o,null,2)+'\n');
+          }
+
+          const sp='research/LB_TRIPLE_CROWN_SEVEN_FG/selection-data.json';
+          const s=JSON.parse(fs.readFileSync(sp,'utf8'));
+          const plum=(s.features??[]).find(f=>f.researchFeatureId==='RF_PLUM');
+          if(!plum) throw new Error('Triple Crown RF_PLUM missing');
+          plum.adoptionCategory='EXCLUDE';
+          delete plum.userReason; delete plum.weight; delete plum.numeratorInputId; delete plum.denominatorInputId; delete plum.suppressedByFeatureIds;
+          plum.userFacingReason='プラムは設定差自体はあるが、チェリーと同一の通常ゲームを分母とする排他的な小役事象であり、チェリーと独立Binomialとして同時評価すると同じ通常ゲーム情報を重ねて尤度を強めるため不採用とする。設定差がより大きいチェリーを代表Featureとして残す。';
+          plum.difficultyParticipation='EXCLUDE';
+          plum.difficultyExclusionReason='推測計算に採用しないためDifficultyにも参加させない。';
+          const pi=(s.inputs??[]).find(i=>i.id==='INP_PLUM_COUNT'); if(pi){pi.inferenceRole='EXCLUDE';}
+          const selected=(s.features??[]).filter(f=>f.adoptionCategory!=='EXCLUDE');
+          const rejected=(s.features??[]).filter(f=>f.adoptionCategory==='EXCLUDE');
+          const r=JSON.parse(fs.readFileSync('research/LB_TRIPLE_CROWN_SEVEN_FG/research-data.json','utf8'));
+          const byRid=new Map((r.features??[]).map(f=>[f.researchFeatureId,f]));
+          s.selectionSummaryContract={schemaVersion:'selection-summary-v1',evaluatedCount:s.features.length,selectedCount:selected.length,rejectedCount:rejected.length,selected:selected.map(f=>({name:byRid.get(f.researchFeatureId)?.name??f.researchFeatureId,reason:f.userReason??'推測計算に採用しています。'})),rejected:rejected.map(f=>({name:byRid.get(f.researchFeatureId)?.name??f.researchFeatureId,reason:f.userFacingReason??'推測計算には採用していません。'}))};
+          fs.writeFileSync(sp,JSON.stringify(s,null,2)+'\n');
+
+          const op='research/LB_TRIPLE_CROWN_SEVEN_FG/machine-observation-data.json';
+          const o=JSON.parse(fs.readFileSync(op,'utf8'));
+          o.featureMappings=(o.featureMappings??[]).filter(m=>m.featureId!=='FEAT_PLUM');
+          const small=(o.observations??[]).find(x=>x.observationId==='OBS_SMALL_ROLES_SHARED');
+          if(small){
+            small.label='通常時の小役（チェリー）';
+            small.categories=['チェリー回数','通常ゲーム'];
+            small.excludedConditions=(small.excludedConditions??[]).filter(x=>!x.includes('プラム')).concat(['プラムはResearch候補として保持するが、Selection再評価で推測不採用のため推測入力には使用しない']);
+            small.notes='チェリーを代表Featureとして採用。プラムは同一通常G上の排他的事象で独立Binomial併用による過信を避けるためSelectionでEXCLUDE。';
+          }
+          fs.writeFileSync(op,JSON.stringify(o,null,2)+'\n');
+          NODE
+      - name: Revalidate Gate B and Gate C canonical state
+        shell: bash
+        run: |
+          set -euo pipefail
+          ids=(L_FIRE_FORCE_2 L_UMINEKO_2_A1 L_KABANERI_UNATO_KESSEN_XX L_JORMUNGAND_ND01G LB_TRIPLE_CROWN_SEVEN_FG L_SHINUCHI_YOSHIMUNE_A1 L_KYOKOU_SUIRI_ST L_AKUDAMA_DRIVE_TP L_MILLION_GOD_KISEKI_CX L_GUNDAM_UNICORN_KAKUSEI_DRIVE_2JA)
+          for id in "${ids[@]}"; do
+            npm run selection:validate -- "research/$id/selection-data.json" "research/$id/research-data.json"
+            npm run observation:validate -- "research/$id/machine-observation-data.json"
+          done
+          npm run observation:selection:audit -- "${ids[@]}" --strict-v2
+          npm run observation:gate -- --from-id=250 --to-id=259
+      - name: Semantic totals and checkpoint
+        shell: bash
+        run: |
+          node --input-type=module <<'NODE'
+          import fs from 'node:fs';
+          import { assessSelectionQuality } from './tools/selection-quality-gate.mjs';
+          import { validateSelectionEvidenceCoverage } from './tools/batch-completeness-gates.mjs';
+          const ids=['L_FIRE_FORCE_2','L_UMINEKO_2_A1','L_KABANERI_UNATO_KESSEN_XX','L_JORMUNGAND_ND01G','LB_TRIPLE_CROWN_SEVEN_FG','L_SHINUCHI_YOSHIMUNE_A1','L_KYOKOU_SUIRI_ST','L_AKUDAMA_DRIVE_TP','L_MILLION_GOD_KISEKI_CX','L_GUNDAM_UNICORN_KAKUSEI_DRIVE_2JA'];
+          const noLinked=new Set(['L_FIRE_FORCE_2','L_GUNDAM_UNICORN_KAKUSEI_DRIVE_2JA','L_KYOKOU_SUIRI_ST','L_AKUDAMA_DRIVE_TP','LB_TRIPLE_CROWN_SEVEN_FG']);
+          let features=0,selected=0,rejected=0,evidence=0,mappings=0,field=0,natural=0; const errors=[];
+          for(const id of ids){
+            const r=JSON.parse(fs.readFileSync(`research/${id}/research-data.json`));
+            const s=JSON.parse(fs.readFileSync(`research/${id}/selection-data.json`));
+            const o=JSON.parse(fs.readFileSync(`research/${id}/machine-observation-data.json`));
+            const q=assessSelectionQuality(r,s); if(q.status==='BLOCKED') errors.push(...q.blockers.map(x=>`${id}: ${x}`));
+            const ec=validateSelectionEvidenceCoverage(s,r,{required:true}); if(!ec.ok) errors.push(...ec.errors.map(x=>`${id}: ${x}`));
+            features+=(s.features??[]).length; selected+=(s.features??[]).filter(f=>f.adoptionCategory!=='EXCLUDE').length; rejected+=(s.features??[]).filter(f=>f.adoptionCategory==='EXCLUDE').length; evidence+=(s.evidence??[]).length;
+            mappings+=(o.featureMappings??[]).length; natural+=(o.observations??[]).length; field+=(o.fieldVerificationItems??[]).filter(v=>v.status==='WAITING_FOR_MACHINE').length;
+            if(noLinked.has(id)){
+              const lv=(o.fieldVerificationItems??[]).find(v=>v.sourceType==='LINKED_SERVICE');
+              if(o.sourceCoverage.linkedService!=='CHECKED_NONE'||lv?.status!=='NOT_REQUIRED') errors.push(`${id}: linked service confirmation not finalized`);
+            }
+          }
+          if(features!==38||selected!==34||rejected!==4||evidence!==95||mappings!==34) errors.push(`totals f=${features} selected=${selected} rejected=${rejected} evidence=${evidence} mappings=${mappings}`);
+          const tc=JSON.parse(fs.readFileSync('research/LB_TRIPLE_CROWN_SEVEN_FG/selection-data.json'));
+          if(tc.features.find(f=>f.researchFeatureId==='RF_PLUM')?.adoptionCategory!=='EXCLUDE') errors.push('Triple Crown plum not excluded');
+          if(errors.length) throw new Error(errors.join('\n'));
+          const report={status:'PASS',machines:10,features,selected,rejected,evidence,observationMappings:mappings,naturalObservations:natural,waitingFieldVerification:field,linkedServiceConfirmedNone:[...noLinked]};
+          fs.writeFileSync('reports/batch-20260907-gate-bc-feedback-validation.json',JSON.stringify(report,null,2)+'\n');
+          fs.writeFileSync('reports/batch-20260907-gate-c-completion.md',`# SloAnalytica 2026-09-07 Next10 — Gate C Observation checkpoint\n\n## Status\n\n**Gate C / Observation: PASS_WITH_UNRESOLVED (field verification only)**\n\n- exact batch scope: 10/10\n- Research Features evaluated: 38\n- selected Selection Features: 34\n- rejected Selection Features: 4\n- Observation feature mappings: 34/34\n- natural observation groups: ${natural}\n- Research reopen required: 0\n- field verification items still WAITING_FOR_MACHINE: ${field}\n- public main: unchanged\n\nAll selected Features have a v2 Observation mapping. Remaining unresolved items are field-verification items only; the five user-confirmed machines below have linked-service verification closed as NOT_REQUIRED.\n\n## Confirmed no linked service\n\n- Lパチスロ 炎炎ノ消防隊2\n- Lパチスロ 機動戦士ガンダムユニコーン 覚醒DRIVE\n- L虚構推理\n- Lアクダマドライブ\n- LBトリプルクラウンセブン\n\n## Selection reconsideration\n\nLBトリプルクラウンセブンのプラムは、チェリーと同一の通常G分母上で排他的に成立する小役で、独立Binomialとして両方を同時尤度化すると同じ通常G情報を重ねて過信させるためEXCLUDEへ変更した。設定差がより大きいチェリーを代表Featureとして残す。Research候補自体は保持する。\n\n## Other special contracts\n\n- Jormungand: REG/BIG end-screen remains one natural observation; four Hard Evidence screens are excluded from the numeric multinomial and entered only once as Evidence.\n- Hard Evidence: repeated sightings do not multiply evidence strength. 0 means not confirmed; >=1 means established unless an explicit count contract says otherwise.\n- Conditional Features: route/state-specific eligible attempts remain their denominators; total normal games are never substituted.\n`);
+          console.log(JSON.stringify(report,null,2));
+          NODE
+      - name: Commit feedback result
+        shell: bash
+        run: |
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git add research/*/machine-observation-data.json research/LB_TRIPLE_CROWN_SEVEN_FG/selection-data.json reports/batch-20260907-gate-c-completion.md reports/batch-20260907-gate-bc-feedback-validation.json
+          git commit -m 'GateC: apply linked-service confirmations and Triple Crown reconsideration'
+          git push origin HEAD:batch/20260907-next10-gatec
