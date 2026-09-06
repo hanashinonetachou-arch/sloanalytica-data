@@ -25,7 +25,17 @@ jobs:
       - name: Install dependencies
         run: npm ci
       - name: Apply post-device reselection
-        run: node tools/apply-device-review-reselection-20260906.mjs
+        run: |
+          node tools/apply-device-review-reselection-20260906.mjs
+          node --input-type=module <<'EOF'
+          import fs from 'node:fs';
+          const p='research/L_BURNING_EXPRESS_ZN/selection-data.json';
+          const s=JSON.parse(fs.readFileSync(p,'utf8'));
+          const f=s.features.find(x=>x.researchFeatureId==='RF_REEL_LOCK_REACH');
+          const reason='リーチ目を伴うリールロックは全設定の公開確率が約1/1337.5〜1/1339.2で設定差がほぼなく、設定推測への判別情報量が極めて小さいため不採用。';
+          f.userFacingReason=reason;f.rejectionReason=reason;
+          fs.writeFileSync(p,JSON.stringify(s,null,2)+'\n');
+          EOF
       - name: Validate SelectionData 10/10
         shell: bash
         run: |
