@@ -1,0 +1,57 @@
+name: Device Feedback Publish 20260906
+
+on:
+  push:
+    branches:
+      - fix/device-feedback-publish-20260906
+    paths:
+      - .github/workflows/device-feedback-publish-20260906.yml
+
+permissions:
+  contents: write
+
+jobs:
+  publish-and-audit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: fix/device-feedback-publish-20260906
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Publish all current 20260906 machines atomically
+        run: >-
+          npm run machine:publish:batch -- --apply
+          L_BURNING_EXPRESS_ZN L_PRISM_NANA_CC L_GINGA_EIYUU_DNT_GH
+          L_HIHODEN_PA7 L_OKIDOKI_DUO_ENCORE_FR L_HOKUTO_TENSEI_2_MW
+          L_TEKKEN_6_YD01H L_HANMA_BAKI_L5 L_GOBLIN_SLAYER_2_JZ
+          L_GHOST_IN_THE_SHELL_ZS
+      - name: Four-layer linkage gate
+        run: >-
+          npm run pipeline:four-layer:gate --
+          L_BURNING_EXPRESS_ZN L_PRISM_NANA_CC L_GINGA_EIYUU_DNT_GH
+          L_HIHODEN_PA7 L_OKIDOKI_DUO_ENCORE_FR L_HOKUTO_TENSEI_2_MW
+          L_TEKKEN_6_YD01H L_HANMA_BAKI_L5 L_GOBLIN_SLAYER_2_JZ
+          L_GHOST_IN_THE_SHELL_ZS
+      - name: Observation linkage audit for current 20260906 batch
+        run: >-
+          npm run observation:selection:audit -- --strict-v2
+          L_BURNING_EXPRESS_ZN L_PRISM_NANA_CC L_GINGA_EIYUU_DNT_GH
+          L_HIHODEN_PA7 L_OKIDOKI_DUO_ENCORE_FR L_HOKUTO_TENSEI_2_MW
+          L_TEKKEN_6_YD01H L_HANMA_BAKI_L5 L_GOBLIN_SLAYER_2_JZ
+          L_GHOST_IN_THE_SHELL_ZS
+      - name: Difficulty exposure audit
+        run: npm run difficulty:exposure-audit
+      - name: Commit publish outputs
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add catalog.json difficulty-catalog.json machine-registry.json machines
+          if git diff --cached --quiet; then
+            echo "No publish outputs changed"
+          else
+            git commit -m "publish: refresh 20260906 device-feedback packages"
+            git push origin HEAD:fix/device-feedback-publish-20260906
+          fi
