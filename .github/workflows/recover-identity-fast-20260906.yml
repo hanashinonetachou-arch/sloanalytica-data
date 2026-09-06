@@ -1,0 +1,81 @@
+name: Recover identity fast 20260906
+
+on:
+  push:
+    branches: [fix/identity-audit-recover-fast-20260906]
+    paths: ['.github/workflows/recover-identity-fast-20260906.yml']
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  recover:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: fix/identity-audit-recover-fast-20260906
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Scan identity and gate0 JSON across refs
+        shell: bash
+        run: |
+          node --input-type=module <<'EOF'
+          import fs from 'node:fs';
+          import {execFileSync} from 'node:child_process';
+          const diag=JSON.parse(fs.readFileSync('reports/machine-identity-gap-diagnostic-20260906.json','utf8'));
+          const target=new Set(diag.missingIds);
+          const validMachine=new Set(['SMART_SLOT','MEDAL']);
+          const validGame=new Set(['A_TYPE','AT','A_AT','A_ART','BT']);
+          const refs=execFileSync('git',['for-each-ref','--format=%(refname)','refs/remotes/origin'],{encoding:'utf8'}).trim().split('\n').filter(x=>x&&!x.endsWith('/HEAD'));
+          const byId=new Map([...target].map(id=>[id,[]]));
+          function walk(v,ref,file,loc='$'){
+            if(!v||typeof v!=='object')return;
+            if(target.has(v.machineId)){
+              const introductionDate=v.introductionDate??v.releaseDate??v.introducedAt??null;
+              const machineType=v.machineType??null, gameType=v.gameType??null;
+              if(/^\d{4}-\d{2}-\d{2}$/.test(introductionDate??'')&&validMachine.has(machineType)&&validGame.has(gameType))
+                byId.get(v.machineId).push({introductionDate,machineType,gameType,source:`${ref}:${file}#${loc}`});
+            }
+            if(Array.isArray(v))v.forEach((x,i)=>walk(x,ref,file,`${loc}[${i}]`));
+            else for(const [k,x] of Object.entries(v))if(x&&typeof x==='object')walk(x,ref,file,`${loc}.${k}`);
+          }
+          const seenBlob=new Set();
+          let scannedFiles=0;
+          for(const ref of refs){
+            let files=[];
+            try{files=execFileSync('git',['ls-tree','-r','--name-only',ref],{encoding:'utf8',maxBuffer:20*1024*1024}).trim().split('\n').filter(f=>/\.json$/i.test(f)&&/(identity|gate0|machine-registry|batch)/i.test(f));}catch{continue;}
+            for(const file of files){
+              let blob;try{blob=execFileSync('git',['rev-parse',`${ref}:${file}`],{encoding:'utf8'}).trim();}catch{continue;}
+              if(seenBlob.has(blob))continue; seenBlob.add(blob);
+              let text;try{text=execFileSync('git',['show',`${ref}:${file}`],{encoding:'utf8',maxBuffer:20*1024*1024});}catch{continue;}
+              let j;try{j=JSON.parse(text);}catch{continue;}
+              scannedFiles++; walk(j,ref,file);
+            }
+          }
+          const rows=[];
+          for(const row of diag.rows){
+            const all=[...(byId.get(row.machineId)??[])];
+            for(const c of row.structuredCandidates??[]){if(c.introductionDate&&c.machineType&&c.gameType)all.push({introductionDate:c.introductionDate,machineType:c.machineType,gameType:c.gameType,source:`CURRENT:${c.path}#${c.loc}`});}
+            const uniq=new Map();
+            for(const c of all){const key=`${c.introductionDate}|${c.machineType}|${c.gameType}`;if(!uniq.has(key))uniq.set(key,{triple:key,introductionDate:c.introductionDate,machineType:c.machineType,gameType:c.gameType,sources:[]});uniq.get(key).sources.push(c.source);}
+            for(const u of uniq.values())u.sources=[...new Set(u.sources)];
+            rows.push({machineId:row.machineId,displayName:row.displayName,registry:row.registry,uniqueTriples:[...uniq.values()]});
+          }
+          const unresolved=rows.filter(r=>r.uniqueTriples.length!==1).map(r=>({machineId:r.machineId,count:r.uniqueTriples.length,triples:r.uniqueTriples.map(x=>x.triple)}));
+          const report={generatedAt:new Date().toISOString(),searchedRefCount:refs.length,scannedUniqueJsonBlobs:scannedFiles,missingCount:rows.length,resolvedUnique:rows.length-unresolved.length,unresolvedCount:unresolved.length,unresolved,rows};
+          fs.writeFileSync('reports/machine-identity-fast-recovery-20260906.json',JSON.stringify(report,null,2)+'\n');
+          console.log(`fast identity recovery refs=${refs.length} blobs=${scannedFiles} unique=${report.resolvedUnique}/${rows.length} unresolved=${unresolved.length}`);
+          for(const x of unresolved)console.log(`UNRESOLVED ${x.machineId}: ${x.count} ${x.triples.join(' ; ')}`);
+          EOF
+      - name: Commit report
+        run: |
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git add reports/machine-identity-fast-recovery-20260906.json
+          git commit -m 'audit: add fast historical identity recovery report'
+          git pull --rebase origin fix/identity-audit-recover-fast-20260906
+          git push origin HEAD:fix/identity-audit-recover-fast-20260906
