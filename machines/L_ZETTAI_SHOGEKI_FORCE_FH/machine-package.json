@@ -3,7 +3,7 @@
   "machine": {
     "schemaVersion": "2.0.0",
     "machineId": "L_ZETTAI_SHOGEKI_FORCE_FH",
-    "machineDataVersion": "0.1.0",
+    "machineDataVersion": "0.1.1",
     "displayName": "L 絶対衝激Ⅳ",
     "modelName": "L絶対衝激フォースFH",
     "manufacturer": "アイドル",
@@ -203,6 +203,30 @@
           }
         ],
         "defaultValue": []
+      },
+      {
+        "id": "INP_WEAK_CHERRY_ELIGIBLE",
+        "name": "弱チェリー",
+        "category": "ZETTAI_NIGHT",
+        "type": "counter",
+        "unit": "回",
+        "displayOrder": 30,
+        "inferenceRole": "INCLUDE_SUPPORT",
+        "defaultValue": "",
+        "minimum": 0,
+        "description": "通常時の弱チェリー回数。夜ステージ中の保障再セット目的の弱チェリーは母数から除外します。"
+      },
+      {
+        "id": "INP_WEAK_CHERRY_NIGHT",
+        "name": "夜ステージ移行",
+        "category": "ZETTAI_NIGHT",
+        "type": "counter",
+        "unit": "回",
+        "displayOrder": 31,
+        "inferenceRole": "INCLUDE_SUPPORT",
+        "defaultValue": "",
+        "minimum": 0,
+        "description": "上記弱チェリーを契機に夜ステージへ新規移行した回数。"
       }
     ]
   },
@@ -235,6 +259,33 @@
         "sourceEvidenceRefs": [
           "SRC_1GEKI_SPEC",
           "SRC_PWORLD"
+        ]
+      },
+      {
+        "featureId": "FEAT_WEAK_CHERRY_NIGHT",
+        "name": "弱チェリー契機 夜ステージ移行",
+        "adoptionCategory": "INCLUDE_SUPPORT",
+        "calculationRole": "PROBABILITY",
+        "probabilityEngineUsage": true,
+        "modelType": "binomial",
+        "minimumSample": 1,
+        "sampleRecommendation": 1,
+        "reliabilityProfile": {
+          "weight": 0.8
+        },
+        "denominatorInputId": "INP_WEAK_CHERRY_ELIGIBLE",
+        "numeratorInputId": "INP_WEAK_CHERRY_NIGHT",
+        "displayFormat": "ratio_1_over_n",
+        "probabilities": {
+          "SET_1": 0.301,
+          "SET_2": 0.301,
+          "SET_3": 0.301,
+          "SET_4": 0.301,
+          "SET_5": 0.336,
+          "SET_6": 0.375
+        },
+        "sourceEvidenceRefs": [
+          "SRC_NANA_REVIEW_NIGHT"
         ]
       }
     ]
@@ -675,6 +726,13 @@
         "pageName": "絶対衝激4 ダイナマイトトロフィー",
         "url": "https://nana-press.com/kaiseki/machine/1043/32944/",
         "checkedAt": "2026-09-05"
+      },
+      {
+        "id": "SRC_NANA_REVIEW_NIGHT",
+        "classification": "ANALYSIS",
+        "pageName": "絶対衝激4 設定差・夜ステージ抽選",
+        "url": "https://nana-press.com/kaiseki/machine/1043/32612/",
+        "checkedAt": "2026-09-06"
       }
     ]
   },
@@ -759,19 +817,68 @@
             "gridSpan": 12
           }
         ]
+      },
+      {
+        "id": "UI_DESIGN_3",
+        "title": "弱チェリー→夜ステージ",
+        "displayOrder": 3,
+        "description": "夜ステージ中の保障再セットは新規移行として数えません。",
+        "collapsible": true,
+        "defaultExpanded": false,
+        "items": [
+          {
+            "type": "input",
+            "inputId": "INP_WEAK_CHERRY_ELIGIBLE",
+            "label": "弱チェリー",
+            "widget": "counter",
+            "gridSpan": 6,
+            "config": {
+              "directInput": false,
+              "compact": true,
+              "quickAdd": [
+                1
+              ],
+              "step": 1,
+              "emptyMeansUnobserved": true,
+              "observedZeroAllowed": true
+            }
+          },
+          {
+            "type": "input",
+            "inputId": "INP_WEAK_CHERRY_NIGHT",
+            "label": "夜ステージ移行",
+            "widget": "counter",
+            "gridSpan": 6,
+            "config": {
+              "directInput": false,
+              "compact": true,
+              "quickAdd": [
+                1
+              ],
+              "step": 1,
+              "emptyMeansUnobserved": true,
+              "observedZeroAllowed": true
+            }
+          }
+        ]
       }
     ]
   },
   "selectionSummary": {
     "schemaVersion": "selection-summary-v1",
-    "evaluatedCount": 10,
-    "selectedCount": 1,
-    "rejectedCount": 1,
+    "evaluatedCount": 12,
+    "selectedCount": 2,
+    "rejectedCount": 2,
     "selected": [
       {
         "featureId": "FEAT_AT_INITIAL",
         "name": "Platonic Time初当り",
         "reason": "6設定すべての公開値があり、AT到達の終端指標として通常ゲーム数から直接観測できるため採用。"
+      },
+      {
+        "featureId": "FEAT_WEAK_CHERRY_NIGHT",
+        "name": "弱チェリー契機の夜ステージ移行率",
+        "reason": "通常時弱チェリーを母数として設定別当選率を直接観測できるため採用。"
       }
     ],
     "rejected": [
@@ -779,6 +886,11 @@
         "featureId": "FEAT_REF_BONUS_INITIAL",
         "name": "ボーナス初当り",
         "reason": "AT初当りと強く同一経路に依存し、同時利用すると引きの偏りを重複評価するためv1では参考扱い。"
+      },
+      {
+        "featureId": "FEAT_REF_BONUS_DIRECT_AGG",
+        "name": "ボーナス直撃確率（各契機役の合算）",
+        "reason": "公開実質値は「日曜日」と「日曜日以外かつポイントMAX時以外」で母集団が分かれており、実戦総Gから正しい対象G分母を安定して切り出せないため合算Featureは不採用。契機役ごとの確定/下限示唆はEvidenceとして別途扱う余地がある。"
       }
     ]
   },

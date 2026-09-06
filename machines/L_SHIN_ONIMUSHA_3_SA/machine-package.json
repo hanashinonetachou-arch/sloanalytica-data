@@ -3,7 +3,7 @@
   "machine": {
     "schemaVersion": "2.0.0",
     "machineId": "L_SHIN_ONIMUSHA_3_SA",
-    "machineDataVersion": "0.1.0",
+    "machineDataVersion": "0.1.1",
     "displayName": "スマスロ 新鬼武者3",
     "modelName": "L新鬼武者3SA",
     "manufacturer": "レオスター",
@@ -208,6 +208,30 @@
           }
         ],
         "defaultValue": []
+      },
+      {
+        "id": "INP_NAV_ELIGIBLE_BONUS",
+        "name": "4コマ条件達成ボーナス",
+        "category": "ONIMUSHA_NAV",
+        "type": "counter",
+        "unit": "回",
+        "displayOrder": 30,
+        "inferenceRole": "INCLUDE_SUPPORT",
+        "defaultValue": "",
+        "minimum": 0,
+        "description": "ボーナス開始時の擬似遊技で全リール4コマ以内にボーナス絵柄を目押しできた赤7+青7ボーナス回数。"
+      },
+      {
+        "id": "INP_NAV_ALL_CAST",
+        "name": "オールキャストナビ",
+        "category": "ONIMUSHA_NAV",
+        "type": "counter",
+        "unit": "回",
+        "displayOrder": 31,
+        "inferenceRole": "INCLUDE_SUPPORT",
+        "defaultValue": "",
+        "minimum": 0,
+        "description": "上記条件達成ボーナスでオールキャストナビが発生した回数。"
       }
     ]
   },
@@ -240,6 +264,33 @@
         "sourceEvidenceRefs": [
           "SRC_NANA_SPEC",
           "SRC_PWORLD"
+        ]
+      },
+      {
+        "featureId": "FEAT_BONUS_ALL_CAST_NAV",
+        "name": "(真)蒼剣ボーナス中 オールキャストナビ",
+        "adoptionCategory": "INCLUDE_SUPPORT",
+        "calculationRole": "PROBABILITY",
+        "probabilityEngineUsage": true,
+        "modelType": "binomial",
+        "minimumSample": 1,
+        "sampleRecommendation": 1,
+        "reliabilityProfile": {
+          "weight": 0.8
+        },
+        "denominatorInputId": "INP_NAV_ELIGIBLE_BONUS",
+        "numeratorInputId": "INP_NAV_ALL_CAST",
+        "displayFormat": "ratio_1_over_n",
+        "probabilities": {
+          "SET_1": 0.063,
+          "SET_2": 0.094,
+          "SET_3": 0.094,
+          "SET_4": 0.125,
+          "SET_5": 0.125,
+          "SET_6": 0.125
+        },
+        "sourceEvidenceRefs": [
+          "SRC_PACHIMAGA_REVIEW_20260906"
         ]
       }
     ]
@@ -684,6 +735,13 @@
         "pageName": "新鬼武者3 鬼ボーナス中のキャラ紹介による設定示唆",
         "url": "https://nana-press.com/kaiseki/machine/1015/32038/",
         "checkedAt": "2026-09-05"
+      },
+      {
+        "id": "SRC_PACHIMAGA_REVIEW_20260906",
+        "classification": "ANALYSIS",
+        "pageName": "新鬼武者3 設定判別・オールキャストナビ発生率",
+        "url": "https://pachimaga.com/free/mach/maker-s/leostar/064435.php",
+        "checkedAt": "2026-09-06"
       }
     ]
   },
@@ -768,19 +826,68 @@
             "gridSpan": 12
           }
         ]
+      },
+      {
+        "id": "UI_DESIGN_3",
+        "title": "ボーナス中ナビボイス",
+        "displayOrder": 3,
+        "description": "4コマ目押し条件を達成した赤7+青7ボーナスだけを母数にします。",
+        "collapsible": true,
+        "defaultExpanded": false,
+        "items": [
+          {
+            "type": "input",
+            "inputId": "INP_NAV_ELIGIBLE_BONUS",
+            "label": "4コマ条件達成ボーナス",
+            "widget": "counter",
+            "gridSpan": 6,
+            "config": {
+              "directInput": false,
+              "compact": true,
+              "quickAdd": [
+                1
+              ],
+              "step": 1,
+              "emptyMeansUnobserved": true,
+              "observedZeroAllowed": true
+            }
+          },
+          {
+            "type": "input",
+            "inputId": "INP_NAV_ALL_CAST",
+            "label": "オールキャストナビ",
+            "widget": "counter",
+            "gridSpan": 6,
+            "config": {
+              "directInput": false,
+              "compact": true,
+              "quickAdd": [
+                1
+              ],
+              "step": 1,
+              "emptyMeansUnobserved": true,
+              "observedZeroAllowed": true
+            }
+          }
+        ]
       }
     ]
   },
   "selectionSummary": {
     "schemaVersion": "selection-summary-v1",
-    "evaluatedCount": 5,
-    "selectedCount": 1,
+    "evaluatedCount": 6,
+    "selectedCount": 2,
     "rejectedCount": 1,
     "selected": [
       {
         "featureId": "FEAT_AT_INITIAL",
         "name": "蒼剣RUSH初当り",
         "reason": "6設定すべての公開確率が複数ソースで一致し、通常ゲーム数を分母として直接観測できるため採用。"
+      },
+      {
+        "featureId": "FEAT_BONUS_ALL_CAST_NAV",
+        "name": "ボーナス中のナビボイス選択率",
+        "reason": "4コマ目押し条件を満たしたボーナスを母数として6設定の公開選択率を直接観測できるため採用。"
       }
     ],
     "rejected": [

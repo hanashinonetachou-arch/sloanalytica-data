@@ -3,7 +3,7 @@
   "machine": {
     "schemaVersion": "2.0.0",
     "machineId": "L_SMASLO_TOKYO_REVENGERS_ZF",
-    "machineDataVersion": "0.1.0",
+    "machineDataVersion": "0.1.1",
     "displayName": "スマスロ 東京リベンジャーズ",
     "modelName": "Lスマスロ東京リベンジャーズZF",
     "manufacturer": "サミー",
@@ -121,6 +121,54 @@
           }
         ],
         "defaultValue": []
+      },
+      {
+        "id": "INP_TC_WEAK_RARE",
+        "name": "弱チェリー/スイカ",
+        "category": "TOKYO_TC_RARE",
+        "type": "counter",
+        "unit": "回",
+        "displayOrder": 30,
+        "inferenceRole": "INCLUDE_SUPPORT",
+        "defaultValue": "",
+        "minimum": 0,
+        "description": "東卍CHANCE中に成立した弱チェリーとスイカの合計。卍目は含めません。"
+      },
+      {
+        "id": "INP_TC_WEAK_RARE_AT",
+        "name": "うちAT当選",
+        "category": "TOKYO_TC_RARE",
+        "type": "counter",
+        "unit": "回",
+        "displayOrder": 31,
+        "inferenceRole": "INCLUDE_SUPPORT",
+        "defaultValue": "",
+        "minimum": 0,
+        "description": "上記弱チェリー/スイカ契機で東卍RUSHに当選した回数。"
+      },
+      {
+        "id": "INP_REVENGE_ELIGIBLE_AT_END",
+        "name": "対象AT終了",
+        "category": "TOKYO_REVENGE",
+        "type": "counter",
+        "unit": "回",
+        "displayOrder": 40,
+        "inferenceRole": "INCLUDE_SUPPORT",
+        "defaultValue": "",
+        "minimum": 0,
+        "description": "一触即発または東卍CHANCEに一度以上当選した東卍RUSHの終了回数。駆け抜けは除外します。"
+      },
+      {
+        "id": "INP_REVENGE_HIT",
+        "name": "REVENGE発生",
+        "category": "TOKYO_REVENGE",
+        "type": "counter",
+        "unit": "回",
+        "displayOrder": 41,
+        "inferenceRole": "INCLUDE_SUPPORT",
+        "defaultValue": "",
+        "minimum": 0,
+        "description": "上記対象AT終了後にREVENGEフリーズが発生した回数。"
       }
     ]
   },
@@ -210,6 +258,60 @@
           "SRC_PWORLD",
           "SRC_NANA_MIDDLE_CHERRY",
           "SRC_1GEKI_ROLE"
+        ]
+      },
+      {
+        "featureId": "FEAT_TC_WEAK_RARE_AT",
+        "name": "東卍CHANCE中 弱チェリー/スイカからAT",
+        "adoptionCategory": "INCLUDE_SUPPORT",
+        "calculationRole": "PROBABILITY",
+        "probabilityEngineUsage": true,
+        "modelType": "binomial",
+        "minimumSample": 1,
+        "sampleRecommendation": 1,
+        "reliabilityProfile": {
+          "weight": 0.8
+        },
+        "denominatorInputId": "INP_TC_WEAK_RARE",
+        "numeratorInputId": "INP_TC_WEAK_RARE_AT",
+        "displayFormat": "ratio_1_over_n",
+        "probabilities": {
+          "SET_1": 0.102,
+          "SET_2": 0.105,
+          "SET_3": 0.109,
+          "SET_4": 0.125,
+          "SET_5": 0.148,
+          "SET_6": 0.164
+        },
+        "sourceEvidenceRefs": [
+          "SRC_1GEKI_REVIEW_20260906"
+        ]
+      },
+      {
+        "featureId": "FEAT_AT_END_REVENGE_ELIGIBLE",
+        "name": "東卍RUSH終了後REVENGE（非駆け抜け）",
+        "adoptionCategory": "INCLUDE_SUPPORT",
+        "calculationRole": "PROBABILITY",
+        "probabilityEngineUsage": true,
+        "modelType": "binomial",
+        "minimumSample": 1,
+        "sampleRecommendation": 1,
+        "reliabilityProfile": {
+          "weight": 0.8
+        },
+        "denominatorInputId": "INP_REVENGE_ELIGIBLE_AT_END",
+        "numeratorInputId": "INP_REVENGE_HIT",
+        "displayFormat": "ratio_1_over_n",
+        "probabilities": {
+          "SET_1": 0.102,
+          "SET_2": 0.109,
+          "SET_3": 0.109,
+          "SET_4": 0.125,
+          "SET_5": 0.16,
+          "SET_6": 0.164
+        },
+        "sourceEvidenceRefs": [
+          "SRC_1GEKI_REVIEW_20260906"
         ]
       }
     ]
@@ -360,6 +462,13 @@
         "pageName": "東京リベンジャーズ 設定示唆演出",
         "url": "https://1geki.jp/slot/l_tokyo_revengers/0/",
         "checkedAt": "2026-09-05"
+      },
+      {
+        "id": "SRC_1GEKI_REVIEW_20260906",
+        "classification": "ANALYSIS",
+        "pageName": "東京リベンジャーズ 設定差・設定判別要素まとめ",
+        "url": "https://1geki.jp/slot/l_tokyo_revengers/0/",
+        "checkedAt": "2026-09-06"
       }
     ]
   },
@@ -464,14 +573,102 @@
             "gridSpan": 12
           }
         ]
+      },
+      {
+        "id": "UI_DESIGN_3",
+        "title": "東卍CHANCE レア役",
+        "displayOrder": 3,
+        "description": "弱チェリー/スイカだけを母数にします。卍目は対象外です。",
+        "collapsible": true,
+        "defaultExpanded": false,
+        "items": [
+          {
+            "type": "input",
+            "inputId": "INP_TC_WEAK_RARE",
+            "label": "弱チェリー/スイカ",
+            "widget": "counter",
+            "gridSpan": 6,
+            "config": {
+              "directInput": false,
+              "compact": true,
+              "quickAdd": [
+                1
+              ],
+              "step": 1,
+              "emptyMeansUnobserved": true,
+              "observedZeroAllowed": true
+            }
+          },
+          {
+            "type": "input",
+            "inputId": "INP_TC_WEAK_RARE_AT",
+            "label": "うちAT当選",
+            "widget": "counter",
+            "gridSpan": 6,
+            "config": {
+              "directInput": false,
+              "compact": true,
+              "quickAdd": [
+                1
+              ],
+              "step": 1,
+              "emptyMeansUnobserved": true,
+              "observedZeroAllowed": true
+            }
+          }
+        ]
+      },
+      {
+        "id": "UI_DESIGN_4",
+        "title": "AT終了後 REVENGE",
+        "displayOrder": 4,
+        "description": "一触即発または東卍CHANCEに一度以上当選したATだけを母数にします。駆け抜けATは除外します。",
+        "collapsible": true,
+        "defaultExpanded": false,
+        "items": [
+          {
+            "type": "input",
+            "inputId": "INP_REVENGE_ELIGIBLE_AT_END",
+            "label": "対象AT終了",
+            "widget": "counter",
+            "gridSpan": 6,
+            "config": {
+              "directInput": false,
+              "compact": true,
+              "quickAdd": [
+                1
+              ],
+              "step": 1,
+              "emptyMeansUnobserved": true,
+              "observedZeroAllowed": true
+            }
+          },
+          {
+            "type": "input",
+            "inputId": "INP_REVENGE_HIT",
+            "label": "REVENGE発生",
+            "widget": "counter",
+            "gridSpan": 6,
+            "config": {
+              "directInput": false,
+              "compact": true,
+              "quickAdd": [
+                1
+              ],
+              "step": 1,
+              "emptyMeansUnobserved": true,
+              "observedZeroAllowed": true
+            }
+          }
+        ]
       }
     ]
   },
   "selectionSummary": {
     "schemaVersion": "selection-summary-v1",
-    "evaluatedCount": 10,
-    "selectedCount": 3,
-    "rejectedCount": 1,
+    "evaluatedCount": 13,
+    "selectedCount": 5,
+    "rejectedCount": 2,
     "selected": [
       {
         "featureId": "FEAT_AT_INITIAL",
@@ -487,6 +684,16 @@
         "featureId": "FEAT_MIDDLE_CHERRY",
         "name": "中段チェリー",
         "reason": "Gate Cでは完全ベクトル確認待ちだったが、設定1-3・4-5・6の全段階公開値を複数ソースで確認できたため補間なしで採用。"
+      },
+      {
+        "featureId": "FEAT_TC_WEAK_RARE_AT",
+        "name": "東卍CHANCE中 弱チェリー・スイカ時AT当選率",
+        "reason": "対象役とAT当選を直接数えられ、設定1～6の完全な当選率が公開されているため採用。"
+      },
+      {
+        "featureId": "FEAT_AT_END_REVENGE_ELIGIBLE",
+        "name": "東卍RUSH終了後のREVENGE発生率（非駆け抜け）",
+        "reason": "駆け抜けを除外した対象ATで完全な設定別発生率が公開され、条件を実戦で識別できるため採用。"
       }
     ],
     "rejected": [
@@ -494,6 +701,11 @@
         "featureId": "FEAT_REF_FIRST_HIT_TOTAL",
         "name": "初当り合算",
         "reason": "AT/CZ等の同一因果経路を重複評価するためv1の同時尤度から除外。"
+      },
+      {
+        "featureId": "FEAT_REF_INITIAL_SET_STOCK",
+        "name": "初当り時のセットストック抽選",
+        "reason": "設定別振り分けは公開されているが、AT中の別契機ストックと事後的に混在し「初当り時に付与されたストック数」を安定して直接識別できないため不採用。"
       }
     ]
   },
