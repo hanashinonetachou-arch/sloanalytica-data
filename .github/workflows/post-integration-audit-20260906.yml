@@ -1,0 +1,38 @@
+name: Post-integration Audit 20260906
+
+on:
+  push:
+    branches: [audit/post-integration-20260906]
+    paths: ['.github/workflows/post-integration-audit-20260906.yml']
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout current prototype HEAD
+        uses: actions/checkout@v4
+        with:
+          ref: prototype-multi-machine
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - name: Install dependencies
+        run: npm ci
+      - name: Repository-wide tests
+        run: npm test
+      - name: Public-data audit
+        run: npm run audit
+      - name: Registry validation
+        run: npm run registry:validate
+      - name: Four-layer linkage gate
+        run: npm run pipeline:four-layer:gate
+      - name: Difficulty exposure audit
+        run: npm run difficulty:exposure-audit
+      - name: UI service-name audit
+        run: npm run audit:ui-service-names
