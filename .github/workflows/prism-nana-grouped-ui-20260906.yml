@@ -19,44 +19,14 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 22
-      - name: Rewrite canonical Prism Nana UI
+
+      - name: Validate canonical grouped UI
         run: |
           node <<'NODE'
           const fs = require('fs');
           const p = 'research/L_PRISM_NANA_CC/ui-design-data.json';
           const d = JSON.parse(fs.readFileSync(p, 'utf8'));
-
-          const old = d.sections;
-          const keep = (name) => {
-            if (!old[name]) throw new Error(`missing section: ${name}`);
-            return old[name];
-          };
-
-          const ids = {
-            payout: ['INP_PAYOUT_222_COUNT','INP_PAYOUT_456_COUNT','INP_PAYOUT_666_COUNT'],
-            bonusEndNumeric: ['INP_BONUS_END_NON_EVIDENCE_CAT_1','INP_BONUS_END_NON_EVIDENCE_CAT_2','INP_BONUS_END_NON_EVIDENCE_CAT_3'],
-            bonusEndEvidence: ['INP_END_AL_MIKU_SHIRUBE_COUNT','INP_END_MAKO_COUNT','INP_END_UNIFORM_COUNT','INP_END_SWIM_COUNT'],
-            music: ['INP_SPECIAL_BONUS_MUSIC_CAT_1','INP_SPECIAL_BONUS_MUSIC_CAT_2','INP_SPECIAL_BONUS_MUSIC_CAT_3'],
-            voiceSpace: ['INP_PURI_VOICE_SPACE_NON_EVIDENCE_CAT_1','INP_PURI_VOICE_SPACE_NON_EVIDENCE_CAT_2'],
-            voiceIce: ['INP_PURI_VOICE_ICE_NON_EVIDENCE_CAT_1','INP_PURI_VOICE_ICE_NON_EVIDENCE_CAT_2'],
-            voiceFire: ['INP_PURI_VOICE_FIRE_NON_EVIDENCE_CAT_1','INP_PURI_VOICE_FIRE_NON_EVIDENCE_CAT_2'],
-            voiceSweet: ['INP_PURI_VOICE_SWEET_NON_EVIDENCE_CAT_1','INP_PURI_VOICE_SWEET_NON_EVIDENCE_CAT_2'],
-            voiceEvidence: ['INP_PURI_VOICE_456_COUNT','INP_PURI_VOICE_666_COUNT'],
-            talkNumeric: ['INP_NORMAL_TALK_NON_EVIDENCE_CAT_1','INP_NORMAL_TALK_NON_EVIDENCE_CAT_2','INP_NORMAL_TALK_NON_EVIDENCE_CAT_3','INP_NORMAL_TALK_NON_EVIDENCE_CAT_4'],
-            talkEvidence: ['INP_TALK_CLEAR_SKY_COUNT','INP_TALK_DESTINY_COUNT','INP_TALK_RAINBOW_COUNT']
-          };
-
-          const direct = (inputIds, description, refs=[]) => ({
-            inputIds,
-            description,
-            observationRole: 'DIRECT_PLAY',
-            observationRefs: refs,
-            acquisitionSources: ['DIRECT_PLAY'],
-            collapsible: false,
-            defaultExpanded: true
-          });
-
-          d.sectionOrder = [
+          const expected = [
             'ST初当り',
             'ボーナス中',
             'ボーナス終了画面',
@@ -65,104 +35,97 @@ jobs:
             '通常時の特定会話',
             '獲得枚数による設定示唆・確定'
           ];
-
-          d.sections = {
-            'ST初当り': {...keep('ST初当り 回数 / 通常ゲーム数')},
-            'ボーナス中': {...keep('ボーナス中')},
-            'ボーナス終了画面': direct(
-              [...ids.bonusEndNumeric, ...ids.bonusEndEvidence],
-              'ボーナス終了時に表示された画面を数えます。設定差のある画面と、設定が確定する画面を同じ場所に入力できます。',
-              ['OBS_BONUS_END_NON_EVIDENCE']
-            ),
-            'スペシャルボーナス開始時の楽曲': direct(
-              ids.music,
-              'スペシャルボーナス開始時に流れた楽曲を数えます。',
-              ['OBS_SPECIAL_BONUS_MUSIC']
-            ),
-            'プリプリゾーン終了時 タッチボイス': direct(
-              [...ids.voiceSpace, ...ids.voiceIce, ...ids.voiceFire, ...ids.voiceSweet, ...ids.voiceEvidence],
-              'プリプリゾーン終了時に画面をタッチし、そのときのステージとボイス内容を数えます。設定が確定するボイスも同じ場所に入力できます。',
-              ['OBS_PURI_VOICE_SPACE_NON_EVIDENCE','OBS_PURI_VOICE_ICE_NON_EVIDENCE','OBS_PURI_VOICE_FIRE_NON_EVIDENCE','OBS_PURI_VOICE_SWEET_NON_EVIDENCE']
-            ),
-            '通常時の特定会話': direct(
-              [...ids.talkNumeric, ...ids.talkEvidence],
-              '通常時に対象となる会話を確認した回数を数えます。設定差のある会話と、設定が確定する会話を同じ場所に入力できます。',
-              ['OBS_NORMAL_TALK_NON_EVIDENCE']
-            ),
-            '獲得枚数による設定示唆・確定': {
-              inputIds: ids.payout,
-              description: 'ボーナス終了時などに表示された特定の獲得枚数を確認した回数を数えます。',
-              observationRefs: [],
-              acquisitionSources: [],
-              collapsible: true,
-              defaultExpanded: false
-            }
-          };
-
-          const rename = (id, name) => {
-            if (!d.inputContracts[id]) throw new Error(`missing input contract: ${id}`);
-            d.inputContracts[id].name = name;
-            d.inputContracts[id].gridSpan = 6;
-          };
-
-          rename('INP_SPECIAL_BONUS_MUSIC_CAT_1', 'YOUR PRISM');
-          rename('INP_SPECIAL_BONUS_MUSIC_CAT_2', '愛の[i]nfection');
-          rename('INP_SPECIAL_BONUS_MUSIC_CAT_3', '星空リンカネーション');
-
-          const voiceNames = [
-            ['INP_PURI_VOICE_SPACE_NON_EVIDENCE_CAT_1','宇宙・通常'],
-            ['INP_PURI_VOICE_SPACE_NON_EVIDENCE_CAT_2','宇宙・偶数示唆'],
-            ['INP_PURI_VOICE_ICE_NON_EVIDENCE_CAT_1','氷・通常'],
-            ['INP_PURI_VOICE_ICE_NON_EVIDENCE_CAT_2','氷・偶数示唆'],
-            ['INP_PURI_VOICE_FIRE_NON_EVIDENCE_CAT_1','炎・通常'],
-            ['INP_PURI_VOICE_FIRE_NON_EVIDENCE_CAT_2','炎・偶数示唆'],
-            ['INP_PURI_VOICE_SWEET_NON_EVIDENCE_CAT_1','お菓子・通常'],
-            ['INP_PURI_VOICE_SWEET_NON_EVIDENCE_CAT_2','お菓子・偶数示唆'],
-            ['INP_PURI_VOICE_456_COUNT','やる気度456%（設定4以上）'],
-            ['INP_PURI_VOICE_666_COUNT','やる気度666%（設定6）']
-          ];
-          for (const [id,name] of voiceNames) rename(id,name);
-
-          for (const id of [...ids.bonusEndNumeric,...ids.bonusEndEvidence,...ids.music,...ids.talkNumeric,...ids.talkEvidence,...ids.payout]) {
-            if (d.inputContracts[id]) d.inputContracts[id].gridSpan = 6;
-          }
-
-          const userFacing = [
-            ...d.sectionOrder,
-            ...Object.entries(d.sections).flatMap(([name, s]) => [name, s.description || '']),
-            ...Object.values(d.inputContracts).flatMap(c => [c.name || '', c.description || ''])
-          ].join('\n');
-          if (/\bFeature\b|\bEvidence\b/.test(userFacing)) {
-            throw new Error('internal terminology remains in user-facing canonical UI');
-          }
-          fs.writeFileSync(p, JSON.stringify(d, null, 2) + '\n');
-          NODE
-      - name: Validate grouped UI contract
-        run: |
-          node <<'NODE'
-          const fs = require('fs');
-          const d = JSON.parse(fs.readFileSync('research/L_PRISM_NANA_CC/ui-design-data.json','utf8'));
-          const expected = ['ST初当り','ボーナス中','ボーナス終了画面','スペシャルボーナス開始時の楽曲','プリプリゾーン終了時 タッチボイス','通常時の特定会話','獲得枚数による設定示唆・確定'];
-          if (JSON.stringify(d.sectionOrder) !== JSON.stringify(expected)) throw new Error('section order mismatch');
+          if (JSON.stringify(d.sectionOrder) !== JSON.stringify(expected)) throw new Error('canonical section order mismatch');
           if (d.sections['プリプリゾーン終了時 タッチボイス'].inputIds.length !== 10) throw new Error('touch voice grouping mismatch');
           if (!d.sections['ボーナス終了画面'].inputIds.includes('INP_END_UNIFORM_COUNT')) throw new Error('bonus-end evidence not colocated');
           if (!d.sections['通常時の特定会話'].inputIds.includes('INP_TALK_RAINBOW_COUNT')) throw new Error('talk evidence not colocated');
           const userFacing = [
             ...d.sectionOrder,
-            ...Object.entries(d.sections).flatMap(([name, s]) => [name, s.description || '']),
+            ...Object.entries(d.sections).flatMap(([name,s]) => [name,s.description || '']),
             ...Object.values(d.inputContracts).flatMap(c => [c.name || '', c.description || ''])
           ].join('\n');
-          if (/\bFeature\b|\bEvidence\b/.test(userFacing)) throw new Error('internal terminology leak');
-          console.log('Prism Nana grouped canonical UI: PASS');
+          if (/\bFeature\b|\bEvidence\b/.test(userFacing)) throw new Error('internal terminology leak in canonical UI');
+          console.log('Canonical grouped UI: PASS');
           NODE
-      - name: Commit canonical UI
+
+      - name: Sync machine package UI from canonical
+        run: |
+          node <<'NODE'
+          const fs = require('fs');
+          const cp = 'research/L_PRISM_NANA_CC/ui-design-data.json';
+          const mp = 'machines/L_PRISM_NANA_CC/machine-package.json';
+          const c = JSON.parse(fs.readFileSync(cp, 'utf8'));
+          const m = JSON.parse(fs.readFileSync(mp, 'utf8'));
+
+          const logicBefore = JSON.stringify({features:m.features,evidence:m.evidence});
+          const oldItems = new Map();
+          for (const sec of m.ui.sections) {
+            for (const item of sec.items || []) {
+              if (item.type === 'input' && item.inputId) oldItems.set(item.inputId, JSON.parse(JSON.stringify(item)));
+            }
+          }
+
+          const inputById = new Map(m.inputs.inputs.map(x => [x.id,x]));
+          for (const [id, contract] of Object.entries(c.inputContracts)) {
+            const inp = inputById.get(id);
+            if (inp && contract.name) inp.name = contract.name;
+          }
+
+          const sections = [];
+          c.sectionOrder.forEach((title, idx) => {
+            const src = c.sections[title];
+            if (!src) throw new Error(`missing canonical section ${title}`);
+            const items = src.inputIds.map(inputId => {
+              const item = oldItems.get(inputId);
+              if (!item) throw new Error(`missing package UI item ${inputId}`);
+              const contract = c.inputContracts[inputId];
+              if (!contract) throw new Error(`missing canonical input contract ${inputId}`);
+              item.label = contract.name || item.label;
+              item.gridSpan = contract.gridSpan || item.gridSpan;
+              return item;
+            });
+            sections.push({
+              id:`UI_DESIGN_${idx+1}`,
+              title,
+              displayOrder:idx+1,
+              description:src.description || '',
+              collapsible:Boolean(src.collapsible),
+              defaultExpanded:Boolean(src.defaultExpanded),
+              items
+            });
+          });
+          m.ui.sections = sections;
+          m.machine.machineDataVersion = '0.1.2';
+
+          const logicAfter = JSON.stringify({features:m.features,evidence:m.evidence});
+          if (logicBefore !== logicAfter) throw new Error('inference logic changed unexpectedly');
+          fs.writeFileSync(mp, JSON.stringify(m,null,2)+'\n');
+          NODE
+
+      - name: Validate generated package UI
+        run: |
+          node <<'NODE'
+          const fs = require('fs');
+          const m = JSON.parse(fs.readFileSync('machines/L_PRISM_NANA_CC/machine-package.json','utf8'));
+          const expected = ['ST初当り','ボーナス中','ボーナス終了画面','スペシャルボーナス開始時の楽曲','プリプリゾーン終了時 タッチボイス','通常時の特定会話','獲得枚数による設定示唆・確定'];
+          if (m.machine.machineDataVersion !== '0.1.2') throw new Error('machineDataVersion mismatch');
+          if (JSON.stringify(m.ui.sections.map(s=>s.title)) !== JSON.stringify(expected)) throw new Error('package section order mismatch');
+          const voice = m.ui.sections.find(s=>s.title==='プリプリゾーン終了時 タッチボイス');
+          if (!voice || voice.items.length !== 10) throw new Error('package touch voice grouping mismatch');
+          const visible = m.ui.sections.flatMap(s=>[s.title,s.description,...s.items.map(i=>i.label||'')]).join('\n');
+          if (/\bFeature\b|\bEvidence\b/.test(visible)) throw new Error('internal terminology leak in package UI');
+          if (m.ui.sections.some(s=>/デフォルトボイス \/ 偶数示唆ボイス|非Evidence/.test(`${s.title}\n${s.description}`))) throw new Error('legacy section wording remains');
+          console.log('Generated Prism Nana package UI: PASS');
+          NODE
+
+      - name: Commit package sync
         run: |
           git config user.name github-actions[bot]
           git config user.email 41898282+github-actions[bot]@users.noreply.github.com
-          git add research/L_PRISM_NANA_CC/ui-design-data.json
+          git add research/L_PRISM_NANA_CC/ui-design-data.json machines/L_PRISM_NANA_CC/machine-package.json
           if git diff --cached --quiet; then
             echo 'No changes'
           else
-            git commit -m 'fix: group Prism Nana observation UI'
+            git commit -m 'fix: sync Prism Nana grouped UI to package'
             git push
           fi
