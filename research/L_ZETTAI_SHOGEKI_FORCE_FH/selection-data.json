@@ -1,7 +1,7 @@
 {
   "schemaVersion": "selection-data-v1",
   "machineId": "L_ZETTAI_SHOGEKI_FORCE_FH",
-  "machineDataVersion": "0.1.0",
+  "machineDataVersion": "0.1.1",
   "inputs": [
     {
       "id": "INP_NORMAL_GAMES",
@@ -182,6 +182,30 @@
         }
       ],
       "defaultValue": []
+    },
+    {
+      "id": "INP_WEAK_CHERRY_ELIGIBLE",
+      "name": "弱チェリー",
+      "category": "ZETTAI_NIGHT",
+      "type": "counter",
+      "unit": "回",
+      "displayOrder": 30,
+      "inferenceRole": "INCLUDE_SUPPORT",
+      "defaultValue": "",
+      "minimum": 0,
+      "description": "通常時の弱チェリー回数。夜ステージ中の保障再セット目的の弱チェリーは母数から除外します。"
+    },
+    {
+      "id": "INP_WEAK_CHERRY_NIGHT",
+      "name": "夜ステージ移行",
+      "category": "ZETTAI_NIGHT",
+      "type": "counter",
+      "unit": "回",
+      "displayOrder": 31,
+      "inferenceRole": "INCLUDE_SUPPORT",
+      "defaultValue": "",
+      "minimum": 0,
+      "description": "上記弱チェリーを契機に夜ステージへ新規移行した回数。"
     }
   ],
   "features": [
@@ -195,6 +219,17 @@
       "userReason": "Gate Bで採用し、Gate Cの観測契約を経てGate D MachineDataに物質化済み。分子・分母・設定別確率はMachineDataと同一。",
       "difficultyParticipation": "EXCLUDE",
       "difficultyExclusionReason": "Gate E時点では実戦総GへのDifficulty Exposure換算を別監査するため、推測Featureは維持したままDifficulty校正のみ除外する。"
+    },
+    {
+      "researchFeatureId": "RF_WEAK_CHERRY_NIGHT",
+      "featureId": "FEAT_WEAK_CHERRY_NIGHT",
+      "adoptionCategory": "INCLUDE_SUPPORT",
+      "weight": 0.8,
+      "numeratorInputId": "INP_WEAK_CHERRY_NIGHT",
+      "denominatorInputId": "INP_WEAK_CHERRY_ELIGIBLE",
+      "userReason": "弱チェリーを母数に30.1%/33.6%/37.5%の設定差を直接評価できるため採用。",
+      "difficultyParticipation": "EXCLUDE",
+      "difficultyExclusionReason": "条件付き観測で総Gへの共通Exposure換算を置けないため。"
     }
   ],
   "evidence": [
@@ -562,7 +597,8 @@
   },
   "uiCategoryLabels": {
     "SEL_FEAT_AT_INITIAL": "通常ゲーム数",
-    "EVIDENCE": "設定示唆・確定情報"
+    "EVIDENCE": "設定示唆・確定情報",
+    "ZETTAI_NIGHT": "弱チェリー→夜ステージ"
   },
   "difficultyAnalysis": {
     "targetGames": [
@@ -585,14 +621,19 @@
   "migrationNote": "Gate A/Bの不採用候補一覧はbatch Gate文書とMachineData selectionSummaryに保持。Phase 12構造化SelectionDataでは、現在実行される採用Feature/Evidence契約のみをMachineDataから無変換で再表現する。",
   "selectionSummaryContract": {
     "schemaVersion": "selection-summary-v1",
-    "evaluatedCount": 10,
-    "selectedCount": 1,
-    "rejectedCount": 1,
+    "evaluatedCount": 12,
+    "selectedCount": 2,
+    "rejectedCount": 2,
     "selected": [
       {
         "featureId": "FEAT_AT_INITIAL",
         "name": "Platonic Time初当り",
         "reason": "6設定すべての公開値があり、AT到達の終端指標として通常ゲーム数から直接観測できるため採用。"
+      },
+      {
+        "featureId": "FEAT_WEAK_CHERRY_NIGHT",
+        "name": "弱チェリー契機の夜ステージ移行率",
+        "reason": "通常時弱チェリーを母数として設定別当選率を直接観測できるため採用。"
       }
     ],
     "rejected": [
@@ -600,6 +641,11 @@
         "featureId": "FEAT_REF_BONUS_INITIAL",
         "name": "ボーナス初当り",
         "reason": "AT初当りと強く同一経路に依存し、同時利用すると引きの偏りを重複評価するためv1では参考扱い。"
+      },
+      {
+        "featureId": "FEAT_REF_BONUS_DIRECT_AGG",
+        "name": "ボーナス直撃確率（各契機役の合算）",
+        "reason": "公開実質値は「日曜日」と「日曜日以外かつポイントMAX時以外」で母集団が分かれており、実戦総Gから正しい対象G分母を安定して切り出せないため合算Featureは不採用。契機役ごとの確定/下限示唆はEvidenceとして別途扱う余地がある。"
       }
     ]
   }

@@ -1,7 +1,7 @@
 {
   "schemaVersion": "selection-data-v1",
   "machineId": "L_SHIN_ONIMUSHA_3_SA",
-  "machineDataVersion": "0.1.0",
+  "machineDataVersion": "0.1.1",
   "inputs": [
     {
       "id": "INP_NORMAL_GAMES",
@@ -187,6 +187,30 @@
         }
       ],
       "defaultValue": []
+    },
+    {
+      "id": "INP_NAV_ELIGIBLE_BONUS",
+      "name": "4コマ条件達成ボーナス",
+      "category": "ONIMUSHA_NAV",
+      "type": "counter",
+      "unit": "回",
+      "displayOrder": 30,
+      "inferenceRole": "INCLUDE_SUPPORT",
+      "defaultValue": "",
+      "minimum": 0,
+      "description": "ボーナス開始時の擬似遊技で全リール4コマ以内にボーナス絵柄を目押しできた赤7+青7ボーナス回数。"
+    },
+    {
+      "id": "INP_NAV_ALL_CAST",
+      "name": "オールキャストナビ",
+      "category": "ONIMUSHA_NAV",
+      "type": "counter",
+      "unit": "回",
+      "displayOrder": 31,
+      "inferenceRole": "INCLUDE_SUPPORT",
+      "defaultValue": "",
+      "minimum": 0,
+      "description": "上記条件達成ボーナスでオールキャストナビが発生した回数。"
     }
   ],
   "features": [
@@ -200,6 +224,17 @@
       "userReason": "Gate Bで採用し、Gate Cの観測契約を経てGate D MachineDataに物質化済み。分子・分母・設定別確率はMachineDataと同一。",
       "difficultyParticipation": "EXCLUDE",
       "difficultyExclusionReason": "Gate E時点では実戦総GへのDifficulty Exposure換算を別監査するため、推測Featureは維持したままDifficulty校正のみ除外する。"
+    },
+    {
+      "researchFeatureId": "RF_BONUS_ALL_CAST_NAV",
+      "featureId": "FEAT_BONUS_ALL_CAST_NAV",
+      "adoptionCategory": "INCLUDE_SUPPORT",
+      "weight": 0.8,
+      "numeratorInputId": "INP_NAV_ALL_CAST",
+      "denominatorInputId": "INP_NAV_ELIGIBLE_BONUS",
+      "userReason": "4コマ条件達成時に限定すれば6.3%～12.5%の公開発生率を直接評価できるため採用。",
+      "difficultyParticipation": "EXCLUDE",
+      "difficultyExclusionReason": "条件付き観測で総Gへの共通Exposure換算を置けないため。"
     }
   ],
   "evidence": [
@@ -583,7 +618,8 @@
   },
   "uiCategoryLabels": {
     "SEL_FEAT_AT_INITIAL": "通常ゲーム数",
-    "EVIDENCE": "設定示唆・確定情報"
+    "EVIDENCE": "設定示唆・確定情報",
+    "ONIMUSHA_NAV": "ボーナス中ナビボイス"
   },
   "difficultyAnalysis": {
     "targetGames": [
@@ -606,14 +642,19 @@
   "migrationNote": "Gate A/Bの不採用候補一覧はbatch Gate文書とMachineData selectionSummaryに保持。Phase 12構造化SelectionDataでは、現在実行される採用Feature/Evidence契約のみをMachineDataから無変換で再表現する。",
   "selectionSummaryContract": {
     "schemaVersion": "selection-summary-v1",
-    "evaluatedCount": 5,
-    "selectedCount": 1,
+    "evaluatedCount": 6,
+    "selectedCount": 2,
     "rejectedCount": 1,
     "selected": [
       {
         "featureId": "FEAT_AT_INITIAL",
         "name": "蒼剣RUSH初当り",
         "reason": "6設定すべての公開確率が複数ソースで一致し、通常ゲーム数を分母として直接観測できるため採用。"
+      },
+      {
+        "featureId": "FEAT_BONUS_ALL_CAST_NAV",
+        "name": "ボーナス中のナビボイス選択率",
+        "reason": "4コマ目押し条件を満たしたボーナスを母数として6設定の公開選択率を直接観測できるため採用。"
       }
     ],
     "rejected": [
