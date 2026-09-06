@@ -1,0 +1,104 @@
+name: Final Audit 20260906 Next10 Gate A
+
+on:
+  push:
+    branches:
+      - batch/20260906-next10-gate0
+    paths:
+      - '.github/workflows/final-audit-20260906-next10-gate-a.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  audit:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: batch/20260906-next10-gate0
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: npm ci
+      - name: Validate authoritative scope and ResearchData
+        shell: bash
+        run: |
+          set -euo pipefail
+          ids=(L_BURNING_EXPRESS_ZN L_PRISM_NANA_CC L_GINGA_EIYUU_DNT_GH L_HIHODEN_PA7 L_OKIDOKI_DUO_ENCORE_FR L_HOKUTO_TENSEI_2_MW L_TEKKEN_6_YD01H L_HANMA_BAKI_L5 L_GOBLIN_SLAYER_2_JZ L_GHOST_IN_THE_SHELL_ZS)
+          npm run registry:validate
+          for id in "${ids[@]}"; do node tools/validate-research-data.mjs "research/$id/research-data.json"; done
+          node tools/discovery-completeness-gate.mjs "${ids[@]}"
+      - name: Run strict Gate A semantic audit
+        shell: bash
+        run: |
+          node --input-type=module <<'NODE'
+          import fs from 'node:fs';
+          const ids=['L_BURNING_EXPRESS_ZN','L_PRISM_NANA_CC','L_GINGA_EIYUU_DNT_GH','L_HIHODEN_PA7','L_OKIDOKI_DUO_ENCORE_FR','L_HOKUTO_TENSEI_2_MW','L_TEKKEN_6_YD01H','L_HANMA_BAKI_L5','L_GOBLIN_SLAYER_2_JZ','L_GHOST_IN_THE_SHELL_ZS'];
+          const excluded=['LB_NEW_KING_HANAHANA_V_PF','L_HANABI_KM'];
+          const errors=[]; const rows=[]; const risks=[]; const conflicts=[];
+          let discovered=0,resolved=0,reference=0,features=0,evidence=0;
+          for(const id of ids){
+            const d=JSON.parse(fs.readFileSync(`research/${id}/research-data.json`,'utf8'));
+            if(d.machine?.machineId!==id) errors.push(`${id}: machineId mismatch`);
+            const inv=d.discoveryInventory??[]; discovered+=inv.length;
+            for(const x of inv){
+              if(x.transferStatus==='UNRESOLVED') errors.push(`${id}:${x.discoveryCandidateId}: unresolved`);
+              else if(x.transferStatus==='RESOLVED') resolved++;
+              else if(x.transferStatus==='REFERENCE') reference++;
+              else errors.push(`${id}:${x.discoveryCandidateId}: unsupported transferStatus ${x.transferStatus}`);
+            }
+            for(const f of d.features??[]){features++; if(f.factStatus==='verified' && !(f.sourceRefs??[]).length) errors.push(`${id}:${f.researchFeatureId}: verified feature sourceRefs missing`); if(!String(f.denominatorDefinition??'').trim()) errors.push(`${id}:${f.researchFeatureId}: denominatorDefinition missing`); if(f.dependencyRisk) risks.push({machineId:id,targetId:f.researchFeatureId,risk:f.dependencyRisk});}
+            for(const e of d.evidenceCandidates??[]){evidence++; if(e.factStatus==='verified' && !(e.sourceRefs??[]).length) errors.push(`${id}:${e.researchEvidenceId}: verified evidence sourceRefs missing`);}
+            for(const c of d.conflicts??[]) conflicts.push({machineId:id,...c});
+            if(!(d.linkedServices??[]).length) errors.push(`${id}: linkedServices research record missing`);
+            rows.push({machineId:id,features:(d.features??[]).length,evidence:(d.evidenceCandidates??[]).length,discovery:inv.length,resolved:inv.filter(x=>x.transferStatus==='RESOLVED').length,reference:inv.filter(x=>x.transferStatus==='REFERENCE').length,linkedServices:(d.linkedServices??[]).map(x=>({name:x.name,status:x.status,exactFieldsStatus:x.exactFieldsStatus??null,fieldCount:(x.verifiedFields??[]).length}))});
+          }
+          const identity=JSON.parse(fs.readFileSync('research/batches/20260906-next10/gate0-machine-identity.json','utf8'));
+          const identityIds=(identity.machines??[]).map(x=>x.machineId);
+          if(JSON.stringify(identityIds)!==JSON.stringify(ids)) errors.push(`Gate0 identity scope/order mismatch: ${identityIds.join(',')}`);
+          for(const x of excluded) if(identityIds.includes(x)) errors.push(`excluded machine in batch identity: ${x}`);
+          const universe=JSON.parse(fs.readFileSync('research/batches/20260906-next10/discovery-candidate-universe.json','utf8'));
+          const universeIds=(universe.machines??[]).map(x=>x.machineId);
+          for(const x of excluded) if(universeIds.includes(x)) errors.push(`excluded machine in discovery universe: ${x}`);
+          if(discovered!==61) errors.push(`expected discovered 61, got ${discovered}`);
+          if(resolved+reference!==discovered) errors.push(`disposition mismatch ${resolved}+${reference} != ${discovered}`);
+          const requiredRiskNotes={
+            L_BURNING_EXPRESS_ZN:['合算','重複'],
+            L_OKIDOKI_DUO_ENCORE_FR:['連チャン中','モード'],
+            L_HOKUTO_TENSEI_2_MW:['天破','条件'],
+            L_TEKKEN_6_YD01H:['引き戻し','eligible'],
+            L_HANMA_BAKI_L5:['引き戻し'],
+            L_GOBLIN_SLAYER_2_JZ:['300G','弱チェリー'],
+            L_GHOST_IN_THE_SHELL_ZS:['白の境界','タチコマ']
+          };
+          for(const [id,terms] of Object.entries(requiredRiskNotes)){
+            const d=JSON.parse(fs.readFileSync(`research/${id}/research-data.json`,'utf8'));
+            const text=JSON.stringify({notes:d.researchNotes??[],features:d.features??[]});
+            for(const term of terms) if(!text.includes(term)) errors.push(`${id}: risk note missing term ${term}`);
+          }
+          if(errors.length){for(const e of errors) console.error(`ERROR GateA: ${e}`);process.exit(1);}
+          const report={schemaVersion:'gate-a-final-audit-v1',batch:'20260906-next10',scope:'AUTHORITATIVE_NEW_10',generatedAt:new Date().toISOString(),gateA:'PASS',researchValidation:'PASS',discoveryCompleteness:'PASS',discovered,resolved,reference,unresolved:0,totalFeatures:features,totalEvidence:evidence,excludedMachinesVerifiedAbsent:excluded,carriedForwardConflicts:conflicts,dependencyRisks:risks,machines:rows,notes:['Research completeness PASS does not imply Selection adoption. All Reference dispositions remain non-likelihood until Gate B.','Tekken6 Kerotto Trophy authority conflict is intentionally carried forward; it is not Hard Evidence in Gate A.','Linked-service status NOT_CONFIRMED means searched but not positively verified; it is not an assertion of nonexistence.']};
+          fs.writeFileSync('reports/batch-20260906-gate-a-final-audit.json',JSON.stringify(report,null,2)+'\n');
+          console.log(`Gate A PASS: machines 10 / discovery ${discovered} / resolved ${resolved} / reference ${reference} / unresolved 0 / features ${features} / evidence ${evidence} / conflicts ${conflicts.length}`);
+          NODE
+      - name: Mark Gate A PASS in authoritative ResearchData
+        shell: bash
+        run: |
+          node --input-type=module <<'NODE'
+          import fs from 'node:fs';
+          const ids=['L_BURNING_EXPRESS_ZN','L_PRISM_NANA_CC','L_GINGA_EIYUU_DNT_GH','L_HIHODEN_PA7','L_OKIDOKI_DUO_ENCORE_FR','L_HOKUTO_TENSEI_2_MW','L_TEKKEN_6_YD01H','L_HANMA_BAKI_L5','L_GOBLIN_SLAYER_2_JZ','L_GHOST_IN_THE_SHELL_ZS'];
+          for(const id of ids){const p=`research/${id}/research-data.json`;const d=JSON.parse(fs.readFileSync(p,'utf8'));d.researchStage='GATE_A_PASS';d.gateStatus={...(d.gateStatus??{}),gate0:'PASS',gateA:'PASS'};fs.writeFileSync(p,JSON.stringify(d,null,2)+'\n');}
+          NODE
+          for id in L_BURNING_EXPRESS_ZN L_PRISM_NANA_CC L_GINGA_EIYUU_DNT_GH L_HIHODEN_PA7 L_OKIDOKI_DUO_ENCORE_FR L_HOKUTO_TENSEI_2_MW L_TEKKEN_6_YD01H L_HANMA_BAKI_L5 L_GOBLIN_SLAYER_2_JZ L_GHOST_IN_THE_SHELL_ZS; do node tools/validate-research-data.mjs "research/$id/research-data.json"; done
+      - name: Commit Gate A PASS
+        shell: bash
+        run: |
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git add reports/batch-20260906-gate-a-final-audit.json research/*/research-data.json
+          git commit -m 'research: Gate A PASS for authoritative 20260906 Next10'
+          git pull --rebase origin batch/20260906-next10-gate0
+          git push origin HEAD:batch/20260906-next10-gate0
