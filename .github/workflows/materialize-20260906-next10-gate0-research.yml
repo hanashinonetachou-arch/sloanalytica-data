@@ -1,0 +1,53 @@
+name: Materialize 20260906 Next10 Gate0 ResearchData
+
+on:
+  push:
+    branches:
+      - batch/20260906-next10-gate0
+    paths:
+      - '.github/workflows/materialize-20260906-next10-gate0-research.yml'
+      - 'tools/materialize-20260906-next10-gate0-research.mjs'
+
+permissions:
+  contents: write
+
+jobs:
+  gate0:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: batch/20260906-next10-gate0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - run: npm ci
+      - name: Materialize ResearchData Discovery inventory
+        run: node tools/materialize-20260906-next10-gate0-research.mjs
+      - name: Validate ResearchData and formal Gate0
+        shell: bash
+        run: |
+          set -euo pipefail
+          IDS="L_BURNING_EXPRESS_ZN L_PRISM_NANA_CC L_GINGA_EIYUU_DNT_GH L_HIHODEN_PA7 L_OKIDOKI_DUO_ENCORE_FR L_HOKUTO_TENSEI_2_MW L_TEKKEN_6_YD01H L_HANMA_BAKI_L5 L_GOBLIN_SLAYER_2_JZ L_GHOST_IN_THE_SHELL_ZS"
+          for id in $IDS; do npm run research:validate -- "research/$id/research-data.json"; done
+          npm run research:gate0 -- $IDS
+      - name: Mark formal Gate0 PASS
+        run: |
+          node --input-type=module <<'NODE'
+          import fs from 'node:fs';
+          const p='research/batches/20260906-next10/gate0-machine-identity.json';
+          const g=JSON.parse(fs.readFileSync(p,'utf8'));
+          g.status='GATE0_PASS';
+          g.gate0Audit.discoveryStatus='PASS';
+          g.gate0Audit.note='Formal Discovery Completeness PASS: all seeded Discovery candidates transferred to ResearchData as unresolved candidates for Gate A; no Selection decisions were made.';
+          fs.writeFileSync(p,JSON.stringify(g,null,2)+'\n');
+          NODE
+      - name: Commit Gate0 ResearchData
+        run: |
+          set -euo pipefail
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git add research/L_BURNING_EXPRESS_ZN research/L_PRISM_NANA_CC research/L_GINGA_EIYUU_DNT_GH research/L_HIHODEN_PA7 research/L_OKIDOKI_DUO_ENCORE_FR research/L_HOKUTO_TENSEI_2_MW research/L_TEKKEN_6_YD01H research/L_HANMA_BAKI_L5 research/L_GOBLIN_SLAYER_2_JZ research/L_GHOST_IN_THE_SHELL_ZS research/batches/20260906-next10/gate0-machine-identity.json
+          git commit -m 'Gate0: complete Next10 Discovery transfer'
+          git push origin HEAD:batch/20260906-next10-gate0
