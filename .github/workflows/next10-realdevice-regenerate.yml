@@ -1,0 +1,54 @@
+name: Next10 Real-device Regeneration 20260906
+
+on:
+  push:
+    branches:
+      - fix/next10-realdevice-selection-review-20260906
+    paths:
+      - .github/workflows/next10-realdevice-regenerate.yml
+
+permissions:
+  contents: write
+
+jobs:
+  regenerate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - name: Install dependencies
+        run: npm ci
+      - name: Regenerate reviewed machines
+        run: >-
+          npm run machine:batch --
+          L_AZURLANE_THE_ANIMATION_KN
+          L_DRUAGA_NO_TOU_ZA
+          L_SMASLO_TOKYO_REVENGERS_ZF
+          L_BABEL_BA
+          L_SHIN_ONIMUSHA_3_SA
+          L_TOARU_KAGAKU_NO_RAILGUN_2_FV
+          L_ZETTAI_SHOGEKI_FORCE_FH
+          L_KAKUMEIKI_VALVRAVE_2_JF
+      - name: Repository test suite
+        run: npm test
+      - name: Public-data audit
+        run: npm run audit
+      - name: Commit regenerated artifacts
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git reset -- .github/workflows/next10-realdevice-review.yml .github/workflows/next10-realdevice-regenerate.yml tools/apply-next10-realdevice-review.mjs tools/run-next10-realdevice-review.mjs || true
+          if git diff --cached --quiet; then
+            echo "No regenerated changes to commit."
+            exit 0
+          fi
+          git commit -m "pipeline: regenerate Next10 after real-device review"
+          git push
