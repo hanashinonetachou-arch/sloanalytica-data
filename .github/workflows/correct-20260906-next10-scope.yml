@@ -1,0 +1,164 @@
+name: Correct 20260906 Next10 scope
+
+on:
+  push:
+    branches:
+      - batch/20260906-next10-gate0
+    paths:
+      - '.github/workflows/correct-20260906-next10-scope.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  correct:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: batch/20260906-next10-gate0
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Restore user-confirmed batch scope
+        shell: bash
+        run: |
+          node --input-type=module <<'NODE'
+          import fs from 'node:fs';
+          import path from 'node:path';
+
+          const WRONG = new Set(['L_GOBLIN_SLAYER_2_JZ','L_GHOST_IN_THE_SHELL_ZS']);
+          const CORRECT = [
+            'L_BURNING_EXPRESS_ZN',
+            'L_PRISM_NANA_CC',
+            'L_GINGA_EIYUU_DNT_GH',
+            'L_HIHODEN_PA7',
+            'L_OKIDOKI_DUO_ENCORE_FR',
+            'L_HOKUTO_TENSEI_2_MW',
+            'LB_NEW_KING_HANAHANA_V_PF',
+            'L_TEKKEN_6_YD01H',
+            'L_HANMA_BAKI_L5',
+            'L_HANABI_KM'
+          ];
+
+          const registryPath = 'machine-registry.json';
+          const registry = JSON.parse(fs.readFileSync(registryPath,'utf8'));
+          const before = registry.machines.length;
+          registry.machines = registry.machines.filter(m => !WRONG.has(m.machineId));
+          if (registry.machines.length !== before - 2) throw new Error('Expected exactly two erroneous registry entries to remove');
+          const regMap = new Map(registry.machines.map(m => [m.machineId,m]));
+          for (const id of CORRECT) if (!regMap.has(id)) throw new Error(`Missing correct target in registry: ${id}`);
+          registry.generatedAt = new Date().toISOString();
+          fs.writeFileSync(registryPath, `${JSON.stringify(registry,null,2)}\n`);
+
+          for (const id of WRONG) {
+            const dir = path.join('research', id);
+            if (fs.existsSync(dir)) fs.rmSync(dir,{recursive:true,force:true});
+          }
+
+          const identityPath = 'research/batches/20260906-next10/gate0-machine-identity.json';
+          const oldIdentity = JSON.parse(fs.readFileSync(identityPath,'utf8'));
+          const oldMap = new Map(oldIdentity.machines.map(m => [m.machineId,m]));
+          const existingNewKing = regMap.get('LB_NEW_KING_HANAHANA_V_PF');
+          const existingHanabi = regMap.get('L_HANABI_KM');
+          const identityMachines = [
+            ...['L_BURNING_EXPRESS_ZN','L_PRISM_NANA_CC','L_GINGA_EIYUU_DNT_GH','L_HIHODEN_PA7','L_OKIDOKI_DUO_ENCORE_FR','L_HOKUTO_TENSEI_2_MW'].map(id=>oldMap.get(id)),
+            {
+              provisionalRegistrationId: existingNewKing.provisionalRegistrationId,
+              machineId:'LB_NEW_KING_HANAHANA_V_PF', displayName:'スマート沖スロ ニューキングハナハナV', modelCode:'LBニューキングハナハナVPF',
+              manufacturer:existingNewKing.manufacturer, releaseDate:'2026-01-05', releaseDateStatus:'VERIFIED', machineType:'SMART_SLOT', gameType:'NORMAL_BT',
+              registrationMode:'EXISTING_IDENTITY_REUSE', identityEvidenceNote:'既存canonical Machine Identityを再利用。今回BatchではResearch/Selection/Observation/MachineData更新対象として扱う。'
+            },
+            oldMap.get('L_TEKKEN_6_YD01H'), oldMap.get('L_HANMA_BAKI_L5'),
+            {
+              provisionalRegistrationId: existingHanabi.provisionalRegistrationId,
+              machineId:'L_HANABI_KM', displayName:'スマスロ ハナビ', modelCode:'L／ハナビ／KM', manufacturer:existingHanabi.manufacturer,
+              releaseDate:'2026-02-02', releaseDateStatus:'VERIFIED', machineType:'SMART_SLOT', gameType:'BONUS_RT',
+              registrationMode:'EXISTING_IDENTITY_REUSE', identityEvidenceNote:'既存canonical Machine Identityを再利用。今回Batchでは未調査版Researchを更新対象として扱う。'
+            }
+          ];
+          if (identityMachines.some(x=>!x)) throw new Error('Failed to assemble corrected identity machines');
+          const newIds = identityMachines.filter(m=>m.registrationMode!=='EXISTING_IDENTITY_REUSE').map(m=>m.provisionalRegistrationId);
+          const identity = {
+            schemaVersion:'sloanalytica-gate0-machine-identity-v1', batchId:'20260906-next10', baseBranch:'prototype-multi-machine',
+            baseCommit:oldIdentity.baseCommit, status:'GATE0_PASS',
+            notes:[
+              'Corrected to the user-confirmed 10-machine scope.',
+              'Eight new identities use provisionalRegistrationId 240-247; New King Hanahana V and Smart Slot Hanabi reuse existing canonical identities.',
+              'Goblin Slayer II is deferred; Ghost in the Shell is not part of this batch.'
+            ],
+            machines:identityMachines,
+            gate0Audit:{auditedAt:new Date().toISOString(),targetCount:10,newIdentityCount:8,existingIdentityReuseCount:2,provisionalRegistrationIds:newIds,duplicateMachineIdCount:0,identityStatus:'PASS',discoveryStatus:'PASS',scopeCorrection:'PASS'}
+          };
+          fs.writeFileSync(identityPath, `${JSON.stringify(identity,null,2)}\n`);
+
+          const discoveryPath = 'research/batches/20260906-next10/discovery-candidate-universe.json';
+          const oldDiscovery = JSON.parse(fs.readFileSync(discoveryPath,'utf8'));
+          const discMap = new Map(oldDiscovery.machines.map(m=>[m.machineId,m]));
+          const newKing = {machineId:'LB_NEW_KING_HANAHANA_V_PF',displayName:'スマート沖スロ ニューキングハナハナV',seedCandidates:[
+            'BIG/REG first-hit and type rates','predecessor seated-data BIG/REG exposure','BIG first-half watermelon','REG watermelon','BIG side-lamp colors','bonus-end hibiscus lamp colors','normal bell and other small-role candidates','linked-service/manufacturer smartphone content and exact obtainable fields'
+          ]};
+          const hanabi = {machineId:'L_HANABI_KM',displayName:'スマスロ ハナビ',seedCandidates:[
+            'BIG/REG first-hit and type rates','predecessor seated-data BIG/REG exposure','normal-time wind-bell rates','BIG wind-bell/scatter outcomes','REG one-coin/scatter outcomes','Hanabi Challenge miss','Hanabi GAME miss','cherry subtype rates','RT/bonus technical-exposure integrity','Unimemo availability and exact obtainable fields'
+          ]};
+          const machines = [
+            discMap.get('L_BURNING_EXPRESS_ZN'),discMap.get('L_PRISM_NANA_CC'),discMap.get('L_GINGA_EIYUU_DNT_GH'),discMap.get('L_HIHODEN_PA7'),discMap.get('L_OKIDOKI_DUO_ENCORE_FR'),discMap.get('L_HOKUTO_TENSEI_2_MW'),newKing,discMap.get('L_TEKKEN_6_YD01H'),discMap.get('L_HANMA_BAKI_L5'),hanabi
+          ];
+          const discovery = {...oldDiscovery,status:'GATE0_PASS',machines};
+          fs.writeFileSync(discoveryPath, `${JSON.stringify(discovery,null,2)}\n`);
+
+          function inventory(machine) {
+            return machine.seedCandidates.map((name,i)=>({
+              discoveryCandidateId:`DC_${String(i+1).padStart(2,'0')}`,
+              name,
+              transferStatus:'UNRESOLVED',
+              researchTarget:'UNRESOLVED',
+              discoverySource:'20260906-next10 corrected candidate universe'
+            }));
+          }
+          for (const machine of machines) {
+            const file = path.join('research',machine.machineId,'research-data.json');
+            if (!fs.existsSync(file)) throw new Error(`research-data missing: ${file}`);
+            const data = JSON.parse(fs.readFileSync(file,'utf8'));
+            data.discoveryInventory = inventory(machine);
+            data.researchedAt = '2026-09-06';
+            fs.writeFileSync(file, `${JSON.stringify(data,null,2)}\n`);
+          }
+
+          const corePath='research/batches/20260906-next10/gate-a-core-findings.json';
+          if (fs.existsSync(corePath)) {
+            const core=JSON.parse(fs.readFileSync(corePath,'utf8'));
+            if (core.machines) {
+              delete core.machines.L_GOBLIN_SLAYER_2_JZ;
+              delete core.machines.L_GHOST_IN_THE_SHELL_ZS;
+              core.machines.LB_NEW_KING_HANAHANA_V_PF = {status:'EXISTING_RESEARCH_REVIEW_REQUIRED',note:'既存ResearchDataを今回Gate A基準で再監査する。'};
+              core.machines.L_HANABI_KM = {status:'EXISTING_RESEARCH_REVIEW_REQUIRED',note:'既存未調査版ResearchDataを今回Gate A基準で再監査する。'};
+            }
+            core.status='IN_PROGRESS_SCOPE_CORRECTED';
+            core.scopeCorrection='PASS';
+            fs.writeFileSync(corePath, `${JSON.stringify(core,null,2)}\n`);
+          }
+          console.log('Corrected scope:', CORRECT.join(', '));
+          NODE
+      - name: Validate corrected registry
+        run: npm run registry:validate
+      - name: Validate corrected ResearchData
+        shell: bash
+        run: |
+          set -euo pipefail
+          ids=(L_BURNING_EXPRESS_ZN L_PRISM_NANA_CC L_GINGA_EIYUU_DNT_GH L_HIHODEN_PA7 L_OKIDOKI_DUO_ENCORE_FR L_HOKUTO_TENSEI_2_MW LB_NEW_KING_HANAHANA_V_PF L_TEKKEN_6_YD01H L_HANMA_BAKI_L5 L_HANABI_KM)
+          for id in "${ids[@]}"; do node tools/validate-research-data.mjs "research/$id/research-data.json"; done
+      - name: Validate corrected Gate 0 Discovery completeness
+        run: node tools/discovery-completeness-gate.mjs L_BURNING_EXPRESS_ZN L_PRISM_NANA_CC L_GINGA_EIYUU_DNT_GH L_HIHODEN_PA7 L_OKIDOKI_DUO_ENCORE_FR L_HOKUTO_TENSEI_2_MW LB_NEW_KING_HANAHANA_V_PF L_TEKKEN_6_YD01H L_HANMA_BAKI_L5 L_HANABI_KM
+      - name: Commit corrected scope
+        shell: bash
+        run: |
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git add -A machine-registry.json research
+          if git diff --cached --quiet; then echo 'No changes'; exit 0; fi
+          git commit -m 'Gate0: correct Next10 scope to user-confirmed targets'
+          git pull --rebase origin batch/20260906-next10-gate0
+          git push origin HEAD:batch/20260906-next10-gate0
