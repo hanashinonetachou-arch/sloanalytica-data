@@ -1,0 +1,91 @@
+name: Batch 20260906 Gate D UI MachineData
+
+on:
+  push:
+    branches: [batch/20260906-next10-gate0]
+    paths:
+      - tools/generate-batch-20260906-gate-d-ui.mjs
+      - .github/workflows/batch-20260906-gate-d-ui-machine.yml
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  generate-validate-build:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: batch/20260906-next10-gate0
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Generate Gate D UI Design
+        run: node tools/generate-batch-20260906-gate-d-ui.mjs
+      - name: Validate UI Design
+        run: npm run ui-design:validate
+      - name: Audit UI Selection linkage
+        run: |
+          npm run ui-design:linkage:audit -- . \
+            L_BURNING_EXPRESS_ZN L_PRISM_NANA_CC L_GINGA_EIYUU_DNT_GH L_HIHODEN_PA7 L_OKIDOKI_DUO_ENCORE_FR \
+            L_HOKUTO_TENSEI_2_MW L_TEKKEN_6_YD01H L_HANMA_BAKI_L5 L_GOBLIN_SLAYER_2_JZ L_GHOST_IN_THE_SHELL_ZS
+      - name: Audit UI Observation linkage
+        run: |
+          npm run ui-design:observation:audit -- \
+            L_BURNING_EXPRESS_ZN L_PRISM_NANA_CC L_GINGA_EIYUU_DNT_GH L_HIHODEN_PA7 L_OKIDOKI_DUO_ENCORE_FR \
+            L_HOKUTO_TENSEI_2_MW L_TEKKEN_6_YD01H L_HANMA_BAKI_L5 L_GOBLIN_SLAYER_2_JZ L_GHOST_IN_THE_SHELL_ZS --strict-v2
+      - name: Four-layer Gate
+        run: |
+          npm run pipeline:four-layer:gate -- \
+            L_BURNING_EXPRESS_ZN L_PRISM_NANA_CC L_GINGA_EIYUU_DNT_GH L_HIHODEN_PA7 L_OKIDOKI_DUO_ENCORE_FR \
+            L_HOKUTO_TENSEI_2_MW L_TEKKEN_6_YD01H L_HANMA_BAKI_L5 L_GOBLIN_SLAYER_2_JZ L_GHOST_IN_THE_SHELL_ZS
+      - name: Build MachineData batch
+        run: |
+          npm run machine:batch -- \
+            L_BURNING_EXPRESS_ZN L_PRISM_NANA_CC L_GINGA_EIYUU_DNT_GH L_HIHODEN_PA7 L_OKIDOKI_DUO_ENCORE_FR \
+            L_HOKUTO_TENSEI_2_MW L_TEKKEN_6_YD01H L_HANMA_BAKI_L5 L_GOBLIN_SLAYER_2_JZ L_GHOST_IN_THE_SHELL_ZS
+      - name: Materialize UI Design into MachineData
+        run: |
+          node tools/materialize-ui-design.mjs --apply \
+            L_BURNING_EXPRESS_ZN L_PRISM_NANA_CC L_GINGA_EIYUU_DNT_GH L_HIHODEN_PA7 L_OKIDOKI_DUO_ENCORE_FR \
+            L_HOKUTO_TENSEI_2_MW L_TEKKEN_6_YD01H L_HANMA_BAKI_L5 L_GOBLIN_SLAYER_2_JZ L_GHOST_IN_THE_SHELL_ZS
+      - name: Verify materialization stability
+        run: |
+          node tools/materialize-ui-design.mjs --require-unchanged \
+            L_BURNING_EXPRESS_ZN L_PRISM_NANA_CC L_GINGA_EIYUU_DNT_GH L_HIHODEN_PA7 L_OKIDOKI_DUO_ENCORE_FR \
+            L_HOKUTO_TENSEI_2_MW L_TEKKEN_6_YD01H L_HANMA_BAKI_L5 L_GOBLIN_SLAYER_2_JZ L_GHOST_IN_THE_SHELL_ZS
+      - name: Gate D contract validations
+        run: |
+          npm run ui-design:test
+          npm run difficulty:exposure-audit
+          npm test
+          npm run audit
+          npm run audit:ui-service-names
+      - name: Write Gate D report
+        shell: bash
+        run: |
+          cat > reports/batch-20260906-gate-d-baseline.md <<'EOF'
+          # 20260906 Gate D UI Design / MachineData baseline
+
+          - UI Design: generated 10/10 from finalized SelectionData + Machine Observation Data v2
+          - UI validation: PASS
+          - Selection linkage: PASS
+          - Observation linkage strict-v2: PASS
+          - Four-layer gate: PASS (tracked field verification may remain)
+          - MachineData batch construction: PASS
+          - UI Design -> MachineData materialization: PASS / stable 10/10
+          - Blank vs observed zero, conditional denominator semantics, Fallback suppression and Evidence separation are retained.
+          - Difficulty exposure / repository tests / audits: PASS
+          - Gate E / Formal Publish: NOT RUN
+          EOF
+      - name: Commit Gate D baseline
+        run: |
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git add research machines reports difficulty-catalog.json machine-registry.json catalog.json 2>/dev/null || true
+          git add reports/batch-20260906-gate-d-baseline.md
+          git commit -m 'machine-data: materialize 20260906 Gate D UI contracts'
+          git pull --rebase origin batch/20260906-next10-gate0
+          git push origin HEAD:batch/20260906-next10-gate0
