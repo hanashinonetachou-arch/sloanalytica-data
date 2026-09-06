@@ -1,0 +1,63 @@
+name: Prepare 20260907 Gate B
+
+on:
+  push:
+    branches:
+      - batch/20260907-next10-gateb
+    paths:
+      - '.github/workflows/prepare-20260907-gate-b.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  prepare:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: batch/20260907-next10-gateb
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - run: npm ci
+      - name: Prepare exact 10 selection briefs
+        shell: bash
+        run: |
+          set -euo pipefail
+          ids=(L_FIRE_FORCE_2 L_UMINEKO_2_A1 L_KABANERI_UNATO_KESSEN_XX L_JORMUNGAND_ND01G LB_TRIPLE_CROWN_SEVEN_FG L_SHINUCHI_YOSHIMUNE_A1 L_KYOKOU_SUIRI_ST L_AKUDAMA_DRIVE_TP L_MILLION_GOD_KISEKI_CX L_GUNDAM_UNICORN_KAKUSEI_DRIVE_2JA)
+          npm run selection:batch -- "${ids[@]}" --report reports/batch-20260907-selection-prepare.json
+          workspace=$(node --input-type=module <<'NODE'
+          import fs from 'node:fs';
+          const r=JSON.parse(fs.readFileSync('reports/batch-20260907-selection-prepare.json','utf8'));
+          if(r.results?.length!==10) throw new Error(`unexpected selection batch size ${r.results?.length}`);
+          if((r.results??[]).some(x=>x.status!=='SELECTION_REQUIRED')) throw new Error(JSON.stringify(r.results,null,2));
+          console.log(r.workspace);
+          NODE
+          )
+          echo "workspace=$workspace" >> "$GITHUB_ENV"
+          cp reports/batch-20260907-selection-prepare.json "$workspace/prepare-report.json"
+      - name: Summarize statistical ranking
+        shell: bash
+        run: |
+          node --input-type=module <<'NODE'
+          import fs from 'node:fs';
+          const r=JSON.parse(fs.readFileSync('reports/batch-20260907-selection-prepare.json','utf8'));
+          const out=[];
+          for(const item of r.results){
+            const p=`${r.workspace}/${item.machineId}/selection-brief.json`;
+            const b=JSON.parse(fs.readFileSync(p,'utf8'));
+            out.push({machineId:item.machineId,displayName:item.displayName,researchSummary:b.researchSummary,statisticalReport:b.statisticalReport});
+          }
+          fs.writeFileSync('reports/batch-20260907-selection-statistics.json',JSON.stringify({schemaVersion:'batch-selection-statistics-v1',machines:out},null,2)+'\n');
+          NODE
+      - name: Commit prepared workspace
+        shell: bash
+        run: |
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git add selection-batch reports/batch-20260907-selection-prepare.json reports/batch-20260907-selection-statistics.json
+          git commit -m 'GateB: prepare 20260907 Next10 selection briefs'
+          git push origin HEAD:batch/20260907-next10-gateb
