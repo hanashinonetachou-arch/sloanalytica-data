@@ -20,58 +20,60 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
-      - name: Recover full identity triples from recent batch refs
+      - name: Recover full identity triples from all historical refs
         shell: bash
         run: |
           node --input-type=module <<'EOF'
           import fs from 'node:fs';
           import {execFileSync} from 'node:child_process';
           const diag=JSON.parse(fs.readFileSync('reports/machine-identity-gap-diagnostic-20260906.json','utf8'));
-          const refs=[
-            'origin/batch/20260901-magia-gundamseed',
-            'origin/batch/20260903-hanagasa-ultraman',
-            'origin/batch/20260904-next10-clean',
-            'origin/research/20260905-batch10-next',
-            'origin/publish/20260905-next10',
-            'origin/batch/20260906-next10-gate0'
-          ];
+          const refs=execFileSync('git',['for-each-ref','--format=%(refname)','refs/remotes/origin'],{encoding:'utf8'})
+            .trim().split('\n').filter(x=>x && !x.endsWith('/HEAD'));
           const validMachine=new Set(['SMART_SLOT','MEDAL']);
           const validGame=new Set(['A_TYPE','AT','A_AT','A_ART','BT']);
           function walk(v,id,loc='$',out=[]){
             if(!v||typeof v!=='object')return out;
             if(v.machineId===id){
               const introductionDate=v.introductionDate??v.releaseDate??v.introducedAt??null;
-              const machineType=v.machineType??null; const gameType=v.gameType??null;
-              if(/^\d{4}-\d{2}-\d{2}$/.test(introductionDate??'')&&validMachine.has(machineType)&&validGame.has(gameType)) out.push({loc,introductionDate,machineType,gameType,displayName:v.displayName??v.formalName??null});
+              const machineType=v.machineType??null;
+              const gameType=v.gameType??null;
+              if(/^\d{4}-\d{2}-\d{2}$/.test(introductionDate??'')&&validMachine.has(machineType)&&validGame.has(gameType))
+                out.push({loc,introductionDate,machineType,gameType,displayName:v.displayName??v.formalName??null});
             }
-            if(Array.isArray(v))v.forEach((x,i)=>walk(x,id,`${loc}[${i}]`,out)); else for(const [k,x] of Object.entries(v))if(x&&typeof x==='object')walk(x,id,`${loc}.${k}`,out);
+            if(Array.isArray(v))v.forEach((x,i)=>walk(x,id,`${loc}[${i}]`,out));
+            else for(const [k,x] of Object.entries(v))if(x&&typeof x==='object')walk(x,id,`${loc}.${k}`,out);
             return out;
           }
           const rows=[];
           for(const row of diag.rows){
             const candidates=[];
-            for(const c of row.structuredCandidates??[]) if(c.introductionDate&&c.machineType&&c.gameType)candidates.push({...c,ref:'CURRENT'});
-            for(const ref of refs){
-              let files=[];
-              try{
-                const out=execFileSync('git',['grep','-l','-F',row.machineId,ref,'--','*.json'],{encoding:'utf8',maxBuffer:10*1024*1024}).trim();
-                if(out)files=out.split('\n').map(x=>x.replace(`${ref}:`,''));
-              }catch(e){ if(e.status!==1) throw e; }
-              for(const file of [...new Set(files)]){
-                if(!/(identity|gate0|registry|research|batch)/i.test(file))continue;
-                let text; try{text=execFileSync('git',['show',`${ref}:${file}`],{encoding:'utf8',maxBuffer:10*1024*1024});}catch{continue;}
-                let j;try{j=JSON.parse(text);}catch{continue;}
-                for(const c of walk(j,row.machineId))candidates.push({...c,path:file,ref});
-              }
+            for(const c of row.structuredCandidates??[])
+              if(c.introductionDate&&c.machineType&&c.gameType)candidates.push({...c,ref:'CURRENT'});
+            let matches=[];
+            try{
+              const out=execFileSync('git',['grep','-l','-F',row.machineId,...refs,'--','*.json'],{encoding:'utf8',maxBuffer:50*1024*1024}).trim();
+              if(out)matches=out.split('\n');
+            }catch(e){if(e.status!==1)throw e;}
+            for(const match of [...new Set(matches)]){
+              const idx=match.indexOf(':'); if(idx<0)continue;
+              const ref=match.slice(0,idx), file=match.slice(idx+1);
+              if(!/(identity|gate0|registry|research|batch|handoff|machine)/i.test(file))continue;
+              let text;try{text=execFileSync('git',['show',`${ref}:${file}`],{encoding:'utf8',maxBuffer:20*1024*1024});}catch{continue;}
+              let j;try{j=JSON.parse(text);}catch{continue;}
+              for(const c of walk(j,row.machineId))candidates.push({...c,path:file,ref});
             }
             const uniq=new Map();
-            for(const c of candidates){const key=`${c.introductionDate}|${c.machineType}|${c.gameType}`;if(!uniq.has(key))uniq.set(key,{...c,sources:[]});uniq.get(key).sources.push(`${c.ref}:${c.path}${c.loc?`#${c.loc}`:''}`);}
+            for(const c of candidates){
+              const key=`${c.introductionDate}|${c.machineType}|${c.gameType}`;
+              if(!uniq.has(key))uniq.set(key,{...c,sources:[]});
+              uniq.get(key).sources.push(`${c.ref}:${c.path??'diagnostic'}${c.loc?`#${c.loc}`:''}`);
+            }
             rows.push({machineId:row.machineId,displayName:row.displayName,registry:row.registry,uniqueTriples:[...uniq.entries()].map(([triple,c])=>({triple,introductionDate:c.introductionDate,machineType:c.machineType,gameType:c.gameType,sources:[...new Set(c.sources)]}))});
           }
           const unresolved=rows.filter(r=>r.uniqueTriples.length!==1).map(r=>({machineId:r.machineId,count:r.uniqueTriples.length,triples:r.uniqueTriples.map(x=>x.triple)}));
-          const report={generatedAt:new Date().toISOString(),refs,missingCount:rows.length,resolvedUnique:rows.length-unresolved.length,unresolvedCount:unresolved.length,unresolved,rows};
+          const report={generatedAt:new Date().toISOString(),searchedRefCount:refs.length,missingCount:rows.length,resolvedUnique:rows.length-unresolved.length,unresolvedCount:unresolved.length,unresolved,rows};
           fs.writeFileSync('reports/machine-identity-historical-recovery-20260906.json',JSON.stringify(report,null,2)+'\n');
-          console.log(`historical identity recovery: unique=${report.resolvedUnique}/${rows.length} unresolved=${unresolved.length}`);
+          console.log(`historical identity recovery across ${refs.length} refs: unique=${report.resolvedUnique}/${rows.length} unresolved=${unresolved.length}`);
           for(const x of unresolved)console.log(`UNRESOLVED ${x.machineId}: ${x.count} ${x.triples.join(' ; ')}`);
           EOF
       - name: Commit recovery report
@@ -79,6 +81,6 @@ jobs:
           git config user.name github-actions[bot]
           git config user.email 41898282+github-actions[bot]@users.noreply.github.com
           git add reports/machine-identity-historical-recovery-20260906.json
-          git commit -m 'audit: recover historical identity sources for recent batches'
+          git commit -m 'audit: recover identity sources across all historical branches'
           git pull --rebase origin fix/identity-audit-backfill-20260906
           git push origin HEAD:fix/identity-audit-backfill-20260906
