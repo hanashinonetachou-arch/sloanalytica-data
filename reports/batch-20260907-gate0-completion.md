@@ -3,8 +3,10 @@
 ## Status
 
 **Machine Identity: PASS**  
-**Registry registration: PENDING_SAFE_MUTATION_PATH**  
-**Research / Selection: NOT STARTED**
+**Registry registration: PASS — 10/10**  
+**Exact scope audit: PASS — 10/10**  
+**Discovery: SEEDED — Gate A transfer pending**  
+**Selection: NOT STARTED**
 
 Canonical identity source: `research/batches/20260907-next10/gate0-machine-identity.json`
 
@@ -24,14 +26,29 @@ Canonical identity source: `research/batches/20260907-next10/gate0-machine-ident
 ## Gate 0 audit
 
 - Target count: 10
-- Existing prototype catalog display-name collisions: 0
-- Existing prototype catalog machineId collisions: 0
-- Current production provisionalRegistrationId tail: 249 (`L_GHOST_IN_THE_SHELL_ZS`)
-- provisionalRegistrationId 250: unused before this batch
-- Reserved IDs: 250–259, exact user-supplied order
+- Existing prototype catalog display-name collisions before registration: 0
+- Existing prototype catalog machineId collisions before registration: 0
+- Existing registry machineId collisions before registration: 0
+- Existing registry provisionalRegistrationId collisions before registration: 0
+- Previous production provisionalRegistrationId tail: 249 (`L_GHOST_IN_THE_SHELL_ZS`)
+- Registered IDs: 250–259, exact user-supplied order
+- Registry appStatus: `RESEARCHING` for all 10
+- Registry researchStatus: `NOT_RESEARCHED` for all 10 at Gate 0 registration
 - Series / similarly named-machine disambiguation: checked during identity verification
 - Public `main`: unchanged
 - Selection decisions: none
+
+## Registration execution
+
+The previous batch's already-proven Gate 0 registrar/workflow was temporarily retargeted on this working branch only. It preserved the same duplicate checks and registry validation contract, with the exact 2026-09-07 scope and provisional IDs changed to 250–259.
+
+- GitHub Actions run: `34047683664`
+- Workflow conclusion: `SUCCESS`
+- Generated registration commit: `a678014a0461a2805ddaddca44fb281c67775952`
+- Exact membership assertion: 10/10
+- Registry validator: PASS
+
+After successful registration, the temporary retargeting of the shared registrar and workflow was restored byte-for-byte to the `prototype-multi-machine` versions. They are not part of the final PR diff.
 
 ## Important identity notes
 
@@ -42,8 +59,6 @@ Canonical identity source: `research/batches/20260907-next10/gate0-machine-ident
 - `L_GUNDAM_UNICORN_KAKUSEI_DRIVE_2JA` uses the official SANKYO collection brand/manufacturer identity `ビスティ`; do not collapse it to SANKYO in canonical identity.
 - `L_KABANERI_UNATO_KESSEN_XX` records market brand `サミー` and legal manufacturer `タイヨーエレック` together.
 
-## Safe-mutation stop
+## Gate 0 conclusion
 
-An attempt to add a new batch-specific registry mutation script was blocked by the tool safety layer. The block was preserved; the audit was not weakened and no alternate direct registry mutation was performed. The existing registry remains unchanged at this checkpoint.
-
-Gate A must not change the fixed 10-machine scope. Before any registry-dependent automated Research workflow, use an approved existing mutation path or explicitly validated equivalent and re-run duplicate checks against the then-current prototype state.
+Gate 0 Machine Identity and registry registration are complete for the exact 10-machine scope. Gate A may now materialize the exhaustive Candidate Universe and ResearchData. Gate A must not change this machine set or make Selection decisions.
