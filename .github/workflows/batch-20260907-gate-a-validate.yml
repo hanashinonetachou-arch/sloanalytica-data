@@ -60,6 +60,7 @@ jobs:
           const ids=['L_FIRE_FORCE_2','L_UMINEKO_2_A1','L_KABANERI_UNATO_KESSEN_XX','L_JORMUNGAND_ND01G','LB_TRIPLE_CROWN_SEVEN_FG','L_SHINUCHI_YOSHIMUNE_A1','L_KYOKOU_SUIRI_ST','L_AKUDAMA_DRIVE_TP','L_MILLION_GOD_KISEKI_CX','L_GUNDAM_UNICORN_KAKUSEI_DRIVE_2JA'];
           let feature=0,evidence=0,discovery=0,unresolved=0,reference=0;
           const errors=[];
+          const unresolvedItems=[];
           for(const id of ids){
             const p=`research/${id}/research-data.json`;
             if(!fs.existsSync(p)){errors.push(`missing ${id}`);continue;}
@@ -68,9 +69,11 @@ jobs:
             feature+=(d.features??[]).length;
             evidence+=(d.evidenceCandidates??[]).length;
             discovery+=(d.discoveryInventory??[]).length;
-            unresolved+=(d.discoveryInventory??[]).filter(x=>x.transferStatus==='UNRESOLVED').length;
+            const u=(d.discoveryInventory??[]).filter(x=>x.transferStatus==='UNRESOLVED');
+            unresolved+=u.length;
+            for(const x of u) unresolvedItems.push({machineId:id,id:x.discoveryCandidateId,name:x.name});
             reference+=(d.discoveryInventory??[]).filter(x=>x.transferStatus==='REFERENCE').length;
           }
           if(errors.length) throw new Error(errors.join('\n'));
-          console.log(JSON.stringify({machines:ids.length,features:feature,evidence,discovery,unresolved,reference},null,2));
+          console.log(JSON.stringify({machines:ids.length,features:feature,evidence,discovery,unresolved,reference,unresolvedItems},null,2));
           NODE
