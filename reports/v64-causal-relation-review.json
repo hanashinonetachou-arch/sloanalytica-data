@@ -1,12 +1,107 @@
 {
   "schemaVersion": "v6.4-causal-relation-review-v1",
-  "generatedAt": "2026-08-29T15:56:56.101Z",
+  "generatedAt": "2026-09-06T02:43:41.055Z",
   "summary": {
-    "candidateCount": 0,
-    "machineCount": 0,
-    "relationCounts": {},
-    "actionCounts": {}
+    "candidateCount": 5,
+    "reviewedCandidateCount": 5,
+    "unresolvedCandidateCount": 0,
+    "machineCount": 5,
+    "relationCounts": {
+      "SHARED_PATH_DEPENDENCY": 3,
+      "DOWNSTREAM_COMPOSITE_OUTCOME": 1,
+      "CONDITIONAL_ATTRIBUTION_OBSERVATION": 1
+    },
+    "actionCounts": {
+      "KEEP_EXCLUDED_AVOID_DOUBLE_COUNT": 4,
+      "KEEP_EXCLUDED_OBSERVATION_LIMIT": 1
+    }
   },
   "policyNote": "Causal wording is not itself a valid rejection criterion. Reopened candidates must be resolved through an explicit likelihood, composition, subset, Observation, or practical-information contract.",
-  "candidates": []
+  "candidates": [
+    {
+      "machineId": "L_BIOHAZARD5_ZE",
+      "displayName": "スマスロ バイオハザード5",
+      "researchFeatureId": "RF_CZ_TOTAL",
+      "featureId": "FEAT_CZ_TOTAL_EXCLUDED",
+      "name": "CZ合算出現率",
+      "relation": "SHARED_PATH_DEPENDENCY",
+      "secondaryRelation": "REOPEN_IF_CONDITIONAL_COMPOSITION_MODEL_AVAILABLE",
+      "action": "KEEP_EXCLUDED_AVOID_DOUBLE_COUNT",
+      "rationale": "CZ合算はAT初当りへつながる上流当選過程を共有する。現行SelectionはAT初当りを代表尤度として採用しており、CZ成功率などを条件分解した構成モデルがない状態でCZ合算を独立乗算すると同一遊技区間の設定差を重複評価するため、独立Featureとしては除外を維持する。",
+      "trialUnit": "通常ゲーム",
+      "observationScope": null,
+      "numeratorDefinition": "パニックZONEまたはウェスカーZONE初当り回数",
+      "denominatorDefinition": "CZ抽選対象通常ゲーム数",
+      "candidateModel": "binomial",
+      "currentReason": "AT初当りと因果的に強く関連し、同一遊技区間の当選過程を重複評価しやすいため。"
+    },
+    {
+      "machineId": "L_DMC5_ST_XA",
+      "displayName": "スマスロ デビル メイ クライ5 スタイリッシュトライブ",
+      "researchFeatureId": "RF_ST_FIRST_HIT",
+      "featureId": "FEAT_ST_FIRST_HIT",
+      "name": "ST初当り",
+      "relation": "DOWNSTREAM_COMPOSITE_OUTCOME",
+      "secondaryRelation": "REOPEN_IF_ROUTE_COMPOSITION_MODEL_AVAILABLE",
+      "action": "KEEP_EXCLUDED_AVOID_DOUBLE_COUNT",
+      "rationale": "ST初当りはボーナス/CZ成功の下流結果を含む複合アウトカムで、主Featureのボーナス初当りと当選系列を共有する。経路別の条件付き成功率へ分解する構成モデルがないため、独立尤度としての同時採用は行わない。",
+      "trialUnit": "有効通常ゲーム",
+      "observationScope": null,
+      "numeratorDefinition": "ST初当りの観測回数",
+      "denominatorDefinition": "ST初当りが定義される公開上の正しい対象試行数",
+      "candidateModel": "binomial",
+      "currentReason": "ST初当りはボーナス/CZ成功の下流結果を含みボーナス初当りと因果的に重なるため、独立尤度で二重評価せずボーナス初当りを代表採用する。"
+    },
+    {
+      "machineId": "L_GUNDAM_SEED_G",
+      "displayName": "Lパチスロ 機動戦士ガンダムSEED",
+      "researchFeatureId": "RF_CZ_FIRST_HIT",
+      "featureId": "FEAT_CZ_FIRST_HIT",
+      "name": "CZ Strike Attack初当り",
+      "relation": "SHARED_PATH_DEPENDENCY",
+      "secondaryRelation": "REOPEN_IF_CONDITIONAL_ROUTE_MODEL_AVAILABLE",
+      "action": "KEEP_EXCLUDED_AVOID_DOUBLE_COUNT",
+      "rationale": "CZ初当りは主FeatureのAT初当りへ接続する主要経路の上流観測であり、両者を独立尤度として扱うと同じ当選系列の設定差を重ねやすい。現行はAT初当りを代表採用し、CZ経由率を条件分解できるモデルが整うまで独立Feature化しない。",
+      "trialUnit": "有効通常ゲーム",
+      "observationScope": null,
+      "numeratorDefinition": "CZ Strike Attack初当り回数",
+      "denominatorDefinition": "CZ初当りを観測可能な有効通常ゲーム数",
+      "candidateModel": "binomial",
+      "currentReason": "AT初当りの主要経路とCZ初当りが因果的に重なるため、独立尤度で二重評価せずAT初当りを代表採用する。"
+    },
+    {
+      "machineId": "L_SISTER_QUEST_CA",
+      "displayName": "Sister Quest",
+      "researchFeatureId": "RF_CZ_FIRST_HIT",
+      "featureId": "FEAT_CZ_FIRST_HIT_EXCLUDED",
+      "name": "Quest Battle CZ初当り",
+      "relation": "SHARED_PATH_DEPENDENCY",
+      "secondaryRelation": "REOPEN_IF_CONDITIONAL_ROUTE_MODEL_AVAILABLE",
+      "action": "KEEP_EXCLUDED_AVOID_DOUBLE_COUNT",
+      "rationale": "CZ初当りからAT当選へ至る経路が主FeatureのAT初当りに含まれるため、CZ初当りとAT初当りは独立試行ではない。CZ成功率などを条件付きで分離するモデルなしに両方を乗算すると重複評価となるため、差が大きく直接観測できるAT初当りを代表採用する。",
+      "trialUnit": "通常ゲーム",
+      "observationScope": null,
+      "numeratorDefinition": "Quest Battle初当り回数",
+      "denominatorDefinition": "CZ抽選対象通常ゲーム数",
+      "candidateModel": "binomial",
+      "currentReason": "AT初当りと因果的に強く重複するため独立尤度で同時採用しません。"
+    },
+    {
+      "machineId": "S_SUPER_RIO_ACE_CC",
+      "displayName": "スーパーリオエース",
+      "researchFeatureId": "RF_BONUS_AT_DRAW_STRONG",
+      "featureId": "FEAT_BONUS_AT_DRAW_STRONG_EXCLUDED",
+      "name": "ボーナス中強レア役AT抽選",
+      "relation": "CONDITIONAL_ATTRIBUTION_OBSERVATION",
+      "secondaryRelation": "REOPEN_IF_ATTRIBUTABLE_TRIAL_OBSERVATION_IS_AVAILABLE",
+      "action": "KEEP_EXCLUDED_OBSERVATION_LIMIT",
+      "rationale": "強レア役成立を分母、かつその契機によるAT当選だけを分子として対応付ける必要があり、通常実戦では因果帰属の観測負担が高い。さらに対象事象が希少で有効サンプルが少なくなりやすいため、現行の通常入力面には採用せずResearch事実として保持する。",
+      "trialUnit": "ボーナス中強レア役成立1回",
+      "observationScope": null,
+      "numeratorDefinition": "強レア役からAT当選した回数",
+      "denominatorDefinition": "ボーナス中強レア役成立回数",
+      "candidateModel": "binomial",
+      "currentReason": "設定差は比較的大きいものの、強レア役成立とAT当選の因果判別が必要でサンプルも少ないため、通常入力には採用しません。"
+    }
+  ]
 }
