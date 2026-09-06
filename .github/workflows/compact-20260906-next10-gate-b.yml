@@ -1,0 +1,44 @@
+name: Compact 20260906 Next10 Gate B
+
+on:
+  push:
+    branches: [batch/20260906-next10-gate0]
+    paths: ['.github/workflows/compact-20260906-next10-gate-b.yml']
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  compact:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: batch/20260906-next10-gate0
+      - name: Build compact candidate map
+        shell: bash
+        run: |
+          node --input-type=module <<'EOF'
+          import fs from 'node:fs';
+          const ids=['L_BURNING_EXPRESS_ZN','L_PRISM_NANA_CC','L_GINGA_EIYUU_DNT_GH','L_HIHODEN_PA7','L_OKIDOKI_DUO_ENCORE_FR','L_HOKUTO_TENSEI_2_MW','L_TEKKEN_6_YD01H','L_HANMA_BAKI_L5','L_GOBLIN_SLAYER_2_JZ','L_GHOST_IN_THE_SHELL_ZS'];
+          const lines=[];
+          for(const id of ids){
+            const r=JSON.parse(fs.readFileSync(`research/${id}/research-data.json`,'utf8'));
+            lines.push(`## ${id} | ${r.machine?.displayName}`);
+            for(const f of r.features??[]) lines.push(`F | ${f.researchFeatureId} | ${f.name} | ${f.factStatus} | ${f.candidateModel} | trial=${f.trialUnit??''} | den=${f.denominatorDefinition??''}`);
+            for(const e of r.evidenceCandidates??[]) lines.push(`E | ${e.researchEvidenceId} | ${e.name??e.label??''} | ${e.factStatus} | allowed=${JSON.stringify(e.allowedSettings??[])}`);
+            for(const c of r.conflicts??[]) lines.push(`C | ${JSON.stringify(c)}`);
+            for(const n of r.researchNotes??[]) if(/重複|内包|条件|母数|競合|依存|経路|設定差|確定|示唆/.test(n)) lines.push(`N | ${n}`);
+            lines.push('');
+          }
+          fs.writeFileSync('reports/batch-20260906-gate-b-compact.txt',lines.join('\n')+'\n');
+          EOF
+      - name: Commit compact map
+        run: |
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git add reports/batch-20260906-gate-b-compact.txt
+          git commit -m 'audit: compact 20260906 Gate B candidate map'
+          git pull --rebase origin batch/20260906-next10-gate0
+          git push origin HEAD:batch/20260906-next10-gate0
