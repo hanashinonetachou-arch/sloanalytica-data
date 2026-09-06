@@ -1,0 +1,63 @@
+name: Inventory 20260906 Next10 Gate B
+
+on:
+  push:
+    branches:
+      - batch/20260906-next10-gate0
+    paths:
+      - '.github/workflows/inventory-20260906-next10-gate-b.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  inventory:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: batch/20260906-next10-gate0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Build Gate B candidate inventory
+        shell: bash
+        run: |
+          node --input-type=module <<'EOF'
+          import fs from 'node:fs';
+          const ids=[
+            'L_BURNING_EXPRESS_ZN','L_PRISM_NANA_CC','L_GINGA_EIYUU_DNT_GH','L_HIHODEN_PA7','L_OKIDOKI_DUO_ENCORE_FR',
+            'L_HOKUTO_TENSEI_2_MW','L_TEKKEN_6_YD01H','L_HANMA_BAKI_L5','L_GOBLIN_SLAYER_2_JZ','L_GHOST_IN_THE_SHELL_ZS'
+          ];
+          const machines=[];
+          for(const id of ids){
+            const r=JSON.parse(fs.readFileSync(`research/${id}/research-data.json`,'utf8'));
+            machines.push({
+              machineId:id,
+              displayName:r.machine?.displayName,
+              settings:r.machine?.settings,
+              features:(r.features??[]).map(f=>({
+                researchFeatureId:f.researchFeatureId,name:f.name,factStatus:f.factStatus,candidateModel:f.candidateModel,
+                trialUnit:f.trialUnit,numeratorDefinition:f.numeratorDefinition,denominatorDefinition:f.denominatorDefinition,
+                categories:f.categories??null,settingValues:f.settingValues??null,notes:f.notes??null,sourceRefs:f.sourceRefs??[]
+              })),
+              evidenceCandidates:(r.evidenceCandidates??[]).map(e=>({
+                researchEvidenceId:e.researchEvidenceId,name:e.name??e.label,factStatus:e.factStatus,allowedSettings:e.allowedSettings??null,
+                notes:e.notes??null,sourceRefs:e.sourceRefs??[]
+              })),
+              conflicts:r.conflicts??[],researchNotes:r.researchNotes??[]
+            });
+          }
+          const report={schemaVersion:'batch-gate-b-candidate-inventory-v1',generatedAt:new Date().toISOString(),machines};
+          fs.mkdirSync('reports',{recursive:true});
+          fs.writeFileSync('reports/batch-20260906-gate-b-candidate-inventory.json',JSON.stringify(report,null,2)+'\n');
+          EOF
+      - name: Commit inventory
+        run: |
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git add reports/batch-20260906-gate-b-candidate-inventory.json
+          git commit -m 'audit: inventory 20260906 Gate B candidates'
+          git pull --rebase origin batch/20260906-next10-gate0
+          git push origin HEAD:batch/20260906-next10-gate0
