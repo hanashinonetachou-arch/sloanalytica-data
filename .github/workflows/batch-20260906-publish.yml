@@ -1,0 +1,120 @@
+name: Batch 20260906 Formal Publish
+
+on:
+  push:
+    branches:
+      - batch/20260906-next10-gate0
+    paths:
+      - '.github/workflows/batch-20260906-publish.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  formal-publish:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout batch branch
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: batch/20260906-next10-gate0
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Fetch current integration baseline
+        shell: bash
+        run: |
+          set -euo pipefail
+          git fetch origin prototype-multi-machine:refs/remotes/origin/prototype-multi-machine
+          echo "HEAD=$(git rev-parse HEAD)"
+          echo "PROTOTYPE=$(git rev-parse origin/prototype-multi-machine)"
+          echo "MERGE_BASE=$(git merge-base HEAD origin/prototype-multi-machine)"
+      - name: Verify Publish scope and dependency
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse --abbrev-ref HEAD)" = "batch/20260906-next10-gate0"
+          test "$(git merge-base HEAD origin/prototype-multi-machine)" = "d407f03c2235be582d3f3340021e7d360e85b7d2"
+          expected=$(cat <<'EOF'
+          L_BURNING_EXPRESS_ZN
+          L_GHOST_IN_THE_SHELL_ZS
+          L_GINGA_EIYUU_DNT_GH
+          L_GOBLIN_SLAYER_2_JZ
+          L_HANMA_BAKI_L5
+          L_HIHODEN_PA7
+          L_HOKUTO_TENSEI_2_MW
+          L_OKIDOKI_DUO_ENCORE_FR
+          L_PRISM_NANA_CC
+          L_TEKKEN_6_YD01H
+          EOF
+          )
+          actual=$(git diff --name-only "$(git merge-base HEAD origin/prototype-multi-machine)"...HEAD -- 'machines/*/machine-package.json' | sed -nE 's#^machines/([^/]+)/machine-package\.json$#\1#p' | sort)
+          printf 'Expected machine scope:\n%s\n' "$expected"
+          printf 'Actual machine scope:\n%s\n' "$actual"
+          test "$actual" = "$expected"
+          ! printf '%s\n' "$actual" | grep -q 'LB_NEW_KING_HANAHANA_V_PF\|L_HANABI_KM'
+      - name: Batch Publish dry run
+        run: |
+          npm run machine:publish:batch -- \
+            L_GHOST_IN_THE_SHELL_ZS L_GOBLIN_SLAYER_2_JZ L_HANMA_BAKI_L5 L_TEKKEN_6_YD01H L_HOKUTO_TENSEI_2_MW \
+            L_OKIDOKI_DUO_ENCORE_FR L_HIHODEN_PA7 L_GINGA_EIYUU_DNT_GH L_PRISM_NANA_CC L_BURNING_EXPRESS_ZN
+      - name: Formal Publish APPLY
+        run: |
+          npm run machine:publish:batch -- --apply \
+            L_GHOST_IN_THE_SHELL_ZS L_GOBLIN_SLAYER_2_JZ L_HANMA_BAKI_L5 L_TEKKEN_6_YD01H L_HOKUTO_TENSEI_2_MW \
+            L_OKIDOKI_DUO_ENCORE_FR L_HIHODEN_PA7 L_GINGA_EIYUU_DNT_GH L_PRISM_NANA_CC L_BURNING_EXPRESS_ZN
+      - name: Validate registry and publication contracts
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm run registry:validate
+          node --input-type=module <<'NODE'
+          import fs from 'node:fs';
+          const ids=[
+            ['L_BURNING_EXPRESS_ZN',240],['L_PRISM_NANA_CC',241],['L_GINGA_EIYUU_DNT_GH',242],['L_HIHODEN_PA7',243],['L_OKIDOKI_DUO_ENCORE_FR',244],
+            ['L_HOKUTO_TENSEI_2_MW',245],['L_TEKKEN_6_YD01H',246],['L_HANMA_BAKI_L5',247],['L_GOBLIN_SLAYER_2_JZ',248],['L_GHOST_IN_THE_SHELL_ZS',249]
+          ];
+          const catalog=JSON.parse(fs.readFileSync('catalog.json','utf8')); const difficulty=JSON.parse(fs.readFileSync('difficulty-catalog.json','utf8')); const registry=JSON.parse(fs.readFileSync('machine-registry.json','utf8'));
+          const ce=Array.isArray(catalog)?catalog:(catalog.machines??catalog.entries??[]); const de=Array.isArray(difficulty)?difficulty:(difficulty.entries??difficulty.machines??[]); const re=Array.isArray(registry)?registry:(registry.machines??registry.entries??[]);
+          for(const [id,pid] of ids){
+            const c=ce.find(x=>x.machineId===id); if(!c||c.status!=='available') throw new Error(`${id}: catalog missing/not available`);
+            const d=de.find(x=>x.machineId===id); if(!d) throw new Error(`${id}: difficulty missing`); if(d.machineDataVersion!==c.machineDataVersion) throw new Error(`${id}: difficulty/catalog version mismatch`);
+            const r=re.find(x=>x.machineId===id); if(!r) throw new Error(`${id}: registry missing`); if(r.provisionalRegistrationId!==pid) throw new Error(`${id}: provisionalRegistrationId ${r.provisionalRegistrationId} != ${pid}`);
+          }
+          console.log('PASS: catalog/difficulty/registry verified for IDs 240-249');
+          NODE
+      - name: Preserve known timestamp-only legacy report
+        run: git restore -- reports/v64-observation-debt-classification.json || true
+      - name: Verify Publish mutation allowlist
+        shell: bash
+        run: |
+          set -euo pipefail
+          git status --short
+          unexpected=$(git status --porcelain | sed -E 's/^...//' | grep -Ev '^(catalog\.json|difficulty-catalog\.json|machine-registry\.json)$' || true)
+          if [[ -n "$unexpected" ]]; then echo 'Unexpected Publish-side mutation(s):'; echo "$unexpected"; exit 1; fi
+          for f in catalog.json difficulty-catalog.json machine-registry.json; do git diff --quiet -- "$f" && { echo "Expected Publish mutation missing: $f"; exit 1; } || true; done
+      - name: Commit Formal Publish outputs
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add catalog.json difficulty-catalog.json machine-registry.json
+          git commit -m 'Publish 20260906 Next10 batch to integration payload'
+          git pull --rebase origin batch/20260906-next10-gate0
+          git push origin HEAD:batch/20260906-next10-gate0
+          echo "PUBLISHED_HEAD=$(git rev-parse HEAD)" >> "$GITHUB_ENV"
+      - name: Final published-state checks
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm run registry:validate
+          npm run audit
+          npm run audit:ui-service-names
+          npm test
+          git restore -- reports/v64-observation-debt-classification.json || true
+          test -z "$(git status --porcelain)"
+          echo "Formal Publish complete at ${PUBLISHED_HEAD}"
