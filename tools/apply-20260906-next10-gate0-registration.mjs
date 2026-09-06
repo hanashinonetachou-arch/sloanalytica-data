@@ -1,6 +1,6 @@
 import fs from 'node:fs';
 
-const identityPath='research/batches/20260906-next10/gate0-machine-identity.json';
+const identityPath='research/batches/20260907-next10/gate0-machine-identity.json';
 const registryPath='machine-registry.json';
 const identity=JSON.parse(fs.readFileSync(identityPath,'utf8'));
 const registry=JSON.parse(fs.readFileSync(registryPath,'utf8'));
@@ -8,7 +8,7 @@ const registry=JSON.parse(fs.readFileSync(registryPath,'utf8'));
 const targets=identity.machines??[];
 if(targets.length!==10) throw new Error(`expected 10 Gate0 targets, got ${targets.length}`);
 const expectedIds=targets.map(x=>x.provisionalRegistrationId);
-if(expectedIds.join(',')!=='240,241,242,243,244,245,246,247,248,249') throw new Error(`unexpected provisional ID reservation: ${expectedIds.join(',')}`);
+if(expectedIds.join(',')!=='250,251,252,253,254,255,256,257,258,259') throw new Error(`unexpected provisional ID reservation: ${expectedIds.join(',')}`);
 
 const existingIds=new Map((registry.machines??[]).map(x=>[x.machineId,x]));
 const existingProv=new Map((registry.machines??[]).filter(x=>Number.isInteger(x.provisionalRegistrationId)).map(x=>[x.provisionalRegistrationId,x]));
@@ -42,7 +42,7 @@ for(const t of targets){
     fieldTestStatus:'NOT_TESTED',
     machineDataVersion:null,
     priority:'NONE',
-    notes:'20260906-next10 Gate 0 canonical identity registration. Research/Selection/Observation/MachineData pending.'
+    notes:'20260907-next10 Gate 0 canonical identity registration. Research/Selection/Observation/MachineData pending.'
   });
 }
 registry.machines.sort((a,b)=>String(a.displayName).localeCompare(String(b.displayName),'ja'));
@@ -53,13 +53,14 @@ identity.status='IDENTITY_PASS_DISCOVERY_SEEDED';
 identity.gate0Audit={
   auditedAt:new Date().toISOString(),
   targetCount:10,
-  provisionalRegistrationIds:[240,241,242,243,244,245,246,247,248,249],
+  provisionalRegistrationIds:[250,251,252,253,254,255,256,257,258,259],
   duplicateMachineIdCount:0,
   duplicateProvisionalIdCount:0,
   normalizedDisplayNameCollisionCount:0,
   identityStatus:'PASS',
+  registryRegistrationStatus:'REGISTERED',
   discoveryStatus:'SEEDED',
   note:'Formal Discovery Completeness transfer is evaluated once ResearchData discoveryInventory is materialized; no Selection decisions were made in Discovery.'
 };
 fs.writeFileSync(identityPath,JSON.stringify(identity,null,2)+'\n');
-console.log('PASS 20260906 Next10 Gate0 identity registration: 10 targets / provisional IDs 240-249 / duplicates 0');
+console.log('PASS 20260907 Next10 Gate0 identity registration: 10 targets / provisional IDs 250-259 / duplicates 0');
