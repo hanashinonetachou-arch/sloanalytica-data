@@ -27,6 +27,8 @@ export function validateUiDesignData(data,{expectedMachineId}={}){
     if(!section){errors.push(`missing section definition: ${sectionName}`);continue;}
     if(!Array.isArray(section.inputIds)) errors.push(`${sectionName}: inputIds must be an array`);
     if(section.evidenceIds!==undefined&&!Array.isArray(section.evidenceIds)) errors.push(`${sectionName}: evidenceIds must be an array when present`);
+    if(section.suppressInputDescriptions!==undefined&&typeof section.suppressInputDescriptions!=='boolean') errors.push(`${sectionName}: suppressInputDescriptions must be boolean`);
+    if(section.suppressInputDescriptions===true&&!(typeof section.description==='string'&&section.description.trim())) errors.push(`${sectionName}: suppressInputDescriptions requires a non-empty section description`);
     for(const id of section.inputIds??[]){
       if(seenInputs.has(id)) errors.push(`${id}: appears in multiple sections`);
       seenInputs.add(id);
