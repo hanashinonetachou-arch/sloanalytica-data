@@ -1,0 +1,199 @@
+{
+  "schemaVersion": "machine-observation-data-v2",
+  "machineId": "LB_TRIPLE_CROWN_SEVEN_FG",
+  "displayName": "LBトリプルクラウンセブン",
+  "provisionalRegistrationId": 254,
+  "registrationId": null,
+  "releaseDate": "2026-04-06",
+  "researchedAt": "2026-09-07",
+  "sources": [],
+  "sourceCoverage": {
+    "machineMenu": "UNRESOLVED",
+    "dataCounter": "UNRESOLVED",
+    "linkedService": "CHECKED_NONE",
+    "directPlay": "FOUND",
+    "endEvent": "FOUND",
+    "seatedState": "UNRESOLVED"
+  },
+  "observations": [
+    {
+      "observationId": "OBS_SMALL_ROLES_SHARED",
+      "sourceType": "DIRECT_PLAY",
+      "observationMode": "MANUAL_COUNTER",
+      "status": "FOUND",
+      "label": "通常時の小役（チェリー・プラム）",
+      "categories": [
+        "チェリー回数",
+        "プラム回数",
+        "通常ゲーム"
+      ],
+      "timing": [
+        "自己実戦中、通常ゲームと各小役成立時に更新"
+      ],
+      "excludedConditions": [
+        "チェリーとプラムを同一ゲームで重複成立として数えない",
+        "同じ通常ゲーム分母を各小役で別々に増やさない",
+        "着席前累積値を自己実戦値へ混ぜない",
+        "未観測を観測済み0として扱わない"
+      ],
+      "sourceRefs": [
+        "SRC_SETTING"
+      ],
+      "notes": "チェリー/プラムは同一通常G上の排他的カテゴリとして一つの自然観測に統合。Gate D/MachineDataで独立二項の過信が生じないか再監査する。"
+    },
+    {
+      "observationId": "OBS_BB_INITIAL",
+      "sourceType": "DIRECT_PLAY",
+      "observationMode": "MANUAL_COUNTER",
+      "status": "FOUND",
+      "label": "BB確率",
+      "categories": [
+        "BB回数",
+        "通常ゲーム"
+      ],
+      "timing": [
+        "自己実戦中、「通常ゲーム」の有効試行と対象事象の成立時に更新"
+      ],
+      "excludedConditions": [
+        "分母「通常ゲーム」外の遊技状態・試行を混ぜない",
+        "着席前累積値を自己実戦値へ混ぜない",
+        "未観測を観測済み0として扱わない"
+      ],
+      "sourceRefs": [
+        "SRC_SETTING"
+      ],
+      "notes": "Selection FEAT_BB_INITIAL (INCLUDE_PRIMARY) の観測契約。分子=BB回数 / 分母=通常ゲーム"
+    },
+    {
+      "observationId": "OBS_RB_INITIAL",
+      "sourceType": "DIRECT_PLAY",
+      "observationMode": "MANUAL_COUNTER",
+      "status": "FOUND",
+      "label": "RB確率",
+      "categories": [
+        "RB回数",
+        "通常ゲーム"
+      ],
+      "timing": [
+        "自己実戦中、「通常ゲーム」の有効試行と対象事象の成立時に更新"
+      ],
+      "excludedConditions": [
+        "分母「通常ゲーム」外の遊技状態・試行を混ぜない",
+        "着席前累積値を自己実戦値へ混ぜない",
+        "未観測を観測済み0として扱わない"
+      ],
+      "sourceRefs": [
+        "SRC_SETTING"
+      ],
+      "notes": "Selection FEAT_RB_INITIAL (INCLUDE_SUPPORT) の観測契約。分子=RB回数 / 分母=通常ゲーム"
+    },
+    {
+      "observationId": "OBS_HARD_EVIDENCE_EVENTS",
+      "sourceType": "END_EVENT",
+      "observationMode": "VISUAL_EVENT",
+      "status": "FOUND",
+      "label": "設定を直接絞り込める演出・表示",
+      "categories": [
+        "BB終了時クラウン+下パネル点滅",
+        "BB終了時青バット点滅",
+        "Specialトロフィー レインボー"
+      ],
+      "timing": [
+        "各確定・否定Evidenceが表示/発生した時に成立として記録"
+      ],
+      "excludedConditions": [
+        "傾向示唆を確定・否定情報へ昇格させない",
+        "同一Evidenceの複数回出現で証拠強度を乗算しない",
+        "0は未確認、1回以上はEvidence成立として扱う",
+        "ヨルムンガンド終了画面Hardカテゴリは共有終了画面観測から一度だけ記録する"
+      ],
+      "sourceRefs": [],
+      "notes": "SelectionDataのHard Evidence候補を自然観測として保持。UIでは発生場所/タイミングに応じて分割可能だが、同一事象の二重入力は禁止。"
+    }
+  ],
+  "featureMappings": [
+    {
+      "featureId": "FEAT_CHERRY",
+      "mappingType": "COMBINABLE",
+      "observationIds": [
+        "OBS_SMALL_ROLES_SHARED"
+      ],
+      "collectionMethods": [
+        "MANUAL_COUNTER"
+      ],
+      "usableForInference": true,
+      "usableForDifficulty": false,
+      "notes": "Gate C観測写像。Selectionの分母・抑制契約を保持し、未観測を観測済み0として扱わない。"
+    },
+    {
+      "featureId": "FEAT_PLUM",
+      "mappingType": "COMBINABLE",
+      "observationIds": [
+        "OBS_SMALL_ROLES_SHARED"
+      ],
+      "collectionMethods": [
+        "MANUAL_COUNTER"
+      ],
+      "usableForInference": true,
+      "usableForDifficulty": false,
+      "notes": "Gate C観測写像。Selectionの分母・抑制契約を保持し、未観測を観測済み0として扱わない。"
+    },
+    {
+      "featureId": "FEAT_BB_INITIAL",
+      "mappingType": "EXACT",
+      "observationIds": [
+        "OBS_BB_INITIAL"
+      ],
+      "collectionMethods": [
+        "MANUAL_COUNTER"
+      ],
+      "usableForInference": true,
+      "usableForDifficulty": false,
+      "notes": "Gate C観測写像。Selectionの分母・抑制契約を保持し、未観測を観測済み0として扱わない。"
+    },
+    {
+      "featureId": "FEAT_RB_INITIAL",
+      "mappingType": "EXACT",
+      "observationIds": [
+        "OBS_RB_INITIAL"
+      ],
+      "collectionMethods": [
+        "MANUAL_COUNTER"
+      ],
+      "usableForInference": true,
+      "usableForDifficulty": false,
+      "notes": "Gate C観測写像。Selectionの分母・抑制契約を保持し、未観測を観測済み0として扱わない。"
+    }
+  ],
+  "researchReopenRequests": [],
+  "fieldVerificationItems": [
+    {
+      "verificationId": "VFY_LB_TRIPLE_CROWN_SEVEN_FG_MACHINE_MENU",
+      "status": "WAITING_FOR_MACHINE",
+      "sourceType": "MACHINE_MENU",
+      "priority": "MEDIUM",
+      "question": "筐体メニュー/遊技履歴に総G・通常G・初当り・小役などSelectionに利用できる当日累積値がどこまで表示されるか確認する。"
+    },
+    {
+      "verificationId": "VFY_LB_TRIPLE_CROWN_SEVEN_FG_DATA_COUNTER",
+      "status": "WAITING_FOR_MACHINE",
+      "sourceType": "DATA_COUNTER",
+      "priority": "HIGH",
+      "question": "ホールのデータカウンターで取得できる当日累積値と、Selectionの通常G/初当り分母定義が一致する範囲を確認する。設備依存のためWebだけで確定しない。"
+    },
+    {
+      "verificationId": "VFY_LB_TRIPLE_CROWN_SEVEN_FG_SEATED_STATE",
+      "status": "WAITING_FOR_MACHINE",
+      "sourceType": "SEATED_STATE",
+      "priority": "HIGH",
+      "question": "着席直後に取得できる当日累積値と自己実戦開始値を確認し、安全に差分利用できる項目を確定する。"
+    },
+    {
+      "verificationId": "VFY_LB_TRIPLE_CROWN_SEVEN_FG_LINKED_SERVICE",
+      "status": "WAITING_FOR_MACHINE",
+      "sourceType": "LINKED_SERVICE",
+      "priority": "LOW",
+      "question": "公開資料では機種固有の遊技履歴連動を確認できなかったため、実機メニューにQR/連動導線が存在するかだけ確認する。非対応を事前断定しない。"
+    }
+  ]
+}
