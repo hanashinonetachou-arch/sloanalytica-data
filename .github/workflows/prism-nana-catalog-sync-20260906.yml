@@ -1,0 +1,69 @@
+name: Prism Nana Catalog Sync 20260906
+
+on:
+  push:
+    branches:
+      - fix/prism-nana-observation-grouped-ui-20260906
+
+permissions:
+  contents: write
+
+jobs:
+  sync:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: fix/prism-nana-observation-grouped-ui-20260906
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Sync Prism Nana catalog version hash and size
+        run: |
+          node <<'NODE'
+          const fs = require('fs');
+          const crypto = require('crypto');
+          const pkgPath = 'machines/L_PRISM_NANA_CC/machine-package.json';
+          const catalogPath = 'catalog.json';
+          const raw = fs.readFileSync(pkgPath);
+          const pkg = JSON.parse(raw.toString('utf8'));
+          const catalog = JSON.parse(fs.readFileSync(catalogPath, 'utf8'));
+          const entry = catalog.machines.find(m => m.machineId === 'L_PRISM_NANA_CC');
+          if (!entry) throw new Error('Prism Nana catalog entry missing');
+          const version = pkg.machine?.machineDataVersion ?? pkg.machineDataVersion;
+          if (!version) throw new Error('machineDataVersion missing from package');
+          entry.machineDataVersion = version;
+          entry.sha256 = crypto.createHash('sha256').update(raw).digest('hex');
+          entry.packageSizeBytes = raw.length;
+          catalog.generatedAt = new Date().toISOString();
+          fs.writeFileSync(catalogPath, JSON.stringify(catalog, null, 2) + '\n');
+          console.log({version: entry.machineDataVersion, sha256: entry.sha256, packageSizeBytes: entry.packageSizeBytes});
+          NODE
+      - name: Validate exact metadata match
+        run: |
+          node <<'NODE'
+          const fs = require('fs');
+          const crypto = require('crypto');
+          const raw = fs.readFileSync('machines/L_PRISM_NANA_CC/machine-package.json');
+          const pkg = JSON.parse(raw.toString('utf8'));
+          const c = JSON.parse(fs.readFileSync('catalog.json','utf8'));
+          const e = c.machines.find(m => m.machineId === 'L_PRISM_NANA_CC');
+          const version = pkg.machine?.machineDataVersion ?? pkg.machineDataVersion;
+          const hash = crypto.createHash('sha256').update(raw).digest('hex');
+          if (e.machineDataVersion !== version) throw new Error('version mismatch');
+          if (e.sha256 !== hash) throw new Error('sha mismatch');
+          if (e.packageSizeBytes !== raw.length) throw new Error('size mismatch');
+          console.log('Prism Nana catalog metadata: PASS');
+          NODE
+      - name: Commit catalog sync
+        run: |
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git add catalog.json
+          if git diff --cached --quiet; then
+            echo 'No changes'
+          else
+            git commit -m 'fix: sync Prism Nana catalog metadata'
+            git push
+          fi

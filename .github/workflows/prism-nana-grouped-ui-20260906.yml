@@ -1,0 +1,131 @@
+name: Prism Nana Grouped UI 20260906
+
+on:
+  push:
+    branches:
+      - fix/prism-nana-observation-grouped-ui-20260906
+
+permissions:
+  contents: write
+
+jobs:
+  apply:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: fix/prism-nana-observation-grouped-ui-20260906
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Validate canonical grouped UI
+        run: |
+          node <<'NODE'
+          const fs = require('fs');
+          const p = 'research/L_PRISM_NANA_CC/ui-design-data.json';
+          const d = JSON.parse(fs.readFileSync(p, 'utf8'));
+          const expected = [
+            'ST初当り',
+            'ボーナス中',
+            'ボーナス終了画面',
+            'スペシャルボーナス開始時の楽曲',
+            'プリプリゾーン終了時 タッチボイス',
+            '通常時の特定会話',
+            '獲得枚数による設定示唆・確定'
+          ];
+          if (JSON.stringify(d.sectionOrder) !== JSON.stringify(expected)) throw new Error('canonical section order mismatch');
+          if (d.sections['プリプリゾーン終了時 タッチボイス'].inputIds.length !== 10) throw new Error('touch voice grouping mismatch');
+          if (!d.sections['ボーナス終了画面'].inputIds.includes('INP_END_UNIFORM_COUNT')) throw new Error('bonus-end evidence not colocated');
+          if (!d.sections['通常時の特定会話'].inputIds.includes('INP_TALK_RAINBOW_COUNT')) throw new Error('talk evidence not colocated');
+          const userFacing = [
+            ...d.sectionOrder,
+            ...Object.entries(d.sections).flatMap(([name,s]) => [name,s.description || '']),
+            ...Object.values(d.inputContracts).flatMap(c => [c.name || '', c.description || ''])
+          ].join('\n');
+          if (/\bFeature\b|\bEvidence\b/.test(userFacing)) throw new Error('internal terminology leak in canonical UI');
+          console.log('Canonical grouped UI: PASS');
+          NODE
+
+      - name: Sync machine package UI from canonical
+        run: |
+          node <<'NODE'
+          const fs = require('fs');
+          const cp = 'research/L_PRISM_NANA_CC/ui-design-data.json';
+          const mp = 'machines/L_PRISM_NANA_CC/machine-package.json';
+          const c = JSON.parse(fs.readFileSync(cp, 'utf8'));
+          const m = JSON.parse(fs.readFileSync(mp, 'utf8'));
+
+          const logicBefore = JSON.stringify({features:m.features,evidence:m.evidence});
+          const oldItems = new Map();
+          for (const sec of m.ui.sections) {
+            for (const item of sec.items || []) {
+              if (item.type === 'input' && item.inputId) oldItems.set(item.inputId, JSON.parse(JSON.stringify(item)));
+            }
+          }
+
+          const inputById = new Map(m.inputs.inputs.map(x => [x.id,x]));
+          for (const [id, contract] of Object.entries(c.inputContracts)) {
+            const inp = inputById.get(id);
+            if (inp && contract.name) inp.name = contract.name;
+          }
+
+          const sections = [];
+          c.sectionOrder.forEach((title, idx) => {
+            const src = c.sections[title];
+            if (!src) throw new Error(`missing canonical section ${title}`);
+            const items = src.inputIds.map(inputId => {
+              const item = oldItems.get(inputId);
+              if (!item) throw new Error(`missing package UI item ${inputId}`);
+              const contract = c.inputContracts[inputId];
+              if (!contract) throw new Error(`missing canonical input contract ${inputId}`);
+              item.label = contract.name || item.label;
+              item.gridSpan = contract.gridSpan || item.gridSpan;
+              return item;
+            });
+            sections.push({
+              id:`UI_DESIGN_${idx+1}`,
+              title,
+              displayOrder:idx+1,
+              description:src.description || '',
+              collapsible:Boolean(src.collapsible),
+              defaultExpanded:Boolean(src.defaultExpanded),
+              items
+            });
+          });
+          m.ui.sections = sections;
+          m.machine.machineDataVersion = '0.1.2';
+
+          const logicAfter = JSON.stringify({features:m.features,evidence:m.evidence});
+          if (logicBefore !== logicAfter) throw new Error('inference logic changed unexpectedly');
+          fs.writeFileSync(mp, JSON.stringify(m,null,2)+'\n');
+          NODE
+
+      - name: Validate generated package UI
+        run: |
+          node <<'NODE'
+          const fs = require('fs');
+          const m = JSON.parse(fs.readFileSync('machines/L_PRISM_NANA_CC/machine-package.json','utf8'));
+          const expected = ['ST初当り','ボーナス中','ボーナス終了画面','スペシャルボーナス開始時の楽曲','プリプリゾーン終了時 タッチボイス','通常時の特定会話','獲得枚数による設定示唆・確定'];
+          if (m.machine.machineDataVersion !== '0.1.2') throw new Error('machineDataVersion mismatch');
+          if (JSON.stringify(m.ui.sections.map(s=>s.title)) !== JSON.stringify(expected)) throw new Error('package section order mismatch');
+          const voice = m.ui.sections.find(s=>s.title==='プリプリゾーン終了時 タッチボイス');
+          if (!voice || voice.items.length !== 10) throw new Error('package touch voice grouping mismatch');
+          const visible = m.ui.sections.flatMap(s=>[s.title,s.description,...s.items.map(i=>i.label||'')]).join('\n');
+          if (/\bFeature\b|\bEvidence\b/.test(visible)) throw new Error('internal terminology leak in package UI');
+          if (m.ui.sections.some(s=>/デフォルトボイス \/ 偶数示唆ボイス|非Evidence/.test(`${s.title}\n${s.description}`))) throw new Error('legacy section wording remains');
+          console.log('Generated Prism Nana package UI: PASS');
+          NODE
+
+      - name: Commit package sync
+        run: |
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git add research/L_PRISM_NANA_CC/ui-design-data.json machines/L_PRISM_NANA_CC/machine-package.json
+          if git diff --cached --quiet; then
+            echo 'No changes'
+          else
+            git commit -m 'fix: sync Prism Nana grouped UI to package'
+            git push
+          fi
