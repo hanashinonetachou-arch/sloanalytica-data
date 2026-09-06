@@ -1,7 +1,7 @@
 {
   "schemaVersion": "selection-data-v1",
   "machineId": "L_SMASLO_TOKYO_REVENGERS_ZF",
-  "machineDataVersion": "0.1.0",
+  "machineDataVersion": "0.1.1",
   "inputs": [
     {
       "id": "INP_NORMAL_GAMES",
@@ -100,6 +100,54 @@
         }
       ],
       "defaultValue": []
+    },
+    {
+      "id": "INP_TC_WEAK_RARE",
+      "name": "弱チェリー/スイカ",
+      "category": "TOKYO_TC_RARE",
+      "type": "counter",
+      "unit": "回",
+      "displayOrder": 30,
+      "inferenceRole": "INCLUDE_SUPPORT",
+      "defaultValue": "",
+      "minimum": 0,
+      "description": "東卍CHANCE中に成立した弱チェリーとスイカの合計。卍目は含めません。"
+    },
+    {
+      "id": "INP_TC_WEAK_RARE_AT",
+      "name": "うちAT当選",
+      "category": "TOKYO_TC_RARE",
+      "type": "counter",
+      "unit": "回",
+      "displayOrder": 31,
+      "inferenceRole": "INCLUDE_SUPPORT",
+      "defaultValue": "",
+      "minimum": 0,
+      "description": "上記弱チェリー/スイカ契機で東卍RUSHに当選した回数。"
+    },
+    {
+      "id": "INP_REVENGE_ELIGIBLE_AT_END",
+      "name": "対象AT終了",
+      "category": "TOKYO_REVENGE",
+      "type": "counter",
+      "unit": "回",
+      "displayOrder": 40,
+      "inferenceRole": "INCLUDE_SUPPORT",
+      "defaultValue": "",
+      "minimum": 0,
+      "description": "一触即発または東卍CHANCEに一度以上当選した東卍RUSHの終了回数。駆け抜けは除外します。"
+    },
+    {
+      "id": "INP_REVENGE_HIT",
+      "name": "REVENGE発生",
+      "category": "TOKYO_REVENGE",
+      "type": "counter",
+      "unit": "回",
+      "displayOrder": 41,
+      "inferenceRole": "INCLUDE_SUPPORT",
+      "defaultValue": "",
+      "minimum": 0,
+      "description": "上記対象AT終了後にREVENGEフリーズが発生した回数。"
     }
   ],
   "features": [
@@ -135,6 +183,28 @@
       "userReason": "Gate Bで採用し、Gate Cの観測契約を経てGate D MachineDataに物質化済み。分子・分母・設定別確率はMachineDataと同一。",
       "difficultyParticipation": "EXCLUDE",
       "difficultyExclusionReason": "Gate E時点では実戦総GへのDifficulty Exposure換算を別監査するため、推測Featureは維持したままDifficulty校正のみ除外する。"
+    },
+    {
+      "researchFeatureId": "RF_TOMAN_CHANCE_WEAK_RARE_AT",
+      "featureId": "FEAT_TC_WEAK_RARE_AT",
+      "adoptionCategory": "INCLUDE_SUPPORT",
+      "weight": 0.8,
+      "numeratorInputId": "INP_TC_WEAK_RARE_AT",
+      "denominatorInputId": "INP_TC_WEAK_RARE",
+      "userReason": "対象役は全設定共通約1/42で、AT当選率10.2%～16.4%を条件付きで直接評価できるため採用。",
+      "difficultyParticipation": "EXCLUDE",
+      "difficultyExclusionReason": "条件付き観測で総Gへの共通Exposure換算を置けないため。"
+    },
+    {
+      "researchFeatureId": "RF_AT_END_REVENGE_ELIGIBLE",
+      "featureId": "FEAT_AT_END_REVENGE_ELIGIBLE",
+      "adoptionCategory": "INCLUDE_SUPPORT",
+      "weight": 0.8,
+      "numeratorInputId": "INP_REVENGE_HIT",
+      "denominatorInputId": "INP_REVENGE_ELIGIBLE_AT_END",
+      "userReason": "駆け抜けを除外すれば10.2%～16.4%の設定別発生率を直接観測できるため採用。",
+      "difficultyParticipation": "EXCLUDE",
+      "difficultyExclusionReason": "条件付き観測で総Gへの共通Exposure換算を置けないため。"
     }
   ],
   "evidence": [
@@ -250,7 +320,9 @@
     "SEL_FEAT_AT_INITIAL": "東京卍RUSH初当り",
     "SEL_FEAT_COMMON_BELL": "通常時共通ベル",
     "SEL_FEAT_MIDDLE_CHERRY": "中段チェリー",
-    "EVIDENCE": "設定示唆・確定情報"
+    "EVIDENCE": "設定示唆・確定情報",
+    "TOKYO_TC_RARE": "東卍CHANCE レア役",
+    "TOKYO_REVENGE": "AT終了後 REVENGE"
   },
   "difficultyAnalysis": {
     "targetGames": [
@@ -273,9 +345,9 @@
   "migrationNote": "Gate A/Bの不採用候補一覧はbatch Gate文書とMachineData selectionSummaryに保持。Phase 12構造化SelectionDataでは、現在実行される採用Feature/Evidence契約のみをMachineDataから無変換で再表現する。",
   "selectionSummaryContract": {
     "schemaVersion": "selection-summary-v1",
-    "evaluatedCount": 10,
-    "selectedCount": 3,
-    "rejectedCount": 1,
+    "evaluatedCount": 13,
+    "selectedCount": 5,
+    "rejectedCount": 2,
     "selected": [
       {
         "featureId": "FEAT_AT_INITIAL",
@@ -291,6 +363,16 @@
         "featureId": "FEAT_MIDDLE_CHERRY",
         "name": "中段チェリー",
         "reason": "Gate Cでは完全ベクトル確認待ちだったが、設定1-3・4-5・6の全段階公開値を複数ソースで確認できたため補間なしで採用。"
+      },
+      {
+        "featureId": "FEAT_TC_WEAK_RARE_AT",
+        "name": "東卍CHANCE中 弱チェリー・スイカ時AT当選率",
+        "reason": "対象役とAT当選を直接数えられ、設定1～6の完全な当選率が公開されているため採用。"
+      },
+      {
+        "featureId": "FEAT_AT_END_REVENGE_ELIGIBLE",
+        "name": "東卍RUSH終了後のREVENGE発生率（非駆け抜け）",
+        "reason": "駆け抜けを除外した対象ATで完全な設定別発生率が公開され、条件を実戦で識別できるため採用。"
       }
     ],
     "rejected": [
@@ -298,6 +380,11 @@
         "featureId": "FEAT_REF_FIRST_HIT_TOTAL",
         "name": "初当り合算",
         "reason": "AT/CZ等の同一因果経路を重複評価するためv1の同時尤度から除外。"
+      },
+      {
+        "featureId": "FEAT_REF_INITIAL_SET_STOCK",
+        "name": "初当り時のセットストック抽選",
+        "reason": "設定別振り分けは公開されているが、AT中の別契機ストックと事後的に混在し「初当り時に付与されたストック数」を安定して直接識別できないため不採用。"
       }
     ]
   }
