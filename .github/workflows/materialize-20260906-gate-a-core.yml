@@ -1,0 +1,101 @@
+name: Materialize 20260906 Gate A core
+
+on:
+  push:
+    branches:
+      - batch/20260906-next10-gate0
+    paths:
+      - 'research/batches/20260906-next10/gate-a-verified-core.json'
+      - '.github/workflows/materialize-20260906-gate-a-core.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  materialize:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: batch/20260906-next10-gate0
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Materialize verified core into ResearchData
+        shell: bash
+        run: |
+          node --input-type=module <<'NODE'
+          import fs from 'node:fs';
+          import path from 'node:path';
+          const core=JSON.parse(fs.readFileSync('research/batches/20260906-next10/gate-a-verified-core.json','utf8'));
+          const checkedAt=core.checkedAt;
+          for(const [machineId,m] of Object.entries(core.machines)){
+            const file=path.join('research',machineId,'research-data.json');
+            const data=JSON.parse(fs.readFileSync(file,'utf8'));
+            const sourceMap=new Map((data.sources??[]).map(s=>[s.sourceId,s]));
+            for(const s of m.sources??[]) sourceMap.set(s.sourceId,{...s,checkedAt});
+            data.sources=[...sourceMap.values()];
+            const featureMap=new Map((data.features??[]).map(f=>[f.researchFeatureId,f]));
+            for(const f of m.features??[]){
+              const settingValues={};
+              if(f.rates){ for(const [setting,denom] of Object.entries(f.rates)) settingValues[setting]={probability:1/denom,rawDisplay:`1/${denom}`,numerator:1,denominator:denom}; }
+              if(f.probabilities){ for(const [setting,p] of Object.entries(f.probabilities)) settingValues[setting]={probability:p,rawDisplay:String(p)}; }
+              featureMap.set(f.researchFeatureId,{
+                researchFeatureId:f.researchFeatureId,name:f.name,factStatus:'verified',candidateModel:f.candidateModel,
+                trialUnit:f.trialUnit,numeratorDefinition:f.numeratorDefinition,denominatorDefinition:f.denominatorDefinition,
+                settingValues,sourceRefs:f.sourceRefs,crossSourceStatus:f.crossSourceStatus,
+                ...(f.dependencyRisk?{dependencyRisk:f.dependencyRisk}:{}),
+                notes:'2026-09-06 Gate A core materialization; Selection判断は未実施。'
+              });
+            }
+            data.features=[...featureMap.values()];
+            const evMap=new Map((data.evidenceCandidates??[]).map(e=>[e.researchEvidenceId,e]));
+            const defaultEvRefs=(m.sources??[]).filter(s=>s.sourceType==='major_analysis').map(s=>s.sourceId);
+            for(const ev of m.evidence??[]){
+              evMap.set(ev.researchEvidenceId,{
+                researchEvidenceId:ev.researchEvidenceId,name:ev.name,allowedSettings:ev.allowedSettings,
+                deniedSettings:(data.machine.settings??[]).filter(s=>!ev.allowedSettings.includes(s)),
+                sourceRefs:defaultEvRefs.length?defaultEvRefs:[(m.sources??[])[0]?.sourceId].filter(Boolean),
+                factStatus:'verified',notes:'特定設定以上/特定設定濃厚のResearch Evidence候補。Selection/Evidence UI判断は後段。'
+              });
+            }
+            data.evidenceCandidates=[...evMap.values()];
+            const conflictMap=new Map((data.conflicts??[]).map(c=>[c.conflictId,c]));
+            for(const c of m.conflicts??[]) conflictMap.set(c.conflictId,{...c,targetId:machineId,sourceRefs:c.sourceRefs});
+            data.conflicts=[...conflictMap.values()];
+            if(m.linkedServices) data.linkedServices=m.linkedServices;
+            if(m.researchNotes) data.researchNotes=[...(data.researchNotes??[]),...m.researchNotes];
+            data.researchedAt=checkedAt;
+            data.researchStage='GATE_A_CORE_MATERIALIZED';
+            data.gateStatus={...(data.gateStatus??{}),gate0:'PASS',gateA:'IN_PROGRESS'};
+            fs.writeFileSync(file,`${JSON.stringify(data,null,2)}\n`);
+          }
+          for(const [machineId,r] of Object.entries(core.existingResearchReview??{})){
+            const file=path.join('research',machineId,'research-data.json');
+            const data=JSON.parse(fs.readFileSync(file,'utf8'));
+            data.researchedAt=checkedAt;
+            data.researchStage='GATE_A_EXISTING_RESEARCH_REVIEW';
+            data.gateStatus={...(data.gateStatus??{}),gate0:'PASS',gateA:'IN_PROGRESS'};
+            data.gateAReview=r;
+            fs.writeFileSync(file,`${JSON.stringify(data,null,2)}\n`);
+          }
+          NODE
+      - name: Validate all 10 ResearchData
+        shell: bash
+        run: |
+          set -euo pipefail
+          ids=(L_BURNING_EXPRESS_ZN L_PRISM_NANA_CC L_GINGA_EIYUU_DNT_GH L_HIHODEN_PA7 L_OKIDOKI_DUO_ENCORE_FR L_HOKUTO_TENSEI_2_MW LB_NEW_KING_HANAHANA_V_PF L_TEKKEN_6_YD01H L_HANMA_BAKI_L5 L_HANABI_KM)
+          for id in "${ids[@]}"; do echo "=== $id ==="; node tools/validate-research-data.mjs "research/$id/research-data.json"; done
+          node tools/discovery-completeness-gate.mjs "${ids[@]}"
+      - name: Commit materialized ResearchData
+        shell: bash
+        run: |
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git add research/*/research-data.json
+          if git diff --cached --quiet; then echo 'No changes'; exit 0; fi
+          git commit -m 'research: materialize Gate A core facts for corrected Next10'
+          git pull --rebase origin batch/20260906-next10-gate0
+          git push origin HEAD:batch/20260906-next10-gate0
