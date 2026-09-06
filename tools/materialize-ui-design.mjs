@@ -56,6 +56,7 @@ export function materializeUiDesign(pkg,design){
       const input=inputMap.get(id);
       const c=design.inputContracts?.[id];
       if(!input||!c) throw new Error(`${design.machineId}: invalid section input ${id}`);
+      if(section.suppressInputDescriptions===true) delete input.description;
       if(c.inputVisible===false) continue;
       const config={};
       if(c.directInput!==undefined) config.directInput=c.directInput;
