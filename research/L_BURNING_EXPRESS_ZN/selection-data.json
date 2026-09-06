@@ -6,7 +6,7 @@
     {
       "id": "INP_EXPRESS_BONUS_INITIAL_COUNT",
       "name": "エクスプレスボーナス初当り 回数",
-      "category": "SEL_RF_EXPRESS_BONUS_INITIAL",
+      "category": "SHARED_DENOM_VALUE",
       "type": "counter",
       "unit": "回",
       "displayOrder": 10,
@@ -15,29 +15,20 @@
     },
     {
       "id": "INP_EXPRESS_BONUS_INITIAL_TRIALS",
-      "name": "エクスプレスボーナス初当り 試行数",
-      "category": "SEL_RF_EXPRESS_BONUS_INITIAL",
+      "name": "通常ゲーム数",
+      "category": "SHARED_DENOM_VALUE",
       "type": "integer",
-      "unit": "回",
+      "unit": "G",
       "displayOrder": 11,
       "inferenceRole": "INCLUDE_PRIMARY",
-      "defaultValue": ""
+      "defaultValue": "",
+      "description": "この項目の母数は「通常ゲーム数」です。"
     },
     {
-      "id": "INP_REEL_LOCK_TOTAL_COUNT",
-      "name": "通常時リールロック合算 回数",
-      "category": "SEL_RF_REEL_LOCK_TOTAL",
+      "id": "INP_REEL_LOCK_NON_REACH_COUNT",
+      "name": "リーチ目以外のリールロック 回数",
+      "category": "SHARED_DENOM_VALUE",
       "type": "counter",
-      "unit": "回",
-      "displayOrder": 15,
-      "inferenceRole": "INCLUDE_FALLBACK",
-      "defaultValue": ""
-    },
-    {
-      "id": "INP_REEL_LOCK_TOTAL_TRIALS",
-      "name": "通常時リールロック合算 試行数",
-      "category": "SEL_RF_REEL_LOCK_TOTAL",
-      "type": "integer",
       "unit": "回",
       "displayOrder": 16,
       "inferenceRole": "INCLUDE_FALLBACK",
@@ -68,13 +59,31 @@
     {
       "researchFeatureId": "RF_REEL_LOCK_TOTAL",
       "featureId": "FEAT_REEL_LOCK_TOTAL",
+      "adoptionCategory": "EXCLUDE",
+      "weight": 1,
+      "difficultyParticipation": "EXCLUDE",
+      "userFacingReason": "リールロック合算は、最も頻度の高いリーチ目ロックが設定1〜6で約1/1338とほぼ不変で、チェリー・スイカ・その他にある設定差を薄めるため不採用。リーチ目以外を分離して評価する。",
+      "rejectionReason": "リールロック合算は、最も頻度の高いリーチ目ロックが設定1〜6で約1/1338とほぼ不変で、チェリー・スイカ・その他にある設定差を薄めるため不採用。リーチ目以外を分離して評価する。"
+    },
+    {
+      "researchFeatureId": "RF_REEL_LOCK_REACH",
+      "featureId": "FEAT_REEL_LOCK_REACH",
+      "adoptionCategory": "EXCLUDE",
+      "weight": 1,
+      "userFacingReason": "リーチ目を伴うリールロックは全設定の公開確率が約1/1337.5〜1/1339.2で設定差がほぼなく、設定推測への判別情報量が極めて小さいため不採用。",
+      "rejectionReason": "リーチ目を伴うリールロックは全設定の公開確率が約1/1337.5〜1/1339.2で設定差がほぼなく、設定推測への判別情報量が極めて小さいため不採用。",
+      "difficultyParticipation": "EXCLUDE"
+    },
+    {
+      "researchFeatureId": "RF_REEL_LOCK_NON_REACH",
+      "featureId": "FEAT_REEL_LOCK_NON_REACH",
       "adoptionCategory": "INCLUDE_FALLBACK",
       "weight": 1,
-      "numeratorInputId": "INP_REEL_LOCK_TOTAL_COUNT",
-      "denominatorInputId": "INP_REEL_LOCK_TOTAL_TRIALS",
-      "userReason": "公開値は利用可能だが主要Featureとの経路重複または同一事象の包含があるため、二重評価を避け主Featureが使えない場合のFallbackとしてのみ採用する。",
+      "numeratorInputId": "INP_REEL_LOCK_NON_REACH_COUNT",
+      "denominatorInputId": "INP_EXPRESS_BONUS_INITIAL_TRIALS",
+      "userReason": "設定差がほぼないリーチ目を除いたリールロックだけを評価する。ボーナス経路との事象重複を避けるため、エクスプレスボーナス初当りが利用できない場合のFallbackとして採用する。",
       "difficultyParticipation": "EXCLUDE",
-      "difficultyExclusionReason": "Observationで実戦時の試行量・露出率を確定する前にDifficultyへ推定値を持ち込まない。",
+      "difficultyExclusionReason": "今回の実機フィードバック再SelectionではDifficulty再較正前のため推測Featureのみ更新する。",
       "suppressedByFeatureIds": [
         "FEAT_EXPRESS_BONUS_INITIAL"
       ]
@@ -107,6 +116,8 @@
   },
   "uiCategoryLabels": {
     "SEL_RF_EXPRESS_BONUS_INITIAL": "エクスプレスボーナス初当り",
-    "SEL_RF_REEL_LOCK_TOTAL": "通常時リールロック合算"
+    "SEL_RF_REEL_LOCK_TOTAL": "通常時リールロック合算",
+    "SEL_RF_REEL_LOCK_NON_REACH": "リーチ目以外のリールロック",
+    "SHARED_DENOM_VALUE": "通常ゲーム数を共通母数にする項目"
   }
 }
