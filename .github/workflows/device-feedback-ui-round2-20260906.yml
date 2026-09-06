@@ -1,0 +1,108 @@
+name: Device Feedback UI Round2 20260906
+on:
+  push:
+    branches: [fix/device-feedback-ui-round2-20260906]
+permissions:
+  contents: write
+jobs:
+  apply:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: fix/device-feedback-ui-round2-20260906
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Apply UI fixes
+        shell: bash
+        run: |
+          node <<'NODE'
+          const fs=require('fs');
+          const paths={
+            burning:'machines/L_BURNING_EXPRESS_ZN/machine-package.json',
+            prism:'machines/L_PRISM_NANA_CC/machine-package.json',
+            tekken:'machines/L_TEKKEN_6_YD01H/machine-package.json'
+          };
+          const read=p=>JSON.parse(fs.readFileSync(p,'utf8'));
+          const write=(p,j)=>fs.writeFileSync(p,JSON.stringify(j,null,2)+'\n');
+
+          // Burning Express: force a package-version bump so devices cannot retain the pre-feedback package.
+          {
+            const j=read(paths.burning);
+            j.machine.machineDataVersion='0.1.1';
+            const s=j.ui.sections.find(x=>x.id==='UI_DESIGN_1');
+            if(!s.items.some(x=>x.inputId==='INP_REEL_LOCK_NON_REACH_COUNT')) throw new Error('Burning reel-lock input missing');
+            // denominator first, then the two counters in a 2-column row.
+            const by=Object.fromEntries(s.items.map(x=>[x.inputId,x]));
+            by.INP_EXPRESS_BONUS_INITIAL_TRIALS.gridSpan=12;
+            by.INP_EXPRESS_BONUS_INITIAL_COUNT.gridSpan=6;
+            by.INP_REEL_LOCK_NON_REACH_COUNT.gridSpan=6;
+            s.items=[by.INP_EXPRESS_BONUS_INITIAL_TRIALS,by.INP_EXPRESS_BONUS_INITIAL_COUNT,by.INP_REEL_LOCK_NON_REACH_COUNT];
+            write(paths.burning,j);
+          }
+
+          // Prism Nana: every category sharing one multinomial denominator is shown as two vertical columns.
+          {
+            const j=read(paths.prism);
+            j.machine.machineDataVersion='0.1.1';
+            for(const s of j.ui.sections){
+              if(s.displayOrder>=4){
+                for(const item of s.items||[]) if(item.type==='input') item.gridSpan=6;
+              }
+            }
+            write(paths.prism,j);
+          }
+
+          // Tekken 6: normal games -> CZ full row -> Bonus/AT two-column; return numerator/denominator both +/- counters.
+          {
+            const j=read(paths.tekken);
+            j.machine.machineDataVersion='0.1.1';
+            const s=j.ui.sections.find(x=>x.id==='UI_DESIGN_1');
+            const by=Object.fromEntries(s.items.map(x=>[x.inputId,x]));
+            by.INP_AT_INITIAL_TRIALS.gridSpan=12;
+            by.INP_CZ_INITIAL_COUNT.gridSpan=12;
+            by.INP_BONUS_INITIAL_COUNT.gridSpan=6;
+            by.INP_AT_INITIAL_COUNT.gridSpan=6;
+            s.items=[by.INP_AT_INITIAL_TRIALS,by.INP_CZ_INITIAL_COUNT,by.INP_BONUS_INITIAL_COUNT,by.INP_AT_INITIAL_COUNT];
+            const r=j.ui.sections.find(x=>x.id==='UI_DESIGN_2');
+            const trials=r.items.find(x=>x.inputId==='INP_AT_RETURN_RED_UI_TRIALS');
+            trials.label='AT終了回数';
+            trials.widget='counter';
+            trials.gridSpan=6;
+            trials.config={directInput:false,compact:true,quickAdd:[1],step:1,emptyMeansUnobserved:true,observedZeroAllowed:true};
+            const hit=r.items.find(x=>x.inputId==='INP_AT_RETURN_RED_UI_COUNT');
+            hit.label='引き戻し回数';
+            hit.gridSpan=6;
+            r.items=[trials,hit];
+            const inp=j.inputs.inputs.find(x=>x.id==='INP_AT_RETURN_RED_UI_TRIALS');
+            inp.name='AT終了回数';
+            inp.type='counter';
+            inp.description='コンティニューゾーン失敗後に通常時へ戻り、赤UIの引き戻し抽選を確認できたAT終了回数を+/-で数えます。';
+            write(paths.tekken,j);
+          }
+          NODE
+      - name: Validate targeted contracts
+        run: |
+          node - <<'NODE'
+          const fs=require('fs');
+          for(const p of ['machines/L_BURNING_EXPRESS_ZN/machine-package.json','machines/L_PRISM_NANA_CC/machine-package.json','machines/L_TEKKEN_6_YD01H/machine-package.json']) JSON.parse(fs.readFileSync(p));
+          const b=require('./machines/L_BURNING_EXPRESS_ZN/machine-package.json');
+          if(b.machine.machineDataVersion!=='0.1.1') process.exit(1);
+          const p=require('./machines/L_PRISM_NANA_CC/machine-package.json');
+          for(const s of p.ui.sections.filter(x=>x.displayOrder>=4)) for(const i of s.items||[]) if(i.type==='input'&&i.gridSpan!==6) process.exit(2);
+          const t=require('./machines/L_TEKKEN_6_YD01H/machine-package.json');
+          const s=t.ui.sections.find(x=>x.id==='UI_DESIGN_1');
+          const ids=s.items.map(x=>x.inputId).join(',');
+          if(ids!=='INP_AT_INITIAL_TRIALS,INP_CZ_INITIAL_COUNT,INP_BONUS_INITIAL_COUNT,INP_AT_INITIAL_COUNT') process.exit(3);
+          const r=t.ui.sections.find(x=>x.id==='UI_DESIGN_2');
+          if(r.items[0].widget!=='counter'||r.items[0].gridSpan!==6||r.items[1].gridSpan!==6) process.exit(4);
+          NODE
+      - name: Commit generated package fixes
+        run: |
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git add machines/L_BURNING_EXPRESS_ZN/machine-package.json machines/L_PRISM_NANA_CC/machine-package.json machines/L_TEKKEN_6_YD01H/machine-package.json
+          git commit -m 'fix: refine round2 device feedback UI' || exit 0
+          git push origin HEAD:fix/device-feedback-ui-round2-20260906
