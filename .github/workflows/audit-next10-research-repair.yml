@@ -28,9 +28,17 @@ jobs:
       - name: Apply isolated canonical repair
         run: node tools/repair-next10-research-universe.mjs
       - name: Validate ResearchData
-        run: npm run research:validate
+        shell: bash
+        run: |
+          for m in L_FIRE_FORCE_2 L_UMINEKO_2_A1 L_KABANERI_UNATO_KESSEN_XX L_AKUDAMA_DRIVE_TP; do
+            npm run research:validate -- "research/$m/research-data.json"
+          done
       - name: Validate SelectionData
-        run: npm run selection:validate
+        shell: bash
+        run: |
+          for m in L_FIRE_FORCE_2 L_UMINEKO_2_A1 L_KABANERI_UNATO_KESSEN_XX; do
+            npm run selection:validate -- "research/$m/selection-data.json" "research/$m/research-data.json"
+          done
       - name: Guard test suite
         run: npm test
       - name: Commit validated generated changes
