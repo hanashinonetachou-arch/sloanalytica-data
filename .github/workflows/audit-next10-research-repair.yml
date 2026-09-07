@@ -1,0 +1,47 @@
+name: Next10 isolated research repair
+
+on:
+  push:
+    branches:
+      - audit/20260907-next10-research-universe
+
+permissions:
+  contents: write
+
+concurrency:
+  group: next10-research-repair
+  cancel-in-progress: false
+
+jobs:
+  repair-and-validate:
+    if: ${{ !contains(github.event.head_commit.message, '[repair-generated]') }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - run: npm ci
+      - name: Apply isolated canonical repair
+        run: node tools/repair-next10-research-universe.mjs
+      - name: Validate ResearchData
+        run: npm run research:validate
+      - name: Validate SelectionData
+        run: npm run selection:validate
+      - name: Guard test suite
+        run: npm test
+      - name: Commit validated generated changes
+        shell: bash
+        run: |
+          if git diff --quiet -- research/L_FIRE_FORCE_2 research/L_UMINEKO_2_A1 research/L_KABANERI_UNATO_KESSEN_XX research/L_AKUDAMA_DRIVE_TP; then
+            echo 'No generated changes.'
+            exit 0
+          fi
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add research/L_FIRE_FORCE_2 research/L_UMINEKO_2_A1 research/L_KABANERI_UNATO_KESSEN_XX research/L_AKUDAMA_DRIVE_TP
+          git commit -m 'research: repair remaining Next10 universe [repair-generated]'
+          git push origin HEAD:audit/20260907-next10-research-universe
