@@ -1,0 +1,77 @@
+name: Batch 20260907 Gate C Validate
+
+on:
+  push:
+    branches:
+      - batch/20260907-next10-gatec-v2
+    paths:
+      - 'research/L_FIRE_FORCE_2/machine-observation-data.json'
+      - 'research/L_UMINEKO_2_A1/machine-observation-data.json'
+      - 'research/L_KABANERI_UNATO_KESSEN_XX/machine-observation-data.json'
+      - 'research/L_JORMUNGAND_ND01G/machine-observation-data.json'
+      - 'research/LB_TRIPLE_CROWN_SEVEN_FG/machine-observation-data.json'
+      - 'research/L_SHINUCHI_YOSHIMUNE_A1/machine-observation-data.json'
+      - 'research/L_KYOKOU_SUIRI_ST/machine-observation-data.json'
+      - 'research/L_AKUDAMA_DRIVE_TP/machine-observation-data.json'
+      - 'research/L_MILLION_GOD_KISEKI_CX/machine-observation-data.json'
+      - 'research/L_GUNDAM_UNICORN_KAKUSEI_DRIVE_2JA/machine-observation-data.json'
+      - 'research/LB_TRIPLE_CROWN_SEVEN_FG/selection-data.json'
+      - '.github/workflows/batch-20260907-gate-c-validate.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: batch/20260907-next10-gatec-v2
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - run: npm ci
+      - name: Validate exact 10 ObservationData
+        shell: bash
+        run: |
+          set -euo pipefail
+          ids=(L_FIRE_FORCE_2 L_UMINEKO_2_A1 L_KABANERI_UNATO_KESSEN_XX L_JORMUNGAND_ND01G LB_TRIPLE_CROWN_SEVEN_FG L_SHINUCHI_YOSHIMUNE_A1 L_KYOKOU_SUIRI_ST L_AKUDAMA_DRIVE_TP L_MILLION_GOD_KISEKI_CX L_GUNDAM_UNICORN_KAKUSEI_DRIVE_2JA)
+          for id in "${ids[@]}"; do npm run observation:validate -- "research/$id/machine-observation-data.json"; done
+          npm run observation:selection:audit -- "${ids[@]}" --strict-v2
+          npm run observation:gate -- --from-id=250 --to-id=259
+      - name: Semantic Gate C assertions
+        shell: bash
+        run: |
+          node --input-type=module <<'NODE'
+          import fs from 'node:fs';
+          const ids=['L_FIRE_FORCE_2','L_UMINEKO_2_A1','L_KABANERI_UNATO_KESSEN_XX','L_JORMUNGAND_ND01G','LB_TRIPLE_CROWN_SEVEN_FG','L_SHINUCHI_YOSHIMUNE_A1','L_KYOKOU_SUIRI_ST','L_AKUDAMA_DRIVE_TP','L_MILLION_GOD_KISEKI_CX','L_GUNDAM_UNICORN_KAKUSEI_DRIVE_2JA'];
+          const noLinked=new Set(['L_FIRE_FORCE_2','L_GUNDAM_UNICORN_KAKUSEI_DRIVE_2JA','L_KYOKOU_SUIRI_ST','L_AKUDAMA_DRIVE_TP','LB_TRIPLE_CROWN_SEVEN_FG']);
+          let selected=0,mappings=0,natural=0,waiting=0; const errors=[];
+          for(const id of ids){
+            const s=JSON.parse(fs.readFileSync(`research/${id}/selection-data.json`,'utf8'));
+            const o=JSON.parse(fs.readFileSync(`research/${id}/machine-observation-data.json`,'utf8'));
+            const included=(s.features??[]).filter(f=>String(f.adoptionCategory??'').startsWith('INCLUDE'));
+            selected+=included.length; mappings+=(o.featureMappings??[]).length; natural+=(o.observations??[]).length;
+            waiting+=(o.fieldVerificationItems??[]).filter(v=>v.status==='WAITING_FOR_MACHINE').length;
+            if((o.researchReopenRequests??[]).some(r=>r.status==='RESEARCH_REOPEN_REQUIRED')) errors.push(`${id}: research reopen remains`);
+            const mapped=new Set((o.featureMappings??[]).map(m=>m.featureId));
+            for(const f of included) if(!mapped.has(f.featureId)) errors.push(`${id}: missing mapping ${f.featureId}`);
+            if(noLinked.has(id)){
+              const v=(o.fieldVerificationItems??[]).find(x=>x.sourceType==='LINKED_SERVICE');
+              if(o.sourceCoverage?.linkedService!=='CHECKED_NONE') errors.push(`${id}: linkedService coverage must be CHECKED_NONE`);
+              if(v?.status!=='NOT_REQUIRED') errors.push(`${id}: linked-service field verification must be NOT_REQUIRED`);
+            }
+          }
+          if(selected!==34||mappings!==34||natural!==48||waiting!==35) errors.push(`totals selected=${selected} mappings=${mappings} natural=${natural} waiting=${waiting}`);
+          const tc=JSON.parse(fs.readFileSync('research/LB_TRIPLE_CROWN_SEVEN_FG/selection-data.json','utf8'));
+          if(tc.features.find(f=>f.researchFeatureId==='RF_PLUM')?.adoptionCategory!=='EXCLUDE') errors.push('Triple Crown RF_PLUM must remain EXCLUDE');
+          const tco=JSON.parse(fs.readFileSync('research/LB_TRIPLE_CROWN_SEVEN_FG/machine-observation-data.json','utf8'));
+          if((tco.featureMappings??[]).some(m=>m.featureId==='FEAT_PLUM')) errors.push('Triple Crown FEAT_PLUM must not have an Observation mapping');
+          const jo=JSON.parse(fs.readFileSync('research/L_JORMUNGAND_ND01G/machine-observation-data.json','utf8'));
+          if(!(jo.observations??[]).some(o=>o.observationId==='OBS_BONUS_END_SCREEN_SHARED')) errors.push('Jormungand shared end-screen observation missing');
+          if(errors.length) throw new Error(errors.join('\n'));
+          console.log(JSON.stringify({status:'PASS',machines:10,selected,mappings,natural,waitingFieldVerification:waiting,noLinkedServiceConfirmed:noLinked.size},null,2));
+          NODE
