@@ -13,7 +13,7 @@
 - Five user-confirmed no-linked-service machines do not expose LINKED_SERVICE UX.
 - Triple Crown plum remains excluded from UI.
 - Jormungand end-screen numeric multinomial conditions on the four non-Evidence categories; four Hard Evidence screens remain Evidence-only.
-- Inherited Burning Express catalog/difficulty version skew was repaired by syncing difficulty-catalog to catalog version 0.1.1.
+- Inherited prototype difficulty version-pointer drift was repaired only by syncing existing difficulty-catalog machineDataVersion pointers to catalog package versions: L_BURNING_EXPRESS_ZN 0.1.0 -> 0.1.1, L_PRISM_NANA 0.1.0 -> 0.1.3, and L_TEKKEN_6 0.1.0 -> 0.1.2. No difficulty scores/content or machine definitions were changed, and no difficulty entries were created.
 - Difficulty exposure / repository tests / audits: PASS
 - Gate E / Formal Publish: NOT RUN
 - public main: unchanged
