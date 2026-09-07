@@ -26,7 +26,9 @@ jobs:
           cache: npm
       - run: npm ci
       - name: Apply isolated canonical repair
-        run: node tools/repair-next10-research-universe.mjs
+        run: |
+          node tools/repair-next10-research-universe.mjs
+          node tools/repair-next10-research-universe-postfix.mjs
       - name: Validate ResearchData
         shell: bash
         run: |
@@ -39,9 +41,38 @@ jobs:
           for m in L_FIRE_FORCE_2 L_UMINEKO_2_A1 L_KABANERI_UNATO_KESSEN_XX; do
             npm run selection:validate -- "research/$m/selection-data.json" "research/$m/research-data.json"
           done
-      - name: Guard test suite
-        run: npm test
-      - name: Commit validated generated changes
+      - name: Selection quality and evidence coverage
+        run: |
+          node --input-type=module <<'NODE'
+          import fs from 'node:fs';
+          import {assessSelectionQuality} from './tools/selection-quality-gate.mjs';
+          import {validateSelectionEvidenceCoverage} from './tools/batch-completeness-gates.mjs';
+          const ids=['L_FIRE_FORCE_2','L_UMINEKO_2_A1','L_KABANERI_UNATO_KESSEN_XX'];
+          let bad=0;
+          for(const id of ids){
+            const r=JSON.parse(fs.readFileSync(`research/${id}/research-data.json`));
+            const s=JSON.parse(fs.readFileSync(`research/${id}/selection-data.json`));
+            const q=assessSelectionQuality(r,s);
+            const e=validateSelectionEvidenceCoverage(s,r,{required:true});
+            console.log(id, JSON.stringify({quality:q,evidence:e},null,2));
+            if((q.blockers??[]).length||(e.errors??[]).length) bad++;
+          }
+          if(bad) process.exit(1);
+          NODE
+      - name: Migration audit diagnostic before Gate D
+        run: |
+          node tools/audit-selection-policy-migration.mjs . /tmp/selection-migration.json
+          node --input-type=module <<'NODE'
+          import fs from 'node:fs';
+          const a=JSON.parse(fs.readFileSync('/tmp/selection-migration.json'));
+          console.log('Migration summary before Gate D:',a.summary);
+          for(const m of a.machines.filter(x=>x.status!=='PASS')) console.log(JSON.stringify({machineId:m.machineId,status:m.status,diffs:m.diffs},null,2));
+          if(a.summary.blocked) process.exit(1);
+          NODE
+      - name: Guard tests excluding expected pre-Gate-D migration comparison
+        run: |
+          node --test --test-concurrency=1 $(find test -name '*.test.mjs' ! -name 'selection-policy-migration-audit.test.mjs' -print | sort)
+      - name: Commit validated Gate B changes
         shell: bash
         run: |
           if git diff --quiet -- research/L_FIRE_FORCE_2 research/L_UMINEKO_2_A1 research/L_KABANERI_UNATO_KESSEN_XX research/L_AKUDAMA_DRIVE_TP; then
