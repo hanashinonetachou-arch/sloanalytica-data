@@ -1,0 +1,51 @@
+name: Next10 isolated Observation repair
+
+on:
+  push:
+    branches:
+      - audit/20260907-next10-research-universe
+
+permissions:
+  contents: write
+
+concurrency:
+  group: next10-observation-repair
+  cancel-in-progress: false
+
+jobs:
+  repair-observation:
+    if: ${{ !contains(github.event.head_commit.message, '[observation-generated]') }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - run: npm ci
+      - name: Apply Observation repair
+        run: node tools/repair-next10-observation-mappings.mjs
+      - name: Validate Observation files
+        shell: bash
+        run: |
+          for m in L_FIRE_FORCE_2 L_UMINEKO_2_A1 L_KABANERI_UNATO_KESSEN_XX L_JORMUNGAND_ND01G LB_TRIPLE_CROWN_SEVEN_FG L_SHINUCHI_YOSHIMUNE_A1 L_KYOKOU_SUIRI_ST L_AKUDAMA_DRIVE_TP L_MILLION_GOD_KISEKI_CX L_GUNDAM_UNICORN_KAKUSEI_DRIVE_2JA; do
+            npm run observation:validate -- "research/$m/machine-observation-data.json"
+          done
+      - name: Gate C status
+        run: npm run observation:gate
+      - name: Selection linkage strict v2
+        run: node tools/audit-observation-selection-linkage.mjs --strict-v2 L_FIRE_FORCE_2 L_UMINEKO_2_A1 L_KABANERI_UNATO_KESSEN_XX L_JORMUNGAND_ND01G LB_TRIPLE_CROWN_SEVEN_FG L_SHINUCHI_YOSHIMUNE_A1 L_KYOKOU_SUIRI_ST L_AKUDAMA_DRIVE_TP L_MILLION_GOD_KISEKI_CX L_GUNDAM_UNICORN_KAKUSEI_DRIVE_2JA
+      - name: Commit validated Observation changes
+        shell: bash
+        run: |
+          if git diff --quiet -- research/*/machine-observation-data.json; then
+            echo 'No Observation changes.'
+            exit 0
+          fi
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add research/*/machine-observation-data.json
+          git commit -m 'observation: map recovered Next10 features [observation-generated]'
+          git push origin HEAD:audit/20260907-next10-research-universe
