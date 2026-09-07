@@ -1,0 +1,147 @@
+name: One-off input layout repair
+
+on:
+  push:
+    branches: [fix/20260907-input-layout-audit]
+    paths: [.github/workflows/oneoff-input-layout-repair.yml]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  repair:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: fix/20260907-input-layout-audit
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Patch Gate D generator to merge shared denominators with linked features
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          p=Path('tools/generate-batch-20260907-gate-d-ui.mjs')
+          s=p.read_text()
+          old="""  // Ordinary inference sections first; hard Evidence last by policy.\n  const orderedGroups = [...groups.entries()].sort(([a],[b]) => (a === 'EVIDENCE' ? 1 : 0) - (b === 'EVIDENCE' ? 1 : 0));\n  const sectionOrder = [];\n"""
+          new="""  // Shared denominator inputs (for example normal games used by multiple initial-hit Features)\n  // belong in the same user-facing section as the linked numerators.  Selection linkage, not\n  // the synthetic SHARED_DENOM_* category, owns that grouping decision.\n  const inputById = new Map(inputs.map(input => [input.id, input]));\n  const categoryByInputId = new Map(inputs.map(input => [input.id, input.category ?? 'OTHER']));\n  const consumedCategories = new Set();\n  const groupedEntries = [];\n\n  for (const [category, group] of groups.entries()) {\n    if (consumedCategories.has(category)) continue;\n    if (!String(category).startsWith('SHARED_DENOM_')) {\n      groupedEntries.push({ category, group, titleCategory: category, sharedDenominator: false });\n      continue;\n    }\n\n    const denominatorIds = new Set(group.map(input => input.id));\n    const linkedCategories = [];\n    for (const feature of selection.features ?? []) {\n      if (feature.adoptionCategory === 'EXCLUDE' || feature.adoptionCategory === 'DISPLAY_ONLY') continue;\n      const featureDenominators = [feature.denominatorInputId, ...(feature.denominatorInputIds ?? [])].filter(Boolean);\n      if (!featureDenominators.some(id => denominatorIds.has(id))) continue;\n      const linkedIds = [feature.numeratorInputId, ...(feature.numeratorInputIds ?? []), ...(feature.categoryInputIds ?? [])].filter(Boolean);\n      for (const id of linkedIds) {\n        const linkedCategory = categoryByInputId.get(id);\n        if (!linkedCategory || linkedCategory === category || linkedCategory === 'EVIDENCE' || String(linkedCategory).startsWith('SHARED_DENOM_')) continue;\n        if (!linkedCategories.includes(linkedCategory)) linkedCategories.push(linkedCategory);\n      }\n    }\n\n    if (!linkedCategories.length) {\n      groupedEntries.push({ category, group, titleCategory: category, sharedDenominator: false });\n      continue;\n    }\n\n    const linkedInputs = linkedCategories.flatMap(linkedCategory => groups.get(linkedCategory) ?? []);\n    const mergedGroup = [\n      ...group,\n      ...linkedInputs.sort((a,b) => (a.displayOrder ?? 999) - (b.displayOrder ?? 999))\n    ];\n    for (const linkedCategory of linkedCategories) consumedCategories.add(linkedCategory);\n    consumedCategories.add(category);\n\n    const linkedNames = linkedInputs.map(input => safeTitle(input.name)).filter(Boolean);\n    let sharedTitle;\n    if (linkedNames.length >= 2 && linkedNames.every(name => name.includes('初当り'))) sharedTitle = '初当り';\n    else if (linkedNames.length >= 2 && linkedNames.every(name => /^(BB|RB)/.test(name))) sharedTitle = 'ボーナス回数';\n    else sharedTitle = linkedNames[0] || selection.uiCategoryLabels?.[category] || safeTitle(group[0]?.name) || '実戦データ';\n\n    groupedEntries.push({ category, group: mergedGroup, titleCategory: linkedCategories[0], sharedDenominator: true, sharedTitle });\n  }\n\n  // Categories consumed by a shared-denominator section may have appeared before the shared\n  // denominator in Selection display order. Remove those provisional entries and keep the\n  // merged section at the earliest display position of any member.\n  const normalizedGroups = groupedEntries\n    .filter(entry => !consumedCategories.has(entry.category) || entry.sharedDenominator)\n    .map(entry => ({\n      ...entry,\n      minDisplayOrder: Math.min(...entry.group.map(input => input.displayOrder ?? 999))\n    }))\n    .sort((a,b) => {\n      if (a.category === 'EVIDENCE' && b.category !== 'EVIDENCE') return 1;\n      if (b.category === 'EVIDENCE' && a.category !== 'EVIDENCE') return -1;\n      return a.minDisplayOrder - b.minDisplayOrder;\n    });\n\n  // Ordinary inference sections first; hard Evidence last by policy.\n  const orderedGroups = normalizedGroups;\n  const sectionOrder = [];\n"""
+          if old not in s:
+              raise SystemExit('generator patch anchor not found')
+          s=s.replace(old,new,1)
+          old2="""  for (const [category, group] of orderedGroups) {\n    const observations = obsForCategory(obs, category, selection, group);\n    let title = sectionTitle(category, group, observations, selection);\n"""
+          new2="""  for (const entry of orderedGroups) {\n    const { category, group, titleCategory, sharedDenominator, sharedTitle } = entry;\n    const observations = obsForCategory(obs, category, selection, group);\n    let title = sharedDenominator ? sharedTitle : sectionTitle(titleCategory, group, observations, selection);\n"""
+          if old2 not in s:
+              raise SystemExit('generator loop patch anchor not found')
+          s=s.replace(old2,new2,1)
+          p.write_text(s)
+          PY
+
+      - name: Regenerate canonical UI Design for Next10
+        run: node tools/generate-batch-20260907-gate-d-ui.mjs
+
+      - name: Validate UI Design and linkages
+        run: |
+          npm run ui-design:validate
+          npm run ui-design:linkage:audit -- . \
+            L_FIRE_FORCE_2 L_UMINEKO_2_A1 L_KABANERI_UNATO_KESSEN_XX L_JORMUNGAND_ND01G LB_TRIPLE_CROWN_SEVEN_FG \
+            L_SHINUCHI_YOSHIMUNE_A1 L_KYOKOU_SUIRI_ST L_AKUDAMA_DRIVE_TP L_MILLION_GOD_KISEKI_CX L_GUNDAM_UNICORN_KAKUSEI_DRIVE_2JA
+          npm run ui-design:observation:audit -- \
+            L_FIRE_FORCE_2 L_UMINEKO_2_A1 L_KABANERI_UNATO_KESSEN_XX L_JORMUNGAND_ND01G LB_TRIPLE_CROWN_SEVEN_FG \
+            L_SHINUCHI_YOSHIMUNE_A1 L_KYOKOU_SUIRI_ST L_AKUDAMA_DRIVE_TP L_MILLION_GOD_KISEKI_CX L_GUNDAM_UNICORN_KAKUSEI_DRIVE_2JA --strict-v2
+
+      - name: Enforce shared denominator section contract
+        run: |
+          node --input-type=module <<'NODE'
+          import fs from 'node:fs';
+          const ids=['L_FIRE_FORCE_2','L_UMINEKO_2_A1','L_KABANERI_UNATO_KESSEN_XX','L_JORMUNGAND_ND01G','LB_TRIPLE_CROWN_SEVEN_FG','L_SHINUCHI_YOSHIMUNE_A1','L_KYOKOU_SUIRI_ST','L_AKUDAMA_DRIVE_TP','L_MILLION_GOD_KISEKI_CX','L_GUNDAM_UNICORN_KAKUSEI_DRIVE_2JA'];
+          const errors=[];
+          for (const id of ids) {
+            const selection=JSON.parse(fs.readFileSync(`research/${id}/selection-data.json`,'utf8'));
+            const ui=JSON.parse(fs.readFileSync(`research/${id}/ui-design-data.json`,'utf8'));
+            const sectionByInput=new Map();
+            for (const title of ui.sectionOrder ?? []) for (const inputId of ui.sections?.[title]?.inputIds ?? []) {
+              if (sectionByInput.has(inputId)) errors.push(`${id}: duplicate UI input ${inputId}`);
+              sectionByInput.set(inputId,title);
+            }
+            const sharedInputs=(selection.inputs??[]).filter(x=>String(x.category??'').startsWith('SHARED_DENOM_'));
+            for (const denominator of sharedInputs) {
+              const linked=(selection.features??[]).filter(f=>f.adoptionCategory!=='EXCLUDE'&&f.adoptionCategory!=='DISPLAY_ONLY'&&[f.denominatorInputId,...(f.denominatorInputIds??[])].includes(denominator.id));
+              if (!linked.length) continue;
+              const denomSection=sectionByInput.get(denominator.id);
+              if (!denomSection) { errors.push(`${id}: shared denominator ${denominator.id} not rendered`); continue; }
+              for (const f of linked) {
+                for (const numeratorId of [f.numeratorInputId,...(f.numeratorInputIds??[]),...(f.categoryInputIds??[])].filter(Boolean)) {
+                  if (sectionByInput.get(numeratorId)!==denomSection) errors.push(`${id}: ${denominator.id} separated from ${f.featureId}/${numeratorId}`);
+                }
+              }
+              const section=ui.sections[denomSection];
+              if ((section?.inputIds??[])[0]!==denominator.id) errors.push(`${id}: ${denominator.id} must be first in combined section`);
+            }
+          }
+          if (errors.length) throw new Error(errors.join('\n'));
+          console.log(JSON.stringify({status:'PASS',machines:ids.length,contract:'shared denominator co-located with linked numerators'},null,2));
+          NODE
+
+      - name: Four-layer Gate
+        run: |
+          npm run pipeline:four-layer:gate -- \
+            L_FIRE_FORCE_2 L_UMINEKO_2_A1 L_KABANERI_UNATO_KESSEN_XX L_JORMUNGAND_ND01G LB_TRIPLE_CROWN_SEVEN_FG \
+            L_SHINUCHI_YOSHIMUNE_A1 L_KYOKOU_SUIRI_ST L_AKUDAMA_DRIVE_TP L_MILLION_GOD_KISEKI_CX L_GUNDAM_UNICORN_KAKUSEI_DRIVE_2JA
+
+      - name: Rebuild and materialize Next10 MachineData
+        run: |
+          npm run machine:batch -- \
+            L_FIRE_FORCE_2 L_UMINEKO_2_A1 L_KABANERI_UNATO_KESSEN_XX L_JORMUNGAND_ND01G LB_TRIPLE_CROWN_SEVEN_FG \
+            L_SHINUCHI_YOSHIMUNE_A1 L_KYOKOU_SUIRI_ST L_AKUDAMA_DRIVE_TP L_MILLION_GOD_KISEKI_CX L_GUNDAM_UNICORN_KAKUSEI_DRIVE_2JA
+          node tools/materialize-ui-design.mjs --apply \
+            L_FIRE_FORCE_2 L_UMINEKO_2_A1 L_KABANERI_UNATO_KESSEN_XX L_JORMUNGAND_ND01G LB_TRIPLE_CROWN_SEVEN_FG \
+            L_SHINUCHI_YOSHIMUNE_A1 L_KYOKOU_SUIRI_ST L_AKUDAMA_DRIVE_TP L_MILLION_GOD_KISEKI_CX L_GUNDAM_UNICORN_KAKUSEI_DRIVE_2JA
+          node tools/materialize-ui-design.mjs --require-unchanged \
+            L_FIRE_FORCE_2 L_UMINEKO_2_A1 L_KABANERI_UNATO_KESSEN_XX L_JORMUNGAND_ND01G LB_TRIPLE_CROWN_SEVEN_FG \
+            L_SHINUCHI_YOSHIMUNE_A1 L_KYOKOU_SUIRI_ST L_AKUDAMA_DRIVE_TP L_MILLION_GOD_KISEKI_CX L_GUNDAM_UNICORN_KAKUSEI_DRIVE_2JA
+
+      - name: Repository audits
+        run: |
+          npm run ui-design:test
+          npm run difficulty:exposure-audit
+          npm test
+          npm run audit
+          npm run audit:ui-service-names
+
+      - name: Verify rendered MachineData contract
+        run: |
+          node --input-type=module <<'NODE'
+          import fs from 'node:fs';
+          const ids=['L_FIRE_FORCE_2','L_UMINEKO_2_A1','L_KABANERI_UNATO_KESSEN_XX','L_JORMUNGAND_ND01G','LB_TRIPLE_CROWN_SEVEN_FG','L_SHINUCHI_YOSHIMUNE_A1','L_KYOKOU_SUIRI_ST','L_AKUDAMA_DRIVE_TP','L_MILLION_GOD_KISEKI_CX','L_GUNDAM_UNICORN_KAKUSEI_DRIVE_2JA'];
+          const errors=[];
+          for (const id of ids) {
+            const p=JSON.parse(fs.readFileSync(`machines/${id}/machine-package.json`,'utf8'));
+            const sections=p.ui?.sections??[];
+            const standalone=sections.filter(s=>(s.items??[]).length===1 && s.items[0]?.inputId==='INP_NORMAL_GAMES');
+            if (standalone.length) errors.push(`${id}: INP_NORMAL_GAMES still standalone in package`);
+            const normalSection=sections.find(s=>(s.items??[]).some(x=>x.inputId==='INP_NORMAL_GAMES'));
+            if (!normalSection) errors.push(`${id}: INP_NORMAL_GAMES section missing`);
+            else if ((normalSection.items??[]).length<2) errors.push(`${id}: combined normal-game section has fewer than 2 items`);
+          }
+          if(errors.length) throw new Error(errors.join('\n'));
+          console.log(JSON.stringify({status:'PASS',machines:ids.length},null,2));
+          NODE
+
+      - name: Commit scoped repair
+        run: |
+          # Readiness/audit commands may rewrite reports; keep the repair diff focused on the canonical generator/UI/package/catalog outputs.
+          git restore reports difficulty-catalog.json machine-registry.json 2>/dev/null || true
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git add tools/generate-batch-20260907-gate-d-ui.mjs research/*/ui-design-data.json machines/*/machine-package.json catalog.json
+          changed=$(git diff --cached --name-only)
+          echo "$changed"
+          if echo "$changed" | grep -Ev '^(tools/generate-batch-20260907-gate-d-ui\.mjs|research/(L_FIRE_FORCE_2|L_UMINEKO_2_A1|L_KABANERI_UNATO_KESSEN_XX|L_JORMUNGAND_ND01G|LB_TRIPLE_CROWN_SEVEN_FG|L_SHINUCHI_YOSHIMUNE_A1|L_KYOKOU_SUIRI_ST|L_AKUDAMA_DRIVE_TP|L_MILLION_GOD_KISEKI_CX|L_GUNDAM_UNICORN_KAKUSEI_DRIVE_2JA)/ui-design-data\.json|machines/(L_FIRE_FORCE_2|L_UMINEKO_2_A1|L_KABANERI_UNATO_KESSEN_XX|L_JORMUNGAND_ND01G|LB_TRIPLE_CROWN_SEVEN_FG|L_SHINUCHI_YOSHIMUNE_A1|L_KYOKOU_SUIRI_ST|L_AKUDAMA_DRIVE_TP|L_MILLION_GOD_KISEKI_CX|L_GUNDAM_UNICORN_KAKUSEI_DRIVE_2JA)/machine-package\.json|catalog\.json)$' | grep -q .; then
+            echo 'Unexpected staged path detected'; exit 1
+          fi
+          git commit -m 'fix: group shared denominators with initial-hit inputs'
+          git push origin HEAD:fix/20260907-input-layout-audit
