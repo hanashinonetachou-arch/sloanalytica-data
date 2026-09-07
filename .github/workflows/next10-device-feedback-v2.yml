@@ -1,0 +1,72 @@
+name: Next10 device feedback v2
+
+on:
+  push:
+    branches:
+      - fix/20260908-next10-device-feedback-v2-work2
+
+permissions:
+  contents: write
+
+concurrency:
+  group: next10-device-feedback-v2
+  cancel-in-progress: false
+
+jobs:
+  apply-and-validate:
+    if: ${{ !contains(github.event.head_commit.message, '[feedback-generated]') }}
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - run: npm ci
+      - name: Apply device feedback canonically
+        run: node tools/apply-20260908-device-feedback-v2.mjs
+      - name: Validate Research
+        run: npm run research:validate
+      - name: Validate Selection
+        run: npm run selection:validate
+      - name: Validate Observation
+        run: npm run observation:validate
+      - name: Validate UI Design
+        run: npm run ui-design:validate
+      - name: Audit Selection Observation linkage
+        run: npm run observation:selection:audit
+      - name: Audit UI Selection linkage
+        run: npm run ui-design:linkage:audit -- . L_FIRE_FORCE_2 L_UMINEKO_2_A1 L_KABANERI_UNATO_KESSEN_XX L_JORMUNGAND_ND01G LB_TRIPLE_CROWN_SEVEN_FG L_SHINUCHI_YOSHIMUNE_A1 L_KYOKOU_SUIRI_ST L_AKUDAMA_DRIVE_TP L_MILLION_GOD_KISEKI_CX L_GUNDAM_UNICORN_KAKUSEI_DRIVE_2JA
+      - name: Audit UI Observation linkage
+        run: npm run ui-design:observation:audit -- L_FIRE_FORCE_2 L_UMINEKO_2_A1 L_KABANERI_UNATO_KESSEN_XX L_JORMUNGAND_ND01G LB_TRIPLE_CROWN_SEVEN_FG L_SHINUCHI_YOSHIMUNE_A1 L_KYOKOU_SUIRI_ST L_AKUDAMA_DRIVE_TP L_MILLION_GOD_KISEKI_CX L_GUNDAM_UNICORN_KAKUSEI_DRIVE_2JA --strict-v2
+      - name: Four-layer gate
+        run: npm run pipeline:four-layer:gate -- L_FIRE_FORCE_2 L_UMINEKO_2_A1 L_KABANERI_UNATO_KESSEN_XX L_JORMUNGAND_ND01G LB_TRIPLE_CROWN_SEVEN_FG L_SHINUCHI_YOSHIMUNE_A1 L_KYOKOU_SUIRI_ST L_AKUDAMA_DRIVE_TP L_MILLION_GOD_KISEKI_CX L_GUNDAM_UNICORN_KAKUSEI_DRIVE_2JA
+      - name: Build MachineData
+        run: npm run machine:batch -- L_FIRE_FORCE_2 L_UMINEKO_2_A1 L_KABANERI_UNATO_KESSEN_XX L_JORMUNGAND_ND01G LB_TRIPLE_CROWN_SEVEN_FG L_SHINUCHI_YOSHIMUNE_A1 L_KYOKOU_SUIRI_ST L_AKUDAMA_DRIVE_TP L_MILLION_GOD_KISEKI_CX L_GUNDAM_UNICORN_KAKUSEI_DRIVE_2JA
+      - name: Materialize UI Design
+        run: node tools/materialize-ui-design.mjs --apply L_FIRE_FORCE_2 L_UMINEKO_2_A1 L_KABANERI_UNATO_KESSEN_XX L_JORMUNGAND_ND01G LB_TRIPLE_CROWN_SEVEN_FG L_SHINUCHI_YOSHIMUNE_A1 L_KYOKOU_SUIRI_ST L_AKUDAMA_DRIVE_TP L_MILLION_GOD_KISEKI_CX L_GUNDAM_UNICORN_KAKUSEI_DRIVE_2JA
+      - name: Stability and migration audits
+        run: |
+          node tools/materialize-ui-design.mjs --require-unchanged L_FIRE_FORCE_2 L_UMINEKO_2_A1 L_KABANERI_UNATO_KESSEN_XX L_JORMUNGAND_ND01G LB_TRIPLE_CROWN_SEVEN_FG L_SHINUCHI_YOSHIMUNE_A1 L_KYOKOU_SUIRI_ST L_AKUDAMA_DRIVE_TP L_MILLION_GOD_KISEKI_CX L_GUNDAM_UNICORN_KAKUSEI_DRIVE_2JA
+          npm run selection:migration-audit
+      - name: Repository quality
+        run: |
+          npm run ui-design:test
+          npm run difficulty:exposure-audit
+          npm test
+          npm run audit
+          npm run audit:ui-service-names
+      - name: Commit validated feedback
+        shell: bash
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add research machines reports catalog.json difficulty-catalog.json machine-registry.json 2>/dev/null || true
+          if git diff --cached --quiet; then
+            echo 'No changes to commit.'
+            exit 0
+          fi
+          git commit -m 'fix: apply Next10 real-device feedback [feedback-generated]'
+          git push origin HEAD:fix/20260908-next10-device-feedback-v2-work2
