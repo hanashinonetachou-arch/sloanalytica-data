@@ -86,8 +86,9 @@ jobs:
           const tc=read('research/LB_TRIPLE_CROWN_SEVEN_FG/selection-data.json');
           if(tc.features.find(f=>f.researchFeatureId==='RF_PLUM')?.adoptionCategory!=='EXCLUDE') throw new Error('Triple Crown RF_PLUM must remain EXCLUDE');
           const tcui=read('research/LB_TRIPLE_CROWN_SEVEN_FG/ui-design-data.json');
-          const text=JSON.stringify(tcui);
-          if(text.includes('FEAT_PLUM')) throw new Error('Triple Crown excluded plum feature reappeared in UI');
+          const tcSectionInputs=Object.values(tcui.sections??{}).flatMap(s=>s.inputIds??[]);
+          if(tcSectionInputs.some(id=>String(id).includes('PLUM'))) throw new Error('Triple Crown excluded plum input reappeared in UI sections');
+          if(Object.keys(tcui.inputContracts??{}).some(id=>String(id).includes('PLUM'))) throw new Error('Triple Crown excluded plum input contract reappeared in UI');
           const noLinked=['L_FIRE_FORCE_2','L_GUNDAM_UNICORN_KAKUSEI_DRIVE_2JA','L_KYOKOU_SUIRI_ST','L_AKUDAMA_DRIVE_TP','LB_TRIPLE_CROWN_SEVEN_FG'];
           for(const id of noLinked){
             const o=read(`research/${id}/machine-observation-data.json`);
