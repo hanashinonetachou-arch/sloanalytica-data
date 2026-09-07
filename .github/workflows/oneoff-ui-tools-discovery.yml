@@ -1,0 +1,20 @@
+name: One-off UI tools discovery
+on:
+  push:
+    branches: [fix/20260907-input-layout-audit]
+    paths: [.github/workflows/oneoff-ui-tools-discovery.yml]
+permissions:
+  contents: read
+jobs:
+  discover:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Locate UI Design consumers and package writers
+        run: |
+          echo '=== ui-design-data consumers ==='
+          grep -R -n --include='*.mjs' --include='*.js' 'ui-design-data' tools scripts .github 2>/dev/null || true
+          echo '=== machine-package writers/paths ==='
+          grep -R -n --include='*.mjs' --include='*.js' 'machine-package.json' tools scripts .github 2>/dev/null | head -n 200 || true
+          echo '=== gate d generator refs ==='
+          grep -R -n --include='*.yml' --include='*.yaml' --include='*.mjs' 'gate-d-ui\|ui-design:validate\|four-layer' .github tools 2>/dev/null | head -n 200 || true
