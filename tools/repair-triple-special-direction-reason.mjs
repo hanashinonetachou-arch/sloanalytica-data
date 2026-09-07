@@ -1,0 +1,13 @@
+import fs from 'node:fs';
+const p='research/LB_TRIPLE_CROWN_SEVEN_FG/selection-data.json';
+const s=JSON.parse(fs.readFileSync(p,'utf8'));
+const reason='BB中MB入賞時に必ず下→上/上→下のどちらかを直接観測でき、公開分布は設定1=55/45%、設定2=45/55%、設定5=60/40%、設定6=40/60%と奇偶で方向が反転する。2カテゴリの再現可能な試行分母と具体的な設定別確率が揃うため、偶奇判別の補助Featureとして採用する。';
+const f=s.features.find(x=>x.featureId==='FEAT_SPECIAL_DIRECTION');
+if(!f) throw new Error('FEAT_SPECIAL_DIRECTION missing');
+f.userReason=reason;
+const item=s.selectionSummaryContract?.selected?.find(x=>x.name==='BB中MB入賞時 Specialトロフィー点灯方向');
+if(!item) throw new Error('selection summary item missing');
+item.featureId='FEAT_SPECIAL_DIRECTION';
+item.reason=reason;
+fs.writeFileSync(p,JSON.stringify(s,null,2)+'\n');
+console.log('Triple Crown Special direction rationale strengthened.');
