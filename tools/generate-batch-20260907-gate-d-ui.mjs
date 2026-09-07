@@ -143,15 +143,82 @@ for (const machineId of IDS) {
     groups.get(category).push(input);
   }
 
+  // Shared denominator inputs (for example normal games used by multiple initial-hit Features)
+  // belong in the same user-facing section as the linked numerators.  Selection linkage, not
+  // the synthetic SHARED_DENOM_* category, owns that grouping decision.
+  const inputById = new Map(inputs.map(input => [input.id, input]));
+  const categoryByInputId = new Map(inputs.map(input => [input.id, input.category ?? 'OTHER']));
+  const consumedCategories = new Set();
+  const groupedEntries = [];
+
+  for (const [category, group] of groups.entries()) {
+    if (consumedCategories.has(category)) continue;
+    if (!String(category).startsWith('SHARED_DENOM_')) {
+      groupedEntries.push({ category, group, titleCategory: category, sharedDenominator: false });
+      continue;
+    }
+
+    const denominatorIds = new Set(group.map(input => input.id));
+    const linkedCategories = [];
+    for (const feature of selection.features ?? []) {
+      if (feature.adoptionCategory === 'EXCLUDE' || feature.adoptionCategory === 'DISPLAY_ONLY') continue;
+      const featureDenominators = [feature.denominatorInputId, ...(feature.denominatorInputIds ?? [])].filter(Boolean);
+      if (!featureDenominators.some(id => denominatorIds.has(id))) continue;
+      const linkedIds = [feature.numeratorInputId, ...(feature.numeratorInputIds ?? []), ...(feature.categoryInputIds ?? [])].filter(Boolean);
+      for (const id of linkedIds) {
+        const linkedCategory = categoryByInputId.get(id);
+        if (!linkedCategory || linkedCategory === category || linkedCategory === 'EVIDENCE' || String(linkedCategory).startsWith('SHARED_DENOM_')) continue;
+        if (!linkedCategories.includes(linkedCategory)) linkedCategories.push(linkedCategory);
+      }
+    }
+
+    if (!linkedCategories.length) {
+      groupedEntries.push({ category, group, titleCategory: category, sharedDenominator: false });
+      continue;
+    }
+
+    const linkedInputs = linkedCategories.flatMap(linkedCategory => groups.get(linkedCategory) ?? []);
+    const mergedGroup = [
+      ...group,
+      ...linkedInputs.sort((a,b) => (a.displayOrder ?? 999) - (b.displayOrder ?? 999))
+    ];
+    for (const linkedCategory of linkedCategories) consumedCategories.add(linkedCategory);
+    consumedCategories.add(category);
+
+    const linkedNames = linkedInputs.map(input => safeTitle(input.name)).filter(Boolean);
+    let sharedTitle;
+    if (linkedNames.length >= 2 && linkedNames.every(name => name.includes('初当り'))) sharedTitle = '初当り';
+    else if (linkedNames.length >= 2 && linkedNames.every(name => /^(BB|RB)/.test(name))) sharedTitle = 'ボーナス回数';
+    else sharedTitle = linkedNames[0] || selection.uiCategoryLabels?.[category] || safeTitle(group[0]?.name) || '実戦データ';
+
+    groupedEntries.push({ category, group: mergedGroup, titleCategory: linkedCategories[0], sharedDenominator: true, sharedTitle });
+  }
+
+  // Categories consumed by a shared-denominator section may have appeared before the shared
+  // denominator in Selection display order. Remove those provisional entries and keep the
+  // merged section at the earliest display position of any member.
+  const normalizedGroups = groupedEntries
+    .filter(entry => !consumedCategories.has(entry.category) || entry.sharedDenominator)
+    .map(entry => ({
+      ...entry,
+      minDisplayOrder: Math.min(...entry.group.map(input => input.displayOrder ?? 999))
+    }))
+    .sort((a,b) => {
+      if (a.category === 'EVIDENCE' && b.category !== 'EVIDENCE') return 1;
+      if (b.category === 'EVIDENCE' && a.category !== 'EVIDENCE') return -1;
+      return a.minDisplayOrder - b.minDisplayOrder;
+    });
+
   // Ordinary inference sections first; hard Evidence last by policy.
-  const orderedGroups = [...groups.entries()].sort(([a],[b]) => (a === 'EVIDENCE' ? 1 : 0) - (b === 'EVIDENCE' ? 1 : 0));
+  const orderedGroups = normalizedGroups;
   const sectionOrder = [];
   const sections = {};
   const inputContracts = {};
 
-  for (const [category, group] of orderedGroups) {
+  for (const entry of orderedGroups) {
+    const { category, group, titleCategory, sharedDenominator, sharedTitle } = entry;
     const observations = obsForCategory(obs, category, selection, group);
-    let title = sectionTitle(category, group, observations, selection);
+    let title = sharedDenominator ? sharedTitle : sectionTitle(titleCategory, group, observations, selection);
     let base = title, n = 2;
     while (sections[title]) title = `${base} ${n++}`;
     sectionOrder.push(title);
