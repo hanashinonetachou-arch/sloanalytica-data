@@ -29,16 +29,17 @@ jobs:
         run: |
           node tools/repair-next10-research-universe.mjs
           node tools/repair-next10-research-universe-postfix.mjs
+          node tools/repair-next10-existing-blockers.mjs
       - name: Validate ResearchData
         shell: bash
         run: |
-          for m in L_FIRE_FORCE_2 L_UMINEKO_2_A1 L_KABANERI_UNATO_KESSEN_XX L_AKUDAMA_DRIVE_TP; do
+          for m in L_FIRE_FORCE_2 L_UMINEKO_2_A1 L_KABANERI_UNATO_KESSEN_XX L_AKUDAMA_DRIVE_TP L_KYOKOU_SUIRI_ST L_JORMUNGAND_ND01G; do
             npm run research:validate -- "research/$m/research-data.json"
           done
       - name: Validate SelectionData
         shell: bash
         run: |
-          for m in L_FIRE_FORCE_2 L_UMINEKO_2_A1 L_KABANERI_UNATO_KESSEN_XX; do
+          for m in L_FIRE_FORCE_2 L_UMINEKO_2_A1 L_KABANERI_UNATO_KESSEN_XX L_KYOKOU_SUIRI_ST L_JORMUNGAND_ND01G; do
             npm run selection:validate -- "research/$m/selection-data.json" "research/$m/research-data.json"
           done
       - name: Selection quality and evidence coverage
@@ -47,7 +48,7 @@ jobs:
           import fs from 'node:fs';
           import {assessSelectionQuality} from './tools/selection-quality-gate.mjs';
           import {validateSelectionEvidenceCoverage} from './tools/batch-completeness-gates.mjs';
-          const ids=['L_FIRE_FORCE_2','L_UMINEKO_2_A1','L_KABANERI_UNATO_KESSEN_XX'];
+          const ids=['L_FIRE_FORCE_2','L_UMINEKO_2_A1','L_KABANERI_UNATO_KESSEN_XX','L_KYOKOU_SUIRI_ST','L_JORMUNGAND_ND01G'];
           let bad=0;
           for(const id of ids){
             const r=JSON.parse(fs.readFileSync(`research/${id}/research-data.json`));
@@ -55,18 +56,19 @@ jobs:
             const q=assessSelectionQuality(r,s);
             const e=validateSelectionEvidenceCoverage(s,r,{required:true});
             console.log(id, JSON.stringify({quality:q,evidence:e},null,2));
-            if((q.blockers??[]).length||(e.errors??[]).length) bad++;
+            if((q.blockers??[]).length||(q.reviews??[]).length||(e.errors??[]).length) bad++;
           }
           if(bad) process.exit(1);
           NODE
       - name: Migration audit diagnostic before Gate D
+        shell: bash
         run: |
-          node tools/audit-selection-policy-migration.mjs . /tmp/selection-migration.json
+          node tools/audit-selection-policy-migration.mjs . /tmp/selection-migration.json || true
           node --input-type=module <<'NODE'
           import fs from 'node:fs';
           const a=JSON.parse(fs.readFileSync('/tmp/selection-migration.json'));
           console.log('Migration summary before Gate D:',a.summary);
-          for(const m of a.machines.filter(x=>x.status!=='PASS')) console.log(JSON.stringify({machineId:m.machineId,status:m.status,diffs:m.diffs},null,2));
+          for(const m of a.machines.filter(x=>x.status!=='PASS')) console.log(JSON.stringify({machineId:m.machineId,status:m.status,error:m.error,diffs:m.diffs},null,2));
           if(a.summary.blocked) process.exit(1);
           NODE
       - name: Guard tests excluding expected pre-Gate-D migration comparison
@@ -75,12 +77,12 @@ jobs:
       - name: Commit validated Gate B changes
         shell: bash
         run: |
-          if git diff --quiet -- research/L_FIRE_FORCE_2 research/L_UMINEKO_2_A1 research/L_KABANERI_UNATO_KESSEN_XX research/L_AKUDAMA_DRIVE_TP; then
+          if git diff --quiet -- research/L_FIRE_FORCE_2 research/L_UMINEKO_2_A1 research/L_KABANERI_UNATO_KESSEN_XX research/L_AKUDAMA_DRIVE_TP research/L_KYOKOU_SUIRI_ST research/L_JORMUNGAND_ND01G; then
             echo 'No generated changes.'
             exit 0
           fi
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add research/L_FIRE_FORCE_2 research/L_UMINEKO_2_A1 research/L_KABANERI_UNATO_KESSEN_XX research/L_AKUDAMA_DRIVE_TP
+          git add research/L_FIRE_FORCE_2 research/L_UMINEKO_2_A1 research/L_KABANERI_UNATO_KESSEN_XX research/L_AKUDAMA_DRIVE_TP research/L_KYOKOU_SUIRI_ST research/L_JORMUNGAND_ND01G
           git commit -m 'research: repair remaining Next10 universe [repair-generated]'
           git push origin HEAD:audit/20260907-next10-research-universe
