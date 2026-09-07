@@ -182,7 +182,35 @@ function buildSelectionSummary(research,selection,statistics=null){
     const c=selection.selectionSummaryContract;
     if(!c||c.schemaVersion!=="selection-summary-v1"||!Number.isInteger(c.evaluatedCount)||!Number.isInteger(c.selectedCount)||!Number.isInteger(c.rejectedCount)||!Array.isArray(c.selected)||!Array.isArray(c.rejected)) fail("invalid selectionSummaryContract");
     if(c.selectedCount!==c.selected.length||c.rejectedCount!==c.rejected.length||c.evaluatedCount<c.selectedCount+c.rejectedCount) fail("selectionSummaryContract count mismatch");
-    return structuredClone(c);
+    const cloned=structuredClone(c);
+    const researchById=new Map((research.features??[]).map(f=>[f.researchFeatureId,f]));
+    const candidates=(selection.features??[])
+      .filter(sf=>sf.adoptionCategory!=="DISPLAY_ONLY" && sf.summarySuppressed!==true)
+      .map(sf=>{
+        const rf=researchById.get(sf.researchFeatureId);
+        const explicitReason=sf.userFacingReason ?? sf.userReason ?? sf.rejectionReason;
+        return {
+          featureId:sf.featureId,
+          group:sf.adoptionCategory==="EXCLUDE"?"rejected":"selected",
+          name:sf.nameOverride??rf?.name,
+          reason:(typeof explicitReason==="string"&&explicitReason.trim())?explicitReason.trim():(sf.adoptionCategory==="EXCLUDE"?"採用条件が確定していないため、現時点では推測計算に使用していません。":"推測計算に採用しています。")
+        };
+      });
+    const used=new Set();
+    for(const group of ["selected","rejected"]){
+      cloned[group]=cloned[group].map(item=>{
+        if(typeof item.featureId==="string"&&item.featureId) return item;
+        const available=candidates.filter(x=>x.group===group&&!used.has(x.featureId));
+        let matches=available.filter(x=>x.name===item.name&&x.reason===item.reason);
+        if(matches.length===0) matches=available.filter(x=>x.name===item.name||x.reason===item.reason);
+        if(matches.length!==1) fail(`selectionSummaryContract ${group} item cannot resolve featureId uniquely: ${item.name}`);
+        const match=matches[0];
+        if(typeof match.featureId!=="string"||!match.featureId) fail(`selectionSummaryContract ${group} item resolved without featureId: ${item.name}`);
+        used.add(match.featureId);
+        return {featureId:match.featureId,...item};
+      });
+    }
+    return cloned;
   }
   const rfs=new Map((research.features??[]).map(f=>[f.researchFeatureId,f]));
   const statsById=new Map((statistics?.features??[]).map(f=>[f.researchFeatureId,f]));
