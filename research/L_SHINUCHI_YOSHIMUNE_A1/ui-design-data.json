@@ -7,70 +7,23 @@
     "observation": "research/L_SHINUCHI_YOSHIMUNE_A1/machine-observation-data.json"
   },
   "sectionOrder": [
-    "初当り",
-    "抜刀メーターMAX時 / 抜刀チャンス当選率",
-    "CZ柳生選択回数",
+    "初当り・CZ柳生選択",
+    "抜刀メーターMAX時の抽選",
     "AT終了画面",
     "設定示唆・確定情報"
   ],
   "sections": {
-    "初当り": {
-      "inputIds": [
-        "INP_NORMAL_GAMES",
-        "INP_AT_INITIAL_COUNT",
-        "INP_CZ_INITIAL_COUNT"
-      ],
-      "description": "自己実戦中、「通常ゲーム」の有効試行と対象事象の成立時に更新",
-      "observationRole": "DIRECT_PLAY",
-      "observationRefs": [
-        "OBS_AT_INITIAL",
-        "OBS_CZ_INITIAL",
-        "OBS_CZ_YAGYU_SELECTION"
-      ],
-      "acquisitionSources": [
-        "DIRECT_PLAY"
-      ],
-      "collapsible": false,
-      "defaultExpanded": true
-    },
-    "抜刀メーターMAX時 / 抜刀チャンス当選率": {
-      "inputIds": [
-        "INP_BATTO_METER_MAX_HIT",
-        "INP_BATTO_METER_MAX_TRIAL"
-      ],
-      "description": "通常時・抜刀メーターMAX到達時で、有効な抜刀メーターMAX到達1回ごとに観測する",
-      "observationRole": "DIRECT_PLAY",
-      "observationRefs": [
-        "OBS_BATTO_METER_MAX_CHANCE"
-      ],
-      "acquisitionSources": [
-        "DIRECT_PLAY"
-      ],
-      "collapsible": false,
-      "defaultExpanded": true
-    },
-    "CZ柳生選択回数": {
-      "inputIds": [
-        "INP_CZ_YAGYU_SELECTED"
-      ],
-      "description": "CZ当選時で、CZ当選1回ごとに観測する",
-      "observationRole": "DIRECT_PLAY",
-      "observationRefs": [
-        "OBS_CZ_YAGYU_SELECTION"
-      ],
-      "acquisitionSources": [
-        "DIRECT_PLAY"
-      ],
-      "collapsible": false,
-      "defaultExpanded": true
-    },
     "AT終了画面": {
       "inputIds": [
         "INP_AT_END_SCREEN_NO_MOON",
         "INP_AT_END_SCREEN_CRESCENT",
-        "INP_AT_END_SCREEN_FULL_MOON"
+        "INP_AT_END_SCREEN_FULL_MOON",
+        "INP_EVIDENCE_AT_END_2PLUS",
+        "INP_EVIDENCE_AT_END_4PLUS",
+        "INP_EVIDENCE_AT_END_5PLUS",
+        "INP_EVIDENCE_AT_END_6"
       ],
-      "description": "AT終了時で、通常のAT終了画面確認1回ごとに観測する",
+      "description": "AT終了時に表示された画面を1回につき1つ記録します。通常3パターンは確率推測、確定系4パターンはEvidenceとして同じ観測から分離して処理します。",
       "observationRole": "END_EVENT",
       "observationRefs": [
         "OBS_AT_END_SCREEN"
@@ -83,21 +36,53 @@
     },
     "設定示唆・確定情報": {
       "inputIds": [
-        "INP_EVIDENCE_AT_END_2PLUS",
-        "INP_EVIDENCE_AT_END_4PLUS",
-        "INP_EVIDENCE_AT_END_5PLUS",
-        "INP_EVIDENCE_AT_END_6",
         "INP_EVIDENCE_PAYOUT_456",
         "INP_EVIDENCE_PAYOUT_555",
         "INP_EVIDENCE_PAYOUT_666",
         "INP_EVIDENCE_KOPANDA_BRONZE",
         "INP_EVIDENCE_KOPANDA_RAINBOW"
       ],
-      "description": "実戦中に確認できた設定確定・否定情報だけを入力します。通常の確率Featureとは分離して扱います。",
+      "description": "AT終了画面以外で確認した設定確定・否定演出を入力します。",
       "observationRefs": [],
       "acquisitionSources": [],
       "collapsible": true,
       "defaultExpanded": false
+    },
+    "初当り・CZ柳生選択": {
+      "inputIds": [
+        "INP_NORMAL_GAMES",
+        "INP_AT_INITIAL_COUNT",
+        "INP_CZ_INITIAL_COUNT",
+        "INP_CZ_YAGYU_SELECTED"
+      ],
+      "description": "通常ゲーム数とAT/CZ初当りを記録します。CZ当選時に「柳生」が選ばれた回数も入力し、柳生選択率はCZ初当り回数を母数に計算します。",
+      "observationRole": "DIRECT_PLAY",
+      "observationRefs": [
+        "OBS_AT_INITIAL",
+        "OBS_CZ_INITIAL",
+        "OBS_CZ_YAGYU_SELECTION"
+      ],
+      "acquisitionSources": [
+        "DIRECT_PLAY"
+      ],
+      "collapsible": false,
+      "defaultExpanded": true
+    },
+    "抜刀メーターMAX時の抽選": {
+      "inputIds": [
+        "INP_BATTO_METER_MAX_HIT",
+        "INP_BATTO_METER_MAX_TRIAL"
+      ],
+      "description": "有効な抜刀メーターMAX到達ごとに、抜刀チャンスへ当選したかを記録します。AT終了後の初回周期と5周期目は対象外です。",
+      "observationRole": "DIRECT_PLAY",
+      "observationRefs": [
+        "OBS_BATTO_METER_MAX_CHANCE"
+      ],
+      "acquisitionSources": [
+        "DIRECT_PLAY"
+      ],
+      "collapsible": false,
+      "defaultExpanded": true
     }
   },
   "inputContracts": {
@@ -115,7 +100,7 @@
       "observedZeroAllowed": true
     },
     "INP_AT_INITIAL_COUNT": {
-      "name": "AT初当り回数",
+      "name": "AT初当り",
       "mode": "COUNTER",
       "gridSpan": 6,
       "directInput": false,
@@ -130,7 +115,7 @@
       "observedZeroAllowed": true
     },
     "INP_CZ_INITIAL_COUNT": {
-      "name": "CZ初当り回数",
+      "name": "CZ初当り",
       "mode": "COUNTER",
       "gridSpan": 6,
       "directInput": false,
@@ -145,7 +130,7 @@
       "observedZeroAllowed": true
     },
     "INP_BATTO_METER_MAX_HIT": {
-      "name": "抜刀メーターMAX時・抜刀チャンス当選回数",
+      "name": "抜刀チャンス当選",
       "mode": "COUNTER",
       "gridSpan": 12,
       "directInput": false,
@@ -160,7 +145,7 @@
       "observedZeroAllowed": true
     },
     "INP_BATTO_METER_MAX_TRIAL": {
-      "name": "有効な抜刀メーターMAX到達回数",
+      "name": "対象MAX到達",
       "mode": "COUNTER",
       "gridSpan": 6,
       "directInput": false,
@@ -175,7 +160,7 @@
       "observedZeroAllowed": true
     },
     "INP_CZ_YAGYU_SELECTED": {
-      "name": "CZ柳生選択回数",
+      "name": "柳生",
       "mode": "COUNTER",
       "gridSpan": 12,
       "directInput": false,
@@ -190,7 +175,7 @@
       "observedZeroAllowed": true
     },
     "INP_AT_END_SCREEN_NO_MOON": {
-      "name": "AT終了画面・月なし",
+      "name": "月なし",
       "mode": "COUNTER",
       "gridSpan": 6,
       "directInput": false,
@@ -205,7 +190,7 @@
       "observedZeroAllowed": true
     },
     "INP_AT_END_SCREEN_CRESCENT": {
-      "name": "AT終了画面・三日月",
+      "name": "三日月",
       "mode": "COUNTER",
       "gridSpan": 6,
       "directInput": false,
@@ -220,7 +205,7 @@
       "observedZeroAllowed": true
     },
     "INP_AT_END_SCREEN_FULL_MOON": {
-      "name": "AT終了画面・満月",
+      "name": "満月",
       "mode": "COUNTER",
       "gridSpan": 6,
       "directInput": false,
@@ -235,7 +220,7 @@
       "observedZeroAllowed": true
     },
     "INP_EVIDENCE_AT_END_2PLUS": {
-      "name": "AT終了画面・大岡越前",
+      "name": "大岡越前",
       "mode": "COUNTER",
       "gridSpan": 6,
       "directInput": false,
@@ -250,7 +235,7 @@
       "observedZeroAllowed": true
     },
     "INP_EVIDENCE_AT_END_4PLUS": {
-      "name": "AT終了画面・柳生宗矩",
+      "name": "柳生宗矩",
       "mode": "COUNTER",
       "gridSpan": 6,
       "directInput": false,
@@ -265,7 +250,7 @@
       "observedZeroAllowed": true
     },
     "INP_EVIDENCE_AT_END_5PLUS": {
-      "name": "AT終了画面・大奥",
+      "name": "大奥",
       "mode": "COUNTER",
       "gridSpan": 6,
       "directInput": false,
@@ -280,7 +265,7 @@
       "observedZeroAllowed": true
     },
     "INP_EVIDENCE_AT_END_6": {
-      "name": "AT終了画面・吉宗",
+      "name": "吉宗",
       "mode": "COUNTER",
       "gridSpan": 6,
       "directInput": false,
