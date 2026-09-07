@@ -1,0 +1,82 @@
+name: Batch 20260907 Gate A Validate
+
+on:
+  push:
+    branches:
+      - batch/20260907-next10-gatea
+    paths:
+      - 'research/L_FIRE_FORCE_2/**'
+      - 'research/L_UMINEKO_2_A1/**'
+      - 'research/L_KABANERI_UNATO_KESSEN_XX/**'
+      - 'research/L_JORMUNGAND_ND01G/**'
+      - 'research/LB_TRIPLE_CROWN_SEVEN_FG/**'
+      - 'research/L_SHINUCHI_YOSHIMUNE_A1/**'
+      - 'research/L_KYOKOU_SUIRI_ST/**'
+      - 'research/L_AKUDAMA_DRIVE_TP/**'
+      - 'research/L_MILLION_GOD_KISEKI_CX/**'
+      - 'research/L_GUNDAM_UNICORN_KAKUSEI_DRIVE_2JA/**'
+      - '.github/workflows/batch-20260907-gate-a-validate.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: batch/20260907-next10-gatea
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - run: npm ci
+      - name: Validate exact 10 ResearchData files
+        shell: bash
+        run: |
+          set -euo pipefail
+          ids=(
+            L_FIRE_FORCE_2
+            L_UMINEKO_2_A1
+            L_KABANERI_UNATO_KESSEN_XX
+            L_JORMUNGAND_ND01G
+            LB_TRIPLE_CROWN_SEVEN_FG
+            L_SHINUCHI_YOSHIMUNE_A1
+            L_KYOKOU_SUIRI_ST
+            L_AKUDAMA_DRIVE_TP
+            L_MILLION_GOD_KISEKI_CX
+            L_GUNDAM_UNICORN_KAKUSEI_DRIVE_2JA
+          )
+          for id in "${ids[@]}"; do
+            node tools/validate-research-data.mjs "research/$id/research-data.json"
+          done
+          node tools/discovery-completeness-gate.mjs "${ids[@]}"
+      - name: Audit final Gate A scope and Research totals
+        shell: bash
+        run: |
+          node --input-type=module <<'NODE'
+          import fs from 'node:fs';
+          const ids=['L_FIRE_FORCE_2','L_UMINEKO_2_A1','L_KABANERI_UNATO_KESSEN_XX','L_JORMUNGAND_ND01G','LB_TRIPLE_CROWN_SEVEN_FG','L_SHINUCHI_YOSHIMUNE_A1','L_KYOKOU_SUIRI_ST','L_AKUDAMA_DRIVE_TP','L_MILLION_GOD_KISEKI_CX','L_GUNDAM_UNICORN_KAKUSEI_DRIVE_2JA'];
+          let feature=0,evidence=0,discovery=0,unresolved=0,reference=0;
+          const errors=[];
+          const unresolvedItems=[];
+          for(const id of ids){
+            const p=`research/${id}/research-data.json`;
+            if(!fs.existsSync(p)){errors.push(`missing ${id}`);continue;}
+            const d=JSON.parse(fs.readFileSync(p,'utf8'));
+            if(d.machine?.machineId!==id) errors.push(`machineId mismatch ${id}`);
+            if(d.researchStage!=='GATE_A_PASS') errors.push(`${id}: researchStage=${d.researchStage}`);
+            feature+=(d.features??[]).length;
+            evidence+=(d.evidenceCandidates??[]).length;
+            discovery+=(d.discoveryInventory??[]).length;
+            const u=(d.discoveryInventory??[]).filter(x=>x.transferStatus==='UNRESOLVED');
+            unresolved+=u.length;
+            for(const x of u) unresolvedItems.push({machineId:id,id:x.discoveryCandidateId,name:x.name});
+            reference+=(d.discoveryInventory??[]).filter(x=>x.transferStatus==='REFERENCE').length;
+          }
+          if(unresolved) errors.push(`unresolved Discovery candidates=${unresolved}`);
+          if(errors.length) throw new Error(errors.join('\n'));
+          console.log(JSON.stringify({machines:ids.length,features:feature,evidence,discovery,unresolved,reference,unresolvedItems},null,2));
+          NODE

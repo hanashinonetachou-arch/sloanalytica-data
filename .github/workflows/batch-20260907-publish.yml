@@ -1,0 +1,131 @@
+name: Batch 20260907 Formal Publish
+
+on:
+  push:
+    branches:
+      - batch/20260907-next10-publish
+    paths:
+      - '.github/workflows/batch-20260907-publish.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  formal-publish:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout publish branch
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: batch/20260907-next10-publish
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Fetch and lock integration baseline
+        shell: bash
+        run: |
+          set -euo pipefail
+          git fetch origin prototype-multi-machine:refs/remotes/origin/prototype-multi-machine
+          test "$(git rev-parse --abbrev-ref HEAD)" = "batch/20260907-next10-publish"
+          test "$(git rev-parse origin/prototype-multi-machine)" = "269ae5a2b85c25e6cf71241b73a6aca4b581040b"
+          test "$(git merge-base HEAD origin/prototype-multi-machine)" = "269ae5a2b85c25e6cf71241b73a6aca4b581040b"
+          echo "HEAD=$(git rev-parse HEAD)"
+          echo "PROTOTYPE=$(git rev-parse origin/prototype-multi-machine)"
+      - name: Verify exact publish scope
+        shell: bash
+        run: |
+          set -euo pipefail
+          expected=$(cat <<'EOF'
+          LB_TRIPLE_CROWN_SEVEN_FG
+          L_AKUDAMA_DRIVE_TP
+          L_FIRE_FORCE_2
+          L_GUNDAM_UNICORN_KAKUSEI_DRIVE_2JA
+          L_JORMUNGAND_ND01G
+          L_KABANERI_UNATO_KESSEN_XX
+          L_KYOKOU_SUIRI_ST
+          L_MILLION_GOD_KISEKI_CX
+          L_SHINUCHI_YOSHIMUNE_A1
+          L_UMINEKO_2_A1
+          EOF
+          )
+          actual=$(git diff --name-only "$(git merge-base HEAD origin/prototype-multi-machine)"...HEAD -- 'machines/*/machine-package.json' | sed -nE 's#^machines/([^/]+)/machine-package\.json$#\1#p' | sort)
+          printf 'Expected machine scope:\n%s\n' "$expected"
+          printf 'Actual machine scope:\n%s\n' "$actual"
+          test "$actual" = "$expected"
+      - name: Batch Publish dry run
+        run: |
+          npm run machine:publish:batch -- \
+            L_FIRE_FORCE_2 L_UMINEKO_2_A1 L_KABANERI_UNATO_KESSEN_XX L_JORMUNGAND_ND01G LB_TRIPLE_CROWN_SEVEN_FG \
+            L_SHINUCHI_YOSHIMUNE_A1 L_KYOKOU_SUIRI_ST L_AKUDAMA_DRIVE_TP L_MILLION_GOD_KISEKI_CX L_GUNDAM_UNICORN_KAKUSEI_DRIVE_2JA
+      - name: Formal Publish APPLY
+        run: |
+          npm run machine:publish:batch -- --apply \
+            L_FIRE_FORCE_2 L_UMINEKO_2_A1 L_KABANERI_UNATO_KESSEN_XX L_JORMUNGAND_ND01G LB_TRIPLE_CROWN_SEVEN_FG \
+            L_SHINUCHI_YOSHIMUNE_A1 L_KYOKOU_SUIRI_ST L_AKUDAMA_DRIVE_TP L_MILLION_GOD_KISEKI_CX L_GUNDAM_UNICORN_KAKUSEI_DRIVE_2JA
+      - name: Validate publication contracts and identity mapping
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm run registry:validate
+          node --input-type=module <<'NODE'
+          import fs from 'node:fs';
+          const identity=JSON.parse(fs.readFileSync('research/batches/20260907-next10/gate0-machine-identity.json','utf8'));
+          const catalog=JSON.parse(fs.readFileSync('catalog.json','utf8'));
+          const difficulty=JSON.parse(fs.readFileSync('difficulty-catalog.json','utf8'));
+          const registry=JSON.parse(fs.readFileSync('machine-registry.json','utf8'));
+          const entries=(x)=>Array.isArray(x)?x:(x.machines??x.entries??[]);
+          const ce=entries(catalog), de=entries(difficulty), re=entries(registry);
+          if(identity.machines?.length!==10) throw new Error('Gate0 identity scope is not 10');
+          for(const m of identity.machines){
+            const c=ce.find(x=>x.machineId===m.machineId);
+            if(!c||c.status!=='available') throw new Error(`${m.machineId}: catalog missing/not available`);
+            const d=de.find(x=>x.machineId===m.machineId);
+            if(!d) throw new Error(`${m.machineId}: difficulty missing`);
+            if(d.machineDataVersion!==c.machineDataVersion) throw new Error(`${m.machineId}: difficulty/catalog version mismatch`);
+            const r=re.find(x=>x.machineId===m.machineId);
+            if(!r) throw new Error(`${m.machineId}: registry missing`);
+            if(r.provisionalRegistrationId!==m.provisionalRegistrationId) throw new Error(`${m.machineId}: provisionalRegistrationId mismatch`);
+          }
+          const pids=identity.machines.map(x=>x.provisionalRegistrationId).sort((a,b)=>a-b);
+          if(JSON.stringify(pids)!==JSON.stringify([250,251,252,253,254,255,256,257,258,259])) throw new Error('provisionalRegistrationId reservation drift');
+          console.log('PASS: 20260907 catalog/difficulty/registry contracts verified for IDs 250-259');
+          NODE
+      - name: Preserve known timestamp-only legacy report
+        run: git restore -- reports/v64-observation-debt-classification.json 2>/dev/null || true
+      - name: Verify Publish mutation allowlist
+        shell: bash
+        run: |
+          set -euo pipefail
+          git status --short
+          unexpected=$(git status --porcelain | sed -E 's/^...//' | grep -Ev '^(catalog\.json|difficulty-catalog\.json|machine-registry\.json)$' || true)
+          if [[ -n "$unexpected" ]]; then echo 'Unexpected Publish-side mutation(s):'; echo "$unexpected"; exit 1; fi
+          for f in catalog.json difficulty-catalog.json machine-registry.json; do
+            git diff --quiet -- "$f" && { echo "Expected Publish mutation missing: $f"; exit 1; } || true
+          done
+      - name: Commit Formal Publish outputs
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add catalog.json difficulty-catalog.json machine-registry.json
+          git commit -m 'Publish 20260907 Next10 batch to integration payload'
+          git pull --rebase origin batch/20260907-next10-publish
+          git push origin HEAD:batch/20260907-next10-publish
+          echo "PUBLISHED_HEAD=$(git rev-parse HEAD)" >> "$GITHUB_ENV"
+      - name: Final published-state checks
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm run registry:validate
+          npm run audit
+          npm run audit:ui-service-names
+          npm test
+          git restore -- reports/v64-observation-debt-classification.json 2>/dev/null || true
+          test -z "$(git status --porcelain)"
+          echo "Formal Publish complete at ${PUBLISHED_HEAD}"
+          echo 'prototype-multi-machine: NOT MUTATED'
+          echo 'public main: NOT MUTATED'
