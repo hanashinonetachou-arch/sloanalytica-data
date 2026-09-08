@@ -2,6 +2,21 @@ import fs from 'node:fs';
 import path from 'node:path';
 
 const ROOT = process.cwd();
+
+// Keep statistical/difficulty calculations semantically aligned with the runtime
+// package probabilities when Selection explicitly opts into rounded-category
+// normalization. ResearchData itself remains untouched.
+const builderPath = path.join(ROOT, 'tools', 'build-machine-data.mjs');
+let builder = fs.readFileSync(builderPath, 'utf8');
+const oldBuilderLine = '  return excluded.size?probs.map(v=>v/sum):probs;';
+const newBuilderLine = '  return (excluded.size||sf.normalizeRoundedCategoryProbabilities===true)?probs.map(v=>v/sum):probs;';
+if (builder.includes(oldBuilderLine)) {
+  builder = builder.replace(oldBuilderLine, newBuilderLine);
+  fs.writeFileSync(builderPath, builder);
+} else if (!builder.includes(newBuilderLine)) {
+  throw new Error('build-machine-data.mjs normalization hook not found');
+}
+
 const targets = [
   ['L_TAKT_OP_DESTINY_M1', 'FEAT_CZ_TYPE', ['SET_2']],
   ['L_BIOHAZARD_RE3_ZD', 'FEAT_NE_POINT_DISTRIBUTION', ['SET_3','SET_4','SET_6']],
