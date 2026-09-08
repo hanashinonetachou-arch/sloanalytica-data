@@ -1,0 +1,32 @@
+name: Batch 20260908 Gate C Selection Reopen
+
+on:
+  push:
+    branches:
+      - batch/20260908-manifest-v7-first10
+    paths:
+      - 'tools/apply-gate-c-selection-reopen-v7.mjs'
+      - '.github/workflows/batch-20260908-gate-c-selection-reopen.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  reopen-selection:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: batch/20260908-manifest-v7-first10
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Apply Observation-driven Selection reopen
+        run: node tools/apply-gate-c-selection-reopen-v7.mjs
+      - name: Commit revised dispositions and audit
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add batches/20260908-manifest-v7-first10/gate-b-feature-disposition-draft.json batches/20260908-manifest-v7-first10/gate-c-selection-reopen-audit.json
+          git commit -m "selection: reopen from Gate C observation feasibility"
+          git push origin HEAD:batch/20260908-manifest-v7-first10
