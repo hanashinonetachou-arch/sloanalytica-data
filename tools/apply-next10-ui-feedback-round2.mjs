@@ -122,16 +122,16 @@ function replaceStringDeep(value, from, to) {
   const suppressIds = new Set();
   for (const f of sel.features ?? []) {
     if (f.adoptionCategory !== 'EXCLUDE') continue;
-    const reason = `${f.userReason ?? ''} ${f.reason ?? ''}`;
-    const integrated = /Multinomial|統合|情報自体は推測から捨てていない|同じ観測/.test(reason) && /二重|単独|分解|統合|同時/.test(reason);
-    const trueUnused = /BT.*リプレイ.*BB|リプレイ.*BB/.test(`${f.featureId ?? ''} ${f.researchFeatureId ?? ''} ${reason}`);
+    const reason = `${f.userFacingReason ?? ''} ${f.userReason ?? ''} ${f.reason ?? ''}`;
+    const integrated = /Multinomial|統合して利用|情報自体は推測から捨てていない/.test(reason);
+    const trueUnused = /BT.*リプレイ.*BB|BT中リプレイ.*BB/.test(`${f.featureId ?? ''} ${f.researchFeatureId ?? ''} ${reason}`);
     if (integrated && !trueUnused) {
       f.summarySuppressed = true;
       suppressIds.add(f.featureId);
     }
   }
-  assert(suppressIds.size >= 3, `Triple Crown integrated EXCLUDE suppression too small: ${suppressIds.size}`);
-  const btReplay = (sel.features ?? []).find((f) => /BT.*REPLAY.*BB/i.test(`${f.featureId ?? ''} ${f.researchFeatureId ?? ''}`) || /BT中リプレイ.*BB/.test(`${f.userReason ?? ''} ${f.reason ?? ''}`));
+  assert(suppressIds.size >= 4, `Triple Crown integrated EXCLUDE suppression too small: ${suppressIds.size}`);
+  const btReplay = (sel.features ?? []).find((f) => /BT.*REPLAY.*BB/i.test(`${f.featureId ?? ''} ${f.researchFeatureId ?? ''}`) || /BT中リプレイ.*BB/.test(`${f.userFacingReason ?? ''} ${f.userReason ?? ''} ${f.reason ?? ''}`));
   if (btReplay) assert(btReplay.summarySuppressed !== true, 'Triple Crown true-unused BT replay+BB must remain visible');
   write(selPath, sel);
 
