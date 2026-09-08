@@ -93,10 +93,16 @@ jobs:
           NODE
       - name: Commit generated MachineData
         run: |
+          set -euo pipefail
           git config user.name github-actions[bot]
           git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          echo '--- status before staging ---'
+          git status --short
           git add research machines catalog.json difficulty-catalog.json machine-registry.json 2>/dev/null || true
+          echo '--- staged diff ---'
+          git diff --cached --stat
           if git diff --cached --quiet; then echo 'No generated changes'; exit 0; fi
           git commit -m 'machine-data: rebuild Next10 after v6.14 reselection'
-          git pull --rebase origin audit/20260908-next10-selection-v614
+          echo '--- status after commit ---'
+          git status --short
           git push origin HEAD:audit/20260908-next10-selection-v614
