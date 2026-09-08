@@ -1,0 +1,98 @@
+name: Batch 20260908 Gate D Materialize
+
+on:
+  push:
+    branches:
+      - batch/20260908-manifest-v7-first10
+    paths:
+      - tools/materialize-ui-design-into-machine-package.mjs
+      - tools/build-machine-data-with-ui.mjs
+      - tools/audit-ui-materialization-v7.mjs
+      - .github/workflows/batch-20260908-gate-d-materialize.yml
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  materialize-audit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: batch/20260908-manifest-v7-first10
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Validate canonical UI
+        run: npm run ui-design:validate
+      - name: Rebuild MachineData baseline
+        run: |
+          npm run machine:batch -- \
+            L_ANIMAL_SLOT_DOCCHI_ZT L_BIG_DREAM_GOLDEN_PUSHER_KR L_BIOHAZARD_RE3_ZD L_TAKT_OP_DESTINY_M1 L_SUPER_RIO_ACE2_ND02H \
+            L_BIRDIE_WING_BC L_SAO2_PA1 L_SENGOKU_OTOME5_L8 L_DARK_HAIBI_SB L_LOTIS_TN
+      - name: Materialize canonical UI into MachineData
+        run: |
+          for id in \
+            L_ANIMAL_SLOT_DOCCHI_ZT L_BIG_DREAM_GOLDEN_PUSHER_KR L_BIOHAZARD_RE3_ZD L_TAKT_OP_DESTINY_M1 L_SUPER_RIO_ACE2_ND02H \
+            L_BIRDIE_WING_BC L_SAO2_PA1 L_SENGOKU_OTOME5_L8 L_DARK_HAIBI_SB L_LOTIS_TN; do
+            node tools/materialize-ui-design-into-machine-package.mjs \
+              "machines/$id/machine-package.json" \
+              "research/$id/ui-design-data.json"
+            cp "machines/$id/machine-package.json" "research/$id/machine-package.generated.json"
+          done
+      - name: Audit exact canonical UI materialization
+        run: |
+          node tools/audit-ui-materialization-v7.mjs \
+            L_ANIMAL_SLOT_DOCCHI_ZT L_BIG_DREAM_GOLDEN_PUSHER_KR L_BIOHAZARD_RE3_ZD L_TAKT_OP_DESTINY_M1 L_SUPER_RIO_ACE2_ND02H \
+            L_BIRDIE_WING_BC L_SAO2_PA1 L_SENGOKU_OTOME5_L8 L_DARK_HAIBI_SB L_LOTIS_TN
+      - name: Verify materialization idempotence
+        run: |
+          cp -R machines /tmp/machines-before
+          for id in \
+            L_ANIMAL_SLOT_DOCCHI_ZT L_BIG_DREAM_GOLDEN_PUSHER_KR L_BIOHAZARD_RE3_ZD L_TAKT_OP_DESTINY_M1 L_SUPER_RIO_ACE2_ND02H \
+            L_BIRDIE_WING_BC L_SAO2_PA1 L_SENGOKU_OTOME5_L8 L_DARK_HAIBI_SB L_LOTIS_TN; do
+            node tools/materialize-ui-design-into-machine-package.mjs \
+              "machines/$id/machine-package.json" \
+              "research/$id/ui-design-data.json"
+          done
+          diff -ru /tmp/machines-before machines
+      - name: Repository contract validation
+        run: |
+          npm run ui-design:linkage:audit -- . \
+            L_ANIMAL_SLOT_DOCCHI_ZT L_BIG_DREAM_GOLDEN_PUSHER_KR L_BIOHAZARD_RE3_ZD L_TAKT_OP_DESTINY_M1 L_SUPER_RIO_ACE2_ND02H \
+            L_BIRDIE_WING_BC L_SAO2_PA1 L_SENGOKU_OTOME5_L8 L_DARK_HAIBI_SB L_LOTIS_TN
+          npm run ui-design:observation:audit -- \
+            L_ANIMAL_SLOT_DOCCHI_ZT L_BIG_DREAM_GOLDEN_PUSHER_KR L_BIOHAZARD_RE3_ZD L_TAKT_OP_DESTINY_M1 L_SUPER_RIO_ACE2_ND02H \
+            L_BIRDIE_WING_BC L_SAO2_PA1 L_SENGOKU_OTOME5_L8 L_DARK_HAIBI_SB L_LOTIS_TN --strict-v2
+          npm test
+          npm run audit
+          npm run audit:ui-service-names
+      - name: Write Gate D materialization report
+        run: |
+          mkdir -p batches/20260908-manifest-v7-first10
+          cat > batches/20260908-manifest-v7-first10/gate-d-materialization-report.json <<'JSON'
+          {
+            "schemaVersion": "gate-d-materialization-report-v1",
+            "batchId": "20260908-manifest-v7-first10",
+            "machineCount": 10,
+            "canonicalUiMaterialization": "PASS",
+            "semanticEquality": "PASS",
+            "idempotence": "PASS",
+            "rejectExcludeVisibility": "PASS",
+            "repositoryContracts": "PASS",
+            "gateDClosure": "PENDING_LEDGER_UPDATE"
+          }
+          JSON
+      - name: Commit materialized MachineData
+        run: |
+          if [ -z "$(git status --porcelain)" ]; then
+            echo 'No generated changes.'
+            exit 0
+          fi
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add machines research batches/20260908-manifest-v7-first10/gate-d-materialization-report.json
+          git commit -m 'machine-data: materialize manifest v7 canonical UI'
+          git push origin HEAD:batch/20260908-manifest-v7-first10
