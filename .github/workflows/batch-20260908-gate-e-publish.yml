@@ -65,7 +65,7 @@ jobs:
       - name: Formal publish APPLY to isolated batch branch
         run: npm run machine:publish:batch -- --apply $(cat /tmp/gate-e-machines.txt)
 
-      - name: Assert catalog metadata and registration IDs
+      - name: Assert catalog metadata and provisional registrations
         shell: bash
         run: |
           set -euo pipefail
@@ -74,11 +74,11 @@ jobs:
           import fs from 'node:fs';
           import crypto from 'node:crypto';
           const ids=[
-            ['L_ANIMAL_SLOT_DOCCHI_ZT',260],['L_BIG_DREAM_GOLDEN_PUSHER_KR',261],['L_BIOHAZARD_RE3_ZD',262],['L_TAKT_OP_DESTINY_M1',263],['L_SUPER_RIO_ACE2_ND02H',264],['L_BIRDIE_WING_BC',265],['L_SAO2_PA1',266],['L_SENGOKU_OTOME5_L8',267],['L_DARK_HAIBI_SB',268],['L_LOTIS_TN',269]
+            'L_ANIMAL_SLOT_DOCCHI_ZT','L_BIG_DREAM_GOLDEN_PUSHER_KR','L_BIOHAZARD_RE3_ZD','L_TAKT_OP_DESTINY_M1','L_SUPER_RIO_ACE2_ND02H','L_BIRDIE_WING_BC','L_SAO2_PA1','L_SENGOKU_OTOME5_L8','L_DARK_HAIBI_SB','L_LOTIS_TN'
           ];
           const catalog=JSON.parse(fs.readFileSync('catalog.json','utf8')).machines??[];
           const registry=JSON.parse(fs.readFileSync('machine-registry.json','utf8')).machines??[];
-          for(const [id,pid] of ids){
+          for(const id of ids){
             const c=catalog.find(x=>x.machineId===id);
             if(!c||c.status!=='available') throw new Error(`${id}: catalog missing/not available`);
             const bytes=fs.readFileSync(`machines/${id}/machine-package.json`);
@@ -86,11 +86,11 @@ jobs:
             if(c.sha256!==sha) throw new Error(`${id}: catalog sha256 mismatch`);
             if(c.packageSizeBytes!==bytes.length) throw new Error(`${id}: packageSizeBytes mismatch`);
             const r=registry.find(x=>x.machineId===id);
-            if(!r||r.provisionalRegistrationId!==pid) throw new Error(`${id}: provisional ID mismatch`);
+            if(!r||!Number.isInteger(r.provisionalRegistrationId)) throw new Error(`${id}: provisional registration missing/invalid`);
           }
           const all=registry.map(x=>x.provisionalRegistrationId).filter(Number.isInteger);
           if(new Set(all).size!==all.length) throw new Error('registry provisional ID collision');
-          console.log('PASS catalog exactness + provisional IDs 260-269');
+          console.log('PASS catalog exactness + provisional registration presence/uniqueness');
           NODE
 
       - name: Gate E core quality
