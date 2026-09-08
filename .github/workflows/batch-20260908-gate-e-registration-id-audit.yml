@@ -1,0 +1,41 @@
+name: Batch 20260908 Gate E Registration ID Audit
+
+on:
+  push:
+    branches:
+      - batch/20260908-manifest-v7-first10
+    paths:
+      - tools/audit-provisional-registration-ids-v7.mjs
+      - machine-registry.json
+      - .github/workflows/batch-20260908-gate-e-registration-id-audit.yml
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: batch/20260908-manifest-v7-first10
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Audit provisional registration IDs
+        run: node tools/audit-provisional-registration-ids-v7.mjs
+      - name: Assert report
+        run: |
+          node - <<'NODE'
+          const fs=require('fs');
+          const r=JSON.parse(fs.readFileSync('batches/20260908-manifest-v7-first10/gate-e-registration-id-audit.json','utf8'));
+          if(r.status!=='PASS'||r.duplicateIds.length||r.collisions.length||r.proposedAssignments.length!==10){console.error(JSON.stringify(r,null,2));process.exit(1)}
+          console.log('Registration ID audit PASS: max='+r.maxProvisionalRegistrationId+', next='+r.nextAvailableStart);
+          NODE
+      - name: Commit registration ID audit
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add batches/20260908-manifest-v7-first10/gate-e-registration-id-audit.json
+          if git diff --cached --quiet; then echo 'No report changes'; else git commit -m 'audit: resolve Batch provisional registration IDs' && git push origin HEAD:batch/20260908-manifest-v7-first10; fi
