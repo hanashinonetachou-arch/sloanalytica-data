@@ -1,0 +1,48 @@
+name: Next10 v6.14 deep selection audit
+
+on:
+  push:
+    branches:
+      - audit/20260908-next10-selection-v614
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  inspect:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Existing residual multinomial patterns
+        run: |
+          grep -R -n --include='selection-data.json' -E 'residualCategoryLabel|trialCountInputId|categorySubtractInputIds' research | head -120 || true
+      - name: Triple and Umineko target contracts
+        run: |
+          node --input-type=module <<'NODE'
+          import fs from 'node:fs';
+          const targets={
+            LB_TRIPLE_CROWN_SEVEN_FG:['RF_CHERRY','RF_PLUM','RF_SPECIFIC_BONUS_CHERRY_BB','RF_SPECIFIC_BONUS_CHERRY_RB','RF_BT_REPLAY_BB'],
+            L_UMINEKO_2_A1:['RF_ART_MISS','RF_ART_COMMON_BELL','RF_ROLE_1B','RF_ROLE_1C','RF_CONFIRM_A']
+          };
+          for(const [id,rids] of Object.entries(targets)){
+            const r=JSON.parse(fs.readFileSync(`research/${id}/research-data.json`,'utf8'));
+            const s=JSON.parse(fs.readFileSync(`research/${id}/selection-data.json`,'utf8'));
+            const st=JSON.parse(fs.readFileSync(`research/${id}/statistics-report.json`,'utf8'));
+            console.log(`\n=== ${id} ===`);
+            for(const rid of rids){
+              console.log(`\n-- ${rid} Research --`);
+              console.log(JSON.stringify((r.features??[]).find(x=>x.researchFeatureId===rid),null,2));
+              console.log(`-- ${rid} Selection --`);
+              console.log(JSON.stringify((s.features??[]).find(x=>x.researchFeatureId===rid),null,2));
+              console.log(`-- ${rid} Stats --`);
+              const x=(st.features??[]).find(x=>x.researchFeatureId===rid);
+              console.log(JSON.stringify({extremePair80:x?.extremePair80,hardestAdjacentPair:x?.hardestAdjacentPair,probabilityRange:x?.probabilityRange},null,2));
+            }
+            console.log('\nInputs relevant:');
+            console.log(JSON.stringify((s.inputs??[]).filter(x=>/CHERRY|PLUM|BT|ART_MISS|ART_COMMON|ROLE_1B|ROLE_1C|CONFIRM_A/.test(x.id)),null,2));
+          }
+          NODE
