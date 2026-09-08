@@ -1,0 +1,22 @@
+#!/usr/bin/env node
+import fs from 'node:fs';
+import path from 'node:path';
+const ROOT=process.cwd();
+const BATCH='20260908-manifest-v7-first10';
+const IDS=['L_ANIMAL_SLOT_DOCCHI_ZT','L_BIG_DREAM_GOLDEN_PUSHER_KR','L_BIOHAZARD_RE3_ZD','L_TAKT_OP_DESTINY_M1','L_SUPER_RIO_ACE2_ND02H','L_BIRDIE_WING_BC','L_SAO2_PA1','L_SENGOKU_OTOME5_L8','L_DARK_HAIBI_SB','L_LOTIS_TN'];
+const reg=JSON.parse(fs.readFileSync(path.join(ROOT,'machine-registry.json'),'utf8'));
+const rows=Array.isArray(reg.machines)?reg.machines:[];
+const numeric=rows.map(x=>x.provisionalRegistrationId).filter(Number.isInteger);
+const counts=new Map(); for(const n of numeric) counts.set(n,(counts.get(n)||0)+1);
+const duplicateIds=[...counts.entries()].filter(([,c])=>c>1).map(([id,count])=>({id,count}));
+const maxId=numeric.length?Math.max(...numeric):0;
+const existingByMachine=Object.fromEntries(rows.filter(x=>IDS.includes(x.machineId)).map(x=>[x.machineId,x.provisionalRegistrationId??null]));
+const proposed=IDS.map((machineId,i)=>({machineId,provisionalRegistrationId:maxId+1+i}));
+const used=new Set(numeric);
+const collisions=proposed.filter(x=>used.has(x.provisionalRegistrationId));
+const missingNumeric=rows.filter(x=>!Number.isInteger(x.provisionalRegistrationId)).map(x=>x.machineId);
+const report={schemaVersion:'gate-e-registration-id-audit-v1',batchId:BATCH,status:duplicateIds.length||collisions.length?'FAIL':'PASS',registryMachineCount:rows.length,assignedNumericCount:numeric.length,maxProvisionalRegistrationId:maxId,duplicateIds,missingNumericCount:missingNumeric.length,missingNumericMachineIds:missingNumeric,existingBatchEntries:existingByMachine,proposedAssignments:proposed,collisions,nextAvailableStart:maxId+1};
+fs.mkdirSync(path.join(ROOT,'batches',BATCH),{recursive:true});
+fs.writeFileSync(path.join(ROOT,'batches',BATCH,'gate-e-registration-id-audit.json'),JSON.stringify(report,null,2)+'\n');
+console.log(JSON.stringify(report,null,2));
+if(report.status!=='PASS') process.exit(1);
