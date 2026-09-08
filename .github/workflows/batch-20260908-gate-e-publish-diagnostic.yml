@@ -1,0 +1,48 @@
+name: Batch 20260908 Gate E Publish Diagnostic
+
+on:
+  push:
+    branches:
+      - batch/20260908-manifest-v7-first10
+    paths:
+      - '.github/workflows/batch-20260908-gate-e-publish-diagnostic.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  diagnose-publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: batch/20260908-manifest-v7-first10
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Reproduce isolated APPLY and persist bounded failure evidence
+        shell: bash
+        run: |
+          set -u
+          git fetch origin prototype-multi-machine:refs/remotes/origin/prototype-multi-machine
+          ids='L_ANIMAL_SLOT_DOCCHI_ZT L_BIG_DREAM_GOLDEN_PUSHER_KR L_BIOHAZARD_RE3_ZD L_TAKT_OP_DESTINY_M1 L_SUPER_RIO_ACE2_ND02H L_BIRDIE_WING_BC L_SAO2_PA1 L_SENGOKU_OTOME5_L8 L_DARK_HAIBI_SB L_LOTIS_TN'
+          set +e
+          npm run machine:publish:batch -- --apply $ids > /tmp/gate-e-publish.log 2>&1
+          code=$?
+          set -e
+          mkdir -p batches/20260908-manifest-v7-first10
+          {
+            echo "exitCode=$code"
+            echo "head=$(git rev-parse HEAD)"
+            echo '--- last 240 lines ---'
+            tail -n 240 /tmp/gate-e-publish.log
+          } > batches/20260908-manifest-v7-first10/gate-e-publish-diagnostic.log
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add batches/20260908-manifest-v7-first10/gate-e-publish-diagnostic.log
+          git commit -m 'audit: capture Gate E publish failure diagnostic'
+          git pull --rebase origin batch/20260908-manifest-v7-first10
+          git push origin HEAD:batch/20260908-manifest-v7-first10
+          exit "$code"
