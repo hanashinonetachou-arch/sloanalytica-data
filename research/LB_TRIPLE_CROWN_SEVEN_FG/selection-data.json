@@ -7,7 +7,7 @@
       "id": "INP_BB_INITIAL_COUNT",
       "name": "BB回数",
       "type": "counter",
-      "category": "SEL_RF_BB_INITIAL",
+      "category": "SEL_RF_BONUS_OUTCOME",
       "unit": "回",
       "displayOrder": 10,
       "inferenceRole": "INCLUDE_PRIMARY",
@@ -27,10 +27,10 @@
       "id": "INP_RB_INITIAL_COUNT",
       "name": "RB回数",
       "type": "counter",
-      "category": "SEL_RF_RB_INITIAL",
+      "category": "SEL_RF_BONUS_OUTCOME",
       "unit": "回",
       "displayOrder": 12,
-      "inferenceRole": "INCLUDE_SUPPORT",
+      "inferenceRole": "INCLUDE_PRIMARY",
       "defaultValue": ""
     },
     {
@@ -168,24 +168,20 @@
     {
       "researchFeatureId": "RF_BB_INITIAL",
       "featureId": "FEAT_BB_INITIAL",
-      "adoptionCategory": "INCLUDE_PRIMARY",
+      "adoptionCategory": "EXCLUDE",
       "weight": 1,
       "difficultyParticipation": "EXCLUDE",
-      "difficultyExclusionReason": "Observationで実戦時の露出率・試行量を確定する前にDifficultyへ推定値を持ち込まない。",
-      "userReason": "全設定の公開確率と通常ゲームという再現可能な分母が揃うため主Featureとして採用する。",
-      "numeratorInputId": "INP_BB_INITIAL_COUNT",
-      "denominatorInputId": "INP_NORMAL_GAMES"
+      "difficultyExclusionReason": "jointボーナス構成へ統合したため単独FeatureはDifficultyにも参加させない。",
+      "userFacingReason": "BBには設定差があるが、BB・RBは同じ通常ゲーム上の排他的な結果。別々のBinomialではなく「BB・RB・非当選」のMultinomialへ統合して一度だけ評価するため、単独Featureとしては不採用とする。"
     },
     {
       "researchFeatureId": "RF_RB_INITIAL",
       "featureId": "FEAT_RB_INITIAL",
-      "adoptionCategory": "INCLUDE_SUPPORT",
+      "adoptionCategory": "EXCLUDE",
       "weight": 1,
       "difficultyParticipation": "EXCLUDE",
-      "difficultyExclusionReason": "Observation確定前はDifficultyへ参加させない。",
-      "userReason": "BBとは別のボーナス種別として設定差を持ち、実戦で直接観測できるため補助Featureとして採用する。",
-      "numeratorInputId": "INP_RB_INITIAL_COUNT",
-      "denominatorInputId": "INP_NORMAL_GAMES"
+      "difficultyExclusionReason": "jointボーナス構成へ統合したため単独FeatureはDifficultyにも参加させない。",
+      "userFacingReason": "RBには設定差があるが、BB・RBは同じ通常ゲーム上の排他的な結果。別々のBinomialではなく「BB・RB・非当選」のMultinomialへ統合して一度だけ評価するため、単独Featureとしては不採用とする。"
     },
     {
       "researchFeatureId": "RF_CHERRY",
@@ -290,6 +286,21 @@
         "INP_PLUM_COUNT"
       ],
       "residualCategoryLabel": "OTHER"
+    },
+    {
+      "researchFeatureId": "RF_BONUS_OUTCOME",
+      "featureId": "FEAT_BONUS_OUTCOME",
+      "adoptionCategory": "INCLUDE_PRIMARY",
+      "weight": 1,
+      "difficultyParticipation": "EXCLUDE",
+      "difficultyExclusionReason": "joint化後のDifficulty reportを再生成してから参加可否を再評価する。",
+      "userReason": "BBとRBは通常ゲーム1Gごとの排他的なボーナス結果なので、BB・RB・非当選を1つのMultinomialとして評価する。各単独Binomialの非成立情報を重ねず、両方の設定差を安全に利用できる。",
+      "denominatorInputId": "INP_NORMAL_GAMES",
+      "numeratorInputId": "INP_BB_INITIAL_COUNT",
+      "categoryInputIds": [
+        "INP_RB_INITIAL_COUNT"
+      ],
+      "residualCategoryLabel": "NO_BONUS"
     }
   ],
   "evidence": [
@@ -380,20 +391,10 @@
   },
   "selectionSummaryContract": {
     "schemaVersion": "selection-summary-v1",
-    "evaluatedCount": 12,
-    "selectedCount": 6,
-    "rejectedCount": 6,
+    "evaluatedCount": 13,
+    "selectedCount": 5,
+    "rejectedCount": 8,
     "selected": [
-      {
-        "featureId": "FEAT_BB_INITIAL",
-        "name": "BB確率",
-        "reason": "全設定の公開確率と通常ゲームという再現可能な分母が揃うため主Featureとして採用する。"
-      },
-      {
-        "featureId": "FEAT_RB_INITIAL",
-        "name": "RB確率",
-        "reason": "BBとは別のボーナス種別として設定差を持ち、実戦で直接観測できるため補助Featureとして採用する。"
-      },
       {
         "featureId": "FEAT_SPECIAL_DIRECTION",
         "name": "BB中MB入賞時 Specialトロフィー点灯方向",
@@ -413,9 +414,24 @@
         "featureId": "FEAT_SMALL_ROLE_COMPOSITION",
         "name": "通常時小役構成（チェリー・プラム・その他）",
         "reason": "チェリーとプラムは同一通常ゲーム上の排他的な小役。独立Binomialを重ねず、チェリー・プラム・その他の3カテゴリMultinomialとして一体評価する。設定1↔6の1試行あたり識別情報はチェリー単独の約1.9倍となり、プラムの追加情報を二重計上せず利用できる。"
+      },
+      {
+        "featureId": "FEAT_BONUS_OUTCOME",
+        "name": "通常時ボーナス構成（BB・RB・非当選）",
+        "reason": "BBとRBは通常ゲーム1Gごとの排他的なボーナス結果なので、BB・RB・非当選を1つのMultinomialとして評価する。各単独Binomialの非成立情報を重ねず、両方の設定差を安全に利用できる。"
       }
     ],
     "rejected": [
+      {
+        "featureId": "FEAT_BB_INITIAL",
+        "name": "BB確率",
+        "reason": "BBには設定差があるが、BB・RBは同じ通常ゲーム上の排他的な結果。別々のBinomialではなく「BB・RB・非当選」のMultinomialへ統合して一度だけ評価するため、単独Featureとしては不採用とする。"
+      },
+      {
+        "featureId": "FEAT_RB_INITIAL",
+        "name": "RB確率",
+        "reason": "RBには設定差があるが、BB・RBは同じ通常ゲーム上の排他的な結果。別々のBinomialではなく「BB・RB・非当選」のMultinomialへ統合して一度だけ評価するため、単独Featureとしては不採用とする。"
+      },
       {
         "featureId": "FEAT_CHERRY",
         "name": "チェリー確率",

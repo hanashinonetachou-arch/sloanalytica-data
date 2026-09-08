@@ -10,7 +10,7 @@
       "category": "SEL_RF_BONUS_INITIAL",
       "unit": "回",
       "displayOrder": 10,
-      "inferenceRole": "INCLUDE_SUPPORT",
+      "inferenceRole": "INCLUDE_FALLBACK",
       "defaultValue": ""
     },
     {
@@ -338,13 +338,16 @@
     {
       "researchFeatureId": "RF_BONUS_INITIAL",
       "featureId": "FEAT_BONUS_INITIAL",
-      "adoptionCategory": "INCLUDE_SUPPORT",
+      "adoptionCategory": "INCLUDE_FALLBACK",
       "weight": 1,
       "difficultyParticipation": "EXCLUDE",
       "difficultyExclusionReason": "Observationで実戦時の露出率・試行量を確定する前にDifficultyへ推定値を持ち込まない。",
-      "userReason": "全設定の公開確率と条件付き観測分母が明示され、主要Featureとは異なる確率情報を持つため補助Featureとして採用する。",
+      "userReason": "ボーナス初当りには設定差があるが、炎炎ループ初当りへつながる同一の当選連鎖を含み、公開値から両者の完全なjoint/条件付き分解は作れない。独立尤度として同時加算せず、設定差がより大きく公開解析でも最重要とされる炎炎ループ初当りが使えない場合のFallbackとして採用する。",
       "numeratorInputId": "INP_BONUS_INITIAL_COUNT",
-      "denominatorInputId": "INP_NORMAL_GAMES"
+      "denominatorInputId": "INP_NORMAL_GAMES",
+      "suppressedByFeatureIds": [
+        "FEAT_ENEN_LOOP_INITIAL"
+      ]
     },
     {
       "researchFeatureId": "RF_ENEN_LOOP_INITIAL",
@@ -871,30 +874,34 @@
     "rejectedCount": 2,
     "selected": [
       {
+        "featureId": "FEAT_BONUS_INITIAL",
         "name": "ボーナス初当り",
-        "reason": "全設定の公開確率と条件付き観測分母が明示され、主要Featureとは異なる確率情報を持つため補助Featureとして採用する。"
+        "reason": "ボーナス初当りには設定差があるが、炎炎ループ初当りへつながる同一の当選連鎖を含み、公開値から両者の完全なjoint/条件付き分解は作れない。独立尤度として同時加算せず、設定差がより大きく公開解析でも最重要とされる炎炎ループ初当りが使えない場合のFallbackとして採用する。"
       },
       {
+        "featureId": "FEAT_ENEN_LOOP_INITIAL",
         "name": "炎炎ループ初当り",
         "reason": "全設定の公開確率と「通常ゲーム」という再現可能な分母が揃い、主要な設定差を直接評価できるため主Featureとして採用する。"
       },
       {
-        "name": "REG/アクセル/灰焰ボーナス終了画面振り分け",
-        "reason": "ボーナス終了時に必ず観測できる通常画面の設定別分布が公開され、初当りFeatureとは別の条件付き情報を持つため補助Featureとして採用する。確定系画面はHard Evidence側へ分離して二重計上しない。",
-        "featureId": "FEAT_BONUS_END_REG_GROUP"
+        "featureId": "FEAT_BONUS_END_REG_GROUP",
+        "name": "REG・アクセル・灰焰ボーナス終了画面振り分け",
+        "reason": "ボーナス終了時に必ず観測できる通常画面の設定別分布が公開され、初当りFeatureとは別の条件付き情報を持つため補助Featureとして採用する。確定系画面はHard Evidence側へ分離して二重計上しない。"
       },
       {
+        "featureId": "FEAT_BONUS_END_ENEN",
         "name": "炎炎ボーナス終了画面振り分け",
-        "reason": "ボーナス終了時に必ず観測できる通常画面の設定別分布が公開され、初当りFeatureとは別の条件付き情報を持つため補助Featureとして採用する。確定系画面はHard Evidence側へ分離して二重計上しない。",
-        "featureId": "FEAT_BONUS_END_ENEN"
+        "reason": "ボーナス終了時に必ず観測できる通常画面の設定別分布が公開され、初当りFeatureとは別の条件付き情報を持つため補助Featureとして採用する。確定系画面はHard Evidence側へ分離して二重計上しない。"
       }
     ],
     "rejected": [
       {
+        "featureId": "FEAT_TRAP_SMALLV_CONVERT",
         "name": "伝導者の罠 小Vリプレイ十字目変換",
         "reason": "設定1と設定4以上の公開確率のみで設定2・3の個別尤度が欠け、全設定を同一基準で比較できないため推測計算には採用しない。"
       },
       {
+        "featureId": "FEAT_TRAP_SMALLV_BONUS_AFTER_CONVERT",
         "name": "伝導者の罠 小Vリプレイ十字目変換後ボーナス当選",
         "reason": "設定2・3の個別確率が未公表で全設定尤度を構成できず、前段の十字目変換との条件依存も強いため推測計算には採用しない。"
       }
