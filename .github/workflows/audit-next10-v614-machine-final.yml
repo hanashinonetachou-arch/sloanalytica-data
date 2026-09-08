@@ -1,0 +1,99 @@
+name: Next10 v6.14 final MachineData audit
+on:
+  push:
+    branches: [audit/20260908-next10-selection-v614]
+    paths:
+      - .github/workflows/audit-next10-v614-machine-final.yml
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  final:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+        with: {fetch-depth: 0}
+      - uses: actions/setup-node@v4
+        with: {node-version: 22}
+      - run: npm ci
+      - name: Research Selection Observation UI gates
+        run: |
+          set -euo pipefail
+          ids=(L_FIRE_FORCE_2 L_UMINEKO_2_A1 L_KABANERI_UNATO_KESSEN_XX L_JORMUNGAND_ND01G LB_TRIPLE_CROWN_SEVEN_FG L_SHINUCHI_YOSHIMUNE_A1 L_KYOKOU_SUIRI_ST L_AKUDAMA_DRIVE_TP L_MILLION_GOD_KISEKI_CX L_GUNDAM_UNICORN_KAKUSEI_DRIVE_2JA)
+          for id in "${ids[@]}"; do
+            node tools/validate-research-data.mjs "research/$id/research-data.json"
+            node tools/validate-selection-data.mjs "research/$id/selection-data.json"
+          done
+          node tools/audit-selection-quality.mjs "${ids[@]}" --strict
+          node tools/audit-observation-selection-linkage.mjs "${ids[@]}" --strict-v2
+          node tools/validate-ui-design-data.mjs .
+          node tools/audit-ui-design-selection-linkage.mjs . "${ids[@]}"
+          node tools/audit-ui-design-observation-linkage.mjs . "${ids[@]}" --strict-v2
+          node tools/four-layer-pipeline-gate.mjs "${ids[@]}"
+      - name: Build MachineData batch
+        run: |
+          npm run machine:batch -- \
+            L_FIRE_FORCE_2 L_UMINEKO_2_A1 L_KABANERI_UNATO_KESSEN_XX L_JORMUNGAND_ND01G LB_TRIPLE_CROWN_SEVEN_FG \
+            L_SHINUCHI_YOSHIMUNE_A1 L_KYOKOU_SUIRI_ST L_AKUDAMA_DRIVE_TP L_MILLION_GOD_KISEKI_CX L_GUNDAM_UNICORN_KAKUSEI_DRIVE_2JA
+      - name: Materialize UI
+        run: |
+          node tools/materialize-ui-design.mjs --apply \
+            L_FIRE_FORCE_2 L_UMINEKO_2_A1 L_KABANERI_UNATO_KESSEN_XX L_JORMUNGAND_ND01G LB_TRIPLE_CROWN_SEVEN_FG \
+            L_SHINUCHI_YOSHIMUNE_A1 L_KYOKOU_SUIRI_ST L_AKUDAMA_DRIVE_TP L_MILLION_GOD_KISEKI_CX L_GUNDAM_UNICORN_KAKUSEI_DRIVE_2JA
+          node tools/materialize-ui-design.mjs --require-unchanged \
+            L_FIRE_FORCE_2 L_UMINEKO_2_A1 L_KABANERI_UNATO_KESSEN_XX L_JORMUNGAND_ND01G LB_TRIPLE_CROWN_SEVEN_FG \
+            L_SHINUCHI_YOSHIMUNE_A1 L_KYOKOU_SUIRI_ST L_AKUDAMA_DRIVE_TP L_MILLION_GOD_KISEKI_CX L_GUNDAM_UNICORN_KAKUSEI_DRIVE_2JA
+      - name: Selection migration and repository quality
+        run: |
+          npm run selection:migration-audit
+          npm run selection:summary-readiness
+          npm run ui-design:test
+          npm run difficulty:exposure-audit
+          npm run ux-contract:audit
+          npm test
+          npm run audit
+          npm run audit:ui-service-names
+      - name: Real-device feedback semantic assertions
+        run: |
+          node --input-type=module <<'NODE'
+          import fs from 'node:fs';
+          const j=p=>JSON.parse(fs.readFileSync(p,'utf8'));
+          const errors=[];
+          const sec=(ui,n)=>ui.sections?.[n];
+          const hasInput=(ui,id)=>Object.values(ui.sections??{}).some(s=>(s.inputIds??[]).includes(id));
+          const t=j('research/LB_TRIPLE_CROWN_SEVEN_FG/ui-design-data.json');
+          const ts=j('research/LB_TRIPLE_CROWN_SEVEN_FG/selection-data.json');
+          if(!hasInput(t,'INP_PLUM_COUNT')) errors.push('Triple: plum input missing after joint adoption');
+          if(!sec(t,'通常時ボーナスの当選契機')) errors.push('Triple: conditional bonus-trigger section missing');
+          if(!String(sec(t,'通常時ボーナスの当選契機')?.description??'').includes('BB回数+RB回数')) errors.push('Triple: bonus-trigger denominator explanation unclear');
+          if(!String(sec(t,'RB入賞時BGM')?.description??'').includes('100G')) errors.push('Triple: Asadoya 100G condition missing');
+          const bt=ts.features.find(f=>f.featureId==='FEAT_BT_REPLAY_BB');
+          if(bt?.adoptionCategory!=='EXCLUDE') errors.push('Triple: BT replay+BB disposition changed unexpectedly');
+          if(/入力負担|手動.*負担|カウント.*負担/.test(bt?.userFacingReason??'')) errors.push('Triple: forbidden burden reason remains');
+          if(!/111,474|11\.1万/.test(bt?.userFacingReason??'')) errors.push('Triple: BT replay+BB quantitative rejection basis missing');
+          const us=j('research/L_UMINEKO_2_A1/selection-data.json');
+          if(us.features.find(f=>f.featureId==='FEAT_ART_ROLE_COMPOSITION')?.adoptionCategory!=='INCLUDE_SUPPORT') errors.push('Umineko: ART joint feature not adopted');
+          const uu=j('research/L_UMINEKO_2_A1/ui-design-data.json');
+          if(!sec(uu,'ART中の役構成')) errors.push('Umineko: ART joint section missing');
+          const y=j('research/L_SHINUCHI_YOSHIMUNE_A1/ui-design-data.json');
+          if(!hasInput(y,'INP_CZ_YAGYU_TRIALS')) errors.push('Yoshimune: Yagyu denominator missing');
+          const ky=j('research/L_KYOKOU_SUIRI_ST/ui-design-data.json');
+          if(!sec(ky,'初回エピソードの振り分け')) errors.push('Kyokou: exact initial episode section title missing');
+          if(sec(ky,'初回エピソードの振り分け')?.description!=='設定変更時・虚構連モード駆け抜け後は除外') errors.push('Kyokou: exact initial episode description mismatch');
+          const evidenceIndexes=(ky.sectionOrder??[]).map((x,i)=>({x,i})).filter(v=>/設定示唆|設定確定/.test(v.x));
+          if(evidenceIndexes.length && Math.max(...evidenceIndexes.map(v=>v.i))!==(ky.sectionOrder.length-1)) errors.push('Kyokou: setting evidence section is not last');
+          const a=j('research/L_AKUDAMA_DRIVE_TP/ui-design-data.json');
+          const allText=JSON.stringify(a);
+          if(!/シンテツドウポイント/.test(allText)) errors.push('Akudama: Shintetsudo point wording missing');
+          if(errors.length){ console.error(errors.join('\n')); process.exit(1); }
+          console.log('PASS: real-device feedback semantic assertions');
+          NODE
+      - name: Commit generated MachineData
+        run: |
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git add research machines catalog.json difficulty-catalog.json machine-registry.json 2>/dev/null || true
+          if git diff --cached --quiet; then echo 'No generated changes'; exit 0; fi
+          git commit -m 'machine-data: rebuild Next10 after v6.14 reselection'
+          git pull --rebase origin audit/20260908-next10-selection-v614
+          git push origin HEAD:audit/20260908-next10-selection-v614
