@@ -1,0 +1,53 @@
+name: Repair Next10 catalog after UI feedback
+
+on:
+  push:
+    branches:
+      - fix/20260908-next10-catalog-regeneration
+    paths:
+      - .github/workflows/repair-next10-catalog-after-ui-feedback.yml
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  regenerate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: fix/20260908-next10-catalog-regeneration
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Regenerate affected MachineData and catalog
+        run: |
+          npm run machine:batch -- L_FIRE_FORCE_2 L_KABANERI_UNATO_KESSEN_XX L_JORMUNGAND_ND01G LB_TRIPLE_CROWN_SEVEN_FG L_KYOKOU_SUIRI_ST
+      - name: Assert catalog matches regenerated packages
+        run: |
+          node --input-type=module <<'NODE'
+          import fs from 'node:fs';
+          import crypto from 'node:crypto';
+          const ids=['L_FIRE_FORCE_2','L_KABANERI_UNATO_KESSEN_XX','L_JORMUNGAND_ND01G','LB_TRIPLE_CROWN_SEVEN_FG','L_KYOKOU_SUIRI_ST'];
+          const catalog=JSON.parse(fs.readFileSync('catalog.json','utf8'));
+          for(const id of ids){
+            const bytes=fs.readFileSync(`machines/${id}/machine-package.json`);
+            const item=catalog.machines.find(x=>x.machineId===id);
+            if(!item) throw new Error(`catalog missing ${id}`);
+            const hash=crypto.createHash('sha256').update(bytes).digest('hex');
+            if(item.sha256!==hash) throw new Error(`hash mismatch ${id}`);
+            if(item.packageSizeBytes!==bytes.length) throw new Error(`size mismatch ${id}`);
+            console.log(`PASS ${id} ${bytes.length} ${hash}`);
+          }
+          NODE
+      - name: Commit regenerated artifacts
+        run: |
+          if git diff --quiet; then
+            echo 'No generated changes'; exit 1
+          fi
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add catalog.json difficulty-catalog.json machine-registry.json machines/L_FIRE_FORCE_2/machine-package.json machines/L_KABANERI_UNATO_KESSEN_XX/machine-package.json machines/L_JORMUNGAND_ND01G/machine-package.json machines/LB_TRIPLE_CROWN_SEVEN_FG/machine-package.json machines/L_KYOKOU_SUIRI_ST/machine-package.json research/L_FIRE_FORCE_2 research/L_KABANERI_UNATO_KESSEN_XX research/L_JORMUNGAND_ND01G research/LB_TRIPLE_CROWN_SEVEN_FG research/L_KYOKOU_SUIRI_ST reports || true
+          git commit -m 'data: regenerate Next10 catalog after UI feedback'
+          git push origin HEAD:fix/20260908-next10-catalog-regeneration
