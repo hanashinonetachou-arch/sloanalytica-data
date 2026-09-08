@@ -1,0 +1,142 @@
+name: Batch 20260908 Gate E Rounded Multinomial Remediation
+
+on:
+  push:
+    branches:
+      - batch/20260908-manifest-v7-first10
+    paths:
+      - '.github/workflows/batch-20260908-gate-e-rounded-multinomial-remediation.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  remediate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: batch/20260908-manifest-v7-first10
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Lock batch baseline and snapshot ResearchData
+        shell: bash
+        run: |
+          set -euo pipefail
+          git fetch origin prototype-multi-machine:refs/remotes/origin/prototype-multi-machine
+          test "$(git rev-parse origin/prototype-multi-machine)" = "24a885154a5171099de84811e330490bf7a4be33"
+          mkdir -p /tmp/research-before
+          for id in L_TAKT_OP_DESTINY_M1 L_BIOHAZARD_RE3_ZD L_BIG_DREAM_GOLDEN_PUSHER_KR; do
+            sha256sum "research/$id/research-data.json" >> /tmp/research-before/sha256.txt
+          done
+
+      - name: Apply canonical Selection remediation
+        run: node tools/apply-gate-e-rounded-multinomial-normalization-v7.mjs
+
+      - name: Validate changed Selection contracts
+        shell: bash
+        run: |
+          set -euo pipefail
+          for id in L_TAKT_OP_DESTINY_M1 L_BIOHAZARD_RE3_ZD L_BIG_DREAM_GOLDEN_PUSHER_KR; do
+            npm run selection:validate -- "research/$id/selection-data.json" "research/$id/research-data.json"
+          done
+
+      - name: Rebuild ten machines from canonical sources
+        shell: bash
+        run: |
+          set -euo pipefail
+          cat > /tmp/ids.txt <<'EOF'
+          L_ANIMAL_SLOT_DOCCHI_ZT
+          L_BIG_DREAM_GOLDEN_PUSHER_KR
+          L_BIOHAZARD_RE3_ZD
+          L_TAKT_OP_DESTINY_M1
+          L_SUPER_RIO_ACE2_ND02H
+          L_BIRDIE_WING_BC
+          L_SAO2_PA1
+          L_SENGOKU_OTOME5_L8
+          L_DARK_HAIBI_SB
+          L_LOTIS_TN
+          EOF
+          npm run machine:batch -- $(cat /tmp/ids.txt)
+          while read -r id; do
+            node tools/materialize-ui-design-into-machine-package.mjs \
+              "machines/$id/machine-package.json" \
+              "research/$id/ui-design-data.json"
+            cp "machines/$id/machine-package.json" "research/$id/machine-package.generated.json"
+          done < /tmp/ids.txt
+          node tools/audit-ui-materialization-v7.mjs $(cat /tmp/ids.txt)
+
+      - name: Assert normalized execution probabilities and Research immutability
+        shell: bash
+        run: |
+          set -euo pipefail
+          sha256sum -c /tmp/research-before/sha256.txt
+          node --input-type=module <<'NODE'
+          import fs from 'node:fs';
+          const targets=[
+            ['L_TAKT_OP_DESTINY_M1','FEAT_CZ_TYPE'],
+            ['L_BIOHAZARD_RE3_ZD','FEAT_NE_POINT_DISTRIBUTION'],
+            ['L_BIG_DREAM_GOLDEN_PUSHER_KR','FEAT_STATION_INITIAL_BALLS'],
+          ];
+          for (const [id,fid] of targets) {
+            const sel=JSON.parse(fs.readFileSync(`research/${id}/selection-data.json`,'utf8'));
+            const sf=(sel.features??[]).find(x=>x.featureId===fid);
+            if (sf?.normalizeRoundedCategoryProbabilities!==true) throw new Error(`${id}/${fid}: Selection normalization flag missing`);
+            const pkg=JSON.parse(fs.readFileSync(`machines/${id}/machine-package.json`,'utf8'));
+            const pf=(pkg.features?.features??[]).find(x=>x.featureId===fid);
+            if (!pf) throw new Error(`${id}/${fid}: package feature missing`);
+            if (pf.categoryConditioning?.roundingNormalization!==true) throw new Error(`${id}/${fid}: runtime normalization marker missing`);
+            for (const [setting, probs] of Object.entries(pf.categoryProbabilities??{})) {
+              const sum=probs.reduce((a,b)=>a+Number(b),0);
+              if (Math.abs(sum-1)>1e-9) throw new Error(`${id}/${fid}/${setting}: normalized sum=${sum}`);
+            }
+          }
+          console.log('PASS three rounded multinomial runtime distributions normalize exactly to 1');
+          NODE
+
+      - name: Assert no new package audit category-sum failures
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --input-type=module <<'NODE'
+          import fs from 'node:fs';
+          const ids=fs.readFileSync('/tmp/ids.txt','utf8').trim().split(/\s+/);
+          for(const id of ids){
+            const pkg=JSON.parse(fs.readFileSync(`machines/${id}/machine-package.json`,'utf8'));
+            for(const f of pkg.features?.features??[]){
+              if(!f.categoryProbabilities) continue;
+              for(const [s,p] of Object.entries(f.categoryProbabilities)){
+                const sum=p.reduce((a,b)=>a+Number(b),0);
+                if(sum>1+1e-9) throw new Error(`${id}/${f.featureId}/${s}: category sum > 1: ${sum}`);
+              }
+            }
+          }
+          console.log('PASS all ten generated packages: no category probability sum > 1');
+          NODE
+
+      - name: Commit canonical and regenerated changes
+        shell: bash
+        run: |
+          set -euo pipefail
+          git status --short
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add tools/build-machine-data.mjs \
+            research/L_TAKT_OP_DESTINY_M1/selection-data.json \
+            research/L_BIOHAZARD_RE3_ZD/selection-data.json \
+            research/L_BIG_DREAM_GOLDEN_PUSHER_KR/selection-data.json
+          while read -r id; do
+            git add "machines/$id/machine-package.json" "research/$id/machine-package.generated.json" \
+              "research/$id/statistics-report.json" "research/$id/difficulty-report.json" \
+              "research/$id/setting-band-report.json" 2>/dev/null || true
+          done < /tmp/ids.txt
+          unexpected=$(git status --porcelain | awk '$1!="??" {print substr($0,4)}' | grep -Ev '^(tools/build-machine-data\.mjs|research/(L_TAKT_OP_DESTINY_M1|L_BIOHAZARD_RE3_ZD|L_BIG_DREAM_GOLDEN_PUSHER_KR)/selection-data\.json|machines/[^/]+/machine-package\.json|research/[^/]+/(machine-package\.generated\.json|statistics-report\.json|difficulty-report\.json|setting-band-report\.json))$' || true)
+          if [[ -n "$unexpected" ]]; then echo 'Unexpected tracked mutation:'; echo "$unexpected"; exit 1; fi
+          git diff --cached --quiet && { echo 'No remediation changes staged'; exit 1; }
+          git commit -m 'fix: normalize rounded multinomial execution distributions'
+          git pull --rebase origin batch/20260908-manifest-v7-first10
+          git push origin HEAD:batch/20260908-manifest-v7-first10
