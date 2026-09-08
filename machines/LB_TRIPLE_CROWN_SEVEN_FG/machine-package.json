@@ -200,6 +200,83 @@
         "inferenceRole": "INCLUDE_SUPPORT",
         "defaultValue": "",
         "minimum": 0
+      },
+      {
+        "id": "INP_TRIGGER_SINGLE_BB",
+        "name": "単独BB",
+        "type": "counter",
+        "category": "SEL_RF_BONUS_TRIGGER_COMPOSITION",
+        "unit": "回",
+        "displayOrder": 26,
+        "inferenceRole": "INCLUDE_SUPPORT",
+        "defaultValue": "",
+        "minimum": 0
+      },
+      {
+        "id": "INP_TRIGGER_SINGLE_RB",
+        "name": "単独RB",
+        "type": "counter",
+        "category": "SEL_RF_BONUS_TRIGGER_COMPOSITION",
+        "unit": "回",
+        "displayOrder": 27,
+        "inferenceRole": "INCLUDE_SUPPORT",
+        "defaultValue": "",
+        "minimum": 0
+      },
+      {
+        "id": "INP_TRIGGER_REPLAY_BB",
+        "name": "リプレイ+BB",
+        "type": "counter",
+        "category": "SEL_RF_BONUS_TRIGGER_COMPOSITION",
+        "unit": "回",
+        "displayOrder": 28,
+        "inferenceRole": "INCLUDE_SUPPORT",
+        "defaultValue": "",
+        "minimum": 0
+      },
+      {
+        "id": "INP_TRIGGER_REPLAY_RB",
+        "name": "リプレイ+RB",
+        "type": "counter",
+        "category": "SEL_RF_BONUS_TRIGGER_COMPOSITION",
+        "unit": "回",
+        "displayOrder": 29,
+        "inferenceRole": "INCLUDE_SUPPORT",
+        "defaultValue": "",
+        "minimum": 0
+      },
+      {
+        "id": "INP_TRIGGER_CHERRY_BB",
+        "name": "チェリー+BB",
+        "type": "counter",
+        "category": "SEL_RF_BONUS_TRIGGER_COMPOSITION",
+        "unit": "回",
+        "displayOrder": 30,
+        "inferenceRole": "INCLUDE_SUPPORT",
+        "defaultValue": "",
+        "minimum": 0
+      },
+      {
+        "id": "INP_TRIGGER_CHERRY_RB",
+        "name": "チェリー+RB",
+        "type": "counter",
+        "category": "SEL_RF_BONUS_TRIGGER_COMPOSITION",
+        "unit": "回",
+        "displayOrder": 31,
+        "inferenceRole": "INCLUDE_SUPPORT",
+        "defaultValue": "",
+        "minimum": 0
+      },
+      {
+        "id": "INP_TRIGGER_PLUM_BB",
+        "name": "プラム+BB",
+        "type": "counter",
+        "category": "SEL_RF_BONUS_TRIGGER_COMPOSITION",
+        "unit": "回",
+        "displayOrder": 32,
+        "inferenceRole": "INCLUDE_SUPPORT",
+        "defaultValue": "",
+        "minimum": 0
       }
     ]
   },
@@ -358,7 +435,7 @@
       },
       {
         "featureId": "FEAT_BONUS_OUTCOME",
-        "name": "通常時ボーナス構成（BB・RB・非当選）",
+        "name": "BB・RB出現構成",
         "adoptionCategory": "INCLUDE_PRIMARY",
         "calculationRole": "PROBABILITY",
         "probabilityEngineUsage": true,
@@ -403,6 +480,92 @@
         },
         "sourceEvidenceRefs": [
           "SRC_SETTING"
+        ]
+      },
+      {
+        "featureId": "FEAT_BONUS_TRIGGER_COMPOSITION",
+        "name": "ボーナス当選契機の構成",
+        "adoptionCategory": "INCLUDE_SUPPORT",
+        "calculationRole": "PROBABILITY",
+        "probabilityEngineUsage": true,
+        "modelType": "multinomial",
+        "minimumSample": 1,
+        "sampleRecommendation": 1,
+        "reliabilityProfile": {
+          "weight": 1
+        },
+        "denominatorAdjustments": [
+          {
+            "inputId": "INP_RB_INITIAL_COUNT",
+            "multiplier": 1
+          }
+        ],
+        "numeratorInputId": "INP_TRIGGER_SINGLE_BB",
+        "denominatorInputId": "INP_BB_INITIAL_COUNT",
+        "categoryInputIds": [
+          "INP_TRIGGER_SINGLE_RB",
+          "INP_TRIGGER_REPLAY_BB",
+          "INP_TRIGGER_REPLAY_RB",
+          "INP_TRIGGER_CHERRY_BB",
+          "INP_TRIGGER_CHERRY_RB",
+          "INP_TRIGGER_PLUM_BB"
+        ],
+        "probabilities": {},
+        "categoryLabels": [
+          "SINGLE_BB",
+          "SINGLE_RB",
+          "REPLAY_BB",
+          "REPLAY_RB",
+          "CHERRY_BB",
+          "CHERRY_RB",
+          "PLUM_BB"
+        ],
+        "categoryProbabilities": {
+          "SET_1": [
+            0.030137695166643035,
+            0.013698910542589255,
+            0.6109369182164882,
+            0.26851257703577963,
+            0.02739782108517851,
+            0.010959128434071404,
+            0.02739782108517851
+          ],
+          "SET_2": [
+            0.032259742621541236,
+            0.013441477384874206,
+            0.6048064963234575,
+            0.26346662536118315,
+            0.029571363047902897,
+            0.013441477384874206,
+            0.02957134049129262
+          ],
+          "SET_5": [
+            0.03902388652563877,
+            0.014633912787956858,
+            0.5829388738476163,
+            0.2609662680963533,
+            0.03658458735322993,
+            0.014633944101919382,
+            0.03658461449932855
+          ],
+          "SET_6": [
+            0.049674626297025286,
+            0.017278183614592758,
+            0.5507505065009489,
+            0.2527100163734045,
+            0.04751515003998283,
+            0.017278183614592758,
+            0.047515149944860134
+          ]
+        },
+        "categoryConditioning": {
+          "excludedCategories": [],
+          "normalization": "RENORMALIZE_INCLUDED",
+          "residualCategory": "PLUM_RB"
+        },
+        "sourceEvidenceRefs": [
+          "SRC_PWORLD",
+          "SRC_HAZUSE"
         ]
       }
     ]
@@ -629,8 +792,137 @@
       },
       {
         "id": "UI_DESIGN_2",
-        "title": "BT中MB入賞時のSpecialトロフィー",
+        "title": "通常時ボーナスの当選契機",
         "displayOrder": 2,
+        "description": "通常時に成立したBB・RBについて、成立契機ごとの回数を記録します。母数は上のBB回数+RB回数を自動で使うため、総回数の追加入力は不要です。プラム+RBは残り回数から内部計算します。",
+        "collapsible": true,
+        "defaultExpanded": false,
+        "items": [
+          {
+            "type": "input",
+            "inputId": "INP_TRIGGER_SINGLE_BB",
+            "label": "単独BB",
+            "widget": "counter",
+            "gridSpan": 6,
+            "config": {
+              "directInput": false,
+              "compact": true,
+              "quickAdd": [
+                1
+              ],
+              "step": 1,
+              "emptyMeansUnobserved": true,
+              "observedZeroAllowed": true
+            }
+          },
+          {
+            "type": "input",
+            "inputId": "INP_TRIGGER_SINGLE_RB",
+            "label": "単独RB",
+            "widget": "counter",
+            "gridSpan": 6,
+            "config": {
+              "directInput": false,
+              "compact": true,
+              "quickAdd": [
+                1
+              ],
+              "step": 1,
+              "emptyMeansUnobserved": true,
+              "observedZeroAllowed": true
+            }
+          },
+          {
+            "type": "input",
+            "inputId": "INP_TRIGGER_REPLAY_BB",
+            "label": "リプレイ+BB",
+            "widget": "counter",
+            "gridSpan": 6,
+            "config": {
+              "directInput": false,
+              "compact": true,
+              "quickAdd": [
+                1
+              ],
+              "step": 1,
+              "emptyMeansUnobserved": true,
+              "observedZeroAllowed": true
+            }
+          },
+          {
+            "type": "input",
+            "inputId": "INP_TRIGGER_REPLAY_RB",
+            "label": "リプレイ+RB",
+            "widget": "counter",
+            "gridSpan": 6,
+            "config": {
+              "directInput": false,
+              "compact": true,
+              "quickAdd": [
+                1
+              ],
+              "step": 1,
+              "emptyMeansUnobserved": true,
+              "observedZeroAllowed": true
+            }
+          },
+          {
+            "type": "input",
+            "inputId": "INP_TRIGGER_CHERRY_BB",
+            "label": "チェリー+BB",
+            "widget": "counter",
+            "gridSpan": 6,
+            "config": {
+              "directInput": false,
+              "compact": true,
+              "quickAdd": [
+                1
+              ],
+              "step": 1,
+              "emptyMeansUnobserved": true,
+              "observedZeroAllowed": true
+            }
+          },
+          {
+            "type": "input",
+            "inputId": "INP_TRIGGER_CHERRY_RB",
+            "label": "チェリー+RB",
+            "widget": "counter",
+            "gridSpan": 6,
+            "config": {
+              "directInput": false,
+              "compact": true,
+              "quickAdd": [
+                1
+              ],
+              "step": 1,
+              "emptyMeansUnobserved": true,
+              "observedZeroAllowed": true
+            }
+          },
+          {
+            "type": "input",
+            "inputId": "INP_TRIGGER_PLUM_BB",
+            "label": "プラム+BB",
+            "widget": "counter",
+            "gridSpan": 6,
+            "config": {
+              "directInput": false,
+              "compact": true,
+              "quickAdd": [
+                1
+              ],
+              "step": 1,
+              "emptyMeansUnobserved": true,
+              "observedZeroAllowed": true
+            }
+          }
+        ]
+      },
+      {
+        "id": "UI_DESIGN_3",
+        "title": "BT中MB入賞時のSpecialトロフィー",
+        "displayOrder": 3,
         "description": "BT中のMB入賞時、Specialトロフィーが点灯する順番を1回ずつ記録します。「下→上」「上→下」のどちらかを入力してください。",
         "collapsible": false,
         "defaultExpanded": true,
@@ -672,9 +964,9 @@
         ]
       },
       {
-        "id": "UI_DESIGN_3",
+        "id": "UI_DESIGN_4",
         "title": "連チャン中BBの楽曲",
-        "displayOrder": 3,
+        "displayOrder": 4,
         "description": "BB後100G以内の連チャン中にBBへ当選したとき、琉球メドレーが流れた回数と対象BB回数を記録します。途中にRBを挟んでも連チャン扱いです。",
         "collapsible": false,
         "defaultExpanded": true,
@@ -716,9 +1008,9 @@
         ]
       },
       {
-        "id": "UI_DESIGN_4",
+        "id": "UI_DESIGN_5",
         "title": "連チャン中RBの楽曲",
-        "displayOrder": 4,
+        "displayOrder": 5,
         "description": "BB後100G以内の連チャン中にRBへ当選したとき、安里屋ユンタが流れた回数と対象RB回数を記録します。途中にRBを挟んでも連チャン扱いです。",
         "collapsible": false,
         "defaultExpanded": true,
@@ -760,9 +1052,9 @@
         ]
       },
       {
-        "id": "UI_DESIGN_5",
+        "id": "UI_DESIGN_6",
         "title": "設定示唆・確定情報",
-        "displayOrder": 5,
+        "displayOrder": 6,
         "description": "実戦中に確認できた設定確定・否定情報だけを入力します。通常の確率Featureとは分離して扱います。",
         "collapsible": true,
         "defaultExpanded": false,
@@ -858,9 +1150,9 @@
   },
   "selectionSummary": {
     "schemaVersion": "selection-summary-v1",
-    "evaluatedCount": 13,
-    "selectedCount": 5,
-    "rejectedCount": 8,
+    "evaluatedCount": 20,
+    "selectedCount": 6,
+    "rejectedCount": 14,
     "selected": [
       {
         "featureId": "FEAT_SPECIAL_DIRECTION",
@@ -880,34 +1172,39 @@
       {
         "featureId": "FEAT_SMALL_ROLE_COMPOSITION",
         "name": "通常時小役構成（チェリー・プラム・その他）",
-        "reason": "チェリーとプラムは同一通常ゲーム上の排他的な小役。独立Binomialを重ねず、チェリー・プラム・その他の3カテゴリMultinomialとして一体評価する。設定1↔6の1試行あたり識別情報はチェリー単独の約1.9倍となり、プラムの追加情報を二重計上せず利用できる。"
+        "reason": "チェリーとプラムはいずれも公開設定差があり、同じ通常1G上の排他的カテゴリとしてMultinomialへ統合すれば非成立情報の二重計上を避けながら両方の情報を利用できる。"
       },
       {
         "featureId": "FEAT_BONUS_OUTCOME",
-        "name": "通常時ボーナス構成（BB・RB・非当選）",
-        "reason": "BBとRBは通常ゲーム1Gごとの排他的なボーナス結果なので、BB・RB・非当選を1つのMultinomialとして評価する。各単独Binomialの非成立情報を重ねず、両方の設定差を安全に利用できる。"
+        "name": "BB・RB出現構成",
+        "reason": "BB・RBを別々の独立Binomialにせず、通常1GごとのBB/RB/非当選という排他的な結果として一体評価する。"
+      },
+      {
+        "featureId": "FEAT_BONUS_TRIGGER_COMPOSITION",
+        "name": "ボーナス当選契機の構成",
+        "reason": "公開された単独/リプレイ/チェリー/プラム×BB/RBの8カテゴリ実質出現率は、各設定で合計がBB/RB総確率と一致する。総ボーナス発生率とは分離し、ボーナス成立後の契機構成として条件付き評価することで追加情報だけを安全に利用する。"
       }
     ],
     "rejected": [
       {
         "featureId": "FEAT_BB_INITIAL",
         "name": "BB確率",
-        "reason": "BBには設定差があるが、BB・RBは同じ通常ゲーム上の排他的な結果。別々のBinomialではなく「BB・RB・非当選」のMultinomialへ統合して一度だけ評価するため、単独Featureとしては不採用とする。"
+        "reason": "BBの設定差は、BB/RB/非当選を通常1Gの排他的結果として扱う「ボーナス出現構成」に統合して利用するため、独立Binomialとしては不採用とする。情報自体は推測から捨てていない。"
       },
       {
         "featureId": "FEAT_RB_INITIAL",
         "name": "RB確率",
-        "reason": "RBには設定差があるが、BB・RBは同じ通常ゲーム上の排他的な結果。別々のBinomialではなく「BB・RB・非当選」のMultinomialへ統合して一度だけ評価するため、単独Featureとしては不採用とする。"
+        "reason": "RBの設定差は、BB/RB/非当選を通常1Gの排他的結果として扱う「ボーナス出現構成」に統合して利用するため、独立Binomialとしては不採用とする。情報自体は推測から捨てていない。"
       },
       {
         "featureId": "FEAT_CHERRY",
         "name": "チェリー確率",
-        "reason": "チェリーには設定差があるが、プラムと同じ通常ゲーム上の排他的事象である。チェリー単独Binomialではなく「チェリー・プラム・その他」のMultinomialへ統合して同じ情報を一度だけ評価するため、単独Featureとしては不採用とする。"
+        "reason": "チェリーの設定差は、チェリー/プラム/その他を通常1Gの排他的結果として扱う小役Multinomialへ統合して利用するため、独立Binomialとしては不採用とする。"
       },
       {
         "featureId": "FEAT_PLUM",
         "name": "プラム確率",
-        "reason": "プラムには設定1約1/64.63から設定6約1/55.54の設定差があり、情報自体は有効。チェリーと別々のBinomialで重ねず、「チェリー・プラム・その他」のMultinomialへ統合して利用するため、プラム単独Featureとしては不採用とする。"
+        "reason": "プラムには設定1約1/64.63～設定6約1/55.54の設定差がある。チェリーと同じ通常1G上の排他的カテゴリなので、チェリー/プラム/その他のMultinomialへ統合して情報を利用し、プラム単独Binomialだけを不採用とする。"
       },
       {
         "featureId": "FEAT_RB_END_LED",
@@ -917,17 +1214,47 @@
       {
         "featureId": "FEAT_SPECIFIC_BONUS_CHERRY_BB",
         "name": "チェリー+BB実質出現率",
-        "reason": "チェリー+BBは設定差を持つが、チェリー成立とBB成立の交差事象であり、採用する小役構成とBB初当りの双方に同じ成立ゲームが含まれる。条件付き分解も検討したが、チェリー以外のBB契機を含む完全なjoint分布が公開されておらず、現行データだけでは全体を二重計上なく因数分解できないため不採用とする。"
+        "reason": "チェリー+BBの設定差は、総ボーナス発生率とは分離した「ボーナス当選契機の構成」に統合して利用する。通常G分母の単独Binomialでは親のボーナス/小役情報を再利用するため、単独Featureとしては不採用とする。"
       },
       {
         "featureId": "FEAT_SPECIFIC_BONUS_CHERRY_RB",
         "name": "チェリー+RB実質出現率",
-        "reason": "チェリー+RBは設定差を持つが、チェリー成立とRB成立の交差事象であり、採用する小役構成とRB初当りの双方に同じ成立ゲームが含まれる。条件付き分解も検討したが、チェリー以外のRB契機を含む完全なjoint分布が公開されておらず、現行データだけでは全体を二重計上なく因数分解できないため不採用とする。"
+        "reason": "チェリー+RBの設定差は、総ボーナス発生率とは分離した「ボーナス当選契機の構成」に統合して利用する。通常G分母の単独Binomialでは親のボーナス/小役情報を再利用するため、単独Featureとしては不採用とする。"
       },
       {
         "featureId": "FEAT_BT_REPLAY_BB",
         "name": "BT中 リプレイ+BB in BB実質出現率",
-        "reason": "BT中リプレイ+BB in BBには設定差があるが、設定1=1/293.9・設定6=1/257.0で1 trialあたりの識別差が小さい。統計評価では設定1↔6でも80%識別目安が約111,474 BTゲーム、最難関の設定1↔2は95%目安が約28,374,158 BTゲームとなり、1日実戦で得られるBTゲーム数に対して追加情報量が極めて小さいため不採用とする。"
+        "reason": "BT中リプレイ+BB in BBには設定差があるが、設定1↔6でも80%識別目安が約111,474 BTゲーム、最も厳しい設定1↔2のJS情報量は約3.38e-8/trial（95%比較目安約28,374,158 trial）と極めて小さい。通常の1日実戦で設定推測結果へ実質的な追加寄与を得にくいため不採用とする。"
+      },
+      {
+        "featureId": "FEAT_SPECIFIC_BONUS_SINGLE_BB",
+        "name": "単独BB実質出現率",
+        "reason": "単独BB実質出現率の設定差は「ボーナス当選契機の構成」に条件付き統合して利用するため、通常ゲームを分母とする単独Featureとしては不採用とする。"
+      },
+      {
+        "featureId": "FEAT_SPECIFIC_BONUS_SINGLE_RB",
+        "name": "単独RB実質出現率",
+        "reason": "単独RB実質出現率の設定差は「ボーナス当選契機の構成」に条件付き統合して利用するため、通常ゲームを分母とする単独Featureとしては不採用とする。"
+      },
+      {
+        "featureId": "FEAT_SPECIFIC_BONUS_REPLAY_BB",
+        "name": "リプレイ+BB実質出現率",
+        "reason": "リプレイ+BB実質出現率の設定差は「ボーナス当選契機の構成」に条件付き統合して利用するため、通常ゲームを分母とする単独Featureとしては不採用とする。"
+      },
+      {
+        "featureId": "FEAT_SPECIFIC_BONUS_REPLAY_RB",
+        "name": "リプレイ+RB実質出現率",
+        "reason": "リプレイ+RB実質出現率の設定差は「ボーナス当選契機の構成」に条件付き統合して利用するため、通常ゲームを分母とする単独Featureとしては不採用とする。"
+      },
+      {
+        "featureId": "FEAT_SPECIFIC_BONUS_PLUM_BB",
+        "name": "プラム+BB実質出現率",
+        "reason": "プラム+BB実質出現率の設定差は「ボーナス当選契機の構成」に条件付き統合して利用するため、通常ゲームを分母とする単独Featureとしては不採用とする。"
+      },
+      {
+        "featureId": "FEAT_SPECIFIC_BONUS_PLUM_RB",
+        "name": "プラム+RB実質出現率",
+        "reason": "プラム+RB実質出現率の設定差は「ボーナス当選契機の構成」に条件付き統合して利用するため、通常ゲームを分母とする単独Featureとしては不採用とする。"
       }
     ]
   },
