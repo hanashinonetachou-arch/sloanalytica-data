@@ -18,13 +18,19 @@
     {
       "id": "INP_DEN_INITIAL",
       "name": "通常ゲーム数",
-      "category": "SEL_INITIAL",
+      "category": "SHARED_DENOMINATOR",
       "type": "integer",
       "unit": "回",
       "displayOrder": 11,
       "inferenceRole": "INCLUDE_PRIMARY",
       "defaultValue": "",
-      "minimum": 0
+      "minimum": 0,
+      "description": "複数の設定推測要素で同じ公開母集団を使うため共有します。通常ゲーム数",
+      "sharedByFeatureIds": [
+        "FEAT_INITIAL",
+        "FEAT_NOIR_ROOM",
+        "FEAT_BONUS_DIRECT"
+      ]
     },
     {
       "id": "INP_NUM_NOIR_ROOM",
@@ -38,34 +44,12 @@
       "minimum": 0
     },
     {
-      "id": "INP_DEN_NOIR_ROOM",
-      "name": "通常ゲーム数",
-      "category": "SEL_NOIR_ROOM",
-      "type": "integer",
-      "unit": "回",
-      "displayOrder": 13,
-      "inferenceRole": "INCLUDE_FALLBACK",
-      "defaultValue": "",
-      "minimum": 0
-    },
-    {
       "id": "INP_NUM_BONUS_DIRECT",
       "name": "ボーナス直撃回数",
       "category": "SEL_BONUS_DIRECT",
       "type": "counter",
       "unit": "回",
       "displayOrder": 14,
-      "inferenceRole": "INCLUDE_SUPPORT",
-      "defaultValue": "",
-      "minimum": 0
-    },
-    {
-      "id": "INP_DEN_BONUS_DIRECT",
-      "name": "通常ゲーム数",
-      "category": "SEL_BONUS_DIRECT",
-      "type": "integer",
-      "unit": "回",
-      "displayOrder": 15,
       "inferenceRole": "INCLUDE_SUPPORT",
       "defaultValue": "",
       "minimum": 0
@@ -93,34 +77,12 @@
       "minimum": 0
     },
     {
-      "id": "INP_NUM_ACE_MODE",
-      "name": "内部エースモードが選択された回数",
-      "category": "SEL_ACE_MODE",
-      "type": "counter",
-      "unit": "回",
-      "displayOrder": 18,
-      "inferenceRole": "INCLUDE_SUPPORT",
-      "defaultValue": "",
-      "minimum": 0
-    },
-    {
-      "id": "INP_DEN_ACE_MODE",
-      "name": "エースモード選択契機回数",
-      "category": "SEL_ACE_MODE",
-      "type": "integer",
-      "unit": "回",
-      "displayOrder": 19,
-      "inferenceRole": "INCLUDE_SUPPORT",
-      "defaultValue": "",
-      "minimum": 0
-    },
-    {
       "id": "INP_NUM_WATERMELON_NEXT_NOIR",
       "name": "次回ノワールルーム成功が選ばれた回数",
       "category": "SEL_WATERMELON_NEXT_NOIR",
       "type": "counter",
       "unit": "回",
-      "displayOrder": 20,
+      "displayOrder": 18,
       "inferenceRole": "INCLUDE_SUPPORT",
       "defaultValue": "",
       "minimum": 0
@@ -131,7 +93,7 @@
       "category": "SEL_WATERMELON_NEXT_NOIR",
       "type": "integer",
       "unit": "回",
-      "displayOrder": 21,
+      "displayOrder": 19,
       "inferenceRole": "INCLUDE_SUPPORT",
       "defaultValue": "",
       "minimum": 0
@@ -156,7 +118,7 @@
       "weight": 1,
       "integratedContribution": false,
       "numeratorInputId": "INP_NUM_NOIR_ROOM",
-      "denominatorInputId": "INP_DEN_NOIR_ROOM"
+      "denominatorInputId": "INP_DEN_INITIAL"
     },
     {
       "featureId": "FEAT_BONUS_DIRECT",
@@ -166,7 +128,7 @@
       "weight": 1,
       "integratedContribution": false,
       "numeratorInputId": "INP_NUM_BONUS_DIRECT",
-      "denominatorInputId": "INP_DEN_BONUS_DIRECT"
+      "denominatorInputId": "INP_DEN_INITIAL"
     },
     {
       "featureId": "FEAT_HOWARD_THRESHOLD",
@@ -181,12 +143,11 @@
     {
       "featureId": "FEAT_ACE_MODE",
       "researchFeatureId": "RF_ACE_MODE",
-      "adoptionCategory": "INCLUDE_SUPPORT",
-      "userReason": "公開された全設定の確率・分布があり、条件付き分母や排他的カテゴリを保って観測できるため、補助推測要素として採用する。",
+      "adoptionCategory": "EXCLUDE",
+      "userReason": "エースモードは内部状態で、公開解析も見た目での判別は難しいと明記している。示唆からの推測では公開30.1%～43.8%の選択率と同じ母集団を正確にカウントできないため数値推測に使用しない。",
+      "userFacingReason": "エースモードは内部状態で、公開解析も見た目での判別は難しいと明記している。示唆からの推測では公開30.1%～43.8%の選択率と同じ母集団を正確にカウントできないため数値推測に使用しない。",
       "weight": 1,
-      "integratedContribution": false,
-      "numeratorInputId": "INP_NUM_ACE_MODE",
-      "denominatorInputId": "INP_DEN_ACE_MODE"
+      "integratedContribution": false
     },
     {
       "featureId": "FEAT_WATERMELON_NEXT_NOIR",
@@ -236,8 +197,8 @@
   "selectionSummaryContract": {
     "schemaVersion": "selection-summary-v1",
     "evaluatedCount": 6,
-    "selectedCount": 6,
-    "rejectedCount": 0,
+    "selectedCount": 5,
+    "rejectedCount": 1,
     "selected": [
       {
         "name": "ボーナス/AT初当り",
@@ -256,19 +217,36 @@
         "reason": "公開された全設定の確率・分布があり、条件付き分母や排他的カテゴリを保って観測できるため、補助推測要素として採用する。"
       },
       {
-        "name": "内部エースモード選択",
-        "reason": "公開された全設定の確率・分布があり、条件付き分母や排他的カテゴリを保って観測できるため、補助推測要素として採用する。"
-      },
-      {
         "name": "スイカ成立時 次回ノワールルーム成功抽選",
         "reason": "公開された全設定の確率・分布があり、条件付き分母や排他的カテゴリを保って観測できるため、補助推測要素として採用する。"
       }
     ],
-    "rejected": []
+    "rejected": [
+      {
+        "name": "内部エースモード選択",
+        "reason": "エースモードは内部状態で、公開解析も見た目での判別は難しいと明記している。示唆からの推測では公開30.1%～43.8%の選択率と同じ母集団を正確にカウントできないため数値推測に使用しない。"
+      }
+    ]
   },
   "selectionPolicy": {
     "noRejectionForInputBurden": true,
     "noRejectionForRequiredTrialsAlone": true,
     "rareEventLikelihoodEvaluation": true
+  },
+  "denominatorSharingContract": {
+    "schemaVersion": "denominator-sharing-v1",
+    "ruleId": "RSO-OBS-003",
+    "exactDefinitionOnly": true,
+    "sharedGroups": [
+      {
+        "definitionKey": "[\"通常ゲーム数\",\"通常ゲーム数\"]",
+        "denominatorInputId": "INP_DEN_INITIAL",
+        "featureIds": [
+          "FEAT_INITIAL",
+          "FEAT_NOIR_ROOM",
+          "FEAT_BONUS_DIRECT"
+        ]
+      }
+    ]
   }
 }
