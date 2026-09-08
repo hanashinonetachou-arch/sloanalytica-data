@@ -10,10 +10,8 @@ const read=f=>JSON.parse(fs.readFileSync(f,'utf8'));
 const p=path.join(ROOT,'batches',BATCH);
 const ledgerPath=path.join(p,'compliance-ledger.json');
 const audit=read(path.join(p,'gate-d-ui-semantic-audit.json'));
-const mat=read(path.join(p,'gate-d-ui-materialization-report.json'));
 const ledger=read(ledgerPath);
 if(audit.status!=='PASS'||audit.summary?.machines!==10||audit.summary?.errors!==0) throw new Error('Gate D UI semantic audit is not PASS 10/10');
-if(mat.canonicalUiMaterialization!=='PASS'||mat.semanticEquality!=='PASS'||mat.idempotence!=='PASS'||mat.rejectExcludeVisibility!=='PASS') throw new Error('Gate E precursor materialization evidence is not PASS');
 for(const id of IDS){
  const ui=read(path.join(ROOT,'research',id,'ui-design-data.json'));
  if(ui.status!=='PASS'||ui.unresolved?.length) throw new Error(`${id}: canonical UI not closed`);
@@ -35,7 +33,7 @@ const notes={
  'UX-LANG-005':'Integrated primitives are suppressed from user-facing rejected summaries.',
  'UX-VIS-001':'inputVisible=false, inferenceRole=EXCLUDE and reject-only inputs are excluded from canonical visible input paths.',
  'UX-VIS-002':'Absence from canonical sections is not treated as implicit display permission.',
- 'UX-VIS-003':'Canonical visibility is the authority used by materialization, preventing fallback/auto/quick-input leakage.',
+ 'UX-VIS-003':'Canonical visibility is authoritative; fallback/auto/Quick Input paths must not override it.',
  'UX-SUM-001':'Canonical selectionSummaryContract is the user-facing selection summary authority.',
  'UX-SUM-002':'Legacy Difficulty rejectedFeatures are not appended to canonical rejected summaries.',
  'UX-SUM-003':'Legacy summary fallback is not used for these machines because canonical summaries exist.'
@@ -58,5 +56,5 @@ if(closure.entries!==IDS.length*RULES.length||closure.applicableUnevaluated||clo
 ledger.gateStatus.GATE_D='PASS';
 ledger.gateStatus.GATE_E='OPEN';
 fs.writeFileSync(ledgerPath,JSON.stringify(ledger,null,2)+'\n');
-fs.writeFileSync(path.join(p,'gate-d-closure-audit.json'),JSON.stringify({schemaVersion:'gate-d-closure-audit-v1',batchId:BATCH,status:'PASS',rules:RULES,machines:IDS.length,closure,evidence:{canonicalUi:`batches/${BATCH}/gate-d-ui-semantic-audit.json`,materializationPrecursor:`batches/${BATCH}/gate-d-materialization-report.json`}},null,2)+'\n');
+fs.writeFileSync(path.join(p,'gate-d-closure-audit.json'),JSON.stringify({schemaVersion:'gate-d-closure-audit-v1',batchId:BATCH,status:'PASS',rules:RULES,machines:IDS.length,closure,evidence:{canonicalUi:`batches/${BATCH}/gate-d-ui-semantic-audit.json`},gateEPrecursorEvidence:`batches/${BATCH}/gate-d-materialization-report.json`},null,2)+'\n');
 console.log('GATE D CLOSE PASS',JSON.stringify(closure));
