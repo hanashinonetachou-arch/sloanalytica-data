@@ -8,7 +8,11 @@ for (const id of fs.readdirSync('research')) {
   const ui=JSON.parse(fs.readFileSync(p,'utf8'));
   for (const [inputId,c] of Object.entries(ui.inputContracts??{})) {
     const name=String(c?.name??'');
-    if (name.includes('有効')) hits.push({machineId:id,inputId,name});
+    if (!name.includes('有効')) continue;
+    const sections=Object.entries(ui.sections??{})
+      .filter(([,s])=>(s.inputIds??[]).includes(inputId))
+      .map(([sectionName,s])=>({sectionName,description:s.description??''}));
+    hits.push({machineId:id,inputId,name,sections});
   }
 }
 console.log(JSON.stringify(hits,null,2));
