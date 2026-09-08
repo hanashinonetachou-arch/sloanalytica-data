@@ -42,6 +42,12 @@ function inputContract(input){
 function cleanConditions(values){
  return uniq(values).filter(x=>!internalText.test(String(x)));
 }
+function executableInputIds(feat){
+ const ids=[];
+ for(const key of ['denominatorInputId','numeratorInputId','conditionedOnInputId']) if(feat[key]) ids.push(feat[key]);
+ for(const key of ['denominatorInputIds','numeratorInputIds','categoryInputIds']) ids.push(...(feat[key]??[]));
+ return uniq(ids);
+}
 function build(id){
  const dir=path.join(ROOT,'research',id);
  const sel=read(path.join(dir,'selection-data.json'));
@@ -66,7 +72,7 @@ function build(id){
   let base=title,n=2; while(sections[title]) title=`${base} ${n++}`;
   const ids=[];
   if(!denId.startsWith('NO_DEN_')) ids.push(denId);
-  for(const {feat} of rows){ if(feat.numeratorInputId&&!ids.includes(feat.numeratorInputId)) ids.push(feat.numeratorInputId); }
+  for(const {feat} of rows) for(const iid of executableInputIds(feat)) if(!ids.includes(iid)) ids.push(iid);
   const included=cleanConditions(rows.flatMap(r=>r.map.includedConditions??[]));
   const excluded=cleanConditions(rows.flatMap(r=>r.map.excludedConditions??[]));
   const denomName=!denId.startsWith('NO_DEN_')?(inputById.get(denId)?.name??rows[0].map.denominatorDefinition):null;
