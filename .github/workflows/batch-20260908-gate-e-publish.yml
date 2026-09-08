@@ -54,10 +54,14 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
+          npm run machine:batch -- $(cat /tmp/gate-e-machines.txt)
           while read -r id; do
-            node tools/build-machine-data-with-ui.mjs "$id"
+            node tools/materialize-ui-design-into-machine-package.mjs \
+              "machines/$id/machine-package.json" \
+              "research/$id/ui-design-data.json"
+            cp "machines/$id/machine-package.json" "research/$id/machine-package.generated.json"
           done < /tmp/gate-e-machines.txt
-          node tools/audit-ui-materialization-v7.mjs
+          node tools/audit-ui-materialization-v7.mjs $(cat /tmp/gate-e-machines.txt)
           git diff --exit-code -- $(while read -r id; do printf 'machines/%s/machine-package.json research/%s/machine-package.generated.json ' "$id" "$id"; done < /tmp/gate-e-machines.txt)
 
       - name: Batch publish dry run
@@ -129,16 +133,17 @@ jobs:
         run: |
           set -euo pipefail
           node tools/audit-gate-d-ui-v7.mjs
-          node tools/audit-ui-materialization-v7.mjs
+          node tools/audit-ui-materialization-v7.mjs $(cat /tmp/gate-e-machines.txt)
           node --input-type=module <<'NODE'
           import fs from 'node:fs';
           const ids=fs.readFileSync('/tmp/gate-e-machines.txt','utf8').trim().split(/\s+/);
           for(const id of ids){
             const ui=JSON.parse(fs.readFileSync(`research/${id}/ui-design-data.json`,'utf8'));
             const pkg=JSON.parse(fs.readFileSync(`machines/${id}/machine-package.json`,'utf8'));
-            const visibleInputs=new Set();
-            for(const s of Object.values(ui.sections??{})) for(const inputId of (s.inputIds??[])) visibleInputs.add(inputId);
-            const pkgInputs=new Set((pkg.inputs??[]).filter(x=>x.inputVisible!==false).map(x=>x.inputId??x.id));
+            const sections=Array.isArray(ui.sections)?ui.sections:Object.values(ui.sections??{});
+            const visibleInputs=new Set(sections.flatMap(s=>s.inputIds??[]));
+            const packageInputs=Array.isArray(pkg.inputs)?pkg.inputs:Object.values(pkg.inputs??{});
+            const pkgInputs=new Set(packageInputs.filter(x=>x.inputVisible!==false).map(x=>x.inputId??x.id));
             for(const inputId of visibleInputs) if(!pkgInputs.has(inputId)) throw new Error(`${id}: canonical UI input missing from package: ${inputId}`);
           }
           console.log('PASS visibility/canonical semantic assertions');
