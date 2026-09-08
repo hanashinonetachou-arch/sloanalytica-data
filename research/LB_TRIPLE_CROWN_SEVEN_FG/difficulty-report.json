@@ -2,7 +2,7 @@
   "analyzerVersion": "difficulty-analyzer-v1.2",
   "machineId": "LB_TRIPLE_CROWN_SEVEN_FG",
   "machineDataVersion": "0.1.0",
-  "generatedAt": "2026-09-08T00:16:41.637Z",
+  "generatedAt": "2026-09-08T05:40:02.044Z",
   "status": "NO_NUMERIC_FEATURES",
   "scoreDefinition": {
     "range": "0-100 integer; higher is easier to discriminate numerically",
@@ -34,9 +34,9 @@
     "derivedEventRate": "source feature exposure × source event/category probability × eventMultiplier; no observed event frequency is invented"
   },
   "coverage": {
-    "inferenceNumericFeatureCount": 5,
+    "inferenceNumericFeatureCount": 6,
     "includedNumericFeatureCount": 0,
-    "explicitlyExcludedNumericFeatureCount": 5,
+    "explicitlyExcludedNumericFeatureCount": 6,
     "explicitlyExcludedNumericFeatures": [
       {
         "featureId": "FEAT_SPECIAL_DIRECTION",
@@ -52,11 +52,15 @@
       },
       {
         "featureId": "FEAT_SMALL_ROLE_COMPOSITION",
-        "reason": "既存Difficulty reportがjoint化前のため、再生成後に参加可否を再評価する。"
+        "reason": "今回の実機ReopenではSelection整合を先に確定し、Difficulty再計算はObservation再同期後に行う。"
       },
       {
         "featureId": "FEAT_BONUS_OUTCOME",
-        "reason": "joint化後のDifficulty reportを再生成してから参加可否を再評価する。"
+        "reason": "今回の実機ReopenではSelection整合を先に確定し、Difficulty再計算はObservation再同期後に行う。"
+      },
+      {
+        "featureId": "FEAT_BONUS_TRIGGER_COMPOSITION",
+        "reason": "ボーナス成立回数を条件分母とする構成Featureのため、通常ゲーム基準Difficultyへ重ねて参加させない。"
       }
     ],
     "analyzableFeatureCount": 0,
@@ -207,13 +211,97 @@
     {
       "featureId": "FEAT_BONUS_OUTCOME",
       "researchFeatureId": "RF_BONUS_OUTCOME",
-      "name": "通常時ボーナス構成（BB・RB・非当選）",
+      "name": "BB・RB出現構成",
       "adoptionCategory": "INCLUDE_PRIMARY",
       "settings": [
         "SET_1",
         "SET_6"
       ],
       "requiredTrials80": 20497,
+      "criterion": "equal-prior Bayes accuracy >= 80% (Bhattacharyya upper-bound estimate)"
+    },
+    {
+      "featureId": "FEAT_SPECIFIC_BONUS_SINGLE_BB",
+      "researchFeatureId": "RF_SPECIFIC_BONUS_SINGLE_BB",
+      "name": "単独BB実質出現率",
+      "adoptionCategory": "EXCLUDE",
+      "settings": [
+        "SET_1",
+        "SET_6"
+      ],
+      "requiredTrials80": 54876,
+      "criterion": "equal-prior Bayes accuracy >= 80% (Bhattacharyya upper-bound estimate)"
+    },
+    {
+      "featureId": "FEAT_SPECIFIC_BONUS_SINGLE_RB",
+      "researchFeatureId": "RF_SPECIFIC_BONUS_SINGLE_RB",
+      "name": "単独RB実質出現率",
+      "adoptionCategory": "EXCLUDE",
+      "settings": [
+        "SET_1",
+        "SET_6"
+      ],
+      "requiredTrials80": 342240,
+      "criterion": "equal-prior Bayes accuracy >= 80% (Bhattacharyya upper-bound estimate)"
+    },
+    {
+      "featureId": "FEAT_SPECIFIC_BONUS_REPLAY_BB",
+      "researchFeatureId": "RF_SPECIFIC_BONUS_REPLAY_BB",
+      "name": "リプレイ+BB実質出現率",
+      "adoptionCategory": "EXCLUDE",
+      "settings": [
+        "SET_1",
+        "SET_6"
+      ],
+      "requiredTrials80": 111474,
+      "criterion": "equal-prior Bayes accuracy >= 80% (Bhattacharyya upper-bound estimate)"
+    },
+    {
+      "featureId": "FEAT_SPECIFIC_BONUS_REPLAY_RB",
+      "researchFeatureId": "RF_SPECIFIC_BONUS_REPLAY_RB",
+      "name": "リプレイ+RB実質出現率",
+      "adoptionCategory": "EXCLUDE",
+      "settings": [
+        "SET_1",
+        "SET_6"
+      ],
+      "requiredTrials80": 142511,
+      "criterion": "equal-prior Bayes accuracy >= 80% (Bhattacharyya upper-bound estimate)"
+    },
+    {
+      "featureId": "FEAT_SPECIFIC_BONUS_PLUM_BB",
+      "researchFeatureId": "RF_SPECIFIC_BONUS_PLUM_BB",
+      "name": "プラム+BB実質出現率",
+      "adoptionCategory": "EXCLUDE",
+      "settings": [
+        "SET_1",
+        "SET_6"
+      ],
+      "requiredTrials80": 51418,
+      "criterion": "equal-prior Bayes accuracy >= 80% (Bhattacharyya upper-bound estimate)"
+    },
+    {
+      "featureId": "FEAT_SPECIFIC_BONUS_PLUM_RB",
+      "researchFeatureId": "RF_SPECIFIC_BONUS_PLUM_RB",
+      "name": "プラム+RB実質出現率",
+      "adoptionCategory": "EXCLUDE",
+      "settings": [
+        "SET_1",
+        "SET_6"
+      ],
+      "requiredTrials80": 174983,
+      "criterion": "equal-prior Bayes accuracy >= 80% (Bhattacharyya upper-bound estimate)"
+    },
+    {
+      "featureId": "FEAT_BONUS_TRIGGER_COMPOSITION",
+      "researchFeatureId": "RF_BONUS_TRIGGER_COMPOSITION",
+      "name": "ボーナス当選契機の構成",
+      "adoptionCategory": "INCLUDE_SUPPORT",
+      "settings": [
+        "SET_1",
+        "SET_6"
+      ],
+      "requiredTrials80": 161,
       "criterion": "equal-prior Bayes accuracy >= 80% (Bhattacharyya upper-bound estimate)"
     }
   ],
