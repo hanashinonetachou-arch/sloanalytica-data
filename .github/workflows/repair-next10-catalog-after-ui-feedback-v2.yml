@@ -1,0 +1,52 @@
+name: Repair Next10 catalog after UI feedback v2
+on:
+  push:
+    branches: [fix/20260908-next10-catalog-regeneration]
+    paths: [.github/workflows/repair-next10-catalog-after-ui-feedback-v2.yml]
+permissions:
+  contents: write
+jobs:
+  regenerate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: fix/20260908-next10-catalog-regeneration
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Canonicalize Triple Crown user-facing rejection summary
+        run: |
+          node --input-type=module <<'NODE'
+          import fs from 'node:fs';
+          const p='research/LB_TRIPLE_CROWN_SEVEN_FG/selection-data.json';
+          const s=JSON.parse(fs.readFileSync(p,'utf8'));
+          const c=s.selectionSummaryContract;
+          const keep=new Set(['FEAT_BT_REPLAY_BB']);
+          c.rejected=c.rejected.filter(x=>keep.has(x.featureId));
+          if(c.rejected.length!==1) throw new Error(`expected one genuine rejected element, got ${c.rejected.length}`);
+          c.rejectedCount=1; c.selectedCount=c.selected.length; c.evaluatedCount=20;
+          fs.writeFileSync(p,JSON.stringify(s,null,2)+'\n');
+          NODE
+      - name: Regenerate affected MachineData and catalog
+        run: npm run machine:batch -- L_FIRE_FORCE_2 L_KABANERI_UNATO_KESSEN_XX L_JORMUNGAND_ND01G LB_TRIPLE_CROWN_SEVEN_FG L_KYOKOU_SUIRI_ST
+      - name: Assert catalog and requested UI semantics
+        run: |
+          node --input-type=module <<'NODE'
+          import fs from 'node:fs'; import crypto from 'node:crypto';
+          const ids=['L_FIRE_FORCE_2','L_KABANERI_UNATO_KESSEN_XX','L_JORMUNGAND_ND01G','LB_TRIPLE_CROWN_SEVEN_FG','L_KYOKOU_SUIRI_ST'];
+          const catalog=JSON.parse(fs.readFileSync('catalog.json','utf8')); const pkgs={};
+          for(const id of ids){ const bytes=fs.readFileSync(`machines/${id}/machine-package.json`); pkgs[id]=JSON.parse(bytes); const item=catalog.machines.find(x=>x.machineId===id); const hash=crypto.createHash('sha256').update(bytes).digest('hex'); if(!item||item.sha256!==hash||item.packageSizeBytes!==bytes.length) throw new Error(`catalog mismatch ${id}`); }
+          const fire=pkgs.L_FIRE_FORCE_2; if(!fire.ui.sections.some(s=>s.title==='炎炎ボーナス終了画面'&&s.items.length>=2)) throw new Error('Fire Force merged section missing');
+          const kab=pkgs.L_KABANERI_UNATO_KESSEN_XX; if(!kab.inputs.inputs.some(i=>i.name==='通常時・ST中・ボーナス中の消化ゲーム数')) throw new Error('Kabaneri wording missing');
+          const jor=pkgs.L_JORMUNGAND_ND01G; const end=jor.ui.sections.find(s=>/終了画面/.test(s.title)); if(!end||!end.items.some(i=>i.gridSpan===6)) throw new Error('Jormungand 2-column missing');
+          const tri=pkgs.LB_TRIPLE_CROWN_SEVEN_FG; if(tri.selectionSummary.rejected.length!==1||tri.selectionSummary.rejected[0].featureId!=='FEAT_BT_REPLAY_BB') throw new Error('Triple Crown rejection summary mismatch');
+          const kyo=pkgs.L_KYOKOU_SUIRI_ST; if(kyo.ui.sections.some(s=>s.title==='追加入力')) throw new Error('Kyokou additional-input section leaked');
+          console.log('PASS catalog hashes + requested UI semantics');
+          NODE
+      - name: Commit corrected canonical/generated artifacts
+        run: |
+          git config user.name 'github-actions[bot]'; git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add catalog.json difficulty-catalog.json machine-registry.json machines/L_FIRE_FORCE_2/machine-package.json machines/L_KABANERI_UNATO_KESSEN_XX/machine-package.json machines/L_JORMUNGAND_ND01G/machine-package.json machines/LB_TRIPLE_CROWN_SEVEN_FG/machine-package.json machines/L_KYOKOU_SUIRI_ST/machine-package.json research/L_FIRE_FORCE_2 research/L_KABANERI_UNATO_KESSEN_XX research/L_JORMUNGAND_ND01G research/LB_TRIPLE_CROWN_SEVEN_FG research/L_KYOKOU_SUIRI_ST reports || true
+          git commit -m 'fix: publish corrected Next10 UI packages and catalog'
+          git push origin HEAD:fix/20260908-next10-catalog-regeneration
