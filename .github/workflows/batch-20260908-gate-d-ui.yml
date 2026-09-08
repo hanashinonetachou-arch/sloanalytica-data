@@ -7,6 +7,7 @@ on:
     paths:
       - 'tools/materialize-gate-d-ui-design-v7.mjs'
       - 'tools/audit-gate-d-ui-v7.mjs'
+      - 'tools/normalize-selection-user-language-v7.mjs'
       - '.github/workflows/batch-20260908-gate-d-ui.yml'
 
 permissions:
@@ -22,6 +23,8 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 20
+      - name: Normalize user-facing Selection language
+        run: node tools/normalize-selection-user-language-v7.mjs
       - name: Materialize canonical UI Design 10/10
         run: node tools/materialize-gate-d-ui-design-v7.mjs
       - name: Validate UI Design schema
@@ -44,5 +47,8 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add research/*/ui-design-data.json batches/20260908-manifest-v7-first10/gate-d-ui-materialization-report.json batches/20260908-manifest-v7-first10/gate-d-ui-semantic-audit.json
+          git add research/*/selection-data.json research/*/ui-design-data.json \
+            batches/20260908-manifest-v7-first10/selection-user-language-normalization-report.json \
+            batches/20260908-manifest-v7-first10/gate-d-ui-materialization-report.json \
+            batches/20260908-manifest-v7-first10/gate-d-ui-semantic-audit.json
           if git diff --cached --quiet; then echo "No UI changes"; else git commit -m "ui: materialize Manifest v7 Gate D designs" && git push origin HEAD:batch/20260908-manifest-v7-first10; fi
