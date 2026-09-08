@@ -22,6 +22,8 @@ jobs:
           node-version: 20
       - name: Re-materialize SelectionData
         run: node tools/materialize-gate-b-selection-v7.mjs
+      - name: Share exact common denominators
+        run: node tools/share-gate-b-denominators-v7.mjs
       - name: Re-close Gate B
         run: node tools/close-gate-b-v7.mjs
       - name: Materialize revised ObservationData
@@ -41,17 +43,20 @@ jobs:
             research/L_LOTIS_TN/machine-observation-data.json
       - name: Audit Selection-Observation linkage
         run: node tools/audit-observation-selection-linkage.mjs --strict-v2 L_ANIMAL_SLOT_DOCCHI_ZT L_BIG_DREAM_GOLDEN_PUSHER_KR L_BIOHAZARD_RE3_ZD L_TAKT_OP_DESTINY_M1 L_SUPER_RIO_ACE2_ND02H L_BIRDIE_WING_BC L_SAO2_PA1 L_SENGOKU_OTOME5_L8 L_DARK_HAIBI_SB L_LOTIS_TN
-      - name: Run Machine Observation Gate
-        run: node tools/machine-observation-gate.mjs
-      - name: Assert batch Gate C draft has no unresolved debt
+      - name: Run batch-scoped Machine Observation Gate
+        run: node tools/machine-observation-gate.mjs L_ANIMAL_SLOT_DOCCHI_ZT L_BIG_DREAM_GOLDEN_PUSHER_KR L_BIOHAZARD_RE3_ZD L_TAKT_OP_DESTINY_M1 L_SUPER_RIO_ACE2_ND02H L_BIRDIE_WING_BC L_SAO2_PA1 L_SENGOKU_OTOME5_L8 L_DARK_HAIBI_SB L_LOTIS_TN
+      - name: Assert denominator sharing and Gate C debt
         run: |
           node - <<'NODE'
           const fs=require('fs');
+          const d=JSON.parse(fs.readFileSync('batches/20260908-manifest-v7-first10/gate-b-denominator-sharing-report.json','utf8'));
+          if(d.status!=='PASS'||d.summary?.validatorPass!==10){console.error(JSON.stringify(d,null,2));process.exit(1);}
           const x=JSON.parse(fs.readFileSync('batches/20260908-manifest-v7-first10/gate-c-observation-draft-report.json','utf8'));
           const s=x.summary||{};
           if(s.machines!==10||s.validatorPass!==10||s.unresolvedMappings!==0||s.researchReopenRequests!==0||s.linkedServiceDebt!==0) {
             console.error(JSON.stringify(x,null,2)); process.exit(1);
           }
+          console.log('Denominator sharing PASS',JSON.stringify(d.summary));
           console.log('Gate C batch debt assertion PASS',JSON.stringify(s));
           NODE
       - name: Commit re-audited Gate B-C outputs
@@ -60,6 +65,7 @@ jobs:
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add research/*/selection-data.json research/*/machine-observation-data.json \
             batches/20260908-manifest-v7-first10/gate-b-materialization-report.json \
+            batches/20260908-manifest-v7-first10/gate-b-denominator-sharing-report.json \
             batches/20260908-manifest-v7-first10/gate-b-dependency-audit.json \
             batches/20260908-manifest-v7-first10/gate-c-observation-draft-report.json \
             batches/20260908-manifest-v7-first10/compliance-ledger.json
