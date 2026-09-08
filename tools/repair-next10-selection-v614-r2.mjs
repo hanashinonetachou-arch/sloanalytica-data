@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+// Trigger isolated second-pass apply after workflow registration.
 import fs from 'node:fs';
 const read=p=>JSON.parse(fs.readFileSync(p,'utf8'));
 const write=(p,x)=>fs.writeFileSync(p,JSON.stringify(x,null,2)+'\n');
@@ -10,8 +11,6 @@ function rebuild(r,s){
  const rej=(s.features??[]).filter(f=>f.adoptionCategory==='EXCLUDE');
  s.selectionSummaryContract={schemaVersion:'selection-summary-v1',evaluatedCount:s.features.length,selectedCount:sel.length,rejectedCount:rej.length,selected:sel.map(f=>({featureId:f.featureId,name:names.get(f.researchFeatureId)??f.featureId,reason:f.userReason??'採用'})),rejected:rej.map(f=>({featureId:f.featureId,name:names.get(f.researchFeatureId)??f.featureId,reason:f.userFacingReason??f.rejectionReason??'不採用'}))};
 }
-
-// Triple Crown: BB/RB/NO_BONUS are mutually exclusive outcomes of one normal game.
 {
  const d='research/LB_TRIPLE_CROWN_SEVEN_FG',rp=`${d}/research-data.json`,sp=`${d}/selection-data.json`;
  const r=read(rp),s=read(sp),bb=byRid(r.features,'RF_BB_INITIAL'),rb=byRid(r.features,'RF_RB_INITIAL');
@@ -25,9 +24,6 @@ function rebuild(r,s){
  const ri=s.inputs.find(x=>x.id==='INP_RB_INITIAL_COUNT');if(ri){ri.category='SEL_RF_BONUS_OUTCOME';ri.inferenceRole='INCLUDE_PRIMARY';}
  rebuild(r,s);write(rp,r);write(sp,s);
 }
-
-// Fire Force 2: bonus first-hit is upstream of the more discriminative Enen-loop first-hit.
-// With no published joint/conditional decomposition, do not multiply both as independent evidence.
 {
  const d='research/L_FIRE_FORCE_2',rp=`${d}/research-data.json`,sp=`${d}/selection-data.json`;
  const r=read(rp),s=read(sp);
