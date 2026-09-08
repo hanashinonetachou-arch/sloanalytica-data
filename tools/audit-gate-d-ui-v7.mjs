@@ -8,6 +8,13 @@ const read=f=>JSON.parse(fs.readFileSync(f,'utf8'));
 const errors=[]; const rows=[];
 const jargon=/(^|[^A-Za-z])(Gate|Feature|Evidence|SelectionData|ResearchData|schemaVersion|inferenceRole|INCLUDE_PRIMARY|INCLUDE_SUPPORT|INCLUDE_FALLBACK|EXCLUDE)([^A-Za-z]|$)/i;
 const vague=/有効な(?:ゲーム|G|区間|回数|状態|CZ|AT|ボーナス|小役)/;
+const uniq=a=>[...new Set((a??[]).filter(Boolean))];
+function executableInputIds(f){
+ const ids=[];
+ for(const key of ['denominatorInputId','numeratorInputId','conditionedOnInputId']) if(f[key]) ids.push(f[key]);
+ for(const key of ['denominatorInputIds','numeratorInputIds','categoryInputIds']) ids.push(...(f[key]??[]));
+ return uniq(ids);
+}
 for(const id of IDS){
  const dir=path.join(ROOT,'research',id); const sel=read(path.join(dir,'selection-data.json')); const ui=read(path.join(dir,'ui-design-data.json'));
  const visible=new Set(Object.values(ui.sections??{}).flatMap(s=>s.inputIds??[]));
@@ -17,8 +24,17 @@ for(const id of IDS){
  let adopted=0;
  for(const f of sel.features??[]){
   const isAdopted=/^INCLUDE_/.test(f.adoptionCategory??'');
-  if(isAdopted){adopted++; if(f.numeratorInputId&&!visible.has(f.numeratorInputId)) errors.push(`${id}/${f.featureId}: adopted numerator missing from UI`); if(f.denominatorInputId&&!visible.has(f.denominatorInputId)) errors.push(`${id}/${f.featureId}: adopted denominator missing from UI`);}
-  else {if(f.numeratorInputId&&visible.has(f.numeratorInputId)) errors.push(`${id}/${f.featureId}: rejected numerator visible`);if(f.denominatorInputId&&visible.has(f.denominatorInputId)&&!(sel.features??[]).some(o=>o!==f&&/^INCLUDE_/.test(o.adoptionCategory??'')&&o.denominatorInputId===f.denominatorInputId)) errors.push(`${id}/${f.featureId}: reject-only denominator visible`);}
+  const refs=executableInputIds(f);
+  if(isAdopted){
+   adopted++;
+   for(const iid of refs) if(!visible.has(iid)) errors.push(`${id}/${f.featureId}: adopted executable input missing from UI: ${iid}`);
+  } else {
+   for(const iid of refs){
+    if(!visible.has(iid)) continue;
+    const sharedByAdopted=(sel.features??[]).some(o=>o!==f&&/^INCLUDE_/.test(o.adoptionCategory??'')&&executableInputIds(o).includes(iid));
+    if(!sharedByAdopted) errors.push(`${id}/${f.featureId}: reject-only executable input visible: ${iid}`);
+   }
+  }
  }
  for(const g of groups.values()){const cid=evByGroup.get(g.groupId);if(!cid) errors.push(`${id}/${g.groupId}: Evidence group missing from canonical UI`); else if(!evVisible.has(cid)) errors.push(`${id}/${g.groupId}: Evidence contract not placed in a section`);}
  const placedInputs=[...Object.values(ui.sections??{}).flatMap(s=>s.inputIds??[])];
