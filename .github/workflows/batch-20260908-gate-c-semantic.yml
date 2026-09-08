@@ -1,0 +1,49 @@
+name: Batch 20260908 Gate C Semantic
+
+on:
+  push:
+    branches:
+      - batch/20260908-manifest-v7-first10
+    paths:
+      - '.github/workflows/batch-20260908-gate-c-semantic.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  semantic:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: batch/20260908-manifest-v7-first10
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Re-materialize Selection and share denominators
+        run: |
+          node tools/materialize-gate-b-selection-v7.mjs
+          node tools/share-gate-b-denominators-v7.mjs
+      - name: Re-materialize and enrich Observation contracts
+        run: |
+          node tools/materialize-gate-c-observation-v7.mjs
+          node tools/enrich-gate-c-observation-contract-v7.mjs
+      - name: Validate ObservationData
+        run: node tools/validate-machine-observation-data.mjs research/L_ANIMAL_SLOT_DOCCHI_ZT/machine-observation-data.json research/L_BIG_DREAM_GOLDEN_PUSHER_KR/machine-observation-data.json research/L_BIOHAZARD_RE3_ZD/machine-observation-data.json research/L_TAKT_OP_DESTINY_M1/machine-observation-data.json research/L_SUPER_RIO_ACE2_ND02H/machine-observation-data.json research/L_BIRDIE_WING_BC/machine-observation-data.json research/L_SAO2_PA1/machine-observation-data.json research/L_SENGOKU_OTOME5_L8/machine-observation-data.json research/L_DARK_HAIBI_SB/machine-observation-data.json research/L_LOTIS_TN/machine-observation-data.json
+      - name: Strict linkage audit
+        run: node tools/audit-observation-selection-linkage.mjs --strict-v2 L_ANIMAL_SLOT_DOCCHI_ZT L_BIG_DREAM_GOLDEN_PUSHER_KR L_BIOHAZARD_RE3_ZD L_TAKT_OP_DESTINY_M1 L_SUPER_RIO_ACE2_ND02H L_BIRDIE_WING_BC L_SAO2_PA1 L_SENGOKU_OTOME5_L8 L_DARK_HAIBI_SB L_LOTIS_TN
+      - name: Semantic OBS-001/002/003/004/006 audit
+        run: node tools/audit-gate-c-semantic-v7.mjs
+      - name: Batch-scoped machine gate
+        run: node tools/machine-observation-gate.mjs L_ANIMAL_SLOT_DOCCHI_ZT L_BIG_DREAM_GOLDEN_PUSHER_KR L_BIOHAZARD_RE3_ZD L_TAKT_OP_DESTINY_M1 L_SUPER_RIO_ACE2_ND02H L_BIRDIE_WING_BC L_SAO2_PA1 L_SENGOKU_OTOME5_L8 L_DARK_HAIBI_SB L_LOTIS_TN
+      - name: Commit semantic Gate C outputs
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add research/*/selection-data.json research/*/machine-observation-data.json \
+            batches/20260908-manifest-v7-first10/gate-b-materialization-report.json \
+            batches/20260908-manifest-v7-first10/gate-b-denominator-sharing-report.json \
+            batches/20260908-manifest-v7-first10/gate-c-observation-draft-report.json \
+            batches/20260908-manifest-v7-first10/gate-c-observation-contract-enrichment.json \
+            batches/20260908-manifest-v7-first10/gate-c-semantic-audit.json
+          if git diff --cached --quiet; then echo "No changes"; else git commit -m "observation: enforce Gate C semantic contracts" && git push origin HEAD:batch/20260908-manifest-v7-first10; fi

@@ -1,0 +1,39 @@
+name: Batch 20260908 Gate B Close
+
+on:
+  push:
+    branches:
+      - batch/20260908-manifest-v7-first10
+    paths:
+      - 'tools/close-gate-b-v7.mjs'
+      - '.github/workflows/batch-20260908-gate-b-close.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  close-gate-b:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: batch/20260908-manifest-v7-first10
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Close Gate B
+        run: node tools/close-gate-b-v7.mjs
+      - name: Show Gate B summary
+        run: |
+          node -e "const x=require('./batches/20260908-manifest-v7-first10/compliance-ledger.json'); console.log(JSON.stringify(x.gateBSummary,null,2));"
+      - name: Commit Gate B closure
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add batches/20260908-manifest-v7-first10/compliance-ledger.json batches/20260908-manifest-v7-first10/gate-b-dependency-audit.json
+          if git diff --cached --quiet; then
+            echo "No closure changes"
+          else
+            git commit -m "audit: close Gate B and open Gate C"
+            git push origin HEAD:batch/20260908-manifest-v7-first10
+          fi

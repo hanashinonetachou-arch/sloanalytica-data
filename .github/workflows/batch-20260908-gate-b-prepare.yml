@@ -1,0 +1,38 @@
+name: Batch 20260908 Gate B Prepare
+
+on:
+  push:
+    branches:
+      - batch/20260908-manifest-v7-first10
+  workflow_dispatch:
+
+jobs:
+  prepare-selection:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Prepare Selection briefs and statistical reports
+        run: |
+          npm run selection:batch -- \
+            L_ANIMAL_SLOT_DOCCHI_ZT \
+            L_BIG_DREAM_GOLDEN_PUSHER_KR \
+            L_BIOHAZARD_RE3_ZD \
+            L_TAKT_OP_DESTINY_M1 \
+            L_SUPER_RIO_ACE2_ND02H \
+            L_BIRDIE_WING_BC \
+            L_SAO2_PA1 \
+            L_SENGOKU_OTOME5_L8 \
+            L_DARK_HAIBI_SB \
+            L_LOTIS_TN \
+            --report reports/batch-20260908-gate-b-prepare.json
+      - name: Show preparation report
+        run: cat reports/batch-20260908-gate-b-prepare.json
+      - uses: actions/upload-artifact@v4
+        with:
+          name: batch-20260908-gate-b-selection-briefs
+          path: |
+            selection-batch/
+            reports/batch-20260908-gate-b-prepare.json

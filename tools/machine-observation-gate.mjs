@@ -10,18 +10,20 @@ const registryPath=path.join(root,'machine-registry.json');
 const registry=fs.existsSync(registryPath)?JSON.parse(fs.readFileSync(registryPath,'utf8')):{machines:[]};
 const byId=new Map((registry.machines??[]).map(m=>[m.machineId,m]));
 
-function parseRange(){
-  let from=null,to=null;
+function parseArgs(){
+  let from=null,to=null; const targets=[];
   for(const a of process.argv.slice(2)){
     if(a.startsWith('--from-id=')) from=Number(a.slice(10));
-    if(a.startsWith('--to-id=')) to=Number(a.slice(8));
+    else if(a.startsWith('--to-id=')) to=Number(a.slice(8));
+    else if(!a.startsWith('--')) targets.push(a);
   }
-  return {from:Number.isFinite(from)?from:null,to:Number.isFinite(to)?to:null};
+  return {from:Number.isFinite(from)?from:null,to:Number.isFinite(to)?to:null,targets:new Set(targets)};
 }
-function inRange(machineId,range){
+function inScope(machineId,args){
+  if(args.targets.size && !args.targets.has(machineId)) return false;
   const id=byId.get(machineId)?.provisionalRegistrationId;
-  if(range.from!=null && !(id>=range.from)) return false;
-  if(range.to!=null && !(id<=range.to)) return false;
+  if(args.from!=null && !(id>=args.from)) return false;
+  if(args.to!=null && !(id<=args.to)) return false;
   return true;
 }
 function gateFor(data){
@@ -37,12 +39,12 @@ function gateFor(data){
   return unresolvedCoverage||unresolvedObservation||unresolvedMapping||waiting?'PASS_WITH_UNRESOLVED':'PASS';
 }
 
-const range=parseRange();
+const args=parseArgs();
 const rows=[]; const errors=[];
 if(fs.existsSync(researchRoot)) for(const entry of fs.readdirSync(researchRoot,{withFileTypes:true})){
-  if(!entry.isDirectory()||entry.name.startsWith('_')||!inRange(entry.name,range)) continue;
+  if(!entry.isDirectory()||entry.name.startsWith('_')||!inScope(entry.name,args)) continue;
   const file=path.join(researchRoot,entry.name,'machine-observation-data.json');
-  if(!fs.existsSync(file)) continue;
+  if(!fs.existsSync(file)){ if(args.targets.has(entry.name)) errors.push(`${entry.name}: machine-observation-data.json missing`); continue; }
   try{
     const data=JSON.parse(fs.readFileSync(file,'utf8'));
     const validation=validateObservationObject(data,path.relative(root,file));
@@ -51,6 +53,10 @@ if(fs.existsSync(researchRoot)) for(const entry of fs.readdirSync(researchRoot,{
     rows.push({provisionalRegistrationId:meta.provisionalRegistrationId??null,machineId:entry.name,displayName:data.displayName??meta.displayName??entry.name,schemaVersion:data.schemaVersion,gate:gateFor(data)});
   }catch(e){ errors.push(`${entry.name}: ${e.message}`); }
 }
+if(args.targets.size){
+  const seen=new Set(rows.map(r=>r.machineId));
+  for(const id of args.targets) if(!seen.has(id) && !errors.some(e=>e.startsWith(`${id}:`))) errors.push(`${id}: target not evaluated`);
+}
 rows.sort((a,b)=>(a.provisionalRegistrationId??Number.MAX_SAFE_INTEGER)-(b.provisionalRegistrationId??Number.MAX_SAFE_INTEGER)||a.machineId.localeCompare(b.machineId));
 if(errors.length){ for(const e of errors) console.error(`ERROR: ${e}`); process.exit(1); }
 const counts={PASS:0,PASS_WITH_UNRESOLVED:0,RESEARCH_REOPEN_REQUIRED:0}; for(const r of rows) counts[r.gate]++;
@@ -58,3 +64,4 @@ console.log('Machine Observation Gate');
 console.log(JSON.stringify({machines:rows.length,...counts},null,2));
 for(const r of rows) console.log(`- provisionalId=${r.provisionalRegistrationId??'-'} | ${r.gate} | ${r.machineId} | ${r.displayName}`);
 if(counts.RESEARCH_REOPEN_REQUIRED>0) process.exitCode=2;
+if(args.targets.size && (rows.length!==args.targets.size || counts.PASS!==args.targets.size)) process.exitCode=3;

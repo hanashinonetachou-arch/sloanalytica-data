@@ -1,0 +1,43 @@
+name: Batch 20260908 Gate B Materialize
+
+on:
+  push:
+    branches:
+      - batch/20260908-manifest-v7-first10
+    paths:
+      - 'tools/materialize-gate-b-selection-v7.mjs'
+      - 'batches/20260908-manifest-v7-first10/gate-b-feature-disposition-draft.json'
+      - 'batches/20260908-manifest-v7-first10/gate-b-dependency-audit.json'
+      - 'research/**/research-data.json'
+      - '.github/workflows/batch-20260908-gate-b-materialize.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  materialize:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: batch/20260908-manifest-v7-first10
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Materialize canonical SelectionData
+        run: node tools/materialize-gate-b-selection-v7.mjs
+      - name: Show report
+        if: always()
+        run: cat batches/20260908-manifest-v7-first10/gate-b-materialization-report.json || true
+      - name: Commit generated SelectionData and report
+        if: success()
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add research/*/selection-data.json batches/20260908-manifest-v7-first10/gate-b-materialization-report.json
+          if git diff --cached --quiet; then
+            echo "No generated changes"
+          else
+            git commit -m "selection: materialize Gate B canonical data"
+            git push origin HEAD:batch/20260908-manifest-v7-first10
+          fi

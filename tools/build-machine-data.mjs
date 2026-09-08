@@ -39,7 +39,7 @@ function selectedCategorical(rf,sf,setting){
   if(kept.length<2)return null;
   const probs=kept.map(([,v])=>v),sum=probs.reduce((a,b)=>a+b,0);
   if(sum<=0)return null;
-  return excluded.size?probs.map(v=>v/sum):probs;
+  return (excluded.size||sf.normalizeRoundedCategoryProbabilities===true)?probs.map(v=>v/sum):probs;
 }
 function estimateRequiredTrials80(rf,sf,settings){
   if(!Array.isArray(settings)||settings.length<2)return null; const low=settings[0],high=settings.at(-1);

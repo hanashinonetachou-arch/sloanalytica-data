@@ -1,0 +1,345 @@
+{
+  "schemaVersion": "gate-b-dependency-audit-v1",
+  "batchId": "20260908-manifest-v7-first10",
+  "checkedAt": "2026-09-08T21:05:00+09:00",
+  "status": "PASS",
+  "rules": {
+    "RSO-DEP-001": "APPLIED",
+    "RSO-DEP-002": "APPLIED",
+    "RSO-DEP-003": "APPLIED"
+  },
+  "machines": [
+    {
+      "machineId": "L_ANIMAL_SLOT_DOCCHI_ZT",
+      "relationships": [
+        {
+          "members": [
+            "RF_BIG",
+            "RF_REG"
+          ],
+          "type": "mutually_exclusive_outcomes_shared_denominator",
+          "decision": "both retained",
+          "reason": "BIGとREGは同一通常G分母でも排他的な別結果。共有分母だけを理由に片方を削除しない。"
+        },
+        {
+          "members": [
+            "RF_CHERRY",
+            "RF_WATERMELON"
+          ],
+          "type": "distinct_small_roles_shared_denominator",
+          "decision": "both retained",
+          "reason": "別小役であり同一事象の重複ではない。"
+        }
+      ]
+    },
+    {
+      "machineId": "L_BIG_DREAM_GOLDEN_PUSHER_KR",
+      "relationships": [
+        {
+          "members": [
+            "RF_CZ_INITIAL",
+            "RF_AT_INITIAL"
+          ],
+          "type": "causal_chain_intermediate_to_outcome",
+          "decision": "CZ primary / AT fallback",
+          "reason": "CZ経由ATを単純加算すると同じ好不調を二重評価し得るため、ATをFallbackへ分離。"
+        },
+        {
+          "members": [
+            "RF_STATION_INITIAL_BALLS",
+            "RF_GAME_CEILING_1499"
+          ],
+          "type": "distinct_latent_draws",
+          "decision": "both support",
+          "reason": "初期ボール数とゲーム数天井選択は異なる抽選で、共有する結果事象ではない。"
+        }
+      ]
+    },
+    {
+      "machineId": "L_BIOHAZARD_RE3_ZD",
+      "relationships": [
+        {
+          "members": [
+            "RF_AT_INITIAL",
+            "RF_CZ_NORMAL",
+            "RF_CZ_AT",
+            "RF_CZ_UPPER_AT"
+          ],
+          "type": "state_specific_intermediate_and_downstream_outcome",
+          "decision": "AT primary / CZ state rates fallback",
+          "reason": "状態別CZと最終AT初当りを同時に独立加算せず、CZ群はFallback。"
+        },
+        {
+          "members": [
+            "RF_WEAK_RARE_CZ_BY_STATE",
+            "RF_STRONG_RARE_AT_DIRECT_BY_STATE"
+          ],
+          "type": "conditional_by_state_and_role",
+          "decision": "support with explicit conditional denominators",
+          "reason": "弱レア役CZと強レア役AT直撃は成立役・状態・結果が異なる条件付き抽選。"
+        },
+        {
+          "members": [
+            "RF_NE_POINT_DISTRIBUTION"
+          ],
+          "type": "multinomial_exclusive_categories",
+          "decision": "retain as multinomial",
+          "reason": "規定NEポイントカテゴリは排他的分布として一体評価し、カテゴリ別binomialへ分解しない。"
+        }
+      ]
+    },
+    {
+      "machineId": "L_BIRDIE_WING_BC",
+      "relationships": [
+        {
+          "members": [
+            "RF_NORMAL_INITIAL",
+            "RF_ST_INITIAL"
+          ],
+          "type": "suspected_subset_or_downstream",
+          "decision": "normal initial primary / ST fallback",
+          "reason": "ST初当りが通常時初当り系列に包含される可能性があるため単純同時加算を避ける。"
+        }
+      ]
+    },
+    {
+      "machineId": "L_DARK_HAIBI_SB",
+      "relationships": [
+        {
+          "members": [
+            "RF_BB",
+            "RF_RB"
+          ],
+          "type": "mutually_exclusive_bonus_types_shared_denominator",
+          "decision": "both primary",
+          "reason": "BBとRBは排他的ボーナス種別なので共有分母だけで削除しない。"
+        },
+        {
+          "members": [
+            "RF_NON_CHAIN_INITIAL",
+            "RF_BB",
+            "RF_RB"
+          ],
+          "type": "overlapping_event_universe_with_chain_exclusion",
+          "decision": "BB/RB primary / non-chain initial fallback",
+          "reason": "非連チャン初当りはBB/RB集合と重なりつつ連チャン除外条件が異なるため同時独立加算しない。"
+        }
+      ]
+    },
+    {
+      "machineId": "L_LOTIS_TN",
+      "relationships": [
+        {
+          "members": [
+            "RF_BIG",
+            "RF_REG"
+          ],
+          "type": "mutually_exclusive_bonus_types_shared_denominator",
+          "decision": "both primary",
+          "reason": "排他的な別ボーナス種別。"
+        },
+        {
+          "members": [
+            "RF_MODE_BONUS_MORNING",
+            "RF_MODE_BONUS_CHANCE",
+            "RF_MODE_BONUS_NORMAL",
+            "RF_MODE_BONUS_RETURN_A",
+            "RF_MODE_BONUS_RETURN_B"
+          ],
+          "type": "conditional_same_outcome_by_exclusive_state",
+          "decision": "retain conditionally; do not sum as independent global bonus features",
+          "reason": "同じボーナス当選を排他的モード別に条件付けしたもの。状態別分母を維持する。"
+        },
+        {
+          "members": [
+            "RF_PSEUDO_CHERRY_TRUE_PRELUDE",
+            "RF_PSEUDO_CHERRY_FAKE_PRELUDE",
+            "RF_FAKE_TO_TRUE_REWRITE"
+          ],
+          "type": "precursor_causal_chain",
+          "decision": "retain with conditional denominators",
+          "reason": "擬似チェリー→前兆種別→書き換えの系列なので各段階の条件付き分母で扱う。"
+        },
+        {
+          "members": [
+            "RF_REAL_CHERRY_B"
+          ],
+          "type": "source_conflict",
+          "decision": "exclude numeric inference pending conflict resolution",
+          "reason": "SET_4公開値が競合しており尤度を一意に定義できない。"
+        }
+      ]
+    },
+    {
+      "machineId": "L_SAO2_PA1",
+      "relationships": [
+        {
+          "members": [
+            "RF_CZ_INITIAL",
+            "RF_AT_INITIAL"
+          ],
+          "type": "causal_chain_intermediate_to_outcome",
+          "decision": "CZ primary / AT fallback",
+          "reason": "CZ経由ATを含む系列の二重評価を避ける。"
+        },
+        {
+          "members": [
+            "RF_STRONG_CHERRY_CZ_NORMAL",
+            "RF_STRONG_CHERRY_CZ_HIGH"
+          ],
+          "type": "same_trigger_exclusive_state_conditions",
+          "decision": "both support conditionally",
+          "reason": "同じ強チェリーでも通常/高確という排他的状態別抽選なので状態分母を分離。"
+        },
+        {
+          "members": [
+            "RF_CONFIRMED_CZ",
+            "RF_STRONG_CHANCE_CONFIRMED_CZ"
+          ],
+          "type": "marginal_outcome_and_trigger_conditional",
+          "decision": "both retained with dependency note",
+          "reason": "確定CZの通常Gあたり出現率と強チャンス目成立時の条件付き当選率は同じ結果へ至る異なる表現。観測可能な分母に応じて同時重複を抑制する。"
+        },
+        {
+          "members": [
+            "RF_CZ_FAIL_ITEM",
+            "RF_WILDERNESS_DUEL"
+          ],
+          "type": "post_failure_branches",
+          "decision": "CZ失敗時アイテムはsupport / 曠野の決闘はEXCLUDE",
+          "reason": "CZ失敗後派生事象として条件付き分母は分離するが、曠野の決闘は設定1・6のみ公開で全設定尤度を構築できないため欠損補間せず数値採用しない。"
+        },
+        {
+          "members": [
+            "RF_AT_INITIAL_STAGE"
+          ],
+          "type": "multinomial_downstream_distribution",
+          "decision": "support conditionally on AT first hit",
+          "reason": "AT初当り回数を分母とするステージ振り分けとしてAT初当り確率とは条件付き分解する。"
+        }
+      ]
+    },
+    {
+      "machineId": "L_SENGOKU_OTOME5_L8",
+      "relationships": [
+        {
+          "members": [
+            "RF_AT_INITIAL",
+            "RF_OTOME_ATTACK_ZERO_PT"
+          ],
+          "type": "intermediate_to_downstream_possible_chain",
+          "decision": "AT primary / zero-point lottery support conditionally",
+          "reason": "巫女ポイント0pt到達を明示分母とし、AT初当りと同一通常G尤度としては加算しない。"
+        },
+        {
+          "members": [
+            "RF_SENGOKU_OTOME_BONUS"
+          ],
+          "type": "rare_distinct_event",
+          "decision": "support",
+          "reason": "低頻度だが設定1→6の尤度差が大きく、試行量だけを理由に排除しない。"
+        }
+      ],
+      "excludedPartialFeatures": "設定1のみ等で他設定尤度が構築できない10 Featureは公開不足を理由にEXCLUDE。"
+    },
+    {
+      "machineId": "L_SUPER_RIO_ACE2_ND02H",
+      "relationships": [
+        {
+          "members": [
+            "RF_INITIAL",
+            "RF_NOIR_ROOM"
+          ],
+          "type": "intermediate_and_outcome_chain",
+          "decision": "initial primary / Noir fallback",
+          "reason": "ノワールルーム経由の初当りを含む系列を二重評価しない。"
+        },
+        {
+          "members": [
+            "RF_BONUS_DIRECT"
+          ],
+          "type": "rare_direct_event",
+          "decision": "support",
+          "reason": "低頻度でも設定1 1/53905.6から設定6 1/4326.7まで大きな尤度差があり、試行量を理由にRejectしない。"
+        },
+        {
+          "members": [
+            "RF_ACE_MODE",
+            "RF_HOWARD_THRESHOLD",
+            "RF_WATERMELON_NEXT_NOIR"
+          ],
+          "type": "conditional_internal_or_threshold_draws",
+          "decision": "support conditionally",
+          "reason": "それぞれ内部モード選択、規定リプレイ到達、スイカ成立という別条件分母を保持する。"
+        }
+      ]
+    },
+    {
+      "machineId": "L_TAKT_OP_DESTINY_M1",
+      "relationships": [
+        {
+          "members": [
+            "RF_CZ",
+            "RF_AT_INITIAL"
+          ],
+          "type": "causal_chain_intermediate_to_outcome",
+          "decision": "AT primary / CZ fallback",
+          "reason": "CZとAT初当りの好不調を二重評価しない。"
+        },
+        {
+          "members": [
+            "RF_CZ_TYPE",
+            "RF_CZ_OPEN_SUCCESS_GIANT",
+            "RF_CZ_OPEN_SUCCESS_DESTINY",
+            "RF_CZ_OPEN_SUCCESS_HEAVEN_HELL"
+          ],
+          "type": "multinomial_type_then_conditional_success",
+          "decision": "retain as conditional decomposition",
+          "reason": "CZ種別振り分けと種別ごとの一発成功率は、CZ当選→種別→成功という条件付き分解であり単純重複ではない。"
+        },
+        {
+          "members": [
+            "RF_CZ_TO_AT_PROMOTION"
+          ],
+          "type": "conditional_branch_at_cz_hit",
+          "decision": "support conditionally",
+          "reason": "CZ当選時のAT昇格という分岐確率としてCZ合算と分母を分ける。"
+        },
+        {
+          "members": [
+            "RF_AT_END_MODE",
+            "RF_UPPER_AT_RETURN"
+          ],
+          "type": "post_at_state_and_return",
+          "decision": "AT終了後モードはEXCLUDE / 上位AT引き戻しはsupport",
+          "reason": "AT終了後モードは全設定値が揃わないため欠損補間せず数値採用しない。上位AT引き戻しは全設定公開値がある別終了条件としてSupport。"
+        }
+      ],
+      "partialPublicExclusions": [
+        "RF_REWARD_CHANCE_AT_POINT",
+        "RF_AT_END_MODE"
+      ]
+    }
+  ],
+  "remainingBlockers": [],
+  "gateB": "PASS",
+  "gateCCarryover": [
+    "Rebuild ObservationData against revised SelectionData and verify exact denominator sharing/fallback paths before Gate C closure."
+  ],
+  "materializationEvidence": {
+    "report": "batches/20260908-manifest-v7-first10/gate-b-materialization-report.json",
+    "validatorPass": 10,
+    "qualityPass": 10,
+    "hardErrors": 0,
+    "selectionRevision": "OBSERVATION_DRIVEN"
+  },
+  "observationDrivenRevision": {
+    "ruleId": "RSO-OBS-005",
+    "auditRef": "batches/20260908-manifest-v7-first10/gate-c-selection-reopen-audit.json",
+    "selectionReopened": true,
+    "excludedAfterObservation": 8,
+    "retainedAfterReview": [
+      "L_BIOHAZARD_RE3_ZD/RF_HEARTBEAT_DOWN"
+    ]
+  }
+}

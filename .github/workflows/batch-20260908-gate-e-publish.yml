@@ -1,0 +1,159 @@
+name: Batch 20260908 Gate E Publish and Quality
+
+on:
+  push:
+    branches:
+      - batch/20260908-manifest-v7-first10
+    paths:
+      - '.github/workflows/batch-20260908-gate-e-publish.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  gate-e-publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: batch/20260908-manifest-v7-first10
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Lock baseline and exact scope
+        shell: bash
+        run: |
+          set -euo pipefail
+          git fetch origin prototype-multi-machine:refs/remotes/origin/prototype-multi-machine
+          test "$(git rev-parse origin/prototype-multi-machine)" = "24a885154a5171099de84811e330490bf7a4be33"
+          test "$(git merge-base HEAD origin/prototype-multi-machine)" = "24a885154a5171099de84811e330490bf7a4be33"
+          cat > /tmp/gate-e-machines.txt <<'EOF'
+          L_ANIMAL_SLOT_DOCCHI_ZT
+          L_BIG_DREAM_GOLDEN_PUSHER_KR
+          L_BIOHAZARD_RE3_ZD
+          L_TAKT_OP_DESTINY_M1
+          L_SUPER_RIO_ACE2_ND02H
+          L_BIRDIE_WING_BC
+          L_SAO2_PA1
+          L_SENGOKU_OTOME5_L8
+          L_DARK_HAIBI_SB
+          L_LOTIS_TN
+          EOF
+          test "$(wc -l < /tmp/gate-e-machines.txt)" -eq 10
+          expected=$(sort /tmp/gate-e-machines.txt)
+          actual=$(git diff --name-only "$(git merge-base HEAD origin/prototype-multi-machine)"...HEAD -- 'machines/*/machine-package.json' | sed -nE 's#^machines/([^/]+)/machine-package\.json$#\1#p' | sort)
+          test "$actual" = "$expected"
+
+      - name: Canonical UI and MachineData parity
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm run machine:batch -- $(cat /tmp/gate-e-machines.txt)
+          while read -r id; do
+            node tools/materialize-ui-design-into-machine-package.mjs "machines/$id/machine-package.json" "research/$id/ui-design-data.json"
+            cp "machines/$id/machine-package.json" "research/$id/machine-package.generated.json"
+          done < /tmp/gate-e-machines.txt
+          node tools/audit-ui-materialization-v7.mjs $(cat /tmp/gate-e-machines.txt)
+          git diff --exit-code -- $(while read -r id; do printf 'machines/%s/machine-package.json research/%s/machine-package.generated.json ' "$id" "$id"; done < /tmp/gate-e-machines.txt)
+
+      - name: Batch publish dry run
+        run: npm run machine:publish:batch -- $(cat /tmp/gate-e-machines.txt)
+
+      - name: Formal publish APPLY to isolated batch branch
+        run: npm run machine:publish:batch -- --apply $(cat /tmp/gate-e-machines.txt)
+
+      - name: Assert catalog metadata and provisional registrations
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm run registry:validate
+          node --input-type=module <<'NODE'
+          import fs from 'node:fs';
+          import crypto from 'node:crypto';
+          const ids=[
+            'L_ANIMAL_SLOT_DOCCHI_ZT','L_BIG_DREAM_GOLDEN_PUSHER_KR','L_BIOHAZARD_RE3_ZD','L_TAKT_OP_DESTINY_M1','L_SUPER_RIO_ACE2_ND02H','L_BIRDIE_WING_BC','L_SAO2_PA1','L_SENGOKU_OTOME5_L8','L_DARK_HAIBI_SB','L_LOTIS_TN'
+          ];
+          const catalog=JSON.parse(fs.readFileSync('catalog.json','utf8')).machines??[];
+          const registry=JSON.parse(fs.readFileSync('machine-registry.json','utf8')).machines??[];
+          for(const id of ids){
+            const c=catalog.find(x=>x.machineId===id);
+            if(!c||c.status!=='available') throw new Error(`${id}: catalog missing/not available`);
+            const bytes=fs.readFileSync(`machines/${id}/machine-package.json`);
+            const sha=crypto.createHash('sha256').update(bytes).digest('hex');
+            if(c.sha256!==sha) throw new Error(`${id}: catalog sha256 mismatch`);
+            if(c.packageSizeBytes!==bytes.length) throw new Error(`${id}: packageSizeBytes mismatch`);
+            const r=registry.find(x=>x.machineId===id);
+            if(!r||!Number.isInteger(r.provisionalRegistrationId)) throw new Error(`${id}: provisional registration missing/invalid`);
+          }
+          const all=registry.map(x=>x.provisionalRegistrationId).filter(Number.isInteger);
+          if(new Set(all).size!==all.length) throw new Error('registry provisional ID collision');
+          console.log('PASS catalog exactness + provisional registration presence/uniqueness');
+          NODE
+
+      - name: Gate E core quality
+        shell: bash
+        run: |
+          set -euo pipefail
+          while read -r id; do npm run research:validate -- "research/$id/research-data.json"; done < /tmp/gate-e-machines.txt
+          while read -r id; do npm run selection:validate -- "research/$id/selection-data.json" "research/$id/research-data.json"; done < /tmp/gate-e-machines.txt
+          node tools/audit-selection-quality.mjs $(cat /tmp/gate-e-machines.txt) --strict
+          args=(); while read -r id; do args+=("research/$id/machine-observation-data.json"); done < /tmp/gate-e-machines.txt
+          npm run observation:validate -- "${args[@]}"
+          npm run observation:selection:audit -- $(cat /tmp/gate-e-machines.txt) --strict-v2
+          npm run ui-design:validate
+          npm run ui-design:linkage:audit -- . $(cat /tmp/gate-e-machines.txt)
+          npm run ui-design:observation:audit -- $(cat /tmp/gate-e-machines.txt) --strict-v2
+          npm run pipeline:four-layer:gate -- $(cat /tmp/gate-e-machines.txt)
+          npm run registry:validate
+          npm run audit:ui-service-names
+          npm run ux-contract:audit
+          npm test
+          npm run audit
+
+      - name: Gate E semantic assertions
+        shell: bash
+        run: |
+          set -euo pipefail
+          node tools/audit-gate-d-ui-v7.mjs
+          node tools/audit-ui-materialization-v7.mjs $(cat /tmp/gate-e-machines.txt)
+
+      - name: Restore transient generated reports
+        shell: bash
+        run: |
+          git restore -- reports/v64-observation-debt-classification.json 2>/dev/null || true
+          git restore -- reports/batch-machine-pipeline-report.json 2>/dev/null || true
+
+      - name: Verify mutation allowlist
+        shell: bash
+        run: |
+          set -euo pipefail
+          git status --short
+          unexpected=$(git status --porcelain | sed -E 's/^...//' | grep -Ev '^(catalog\.json|difficulty-catalog\.json|machine-registry\.json)$' || true)
+          if [[ -n "$unexpected" ]]; then echo 'Unexpected Gate E mutation(s):'; echo "$unexpected"; exit 1; fi
+          for f in catalog.json difficulty-catalog.json machine-registry.json; do
+            git diff --quiet -- "$f" && { echo "Expected publish mutation missing: $f"; exit 1; } || true
+          done
+
+      - name: Commit isolated publish outputs
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add catalog.json difficulty-catalog.json machine-registry.json
+          git commit -m 'publish: materialize 20260908 Manifest v7 first10 metadata'
+          git pull --rebase origin batch/20260908-manifest-v7-first10
+          git push origin HEAD:batch/20260908-manifest-v7-first10
+
+      - name: Final clean-state check
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm run registry:validate
+          npm run audit
+          git restore -- reports/v64-observation-debt-classification.json reports/batch-machine-pipeline-report.json 2>/dev/null || true
+          test -z "$(git status --porcelain)"
+          echo 'Gate E publish/quality phase PASS; prototype and public main not mutated.'
