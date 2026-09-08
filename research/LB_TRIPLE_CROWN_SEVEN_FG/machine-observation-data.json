@@ -21,31 +21,31 @@
       "sourceType": "DIRECT_PLAY",
       "observationMode": "MANUAL_COUNTER",
       "status": "FOUND",
-      "label": "通常時の小役（チェリー）",
+      "label": "通常時の小役構成（チェリー・プラム）",
       "categories": [
         "チェリー回数",
+        "プラム回数",
         "通常ゲーム"
       ],
       "timing": [
-        "自己実戦中、通常ゲームと各小役成立時に更新"
+        "自己実戦中、通常ゲームを分母としてチェリー・プラム成立時に各回数を更新"
       ],
       "excludedConditions": [
-        "同じ通常ゲーム分母を各小役で別々に増やさない",
         "着席前累積値を自己実戦値へ混ぜない",
         "未観測を観測済み0として扱わない",
-        "プラムはResearch候補として保持するが、Selection再評価で推測不採用のため推測入力には使用しない"
+        "チェリーとプラムを別々の独立Binomialとして重複評価しない"
       ],
       "sourceRefs": [
         "SRC_SETTING"
       ],
-      "notes": "チェリーを代表Featureとして採用。プラムは同一通常G上の排他的事象で独立Binomial併用による過信を避けるためSelectionでEXCLUDE。"
+      "notes": "Selection FEAT_SMALL_ROLE_COMPOSITION の自然観測。通常Gを共通分母に、チェリー・プラム・OTHERを1つのMultinomialとして評価する。OTHERは通常G-チェリー-プラムで導出する。"
     },
     {
       "observationId": "OBS_BB_INITIAL",
       "sourceType": "DIRECT_PLAY",
       "observationMode": "MANUAL_COUNTER",
       "status": "FOUND",
-      "label": "BB確率",
+      "label": "通常時のボーナス構成（BB）",
       "categories": [
         "BB回数",
         "通常ゲーム"
@@ -61,14 +61,14 @@
       "sourceRefs": [
         "SRC_SETTING"
       ],
-      "notes": "Selection FEAT_BB_INITIAL (INCLUDE_PRIMARY) の観測契約。分子=BB回数 / 分母=通常ゲーム"
+      "notes": "FEAT_BONUS_OUTCOMEの構成要素。BB/RB/NO_BONUSを同一通常GのMultinomialとして評価する。"
     },
     {
       "observationId": "OBS_RB_INITIAL",
       "sourceType": "DIRECT_PLAY",
       "observationMode": "MANUAL_COUNTER",
       "status": "FOUND",
-      "label": "RB確率",
+      "label": "通常時のボーナス構成（RB）",
       "categories": [
         "RB回数",
         "通常ゲーム"
@@ -84,7 +84,7 @@
       "sourceRefs": [
         "SRC_SETTING"
       ],
-      "notes": "Selection FEAT_RB_INITIAL (INCLUDE_SUPPORT) の観測契約。分子=RB回数 / 分母=通常ゲーム"
+      "notes": "FEAT_BONUS_OUTCOMEの構成要素。BB/RB/NO_BONUSを同一通常GのMultinomialとして評価する。"
     },
     {
       "observationId": "OBS_HARD_EVIDENCE_EVENTS",
@@ -168,15 +168,15 @@
       "status": "FOUND",
       "label": "RB入賞時 安里屋ユンタ選択率",
       "categories": [
-        "RB中 安里屋ユンタ",
-        "RB入賞回数"
+        "安里屋ユンタ選択回数",
+        "BB後100G以内の連チャン条件を満たすRB入賞回数"
       ],
       "timing": [
-        "RB入賞時で、RB入賞1回ごとに観測する"
+        "BB後100G以内の連チャン条件を満たすRB入賞時に1回ずつ観測する。途中にRBを挟んでも条件継続中は対象"
       ],
       "excludedConditions": [
-        "分母条件: RB入賞回数",
-        "対象条件外の試行を分母へ混ぜない",
+        "分母条件: BB後100G以内の連チャン条件を満たすRB入賞回数",
+        "対象条件外のRBを分母へ混ぜない",
         "着席前累積値を自己実戦値へ混ぜない",
         "未観測を観測済み0として扱わない"
       ],
@@ -184,49 +184,10 @@
         "SRC_PWORLD",
         "SRC_HAZUSE"
       ],
-      "notes": "Selection FEAT_RB_BGM (INCLUDE_SUPPORT) の観測契約。Research分子=安里屋ユンタが選択された回数 / 分母=RB入賞回数"
+      "notes": "Selection FEAT_RB_BGM の観測契約。安里屋ユンタ回数 / BB後100G以内連チャン条件を満たすRB入賞回数。"
     }
   ],
   "featureMappings": [
-    {
-      "featureId": "FEAT_CHERRY",
-      "mappingType": "COMBINABLE",
-      "observationIds": [
-        "OBS_SMALL_ROLES_SHARED"
-      ],
-      "collectionMethods": [
-        "MANUAL_COUNTER"
-      ],
-      "usableForInference": true,
-      "usableForDifficulty": false,
-      "notes": "Gate C観測写像。Selectionの分母・抑制契約を保持し、未観測を観測済み0として扱わない。"
-    },
-    {
-      "featureId": "FEAT_BB_INITIAL",
-      "mappingType": "EXACT",
-      "observationIds": [
-        "OBS_BB_INITIAL"
-      ],
-      "collectionMethods": [
-        "MANUAL_COUNTER"
-      ],
-      "usableForInference": true,
-      "usableForDifficulty": false,
-      "notes": "Gate C観測写像。Selectionの分母・抑制契約を保持し、未観測を観測済み0として扱わない。"
-    },
-    {
-      "featureId": "FEAT_RB_INITIAL",
-      "mappingType": "EXACT",
-      "observationIds": [
-        "OBS_RB_INITIAL"
-      ],
-      "collectionMethods": [
-        "MANUAL_COUNTER"
-      ],
-      "usableForInference": true,
-      "usableForDifficulty": false,
-      "notes": "Gate C観測写像。Selectionの分母・抑制契約を保持し、未観測を観測済み0として扱わない。"
-    },
     {
       "featureId": "FEAT_SPECIAL_DIRECTION",
       "mappingType": "EXACT",
@@ -265,6 +226,33 @@
       "usableForInference": true,
       "usableForDifficulty": false,
       "notes": "Research/Selection再監査で追加されたFeatureを正本定義どおり観測する。条件分母・Hard Evidence除外・suppression契約を保持する。"
+    },
+    {
+      "featureId": "FEAT_SMALL_ROLE_COMPOSITION",
+      "mappingType": "EXACT",
+      "observationIds": [
+        "OBS_SMALL_ROLES_SHARED"
+      ],
+      "collectionMethods": [
+        "MANUAL_COUNTER"
+      ],
+      "usableForInference": true,
+      "usableForDifficulty": false,
+      "notes": "チェリー・プラム・OTHERを同一通常Gの排他的Multinomialとして一度だけ評価する。"
+    },
+    {
+      "featureId": "FEAT_BONUS_OUTCOME",
+      "mappingType": "COMBINABLE",
+      "observationIds": [
+        "OBS_BB_INITIAL",
+        "OBS_RB_INITIAL"
+      ],
+      "collectionMethods": [
+        "MANUAL_COUNTER"
+      ],
+      "usableForInference": true,
+      "usableForDifficulty": false,
+      "notes": "BB/RB/NO_BONUSを同一通常Gの排他的Multinomialとして一度だけ評価する。"
     }
   ],
   "researchReopenRequests": [],
