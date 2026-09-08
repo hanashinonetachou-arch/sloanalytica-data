@@ -7,15 +7,68 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
-  audit-ui-wording:
+  apply-and-audit:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
+          cache: npm
+      - run: npm ci
+      - name: Apply canonical UI feedback
+        run: node tools/apply-next10-ui-feedback-20260908.mjs
+      - name: Validate Selection and Observation
+        run: |
+          set -euo pipefail
+          ids=(L_FIRE_FORCE_2 L_JORMUNGAND_ND01G L_KYOKOU_SUIRI_ST L_AKUDAMA_DRIVE_TP L_GHOST_IN_THE_SHELL_ZS L_GOBLIN_SLAYER_2_JZ L_GODZILLA_NS L_KABANERI_UNATO_KESSEN_XX L_MAGIA_RECORD_RN L_MAHJONG_MONOGATARI_S2 L_MILLION_GOD_KISEKI_CX L_UMINEKO_2_A1)
+          for id in "${ids[@]}"; do node tools/validate-selection-data.mjs "research/$id/selection-data.json"; done
+          node tools/validate-machine-observation-data.mjs research/L_KYOKOU_SUIRI_ST/machine-observation-data.json
+          node tools/audit-selection-quality.mjs "${ids[@]}" --strict
+          node tools/audit-ui-design-observation-linkage.mjs . "${ids[@]}" --strict-v2
+      - name: Verify requested UI semantics
+        run: |
+          node --input-type=module <<'NODE'
+          import fs from 'node:fs';
+          const j=p=>JSON.parse(fs.readFileSync(p,'utf8'));
+          const err=[];
+          const f=j('research/L_FIRE_FORCE_2/ui-design-data.json');
+          for(const n of ['REGキャラ紹介','ボーナス終了画面・確定パターン','獲得枚数表示','エンディングミニキャラ']) if(!f.sections?.[n]) err.push(`Fire: ${n} missing`);
+          if(f.sections?.['設定示唆・確定情報']) err.push('Fire: monolithic evidence section remains');
+          const y=j('research/L_JORMUNGAND_ND01G/ui-design-data.json');
+          for(const [id,n] of Object.entries({INP_BONUS_END_SCREEN_DEFAULT:'デフォルト',INP_BONUS_END_SCREEN_EVENING:'夕方',INP_BONUS_END_SCREEN_SLEEPING_VALMET:'睡眠バルメ',INP_BONUS_END_SCREEN_THREE_DOCTORS:'博士3人'})) if(y.inputContracts?.[id]?.name!==n) err.push(`Jormungand: ${id}`);
+          const k=j('research/L_KYOKOU_SUIRI_ST/ui-design-data.json'); const ks=j('research/L_KYOKOU_SUIRI_ST/selection-data.json');
+          if(!k.sections?.['CZ開始時一発成功抽選']) err.push('Kyokou: section rename missing');
+          if(k.inputContracts?.INP_CZ_ONE_SHOT_SUCCESS_COUNT?.name!=='一発成功抽選で成功') err.push('Kyokou: success label');
+          if(k.inputContracts?.INP_CZ_ONE_SHOT_SUCCESS_TRIALS) err.push('Kyokou: duplicate denominator input remains');
+          if(ks.features?.find(x=>x.featureId==='FEAT_CZ_ONE_SHOT_SUCCESS')?.denominatorInputId!=='INP_CZ_INITIAL_COUNT') err.push('Kyokou: denominator not CZ initial');
+          for(const [id,n] of Object.entries({INP_COMMON_BELL_NONE:'同時成立なし',INP_COMMON_BELL_CZ:'CZ当選',INP_COMMON_BELL_BONUS:'ボーナス直撃'})) if(k.inputContracts?.[id]?.name!==n) err.push(`Kyokou: ${id}`);
+          const a=j('research/L_AKUDAMA_DRIVE_TP/ui-design-data.json');
+          if(a.inputContracts?.INP_ANALYZE_0PT_COUNT?.name!=='アナライズチャレンジ'||a.inputContracts?.INP_ANALYZE_0PT_COUNT?.gridSpan!==6) err.push('Akudama: Analyze UI');
+          if(!String(a.sections?.['アクダマボーナス→エピソードボーナス昇格']?.description??'').includes('3・5・7回目')) err.push('Akudama: ceiling exclusion missing');
+          if(err.length){console.error(err.join('\n'));process.exit(1)}
+          console.log('Requested UI semantics PASS');
+          NODE
       - name: Scan ambiguous user-facing wording
         run: node tools/audit-user-facing-valid-wording.mjs
+      - name: Build and materialize affected MachineData
+        run: |
+          set -euo pipefail
+          ids=(L_FIRE_FORCE_2 L_JORMUNGAND_ND01G L_KYOKOU_SUIRI_ST L_AKUDAMA_DRIVE_TP L_GHOST_IN_THE_SHELL_ZS L_GOBLIN_SLAYER_2_JZ L_GODZILLA_NS L_KABANERI_UNATO_KESSEN_XX L_MAGIA_RECORD_RN L_MAHJONG_MONOGATARI_S2 L_MILLION_GOD_KISEKI_CX L_UMINEKO_2_A1)
+          npm run machine:batch -- "${ids[@]}"
+          node tools/materialize-ui-design.mjs --apply "${ids[@]}"
+          node tools/materialize-ui-design.mjs --require-unchanged "${ids[@]}"
+          npm run selection:migration-audit
+          npm run selection:summary-readiness
+      - name: Commit audited UI changes
+        run: |
+          set -euo pipefail
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git add research machines catalog.json difficulty-catalog.json machine-registry.json
+          if git diff --cached --quiet; then echo 'No generated changes'; exit 0; fi
+          git commit -m 'ui: apply real-device feedback and remove ambiguous valid wording'
+          git push origin HEAD:integrate/20260908-next10-ui-feedback
