@@ -1,11 +1,11 @@
 #!/usr/bin/env node
-// v6.14 canonical dependency repair; changing this file intentionally triggers the isolated apply workflow.
 import fs from 'node:fs';
 
-const read = p => JSON.parse(fs.readFileSync(p,'utf8'));
-const write = (p,x) => fs.writeFileSync(p, JSON.stringify(x,null,2)+'\n');
-const byRid = (arr,id) => arr.find(x=>x.researchFeatureId===id);
-const settingProb = (f,s) => f.settingValues[s].probability;
+const read = p => JSON.parse(fs.readFileSync(p, 'utf8'));
+const write = (p, v) => fs.writeFileSync(p, JSON.stringify(v, null, 2) + '\n');
+const prob = d => 1 / d;
+const byRid = (arr, id) => arr.find(x => x.researchFeatureId === id);
+const upsertBy = (arr, key, obj) => { const i=arr.findIndex(x=>x[key]===obj[key]); if(i>=0) arr[i]=obj; else arr.push(obj); };
 
 function rebuildSummary(research, selection) {
   const names = new Map((research.features??[]).map(f=>[f.researchFeatureId,f.name]));
@@ -20,39 +20,98 @@ function rebuildSummary(research, selection) {
     rejected:rejected.map(f=>({featureId:f.featureId,name:names.get(f.researchFeatureId)??f.featureId,reason:f.userFacingReason??f.rejectionReason??'不採用'}))
   };
 }
+function setExcluded(s,rid,reason){
+  const f=byRid(s.features,rid); if(!f) throw new Error(`missing ${rid}`);
+  Object.assign(f,{adoptionCategory:'EXCLUDE',difficultyParticipation:'EXCLUDE',difficultyExclusionReason:'推測計算に単独Featureとして採用しないためDifficultyにも参加させない。',userFacingReason:reason});
+  for(const k of ['userReason','weight','numeratorInputId','denominatorInputId','denominatorInputIds','denominatorAdjustments','categoryInputIds','residualCategoryLabel','inputTransform']) delete f[k];
+}
+function markInput(s,id,role='INCLUDE_SUPPORT',category){ const x=s.inputs.find(i=>i.id===id); if(!x) throw new Error(`missing input ${id}`); x.inferenceRole=role; if(category)x.category=category; }
+function multinomial({rid,name,trialUnit,scope,denominator,categories,distributions,sourceRefs,notes}){
+  return {researchFeatureId:rid,name,factStatus:'verified',candidateModel:'multinomial',trialUnit,observationScope:scope,numeratorDefinition:`${categories.join(' / ')} の各出現回数`,denominatorDefinition:denominator,categories,distributionMode:'complete',settingValues:{},settingDistributions:distributions,sourceRefs,crossSourceStatus:sourceRefs.length>1?'cross_checked':'single_source_major',...(notes?{notes}:{})};
+}
 
+// ===== Triple Crown Seven =====
 {
-  const dir='research/LB_TRIPLE_CROWN_SEVEN_FG';
-  const rp=`${dir}/research-data.json`, sp=`${dir}/selection-data.json`;
+  const dir='research/LB_TRIPLE_CROWN_SEVEN_FG', rp=`${dir}/research-data.json`, sp=`${dir}/selection-data.json`;
   const r=read(rp), s=read(sp);
-  const ch=byRid(r.features,'RF_CHERRY'), pl=byRid(r.features,'RF_PLUM');
-  if(!byRid(r.features,'RF_SMALL_ROLE_COMPOSITION')) {
-    const settingDistributions={};
-    for(const set of r.machine.settings){const c=settingProb(ch,set),p=settingProb(pl,set);settingDistributions[set]={CHERRY:c,PLUM:p,OTHER:1-c-p};}
-    r.features.push({researchFeatureId:'RF_SMALL_ROLE_COMPOSITION',name:'通常時小役構成（チェリー・プラム・その他）',factStatus:'verified',candidateModel:'multinomial',trialUnit:'通常ゲーム1G',observationScope:'通常時',numeratorDefinition:'チェリー・プラム・その他の各成立ゲーム数',denominatorDefinition:'通常ゲーム',categories:['CHERRY','PLUM','OTHER'],distributionMode:'complete',settingValues:{},settingDistributions,sourceRefs:[...new Set([...(ch.sourceRefs??[]),...(pl.sourceRefs??[])])],crossSourceStatus:'single_source_major',notes:'RF_CHERRYとRF_PLUMの公開確率から、同一通常ゲーム上の排他的カテゴリとして構成したSelection用joint model。OTHERは1-CHERRY-PLUMで導出。'});
+  const bb=byRid(r.features,'RF_BB_INITIAL'), rb=byRid(r.features,'RF_RB_INITIAL'), ch=byRid(r.features,'RF_CHERRY'), pl=byRid(r.features,'RF_PLUM');
+  const settings=Object.keys(bb.settingValues);
+
+  const bonusDist={}, roleDist={};
+  for(const set of settings){
+    const pBB=bb.settingValues[set].probability,pRB=rb.settingValues[set].probability,pC=ch.settingValues[set].probability,pP=pl.settingValues[set].probability;
+    bonusDist[set]={BB:pBB,RB:pRB,NO_BONUS:1-pBB-pRB};
+    roleDist[set]={CHERRY:pC,PLUM:pP,OTHER:1-pC-pP};
   }
-  const fch=byRid(s.features,'RF_CHERRY'); Object.assign(fch,{adoptionCategory:'EXCLUDE',difficultyParticipation:'EXCLUDE',difficultyExclusionReason:'joint小役構成へ統合したため単独FeatureはDifficultyにも参加させない。',userFacingReason:'チェリーには設定差があるが、プラムと同じ通常ゲーム上の排他的事象である。チェリー単独Binomialではなく「チェリー・プラム・その他」のMultinomialへ統合して同じ情報を一度だけ評価するため、単独Featureとしては不採用とする。'}); delete fch.userReason; delete fch.numeratorInputId; delete fch.denominatorInputId;
-  const fpl=byRid(s.features,'RF_PLUM'); Object.assign(fpl,{adoptionCategory:'EXCLUDE',difficultyParticipation:'EXCLUDE',difficultyExclusionReason:'joint小役構成へ統合したため単独FeatureはDifficultyにも参加させない。',userFacingReason:'プラムには設定1約1/64.63から設定6約1/55.54の設定差があり、情報自体は有効。チェリーと別々のBinomialで重ねず、「チェリー・プラム・その他」のMultinomialへ統合して利用するため、プラム単独Featureとしては不採用とする。'});
-  if(!byRid(s.features,'RF_SMALL_ROLE_COMPOSITION')) s.features.push({researchFeatureId:'RF_SMALL_ROLE_COMPOSITION',featureId:'FEAT_SMALL_ROLE_COMPOSITION',adoptionCategory:'INCLUDE_SUPPORT',weight:1,difficultyParticipation:'EXCLUDE',difficultyExclusionReason:'既存Difficulty reportがjoint化前のため、再生成後に参加可否を再評価する。',userReason:'チェリーとプラムは同一通常ゲーム上の排他的な小役。独立Binomialを重ねず、チェリー・プラム・その他の3カテゴリMultinomialとして一体評価する。設定1↔6の1試行あたり識別情報はチェリー単独の約1.9倍となり、プラムの追加情報を二重計上せず利用できる。',denominatorInputId:'INP_NORMAL_GAMES',numeratorInputId:'INP_CHERRY_COUNT',categoryInputIds:['INP_PLUM_COUNT'],residualCategoryLabel:'OTHER'});
-  const ci=s.inputs.find(x=>x.id==='INP_CHERRY_COUNT'); if(ci){ci.category='SEL_RF_SMALL_ROLE_COMPOSITION';ci.inferenceRole='INCLUDE_SUPPORT';}
-  const pi=s.inputs.find(x=>x.id==='INP_PLUM_COUNT'); if(pi){pi.category='SEL_RF_SMALL_ROLE_COMPOSITION';pi.inferenceRole='INCLUDE_SUPPORT';}
-  byRid(s.features,'RF_BT_REPLAY_BB').userFacingReason='BT中リプレイ+BB in BBには設定差があるが、設定1=1/293.9・設定6=1/257.0で1 trialあたりの識別差が小さい。統計評価では設定1↔6でも80%識別目安が約111,474 BTゲーム、最難関の設定1↔2は95%目安が約28,374,158 BTゲームとなり、1日実戦で得られるBTゲーム数に対して追加情報量が極めて小さいため不採用とする。';
-  byRid(s.features,'RF_SPECIFIC_BONUS_CHERRY_BB').userFacingReason='チェリー+BBは設定差を持つが、チェリー成立とBB成立の交差事象であり、採用する小役構成とBB初当りの双方に同じ成立ゲームが含まれる。条件付き分解も検討したが、チェリー以外のBB契機を含む完全なjoint分布が公開されておらず、現行データだけでは全体を二重計上なく因数分解できないため不採用とする。';
-  byRid(s.features,'RF_SPECIFIC_BONUS_CHERRY_RB').userFacingReason='チェリー+RBは設定差を持つが、チェリー成立とRB成立の交差事象であり、採用する小役構成とRB初当りの双方に同じ成立ゲームが含まれる。条件付き分解も検討したが、チェリー以外のRB契機を含む完全なjoint分布が公開されておらず、現行データだけでは全体を二重計上なく因数分解できないため不採用とする。';
-  const rb=byRid(r.features,'RF_RB_BGM'); rb.trialUnit='BB後100G以内の連チャン条件を満たすRB入賞1回'; rb.observationScope='BB後100G以内の連チャン中のRB入賞時'; rb.denominatorDefinition='BB後100G以内の連チャン条件を満たすRB入賞回数（途中にRBを挟んでも条件継続中は対象）'; rb.notes='安里屋ユンタ選択率はBB後100G以内の連チャン条件を満たすRBのみを母数とする。';
+  upsertBy(r.features,'researchFeatureId',multinomial({rid:'RF_BONUS_OUTCOME',name:'BB・RB出現構成',trialUnit:'通常ゲーム1G',scope:'通常時',denominator:'通常ゲーム',categories:['BB','RB','NO_BONUS'],distributions:bonusDist,sourceRefs:['SRC_SETTING'],notes:'BB/RBを別々の独立Binomialにせず、通常1Gの排他的結果として一体評価するderived Research候補。'}));
+  upsertBy(r.features,'researchFeatureId',multinomial({rid:'RF_SMALL_ROLE_COMPOSITION',name:'通常時小役構成（チェリー・プラム・その他）',trialUnit:'通常ゲーム1G',scope:'通常時',denominator:'通常ゲーム',categories:['CHERRY','PLUM','OTHER'],distributions:roleDist,sourceRefs:['SRC_SETTING'],notes:'チェリー/プラムを同じ通常1G上の排他的カテゴリとして一体評価するderived Research候補。'}));
+
+  const newRows={
+    RF_SPECIFIC_BONUS_SINGLE_BB:['単独BB実質出現率',{SET_1:5957.8,SET_2:5461.3,SET_5:4096.0,SET_6:2849.4}],
+    RF_SPECIFIC_BONUS_SINGLE_RB:['単独RB実質出現率',{SET_1:13107.2,SET_2:13107.2,SET_5:10922.7,SET_6:8192.0}],
+    RF_SPECIFIC_BONUS_REPLAY_BB:['リプレイ+BB実質出現率',{SET_1:293.9,SET_2:291.3,SET_5:274.2,SET_6:257.0}],
+    RF_SPECIFIC_BONUS_REPLAY_RB:['リプレイ+RB実質出現率',{SET_1:668.7,SET_2:668.7,SET_5:612.5,SET_6:560.1}],
+    RF_SPECIFIC_BONUS_PLUM_BB:['プラム+BB実質出現率',{SET_1:6553.6,SET_2:5957.8,SET_5:4369.1,SET_6:2978.9}],
+    RF_SPECIFIC_BONUS_PLUM_RB:['プラム+RB実質出現率',{SET_1:16384.0,SET_2:13107.2,SET_5:10922.7,SET_6:8192.0}]
+  };
+  for(const [rid,[name,ds]] of Object.entries(newRows)){
+    const settingValues=Object.fromEntries(Object.entries(ds).map(([set,d])=>[set,{probability:prob(d),rawDisplay:`1/${d}`} ]));
+    upsertBy(r.features,'researchFeatureId',{researchFeatureId:rid,name,factStatus:'verified',candidateModel:'binomial',trialUnit:'通常ゲーム',observationScope:'通常時',numeratorDefinition:name.replace('実質出現率','')+'回数',denominatorDefinition:'通常ゲーム',settingValues,sourceRefs:['SRC_PWORLD','SRC_HAZUSE'],crossSourceStatus:'cross_checked',notes:'公開されたボーナス契機別実質出現率。単独Featureではなく、ボーナス成立後の条件付き構成への分解をSelectionで評価する。'});
+  }
+  const cherryBB=byRid(r.features,'RF_SPECIFIC_BONUS_CHERRY_BB'), cherryRB=byRid(r.features,'RF_SPECIFIC_BONUS_CHERRY_RB');
+  const sourceDenoms={
+    SINGLE_BB:newRows.RF_SPECIFIC_BONUS_SINGLE_BB[1],SINGLE_RB:newRows.RF_SPECIFIC_BONUS_SINGLE_RB[1],
+    REPLAY_BB:newRows.RF_SPECIFIC_BONUS_REPLAY_BB[1],REPLAY_RB:newRows.RF_SPECIFIC_BONUS_REPLAY_RB[1],
+    CHERRY_BB:Object.fromEntries(settings.map(set=>[set,1/cherryBB.settingValues[set].probability])),CHERRY_RB:Object.fromEntries(settings.map(set=>[set,1/cherryRB.settingValues[set].probability])),
+    PLUM_BB:newRows.RF_SPECIFIC_BONUS_PLUM_BB[1],PLUM_RB:newRows.RF_SPECIFIC_BONUS_PLUM_RB[1]
+  };
+  const triggerDist={};
+  for(const set of settings){
+    const raw=Object.fromEntries(Object.entries(sourceDenoms).map(([cat,ds])=>[cat,1/ds[set]]));
+    const total=Object.values(raw).reduce((a,b)=>a+b,0);
+    triggerDist[set]=Object.fromEntries(Object.entries(raw).map(([cat,v])=>[cat,v/total]));
+  }
+  const triggerResearch=multinomial({rid:'RF_BONUS_TRIGGER_COMPOSITION',name:'ボーナス当選契機の構成',trialUnit:'ボーナス成立1回',scope:'通常時ボーナス成立時',denominator:'BB+RBの総成立回数',categories:['SINGLE_BB','SINGLE_RB','REPLAY_BB','REPLAY_RB','CHERRY_BB','CHERRY_RB','PLUM_BB','PLUM_RB'],distributions:triggerDist,sourceRefs:['SRC_PWORLD','SRC_HAZUSE'],notes:'公開8カテゴリの実質出現率合計が各設定のBB/RB総確率と丸め誤差内で一致するため、ボーナス成立を条件とする構成比に正規化して評価する。公開原値はcomponentRateDenominatorsに保持。'});
+  triggerResearch.componentRateDenominators=Object.fromEntries(settings.map(set=>[set,Object.fromEntries(Object.entries(sourceDenoms).map(([cat,ds])=>[cat,ds[set]]))]));
+  upsertBy(r.features,'researchFeatureId',triggerResearch);
+
+  // Existing single-candidate rows are retained but represented by joint/conditional models.
+  setExcluded(s,'RF_BB_INITIAL','BBの設定差は、BB/RB/非当選を通常1Gの排他的結果として扱う「ボーナス出現構成」に統合して利用するため、独立Binomialとしては不採用とする。情報自体は推測から捨てていない。');
+  setExcluded(s,'RF_RB_INITIAL','RBの設定差は、BB/RB/非当選を通常1Gの排他的結果として扱う「ボーナス出現構成」に統合して利用するため、独立Binomialとしては不採用とする。情報自体は推測から捨てていない。');
+  setExcluded(s,'RF_CHERRY','チェリーの設定差は、チェリー/プラム/その他を通常1Gの排他的結果として扱う小役Multinomialへ統合して利用するため、独立Binomialとしては不採用とする。');
+  setExcluded(s,'RF_PLUM','プラムには設定1約1/64.63～設定6約1/55.54の設定差がある。チェリーと同じ通常1G上の排他的カテゴリなので、チェリー/プラム/その他のMultinomialへ統合して情報を利用し、プラム単独Binomialだけを不採用とする。');
+  setExcluded(s,'RF_SPECIFIC_BONUS_CHERRY_BB','チェリー+BBの設定差は、総ボーナス発生率とは分離した「ボーナス当選契機の構成」に統合して利用する。通常G分母の単独Binomialでは親のボーナス/小役情報を再利用するため、単独Featureとしては不採用とする。');
+  setExcluded(s,'RF_SPECIFIC_BONUS_CHERRY_RB','チェリー+RBの設定差は、総ボーナス発生率とは分離した「ボーナス当選契機の構成」に統合して利用する。通常G分母の単独Binomialでは親のボーナス/小役情報を再利用するため、単独Featureとしては不採用とする。');
+  for(const rid of Object.keys(newRows)) upsertBy(s.features,'researchFeatureId',{researchFeatureId:rid,featureId:rid.replace(/^RF_/,'FEAT_'),adoptionCategory:'EXCLUDE',difficultyParticipation:'EXCLUDE',difficultyExclusionReason:'推測計算に単独Featureとして採用しないためDifficultyにも参加させない。',userFacingReason:`${byRid(r.features,rid).name}の設定差は「ボーナス当選契機の構成」に条件付き統合して利用するため、通常ゲームを分母とする単独Featureとしては不採用とする。`});
+  byRid(s.features,'RF_BT_REPLAY_BB').userFacingReason='BT中リプレイ+BB in BBには設定差があるが、設定1↔6でも80%識別目安が約111,474 BTゲーム、最も厳しい設定1↔2のJS情報量は約3.38e-8/trial（95%比較目安約28,374,158 trial）と極めて小さい。通常の1日実戦で設定推測結果へ実質的な追加寄与を得にくいため不採用とする。';
+
+  upsertBy(s.features,'researchFeatureId',{researchFeatureId:'RF_BONUS_OUTCOME',featureId:'FEAT_BONUS_OUTCOME',adoptionCategory:'INCLUDE_PRIMARY',weight:1,numeratorInputId:'INP_BB_INITIAL_COUNT',categoryInputIds:['INP_RB_INITIAL_COUNT'],denominatorInputId:'INP_NORMAL_GAMES',residualCategoryLabel:'NO_BONUS',difficultyParticipation:'EXCLUDE',difficultyExclusionReason:'今回の実機ReopenではSelection整合を先に確定し、Difficulty再計算はObservation再同期後に行う。',userReason:'BB・RBを別々の独立Binomialにせず、通常1GごとのBB/RB/非当選という排他的な結果として一体評価する。'});
+  upsertBy(s.features,'researchFeatureId',{researchFeatureId:'RF_SMALL_ROLE_COMPOSITION',featureId:'FEAT_SMALL_ROLE_COMPOSITION',adoptionCategory:'INCLUDE_SUPPORT',weight:1,numeratorInputId:'INP_CHERRY_COUNT',categoryInputIds:['INP_PLUM_COUNT'],denominatorInputId:'INP_NORMAL_GAMES',residualCategoryLabel:'OTHER',difficultyParticipation:'EXCLUDE',difficultyExclusionReason:'今回の実機ReopenではSelection整合を先に確定し、Difficulty再計算はObservation再同期後に行う。',userReason:'チェリーとプラムはいずれも公開設定差があり、同じ通常1G上の排他的カテゴリとしてMultinomialへ統合すれば非成立情報の二重計上を避けながら両方の情報を利用できる。'});
+
+  const triggerInputs=[['INP_TRIGGER_SINGLE_BB','単独BB',26],['INP_TRIGGER_SINGLE_RB','単独RB',27],['INP_TRIGGER_REPLAY_BB','リプレイ+BB',28],['INP_TRIGGER_REPLAY_RB','リプレイ+RB',29],['INP_TRIGGER_CHERRY_BB','チェリー+BB',30],['INP_TRIGGER_CHERRY_RB','チェリー+RB',31],['INP_TRIGGER_PLUM_BB','プラム+BB',32]];
+  for(const [id,name,order] of triggerInputs) upsertBy(s.inputs,'id',{id,name,type:'counter',category:'SEL_RF_BONUS_TRIGGER_COMPOSITION',unit:'回',displayOrder:order,inferenceRole:'INCLUDE_SUPPORT',defaultValue:''});
+  upsertBy(s.features,'researchFeatureId',{researchFeatureId:'RF_BONUS_TRIGGER_COMPOSITION',featureId:'FEAT_BONUS_TRIGGER_COMPOSITION',adoptionCategory:'INCLUDE_SUPPORT',weight:1,numeratorInputId:'INP_TRIGGER_SINGLE_BB',denominatorInputId:'INP_BB_INITIAL_COUNT',denominatorAdjustments:[{inputId:'INP_RB_INITIAL_COUNT',multiplier:1}],categoryInputIds:['INP_TRIGGER_SINGLE_RB','INP_TRIGGER_REPLAY_BB','INP_TRIGGER_REPLAY_RB','INP_TRIGGER_CHERRY_BB','INP_TRIGGER_CHERRY_RB','INP_TRIGGER_PLUM_BB'],residualCategoryLabel:'PLUM_RB',difficultyParticipation:'EXCLUDE',difficultyExclusionReason:'ボーナス成立回数を条件分母とする構成Featureのため、通常ゲーム基準Difficultyへ重ねて参加させない。',userReason:'公開された単独/リプレイ/チェリー/プラム×BB/RBの8カテゴリ実質出現率は、各設定で合計がBB/RB総確率と一致する。総ボーナス発生率とは分離し、ボーナス成立後の契機構成として条件付き評価することで追加情報だけを安全に利用する。'});
+  markInput(s,'INP_BB_INITIAL_COUNT','INCLUDE_PRIMARY'); markInput(s,'INP_RB_INITIAL_COUNT','INCLUDE_PRIMARY');
+  markInput(s,'INP_CHERRY_COUNT','INCLUDE_SUPPORT','SEL_RF_SMALL_ROLE_COMPOSITION'); markInput(s,'INP_PLUM_COUNT','INCLUDE_SUPPORT','SEL_RF_SMALL_ROLE_COMPOSITION');
+
+  const rbg=byRid(r.features,'RF_RB_BGM');
+  rbg.trialUnit='BB後100G以内の連チャン条件を満たすRB入賞1回'; rbg.observationScope='BB後100G以内の連チャン中のRB入賞時'; rbg.denominatorDefinition='BB後100G以内の連チャン条件を満たすRB入賞回数（途中にRBを挟んでも条件継続中は対象）'; rbg.notes='安里屋ユンタ選択率はBB後100G以内の連チャン条件を満たすRBのみを母数とする。';
   rebuildSummary(r,s); write(rp,r); write(sp,s);
 }
 
+// ===== Umineko 2 =====
 {
-  const dir='research/L_UMINEKO_2_A1'; const rp=`${dir}/research-data.json`,sp=`${dir}/selection-data.json`; const r=read(rp),s=read(sp); const miss=byRid(r.features,'RF_ART_MISS'),bell=byRid(r.features,'RF_ART_COMMON_BELL');
-  if(!byRid(r.features,'RF_ART_ROLE_COMPOSITION')) {const settingDistributions={};for(const set of r.machine.settings){const m=settingProb(miss,set),b=settingProb(bell,set);settingDistributions[set]={MISS:m,COMMON_BELL:b,OTHER:1-m-b};}r.features.push({researchFeatureId:'RF_ART_ROLE_COMPOSITION',name:'ART中役構成（ハズレ・共通ベル・その他）',factStatus:'verified',candidateModel:'multinomial',trialUnit:'ARTゲーム1G',observationScope:'ART中',numeratorDefinition:'ART中ハズレ・共通ベル・その他の各ゲーム数',denominatorDefinition:'ARTゲーム',categories:['MISS','COMMON_BELL','OTHER'],distributionMode:'complete',settingValues:{},settingDistributions,sourceRefs:[...new Set([...(miss.sourceRefs??[]),...(bell.sourceRefs??[])])],crossSourceStatus:'cross_checked',notes:'RF_ART_MISSとRF_ART_COMMON_BELLを同一ARTゲーム上の排他的カテゴリとして統合したSelection用joint model。'});}
-  const fm=byRid(s.features,'RF_ART_MISS'); Object.assign(fm,{adoptionCategory:'EXCLUDE',difficultyParticipation:'EXCLUDE',difficultyExclusionReason:'joint ART役構成へ統合したため単独FeatureはDifficultyにも参加させない。',userFacingReason:'ART中ハズレは共通ベルと同一ARTゲーム上の排他的事象。ハズレの情報を捨てず、ハズレ・共通ベル・その他のMultinomialへ統合して一度だけ評価するため、単独Binomialとしては不採用とする。'}); delete fm.userReason;
-  const fb=byRid(s.features,'RF_ART_COMMON_BELL'); Object.assign(fb,{adoptionCategory:'EXCLUDE',difficultyParticipation:'EXCLUDE',difficultyExclusionReason:'joint ART役構成へ統合したため単独FeatureはDifficultyにも参加させない。',userFacingReason:'ART中共通ベルは強い設定差を持つが、ART中ハズレと別々のBinomialで評価せず、ハズレ・共通ベル・その他のMultinomialへ統合して利用するため、単独Featureとしては不採用とする。'}); delete fb.userReason; delete fb.numeratorInputId; delete fb.denominatorInputId;
-  if(!byRid(s.features,'RF_ART_ROLE_COMPOSITION')) s.features.push({researchFeatureId:'RF_ART_ROLE_COMPOSITION',featureId:'FEAT_ART_ROLE_COMPOSITION',adoptionCategory:'INCLUDE_SUPPORT',weight:1,difficultyParticipation:'EXCLUDE',difficultyExclusionReason:'joint化後のDifficulty reportを再生成してから参加可否を再評価する。',userReason:'ART中ハズレと共通ベルは同じARTゲームから生じる排他的カテゴリのため、独立Binomialではなくハズレ・共通ベル・その他のMultinomialとして一体評価する。共通ベル単独より追加の識別情報を安全に取り込める。',denominatorInputId:'INP_ART_MISS_TRIALS',numeratorInputId:'INP_ART_MISS_COUNT',categoryInputIds:['INP_ART_COMMON_BELL_COUNT'],residualCategoryLabel:'OTHER'});
-  for(const id of ['INP_ART_MISS_COUNT','INP_ART_MISS_TRIALS','INP_ART_COMMON_BELL_COUNT']){const x=s.inputs.find(i=>i.id===id);if(x){x.category='SEL_RF_ART_ROLE_COMPOSITION';x.inferenceRole='INCLUDE_SUPPORT';}}
-  byRid(s.features,'RF_ROLE_1B').userFacingReason='1枚役Bは通常ゲーム上の排他的役としてjoint化を検討したが、設定1約1/102.1から設定6約1/100.4と差が非常に小さく、単独80%識別目安は約2,606,522G。確定役A等との正しいMultinomialに加えても実戦1日の追加情報量が小さいため、Researchには保持するが推測Featureには採用しない。';
-  byRid(s.features,'RF_ROLE_1C').userFacingReason='1枚役Cは通常ゲーム上の排他的役としてjoint化を検討したが、設定1約1/114.2から設定6約1/111.5と差が非常に小さく、単独80%識別目安は約1,432,045G。確定役A等との正しいMultinomialに加えても実戦1日の追加情報量が小さいため、Researchには保持するが推測Featureには採用しない。';
+  const dir='research/L_UMINEKO_2_A1',rp=`${dir}/research-data.json`,sp=`${dir}/selection-data.json`; const r=read(rp),s=read(sp);
+  const miss=byRid(r.features,'RF_ART_MISS'),bell=byRid(r.features,'RF_ART_COMMON_BELL'); const settings=Object.keys(bell.settingValues),dists={};
+  for(const set of settings){const m=miss.settingValues[set].probability,b=bell.settingValues[set].probability;dists[set]={MISS:m,COMMON_BELL:b,OTHER:1-m-b};}
+  upsertBy(r.features,'researchFeatureId',multinomial({rid:'RF_ART_ROLE_COMPOSITION',name:'ART中役構成（ハズレ・共通ベル・その他）',trialUnit:'ARTゲーム1G',scope:'ART中',denominator:'ARTゲーム',categories:['MISS','COMMON_BELL','OTHER'],distributions:dists,sourceRefs:[...new Set([...(miss.sourceRefs??[]),...(bell.sourceRefs??[])])],notes:'ART中ハズレと共通ベルを同じART 1G上の排他的カテゴリとして一体評価するderived Research候補。'}));
+  setExcluded(s,'RF_ART_MISS','ART中ハズレには設定差があるため情報自体は捨てない。ART中共通ベルと同じART 1G上の排他的カテゴリなので、ハズレ/共通ベル/その他のMultinomialへ統合して利用し、ハズレ単独Binomialだけを不採用とする。');
+  setExcluded(s,'RF_ART_COMMON_BELL','ART中共通ベルの設定差は、ART中ハズレと合わせたハズレ/共通ベル/その他のMultinomialへ統合して利用するため、単独Binomialとしては不採用とする。');
+  setExcluded(s,'RF_ROLE_1B','1枚役Bには設定差があるが、設定1↔6の80%識別目安が約2,606,522通常ゲーム、最も厳しい設定5↔6のJS情報量は約1.25e-9/trialと極めて小さい。通常の実戦ゲーム数では設定推測への追加寄与が実質的に得られないため不採用とする。');
+  setExcluded(s,'RF_ROLE_1C','1枚役Cには設定差があるが、設定1↔6の80%識別目安が約1,432,045通常ゲーム、最も厳しい設定5↔6のJS情報量は約8.16e-9/trialと極めて小さい。通常の実戦ゲーム数では設定推測への追加寄与が実質的に得られないため不採用とする。');
+  upsertBy(s.features,'researchFeatureId',{researchFeatureId:'RF_ART_ROLE_COMPOSITION',featureId:'FEAT_ART_ROLE_COMPOSITION',adoptionCategory:'INCLUDE_SUPPORT',weight:1,numeratorInputId:'INP_ART_MISS_COUNT',categoryInputIds:['INP_ART_COMMON_BELL_COUNT'],denominatorInputId:'INP_ART_MISS_TRIALS',residualCategoryLabel:'OTHER',difficultyParticipation:'EXCLUDE',difficultyExclusionReason:'今回の実機ReopenではSelection整合を先に確定し、Difficulty再計算はObservation再同期後に行う。',userReason:'ART中ハズレと共通ベルは同じART 1Gから生じる排他的カテゴリのため、独立Binomialではなくハズレ/共通ベル/その他のMultinomialとして一体評価する。共通ベル単独より追加の識別情報を安全に取り込める。'});
+  for(const id of ['INP_ART_MISS_COUNT','INP_ART_MISS_TRIALS','INP_ART_COMMON_BELL_COUNT']) markInput(s,id,'INCLUDE_SUPPORT','SEL_RF_ART_ROLE_COMPOSITION');
   rebuildSummary(r,s); write(rp,r); write(sp,s);
 }
 
-console.log('Applied v6.14 Selection repairs for Triple Crown and Umineko2.');
+console.log('Applied v6.14 joint/conditional Selection repair for Triple Crown and Umineko2.');
