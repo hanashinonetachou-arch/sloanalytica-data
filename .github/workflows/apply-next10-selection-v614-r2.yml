@@ -1,0 +1,47 @@
+name: Apply Next10 v6.14 selection repairs r2
+on:
+  push:
+    branches: [audit/20260908-next10-selection-v614]
+    paths: [tools/repair-next10-selection-v614-r2.mjs]
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  apply:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with: {fetch-depth: 0}
+      - uses: actions/setup-node@v4
+        with: {node-version: 20}
+      - run: npm ci
+      - run: node tools/repair-next10-selection-v614-r2.mjs
+      - name: Validate all Next10 Selection
+        run: |
+          set -euo pipefail
+          for id in L_FIRE_FORCE_2 L_UMINEKO_2_A1 L_KABANERI_UNATO_KESSEN_XX L_JORMUNGAND_ND01G LB_TRIPLE_CROWN_SEVEN_FG L_SHINUCHI_YOSHIMUNE_A1 L_KYOKOU_SUIRI_ST L_AKUDAMA_DRIVE_TP L_MILLION_GOD_KISEKI_CX L_GUNDAM_UNICORN_KAKUSEI_DRIVE_2JA; do
+            node tools/validate-research-data.mjs "research/$id/research-data.json"
+            node tools/validate-selection-data.mjs "research/$id/selection-data.json"
+          done
+          node tools/audit-selection-quality.mjs L_FIRE_FORCE_2 L_UMINEKO_2_A1 L_KABANERI_UNATO_KESSEN_XX L_JORMUNGAND_ND01G LB_TRIPLE_CROWN_SEVEN_FG L_SHINUCHI_YOSHIMUNE_A1 L_KYOKOU_SUIRI_ST L_AKUDAMA_DRIVE_TP L_MILLION_GOD_KISEKI_CX L_GUNDAM_UNICORN_KAKUSEI_DRIVE_2JA --strict
+      - name: Assert second-pass contract
+        run: |
+          node --input-type=module <<'NODE'
+          import fs from 'node:fs';
+          const t=JSON.parse(fs.readFileSync('research/LB_TRIPLE_CROWN_SEVEN_FG/selection-data.json','utf8'));
+          const e=JSON.parse(fs.readFileSync('research/L_FIRE_FORCE_2/selection-data.json','utf8'));
+          const f=(s,id)=>s.features.find(x=>x.featureId===id);
+          if(f(t,'FEAT_BONUS_OUTCOME')?.adoptionCategory!=='INCLUDE_PRIMARY') throw new Error('Triple bonus joint missing');
+          if(f(t,'FEAT_BB_INITIAL')?.adoptionCategory!=='EXCLUDE'||f(t,'FEAT_RB_INITIAL')?.adoptionCategory!=='EXCLUDE') throw new Error('Triple standalone bonus features not subsumed');
+          if(f(e,'FEAT_BONUS_INITIAL')?.adoptionCategory!=='INCLUDE_FALLBACK') throw new Error('Fire bonus initial not fallback');
+          if(!(f(e,'FEAT_BONUS_INITIAL')?.suppressedByFeatureIds??[]).includes('FEAT_ENEN_LOOP_INITIAL')) throw new Error('Fire fallback suppression missing');
+          console.log('PASS: second-pass dependency assertions');
+          NODE
+      - name: Commit
+        run: |
+          if git diff --quiet; then exit 0; fi
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add research/LB_TRIPLE_CROWN_SEVEN_FG/research-data.json research/LB_TRIPLE_CROWN_SEVEN_FG/selection-data.json research/L_FIRE_FORCE_2/selection-data.json
+          git commit -m 'fix: complete Next10 v6.14 dependency re-audit'
+          git push origin HEAD:audit/20260908-next10-selection-v614
