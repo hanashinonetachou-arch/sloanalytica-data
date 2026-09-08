@@ -1,0 +1,40 @@
+name: Batch 20260908 Gate C Close
+
+on:
+  push:
+    branches:
+      - batch/20260908-manifest-v7-first10
+    paths:
+      - 'tools/close-gate-c-v7.mjs'
+      - '.github/workflows/batch-20260908-gate-c-close.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  close:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: batch/20260908-manifest-v7-first10
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Close Gate C
+        run: node tools/close-gate-c-v7.mjs
+      - name: Assert Gate C closure
+        run: |
+          node - <<'NODE'
+          const fs=require('fs');
+          const x=JSON.parse(fs.readFileSync('batches/20260908-manifest-v7-first10/compliance-ledger.json','utf8'));
+          const s=x.gateCSummary||{};
+          if(x.gateStatus.GATE_C!=='PASS'||x.gateStatus.GATE_D!=='OPEN'||s.entries!==60||s.fail||s.blocked||s.applicableUnevaluated||s.missingNaReason||s.missingEvidenceRef||s.unresolvedMappings||s.researchReopenRequests||s.linkedServiceDebt){console.error(JSON.stringify(x,null,2));process.exit(1)}
+          console.log('Gate C formal closure PASS',JSON.stringify(s));
+          NODE
+      - name: Commit Gate C closure
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add batches/20260908-manifest-v7-first10/compliance-ledger.json
+          if git diff --cached --quiet; then echo "No closure changes"; else git commit -m "audit: close Gate C under Manifest v7" && git push origin HEAD:batch/20260908-manifest-v7-first10; fi
