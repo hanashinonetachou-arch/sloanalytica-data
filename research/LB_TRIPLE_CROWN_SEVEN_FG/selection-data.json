@@ -7,7 +7,7 @@
       "id": "INP_BB_INITIAL_COUNT",
       "name": "BB回数",
       "type": "counter",
-      "category": "SEL_RF_BB_INITIAL",
+      "category": "SEL_RF_BONUS_OUTCOME",
       "unit": "回",
       "displayOrder": 10,
       "inferenceRole": "INCLUDE_PRIMARY",
@@ -27,17 +27,17 @@
       "id": "INP_RB_INITIAL_COUNT",
       "name": "RB回数",
       "type": "counter",
-      "category": "SEL_RF_RB_INITIAL",
+      "category": "SEL_RF_BONUS_OUTCOME",
       "unit": "回",
       "displayOrder": 12,
-      "inferenceRole": "INCLUDE_SUPPORT",
+      "inferenceRole": "INCLUDE_PRIMARY",
       "defaultValue": ""
     },
     {
       "id": "INP_CHERRY_COUNT",
       "name": "チェリー回数",
       "type": "counter",
-      "category": "SEL_RF_CHERRY",
+      "category": "SEL_RF_SMALL_ROLE_COMPOSITION",
       "unit": "回",
       "displayOrder": 13,
       "inferenceRole": "INCLUDE_SUPPORT",
@@ -47,10 +47,10 @@
       "id": "INP_PLUM_COUNT",
       "name": "プラム回数",
       "type": "counter",
-      "category": "SEL_RF_PLUM",
+      "category": "SEL_RF_SMALL_ROLE_COMPOSITION",
       "unit": "回",
       "displayOrder": 14,
-      "inferenceRole": "EXCLUDE",
+      "inferenceRole": "INCLUDE_SUPPORT",
       "defaultValue": ""
     },
     {
@@ -105,7 +105,7 @@
     },
     {
       "id": "INP_RB_BGM_TRIALS",
-      "name": "RB入賞回数",
+      "name": "100G以内連チャン中のRB入賞回数",
       "type": "counter",
       "category": "SEL_RF_RB_BGM",
       "unit": "回",
@@ -168,43 +168,37 @@
     {
       "researchFeatureId": "RF_BB_INITIAL",
       "featureId": "FEAT_BB_INITIAL",
-      "adoptionCategory": "INCLUDE_PRIMARY",
+      "adoptionCategory": "EXCLUDE",
       "weight": 1,
       "difficultyParticipation": "EXCLUDE",
-      "difficultyExclusionReason": "Observationで実戦時の露出率・試行量を確定する前にDifficultyへ推定値を持ち込まない。",
-      "userReason": "全設定の公開確率と通常ゲームという再現可能な分母が揃うため主Featureとして採用する。",
-      "numeratorInputId": "INP_BB_INITIAL_COUNT",
-      "denominatorInputId": "INP_NORMAL_GAMES"
+      "difficultyExclusionReason": "jointボーナス構成へ統合したため単独FeatureはDifficultyにも参加させない。",
+      "userFacingReason": "BBには設定差があるが、BB・RBは同じ通常ゲーム上の排他的な結果。別々のBinomialではなく「BB・RB・非当選」のMultinomialへ統合して一度だけ評価するため、単独Featureとしては不採用とする。"
     },
     {
       "researchFeatureId": "RF_RB_INITIAL",
       "featureId": "FEAT_RB_INITIAL",
-      "adoptionCategory": "INCLUDE_SUPPORT",
+      "adoptionCategory": "EXCLUDE",
       "weight": 1,
       "difficultyParticipation": "EXCLUDE",
-      "difficultyExclusionReason": "Observation確定前はDifficultyへ参加させない。",
-      "userReason": "BBとは別のボーナス種別として設定差を持ち、実戦で直接観測できるため補助Featureとして採用する。",
-      "numeratorInputId": "INP_RB_INITIAL_COUNT",
-      "denominatorInputId": "INP_NORMAL_GAMES"
+      "difficultyExclusionReason": "jointボーナス構成へ統合したため単独FeatureはDifficultyにも参加させない。",
+      "userFacingReason": "RBには設定差があるが、BB・RBは同じ通常ゲーム上の排他的な結果。別々のBinomialではなく「BB・RB・非当選」のMultinomialへ統合して一度だけ評価するため、単独Featureとしては不採用とする。"
     },
     {
       "researchFeatureId": "RF_CHERRY",
       "featureId": "FEAT_CHERRY",
-      "adoptionCategory": "INCLUDE_SUPPORT",
+      "adoptionCategory": "EXCLUDE",
       "weight": 1,
       "difficultyParticipation": "EXCLUDE",
-      "difficultyExclusionReason": "Observation確定前はDifficultyへ参加させない。",
-      "userReason": "通常ゲーム中に直接カウントでき、4設定すべての公開確率があるため補助Featureとして採用する。",
-      "numeratorInputId": "INP_CHERRY_COUNT",
-      "denominatorInputId": "INP_NORMAL_GAMES"
+      "difficultyExclusionReason": "joint小役構成へ統合したため単独FeatureはDifficultyにも参加させない。",
+      "userFacingReason": "チェリーには設定差があるが、プラムと同じ通常ゲーム上の排他的事象である。チェリー単独Binomialではなく「チェリー・プラム・その他」のMultinomialへ統合して同じ情報を一度だけ評価するため、単独Featureとしては不採用とする。"
     },
     {
       "researchFeatureId": "RF_PLUM",
       "featureId": "FEAT_PLUM",
       "adoptionCategory": "EXCLUDE",
       "difficultyParticipation": "EXCLUDE",
-      "difficultyExclusionReason": "推測計算に採用しないためDifficultyにも参加させない。",
-      "userFacingReason": "プラムは設定差自体はあるが、チェリーと同一通常ゲームを分母とする排他的な小役事象を独立Binomialとして同時評価すると同じ試行情報を重ねるため不採用。"
+      "difficultyExclusionReason": "joint小役構成へ統合したため単独FeatureはDifficultyにも参加させない。",
+      "userFacingReason": "プラムには設定1約1/64.63から設定6約1/55.54の設定差があり、情報自体は有効。チェリーと別々のBinomialで重ねず、「チェリー・プラム・その他」のMultinomialへ統合して利用するため、プラム単独Featureとしては不採用とする。"
     },
     {
       "researchFeatureId": "RF_SPECIAL_DIRECTION",
@@ -242,7 +236,7 @@
       "weight": 1,
       "difficultyParticipation": "EXCLUDE",
       "difficultyExclusionReason": "Observation確定前はDifficultyへ参加させない。",
-      "userReason": "RB入賞ごとに直接観測でき、安里屋ユンタ選択率が偶数設定で明確に高いため補助Featureとして採用する。",
+      "userReason": "BB後100G以内の連チャン中（途中にRBを挟んでも継続）のRB入賞時に直接観測でき、安里屋ユンタ選択率は設定1/5=6%、設定2=12%、設定6=15%と偶数設定で高い。条件を満たすRBだけを母数にして補助Featureとして採用する。",
       "numeratorInputId": "INP_RB_BGM_ASADOYA",
       "denominatorInputId": "INP_RB_BGM_TRIALS"
     },
@@ -260,7 +254,7 @@
       "adoptionCategory": "EXCLUDE",
       "difficultyParticipation": "EXCLUDE",
       "difficultyExclusionReason": "推測計算に採用しないためDifficultyにも参加させない。",
-      "userFacingReason": "チェリー+BBには設定差があるが、採用済みチェリー確率とBB確率の両方に包含される事象で、独立Featureとして追加すると同じ成立ゲーム情報を重複評価するため不採用とする。"
+      "userFacingReason": "チェリー+BBは設定差を持つが、チェリー成立とBB成立の交差事象であり、採用する小役構成とBB初当りの双方に同じ成立ゲームが含まれる。条件付き分解も検討したが、チェリー以外のBB契機を含む完全なjoint分布が公開されておらず、現行データだけでは全体を二重計上なく因数分解できないため不採用とする。"
     },
     {
       "researchFeatureId": "RF_SPECIFIC_BONUS_CHERRY_RB",
@@ -268,7 +262,7 @@
       "adoptionCategory": "EXCLUDE",
       "difficultyParticipation": "EXCLUDE",
       "difficultyExclusionReason": "推測計算に採用しないためDifficultyにも参加させない。",
-      "userFacingReason": "チェリー+RBには設定差があるが、採用済みチェリー確率とRB確率に包含されるため、独立Binomialでの二重計上を避けて不採用とする。"
+      "userFacingReason": "チェリー+RBは設定差を持つが、チェリー成立とRB成立の交差事象であり、採用する小役構成とRB初当りの双方に同じ成立ゲームが含まれる。条件付き分解も検討したが、チェリー以外のRB契機を含む完全なjoint分布が公開されておらず、現行データだけでは全体を二重計上なく因数分解できないため不採用とする。"
     },
     {
       "researchFeatureId": "RF_BT_REPLAY_BB",
@@ -276,7 +270,37 @@
       "adoptionCategory": "EXCLUDE",
       "difficultyParticipation": "EXCLUDE",
       "difficultyExclusionReason": "推測計算に採用しないためDifficultyにも参加させない。",
-      "userFacingReason": "BT中リプレイ+BB in BBには設定差があるが、1日実戦でのBTゲーム試行が少なく実質確率も約1/294～1/257と差が小さい。専用BTゲーム分母の入力負担に対して追加情報量が小さいため不採用とする。"
+      "userFacingReason": "BT中リプレイ+BB in BBには設定差があるが、設定1=1/293.9・設定6=1/257.0で1 trialあたりの識別差が小さい。統計評価では設定1↔6でも80%識別目安が約111,474 BTゲーム、最難関の設定1↔2は95%目安が約28,374,158 BTゲームとなり、1日実戦で得られるBTゲーム数に対して追加情報量が極めて小さいため不採用とする。"
+    },
+    {
+      "researchFeatureId": "RF_SMALL_ROLE_COMPOSITION",
+      "featureId": "FEAT_SMALL_ROLE_COMPOSITION",
+      "adoptionCategory": "INCLUDE_SUPPORT",
+      "weight": 1,
+      "difficultyParticipation": "EXCLUDE",
+      "difficultyExclusionReason": "既存Difficulty reportがjoint化前のため、再生成後に参加可否を再評価する。",
+      "userReason": "チェリーとプラムは同一通常ゲーム上の排他的な小役。独立Binomialを重ねず、チェリー・プラム・その他の3カテゴリMultinomialとして一体評価する。設定1↔6の1試行あたり識別情報はチェリー単独の約1.9倍となり、プラムの追加情報を二重計上せず利用できる。",
+      "denominatorInputId": "INP_NORMAL_GAMES",
+      "numeratorInputId": "INP_CHERRY_COUNT",
+      "categoryInputIds": [
+        "INP_PLUM_COUNT"
+      ],
+      "residualCategoryLabel": "OTHER"
+    },
+    {
+      "researchFeatureId": "RF_BONUS_OUTCOME",
+      "featureId": "FEAT_BONUS_OUTCOME",
+      "adoptionCategory": "INCLUDE_PRIMARY",
+      "weight": 1,
+      "difficultyParticipation": "EXCLUDE",
+      "difficultyExclusionReason": "joint化後のDifficulty reportを再生成してから参加可否を再評価する。",
+      "userReason": "BBとRBは通常ゲーム1Gごとの排他的なボーナス結果なので、BB・RB・非当選を1つのMultinomialとして評価する。各単独Binomialの非成立情報を重ねず、両方の設定差を安全に利用できる。",
+      "denominatorInputId": "INP_NORMAL_GAMES",
+      "numeratorInputId": "INP_BB_INITIAL_COUNT",
+      "categoryInputIds": [
+        "INP_RB_INITIAL_COUNT"
+      ],
+      "residualCategoryLabel": "NO_BONUS"
     }
   ],
   "evidence": [
@@ -367,56 +391,76 @@
   },
   "selectionSummaryContract": {
     "schemaVersion": "selection-summary-v1",
-    "evaluatedCount": 11,
-    "selectedCount": 6,
-    "rejectedCount": 5,
+    "evaluatedCount": 13,
+    "selectedCount": 5,
+    "rejectedCount": 8,
     "selected": [
       {
-        "name": "BB確率",
-        "reason": "全設定の公開確率と通常ゲームという再現可能な分母が揃うため主Featureとして採用する。"
-      },
-      {
-        "name": "RB確率",
-        "reason": "BBとは別のボーナス種別として実戦で直接観測できるため補助Featureとして採用する。"
-      },
-      {
-        "name": "チェリー確率",
-        "reason": "通常ゲーム中に直接カウントできるため補助Featureとして採用する。"
-      },
-      {
+        "featureId": "FEAT_SPECIAL_DIRECTION",
         "name": "BB中MB入賞時 Specialトロフィー点灯方向",
-        "reason": "BB中MB入賞時に必ず下→上/上→下のどちらかを直接観測でき、公開分布は設定1=55/45%、設定2=45/55%、設定5=60/40%、設定6=40/60%と奇偶で方向が反転する。2カテゴリの再現可能な試行分母と具体的な設定別確率が揃うため、偶奇判別の補助Featureとして採用する。",
-        "featureId": "FEAT_SPECIAL_DIRECTION"
+        "reason": "BB中MB入賞時に必ず下→上/上→下のどちらかを直接観測でき、公開分布は設定1=55/45%、設定2=45/55%、設定5=60/40%、設定6=40/60%と奇偶で方向が反転する。2カテゴリの再現可能な試行分母と具体的な設定別確率が揃うため、偶奇判別の補助Featureとして採用する。"
       },
       {
+        "featureId": "FEAT_BB_BGM",
         "name": "BB入賞時 琉球メドレー選択率",
-        "reason": "条件を再現できる公開設定差のため採用する。"
+        "reason": "100G以内連チャンという条件を実戦で再現でき、琉球メドレー選択率に公開設定差があるため補助Featureとして採用する。"
       },
       {
+        "featureId": "FEAT_RB_BGM",
         "name": "RB入賞時 安里屋ユンタ選択率",
-        "reason": "RBごとに観測でき偶奇差が明確なため採用する。"
+        "reason": "BB後100G以内の連チャン中（途中にRBを挟んでも継続）のRB入賞時に直接観測でき、安里屋ユンタ選択率は設定1/5=6%、設定2=12%、設定6=15%と偶数設定で高い。条件を満たすRBだけを母数にして補助Featureとして採用する。"
+      },
+      {
+        "featureId": "FEAT_SMALL_ROLE_COMPOSITION",
+        "name": "通常時小役構成（チェリー・プラム・その他）",
+        "reason": "チェリーとプラムは同一通常ゲーム上の排他的な小役。独立Binomialを重ねず、チェリー・プラム・その他の3カテゴリMultinomialとして一体評価する。設定1↔6の1試行あたり識別情報はチェリー単独の約1.9倍となり、プラムの追加情報を二重計上せず利用できる。"
+      },
+      {
+        "featureId": "FEAT_BONUS_OUTCOME",
+        "name": "通常時ボーナス構成（BB・RB・非当選）",
+        "reason": "BBとRBは通常ゲーム1Gごとの排他的なボーナス結果なので、BB・RB・非当選を1つのMultinomialとして評価する。各単独Binomialの非成立情報を重ねず、両方の設定差を安全に利用できる。"
       }
     ],
     "rejected": [
       {
+        "featureId": "FEAT_BB_INITIAL",
+        "name": "BB確率",
+        "reason": "BBには設定差があるが、BB・RBは同じ通常ゲーム上の排他的な結果。別々のBinomialではなく「BB・RB・非当選」のMultinomialへ統合して一度だけ評価するため、単独Featureとしては不採用とする。"
+      },
+      {
+        "featureId": "FEAT_RB_INITIAL",
+        "name": "RB確率",
+        "reason": "RBには設定差があるが、BB・RBは同じ通常ゲーム上の排他的な結果。別々のBinomialではなく「BB・RB・非当選」のMultinomialへ統合して一度だけ評価するため、単独Featureとしては不採用とする。"
+      },
+      {
+        "featureId": "FEAT_CHERRY",
+        "name": "チェリー確率",
+        "reason": "チェリーには設定差があるが、プラムと同じ通常ゲーム上の排他的事象である。チェリー単独Binomialではなく「チェリー・プラム・その他」のMultinomialへ統合して同じ情報を一度だけ評価するため、単独Featureとしては不採用とする。"
+      },
+      {
+        "featureId": "FEAT_PLUM",
         "name": "プラム確率",
-        "reason": "チェリーとの独立評価で同一通常ゲーム情報を重ねるため不採用。"
+        "reason": "プラムには設定1約1/64.63から設定6約1/55.54の設定差があり、情報自体は有効。チェリーと別々のBinomialで重ねず、「チェリー・プラム・その他」のMultinomialへ統合して利用するため、プラム単独Featureとしては不採用とする。"
       },
       {
+        "featureId": "FEAT_RB_END_LED",
         "name": "RB終了時LED振り分け",
-        "reason": "設定差を持つカテゴリがHard Evidenceと同一自然観測のため二重計上防止で不採用。"
+        "reason": "RB終了LEDの設定別分布は公開されているが、設定差を生むクラウン+下パネルと青バットはそれぞれ設定5以上・設定6のHard Evidenceそのもの。同じ自然観測を確率FeatureとEvidenceで二重計上しないため確率Featureは不採用とする。"
       },
       {
+        "featureId": "FEAT_SPECIFIC_BONUS_CHERRY_BB",
         "name": "チェリー+BB実質出現率",
-        "reason": "チェリーとBBに包含されるため二重計上防止で不採用。"
+        "reason": "チェリー+BBは設定差を持つが、チェリー成立とBB成立の交差事象であり、採用する小役構成とBB初当りの双方に同じ成立ゲームが含まれる。条件付き分解も検討したが、チェリー以外のBB契機を含む完全なjoint分布が公開されておらず、現行データだけでは全体を二重計上なく因数分解できないため不採用とする。"
       },
       {
+        "featureId": "FEAT_SPECIFIC_BONUS_CHERRY_RB",
         "name": "チェリー+RB実質出現率",
-        "reason": "チェリーとRBに包含されるため二重計上防止で不採用。"
+        "reason": "チェリー+RBは設定差を持つが、チェリー成立とRB成立の交差事象であり、採用する小役構成とRB初当りの双方に同じ成立ゲームが含まれる。条件付き分解も検討したが、チェリー以外のRB契機を含む完全なjoint分布が公開されておらず、現行データだけでは全体を二重計上なく因数分解できないため不採用とする。"
       },
       {
+        "featureId": "FEAT_BT_REPLAY_BB",
         "name": "BT中 リプレイ+BB in BB実質出現率",
-        "reason": "1日試行量と設定差に対して専用分母入力負担が大きいため不採用。"
+        "reason": "BT中リプレイ+BB in BBには設定差があるが、設定1=1/293.9・設定6=1/257.0で1 trialあたりの識別差が小さい。統計評価では設定1↔6でも80%識別目安が約111,474 BTゲーム、最難関の設定1↔2は95%目安が約28,374,158 BTゲームとなり、1日実戦で得られるBTゲーム数に対して追加情報量が極めて小さいため不採用とする。"
       }
     ]
   }
