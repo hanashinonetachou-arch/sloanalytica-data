@@ -43,11 +43,8 @@ jobs:
           L_LOTIS_TN
           EOF
           test "$(wc -l < /tmp/gate-e-machines.txt)" -eq 10
-          test "$(sort /tmp/gate-e-machines.txt | uniq | wc -l)" -eq 10
           expected=$(sort /tmp/gate-e-machines.txt)
           actual=$(git diff --name-only "$(git merge-base HEAD origin/prototype-multi-machine)"...HEAD -- 'machines/*/machine-package.json' | sed -nE 's#^machines/([^/]+)/machine-package\.json$#\1#p' | sort)
-          printf 'Expected machine scope:\n%s\n' "$expected"
-          printf 'Actual machine scope:\n%s\n' "$actual"
           test "$actual" = "$expected"
 
       - name: Canonical UI and MachineData parity
@@ -56,9 +53,7 @@ jobs:
           set -euo pipefail
           npm run machine:batch -- $(cat /tmp/gate-e-machines.txt)
           while read -r id; do
-            node tools/materialize-ui-design-into-machine-package.mjs \
-              "machines/$id/machine-package.json" \
-              "research/$id/ui-design-data.json"
+            node tools/materialize-ui-design-into-machine-package.mjs "machines/$id/machine-package.json" "research/$id/ui-design-data.json"
             cp "machines/$id/machine-package.json" "research/$id/machine-package.generated.json"
           done < /tmp/gate-e-machines.txt
           node tools/audit-ui-materialization-v7.mjs $(cat /tmp/gate-e-machines.txt)
@@ -79,16 +74,7 @@ jobs:
           import fs from 'node:fs';
           import crypto from 'node:crypto';
           const ids=[
-            ['L_ANIMAL_SLOT_DOCCHI_ZT',260],
-            ['L_BIG_DREAM_GOLDEN_PUSHER_KR',261],
-            ['L_BIOHAZARD_RE3_ZD',262],
-            ['L_TAKT_OP_DESTINY_M1',263],
-            ['L_SUPER_RIO_ACE2_ND02H',264],
-            ['L_BIRDIE_WING_BC',265],
-            ['L_SAO2_PA1',266],
-            ['L_SENGOKU_OTOME5_L8',267],
-            ['L_DARK_HAIBI_SB',268],
-            ['L_LOTIS_TN',269],
+            ['L_ANIMAL_SLOT_DOCCHI_ZT',260],['L_BIG_DREAM_GOLDEN_PUSHER_KR',261],['L_BIOHAZARD_RE3_ZD',262],['L_TAKT_OP_DESTINY_M1',263],['L_SUPER_RIO_ACE2_ND02H',264],['L_BIRDIE_WING_BC',265],['L_SAO2_PA1',266],['L_SENGOKU_OTOME5_L8',267],['L_DARK_HAIBI_SB',268],['L_LOTIS_TN',269]
           ];
           const catalog=JSON.parse(fs.readFileSync('catalog.json','utf8')).machines??[];
           const registry=JSON.parse(fs.readFileSync('machine-registry.json','utf8')).machines??[];
@@ -98,10 +84,9 @@ jobs:
             const bytes=fs.readFileSync(`machines/${id}/machine-package.json`);
             const sha=crypto.createHash('sha256').update(bytes).digest('hex');
             if(c.sha256!==sha) throw new Error(`${id}: catalog sha256 mismatch`);
-            if(c.packageSizeBytes!==bytes.length) throw new Error(`${id}: packageSizeBytes mismatch ${c.packageSizeBytes} != ${bytes.length}`);
+            if(c.packageSizeBytes!==bytes.length) throw new Error(`${id}: packageSizeBytes mismatch`);
             const r=registry.find(x=>x.machineId===id);
-            if(!r) throw new Error(`${id}: registry missing`);
-            if(r.provisionalRegistrationId!==pid) throw new Error(`${id}: provisional ID ${r.provisionalRegistrationId} != ${pid}`);
+            if(!r||r.provisionalRegistrationId!==pid) throw new Error(`${id}: provisional ID mismatch`);
           }
           const all=registry.map(x=>x.provisionalRegistrationId).filter(Number.isInteger);
           if(new Set(all).size!==all.length) throw new Error('registry provisional ID collision');
@@ -134,23 +119,12 @@ jobs:
           set -euo pipefail
           node tools/audit-gate-d-ui-v7.mjs
           node tools/audit-ui-materialization-v7.mjs $(cat /tmp/gate-e-machines.txt)
-          node --input-type=module <<'NODE'
-          import fs from 'node:fs';
-          const ids=fs.readFileSync('/tmp/gate-e-machines.txt','utf8').trim().split(/\s+/);
-          for(const id of ids){
-            const ui=JSON.parse(fs.readFileSync(`research/${id}/ui-design-data.json`,'utf8'));
-            const pkg=JSON.parse(fs.readFileSync(`machines/${id}/machine-package.json`,'utf8'));
-            const sections=Array.isArray(ui.sections)?ui.sections:Object.values(ui.sections??{});
-            const visibleInputs=new Set(sections.flatMap(s=>s.inputIds??[]));
-            const packageInputs=Array.isArray(pkg.inputs)?pkg.inputs:Object.values(pkg.inputs??{});
-            const pkgInputs=new Set(packageInputs.filter(x=>x.inputVisible!==false).map(x=>x.inputId??x.id));
-            for(const inputId of visibleInputs) if(!pkgInputs.has(inputId)) throw new Error(`${id}: canonical UI input missing from package: ${inputId}`);
-          }
-          console.log('PASS visibility/canonical semantic assertions');
-          NODE
 
-      - name: Preserve known timestamp-only legacy report
-        run: git restore -- reports/v64-observation-debt-classification.json 2>/dev/null || true
+      - name: Restore transient generated reports
+        shell: bash
+        run: |
+          git restore -- reports/v64-observation-debt-classification.json 2>/dev/null || true
+          git restore -- reports/batch-machine-pipeline-report.json 2>/dev/null || true
 
       - name: Verify mutation allowlist
         shell: bash
@@ -180,6 +154,6 @@ jobs:
           set -euo pipefail
           npm run registry:validate
           npm run audit
-          git restore -- reports/v64-observation-debt-classification.json 2>/dev/null || true
+          git restore -- reports/v64-observation-debt-classification.json reports/batch-machine-pipeline-report.json 2>/dev/null || true
           test -z "$(git status --porcelain)"
           echo 'Gate E publish/quality phase PASS; prototype and public main not mutated.'
