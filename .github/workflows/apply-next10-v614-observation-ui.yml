@@ -4,6 +4,7 @@ on:
     branches: [audit/20260908-next10-selection-v614]
     paths:
       - tools/repair-next10-v614-observation-ui.mjs
+      - tools/fix-next10-v614-observation-schema.mjs
       - .github/workflows/apply-next10-v614-observation-ui.yml
   workflow_dispatch:
 permissions:
@@ -18,6 +19,7 @@ jobs:
         with: {node-version: 20}
       - run: npm ci
       - run: node tools/repair-next10-v614-observation-ui.mjs
+      - run: node tools/fix-next10-v614-observation-schema.mjs
       - name: Validate Observation and linkages
         run: |
           node tools/validate-machine-observation-data.mjs \
@@ -44,9 +46,10 @@ jobs:
           const u=JSON.parse(fs.readFileSync('research/L_UMINEKO_2_A1/machine-observation-data.json','utf8'));
           const uu=JSON.parse(fs.readFileSync('research/L_UMINEKO_2_A1/ui-design-data.json','utf8'));
           const fm=(o,id)=>o.featureMappings.find(x=>x.featureId===id);
-          if(!fm(t,'FEAT_SMALL_ROLE_COMPOSITION')||!fm(t,'FEAT_BONUS_OUTCOME')) throw new Error('Triple joint observation mappings missing');
+          if(!fm(t,'FEAT_SMALL_ROLE_COMPOSITION')||!fm(t,'FEAT_BONUS_OUTCOME')||!fm(t,'FEAT_BONUS_TRIGGER_COMPOSITION')) throw new Error('Triple joint/conditional observation mappings missing');
           if(fm(t,'FEAT_CHERRY')||fm(t,'FEAT_PLUM')||fm(t,'FEAT_BB_INITIAL')||fm(t,'FEAT_RB_INITIAL')) throw new Error('Triple stale mappings remain');
           if(!tu.sections['通常時'].inputIds.includes('INP_PLUM_COUNT')) throw new Error('Plum UI missing');
+          if(!tu.sections['通常時ボーナスの当選契機']) throw new Error('Triple trigger UI missing');
           if(!fm(u,'FEAT_ART_ROLE_COMPOSITION')) throw new Error('Umineko ART joint mapping missing');
           if(fm(u,'FEAT_ART_MISS')||fm(u,'FEAT_ART_COMMON_BELL')) throw new Error('Umineko stale ART mappings remain');
           if(!uu.sections['ART中の役構成']) throw new Error('Umineko joint ART UI missing');
