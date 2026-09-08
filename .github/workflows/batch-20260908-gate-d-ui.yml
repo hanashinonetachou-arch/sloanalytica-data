@@ -1,0 +1,48 @@
+name: Batch 20260908 Gate D UI
+
+on:
+  push:
+    branches:
+      - batch/20260908-manifest-v7-first10
+    paths:
+      - 'tools/materialize-gate-d-ui-design-v7.mjs'
+      - 'tools/audit-gate-d-ui-v7.mjs'
+      - '.github/workflows/batch-20260908-gate-d-ui.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  ui:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: batch/20260908-manifest-v7-first10
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Materialize canonical UI Design 10/10
+        run: node tools/materialize-gate-d-ui-design-v7.mjs
+      - name: Validate UI Design schema
+        run: node tools/validate-ui-design-data.mjs .
+      - name: Audit UI-Selection linkage
+        run: node tools/audit-ui-design-selection-linkage.mjs . L_ANIMAL_SLOT_DOCCHI_ZT L_BIG_DREAM_GOLDEN_PUSHER_KR L_BIOHAZARD_RE3_ZD L_TAKT_OP_DESTINY_M1 L_SUPER_RIO_ACE2_ND02H L_BIRDIE_WING_BC L_SAO2_PA1 L_SENGOKU_OTOME5_L8 L_DARK_HAIBI_SB L_LOTIS_TN
+      - name: Audit UI-Observation linkage
+        run: node tools/audit-ui-design-observation-linkage.mjs --strict-v2 L_ANIMAL_SLOT_DOCCHI_ZT L_BIG_DREAM_GOLDEN_PUSHER_KR L_BIOHAZARD_RE3_ZD L_TAKT_OP_DESTINY_M1 L_SUPER_RIO_ACE2_ND02H L_BIRDIE_WING_BC L_SAO2_PA1 L_SENGOKU_OTOME5_L8 L_DARK_HAIBI_SB L_LOTIS_TN
+      - name: Run Manifest v7 UI semantic audit
+        run: node tools/audit-gate-d-ui-v7.mjs
+      - name: Assert 10-machine Gate D UI coverage
+        run: |
+          node - <<'NODE'
+          const fs=require('fs');
+          const r=JSON.parse(fs.readFileSync('batches/20260908-manifest-v7-first10/gate-d-ui-semantic-audit.json','utf8'));
+          if(r.status!=='PASS'||r.summary?.machines!==10||r.summary?.adoptedFeatures!==51||r.summary?.errors!==0){console.error(JSON.stringify(r,null,2));process.exit(1)}
+          console.log('Gate D UI coverage PASS',JSON.stringify(r.summary));
+          NODE
+      - name: Commit canonical UI Design
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add research/*/ui-design-data.json batches/20260908-manifest-v7-first10/gate-d-ui-materialization-report.json batches/20260908-manifest-v7-first10/gate-d-ui-semantic-audit.json
+          if git diff --cached --quiet; then echo "No UI changes"; else git commit -m "ui: materialize Manifest v7 Gate D designs" && git push origin HEAD:batch/20260908-manifest-v7-first10; fi
