@@ -21,25 +21,55 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
+      - name: Canonicalize Triple Crown user-facing rejection summary
+        run: |
+          node --input-type=module <<'NODE'
+          import fs from 'node:fs';
+          const p='research/LB_TRIPLE_CROWN_SEVEN_FG/selection-data.json';
+          const s=JSON.parse(fs.readFileSync(p,'utf8'));
+          const c=s.selectionSummaryContract;
+          if(!c) throw new Error('selectionSummaryContract missing');
+          const keep=new Set(['FEAT_BT_REPLAY_BB']);
+          c.rejected=c.rejected.filter(x=>keep.has(x.featureId));
+          if(c.rejected.length!==1) throw new Error(`expected one genuine rejected element, got ${c.rejected.length}`);
+          c.rejectedCount=c.rejected.length;
+          c.selectedCount=c.selected.length;
+          c.evaluatedCount=20;
+          fs.writeFileSync(p,JSON.stringify(s,null,2)+'\n');
+          NODE
       - name: Regenerate affected MachineData and catalog
         run: |
           npm run machine:batch -- L_FIRE_FORCE_2 L_KABANERI_UNATO_KESSEN_XX L_JORMUNGAND_ND01G LB_TRIPLE_CROWN_SEVEN_FG L_KYOKOU_SUIRI_ST
-      - name: Assert catalog matches regenerated packages
+      - name: Assert catalog and requested UI semantics
         run: |
           node --input-type=module <<'NODE'
           import fs from 'node:fs';
           import crypto from 'node:crypto';
           const ids=['L_FIRE_FORCE_2','L_KABANERI_UNATO_KESSEN_XX','L_JORMUNGAND_ND01G','LB_TRIPLE_CROWN_SEVEN_FG','L_KYOKOU_SUIRI_ST'];
           const catalog=JSON.parse(fs.readFileSync('catalog.json','utf8'));
+          const pkgs={};
           for(const id of ids){
             const bytes=fs.readFileSync(`machines/${id}/machine-package.json`);
+            pkgs[id]=JSON.parse(bytes);
             const item=catalog.machines.find(x=>x.machineId===id);
             if(!item) throw new Error(`catalog missing ${id}`);
             const hash=crypto.createHash('sha256').update(bytes).digest('hex');
             if(item.sha256!==hash) throw new Error(`hash mismatch ${id}`);
             if(item.packageSizeBytes!==bytes.length) throw new Error(`size mismatch ${id}`);
-            console.log(`PASS ${id} ${bytes.length} ${hash}`);
+            console.log(`PASS catalog ${id} ${bytes.length} ${hash}`);
           }
+          const fire=pkgs.L_FIRE_FORCE_2;
+          if(!fire.ui.sections.some(s=>s.title==='炎炎ボーナス終了画面' && s.items.length>=2)) throw new Error('Fire Force merged bonus-end section missing');
+          const kab=pkgs.L_KABANERI_UNATO_KESSEN_XX;
+          if(!kab.inputs.inputs.some(i=>i.name==='通常時・ST中・ボーナス中の消化ゲーム数')) throw new Error('Kabaneri denominator wording missing');
+          const jor=pkgs.L_JORMUNGAND_ND01G;
+          const end=jor.ui.sections.find(s=>/終了画面/.test(s.title));
+          if(!end || !end.items.some(i=>i.gridSpan===6)) throw new Error('Jormungand 2-column end-screen layout missing');
+          const tri=pkgs.LB_TRIPLE_CROWN_SEVEN_FG;
+          if(tri.selectionSummary.rejected.length!==1 || tri.selectionSummary.rejected[0].featureId!=='FEAT_BT_REPLAY_BB') throw new Error('Triple Crown genuine rejection summary mismatch');
+          const kyo=pkgs.L_KYOKOU_SUIRI_ST;
+          if(kyo.ui.sections.some(s=>s.title==='追加入力')) throw new Error('Kyokou fallback additional-input section leaked');
+          console.log('PASS requested UI semantics');
           NODE
       - name: Commit regenerated artifacts
         run: |
