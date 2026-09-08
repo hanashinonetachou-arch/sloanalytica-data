@@ -38,8 +38,10 @@ export function materializeUiDesignIntoPackage(pkg,uiDesign){
     const items=[];
     for(const inputId of asArray(s.inputIds)){
       const input=byId.get(inputId); if(!input) fail(`${title}: unknown canonical input ${inputId}`);
+      const contract=uiDesign.inputContracts?.[inputId]??{};
+      if(contract.inputVisible===false) continue;
       visible.add(inputId);
-      items.push(uiItem(input,uiDesign.inputContracts?.[inputId]??{}));
+      items.push(uiItem(input,contract));
     }
     for(const evidenceContractId of asArray(s.evidenceIds)){
       const c=uiDesign.evidenceContracts?.[evidenceContractId]; if(!c) fail(`${title}: unknown evidence contract ${evidenceContractId}`);
