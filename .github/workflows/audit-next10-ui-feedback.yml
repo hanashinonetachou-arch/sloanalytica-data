@@ -57,10 +57,13 @@ jobs:
       - name: Build and materialize affected MachineData
         run: |
           set -euo pipefail
-          ids=(L_FIRE_FORCE_2 L_JORMUNGAND_ND01G L_KYOKOU_SUIRI_ST L_AKUDAMA_DRIVE_TP L_GHOST_IN_THE_SHELL_ZS L_GOBLIN_SLAYER_2_JZ L_GODZILLA_NS L_KABANERI_UNATO_KESSEN_XX L_MAGIA_RECORD_RN L_MAHJONG_MONOGATARI_S2 L_MILLION_GOD_KISEKI_CX L_UMINEKO_2_A1)
-          npm run machine:batch -- "${ids[@]}"
-          node tools/materialize-ui-design.mjs --apply "${ids[@]}"
-          node tools/materialize-ui-design.mjs --require-unchanged "${ids[@]}"
+          first=(L_FIRE_FORCE_2 L_JORMUNGAND_ND01G L_KYOKOU_SUIRI_ST L_AKUDAMA_DRIVE_TP L_GHOST_IN_THE_SHELL_ZS L_GOBLIN_SLAYER_2_JZ L_GODZILLA_NS L_KABANERI_UNATO_KESSEN_XX L_MAGIA_RECORD_RN L_MAHJONG_MONOGATARI_S2)
+          second=(L_MILLION_GOD_KISEKI_CX L_UMINEKO_2_A1)
+          all=("${first[@]}" "${second[@]}")
+          npm run machine:batch -- "${first[@]}"
+          npm run machine:batch -- "${second[@]}"
+          node tools/materialize-ui-design.mjs --apply "${all[@]}"
+          node tools/materialize-ui-design.mjs --require-unchanged "${all[@]}"
           npm run selection:migration-audit
           npm run selection:summary-readiness
       - name: Commit audited UI changes
