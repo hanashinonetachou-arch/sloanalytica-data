@@ -1,0 +1,62 @@
+name: Apply Next10 v6.14 Observation UI cascade
+on:
+  push:
+    branches: [audit/20260908-next10-selection-v614]
+    paths: [tools/repair-next10-v614-observation-ui.mjs]
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  apply:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with: {fetch-depth: 0}
+      - uses: actions/setup-node@v4
+        with: {node-version: 20}
+      - run: npm ci
+      - run: node tools/repair-next10-v614-observation-ui.mjs
+      - name: Validate Observation and linkages
+        run: |
+          node tools/validate-machine-observation-data.mjs \
+            research/LB_TRIPLE_CROWN_SEVEN_FG/machine-observation-data.json \
+            research/L_UMINEKO_2_A1/machine-observation-data.json
+          node tools/audit-observation-selection-linkage.mjs \
+            L_FIRE_FORCE_2 L_UMINEKO_2_A1 L_KABANERI_UNATO_KESSEN_XX L_JORMUNGAND_ND01G \
+            LB_TRIPLE_CROWN_SEVEN_FG L_SHINUCHI_YOSHIMUNE_A1 L_KYOKOU_SUIRI_ST L_AKUDAMA_DRIVE_TP \
+            L_MILLION_GOD_KISEKI_CX L_GUNDAM_UNICORN_KAKUSEI_DRIVE_2JA --strict-v2
+      - name: Validate UI and linkages
+        run: |
+          node tools/validate-ui-design-data.mjs .
+          node tools/audit-ui-design-selection-linkage.mjs . LB_TRIPLE_CROWN_SEVEN_FG L_UMINEKO_2_A1 L_FIRE_FORCE_2
+          node tools/audit-ui-design-observation-linkage.mjs . LB_TRIPLE_CROWN_SEVEN_FG L_UMINEKO_2_A1 L_FIRE_FORCE_2
+      - name: Four-layer gate for changed machines
+        run: |
+          node tools/four-layer-pipeline-gate.mjs LB_TRIPLE_CROWN_SEVEN_FG L_UMINEKO_2_A1 L_FIRE_FORCE_2
+      - name: Assertions
+        run: |
+          node --input-type=module <<'NODE'
+          import fs from 'node:fs';
+          const t=JSON.parse(fs.readFileSync('research/LB_TRIPLE_CROWN_SEVEN_FG/machine-observation-data.json','utf8'));
+          const tu=JSON.parse(fs.readFileSync('research/LB_TRIPLE_CROWN_SEVEN_FG/ui-design-data.json','utf8'));
+          const u=JSON.parse(fs.readFileSync('research/L_UMINEKO_2_A1/machine-observation-data.json','utf8'));
+          const uu=JSON.parse(fs.readFileSync('research/L_UMINEKO_2_A1/ui-design-data.json','utf8'));
+          const fm=(o,id)=>o.featureMappings.find(x=>x.featureId===id);
+          if(!fm(t,'FEAT_SMALL_ROLE_COMPOSITION')||!fm(t,'FEAT_BONUS_OUTCOME')) throw new Error('Triple joint observation mappings missing');
+          if(fm(t,'FEAT_CHERRY')||fm(t,'FEAT_PLUM')||fm(t,'FEAT_BB_INITIAL')||fm(t,'FEAT_RB_INITIAL')) throw new Error('Triple stale mappings remain');
+          if(!tu.sections['通常時'].inputIds.includes('INP_PLUM_COUNT')) throw new Error('Plum UI missing');
+          if(!fm(u,'FEAT_ART_ROLE_COMPOSITION')) throw new Error('Umineko ART joint mapping missing');
+          if(fm(u,'FEAT_ART_MISS')||fm(u,'FEAT_ART_COMMON_BELL')) throw new Error('Umineko stale ART mappings remain');
+          if(!uu.sections['ART中の役構成']) throw new Error('Umineko joint ART UI missing');
+          if(uu.sections['ART中ハズレ']||uu.sections['ART中の共通ベル']) throw new Error('Umineko split ART sections remain');
+          console.log('PASS: v6.14 Observation/UI assertions');
+          NODE
+      - name: Commit cascade
+        run: |
+          if git diff --quiet; then exit 0; fi
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add research/LB_TRIPLE_CROWN_SEVEN_FG/machine-observation-data.json research/LB_TRIPLE_CROWN_SEVEN_FG/ui-design-data.json \
+                  research/L_UMINEKO_2_A1/machine-observation-data.json research/L_UMINEKO_2_A1/ui-design-data.json
+          git commit -m 'fix: cascade v6.14 selection changes through Observation and UI'
+          git push origin HEAD:audit/20260908-next10-selection-v614
