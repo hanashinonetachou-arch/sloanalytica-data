@@ -1,0 +1,60 @@
+name: Batch 20260909 Identity UI Remediation
+
+on:
+  push:
+    branches:
+      - batch/20260909-field-feedback-first10-fixes
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  validate-materialize:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: batch/20260909-field-feedback-first10-fixes
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - run: npm ci
+      - name: Materialize identity checkpoint 26
+        run: |
+          node tools/apply-machine-identity-classification.mjs --apply
+          node tools/apply-machine-identity-classification.mjs --verify
+      - name: Validate UI evidence ordering and design
+        run: |
+          node tools/audit-ui-evidence-section-order.mjs .
+          npm run ui-design:validate
+          npm run ui-design:linkage:audit -- . L_ANIMAL_SLOT_DOCCHI_ZT
+      - name: Full repository quality
+        run: |
+          npm test
+          npm run audit
+          npm run registry:validate
+          npm run audit:ui-service-names
+          npm run ux-contract:audit
+      - name: Restore transient reports
+        run: |
+          git restore --worktree reports/batch-machine-pipeline-report.json 2>/dev/null || true
+          git restore --worktree reports/v64-observation-debt-classification.json 2>/dev/null || true
+          git restore --worktree reports/machine-observation-migration-plan.json 2>/dev/null || true
+          git restore --worktree reports/v64-observation-trial-universe-audit.json 2>/dev/null || true
+      - name: Commit canonical generated identity outputs
+        run: |
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git add catalog.json machine-identity-metadata.json
+          git add machines/*/machine-package.json
+          if git diff --cached --quiet; then
+            echo 'No generated identity changes'
+          else
+            git commit -m 'audit: materialize first10 identity metadata'
+            git push
+          fi
+      - name: Final clean state
+        run: git status --short
