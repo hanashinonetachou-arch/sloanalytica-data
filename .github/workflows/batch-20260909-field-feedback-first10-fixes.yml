@@ -1,0 +1,86 @@
+name: Batch 20260909 Field Feedback First10 Fixes
+
+on:
+  push:
+    branches:
+      - batch/20260909-field-feedback-first10-fixes
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  validate-and-materialize:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: batch/20260909-field-feedback-first10-fixes
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - run: npm ci
+      - name: Apply canonical field-feedback fixes
+        run: |
+          node tools/apply-20260909-field-feedback-first10-fixes.mjs
+          node tools/apply-required-trials-builder-fix.mjs
+      - name: Validate Research and Selection
+        run: |
+          for id in L_BIG_DREAM_GOLDEN_PUSHER_KR L_SUPER_RIO_ACE2_ND02H; do
+            npm run research:validate -- "research/$id/research-data.json"
+            npm run selection:validate -- "research/$id/selection-data.json" "research/$id/research-data.json"
+          done
+      - name: Validate Observation and UI design
+        run: |
+          npm run observation:validate -- research/L_BIG_DREAM_GOLDEN_PUSHER_KR/machine-observation-data.json research/L_SUPER_RIO_ACE2_ND02H/machine-observation-data.json
+          npm run observation:selection:audit -- L_BIG_DREAM_GOLDEN_PUSHER_KR L_SUPER_RIO_ACE2_ND02H --strict-v2
+          npm run ui-design:validate
+          npm run ui-design:linkage:audit -- . L_BIG_DREAM_GOLDEN_PUSHER_KR L_SUPER_RIO_ACE2_ND02H
+          npm run ui-design:observation:audit -- L_BIG_DREAM_GOLDEN_PUSHER_KR L_SUPER_RIO_ACE2_ND02H --strict-v2
+      - name: Rebuild affected machine packages
+        run: npm run machine:batch -- L_BIG_DREAM_GOLDEN_PUSHER_KR L_SUPER_RIO_ACE2_ND02H
+      - name: Assert requested semantics
+        run: |
+          node --input-type=module <<'NODE'
+          import fs from 'node:fs';
+          const read=p=>JSON.parse(fs.readFileSync(p,'utf8'));
+          const big=read('research/L_BIG_DREAM_GOLDEN_PUSHER_KR/selection-data.json');
+          const rio=read('research/L_SUPER_RIO_ACE2_ND02H/selection-data.json');
+          const ru=read('research/L_SUPER_RIO_ACE2_ND02H/ui-design-data.json');
+          const bp=read('research/L_BIG_DREAM_GOLDEN_PUSHER_KR/machine-package.generated.json');
+          const rp=read('research/L_SUPER_RIO_ACE2_ND02H/machine-package.generated.json');
+          const get=(x,id)=>x.features.find(f=>f.featureId===id);
+          if(get(big,'FEAT_GAME_CEILING_1499')?.adoptionCategory!=='EXCLUDE') throw new Error('Big Dream ceiling must be EXCLUDE');
+          if(get(rio,'FEAT_WATERMELON_NEXT_NOIR')?.adoptionCategory!=='EXCLUDE') throw new Error('Rio watermelon next Noir must be EXCLUDE');
+          if(!get(big,'FEAT_GC_END_SCREEN') || !get(rio,'FEAT_RINA_SIGN')) throw new Error('new end-screen features missing');
+          if(!ru.sections['ハワードゲーム']) throw new Error('Howard section title missing');
+          if(ru.inputContracts.INP_DEN_HOWARD_THRESHOLD.name!=='規定リプレイ50回到達' || ru.inputContracts.INP_NUM_HOWARD_THRESHOLD.name!=='ハワードゲーム') throw new Error('Howard labels mismatch');
+          if(ru.inputContracts.INP_DEN_HOWARD_THRESHOLD.gridSpan!==12 || ru.inputContracts.INP_NUM_HOWARD_THRESHOLD.gridSpan!==12) throw new Error('Howard must be vertical/full width');
+          for(const pkg of [bp,rp]) for(const f of pkg.features.features){
+            if(f.probabilityEngineUsage===false) continue;
+            if(f.minimumSample===1 && f.sampleRecommendation===1) throw new Error(`${pkg.machine.machineId}/${f.featureId}: invalid 1/1 sample default remains`);
+          }
+          console.log('PASS requested semantics');
+          NODE
+      - name: Full data quality
+        run: |
+          npm test
+          npm run audit
+          npm run registry:validate
+          npm run audit:ui-service-names
+          npm run ux-contract:audit
+      - name: Restore transient reports
+        run: |
+          git restore --worktree reports/batch-machine-pipeline-report.json 2>/dev/null || true
+          git restore --worktree reports/v64-observation-debt-classification.json 2>/dev/null || true
+      - name: Commit materialized fixes
+        run: |
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git add tools/build-machine-data.mjs research/L_BIG_DREAM_GOLDEN_PUSHER_KR research/L_SUPER_RIO_ACE2_ND02H
+          for id in L_ANIMAL_SLOT_DOCCHI_ZT L_BIOHAZARD_RE3_ZD L_TAKT_OP_DESTINY_M1 L_BIRDIE_WING_BC L_SAO2_PA1 L_SENGOKU_OTOME5_L8 L_DARK_HAIBI_SB L_LOTIS_TN; do git add "research/$id/ui-design-data.json"; done
+          if git diff --cached --quiet; then echo 'No materialized changes'; else git commit -m 'fix: address first10 real-device feedback'; git push; fi
+      - name: Final clean state
+        run: git status --short
