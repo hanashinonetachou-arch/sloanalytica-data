@@ -56,47 +56,51 @@
     },
     {
       "id": "INP_NUM_HOWARD_THRESHOLD",
-      "name": "到達時にハワードゲームへ当選した回数",
+      "name": "ハワードゲーム",
       "category": "SEL_HOWARD_THRESHOLD",
       "type": "counter",
       "unit": "回",
       "displayOrder": 16,
       "inferenceRole": "INCLUDE_SUPPORT",
       "defaultValue": "",
-      "minimum": 0
+      "minimum": 0,
+      "uiGridSpan": 12
     },
     {
       "id": "INP_DEN_HOWARD_THRESHOLD",
-      "name": "通常時に規定リプレイ50回へ到達した回数",
+      "name": "規定リプレイ50回到達",
       "category": "SEL_HOWARD_THRESHOLD",
       "type": "integer",
       "unit": "回",
       "displayOrder": 17,
       "inferenceRole": "INCLUDE_SUPPORT",
       "defaultValue": "",
-      "minimum": 0
+      "minimum": 0,
+      "uiGridSpan": 12
     },
     {
-      "id": "INP_NUM_WATERMELON_NEXT_NOIR",
-      "name": "次回ノワールルーム成功が選ばれた回数",
-      "category": "SEL_WATERMELON_NEXT_NOIR",
+      "id": "INP_NUM_RINA_SIGN",
+      "name": "リナサイン",
+      "category": "SEL_RINA_SIGN",
       "type": "counter",
       "unit": "回",
       "displayOrder": 18,
       "inferenceRole": "INCLUDE_SUPPORT",
       "defaultValue": "",
-      "minimum": 0
+      "minimum": 0,
+      "uiGridSpan": 12
     },
     {
-      "id": "INP_DEN_WATERMELON_NEXT_NOIR",
-      "name": "対象条件下のスイカ成立回数",
-      "category": "SEL_WATERMELON_NEXT_NOIR",
+      "id": "INP_DEN_RINA_SIGN",
+      "name": "BB・AT終了画面",
+      "category": "SEL_RINA_SIGN",
       "type": "integer",
       "unit": "回",
       "displayOrder": 19,
       "inferenceRole": "INCLUDE_SUPPORT",
       "defaultValue": "",
-      "minimum": 0
+      "minimum": 0,
+      "uiGridSpan": 12
     }
   ],
   "features": [
@@ -108,7 +112,9 @@
       "weight": 1,
       "integratedContribution": false,
       "numeratorInputId": "INP_NUM_INITIAL",
-      "denominatorInputId": "INP_DEN_INITIAL"
+      "denominatorInputId": "INP_DEN_INITIAL",
+      "sampleRecommendation": 23567,
+      "minimumSample": 7856
     },
     {
       "featureId": "FEAT_NOIR_ROOM",
@@ -118,7 +124,9 @@
       "weight": 1,
       "integratedContribution": false,
       "numeratorInputId": "INP_NUM_NOIR_ROOM",
-      "denominatorInputId": "INP_DEN_INITIAL"
+      "denominatorInputId": "INP_DEN_INITIAL",
+      "sampleRecommendation": 56029,
+      "minimumSample": 18677
     },
     {
       "featureId": "FEAT_BONUS_DIRECT",
@@ -128,7 +136,10 @@
       "weight": 1,
       "integratedContribution": false,
       "numeratorInputId": "INP_NUM_BONUS_DIRECT",
-      "denominatorInputId": "INP_DEN_INITIAL"
+      "denominatorInputId": "INP_DEN_INITIAL",
+      "userFacingReason": "通常時にノワールルームを経由せず当選したボーナスは、設定差が大きく公開確率も全設定そろっているため採用します。通常ゲーム数と、該当するボーナス直撃回数を入力してください。",
+      "sampleRecommendation": 15435,
+      "minimumSample": 5145
     },
     {
       "featureId": "FEAT_HOWARD_THRESHOLD",
@@ -138,7 +149,9 @@
       "weight": 1,
       "integratedContribution": false,
       "numeratorInputId": "INP_NUM_HOWARD_THRESHOLD",
-      "denominatorInputId": "INP_DEN_HOWARD_THRESHOLD"
+      "denominatorInputId": "INP_DEN_HOWARD_THRESHOLD",
+      "sampleRecommendation": 143,
+      "minimumSample": 48
     },
     {
       "featureId": "FEAT_ACE_MODE",
@@ -152,12 +165,24 @@
     {
       "featureId": "FEAT_WATERMELON_NEXT_NOIR",
       "researchFeatureId": "RF_WATERMELON_NEXT_NOIR",
-      "adoptionCategory": "INCLUDE_SUPPORT",
-      "userReason": "公開された全設定の確率・分布があり、条件付き分母や排他的カテゴリを保って観測できるため、補助推測要素として採用する。",
+      "adoptionCategory": "EXCLUDE",
+      "userReason": "スイカ成立時の次回ノワールルーム成功抽選には設定差があるが、内部で先に行われる成功抽選であり、通常遊技中に「このスイカで当選した」と確定できる表示が確認できない。次回ノワールルームの成功だけでは通常の成功抽選との区別もできないため、分子を確実に数えられず数値推測には使用しない。",
       "weight": 1,
       "integratedContribution": false,
-      "numeratorInputId": "INP_NUM_WATERMELON_NEXT_NOIR",
-      "denominatorInputId": "INP_DEN_WATERMELON_NEXT_NOIR"
+      "userFacingReason": "スイカ成立時の「次回ノワールルーム成功抽選」には設定差がありますが、そのスイカで内部当選したかを確実に見分ける方法が確認できません。次のノワールルームが成功しても、スイカの抽選で成功が決まったとは断定できないため、設定推測の計算には使用しません。PUSHなどの示唆は期待度を示すもので、当選確定のカウントには使いません。"
+    },
+    {
+      "featureId": "FEAT_RINA_SIGN",
+      "researchFeatureId": "RF_RINA_SIGN",
+      "adoptionCategory": "INCLUDE_SUPPORT",
+      "userReason": "リナサインはBB・AT終了画面ごとの設定別出現率が全設定で公開され、直接カウントできるため補助推測要素として採用する。",
+      "userFacingReason": "BB・AT終了画面のリナサインは、設定1の1.0%から設定6の5.0%まで設定別出現率が公開されているため採用します。終了画面を確認した回数と、リナサインが出た回数を入力してください。",
+      "weight": 1,
+      "integratedContribution": false,
+      "numeratorInputId": "INP_NUM_RINA_SIGN",
+      "denominatorInputId": "INP_DEN_RINA_SIGN",
+      "sampleRecommendation": 117,
+      "minimumSample": 39
     }
   ],
   "evidenceUi": {
@@ -180,7 +205,7 @@
       "candidateId": "RQ_HINTS",
       "name": "リール枠・アイキャッチ・サイン・獲得枚数・トロフィー・エンディングPUSH",
       "disposition": "REFERENCE",
-      "reason": "設定差の数値尤度を構築できないため確率推測には直接加えず、示唆・観測経路・参考情報として保持する。",
+      "reason": "リナサインは設定別出現率が公開されたため数値推測へ採用。リオサイン（奇数示唆）とミントサイン（偶数示唆）は示唆内容は有用だが設定別出現率が揃っていないため確率計算には使用せず参考情報として保持する。",
       "integratedContribution": false,
       "userFacingRejected": false
     },
@@ -196,35 +221,46 @@
   "dependencyAuditRef": "batches/20260908-manifest-v7-first10/gate-b-dependency-audit.json",
   "selectionSummaryContract": {
     "schemaVersion": "selection-summary-v1",
-    "evaluatedCount": 6,
+    "evaluatedCount": 7,
     "selectedCount": 5,
-    "rejectedCount": 1,
+    "rejectedCount": 2,
     "selected": [
       {
         "name": "ボーナス/AT初当り",
-        "reason": "公開された全設定の確率・分布を比較でき、依存関係監査で独立または主経路として扱えるため、主推測要素として採用する。"
+        "reason": "公開された全設定の確率・分布を比較でき、依存関係監査で独立または主経路として扱えるため、主推測要素として採用する。",
+        "featureId": "FEAT_INITIAL"
       },
       {
         "name": "ノワールルーム突入",
-        "reason": "公開された設定差は有効だが、主な推測要素との因果・包含関係で同じ好不調を二重評価し得るため、同時独立加算せず補助経路として使用する。"
+        "reason": "公開された設定差は有効だが、主な推測要素との因果・包含関係で同じ好不調を二重評価し得るため、同時独立加算せず補助経路として使用する。",
+        "featureId": "FEAT_NOIR_ROOM"
       },
       {
         "name": "ボーナス直撃",
-        "reason": "公開された全設定の確率・分布があり、条件付き分母や排他的カテゴリを保って観測できるため、補助推測要素として採用する。"
+        "reason": "公開された全設定の確率・分布があり、条件付き分母や排他的カテゴリを保って観測できるため、補助推測要素として採用する。",
+        "featureId": "FEAT_BONUS_DIRECT"
       },
       {
         "name": "規定リプレイ50回到達時ハワードゲーム当選",
-        "reason": "公開された全設定の確率・分布があり、条件付き分母や排他的カテゴリを保って観測できるため、補助推測要素として採用する。"
+        "reason": "公開された全設定の確率・分布があり、条件付き分母や排他的カテゴリを保って観測できるため、補助推測要素として採用する。",
+        "featureId": "FEAT_HOWARD_THRESHOLD"
       },
       {
-        "name": "スイカ成立時 次回ノワールルーム成功抽選",
-        "reason": "公開された全設定の確率・分布があり、条件付き分母や排他的カテゴリを保って観測できるため、補助推測要素として採用する。"
+        "name": "BB・AT終了画面 リナサイン",
+        "reason": "設定別出現率が全設定で公開され、終了画面から直接カウントできるため採用する。",
+        "featureId": "FEAT_RINA_SIGN"
       }
     ],
     "rejected": [
       {
         "name": "内部エースモード選択",
-        "reason": "エースモードは内部状態で、公開解析も見た目での判別は難しいと明記している。示唆からの推測では公開30.1%～43.8%の選択率と同じ母集団を正確にカウントできないため数値推測に使用しない。"
+        "reason": "エースモードは内部状態で、公開解析も見た目での判別は難しいと明記している。示唆からの推測では公開30.1%～43.8%の選択率と同じ母集団を正確にカウントできないため数値推測に使用しない。",
+        "featureId": "FEAT_ACE_MODE"
+      },
+      {
+        "name": "スイカ成立時 次回ノワールルーム成功抽選",
+        "reason": "スイカ成立時の「次回ノワールルーム成功抽選」には設定差がありますが、そのスイカで内部当選したかを確実に見分ける方法が確認できません。次のノワールルームが成功しても、スイカの抽選で成功が決まったとは断定できないため、設定推測の計算には使用しません。PUSHなどの示唆は期待度を示すもので、当選確定のカウントには使いません。",
+        "featureId": "FEAT_WATERMELON_NEXT_NOIR"
       }
     ]
   },
