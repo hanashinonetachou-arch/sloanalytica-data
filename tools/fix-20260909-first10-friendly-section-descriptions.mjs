@@ -1,0 +1,36 @@
+import fs from 'node:fs';
+
+const ids = [
+  'L_ANIMAL_SLOT_DOCCHI_ZT','L_BIG_DREAM_GOLDEN_PUSHER_KR','L_BIOHAZARD_RE3_ZD','L_TAKT_OP_DESTINY_M1',
+  'L_SUPER_RIO_ACE2_ND02H','L_BIRDIE_WING_BC','L_SAO2_PA1','L_SENGOKU_OTOME5_L8','L_DARK_HAIBI_SB','L_LOTIS_TN'
+];
+
+function friendly(text) {
+  if (typeof text !== 'string') return text;
+  let s = text;
+  s = s.replace(/「([^」]+)」を分母として、同じ実戦中に各項目を数えます。数え方：[^。]+。自分で確認できた回数だけを入力してください。/g,
+    '「$1」を確認した回数と、そのときに該当した回数を入力してください。自分で確認できたものだけを数えます。');
+  s = s.replace(/「([^」]+)」を分母として、同じ実戦中に各項目を数えます。自分で確認できた回数だけを入力してください。/g,
+    '自分で確認できた「$1」と、このセクションの各項目の回数を入力してください。');
+  s = s.replace(/数え方：[^。]+。自分で確認できた回数だけを入力してください。/g,
+    '結果が確定したときに、当てはまる項目を1回ずつ数えてください。自分で確認できたものだけを入力します。');
+  s = s.replace(/同じ観測区間/g, '同じ実戦中');
+  s = s.replace(/観測区間/g, '実戦中');
+  s = s.replace(/対象条件下の/g, '該当する');
+  s = s.replace(/対象条件下/g, '該当する場面');
+  s = s.replace(/数える範囲：/g, '数えるもの：');
+  return s;
+}
+
+for (const id of ids) {
+  const p = `research/${id}/ui-design-data.json`;
+  const data = JSON.parse(fs.readFileSync(p, 'utf8'));
+  for (const section of Object.values(data.sections ?? {})) {
+    if (typeof section.description === 'string') section.description = friendly(section.description);
+  }
+  const descriptions = Object.values(data.sections ?? {}).map(s => s.description ?? '').join('\n');
+  const banned = descriptions.match(/観測区間|対象条件下|同じ観測|分母として|数え方：/g);
+  if (banned) throw new Error(`${id}: technical section wording remains: ${[...new Set(banned)].join(', ')}`);
+  fs.writeFileSync(p, JSON.stringify(data, null, 2) + '\n');
+}
+console.log('PASS first10 section descriptions use user-facing action wording');
