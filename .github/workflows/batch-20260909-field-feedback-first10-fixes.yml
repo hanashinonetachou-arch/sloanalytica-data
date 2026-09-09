@@ -53,8 +53,8 @@ jobs:
           const big=read('research/L_BIG_DREAM_GOLDEN_PUSHER_KR/selection-data.json');
           const rio=read('research/L_SUPER_RIO_ACE2_ND02H/selection-data.json');
           const ru=read('research/L_SUPER_RIO_ACE2_ND02H/ui-design-data.json');
-          const bp=read('research/L_BIG_DREAM_GOLDEN_PUSHER_KR/machine-package.generated.json');
-          const rp=read('research/L_SUPER_RIO_ACE2_ND02H/machine-package.generated.json');
+          const bp=read('machines/L_BIG_DREAM_GOLDEN_PUSHER_KR/machine-package.json');
+          const rp=read('machines/L_SUPER_RIO_ACE2_ND02H/machine-package.json');
           const get=(x,id)=>x.features.find(f=>f.featureId===id);
           if(get(big,'FEAT_GAME_CEILING_1499')?.adoptionCategory!=='EXCLUDE') throw new Error('Big Dream ceiling must be EXCLUDE');
           if(get(rio,'FEAT_WATERMELON_NEXT_NOIR')?.adoptionCategory!=='EXCLUDE') throw new Error('Rio watermelon next Noir must be EXCLUDE');
@@ -83,7 +83,9 @@ jobs:
         run: |
           git config user.name github-actions[bot]
           git config user.email 41898282+github-actions[bot]@users.noreply.github.com
-          git add tools/build-machine-data.mjs research/L_BIG_DREAM_GOLDEN_PUSHER_KR research/L_SUPER_RIO_ACE2_ND02H
+          git add tools/build-machine-data.mjs catalog.json difficulty-catalog.json
+          git add machines/L_BIG_DREAM_GOLDEN_PUSHER_KR/machine-package.json machines/L_SUPER_RIO_ACE2_ND02H/machine-package.json
+          git add research/L_BIG_DREAM_GOLDEN_PUSHER_KR research/L_SUPER_RIO_ACE2_ND02H
           for id in L_ANIMAL_SLOT_DOCCHI_ZT L_BIOHAZARD_RE3_ZD L_TAKT_OP_DESTINY_M1 L_BIRDIE_WING_BC L_SAO2_PA1 L_SENGOKU_OTOME5_L8 L_DARK_HAIBI_SB L_LOTIS_TN; do git add "research/$id/ui-design-data.json"; done
           if git diff --cached --quiet; then echo 'No materialized changes'; else git commit -m 'fix: address first10 real-device feedback'; git push; fi
       - name: Final clean state
