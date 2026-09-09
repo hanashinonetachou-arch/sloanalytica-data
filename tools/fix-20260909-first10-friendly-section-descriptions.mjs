@@ -22,11 +22,22 @@ function friendly(text) {
   return s;
 }
 
+const sao2Descriptions = {
+  '通常時': '自分で回した通常ゲーム数と、その間に確認できたCZ初当り・AT初当り・シノンAT直撃・確定CZを入力してください。CZ中の途中昇格は数えません。',
+  '低確滞在時スイカ→シューティングチャージ': '低確中にスイカが成立するたびに1回数え、そのスイカからシューティングチャージへ当選した回数を入力してください。',
+  '低確滞在時 強チェリー→CZ': '低確中に強チェリーが成立するたびに1回数え、その強チェリーからCZへ当選した回数を入力してください。',
+  '高確滞在時 強チェリー→CZ': '高確中に強チェリーが成立するたびに1回数え、その強チェリーからCZへ当選した回数を入力してください。',
+  'CZ失敗時アイテム獲得': 'CZに失敗するたびに1回数え、その失敗時にアイテムを獲得した回数を入力してください。',
+  '強チャンス目→確定CZ': '強チャンス目A/Bが成立するたびに1回数え、確定CZに当選した回数を入力してください。',
+  'AT初当り時ステージ選択率': 'AT初当りごとに開始ステージを確認し、当てはまる項目を1回数えてください。50G以内の引き戻しは含めますが、高確率スタートとその後のステージ移行は数えません。'
+};
+
 for (const id of ids) {
   const p = `research/${id}/ui-design-data.json`;
   const data = JSON.parse(fs.readFileSync(p, 'utf8'));
-  for (const section of Object.values(data.sections ?? {})) {
-    if (typeof section.description === 'string') section.description = friendly(section.description);
+  for (const [title, section] of Object.entries(data.sections ?? {})) {
+    if (id === 'L_SAO2_PA1' && sao2Descriptions[title]) section.description = sao2Descriptions[title];
+    else if (typeof section.description === 'string') section.description = friendly(section.description);
   }
   const descriptions = Object.values(data.sections ?? {}).map(s => s.description ?? '').join('\n');
   const banned = descriptions.match(/観測区間|対象条件下|同じ観測|分母として|数え方：/g);
