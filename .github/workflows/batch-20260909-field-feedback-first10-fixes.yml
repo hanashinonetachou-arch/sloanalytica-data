@@ -28,6 +28,7 @@ jobs:
           node tools/fix-20260909-field-feedback-observation-methods.mjs
           node tools/fix-20260909-field-feedback-summary-feature-ids.mjs
           node tools/fix-20260909-field-feedback-service-name-ui.mjs
+          node tools/fix-20260909-first10-friendly-section-descriptions.mjs
           node tools/apply-required-trials-builder-fix.mjs
           node tools/materialize-20260909-sample-thresholds.mjs
       - name: Validate Research and Selection
@@ -62,6 +63,11 @@ jobs:
           if(!ru.sections['ハワードゲーム']) throw new Error('Howard section title missing');
           if(ru.inputContracts.INP_DEN_HOWARD_THRESHOLD.name!=='規定リプレイ50回到達' || ru.inputContracts.INP_NUM_HOWARD_THRESHOLD.name!=='ハワードゲーム') throw new Error('Howard labels mismatch');
           if(ru.inputContracts.INP_DEN_HOWARD_THRESHOLD.gridSpan!==12 || ru.inputContracts.INP_NUM_HOWARD_THRESHOLD.gridSpan!==12) throw new Error('Howard must be vertical/full width');
+          for(const id of ['L_ANIMAL_SLOT_DOCCHI_ZT','L_BIG_DREAM_GOLDEN_PUSHER_KR','L_BIOHAZARD_RE3_ZD','L_TAKT_OP_DESTINY_M1','L_SUPER_RIO_ACE2_ND02H','L_BIRDIE_WING_BC','L_SAO2_PA1','L_SENGOKU_OTOME5_L8','L_DARK_HAIBI_SB','L_LOTIS_TN']){
+            const ui=read(`research/${id}/ui-design-data.json`);
+            const descriptions=Object.values(ui.sections??{}).map(s=>s.description??'').join('\n');
+            if(/観測区間|対象条件下|同じ観測|分母として|数え方：/.test(descriptions)) throw new Error(`${id}: technical section wording remains`);
+          }
           for(const pkg of [bp,rp]) for(const f of pkg.features.features){
             if(f.probabilityEngineUsage===false) continue;
             if(f.minimumSample===1 && f.sampleRecommendation===1) throw new Error(`${pkg.machine.machineId}/${f.featureId}: invalid 1/1 sample default remains`);
@@ -85,8 +91,8 @@ jobs:
           git config user.email 41898282+github-actions[bot]@users.noreply.github.com
           git add tools/build-machine-data.mjs catalog.json difficulty-catalog.json
           git add machines/L_BIG_DREAM_GOLDEN_PUSHER_KR/machine-package.json machines/L_SUPER_RIO_ACE2_ND02H/machine-package.json
-          git add research/L_BIG_DREAM_GOLDEN_PUSHER_KR research/L_SUPER_RIO_ACE2_ND02H
-          for id in L_ANIMAL_SLOT_DOCCHI_ZT L_BIOHAZARD_RE3_ZD L_TAKT_OP_DESTINY_M1 L_BIRDIE_WING_BC L_SAO2_PA1 L_SENGOKU_OTOME5_L8 L_DARK_HAIBI_SB L_LOTIS_TN; do git add "research/$id/ui-design-data.json"; done
+          for id in L_ANIMAL_SLOT_DOCCHI_ZT L_BIG_DREAM_GOLDEN_PUSHER_KR L_BIOHAZARD_RE3_ZD L_TAKT_OP_DESTINY_M1 L_SUPER_RIO_ACE2_ND02H L_BIRDIE_WING_BC L_SAO2_PA1 L_SENGOKU_OTOME5_L8 L_DARK_HAIBI_SB L_LOTIS_TN; do git add "research/$id/ui-design-data.json"; done
+          git add research/L_BIG_DREAM_GOLDEN_PUSHER_KR/selection-data.json research/L_SUPER_RIO_ACE2_ND02H/selection-data.json research/L_BIG_DREAM_GOLDEN_PUSHER_KR/research-data.json research/L_SUPER_RIO_ACE2_ND02H/research-data.json research/L_BIG_DREAM_GOLDEN_PUSHER_KR/machine-observation-data.json research/L_SUPER_RIO_ACE2_ND02H/machine-observation-data.json
           if git diff --cached --quiet; then echo 'No materialized changes'; else git commit -m 'fix: address first10 real-device feedback'; git push; fi
       - name: Final clean state
         run: git status --short
