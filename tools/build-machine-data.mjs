@@ -64,13 +64,27 @@ function inputWithDefaults(x){
 function buildFeature(rf,sf,inputIds,inferenceSettings=null){
   const role=sf.adoptionCategory;
   if(role==="EXCLUDE") return null;
+  const settingsForTrials=Array.isArray(inferenceSettings)&&inferenceSettings.length>=2
+    ? inferenceSettings
+    : Object.keys(rf.settingValues??rf.settingDistributions??{});
+  const estimatedRecommended=estimateRequiredTrials80(rf,sf,settingsForTrials);
+  const recommendedSample=Number.isFinite(sf.sampleRecommendation)
+    ? Math.max(1,Math.ceil(sf.sampleRecommendation))
+    : Number.isFinite(estimatedRecommended)
+      ? Math.max(1,Math.ceil(estimatedRecommended))
+      : null;
+  const minimumSample=Number.isFinite(sf.minimumSample)
+    ? Math.max(1,Math.ceil(sf.minimumSample))
+    : recommendedSample!=null
+      ? Math.max(1,Math.ceil(recommendedSample/3))
+      : null;
   const base={
     featureId:sf.featureId,name:sf.nameOverride??rf.name,adoptionCategory:role,
     calculationRole:role==="DISPLAY_ONLY"?"DISPLAY_ONLY":"PROBABILITY",
     probabilityEngineUsage:role!=="DISPLAY_ONLY",
     modelType:sf.modelTypeOverride??rf.candidateModel,
-    minimumSample:sf.minimumSample ?? 1,
-    sampleRecommendation:sf.sampleRecommendation ?? sf.minimumSample ?? 1
+    ...(minimumSample!=null?{minimumSample}:{}),
+    ...(recommendedSample!=null?{sampleRecommendation:recommendedSample}:{})
   };
   if(sf.weight!=null) base.reliabilityProfile={weight:sf.weight};
   if(sf.suppressedByFeatureIds!=null){

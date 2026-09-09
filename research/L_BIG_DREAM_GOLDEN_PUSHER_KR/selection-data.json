@@ -87,26 +87,40 @@
       "minimum": 0
     },
     {
-      "id": "INP_NUM_GAME_CEILING_1499",
-      "name": "1499G天井が選択された回数",
-      "category": "SEL_GAME_CEILING_1499",
+      "id": "INP_GC_END_HAT",
+      "name": "帽子",
+      "category": "SEL_GC_END_SCREEN",
       "type": "counter",
       "unit": "回",
       "displayOrder": 18,
       "inferenceRole": "INCLUDE_SUPPORT",
       "defaultValue": "",
-      "minimum": 0
+      "minimum": 0,
+      "uiGridSpan": 6
     },
     {
-      "id": "INP_DEN_GAME_CEILING_1499",
-      "name": "ゲーム数天井振り分け回数",
-      "category": "SEL_GAME_CEILING_1499",
-      "type": "integer",
+      "id": "INP_GC_END_GUN",
+      "name": "銃&玉",
+      "category": "SEL_GC_END_SCREEN",
+      "type": "counter",
       "unit": "回",
       "displayOrder": 19,
       "inferenceRole": "INCLUDE_SUPPORT",
       "defaultValue": "",
-      "minimum": 0
+      "minimum": 0,
+      "uiGridSpan": 6
+    },
+    {
+      "id": "INP_GC_END_SWORD",
+      "name": "剣",
+      "category": "SEL_GC_END_SCREEN",
+      "type": "counter",
+      "unit": "回",
+      "displayOrder": 20,
+      "inferenceRole": "INCLUDE_SUPPORT",
+      "defaultValue": "",
+      "minimum": 0,
+      "uiGridSpan": 6
     }
   ],
   "features": [
@@ -118,7 +132,9 @@
       "weight": 1,
       "integratedContribution": false,
       "numeratorInputId": "INP_NUM_CZ_INITIAL",
-      "denominatorInputId": "INP_DEN_CZ_INITIAL"
+      "denominatorInputId": "INP_DEN_CZ_INITIAL",
+      "sampleRecommendation": 203848,
+      "minimumSample": 67950
     },
     {
       "featureId": "FEAT_AT_INITIAL",
@@ -128,7 +144,9 @@
       "weight": 1,
       "integratedContribution": false,
       "numeratorInputId": "INP_NUM_AT_INITIAL",
-      "denominatorInputId": "INP_DEN_CZ_INITIAL"
+      "denominatorInputId": "INP_DEN_CZ_INITIAL",
+      "sampleRecommendation": 165747,
+      "minimumSample": 55249
     },
     {
       "featureId": "FEAT_STATION_INITIAL_BALLS",
@@ -143,17 +161,47 @@
         "INP_CAT_STATION_INITIAL_BALLS_3",
         "INP_CAT_STATION_INITIAL_BALLS_4"
       ],
-      "normalizeRoundedCategoryProbabilities": true
+      "normalizeRoundedCategoryProbabilities": true,
+      "sampleRecommendation": 272,
+      "minimumSample": 91
     },
     {
       "featureId": "FEAT_GAME_CEILING_1499",
       "researchFeatureId": "RF_GAME_CEILING_1499",
-      "adoptionCategory": "INCLUDE_SUPPORT",
-      "userReason": "公開された全設定の確率・分布があり、条件付き分母や排他的カテゴリを保って観測できるため、補助推測要素として採用する。",
+      "adoptionCategory": "EXCLUDE",
+      "userReason": "天井振り分け自体には設定差があるが、選ばれた天井ゲーム数は到達前にAT等へ当選すると外から確定できない。到達した周期だけを母数にすると偏りが生じるため、同じ条件で全試行を数えられず数値推測には使用しない。",
       "weight": 1,
       "integratedContribution": false,
-      "numeratorInputId": "INP_NUM_GAME_CEILING_1499",
-      "denominatorInputId": "INP_DEN_GAME_CEILING_1499"
+      "userFacingReason": "天井振り分けには設定差がありますが、途中でATなどに当選すると「何G天井が選ばれていたか」は確認できません。天井まで到達したときだけ数えるとデータが偏るため、設定推測の計算には使用しません。天井到達時は成功濃厚のJUDGEMENTを経由してATへ入りますが、これは到達した周期の確認用です。"
+    },
+    {
+      "featureId": "FEAT_GC_END_SCREEN",
+      "researchFeatureId": "RF_GC_END_SCREEN",
+      "adoptionCategory": "INCLUDE_SUPPORT",
+      "userReason": "通常AT後のゴールデンチャレンジ終了画面は設定別選択率が公開され、画面を直接確認できる。設定下限確定画面はEvidenceへ分離し、帽子・銃&玉・剣の相対分布だけを数値推測に使用する。",
+      "userFacingReason": "通常AT後のゴールデンチャレンジ終了画面は設定別の出現率が公開されているため採用します。帽子・銃&玉・剣を数えてください。設定2以上などが確定する画面は下の「設定確定・否定情報」で別に入力します。マイスロ利用時は終了画面の回数を自動で確認できます。",
+      "weight": 1,
+      "integratedContribution": false,
+      "numeratorInputId": "INP_GC_END_HAT",
+      "categoryInputIds": [
+        "INP_GC_END_GUN",
+        "INP_GC_END_SWORD"
+      ],
+      "inputTransform": "sum_inputs_to_trials",
+      "denominatorInputIds": [
+        "INP_GC_END_HAT",
+        "INP_GC_END_GUN",
+        "INP_GC_END_SWORD"
+      ],
+      "categoryExcludeLabels": [
+        "金銀財宝の山",
+        "ギルガメッシュ立ち絵",
+        "ギルガメッシュ見返り",
+        "ギルガメッシュ玉座",
+        "覚醒ギルガメッシュ"
+      ],
+      "sampleRecommendation": 66,
+      "minimumSample": 22
     }
   ],
   "evidenceUi": {
@@ -288,6 +336,121 @@
             ]
           }
         ]
+      },
+      {
+        "groupId": "EVI_GC_TREASURE_4PLUS",
+        "label": "金銀財宝の山",
+        "options": [
+          {
+            "value": "RE_GC_TREASURE_4PLUS",
+            "label": "金銀財宝の山",
+            "allowedSettings": [
+              "SET_4",
+              "SET_5",
+              "SET_6"
+            ],
+            "excludedSettings": [
+              "SET_1",
+              "SET_2",
+              "SET_3"
+            ],
+            "sourceEvidenceIds": [
+              "RE_GC_TREASURE_4PLUS"
+            ]
+          }
+        ]
+      },
+      {
+        "groupId": "EVI_GC_STANDING_2PLUS",
+        "label": "ギルガメッシュ立ち絵",
+        "options": [
+          {
+            "value": "RE_GC_STANDING_2PLUS",
+            "label": "ギルガメッシュ立ち絵",
+            "allowedSettings": [
+              "SET_2",
+              "SET_3",
+              "SET_4",
+              "SET_5",
+              "SET_6"
+            ],
+            "excludedSettings": [
+              "SET_1"
+            ],
+            "sourceEvidenceIds": [
+              "RE_GC_STANDING_2PLUS"
+            ]
+          }
+        ]
+      },
+      {
+        "groupId": "EVI_GC_LOOKBACK_4PLUS",
+        "label": "ギルガメッシュ見返り",
+        "options": [
+          {
+            "value": "RE_GC_LOOKBACK_4PLUS",
+            "label": "ギルガメッシュ見返り",
+            "allowedSettings": [
+              "SET_4",
+              "SET_5",
+              "SET_6"
+            ],
+            "excludedSettings": [
+              "SET_1",
+              "SET_2",
+              "SET_3"
+            ],
+            "sourceEvidenceIds": [
+              "RE_GC_LOOKBACK_4PLUS"
+            ]
+          }
+        ]
+      },
+      {
+        "groupId": "EVI_GC_THRONE_5PLUS",
+        "label": "ギルガメッシュ玉座",
+        "options": [
+          {
+            "value": "RE_GC_THRONE_5PLUS",
+            "label": "ギルガメッシュ玉座",
+            "allowedSettings": [
+              "SET_5",
+              "SET_6"
+            ],
+            "excludedSettings": [
+              "SET_1",
+              "SET_2",
+              "SET_3",
+              "SET_4"
+            ],
+            "sourceEvidenceIds": [
+              "RE_GC_THRONE_5PLUS"
+            ]
+          }
+        ]
+      },
+      {
+        "groupId": "EVI_GC_AWAKENED_6",
+        "label": "覚醒ギルガメッシュ",
+        "options": [
+          {
+            "value": "RE_GC_AWAKENED_6",
+            "label": "覚醒ギルガメッシュ",
+            "allowedSettings": [
+              "SET_6"
+            ],
+            "excludedSettings": [
+              "SET_1",
+              "SET_2",
+              "SET_3",
+              "SET_4",
+              "SET_5"
+            ],
+            "sourceEvidenceIds": [
+              "RE_GC_AWAKENED_6"
+            ]
+          }
+        ]
       }
     ]
   },
@@ -324,28 +487,38 @@
   "dependencyAuditRef": "batches/20260908-manifest-v7-first10/gate-b-dependency-audit.json",
   "selectionSummaryContract": {
     "schemaVersion": "selection-summary-v1",
-    "evaluatedCount": 4,
+    "evaluatedCount": 5,
     "selectedCount": 4,
-    "rejectedCount": 0,
+    "rejectedCount": 1,
     "selected": [
       {
         "name": "CZ JUDGEMENT",
-        "reason": "公開された全設定の確率・分布を比較でき、依存関係監査で独立または主経路として扱えるため、主推測要素として採用する。"
+        "reason": "公開された全設定の確率・分布を比較でき、依存関係監査で独立または主経路として扱えるため、主推測要素として採用する。",
+        "featureId": "FEAT_CZ_INITIAL"
       },
       {
         "name": "AT ゴールデンボーナス",
-        "reason": "公開された設定差は有効だが、主な推測要素との因果・包含関係で同じ好不調を二重評価し得るため、同時独立加算せず補助経路として使用する。"
+        "reason": "公開された設定差は有効だが、主な推測要素との因果・包含関係で同じ好不調を二重評価し得るため、同時独立加算せず補助経路として使用する。",
+        "featureId": "FEAT_AT_INITIAL"
       },
       {
         "name": "ステーションチェンジ時 初期ボール個数振り分け",
-        "reason": "公開された全設定の確率・分布があり、条件付き分母や排他的カテゴリを保って観測できるため、補助推測要素として採用する。"
+        "reason": "公開された全設定の確率・分布があり、条件付き分母や排他的カテゴリを保って観測できるため、補助推測要素として採用する。",
+        "featureId": "FEAT_STATION_INITIAL_BALLS"
       },
       {
-        "name": "ゲーム数天井1499G選択",
-        "reason": "公開された全設定の確率・分布があり、条件付き分母や排他的カテゴリを保って観測できるため、補助推測要素として採用する。"
+        "name": "ゴールデンチャレンジ終了画面",
+        "reason": "通常AT後の終了画面は設定別選択率が公開され、直接カウントできるため採用。設定下限確定画面はEvidenceへ分離する。",
+        "featureId": "FEAT_GC_END_SCREEN"
       }
     ],
-    "rejected": []
+    "rejected": [
+      {
+        "name": "ゲーム数天井1499G選択",
+        "reason": "天井振り分けには設定差がありますが、途中でATなどに当選すると「何G天井が選ばれていたか」は確認できません。天井まで到達したときだけ数えるとデータが偏るため、設定推測の計算には使用しません。天井到達時は成功濃厚のJUDGEMENTを経由してATへ入りますが、これは到達した周期の確認用です。",
+        "featureId": "FEAT_GAME_CEILING_1499"
+      }
+    ]
   },
   "selectionPolicy": {
     "noRejectionForInputBurden": true,
