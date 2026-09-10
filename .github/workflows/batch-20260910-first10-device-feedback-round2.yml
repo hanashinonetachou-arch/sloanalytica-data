@@ -1,0 +1,90 @@
+name: Batch 20260910 First10 Device Feedback Round2
+
+on:
+  push:
+    branches: [batch/20260910-first10-device-feedback-round2]
+    paths:
+      - 'tools/apply-20260910-first10-device-feedback-round2.mjs'
+      - '.github/workflows/batch-20260910-first10-device-feedback-round2.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  validate-materialize:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: batch/20260910-first10-device-feedback-round2
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm ci
+      - name: Apply canonical round2 fixes
+        run: node tools/apply-20260910-first10-device-feedback-round2.mjs
+      - name: Validate affected Selection
+        run: |
+          for id in L_SAO2_PA1 L_SENGOKU_OTOME5_L8 L_LOTIS_TN L_DARK_HAIBI_SB L_BIG_DREAM_GOLDEN_PUSHER_KR L_SUPER_RIO_ACE2_ND02H; do
+            node tools/validate-selection-data.mjs research/$id/selection-data.json research/$id/research-data.json
+          done
+      - name: Validate Observation and UI
+        run: |
+          npm run observation:validate
+          npm run ui-design:validate
+          npm run ui-design:linkage:audit -- . L_SAO2_PA1 L_SENGOKU_OTOME5_L8 L_LOTIS_TN L_DARK_HAIBI_SB L_BIG_DREAM_GOLDEN_PUSHER_KR L_SUPER_RIO_ACE2_ND02H
+          npm run ui-design:observation:audit -- L_SAO2_PA1 L_SENGOKU_OTOME5_L8 L_LOTIS_TN L_DARK_HAIBI_SB L_BIG_DREAM_GOLDEN_PUSHER_KR L_SUPER_RIO_ACE2_ND02H --strict-v2
+      - name: Four-layer gate
+        run: npm run pipeline:four-layer:gate -- L_SAO2_PA1 L_SENGOKU_OTOME5_L8 L_LOTIS_TN L_DARK_HAIBI_SB L_BIG_DREAM_GOLDEN_PUSHER_KR L_SUPER_RIO_ACE2_ND02H
+      - name: Rebuild affected packages
+        run: npm run machine:batch -- L_SAO2_PA1 L_SENGOKU_OTOME5_L8 L_LOTIS_TN L_DARK_HAIBI_SB L_BIG_DREAM_GOLDEN_PUSHER_KR L_SUPER_RIO_ACE2_ND02H
+      - name: Materialize UI
+        run: node tools/materialize-ui-design.mjs --apply L_SAO2_PA1 L_SENGOKU_OTOME5_L8 L_LOTIS_TN L_DARK_HAIBI_SB L_BIG_DREAM_GOLDEN_PUSHER_KR L_SUPER_RIO_ACE2_ND02H
+      - name: Assert requested semantics
+        run: |
+          node --input-type=module <<'NODE'
+          import fs from 'node:fs';
+          const j=p=>JSON.parse(fs.readFileSync(p,'utf8'));
+          const sel=id=>j(`research/${id}/selection-data.json`);
+          const ui=id=>j(`research/${id}/ui-design-data.json`);
+          const mustExclude=(id,ids)=>{const s=sel(id);for(const x of ids){const f=s.features.find(v=>v.featureId===x);if(!f||f.adoptionCategory!=='EXCLUDE'||!f.userFacingReason)throw new Error(`${id} ${x} not excluded with reason`);}};
+          mustExclude('L_SAO2_PA1',['FEAT_WATERMELON_SC_NORMAL','FEAT_STRONG_CHERRY_CZ_NORMAL','FEAT_STRONG_CHERRY_CZ_HIGH']);
+          mustExclude('L_SENGOKU_OTOME5_L8',['FEAT_OTOME_ATTACK_ZERO_PT']);
+          mustExclude('L_LOTIS_TN',['FEAT_PSEUDO_CHERRY_TRUE_PRELUDE','FEAT_PSEUDO_CHERRY_FAKE_PRELUDE','FEAT_FAKE_TO_TRUE_REWRITE']);
+          const sao=ui('L_SAO2_PA1');
+          if(sao.inputContracts.INP_DEN_CZ_FAIL_ITEM.gridSpan!==6||sao.inputContracts.INP_NUM_CZ_FAIL_ITEM.gridSpan!==6)throw new Error('SAO CZ fail layout');
+          if(!sao.sections['強チャンス目→確定CZ'].description.includes('※確定CZ：THE END状態から始まるCZ'))throw new Error('SAO note missing');
+          const rio=ui('L_SUPER_RIO_ACE2_ND02H');
+          for(const id of ['INP_DEN_HOWARD_THRESHOLD','INP_NUM_HOWARD_THRESHOLD','INP_DEN_RINA_SIGN','INP_NUM_RINA_SIGN'])if(rio.inputContracts[id].gridSpan!==6)throw new Error(`Rio ${id} layout`);
+          const bd=ui('L_BIG_DREAM_GOLDEN_PUSHER_KR');
+          const gc=bd.sections['ゴールデンチャレンジ終了画面'];
+          if((gc.evidenceIds||[]).length!==5)throw new Error('Big Dream GC evidence not merged');
+          for(const id of ['INP_GC_END_HAT','INP_GC_END_GUN','INP_GC_END_SWORD'])if(bd.inputContracts[id].gridSpan!==6)throw new Error('Big Dream layout');
+          const dh=sel('L_DARK_HAIBI_SB');
+          if(dh.inputs.some(x=>x.id==='INP_DEN_RB'))throw new Error('Dark Haibi duplicate RB denominator remains');
+          if(dh.features.find(x=>x.featureId==='FEAT_RB')?.denominatorInputId!=='INP_DEN_BB')throw new Error('Dark Haibi RB denominator not shared');
+          const dhu=ui('L_DARK_HAIBI_SB');
+          if(!dhu.sections['通常時'].description.includes('ボーナス後32G経過後からボーナス当選までの通常ゲーム数'))throw new Error('Dark Haibi description');
+          if(!dhu.sections['BB・RB'])throw new Error('Dark Haibi BB/RB not merged');
+          console.log('Requested semantics PASS');
+          NODE
+      - name: Full quality
+        run: |
+          npm test
+          npm run audit
+          npm run registry:validate
+          npm run audit:ui-service-names
+          npm run ux-contract:audit
+      - name: Commit materialized fixes
+        run: |
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git add research machines build catalog.json difficulty-catalog.json machine-registry.json 2>/dev/null || true
+          if ! git diff --cached --quiet; then
+            git commit -m 'fix: apply first10 device feedback round2'
+            git push origin HEAD:batch/20260910-first10-device-feedback-round2
+          fi
+      - name: Final clean state
+        run: git status --porcelain
