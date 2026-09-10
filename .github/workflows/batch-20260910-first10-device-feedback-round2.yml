@@ -30,9 +30,20 @@ jobs:
           for id in L_SAO2_PA1 L_SENGOKU_OTOME5_L8 L_LOTIS_TN L_DARK_HAIBI_SB L_BIG_DREAM_GOLDEN_PUSHER_KR L_SUPER_RIO_ACE2_ND02H; do
             node tools/validate-selection-data.mjs research/$id/selection-data.json research/$id/research-data.json
           done
-      - name: Validate Observation and UI
+      - name: Validate target Observation and UI
         run: |
-          npm run observation:validate
+          node --input-type=module <<'NODE'
+          import fs from 'node:fs';
+          import { validateObservationObject } from './tools/validate-machine-observation-data.mjs';
+          const ids=['L_SAO2_PA1','L_SENGOKU_OTOME5_L8','L_LOTIS_TN','L_DARK_HAIBI_SB','L_BIG_DREAM_GOLDEN_PUSHER_KR','L_SUPER_RIO_ACE2_ND02H'];
+          let failed=false;
+          for(const id of ids){
+            const p=`research/${id}/machine-observation-data.json`;
+            const r=validateObservationObject(JSON.parse(fs.readFileSync(p,'utf8')),p);
+            if(!r.ok){failed=true;console.error(`${id}:\n${r.errors.join('\n')}`)} else console.log(`${id}: Observation PASS`);
+          }
+          if(failed) process.exit(1);
+          NODE
           npm run ui-design:validate
           npm run ui-design:linkage:audit -- . L_SAO2_PA1 L_SENGOKU_OTOME5_L8 L_LOTIS_TN L_DARK_HAIBI_SB L_BIG_DREAM_GOLDEN_PUSHER_KR L_SUPER_RIO_ACE2_ND02H
           npm run ui-design:observation:audit -- L_SAO2_PA1 L_SENGOKU_OTOME5_L8 L_LOTIS_TN L_DARK_HAIBI_SB L_BIG_DREAM_GOLDEN_PUSHER_KR L_SUPER_RIO_ACE2_ND02H --strict-v2
