@@ -6,6 +6,7 @@ on:
       - batch/20260910-next10-gate0-v2
     paths:
       - '.github/workflows/batch-20260910-next10-formal-publish.yml'
+      - 'test/market-registry.test.mjs'
   workflow_dispatch:
 
 permissions:
@@ -132,6 +133,7 @@ jobs:
         run: |
           git restore -- reports/v64-observation-debt-classification.json 2>/dev/null || true
           git restore -- reports/batch-machine-pipeline-report.json 2>/dev/null || true
+          git restore -- reports/market-registry-merge.json 2>/dev/null || true
 
       - name: Verify publish mutation allowlist
         shell: bash
@@ -161,6 +163,6 @@ jobs:
           set -euo pipefail
           npm run registry:validate
           npm run audit
-          git restore -- reports/v64-observation-debt-classification.json reports/batch-machine-pipeline-report.json 2>/dev/null || true
+          git restore -- reports/v64-observation-debt-classification.json reports/batch-machine-pipeline-report.json reports/market-registry-merge.json 2>/dev/null || true
           test -z "$(git status --porcelain)"
           echo 'Formal publish PASS on isolated batch branch; prototype and public main not mutated.'
