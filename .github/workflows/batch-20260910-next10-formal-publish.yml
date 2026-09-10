@@ -6,7 +6,6 @@ on:
       - batch/20260910-next10-gate0-v2
     paths:
       - '.github/workflows/batch-20260910-next10-formal-publish.yml'
-      - 'test/market-registry.test.mjs'
   workflow_dispatch:
 
 permissions:
@@ -48,18 +47,22 @@ jobs:
           actual=$(git diff --name-only "$(git merge-base HEAD origin/prototype-multi-machine)"...HEAD -- 'machines/*/machine-package.json' | sed -nE 's#^machines/([^/]+)/machine-package\.json$#\1#p' | sort)
           test "$actual" = "$expected"
 
-      - name: Assert Gate E PASS and ID plan
+      - name: Assert corrected Gate E PASS and ID plan
         shell: bash
         run: |
           node --input-type=module <<'NODE'
           import fs from 'node:fs';
           const q=JSON.parse(fs.readFileSync('batches/20260910-next10-v7/gate-e-quality-report.json','utf8'));
           const r=JSON.parse(fs.readFileSync('batches/20260910-next10-v7/gate-e-registration-id-audit.json','utf8'));
-          if(q.status!=='PASS') throw new Error(`Gate E not PASS: ${q.status}`);
-          if(r.status!=='PASS'||r.collisions.length!==0||r.nextAvailableStart!==270) throw new Error('registration audit not publish-ready');
-          const got=r.proposedAssignments.map(x=>x.provisionalRegistrationId).join(',');
-          const expected=Array.from({length:10},(_,i)=>270+i).join(',');
-          if(got!==expected) throw new Error(`registration plan mismatch ${got}`);
+          const identity=JSON.parse(fs.readFileSync('batches/20260910-next10-v7/machine-identity-data.json','utf8'));
+          if(q.status!=='PASS' || q.registrationAllocation!=='REVERSE_INPUT_279_TO_270_VERIFIED') throw new Error(`corrected Gate E not publish-ready: ${JSON.stringify(q)}`);
+          if(r.status!=='PASS'||r.collisions.length!==0) throw new Error('registration audit not publish-ready');
+          const audited=new Map(r.proposedAssignments.map(x=>[x.machineId,x.provisionalRegistrationId]));
+          for(const m of identity.machines){
+            if(audited.get(m.machineId)!==m.temporaryRegistrationId) throw new Error(`${m.machineId}: Gate0/GateE registration mismatch`);
+          }
+          const assigned=identity.machines.map(m=>m.temporaryRegistrationId);
+          if(new Set(assigned).size!==10 || Math.min(...assigned)!==270 || Math.max(...assigned)!==279) throw new Error(`registration range/uniqueness mismatch: ${assigned}`);
           NODE
 
       - name: Canonical MachineData parity before publish
@@ -80,7 +83,7 @@ jobs:
       - name: Formal publish APPLY on isolated batch branch
         run: npm run machine:publish:batch -- --apply $(cat /tmp/publish-machines.txt)
 
-      - name: Assert exact catalog metadata and registration IDs 270-279
+      - name: Assert exact catalog metadata and source-verified registration IDs
         shell: bash
         run: |
           set -euo pipefail
@@ -88,10 +91,11 @@ jobs:
           node --input-type=module <<'NODE'
           import fs from 'node:fs';
           import crypto from 'node:crypto';
-          const ids=['L_YABACHIBA_ZM','L_NANGOKU_SPECIAL_M1','L_SENGOKU_COLLECTION6_KS','L_KARAKURI_CIRCUS2_JG','L_ULTRAMAN_FINAL_BATTLE_ME','L_WORLD_DAI_STAR_PA3','L_YAJIKITA_MAIRU_BG','L_TONDEMO_SKILL_KM','LB_TRIPLE_CROWN_X300','L_TOARU_INDEX2_FA'];
+          const identity=JSON.parse(fs.readFileSync('batches/20260910-next10-v7/machine-identity-data.json','utf8'));
           const catalog=JSON.parse(fs.readFileSync('catalog.json','utf8')).machines??[];
           const registry=JSON.parse(fs.readFileSync('machine-registry.json','utf8')).machines??[];
-          for(const [i,id] of ids.entries()){
+          for(const m of identity.machines){
+            const id=m.machineId;
             const c=catalog.find(x=>x.machineId===id);
             if(!c||c.status!=='available') throw new Error(`${id}: catalog missing/not available`);
             const bytes=fs.readFileSync(`machines/${id}/machine-package.json`);
@@ -100,12 +104,14 @@ jobs:
             if(c.packageSizeBytes!==bytes.length) throw new Error(`${id}: packageSizeBytes mismatch`);
             const r=registry.find(x=>x.machineId===id);
             if(!r) throw new Error(`${id}: registry missing`);
-            if(r.provisionalRegistrationId!==270+i) throw new Error(`${id}: expected provisionalRegistrationId=${270+i}, got ${r.provisionalRegistrationId}`);
+            if(r.provisionalRegistrationId!==m.temporaryRegistrationId) throw new Error(`${id}: expected source-verified provisionalRegistrationId=${m.temporaryRegistrationId}, got ${r.provisionalRegistrationId}`);
           }
           const all=registry.map(x=>x.provisionalRegistrationId).filter(Number.isInteger);
           if(new Set(all).size!==all.length) throw new Error('registry provisional ID collision');
           if(registry.length!==270) throw new Error(`expected 270 registry machines after publish, got ${registry.length}`);
-          console.log('PASS exact catalog + provisionalRegistrationId 270-279 + registry count 270');
+          const batchIds=identity.machines.map(m=>registry.find(x=>x.machineId===m.machineId)?.provisionalRegistrationId);
+          if(Math.min(...batchIds)!==270||Math.max(...batchIds)!==279) throw new Error(`published batch range mismatch: ${batchIds}`);
+          console.log('PASS exact catalog + source-verified provisionalRegistrationIds 270-279 + registry count 270');
           NODE
 
       - name: Full post-publish quality gate
