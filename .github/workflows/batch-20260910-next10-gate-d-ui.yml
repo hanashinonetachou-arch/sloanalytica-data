@@ -1,0 +1,50 @@
+name: Batch 20260910 Next10 Gate D UI
+
+on:
+  push:
+    branches:
+      - batch/20260910-next10-gate0-v2
+    paths:
+      - 'tools/materialize-gate-d-ui-design-20260910.mjs'
+      - '.github/workflows/batch-20260910-next10-gate-d-ui.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  ui:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: batch/20260910-next10-gate0-v2
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Materialize UX v7.1 UI Design
+        run: node tools/materialize-gate-d-ui-design-20260910.mjs
+      - name: Validate UI Design repository
+        run: node tools/validate-ui-design-data.mjs .
+      - name: Show Gate D UI report
+        if: always()
+        run: cat batches/20260910-next10-v7/gate-d-ui-materialization-report.json || true
+      - name: Commit UI Design and report
+        if: success()
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add research/L_YABACHIBA_ZM/ui-design-data.json \
+                  research/L_NANGOKU_SPECIAL_M1/ui-design-data.json \
+                  research/L_SENGOKU_COLLECTION6_KS/ui-design-data.json \
+                  research/L_KARAKURI_CIRCUS2_JG/ui-design-data.json \
+                  research/L_ULTRAMAN_FINAL_BATTLE_ME/ui-design-data.json \
+                  research/L_WORLD_DAI_STAR_PA3/ui-design-data.json \
+                  research/L_YAJIKITA_MAIRU_BG/ui-design-data.json \
+                  research/L_TONDEMO_SKILL_KM/ui-design-data.json \
+                  research/LB_TRIPLE_CROWN_X300/ui-design-data.json \
+                  research/L_TOARU_INDEX2_FA/ui-design-data.json \
+                  batches/20260910-next10-v7/gate-d-ui-materialization-report.json
+          if ! git diff --cached --quiet; then
+            git commit -m "ui: materialize 20260910 next10 UX v7.1"
+            git push origin HEAD:batch/20260910-next10-gate0-v2
+          fi
