@@ -42,7 +42,7 @@ for(const id of machineIds){
  fs.writeFileSync(sp,JSON.stringify(sel,null,2)+'\n');
  report.push({machineId:id,sharedGroups,removedDuplicateDenominatorInputs:removed,validator:v.ok?'PASS':'FAIL'});
 }
-const out={schemaVersion:'gate-b-denominator-sharing-report-v1',batchId:BATCH,checkedAt:'2026-09-11T00:48:00+09:00',status:errors.length?'BLOCKED':'PASS',machines:report,summary:{machines:10,validatorPass:report.filter(x=>x.validator==='PASS').length,sharedGroups:report.reduce((a,x)=>a+x.sharedGroups,0),removedDuplicateDenominatorInputs:report.reduce((a,x)=>a+x.removedDuplicateDenominatorInputs,0)},errors};
+const out={schemaVersion:'gate-b-denominator-sharing-report-v1',batchId:BATCH,checkedAt:'2026-09-11T01:24:00+09:00',status:errors.length?'BLOCKED':'PASS',machines:report,summary:{machines:10,validatorPass:report.filter(x=>x.validator==='PASS').length,sharedGroups:report.reduce((a,x)=>a+x.sharedGroups,0),removedDuplicateDenominatorInputs:report.reduce((a,x)=>a+x.removedDuplicateDenominatorInputs,0)},errors};
 fs.writeFileSync(path.join(ROOT,'batches',BATCH,'gate-b-denominator-sharing-report.json'),JSON.stringify(out,null,2)+'\n');
 console.log(`DENOMINATOR SHARING ${out.status}`,JSON.stringify(out.summary));
 if(errors.length){for(const e of errors)console.error(e);process.exit(1);}
