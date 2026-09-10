@@ -1,0 +1,59 @@
+name: Batch 20260910 Next10 Gate B Materialize
+
+on:
+  push:
+    branches:
+      - batch/20260910-next10-gate0-v2
+    paths:
+      - 'batches/20260910-next10-v7/gate-b-feature-disposition-draft.json'
+      - 'batches/20260910-next10-v7/gate-b-dependency-audit.json'
+      - 'research/**/research-data.json'
+      - '.github/workflows/batch-20260910-next10-gate-b-materialize.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  materialize:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: batch/20260910-next10-gate0-v2
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Prepare batch-scoped materializer
+        run: |
+          cp tools/materialize-gate-b-selection-v7.mjs tools/materialize-gate-b-selection-20260910.mjs
+          sed -i "s/const BATCH = '20260908-manifest-v7-first10';/const BATCH = '20260910-next10-v7';/" tools/materialize-gate-b-selection-20260910.mjs
+          sed -i "s/generatedAt:'2026-09-08'/generatedAt:'2026-09-11'/g" tools/materialize-gate-b-selection-20260910.mjs
+          sed -i "s/checkedAt:'2026-09-08T20:30:00+09:00'/checkedAt:'2026-09-11T00:42:00+09:00'/g" tools/materialize-gate-b-selection-20260910.mjs
+      - name: Materialize canonical SelectionData
+        run: node tools/materialize-gate-b-selection-20260910.mjs
+      - name: Show report
+        if: always()
+        run: cat batches/20260910-next10-v7/gate-b-materialization-report.json || true
+      - name: Commit generated SelectionData and report
+        if: success()
+        run: |
+          rm -f tools/materialize-gate-b-selection-20260910.mjs
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add research/L_YABACHIBA_ZM/selection-data.json \
+                  research/L_NANGOKU_SPECIAL_M1/selection-data.json \
+                  research/L_SENGOKU_COLLECTION6_KS/selection-data.json \
+                  research/L_KARAKURI_CIRCUS2_JG/selection-data.json \
+                  research/L_ULTRAMAN_FINAL_BATTLE_ME/selection-data.json \
+                  research/L_WORLD_DAI_STAR_PA3/selection-data.json \
+                  research/L_YAJIKITA_MAIRU_BG/selection-data.json \
+                  research/L_TONDEMO_SKILL_KM/selection-data.json \
+                  research/LB_TRIPLE_CROWN_X300/selection-data.json \
+                  research/L_TOARU_INDEX2_FA/selection-data.json \
+                  batches/20260910-next10-v7/gate-b-materialization-report.json
+          if git diff --cached --quiet; then
+            echo "No generated changes"
+          else
+            git commit -m "selection: materialize 20260910 next10 Gate B"
+            git push origin HEAD:batch/20260910-next10-gate0-v2
+          fi

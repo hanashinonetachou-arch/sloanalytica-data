@@ -1,0 +1,37 @@
+name: Batch 20260910 Next10 Gate A Validate
+
+on:
+  push:
+    branches:
+      - batch/20260910-next10-gate0-v2
+  workflow_dispatch:
+
+jobs:
+  validate-research:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Validate canonical ResearchData 10/10
+        shell: bash
+        run: |
+          set -euo pipefail
+          machines=(
+            L_YABACHIBA_ZM
+            L_NANGOKU_SPECIAL_M1
+            L_SENGOKU_COLLECTION6_KS
+            L_KARAKURI_CIRCUS2_JG
+            L_ULTRAMAN_FINAL_BATTLE_ME
+            L_WORLD_DAI_STAR_PA3
+            L_YAJIKITA_MAIRU_BG
+            L_TONDEMO_SKILL_KM
+            LB_TRIPLE_CROWN_X300
+            L_TOARU_INDEX2_FA
+          )
+          for machine in "${machines[@]}"; do
+            echo "=== ${machine} ==="
+            node tools/validate-research-data.mjs "research/${machine}/research-data.json"
+          done
+          echo "GATE_A_RESEARCH_VALIDATOR_10_OF_10_PASS"
