@@ -46,7 +46,7 @@ jobs:
           L_TOARU_INDEX2_FA
           EOF
 
-      - name: Registration ID collision audit
+      - name: Registration ID collision and allocation audit
         run: |
           node --input-type=module <<'NODE'
           import fs from 'node:fs';
@@ -56,21 +56,17 @@ jobs:
           const ids=registry.machines.map(x=>x.provisionalRegistrationId).filter(Number.isInteger);
           const duplicates=[...new Set(ids.filter((x,i)=>ids.indexOf(x)!==i))];
           const max=ids.length?Math.max(...ids):0;
-          const existingBatchEntries={};
           const collisions=[];
-          const proposedAssignments=[];
-          for(const m of identity.machines){
-            const proposed=m.temporaryRegistrationId;
-            const existing=registry.machines.find(x=>x.machineId===m.machineId);
-            if(existing) existingBatchEntries[m.machineId]=existing.provisionalRegistrationId ?? null;
-            const owner=registry.machines.find(x=>x.provisionalRegistrationId===proposed && x.machineId!==m.machineId);
-            if(owner) collisions.push({machineId:m.machineId,proposed,occupiedBy:owner.machineId});
-            proposedAssignments.push({machineId:m.machineId,provisionalRegistrationId:proposed});
+          const proposedAssignments=identity.machines.map(m=>({machineId:m.machineId,provisionalRegistrationId:m.temporaryRegistrationId}));
+          for(const p of proposedAssignments){
+            const owner=registry.machines.find(x=>x.provisionalRegistrationId===p.provisionalRegistrationId && x.machineId!==p.machineId);
+            if(owner) collisions.push({...p,occupiedBy:owner.machineId});
           }
-          const nextAvailableStart=max+1;
-          const expectedStart=Math.min(...proposedAssignments.map(x=>x.provisionalRegistrationId));
-          const status=duplicates.length===0 && collisions.length===0 && expectedStart===nextAvailableStart ? 'PASS':'FAIL';
-          const out={schemaVersion:'gate-e-registration-id-audit-v1',batchId,status,registryMachineCount:registry.machines.length,assignedNumericCount:ids.length,maxProvisionalRegistrationId:max,duplicateIds:duplicates,existingBatchEntries,proposedAssignments,collisions,nextAvailableStart};
+          const expectedAssignments=identity.machines.map((m,i)=>({machineId:m.machineId,provisionalRegistrationId:max+identity.machines.length-i}));
+          const allocationMatchesPublisher=JSON.stringify(proposedAssignments)===JSON.stringify(expectedAssignments);
+          const values=proposedAssignments.map(x=>x.provisionalRegistrationId);
+          const status=duplicates.length===0 && collisions.length===0 && allocationMatchesPublisher && new Set(values).size===10 && Math.min(...values)===max+1 && Math.max(...values)===max+10 ? 'PASS':'FAIL';
+          const out={schemaVersion:'gate-e-registration-id-audit-v2',batchId,status,registryMachineCount:registry.machines.length,assignedNumericCount:ids.length,maxExistingProvisionalRegistrationId:max,assignmentRule:'machine:publish:batch prepends catalog entries; registry sync assigns new IDs in catalog order, therefore one batch receives reverse input order',proposedAssignments,collisions,nextAvailableRange:[max+1,max+10],allocationMatchesPublisher};
           fs.writeFileSync(`batches/${batchId}/gate-e-registration-id-audit.json`,JSON.stringify(out,null,2)+'\n');
           console.log(JSON.stringify(out,null,2));
           if(status!=='PASS') process.exit(1);
@@ -124,7 +120,7 @@ jobs:
 
       - name: Generated artifact drift check
         run: |
-          git restore -- reports/v64-observation-debt-classification.json 2>/dev/null || true
+          git restore -- reports/v64-observation-debt-classification.json reports/market-registry-merge.json reports/batch-machine-pipeline-report.json 2>/dev/null || true
           git diff --exit-code -- research machines catalog.json machine-registry.json difficulty-catalog.json
 
       - name: Write Gate E report
@@ -132,7 +128,7 @@ jobs:
           node --input-type=module <<'NODE'
           import fs from 'node:fs';
           const p='batches/20260910-next10-v7/gate-e-quality-report.json';
-          const out={schemaVersion:'gate-e-quality-report-v1',batchId:'20260910-next10-v7',machineCount:10,status:'PASS',registrationIdAudit:'PASS',researchValidation:'PASS',selectionValidation:'PASS',selectionQuality:'PASS',observationValidation:'PASS',fourLayerGate:'PASS',canonicalUiDrift:'PASS',uxContracts:'PASS',registryValidation:'PASS',repositoryTests:'PASS',publicDataAudit:'PASS',publish:'NOT_RUN'};
+          const out={schemaVersion:'gate-e-quality-report-v2',batchId:'20260910-next10-v7',machineCount:10,status:'PASS',registrationIdAudit:'PASS',registrationAllocation:'REVERSE_INPUT_279_TO_270_VERIFIED',researchValidation:'PASS',selectionValidation:'PASS',selectionQuality:'PASS',observationValidation:'PASS',fourLayerGate:'PASS',canonicalUiDrift:'PASS',uxContracts:'PASS',registryValidation:'PASS',repositoryTests:'PASS',publicDataAudit:'PASS',publish:'NOT_RUN_AFTER_SOURCE_CORRECTION'};
           fs.writeFileSync(p,JSON.stringify(out,null,2)+'\n');
           NODE
 
@@ -142,5 +138,6 @@ jobs:
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
           git add batches/20260910-next10-v7/gate-e-registration-id-audit.json batches/20260910-next10-v7/gate-e-quality-report.json
           if git diff --cached --quiet; then exit 0; fi
-          git commit -m 'gate-e: record 20260910 Next10 quality audit'
+          git commit -m 'gate-e: record corrected 20260910 Next10 quality audit'
+          git pull --rebase origin batch/20260910-next10-gate0-v2
           git push origin HEAD:batch/20260910-next10-gate0-v2
