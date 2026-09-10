@@ -28,7 +28,7 @@
     "inputs": [
       {
         "id": "INP_NUM_NON_CHAIN_INITIAL",
-        "name": "連チャン時のボーナス当選を除いた初当り回数",
+        "name": "ボーナス初当り回数",
         "category": "SEL_NON_CHAIN_INITIAL",
         "type": "counter",
         "unit": "回",
@@ -39,7 +39,7 @@
       },
       {
         "id": "INP_DEN_NON_CHAIN_INITIAL",
-        "name": "公開初当り確率と同一条件の通常ゲーム数",
+        "name": "通常ゲーム数",
         "category": "SEL_NON_CHAIN_INITIAL",
         "type": "integer",
         "unit": "回",
@@ -61,14 +61,18 @@
       },
       {
         "id": "INP_DEN_BB",
-        "name": "公開BB確率と同一のゲーム数",
-        "category": "SEL_BB",
+        "name": "ボーナスゲーム数",
+        "category": "SHARED_DENOMINATOR",
         "type": "integer",
         "unit": "回",
         "displayOrder": 13,
         "inferenceRole": "INCLUDE_PRIMARY",
         "defaultValue": "",
-        "minimum": 0
+        "minimum": 0,
+        "sharedByFeatureIds": [
+          "FEAT_BB",
+          "FEAT_RB"
+        ]
       },
       {
         "id": "INP_NUM_RB",
@@ -77,17 +81,6 @@
         "type": "counter",
         "unit": "回",
         "displayOrder": 14,
-        "inferenceRole": "INCLUDE_PRIMARY",
-        "defaultValue": "",
-        "minimum": 0
-      },
-      {
-        "id": "INP_DEN_RB",
-        "name": "公開RB確率と同一のゲーム数",
-        "category": "SEL_RB",
-        "type": "integer",
-        "unit": "回",
-        "displayOrder": 15,
         "inferenceRole": "INCLUDE_PRIMARY",
         "defaultValue": "",
         "minimum": 0
@@ -227,7 +220,7 @@
         "reliabilityProfile": {
           "weight": 1
         },
-        "denominatorInputId": "INP_DEN_RB",
+        "denominatorInputId": "INP_DEN_BB",
         "numeratorInputId": "INP_NUM_RB",
         "displayFormat": "ratio_1_over_n",
         "probabilities": {
@@ -313,14 +306,14 @@
         "id": "UI_DESIGN_1",
         "title": "通常時",
         "displayOrder": 1,
-        "description": "自分で回した通常ゲーム数と、連チャン中を除いたボーナス初当り回数を入力してください。連チャン中のボーナスは数えません。",
+        "description": "ボーナス後32G経過後からボーナス当選までの通常ゲーム数と、ボーナス初当り回数を入力してください。",
         "collapsible": false,
         "defaultExpanded": true,
         "items": [
           {
             "type": "input",
             "inputId": "INP_DEN_NON_CHAIN_INITIAL",
-            "label": "公開初当り確率と同一条件の通常ゲーム数",
+            "label": "通常ゲーム数",
             "widget": "number",
             "gridSpan": 12,
             "config": {
@@ -335,7 +328,7 @@
           {
             "type": "input",
             "inputId": "INP_NUM_NON_CHAIN_INITIAL",
-            "label": "連チャン時のボーナス当選を除いた初当り回数",
+            "label": "ボーナス初当り回数",
             "widget": "counter",
             "gridSpan": 6,
             "config": {
@@ -353,16 +346,16 @@
       },
       {
         "id": "UI_DESIGN_2",
-        "title": "BB",
+        "title": "BB・RB",
         "displayOrder": 2,
-        "description": "BBを数えているゲーム数と、その間のBB当選回数を入力してください。",
+        "description": "BBとRBは同じゲーム数を使います。「ボーナスゲーム数」を1回だけ入力し、その間のBB・RB当選回数を入力してください。",
         "collapsible": false,
         "defaultExpanded": true,
         "items": [
           {
             "type": "input",
             "inputId": "INP_DEN_BB",
-            "label": "公開BB確率と同一のゲーム数",
+            "label": "ボーナスゲーム数",
             "widget": "number",
             "gridSpan": 12,
             "config": {
@@ -390,31 +383,6 @@
               "emptyMeansUnobserved": true,
               "observedZeroAllowed": true
             }
-          }
-        ]
-      },
-      {
-        "id": "UI_DESIGN_3",
-        "title": "RB",
-        "displayOrder": 3,
-        "description": "RBを数えているゲーム数と、その間のRB当選回数を入力してください。",
-        "collapsible": false,
-        "defaultExpanded": true,
-        "items": [
-          {
-            "type": "input",
-            "inputId": "INP_DEN_RB",
-            "label": "公開RB確率と同一のゲーム数",
-            "widget": "number",
-            "gridSpan": 12,
-            "config": {
-              "directInput": true,
-              "quickAdd": [
-                50
-              ],
-              "emptyMeansUnobserved": true,
-              "observedZeroAllowed": true
-            }
           },
           {
             "type": "input",
@@ -436,9 +404,9 @@
         ]
       },
       {
-        "id": "UI_DESIGN_4",
+        "id": "UI_DESIGN_3",
         "title": "カード・ランプ示唆",
-        "displayOrder": 4,
+        "displayOrder": 3,
         "description": "実戦中に確認できた設定示唆・設定確定演出だけを選択してください。見逃したものや未確認のものは入力しません。",
         "collapsible": true,
         "defaultExpanded": false,
@@ -460,9 +428,9 @@
         ]
       },
       {
-        "id": "UI_DESIGN_5",
+        "id": "UI_DESIGN_4",
         "title": "設定示唆・確定演出",
-        "displayOrder": 5,
+        "displayOrder": 4,
         "description": "実戦中に確認できた設定示唆・設定確定演出だけを選択してください。見逃したものや未確認のものは入力しません。",
         "collapsible": true,
         "defaultExpanded": false,
