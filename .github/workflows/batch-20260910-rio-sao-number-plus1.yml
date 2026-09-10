@@ -1,0 +1,79 @@
+name: Batch 20260910 Rio SAO Number Plus1
+
+on:
+  push:
+    branches: [batch/20260910-rio-sao-number-plus1]
+    paths:
+      - 'tools/apply-20260910-rio-sao-number-plus1.mjs'
+      - '.github/workflows/batch-20260910-rio-sao-number-plus1.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  validate-materialize:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: batch/20260910-rio-sao-number-plus1
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm ci
+      - name: Apply contracts
+        run: node tools/apply-20260910-rio-sao-number-plus1.mjs
+      - name: Validate Selection and UI
+        run: |
+          node tools/validate-selection-data.mjs research/L_SUPER_RIO_ACE2_ND02H/selection-data.json research/L_SUPER_RIO_ACE2_ND02H/research-data.json
+          node tools/validate-selection-data.mjs research/L_SAO2_PA1/selection-data.json research/L_SAO2_PA1/research-data.json
+          npm run ui-design:validate
+          npm run ui-design:linkage:audit -- . L_SUPER_RIO_ACE2_ND02H L_SAO2_PA1
+          npm run ui-design:observation:audit -- L_SUPER_RIO_ACE2_ND02H L_SAO2_PA1 --strict-v2
+      - name: Four-layer gate
+        run: npm run pipeline:four-layer:gate -- L_SUPER_RIO_ACE2_ND02H L_SAO2_PA1
+      - name: Rebuild packages
+        run: npm run machine:batch -- L_SUPER_RIO_ACE2_ND02H L_SAO2_PA1
+      - name: Materialize UI
+        run: node tools/materialize-ui-design.mjs --apply L_SUPER_RIO_ACE2_ND02H L_SAO2_PA1
+      - name: Assert number plus1 contracts
+        run: |
+          node --input-type=module <<'NODE'
+          import fs from 'node:fs';
+          const j=p=>JSON.parse(fs.readFileSync(p,'utf8'));
+          const targets={
+            L_SUPER_RIO_ACE2_ND02H:['INP_DEN_HOWARD_THRESHOLD','INP_NUM_HOWARD_THRESHOLD','INP_DEN_RINA_SIGN','INP_NUM_RINA_SIGN'],
+            L_SAO2_PA1:['INP_DEN_CZ_FAIL_ITEM','INP_NUM_CZ_FAIL_ITEM','INP_DEN_STRONG_CHANCE_CONFIRMED_CZ','INP_NUM_STRONG_CHANCE_CONFIRMED_CZ']
+          };
+          for(const [id,inputs] of Object.entries(targets)){
+            const u=j(`research/${id}/ui-design-data.json`);
+            const p=j(`machines/${id}/machine-package.json`);
+            for(const inputId of inputs){
+              const c=u.inputContracts[inputId];
+              if(c.mode!=='NUMBER'||c.directInput!==true||JSON.stringify(c.quickAdd)!=='[1]'||c.gridSpan!==6) throw new Error(`${id}/${inputId}: UI contract mismatch`);
+              const pi=p.inputs?.find?.(x=>x.id===inputId) ?? p.machineData?.inputs?.find?.(x=>x.id===inputId);
+              if(pi && pi.mode && pi.mode!=='NUMBER') throw new Error(`${id}/${inputId}: package mode ${pi.mode}`);
+            }
+          }
+          console.log('Number +1 contracts PASS');
+          NODE
+      - name: Full quality
+        run: |
+          npm test
+          npm run audit
+          npm run registry:validate
+          npm run audit:ui-service-names
+          npm run ux-contract:audit
+      - name: Commit materialized changes
+        run: |
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git add research machines build catalog.json difficulty-catalog.json machine-registry.json 2>/dev/null || true
+          if ! git diff --cached --quiet; then
+            git commit -m 'fix: use numeric plus1 inputs for Rio2 and SAO2 compact pairs'
+            git push origin HEAD:batch/20260910-rio-sao-number-plus1
+          fi
+      - name: Final clean state
+        run: git status --porcelain
