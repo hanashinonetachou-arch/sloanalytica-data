@@ -1,0 +1,166 @@
+name: Batch 20260910 Next10 Formal Publish
+
+on:
+  push:
+    branches:
+      - batch/20260910-next10-gate0-v2
+    paths:
+      - '.github/workflows/batch-20260910-next10-formal-publish.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  formal-publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: batch/20260910-next10-gate0-v2
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Lock prototype baseline and exact machine scope
+        shell: bash
+        run: |
+          set -euo pipefail
+          git fetch origin prototype-multi-machine:refs/remotes/origin/prototype-multi-machine
+          test "$(git rev-parse origin/prototype-multi-machine)" = "877dcfde2707763ec9dfbf2a5b8d43d3d1515038"
+          test "$(git merge-base HEAD origin/prototype-multi-machine)" = "877dcfde2707763ec9dfbf2a5b8d43d3d1515038"
+          cat > /tmp/publish-machines.txt <<'EOF'
+          L_YABACHIBA_ZM
+          L_NANGOKU_SPECIAL_M1
+          L_SENGOKU_COLLECTION6_KS
+          L_KARAKURI_CIRCUS2_JG
+          L_ULTRAMAN_FINAL_BATTLE_ME
+          L_WORLD_DAI_STAR_PA3
+          L_YAJIKITA_MAIRU_BG
+          L_TONDEMO_SKILL_KM
+          LB_TRIPLE_CROWN_X300
+          L_TOARU_INDEX2_FA
+          EOF
+          test "$(wc -l < /tmp/publish-machines.txt)" -eq 10
+          expected=$(sort /tmp/publish-machines.txt)
+          actual=$(git diff --name-only "$(git merge-base HEAD origin/prototype-multi-machine)"...HEAD -- 'machines/*/machine-package.json' | sed -nE 's#^machines/([^/]+)/machine-package\.json$#\1#p' | sort)
+          test "$actual" = "$expected"
+
+      - name: Assert Gate E PASS and ID plan
+        shell: bash
+        run: |
+          node --input-type=module <<'NODE'
+          import fs from 'node:fs';
+          const q=JSON.parse(fs.readFileSync('batches/20260910-next10-v7/gate-e-quality-report.json','utf8'));
+          const r=JSON.parse(fs.readFileSync('batches/20260910-next10-v7/gate-e-registration-id-audit.json','utf8'));
+          if(q.status!=='PASS') throw new Error(`Gate E not PASS: ${q.status}`);
+          if(r.status!=='PASS'||r.collisions.length!==0||r.nextAvailableStart!==270) throw new Error('registration audit not publish-ready');
+          const got=r.proposedAssignments.map(x=>x.provisionalRegistrationId).join(',');
+          const expected=Array.from({length:10},(_,i)=>270+i).join(',');
+          if(got!==expected) throw new Error(`registration plan mismatch ${got}`);
+          NODE
+
+      - name: Canonical MachineData parity before publish
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm run machine:batch -- $(cat /tmp/publish-machines.txt)
+          while read -r id; do
+            node tools/materialize-ui-design-into-machine-package.mjs "machines/$id/machine-package.json" "research/$id/ui-design-data.json"
+            cp "machines/$id/machine-package.json" "research/$id/machine-package.generated.json"
+          done < /tmp/publish-machines.txt
+          node tools/audit-ui-materialization-v7.mjs $(cat /tmp/publish-machines.txt)
+          git diff --exit-code -- $(while read -r id; do printf 'machines/%s/machine-package.json research/%s/machine-package.generated.json ' "$id" "$id"; done < /tmp/publish-machines.txt)
+
+      - name: Formal publish dry run
+        run: npm run machine:publish:batch -- $(cat /tmp/publish-machines.txt)
+
+      - name: Formal publish APPLY on isolated batch branch
+        run: npm run machine:publish:batch -- --apply $(cat /tmp/publish-machines.txt)
+
+      - name: Assert exact catalog metadata and registration IDs 270-279
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm run registry:validate
+          node --input-type=module <<'NODE'
+          import fs from 'node:fs';
+          import crypto from 'node:crypto';
+          const ids=['L_YABACHIBA_ZM','L_NANGOKU_SPECIAL_M1','L_SENGOKU_COLLECTION6_KS','L_KARAKURI_CIRCUS2_JG','L_ULTRAMAN_FINAL_BATTLE_ME','L_WORLD_DAI_STAR_PA3','L_YAJIKITA_MAIRU_BG','L_TONDEMO_SKILL_KM','LB_TRIPLE_CROWN_X300','L_TOARU_INDEX2_FA'];
+          const catalog=JSON.parse(fs.readFileSync('catalog.json','utf8')).machines??[];
+          const registry=JSON.parse(fs.readFileSync('machine-registry.json','utf8')).machines??[];
+          for(const [i,id] of ids.entries()){
+            const c=catalog.find(x=>x.machineId===id);
+            if(!c||c.status!=='available') throw new Error(`${id}: catalog missing/not available`);
+            const bytes=fs.readFileSync(`machines/${id}/machine-package.json`);
+            const sha=crypto.createHash('sha256').update(bytes).digest('hex');
+            if(c.sha256!==sha) throw new Error(`${id}: sha256 mismatch`);
+            if(c.packageSizeBytes!==bytes.length) throw new Error(`${id}: packageSizeBytes mismatch`);
+            const r=registry.find(x=>x.machineId===id);
+            if(!r) throw new Error(`${id}: registry missing`);
+            if(r.provisionalRegistrationId!==270+i) throw new Error(`${id}: expected provisionalRegistrationId=${270+i}, got ${r.provisionalRegistrationId}`);
+          }
+          const all=registry.map(x=>x.provisionalRegistrationId).filter(Number.isInteger);
+          if(new Set(all).size!==all.length) throw new Error('registry provisional ID collision');
+          if(registry.length!==270) throw new Error(`expected 270 registry machines after publish, got ${registry.length}`);
+          console.log('PASS exact catalog + provisionalRegistrationId 270-279 + registry count 270');
+          NODE
+
+      - name: Full post-publish quality gate
+        shell: bash
+        run: |
+          set -euo pipefail
+          while read -r id; do npm run research:validate -- "research/$id/research-data.json"; done < /tmp/publish-machines.txt
+          while read -r id; do npm run selection:validate -- "research/$id/selection-data.json" "research/$id/research-data.json"; done < /tmp/publish-machines.txt
+          node tools/audit-selection-quality.mjs $(cat /tmp/publish-machines.txt) --strict
+          args=(); while read -r id; do args+=("research/$id/machine-observation-data.json"); done < /tmp/publish-machines.txt
+          npm run observation:validate -- "${args[@]}"
+          npm run observation:selection:audit -- $(cat /tmp/publish-machines.txt) --strict-v2
+          npm run ui-design:validate
+          npm run ui-design:linkage:audit -- . $(cat /tmp/publish-machines.txt)
+          npm run ui-design:observation:audit -- $(cat /tmp/publish-machines.txt) --strict-v2
+          npm run pipeline:four-layer:gate -- $(cat /tmp/publish-machines.txt)
+          npm run registry:validate
+          npm run audit:ui-service-names
+          npm run ux-contract:audit
+          npm test
+          npm run audit
+
+      - name: Restore transient reports
+        shell: bash
+        run: |
+          git restore -- reports/v64-observation-debt-classification.json 2>/dev/null || true
+          git restore -- reports/batch-machine-pipeline-report.json 2>/dev/null || true
+
+      - name: Verify publish mutation allowlist
+        shell: bash
+        run: |
+          set -euo pipefail
+          git status --short
+          unexpected=$(git status --porcelain | sed -E 's/^...//' | grep -Ev '^(catalog\.json|difficulty-catalog\.json|machine-registry\.json)$' || true)
+          if [[ -n "$unexpected" ]]; then echo 'Unexpected formal publish mutation(s):'; echo "$unexpected"; exit 1; fi
+          for f in catalog.json difficulty-catalog.json machine-registry.json; do
+            git diff --quiet -- "$f" && { echo "Expected publish mutation missing: $f"; exit 1; } || true
+          done
+
+      - name: Commit isolated formal publish outputs
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add catalog.json difficulty-catalog.json machine-registry.json
+          git commit -m 'publish: materialize 20260910 Next10 metadata'
+          git pull --rebase origin batch/20260910-next10-gate0-v2
+          git push origin HEAD:batch/20260910-next10-gate0-v2
+
+      - name: Final clean-state check
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm run registry:validate
+          npm run audit
+          git restore -- reports/v64-observation-debt-classification.json reports/batch-machine-pipeline-report.json 2>/dev/null || true
+          test -z "$(git status --porcelain)"
+          echo 'Formal publish PASS on isolated batch branch; prototype and public main not mutated.'
