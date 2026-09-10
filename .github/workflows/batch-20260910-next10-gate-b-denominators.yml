@@ -1,0 +1,48 @@
+name: Batch 20260910 Next10 Gate B Denominators
+
+on:
+  push:
+    branches:
+      - batch/20260910-next10-gate0-v2
+    paths:
+      - 'tools/share-gate-b-denominators-20260910.mjs'
+      - '.github/workflows/batch-20260910-next10-gate-b-denominators.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: batch/20260910-next10-gate0-v2
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Share only exact denominator definitions
+        run: node tools/share-gate-b-denominators-20260910.mjs
+      - name: Show report
+        if: always()
+        run: cat batches/20260910-next10-v7/gate-b-denominator-sharing-report.json || true
+      - name: Commit audited SelectionData
+        if: success()
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add research/L_YABACHIBA_ZM/selection-data.json \
+                  research/L_NANGOKU_SPECIAL_M1/selection-data.json \
+                  research/L_SENGOKU_COLLECTION6_KS/selection-data.json \
+                  research/L_KARAKURI_CIRCUS2_JG/selection-data.json \
+                  research/L_ULTRAMAN_FINAL_BATTLE_ME/selection-data.json \
+                  research/L_WORLD_DAI_STAR_PA3/selection-data.json \
+                  research/L_YAJIKITA_MAIRU_BG/selection-data.json \
+                  research/L_TONDEMO_SKILL_KM/selection-data.json \
+                  research/LB_TRIPLE_CROWN_X300/selection-data.json \
+                  research/L_TOARU_INDEX2_FA/selection-data.json \
+                  batches/20260910-next10-v7/gate-b-denominator-sharing-report.json
+          if ! git diff --cached --quiet; then
+            git commit -m "selection: share exact denominators for next10"
+            git push origin HEAD:batch/20260910-next10-gate0-v2
+          fi
