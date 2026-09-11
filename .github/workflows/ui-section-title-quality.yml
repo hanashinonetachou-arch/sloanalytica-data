@@ -1,0 +1,29 @@
+name: UI section title quality
+
+on:
+  pull_request:
+    branches:
+      - prototype-multi-machine
+    paths:
+      - 'research/**/ui-design-data.json'
+      - 'tools/audit-ui-section-title-quality.mjs'
+      - 'test/ui-section-title-quality.test.mjs'
+      - '.github/workflows/ui-section-title-quality.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  section-title-quality:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Regression tests
+        run: node --test test/ui-section-title-quality.test.mjs
+      - name: Audit changed UI Design section titles
+        run: node tools/audit-ui-section-title-quality.mjs "origin/${{ github.base_ref }}"
