@@ -1,0 +1,81 @@
+name: Restore Next10 cleaned UI copy
+
+on:
+  pull_request:
+    branches: [prototype-multi-machine]
+
+permissions:
+  contents: write
+
+jobs:
+  restore:
+    if: github.head_ref == 'fix/20260912-next10-ui-copy-restore'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.head_ref }}
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Restore cleaned descriptions and labels while preserving section titles
+        run: |
+          node <<'NODE'
+          const fs=require('fs'),cp=require('child_process'),crypto=require('crypto');
+          const ids=['L_YABACHIBA_ZM','L_NANGOKU_SPECIAL_M1','L_SENGOKU_COLLECTION6_KS','L_KARAKURI_CIRCUS2_JG','L_ULTRAMAN_FINAL_BATTLE_ME','L_WORLD_DAI_STAR_PA3','L_YAJIKITA_MAIRU_BG','L_TONDEMO_SKILL_KM','LB_TRIPLE_CROWN_X300','L_TOARU_INDEX2_FA'];
+          const sourceRef='origin/fix/20260912-next10-ui-copy';
+          const readSource=p=>JSON.parse(cp.execFileSync('git',['show',`${sourceRef}:${p}`],{encoding:'utf8'}));
+          let changed=0;
+          for(const id of ids){
+            const pkgPath=`machines/${id}/machine-package.json`;
+            const src=readSource(pkgPath);
+            const cur=JSON.parse(fs.readFileSync(pkgPath,'utf8'));
+            const srcById=new Map((src.ui?.sections||[]).map(s=>[s.id,s]));
+            for(const sec of cur.ui?.sections||[]){
+              const s=srcById.get(sec.id); if(!s) continue;
+              if(sec.description!==s.description){sec.description=s.description;changed++;}
+              const srcItems=new Map((s.items||[]).map(i=>[i.inputId||i.targetInputId,i]));
+              for(const item of sec.items||[]){const key=item.inputId||item.targetInputId, si=srcItems.get(key);if(si&&item.label!==si.label){item.label=si.label;changed++;}}
+            }
+            fs.writeFileSync(pkgPath,JSON.stringify(cur,null,2)+'\n');
+
+            const genPath=`research/${id}/machine-package.generated.json`;
+            if(fs.existsSync(genPath)){
+              const gen=JSON.parse(fs.readFileSync(genPath,'utf8'));
+              const curById=new Map((cur.ui?.sections||[]).map(s=>[s.id,s]));
+              for(const sec of gen.ui?.sections||[]){const s=curById.get(sec.id);if(!s)continue;sec.description=s.description;const items=new Map((s.items||[]).map(i=>[i.inputId||i.targetInputId,i]));for(const item of sec.items||[]){const si=items.get(item.inputId||item.targetInputId);if(si)item.label=si.label;}}
+              fs.writeFileSync(genPath,JSON.stringify(gen,null,2)+'\n');
+            }
+
+            const uiPath=`research/${id}/ui-design-data.json`;
+            const srcUi=readSource(uiPath);
+            fs.writeFileSync(uiPath,JSON.stringify(srcUi,null,2)+'\n');
+          }
+          if(!changed) throw new Error('No UI copy changes detected');
+          const catalog=JSON.parse(fs.readFileSync('catalog.json','utf8'));
+          for(const m of catalog.machines||[]){if(!ids.includes(m.machineId))continue;const buf=fs.readFileSync(`machines/${m.machineId}/machine-package.json`);m.sha256=crypto.createHash('sha256').update(buf).digest('hex');m.packageSizeBytes=buf.length;}
+          catalog.generatedAt=new Date().toISOString();fs.writeFileSync('catalog.json',JSON.stringify(catalog,null,2)+'\n');
+          console.log(`restored UI copy changes: ${changed}`);
+          NODE
+      - name: Audit restored copy, section titles, and catalog hashes
+        run: |
+          node <<'NODE'
+          const fs=require('fs'),cp=require('child_process'),crypto=require('crypto');
+          const ids=['L_YABACHIBA_ZM','L_NANGOKU_SPECIAL_M1','L_SENGOKU_COLLECTION6_KS','L_KARAKURI_CIRCUS2_JG','L_ULTRAMAN_FINAL_BATTLE_ME','L_WORLD_DAI_STAR_PA3','L_YAJIKITA_MAIRU_BG','L_TONDEMO_SKILL_KM','LB_TRIPLE_CROWN_X300','L_TOARU_INDEX2_FA'];
+          const ref='origin/fix/20260912-next10-ui-copy', bad=[],cat=JSON.parse(fs.readFileSync('catalog.json'));
+          for(const id of ids){
+            const p=`machines/${id}/machine-package.json`,buf=fs.readFileSync(p),cur=JSON.parse(buf),src=JSON.parse(cp.execFileSync('git',['show',`${ref}:${p}`],{encoding:'utf8'}));
+            const sm=new Map((src.ui?.sections||[]).map(s=>[s.id,s]));
+            for(const sec of cur.ui?.sections||[]){if(/^通常時(?:\s+\d+)?$/.test(String(sec.title||'').trim()))bad.push(`${id}:${sec.id}:generic-title`);const s=sm.get(sec.id);if(!s)continue;if(sec.description!==s.description)bad.push(`${id}:${sec.id}:description`);const im=new Map((s.items||[]).map(i=>[i.inputId||i.targetInputId,i.label]));for(const item of sec.items||[]){const k=item.inputId||item.targetInputId;if(im.has(k)&&item.label!==im.get(k))bad.push(`${id}:${sec.id}:${k}:label`);}}
+            const m=cat.machines.find(x=>x.machineId===id),h=crypto.createHash('sha256').update(buf).digest('hex');if(!m||m.sha256!==h||m.packageSizeBytes!==buf.length)bad.push(`${id}:catalog`);
+          }
+          if(bad.length)throw new Error(bad.join(', '));console.log('PASS: cleaned copy restored, content titles preserved, catalog hashes synced');
+          NODE
+      - name: Commit restored data
+        run: |
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git add catalog.json machines research
+          git commit -m "Restore Next10 cleaned UI descriptions" || exit 0
+          git push origin HEAD:${{ github.head_ref }}
