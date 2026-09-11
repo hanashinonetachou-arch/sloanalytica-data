@@ -1,0 +1,103 @@
+name: Fix Next10 section titles
+
+on:
+  pull_request:
+    branches: [prototype-multi-machine]
+
+permissions:
+  contents: write
+
+jobs:
+  repair:
+    if: github.head_ref == 'fix/20260912-next10-section-titles'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.head_ref }}
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Repair numbered/generic normal-play section titles
+        run: |
+          node <<'NODE'
+          const fs = require('fs');
+          const crypto = require('crypto');
+          const ids = [
+            'L_YABACHIBA_ZM','L_NANGOKU_SPECIAL_M1','L_SENGOKU_COLLECTION6_KS','L_KARAKURI_CIRCUS2_JG','L_ULTRAMAN_FINAL_BATTLE_ME','L_WORLD_DAI_STAR_PA3','L_YAJIKITA_MAIRU_BG','L_TONDEMO_SKILL_KM','LB_TRIPLE_CROWN_X300','L_TOARU_INDEX2_FA'
+          ];
+          const titleFor = (section, inputs) => {
+            if (!/^通常時(?:\s+\d+)?$/.test(String(section.title || '').trim())) return null;
+            const items = section.items || [];
+            const numerator = items.map(x => x.inputId || x.targetInputId).find(id => /^INP_NUM_/.test(id || ''));
+            if (!numerator) return null;
+            if (/CZ_INITIAL/.test(numerator)) return 'CZ初当り';
+            if (/AT_DIRECT/.test(numerator)) return 'AT直撃';
+            if (/AT_INITIAL/.test(numerator)) return 'AT初当り';
+            if (/BONUS_INITIAL/.test(numerator)) return 'ボーナス初当り';
+            const input = inputs.find(x => x.id === numerator);
+            const label = items.find(x => (x.inputId || x.targetInputId) === numerator)?.label || input?.name || '';
+            return String(label).replace(/回数$/, '').trim() || null;
+          };
+          const patchUi = obj => {
+            const inputs = obj.inputs?.inputs || [];
+            const sections = obj.ui?.sections || obj.sections || [];
+            let changed = 0;
+            for (const s of sections) {
+              const next = titleFor(s, inputs);
+              if (next && next !== s.title) { console.log(`${s.title} -> ${next}`); s.title = next; changed++; }
+            }
+            return changed;
+          };
+          let total = 0;
+          for (const id of ids) {
+            for (const path of [`machines/${id}/machine-package.json`, `research/${id}/machine-package.generated.json`]) {
+              if (!fs.existsSync(path)) continue;
+              const obj = JSON.parse(fs.readFileSync(path, 'utf8'));
+              total += patchUi(obj);
+              fs.writeFileSync(path, JSON.stringify(obj, null, 2) + '\n');
+            }
+            const uiPath = `research/${id}/ui-design-data.json`;
+            if (fs.existsSync(uiPath)) {
+              const obj = JSON.parse(fs.readFileSync(uiPath, 'utf8'));
+              const sections = obj.sections || obj.ui?.sections || [];
+              const pkg = JSON.parse(fs.readFileSync(`machines/${id}/machine-package.json`, 'utf8'));
+              const inputs = pkg.inputs?.inputs || [];
+              for (const s of sections) {
+                const next = titleFor(s, inputs);
+                if (next && next !== s.title) { s.title = next; total++; }
+              }
+              fs.writeFileSync(uiPath, JSON.stringify(obj, null, 2) + '\n');
+            }
+          }
+          if (!total) throw new Error('No section titles were changed');
+          const catalog = JSON.parse(fs.readFileSync('catalog.json','utf8'));
+          for (const m of catalog.machines || []) {
+            if (!ids.includes(m.machineId)) continue;
+            const path = `machines/${m.machineId}/machine-package.json`;
+            const buf = fs.readFileSync(path);
+            m.sha256 = crypto.createHash('sha256').update(buf).digest('hex');
+            m.packageSizeBytes = buf.length;
+          }
+          catalog.generatedAt = new Date().toISOString();
+          fs.writeFileSync('catalog.json', JSON.stringify(catalog, null, 2) + '\n');
+          console.log(`changed titles: ${total}`);
+          NODE
+      - name: Audit no generic numbered section titles remain in Next10
+        run: |
+          node <<'NODE'
+          const fs=require('fs');
+          const ids=['L_YABACHIBA_ZM','L_NANGOKU_SPECIAL_M1','L_SENGOKU_COLLECTION6_KS','L_KARAKURI_CIRCUS2_JG','L_ULTRAMAN_FINAL_BATTLE_ME','L_WORLD_DAI_STAR_PA3','L_YAJIKITA_MAIRU_BG','L_TONDEMO_SKILL_KM','LB_TRIPLE_CROWN_X300','L_TOARU_INDEX2_FA'];
+          const bad=[];
+          for(const id of ids){const p=`machines/${id}/machine-package.json`;const o=JSON.parse(fs.readFileSync(p));for(const s of o.ui?.sections||[]){if(/^通常時(?:\s+\d+)?$/.test(String(s.title||'').trim())) bad.push(`${id}:${s.id}:${s.title}`)}}
+          if(bad.length) throw new Error('Generic titles remain: '+bad.join(', '));
+          console.log('PASS: no generic normal-play section titles remain');
+          NODE
+      - name: Commit repaired data
+        run: |
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git add catalog.json machines research
+          git commit -m "Fix Next10 section titles" || exit 0
+          git push origin HEAD:${{ github.head_ref }}
