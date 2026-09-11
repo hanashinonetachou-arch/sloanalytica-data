@@ -19,80 +19,46 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 22
-      - name: Repair numbered/generic normal-play section titles
+      - name: Repair generic normal-play section titles
         run: |
           node <<'NODE'
-          const fs = require('fs');
-          const crypto = require('crypto');
-          const ids = [
-            'L_YABACHIBA_ZM','L_NANGOKU_SPECIAL_M1','L_SENGOKU_COLLECTION6_KS','L_KARAKURI_CIRCUS2_JG','L_ULTRAMAN_FINAL_BATTLE_ME','L_WORLD_DAI_STAR_PA3','L_YAJIKITA_MAIRU_BG','L_TONDEMO_SKILL_KM','LB_TRIPLE_CROWN_X300','L_TOARU_INDEX2_FA'
-          ];
-          const titleFor = (section, inputs) => {
-            if (!/^通常時(?:\s+\d+)?$/.test(String(section.title || '').trim())) return null;
-            const items = section.items || [];
-            const numerator = items.map(x => x.inputId || x.targetInputId).find(id => /^INP_NUM_/.test(id || ''));
-            if (!numerator) return null;
-            if (/CZ_INITIAL/.test(numerator)) return 'CZ初当り';
-            if (/AT_DIRECT/.test(numerator)) return 'AT直撃';
-            if (/AT_INITIAL/.test(numerator)) return 'AT初当り';
-            if (/BONUS_INITIAL/.test(numerator)) return 'ボーナス初当り';
-            const input = inputs.find(x => x.id === numerator);
-            const label = items.find(x => (x.inputId || x.targetInputId) === numerator)?.label || input?.name || '';
-            return String(label).replace(/回数$/, '').trim() || null;
-          };
-          const patchUi = obj => {
-            const inputs = obj.inputs?.inputs || [];
-            const sections = obj.ui?.sections || obj.sections || [];
-            let changed = 0;
-            for (const s of sections) {
-              const next = titleFor(s, inputs);
-              if (next && next !== s.title) { console.log(`${s.title} -> ${next}`); s.title = next; changed++; }
-            }
-            return changed;
-          };
-          let total = 0;
-          for (const id of ids) {
-            for (const path of [`machines/${id}/machine-package.json`, `research/${id}/machine-package.generated.json`]) {
-              if (!fs.existsSync(path)) continue;
-              const obj = JSON.parse(fs.readFileSync(path, 'utf8'));
-              total += patchUi(obj);
-              fs.writeFileSync(path, JSON.stringify(obj, null, 2) + '\n');
-            }
-            const uiPath = `research/${id}/ui-design-data.json`;
-            if (fs.existsSync(uiPath)) {
-              const obj = JSON.parse(fs.readFileSync(uiPath, 'utf8'));
-              const sections = obj.sections || obj.ui?.sections || [];
-              const pkg = JSON.parse(fs.readFileSync(`machines/${id}/machine-package.json`, 'utf8'));
-              const inputs = pkg.inputs?.inputs || [];
-              for (const s of sections) {
-                const next = titleFor(s, inputs);
-                if (next && next !== s.title) { s.title = next; total++; }
-              }
-              fs.writeFileSync(uiPath, JSON.stringify(obj, null, 2) + '\n');
-            }
-          }
-          if (!total) throw new Error('No section titles were changed');
-          const catalog = JSON.parse(fs.readFileSync('catalog.json','utf8'));
-          for (const m of catalog.machines || []) {
-            if (!ids.includes(m.machineId)) continue;
-            const path = `machines/${m.machineId}/machine-package.json`;
-            const buf = fs.readFileSync(path);
-            m.sha256 = crypto.createHash('sha256').update(buf).digest('hex');
-            m.packageSizeBytes = buf.length;
-          }
-          catalog.generatedAt = new Date().toISOString();
-          fs.writeFileSync('catalog.json', JSON.stringify(catalog, null, 2) + '\n');
-          console.log(`changed titles: ${total}`);
-          NODE
-      - name: Audit no generic numbered section titles remain in Next10
-        run: |
-          node <<'NODE'
-          const fs=require('fs');
+          const fs=require('fs'), crypto=require('crypto');
           const ids=['L_YABACHIBA_ZM','L_NANGOKU_SPECIAL_M1','L_SENGOKU_COLLECTION6_KS','L_KARAKURI_CIRCUS2_JG','L_ULTRAMAN_FINAL_BATTLE_ME','L_WORLD_DAI_STAR_PA3','L_YAJIKITA_MAIRU_BG','L_TONDEMO_SKILL_KM','LB_TRIPLE_CROWN_X300','L_TOARU_INDEX2_FA'];
-          const bad=[];
-          for(const id of ids){const p=`machines/${id}/machine-package.json`;const o=JSON.parse(fs.readFileSync(p));for(const s of o.ui?.sections||[]){if(/^通常時(?:\s+\d+)?$/.test(String(s.title||'').trim())) bad.push(`${id}:${s.id}:${s.title}`)}}
-          if(bad.length) throw new Error('Generic titles remain: '+bad.join(', '));
-          console.log('PASS: no generic normal-play section titles remain');
+          const generic=t=>/^通常時(?:\s+\d+)?$/.test(String(t||'').trim());
+          const chooseTitle=(section,pkg)=>{
+            if(!generic(section.title)) return null;
+            const ids=(section.items||[]).map(x=>x.inputId||x.targetInputId);
+            const num=ids.find(x=>/^INP_NUM_/.test(x||'')); if(!num)return null;
+            if(/CZ_INITIAL/.test(num))return 'CZ初当り';
+            if(/AT_DIRECT/.test(num))return 'AT直撃';
+            if(/AT_INITIAL/.test(num))return 'AT初当り';
+            if(/BONUS_INITIAL/.test(num))return 'ボーナス初当り';
+            const feat=(pkg.features?.features||[]).find(f=>f.numeratorInputId===num);
+            if(feat?.name)return feat.name;
+            const inp=(pkg.inputs?.inputs||[]).find(x=>x.id===num);
+            return String(inp?.name||num).replace(/回数$/,'').trim();
+          };
+          let total=0;
+          for(const id of ids){
+            const pkgPath=`machines/${id}/machine-package.json`;
+            const pkg=JSON.parse(fs.readFileSync(pkgPath,'utf8'));
+            const titleMap=new Map();
+            for(const s of pkg.ui?.sections||[]){const next=chooseTitle(s,pkg);if(next&&next!==s.title){titleMap.set(s.title,next);console.log(`${id}: ${s.title} -> ${next}`);s.title=next;total++;}}
+            fs.writeFileSync(pkgPath,JSON.stringify(pkg,null,2)+'\n');
+            const genPath=`research/${id}/machine-package.generated.json`;
+            if(fs.existsSync(genPath)){const gen=JSON.parse(fs.readFileSync(genPath,'utf8'));for(const s of gen.ui?.sections||[]){const next=titleMap.get(s.title);if(next)s.title=next;}fs.writeFileSync(genPath,JSON.stringify(gen,null,2)+'\n');}
+            const uiPath=`research/${id}/ui-design-data.json`;
+            if(fs.existsSync(uiPath)){const ui=JSON.parse(fs.readFileSync(uiPath,'utf8'));if(ui.sections&&!Array.isArray(ui.sections)){const nextSections={};for(const [key,val] of Object.entries(ui.sections)){nextSections[titleMap.get(key)||key]=val;}ui.sections=nextSections;ui.sectionOrder=(ui.sectionOrder||[]).map(x=>titleMap.get(x)||x);}fs.writeFileSync(uiPath,JSON.stringify(ui,null,2)+'\n');}
+          }
+          if(!total)throw new Error('No section titles were changed');
+          const catalog=JSON.parse(fs.readFileSync('catalog.json','utf8'));
+          for(const m of catalog.machines||[]){if(!ids.includes(m.machineId))continue;const buf=fs.readFileSync(`machines/${m.machineId}/machine-package.json`);m.sha256=crypto.createHash('sha256').update(buf).digest('hex');m.packageSizeBytes=buf.length;}
+          catalog.generatedAt=new Date().toISOString();fs.writeFileSync('catalog.json',JSON.stringify(catalog,null,2)+'\n');console.log(`changed titles: ${total}`);
+          NODE
+      - name: Audit section titles and catalog hashes
+        run: |
+          node <<'NODE'
+          const fs=require('fs'),crypto=require('crypto');const ids=['L_YABACHIBA_ZM','L_NANGOKU_SPECIAL_M1','L_SENGOKU_COLLECTION6_KS','L_KARAKURI_CIRCUS2_JG','L_ULTRAMAN_FINAL_BATTLE_ME','L_WORLD_DAI_STAR_PA3','L_YAJIKITA_MAIRU_BG','L_TONDEMO_SKILL_KM','LB_TRIPLE_CROWN_X300','L_TOARU_INDEX2_FA'];const cat=JSON.parse(fs.readFileSync('catalog.json'));const bad=[];for(const id of ids){const p=`machines/${id}/machine-package.json`,buf=fs.readFileSync(p),o=JSON.parse(buf);for(const s of o.ui?.sections||[])if(/^通常時(?:\s+\d+)?$/.test(String(s.title||'').trim()))bad.push(`${id}:${s.title}`);const m=cat.machines.find(x=>x.machineId===id);const h=crypto.createHash('sha256').update(buf).digest('hex');if(!m||m.sha256!==h||m.packageSizeBytes!==buf.length)bad.push(`${id}:catalog`);}if(bad.length)throw new Error(bad.join(', '));console.log('PASS: content-based titles and catalog hashes');
           NODE
       - name: Commit repaired data
         run: |
