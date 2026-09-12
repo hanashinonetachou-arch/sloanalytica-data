@@ -1,0 +1,56 @@
+name: Apply blank-zero v7 migration
+
+on:
+  push:
+    branches:
+      - audit/20260912-cross-sectional-v7
+    paths:
+      - tools/migrate-blank-zero-defaults-v7.mjs
+      - .github/workflows/apply-blank-zero-v7-migration.yml
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  migrate:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: audit/20260912-cross-sectional-v7
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Apply blank-zero migration
+        run: node tools/migrate-blank-zero-defaults-v7.mjs
+      - name: Validate Selection repository
+        run: |
+          set -euo pipefail
+          for f in research/*/selection-data.json; do
+            r="${f%selection-data.json}research-data.json"
+            node tools/windows-safe-cli.mjs selection:validate "$f" "$r"
+          done
+      - name: Repository tests
+        run: npm test
+      - name: Repository audit
+        run: npm run audit
+      - name: Cross-sectional audit dry validation
+        run: |
+          node tools/audit-cross-sectional-v7.mjs
+          node tools/reclassify-cross-sectional-v7.mjs
+          node -e "const r=require('./reports/cross-sectional-v7-audit.json'); if(r.issueCounts.BLANK_ZERO_DEFAULT) throw new Error('BLANK_ZERO_DEFAULT remains: '+r.issueCounts.BLANK_ZERO_DEFAULT); console.log('BLANK_ZERO_DEFAULT: 0')"
+      - name: Commit migrated data
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add research/*/selection-data.json machines/*/machine-package.json catalog.json
+          if git diff --cached --quiet; then
+            echo 'No blank-zero migration required.'
+            exit 0
+          fi
+          git commit -m 'Audit: preserve blank versus observed zero'
+          git push origin HEAD:audit/20260912-cross-sectional-v7
