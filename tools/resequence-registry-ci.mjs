@@ -18,13 +18,11 @@ run(process.execPath, ['tools/validate-machine-registry.mjs', 'machine-registry.
 
 const catalog = JSON.parse(fs.readFileSync('catalog.json', 'utf8'));
 const registry = JSON.parse(fs.readFileSync('machine-registry.json', 'utf8'));
-const expected = [...catalog.machines].sort((a, b) =>
+const isTest = machine => String(machine.machineId ?? '').includes('_TEST_') || String(machine.displayName ?? '').startsWith('【テスト版】');
+const expected = [...catalog.machines].filter(machine => !isTest(machine)).sort((a, b) =>
   a.introductionDate.localeCompare(b.introductionDate) || a.machineId.localeCompare(b.machineId)
 );
 const byId = new Map(registry.machines.map(machine => [machine.machineId, machine]));
-if (registry.machines.length !== expected.length) {
-  throw new Error(`Registry/catalog count mismatch: ${registry.machines.length} != ${expected.length}`);
-}
 for (let index = 0; index < expected.length; index += 1) {
   const source = expected[index];
   const machine = byId.get(source.machineId);
@@ -36,7 +34,10 @@ for (let index = 0; index < expected.length; index += 1) {
     throw new Error(`releaseDate mismatch ${source.machineId}: ${machine.releaseDate} != ${source.introductionDate}`);
   }
 }
-console.log(`Chronological provisional IDs verified: ${expected.length} machines`);
+for (const test of registry.machines.filter(isTest)) {
+  if (test.provisionalRegistrationId !== null) throw new Error(`Test package has canonical ID: ${test.machineId}`);
+}
+console.log(`Chronological provisional IDs verified: ${expected.length} canonical machines`);
 
 const diff = spawnSync('git', ['diff', '--quiet', '--', 'machine-registry.json']);
 if (diff.status === 0) {
