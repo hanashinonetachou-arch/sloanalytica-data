@@ -1,0 +1,50 @@
+name: Materialize canonical UI v7 seven
+
+on:
+  push:
+    branches:
+      - audit/20260912-cross-sectional-v7
+    paths:
+      - tools/materialize-canonical-ui-v7-seven.mjs
+      - .github/workflows/materialize-canonical-ui-v7-seven.yml
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  materialize:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: audit/20260912-cross-sectional-v7
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Materialize canonical UI
+        run: node tools/materialize-canonical-ui-v7-seven.mjs
+      - name: Validate UI Design repository
+        run: node tools/validate-ui-design-data.mjs
+      - name: Repository tests
+        run: npm test
+      - name: Repository audit
+        run: npm run audit
+      - name: Cross-sectional audit
+        run: |
+          node tools/audit-cross-sectional-v7.mjs
+          node tools/reclassify-cross-sectional-v7.mjs
+      - name: Commit materialized packages
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add machines/*/machine-package.json catalog.json
+          if git diff --cached --quiet; then
+            echo 'No materialized package changes.'
+            exit 0
+          fi
+          git commit -m 'Audit: materialize canonical UI for seven machines'
+          git push origin HEAD:audit/20260912-cross-sectional-v7
