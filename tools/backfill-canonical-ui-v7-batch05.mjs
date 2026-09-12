@@ -2,7 +2,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 const ROOT=process.cwd();
-const IDS=['LB_AREX_BRIGHT_BA','LB_CREA_NEMUREN_HOUDOU_RS','LB_EVA_NO_YAKUSOKU_RD','LB_FUJIKO_TOOTSWEET_RA','LB_ISEKAI_QUARTET_KA','LB_JACKPOT_WORLD_J5','LB_KELLOT_Q1','LB_MAGICAL_HALLOWEEN_RB','LB_MATADOR_III_SK','LB_NEW_KING_HANAHANA_V_PF'];
+const IDS=['LB_AREX_BRIGHT_BA','LB_CREA_BONUS_TRIGGER_A2','LB_EVA_PROMISE_DOOR_SR','LB_FUJIKO_M2','LB_ISEKAI_QUARTET_KR','LB_JACKPOT_CY1','LB_KELLOT_5_ND05H','LB_MAGICAL_HALLOWEEN_GS','LB_MATADOR_3_TT','LB_NEW_KING_HANAHANA_V_PF'];
 const read=p=>JSON.parse(fs.readFileSync(p,'utf8'));
 const write=(p,v)=>fs.writeFileSync(p,JSON.stringify(v,null,2)+'\n');
 function modeFor(input,item){const t=input?.type;if(t==='counter')return'COUNTER';if(t==='enum'||t==='multi_enum')return'SELECT';if(t==='integer'||t==='number')return'NUMBER';if(item?.widget==='select')return'SELECT';if(item?.widget==='counter')return'COUNTER';return'NUMBER';}
