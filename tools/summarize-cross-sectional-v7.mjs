@@ -2,6 +2,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
+// Keep this summary machine-readable so the first remediation batches can be selected deterministically.
 const ROOT=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
 const source=JSON.parse(fs.readFileSync(path.join(ROOT,'reports','cross-sectional-v7-audit.json'),'utf8'));
 const machinesByClassification={};
