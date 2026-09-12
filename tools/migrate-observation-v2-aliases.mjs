@@ -14,6 +14,21 @@ const modeMap=new Map([
 ]);
 const coverageMap=new Map([['NOT_AVAILABLE','CHECKED_NONE']]);
 const reopenMap=new Map([['OPEN','RESEARCH_REOPEN_REQUIRED']]);
+const reviewedMappingTypes=new Map([
+  ['LB_TOBE_HAREM_ACE_CF:FEAT_PREDECESSOR_HB_SHARE','EXACT'],
+  ['LB_TOBE_HAREM_ACE_CF:FEAT_BONUS_CHERRY_STOP','DERIVABLE'],
+  ['L_EUREKA_SEVEN4_HIEVO_KX:FEAT_SC_LV12','EXACT'],
+  ['L_MAGICAL_HALLOWEEN8_FE:FEAT_DOKOMAJI','EXACT'],
+  ['L_MAGICAL_HALLOWEEN8_FE:FEAT_REG_REQUIRED_KILLS','EXACT'],
+  ['L_MUSHOKU_TENSEI_NM:FEAT_HITOGAMI_SPACE_PREMONITION_SUCCESS_RATE','EXACT'],
+  ['L_MUSHOKU_TENSEI_NM:FEAT_SHIRONE_KINGDOM_TRANSITION_RATE','EXACT'],
+  ['L_STREET_FIGHTER5_ZD:FEAT_SUIKA_DIRECT','EXACT'],
+  ['L_TENSURA_CD:FEAT_END_STRONG','EXACT'],
+  ['S_CODE_GEASS_3_CC_FS:FEAT_CHERRY_RB_GIVEN_CHERRY','EXACT'],
+  ['S_DANMACHI2_XZ:FEAT_SUIKA_BONUS','EXACT'],
+  ['S_DANMACHI2_XZ:FEAT_STRONG_BONUS','EXACT'],
+  ['S_HARD_BOILED_XX:FEAT_REG_END_AT','EXACT'],
+]);
 
 function canonicalMethods(methods,data){
   const out=[];
@@ -51,6 +66,8 @@ for(const ent of fs.readdirSync(researchRoot,{withFileTypes:true})){
     const before=JSON.stringify(m.collectionMethods??[]);
     const after=canonicalMethods(m.collectionMethods,data);
     if(before!==JSON.stringify(after)){m.collectionMethods=after;dirty=true;replacements++;}
+    const reviewed=reviewedMappingTypes.get(`${data.machineId}:${m.featureId}`);
+    if(reviewed && m.mappingType!==reviewed){m.mappingType=reviewed;dirty=true;replacements++;}
   }
   for(const r of data.researchReopenRequests??[]){
     const nv=reopenMap.get(r.status);
