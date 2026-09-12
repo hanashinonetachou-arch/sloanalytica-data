@@ -14,25 +14,27 @@ const comparable=value=>{
 const beforeComparable=comparable(registry);
 const byId=new Map((registry.machines??[]).map(m=>[m.machineId,m]));
 
-// provisionalRegistrationId is a development-time sequence only. Once assigned it is immutable.
-// Existing machines are backfilled from catalog.addedAt order; future machines receive max + 1.
-const assigned=new Set((registry.machines??[]).map(m=>m.provisionalRegistrationId).filter(Number.isInteger));
-let nextProvisionalId=Math.max(0,...assigned)+1;
-const catalogOrder=[...(catalog.machines??[])].sort((a,b)=>{
- const at=Date.parse(a.addedAt??"");
- const bt=Date.parse(b.addedAt??"");
- if(Number.isFinite(at)&&Number.isFinite(bt)&&at!==bt) return at-bt;
- if(Number.isFinite(at)!==Number.isFinite(bt)) return Number.isFinite(at)?-1:1;
+// provisionalRegistrationId is the canonical development-time sequence.
+// From 2026-09-12 onward, all currently registered machines are resequenced by
+// introduction date (oldest first). New machines are expected to be newer than
+// this frozen historical universe and therefore append naturally at the end.
+// Same-day machines use machineId as a deterministic tie-breaker.
+const catalogMachines=[...(catalog.machines??[])];
+const invalidIntroductionDates=catalogMachines.filter(c=>{
+ const raw=c.introductionDate;
+ return typeof raw!=="string" || !/^\d{4}-\d{2}-\d{2}$/.test(raw) || !Number.isFinite(Date.parse(`${raw}T00:00:00Z`));
+});
+if(invalidIntroductionDates.length){
+ console.error("Registry resequence blocked: every catalog machine must have a valid introductionDate.");
+ for(const c of invalidIntroductionDates) console.error(`- ${c.machineId}: ${c.introductionDate??"<missing>"}`);
+ process.exit(1);
+}
+const chronologicalOrder=catalogMachines.sort((a,b)=>{
+ const dateCompare=String(a.introductionDate).localeCompare(String(b.introductionDate));
+ if(dateCompare!==0) return dateCompare;
  return String(a.machineId).localeCompare(String(b.machineId));
 });
-for(const c of catalogOrder){
- const existing=byId.get(c.machineId);
- if(existing && !Number.isInteger(existing.provisionalRegistrationId)){
-   while(assigned.has(nextProvisionalId)) nextProvisionalId++;
-   existing.provisionalRegistrationId=nextProvisionalId;
-   assigned.add(nextProvisionalId++);
- }
-}
+const provisionalIdByMachineId=new Map(chronologicalOrder.map((c,index)=>[c.machineId,index+1]));
 
 let added=0,updated=0;
 for(const c of catalog.machines??[]){
@@ -40,21 +42,16 @@ for(const c of catalog.machines??[]){
  const pkg=fs.existsSync(packagePath)?JSON.parse(fs.readFileSync(packagePath,"utf8")):{};
  const research=fs.existsSync(path.join(ROOT,"research",c.machineId,"research-data.json"));
  const existing=byId.get(c.machineId);
- let provisionalRegistrationId=existing?.provisionalRegistrationId;
- if(!Number.isInteger(provisionalRegistrationId)){
-   while(assigned.has(nextProvisionalId)) nextProvisionalId++;
-   provisionalRegistrationId=nextProvisionalId;
-   assigned.add(nextProvisionalId++);
- }
+ const provisionalRegistrationId=provisionalIdByMachineId.get(c.machineId);
  const packageReleaseDate=pkg.metadata?.releaseDate??pkg.metadata?.introductionDate??null;
  const base={
   provisionalRegistrationId,
   registrationId:existing?.registrationId??null,
   machineId:c.machineId,displayName:c.displayName??pkg.machine?.displayName??c.machineId,
   manufacturer:c.manufacturer??pkg.machine?.manufacturer??"UNKNOWN",
-  releaseDate:existing?.releaseDate??packageReleaseDate,
-  releaseDateStatus:existing?.releaseDateStatus??(packageReleaseDate?"VERIFIED":"UNRESOLVED"),
-  introducedAt:pkg.metadata?.introductionDate??existing?.introducedAt??null,
+  releaseDate:c.introductionDate??existing?.releaseDate??packageReleaseDate,
+  releaseDateStatus:c.introductionDate?"VERIFIED":(existing?.releaseDateStatus??(packageReleaseDate?"VERIFIED":"UNRESOLVED")),
+  introducedAt:c.introductionDate??pkg.metadata?.introductionDate??existing?.introducedAt??null,
   marketStatus:existing?.marketStatus??"UNKNOWN",marketLastCheckedAt:existing?.marketLastCheckedAt??null,
   marketSources:existing?.marketSources??[],appStatus:"INCLUDED",
   researchStatus:research?"RESEARCH_DATA_PRESENT":(existing?.researchStatus??"UNKNOWN"),
@@ -72,3 +69,4 @@ if(changed){
  registry.generatedAt=previousGeneratedAt;
 }
 console.log(`Registry sync: added ${added}, updated ${updated}${changed?" (changed)":" (unchanged)"}`);
+console.log(`Provisional registration IDs: 1..${chronologicalOrder.length} by introductionDate (oldest first)`);
