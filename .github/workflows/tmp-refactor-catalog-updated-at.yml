@@ -1,0 +1,49 @@
+name: Wire catalog timestamp helper
+
+on:
+  push:
+    branches:
+      - feature/20260912-catalog-updated-at
+
+permissions:
+  contents: write
+
+jobs:
+  apply:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: feature/20260912-catalog-updated-at
+          fetch-depth: 0
+      - name: Refactor publisher to shared timestamp policy
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          path = Path('tools/publish-machine-data.mjs')
+          text = path.read_text(encoding='utf-8')
+          anchor = 'import { fileURLToPath } from "node:url";\n'
+          replacement = anchor + 'import { resolveCatalogTimestamps } from "./catalog-update-timestamp.mjs";\n'
+          if anchor not in text or 'resolveCatalogTimestamps' in text:
+              raise SystemExit('publisher import anchor not found or already patched')
+          text = text.replace(anchor, replacement, 1)
+          old = ''' const packageBytes=approvedBytes.length;\n const now=new Date().toISOString();\n const packageChanged=!existing || existing.sha256!==actualSha;\n const entry={'''
+          new = ''' const packageBytes=approvedBytes.length;\n const now=new Date().toISOString();\n const timestamps=resolveCatalogTimestamps(existing,actualSha,now);\n const entry={'''
+          if old not in text:
+              raise SystemExit('publisher timestamp setup anchor not found')
+          text = text.replace(old, new, 1)
+          old = '''   status:existing?.status ?? "available",\n   addedAt: existing?.addedAt ?? now,\n   ...(!existing || packageChanged\n     ? {updatedAt:now}\n     : existing?.updatedAt!==undefined\n       ? {updatedAt:existing.updatedAt}\n       : {})\n };'''
+          new = '''   status:existing?.status ?? "available",\n   ...timestamps\n };'''
+          if old not in text:
+              raise SystemExit('publisher timestamp entry anchor not found')
+          path.write_text(text.replace(old, new, 1), encoding='utf-8')
+          PY
+      - name: Remove temporary workflow and commit
+        run: |
+          git rm .github/workflows/tmp-refactor-catalog-updated-at.yml
+          git add tools/publish-machine-data.mjs
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git commit -m "Catalog: use tested update timestamp policy"
+          git push origin HEAD:feature/20260912-catalog-updated-at
