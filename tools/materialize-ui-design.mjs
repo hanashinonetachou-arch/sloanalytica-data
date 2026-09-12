@@ -21,6 +21,12 @@ function widgetFor(input,contract){
   return 'number';
 }
 function evidenceInputId(groupId){ return `INP_EVI_${groupId}`; }
+function materializeQuickAdd(value,inputId){
+  if(value===undefined) return undefined;
+  if(typeof value==='number'&&Number.isFinite(value)) return value;
+  if(Array.isArray(value)&&value.length&&value.every(v=>typeof v==='number'&&Number.isFinite(v))) return [...value];
+  throw new Error(`${inputId}: quickAdd must be a finite number or a non-empty array of finite numbers`);
+}
 
 export function materializeUiDesign(pkg,design){
   const errors=validateUiDesignData(design,{expectedMachineId:pkg.machine?.machineId});
@@ -62,7 +68,8 @@ export function materializeUiDesign(pkg,design){
       if(c.directInput!==undefined) config.directInput=c.directInput;
       if(c.compact!==undefined) config.compact=c.compact;
       if(c.note) config.note=c.note;
-      if(Array.isArray(c.quickAdd)&&c.quickAdd.length) config.quickAdd=[...c.quickAdd];
+      const quickAdd=materializeQuickAdd(c.quickAdd,id);
+      if(quickAdd!==undefined) config.quickAdd=quickAdd;
       if(c.step!==undefined) config.step=c.step;
       if(c.emptyMeansUnobserved!==undefined) config.emptyMeansUnobserved=c.emptyMeansUnobserved;
       if(c.observedZeroAllowed!==undefined) config.observedZeroAllowed=c.observedZeroAllowed;
