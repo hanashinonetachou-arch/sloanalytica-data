@@ -3,6 +3,7 @@ import path from "node:path";
 import crypto from "node:crypto";
 import { spawnSync } from "node:child_process";
 import { fileURLToPath } from "node:url";
+import { resolveCatalogTimestamps } from "./catalog-update-timestamp.mjs";
 
 const ROOT=path.resolve(path.dirname(fileURLToPath(import.meta.url)),"..");
 const BUILD_ROOT=path.join(ROOT,"build");
@@ -94,7 +95,7 @@ function publish(id,apply,deferAudit=false){
  const existing=idx>=0?machines[idx]:null;
  const packageBytes=approvedBytes.length;
  const now=new Date().toISOString();
- const packageChanged=!existing || existing.sha256!==actualSha;
+ const timestamps=resolveCatalogTimestamps(existing,actualSha,now);
  const entry={
    machineId:id,
    displayName:pkg.machine?.displayName,
@@ -106,12 +107,7 @@ function publish(id,apply,deferAudit=false){
    sha256:actualSha,
    packageSizeBytes:packageBytes,
    status:existing?.status ?? "available",
-   addedAt: existing?.addedAt ?? now,
-   ...(!existing || packageChanged
-     ? {updatedAt:now}
-     : existing?.updatedAt!==undefined
-       ? {updatedAt:existing.updatedAt}
-       : {})
+   ...timestamps
  };
  const nextCatalog=structuredClone(catalog);
  nextCatalog.generatedAt=now;
