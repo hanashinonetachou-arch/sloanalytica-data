@@ -21,7 +21,8 @@ const testFiles = fs.readdirSync(testDir)
 
 let status = 1;
 try {
-  const r = spawnSync(process.execPath, ['--test', '--test-concurrency=1', ...testFiles], {
+  const reporterArgs = process.env.GITHUB_ACTIONS === 'true' ? ['--test-reporter=dot'] : [];
+  const r = spawnSync(process.execPath, ['--test', '--test-concurrency=1', ...reporterArgs, ...testFiles], {
     cwd: ROOT,
     stdio: 'inherit',
     shell: false,
