@@ -1,0 +1,50 @@
+name: Migrate Observation v2 contract 20260912
+
+on:
+  push:
+    branches:
+      - fix/20260912-observation-v2-contract-migration
+    paths:
+      - tools/migrate-observation-v2-contract-20260912.mjs
+      - .github/workflows/migrate-observation-v2-contract-20260912.yml
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  migrate:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: fix/20260912-observation-v2-contract-migration
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Apply reviewed Observation v2 contract migration
+        run: node tools/migrate-observation-v2-contract-20260912.mjs
+      - name: Validate Observation repository
+        run: npm run observation:validate
+      - name: Audit Observation Selection linkage
+        run: npm run observation:selection:audit
+      - name: Repository tests
+        run: npm test
+      - name: Repository audit
+        run: npm run audit
+      - name: User-facing service-name audit
+        run: npm run audit:ui-service-names
+      - name: Commit migrated Observation data
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add research/*/machine-observation-data.json
+          if git diff --cached --quiet; then
+            echo 'No Observation migration changes.'
+            exit 0
+          fi
+          git commit -m 'Audit: migrate Observation v2 contract aliases'
+          git push origin HEAD:fix/20260912-observation-v2-contract-migration

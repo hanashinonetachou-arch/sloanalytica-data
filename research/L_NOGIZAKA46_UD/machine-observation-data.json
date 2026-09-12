@@ -39,9 +39,32 @@
   },
   "observations": [
     {
+      "observationId": "OBS_CZ_INITIAL",
+      "sourceType": "DIRECT_PLAY",
+      "observationMode": "MANUAL_COUNTER",
+      "status": "FOUND",
+      "label": "CZ初当り回数・通常ゲーム数",
+      "categories": [
+        "CZ初当り回数",
+        "通常ゲーム数"
+      ],
+      "timing": [
+        "通常時の自己実戦中"
+      ],
+      "excludedConditions": [
+        "CZ中・AT中などCZ抽選対象外のゲームを分母に混ぜない",
+        "着席前の累積値を混ぜない",
+        "未観測を観測済み0として扱わない"
+      ],
+      "sourceRefs": [
+        "OBS_SRC_NOGI_NANA_MENU"
+      ],
+      "notes": "Primaryは自己実戦でCZ大変身ゾーン初当りを手動カウントし、CZ抽選対象の通常ゲーム数を同じtrial universeの分母として記録する。筐体メニュー・連動サービスは存在確認済みだがCZ初当りの具体的取得可否をObservation上で確定していないため、Fallbackとして勝手に代用しない。"
+    },
+    {
       "observationId": "OBS_AT_INITIAL",
       "sourceType": "DIRECT_PLAY",
-      "observationMode": "MANUAL_OR_LINKED_READ",
+      "observationMode": "MANUAL_COUNTER",
       "status": "FOUND",
       "label": "AT初当り回数・通常ゲーム数",
       "categories": [
@@ -62,7 +85,7 @@
     {
       "observationId": "OBS_SETTING_EVIDENCE",
       "sourceType": "END_EVENT",
-      "observationMode": "VISUAL_CONFIRMATION",
+      "observationMode": "VISUAL_EVENT",
       "status": "FOUND",
       "label": "設定確定・設定下限Evidence",
       "categories": [
@@ -79,13 +102,27 @@
   ],
   "featureMappings": [
     {
+      "featureId": "FEAT_CZ_INITIAL",
+      "mappingType": "EXACT",
+      "observationIds": [
+        "OBS_CZ_INITIAL"
+      ],
+      "collectionMethods": [
+        "MANUAL_COUNTER"
+      ],
+      "usableForInference": true,
+      "usableForDifficulty": true,
+      "notes": "SelectionDataのINP_CZ_INITIAL_COUNT / INP_NORMAL_GAMESを1対1でObservationへ固定する。未観測はblank、通常時を観測してCZ初当り0回なら0として扱う。"
+    },
+    {
       "featureId": "FEAT_AT_INITIAL",
       "mappingType": "EXACT",
       "observationIds": [
         "OBS_AT_INITIAL"
       ],
       "collectionMethods": [
-        "MANUAL_OR_LINKED_READ"
+        "MANUAL_COUNTER",
+        "LINKED_SERVICE_READ"
       ],
       "usableForInference": true,
       "usableForDifficulty": true,
