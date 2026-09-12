@@ -37,6 +37,36 @@ jobs:
         with:
           node-version: '22'
 
+      - name: Apply and verify chronological provisional IDs
+        if: github.event_name == 'pull_request' && github.event.pull_request.head.ref == 'chore/20260912-resequence-provisional-registration-ids'
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm run registry:sync
+          npm run registry:validate
+          node --input-type=module <<'NODE'
+          import fs from 'node:fs';
+          const catalog=JSON.parse(fs.readFileSync('catalog.json','utf8'));
+          const registry=JSON.parse(fs.readFileSync('machine-registry.json','utf8'));
+          const expected=[...catalog.machines].sort((a,b)=>a.introductionDate.localeCompare(b.introductionDate)||a.machineId.localeCompare(b.machineId));
+          const byId=new Map(registry.machines.map(m=>[m.machineId,m]));
+          if(registry.machines.length!==expected.length) throw new Error(`Registry/catalog count mismatch: ${registry.machines.length} != ${expected.length}`);
+          for(let i=0;i<expected.length;i++){
+            const machine=byId.get(expected[i].machineId);
+            if(!machine) throw new Error(`Missing registry machine: ${expected[i].machineId}`);
+            if(machine.provisionalRegistrationId!==i+1) throw new Error(`ID mismatch ${expected[i].machineId}: ${machine.provisionalRegistrationId} != ${i+1}`);
+            if(machine.releaseDate!==expected[i].introductionDate) throw new Error(`releaseDate mismatch ${expected[i].machineId}`);
+          }
+          console.log(`Chronological provisional IDs verified: ${expected.length} machines`);
+          NODE
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          if ! git diff --quiet -- machine-registry.json; then
+            git add machine-registry.json
+            git commit -m 'Registry: apply chronological provisional IDs'
+            git push origin HEAD:${{ github.event.pull_request.head.ref }}
+          fi
+
       - name: Resolve changed stages
         id: stages
         shell: bash
