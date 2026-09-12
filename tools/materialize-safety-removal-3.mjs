@@ -71,3 +71,4 @@ for(const id of IDS){
 }
 fs.writeFileSync(testPath,test);
 console.log(JSON.stringify({machines:IDS,reviewedSafetyChangesAfter:22},null,2));
+// trigger safety-removal preparation
