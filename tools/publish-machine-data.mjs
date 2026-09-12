@@ -93,6 +93,8 @@ function publish(id,apply,deferAudit=false){
  const idx=machines.findIndex(m=>m.machineId===id);
  const existing=idx>=0?machines[idx]:null;
  const packageBytes=approvedBytes.length;
+ const now=new Date().toISOString();
+ const packageChanged=!existing || existing.sha256!==actualSha;
  const entry={
    machineId:id,
    displayName:pkg.machine?.displayName,
@@ -104,10 +106,15 @@ function publish(id,apply,deferAudit=false){
    sha256:actualSha,
    packageSizeBytes:packageBytes,
    status:existing?.status ?? "available",
-   addedAt: existing?.addedAt ?? new Date().toISOString()
+   addedAt: existing?.addedAt ?? now,
+   ...(!existing || packageChanged
+     ? {updatedAt:now}
+     : existing?.updatedAt!==undefined
+       ? {updatedAt:existing.updatedAt}
+       : {})
  };
  const nextCatalog=structuredClone(catalog);
- nextCatalog.generatedAt=new Date().toISOString();
+ nextCatalog.generatedAt=now;
  if(idx>=0) nextCatalog.machines[idx]=entry; else nextCatalog.machines.push(entry);
  nextCatalog.machines.sort((a,b)=>(b.addedAt??"").localeCompare(a.addedAt??"") || String(a.displayName??"").localeCompare(String(b.displayName??""),"ja"));
 
