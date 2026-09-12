@@ -62,3 +62,4 @@ const out={schemaVersion:'missing-canonical-ui-v7-classification-v1',generatedAt
 fs.mkdirSync(path.dirname(outPath),{recursive:true});
 fs.writeFileSync(outPath,JSON.stringify(out,null,2)+'\n');
 console.log(JSON.stringify({machineCount:rows.length,classificationCounts:counts,autoEvidenceGaps:rows.filter(x=>x.classification==='AUTO_CANONICALIZE'&&x.missingEvidenceInputIds.length).length},null,2));
+// workflow trigger marker: 2026-09-12
