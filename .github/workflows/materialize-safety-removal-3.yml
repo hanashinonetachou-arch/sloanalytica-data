@@ -1,0 +1,38 @@
+name: Materialize safety removals for 3 machines
+
+on:
+  push:
+    branches:
+      - fix/20260912-safety-removal-materialize-3
+    paths:
+      - tools/materialize-safety-removal-3.mjs
+      - .github/workflows/materialize-safety-removal-3.yml
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  prepare:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: fix/20260912-safety-removal-materialize-3
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Prepare canonical UI and retire migration exceptions
+        run: node tools/materialize-safety-removal-3.mjs
+      - name: Validate canonical UI
+        run: node tools/validate-ui-design-data.mjs
+      - name: Commit intended source changes
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add research/*/ui-design-data.json tools/audit-selection-policy-migration.mjs test/selection-policy-migration-audit.test.mjs
+          git commit -m 'Audit: prepare 3-machine safety-removal materialization'
+          git push origin HEAD:fix/20260912-safety-removal-materialize-3
