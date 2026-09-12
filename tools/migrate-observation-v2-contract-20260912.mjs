@@ -80,3 +80,4 @@ for(const ent of fs.readdirSync(researchRoot,{withFileTypes:true})){
   }
 }
 console.log(JSON.stringify({files,changedFiles,replacements,changed},null,2));
+// trigger reviewed contract migration
