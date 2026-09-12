@@ -1,0 +1,55 @@
+name: Cross-sectional v7 Audit
+
+on:
+  push:
+    branches:
+      - audit/20260912-cross-sectional-v7
+    paths:
+      - tools/audit-cross-sectional-v7.mjs
+      - tools/reclassify-cross-sectional-v7.mjs
+      - tools/summarize-cross-sectional-v7.mjs
+      - tools/build-cross-sectional-v7-focus.mjs
+      - .github/workflows/cross-sectional-v7-audit.yml
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  audit:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: audit/20260912-cross-sectional-v7
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Generate cross-sectional diagnostic
+        run: node tools/audit-cross-sectional-v7.mjs
+      - name: Reclassify field verification as secondary
+        run: node tools/reclassify-cross-sectional-v7.mjs
+      - name: Build priority summary
+        run: node tools/summarize-cross-sectional-v7.mjs
+      - name: Build systemic focus report
+        run: node tools/build-cross-sectional-v7-focus.mjs
+      - name: Repository tests
+        run: npm test
+      - name: Repository audit
+        run: npm run audit
+      - name: User-facing service-name audit
+        run: npm run audit:ui-service-names
+      - name: Commit reports
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add reports/cross-sectional-v7-audit.json reports/cross-sectional-v7-priority.json reports/cross-sectional-v7-focus.json reports/CROSS_SECTIONAL_V7_AUDIT.md
+          if git diff --cached --quiet; then
+            echo 'Audit reports unchanged.'
+            exit 0
+          fi
+          git commit -m 'Audit: record cross-sectional v7 baseline'
+          git push origin HEAD:audit/20260912-cross-sectional-v7
