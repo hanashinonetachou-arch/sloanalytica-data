@@ -66,6 +66,7 @@
         "displayOrder": 10,
         "description": "データカウンター仕様が公開AT初当り確率と合う場合のみ入力。",
         "defaultValue": "",
+        "inferenceRole": "EXCLUDE",
         "minimum": 0,
         "observationScope": "PREDECESSOR_SNAPSHOT"
       },
@@ -77,6 +78,7 @@
         "unit": "回",
         "displayOrder": 11,
         "defaultValue": "",
+        "inferenceRole": "EXCLUDE",
         "minimum": 0,
         "observationScope": "PREDECESSOR_SNAPSHOT"
       },
@@ -130,35 +132,8 @@
           "weight": 1
         },
         "displayFormat": "ratio_1_over_n",
-        "numeratorInputId": "INP_AT_COUNT",
         "denominatorInputId": "INP_NORMAL_GAMES",
-        "probabilities": {
-          "SET_1": 0.002503,
-          "SET_2": 0.002565,
-          "SET_3": 0.002821,
-          "SET_4": 0.003171,
-          "SET_5": 0.003502,
-          "SET_6": 0.003903
-        },
-        "sourceEvidenceRefs": [
-          "SRC_KENGAN_1GEKI"
-        ]
-      },
-      {
-        "featureId": "FEAT_AT_PREDECESSOR",
-        "name": "着席前AT初当り",
-        "adoptionCategory": "INCLUDE_SUPPORT",
-        "calculationRole": "PROBABILITY",
-        "probabilityEngineUsage": true,
-        "modelType": "binomial",
-        "minimumSample": 1,
-        "sampleRecommendation": 1000,
-        "reliabilityProfile": {
-          "weight": 1
-        },
-        "displayFormat": "ratio_1_over_n",
-        "numeratorInputId": "INP_SEATED_AT_COUNT",
-        "denominatorInputId": "INP_SEATED_GAMES",
+        "numeratorInputId": "INP_AT_COUNT",
         "probabilities": {
           "SET_1": 0.002503,
           "SET_2": 0.002565,
@@ -184,8 +159,8 @@
           "weight": 0.7
         },
         "displayFormat": "ratio_1_over_n",
-        "numeratorInputId": "INP_CZ_COUNT",
         "denominatorInputId": "INP_NORMAL_GAMES",
+        "numeratorInputId": "INP_CZ_COUNT",
         "probabilities": {
           "SET_1": 0.005631,
           "SET_2": 0.005647,
@@ -271,7 +246,7 @@
   "ui": {
     "sections": [
       {
-        "id": "AUTO_PREDECESSOR",
+        "id": "UI_DESIGN_1",
         "title": "着席時データ",
         "displayOrder": 1,
         "items": [
@@ -290,7 +265,7 @@
         ]
       },
       {
-        "id": "AUTO_PRIMARY",
+        "id": "UI_DESIGN_2",
         "title": "AT・CZ初当り",
         "displayOrder": 2,
         "items": [
@@ -315,7 +290,7 @@
         ]
       },
       {
-        "id": "AUTO_EVIDENCE",
+        "id": "UI_DESIGN_3",
         "title": "設定確定・否定情報",
         "displayOrder": 3,
         "items": [
@@ -332,8 +307,8 @@
   "selectionSummary": {
     "schemaVersion": "selection-summary-v1",
     "evaluatedCount": 3,
-    "selectedCount": 3,
-    "rejectedCount": 0,
+    "selectedCount": 2,
+    "rejectedCount": 1,
     "selected": [
       {
         "featureId": "FEAT_AT_INITIAL",
@@ -342,15 +317,6 @@
         "requiredTrials": {
           "value": 11797,
           "unit": "通常ゲーム"
-        }
-      },
-      {
-        "featureId": "FEAT_AT_PREDECESSOR",
-        "name": "着席前AT初当り",
-        "reason": "カウンター仕様が適切なら着席前AT初当りも補助利用。",
-        "requiredTrials": {
-          "value": 11797,
-          "unit": "データカウンターゲーム"
         }
       },
       {
@@ -363,7 +329,17 @@
         }
       }
     ],
-    "rejected": []
+    "rejected": [
+      {
+        "featureId": "FEAT_AT_PREDECESSOR",
+        "name": "着席前AT初当り",
+        "reason": "機種固有の着席時ゲーム数・AT初当り回数の取得元と、公開AT初当り確率の通常ゲーム試行区間との同値性が実機未確認のため不採用。",
+        "requiredTrials": {
+          "value": 11797,
+          "unit": "データカウンターゲーム"
+        }
+      }
+    ]
   },
   "reliability": {},
   "metadata": {
@@ -376,7 +352,10 @@
       "SET_4",
       "SET_5",
       "SET_6"
-    ]
+    ],
+    "uiDesignMaterialized": true,
+    "uiDesignSchemaVersion": "ui-design-data-v1",
+    "uiDesignStatus": "PASS"
   },
   "validation": {
     "cases": []

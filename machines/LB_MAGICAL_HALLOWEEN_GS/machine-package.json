@@ -32,11 +32,11 @@
         "category": "PREDECESSOR",
         "unit": "G",
         "displayOrder": 1,
-        "inferenceRole": "INCLUDE_PRIMARY",
+        "inferenceRole": "REFERENCE",
         "defaultValue": 0,
         "observationScope": "PREDECESSOR_SNAPSHOT",
         "sessionDifferenceHelper": false,
-        "description": "着席時にデータカウンターへ表示されている累計ゲーム数を入力します。",
+        "description": "着席時にデータカウンターへ表示されている累計ゲーム数を入力します。機種固有の観測元が実機確認されるまでは推測計算に使用しません。",
         "minimum": 0
       },
       {
@@ -46,11 +46,11 @@
         "category": "PREDECESSOR",
         "unit": "回",
         "displayOrder": 2,
-        "inferenceRole": "INCLUDE_PRIMARY",
+        "inferenceRole": "REFERENCE",
         "defaultValue": 0,
         "observationScope": "PREDECESSOR_SNAPSHOT",
         "parentInputId": "INP_PREDECESSOR_GAMES",
-        "description": "着席時のBIG回数を入力します。",
+        "description": "着席時のBIG回数を入力します。機種固有の観測元が実機確認されるまでは推測計算に使用しません。",
         "minimum": 0
       },
       {
@@ -60,11 +60,11 @@
         "category": "PREDECESSOR",
         "unit": "回",
         "displayOrder": 3,
-        "inferenceRole": "INCLUDE_PRIMARY",
+        "inferenceRole": "REFERENCE",
         "defaultValue": 0,
         "observationScope": "PREDECESSOR_SNAPSHOT",
         "parentInputId": "INP_PREDECESSOR_GAMES",
-        "description": "着席時のREG回数を入力します。",
+        "description": "着席時のREG回数を入力します。機種固有の観測元が実機確認されるまでは推測計算に使用しません。",
         "minimum": 0
       },
       {
@@ -148,56 +148,6 @@
     "schemaVersion": "2.0.0",
     "features": [
       {
-        "featureId": "FEAT_PREDECESSOR_BONUS_OUTCOME",
-        "name": "着席前BIG・REG内訳",
-        "adoptionCategory": "INCLUDE_PRIMARY",
-        "calculationRole": "PROBABILITY",
-        "probabilityEngineUsage": true,
-        "modelType": "multinomial",
-        "minimumSample": 300,
-        "sampleRecommendation": 5000,
-        "reliabilityProfile": {
-          "weight": 1
-        },
-        "numeratorInputId": "INP_PREDECESSOR_BIG_COUNT",
-        "denominatorInputId": "INP_PREDECESSOR_GAMES",
-        "categoryInputIds": [
-          "INP_PREDECESSOR_REG_COUNT"
-        ],
-        "probabilities": {},
-        "categoryLabels": [
-          "BIG",
-          "REG"
-        ],
-        "categoryProbabilities": {
-          "SET_1": [
-            0.0033444816053511705,
-            0.002564102564102564
-          ],
-          "SET_2": [
-            0.003389830508474576,
-            0.002881844380403458
-          ],
-          "SET_5": [
-            0.003663003663003663,
-            0.0033222591362126247
-          ],
-          "SET_6": [
-            0.003816793893129771,
-            0.003816793893129771
-          ]
-        },
-        "categoryConditioning": {
-          "excludedCategories": [],
-          "normalization": "RENORMALIZE_INCLUDED",
-          "residualCategory": "NO_BONUS"
-        },
-        "sourceEvidenceRefs": [
-          "SRC_NANAPRESS",
-          "SRC_PWORLD"
-        ]
-      },
-      {
         "featureId": "FEAT_BONUS_OUTCOME",
         "name": "自分のBIG・REG",
         "adoptionCategory": "INCLUDE_PRIMARY",
@@ -260,8 +210,8 @@
         "reliabilityProfile": {
           "weight": 1
         },
-        "numeratorInputId": "INP_BELL",
         "denominatorInputId": "INP_NORMAL_GAMES",
+        "numeratorInputId": "INP_BELL",
         "displayFormat": "ratio_1_over_n",
         "probabilities": {
           "SET_1": 0.16666666666666666,
@@ -357,7 +307,7 @@
   "ui": {
     "sections": [
       {
-        "id": "AUTO_PREDECESSOR",
+        "id": "UI_DESIGN_1",
         "title": "着席時データ",
         "displayOrder": 1,
         "items": [
@@ -382,7 +332,7 @@
         ]
       },
       {
-        "id": "AUTO_NORMAL",
+        "id": "UI_DESIGN_2",
         "title": "実戦結果",
         "displayOrder": 2,
         "items": [
@@ -407,7 +357,7 @@
         ]
       },
       {
-        "id": "AUTO_SMALL_ROLE",
+        "id": "UI_DESIGN_3",
         "title": "小役",
         "displayOrder": 3,
         "items": [
@@ -420,7 +370,7 @@
         ]
       },
       {
-        "id": "AUTO_EVIDENCE",
+        "id": "UI_DESIGN_4",
         "title": "設定確定情報",
         "displayOrder": 4,
         "items": [
@@ -437,18 +387,9 @@
   "selectionSummary": {
     "schemaVersion": "selection-summary-v1",
     "evaluatedCount": 7,
-    "selectedCount": 3,
-    "rejectedCount": 4,
+    "selectedCount": 2,
+    "rejectedCount": 5,
     "selected": [
-      {
-        "featureId": "FEAT_PREDECESSOR_BONUS_OUTCOME",
-        "name": "着席前BIG・REG内訳",
-        "reason": "着席前のゲーム数・BIG・REGは自己実戦区間と独立しているため、前任者区間の推測情報として採用します。",
-        "requiredTrials": {
-          "value": 13042,
-          "unit": "通常ゲーム"
-        }
-      },
       {
         "featureId": "FEAT_BONUS_OUTCOME",
         "name": "自分のBIG・REG",
@@ -469,6 +410,15 @@
       }
     ],
     "rejected": [
+      {
+        "featureId": "FEAT_PREDECESSOR_BONUS_OUTCOME",
+        "name": "着席前BIG・REG内訳",
+        "reason": "機種固有の着席時ゲーム数・BIG・REGの観測元が実機未確認のため、確認完了まで推測不参加。",
+        "requiredTrials": {
+          "value": 13042,
+          "unit": "通常ゲーム"
+        }
+      },
       {
         "featureId": "FEAT_CHERRY_REG_EXCLUDED",
         "name": "チェリー＋REG",
@@ -516,7 +466,10 @@
       "SET_2",
       "SET_5",
       "SET_6"
-    ]
+    ],
+    "uiDesignMaterialized": true,
+    "uiDesignSchemaVersion": "ui-design-data-v1",
+    "uiDesignStatus": "PASS"
   },
   "validation": {
     "cases": []

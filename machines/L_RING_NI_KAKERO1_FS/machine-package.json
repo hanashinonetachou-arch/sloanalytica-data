@@ -66,6 +66,7 @@
         "displayOrder": 10,
         "description": "データカウンター仕様が公開ボーナス確率と合う場合のみ入力。",
         "defaultValue": "",
+        "inferenceRole": "EXCLUDE",
         "minimum": 0,
         "observationScope": "PREDECESSOR_SNAPSHOT"
       },
@@ -77,6 +78,7 @@
         "unit": "回",
         "displayOrder": 11,
         "defaultValue": "",
+        "inferenceRole": "EXCLUDE",
         "minimum": 0,
         "observationScope": "PREDECESSOR_SNAPSHOT"
       },
@@ -181,8 +183,8 @@
           "weight": 1
         },
         "displayFormat": "ratio_1_over_n",
-        "numeratorInputId": "INP_ST_COUNT",
         "denominatorInputId": "INP_NORMAL_GAMES",
+        "numeratorInputId": "INP_ST_COUNT",
         "probabilities": {
           "SET_1": 0.001938,
           "SET_2": 0.002012,
@@ -208,35 +210,8 @@
           "weight": 0.7
         },
         "displayFormat": "ratio_1_over_n",
-        "numeratorInputId": "INP_BONUS_COUNT",
         "denominatorInputId": "INP_NORMAL_GAMES",
-        "probabilities": {
-          "SET_1": 0.005283,
-          "SET_2": 0.005405,
-          "SET_3": 0.005587,
-          "SET_4": 0.006211,
-          "SET_5": 0.007199,
-          "SET_6": 0.008264
-        },
-        "sourceEvidenceRefs": [
-          "SRC_RING_NANA"
-        ]
-      },
-      {
-        "featureId": "FEAT_BONUS_PREDECESSOR",
-        "name": "着席前ボーナス確率",
-        "adoptionCategory": "INCLUDE_SUPPORT",
-        "calculationRole": "PROBABILITY",
-        "probabilityEngineUsage": true,
-        "modelType": "binomial",
-        "minimumSample": 1,
-        "sampleRecommendation": 1000,
-        "reliabilityProfile": {
-          "weight": 0.7
-        },
-        "displayFormat": "ratio_1_over_n",
-        "numeratorInputId": "INP_SEATED_BONUS_COUNT",
-        "denominatorInputId": "INP_SEATED_GAMES",
+        "numeratorInputId": "INP_BONUS_COUNT",
         "probabilities": {
           "SET_1": 0.005283,
           "SET_2": 0.005405,
@@ -262,8 +237,8 @@
           "weight": 1
         },
         "displayFormat": "percent",
-        "numeratorInputId": "INP_SAME_COLOR_BIG_PLUS",
         "denominatorInputId": "INP_NORMAL_BONUS_TRIALS",
+        "numeratorInputId": "INP_SAME_COLOR_BIG_PLUS",
         "probabilities": {
           "SET_1": 0.047,
           "SET_2": 0.052,
@@ -289,8 +264,8 @@
           "weight": 1
         },
         "displayFormat": "percent",
-        "numeratorInputId": "INP_KIKU_REENTRY",
         "denominatorInputId": "INP_KIKU_FAILURES",
+        "numeratorInputId": "INP_KIKU_REENTRY",
         "probabilities": {
           "SET_1": 0.1992,
           "SET_2": 0.2148,
@@ -415,7 +390,7 @@
   "ui": {
     "sections": [
       {
-        "id": "AUTO_PREDECESSOR",
+        "id": "UI_DESIGN_1",
         "title": "着席時データ",
         "displayOrder": 1,
         "items": [
@@ -434,7 +409,7 @@
         ]
       },
       {
-        "id": "AUTO_PRIMARY",
+        "id": "UI_DESIGN_2",
         "title": "ボーナス・ST初当り",
         "displayOrder": 2,
         "items": [
@@ -459,7 +434,7 @@
         ]
       },
       {
-        "id": "AUTO_BONUS_TYPE",
+        "id": "UI_DESIGN_3",
         "title": "通常時ボーナス種類",
         "displayOrder": 3,
         "items": [
@@ -478,7 +453,7 @@
         ]
       },
       {
-        "id": "AUTO_KIKU_REENTRY",
+        "id": "UI_DESIGN_4",
         "title": "菊チャンス 再突入",
         "displayOrder": 4,
         "items": [
@@ -497,7 +472,7 @@
         ]
       },
       {
-        "id": "AUTO_EVIDENCE",
+        "id": "UI_DESIGN_5",
         "title": "設定確定・否定情報",
         "displayOrder": 5,
         "items": [
@@ -514,8 +489,8 @@
   "selectionSummary": {
     "schemaVersion": "selection-summary-v1",
     "evaluatedCount": 10,
-    "selectedCount": 5,
-    "rejectedCount": 5,
+    "selectedCount": 4,
+    "rejectedCount": 6,
     "selected": [
       {
         "featureId": "FEAT_ST",
@@ -533,15 +508,6 @@
         "requiredTrials": {
           "value": 5482,
           "unit": "通常ゲーム"
-        }
-      },
-      {
-        "featureId": "FEAT_BONUS_PREDECESSOR",
-        "name": "着席前ボーナス確率",
-        "reason": "カウンター仕様が適切なら着席前ボーナスを補助利用。",
-        "requiredTrials": {
-          "value": 5482,
-          "unit": "データカウンターゲーム"
         }
       },
       {
@@ -564,6 +530,15 @@
       }
     ],
     "rejected": [
+      {
+        "featureId": "FEAT_BONUS_PREDECESSOR",
+        "name": "着席前ボーナス確率",
+        "reason": "着席時入力欄は記録用として残しますが、データカウンター仕様の実機確認完了まで前任者Featureは推測不参加とします。",
+        "requiredTrials": {
+          "value": 5482,
+          "unit": "データカウンターゲーム"
+        }
+      },
       {
         "featureId": "FEAT_KIKU_NONRARE_SUCCESS",
         "name": "菊チャンス中 非レア役成功",
@@ -606,7 +581,10 @@
       "SET_4",
       "SET_5",
       "SET_6"
-    ]
+    ],
+    "uiDesignMaterialized": true,
+    "uiDesignSchemaVersion": "ui-design-data-v1",
+    "uiDesignStatus": "PASS"
   },
   "validation": {
     "cases": []
