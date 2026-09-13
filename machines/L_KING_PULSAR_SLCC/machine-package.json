@@ -86,6 +86,7 @@
         "defaultValue": 0,
         "observationScope": "PREDECESSOR_SNAPSHOT",
         "description": "着席時のデータカウンターに表示されている当日累計ゲーム数。同一区間のBIG・REGが確認できる場合のみ入力します。",
+        "inferenceRole": "EXCLUDE",
         "minimum": 0
       },
       {
@@ -99,6 +100,7 @@
         "observationScope": "PREDECESSOR_SNAPSHOT",
         "parentInputId": "INP_PREDECESSOR_GAMES",
         "description": "着席時の当日累計BIG回数。",
+        "inferenceRole": "EXCLUDE",
         "minimum": 0
       },
       {
@@ -112,6 +114,7 @@
         "observationScope": "PREDECESSOR_SNAPSHOT",
         "parentInputId": "INP_PREDECESSOR_GAMES",
         "description": "着席時の当日累計REG回数。",
+        "inferenceRole": "EXCLUDE",
         "minimum": 0
       },
       {
@@ -235,60 +238,6 @@
         "sourceEvidenceRefs": [
           "SRC_KP_GABU"
         ]
-      },
-      {
-        "featureId": "FEAT_PREDECESSOR_BONUS",
-        "name": "着席時BIG/REG",
-        "adoptionCategory": "INCLUDE_PRIMARY",
-        "calculationRole": "PROBABILITY",
-        "probabilityEngineUsage": true,
-        "modelType": "multinomial",
-        "minimumSample": 1,
-        "sampleRecommendation": 3000,
-        "reliabilityProfile": {
-          "weight": 1
-        },
-        "displayFormat": "ratio_1_over_n",
-        "numeratorInputId": "INP_PREDECESSOR_BIG",
-        "denominatorInputId": "INP_PREDECESSOR_GAMES",
-        "categoryInputIds": [
-          "INP_PREDECESSOR_REG"
-        ],
-        "probabilities": {},
-        "categoryLabels": [
-          "BIG",
-          "REG"
-        ],
-        "categoryProbabilities": {
-          "SET_1": [
-            0.003881987577639751,
-            0.0025786487880350697
-          ],
-          "SET_2": [
-            0.003977724741447892,
-            0.002642706131078224
-          ],
-          "SET_4": [
-            0.004761904761904762,
-            0.0030845157310302285
-          ],
-          "SET_5": [
-            0.005213764337851929,
-            0.0033467202141900937
-          ],
-          "SET_6": [
-            0.00576036866359447,
-            0.003637686431429611
-          ]
-        },
-        "categoryConditioning": {
-          "excludedCategories": [],
-          "normalization": "RENORMALIZE_INCLUDED",
-          "residualCategory": "OTHER"
-        },
-        "sourceEvidenceRefs": [
-          "SRC_KP_PW"
-        ]
       }
     ]
   },
@@ -386,7 +335,7 @@
   "ui": {
     "sections": [
       {
-        "id": "AUTO_PREDECESSOR",
+        "id": "UI_DESIGN_1",
         "title": "着席時データ",
         "displayOrder": 1,
         "items": [
@@ -411,7 +360,7 @@
         ]
       },
       {
-        "id": "AUTO_PRIMARY",
+        "id": "UI_DESIGN_2",
         "title": "ボーナス",
         "displayOrder": 2,
         "items": [
@@ -436,7 +385,7 @@
         ]
       },
       {
-        "id": "AUTO_ROLE",
+        "id": "UI_DESIGN_3",
         "title": "小役",
         "displayOrder": 3,
         "items": [
@@ -455,7 +404,7 @@
         ]
       },
       {
-        "id": "AUTO_EVIDENCE",
+        "id": "UI_DESIGN_4",
         "title": "設定確定・否定情報",
         "displayOrder": 4,
         "items": [
@@ -472,8 +421,8 @@
   "selectionSummary": {
     "schemaVersion": "selection-summary-v1",
     "evaluatedCount": 6,
-    "selectedCount": 3,
-    "rejectedCount": 3,
+    "selectedCount": 2,
+    "rejectedCount": 4,
     "selected": [
       {
         "featureId": "FEAT_BONUS",
@@ -491,15 +440,6 @@
         "requiredTrials": {
           "value": 20354,
           "unit": "通常ゲーム"
-        }
-      },
-      {
-        "featureId": "FEAT_PREDECESSOR_BONUS",
-        "name": "着席時BIG/REG",
-        "reason": "着席時に当日累計ゲーム数・BIG・REGを同一区間で取得できる場合、前任者区間も独立した設定推測情報として利用できるため採用。入力できない場合は未入力で構いません。",
-        "requiredTrials": {
-          "value": 6597,
-          "unit": "着席前ゲーム"
         }
       }
     ],
@@ -522,6 +462,15 @@
         "featureId": "FEAT_BONUS_1COIN_CZ",
         "name": "ボーナス中1枚役からCZ",
         "reason": "設定1・2の1/16384に対して設定6は1/1638.4と差は大きいものの、ボーナス中1枚役の終日試行数では必要試行量に届かないため不採用。"
+      },
+      {
+        "featureId": "FEAT_PREDECESSOR_BONUS",
+        "name": "着席時BIG/REG",
+        "reason": "着席時入力欄は記録用として残しますが、機種固有の実機確認完了まで前任者Featureは推測不参加とします。",
+        "requiredTrials": {
+          "value": 6597,
+          "unit": "着席前ゲーム"
+        }
       }
     ]
   },
@@ -535,7 +484,10 @@
       "SET_4",
       "SET_5",
       "SET_6"
-    ]
+    ],
+    "uiDesignMaterialized": true,
+    "uiDesignSchemaVersion": "ui-design-data-v1",
+    "uiDesignStatus": "PASS"
   },
   "validation": {
     "cases": []

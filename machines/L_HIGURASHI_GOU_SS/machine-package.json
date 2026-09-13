@@ -56,6 +56,7 @@
         "displayOrder": 10,
         "description": "着席時のデータカウンター累計ゲーム数。公開ボーナス確率の分母と合わないカウンターでは入力しないでください。",
         "defaultValue": "",
+        "inferenceRole": "EXCLUDE",
         "minimum": 0,
         "observationScope": "PREDECESSOR_SNAPSHOT"
       },
@@ -68,6 +69,7 @@
         "displayOrder": 11,
         "description": "着席時のBIG+REG回数。",
         "defaultValue": "",
+        "inferenceRole": "EXCLUDE",
         "minimum": 0,
         "observationScope": "PREDECESSOR_SNAPSHOT"
       },
@@ -175,33 +177,6 @@
         "displayFormat": "ratio_1_over_n",
         "denominatorInputId": "INP_NORMAL_GAMES",
         "numeratorInputId": "INP_BONUS_COUNT",
-        "probabilities": {
-          "SET_1": 0.00508130081300813,
-          "SET_2": 0.005202913631633715,
-          "SET_3": 0.005310674455655868,
-          "SET_4": 0.005431830526887562,
-          "SET_5": 0.005555555555555556,
-          "SET_6": 0.005675368898978434
-        },
-        "sourceEvidenceRefs": [
-          "SRC_HIG_NANA_SET"
-        ]
-      },
-      {
-        "featureId": "FEAT_BONUS_PREDECESSOR",
-        "name": "着席前ボーナス合算",
-        "adoptionCategory": "INCLUDE_SUPPORT",
-        "calculationRole": "PROBABILITY",
-        "probabilityEngineUsage": true,
-        "modelType": "binomial",
-        "minimumSample": 1,
-        "sampleRecommendation": 1000,
-        "reliabilityProfile": {
-          "weight": 1
-        },
-        "displayFormat": "ratio_1_over_n",
-        "denominatorInputId": "INP_SEATED_GAMES",
-        "numeratorInputId": "INP_SEATED_BONUS_COUNT",
         "probabilities": {
           "SET_1": 0.00508130081300813,
           "SET_2": 0.005202913631633715,
@@ -394,7 +369,7 @@
   "ui": {
     "sections": [
       {
-        "id": "AUTO_PREDECESSOR",
+        "id": "UI_DESIGN_1",
         "title": "着席時データ",
         "displayOrder": 1,
         "items": [
@@ -413,7 +388,7 @@
         ]
       },
       {
-        "id": "AUTO_PRIMARY",
+        "id": "UI_DESIGN_2",
         "title": "ボーナス・主要データ",
         "displayOrder": 2,
         "items": [
@@ -432,7 +407,7 @@
         ]
       },
       {
-        "id": "AUTO_ROLE",
+        "id": "UI_DESIGN_3",
         "title": "小役",
         "displayOrder": 3,
         "items": [
@@ -451,7 +426,7 @@
         ]
       },
       {
-        "id": "AUTO_ART_ROLE",
+        "id": "UI_DESIGN_4",
         "title": "ART中小役",
         "displayOrder": 4,
         "items": [
@@ -470,7 +445,7 @@
         ]
       },
       {
-        "id": "AUTO_EVIDENCE",
+        "id": "UI_DESIGN_5",
         "title": "設定確定・否定情報",
         "displayOrder": 5,
         "items": [
@@ -487,8 +462,8 @@
   "selectionSummary": {
     "schemaVersion": "selection-summary-v1",
     "evaluatedCount": 9,
-    "selectedCount": 4,
-    "rejectedCount": 5,
+    "selectedCount": 3,
+    "rejectedCount": 6,
     "selected": [
       {
         "featureId": "FEAT_BONUS_COMBINED",
@@ -497,15 +472,6 @@
         "requiredTrials": {
           "value": 111027,
           "unit": "通常ゲーム"
-        }
-      },
-      {
-        "featureId": "FEAT_BONUS_PREDECESSOR",
-        "name": "着席前ボーナス合算",
-        "reason": "データカウンター仕様が適切なら着席前区間もボーナス観測として利用できる。",
-        "requiredTrials": {
-          "value": 111027,
-          "unit": "データカウンターゲーム"
         }
       },
       {
@@ -528,6 +494,15 @@
       }
     ],
     "rejected": [
+      {
+        "featureId": "FEAT_BONUS_PREDECESSOR",
+        "name": "着席前ボーナス合算",
+        "reason": "着席時入力欄は記録用として残しますが、機種固有の実機確認完了まで前任者Featureは推測不参加とします。",
+        "requiredTrials": {
+          "value": 111027,
+          "unit": "データカウンターゲーム"
+        }
+      },
       {
         "featureId": "FEAT_ONE_YAKU_B",
         "name": "1枚役B",
@@ -570,7 +545,10 @@
       "SET_4",
       "SET_5",
       "SET_6"
-    ]
+    ],
+    "uiDesignMaterialized": true,
+    "uiDesignSchemaVersion": "ui-design-data-v1",
+    "uiDesignStatus": "PASS"
   },
   "validation": {
     "cases": []
