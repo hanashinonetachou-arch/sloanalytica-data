@@ -10,7 +10,8 @@ const ids = [
 test('snapshot SR1 UI contracts', () => {
   for (const id of ids) {
     const pkg = JSON.parse(fs.readFileSync(`machines/${id}/machine-package.json`, 'utf8'));
-    const inputsById = new Map((pkg.inputs ?? []).map(x => [x.id, x]));
+    const inputList = Array.isArray(pkg.inputs) ? pkg.inputs : (pkg.inputs?.inputs ?? []);
+    const inputsById = new Map(inputList.map(x => [x.id, x]));
     const sections = (pkg.ui?.sections ?? []).map(s => ({
       id:s.id,title:s.title,displayOrder:s.displayOrder,
       items:(s.items ?? []).filter(x=>x.type==='input').map(x=>({
