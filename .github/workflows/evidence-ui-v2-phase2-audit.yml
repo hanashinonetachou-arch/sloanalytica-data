@@ -1,0 +1,53 @@
+name: Evidence UI v2 Phase 2 Audit
+
+on:
+  push:
+    branches:
+      - audit/evidence-ui-v2-phase2-20260914
+    paths:
+      - tools/audit-evidence-ui-v2.mjs
+      - .github/workflows/evidence-ui-v2-phase2-audit.yml
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  inventory:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: audit/evidence-ui-v2-phase2-20260914
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Validate machine registry
+        run: npm run registry:validate
+      - name: Run existing Evidence validator
+        run: npm run evidence-ui:validate
+      - name: Run Evidence UI v2 Phase 2 inventory
+        env:
+          EVIDENCE_UI_V2_BASELINE_SHA: e38ad44297f6c1dcb923f0ce7417373099c86f61
+        run: node tools/audit-evidence-ui-v2.mjs
+      - name: Show inventory summary
+        run: cat audit-reports/evidence-ui-v2-phase2.md
+      - name: Upload audit report
+        uses: actions/upload-artifact@v4
+        with:
+          name: evidence-ui-v2-phase2-audit
+          path: |
+            audit-reports/evidence-ui-v2-phase2.json
+            audit-reports/evidence-ui-v2-phase2.md
+      - name: Commit generated inventory
+        run: |
+          if [ -z "$(git status --porcelain -- audit-reports/evidence-ui-v2-phase2.json audit-reports/evidence-ui-v2-phase2.md)" ]; then
+            echo 'No report changes.'
+            exit 0
+          fi
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add audit-reports/evidence-ui-v2-phase2.json audit-reports/evidence-ui-v2-phase2.md
+          git commit -m 'audit: record Evidence UI v2 phase 2 inventory'
+          git push origin HEAD:audit/evidence-ui-v2-phase2-20260914
