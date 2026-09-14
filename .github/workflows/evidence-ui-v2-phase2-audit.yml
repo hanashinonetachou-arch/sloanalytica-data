@@ -10,6 +10,7 @@ on:
       - tools/finalize-evidence-ui-v2-phase2.mjs
       - tools/triage-evidence-ui-v2-reopen.mjs
       - tools/plan-evidence-ui-v2-migration.mjs
+      - tools/pilot-evidence-ui-v2-g1-gold.mjs
       - .github/workflows/evidence-ui-v2-phase2-audit.yml
   workflow_dispatch:
 
@@ -60,6 +61,11 @@ jobs:
         continue-on-error: true
         run: node tools/plan-evidence-ui-v2-migration.mjs
 
+      - name: Run GI Gold dry-run pilot
+        id: g1_pilot
+        continue-on-error: true
+        run: node tools/pilot-evidence-ui-v2-g1-gold.mjs
+
       - name: Show audit summaries
         if: always()
         run: |
@@ -67,6 +73,7 @@ jobs:
           echo "fixed breakdowns outcome: ${{ steps.fixed_breakdowns.outcome }}"
           echo "reopen triage outcome: ${{ steps.reopen_triage.outcome }}"
           echo "migration plan outcome: ${{ steps.migration_plan.outcome }}"
+          echo "G1 pilot outcome: ${{ steps.g1_pilot.outcome }}"
           echo
           cat audit-reports/evidence-ui-v2-phase2.md
           echo
@@ -75,6 +82,8 @@ jobs:
           cat audit-reports/evidence-ui-v2-phase2-triage.md || true
           echo
           cat audit-reports/evidence-ui-v2-phase2-migration-plan.md || true
+          echo
+          cat audit-reports/evidence-ui-v2-pilot-L_G1_YUSHUN_CLUB_GOLD_KD.md || true
           echo
           cat audit-reports/evidence-validator-all.md || true
 
@@ -92,6 +101,8 @@ jobs:
             audit-reports/evidence-ui-v2-phase2-triage.md
             audit-reports/evidence-ui-v2-phase2-migration-plan.json
             audit-reports/evidence-ui-v2-phase2-migration-plan.md
+            audit-reports/evidence-ui-v2-pilot-L_G1_YUSHUN_CLUB_GOLD_KD.json
+            audit-reports/evidence-ui-v2-pilot-L_G1_YUSHUN_CLUB_GOLD_KD.md
             audit-reports/evidence-validator-all.json
             audit-reports/evidence-validator-all.md
             audit-reports/existing-evidence-validator.log
@@ -108,6 +119,8 @@ jobs:
             audit-reports/evidence-ui-v2-phase2-triage.md
             audit-reports/evidence-ui-v2-phase2-migration-plan.json
             audit-reports/evidence-ui-v2-phase2-migration-plan.md
+            audit-reports/evidence-ui-v2-pilot-L_G1_YUSHUN_CLUB_GOLD_KD.json
+            audit-reports/evidence-ui-v2-pilot-L_G1_YUSHUN_CLUB_GOLD_KD.md
             audit-reports/evidence-validator-all.json
             audit-reports/evidence-validator-all.md
           )
@@ -126,27 +139,16 @@ jobs:
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
           git add "${EXISTING[@]}"
-          git commit -m 'audit: record Evidence UI v2 phase 2 migration plan'
+          git commit -m 'audit: record Evidence UI v2 GI Gold dry-run pilot'
           git push origin HEAD:audit/evidence-ui-v2-phase2-20260914
 
       - name: Enforce audit outcomes
         if: always()
         run: |
           failed=0
-          if [ "${{ steps.existing_evidence.outcome }}" != "success" ]; then
-            echo 'Full Evidence UI validator wrapper reported failures.'
-            failed=1
-          fi
-          if [ "${{ steps.fixed_breakdowns.outcome }}" != "success" ]; then
-            echo 'Evidence UI Phase 2 fixed-breakdown invariants reported failures.'
-            failed=1
-          fi
-          if [ "${{ steps.reopen_triage.outcome }}" != "success" ]; then
-            echo 'Evidence UI Phase 2 reopen triage reported failures.'
-            failed=1
-          fi
-          if [ "${{ steps.migration_plan.outcome }}" != "success" ]; then
-            echo 'Evidence UI Phase 2 migration plan reported failures.'
-            failed=1
-          fi
+          if [ "${{ steps.existing_evidence.outcome }}" != "success" ]; then failed=1; fi
+          if [ "${{ steps.fixed_breakdowns.outcome }}" != "success" ]; then failed=1; fi
+          if [ "${{ steps.reopen_triage.outcome }}" != "success" ]; then failed=1; fi
+          if [ "${{ steps.migration_plan.outcome }}" != "success" ]; then failed=1; fi
+          if [ "${{ steps.g1_pilot.outcome }}" != "success" ]; then failed=1; fi
           exit "$failed"
