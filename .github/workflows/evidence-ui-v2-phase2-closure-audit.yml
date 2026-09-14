@@ -1,0 +1,32 @@
+name: Evidence UI v2 Phase 2 Closure Audit
+
+on:
+  push:
+    branches:
+      - audit/evidence-ui-v2-phase2-20260914
+    paths:
+      - .github/workflows/evidence-ui-v2-phase2-closure-audit.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  closure-audit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: audit/evidence-ui-v2-phase2-20260914
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Scan residual legacy Evidence UI
+        run: node tools/audit-evidence-ui-v2-residuals.mjs
+      - name: Validate residual classification coverage
+        run: node tools/validate-evidence-ui-v2-residual-classification.mjs
+      - name: Validate all Evidence UI contracts
+        run: node tools/validate-evidence-ui-all.mjs
+      - name: Validate all canonical UI designs
+        run: node tools/validate-ui-design-data.mjs .
