@@ -1,0 +1,175 @@
+name: Evidence UI v2 Formal Migration Batch 3
+
+on:
+  push:
+    branches:
+      - audit/evidence-ui-v2-phase2-20260914
+    paths:
+      - .github/workflows/evidence-ui-v2-batch-vendetta-kingpulsar-tensura-formal.yml
+
+permissions:
+  contents: write
+
+jobs:
+  formal-migration:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: audit/evidence-ui-v2-phase2-20260914
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Canonicalize Evidence UI v2 batch
+        run: |
+          node --input-type=module <<'NODE'
+          import fs from 'node:fs';
+
+          const configs = [
+            {
+              id:'L_BIOHAZARD_VENDETTA_FK', version:'0.1.3',
+              groups:[{
+                groupId:'PAYOUT_DISPLAY', label:'AT中獲得枚数表示',
+                specs:[
+                  ['RE_PAYOUT_222_2PLUS','PAYOUT_222'],['RE_PAYOUT_333_3PLUS','PAYOUT_333'],['RE_PAYOUT_444_4PLUS','PAYOUT_444'],
+                  ['RE_PAYOUT_555_5PLUS','PAYOUT_555'],['RE_PAYOUT_666_6','PAYOUT_666']
+                ]
+              }],
+              evidenceIds:['EVI_UI_PAYOUT_DISPLAY']
+            },
+            {
+              id:'L_KING_PULSAR_SLCC', version:'0.1.1',
+              groups:[{
+                groupId:'BB_END_TROPHY', label:'BB終了時サイド液晶',
+                specs:[
+                  ['RE_TROPHY_2PLUS','TROPHY_2PLUS'],['RE_TROPHY_4PLUS','TROPHY_4PLUS'],
+                  ['RE_TROPHY_5PLUS','TROPHY_5PLUS'],['RE_TROPHY_6','TROPHY_6']
+                ]
+              }],
+              evidenceIds:['EVI_UI_BB_END_TROPHY']
+            },
+            {
+              id:'L_TENSURA_CD', version:'0.1.2',
+              groups:[{
+                groupId:'AT_END_SCREEN_EVIDENCE', label:'AT終了画面',
+                specs:[['RE_END_6','END_ALL_6']]
+              }],
+              evidenceIds:['EVI_UI_AT_END_SCREEN_EVIDENCE']
+            }
+          ];
+
+          for (const cfg of configs) {
+            const base=`research/${cfg.id}`;
+            const sp=`${base}/selection-data.json`, rp=`${base}/research-data.json`, up=`${base}/ui-design-data.json`;
+            const s=JSON.parse(fs.readFileSync(sp,'utf8'));
+            const r=JSON.parse(fs.readFileSync(rp,'utf8'));
+            const ui=JSON.parse(fs.readFileSync(up,'utf8'));
+            const em=new Map((r.evidenceCandidates??[]).map(x=>[x.researchEvidenceId,x]));
+            const groups=cfg.groups.map(g=>({
+              groupId:g.groupId,label:g.label,selectionMode:'single',normalizationMode:'ALLOWED_SETTINGS',
+              options:g.specs.map(([eid,value])=>{
+                const c=em.get(eid);
+                if(!c||c.factStatus!=='verified') throw new Error(`${cfg.id}: invalid Research Evidence ${eid}`);
+                return {value,label:c.name,allowedSettings:c.allowedSettings,excludedSettings:c.deniedSettings??[],sourceEvidenceIds:[eid]};
+              })
+            }));
+            s.machineDataVersion=cfg.version;
+            s.evidenceUi={groups};
+            fs.writeFileSync(sp,JSON.stringify(s,null,2)+'\n');
+
+            const sec=ui.sections?.['設定確定・否定情報'];
+            if(!sec) throw new Error(`${cfg.id}: evidence section missing`);
+            sec.inputIds=[];
+            sec.evidenceIds=cfg.evidenceIds;
+            sec.description=sec.description??'';
+            sec.collapsible=sec.collapsible??false;
+            sec.defaultExpanded=sec.defaultExpanded??true;
+            delete ui.inputContracts?.INP_EVI_SETTING_FLOOR;
+            delete ui.inputContracts?.INP_EVI_SETTING_CONSTRAINT;
+            delete ui.inputContracts?.INP_EVI_SETTING_DENIAL;
+            delete ui.inputContracts?.INP_EVI_SETTING_SUBSET;
+            ui.evidenceContracts={};
+            for(const g of groups){
+              const eid=`EVI_UI_${g.groupId}`;
+              ui.evidenceContracts[eid]={label:g.label,selectionMode:'single',sourceEvidenceGroupId:g.groupId,inheritOptions:true};
+            }
+            ui.auditNotes=[
+              'Evidence UI v2 Phase 2正式移行。設定結果そのものではなく、実際に確認した表示・画面・トロフィーを入力する。',
+              '設定下限はResearch EvidenceのallowedSettings / deniedSettingsから導出し、Feature再選定は行っていない。',
+              'Researchで定義済みの自然観測面をそのままEvidence Groupとして使用する。'
+            ];
+            fs.writeFileSync(up,JSON.stringify(ui,null,2)+'\n');
+          }
+          NODE
+
+      - name: Validate canonical layers
+        run: |
+          for id in L_BIOHAZARD_VENDETTA_FK L_KING_PULSAR_SLCC L_TENSURA_CD; do
+            node tools/validate-selection-data.mjs research/$id/selection-data.json research/$id/research-data.json
+            node tools/validate-machine-observation-data.mjs research/$id/machine-observation-data.json
+          done
+          node tools/validate-ui-design-data.mjs .
+          for id in L_BIOHAZARD_VENDETTA_FK L_KING_PULSAR_SLCC L_TENSURA_CD; do
+            node tools/audit-ui-design-observation-linkage.mjs $id --strict-v2
+            node tools/four-layer-pipeline-gate.mjs $id
+          done
+
+      - name: Check MachineData regeneration without writing
+        run: |
+          for id in L_BIOHAZARD_VENDETTA_FK L_KING_PULSAR_SLCC L_TENSURA_CD; do
+            npm run machine:pipeline -- $id --check --skip-repo-checks
+          done
+
+      - name: Materialize formal MachineData
+        run: |
+          for id in L_BIOHAZARD_VENDETTA_FK L_KING_PULSAR_SLCC L_TENSURA_CD; do
+            npm run machine:pipeline -- $id --skip-repo-checks
+          done
+
+      - name: Validate regenerated Evidence UI with existing validator wrapper
+        run: node tools/validate-evidence-ui-all.mjs
+
+      - name: Re-run canonical and four-layer gates
+        run: |
+          node tools/validate-ui-design-data.mjs .
+          for id in L_BIOHAZARD_VENDETTA_FK L_KING_PULSAR_SLCC L_TENSURA_CD; do
+            node tools/audit-ui-design-observation-linkage.mjs $id --strict-v2
+            node tools/four-layer-pipeline-gate.mjs $id
+          done
+
+      - name: Verify generated contracts
+        run: |
+          node --input-type=module <<'NODE'
+          import fs from 'node:fs';
+          const specs={
+            L_BIOHAZARD_VENDETTA_FK:{version:'0.1.3',inputs:['INP_EVI_PAYOUT_DISPLAY'],refs:['RE_PAYOUT_222_2PLUS','RE_PAYOUT_333_3PLUS','RE_PAYOUT_444_4PLUS','RE_PAYOUT_555_5PLUS','RE_PAYOUT_666_6']},
+            L_KING_PULSAR_SLCC:{version:'0.1.1',inputs:['INP_EVI_BB_END_TROPHY'],refs:['RE_TROPHY_2PLUS','RE_TROPHY_4PLUS','RE_TROPHY_5PLUS','RE_TROPHY_6']},
+            L_TENSURA_CD:{version:'0.1.2',inputs:['INP_EVI_AT_END_SCREEN_EVIDENCE'],refs:['RE_END_6']}
+          };
+          function assert(c,m){if(!c) throw new Error(m)}
+          for(const [id,s] of Object.entries(specs)){
+            const pkg=JSON.parse(fs.readFileSync(`machines/${id}/machine-package.json`,'utf8'));
+            const inputs=new Map((pkg.inputs?.inputs??[]).map(x=>[x.id,x]));
+            for(const legacy of ['INP_EVI_SETTING_FLOOR','INP_EVI_SETTING_CONSTRAINT','INP_EVI_SETTING_DENIAL','INP_EVI_SETTING_SUBSET']) assert(!inputs.has(legacy),`${id}: legacy Evidence input remains ${legacy}`);
+            assert(pkg.machine?.machineDataVersion===s.version,`${id}: version mismatch ${pkg.machine?.machineDataVersion}`);
+            for(const iid of s.inputs) assert(inputs.has(iid),`${id}: missing ${iid}`);
+            const refs=new Set((pkg.evidence?.evidences??[]).flatMap(x=>x.sourceEvidenceRefs??[]));
+            for(const eid of s.refs) assert(refs.has(eid),`${id}: missing sourceEvidenceRef ${eid}`);
+          }
+          console.log('Evidence UI v2 batch 3 generated contracts: PASS');
+          NODE
+
+      - name: Commit canonical and generated artifacts
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          for id in L_BIOHAZARD_VENDETTA_FK L_KING_PULSAR_SLCC L_TENSURA_CD; do
+            git add research/$id/selection-data.json research/$id/ui-design-data.json
+            git add machines/$id/machine-package.json research/$id/statistics-report.json research/$id/difficulty-report.json research/$id/setting-band-report.json || true
+          done
+          git add catalog.json difficulty-catalog.json machine-registry.json || true
+          if git diff --cached --quiet; then echo 'No changes to commit.'; exit 0; fi
+          git commit -m 'evidence-ui: formalize Vendetta KingPulsar and Tensura evidence'
+          git push origin HEAD:audit/evidence-ui-v2-phase2-20260914
