@@ -49,11 +49,13 @@ const classify = (c, fixtureRequired) => {
   if (fixtureRequired) return ['AUTO-6','required-regression-fixture'];
   if (FULL.test(label)) return ['KEEP-12','game-total/denominator/aggregate'];
   if (COMPLEX.test(label)) return ['KEEP-12','long/freeform/complex'];
-  if (DEP.test(label)) return ['REVIEW','possible parent-child/denominator dependency'];
-  if (c?.gridSpan === 6 && c?.compact === true) return ['AUTO-6','existing explicit compact canonical intent'];
+  // Explicit canonical half-width is a resolved layout decision even when NUMBER/direct-input has no compact flag.
+  if (c?.gridSpan === 6) return ['AUTO-6','existing explicit half-width canonical intent'];
+  // Parent/child or denominator-like inputs explicitly locked to full width are resolved KEEP-12 decisions.
+  if (DEP.test(label) && c?.gridSpan === 12) return ['KEEP-12','explicit parent-child/denominator full-width intent'];
+  if (DEP.test(label)) return ['REVIEW','parent-child/denominator dependency needs explicit layout'];
   if (mode === 'COUNTER') return ['AUTO-6','short independent counter'];
   if (REVIEW_MODES.has(mode)) return ['REVIEW',`compact-capable/special ${mode} requires review`];
-  if (c?.gridSpan === 6) return ['REVIEW',`existing half-width special ${mode || 'UNKNOWN'}`];
   return ['REVIEW',`unknown/special ${mode || 'UNKNOWN'}`];
 };
 const isEvidence = (id, contract, pkgInput) => id.startsWith('INP_EVI_') || String(contract?.mode ?? '').toUpperCase() === 'EVIDENCE' || pkgInput?.category === 'EVIDENCE';
