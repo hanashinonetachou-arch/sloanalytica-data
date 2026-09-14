@@ -1,0 +1,26 @@
+#!/usr/bin/env node
+import { execSync } from 'node:child_process';
+import fs from 'node:fs';
+const id='L_GOD_EATER_RESURRECTION';
+const run=cmd=>execSync(cmd,{stdio:'inherit'});
+run('node tools/migrate-evidence-ui-v2-review-semantics-batch2.mjs');
+run(`node tools/validate-selection-data.mjs research/${id}/selection-data.json research/${id}/research-data.json`);
+run(`node tools/validate-machine-observation-data.mjs research/${id}/machine-observation-data.json`);
+run(`node tools/audit-ui-design-observation-linkage.mjs ${id} --strict-v2`);
+run(`node tools/four-layer-pipeline-gate.mjs ${id}`);
+run(`npm run machine:pipeline -- ${id} --check --skip-repo-checks`);
+run(`npm run machine:pipeline -- ${id} --skip-repo-checks`);
+run('node tools/validate-ui-design-data.mjs .');
+run('node tools/validate-evidence-ui-all.mjs');
+run(`node tools/audit-ui-design-observation-linkage.mjs ${id} --strict-v2`);
+run(`node tools/four-layer-pipeline-gate.mjs ${id}`);
+const s=JSON.parse(fs.readFileSync(`research/${id}/selection-data.json`,'utf8'));
+const groups=new Map((s.evidenceUi?.groups??[]).map(g=>[g.groupId,g]));
+if(groups.size!==2||!groups.has('ST_END_SCREEN')||!groups.has('PAYOUT_DISPLAY')) throw new Error('natural Evidence groups mismatch');
+if(groups.has('SETTING_FLOOR')||groups.has('DENIED_SETTINGS')) throw new Error('legacy abstract Evidence groups remain');
+const ui=JSON.parse(fs.readFileSync(`research/${id}/ui-design-data.json`,'utf8'));
+if(ui.inputContracts?.INP_EVI_SETTING_FLOOR||ui.inputContracts?.INP_EVI_DENIED_SETTINGS) throw new Error('legacy Evidence inputs remain');
+const pkg=JSON.parse(fs.readFileSync(`machines/${id}/machine-package.json`,'utf8'));
+const raw=JSON.stringify(pkg);
+if(raw.includes('INP_EVI_SETTING_FLOOR')||raw.includes('INP_EVI_DENIED_SETTINGS')) throw new Error('generated package contains legacy Evidence inputs');
+console.log('Evidence UI v2 REVIEW semantics batch2: PASS');
