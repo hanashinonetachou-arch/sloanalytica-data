@@ -1,0 +1,125 @@
+name: Evidence UI v2 Zenigata4 Formal Migration
+
+on:
+  push:
+    branches:
+      - audit/evidence-ui-v2-phase2-20260914
+    paths:
+      - .github/workflows/evidence-ui-v2-zenigata4-formal.yml
+
+permissions:
+  contents: write
+
+jobs:
+  formal-migration:
+    runs-on: ubuntu-latest
+    env:
+      MACHINE_ID: L_ZENIGATA4_L1
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: audit/evidence-ui-v2-phase2-20260914
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Canonicalize Zenigata4 Evidence UI v2
+        run: |
+          node --input-type=module <<'NODE'
+          import fs from 'node:fs';
+          const id=process.env.MACHINE_ID;
+          const base=`research/${id}`;
+          const sp=`${base}/selection-data.json`, rp=`${base}/research-data.json`, up=`${base}/ui-design-data.json`;
+          const s=JSON.parse(fs.readFileSync(sp,'utf8'));
+          const r=JSON.parse(fs.readFileSync(rp,'utf8'));
+          const em=new Map((r.evidenceCandidates??[]).map(x=>[x.researchEvidenceId,x]));
+          const specs=[
+            ['RE_DWIN_2PLUS','DWIN_2PLUS'],
+            ['RE_DWIN_3PLUS','DWIN_3PLUS'],
+            ['RE_DWIN_4PLUS','DWIN_4PLUS'],
+            ['RE_DWIN_5PLUS','DWIN_5PLUS'],
+            ['RE_DWIN_6','DWIN_6']
+          ];
+          const groupId='DWIN_LITE_1000G_VOICE';
+          const groupLabel='打-WIN LITE 1000Gごとのボイス';
+          s.machineDataVersion='0.1.1';
+          s.evidenceUi={groups:[{
+            groupId,label:groupLabel,selectionMode:'single',normalizationMode:'ALLOWED_SETTINGS',
+            options:specs.map(([eid,value])=>{
+              const c=em.get(eid); if(!c||c.factStatus!=='verified') throw new Error(`${id}: invalid Research Evidence ${eid}`);
+              return {value,label:c.name,allowedSettings:c.allowedSettings,excludedSettings:c.deniedSettings??[],sourceEvidenceIds:[eid]};
+            })
+          }]};
+          fs.writeFileSync(sp,JSON.stringify(s,null,2)+'\n');
+          const ui={
+            schemaVersion:'ui-design-data-v1',machineId:id,status:'PASS',
+            generatedFrom:{selection:`${base}/selection-data.json`,observation:`${base}/machine-observation-data.json`,manifest:'SloAnalytica_MachineData_UX_Construction_Manifest_v7_1',materializedSource:`machines/${id}/machine-package.json`},
+            sectionOrder:['主要入力','設定確定・否定情報'],
+            sections:{
+              '主要入力':{inputIds:['INP_NORMAL_GAMES','INP_AT_INITIAL_COUNT'],description:'',collapsible:false,defaultExpanded:true},
+              '設定確定・否定情報':{inputIds:[],evidenceIds:['EVI_UI_DWIN_LITE_1000G_VOICE'],description:'',collapsible:false,defaultExpanded:true}
+            },
+            inputContracts:{
+              INP_NORMAL_GAMES:{name:'通常ゲーム数',mode:'NUMBER',gridSpan:12,directInput:true},
+              INP_AT_INITIAL_COUNT:{name:'AT初当り回数',mode:'COUNTER',gridSpan:12,directInput:true}
+            },
+            evidenceContracts:{
+              EVI_UI_DWIN_LITE_1000G_VOICE:{label:groupLabel,selectionMode:'single',sourceEvidenceGroupId:groupId,inheritOptions:true}
+            },
+            unresolved:[],
+            auditNotes:[
+              'Evidence UI v2 Phase 2正式移行。設定下限ではなく、打-WIN LITEで実際に確認した1000Gごとのボイスを入力する。',
+              '設定下限はResearch EvidenceのallowedSettings / deniedSettingsから導出し、Feature再選定は行っていない。'
+            ]
+          };
+          fs.writeFileSync(up,JSON.stringify(ui,null,2)+'\n');
+          NODE
+
+      - name: Validate Selection against Research
+        run: node tools/validate-selection-data.mjs research/$MACHINE_ID/selection-data.json research/$MACHINE_ID/research-data.json
+      - name: Validate Observation v2
+        run: node tools/validate-machine-observation-data.mjs research/$MACHINE_ID/machine-observation-data.json
+      - name: Validate canonical UI Design
+        run: node tools/validate-ui-design-data.mjs .
+      - name: Audit UI to Observation linkage
+        run: node tools/audit-ui-design-observation-linkage.mjs $MACHINE_ID --strict-v2
+      - name: Run four-layer pipeline gate
+        run: node tools/four-layer-pipeline-gate.mjs $MACHINE_ID
+      - name: Check MachineData regeneration without writing
+        run: npm run machine:pipeline -- $MACHINE_ID --check --skip-repo-checks
+      - name: Materialize formal MachineData
+        run: npm run machine:pipeline -- $MACHINE_ID --skip-repo-checks
+      - name: Validate regenerated Evidence UI with existing validator wrapper
+        run: node tools/validate-evidence-ui-all.mjs
+      - name: Re-run canonical and four-layer gates
+        run: |
+          node tools/validate-ui-design-data.mjs .
+          node tools/audit-ui-design-observation-linkage.mjs $MACHINE_ID --strict-v2
+          node tools/four-layer-pipeline-gate.mjs $MACHINE_ID
+      - name: Verify generated Zenigata4 contract
+        run: |
+          node --input-type=module <<'NODE'
+          import fs from 'node:fs';
+          const id=process.env.MACHINE_ID;
+          const pkg=JSON.parse(fs.readFileSync(`machines/${id}/machine-package.json`,'utf8'));
+          const inputs=new Map((pkg.inputs?.inputs??[]).map(x=>[x.id,x]));
+          function assert(c,m){if(!c) throw new Error(m)}
+          assert(!inputs.has('INP_EVI_SETTING_FLOOR'),`${id}: legacy setting-floor remains`);
+          assert(pkg.machine?.machineDataVersion==='0.1.1',`${id}: version mismatch`);
+          const voice=inputs.get('INP_EVI_DWIN_LITE_1000G_VOICE');
+          assert(voice,`${id}: voice Evidence input missing`);
+          const refs=new Set((pkg.evidence?.evidences??[]).flatMap(x=>x.sourceEvidenceRefs??[]));
+          for(const eid of ['RE_DWIN_2PLUS','RE_DWIN_3PLUS','RE_DWIN_4PLUS','RE_DWIN_5PLUS','RE_DWIN_6']) assert(refs.has(eid),`${id}: missing ${eid}`);
+          console.log('Evidence UI v2 Zenigata4 contract: PASS');
+          NODE
+      - name: Commit canonical and generated artifacts
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add research/$MACHINE_ID/selection-data.json research/$MACHINE_ID/ui-design-data.json
+          git add machines/$MACHINE_ID/machine-package.json research/$MACHINE_ID/statistics-report.json research/$MACHINE_ID/difficulty-report.json research/$MACHINE_ID/setting-band-report.json || true
+          git add catalog.json difficulty-catalog.json machine-registry.json || true
+          if git diff --cached --quiet; then echo 'No changes to commit.'; exit 0; fi
+          git commit -m 'evidence-ui: formalize Zenigata4 voice evidence'
+          git push origin HEAD:audit/evidence-ui-v2-phase2-20260914
