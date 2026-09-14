@@ -1,0 +1,25 @@
+#!/usr/bin/env node
+import {execSync} from 'node:child_process';
+import fs from 'node:fs';
+const id='S_KABANERI_ZR';
+const run=c=>execSync(c,{stdio:'inherit'});
+run('node tools/reopen-research-evidence-kabaneri.mjs');
+run(`node tools/validate-research-data.mjs research/${id}/research-data.json`);
+run(`node tools/validate-selection-data.mjs research/${id}/selection-data.json research/${id}/research-data.json`);
+run(`node tools/validate-machine-observation-data.mjs research/${id}/machine-observation-data.json`);
+run(`node tools/audit-ui-design-observation-linkage.mjs ${id} --strict-v2`);
+run(`node tools/four-layer-pipeline-gate.mjs ${id}`);
+run(`npm run machine:pipeline -- ${id} --check --skip-repo-checks`);
+run(`npm run machine:pipeline -- ${id} --skip-repo-checks`);
+run('node tools/validate-ui-design-data.mjs .');
+run('node tools/validate-evidence-ui-all.mjs');
+run(`node tools/audit-ui-design-observation-linkage.mjs ${id} --strict-v2`);
+run(`node tools/four-layer-pipeline-gate.mjs ${id}`);
+const r=JSON.parse(fs.readFileSync(`research/${id}/research-data.json`,'utf8'));
+const ids=new Set((r.evidenceCandidates??[]).map(x=>x.researchEvidenceId));
+for(const old of ['RE_2PLUS','RE_4PLUS','RE_5PLUS','RE_6']) if(ids.has(old)) throw new Error(`legacy compressed/abstract Research Evidence remains: ${old}`);
+for(const need of ['RE_OMIKUJI_SMALL_2PLUS','RE_OMIKUJI_MEDIUM_4PLUS','RE_OMIKUJI_LARGE_6','RE_MUMEI_ADD_44_4PLUS','RE_MUMEI_ADD_55_5PLUS','RE_MUMEI_ADD_66_6','RE_MUMEI_ADD_77_6','RE_MUMEI_ADD_331_6']) if(!ids.has(need)) throw new Error(`missing split Research Evidence: ${need}`);
+const s=JSON.parse(fs.readFileSync(`research/${id}/selection-data.json`,'utf8'));
+const groups=new Set((s.evidenceUi?.groups??[]).map(x=>x.groupId));
+for(const need of ['OMIKUJI','MUMEI_ADD_SETTING']) if(!groups.has(need)) throw new Error(`missing Selection Evidence group: ${need}`);
+console.log('Kabaneri Research Evidence reopen: PASS');
