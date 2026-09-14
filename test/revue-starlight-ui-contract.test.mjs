@@ -15,20 +15,31 @@ test('Revue Starlight places lamp and CZ directly below predecessor data', () =>
   assert.equal(sections[predecessor + 2]?.title, 'CZ初当り');
 });
 
-test('Revue Starlight BIG end counters are two-column plus/minus only', () => {
+test('Revue Starlight BIG end section separates statistical counters from Evidence controls', () => {
   const section = sections.find(item => item.title === 'BIG終了画面');
   assert.ok(section);
   assert.ok(section.items.length >= 7);
-  for (const item of section.items) {
+
+  const statistical = section.items.slice(0, 3);
+  for (const item of statistical) {
     assert.equal(item.gridSpan, 6);
-    assert.equal(item.config?.directInput, false);
+    assert.equal(item.config?.directInput, true);
     assert.equal(item.config?.compact, true);
+    assert.deepEqual(item.config?.quickAdd, [1]);
+  }
+
+  const evidence = section.items.slice(3);
+  for (const item of evidence) {
+    assert.equal(item.gridSpan, 12);
+    assert.equal(item.config?.directInput, false);
   }
 });
 
-test('Revue Starlight lamp guidance excludes AT-end red lamp', () => {
+test('Revue Starlight lamp guidance is section-level, readable, and excludes AT-end red lamp', () => {
   const section = sections.find(item => item.title === 'CZ関連終了時のランプ色');
-  assert.equal(section?.description, 'CZ失敗時、CZ前兆失敗時のランプ色を入力。AT終了時の赤ランプは対象外です。');
+  assert.match(section?.description ?? '', /入力方法\n・/);
+  assert.match(section?.description ?? '', /除外条件\n・/);
+  assert.match(section?.description ?? '', /AT終了時の赤ランプは対象外/);
 });
 
 test('Revue Starlight Evidence inputs expose recognizable voice and payout cues', () => {
