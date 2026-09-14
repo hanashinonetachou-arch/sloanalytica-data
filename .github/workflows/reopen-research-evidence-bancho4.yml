@@ -1,0 +1,32 @@
+name: Evidence UI v2 Research Reopen Bancho4
+on:
+  push:
+    branches: [audit/evidence-ui-v2-review-remediation-20260915]
+    paths: [.github/workflows/reopen-research-evidence-bancho4.yml]
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  research-reopen:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: audit/evidence-ui-v2-review-remediation-20260915
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Run Bancho4 Research Evidence reopen and gates
+        run: node tools/run-reopen-research-evidence-bancho4.mjs
+      - name: Commit Research canonical and generated artifacts
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          id=L_OSU_BANCHO4_A3
+          git add research/$id/research-data.json research/$id/selection-data.json research/$id/machine-observation-data.json research/$id/ui-design-data.json
+          git add machines/$id/machine-package.json research/$id/statistics-report.json research/$id/difficulty-report.json research/$id/setting-band-report.json
+          git add catalog.json difficulty-catalog.json machine-registry.json
+          git diff --cached --quiet && exit 0
+          git commit -m 'evidence-ui: reopen and split Bancho4 Research Evidence'
+          git push origin HEAD:audit/evidence-ui-v2-review-remediation-20260915
