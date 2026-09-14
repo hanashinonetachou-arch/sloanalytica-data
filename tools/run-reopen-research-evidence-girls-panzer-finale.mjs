@@ -1,0 +1,25 @@
+#!/usr/bin/env node
+import {execSync} from 'node:child_process';
+import fs from 'node:fs';
+const id='L_GIRLS_UND_PANZER_FINALE_H1';
+const run=c=>execSync(c,{stdio:'inherit'});
+run('node tools/reopen-research-evidence-girls-panzer-finale.mjs');
+run(`node tools/validate-research-data.mjs research/${id}/research-data.json`);
+run(`node tools/validate-selection-data.mjs research/${id}/selection-data.json research/${id}/research-data.json`);
+run(`node tools/validate-machine-observation-data.mjs research/${id}/machine-observation-data.json`);
+run(`node tools/audit-ui-design-observation-linkage.mjs ${id} --strict-v2`);
+run(`node tools/four-layer-pipeline-gate.mjs ${id}`);
+run(`npm run machine:pipeline -- ${id} --check --skip-repo-checks`);
+run(`npm run machine:pipeline -- ${id} --skip-repo-checks`);
+run('node tools/validate-ui-design-data.mjs .');
+run('node tools/validate-evidence-ui-all.mjs');
+run(`node tools/audit-ui-design-observation-linkage.mjs ${id} --strict-v2`);
+run(`node tools/four-layer-pipeline-gate.mjs ${id}`);
+const r=JSON.parse(fs.readFileSync(`research/${id}/research-data.json`,'utf8'));
+const ids=new Set((r.evidenceCandidates??[]).map(x=>x.researchEvidenceId));
+for(const old of ['RE_AT_END_2PLUS','RE_AT_END_3PLUS','RE_AT_END_4PLUS','RE_AT_END_5PLUS','RE_AT_END_6']) if(ids.has(old)) throw new Error(`legacy compressed Research Evidence remains: ${old}`);
+for(const need of ['RE_AT_END_STAMP_2PLUS','RE_AT_END_STAMP_3PLUS','RE_AT_END_STAMP_4PLUS','RE_AT_END_STAMP_5PLUS','RE_AT_END_STAMP_6','RE_ED_END_4PLUS','RE_PAYOUT_444_4PLUS','RE_PAYOUT_555_5PLUS','RE_PAYOUT_666_6','RE_HIDDEN_NAGI_2PLUS','RE_HIDDEN_NAGI_3PLUS','RE_HIDDEN_NAGI_4PLUS','RE_HIDDEN_NAGI_5PLUS','RE_HIDDEN_NAGI_6']) if(!ids.has(need)) throw new Error(`missing split Research Evidence: ${need}`);
+const s=JSON.parse(fs.readFileSync(`research/${id}/selection-data.json`,'utf8'));
+const groups=new Set((s.evidenceUi?.groups??[]).map(x=>x.groupId));
+for(const need of ['AT_END_STAMP','ED_END_SCREEN','PAYOUT_DISPLAY','HIDDEN_NAGI']) if(!groups.has(need)) throw new Error(`missing Selection Evidence group: ${need}`);
+console.log('Girls und Panzer Finale Research Evidence reopen: PASS');
