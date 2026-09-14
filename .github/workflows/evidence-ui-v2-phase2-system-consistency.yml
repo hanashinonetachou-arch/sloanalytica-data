@@ -1,0 +1,36 @@
+name: Evidence UI v2 Phase 2 System Consistency
+
+on:
+  push:
+    branches:
+      - audit/evidence-ui-v2-phase2-20260914
+    paths:
+      - .github/workflows/evidence-ui-v2-phase2-system-consistency.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  system-consistency:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: audit/evidence-ui-v2-phase2-20260914
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Evidence UI Phase 2 closure coverage
+        run: |
+          node tools/audit-evidence-ui-v2-residuals.mjs
+          node tools/validate-evidence-ui-v2-residual-classification.mjs
+          node tools/validate-evidence-ui-all.mjs
+          node tools/validate-ui-design-data.mjs .
+      - name: Repository guard test suite
+        run: npm test
+      - name: Public-data repository audit
+        run: npm run audit
+      - name: Machine registry validation
+        run: npm run registry:validate
