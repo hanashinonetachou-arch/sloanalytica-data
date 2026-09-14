@@ -1,0 +1,33 @@
+name: Evidence UI v2 REVIEW Final Batch 4
+on:
+  push:
+    branches: [audit/evidence-ui-v2-review-remediation-20260915]
+    paths: [.github/workflows/evidence-ui-v2-review-final-batch4.yml]
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  review-remediation:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: audit/evidence-ui-v2-review-remediation-20260915
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Run Madoka and Tokyo Ghoul REVIEW remediation
+        run: node tools/run-evidence-ui-v2-review-final-batch4.mjs
+      - name: Commit canonical and generated artifacts
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          for id in L_MADOKA_FORTE_UU L_TOKYO_GHOUL; do
+            git add research/$id/selection-data.json research/$id/machine-observation-data.json research/$id/ui-design-data.json
+            git add machines/$id/machine-package.json research/$id/statistics-report.json research/$id/difficulty-report.json research/$id/setting-band-report.json
+          done
+          git add catalog.json difficulty-catalog.json machine-registry.json
+          git diff --cached --quiet && exit 0
+          git commit -m 'evidence-ui: resolve remaining REVIEW machines'
+          git push origin HEAD:audit/evidence-ui-v2-review-remediation-20260915
