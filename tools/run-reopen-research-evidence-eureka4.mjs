@@ -1,0 +1,21 @@
+#!/usr/bin/env node
+import {execSync} from 'node:child_process';
+import fs from 'node:fs';
+const id='L_EUREKA_SEVEN4_HIEVO_KX'; const run=c=>execSync(c,{stdio:'inherit'});
+run('node tools/reopen-research-evidence-eureka4.mjs');
+run(`node tools/validate-research-data.mjs research/${id}/research-data.json`);
+run(`node tools/validate-selection-data.mjs research/${id}/selection-data.json research/${id}/research-data.json`);
+run(`node tools/validate-machine-observation-data.mjs research/${id}/machine-observation-data.json`);
+run(`node tools/audit-ui-design-observation-linkage.mjs ${id} --strict-v2`);
+run(`node tools/four-layer-pipeline-gate.mjs ${id}`);
+run(`npm run machine:pipeline -- ${id} --check --skip-repo-checks`);
+run(`npm run machine:pipeline -- ${id} --skip-repo-checks`);
+run('node tools/validate-ui-design-data.mjs .');
+run('node tools/validate-evidence-ui-all.mjs');
+run(`node tools/audit-ui-design-observation-linkage.mjs ${id} --strict-v2`);
+run(`node tools/four-layer-pipeline-gate.mjs ${id}`);
+const r=JSON.parse(fs.readFileSync(`research/${id}/research-data.json`,'utf8'));
+const ids=new Set((r.evidenceCandidates??[]).map(x=>x.researchEvidenceId));
+for(const old of ['RE_2PLUS','RE_3PLUS','RE_4PLUS','RE_5PLUS','RE_6']) if(ids.has(old)) throw new Error(`legacy compressed Research Evidence remains: ${old}`);
+for(const need of ['RE_TROPHY_2PLUS','RE_TROPHY_3PLUS','RE_TROPHY_4PLUS','RE_TROPHY_5PLUS','RE_TROPHY_6','RE_PAYOUT_174_2PLUS','RE_PAYOUT_456_4PLUS','RE_PAYOUT_331_666_6']) if(!ids.has(need)) throw new Error(`missing split Research Evidence: ${need}`);
+console.log('Eureka4 Research Evidence reopen: PASS');
