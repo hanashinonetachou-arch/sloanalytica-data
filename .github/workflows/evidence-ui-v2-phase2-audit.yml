@@ -25,14 +25,21 @@ jobs:
           node-version: 22
       - name: Validate machine registry
         run: npm run registry:validate
-      - name: Run existing Evidence validator
-        run: npm run evidence-ui:validate
+      - name: Run existing Evidence validator (independent signal)
+        id: existing_evidence
+        continue-on-error: true
+        run: |
+          mkdir -p audit-reports
+          set -o pipefail
+          npm run evidence-ui:validate 2>&1 | tee audit-reports/existing-evidence-validator.log
       - name: Run Evidence UI v2 Phase 2 inventory
         env:
           EVIDENCE_UI_V2_BASELINE_SHA: e38ad44297f6c1dcb923f0ce7417373099c86f61
         run: node tools/audit-evidence-ui-v2.mjs
       - name: Show inventory summary
-        run: cat audit-reports/evidence-ui-v2-phase2.md
+        run: |
+          echo "existing evidence validator outcome: ${{ steps.existing_evidence.outcome }}"
+          cat audit-reports/evidence-ui-v2-phase2.md
       - name: Upload audit report
         uses: actions/upload-artifact@v4
         with:
@@ -40,6 +47,7 @@ jobs:
           path: |
             audit-reports/evidence-ui-v2-phase2.json
             audit-reports/evidence-ui-v2-phase2.md
+            audit-reports/existing-evidence-validator.log
       - name: Commit generated inventory
         run: |
           if [ -z "$(git status --porcelain -- audit-reports/evidence-ui-v2-phase2.json audit-reports/evidence-ui-v2-phase2.md)" ]; then
