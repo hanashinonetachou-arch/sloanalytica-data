@@ -42,7 +42,7 @@ for(const m of machines){
   selection.machineDataVersion=m.version;
   selection.evidenceUi={groups:[]};
   selection.evidenceReview={
-    policyVersion:2,
+    policyVersion:1,
     ownershipPolicy:'FEATURE_OWNS_OVERLAPPING_OBSERVATION',
     exclusions:m.owned.map(([researchEvidenceId,ownerFeatureId])=>({
       researchEvidenceId,
