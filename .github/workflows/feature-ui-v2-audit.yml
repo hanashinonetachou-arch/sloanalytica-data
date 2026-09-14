@@ -1,0 +1,31 @@
+name: Feature UI v2 Audit
+
+on:
+  pull_request:
+    paths:
+      - 'tools/audit-feature-ui-v2-final.mjs'
+      - 'research/**/ui-design-data.json'
+      - 'machines/**/machine-package.json'
+      - 'machine-registry.json'
+      - '.github/workflows/feature-ui-v2-audit.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  classify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      # Compare canonical layout intent against the materialized UI section items consumed by the app.
+      # Re-run after each guarded layout wave to lock canonical/materialized parity before the next wave.
+      - name: Run read-only Feature UI v2 audit
+        run: node tools/audit-feature-ui-v2-final.mjs --report reports/feature-ui-v2-audit.json
+      - name: Upload audit report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: feature-ui-v2-audit-report
+          path: reports/feature-ui-v2-audit.json
+          if-no-files-found: error
