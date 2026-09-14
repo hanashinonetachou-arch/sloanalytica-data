@@ -1,0 +1,23 @@
+name: Feature Two-Column Audit
+
+on:
+  pull_request:
+    branches:
+      - prototype-multi-machine
+  workflow_dispatch:
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Audit Feature two-column candidates
+        run: node tools/audit-feature-two-column-layout.mjs --json-out reports/feature-two-column-audit.json
+      - name: Upload audit report
+        uses: actions/upload-artifact@v4
+        with:
+          name: feature-two-column-audit
+          path: reports/feature-two-column-audit.json
