@@ -1,0 +1,25 @@
+#!/usr/bin/env node
+import {execSync} from 'node:child_process';
+import fs from 'node:fs';
+const id='L_OSU_BANCHO4_A3';
+const run=c=>execSync(c,{stdio:'inherit'});
+run('node tools/reopen-research-evidence-bancho4.mjs');
+run(`node tools/validate-research-data.mjs research/${id}/research-data.json`);
+run(`node tools/validate-selection-data.mjs research/${id}/selection-data.json research/${id}/research-data.json`);
+run(`node tools/validate-machine-observation-data.mjs research/${id}/machine-observation-data.json`);
+run(`node tools/audit-ui-design-observation-linkage.mjs ${id} --strict-v2`);
+run(`node tools/four-layer-pipeline-gate.mjs ${id}`);
+run(`npm run machine:pipeline -- ${id} --check --skip-repo-checks`);
+run(`npm run machine:pipeline -- ${id} --skip-repo-checks`);
+run('node tools/validate-ui-design-data.mjs .');
+run('node tools/validate-evidence-ui-all.mjs');
+run(`node tools/audit-ui-design-observation-linkage.mjs ${id} --strict-v2`);
+run(`node tools/four-layer-pipeline-gate.mjs ${id}`);
+const r=JSON.parse(fs.readFileSync(`research/${id}/research-data.json`,'utf8'));
+const ids=new Set((r.evidenceCandidates??[]).map(x=>x.researchEvidenceId));
+for(const old of ['RE_FUJI_2PLUS','RE_END_4PLUS','RE_END_5PLUS','RE_END_6']) if(ids.has(old)) throw new Error(`legacy compressed/abstract Research Evidence remains: ${old}`);
+for(const need of ['RE_END_SCREEN_FUJI_2PLUS','RE_END_SCREEN_TEA_4PLUS','RE_END_SCREEN_RQ_5PLUS','RE_END_SCREEN_HOTSPRING_6','RE_AT_REG_FK_6','RE_ED_BELL_GOTETSU_6']) if(!ids.has(need)) throw new Error(`missing split Research Evidence: ${need}`);
+const s=JSON.parse(fs.readFileSync(`research/${id}/selection-data.json`,'utf8'));
+const groups=new Set((s.evidenceUi?.groups??[]).map(x=>x.groupId));
+for(const need of ['BONUS_AT_END_SCREEN','AT_REG_CHARACTER','ED_BELL_COUNTER']) if(!groups.has(need)) throw new Error(`missing Selection Evidence group: ${need}`);
+console.log('Bancho4 Research Evidence reopen: PASS');
