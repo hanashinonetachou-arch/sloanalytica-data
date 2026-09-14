@@ -11,16 +11,21 @@ const REPORT_PATH = path.resolve(ROOT, REPORT_ARG >= 0 && process.argv[REPORT_AR
   : 'reports/feature-two-column-canonical-reaudit.json');
 
 // Evidence / setting-hint presentation is intentionally a separate redesign lane.
-const DEFER_SECTION = /(設定示唆|確定情報|確定演出|終了画面|終了時.*(画面|ボイス)|ボイス|セリフ|ミニキャラ|キャラ紹介|写真|トロフィー|BGM|楽曲|ベストショット|怪獣紹介|ルーレット|枚数調整成功時の魔法)/;
+const DEFER_SECTION = /(設定示唆|確定情報|確定演出|確定画面|終了画面|終了時.*(画面|ボイス)|ボイス|セリフ|ミニキャラ|キャラ紹介|写真|トロフィー|BGM|楽曲|ベストショット|怪獣紹介|ルーレット|枚数調整成功時の魔法)/;
+// Legacy canonical data sometimes marks manually entered game totals as COUNTER.
+// Keep those full-width and use them as a boundary instead of compacting them.
+const MANUAL_TOTAL_NAME = /(総ゲーム|累計ゲーム|ゲーム数|G数|消化G|消化ゲーム|対象ゲーム)/;
 
 const read = (p) => JSON.parse(fs.readFileSync(p, 'utf8'));
 const write = (p, value) => fs.writeFileSync(p, `${JSON.stringify(value, null, 2)}\n`);
+const isPairableCounter = (contract) => contract?.mode === 'COUNTER' && !MANUAL_TOTAL_NAME.test(String(contract.name ?? ''));
 
 const findings = [];
 const changedMachineIds = new Set();
 let canonicalMachines = 0;
 let scannedSections = 0;
 let deferredSections = 0;
+let manualCounterBoundaries = 0;
 
 for (const machineId of fs.readdirSync(RESEARCH_DIR).sort()) {
   if (machineId.includes('_TEST_') || machineId.endsWith('_TEST')) continue;
@@ -49,8 +54,12 @@ for (const machineId of fs.readdirSync(RESEARCH_DIR).sort()) {
 
     for (const inputId of section.inputIds) {
       const contract = ui.inputContracts?.[inputId];
-      if (contract?.mode === 'COUNTER') current.push({ inputId, contract });
-      else flush();
+      if (isPairableCounter(contract)) {
+        current.push({ inputId, contract });
+      } else {
+        if (contract?.mode === 'COUNTER' && MANUAL_TOTAL_NAME.test(String(contract.name ?? ''))) manualCounterBoundaries += 1;
+        flush();
+      }
     }
     flush();
 
@@ -60,14 +69,14 @@ for (const machineId of fs.readdirSync(RESEARCH_DIR).sort()) {
       const repairs = [];
       for (let i = 0; i < pairableCount; i += 1) {
         const { inputId, contract } = group[i];
+        // Existing span=6 is already laid out correctly; do not change compactness only.
+        if (contract.gridSpan === 6) continue;
         const before = { gridSpan: contract.gridSpan ?? null, compact: contract.compact ?? null };
-        if (contract.gridSpan !== 6 || contract.compact !== true) {
-          repairs.push({ inputId, name: contract.name, before, after: { gridSpan: 6, compact: true } });
-          if (APPLY) {
-            contract.gridSpan = 6;
-            contract.compact = true;
-            changed = true;
-          }
+        repairs.push({ inputId, name: contract.name, before, after: { gridSpan: 6, compact: true } });
+        if (APPLY) {
+          contract.gridSpan = 6;
+          contract.compact = true;
+          changed = true;
         }
       }
       if (repairs.length) {
@@ -96,19 +105,21 @@ for (const machineId of fs.readdirSync(RESEARCH_DIR).sort()) {
 }
 
 const report = {
-  schemaVersion: 'feature-two-column-canonical-reaudit-v1',
+  schemaVersion: 'feature-two-column-canonical-reaudit-v2',
   mode: APPLY ? 'APPLY' : 'AUDIT',
   policy: {
     sourceOfTruth: 'research/<machineId>/ui-design-data.json',
     scope: 'Canonical numeric Feature COUNTER sibling groups only.',
-    pairing: 'Consecutive COUNTER controls pair left-to-right as 6+6. An odd final counter is not modified.',
-    numberInputs: 'NUMBER/manual denominator controls stay full width and break sibling groups.',
+    pairing: 'Consecutive pairable COUNTER controls pair left-to-right as 6+6. An odd final counter is not modified.',
+    manualTotals: 'Game-total/manual-game counters remain full width and break sibling groups even when legacy canonical mode says COUNTER.',
+    existingSix: 'Existing gridSpan=6 entries are not modified solely to change compactness.',
     evidence: 'Evidence/setting-hint presentation sections are deferred to the separate Evidence redesign.',
   },
   summary: {
     canonicalMachines,
     scannedSections,
     deferredSections,
+    manualCounterBoundaries,
     repairGroups: findings.length,
     repairInputs: findings.reduce((sum, row) => sum + row.repairs.length, 0),
     changedMachines: APPLY ? changedMachineIds.size : [...new Set(findings.map((row) => row.machineId))].length,
@@ -120,6 +131,7 @@ const report = {
 fs.mkdirSync(path.dirname(REPORT_PATH), { recursive: true });
 write(REPORT_PATH, report);
 console.log(`Canonical Feature 2-col ${report.mode}: machines=${canonicalMachines}, sections=${scannedSections}, deferred=${deferredSections}`);
+console.log(`Manual-game counter boundaries=${manualCounterBoundaries}`);
 console.log(`REPAIR groups=${report.summary.repairGroups}, inputs=${report.summary.repairInputs}, machines=${report.summary.changedMachines}`);
 for (const row of findings) {
   console.log(`REPAIR ${row.machineId} | ${row.sectionName}: ${row.repairs.map((x) => `${x.name}[${x.before.gridSpan}->6]`).join(' / ')}`);
