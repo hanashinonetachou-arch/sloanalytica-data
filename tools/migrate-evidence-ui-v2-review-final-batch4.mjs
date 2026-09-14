@@ -35,6 +35,10 @@ for(const [id,cfg] of Object.entries(configs)){
   const o=JSON.parse(fs.readFileSync(op,'utf8'));
   const u=JSON.parse(fs.readFileSync(up,'utf8'));
   const researchMap=new Map((r.evidenceCandidates??[]).map(e=>[e.researchEvidenceId,e]));
+  if(id==='L_TOKYO_GHOUL'){
+    const sourceLess=(s.evidenceUi?.groups??[]).flatMap(g=>g.options??[]).filter(opt=>Array.isArray(opt.sourceEvidenceIds)&&opt.sourceEvidenceIds.length===0);
+    if(sourceLess.length!==2) throw new Error(`Tokyo Ghoul expected 2 source-less legacy options, found ${sourceLess.length}`);
+  }
   const sourceIds=[];
   for(const g of s.evidenceUi?.groups??[]) for(const opt of g.options??[]) for(const eid of opt.sourceEvidenceIds??[]) if(eid&&!sourceIds.includes(eid)) sourceIds.push(eid);
   const groups=new Map();
@@ -46,10 +50,6 @@ for(const [id,cfg] of Object.entries(configs)){
     if(!groups.has(groupId)) groups.set(groupId,{groupId,label,selectionMode:'single',normalizationMode:'ALLOWED_SETTINGS',options:[]});
     const value=eid.replace(/^RE_/,'');
     groups.get(groupId).options.push({value,label:ev.name,allowedSettings:[...(ev.allowedSettings??[])],excludedSettings:[...(ev.deniedSettings??[])],sourceEvidenceIds:[eid]});
-  }
-  if(id==='L_TOKYO_GHOUL'){
-    const oldRaw=JSON.stringify(s.evidenceUi);
-    if(!oldRaw.includes('"sourceEvidenceIds": []')) throw new Error('Tokyo Ghoul expected source-less legacy options not found');
   }
   s.machineDataVersion=cfg.version;
   s.evidenceUi={groups:[...groups.values()]};
