@@ -1,0 +1,142 @@
+name: Evidence UI v2 Phase 2 Audit
+
+on:
+  push:
+    branches:
+      - audit/evidence-ui-v2-phase2-20260914
+    paths:
+      - tools/audit-evidence-ui-v2.mjs
+      - tools/validate-evidence-ui-all.mjs
+      - tools/finalize-evidence-ui-v2-phase2.mjs
+      - tools/triage-evidence-ui-v2-reopen.mjs
+      - tools/plan-evidence-ui-v2-migration.mjs
+      - tools/pilot-evidence-ui-v2-g1-gold.mjs
+      - tools/audit-evidence-ui-v2-dry-run-all.mjs
+      - tools/finalize-evidence-ui-v2-promotion-readiness.mjs
+      - .github/workflows/evidence-ui-v2-phase2-audit.yml
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  inventory:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: audit/evidence-ui-v2-phase2-20260914
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Validate machine registry
+        run: npm run registry:validate
+
+      - name: Run existing Evidence validator for every resolvable UI / Research pair
+        id: existing_evidence
+        continue-on-error: true
+        run: |
+          mkdir -p audit-reports
+          set -o pipefail
+          node tools/validate-evidence-ui-all.mjs 2>&1 | tee audit-reports/existing-evidence-validator.log
+
+      - name: Run Evidence UI v2 Phase 2 inventory
+        env:
+          EVIDENCE_UI_V2_BASELINE_SHA: e38ad44297f6c1dcb923f0ce7417373099c86f61
+        run: node tools/audit-evidence-ui-v2.mjs
+
+      - name: Fix group-unit layout and audit breakdowns
+        id: fixed_breakdowns
+        continue-on-error: true
+        run: node tools/finalize-evidence-ui-v2-phase2.mjs
+
+      - name: Triage Research reopen and shared inputs
+        id: reopen_triage
+        continue-on-error: true
+        run: node tools/triage-evidence-ui-v2-reopen.mjs
+
+      - name: Build concrete migration plan
+        id: migration_plan
+        continue-on-error: true
+        run: node tools/plan-evidence-ui-v2-migration.mjs
+
+      - name: Run GI Gold dry-run pilot
+        id: g1_pilot
+        continue-on-error: true
+        run: node tools/pilot-evidence-ui-v2-g1-gold.mjs
+
+      - name: Audit all ready migrations in dry-run mode
+        id: dry_run_all
+        continue-on-error: true
+        run: node tools/audit-evidence-ui-v2-dry-run-all.mjs
+
+      - name: Gate promotion-ready subset
+        id: promotion_readiness
+        continue-on-error: true
+        run: node tools/finalize-evidence-ui-v2-promotion-readiness.mjs
+
+      - name: Show audit summaries
+        if: always()
+        run: |
+          echo "existing evidence validator outcome: ${{ steps.existing_evidence.outcome }}"
+          echo "fixed breakdowns outcome: ${{ steps.fixed_breakdowns.outcome }}"
+          echo "reopen triage outcome: ${{ steps.reopen_triage.outcome }}"
+          echo "migration plan outcome: ${{ steps.migration_plan.outcome }}"
+          echo "G1 pilot outcome: ${{ steps.g1_pilot.outcome }}"
+          echo "all-ready dry-run outcome: ${{ steps.dry_run_all.outcome }}"
+          echo "promotion readiness outcome: ${{ steps.promotion_readiness.outcome }}"
+          echo
+          cat audit-reports/evidence-ui-v2-phase2-breakdowns.md || true
+          echo
+          cat audit-reports/evidence-ui-v2-phase2-triage.md || true
+          echo
+          cat audit-reports/evidence-ui-v2-phase2-migration-plan.md || true
+          echo
+          cat audit-reports/evidence-ui-v2-pilot-L_G1_YUSHUN_CLUB_GOLD_KD.md || true
+          echo
+          cat audit-reports/evidence-ui-v2-phase2-dry-run-all.md || true
+          echo
+          cat audit-reports/evidence-ui-v2-phase2-promotion-readiness.md || true
+
+      - name: Upload audit report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: evidence-ui-v2-phase2-audit
+          path: |
+            audit-reports/evidence-ui-v2-phase2*.json
+            audit-reports/evidence-ui-v2-phase2*.md
+            audit-reports/evidence-ui-v2-pilot-L_G1_YUSHUN_CLUB_GOLD_KD.json
+            audit-reports/evidence-ui-v2-pilot-L_G1_YUSHUN_CLUB_GOLD_KD.md
+            audit-reports/evidence-validator-all.json
+            audit-reports/evidence-validator-all.md
+            audit-reports/existing-evidence-validator.log
+
+      - name: Commit generated audit reports
+        if: always()
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add audit-reports/evidence-ui-v2-phase2*.json audit-reports/evidence-ui-v2-phase2*.md audit-reports/evidence-ui-v2-pilot-L_G1_YUSHUN_CLUB_GOLD_KD.json audit-reports/evidence-ui-v2-pilot-L_G1_YUSHUN_CLUB_GOLD_KD.md audit-reports/evidence-validator-all.json audit-reports/evidence-validator-all.md
+          if git diff --cached --quiet; then
+            echo 'No report changes.'
+            exit 0
+          fi
+          git commit -m 'audit: record Evidence UI v2 promotion readiness'
+          git push origin HEAD:audit/evidence-ui-v2-phase2-20260914
+
+      - name: Enforce audit outcomes
+        if: always()
+        run: |
+          failed=0
+          if [ "${{ steps.existing_evidence.outcome }}" != "success" ]; then failed=1; fi
+          if [ "${{ steps.fixed_breakdowns.outcome }}" != "success" ]; then failed=1; fi
+          if [ "${{ steps.reopen_triage.outcome }}" != "success" ]; then failed=1; fi
+          if [ "${{ steps.migration_plan.outcome }}" != "success" ]; then failed=1; fi
+          if [ "${{ steps.g1_pilot.outcome }}" != "success" ]; then failed=1; fi
+          if [ "${{ steps.dry_run_all.outcome }}" != "success" ]; then failed=1; fi
+          if [ "${{ steps.promotion_readiness.outcome }}" != "success" ]; then failed=1; fi
+          exit "$failed"

@@ -1,0 +1,35 @@
+name: Evidence UI v2 Formal Migration Batch 9g Bakemonogatari
+
+on:
+  push:
+    branches:
+      - audit/evidence-ui-v2-phase2-20260914
+    paths:
+      - .github/workflows/evidence-ui-v2-batch9g-bakemonogatari-formal.yml
+
+permissions:
+  contents: write
+
+jobs:
+  formal-migration:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: audit/evidence-ui-v2-phase2-20260914
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Run Batch 9g Bakemonogatari formal migration and gates
+        run: node tools/run-evidence-ui-v2-batch9g-bakemonogatari.mjs
+      - name: Commit canonical observation and generated artifacts
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add research/L_SMASLO_BAKEMONOGATARI_KH/selection-data.json research/L_SMASLO_BAKEMONOGATARI_KH/machine-observation-data.json research/L_SMASLO_BAKEMONOGATARI_KH/ui-design-data.json
+          git add machines/L_SMASLO_BAKEMONOGATARI_KH/machine-package.json research/L_SMASLO_BAKEMONOGATARI_KH/statistics-report.json research/L_SMASLO_BAKEMONOGATARI_KH/difficulty-report.json research/L_SMASLO_BAKEMONOGATARI_KH/setting-band-report.json
+          git add catalog.json difficulty-catalog.json machine-registry.json
+          git diff --cached --quiet && exit 0
+          git commit -m 'evidence-ui: formalize Bakemonogatari natural evidence'
+          git push origin HEAD:audit/evidence-ui-v2-phase2-20260914

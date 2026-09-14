@@ -1,0 +1,87 @@
+name: Evidence UI v2 Formal Migration Pilots
+
+on:
+  push:
+    branches:
+      - audit/evidence-ui-v2-phase2-20260914
+    paths:
+      - research/L_G1_YUSHUN_CLUB_GOLD_KD/**
+      - research/L_EVANGELION_MIRAI_JF/**
+      - research/L_GODZILLA_VS_EVANGELION_JA/**
+      - research/L_KAMEN_RIDER_7RIDERS_UJA/**
+      - research/L_BERSERK_MUSOU_EV/**
+      - .github/workflows/evidence-ui-v2-g1-gold-formal.yml
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  formal-migration:
+    runs-on: ubuntu-latest
+    env:
+      MACHINE_IDS: L_G1_YUSHUN_CLUB_GOLD_KD L_EVANGELION_MIRAI_JF L_GODZILLA_VS_EVANGELION_JA L_KAMEN_RIDER_7RIDERS_UJA L_BERSERK_MUSOU_EV
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: audit/evidence-ui-v2-phase2-20260914
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Validate Selection against Research
+        run: |
+          for id in $MACHINE_IDS; do node tools/validate-selection-data.mjs research/$id/selection-data.json research/$id/research-data.json; done
+      - name: Validate Observation v2
+        run: |
+          for id in $MACHINE_IDS; do node tools/validate-machine-observation-data.mjs research/$id/machine-observation-data.json; done
+      - name: Validate canonical UI Design
+        run: node tools/validate-ui-design-data.mjs .
+      - name: Audit UI to Observation linkage
+        run: node tools/audit-ui-design-observation-linkage.mjs $MACHINE_IDS --strict-v2
+      - name: Run four-layer pipeline gate
+        run: node tools/four-layer-pipeline-gate.mjs $MACHINE_IDS
+      - name: Check MachineData regeneration without writing
+        run: |
+          for id in $MACHINE_IDS; do npm run machine:pipeline -- $id --check --skip-repo-checks; done
+      - name: Materialize formal MachineData
+        run: |
+          for id in $MACHINE_IDS; do npm run machine:pipeline -- $id --skip-repo-checks; done
+      - name: Validate regenerated Evidence UI
+        run: node tools/validate-evidence-ui-all.mjs
+      - name: Re-run canonical and four-layer gates
+        run: |
+          node tools/validate-ui-design-data.mjs .
+          node tools/audit-ui-design-observation-linkage.mjs $MACHINE_IDS --strict-v2
+          node tools/four-layer-pipeline-gate.mjs $MACHINE_IDS
+      - name: Verify generated pilot contracts
+        run: |
+          node --input-type=module <<'NODE'
+          import fs from 'node:fs';
+          function load(id){return JSON.parse(fs.readFileSync(`machines/${id}/machine-package.json`,'utf8'));}
+          function assert(cond,msg){if(!cond) throw new Error(msg);}
+          for(const id of ['L_G1_YUSHUN_CLUB_GOLD_KD','L_EVANGELION_MIRAI_JF','L_GODZILLA_VS_EVANGELION_JA','L_KAMEN_RIDER_7RIDERS_UJA','L_BERSERK_MUSOU_EV']){
+            const pkg=load(id); const inputs=new Map((pkg.inputs?.inputs??[]).map(x=>[x.id,x]));
+            assert(!inputs.has('INP_EVI_SETTING_FLOOR'),`${id}: legacy setting-floor input remains`);
+            assert(pkg.machine?.machineDataVersion==='0.1.1',`${id}: version mismatch`);
+          }
+          const berserk=load('L_BERSERK_MUSOU_EV');
+          const bi=new Map((berserk.inputs?.inputs??[]).map(x=>[x.id,x]));
+          assert(bi.has('INP_EVI_AT_END_SCREEN'),'Berserk AT end-screen input missing');
+          const labels=(bi.get('INP_EVI_AT_END_SCREEN')?.options??[]).map(o=>o.label).filter(x=>x!=='未選択');
+          assert(JSON.stringify(labels)===JSON.stringify(['仲間達','ゴッドハンド','フェムト','覇王の卵']),`Berserk options mismatch: ${JSON.stringify(labels)}`);
+          assert((berserk.evidence?.evidences??[]).length===4,'Berserk expected 4 Evidence rules');
+          console.log('Evidence UI v2 formal pilot contracts: PASS');
+          NODE
+      - name: Commit generated artifacts
+        run: |
+          if [ -z "$(git status --porcelain)" ]; then echo 'No generated changes to commit.'; exit 0; fi
+          git config user.name 'github-actions[bot]'
+          git config user.email '4189826+github-actions[bot]@users.noreply.github.com'
+          for id in $MACHINE_IDS; do
+            git add machines/$id/machine-package.json research/$id/statistics-report.json research/$id/difficulty-report.json research/$id/setting-band-report.json || true
+          done
+          git add catalog.json difficulty-catalog.json machine-registry.json || true
+          if git diff --cached --quiet; then echo 'No generated artifacts changed.'; exit 0; fi
+          git commit -m 'evidence-ui: materialize formal pilot migrations'
+          git push origin HEAD:audit/evidence-ui-v2-phase2-20260914

@@ -1,0 +1,37 @@
+name: Evidence UI v2 Formal Migration Batch 9e Tiga Zombie Fire
+
+on:
+  push:
+    branches:
+      - audit/evidence-ui-v2-phase2-20260914
+    paths:
+      - .github/workflows/evidence-ui-v2-batch9e-tiga-zombie-fire-formal.yml
+
+permissions:
+  contents: write
+
+jobs:
+  formal-migration:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: audit/evidence-ui-v2-phase2-20260914
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Run Batch 9e Tiga Zombie Fire formal migration and gates
+        run: node tools/run-evidence-ui-v2-batch9e-tiga-zombie-fire.mjs
+      - name: Commit canonical observation and generated artifacts
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          for id in L_ULTRAMAN_TIGA_KA L_ZOMBIE_LAND_SAGA S_FIRE_DRIFT; do
+            git add research/$id/selection-data.json research/$id/machine-observation-data.json research/$id/ui-design-data.json
+            git add machines/$id/machine-package.json research/$id/statistics-report.json research/$id/difficulty-report.json research/$id/setting-band-report.json
+          done
+          git add catalog.json difficulty-catalog.json machine-registry.json
+          git diff --cached --quiet && exit 0
+          git commit -m 'evidence-ui: formalize Tiga Zombie and Fire Drift natural evidence'
+          git push origin HEAD:audit/evidence-ui-v2-phase2-20260914

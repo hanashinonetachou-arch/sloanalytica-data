@@ -1,0 +1,37 @@
+name: Evidence UI v2 Formal Migration Batch 9d SAO ToLOVE
+
+on:
+  push:
+    branches:
+      - audit/evidence-ui-v2-phase2-20260914
+    paths:
+      - .github/workflows/evidence-ui-v2-batch9d-sao-tolove-formal.yml
+
+permissions:
+  contents: write
+
+jobs:
+  formal-migration:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: audit/evidence-ui-v2-phase2-20260914
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Run Batch 9d SAO ToLOVE formal migration and gates
+        run: node tools/run-evidence-ui-v2-batch9d-sao-tolove.mjs
+      - name: Commit canonical observation and generated artifacts
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          for id in L_SAO_B2 L_TOLOVE_DARKNESS_S6; do
+            git add research/$id/selection-data.json research/$id/machine-observation-data.json research/$id/ui-design-data.json
+            git add machines/$id/machine-package.json research/$id/statistics-report.json research/$id/difficulty-report.json research/$id/setting-band-report.json
+          done
+          git add catalog.json difficulty-catalog.json machine-registry.json
+          git diff --cached --quiet && exit 0
+          git commit -m 'evidence-ui: formalize SAO and ToLOVE natural evidence'
+          git push origin HEAD:audit/evidence-ui-v2-phase2-20260914

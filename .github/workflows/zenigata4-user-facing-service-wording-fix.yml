@@ -1,0 +1,36 @@
+name: Zenigata4 User-facing Service Wording Fix
+
+on:
+  push:
+    branches:
+      - audit/evidence-ui-v2-phase2-20260914
+    paths:
+      - .github/workflows/zenigata4-user-facing-service-wording-fix.yml
+
+permissions:
+  contents: write
+
+jobs:
+  fix-and-verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: audit/evidence-ui-v2-phase2-20260914
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Apply canonical wording fix and regenerate Zenigata4
+        run: node tools/run-zenigata4-user-facing-service-wording-fix.mjs
+      - name: Commit canonical and generated artifacts
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          id=L_ZENIGATA4_L1
+          git add research/$id/research-data.json research/$id/selection-data.json research/$id/machine-observation-data.json research/$id/ui-design-data.json
+          git add machines/$id/machine-package.json research/$id/statistics-report.json research/$id/difficulty-report.json research/$id/setting-band-report.json
+          git add catalog.json difficulty-catalog.json machine-registry.json
+          git diff --cached --quiet && exit 0
+          git commit -m 'fix: neutralize Zenigata4 user-facing service wording'
+          git push origin HEAD:audit/evidence-ui-v2-phase2-20260914

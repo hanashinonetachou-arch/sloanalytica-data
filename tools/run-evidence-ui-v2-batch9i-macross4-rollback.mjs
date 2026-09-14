@@ -1,0 +1,26 @@
+#!/usr/bin/env node
+import { execSync } from 'node:child_process';
+import fs from 'node:fs';
+const id='L_MACROSS_FRONTIER4_BA';
+const run=cmd=>execSync(cmd,{stdio:'inherit'});
+run('node tools/rollback-evidence-ui-v2-batch9i-macross4.mjs');
+run(`node tools/validate-selection-data.mjs research/${id}/selection-data.json research/${id}/research-data.json`);
+run(`node tools/validate-machine-observation-data.mjs research/${id}/machine-observation-data.json`);
+run('node tools/validate-ui-design-data.mjs .');
+run(`node tools/audit-ui-design-observation-linkage.mjs ${id} --strict-v2`);
+run(`node tools/four-layer-pipeline-gate.mjs ${id}`);
+run(`npm run machine:pipeline -- ${id} --check --skip-repo-checks`);
+run(`npm run machine:pipeline -- ${id} --skip-repo-checks`);
+run('node tools/validate-evidence-ui-all.mjs');
+run('node tools/validate-ui-design-data.mjs .');
+run(`node tools/audit-ui-design-observation-linkage.mjs ${id} --strict-v2`);
+run(`node tools/four-layer-pipeline-gate.mjs ${id}`);
+const sel=JSON.parse(fs.readFileSync(`research/${id}/selection-data.json`,'utf8'));
+if(sel.machineDataVersion!=='0.1.0') throw new Error(`${id}: rollback version mismatch`);
+if(!sel.evidenceUi?.groups?.some(g=>g.groupId==='SETTING_FLOOR')) throw new Error(`${id}: legacy floor not restored`);
+if(!sel.evidenceUi?.groups?.some(g=>g.groupId==='SETTING_DENIAL')) throw new Error(`${id}: legacy denial not restored`);
+const obs=JSON.parse(fs.readFileSync(`research/${id}/machine-observation-data.json`,'utf8'));
+if(!(obs.observations??[]).some(x=>x.observationId==='OBS_MACROSS_EVIDENCE')) throw new Error(`${id}: legacy observation not restored`);
+const ui=JSON.parse(fs.readFileSync(`research/${id}/ui-design-data.json`,'utf8'));
+if(!ui.inputContracts?.INP_EVI_SETTING_FLOOR || !ui.inputContracts?.INP_EVI_SETTING_DENIAL) throw new Error(`${id}: legacy UI not restored`);
+console.log('Macross4 batch9i rollback: PASS');

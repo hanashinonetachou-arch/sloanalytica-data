@@ -1,0 +1,32 @@
+name: Evidence UI v2 Residual Audit
+
+# forced audit marker: batch9j-magical-halloween8
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - audit/evidence-ui-v2-phase2-20260914
+    paths:
+      - .github/workflows/evidence-ui-v2-residual-audit.yml
+      - tools/audit-evidence-ui-v2-residuals.mjs
+      - research/**/selection-data.json
+      - research/**/ui-design-data.json
+      - research/**/machine-observation-data.json
+      - machines/**/machine-package.json
+
+permissions:
+  contents: read
+
+jobs:
+  residual-audit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: audit/evidence-ui-v2-phase2-20260914
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Scan residual legacy Evidence UI
+        run: node tools/audit-evidence-ui-v2-residuals.mjs
