@@ -43,7 +43,7 @@ s.evidenceReview={policyVersion:1,exclusions:[]};
 fs.writeFileSync(sp,JSON.stringify(s,null,2)+'\n');
 o.observations=(o.observations??[]).filter(x=>x.observationId!=='OBS_KENGAN_EVIDENCE' && !['OBS_EVI_ENDING_VOICE_LAMP','OBS_EVI_AT_END_SCREEN','OBS_EVI_NIKO_DOOR_ART'].includes(x.observationId));
 o.observations.push(
- {observationId:'OBS_EVI_ENDING_VOICE_LAMP',sourceType:'END_EVENT',observationMode:'AUDIO_VISUAL_EVENT',status:'FOUND',label:'エンディング中ボイス・トップランプ',categories:['秋山ボイス・緑','鞘香ボイス・赤','迦楼羅ボイス・紫'],timing:['エンディング中のレア役成立時'],excludedConditions:['未確認を非発生とみなさない'],sourceRefs:['SRC_KENGAN_1GEKI'],notes:'Research reopen後の自然観測Evidence。'},
+ {observationId:'OBS_EVI_ENDING_VOICE_LAMP',sourceType:'END_EVENT',observationMode:'AUDIO_EVENT',status:'FOUND',label:'エンディング中ボイス・トップランプ',categories:['秋山ボイス・緑','鞘香ボイス・赤','迦楼羅ボイス・紫'],timing:['エンディング中のレア役成立時'],excludedConditions:['未確認を非発生とみなさない'],sourceRefs:['SRC_KENGAN_1GEKI'],notes:'ボイスが主観測。トップランプ色は同一イベントの視覚的な識別補助。Research reopen後の自然観測Evidence。'},
  {observationId:'OBS_EVI_AT_END_SCREEN',sourceType:'END_EVENT',observationMode:'VISUAL_EVENT',status:'FOUND',label:'AT終了画面',categories:['秋山','鞘香','迦楼羅'],timing:['AT終了画面確認時'],excludedConditions:['未確認を非発生とみなさない'],sourceRefs:['SRC_KENGAN_1GEKI'],notes:'Research reopen後の自然観測Evidence。'},
  {observationId:'OBS_EVI_NIKO_DOOR_ART',sourceType:'END_EVENT',observationMode:'VISUAL_EVENT',status:'FOUND',label:'二虎流奥義伝授 極 突入時の扉絵',categories:['秋山','鞘香','迦楼羅'],timing:['「二虎流奥義伝授 極」突入時'],excludedConditions:['未確認を非発生とみなさない'],sourceRefs:['SRC_KENGAN_1GEKI'],notes:'Research reopen後の自然観測Evidence。'}
 );
