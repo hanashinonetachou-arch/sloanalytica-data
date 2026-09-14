@@ -1,0 +1,144 @@
+{
+  "schemaVersion": "machine-observation-data-v2",
+  "machineId": "L_BABEL_BA",
+  "displayName": "スマスロ バベル",
+  "researchedAt": "2026-09-05",
+  "sources": [
+    {
+      "sourceId": "SRC_NANA",
+      "publisher": "nana-press.com",
+      "title": "スマスロ バベル 設定差まとめ",
+      "url": "https://nana-press.com/kaiseki/machine/1027/32135/",
+      "checkedAt": "2026-09-05",
+      "sourceType": "analysis"
+    },
+    {
+      "sourceId": "SRC_1GEKI",
+      "publisher": "1geki.jp",
+      "title": "バベル 設定差・設定判別要素まとめ",
+      "url": "https://1geki.jp/slot/l_babel/0/",
+      "checkedAt": "2026-09-05",
+      "sourceType": "analysis"
+    }
+  ],
+  "sourceCoverage": {
+    "machineMenu": "UNRESOLVED",
+    "dataCounter": "UNRESOLVED",
+    "linkedService": "UNRESOLVED",
+    "directPlay": "FOUND",
+    "endEvent": "UNRESOLVED",
+    "seatedState": "UNRESOLVED"
+  },
+  "observations": [
+    {
+      "observationId": "OBS_NORMAL_BONUS",
+      "sourceType": "DIRECT_PLAY",
+      "observationMode": "MANUAL_COUNTER",
+      "status": "FOUND",
+      "label": "通常ゲーム数・BIG・REG",
+      "categories": ["通常ゲーム数", "BIG", "REG"],
+      "timing": ["自己実戦中の通常ゲーム区間"],
+      "excludedConditions": [
+        "BIGとREGで異なる観測区間を使わない",
+        "BIG+REGの合算を別Featureとして重複入力しない"
+      ],
+      "sourceRefs": ["SRC_NANA", "SRC_1GEKI"],
+      "notes": "BIGとREGは同じ通常ゲーム数を分母として手動計数する。"
+    },
+    {
+      "observationId": "OBS_WEAK_CHERRY_BONUS_HIT",
+      "sourceType": "DIRECT_PLAY",
+      "observationMode": "MANUAL_COUNTER",
+      "status": "FOUND",
+      "label": "弱チェリー成立とボーナス当選",
+      "categories": ["弱チェリー成立", "弱チェリーからボーナス当選"],
+      "timing": ["弱チェリー成立時"],
+      "excludedConditions": [
+        "当選回数を弱チェリー成立回数より多くしない",
+        "未計数の成立機会を0回として扱わない"
+      ],
+      "sourceRefs": ["SRC_NANA", "SRC_1GEKI"],
+      "notes": "弱チェリー成立回数を条件分母、その成立からのボーナス当選回数を分子として使用する。"
+    },
+    {
+      "observationId": "OBS_STRONG_CHERRY_BONUS_HIT",
+      "sourceType": "DIRECT_PLAY",
+      "observationMode": "MANUAL_COUNTER",
+      "status": "FOUND",
+      "label": "強チェリー成立とボーナス当選",
+      "categories": ["強チェリー成立", "強チェリーからボーナス当選"],
+      "timing": ["強チェリー成立時"],
+      "excludedConditions": [
+        "当選回数を強チェリー成立回数より多くしない",
+        "未計数の成立機会を0回として扱わない"
+      ],
+      "sourceRefs": ["SRC_NANA", "SRC_1GEKI"],
+      "notes": "強チェリー成立回数を条件分母、その成立からのボーナス当選回数を分子として使用する。"
+    },
+    {
+      "observationId": "OBS_SCORPION_36_BONUS_HIT",
+      "sourceType": "DIRECT_PLAY",
+      "observationMode": "MANUAL_COUNTER",
+      "status": "FOUND",
+      "label": "サソリ3・6回目の成立機会とボーナス当選",
+      "categories": ["サソリ3・6回目の成立機会", "サソリ3・6回目からボーナス当選"],
+      "timing": ["サソリ成立回数が3回目または6回目に到達した時"],
+      "excludedConditions": [
+        "10回目やその他のサソリ成立を条件分母に含めない",
+        "当選回数を3・6回目の成立機会より多くしない",
+        "未計数の成立機会を0回として扱わない"
+      ],
+      "sourceRefs": ["SRC_NANA", "SRC_1GEKI"],
+      "notes": "3回目と6回目だけを成立機会として数え、その機会からのボーナス当選を分子として使用する。"
+    }
+  ],
+  "featureMappings": [
+    {
+      "featureId": "FEAT_BIG",
+      "mappingType": "EXACT",
+      "observationIds": ["OBS_NORMAL_BONUS"],
+      "collectionMethods": ["MANUAL_COUNTER"],
+      "usableForInference": true,
+      "usableForDifficulty": false,
+      "notes": "通常ゲーム数を分母、同一区間のBIGを分子として使用する。"
+    },
+    {
+      "featureId": "FEAT_REG",
+      "mappingType": "EXACT",
+      "observationIds": ["OBS_NORMAL_BONUS"],
+      "collectionMethods": ["MANUAL_COUNTER"],
+      "usableForInference": true,
+      "usableForDifficulty": false,
+      "notes": "通常ゲーム数を分母、同一区間のREGを分子として使用する。"
+    },
+    {
+      "featureId": "FEAT_WEAK_CHERRY_BONUS_HIT",
+      "mappingType": "EXACT",
+      "observationIds": ["OBS_WEAK_CHERRY_BONUS_HIT"],
+      "collectionMethods": ["MANUAL_COUNTER"],
+      "usableForInference": true,
+      "usableForDifficulty": false,
+      "notes": "弱チェリー成立回数を条件分母、そこからのボーナス当選回数を分子として使用する。"
+    },
+    {
+      "featureId": "FEAT_STRONG_CHERRY_BONUS_HIT",
+      "mappingType": "EXACT",
+      "observationIds": ["OBS_STRONG_CHERRY_BONUS_HIT"],
+      "collectionMethods": ["MANUAL_COUNTER"],
+      "usableForInference": true,
+      "usableForDifficulty": false,
+      "notes": "強チェリー成立回数を条件分母、そこからのボーナス当選回数を分子として使用する。"
+    },
+    {
+      "featureId": "FEAT_SCORPION_36_BONUS_HIT",
+      "mappingType": "EXACT",
+      "observationIds": ["OBS_SCORPION_36_BONUS_HIT"],
+      "collectionMethods": ["MANUAL_COUNTER"],
+      "usableForInference": true,
+      "usableForDifficulty": false,
+      "notes": "サソリ3・6回目だけを条件分母として、その機会からのボーナス当選回数を評価する。"
+    }
+  ],
+  "researchReopenRequests": [],
+  "fieldVerificationItems": []
+}
