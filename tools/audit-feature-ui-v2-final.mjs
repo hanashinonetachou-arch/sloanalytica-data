@@ -49,10 +49,9 @@ const classify = (c, fixtureRequired) => {
   if (fixtureRequired) return ['AUTO-6','required-regression-fixture'];
   if (FULL.test(label)) return ['KEEP-12','game-total/denominator/aggregate'];
   if (COMPLEX.test(label)) return ['KEEP-12','long/freeform/complex'];
-  // Explicit canonical half-width is a resolved layout decision even when NUMBER/direct-input has no compact flag.
+  // Explicit canonical spans are resolved layout decisions after the v2 cross-machine audit.
   if (c?.gridSpan === 6) return ['AUTO-6','existing explicit half-width canonical intent'];
-  // Parent/child or denominator-like inputs explicitly locked to full width are resolved KEEP-12 decisions.
-  if (DEP.test(label) && c?.gridSpan === 12) return ['KEEP-12','explicit parent-child/denominator full-width intent'];
+  if (c?.gridSpan === 12) return ['KEEP-12','existing explicit full-width canonical intent'];
   if (DEP.test(label)) return ['REVIEW','parent-child/denominator dependency needs explicit layout'];
   if (mode === 'COUNTER') return ['AUTO-6','short independent counter'];
   if (REVIEW_MODES.has(mode)) return ['REVIEW',`compact-capable/special ${mode} requires review`];
