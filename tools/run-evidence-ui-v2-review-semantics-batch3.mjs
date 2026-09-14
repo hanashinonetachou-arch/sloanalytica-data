@@ -1,0 +1,8 @@
+#!/usr/bin/env node
+import {execSync} from 'node:child_process'; import fs from 'node:fs';
+const ids=['L_KEIJI_SADO_ER','L_MACROSS_FRONTIER4_BA']; const run=c=>execSync(c,{stdio:'inherit'});
+run('node tools/migrate-evidence-ui-v2-review-semantics-batch3.mjs');
+for(const id of ids){run(`node tools/validate-selection-data.mjs research/${id}/selection-data.json research/${id}/research-data.json`);run(`node tools/validate-machine-observation-data.mjs research/${id}/machine-observation-data.json`);run(`node tools/audit-ui-design-observation-linkage.mjs ${id} --strict-v2`);run(`node tools/four-layer-pipeline-gate.mjs ${id}`);run(`npm run machine:pipeline -- ${id} --check --skip-repo-checks`);run(`npm run machine:pipeline -- ${id} --skip-repo-checks`);}
+run('node tools/validate-ui-design-data.mjs .'); run('node tools/validate-evidence-ui-all.mjs');
+for(const id of ids){run(`node tools/audit-ui-design-observation-linkage.mjs ${id} --strict-v2`);run(`node tools/four-layer-pipeline-gate.mjs ${id}`);const s=JSON.parse(fs.readFileSync(`research/${id}/selection-data.json`,'utf8'));if((s.evidenceUi?.groups??[]).some(g=>/^SETTING_(FLOOR|DENIAL|SUBSET)$/.test(g.groupId)))throw new Error(`${id}: legacy abstract Evidence groups remain`);const u=JSON.parse(fs.readFileSync(`research/${id}/ui-design-data.json`,'utf8'));if(Object.keys(u.inputContracts??{}).some(k=>k.startsWith('INP_EVI_SETTING_')))throw new Error(`${id}: legacy Evidence inputs remain`);const raw=fs.readFileSync(`machines/${id}/machine-package.json`,'utf8');if(/INP_EVI_SETTING_(FLOOR|DENIAL|SUBSET)/.test(raw))throw new Error(`${id}: generated package contains legacy Evidence inputs`);}
+console.log('Evidence UI v2 REVIEW semantics batch3: PASS');
