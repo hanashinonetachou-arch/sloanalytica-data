@@ -1,0 +1,41 @@
+name: Evidence UI v2 REVIEW Ownership Batch 1 Diagnostic
+
+on:
+  push:
+    branches:
+      - audit/evidence-ui-v2-review-remediation-20260915
+    paths:
+      - .github/workflows/evidence-ui-v2-review-ownership-batch1-diagnostic.yml
+
+permissions:
+  contents: write
+
+jobs:
+  diagnostic:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: audit/evidence-ui-v2-review-remediation-20260915
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Run and capture diagnostic
+        shell: bash
+        run: |
+          mkdir -p audit-reports
+          set +e
+          node tools/run-evidence-ui-v2-review-ownership-batch1.mjs > audit-reports/review-ownership-batch1.log 2>&1
+          status=$?
+          echo "$status" > audit-reports/review-ownership-batch1.status
+          cat audit-reports/review-ownership-batch1.log
+          exit 0
+      - name: Commit diagnostic only
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add audit-reports/review-ownership-batch1.log audit-reports/review-ownership-batch1.status
+          git diff --cached --quiet && exit 0
+          git commit -m 'audit: capture ownership remediation diagnostic'
+          git push origin HEAD:audit/evidence-ui-v2-review-remediation-20260915
