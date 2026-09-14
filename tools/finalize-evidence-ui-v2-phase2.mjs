@@ -6,6 +6,7 @@ const ROOT = process.cwd();
 const IN_FILE = path.join(ROOT, 'audit-reports', 'evidence-ui-v2-phase2.json');
 const JSON_OUT = path.join(ROOT, 'audit-reports', 'evidence-ui-v2-phase2-breakdowns.json');
 const MD_OUT = path.join(ROOT, 'audit-reports', 'evidence-ui-v2-phase2-breakdowns.md');
+const SPECIAL_BEHAVIOR_REOPEN_RE = /^設定[HL]特殊挙動$/;
 
 const segmenter = typeof Intl?.Segmenter === 'function'
   ? new Intl.Segmenter('ja', { granularity:'grapheme' }) : null;
@@ -19,6 +20,7 @@ const machines = Array.isArray(inventory?.machines) ? inventory.machines : [];
 const researchReopen = [];
 const legacyMigration = [];
 const legacyLexical = [];
+const specialBehaviorReopen = [];
 const featureEvidenceSharing = [];
 const groupLayouts = [];
 
@@ -33,10 +35,19 @@ for (const machine of machines) {
       name:item.name ?? null,
       currentInputType:item.currentInputType ?? null,
     };
-    if (item.namingResearchReopenCandidate) researchReopen.push({
-      ...base,
-      reason:item.legacyAbstraction ? 'LEGACY_ABSTRACTION_NEEDS_OBSERVATION_CONTEXT' : 'GENERIC_EVIDENCE_NEEDS_OBSERVATION_CONTEXT'
-    });
+    const isSpecialBehaviorReopen = SPECIAL_BEHAVIOR_REOPEN_RE.test(String(item.name ?? '').trim());
+    if (item.namingResearchReopenCandidate) {
+      const reason = isSpecialBehaviorReopen
+        ? 'SPECIAL_BEHAVIOR_NEEDS_OBSERVATION_CONTEXT'
+        : item.legacyAbstraction
+          ? 'LEGACY_ABSTRACTION_NEEDS_OBSERVATION_CONTEXT'
+          : 'GENERIC_EVIDENCE_NEEDS_OBSERVATION_CONTEXT';
+      researchReopen.push({ ...base, reason });
+    }
+    if (isSpecialBehaviorReopen) {
+      specialBehaviorReopen.push({ ...base, reason:'OBSERVABLE_BEHAVIOR_NAME_IS_NOT_A_DIRECT_SETTING_RESULT' });
+      continue;
+    }
     if (item.legacyAbstraction) legacyLexical.push(base);
     if (item.legacySelect) legacyMigration.push({ ...base, reason:'INTERACTIVE_DIRECT_SETTING_RESULT_INPUT' });
   }
@@ -83,6 +94,8 @@ const summary = {
   legacyMigrationMachines:new Set(legacyMigration.map(x=>x.machineId)).size,
   legacyLexicalInputs:legacyLexical.length,
   legacyLexicalMachines:new Set(legacyLexical.map(x=>x.machineId)).size,
+  specialBehaviorReopenInputs:specialBehaviorReopen.length,
+  specialBehaviorReopenMachines:new Set(specialBehaviorReopen.map(x=>x.machineId)).size,
   featureEvidenceSharingMachines:featureEvidenceSharing.length,
   featureEvidenceSharingInputs:featureEvidenceSharing.reduce((n,m)=>n+m.inputs.length,0),
   unclassifiedActualObservationInputs:machines.reduce((n,m)=>n+(m.unclassifiedObservationContextCount ?? 0),0),
@@ -92,19 +105,20 @@ const summary = {
 const invariants = [
   { id:'RESEARCH_REOPEN_INPUTS', expected:93, actual:summary.researchReopenInputs },
   { id:'LEGACY_INTERACTIVE_MIGRATION_INPUTS', expected:88, actual:summary.legacyMigrationInputs },
+  { id:'SPECIAL_BEHAVIOR_REOPEN_INPUTS', expected:1, actual:summary.specialBehaviorReopenInputs },
   { id:'FEATURE_EVIDENCE_SHARING_MACHINES', expected:6, actual:summary.featureEvidenceSharingMachines },
   { id:'UNCLASSIFIED_ACTUAL_OBSERVATION_INPUTS', expected:0, actual:summary.unclassifiedActualObservationInputs },
 ].map(x=>({ ...x, status:x.actual===x.expected ? 'PASS' : 'FAIL' }));
 
 const report = {
-  schemaVersion:'evidence-ui-v2-phase2-breakdowns-v1',
+  schemaVersion:'evidence-ui-v2-phase2-breakdowns-v2',
   generatedAt:new Date().toISOString(),
   source:'audit-reports/evidence-ui-v2-phase2.json',
   policyNotes:[
     'Layout is decided once per resolved observationContext group, never independently per input.',
     'UNRESOLVED_REOPEN inputs receive no inferred layout decision.',
-    'Legacy migration count means interactive direct-setting-result inputs (legacySelect).',
-    'Legacy lexical count is retained separately so a non-interactive lexical abstraction is not silently discarded.',
+    'Legacy migration means interactive direct-setting-result abstractions only.',
+    '設定H特殊挙動 / 設定L特殊挙動 are observable-behavior placeholders: they remain Research reopen but are not counted as Legacy direct-setting-result abstractions.',
     'Research reopen names/contexts are not guessed.'
   ],
   summary,
@@ -113,6 +127,7 @@ const report = {
     researchReopen:{ reasons:byReason(researchReopen), items:researchReopen },
     legacyMigration:{ reasons:byReason(legacyMigration), items:legacyMigration },
     legacyLexical:{ items:legacyLexical },
+    specialBehaviorReopen:{ items:specialBehaviorReopen },
     featureEvidenceSharingCandidates:featureEvidenceSharing,
     groupLayouts,
   }
@@ -123,12 +138,15 @@ const md = [
   '# Evidence UI v2 Phase 2 fixed breakdowns', '',
   `- Research reopen: ${summary.researchReopenInputs} inputs / ${summary.researchReopenMachines} machines`,
   `- Legacy migration: ${summary.legacyMigrationInputs} interactive inputs / ${summary.legacyMigrationMachines} machines`,
-  `- Legacy lexical abstractions: ${summary.legacyLexicalInputs} inputs / ${summary.legacyLexicalMachines} machines`,
+  `- Special-behavior Research reopen (non-Legacy): ${summary.specialBehaviorReopenInputs} input / ${summary.specialBehaviorReopenMachines} machine`,
   `- Feature/Evidence sharing candidates: ${summary.featureEvidenceSharingMachines} machines / ${summary.featureEvidenceSharingInputs} inputs`,
   `- Unclassified actual observation contexts: ${summary.unclassifiedActualObservationInputs} inputs`,
   `- Resolved observation groups with group-unit layout decision: ${summary.resolvedObservationGroups}`, '',
   '## Invariants', '',
   ...invariants.map(x=>`- **${x.status}** ${x.id}: expected ${x.expected}, actual ${x.actual}`), '',
+  '## Special-behavior reopen separated from Legacy', '',
+  ...specialBehaviorReopen.map(x=>`- **${x.machineId}** ${x.displayName ?? ''}: ${x.inputId ?? '?'} / ${x.name ?? ''}`),
+  ...(specialBehaviorReopen.length ? [] : ['- none']), '',
   '## Feature / Evidence sharing candidates', '',
   ...featureEvidenceSharing.map(m=>`- **${m.machineId}** ${m.displayName ?? ''}: ${m.inputs.map(i=>i.inputId ?? i.name ?? '?').join(', ')}`),
   ...(featureEvidenceSharing.length ? [] : ['- none']), '',
@@ -141,7 +159,7 @@ const md = [
 ].join('\n');
 fs.writeFileSync(MD_OUT, md);
 
-console.log(`Phase 2 fixed breakdowns: reopen=${summary.researchReopenInputs}, legacyMigration=${summary.legacyMigrationInputs}, legacyLexical=${summary.legacyLexicalInputs}, sharedMachines=${summary.featureEvidenceSharingMachines}, unclassified=${summary.unclassifiedActualObservationInputs}, groups=${summary.resolvedObservationGroups}`);
+console.log(`Phase 2 fixed breakdowns: reopen=${summary.researchReopenInputs}, legacyMigration=${summary.legacyMigrationInputs}, specialBehaviorReopen=${summary.specialBehaviorReopenInputs}, sharedMachines=${summary.featureEvidenceSharingMachines}, unclassified=${summary.unclassifiedActualObservationInputs}, groups=${summary.resolvedObservationGroups}`);
 const failed = invariants.filter(x=>x.status==='FAIL');
 if (failed.length) {
   failed.forEach(x=>console.error(`Invariant FAIL ${x.id}: expected ${x.expected}, actual ${x.actual}`));
