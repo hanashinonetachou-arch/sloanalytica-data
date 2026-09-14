@@ -1,0 +1,36 @@
+name: Evidence UI v2 Batch 9i Macross4 Rollback
+
+on:
+  push:
+    branches:
+      - audit/evidence-ui-v2-phase2-20260914
+    paths:
+      - .github/workflows/evidence-ui-v2-batch9i-macross4-rollback.yml
+
+permissions:
+  contents: write
+
+jobs:
+  rollback:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: audit/evidence-ui-v2-phase2-20260914
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Restore Macross4 pre-batch9i canonical state and validate
+        run: node tools/run-evidence-ui-v2-batch9i-macross4-rollback.mjs
+      - name: Commit restored canonical and generated artifacts
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          id=L_MACROSS_FRONTIER4_BA
+          git add research/$id/selection-data.json research/$id/machine-observation-data.json research/$id/ui-design-data.json
+          git add machines/$id/machine-package.json research/$id/statistics-report.json research/$id/difficulty-report.json research/$id/setting-band-report.json
+          git add catalog.json difficulty-catalog.json machine-registry.json
+          git diff --cached --quiet && exit 0
+          git commit -m 'audit: rollback Macross4 Evidence UI pending selectionMode review'
+          git push origin HEAD:audit/evidence-ui-v2-phase2-20260914
