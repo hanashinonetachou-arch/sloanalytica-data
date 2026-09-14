@@ -1,0 +1,122 @@
+name: Feature UI v2 label finalize
+
+on:
+  pull_request:
+    branches:
+      - prototype-multi-machine
+    paths:
+      - '.github/workflows/feature-ui-v2-label-finalize.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  apply:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout PR head
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.ref || github.ref }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Clarify Arifureta band labels and contextual duplicate audit
+        shell: bash
+        run: |
+          set -euo pipefail
+          node <<'NODE'
+          const fs = require('fs');
+
+          const file = 'research/L_ARIFURETA_JA/ui-design-data.json';
+          const data = JSON.parse(fs.readFileSync(file, 'utf8'));
+          const labels = {
+            INP_AT_END_U1999_GUN: '銃（～1999G）',
+            INP_AT_END_U1999_TIO_SHIA_YUE: 'ティオ・シア・ユエ（～1999G）',
+            INP_AT_END_B2000_5999_GUN: '銃（2000～5999G）',
+            INP_AT_END_B2000_5999_TIO_SHIA_YUE: 'ティオ・シア・ユエ（2000～5999G）',
+            INP_AT_END_B6000_PLUS_GUN: '銃（6000G～）',
+            INP_AT_END_B6000_PLUS_TIO_SHIA_YUE: 'ティオ・シア・ユエ（6000G～）',
+          };
+          for (const [id, name] of Object.entries(labels)) {
+            if (!data.inputContracts?.[id]) throw new Error(`missing ${id}`);
+            data.inputContracts[id].name = name;
+          }
+          fs.writeFileSync(file, JSON.stringify(data, null, 2) + '\n');
+
+          const auditFile = 'tools/audit-feature-ui-v2-final.mjs';
+          let s = fs.readFileSync(auditFile, 'utf8');
+          const oldDecl = "const rows=[]; const excludedEvidence=[]; const labels=[]; const duplicates=[]; const contractDrifts=[]; const parity=[]; const fixtureResults=[];";
+          const newDecl = "const rows=[]; const excludedEvidence=[]; const labels=[]; const duplicates=[]; const contextualDuplicates=[]; const contractDrifts=[]; const parity=[]; const fixtureResults=[];";
+          if (!s.includes(oldDecl)) throw new Error('audit declaration anchor not found');
+          s = s.replace(oldDecl, newDecl);
+
+          const oldLoop = "    for (const [label,inputIds] of seen) if (label && inputIds.length>1) duplicates.push({machineId,displayName,sectionName,label,inputIds});";
+          const newLoop = `    for (const [label,inputIds] of seen) {
+      if (!label || inputIds.length <= 1) continue;
+      const positions=inputIds.map((id)=>featureIds.indexOf(id));
+      const leftLabels=positions.map((pos)=>pos>0 ? safeLabel(ui.inputContracts[featureIds[pos-1]]?.name) : null);
+      const contextualPair=positions.every((pos)=>pos>0 && pos%2===1 && ui.inputContracts[featureIds[pos-1]]?.gridSpan===6 && ui.inputContracts[featureIds[pos]]?.gridSpan===6)
+        && leftLabels.every(Boolean)
+        && new Set(leftLabels).size===leftLabels.length;
+      const entry={machineId,displayName,sectionName,label,inputIds};
+      if (contextualPair) contextualDuplicates.push({...entry,reason:'distinct-left-label 6+6 row context'});
+      else duplicates.push(entry);
+    }`;
+          if (!s.includes(oldLoop)) throw new Error('duplicate-loop anchor not found');
+          s = s.replace(oldLoop, newLoop);
+
+          const oldSummary = "labelIssues:labels.length,duplicateLabels:duplicates.length,contractDrifts:";
+          const newSummary = "labelIssues:labels.length,duplicateLabels:duplicates.length,contextualDuplicateLabels:contextualDuplicates.length,contractDrifts:";
+          if (!s.includes(oldSummary)) throw new Error('summary anchor not found');
+          s = s.replace(oldSummary, newSummary);
+
+          const oldReportArrays = "fixtureResults,labelIssues:labels,duplicateLabels:duplicates,evidenceInputsExcluded:";
+          const newReportArrays = "fixtureResults,labelIssues:labels,duplicateLabels:duplicates,contextualDuplicateLabels:contextualDuplicates,evidenceInputsExcluded:";
+          if (!s.includes(oldReportArrays)) throw new Error('report-array anchor not found');
+          s = s.replace(oldReportArrays, newReportArrays);
+
+          const oldLog = "console.log(`labelIssues=${report.summary.labelIssues} duplicateLabels=${report.summary.duplicateLabels}`);";
+          const newLog = "console.log(`labelIssues=${report.summary.labelIssues} duplicateLabels=${report.summary.duplicateLabels} contextualDuplicateLabels=${report.summary.contextualDuplicateLabels}`);";
+          if (!s.includes(oldLog)) throw new Error('log anchor not found');
+          s = s.replace(oldLog, newLog);
+          fs.writeFileSync(auditFile, s);
+          NODE
+
+      - name: Materialize Arifureta through normal pipeline
+        shell: bash
+        run: |
+          set -euo pipefail
+          printf '%s\n' L_ARIFURETA_JA > /tmp/feature-ui-v2-label-finalize.txt
+          npm run machine:batch -- --file /tmp/feature-ui-v2-label-finalize.txt
+
+      - name: Run final Feature UI v2 audit
+        run: node tools/audit-feature-ui-v2-final.mjs --report reports/feature-ui-v2-audit-label-finalize.json
+
+      - name: Require zero unresolved label duplicates
+        shell: bash
+        run: |
+          set -euo pipefail
+          node -e "const r=require('./reports/feature-ui-v2-audit-label-finalize.json'); if(r.summary.review!==0||r.summary.labelIssues!==0||r.summary.duplicateLabels!==0||r.summary.unexpectedContractDrifts!==0||r.summary.fixturePass!==r.summary.fixtureTotal) { console.error(r.summary); process.exit(1); } console.log(r.summary)"
+
+      - name: Commit canonical, audit, and generated outputs
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add research/L_ARIFURETA_JA/ui-design-data.json machines/L_ARIFURETA_JA/machine-package.json tools/audit-feature-ui-v2-final.mjs catalog.json difficulty-catalog.json machine-registry.json research/L_ARIFURETA_JA/statistics-report.json research/L_ARIFURETA_JA/difficulty-report.json research/L_ARIFURETA_JA/setting-band-report.json
+          if git diff --cached --quiet; then
+            echo 'No changes to commit.'
+            exit 0
+          fi
+          git commit -m 'fix: finalize Feature UI v2 duplicate label handling'
+          if [[ "${{ github.event_name }}" == 'pull_request' ]]; then
+            git push origin HEAD:${{ github.event.pull_request.head.ref }}
+          fi
