@@ -88,12 +88,19 @@ jobs:
             echo '::endgroup::'
           done < /tmp/research_files.txt
 
-      - name: Build and validate changed machines as one batch
+      - name: Build and validate changed machines in guarded batches
         if: steps.stages.outputs.has_machines == 'true'
         shell: bash
         run: |
           set -euo pipefail
-          npm run machine:batch -- --file /tmp/machine_ids.txt
+          rm -f /tmp/machine_ids_chunk_*
+          split -l 10 /tmp/machine_ids.txt /tmp/machine_ids_chunk_
+          for chunk in /tmp/machine_ids_chunk_*; do
+            count="$(wc -l < "$chunk" | tr -d ' ')"
+            echo "::group::MachineData batch ${chunk##*/} (${count} machines)"
+            npm run machine:batch -- --file "$chunk"
+            echo '::endgroup::'
+          done
 
       - name: Commit generated artifacts
         if: >-
