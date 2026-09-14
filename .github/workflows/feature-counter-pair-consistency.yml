@@ -1,0 +1,23 @@
+name: Feature Counter Pair Consistency
+
+on:
+  pull_request:
+    branches:
+      - prototype-multi-machine
+  workflow_dispatch:
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Audit Feature counter-pair consistency
+        run: node tools/audit-feature-counter-pair-consistency.mjs --json-out reports/feature-counter-pair-consistency.json
+      - name: Upload consistency report
+        uses: actions/upload-artifact@v4
+        with:
+          name: feature-counter-pair-consistency
+          path: reports/feature-counter-pair-consistency.json
