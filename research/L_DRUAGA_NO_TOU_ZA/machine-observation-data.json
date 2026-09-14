@@ -1,0 +1,125 @@
+{
+  "schemaVersion": "machine-observation-data-v2",
+  "machineId": "L_DRUAGA_NO_TOU_ZA",
+  "displayName": "スマスロ ドルアーガの塔",
+  "researchedAt": "2026-09-05",
+  "sources": [
+    {
+      "sourceId": "SRC_PWORLD",
+      "publisher": "p-world.co.jp",
+      "title": "スマスロ ドルアーガの塔 機種情報",
+      "url": "https://www.p-world.co.jp/machine/database/10307",
+      "checkedAt": "2026-09-05",
+      "sourceType": "analysis"
+    },
+    {
+      "sourceId": "SRC_1GEKI",
+      "publisher": "1geki.jp",
+      "title": "ドルアーガの塔 設定差・設定判別要素まとめ",
+      "url": "https://1geki.jp/slot/l_druaga/0/",
+      "checkedAt": "2026-09-05",
+      "sourceType": "analysis"
+    },
+    {
+      "sourceId": "SRC_NANA_BGM",
+      "publisher": "nana-press.com",
+      "title": "ドルアーガの塔 REGボーナス中のBGMによる設定示唆",
+      "url": "https://nana-press.com/kaiseki/machine/1012/31671/",
+      "checkedAt": "2026-09-05",
+      "sourceType": "analysis"
+    },
+    {
+      "sourceId": "SRC_1GEKI_REVIEW_20260906",
+      "publisher": "1geki.jp",
+      "title": "ドルアーガの塔 設定差・設定判別要素まとめ",
+      "url": "https://1geki.jp/slot/l_druaga/0/",
+      "checkedAt": "2026-09-06",
+      "sourceType": "analysis"
+    }
+  ],
+  "sourceCoverage": {
+    "machineMenu": "UNRESOLVED",
+    "dataCounter": "UNRESOLVED",
+    "linkedService": "UNRESOLVED",
+    "directPlay": "FOUND",
+    "endEvent": "FOUND",
+    "seatedState": "UNRESOLVED"
+  },
+  "observations": [
+    {
+      "observationId": "OBS_NORMAL_BONUS",
+      "sourceType": "DIRECT_PLAY",
+      "observationMode": "MANUAL_COUNTER",
+      "status": "FOUND",
+      "label": "通常ゲーム数・BIG・REG",
+      "categories": ["通常ゲーム数", "BIG", "REG"],
+      "timing": ["自己実戦中の通常ゲーム区間"],
+      "excludedConditions": [
+        "BIGとREGで異なる観測区間を使わない",
+        "BIG+REGの合算を別Featureとして重複入力しない"
+      ],
+      "sourceRefs": ["SRC_PWORLD", "SRC_1GEKI"],
+      "notes": "BIGとREGは同じ通常ゲーム数を分母として手動計数する。"
+    },
+    {
+      "observationId": "OBS_DC_EMPTY_CELL_CHEST",
+      "sourceType": "DIRECT_PLAY",
+      "observationMode": "MANUAL_COUNTER",
+      "status": "FOUND",
+      "label": "DC中・何もないマスでの対象役と宝箱獲得",
+      "categories": ["対象スイカ/チェリー", "宝箱獲得"],
+      "timing": ["DC中のモンスター／鍵マス以外でスイカまたはチェリーが成立した時"],
+      "excludedConditions": [
+        "EX-DCを含めない",
+        "モンスター／鍵マスでの成立を条件分母に含めない",
+        "対象役以外を条件分母に含めない",
+        "宝箱獲得回数を対象役成立回数より多くしない"
+      ],
+      "sourceRefs": ["SRC_1GEKI_REVIEW_20260906"],
+      "notes": "対象スイカ/チェリー1回を1試行とし、その対象役から宝箱を1個獲得した回数を分子として使用する。"
+    },
+    {
+      "observationId": "OBS_REG_BGM_EVIDENCE",
+      "sourceType": "END_EVENT",
+      "observationMode": "AUDIO_EVENT",
+      "status": "FOUND",
+      "label": "通常時REG中BGM",
+      "categories": ["『イシターの復活』メインテーマ"],
+      "timing": ["通常時REG中"],
+      "excludedConditions": ["未確認を非発生として扱わない"],
+      "sourceRefs": ["SRC_NANA_BGM", "SRC_PWORLD"],
+      "notes": "該当BGMを確認した場合のみ、公開された設定集合制約としてEvidence入力する。"
+    }
+  ],
+  "featureMappings": [
+    {
+      "featureId": "FEAT_BIG",
+      "mappingType": "EXACT",
+      "observationIds": ["OBS_NORMAL_BONUS"],
+      "collectionMethods": ["MANUAL_COUNTER"],
+      "usableForInference": true,
+      "usableForDifficulty": false,
+      "notes": "通常ゲーム数を分母、同一区間のBIGを分子として使用する。"
+    },
+    {
+      "featureId": "FEAT_REG",
+      "mappingType": "EXACT",
+      "observationIds": ["OBS_NORMAL_BONUS"],
+      "collectionMethods": ["MANUAL_COUNTER"],
+      "usableForInference": true,
+      "usableForDifficulty": false,
+      "notes": "通常ゲーム数を分母、同一区間のREGを分子として使用する。"
+    },
+    {
+      "featureId": "FEAT_DC_EMPTY_CELL_CHEST",
+      "mappingType": "EXACT",
+      "observationIds": ["OBS_DC_EMPTY_CELL_CHEST"],
+      "collectionMethods": ["MANUAL_COUNTER"],
+      "usableForInference": true,
+      "usableForDifficulty": false,
+      "notes": "DC中のモンスター／鍵マス以外で成立したスイカ・チェリーだけを条件分母とし、その対象役からの宝箱獲得を分子として評価する。"
+    }
+  ],
+  "researchReopenRequests": [],
+  "fieldVerificationItems": []
+}
