@@ -11,6 +11,9 @@ on:
       - research/L_EVANGELION_MIRAI_JF/selection-data.json
       - research/L_EVANGELION_MIRAI_JF/machine-observation-data.json
       - research/L_EVANGELION_MIRAI_JF/ui-design-data.json
+      - research/L_GODZILLA_VS_EVANGELION_JA/selection-data.json
+      - research/L_GODZILLA_VS_EVANGELION_JA/machine-observation-data.json
+      - research/L_GODZILLA_VS_EVANGELION_JA/ui-design-data.json
       - .github/workflows/evidence-ui-v2-g1-gold-formal.yml
   workflow_dispatch:
 
@@ -21,7 +24,7 @@ jobs:
   formal-migration:
     runs-on: ubuntu-latest
     env:
-      MACHINE_IDS: L_G1_YUSHUN_CLUB_GOLD_KD L_EVANGELION_MIRAI_JF
+      MACHINE_IDS: L_G1_YUSHUN_CLUB_GOLD_KD L_EVANGELION_MIRAI_JF L_GODZILLA_VS_EVANGELION_JA
     steps:
       - uses: actions/checkout@v4
         with:
@@ -93,12 +96,22 @@ jobs:
           const evaInputs=new Map((eva.inputs?.inputs??[]).map(x=>[x.id,x]));
           assert(!evaInputs.has('INP_EVI_SETTING_FLOOR'),'Eva legacy setting-floor input remains');
           assert(evaInputs.has('INP_EVI_E_FREEZE_END'),'Eva E-FREEZE end input missing');
-          const labels=(evaInputs.get('INP_EVI_E_FREEZE_END')?.options??[]).map(o=>o.label).filter(x=>x!=='未選択');
-          assert(JSON.stringify(labels)===JSON.stringify(['リリス','mark.6']),`Eva options mismatch: ${JSON.stringify(labels)}`);
+          const evaLabels=(evaInputs.get('INP_EVI_E_FREEZE_END')?.options??[]).map(o=>o.label).filter(x=>x!=='未選択');
+          assert(JSON.stringify(evaLabels)===JSON.stringify(['リリス','mark.6']),`Eva options mismatch: ${JSON.stringify(evaLabels)}`);
           assert((eva.evidence?.evidences??[]).length===2,'Eva expected 2 Evidence rules');
           assert(eva.machine?.machineDataVersion==='0.1.1','Eva version mismatch');
-          const evaUi=(eva.ui?.sections??[]).flatMap(s=>s.items??[]);
-          assert(evaUi.some(i=>i.inputId==='INP_EVI_E_FREEZE_END'&&i.label==='E-FREEZE終了画面'),'Eva natural Evidence UI missing');
+
+          const goe=load('L_GODZILLA_VS_EVANGELION_JA');
+          const goeInputs=new Map((goe.inputs?.inputs??[]).map(x=>[x.id,x]));
+          assert(!goeInputs.has('INP_EVI_SETTING_FLOOR'),'Godzilla x Eva legacy setting-floor input remains');
+          assert(goeInputs.has('INP_EVI_PAYOUT_DISPLAY'),'Godzilla x Eva payout-display input missing');
+          assert(goeInputs.has('INP_EVI_AT_END_SCREEN'),'Godzilla x Eva AT end-screen input missing');
+          const payoutLabels=(goeInputs.get('INP_EVI_PAYOUT_DISPLAY')?.options??[]).map(o=>o.label).filter(x=>x!=='未選択');
+          const endLabels=(goeInputs.get('INP_EVI_AT_END_SCREEN')?.options??[]).map(o=>o.label).filter(x=>x!=='未選択');
+          assert(JSON.stringify(payoutLabels)===JSON.stringify(['222枚OVER','456枚OVER','666枚OVER']),`Godzilla x Eva payout options mismatch: ${JSON.stringify(payoutLabels)}`);
+          assert(JSON.stringify(endLabels)===JSON.stringify(['モスラ','エヴァ＆ゴジラ','カヲル']),`Godzilla x Eva end-screen options mismatch: ${JSON.stringify(endLabels)}`);
+          assert((goe.evidence?.evidences??[]).length===6,'Godzilla x Eva expected 6 Evidence rules');
+          assert(goe.machine?.machineDataVersion==='0.1.1','Godzilla x Eva version mismatch');
           console.log('Evidence UI v2 pilot contracts: PASS');
           NODE
 
