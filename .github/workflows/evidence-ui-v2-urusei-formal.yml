@@ -1,0 +1,185 @@
+name: Evidence UI v2 Urusei Formal Migration
+
+on:
+  push:
+    branches:
+      - audit/evidence-ui-v2-phase2-20260914
+    paths:
+      - .github/workflows/evidence-ui-v2-urusei-formal.yml
+
+permissions:
+  contents: write
+
+jobs:
+  formal-migration:
+    runs-on: ubuntu-latest
+    env:
+      MACHINE_ID: L_URUSEI_YATSURA_EV
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: audit/evidence-ui-v2-phase2-20260914
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Canonicalize Urusei Evidence UI v2
+        run: |
+          node --input-type=module <<'NODE'
+          import fs from 'node:fs';
+          const id = process.env.MACHINE_ID;
+          const base = `research/${id}`;
+          const selectionPath = `${base}/selection-data.json`;
+          const researchPath = `${base}/research-data.json`;
+          const uiPath = `${base}/ui-design-data.json`;
+          const selection = JSON.parse(fs.readFileSync(selectionPath, 'utf8'));
+          const research = JSON.parse(fs.readFileSync(researchPath, 'utf8'));
+          const evidence = new Map((research.evidenceCandidates ?? []).map(x => [x.researchEvidenceId, x]));
+
+          const specs = [
+            ['END_SCREEN_TENCHAN', '終了画面 テンちゃん', 'RE_DENY_1', 'DENY_SET_1'],
+            ['END_SCREEN_SAKURANBO', '終了画面 錯乱坊', 'RE_DENY_2', 'DENY_SET_2'],
+            ['END_SCREEN_KOTATSUNEKO', '終了画面 コタツネコ', 'RE_DENY_1_5', 'DENY_SET_1_5'],
+            ['AT_END_SCREEN', 'AT終了画面 ラム＆あたる等', 'RE_4PLUS', 'SET_4_OR_HIGHER'],
+            ['HEROINE_GROUP', 'ヒロイン集合', 'RE_5PLUS', 'SET_5_OR_HIGHER'],
+            ['ATARU_ESCAPE_EYECATCH', 'あたる逃走中アイキャッチ', 'RE_6', 'SET_6']
+          ];
+
+          function candidate(eid) {
+            const c = evidence.get(eid);
+            if (!c) throw new Error(`${id}: Research Evidence missing: ${eid}`);
+            if (c.factStatus !== 'verified') throw new Error(`${id}: Research Evidence is not verified: ${eid}`);
+            return c;
+          }
+
+          selection.machineDataVersion = '0.1.1';
+          selection.evidenceUi = {
+            groups: specs.map(([groupId, label, eid, value]) => {
+              const c = candidate(eid);
+              return {
+                groupId,
+                label,
+                selectionMode: 'single',
+                normalizationMode: 'ALLOWED_SETTINGS',
+                options: [{
+                  value,
+                  label,
+                  allowedSettings: c.allowedSettings,
+                  excludedSettings: c.deniedSettings ?? [],
+                  sourceEvidenceIds: [eid]
+                }]
+              };
+            })
+          };
+          fs.writeFileSync(selectionPath, JSON.stringify(selection, null, 2) + '\n');
+
+          const evidenceIds = specs.map(([groupId]) => `EVI_UI_${groupId}`);
+          const evidenceContracts = Object.fromEntries(specs.map(([groupId, label]) => [
+            `EVI_UI_${groupId}`,
+            { label, selectionMode: 'single', sourceEvidenceGroupId: groupId, inheritOptions: true }
+          ]));
+          const ui = {
+            schemaVersion: 'ui-design-data-v1',
+            machineId: id,
+            status: 'PASS',
+            generatedFrom: {
+              selection: `${base}/selection-data.json`,
+              observation: `${base}/machine-observation-data.json`,
+              manifest: 'SloAnalytica_MachineData_UX_Construction_Manifest_v7_1',
+              materializedSource: `machines/${id}/machine-package.json`
+            },
+            sectionOrder: ['AT初当り', '設定確定・否定情報'],
+            sections: {
+              'AT初当り': {
+                inputIds: ['INP_NORMAL_GAMES', 'INP_AT'],
+                description: '', collapsible: false, defaultExpanded: true
+              },
+              '設定確定・否定情報': {
+                inputIds: [], evidenceIds,
+                description: '', collapsible: false, defaultExpanded: true
+              }
+            },
+            inputContracts: {
+              INP_NORMAL_GAMES: { name: '通常ゲーム数', mode: 'NUMBER', gridSpan: 12, directInput: true },
+              INP_AT: { name: 'AT初当り回数', mode: 'COUNTER', gridSpan: 12, directInput: true }
+            },
+            evidenceContracts,
+            unresolved: [],
+            auditNotes: [
+              'Evidence UI v2 Phase 2正式移行。設定確定・否定結果そのものではなく、実際に確認した演出を入力する。',
+              'Research EvidenceのallowedSettings / deniedSettingsから設定制約を導出し、SelectionのFeature再選定は行っていない。',
+              'Researchの自然観測単位を保持し、6つのEvidence Groupを独立入力とする。'
+            ]
+          };
+          fs.writeFileSync(uiPath, JSON.stringify(ui, null, 2) + '\n');
+          console.log('Urusei canonical Evidence UI v2 prepared.');
+          NODE
+
+      - name: Validate Selection against Research
+        run: node tools/validate-selection-data.mjs research/$MACHINE_ID/selection-data.json research/$MACHINE_ID/research-data.json
+
+      - name: Validate Observation v2
+        run: node tools/validate-machine-observation-data.mjs research/$MACHINE_ID/machine-observation-data.json
+
+      - name: Validate canonical UI Design
+        run: node tools/validate-ui-design-data.mjs .
+
+      - name: Audit UI to Observation linkage
+        run: node tools/audit-ui-design-observation-linkage.mjs $MACHINE_ID --strict-v2
+
+      - name: Run four-layer pipeline gate
+        run: node tools/four-layer-pipeline-gate.mjs $MACHINE_ID
+
+      - name: Check MachineData regeneration without writing
+        run: npm run machine:pipeline -- $MACHINE_ID --check --skip-repo-checks
+
+      - name: Materialize formal MachineData
+        run: npm run machine:pipeline -- $MACHINE_ID --skip-repo-checks
+
+      - name: Validate regenerated Evidence UI with existing validator wrapper
+        run: node tools/validate-evidence-ui-all.mjs
+
+      - name: Re-run canonical and four-layer gates
+        run: |
+          node tools/validate-ui-design-data.mjs .
+          node tools/audit-ui-design-observation-linkage.mjs $MACHINE_ID --strict-v2
+          node tools/four-layer-pipeline-gate.mjs $MACHINE_ID
+
+      - name: Verify generated Urusei contract
+        run: |
+          node --input-type=module <<'NODE'
+          import fs from 'node:fs';
+          const id = process.env.MACHINE_ID;
+          const pkg = JSON.parse(fs.readFileSync(`machines/${id}/machine-package.json`, 'utf8'));
+          const inputs = new Map((pkg.inputs?.inputs ?? []).map(x => [x.id, x]));
+          const expected = [
+            'INP_EVI_END_SCREEN_TENCHAN',
+            'INP_EVI_END_SCREEN_SAKURANBO',
+            'INP_EVI_END_SCREEN_KOTATSUNEKO',
+            'INP_EVI_AT_END_SCREEN',
+            'INP_EVI_HEROINE_GROUP',
+            'INP_EVI_ATARU_ESCAPE_EYECATCH'
+          ];
+          function assert(cond, msg) { if (!cond) throw new Error(msg); }
+          assert(!inputs.has('INP_EVI_SETTING_CONSTRAINT'), `${id}: legacy setting-constraint input remains`);
+          assert(pkg.machine?.machineDataVersion === '0.1.1', `${id}: version mismatch`);
+          for (const inputId of expected) assert(inputs.has(inputId), `${id}: ${inputId} missing`);
+          const refs = new Set((pkg.evidence?.evidences ?? []).flatMap(x => x.sourceEvidenceRefs ?? []));
+          for (const eid of ['RE_DENY_1','RE_DENY_2','RE_DENY_1_5','RE_4PLUS','RE_5PLUS','RE_6']) {
+            assert(refs.has(eid), `${id}: generated Evidence source ref missing: ${eid}`);
+          }
+          console.log('Evidence UI v2 Urusei contract: PASS');
+          NODE
+
+      - name: Commit canonical and generated artifacts
+        run: |
+          if [ -z "$(git status --porcelain)" ]; then echo 'No changes to commit.'; exit 0; fi
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add research/$MACHINE_ID/selection-data.json research/$MACHINE_ID/ui-design-data.json
+          git add machines/$MACHINE_ID/machine-package.json research/$MACHINE_ID/statistics-report.json research/$MACHINE_ID/difficulty-report.json research/$MACHINE_ID/setting-band-report.json || true
+          git add catalog.json difficulty-catalog.json machine-registry.json || true
+          git commit -m 'evidence-ui: formalize Urusei observation evidence'
+          git push origin HEAD:audit/evidence-ui-v2-phase2-20260914
