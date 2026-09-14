@@ -1,0 +1,103 @@
+name: Apply Feature Two-Column Canonical Reaudit
+
+on:
+  push:
+    branches:
+      - fix/20260914-feature-two-column-reaudit
+    paths:
+      - '.github/workflows/apply-feature-two-column-canonical-reaudit.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: apply-feature-two-column-canonical-reaudit
+  cancel-in-progress: false
+
+jobs:
+  apply-validate:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: fix/20260914-feature-two-column-reaudit
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Apply canonical UI repairs
+        run: node tools/reaudit-feature-two-column-canonical.mjs --apply --report reports/feature-two-column-canonical-reaudit.json
+
+      - name: Materialize repaired canonical UI
+        shell: bash
+        run: |
+          mapfile -t ids < <(node --input-type=module <<'NODE'
+          import fs from 'node:fs';
+          const report=JSON.parse(fs.readFileSync('reports/feature-two-column-canonical-reaudit.json','utf8'));
+          for(const id of report.machineIds ?? []) console.log(id);
+          NODE
+          )
+          echo "Materializing ${#ids[@]} machines"
+          if [ ${#ids[@]} -gt 0 ]; then
+            node tools/materialize-ui-design.mjs --apply "${ids[@]}"
+          fi
+
+      - name: Sync catalog package metadata
+        run: |
+          node --input-type=module <<'NODE'
+          import fs from 'node:fs';
+          import crypto from 'node:crypto';
+          const report=JSON.parse(fs.readFileSync('reports/feature-two-column-canonical-reaudit.json','utf8'));
+          const catalog=JSON.parse(fs.readFileSync('catalog.json','utf8'));
+          let changed=false;
+          for(const id of report.machineIds ?? []){
+            const p=`machines/${id}/machine-package.json`;
+            if(!fs.existsSync(p)) throw new Error(`${id}: machine package missing`);
+            const bytes=fs.readFileSync(p);
+            const pkg=JSON.parse(bytes.toString('utf8'));
+            const entry=(catalog.machines ?? []).find(x=>x.machineId===id);
+            if(!entry){ console.log(`${id}: not in catalog; metadata sync skipped`); continue; }
+            const sha=crypto.createHash('sha256').update(bytes).digest('hex');
+            const size=bytes.length;
+            const version=pkg.machine?.machineDataVersion;
+            if(entry.sha256!==sha || entry.packageSizeBytes!==size || entry.machineDataVersion!==version){
+              entry.sha256=sha;
+              entry.packageSizeBytes=size;
+              entry.machineDataVersion=version;
+              changed=true;
+            }
+          }
+          if(changed){
+            catalog.generatedAt=new Date().toISOString();
+            fs.writeFileSync('catalog.json',`${JSON.stringify(catalog,null,2)}\n`);
+          }
+          console.log(`Catalog metadata: ${changed?'updated':'unchanged'}`);
+          NODE
+
+      - name: Validate canonical UI
+        run: node tools/validate-ui-design-data.mjs .
+
+      - name: Full repository tests
+        run: npm test
+
+      - name: Public-data audit
+        run: npm run audit
+
+      - name: User-facing service-name audit
+        run: npm run audit:ui-service-names
+
+      - name: Commit validated repairs
+        shell: bash
+        run: |
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git add research machines catalog.json reports/feature-two-column-canonical-reaudit.json
+          if git diff --cached --quiet; then
+            echo 'No repair changes.'
+            exit 0
+          fi
+          git commit -m 'ui: repair Feature two-column layout gaps'
+          git pull --rebase origin fix/20260914-feature-two-column-reaudit
+          git push origin HEAD:fix/20260914-feature-two-column-reaudit
