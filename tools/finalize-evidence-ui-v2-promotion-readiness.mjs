@@ -1,0 +1,24 @@
+#!/usr/bin/env node
+import fs from 'node:fs';
+import path from 'node:path';
+const ROOT=process.cwd();
+const IN=path.join(ROOT,'audit-reports','evidence-ui-v2-phase2-dry-run-all.json');
+const JSON_OUT=path.join(ROOT,'audit-reports','evidence-ui-v2-phase2-promotion-readiness.json');
+const MD_OUT=path.join(ROOT,'audit-reports','evidence-ui-v2-phase2-promotion-readiness.md');
+const report=JSON.parse(fs.readFileSync(IN,'utf8'));
+const key=x=>`${x.machineId}::${x.inputId}`;
+const blockedKeys=new Set((report.reviewFlags??[]).map(key));
+const all=(report.machines??[]).map(m=>({machineId:m.machineId,displayName:m.displayName,legacyInputId:m.legacyInputId,legacyName:m.legacyName,groups:m.groups.map(g=>({observationScope:g.observationScope,layoutCandidate:g.layoutCandidate,optionCount:g.options.length}))}));
+const ready=all.filter(x=>!blockedKeys.has(`${x.machineId}::${x.legacyInputId}`));
+const blocked=all.filter(x=>blockedKeys.has(`${x.machineId}::${x.legacyInputId}`)).map(x=>({...x,flags:(report.reviewFlags??[]).filter(f=>key(f)===`${x.machineId}::${x.legacyInputId}`).map(f=>({flag:f.flag,group:f.group,observedTitle:f.observedTitle??null,titles:f.titles??null}))}));
+const errors=[];
+if(all.length!==48) errors.push(`all planned inputs expected 48, got ${all.length}`);
+if(ready.length!==38) errors.push(`promotion-ready inputs expected 38, got ${ready.length}`);
+if(blocked.length!==10) errors.push(`Research-refinement inputs expected 10, got ${blocked.length}`);
+if((report.hardErrors??[]).length) errors.push(`upstream hard errors: ${report.hardErrors.length}`);
+const out={schemaVersion:'evidence-ui-v2-phase2-promotion-readiness-v1',generatedAt:new Date().toISOString(),policyNotes:['Only dry-run inputs with zero presentation/research-granularity review flags are promotion-ready.','Composite observationScope and duplicate normalized titles are Research/Observation refinement blockers, not auto-fix targets.','Promotion-ready does not mean merged; canonical mutation still requires the normal Observation -> canonical UI -> materialization validation path.'],summary:{plannedInputs:all.length,promotionReadyInputs:ready.length,researchRefinementInputs:blocked.length,promotionReadyMachines:new Set(ready.map(x=>x.machineId)).size,researchRefinementMachines:new Set(blocked.map(x=>x.machineId)).size,errors:errors.length},promotionReady:ready,researchRefinementRequired:blocked,errors};
+fs.writeFileSync(JSON_OUT,JSON.stringify(out,null,2)+'\n');
+const md=['# Evidence UI v2 Phase 2 promotion readiness','',`- Planned inputs: ${out.summary.plannedInputs}`,`- Promotion-ready inputs: ${out.summary.promotionReadyInputs} / ${out.summary.promotionReadyMachines} machines`,`- Research/Observation refinement required: ${out.summary.researchRefinementInputs} inputs / ${out.summary.researchRefinementMachines} machines`,`- Errors: ${out.summary.errors}`,'','## Research/Observation refinement required','',...blocked.map(x=>`- **${x.machineId}** ${x.displayName??''}: ${x.legacyInputId} / ${x.legacyName} — ${x.flags.map(f=>`${f.flag}:${f.group}`).join(' | ')}`),'','## Promotion-ready','',...ready.map(x=>`- **${x.machineId}** ${x.displayName??''}: ${x.legacyInputId} / ${x.legacyName} → ${x.groups.map(g=>`${g.observationScope}[${g.layoutCandidate}]`).join(' + ')}`),'','## Errors','',...(errors.length?errors.map(e=>`- ${e}`):['- none']),''].join('\n');
+fs.writeFileSync(MD_OUT,md);
+console.log(JSON.stringify(out.summary,null,2));
+if(errors.length) process.exitCode=1;
