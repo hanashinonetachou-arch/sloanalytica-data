@@ -21,6 +21,7 @@ const write = (p, value) => fs.writeFileSync(p, `${JSON.stringify(value, null, 2
 const isPairableCounter = (contract) => contract?.mode === 'COUNTER' && !MANUAL_TOTAL_NAME.test(String(contract.name ?? ''));
 
 const findings = [];
+const contractDrifts = [];
 const changedMachineIds = new Set();
 let canonicalMachines = 0;
 let scannedSections = 0;
@@ -34,6 +35,24 @@ for (const machineId of fs.readdirSync(RESEARCH_DIR).sort()) {
   const ui = read(uiPath);
   if (ui.schemaVersion !== 'ui-design-data-v1' || ui.machineId !== machineId) continue;
   canonicalMachines += 1;
+
+  // Fail closed for this layout lane when canonical UI IDs no longer exist in the
+  // materialized package. That is a separate contract-migration problem and must
+  // not be silently "fixed" by a layout audit.
+  const packagePath = path.join(ROOT, 'machines', machineId, 'machine-package.json');
+  if (!fs.existsSync(packagePath)) {
+    contractDrifts.push({ machineId, reason: 'machine-package-missing', missingInputIds: [] });
+    continue;
+  }
+  const pkg = read(packagePath);
+  const packageInputIds = new Set((pkg.inputs?.inputs ?? []).map((input) => input.id));
+  const canonicalInputIds = [...new Set(Object.values(ui.sections ?? {}).flatMap((section) => section?.inputIds ?? []))];
+  const missingInputIds = canonicalInputIds.filter((inputId) => !packageInputIds.has(inputId));
+  if (missingInputIds.length) {
+    contractDrifts.push({ machineId, reason: 'canonical-input-id-missing-in-package', missingInputIds });
+    continue;
+  }
+
   let changed = false;
 
   for (const sectionName of ui.sectionOrder ?? []) {
@@ -105,7 +124,7 @@ for (const machineId of fs.readdirSync(RESEARCH_DIR).sort()) {
 }
 
 const report = {
-  schemaVersion: 'feature-two-column-canonical-reaudit-v2',
+  schemaVersion: 'feature-two-column-canonical-reaudit-v3',
   mode: APPLY ? 'APPLY' : 'AUDIT',
   policy: {
     sourceOfTruth: 'research/<machineId>/ui-design-data.json',
@@ -114,23 +133,28 @@ const report = {
     manualTotals: 'Game-total/manual-game counters remain full width and break sibling groups even when legacy canonical mode says COUNTER.',
     existingSix: 'Existing gridSpan=6 entries are not modified solely to change compactness.',
     evidence: 'Evidence/setting-hint presentation sections are deferred to the separate Evidence redesign.',
+    contractDrift: 'Machines whose canonical input IDs are absent from the current machine package are reported and skipped, not silently migrated.',
   },
   summary: {
     canonicalMachines,
     scannedSections,
     deferredSections,
     manualCounterBoundaries,
+    contractDriftMachines: contractDrifts.length,
     repairGroups: findings.length,
     repairInputs: findings.reduce((sum, row) => sum + row.repairs.length, 0),
     changedMachines: APPLY ? changedMachineIds.size : [...new Set(findings.map((row) => row.machineId))].length,
   },
   machineIds: APPLY ? [...changedMachineIds].sort() : [...new Set(findings.map((row) => row.machineId))].sort(),
+  contractDrifts,
   findings,
 };
 
 fs.mkdirSync(path.dirname(REPORT_PATH), { recursive: true });
 write(REPORT_PATH, report);
 console.log(`Canonical Feature 2-col ${report.mode}: machines=${canonicalMachines}, sections=${scannedSections}, deferred=${deferredSections}`);
+console.log(`Contract-drift machines=${contractDrifts.length}`);
+for (const row of contractDrifts) console.log(`DEFER CONTRACT_DRIFT ${row.machineId}: ${row.missingInputIds.join(', ') || row.reason}`);
 console.log(`Manual-game counter boundaries=${manualCounterBoundaries}`);
 console.log(`REPAIR groups=${report.summary.repairGroups}, inputs=${report.summary.repairInputs}, machines=${report.summary.changedMachines}`);
 for (const row of findings) {
