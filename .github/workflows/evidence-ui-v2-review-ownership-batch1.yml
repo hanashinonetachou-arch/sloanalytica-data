@@ -23,8 +23,27 @@ jobs:
         with:
           node-version: 22
       - name: Run Feature/Evidence ownership remediation and gates
-        run: node tools/run-evidence-ui-v2-review-ownership-batch1.mjs
+        id: remediate
+        shell: bash
+        run: |
+          mkdir -p audit-reports
+          set +e
+          node tools/run-evidence-ui-v2-review-ownership-batch1.mjs > audit-reports/review-ownership-batch1.log 2>&1
+          status=$?
+          echo "$status" > audit-reports/review-ownership-batch1.status
+          cat audit-reports/review-ownership-batch1.log
+          exit $status
+      - name: Commit failure diagnostics only
+        if: failure()
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add audit-reports/review-ownership-batch1.log audit-reports/review-ownership-batch1.status
+          git diff --cached --quiet && exit 0
+          git commit -m 'audit: capture ownership remediation failure'
+          git push origin HEAD:audit/evidence-ui-v2-review-remediation-20260915
       - name: Commit canonical and generated artifacts
+        if: success()
         run: |
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
