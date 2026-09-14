@@ -8,6 +8,7 @@ on:
       - tools/audit-evidence-ui-v2.mjs
       - tools/validate-evidence-ui-all.mjs
       - tools/finalize-evidence-ui-v2-phase2.mjs
+      - tools/triage-evidence-ui-v2-reopen.mjs
       - .github/workflows/evidence-ui-v2-phase2-audit.yml
   workflow_dispatch:
 
@@ -48,15 +49,23 @@ jobs:
         continue-on-error: true
         run: node tools/finalize-evidence-ui-v2-phase2.mjs
 
+      - name: Triage Research reopen and shared inputs
+        id: reopen_triage
+        continue-on-error: true
+        run: node tools/triage-evidence-ui-v2-reopen.mjs
+
       - name: Show audit summaries
         if: always()
         run: |
           echo "existing evidence validator outcome: ${{ steps.existing_evidence.outcome }}"
           echo "fixed breakdowns outcome: ${{ steps.fixed_breakdowns.outcome }}"
+          echo "reopen triage outcome: ${{ steps.reopen_triage.outcome }}"
           echo
           cat audit-reports/evidence-ui-v2-phase2.md
           echo
           cat audit-reports/evidence-ui-v2-phase2-breakdowns.md || true
+          echo
+          cat audit-reports/evidence-ui-v2-phase2-triage.md || true
           echo
           cat audit-reports/evidence-validator-all.md || true
 
@@ -70,6 +79,8 @@ jobs:
             audit-reports/evidence-ui-v2-phase2.md
             audit-reports/evidence-ui-v2-phase2-breakdowns.json
             audit-reports/evidence-ui-v2-phase2-breakdowns.md
+            audit-reports/evidence-ui-v2-phase2-triage.json
+            audit-reports/evidence-ui-v2-phase2-triage.md
             audit-reports/evidence-validator-all.json
             audit-reports/evidence-validator-all.md
             audit-reports/existing-evidence-validator.log
@@ -82,6 +93,8 @@ jobs:
             audit-reports/evidence-ui-v2-phase2.md
             audit-reports/evidence-ui-v2-phase2-breakdowns.json
             audit-reports/evidence-ui-v2-phase2-breakdowns.md
+            audit-reports/evidence-ui-v2-phase2-triage.json
+            audit-reports/evidence-ui-v2-phase2-triage.md
             audit-reports/evidence-validator-all.json
             audit-reports/evidence-validator-all.md
           )
@@ -100,7 +113,7 @@ jobs:
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
           git add "${EXISTING[@]}"
-          git commit -m 'audit: record Evidence UI v2 phase 2 fixed breakdowns'
+          git commit -m 'audit: record Evidence UI v2 phase 2 triage'
           git push origin HEAD:audit/evidence-ui-v2-phase2-20260914
 
       - name: Enforce audit outcomes
@@ -113,6 +126,10 @@ jobs:
           fi
           if [ "${{ steps.fixed_breakdowns.outcome }}" != "success" ]; then
             echo 'Evidence UI Phase 2 fixed-breakdown invariants reported failures.'
+            failed=1
+          fi
+          if [ "${{ steps.reopen_triage.outcome }}" != "success" ]; then
+            echo 'Evidence UI Phase 2 reopen triage reported failures.'
             failed=1
           fi
           exit "$failed"
