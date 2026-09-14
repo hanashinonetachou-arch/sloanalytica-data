@@ -1,0 +1,204 @@
+# Evidence UI v2 Phase 2 inventory
+
+- Baseline SHA: `e38ad44297f6c1dcb923f0ce7417373099c86f61`
+- Registry machines: 270
+- Machine packages present: 270 (missing 0)
+- Evidence-present machines: 216
+- Evidence inputs: 697
+- Legacy interactive inputs: 100 / 76 machines
+- Result-badge separation candidates: 299 options / 40 machines
+- Generic Evidence separation candidates: 64 machines
+- Natural Feature-share candidates: 6 machines
+- Unclassified contexts: 362 inputs / 162 machines
+- Research reopen candidates: 166 machines
+- Selection reopen candidates: 77 machines
+
+## Machines needing review
+
+- **S_REVUE_STARLIGHT_CX_TEST_V66** 【テスト版】L少女☆歌劇 レヴュースタァライト -The SLOT-: legacy=6, badgeSplit=0, generic=0, shared=0, unclassified=3
+- **L_DISCUP_ULTRA_REMIX_XR** A-SLOT+ ディスクアップ ULTRAREMIX: legacy=1, badgeSplit=0, generic=0, shared=3, unclassified=0
+- **LB_ISEKAI_QUARTET_KR** A-SLOT+ 異世界かるてっと BT: legacy=0, badgeSplit=15, generic=0, shared=0, unclassified=1
+- **L_G1_YUSHUN_CLUB_GOLD_KD** GI優駿倶楽部黄金: legacy=1, badgeSplit=0, generic=1, shared=0, unclassified=1
+- **L_HEY_ELITE_SALARYMAN_KAGAMI_PA4** HEY！エリートサラリーマン鏡: legacy=1, badgeSplit=0, generic=1, shared=0, unclassified=1
+- **L_TOLOVE_DARKNESS_S6** L ToLOVEるダークネス: legacy=1, badgeSplit=0, generic=1, shared=0, unclassified=1
+- **L_TOLOVE_DARKNESS_S8** L ToLOVEるダークネス TRANCE ver.8.7: legacy=0, badgeSplit=0, generic=0, shared=0, unclassified=2
+- **L_ULTRAMAN_KE** L ULTRAMAN: legacy=0, badgeSplit=0, generic=0, shared=0, unclassified=2
+- **L_ULTRAMAN_FINAL_BATTLE_ME** L ULTRAMAN 最終決戦: legacy=0, badgeSplit=0, generic=0, shared=0, unclassified=3
+- **L_AKAME_GA_KILL_2** L アカメが斬る！2: legacy=1, badgeSplit=0, generic=1, shared=0, unclassified=1
+- **L_EVANGELION_MIRAI_JF** L エヴァンゲリオン ～未来への創造～: legacy=1, badgeSplit=0, generic=1, shared=0, unclassified=1
+- **L_GODZILLA_VS_EVANGELION_JA** L ゴジラ対エヴァンゲリオン: legacy=1, badgeSplit=0, generic=1, shared=0, unclassified=1
+- **L_SALARYMAN_KINTARO_ET** L サラリーマン金太郎: legacy=1, badgeSplit=0, generic=0, shared=0, unclassified=0
+- **L_DARLING_IN_THE_FRANXX_SA** L ダーリン・イン・ザ・フランキス: legacy=0, badgeSplit=0, generic=0, shared=0, unclassified=1
+- **L_NYANKO_DAISENSO_CHOSHINSOKU_KB** L にゃんこ大戦争 超神速: legacy=1, badgeSplit=0, generic=0, shared=0, unclassified=0
+- **L_SHIN_EVANGELION** L パチスロ シン・エヴァンゲリオン: legacy=0, badgeSplit=0, generic=0, shared=8, unclassified=1
+- **L_HIGURASHI_GOU_SS** L ひぐらしのなく頃に 業: legacy=1, badgeSplit=0, generic=1, shared=0, unclassified=1
+- **L_BERSERK_MUSOU_EV** L ベルセルク無双: legacy=1, badgeSplit=0, generic=1, shared=0, unclassified=1
+- **L_RING_NI_KAKERO1_FS** L リングにかけろ1V: legacy=1, badgeSplit=0, generic=1, shared=0, unclassified=1
+- **L_KAMEN_RIDER_7RIDERS_UJA** L 仮面ライダー 7RIDERS: legacy=1, badgeSplit=0, generic=1, shared=0, unclassified=1
+- **L_KAMEN_RIDER_DEN_O_UD** L 仮面ライダー電王: legacy=0, badgeSplit=9, generic=0, shared=0, unclassified=0
+- **L_INUYASHA2_FK** Ｌ 犬夜叉2: legacy=0, badgeSplit=0, generic=0, shared=4, unclassified=0
+- **L_SHIN_IKKITOUSEN_V** L 真・一騎当千: legacy=0, badgeSplit=4, generic=0, shared=0, unclassified=1
+- **L_ZETTAI_SHOGEKI_PLATONIC_HEART_TK** L 絶対衝激～PLATONIC HEART～: legacy=0, badgeSplit=0, generic=0, shared=0, unclassified=1
+- **L_ZETTAI_SHOGEKI_FORCE_FH** L 絶対衝激Ⅳ: legacy=0, badgeSplit=0, generic=0, shared=0, unclassified=2
+- **L_TOKYO_GHOUL** L 東京喰種: legacy=1, badgeSplit=0, generic=1, shared=0, unclassified=3
+- **LB_SLOT_GALFY_A4** LB スロット GALFY: legacy=0, badgeSplit=1, generic=0, shared=0, unclassified=0
+- **LB_EVA_PROMISE_DOOR_SR** LBパチスロ ヱヴァンゲリヲン ～約束の扉～: legacy=0, badgeSplit=7, generic=1, shared=0, unclassified=2
+- **LB_1000CHAN_ALPHA_L3** LBパチスロ1000ちゃんA: legacy=0, badgeSplit=0, generic=0, shared=0, unclassified=1
+- **L_AKUDAMA_DRIVE_TP** Lアクダマドライブ: legacy=0, badgeSplit=0, generic=0, shared=0, unclassified=5
+- **L_USHIO_TORA_HAKUMEN_VH** Lうしおととら 白面決戦: legacy=0, badgeSplit=0, generic=0, shared=0, unclassified=6
+- **L_ULTRAMAN_TIGA_KA** Lウルトラマンティガ: legacy=1, badgeSplit=0, generic=1, shared=0, unclassified=1
+- **L_GODZILLA_NS** Lゴジラ: legacy=5, badgeSplit=0, generic=0, shared=0, unclassified=7
+- **L_SUPER_BINGO_NEO_SB5** Lスーパービンゴネオ: legacy=0, badgeSplit=0, generic=0, shared=0, unclassified=1
+- **L_STRIKE_WITCHES2_TF** Lストライクウィッチーズ2: legacy=1, badgeSplit=0, generic=1, shared=0, unclassified=1
+- **L_DOUBLE_ATTACK2_EX** Lダブルアタック2 withOZS-1000＆RAPHAEL: legacy=0, badgeSplit=8, generic=0, shared=0, unclassified=0
+- **L_BAKI_L3** Lバキ 強くなりたくば喰らえ!!!: legacy=1, badgeSplit=0, generic=1, shared=0, unclassified=1
+- **L_ARIFURETA_JA** Lパチスロ ありふれた職業で世界最強: legacy=0, badgeSplit=0, generic=0, shared=0, unclassified=1
+- **L_KAGUYA_SAMA_JA** Lパチスロ かぐや様は告らせたい: legacy=0, badgeSplit=0, generic=0, shared=3, unclassified=3
+- **L_DUMBBELL_X** Lパチスロ ダンベル何キロ持てる？: legacy=0, badgeSplit=0, generic=0, shared=0, unclassified=2
+- **L_MACROSS_FRONTIER4_BA** Lパチスロ マクロスフロンティア4: legacy=1, badgeSplit=0, generic=1, shared=0, unclassified=2
+- **L_FIRE_FORCE_2** Lパチスロ 炎炎ノ消防隊2: legacy=0, badgeSplit=0, generic=0, shared=0, unclassified=8
+- **L_KAKUMEIKI_VALVRAVE_2_JF** Lパチスロ 革命機ヴァルヴレイヴ2: legacy=0, badgeSplit=0, generic=0, shared=0, unclassified=2
+- **L_GUNDAM_UNICORN_KAKUSEI_DRIVE_2JA** Lパチスロ 機動戦士ガンダムユニコーン 覚醒DRIVE: legacy=0, badgeSplit=0, generic=0, shared=0, unclassified=3
+- **L_UMINEKO_2_A1** Lパチスロうみねこのなく頃に2: legacy=0, badgeSplit=0, generic=0, shared=0, unclassified=5
+- **L_URUSEI_YATSURA_EV** Lパチスロうる星やつら: legacy=0, badgeSplit=0, generic=0, shared=0, unclassified=1
+- **L_GIRLS_UND_PANZER_FINALE_H1** Lパチスロガールズ＆パンツァー 最終章: legacy=1, badgeSplit=0, generic=1, shared=0, unclassified=1
+- **L_ENEN_NO_SHOUBOUTAI_JG** Lパチスロ炎炎ノ消防隊: legacy=1, badgeSplit=0, generic=1, shared=0, unclassified=1
+- **L_SYMPHOGEAR_SEIGI_JA** Lパチスロ戦姫絶唱シンフォギア 正義の歌: legacy=0, badgeSplit=5, generic=0, shared=0, unclassified=0
+- **L_PACHISLO_SENRAN_KAGURA2_L9** Lパチスロ閃乱カグラ2 SHINOVI MASTER: legacy=0, badgeSplit=0, generic=0, shared=0, unclassified=1
+- **L_BANDORI_S11** Lバンドリ！: legacy=0, badgeSplit=5, generic=0, shared=0, unclassified=1
+- **L_LUPIN_DAIKOUKAISHA_H1** Lルパン三世 大航海者の秘宝: legacy=0, badgeSplit=15, generic=0, shared=0, unclassified=1
+- **L_ONE_PUNCH_MAN** Lワンパンマン: legacy=1, badgeSplit=0, generic=1, shared=0, unclassified=1
+- **L_KEIJI_SADO_ER** L花の慶次〜佐渡攻めの章〜: legacy=1, badgeSplit=0, generic=1, shared=0, unclassified=2
+- **L_KYOKOU_SUIRI_ST** L虚構推理: legacy=0, badgeSplit=0, generic=0, shared=0, unclassified=8
+- **L_ZENIGATA4_L1** L主役は銭形4: legacy=1, badgeSplit=0, generic=1, shared=0, unclassified=1
+- **L_ZENIGATA_5_L2** L主役は銭形5: legacy=0, badgeSplit=0, generic=0, shared=0, unclassified=1
+- **S_REVUE_STARLIGHT_CX** L少女☆歌劇 レヴュースタァライト -The SLOT-: legacy=6, badgeSplit=0, generic=0, shared=0, unclassified=3
+- **L_SEIYA_KAIOU_ED** L聖闘士星矢 海皇覚醒 CUSTOM EDITION: legacy=0, badgeSplit=0, generic=0, shared=0, unclassified=1
+- **L_SENGOKU_OTOME4_S3** L戦国乙女4 戦乱に閃く炯眼の軍師: legacy=1, badgeSplit=0, generic=1, shared=0, unclassified=1
+- **L_GEN_CHOMUGEN_PH** L大工の源さん 超夢源: legacy=1, badgeSplit=0, generic=1, shared=0, unclassified=1
+- **L_HANMA_BAKI_L5** L範馬刃牙: legacy=0, badgeSplit=0, generic=0, shared=0, unclassified=9
+- **LB_FUJIKO_M2** L不二子BT: legacy=0, badgeSplit=9, generic=1, shared=0, unclassified=0
+- **L_MAHJONG_MONOGATARI_S2** L麻雀物語: legacy=0, badgeSplit=0, generic=0, shared=0, unclassified=4
+- **S_BIG_SHIMAUTA_E2_30** S BIG島唄30: legacy=0, badgeSplit=0, generic=0, shared=0, unclassified=1
+- **LB_SHAKE_BONUS_TRIGGER_A1** SHAKE BONUS TRIGGER: legacy=0, badgeSplit=5, generic=0, shared=0, unclassified=0
+- **L_SISTER_QUEST_CA** Sister Quest: legacy=0, badgeSplit=9, generic=0, shared=0, unclassified=3
+- **L_SKY_LOVE_GNB** Sky Love: legacy=1, badgeSplit=0, generic=1, shared=0, unclassified=1
+- **S_MADE_IN_ABYSS_EN** SLOTメイドインアビス: legacy=0, badgeSplit=3, generic=0, shared=0, unclassified=1
+- **S_NINJA_JAJAMARU** SLOT忍者じゃじゃ丸くん: legacy=1, badgeSplit=0, generic=1, shared=0, unclassified=1
+- **S_MOMOKYUN_SWORD_DX** SモモキュンソードDX: legacy=1, badgeSplit=0, generic=0, shared=0, unclassified=0
+- **S_WARAU4_KH** S笑ゥせぇるすまん4: legacy=0, badgeSplit=6, generic=0, shared=0, unclassified=1
+- **S_AOHARU_MISAO_A2** アオハル♪操 A-LIVE: legacy=0, badgeSplit=0, generic=0, shared=0, unclassified=1
+- **S_ANOTHER_GOD_HADES_SL** アナザーゴッドハーデス-解き放たれし槍撃ver.-: legacy=0, badgeSplit=4, generic=0, shared=0, unclassified=1
+- **L_ANIMAL_SLOT_DOCCHI_ZT** アニマルスロット ドッチ: legacy=0, badgeSplit=0, generic=0, shared=0, unclassified=12
+- **LB_CREA_BONUS_TRIGGER_A2** クレアの秘宝伝 〜はじまりの扉と太陽の石〜 ボーナストリガーver.: legacy=0, badgeSplit=8, generic=0, shared=0, unclassified=1
+- **S_SUPER_RIO_ACE_CC** スーパーリオエース: legacy=0, badgeSplit=11, generic=0, shared=0, unclassified=2
+- **S_SUHANA_RISING_PC30** スーハナライジング-30: legacy=0, badgeSplit=0, generic=0, shared=0, unclassified=1
+- **L_AMAZING_LIVE_PD** スマート沖スロ アメイジングライブ: legacy=0, badgeSplit=0, generic=0, shared=0, unclassified=1
+- **L_STAR_HANAHANA_MX** スマート沖スロ スターハナハナ: legacy=1, badgeSplit=0, generic=0, shared=0, unclassified=0
+- **L_DARK_HAIBI_SB** スマート沖スロ ダークハイビ: legacy=0, badgeSplit=0, generic=0, shared=0, unclassified=1
+- **L_CHO_HANAMATSURI_PB** スマート沖スロ 超華祭: legacy=0, badgeSplit=9, generic=0, shared=0, unclassified=1
+- **L_BIRDIE_WING_BC** スマスロ BIRDIE WING -Golf Girls' Story-: legacy=0, badgeSplit=0, generic=0, shared=0, unclassified=11
+- **L_IDOLMASTER_MILLION_LIVE_HC** スマスロ アイドルマスター ミリオンライブ！ ネクストプロローグ: legacy=0, badgeSplit=0, generic=0, shared=0, unclassified=6
+- **L_GUILTY_CROWN_2_XF** スマスロ ギルティクラウン2: legacy=0, badgeSplit=0, generic=0, shared=0, unclassified=2
+- **L_GEGEGE_NO_KITARO_KAKUSEI_JC** スマスロ ゲゲゲの鬼太郎 覚醒: legacy=0, badgeSplit=0, generic=0, shared=0, unclassified=1
+- **L_CODE_GEASS_REVIVAL_ZS** スマスロ コードギアス反逆のルルーシュ／復活のルルーシュ: legacy=1, badgeSplit=0, generic=1, shared=0, unclassified=1
+- **L_GOLDEN_KAMUY_KR** スマスロ ゴールデンカムイ: legacy=1, badgeSplit=0, generic=1, shared=0, unclassified=1
+- **L_GOD_EATER_RESURRECTION** スマスロ ゴッドイーター リザレクション: legacy=1, badgeSplit=0, generic=1, shared=0, unclassified=1
+- **L_GOBLIN_SLAYER_2_JZ** スマスロ ゴブリンスレイヤーⅡ: legacy=0, badgeSplit=0, generic=0, shared=0, unclassified=10
+- **LB_THUNDER_V_HA** スマスロ サンダーV: legacy=0, badgeSplit=3, generic=0, shared=0, unclassified=0
+- **L_SHAMANKING_SS** スマスロ シャーマンキング: legacy=0, badgeSplit=0, generic=0, shared=0, unclassified=1
+- **L_STRIKE_THE_BLOOD_ZC** スマスロ ストライク・ザ・ブラッド: legacy=0, badgeSplit=0, generic=0, shared=0, unclassified=1
+- **L_DMC5_ST_XA** スマスロ デビル メイ クライ5 スタイリッシュトライブ: legacy=0, badgeSplit=0, generic=0, shared=0, unclassified=1
+- **L_TOARU_KAGAKU_NO_RAILGUN_2_FV** スマスロ とある科学の超電磁砲2: legacy=0, badgeSplit=0, generic=0, shared=0, unclassified=1
+- **L_TOARU_INDEX_JC** スマスロ とある魔術の禁書目録: legacy=1, badgeSplit=0, generic=1, shared=0, unclassified=1
+- **L_TOARU_INDEX2_FA** スマスロ とある魔術の禁書目録2: legacy=0, badgeSplit=0, generic=0, shared=0, unclassified=9
+- **L_DRUAGA_NO_TOU_ZA** スマスロ ドルアーガの塔: legacy=0, badgeSplit=0, generic=0, shared=0, unclassified=1
+- **L_TONDEMO_SKILL_KM** スマスロ とんでもスキルで異世界放浪メシ: legacy=3, badgeSplit=0, generic=0, shared=0, unclassified=7
+- **L_BIOHAZARD_VENDETTA_FK** スマスロ バイオハザード:ヴェンデッタ: legacy=1, badgeSplit=0, generic=1, shared=0, unclassified=1
+- **L_BIOHAZARD5_ZE** スマスロ バイオハザード5: legacy=0, badgeSplit=12, generic=0, shared=0, unclassified=1
+- **L_BIOHAZARD_VILLAGE_XA** スマスロ バイオハザードヴィレッジ: legacy=1, badgeSplit=0, generic=1, shared=0, unclassified=1
+- **L_HANABI_KM** スマスロ ハナビ（未調査版）: legacy=0, badgeSplit=1, generic=0, shared=0, unclassified=0
+- **L_BIG_DREAM_GOLDEN_PUSHER_KR** スマスロ ビッグドリーム THE GOLDEN PUSHER: legacy=0, badgeSplit=0, generic=0, shared=0, unclassified=7
+- **L_MAGIA_RECORD_RN** スマスロ マギアレコード 魔法少女まどか☆マギカ外伝: legacy=4, badgeSplit=0, generic=0, shared=0, unclassified=16
+- **L_MILLION_GOD_KISEKI_CX** スマスロ ミリオンゴッド-神々の軌跡-: legacy=0, badgeSplit=0, generic=0, shared=0, unclassified=5
+- **L_MONSTER_HUNTER_RISE_XA** スマスロ モンスターハンターライズ: legacy=0, badgeSplit=20, generic=0, shared=0, unclassified=2
+- **L_YAJIKITA_MAIRU_BG** スマスロ やじきた道中記参る！: legacy=0, badgeSplit=0, generic=0, shared=0, unclassified=3
+- **L_YOUJITSU_DE** スマスロ ようこそ実力至上主義の教室へ: legacy=0, badgeSplit=0, generic=0, shared=0, unclassified=7
+- **L_TOARU_ACCELERATOR_RZ** スマスロ 一方通行 とある魔術の禁書目録: legacy=0, badgeSplit=0, generic=0, shared=0, unclassified=1
+- **L_SMASLO_BAKEMONOGATARI_KH** スマスロ 化物語: legacy=1, badgeSplit=0, generic=1, shared=0, unclassified=0
+- **L_ONIMUSHA3_XA** スマスロ 鬼武者3: legacy=0, badgeSplit=0, generic=0, shared=0, unclassified=1
+- **L_GHOST_IN_THE_SHELL_ZS** スマスロ 攻殻機動隊: legacy=0, badgeSplit=0, generic=0, shared=0, unclassified=1
+- **L_KABANERI_UNATO_KESSEN_XX** スマスロ 甲鉄城のカバネリ 海門（うなと）決戦: legacy=0, badgeSplit=0, generic=0, shared=0, unclassified=2
+- **L_SHIN_ONIMUSHA_3_SA** スマスロ 新鬼武者3: legacy=0, badgeSplit=0, generic=0, shared=0, unclassified=1
+- **L_SMASLO_DUNBINE_MF** スマスロ 聖戦士ダンバイン: legacy=0, badgeSplit=24, generic=0, shared=0, unclassified=4
+- **L_SENGOKU_BASARA_GIGA_ZE** スマスロ 戦国BASARA GIGA: legacy=1, badgeSplit=0, generic=1, shared=0, unclassified=1
+- **L_HIHODEN_PA7** スマスロ 秘宝伝: legacy=0, badgeSplit=0, generic=0, shared=0, unclassified=3
+- **L_MIDORIDON_VIVA_REVIVAL_FY** スマスロ 緑ドン VIVA!情熱南米編 REVIVAL: legacy=0, badgeSplit=0, generic=0, shared=0, unclassified=7
+- **L_KING_PULSAR_SLCC** スマスロキングパルサー: legacy=1, badgeSplit=0, generic=1, shared=0, unclassified=1
+- **L_KINNIKUMAN4_SLDC** スマスロキン肉マン～7人の悪魔超人編～: legacy=1, badgeSplit=0, generic=1, shared=0, unclassified=1
+- **LB_KELLOT_5_ND05H** スマスロケロット5BT（スロプラNEXT未調査）: legacy=0, badgeSplit=12, generic=0, shared=0, unclassified=2
+- **L_NEO_PLANET_SLED** スマスロネオプラネット: legacy=0, badgeSplit=0, generic=0, shared=0, unclassified=2
+- **L_BASILISK_KIZUNA2_TENZEN_ZN** スマスロバジリスク～甲賀忍法帖～絆2 天膳 BLACK EDITION: legacy=1, badgeSplit=0, generic=1, shared=0, unclassified=1
+- **L_MONKEY_TURN5_CE** スマスロモンキーターンV: legacy=1, badgeSplit=0, generic=1, shared=0, unclassified=1
+- **L_JORMUNGAND_ND01G** スマスロヨルムンガンド: legacy=0, badgeSplit=0, generic=0, shared=0, unclassified=4
+- **L_ANOTHER_RINO_HEAVEN_CC** スマスロリノヘブン（未調査版）: legacy=0, badgeSplit=4, generic=0, shared=0, unclassified=0
+- **L_MADOKA_FORTE_UU** スマスロ劇場版 魔法少女まどか☆マギカ[前編]始まりの物語／[後編]永遠の物語f-フォルテ-: legacy=2, badgeSplit=0, generic=1, shared=0, unclassified=1
+- **L_EUREKA_SEVEN4_HIEVO_KX** スマスロ交響詩篇エウレカセブン4 HI-EVOLUTION: legacy=1, badgeSplit=0, generic=1, shared=0, unclassified=1
+- **L_HOKUTO_MUSOU_FS** スマスロ真・北斗無双: legacy=0, badgeSplit=8, generic=0, shared=0, unclassified=0
+- **L_BOFURI_FN** スマスロ痛いのは嫌なので防御力に極振りしたいと思います。: legacy=0, badgeSplit=5, generic=0, shared=0, unclassified=0
+- **L_TENSURA_CD** スマスロ転生したらスライムだった件: legacy=1, badgeSplit=0, generic=1, shared=0, unclassified=1
+- **L_INITIAL_D_2ND** スマスロ頭文字D 2nd: legacy=0, badgeSplit=0, generic=0, shared=0, unclassified=2
+- **L_HOKUTO_AD_XR** スマスロ北斗の拳: legacy=1, badgeSplit=0, generic=1, shared=0, unclassified=1
+- **L_REZERO_SEASON2_PA5** スロット Re:ゼロから始める異世界生活 season2: legacy=0, badgeSplit=8, generic=0, shared=0, unclassified=1
+- **L_SAO_B2** スロット ソードアート・オンライン: legacy=1, badgeSplit=0, generic=1, shared=0, unclassified=0
+- **L_ZOMBIE_LAND_SAGA** スロット ゾンビランドサガ: legacy=1, badgeSplit=0, generic=1, shared=0, unclassified=1
+- **L_WORLD_DAI_STAR_PA3** スロット ワールドダイスター: legacy=4, badgeSplit=0, generic=0, shared=0, unclassified=4
+- **L_SAEKANO_SA3** スロット 冴えない彼女の育てかた: legacy=1, badgeSplit=0, generic=1, shared=0, unclassified=1
+- **S_SLODOL_PK** スロドル: legacy=0, badgeSplit=8, generic=0, shared=0, unclassified=1
+- **L_TIDADONDON_PA5** てぃだどんどん: legacy=0, badgeSplit=3, generic=0, shared=0, unclassified=1
+- **S_HAIBI_RETURN_PA30** ハイビリターン-30: legacy=1, badgeSplit=0, generic=1, shared=0, unclassified=1
+- **S_BOOWY_SV** パチスロ BOØWY: legacy=0, badgeSplit=0, generic=0, shared=0, unclassified=1
+- **S_GAMERA2** パチスロ ガメラ2: legacy=1, badgeSplit=5, generic=1, shared=0, unclassified=1
+- **L_KARAKURI_CIRCUS_G** パチスロ からくりサーカス: legacy=1, badgeSplit=0, generic=1, shared=0, unclassified=1
+- **L_KENGAN_ASHURA_ND** パチスロ ケンガンアシュラ: legacy=1, badgeSplit=0, generic=1, shared=0, unclassified=1
+- **S_CODE_GEASS_3_CC_FS** パチスロ コードギアス 反逆のルルーシュ3 C.C.&Kallen ver.: legacy=1, badgeSplit=0, generic=1, shared=0, unclassified=0
+- **L_NYANKO_BIGBANG_MK** ぱちスロ にゃんこ大戦争 BIGBANG: legacy=1, badgeSplit=0, generic=1, shared=0, unclassified=1
+- **S_BIOHAZARD_RE2_XB** パチスロ バイオハザード RE:2: legacy=0, badgeSplit=8, generic=0, shared=0, unclassified=1
+- **S_FIRE_DRIFT** パチスロ ファイヤードリフト: legacy=1, badgeSplit=0, generic=1, shared=0, unclassified=1
+- **S_MHW_ICEBORNE_ZF** パチスロ モンスターハンターワールド：アイスボーンTM: legacy=0, badgeSplit=0, generic=0, shared=1, unclassified=1
+- **L_VALVRAVE_D** パチスロ 革命機ヴァルヴレイヴ: legacy=1, badgeSplit=0, generic=1, shared=0, unclassified=1
+- **S_SHIN_ORE_NO_SORA_ST** パチスロ 真俺の空: legacy=1, badgeSplit=0, generic=0, shared=0, unclassified=0
+- **S_MILKY_HOMES_GNB** パチスロ 探偵オペラ ミルキィホームズR 大収穫祭!!!!: legacy=0, badgeSplit=0, generic=0, shared=6, unclassified=1
+- **L_NOGIZAKA46_UD** ぱちスロ 乃木坂46: legacy=1, badgeSplit=0, generic=1, shared=0, unclassified=1
+- **S_HIDAN_NO_ARIA_II_JZ** パチスロ 緋弾のアリアⅡ: legacy=0, badgeSplit=0, generic=0, shared=0, unclassified=1
+- **S_MAHOIKU_NB** パチスロ 魔法少女育成計画: legacy=0, badgeSplit=0, generic=0, shared=0, unclassified=1
+- **L_KOMONCHAMA_TEN_L2** パチスロL黄門ちゃま天: legacy=0, badgeSplit=0, generic=0, shared=0, unclassified=1
+- **S_OVERLORD_II_SX** パチスロOVERLORD絶対支配者光臨Ⅱ: legacy=0, badgeSplit=11, generic=0, shared=0, unclassified=3
+- **S_HARD_BOILED_XX** パチスロハードボイルド: legacy=1, badgeSplit=0, generic=1, shared=0, unclassified=1
+- **S_HYPER_RUSH_SLC8** パチスロハイパーラッシュ: legacy=1, badgeSplit=0, generic=1, shared=0, unclassified=1
+- **S_PERSONA5_FR** パチスロペルソナ5: legacy=0, badgeSplit=7, generic=0, shared=0, unclassified=0
+- **S_RAKUEN_TSUHO_FS** パチスロ楽園追放: legacy=0, badgeSplit=0, generic=0, shared=0, unclassified=1
+- **S_GUNDAM_UNICORN_SF** パチスロ機動戦士ガンダムユニコーン: legacy=0, badgeSplit=9, generic=0, shared=0, unclassified=2
+- **S_KABANERI_ZR** パチスロ甲鉄城のカバネリ: legacy=1, badgeSplit=0, generic=1, shared=0, unclassified=1
+- **S_TATE_NO_YUSHA_KS** パチスロ盾の勇者の成り上がり: legacy=0, badgeSplit=0, generic=0, shared=0, unclassified=2
+- **S_KIZUMONOGATARI_FS** パチスロ傷物語 始マリノ刻: legacy=0, badgeSplit=0, generic=0, shared=0, unclassified=2
+- **S_SENGOKU_MUSOU3_ZYTCD** パチスロ戦国無双3: legacy=0, badgeSplit=0, generic=0, shared=0, unclassified=1
+- **S_FAMISTA_KAIDO_FB** ファミスタ回胴版!!: legacy=0, badgeSplit=0, generic=0, shared=0, unclassified=1
+- **L_PRISM_NANA_CC** プリズムナナ: legacy=2, badgeSplit=0, generic=0, shared=0, unclassified=8
+- **LB_MAGICAL_HALLOWEEN_GS** マジカルハロウィン ボーナストリガー: legacy=0, badgeSplit=2, generic=0, shared=0, unclassified=1
+- **L_MAGICAL_HALLOWEEN8_FE** マジカルハロウィン8: legacy=1, badgeSplit=0, generic=1, shared=0, unclassified=1
+- **L_OSU_BANCHO4_A3** 押忍！番長4: legacy=1, badgeSplit=0, generic=1, shared=0, unclassified=1
+- **S_GRANBELM_ZX** 回胴式遊技機 グランベルム: legacy=0, badgeSplit=1, generic=0, shared=0, unclassified=1
+- **L_YOSHIMUNE_SC2** 吉宗: legacy=0, badgeSplit=0, generic=0, shared=0, unclassified=5
+- **L_YOSHIMUNE_RISING_SA2** 吉宗RISING: legacy=1, badgeSplit=0, generic=1, shared=0, unclassified=1
+- **L_KYOUKARA_OREHA_FE** 今日から俺は!!　パチスロ編: legacy=0, badgeSplit=0, generic=0, shared=0, unclassified=1
+- **L_NANATSU_NO_MAKEN_PU** 七つの魔剣が支配する: legacy=1, badgeSplit=0, generic=0, shared=0, unclassified=0
+- **L_BOUNTY_ANGEL** 賞金首Angel: legacy=1, badgeSplit=0, generic=1, shared=0, unclassified=1
+- **L_SHINUCHI_YOSHIMUNE_A1** 真打 吉宗: legacy=0, badgeSplit=0, generic=0, shared=0, unclassified=7
+- **S_SENGOKU_COLLECTION5_PS** 戦国コレクション5: legacy=0, badgeSplit=6, generic=0, shared=0, unclassified=1
+- **L_SENGOKU_COLLECTION6_KS** 戦国コレクション6: legacy=0, badgeSplit=0, generic=0, shared=0, unclassified=7
+- **L_MOMOTARO_DENTETSU_TEIBAN_PU** 桃太郎電鉄 ～パチスロも定番！～: legacy=0, badgeSplit=5, generic=0, shared=0, unclassified=0
+- **L_SHINOBIDAMASHII3_A3** 忍魂参 ～奥義皆伝ノ章～: legacy=1, badgeSplit=0, generic=1, shared=0, unclassified=1
+- **L_LOVEKYURE2_PS** 防空少女ラブキューレ2〜極限の共鳴〜: legacy=1, badgeSplit=0, generic=1, shared=0, unclassified=1
+- **L_MAHJONG_FIGHT_CLUB_KAKUSEI_KM** 麻雀格闘倶楽部 覚醒: legacy=1, badgeSplit=0, generic=1, shared=0, unclassified=1
+- **LB_TOBE_HAREM_ACE_CF** 翔べ！ハーレムエース: legacy=0, badgeSplit=4, generic=0, shared=0, unclassified=0
