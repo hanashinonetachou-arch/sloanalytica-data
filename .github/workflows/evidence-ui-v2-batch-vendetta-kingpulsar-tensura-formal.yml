@@ -1,4 +1,4 @@
-name: Evidence UI v2 Formal Migration Batch 4
+name: Evidence UI v2 Formal Migration Batch 5
 
 on:
   push:
@@ -22,42 +22,53 @@ jobs:
         with:
           node-version: 22
       - name: Canonicalize Evidence UI v2 batch
-        run: node tools/migrate-evidence-ui-v2-batch4.mjs
+        run: node tools/migrate-evidence-ui-v2-batch5.mjs
       - name: Validate canonical layers
         run: |
-          for id in L_KINNIKUMAN4_SLDC L_SAEKANO_SA3 L_KARAKURI_CIRCUS_G L_YOSHIMUNE_RISING_SA2; do
+          for id in L_NYANKO_BIGBANG_MK L_NOGIZAKA46_UD L_VALVRAVE_D L_SHINOBIDAMASHII3_A3; do
             node tools/validate-selection-data.mjs research/$id/selection-data.json research/$id/research-data.json
             node tools/validate-machine-observation-data.mjs research/$id/machine-observation-data.json
           done
           node tools/validate-ui-design-data.mjs .
-          for id in L_KINNIKUMAN4_SLDC L_SAEKANO_SA3 L_KARAKURI_CIRCUS_G L_YOSHIMUNE_RISING_SA2; do
+          for id in L_NYANKO_BIGBANG_MK L_NOGIZAKA46_UD L_VALVRAVE_D L_SHINOBIDAMASHII3_A3; do
             node tools/audit-ui-design-observation-linkage.mjs $id --strict-v2
             node tools/four-layer-pipeline-gate.mjs $id
           done
       - name: Check MachineData regeneration without writing
         run: |
-          for id in L_KINNIKUMAN4_SLDC L_SAEKANO_SA3 L_KARAKURI_CIRCUS_G L_YOSHIMUNE_RISING_SA2; do npm run machine:pipeline -- $id --check --skip-repo-checks; done
+          for id in L_NYANKO_BIGBANG_MK L_NOGIZAKA46_UD L_VALVRAVE_D L_SHINOBIDAMASHII3_A3; do npm run machine:pipeline -- $id --check --skip-repo-checks; done
       - name: Materialize formal MachineData
         run: |
-          for id in L_KINNIKUMAN4_SLDC L_SAEKANO_SA3 L_KARAKURI_CIRCUS_G L_YOSHIMUNE_RISING_SA2; do npm run machine:pipeline -- $id --skip-repo-checks; done
+          for id in L_NYANKO_BIGBANG_MK L_NOGIZAKA46_UD L_VALVRAVE_D L_SHINOBIDAMASHII3_A3; do npm run machine:pipeline -- $id --skip-repo-checks; done
       - name: Validate all Evidence UI
         run: node tools/validate-evidence-ui-all.mjs
       - name: Re-run gates
         run: |
           node tools/validate-ui-design-data.mjs .
-          for id in L_KINNIKUMAN4_SLDC L_SAEKANO_SA3 L_KARAKURI_CIRCUS_G L_YOSHIMUNE_RISING_SA2; do
+          for id in L_NYANKO_BIGBANG_MK L_NOGIZAKA46_UD L_VALVRAVE_D L_SHINOBIDAMASHII3_A3; do
             node tools/audit-ui-design-observation-linkage.mjs $id --strict-v2
             node tools/four-layer-pipeline-gate.mjs $id
           done
+      - name: Assert generated artifacts are present
+        run: |
+          for id in L_NYANKO_BIGBANG_MK L_NOGIZAKA46_UD L_VALVRAVE_D L_SHINOBIDAMASHII3_A3; do
+            test -s machines/$id/machine-package.json
+            test -s research/$id/statistics-report.json
+            test -s research/$id/difficulty-report.json
+            test -s research/$id/setting-band-report.json
+          done
+          test -s catalog.json
+          test -s difficulty-catalog.json
+          test -s machine-registry.json
       - name: Commit canonical and generated artifacts
         run: |
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          for id in L_KINNIKUMAN4_SLDC L_SAEKANO_SA3 L_KARAKURI_CIRCUS_G L_YOSHIMUNE_RISING_SA2; do
+          for id in L_NYANKO_BIGBANG_MK L_NOGIZAKA46_UD L_VALVRAVE_D L_SHINOBIDAMASHII3_A3; do
             git add research/$id/selection-data.json research/$id/ui-design-data.json
             git add machines/$id/machine-package.json research/$id/statistics-report.json research/$id/difficulty-report.json research/$id/setting-band-report.json || true
           done
           git add catalog.json difficulty-catalog.json machine-registry.json || true
           git diff --cached --quiet && exit 0
-          git commit -m 'evidence-ui: formalize Kinnikuman Saekano Karakuri and Yoshimune evidence'
+          git commit -m 'evidence-ui: formalize Nyanko Nogizaka Valvrave and Shinobi evidence'
           git push origin HEAD:audit/evidence-ui-v2-phase2-20260914
