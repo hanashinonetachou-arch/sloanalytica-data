@@ -3,7 +3,7 @@
   "machine": {
     "schemaVersion": "2.0.0",
     "machineId": "L_MUSHOKU_TENSEI_NM",
-    "machineDataVersion": "0.2.5",
+    "machineDataVersion": "0.2.6",
     "displayName": "L 無職転生 ～異世界行ったら本気だす～",
     "modelName": "L無職転生～異世界行ったら本気だす～NM",
     "manufacturer": "ニューギン",
@@ -19,7 +19,10 @@
       "offlineCapable": true,
       "containsImages": false,
       "containsExecutableCode": false
-    }
+    },
+    "introductionDate": "2025-12-22",
+    "machineType": "SMART_SLOT",
+    "gameType": "AT"
   },
   "inputs": {
     "schemaVersion": "2.0.0",
@@ -368,8 +371,8 @@
         "reliabilityProfile": {
           "weight": 1
         },
-        "numeratorInputId": "INP_AT_FIRST_HITS",
         "denominatorInputId": "INP_NORMAL_GAMES",
+        "numeratorInputId": "INP_AT_FIRST_HITS",
         "displayFormat": "ratio_1_over_n",
         "probabilities": {
           "SET_1": 0.002403846153846154,
@@ -397,8 +400,8 @@
         "reliabilityProfile": {
           "weight": 0.8
         },
-        "numeratorInputId": "INP_HITOGAMI_SUCCESSES",
         "denominatorInputId": "INP_HITOGAMI_ENTRIES",
+        "numeratorInputId": "INP_HITOGAMI_SUCCESSES",
         "displayFormat": "ratio_1_over_n",
         "probabilities": {
           "SET_1": 0.318,
@@ -424,10 +427,10 @@
         "minimumSample": 30,
         "sampleRecommendation": 100,
         "reliabilityProfile": {
-          "weight": 0.9
+          "weight": 1
         },
-        "numeratorInputId": "INP_SHIRONE_TRANSITIONS",
         "denominatorInputId": "INP_STAGE_CHANGES_VALID",
+        "numeratorInputId": "INP_SHIRONE_TRANSITIONS",
         "displayFormat": "ratio_1_over_n",
         "probabilities": {
           "SET_1": 0.0625,
@@ -989,7 +992,7 @@
   "ui": {
     "sections": [
       {
-        "id": "AUTO_______",
+        "id": "UI_DESIGN_1",
         "title": "基本ゲーム数",
         "displayOrder": 1,
         "items": [
@@ -1002,7 +1005,7 @@
         ]
       },
       {
-        "id": "AUTO_AT___",
+        "id": "UI_DESIGN_2",
         "title": "AT初当り",
         "displayOrder": 2,
         "items": [
@@ -1015,7 +1018,7 @@
         ]
       },
       {
-        "id": "AUTO____CZ",
+        "id": "UI_DESIGN_3",
         "title": "前兆・CZ",
         "displayOrder": 3,
         "items": [
@@ -1023,18 +1026,26 @@
             "type": "input",
             "inputId": "INP_HITOGAMI_ENTRIES",
             "label": "ヒトガミの空間突入回数",
-            "widget": "counter"
+            "widget": "counter",
+            "gridSpan": 6,
+            "config": {
+              "compact": true
+            }
           },
           {
             "type": "input",
             "inputId": "INP_HITOGAMI_SUCCESSES",
             "label": "ヒトガミの空間本前兆（成功）回数",
-            "widget": "counter"
+            "widget": "counter",
+            "gridSpan": 6,
+            "config": {
+              "compact": true
+            }
           }
         ]
       },
       {
-        "id": "AUTO_______",
+        "id": "UI_DESIGN_4",
         "title": "ステージ移行",
         "displayOrder": 4,
         "items": [
@@ -1042,18 +1053,26 @@
             "type": "input",
             "inputId": "INP_STAGE_CHANGES_VALID",
             "label": "有効ステージチェンジ回数",
-            "widget": "counter"
+            "widget": "counter",
+            "gridSpan": 6,
+            "config": {
+              "compact": true
+            }
           },
           {
             "type": "input",
             "inputId": "INP_SHIRONE_TRANSITIONS",
             "label": "シーローン王国移行回数",
-            "widget": "counter"
+            "widget": "counter",
+            "gridSpan": 6,
+            "config": {
+              "compact": true
+            }
           }
         ]
       },
       {
-        "id": "AUTO________",
+        "id": "UI_DESIGN_5",
         "title": "確定・否定情報",
         "displayOrder": 5,
         "items": [
@@ -1115,7 +1134,7 @@
       {
         "featureId": "FEAT_HITOGAMI_SPACE_PREMONITION_SUCCESS_RATE",
         "name": "ヒトガミの空間本前兆期待度",
-        "reason": "設定1の31.8%に対して設定6は41.0%で、本前兆期待度は約1.29倍です。ヒトガミの空間への突入率にはほとんど設定差がないため、突入後の結果だけを補助項目に採用しています。",
+        "reason": "設定1の31.8%に対して設定6は41.0%で、本前兆期待度に設定差があります。ただし本前兆成功はボーナス当選へつながり、採用済みAT初当りと下流経路の一部を共有するため、独立証拠として過大評価しないようweight 0.8で補助採用します。",
         "requiredTrials": {
           "value": 200,
           "unit": "ヒトガミの空間突入1回"
@@ -1124,7 +1143,7 @@
       {
         "featureId": "FEAT_SHIRONE_KINGDOM_TRANSITION_RATE",
         "name": "シーローン王国移行率",
-        "reason": "設定1の6.25%に対して設定6は10.94%で、移行率は約1.75倍です。ステージチェンジの発生率自体にはほとんど設定差がないため、発生回数ではなく移行先を主要項目に採用しています。",
+        "reason": "ヒトガミ非移行時の有効ステージ移行を分母とした条件付き振り分けで、設定1の6.25%から設定6の10.94%まで明確な差があるため採用します。除外条件を適用した有効試行だけを入力して評価します。",
         "requiredTrials": {
           "value": 258,
           "unit": "有効ステージ移行1回"
@@ -1135,7 +1154,7 @@
       {
         "featureId": "FEAT_HITOGAMI_SPACE_ENTRY_RATE",
         "name": "ヒトガミの空間突入率",
-        "reason": "設定差が小さい。",
+        "reason": "ヒトガミの空間突入率は単独尤度にせず、突入後の本前兆成功率の試行機会（Exposure）として利用する。同じ突入事象を両方の独立Featureで使うと重複評価になるため不採用。",
         "requiredTrials": {
           "value": 1705722,
           "unit": "通常時対象1G"
@@ -1154,7 +1173,10 @@
       "SET_4",
       "SET_5",
       "SET_6"
-    ]
+    ],
+    "uiDesignMaterialized": true,
+    "uiDesignSchemaVersion": "ui-design-data-v1",
+    "uiDesignStatus": "PASS"
   },
   "validation": {
     "cases": []
