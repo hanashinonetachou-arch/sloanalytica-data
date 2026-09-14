@@ -12,6 +12,7 @@ on:
       - tools/plan-evidence-ui-v2-migration.mjs
       - tools/pilot-evidence-ui-v2-g1-gold.mjs
       - tools/audit-evidence-ui-v2-dry-run-all.mjs
+      - tools/finalize-evidence-ui-v2-promotion-readiness.mjs
       - .github/workflows/evidence-ui-v2-phase2-audit.yml
   workflow_dispatch:
 
@@ -72,6 +73,11 @@ jobs:
         continue-on-error: true
         run: node tools/audit-evidence-ui-v2-dry-run-all.mjs
 
+      - name: Gate promotion-ready subset
+        id: promotion_readiness
+        continue-on-error: true
+        run: node tools/finalize-evidence-ui-v2-promotion-readiness.mjs
+
       - name: Show audit summaries
         if: always()
         run: |
@@ -81,6 +87,7 @@ jobs:
           echo "migration plan outcome: ${{ steps.migration_plan.outcome }}"
           echo "G1 pilot outcome: ${{ steps.g1_pilot.outcome }}"
           echo "all-ready dry-run outcome: ${{ steps.dry_run_all.outcome }}"
+          echo "promotion readiness outcome: ${{ steps.promotion_readiness.outcome }}"
           echo
           cat audit-reports/evidence-ui-v2-phase2-breakdowns.md || true
           echo
@@ -91,6 +98,8 @@ jobs:
           cat audit-reports/evidence-ui-v2-pilot-L_G1_YUSHUN_CLUB_GOLD_KD.md || true
           echo
           cat audit-reports/evidence-ui-v2-phase2-dry-run-all.md || true
+          echo
+          cat audit-reports/evidence-ui-v2-phase2-promotion-readiness.md || true
 
       - name: Upload audit report
         if: always()
@@ -116,7 +125,7 @@ jobs:
             echo 'No report changes.'
             exit 0
           fi
-          git commit -m 'audit: record Evidence UI v2 all-ready dry-run'
+          git commit -m 'audit: record Evidence UI v2 promotion readiness'
           git push origin HEAD:audit/evidence-ui-v2-phase2-20260914
 
       - name: Enforce audit outcomes
@@ -129,4 +138,5 @@ jobs:
           if [ "${{ steps.migration_plan.outcome }}" != "success" ]; then failed=1; fi
           if [ "${{ steps.g1_pilot.outcome }}" != "success" ]; then failed=1; fi
           if [ "${{ steps.dry_run_all.outcome }}" != "success" ]; then failed=1; fi
+          if [ "${{ steps.promotion_readiness.outcome }}" != "success" ]; then failed=1; fi
           exit "$failed"
