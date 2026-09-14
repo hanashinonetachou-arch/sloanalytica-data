@@ -11,6 +11,7 @@ on:
       - tools/triage-evidence-ui-v2-reopen.mjs
       - tools/plan-evidence-ui-v2-migration.mjs
       - tools/pilot-evidence-ui-v2-g1-gold.mjs
+      - tools/audit-evidence-ui-v2-dry-run-all.mjs
       - .github/workflows/evidence-ui-v2-phase2-audit.yml
   workflow_dispatch:
 
@@ -66,6 +67,11 @@ jobs:
         continue-on-error: true
         run: node tools/pilot-evidence-ui-v2-g1-gold.mjs
 
+      - name: Audit all ready migrations in dry-run mode
+        id: dry_run_all
+        continue-on-error: true
+        run: node tools/audit-evidence-ui-v2-dry-run-all.mjs
+
       - name: Show audit summaries
         if: always()
         run: |
@@ -74,8 +80,7 @@ jobs:
           echo "reopen triage outcome: ${{ steps.reopen_triage.outcome }}"
           echo "migration plan outcome: ${{ steps.migration_plan.outcome }}"
           echo "G1 pilot outcome: ${{ steps.g1_pilot.outcome }}"
-          echo
-          cat audit-reports/evidence-ui-v2-phase2.md
+          echo "all-ready dry-run outcome: ${{ steps.dry_run_all.outcome }}"
           echo
           cat audit-reports/evidence-ui-v2-phase2-breakdowns.md || true
           echo
@@ -85,7 +90,7 @@ jobs:
           echo
           cat audit-reports/evidence-ui-v2-pilot-L_G1_YUSHUN_CLUB_GOLD_KD.md || true
           echo
-          cat audit-reports/evidence-validator-all.md || true
+          cat audit-reports/evidence-ui-v2-phase2-dry-run-all.md || true
 
       - name: Upload audit report
         if: always()
@@ -93,14 +98,8 @@ jobs:
         with:
           name: evidence-ui-v2-phase2-audit
           path: |
-            audit-reports/evidence-ui-v2-phase2.json
-            audit-reports/evidence-ui-v2-phase2.md
-            audit-reports/evidence-ui-v2-phase2-breakdowns.json
-            audit-reports/evidence-ui-v2-phase2-breakdowns.md
-            audit-reports/evidence-ui-v2-phase2-triage.json
-            audit-reports/evidence-ui-v2-phase2-triage.md
-            audit-reports/evidence-ui-v2-phase2-migration-plan.json
-            audit-reports/evidence-ui-v2-phase2-migration-plan.md
+            audit-reports/evidence-ui-v2-phase2*.json
+            audit-reports/evidence-ui-v2-phase2*.md
             audit-reports/evidence-ui-v2-pilot-L_G1_YUSHUN_CLUB_GOLD_KD.json
             audit-reports/evidence-ui-v2-pilot-L_G1_YUSHUN_CLUB_GOLD_KD.md
             audit-reports/evidence-validator-all.json
@@ -110,36 +109,14 @@ jobs:
       - name: Commit generated audit reports
         if: always()
         run: |
-          REPORTS=(
-            audit-reports/evidence-ui-v2-phase2.json
-            audit-reports/evidence-ui-v2-phase2.md
-            audit-reports/evidence-ui-v2-phase2-breakdowns.json
-            audit-reports/evidence-ui-v2-phase2-breakdowns.md
-            audit-reports/evidence-ui-v2-phase2-triage.json
-            audit-reports/evidence-ui-v2-phase2-triage.md
-            audit-reports/evidence-ui-v2-phase2-migration-plan.json
-            audit-reports/evidence-ui-v2-phase2-migration-plan.md
-            audit-reports/evidence-ui-v2-pilot-L_G1_YUSHUN_CLUB_GOLD_KD.json
-            audit-reports/evidence-ui-v2-pilot-L_G1_YUSHUN_CLUB_GOLD_KD.md
-            audit-reports/evidence-validator-all.json
-            audit-reports/evidence-validator-all.md
-          )
-          EXISTING=()
-          for f in "${REPORTS[@]}"; do
-            if [ -f "$f" ]; then EXISTING+=("$f"); fi
-          done
-          if [ ${#EXISTING[@]} -eq 0 ]; then
-            echo 'No generated report files.'
-            exit 0
-          fi
-          if [ -z "$(git status --porcelain -- "${EXISTING[@]}")" ]; then
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add audit-reports/evidence-ui-v2-phase2*.json audit-reports/evidence-ui-v2-phase2*.md audit-reports/evidence-ui-v2-pilot-L_G1_YUSHUN_CLUB_GOLD_KD.json audit-reports/evidence-ui-v2-pilot-L_G1_YUSHUN_CLUB_GOLD_KD.md audit-reports/evidence-validator-all.json audit-reports/evidence-validator-all.md
+          if git diff --cached --quiet; then
             echo 'No report changes.'
             exit 0
           fi
-          git config user.name 'github-actions[bot]'
-          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add "${EXISTING[@]}"
-          git commit -m 'audit: record Evidence UI v2 GI Gold dry-run pilot'
+          git commit -m 'audit: record Evidence UI v2 all-ready dry-run'
           git push origin HEAD:audit/evidence-ui-v2-phase2-20260914
 
       - name: Enforce audit outcomes
@@ -151,4 +128,5 @@ jobs:
           if [ "${{ steps.reopen_triage.outcome }}" != "success" ]; then failed=1; fi
           if [ "${{ steps.migration_plan.outcome }}" != "success" ]; then failed=1; fi
           if [ "${{ steps.g1_pilot.outcome }}" != "success" ]; then failed=1; fi
+          if [ "${{ steps.dry_run_all.outcome }}" != "success" ]; then failed=1; fi
           exit "$failed"
