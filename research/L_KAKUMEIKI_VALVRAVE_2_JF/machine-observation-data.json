@@ -1,0 +1,78 @@
+{
+  "schemaVersion": "machine-observation-data-v2",
+  "machineId": "L_KAKUMEIKI_VALVRAVE_2_JF",
+  "displayName": "Lパチスロ 革命機ヴァルヴレイヴ2",
+  "researchedAt": "2026-09-05",
+  "sources": [
+    {"sourceId":"SRC_NANA_SPEC","publisher":"nana-press.com","title":"ヴァルヴレイヴ2 初当たり確率","url":"https://nana-press.com/kaiseki/machine/1040/31856/","checkedAt":"2026-09-05","sourceType":"analysis"},
+    {"sourceId":"SRC_1GEKI_SPEC","publisher":"1geki.jp","title":"ヴァルヴレイヴ2 設定差","url":"https://1geki.jp/slot/l_valvrave2/0/","checkedAt":"2026-09-05","sourceType":"analysis"},
+    {"sourceId":"SRC_NANA_CZ_END","publisher":"nana-press.com","title":"ヴァルヴレイヴ2 CZ・ボーナス終了画面","url":"https://nana-press.com/kaiseki/machine/1040/32833/","checkedAt":"2026-09-05","sourceType":"analysis"},
+    {"sourceId":"SRC_NANA_GAMES","publisher":"nana-press.com","title":"ヴァルヴレイヴ2 獲得枚数・ATゲーム数","url":"https://nana-press.com/kaiseki/machine/1040/32983/","checkedAt":"2026-09-05","sourceType":"analysis"},
+    {"sourceId":"SRC_NANA_AT_END","publisher":"nana-press.com","title":"ヴァルヴレイヴ2 AT終了画面","url":"https://nana-press.com/kaiseki/machine/1040/32922/","checkedAt":"2026-09-05","sourceType":"analysis"}
+  ],
+  "sourceCoverage": {"machineMenu":"UNRESOLVED","dataCounter":"UNRESOLVED","linkedService":"UNRESOLVED","directPlay":"FOUND","endEvent":"FOUND","seatedState":"UNRESOLVED"},
+  "observations": [
+    {
+      "observationId":"OBS_INITIAL",
+      "sourceType":"DIRECT_PLAY",
+      "observationMode":"MANUAL_COUNTER",
+      "status":"FOUND",
+      "label":"通常ゲーム数・初当り合算",
+      "categories":["通常ゲーム数","初当り合算"],
+      "timing":["自己実戦中の通常ゲーム区間"],
+      "excludedConditions":["初当りを構成する事象を初当り合算と別Featureとして重複評価しない","設定3を入力候補として扱わない"],
+      "sourceRefs":["SRC_NANA_SPEC","SRC_1GEKI_SPEC"],
+      "notes":"初当り合算は革命ボーナス・決戦ボーナス・革命RUSH直撃・超革命RUSH直撃の合計を数え、通常ゲーム数を分母とする。"
+    },
+    {
+      "observationId":"OBS_CZ_BONUS_END_EVIDENCE",
+      "sourceType":"END_EVENT",
+      "observationMode":"VISUAL_EVENT",
+      "status":"FOUND",
+      "label":"CZ・ボーナス終了画面の確定系",
+      "categories":["紫枠（ショーコ＆サキ）","銀枠（ピノ＆プルー）","金枠（集合画面）"],
+      "timing":["CZ・ボーナス終了画面表示時"],
+      "excludedConditions":["通常画面の出現割合を推測確率として使用しない","エンディング固定画面を含めない","未確認を非発生として扱わない"],
+      "sourceRefs":["SRC_NANA_CZ_END"],
+      "notes":"店長カスタムの有無にかかわらず、確定色が示す設定下限だけをEvidenceとして使用する。"
+    },
+    {
+      "observationId":"OBS_AT_START_GAMES_EVIDENCE",
+      "sourceType":"END_EVENT",
+      "observationMode":"VISUAL_EVENT",
+      "status":"FOUND",
+      "label":"ATセット開始ゲーム数の確定系",
+      "categories":["+22G","+44G","+66G"],
+      "timing":["ATセット開始ゲーム数表示時"],
+      "excludedConditions":["未確認を非発生として扱わない"],
+      "sourceRefs":["SRC_NANA_GAMES"]
+    },
+    {
+      "observationId":"OBS_AT_END_EVIDENCE",
+      "sourceType":"END_EVENT",
+      "observationMode":"VISUAL_EVENT",
+      "status":"FOUND",
+      "label":"AT・上位AT終了画面の確定系",
+      "categories":["ディスプレイあり（多数の写真）"],
+      "timing":["AT・上位AT終了画面表示時"],
+      "excludedConditions":["未確認を非発生として扱わない"],
+      "sourceRefs":["SRC_NANA_AT_END"]
+    },
+    {
+      "observationId":"OBS_PAYOUT_EVIDENCE",
+      "sourceType":"END_EVENT",
+      "observationMode":"VISUAL_EVENT",
+      "status":"FOUND",
+      "label":"獲得枚数表示の確定系",
+      "categories":["456枚OVER","555枚OVER","666枚OVER"],
+      "timing":["該当する獲得枚数表示の出現時"],
+      "excludedConditions":["未確認を非発生として扱わない"],
+      "sourceRefs":["SRC_NANA_GAMES"]
+    }
+  ],
+  "featureMappings": [
+    {"featureId":"FEAT_INITIAL","mappingType":"EXACT","observationIds":["OBS_INITIAL"],"collectionMethods":["MANUAL_COUNTER"],"usableForInference":true,"usableForDifficulty":false,"notes":"通常ゲーム数を分母、同一区間の初当り合算を分子として使用する。"}
+  ],
+  "researchReopenRequests": [],
+  "fieldVerificationItems": []
+}
