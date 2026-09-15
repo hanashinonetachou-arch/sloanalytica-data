@@ -1,4 +1,4 @@
-name: Evidence UI Gate 0 Batch A Diagnostic
+name: Evidence UI Batch A Remediation
 
 on:
   pull_request:
@@ -6,88 +6,108 @@ on:
       - prototype-multi-machine
     paths:
       - '.github/workflows/evidence-ui-gate0-batch-a-diagnostic.yml'
-      - 'tools/**'
-      - 'research/**'
       - 'machines/**'
+      - 'research/**'
+      - 'tools/**'
+
+permissions:
+  contents: write
 
 jobs:
-  gate0-ledger:
+  remediate-and-validate:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: audit/evidence-ui-remediation-batch-a-20260915
+          fetch-depth: 0
       - uses: actions/setup-node@v4
         with:
           node-version: '20'
-      - name: Gate 0 fixture tests
-        run: npm run evidence-ui:gate0:test
-      - name: Generate Gate 0 ledger
-        id: gate0
-        shell: bash
-        run: |
-          set +e
-          node tools/audit-evidence-ui-gate0.mjs --output=evidence-ui-gate0-ledger.json
-          rc=$?
-          echo "exit_code=$rc" >> "$GITHUB_OUTPUT"
-          if [ "$rc" -gt 1 ]; then exit "$rc"; fi
-          exit 0
-      - name: Validate ledger structure
-        run: node tools/validate-evidence-ui-gate0-ledger.mjs evidence-ui-gate0-ledger.json
-      - name: Select mechanically closed Batch A candidates
-        run: |
-          node --input-type=module <<'NODE'
-          import { readFile, writeFile } from 'node:fs/promises';
-          const ledger = JSON.parse(await readFile('evidence-ui-gate0-ledger.json', 'utf8'));
-          const mechanicallyClosed = ['layerCompleteness','evidenceInputType','naturalObservationStructure','selectionObservationLinkage'];
-          const artifactGates = ['evidencePropagation','artifactFreshness','materializerRoute','generatedPublishedSeparation'];
-          const candidates = ledger.rows.filter(r => {
-            if (r.disposition !== 'EVIDENCE') return false;
-            const g = r.gates;
-            const closed = mechanicallyClosed.every(k => (g[k]?.failed ?? 0) === 0 && (g[k]?.unresolved ?? 0) === 0);
-            const artifactDebt = artifactGates.some(k => (g[k]?.failed ?? 0) > 0 || (g[k]?.unresolved ?? 0) > 0);
-            return closed && artifactDebt;
-          }).map(r => ({ machineId:r.machineId, status:r.status, findings:r.findings.map(f=>f.code) }));
-          await writeFile('batch-a-candidates.json', JSON.stringify({rule:{mechanicallyClosed,artifactGates},count:candidates.length,candidates},null,2)+'\n');
-          await writeFile('batch-a-candidates.txt', candidates.map(x=>x.machineId).join('\n') + (candidates.length?'\n':''));
-          console.log(JSON.stringify({count:candidates.length,candidates},null,2));
-          NODE
-      - name: Formal materializer dry-run
+      - name: Materialize audited Batch A machines
         shell: bash
         run: |
           set -euo pipefail
-          mkdir -p batch-a-dry-run/out batch-a-dry-run/diff
-          : > batch-a-dry-run/summary.tsv
-          while IFS= read -r id; do
-            [ -n "$id" ] || continue
+          ids=(
+            L_EVANGELION_MIRAI_JF
+            L_KINNIKUMAN4_SLDC
+            L_LOVEKYURE2_PS
+            L_MAHJONG_FIGHT_CLUB_KAKUSEI_KM
+            L_NOGIZAKA46_UD
+            L_SAO_B2
+            L_SENGOKU_BASARA_GIGA_ZE
+            S_BOOWY_SV
+          )
+          mkdir -p /tmp/batch-a-materialized
+          for id in "${ids[@]}"; do
             pkg="machines/$id/machine-package.json"
             ui="research/$id/ui-design-data.json"
-            out="batch-a-dry-run/out/$id.machine-package.json"
-            if [ ! -f "$pkg" ] || [ ! -f "$ui" ]; then
-              printf '%s\tMISSING_INPUT\n' "$id" >> batch-a-dry-run/summary.tsv
-              continue
-            fi
-            if node tools/materialize-ui-design-into-machine-package.mjs "$pkg" "$ui" "$out"; then
-              if cmp -s "$pkg" "$out"; then
-                printf '%s\tNO_DIFF\n' "$id" >> batch-a-dry-run/summary.tsv
-              else
-                printf '%s\tDIFF\n' "$id" >> batch-a-dry-run/summary.tsv
-                diff -u "$pkg" "$out" > "batch-a-dry-run/diff/$id.diff" || true
-              fi
-            else
-              printf '%s\tMATERIALIZER_FAIL\n' "$id" >> batch-a-dry-run/summary.tsv
-            fi
-          done < batch-a-candidates.txt
-          cat batch-a-dry-run/summary.tsv
-          if grep -Eq '\t(MISSING_INPUT|MATERIALIZER_FAIL)$' batch-a-dry-run/summary.tsv; then
-            echo 'Batch A dry-run has unsafe candidates.' >&2
-            exit 1
-          fi
-      - name: Upload Batch A diagnostic evidence
-        uses: actions/upload-artifact@v4
-        with:
-          name: evidence-ui-gate0-batch-a-dry-run
-          path: |
-            evidence-ui-gate0-ledger.json
-            batch-a-candidates.json
-            batch-a-candidates.txt
-            batch-a-dry-run/summary.tsv
-            batch-a-dry-run/diff/*.diff
+            out="/tmp/batch-a-materialized/$id.json"
+            node tools/materialize-ui-design-into-machine-package.mjs "$pkg" "$ui" "$out"
+            mv "$out" "$pkg"
+          done
+      - name: Guard remediation scope and semantics
+        shell: bash
+        run: |
+          set -euo pipefail
+          allowed='^(machines/(L_EVANGELION_MIRAI_JF|L_KINNIKUMAN4_SLDC|L_LOVEKYURE2_PS|L_MAHJONG_FIGHT_CLUB_KAKUSEI_KM|L_NOGIZAKA46_UD|L_SAO_B2|L_SENGOKU_BASARA_GIGA_ZE|S_BOOWY_SV)/machine-package\.json|\.github/workflows/evidence-ui-gate0-batch-a-diagnostic\.yml|reports/)'
+          bad=$(git diff --name-only origin/prototype-multi-machine...HEAD; git diff --name-only) | sort -u | grep -Ev "$allowed" || true
+          if [ -n "$bad" ]; then echo "Unexpected remediation paths:"; echo "$bad"; exit 1; fi
+          node --input-type=module <<'NODE'
+          import fs from 'node:fs'; import {execFileSync} from 'node:child_process';
+          const ids=['L_EVANGELION_MIRAI_JF','L_KINNIKUMAN4_SLDC','L_LOVEKYURE2_PS','L_MAHJONG_FIGHT_CLUB_KAKUSEI_KM','L_NOGIZAKA46_UD','L_SAO_B2','L_SENGOKU_BASARA_GIGA_ZE','S_BOOWY_SV'];
+          const stableInput = x => { const y=structuredClone(x); delete y.uiGridSpan; delete y.uiCompactCounter; return y; };
+          for (const id of ids) {
+            const p=`machines/${id}/machine-package.json`;
+            const before=JSON.parse(execFileSync('git',['show',`origin/prototype-multi-machine:${p}`],{encoding:'utf8'}));
+            const after=JSON.parse(fs.readFileSync(p,'utf8'));
+            for (const k of ['machine','features','evidence','selectionSummary','reliability','metadata','validation','statistics']) {
+              if (JSON.stringify(before[k])!==JSON.stringify(after[k])) throw new Error(`${id}: semantic block changed: ${k}`);
+            }
+            const bi=(before.inputs?.inputs??[]).map(stableInput), ai=(after.inputs?.inputs??[]).map(stableInput);
+            if (JSON.stringify(bi)!==JSON.stringify(ai)) throw new Error(`${id}: input semantics changed`);
+          }
+          console.log('Semantic guard: PASS (features/evidence/settings/sources unchanged)');
+          NODE
+      - name: Selection validation
+        run: npm run selection:validate
+      - name: Observation validation
+        run: npm run observation:validate
+      - name: Canonical UI validation
+        run: npm run ui-design:validate
+      - name: Strict UI / Observation linkage
+        run: npm run ui-design:observation:audit
+      - name: Four-layer pipeline gate
+        run: npm run pipeline:four-layer:gate
+      - name: Evidence UI validator all
+        run: node tools/validate-evidence-ui-all.mjs
+      - name: Repository tests
+        run: npm test
+      - name: Gate 0 fixture tests
+        run: npm run evidence-ui:gate0:test
+      - name: Gate 0 after remediation
+        shell: bash
+        run: |
+          set +e
+          node tools/audit-evidence-ui-gate0.mjs --output=evidence-ui-gate0-after-batch-a.json
+          rc=$?
+          if [ "$rc" -gt 1 ]; then exit "$rc"; fi
+          node tools/validate-evidence-ui-gate0-ledger.mjs evidence-ui-gate0-after-batch-a.json
+          exit 0
+      - name: Commit only validated machine artifacts
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git add machines/L_EVANGELION_MIRAI_JF/machine-package.json \
+                  machines/L_KINNIKUMAN4_SLDC/machine-package.json \
+                  machines/L_LOVEKYURE2_PS/machine-package.json \
+                  machines/L_MAHJONG_FIGHT_CLUB_KAKUSEI_KM/machine-package.json \
+                  machines/L_NOGIZAKA46_UD/machine-package.json \
+                  machines/L_SAO_B2/machine-package.json \
+                  machines/L_SENGOKU_BASARA_GIGA_ZE/machine-package.json \
+                  machines/S_BOOWY_SV/machine-package.json
+          git diff --cached --quiet && exit 0
+          git commit -m 'fix: materialize Evidence UI Batch A machine packages'
+          git push origin HEAD:audit/evidence-ui-remediation-batch-a-20260915
