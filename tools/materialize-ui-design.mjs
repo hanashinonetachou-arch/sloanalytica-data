@@ -27,6 +27,9 @@ function materializeQuickAdd(value,inputId){
   if(Array.isArray(value)&&value.length&&value.every(v=>typeof v==='number'&&Number.isFinite(v))) return [...value];
   throw new Error(`${inputId}: quickAdd must be a finite number or a non-empty array of finite numbers`);
 }
+function canonicalSectionId(title,index){
+  return `UID_${String(title).normalize('NFKC').replace(/[^A-Za-z0-9一-龠ぁ-んァ-ヶー]+/g,'_')}_${index+1}`;
+}
 
 export function materializeUiDesign(pkg,design){
   const errors=validateUiDesignData(design,{expectedMachineId:pkg.machine?.machineId});
@@ -39,6 +42,15 @@ export function materializeUiDesign(pkg,design){
     const input=inputMap.get(id);
     if(!input) throw new Error(`${design.machineId}: ui input not found in machine package: ${id}`);
     input.name=c.name;
+    if(c.gridSpan!==undefined) input.uiGridSpan=c.gridSpan;
+    else delete input.uiGridSpan;
+    if(c.directInput===false) input.uiDirectInput=false;
+    else delete input.uiDirectInput;
+    if(c.compact===true) input.uiCompactCounter=true;
+    else delete input.uiCompactCounter;
+    const quickAdd=materializeQuickAdd(c.quickAdd,id);
+    if(quickAdd!==undefined) input.uiQuickAdd=quickAdd;
+    else delete input.uiQuickAdd;
     if(c.mode==='DERIVED'){
       input.derivedCalculation=c.derivedCalculation;
       input.derivedFromInputIds=[...(c.derivedFromInputIds??[])];
@@ -65,8 +77,8 @@ export function materializeUiDesign(pkg,design){
       if(section.suppressInputDescriptions===true) delete input.description;
       if(c.inputVisible===false) continue;
       const config={};
-      if(c.directInput!==undefined) config.directInput=c.directInput;
-      if(c.compact!==undefined) config.compact=c.compact;
+      if(c.directInput===false) config.directInput=false;
+      if(c.compact===true) config.compact=true;
       if(c.note) config.note=c.note;
       const quickAdd=materializeQuickAdd(c.quickAdd,id);
       if(quickAdd!==undefined) config.quickAdd=quickAdd;
@@ -87,7 +99,7 @@ export function materializeUiDesign(pkg,design){
       items.push({type:'input',inputId:id,label:c.label,widget:widgetFor(input,c),gridSpan:12});
     }
     sections.push({
-      id:`UI_DESIGN_${index+1}`,
+      id:canonicalSectionId(title,index),
       title,
       displayOrder:index+1,
       ...(section.description?{description:section.description}:{}),
@@ -98,7 +110,7 @@ export function materializeUiDesign(pkg,design){
       items,
     });
   }
-  out.ui={...(out.ui??{}),sections};
+  out.ui={...(out.ui??{}),sections,canonicalUiDesign:{schemaVersion:design.schemaVersion,materialized:true}};
   out.metadata={...(out.metadata??{}),uiDesignMaterialized:true,uiDesignSchemaVersion:design.schemaVersion,uiDesignStatus:design.status};
   return out;
 }
