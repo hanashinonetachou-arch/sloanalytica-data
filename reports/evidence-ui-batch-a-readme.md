@@ -1,1 +1,0 @@
-This branch is using a temporary pull-request workflow to execute the read-only Gate 0 ledger on GitHub Actions. The workflow and trigger-only report files are diagnostic scaffolding and must be removed before the remediation PR is finalized.
