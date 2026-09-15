@@ -51,7 +51,7 @@ jobs:
         run: |
           set -euo pipefail
           allowed='^(machines/(L_EVANGELION_MIRAI_JF|L_KINNIKUMAN4_SLDC|L_LOVEKYURE2_PS|L_MAHJONG_FIGHT_CLUB_KAKUSEI_KM|L_NOGIZAKA46_UD|L_SAO_B2|L_SENGOKU_BASARA_GIGA_ZE|S_BOOWY_SV)/machine-package\.json|\.github/workflows/evidence-ui-gate0-batch-a-diagnostic\.yml|reports/)'
-          bad=$(git diff --name-only origin/prototype-multi-machine...HEAD; git diff --name-only) | sort -u | grep -Ev "$allowed" || true
+          bad="$({ git diff --name-only origin/prototype-multi-machine...HEAD; git diff --name-only; } | sort -u | grep -Ev "$allowed" || true)"
           if [ -n "$bad" ]; then echo "Unexpected remediation paths:"; echo "$bad"; exit 1; fi
           node --input-type=module <<'NODE'
           import fs from 'node:fs'; import {execFileSync} from 'node:child_process';
