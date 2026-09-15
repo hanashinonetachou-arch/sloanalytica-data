@@ -312,10 +312,25 @@ function materializeEvidenceUi(research,selection){
   return {generatedInputs,generatedEvidence};
 }
 
+function materializeEvidenceContract(selection){
+  if(selection.evidenceContract?.contractVersion!=="selection-evidence-v2") return null;
+  if((selection.evidenceUi?.groups??[]).length) fail("selection-evidence-v2 forbids legacy evidenceUi.groups (atomic cutover)");
+  const inputs=selection.evidenceContract.inputs??[];
+  const evidence=selection.evidenceContract.items??[];
+  if(!inputs.length||!evidence.length) fail("selection-evidence-v2 requires inputs and items");
+  return {generatedInputs:inputs,generatedEvidence:evidence.map(e=>({
+    id:e.evidenceId,name:e.displayName,displayName:e.displayName,inputId:e.inputId,
+    triggerValue:e.triggerValue,confirmedSettings:e.confirmedSettings,
+    deniedSettings:e.deniedSettings,hasImage:false,type:e.runtimeType,
+    sourceEvidenceRefs:e.sourceResearchEvidenceIds,
+    ...(e.sharedFeatureIds.length?{sharedFeatureIds:e.sharedFeatureIds}:{})
+  }))};
+}
+
 export function buildMachineData(research,selection,statistics=null){
   if(selection.machineId!==research.machine?.machineId) fail("machineId mismatch");
   const rfs=new Map((research.features??[]).map(f=>[f.researchFeatureId,f]));
-  const {generatedInputs,generatedEvidence}=materializeEvidenceUi(research,selection);
+  const {generatedInputs,generatedEvidence}=materializeEvidenceContract(selection)??materializeEvidenceUi(research,selection);
   const selectionSummary=buildSelectionSummary(research,selection,statistics);
   const allInputs=[...(selection.inputs??[]),...generatedInputs];
   const inputIds=new Set(allInputs.map(x=>x.id));

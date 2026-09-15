@@ -50,6 +50,20 @@ test('observation missing is detected', () => { const x = base(); x.observation 
 test('structured observation linkage passes', () => { const x = base(); x.selection.features = [{ featureId: 'F' }]; x.observation.featureMappings = [{ featureId: 'F', observationIds: ['O'] }]; x.observation.observations = [{ observationId: 'O', observationMode: 'MANUAL_COUNTER', sourceType: 'DIRECT_PLAY', status: 'FOUND', categories: [], timing: [], excludedConditions: [] }]; assert.equal(auditMachine('M', x).gates.selectionObservationLinkage.passed, 1); });
 test('generated/published separation is explicit', () => assert.ok(code(auditMachine('M', ev()), 'GENERATED_PUBLISHED_ARTIFACT_NOT_SEPARATE')));
 test('legacy evidence is covered, not skipped', () => { const x = base(); x.ui.evidenceContracts.EV = { selectionMode: 'single' }; const row = auditMachine('M', x); assert.equal(row.gates.evidencePropagation.skipped, 0); });
+test('v2 declarations alone cannot green proof-dependent gates', () => {
+  const x = ev(); x.selection.evidenceContract = { contractVersion: 'selection-evidence-v2', items: [{ evidenceId: 'EV', sourceResearchEvidenceIds: ['R'], triggerValue: 'A', confirmedSettings: ['SET_2'], deniedSettings: [], normalizationSemantics: 'DECLARED', settingFloorSemantics: 'DECLARED', canonicalUi: { inputId: 'EV' }, observationIds: ['O'], featureSharing: 'NONE', sharedFeatureIds: [] }] }; x.selection.evidence = [];
+  const row = auditMachine('M', x);
+  for (const gate of ['materializerRoute', 'generatedPublishedSeparation', 'evidenceOptionSemantics', 'sharedFeatureEvidence']) assert.ok(row.gates[gate].unresolved > 0, gate);
+  assert.equal(row.gates.evidencePropagation.passed, 0);
+});
+
+test('legacy Gate0 behavior is unchanged by v2 support', () => {
+  const row = auditMachine('M', ev());
+  assert.ok(code(row, 'ARTIFACT_FRESHNESS_UNPROVEN'));
+  assert.ok(code(row, 'MATERIALIZER_ROUTE_UNPROVEN'));
+  assert.ok(code(row, 'IMPLICIT_SHARED_EVIDENCE_UNRESOLVED'));
+  assert.ok(code(row, 'GENERATED_PUBLISHED_ARTIFACT_NOT_SEPARATE'));
+});
 
 const ledger = () => { const rows = [auditMachine('M', base())]; return { rows, summary: buildSummary(rows) }; };
 test('valid fixture ledger', () => assert.deepEqual(validateLedger(ledger(), { expectedRows: 1 }), []));
