@@ -1,0 +1,34 @@
+name: M7 Third Pilot Candidate Audit
+
+on:
+  pull_request:
+    branches: [prototype-multi-machine]
+    paths:
+      - 'tools/audit-m7-third-pilot-candidates.mjs'
+      - '.github/workflows/m7-third-pilot-candidate-audit.yml'
+      - 'research/**/selection-data.json'
+      - 'research/**/research-data.json'
+      - 'research/**/machine-observation-data.json'
+      - 'research/**/ui-design-data.json'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Audit current checkout
+        run: node tools/audit-m7-third-pilot-candidates.mjs | tee m7-third-pilot-candidates.log
+      - name: Upload audit result
+        uses: actions/upload-artifact@v4
+        with:
+          name: m7-third-pilot-candidates
+          path: |
+            tmp/m7-third-pilot-candidates.json
+            m7-third-pilot-candidates.log
