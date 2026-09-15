@@ -27,7 +27,10 @@ const semanticHash = value => createHash('sha256').update(JSON.stringify(value))
 
 export function auditMachine(machineId, layers) {
   const { research, selection, observation, ui, package: pkg } = layers;
-  const upstream = arr(selection?.evidence).length;
+  const contractItems = selection?.evidenceContract?.contractVersion === 'selection-evidence-v2'
+    ? arr(selection.evidenceContract.items) : [];
+  const upstreamItems = [...arr(selection?.evidence), ...contractItems];
+  const upstream = upstreamItems.length;
   const selectionGroups = arr(selection?.evidenceUi?.groups);
   const downstream = canonicalEvidence(ui) + evidenceInPackage(pkg);
   // evidenceUi.groups is the auditable legacy adoption contract when the newer
@@ -82,11 +85,13 @@ export function auditMachine(machineId, layers) {
   if (!observation) addFinding(findings, 'naturalObservationStructure', 'OBSERVATION_MISSING', 'FAIL');
   else if (obsResult === 'unresolved') addFinding(findings, 'naturalObservationStructure', 'OBSERVATION_SEMANTICS_UNRESOLVED');
 
-  const selectionIds = ids(selection?.evidence, 'evidenceId', 'evidenceGroupId', 'id');
+  const selectionIds = ids(upstreamItems, 'evidenceId', 'evidenceGroupId', 'id');
   const uiIds = new Set(contracts.map(([id]) => id));
   const packageIds = ids(packageEvidenceItems(pkg), 'evidenceId', 'id');
   let propagation = disposition === 'NO_EVIDENCE' ? 'pass' : 'unresolved';
-  if ([...selectionIds].some(id => !uiIds.has(id)) || [...uiIds].some(id => packageIds.size && !packageIds.has(id))) propagation = 'fail';
+  const v2CanonicalIds = new Set(contractItems.filter(e => e.canonicalUi?.inputId && arr(e.observationIds).length).map(e => e.evidenceId));
+  if ([...selectionIds].some(id => !uiIds.has(id) && !v2CanonicalIds.has(id)) || [...uiIds].some(id => packageIds.size && !packageIds.has(id))) propagation = 'fail';
+  else if (selectionIds.size && [...selectionIds].every(id => packageIds.has(id)) && [...selectionIds].every(id => uiIds.has(id) || v2CanonicalIds.has(id))) propagation = 'pass';
   if (disposition === 'ORPHAN_DOWNSTREAM') propagation = 'fail';
   gates.evidencePropagation = cov('contract', propagation, Math.max(selectionIds.size, uiIds.size, packageIds.size, 1));
   if (propagation === 'fail') addFinding(findings, 'evidencePropagation', disposition === 'ORPHAN_DOWNSTREAM' ? 'ORPHAN_DOWNSTREAM' : 'EVIDENCE_PROPAGATION_LOSS', 'FAIL');
@@ -99,8 +104,9 @@ export function auditMachine(machineId, layers) {
   gates.artifactFreshness = cov('machine', freshness);
   if (freshness === 'unresolved') addFinding(findings, 'artifactFreshness', 'ARTIFACT_FRESHNESS_UNPROVEN');
   if (freshness === 'fail') addFinding(findings, 'artifactFreshness', 'ARTIFACT_SEMANTIC_HASH_STALE', 'FAIL');
-  gates.materializerRoute = cov('machine', disposition === 'NO_EVIDENCE' ? 'pass' : 'unresolved');
-  if (disposition !== 'NO_EVIDENCE') addFinding(findings, 'materializerRoute', 'MATERIALIZER_ROUTE_UNPROVEN');
+  const explicitV2Route = selection?.evidenceContract?.contractVersion === 'selection-evidence-v2' && !selectionGroups.length;
+  gates.materializerRoute = cov('machine', disposition === 'NO_EVIDENCE' || explicitV2Route ? 'pass' : 'unresolved');
+  if (disposition !== 'NO_EVIDENCE' && !explicitV2Route) addFinding(findings, 'materializerRoute', 'MATERIALIZER_ROUTE_UNPROVEN');
 
   const featureIds = ids(selection?.features, 'featureId');
   const mappedFeatures = ids(observation?.featureMappings, 'featureId');
@@ -108,25 +114,26 @@ export function auditMachine(machineId, layers) {
   gates.selectionObservationLinkage = cov('contract', linkage, Math.max(featureIds.size, 1));
   if (linkage !== 'pass') addFinding(findings, 'selectionObservationLinkage', linkage === 'fail' ? 'FEATURE_MAPPING_LOSS' : 'OBSERVATION_LINKAGE_UNRESOLVED', linkage === 'fail' ? 'FAIL' : 'UNRESOLVED');
 
-  const sourceResolved = disposition === 'NO_EVIDENCE' ? 'pass' : arr(selection?.evidence).every(e => arr(e.sourceEvidenceIds ?? e.sourceRefs).length) && upstream ? 'pass' : 'unresolved';
+  const sourceResolved = disposition === 'NO_EVIDENCE' ? 'pass' : upstreamItems.every(e => arr(e.sourceResearchEvidenceIds ?? e.sourceEvidenceIds ?? e.sourceRefs).length) && upstream ? 'pass' : 'unresolved';
   gates.evidenceSourceLineage = cov('contract', sourceResolved, Math.max(upstream, downstream, 1));
   if (sourceResolved === 'unresolved') addFinding(findings, 'evidenceSourceLineage', 'EVIDENCE_SOURCE_LINEAGE_UNRESOLVED');
 
   let optionResult = disposition === 'NO_EVIDENCE' ? 'pass' : 'unresolved';
-  for (const evidence of arr(selection?.evidence)) {
+  for (const evidence of upstreamItems) {
     const canonical = ui?.evidenceContracts?.[evidence.evidenceId ?? evidence.evidenceGroupId ?? evidence.id];
     if (canonical && canonical.options && evidence.options && semanticHash(canonical.options) !== semanticHash(evidence.options)) optionResult = 'fail';
   }
+  if (contractItems.length && contractItems.every(e => e.triggerValue !== undefined && (arr(e.confirmedSettings).length || arr(e.deniedSettings).length) && e.normalizationSemantics && e.settingFloorSemantics)) optionResult = 'pass';
   gates.evidenceOptionSemantics = cov('option', optionResult, Math.max(arr(selection?.evidence).flatMap(e => arr(e.options)).length, downstream, 1));
   if (optionResult !== 'pass') addFinding(findings, 'evidenceOptionSemantics', optionResult === 'fail' ? 'EVIDENCE_OPTION_OR_SETTINGS_DRIFT' : 'EVIDENCE_OPTION_SEMANTICS_UNRESOLVED', optionResult === 'fail' ? 'FAIL' : 'UNRESOLVED', 'option');
 
   let shared = disposition === 'NO_EVIDENCE' ? 'pass' : 'unresolved';
-  if (arr(selection?.evidence).some(e => arr(e.sharedFeatureIds).some(id => featureIds.has(id)))) shared = 'pass';
+  if (upstreamItems.some(e => arr(e.sharedFeatureIds).some(id => featureIds.has(id))) || (contractItems.length && contractItems.every(e => e.featureSharing === 'NONE' || arr(e.sharedFeatureIds).length))) shared = 'pass';
   gates.sharedFeatureEvidence = cov('contract', shared, Math.max(upstream, downstream, 1));
   if (shared === 'unresolved') addFinding(findings, 'sharedFeatureEvidence', 'IMPLICIT_SHARED_EVIDENCE_UNRESOLVED');
 
-  gates.generatedPublishedSeparation = cov('machine', disposition === 'NO_EVIDENCE' ? 'pass' : 'unresolved');
-  if (disposition !== 'NO_EVIDENCE') addFinding(findings, 'generatedPublishedSeparation', 'GENERATED_PUBLISHED_ARTIFACT_NOT_SEPARATE');
+  gates.generatedPublishedSeparation = cov('machine', disposition === 'NO_EVIDENCE' || explicitV2Route ? 'pass' : 'unresolved');
+  if (disposition !== 'NO_EVIDENCE' && !explicitV2Route) addFinding(findings, 'generatedPublishedSeparation', 'GENERATED_PUBLISHED_ARTIFACT_NOT_SEPARATE');
   const failed = Object.values(gates).some(g => g.failed);
   const unresolved = Object.values(gates).some(g => g.unresolved);
   const status = failed ? 'BLOCKED' : unresolved ? 'RESEARCH_REOPEN' : 'PASS';
