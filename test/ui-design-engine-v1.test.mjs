@@ -89,7 +89,7 @@ test('materializer rejects invalid quickAdd instead of dropping it silently',()=
   );
 });
 
-test('materializer preserves canonical runtime compatibility metadata',()=>{
+test('materializer preserves canonical runtime compatibility metadata and section identity',()=>{
   const pkg={
     machine:{machineId:'TEST_CANONICAL_COMPAT'},
     inputs:{inputs:[
