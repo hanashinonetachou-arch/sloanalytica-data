@@ -27,7 +27,10 @@ const semanticHash = value => createHash('sha256').update(JSON.stringify(value))
 
 export function auditMachine(machineId, layers) {
   const { research, selection, observation, ui, package: pkg } = layers;
-  const upstream = arr(selection?.evidence).length;
+  const contractItems = selection?.evidenceContract?.contractVersion === 'selection-evidence-v2'
+    ? arr(selection.evidenceContract.items) : [];
+  const upstreamItems = [...arr(selection?.evidence), ...contractItems];
+  const upstream = upstreamItems.length;
   const selectionGroups = arr(selection?.evidenceUi?.groups);
   const downstream = canonicalEvidence(ui) + evidenceInPackage(pkg);
   // evidenceUi.groups is the auditable legacy adoption contract when the newer
@@ -82,11 +85,15 @@ export function auditMachine(machineId, layers) {
   if (!observation) addFinding(findings, 'naturalObservationStructure', 'OBSERVATION_MISSING', 'FAIL');
   else if (obsResult === 'unresolved') addFinding(findings, 'naturalObservationStructure', 'OBSERVATION_SEMANTICS_UNRESOLVED');
 
-  const selectionIds = ids(selection?.evidence, 'evidenceId', 'evidenceGroupId', 'id');
+  const selectionIds = ids(upstreamItems, 'evidenceId', 'evidenceGroupId', 'id');
   const uiIds = new Set(contracts.map(([id]) => id));
   const packageIds = ids(packageEvidenceItems(pkg), 'evidenceId', 'id');
   let propagation = disposition === 'NO_EVIDENCE' ? 'pass' : 'unresolved';
   if ([...selectionIds].some(id => !uiIds.has(id)) || [...uiIds].some(id => packageIds.size && !packageIds.has(id))) propagation = 'fail';
+  // A v2 item's own canonicalUi/observation fields are declarations, not
+  // independent propagation proof. Until canonical UI exposes a cross-layer
+  // Evidence contract keyed by the stable Evidence ID, keep this unresolved.
+  if (contractItems.length && propagation !== 'fail') propagation = 'unresolved';
   if (disposition === 'ORPHAN_DOWNSTREAM') propagation = 'fail';
   gates.evidencePropagation = cov('contract', propagation, Math.max(selectionIds.size, uiIds.size, packageIds.size, 1));
   if (propagation === 'fail') addFinding(findings, 'evidencePropagation', disposition === 'ORPHAN_DOWNSTREAM' ? 'ORPHAN_DOWNSTREAM' : 'EVIDENCE_PROPAGATION_LOSS', 'FAIL');
@@ -108,20 +115,27 @@ export function auditMachine(machineId, layers) {
   gates.selectionObservationLinkage = cov('contract', linkage, Math.max(featureIds.size, 1));
   if (linkage !== 'pass') addFinding(findings, 'selectionObservationLinkage', linkage === 'fail' ? 'FEATURE_MAPPING_LOSS' : 'OBSERVATION_LINKAGE_UNRESOLVED', linkage === 'fail' ? 'FAIL' : 'UNRESOLVED');
 
-  const sourceResolved = disposition === 'NO_EVIDENCE' ? 'pass' : arr(selection?.evidence).every(e => arr(e.sourceEvidenceIds ?? e.sourceRefs).length) && upstream ? 'pass' : 'unresolved';
+  const researchEvidenceIds = ids(research?.evidenceCandidates, 'researchEvidenceId', 'evidenceId');
+  const sourceResolved = disposition === 'NO_EVIDENCE' ? 'pass' : upstreamItems.every(e => {
+    const refs = arr(e.sourceResearchEvidenceIds ?? e.sourceEvidenceIds ?? e.sourceRefs);
+    return refs.length && refs.every(id => researchEvidenceIds.has(id));
+  }) && upstream ? 'pass' : 'unresolved';
   gates.evidenceSourceLineage = cov('contract', sourceResolved, Math.max(upstream, downstream, 1));
   if (sourceResolved === 'unresolved') addFinding(findings, 'evidenceSourceLineage', 'EVIDENCE_SOURCE_LINEAGE_UNRESOLVED');
 
   let optionResult = disposition === 'NO_EVIDENCE' ? 'pass' : 'unresolved';
-  for (const evidence of arr(selection?.evidence)) {
+  for (const evidence of upstreamItems) {
     const canonical = ui?.evidenceContracts?.[evidence.evidenceId ?? evidence.evidenceGroupId ?? evidence.id];
     if (canonical && canonical.options && evidence.options && semanticHash(canonical.options) !== semanticHash(evidence.options)) optionResult = 'fail';
   }
+  // v2 fields alone do not prove that the canonical UI and published runtime
+  // retained the same option/setting semantics.
+  if (contractItems.length && optionResult !== 'fail') optionResult = 'unresolved';
   gates.evidenceOptionSemantics = cov('option', optionResult, Math.max(arr(selection?.evidence).flatMap(e => arr(e.options)).length, downstream, 1));
   if (optionResult !== 'pass') addFinding(findings, 'evidenceOptionSemantics', optionResult === 'fail' ? 'EVIDENCE_OPTION_OR_SETTINGS_DRIFT' : 'EVIDENCE_OPTION_SEMANTICS_UNRESOLVED', optionResult === 'fail' ? 'FAIL' : 'UNRESOLVED', 'option');
 
   let shared = disposition === 'NO_EVIDENCE' ? 'pass' : 'unresolved';
-  if (arr(selection?.evidence).some(e => arr(e.sharedFeatureIds).some(id => featureIds.has(id)))) shared = 'pass';
+  if (!contractItems.length && upstreamItems.some(e => arr(e.sharedFeatureIds).some(id => featureIds.has(id)))) shared = 'pass';
   gates.sharedFeatureEvidence = cov('contract', shared, Math.max(upstream, downstream, 1));
   if (shared === 'unresolved') addFinding(findings, 'sharedFeatureEvidence', 'IMPLICIT_SHARED_EVIDENCE_UNRESOLVED');
 
