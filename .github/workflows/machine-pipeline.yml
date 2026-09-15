@@ -43,6 +43,7 @@ jobs:
         run: |
           set -euo pipefail
           : > /tmp/research_files.txt
+          : > /tmp/ui_design_files.txt
           : > /tmp/machine_ids.txt
 
           if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
@@ -53,8 +54,20 @@ jobs:
               | sort -u > /tmp/research_files.txt
 
             git diff --name-only "${{ github.event.pull_request.base.sha }}" "${{ github.event.pull_request.head.sha }}" \
-              | sed -nE -e 's#^research/([^/]+)/selection-data\.json$#\1#p' -e 's#^research/([^/]+)/ui-design-data\.json$#\1#p' \
+              | sed -nE 's#^research/([^/]+)/selection-data\.json$#\1#p' \
               | sort -u > /tmp/machine_ids.txt
+
+            git diff --name-only "${{ github.event.pull_request.base.sha }}" "${{ github.event.pull_request.head.sha }}" \
+              | sed -nE '/^research\/[^/]+\/ui-design-data\.json$/p' \
+              | sort -u > /tmp/ui_design_files.txt
+
+            if [[ -s /tmp/ui_design_files.txt ]]; then
+              node tools/filter-materialized-ui-changes.mjs \
+                --base "${{ github.event.pull_request.base.sha }}" \
+                --head "${{ github.event.pull_request.head.sha }}" \
+                --files-from /tmp/ui_design_files.txt >> /tmp/machine_ids.txt
+              sort -u -o /tmp/machine_ids.txt /tmp/machine_ids.txt
+            fi
           fi
 
           if [[ -s /tmp/research_files.txt ]]; then
@@ -70,7 +83,7 @@ jobs:
             cat /tmp/machine_ids.txt
             echo 'has_machines=true' >> "$GITHUB_OUTPUT"
           else
-            echo 'No changed SelectionData/UI Design; full MachineData generation is not required yet.'
+            echo 'No changed SelectionData or materialized UI semantics; full MachineData generation is not required.'
             echo 'has_machines=false' >> "$GITHUB_OUTPUT"
           fi
 
