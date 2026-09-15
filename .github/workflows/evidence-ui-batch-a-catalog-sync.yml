@@ -1,0 +1,48 @@
+name: Evidence UI Batch A Catalog Sync
+
+on:
+  pull_request:
+    branches: [prototype-multi-machine]
+    paths:
+      - '.github/workflows/evidence-ui-batch-a-catalog-sync.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: audit/evidence-ui-remediation-batch-a-20260915
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Apply canonical identity/catalog synchronization
+        run: node tools/apply-machine-identity-classification.mjs --apply
+      - name: Guard generated scope
+        shell: bash
+        run: |
+          set -euo pipefail
+          changed="$(git diff --name-only)"
+          printf '%s\n' "$changed"
+          bad="$(printf '%s\n' "$changed" | grep -Ev '^(catalog\.json)$' || true)"
+          if [ -n "$bad" ]; then
+            echo 'Unexpected files changed by identity apply:'
+            printf '%s\n' "$bad"
+            exit 1
+          fi
+          test -n "$changed"
+      - name: Verify identity metadata
+        run: node tools/apply-machine-identity-classification.mjs --verify
+      - name: Commit catalog synchronization
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git add catalog.json
+          git commit -m 'fix: synchronize Batch A catalog package hashes'
+          git push origin HEAD:audit/evidence-ui-remediation-batch-a-20260915
