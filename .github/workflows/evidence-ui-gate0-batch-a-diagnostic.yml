@@ -32,22 +32,62 @@ jobs:
           exit 0
       - name: Validate ledger structure
         run: node tools/validate-evidence-ui-gate0-ledger.mjs evidence-ui-gate0-ledger.json
-      - name: Batch A candidate summary
+      - name: Select mechanically closed Batch A candidates
         run: |
           node --input-type=module <<'NODE'
-          import { readFile } from 'node:fs/promises';
+          import { readFile, writeFile } from 'node:fs/promises';
           const ledger = JSON.parse(await readFile('evidence-ui-gate0-ledger.json', 'utf8'));
+          const mechanicallyClosed = ['layerCompleteness','evidenceInputType','naturalObservationStructure','selectionObservationLinkage'];
+          const artifactGates = ['evidencePropagation','artifactFreshness','materializerRoute','generatedPublishedSeparation'];
           const candidates = ledger.rows.filter(r => {
             if (r.disposition !== 'EVIDENCE') return false;
             const g = r.gates;
-            const upstreamClean = ['layerCompleteness','evidenceInputType','naturalObservationStructure','selectionObservationLinkage','evidenceSourceLineage','evidenceOptionSemantics','sharedFeatureEvidence'].every(k => (g[k]?.failed ?? 0) === 0);
-            const artifactDebt = ['evidencePropagation','artifactFreshness','materializerRoute','generatedPublishedSeparation'].some(k => (g[k]?.failed ?? 0) > 0 || (g[k]?.unresolved ?? 0) > 0);
-            return upstreamClean && artifactDebt;
-          }).map(r => ({ machineId: r.machineId, status: r.status, findings: r.findings.map(f => f.code) }));
-          console.log(JSON.stringify({ count: candidates.length, candidates }, null, 2));
+            const closed = mechanicallyClosed.every(k => (g[k]?.failed ?? 0) === 0 && (g[k]?.unresolved ?? 0) === 0);
+            const artifactDebt = artifactGates.some(k => (g[k]?.failed ?? 0) > 0 || (g[k]?.unresolved ?? 0) > 0);
+            return closed && artifactDebt;
+          }).map(r => ({ machineId:r.machineId, status:r.status, findings:r.findings.map(f=>f.code) }));
+          await writeFile('batch-a-candidates.json', JSON.stringify({rule:{mechanicallyClosed,artifactGates},count:candidates.length,candidates},null,2)+'\n');
+          await writeFile('batch-a-candidates.txt', candidates.map(x=>x.machineId).join('\n') + (candidates.length?'\n':''));
+          console.log(JSON.stringify({count:candidates.length,candidates},null,2));
           NODE
-      - name: Upload Gate 0 ledger
+      - name: Formal materializer dry-run
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p batch-a-dry-run/out batch-a-dry-run/diff
+          : > batch-a-dry-run/summary.tsv
+          while IFS= read -r id; do
+            [ -n "$id" ] || continue
+            pkg="machines/$id/machine-package.json"
+            ui="research/$id/ui-design-data.json"
+            out="batch-a-dry-run/out/$id.machine-package.json"
+            if [ ! -f "$pkg" ] || [ ! -f "$ui" ]; then
+              printf '%s\tMISSING_INPUT\n' "$id" >> batch-a-dry-run/summary.tsv
+              continue
+            fi
+            if node tools/materialize-ui-design-into-machine-package.mjs "$pkg" "$ui" "$out"; then
+              if cmp -s "$pkg" "$out"; then
+                printf '%s\tNO_DIFF\n' "$id" >> batch-a-dry-run/summary.tsv
+              else
+                printf '%s\tDIFF\n' "$id" >> batch-a-dry-run/summary.tsv
+                diff -u "$pkg" "$out" > "batch-a-dry-run/diff/$id.diff" || true
+              fi
+            else
+              printf '%s\tMATERIALIZER_FAIL\n' "$id" >> batch-a-dry-run/summary.tsv
+            fi
+          done < batch-a-candidates.txt
+          cat batch-a-dry-run/summary.tsv
+          if grep -Eq '\t(MISSING_INPUT|MATERIALIZER_FAIL)$' batch-a-dry-run/summary.tsv; then
+            echo 'Batch A dry-run has unsafe candidates.' >&2
+            exit 1
+          fi
+      - name: Upload Batch A diagnostic evidence
         uses: actions/upload-artifact@v4
         with:
-          name: evidence-ui-gate0-batch-a-ledger
-          path: evidence-ui-gate0-ledger.json
+          name: evidence-ui-gate0-batch-a-dry-run
+          path: |
+            evidence-ui-gate0-ledger.json
+            batch-a-candidates.json
+            batch-a-candidates.txt
+            batch-a-dry-run/summary.tsv
+            batch-a-dry-run/diff/*.diff
