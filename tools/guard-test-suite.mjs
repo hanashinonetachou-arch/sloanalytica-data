@@ -19,41 +19,15 @@ const testFiles = fs.readdirSync(testDir)
   .sort()
   .map(name => path.join('test', name));
 
-function runTests(files, stdio = 'inherit') {
-  return spawnSync(process.execPath, ['--test', '--test-concurrency=1', ...files], {
-    cwd: ROOT,
-    stdio,
-    shell: false,
-    encoding: stdio === 'pipe' ? 'utf8' : undefined,
-  });
-}
-
 let status = 1;
 try {
-  const r = runTests(testFiles);
+  const r = spawnSync(process.execPath, ['--test', '--test-concurrency=1', ...testFiles], {
+    cwd: ROOT,
+    stdio: 'inherit',
+    shell: false,
+  });
   if (r.error) throw r.error;
   status = r.status ?? 1;
-
-  // Node's aggregate test runner can occasionally return non-zero without a useful
-  // failing-file line in CI output. Preserve the failure, but rerun files one by one
-  // only on that path so the actual offender is reported instead of weakening the gate.
-  if (status !== 0) {
-    console.error(`TEST SUITE FAILED: status=${String(r.status)} signal=${String(r.signal)}`);
-    const failedFiles = [];
-    for (const testFile of testFiles) {
-      const single = runTests([testFile], 'pipe');
-      if (single.error) throw single.error;
-      if ((single.status ?? 1) !== 0) {
-        failedFiles.push(testFile);
-        console.error(`FAILED TEST FILE: ${testFile} status=${String(single.status)} signal=${String(single.signal)}`);
-        if (single.stdout) process.stderr.write(single.stdout);
-        if (single.stderr) process.stderr.write(single.stderr);
-      }
-    }
-    if (failedFiles.length === 0) {
-      console.error('FAILED TEST FILE: none reproduced individually; aggregate runner failure only');
-    }
-  }
 } finally {
   for (const [filePath, backup] of guardedBackups) {
     if (backup !== null) {
