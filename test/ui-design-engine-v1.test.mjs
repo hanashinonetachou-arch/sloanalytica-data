@@ -112,7 +112,7 @@ test('materializer preserves canonical runtime compatibility metadata',()=>{
       INP_GAMES:{name:'通常ゲーム数',mode:'NUMBER',gridSpan:12,directInput:true},
       INP_COUNT:{name:'初当り回数',mode:'COUNTER',gridSpan:6,directInput:true,compact:true},
     },
-    evidenceContracts:{EVI_UI_END:{label:'終了画面',selectionMode:'single',sourceEvidenceGroupId:'END'}},
+    evidenceContracts:{EVI_UI_END:{label:'終了画面',selectionMode:'single',sourceEvidenceGroupId:'END',inheritOptions:true}},
     unresolved:[],
     auditNotes:[],
   };
