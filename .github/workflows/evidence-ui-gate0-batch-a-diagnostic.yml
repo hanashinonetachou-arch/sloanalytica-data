@@ -1,0 +1,53 @@
+name: Evidence UI Gate 0 Batch A Diagnostic
+
+on:
+  pull_request:
+    branches:
+      - prototype-multi-machine
+    paths:
+      - '.github/workflows/evidence-ui-gate0-batch-a-diagnostic.yml'
+      - 'tools/**'
+      - 'research/**'
+      - 'machines/**'
+
+jobs:
+  gate0-ledger:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Gate 0 fixture tests
+        run: npm run evidence-ui:gate0:test
+      - name: Generate Gate 0 ledger
+        id: gate0
+        shell: bash
+        run: |
+          set +e
+          node tools/audit-evidence-ui-gate0.mjs --output=evidence-ui-gate0-ledger.json
+          rc=$?
+          echo "exit_code=$rc" >> "$GITHUB_OUTPUT"
+          if [ "$rc" -gt 1 ]; then exit "$rc"; fi
+          exit 0
+      - name: Validate ledger structure
+        run: node tools/validate-evidence-ui-gate0-ledger.mjs evidence-ui-gate0-ledger.json
+      - name: Batch A candidate summary
+        run: |
+          node --input-type=module <<'NODE'
+          import { readFile } from 'node:fs/promises';
+          const ledger = JSON.parse(await readFile('evidence-ui-gate0-ledger.json', 'utf8'));
+          const candidates = ledger.rows.filter(r => {
+            if (r.disposition !== 'EVIDENCE') return false;
+            const g = r.gates;
+            const upstreamClean = ['layerCompleteness','evidenceInputType','naturalObservationStructure','selectionObservationLinkage','evidenceSourceLineage','evidenceOptionSemantics','sharedFeatureEvidence'].every(k => (g[k]?.failed ?? 0) === 0);
+            const artifactDebt = ['evidencePropagation','artifactFreshness','materializerRoute','generatedPublishedSeparation'].some(k => (g[k]?.failed ?? 0) > 0 || (g[k]?.unresolved ?? 0) > 0);
+            return upstreamClean && artifactDebt;
+          }).map(r => ({ machineId: r.machineId, status: r.status, findings: r.findings.map(f => f.code) }));
+          console.log(JSON.stringify({ count: candidates.length, candidates }, null, 2));
+          NODE
+      - name: Upload Gate 0 ledger
+        uses: actions/upload-artifact@v4
+        with:
+          name: evidence-ui-gate0-batch-a-ledger
+          path: evidence-ui-gate0-ledger.json
