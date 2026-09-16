@@ -1,0 +1,61 @@
+name: M7 Phase 2.2 Observation Candidate Scan
+
+on:
+  push:
+    branches:
+      - audit/m7-phase2-2-observation-candidate-scan-20260916
+
+permissions:
+  contents: write
+
+jobs:
+  scan:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Scan explicit Evidence lineage candidates
+        shell: bash
+        run: |
+          node <<'NODE'
+          const fs=require('fs'); const path=require('path');
+          const root='research';
+          const out=[];
+          const clean=s=>String(s??'').replace(/[^A-Z0-9_]/g,'_');
+          for(const machineId of fs.readdirSync(root)){
+            const sp=path.join(root,machineId,'selection-data.json');
+            const op=path.join(root,machineId,'machine-observation-data.json');
+            if(!fs.existsSync(sp)||!fs.existsSync(op)) continue;
+            let s,o; try{s=JSON.parse(fs.readFileSync(sp,'utf8'));o=JSON.parse(fs.readFileSync(op,'utf8'));}catch{continue}
+            for(const g of s?.evidenceUi?.groups??[]){
+              const evidenceIds=[...new Set((g.options??[]).flatMap(x=>x.sourceEvidenceIds??[]))];
+              if(!evidenceIds.length) continue;
+              const formal=`OBS_EVI_${clean(g.groupId)}`;
+              if((o.observations??[]).some(x=>x.observationId===formal)) continue;
+              const hits=[];
+              for(const obs of o.observations??[]){
+                const serialized=JSON.stringify(obs);
+                const matched=evidenceIds.filter(id=>serialized.includes(id));
+                if(matched.length) hits.push({observationId:obs.observationId,label:obs.label,matchedEvidenceIds:matched,notes:obs.notes??null});
+              }
+              if(hits.length) out.push({machineId,groupId:g.groupId,formalObservationId:formal,sourceEvidenceIds:evidenceIds,hits});
+            }
+          }
+          fs.mkdirSync('reports',{recursive:true});
+          fs.writeFileSync('reports/m7-phase2-2-observation-explicit-lineage-candidates-20260916.json',JSON.stringify({generatedAt:new Date().toISOString(),candidateGroups:out.length,candidates:out},null,2)+'\n');
+          console.log('candidate groups:',out.length);
+          for(const x of out) console.log(x.machineId,x.groupId,'=>',x.formalObservationId,x.hits.map(h=>h.observationId).join(','));
+          NODE
+      - name: Commit scan report
+        shell: bash
+        run: |
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git add reports/m7-phase2-2-observation-explicit-lineage-candidates-20260916.json
+          if git diff --cached --quiet; then exit 0; fi
+          git commit -m "audit: record explicit M7 Observation lineage candidates"
+          git push
