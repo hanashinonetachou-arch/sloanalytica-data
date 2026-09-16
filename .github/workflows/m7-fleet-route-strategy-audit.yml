@@ -1,0 +1,22 @@
+name: M7 Fleet Route Strategy Audit
+on:
+  pull_request:
+    paths:
+      - 'tools/audit-m7-fleet-route-strategy.mjs'
+      - '.github/workflows/m7-fleet-route-strategy-audit.yml'
+  workflow_dispatch:
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Measure fleet strategy
+        run: node tools/audit-m7-fleet-route-strategy.mjs --json-out=reports/m7-fleet-route-strategy.json
+      - name: Upload strategy evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: m7-fleet-route-strategy
+          path: reports/m7-fleet-route-strategy.json
