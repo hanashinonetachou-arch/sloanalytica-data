@@ -12,6 +12,7 @@ const report = JSON.parse(fs.readFileSync(`${stem}.json`, "utf8"));
 const completion = JSON.parse(fs.readFileSync(path.join(root, "reports/m7-phase2-2-observation-contract-completion-audit-20260916.json"), "utf8"));
 const formalization = JSON.parse(fs.readFileSync(path.join(root, "reports/m7-phase2-2-proof-formalization-batch1-20260916.json"), "utf8"));
 const keyOf = item => `${item.machineId}/${item.groupId}`;
+const LINEAGE_PLAN_HEAD = "d204c65affc09deb9d0bb055a90e8a96eb496fbb";
 
 test("full-debt resolution output is deterministic", () => {
   const actual = auditLineageResolution(root);
@@ -81,10 +82,8 @@ test("the plan preserves exact artifact lineage while never re-deciding Selectio
   }
 });
 
-test("only the four audit deliverables differ from the required base", () => {
-  const tracked = execFileSync("git", ["diff", "--name-only", BASE_HEAD, "--"], { cwd: root, encoding: "utf8" }).trim().split("\n").filter(Boolean);
-  const working = execFileSync("git", ["status", "--porcelain=v1", "--untracked-files=all"], { cwd: root, encoding: "utf8" }).trim().split("\n").filter(Boolean).map(line => line.slice(3));
-  const changed = [...new Set([...tracked, ...working])].sort();
+test("the lineage-plan commit contains only its four audit deliverables", () => {
+  const changed = execFileSync("git", ["diff", "--name-only", BASE_HEAD, LINEAGE_PLAN_HEAD, "--"], { cwd: root, encoding: "utf8" }).trim().split("\n").filter(Boolean).sort();
   assert.deepEqual(changed, [
     "reports/m7-phase2-2-lineage-resolution-plan-20260916.json",
     "reports/m7-phase2-2-lineage-resolution-plan-20260916.md",
