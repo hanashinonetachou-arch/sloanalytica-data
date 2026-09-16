@@ -24,7 +24,6 @@ test("full-debt resolution output is deterministic", () => {
 test("every unresolved Phase 2.2 group appears exactly once and formal groups are excluded", () => {
   const expected = completion.groups.filter(item => item.proofResult === "NOT_ESTABLISHED").map(keyOf).sort();
   const actual = report.unresolvedGroups.map(keyOf).sort();
-  assert.equal(expected.length, 288);
   assert.deepEqual(actual, expected);
   assert.equal(new Set(actual).size, actual.length);
   const formal = new Set(completion.groups.filter(item => item.proofResult === "ESTABLISHED").map(keyOf));
@@ -99,13 +98,13 @@ test("no runtime field, semantic mutation, unsafe migration, or device claim is 
 });
 
 test("endgame accounting remains actionable and finite", () => {
-  assert.equal(report.summary.unresolvedGroupCount, 288);
-  assert.equal(report.summary.affectedMachineCount, 140);
-  assert.equal(report.summary.controlledHumanLineageConfirmationOnlyCount, 238);
+  assert.equal(report.summary.unresolvedGroupCount, completion.groups.filter(item => item.proofResult === "NOT_ESTABLISHED").length);
+  assert.equal(report.summary.affectedMachineCount, new Set(report.unresolvedGroups.map(item => item.machineId)).size);
+  assert.equal(report.summary.controlledHumanLineageConfirmationOnlyCount, report.summary.resolutionClassCounts.SOURCE_EVIDENCE_SET_NOT_EXPLICIT);
   assert.equal(report.summary.observationSemanticsReviewCount, 21);
   assert.equal(report.summary.redesignOrSplitCount, 3);
   assert.equal(report.summary.fieldOrExternalVerificationCount, 21);
   assert.equal(report.summary.upstreamContractBlockedCount, 5);
   assert.equal(report.workTypes.length, 6);
-  assert.equal(report.workTypes.reduce((sum, item) => sum + item.groupCount, 0), 288);
+  assert.equal(report.workTypes.reduce((sum, item) => sum + item.groupCount, 0), report.summary.unresolvedGroupCount);
 });

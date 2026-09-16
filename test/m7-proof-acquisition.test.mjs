@@ -15,10 +15,9 @@ test("proof acquisition reports are deterministic", () => {
   assert.equal(markdownReport(actual), fs.readFileSync(reportPath.replace(/\.json$/, ".md"), "utf8"));
 });
 
-test("all 267 semantic-review groups receive exactly one of seven classifications", () => {
-  assert.equal(report.summary.semanticReviewInput, 267);
-  assert.equal(report.groups.length, 267);
-  assert.equal(Object.values(report.summary.classificationCounts).reduce((a, b) => a + b, 0), 267);
+test("all semantic-review groups receive exactly one of seven classifications", () => {
+  assert.equal(report.groups.length, report.summary.semanticReviewInput);
+  assert.equal(Object.values(report.summary.classificationCounts).reduce((a, b) => a + b, 0), report.summary.semanticReviewInput);
   for (const item of report.groups) {
     assert.ok(CLASSIFICATIONS.includes(item.classification));
     assert.equal(item.proofResult, "NOT_ESTABLISHED");

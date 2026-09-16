@@ -10,9 +10,9 @@ Proof remains binary. Every Batch 1 entry is `NOT_ESTABLISHED`: it is a safe tar
 
 | Metric | Count |
 |---|---:|
-| semanticReviewInput | 267 |
+| semanticReviewInput | 264 |
 | REPOSITORY_PROOF_ACQUIRABLE | 13 |
-| LINEAGE_ANNOTATION_REQUIRED | 228 |
+| LINEAGE_ANNOTATION_REQUIRED | 225 |
 | OBSERVATION_SEMANTICS_REVIEW_REQUIRED | 21 |
 | EXTERNAL_RESEARCH_REQUIRED | 0 |
 | FIELD_VERIFICATION_REQUIRED | 0 |
@@ -46,7 +46,6 @@ Zero counts are deliberate: this batch does not manufacture an external-research
 
 | Machine | Group | Classification | Proof decision | Reason / blocker | Diagnostic candidates |
 |---|---|---|---|---|---|
-| `L_ANOTHER_RINO_HEAVEN_CC` | `RINO_TROPHY` | LINEAGE_ANNOTATION_REQUIRED | NOT_ESTABLISHED | Research IDs and Selection sourceEvidenceIds are present, but the repository has no unique non-label Observation relationship; an explicit lineage annotation is required. | - |
 | `L_ARIFURETA_JA` | `SETTING_EVIDENCE` | REPOSITORY_PROOF_ACQUIRABLE | NOT_ESTABLISHED | A unique machine-local Observation structurally embeds the exact groupId in its identifier, and the prior formal UI audit independently records INP_EVI_<groupId> at concrete package/UI trails. This is a proof-acquisition candidate, not yet an established formal Observation proof. | - |
 | `L_ASLOT_KONOSUBA_FX` | `KONOSUBA_BIG_END` | REPOSITORY_PROOF_ACQUIRABLE | NOT_ESTABLISHED | A unique machine-local Observation structurally embeds the exact groupId in its identifier, and the prior formal UI audit independently records INP_EVI_<groupId> at concrete package/UI trails. This is a proof-acquisition candidate, not yet an established formal Observation proof. | - |
 | `L_ASLOT_KONOSUBA_FX` | `KONOSUBA_BLESS_STAMP` | LINEAGE_ANNOTATION_REQUIRED | NOT_ESTABLISHED | Research IDs and Selection sourceEvidenceIds are present, but the repository has no unique non-label Observation relationship; an explicit lineage annotation is required. | - |
@@ -67,7 +66,6 @@ Zero counts are deliberate: this batch does not manufacture an external-research
 | `L_BIG_DREAM_GOLDEN_PUSHER_KR` | `EVI_GC_THRONE_5PLUS` | LINEAGE_ANNOTATION_REQUIRED | NOT_ESTABLISHED | Research IDs and Selection sourceEvidenceIds are present, but the repository has no unique non-label Observation relationship; an explicit lineage annotation is required. | - |
 | `L_BIG_DREAM_GOLDEN_PUSHER_KR` | `EVI_GC_TREASURE_4PLUS` | LINEAGE_ANNOTATION_REQUIRED | NOT_ESTABLISHED | Research IDs and Selection sourceEvidenceIds are present, but the repository has no unique non-label Observation relationship; an explicit lineage annotation is required. | - |
 | `L_BIOHAZARD_VENDETTA_FK` | `PAYOUT_DISPLAY` | LINEAGE_ANNOTATION_REQUIRED | NOT_ESTABLISHED | Research IDs and Selection sourceEvidenceIds are present, but the repository has no unique non-label Observation relationship; an explicit lineage annotation is required. | - |
-| `L_BIOHAZARD_VILLAGE_XA` | `TROPHY` | LINEAGE_ANNOTATION_REQUIRED | NOT_ESTABLISHED | Research IDs and Selection sourceEvidenceIds are present, but the repository has no unique non-label Observation relationship; an explicit lineage annotation is required. | - |
 | `L_BIOHAZARD5_ZE` | `AT_END` | LINEAGE_ANNOTATION_REQUIRED | NOT_ESTABLISHED | Research IDs and Selection sourceEvidenceIds are present, but the repository has no unique non-label Observation relationship; an explicit lineage annotation is required. | - |
 | `L_BIOHAZARD5_ZE` | `ENDING` | LINEAGE_ANNOTATION_REQUIRED | NOT_ESTABLISHED | Research IDs and Selection sourceEvidenceIds are present, but the repository has no unique non-label Observation relationship; an explicit lineage annotation is required. | - |
 | `L_BIOHAZARD5_ZE` | `PAYOUT` | LINEAGE_ANNOTATION_REQUIRED | NOT_ESTABLISHED | Research IDs and Selection sourceEvidenceIds are present, but the repository has no unique non-label Observation relationship; an explicit lineage annotation is required. | - |
@@ -94,7 +92,6 @@ Zero counts are deliberate: this batch does not manufacture an external-research
 | `L_GEN_CHOMUGEN_PH` | `ENDING_LAMP` | LINEAGE_ANNOTATION_REQUIRED | NOT_ESTABLISHED | Research IDs and Selection sourceEvidenceIds are present, but the repository has no unique non-label Observation relationship; an explicit lineage annotation is required. | - |
 | `L_GEN_CHOMUGEN_PH` | `GEN_WINDOW` | LINEAGE_ANNOTATION_REQUIRED | NOT_ESTABLISHED | Research IDs and Selection sourceEvidenceIds are present, but the repository has no unique non-label Observation relationship; an explicit lineage annotation is required. | - |
 | `L_GEN_CHOMUGEN_PH` | `PAYOUT_DISPLAY` | LINEAGE_ANNOTATION_REQUIRED | NOT_ESTABLISHED | Research IDs and Selection sourceEvidenceIds are present, but the repository has no unique non-label Observation relationship; an explicit lineage annotation is required. | - |
-| `L_GEN_CHOMUGEN_PH` | `TROPHY` | LINEAGE_ANNOTATION_REQUIRED | NOT_ESTABLISHED | Research IDs and Selection sourceEvidenceIds are present, but the repository has no unique non-label Observation relationship; an explicit lineage annotation is required. | - |
 | `L_GODZILLA_VS_EVANGELION_JA` | `AT_END_SCREEN` | LINEAGE_ANNOTATION_REQUIRED | NOT_ESTABLISHED | Research IDs and Selection sourceEvidenceIds are present, but the repository has no unique non-label Observation relationship; an explicit lineage annotation is required. | - |
 | `L_GODZILLA_VS_EVANGELION_JA` | `PAYOUT_DISPLAY` | LINEAGE_ANNOTATION_REQUIRED | NOT_ESTABLISHED | Research IDs and Selection sourceEvidenceIds are present, but the repository has no unique non-label Observation relationship; an explicit lineage annotation is required. | - |
 | `L_GOLDEN_KAMUY_KR` | `GOLD_FRAME_PHOTO` | LINEAGE_ANNOTATION_REQUIRED | NOT_ESTABLISHED | Research IDs and Selection sourceEvidenceIds are present, but the repository has no unique non-label Observation relationship; an explicit lineage annotation is required. | - |

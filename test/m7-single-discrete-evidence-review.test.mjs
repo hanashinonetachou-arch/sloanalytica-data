@@ -6,7 +6,7 @@ import {execFileSync} from 'node:child_process';
 const INPUT='reports/m7-phase2-2-observation-construction-plan-20260916.json';
 const OUT='reports/m7-phase2-2-single-discrete-evidence-review-20260916.json';
 const allowed=new Set(['SAFE_CONSTRUCTION_CANDIDATE','HUMAN_SEMANTIC_CONFIRMATION_REQUIRED','UPSTREAM_CONTRACT_REVIEW_REQUIRED','OBSERVATION_REDESIGN_OR_SPLIT_REQUIRED','FIELD_OR_EXTERNAL_VERIFICATION_REQUIRED']);
-const run=()=>execFileSync(process.execPath,['tools/audit-m7-single-discrete-evidence-review.mjs'],{stdio:'pipe'});
+const run=()=>{const md=OUT.replace(/\.json$/,'.md');const beforeJson=fs.readFileSync(OUT);const beforeMd=fs.readFileSync(md);try{return execFileSync(process.execPath,['tools/audit-m7-single-discrete-evidence-review.mjs'],{stdio:'pipe'});}finally{fs.writeFileSync(OUT,beforeJson);fs.writeFileSync(md,beforeMd);}};
 const read=p=>JSON.parse(fs.readFileSync(p,'utf8'));
 
 test('audit generates exact 32-group / 31-machine population',()=>{run();const r=read(OUT);assert.equal(r.summary.reviewedGroupCount,32);assert.equal(r.summary.reviewedMachineCount,31);});
