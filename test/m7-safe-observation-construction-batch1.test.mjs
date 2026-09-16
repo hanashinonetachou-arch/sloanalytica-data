@@ -1,0 +1,11 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import fs from 'node:fs';
+import {execFileSync} from 'node:child_process';
+const OUT='reports/m7-phase2-2-safe-observation-construction-batch1-20260917.json';
+const run=()=>execFileSync(process.execPath,['tools/audit-m7-safe-observation-construction-batch1.mjs'],{stdio:'pipe'});
+const read=()=>JSON.parse(fs.readFileSync(OUT,'utf8'));
+test('batch1 is exactly three pre-approved SAFE groups',()=>{run();const r=read();assert.equal(r.summary.targetGroupCount,3);assert.deepEqual(r.groups.map(g=>`${g.machineId}/${g.groupId}`),['L_ANOTHER_RINO_HEAVEN_CC/RINO_TROPHY','L_BIOHAZARD_VILLAGE_XA/TROPHY','L_GEN_CHOMUGEN_PH/TROPHY']);});
+test('construction plan never claims proof or mutates production',()=>{const r=read();assert.equal(r.summary.formalProofEstablishedCount,0);for(const g of r.groups){assert.equal(g.formalProofEstablished,false);assert.equal(g.productionMutationPerformed,false);}});
+test('formalization requires exactly one existing FOUND visual END_EVENT observation',()=>{const r=read();for(const g of r.groups){if(g.constructionDecision==='FORMALIZE_EXISTING_SINGLE_END_EVENT_OBSERVATION')assert.equal(g.currentEndEventVisualObservations.length,1);else assert.equal(g.constructionDecision,'HUMAN_REVIEW_REQUIRED');}});
+test('planned lineage exactly preserves reviewed sourceEvidenceIds',()=>{const r=read();for(const g of r.groups.filter(x=>x.proposedMutation)){assert.deepEqual(g.proposedMutation.addSourceEvidenceIds,g.selectedSourceEvidenceIds);assert.equal(g.proposedMutation.addGroupId,g.groupId);assert.match(g.proposedMutation.withObservationId,/^OBS_EVI_/);}});
