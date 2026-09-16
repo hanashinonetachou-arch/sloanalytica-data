@@ -1,0 +1,15 @@
+name: M7 Hokuto PR CI
+on:
+  pull_request:
+    branches: [prototype-multi-machine]
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: {node-version: '22'}
+      - run: node --test test/m7-full-fleet-migration-audit.test.mjs
+      - run: |
+          node tools/audit-m7-full-fleet-migration.mjs --write
+          git diff --exit-code -- reports/m7-full-fleet-migration-audit-20260916.json reports/m7-full-fleet-migration-audit-20260916.md
