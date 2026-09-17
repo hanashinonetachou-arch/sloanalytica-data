@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 import fs from "node:fs";
 import path from "node:path";
+import { resolveHistoricalEvidenceGroup } from "./lib/evidence-contract-m7.mjs";
 
 export const AUDIT_DATE = "2026-09-16";
 export const BASE_HEAD = "f02e7fca2fb35dc2e7f6ad303dbc7f23dd7b6fb9";
@@ -12,6 +13,8 @@ export const CLASSIFICATIONS = [
   "FIELD_VERIFICATION_REQUIRED",
   "NOT_APPLICABLE_OR_LEGACY_EQUIVALENT"
 ];
+
+const POPULATION_FILE = "m7-phase2-2-observation-contract-completion-population-20260916.json";
 
 // These machines are retained by the existing full-fleet audit as real-device /
 // Observation verification regressions. This is a stop list, never a migration allow-list.
@@ -155,20 +158,34 @@ export function auditGroup(machineId, group, research, observation) {
   };
 }
 
+function loadHistoricalPopulation(root) {
+  const population = read(path.join(root, "audit-inputs", POPULATION_FILE));
+  if (population.sourceBaseHead !== BASE_HEAD) {
+    throw new Error(`HISTORICAL_POPULATION_BASE_HEAD_MISMATCH: ${population.sourceBaseHead}`);
+  }
+  if (population.groupCount !== 447 || population.groups?.length !== 447) {
+    throw new Error(`HISTORICAL_POPULATION_COUNT_MISMATCH: ${population.groupCount}/${population.groups?.length ?? 0}`);
+  }
+  return population.groups;
+}
+
 export function auditFleet(root) {
-  const machineIds = fs.readdirSync(path.join(root, "research"), { withFileTypes: true })
-    .filter(entry => entry.isDirectory() && !entry.name.startsWith("_") && fs.existsSync(path.join(root, "research", entry.name, "selection-data.json")))
-    .map(entry => entry.name).sort();
   const groups = [];
-  for (const machineId of machineIds) {
+  for (const entry of loadHistoricalPopulation(root)) {
+    const machineId = entry.machineId;
+    const historicalGroup = entry.group;
     const dir = path.join(root, "research", machineId);
-    const selection = read(path.join(dir, "selection-data.json"));
+    const selectionPath = path.join(dir, "selection-data.json");
     const researchPath = path.join(dir, "research-data.json");
     const observationPath = path.join(dir, "machine-observation-data.json");
-    if (!fs.existsSync(researchPath) || !fs.existsSync(observationPath)) continue;
+    if (!fs.existsSync(selectionPath)) throw new Error(`CURRENT_SELECTION_MISSING: ${machineId}`);
+    if (!fs.existsSync(researchPath)) throw new Error(`CURRENT_RESEARCH_MISSING: ${machineId}`);
+    if (!fs.existsSync(observationPath)) throw new Error(`CURRENT_OBSERVATION_MISSING: ${machineId}`);
+    const selection = read(selectionPath);
+    resolveHistoricalEvidenceGroup(selection, historicalGroup);
     const research = read(researchPath);
     const observation = read(observationPath);
-    for (const group of selection.evidenceUi?.groups ?? []) groups.push(auditGroup(machineId, group, research, observation));
+    groups.push(auditGroup(machineId, historicalGroup, research, observation));
   }
   groups.sort((a, b) => a.machineId.localeCompare(b.machineId) || a.groupId.localeCompare(b.groupId));
   const counts = Object.fromEntries(CLASSIFICATIONS.map(name => [name, groups.filter(item => item.classification === name).length]));
