@@ -67,3 +67,4 @@ test("EVA MIRAI M7 cutover rejects broken legacy migration provenance",()=>{
     /M7_CUTOVER_PROVENANCE_MISMATCH/
   );
 });
+test("Rino Heaven before and after runtime projections are byte-equivalent",()=>{const read=p=>JSON.parse(fs.readFileSync(new URL(p,import.meta.url)));const research=read("../research/L_ANOTHER_RINO_HEAVEN_CC/research-data.json"),legacy=read("fixtures/evidence-contract-m7/L_ANOTHER_RINO_HEAVEN_CC-selection-legacy.json"),migrated=read("../research/L_ANOTHER_RINO_HEAVEN_CC/selection-data.json"),stats=read("../research/L_ANOTHER_RINO_HEAVEN_CC/statistics-report.json");assert.deepEqual(buildMachineData(research,migrated,stats),buildMachineData(research,legacy,stats));});
