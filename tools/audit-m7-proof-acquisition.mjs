@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 import fs from "node:fs";
 import path from "node:path";
+import { resolveHistoricalEvidenceGroup } from "./lib/evidence-contract-m7.mjs";
 
 export const AUDIT_DATE = "2026-09-16";
 export const BASE_HEAD = "a9234354d0091cdbcab17619dc0ba2887b5e30bc";
@@ -90,8 +91,11 @@ export function auditProofAcquisition(root) {
     const research = read(path.join(dir, "research-data.json"));
     const selection = read(path.join(dir, "selection-data.json"));
     const observation = read(path.join(dir, "machine-observation-data.json"));
-    const selectedGroup = (selection.evidenceUi?.groups ?? []).find(group => group.groupId === item.groupId);
-    if (!selectedGroup) throw new Error(`Selection group disappeared: ${item.machineId}/${item.groupId}`);
+        const historicalGroup = {
+      groupId: item.groupId,
+      options: [{ sourceEvidenceIds: item.sourceEvidenceIds }]
+    };
+    resolveHistoricalEvidenceGroup(selection, historicalGroup);
     const researchIds = new Set((research.evidenceCandidates ?? []).map(candidate => candidate.researchEvidenceId));
     if (item.sourceEvidenceIds.some(id => !researchIds.has(id))) throw new Error(`Research lineage changed: ${item.machineId}/${item.groupId}`);
     const auditedInput = inputIndex.get(`${item.machineId}/INP_EVI_${item.groupId}`);
