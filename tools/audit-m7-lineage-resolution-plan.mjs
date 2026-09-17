@@ -2,6 +2,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import { pathToFileURL } from "node:url";
+import { resolveHistoricalEvidenceGroup } from "./lib/evidence-contract-m7.mjs";
 
 export const AUDIT_DATE = "2026-09-16";
 export const BASE_HEAD = "b5bef0645b1779201cb9bf07f33a3258b3b2c7fb";
@@ -74,10 +75,14 @@ function inspectArtifacts(root, item) {
   const research = read(root, `${dir}/research-data.json`);
   const selection = read(root, `${dir}/selection-data.json`);
   const observation = read(root, `${dir}/machine-observation-data.json`);
-  const group = selection.evidenceUi?.groups?.find(candidate => candidate.groupId === item.groupId);
-  if (!group) throw new Error(`${keyOf(item)}: Selection group is missing`);
-  const selectedIds = uniq((group.options ?? []).flatMap(option => option.sourceEvidenceIds ?? []));
-  if (JSON.stringify(selectedIds) !== JSON.stringify([...item.sourceEvidenceIds].sort())) throw new Error(`${keyOf(item)}: Selection lineage differs from completion audit`);
+
+  const historicalGroup = {
+    groupId: item.groupId,
+    options: [{ sourceEvidenceIds: item.sourceEvidenceIds }]
+  };
+  resolveHistoricalEvidenceGroup(selection, historicalGroup);
+  const selectedIds = uniq(item.sourceEvidenceIds);
+
   const researchIds = new Set((research.evidenceCandidates ?? []).map(candidate => candidate.researchEvidenceId));
   const missing = selectedIds.filter(id => !researchIds.has(id));
   if (missing.length) throw new Error(`${keyOf(item)}: missing Research Evidence IDs: ${missing.join(", ")}`);
