@@ -1,0 +1,32 @@
+name: M7 Reconstruction Pilot Preparation Audit
+on:
+  pull_request:
+    paths:
+      - 'tools/audit-m7-reconstruction-pilot-preparation.mjs'
+      - 'test/m7-reconstruction-pilot-preparation-audit.test.mjs'
+      - 'reports/m7-reconstruction-pilot-preparation-audit-20260917.json'
+      - 'reports/m7-reconstruction-pilot-preparation-audit-20260917.md'
+      - '.github/workflows/m7-reconstruction-pilot-preparation-audit.yml'
+  workflow_dispatch:
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Generate route evidence
+        run: node tools/audit-m7-fleet-route-strategy.mjs --json-out=reports/m7-fleet-route-strategy.json
+      - name: Run focused tests
+        run: node --test test/m7-reconstruction-pilot-preparation-audit.test.mjs
+      - name: Run pilot preparation audit
+        run: node tools/audit-m7-reconstruction-pilot-preparation.mjs --write
+      - name: Upload pilot evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: m7-reconstruction-pilot-preparation
+          path: |
+            reports/m7-reconstruction-pilot-preparation-audit-20260917.json
+            reports/m7-reconstruction-pilot-preparation-audit-20260917.md
