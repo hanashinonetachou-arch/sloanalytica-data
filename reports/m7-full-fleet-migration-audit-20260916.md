@@ -7,17 +7,17 @@ Phase 1 base: `8a31eec356e40fecc38ac86fd6e938e1deff9375`. Original verified Data
 | Metric | Count |
 |---|---:|
 | Total machines | 270 |
-| Already M7 | 4 |
-| Legacy machines | 266 |
+| Already M7 | 5 |
+| Legacy machines | 265 |
 | AUTO_MIGRATABLE | 0 |
 | FEATURE_SHARING_REVIEW | 0 |
 | OBSERVATION_BLOCKED | 70 |
-| CANONICAL_UI_BLOCKED | 12 |
+| CANONICAL_UI_BLOCKED | 11 |
 | NORMALIZATION_BLOCKED | 28 |
 | INPUT_COMPATIBILITY_BLOCKED | 0 |
 | SELECTION_QUALITY_BLOCKED | 88 |
 | OTHER_BLOCKED | 68 |
-| NOT_APPLICABLE_OR_EQUIVALENT | 52 |
+| NOT_APPLICABLE_OR_EQUIVALENT | 53 |
 
 Classification is fail-closed. Only explicit formal repository relationships are accepted for mandatory migration proofs; labels/categories are diagnostic only. A machine can have several failed proofs, while its classification follows the documented deterministic blocker priority.
 
@@ -44,7 +44,7 @@ Classification is fail-closed. Only explicit formal repository relationships are
 - `LB_SHAKE_BONUS_TRIGGER_A1`: NORMALIZATION_BLOCKED → SELECTION_QUALITY_BLOCKED — rejected FEAT_SPECIAL_I_BONUS_EXCLUDED: reason lacks a concrete basis
 - `LB_SLOT_GALFY_A4`: OBSERVATION_BLOCKED → SELECTION_QUALITY_BLOCKED — selected FEAT_BT_MISS: reason lacks a concrete statistical/observational basis
 - `LB_THUNDER_V_HA`: NORMALIZATION_BLOCKED → SELECTION_QUALITY_BLOCKED — selected FEAT_BIG_GAME_OUTCOME: reason lacks a concrete statistical/observational basis
-- `L_ANOTHER_RINO_HEAVEN_CC`: OBSERVATION_BLOCKED → CANONICAL_UI_BLOCKED — tools/selection-quality-gate.mjs returned PASS
+- `L_ANOTHER_RINO_HEAVEN_CC`: OBSERVATION_BLOCKED → ALREADY_M7 — Reference implementation is governed by its checked-in pilot tests
 - `L_ASLOT_KONOSUBA_FX`: OBSERVATION_BLOCKED → SELECTION_QUALITY_BLOCKED — rejected FEAT_BONUS_OUTCOME: reason lacks a concrete basis; rejected FEAT_BONUS_DETAIL: reason lacks a concrete basis
 - `L_AZURLANE_THE_ANIMATION_KN`: OTHER_BLOCKED → SELECTION_QUALITY_BLOCKED — selected FEAT_KAGA_CHARACTER_SEQUENCE: reason lacks a concrete statistical/observational basis
 - `L_BAKI_L3`: OBSERVATION_BLOCKED → SELECTION_QUALITY_BLOCKED — selected FEAT_AT_INITIAL: reason is too generic: AT初当りを主軸として採用。; selected FEAT_AT_INITIAL: reason lacks a concrete statistical/observational basis
@@ -140,7 +140,7 @@ Classification is fail-closed. Only explicit formal repository relationships are
 
 ## Phase 2 → Phase 2.1 primary-classification changes
 
-- `L_ANOTHER_RINO_HEAVEN_CC`: OBSERVATION_BLOCKED → CANONICAL_UI_BLOCKED — RINO_TROPHY->OBS_EVI_RINO_TROPHY (FORMAL_GROUP_OBSERVATION_ID)
+- `L_ANOTHER_RINO_HEAVEN_CC`: OBSERVATION_BLOCKED → ALREADY_M7 — Preserved checked-in contract
 - `L_BIOHAZARD_VILLAGE_XA`: OBSERVATION_BLOCKED → CANONICAL_UI_BLOCKED — TROPHY->OBS_EVI_TROPHY (FORMAL_GROUP_OBSERVATION_ID)
 - `L_CHO_HANAMATSURI_PB`: CANONICAL_UI_BLOCKED → OBSERVATION_BLOCKED — [{"ok":false,"groupId":"HANAMATSURI_END_SEG","expectedFormalObservationId":"OBS_EVI_HANAMATSURI_END_SEG","formalCandidateObservationIds":[],"diagnosticLabelCandidates":{"exactGroupLabel":["OBS_END_SEG"],"exactOptionLabelCoverage":[]},"rule":"FORMAL_GROUP_OBSERVATION_ID_MISSING"}]
 - `L_DOUBLE_ATTACK2_EX`: CANONICAL_UI_BLOCKED → OBSERVATION_BLOCKED — [{"ok":false,"groupId":"DA2_COIN","expectedFormalObservationId":"OBS_EVI_DA2_COIN","formalCandidateObservationIds":[],"diagnosticLabelCandidates":{"exactGroupLabel":["OBS_COIN_END"],"exactOptionLabelCoverage":[]},"rule":"FORMAL_GROUP_OBSERVATION_ID_MISSING"},{"ok":false,"groupId":"DA2_ENDING","expectedFormalObservationId":"OBS_EVI_DA2_ENDING","formalCandidateObservationIds":[],"diagnosticLabelCandidates":{"exactGroupLabel":["OBS_ENDING_VOICE"],"exactOptionLabelCoverage":[]},"rule":"FORMAL_GROUP_OBSERVATION_ID_MISSING"}]
@@ -227,7 +227,7 @@ Phase 1 total: 92. The Phase 1 OTHER_BLOCKED population can be subdivided by the
 | `L_AKUDAMA_DRIVE_TP` | OTHER_BLOCKED | BLOCKED_ADOPTION_OUTSIDE_LEGACY_GROUPS | 0 | 0 | PASS | NOT_APPLICABLE | FAIL | NOT_APPLICABLE | FAIL | NOT_APPLICABLE | NOT_APPLICABLE | NOT_RUN | Gate0 found formal Evidence adoption outside legacy evidenceUi.groups |
 | `L_AMAZING_LIVE_PD` | OTHER_BLOCKED | BLOCKED_ADOPTION_OUTSIDE_LEGACY_GROUPS | 0 | 0 | PASS | NOT_APPLICABLE | FAIL | NOT_APPLICABLE | FAIL | NOT_APPLICABLE | NOT_APPLICABLE | NOT_RUN | Gate0 found formal Evidence adoption outside legacy evidenceUi.groups |
 | `L_ANIMAL_SLOT_DOCCHI_ZT` | NORMALIZATION_BLOCKED | MIGRATION_REQUIRED | 19 | 19 | PASS | PASS | FAIL | FAIL | REVIEW | PASS | BASELINE_ONLY | NOT_RUN | Missing or unsupported normalizationMode: EVI_RE_REG_PENGUIN_NOT1, EVI_RE_REG_RABBIT_NOT2, EVI_RE_REG_LION_4PLUS, EVI_RE_REG_BULLDOG_5PLUS, EVI_RE_REG_JUGGLER_6, EVI_RE_ST_RELAX_POLAR_NOT1, EVI_RE_ST_OLD_NINJA_NOT2, EVI_RE_ST_TOPSTAR_246, EVI_RE_ST_FIGHT_PENGUIN_256, EVI_RE_ST_MIKO_RABBIT_4PLUS, EVI_RE_ST_HOST_DOG_5PLUS, EVI_RE_ST_MAIKO_6, EVI_RE_JUNGLE_147_NOT1, EVI_RE_JUNGLE_247_NOT2, EVI_RE_JUNGLE_246, EVI_RE_JUNGLE_256, EVI_RE_JUNGLE_456_4PLUS, EVI_RE_JUNGLE_56_5PLUS, EVI_RE_JUNGLE_6; canonical UI proof failed: canonical materialization marker is missing; Feature/Evidence sharing state is not uniquely represented by the legacy runtime surface |
-| `L_ANOTHER_RINO_HEAVEN_CC` | CANONICAL_UI_BLOCKED | MIGRATION_REQUIRED | 1 | 4 | PASS | PASS | FAIL | PASS | REVIEW | PASS | BASELINE_ONLY | NOT_RUN | canonical UI proof failed: canonical materialization marker is missing; Feature/Evidence sharing state is not uniquely represented by the legacy runtime surface |
+| `L_ANOTHER_RINO_HEAVEN_CC` | ALREADY_M7 | ALREADY_M7_EQUIVALENT | 0 | 0 | NOT_APPLICABLE | PASS | PASS | PASS | PASS | PASS | PASS | PASS | - |
 | `L_ARIFURETA_JA` | OBSERVATION_BLOCKED | MIGRATION_REQUIRED | 1 | 11 | PASS | FAIL | FAIL | PASS | REVIEW | PASS | BASELINE_ONLY | NOT_RUN | One or more Evidence groups lack exactly one formal OBS_EVI_<clean(groupId)> Observation linkage; label/category matching is diagnostic only; canonical UI proof failed: canonical materialization marker is missing; Feature/Evidence sharing state is not uniquely represented by the legacy runtime surface |
 | `L_ASLOT_KONOSUBA_FX` | SELECTION_QUALITY_BLOCKED | MIGRATION_REQUIRED | 4 | 13 | REVIEW | FAIL | FAIL | PASS | REVIEW | PASS | BASELINE_ONLY | NOT_RUN | Selection Quality REVIEW: rejected FEAT_BONUS_OUTCOME: reason lacks a concrete basis; rejected FEAT_BONUS_DETAIL: reason lacks a concrete basis; One or more Evidence groups lack exactly one formal OBS_EVI_<clean(groupId)> Observation linkage; label/category matching is diagnostic only; canonical UI proof failed: canonical materialization marker is missing; Feature/Evidence sharing state is not uniquely represented by the legacy runtime surface |
 | `L_AZURLANE_THE_ANIMATION_KN` | SELECTION_QUALITY_BLOCKED | BLOCKED_ADOPTION_OUTSIDE_LEGACY_GROUPS | 0 | 0 | REVIEW | NOT_APPLICABLE | FAIL | NOT_APPLICABLE | FAIL | NOT_APPLICABLE | NOT_APPLICABLE | NOT_RUN | Selection Quality REVIEW: selected FEAT_KAGA_CHARACTER_SEQUENCE: reason lacks a concrete statistical/observational basis; Gate0 found formal Evidence adoption outside legacy evidenceUi.groups |
