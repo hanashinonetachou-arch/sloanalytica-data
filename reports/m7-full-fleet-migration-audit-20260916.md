@@ -7,17 +7,17 @@ Phase 1 base: `8a31eec356e40fecc38ac86fd6e938e1deff9375`. Original verified Data
 | Metric | Count |
 |---|---:|
 | Total machines | 270 |
-| Already M7 | 3 |
-| Legacy machines | 267 |
+| Already M7 | 4 |
+| Legacy machines | 266 |
 | AUTO_MIGRATABLE | 0 |
 | FEATURE_SHARING_REVIEW | 0 |
-| OBSERVATION_BLOCKED | 71 |
+| OBSERVATION_BLOCKED | 70 |
 | CANONICAL_UI_BLOCKED | 12 |
 | NORMALIZATION_BLOCKED | 28 |
 | INPUT_COMPATIBILITY_BLOCKED | 0 |
 | SELECTION_QUALITY_BLOCKED | 88 |
 | OTHER_BLOCKED | 68 |
-| NOT_APPLICABLE_OR_EQUIVALENT | 51 |
+| NOT_APPLICABLE_OR_EQUIVALENT | 52 |
 
 Classification is fail-closed. Only explicit formal repository relationships are accepted for mandatory migration proofs; labels/categories are diagnostic only. A machine can have several failed proofs, while its classification follows the documented deterministic blocker priority.
 
@@ -109,6 +109,7 @@ Classification is fail-closed. Only explicit formal repository relationships are
 - `L_ZOMBIE_LAND_SAGA`: CANONICAL_UI_BLOCKED → SELECTION_QUALITY_BLOCKED — rejected FEAT_ADABANA_BONUS: reason lacks a concrete basis; rejected FEAT_RF_CZ_WAF: reason lacks a concrete basis; rejected FEAT_RF_CZ_HOUSE: reason lacks a concrete basis; rejected FEAT_RF_CZ_SAGA: reason lacks a concrete basis
 - `S_AOHARU_MISAO_A2`: OBSERVATION_BLOCKED → SELECTION_QUALITY_BLOCKED — selected FEAT_BB: reason is too generic: BB確率に段階差があるため採用。; selected FEAT_SUIKA: reason lacks a concrete statistical/observational basis; selected FEAT_BB_REPLAY_DOWN: reason lacks a concrete statistical/observational basis; selected FEAT_RB_TO_BB: reason lacks a concrete statistical/observational basis
 - `S_BAHAMA_A3_30`: OTHER_BLOCKED → SELECTION_QUALITY_BLOCKED — rejected FEAT_BONUS: reason lacks a concrete basis; selected FEAT_SUIKA: reason lacks a concrete statistical/observational basis; rejected FEAT_FREEZE: reason lacks a concrete basis; rejected FEAT_COMMON1: reason lacks a concrete basis
+- `S_BOOWY_SV`: OBSERVATION_BLOCKED → ALREADY_M7 — Reference implementation is governed by its checked-in pilot tests
 - `S_DANMACHI2_XZ`: OBSERVATION_BLOCKED → SELECTION_QUALITY_BLOCKED — selected FEAT_CZ: reason lacks a concrete statistical/observational basis; selected FEAT_ART: reason lacks a concrete statistical/observational basis; selected FEAT_SUIKA: reason is too generic: 出現率自体に段階差があるため採用。; selected FEAT_SUIKA: reason lacks a concrete statistical/observational basis
 - `S_DIGISLO_JACK_GB1`: OTHER_BLOCKED → SELECTION_QUALITY_BLOCKED — unclassified research feature: RF_ROLE_CHAIN_BONUS; selected FEAT_BONUS_OUTCOME: missing userReason
 - `S_GAMERA2`: CANONICAL_UI_BLOCKED → SELECTION_QUALITY_BLOCKED — rejected FEAT_RB: reason lacks a concrete basis
@@ -149,6 +150,7 @@ Classification is fail-closed. Only explicit formal repository relationships are
 - `L_MOMOTARO_DENTETSU_TEIBAN_PU`: CANONICAL_UI_BLOCKED → OBSERVATION_BLOCKED — [{"ok":false,"groupId":"MOMOTETSU_TROPHY","expectedFormalObservationId":"OBS_EVI_MOMOTETSU_TROPHY","formalCandidateObservationIds":[],"diagnosticLabelCandidates":{"exactGroupLabel":["OBS_TROPHY"],"exactOptionLabelCoverage":[]},"rule":"FORMAL_GROUP_OBSERVATION_ID_MISSING"}]
 - `L_ONE_PUNCH_MAN`: CANONICAL_UI_BLOCKED → OBSERVATION_BLOCKED — [{"ok":false,"groupId":"BONUS_AT_END_SCREEN","expectedFormalObservationId":"OBS_EVI_BONUS_AT_END_SCREEN","formalCandidateObservationIds":[],"diagnosticLabelCandidates":{"exactGroupLabel":["OBS_BONUS_AT_END_SCREEN_EVIDENCE"],"exactOptionLabelCoverage":["OBS_BONUS_AT_END_SCREEN_EVIDENCE"]},"rule":"FORMAL_GROUP_OBSERVATION_ID_MISSING"}]
 - `L_TOLOVE_DARKNESS_S6`: CANONICAL_UI_BLOCKED → OBSERVATION_BLOCKED — [{"ok":false,"groupId":"ST_END_STAMP","expectedFormalObservationId":"OBS_EVI_ST_END_STAMP","formalCandidateObservationIds":[],"diagnosticLabelCandidates":{"exactGroupLabel":["OBS_ST_END_STAMP_EVIDENCE"],"exactOptionLabelCoverage":["OBS_ST_END_STAMP_EVIDENCE"]},"rule":"FORMAL_GROUP_OBSERVATION_ID_MISSING"}]
+- `S_BOOWY_SV`: OBSERVATION_BLOCKED → ALREADY_M7 — Preserved checked-in contract
 - `S_OVERLORD_II_SX`: CANONICAL_UI_BLOCKED → OBSERVATION_BLOCKED — [{"ok":false,"groupId":"OVERLORD_SET_START","expectedFormalObservationId":"OBS_EVI_OVERLORD_SET_START","formalCandidateObservationIds":[],"diagnosticLabelCandidates":{"exactGroupLabel":["OBS_SET_START"],"exactOptionLabelCoverage":[]},"rule":"FORMAL_GROUP_OBSERVATION_ID_MISSING"},{"ok":false,"groupId":"OVERLORD_PAYOUT","expectedFormalObservationId":"OBS_EVI_OVERLORD_PAYOUT","formalCandidateObservationIds":[],"diagnosticLabelCandidates":{"exactGroupLabel":["OBS_PAYOUT"],"exactOptionLabelCoverage":[]},"rule":"FORMAL_GROUP_OBSERVATION_ID_MISSING"},{"ok":false,"groupId":"OVERLORD_ENDING","expectedFormalObservationId":"OBS_EVI_OVERLORD_ENDING","formalCandidateObservationIds":[],"diagnosticLabelCandidates":{"exactGroupLabel":["OBS_ENDING_TEXT"],"exactOptionLabelCoverage":[]},"rule":"FORMAL_GROUP_OBSERVATION_ID_MISSING"}]
 - `S_PERSONA5_FR`: CANONICAL_UI_BLOCKED → OBSERVATION_BLOCKED — [{"ok":false,"groupId":"SAMMY_TROPHY","expectedFormalObservationId":"OBS_EVI_SAMMY_TROPHY","formalCandidateObservationIds":[],"diagnosticLabelCandidates":{"exactGroupLabel":["OBS_SAMMY_TROPHY"],"exactOptionLabelCoverage":[]},"rule":"FORMAL_GROUP_OBSERVATION_ID_MISSING"},{"ok":false,"groupId":"PC_END_CONDITIONAL","expectedFormalObservationId":"OBS_EVI_PC_END_CONDITIONAL","formalCandidateObservationIds":[],"diagnosticLabelCandidates":{"exactGroupLabel":["OBS_PC_END_CONDITIONAL"],"exactOptionLabelCoverage":[]},"rule":"FORMAL_GROUP_OBSERVATION_ID_MISSING"}]
 
@@ -401,7 +403,7 @@ Phase 1 total: 92. The Phase 1 OTHER_BLOCKED population can be subdivided by the
 | `S_BAHAMA_A3_30` | SELECTION_QUALITY_BLOCKED | NOT_APPLICABLE_NO_EVIDENCE | 0 | 0 | REVIEW | NOT_APPLICABLE | NOT_APPLICABLE | NOT_APPLICABLE | NOT_APPLICABLE | NOT_APPLICABLE | NOT_APPLICABLE | NOT_RUN | Selection Quality REVIEW: rejected FEAT_BONUS: reason lacks a concrete basis; selected FEAT_SUIKA: reason lacks a concrete statistical/observational basis; rejected FEAT_FREEZE: reason lacks a concrete basis; rejected FEAT_COMMON1: reason lacks a concrete basis; Formal Gate0 disposition is NO_EVIDENCE; there is no Evidence contract to migrate |
 | `S_BIG_SHIMAUTA_E2_30` | OBSERVATION_BLOCKED | MIGRATION_REQUIRED | 1 | 1 | PASS | FAIL | FAIL | PASS | REVIEW | PASS | BASELINE_ONLY | NOT_RUN | One or more Evidence groups lack exactly one formal OBS_EVI_<clean(groupId)> Observation linkage; label/category matching is diagnostic only; canonical UI proof failed: canonical UI is not closed; Feature/Evidence sharing state is not uniquely represented by the legacy runtime surface |
 | `S_BIOHAZARD_RE2_XB` | OBSERVATION_BLOCKED | MIGRATION_REQUIRED | 1 | 8 | PASS | FAIL | FAIL | PASS | REVIEW | PASS | BASELINE_ONLY | NOT_RUN | One or more Evidence groups lack exactly one formal OBS_EVI_<clean(groupId)> Observation linkage; label/category matching is diagnostic only; canonical UI proof failed: canonical UI is not closed; Feature/Evidence sharing state is not uniquely represented by the legacy runtime surface |
-| `S_BOOWY_SV` | OBSERVATION_BLOCKED | MIGRATION_REQUIRED | 2 | 3 | PASS | FAIL | PASS | PASS | REVIEW | PASS | BASELINE_ONLY | NOT_RUN | One or more Evidence groups lack exactly one formal OBS_EVI_<clean(groupId)> Observation linkage; label/category matching is diagnostic only; Feature/Evidence sharing state is not uniquely represented by the legacy runtime surface |
+| `S_BOOWY_SV` | ALREADY_M7 | ALREADY_M7_EQUIVALENT | 0 | 0 | NOT_APPLICABLE | PASS | PASS | PASS | PASS | PASS | PASS | PASS | - |
 | `S_BUSOU_SHINKI` | OTHER_BLOCKED | NOT_APPLICABLE_NO_EVIDENCE | 0 | 0 | PASS | NOT_APPLICABLE | NOT_APPLICABLE | NOT_APPLICABLE | NOT_APPLICABLE | NOT_APPLICABLE | NOT_APPLICABLE | NOT_RUN | Formal Gate0 disposition is NO_EVIDENCE; there is no Evidence contract to migrate |
 | `S_CHABUDAI_EB6` | OTHER_BLOCKED | NOT_APPLICABLE_NO_EVIDENCE | 0 | 0 | PASS | NOT_APPLICABLE | NOT_APPLICABLE | NOT_APPLICABLE | NOT_APPLICABLE | NOT_APPLICABLE | NOT_APPLICABLE | NOT_RUN | Formal Gate0 disposition is NO_EVIDENCE; there is no Evidence contract to migrate |
 | `S_CODE_GEASS_3_CC_FS` | OTHER_BLOCKED | BLOCKED_ADOPTION_OUTSIDE_LEGACY_GROUPS | 0 | 0 | PASS | NOT_APPLICABLE | FAIL | NOT_APPLICABLE | FAIL | NOT_APPLICABLE | NOT_APPLICABLE | NOT_RUN | Gate0 found formal Evidence adoption outside legacy evidenceUi.groups |
