@@ -10,9 +10,9 @@ Proof remains binary. Every Batch 1 entry is `NOT_ESTABLISHED`: it is a safe tar
 
 | Metric | Count |
 |---|---:|
-| semanticReviewInput | 264 |
+| semanticReviewInput | 258 |
 | REPOSITORY_PROOF_ACQUIRABLE | 13 |
-| LINEAGE_ANNOTATION_REQUIRED | 225 |
+| LINEAGE_ANNOTATION_REQUIRED | 219 |
 | OBSERVATION_SEMANTICS_REVIEW_REQUIRED | 21 |
 | EXTERNAL_RESEARCH_REQUIRED | 0 |
 | FIELD_VERIFICATION_REQUIRED | 0 |
@@ -104,7 +104,6 @@ Zero counts are deliberate: this batch does not manufacture an external-research
 | `L_HIGURASHI_GOU_SS` | `CZ_END_VOICE` | LINEAGE_ANNOTATION_REQUIRED | NOT_ESTABLISHED | Research IDs and Selection sourceEvidenceIds are present, but the repository has no unique non-label Observation relationship; an explicit lineage annotation is required. | - |
 | `L_HIGURASHI_GOU_SS` | `NIPAA_EVENT` | LINEAGE_ANNOTATION_REQUIRED | NOT_ESTABLISHED | Research IDs and Selection sourceEvidenceIds are present, but the repository has no unique non-label Observation relationship; an explicit lineage annotation is required. | - |
 | `L_HIGURASHI_GOU_SS` | `REG_CHARACTER` | LINEAGE_ANNOTATION_REQUIRED | NOT_ESTABLISHED | Research IDs and Selection sourceEvidenceIds are present, but the repository has no unique non-label Observation relationship; an explicit lineage annotation is required. | - |
-| `L_HIGURASHI_GOU_SS` | `TROPHY` | LINEAGE_ANNOTATION_REQUIRED | NOT_ESTABLISHED | Research IDs and Selection sourceEvidenceIds are present, but the repository has no unique non-label Observation relationship; an explicit lineage annotation is required. | - |
 | `L_HOKUTO_MUSOU_FS` | `SETTING_EVIDENCE` | LINEAGE_ANNOTATION_REQUIRED | NOT_ESTABLISHED | Research IDs and Selection sourceEvidenceIds are present, but the repository has no unique non-label Observation relationship; an explicit lineage annotation is required. | - |
 | `L_INITIAL_D_2ND` | `INITIAL_D_LB_END` | LINEAGE_ANNOTATION_REQUIRED | NOT_ESTABLISHED | Research IDs and Selection sourceEvidenceIds are present, but the repository has no unique non-label Observation relationship; an explicit lineage annotation is required. | - |
 | `L_INITIAL_D_2ND` | `INITIAL_D_PAYOUT` | LINEAGE_ANNOTATION_REQUIRED | NOT_ESTABLISHED | Research IDs and Selection sourceEvidenceIds are present, but the repository has no unique non-label Observation relationship; an explicit lineage annotation is required. | - |
@@ -117,8 +116,6 @@ Zero counts are deliberate: this batch does not manufacture an external-research
 | `L_KAGUYA_SAMA_JA` | `KAGUYA_FUJI_COSTUME` | OBSERVATION_SEMANTICS_REVIEW_REQUIRED | NOT_ESTABLISHED | The candidate Observation must be semantically reviewed; label/category resemblance is retained only to locate it and cannot establish lineage. | `OBS_FUJI_COSTUME_EVIDENCE` |
 | `L_KAGUYA_SAMA_JA` | `KAGUYA_PAYOUT` | OBSERVATION_SEMANTICS_REVIEW_REQUIRED | NOT_ESTABLISHED | The candidate Observation must be semantically reviewed; label/category resemblance is retained only to locate it and cannot establish lineage. | `OBS_PAYOUT_EVIDENCE` |
 | `L_KAGUYA_SAMA_JA` | `KAGUYA_REG_SCENARIO` | LINEAGE_ANNOTATION_REQUIRED | NOT_ESTABLISHED | Research IDs and Selection sourceEvidenceIds are present, but the repository has no unique non-label Observation relationship; an explicit lineage annotation is required. | - |
-| `L_KAMEN_RIDER_7RIDERS_UJA` | `AREA_COORDINATE` | LINEAGE_ANNOTATION_REQUIRED | NOT_ESTABLISHED | Research IDs and Selection sourceEvidenceIds are present, but the repository has no unique non-label Observation relationship; an explicit lineage annotation is required. | - |
-| `L_KAMEN_RIDER_7RIDERS_UJA` | `TROPHY` | LINEAGE_ANNOTATION_REQUIRED | NOT_ESTABLISHED | Research IDs and Selection sourceEvidenceIds are present, but the repository has no unique non-label Observation relationship; an explicit lineage annotation is required. | - |
 | `L_KAMEN_RIDER_DEN_O_UD` | `AT_END_HARD` | LINEAGE_ANNOTATION_REQUIRED | NOT_ESTABLISHED | Research IDs and Selection sourceEvidenceIds are present, but the repository has no unique non-label Observation relationship; an explicit lineage annotation is required. | - |
 | `L_KAMEN_RIDER_DEN_O_UD` | `HIGH_AT_BONUS_END` | LINEAGE_ANNOTATION_REQUIRED | NOT_ESTABLISHED | Research IDs and Selection sourceEvidenceIds are present, but the repository has no unique non-label Observation relationship; an explicit lineage annotation is required. | - |
 | `L_KAMEN_RIDER_DEN_O_UD` | `TROPHY` | LINEAGE_ANNOTATION_REQUIRED | NOT_ESTABLISHED | Research IDs and Selection sourceEvidenceIds are present, but the repository has no unique non-label Observation relationship; an explicit lineage annotation is required. | - |
@@ -141,9 +138,6 @@ Zero counts are deliberate: this batch does not manufacture an external-research
 | `L_MONSTER_HUNTER_RISE_XA` | `MH_OMIKUJI` | LINEAGE_ANNOTATION_REQUIRED | NOT_ESTABLISHED | Research IDs and Selection sourceEvidenceIds are present, but the repository has no unique non-label Observation relationship; an explicit lineage annotation is required. | - |
 | `L_MONSTER_HUNTER_RISE_XA` | `MH_VOICE` | LINEAGE_ANNOTATION_REQUIRED | NOT_ESTABLISHED | Research IDs and Selection sourceEvidenceIds are present, but the repository has no unique non-label Observation relationship; an explicit lineage annotation is required. | - |
 | `L_NANATSU_NO_MAKEN_PU` | `SETTING_EVIDENCE` | LINEAGE_ANNOTATION_REQUIRED | NOT_ESTABLISHED | Research IDs and Selection sourceEvidenceIds are present, but the repository has no unique non-label Observation relationship; an explicit lineage annotation is required. | - |
-| `L_NOGIZAKA46_UD` | `TAMA_TROPHY` | LINEAGE_ANNOTATION_REQUIRED | NOT_ESTABLISHED | Research IDs and Selection sourceEvidenceIds are present, but the repository has no unique non-label Observation relationship; an explicit lineage annotation is required. | - |
-| `L_NYANKO_BIGBANG_MK` | `AT_END_SCREEN` | LINEAGE_ANNOTATION_REQUIRED | NOT_ESTABLISHED | Research IDs and Selection sourceEvidenceIds are present, but the repository has no unique non-label Observation relationship; an explicit lineage annotation is required. | - |
-| `L_NYANKO_BIGBANG_MK` | `TAMA_TROPHY` | LINEAGE_ANNOTATION_REQUIRED | NOT_ESTABLISHED | Research IDs and Selection sourceEvidenceIds are present, but the repository has no unique non-label Observation relationship; an explicit lineage annotation is required. | - |
 | `L_NYANKO_DAISENSO_CHOSHINSOKU_KB` | `SETTING_EVIDENCE` | LINEAGE_ANNOTATION_REQUIRED | NOT_ESTABLISHED | Research IDs and Selection sourceEvidenceIds are present, but the repository has no unique non-label Observation relationship; an explicit lineage annotation is required. | - |
 | `L_ONE_PUNCH_MAN` | `BONUS_AT_END_SCREEN` | OBSERVATION_SEMANTICS_REVIEW_REQUIRED | NOT_ESTABLISHED | The candidate Observation must be semantically reviewed; label/category resemblance is retained only to locate it and cannot establish lineage. | `OBS_BONUS_AT_END_SCREEN_EVIDENCE` |
 | `L_ONIMUSHA3_XA` | `EV_BIG_END` | LINEAGE_ANNOTATION_REQUIRED | NOT_ESTABLISHED | Research IDs and Selection sourceEvidenceIds are present, but the repository has no unique non-label Observation relationship; an explicit lineage annotation is required. | - |

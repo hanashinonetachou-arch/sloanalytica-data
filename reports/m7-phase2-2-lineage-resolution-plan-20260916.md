@@ -4,14 +4,14 @@ Base HEAD: `b5bef0645b1779201cb9bf07f33a3258b3b2c7fb`. This is a full-debt class
 
 ## Endgame
 
-The 285 unresolved groups on 138 machines are compressed into 8 populated resolution classes and 6 future work types. Existing repository proof makes **0** groups automatically safe. No real-device verification was performed.
+The 279 unresolved groups on 135 machines are compressed into 8 populated resolution classes and 6 future work types. Existing repository proof makes **0** groups automatically safe. No real-device verification was performed.
 
 ### Resolution classes
 
 | Resolution class | Groups | Machines |
 |---|---:|---:|
 | EXACT_UNIVERSE_LINEAGE_METADATA_MISSING | 0 | 0 |
-| SOURCE_EVIDENCE_SET_NOT_EXPLICIT | 235 | 118 |
+| SOURCE_EVIDENCE_SET_NOT_EXPLICIT | 229 | 115 |
 | OBSERVATION_UNIVERSE_BROADER_THAN_SELECTION | 1 | 1 |
 | OBSERVATION_UNIVERSE_NARROWER_OR_PARTIAL | 0 | 0 |
 | OBSERVATION_MODE_MISMATCH | 1 | 1 |
@@ -27,7 +27,7 @@ The 285 unresolved groups on 138 machines are compressed into 8 populated resolu
 | Eligibility | Groups |
 |---|---:|
 | SAFE_WITH_EXISTING_REPOSITORY_PROOF | 0 |
-| REQUIRES_HUMAN_LINEAGE_CONFIRMATION | 256 |
+| REQUIRES_HUMAN_LINEAGE_CONFIRMATION | 250 |
 | REQUIRES_OBSERVATION_REDESIGN_OR_SPLIT | 3 |
 | REQUIRES_EXTERNAL_OR_FIELD_VERIFICATION | 21 |
 | BLOCKED_BY_UPSTREAM_CONTRACT | 5 |
@@ -37,7 +37,7 @@ The 285 unresolved groups on 138 machines are compressed into 8 populated resolu
 
 | Work type | Groups | Classes |
 |---|---:|---|
-| CONTROLLED_LINEAGE_CONFIRMATION_AND_ANNOTATION | 235 | SOURCE_EVIDENCE_SET_NOT_EXPLICIT, EXACT_UNIVERSE_LINEAGE_METADATA_MISSING |
+| CONTROLLED_LINEAGE_CONFIRMATION_AND_ANNOTATION | 229 | SOURCE_EVIDENCE_SET_NOT_EXPLICIT, EXACT_UNIVERSE_LINEAGE_METADATA_MISSING |
 | OBSERVATION_REDESIGN_OR_SPLIT | 3 | OBSERVATION_UNIVERSE_BROADER_THAN_SELECTION, OBSERVATION_UNIVERSE_NARROWER_OR_PARTIAL, OBSERVATION_MODE_MISMATCH, ANSWER_OR_VARIANT_UNIVERSE_MISMATCH, MULTIPLE_OBSERVATIONS_REQUIRED |
 | OBSERVATION_SEMANTICS_REVIEW | 21 | OBSERVATION_SEMANTICS_REVIEW_REQUIRED |
 | FIELD_OR_EXTERNAL_VERIFICATION | 21 | FIELD_VERIFICATION_REQUIRED |
@@ -73,13 +73,13 @@ These machines contain multiple blocked groups; counts identify consolidation le
 | `L_SMASLO_DUNBINE_MF` | 6 | FIELD_VERIFICATION_REQUIRED (6) |
 | `L_URUSEI_YATSURA_EV` | 6 | SOURCE_EVIDENCE_SET_NOT_EXPLICIT (6) |
 | `L_BIG_DREAM_GOLDEN_PUSHER_KR` | 5 | SOURCE_EVIDENCE_SET_NOT_EXPLICIT (5) |
-| `L_HIGURASHI_GOU_SS` | 5 | SOURCE_EVIDENCE_SET_NOT_EXPLICIT (5) |
 | `L_LUPIN_DAIKOUKAISHA_H1` | 5 | FIELD_VERIFICATION_REQUIRED (5) |
 | `L_MONSTER_HUNTER_RISE_XA` | 5 | SOURCE_EVIDENCE_SET_NOT_EXPLICIT (4), OBSERVATION_SEMANTICS_REVIEW_REQUIRED (1) |
 | `S_TATE_NO_YUSHA_KS` | 5 | SOURCE_EVIDENCE_SET_NOT_EXPLICIT (5) |
 | `L_ASLOT_KONOSUBA_FX` | 4 | SOURCE_EVIDENCE_SET_NOT_EXPLICIT (3), OBSERVATION_UNIVERSE_BROADER_THAN_SELECTION (1) |
 | `L_BIOHAZARD5_ZE` | 4 | SOURCE_EVIDENCE_SET_NOT_EXPLICIT (4) |
 | `L_DMC5_ST_XA` | 4 | SOURCE_EVIDENCE_SET_NOT_EXPLICIT (4) |
+| `L_HIGURASHI_GOU_SS` | 4 | SOURCE_EVIDENCE_SET_NOT_EXPLICIT (4) |
 | `L_INITIAL_D_2ND` | 4 | SOURCE_EVIDENCE_SET_NOT_EXPLICIT (4) |
 | `L_KAGUYA_SAMA_JA` | 4 | SOURCE_EVIDENCE_SET_NOT_EXPLICIT (2), OBSERVATION_SEMANTICS_REVIEW_REQUIRED (2) |
 | `L_SHIOKININ_KC` | 4 | SOURCE_EVIDENCE_SET_NOT_EXPLICIT (3), OBSERVATION_SEMANTICS_REVIEW_REQUIRED (1) |
@@ -119,11 +119,9 @@ These machines contain multiple blocked groups; counts identify consolidation le
 | `L_GODZILLA_VS_EVANGELION_JA` | 2 | SOURCE_EVIDENCE_SET_NOT_EXPLICIT (2) |
 | `L_GUILTY_CROWN_2_XF` | 2 | SOURCE_EVIDENCE_SET_NOT_EXPLICIT (2) |
 | `L_INUYASHA2_FK` | 2 | SOURCE_EVIDENCE_SET_NOT_EXPLICIT (2) |
-| `L_KAMEN_RIDER_7RIDERS_UJA` | 2 | SOURCE_EVIDENCE_SET_NOT_EXPLICIT (2) |
 | `L_KOMONCHAMA_TEN_L2` | 2 | SOURCE_EVIDENCE_SET_NOT_EXPLICIT (2) |
 | `L_MAHJONG_FIGHT_CLUB_KAKUSEI_KM` | 2 | SOURCE_EVIDENCE_SET_NOT_EXPLICIT (2) |
 | `L_MONKEY_TURN5_CE` | 2 | SOURCE_EVIDENCE_SET_NOT_EXPLICIT (2) |
-| `L_NYANKO_BIGBANG_MK` | 2 | SOURCE_EVIDENCE_SET_NOT_EXPLICIT (2) |
 | `L_ONIMUSHA3_XA` | 2 | SOURCE_EVIDENCE_SET_NOT_EXPLICIT (2) |
 | `L_PACHISLO_SENRAN_KAGURA2_L9` | 2 | SOURCE_EVIDENCE_SET_NOT_EXPLICIT (2) |
 | `L_REZERO_SEASON2_PA5` | 2 | FIELD_VERIFICATION_REQUIRED (2) |
@@ -212,7 +210,6 @@ These machines contain multiple blocked groups; counts identify consolidation le
 | `L_HIGURASHI_GOU_SS/CZ_END_VOICE` | `RE_CZ_VOICE_2PLUS`, `RE_CZ_VOICE_5PLUS` | - | LINEAGE_ANNOTATION_REQUIRED | SOURCE_EVIDENCE_SET_NOT_EXPLICIT | REQUIRES_HUMAN_LINEAGE_CONFIRMATION | Obtain controlled authoritative confirmation of the exact Evidence-to-Observation universe, then annotate it in an existing formal artifact. |
 | `L_HIGURASHI_GOU_SS/NIPAA_EVENT` | `RE_NIPAA_2PLUS`, `RE_NIPAA_3PLUS`, `RE_NIPAA_4PLUS`, `RE_NIPAA_5PLUS`, `RE_NIPAA_6` | - | LINEAGE_ANNOTATION_REQUIRED | SOURCE_EVIDENCE_SET_NOT_EXPLICIT | REQUIRES_HUMAN_LINEAGE_CONFIRMATION | Obtain controlled authoritative confirmation of the exact Evidence-to-Observation universe, then annotate it in an existing formal artifact. |
 | `L_HIGURASHI_GOU_SS/REG_CHARACTER` | `RE_REG_GOLD_4PLUS` | - | LINEAGE_ANNOTATION_REQUIRED | SOURCE_EVIDENCE_SET_NOT_EXPLICIT | REQUIRES_HUMAN_LINEAGE_CONFIRMATION | Obtain controlled authoritative confirmation of the exact Evidence-to-Observation universe, then annotate it in an existing formal artifact. |
-| `L_HIGURASHI_GOU_SS/TROPHY` | `RE_TROPHY_2PLUS`, `RE_TROPHY_4PLUS`, `RE_TROPHY_5PLUS`, `RE_TROPHY_6` | - | LINEAGE_ANNOTATION_REQUIRED | SOURCE_EVIDENCE_SET_NOT_EXPLICIT | REQUIRES_HUMAN_LINEAGE_CONFIRMATION | Obtain controlled authoritative confirmation of the exact Evidence-to-Observation universe, then annotate it in an existing formal artifact. |
 | `L_HOKUTO_MUSOU_FS/SETTING_EVIDENCE` | `RE_4PLUS`, `RE_6`, `RE_ST_2PLUS`, `RE_ST_4PLUS`, `RE_ST_6`, `RE_TROPHY_2PLUS`, `RE_TROPHY_3PLUS`, `RE_TROPHY_4PLUS`, `RE_TROPHY_5PLUS`, `RE_TROPHY_6` | - | LINEAGE_ANNOTATION_REQUIRED | SOURCE_EVIDENCE_SET_NOT_EXPLICIT | REQUIRES_HUMAN_LINEAGE_CONFIRMATION | Obtain controlled authoritative confirmation of the exact Evidence-to-Observation universe, then annotate it in an existing formal artifact. |
 | `L_INITIAL_D_2ND/INITIAL_D_LB_END` | `RE_LB_END_GOLD`, `RE_LB_END_RED` | - | LINEAGE_ANNOTATION_REQUIRED | SOURCE_EVIDENCE_SET_NOT_EXPLICIT | REQUIRES_HUMAN_LINEAGE_CONFIRMATION | Obtain controlled authoritative confirmation of the exact Evidence-to-Observation universe, then annotate it in an existing formal artifact. |
 | `L_INITIAL_D_2ND/INITIAL_D_PAYOUT` | `RE_PAYOUT_456`, `RE_PAYOUT_555`, `RE_PAYOUT_666`, `RE_PAYOUT_85` | - | LINEAGE_ANNOTATION_REQUIRED | SOURCE_EVIDENCE_SET_NOT_EXPLICIT | REQUIRES_HUMAN_LINEAGE_CONFIRMATION | Obtain controlled authoritative confirmation of the exact Evidence-to-Observation universe, then annotate it in an existing formal artifact. |
@@ -225,8 +222,6 @@ These machines contain multiple blocked groups; counts identify consolidation le
 | `L_KAGUYA_SAMA_JA/KAGUYA_FUJI_COSTUME` | `RE_KAGUYA_FUJI_GYM_TO_LOVE`, `RE_KAGUYA_FUJI_GYM_TO_UNIFORM`, `RE_KAGUYA_FUJI_LOVE_TO_UNIFORM` | `OBS_FUJI_COSTUME_EVIDENCE` | OBSERVATION_SEMANTICS_REVIEW_REQUIRED | OBSERVATION_SEMANTICS_REVIEW_REQUIRED | REQUIRES_HUMAN_LINEAGE_CONFIRMATION | Perform human Observation semantics review, then annotate exact lineage only if equivalence is confirmed. |
 | `L_KAGUYA_SAMA_JA/KAGUYA_PAYOUT` | `RE_KAGUYA_PAYOUT_246`, `RE_KAGUYA_PAYOUT_456`, `RE_KAGUYA_PAYOUT_666` | `OBS_PAYOUT_EVIDENCE` | OBSERVATION_SEMANTICS_REVIEW_REQUIRED | OBSERVATION_SEMANTICS_REVIEW_REQUIRED | REQUIRES_HUMAN_LINEAGE_CONFIRMATION | Perform human Observation semantics review, then annotate exact lineage only if equivalence is confirmed. |
 | `L_KAGUYA_SAMA_JA/KAGUYA_REG_SCENARIO` | `RE_KAGUYA_REG_HAYASAKA`, `RE_KAGUYA_REG_PAPA`, `RE_KAGUYA_REG_RAINBOW` | - | LINEAGE_ANNOTATION_REQUIRED | SOURCE_EVIDENCE_SET_NOT_EXPLICIT | REQUIRES_HUMAN_LINEAGE_CONFIRMATION | Obtain controlled authoritative confirmation of the exact Evidence-to-Observation universe, then annotate it in an existing formal artifact. |
-| `L_KAMEN_RIDER_7RIDERS_UJA/AREA_COORDINATE` | `RE_AREA_4PLUS`, `RE_AREA_6` | - | LINEAGE_ANNOTATION_REQUIRED | SOURCE_EVIDENCE_SET_NOT_EXPLICIT | REQUIRES_HUMAN_LINEAGE_CONFIRMATION | Obtain controlled authoritative confirmation of the exact Evidence-to-Observation universe, then annotate it in an existing formal artifact. |
-| `L_KAMEN_RIDER_7RIDERS_UJA/TROPHY` | `RE_TROPHY_2PLUS`, `RE_TROPHY_4PLUS`, `RE_TROPHY_5PLUS`, `RE_TROPHY_6` | - | LINEAGE_ANNOTATION_REQUIRED | SOURCE_EVIDENCE_SET_NOT_EXPLICIT | REQUIRES_HUMAN_LINEAGE_CONFIRMATION | Obtain controlled authoritative confirmation of the exact Evidence-to-Observation universe, then annotate it in an existing formal artifact. |
 | `L_KAMEN_RIDER_DEN_O_UD/AT_END_HARD` | `RE_AT_END_SCREEN` | - | LINEAGE_ANNOTATION_REQUIRED | SOURCE_EVIDENCE_SET_NOT_EXPLICIT | REQUIRES_HUMAN_LINEAGE_CONFIRMATION | Obtain controlled authoritative confirmation of the exact Evidence-to-Observation universe, then annotate it in an existing formal artifact. |
 | `L_KAMEN_RIDER_DEN_O_UD/HIGH_AT_BONUS_END` | `RE_HIGH_AT_BONUS_END_SCREEN` | - | LINEAGE_ANNOTATION_REQUIRED | SOURCE_EVIDENCE_SET_NOT_EXPLICIT | REQUIRES_HUMAN_LINEAGE_CONFIRMATION | Obtain controlled authoritative confirmation of the exact Evidence-to-Observation universe, then annotate it in an existing formal artifact. |
 | `L_KAMEN_RIDER_DEN_O_UD/TROPHY` | `RE_TROPHY_2PLUS`, `RE_TROPHY_4PLUS`, `RE_TROPHY_5PLUS`, `RE_TROPHY_6` | - | LINEAGE_ANNOTATION_REQUIRED | SOURCE_EVIDENCE_SET_NOT_EXPLICIT | REQUIRES_HUMAN_LINEAGE_CONFIRMATION | Obtain controlled authoritative confirmation of the exact Evidence-to-Observation universe, then annotate it in an existing formal artifact. |
@@ -255,9 +250,6 @@ These machines contain multiple blocked groups; counts identify consolidation le
 | `L_MONSTER_HUNTER_RISE_XA/MH_OMIKUJI` | `RE_OMIKUJI_BRONZE`, `RE_OMIKUJI_GOLD`, `RE_OMIKUJI_MAPLE`, `RE_OMIKUJI_RAINBOW`, `RE_OMIKUJI_SILVER` | - | LINEAGE_ANNOTATION_REQUIRED | SOURCE_EVIDENCE_SET_NOT_EXPLICIT | REQUIRES_HUMAN_LINEAGE_CONFIRMATION | Obtain controlled authoritative confirmation of the exact Evidence-to-Observation universe, then annotate it in an existing formal artifact. |
 | `L_MONSTER_HUNTER_RISE_XA/MH_VOICE` | `RE_ENTRY_VOICE_CONTRADICTION_4PLUS`, `RE_PURPLE7_ENTA_6`, `RE_STOP_VOICE_HINOE_6`, `RE_STOP_VOICE_UTSUSHI_5PLUS` | - | LINEAGE_ANNOTATION_REQUIRED | SOURCE_EVIDENCE_SET_NOT_EXPLICIT | REQUIRES_HUMAN_LINEAGE_CONFIRMATION | Obtain controlled authoritative confirmation of the exact Evidence-to-Observation universe, then annotate it in an existing formal artifact. |
 | `L_NANATSU_NO_MAKEN_PU/SETTING_EVIDENCE` | `RE_ENDING_NANAO_6`, `RE_ESMERALDA_4PLUS`, `RE_ST_END_2PLUS`, `RE_ST_END_3PLUS`, `RE_ST_END_4PLUS`, `RE_ST_END_6` | - | LINEAGE_ANNOTATION_REQUIRED | SOURCE_EVIDENCE_SET_NOT_EXPLICIT | REQUIRES_HUMAN_LINEAGE_CONFIRMATION | Obtain controlled authoritative confirmation of the exact Evidence-to-Observation universe, then annotate it in an existing formal artifact. |
-| `L_NOGIZAKA46_UD/TAMA_TROPHY` | `RE_TROPHY_2PLUS`, `RE_TROPHY_4PLUS`, `RE_TROPHY_5PLUS`, `RE_TROPHY_6` | - | LINEAGE_ANNOTATION_REQUIRED | SOURCE_EVIDENCE_SET_NOT_EXPLICIT | REQUIRES_HUMAN_LINEAGE_CONFIRMATION | Obtain controlled authoritative confirmation of the exact Evidence-to-Observation universe, then annotate it in an existing formal artifact. |
-| `L_NYANKO_BIGBANG_MK/AT_END_SCREEN` | `RE_END_GOD_AWAKENED_4PLUS`, `RE_END_GOD_KIRA_6` | - | LINEAGE_ANNOTATION_REQUIRED | SOURCE_EVIDENCE_SET_NOT_EXPLICIT | REQUIRES_HUMAN_LINEAGE_CONFIRMATION | Obtain controlled authoritative confirmation of the exact Evidence-to-Observation universe, then annotate it in an existing formal artifact. |
-| `L_NYANKO_BIGBANG_MK/TAMA_TROPHY` | `RE_TROPHY_BRONZE_2PLUS`, `RE_TROPHY_RAINBOW_6`, `RE_TROPHY_SILVER_4PLUS`, `RE_TROPHY_ZEBRA_5PLUS` | - | LINEAGE_ANNOTATION_REQUIRED | SOURCE_EVIDENCE_SET_NOT_EXPLICIT | REQUIRES_HUMAN_LINEAGE_CONFIRMATION | Obtain controlled authoritative confirmation of the exact Evidence-to-Observation universe, then annotate it in an existing formal artifact. |
 | `L_NYANKO_DAISENSO_CHOSHINSOKU_KB/SETTING_EVIDENCE` | `RE_TAMACHAN_COPPER`, `RE_TAMACHAN_GOLD`, `RE_TAMACHAN_RAINBOW`, `RE_TAMACHAN_SILVER`, `RE_TAMACHAN_ZEBRA` | - | LINEAGE_ANNOTATION_REQUIRED | SOURCE_EVIDENCE_SET_NOT_EXPLICIT | REQUIRES_HUMAN_LINEAGE_CONFIRMATION | Obtain controlled authoritative confirmation of the exact Evidence-to-Observation universe, then annotate it in an existing formal artifact. |
 | `L_ONE_PUNCH_MAN/BONUS_AT_END_SCREEN` | `EV_END_2PLUS`, `EV_END_4PLUS`, `EV_END_6` | `OBS_BONUS_AT_END_SCREEN_EVIDENCE` | OBSERVATION_SEMANTICS_REVIEW_REQUIRED | OBSERVATION_SEMANTICS_REVIEW_REQUIRED | REQUIRES_HUMAN_LINEAGE_CONFIRMATION | Perform human Observation semantics review, then annotate exact lineage only if equivalence is confirmed. |
 | `L_ONIMUSHA3_XA/EV_BIG_END` | `RE_BIG_246`, `RE_BIG_2PLUS`, `RE_BIG_4PLUS`, `RE_BIG_5PLUS`, `RE_BIG_6` | - | LINEAGE_ANNOTATION_REQUIRED | SOURCE_EVIDENCE_SET_NOT_EXPLICIT | REQUIRES_HUMAN_LINEAGE_CONFIRMATION | Obtain controlled authoritative confirmation of the exact Evidence-to-Observation universe, then annotate it in an existing formal artifact. |
