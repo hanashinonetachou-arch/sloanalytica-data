@@ -7,17 +7,17 @@ Phase 1 base: `8a31eec356e40fecc38ac86fd6e938e1deff9375`. Original verified Data
 | Metric | Count |
 |---|---:|
 | Total machines | 270 |
-| Already M7 | 8 |
-| Legacy machines | 262 |
+| Already M7 | 9 |
+| Legacy machines | 261 |
 | AUTO_MIGRATABLE | 0 |
 | FEATURE_SHARING_REVIEW | 0 |
 | OBSERVATION_BLOCKED | 70 |
-| CANONICAL_UI_BLOCKED | 9 |
+| CANONICAL_UI_BLOCKED | 8 |
 | NORMALIZATION_BLOCKED | 27 |
 | INPUT_COMPATIBILITY_BLOCKED | 0 |
 | SELECTION_QUALITY_BLOCKED | 88 |
 | OTHER_BLOCKED | 68 |
-| NOT_APPLICABLE_OR_EQUIVALENT | 56 |
+| NOT_APPLICABLE_OR_EQUIVALENT | 57 |
 
 Classification is fail-closed. Only explicit formal repository relationships are accepted for mandatory migration proofs; labels/categories are diagnostic only. A machine can have several failed proofs, while its classification follows the documented deterministic blocker priority.
 
@@ -53,7 +53,7 @@ Classification is fail-closed. Only explicit formal repository relationships are
 - `L_BASILISK_KIZUNA2_TENZEN_ZN`: OBSERVATION_BLOCKED → SELECTION_QUALITY_BLOCKED — rejected FEAT_BT_PREDECESSOR: reason lacks a concrete basis
 - `L_BERSERK_MUSOU_EV`: OBSERVATION_BLOCKED → SELECTION_QUALITY_BLOCKED — selected FEAT_AT_INITIAL: reason lacks a concrete statistical/observational basis; rejected FEAT_LONG_FREEZE: reason is too generic: 極端に低頻度。
 - `L_BIOHAZARD_VENDETTA_FK`: OBSERVATION_BLOCKED → SELECTION_QUALITY_BLOCKED — selected FEAT_AT_INITIAL: reason is too generic: AT初当りを採用。; selected FEAT_AT_INITIAL: reason lacks a concrete statistical/observational basis
-- `L_BIOHAZARD_VILLAGE_XA`: OBSERVATION_BLOCKED → CANONICAL_UI_BLOCKED — tools/selection-quality-gate.mjs returned PASS
+- `L_BIOHAZARD_VILLAGE_XA`: OBSERVATION_BLOCKED → ALREADY_M7 — Reference implementation is governed by its checked-in pilot tests
 - `L_BOFURI_FN`: OBSERVATION_BLOCKED → SELECTION_QUALITY_BLOCKED — rejected FEAT_PREDECESSOR_COUNTER_BONUS: reason lacks a concrete basis; selected FEAT_INITIAL: reason lacks a concrete statistical/observational basis; rejected FEAT_ZONE_CZ: reason lacks a concrete basis
 - `L_CHIBARIYO2_ZB`: OTHER_BLOCKED → SELECTION_QUALITY_BLOCKED — selected FEAT_INITIAL: reason lacks a concrete statistical/observational basis
 - `L_CHO_HANAMATSURI_PB`: CANONICAL_UI_BLOCKED → OBSERVATION_BLOCKED — tools/selection-quality-gate.mjs returned PASS
@@ -145,7 +145,7 @@ Classification is fail-closed. Only explicit formal repository relationships are
 
 - `L_ANIMAL_SLOT_DOCCHI_ZT`: NORMALIZATION_BLOCKED → ALREADY_M7 — Preserved checked-in contract
 - `L_ANOTHER_RINO_HEAVEN_CC`: OBSERVATION_BLOCKED → ALREADY_M7 — Preserved checked-in contract
-- `L_BIOHAZARD_VILLAGE_XA`: OBSERVATION_BLOCKED → CANONICAL_UI_BLOCKED — TROPHY->OBS_EVI_TROPHY (FORMAL_GROUP_OBSERVATION_ID)
+- `L_BIOHAZARD_VILLAGE_XA`: OBSERVATION_BLOCKED → ALREADY_M7 — Preserved checked-in contract
 - `L_CHO_HANAMATSURI_PB`: CANONICAL_UI_BLOCKED → OBSERVATION_BLOCKED — [{"ok":false,"groupId":"HANAMATSURI_END_SEG","expectedFormalObservationId":"OBS_EVI_HANAMATSURI_END_SEG","formalCandidateObservationIds":[],"diagnosticLabelCandidates":{"exactGroupLabel":["OBS_END_SEG"],"exactOptionLabelCoverage":[]},"rule":"FORMAL_GROUP_OBSERVATION_ID_MISSING"}]
 - `L_DOUBLE_ATTACK2_EX`: CANONICAL_UI_BLOCKED → OBSERVATION_BLOCKED — [{"ok":false,"groupId":"DA2_COIN","expectedFormalObservationId":"OBS_EVI_DA2_COIN","formalCandidateObservationIds":[],"diagnosticLabelCandidates":{"exactGroupLabel":["OBS_COIN_END"],"exactOptionLabelCoverage":[]},"rule":"FORMAL_GROUP_OBSERVATION_ID_MISSING"},{"ok":false,"groupId":"DA2_ENDING","expectedFormalObservationId":"OBS_EVI_DA2_ENDING","formalCandidateObservationIds":[],"diagnosticLabelCandidates":{"exactGroupLabel":["OBS_ENDING_VOICE"],"exactOptionLabelCoverage":[]},"rule":"FORMAL_GROUP_OBSERVATION_ID_MISSING"}]
 - `L_G1_YUSHUN_CLUB_GOLD_KD`: CANONICAL_UI_BLOCKED → OBSERVATION_BLOCKED — [{"ok":false,"groupId":"TROPHY","expectedFormalObservationId":"OBS_EVI_TROPHY","formalCandidateObservationIds":[],"diagnosticLabelCandidates":{"exactGroupLabel":["OBS_TROPHY_EVIDENCE"],"exactOptionLabelCoverage":["OBS_TROPHY_EVIDENCE"]},"rule":"FORMAL_GROUP_OBSERVATION_ID_MISSING"},{"ok":false,"groupId":"AT_END_SCREEN","expectedFormalObservationId":"OBS_EVI_AT_END_SCREEN","formalCandidateObservationIds":[],"diagnosticLabelCandidates":{"exactGroupLabel":["OBS_AT_END_SCREEN_EVIDENCE"],"exactOptionLabelCoverage":["OBS_AT_END_SCREEN_EVIDENCE"]},"rule":"FORMAL_GROUP_OBSERVATION_ID_MISSING"}]
@@ -246,7 +246,7 @@ Phase 1 total: 92. The Phase 1 OTHER_BLOCKED population can be subdivided by the
 | `L_BIOHAZARD5_ZE` | OBSERVATION_BLOCKED | MIGRATION_REQUIRED | 4 | 13 | PASS | FAIL | FAIL | PASS | REVIEW | PASS | BASELINE_ONLY | NOT_RUN | One or more Evidence groups lack exactly one formal OBS_EVI_<clean(groupId)> Observation linkage; label/category matching is diagnostic only; canonical UI proof failed: canonical UI is not closed; Feature/Evidence sharing state is not uniquely represented by the legacy runtime surface |
 | `L_BIOHAZARD_RE3_ZD` | OTHER_BLOCKED | NOT_APPLICABLE_NO_EVIDENCE | 0 | 0 | PASS | NOT_APPLICABLE | NOT_APPLICABLE | NOT_APPLICABLE | NOT_APPLICABLE | NOT_APPLICABLE | NOT_APPLICABLE | NOT_RUN | Formal Gate0 disposition is NO_EVIDENCE; there is no Evidence contract to migrate |
 | `L_BIOHAZARD_VENDETTA_FK` | SELECTION_QUALITY_BLOCKED | MIGRATION_REQUIRED | 1 | 5 | REVIEW | FAIL | FAIL | PASS | REVIEW | PASS | BASELINE_ONLY | NOT_RUN | Selection Quality REVIEW: selected FEAT_AT_INITIAL: reason is too generic: AT初当りを採用。; selected FEAT_AT_INITIAL: reason lacks a concrete statistical/observational basis; One or more Evidence groups lack exactly one formal OBS_EVI_<clean(groupId)> Observation linkage; label/category matching is diagnostic only; canonical UI proof failed: canonical materialization marker is missing; Feature/Evidence sharing state is not uniquely represented by the legacy runtime surface |
-| `L_BIOHAZARD_VILLAGE_XA` | CANONICAL_UI_BLOCKED | MIGRATION_REQUIRED | 1 | 5 | PASS | PASS | FAIL | PASS | REVIEW | PASS | BASELINE_ONLY | NOT_RUN | canonical UI proof failed: canonical materialization marker is missing; Feature/Evidence sharing state is not uniquely represented by the legacy runtime surface |
+| `L_BIOHAZARD_VILLAGE_XA` | ALREADY_M7 | ALREADY_M7_EQUIVALENT | 0 | 0 | NOT_APPLICABLE | PASS | PASS | PASS | PASS | PASS | PASS | PASS | - |
 | `L_BIRDIE_WING_BC` | NORMALIZATION_BLOCKED | MIGRATION_REQUIRED | 11 | 11 | PASS | PASS | FAIL | FAIL | REVIEW | PASS | BASELINE_ONLY | NOT_RUN | Missing or unsupported normalizationMode: EVI_RE_WB_SCENARIO_2PLUS, EVI_RE_WB_SCENARIO_3PLUS, EVI_RE_WB_SCENARIO_4PLUS, EVI_RE_WB_SCENARIO_5PLUS, EVI_RE_WB_SCENARIO_6, EVI_RE_BQB_246_EVEN, EVI_RE_BQB_456_4PLUS, EVI_RE_BQB_555_5PLUS, EVI_RE_BQB_666_6, EVI_RE_BB_CARD_SSR_5PLUS, EVI_RE_BB_CARD_SSSR_6; canonical UI proof failed: canonical materialization marker is missing; Feature/Evidence sharing state is not uniquely represented by the legacy runtime surface |
 | `L_BOFURI_FN` | SELECTION_QUALITY_BLOCKED | MIGRATION_REQUIRED | 1 | 7 | REVIEW | FAIL | FAIL | PASS | REVIEW | PASS | BASELINE_ONLY | NOT_RUN | Selection Quality REVIEW: rejected FEAT_PREDECESSOR_COUNTER_BONUS: reason lacks a concrete basis; selected FEAT_INITIAL: reason lacks a concrete statistical/observational basis; rejected FEAT_ZONE_CZ: reason lacks a concrete basis; One or more Evidence groups lack exactly one formal OBS_EVI_<clean(groupId)> Observation linkage; label/category matching is diagnostic only; canonical UI proof failed: canonical materialization marker is missing; Feature/Evidence sharing state is not uniquely represented by the legacy runtime surface |
 | `L_BOUNTY_ANGEL` | CANONICAL_UI_BLOCKED | MIGRATION_REQUIRED | 3 | 3 | PASS | PASS | FAIL | PASS | REVIEW | PASS | BASELINE_ONLY | NOT_RUN | canonical UI proof failed: canonical materialization marker is missing; Feature/Evidence sharing state is not uniquely represented by the legacy runtime surface |
