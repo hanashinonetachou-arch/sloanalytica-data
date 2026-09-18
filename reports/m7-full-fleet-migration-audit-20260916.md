@@ -7,17 +7,17 @@ Phase 1 base: `8a31eec356e40fecc38ac86fd6e938e1deff9375`. Original verified Data
 | Metric | Count |
 |---|---:|
 | Total machines | 270 |
-| Already M7 | 7 |
-| Legacy machines | 263 |
+| Already M7 | 8 |
+| Legacy machines | 262 |
 | AUTO_MIGRATABLE | 0 |
 | FEATURE_SHARING_REVIEW | 0 |
 | OBSERVATION_BLOCKED | 70 |
-| CANONICAL_UI_BLOCKED | 10 |
+| CANONICAL_UI_BLOCKED | 9 |
 | NORMALIZATION_BLOCKED | 27 |
 | INPUT_COMPATIBILITY_BLOCKED | 0 |
 | SELECTION_QUALITY_BLOCKED | 88 |
 | OTHER_BLOCKED | 68 |
-| NOT_APPLICABLE_OR_EQUIVALENT | 55 |
+| NOT_APPLICABLE_OR_EQUIVALENT | 56 |
 
 Classification is fail-closed. Only explicit formal repository relationships are accepted for mandatory migration proofs; labels/categories are diagnostic only. A machine can have several failed proofs, while its classification follows the documented deterministic blocker priority.
 
@@ -128,6 +128,7 @@ Classification is fail-closed. Only explicit formal repository relationships are
 - `S_MOECHIBA_GNC30`: OTHER_BLOCKED → SELECTION_QUALITY_BLOCKED — rejected FEAT_400G_CEILING: reason lacks a concrete basis
 - `S_MR_JUGGLER_KK`: OTHER_BLOCKED → SELECTION_QUALITY_BLOCKED — rejected FEAT_PREDECESSOR_BONUS_OUTCOME: reason lacks a concrete basis; selected FEAT_SELF_BONUS_OUTCOME: reason lacks a concrete statistical/observational basis; rejected FEAT_MRJ_GRAPE_CANDIDATE: reason lacks a concrete basis
 - `S_NEO_IM_JUGGLER_EX_KK`: OTHER_BLOCKED → SELECTION_QUALITY_BLOCKED — selected FEAT_SELF_BONUS_OUTCOME: reason lacks a concrete statistical/observational basis; rejected FEAT_NIJ_GRAPE_CANDIDATE: reason lacks a concrete basis
+- `S_NINJA_JAJAMARU`: CANONICAL_UI_BLOCKED → ALREADY_M7 — Reference implementation is governed by its checked-in pilot tests
 - `S_OKIDOKI_GORGEOUS_GS`: OTHER_BLOCKED → SELECTION_QUALITY_BLOCKED — selected FEAT_INITIAL: reason lacks a concrete statistical/observational basis
 - `S_OVERLORD_II_SX`: CANONICAL_UI_BLOCKED → OBSERVATION_BLOCKED — tools/selection-quality-gate.mjs returned PASS
 - `S_PERSONA5_FR`: CANONICAL_UI_BLOCKED → OBSERVATION_BLOCKED — tools/selection-quality-gate.mjs returned PASS
@@ -155,6 +156,7 @@ Classification is fail-closed. Only explicit formal repository relationships are
 - `L_TOLOVE_DARKNESS_S6`: CANONICAL_UI_BLOCKED → OBSERVATION_BLOCKED — [{"ok":false,"groupId":"ST_END_STAMP","expectedFormalObservationId":"OBS_EVI_ST_END_STAMP","formalCandidateObservationIds":[],"diagnosticLabelCandidates":{"exactGroupLabel":["OBS_ST_END_STAMP_EVIDENCE"],"exactOptionLabelCoverage":["OBS_ST_END_STAMP_EVIDENCE"]},"rule":"FORMAL_GROUP_OBSERVATION_ID_MISSING"}]
 - `S_BOOWY_SV`: OBSERVATION_BLOCKED → ALREADY_M7 — Preserved checked-in contract
 - `S_HYPER_RUSH_SLC8`: CANONICAL_UI_BLOCKED → ALREADY_M7 — Preserved checked-in contract
+- `S_NINJA_JAJAMARU`: CANONICAL_UI_BLOCKED → ALREADY_M7 — Preserved checked-in contract
 - `S_OVERLORD_II_SX`: CANONICAL_UI_BLOCKED → OBSERVATION_BLOCKED — [{"ok":false,"groupId":"OVERLORD_SET_START","expectedFormalObservationId":"OBS_EVI_OVERLORD_SET_START","formalCandidateObservationIds":[],"diagnosticLabelCandidates":{"exactGroupLabel":["OBS_SET_START"],"exactOptionLabelCoverage":[]},"rule":"FORMAL_GROUP_OBSERVATION_ID_MISSING"},{"ok":false,"groupId":"OVERLORD_PAYOUT","expectedFormalObservationId":"OBS_EVI_OVERLORD_PAYOUT","formalCandidateObservationIds":[],"diagnosticLabelCandidates":{"exactGroupLabel":["OBS_PAYOUT"],"exactOptionLabelCoverage":[]},"rule":"FORMAL_GROUP_OBSERVATION_ID_MISSING"},{"ok":false,"groupId":"OVERLORD_ENDING","expectedFormalObservationId":"OBS_EVI_OVERLORD_ENDING","formalCandidateObservationIds":[],"diagnosticLabelCandidates":{"exactGroupLabel":["OBS_ENDING_TEXT"],"exactOptionLabelCoverage":[]},"rule":"FORMAL_GROUP_OBSERVATION_ID_MISSING"}]
 - `S_PERSONA5_FR`: CANONICAL_UI_BLOCKED → OBSERVATION_BLOCKED — [{"ok":false,"groupId":"SAMMY_TROPHY","expectedFormalObservationId":"OBS_EVI_SAMMY_TROPHY","formalCandidateObservationIds":[],"diagnosticLabelCandidates":{"exactGroupLabel":["OBS_SAMMY_TROPHY"],"exactOptionLabelCoverage":[]},"rule":"FORMAL_GROUP_OBSERVATION_ID_MISSING"},{"ok":false,"groupId":"PC_END_CONDITIONAL","expectedFormalObservationId":"OBS_EVI_PC_END_CONDITIONAL","formalCandidateObservationIds":[],"diagnosticLabelCandidates":{"exactGroupLabel":["OBS_PC_END_CONDITIONAL"],"exactOptionLabelCoverage":[]},"rule":"FORMAL_GROUP_OBSERVATION_ID_MISSING"}]
 
@@ -449,7 +451,7 @@ Phase 1 total: 92. The Phase 1 OTHER_BLOCKED population can be subdivided by the
 | `S_NAMENEKO_QQ` | OTHER_BLOCKED | NOT_APPLICABLE_NO_EVIDENCE | 0 | 0 | PASS | NOT_APPLICABLE | NOT_APPLICABLE | NOT_APPLICABLE | NOT_APPLICABLE | NOT_APPLICABLE | NOT_APPLICABLE | NOT_RUN | Formal Gate0 disposition is NO_EVIDENCE; there is no Evidence contract to migrate |
 | `S_NEO_IM_JUGGLER_EX_KK` | SELECTION_QUALITY_BLOCKED | NOT_APPLICABLE_NO_EVIDENCE | 0 | 0 | REVIEW | NOT_APPLICABLE | NOT_APPLICABLE | NOT_APPLICABLE | NOT_APPLICABLE | NOT_APPLICABLE | NOT_APPLICABLE | NOT_RUN | Selection Quality REVIEW: selected FEAT_SELF_BONUS_OUTCOME: reason lacks a concrete statistical/observational basis; rejected FEAT_NIJ_GRAPE_CANDIDATE: reason lacks a concrete basis; Formal Gate0 disposition is NO_EVIDENCE; there is no Evidence contract to migrate |
 | `S_NIGHTS_YTCC` | NORMALIZATION_BLOCKED | MIGRATION_REQUIRED | 2 | 12 | PASS | FAIL | FAIL | FAIL | REVIEW | PASS | BASELINE_ONLY | NOT_RUN | Missing or unsupported normalizationMode: EV_TROPHY, EV_END_COMBO; One or more Evidence groups lack exactly one formal OBS_EVI_<clean(groupId)> Observation linkage; label/category matching is diagnostic only; canonical UI proof failed: canonical UI is not closed; Feature/Evidence sharing state is not uniquely represented by the legacy runtime surface |
-| `S_NINJA_JAJAMARU` | CANONICAL_UI_BLOCKED | MIGRATION_REQUIRED | 2 | 2 | PASS | PASS | FAIL | PASS | REVIEW | PASS | BASELINE_ONLY | NOT_RUN | canonical UI proof failed: canonical materialization marker is missing; Feature/Evidence sharing state is not uniquely represented by the legacy runtime surface |
+| `S_NINJA_JAJAMARU` | ALREADY_M7 | ALREADY_M7_EQUIVALENT | 0 | 0 | NOT_APPLICABLE | PASS | PASS | PASS | PASS | PASS | PASS | PASS | - |
 | `S_ODANOBUNA_ZENKOKU_SNT` | NORMALIZATION_BLOCKED | MIGRATION_REQUIRED | 1 | 3 | PASS | FAIL | FAIL | FAIL | REVIEW | PASS | BASELINE_ONLY | NOT_RUN | Missing or unsupported normalizationMode: EV_AT_END; One or more Evidence groups lack exactly one formal OBS_EVI_<clean(groupId)> Observation linkage; label/category matching is diagnostic only; canonical UI proof failed: canonical UI is not closed; Feature/Evidence sharing state is not uniquely represented by the legacy runtime surface |
 | `S_OKIDOKI_BLACK_EP` | OTHER_BLOCKED | NOT_APPLICABLE_NO_EVIDENCE | 0 | 0 | PASS | NOT_APPLICABLE | NOT_APPLICABLE | NOT_APPLICABLE | NOT_APPLICABLE | NOT_APPLICABLE | NOT_APPLICABLE | NOT_RUN | Formal Gate0 disposition is NO_EVIDENCE; there is no Evidence contract to migrate |
 | `S_OKIDOKI_GOLD_GS` | OTHER_BLOCKED | NOT_APPLICABLE_NO_EVIDENCE | 0 | 0 | PASS | NOT_APPLICABLE | NOT_APPLICABLE | NOT_APPLICABLE | NOT_APPLICABLE | NOT_APPLICABLE | NOT_APPLICABLE | NOT_RUN | Formal Gate0 disposition is NO_EVIDENCE; there is no Evidence contract to migrate |
