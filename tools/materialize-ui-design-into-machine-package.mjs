@@ -54,7 +54,7 @@ export function materializeUiDesignIntoPackage(pkg,uiDesign){
       id:`UID_${String(title).normalize('NFKC').replace(/[^A-Za-z0-9一-龠ぁ-んァ-ヶー]+/g,'_')}_${order}`,
       title,
       displayOrder:order++,
-      ...(typeof s.description==='string'&&s.description?{description:s.description}:{}),
+      ...(typeof s.description==='string'?{description:s.description}:{}),
       ...(typeof s.collapsible==='boolean'?{collapsible:s.collapsible}:{}),
       ...(typeof s.defaultExpanded==='boolean'?{defaultExpanded:s.defaultExpanded}:{}),
       items
