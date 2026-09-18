@@ -60,7 +60,9 @@ test("formal non-sharing proof promotes the canonical-UI batch without weakening
     const machine = auditMachine(root, id);
     assert.equal(machine.featureSharingProof.status, "PASS", id);
     assert.equal(machine.featureSharingProof.rule, "FORMAL_FEATURE_EVIDENCE_NON_SHARING", id);
-    assert.equal(machine.canonicalUiProof.status, "PASS", id);\n    assert.equal(machine.classification, "AUTO_MIGRATABLE", id);\n    assert.equal(machine.blockReasons.length, 0, id);
+    assert.equal(machine.canonicalUiProof.status, "PASS", id);
+    assert.equal(machine.classification, "AUTO_MIGRATABLE", id);
+    assert.equal(machine.blockReasons.length, 0, id);
   }
   const unresolved = auditMachine(root, "LB_KELLOT_5_ND05H").featureSharingProof;
   assert.equal(unresolved.status, "REVIEW");
