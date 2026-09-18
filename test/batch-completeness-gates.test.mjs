@@ -111,6 +111,40 @@ test('Research Evidence cannot silently disappear in SelectionData', () => {
   assert.ok(result.errors.some(error => error.includes('undispositioned RE_VOICE')));
 });
 
+test('M7 Evidence contract dispositions satisfy Research Evidence coverage', () => {
+  const research = researchFixture();
+  const selection = {
+    evidenceReview: { policyVersion: 1, exclusions: [] },
+    evidenceContract: {
+      contractVersion: 'selection-evidence-v2',
+      items: [
+        { evidenceId: 'EVI_END', sourceResearchEvidenceIds: ['RE_END'] },
+        { evidenceId: 'EVI_VOICE', sourceResearchEvidenceIds: ['RE_VOICE'] },
+      ],
+    },
+  };
+  const result = validateSelectionEvidenceCoverage(selection, research, { required: true });
+  assert.equal(result.ok, true);
+  assert.deepEqual(result.missing, []);
+});
+
+test('M7 Evidence contract rejects unknown Research Evidence lineage', () => {
+  const research = researchFixture();
+  const selection = {
+    evidenceReview: { policyVersion: 1, exclusions: [] },
+    evidenceContract: {
+      contractVersion: 'selection-evidence-v2',
+      items: [
+        { evidenceId: 'EVI_END', sourceResearchEvidenceIds: ['RE_END'] },
+        { evidenceId: 'EVI_VOICE', sourceResearchEvidenceIds: ['RE_VOICE', 'RE_UNKNOWN'] },
+      ],
+    },
+  };
+  const result = validateSelectionEvidenceCoverage(selection, research, { required: true });
+  assert.equal(result.ok, false);
+  assert.ok(result.errors.some(error => error.includes('unknown researchEvidenceId RE_UNKNOWN')));
+});
+
 test('every Research Evidence may be UI-referenced or explicitly excluded with reason', () => {
   const research = researchFixture();
   const selection = {
