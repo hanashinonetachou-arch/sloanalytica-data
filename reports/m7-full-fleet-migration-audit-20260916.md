@@ -7,17 +7,17 @@ Phase 1 base: `8a31eec356e40fecc38ac86fd6e938e1deff9375`. Original verified Data
 | Metric | Count |
 |---|---:|
 | Total machines | 270 |
-| Already M7 | 6 |
-| Legacy machines | 264 |
+| Already M7 | 7 |
+| Legacy machines | 263 |
 | AUTO_MIGRATABLE | 0 |
 | FEATURE_SHARING_REVIEW | 0 |
 | OBSERVATION_BLOCKED | 70 |
-| CANONICAL_UI_BLOCKED | 11 |
+| CANONICAL_UI_BLOCKED | 10 |
 | NORMALIZATION_BLOCKED | 27 |
 | INPUT_COMPATIBILITY_BLOCKED | 0 |
 | SELECTION_QUALITY_BLOCKED | 88 |
 | OTHER_BLOCKED | 68 |
-| NOT_APPLICABLE_OR_EQUIVALENT | 54 |
+| NOT_APPLICABLE_OR_EQUIVALENT | 55 |
 
 Classification is fail-closed. Only explicit formal repository relationships are accepted for mandatory migration proofs; labels/categories are diagnostic only. A machine can have several failed proofs, while its classification follows the documented deterministic blocker priority.
 
@@ -118,6 +118,7 @@ Classification is fail-closed. Only explicit formal repository relationships are
 - `S_HAIBI_RETURN_PA30`: CANONICAL_UI_BLOCKED → SELECTION_QUALITY_BLOCKED — selected FEAT_INITIAL: reason lacks a concrete statistical/observational basis
 - `S_HAPPY_JUGGLER_V3_EA`: OTHER_BLOCKED → SELECTION_QUALITY_BLOCKED — selected FEAT_SELF_BONUS_OUTCOME: reason lacks a concrete statistical/observational basis
 - `S_HARD_BOILED_XX`: OTHER_BLOCKED → SELECTION_QUALITY_BLOCKED — unclassified research evidence: RE_2PLUS
+- `S_HYPER_RUSH_SLC8`: CANONICAL_UI_BLOCKED → ALREADY_M7 — Reference implementation is governed by its checked-in pilot tests
 - `S_IM_JUGGLER_EX_TP`: OTHER_BLOCKED → SELECTION_QUALITY_BLOCKED — selected FEAT_BONUS_OUTCOME_MULTINOMIAL: reason lacks a concrete statistical/observational basis; rejected FEAT_IM_GRAPE_CANDIDATE: reason lacks a concrete basis
 - `S_JUGGLER_GIRLS_SS_KH`: OTHER_BLOCKED → SELECTION_QUALITY_BLOCKED — rejected FEAT_PREDECESSOR_BONUS_OUTCOME: reason lacks a concrete basis; selected FEAT_SELF_BONUS_OUTCOME: reason lacks a concrete statistical/observational basis; rejected FEAT_JGSS_GRAPE_CANDIDATE: reason lacks a concrete basis
 - `S_KIN_NO_KABOCHA_AA`: OTHER_BLOCKED → SELECTION_QUALITY_BLOCKED — selected FEAT_BONUS: reason lacks a concrete statistical/observational basis
@@ -153,6 +154,7 @@ Classification is fail-closed. Only explicit formal repository relationships are
 - `L_ONE_PUNCH_MAN`: CANONICAL_UI_BLOCKED → OBSERVATION_BLOCKED — [{"ok":false,"groupId":"BONUS_AT_END_SCREEN","expectedFormalObservationId":"OBS_EVI_BONUS_AT_END_SCREEN","formalCandidateObservationIds":[],"diagnosticLabelCandidates":{"exactGroupLabel":["OBS_BONUS_AT_END_SCREEN_EVIDENCE"],"exactOptionLabelCoverage":["OBS_BONUS_AT_END_SCREEN_EVIDENCE"]},"rule":"FORMAL_GROUP_OBSERVATION_ID_MISSING"}]
 - `L_TOLOVE_DARKNESS_S6`: CANONICAL_UI_BLOCKED → OBSERVATION_BLOCKED — [{"ok":false,"groupId":"ST_END_STAMP","expectedFormalObservationId":"OBS_EVI_ST_END_STAMP","formalCandidateObservationIds":[],"diagnosticLabelCandidates":{"exactGroupLabel":["OBS_ST_END_STAMP_EVIDENCE"],"exactOptionLabelCoverage":["OBS_ST_END_STAMP_EVIDENCE"]},"rule":"FORMAL_GROUP_OBSERVATION_ID_MISSING"}]
 - `S_BOOWY_SV`: OBSERVATION_BLOCKED → ALREADY_M7 — Preserved checked-in contract
+- `S_HYPER_RUSH_SLC8`: CANONICAL_UI_BLOCKED → ALREADY_M7 — Preserved checked-in contract
 - `S_OVERLORD_II_SX`: CANONICAL_UI_BLOCKED → OBSERVATION_BLOCKED — [{"ok":false,"groupId":"OVERLORD_SET_START","expectedFormalObservationId":"OBS_EVI_OVERLORD_SET_START","formalCandidateObservationIds":[],"diagnosticLabelCandidates":{"exactGroupLabel":["OBS_SET_START"],"exactOptionLabelCoverage":[]},"rule":"FORMAL_GROUP_OBSERVATION_ID_MISSING"},{"ok":false,"groupId":"OVERLORD_PAYOUT","expectedFormalObservationId":"OBS_EVI_OVERLORD_PAYOUT","formalCandidateObservationIds":[],"diagnosticLabelCandidates":{"exactGroupLabel":["OBS_PAYOUT"],"exactOptionLabelCoverage":[]},"rule":"FORMAL_GROUP_OBSERVATION_ID_MISSING"},{"ok":false,"groupId":"OVERLORD_ENDING","expectedFormalObservationId":"OBS_EVI_OVERLORD_ENDING","formalCandidateObservationIds":[],"diagnosticLabelCandidates":{"exactGroupLabel":["OBS_ENDING_TEXT"],"exactOptionLabelCoverage":[]},"rule":"FORMAL_GROUP_OBSERVATION_ID_MISSING"}]
 - `S_PERSONA5_FR`: CANONICAL_UI_BLOCKED → OBSERVATION_BLOCKED — [{"ok":false,"groupId":"SAMMY_TROPHY","expectedFormalObservationId":"OBS_EVI_SAMMY_TROPHY","formalCandidateObservationIds":[],"diagnosticLabelCandidates":{"exactGroupLabel":["OBS_SAMMY_TROPHY"],"exactOptionLabelCoverage":[]},"rule":"FORMAL_GROUP_OBSERVATION_ID_MISSING"},{"ok":false,"groupId":"PC_END_CONDITIONAL","expectedFormalObservationId":"OBS_EVI_PC_END_CONDITIONAL","formalCandidateObservationIds":[],"diagnosticLabelCandidates":{"exactGroupLabel":["OBS_PC_END_CONDITIONAL"],"exactOptionLabelCoverage":[]},"rule":"FORMAL_GROUP_OBSERVATION_ID_MISSING"}]
 
@@ -426,7 +428,7 @@ Phase 1 total: 92. The Phase 1 OTHER_BLOCKED population can be subdivided by the
 | `S_HAPPY_JUGGLER_V3_EA` | SELECTION_QUALITY_BLOCKED | NOT_APPLICABLE_NO_EVIDENCE | 0 | 0 | REVIEW | NOT_APPLICABLE | NOT_APPLICABLE | NOT_APPLICABLE | NOT_APPLICABLE | NOT_APPLICABLE | NOT_APPLICABLE | NOT_RUN | Selection Quality REVIEW: selected FEAT_SELF_BONUS_OUTCOME: reason lacks a concrete statistical/observational basis; Formal Gate0 disposition is NO_EVIDENCE; there is no Evidence contract to migrate |
 | `S_HARD_BOILED_XX` | SELECTION_QUALITY_BLOCKED | NOT_APPLICABLE_NO_EVIDENCE | 0 | 0 | FAIL | NOT_APPLICABLE | NOT_APPLICABLE | NOT_APPLICABLE | NOT_APPLICABLE | NOT_APPLICABLE | NOT_APPLICABLE | NOT_RUN | Selection Quality BLOCKED: unclassified research evidence: RE_2PLUS; Formal Gate0 disposition is NO_EVIDENCE; there is no Evidence contract to migrate |
 | `S_HIDAN_NO_ARIA_II_JZ` | NORMALIZATION_BLOCKED | MIGRATION_REQUIRED | 2 | 8 | PASS | FAIL | FAIL | FAIL | REVIEW | PASS | BASELINE_ONLY | NOT_RUN | Missing or unsupported normalizationMode: EVID_PREMIUM_AT, EVID_AT_END; One or more Evidence groups lack exactly one formal OBS_EVI_<clean(groupId)> Observation linkage; label/category matching is diagnostic only; canonical UI proof failed: canonical UI is not closed; Feature/Evidence sharing state is not uniquely represented by the legacy runtime surface |
-| `S_HYPER_RUSH_SLC8` | CANONICAL_UI_BLOCKED | MIGRATION_REQUIRED | 2 | 2 | PASS | PASS | FAIL | PASS | REVIEW | PASS | BASELINE_ONLY | NOT_RUN | canonical UI proof failed: canonical materialization marker is missing; Feature/Evidence sharing state is not uniquely represented by the legacy runtime surface |
+| `S_HYPER_RUSH_SLC8` | ALREADY_M7 | ALREADY_M7_EQUIVALENT | 0 | 0 | NOT_APPLICABLE | PASS | PASS | PASS | PASS | PASS | PASS | PASS | - |
 | `S_IM_JUGGLER_EX_TP` | SELECTION_QUALITY_BLOCKED | NOT_APPLICABLE_NO_EVIDENCE | 0 | 0 | REVIEW | NOT_APPLICABLE | NOT_APPLICABLE | NOT_APPLICABLE | NOT_APPLICABLE | NOT_APPLICABLE | NOT_APPLICABLE | NOT_RUN | Selection Quality REVIEW: selected FEAT_BONUS_OUTCOME_MULTINOMIAL: reason lacks a concrete statistical/observational basis; rejected FEAT_IM_GRAPE_CANDIDATE: reason lacks a concrete basis; Formal Gate0 disposition is NO_EVIDENCE; there is no Evidence contract to migrate |
 | `S_JUGGLER_GIRLS_SS_KH` | SELECTION_QUALITY_BLOCKED | NOT_APPLICABLE_NO_EVIDENCE | 0 | 0 | REVIEW | NOT_APPLICABLE | NOT_APPLICABLE | NOT_APPLICABLE | NOT_APPLICABLE | NOT_APPLICABLE | NOT_APPLICABLE | NOT_RUN | Selection Quality REVIEW: rejected FEAT_PREDECESSOR_BONUS_OUTCOME: reason lacks a concrete basis; selected FEAT_SELF_BONUS_OUTCOME: reason lacks a concrete statistical/observational basis; rejected FEAT_JGSS_GRAPE_CANDIDATE: reason lacks a concrete basis; Formal Gate0 disposition is NO_EVIDENCE; there is no Evidence contract to migrate |
 | `S_KABANERI_ZR` | CANONICAL_UI_BLOCKED | MIGRATION_REQUIRED | 2 | 8 | PASS | PASS | FAIL | PASS | REVIEW | PASS | BASELINE_ONLY | NOT_RUN | canonical UI proof failed: canonical materialization marker is missing; Feature/Evidence sharing state is not uniquely represented by the legacy runtime surface |
