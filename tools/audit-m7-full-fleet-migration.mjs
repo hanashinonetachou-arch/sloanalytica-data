@@ -248,7 +248,7 @@ export function auditMachine(root, machineId) {
         ? pass("EVIDENCE_UI_GATE0_SHARED_FEATURE_EVIDENCE", "Independent Gate0 shared Feature/Evidence proof passed")
         : formalNonSharing.status === "FAIL"
           ? fail(formalNonSharing.rule, formalNonSharing.detail)
-          : review(formalNonSharing.rule, formalNonSharing.detail);
+          : review("EVIDENCE_UI_GATE0_SHARED_FEATURE_EVIDENCE", "No runtime input overlap was found, but absence of implicit Feature/Evidence sharing has no independent formal proof");
   if (base.featureSharingProof.status !== "PASS") {
     base.blockReasons.push("Feature/Evidence sharing state is not uniquely represented by the legacy runtime surface");
   }
