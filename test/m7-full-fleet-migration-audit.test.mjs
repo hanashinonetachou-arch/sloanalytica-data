@@ -47,7 +47,7 @@ test("known blocker regression targets remain blocked without classification exc
 
 test("repository proofs retain Observation, canonical UI, normalization, and sharing failures", () => {
   assert.equal(auditMachine(root, "L_REZERO_SEASON2_PA5").observationProof.status, "FAIL");
-  assert.equal(auditMachine(root, "L_AKAME_GA_KILL_2").canonicalUiProof.status, "FAIL");
+  assert.equal(auditMachine(root, "L_AKAME_GA_KILL_2").canonicalUiProof.status, "PASS");
   assert.equal(auditMachine(root, "LB_KELLOT_5_ND05H").normalizationProof.status, "FAIL");
   const sharing = auditMachine(root, "L_TENSEI_SHITARA_KEN_DESHITA_GT").featureSharingProof;
   assert.equal(sharing.status, "REVIEW");
@@ -60,7 +60,7 @@ test("formal non-sharing proof promotes the canonical-UI batch without weakening
     const machine = auditMachine(root, id);
     assert.equal(machine.featureSharingProof.status, "PASS", id);
     assert.equal(machine.featureSharingProof.rule, "FORMAL_FEATURE_EVIDENCE_NON_SHARING", id);
-    assert.equal(machine.classification, "CANONICAL_UI_BLOCKED", id);
+    assert.equal(machine.canonicalUiProof.status, "PASS", id);\n    assert.equal(machine.classification, "AUTO_MIGRATABLE", id);\n    assert.equal(machine.blockReasons.length, 0, id);
   }
   const unresolved = auditMachine(root, "LB_KELLOT_5_ND05H").featureSharingProof;
   assert.equal(unresolved.status, "REVIEW");
@@ -98,16 +98,30 @@ test("full-fleet M7 audit is deterministic and matches checked-in JSON and Markd
   assert.equal(actual.summary.totalMachines, 270);
   assert.equal(actual.summary.alreadyM7, 9);
   assert.equal(actual.summary.legacyMachines, 261);
-  assert.equal(actual.summary.AUTO_MIGRATABLE, 0);
+  assert.equal(actual.summary.AUTO_MIGRATABLE, 8);
 });
 
-test("no legacy machine enters Batch 1 while any mandatory proof fails", () => {
+test("only fully proven legacy machines enter Batch 1", () => {
   const report = auditFleet(root, checkedIn);
-  assert.equal(report.machines.filter(machine => machine.classification === "AUTO_MIGRATABLE").length, 0);
-  for (const machine of report.machines.filter(machine => machine.classification !== "ALREADY_M7")) {
+  const candidates = report.machines.filter(machine => machine.classification === "AUTO_MIGRATABLE");
+  assert.equal(candidates.length, 8);
+  for (const machine of candidates) {
+    assert.equal(machine.selectionQualityProof.status, "PASS", machine.machineId);
+    assert.equal(machine.researchLineageProof.status, "PASS", machine.machineId);
+    assert.equal(machine.normalizationProof.status, "PASS", machine.machineId);
+    assert.equal(machine.observationProof.status, "PASS", machine.machineId);
+    assert.equal(machine.canonicalUiProof.status, "PASS", machine.machineId);
+    assert.equal(machine.featureSharingProof.status, "PASS", machine.machineId);
+    assert.equal(machine.inputCompatibilityProof.status, "PASS", machine.machineId);
+    assert.equal(machine.migrationDisposition, "MIGRATION_REQUIRED", machine.machineId);
+    assert.equal(machine.machineDataEquivalenceProof.status, "BASELINE_ONLY", machine.machineId);
+    assert.equal(machine.postMigrationEquivalenceProof.status, "NOT_RUN", machine.machineId);
+    assert.equal(machine.postMigrationInputCompatibilityProof.status, "NOT_RUN", machine.machineId);
+    assert.equal(machine.blockReasons.length, 0, machine.machineId);
+  }
+  for (const machine of report.machines.filter(machine => machine.classification !== "ALREADY_M7" && machine.classification !== "AUTO_MIGRATABLE")) {
     assert.ok(machine.classification.endsWith("BLOCKED") || machine.classification.endsWith("REVIEW"));
     assert.ok(machine.blockReasons.length > 0);
-    assert.equal(machine.postMigrationEquivalenceProof.status, "NOT_RUN");
   }
   for (const machine of report.machines.filter(machine => machine.researchLineageProof?.status === "FAIL")) {
     assert.notEqual(machine.classification, "AUTO_MIGRATABLE", machine.machineId);
