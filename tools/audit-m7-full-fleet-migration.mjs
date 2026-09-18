@@ -5,6 +5,7 @@ import { buildMachineData } from "./build-machine-data.mjs";
 import { legacyProjection, VERSION } from "./lib/evidence-contract-m7.mjs";
 import { assessSelectionQuality } from "./selection-quality-gate.mjs";
 import { auditMachine as auditEvidenceGate0 } from "./lib/evidence-ui-gate0.mjs";
+import { proveFeatureEvidenceNonSharing } from "./lib/feature-evidence-sharing-proof.mjs";
 
 const CLASSIFICATIONS = [
   "AUTO_MIGRATABLE", "FEATURE_SHARING_REVIEW", "OBSERVATION_BLOCKED",
@@ -238,11 +239,16 @@ export function auditMachine(root, machineId) {
   const lineageIds = new Set(projection.items.flatMap(item => item.sourceResearchEvidenceIds));
   const conflictingLegacyDeclarations = (selection.evidence ?? []).filter(item => lineageIds.has(item.researchEvidenceId) && item.inputId && !projection.inputs.some(input => input.id === item.inputId)).map(item => ({ researchEvidenceId: item.researchEvidenceId, inputId: item.inputId, sharedFeatureIds: item.sharedFeatureIds ?? [] }));
   const sharedGate = evidenceGate0.gates.sharedFeatureEvidence;
+  const formalNonSharing = proveFeatureEvidenceNonSharing(selection, observation, ui);
   base.featureSharingProof = overlaps.length || conflictingLegacyDeclarations.length
     ? fail("INDEPENDENT_INPUT_RELATIONSHIP", JSON.stringify({ overlaps, conflictingLegacyDeclarations }))
-    : sharedGate?.passed > 0 && sharedGate?.unresolved === 0
-      ? pass("EVIDENCE_UI_GATE0_SHARED_FEATURE_EVIDENCE", "Independent Gate0 shared Feature/Evidence proof passed")
-      : review("EVIDENCE_UI_GATE0_SHARED_FEATURE_EVIDENCE", "No runtime input overlap was found, but absence of implicit Feature/Evidence sharing has no independent formal proof");
+    : formalNonSharing.status === "PASS"
+      ? pass(formalNonSharing.rule, formalNonSharing.detail)
+      : sharedGate?.passed > 0 && sharedGate?.unresolved === 0
+        ? pass("EVIDENCE_UI_GATE0_SHARED_FEATURE_EVIDENCE", "Independent Gate0 shared Feature/Evidence proof passed")
+        : formalNonSharing.status === "FAIL"
+          ? fail(formalNonSharing.rule, formalNonSharing.detail)
+          : review("EVIDENCE_UI_GATE0_SHARED_FEATURE_EVIDENCE", "No runtime input overlap was found, but absence of implicit Feature/Evidence sharing has no independent formal proof");
   if (base.featureSharingProof.status !== "PASS") {
     base.blockReasons.push("Feature/Evidence sharing state is not uniquely represented by the legacy runtime surface");
   }

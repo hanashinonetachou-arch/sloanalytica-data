@@ -54,6 +54,19 @@ test("repository proofs retain Observation, canonical UI, normalization, and sha
   assert.equal(sharing.rule, "EVIDENCE_UI_GATE0_SHARED_FEATURE_EVIDENCE");
 });
 
+test("formal non-sharing proof promotes the canonical-UI batch without weakening legacy reviews", () => {
+  const promoted = ["L_AKAME_GA_KILL_2", "L_BOUNTY_ANGEL", "L_GIRLS_UND_PANZER_FINALE_H1", "L_GOD_EATER_RESURRECTION", "L_KAMEN_RIDER_7RIDERS_UJA", "L_ULTRAMAN_TIGA_KA", "S_FIRE_DRIFT", "S_KABANERI_ZR"];
+  for (const id of promoted) {
+    const machine = auditMachine(root, id);
+    assert.equal(machine.featureSharingProof.status, "PASS", id);
+    assert.equal(machine.featureSharingProof.rule, "FORMAL_FEATURE_EVIDENCE_NON_SHARING", id);
+    assert.equal(machine.classification, "CANONICAL_UI_BLOCKED", id);
+  }
+  const unresolved = auditMachine(root, "LB_KELLOT_5_ND05H").featureSharingProof;
+  assert.equal(unresolved.status, "REVIEW");
+  assert.equal(unresolved.rule, "EVIDENCE_UI_GATE0_SHARED_FEATURE_EVIDENCE");
+});
+
 test("label equality is diagnostic only and cannot prove Observation linkage", () => {
   for (const id of ["L_LUPIN_DAIKOUKAISHA_H1", "L_MOMOTARO_DENTETSU_TEIBAN_PU", "S_OVERLORD_II_SX"]) {
     const proof = auditMachine(root, id).observationProof;
