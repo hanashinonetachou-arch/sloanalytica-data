@@ -24,3 +24,21 @@ These representations are not interchangeable proof. In particular, `legacyContr
 Do not auto-convert these 38 machines into `selection-evidence-v2` as one batch yet. The safe next split is by exact Selection Evidence representation and formal lineage source, then by availability of Observation/canonical-UI propagation proof. No label/category similarity may be used to bridge missing lineage.
 
 This is an audit-only classification step; it changes no Selection, Observation, MachineData, or runtime semantics.
+
+
+## Follow-up structural sample
+
+A second sample across eight additional machines found all Selection Evidence items explicitly Research-linked:
+
+- `L_GHOST_IN_THE_SHELL_ZS`: 11/11 items
+- `L_GOBLIN_SLAYER_2_JZ`: 14/14
+- `L_GODZILLA_NS`: 17/17
+- `L_HANMA_BAKI_L5`: 14/14
+- `L_MAGIA_RECORD_RN`: 16/16
+- `L_SMASLO_TOKYO_REVENGERS_ZF`: 6/6
+- `L_YOUJITSU_DE`: 13/13
+- `L_ZENIGATA_5_L2`: 12/12
+
+This sample also exposes two sub-shapes inside Research-linked Evidence: items with explicit allowed/denied setting sets, and items whose semantics are represented by a trigger value plus source Evidence references. These must remain separate until normalization equivalence is formally proven.
+
+The current evidence therefore supports prioritizing the Research-linked population for the next mechanical proof scan, while retaining the published-machine-data population as a separate legacy-lineage class.
