@@ -1,9 +1,417 @@
 {
-  "schemaVersion":"selection-data-v1","machineId":"S_BIOHAZARD_RE2_XB","machineDataVersion":"0.1.0",
-  "uiCategoryLabels":{"NUMERIC":"AT初当り","EVIDENCE":"フィギュア確定・否定"},
-  "inputs":[{"id":"INP_NORMAL_GAMES","name":"通常ゲーム数","type":"integer","category":"NUMERIC","unit":"G","displayOrder":10,"inferenceRole":"INCLUDE_PRIMARY"},{"id":"INP_AT_FIRST_HIT","name":"AT初当り","type":"counter","category":"NUMERIC","unit":"回","displayOrder":11,"inferenceRole":"INCLUDE_PRIMARY","parentInputId":"INP_NORMAL_GAMES"}],
-  "features":[{"researchFeatureId":"RF_AT_FIRST_HIT","featureId":"FEAT_AT_FIRST_HIT","adoptionCategory":"INCLUDE_PRIMARY","numeratorInputId":"INP_AT_FIRST_HIT","denominatorInputId":"INP_NORMAL_GAMES","weight":1,"difficultyParticipation":"INCLUDE","difficultyExposure":{"mode":"per_game","factor":1,"quality":"EXACT","basisId":"NORMAL_GAMES"},"userReason":"通常ゲーム数とAT初当り回数で直接観測でき、設定1から6へ一貫した差があるため主軸採用します。"},{"researchFeatureId":"RF_HEART_RED_REPLAY_GBATTLE","featureId":"FEAT_HEART_RED_REPLAY_GBATTLE_EXCLUDED","adoptionCategory":"EXCLUDE","userReason":"大きな設定差はありますが、表示上の心音赤と内部状態が完全一致せず、赤→紫昇格後の当選も混在し得るため正しい分母・分子を実戦で厳密に作れません。"},{"researchFeatureId":"RF_DIRECT_AT","featureId":"FEAT_DIRECT_AT_EXCLUDED","adoptionCategory":"EXCLUDE","userReason":"全設定の具体値が未充足で設定別尤度を構成できないため不採用です。"},{"researchFeatureId":"RF_TYRANT_HIGH","featureId":"FEAT_TYRANT_HIGH_EXCLUDED","adoptionCategory":"EXCLUDE","userReason":"移行抽選の全設定値と観測条件が未充足のため不採用です。"},{"researchFeatureId":"RF_AT_LEVEL","featureId":"FEAT_AT_LEVEL_EXCLUDED","adoptionCategory":"EXCLUDE","userReason":"設定差はありますがATレベルそのものを毎回確定観測できず、示唆演出から推定したカテゴリを尤度入力に使うのは観測誤差が大きいため不採用です。"}],
-  "evidenceUi":{"groups":[{"groupId":"FIGURE_HARD","label":"フィギュア（確定・否定のみ）","selectionMode":"multi","normalizationMode":"ALLOWED_SETTINGS_INTERSECTION","displayOrder":100,"options":[{"value":"NO17","label":"No.17 G第1形態（設定1否定）","excludedSettings":["SET_1"],"sourceEvidenceIds":["RE_BONUS_FIGURE","RE_ENDING_FIGURE"]},{"value":"NO18","label":"No.18 G第2形態（設定2否定）","excludedSettings":["SET_2"],"sourceEvidenceIds":["RE_BONUS_FIGURE","RE_ENDING_FIGURE"]},{"value":"NO19","label":"No.19 G第3形態（設定3否定）","excludedSettings":["SET_3"],"sourceEvidenceIds":["RE_BONUS_FIGURE","RE_ENDING_FIGURE"]},{"value":"NO20","label":"No.20 G第4形態（設定4否定）","excludedSettings":["SET_4"],"sourceEvidenceIds":["RE_BONUS_FIGURE","RE_ENDING_FIGURE"]},{"value":"NO21","label":"No.21 豆腐（設定3以上）","allowedSettings":["SET_3","SET_4","SET_5","SET_6"],"sourceEvidenceIds":["RE_BONUS_FIGURE","RE_ENDING_FIGURE"]},{"value":"NO22","label":"No.22 ボスクリーチャー（設定4以上）","allowedSettings":["SET_4","SET_5","SET_6"],"sourceEvidenceIds":["RE_BONUS_FIGURE","RE_ENDING_FIGURE"]},{"value":"NO23","label":"No.23 全員集合（設定5以上）","allowedSettings":["SET_5","SET_6"],"sourceEvidenceIds":["RE_BONUS_FIGURE","RE_ENDING_FIGURE"]},{"value":"NO24","label":"No.24 エンタライオン（設定6）","allowedSettings":["SET_6"],"sourceEvidenceIds":["RE_BONUS_FIGURE","RE_ENDING_FIGURE"]}]}]},
-  "evidenceDecisions":[{"researchEvidenceId":"RE_FIGURE_COLLECTION","decision":"EXCLUDE","reason":"新規Evidenceではなく取得済みフィギュアを再確認するObservation経路なので独立Evidenceとして採用しない。"}],
-  "evidenceReview":{"policyVersion":1,"exclusions":[{"researchEvidenceId":"RE_FIGURE_COLLECTION","reason":"フィギュアコレクションは新しい設定Evidenceそのものではなく、取得済みフィギュアを再確認するObservation経路なので独立Evidence UIとしては採用しません。"}]}
+  "schemaVersion": "selection-data-v1",
+  "machineId": "S_BIOHAZARD_RE2_XB",
+  "machineDataVersion": "0.1.0",
+  "uiCategoryLabels": {
+    "NUMERIC": "AT初当り",
+    "EVIDENCE": "フィギュア確定・否定"
+  },
+  "inputs": [
+    {
+      "id": "INP_NORMAL_GAMES",
+      "name": "通常ゲーム数",
+      "type": "integer",
+      "category": "NUMERIC",
+      "unit": "G",
+      "displayOrder": 10,
+      "inferenceRole": "INCLUDE_PRIMARY"
+    },
+    {
+      "id": "INP_AT_FIRST_HIT",
+      "name": "AT初当り",
+      "type": "counter",
+      "category": "NUMERIC",
+      "unit": "回",
+      "displayOrder": 11,
+      "inferenceRole": "INCLUDE_PRIMARY",
+      "parentInputId": "INP_NORMAL_GAMES"
+    }
+  ],
+  "features": [
+    {
+      "researchFeatureId": "RF_AT_FIRST_HIT",
+      "featureId": "FEAT_AT_FIRST_HIT",
+      "adoptionCategory": "INCLUDE_PRIMARY",
+      "numeratorInputId": "INP_AT_FIRST_HIT",
+      "denominatorInputId": "INP_NORMAL_GAMES",
+      "weight": 1,
+      "difficultyParticipation": "INCLUDE",
+      "difficultyExposure": {
+        "mode": "per_game",
+        "factor": 1,
+        "quality": "EXACT",
+        "basisId": "NORMAL_GAMES"
+      },
+      "userReason": "通常ゲーム数とAT初当り回数で直接観測でき、設定1から6へ一貫した差があるため主軸採用します。"
+    },
+    {
+      "researchFeatureId": "RF_HEART_RED_REPLAY_GBATTLE",
+      "featureId": "FEAT_HEART_RED_REPLAY_GBATTLE_EXCLUDED",
+      "adoptionCategory": "EXCLUDE",
+      "userReason": "大きな設定差はありますが、表示上の心音赤と内部状態が完全一致せず、赤→紫昇格後の当選も混在し得るため正しい分母・分子を実戦で厳密に作れません。"
+    },
+    {
+      "researchFeatureId": "RF_DIRECT_AT",
+      "featureId": "FEAT_DIRECT_AT_EXCLUDED",
+      "adoptionCategory": "EXCLUDE",
+      "userReason": "全設定の具体値が未充足で設定別尤度を構成できないため不採用です。"
+    },
+    {
+      "researchFeatureId": "RF_TYRANT_HIGH",
+      "featureId": "FEAT_TYRANT_HIGH_EXCLUDED",
+      "adoptionCategory": "EXCLUDE",
+      "userReason": "移行抽選の全設定値と観測条件が未充足のため不採用です。"
+    },
+    {
+      "researchFeatureId": "RF_AT_LEVEL",
+      "featureId": "FEAT_AT_LEVEL_EXCLUDED",
+      "adoptionCategory": "EXCLUDE",
+      "userReason": "設定差はありますがATレベルそのものを毎回確定観測できず、示唆演出から推定したカテゴリを尤度入力に使うのは観測誤差が大きいため不採用です。"
+    }
+  ],
+  "evidenceDecisions": [
+    {
+      "researchEvidenceId": "RE_FIGURE_COLLECTION",
+      "decision": "EXCLUDE",
+      "reason": "新規Evidenceではなく取得済みフィギュアを再確認するObservation経路なので独立Evidenceとして採用しない。"
+    }
+  ],
+  "evidenceReview": {
+    "policyVersion": 1,
+    "exclusions": [
+      {
+        "researchEvidenceId": "RE_FIGURE_COLLECTION",
+        "reason": "フィギュアコレクションは新しい設定Evidenceそのものではなく、取得済みフィギュアを再確認するObservation経路なので独立Evidence UIとしては採用しません。"
+      }
+    ]
+  },
+  "evidenceContract": {
+    "contractVersion": "selection-evidence-v2",
+    "inputs": [
+      {
+        "id": "INP_EVI_FIGURE_HARD",
+        "name": "フィギュア（確定・否定のみ）",
+        "type": "multi_enum",
+        "category": "EVIDENCE",
+        "unit": "",
+        "displayOrder": 100,
+        "inferenceRole": "INCLUDE_SUPPORT",
+        "options": [
+          {
+            "key": "NO17",
+            "label": "No.17 G第1形態（設定1否定）",
+            "value": "NO17"
+          },
+          {
+            "key": "NO18",
+            "label": "No.18 G第2形態（設定2否定）",
+            "value": "NO18"
+          },
+          {
+            "key": "NO19",
+            "label": "No.19 G第3形態（設定3否定）",
+            "value": "NO19"
+          },
+          {
+            "key": "NO20",
+            "label": "No.20 G第4形態（設定4否定）",
+            "value": "NO20"
+          },
+          {
+            "key": "NO21",
+            "label": "No.21 豆腐（設定3以上）",
+            "value": "NO21"
+          },
+          {
+            "key": "NO22",
+            "label": "No.22 ボスクリーチャー（設定4以上）",
+            "value": "NO22"
+          },
+          {
+            "key": "NO23",
+            "label": "No.23 全員集合（設定5以上）",
+            "value": "NO23"
+          },
+          {
+            "key": "NO24",
+            "label": "No.24 エンタライオン（設定6）",
+            "value": "NO24"
+          }
+        ],
+        "defaultValue": []
+      }
+    ],
+    "items": [
+      {
+        "evidenceId": "EVI_FIGURE_HARD_NO17",
+        "displayName": "No.17 G第1形態（設定1否定）",
+        "sourceResearchEvidenceIds": [
+          "RE_BONUS_FIGURE",
+          "RE_ENDING_FIGURE"
+        ],
+        "inputId": "INP_EVI_FIGURE_HARD",
+        "triggerValue": "NO17",
+        "confirmedSettings": [],
+        "deniedSettings": [
+          "SET_1"
+        ],
+        "runtimeType": "SETTING_DENIAL",
+        "groupId": "FIGURE_HARD",
+        "settingFloorSemantics": "EXACT_ALLOWED_SETTINGS",
+        "normalizationSemantics": "ALLOWED_SETTINGS_INTERSECTION",
+        "observationIds": [
+          "OBS_EVI_FIGURE_HARD"
+        ],
+        "canonicalUi": {
+          "inputId": "INP_EVI_FIGURE_HARD",
+          "section": "フィギュア確定・否定",
+          "evidenceUiId": "EVI_UI_FIGURE_HARD"
+        },
+        "sharedFeatureIds": [],
+        "featureSharing": "NONE",
+        "legacyMigrationProvenance": {
+          "source": "selection.evidenceUi.groups",
+          "groupId": "FIGURE_HARD",
+          "specificationId": "M7_S_BIOHAZARD_RE2_XB_RELEASE_BATCH01_20260920"
+        }
+      },
+      {
+        "evidenceId": "EVI_FIGURE_HARD_NO18",
+        "displayName": "No.18 G第2形態（設定2否定）",
+        "sourceResearchEvidenceIds": [
+          "RE_BONUS_FIGURE",
+          "RE_ENDING_FIGURE"
+        ],
+        "inputId": "INP_EVI_FIGURE_HARD",
+        "triggerValue": "NO18",
+        "confirmedSettings": [],
+        "deniedSettings": [
+          "SET_2"
+        ],
+        "runtimeType": "SETTING_DENIAL",
+        "groupId": "FIGURE_HARD",
+        "settingFloorSemantics": "EXACT_ALLOWED_SETTINGS",
+        "normalizationSemantics": "ALLOWED_SETTINGS_INTERSECTION",
+        "observationIds": [
+          "OBS_EVI_FIGURE_HARD"
+        ],
+        "canonicalUi": {
+          "inputId": "INP_EVI_FIGURE_HARD",
+          "section": "フィギュア確定・否定",
+          "evidenceUiId": "EVI_UI_FIGURE_HARD"
+        },
+        "sharedFeatureIds": [],
+        "featureSharing": "NONE",
+        "legacyMigrationProvenance": {
+          "source": "selection.evidenceUi.groups",
+          "groupId": "FIGURE_HARD",
+          "specificationId": "M7_S_BIOHAZARD_RE2_XB_RELEASE_BATCH01_20260920"
+        }
+      },
+      {
+        "evidenceId": "EVI_FIGURE_HARD_NO19",
+        "displayName": "No.19 G第3形態（設定3否定）",
+        "sourceResearchEvidenceIds": [
+          "RE_BONUS_FIGURE",
+          "RE_ENDING_FIGURE"
+        ],
+        "inputId": "INP_EVI_FIGURE_HARD",
+        "triggerValue": "NO19",
+        "confirmedSettings": [],
+        "deniedSettings": [
+          "SET_3"
+        ],
+        "runtimeType": "SETTING_DENIAL",
+        "groupId": "FIGURE_HARD",
+        "settingFloorSemantics": "EXACT_ALLOWED_SETTINGS",
+        "normalizationSemantics": "ALLOWED_SETTINGS_INTERSECTION",
+        "observationIds": [
+          "OBS_EVI_FIGURE_HARD"
+        ],
+        "canonicalUi": {
+          "inputId": "INP_EVI_FIGURE_HARD",
+          "section": "フィギュア確定・否定",
+          "evidenceUiId": "EVI_UI_FIGURE_HARD"
+        },
+        "sharedFeatureIds": [],
+        "featureSharing": "NONE",
+        "legacyMigrationProvenance": {
+          "source": "selection.evidenceUi.groups",
+          "groupId": "FIGURE_HARD",
+          "specificationId": "M7_S_BIOHAZARD_RE2_XB_RELEASE_BATCH01_20260920"
+        }
+      },
+      {
+        "evidenceId": "EVI_FIGURE_HARD_NO20",
+        "displayName": "No.20 G第4形態（設定4否定）",
+        "sourceResearchEvidenceIds": [
+          "RE_BONUS_FIGURE",
+          "RE_ENDING_FIGURE"
+        ],
+        "inputId": "INP_EVI_FIGURE_HARD",
+        "triggerValue": "NO20",
+        "confirmedSettings": [],
+        "deniedSettings": [
+          "SET_4"
+        ],
+        "runtimeType": "SETTING_DENIAL",
+        "groupId": "FIGURE_HARD",
+        "settingFloorSemantics": "EXACT_ALLOWED_SETTINGS",
+        "normalizationSemantics": "ALLOWED_SETTINGS_INTERSECTION",
+        "observationIds": [
+          "OBS_EVI_FIGURE_HARD"
+        ],
+        "canonicalUi": {
+          "inputId": "INP_EVI_FIGURE_HARD",
+          "section": "フィギュア確定・否定",
+          "evidenceUiId": "EVI_UI_FIGURE_HARD"
+        },
+        "sharedFeatureIds": [],
+        "featureSharing": "NONE",
+        "legacyMigrationProvenance": {
+          "source": "selection.evidenceUi.groups",
+          "groupId": "FIGURE_HARD",
+          "specificationId": "M7_S_BIOHAZARD_RE2_XB_RELEASE_BATCH01_20260920"
+        }
+      },
+      {
+        "evidenceId": "EVI_FIGURE_HARD_NO21",
+        "displayName": "No.21 豆腐（設定3以上）",
+        "sourceResearchEvidenceIds": [
+          "RE_BONUS_FIGURE",
+          "RE_ENDING_FIGURE"
+        ],
+        "inputId": "INP_EVI_FIGURE_HARD",
+        "triggerValue": "NO21",
+        "confirmedSettings": [
+          "SET_3",
+          "SET_4",
+          "SET_5",
+          "SET_6"
+        ],
+        "deniedSettings": [],
+        "runtimeType": "SETTING_CONFIRMATION",
+        "groupId": "FIGURE_HARD",
+        "settingFloorSemantics": "EXACT_ALLOWED_SETTINGS",
+        "normalizationSemantics": "ALLOWED_SETTINGS_INTERSECTION",
+        "observationIds": [
+          "OBS_EVI_FIGURE_HARD"
+        ],
+        "canonicalUi": {
+          "inputId": "INP_EVI_FIGURE_HARD",
+          "section": "フィギュア確定・否定",
+          "evidenceUiId": "EVI_UI_FIGURE_HARD"
+        },
+        "sharedFeatureIds": [],
+        "featureSharing": "NONE",
+        "legacyMigrationProvenance": {
+          "source": "selection.evidenceUi.groups",
+          "groupId": "FIGURE_HARD",
+          "specificationId": "M7_S_BIOHAZARD_RE2_XB_RELEASE_BATCH01_20260920"
+        }
+      },
+      {
+        "evidenceId": "EVI_FIGURE_HARD_NO22",
+        "displayName": "No.22 ボスクリーチャー（設定4以上）",
+        "sourceResearchEvidenceIds": [
+          "RE_BONUS_FIGURE",
+          "RE_ENDING_FIGURE"
+        ],
+        "inputId": "INP_EVI_FIGURE_HARD",
+        "triggerValue": "NO22",
+        "confirmedSettings": [
+          "SET_4",
+          "SET_5",
+          "SET_6"
+        ],
+        "deniedSettings": [],
+        "runtimeType": "SETTING_CONFIRMATION",
+        "groupId": "FIGURE_HARD",
+        "settingFloorSemantics": "EXACT_ALLOWED_SETTINGS",
+        "normalizationSemantics": "ALLOWED_SETTINGS_INTERSECTION",
+        "observationIds": [
+          "OBS_EVI_FIGURE_HARD"
+        ],
+        "canonicalUi": {
+          "inputId": "INP_EVI_FIGURE_HARD",
+          "section": "フィギュア確定・否定",
+          "evidenceUiId": "EVI_UI_FIGURE_HARD"
+        },
+        "sharedFeatureIds": [],
+        "featureSharing": "NONE",
+        "legacyMigrationProvenance": {
+          "source": "selection.evidenceUi.groups",
+          "groupId": "FIGURE_HARD",
+          "specificationId": "M7_S_BIOHAZARD_RE2_XB_RELEASE_BATCH01_20260920"
+        }
+      },
+      {
+        "evidenceId": "EVI_FIGURE_HARD_NO23",
+        "displayName": "No.23 全員集合（設定5以上）",
+        "sourceResearchEvidenceIds": [
+          "RE_BONUS_FIGURE",
+          "RE_ENDING_FIGURE"
+        ],
+        "inputId": "INP_EVI_FIGURE_HARD",
+        "triggerValue": "NO23",
+        "confirmedSettings": [
+          "SET_5",
+          "SET_6"
+        ],
+        "deniedSettings": [],
+        "runtimeType": "SETTING_CONFIRMATION",
+        "groupId": "FIGURE_HARD",
+        "settingFloorSemantics": "EXACT_ALLOWED_SETTINGS",
+        "normalizationSemantics": "ALLOWED_SETTINGS_INTERSECTION",
+        "observationIds": [
+          "OBS_EVI_FIGURE_HARD"
+        ],
+        "canonicalUi": {
+          "inputId": "INP_EVI_FIGURE_HARD",
+          "section": "フィギュア確定・否定",
+          "evidenceUiId": "EVI_UI_FIGURE_HARD"
+        },
+        "sharedFeatureIds": [],
+        "featureSharing": "NONE",
+        "legacyMigrationProvenance": {
+          "source": "selection.evidenceUi.groups",
+          "groupId": "FIGURE_HARD",
+          "specificationId": "M7_S_BIOHAZARD_RE2_XB_RELEASE_BATCH01_20260920"
+        }
+      },
+      {
+        "evidenceId": "EVI_FIGURE_HARD_NO24",
+        "displayName": "No.24 エンタライオン（設定6）",
+        "sourceResearchEvidenceIds": [
+          "RE_BONUS_FIGURE",
+          "RE_ENDING_FIGURE"
+        ],
+        "inputId": "INP_EVI_FIGURE_HARD",
+        "triggerValue": "NO24",
+        "confirmedSettings": [
+          "SET_6"
+        ],
+        "deniedSettings": [],
+        "runtimeType": "SETTING_CONFIRMATION",
+        "groupId": "FIGURE_HARD",
+        "settingFloorSemantics": "EXACT_ALLOWED_SETTINGS",
+        "normalizationSemantics": "ALLOWED_SETTINGS_INTERSECTION",
+        "observationIds": [
+          "OBS_EVI_FIGURE_HARD"
+        ],
+        "canonicalUi": {
+          "inputId": "INP_EVI_FIGURE_HARD",
+          "section": "フィギュア確定・否定",
+          "evidenceUiId": "EVI_UI_FIGURE_HARD"
+        },
+        "sharedFeatureIds": [],
+        "featureSharing": "NONE",
+        "legacyMigrationProvenance": {
+          "source": "selection.evidenceUi.groups",
+          "groupId": "FIGURE_HARD",
+          "specificationId": "M7_S_BIOHAZARD_RE2_XB_RELEASE_BATCH01_20260920"
+        }
+      }
+    ]
+  }
 }
