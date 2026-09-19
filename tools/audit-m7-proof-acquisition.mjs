@@ -167,14 +167,14 @@ export function markdownReport(report) {
     `| semanticReviewInput | ${s.semanticReviewInput} |`,
     ...CLASSIFICATIONS.map(name => `| ${name} | ${s.classificationCounts[name]} |`),
     `| batch1CandidateCount | ${s.batch1CandidateCount} |`,
-    `| labelOnlyRejectedCount (${s.semanticReviewInput}-group input) | ${s.labelOnlyRejectedCount} |`,
+    `| labelOnlyRejectedCount (267-group input) | ${s.labelOnlyRejectedCount} |`,
     `| upstream label-only rejected (all 447 groups) | ${s.upstreamAllClassificationsLabelOnlyRejectedCount} |`, "",
     "Zero counts are deliberate: this batch does not manufacture an external-research or field-verification conclusion for groups whose upstream classification was semantic review.", "",
     "## Batch 1 candidates", "",
     "| Machine | Group | Source Evidence IDs | Current Observation | Expected formal Observation | Proof source/type | Minimum change | Independent blocker |", "|---|---|---|---|---|---|---|---|"
   ];
   for (const item of report.batch1Candidates) lines.push(`| \`${item.machineId}\` | \`${item.groupId}\` | ${item.sourceEvidenceIds.map(id => `\`${id}\``).join(", ")} | \`${item.currentObservationId}\` | \`${item.expectedFormalObservationId}\` | ${item.proofType}: ${item.proofExplanation} Source: \`${item.proofSource}\` | ${item.minimumChange} | ${item.independentBlocker ? "yes" : "no"} |`);
-  lines.push("", `## All ${report.groups.length} classifications`, "", "| Machine | Group | Classification | Proof decision | Reason / blocker | Diagnostic candidates |", "|---|---|---|---|---|---|");
+  lines.push("", "## All 267 classifications", "", "| Machine | Group | Classification | Proof decision | Reason / blocker | Diagnostic candidates |", "|---|---|---|---|---|---|");
   for (const item of report.groups) lines.push(`| \`${item.machineId}\` | \`${item.groupId}\` | ${item.classification} | ${item.proofResult} | ${item.proofExplanation} | ${item.diagnosticCandidateObservationIds.map(id => `\`${id}\``).join(", ") || "-"} |`);
   lines.push("", "## Unresolved blockers", "", "- `L_TENSEI_SHITARA_KEN_DESHITA_GT`: Feature/Evidence sharing formal proof or shared-input contract review is required; no new runtime field is proposed.", "- `LB_FUJIKO_M2`: Selection Quality remains an independent blocker.", "- Label-only candidates require Observation semantics review; all other unproven relationships require explicit lineage annotation.", "- The 21 upstream `FIELD_VERIFICATION_REQUIRED` groups (including the named real-device/service checks) are outside the 267 semantic-review input and remain unchanged.", "", "## Stop statement", "", "No Observation ID was renamed, no meaning was rewritten, and canonical UI, materialized MachineData, App runtime, validator behavior, and real-device status were not changed.");
   return `${lines.join("\n")}\n`;
