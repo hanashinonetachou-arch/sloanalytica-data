@@ -48,3 +48,28 @@ Both are adoption-outside-legacy-groups machines. A duplicate Research Feature d
 ## Batch decision
 
 No whole-family automatic repair is authorized from the blocker strings alone. The most promising deterministic candidates are the two Revue Starlight duplicate-decision cases: if duplicate entries are byte/semantically identical or one is demonstrably stale with authoritative lineage, deduplication may be decision-preserving. Audit those two next; freeze the other structural families pending authoritative Selection decisions/rationale.
+
+
+## Revue Starlight duplicate-decision audit
+
+The duplicate gate result is a **false structural assumption**, not duplicate Selection data.
+
+### `S_REVUE_STARLIGHT_CX`
+`RF_REVUE_CZ` intentionally feeds two distinct Selection decisions:
+- `FEAT_CZ_FIRST_POISSON`: self-play CZ observation, `INCLUDE_PRIMARY`, inputs `INP_CZ_FIRST_COUNT / INP_CZ_NORMAL_GAMES`.
+- `FEAT_CZ_PREDECESSOR`: predecessor/session-before-seat CZ observation, `INCLUDE_PRIMARY`, inputs `INP_SEATED_CZ_COUNT / INP_SEATED_NORMAL_GAMES`, excluded from common Difficulty.
+
+These are not duplicate runtime Features. They share one verified Research probability source but represent distinct observation scopes.
+
+### `S_REVUE_STARLIGHT_CX_TEST_V66`
+The same one-to-many pattern exists for `RF_REVUE_CZ`. In addition, `RF_REVUE_AT` feeds two distinct excluded decisions:
+- predecessor AT observation;
+- self AT observation retained for validation but excluded to avoid double-counting downstream AT against CZ.
+
+Research itself documents the scope distinction / overlap rationale.
+
+### Conclusion
+
+Do **not** delete either Feature decision. The current Selection Quality Gate assumes one Selection Feature decision per `researchFeatureId`; that assumption is invalid for a verified Research fact intentionally reused across distinct observation scopes or decision roles.
+
+The appropriate fix is gate-level: duplicate detection must distinguish accidental duplicate decisions from explicit one-to-many adoption. Any gate change must preserve detection of true duplicate records and require deterministic identity/scope evidence; it must not simply allow all repeated `researchFeatureId` values.
