@@ -1,0 +1,39 @@
+name: M7 Release Order Batch 01 Validate
+on:
+  pull_request:
+    branches: [prototype-multi-machine]
+    paths:
+      - 'research/**'
+      - 'migration-specs/evidence-contract-m7/**'
+      - '.github/workflows/m7-release-order-batch01-validate.yml'
+  workflow_dispatch:
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Run full test suite
+        run: node --test
+      - name: Run M7 full-fleet audit
+        run: node tools/audit-m7-full-fleet-migration.mjs --write
+      - name: Verify first release-order batch
+        run: |
+          node --input-type=module <<'NODE'
+          import fs from 'node:fs';
+          const ids = ["S_RAKUEN_TSUHO_FS","S_KONOSUBA_ZR","S_PERSONA5_FR","S_SUPER_RIO_ACE_CC","S_BIG_SHIMAUTA_E2_30","S_BIOHAZARD_RE2_XB","S_WARAU4_KH","S_DANMACHI_GAIDEN_XR","S_MAHOIKU_NB","S_TEKKEN4_ULTIMATE_DEVIL_TCD"];
+          const r = JSON.parse(fs.readFileSync('reports/m7-full-fleet-migration-audit-20260916.json','utf8'));
+          const rows = ids.map(id => r.machines.find(x => x.machineId === id));
+          console.log(JSON.stringify(rows.map(x => ({machineId:x?.machineId,classification:x?.classification,migrationDisposition:x?.migrationDisposition,blockers:x?.blockers})), null, 2));
+          if (rows.some(x => !x)) process.exit(2);
+          NODE
+      - name: Upload M7 audit
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: m7-release-order-batch01-audit
+          path: |
+            reports/m7-full-fleet-migration-audit-20260916.json
+            reports/m7-full-fleet-migration-audit-20260916.md
