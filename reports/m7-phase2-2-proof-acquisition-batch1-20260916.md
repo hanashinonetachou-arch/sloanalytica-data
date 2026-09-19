@@ -19,7 +19,7 @@ Proof remains binary. Every Batch 1 entry is `NOT_ESTABLISHED`: it is a safe tar
 | INDEPENDENT_BLOCKER | 3 |
 | FEATURE_EVIDENCE_SHARING_REVIEW_REQUIRED | 2 |
 | batch1CandidateCount | 13 |
-| labelOnlyRejectedCount | 17 |
+| labelOnlyRejectedCount (267-group input) | 17 |
 | upstream label-only rejected (all 447 groups) | 33 |
 
 Zero counts are deliberate: this batch does not manufacture an external-research or field-verification conclusion for groups whose upstream classification was semantic review.
@@ -42,7 +42,7 @@ Zero counts are deliberate: this batch does not manufacture an external-research
 | `S_TOARU_RAILGUN_FB` | `SETTING_EVIDENCE` | `RE_AT_END_2PLUS`, `RE_AT_END_3PLUS`, `RE_AT_END_4PLUS`, `RE_AT_END_5PLUS`, `RE_AT_END_6`, `RE_BATTLE_4PLUS`, `RE_BATTLE_5PLUS`, `RE_BATTLE_6`, `RE_BONUS_ROUND_4PLUS`, `RE_BONUS_ROUND_5PLUS`, `RE_CHANCE_VOICE_4PLUS`, `RE_CHANCE_VOICE_6`, `RE_ENDING_4PLUS`, `RE_ITEM_BATTLE_4PLUS`, `RE_ITEM_BATTLE_6`, `RE_MISSION_2PLUS`, `RE_NOISE_4PLUS` | `OBS_SETTING_EVIDENCE` | `OBS_EVI_SETTING_EVIDENCE` | UNIQUE_LEGACY_ID_AND_AUDITED_INPUT_PROJECTION: A unique machine-local Observation structurally embeds the exact groupId in its identifier, and the prior formal UI audit independently records INP_EVI_<groupId> at concrete package/UI trails. This is a proof-acquisition candidate, not yet an established formal Observation proof. Source: `research/S_TOARU_RAILGUN_FB/machine-observation-data.json#OBS_SETTING_EVIDENCE + audit-reports/evidence-ui-v2-phase2.json#S_TOARU_RAILGUN_FB/INP_EVI_SETTING_EVIDENCE` | After human confirmation, add explicit groupId/sourceEvidenceIds lineage using an existing Observation lineage field; separately validate any ID rename. Do not change semantics or runtime shape. | no |
 | `S_YOUJO_SENKI_ZR` | `SETTING_EVIDENCE` | `RE_AT_EXISTENCE_X`, `RE_AT_TANYA`, `RE_AT_VISHYA`, `RE_AT_ZETTOUR`, `RE_OP203_4PLUS_HEAVEN`, `RE_PAYOUT_246`, `RE_PAYOUT_456`, `RE_PAYOUT_666`, `RE_TROPHY_BRONZE`, `RE_TROPHY_GOLD`, `RE_TROPHY_KIRIN`, `RE_TROPHY_RAINBOW`, `RE_VCOMBAT_4PLUS`, `RE_VCOMBAT_5PLUS`, `RE_VCOMBAT_6` | `OBS_SETTING_EVIDENCE` | `OBS_EVI_SETTING_EVIDENCE` | UNIQUE_LEGACY_ID_AND_AUDITED_INPUT_PROJECTION: A unique machine-local Observation structurally embeds the exact groupId in its identifier, and the prior formal UI audit independently records INP_EVI_<groupId> at concrete package/UI trails. This is a proof-acquisition candidate, not yet an established formal Observation proof. Source: `research/S_YOUJO_SENKI_ZR/machine-observation-data.json#OBS_SETTING_EVIDENCE + audit-reports/evidence-ui-v2-phase2.json#S_YOUJO_SENKI_ZR/INP_EVI_SETTING_EVIDENCE` | After human confirmation, add explicit groupId/sourceEvidenceIds lineage using an existing Observation lineage field; separately validate any ID rename. Do not change semantics or runtime shape. | no |
 
-## All 254 classifications
+## All 267 classifications
 
 | Machine | Group | Classification | Proof decision | Reason / blocker | Diagnostic candidates |
 |---|---|---|---|---|---|
