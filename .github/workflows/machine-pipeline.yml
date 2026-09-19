@@ -49,15 +49,15 @@ jobs:
           if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
             printf '%s\n' "${{ inputs.machine_id }}" > /tmp/machine_ids.txt
           else
-            git diff --name-only "${{ github.event.pull_request.base.sha }}" "${{ github.event.pull_request.head.sha }}" \
+            git diff --diff-filter=ACMRT --name-only "${{ github.event.pull_request.base.sha }}" "${{ github.event.pull_request.head.sha }}" \
               | sed -nE '/^research\/[^/]+\/research-data\.json$/p' \
               | sort -u > /tmp/research_files.txt
 
-            git diff --name-only "${{ github.event.pull_request.base.sha }}" "${{ github.event.pull_request.head.sha }}" \
+            git diff --diff-filter=ACMRT --name-only "${{ github.event.pull_request.base.sha }}" "${{ github.event.pull_request.head.sha }}" \
               | sed -nE 's#^research/([^/]+)/selection-data\.json$#\1#p' \
               | sort -u > /tmp/machine_ids.txt
 
-            git diff --name-only "${{ github.event.pull_request.base.sha }}" "${{ github.event.pull_request.head.sha }}" \
+            git diff --diff-filter=ACMRT --name-only "${{ github.event.pull_request.base.sha }}" "${{ github.event.pull_request.head.sha }}" \
               | sed -nE '/^research\/[^/]+\/ui-design-data\.json$/p' \
               | sort -u > /tmp/ui_design_files.txt
 
