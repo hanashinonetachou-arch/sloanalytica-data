@@ -1,4 +1,6 @@
 name: M7 Release Order Batch 01 Validate
+permissions:
+  contents: write
 on:
   pull_request:
     branches: [prototype-multi-machine]
@@ -36,6 +38,14 @@ jobs:
           done
           git diff -- research/*/selection-data.json > batch01-selection-evidence.patch
           test -s batch01-selection-evidence.patch
+      - name: Commit batch01 migrated selections
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add research/*/selection-data.json
+          git diff --cached --quiet && exit 0
+          git commit -m "m7: apply release-order batch01 evidence contracts"
+          git push origin HEAD:audit/m7-release-order-batch-01-20260920
       - name: Upload batch01 migrated selections
         uses: actions/upload-artifact@v4
         with:
