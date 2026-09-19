@@ -1,0 +1,308 @@
+{
+  "schemaVersion": "selection-data-v1",
+  "machineId": "L_ONE_PUNCH_MAN",
+  "machineDataVersion": "0.1.3",
+  "uiCategoryLabels": {
+    "PRIMARY": "初当り",
+    "BEST_SHOT": "ベストショット",
+    "ROLE": "小役"
+  },
+  "inputs": [
+    {
+      "id": "INP_AT_GAMES",
+      "name": "AT初当り集計ゲーム数",
+      "type": "integer",
+      "category": "PRIMARY",
+      "unit": "G",
+      "displayOrder": 1,
+      "description": "公開AT初当り確率と同じ集計範囲のゲーム数を入力してください。実機表示Gとの定義一致は未確認です。",
+      "defaultValue": 0
+    },
+    {
+      "id": "INP_AT_COUNT",
+      "name": "AT初当り回数",
+      "type": "counter",
+      "category": "PRIMARY",
+      "unit": "回",
+      "displayOrder": 2,
+      "defaultValue": 0
+    },
+    {
+      "id": "INP_ROLE_GAMES",
+      "name": "小役集計ゲーム数",
+      "type": "integer",
+      "category": "ROLE",
+      "unit": "G",
+      "displayOrder": 10,
+      "defaultValue": null,
+      "description": "通常時に弱チェリー・スイカを数えたゲーム数を入力してください。"
+    },
+    {
+      "id": "INP_WEAK_CHERRY",
+      "name": "弱チェリー",
+      "type": "counter",
+      "category": "ROLE",
+      "unit": "回",
+      "displayOrder": 11,
+      "defaultValue": null,
+      "parentInputId": "INP_ROLE_GAMES",
+      "uiQuickAdd": 1
+    },
+    {
+      "id": "INP_WATERMELON",
+      "name": "スイカ",
+      "type": "counter",
+      "category": "ROLE",
+      "unit": "回",
+      "displayOrder": 12,
+      "defaultValue": null,
+      "parentInputId": "INP_ROLE_GAMES",
+      "uiQuickAdd": 1
+    },
+    {
+      "id": "INP_BEST_LILY",
+      "name": "リリー",
+      "type": "counter",
+      "category": "BEST_SHOT",
+      "unit": "枚",
+      "displayOrder": 20,
+      "defaultValue": 0,
+      "maximum": 5,
+      "uiQuickAdd": 1,
+      "description": "1回のベストショットチャンス内でこのキャラが表示された枚数を数えてください。次のチャンスでは0に戻してください。"
+    },
+    {
+      "id": "INP_BEST_FUBUKI",
+      "name": "フブキ",
+      "type": "counter",
+      "category": "BEST_SHOT",
+      "unit": "枚",
+      "displayOrder": 21,
+      "defaultValue": 0,
+      "maximum": 5,
+      "uiQuickAdd": 1,
+      "description": "1回のベストショットチャンス内でこのキャラが表示された枚数を数えてください。次のチャンスでは0に戻してください。"
+    },
+    {
+      "id": "INP_BEST_TATSUMAKI",
+      "name": "タツマキ",
+      "type": "counter",
+      "category": "BEST_SHOT",
+      "unit": "枚",
+      "displayOrder": 22,
+      "defaultValue": 0,
+      "maximum": 5,
+      "uiQuickAdd": 1,
+      "description": "1回のベストショットチャンス内でこのキャラが表示された枚数を数えてください。次のチャンスでは0に戻してください。"
+    }
+  ],
+  "features": [
+    {
+      "researchFeatureId": "RF_CZ_INITIAL",
+      "featureId": "FEAT_CZ_INITIAL",
+      "adoptionCategory": "EXCLUDE",
+      "rejectionReason": "CZはボーナス/AT到達経路と依存し、AT初当りと二重計上せず安全に分解する構造を初版では確定できない。",
+      "userReason": "CZ初当りはATとの経路依存を安全に分解できないため不採用。"
+    },
+    {
+      "researchFeatureId": "RF_BONUS_INITIAL",
+      "featureId": "FEAT_BONUS_INITIAL",
+      "adoptionCategory": "EXCLUDE",
+      "rejectionReason": "ボーナスはAT突入経路の一部であり、AT初当りと単純併用すると同じ経路情報を重複評価する。",
+      "userReason": "ボーナス初当りはATとの経路依存を避けるため初版では不採用。"
+    },
+    {
+      "researchFeatureId": "RF_AT_INITIAL",
+      "featureId": "FEAT_AT_INITIAL",
+      "adoptionCategory": "EXCLUDE",
+      "userFacingReason": "AT初当りには設定差がありますが、公開確率の集計対象ゲームと実機で入力できるゲーム数の定義一致が未確認です。また弱チェリー・スイカを主軸採用する現構成では下流ATと独立尤度として同時評価できないため、現版では推測計算に使用しません。"
+    },
+    {
+      "researchFeatureId": "RF_WEAK_CHERRY",
+      "featureId": "FEAT_WEAK_CHERRY",
+      "adoptionCategory": "EXCLUDE",
+      "userFacingReason": "単独Binomialではなく、弱チェリー・スイカ・その他を同一通常ゲーム上の排他的Multinomialとしてまとめて評価します。"
+    },
+    {
+      "researchFeatureId": "RF_WATERMELON",
+      "featureId": "FEAT_WATERMELON",
+      "adoptionCategory": "EXCLUDE",
+      "userFacingReason": "単独Binomialではなく、弱チェリー・スイカ・その他を同一通常ゲーム上の排他的Multinomialとしてまとめて評価します。"
+    },
+    {
+      "researchFeatureId": "RF_SMALL_ROLE_MULTI",
+      "featureId": "FEAT_SMALL_ROLE_MULTI",
+      "adoptionCategory": "INCLUDE_PRIMARY",
+      "denominatorInputId": "INP_ROLE_GAMES",
+      "numeratorInputId": "INP_WEAK_CHERRY",
+      "categoryInputIds": [
+        "INP_WATERMELON"
+      ],
+      "residualCategoryLabel": "OTHER",
+      "minimumSample": 1,
+      "sampleRecommendation": 3000,
+      "weight": 1,
+      "displayFormat": "ratio_1_over_n",
+      "difficultyExposure": {
+        "mode": "per_game",
+        "factor": 1,
+        "quality": "EXACT",
+        "basisId": "NORMAL_GAMES"
+      },
+      "difficultyParticipation": "INCLUDE",
+      "userReason": "弱チェリー・スイカは同じ通常時ゲームを母数に排他的カテゴリとして観測でき、AT初当りより設定1↔6の1Gあたり識別情報が大きいため主軸採用。"
+    }
+  ],
+  "evidence": [
+    {
+      "evidenceId": "EVI_BEST_LILY_3",
+      "researchEvidenceId": "EV_BEST_LILY_3",
+      "inputId": "INP_BEST_LILY",
+      "triggerValue": 3
+    },
+    {
+      "evidenceId": "EVI_BEST_LILY_4",
+      "researchEvidenceId": "EV_BEST_LILY_4",
+      "inputId": "INP_BEST_LILY",
+      "triggerValue": 4
+    },
+    {
+      "evidenceId": "EVI_BEST_LILY_5",
+      "researchEvidenceId": "EV_BEST_LILY_5",
+      "inputId": "INP_BEST_LILY",
+      "triggerValue": 5
+    },
+    {
+      "evidenceId": "EVI_BEST_FUBUKI_3",
+      "researchEvidenceId": "EV_BEST_FUBUKI_3",
+      "inputId": "INP_BEST_FUBUKI",
+      "triggerValue": 3
+    },
+    {
+      "evidenceId": "EVI_BEST_FUBUKI_4",
+      "researchEvidenceId": "EV_BEST_FUBUKI_4",
+      "inputId": "INP_BEST_FUBUKI",
+      "triggerValue": 4
+    },
+    {
+      "evidenceId": "EVI_BEST_FUBUKI_5",
+      "researchEvidenceId": "EV_BEST_FUBUKI_5",
+      "inputId": "INP_BEST_FUBUKI",
+      "triggerValue": 5
+    },
+    {
+      "evidenceId": "EVI_BEST_TATSUMAKI_3",
+      "researchEvidenceId": "EV_BEST_TATSUMAKI_3",
+      "inputId": "INP_BEST_TATSUMAKI",
+      "triggerValue": 3
+    },
+    {
+      "evidenceId": "EVI_BEST_TATSUMAKI_4",
+      "researchEvidenceId": "EV_BEST_TATSUMAKI_4",
+      "inputId": "INP_BEST_TATSUMAKI",
+      "triggerValue": 4
+    },
+    {
+      "evidenceId": "EVI_BEST_TATSUMAKI_5",
+      "researchEvidenceId": "EV_BEST_TATSUMAKI_5",
+      "inputId": "INP_BEST_TATSUMAKI",
+      "triggerValue": 5
+    }
+  ],
+  "evidenceUi": {
+    "groups": [
+      {
+        "groupId": "BONUS_AT_END_SCREEN",
+        "label": "ボーナス/AT終了画面",
+        "selectionMode": "single",
+        "normalizationMode": "ALLOWED_SETTINGS",
+        "options": [
+          {
+            "value": "END_SAITAMA_UNDERGROUND",
+            "label": "ボーナス/AT終了画面 サイタマ+地底人",
+            "allowedSettings": [
+              "SET_2",
+              "SET_3",
+              "SET_4",
+              "SET_5",
+              "SET_6"
+            ],
+            "excludedSettings": [
+              "SET_1"
+            ],
+            "sourceEvidenceIds": [
+              "EV_END_2PLUS"
+            ]
+          },
+          {
+            "value": "END_SAITAMA_FIGHT",
+            "label": "ボーナス/AT終了画面 奮戦サイタマ",
+            "allowedSettings": [
+              "SET_4",
+              "SET_5",
+              "SET_6"
+            ],
+            "excludedSettings": [
+              "SET_1",
+              "SET_2",
+              "SET_3"
+            ],
+            "sourceEvidenceIds": [
+              "EV_END_4PLUS"
+            ]
+          },
+          {
+            "value": "END_S_CLASS_HEROES",
+            "label": "ボーナス/AT終了画面 S級ヒーロー集合",
+            "allowedSettings": [
+              "SET_6"
+            ],
+            "excludedSettings": [
+              "SET_1",
+              "SET_2",
+              "SET_3",
+              "SET_4",
+              "SET_5"
+            ],
+            "sourceEvidenceIds": [
+              "EV_END_6"
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "evidenceReview": {
+    "policyVersion": 1,
+    "exclusions": []
+  },
+  "difficultyAnalysis": {
+    "targetGames": [
+      1500,
+      3000,
+      7000
+    ],
+    "simulationsPerSetting": 4000,
+    "seed": 20260822,
+    "targetGameBasis": {
+      "basisId": "NORMAL_GAMES",
+      "label": "通常ゲーム数",
+      "quality": "EXACT"
+    },
+    "calibrationAllowedExposureQualities": [
+      "EXACT",
+      "DERIVED",
+      "ESTIMATED"
+    ]
+  },
+  "selectionNotes": [
+    "弱チェリー/スイカは残余カテゴリを含む排他的Multinomialとして主軸採用する。",
+    "AT初当りは公開確率の分母定義と実機入力Gの一致が未確認で、小役主軸とのjoint likelihoodも未定義のため現版では推測不参加。",
+    "通常滞在時レア役→CZなど内部状態を必要とする条件付きFeatureはResearchに保持する。"
+  ],
+  "uiSectionOptions": {
+    "BEST_SHOT": {
+      "description": "1回のベストショットチャンスごとに3キャラの枚数を数えます。3枚/4枚/5枚でEvidenceが自動反映されます。次のチャンスでは各カウンターを0に戻してください。"
+    }
+  }
+}
