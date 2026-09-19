@@ -194,7 +194,7 @@ export function auditMachine(root, machineId) {
     base.featureSharingProof = evidenceGate0.disposition === "NO_EVIDENCE" ? notApplicable("EVIDENCE_UI_GATE0_DISPOSITION", detail) : fail("ADOPTION_PATH_UNREPRESENTED", detail);
     base.inputCompatibilityProof = notApplicable("NO_LEGACY_GROUP_PROJECTION", detail);
     base.machineDataEquivalenceProof = notApplicable("NO_MIGRATION_PROJECTION", "Legacy build success cannot establish pre/post migration equivalence when no migration projection exists");
-    if (evidenceGate0.disposition !== "NO_EVIDENCE") base.blockReasons.push(detail);
+    if (evidenceGate0.disposition !== "NO_EVIDENCE" || selectionQuality.status !== "PASS") base.blockReasons.push(detail);
     base.classification = selectionQuality.status !== "PASS"
       ? "SELECTION_QUALITY_BLOCKED"
       : evidenceGate0.disposition === "NO_EVIDENCE"
