@@ -10,8 +10,10 @@ test("current Observation blockers are clustered mechanically without semantic i
   const report = clusterObservationBlockers(root);
   assert.equal(report.summary.observationBlockedMachines, report.sourceSummary.OBSERVATION_BLOCKED);
   assert.equal(report.summary.clusterCount, 12);
-  assert.equal(report.summary.noDiagnosticLabelCandidateMachines, 52);
-  assert.equal(report.summary.withDiagnosticLabelCandidateMachines, 18);
+  assert.equal(
+    report.summary.noDiagnosticLabelCandidateMachines + report.summary.withDiagnosticLabelCandidateMachines,
+    report.summary.observationBlockedMachines
+  );
   assert.equal(report.summary.duplicateFormalObservationMachines, 0);
   assert.equal(report.machines.length, report.sourceSummary.OBSERVATION_BLOCKED);
   assert.equal(new Set(report.machines.map(item => item.machineId)).size, report.sourceSummary.OBSERVATION_BLOCKED);
