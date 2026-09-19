@@ -19,7 +19,7 @@ Proof remains binary. Every Batch 1 entry is `NOT_ESTABLISHED`: it is a safe tar
 | INDEPENDENT_BLOCKER | 3 |
 | FEATURE_EVIDENCE_SHARING_REVIEW_REQUIRED | 2 |
 | batch1CandidateCount | 13 |
-| labelOnlyRejectedCount (267-group input) | 17 |
+| labelOnlyRejectedCount (254-group input) | 17 |
 | upstream label-only rejected (all 447 groups) | 33 |
 
 Zero counts are deliberate: this batch does not manufacture an external-research or field-verification conclusion for groups whose upstream classification was semantic review.
