@@ -13,9 +13,9 @@ Phase 1 base: `8a31eec356e40fecc38ac86fd6e938e1deff9375`. Original verified Data
 | FEATURE_SHARING_REVIEW | 0 |
 | OBSERVATION_BLOCKED | 70 |
 | CANONICAL_UI_BLOCKED | 0 |
-| NORMALIZATION_BLOCKED | 17 |
+| NORMALIZATION_BLOCKED | 19 |
 | INPUT_COMPATIBILITY_BLOCKED | 0 |
-| SELECTION_QUALITY_BLOCKED | 87 |
+| SELECTION_QUALITY_BLOCKED | 85 |
 | OTHER_BLOCKED | 39 |
 | NOT_APPLICABLE_OR_EQUIVALENT | 75 |
 
@@ -36,87 +36,11 @@ Classification is fail-closed. Only explicit formal repository relationships are
 
 ## Phase 1 → Phase 2 primary-classification changes
 
-- `LB_JACKPOT_CY1`: OTHER_BLOCKED → NOT_APPLICABLE_OR_EQUIVALENT — tools/selection-quality-gate.mjs returned PASS
-- `LB_MATADOR_3_TT`: OTHER_BLOCKED → NOT_APPLICABLE_OR_EQUIVALENT — tools/selection-quality-gate.mjs returned PASS
-- `LB_NEW_KING_HANAHANA_V_PF`: OTHER_BLOCKED → NOT_APPLICABLE_OR_EQUIVALENT — tools/selection-quality-gate.mjs returned PASS
-- `LB_NEW_PULSAR_BT_C9`: OTHER_BLOCKED → NOT_APPLICABLE_OR_EQUIVALENT — tools/selection-quality-gate.mjs returned PASS
-- `LB_PREMIUM_UMAIBO_S1`: OTHER_BLOCKED → NOT_APPLICABLE_OR_EQUIVALENT — tools/selection-quality-gate.mjs returned PASS
-- `LB_TRIPLE_CROWN_X300`: OTHER_BLOCKED → NOT_APPLICABLE_OR_EQUIVALENT — tools/selection-quality-gate.mjs returned PASS
-- `L_009_RECYBORG_NZ`: OTHER_BLOCKED → NOT_APPLICABLE_OR_EQUIVALENT — tools/selection-quality-gate.mjs returned PASS
-- `L_BABEL_BA`: OTHER_BLOCKED → NOT_APPLICABLE_OR_EQUIVALENT — tools/selection-quality-gate.mjs returned PASS
-- `L_BIOHAZARD_RE3_ZD`: OTHER_BLOCKED → NOT_APPLICABLE_OR_EQUIVALENT — tools/selection-quality-gate.mjs returned PASS
-- `L_BIRDIE_WING_BC`: NORMALIZATION_BLOCKED → ALREADY_M7 — Reference implementation is governed by its checked-in pilot tests
-- `L_BURNING_EXPRESS_ZN`: OTHER_BLOCKED → NOT_APPLICABLE_OR_EQUIVALENT — tools/selection-quality-gate.mjs returned PASS
-- `L_CHIBARIYO2_PLUS_ZC`: OTHER_BLOCKED → NOT_APPLICABLE_OR_EQUIVALENT — tools/selection-quality-gate.mjs returned PASS
-- `L_DARK_HAIBI_SB`: NORMALIZATION_BLOCKED → ALREADY_M7 — Reference implementation is governed by its checked-in pilot tests
-- `L_HANAGASA_NA`: OTHER_BLOCKED → NOT_APPLICABLE_OR_EQUIVALENT — tools/selection-quality-gate.mjs returned PASS
-- `L_KARAKURI_CIRCUS2_JG`: OTHER_BLOCKED → NOT_APPLICABLE_OR_EQUIVALENT — tools/selection-quality-gate.mjs returned PASS
-- `L_LOTIS_TN`: NORMALIZATION_BLOCKED → ALREADY_M7 — Reference implementation is governed by its checked-in pilot tests
-- `L_NANGOKU_SPECIAL_M1`: NORMALIZATION_BLOCKED → ALREADY_M7 — Reference implementation is governed by its checked-in pilot tests
-- `L_SAO2_PA1`: OTHER_BLOCKED → NOT_APPLICABLE_OR_EQUIVALENT — tools/selection-quality-gate.mjs returned PASS
-- `L_SENGOKU_COLLECTION5_GJ`: OTHER_BLOCKED → NOT_APPLICABLE_OR_EQUIVALENT — tools/selection-quality-gate.mjs returned PASS
-- `L_SENGOKU_COLLECTION6_KS`: NORMALIZATION_BLOCKED → ALREADY_M7 — Reference implementation is governed by its checked-in pilot tests
-- `L_SENGOKU_OTOME5_L8`: OTHER_BLOCKED → NOT_APPLICABLE_OR_EQUIVALENT — tools/selection-quality-gate.mjs returned PASS
-- `L_SHIMAMUSUME_L2`: OTHER_BLOCKED → NOT_APPLICABLE_OR_EQUIVALENT — tools/selection-quality-gate.mjs returned PASS
-- `L_SUPER_RIO_ACE2_ND02H`: OTHER_BLOCKED → NOT_APPLICABLE_OR_EQUIVALENT — tools/selection-quality-gate.mjs returned PASS
-- `L_TAKT_OP_DESTINY_M1`: OTHER_BLOCKED → NOT_APPLICABLE_OR_EQUIVALENT — tools/selection-quality-gate.mjs returned PASS
-- `L_TEKKEN_6_YD01H`: OTHER_BLOCKED → NOT_APPLICABLE_OR_EQUIVALENT — tools/selection-quality-gate.mjs returned PASS
-- `L_TOARU_INDEX2_FA`: NORMALIZATION_BLOCKED → ALREADY_M7 — Reference implementation is governed by its checked-in pilot tests
-- `L_TONDEMO_SKILL_KM`: NORMALIZATION_BLOCKED → ALREADY_M7 — Reference implementation is governed by its checked-in pilot tests
-- `L_ULTRAMAN_FINAL_BATTLE_ME`: NORMALIZATION_BLOCKED → ALREADY_M7 — Reference implementation is governed by its checked-in pilot tests
-- `L_WORLD_DAI_STAR_PA3`: NORMALIZATION_BLOCKED → ALREADY_M7 — Reference implementation is governed by its checked-in pilot tests
-- `L_YABACHIBA_ZM`: OTHER_BLOCKED → NOT_APPLICABLE_OR_EQUIVALENT — tools/selection-quality-gate.mjs returned PASS
-- `L_YAJIKITA_MAIRU_BG`: NORMALIZATION_BLOCKED → ALREADY_M7 — Reference implementation is governed by its checked-in pilot tests
-- `S_BUSOU_SHINKI`: OTHER_BLOCKED → NOT_APPLICABLE_OR_EQUIVALENT — tools/selection-quality-gate.mjs returned PASS
-- `S_CHABUDAI_EB6`: OTHER_BLOCKED → NOT_APPLICABLE_OR_EQUIVALENT — tools/selection-quality-gate.mjs returned PASS
-- `S_FUNKY_JUGGLER_2_KT`: OTHER_BLOCKED → NOT_APPLICABLE_OR_EQUIVALENT — tools/selection-quality-gate.mjs returned PASS
-- `S_MORE_CHIBARIYO_NB_30`: OTHER_BLOCKED → NOT_APPLICABLE_OR_EQUIVALENT — tools/selection-quality-gate.mjs returned PASS
-- `S_MY_JUGGLER_V_KD`: OTHER_BLOCKED → NOT_APPLICABLE_OR_EQUIVALENT — tools/selection-quality-gate.mjs returned PASS
-- `S_NAMENEKO_QQ`: OTHER_BLOCKED → NOT_APPLICABLE_OR_EQUIVALENT — tools/selection-quality-gate.mjs returned PASS
-- `S_OKIDOKI_BLACK_EP`: OTHER_BLOCKED → NOT_APPLICABLE_OR_EQUIVALENT — tools/selection-quality-gate.mjs returned PASS
-- `S_OKIDOKI_GOLD_GS`: OTHER_BLOCKED → NOT_APPLICABLE_OR_EQUIVALENT — tools/selection-quality-gate.mjs returned PASS
+- None
 
 ## Phase 2 → Phase 2.1 primary-classification changes
 
-- `LB_JACKPOT_CY1`: OTHER_BLOCKED → NOT_APPLICABLE_OR_EQUIVALENT — Formal Gate0 disposition is NO_EVIDENCE; there is no Evidence contract to migrate
-- `LB_MATADOR_3_TT`: OTHER_BLOCKED → NOT_APPLICABLE_OR_EQUIVALENT — Formal Gate0 disposition is NO_EVIDENCE; there is no Evidence contract to migrate
-- `LB_NEW_KING_HANAHANA_V_PF`: OTHER_BLOCKED → NOT_APPLICABLE_OR_EQUIVALENT — Formal Gate0 disposition is NO_EVIDENCE; there is no Evidence contract to migrate
-- `LB_NEW_PULSAR_BT_C9`: OTHER_BLOCKED → NOT_APPLICABLE_OR_EQUIVALENT — Formal Gate0 disposition is NO_EVIDENCE; there is no Evidence contract to migrate
-- `LB_PREMIUM_UMAIBO_S1`: OTHER_BLOCKED → NOT_APPLICABLE_OR_EQUIVALENT — Formal Gate0 disposition is NO_EVIDENCE; there is no Evidence contract to migrate
-- `LB_TRIPLE_CROWN_X300`: OTHER_BLOCKED → NOT_APPLICABLE_OR_EQUIVALENT — Formal Gate0 disposition is NO_EVIDENCE; there is no Evidence contract to migrate
-- `L_009_RECYBORG_NZ`: OTHER_BLOCKED → NOT_APPLICABLE_OR_EQUIVALENT — Formal Gate0 disposition is NO_EVIDENCE; there is no Evidence contract to migrate
-- `L_BABEL_BA`: OTHER_BLOCKED → NOT_APPLICABLE_OR_EQUIVALENT — Formal Gate0 disposition is NO_EVIDENCE; there is no Evidence contract to migrate
-- `L_BIOHAZARD_RE3_ZD`: OTHER_BLOCKED → NOT_APPLICABLE_OR_EQUIVALENT — Formal Gate0 disposition is NO_EVIDENCE; there is no Evidence contract to migrate
-- `L_BIRDIE_WING_BC`: NORMALIZATION_BLOCKED → ALREADY_M7 — Preserved checked-in contract
-- `L_BURNING_EXPRESS_ZN`: OTHER_BLOCKED → NOT_APPLICABLE_OR_EQUIVALENT — Formal Gate0 disposition is NO_EVIDENCE; there is no Evidence contract to migrate
-- `L_CHIBARIYO2_PLUS_ZC`: OTHER_BLOCKED → NOT_APPLICABLE_OR_EQUIVALENT — Formal Gate0 disposition is NO_EVIDENCE; there is no Evidence contract to migrate
-- `L_DARK_HAIBI_SB`: NORMALIZATION_BLOCKED → ALREADY_M7 — Preserved checked-in contract
-- `L_HANAGASA_NA`: OTHER_BLOCKED → NOT_APPLICABLE_OR_EQUIVALENT — Formal Gate0 disposition is NO_EVIDENCE; there is no Evidence contract to migrate
-- `L_KARAKURI_CIRCUS2_JG`: OTHER_BLOCKED → NOT_APPLICABLE_OR_EQUIVALENT — Formal Gate0 disposition is NO_EVIDENCE; there is no Evidence contract to migrate
-- `L_LOTIS_TN`: NORMALIZATION_BLOCKED → ALREADY_M7 — Preserved checked-in contract
-- `L_NANGOKU_SPECIAL_M1`: NORMALIZATION_BLOCKED → ALREADY_M7 — Preserved checked-in contract
-- `L_SAO2_PA1`: OTHER_BLOCKED → NOT_APPLICABLE_OR_EQUIVALENT — Formal Gate0 disposition is NO_EVIDENCE; there is no Evidence contract to migrate
-- `L_SENGOKU_COLLECTION5_GJ`: OTHER_BLOCKED → NOT_APPLICABLE_OR_EQUIVALENT — Formal Gate0 disposition is NO_EVIDENCE; there is no Evidence contract to migrate
-- `L_SENGOKU_COLLECTION6_KS`: NORMALIZATION_BLOCKED → ALREADY_M7 — Preserved checked-in contract
-- `L_SENGOKU_OTOME5_L8`: OTHER_BLOCKED → NOT_APPLICABLE_OR_EQUIVALENT — Formal Gate0 disposition is NO_EVIDENCE; there is no Evidence contract to migrate
-- `L_SHIMAMUSUME_L2`: OTHER_BLOCKED → NOT_APPLICABLE_OR_EQUIVALENT — Formal Gate0 disposition is NO_EVIDENCE; there is no Evidence contract to migrate
-- `L_SUPER_RIO_ACE2_ND02H`: OTHER_BLOCKED → NOT_APPLICABLE_OR_EQUIVALENT — Formal Gate0 disposition is NO_EVIDENCE; there is no Evidence contract to migrate
-- `L_TAKT_OP_DESTINY_M1`: OTHER_BLOCKED → NOT_APPLICABLE_OR_EQUIVALENT — Formal Gate0 disposition is NO_EVIDENCE; there is no Evidence contract to migrate
-- `L_TEKKEN_6_YD01H`: OTHER_BLOCKED → NOT_APPLICABLE_OR_EQUIVALENT — Formal Gate0 disposition is NO_EVIDENCE; there is no Evidence contract to migrate
-- `L_TOARU_INDEX2_FA`: NORMALIZATION_BLOCKED → ALREADY_M7 — Preserved checked-in contract
-- `L_TONDEMO_SKILL_KM`: NORMALIZATION_BLOCKED → ALREADY_M7 — Preserved checked-in contract
-- `L_ULTRAMAN_FINAL_BATTLE_ME`: NORMALIZATION_BLOCKED → ALREADY_M7 — Preserved checked-in contract
-- `L_WORLD_DAI_STAR_PA3`: NORMALIZATION_BLOCKED → ALREADY_M7 — Preserved checked-in contract
-- `L_YABACHIBA_ZM`: OTHER_BLOCKED → NOT_APPLICABLE_OR_EQUIVALENT — Formal Gate0 disposition is NO_EVIDENCE; there is no Evidence contract to migrate
-- `L_YAJIKITA_MAIRU_BG`: NORMALIZATION_BLOCKED → ALREADY_M7 — Preserved checked-in contract
-- `S_BUSOU_SHINKI`: OTHER_BLOCKED → NOT_APPLICABLE_OR_EQUIVALENT — Formal Gate0 disposition is NO_EVIDENCE; there is no Evidence contract to migrate
-- `S_CHABUDAI_EB6`: OTHER_BLOCKED → NOT_APPLICABLE_OR_EQUIVALENT — Formal Gate0 disposition is NO_EVIDENCE; there is no Evidence contract to migrate
-- `S_FUNKY_JUGGLER_2_KT`: OTHER_BLOCKED → NOT_APPLICABLE_OR_EQUIVALENT — Formal Gate0 disposition is NO_EVIDENCE; there is no Evidence contract to migrate
-- `S_MORE_CHIBARIYO_NB_30`: OTHER_BLOCKED → NOT_APPLICABLE_OR_EQUIVALENT — Formal Gate0 disposition is NO_EVIDENCE; there is no Evidence contract to migrate
-- `S_MY_JUGGLER_V_KD`: OTHER_BLOCKED → NOT_APPLICABLE_OR_EQUIVALENT — Formal Gate0 disposition is NO_EVIDENCE; there is no Evidence contract to migrate
-- `S_NAMENEKO_QQ`: OTHER_BLOCKED → NOT_APPLICABLE_OR_EQUIVALENT — Formal Gate0 disposition is NO_EVIDENCE; there is no Evidence contract to migrate
-- `S_OKIDOKI_BLACK_EP`: OTHER_BLOCKED → NOT_APPLICABLE_OR_EQUIVALENT — Formal Gate0 disposition is NO_EVIDENCE; there is no Evidence contract to migrate
-- `S_OKIDOKI_GOLD_GS`: OTHER_BLOCKED → NOT_APPLICABLE_OR_EQUIVALENT — Formal Gate0 disposition is NO_EVIDENCE; there is no Evidence contract to migrate
+- None
 
 ## Observation proof changes
 
@@ -126,18 +50,16 @@ Label/category-only PASS results rejected: 0.
 
 ## Phase 1 OTHER_BLOCKED analysis
 
-Phase 1 total: 68. The Phase 1 OTHER_BLOCKED population can be subdivided by the existing Evidence Gate0 disposition without interpreting machine semantics. NO_EVIDENCE is recorded as a non-migration disposition, not AUTO_MIGRATABLE.
+Phase 1 total: 39. The Phase 1 OTHER_BLOCKED population can be subdivided by the existing Evidence Gate0 disposition without interpreting machine semantics. NO_EVIDENCE is recorded as a non-migration disposition, not AUTO_MIGRATABLE.
 
 - BLOCKED_ADOPTION_OUTSIDE_LEGACY_GROUPS: 38
 - BLOCKED_ORPHAN_DOWNSTREAM: 1
-- NOT_APPLICABLE_NO_EVIDENCE: 29
 - Selection Quality non-PASS: 0
 
 ## Known-blocker regression review
 
 ### Reproduced from repository evidence
 
-- `LB_FUJIKO_M2`: Selection Quality — SELECTION_QUALITY_GATE: unclassified research evidence: RE_VOICE_FUJIKO
 - `L_REZERO_SEASON2_PA5`: real-device / Observation verification — FORMAL_GROUP_OBSERVATION_ID: [{"ok":false,"groupId":"REZERO_CLOCK","expectedFormalObservationId":"OBS_EVI_REZERO_CLOCK","formalCandidateObservationIds":[],"diagnosticLabelCandidates":{"exactGroupLabel":[],"exactOptionLabelCoverage":[]},"rule":"FORMAL_GROUP_OBSERVATION_ID_MISSING"},{"ok":false,"groupId":"REZERO_END","expectedFormalObservationId":"OBS_EVI_REZERO_END","formalCandidateObservationIds":[],"diagnosticLabelCandidates":{"exactGroupLabel":[],"exactOptionLabelCoverage":[]},"rule":"FORMAL_GROUP_OBSERVATION_ID_MISSING"}]
 - `L_LUPIN_DAIKOUKAISHA_H1`: real-device / Observation verification — FORMAL_GROUP_OBSERVATION_ID: [{"ok":false,"groupId":"LUPIN_AT_END_STAMP","expectedFormalObservationId":"OBS_EVI_LUPIN_AT_END_STAMP","formalCandidateObservationIds":[],"diagnosticLabelCandidates":{"exactGroupLabel":["OBS_AT_END_STAMP"],"exactOptionLabelCoverage":[]},"rule":"FORMAL_GROUP_OBSERVATION_ID_MISSING"},{"ok":false,"groupId":"LUPIN_TV_STAMP","expectedFormalObservationId":"OBS_EVI_LUPIN_TV_STAMP","formalCandidateObservationIds":[],"diagnosticLabelCandidates":{"exactGroupLabel":["OBS_TV_STAMP"],"exactOptionLabelCoverage":[]},"rule":"FORMAL_GROUP_OBSERVATION_ID_MISSING"},{"ok":false,"groupId":"LUPIN_HARURUNA","expectedFormalObservationId":"OBS_EVI_LUPIN_HARURUNA","formalCandidateObservationIds":[],"diagnosticLabelCandidates":{"exactGroupLabel":["OBS_HARURUNA"],"exactOptionLabelCoverage":[]},"rule":"FORMAL_GROUP_OBSERVATION_ID_MISSING"},{"ok":false,"groupId":"LUPIN_BONUS_VOICE","expectedFormalObservationId":"OBS_EVI_LUPIN_BONUS_VOICE","formalCandidateObservationIds":[],"diagnosticLabelCandidates":{"exactGroupLabel":["OBS_BONUS_VOICE"],"exactOptionLabelCoverage":[]},"rule":"FORMAL_GROUP_OBSERVATION_ID_MISSING"},{"ok":false,"groupId":"LUPIN_ROUND","expectedFormalObservationId":"OBS_EVI_LUPIN_ROUND","formalCandidateObservationIds":[],"diagnosticLabelCandidates":{"exactGroupLabel":["OBS_ROUND"],"exactOptionLabelCoverage":[]},"rule":"FORMAL_GROUP_OBSERVATION_ID_MISSING"}]
 - `L_MOMOTARO_DENTETSU_TEIBAN_PU`: real-device / Observation verification — FORMAL_GROUP_OBSERVATION_ID: [{"ok":false,"groupId":"MOMOTETSU_TROPHY","expectedFormalObservationId":"OBS_EVI_MOMOTETSU_TROPHY","formalCandidateObservationIds":[],"diagnosticLabelCandidates":{"exactGroupLabel":["OBS_TROPHY"],"exactOptionLabelCoverage":[]},"rule":"FORMAL_GROUP_OBSERVATION_ID_MISSING"}]
@@ -148,6 +70,7 @@ Phase 1 total: 68. The Phase 1 OTHER_BLOCKED population can be subdivided by the
 
 ### Not formally derivable as the stated blocker
 
+- `LB_FUJIKO_M2`: Selection Quality; current generic audit still returns a fail-closed result, but the supplied blocker itself has no matching machine-readable proof.
 - `L_TENSEI_SHITARA_KEN_DESHITA_GT`: prior sharedFeatureIds runtime equivalence failure; current generic audit still returns OBSERVATION_BLOCKED, but the supplied blocker itself has no matching machine-readable proof.
 
 ## Machines
@@ -158,7 +81,7 @@ Phase 1 total: 68. The Phase 1 OTHER_BLOCKED population can be subdivided by the
 | `LB_AREX_BRIGHT_BA` | SELECTION_QUALITY_BLOCKED | NOT_APPLICABLE_NO_EVIDENCE | 0 | 0 | FAIL | NOT_APPLICABLE | NOT_APPLICABLE | NOT_APPLICABLE | NOT_APPLICABLE | NOT_APPLICABLE | NOT_APPLICABLE | NOT_RUN | Selection Quality BLOCKED: rejected FEAT_NORMAL_CHERRY_A2_EXCLUDED: input burden/manual counting must not be used as a rejection basis; Formal Gate0 disposition is NO_EVIDENCE; there is no Evidence contract to migrate |
 | `LB_CREA_BONUS_TRIGGER_A2` | ALREADY_M7 | ALREADY_M7_EQUIVALENT | 0 | 0 | NOT_APPLICABLE | PASS | PASS | PASS | PASS | PASS | PASS | PASS | - |
 | `LB_EVA_PROMISE_DOOR_SR` | SELECTION_QUALITY_BLOCKED | MIGRATION_REQUIRED | 4 | 7 | REVIEW | FAIL | FAIL | PASS | REVIEW | PASS | BASELINE_ONLY | NOT_RUN | Selection Quality REVIEW: selected FEAT_DAILY_BONUS_DETAIL: reason lacks a concrete statistical/observational basis; One or more Evidence groups lack exactly one formal OBS_EVI_<clean(groupId)> Observation linkage; label/category matching is diagnostic only; canonical UI proof failed: canonical materialization marker is missing; Feature/Evidence sharing state is not uniquely represented by the legacy runtime surface |
-| `LB_FUJIKO_M2` | SELECTION_QUALITY_BLOCKED | MIGRATION_REQUIRED | 3 | 9 | FAIL | FAIL | FAIL | PASS | REVIEW | PASS | BASELINE_ONLY | NOT_RUN | Selection Quality BLOCKED: unclassified research evidence: RE_VOICE_FUJIKO; selected FEAT_NORMAL_PLUM: reason lacks a concrete statistical/observational basis; One or more Evidence groups lack exactly one formal OBS_EVI_<clean(groupId)> Observation linkage; label/category matching is diagnostic only; canonical UI proof failed: canonical materialization marker is missing; Feature/Evidence sharing state is not uniquely represented by the legacy runtime surface |
+| `LB_FUJIKO_M2` | SELECTION_QUALITY_BLOCKED | MIGRATION_REQUIRED | 3 | 9 | REVIEW | FAIL | FAIL | PASS | REVIEW | PASS | BASELINE_ONLY | NOT_RUN | Selection Quality REVIEW: selected FEAT_NORMAL_PLUM: reason lacks a concrete statistical/observational basis; One or more Evidence groups lack exactly one formal OBS_EVI_<clean(groupId)> Observation linkage; label/category matching is diagnostic only; canonical UI proof failed: canonical materialization marker is missing; Feature/Evidence sharing state is not uniquely represented by the legacy runtime surface |
 | `LB_ISEKAI_QUARTET_KR` | OBSERVATION_BLOCKED | MIGRATION_REQUIRED | 4 | 15 | PASS | FAIL | FAIL | PASS | REVIEW | PASS | BASELINE_ONLY | NOT_RUN | One or more Evidence groups lack exactly one formal OBS_EVI_<clean(groupId)> Observation linkage; label/category matching is diagnostic only; canonical UI proof failed: canonical materialization marker is missing; Feature/Evidence sharing state is not uniquely represented by the legacy runtime surface |
 | `LB_JACKPOT_CY1` | NOT_APPLICABLE_OR_EQUIVALENT | NOT_APPLICABLE_NO_EVIDENCE | 0 | 0 | PASS | NOT_APPLICABLE | NOT_APPLICABLE | NOT_APPLICABLE | NOT_APPLICABLE | NOT_APPLICABLE | NOT_APPLICABLE | NOT_RUN | - |
 | `LB_KELLOT_5_ND05H` | SELECTION_QUALITY_BLOCKED | MIGRATION_REQUIRED | 4 | 12 | FAIL | FAIL | FAIL | FAIL | REVIEW | PASS | BASELINE_ONLY | NOT_RUN | Selection Quality BLOCKED: unclassified research feature: RF_BELL; unclassified research feature: RF_CHERRY; unclassified research feature: RF_PARALLEL_ORANGE; unclassified research feature: RF_DIAGONAL_ORANGE; Missing or unsupported normalizationMode: KELLOT_BIG_END, KELLOT_REG_CUTIN, KELLOT_TROPHY, KELLOT_FREEZE; One or more Evidence groups lack exactly one formal OBS_EVI_<clean(groupId)> Observation linkage; label/category matching is diagnostic only; canonical UI proof failed: canonical UI is not closed; Feature/Evidence sharing state is not uniquely represented by the legacy runtime surface |
@@ -260,7 +183,7 @@ Phase 1 total: 68. The Phase 1 OTHER_BLOCKED population can be subdivided by the
 | `L_LOVEKYURE2_PS` | OBSERVATION_BLOCKED | MIGRATION_REQUIRED | 1 | 5 | PASS | FAIL | FAIL | PASS | REVIEW | PASS | BASELINE_ONLY | NOT_RUN | One or more Evidence groups lack exactly one formal OBS_EVI_<clean(groupId)> Observation linkage; label/category matching is diagnostic only; canonical UI proof failed: description differs for 主要入力; Feature/Evidence sharing state is not uniquely represented by the legacy runtime surface |
 | `L_LUPIN_DAIKOUKAISHA_H1` | OBSERVATION_BLOCKED | MIGRATION_REQUIRED | 5 | 15 | PASS | FAIL | FAIL | PASS | REVIEW | PASS | BASELINE_ONLY | NOT_RUN | One or more Evidence groups lack exactly one formal OBS_EVI_<clean(groupId)> Observation linkage; label/category matching is diagnostic only; canonical UI proof failed: canonical UI is not closed; Feature/Evidence sharing state is not uniquely represented by the legacy runtime surface |
 | `L_MACROSS_FRONTIER4_BA` | SELECTION_QUALITY_BLOCKED | MIGRATION_REQUIRED | 3 | 6 | REVIEW | PASS | FAIL | PASS | PASS | PASS | BASELINE_ONLY | NOT_RUN | Selection Quality REVIEW: rejected FEAT_8_BELL: reason lacks a concrete basis; rejected FEAT_CHANCE_COMBINED: reason lacks a concrete basis; canonical UI proof failed: canonical materialization marker is missing |
-| `L_MADOKA_FORTE_UU` | SELECTION_QUALITY_BLOCKED | MIGRATION_REQUIRED | 2 | 10 | FAIL | PASS | FAIL | PASS | PASS | PASS | BASELINE_ONLY | NOT_RUN | Selection Quality BLOCKED: unclassified research evidence: RE_VOICE_6; rejected element REJECTED_SOUL_GEM_LIGHTING: input burden/manual counting must not be used as a rejection basis; rejected FEAT_BONUS_PREDECESSOR: reason lacks a concrete basis; canonical UI proof failed: canonical materialization marker is missing |
+| `L_MADOKA_FORTE_UU` | SELECTION_QUALITY_BLOCKED | MIGRATION_REQUIRED | 2 | 10 | FAIL | PASS | FAIL | PASS | PASS | PASS | BASELINE_ONLY | NOT_RUN | Selection Quality BLOCKED: rejected element REJECTED_SOUL_GEM_LIGHTING: input burden/manual counting must not be used as a rejection basis; rejected FEAT_BONUS_PREDECESSOR: reason lacks a concrete basis; canonical UI proof failed: canonical materialization marker is missing |
 | `L_MAGIA_RECORD_RN` | OTHER_BLOCKED | BLOCKED_ADOPTION_OUTSIDE_LEGACY_GROUPS | 0 | 0 | PASS | NOT_APPLICABLE | FAIL | NOT_APPLICABLE | FAIL | NOT_APPLICABLE | NOT_APPLICABLE | NOT_RUN | Gate0 found formal Evidence adoption outside legacy evidenceUi.groups |
 | `L_MAGICAL_HALLOWEEN8_FE` | SELECTION_QUALITY_BLOCKED | MIGRATION_REQUIRED | 4 | 13 | FAIL | PASS | FAIL | PASS | PASS | PASS | BASELINE_ONLY | NOT_RUN | Selection Quality BLOCKED: rejected element REJECTED_REPLAY_BONUS: input burden/manual counting must not be used as a rejection basis; canonical UI proof failed: canonical materialization marker is missing |
 | `L_MAHJONG_FIGHT_CLUB_KAKUSEI_KM` | SELECTION_QUALITY_BLOCKED | MIGRATION_REQUIRED | 2 | 7 | REVIEW | FAIL | FAIL | PASS | REVIEW | PASS | BASELINE_ONLY | NOT_RUN | Selection Quality REVIEW: selected FEAT_AT_INITIAL: reason lacks a concrete statistical/observational basis; One or more Evidence groups lack exactly one formal OBS_EVI_<clean(groupId)> Observation linkage; label/category matching is diagnostic only; canonical UI proof failed: description differs for 主要入力; Feature/Evidence sharing state is not uniquely represented by the legacy runtime surface |
@@ -386,8 +309,8 @@ Phase 1 total: 68. The Phase 1 OTHER_BLOCKED population can be subdivided by the
 | `S_KONOSUBA_ZR` | OBSERVATION_BLOCKED | MIGRATION_REQUIRED | 3 | 14 | PASS | FAIL | FAIL | PASS | REVIEW | PASS | BASELINE_ONLY | NOT_RUN | One or more Evidence groups lack exactly one formal OBS_EVI_<clean(groupId)> Observation linkage; label/category matching is diagnostic only; canonical UI proof failed: canonical UI is not closed; Feature/Evidence sharing state is not uniquely represented by the legacy runtime surface |
 | `S_MADE_IN_ABYSS_EN` | OBSERVATION_BLOCKED | MIGRATION_REQUIRED | 2 | 11 | PASS | FAIL | FAIL | PASS | REVIEW | PASS | BASELINE_ONLY | NOT_RUN | One or more Evidence groups lack exactly one formal OBS_EVI_<clean(groupId)> Observation linkage; label/category matching is diagnostic only; canonical UI proof failed: canonical UI is not closed; Feature/Evidence sharing state is not uniquely represented by the legacy runtime surface |
 | `S_MAHOIKU_NB` | OBSERVATION_BLOCKED | MIGRATION_REQUIRED | 1 | 6 | PASS | FAIL | FAIL | PASS | REVIEW | PASS | BASELINE_ONLY | NOT_RUN | One or more Evidence groups lack exactly one formal OBS_EVI_<clean(groupId)> Observation linkage; label/category matching is diagnostic only; canonical UI proof failed: canonical UI is not closed; Feature/Evidence sharing state is not uniquely represented by the legacy runtime surface |
-| `S_MHW_ICEBORNE_ZF` | SELECTION_QUALITY_BLOCKED | MIGRATION_REQUIRED | 2 | 7 | FAIL | FAIL | FAIL | FAIL | PASS | PASS | BASELINE_ONLY | NOT_RUN | Selection Quality BLOCKED: unclassified research evidence: RE_HIGH_WEAK_SELIANA; Missing or unsupported normalizationMode: EVID_SPECIAL, EVID_CONFIRM_END; One or more Evidence groups lack exactly one formal OBS_EVI_<clean(groupId)> Observation linkage; label/category matching is diagnostic only; canonical UI proof failed: canonical UI is not closed |
-| `S_MILKY_HOMES_GNB` | SELECTION_QUALITY_BLOCKED | MIGRATION_REQUIRED | 2 | 5 | FAIL | FAIL | FAIL | FAIL | PASS | PASS | BASELINE_ONLY | NOT_RUN | Selection Quality BLOCKED: unclassified research evidence: RE_SMART_A_RED; unclassified research evidence: RE_SMART_B_BLUE; unclassified research evidence: RE_SMART_B_RED; unclassified research evidence: RE_SMART_C_BLUE; unclassified research evidence: RE_SMART_C_RED; unclassified research evidence: RE_GACHA_A; unclassified research evidence: RE_GACHA_S; unclassified research evidence: RE_GACHA_SS; unmapped discovery candidate: DISC_SMART_A_RED -> RE_SMART_A_RED; unmapped discovery candidate: DISC_SMART_B_BLUE -> RE_SMART_B_BLUE; unmapped discovery candidate: DISC_SMART_B_RED -> RE_SMART_B_RED; unmapped discovery candidate: DISC_SMART_C_BLUE -> RE_SMART_C_BLUE; unmapped discovery candidate: DISC_SMART_C_RED -> RE_SMART_C_RED; unmapped discovery candidate: DISC_GACHA_A -> RE_GACHA_A; unmapped discovery candidate: DISC_GACHA_S -> RE_GACHA_S; unmapped discovery candidate: DISC_GACHA_SS -> RE_GACHA_SS; Missing or unsupported normalizationMode: EVID_TOUCH, EVID_MMB_ROULETTE; One or more Evidence groups lack exactly one formal OBS_EVI_<clean(groupId)> Observation linkage; label/category matching is diagnostic only; canonical UI proof failed: canonical UI is not closed |
+| `S_MHW_ICEBORNE_ZF` | NORMALIZATION_BLOCKED | MIGRATION_REQUIRED | 2 | 7 | PASS | FAIL | FAIL | FAIL | PASS | PASS | BASELINE_ONLY | NOT_RUN | Missing or unsupported normalizationMode: EVID_SPECIAL, EVID_CONFIRM_END; One or more Evidence groups lack exactly one formal OBS_EVI_<clean(groupId)> Observation linkage; label/category matching is diagnostic only; canonical UI proof failed: canonical UI is not closed |
+| `S_MILKY_HOMES_GNB` | NORMALIZATION_BLOCKED | MIGRATION_REQUIRED | 2 | 5 | PASS | FAIL | FAIL | FAIL | PASS | PASS | BASELINE_ONLY | NOT_RUN | Missing or unsupported normalizationMode: EVID_TOUCH, EVID_MMB_ROULETTE; One or more Evidence groups lack exactly one formal OBS_EVI_<clean(groupId)> Observation linkage; label/category matching is diagnostic only; canonical UI proof failed: canonical UI is not closed |
 | `S_MOECHIBA_GNC30` | SELECTION_QUALITY_BLOCKED | NOT_APPLICABLE_NO_EVIDENCE | 0 | 0 | REVIEW | NOT_APPLICABLE | NOT_APPLICABLE | NOT_APPLICABLE | NOT_APPLICABLE | NOT_APPLICABLE | NOT_APPLICABLE | NOT_RUN | Selection Quality REVIEW: rejected FEAT_400G_CEILING: reason lacks a concrete basis; Formal Gate0 disposition is NO_EVIDENCE; there is no Evidence contract to migrate |
 | `S_MOMOKYUN_SWORD_DX` | OBSERVATION_BLOCKED | MIGRATION_REQUIRED | 1 | 4 | PASS | FAIL | FAIL | PASS | REVIEW | PASS | BASELINE_ONLY | NOT_RUN | One or more Evidence groups lack exactly one formal OBS_EVI_<clean(groupId)> Observation linkage; label/category matching is diagnostic only; canonical UI proof failed: canonical UI is not closed; Feature/Evidence sharing state is not uniquely represented by the legacy runtime surface |
 | `S_MORE_CHIBARIYO_NB_30` | NOT_APPLICABLE_OR_EQUIVALENT | NOT_APPLICABLE_NO_EVIDENCE | 0 | 0 | PASS | NOT_APPLICABLE | NOT_APPLICABLE | NOT_APPLICABLE | NOT_APPLICABLE | NOT_APPLICABLE | NOT_APPLICABLE | NOT_RUN | - |
