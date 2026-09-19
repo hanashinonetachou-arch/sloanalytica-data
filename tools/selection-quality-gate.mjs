@@ -110,8 +110,11 @@ export function assessSelectionQuality(research, selection) {
 
   for (const feature of selection.features ?? []) {
     if (!feature.researchFeatureId) continue;
-    if (featureDecisions.has(feature.researchFeatureId)) blockers.push(`duplicate feature decision: ${feature.researchFeatureId}`);
-    featureDecisions.set(feature.researchFeatureId, feature);
+    const decisions = featureDecisions.get(feature.researchFeatureId) ?? [];
+    const duplicateFeatureId = decisions.some(existing => existing?.featureId && existing.featureId === feature.featureId);
+    if (duplicateFeatureId) blockers.push(`duplicate feature decision: ${feature.researchFeatureId}`);
+    decisions.push(feature);
+    featureDecisions.set(feature.researchFeatureId, decisions);
   }
 
   const researchFeatureIds = (research.features ?? []).map(f => f.researchFeatureId).filter(Boolean);

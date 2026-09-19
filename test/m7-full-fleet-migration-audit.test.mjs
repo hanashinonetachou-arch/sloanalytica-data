@@ -98,9 +98,9 @@ test("full-fleet M7 audit is deterministic and matches checked-in JSON and Markd
   const actual = auditFleet(root, checkedIn);
   assert.deepEqual(actual, checkedIn);
   assert.equal(markdownReport(actual), fs.readFileSync(path.join(root, "reports/m7-full-fleet-migration-audit-20260916.md"), "utf8"));
-  assert.equal(actual.summary.totalMachines, 270);
+  assert.equal(actual.summary.totalMachines, 269);
   assert.equal(actual.summary.alreadyM7, 27);
-  assert.equal(actual.summary.legacyMachines, 243);
+  assert.equal(actual.summary.legacyMachines, 242);
   assert.equal(actual.summary.AUTO_MIGRATABLE, 0);
 });
 

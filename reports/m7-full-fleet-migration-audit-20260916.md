@@ -6,16 +6,16 @@ Phase 1 base: `8a31eec356e40fecc38ac86fd6e938e1deff9375`. Original verified Data
 
 | Metric | Count |
 |---|---:|
-| Total machines | 270 |
+| Total machines | 269 |
 | Already M7 | 27 |
-| Legacy machines | 243 |
+| Legacy machines | 242 |
 | AUTO_MIGRATABLE | 0 |
 | FEATURE_SHARING_REVIEW | 0 |
 | OBSERVATION_BLOCKED | 70 |
 | CANONICAL_UI_BLOCKED | 0 |
 | NORMALIZATION_BLOCKED | 17 |
 | INPUT_COMPATIBILITY_BLOCKED | 0 |
-| SELECTION_QUALITY_BLOCKED | 88 |
+| SELECTION_QUALITY_BLOCKED | 87 |
 | OTHER_BLOCKED | 39 |
 | NOT_APPLICABLE_OR_EQUIVALENT | 75 |
 
@@ -405,8 +405,7 @@ Phase 1 total: 68. The Phase 1 OTHER_BLOCKED population can be subdivided by the
 | `S_OVERLORD_II_SX` | OBSERVATION_BLOCKED | MIGRATION_REQUIRED | 3 | 12 | PASS | FAIL | FAIL | PASS | REVIEW | PASS | BASELINE_ONLY | NOT_RUN | One or more Evidence groups lack exactly one formal OBS_EVI_<clean(groupId)> Observation linkage; label/category matching is diagnostic only; canonical UI proof failed: canonical UI is not closed; Feature/Evidence sharing state is not uniquely represented by the legacy runtime surface |
 | `S_PERSONA5_FR` | OBSERVATION_BLOCKED | MIGRATION_REQUIRED | 2 | 7 | PASS | FAIL | FAIL | PASS | REVIEW | PASS | BASELINE_ONLY | NOT_RUN | One or more Evidence groups lack exactly one formal OBS_EVI_<clean(groupId)> Observation linkage; label/category matching is diagnostic only; canonical UI proof failed: canonical UI is not closed; Feature/Evidence sharing state is not uniquely represented by the legacy runtime surface |
 | `S_RAKUEN_TSUHO_FS` | SELECTION_QUALITY_BLOCKED | MIGRATION_REQUIRED | 3 | 12 | REVIEW | FAIL | FAIL | PASS | REVIEW | PASS | BASELINE_ONLY | NOT_RUN | Selection Quality REVIEW: selected FEAT_COMMON_BELL: reason lacks a concrete statistical/observational basis; One or more Evidence groups lack exactly one formal OBS_EVI_<clean(groupId)> Observation linkage; label/category matching is diagnostic only; canonical UI proof failed: canonical UI is not closed; Feature/Evidence sharing state is not uniquely represented by the legacy runtime surface |
-| `S_REVUE_STARLIGHT_CX` | SELECTION_QUALITY_BLOCKED | BLOCKED_ADOPTION_OUTSIDE_LEGACY_GROUPS | 0 | 0 | FAIL | NOT_APPLICABLE | FAIL | NOT_APPLICABLE | FAIL | NOT_APPLICABLE | NOT_APPLICABLE | NOT_RUN | Selection Quality BLOCKED: duplicate feature decision: RF_REVUE_CZ; selected FEAT_CZ_FIRST_POISSON: reason lacks a concrete statistical/observational basis; rejected FEAT_AT_PREDECESSOR: reason lacks a concrete basis; Gate0 found formal Evidence adoption outside legacy evidenceUi.groups |
-| `S_REVUE_STARLIGHT_CX_TEST_V66` | SELECTION_QUALITY_BLOCKED | BLOCKED_ADOPTION_OUTSIDE_LEGACY_GROUPS | 0 | 0 | FAIL | NOT_APPLICABLE | FAIL | NOT_APPLICABLE | FAIL | NOT_APPLICABLE | NOT_APPLICABLE | NOT_RUN | Selection Quality BLOCKED: duplicate feature decision: RF_REVUE_CZ; duplicate feature decision: RF_REVUE_AT; selected FEAT_CZ_FIRST_POISSON: reason lacks a concrete statistical/observational basis; rejected FEAT_CZ_PREDECESSOR: reason lacks a concrete basis; rejected FEAT_AT_PREDECESSOR: reason lacks a concrete basis; rejected FEAT_AT_FIRST_SELF_DEPENDENCY_REVIEW: reason lacks a concrete basis; Gate0 found formal Evidence adoption outside legacy evidenceUi.groups |
+| `S_REVUE_STARLIGHT_CX` | SELECTION_QUALITY_BLOCKED | BLOCKED_ADOPTION_OUTSIDE_LEGACY_GROUPS | 0 | 0 | REVIEW | NOT_APPLICABLE | FAIL | NOT_APPLICABLE | FAIL | NOT_APPLICABLE | NOT_APPLICABLE | NOT_RUN | Selection Quality REVIEW: selected FEAT_CZ_FIRST_POISSON: reason lacks a concrete statistical/observational basis; rejected FEAT_AT_PREDECESSOR: reason lacks a concrete basis; Gate0 found formal Evidence adoption outside legacy evidenceUi.groups |
 | `S_RYUJIN_RZ30_SUIKA_VERSION` | SELECTION_QUALITY_BLOCKED | NOT_APPLICABLE_NO_EVIDENCE | 0 | 0 | FAIL | NOT_APPLICABLE | NOT_APPLICABLE | NOT_APPLICABLE | NOT_APPLICABLE | NOT_APPLICABLE | NOT_APPLICABLE | NOT_RUN | Selection Quality BLOCKED: selected FEAT_BONUS_OUTCOME: missing userReason; Formal Gate0 disposition is NO_EVIDENCE; there is no Evidence contract to migrate |
 | `S_SENGOKU_COLLECTION5_PS` | OBSERVATION_BLOCKED | MIGRATION_REQUIRED | 2 | 6 | PASS | FAIL | FAIL | PASS | REVIEW | PASS | BASELINE_ONLY | NOT_RUN | One or more Evidence groups lack exactly one formal OBS_EVI_<clean(groupId)> Observation linkage; label/category matching is diagnostic only; canonical UI proof failed: canonical UI is not closed; Feature/Evidence sharing state is not uniquely represented by the legacy runtime surface |
 | `S_SENGOKU_KOIHIME_FC` | NORMALIZATION_BLOCKED | MIGRATION_REQUIRED | 2 | 8 | PASS | FAIL | FAIL | FAIL | REVIEW | PASS | BASELINE_ONLY | NOT_RUN | Missing or unsupported normalizationMode: EV_BIG_END, EV_REG_END; One or more Evidence groups lack exactly one formal OBS_EVI_<clean(groupId)> Observation linkage; label/category matching is diagnostic only; canonical UI proof failed: canonical UI is not closed; Feature/Evidence sharing state is not uniquely represented by the legacy runtime surface |

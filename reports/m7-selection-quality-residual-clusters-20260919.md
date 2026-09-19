@@ -1,0 +1,75 @@
+# M7 residual Selection Quality clustering — 2026-09-19
+
+After freezing the 19 masked NO_EVIDENCE cases, 69 primary Selection Quality blockers remain.
+
+## Exact split
+
+| Dimension | Class | Machines |
+|---|---|---:|
+| Migration disposition | MIGRATION_REQUIRED | 64 |
+| Migration disposition | BLOCKED_ADOPTION_OUTSIDE_LEGACY_GROUPS | 5 |
+| Selection Quality | REVIEW | 57 |
+| Selection Quality | FAIL | 12 |
+
+The next audit will isolate the structural FAIL subset before any prose REVIEW work. No Selection decision or rationale is changed by this report.
+
+
+## Structural FAIL subset — exact 12 machines
+
+### Unclassified Research Evidence / discovery — 4 machines
+- `LB_FUJIKO_M2`: `RE_VOICE_FUJIKO`.
+- `L_MADOKA_FORTE_UU`: `RE_VOICE_6` (also prohibited-burden rejection).
+- `S_MHW_ICEBORNE_ZF`: `RE_HIGH_WEAK_SELIANA`.
+- `S_MILKY_HOMES_GNB`: 8 unclassified Research Evidence candidates; the same 8 discovery candidates are consequently unmapped.
+
+These are missing Selection Evidence decisions and are not auto-repairable from names or downstream contracts.
+
+### Unclassified Research Feature — 1 machine
+- `LB_KELLOT_5_ND05H`: `RF_BELL`, `RF_CHERRY`, `RF_PARALLEL_ORANGE`, `RF_DIAGONAL_ORANGE`.
+
+This requires explicit Selection classification.
+
+### Prohibited input/manual-count burden rejection basis — 5 machines
+- `L_GOLDEN_KAMUY_KR`
+- `L_HEY_ELITE_SALARYMAN_KAGAMI_PA4`
+- `L_MADOKA_FORTE_UU`
+- `L_MAGICAL_HALLOWEEN8_FE`
+- `L_SHINOBIDAMASHII3_A3`
+- `S_SHIN_TENKAFUBU_DD`
+
+Note: six machines are listed because `L_MADOKA_FORTE_UU` overlaps the unclassified-Evidence family. These are rationale-policy failures; do not mechanically delete or rewrite the burden wording.
+
+### Duplicate Feature decisions — 2 machines
+- `S_REVUE_STARLIGHT_CX`: duplicate `RF_REVUE_CZ`.
+- `S_REVUE_STARLIGHT_CX_TEST_V66`: duplicate `RF_REVUE_CZ` and `RF_REVUE_AT`.
+
+Both are adoption-outside-legacy-groups machines. A duplicate Research Feature decision is structurally suspicious, but choosing which decision survives can change Selection semantics. It therefore requires direct identity/semantic comparison before any repair.
+
+## Batch decision
+
+No whole-family automatic repair is authorized from the blocker strings alone. The most promising deterministic candidates are the two Revue Starlight duplicate-decision cases: if duplicate entries are byte/semantically identical or one is demonstrably stale with authoritative lineage, deduplication may be decision-preserving. Audit those two next; freeze the other structural families pending authoritative Selection decisions/rationale.
+
+
+## Revue Starlight duplicate-decision audit
+
+The duplicate gate result is a **false structural assumption**, not duplicate Selection data.
+
+### `S_REVUE_STARLIGHT_CX`
+`RF_REVUE_CZ` intentionally feeds two distinct Selection decisions:
+- `FEAT_CZ_FIRST_POISSON`: self-play CZ observation, `INCLUDE_PRIMARY`, inputs `INP_CZ_FIRST_COUNT / INP_CZ_NORMAL_GAMES`.
+- `FEAT_CZ_PREDECESSOR`: predecessor/session-before-seat CZ observation, `INCLUDE_PRIMARY`, inputs `INP_SEATED_CZ_COUNT / INP_SEATED_NORMAL_GAMES`, excluded from common Difficulty.
+
+These are not duplicate runtime Features. They share one verified Research probability source but represent distinct observation scopes.
+
+### `S_REVUE_STARLIGHT_CX_TEST_V66`
+The same one-to-many pattern exists for `RF_REVUE_CZ`. In addition, `RF_REVUE_AT` feeds two distinct excluded decisions:
+- predecessor AT observation;
+- self AT observation retained for validation but excluded to avoid double-counting downstream AT against CZ.
+
+Research itself documents the scope distinction / overlap rationale.
+
+### Conclusion
+
+Do **not** delete either Feature decision. The current Selection Quality Gate assumes one Selection Feature decision per `researchFeatureId`; that assumption is invalid for a verified Research fact intentionally reused across distinct observation scopes or decision roles.
+
+The appropriate fix is gate-level: duplicate detection must distinguish accidental duplicate decisions from explicit one-to-many adoption. Any gate change must preserve detection of true duplicate records and require deterministic identity/scope evidence; it must not simply allow all repeated `researchFeatureId` values.
