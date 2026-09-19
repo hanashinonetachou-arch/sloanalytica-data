@@ -306,7 +306,7 @@ Zero counts are deliberate: this batch does not manufacture an external-research
 - `L_TENSEI_SHITARA_KEN_DESHITA_GT`: Feature/Evidence sharing formal proof or shared-input contract review is required; no new runtime field is proposed.
 - `LB_FUJIKO_M2`: Selection Quality remains an independent blocker.
 - Label-only candidates require Observation semantics review; all other unproven relationships require explicit lineage annotation.
-- The 21 upstream `FIELD_VERIFICATION_REQUIRED` groups remain outside the semantic-review input and unchanged.
+- The 21 upstream `FIELD_VERIFICATION_REQUIRED` groups (including the named real-device/service checks) are outside the semantic-review input and remain unchanged.
 
 ## Stop statement
 
