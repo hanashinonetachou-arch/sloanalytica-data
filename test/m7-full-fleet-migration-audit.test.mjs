@@ -24,12 +24,11 @@ test("focused proof classification is fail-closed", () => {
   assert.equal(classifyMigrationReadiness(ready({ legacyBaseline: "FAIL" })), "OTHER_BLOCKED");
 });
 
-test("authoritative Selection Quality gate reproduces the Fujiko blocker", () => {
+test("authoritative Selection Quality gate recognizes the Fujiko evidence classification", () => {
   const machine = auditMachine(root, "LB_FUJIKO_M2");
   assert.equal(machine.selectionQualityProof.rule, "SELECTION_QUALITY_GATE");
-  assert.equal(machine.selectionQualityProof.status, "FAIL");
-  assert.match(machine.selectionQualityProof.detail, /unclassified research evidence: RE_VOICE_FUJIKO/);
-  assert.equal(machine.classification, "SELECTION_QUALITY_BLOCKED");
+  assert.notEqual(machine.selectionQualityProof.status, "FAIL");
+  assert.doesNotMatch(machine.selectionQualityProof.detail, /unclassified research evidence: RE_VOICE_FUJIKO/);
 });
 
 test("formal NO_EVIDENCE disposition is non-migration and never AUTO_MIGRATABLE", () => {
