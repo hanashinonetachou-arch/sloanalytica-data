@@ -373,7 +373,7 @@ export function markdownReport(report) {
     "## Summary", "",
     "| Metric | Count |", "|---|---:|",
     `| Total machines | ${s.totalMachines} |`, `| Already M7 | ${s.alreadyM7} |`, `| Legacy machines | ${s.legacyMachines} |`,
-    ...CLASSIFICATIONS.map(name => `| ${name} | ${s[name]} |`), `| NOT_APPLICABLE_OR_EQUIVALENT | ${s.NOT_APPLICABLE_OR_EQUIVALENT} |`, "",
+    ...CLASSIFICATIONS.map(name => `| ${name} | ${s[name]} |`), "",
     "Classification is fail-closed. Only explicit formal repository relationships are accepted for mandatory migration proofs; labels/categories are diagnostic only. A machine can have several failed proofs, while its classification follows the documented deterministic blocker priority.", "",
     "`DETERMINISTIC_LEGACY_BASELINE` is reported as `BASELINE_ONLY`; it is not final MIG-INV-007 equivalence. Every legacy machine retains `postMigrationEquivalenceProof=NOT_RUN`.", "",
     "`PRE_MIGRATION_LEGACY_INPUT_SURFACE` is only a pre-migration candidate gate. Final MIG-INV-005/006/010 compatibility requires comparison with a proposed post-migration projection.", "",
