@@ -37,7 +37,8 @@ test("formal NO_EVIDENCE disposition is non-migration and never AUTO_MIGRATABLE"
   assert.equal(machine.evidenceDispositionProof.rule, "EVIDENCE_UI_GATE0_DISPOSITION");
   assert.equal(machine.evidenceDispositionProof.detail, "NO_EVIDENCE");
   assert.equal(machine.migrationDisposition, "NOT_APPLICABLE_NO_EVIDENCE");
-  assert.equal(machine.classification, "OTHER_BLOCKED");
+  assert.equal(machine.classification, "NOT_APPLICABLE_OR_EQUIVALENT");
+  assert.equal(machine.blockReasons.length, 0);
 });
 
 test("known blocker regression targets remain blocked without classification exceptions", () => {
@@ -121,7 +122,7 @@ test("only fully proven legacy machines enter Batch 1", () => {
     assert.equal(machine.postMigrationInputCompatibilityProof.status, "NOT_RUN", machine.machineId);
     assert.equal(machine.blockReasons.length, 0, machine.machineId);
   }
-  for (const machine of report.machines.filter(machine => machine.classification !== "ALREADY_M7" && machine.classification !== "AUTO_MIGRATABLE")) {
+  for (const machine of report.machines.filter(machine => !["ALREADY_M7", "AUTO_MIGRATABLE", "NOT_APPLICABLE_OR_EQUIVALENT"].includes(machine.classification))) {
     assert.ok(machine.classification.endsWith("BLOCKED") || machine.classification.endsWith("REVIEW"));
     assert.ok(machine.blockReasons.length > 0);
   }
