@@ -18,7 +18,6 @@ Phase 1 base: `8a31eec356e40fecc38ac86fd6e938e1deff9375`. Original verified Data
 | SELECTION_QUALITY_BLOCKED | 88 |
 | OTHER_BLOCKED | 39 |
 | NOT_APPLICABLE_OR_EQUIVALENT | 75 |
-| NOT_APPLICABLE_OR_EQUIVALENT | 75 |
 
 Classification is fail-closed. Only explicit formal repository relationships are accepted for mandatory migration proofs; labels/categories are diagnostic only. A machine can have several failed proofs, while its classification follows the documented deterministic blocker priority.
 
