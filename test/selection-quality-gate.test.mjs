@@ -137,3 +137,20 @@ test('explicit reference input is allowed when deliberately retained', () => {
   });
   assert.equal(result.status, 'PASS');
 });
+
+
+test('one Research Feature may feed distinct Selection feature identities', () => {
+  const localResearch = { features: [{ researchFeatureId: 'RF_SHARED' }], evidenceCandidates: [] };
+  const result = assessSelectionQuality(localResearch, { features: [
+    { researchFeatureId: 'RF_SHARED', featureId: 'FEAT_SELF', adoptionCategory: 'INCLUDE_PRIMARY', userReason: '通常ゲーム数を分母として自己実戦区間を観測し、公開確率で評価するため採用します。' },
+    { researchFeatureId: 'RF_SHARED', featureId: 'FEAT_PREDECESSOR', adoptionCategory: 'INCLUDE_PRIMARY', userReason: '着席前区間を独立した観測範囲として扱い、同じ公開確率で評価するため採用します。' },
+  ] });
+  assert.ok(!result.blockers.some(x => x.includes('duplicate feature decision')));
+});
+
+test('same Research Feature and same Selection feature identity remains blocked as duplicate', () => {
+  const localResearch = { features: [{ researchFeatureId: 'RF_SHARED' }], evidenceCandidates: [] };
+  const feature = { researchFeatureId: 'RF_SHARED', featureId: 'FEAT_SAME', adoptionCategory: 'EXCLUDE', userFacingReason: '同じ観測経路を重複評価しないため不採用です。' };
+  const result = assessSelectionQuality(localResearch, { features: [feature, { ...feature }] });
+  assert.ok(result.blockers.some(x => x.includes('duplicate feature decision: RF_SHARED')));
+});
