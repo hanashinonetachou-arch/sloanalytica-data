@@ -76,3 +76,17 @@ test("normalization batch preserves legacy Evidence semantics and non-Evidence S
   }
   assert.equal(totalEvidence, 66);
 });
+
+
+test("Madoka Forte migration preserves legacy Evidence semantics and non-Evidence Selection fields", () => {
+  const id = "L_MADOKA_FORTE_UU";
+  const legacy = read(`test/fixtures/evidence-contract-m7/${id}-selection-legacy.json`);
+  const current = read(`research/${id}/selection-data.json`);
+  assert.equal(current.evidenceContract?.contractVersion, VERSION, `${id}: M7 contract version`);
+  assert.equal(current.evidenceUi, undefined, `${id}: legacy evidenceUi removed`);
+  const before = legacyProjection(legacy).items.map(evidenceSemantics);
+  const after = (current.evidenceContract?.items ?? []).map(evidenceSemantics);
+  assert.deepEqual(stable(after), stable(before), `${id}: Evidence semantics changed`);
+  assert.deepEqual(stripEvidenceMigration(current), stripEvidenceMigration(legacy), `${id}: non-Evidence Selection fields changed`);
+  assert.equal(after.length, 10);
+});
