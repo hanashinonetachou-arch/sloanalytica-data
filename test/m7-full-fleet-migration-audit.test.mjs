@@ -98,9 +98,9 @@ test("full-fleet M7 audit is deterministic and matches checked-in JSON and Markd
   assert.deepEqual(actual, checkedIn);
   assert.equal(markdownReport(actual), fs.readFileSync(path.join(root, "reports/m7-full-fleet-migration-audit-20260916.md"), "utf8"));
   assert.equal(actual.summary.totalMachines, 269);
-  assert.equal(actual.summary.alreadyM7, 27);
-  assert.equal(actual.summary.legacyMachines, 242);
-  assert.ok(actual.summary.AUTO_MIGRATABLE >= 0);
+  assert.equal(actual.summary.alreadyM7, actual.machines.filter(machine => machine.classification === "ALREADY_M7").length);
+  assert.equal(actual.summary.legacyMachines, actual.summary.totalMachines - actual.summary.alreadyM7);
+  assert.equal(actual.summary.AUTO_MIGRATABLE, actual.machines.filter(machine => machine.classification === "AUTO_MIGRATABLE").length);
 });
 
 test("only fully proven legacy machines enter Batch 1", () => {
