@@ -10,7 +10,7 @@ import { proveFeatureEvidenceNonSharing } from "./lib/feature-evidence-sharing-p
 const CLASSIFICATIONS = [
   "AUTO_MIGRATABLE", "FEATURE_SHARING_REVIEW", "OBSERVATION_BLOCKED",
   "CANONICAL_UI_BLOCKED", "NORMALIZATION_BLOCKED",
-  "INPUT_COMPATIBILITY_BLOCKED", "SELECTION_QUALITY_BLOCKED", "OTHER_BLOCKED"
+  "INPUT_COMPATIBILITY_BLOCKED", "SELECTION_QUALITY_BLOCKED", "OTHER_BLOCKED", "NOT_APPLICABLE_OR_EQUIVALENT"
 ];
 const SUPPORTED_NORMALIZATION = new Set(["ALLOWED_SETTINGS", "ALLOWED_SETTINGS_INTERSECTION"]);
 const REGRESSION_TARGETS = {
@@ -194,8 +194,12 @@ export function auditMachine(root, machineId) {
     base.featureSharingProof = evidenceGate0.disposition === "NO_EVIDENCE" ? notApplicable("EVIDENCE_UI_GATE0_DISPOSITION", detail) : fail("ADOPTION_PATH_UNREPRESENTED", detail);
     base.inputCompatibilityProof = notApplicable("NO_LEGACY_GROUP_PROJECTION", detail);
     base.machineDataEquivalenceProof = notApplicable("NO_MIGRATION_PROJECTION", "Legacy build success cannot establish pre/post migration equivalence when no migration projection exists");
-    base.blockReasons.push(detail);
-    base.classification = selectionQuality.status === "PASS" ? "OTHER_BLOCKED" : "SELECTION_QUALITY_BLOCKED";
+    if (evidenceGate0.disposition !== "NO_EVIDENCE") base.blockReasons.push(detail);
+    base.classification = selectionQuality.status !== "PASS"
+      ? "SELECTION_QUALITY_BLOCKED"
+      : evidenceGate0.disposition === "NO_EVIDENCE"
+        ? "NOT_APPLICABLE_OR_EQUIVALENT"
+        : "OTHER_BLOCKED";
     return base;
   }
   base.migrationDisposition = "MIGRATION_REQUIRED";
