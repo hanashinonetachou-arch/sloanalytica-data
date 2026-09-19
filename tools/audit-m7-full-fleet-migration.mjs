@@ -10,7 +10,7 @@ import { proveFeatureEvidenceNonSharing } from "./lib/feature-evidence-sharing-p
 const CLASSIFICATIONS = [
   "AUTO_MIGRATABLE", "FEATURE_SHARING_REVIEW", "OBSERVATION_BLOCKED",
   "CANONICAL_UI_BLOCKED", "NORMALIZATION_BLOCKED",
-  "INPUT_COMPATIBILITY_BLOCKED", "SELECTION_QUALITY_BLOCKED", "OTHER_BLOCKED"
+  "INPUT_COMPATIBILITY_BLOCKED", "SELECTION_QUALITY_BLOCKED", "OTHER_BLOCKED", "NOT_APPLICABLE_OR_EQUIVALENT"
 ];
 const SUPPORTED_NORMALIZATION = new Set(["ALLOWED_SETTINGS", "ALLOWED_SETTINGS_INTERSECTION"]);
 const REGRESSION_TARGETS = {
@@ -194,8 +194,12 @@ export function auditMachine(root, machineId) {
     base.featureSharingProof = evidenceGate0.disposition === "NO_EVIDENCE" ? notApplicable("EVIDENCE_UI_GATE0_DISPOSITION", detail) : fail("ADOPTION_PATH_UNREPRESENTED", detail);
     base.inputCompatibilityProof = notApplicable("NO_LEGACY_GROUP_PROJECTION", detail);
     base.machineDataEquivalenceProof = notApplicable("NO_MIGRATION_PROJECTION", "Legacy build success cannot establish pre/post migration equivalence when no migration projection exists");
-    base.blockReasons.push(detail);
-    base.classification = selectionQuality.status === "PASS" ? "OTHER_BLOCKED" : "SELECTION_QUALITY_BLOCKED";
+    if (evidenceGate0.disposition !== "NO_EVIDENCE" || selectionQuality.status !== "PASS") base.blockReasons.push(detail);
+    base.classification = selectionQuality.status !== "PASS"
+      ? "SELECTION_QUALITY_BLOCKED"
+      : evidenceGate0.disposition === "NO_EVIDENCE"
+        ? "NOT_APPLICABLE_OR_EQUIVALENT"
+        : "OTHER_BLOCKED";
     return base;
   }
   base.migrationDisposition = "MIGRATION_REQUIRED";
@@ -369,7 +373,7 @@ export function markdownReport(report) {
     "## Summary", "",
     "| Metric | Count |", "|---|---:|",
     `| Total machines | ${s.totalMachines} |`, `| Already M7 | ${s.alreadyM7} |`, `| Legacy machines | ${s.legacyMachines} |`,
-    ...CLASSIFICATIONS.map(name => `| ${name} | ${s[name]} |`), `| NOT_APPLICABLE_OR_EQUIVALENT | ${s.NOT_APPLICABLE_OR_EQUIVALENT} |`, "",
+    ...CLASSIFICATIONS.map(name => `| ${name} | ${s[name]} |`), "",
     "Classification is fail-closed. Only explicit formal repository relationships are accepted for mandatory migration proofs; labels/categories are diagnostic only. A machine can have several failed proofs, while its classification follows the documented deterministic blocker priority.", "",
     "`DETERMINISTIC_LEGACY_BASELINE` is reported as `BASELINE_ONLY`; it is not final MIG-INV-007 equivalence. Every legacy machine retains `postMigrationEquivalenceProof=NOT_RUN`.", "",
     "`PRE_MIGRATION_LEGACY_INPUT_SURFACE` is only a pre-migration candidate gate. Final MIG-INV-005/006/010 compatibility requires comparison with a proposed post-migration projection.", "",
