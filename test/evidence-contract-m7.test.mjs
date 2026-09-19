@@ -87,3 +87,18 @@ for (const id of ["L_HOKUTO_AD_XR","L_MAGICAL_HALLOWEEN8_FE"]) {
     assert.deepEqual(strip(migrated),strip(legacy),`${id}: non-Evidence Selection fields changed`);
   });
 }
+
+for (const id of ["L_G1_YUSHUN_CLUB_GOLD_KD","L_ONE_PUNCH_MAN","L_TOLOVE_DARKNESS_S6"]) {
+  test(`${id} formalized Observation cutover is byte-equivalent`,()=> {
+    const read=p=>JSON.parse(fs.readFileSync(new URL(p,import.meta.url)));
+    const research=read(`../research/${id}/research-data.json`);
+    const legacy=read(`fixtures/evidence-contract-m7/${id}-selection-legacy.json`);
+    const migrated=read(`../research/${id}/selection-data.json`);
+    const statsPath=new URL(`../research/${id}/statistics-report.json`,import.meta.url);
+    const stats=fs.existsSync(statsPath)?JSON.parse(fs.readFileSync(statsPath)):null;
+    assert.deepEqual(buildMachineData(research,migrated,stats),buildMachineData(research,legacy,stats));
+    const strip=value=>{const x=JSON.parse(JSON.stringify(value));delete x.evidenceUi;delete x.evidenceContract;return x;};
+    assert.deepEqual(strip(migrated),strip(legacy),`${id}: non-Evidence Selection fields changed`);
+  });
+}
+
