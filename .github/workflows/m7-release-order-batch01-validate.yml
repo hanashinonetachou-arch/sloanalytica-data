@@ -29,31 +29,6 @@ jobs:
           console.log(JSON.stringify(rows.map(x => ({machineId:x?.machineId,classification:x?.classification,migrationDisposition:x?.migrationDisposition,blockers:x?.blockers})), null, 2));
           if (rows.some(x => !x)) process.exit(2);
           NODE
-      - name: Apply batch01 Evidence Contract migration
-        run: |
-          set -e
-          ids=(S_RAKUEN_TSUHO_FS S_KONOSUBA_ZR S_PERSONA5_FR S_SUPER_RIO_ACE_CC S_BIG_SHIMAUTA_E2_30 S_BIOHAZARD_RE2_XB S_WARAU4_KH S_DANMACHI_GAIDEN_XR S_MAHOIKU_NB S_TEKKEN4_ULTIMATE_DEVIL_TCD)
-          for id in "${ids[@]}"; do
-            node tools/migrate-selection-evidence-contract.mjs "$id" --apply
-          done
-          git diff -- research/*/selection-data.json > batch01-selection-evidence.patch
-          test -s batch01-selection-evidence.patch
-      - name: Commit batch01 migrated selections
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add research/*/selection-data.json
-          git diff --cached --quiet && exit 0
-          git commit -m "m7: apply release-order batch01 evidence contracts"
-          git restore reports/m7-full-fleet-migration-audit-20260916.json reports/m7-full-fleet-migration-audit-20260916.md
-          git fetch origin audit/m7-release-order-batch-01-20260920
-          git rebase origin/audit/m7-release-order-batch-01-20260920
-          git push origin HEAD:audit/m7-release-order-batch-01-20260920
-      - name: Upload batch01 migrated selections
-        uses: actions/upload-artifact@v4
-        with:
-          name: m7-release-order-batch01-selection-migration
-          path: batch01-selection-evidence.patch
       - name: Upload M7 audit
         if: always()
         uses: actions/upload-artifact@v4
