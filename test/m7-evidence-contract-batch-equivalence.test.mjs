@@ -76,25 +76,3 @@ test("normalization batch preserves legacy Evidence semantics and non-Evidence S
   }
   assert.equal(totalEvidence, 66);
 });
-
-const normalizationBatchIds = [
-  "L_BIRDIE_WING_BC","L_DARK_HAIBI_SB","L_LOTIS_TN","L_NANGOKU_SPECIAL_M1",
-  "L_SENGOKU_COLLECTION6_KS","L_TOARU_INDEX2_FA","L_TONDEMO_SKILL_KM",
-  "L_ULTRAMAN_FINAL_BATTLE_ME","L_WORLD_DAI_STAR_PA3","L_YAJIKITA_MAIRU_BG"
-];
-
-test("normalization batch preserves legacy Evidence semantics and non-Evidence Selection fields", () => {
-  let totalEvidence = 0;
-  for (const id of normalizationBatchIds) {
-    const legacy = read(`test/fixtures/evidence-contract-m7/${id}-selection-legacy.json`);
-    const current = read(`research/${id}/selection-data.json`);
-    assert.equal(current.evidenceContract?.contractVersion, VERSION, `${id}: M7 contract version`);
-    assert.equal(current.evidenceUi, undefined, `${id}: legacy evidenceUi removed`);
-    const before = legacyProjection(legacy).items.map(evidenceSemantics);
-    const after = (current.evidenceContract?.items ?? []).map(evidenceSemantics);
-    assert.deepEqual(stable(after), stable(before), `${id}: Evidence semantics changed`);
-    assert.deepEqual(stripEvidenceMigration(current), stripEvidenceMigration(legacy), `${id}: non-Evidence Selection fields changed`);
-    totalEvidence += after.length;
-  }
-  assert.equal(totalEvidence, 66);
-});
