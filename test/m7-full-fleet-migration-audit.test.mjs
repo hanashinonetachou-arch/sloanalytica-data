@@ -54,14 +54,15 @@ test("repository proofs retain Observation, canonical UI, normalization, and sha
   assert.equal(sharing.rule, "EVIDENCE_UI_GATE0_SHARED_FEATURE_EVIDENCE");
 });
 
-test("formal non-sharing proof promotes the canonical-UI batch without weakening legacy reviews", () => {
-  const promoted = ["L_AKAME_GA_KILL_2", "L_BOUNTY_ANGEL", "L_GIRLS_UND_PANZER_FINALE_H1", "L_GOD_EATER_RESURRECTION", "L_KAMEN_RIDER_7RIDERS_UJA", "L_ULTRAMAN_TIGA_KA", "S_FIRE_DRIFT", "S_KABANERI_ZR"];
-  for (const id of promoted) {
+test("canonical-UI batch is recognized as migrated M7 without weakening legacy reviews", () => {
+  const migrated = ["L_AKAME_GA_KILL_2", "L_BOUNTY_ANGEL", "L_GIRLS_UND_PANZER_FINALE_H1", "L_GOD_EATER_RESURRECTION", "L_KAMEN_RIDER_7RIDERS_UJA", "L_ULTRAMAN_TIGA_KA", "S_FIRE_DRIFT", "S_KABANERI_ZR"];
+  for (const id of migrated) {
     const machine = auditMachine(root, id);
     assert.equal(machine.featureSharingProof.status, "PASS", id);
-    assert.equal(machine.featureSharingProof.rule, "FORMAL_FEATURE_EVIDENCE_NON_SHARING", id);
+    assert.equal(machine.featureSharingProof.rule, "EXISTING_M7_CONTRACT", id);
     assert.equal(machine.canonicalUiProof.status, "PASS", id);
-    assert.equal(machine.classification, "AUTO_MIGRATABLE", id);
+    assert.equal(machine.classification, "ALREADY_M7", id);
+    assert.equal(machine.migrationDisposition, "ALREADY_M7_EQUIVALENT", id);
     assert.equal(machine.blockReasons.length, 0, id);
   }
   const unresolved = auditMachine(root, "LB_KELLOT_5_ND05H").featureSharingProof;
@@ -78,19 +79,18 @@ test("label equality is diagnostic only and cannot prove Observation linkage", (
   }
 });
 
-test("legacy build success is baseline-only, never final post-migration equivalence", () => {
+test("migrated batch records pre/post equivalence instead of a legacy-only baseline", () => {
   const machine = auditMachine(root, "L_AKAME_GA_KILL_2");
-  assert.equal(machine.machineDataEquivalenceProof.rule, "DETERMINISTIC_LEGACY_BASELINE");
-  assert.equal(machine.machineDataEquivalenceProof.status, "BASELINE_ONLY");
-  assert.equal(machine.postMigrationEquivalenceProof.status, "NOT_RUN");
+  assert.equal(machine.machineDataEquivalenceProof.rule, "PILOT_PRE_POST_EQUIVALENCE");
+  assert.equal(machine.machineDataEquivalenceProof.status, "PASS");
+  assert.equal(machine.postMigrationEquivalenceProof.status, "PASS");
 });
 
-test("input compatibility is explicitly pre-migration and not final MIG-INV-005/006/010 proof", () => {
+test("migrated batch input compatibility is recognized from the existing M7 contract", () => {
   const machine = auditMachine(root, "L_AKAME_GA_KILL_2");
-  assert.equal(machine.inputCompatibilityProof.rule, "PRE_MIGRATION_LEGACY_INPUT_SURFACE");
-  assert.match(machine.inputCompatibilityProof.detail, /Candidate-gate only/);
-  assert.match(machine.inputCompatibilityProof.detail, /post-migration comparison/);
-  assert.equal(machine.postMigrationInputCompatibilityProof.status, "NOT_RUN");
+  assert.equal(machine.inputCompatibilityProof.rule, "EXISTING_M7_CONTRACT");
+  assert.equal(machine.inputCompatibilityProof.status, "PASS");
+  assert.equal(machine.postMigrationInputCompatibilityProof.status, "PASS");
 });
 
 test("full-fleet M7 audit is deterministic and matches checked-in JSON and Markdown", () => {
@@ -98,15 +98,15 @@ test("full-fleet M7 audit is deterministic and matches checked-in JSON and Markd
   assert.deepEqual(actual, checkedIn);
   assert.equal(markdownReport(actual), fs.readFileSync(path.join(root, "reports/m7-full-fleet-migration-audit-20260916.md"), "utf8"));
   assert.equal(actual.summary.totalMachines, 270);
-  assert.equal(actual.summary.alreadyM7, 9);
-  assert.equal(actual.summary.legacyMachines, 261);
-  assert.equal(actual.summary.AUTO_MIGRATABLE, 8);
+  assert.equal(actual.summary.alreadyM7, 17);
+  assert.equal(actual.summary.legacyMachines, 253);
+  assert.equal(actual.summary.AUTO_MIGRATABLE, 0);
 });
 
 test("only fully proven legacy machines enter Batch 1", () => {
   const report = auditFleet(root, checkedIn);
   const candidates = report.machines.filter(machine => machine.classification === "AUTO_MIGRATABLE");
-  assert.equal(candidates.length, 8);
+  assert.equal(candidates.length, 0);
   for (const machine of candidates) {
     assert.equal(machine.selectionQualityProof.status, "PASS", machine.machineId);
     assert.equal(machine.researchLineageProof.status, "PASS", machine.machineId);

@@ -1,0 +1,365 @@
+{
+  "schemaVersion": "selection-data-v1",
+  "machineId": "L_GIRLS_UND_PANZER_FINALE_H1",
+  "machineDataVersion": "0.1.1",
+  "inputs": [
+    {
+      "id": "INP_NORMAL_GAMES",
+      "name": "通常ゲーム数",
+      "type": "integer",
+      "category": "PRIMARY",
+      "unit": "G",
+      "displayOrder": 1,
+      "defaultValue": 0
+    },
+    {
+      "id": "INP_AT",
+      "name": "AT初当り回数",
+      "type": "counter",
+      "category": "PRIMARY",
+      "unit": "回",
+      "displayOrder": 2,
+      "defaultValue": 0
+    }
+  ],
+  "features": [
+    {
+      "researchFeatureId": "RF_CZ",
+      "featureId": "FEAT_CZ",
+      "adoptionCategory": "EXCLUDE",
+      "userFacingReason": "CZ初当りは設定1→6で約1.13倍と設定差が小さく、AT初当りより単独の識別情報が弱い要素です。さらにCZ→ATの依存をAT初当りと同時利用するための依存モデルを現Engineで定義していないため、現版では推測計算に使用しません。"
+    },
+    {
+      "researchFeatureId": "RF_AT",
+      "featureId": "FEAT_AT",
+      "adoptionCategory": "INCLUDE_PRIMARY",
+      "numeratorInputId": "INP_AT",
+      "denominatorInputId": "INP_NORMAL_GAMES",
+      "minimumSample": 1,
+      "sampleRecommendation": 7000,
+      "weight": 1,
+      "displayFormat": "ratio_1_over_n",
+      "difficultyExposure": {
+        "mode": "per_game",
+        "factor": 1,
+        "quality": "EXACT",
+        "basisId": "NORMAL_GAMES"
+      },
+      "difficultyParticipation": "INCLUDE",
+      "userReason": "終日を通して取得でき、CZより設定差が大きいため主軸採用。"
+    },
+    {
+      "researchFeatureId": "RF_CZ_SKIP_CEILING",
+      "featureId": "FEAT_CZ_SKIP_CEILING",
+      "adoptionCategory": "EXCLUDE",
+      "rejectionReason": "AT単発後・継続高校敗北後などで抽選条件が変わり、終日の対象試行数も少ないため不採用。"
+    },
+    {
+      "researchFeatureId": "RF_GC_INITIAL_POINT",
+      "featureId": "FEAT_GC_INITIAL_POINT",
+      "adoptionCategory": "EXCLUDE",
+      "rejectionReason": "設定差はありますが、初期ポイントを安定して判別・集計できる条件を公開情報だけでは保証できないため不採用。"
+    }
+  ],
+  "rejectedElements": [
+    {
+      "id": "REJECTED_PREDECESSOR_DENOMINATOR",
+      "name": "着席時データ",
+      "reason": "店舗データカウンターの総ゲーム数は公開解析の通常ゲーム数と集計区間が一致する保証がないため、前任者区間の設定推測には使用しません。実機メニュー等で分子・分母を同一区間で直接取得できる場合のみ個別採用します。"
+    }
+  ],
+  "evidence": [],
+  "evidenceUi": {
+    "groups": [
+      {
+        "groupId": "AT_END_STAMP",
+        "label": "AT終了画面",
+        "selectionMode": "single",
+        "normalizationMode": "ALLOWED_SETTINGS",
+        "options": [
+          {
+            "value": "STAMP_KA_2PLUS",
+            "label": "可スタンプ 設定2以上",
+            "allowedSettings": [
+              "SET_2",
+              "SET_3",
+              "SET_4",
+              "SET_5",
+              "SET_6"
+            ],
+            "excludedSettings": [
+              "SET_1"
+            ],
+            "sourceEvidenceIds": [
+              "RE_AT_END_STAMP_2PLUS"
+            ]
+          },
+          {
+            "value": "STAMP_KICHI_3PLUS",
+            "label": "吉スタンプ 設定3以上",
+            "allowedSettings": [
+              "SET_3",
+              "SET_4",
+              "SET_5",
+              "SET_6"
+            ],
+            "excludedSettings": [
+              "SET_1",
+              "SET_2"
+            ],
+            "sourceEvidenceIds": [
+              "RE_AT_END_STAMP_3PLUS"
+            ]
+          },
+          {
+            "value": "STAMP_RYO_4PLUS",
+            "label": "良スタンプ 設定4以上",
+            "allowedSettings": [
+              "SET_4",
+              "SET_5",
+              "SET_6"
+            ],
+            "excludedSettings": [
+              "SET_1",
+              "SET_2",
+              "SET_3"
+            ],
+            "sourceEvidenceIds": [
+              "RE_AT_END_STAMP_4PLUS"
+            ]
+          },
+          {
+            "value": "STAMP_YU_5PLUS",
+            "label": "優スタンプ 設定5以上",
+            "allowedSettings": [
+              "SET_5",
+              "SET_6"
+            ],
+            "excludedSettings": [
+              "SET_1",
+              "SET_2",
+              "SET_3",
+              "SET_4"
+            ],
+            "sourceEvidenceIds": [
+              "RE_AT_END_STAMP_5PLUS"
+            ]
+          },
+          {
+            "value": "STAMP_KIWAMI_6",
+            "label": "極スタンプ 設定6",
+            "allowedSettings": [
+              "SET_6"
+            ],
+            "excludedSettings": [
+              "SET_1",
+              "SET_2",
+              "SET_3",
+              "SET_4",
+              "SET_5"
+            ],
+            "sourceEvidenceIds": [
+              "RE_AT_END_STAMP_6"
+            ]
+          }
+        ]
+      },
+      {
+        "groupId": "ED_END_SCREEN",
+        "label": "エンディング終了画面",
+        "selectionMode": "single",
+        "normalizationMode": "ALLOWED_SETTINGS",
+        "options": [
+          {
+            "value": "ED_4PLUS",
+            "label": "設定4以上濃厚画面",
+            "allowedSettings": [
+              "SET_4",
+              "SET_5",
+              "SET_6"
+            ],
+            "excludedSettings": [
+              "SET_1",
+              "SET_2",
+              "SET_3"
+            ],
+            "sourceEvidenceIds": [
+              "RE_ED_END_4PLUS"
+            ]
+          }
+        ]
+      },
+      {
+        "groupId": "PAYOUT_DISPLAY",
+        "label": "獲得枚数表示",
+        "selectionMode": "single",
+        "normalizationMode": "ALLOWED_SETTINGS",
+        "options": [
+          {
+            "value": "PAYOUT_444",
+            "label": "444枚OVER 設定4以上",
+            "allowedSettings": [
+              "SET_4",
+              "SET_5",
+              "SET_6"
+            ],
+            "excludedSettings": [
+              "SET_1",
+              "SET_2",
+              "SET_3"
+            ],
+            "sourceEvidenceIds": [
+              "RE_PAYOUT_444_4PLUS"
+            ]
+          },
+          {
+            "value": "PAYOUT_555",
+            "label": "555枚OVER 設定5以上",
+            "allowedSettings": [
+              "SET_5",
+              "SET_6"
+            ],
+            "excludedSettings": [
+              "SET_1",
+              "SET_2",
+              "SET_3",
+              "SET_4"
+            ],
+            "sourceEvidenceIds": [
+              "RE_PAYOUT_555_5PLUS"
+            ]
+          },
+          {
+            "value": "PAYOUT_666",
+            "label": "666枚OVER 設定6",
+            "allowedSettings": [
+              "SET_6"
+            ],
+            "excludedSettings": [
+              "SET_1",
+              "SET_2",
+              "SET_3",
+              "SET_4",
+              "SET_5"
+            ],
+            "sourceEvidenceIds": [
+              "RE_PAYOUT_666_6"
+            ]
+          }
+        ]
+      },
+      {
+        "groupId": "HIDDEN_NAGI",
+        "label": "隠れ凪",
+        "selectionMode": "single",
+        "normalizationMode": "ALLOWED_SETTINGS",
+        "options": [
+          {
+            "value": "NAGI_BLUE_2PLUS",
+            "label": "青「一味違いますね」 設定2以上",
+            "allowedSettings": [
+              "SET_2",
+              "SET_3",
+              "SET_4",
+              "SET_5",
+              "SET_6"
+            ],
+            "excludedSettings": [
+              "SET_1"
+            ],
+            "sourceEvidenceIds": [
+              "RE_HIDDEN_NAGI_2PLUS"
+            ]
+          },
+          {
+            "value": "NAGI_GREEN_3PLUS",
+            "label": "緑「何やら不思議な気配です」 設定3以上",
+            "allowedSettings": [
+              "SET_3",
+              "SET_4",
+              "SET_5",
+              "SET_6"
+            ],
+            "excludedSettings": [
+              "SET_1",
+              "SET_2"
+            ],
+            "sourceEvidenceIds": [
+              "RE_HIDDEN_NAGI_3PLUS"
+            ]
+          },
+          {
+            "value": "NAGI_RED_4PLUS",
+            "label": "赤「良い予感がします」 設定4以上",
+            "allowedSettings": [
+              "SET_4",
+              "SET_5",
+              "SET_6"
+            ],
+            "excludedSettings": [
+              "SET_1",
+              "SET_2",
+              "SET_3"
+            ],
+            "sourceEvidenceIds": [
+              "RE_HIDDEN_NAGI_4PLUS"
+            ]
+          },
+          {
+            "value": "NAGI_SILVER_5PLUS",
+            "label": "銀「遊び尽くしちゃいましょう」 設定5以上",
+            "allowedSettings": [
+              "SET_5",
+              "SET_6"
+            ],
+            "excludedSettings": [
+              "SET_1",
+              "SET_2",
+              "SET_3",
+              "SET_4"
+            ],
+            "sourceEvidenceIds": [
+              "RE_HIDDEN_NAGI_5PLUS"
+            ]
+          },
+          {
+            "value": "NAGI_GOLD_6",
+            "label": "金「お肉～お肉～」 設定6",
+            "allowedSettings": [
+              "SET_6"
+            ],
+            "excludedSettings": [
+              "SET_1",
+              "SET_2",
+              "SET_3",
+              "SET_4",
+              "SET_5"
+            ],
+            "sourceEvidenceIds": [
+              "RE_HIDDEN_NAGI_6"
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "evidenceReview": {
+    "policyVersion": 1,
+    "exclusions": []
+  },
+  "uiCategoryLabels": {
+    "PRIMARY": "初当り"
+  },
+  "difficultyAnalysis": {
+    "targetGameBasis": {
+      "basisId": "NORMAL_GAMES",
+      "label": "通常ゲーム数",
+      "quality": "EXACT"
+    },
+    "calibrationAllowedExposureQualities": [
+      "EXACT",
+      "DERIVED",
+      "ESTIMATED"
+    ]
+  }
+}

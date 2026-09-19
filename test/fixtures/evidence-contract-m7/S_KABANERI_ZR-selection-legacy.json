@@ -1,0 +1,395 @@
+{
+  "schemaVersion": "selection-data-v1",
+  "machineId": "S_KABANERI_ZR",
+  "machineDataVersion": "0.1.2",
+  "inputs": [
+    {
+      "id": "INP_NORMAL_GAMES",
+      "name": "通常ゲーム数",
+      "type": "integer",
+      "category": "PRIMARY",
+      "displayOrder": 1,
+      "defaultValue": 0,
+      "unit": "G"
+    },
+    {
+      "id": "INP_BONUS",
+      "name": "ボーナス初当り回数",
+      "type": "counter",
+      "category": "PRIMARY",
+      "displayOrder": 2,
+      "defaultValue": 0,
+      "unit": "回"
+    },
+    {
+      "id": "INP_CZ",
+      "name": "CZ初当り回数",
+      "type": "counter",
+      "category": "SUPPORT",
+      "displayOrder": 3,
+      "defaultValue": 0,
+      "unit": "回"
+    },
+    {
+      "id": "INP_COMMON_BELL_GAMES",
+      "name": "共通ベル対象ゲーム数",
+      "type": "integer",
+      "category": "SMALL_ROLE",
+      "displayOrder": 10,
+      "defaultValue": 0,
+      "unit": "G",
+      "description": "通常時・AT中など共通6枚ベルを判別して数えた区間のゲーム数。"
+    },
+    {
+      "id": "INP_COMMON_BELL",
+      "name": "共通6枚ベル回数",
+      "type": "counter",
+      "category": "SMALL_ROLE",
+      "displayOrder": 11,
+      "defaultValue": 0,
+      "unit": "回",
+      "parentInputId": "INP_COMMON_BELL_GAMES"
+    },
+    {
+      "id": "INP_MUMEI_3_TRIALS",
+      "name": "無名CZ 小役3連回数",
+      "type": "counter",
+      "category": "CZ_DETAIL",
+      "displayOrder": 20,
+      "defaultValue": 0,
+      "unit": "回"
+    },
+    {
+      "id": "INP_MUMEI_3_HIT",
+      "name": "うちボーナス当選回数",
+      "type": "counter",
+      "category": "CZ_DETAIL",
+      "displayOrder": 21,
+      "defaultValue": 0,
+      "unit": "回",
+      "parentInputId": "INP_MUMEI_3_TRIALS"
+    },
+    {
+      "id": "INP_ST_END_TOTAL",
+      "name": "ST終了画面確認回数",
+      "type": "integer",
+      "category": "ST_END",
+      "displayOrder": 30,
+      "defaultValue": null,
+      "unit": "回",
+      "description": "ST終了時に確認した画面を集計します。公開解析では駆け抜け時除外の条件を確認できていないため、現時点では全ST終了画面を対象とします。"
+    },
+    {
+      "id": "INP_ST_END_HIGH",
+      "name": "高設定示唆（菖蒲）",
+      "type": "counter",
+      "category": "ST_END",
+      "displayOrder": 31,
+      "defaultValue": null,
+      "unit": "回",
+      "parentInputId": "INP_ST_END_TOTAL"
+    }
+  ],
+  "features": [
+    {
+      "researchFeatureId": "RF_BONUS",
+      "featureId": "FEAT_BONUS",
+      "adoptionCategory": "INCLUDE_PRIMARY",
+      "numeratorInputId": "INP_BONUS",
+      "denominatorInputId": "INP_NORMAL_GAMES",
+      "minimumSample": 1,
+      "sampleRecommendation": 7000,
+      "weight": 1,
+      "displayFormat": "ratio_1_over_n",
+      "difficultyExposure": {
+        "mode": "per_game",
+        "factor": 1,
+        "quality": "EXACT",
+        "basisId": "NORMAL_GAMES"
+      },
+      "difficultyParticipation": "INCLUDE",
+      "userReason": "終日を通して取得でき、設定差が大きいため主軸採用。"
+    },
+    {
+      "researchFeatureId": "RF_CZ",
+      "featureId": "FEAT_CZ",
+      "adoptionCategory": "INCLUDE_SUPPORT",
+      "numeratorInputId": "INP_CZ",
+      "denominatorInputId": "INP_NORMAL_GAMES",
+      "minimumSample": 1,
+      "sampleRecommendation": 7000,
+      "weight": 0.6,
+      "displayFormat": "ratio_1_over_n",
+      "difficultyExposure": {
+        "mode": "per_game",
+        "factor": 1,
+        "quality": "EXACT",
+        "basisId": "NORMAL_GAMES"
+      },
+      "difficultyParticipation": "INCLUDE",
+      "userReason": "高頻度で設定差があるがボーナスへつながる中間過程のため相関を考慮して補助採用。"
+    },
+    {
+      "researchFeatureId": "RF_COMMON_BELL",
+      "featureId": "FEAT_COMMON_BELL",
+      "adoptionCategory": "INCLUDE_SUPPORT",
+      "numeratorInputId": "INP_COMMON_BELL",
+      "denominatorInputId": "INP_COMMON_BELL_GAMES",
+      "minimumSample": 1,
+      "sampleRecommendation": 7000,
+      "weight": 1,
+      "displayFormat": "ratio_1_over_n",
+      "difficultyExposure": {
+        "mode": "per_game",
+        "factor": 1,
+        "quality": "DERIVED",
+        "basisId": "NORMAL_GAMES"
+      },
+      "difficultyParticipation": "INCLUDE",
+      "userReason": "独立した小役情報で、比較的多く試行を確保できるため採用。"
+    },
+    {
+      "researchFeatureId": "RF_MUMEI_3CHAIN",
+      "featureId": "FEAT_MUMEI_3CHAIN",
+      "adoptionCategory": "INCLUDE_SUPPORT",
+      "numeratorInputId": "INP_MUMEI_3_HIT",
+      "denominatorInputId": "INP_MUMEI_3_TRIALS",
+      "minimumSample": 1,
+      "sampleRecommendation": 20,
+      "weight": 0.8,
+      "displayFormat": "percent",
+      "difficultyParticipation": "EXCLUDE",
+      "difficultyExclusionReason": "無名CZ内の小役3連試行数を通常Gから一意換算できないため。",
+      "userReason": "無名CZ中の小役3連成功率は設定1と6で2倍超の差があります。ただし成功はボーナス当選そのもので、採用済みボーナス初当りと結果の一部を共有するため、独立証拠として過大評価しないようweight 0.8で補助採用します。",
+      "categorySubtractInputIds": {
+        "INP_MUMEI_3_TRIALS": [
+          "INP_MUMEI_3_HIT"
+        ]
+      }
+    },
+    {
+      "researchFeatureId": "RF_MUMEI_NAV",
+      "featureId": "FEAT_MUMEI_NAV",
+      "adoptionCategory": "EXCLUDE",
+      "rejectionReason": "同一無名CZ内部の3連成功率と強く関連し、同時採用するとCZ内部挙動を重複評価する。"
+    },
+    {
+      "researchFeatureId": "RF_ST",
+      "featureId": "FEAT_ST",
+      "adoptionCategory": "EXCLUDE",
+      "userFacingReason": "ST初当りには設定差がありますが、採用済みボーナス初当りより1Gあたりの識別情報が弱い下流指標です。ボーナス初当りとST初当りを同時利用するjoint/conditional likelihood contractを現Engineで定義していないため、独立尤度として重ねず現版では推測計算に使用しません。"
+    },
+    {
+      "researchFeatureId": "RF_IKOMA_AVOID",
+      "featureId": "FEAT_IKOMA_AVOID",
+      "adoptionCategory": "EXCLUDE",
+      "rejectionReason": "ライフ残量ごとに別分母が必要で、同一CZ内部の挙動を過度に重複評価するため不採用。"
+    },
+    {
+      "researchFeatureId": "RF_ST_END_SCREEN",
+      "featureId": "FEAT_ST_END_SCREEN",
+      "adoptionCategory": "INCLUDE_SUPPORT",
+      "numeratorInputId": "INP_ST_END_HIGH",
+      "denominatorInputId": "INP_ST_END_TOTAL",
+      "minimumSample": 1,
+      "sampleRecommendation": 20,
+      "weight": 1,
+      "displayFormat": "percent",
+      "difficultyParticipation": "EXCLUDE",
+      "difficultyExclusionReason": "通常GからST終了画面の試行数を一意換算できないため。",
+      "userReason": "ST終了画面の高設定示唆選択率は設定1の1.2%から設定6の6.1%まで差があり、条件付き情報として採用。"
+    }
+  ],
+  "rejectedElements": [
+    {
+      "id": "REJECTED_REG_GAME",
+      "name": "規定G数到達時のボーナス当選率",
+      "reason": "複数ゾーンは前ゾーン非当選を条件に次の試行へ進むため、独立Feature化すると生存条件を無視して情報を水増しします。"
+    },
+    {
+      "id": "REJECTED_CHARACTER_DISTRIBUTION",
+      "name": "カバネリボーナス中キャラ紹介の偶奇傾向",
+      "reason": "示唆要素は把握していますが、全設定別の完全な出現分布を公開情報で安定照合できないため数値Feature化しません。"
+    }
+  ],
+  "evidence": [],
+  "evidenceUi": {
+    "groups": [
+      {
+        "groupId": "OMIKUJI",
+        "label": "おみくじ",
+        "selectionMode": "single",
+        "normalizationMode": "ALLOWED_SETTINGS",
+        "options": [
+          {
+            "value": "SMALL_2PLUS",
+            "label": "小吉（銅） 設定2以上",
+            "allowedSettings": [
+              "SET_2",
+              "SET_3",
+              "SET_4",
+              "SET_5",
+              "SET_6"
+            ],
+            "excludedSettings": [
+              "SET_1"
+            ],
+            "sourceEvidenceIds": [
+              "RE_OMIKUJI_SMALL_2PLUS"
+            ]
+          },
+          {
+            "value": "MEDIUM_4PLUS",
+            "label": "中吉（銀） 設定4以上",
+            "allowedSettings": [
+              "SET_4",
+              "SET_5",
+              "SET_6"
+            ],
+            "excludedSettings": [
+              "SET_1",
+              "SET_2",
+              "SET_3"
+            ],
+            "sourceEvidenceIds": [
+              "RE_OMIKUJI_MEDIUM_4PLUS"
+            ]
+          },
+          {
+            "value": "LARGE_6",
+            "label": "大吉（金） 設定6",
+            "allowedSettings": [
+              "SET_6"
+            ],
+            "excludedSettings": [
+              "SET_1",
+              "SET_2",
+              "SET_3",
+              "SET_4",
+              "SET_5"
+            ],
+            "sourceEvidenceIds": [
+              "RE_OMIKUJI_LARGE_6"
+            ]
+          }
+        ]
+      },
+      {
+        "groupId": "MUMEI_ADD_SETTING",
+        "label": "カバネリアタック・無名 上乗せ",
+        "selectionMode": "single",
+        "normalizationMode": "ALLOWED_SETTINGS",
+        "options": [
+          {
+            "value": "ADD_44_4PLUS",
+            "label": "44 設定4以上",
+            "allowedSettings": [
+              "SET_4",
+              "SET_5",
+              "SET_6"
+            ],
+            "excludedSettings": [
+              "SET_1",
+              "SET_2",
+              "SET_3"
+            ],
+            "sourceEvidenceIds": [
+              "RE_MUMEI_ADD_44_4PLUS"
+            ]
+          },
+          {
+            "value": "ADD_55_5PLUS",
+            "label": "55 設定5以上",
+            "allowedSettings": [
+              "SET_5",
+              "SET_6"
+            ],
+            "excludedSettings": [
+              "SET_1",
+              "SET_2",
+              "SET_3",
+              "SET_4"
+            ],
+            "sourceEvidenceIds": [
+              "RE_MUMEI_ADD_55_5PLUS"
+            ]
+          },
+          {
+            "value": "ADD_66_6",
+            "label": "66 設定6",
+            "allowedSettings": [
+              "SET_6"
+            ],
+            "excludedSettings": [
+              "SET_1",
+              "SET_2",
+              "SET_3",
+              "SET_4",
+              "SET_5"
+            ],
+            "sourceEvidenceIds": [
+              "RE_MUMEI_ADD_66_6"
+            ]
+          },
+          {
+            "value": "ADD_77_6",
+            "label": "77 設定6",
+            "allowedSettings": [
+              "SET_6"
+            ],
+            "excludedSettings": [
+              "SET_1",
+              "SET_2",
+              "SET_3",
+              "SET_4",
+              "SET_5"
+            ],
+            "sourceEvidenceIds": [
+              "RE_MUMEI_ADD_77_6"
+            ]
+          },
+          {
+            "value": "ADD_331_6",
+            "label": "331 設定6",
+            "allowedSettings": [
+              "SET_6"
+            ],
+            "excludedSettings": [
+              "SET_1",
+              "SET_2",
+              "SET_3",
+              "SET_4",
+              "SET_5"
+            ],
+            "sourceEvidenceIds": [
+              "RE_MUMEI_ADD_331_6"
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "evidenceReview": {
+    "policyVersion": 1,
+    "exclusions": []
+  },
+  "uiCategoryLabels": {
+    "PRIMARY": "初当り",
+    "SUPPORT": "CZ",
+    "SMALL_ROLE": "共通6枚ベル",
+    "CZ_DETAIL": "無名CZ",
+    "ST_END": "ST終了画面"
+  },
+  "difficultyAnalysis": {
+    "targetGameBasis": {
+      "basisId": "NORMAL_GAMES",
+      "label": "通常ゲーム数",
+      "quality": "EXACT"
+    },
+    "calibrationAllowedExposureQualities": [
+      "EXACT",
+      "DERIVED",
+      "ESTIMATED"
+    ]
+  }
+}
