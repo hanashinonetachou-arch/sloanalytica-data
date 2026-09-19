@@ -5,6 +5,7 @@ import { fileURLToPath } from 'node:url';
 import { validateResearchData } from './validate-research-data.mjs';
 import { validateSelectionData } from './validate-selection-data.mjs';
 import { assessSelectionQuality } from './selection-quality-gate.mjs';
+import { auditFleet, markdownReport } from './audit-m7-full-fleet-migration.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const DEFAULT_REPORT = path.join(ROOT, 'reports', 'batch-machine-pipeline-report.json');
@@ -104,6 +105,8 @@ export function generatedPaths(machineIds) {
     path.join(ROOT, 'catalog.json'),
     path.join(ROOT, 'difficulty-catalog.json'),
     path.join(ROOT, 'machine-registry.json'),
+    path.join(ROOT, 'reports', 'm7-full-fleet-migration-audit-20260916.json'),
+    path.join(ROOT, 'reports', 'm7-full-fleet-migration-audit-20260916.md'),
   ];
   for (const machineId of machineIds) {
     paths.push(
@@ -147,6 +150,11 @@ function resolveNpmCommand(script) {
     return { command: process.env.ComSpec || 'cmd.exe', args: ['/d', '/s', '/c', `npm run ${script}`] };
   }
   return { command: 'npm', args: ['run', script] };
+}
+function refreshDerivedFleetAudit() {
+  const report = auditFleet(ROOT);
+  writeJson(path.join(ROOT, 'reports', 'm7-full-fleet-migration-audit-20260916.json'), report);
+  fs.writeFileSync(path.join(ROOT, 'reports', 'm7-full-fleet-migration-audit-20260916.md'), markdownReport(report), 'utf8');
 }
 function runRepositoryCheck(script) {
   const { command, args } = resolveNpmCommand(script);
@@ -245,6 +253,10 @@ if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.me
         restoreFiles(snapshot);
         restoredForCheck = true;
         console.log('\nCHECK mode: restored generated files before repository-wide checks.');
+      }
+      if (!args.checkOnly) {
+        refreshDerivedFleetAudit();
+        console.log('\nRefreshed derived full-fleet M7 audit before repository-wide checks.');
       }
       console.log('\n=== REPOSITORY CHECKS (ONCE PER BATCH) ===');
       for (const script of ['test', 'audit', 'audit:ui-service-names']) {
