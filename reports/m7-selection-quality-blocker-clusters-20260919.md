@@ -50,3 +50,29 @@ Therefore the 88-machine population may contain machines with no Evidence migrat
 3. Selection Quality non-PASS + legacy Evidence migration projection.
 
 The first class is especially important: fixing or formally resolving Selection Quality could immediately move such machines to terminal `NOT_APPLICABLE_OR_EQUIVALENT`, without any Evidence migration.
+
+
+## Exact fleet split
+
+The current checked-in full-fleet report contains exactly 88 primary `SELECTION_QUALITY_BLOCKED` rows.
+
+By migration disposition:
+
+| Disposition | Machines |
+|---|---:|
+| `MIGRATION_REQUIRED` | 64 |
+| `NOT_APPLICABLE_NO_EVIDENCE` | 19 |
+| `BLOCKED_ADOPTION_OUTSIDE_LEGACY_GROUPS` | 5 |
+| **Total** | **88** |
+
+By Selection Quality status:
+
+| Status | Machines |
+|---|---:|
+| `REVIEW` | 71 |
+| `FAIL` | 17 |
+| **Total** | **88** |
+
+This confirms that **19 machines have no Evidence contract to migrate but are kept out of terminal classification solely because Selection Quality is non-PASS**. These 19 are the highest-value next subcluster to inspect because resolving Selection Quality would not require an Evidence migration.
+
+The 64 migration-required and 5 adoption-outside machines remain separate; their Selection Quality resolution must not be conflated with downstream M7 migration authorization.
