@@ -37,3 +37,16 @@ Safe mechanical work is limited to defects whose intended value is already expli
 ## Next scan
 
 Cluster all 88 machines by normalized blocker/review reason family, retaining counts and machine IDs. Prioritize exact structural BLOCKED causes before prose REVIEW causes. A batch is authorized only if its repair is deterministic and decision-preserving.
+
+
+## Fleet-audit interaction
+
+Inspection of `audit-m7-full-fleet-migration.mjs` confirms Selection Quality is evaluated before the downstream M7 proof chain for legacy machines and is the highest-priority primary blocker. For zero-group/no-projection machines, a non-PASS Selection Quality result also overrides formal `NO_EVIDENCE` terminalization.
+
+Therefore the 88-machine population may contain machines with no Evidence migration at all whose terminal status is currently masked by Selection Quality. The clustering must preserve this distinction:
+
+1. Selection Quality non-PASS + Gate0 `NO_EVIDENCE`;
+2. Selection Quality non-PASS + Gate0 Evidence/adoption;
+3. Selection Quality non-PASS + legacy Evidence migration projection.
+
+The first class is especially important: fixing or formally resolving Selection Quality could immediately move such machines to terminal `NOT_APPLICABLE_OR_EQUIVALENT`, without any Evidence migration.
