@@ -76,3 +76,28 @@ By Selection Quality status:
 This confirms that **19 machines have no Evidence contract to migrate but are kept out of terminal classification solely because Selection Quality is non-PASS**. These 19 are the highest-value next subcluster to inspect because resolving Selection Quality would not require an Evidence migration.
 
 The 64 migration-required and 5 adoption-outside machines remain separate; their Selection Quality resolution must not be conflated with downstream M7 migration authorization.
+
+
+## NO_EVIDENCE masked subcluster — exact 19 machines
+
+Selection Quality status:
+- REVIEW: 14
+- FAIL: 5
+
+### FAIL (5)
+
+- `LB_AREX_BRIGHT_BA` — prohibited input/manual-count burden rejection basis.
+- `L_ENEN_NO_SHOUBOUTAI_JG` — 4 unclassified Research Evidence candidates.
+- `S_DIGISLO_JACK_GB1` — unclassified Research Feature plus missing selected `userReason`.
+- `S_HARD_BOILED_XX` — 1 unclassified Research Evidence candidate.
+- `S_RYUJIN_RZ30_SUIKA_VERSION` — missing selected `userReason`.
+
+### REVIEW (14)
+
+`L_CHIBARIYO2_ZB`, `L_DRAGON_HANAHANA_SENKO_JP`, `L_NANGOKU_SODACHI_S3`, `S_BAHAMA_A3_30`, `S_GOGO_JUGGLER_3_KA`, `S_HAPPY_JUGGLER_V3_EA`, `S_IM_JUGGLER_EX_TP`, `S_JUGGLER_GIRLS_SS_KH`, `S_KIN_NO_KABOCHA_AA`, `S_MOECHIBA_GNC30`, `S_MR_JUGGLER_KK`, `S_NEO_IM_JUGGLER_EX_KK`, `S_OKIDOKI_GORGEOUS_GS`, `S_ULTRA_MIRACLE_JUGGLER_KT`.
+
+All 14 are prose-quality reviews: selected/rejected reasons lack the gate's required concrete statistical/observational basis. They must not be auto-rewritten just to satisfy the heuristic.
+
+### Decision
+
+There is no safe blanket repair for all 19. The 14 REVIEW machines require authoritative rationale improvement, while the 5 FAIL machines require separate structural inspection. The two unclassified-Research-Evidence cases are especially important: Gate0 says NO_EVIDENCE while Research still contains Evidence candidates, so terminalization must not bypass the missing Selection decision.
