@@ -7,9 +7,9 @@ Phase 1 base: `8a31eec356e40fecc38ac86fd6e938e1deff9375`. Original verified Data
 | Metric | Count |
 |---|---:|
 | Total machines | 269 |
-| Already M7 | 28 |
-| Legacy machines | 241 |
-| AUTO_MIGRATABLE | 1 |
+| Already M7 | 29 |
+| Legacy machines | 240 |
+| AUTO_MIGRATABLE | 0 |
 | FEATURE_SHARING_REVIEW | 0 |
 | OBSERVATION_BLOCKED | 80 |
 | CANONICAL_UI_BLOCKED | 2 |
@@ -17,7 +17,7 @@ Phase 1 base: `8a31eec356e40fecc38ac86fd6e938e1deff9375`. Original verified Data
 | INPUT_COMPATIBILITY_BLOCKED | 0 |
 | SELECTION_QUALITY_BLOCKED | 70 |
 | OTHER_BLOCKED | 39 |
-| NOT_APPLICABLE_OR_EQUIVALENT | 76 |
+| NOT_APPLICABLE_OR_EQUIVALENT | 77 |
 
 Classification is fail-closed. Only explicit formal repository relationships are accepted for mandatory migration proofs; labels/categories are diagnostic only. A machine can have several failed proofs, while its classification follows the documented deterministic blocker priority.
 
@@ -172,7 +172,7 @@ Phase 1 total: 39. The Phase 1 OTHER_BLOCKED population can be subdivided by the
 | `L_KAMEN_RIDER_DEN_O_UD` | OBSERVATION_BLOCKED | MIGRATION_REQUIRED | 3 | 9 | PASS | FAIL | FAIL | PASS | REVIEW | PASS | BASELINE_ONLY | NOT_RUN | One or more Evidence groups lack exactly one formal OBS_EVI_<clean(groupId)> Observation linkage; label/category matching is diagnostic only; canonical UI proof failed: canonical UI is not closed; Feature/Evidence sharing state is not uniquely represented by the legacy runtime surface |
 | `L_KARAKURI_CIRCUS2_JG` | NOT_APPLICABLE_OR_EQUIVALENT | NOT_APPLICABLE_NO_EVIDENCE | 0 | 0 | PASS | NOT_APPLICABLE | NOT_APPLICABLE | NOT_APPLICABLE | NOT_APPLICABLE | NOT_APPLICABLE | NOT_APPLICABLE | NOT_RUN | - |
 | `L_KARAKURI_CIRCUS_G` | SELECTION_QUALITY_BLOCKED | MIGRATION_REQUIRED | 1 | 3 | REVIEW | FAIL | FAIL | PASS | REVIEW | PASS | BASELINE_ONLY | NOT_RUN | Selection Quality REVIEW: selected FEAT_CZ_INITIAL: reason lacks a concrete statistical/observational basis; One or more Evidence groups lack exactly one formal OBS_EVI_<clean(groupId)> Observation linkage; label/category matching is diagnostic only; canonical UI proof failed: canonical materialization marker is missing; Feature/Evidence sharing state is not uniquely represented by the legacy runtime surface |
-| `L_KEIJI_SADO_ER` | AUTO_MIGRATABLE | MIGRATION_REQUIRED | 4 | 11 | PASS | PASS | PASS | PASS | PASS | PASS | BASELINE_ONLY | NOT_RUN | - |
+| `L_KEIJI_SADO_ER` | ALREADY_M7 | ALREADY_M7_EQUIVALENT | 0 | 0 | NOT_APPLICABLE | PASS | PASS | PASS | PASS | PASS | PASS | PASS | - |
 | `L_KENGAN_ASHURA_ND` | SELECTION_QUALITY_BLOCKED | MIGRATION_REQUIRED | 3 | 9 | REVIEW | PASS | FAIL | PASS | PASS | PASS | BASELINE_ONLY | NOT_RUN | Selection Quality REVIEW: selected FEAT_AT_INITIAL: reason lacks a concrete statistical/observational basis; canonical UI proof failed: canonical materialization marker is missing |
 | `L_KING_PULSAR_SLCC` | OBSERVATION_BLOCKED | MIGRATION_REQUIRED | 1 | 4 | PASS | FAIL | FAIL | PASS | REVIEW | PASS | BASELINE_ONLY | NOT_RUN | One or more Evidence groups lack exactly one formal OBS_EVI_<clean(groupId)> Observation linkage; label/category matching is diagnostic only; canonical UI proof failed: description differs for 設定確定・否定情報; Feature/Evidence sharing state is not uniquely represented by the legacy runtime surface |
 | `L_KINNIKUMAN4_SLDC` | OBSERVATION_BLOCKED | MIGRATION_REQUIRED | 1 | 2 | PASS | FAIL | FAIL | PASS | REVIEW | PASS | BASELINE_ONLY | NOT_RUN | One or more Evidence groups lack exactly one formal OBS_EVI_<clean(groupId)> Observation linkage; label/category matching is diagnostic only; canonical UI proof failed: description differs for 主要入力; Feature/Evidence sharing state is not uniquely represented by the legacy runtime surface |
