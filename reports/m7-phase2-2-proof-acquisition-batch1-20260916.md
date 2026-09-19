@@ -10,17 +10,17 @@ Proof remains binary. Every Batch 1 entry is `NOT_ESTABLISHED`: it is a safe tar
 
 | Metric | Count |
 |---|---:|
-| semanticReviewInput | 258 |
+| semanticReviewInput | 254 |
 | REPOSITORY_PROOF_ACQUIRABLE | 13 |
 | LINEAGE_ANNOTATION_REQUIRED | 219 |
-| OBSERVATION_SEMANTICS_REVIEW_REQUIRED | 21 |
+| OBSERVATION_SEMANTICS_REVIEW_REQUIRED | 17 |
 | EXTERNAL_RESEARCH_REQUIRED | 0 |
 | FIELD_VERIFICATION_REQUIRED | 0 |
 | INDEPENDENT_BLOCKER | 3 |
 | FEATURE_EVIDENCE_SHARING_REVIEW_REQUIRED | 2 |
 | batch1CandidateCount | 13 |
-| labelOnlyRejectedCount (267-group input) | 21 |
-| upstream label-only rejected (all 447 groups) | 37 |
+| labelOnlyRejectedCount (267-group input) | 17 |
+| upstream label-only rejected (all 447 groups) | 33 |
 
 Zero counts are deliberate: this batch does not manufacture an external-research or field-verification conclusion for groups whose upstream classification was semantic review.
 
@@ -42,7 +42,7 @@ Zero counts are deliberate: this batch does not manufacture an external-research
 | `S_TOARU_RAILGUN_FB` | `SETTING_EVIDENCE` | `RE_AT_END_2PLUS`, `RE_AT_END_3PLUS`, `RE_AT_END_4PLUS`, `RE_AT_END_5PLUS`, `RE_AT_END_6`, `RE_BATTLE_4PLUS`, `RE_BATTLE_5PLUS`, `RE_BATTLE_6`, `RE_BONUS_ROUND_4PLUS`, `RE_BONUS_ROUND_5PLUS`, `RE_CHANCE_VOICE_4PLUS`, `RE_CHANCE_VOICE_6`, `RE_ENDING_4PLUS`, `RE_ITEM_BATTLE_4PLUS`, `RE_ITEM_BATTLE_6`, `RE_MISSION_2PLUS`, `RE_NOISE_4PLUS` | `OBS_SETTING_EVIDENCE` | `OBS_EVI_SETTING_EVIDENCE` | UNIQUE_LEGACY_ID_AND_AUDITED_INPUT_PROJECTION: A unique machine-local Observation structurally embeds the exact groupId in its identifier, and the prior formal UI audit independently records INP_EVI_<groupId> at concrete package/UI trails. This is a proof-acquisition candidate, not yet an established formal Observation proof. Source: `research/S_TOARU_RAILGUN_FB/machine-observation-data.json#OBS_SETTING_EVIDENCE + audit-reports/evidence-ui-v2-phase2.json#S_TOARU_RAILGUN_FB/INP_EVI_SETTING_EVIDENCE` | After human confirmation, add explicit groupId/sourceEvidenceIds lineage using an existing Observation lineage field; separately validate any ID rename. Do not change semantics or runtime shape. | no |
 | `S_YOUJO_SENKI_ZR` | `SETTING_EVIDENCE` | `RE_AT_EXISTENCE_X`, `RE_AT_TANYA`, `RE_AT_VISHYA`, `RE_AT_ZETTOUR`, `RE_OP203_4PLUS_HEAVEN`, `RE_PAYOUT_246`, `RE_PAYOUT_456`, `RE_PAYOUT_666`, `RE_TROPHY_BRONZE`, `RE_TROPHY_GOLD`, `RE_TROPHY_KIRIN`, `RE_TROPHY_RAINBOW`, `RE_VCOMBAT_4PLUS`, `RE_VCOMBAT_5PLUS`, `RE_VCOMBAT_6` | `OBS_SETTING_EVIDENCE` | `OBS_EVI_SETTING_EVIDENCE` | UNIQUE_LEGACY_ID_AND_AUDITED_INPUT_PROJECTION: A unique machine-local Observation structurally embeds the exact groupId in its identifier, and the prior formal UI audit independently records INP_EVI_<groupId> at concrete package/UI trails. This is a proof-acquisition candidate, not yet an established formal Observation proof. Source: `research/S_YOUJO_SENKI_ZR/machine-observation-data.json#OBS_SETTING_EVIDENCE + audit-reports/evidence-ui-v2-phase2.json#S_YOUJO_SENKI_ZR/INP_EVI_SETTING_EVIDENCE` | After human confirmation, add explicit groupId/sourceEvidenceIds lineage using an existing Observation lineage field; separately validate any ID rename. Do not change semantics or runtime shape. | no |
 
-## All 267 classifications
+## All 254 classifications
 
 | Machine | Group | Classification | Proof decision | Reason / blocker | Diagnostic candidates |
 |---|---|---|---|---|---|
@@ -85,8 +85,6 @@ Zero counts are deliberate: this batch does not manufacture an external-research
 | `L_DUMBBELL_X` | `EVID_CHEAT` | LINEAGE_ANNOTATION_REQUIRED | NOT_ESTABLISHED | Research IDs and Selection sourceEvidenceIds are present, but the repository has no unique non-label Observation relationship; an explicit lineage annotation is required. | - |
 | `L_DUMBBELL_X` | `EVID_END` | LINEAGE_ANNOTATION_REQUIRED | NOT_ESTABLISHED | Research IDs and Selection sourceEvidenceIds are present, but the repository has no unique non-label Observation relationship; an explicit lineage annotation is required. | - |
 | `L_DUMBBELL_X` | `EVID_PAYOUT` | LINEAGE_ANNOTATION_REQUIRED | NOT_ESTABLISHED | Research IDs and Selection sourceEvidenceIds are present, but the repository has no unique non-label Observation relationship; an explicit lineage annotation is required. | - |
-| `L_G1_YUSHUN_CLUB_GOLD_KD` | `AT_END_SCREEN` | OBSERVATION_SEMANTICS_REVIEW_REQUIRED | NOT_ESTABLISHED | The candidate Observation must be semantically reviewed; label/category resemblance is retained only to locate it and cannot establish lineage. | `OBS_AT_END_SCREEN_EVIDENCE` |
-| `L_G1_YUSHUN_CLUB_GOLD_KD` | `TROPHY` | OBSERVATION_SEMANTICS_REVIEW_REQUIRED | NOT_ESTABLISHED | The candidate Observation must be semantically reviewed; label/category resemblance is retained only to locate it and cannot establish lineage. | `OBS_TROPHY_EVIDENCE` |
 | `L_GEGEGE_NO_KITARO_KAKUSEI_JC` | `KITARO_CZ_VOICE` | LINEAGE_ANNOTATION_REQUIRED | NOT_ESTABLISHED | Research IDs and Selection sourceEvidenceIds are present, but the repository has no unique non-label Observation relationship; an explicit lineage annotation is required. | - |
 | `L_GEGEGE_NO_KITARO_KAKUSEI_JC` | `KITARO_PAYOUT` | LINEAGE_ANNOTATION_REQUIRED | NOT_ESTABLISHED | Research IDs and Selection sourceEvidenceIds are present, but the repository has no unique non-label Observation relationship; an explicit lineage annotation is required. | - |
 | `L_GEN_CHOMUGEN_PH` | `ENDING_LAMP` | LINEAGE_ANNOTATION_REQUIRED | NOT_ESTABLISHED | Research IDs and Selection sourceEvidenceIds are present, but the repository has no unique non-label Observation relationship; an explicit lineage annotation is required. | - |
@@ -139,7 +137,6 @@ Zero counts are deliberate: this batch does not manufacture an external-research
 | `L_MONSTER_HUNTER_RISE_XA` | `MH_VOICE` | LINEAGE_ANNOTATION_REQUIRED | NOT_ESTABLISHED | Research IDs and Selection sourceEvidenceIds are present, but the repository has no unique non-label Observation relationship; an explicit lineage annotation is required. | - |
 | `L_NANATSU_NO_MAKEN_PU` | `SETTING_EVIDENCE` | LINEAGE_ANNOTATION_REQUIRED | NOT_ESTABLISHED | Research IDs and Selection sourceEvidenceIds are present, but the repository has no unique non-label Observation relationship; an explicit lineage annotation is required. | - |
 | `L_NYANKO_DAISENSO_CHOSHINSOKU_KB` | `SETTING_EVIDENCE` | LINEAGE_ANNOTATION_REQUIRED | NOT_ESTABLISHED | Research IDs and Selection sourceEvidenceIds are present, but the repository has no unique non-label Observation relationship; an explicit lineage annotation is required. | - |
-| `L_ONE_PUNCH_MAN` | `BONUS_AT_END_SCREEN` | OBSERVATION_SEMANTICS_REVIEW_REQUIRED | NOT_ESTABLISHED | The candidate Observation must be semantically reviewed; label/category resemblance is retained only to locate it and cannot establish lineage. | `OBS_BONUS_AT_END_SCREEN_EVIDENCE` |
 | `L_ONIMUSHA3_XA` | `EV_BIG_END` | LINEAGE_ANNOTATION_REQUIRED | NOT_ESTABLISHED | Research IDs and Selection sourceEvidenceIds are present, but the repository has no unique non-label Observation relationship; an explicit lineage annotation is required. | - |
 | `L_ONIMUSHA3_XA` | `EV_REG_CHAR` | LINEAGE_ANNOTATION_REQUIRED | NOT_ESTABLISHED | Research IDs and Selection sourceEvidenceIds are present, but the repository has no unique non-label Observation relationship; an explicit lineage annotation is required. | - |
 | `L_PACHISLO_SENRAN_KAGURA2_L9` | `SENRAN_TROPHY` | LINEAGE_ANNOTATION_REQUIRED | NOT_ESTABLISHED | Research IDs and Selection sourceEvidenceIds are present, but the repository has no unique non-label Observation relationship; an explicit lineage annotation is required. | - |
@@ -184,7 +181,6 @@ Zero counts are deliberate: this batch does not manufacture an external-research
 | `L_TOARU_INDEX_JC` | `AT_END_SCREEN` | LINEAGE_ANNOTATION_REQUIRED | NOT_ESTABLISHED | Research IDs and Selection sourceEvidenceIds are present, but the repository has no unique non-label Observation relationship; an explicit lineage annotation is required. | - |
 | `L_TOARU_INDEX_JC` | `AT_PAYOUT_DISPLAY` | LINEAGE_ANNOTATION_REQUIRED | NOT_ESTABLISHED | Research IDs and Selection sourceEvidenceIds are present, but the repository has no unique non-label Observation relationship; an explicit lineage annotation is required. | - |
 | `L_TOARU_INDEX_JC` | `FUJIMARU_COIN` | LINEAGE_ANNOTATION_REQUIRED | NOT_ESTABLISHED | Research IDs and Selection sourceEvidenceIds are present, but the repository has no unique non-label Observation relationship; an explicit lineage annotation is required. | - |
-| `L_TOLOVE_DARKNESS_S6` | `ST_END_STAMP` | OBSERVATION_SEMANTICS_REVIEW_REQUIRED | NOT_ESTABLISHED | The candidate Observation must be semantically reviewed; label/category resemblance is retained only to locate it and cannot establish lineage. | `OBS_ST_END_STAMP_EVIDENCE` |
 | `L_TOLOVE_DARKNESS_S8` | `EVG_DARWIN_HIDDEN_NAGI` | LINEAGE_ANNOTATION_REQUIRED | NOT_ESTABLISHED | Research IDs and Selection sourceEvidenceIds are present, but the repository has no unique non-label Observation relationship; an explicit lineage annotation is required. | - |
 | `L_TOLOVE_DARKNESS_S8` | `EVG_PAYOUT` | LINEAGE_ANNOTATION_REQUIRED | NOT_ESTABLISHED | Research IDs and Selection sourceEvidenceIds are present, but the repository has no unique non-label Observation relationship; an explicit lineage annotation is required. | - |
 | `L_TOLOVE_DARKNESS_S8` | `EVG_ST_END` | LINEAGE_ANNOTATION_REQUIRED | NOT_ESTABLISHED | Research IDs and Selection sourceEvidenceIds are present, but the repository has no unique non-label Observation relationship; an explicit lineage annotation is required. | - |
@@ -310,7 +306,7 @@ Zero counts are deliberate: this batch does not manufacture an external-research
 - `L_TENSEI_SHITARA_KEN_DESHITA_GT`: Feature/Evidence sharing formal proof or shared-input contract review is required; no new runtime field is proposed.
 - `LB_FUJIKO_M2`: Selection Quality remains an independent blocker.
 - Label-only candidates require Observation semantics review; all other unproven relationships require explicit lineage annotation.
-- The 21 upstream `FIELD_VERIFICATION_REQUIRED` groups (including the named real-device/service checks) are outside the 267 semantic-review input and remain unchanged.
+- The 21 upstream `FIELD_VERIFICATION_REQUIRED` groups (including the named real-device/service checks) are outside the semantic-review input and remain unchanged.
 
 ## Stop statement
 

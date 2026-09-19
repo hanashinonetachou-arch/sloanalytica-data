@@ -177,7 +177,7 @@ export function auditLineageResolution(root) {
     groupIds: rows.map(row => row.groupId)
   })).sort((a, b) => a.machineId.localeCompare(b.machineId));
   const multiGroupMachines = machines.filter(item => item.unresolvedGroupCount > 1).sort((a, b) => b.unresolvedGroupCount - a.unresolvedGroupCount || a.machineId.localeCompare(b.machineId));
-  const previousBatch1Reconciliation = formalization.candidates.map(item => {
+  const previousBatch1Reconciliation = formalization.candidates.filter(item => unresolvedGroups.some(candidate => keyOf(candidate) === keyOf(item))).map(item => {
     const row = unresolvedGroups.find(candidate => keyOf(candidate) === keyOf(item));
     return { machineId: item.machineId, groupId: item.groupId, priorProofResult: item.proofResult, resolutionClass: row.resolutionClass, bulkAnnotationEligibility: row.bulkAnnotationEligibility, newProofDiscovered: false, reconciliation: "CONSISTENT_FORMAL_PROOF_NOT_ESTABLISHED" };
   });
@@ -245,7 +245,7 @@ export function markdownReport(report) {
     ...Object.entries(report.eligibilitySummary).map(([name, count]) => `| ${name} | ${count} |`), "",
     "### Work types", "", "| Work type | Groups | Classes |", "|---|---:|---|",
     ...report.workTypes.map(item => `| ${item.workType} | ${item.groupCount} | ${item.resolutionClasses.join(", ")} |`), "",
-    "## Batch-1 reconciliation", "", "All 13 candidates remain `FORMAL_PROOF_NOT_ESTABLISHED`; no new proof, lineage formalization, or Observation rename was discovered.", "", "| Machine / group | New resolution class | Eligibility |", "|---|---|---|",
+    "## Batch-1 reconciliation", "", `${report.previousBatch1Reconciliation.length} previously reviewed candidates remain unresolved and retain \`FORMAL_PROOF_NOT_ESTABLISHED\`; candidates formalized since the historical batch are excluded from this current unresolved reconciliation.`, "", "| Machine / group | New resolution class | Eligibility |", "|---|---|---|",
     ...report.previousBatch1Reconciliation.map(item => `| \`${item.machineId}/${item.groupId}\` | ${item.resolutionClass} | ${item.bulkAnnotationEligibility} |`), "",
     "## Highest-leverage machines", "", "These machines contain multiple blocked groups; counts identify consolidation leverage, not permission to bulk annotate.", "", "| Machine | Groups | Populated classes |", "|---|---:|---|",
     ...report.machineSummary.multiGroupMachines.map(item => `| \`${item.machineId}\` | ${item.unresolvedGroupCount} | ${Object.entries(item.resolutionClasses).filter(([, count]) => count).map(([name, count]) => `${name} (${count})`).join(", ")} |`), "",

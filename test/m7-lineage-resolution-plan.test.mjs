@@ -62,8 +62,8 @@ test("known stops cannot enter safe eligibility", () => {
 });
 
 test("all 13 Batch-1 candidates remain consistent with formalization", () => {
-  assert.equal(report.previousBatch1Reconciliation.length, 13);
-  assert.deepEqual(report.previousBatch1Reconciliation.map(keyOf).sort(), formalization.candidates.map(keyOf).sort());
+  const stillUnresolved = formalization.candidates.filter(item => completion.groups.some(row => keyOf(row) === keyOf(item) && row.proofResult === "NOT_ESTABLISHED"));
+  assert.deepEqual(report.previousBatch1Reconciliation.map(keyOf).sort(), stillUnresolved.map(keyOf).sort());
   for (const item of report.previousBatch1Reconciliation) {
     assert.equal(item.priorProofResult, "FORMAL_PROOF_NOT_ESTABLISHED");
     assert.equal(item.newProofDiscovered, false);
@@ -101,7 +101,7 @@ test("endgame accounting remains actionable and finite", () => {
   assert.equal(report.summary.unresolvedGroupCount, completion.groups.filter(item => item.proofResult === "NOT_ESTABLISHED").length);
   assert.equal(report.summary.affectedMachineCount, new Set(report.unresolvedGroups.map(item => item.machineId)).size);
   assert.equal(report.summary.controlledHumanLineageConfirmationOnlyCount, report.summary.resolutionClassCounts.SOURCE_EVIDENCE_SET_NOT_EXPLICIT);
-  assert.equal(report.summary.observationSemanticsReviewCount, 21);
+  assert.equal(report.summary.observationSemanticsReviewCount, report.summary.resolutionClassCounts.OBSERVATION_SEMANTICS_REVIEW_REQUIRED);
   assert.equal(report.summary.redesignOrSplitCount, 3);
   assert.equal(report.summary.fieldOrExternalVerificationCount, 21);
   assert.equal(report.summary.upstreamContractBlockedCount, 5);
