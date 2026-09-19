@@ -7,17 +7,17 @@ Phase 1 base: `8a31eec356e40fecc38ac86fd6e938e1deff9375`. Original verified Data
 | Metric | Count |
 |---|---:|
 | Total machines | 269 |
-| Already M7 | 29 |
-| Legacy machines | 240 |
+| Already M7 | 31 |
+| Legacy machines | 238 |
 | AUTO_MIGRATABLE | 0 |
 | FEATURE_SHARING_REVIEW | 0 |
 | OBSERVATION_BLOCKED | 80 |
-| CANONICAL_UI_BLOCKED | 2 |
+| CANONICAL_UI_BLOCKED | 0 |
 | NORMALIZATION_BLOCKED | 19 |
 | INPUT_COMPATIBILITY_BLOCKED | 0 |
 | SELECTION_QUALITY_BLOCKED | 70 |
 | OTHER_BLOCKED | 39 |
-| NOT_APPLICABLE_OR_EQUIVALENT | 77 |
+| NOT_APPLICABLE_OR_EQUIVALENT | 79 |
 
 Classification is fail-closed. Only explicit formal repository relationships are accepted for mandatory migration proofs; labels/categories are diagnostic only. A machine can have several failed proofs, while its classification follows the documented deterministic blocker priority.
 
@@ -157,7 +157,7 @@ Phase 1 total: 39. The Phase 1 OTHER_BLOCKED population can be subdivided by the
 | `L_HEY_ELITE_SALARYMAN_KAGAMI_PA4` | OBSERVATION_BLOCKED | MIGRATION_REQUIRED | 1 | 4 | PASS | FAIL | FAIL | PASS | REVIEW | PASS | BASELINE_ONLY | NOT_RUN | One or more Evidence groups lack exactly one formal OBS_EVI_<clean(groupId)> Observation linkage; label/category matching is diagnostic only; canonical UI proof failed: description differs for 主要入力; Feature/Evidence sharing state is not uniquely represented by the legacy runtime surface |
 | `L_HIGURASHI_GOU_SS` | SELECTION_QUALITY_BLOCKED | MIGRATION_REQUIRED | 5 | 15 | REVIEW | FAIL | FAIL | PASS | REVIEW | PASS | BASELINE_ONLY | NOT_RUN | Selection Quality REVIEW: rejected element REJECTED_REG_BAR: reason lacks a concrete user-facing basis; One or more Evidence groups lack exactly one formal OBS_EVI_<clean(groupId)> Observation linkage; label/category matching is diagnostic only; canonical UI proof failed: description differs for 設定確定・否定情報; Feature/Evidence sharing state is not uniquely represented by the legacy runtime surface |
 | `L_HIHODEN_PA7` | OTHER_BLOCKED | BLOCKED_ADOPTION_OUTSIDE_LEGACY_GROUPS | 0 | 0 | PASS | NOT_APPLICABLE | FAIL | NOT_APPLICABLE | FAIL | NOT_APPLICABLE | NOT_APPLICABLE | NOT_RUN | Gate0 found formal Evidence adoption outside legacy evidenceUi.groups |
-| `L_HOKUTO_AD_XR` | CANONICAL_UI_BLOCKED | MIGRATION_REQUIRED | 2 | 4 | PASS | PASS | FAIL | PASS | PASS | PASS | BASELINE_ONLY | NOT_RUN | canonical UI proof failed: description differs for 設定確定・否定情報 |
+| `L_HOKUTO_AD_XR` | ALREADY_M7 | ALREADY_M7_EQUIVALENT | 0 | 0 | NOT_APPLICABLE | PASS | PASS | PASS | PASS | PASS | PASS | PASS | - |
 | `L_HOKUTO_MUSOU_FS` | SELECTION_QUALITY_BLOCKED | MIGRATION_REQUIRED | 1 | 10 | REVIEW | FAIL | FAIL | PASS | REVIEW | PASS | BASELINE_ONLY | NOT_RUN | Selection Quality REVIEW: selected FEAT_SUIKA: reason is too generic: 高頻度で段階差があるため採用。; One or more Evidence groups lack exactly one formal OBS_EVI_<clean(groupId)> Observation linkage; label/category matching is diagnostic only; canonical UI proof failed: canonical materialization marker is missing; Feature/Evidence sharing state is not uniquely represented by the legacy runtime surface |
 | `L_HOKUTO_TENSEI_2_MW` | OTHER_BLOCKED | BLOCKED_ADOPTION_OUTSIDE_LEGACY_GROUPS | 0 | 0 | PASS | NOT_APPLICABLE | FAIL | NOT_APPLICABLE | FAIL | NOT_APPLICABLE | NOT_APPLICABLE | NOT_RUN | Gate0 found formal Evidence adoption outside legacy evidenceUi.groups |
 | `L_IDOLMASTER_MILLION_LIVE_HC` | OTHER_BLOCKED | BLOCKED_ADOPTION_OUTSIDE_LEGACY_GROUPS | 0 | 0 | PASS | NOT_APPLICABLE | FAIL | NOT_APPLICABLE | FAIL | NOT_APPLICABLE | NOT_APPLICABLE | NOT_RUN | Gate0 found formal Evidence adoption outside legacy evidenceUi.groups |
@@ -185,7 +185,7 @@ Phase 1 total: 39. The Phase 1 OTHER_BLOCKED population can be subdivided by the
 | `L_MACROSS_FRONTIER4_BA` | SELECTION_QUALITY_BLOCKED | MIGRATION_REQUIRED | 3 | 6 | REVIEW | PASS | FAIL | PASS | PASS | PASS | BASELINE_ONLY | NOT_RUN | Selection Quality REVIEW: rejected FEAT_8_BELL: reason lacks a concrete basis; rejected FEAT_CHANCE_COMBINED: reason lacks a concrete basis; canonical UI proof failed: canonical materialization marker is missing |
 | `L_MADOKA_FORTE_UU` | ALREADY_M7 | ALREADY_M7_EQUIVALENT | 0 | 0 | NOT_APPLICABLE | PASS | PASS | PASS | PASS | PASS | PASS | PASS | - |
 | `L_MAGIA_RECORD_RN` | OTHER_BLOCKED | BLOCKED_ADOPTION_OUTSIDE_LEGACY_GROUPS | 0 | 0 | PASS | NOT_APPLICABLE | FAIL | NOT_APPLICABLE | FAIL | NOT_APPLICABLE | NOT_APPLICABLE | NOT_RUN | Gate0 found formal Evidence adoption outside legacy evidenceUi.groups |
-| `L_MAGICAL_HALLOWEEN8_FE` | CANONICAL_UI_BLOCKED | MIGRATION_REQUIRED | 4 | 13 | PASS | PASS | FAIL | PASS | PASS | PASS | BASELINE_ONLY | NOT_RUN | canonical UI proof failed: description differs for 着席時データ |
+| `L_MAGICAL_HALLOWEEN8_FE` | ALREADY_M7 | ALREADY_M7_EQUIVALENT | 0 | 0 | NOT_APPLICABLE | PASS | PASS | PASS | PASS | PASS | PASS | PASS | - |
 | `L_MAHJONG_FIGHT_CLUB_KAKUSEI_KM` | SELECTION_QUALITY_BLOCKED | MIGRATION_REQUIRED | 2 | 7 | REVIEW | FAIL | FAIL | PASS | REVIEW | PASS | BASELINE_ONLY | NOT_RUN | Selection Quality REVIEW: selected FEAT_AT_INITIAL: reason lacks a concrete statistical/observational basis; One or more Evidence groups lack exactly one formal OBS_EVI_<clean(groupId)> Observation linkage; label/category matching is diagnostic only; canonical UI proof failed: description differs for 主要入力; Feature/Evidence sharing state is not uniquely represented by the legacy runtime surface |
 | `L_MAHJONG_MONOGATARI_S2` | OTHER_BLOCKED | BLOCKED_ADOPTION_OUTSIDE_LEGACY_GROUPS | 0 | 0 | PASS | NOT_APPLICABLE | FAIL | NOT_APPLICABLE | FAIL | NOT_APPLICABLE | NOT_APPLICABLE | NOT_RUN | Gate0 found formal Evidence adoption outside legacy evidenceUi.groups |
 | `L_MIDORIDON_VIVA_REVIVAL_FY` | OTHER_BLOCKED | BLOCKED_ADOPTION_OUTSIDE_LEGACY_GROUPS | 0 | 0 | PASS | NOT_APPLICABLE | FAIL | NOT_APPLICABLE | FAIL | NOT_APPLICABLE | NOT_APPLICABLE | NOT_RUN | Gate0 found formal Evidence adoption outside legacy evidenceUi.groups |
