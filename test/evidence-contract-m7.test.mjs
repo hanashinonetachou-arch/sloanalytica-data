@@ -72,3 +72,18 @@ test("Animal Slot Docchi before and after runtime projections are byte-equivalen
 test("Hyper Rush before and after runtime projections are byte-equivalent",()=>{const read=p=>JSON.parse(fs.readFileSync(new URL(p,import.meta.url)));const research=read("../research/S_HYPER_RUSH_SLC8/research-data.json"),legacy=read("fixtures/evidence-contract-m7/S_HYPER_RUSH_SLC8-selection-legacy.json"),migrated=read("../research/S_HYPER_RUSH_SLC8/selection-data.json"),stats=read("../research/S_HYPER_RUSH_SLC8/statistics-report.json");assert.deepEqual(buildMachineData(research,migrated,stats),buildMachineData(research,legacy,stats));});
 test("Ninja Jajamaru before and after runtime projections are byte-equivalent",()=>{const read=p=>JSON.parse(fs.readFileSync(new URL(p,import.meta.url)));const research=read("../research/S_NINJA_JAJAMARU/research-data.json"),legacy=read("fixtures/evidence-contract-m7/S_NINJA_JAJAMARU-selection-legacy.json"),migrated=read("../research/S_NINJA_JAJAMARU/selection-data.json"),stats=read("../research/S_NINJA_JAJAMARU/statistics-report.json");assert.deepEqual(buildMachineData(research,migrated,stats),buildMachineData(research,legacy,stats));});
 test("Biohazard Village before and after runtime projections are byte-equivalent",()=>{const read=p=>JSON.parse(fs.readFileSync(new URL(p,import.meta.url)));const research=read("../research/L_BIOHAZARD_VILLAGE_XA/research-data.json"),legacy=read("fixtures/evidence-contract-m7/L_BIOHAZARD_VILLAGE_XA-selection-legacy.json"),migrated=read("../research/L_BIOHAZARD_VILLAGE_XA/selection-data.json"),stats=read("../research/L_BIOHAZARD_VILLAGE_XA/statistics-report.json");assert.deepEqual(buildMachineData(research,migrated,stats),buildMachineData(research,legacy,stats));});
+
+
+for (const id of ["L_HOKUTO_AD_XR","L_MAGICAL_HALLOWEEN8_FE"]) {
+  test(`${id} before and after runtime projections are byte-equivalent`,()=> {
+    const read=p=>JSON.parse(fs.readFileSync(new URL(p,import.meta.url)));
+    const research=read(`../research/${id}/research-data.json`);
+    const legacy=read(`fixtures/evidence-contract-m7/${id}-selection-legacy.json`);
+    const migrated=read(`../research/${id}/selection-data.json`);
+    const statsPath=new URL(`../research/${id}/statistics-report.json`,import.meta.url);
+    const stats=fs.existsSync(statsPath)?JSON.parse(fs.readFileSync(statsPath)):null;
+    assert.deepEqual(buildMachineData(research,migrated,stats),buildMachineData(research,legacy,stats));
+    const strip=value=>{const x=JSON.parse(JSON.stringify(value));delete x.evidenceUi;delete x.evidenceContract;return x;};
+    assert.deepEqual(strip(migrated),strip(legacy),`${id}: non-Evidence Selection fields changed`);
+  });
+}
