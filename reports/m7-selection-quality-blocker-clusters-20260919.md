@@ -101,3 +101,18 @@ All 14 are prose-quality reviews: selected/rejected reasons lack the gate's requ
 ### Decision
 
 There is no safe blanket repair for all 19. The 14 REVIEW machines require authoritative rationale improvement, while the 5 FAIL machines require separate structural inspection. The two unclassified-Research-Evidence cases are especially important: Gate0 says NO_EVIDENCE while Research still contains Evidence candidates, so terminalization must not bypass the missing Selection decision.
+
+
+## Structural inspection of the 5 NO_EVIDENCE FAIL machines
+
+- `LB_AREX_BRIGHT_BA`: the prohibited phrase is in an explicit Selection rejection rationale. Although the same item also contains an information-value argument, removing/rephrasing the burden rationale is a Selection rationale change and is not authorized mechanically.
+- `L_ENEN_NO_SHOUBOUTAI_JG`: Research contains four **verified** Evidence candidates (`RE_2PLUS`, `RE_4PLUS`, `RE_5PLUS`, `RE_6`) while Selection adopts none. This is not a true settled no-Evidence machine; it has an unresolved Selection Evidence decision.
+- `S_DIGISLO_JACK_GB1`: Research contains unresolved `RF_ROLE_CHAIN_BONUS`, but Selection has no decision for it; the selected `RF_BONUS_OUTCOME` also lacks `userReason`. Both require an explicit Selection decision/rationale.
+- `S_HARD_BOILED_XX`: Research contains at least one verified Evidence candidate (`RE_2PLUS`) not adopted/classified by Selection. Terminal no-Evidence treatment is not authorized.
+- `S_RYUJIN_RZ30_SUIKA_VERSION`: the sole selected primary Feature lacks `userReason`; Research verifies the Feature, but no authoritative Selection rationale field is present to copy.
+
+### Result
+
+**0/5 FAIL machines have a decision-preserving mechanical repair proven from the inspected artifacts.** Do not auto-terminalize these machines and do not synthesize missing rationale/decisions.
+
+Together with the 14 prose REVIEW machines, all 19 masked `NO_EVIDENCE` cases are therefore frozen pending authoritative Selection-quality resolution. This prevents spending M7 Evidence migration effort on them while also preventing unsafe terminalization.
