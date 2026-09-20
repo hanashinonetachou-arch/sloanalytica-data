@@ -17,3 +17,13 @@ jobs:
 
       - run: node tools/calculate-high-low-discrimination.mjs L_GOBLIN_SLAYER_RD L_LOVEJOU3_M4 L_SMASLO_KAIJI_KYOEN_FJ
       - run: node --test test/high-low-discrimination-reproducibility.test.mjs
+      - name: Verify publisher approve and dry-run for pilot packages
+        shell: bash
+        run: |
+          set -euo pipefail
+          for id in L_GOBLIN_SLAYER_RD L_LOVEJOU3_M4 L_SMASLO_KAIJI_KYOEN_FJ; do
+            npm run machine:publish -- approve "$id"
+            npm run machine:publish -- publish "$id"
+            npm run machine:publish -- status "$id"
+          done
+          git diff --exit-code -- catalog.json machines/
