@@ -1,0 +1,6 @@
+import test from "node:test";import assert from "node:assert/strict";
+import fs from "node:fs";import {validateCanonicalUiV8,compilePreviewModel} from "../tools/compile-canonical-ui-v8-preview.mjs";
+const ui=JSON.parse(fs.readFileSync(new URL("../validation/v8/L_LOVEJOU3_M4/canonical-ui.json",import.meta.url),"utf8"));
+test("v8 reference canonical UI is mechanically previewable",()=>{const v=validateCanonicalUiV8(ui);assert.deepEqual(v.errors,[]);assert.equal(v.ok,true);const p=compilePreviewModel(ui);assert.equal(p.accordion.singleOpen,true);assert.equal(p.sections.find(x=>x.id==="SEC_NORMAL").groups.find(x=>x.id==="GRP_SHARED_NORMAL_GAMES").inputs[0].trialUniverse,"NORMAL_PLAY");});
+test("repeated categorical events cannot overwrite prior observation",()=>{const bad=structuredClone(ui);const x=bad.sections.find(s=>s.id==="SEC_AT_DURING").items[0];x.interaction={type:"SELECT",preservePriorObservations:false};assert.equal(validateCanonicalUiV8(bad).ok,false);});
+test("denominator cannot be ambiguous or half width",()=>{const bad=structuredClone(ui);const x=bad.sections.find(s=>s.id==="SEC_NORMAL").groups.find(g=>g.id==="GRP_SHARED_NORMAL_GAMES").inputs[0];delete x.trialUniverse;x.gridSpan=6;assert.equal(validateCanonicalUiV8(bad).ok,false);});
