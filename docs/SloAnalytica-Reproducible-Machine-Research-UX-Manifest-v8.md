@@ -45,8 +45,10 @@ Ordered stages:
 14. MachinePackage
 15. Runtime Contract Verification
 16. Distribution Verification
-17. Real-device Verification
-18. User-Verified UI Lock
+17. UI Preview Checkpoint (reference-machine validation only)
+18. Distribution Verification
+19. Real-device Verification
+20. User-Verified UI Lock
 
 Required machine artifacts:
 - research-data.json
@@ -59,7 +61,9 @@ Required machine artifacts:
 - generation/verification reports sufficient to prove semantic preservation
 
 Statuses are independent:
-Research Complete ≠ Selection Complete ≠ Observation Complete ≠ HighLow Complete ≠ Summary Complete ≠ Canonical UI Complete ≠ MachinePackage Complete ≠ Distribution Complete ≠ Real-device Complete.
+Research Complete ≠ Selection Complete ≠ Observation Complete ≠ HighLow Complete ≠ Summary Complete ≠ Canonical UI Complete ≠ UI Preview Accepted ≠ MachinePackage Complete ≠ Distribution Complete ≠ Real-device Complete.
+
+Reference-machine validation intentionally introduces an early UI Preview Checkpoint. This checkpoint is for evaluating Manifest reproducibility, not for declaring the machine complete.
 
 ## 3. Research — public information first
 
@@ -222,14 +226,25 @@ APP-006: Results MUST NOT present suppressed/alternative information as an equal
 APP-007: Machine Research Summary, adoption/rejection explanations and HighLowDiscrimination MUST be renderable from package data.
 APP-008: “判定信頼度” and HighLowDiscrimination are separate concepts and must remain separate in UI.
 
-## 17. Distribution
+## 17. UI Preview Checkpoint — reference-machine validation
+
+PREVIEW-001: During Manifest reproducibility validation, stop after Canonical UI has been materialized far enough to render a faithful preview. Do NOT require full MachinePackage publish, catalog update, distribution, APK build or real-device installation before this checkpoint.
+PREVIEW-002: The preview MUST be produced from the newly reconstructed Research → Selection → Observation → Summary → Canonical UI path. A hand-made mockup that bypasses canonical data does not validate reproducibility.
+PREVIEW-003: The preview should show, at minimum, section titles/order/descriptions, Accordion structure, two-column/full-width choices, numerator/denominator grouping, Evidence grouping/actions, and the “この機種の設定推測について” information architecture.
+PREVIEW-004: User review at this checkpoint is a design/reproducibility review, not Real-device PASS.
+PREVIEW-005: If the preview is rejected because the Manifest is missing or ambiguous, amend the Manifest and rerun only the earliest affected stage forward. A full distribution/real-device cycle is NOT required.
+PREVIEW-006: If the Manifest is clear but implementation loses the contract, fix the generic generator/adapter/preview renderer and regenerate from the earliest affected implementation stage. Do not redo Research unnecessarily.
+PREVIEW-007: After the preview is accepted, proceed once through MachinePackage → runtime contract verification → distribution → real device for final end-to-end proof.
+PREVIEW-008: Subsequent reference iterations MAY return to this preview checkpoint whenever a Manifest amendment changes UI semantics; they do not need to repeat APK/device verification until the preview is accepted again.
+
+## 18. Distribution
 
 DIST-001: Repo update is not Distribution Complete.
 DIST-002: Verify catalog/package bytes, sha256, packageSize, version/update path and actual endpoint/resource consumed by the app.
 DIST-003: Fresh-storage and update-path are separate verification paths.
 DIST-004: A test build must prove which catalog/resource it actually consumes; do not infer from configuration intent.
 
-## 18. Gates
+## 19. Gates
 
 Gate R — Research Complete:
 - researched public candidate universe and Evidence universe are traceable
@@ -261,6 +276,12 @@ Gate D — Canonical UI Complete:
 - no Quick Input dependency
 - unobserved/zero semantics representable
 
+Gate UI-P — UI Preview Accepted (reference-machine validation):
+- faithful preview is generated from canonical source, not manually mocked
+- user can inspect section descriptions, grouping, two-column decisions, Accordion behavior contract, Evidence contexts/actions and Summary presentation
+- rejection routes back only to the earliest affected stage
+- no distribution/APK/device work is required before acceptance
+
 Gate E — MachinePackage Complete:
 - Canonical UI → package semantic equality
 - Summary and HighLow survive
@@ -279,19 +300,19 @@ Gate RD — Real-device Complete:
 Gate UV — User-Verified UI Lock:
 - after explicit user confirmation, canonical source contract is protected against future regeneration regressions
 
-## 19. Reference-machine reproducibility protocol
+## 20. Reference-machine reproducibility protocol
 
 REF-001: First reference machine is L_LOVEJOU3_M4.
 REF-002: Before the v8 reference run, do not modify Love嬢3 machine artifacts to pre-fit the desired result.
 REF-003: Start Research from zero using this Manifest as the construction specification. Existing machine artifacts may be used only as regression comparison after independent reconstruction, not as authority for decisions.
-REF-004: Run every stage and Gate in order.
+REF-004: Run Research through Canonical UI in order, generate the UI Preview, and pause for the UI-P checkpoint. Only after UI-P acceptance continue through MachinePackage, Distribution and Real-device gates.
 REF-005: Compare the generated result against the intended product qualities and real-device findings.
-REF-006: If a mismatch is caused by missing/ambiguous general rules, revise this Manifest and restart from Research. Do not patch Love嬢3.
+REF-006: If a mismatch is caused by missing/ambiguous general rules, revise this Manifest and restart from the earliest stage whose decisions are affected. Restart from Research only when the changed rule can alter Research or downstream facts. Do not patch Love嬢3.
 REF-007: If the Manifest explicitly and unambiguously required the correct result but implementation lost it, fix the generic pipeline/adapter/renderer and rerun generation; do not alter machine semantics.
 REF-008: Love嬢3 passing proves the first reference only, not fleet reproducibility. Additional structurally different reference machines are required before mass production.
 REF-009: Mass-production readiness means a fresh AI/session can follow this Manifest without relying on hidden prior-chat decisions and reach equivalent-quality artifacts.
 
-## 20. Mandatory anti-omission checklist
+## 21. Mandatory anti-omission checklist
 
 Before starting any machine Research, the operator/AI MUST confirm this Manifest explicitly covers:
 - public-value completeness vs inference usefulness
@@ -316,13 +337,15 @@ Before starting any machine Research, the operator/AI MUST confirm this Manifest
 - App rendering requirements
 - generated vs published distinction
 - distribution/update path
-- real-device gate
+- early UI Preview checkpoint before MachinePackage/distribution/device work
+- rejection returns to the earliest affected stage rather than automatically to Research
+- real-device gate after preview acceptance
 - user-verified canonical persistence
 
 If any item is absent or ambiguous, machine Research MUST NOT begin.
 
-## 21. Current validation state
+## 22. Current validation state
 
 v8.0 is a reconstructed DRAFT. It is not yet validated by a fresh Love嬢3 run.
-The next permitted machine-data action is a zero-based L_LOVEJOU3_M4 Research run under this Manifest.
+The next permitted machine-data action is a zero-based L_LOVEJOU3_M4 Research run under this Manifest, stopping at the UI Preview Checkpoint for user review before package publication/distribution/device work.
 No existing Love嬢3 package/UI should be edited first.
