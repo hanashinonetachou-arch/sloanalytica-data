@@ -374,3 +374,12 @@ If any item is absent or ambiguous, machine Research MUST NOT begin.
 v8.0 is a reconstructed DRAFT. It is not yet validated by a fresh Love嬢3 run.
 The next permitted machine-data action is a zero-based L_LOVEJOU3_M4 Research run under this Manifest, stopping at the UI Preview Checkpoint for user review before package publication/distribution/device work.
 No existing Love嬢3 package/UI should be edited first.
+
+### 14.4A Repeated observation input strategy
+
+- `REPINPUT-007`: `REPEATED_CATEGORICAL_EVENT` does not imply an Add Observation UI. Canonical UI MUST choose an interaction from the observation semantics before materialization.
+- `REPINPUT-008`: When inference and Evidence only require accumulated category frequencies and event order has no meaning, the default interaction is `CATEGORY_COUNTERS`: one cumulative counter per mutually exclusive category. The UI MUST preserve the total opportunity count explicitly or derive it exactly from category counts.
+- `REPINPUT-009`: `ADD_OBSERVATION` is reserved for cases where order/history, per-opportunity co-occurrence, later auditability, or another documented semantic requirement would be lost by category counters. ObservationData MUST state that requirement; the renderer MUST NOT choose it for visual preference.
+- `REPINPUT-010`: Category counters follow the normal grid rules. Short, independent counters in the same observation context are normally eligible for two-column placement; an odd final counter leaves the paired cell empty.
+- `REPINPUT-011`: For mutually exclusive categorical outcomes, incrementing one category records one observation opportunity. A separate total-opportunity input MUST NOT be requested when the total is exactly derivable from the category counters.
+- `REPINPUT-012`: The UI Preview checkpoint MUST demonstrate repeated-entry behavior for the selected interaction. For `CATEGORY_COUNTERS`, incrementing the same or another category MUST accumulate without overwriting prior counts. For `ADD_OBSERVATION`, the second-observation path remains mandatory.
