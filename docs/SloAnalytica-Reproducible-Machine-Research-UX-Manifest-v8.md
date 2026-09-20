@@ -136,6 +136,8 @@ EVI-009: Evidence constraints and Numeric inference remain computationally separ
 LINK-001: Linked play/service data is researched after Selection and is an Observation source for adopted information; availability MUST NOT retroactively make a statistically invalid feature valid.
 LINK-002: Record machine-level linked-play capability/status and which adopted observations can actually be obtained.
 LINK-003: Service labels and aggregation scope SHOULD be preserved when that prevents input ambiguity.
+LINK-004: Linked-play availability is determined from the manufacturer's official linked-play/service machine support information. If the machine is listed, status = AVAILABLE; if it is not listed, status = NOT_AVAILABLE. Do not expand the search to unrelated secondary sources merely to overturn that official support result.
+LINK-005: Use UNRESOLVED only when the official support information itself cannot be confirmed or is genuinely ambiguous. Only when status = AVAILABLE, map which selected Numeric Features/Evidence can be obtained from the linked service.
 PRE-001: Predecessor/seated observations are researched only where relevant and MUST not be fabricated from missing historical UX.
 PRE-002: Predecessor data may participate in live inference when statistically valid but MUST NOT automatically be treated as the standard HighLow benchmark play interval.
 
@@ -173,18 +175,22 @@ UI-003: Every input section MUST have a meaningful description unless an explici
 UI-004: Common observation conditions, target states, exclusions and counting instructions belong in section description once; do not duplicate the same prose on every item.
 UI-005: User-facing text MUST answer practical questions: what to enter, where to find it, when to observe it, which denominator/scope to use, and common mistakes where relevant.
 UI-006: Internal schema vocabulary MUST NOT leak into user-facing text.
+UI-007: Item labels SHOULD be minimal and non-redundant when the Section description already supplies common context. Do not repeat the same explanatory prose on each item.
+UI-008: Existing User-Verified UX Contracts are protected inputs to Canonical UI. Canonical UI MUST NOT silently regress verified labels, order, grouping, folding behavior, direct/compact input behavior or other protected interaction semantics unless this Manifest explicitly supersedes that contract.
 
 ### 14.1 Two-column layout contract
 
 COL-001: The standard numeric layout is two-column where physical/operational compatibility permits; it is not “make every item half width.”
 COL-002: A short input is eligible for half-width only when it is in the same section, semantically independent, remains readable/tappable at half width, is not a parent/child or denominator/helper input, and horizontal placement cannot imply a false relationship.
 COL-003: Typical small independent event counters (e.g. BIG/REG, CZ types, compact AT-related counts) SHOULD be considered for two-column layout.
-COL-004: Full width is the default for cumulative game counts, total game counts, AT game counts, denominators, parent/child inputs, long labels, long free-form/complex/special controls, and controls whose operation becomes cramped at half width.
+COL-004: Full width is the default for cumulative game counts, total game counts, AT game counts, denominators, parent/child inputs, long labels, long free-form/complex/special controls, and controls whose operation becomes cramped at half width. A control requiring multiple quick-add actions such as +1/+50 is not half-width eligible while such actions exist.
 COL-005: Input type alone (NUMBER/COUNTER/RATE/SELECT) MUST NOT determine width.
 COL-006: When a two-column eligible sequence has an odd final item, leave the paired cell empty. MUST NOT pull an item from another section to fill the hole.
 COL-007: Numerator/denominator semantic pairs MUST be designed as a meaningful feature/input group. Builder MUST NOT simply split them into unrelated cards.
 COL-008: UI convenience MUST NOT merge different trial universes.
 COL-009: Labels MUST remain natural Japanese. Mechanical shortening that leaves particles or changes meaning is prohibited.
+COL-010: Width decisions are physical/operational compatibility decisions, not statistical importance decisions.
+COL-011: When a historical/user-verified layout contract exists, regeneration MUST preserve it unless the current Manifest explicitly supersedes it. A statistical rebuild is not permission to erase verified grouping/folding/placement.
 
 ### 14.2 Accordion / menu contract
 
@@ -204,6 +210,7 @@ QI-001: Quick Input and Quick-Input-only sections/eligibility are suspended from
 QI-002: Legacy quickAdd knowledge remains historical/protected knowledge but MUST NOT silently re-enter current generation or acceptance gates.
 QI-003: Every adopted input MUST remain usable through the normal Accordion UI without Quick Input.
 QI-004: Reintroduction requires a future explicit Manifest revision.
+QI-005: Historical quickAdd details are not current generation requirements. If Quick Input is later reintroduced, its width/operation rules must be specified explicitly rather than inferred from old runtime defaults.
 
 ## 15. Runtime translation / MachinePackage
 
@@ -214,6 +221,8 @@ PKG-004: It MUST NOT invent gridSpan, compactness, labels, denominator presentat
 PKG-005: Canonical UI and generated MachinePackage semantic equality is a Gate, not a best-effort check.
 PKG-006: Generated and published packages are distinct states. Publishing stale package bytes after successful generation is failure.
 PKG-007: Package update requires matching catalog sha256/packageSize/version metadata and verified distribution.
+PKG-008: Visibility/hide semantics defined upstream MUST apply consistently across renderers; hidden/rejected-only inputs MUST NOT reappear through a fallback renderer.
+PKG-009: Canonical selectionSummary / Machine Research Summary is the sole user-facing authority for adopted/rejected research explanations. Runtime materialization MUST NOT regenerate competing generic explanations.
 
 ## 16. App Renderer
 
@@ -321,7 +330,7 @@ Before starting any machine Research, the operator/AI MUST confirm this Manifest
 - dependency and double-counting
 - quantitative adoption/rejection reasons
 - Evidence Surface + Observation Context + Observation Action
-- linked play capability
+- linked play capability using manufacturer-official support status
 - predecessor observation where applicable
 - unobserved vs zero
 - HighLowDiscrimination 1500/3000/7000G
@@ -329,6 +338,8 @@ Before starting any machine Research, the operator/AI MUST confirm this Manifest
 - section descriptions
 - two-column eligibility and full-width exceptions
 - feature-level numerator/denominator grouping
+- physical/operational two-column compatibility rather than input-type heuristics
+- preservation of User-Verified UX contracts
 - Accordion + single-open
 - Quick Input suspension
 - Canonical UI authority
