@@ -1,0 +1,228 @@
+{
+  "schemaVersion": "machine-package-v1",
+  "machineId": "L_SMASLO_KAIJI_KYOEN_FJ",
+  "machineDataVersion": "0.1.0",
+  "status": "COMPLETE",
+  "contracts": {
+    "research": "research/L_SMASLO_KAIJI_KYOEN_FJ/research-data.json",
+    "selection": "research/L_SMASLO_KAIJI_KYOEN_FJ/selection-data.json",
+    "observation": "research/L_SMASLO_KAIJI_KYOEN_FJ/observation-data.json",
+    "highLowDiscrimination": "research/L_SMASLO_KAIJI_KYOEN_FJ/high-low-discrimination-report.json",
+    "canonicalUi": "research/L_SMASLO_KAIJI_KYOEN_FJ/canonical-ui.json"
+  },
+  "features": [
+    {
+      "featureId": "FEAT_CZ_INITIAL",
+      "ig7000": 0.295,
+      "selectionScore": 59,
+      "scoreClass": "CORE",
+      "disposition": "ADOPT_PRIMARY"
+    },
+    {
+      "featureId": "FEAT_BONUS_INITIAL",
+      "ig7000": 0.153,
+      "selectionScore": 30.6,
+      "scoreClass": "CORE",
+      "disposition": "ADOPT_ALTERNATIVE",
+      "dependencyNote": "Downstream/aggregate relative to CZ; not independent."
+    },
+    {
+      "featureId": "FEAT_RARE_ROLE_MULTI",
+      "scoreClass": "JOINT_MODEL",
+      "disposition": "ADOPT_PRIMARY",
+      "model": "multinomial",
+      "categories": [
+        "WEAK_CHERRY",
+        "STRONG_CHERRY",
+        "WATERMELON",
+        "WEAK_CHANCE",
+        "OTHER"
+      ],
+      "note": "Individual diagnostic scores: 19.6, 5.3, 12.4, 10.3; engine must use one mutually-exclusive likelihood."
+    }
+  ],
+  "evidence": [
+    {
+      "evidenceId": "EVI_BONUS_END_SCREEN",
+      "name": "ボーナス終了画面",
+      "surface": "END_SCREEN",
+      "observationContext": "BONUS_END",
+      "outcomes": [
+        [
+          "敵キャラ集合",
+          "SET_2_PLUS"
+        ],
+        [
+          "トネガワ",
+          "NOT_SET_2_3_HIGH_STRONG"
+        ],
+        [
+          "ハンチョウ",
+          "NOT_SET_2_3_4_HIGH_STRONG"
+        ],
+        [
+          "美心",
+          "SET_4_PLUS"
+        ],
+        [
+          "カイジ＆バニー",
+          "SET_6"
+        ]
+      ]
+    },
+    {
+      "evidenceId": "EVI_SAMMY_TROPHY",
+      "name": "サミートロフィー",
+      "surface": "TROPHY_STAMP",
+      "observationContext": "BONUS_END_SUB_DISPLAY",
+      "outcomes": [
+        [
+          "銅",
+          "SET_2_PLUS"
+        ],
+        [
+          "銀",
+          "SET_3_PLUS"
+        ],
+        [
+          "金",
+          "SET_4_PLUS"
+        ],
+        [
+          "キリン",
+          "SET_5_PLUS"
+        ],
+        [
+          "レインボー",
+          "SET_6"
+        ]
+      ],
+      "note": "当日総消化G帯とホールカスタムの影響をObservationで保持する"
+    },
+    {
+      "evidenceId": "EVI_PAYOUT",
+      "name": "特定獲得枚数表示",
+      "surface": "PAYOUT_DISPLAY",
+      "observationContext": "BONUS_AT_DURING",
+      "outcomes": [
+        [
+          "456枚突破",
+          "SET_4_PLUS"
+        ],
+        [
+          "666枚突破",
+          "SET_6"
+        ]
+      ]
+    },
+    {
+      "evidenceId": "EVI_ENDING_VOICE",
+      "name": "エンディング中レア役PUSHボイス",
+      "surface": "VOICE",
+      "observationContext": "ENDING_RARE_ROLE",
+      "outcomes": [
+        [
+          "奇数示唆ボイス",
+          "ODD_HINT"
+        ],
+        [
+          "偶数示唆ボイス",
+          "EVEN_HINT"
+        ],
+        [
+          "高設定示唆ボイス",
+          "HIGH_HINT"
+        ],
+        [
+          "456賽ボイス",
+          "SET_4_PLUS"
+        ],
+        [
+          "帝愛ボイス",
+          "SET_6"
+        ]
+      ]
+    }
+  ],
+  "ui": [
+    {
+      "id": "SEC_NORMAL",
+      "title": "通常時",
+      "kind": "NUMERIC",
+      "inputs": [
+        {
+          "featureId": "FEAT_CZ_INITIAL",
+          "label": "CZ初当り",
+          "placement": "COUNTER"
+        },
+        {
+          "featureId": "FEAT_RARE_ROLE_MULTI",
+          "label": "設定差小役",
+          "placement": "MULTI_COUNTER",
+          "items": [
+            "弱チェリー",
+            "強チェリー",
+            "スイカ",
+            "弱チャンス目"
+          ],
+          "sources": [
+            "マイスロ",
+            "手入力"
+          ]
+        },
+        {
+          "featureId": "FEAT_BONUS_INITIAL",
+          "label": "ボーナス初当り",
+          "placement": "COUNTER",
+          "role": "ALTERNATIVE"
+        }
+      ]
+    },
+    {
+      "id": "SEC_BONUS_AT",
+      "title": "ボーナス・AT中",
+      "kind": "EVIDENCE",
+      "observationContext": "BONUS_AT_DURING",
+      "items": [
+        "EVI_PAYOUT"
+      ]
+    },
+    {
+      "id": "SEC_BONUS_END",
+      "title": "ボーナス終了時",
+      "kind": "EVIDENCE",
+      "observationContext": "BONUS_END",
+      "items": [
+        "EVI_BONUS_END_SCREEN"
+      ]
+    },
+    {
+      "id": "SEC_BONUS_END_SUB",
+      "title": "ボーナス終了時・サブ液晶",
+      "kind": "EVIDENCE",
+      "observationContext": "BONUS_END_SUB_DISPLAY",
+      "items": [
+        "EVI_SAMMY_TROPHY"
+      ]
+    },
+    {
+      "id": "SEC_ENDING",
+      "title": "エンディング中",
+      "kind": "EVIDENCE",
+      "observationContext": "ENDING_RARE_ROLE",
+      "items": [
+        "EVI_ENDING_VOICE"
+      ],
+      "observationAction": "レア小役成立時PUSH"
+    }
+  ],
+  "linkedPlayData": {
+    "status": "AVAILABLE",
+    "serviceName": "マイスロ",
+    "note": "Sammy machine; linked-play Observation source is researched only for Selection-adopted observations. Game-app availability such as 777Real/777TOWN is not treated as linked play data."
+  },
+  "predecessorObservation": {
+    "status": "NOT_REQUIRED",
+    "reason": "non-pure-A"
+  }
+}

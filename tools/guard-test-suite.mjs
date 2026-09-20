@@ -14,8 +14,18 @@ const guardedBackups = new Map(guardedPaths.map(filePath => [
   fs.existsSync(filePath) ? fs.readFileSync(filePath) : null,
 ]));
 const testDir = path.join(ROOT, 'test');
+// Historical M7 audit tests are preserved for explicit legacy runs, but no longer gate
+// the active research/build regression suite. They depend on frozen audit reports and
+// historical commit objects rather than the current Machine Research pipeline.
+const legacyM7AuditTests = new Set([
+  'm7-controlled-lineage-workqueue.test.mjs',
+  'm7-full-fleet-migration-audit.test.mjs',
+  'm7-lineage-resolution-plan.test.mjs',
+  'm7-observation-contract-completion-audit.test.mjs',
+  'm7-proof-formalization-batch1.test.mjs',
+]);
 const testFiles = fs.readdirSync(testDir)
-  .filter(name => name.endsWith('.test.mjs'))
+  .filter(name => name.endsWith('.test.mjs') && !legacyM7AuditTests.has(name))
   .sort()
   .map(name => path.join('test', name));
 
