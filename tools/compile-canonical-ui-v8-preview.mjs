@@ -28,8 +28,7 @@ export function validateCanonicalUiV8(ui){
   return {ok:errors.length===0,errors};
 }
 export function compilePreviewModel(ui){
-  const v=validateCanonicalUiV8(ui); if(!v.ok) throw new Error(v.errors.join("
-"));
+  const v=validateCanonicalUiV8(ui); if(!v.ok) throw new Error(v.errors.join("\n"));
   return {
     schemaVersion:"canonical-ui-preview-v8",
     machineId:ui.machineId,
