@@ -448,3 +448,32 @@ The new Manifest requires Evidence to be researched independently from numeric S
 Kaiji and Love Jou now have dependency-safe candidate representations suitable for creation of machine-level Selection artifacts.
 
 Goblin Slayer still needs the exact counted-game universe locked before its common-bell / occurrence-rate formal score is promoted. No fabricated denominator will be introduced to force completion.
+
+
+## 2026-09-20 Goblin Slayer counted-game universe resolved
+
+Fresh cross-source verification resolves the remaining common-bell scope ambiguity.
+
+- 1geki explicitly publishes the small-role table under "通常時/AT中" and gives the same common-bell probabilities for settings 1–6.
+- P-WORLD explicitly states that the common bell can be identified in both normal play and AT.
+- HAZUSE independently confirms the same six-setting common-bell table.
+
+Therefore the common-bell Observation is not a normal-game-only statistic.
+
+Contract:
+- family: GAME
+- target: common-bell occurrences
+- trial universe: all counted games in which the common-bell flag is observable, including normal play and AT
+- numerator: identified common-bell occurrences
+- denominator: corresponding total counted games across the same included states
+- exposureQuality: DERIVED
+- observation requirement: the UI/input must not label the denominator "通常G" if AT games are included.
+
+CZ occurrence and AT initial-hit rates remain normal-play pathway statistics and use their own matching normal-game denominator; they must not reuse the common-bell total-game denominator.
+
+Dependency:
+- common bell is an orthogonal role-frequency observation relative to the CZ/AT pathway aggregates.
+- CZ aggregate and its type-specific rates are alternative views of the same CZ process.
+- AT initial hit is downstream/aggregate and is not independently multiplied with overlapping CZ pathway information without decomposition.
+
+This resolves the last denominator-family ambiguity that was blocking formal Goblin Slayer Selection scoring. Conditional replay-chain and milestone-CZ candidates remain exposure-pending because their opportunity counts are still not derivable without assumptions.
