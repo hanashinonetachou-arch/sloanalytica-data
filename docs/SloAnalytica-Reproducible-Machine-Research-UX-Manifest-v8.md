@@ -1,0 +1,328 @@
+# SloAnalytica Reproducible Machine Research & UX Construction Manifest v8.0
+
+Status: DRAFT — Reference-machine validation required  
+Date: 2026-09-21  
+Supersedes as execution source: Machine Research & Construction Pipeline v1 and the active rules of MachineData・UX Construction Manifest v7.2.  
+Preserves: applicable v7.2/v7.1/v6.15 UX knowledge, Core Policy, User-Verified UX Contract Policy, and established statistical invariants.
+
+## 0. Purpose and acceptance criterion
+
+This Manifest exists so that a different AI/session can receive only this Manifest plus the machine identity and source-access environment, execute research from zero, and reproduce machine data, UI, explanations, and inference behavior at equivalent quality.
+
+The Manifest is not complete merely because artifacts exist. It is complete only after a reference machine can be rebuilt from zero without machine-specific patches and the expected semantics survive:
+
+Research → Completeness → Trial Universe → Exposure → Dependency → Selection → Evidence → Linked Play Data → Predecessor Observation → Observation → HighLowDiscrimination → Machine Research Summary → Canonical UI → MachinePackage → App Renderer → Distribution → Real Device.
+
+If the result is wrong, do NOT patch the reference machine to match an expected screenshot. Identify the missing/ambiguous Manifest rule, amend the Manifest, and restart the affected construction from Research. Machine-specific exceptions are prohibited unless they express a genuine machine-specific fact discovered by Research.
+
+## 1. Normative language and no-guessing rule
+
+MUST / MUST NOT are build requirements. SHOULD requires an explicit reason to deviate. MAY is optional.
+
+REP-001: A downstream stage MUST NOT invent a semantic decision that belongs to an upstream stage.
+REP-002: Missing required upstream information MUST become UNRESOLVED/BLOCK, not a heuristic default.
+REP-003: Builder, Adapter, Materializer, Renderer and Distribution MUST translate/preserve contracts; they MUST NOT re-decide Selection, Observation, dependency, section grouping, labels, layout or evidence semantics.
+REP-004: A green workflow is not Manifest compliance. Every applicable Gate rule must pass.
+REP-005: A package-only or renderer-only correction that cannot be regenerated from canonical source is incomplete.
+REP-006: A machine-specific fix that compensates for a general Manifest/pipeline defect is prohibited.
+
+## 2. Required pipeline and artifacts
+
+Ordered stages:
+1. Research
+2. Data Completeness
+3. Denominator / Trial Universe
+4. Exposure
+5. Dependency
+6. Selection
+7. Evidence Research
+8. Linked Play Data Research
+9. Predecessor Observation Research (pure A-type standard; otherwise NOT_REQUIRED when justified)
+10. Observation
+11. HighLowDiscrimination
+12. Machine Research Summary
+13. Canonical UI
+14. MachinePackage
+15. Runtime Contract Verification
+16. Distribution Verification
+17. Real-device Verification
+18. User-Verified UI Lock
+
+Required machine artifacts:
+- research-data.json
+- selection-data.json
+- observation-data.json
+- high-low-discrimination-report.json
+- machine-research-summary.json
+- canonical-ui.json
+- machine-package.json
+- generation/verification reports sufficient to prove semantic preservation
+
+Statuses are independent:
+Research Complete ≠ Selection Complete ≠ Observation Complete ≠ HighLow Complete ≠ Summary Complete ≠ Canonical UI Complete ≠ MachinePackage Complete ≠ Distribution Complete ≠ Real-device Complete.
+
+## 3. Research — public information first
+
+RES-001: Research MUST seek the public setting-difference universe before deciding usefulness for inference.
+RES-002: Every candidate MUST retain source/provenance, setting values or categorical constraints, observation event, known conditions and uncertainty.
+RES-003: Research MUST NOT omit a public difference merely because it looks weak, inconvenient, dependent, or unlikely to be selected.
+RES-004: Evidence is researched as evidence and is not forced through Numeric SelectionScore.
+RES-005: Unknown values MUST remain unknown. No fabricated probabilities, exposure counts, trial counts, denominators or setting mappings.
+RES-006: Research completeness and inference usefulness are separate dimensions.
+
+## 4. Data Completeness
+
+COMP-001: Every researched candidate receives a completeness state.
+COMP-002: Published-but-incomplete information remains traceable even if unusable for inference.
+COMP-003: Final user-facing research summary MUST distinguish researched/adopted/rejected/unresolved rather than treating Selection as the researched universe.
+COMP-004: REJECT means “researched/evaluated but not used in inference”; it MUST NOT mean “delete knowledge that it exists.”
+
+## 5. Denominator / Trial Universe
+
+DEN-001: Every Numeric candidate MUST define numerator, denominator/trial universe, unit, scope and applicable state.
+DEN-002: When relevant, define exclusion states, reset boundary, shared denominator, conditional denominator and observation interval.
+DEN-003: Different trial universes MUST NOT be merged for UI convenience.
+DEN-004: Multiple features sharing the same real observation interval and denominator SHOULD use one shared denominator input when semantically valid. The user MUST NOT be asked to enter the same denominator repeatedly.
+DEN-005: User-facing denominator labels MUST use natural, countable language corresponding to what the player can actually observe.
+DEN-006: Builder MUST NOT manufacture generic denominator inputs such as “対応通常ゲーム” when Canonical UI has not explicitly contracted the denominator presentation.
+DEN-007: Empty/unentered = unobserved. Numeric zero = observed and zero occurrences. This distinction MUST survive input, storage, inference and results.
+
+## 6. Exposure
+
+EXP-001: Exposure MUST represent realistic opportunities during play, not fabricated 7000G trials.
+EXP-002: UNKNOWN exposure MUST NOT be converted into a guessed trial count.
+EXP-003: Exposure assumptions MUST be traceable to Research/Observation.
+EXP-004: Input burden alone is not a Selection criterion.
+
+## 7. Dependency
+
+DEP-001: Candidate relationships MUST be classified before Selection.
+DEP-002: The contract MUST distinguish at least independent, primary, alternative/suppressed, conditional, derived and mutually-exclusive relationships when applicable.
+DEP-003: Dependent observations MUST NOT be naively multiplied as independent likelihoods.
+DEP-004: A selected alternative MUST retain the identity of the primary information that suppresses/replaces it.
+DEP-005: If dependency affects what the player should input or how results should be interpreted, that relationship MUST propagate to Machine Research Summary and Canonical UI in user-facing language.
+DEP-006: The UI MUST NOT present PRIMARY and ALTERNATIVE as two equal independent pieces of evidence when inference does not treat them that way.
+
+## 8. Selection
+
+SEL-001: SelectionScore = IG7000 × 200.
+SEL-002: CORE >= 20; SUPPORT >= 10; JOINT_ELIGIBLE >= 5; below 5 = REJECT, subject to dependency/validity requirements.
+SEL-003: Standalone Numeric feature requires IG7000 >= 0.05 bit. Joint participation requires >= 0.025 bit and the joint feature must reach >= 0.05 bit.
+SEL-004: Selection MUST occur only after completeness, denominator, exposure and dependency are sufficiently resolved.
+SEL-005: For every candidate preserve disposition, IG, SelectionScore, class, relevant trial/exposure basis, dependency and a concrete reason.
+SEL-006: “推測計算に採用しています” is not an acceptable adoption reason. A reason MUST explain why the information is useful, including quantitative basis where available.
+SEL-007: Rejection reasons MUST distinguish causes such as weak information, insufficient practical exposure, unavailable observation, incomplete public distribution, dependency/double counting, invalid denominator or unresolved semantics.
+SEL-008: User-facing explanations MUST not expose internal tokens such as INCLUDE_PRIMARY, Gate names or schema IDs.
+SEL-009: Detailed technical metrics may remain in research artifacts, but the user-facing reason must preserve the actual rationale rather than replacing it with a generic sentence.
+
+## 9. Evidence Research
+
+EVI-001: First determine whether adopted Evidence exists. No Evidence => NO_EVIDENCE; do not create an empty Evidence section.
+EVI-002: Evidence is grouped by natural Observation Context, not by strength such as “設定示唆/確定”.
+EVI-003: Surface classification uses END_SCREEN, TROPHY_STAMP, VOICE, PAYOUT_DISPLAY, LAMP_LED, CHARACTER_CARD, MUSIC_SOUND, TEXT_MESSAGE, SYMBOL_NAV_EFFECT, MENU_HISTORY, with OTHER only when none fits.
+EVI-004: Evidence Group = same Surface + same natural Observation Context.
+EVI-005: Observation Context MUST identify applicable surface/event/timing/interaction.
+EVI-006: Same observation opportunity with multiple outcomes belongs to one group/options even when setting constraints differ.
+EVI-007: If Surface/Context cannot be determined from Research, return UNRESOLVED; do not guess a group.
+EVI-008: UI input records the observed fact; it MUST NOT ask the user to input the inferred setting constraint itself.
+EVI-009: Evidence constraints and Numeric inference remain computationally separate even when colocated in UI.
+
+## 10. Linked Play Data and Predecessor Observation
+
+LINK-001: Linked play/service data is researched after Selection and is an Observation source for adopted information; availability MUST NOT retroactively make a statistically invalid feature valid.
+LINK-002: Record machine-level linked-play capability/status and which adopted observations can actually be obtained.
+LINK-003: Service labels and aggregation scope SHOULD be preserved when that prevents input ambiguity.
+PRE-001: Predecessor/seated observations are researched only where relevant and MUST not be fabricated from missing historical UX.
+PRE-002: Predecessor data may participate in live inference when statistically valid but MUST NOT automatically be treated as the standard HighLow benchmark play interval.
+
+## 11. Observation
+
+OBS-001: Every adopted Numeric Feature/Evidence MUST have an Observation Context or an explicit valid derived/no-input route.
+OBS-002: Observation defines where, when and how the player obtains the value, including primary/fallback source where applicable.
+OBS-003: Observation defines numerator/denominator acquisition together when both are needed.
+OBS-004: Observation Action such as “PUSHで確認” is first-class data and MUST propagate to user-facing UI when useful.
+OBS-005: Observation MUST determine natural section co-location; Canonical UI may not reconstruct it from feature type.
+OBS-006: Unobserved and observed-zero semantics are explicit and testable.
+
+## 12. HighLowDiscrimination
+
+HLD-001: Evaluate LOW=settings 1–2 vs HIGH=settings 5–6 at 1500/3000/7000G. Settings 3–4 are excluded only from this benchmark, not from the inference engine.
+HLD-002: Record the defined discrimination metric(s), including Balanced Accuracy when used by the adopted pipeline, assumptions and usable features.
+HLD-003: HighLowDiscrimination is not merely an internal report. Machine Research Summary and MachinePackage MUST expose enough structured information for the app to show the player the machine’s discrimination quality by play length.
+HLD-004: The legacy “判定信頼度” of a particular inference result MUST NOT be presented as a substitute for HighLowDiscrimination.
+HLD-005: If a benchmark cannot be computed honestly, display/record unresolved or insufficient data rather than fabricate precision.
+
+## 13. Machine Research Summary
+
+SUM-001: Summary is constructed before Canonical UI so UI can consume it.
+SUM-002: It MUST contain: research coverage/completeness, adopted Numeric information, rejected Numeric information, unresolved items, dependency relationships, observation guidance, adopted Evidence, linked-play status, HighLowDiscrimination and important practical notes.
+SUM-003: Adopted/rejected counts MUST be based on the researched candidate universe, not only on already-selected runtime inputs.
+SUM-004: Each adopted/rejected item MUST have a machine-specific reason derived from Selection/Research facts.
+SUM-005: Summary MUST support the app section “この機種の設定推測について”; “latest data unavailable” while runtime features exist is not MachinePackage Complete.
+SUM-006: Research completion and app completion are separate. Summary existence alone does not prove delivery to the app.
+
+## 14. Canonical UI — authority
+
+UI-001: Canonical UI consumes Selection + Observation + Machine Research Summary. It MUST NOT re-decide Selection.
+UI-002: Canonical UI is the sole authority for section grouping/order/title/description, input placement, input grouping, grid span, compact/direct input mode, accordion behavior, Evidence placement and user-facing observation guidance.
+UI-003: Every input section MUST have a meaningful description unless an explicit documented reason proves that a description would add no useful information. For reference-machine validation, descriptions are required.
+UI-004: Common observation conditions, target states, exclusions and counting instructions belong in section description once; do not duplicate the same prose on every item.
+UI-005: User-facing text MUST answer practical questions: what to enter, where to find it, when to observe it, which denominator/scope to use, and common mistakes where relevant.
+UI-006: Internal schema vocabulary MUST NOT leak into user-facing text.
+
+### 14.1 Two-column layout contract
+
+COL-001: The standard numeric layout is two-column where physical/operational compatibility permits; it is not “make every item half width.”
+COL-002: A short input is eligible for half-width only when it is in the same section, semantically independent, remains readable/tappable at half width, is not a parent/child or denominator/helper input, and horizontal placement cannot imply a false relationship.
+COL-003: Typical small independent event counters (e.g. BIG/REG, CZ types, compact AT-related counts) SHOULD be considered for two-column layout.
+COL-004: Full width is the default for cumulative game counts, total game counts, AT game counts, denominators, parent/child inputs, long labels, long free-form/complex/special controls, and controls whose operation becomes cramped at half width.
+COL-005: Input type alone (NUMBER/COUNTER/RATE/SELECT) MUST NOT determine width.
+COL-006: When a two-column eligible sequence has an odd final item, leave the paired cell empty. MUST NOT pull an item from another section to fill the hole.
+COL-007: Numerator/denominator semantic pairs MUST be designed as a meaningful feature/input group. Builder MUST NOT simply split them into unrelated cards.
+COL-008: UI convenience MUST NOT merge different trial universes.
+COL-009: Labels MUST remain natural Japanese. Mechanical shortening that leaves particles or changes meaning is prohibited.
+
+### 14.2 Accordion / menu contract
+
+ACC-001: Adopted Numeric Feature/Evidence sections are based on natural Observation Context.
+ACC-002: Input sections are normally collapsible Accordion Menu sections.
+ACC-003: Accordion behavior is single-open: opening one section closes the previously open section.
+ACC-004: single-open MUST be explicit in Canonical UI and propagate to MachinePackage; it is not an implicit Renderer preference.
+ACC-005: Section title prioritizes “when/what is observed” in natural language. Generic strength labels MUST NOT merge different contexts.
+ACC-006: Numeric and Evidence obtained in the same natural context MAY share a section, while inference remains separate.
+ACC-007: defaultExpanded is explicit; user interaction must still preserve single-open.
+ACC-008: Accordion conversion MUST NOT delete, duplicate or clone adopted inputs.
+ACC-009: Section order follows real play observation flow; setting-confirmation-only sections are normally later unless co-location is more natural.
+
+### 14.3 Quick Input status
+
+QI-001: Quick Input and Quick-Input-only sections/eligibility are suspended from the current required UI contract.
+QI-002: Legacy quickAdd knowledge remains historical/protected knowledge but MUST NOT silently re-enter current generation or acceptance gates.
+QI-003: Every adopted input MUST remain usable through the normal Accordion UI without Quick Input.
+QI-004: Reintroduction requires a future explicit Manifest revision.
+
+## 15. Runtime translation / MachinePackage
+
+PKG-001: Adapter/Builder is a translator, not a designer.
+PKG-002: It MUST preserve Canonical UI section title/order/description, item grouping/placement, gridSpan, collapsible/defaultExpanded, accordion behavior, observation action, Evidence placement and summary/high-low data required by the app.
+PKG-003: It MUST NOT generate a different section structure from runtime input categories.
+PKG-004: It MUST NOT invent gridSpan, compactness, labels, denominator presentation or grouping when Canonical UI is missing them. Missing required contract => build failure.
+PKG-005: Canonical UI and generated MachinePackage semantic equality is a Gate, not a best-effort check.
+PKG-006: Generated and published packages are distinct states. Publishing stale package bytes after successful generation is failure.
+PKG-007: Package update requires matching catalog sha256/packageSize/version metadata and verified distribution.
+
+## 16. App Renderer
+
+APP-001: Renderer renders the package contract; it MUST NOT fallback into a layout that changes Observation Context, grouping or semantic relationships.
+APP-002: If the current renderer cannot express a valid Canonical UI contract, fix/extend the generic renderer/schema. Do not degrade correct data to fit an old renderer.
+APP-003: Section descriptions MUST be visible at the section level with line breaks preserved.
+APP-004: Accordion single-open behavior MUST be implemented generically.
+APP-005: Results MUST preserve unobserved vs observed-zero.
+APP-006: Results MUST NOT present suppressed/alternative information as an equal independent contribution.
+APP-007: Machine Research Summary, adoption/rejection explanations and HighLowDiscrimination MUST be renderable from package data.
+APP-008: “判定信頼度” and HighLowDiscrimination are separate concepts and must remain separate in UI.
+
+## 17. Distribution
+
+DIST-001: Repo update is not Distribution Complete.
+DIST-002: Verify catalog/package bytes, sha256, packageSize, version/update path and actual endpoint/resource consumed by the app.
+DIST-003: Fresh-storage and update-path are separate verification paths.
+DIST-004: A test build must prove which catalog/resource it actually consumes; do not infer from configuration intent.
+
+## 18. Gates
+
+Gate R — Research Complete:
+- researched public candidate universe and Evidence universe are traceable
+- no known unresolved item is silently dropped
+
+Gate C — Completeness/Trial/Exposure/Dependency Complete:
+- every candidate has sufficient denominator/trial/exposure/dependency state for Selection or explicit UNRESOLVED
+
+Gate S — Selection Complete:
+- every candidate has disposition, quantitative basis and concrete reason
+- dependency/double-counting rules resolved
+
+Gate O — Observation Complete:
+- every adopted item has feasible observation/derived route
+- numerator/denominator acquisition and Evidence Context/Action resolved
+
+Gate H — HighLow Complete:
+- 1500/3000/7000G LOW/HIGH benchmark exists or honest unresolved state exists
+
+Gate M — Summary Complete:
+- researched/adopted/rejected/unresolved, reasons, dependency, Evidence, observation, linked play and HighLow are represented
+
+Gate D — Canonical UI Complete:
+- every adopted observable item placed exactly once
+- every reference-validation section has description
+- two-column/full-width decision explicitly represented
+- Accordion grouping/title/order/collapsible/defaultExpanded/single-open explicitly represented
+- no generic Evidence regrouping
+- no Quick Input dependency
+- unobserved/zero semantics representable
+
+Gate E — MachinePackage Complete:
+- Canonical UI → package semantic equality
+- Summary and HighLow survive
+- no adapter-generated semantic defaults
+- no loss/duplication
+- App validator/capability accepts the intended contract
+
+Gate P — Distribution Complete:
+- published bytes/catalog/version match generated package
+- app fetch/update path verified
+
+Gate RD — Real-device Complete:
+- user verifies actual device behavior; AI MUST NOT self-declare this gate
+- section titles/descriptions, accordion single-open, layout density, Evidence context/action, input semantics, results, summary, HighLow and update path are checked
+
+Gate UV — User-Verified UI Lock:
+- after explicit user confirmation, canonical source contract is protected against future regeneration regressions
+
+## 19. Reference-machine reproducibility protocol
+
+REF-001: First reference machine is L_LOVEJOU3_M4.
+REF-002: Before the v8 reference run, do not modify Love嬢3 machine artifacts to pre-fit the desired result.
+REF-003: Start Research from zero using this Manifest as the construction specification. Existing machine artifacts may be used only as regression comparison after independent reconstruction, not as authority for decisions.
+REF-004: Run every stage and Gate in order.
+REF-005: Compare the generated result against the intended product qualities and real-device findings.
+REF-006: If a mismatch is caused by missing/ambiguous general rules, revise this Manifest and restart from Research. Do not patch Love嬢3.
+REF-007: If the Manifest explicitly and unambiguously required the correct result but implementation lost it, fix the generic pipeline/adapter/renderer and rerun generation; do not alter machine semantics.
+REF-008: Love嬢3 passing proves the first reference only, not fleet reproducibility. Additional structurally different reference machines are required before mass production.
+REF-009: Mass-production readiness means a fresh AI/session can follow this Manifest without relying on hidden prior-chat decisions and reach equivalent-quality artifacts.
+
+## 20. Mandatory anti-omission checklist
+
+Before starting any machine Research, the operator/AI MUST confirm this Manifest explicitly covers:
+- public-value completeness vs inference usefulness
+- denominator/trial universe and shared denominator
+- exposure
+- dependency and double-counting
+- quantitative adoption/rejection reasons
+- Evidence Surface + Observation Context + Observation Action
+- linked play capability
+- predecessor observation where applicable
+- unobserved vs zero
+- HighLowDiscrimination 1500/3000/7000G
+- Machine Research Summary
+- section descriptions
+- two-column eligibility and full-width exceptions
+- feature-level numerator/denominator grouping
+- Accordion + single-open
+- Quick Input suspension
+- Canonical UI authority
+- Adapter/Builder no-redecision
+- package semantic equality
+- App rendering requirements
+- generated vs published distinction
+- distribution/update path
+- real-device gate
+- user-verified canonical persistence
+
+If any item is absent or ambiguous, machine Research MUST NOT begin.
+
+## 21. Current validation state
+
+v8.0 is a reconstructed DRAFT. It is not yet validated by a fresh Love嬢3 run.
+The next permitted machine-data action is a zero-based L_LOVEJOU3_M4 Research run under this Manifest.
+No existing Love嬢3 package/UI should be edited first.
