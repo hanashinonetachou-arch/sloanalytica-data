@@ -1,111 +1,86 @@
-# Love嬢3 — Manifest v8 UI Preview Checkpoint
+# Love嬢3 — Manifest v8 UI Preview Checkpoint / Revision 2
 
-> This preview is generated from `validation/v8/L_LOVEJOU3_M4/canonical-ui.json`. It is not a hand-designed replacement contract and is not a real-device PASS.
+Generated from the revised Canonical UI after the generic denominator, explanation-folding and repeated-observation rules were added to Manifest v8.
 
-## Preview state
-
-- Accordion: **single-open**
-- Initially open: **通常時**
-- Quick Input: **disabled**
-- Distribution / APK / real-device: **blocked until UI Preview acceptance**
-
----
+## Global behavior
+- Accordion: single-open.
+- Long explanations: separately foldable; folding the explanation never hides inputs.
+- Quick Input: disabled.
+- Repeated categorical observations: accumulated; selecting/recording a second event never overwrites the first.
 
 <details open>
 <summary><strong>通常時</strong></summary>
 
-通常時のゲーム数と、LOVE ZONEの突入回数を記録します。AT初当りはLOVE ZONEを数えられない場合の代替情報で、両方を独立した好材料として二重評価しません。液晶右上に緑文字の設定示唆が出た場合もここで記録します。
+<details><summary>入力方法</summary>
+通常時のゲーム数とLOVE ZONEを記録します。AT初当りはLOVE ZONEを数えられない場合の代替情報で、両方を独立加点しません。液晶右上の示唆は発生するたびに追加記録します。
+</details>
+
+### 通常時ゲーム数
+<details><summary>母数に含める範囲</summary>
+通常時として実際に回したゲーム数を入力します。AT中など通常時ではない区間は含めません。この値をLOVE ZONE出現率の母数として使います。AT初当りを代替利用する場合も同じ通常時ゲーム数を参照し、同じ値を二重入力させません。
+</details>
+
+**通常時ゲーム数**　［　　　　　　G］
 
 ### 設定推測の主軸
-
 | LOVE ZONE | |
 |---|---|
-| 回数［入力］ | |
-| **通常時ゲーム数［入力］（全幅）** | |
+| −　0　＋ | |
 
 ### 代替データ
-
-LOVE ZONEを数えている場合、AT初当りを独立加点しません。
+<details><summary>代替データについて</summary>LOVE ZONEを数えている場合、AT初当りを独立加点しません。</details>
 
 | AT初当り | |
 |---|---|
-| 回数［入力］ | |
+| −　0　＋ | |
 
 ### 液晶右上ウインドウ
+［＋ 観測を追加］
 
-観測した緑文字を記録します。未確認と「該当表示なし」は区別します。
+累積: 数奇な運命 0 / 偶然の出会い 0 / 最後まで 0 / 満足いただける 0 / 上質な 0 / 最高級の 0
 
-［数奇な運命］［偶然の出会い］［最後まで］［満足いただける］［上質な］［最高級の］
+**2回目以降:** ［＋ 観測を追加］を再度押して今回の表示を選択。既存件数は残り、該当カテゴリだけ +1。
 
 </details>
 
 <details>
 <summary><strong>AT中</strong></summary>
+<details><summary>説明</summary>ゾロ目獲得枚数表示が出た都度記録します。未確認と、確認したが該当表示なしは区別します。</details>
 
-AT中に222・333・444・555・666枚OVERの表示が出たら、その表示を記録します。出なかった場合と、確認していない場合は区別します。
+**獲得枚数表示**　［＋ 観測を追加］  
+累積: 222枚 0 / 333枚 0 / 444枚 0 / 555枚 0 / 666枚 0
 
-**獲得枚数表示**
-
-［222枚］［333枚］［444枚］［555枚］［666枚］
-
+2回目以降も追加記録し、前回を上書きしません。
 </details>
 
 <details>
 <summary><strong>AT終了時</strong></summary>
+<details><summary>説明</summary>AT終了ごとに終了画面を確認し、PUSHでスタンプを確認します。</details>
 
-AT終了時に画面とスタンプを確認します。**PUSHで確認**できるスタンプは設定下限・設定6確定のEvidenceです。キャスト構成による奇偶/高設定示唆も観測事実として記録します。
+**終了画面**　［＋ 観測を追加］  
+累積: 奇数対応 0 / 偶数対応 0 / 高設定示唆 0
 
-**終了画面**
+**スタンプ — PUSHで確認**　［＋ 観測を追加］  
+累積: 可 0 / 吉 0 / 良 0 / 優 0 / 極 0
 
-［奇数図柄対応キャスト］［偶数図柄対応キャスト］［7・H・ヘルプ嬢］
-
-**スタンプ — PUSHで確認**
-
-［可］［吉］［良］［優］［極］
-
+次のAT終了時も同じ［＋ 観測を追加］から記録し、過去の観測を保持します。
 </details>
 
 <details>
 <summary><strong>この機種の設定推測について</strong></summary>
+<details><summary>説明</summary>公開値の調査範囲、採否理由、依存関係、判別力を表示します。</details>
 
-**主軸はLOVE ZONE。AT初当りは代替情報です。**
+主軸: LOVE ZONE / 代替: AT初当り（独立乗算しない）
 
-### 採用
-- LOVE ZONE出現 — PRIMARY
-- AT初当り — ALTERNATIVE（LOVE ZONEと独立乗算しない）
+1500G: 69.19% / 3000G: 76.56% / 7000G: 85.94%
 
-### 今回の推測入力に採用しない／保留
-- W LOVE RUSH — 単独採用閾値未満
-- 全キャストクリア — 実戦情報量が小さい
-- 設定変更時モード／内部状態 — 通常の反復入力に不向き
-- LOVE ZONEステージ — 公開分布が不完全
-- LOVE ZONE失敗後復活 — Exposure未解決
-- リラクの泉 — AT終了Exposure/依存関係を追加解決する必要あり
-
-### LOW(設定1–2) / HIGH(設定5–6) 判別
-
-| プレイ量 | Balanced Accuracy |
-|---:|---:|
-| 1500G | 69.19% |
-| 3000G | 76.56% |
-| 7000G | 85.94% |
-
+不採用・UNRESOLVED項目も理由付きで表示。
 </details>
 
-## Preview-specific checks
-
-- [x] Observation ContextでSection化
-- [x] Accordion / single-open contract
-- [x] Section description
-- [x] PRIMARY / ALTERNATIVEをUI上で区別
-- [x] 分母を曖昧な「対応通常ゲーム」にしない
-- [x] EvidenceをAT中 / AT終了時 / 通常時に配置
-- [x] AT終了時のObservation Actionを表示
-- [x] 未観測と0回/該当なしを区別する契約
-- [x] HighLowDiscriminationをSummaryに表示
-- [x] 不採用/UNRESOLVED情報を消さない
-- [x] Quick Inputに依存しない
-
-## Known implementation gap discovered before device work
-
-The current production adapter (`tools/adapt-research-pipeline-to-runtime.mjs`) only consumes legacy Canonical UI sections with `kind=NUMERIC/EVIDENCE` and flat `inputs/items`. It cannot faithfully consume the v8 `groups`, Accordion `singleOpen`, Summary section, or the full Evidence/description contract. Therefore package generation with that adapter is intentionally blocked at this checkpoint instead of degrading the v8 UI.
+## Revision-2 gate
+- [x] Denominator says what value to enter.
+- [x] Shared denominator is entered once.
+- [x] Long explanation is independently collapsible.
+- [x] Repeated categorical input has an explicit second-observation path.
+- [x] Previous categorical observations are preserved and accumulated.
+- [x] Two-column baseline retained where operationally compatible.
