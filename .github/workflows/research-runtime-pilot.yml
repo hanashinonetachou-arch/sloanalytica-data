@@ -1,0 +1,16 @@
+name: Research runtime pilot
+on:
+  pull_request:
+    branches: [prototype-multi-machine]
+  workflow_dispatch:
+jobs:
+  pilot:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - run: node --test --test-concurrency=1 test/research-runtime-adapter.test.mjs
+      - run: npm run machine:build:research-pilot -- L_GOBLIN_SLAYER_RD L_LOVEJOU3_M4 L_SMASLO_KAIJI_KYOEN_FJ
+      - run: npm run audit
