@@ -129,3 +129,35 @@ Evidence candidates are researched separately from numeric Selection and must re
 - パチナビ: Lラブ嬢3 設定判別 — https://pachinavi.net/machines/smasloth-love-jou-3/settei/
 - パチナビ: 回胴黙示録カイジ 狂宴 設定判別 — https://pachinavi.net/machines/kaiji-kyoen/settei/
 - パチナビ: 回胴黙示録カイジ 狂宴 ゲーム性 — https://pachinavi.net/machines/kaiji-kyoen/uchikata/
+
+
+## 2026-09-20 denominator / dependency correction
+
+### Kaiji Kyoen
+
+Cross-checking multiple public analysis sources resolves two important points.
+
+1. CZ denominator / trial universe is now explicit enough for the next model stage: the published CZ rate is a normal-game rate. One source explicitly defines the relevant normal interval as the interval in which the machine menu's "通常総ゲーム" counter advances. Therefore:
+   - family: GAME
+   - target: CZ initial hit
+   - includedStates: normal interval represented by 通常総ゲーム
+   - excludedStates: CZ / bonus / AT intervals outside that counter
+   - quality: DERIVED pending official/manual confirmation
+
+2. The previously recorded "setting 2 missing" for post-chain mode transition was a source-coverage problem, not a public-data incompleteness conclusion. Another public source publishes setting 2 as A 57.8%, B 14.8%, C 22.7%, D 3.1%. This candidate is therefore restored to Data Completeness COMPLETE, subject to cross-source verification of rounding / residual probability.
+
+3. Rare-role probabilities have all six setting values confirmed across multiple sources. Before using them together, they must be modeled as mutually exclusive outcomes of the same normal-game trial universe rather than four independent game denominators. Preferred dependency model: multinomial role-category observation (or an equivalent likelihood that preserves exclusivity).
+
+4. CZ initial hit and bonus initial hit remain dependent pathways. The probability model must not multiply both as independent evidence unless a conditional decomposition proves non-overlap.
+
+5. CZ success uses ENTRY-family denominator = CZ entries. It is conditionally downstream of CZ entry count and must be represented as a conditional observation.
+
+### Status after correction
+
+Kaiji:
+- Data Completeness: numeric core COMPLETE for CZ, bonus initial hit, four rare roles, CZ success, and post-chain mode transition.
+- Denominator / Trial Universe: materially resolved for CZ and rare roles; bonus-pathway exposure still requires exact observation definition.
+- Dependency: explicit non-independent CZ→bonus relationship; rare roles share one mutually-exclusive game trial.
+- Predecessor Observation: NOT_REQUIRED by contract because this is not a pure A-type machine.
+
+The same standard will now be applied to Goblin Slayer and Love Jou 3 before final IG7000 is accepted.
