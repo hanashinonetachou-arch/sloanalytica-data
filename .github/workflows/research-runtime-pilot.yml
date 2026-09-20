@@ -27,3 +27,13 @@ jobs:
             npm run machine:publish -- status "$id"
           done
           git diff --exit-code -- catalog.json machines/
+      - name: Publish pilot packages on release branch
+        if: startsWith(github.head_ref, 'release/publish-research-pilot-three-')
+        shell: bash
+        run: |
+          set -euo pipefail
+          for id in L_GOBLIN_SLAYER_RD L_LOVEJOU3_M4 L_SMASLO_KAIJI_KYOEN_FJ; do
+            npm run machine:publish -- publish "$id" --apply
+          done
+          git diff --exit-code --check
+          git status --short
