@@ -323,3 +323,62 @@ For the next calculation pass, final IG7000 is restricted to candidates with DER
 - Kaiji: rare-role multinomial; CZ initial hit; bonus initial hit as an alternative/dependent pathway candidate; CZ success conditionally after CZ exposure.
 
 Conditional/event candidates with UNKNOWN exposure remain documented Research candidates but cannot cross the Selection adoption gate yet.
+
+
+## 2026-09-20 Formal Selection pass — observable derived-exposure candidates
+
+SelectionScore = IG7000 × 200. Classes: CORE >=20; SUPPORT >=10; JOINT_ELIGIBLE >=5; REJECT <5.
+
+This pass accepts only candidates whose 7000G exposure can be represented without inventing conditional/event opportunity counts. Equal prior across settings is used for the information-gain calculation. Scores are stored as Selection rationale, not as inference-engine weights.
+
+### Love Jou 3
+
+Using the complete six-setting published game-normalized rates:
+
+- AT initial hit: IG7000 ≈ 0.2155 bit; SelectionScore ≈ 43.1; CORE.
+- LOVE ZONE occurrence: IG7000 ≈ 0.4496 bit; SelectionScore ≈ 89.9; CORE.
+- W LOVE RUSH occurrence: IG7000 ≈ 0.0354 bit; SelectionScore ≈ 7.1; JOINT_ELIGIBLE.
+
+Dependency rule remains active: AT and LOVE ZONE cannot both be treated as independent if the observation pathways overlap. W LOVE RUSH does not qualify for standalone adoption and may participate only in a valid Joint Feature whose joint IG7000 reaches the adoption floor.
+
+### Kaiji Kyoen
+
+Published normal-game rates and role probabilities are complete for all six settings.
+
+Direct-rate diagnostic scores:
+- CZ initial hit: IG7000 ≈ 0.295 bit; SelectionScore ≈ 59.0; CORE.
+- Bonus initial hit: IG7000 ≈ 0.153 bit; SelectionScore ≈ 30.6; CORE.
+- Weak cherry: IG7000 ≈ 0.098 bit; SelectionScore ≈ 19.6; SUPPORT.
+- Strong cherry: IG7000 ≈ 0.0265 bit; SelectionScore ≈ 5.3; JOINT_ELIGIBLE.
+- Watermelon: IG7000 ≈ 0.062 bit; SelectionScore ≈ 12.4; SUPPORT.
+- Weak chance: IG7000 ≈ 0.0515 bit; SelectionScore ≈ 10.3; SUPPORT.
+
+The four rare roles share the same game trial and are not adopted as four independent likelihood terms. Their final implementation is one multinomial role observation (plus residual OTHER category) or an equivalent mutually-exclusive likelihood.
+
+CZ initial hit and bonus initial hit both clear the numeric floor, but their causal overlap means both cannot automatically participate independently. Selection records both as useful candidates; Dependency decides the final likelihood representation.
+
+CZ success is conditional on CZ entries. It is not scored as 7000 direct trials. Its conditional exposure is derived from expected CZ entries and will be evaluated as a child observation.
+
+### Goblin Slayer
+
+The complete published rates establish:
+- AT initial hit: all six settings complete.
+- Common bell: all six settings complete.
+- CZ aggregate and type-specific occurrence rates: all six settings complete.
+
+AT initial hit, common bell, and published CZ occurrence rates are eligible for the same formal direct-rate calculation after the exact counted-game scope is locked. The common-bell source explicitly states that the role is identifiable both in normal play and during AT; therefore its trial universe must not silently be reduced to normal games.
+
+Conditional replay-chain and milestone-CZ features remain exposure-pending and receive no fabricated score.
+
+### Selection gate outcome
+
+Formal classifications now exist for Love Jou 3 and the directly observable Kaiji candidates. Goblin Slayer is held one step earlier solely to prevent a trial-universe mismatch for common bell / published occurrence rates.
+
+This is not a generic HOLD state: Research and Data Completeness are complete; only the exact exposure denominator required by the Selection formula remains to be locked.
+
+Next:
+1. lock Goblin Slayer counted-game exposure;
+2. calculate its formal IG7000;
+3. calculate Kaiji rare-role multinomial joint IG and CZ-success conditional IG;
+4. resolve pathway participation for Kaiji CZ/bonus and Love Jou LOVE ZONE/AT;
+5. emit per-machine Selection artifacts rather than keeping the result only in this checkpoint report.
