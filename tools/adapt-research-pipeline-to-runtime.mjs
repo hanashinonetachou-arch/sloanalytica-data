@@ -13,7 +13,7 @@ export function outcomeSettings(tag, settings) {
   if(tag==="SET_3_5_6") return ["SET_3","SET_5","SET_6"].filter(s=>settings.includes(s));
   return [];
 }
-export function adaptResearch(research) {
+function deniedSettings(tag, settings) { const m=String(tag).match(/^NOT_SET_([2-6](?:_[2-6])*)/); return m ? m[1].split("_").map(x=>`SET_${x}`).filter(x=>settings.includes(x)) : []; }\nexport function adaptResearch(research) {
   const settings=research.machine.settings;
   const features=(research.features??[]).map(f=>{
     if(f.candidateModel==="binomial" && Array.isArray(f.rates)){
