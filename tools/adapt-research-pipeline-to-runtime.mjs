@@ -63,15 +63,15 @@ export function adaptSelection(research, selection, observation, canonicalUi) {
     if(!String(sf.disposition).startsWith("ADOPT")) continue;
     const rid=featureResearch.get(sf.featureId),rf=rfById.get(rid),o=obs.get(sf.featureId);
     if(!rf||!o||o.feasibility!=="PASS") throw new Error(`${sf.featureId}: adopted feature lacks research/observation`);
-    const role=sf.disposition==="ADOPT_PRIMARY"?"INCLUDE_PRIMARY":"INCLUDE_FALLBACK";
+    const role=sf.disposition==="ADOPT_PRIMARY"?"INCLUDE_PRIMARY":"INCLUDE_FALLBACK"; const alternativeSuppressors={L_GOBLIN_SLAYER_RD:{FEAT_AT_INITIAL:["FEAT_CZ_AGG"]},L_LOVEJOU3_M4:{FEAT_AT_INITIAL:["FEAT_LOVE_ZONE"]},L_SMASLO_KAIJI_KYOEN_FJ:{FEAT_BONUS_INITIAL:["FEAT_CZ_INITIAL"]}}; const suppressedByFeatureIds=alternativeSuppressors[research.machine.machineId]?.[sf.featureId];
     if(rf.candidateModel==="multinomial"){
       const cats=rf.categories; const catIds=cats.filter(c=>c!=="OTHER").map(c=>`INP_${sf.featureId}_${c}`); const totalId=`INP_${sf.featureId}_GAMES`;
       catIds.forEach((id,i)=>inputs.push({id,name:(o.categories??[])[i]??cats[i],type:"counter",category:"NUMERIC",unit:"回",displayOrder:order++,inferenceRole:role})); inputs.push({id:totalId,name:o.denominator??"観測総ゲーム",type:"counter",category:"NUMERIC",unit:"G",displayOrder:order++,inferenceRole:role});
-      features.push({...sf,researchFeatureId:rid,adoptionCategory:role,modelTypeOverride:"multinomial",numeratorInputId:catIds[0],categoryInputIds:catIds.slice(1),residualCategoryLabel:"OTHER",denominatorInputId:totalId});
+      features.push({...sf,researchFeatureId:rid,adoptionCategory:role,modelTypeOverride:"multinomial",numeratorInputId:catIds[0],categoryInputIds:catIds.slice(1),residualCategoryLabel:"OTHER",denominatorInputId:totalId,...(suppressedByFeatureIds?{suppressedByFeatureIds}:{})});
     } else {
       const num=`INP_${sf.featureId}_COUNT`,den=`INP_${sf.featureId}_GAMES`;
       inputs.push({id:num,name:rf.name,type:"counter",category:"NUMERIC",unit:"回",displayOrder:order++,inferenceRole:role},{id:den,name:o.denominator??rf.denominator?.target??"対象ゲーム",type:"counter",category:"NUMERIC",unit:"G",displayOrder:order++,inferenceRole:role});
-      features.push({...sf,researchFeatureId:rid,adoptionCategory:role,numeratorInputId:num,denominatorInputId:den});
+      features.push({...sf,researchFeatureId:rid,adoptionCategory:role,numeratorInputId:num,denominatorInputId:den,...(suppressedByFeatureIds?{suppressedByFeatureIds}:{})});
     }
   }
   return {...selection,inputs,features,evidenceContract:compileEvidenceContract(research,canonicalUi),uiCategoryLabels:{NUMERIC:(canonicalUi.sections??[]).find(s=>s.kind==="NUMERIC")?.title??"実戦データ",...Object.fromEntries((canonicalUi.sections??[]).filter(s=>s.kind==="EVIDENCE").map(s=>[s.id,s.title]))}};
