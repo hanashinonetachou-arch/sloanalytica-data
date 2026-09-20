@@ -45,6 +45,7 @@ jobs:
           : > /tmp/research_files.txt
           : > /tmp/ui_design_files.txt
           : > /tmp/machine_ids.txt
+          : > /tmp/new_research_machine_ids.txt
 
           if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
             printf '%s\n' "${{ inputs.machine_id }}" > /tmp/machine_ids.txt
@@ -102,6 +103,7 @@ jobs:
               echo "New research pipeline contract detected: ${machine_id}"
               node tools/build-research-runtime-pilot.mjs "${machine_id}"
               node tools/validate-runtime-machine-package.mjs "build/${machine_id}/machine-package.generated.json"
+              printf '%s\\n' "${machine_id}" >> /tmp/new_research_machine_ids.txt
             else
               npm run research:validate -- "$research_file"
             fi
@@ -114,7 +116,16 @@ jobs:
         run: |
           set -euo pipefail
           rm -f /tmp/machine_ids_chunk_*
-          split -l 10 /tmp/machine_ids.txt /tmp/machine_ids_chunk_
+          if [[ -s /tmp/new_research_machine_ids.txt ]]; then
+            grep -vxFf /tmp/new_research_machine_ids.txt /tmp/machine_ids.txt > /tmp/legacy_machine_ids.txt || true
+          else
+            cp /tmp/machine_ids.txt /tmp/legacy_machine_ids.txt
+          fi
+          if [[ ! -s /tmp/legacy_machine_ids.txt ]]; then
+            echo 'All changed machines use the new research runtime path; legacy machine:batch is not required.'
+            exit 0
+          fi
+          split -l 10 /tmp/legacy_machine_ids.txt /tmp/machine_ids_chunk_
           for chunk in /tmp/machine_ids_chunk_*; do
             count="$(wc -l < "$chunk" | tr -d ' ')"
             echo "::group::MachineData batch ${chunk##*/} (${count} machines)"
