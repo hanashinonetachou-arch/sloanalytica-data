@@ -1,0 +1,332 @@
+{
+  "schemaVersion": "canonical-ui-v8-validation",
+  "machineId": "L_LOVEJOU3_M4",
+  "status": "UI_PREVIEW_READY",
+  "accordion": {
+    "enabled": true,
+    "singleOpen": true,
+    "defaultOpenSectionId": "SEC_NORMAL",
+    "explanationBehavior": {
+      "collapsible": true,
+      "defaultExpanded": false,
+      "independentFromSection": true
+    }
+  },
+  "sections": [
+    {
+      "id": "SEC_NORMAL",
+      "title": "通常時",
+      "description": "通常時のゲーム数と、LOVE ZONEの突入回数を記録します。AT初当りはLOVE ZONEを数えられない場合の代替情報で、両方を独立した好材料として二重評価しません。液晶右上に緑文字の設定示唆が出た場合もここで記録します。",
+      "collapsible": true,
+      "defaultExpanded": true,
+      "groups": [
+        {
+          "id": "GRP_SHARED_NORMAL_GAMES",
+          "label": "通常時ゲーム数",
+          "description": "この区間を母数としてLOVE ZONE出現率を計算します。通常時として実際に回したゲーム数を入力します。AT中など通常時ではない区間は含めません。",
+          "descriptionPresentation": {
+            "collapsible": true,
+            "defaultExpanded": false,
+            "label": "母数に含める範囲"
+          },
+          "inputs": [
+            {
+              "id": "INP_NORMAL_GAMES",
+              "label": "通常時ゲーム数",
+              "input": "denominator",
+              "gridSpan": 12,
+              "trialUniverse": "NORMAL_PLAY",
+              "sharedBy": [
+                "FEAT_LOVE_ZONE",
+                "FEAT_AT_INITIAL"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "GRP_PRIMARY",
+          "label": "設定推測の主軸",
+          "inputs": [
+            {
+              "featureId": "FEAT_LOVE_ZONE",
+              "label": "LOVE ZONE",
+              "input": "counter",
+              "gridSpan": 6,
+              "denominatorInputId": "INP_NORMAL_GAMES"
+            }
+          ]
+        },
+        {
+          "id": "GRP_ALT",
+          "label": "代替データ",
+          "description": "LOVE ZONEを数えている場合、AT初当りを独立加点しません。",
+          "descriptionPresentation": {
+            "collapsible": true,
+            "defaultExpanded": false,
+            "label": "代替データについて"
+          },
+          "inputs": [
+            {
+              "featureId": "FEAT_AT_INITIAL",
+              "label": "AT初当り",
+              "input": "counter",
+              "gridSpan": 6,
+              "denominatorInputId": "INP_NORMAL_GAMES",
+              "role": "ALTERNATIVE"
+            }
+          ]
+        },
+        {
+          "id": "GRP_WINDOW",
+          "label": "液晶右上ウインドウ",
+          "input": "repeated-evidence-occurrence",
+          "evidenceId": "EVI_NORMAL_WINDOW",
+          "gridSpan": 12,
+          "observationMultiplicity": "REPEATED_CATEGORICAL_EVENT",
+          "interaction": {
+            "type": "CATEGORY_COUNTERS",
+            "preservePriorObservations": true,
+            "showAccumulatedCounts": true,
+            "totalOpportunities": "SEPARATE_COUNTER",
+            "categories": [
+              {
+                "id": "EVI_NORMAL_WINDOW_CAT_1",
+                "label": "数奇な運命",
+                "meaning": "ODD_HINT"
+              },
+              {
+                "id": "EVI_NORMAL_WINDOW_CAT_2",
+                "label": "偶然の出会い",
+                "meaning": "EVEN_HINT"
+              },
+              {
+                "id": "EVI_NORMAL_WINDOW_CAT_3",
+                "label": "最後まで",
+                "meaning": "HIGH_HINT"
+              },
+              {
+                "id": "EVI_NORMAL_WINDOW_CAT_4",
+                "label": "満足いただける",
+                "meaning": "SET_2_PLUS"
+              },
+              {
+                "id": "EVI_NORMAL_WINDOW_CAT_5",
+                "label": "上質な",
+                "meaning": "SET_4_PLUS"
+              },
+              {
+                "id": "EVI_NORMAL_WINDOW_CAT_6",
+                "label": "最高級の",
+                "meaning": "SET_6"
+              }
+            ],
+            "categoryCoverage": "NON_EXHAUSTIVE",
+            "opportunityTracking": {
+              "type": "SEPARATE_COUNTER",
+              "inputId": "EVI_NORMAL_WINDOW_OPPORTUNITIES",
+              "label": "液晶右上ウインドウを確認した回数",
+              "unobservedSemantics": "null/unentered=UNOBSERVED; 0=OBSERVED_ZERO"
+            }
+          }
+        }
+      ],
+      "descriptionPresentation": {
+        "collapsible": true,
+        "defaultExpanded": false,
+        "label": "入力方法"
+      }
+    },
+    {
+      "id": "SEC_AT_DURING",
+      "title": "AT中",
+      "description": "AT中に222・333・444・555・666枚OVERの表示が出たら、その表示を記録します。出なかった場合と、確認していない場合は区別します。",
+      "observationContext": "AT_DURING",
+      "collapsible": true,
+      "defaultExpanded": false,
+      "items": [
+        {
+          "evidenceId": "EVI_PAYOUT",
+          "label": "獲得枚数表示",
+          "input": "repeated-evidence-occurrence",
+          "gridSpan": 12,
+          "observationMultiplicity": "REPEATED_CATEGORICAL_EVENT",
+          "interaction": {
+            "type": "CATEGORY_COUNTERS",
+            "preservePriorObservations": true,
+            "showAccumulatedCounts": true,
+            "totalOpportunities": "SEPARATE_COUNTER",
+            "categories": [
+              {
+                "id": "EVI_PAYOUT_CAT_1",
+                "label": "222枚",
+                "meaning": "SET_2_PLUS"
+              },
+              {
+                "id": "EVI_PAYOUT_CAT_2",
+                "label": "333枚",
+                "meaning": "SET_3_PLUS"
+              },
+              {
+                "id": "EVI_PAYOUT_CAT_3",
+                "label": "444枚",
+                "meaning": "SET_4_PLUS"
+              },
+              {
+                "id": "EVI_PAYOUT_CAT_4",
+                "label": "555枚",
+                "meaning": "SET_5_PLUS"
+              },
+              {
+                "id": "EVI_PAYOUT_CAT_5",
+                "label": "666枚",
+                "meaning": "SET_6"
+              }
+            ],
+            "categoryCoverage": "NON_EXHAUSTIVE",
+            "opportunityTracking": {
+              "type": "SEPARATE_COUNTER",
+              "inputId": "EVI_PAYOUT_OPPORTUNITIES",
+              "label": "AT中の獲得枚数表示を確認した回数",
+              "unobservedSemantics": "null/unentered=UNOBSERVED; 0=OBSERVED_ZERO"
+            }
+          }
+        }
+      ],
+      "descriptionPresentation": {
+        "collapsible": true,
+        "defaultExpanded": false,
+        "label": "説明"
+      }
+    },
+    {
+      "id": "SEC_AT_END",
+      "title": "AT終了時",
+      "description": "AT終了時に画面とスタンプを確認します。PUSHで確認できるスタンプは設定下限・設定6確定のEvidenceです。キャスト構成による奇偶/高設定示唆も観測事実として記録します。",
+      "observationContext": "AT_END",
+      "observationAction": "PUSHで確認",
+      "collapsible": true,
+      "defaultExpanded": false,
+      "items": [
+        {
+          "evidenceId": "EVI_AT_END_SCREEN_WEAK",
+          "label": "終了画面",
+          "input": "repeated-evidence-occurrence",
+          "gridSpan": 12,
+          "observationMultiplicity": "REPEATED_CATEGORICAL_EVENT",
+          "interaction": {
+            "type": "CATEGORY_COUNTERS",
+            "preservePriorObservations": true,
+            "showAccumulatedCounts": true,
+            "totalOpportunities": "SEPARATE_COUNTER",
+            "categories": [
+              {
+                "id": "EVI_AT_END_SCREEN_WEAK_CAT_1",
+                "label": "奇数図柄対応キャスト",
+                "meaning": "ODD_HINT"
+              },
+              {
+                "id": "EVI_AT_END_SCREEN_WEAK_CAT_2",
+                "label": "偶数図柄対応キャスト",
+                "meaning": "EVEN_HINT"
+              },
+              {
+                "id": "EVI_AT_END_SCREEN_WEAK_CAT_3",
+                "label": "7・H・ヘルプ嬢",
+                "meaning": "HIGH_HINT"
+              }
+            ],
+            "categoryCoverage": "NON_EXHAUSTIVE",
+            "opportunityTracking": {
+              "type": "SEPARATE_COUNTER",
+              "inputId": "EVI_AT_END_SCREEN_WEAK_OPPORTUNITIES",
+              "label": "AT終了画面を確認した回数",
+              "unobservedSemantics": "null/unentered=UNOBSERVED; 0=OBSERVED_ZERO"
+            }
+          }
+        },
+        {
+          "evidenceId": "EVI_AT_END_STAMP",
+          "label": "スタンプ",
+          "input": "repeated-evidence-occurrence",
+          "gridSpan": 12,
+          "observationMultiplicity": "REPEATED_CATEGORICAL_EVENT",
+          "interaction": {
+            "type": "CATEGORY_COUNTERS",
+            "preservePriorObservations": true,
+            "showAccumulatedCounts": true,
+            "totalOpportunities": "SEPARATE_COUNTER",
+            "categories": [
+              {
+                "id": "EVI_AT_END_STAMP_CAT_1",
+                "label": "可",
+                "meaning": "SET_2_PLUS"
+              },
+              {
+                "id": "EVI_AT_END_STAMP_CAT_2",
+                "label": "吉",
+                "meaning": "SET_3_PLUS"
+              },
+              {
+                "id": "EVI_AT_END_STAMP_CAT_3",
+                "label": "良",
+                "meaning": "SET_4_PLUS"
+              },
+              {
+                "id": "EVI_AT_END_STAMP_CAT_4",
+                "label": "優",
+                "meaning": "SET_5_PLUS"
+              },
+              {
+                "id": "EVI_AT_END_STAMP_CAT_5",
+                "label": "極",
+                "meaning": "SET_6"
+              }
+            ],
+            "categoryCoverage": "NON_EXHAUSTIVE",
+            "opportunityTracking": {
+              "type": "SEPARATE_COUNTER",
+              "inputId": "EVI_AT_END_STAMP_OPPORTUNITIES",
+              "label": "AT終了時にPUSHしてスタンプを確認した回数",
+              "unobservedSemantics": "null/unentered=UNOBSERVED; 0=OBSERVED_ZERO"
+            }
+          }
+        }
+      ],
+      "descriptionPresentation": {
+        "collapsible": true,
+        "defaultExpanded": false,
+        "label": "説明"
+      }
+    },
+    {
+      "id": "SEC_RESEARCH_SUMMARY",
+      "title": "この機種の設定推測について",
+      "description": "調査結果・採否理由・判別力を確認できます。",
+      "collapsible": true,
+      "defaultExpanded": false,
+      "content": {
+        "headline": "主軸はLOVE ZONE。AT初当りは代替情報です。",
+        "highLow": [
+          "1500G: 69.19%",
+          "3000G: 76.56%",
+          "7000G: 85.94%"
+        ],
+        "showRejectedAndUnresolved": true
+      },
+      "descriptionPresentation": {
+        "collapsible": true,
+        "defaultExpanded": false,
+        "label": "説明"
+      }
+    }
+  ],
+  "quickInput": {
+    "enabled": false
+  },
+  "previewCheckpoint": {
+    "required": true,
+    "distributionBlockedUntilAccepted": true,
+    "repeatedEntryDemonstrationRequired": true
+  },
+  "manifestRevision": "7611ab92ffb4a7114f0a487c012c4963d0b7d116"
+}
