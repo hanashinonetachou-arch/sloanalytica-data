@@ -382,3 +382,69 @@ Next:
 3. calculate Kaiji rare-role multinomial joint IG and CZ-success conditional IG;
 4. resolve pathway participation for Kaiji CZ/bonus and Love Jou LOVE ZONE/AT;
 5. emit per-machine Selection artifacts rather than keeping the result only in this checkpoint report.
+
+
+## 2026-09-20 Selection integrity correction and dependency resolution
+
+A fresh source cross-check was performed before promoting provisional scores.
+
+### Kaiji Kyoen — source integrity
+
+All six setting values for the four rare roles are independently confirmed by Hisshobon / Hazuse:
+- weak cherry: 1/218.5, 1/211.4, 1/204.8, 1/198.6, 1/187.2, 1/182.0
+- strong cherry: 1/528.5, 1/512.0, 1/496.5, 1/481.9, 1/468.1, 1/455.1
+- watermelon: 1/79.9, 1/79.0, 1/78.0, 1/77.1, 1/75.3, 1/72.8
+- weak chance: 1/84.0, 1/81.9, 1/79.9, 1/79.0, 1/78.0, 1/77.1
+
+The public source also confirms all-six-setting CZ rate, CZ success probability, bonus initial-hit rate, and post-chain mode transition. Therefore these are Data Completeness COMPLETE.
+
+Important correction to the earlier checkpoint: one secondary source displayed only settings 1 and 6 for rare roles, but the all-setting table exists in stronger cross-check sources. The research record must preserve the complete table and source hierarchy.
+
+### Kaiji rare-role dependency representation
+
+The four roles are mutually exclusive outcomes of the same game trial. Final likelihood representation:
+- model: multinomial
+- categories: WEAK_CHERRY / STRONG_CHERRY / WATERMELON / WEAK_CHANCE / OTHER
+- denominator: eligible normal games in the published role-probability universe
+- OTHER probability: 1 - sum(four role probabilities)
+
+Individual diagnostic scores remain useful for rationale, but the inference engine receives the joint multinomial observation, not four independent binomials.
+
+### Kaiji CZ success exposure
+
+CZ success is a child of CZ entries:
+- family: ENTRY
+- denominator: observed CZ entries
+- numerator: successful CZ entries
+
+At 7000G, expected CZ-entry exposure is derived from the setting-specific CZ occurrence rate, not fixed at 7000. Final information evaluation therefore integrates entry-count exposure with the conditional success probabilities. This prevents the previous direct-trial overstatement.
+
+### Kaiji CZ vs bonus initial hit
+
+Both are useful public statistics, but bonus initial hit is causally downstream of CZ and other routes. Until the full route decomposition is observable, the safe Selection representation is:
+- retain both in Research with their numeric rationale;
+- use CZ initial hit as the primary pathway-rate candidate;
+- do not independently multiply bonus initial-hit likelihood with CZ likelihood;
+- bonus initial hit remains an alternative aggregate observation route when CZ observation is unavailable or when a later conditional decomposition proves non-overlap.
+
+This is a dependency decision, not a claim that bonus initial hit has no setting information.
+
+### Love Jou 3 AT vs LOVE ZONE
+
+Both rates are Data Completeness COMPLETE and individually informative. LOVE ZONE is an upstream opportunity/pathway related to AT. Without a public decomposition proving independence:
+- retain both Research/Selection rationale;
+- do not naively multiply their likelihoods;
+- prefer the more information-rich observable route where both cover overlapping play;
+- AT initial hit remains an aggregate alternative observation.
+
+W LOVE RUSH remains JOINT_ELIGIBLE only and is not independently adopted.
+
+### Evidence / Observation reminder
+
+The new Manifest requires Evidence to be researched independently from numeric Selection and grouped later by natural Observation Context. This pass does not convert trophy/stamp/end-screen evidence into numeric Selection Score.
+
+### Promotion readiness
+
+Kaiji and Love Jou now have dependency-safe candidate representations suitable for creation of machine-level Selection artifacts.
+
+Goblin Slayer still needs the exact counted-game universe locked before its common-bell / occurrence-rate formal score is promoted. No fabricated denominator will be introduced to force completion.
