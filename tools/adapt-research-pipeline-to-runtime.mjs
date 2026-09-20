@@ -41,7 +41,7 @@ export function compileEvidenceContract(research, canonicalUi) {
       const e=byId.get(eid); if(!e) throw new Error(`${eid}: missing evidence candidate`);
       const inputId=`INP_${eid}`;
       inputs.push({id:inputId,name:e.name,type:"multi_enum",category:section.id,unit:"",displayOrder:inputs.length+100,inferenceRole:"INCLUDE_SUPPORT",options:e.outcomes.map(([label])=>({key:label,label,value:label}))});
-      for(const [label,tag] of e.outcomes){const confirmed=outcomeSettings(tag,settings);if(!confirmed.length) continue;items.push({evidenceId:`${eid}_${label}`.replace(/[^A-Z0-9_]/gi,"_").toUpperCase(),displayName:label,inputId,triggerValue:label,confirmedSettings:confirmed,deniedSettings:[],runtimeType:"SETTING_CONFIRMATION",sourceResearchEvidenceIds:[eid],sharedFeatureIds:[]});}
+      for(const [outcomeIndex,[label,tag]] of e.outcomes.entries()){const confirmed=outcomeSettings(tag,settings);if(!confirmed.length) continue;items.push({evidenceId:`${eid}_OPT_${String(outcomeIndex+1).padStart(2,"0")}`.toUpperCase(),displayName:label,inputId,triggerValue:label,confirmedSettings:confirmed,deniedSettings:[],runtimeType:"SETTING_CONFIRMATION",sourceResearchEvidenceIds:[eid],sharedFeatureIds:[]});}
     }
   }
   return {contractVersion:"selection-evidence-v2",inputs,items};
