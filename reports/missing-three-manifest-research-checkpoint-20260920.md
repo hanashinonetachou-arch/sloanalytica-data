@@ -477,3 +477,30 @@ Dependency:
 - AT initial hit is downstream/aggregate and is not independently multiplied with overlapping CZ pathway information without decomposition.
 
 This resolves the last denominator-family ambiguity that was blocking formal Goblin Slayer Selection scoring. Conditional replay-chain and milestone-CZ candidates remain exposure-pending because their opportunity counts are still not derivable without assumptions.
+
+
+## 2026-09-20 Goblin Slayer formal IG7000
+
+After locking the counted-game universe, formal binomial information gain was calculated with a uniform prior over settings 1–6 and n=7000 matching trials for the directly game-normalized candidates.
+
+Formula policy:
+- IG7000 = I(Setting; observed count at 7000 matching trials)
+- SelectionScore = IG7000 × 200
+- CORE >= 20.0; SUPPORT >= 10.0; JOINT_ELIGIBLE >= 5.0; REJECT < 5.0.
+
+Results:
+- common bell: IG7000 = 0.54050 bit; SelectionScore = 108.10; CORE.
+- AT initial hit: IG7000 = 0.06282 bit; SelectionScore = 12.56; SUPPORT.
+- CZ aggregate: IG7000 = 0.12086 bit; SelectionScore = 24.17; CORE.
+- GM occurrence: IG7000 = 0.10161 bit; SelectionScore = 20.32; CORE.
+- GC occurrence: IG7000 = 0.01563 bit; SelectionScore = 3.13; REJECT as standalone.
+- GB occurrence: IG7000 = 0.01710 bit; SelectionScore = 3.42; REJECT as standalone.
+
+Important dependency/application constraints:
+- CZ aggregate and GM/GC/GB component occurrence rates are alternative representations of the same CZ process and are never summed as independent evidence.
+- Because the aggregate CZ observation is simpler and already clears CORE, the default Selection representation is CZ aggregate unless a multinomial type observation is proven to add joint information and is practically observable.
+- AT initial hit remains SUPPORT numerically, but it is downstream of CZ and must not be blindly multiplied with the selected CZ pathway observation.
+- common bell is the strongest directly observable independent numeric candidate and is orthogonal to the CZ-pathway count at the current dependency level.
+- replay-chain, milestone-CZ, and other conditional/event candidates remain unscored while their opportunity exposure is UNKNOWN.
+
+Goblin Slayer Selection gate is therefore no longer blocked by denominator ambiguity. Numeric Selection can proceed with common bell as CORE and CZ aggregate as the default CORE pathway representation, while AT initial hit is retained as SUPPORT/alternative aggregate evidence subject to dependency handling.
