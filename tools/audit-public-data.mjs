@@ -96,7 +96,7 @@ function validateAutoAccumulator(item, inputIds, result, scope) {
     if (Number.isInteger(config.minSelection) && Number.isInteger(config.maxSelection) && (value < config.minSelection || value > config.maxSelection)) issue(result, 'error', scope, `除外値${value}が選択可能範囲外です`);
   }
 }
-function validateMachineData(machineData, result, machineId, filePath) {
+export function validateMachineData(machineData, result, machineId, filePath) {
   const scope = `${machineId} (${path.relative(result.root, filePath)})`;
   for (const section of ['machine', 'inputs', 'features', 'evidence', 'ui']) if (!isRecord(machineData?.[section])) issue(result, 'error', scope, `必須セクション${section}がありません`);
   if (!isRecord(machineData?.machine)) return new Set();
