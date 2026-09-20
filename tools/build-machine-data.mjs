@@ -327,7 +327,7 @@ function materializeEvidenceContract(selection){
   }))};
 }
 
-export function buildMachineData(research,selection,statistics=null){
+export function buildMachineData(research,selection,statistics=null,runtimeUi=null){
   if(selection.machineId!==research.machine?.machineId) fail("machineId mismatch");
   const rfs=new Map((research.features??[]).map(f=>[f.researchFeatureId,f]));
   const {generatedInputs,generatedEvidence}=materializeEvidenceContract(selection)??materializeEvidenceUi(research,selection);
@@ -426,7 +426,7 @@ export function buildMachineData(research,selection,statistics=null){
     inputs:{schemaVersion:"2.0.0",inputs:allInputs.map(inputWithDefaults)},
     features:{schemaVersion:"2.0.0",features},
     evidence:{version:"1.0.0",evidences,sources},
-    ui:{sections},selectionSummary,reliability:{},
+    ui:runtimeUi??{sections},selectionSummary,reliability:{},
     metadata:{machineId:machine.machineId,displayName:machine.displayName,settings:machine.settings},
     validation:{cases:[]},statistics:{}
   };
