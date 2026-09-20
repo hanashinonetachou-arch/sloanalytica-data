@@ -203,6 +203,8 @@ ACC-006: Numeric and Evidence obtained in the same natural context MAY share a s
 ACC-007: defaultExpanded is explicit; user interaction must still preserve single-open.
 ACC-008: Accordion conversion MUST NOT delete, duplicate or clone adopted inputs.
 ACC-009: Section order follows real play observation flow; setting-confirmation-only sections are normally later unless co-location is more natural.
+ACC-010: Section explanatory prose MUST be independently collapsible/expandable when it is longer than a short one-line operational cue. Collapsing explanation MUST NOT collapse or hide the section's inputs themselves.
+ACC-011: Canonical UI MUST record explanation presentation separately from section accordion state (for example explanationCollapsible/defaultExplanationExpanded). Renderer MUST NOT force long descriptions permanently open.
 
 ### 14.3 Quick Input status
 
@@ -211,6 +213,15 @@ QI-002: Legacy quickAdd knowledge remains historical/protected knowledge but MUS
 QI-003: Every adopted input MUST remain usable through the normal Accordion UI without Quick Input.
 QI-004: Reintroduction requires a future explicit Manifest revision.
 QI-005: Historical quickAdd details are not current generation requirements. If Quick Input is later reintroduced, its width/operation rules must be specified explicitly rather than inferred from old runtime defaults.
+
+### 14.4 Repeated observations and categorical accumulation
+
+REPINPUT-001: A Feature/Evidence whose observation opportunity can occur more than once in a session MUST NOT be represented as a single persistent SELECT that overwrites the previous observation.
+REPINPUT-002: Research/Observation MUST classify each observable as one of SINGLE_SESSION_STATE, REPEATED_CATEGORICAL_EVENT, REPEATED_BINARY_EVENT, REPEATED_NUMERIC_EVENT, or EVIDENCE_OCCURRENCE before Canonical UI.
+REPINPUT-003: REPEATED_CATEGORICAL_EVENT normally requires per-category counters or an “add observation” interaction that accumulates category counts. After one category is recorded, the next opportunity must be recordable without erasing the first.
+REPINPUT-004: When inference needs category distribution, Canonical UI MUST preserve both category counts and the total opportunity count (explicitly or as an exact derivation). A one-shot dropdown is invalid.
+REPINPUT-005: If only the latest state is meaningful, SINGLE_SESSION_STATE may use a select control, but Observation must explicitly justify why earlier observations are irrelevant.
+REPINPUT-006: UI Preview MUST demonstrate the second-observation path for every repeated categorical input; a preview that only shows the first selection is incomplete.
 
 ## 15. Runtime translation / MachinePackage
 
@@ -338,6 +349,9 @@ Before starting any machine Research, the operator/AI MUST confirm this Manifest
 - section descriptions
 - two-column eligibility and full-width exceptions
 - feature-level numerator/denominator grouping
+- explicit user-facing denominator definition and shared-denominator behavior
+- repeated-observation accumulation semantics, including a demonstrated second-observation path
+- independently collapsible long explanations
 - physical/operational two-column compatibility rather than input-type heuristics
 - preservation of User-Verified UX contracts
 - Accordion + single-open
