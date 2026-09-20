@@ -41,7 +41,7 @@ export function compileEvidenceContract(research, canonicalUi) {
       const e=byId.get(eid); if(!e) throw new Error(`${eid}: missing evidence candidate`);
       const inputId=`INP_${eid}`;
       inputs.push({id:inputId,name:e.name,type:"multi_enum",category:section.id,unit:"",displayOrder:inputs.length+100,inferenceRole:"INCLUDE_SUPPORT",options:e.outcomes.map(([label])=>({key:label,label,value:label}))});
-      for(const [outcomeIndex,[label,tag]] of e.outcomes.entries()){const confirmed=outcomeSettings(tag,settings);if(!confirmed.length) continue;items.push({evidenceId:`${eid}_OPT_${String(outcomeIndex+1).padStart(2,"0")}`.toUpperCase(),displayName:label,inputId,triggerValue:label,confirmedSettings:confirmed,deniedSettings:[],runtimeType:"SETTING_CONFIRMATION",sourceResearchEvidenceIds:[eid],sharedFeatureIds:[]});}
+      for(const [outcomeIndex,[label,tag]] of e.outcomes.entries()){const confirmed=outcomeSettings(tag,settings),denied=deniedSettings(tag,settings);items.push({evidenceId:`${eid}_OPT_${String(outcomeIndex+1).padStart(2,"0")}`.toUpperCase(),displayName:label,inputId,triggerValue:label,confirmedSettings:confirmed,deniedSettings:denied,runtimeType:confirmed.length?"SETTING_CONFIRMATION":denied.length?"SETTING_DENIAL":"DISPLAY_ONLY",sourceResearchEvidenceIds:[eid],sharedFeatureIds:[]});}
     }
   }
   return {contractVersion:"selection-evidence-v2",inputs,items};
@@ -65,9 +65,9 @@ export function adaptSelection(research, selection, observation, canonicalUi) {
     if(!rf||!o||o.feasibility!=="PASS") throw new Error(`${sf.featureId}: adopted feature lacks research/observation`);
     const role=sf.disposition==="ADOPT_PRIMARY"?"INCLUDE_PRIMARY":"INCLUDE_FALLBACK";
     if(rf.candidateModel==="multinomial"){
-      const cats=rf.categories; const catIds=cats.filter(c=>c!=="OTHER").map(c=>`INP_${sf.featureId}_${c}`);
-      catIds.forEach((id,i)=>inputs.push({id,name:(o.categories??[])[i]??cats[i],type:"counter",category:"NUMERIC",unit:"回",displayOrder:order++,inferenceRole:role}));
-      features.push({...sf,researchFeatureId:rid,adoptionCategory:role,modelTypeOverride:"multinomial",numeratorInputId:catIds[0],categoryInputIds:catIds.slice(1),residualCategoryLabel:"OTHER",denominatorInputIds:catIds,inputTransform:"sum_inputs_to_trials"});
+      const cats=rf.categories; const catIds=cats.filter(c=>c!=="OTHER").map(c=>`INP_${sf.featureId}_${c}`); const totalId=`INP_${sf.featureId}_GAMES`;
+      catIds.forEach((id,i)=>inputs.push({id,name:(o.categories??[])[i]??cats[i],type:"counter",category:"NUMERIC",unit:"回",displayOrder:order++,inferenceRole:role})); inputs.push({id:totalId,name:o.denominator??"観測総ゲーム",type:"counter",category:"NUMERIC",unit:"G",displayOrder:order++,inferenceRole:role});
+      features.push({...sf,researchFeatureId:rid,adoptionCategory:role,modelTypeOverride:"multinomial",numeratorInputId:catIds[0],categoryInputIds:catIds.slice(1),residualCategoryLabel:"OTHER",denominatorInputId:totalId});
     } else {
       const num=`INP_${sf.featureId}_COUNT`,den=`INP_${sf.featureId}_GAMES`;
       inputs.push({id:num,name:rf.name,type:"counter",category:"NUMERIC",unit:"回",displayOrder:order++,inferenceRole:role},{id:den,name:o.denominator??rf.denominator?.target??"対象ゲーム",type:"counter",category:"NUMERIC",unit:"G",displayOrder:order++,inferenceRole:role});
