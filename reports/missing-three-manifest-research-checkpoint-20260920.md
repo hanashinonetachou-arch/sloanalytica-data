@@ -267,3 +267,59 @@ Kaiji:
 - remains at the previous corrected denominator/dependency state.
 
 No final IG7000 / Selection Score is accepted yet for conditional/event candidates. The next step is to construct realistic 7000G exposure for the three machines and compute Selection from those exposures rather than from nominal direct trials.
+
+
+## 2026-09-20 Exposure gate — strict no-fabrication pass
+
+The new contract requires Selection and HighLowDiscrimination to share an exposure model. This pass therefore separates features whose 7000G exposure can be derived from public rates from features whose opportunity exposure is not yet publicly derivable.
+
+### Exposure status vocabulary
+
+- EXACT: directly defined count/rate for the required trial universe.
+- DERIVED: expected opportunities can be computed from a public rate with matching trial universe.
+- ESTIMATED: requires an explicit approximation; not accepted for final Selection unless the approximation is documented and justified.
+- UNKNOWN: opportunity count cannot currently be derived without inventing assumptions.
+
+### Goblin Slayer
+
+- AT initial hit: DERIVED from published game-normalized initial-hit rate, subject to final normal-game scope confirmation.
+- Common bell: DERIVED if the published common-bell rate applies to the counted game universe; preserve scope check.
+- CZ aggregate/type rates: DERIVED only for their published game-normalized occurrence view; component rates and aggregate are alternative representations, never additive.
+- Replay-3-chain → CZ: UNKNOWN exposure until the qualifying replay-chain opportunity rate is established. The conditional win probability alone is insufficient.
+- 300G/500G milestone → CZ: UNKNOWN exposure until the number of milestone reaches per 7000G can be derived. Do not substitute 7000 trials or a guessed reach rate.
+- 100G milestone: REJECT before exposure because the published probability is setting-common.
+
+Result: final Selection can proceed only for the directly observable/derivable rate candidates. Conditional milestone/replay candidates remain research-complete but Selection exposure-pending, without fabricated scores.
+
+### Love Jou 3
+
+- AT initial hit: DERIVED from published game-normalized rate, subject to matching observable game universe.
+- LOVE ZONE occurrence: DERIVED from published game-normalized occurrence rate.
+- W LOVE RUSH occurrence: DERIVED from published game-normalized occurrence rate.
+- Setting-change / advantageous-section initial mode: UNKNOWN as a 7000G session exposure unless the number of qualifying transitions is established. A reset-table probability does not imply repeated trials.
+- LOVE ZONE failure → revival/state: conditional exposure can be derived only after LOVE ZONE entry and failure opportunity counts are linked. Until the failure rate / exact qualifying count is available, exposure is UNKNOWN.
+- Relaxation-spring transition: UNKNOWN until the precursor opportunity count and observation feasibility are both established.
+
+Result: AT, LOVE ZONE, and W LOVE RUSH are eligible for formal rate-based scoring; reset/state conditional tables are not assigned invented 7000G trial counts.
+
+### Kaiji Kyoen
+
+- CZ initial hit: DERIVED from the published normal-game rate; the source explicitly defines normal time as the interval in which the machine-menu 通常総ゲーム counter advances.
+- Bonus initial hit: DERIVED from published initial-hit rate, but dependency with CZ must be resolved before joint participation.
+- Rare roles: DERIVED from published per-game probabilities. The four setting-differentiated roles share one game trial universe and are modeled as mutually exclusive categories.
+- CZ success: DERIVED conditionally from expected CZ entries; do not use 7000 direct trials.
+- Post-chain mode transition: UNKNOWN until the qualifying post-chain transition count in a 7000G session is derivable.
+- Weak-role → zawa-high: remains excluded where the all-setting public table is incomplete.
+
+### Selection consequence
+
+The earlier nominal direct-trial screens remain diagnostic only. They are not final Selection Scores.
+
+No conditional/event feature receives a final score while exposure is UNKNOWN. This is intentional and is not a research failure: it prevents false precision.
+
+For the next calculation pass, final IG7000 is restricted to candidates with DERIVED/EXACT exposure and an acceptable dependency representation:
+- Goblin Slayer: common bell; AT initial hit if scope validation passes; alternative published CZ-rate representation where observation compatibility passes.
+- Love Jou 3: AT initial hit; LOVE ZONE occurrence; W LOVE RUSH occurrence.
+- Kaiji: rare-role multinomial; CZ initial hit; bonus initial hit as an alternative/dependent pathway candidate; CZ success conditionally after CZ exposure.
+
+Conditional/event candidates with UNKNOWN exposure remain documented Research candidates but cannot cross the Selection adoption gate yet.
