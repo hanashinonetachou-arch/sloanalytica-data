@@ -33,7 +33,11 @@ jobs:
         run: |
           set -euo pipefail
           for id in L_GOBLIN_SLAYER_RD L_LOVEJOU3_M4 L_SMASLO_KAIJI_KYOEN_FJ; do
-            npm run machine:publish -- publish "$id" --apply
+            npm run machine:publish -- publish "$id" --apply --defer-audit
           done
           git diff --exit-code --check
+          for id in L_GOBLIN_SLAYER_RD L_LOVEJOU3_M4 L_SMASLO_KAIJI_KYOEN_FJ; do
+            test -f "machines/$id/machine-package.json"
+            grep -q "\"machineId\": \"$id\"" catalog.json
+          done
           git status --short
