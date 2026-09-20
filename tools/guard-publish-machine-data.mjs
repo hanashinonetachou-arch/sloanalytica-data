@@ -23,6 +23,16 @@ if (command === 'publish' && machineId && args.includes('--apply')) {
   const researchPath = path.join(researchDir, 'research-data.json');
   const selectionPath = path.join(researchDir, 'selection-data.json');
   const settingBandPath = path.join(researchDir, 'setting-band-report.json');
+  const researchSummaryPath = path.join(researchDir, 'machine-research-summary.json');
+  const highLowPath = path.join(researchDir, 'high-low-discrimination-report.json');
+  const usesResearchPipeline = fs.existsSync(researchSummaryPath) && fs.existsSync(highLowPath);
+
+  // New Research pipeline machines use HighLowDiscrimination and intentionally do not
+  // produce the legacy difficulty-report.json / difficulty catalog artifacts.
+  if (usesResearchPipeline) {
+    console.log(`Skipping legacy difficulty catalog sync for Research pipeline machine: ${machineId}`);
+    process.exit(0);
+  }
 
   if (!fs.existsSync(settingBandPath)) {
     if (!fs.existsSync(researchPath) || !fs.existsSync(selectionPath)) {
