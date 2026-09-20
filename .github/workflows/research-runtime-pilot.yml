@@ -1,4 +1,7 @@
 name: Research runtime pilot
+permissions:
+  contents: write
+
 on:
   pull_request:
     branches: [prototype-multi-machine]
@@ -28,7 +31,7 @@ jobs:
           done
           git diff --exit-code -- catalog.json machines/
       - name: Publish pilot packages on release branch
-        if: startsWith(github.head_ref, 'release/publish-research-pilot-three-')
+        if: github.head_ref == 'release/prototype-three-research-machines-20260920'
         shell: bash
         run: |
           set -euo pipefail
@@ -46,3 +49,15 @@ jobs:
             grep -q "\"machineId\": \"$id\"" catalog.json
           done
           git status --short
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add catalog.json \
+            machines/L_GOBLIN_SLAYER_RD/machine-package.json \
+            machines/L_LOVEJOU3_M4/machine-package.json \
+            machines/L_SMASLO_KAIJI_KYOEN_FJ/machine-package.json
+          if ! git diff --cached --quiet; then
+            git commit -m "release: publish three research pilot machines to prototype"
+            git fetch origin "${{ github.head_ref }}"
+            git rebase "origin/${{ github.head_ref }}"
+            git push origin HEAD:${{ github.head_ref }}
+          fi
