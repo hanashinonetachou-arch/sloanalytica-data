@@ -161,3 +161,109 @@ Kaiji:
 - Predecessor Observation: NOT_REQUIRED by contract because this is not a pure A-type machine.
 
 The same standard will now be applied to Goblin Slayer and Love Jou 3 before final IG7000 is accepted.
+
+
+## 2026-09-20 Goblin Slayer / Love Jou 3 denominator and dependency pass
+
+### Goblin Slayer (2023)
+
+Confirmed candidate contracts:
+
+- Common bell
+  - family: GAME
+  - target: common-bell occurrences
+  - trial universe: games in which the published common-bell probability applies
+  - exposureQuality: DERIVED until state applicability is cross-checked
+  - dependency: role observation; do not duplicate with any overlapping role aggregate.
+
+- Replay 3-chain → CZ
+  - family: CONDITIONAL
+  - target: CZ wins caused by the qualifying replay-chain opportunity
+  - denominator: number of replay-3-chain qualifying opportunities
+  - 4+ replay chain is 100% across settings and therefore contributes no setting information as a standalone feature.
+  - dependency: CZ-pathway observation; must not be independently double-counted with a CZ aggregate that already includes these wins.
+
+- 300G / 500G milestone → CZ
+  - family: EVENT
+  - target: CZ wins at the corresponding milestone
+  - denominator: number of times the exact milestone opportunity is reached
+  - 100G milestone is 30.1% for every setting and is rejected for zero setting discrimination.
+  - 300G and 500G must remain separate event opportunities unless a later model explicitly represents their conditional reach relationship.
+  - dependency: downstream CZ-pathway observation.
+
+- CZ type distribution after replay/bell-chain triggered CZ
+  - family: CONDITIONAL
+  - denominator: qualifying CZ wins from the relevant replay/bell-chain route
+  - model: multinomial distribution across MISSION / CHANCE / BATTLE
+  - dependency: conditional child of the triggering-route CZ win; never an independent game-rate feature.
+
+- AT initial hit
+  - published rate remains a candidate but is downstream of several upstream pathways.
+  - final likelihood participation requires dependency decomposition; it must not be blindly multiplied with all upstream CZ observations.
+
+Exposure rule: conditional/event features receive only the expected number of their real opportunities within 7000G. No 7000-direct-trial shortcut is permitted for replay-chain or milestone features.
+
+### Love Jou 3
+
+Confirmed candidate contracts:
+
+- AT initial hit
+  - GAME-normalized published rate candidate.
+  - exact normal-game trial universe remains to be tied to an observable denominator before final score.
+
+- LOVE ZONE initial hit
+  - GAME-normalized published rate candidate.
+  - dependency: upstream/downstream relationship with AT must be represented before joint likelihood use.
+
+- W LOVE RUSH occurrence
+  - rare GAME-normalized candidate.
+  - provisional screen remains JOINT_ELIGIBLE only; final score awaits correct exposure and dependency.
+
+- Advantageous-section transition initial internal state
+  - family: EVENT
+  - denominator: advantageous-section transition / reset opportunities.
+  - destinations Normal / High / Super-high A / Super-high B are mutually exclusive.
+  - model: multinomial.
+  - complete all-setting destination probabilities are available.
+
+- LOVE ZONE failure → internal-state destination
+  - family: CONDITIONAL
+  - denominator: LOVE ZONE failure events.
+  - mutually exclusive destination states; model as multinomial.
+  - most destination probabilities are setting-common or only weakly setting-dependent; evaluate as one multinomial feature, not multiple independent binomials.
+
+- LOVE ZONE failure → AT revival
+  - family: CONDITIONAL
+  - denominator: LOVE ZONE failures
+  - target: subsequent AT true-precursor transition / revival as defined by source
+  - dependency: shares the same parent failure events with post-CZ state transition and must not be treated as an unrelated game-rate feature.
+
+- Relaxation-spring transition
+  - family: CONDITIONAL / EVENT depending on the exact precursor opportunity.
+  - public tables separate fake and true precursor outcomes.
+  - combined rows with missing settings are not used when the complete component representation is available.
+  - observation feasibility must be proven before Selection participation.
+
+Dependency rules:
+- state-destination rows are one multinomial observation each, not four/five independent features;
+- LOVE ZONE rate, LOVE ZONE failure observations, and AT initial hit share a causal pathway and require conditional modeling;
+- reset-only events have very low expected exposure in a normal single-session 7000G model and must not receive 7000 direct trials.
+
+### Gate status after this pass
+
+Goblin Slayer:
+- Data Completeness: major numeric candidates COMPLETE.
+- Denominator/Trial Universe: COMPLETE at family/opportunity level; exact exposure rates still pending where opportunities are conditional.
+- Dependency: pathway map established; final decomposition pending.
+- Predecessor Observation: NOT_REQUIRED.
+
+Love Jou 3:
+- Data Completeness: major numeric candidates COMPLETE; incomplete aggregate rows are excluded where necessary.
+- Denominator/Trial Universe: COMPLETE at family/opportunity level for the principal candidates.
+- Dependency: multinomial and causal-pathway structure established.
+- Predecessor Observation: NOT_REQUIRED.
+
+Kaiji:
+- remains at the previous corrected denominator/dependency state.
+
+No final IG7000 / Selection Score is accepted yet for conditional/event candidates. The next step is to construct realistic 7000G exposure for the three machines and compute Selection from those exposures rather than from nominal direct trials.
