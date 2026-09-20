@@ -97,7 +97,14 @@ jobs:
           set -euo pipefail
           while IFS= read -r research_file; do
             echo "::group::${research_file}"
-            npm run research:validate -- "$research_file"
+            machine_id="$(basename "$(dirname "$research_file")")"
+            if [[ -f "research/${machine_id}/machine-research-summary.json" && -f "research/${machine_id}/canonical-ui.json" && -f "research/${machine_id}/observation-data.json" ]]; then
+              echo "New research pipeline contract detected: ${machine_id}"
+              node tools/build-research-runtime-pilot.mjs "${machine_id}"
+              node tools/validate-runtime-machine-package.mjs "build/${machine_id}/machine-package.generated.json"
+            else
+              npm run research:validate -- "$research_file"
+            fi
             echo '::endgroup::'
           done < /tmp/research_files.txt
 
