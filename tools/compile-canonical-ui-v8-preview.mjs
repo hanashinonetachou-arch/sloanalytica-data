@@ -11,7 +11,7 @@ export function validateCanonicalUiV8(ui){
     if(typeof s.collapsible!=="boolean") errors.push(`${s.id}: collapsible required`);
     if(typeof s.defaultExpanded!=="boolean") errors.push(`${s.id}: defaultExpanded required`);
     if(s.description && s.description.length>80 && s.descriptionPresentation?.collapsible!==true) errors.push(`${s.id}: long description must be independently collapsible`);
-    const nodes=[...(s.groups??[]),...(s.items??[])];\n    const checkRepeated=(n)=>{if(n.observationMultiplicity==="REPEATED_CATEGORICAL_EVENT" && (n.interaction?.type!=="ADD_OBSERVATION"||n.interaction?.preservePriorObservations!==true||n.interaction?.showAccumulatedCounts!==true)) errors.push(`${s.id}/${n.id??n.evidenceId}: repeated categorical event must accumulate and show counts`);};
+    const nodes=[...(s.groups??[]),...(s.items??[])];\n    const checkRepeated=(n)=>{if(n.observationMultiplicity==="REPEATED_CATEGORICAL_EVENT"){const t=n.interaction?.type;if(!["CATEGORY_COUNTERS","ADD_OBSERVATION"].includes(t)||n.interaction?.preservePriorObservations!==true||n.interaction?.showAccumulatedCounts!==true) errors.push(`${s.id}/${n.id??n.evidenceId}: repeated categorical event needs an explicit accumulating interaction`);if(t==="CATEGORY_COUNTERS"&&n.interaction?.totalOpportunities!=="DERIVE_FROM_CATEGORY_COUNTS") errors.push(`${s.id}/${n.id??n.evidenceId}: category counters must derive total opportunities when mutually exclusive`);}};
     for(const n of nodes){
       for(const i of n.inputs??[]){
         if(![6,12].includes(i.gridSpan)) errors.push(`${s.id}/${n.id}: gridSpan must be explicit 6 or 12`);
@@ -23,7 +23,7 @@ export function validateCanonicalUiV8(ui){
       if(i.observationMultiplicity==="REPEATED_CATEGORICAL_EVENT" && (i.interaction?.type!=="ADD_OBSERVATION"||i.interaction?.preservePriorObservations!==true)) errors.push(`${s.id}/${i.evidenceId}: repeated categorical event must accumulate`);
     }
   }
-  if((ui?.previewCheckpoint?.secondObservationPathRequired)!==true) errors.push("preview must require second-observation path");
+  if((ui?.previewCheckpoint?.repeatedEntryDemonstrationRequired)!==true) errors.push("preview must require repeated-entry demonstration");
   return {ok:errors.length===0,errors};
 }
 export function compilePreviewModel(ui){
