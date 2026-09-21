@@ -371,9 +371,8 @@ If any item is absent or ambiguous, machine Research MUST NOT begin.
 
 ## 22. Current validation state
 
-v8.0 is a reconstructed DRAFT. It is not yet validated by a fresh Love嬢3 run.
-The next permitted machine-data action is a zero-based L_LOVEJOU3_M4 Research run under this Manifest, stopping at the UI Preview Checkpoint for user review before package publication/distribution/device work.
-No existing Love嬢3 package/UI should be edited first.
+v8.0 remains a DRAFT under reference-machine validation. The previous Love嬢3 UI-P preview was intentionally rejected after exposing generic UX contract gaps. The next permitted reference action is a fresh L_LOVEJOU3_M4 reconstruction under the amended Manifest, again stopping at UI-P before package publication/distribution/device work.
+No existing Love嬢3 Canonical UI or preview may be patched as the design authority.
 
 ### 14.4A Repeated observation input strategy
 
@@ -411,3 +410,53 @@ No existing Love嬢3 package/UI should be edited first.
 - **REPINPUT-023**: For `SEPARATE_COUNTER`, the UI MUST make the observation opportunity understandable in natural language (for example “AT終了画面を確認した回数”). Incrementing a listed category MUST NOT silently fabricate an opportunity count unless Canonical explicitly declares an atomic paired-entry interaction.
 - **REPINPUT-024**: Canonical validation MUST BLOCK: missing `categoryCoverage`; derived totals on non-exhaustive categories; non-exhaustive absence-sensitive Evidence without opportunity tracking; duplicate or semantically unmatched categories; and any contract that cannot preserve UNOBSERVED versus OBSERVED_ZERO.
 - **REPINPUT-025**: Runtime materialization MUST preserve `categoryCoverage` and `opportunityTracking` without reinterpretation. The faithful UI Preview MUST demonstrate both repeated category accumulation and the checked-zero versus unobserved distinction whenever `SEPARATE_COUNTER` is used.
+
+
+## 23. Reference-preview UX corrections — mandatory generic rules
+
+These rules were discovered at the Love嬢3 reference UI-P checkpoint. They are generic product rules, not Love嬢3 exceptions. A fresh AI/session MUST apply them without access to prior-chat context.
+
+### 23.1 Section header interaction
+- **ACC-012**: For a collapsible observation section, the section title/header itself is the primary expand/collapse control. A separate generic action button such as 「編集」 MUST NOT be required to open the section.
+- **ACC-013**: The complete section header hit area SHOULD be interactive where the renderer permits it, with an accessible expanded/collapsed state and a visual disclosure affordance. The user-facing action MUST mean expand/collapse, not “edit”.
+- **ACC-014**: accordion.singleOpen=true remains authoritative: opening one collapsible section closes the previously open collapsible section.
+- **ACC-015**: Section expansion and explanatory-text expansion are two independent layers. Opening a section MUST NOT automatically expand a collapsible explanation unless descriptionPresentation.defaultExpanded=true.
+
+### 23.2 Explanation behavior inside an opened section
+- **DESC-001**: When a section has a collapsible descriptionPresentation, its explanation control is rendered inside that section after the section is opened.
+- **DESC-002**: A user-facing label such as 「説明」 remains available for that control when specified by Canonical UI. The renderer MUST NOT replace this with always-visible prose merely because the parent section is open.
+- **DESC-003**: Closing/reopening a section MUST NOT conflate section state with explanation state.
+
+### 23.3 Do not expose inference-role scaffolding as UI grouping
+- **UI-013**: Internal inference roles such as PRIMARY, ALTERNATIVE, SUPPORT, REJECT, dependency relationship, or selection disposition are semantic metadata. They MUST NOT automatically become user-facing group headings.
+- **UI-014**: Generic headings that merely expose internal classification — including 「設定推測の主軸」 and 「代替データ」 — MUST NOT be generated unless Research/Observation establishes that the heading itself is necessary natural-language guidance for the user’s observation task.
+- **UI-015**: Dependency semantics MUST still survive for inference and explanation. Removing an internal-role heading MUST NOT remove dependencyContract, double-counting prevention, or the machine-specific explanation of why an item is primary/alternative.
+- **UI-016**: When multiple ordinary inputs belong to the same natural Observation Context and no natural operational subgroup is required, Canonical UI SHOULD place them directly in that section/context rather than wrapping each inference role in a visible subgroup.
+- **UI-017**: Canonical UI validation MUST distinguish an operational/natural-language group from an inference-role-only group. A group whose only justification is Selection metadata is invalid for user-facing rendering.
+
+### 23.4 「この機種の設定推測について」 is a required rendered summary surface
+- **SUMUI-001**: Canonical UI MUST include a user-facing section titled 「この機種の設定推測について」 (or an explicitly product-approved equivalent) when Machine Research Summary exists.
+- **SUMUI-002**: Opening this section MUST render the Machine Research Summary content; an empty shell or description-only section is a blocking preview/runtime error.
+- **SUMUI-003**: At minimum the rendered summary MUST expose: adopted setting-inference elements and their concrete adoption reasons; rejected elements and their concrete rejection reasons; unresolved elements when present and why unresolved; relevant dependency/double-counting rationale; and HighLowDiscrimination for 1500G / 3000G / 7000G when resolved.
+- **SUMUI-004**: The summary MUST use machine-specific user-facing reasons preserved from Research/Selection/Summary. Generic text such as 「推測計算に採用しています」 is insufficient.
+- **SUMUI-005**: HighLowDiscrimination is displayed as setting-discrimination reference information and MUST remain separate from runtime 「判定信頼度」.
+- **SUMUI-006**: Internal tokens, IDs, dispositions, scores, or dependency enum names MUST NOT be shown as the primary user-facing explanation. Rendered copy must be natural Japanese.
+- **SUMUI-007**: Runtime materialization and the App renderer MUST preserve/render the summary payload generically. A renderer that ignores canonical content / summary data fails UI-P even if ordinary input sections render correctly.
+
+### 23.5 Faithful-preview interaction proof
+- **PREVIEW-009**: UI-P review MUST use the actual generic App renderer and product CSS/layout path. Image-generation mockups may aid design discussion but cannot satisfy UI-P.
+- **PREVIEW-010**: The faithful preview MUST visibly or mechanically verify: title/header section toggling; single-open behavior; explanation control remaining independently available inside an opened section; ordinary counter/denominator rendering; Evidence repeated accumulation; UNOBSERVED versus OBSERVED_ZERO; and complete Research Summary rendering.
+- **PREVIEW-011**: The preview MUST NOT be accepted while visible implementation artifacts (for example escaped control characters such as literal backslash-n) remain.
+- **PREVIEW-012**: A preview failure caused by one of these generic rules MUST be corrected in Manifest/generic generation/rendering and then regenerated. Machine-specific visual compensation is prohibited.
+
+### 23.6 Mandatory construction assertions before Canonical UI is accepted
+The Canonical UI builder/validator MUST fail closed when any of the following is true:
+- **ASSERT-UI-001**: a visible group is justified only by inference-role metadata rather than a natural observation/operation context;
+- **ASSERT-UI-002**: a collapsible section requires a generic 「編集」 action instead of title/header expansion;
+- **ASSERT-UI-003**: section explanation behavior cannot be represented independently from section expansion;
+- **ASSERT-UI-004**: a Machine Research Summary exists but the 「この機種の設定推測について」 section cannot render adopted/rejected/unresolved reasons and HighLowDiscrimination;
+- **ASSERT-UI-005**: renderer/materializer drops canonical summary content;
+- **ASSERT-UI-006**: a preview cannot demonstrate the interaction semantics required by PREVIEW-010.
+
+### 23.7 Anti-omission restart instruction
+After any amendment to this section, a reference-machine rerun MUST NOT copy the prior Canonical UI as its design authority. The fresh run uses Research facts and this Manifest to reconstruct downstream artifacts. Prior artifacts are comparison evidence only. If the amendment affects presentation semantics but not public machine facts, Research may be re-executed as a reproducibility exercise without treating prior Research output as authority; quantitative/source facts may converge to the same values when independently recovered.
