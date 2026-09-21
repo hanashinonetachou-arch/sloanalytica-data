@@ -40,9 +40,14 @@ function bindEvidenceNode(node,evidenceCtx){
   const source=options[index]; if(!source || source.label!==cat.label) throw new Error(`Evidence category/order mismatch for ${node.id}: ${cat.label}`);
   // Legacy engine evidence refs identify the input group, not the v8 research option.
   // Resolve wiring by semantic constraint first, then by the engine option value.
+  const legacyGroupRefs=new Set(evidenceCtx.engineEvidence.filter(e=>e.inputId).flatMap(e=>e.sourceEvidenceRefs??[]));
+  const legacyGroupHint=[...legacyGroupRefs].find(ref=>node.id===ref || node.id.includes(ref) || ref.includes(node.id));
   const candidates=evidenceCtx.engineEvidence.filter(e=>{
    const input=evidenceCtx.engineInputs.get(e.inputId);
-   return input?.type==="multi_enum" && (input.options??[]).some(o=>o.value===e.triggerValue);
+   const validOption=input?.type==="multi_enum" && (input.options??[]).some(o=>o.value===e.triggerValue);
+   if(!validOption) return false;
+   if(!legacyGroupHint) return true;
+   return (e.sourceEvidenceRefs??[]).includes(legacyGroupHint);
   });
   const sameConstraint=candidates.filter(e=>{
    const confirmed=[...(e.confirmedSettings??[])].sort().join("|");
