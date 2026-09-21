@@ -21,5 +21,5 @@ jobs:
         run: npm run test:v8-kaiji-runtime
       - name: Build v8 reference package from repro source
         run: node tools/build-v8-reference-package.mjs L_SMASLO_KAIJI_KYOEN_FJ
-      - name: Verify generated package contains runtime bindings
-        run: node --input-type=module -e "import fs from 'node:fs';const p=JSON.parse(fs.readFileSync('repro-v8/L_SMASLO_KAIJI_KYOEN_FJ/machine-package.generated.json'));const s=p.ui.sections.find(x=>x.id==='SEC_NORMAL');const i=s.items[0].inputs.find(x=>x.id==='INP_NORMAL_GAMES');if(!i.engineBinding?.inputIds?.length)process.exit(1);"
+      - name: Verify generated package contains runtime bindings and engine
+        run: node --input-type=module -e "import fs from 'node:fs';const p=JSON.parse(fs.readFileSync('repro-v8/L_SMASLO_KAIJI_KYOEN_FJ/machine-package.generated.json'));const s=p.ui.sections.find(x=>x.id==='SEC_NORMAL');const i=s.items[0].inputs.find(x=>x.id==='INP_NORMAL_GAMES');if(!i.engineBinding?.inputIds?.length)process.exit(1);if((p.features?.features?.length??0)!==3)process.exit(2);if((p.evidence?.evidences?.length??0)!==17)process.exit(3);if(p.machine?.machineId!=='L_SMASLO_KAIJI_KYOEN_FJ')process.exit(4);"
