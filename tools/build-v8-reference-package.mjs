@@ -1,0 +1,19 @@
+import fs from "node:fs";import path from "node:path";import {fileURLToPath} from "node:url";
+import {materializeCanonicalUiV8,assertCanonicalRuntimeUiEquality} from "./materialize-canonical-ui-v8-runtime.mjs";
+const ROOT=path.resolve(path.dirname(fileURLToPath(import.meta.url)),"..");
+const id=process.argv[2];if(!id)throw new Error("Usage: node tools/build-v8-reference-package.mjs MACHINE_ID");
+const candidates=[path.join(ROOT,"validation","v8-rerun",id),path.join(ROOT,"validation","v8",id)];const d=candidates.find(x=>fs.existsSync(path.join(x,"canonical-ui.json")));if(!d)throw new Error("No v8 validation directory for "+id);const read=n=>JSON.parse(fs.readFileSync(path.join(d,n),"utf8"));
+const research=read("research-data.json"),selection=read("selection-data.json"),observation=read("observation-data.json"),highLow=read("high-low-discrimination-report.json"),summary=read("machine-research-summary.json"),canonical=read("canonical-ui.json");
+const machineIdOf=x=>x.machineId??x.machine?.machineId;for(const [name,x] of Object.entries({research,selection,observation,highLow,summary,canonical}))if(machineIdOf(x)!==id)throw new Error(name+" machineId mismatch");
+const featureIds=new Set(selection.features.map(f=>f.featureId).filter(Boolean));
+for(const f of selection.features){
+ const adoptedNonIndependent=['ADOPT_ALTERNATIVE','ADOPT_CONDITIONAL'].includes(f.disposition);
+ if(!adoptedNonIndependent)continue;
+ const dc=f.dependencyContract;
+ if(!dc)throw new Error(f.featureId+' structured dependencyContract required');
+ if(!Array.isArray(dc.featureIds)||dc.featureIds.length===0||dc.featureIds.some(x=>!featureIds.has(x)))throw new Error(f.featureId+' dependency featureIds invalid');
+ if(dc.combinationPolicy!=='DO_NOT_MULTIPLY')throw new Error(f.featureId+' dependency combinationPolicy invalid');
+}
+const ui=materializeCanonicalUiV8(canonical);assertCanonicalRuntimeUiEquality(canonical,ui);
+const pkg={schemaVersion:"machine-package-v8-reference",machineId:id,manifestRevision:canonical.manifestRevision,referenceValidation:true,researchSchemaVersion:research.schemaVersion,selection:structuredClone(selection),observation:structuredClone(observation),highLowDiscrimination:structuredClone(highLow),machineResearchSummary:structuredClone(summary),ui};
+const out=path.join(d,"machine-package.generated.json");fs.writeFileSync(out,JSON.stringify(pkg,null,2)+"\n");console.log(out);
