@@ -49,7 +49,10 @@ function bindEvidenceNode(node,evidenceCtx){
    const denied=[...(e.deniedSettings??[])].sort().join("|");
    const allowed=[...(source.allowedSettings??[])].sort().join("|");
    const sourceDenied=[...(source.deniedSettings??[])].sort().join("|");
-   return confirmed===allowed && denied===sourceDenied;
+   // Legacy confirmation records often omit the complementary denied set.
+   const confirmationEquivalent=allowed && confirmed===allowed && (!denied || denied===sourceDenied);
+   const denialEquivalent=sourceDenied && denied===sourceDenied && (!confirmed || confirmed===allowed);
+   return confirmationEquivalent || denialEquivalent;
   });
   const byMeaning=sameConstraint.length===1?sameConstraint[0]:candidates.find(e=>e.displayName===source.label||e.name===source.label);
   const engineEvidence=byMeaning;
