@@ -480,3 +480,27 @@ After any amendment to this section, a reference-machine rerun MUST NOT copy the
 - **SUMUI-013**: Importance is distinct from adoption disposition and from setting-discrimination score. The construction stage MUST assign it by a Manifest-defined deterministic mapping from quantitative usefulness/role; machine-specific freehand importance labeling is prohibited.
 - **SUMUI-014**: Until a deterministic boundary mapping for 「最重要」「重要」「補助」「微小」 is explicitly defined in this Manifest, Canonical UI generation MUST BLOCK rather than guess an importance label. The reference-machine rerun MUST therefore resolve this mapping before Canonical UI is accepted.
 - **SUMUI-015**: The explanation of what 「設定判別スコア」 means, its formula, and general threshold education are NOT part of the per-machine 「この機種の設定推測について」 surface at this stage. That explanatory content is reserved for a separate app-level settings/help surface. Per-machine UI may show the label/value where required by SUMUI-010 without explaining the metric itself.
+
+
+## 24. 実機入力の操作性 — 母数入力・未観測表示・ラベル重複
+
+### INPUTUX-001 — 母数・ゲーム数は直接数値入力を基本とする
+通常時ゲーム数、総ゲーム数、対応ゲーム数など、実戦で数百〜数千単位になり得る母数入力を +1 / -1 のみで操作させてはならない。Canonical UI はこの種の入力を数値直接入力可能として表現し、Renderer はキーボード等による直接入力を提供する。
+
+### INPUTUX-002 — 補助加算は直接入力を置き換えない
+母数・ゲーム数には +50 等の QuickAdd を補助として提供してよいが、直接数値入力を失ってはならない。Quick Input 全体機能の停止とは別に、個別数値入力の補助操作として扱う。
+
+### INPUTUX-003 — 発生回数カウンターとの操作を分離する
+LOVE ZONE、AT初当り、Evidenceカテゴリ等の低〜中頻度の発生回数は +/- カウンターを使用できる。母数入力と発生回数入力を同一操作方式へ機械的に統一してはならない。
+
+### INPUTUX-004 — 未観測と観測ゼロは意味を保ちつつ簡潔に表示する
+内部値では null/unentered = UNOBSERVED、0 = OBSERVED_ZERO を厳密に維持する。未観測の主表示は原則「—」等の簡潔な表示とし、各カードで「未入力」を強調表示し続けない。
+
+### INPUTUX-005 — 未観測へ戻す操作は入力後のみ表示する
+「未確認に戻す」等のリセット操作は観測値が存在するときのみ表示する。未観測状態で同じ意味の文言を重複表示してはならない。
+
+### INPUTUX-006 — 同一ラベルの重複を避ける
+グループ見出し、入力カード見出し、入力コントロール内で同じ自然言語ラベルを反復してはならない。文脈を失わない範囲で1つの入力対象につき主ラベルは1回を原則とする。グループ説明や母数範囲の説明は独立した説明UIに保持する。
+
+### ASSERT-UI-007 — 実機入力操作性の fail-closed 検証
+Preview / Runtime Contract Verification は、(a) 大きな母数が直接入力可能、(b) UNOBSERVED と OBSERVED_ZERO が区別される、(c) 未観測表示が重複しない、(d) 同一入力ラベルが不必要に反復されないことを確認する。違反時は機種固有UIで補正せず、Canonical規則または汎用Rendererを修正する。
