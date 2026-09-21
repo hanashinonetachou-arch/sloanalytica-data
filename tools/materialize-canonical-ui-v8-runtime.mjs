@@ -15,6 +15,7 @@ export function materializeCanonicalUiV8(canonicalUi){
    id:s.id,title:s.title,description:s.description,
    descriptionPresentation:structuredClone(s.descriptionPresentation??null),
    collapsible:s.collapsible,defaultExpanded:s.defaultExpanded,
+   headerToggle:s.headerToggle===true,genericEditButton:s.genericEditButton===true,
    ...(s.observationContext?{observationContext:s.observationContext}:{}),
    ...(s.observationAction?{observationAction:s.observationAction}:{}),
    groups:(s.groups??[]).map(mapNode),items:(s.items??[]).map(mapNode),
