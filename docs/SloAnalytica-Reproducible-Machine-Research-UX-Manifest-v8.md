@@ -348,7 +348,7 @@ Before starting any machine Research, the operator/AI MUST confirm this Manifest
 - Machine Research Summary
 - 「この機種の設定推測について」 uses fixed order: 高低判別精度 → 採用 → 不採用 → 未解決
 - user-facing SelectionScore label is fixed as 「設定判別スコア」 and score-caused decisions explicitly show it
-- every adopted element has canonical importance label 「最重要／重要／補助／微小」 with deterministic Manifest mapping
+- every adopted element has canonical importance label 「必須／重要／補助／微小」 with deterministic Manifest mapping
 - internal inference roles are not exposed as generic UI headings
 - section title/header is the expand/collapse control; no generic 「編集」 opener
 - section expansion and in-section 「説明」 expansion remain independent
@@ -476,7 +476,7 @@ After any amendment to this section, a reference-machine rerun MUST NOT copy the
 - **SUMUI-009**: The user-facing name of internal SelectionScore is fixed as 「設定判別スコア」. User-facing machine-summary UI MUST NOT expose “SelectionScore” or substitute another label.
 - **SUMUI-010**: When an adoption or rejection reason is caused wholly or partly by the setting-discrimination score / quantitative Selection threshold, the user-facing reason MUST explicitly state that fact and MUST show the applicable 「設定判別スコア」 value. A generic adoption/rejection sentence without the score is insufficient in that case.
 - **SUMUI-011**: When adoption/rejection is determined for another reason (for example dependency/double-counting, unusable denominator, insufficient public data, unresolved exposure, or runtime inapplicability), the UI MUST state that concrete reason and MUST NOT falsely attribute the decision to the score.
-- **SUMUI-012**: Every adopted setting-inference element MUST additionally carry a user-facing qualitative importance label in natural Japanese. The canonical label vocabulary is fixed as: 「最重要」「重要」「補助」「微小」. Runtime renderers MUST display the canonical label and MUST NOT derive or rename it independently.
+- **SUMUI-012**: Every adopted setting-inference element MUST additionally carry a user-facing qualitative importance label in natural Japanese. The canonical label vocabulary is fixed as: 「必須」「重要」「補助」「微小」. Runtime renderers MUST display the canonical label and MUST NOT derive or rename it independently.
 - **SUMUI-013**: Importance is distinct from adoption disposition and from setting-discrimination score. The construction stage MUST assign it by a Manifest-defined deterministic mapping from quantitative usefulness/role; machine-specific freehand importance labeling is prohibited.
 - **SUMUI-014**: Until a deterministic boundary mapping for 「最重要」「重要」「補助」「微小」 is explicitly defined in this Manifest, Canonical UI generation MUST BLOCK rather than guess an importance label. The reference-machine rerun MUST therefore resolve this mapping before Canonical UI is accepted.
 - **SUMUI-015**: The explanation of what 「設定判別スコア」 means, its formula, and general threshold education are NOT part of the per-machine 「この機種の設定推測について」 surface at this stage. That explanatory content is reserved for a separate app-level settings/help surface. Per-machine UI may show the label/value where required by SUMUI-010 without explaining the metric itself.
