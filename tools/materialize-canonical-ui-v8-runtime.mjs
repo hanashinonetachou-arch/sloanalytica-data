@@ -29,43 +29,39 @@ function buildNumericBindings(observationContract){
 
 function buildEvidenceBindings(evidenceContract,machinePackage){
  const groups=new Map((evidenceContract?.groups??[]).map(g=>[g.groupId,g]));
- const evidenceBySource=new Map();
- for(const e of machinePackage?.evidence?.evidences??[]){
-  for(const ref of e.sourceEvidenceRefs??[]) evidenceBySource.set(ref,e);
- }
- const inputByEvidence=new Map();
- for(const input of machinePackage?.inputs?.inputs??[]){
-  if(input.type!=="multi_enum") continue;
-  for(const option of input.options??[]) inputByEvidence.set(`${input.id}\0${option.value}`,{inputId:input.id,triggerValue:option.value});
- }
- return {groups,evidenceBySource,inputByEvidence};
+ const engineEvidence=machinePackage?.evidence?.evidences??[];
+ const engineInputs=new Map((machinePackage?.inputs?.inputs??[]).map(i=>[i.id,i]));
+ return {groups,engineEvidence,engineInputs};
 }
-
 function bindEvidenceNode(node,evidenceCtx){
  const group=evidenceCtx.groups.get(node.id); if(!group || node.interaction?.type!=="CATEGORY_COUNTERS") return node;
  const options=group.options??[];
  const categories=(node.interaction.categories??[]).map((cat,index)=>{
   const source=options[index]; if(!source || source.label!==cat.label) throw new Error(`Evidence category/order mismatch for ${node.id}: ${cat.label}`);
-  const engineEvidence=evidenceCtx.evidenceBySource.get(source.sourceEvidenceId);
-  if(!engineEvidence) return cat; // suggestion-only evidence may intentionally have no engine constraint.
-  for(const [key,binding] of evidenceCtx.inputByEvidence){
-   const [inputId,value]=key.split("\0");
-   if((engineEvidence.inputId===inputId && engineEvidence.triggerValue===value) || engineEvidence.value===value) return {...cat,engineBinding:{mode:"MULTI_ENUM_PRESENCE",...binding}};
-  }
-  return cat;
+  // Legacy engine evidence refs identify the input group, not the v8 research option.
+  // Resolve wiring by semantic constraint first, then by the engine option value.
+  const candidates=evidenceCtx.engineEvidence.filter(e=>{
+   const input=evidenceCtx.engineInputs.get(e.inputId);
+   return input?.type==="multi_enum" && (input.options??[]).some(o=>o.value===e.triggerValue);
+  });
+  const sameConstraint=candidates.filter(e=>{
+   const confirmed=[...(e.confirmedSettings??[])].sort().join("|");
+   const denied=[...(e.deniedSettings??[])].sort().join("|");
+   const allowed=[...(source.allowedSettings??[])].sort().join("|");
+   const sourceDenied=[...(source.deniedSettings??[])].sort().join("|");
+   return confirmed===allowed && denied===sourceDenied;
+  });
+  const byMeaning=sameConstraint.length===1?sameConstraint[0]:candidates.find(e=>e.displayName===source.label||e.name===source.label);
+  const engineEvidence=byMeaning;
+  if(!engineEvidence) return cat;
+  return {...cat,engineBinding:{mode:"MULTI_ENUM_PRESENCE",inputId:engineEvidence.inputId,triggerValue:engineEvidence.triggerValue}};
  });
  const opportunity=group.interaction?.opportunityTracking;
  const interaction={...node.interaction,categories};
- if(opportunity?.type==="NONE"){
-  interaction.totalOpportunities="NONE";
-  delete interaction.opportunityTracking;
- } else if(opportunity?.type==="SEPARATE_COUNTER"){
-  interaction.totalOpportunities="SEPARATE_COUNTER";
-  interaction.opportunityTracking=clone(opportunity);
- }
+ if(opportunity?.type==="NONE"){ interaction.totalOpportunities="NONE"; delete interaction.opportunityTracking; }
+ else if(opportunity?.type==="SEPARATE_COUNTER"){ interaction.totalOpportunities="SEPARATE_COUNTER"; interaction.opportunityTracking=clone(opportunity); }
  return {...node,interaction};
 }
-
 export function materializeCanonicalUiV8(canonicalUi,{observationContract=null,evidenceContract=null,machinePackage=null}={}){
  const v=validateCanonicalUiV8(canonicalUi); if(!v.ok) throw new Error(v.errors.join("\n"));
  const numericBindings=buildNumericBindings(observationContract);
