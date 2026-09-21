@@ -1,0 +1,264 @@
+{
+  "schemaVersion": "repro-v8-preselection-analysis-v1",
+  "machineId": "L_SMASLO_KAIJI_KYOEN_FJ",
+  "manifest": "v8.0",
+  "generatedAt": "2026-09-21",
+  "completeness": {
+    "complete": [
+      "RF_BONUS_INITIAL",
+      "RF_CZ_INITIAL",
+      "RF_CZ_SUCCESS",
+      "RF_WATERMELON",
+      "RF_WEAK_CHANCE",
+      "RF_WEAK_CHERRY",
+      "RF_STRONG_CHERRY",
+      "RF_ZAWA_FROM_WEAK_RARE",
+      "RF_RED7_FIRST_BAR_BENEFIT"
+    ],
+    "incomplete": [
+      "RF_MODE_AFTER_CHAIN",
+      "RF_TONEGAWA_DIRECT_FROM_HIRAMEKI"
+    ],
+    "rule": "Incomplete public distributions remain researched but cannot be given fabricated likelihoods."
+  },
+  "denominator": [
+    {
+      "featureIds": [
+        "RF_BONUS_INITIAL",
+        "RF_CZ_INITIAL"
+      ],
+      "trialUniverse": "通常時消化ゲーム",
+      "sharedInputEligible": true
+    },
+    {
+      "featureIds": [
+        "RF_WATERMELON",
+        "RF_WEAK_CHANCE",
+        "RF_WEAK_CHERRY",
+        "RF_STRONG_CHERRY"
+      ],
+      "trialUniverse": "小役を観測した全遊技ゲーム",
+      "sharedInputEligible": true
+    },
+    {
+      "featureIds": [
+        "RF_CZ_SUCCESS"
+      ],
+      "trialUniverse": "CZ突入回数",
+      "sharedInputEligible": false
+    },
+    {
+      "featureIds": [
+        "RF_ZAWA_FROM_WEAK_RARE"
+      ],
+      "trialUniverse": "通常時に成立した弱レア役回数",
+      "sharedInputEligible": false
+    },
+    {
+      "featureIds": [
+        "RF_RED7_FIRST_BAR_BENEFIT"
+      ],
+      "trialUniverse": "赤7BIG中に初回BAR揃いを確認した回数",
+      "sharedInputEligible": false
+    },
+    {
+      "featureIds": [
+        "RF_MODE_AFTER_CHAIN"
+      ],
+      "trialUniverse": "設定変更後・単発後を除くボーナス連チャン終了回数",
+      "sharedInputEligible": false
+    },
+    {
+      "featureIds": [
+        "RF_TONEGAWA_DIRECT_FROM_HIRAMEKI"
+      ],
+      "trialUniverse": "朝一リセット時・天井到達時を除く閃き前兆移行回数",
+      "sharedInputEligible": false
+    }
+  ],
+  "exposure": [
+    {
+      "featureId": "RF_BONUS_INITIAL",
+      "at7000": "7000通常時Gを観測した場合7000 trials",
+      "status": "RESOLVED"
+    },
+    {
+      "featureId": "RF_CZ_INITIAL",
+      "at7000": "7000通常時Gを観測した場合7000 trials",
+      "status": "RESOLVED"
+    },
+    {
+      "featureIds": [
+        "RF_WATERMELON",
+        "RF_WEAK_CHANCE",
+        "RF_WEAK_CHERRY",
+        "RF_STRONG_CHERRY"
+      ],
+      "at7000": "7000Gを小役観測した場合7000 shared trials",
+      "status": "RESOLVED"
+    },
+    {
+      "featureId": "RF_CZ_SUCCESS",
+      "at7000": "CZ初当り率から約29〜40回/7000通常時G。ただし設定依存の機会数",
+      "status": "RESOLVED_CONDITIONAL"
+    },
+    {
+      "featureId": "RF_ZAWA_FROM_WEAK_RARE",
+      "at7000": "弱レア役（スイカ・弱チャンス目・弱チェリー）公開率から概ね203〜225機会/7000G",
+      "status": "RESOLVED_CONDITIONAL"
+    },
+    {
+      "featureId": "RF_RED7_FIRST_BAR_BENEFIT",
+      "at7000": null,
+      "status": "UNRESOLVED",
+      "reason": "赤7BIGかつ初回BAR揃い機会の実戦頻度を公開情報から一意に構築できない"
+    },
+    {
+      "featureId": "RF_MODE_AFTER_CHAIN",
+      "at7000": null,
+      "status": "UNRESOLVED",
+      "reason": "連チャン終了機会数を7000Gへ変換する公開Exposureがない"
+    },
+    {
+      "featureId": "RF_TONEGAWA_DIRECT_FROM_HIRAMEKI",
+      "at7000": null,
+      "status": "UNRESOLVED",
+      "reason": "対象閃き前兆の機会数と中間設定尤度が不足"
+    }
+  ],
+  "dependency": [
+    {
+      "featureIds": [
+        "RF_BONUS_INITIAL",
+        "RF_CZ_INITIAL"
+      ],
+      "relationship": "ALTERNATIVE",
+      "combinationPolicy": "DO_NOT_MULTIPLY",
+      "preferredPrimary": "RF_CZ_INITIAL",
+      "reason": "CZはボーナス到達経路の一部で、両者を独立尤度として掛けると同じ通常時の好調を重複評価し得る。"
+    },
+    {
+      "featureIds": [
+        "RF_CZ_INITIAL",
+        "RF_ZAWA_FROM_WEAK_RARE"
+      ],
+      "relationship": "CONDITIONAL",
+      "combinationPolicy": "DO_NOT_MULTIPLY_WITHOUT_HIERARCHICAL_MODEL",
+      "reason": "弱レア役→ざわ高確はCZ到達の上流経路に位置するため独立扱いしない。"
+    },
+    {
+      "featureIds": [
+        "RF_WATERMELON",
+        "RF_WEAK_CHANCE",
+        "RF_WEAK_CHERRY",
+        "RF_STRONG_CHERRY"
+      ],
+      "relationship": "MUTUALLY_EXCLUSIVE_SHARED_TRIAL_UNIVERSE",
+      "combinationPolicy": "JOINT_MULTINOMIAL_REQUIRED",
+      "reason": "同一ゲームを共有し各小役は排他的。個別Bernoulliを独立乗算せず共同分布として扱う必要がある。"
+    },
+    {
+      "featureIds": [
+        "RF_WATERMELON",
+        "RF_WEAK_CHANCE",
+        "RF_WEAK_CHERRY",
+        "RF_ZAWA_FROM_WEAK_RARE"
+      ],
+      "relationship": "CONDITIONAL_DENOMINATOR",
+      "combinationPolicy": "HIERARCHICAL_ONLY",
+      "reason": "ざわ高確の母数は弱レア役成立回数であり、小役発生率と条件付き移行率を階層構造として扱う必要がある。"
+    }
+  ],
+  "quantitativeScreen": {
+    "method": "equal-prior mutual information between setting {1..6} and 7000-trial binomial count; IG7000 bits, SelectionScore=IG×200. Conditional features use realistic opportunity counts where resolved. This is pre-selection screening; dependency can suppress adoption.",
+    "scores": [
+      {
+        "featureId": "RF_CZ_INITIAL",
+        "ig7000": 0.296131,
+        "selectionScore": 59.23,
+        "classByScore": "CORE"
+      },
+      {
+        "featureId": "RF_BONUS_INITIAL",
+        "ig7000": 0.153445,
+        "selectionScore": 30.69,
+        "classByScore": "CORE"
+      },
+      {
+        "featureId": "RF_WEAK_CHERRY",
+        "ig7000": 0.098484,
+        "selectionScore": 19.7,
+        "classByScore": "SUPPORT"
+      },
+      {
+        "featureId": "RF_WATERMELON",
+        "ig7000": 0.062645,
+        "selectionScore": 12.53,
+        "classByScore": "SUPPORT"
+      },
+      {
+        "featureId": "RF_WEAK_CHANCE",
+        "ig7000": 0.051894,
+        "selectionScore": 10.38,
+        "classByScore": "SUPPORT"
+      },
+      {
+        "featureId": "RF_STRONG_CHERRY",
+        "ig7000": 0.026422,
+        "selectionScore": 5.28,
+        "classByScore": "JOINT_ELIGIBLE"
+      },
+      {
+        "featureId": "RF_CZ_SUCCESS",
+        "ig7000Range": [
+          0.00573,
+          0.0079
+        ],
+        "selectionScoreRange": [
+          1.15,
+          1.58
+        ],
+        "classByScore": "REJECT"
+      },
+      {
+        "featureId": "RF_ZAWA_FROM_WEAK_RARE",
+        "ig7000ApproxRange": [
+          0.319,
+          0.347
+        ],
+        "selectionScoreApproxRange": [
+          63.8,
+          69.4
+        ],
+        "classByScore": "CORE_BUT_DEPENDENCY_REQUIRES_HIERARCHICAL_OR_ALTERNATIVE"
+      },
+      {
+        "featureId": "RF_RED7_FIRST_BAR_BENEFIT",
+        "selectionScore": null,
+        "classByScore": "BLOCK_EXPOSURE_UNKNOWN"
+      },
+      {
+        "featureId": "RF_MODE_AFTER_CHAIN",
+        "selectionScore": null,
+        "classByScore": "BLOCK_INCOMPLETE_DISTRIBUTION_AND_EXPOSURE_UNKNOWN"
+      },
+      {
+        "featureId": "RF_TONEGAWA_DIRECT_FROM_HIRAMEKI",
+        "selectionScore": null,
+        "classByScore": "BLOCK_INCOMPLETE_LIKELIHOOD_AND_EXPOSURE_UNKNOWN"
+      }
+    ]
+  },
+  "blockers": [
+    {
+      "id": "GENERIC_SELECTION_JOINT_MODEL",
+      "stage": "Selection",
+      "description": "Manifest requires dependency-safe inference but current generic SelectionScore rule does not specify how IG7000 is computed for a mutually-exclusive shared-denominator joint feature or a hierarchical conditional chain. Do not choose a Kaiji-specific formula."
+    },
+    {
+      "id": "GENERIC_IMPORTANCE_MAPPING",
+      "stage": "Canonical UI",
+      "description": "SUMUI-012 requires 必須/重要/補助/微小 while SUMUI-014 requires deterministic mapping and explicitly BLOCKs until boundaries are defined."
+    }
+  ]
+}
