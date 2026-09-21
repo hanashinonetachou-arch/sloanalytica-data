@@ -346,6 +346,10 @@ Before starting any machine Research, the operator/AI MUST confirm this Manifest
 - unobserved vs zero
 - HighLowDiscrimination 1500/3000/7000G
 - Machine Research Summary
+- 「この機種の設定推測について」 renders adopted/rejected/unresolved reasons and HighLowDiscrimination
+- internal inference roles are not exposed as generic UI headings
+- section title/header is the expand/collapse control; no generic 「編集」 opener
+- section expansion and in-section 「説明」 expansion remain independent
 - section descriptions
 - two-column eligibility and full-width exceptions
 - feature-level numerator/denominator grouping
@@ -360,6 +364,8 @@ Before starting any machine Research, the operator/AI MUST confirm this Manifest
 - Adapter/Builder no-redecision
 - package semantic equality
 - App rendering requirements
+- faithful preview interaction proof (header toggle, single-open, independent explanation, repeated accumulation, unobserved/zero, complete summary)
+- no visible escaped/control-character artifacts in preview
 - generated vs published distinction
 - distribution/update path
 - early UI Preview checkpoint before MachinePackage/distribution/device work
