@@ -19,7 +19,24 @@ function trialsFor(feature,games,setting){
 function rng(seed){let x=seed>>>0;return()=>{x=(1664525*x+1013904223)>>>0;return x/4294967296;};}
 function binomial(n,p,r){let k=0;for(let i=0;i<n;i++)if(r()<p)k++;return k;}
 function multinomial(n,d,r){const cs=Object.fromEntries(Object.keys(d).map(k=>[k,0])),keys=Object.keys(d);for(let i=0;i<n;i++){let u=r(),a=0;for(const k of keys){a+=d[k];if(u<=a){cs[k]++;break;}}}return cs;}
-function selectedPrimary(r,s){const map=new Map(r.features.map(x=>[x.researchFeatureId,x]));return s.features.filter(x=>x.disposition==="ADOPT_PRIMARY"||x.adoptionCategory==="INCLUDE_PRIMARY").map(x=>map.get(x.researchFeatureId??({FEAT_COMMON_BELL:"RF_COMMON_BELL",FEAT_CZ_AGG:"RF_CZ_AGG",FEAT_CZ_INITIAL:"RF_CZ",FEAT_RARE_ROLE_MULTI:"RF_RARE_ROLE"}[x.featureId]))).filter(x=>x&&x.exposureQuality!=="UNKNOWN");}
+function selectedPrimary(r,s){
+  const map=new Map(r.features.map(x=>[x.researchFeatureId,x]));
+  return s.features.filter(x=>x.disposition==="ADOPT_PRIMARY"||x.adoptionCategory==="INCLUDE_PRIMARY").map(x=>{
+    if(x.dependencyContract?.combinationPolicy==="JOINT_MULTINOMIAL"&&Array.isArray(x.sourceResearchFeatureIds)){
+      const parts=x.sourceResearchFeatureIds.map(id=>map.get(id));
+      if(parts.some(p=>!p)) throw new Error(`missing joint research feature: ${x.featureId}`);
+      const settings=r.machine.settings,settingDistributions={};
+      for(const st of settings){
+        const dist={}; let sum=0;
+        for(const p of parts){const v=p.settingValues?.[st]?.probability;if(!Number.isFinite(v)) throw new Error(`missing joint probability: ${p.researchFeatureId} ${st}`);dist[p.researchFeatureId]=v;sum+=v;}
+        if(!(sum<1)) throw new Error(`invalid joint residual: ${x.featureId} ${st}`);
+        dist[x.dependencyContract.residualCategory??"OTHER"]=1-sum;settingDistributions[st]=dist;
+      }
+      return {researchFeatureId:x.featureId,candidateModel:"multinomial",trialUnit:parts[0].trialUnit,trialUniverse:parts[0].trialUniverse,exposureQuality:"OBSERVABLE",settingDistributions};
+    }
+    return map.get(x.researchFeatureId??({FEAT_COMMON_BELL:"RF_COMMON_BELL",FEAT_CZ_AGG:"RF_CZ_AGG",FEAT_CZ_INITIAL:"RF_CZ",FEAT_RARE_ROLE_MULTI:"RF_RARE_ROLE"}[x.featureId]));
+  }).filter(x=>x&&x.exposureQuality!=="UNKNOWN");
+}
 export function calculate(id,samples=20000,seed=20260920,onlyFeatureIds=null,sourceDir=null){const d=sourceDir?path.resolve(root,sourceDir):path.join(root,"research",id);const rawResearch=JSON.parse(fs.readFileSync(path.join(d,"research-data.json")),"utf8");const r=sourceDir?rawResearch:adaptResearch(rawResearch);const s=JSON.parse(fs.readFileSync(path.join(d,"selection-data.json"))),fsx=selectedPrimary(r,s).filter(f=>!onlyFeatureIds||onlyFeatureIds.includes(f.researchFeatureId)),settings=r.machine.settings,low=["SET_1","SET_2"],high=["SET_5","SET_6"],rand=rng(seed);const results=[];
 for(const games of [1500,3000,7000]){let lc=0,hc=0;for(const [group,arr] of [["LOW",low],["HIGH",high]])for(let z=0;z<samples;z++){const truth=arr[Math.floor(rand()*arr.length)],obs=[];for(const f of fsx){const n=trialsFor(f,games,truth);if(f.candidateModel==="binomial")obs.push([f,n,binomial(n,f.settingValues[truth].probability,rand)]);else if(f.candidateModel==="multinomial")obs.push([f,n,multinomial(n,f.settingDistributions[truth],rand)]);}const score=g=>logsum(g.map(st=>obs.reduce((q,[f,n,o])=>{const sn=trialsFor(f,games,st);if(sn!==n) return q;return q+(f.candidateModel==="binomial"?logBin(o,n,f.settingValues[st].probability):logMulti(o,f.settingDistributions[st]));},0)))-Math.log(g.length);const pred=score(high)>score(low)?"HIGH":"LOW";if(group==="LOW"&&pred==="LOW")lc++;if(group==="HIGH"&&pred==="HIGH")hc++;}const lr=100*lc/samples,hr=100*hc/samples;results.push({games,lowRecallPercent:+lr.toFixed(2),highRecallPercent:+hr.toFixed(2),balancedAccuracyPercent:+((lr+hr)/2).toFixed(2)});}return results;}
 if(process.argv[1]&&path.resolve(process.argv[1])===path.resolve(import.meta.filename)){for(const arg of process.argv.slice(2)){const [id,features]=arg.split(":");console.log(JSON.stringify({machineId:id,features:features?.split(",")??"PRIMARY",results:calculate(id,20000,20260920,features?.split(","))},null,2));}}
