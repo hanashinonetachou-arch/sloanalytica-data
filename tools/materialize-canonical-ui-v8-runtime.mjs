@@ -25,42 +25,15 @@ function buildNumericBindings(observationContract){
  }
  return bindings;
 }
-function buildEvidenceBindings(evidenceContract,machinePackage){
- const groups=new Map((evidenceContract?.groups??[]).map(g=>[g.groupId,g]));
- const engineEvidence=machinePackage?.evidence?.evidences??[];
- const engineInputs=new Map((machinePackage?.inputs?.inputs??[]).map(i=>[i.id,i]));
- return {groups,engineEvidence,engineInputs};
+function buildEvidenceBindings(evidenceContract){
+ return new Map((evidenceContract?.groups??[]).map(g=>[g.groupId,g]));
 }
-function bindEvidenceNode(node,evidenceCtx){
- const group=evidenceCtx.groups.get(node.id); if(!group || node.interaction?.type!=="CATEGORY_COUNTERS") return node;
+function bindEvidenceNode(node,groups){
+ const group=groups.get(node.id); if(!group || node.interaction?.type!=="CATEGORY_COUNTERS") return node;
  const options=group.options??[];
  const categories=(node.interaction.categories??[]).map((cat,index)=>{
   const source=options[index]; if(!source || source.label!==cat.label) throw new Error(`Evidence category/order mismatch for ${node.id}: ${cat.label}`);
-  // Legacy engine evidence refs identify the input group, not the v8 research option.
-  // Resolve wiring by semantic constraint first, then by the engine option value.
-  const legacyGroupRefs=new Set(evidenceCtx.engineEvidence.filter(e=>e.inputId).flatMap(e=>e.sourceEvidenceRefs??[]));
-  const legacyGroupHint=[...legacyGroupRefs].find(ref=>node.id===ref || node.id.includes(ref) || ref.includes(node.id));
-  const candidates=evidenceCtx.engineEvidence.filter(e=>{
-   const input=evidenceCtx.engineInputs.get(e.inputId);
-   const validOption=input?.type==="multi_enum" && (input.options??[]).some(o=>o.value===e.triggerValue);
-   if(!validOption) return false;
-   if(!legacyGroupHint) return true;
-   return (e.sourceEvidenceRefs??[]).includes(legacyGroupHint);
-  });
-  const sameConstraint=candidates.filter(e=>{
-   const confirmed=[...(e.confirmedSettings??[])].sort().join("|");
-   const denied=[...(e.deniedSettings??[])].sort().join("|");
-   const allowed=[...(source.allowedSettings??[])].sort().join("|");
-   const sourceDenied=[...(source.deniedSettings??[])].sort().join("|");
-   // Legacy confirmation records often omit the complementary denied set.
-   const confirmationEquivalent=allowed && confirmed===allowed && (!denied || denied===sourceDenied);
-   const denialEquivalent=sourceDenied && denied===sourceDenied && (!confirmed || confirmed===allowed);
-   return confirmationEquivalent || denialEquivalent;
-  });
-  const byMeaning=sameConstraint.length===1?sameConstraint[0]:candidates.find(e=>e.displayName===source.label||e.name===source.label);
-  const engineEvidence=byMeaning;
-  if(!engineEvidence) return cat;
-  return {...cat,engineBinding:{mode:"MULTI_ENUM_PRESENCE",inputId:engineEvidence.inputId,triggerValue:engineEvidence.triggerValue}};
+  return source.engineBinding?{...cat,engineBinding:clone(source.engineBinding)}:cat;
  });
  const opportunity=group.interaction?.opportunityTracking;
  const interaction={...node.interaction,categories};
@@ -71,7 +44,7 @@ function bindEvidenceNode(node,evidenceCtx){
 export function materializeCanonicalUiV8(canonicalUi,{observationContract=null,evidenceContract=null,machinePackage=null}={}){
  const v=validateCanonicalUiV8(canonicalUi); if(!v.ok) throw new Error(v.errors.join("\n"));
  const numericBindings=buildNumericBindings(observationContract);
- const evidenceCtx=buildEvidenceBindings(evidenceContract,machinePackage);
+ const evidenceCtx=buildEvidenceBindings(evidenceContract);
  const mapNode=n=>{
   let out=clone(n);
   if(numericBindings.has(out.id)) out.engineBinding=clone(numericBindings.get(out.id));
