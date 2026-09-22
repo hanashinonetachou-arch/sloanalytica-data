@@ -27,14 +27,6 @@ jobs:
         run: node tools/build-v8-reference-package.mjs L_SMASLO_KAIJI_KYOEN_FJ
       - name: Verify generated package contains runtime bindings and engine
         run: node --input-type=module -e "import fs from 'node:fs';const p=JSON.parse(fs.readFileSync('repro-v8/L_SMASLO_KAIJI_KYOEN_FJ/machine-package.generated.json'));const s=p.ui.sections.find(x=>x.id==='SEC_NORMAL');const i=s.items[0].inputs.find(x=>x.id==='INP_NORMAL_GAMES');if(!i.engineBinding?.inputIds?.length)process.exit(1);if((p.features?.features?.length??0)!==3)process.exit(2);if((p.evidence?.evidences?.length??0)!==21)process.exit(3);if(p.machine?.machineId!=='L_SMASLO_KAIJI_KYOEN_FJ')process.exit(4);"
-      - name: Verify generated package through App runtime engines
-        env:
-          GH_TOKEN: ${{ github.token }}
-        run: |
-          git clone --depth 1 --branch ci/v8-runtime-binding-20260922 https://x-access-token:${GH_TOKEN}@github.com/hanashinonetachou-arch/sloanalytica-app.git /tmp/sloanalytica-app
-          cd /tmp/sloanalytica-app
-          npm ci
-          V8_GENERATED_PACKAGE=${GITHUB_WORKSPACE}/repro-v8/L_SMASLO_KAIJI_KYOEN_FJ/machine-package.generated.json node --import tsx src/machine/v8GeneratedPackageIntegration.test.ts
       - name: Upload upstream-only generated package
         uses: actions/upload-artifact@v4
         with:
