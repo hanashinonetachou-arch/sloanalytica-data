@@ -28,7 +28,7 @@ test("V8 approve/publish/catalog/registry path is reproducible without productio
   const catalog=JSON.parse(fs.readFileSync(path.join(ROOT,"catalog.json"),"utf8"));
   const entry=catalog.machines.find(x=>x.machineId===id);assert.equal(entry.machineDataVersion,"0.2.0");
   const registry=JSON.parse(fs.readFileSync(path.join(ROOT,"machine-registry.json"),"utf8"));
-  assert.equal(registry.machines.find(x=>x.machineId===id)?.machineDataVersion,"0.2.0");
+  const reg=registry.machines.find(x=>x.machineId===id);assert.equal(reg?.machineDataVersion,"0.2.0");assert.equal(reg?.releaseDate,"2025-03-03");
  } finally {
   for(const [rel,bytes] of saved){const p=path.join(ROOT,rel);if(bytes===null)fs.rmSync(p,{force:true});else{fs.mkdirSync(path.dirname(p),{recursive:true});fs.writeFileSync(p,bytes);}}
   fs.rmSync(build,{recursive:true,force:true});if(buildSaved){fs.mkdirSync(build,{recursive:true});fs.cpSync(buildSaved,build,{recursive:true});fs.rmSync(buildSaved,{recursive:true,force:true});}
