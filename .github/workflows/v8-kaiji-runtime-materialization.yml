@@ -9,9 +9,6 @@ on:
     branches:
       - prototype-multi-machine
 
-permissions:
-  contents: write
-
 jobs:
   verify:
     runs-on: ubuntu-latest
@@ -30,15 +27,6 @@ jobs:
         run: node tools/build-v8-reference-package.mjs L_SMASLO_KAIJI_KYOEN_FJ
       - name: Verify generated package contains runtime bindings and engine
         run: node --input-type=module -e "import fs from 'node:fs';const p=JSON.parse(fs.readFileSync('repro-v8/L_SMASLO_KAIJI_KYOEN_FJ/machine-package.generated.json'));const s=p.ui.sections.find(x=>x.id==='SEC_NORMAL');const i=s.items[0].inputs.find(x=>x.id==='INP_NORMAL_GAMES');if(!i.engineBinding?.inputIds?.length)process.exit(1);if((p.features?.features?.length??0)!==3)process.exit(2);if((p.evidence?.evidences?.length??0)!==21)process.exit(3);if(p.machine?.machineId!=='L_SMASLO_KAIJI_KYOEN_FJ')process.exit(4);"
-      - name: Retain generated package snapshot for cross-repo verification
-        run: |
-          mkdir -p test-fixtures/v8/L_SMASLO_KAIJI_KYOEN_FJ
-          cp repro-v8/L_SMASLO_KAIJI_KYOEN_FJ/machine-package.generated.json test-fixtures/v8/L_SMASLO_KAIJI_KYOEN_FJ/machine-package.generated.json
-          git config user.name github-actions[bot]
-          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
-          git add -f test-fixtures/v8/L_SMASLO_KAIJI_KYOEN_FJ/machine-package.generated.json
-          git diff --cached --quiet || git commit -m "test: retain upstream-only v8 package snapshot [skip ci]"
-          git push origin HEAD:ci/v8-kaiji-runtime-materialization-20260922
       - name: Upload upstream-only generated package
         uses: actions/upload-artifact@v4
         with:
