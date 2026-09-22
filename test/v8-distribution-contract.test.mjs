@@ -19,7 +19,7 @@ test("V8 distribution materialization is upstream-only and publish-ready",()=>{
   const out=path.join(ROOT,"build",id,"machine-package.generated.json");
   const pkg=JSON.parse(fs.readFileSync(out,"utf8"));
   assert.equal(pkg.v8.source,"REPRO_V8_UPSTREAM_ONLY");
-  assert.match(pkg.machine.machineDataVersion,/^\\d+\\.\\d+\\.\\d+(?:[-+][0-9A-Za-z.-]+)?$/);
+  assert.match(pkg.machine.machineDataVersion,/^\d+\.\d+\.\d+(?:[-+][0-9A-Za-z.-]+)?$/);
   assert.equal(pkg.machine.machineId,id);
  } finally { fs.renameSync(hidden,prod); }
 });
