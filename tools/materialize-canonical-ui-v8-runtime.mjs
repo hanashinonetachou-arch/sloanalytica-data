@@ -88,7 +88,7 @@ export function materializeCanonicalUiV8(canonicalUi,{observationContract=null,e
    collapsible:s.collapsible,defaultExpanded:s.defaultExpanded,headerToggle:s.headerToggle===true,genericEditButton:s.genericEditButton===true,
    ...(s.observationContext?{observationContext:s.observationContext}:{}),...(s.observationAction?{observationAction:s.observationAction}:{}),
    groups:(s.groups??[]).map(g=>({...mapNode(g),inputs:(g.inputs??[]).map(mapNode)})),
-   items:(s.items??[]).map(n=>{
+   items:[...(s.items??[]),...(s.groups??[]).filter(g=>Array.isArray(g.inputs)&&g.inputs.length>0)].map(n=>{
     const out=mapNode(n);
     if(Array.isArray(out.inputs)) out.inputs=out.inputs.map(mapNode);
     return out;
