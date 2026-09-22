@@ -7,26 +7,24 @@ const clone = value => value == null ? value : structuredClone(value);
 
 function buildNumericBindings(observationContract){
  const bindings=new Map();
- for(const feature of observationContract?.numeric??[]){
+ const features=observationContract?.numeric??[];
+ for(const feature of features){
   for(const input of feature.inputs??[]){
    if(!input?.id || input.shared) continue;
-   const target = feature.featureId==="FEAT_CZ_INITIAL"
-    ? (input.id==="INP_NORMAL_GAMES"?"INP_FEAT_CZ_INITIAL_GAMES":input.id==="INP_CZ_INITIAL"?"INP_FEAT_CZ_INITIAL_COUNT":null)
-    : feature.featureId==="FEAT_BONUS_INITIAL"
-      ? (input.id==="INP_BONUS_INITIAL"?"INP_FEAT_BONUS_INITIAL_COUNT":null)
-      : feature.featureId==="FEAT_SMALL_ROLE_JOINT"
-        ? ({INP_ROLE_GAMES:"INP_FEAT_RARE_ROLE_MULTI_GAMES",INP_WATERMELON:"INP_FEAT_RARE_ROLE_MULTI_WATERMELON",INP_WEAK_CHANCE:"INP_FEAT_RARE_ROLE_MULTI_WEAK_CHANCE",INP_WEAK_CHERRY:"INP_FEAT_RARE_ROLE_MULTI_WEAK_CHERRY",INP_STRONG_CHERRY:"INP_FEAT_RARE_ROLE_MULTI_STRONG_CHERRY"}[input.id]??null)
-        : null;
-   if(target) bindings.set(input.id,{inputId:target});
+   const targets=[];
+   if(input.engineInputId) targets.push(input.engineInputId);
+   for(const peerId of feature.sharedDenominatorWith??[]){
+    const peer=features.find(x=>x.featureId===peerId);
+    const shared=(peer?.inputs??[]).find(x=>x.id===input.id && x.shared===true);
+    if(shared?.engineInputId) targets.push(shared.engineInputId);
+   }
+   const unique=[...new Set(targets)];
+   if(unique.length===1) bindings.set(input.id,{inputId:unique[0]});
+   else if(unique.length>1) bindings.set(input.id,{inputIds:unique});
   }
- }
- // Shared denominator is explicitly declared by Observation and maps to both runtime features.
- if((observationContract?.numeric??[]).some(x=>x.featureId==="FEAT_CZ_INITIAL" && x.sharedDenominatorWith?.includes("FEAT_BONUS_INITIAL"))){
-  bindings.set("INP_NORMAL_GAMES",{inputIds:["INP_FEAT_CZ_INITIAL_GAMES","INP_FEAT_BONUS_INITIAL_GAMES"]});
  }
  return bindings;
 }
-
 function buildEvidenceBindings(evidenceContract,machinePackage){
  const groups=new Map((evidenceContract?.groups??[]).map(g=>[g.groupId,g]));
  const engineEvidence=machinePackage?.evidence?.evidences??[];
