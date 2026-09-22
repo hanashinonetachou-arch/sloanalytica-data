@@ -23,18 +23,20 @@ jobs:
           npm run test:v8-selection-ig
           npm run test:v8-high-low-repro
           npm run test:v8-production-independence
-      - name: Build v8 reference package from repro source
-        run: node tools/build-v8-reference-package.mjs L_SMASLO_KAIJI_KYOEN_FJ
+      - name: Build upstream-only V8 distribution package
+        run: npm run machine:build:v8-distribution -- L_SMASLO_KAIJI_KYOEN_FJ
       - name: Verify generated package contains runtime bindings and engine
         run: node --input-type=module -e "import fs from 'node:fs';const p=JSON.parse(fs.readFileSync('repro-v8/L_SMASLO_KAIJI_KYOEN_FJ/machine-package.generated.json'));const s=p.ui.sections.find(x=>x.id==='SEC_NORMAL');const i=s.items[0].inputs.find(x=>x.id==='INP_NORMAL_GAMES');if(!i.engineBinding?.inputIds?.length)process.exit(1);if((p.features?.features?.length??0)!==3)process.exit(2);if((p.evidence?.evidences?.length??0)!==21)process.exit(3);if(p.machine?.machineId!=='L_SMASLO_KAIJI_KYOEN_FJ')process.exit(4);"
       - name: Upload upstream-only generated package
         uses: actions/upload-artifact@v4
         with:
           name: v8-kaiji-upstream-only-machine-package
-          path: repro-v8/L_SMASLO_KAIJI_KYOEN_FJ/machine-package.generated.json
+          path: build/L_SMASLO_KAIJI_KYOEN_FJ/machine-package.generated.json
           if-no-files-found: error
-      - name: Exercise fixed-SHA publish dry run with generated package
+      - name: Prove Distribution contract and publish path
+        run: npm run test:v8-distribution-publish
+      - name: Exercise fixed-SHA publish dry run with upstream-only package
         run: |
-          node tools/publish-machine-data.mjs approve L_SMASLO_KAIJI_KYOEN_FJ repro-v8/L_SMASLO_KAIJI_KYOEN_FJ/machine-package.generated.json
+          node tools/publish-machine-data.mjs approve L_SMASLO_KAIJI_KYOEN_FJ build/L_SMASLO_KAIJI_KYOEN_FJ/machine-package.generated.json
           node tools/publish-machine-data.mjs publish L_SMASLO_KAIJI_KYOEN_FJ
           node tools/publish-machine-data.mjs status L_SMASLO_KAIJI_KYOEN_FJ
