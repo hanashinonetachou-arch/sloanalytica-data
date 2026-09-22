@@ -33,7 +33,9 @@ if(invalidIntroductionDates.length){
  process.exit(1);
 }
 const chronologicalOrder=canonicalMachines.sort((a,b)=>{
- const dateA=a.introductionDate??byId.get(a.machineId)?.releaseDate;\n const dateB=b.introductionDate??byId.get(b.machineId)?.releaseDate;\n const dateCompare=String(dateA).localeCompare(String(dateB));
+ const dateA=a.introductionDate??byId.get(a.machineId)?.releaseDate;
+ const dateB=b.introductionDate??byId.get(b.machineId)?.releaseDate;
+ const dateCompare=String(dateA).localeCompare(String(dateB));
  if(dateCompare!==0) return dateCompare;
  return String(a.machineId).localeCompare(String(b.machineId));
 });
