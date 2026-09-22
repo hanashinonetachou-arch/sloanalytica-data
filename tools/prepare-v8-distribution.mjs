@@ -15,7 +15,7 @@ if(!fs.existsSync(source)) throw new Error("V8 generated package missing: "+sour
 const pkg=JSON.parse(fs.readFileSync(source,"utf8"));
 if(pkg?.v8?.source!=="REPRO_V8_UPSTREAM_ONLY") throw new Error("V8 upstream-only provenance missing");
 const version=pkg?.machine?.machineDataVersion;
-if(typeof version!=="string"||!/^\\d+\\.\\d+\\.\\d+(?:[-+][0-9A-Za-z.-]+)?$/.test(version)) throw new Error("V8 machineDataVersion must be SemVer");
+if(typeof version!=="string"||!/^\d+\.\d+\.\d+(?:[-+][0-9A-Za-z.-]+)?$/.test(version)) throw new Error("V8 machineDataVersion must be SemVer");
 const outDir=path.join(ROOT,"build",id);fs.mkdirSync(outDir,{recursive:true});
 const out=path.join(outDir,"machine-package.generated.json");
 const bytes=Buffer.from(JSON.stringify(pkg,null,2)+"\n","utf8");
