@@ -13,6 +13,7 @@ function posteriorEntropyFromBinomial(n,probs){
  }
  return h;
 }
+export function informationGain7000Binomial(probs,n=7000){return log2(6)-posteriorEntropyFromBinomial(n,probs);}
 function logMultinomialPAtCounts(counts,ps){
  const n=counts.reduce((a,b)=>a+b,0); let l=lgamma(n+1); for(const x of counts)l-=lgamma(x+1); for(let i=0;i<counts.length;i++)if(counts[i])l+=counts[i]*Math.log(ps[i]); return l;
 }
