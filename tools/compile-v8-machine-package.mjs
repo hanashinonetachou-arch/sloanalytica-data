@@ -16,7 +16,16 @@ function compileInputs(observation,evidence){
     for(const option of group.options??[]){
       const inputId=option.engineBinding?.inputId??`INP_V8_${safe(option.sourceEvidenceId??group.groupId+'_'+option.label)}`;
       if(!option.engineBinding) option.engineBinding={mode:'COUNTER_POSITIVE',inputId};
-      inputs.set(inputId,{id:inputId,name:`${group.title}: ${option.label}`,type:'counter',category:'EVIDENCE',unit:'回',inferenceRole:(option.allowedSettings?.length||option.deniedSettings?.length)?'INCLUDE_SUPPORT':'DISPLAY_ONLY',defaultValue:null,minimum:0});
+      const role=(option.allowedSettings?.length||option.deniedSettings?.length)?'INCLUDE_SUPPORT':'DISPLAY_ONLY';
+      if(option.engineBinding?.mode==='MULTI_ENUM_PRESENCE'){
+        const existing=inputs.get(inputId);
+        const trigger=option.engineBinding.triggerValue;
+        const options=[...(existing?.options??[])];
+        if(trigger!=null&&!options.some(x=>(typeof x==='string'?x:x.value)===trigger)) options.push({key:safe(option.sourceEvidenceId??trigger),label:option.label,value:trigger});
+        inputs.set(inputId,{...(existing??{}),id:inputId,name:group.title,type:'multi_enum',category:'EVIDENCE',inferenceRole:role,defaultValue:null,options});
+      }else{
+        inputs.set(inputId,{id:inputId,name:`${group.title}: ${option.label}`,type:'counter',category:'EVIDENCE',unit:'回',inferenceRole:role,defaultValue:null,minimum:0});
+      }
     }
   }
   return {inputs:[...inputs.values()],runtimeEvidence};
@@ -53,7 +62,7 @@ function compileEvidence(runtimeEvidence){
   const evidences=[];
   for(const group of runtimeEvidence?.groups??[]) for(const option of group.options??[]){
     const hard=(option.allowedSettings?.length??0)>0||(option.deniedSettings?.length??0)>0;
-    evidences.push({id:option.sourceEvidenceId,name:option.label,displayName:option.label,inputId:option.engineBinding?.inputId,confirmedSettings:clone(option.allowedSettings??[]),deniedSettings:clone(option.deniedSettings??[]),hasImage:false,type:hard?((option.allowedSettings?.length??0)>0?'SETTING_CONFIRMATION':'SETTING_DENIAL'):'DISPLAY_ONLY',sourceEvidenceRefs:[option.sourceEvidenceId]});
+    evidences.push({id:option.sourceEvidenceId,name:option.label,displayName:option.label,inputId:option.engineBinding?.inputId,triggerValue:option.engineBinding?.triggerValue,confirmedSettings:clone(option.allowedSettings??[]),deniedSettings:clone(option.deniedSettings??[]),hasImage:false,type:hard?((option.allowedSettings?.length??0)>0?'SETTING_CONFIRMATION':'SETTING_DENIAL'):'DISPLAY_ONLY',sourceEvidenceRefs:[option.sourceEvidenceId]});
   }
   return {version:'v8-runtime',evidences};
 }
