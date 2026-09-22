@@ -40,3 +40,17 @@ jobs:
           node tools/publish-machine-data.mjs approve L_SMASLO_KAIJI_KYOEN_FJ build/L_SMASLO_KAIJI_KYOEN_FJ/machine-package.generated.json
           node tools/publish-machine-data.mjs publish L_SMASLO_KAIJI_KYOEN_FJ
           node tools/publish-machine-data.mjs status L_SMASLO_KAIJI_KYOEN_FJ
+      - name: Checkout App runtime gate
+        uses: actions/checkout@v4
+        with:
+          repository: hanashinonetachou-arch/sloanalytica-app
+          ref: ci/v8-runtime-binding-20260922
+          path: app-runtime
+      - name: Install App runtime dependencies
+        working-directory: app-runtime
+        run: npm ci
+      - name: Prove upstream V8 artifact reaches App Runtime
+        working-directory: app-runtime
+        env:
+          V8_DISTRIBUTION_PACKAGE: ../build/L_SMASLO_KAIJI_KYOEN_FJ/machine-package.generated.json
+        run: npm run test:v8-distribution-runtime
