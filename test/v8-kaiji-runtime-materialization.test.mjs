@@ -25,3 +25,17 @@ test("Kaiji v8 runtime UI is deterministically wired from upstream contracts",()
  assert.equal(tr.interaction.totalOpportunities,"NONE");
  assert.equal(tr.interaction.categories[0].engineBinding,undefined);
 });
+
+test("v8 numeric materialization is feature-id agnostic",()=>{
+ const canonical=read(base+"canonical-ui.json");
+ const observation=read(base+"observation-contract.json");
+ const renamed=structuredClone(observation);
+ const ids=new Map(renamed.numeric.map((f,i)=>[f.featureId,`RENAMED_FEATURE_${i+1}`]));
+ for(const f of renamed.numeric){f.featureId=ids.get(f.featureId);if(f.sharedDenominatorWith)f.sharedDenominatorWith=f.sharedDenominatorWith.map(x=>ids.get(x)??x);}
+ const ui=materializeCanonicalUiV8(canonical,{observationContract:renamed});
+ const normal=ui.sections.find(s=>s.id==="SEC_NORMAL").items[0].inputs;
+ assert.deepEqual(normal.find(x=>x.id==="INP_NORMAL_GAMES").engineBinding,{inputIds:["INP_FEAT_CZ_INITIAL_GAMES","INP_FEAT_BONUS_INITIAL_GAMES"]});
+ assert.deepEqual(normal.find(x=>x.id==="INP_CZ_INITIAL").engineBinding,{inputId:"INP_FEAT_CZ_INITIAL_COUNT"});
+ const roles=ui.sections.find(s=>s.id==="SEC_ROLES").items[0].inputs;
+ assert.equal(roles.find(x=>x.id==="INP_WATERMELON").engineBinding.inputId,"INP_FEAT_RARE_ROLE_MULTI_WATERMELON");
+});
