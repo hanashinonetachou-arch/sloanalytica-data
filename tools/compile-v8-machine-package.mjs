@@ -15,7 +15,7 @@ function compileInputs(observation,evidence){
     if(opportunity?.type==='SEPARATE_COUNTER'&&opportunity.inputId) inputs.set(opportunity.inputId,{id:opportunity.inputId,name:opportunity.label??group.title,type:'counter',category:'EVIDENCE',unit:'回',inferenceRole:'DISPLAY_ONLY',defaultValue:null,minimum:0});
     for(const option of group.options??[]){
       const inputId=option.engineBinding?.inputId??`INP_V8_${safe(option.sourceEvidenceId??group.groupId+'_'+option.label)}`;
-      option.engineBinding={mode:'COUNTER_POSITIVE',inputId};
+      if(!option.engineBinding) option.engineBinding={mode:'COUNTER_POSITIVE',inputId};
       inputs.set(inputId,{id:inputId,name:`${group.title}: ${option.label}`,type:'counter',category:'EVIDENCE',unit:'回',inferenceRole:(option.allowedSettings?.length||option.deniedSettings?.length)?'INCLUDE_SUPPORT':'DISPLAY_ONLY',defaultValue:null,minimum:0});
     }
   }
