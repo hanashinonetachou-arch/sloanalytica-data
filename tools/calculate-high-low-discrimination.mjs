@@ -7,7 +7,7 @@ function exposureTrials(feature,games,setting){
   const ex=feature?.benchmarkExposure?.[String(games)] ?? feature?.benchmarkExposure?.[games];
   if(Number.isFinite(ex)) return Math.max(0,Math.round(ex));
   if(ex&&Number.isFinite(ex[setting])) return Math.max(0,Math.round(ex[setting]));
-  if(feature?.trialUniverse==="ALL_GAMES"||feature?.trialUniverse==="NORMAL_GAMES") return games;
+  const unit=String(feature?.trialUniverse??feature?.trialUnit??"");\n  if(feature?.trialUniverse==="ALL_GAMES"||feature?.trialUniverse==="NORMAL_GAMES"||unit.includes("全遊技ゲーム")||unit.includes("通常時ゲーム")) return games;
   return null;
 }
 function trialsFor(feature,games,setting){
