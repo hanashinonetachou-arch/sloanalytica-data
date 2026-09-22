@@ -1,5 +1,8 @@
 name: V8 Kaiji Runtime Materialization
 
+permissions:
+  contents: write
+
 on:
   push:
     branches:
@@ -46,8 +49,12 @@ jobs:
           git config user.name github-actions[bot]
           git config user.email 41898282+github-actions[bot]@users.noreply.github.com
           git add catalog.json machines/L_SMASLO_KAIJI_KYOEN_FJ/machine-package.json
-          git commit -m "publish: stage upstream-only V8 Kaiji for Phase 5"
-          git push origin HEAD:phase5/v8-kaiji-device-distribution-20260922
+          if ! git diff --cached --quiet; then
+            git commit -m "publish: stage upstream-only V8 Kaiji for Phase 5 [skip ci]"
+            git push origin HEAD:phase5/v8-kaiji-device-distribution-20260922
+          else
+            echo "Phase 5 distribution already current"
+          fi
       - name: Exercise fixed-SHA publish dry run with upstream-only package
         if: github.ref != 'refs/heads/phase5/v8-kaiji-device-distribution-20260922'
         run: |
