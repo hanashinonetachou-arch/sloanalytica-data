@@ -29,8 +29,9 @@ jobs:
       - name: Verify catalog metadata is stable
         run: |
           git diff -- catalog.json
+          cp catalog.json /tmp/catalog-after-first-sync.json
           node tools/sync-catalog-package-metadata.mjs .
-          git diff --exit-code -- catalog.json
+          cmp --silent catalog.json /tmp/catalog-after-first-sync.json
 
       - name: Commit synchronized catalog
         shell: bash
