@@ -12,11 +12,11 @@ function buildNumericBindings(observationContract){
   for(const input of feature.inputs??[]){
    if(!input?.id || input.shared) continue;
    const targets=[];
-   if(input.engineInputId) targets.push(input.engineInputId);
+   targets.push(input.engineInputId??input.id);
    for(const peerId of feature.sharedDenominatorWith??[]){
     const peer=features.find(x=>x.featureId===peerId);
     const shared=(peer?.inputs??[]).find(x=>x.id===input.id && x.shared===true);
-    if(shared?.engineInputId) targets.push(shared.engineInputId);
+    if(shared) targets.push(shared.engineInputId??shared.id);
    }
    const unique=[...new Set(targets)];
    if(unique.length===1) bindings.set(input.id,{inputId:unique[0]});
