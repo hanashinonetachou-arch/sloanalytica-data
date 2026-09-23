@@ -1,0 +1,24 @@
+import fs from "node:fs";
+import path from "node:path";
+import crypto from "node:crypto";
+import { fileURLToPath } from "node:url";
+
+const ROOT=path.resolve(path.dirname(fileURLToPath(import.meta.url)),"..");
+const id=process.argv[2];
+if(!id) throw new Error("Usage: node tools/audit-v8-distribution-target.mjs MACHINE_ID");
+const catalog=JSON.parse(fs.readFileSync(path.join(ROOT,"catalog.json"),"utf8"));
+const pkgPath=path.join(ROOT,"machines",id,"machine-package.json");
+if(!fs.existsSync(pkgPath)) throw new Error("published package missing");
+const bytes=fs.readFileSync(pkgPath), pkg=JSON.parse(bytes);
+const entry=(catalog.machines??[]).find(x=>x.machineId===id);
+if(!entry) throw new Error("catalog entry missing");
+const sha=crypto.createHash("sha256").update(bytes).digest("hex");
+const semver=/^\d+\.\d+\.\d+(?:[-+][0-9A-Za-z.-]+)?$/;
+if(pkg?.v8?.source!=="REPRO_V8_UPSTREAM_ONLY") throw new Error("published target is not upstream-only V8");
+if(pkg.machine?.machineId!==id||entry.machineId!==id) throw new Error("machineId mismatch");
+if(!semver.test(pkg.machine?.machineDataVersion??"")) throw new Error("published V8 version is not SemVer");
+if(entry.machineDataVersion!==pkg.machine.machineDataVersion) throw new Error("catalog version mismatch");
+if(entry.packageSizeBytes!==bytes.length) throw new Error("catalog packageSizeBytes mismatch");
+if(entry.sha256!==sha) throw new Error("catalog sha256 mismatch");
+if(typeof entry.packageUrl!=="string"||!entry.packageUrl.endsWith(`/machines/${id}/machine-package.json`)) throw new Error("catalog packageUrl mismatch");
+console.log(JSON.stringify({machineId:id,status:"V8_DISTRIBUTION_TARGET_PASS",machineDataVersion:entry.machineDataVersion,sha256:sha,packageSizeBytes:bytes.length,legacyFleetAudit:"OUT_OF_SCOPE"},null,2));

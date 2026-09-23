@@ -24,7 +24,7 @@ const catalogMachines=[...(catalog.machines??[])];
 const isTestMachine=c=>String(c.machineId??"").includes("_TEST_") || String(c.displayName??"").startsWith("【テスト版】");
 const canonicalMachines=catalogMachines.filter(c=>!isTestMachine(c));
 const invalidIntroductionDates=canonicalMachines.filter(c=>{
- const raw=c.introductionDate;
+ const raw=c.introductionDate??byId.get(c.machineId)?.releaseDate;
  return typeof raw!=="string" || !/^\d{4}-\d{2}-\d{2}$/.test(raw) || !Number.isFinite(Date.parse(`${raw}T00:00:00Z`));
 });
 if(invalidIntroductionDates.length){
@@ -33,7 +33,9 @@ if(invalidIntroductionDates.length){
  process.exit(1);
 }
 const chronologicalOrder=canonicalMachines.sort((a,b)=>{
- const dateCompare=String(a.introductionDate).localeCompare(String(b.introductionDate));
+ const dateA=a.introductionDate??byId.get(a.machineId)?.releaseDate;
+ const dateB=b.introductionDate??byId.get(b.machineId)?.releaseDate;
+ const dateCompare=String(dateA).localeCompare(String(dateB));
  if(dateCompare!==0) return dateCompare;
  return String(a.machineId).localeCompare(String(b.machineId));
 });

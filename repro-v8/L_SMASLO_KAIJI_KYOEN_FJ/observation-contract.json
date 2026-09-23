@@ -1,0 +1,130 @@
+{
+  "schemaVersion": "observation-contract-v8-repro",
+  "machineId": "L_SMASLO_KAIJI_KYOEN_FJ",
+  "generatedAt": "2026-09-21",
+  "numeric": [
+    {
+      "featureId": "FEAT_CZ_INITIAL",
+      "context": "通常時",
+      "how": "CZ「運否天賦」の初当り回数と通常時ゲーム数を記録",
+      "inputs": [
+        {
+          "id": "INP_CZ_INITIAL",
+          "label": "CZ初当り",
+          "type": "counter",
+          "unit": "回",
+          "engineInputId": "INP_FEAT_CZ_INITIAL_COUNT"
+        },
+        {
+          "id": "INP_NORMAL_GAMES",
+          "label": "通常時ゲーム数",
+          "type": "integer",
+          "unit": "G",
+          "directNumeric": true,
+          "quickAdd": [
+            50
+          ],
+          "engineInputId": "INP_FEAT_CZ_INITIAL_GAMES"
+        }
+      ],
+      "sharedDenominatorWith": [
+        "FEAT_BONUS_INITIAL"
+      ]
+    },
+    {
+      "featureId": "FEAT_BONUS_INITIAL",
+      "context": "通常時",
+      "how": "ボーナス初当り回数を記録。通常時ゲーム数はCZ初当りと共用",
+      "inputs": [
+        {
+          "id": "INP_BONUS_INITIAL",
+          "label": "ボーナス初当り",
+          "type": "counter",
+          "unit": "回",
+          "engineInputId": "INP_FEAT_BONUS_INITIAL_COUNT"
+        },
+        {
+          "id": "INP_NORMAL_GAMES",
+          "shared": true,
+          "engineInputId": "INP_FEAT_BONUS_INITIAL_GAMES"
+        }
+      ],
+      "runtimeRole": "FALLBACK_DO_NOT_MULTIPLY_WITH_CZ"
+    },
+    {
+      "featureId": "FEAT_SMALL_ROLE_JOINT",
+      "context": "小役",
+      "how": "観測したゲーム数を共通母数に、4種類の小役回数を記録。その他は母数から4役合計を差し引いて内部導出",
+      "inputs": [
+        {
+          "id": "INP_ROLE_GAMES",
+          "label": "小役を観測したゲーム数",
+          "type": "integer",
+          "unit": "G",
+          "directNumeric": true,
+          "quickAdd": [
+            50
+          ],
+          "engineInputId": "INP_FEAT_RARE_ROLE_MULTI_GAMES"
+        },
+        {
+          "id": "INP_WATERMELON",
+          "label": "スイカ",
+          "type": "counter",
+          "unit": "回",
+          "engineInputId": "INP_FEAT_RARE_ROLE_MULTI_WATERMELON"
+        },
+        {
+          "id": "INP_WEAK_CHANCE",
+          "label": "弱チャンス目",
+          "type": "counter",
+          "unit": "回",
+          "engineInputId": "INP_FEAT_RARE_ROLE_MULTI_WEAK_CHANCE"
+        },
+        {
+          "id": "INP_WEAK_CHERRY",
+          "label": "弱チェリー",
+          "type": "counter",
+          "unit": "回",
+          "engineInputId": "INP_FEAT_RARE_ROLE_MULTI_WEAK_CHERRY"
+        },
+        {
+          "id": "INP_STRONG_CHERRY",
+          "label": "強チェリー",
+          "type": "counter",
+          "unit": "回",
+          "engineInputId": "INP_FEAT_RARE_ROLE_MULTI_STRONG_CHERRY"
+        }
+      ],
+      "derived": {
+        "id": "OTHER",
+        "formula": "INP_ROLE_GAMES - sum(four role counters)",
+        "validation": "must be >= 0"
+      }
+    }
+  ],
+  "evidenceRef": "repro-v8/L_SMASLO_KAIJI_KYOEN_FJ/evidence-contract.json",
+  "stateSemantics": {
+    "unobserved": null,
+    "observedZero": 0,
+    "displayUnobserved": "—"
+  },
+  "predecessorObservation": {
+    "status": "NOT_REQUIRED",
+    "reason": "本機は純Aタイプではなく、前作観測契約を移植する前提を置かない。"
+  },
+  "linkedPlay": {
+    "service": "マイスロ",
+    "status": "AVAILABLE",
+    "observationMappingStatus": "UNRESOLVED",
+    "reason": "公式サービス対応は確認済みだが、今回採用した各入力値をマイスロから直接取得できるかの項目単位対応は公開Webだけでは確定していない。"
+  },
+  "assertions": [
+    "large denominators are direct numeric inputs",
+    "event occurrences are +/- counters",
+    "UNOBSERVED and OBSERVED_ZERO remain distinct",
+    "shared denominator is entered once",
+    "fallback bonus likelihood is not multiplied with CZ likelihood",
+    "joint small-role OTHER residual cannot be negative"
+  ]
+}

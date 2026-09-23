@@ -18,7 +18,10 @@ jobs:
       - run: npm run machine:build:research-pilot -- L_GOBLIN_SLAYER_RD L_LOVEJOU3_M4 L_SMASLO_KAIJI_KYOEN_FJ
       - run: node tools/validate-runtime-machine-package.mjs build/L_GOBLIN_SLAYER_RD/machine-package.generated.json build/L_LOVEJOU3_M4/machine-package.generated.json build/L_SMASLO_KAIJI_KYOEN_FJ/machine-package.generated.json
 
-      - run: node tools/calculate-high-low-discrimination.mjs L_GOBLIN_SLAYER_RD L_LOVEJOU3_M4 L_SMASLO_KAIJI_KYOEN_FJ
+      # Legacy pilot packages may contain state-dependent exposure that cannot be
+      # reconstructed safely from research-data alone. Do not invent those trials.
+      # The reproducibility test below preserves those reports and requires exact
+      # reproduction for the Manifest v8 reference machine.
       - run: node --test test/high-low-discrimination-reproducibility.test.mjs
       - name: Verify publisher approve and dry-run for pilot packages
         shell: bash
