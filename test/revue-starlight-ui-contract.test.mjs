@@ -11,7 +11,7 @@ test('Revue Starlight V8 exposes the conditional LED observation from Canonical 
   assert.ok(conditional);
   assert.match(conditional.description ?? '', /設定変更時/);
   assert.match(conditional.description ?? '', /AT終了後/);
-  assert.match(conditional.description ?? '', /設定推測には使用しません/);
+  assert.match(conditional.description ?? '', /設定推測計算には使用しません/);
 });
 
 test('Revue Starlight conditional LED observation uses exhaustive generic category counters', () => {
