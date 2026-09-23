@@ -40,6 +40,12 @@ jobs:
           # batch operation itself rather than pre-existing PR content.
           git diff --binary "${{ github.event.pull_request.base.sha }}" -- catalog.json difficulty-catalog.json machines/ > /tmp/preexisting-machine-data.patch
           git restore --source="${{ github.event.pull_request.base.sha }}" -- catalog.json difficulty-catalog.json machines/
+          # The batch scope guard compares HEAD with prototype-multi-machine, so test it from an
+          # isolated temporary commit whose tree contains the clean base MachineData snapshot.
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add catalog.json difficulty-catalog.json machines/
+          git commit -m "test: isolate legacy batch dry-run" --no-verify
           npm run machine:publish:batch -- L_BAKI_L3 L_HOKUTO_AD_XR
           git diff --exit-code -- catalog.json difficulty-catalog.json machines/
           test -z "$(git status --porcelain -- build/L_BAKI_L3 build/L_HOKUTO_AD_XR)"
