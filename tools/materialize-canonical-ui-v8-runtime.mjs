@@ -37,7 +37,7 @@ function bindEvidenceNode(node,groups){
  });
  const opportunity=group.interaction?.opportunityTracking;
  const interaction={...node.interaction,categories};
- if(opportunity?.type==="NONE"){ interaction.totalOpportunities="NONE"; delete interaction.opportunityTracking; }
+ if(opportunity?.type==="NONE"){ interaction.totalOpportunities="NOT_REQUIRED"; interaction.opportunityTracking=clone(opportunity); interaction.absenceIsNegativeEvidence=false; }
  else if(opportunity?.type==="SEPARATE_COUNTER"){ interaction.totalOpportunities="SEPARATE_COUNTER"; interaction.opportunityTracking=clone(opportunity); }
  return {...node,interaction};
 }
