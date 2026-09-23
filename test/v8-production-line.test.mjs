@@ -58,8 +58,7 @@ test("materialized V8 HighLow results are reproducible by the generic calculator
   const highPath=path.join(ROOT,"repro-v8",id,"high-low-discrimination.json");
   if(!fs.existsSync(highPath)) continue;
   const artifact=JSON.parse(fs.readFileSync(highPath,"utf8"));
-  if(artifact.status==="PROVISIONAL_PENDING_GENERIC_CALCULATOR_VERIFICATION") continue;
-  const calculated=calculate(id,artifact.simulation?.samplesPerGroup??20000,artifact.simulation?.seed??20260920,null,path.join("repro-v8",id));
+  const calculated=calculate(id,artifact.status==="PROVISIONAL_PENDING_GENERIC_CALCULATOR_VERIFICATION"?20000:(artifact.simulation?.samplesPerGroup??20000),artifact.simulation?.seed??20260920,null,path.join("repro-v8",id));
   assert.deepEqual(calculated,artifact.results,`${id} HighLow artifact must equal generic calculator output`);
  }
 });
