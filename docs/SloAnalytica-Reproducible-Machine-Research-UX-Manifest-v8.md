@@ -1,7 +1,7 @@
-# SloAnalytica Reproducible Machine Research & UX Construction Manifest v8.0
+# SloAnalytica Reproducible Machine Research & UX Construction Manifest v8.1
 
 Status: DRAFT — Reference-machine validation required  
-Date: 2026-09-21  
+Date: 2026-09-23  
 Supersedes as execution source: Machine Research & Construction Pipeline v1 and the active rules of MachineData・UX Construction Manifest v7.2.  
 Preserves: applicable v7.2/v7.1/v6.15 UX knowledge, Core Policy, User-Verified UX Contract Policy, and established statistical invariants.
 
@@ -71,7 +71,7 @@ RES-001: Research MUST seek the public setting-difference universe before decidi
 RES-002: Every candidate MUST retain source/provenance, setting values or categorical constraints, observation event, known conditions and uncertainty.
 RES-003: Research MUST NOT omit a public difference merely because it looks weak, inconvenient, dependent, or unlikely to be selected.
 RES-004: Evidence is researched as evidence and is not forced through Numeric SelectionScore.
-RES-005: Unknown values MUST remain unknown. No fabricated probabilities, exposure counts, trial counts, denominators or setting mappings.
+RES-005: Unknown Research facts MUST remain unknown. No fabricated probabilities, factual exposure counts, factual trial counts, denominators or setting mappings. Explicit benchmark-only exposure estimates permitted by EXP-009..EXP-016 are derived Selection artifacts, not replacements for unknown Research facts.
 RES-006: Research completeness and inference usefulness are separate dimensions.
 
 ## 4. Data Completeness
@@ -334,7 +334,7 @@ Gate C — Completeness/Trial/Exposure/Dependency Complete:
 Gate S — Selection Complete:
 - benchmark scoring status and live-inference authorization are independently explicit for every conditional Numeric candidate
 - no CONDITIONAL_OBSERVATION classification is used as a Selection disposition
-- LIVE_CONDITIONAL, when used, satisfies SEL-008A/SEL-008B/SEL-008C and contains no fabricated benchmark exposure
+- LIVE_CONDITIONAL, when used, satisfies SEL-008A/SEL-008B/SEL-008C; any benchmark exposure is classified and reproducible under EXP-009..EXP-016, with no unrecorded/ad-hoc opportunity assumption
 - every candidate has disposition, quantitative basis and concrete reason
 - dependency/double-counting rules resolved
 
@@ -612,4 +612,4 @@ These rules close a reproducibility gap discovered by the Kaiji zero-base rerun.
   - 「微小」: an adopted element below 5 only when a separate Manifest rule explicitly permits retention despite the normal numeric rejection threshold. Otherwise a below-5 numeric candidate is REJECT and receives no adopted importance label.
 - **SUMUI-014C**: An ALTERNATIVE/FALLBACK element suppressed by `DO_NOT_MULTIPLY` does not become 「必須」 merely because its standalone score is high. If it is retained as an actual user-observable fallback inference path, its importance is one tier below the importance its score would otherwise produce, with a floor of 「微小」. If it is not an active inference path, it is not an adopted element and receives no importance label.
 - **SUMUI-014D**: Evidence constraints are not assigned these numeric importance labels unless a future Manifest rule defines an Evidence-specific quantitative usefulness measure. They remain Evidence, computationally separate from numeric Selection.
-- **SUMUI-014E**: An adopted LIVE_CONDITIONAL element with benchmarkScoreStatus=BLOCKED_UNRESOLVED receives the user-facing importance 「補助」 while that benchmark exposure remains unresolved. This label is a conservative statement that the element can update live inference when exact trials are observed but its practical 1500G/3000G/7000G contribution is not established. It MUST NOT be upgraded from per-trial strength alone.
+- **SUMUI-014E**: An adopted LIVE_CONDITIONAL element follows the ordinary score-derived importance rule when a permitted single-value benchmark exposure (DIRECT_PUBLISHED, DERIVED_EXACT, or DERIVED_APPROXIMATED) yields SelectionScore, while preserving exposure quality in technical provenance. If benchmarkScoreStatus=BLOCKED_UNRESOLVED, it receives the user-facing importance 「補助」 while exposure remains unresolved. A DERIVED_BOUNDED score range that crosses importance thresholds MUST use the lower supported tier or remain explicitly unresolved; it MUST NOT be upgraded from the favorable bound alone.
