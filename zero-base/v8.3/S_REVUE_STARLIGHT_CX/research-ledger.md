@@ -651,3 +651,38 @@ This closes the semantic denominator of the published 1/N values but does not ye
 - direct 7000G expected-count score remains blocked unless eligible lottery-game exposure can be derived.
 - do not discard the feature; retain as a valid high-discrimination research candidate awaiting exposure mapping.
 - role-conditioned reinterpretation remains prohibited.
+
+
+## Manifest v8.4 replay — Exposure Reconstruction checkpoint
+
+Manifest v8.4 adds generic exact live Exposure Reconstruction. Replaying the already-researched Revue mechanics through that rule yields:
+
+Resolved statistical trial universe:
+EFFECTIVE_BONUS_LOTTERY_GAME_TRIAL.
+
+Source-proven exclusion:
+while reproduction mode holds an internally established red BIG, a fresh bonus lottery is not performed. Public sources explicitly state that reproduction mode is an internal-red-BIG-held state and bonus lottery is not performed during it.
+
+Reconstruction shape:
+eligibleBonusLotteryGames
+= broader observed game counter
+- normal-play reproduction-mode games
+- CZ reproduction-mode games where applicable
+- AT reproduction-mode games
+- any other source-proven internally-held-red-BIG interval included by the broader counter.
+
+Classification:
+- normal-play reproduction mode: fixed 20G once entered, therefore DERIVED_EXACT from exact entry count if the observation boundary contains the full 20G interval; boundary-straddling cases require direct residual counting.
+- CZ reproduction mode: duration equals remaining CZ games, therefore DERIVED_EXACT only if exact remaining games are captured; otherwise DIRECT count.
+- AT reproduction mode: duration is variable through the current set and may in some cases carry across a set; it is not predictable from entry count alone. Because entry is visibly indicated and the state persists visibly, its actual duration is DIRECT count, not APPROXIMATED.
+- combined denominator: HYBRID_EXACT when all applicable terms are captured exactly.
+
+Important: user supplied the practical observation fact that normal-play reproduction duration is easy to calculate and AT duration must be counted. Public sources independently support the mechanical fixed-20G versus variable-until-set-end distinction. The Manifest rule itself remains generic and contains no Revue-specific exception.
+
+Runtime consequence:
+When all required exclusion terms are present, the five-specific-bonus aggregate/family may use the reconstructed exact eligible denominator. If the AT reproduction-mode game counter is omitted for a session containing such a state, only this dependent bonus likelihood is disabled; CZ, AT initial-hit, LED, Evidence, etc. remain available.
+
+Reference-machine result:
+v8.4 reproduces the Revue conclusion through generic stages:
+Event -> Trial Universe -> eligibility exclusions -> exact reconstruction -> observability -> dependency -> likelihood.
+No machine-specific Manifest patch is required for the fixed/variable state distinction.
