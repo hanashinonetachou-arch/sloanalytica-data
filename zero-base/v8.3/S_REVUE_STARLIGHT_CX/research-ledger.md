@@ -336,3 +336,78 @@ Define a source-semantic acceptance rule, for example:
 - Ambiguous 1/N without an occurrence/initial-hit semantic label remains SOURCE_UNRESOLVED.
 
 This would be generic and machine-independent, and would allow future researchers to reproduce the same denominator decision without requiring a lucky page that demonstrates G数÷分母 arithmetic.
+
+
+## Trial Universe Resolver application — after DEN-002B..DEN-002F
+
+### Resolver method
+Each candidate is reevaluated in the required order:
+observed event -> eligible states/mechanics -> trial universe -> player-countable denominator -> benchmark exposure.
+The 1/N lexical form is not itself used to choose the universe.
+
+### R1 AT initial occurrence
+- Observed event: AT initial entry.
+- Fresh public mechanics describe AT initial hits as normal-play entries reached through CZ success, direct hit, and other normal-play routes; AT-end/re-entry behavior is treated separately.
+- Eligible universe for the published AT初当り setting table: NORMAL_GAME_TRIAL.
+- Player denominator: normal games, directly countable.
+- Benchmark path: DIRECT_PUBLISHED game occurrence rate once NORMAL_GAME_TRIAL is resolved.
+- Status change: CLOSED_BY_SOURCE_MECHANICS; benchmark scoring AUTHORIZED subject to aggregate-route dependency.
+
+### R2 CZ initial occurrence
+- Observed event: CZ initial entry.
+- Public mechanics place CZ point accumulation / CZ draw in normal play, with rare roles and normal REG contributing points; CZ is the normal-play gateway to AT.
+- The published setting table is CZ初当り, not a per-CZ success percentage or per-point draw percentage.
+- Eligible universe: NORMAL_GAME_TRIAL. The narrower point/table mechanics determine whether CZ occurs but are upstream mechanisms rather than the trial unit of the published aggregate initial-occurrence observable.
+- Player denominator: normal games, directly countable.
+- Benchmark path: DIRECT_PUBLISHED game occurrence rate.
+- Status change: SOURCE_UNRESOLVED -> CLOSED_BY_SOURCE_MECHANICS under DEN-002B..D.
+
+### R3 realized red BIG / blue BIG / REG occurrence
+- Observed event: displayed/realized bonus occurrence by type.
+- Public mechanics distinguish realized occurrence from internal/effective winning probability because an already-established internal bonus can delay visible realization.
+- Current fresh sources do not yet establish that each realized bonus type is eligible on every TOTAL_GAME_TRIAL across normal + AT/other play, nor do they prove a narrower complete game-state boundary.
+- Resolver result: SOURCE_UNRESOLVED for assigning TOTAL_GAME_TRIAL or NORMAL_GAME_TRIAL to the realized occurrence table.
+- DEN-002F prevents substituting the internal winning-rate semantics.
+- No benchmark score yet.
+
+### R4 specific rare-role + REG / blue BIG occurrence
+- Observed event: specified realized bonus associated with specified rare role.
+- The published 1/N is an aggregate occurrence representation of a role+bonus joint event, but the role is a narrower triggering/conditioning mechanism.
+- Exact trial-universe semantics of the 1/N representation remain unresolved; do not relabel as role-count denominator or game denominator without proof.
+- Status: SOURCE_UNRESOLVED + HIERARCHICAL.
+
+### R5 LED five-color
+- Observed event: one LED color.
+- Eligible event boundary remains CZ/fake-premonition end excluding non-target contexts.
+- Trial universe: ELIGIBLE_LED_EVENT, not any game-trial class.
+- Player denominator: sum of five eligible recorded colors.
+- Live numeric inference: AUTHORIZED.
+- Benchmark exposure: UNRESOLVED.
+- This candidate is unchanged by the new resolver, demonstrating that DEN-002B..F does not flatten conditional observations into game trials.
+
+### R6 conditional rare-role AT direct hit
+- Observed event: direct-hit success on specified rare role in source-defined eligible internal state.
+- Trial universe remains CONDITIONAL_ROLE_IN_ELIGIBLE_STATE.
+- Internal state is not reproducibly player-identifiable.
+- Live denominator: not exactly countable.
+- Status remains BLOCKED_OBSERVABILITY.
+- This candidate is also unchanged by the resolver.
+
+## Resolver validation result
+
+The new generic rules improve the machine without creating a Revue-specific exception:
+- AT and CZ now resolve naturally to NORMAL_GAME_TRIAL from their public mechanics.
+- LED remains a conditional event-count universe.
+- conditional AT direct-hit remains conditional and blocked by observability.
+- realized bonus occurrence does NOT get forced into TOTAL_GAME_TRIAL merely because another machine architecture might use total games for bonus probability.
+
+This is the intended behavior for mixed normal+AT/ART machines: bonus, AT, CZ, and other candidates may independently resolve to TOTAL_GAME_TRIAL, NORMAL_GAME_TRIAL, AT_GAME_TRIAL, or a conditional event universe based on each event's mechanics.
+
+## Selection consequence after resolver
+
+For a 7000 NORMAL_GAME_TRIAL benchmark:
+- expected CZ initial opportunities/events by setting = 7000 / [265.9,254.7,207.6,190.3,179.5] = approximately [26.33,27.48,33.72,36.78,39.00].
+- expected AT initial events by setting = 7000 / [359.6,346.8,277.1,255.7,232.5] = approximately [19.47,20.18,25.26,27.38,30.11].
+These are benchmark expectations derived from now-resolved NORMAL_GAME_TRIAL occurrence rates, not fabricated observed counts.
+
+Before committing final SelectionScore values, the scoring implementation/formula in the Manifest/tooling must be applied mechanically and independently verified. Realized bonus families remain excluded from that computation until their own trial universes resolve.
