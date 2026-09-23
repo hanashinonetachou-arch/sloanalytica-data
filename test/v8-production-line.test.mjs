@@ -108,12 +108,18 @@ test("Revue v8.4 production package preserves conditional and categorical infere
  ]);
  const evidenceSections=pkg.ui.sections.filter(s=>["SEC_BONUS_END","SEC_KIRIN_VOICE","SEC_PAYOUT"].includes(s.id));
  for(const section of evidenceSections){
-  const interaction=section.items?.[0]?.interaction;
+  const evidenceItem=section.items?.find(item=>item.interaction?.type==="EVIDENCE_COUNTERS");
+  const interaction=evidenceItem?.interaction;
   assert.equal(interaction?.categoryCoverage,"NON_EXHAUSTIVE");
   assert.equal(interaction?.totalOpportunities,"NOT_REQUIRED");
   assert.equal(interaction?.opportunityTracking?.type,"NONE");
   assert.equal(interaction?.absenceIsNegativeEvidence,false);
  }
+ const bigHint=byId.get("FEAT_BIG_END_HINT_MULTINOMIAL");
+ assert.equal(bigHint?.modelType,"multinomial");
+ assert.equal(bigHint?.denominatorRule,"SUM_CATEGORY_COUNTS");
+ assert.equal(bigHint?.categoryConditioning?.normalization,"SOURCE_CONDITIONAL_NO_RENORMALIZATION");
+ assert.deepEqual(bigHint?.categoryConditioning?.excludedCategories,["EV_BONUS_END_2PLUS","EV_BONUS_END_4PLUS","EV_BONUS_END_5PLUS","EV_BONUS_END_6"]);
  assert.equal(specificBonus?.numeratorInputId,"INP_SPECIFIC_BONUS_5_AGG");
  assert.equal(specificBonus?.exposureReconstruction?.termSetCompleteness,"COMPLETE_FOR_DEFINED_BROADER_GAME_SCOPE");
  assert.equal(specificBonus?.exposureReconstruction?.additionalExcludedTerms?.status,"NONE_WITHIN_DEFINED_SCOPE");
