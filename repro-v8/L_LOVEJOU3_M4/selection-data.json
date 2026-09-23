@@ -34,6 +34,69 @@
       "unit": "回",
       "displayOrder": 30,
       "inferenceRole": "DISPLAY_ONLY"
+    },
+    {
+      "id": "INP_LZ_FAILED",
+      "name": "LOVE ZONE失敗",
+      "type": "counter",
+      "category": "LOVE ZONE",
+      "unit": "回",
+      "displayOrder": 40,
+      "inferenceRole": "INCLUDE_SUPPORT"
+    },
+    {
+      "id": "INP_LZ_FAIL_AT",
+      "name": "失敗後AT本前兆",
+      "type": "counter",
+      "category": "LOVE ZONE",
+      "unit": "回",
+      "displayOrder": 50,
+      "inferenceRole": "INCLUDE_SUPPORT"
+    },
+    {
+      "id": "INP_LZ_LEVEL1",
+      "name": "お店前",
+      "type": "counter",
+      "category": "LOVE ZONEステージ",
+      "unit": "回",
+      "displayOrder": 60,
+      "inferenceRole": "INCLUDE_SUPPORT"
+    },
+    {
+      "id": "INP_LZ_LEVEL2",
+      "name": "Club Luxe",
+      "type": "counter",
+      "category": "LOVE ZONEステージ",
+      "unit": "回",
+      "displayOrder": 70,
+      "inferenceRole": "INCLUDE_SUPPORT"
+    },
+    {
+      "id": "INP_LZ_LEVEL3",
+      "name": "Club Luxe ALLCast",
+      "type": "counter",
+      "category": "LOVE ZONEステージ",
+      "unit": "回",
+      "displayOrder": 80,
+      "inferenceRole": "INCLUDE_SUPPORT"
+    },
+    {
+      "id": "INP_LZ_LEVEL4",
+      "name": "コスプレDAY",
+      "type": "counter",
+      "category": "LOVE ZONEステージ",
+      "unit": "回",
+      "displayOrder": 90,
+      "inferenceRole": "INCLUDE_SUPPORT"
+    },
+    {
+      "id": "INP_LZ_LEVEL5",
+      "name": "Wご指名チャンス",
+      "type": "counter",
+      "category": "LOVE ZONEステージ",
+      "unit": "回",
+      "displayOrder": 100,
+      "inferenceRole": "INCLUDE_SUPPORT"
     }
   ],
   "features": [
@@ -77,26 +140,109 @@
       "researchFeatureId": "RF_W_LOVE_RUSH",
       "featureId": "FEAT_W_LOVE_RUSH",
       "adoptionCategory": "EXCLUDE",
-      "selectionScore": 7.09,
-      "rejectionReason": "単独情報量は基準を超えるが、LOVE ZONE/AT経路に依存する下流事象で共同尤度が公開情報から構築できないため独立採用しない。"
+      "selectionScore": null,
+      "rejectionReason": "公開出現率はあるが、実戦入力で対応する厳密なゲーム母数範囲をfresh Researchから確定できない。7000Gをそのまま母数としてSelection Scoreを作らず、下流経路との依存も未解決のため不採用。",
+      "benchmarkExposureStatus": "BLOCKED_UNRESOLVED"
     },
     {
       "researchFeatureId": "RF_LZ_FAIL_AT",
       "featureId": "FEAT_LZ_FAIL_AT",
-      "adoptionCategory": "EXCLUDE",
-      "rejectionReason": "母数はLOVE ZONE失敗回数。7000Gでの正しい失敗機会数を公開情報だけから確定できず、通常時ゲームを母数に置換しない。"
+      "adoptionCategory": "INCLUDE_SUPPORT",
+      "rejectionReason": "母数はLOVE ZONE失敗回数。7000Gでの正しい失敗機会数を公開情報だけから確定できず、通常時ゲームを母数に置換しない。",
+      "numeratorInputId": "INP_LZ_FAIL_AT",
+      "denominatorInputId": "INP_LZ_FAILED",
+      "minimumSample": 0,
+      "displayFormat": "percentage",
+      "benchmarkExposureStatus": "BLOCKED_UNRESOLVED",
+      "selectionScore": null,
+      "liveInferenceAuthorization": "LIVE_CONDITIONAL",
+      "trialUniverse": "LOVE ZONE失敗1回",
+      "directDenominatorObservation": true,
+      "likelihoodCompleteness": "COMPLETE_ALL_SETTINGS",
+      "perTrialInformationStatus": "NON_ZERO",
+      "difficultyParticipation": "EXCLUDE",
+      "difficultyExclusionReason": "7000GあたりのLOVE ZONE失敗機会数を公開情報だけから一意に確定できないため。実測失敗回数を7000G換算へ流用しない。",
+      "userReason": "LOVE ZONE失敗回数を実戦で直接数え、その各失敗後にAT本前兆へ移行したかを観測できる条件付き要素。設定1〜6の当選率が公開され、設定4以上で尤度差があるためlive inferenceに採用する。7000G benchmark Exposureは未解決のままHighLowから除外する。",
+      "dependencyContract": {
+        "relationship": "CONDITIONAL_DOWNSTREAM",
+        "relatedFeatureIds": [
+          "FEAT_LOVE_ZONE",
+          "FEAT_AT_INITIAL"
+        ],
+        "combinationPolicy": "CONDITIONAL_LIKELIHOOD_ON_DIRECT_TRIALS",
+        "reason": "通常GやLOVE ZONE発生率を分母にせず、実測したLOVE ZONE失敗だけを条件付きTrialとして更新する。"
+      }
     },
     {
       "researchFeatureId": "RF_RELAX_SPRING",
       "featureId": "FEAT_RELAX_SPRING",
       "adoptionCategory": "EXCLUDE",
-      "rejectionReason": "設定別分布は完全だが母数はAT終了回数。7000Gでの終了機会数を公開情報だけから一意に確定できないため推測尤度には採用しない。"
+      "rejectionReason": "AT終了をTrialとする公開分布はあるが、フェイク/本前兆を排他的に確定観測する契約が未解決で、公開丸め値には100.1%となる設定もある。値を正規化せず不採用。",
+      "selectionScore": null,
+      "benchmarkExposureStatus": "BLOCKED_UNRESOLVED"
     },
     {
       "researchFeatureId": "RF_RESET_MODE",
       "featureId": "FEAT_RESET_MODE",
       "adoptionCategory": "EXCLUDE",
-      "rejectionReason": "設定差はあるが設定変更・有利区間移行を母数とする内部モードで、実戦中の客観的な反復観測契約を確立できないため不採用。"
+      "rejectionReason": "設定差はあるが設定変更・有利区間移行を母数とする内部モードで、実戦中の客観的な反復観測契約を確立できないため不採用。",
+      "selectionScore": null,
+      "benchmarkExposureStatus": "BLOCKED_UNRESOLVED"
+    },
+    {
+      "researchFeatureId": "RF_LZ_STAGE",
+      "featureId": "FEAT_LZ_STAGE",
+      "adoptionCategory": "INCLUDE_SUPPORT",
+      "model": "multinomial",
+      "categoryInputIds": [
+        "INP_LZ_LEVEL1",
+        "INP_LZ_LEVEL2",
+        "INP_LZ_LEVEL3",
+        "INP_LZ_LEVEL4",
+        "INP_LZ_LEVEL5"
+      ],
+      "denominatorRule": "SUM_CATEGORY_INPUTS",
+      "minimumSample": 0,
+      "benchmarkExposureStatus": "PENDING_DEPENDENCY",
+      "liveInferenceAuthorization": "LIVE_CONDITIONAL",
+      "trialUniverse": "LOVE ZONE突入1回",
+      "directDenominatorObservation": true,
+      "likelihoodCompleteness": "COMPLETE_ALL_SETTINGS",
+      "perTrialInformationStatus": "NON_ZERO",
+      "difficultyParticipation": "EXCLUDE_PENDING_BENCHMARK_DEPENDENCY",
+      "userReason": "LOVE ZONE突入ごとに表示ステージ（お店前/Club Luxe/Club Luxe ALLCast/コスプレDAY）またはWご指名チャンス直撃として排他的に分類でき、設定1〜6の完全なカテゴリ分布が公開されている。通常Gを分母にせず実測カテゴリ合計を条件付きTrial数としてlive inferenceに利用する。",
+      "dependencyContract": {
+        "relationship": "PARENT_EVENT_CONDITIONAL",
+        "relatedFeatureIds": [
+          "FEAT_LOVE_ZONE"
+        ],
+        "combinationPolicy": "CONDITIONAL_LIKELIHOOD_ON_DIRECT_TRIALS",
+        "reason": "LOVE ZONE発生率は親事象、ステージ分布は突入後の条件付き分布。ステージ側は実測突入Trialだけで尤度更新し、親発生率を分母へ再利用しない。"
+      }
+    },
+    {
+      "researchFeatureId": "RF_ALL_CAST_CLEAR",
+      "featureId": "FEAT_ALL_CAST_CLEAR",
+      "adoptionCategory": "EXCLUDE",
+      "selectionScore": null,
+      "benchmarkExposureStatus": "BLOCKED_UNRESOLVED",
+      "rejectionReason": "公開出現率はあるが厳密なゲーム母数範囲を確定できないためbenchmark Exposureを作らず不採用。公開値の非単調性はそのまま保持する。"
+    },
+    {
+      "researchFeatureId": "RF_RESET_STATE",
+      "featureId": "FEAT_RESET_STATE",
+      "adoptionCategory": "EXCLUDE",
+      "selectionScore": null,
+      "benchmarkExposureStatus": "BLOCKED_UNRESOLVED",
+      "rejectionReason": "設定変更時の内部状態分布は完全だが、全カテゴリを実戦で確定観測できる契約をfresh Researchから確立できないため不採用。"
+    },
+    {
+      "researchFeatureId": "RF_CZ_FAIL_STATE",
+      "featureId": "FEAT_CZ_FAIL_STATE",
+      "adoptionCategory": "EXCLUDE",
+      "selectionScore": null,
+      "benchmarkExposureStatus": "BLOCKED_UNRESOLVED",
+      "rejectionReason": "適格Trialの条件自体にLOVE ZONE突入時の内部状態が含まれ、直接再現可能な適格分母を確定できないため不採用。"
     }
   ],
   "evidenceDecisions": [
@@ -154,10 +300,10 @@
     }
   ],
   "selectionSummaryContract": {
-    "evaluatedCount": 6,
-    "selectedCount": 1,
+    "evaluatedCount": 10,
+    "selectedCount": 3,
     "displayOnlyCount": 1,
-    "rejectedCount": 4
+    "rejectedCount": 6
   },
   "linkedPlayResearch": {
     "status": "UNRESOLVED",

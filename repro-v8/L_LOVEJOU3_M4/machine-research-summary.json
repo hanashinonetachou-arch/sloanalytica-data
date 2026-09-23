@@ -14,6 +14,7 @@
         "featureId": "FEAT_LOVE_ZONE",
         "label": "LOVE ZONE",
         "selectionScore": 90.34,
+        "importance": "必須",
         "reason": "7000G基準で最大の有効情報量。通常時ゲーム数を直接母数として観測可能。"
       }
     ],
@@ -31,16 +32,32 @@
         "reason": "下流フロー依存。共同尤度未確立。"
       },
       {
-        "featureId": "FEAT_LZ_FAIL_AT",
-        "reason": "LOVE ZONE失敗回数という条件付き母数の7000G exposure未確立。"
-      },
-      {
         "featureId": "FEAT_RELAX_SPRING",
         "reason": "AT終了回数を母数とするため7000G exposure未確立。"
       },
       {
         "featureId": "FEAT_RESET_MODE",
         "reason": "内部モードの反復観測契約を実戦上確立できない。"
+      }
+    ],
+    "support": [
+      {
+        "featureId": "FEAT_LZ_STAGE",
+        "label": "LOVE ZONEステージ",
+        "selectionScore": null,
+        "benchmarkExposureStatus": "PENDING_DEPENDENCY",
+        "liveInference": "LIVE_CONDITIONAL",
+        "importance": "補助",
+        "reason": "LOVE ZONE突入ごとに5カテゴリを直接観測できる条件付き分布。benchmark exposure未確定のため重要度は保守的に補助。"
+      },
+      {
+        "featureId": "FEAT_LZ_FAIL_AT",
+        "label": "LOVE ZONE失敗後AT本前兆",
+        "selectionScore": null,
+        "benchmarkExposureStatus": "BLOCKED_UNRESOLVED",
+        "liveInference": "LIVE_CONDITIONAL",
+        "importance": "補助",
+        "reason": "LOVE ZONE失敗を直接分母として観測可能。7000G機会数は作らずHighLowには参加させない。"
       }
     ]
   },
@@ -67,23 +84,11 @@
           "優:設定5以上",
           "極:設定6"
         ]
-      },
-      {
-        "groupId": "EVI_PLAY_WINDOW",
-        "label": "通常時の遊技ウインドウ",
-        "constraints": [
-          "満足いただける:設定2以上",
-          "上質な:設定4以上",
-          "最高級の:設定6"
-        ]
       }
     ],
-    "suggestionOnly": [
-      "遊技ウインドウの奇数/偶数/高設定示唆",
-      "AT終了画面の奇数/偶数/高設定示唆"
-    ],
+    "suggestionOnly": [],
     "unsupportedOrUnresolved": [
-      "二次情報のみで確認された打-WIN LITE/隠れ凪の設定確定対応は、公式または主要解析の十分な裏付けを得るまでHard Evidenceにしない。"
+      "fresh zero-base ResearchでResearch Evidenceとして確認できなかった設定示唆はHard Evidenceへ昇格しない。"
     ]
   },
   "linkedPlay": {
@@ -96,19 +101,35 @@
     "primaryInput": "通常時ゲーム数 + LOVE ZONE回数",
     "referenceInput": "AT初当り回数は参考表示のみ",
     "evidenceGrouping": [
-      "通常時の遊技ウインドウ",
       "AT中の獲得枚数表示",
       "AT終了画面スタンプ"
     ],
-    "internalIdsMustNotAppear": true
+    "internalIdsMustNotAppear": true,
+    "conditionalInputs": [
+      "LOVE ZONE突入時ステージ（5カテゴリ）",
+      "LOVE ZONE失敗回数 + 失敗後AT本前兆回数"
+    ]
   },
   "unresolved": [
     "linked-play official availability/mapping",
-    "conditional-exposure features excluded from inference"
+    "W LOVE RUSH / 全キャストクリアの厳密なゲーム母数",
+    "内部モード・内部状態の確定観測可能性",
+    "AT終了後リラクの泉の排他的観測契約"
   ],
   "contaminationBoundary": {
     "existingLovejoMachinePackageInspected": false,
     "legacySelectionInspected": false,
     "legacyCanonicalUiInspected": false
+  },
+  "highLow": {
+    "status": "RESOLVED_WITH_LIVE_CONDITIONAL_EXCLUSIONS",
+    "benchmarkFeatureIds": [
+      "FEAT_LOVE_ZONE"
+    ],
+    "liveConditionalExcludedFromBenchmark": [
+      "FEAT_LZ_STAGE",
+      "FEAT_LZ_FAIL_AT"
+    ],
+    "reason": "live inference eligibility and HighLow benchmark eligibility are evaluated independently."
   }
 }

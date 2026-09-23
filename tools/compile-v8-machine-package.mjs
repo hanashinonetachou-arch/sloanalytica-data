@@ -39,7 +39,7 @@ function compileFeatures(research,selection,observation){
     const sources=(selected.sourceResearchFeatureIds?.length?selected.sourceResearchFeatureIds:[selected.researchFeatureId]).map(id=>rb.get(id));
     if(sources.some(x=>!x)) throw new Error(`${selected.featureId} research source missing`);
     const engineInputs=(obs.inputs??[]).filter(x=>x.engineInputId);
-    const denominator=engineInputs.find(x=>x.type==='integer'||/GAMES/.test(x.engineInputId));
+    const denominator=engineInputs.find(x=>x.id===selected.denominatorInputId)||engineInputs.find(x=>x.type==='integer'||/GAMES|TRIALS/.test(x.engineInputId));
     const counters=engineInputs.filter(x=>x!==denominator&&x.shared!==true);
     const model=selected.dependencyContract?.combinationPolicy==='JOINT_MULTINOMIAL'?'multinomial':sources[0].candidateModel;
     if(model==='multinomial'){
