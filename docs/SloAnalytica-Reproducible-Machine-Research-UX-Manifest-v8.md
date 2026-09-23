@@ -118,10 +118,10 @@ DEP-006: The UI MUST NOT present PRIMARY and ALTERNATIVE as two equal independen
 ## 8. Selection
 
 SEL-001: SelectionScore = IG7000 × 200.
-SEL-002: CORE >= 20; SUPPORT >= 10; JOINT_ELIGIBLE >= 5; below 5 = REJECT, subject to dependency/validity requirements.
+SEL-002: For candidates with a resolved benchmark SelectionScore, CORE >= 20; SUPPORT >= 10; JOINT_ELIGIBLE >= 5; below 5 = REJECT, subject to dependency/validity requirements. A legitimate LIVE_CONDITIONAL path under SEL-008A is classified separately and MUST NOT be forced into these benchmark-score classes.
 SEL-003: For candidates whose realistic 7000G benchmark exposure is resolved, standalone Numeric feature requires IG7000 >= 0.05 bit. Joint participation requires >= 0.025 bit and the joint feature must reach >= 0.05 bit. These benchmark thresholds MUST NOT be applied to a candidate whose benchmark exposure is legitimately BLOCKED_UNRESOLVED under EXP-008.
 SEL-004: Selection MUST occur only after completeness, denominator, exposure and dependency are sufficiently resolved.
-SEL-005: For every candidate preserve disposition, IG, SelectionScore, class, relevant trial/exposure basis, dependency and a concrete reason.
+SEL-005: For every candidate preserve disposition, relevant trial/exposure basis, dependency and a concrete reason. Preserve IG, SelectionScore and benchmark class when computable; otherwise preserve their explicit BLOCKED_UNRESOLVED status and reason. Missing benchmark metrics MUST NOT be silently replaced by zero.
 
 SEL-006: Selection MUST NOT reject a candidate solely because its conditional trial count cannot be derived from benchmark game count. Before rejection, Selection MUST test whether Observation can directly capture the exact conditional denominator/opportunity count and whether Research supplies a complete setting-specific likelihood over that Trial Universe.
 
@@ -137,7 +137,7 @@ SEL-008C: For LIVE_CONDITIONAL, quantitative usefulness MUST be preserved as per
 SEL-009: “推測計算に採用しています” is not an acceptable adoption reason. A reason MUST explain why the information is useful, including quantitative basis where available.
 SEL-010: Rejection reasons MUST distinguish causes such as weak information, insufficient practical exposure, unavailable observation, incomplete public distribution, dependency/double counting, invalid denominator or unresolved semantics.
 SEL-011: User-facing explanations MUST not expose internal tokens such as INCLUDE_PRIMARY, Gate names or schema IDs.
-SEL-009: Detailed technical metrics may remain in research artifacts, but the user-facing reason must preserve the actual rationale rather than replacing it with a generic sentence.
+SEL-012: Detailed technical metrics may remain in research artifacts, but the user-facing reason must preserve the actual rationale rather than replacing it with a generic sentence.
 
 ## 9. Evidence Research
 
