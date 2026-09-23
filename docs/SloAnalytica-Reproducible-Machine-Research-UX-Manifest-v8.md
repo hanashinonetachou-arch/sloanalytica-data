@@ -1,4 +1,4 @@
-# SloAnalytica Reproducible Machine Research & UX Construction Manifest v8.1
+# SloAnalytica Reproducible Machine Research & UX Construction Manifest v8.2
 
 Status: DRAFT — Reference-machine validation required  
 Date: 2026-09-23  
@@ -118,6 +118,18 @@ EXP-013: When several public values are valid candidates for a common exposure a
 
 EXP-014: DERIVED_BOUNDED records a reproducible exposure interval when public information supports bounds but not a single deterministic estimate. It MAY produce a SelectionScore range/sensitivity result but MUST NOT silently collapse that range to a single factual exposure. UNRESOLVED is required when even a defensible approximate or bounded opportunity model cannot be constructed.
 
+EXP-014A: A bounded exposure MUST distinguish DERIVED_LOWER_BOUNDED, DERIVED_UPPER_BOUNDED, and DERIVED_INTERVAL_BOUNDED. A lower bound MAY be derived from a publicly established containment/implication relation between observable events. If every occurrence of public event P necessarily creates at least one eligible observation opportunity O, then the benchmark resolver MAY assert ExpectedTrials(O) >= ExpectedCount(P). It MUST NOT assert equality unless Research proves equality.
+
+EXP-014B: Guaranteed Minimum Exposure is the lower bound L produced by DERIVED_LOWER_BOUNDED. Its derivation MUST preserve: (a) the source-supported implication/containment relation, (b) exclusions that can invalidate the implication, (c) the public rate/count used for P, (d) benchmark games, and (e) the expression yielding L. Additional opportunities not quantified by public information MUST contribute zero to L; they MUST NOT be guessed.
+
+EXP-014C: When the observation model's mutual information is monotone non-decreasing in the number of independent eligible trials under the same complete setting-specific likelihood, the pipeline MAY compute GuaranteedMinimumIG and GuaranteedMinimumSelectionScore from L. These are conservative lower-bound metrics, not point estimates of actual benchmark information. If monotonicity is not established for the implemented model, the guaranteed score MUST remain unresolved even when an exposure lower bound exists.
+
+EXP-014D: GuaranteedMinimumSelectionScore = IG(L) × 200. A candidate MAY satisfy a Selection threshold from this metric only when the lower-bound score itself meets that threshold. Crossing a threshold only at an unknown/favorable exposure above L is insufficient. The technical artifact MUST label the metric as a guaranteed minimum and MUST NOT serialize it as an ordinary point-estimate SelectionScore.
+
+EXP-014E: DERIVED_LOWER_BOUNDED and its guaranteed-minimum score MUST NOT enter ProbabilityEngine as fabricated live exposure. Runtime inference continues to use only the player's actually observed eligible denominator/opportunities. A lower bound MUST NOT fill missing likelihoods, outcome probabilities, or setting mappings.
+
+EXP-014F: Before classifying benchmark exposure UNRESOLVED, the resolver MUST test, in order, whether a DIRECT_PUBLISHED, DERIVED_EXACT, DERIVED_APPROXIMATED, or defensible bounded relation exists. In particular, if a broader observation opportunity necessarily contains a publicly quantified event class, failure to quantify the additional opportunities is not by itself sufficient for UNRESOLVED; preserve the supported lower bound.
+
 EXP-015: Every benchmarked candidate MUST preserve exposureClass, benchmarkGames, expectedTrials (or bounds), derivation expression, source lineage, assumptions, and an exposureQuality flag. Approximate exposure MUST remain auditable downstream even when SelectionScore is a single number.
 
 EXP-016: Benchmark exposure assumptions are allowed because SelectionScore is a practical ranking/screening measure. They MUST NOT be rendered to users as expected actual counts unless clearly identified as estimates. Real runtime inference always uses the player's directly observed eligible trials under Observation.
@@ -133,9 +145,9 @@ DEP-006: The UI MUST NOT present PRIMARY and ALTERNATIVE as two equal independen
 
 ## 8. Selection
 
-SEL-001: SelectionScore = IG7000 × 200. IG7000 MAY use benchmark exposure classified DIRECT_PUBLISHED, DERIVED_EXACT, or DERIVED_APPROXIMATED under EXP-009..EXP-016. SelectionScore MUST preserve the exposure class/quality that produced it; an approximate exposure does not become a Research fact.
+SEL-001: SelectionScore = IG7000 × 200. Ordinary point-estimate IG7000 MAY use benchmark exposure classified DIRECT_PUBLISHED, DERIVED_EXACT, or DERIVED_APPROXIMATED under EXP-009..EXP-016. DERIVED_LOWER_BOUNDED MAY instead produce GuaranteedMinimumIG7000 / GuaranteedMinimumSelectionScore under EXP-014A..EXP-014F. These lower-bound metrics MAY prove that a threshold is met, but MUST NOT be relabeled as an ordinary point-estimate SelectionScore. All quantitative outputs MUST preserve their exposure class/quality; an approximate or bounded exposure does not become a Research fact.
 SEL-002: For candidates with a resolved benchmark SelectionScore, CORE >= 20; SUPPORT >= 10; JOINT_ELIGIBLE >= 5; below 5 = REJECT, subject to dependency/validity requirements. A legitimate LIVE_CONDITIONAL path under SEL-008A is classified separately and MUST NOT be forced into these benchmark-score classes.
-SEL-003: For candidates whose 7000G benchmark exposure is resolved or deterministically approximated under EXP-009..EXP-016, standalone Numeric feature requires IG7000 >= 0.05 bit. Joint participation requires >= 0.025 bit and the joint feature must reach >= 0.05 bit. These benchmark thresholds MUST NOT be applied to a candidate whose benchmark exposure is legitimately BLOCKED_UNRESOLVED under EXP-008.
+SEL-003: For candidates whose 7000G benchmark exposure is resolved or deterministically approximated under EXP-009..EXP-016, standalone Numeric feature requires IG7000 >= 0.05 bit. Joint participation requires >= 0.025 bit and the joint feature must reach >= 0.05 bit. A GuaranteedMinimumIG7000 from DERIVED_LOWER_BOUNDED MAY prove the same threshold conservatively when its lower-bound value itself reaches the threshold. These benchmark thresholds MUST NOT be applied as though resolved to a candidate whose benchmark exposure is legitimately BLOCKED_UNRESOLVED under EXP-008.
 SEL-004: Selection MUST occur only after completeness, denominator, exposure and dependency are sufficiently resolved.
 SEL-005: For every candidate preserve disposition, relevant trial/exposure basis, dependency and a concrete reason. Preserve IG, SelectionScore and benchmark class when computable; otherwise preserve their explicit BLOCKED_UNRESOLVED status and reason. Missing benchmark metrics MUST NOT be silently replaced by zero.
 
