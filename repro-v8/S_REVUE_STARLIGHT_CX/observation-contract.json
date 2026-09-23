@@ -4,13 +4,13 @@
   "generatedAt": "2026-09-23",
   "numeric": [
     {
-      "featureId": "FEAT_CZ",
+      "featureId": "FEAT_CZ_INITIAL",
       "context": "通常時",
-      "how": "通常時ゲーム数とCZ突入回数を記録",
+      "how": "通常ゲーム数とCZ初当り回数を記録",
       "inputs": [
         {
           "id": "INP_NORMAL_GAMES",
-          "label": "通常時ゲーム数",
+          "label": "通常ゲーム数",
           "type": "integer",
           "unit": "G",
           "directNumeric": true,
@@ -20,7 +20,7 @@
         },
         {
           "id": "INP_CZ",
-          "label": "CZ",
+          "label": "CZ初当り",
           "type": "counter",
           "unit": "回"
         }
@@ -29,8 +29,7 @@
     {
       "featureId": "FEAT_AT_INITIAL",
       "context": "通常時",
-      "runtimeRole": "DISPLAY_ONLY_DO_NOT_MULTIPLY_WITH_CZ",
-      "how": "AT初当り回数を参考表示用に記録。通常時ゲーム数はCZと共用",
+      "how": "AT初当り回数を記録。通常ゲーム数はCZと共用",
       "inputs": [
         {
           "id": "INP_AT_INITIAL",
@@ -43,6 +42,89 @@
           "shared": true
         }
       ]
+    },
+    {
+      "featureId": "FEAT_CZ_FAKE_END_LED",
+      "context": "CZ・フェイク前兆終了時",
+      "how": "設定変更時・AT終了後を除き、対象機会ごとにLED色を1回記録",
+      "model": "multinomial",
+      "denominator": {
+        "type": "DERIVED_SUM",
+        "inputIds": [
+          "INP_CZ_LED_WHITE",
+          "INP_CZ_LED_BLUE",
+          "INP_CZ_LED_GREEN",
+          "INP_CZ_LED_RED",
+          "INP_CZ_LED_PURPLE"
+        ]
+      },
+      "inputs": [
+        {
+          "id": "INP_CZ_LED_WHITE",
+          "label": "白",
+          "type": "counter",
+          "unit": "回"
+        },
+        {
+          "id": "INP_CZ_LED_BLUE",
+          "label": "青",
+          "type": "counter",
+          "unit": "回"
+        },
+        {
+          "id": "INP_CZ_LED_GREEN",
+          "label": "緑",
+          "type": "counter",
+          "unit": "回"
+        },
+        {
+          "id": "INP_CZ_LED_RED",
+          "label": "赤",
+          "type": "counter",
+          "unit": "回"
+        },
+        {
+          "id": "INP_CZ_LED_PURPLE",
+          "label": "紫",
+          "type": "counter",
+          "unit": "回"
+        }
+      ]
+    },
+    {
+      "featureId": "FEAT_SPECIFIC_BONUS_5_AGG",
+      "context": "特定ボーナス",
+      "runtimeRole": "LIVE_CONDITIONAL_EXACT_EXPOSURE",
+      "how": "特定5種合算回数と、正確な抽選対象ゲーム数を復元するため不可避な項目だけを記録",
+      "inputs": [
+        {
+          "id": "INP_SPECIFIC_BONUS_5_AGG",
+          "label": "特定ボーナス",
+          "type": "counter",
+          "unit": "回"
+        },
+        {
+          "id": "INP_BONUS_BROADER_GAMES",
+          "label": "対象ゲーム数",
+          "type": "integer",
+          "unit": "G",
+          "directNumeric": true
+        },
+        {
+          "id": "INP_AT_REPRODUCTION_GAMES",
+          "label": "AT中の再生産モードG",
+          "type": "integer",
+          "unit": "G",
+          "directNumeric": true,
+          "nullable": true
+        }
+      ],
+      "exposureReconstruction": {
+        "classification": "HYBRID_EXACT",
+        "derivedFixedTerms": "APP_CALCULATED_WHEN_BOUNDARY_COMPLETE",
+        "missingRequiredTerm": "DISABLE_FEATURE_ONLY",
+        "observedZeroDistinctFromMissing": true
+      }
     }
   ],
   "evidenceRef": "repro-v8/S_REVUE_STARLIGHT_CX/evidence-contract.json",
@@ -58,42 +140,10 @@
   },
   "assertions": [
     "UNOBSERVED and OBSERVED_ZERO remain distinct",
-    "normal-game denominator is entered once",
-    "AT initial hit is display-only and not multiplied with CZ",
-    "rejected inference features may remain exact conditional observations without entering ProbabilityEngine"
+    "normal-game denominator is entered once and shared by CZ/AT",
+    "LED denominator is derived from the five exhaustive color counts",
+    "missing reconstructed bonus exposure disables only the specific-bonus feature",
+    "fixed-duration exclusions are derived by the app where exact"
   ],
-  "conditional": [
-    {
-      "featureId": "FEAT_CZ_END_LED",
-      "researchFeatureId": "RF_CZ_END_LED",
-      "observationDisposition": "CONDITIONAL_OBSERVATION",
-      "inferenceDisposition": "EXCLUDE",
-      "context": "CZフェイク前兆終了時・CZ終了時",
-      "how": "設定変更時・AT終了後を除き、対象機会ごとに筐体右側LEDの発光色を1回記録",
-      "trialUniverse": "ELIGIBLE_FAKE_PRECURSOR_OR_CZ_END_EXCLUDING_SETTING_CHANGE_AND_AT_END",
-      "categoryCoverage": "EXHAUSTIVE",
-      "outcomes": [
-        {
-          "id": "INP_CZ_LED_WHITE",
-          "label": "白"
-        },
-        {
-          "id": "INP_CZ_LED_BLUE",
-          "label": "青"
-        },
-        {
-          "id": "INP_CZ_LED_GREEN",
-          "label": "緑"
-        },
-        {
-          "id": "INP_CZ_LED_RED",
-          "label": "赤"
-        },
-        {
-          "id": "INP_CZ_LED_PURPLE",
-          "label": "紫"
-        }
-      ]
-    }
-  ]
+  "conditional": []
 }
