@@ -543,3 +543,28 @@ Important constraints:
 
 ### Consequence for Trial Universe re-audit
 This derivation materially weakens the prior JOINT_GAME_EVENT_SOURCE_UNRESOLVED block. The five joint-event rates and effective/internal total bonus rate behave as a common probability space, and the residual exactly reconstructs a setting-invariant complementary bonus family. The next step is to determine whether live play can classify every internally established bonus into these categories at the establishment point. If yes, an exhaustive conditional composition model per internal bonus establishment may avoid needing the unknown absolute game-exposure denominator for live inference, analogous in spirit to an exhaustive categorical denominator.
+
+
+## Revalidation — reproduction mode / red BIG / specific-bonus setting difference
+
+Fresh source proof:
+- Reproduction mode is entered from an internally established red BIG. NanaPress states it is an AT state entered from part of red-BIG wins and that while in reproduction mode red BIG is internally established, so further bonus lottery is not performed until release.
+- P-WORLD independently describes reproduction mode in normal/CZ/AT contexts as triggered by internal red7 BIG establishment.
+- Surface red7 BIG occurrence is essentially setting-invariant: 1/583.0, 1/582.6, 1/584.0, 1/583.3, 1/585.8.
+- More importantly for internal establishment, the effective/internal red7 BIG rate is published as 1/565.0 across settings. Thus the reproduction-mode prerequisite itself is setting-invariant in the underlying lottery.
+- The five setting-difference specific bonuses exclude red BIG entirely: Kirameki-me+REG, chance-me+REG, watermelon+REG, watermelon+blue BIG, chance-me+blue BIG.
+
+Correction to prior reasoning:
+- Reproduction mode does explain why surface/displayed bonus occurrence differs from internal/effective bonus lottery.
+- But it must NOT be used as a reason to block or dilute the setting-difference evaluation of the five specific bonuses: its prerequisite red BIG lottery is setting-invariant and none of the five specific setting-difference events is a red-BIG event.
+- Therefore the setting-difference structure should be analyzed in the internal/effective bonus-lottery probability space, not from delayed surface realization.
+
+Structural reconstruction remains valid:
+effective/internal total bonus probability minus the five specific setting-difference joint-event probabilities leaves an approximately setting-invariant residual (~1/290 across settings, within published-rate rounding).
+This now has a direct mechanical interpretation consistent with fresh sources: the varying part of the effective bonus lottery is concentrated in the five published specific-bonus events, while the red-BIG/reproduction-mode mechanism itself is not a source of setting difference.
+
+Selection implication:
+- remove REPRODUCTION_MODE_CONFOUNDING as a blocker for the five specific-bonus candidates;
+- retain the five as a distinct setting-difference joint-event family;
+- surface bonus occurrence remains a separate observable and should not be used to infer the five events;
+- next investigate an exhaustive internal-bonus composition contract (five specific events + setting-invariant complement), including whether every bonus establishment can be classified reliably enough in live play.
