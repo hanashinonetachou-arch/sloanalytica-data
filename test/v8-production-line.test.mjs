@@ -94,6 +94,16 @@ test("Revue v8.4 production package preserves conditional and categorical infere
  assert.equal(byId.get("FEAT_CZ_FAKE_END_LED")?.categoryInputIds?.length,4);
  assert.equal(byId.get("FEAT_SPECIFIC_BONUS_5_AGG")?.adoptionCategory,"LIVE_CONDITIONAL");
  assert.equal(byId.get("FEAT_SPECIFIC_BONUS_5_AGG")?.inferenceGate,"EXACT_EXPOSURE_RECONSTRUCTION_COMPLETE");
- assert.equal(byId.get("FEAT_SPECIFIC_BONUS_5_AGG")?.runtimeInferenceEnabled,false);
- assert.equal(byId.get("FEAT_SPECIFIC_BONUS_5_AGG")?.runtimeBlockReason,"EXACT_EXPOSURE_RUNTIME_BINDING_REQUIRED");
+ const specificBonus=byId.get("FEAT_SPECIFIC_BONUS_5_AGG");
+ assert.equal(specificBonus?.runtimeInferenceEnabled,true);
+ assert.equal(specificBonus?.runtimeBlockReason,undefined);
+ assert.match(specificBonus?.denominatorInputId,/^DERIVED_.*ELIGIBLE_TRIALS$/);
+ const exposureInput=pkg.inputs.inputs.find(x=>x.id===specificBonus.denominatorInputId);
+ assert.equal(exposureInput?.derivedCalculation,"linear_combination");
+ assert.deepEqual(exposureInput?.derivedTerms,[
+  {inputId:"INP_BONUS_BROADER_GAMES",multiplier:1},
+  {inputId:"INP_NORMAL_REPRODUCTION_ENTRIES",multiplier:-20},
+  {inputId:"INP_CZ_REPRODUCTION_GAMES",multiplier:-1},
+  {inputId:"INP_AT_REPRODUCTION_GAMES",multiplier:-1},
+ ]);
 });
