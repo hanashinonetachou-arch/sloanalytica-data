@@ -506,3 +506,40 @@ but MUST NOT mix both representations as independent evidence.
 The user's concern is confirmed: the five specific-trigger bonus events are important setting-discrimination candidates and deserve their own Trial Universe analysis. They remain alive in Selection Research and are not rejected for low usefulness or hidden under aggregate bonus counts.
 
 The blocker is narrower than previously stated: not likelihood completeness, but the exact game-exposure denominator of the published joint 1/N tables.
+
+
+## Derived composition audit — specific bonus share of internal/effective bonus wins
+
+Fresh public sources provide both:
+- the five setting-difference specific-bonus joint-event rates, whose combined rates are approximately 1/468, 1/452, 1/379, 1/356, 1/333 for settings 1/2/4/5/6; and
+- effective/internal total bonus occurrence rates of 1/179.1, 1/176.6, 1/164.3, 1/159.9, 1/154.9.
+
+A reproducible probability-space subtraction gives:
+P(other bonus) = P(effective total bonus) - Σ P(five specific bonuses).
+
+Using the unrounded five component rates:
+- setting 1: other ≈ 1/290.07
+- setting 2: other ≈ 1/289.81
+- setting 4: other ≈ 1/290.18
+- setting 5: other ≈ 1/290.21
+- setting 6: other ≈ 1/289.89
+
+The residual is effectively invariant at ~1/290 across all settings; variation is consistent with rounding of published denominators.
+
+This is strong structural evidence that the setting difference in the effective/internal total bonus probability is accounted for by the five specific-bonus joint events, while the complementary “other bonus” family is setting-invariant.
+
+Derived composition share among effective/internal bonus wins:
+- setting 1: ~38.26% specific / ~61.74% other
+- setting 2: ~39.06% specific / ~60.94% other
+- setting 4: ~43.38% specific / ~56.62% other
+- setting 5: ~44.90% specific / ~55.10% other
+- setting 6: ~46.57% specific / ~53.43% other
+
+Important constraints:
+- This composition is valid only if the effective/internal total bonus rate and the five joint-event rates share the same underlying game-trial probability space. The near-perfect constant residual across all five settings is a powerful reproducibility check for that shared-space interpretation, but the derivation should be recorded as DERIVED_EXACT/ROUNDING_TOLERANT rather than silently treated as a quoted source statement.
+- Do not use both effective total bonus count and the five specific-bonus counts as independent likelihoods; they are algebraically/dependently related.
+- A preferable inference representation may be the composition itself: specific-bonus joint events versus complementary other-bonus events, or a finer mutually exclusive category model if each observed internal bonus establishment route can be reliably classified in live play.
+- Surface/displayed bonus occurrence remains a different observable because reproduction mode delays realization.
+
+### Consequence for Trial Universe re-audit
+This derivation materially weakens the prior JOINT_GAME_EVENT_SOURCE_UNRESOLVED block. The five joint-event rates and effective/internal total bonus rate behave as a common probability space, and the residual exactly reconstructs a setting-invariant complementary bonus family. The next step is to determine whether live play can classify every internally established bonus into these categories at the establishment point. If yes, an exhaustive conditional composition model per internal bonus establishment may avoid needing the unknown absolute game-exposure denominator for live inference, analogous in spirit to an exhaustive categorical denominator.
