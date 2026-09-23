@@ -1,4 +1,4 @@
-# SloAnalytica Reproducible Machine Research & UX Construction Manifest v8.2
+# SloAnalytica Reproducible Machine Research & UX Construction Manifest v8.3
 
 Status: DRAFT — Reference-machine validation required  
 Date: 2026-09-23  
@@ -85,6 +85,7 @@ COMP-004: REJECT means “researched/evaluated but not used in inference”; it 
 
 DEN-001: Every Numeric candidate MUST define numerator, denominator/trial universe, unit, scope and applicable state.
 DEN-002: When relevant, define exclusion states, reset boundary, shared denominator, conditional denominator and observation interval.
+DEN-002A: Denominator semantics MUST be preserved exactly from the public source. Context such as “during AT”, “during CZ”, or “after event X” identifies an applicable state but MUST NOT by itself be reinterpreted as the denominator of a published “1/N”, percentage, or effective occurrence rate. A denominator may be relabeled only when the source explicitly defines it or when a reproducible mathematical derivation from source-defined denominators proves equivalence. Otherwise denominator semantics remain SOURCE_UNRESOLVED and any score requiring the relabeling is BLOCKED_UNRESOLVED.
 DEN-003: Different trial universes MUST NOT be merged for UI convenience.
 DEN-004: Multiple features sharing the same real observation interval and denominator SHOULD use one shared denominator input when semantically valid. The user MUST NOT be asked to enter the same denominator repeatedly.
 DEN-005: User-facing denominator labels MUST use natural, countable language corresponding to what the player can actually observe.
@@ -124,7 +125,13 @@ EXP-014B: Guaranteed Minimum Exposure is the lower bound L produced by DERIVED_L
 
 EXP-014C: When the observation model's mutual information is monotone non-decreasing in the number of independent eligible trials under the same complete setting-specific likelihood, the pipeline MAY compute GuaranteedMinimumIG and GuaranteedMinimumSelectionScore from L. These are conservative lower-bound metrics, not point estimates of actual benchmark information. If monotonicity is not established for the implemented model, the guaranteed score MUST remain unresolved even when an exposure lower bound exists.
 
-EXP-014D: GuaranteedMinimumSelectionScore = IG(L) × 200. A candidate MAY satisfy a Selection threshold from this metric only when the lower-bound score itself meets that threshold. Crossing a threshold only at an unknown/favorable exposure above L is insufficient. The technical artifact MUST label the metric as a guaranteed minimum and MUST NOT serialize it as an ordinary point-estimate SelectionScore.
+EXP-014D: GuaranteedMinimumSelectionScore = IG(L*) × 200. A candidate MAY satisfy a Selection threshold from this metric only when the lower-bound score itself meets that threshold. Crossing a threshold only at an unknown/favorable exposure above L* is insufficient. The technical artifact MUST label the metric as a guaranteed minimum and MUST NOT serialize it as an ordinary point-estimate SelectionScore.
+
+EXP-014D1: Guaranteed-minimum benchmark construction MUST be deterministic. Let L_s be the source-supported expected lower-bound eligible-trial count at the benchmark for each declared setting s. Define the common guaranteed benchmark exposure as L* = min_s(L_s). The scoring model MUST use this same setting-independent L* for every setting so that setting differences in the upstream lower-bound event rate are not silently counted as additional evidence about the downstream observation.
+
+EXP-014D2: Fractional L* MUST NOT be rounded, floored, or ceiled by machine-specific judgment. For an independent repeated Bernoulli/categorical/multinomial eligible-trial model, GuaranteedMinimumIG is the linear interpolation between the exact fixed-trial observation models at n=floor(L*) and n+1=ceil(L*): IG(L*)=(1-r)IG(n)+r IG(n+1), where r=L*-n. If L* is an integer, use the exact n-trial model. This interpolation is benchmark-only and MUST NOT be represented as a factual fractional runtime trial.
+
+EXP-014D3: The rule in EXP-014D2 is a conservative deterministic benchmark convention, not a claim that a fractional number of trials occurs. A different observation family MAY use another fractional-exposure construction only when that construction is defined generically in the Manifest before machine execution. Otherwise the guaranteed score for that family remains BLOCKED_UNRESOLVED.
 
 EXP-014E: DERIVED_LOWER_BOUNDED and its guaranteed-minimum score MUST NOT enter ProbabilityEngine as fabricated live exposure. Runtime inference continues to use only the player's actually observed eligible denominator/opportunities. A lower bound MUST NOT fill missing likelihoods, outcome probabilities, or setting mappings.
 
@@ -161,7 +168,7 @@ SEL-008A: When benchmark exposure is legitimately BLOCKED_UNRESOLVED but EXP-006
 
 SEL-008B: LIVE_CONDITIONAL is not a substitute benchmark score or a waiver of statistical validity. It authorizes ProbabilityEngine use only for the exact observed trials supplied at runtime. A LIVE_CONDITIONAL candidate MAY also have a benchmark SelectionScore when EXP-009..EXP-016 yield a permitted benchmark exposure. If no permitted exposure is available, preserve benchmarkScoreStatus=BLOCKED_UNRESOLVED and the separate liveInference authorization. A score derived from unrecorded/ad-hoc exposure remains prohibited.
 
-SEL-008C: For LIVE_CONDITIONAL, Selection MUST always record deterministic per-observed-trial information under the same equal-setting prior used by SELDEP-001. A zero-information observation is REJECT. When a permitted benchmark exposure exists, practical usefulness is evaluated by combining that per-trial information with the benchmark opportunity model; when it does not, per-trial information remains the quantitative fallback and MUST NOT alone justify CORE/PRIMARY.
+SEL-008C: For LIVE_CONDITIONAL, Selection MUST always record deterministic per-observed-trial information under the same equal-setting prior used by SELDEP-001 as `IGPerEligibleTrial` in bits. A zero-information observation is REJECT. When a permitted benchmark exposure exists, practical usefulness is evaluated by combining that per-trial information with the benchmark opportunity model; when it does not, `IGPerEligibleTrial` remains quantitative diagnostic metadata and MUST NOT be converted to SelectionScore, multiplied by an assumed opportunity count, or alone justify CORE/PRIMARY or an importance tier.
 SEL-009: “推測計算に採用しています” is not an acceptable adoption reason. A reason MUST explain why the information is useful, including quantitative basis where available.
 SEL-010: Rejection reasons MUST distinguish causes such as weak information, insufficient practical exposure, unavailable observation, incomplete public distribution, dependency/double counting, invalid denominator or unresolved semantics.
 SEL-011: User-facing explanations MUST not expose internal tokens such as INCLUDE_PRIMARY, Gate names or schema IDs.
