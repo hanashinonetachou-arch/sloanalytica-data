@@ -5,9 +5,20 @@ const observationByFeature=o=>new Map((o.numeric??[]).map(x=>[x.featureId,x]));
 
 function compileInputs(observation,evidence){
   const inputs=new Map();
+  const derivedExposureInputs=[];
   for(const feature of observation.numeric??[]) for(const x of feature.inputs??[]){
     const engineInputId=x.engineInputId??x.id; if(!engineInputId) continue;
     inputs.set(engineInputId,{id:engineInputId,name:x.label??x.id,type:x.type==='integer'?'integer':'counter',category:'NUMERIC',unit:x.unit??'',inferenceRole:feature.runtimeRole?.startsWith('LIVE_CONDITIONAL')?'LIVE_CONDITIONAL':'INCLUDE_PRIMARY',defaultValue:null,minimum:0});
+  }
+  for(const feature of observation.numeric??[]){
+    const r=feature.exposureReconstruction;
+    if(r?.classification!=='HYBRID_EXACT'||!Array.isArray(r.terms)) continue;
+    const outputId=`DERIVED_${safe(feature.featureId)}_ELIGIBLE_TRIALS`;
+    const base=r.terms.filter(x=>x.role==='BASE');
+    const subtract=r.terms.filter(x=>x.role==='SUBTRACT_DIRECT_GAMES'||x.role==='SUBTRACT_FIXED_PER_OCCURRENCE');
+    if(base.length!==1||subtract.length<1) continue;
+    inputs.set(outputId,{id:outputId,name:`${feature.context??feature.featureId} 実効抽選G`,type:'integer',category:'DERIVED',inferenceRole:'LIVE_CONDITIONAL',defaultValue:null,minimum:0,derivedCalculation:'linear_combination',derivedTerms:[{inputId:base[0].inputId,multiplier:1},...subtract.map(x=>({inputId:x.inputId,multiplier:x.role==='SUBTRACT_FIXED_PER_OCCURRENCE'?-(x.gamesPerOccurrence??0):-1}))]});
+    derivedExposureInputs.push({featureId:feature.featureId,inputId:outputId});
   }
   const runtimeEvidence=clone(evidence??{groups:[]});
   for(const group of runtimeEvidence.groups??[]){
@@ -28,7 +39,7 @@ function compileInputs(observation,evidence){
       }
     }
   }
-  return {inputs:[...inputs.values()],runtimeEvidence};
+  return {inputs:[...inputs.values()],runtimeEvidence,derivedExposureInputs};
 }
 
 function compileFeatures(research,selection,observation){
@@ -77,8 +88,9 @@ function compileEvidence(runtimeEvidence){
 export function compileV8MachinePackage({research,selection,observation,evidence,highLow,summary,canonical,materializeUi}){
   const id=research.machine?.machineId;
   if(!id||selection.machineId!==id||observation.machineId!==id||canonical.machineId!==id) throw new Error('v8 machineId mismatch');
-  const {inputs,runtimeEvidence}=compileInputs(observation,evidence);
+  const {inputs,runtimeEvidence,derivedExposureInputs}=compileInputs(observation,evidence);
   const features=compileFeatures(research,selection,observation);
+  for(const binding of derivedExposureInputs){ const feature=features.find(x=>x.featureId===binding.featureId); if(!feature) continue; feature.denominatorInputId=binding.inputId; feature.runtimeInferenceEnabled=true; delete feature.runtimeBlockReason; }
   const runtimeEvidenceSection=compileEvidence(runtimeEvidence);
   const ui=materializeUi(canonical,{observationContract:observation,evidenceContract:runtimeEvidence});
   const provenance=clone(selection.provenance??canonical.provenance??summary?.provenance);
