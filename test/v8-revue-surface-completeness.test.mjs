@@ -24,3 +24,12 @@ test("Revue surface completeness keeps Numeric and Hard Evidence paths separate 
   assert.ok(numericNames.has("BIG-end default/weak/strong distribution"));
   assert.ok(evidence.some(x => x.context === "bonusEndScreen"));
 });
+
+test("Revue surface completeness promotes AT-end weak/strong voice distribution to Numeric review", () => {
+  const blind = JSON.parse(fs.readFileSync(new URL("phase7-blind-research.json", base), "utf8"));
+  const numericNames = new Set((blind.freshResearchSnapshot?.numericCandidates ?? []).map(x => x.name));
+  const suggestionOnly = blind.freshResearchSnapshot?.suggestionOnlyCandidates ?? [];
+
+  assert.ok(numericNames.has("AT-end Kirin default/weak/strong distribution"));
+  assert.ok(!suggestionOnly.includes("AT-end Kirin weak/strong high-setting hints"));
+});
