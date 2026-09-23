@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "provenance": {
-    "manifestVersion": "8.0",
+    "manifestVersion": "8.4-DRAFT",
     "generationPath": "V8_RESEARCH_PIPELINE",
     "researchOrigin": "ZERO_BASE_PUBLIC_RESEARCH"
   },
@@ -13,7 +13,7 @@
   "machine": {
     "schemaVersion": "2.0.0",
     "machineId": "S_REVUE_STARLIGHT_CX",
-    "machineDataVersion": "0.2.1",
+    "machineDataVersion": "0.3.0",
     "displayName": "L少女☆歌劇 レヴュースタァライト -The SLOT-",
     "modelName": "L少女☆歌劇 レヴュースタァライト -The SLOT-",
     "settings": [
@@ -32,6 +32,164 @@
   "inputs": {
     "schemaVersion": "2.0.0",
     "inputs": [
+      {
+        "id": "INP_NORMAL_GAMES",
+        "name": "INP_NORMAL_GAMES",
+        "type": "counter",
+        "category": "NUMERIC",
+        "unit": "",
+        "inferenceRole": "INCLUDE_PRIMARY",
+        "defaultValue": null,
+        "minimum": 0
+      },
+      {
+        "id": "INP_CZ",
+        "name": "CZ初当り",
+        "type": "counter",
+        "category": "NUMERIC",
+        "unit": "回",
+        "inferenceRole": "INCLUDE_PRIMARY",
+        "defaultValue": null,
+        "minimum": 0
+      },
+      {
+        "id": "INP_AT_INITIAL",
+        "name": "AT初当り",
+        "type": "counter",
+        "category": "NUMERIC",
+        "unit": "回",
+        "inferenceRole": "INCLUDE_PRIMARY",
+        "defaultValue": null,
+        "minimum": 0
+      },
+      {
+        "id": "INP_CZ_LED_WHITE",
+        "name": "白",
+        "type": "counter",
+        "category": "NUMERIC",
+        "unit": "回",
+        "inferenceRole": "INCLUDE_PRIMARY",
+        "defaultValue": null,
+        "minimum": 0
+      },
+      {
+        "id": "INP_CZ_LED_BLUE",
+        "name": "青",
+        "type": "counter",
+        "category": "NUMERIC",
+        "unit": "回",
+        "inferenceRole": "INCLUDE_PRIMARY",
+        "defaultValue": null,
+        "minimum": 0
+      },
+      {
+        "id": "INP_CZ_LED_GREEN",
+        "name": "緑",
+        "type": "counter",
+        "category": "NUMERIC",
+        "unit": "回",
+        "inferenceRole": "INCLUDE_PRIMARY",
+        "defaultValue": null,
+        "minimum": 0
+      },
+      {
+        "id": "INP_CZ_LED_RED",
+        "name": "赤",
+        "type": "counter",
+        "category": "NUMERIC",
+        "unit": "回",
+        "inferenceRole": "INCLUDE_PRIMARY",
+        "defaultValue": null,
+        "minimum": 0
+      },
+      {
+        "id": "INP_CZ_LED_PURPLE",
+        "name": "紫",
+        "type": "counter",
+        "category": "NUMERIC",
+        "unit": "回",
+        "inferenceRole": "INCLUDE_PRIMARY",
+        "defaultValue": null,
+        "minimum": 0
+      },
+      {
+        "id": "INP_SPECIFIC_BONUS_5_AGG",
+        "name": "特定ボーナス",
+        "type": "counter",
+        "category": "NUMERIC",
+        "unit": "回",
+        "inferenceRole": "LIVE_CONDITIONAL",
+        "defaultValue": null,
+        "minimum": 0
+      },
+      {
+        "id": "INP_BONUS_BROADER_GAMES",
+        "name": "対象ゲーム数",
+        "type": "integer",
+        "category": "NUMERIC",
+        "unit": "G",
+        "inferenceRole": "LIVE_CONDITIONAL",
+        "defaultValue": null,
+        "minimum": 0
+      },
+      {
+        "id": "INP_NORMAL_REPRODUCTION_ENTRIES",
+        "name": "通常時の再生産モード突入",
+        "type": "counter",
+        "category": "NUMERIC",
+        "unit": "回",
+        "inferenceRole": "LIVE_CONDITIONAL",
+        "defaultValue": null,
+        "minimum": 0
+      },
+      {
+        "id": "INP_CZ_REPRODUCTION_GAMES",
+        "name": "CZ中の再生産モードG",
+        "type": "integer",
+        "category": "NUMERIC",
+        "unit": "G",
+        "inferenceRole": "LIVE_CONDITIONAL",
+        "defaultValue": null,
+        "minimum": 0
+      },
+      {
+        "id": "INP_AT_REPRODUCTION_GAMES",
+        "name": "AT中の再生産モードG",
+        "type": "integer",
+        "category": "NUMERIC",
+        "unit": "G",
+        "inferenceRole": "LIVE_CONDITIONAL",
+        "defaultValue": null,
+        "minimum": 0
+      },
+      {
+        "id": "DERIVED_FEAT_SPECIFIC_BONUS_5_AGG_ELIGIBLE_TRIALS",
+        "name": "特定ボーナス 実効抽選G",
+        "type": "integer",
+        "category": "DERIVED",
+        "inferenceRole": "LIVE_CONDITIONAL",
+        "defaultValue": null,
+        "minimum": 0,
+        "derivedCalculation": "linear_combination",
+        "derivedTerms": [
+          {
+            "inputId": "INP_BONUS_BROADER_GAMES",
+            "multiplier": 1
+          },
+          {
+            "inputId": "INP_NORMAL_REPRODUCTION_ENTRIES",
+            "multiplier": -20
+          },
+          {
+            "inputId": "INP_CZ_REPRODUCTION_GAMES",
+            "multiplier": -1
+          },
+          {
+            "inputId": "INP_AT_REPRODUCTION_GAMES",
+            "multiplier": -1
+          }
+        ]
+      },
       {
         "id": "INP_V8_EV_BONUS_END_2PLUS",
         "name": "ボーナス終了画面: 青エフェクト",
@@ -138,12 +296,14 @@
     "schemaVersion": "2.0.0",
     "features": [
       {
-        "featureId": "FEAT_CZ",
+        "featureId": "FEAT_CZ_INITIAL",
         "name": "CZ",
         "adoptionCategory": "INCLUDE_PRIMARY",
         "calculationRole": "PROBABILITY",
         "probabilityEngineUsage": true,
         "modelType": "binomial",
+        "numeratorInputId": "INP_CZ",
+        "denominatorInputId": "INP_NORMAL_GAMES",
         "displayFormat": "ratio_1_over_n",
         "probabilities": {
           "SET_1": 0.0037608123354644606,
@@ -154,6 +314,154 @@
         },
         "sourceResearchFeatureIds": [
           "RF_CZ"
+        ]
+      },
+      {
+        "featureId": "FEAT_AT_INITIAL",
+        "name": "AT初当り",
+        "adoptionCategory": "INCLUDE_PRIMARY",
+        "calculationRole": "PROBABILITY",
+        "probabilityEngineUsage": true,
+        "modelType": "binomial",
+        "numeratorInputId": "INP_AT_INITIAL",
+        "denominatorInputId": "INP_NORMAL_GAMES",
+        "displayFormat": "ratio_1_over_n",
+        "probabilities": {
+          "SET_1": 0.0027808676307007783,
+          "SET_2": 0.0028835063437139563,
+          "SET_4": 0.0036088054853843374,
+          "SET_5": 0.003910833007430583,
+          "SET_6": 0.004301075268817204
+        },
+        "sourceResearchFeatureIds": [
+          "RF_AT_INITIAL"
+        ]
+      },
+      {
+        "featureId": "FEAT_CZ_FAKE_END_LED",
+        "name": "CZ・フェイク前兆終了時",
+        "adoptionCategory": "INCLUDE_PRIMARY",
+        "calculationRole": "PROBABILITY",
+        "probabilityEngineUsage": true,
+        "modelType": "multinomial",
+        "numeratorInputId": "INP_CZ_LED_WHITE",
+        "categoryInputIds": [
+          "INP_CZ_LED_BLUE",
+          "INP_CZ_LED_GREEN",
+          "INP_CZ_LED_RED",
+          "INP_CZ_LED_PURPLE"
+        ],
+        "probabilities": {},
+        "categoryLabels": [
+          "WHITE",
+          "BLUE",
+          "GREEN",
+          "RED",
+          "PURPLE"
+        ],
+        "categoryProbabilities": {
+          "SET_1": [
+            0.3213,
+            0.3315,
+            0.1557,
+            0.1543,
+            0.0371
+          ],
+          "SET_2": [
+            0.3147,
+            0.3308,
+            0.1678,
+            0.1399,
+            0.0469
+          ],
+          "SET_4": [
+            0.2581,
+            0.2907,
+            0.2176,
+            0.1524,
+            0.0812
+          ],
+          "SET_5": [
+            0.233,
+            0.2748,
+            0.2254,
+            0.1481,
+            0.1188
+          ],
+          "SET_6": [
+            0.2184,
+            0.2652,
+            0.2331,
+            0.1443,
+            0.1391
+          ]
+        },
+        "categoryConditioning": {
+          "excludedCategories": [],
+          "normalization": "RENORMALIZE_INCLUDED"
+        },
+        "sourceResearchFeatureIds": [
+          "RF_CZ_END_LED"
+        ]
+      },
+      {
+        "featureId": "FEAT_SPECIFIC_BONUS_5_AGG",
+        "name": "特定ボーナス5種合算",
+        "adoptionCategory": "LIVE_CONDITIONAL",
+        "calculationRole": "PROBABILITY",
+        "probabilityEngineUsage": true,
+        "modelType": "binomial",
+        "numeratorInputId": "INP_SPECIFIC_BONUS_5_AGG",
+        "denominatorInputId": "DERIVED_FEAT_SPECIFIC_BONUS_5_AGG_ELIGIBLE_TRIALS",
+        "displayFormat": "ratio_1_over_n",
+        "probabilities": {
+          "SET_1": 0.002136752136752137,
+          "SET_2": 0.0022123893805309734,
+          "SET_4": 0.002638522427440633,
+          "SET_5": 0.0028089887640449437,
+          "SET_6": 0.003003003003003003
+        },
+        "inferenceGate": "EXACT_EXPOSURE_RECONSTRUCTION_COMPLETE",
+        "exposureReconstruction": {
+          "classification": "HYBRID_EXACT",
+          "expression": "eligibleBonusLotteryGames = broaderGameCount - normalReproductionEntryCount*20 - czReproductionExcludedGames - atReproductionExcludedGames",
+          "terms": [
+            {
+              "inputId": "INP_BONUS_BROADER_GAMES",
+              "role": "BASE",
+              "coefficient": 1,
+              "required": true
+            },
+            {
+              "inputId": "INP_NORMAL_REPRODUCTION_ENTRIES",
+              "role": "SUBTRACT_FIXED_PER_OCCURRENCE",
+              "gamesPerOccurrence": 20,
+              "required": true
+            },
+            {
+              "inputId": "INP_CZ_REPRODUCTION_GAMES",
+              "role": "SUBTRACT_DIRECT_GAMES",
+              "required": true,
+              "observedZeroAllowed": true
+            },
+            {
+              "inputId": "INP_AT_REPRODUCTION_GAMES",
+              "role": "SUBTRACT_DIRECT_GAMES",
+              "required": true,
+              "observedZeroAllowed": true
+            }
+          ],
+          "missingRequiredTerm": "DISABLE_FEATURE_ONLY",
+          "observedZeroDistinctFromMissing": true,
+          "termSetCompleteness": "COMPLETE_FOR_DEFINED_BROADER_GAME_SCOPE",
+          "additionalExcludedTerms": {
+            "status": "NONE_WITHIN_DEFINED_SCOPE",
+            "reason": "対象ゲーム数は通常時・CZ中・AT中の観測対象区間に限定し、内部赤BIG成立後の再生産モードは通常時固定20G、CZ中実G、AT中実Gの3項で完全に除外する。これら以外の保持赤BIG区間を対象ゲーム数へ含めない。"
+          }
+        },
+        "runtimeInferenceEnabled": true,
+        "sourceResearchFeatureIds": [
+          "RF_SPECIFIC_BONUS_5_AGG"
         ]
       }
     ]
@@ -378,7 +686,7 @@
       {
         "id": "SEC_NORMAL",
         "title": "通常時",
-        "description": "通常時ゲーム数とCZを記録します。AT初当りは参考表示のみで、CZと同時に設定推測へ重ねて評価しません。",
+        "description": "通常ゲーム数と、その通常時に確認したCZ・AT初当り回数を入力します。",
         "descriptionPresentation": {
           "collapsible": true,
           "label": "説明",
@@ -396,28 +704,36 @@
             "inputs": [
               {
                 "id": "INP_NORMAL_GAMES",
-                "label": "通常時ゲーム数",
+                "label": "通常ゲーム数",
                 "input": "denominator",
-                "trialUniverse": "通常時消化ゲーム",
+                "trialUniverse": "通常ゲーム",
                 "gridSpan": 12,
                 "directNumeric": true,
                 "quickAdd": [
                   50
                 ],
-                "unobservedDisplay": "—"
+                "unobservedDisplay": "—",
+                "engineBinding": {
+                  "inputId": "INP_NORMAL_GAMES"
+                }
               },
               {
                 "id": "INP_CZ",
-                "label": "CZ",
+                "label": "CZ初当り",
                 "input": "counter",
-                "gridSpan": 6
+                "gridSpan": 6,
+                "engineBinding": {
+                  "inputId": "INP_CZ"
+                }
               },
               {
                 "id": "INP_AT_INITIAL",
-                "label": "AT初当り（参考）",
+                "label": "AT初当り",
                 "input": "counter",
                 "gridSpan": 6,
-                "displayOnly": true
+                "engineBinding": {
+                  "inputId": "INP_AT_INITIAL"
+                }
               }
             ]
           }
@@ -425,8 +741,8 @@
       },
       {
         "id": "SEC_CZ_END_LED",
-        "title": "CZ・フェイク前兆終了時LED",
-        "description": "CZフェイク前兆終了時またはCZ終了時に、筐体右側LEDの色を記録します。設定変更時・AT終了後は対象外です。この項目は記録用で、現在の設定推測計算には使用しません。",
+        "title": "CZ・フェイク前兆終了時のLED",
+        "description": "設定変更時・AT終了後を除き、CZまたはフェイク前兆終了時に筐体右側LEDで確認した色を1回ずつ加算します。確認回数は5色の合計から自動計算します。",
         "descriptionPresentation": {
           "collapsible": true,
           "label": "説明",
@@ -440,8 +756,6 @@
         "items": [
           {
             "id": "OBS_CZ_END_LED",
-            "observationDisposition": "CONDITIONAL_OBSERVATION",
-            "inferenceDisposition": "EXCLUDE",
             "observationMultiplicity": "REPEATED_CATEGORICAL_EVENT",
             "interaction": {
               "type": "CATEGORY_COUNTERS",
@@ -453,27 +767,27 @@
                 {
                   "id": "INP_CZ_LED_WHITE",
                   "label": "白",
-                  "meaning": "観測したLED色（記録用）"
+                  "meaning": "確認したLED色：白"
                 },
                 {
                   "id": "INP_CZ_LED_BLUE",
                   "label": "青",
-                  "meaning": "観測したLED色（記録用）"
+                  "meaning": "確認したLED色：青"
                 },
                 {
                   "id": "INP_CZ_LED_GREEN",
                   "label": "緑",
-                  "meaning": "観測したLED色（記録用）"
+                  "meaning": "確認したLED色：緑"
                 },
                 {
                   "id": "INP_CZ_LED_RED",
                   "label": "赤",
-                  "meaning": "観測したLED色（記録用）"
+                  "meaning": "確認したLED色：赤"
                 },
                 {
                   "id": "INP_CZ_LED_PURPLE",
                   "label": "紫",
-                  "meaning": "観測したLED色（記録用）"
+                  "meaning": "確認したLED色：紫"
                 }
               ]
             }
@@ -481,9 +795,92 @@
         ]
       },
       {
+        "id": "SEC_SPECIFIC_BONUS",
+        "title": "特定ボーナス",
+        "description": "対象5契機のボーナスを記録します。通常時の再生産モードは突入回数から20Gずつ自動除外し、CZ中・AT中は実際に再生産モードだったゲーム数を記録します。必要な記録がすべて揃った場合だけ設定推測に使用します。",
+        "descriptionPresentation": {
+          "collapsible": true,
+          "label": "説明",
+          "defaultExpanded": false
+        },
+        "collapsible": true,
+        "defaultExpanded": false,
+        "headerToggle": true,
+        "genericEditButton": false,
+        "groups": [],
+        "items": [
+          {
+            "id": "GRP_SPECIFIC_BONUS",
+            "inferenceReadiness": {
+              "readyLabel": "推測に使用できます",
+              "incompleteLabel": "追加のゲーム数記録が必要です"
+            },
+            "inputs": [
+              {
+                "id": "INP_SPECIFIC_BONUS_5_AGG",
+                "label": "特定ボーナス",
+                "input": "counter",
+                "gridSpan": 6,
+                "engineBinding": {
+                  "inputId": "INP_SPECIFIC_BONUS_5_AGG"
+                }
+              },
+              {
+                "id": "INP_BONUS_BROADER_GAMES",
+                "label": "対象ゲーム数",
+                "input": "denominator",
+                "gridSpan": 12,
+                "directNumeric": true,
+                "unobservedDisplay": "—",
+                "trialUniverse": "特定ボーナスの基準ゲーム区間",
+                "engineBinding": {
+                  "inputId": "INP_BONUS_BROADER_GAMES"
+                }
+              },
+              {
+                "id": "INP_NORMAL_REPRODUCTION_ENTRIES",
+                "label": "通常時の再生産モード突入",
+                "input": "counter",
+                "gridSpan": 6,
+                "helperText": "1回につき20Gを自動で除外",
+                "engineBinding": {
+                  "inputId": "INP_NORMAL_REPRODUCTION_ENTRIES"
+                }
+              },
+              {
+                "id": "INP_CZ_REPRODUCTION_GAMES",
+                "label": "CZ中の再生産モードG",
+                "input": "denominator",
+                "gridSpan": 12,
+                "directNumeric": true,
+                "unobservedDisplay": "—",
+                "observedZeroValid": true,
+                "trialUniverse": "CZ中の再生産モード",
+                "engineBinding": {
+                  "inputId": "INP_CZ_REPRODUCTION_GAMES"
+                }
+              },
+              {
+                "id": "INP_AT_REPRODUCTION_GAMES",
+                "label": "AT中の再生産モードG",
+                "input": "denominator",
+                "gridSpan": 12,
+                "directNumeric": true,
+                "unobservedDisplay": "—",
+                "observedZeroValid": true,
+                "trialUniverse": "AT中の再生産モード",
+                "engineBinding": {
+                  "inputId": "INP_AT_REPRODUCTION_GAMES"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      {
         "id": "SEC_BONUS_END",
-        "title": "ボーナス終了画面",
-        "description": "確認した設定確定情報を記録します。出現しなかったことは設定否定には使いません。",
+        "title": "BIG終了時の設定示唆",
+        "description": "BIG終了時に確認した設定確定・下限情報を記録します。出現しなかったことは設定否定には使いません。",
         "descriptionPresentation": {
           "collapsible": true,
           "label": "説明",
@@ -503,7 +900,7 @@
               "preservePriorObservations": true,
               "showAccumulatedCounts": true,
               "categoryCoverage": "NON_EXHAUSTIVE",
-              "totalOpportunities": "NONE",
+              "totalOpportunities": "NOT_REQUIRED",
               "categories": [
                 {
                   "id": "EVI_BONUS_END_C1",
@@ -541,72 +938,20 @@
                     "inputId": "INP_V8_EV_BONUS_END_6"
                   }
                 }
-              ]
-            }
-          }
-        ]
-      },
-      {
-        "id": "SEC_PAYOUT",
-        "title": "AT中の獲得枚数表示",
-        "description": "確認した設定確定情報を記録します。出現しなかったことは設定否定には使いません。",
-        "descriptionPresentation": {
-          "collapsible": true,
-          "label": "説明",
-          "defaultExpanded": false
-        },
-        "collapsible": true,
-        "defaultExpanded": false,
-        "headerToggle": true,
-        "genericEditButton": false,
-        "groups": [],
-        "items": [
-          {
-            "id": "EVI_PAYOUT",
-            "observationMultiplicity": "REPEATED_CATEGORICAL_EVENT",
-            "interaction": {
-              "type": "CATEGORY_COUNTERS",
-              "preservePriorObservations": true,
-              "showAccumulatedCounts": true,
-              "categoryCoverage": "NON_EXHAUSTIVE",
-              "totalOpportunities": "NONE",
-              "categories": [
-                {
-                  "id": "EVI_PAYOUT_C1",
-                  "label": "99枚OVER",
-                  "meaning": "設定5以上",
-                  "engineBinding": {
-                    "mode": "COUNTER_POSITIVE",
-                    "inputId": "INP_V8_EV_PAYOUT_99"
-                  }
-                },
-                {
-                  "id": "EVI_PAYOUT_C2",
-                  "label": "456枚OVER",
-                  "meaning": "設定4以上",
-                  "engineBinding": {
-                    "mode": "COUNTER_POSITIVE",
-                    "inputId": "INP_V8_EV_PAYOUT_456"
-                  }
-                },
-                {
-                  "id": "EVI_PAYOUT_C3",
-                  "label": "666枚OVER",
-                  "meaning": "設定6",
-                  "engineBinding": {
-                    "mode": "COUNTER_POSITIVE",
-                    "inputId": "INP_V8_EV_PAYOUT_666"
-                  }
-                }
-              ]
+              ],
+              "opportunityTracking": {
+                "type": "NONE",
+                "reason": "absence is not used as negative Evidence"
+              },
+              "absenceIsNegativeEvidence": false
             }
           }
         ]
       },
       {
         "id": "SEC_KIRIN_VOICE",
-        "title": "AT終了時のキリンボイス",
-        "description": "確認した設定確定情報を記録します。出現しなかったことは設定否定には使いません。",
+        "title": "AT終了時の設定示唆",
+        "description": "AT終了時に筐体上部の「アタシ再生産」役物をタッチし、確認した設定確定・下限情報を記録します。",
         "descriptionPresentation": {
           "collapsible": true,
           "label": "説明",
@@ -626,7 +971,7 @@
               "preservePriorObservations": true,
               "showAccumulatedCounts": true,
               "categoryCoverage": "NON_EXHAUSTIVE",
-              "totalOpportunities": "NONE",
+              "totalOpportunities": "NOT_REQUIRED",
               "categories": [
                 {
                   "id": "EVI_KIRIN_VOICE_C1",
@@ -655,7 +1000,74 @@
                     "inputId": "INP_V8_EV_KIRIN_6"
                   }
                 }
-              ]
+              ],
+              "opportunityTracking": {
+                "type": "NONE",
+                "reason": "absence is not used as negative Evidence"
+              },
+              "absenceIsNegativeEvidence": false
+            }
+          }
+        ]
+      },
+      {
+        "id": "SEC_PAYOUT",
+        "title": "獲得枚数の設定示唆",
+        "description": "AT中の獲得枚数表示で確認した設定確定・下限情報を記録します。",
+        "descriptionPresentation": {
+          "collapsible": true,
+          "label": "説明",
+          "defaultExpanded": false
+        },
+        "collapsible": true,
+        "defaultExpanded": false,
+        "headerToggle": true,
+        "genericEditButton": false,
+        "groups": [],
+        "items": [
+          {
+            "id": "EVI_PAYOUT",
+            "observationMultiplicity": "REPEATED_CATEGORICAL_EVENT",
+            "interaction": {
+              "type": "CATEGORY_COUNTERS",
+              "preservePriorObservations": true,
+              "showAccumulatedCounts": true,
+              "categoryCoverage": "NON_EXHAUSTIVE",
+              "totalOpportunities": "NOT_REQUIRED",
+              "categories": [
+                {
+                  "id": "EVI_PAYOUT_C1",
+                  "label": "99枚OVER",
+                  "meaning": "設定5以上",
+                  "engineBinding": {
+                    "mode": "COUNTER_POSITIVE",
+                    "inputId": "INP_V8_EV_PAYOUT_99"
+                  }
+                },
+                {
+                  "id": "EVI_PAYOUT_C2",
+                  "label": "456枚OVER",
+                  "meaning": "設定4以上",
+                  "engineBinding": {
+                    "mode": "COUNTER_POSITIVE",
+                    "inputId": "INP_V8_EV_PAYOUT_456"
+                  }
+                },
+                {
+                  "id": "EVI_PAYOUT_C3",
+                  "label": "666枚OVER",
+                  "meaning": "設定6",
+                  "engineBinding": {
+                    "mode": "COUNTER_POSITIVE",
+                    "inputId": "INP_V8_EV_PAYOUT_666"
+                  }
+                }
+              ],
+              "opportunityTracking": {
+                "type": "NONE",
+                "reason": "absence is not used as negative Evidence"
+              },
+              "absenceIsNegativeEvidence": false
             }
           }
         ]
@@ -689,7 +1101,7 @@
   "v8": {
     "source": "REPRO_V8_UPSTREAM_ONLY",
     "provenance": {
-      "manifestVersion": "8.0",
+      "manifestVersion": "8.4-DRAFT",
       "generationPath": "V8_RESEARCH_PIPELINE",
       "researchOrigin": "ZERO_BASE_PUBLIC_RESEARCH"
     },
@@ -702,27 +1114,27 @@
     "selection": {
       "schemaVersion": "selection-data-v1",
       "machineId": "S_REVUE_STARLIGHT_CX",
-      "machineDataVersion": "0.2.1",
+      "machineDataVersion": "0.3.0",
       "provenance": {
-        "manifestVersion": "8.0",
+        "manifestVersion": "8.4-DRAFT",
         "generationPath": "V8_RESEARCH_PIPELINE",
         "researchOrigin": "ZERO_BASE_PUBLIC_RESEARCH"
       },
       "inputs": [
         {
           "id": "INP_NORMAL_GAMES",
-          "name": "通常時ゲーム数",
+          "name": "通常ゲーム数",
           "type": "integer",
-          "category": "初当り",
+          "category": "通常時",
           "unit": "G",
           "displayOrder": 10,
           "inferenceRole": "INCLUDE_PRIMARY"
         },
         {
           "id": "INP_CZ",
-          "name": "CZ",
+          "name": "CZ初当り",
           "type": "counter",
-          "category": "初当り",
+          "category": "通常時",
           "unit": "回",
           "displayOrder": 20,
           "inferenceRole": "INCLUDE_PRIMARY"
@@ -731,66 +1143,166 @@
           "id": "INP_AT_INITIAL",
           "name": "AT初当り",
           "type": "counter",
-          "category": "初当り",
+          "category": "通常時",
           "unit": "回",
           "displayOrder": 30,
-          "inferenceRole": "DISPLAY_ONLY"
+          "inferenceRole": "INCLUDE_PRIMARY"
+        },
+        {
+          "id": "INP_CZ_LED_WHITE",
+          "name": "白",
+          "type": "counter",
+          "category": "CZ・フェイク前兆終了時LED",
+          "unit": "回",
+          "displayOrder": 40,
+          "inferenceRole": "INCLUDE_PRIMARY"
+        },
+        {
+          "id": "INP_CZ_LED_BLUE",
+          "name": "青",
+          "type": "counter",
+          "category": "CZ・フェイク前兆終了時LED",
+          "unit": "回",
+          "displayOrder": 41,
+          "inferenceRole": "INCLUDE_PRIMARY"
+        },
+        {
+          "id": "INP_CZ_LED_GREEN",
+          "name": "緑",
+          "type": "counter",
+          "category": "CZ・フェイク前兆終了時LED",
+          "unit": "回",
+          "displayOrder": 42,
+          "inferenceRole": "INCLUDE_PRIMARY"
+        },
+        {
+          "id": "INP_CZ_LED_RED",
+          "name": "赤",
+          "type": "counter",
+          "category": "CZ・フェイク前兆終了時LED",
+          "unit": "回",
+          "displayOrder": 43,
+          "inferenceRole": "INCLUDE_PRIMARY"
+        },
+        {
+          "id": "INP_CZ_LED_PURPLE",
+          "name": "紫",
+          "type": "counter",
+          "category": "CZ・フェイク前兆終了時LED",
+          "unit": "回",
+          "displayOrder": 44,
+          "inferenceRole": "INCLUDE_PRIMARY"
+        },
+        {
+          "id": "INP_SPECIFIC_BONUS_5_AGG",
+          "name": "特定ボーナス",
+          "type": "counter",
+          "category": "特定ボーナス",
+          "unit": "回",
+          "displayOrder": 50,
+          "inferenceRole": "LIVE_CONDITIONAL"
+        },
+        {
+          "id": "INP_BONUS_BROADER_GAMES",
+          "name": "対象ゲーム数",
+          "type": "integer",
+          "category": "特定ボーナス",
+          "unit": "G",
+          "displayOrder": 51,
+          "inferenceRole": "EXPOSURE_RECONSTRUCTION"
+        },
+        {
+          "id": "INP_NORMAL_REPRODUCTION_ENTRIES",
+          "name": "AT中の再生産モードG",
+          "type": "integer",
+          "category": "特定ボーナス",
+          "unit": "回",
+          "displayOrder": 52,
+          "inferenceRole": "EXPOSURE_RECONSTRUCTION",
+          "label": "通常時の再生産モード突入",
+          "role": "EXPOSURE_RECONSTRUCTION"
+        },
+        {
+          "id": "INP_CZ_REPRODUCTION_GAMES",
+          "name": "AT中の再生産モードG",
+          "type": "integer",
+          "category": "特定ボーナス",
+          "unit": "G",
+          "displayOrder": 52,
+          "inferenceRole": "EXPOSURE_RECONSTRUCTION",
+          "label": "CZ中の再生産モードG",
+          "role": "EXPOSURE_RECONSTRUCTION"
+        },
+        {
+          "id": "INP_AT_REPRODUCTION_GAMES",
+          "name": "AT中の再生産モードG",
+          "type": "integer",
+          "category": "特定ボーナス",
+          "unit": "G",
+          "displayOrder": 52,
+          "inferenceRole": "EXPOSURE_RECONSTRUCTION"
         }
       ],
       "features": [
         {
           "researchFeatureId": "RF_CZ",
-          "featureId": "FEAT_CZ",
+          "featureId": "FEAT_CZ_INITIAL",
           "adoptionCategory": "INCLUDE_PRIMARY",
           "numeratorInputId": "INP_CZ",
           "denominatorInputId": "INP_NORMAL_GAMES",
           "minimumSample": 0,
           "displayFormat": "ratio_1_over_n",
-          "selectionScore": 82.05,
-          "userReason": "7000G基準Selection Score 82.05。全設定値と通常時ゲーム母数が揃い、AT初当りより情報量が大きいため主推測要素として採用。",
+          "selectionScore": 82.32755826,
+          "selectionClass": "CORE",
+          "userReason": "通常ゲーム数を共通母数として観測でき、7000G基準で十分な設定判別情報がある。",
           "dependencyContract": {
-            "relationship": "OVERLAPPING_FLOW",
-            "relatedFeatureIds": [
-              "FEAT_AT_INITIAL"
-            ],
-            "combinationPolicy": "DO_NOT_MULTIPLY",
-            "preferredPrimary": "FEAT_CZ"
+            "relationship": "AGGREGATE_CZ_OUTCOME",
+            "combinationPolicy": "DO_NOT_ADD_INCOMPLETE_LATENT_CZ_TABLE"
           }
         },
         {
           "researchFeatureId": "RF_AT_INITIAL",
           "featureId": "FEAT_AT_INITIAL",
-          "adoptionCategory": "DISPLAY_ONLY",
+          "adoptionCategory": "INCLUDE_PRIMARY",
           "numeratorInputId": "INP_AT_INITIAL",
           "denominatorInputId": "INP_NORMAL_GAMES",
-          "selectionScore": 75.54,
-          "userReason": "設定差は大きいがCZを含む下流フローとの独立性を公開情報だけで証明できないため、二重評価を避けて表示専用。",
+          "minimumSample": 0,
+          "displayFormat": "ratio_1_over_n",
+          "selectionScore": 75.7422585,
+          "selectionClass": "CORE",
+          "userReason": "通常ゲーム数を母数として直接観測でき、全設定の初当り確率が揃っている。",
           "dependencyContract": {
-            "relationship": "OVERLAPPING_FLOW",
-            "relatedFeatureIds": [
-              "FEAT_CZ"
-            ],
-            "combinationPolicy": "DO_NOT_MULTIPLY",
-            "preferredPrimary": "FEAT_CZ"
+            "relationship": "AGGREGATE_AT_INITIAL",
+            "combinationPolicy": "DO_NOT_ADD_CONDITIONAL_DIRECT_HIT_WITHOUT_FACTORIZATION"
           }
         },
         {
-          "researchFeatureId": "RF_BONUS_COMBINED",
-          "featureId": "FEAT_BONUS_COMBINED",
-          "adoptionCategory": "EXCLUDE",
-          "rejectionReason": "再生産モードの影響で表示上の出現率と実質抽選率が一致せず、単純な通常ゲーム母数の独立尤度として扱わない。"
-        },
-        {
-          "researchFeatureId": "RF_RARE_ROLE_REG",
-          "featureId": "FEAT_RARE_ROLE_REG",
-          "adoptionCategory": "EXCLUDE",
-          "rejectionReason": "設定差はあるがトリガー分類の実戦観測契約と他ボーナス経路との依存を公開情報だけで十分に確定できないため独立採用しない。"
-        },
-        {
           "researchFeatureId": "RF_CZ_END_LED",
-          "featureId": "FEAT_CZ_END_LED",
-          "adoptionCategory": "EXCLUDE",
-          "rejectionReason": "設定別分布は有力だが、対象となるフェイク前兆/CZ終了機会数を7000Gから一意に導けず、設定変更時・AT終了後を除外する条件付き母数が必要。機会数を捏造して尤度化しない。"
+          "featureId": "FEAT_CZ_FAKE_END_LED",
+          "adoptionCategory": "INCLUDE_PRIMARY",
+          "model": "multinomial",
+          "denominatorRule": "SUM_CATEGORY_COUNTS",
+          "guaranteedMinimumSelectionScore": 92.54490548,
+          "selectionClass": "CORE",
+          "userReason": "5色を漏れなく記録でき、CZ終了分だけでも7000Gで十分な設定判別情報が保証される。フェイク前兆分はスコアへ推定加算しない。",
+          "dependencyContract": {
+            "relationship": "DOWNSTREAM_PROXY_OF_CZ_TABLE",
+            "combinationPolicy": "DO_NOT_ADD_INCOMPLETE_LATENT_CZ_TABLE"
+          }
+        },
+        {
+          "researchFeatureId": "RF_SPECIFIC_BONUS_5_AGG",
+          "featureId": "FEAT_SPECIFIC_BONUS_5_AGG",
+          "adoptionCategory": "LIVE_CONDITIONAL",
+          "numeratorInputId": "INP_SPECIFIC_BONUS_5_AGG",
+          "trialUniverse": "EFFECTIVE_BONUS_LOTTERY_GAME_TRIAL",
+          "benchmarkScoreStatus": "BLOCKED_UNRESOLVED_EXPOSURE",
+          "liveInferenceGate": "EXACT_EXPOSURE_RECONSTRUCTION_COMPLETE",
+          "userReason": "対象5契機の合算は設定差を持つ。ボーナス抽選が行われない区間を正確に除外できた実戦だけ推測へ使用する。",
+          "dependencyContract": {
+            "relationship": "AGGREGATE_OF_FIVE_SPECIFIC_BONUS_EVENTS",
+            "combinationPolicy": "SUPPRESS_COMPONENTS_WHEN_AGGREGATE_SELECTED"
+          }
         }
       ],
       "evidenceDecisions": [
@@ -836,10 +1348,10 @@
         }
       ],
       "selectionSummaryContract": {
-        "evaluatedCount": 5,
-        "selectedCount": 1,
-        "displayOnlyCount": 1,
-        "rejectedCount": 3
+        "evaluatedCount": 4,
+        "selectedCount": 3,
+        "liveConditionalCount": 1,
+        "benchmarkBlockedCount": 1
       },
       "linkedPlayResearch": {
         "status": "UNRESOLVED",
@@ -853,13 +1365,13 @@
       "generatedAt": "2026-09-23",
       "numeric": [
         {
-          "featureId": "FEAT_CZ",
+          "featureId": "FEAT_CZ_INITIAL",
           "context": "通常時",
-          "how": "通常時ゲーム数とCZ突入回数を記録",
+          "how": "通常ゲーム数とCZ初当り回数を記録",
           "inputs": [
             {
               "id": "INP_NORMAL_GAMES",
-              "label": "通常時ゲーム数",
+              "label": "通常ゲーム数",
               "type": "integer",
               "unit": "G",
               "directNumeric": true,
@@ -869,7 +1381,7 @@
             },
             {
               "id": "INP_CZ",
-              "label": "CZ",
+              "label": "CZ初当り",
               "type": "counter",
               "unit": "回"
             }
@@ -878,8 +1390,7 @@
         {
           "featureId": "FEAT_AT_INITIAL",
           "context": "通常時",
-          "runtimeRole": "DISPLAY_ONLY_DO_NOT_MULTIPLY_WITH_CZ",
-          "how": "AT初当り回数を参考表示用に記録。通常時ゲーム数はCZと共用",
+          "how": "AT初当り回数を記録。通常ゲーム数はCZと共用",
           "inputs": [
             {
               "id": "INP_AT_INITIAL",
@@ -892,6 +1403,134 @@
               "shared": true
             }
           ]
+        },
+        {
+          "featureId": "FEAT_CZ_FAKE_END_LED",
+          "context": "CZ・フェイク前兆終了時",
+          "how": "設定変更時・AT終了後を除き、対象機会ごとにLED色を1回記録",
+          "model": "multinomial",
+          "denominator": {
+            "type": "DERIVED_SUM",
+            "inputIds": [
+              "INP_CZ_LED_WHITE",
+              "INP_CZ_LED_BLUE",
+              "INP_CZ_LED_GREEN",
+              "INP_CZ_LED_RED",
+              "INP_CZ_LED_PURPLE"
+            ]
+          },
+          "inputs": [
+            {
+              "id": "INP_CZ_LED_WHITE",
+              "label": "白",
+              "type": "counter",
+              "unit": "回"
+            },
+            {
+              "id": "INP_CZ_LED_BLUE",
+              "label": "青",
+              "type": "counter",
+              "unit": "回"
+            },
+            {
+              "id": "INP_CZ_LED_GREEN",
+              "label": "緑",
+              "type": "counter",
+              "unit": "回"
+            },
+            {
+              "id": "INP_CZ_LED_RED",
+              "label": "赤",
+              "type": "counter",
+              "unit": "回"
+            },
+            {
+              "id": "INP_CZ_LED_PURPLE",
+              "label": "紫",
+              "type": "counter",
+              "unit": "回"
+            }
+          ]
+        },
+        {
+          "featureId": "FEAT_SPECIFIC_BONUS_5_AGG",
+          "context": "特定ボーナス",
+          "runtimeRole": "LIVE_CONDITIONAL_EXACT_EXPOSURE",
+          "how": "特定5種合算回数と、正確な抽選対象ゲーム数を復元するため不可避な項目だけを記録",
+          "inputs": [
+            {
+              "id": "INP_SPECIFIC_BONUS_5_AGG",
+              "label": "特定ボーナス",
+              "type": "counter",
+              "unit": "回"
+            },
+            {
+              "id": "INP_BONUS_BROADER_GAMES",
+              "label": "対象ゲーム数",
+              "type": "integer",
+              "unit": "G",
+              "directNumeric": true
+            },
+            {
+              "id": "INP_NORMAL_REPRODUCTION_ENTRIES",
+              "label": "通常時の再生産モード突入",
+              "type": "counter",
+              "unit": "回"
+            },
+            {
+              "id": "INP_CZ_REPRODUCTION_GAMES",
+              "label": "CZ中の再生産モードG",
+              "type": "integer",
+              "unit": "G",
+              "directNumeric": true,
+              "nullable": true
+            },
+            {
+              "id": "INP_AT_REPRODUCTION_GAMES",
+              "label": "AT中の再生産モードG",
+              "type": "integer",
+              "unit": "G",
+              "directNumeric": true,
+              "nullable": true
+            }
+          ],
+          "exposureReconstruction": {
+            "classification": "HYBRID_EXACT",
+            "expression": "eligibleBonusLotteryGames = broaderGameCount - normalReproductionEntryCount*20 - czReproductionExcludedGames - atReproductionExcludedGames",
+            "terms": [
+              {
+                "inputId": "INP_BONUS_BROADER_GAMES",
+                "role": "BASE",
+                "coefficient": 1,
+                "required": true
+              },
+              {
+                "inputId": "INP_NORMAL_REPRODUCTION_ENTRIES",
+                "role": "SUBTRACT_FIXED_PER_OCCURRENCE",
+                "gamesPerOccurrence": 20,
+                "required": true
+              },
+              {
+                "inputId": "INP_CZ_REPRODUCTION_GAMES",
+                "role": "SUBTRACT_DIRECT_GAMES",
+                "required": true,
+                "observedZeroAllowed": true
+              },
+              {
+                "inputId": "INP_AT_REPRODUCTION_GAMES",
+                "role": "SUBTRACT_DIRECT_GAMES",
+                "required": true,
+                "observedZeroAllowed": true
+              }
+            ],
+            "missingRequiredTerm": "DISABLE_FEATURE_ONLY",
+            "observedZeroDistinctFromMissing": true,
+            "termSetCompleteness": "COMPLETE_FOR_DEFINED_BROADER_GAME_SCOPE",
+            "additionalExcludedTerms": {
+              "status": "NONE_WITHIN_DEFINED_SCOPE",
+              "reason": "対象ゲーム数は通常時・CZ中・AT中の観測対象区間に限定し、内部赤BIG成立後の再生産モードは通常時固定20G、CZ中実G、AT中実Gの3項で完全に除外する。これら以外の保持赤BIG区間を対象ゲーム数へ含めない。"
+            }
+          }
         }
       ],
       "evidenceRef": "repro-v8/S_REVUE_STARLIGHT_CX/evidence-contract.json",
@@ -907,44 +1546,12 @@
       },
       "assertions": [
         "UNOBSERVED and OBSERVED_ZERO remain distinct",
-        "normal-game denominator is entered once",
-        "AT initial hit is display-only and not multiplied with CZ",
-        "rejected inference features may remain exact conditional observations without entering ProbabilityEngine"
+        "normal-game denominator is entered once and shared by CZ/AT",
+        "LED denominator is derived from the five exhaustive color counts",
+        "missing reconstructed bonus exposure disables only the specific-bonus feature",
+        "fixed-duration exclusions are derived by the app where exact"
       ],
-      "conditional": [
-        {
-          "featureId": "FEAT_CZ_END_LED",
-          "researchFeatureId": "RF_CZ_END_LED",
-          "observationDisposition": "CONDITIONAL_OBSERVATION",
-          "inferenceDisposition": "EXCLUDE",
-          "context": "CZフェイク前兆終了時・CZ終了時",
-          "how": "設定変更時・AT終了後を除き、対象機会ごとに筐体右側LEDの発光色を1回記録",
-          "trialUniverse": "ELIGIBLE_FAKE_PRECURSOR_OR_CZ_END_EXCLUDING_SETTING_CHANGE_AND_AT_END",
-          "categoryCoverage": "EXHAUSTIVE",
-          "outcomes": [
-            {
-              "id": "INP_CZ_LED_WHITE",
-              "label": "白"
-            },
-            {
-              "id": "INP_CZ_LED_BLUE",
-              "label": "青"
-            },
-            {
-              "id": "INP_CZ_LED_GREEN",
-              "label": "緑"
-            },
-            {
-              "id": "INP_CZ_LED_RED",
-              "label": "赤"
-            },
-            {
-              "id": "INP_CZ_LED_PURPLE",
-              "label": "紫"
-            }
-          ]
-        }
-      ]
+      "conditional": []
     },
     "evidence": {
       "schemaVersion": "evidence-contract-v8-repro",
@@ -1148,7 +1755,7 @@
       }
     },
     "highLowDiscrimination": {
-      "schemaVersion": "high-low-discrimination-v8-repro",
+      "schemaVersion": "high-low-discrimination-v8.4-repro",
       "machineId": "S_REVUE_STARLIGHT_CX",
       "generatedAt": "2026-09-23",
       "benchmark": {
@@ -1163,47 +1770,70 @@
         "excludedSettings": [
           "SET_4"
         ],
-        "priorWithinGroup": "equal",
+        "classPrior": "equal",
+        "withinGroupPrior": "equal",
+        "classifier": "CLASS_MARGINAL_LIKELIHOOD",
         "features": [
-          "FEAT_CZ"
+          "FEAT_CZ_INITIAL",
+          "FEAT_AT_INITIAL",
+          "FEAT_CZ_FAKE_END_LED"
         ],
-        "dependencyPolicy": "CZ is the sole primary numeric likelihood. AT initial hit is DISPLAY_ONLY and is not multiplied.",
-        "exposureAssumption": "benchmark N games means N observed normal-game trials for CZ. Runtime confidence remains separate."
+        "excludedFeatures": [
+          {
+            "featureId": "FEAT_SPECIFIC_BONUS_5_AGG",
+            "reason": "BLOCKED_UNRESOLVED_EXPOSURE"
+          }
+        ],
+        "dependencyPolicy": "Use only frozen dependency-safe HLD set. LED is not combined with an incomplete latent CZ-table model; specific-bonus components are not added."
       },
       "simulation": {
-        "seed": 20260920,
+        "seed": 20260923,
         "samplesPerGroup": 20000,
-        "method": "Repository generic seeded Monte Carlo calculator",
-        "calculator": "tools/calculate-high-low-discrimination.mjs",
-        "featureConstruction": "FEAT_CZ binomial reconstructed from fresh Research + Selection"
+        "method": "SEEDED_MONTE_CARLO",
+        "calculator": "tools/high-low-discrimination-engine.mjs",
+        "input": "repro-v8/S_REVUE_STARLIGHT_CX/high-low-discrimination-input.json"
       },
       "results": [
         {
           "games": 1500,
-          "lowRecallPercent": 64.41,
-          "highRecallPercent": 70.05,
-          "balancedAccuracyPercent": 67.23
+          "featureExposures": {
+            "FEAT_CZ_INITIAL": 1500,
+            "FEAT_AT_INITIAL": 1500,
+            "FEAT_CZ_FAKE_END_LED": 5
+          },
+          "lowRecallPercent": 79.53,
+          "highRecallPercent": 75.72,
+          "balancedAccuracyPercent": 77.63
         },
         {
           "games": 3000,
-          "lowRecallPercent": 73.15,
-          "highRecallPercent": 74.4,
-          "balancedAccuracyPercent": 73.78
+          "featureExposures": {
+            "FEAT_CZ_INITIAL": 3000,
+            "FEAT_AT_INITIAL": 3000,
+            "FEAT_CZ_FAKE_END_LED": 11
+          },
+          "lowRecallPercent": 86.84,
+          "highRecallPercent": 84.95,
+          "balancedAccuracyPercent": 85.9
         },
         {
           "games": 7000,
-          "lowRecallPercent": 85.56,
-          "highRecallPercent": 80.25,
-          "balancedAccuracyPercent": 82.9
+          "featureExposures": {
+            "FEAT_CZ_INITIAL": 7000,
+            "FEAT_AT_INITIAL": 7000,
+            "FEAT_CZ_FAKE_END_LED": 26
+          },
+          "lowRecallPercent": 94.96,
+          "highRecallPercent": 94.47,
+          "balancedAccuracyPercent": 94.71
         }
       ],
-      "status": "VERIFIED_GENERIC_CALCULATOR",
+      "status": "FORMAL_V8_4_GENERIC_HLD",
       "notes": [
-        "Settings outside low/high groups are excluded from this benchmark by Manifest definition.",
-        "Evidence constraints are not included in HighLowDiscrimination.",
-        "This benchmark is setting-group discrimination reference information, not runtime 判定信頼度.",
-        "AT initial hit is intentionally excluded to preserve the dependency boundary with CZ.",
-        "Values exactly match tools/calculate-high-low-discrimination.mjs with seed 20260920 and 20000 samples/group."
+        "LED exposure is floored from the common conservative CZ-ending lower-bound 1/265.9; no fake-premonition opportunities are guessed.",
+        "Multinomial source percentages are normalized only for likelihood arithmetic because published rounded categories sum to approximately 1.",
+        "Specific-bonus aggregate remains live-inference eligible with exact reconstructed exposure but is excluded from benchmark HLD.",
+        "SelectionScore is not used as the HLD classifier."
       ]
     },
     "machineResearchSummary": {
@@ -1211,41 +1841,47 @@
       "machineId": "S_REVUE_STARLIGHT_CX",
       "generatedAt": "2026-09-23",
       "provenance": {
-        "manifestVersion": "8.0",
+        "manifestVersion": "8.4-DRAFT",
         "generationPath": "V8_RESEARCH_PIPELINE",
         "researchOrigin": "ZERO_BASE_PUBLIC_RESEARCH"
       },
-      "researchStatus": "COMPLETE_WITH_DECLARED_UNRESOLVED",
+      "researchStatus": "CLOSED_WITH_EXPLICIT_UNRESOLVED_ITEMS",
       "selection": {
         "primary": [
           {
-            "featureId": "FEAT_CZ",
-            "label": "CZ",
-            "selectionScore": 82.05,
-            "reason": "7000G基準で最大の有効情報量。通常時ゲーム数を直接母数として観測可能。"
-          }
-        ],
-        "displayOnly": [
+            "featureId": "FEAT_CZ_INITIAL",
+            "label": "CZ初当り",
+            "selectionScore": 82.32755826,
+            "classification": "CORE",
+            "reason": "通常ゲーム数を母数として直接観測でき、7000G基準で十分な設定判別情報がある。"
+          },
           {
             "featureId": "FEAT_AT_INITIAL",
             "label": "AT初当り",
-            "selectionScore": 75.54,
-            "reason": "有用な設定差はあるがCZとの独立性を証明できないため二重評価しない。"
+            "selectionScore": 75.7422585,
+            "classification": "CORE",
+            "reason": "通常ゲーム数を母数として直接観測でき、全設定の初当り確率が揃っている。"
+          },
+          {
+            "featureId": "FEAT_CZ_FAKE_END_LED",
+            "label": "CZ・フェイク前兆終了時LED",
+            "guaranteedMinimumSelectionScore": 92.54490548,
+            "classification": "CORE",
+            "reason": "5色を漏れなく記録でき、CZ終了分だけを使う保守的な最低機会数でもCORE基準を満たす。"
           }
         ],
-        "excluded": [
+        "liveConditional": [
           {
-            "featureId": "FEAT_BONUS_COMBINED",
-            "reason": "再生産モードの影響で表示出現率と実質抽選率が一致しない。"
-          },
-          {
-            "featureId": "FEAT_RARE_ROLE_REG",
-            "reason": "トリガー分類の実戦観測契約と依存関係が未確立。"
-          },
-          {
-            "featureId": "FEAT_CZ_END_LED",
-            "reason": "条件付き機会母数を7000Gから一意に導けないため尤度化しない。"
+            "featureId": "FEAT_SPECIFIC_BONUS_5_AGG",
+            "label": "特定ボーナス",
+            "benchmarkScoreStatus": "BLOCKED_UNRESOLVED_EXPOSURE",
+            "reason": "対象5契機の合算。通常時は再生産モード突入回数×20G、CZ中・AT中は再生産モード実Gを除外し、必要なExposure項がすべて観測済みの実戦だけ推測へ使用する。"
           }
+        ],
+        "suppressed": [
+          "特定ボーナス5種の個別イベントは合算との二重評価を避ける。",
+          "表示上の赤BIG・青BIG・REG・ボーナス合算は特定ボーナス成立経路と重なるため独立評価しない。",
+          "条件付きAT直撃は正確な対象機会を常に観測できないため数値入力化しない。"
         ]
       },
       "evidence": {
@@ -1283,9 +1919,7 @@
           "ボーナス終了画面の弱/強高設定示唆",
           "AT終了時キリンボイスの弱/強高設定示唆"
         ],
-        "unsupportedOrUnresolved": [
-          "CZ終了時LEDは設定差を確認したが条件付き母数のため数値推測には採用しない。"
-        ]
+        "unsupportedOrUnresolved": []
       },
       "linkedPlay": {
         "status": "UNRESOLVED",
@@ -1293,23 +1927,58 @@
         "automaticImportCapability": "NOT_ESTABLISHED"
       },
       "uiGuidance": {
-        "primaryInput": "通常時ゲーム数 + CZ回数",
-        "referenceInput": "AT初当り回数は参考表示のみ",
-        "evidenceGrouping": [
-          "ボーナス終了画面",
-          "AT中の獲得枚数表示",
-          "AT終了時のキリンボイス"
+        "sectionOrder": [
+          "通常時",
+          "CZ・フェイク前兆終了時のLED",
+          "特定ボーナス",
+          "BIG終了時の設定示唆",
+          "AT終了時の設定示唆",
+          "獲得枚数の設定示唆"
         ],
+        "normalInput": "通常ゲーム数 + CZ初当り + AT初当り",
+        "ledInput": "白/青/緑/赤/紫を各1回加算。確認回数は自動合計。",
+        "specificBonus": "特定ボーナス回数、対象ゲーム数、通常時の再生産モード突入回数、CZ中・AT中の再生産モード実Gを入力。通常時の除外Gは1回20Gとして自動計算。",
         "internalIdsMustNotAppear": true
       },
       "unresolved": [
         "linked-play official availability/mapping",
-        "conditional-exposure CZ-end LED excluded from inference"
+        "specific-bonus benchmark exposure; live inference remains available when exact exposure reconstruction is complete"
       ],
       "contaminationBoundary": {
         "existingMachinePackageInspected": false,
         "legacySelectionInspected": false,
         "legacyCanonicalUiInspected": false
+      },
+      "highLow": {
+        "rule": "HLD-001",
+        "lowSettings": [
+          "SET_1",
+          "SET_2"
+        ],
+        "highSettings": [
+          "SET_5",
+          "SET_6"
+        ],
+        "results": [
+          {
+            "games": 1500,
+            "balancedAccuracyPercent": 77.63
+          },
+          {
+            "games": 3000,
+            "balancedAccuracyPercent": 85.9
+          },
+          {
+            "games": 7000,
+            "balancedAccuracyPercent": 94.71
+          }
+        ],
+        "features": [
+          "CZ初当り",
+          "AT初当り",
+          "CZ・フェイク前兆終了時LED"
+        ],
+        "note": "LEDはCZ終了分だけの保守的最低機会数を使用し、フェイク前兆終了分を推定加算していない。"
       }
     }
   }
