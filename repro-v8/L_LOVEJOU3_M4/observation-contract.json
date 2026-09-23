@@ -72,6 +72,52 @@
         "未観測は0ではなくnull",
         "通常時ゲーム数から失敗回数を推定しない"
       ]
+    },
+    {
+      "featureId": "FEAT_LZ_STAGE",
+      "context": "LOVE ZONE突入時",
+      "runtimeRole": "LIVE_CONDITIONAL",
+      "model": "multinomial",
+      "how": "LOVE ZONE突入ごとに最初に確定したステージを1回だけ記録する。お店前、Club Luxe、Club Luxe ALLCast、コスプレDAYのいずれか、またはレベル5に相当するWご指名チャンス直撃として分類する。",
+      "inputs": [
+        {
+          "id": "INP_LZ_LEVEL1",
+          "label": "お店前",
+          "type": "counter",
+          "unit": "回"
+        },
+        {
+          "id": "INP_LZ_LEVEL2",
+          "label": "Club Luxe",
+          "type": "counter",
+          "unit": "回"
+        },
+        {
+          "id": "INP_LZ_LEVEL3",
+          "label": "Club Luxe ALLCast",
+          "type": "counter",
+          "unit": "回"
+        },
+        {
+          "id": "INP_LZ_LEVEL4",
+          "label": "コスプレDAY",
+          "type": "counter",
+          "unit": "回"
+        },
+        {
+          "id": "INP_LZ_LEVEL5",
+          "label": "Wご指名チャンス",
+          "type": "counter",
+          "unit": "回"
+        }
+      ],
+      "denominatorRule": "5カテゴリの合計を実測LOVE ZONE突入Trial数とする",
+      "eligibilityRule": "COUNT_EXACTLY_ONE_CATEGORY_PER_CONFIRMED_LOVE_ZONE_ENTRY",
+      "validation": [
+        "1回のLOVE ZONE突入を複数カテゴリへ重複計上しない",
+        "ステージ未確認の突入は推測で分類しない",
+        "通常時ゲーム数からカテゴリTrial数を推定しない"
+      ]
     }
   ],
   "evidenceRef": "repro-v8/L_LOVEJOU3_M4/evidence-contract.json",
@@ -90,6 +136,7 @@
     "normal-game denominator is entered once",
     "AT initial hit is display-only and not multiplied with LOVE ZONE",
     "LIVE_CONDITIONAL uses exact observed LOVE ZONE failures as trials; benchmark exposure remains unresolved",
-    "failed-CZ AT numerator cannot exceed confirmed failed-CZ denominator"
+    "failed-CZ AT numerator cannot exceed confirmed failed-CZ denominator",
+    "LOVE ZONE stage distribution is an exhaustive direct-observation conditional multinomial; each confirmed entry contributes exactly one observed category"
   ]
 }
