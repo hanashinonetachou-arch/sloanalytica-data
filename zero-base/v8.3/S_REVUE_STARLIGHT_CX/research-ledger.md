@@ -568,3 +568,52 @@ Selection implication:
 - retain the five as a distinct setting-difference joint-event family;
 - surface bonus occurrence remains a separate observable and should not be used to infer the five events;
 - next investigate an exhaustive internal-bonus composition contract (five specific events + setting-invariant complement), including whether every bonus establishment can be classified reliably enough in live play.
+
+
+## Exhaustive bonus-composition validation
+
+### Public probability-space reconstruction
+Fresh sources publish:
+- effective/internal bonus rates by type and total;
+- exactly five setting-difference specific-bonus joint-event rates;
+- setting-1 per-role simultaneous-win expectations separately.
+
+Using the effective/internal total bonus probability as the parent probability space and subtracting the five specific joint-event probabilities yields a complementary “other bonus” probability of approximately 1/290 for every setting (rounding tolerance). Therefore a mathematically exhaustive two-way partition exists in the published probability space:
+A. any of the five setting-difference specific bonus events;
+B. all other internal/effective bonus wins.
+
+The resulting conditional share P(A | any effective/internal bonus win) is approximately:
+setting 1 38.26%, setting 2 39.06%, setting 4 43.38%, setting 5 44.90%, setting 6 46.57%.
+P(B | bonus) is the complement.
+
+A finer six-way partition is also algebraically possible:
+Kirameki+REG / watermelon+REG / chance+REG / watermelon+blueBIG / chance+blueBIG / OTHER.
+Each category probability conditional on an effective/internal bonus win can be derived as p(category)/p(total bonus).
+
+### Exhaustiveness versus live observability
+Mathematical exhaustiveness is proven in the published internal/effective probability space within rounding.
+Live observational exhaustiveness is NOT yet proven.
+
+Reason:
+- the five specific events can be recognized when the triggering rare role and eventual bonus identity are reliably attributable;
+- but the denominator of the categorical model is ALL effective/internal bonus establishments, including internally established red BIG and other bonuses;
+- red BIG may be held through reproduction mode before visible consumption, so “number of displayed bonuses” is not necessarily identical to “number of internal/effective bonus establishments” over an arbitrary live observation window;
+- a categorical live denominator is valid only if every internal/effective bonus establishment can be counted exactly once and classified into one of the six categories, including pending red BIG at session boundaries.
+
+Therefore:
+- probability model: EXHAUSTIVE_DERIVED_CATEGORICAL = VALID;
+- live denominator: OBSERVABILITY_UNRESOLVED;
+- live numeric inference: not yet authorized under EXP-006/007;
+- benchmark composition information: valid diagnostically, but no game-count SelectionScore should be fabricated from the composition alone.
+
+### Potential observation contract
+If a reproducible player-visible rule can count every internal bonus establishment, the preferred live contract is:
+- denominator: all internal/effective bonus establishments;
+- mutually exclusive categories: the five specific events + OTHER;
+- inference: multinomial categorical likelihood using derived setting-specific composition probabilities;
+- do not separately add effective total bonus likelihood or the five joint-event likelihoods, because that would double count the same probability space.
+
+If only the five specific events are countable but OTHER/internal red-BIG establishment is not always countable, this categorical model fails EXP-007 and the feature must remain blocked or use another proven denominator representation.
+
+### Validation conclusion
+The composition idea is statistically valid and reproduces the published setting-difference structure. The remaining issue is no longer probability completeness; it is strictly whether the all-internal-bonus denominator is exactly observable in live play.
