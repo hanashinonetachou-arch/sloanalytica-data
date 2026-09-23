@@ -52,6 +52,7 @@ function compileFeatures(research,selection,observation){
     const engineInputs=(obs.inputs??[]).filter(x=>x.id||x.engineInputId).map(x=>({...x,engineInputId:x.engineInputId??x.id}));
     const denominator=engineInputs.find(x=>x.type==='integer'||/GAMES/.test(x.engineInputId));
     const counters=engineInputs.filter(x=>x!==denominator&&x.shared!==true&&x.type!=='integer');
+    const selectedNumerator=selected.numeratorInputId?engineInputs.find(x=>x.engineInputId===selected.numeratorInputId):undefined;
     const model=selected.model??(selected.dependencyContract?.combinationPolicy==='JOINT_MULTINOMIAL'?'multinomial':sources[0].candidateModel);
     if(model==='multinomial'){
       let categoryLabels,categoryProbabilities;
@@ -70,7 +71,7 @@ function compileFeatures(research,selection,observation){
       const source=sources[0], probabilities=Object.fromEntries((research.machine?.settings??[]).map(s=>[s,source.settingValues?.[s]?.probability]));
       if(Object.values(probabilities).some(p=>!Number.isFinite(p))) throw new Error(`${selected.featureId} incomplete probabilities`);
       const primary=selected.dependencyContract?.preferredPrimary;
-      out.push({featureId:selected.featureId,name:source.name??selected.featureId,adoptionCategory:selected.adoptionCategory,calculationRole:'PROBABILITY',probabilityEngineUsage:true,modelType:model,numeratorInputId:counters[0]?.engineInputId,denominatorInputId:denominator?.engineInputId,displayFormat:'ratio_1_over_n',probabilities,...(selected.adoptionCategory==='LIVE_CONDITIONAL'?{inferenceGate:selected.liveInferenceGate,exposureReconstruction:clone(obs.exposureReconstruction),runtimeInferenceEnabled:false,runtimeBlockReason:'EXACT_EXPOSURE_RUNTIME_BINDING_REQUIRED'}:{}),...(primary&&primary!==selected.featureId?{suppressedByFeatureIds:[primary]}:{}),sourceResearchFeatureIds:[selected.researchFeatureId]});
+      out.push({featureId:selected.featureId,name:source.name??selected.featureId,adoptionCategory:selected.adoptionCategory,calculationRole:'PROBABILITY',probabilityEngineUsage:true,modelType:model,numeratorInputId:selectedNumerator?.engineInputId??counters[0]?.engineInputId,denominatorInputId:denominator?.engineInputId,displayFormat:'ratio_1_over_n',probabilities,...(selected.adoptionCategory==='LIVE_CONDITIONAL'?{inferenceGate:selected.liveInferenceGate,exposureReconstruction:clone(obs.exposureReconstruction),runtimeInferenceEnabled:false,runtimeBlockReason:'EXACT_EXPOSURE_RUNTIME_BINDING_REQUIRED'}:{}),...(primary&&primary!==selected.featureId?{suppressedByFeatureIds:[primary]}:{}),sourceResearchFeatureIds:[selected.researchFeatureId]});
     }
   }
   return out;
