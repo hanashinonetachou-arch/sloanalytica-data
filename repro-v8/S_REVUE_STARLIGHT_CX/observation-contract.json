@@ -111,6 +111,20 @@
           "directNumeric": true
         },
         {
+          "id": "INP_NORMAL_REPRODUCTION_ENTRIES",
+          "label": "通常時の再生産モード突入",
+          "type": "counter",
+          "unit": "回"
+        },
+        {
+          "id": "INP_CZ_REPRODUCTION_GAMES",
+          "label": "CZ中の再生産モードG",
+          "type": "integer",
+          "unit": "G",
+          "directNumeric": true,
+          "nullable": true
+        },
+        {
           "id": "INP_AT_REPRODUCTION_GAMES",
           "label": "AT中の再生産モードG",
           "type": "integer",
@@ -121,7 +135,34 @@
       ],
       "exposureReconstruction": {
         "classification": "HYBRID_EXACT",
-        "derivedFixedTerms": "APP_CALCULATED_WHEN_BOUNDARY_COMPLETE",
+        "expression": "eligibleBonusLotteryGames = broaderGameCount - normalReproductionEntryCount*20 - czReproductionExcludedGames - atReproductionExcludedGames - otherExactHeldRedBigExcludedGames(if any)",
+        "terms": [
+          {
+            "inputId": "INP_BONUS_BROADER_GAMES",
+            "role": "BASE",
+            "coefficient": 1,
+            "required": true
+          },
+          {
+            "inputId": "INP_NORMAL_REPRODUCTION_ENTRIES",
+            "role": "SUBTRACT_FIXED_PER_OCCURRENCE",
+            "gamesPerOccurrence": 20,
+            "required": true
+          },
+          {
+            "inputId": "INP_CZ_REPRODUCTION_GAMES",
+            "role": "SUBTRACT_DIRECT_GAMES",
+            "required": true,
+            "observedZeroAllowed": true
+          },
+          {
+            "inputId": "INP_AT_REPRODUCTION_GAMES",
+            "role": "SUBTRACT_DIRECT_GAMES",
+            "required": true,
+            "observedZeroAllowed": true
+          }
+        ],
+        "otherExactHeldRedBigExcludedGames": "MUST_BE_ZERO_BY_PROVEN_SCOPE_OR_MATERIALIZED_AS_EXACT_TERM_BEFORE_RUNTIME_ENABLE",
         "missingRequiredTerm": "DISABLE_FEATURE_ONLY",
         "observedZeroDistinctFromMissing": true
       }
