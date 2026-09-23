@@ -348,6 +348,15 @@ REF-007: If the Manifest explicitly and unambiguously required the correct resul
 REF-008: Love嬢3 passing proves the first reference only, not fleet reproducibility. Additional structurally different reference machines are required before mass production.
 REF-009: Mass-production readiness means a fresh AI/session can follow this Manifest without relying on hidden prior-chat decisions and reach equivalent-quality artifacts.
 
+## 20A. User-Verified UX contracts during zero-base reconstruction
+
+UVX-001: A prior User-Verified UI Lock is empirical real-device UX evidence, not a Research/Selection/Observation semantic oracle. Zero-base Research MUST NOT read it to decide machine facts, probabilities, feature adoption, dependency, or Evidence meaning.
+UVX-002: After an independent Canonical UI has been materialized, Runtime Contract Verification MUST compare it with any existing User-Verified UI Lock before that lock is replaced or declared obsolete.
+UVX-003: A mismatch with a User-Verified UI Lock is a real-device re-verification requirement, not permission to copy the legacy layout into the new Canonical UI. The zero-base Canonical UI remains authoritative when it is reproducible from current upstream contracts.
+UVX-004: CI MUST distinguish a pending re-verification mismatch from semantic corruption. A historical lock MAY remain as the previous verified baseline while the new Canonical UI is marked pending real-device verification; it MUST NOT silently block or rewrite the new canonical contract.
+UVX-005: Only a successful real-device verification may supersede the prior lock. The replacement lock MUST be regenerated from the verified current Canonical UI/package and record its verification date/version/provenance.
+UVX-006: If real-device verification rejects the new UI, return to the earliest affected Manifest/Canonical rule per PREVIEW-005/006; do not restore legacy machine semantics as an oracle.
+
 ## 21. Mandatory anti-omission checklist
 
 Before starting any machine Research, the operator/AI MUST confirm this Manifest explicitly covers:
