@@ -35,9 +35,15 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
+          # The PR may legitimately carry unrelated MachinePackage changes (for example V8 publication).
+          # Exercise the legacy batch dry-run against a clean base snapshot so its scope guard tests the
+          # batch operation itself rather than pre-existing PR content.
+          git diff --binary "${{ github.event.pull_request.base.sha }}" -- catalog.json difficulty-catalog.json machines/ > /tmp/preexisting-machine-data.patch
+          git restore --source="${{ github.event.pull_request.base.sha }}" -- catalog.json difficulty-catalog.json machines/
           npm run machine:publish:batch -- L_BAKI_L3 L_HOKUTO_AD_XR
           git diff --exit-code -- catalog.json difficulty-catalog.json machines/
           test -z "$(git status --porcelain -- build/L_BAKI_L3 build/L_HOKUTO_AD_XR)"
+          git apply /tmp/preexisting-machine-data.patch
 
       - name: Verify help
         run: npm run machine:publish:batch -- --help
