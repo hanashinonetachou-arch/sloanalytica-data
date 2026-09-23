@@ -182,7 +182,7 @@
     {
       "id": "SEC_BONUS_END",
       "title": "BIG終了時の設定示唆",
-      "description": "BIG終了時に確認した設定確定・下限情報を記録します。出現しなかったことは設定否定には使いません。",
+      "description": "BIG終了時に確認した内容を記録します。青・赤・金・虹が出なかった機会は、デフォルト・高設定示唆（弱）・高設定示唆（強）のいずれか1つを加算して設定推測に使用します。青・赤・金・虹は設定下限・確定Evidenceとして別に記録します。",
       "descriptionPresentation": {
         "collapsible": true,
         "label": "説明",
@@ -195,6 +195,43 @@
       "headerToggle": true,
       "genericEditButton": false,
       "items": [
+        {
+          "id": "OBS_BIG_END_HINT",
+          "observationMultiplicity": "REPEATED_CATEGORICAL_EVENT",
+          "interaction": {
+            "type": "CATEGORY_COUNTERS",
+            "preservePriorObservations": true,
+            "showAccumulatedCounts": true,
+            "categoryCoverage": "EXHAUSTIVE_WITHIN_NON_CONFIRMATION_BIG_END_TRIALS",
+            "totalOpportunities": "DERIVE_FROM_CATEGORY_COUNTS",
+            "categories": [
+              {
+                "id": "INP_BIG_END_DEFAULT",
+                "label": "デフォルト",
+                "meaning": "特定設定示唆エフェクトなし・通常画面"
+              },
+              {
+                "id": "INP_BIG_END_HIGH_WEAK",
+                "label": "高設定示唆・弱",
+                "meaning": "高設定示唆（弱）"
+              },
+              {
+                "id": "INP_BIG_END_HIGH_STRONG",
+                "label": "高設定示唆・強",
+                "meaning": "高設定示唆（強）"
+              }
+            ],
+            "exclusion": {
+              "categoryIds": [
+                "EVI_BONUS_END_C1",
+                "EVI_BONUS_END_C2",
+                "EVI_BONUS_END_C3",
+                "EVI_BONUS_END_C4"
+              ],
+              "reason": "青・赤・金・虹のEvidence発生機会はNumeric分母へ含めない"
+            }
+          }
+        },
         {
           "id": "EVI_BONUS_END",
           "observationMultiplicity": "REPEATED_CATEGORICAL_EVENT",
@@ -384,7 +421,8 @@
     "LED denominator derives from five category counts",
     "specific-bonus inference requires complete exact exposure reconstruction",
     "Evidence category counters accumulate rather than overwrite",
-    "internal Exposure terminology is not user-facing"
+    "internal Exposure terminology is not user-facing",
+    "BIG-end Numeric hint counters and hard Evidence share one natural section but remain computationally separate"
   ],
   "manifestRef": "docs/SloAnalytica-Reproducible-Machine-Research-UX-Manifest-v8.md",
   "previewCheckpoint": {
