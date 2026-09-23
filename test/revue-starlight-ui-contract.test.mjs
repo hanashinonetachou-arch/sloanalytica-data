@@ -4,49 +4,33 @@ import fs from 'node:fs';
 
 const pkg = JSON.parse(fs.readFileSync(new URL('../machines/S_REVUE_STARLIGHT_CX/machine-package.json', import.meta.url), 'utf8'));
 const sections = pkg.ui?.sections ?? [];
-const inputs = pkg.inputs?.inputs ?? [];
-const sectionIndex = title => sections.findIndex(section => section.title === title);
-const inputById = id => inputs.find(input => input.id === id);
+const conditional = sections.find(section => section.title === 'CZ・フェイク前兆終了時LED');
 
-test('Revue Starlight places lamp and CZ directly below predecessor data', () => {
-  const predecessor = sectionIndex('着席時データ');
-  assert.ok(predecessor >= 0);
-  assert.equal(sections[predecessor + 1]?.title, 'CZ関連終了時のランプ色');
-  assert.equal(sections[predecessor + 2]?.title, 'CZ初当り');
+test('Revue Starlight V8 exposes the conditional LED observation from Canonical UI', () => {
+  assert.equal(pkg.v8?.source, 'REPRO_V8_UPSTREAM_ONLY');
+  assert.ok(conditional);
+  assert.match(conditional.description ?? '', /設定変更時/);
+  assert.match(conditional.description ?? '', /AT終了後/);
+  assert.match(conditional.description ?? '', /設定推測には使用しません/);
 });
 
-test('Revue Starlight BIG end section separates statistical counters from Evidence controls', () => {
-  const section = sections.find(item => item.title === 'BIG終了画面');
-  assert.ok(section);
-  assert.ok(section.items.length >= 7);
-
-  const statistical = section.items.slice(0, 3);
-  for (const item of statistical) {
-    assert.equal(item.gridSpan, 6);
-    assert.equal(item.config?.directInput, true);
-    assert.equal(item.config?.compact, true);
-    assert.deepEqual(item.config?.quickAdd, [1]);
-  }
-
-  const evidence = section.items.slice(3);
-  for (const item of evidence) {
-    assert.equal(item.gridSpan, 12);
-    assert.equal(item.config?.directInput, false);
-  }
+test('Revue Starlight conditional LED observation uses exhaustive generic category counters', () => {
+  const item = conditional?.items?.[0];
+  assert.ok(item);
+  assert.equal(item.interaction?.type, 'CATEGORY_COUNTERS');
+  assert.equal(item.interaction?.categoryCoverage, 'EXHAUSTIVE');
+  assert.equal(item.interaction?.totalOpportunities, 'DERIVE_FROM_CATEGORY_COUNTS');
+  assert.deepEqual(
+    item.interaction?.categories?.map(category => category.label),
+    ['白', '青', '緑', '赤', '紫'],
+  );
 });
 
-test('Revue Starlight lamp guidance is section-level, readable, and excludes AT-end red lamp', () => {
-  const section = sections.find(item => item.title === 'CZ関連終了時のランプ色');
-  assert.match(section?.description ?? '', /入力方法\n・/);
-  assert.match(section?.description ?? '', /除外条件\n・/);
-  assert.match(section?.description ?? '', /AT終了時の赤ランプは対象外/);
-});
-
-test('Revue Starlight Evidence inputs expose recognizable voice and payout cues', () => {
-  assert.match(inputById('INP_AT_VOICE_SET2_COUNT')?.name ?? '', /あなたにもあるでしょう/);
-  assert.match(inputById('INP_AT_VOICE_SET4_COUNT')?.name ?? '', /運命の二人/);
-  assert.match(inputById('INP_AT_VOICE_SET6_COUNT')?.name ?? '', /これこそ私が観たかった舞台/);
-  assert.match(inputById('INP_PAYOUT_SET4_COUNT')?.name ?? '', /456 OVER/);
-  assert.match(inputById('INP_PAYOUT_SET5_COUNT')?.name ?? '', /99 OVER/);
-  assert.match(inputById('INP_PAYOUT_SET6_COUNT')?.name ?? '', /666 OVER/);
+test('Revue Starlight conditional LED observation remains record-only', () => {
+  const serialized = JSON.stringify(conditional);
+  assert.match(serialized, /INP_CZ_LED_PURPLE/);
+  assert.doesNotMatch(serialized, /engineBinding/);
+  const summary = pkg.v8?.machineResearchSummary?.selection;
+  const excluded = summary?.excluded ?? [];
+  assert.ok(excluded.some(item => item.featureId === 'FEAT_CZ_END_LED'));
 });
