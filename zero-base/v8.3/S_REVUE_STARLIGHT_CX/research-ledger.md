@@ -842,3 +842,83 @@ LIVE_CONDITIONAL without benchmark tier:
 - five-specific-bonus aggregate — exact reconstructed exposure required
 
 These score classifications do not override dependency rules and do not convert lower-bound/conditional metrics into independent evidence.
+
+
+## v8.4 Observation construction — adopted inference set
+
+Observation is now constructed from the selected features without using legacy Revue UI/data.
+
+### O1 — Normal-play aggregate counts
+Context: normal play.
+Inputs:
+- normalGameCount: cumulative NORMAL_GAME_TRIAL denominator, full-width numeric input.
+- czInitialHitCount: CZ initial occurrences within that denominator.
+- atInitialHitCount: AT initial occurrences within that denominator.
+Acquisition:
+- normalGameCount is the common denominator for CZ/AT initial-hit likelihoods.
+- CZ and AT counts are separate numerators but share the same exact observation/reset interval.
+UI grouping:
+- one natural section; denominator full width, CZ/AT compact counters may be paired in two columns.
+Zero semantics:
+- explicit observed zero is valid after normalGameCount > 0; blank means unobserved/not supplied.
+
+### O2 — CZ/fake-premonition-end LED
+Context: source-eligible fake-premonition end or CZ end during normal play; exclude setting-change and AT-end LED contexts.
+Inputs:
+- whiteCount
+- blueCount
+- greenCount
+- redCount
+- purpleCount
+Denominator:
+- derived exactly as sum of the five counts under EXP-007 exhaustive categorical rule; no separate opportunity-count input.
+Acquisition:
+- record exactly one color for each eligible ending.
+UI grouping:
+- one LED section with five compact +1 counters; do not ask the player to enter the same denominator separately.
+Zero semantics:
+- all blank = unobserved; once any LED observation exists, zero in another color is an observed category count of zero.
+
+### O3 — Specific-bonus aggregate with reconstructed exposure
+Context: effective fresh bonus-lottery games.
+Outcome input:
+- specificBonusCount = count of any of the five selected setting-difference joint events:
+  Kirameki-me+REG, watermelon+REG, chance-me+REG, watermelon+blue BIG, chance-me+blue BIG.
+Exposure inputs/derivations:
+- broaderGameCount: use the exact session game counter that Observation defines for the bonus-lottery reconstruction; do not silently substitute normalGameCount unless the same boundary/universe is proven.
+- normalReproductionExcludedGames: derive automatically from exact observed entries and source-proven fixed duration when boundary-complete; otherwise record only boundary residual directly.
+- atReproductionExcludedGames: direct counter of actual games spent in the visible variable-duration AT reproduction/held-red-BIG state.
+- other source-proven excluded held-red-BIG intervals, if the broader counter includes them, must be exact before enabling this likelihood.
+Derived denominator:
+eligibleBonusLotteryGames = broaderGameCount - exact excluded no-fresh-lottery games.
+Inference gate:
+- enable only when every required reconstruction term for the observation interval is exact.
+- if AT reproduction does not occur in the interval, its exact observed value is zero; do not require a positive count.
+- if it occurs but is not counted exactly, disable only this feature.
+UI burden rule:
+- show/request only irreducible direct terms. Fixed-duration exclusions are calculated automatically.
+- the user-facing label for the variable term should describe the action, e.g. “AT中の再生産モードG”, not internal Exposure terminology.
+
+### O4 — Evidence
+Keep confirmation/lower-bound events as Evidence, not numeric counts:
+- BIG-end confirmation screen variants;
+- AT-end touch-voice confirmation variants;
+- acquired-coin confirmation displays.
+Observation must preserve the exact trigger/action (including touch/PUSH when applicable), setting lower bound/exact setting, and occurrence state.
+Ordinary non-confirmation screen/voice distributions remain outside numeric inference because their published category space is incomplete/conflicted in this run.
+
+### Rejected/unresolved Observation
+- conditional AT direct-hit: no input materialized because the qualifying hidden high-state opportunity cannot always be identified exactly.
+- CZ table/success/raw-role/stage-transition candidates: no numeric inference inputs from incomplete likelihoods.
+- visible bonus-type rates: no independent numeric inputs while suppressed by the selected establishment-route representation.
+
+### Canonical-UI handoff
+Natural section order:
+1. 通常時
+2. CZ・フェイク前兆終了時のLED
+3. 特定ボーナス
+4. BIG終了時の設定示唆
+5. AT終了時の設定示唆
+6. 獲得枚数の設定示唆
+
+The specific-bonus section is conditional: it may always record the specific-bonus count, but inference requires complete exact exposure reconstruction. Runtime must not interpret a missing AT-reproduction counter as zero when the state occurred; Observation needs an explicit not-observed/observed-zero distinction.
