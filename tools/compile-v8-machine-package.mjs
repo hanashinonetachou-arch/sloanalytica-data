@@ -13,6 +13,7 @@ function compileInputs(observation,evidence){
   for(const feature of observation.numeric??[]){
     const r=feature.exposureReconstruction;
     if(r?.classification!=='HYBRID_EXACT'||!Array.isArray(r.terms)) continue;
+    if(r.termSetCompleteness!=='COMPLETE_FOR_DEFINED_BROADER_GAME_SCOPE'||r.additionalExcludedTerms?.status!=='NONE_WITHIN_DEFINED_SCOPE') continue;
     const outputId=`DERIVED_${safe(feature.featureId)}_ELIGIBLE_TRIALS`;
     const base=r.terms.filter(x=>x.role==='BASE');
     const subtract=r.terms.filter(x=>x.role==='SUBTRACT_DIRECT_GAMES'||x.role==='SUBTRACT_FIXED_PER_OCCURRENCE');
