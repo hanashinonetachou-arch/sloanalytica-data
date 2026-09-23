@@ -52,6 +52,51 @@
       "unit": "回",
       "displayOrder": 50,
       "inferenceRole": "INCLUDE_SUPPORT"
+    },
+    {
+      "id": "INP_LZ_LEVEL1",
+      "name": "お店前",
+      "type": "counter",
+      "category": "LOVE ZONEステージ",
+      "unit": "回",
+      "displayOrder": 60,
+      "inferenceRole": "INCLUDE_SUPPORT"
+    },
+    {
+      "id": "INP_LZ_LEVEL2",
+      "name": "Club Luxe",
+      "type": "counter",
+      "category": "LOVE ZONEステージ",
+      "unit": "回",
+      "displayOrder": 70,
+      "inferenceRole": "INCLUDE_SUPPORT"
+    },
+    {
+      "id": "INP_LZ_LEVEL3",
+      "name": "Club Luxe ALLCast",
+      "type": "counter",
+      "category": "LOVE ZONEステージ",
+      "unit": "回",
+      "displayOrder": 80,
+      "inferenceRole": "INCLUDE_SUPPORT"
+    },
+    {
+      "id": "INP_LZ_LEVEL4",
+      "name": "コスプレDAY",
+      "type": "counter",
+      "category": "LOVE ZONEステージ",
+      "unit": "回",
+      "displayOrder": 90,
+      "inferenceRole": "INCLUDE_SUPPORT"
+    },
+    {
+      "id": "INP_LZ_LEVEL5",
+      "name": "Wご指名チャンス",
+      "type": "counter",
+      "category": "LOVE ZONEステージ",
+      "unit": "回",
+      "displayOrder": 100,
+      "inferenceRole": "INCLUDE_SUPPORT"
     }
   ],
   "features": [
@@ -138,6 +183,37 @@
       "featureId": "FEAT_RESET_MODE",
       "adoptionCategory": "EXCLUDE",
       "rejectionReason": "設定差はあるが設定変更・有利区間移行を母数とする内部モードで、実戦中の客観的な反復観測契約を確立できないため不採用。"
+    },
+    {
+      "researchFeatureId": "RF_LZ_STAGE",
+      "featureId": "FEAT_LZ_STAGE",
+      "adoptionCategory": "INCLUDE_SUPPORT",
+      "model": "multinomial",
+      "categoryInputIds": [
+        "INP_LZ_LEVEL1",
+        "INP_LZ_LEVEL2",
+        "INP_LZ_LEVEL3",
+        "INP_LZ_LEVEL4",
+        "INP_LZ_LEVEL5"
+      ],
+      "denominatorRule": "SUM_CATEGORY_INPUTS",
+      "minimumSample": 0,
+      "benchmarkExposureStatus": "PENDING_DEPENDENCY",
+      "liveInferenceAuthorization": "LIVE_CONDITIONAL",
+      "trialUniverse": "LOVE ZONE突入1回",
+      "directDenominatorObservation": true,
+      "likelihoodCompleteness": "COMPLETE_ALL_SETTINGS",
+      "perTrialInformationStatus": "NON_ZERO",
+      "difficultyParticipation": "EXCLUDE_PENDING_BENCHMARK_DEPENDENCY",
+      "userReason": "LOVE ZONE突入ごとに表示ステージ（お店前/Club Luxe/Club Luxe ALLCast/コスプレDAY）またはWご指名チャンス直撃として排他的に分類でき、設定1〜6の完全なカテゴリ分布が公開されている。通常Gを分母にせず実測カテゴリ合計を条件付きTrial数としてlive inferenceに利用する。",
+      "dependencyContract": {
+        "relationship": "PARENT_EVENT_CONDITIONAL",
+        "relatedFeatureIds": [
+          "FEAT_LOVE_ZONE"
+        ],
+        "combinationPolicy": "CONDITIONAL_LIKELIHOOD_ON_DIRECT_TRIALS",
+        "reason": "LOVE ZONE発生率は親事象、ステージ分布は突入後の条件付き分布。ステージ側は実測突入Trialだけで尤度更新し、親発生率を分母へ再利用しない。"
+      }
     }
   ],
   "evidenceDecisions": [
@@ -195,8 +271,8 @@
     }
   ],
   "selectionSummaryContract": {
-    "evaluatedCount": 6,
-    "selectedCount": 2,
+    "evaluatedCount": 7,
+    "selectedCount": 3,
     "displayOnlyCount": 1,
     "rejectedCount": 3
   },
