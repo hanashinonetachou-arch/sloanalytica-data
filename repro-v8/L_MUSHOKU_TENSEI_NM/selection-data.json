@@ -1,0 +1,262 @@
+{
+  "schemaVersion": "selection-data-v1",
+  "machineId": "L_MUSHOKU_TENSEI_NM",
+  "machineDataVersion": "0.3.0",
+  "provenance": {
+    "manifestVersion": "8.0",
+    "generationPath": "V8_RESEARCH_PIPELINE",
+    "researchOrigin": "ZERO_BASE_PUBLIC_RESEARCH"
+  },
+  "inputs": [
+    {
+      "id": "INP_NORMAL_GAMES",
+      "name": "通常時ゲーム数",
+      "type": "integer",
+      "category": "初当り",
+      "unit": "G",
+      "displayOrder": 10,
+      "inferenceRole": "INCLUDE_PRIMARY"
+    },
+    {
+      "id": "INP_AT_INITIAL",
+      "name": "AT初当り",
+      "type": "counter",
+      "category": "初当り",
+      "unit": "回",
+      "displayOrder": 20,
+      "inferenceRole": "INCLUDE_PRIMARY"
+    },
+    {
+      "id": "INP_BONUS_INITIAL",
+      "name": "ボーナス初当り",
+      "type": "counter",
+      "category": "初当り",
+      "unit": "回",
+      "displayOrder": 30,
+      "inferenceRole": "DISPLAY_ONLY"
+    },
+    {
+      "id": "INP_CZ",
+      "name": "無職チャンス",
+      "type": "counter",
+      "category": "初当り",
+      "unit": "回",
+      "displayOrder": 40,
+      "inferenceRole": "DISPLAY_ONLY"
+    }
+  ],
+  "features": [
+    {
+      "researchFeatureId": "RF_AT_INITIAL",
+      "featureId": "FEAT_AT_INITIAL",
+      "adoptionCategory": "INCLUDE_PRIMARY",
+      "numeratorInputId": "INP_AT_INITIAL",
+      "denominatorInputId": "INP_NORMAL_GAMES",
+      "minimumSample": 0,
+      "displayFormat": "ratio_1_over_n",
+      "userReason": "設定1 1/416から設定6 1/292まで段階差が大きく、通常時ゲーム数を直接母数として継続観測できる。ボーナス/CZなど上流経路との二重計上を避けるためAT初当りを代表尤度とする。",
+      "dependencyContract": {
+        "relationship": "DOWNSTREAM_AGGREGATE",
+        "relatedFeatureIds": [
+          "FEAT_BONUS_INITIAL",
+          "FEAT_CZ"
+        ],
+        "combinationPolicy": "DO_NOT_MULTIPLY",
+        "preferredPrimary": "FEAT_AT_INITIAL"
+      }
+    },
+    {
+      "researchFeatureId": "RF_BONUS_INITIAL",
+      "featureId": "FEAT_BONUS_INITIAL",
+      "adoptionCategory": "DISPLAY_ONLY",
+      "numeratorInputId": "INP_BONUS_INITIAL",
+      "denominatorInputId": "INP_NORMAL_GAMES",
+      "userReason": "全設定値と観測可能な母数はあるが、ATへ至る抽選経路との依存をfresh public researchだけで分離できないため二重尤度化しない。",
+      "dependencyContract": {
+        "relationship": "OVERLAPPING_FLOW",
+        "relatedFeatureIds": [
+          "FEAT_AT_INITIAL"
+        ],
+        "combinationPolicy": "DO_NOT_MULTIPLY",
+        "preferredPrimary": "FEAT_AT_INITIAL"
+      }
+    },
+    {
+      "researchFeatureId": "RF_CZ",
+      "featureId": "FEAT_CZ",
+      "adoptionCategory": "DISPLAY_ONLY",
+      "numeratorInputId": "INP_CZ",
+      "denominatorInputId": "INP_NORMAL_GAMES",
+      "userReason": "観測容易だが設定差が小さく、AT初当りの上流経路と重なるため参考表示に留める。",
+      "dependencyContract": {
+        "relationship": "OVERLAPPING_FLOW",
+        "relatedFeatureIds": [
+          "FEAT_AT_INITIAL"
+        ],
+        "combinationPolicy": "DO_NOT_MULTIPLY",
+        "preferredPrimary": "FEAT_AT_INITIAL"
+      }
+    },
+    {
+      "researchFeatureId": "RF_TP2",
+      "featureId": "FEAT_TP2",
+      "adoptionCategory": "EXCLUDE",
+      "rejectionReason": "設定差は大きいが母数がAT中ゲームに限定され、通常時ゲーム数からExposureを一意に導けない。"
+    },
+    {
+      "researchFeatureId": "RF_FORESIGHT",
+      "featureId": "FEAT_FORESIGHT",
+      "adoptionCategory": "EXCLUDE",
+      "rejectionReason": "公式設定差は確認できるがヒロインリンク発生機会を独立して記録する必要があり、差も小さいため標準入力には採用しない。"
+    },
+    {
+      "researchFeatureId": "RF_HITOGAMI_WHITE_MOVE",
+      "featureId": "FEAT_HITOGAMI_WHITE_MOVE",
+      "adoptionCategory": "EXCLUDE",
+      "rejectionReason": "公式設定差は大きいが白マス移行抽選機会という条件付きTrial Universeを正確に数える必要がある。"
+    },
+    {
+      "researchFeatureId": "RF_MUSHOKU_BONUS_NON_HEROINE_AT",
+      "featureId": "FEAT_MUSHOKU_BONUS_NON_HEROINE_AT",
+      "adoptionCategory": "EXCLUDE",
+      "rejectionReason": "公式設定差は大きいが無職転生ボーナス中の非ヒロイン役抽選機会という細粒度母数が必要で、標準実戦入力の観測負荷が高い。"
+    }
+  ],
+  "evidenceDecisions": [
+    {
+      "researchEvidenceId": "EV_END_2PLUS",
+      "disposition": "DEFER_TO_EVIDENCE_STAGE"
+    },
+    {
+      "researchEvidenceId": "EV_END_4PLUS",
+      "disposition": "DEFER_TO_EVIDENCE_STAGE"
+    },
+    {
+      "researchEvidenceId": "EV_END_6",
+      "disposition": "DEFER_TO_EVIDENCE_STAGE"
+    },
+    {
+      "researchEvidenceId": "EV_TROPHY_2PLUS",
+      "disposition": "DEFER_TO_EVIDENCE_STAGE"
+    },
+    {
+      "researchEvidenceId": "EV_TROPHY_3PLUS",
+      "disposition": "DEFER_TO_EVIDENCE_STAGE"
+    },
+    {
+      "researchEvidenceId": "EV_TROPHY_4PLUS",
+      "disposition": "DEFER_TO_EVIDENCE_STAGE"
+    },
+    {
+      "researchEvidenceId": "EV_TROPHY_5PLUS",
+      "disposition": "DEFER_TO_EVIDENCE_STAGE"
+    },
+    {
+      "researchEvidenceId": "EV_TROPHY_6",
+      "disposition": "DEFER_TO_EVIDENCE_STAGE"
+    },
+    {
+      "researchEvidenceId": "EV_PAYOUT_2PLUS",
+      "disposition": "DEFER_TO_EVIDENCE_STAGE"
+    },
+    {
+      "researchEvidenceId": "EV_PAYOUT_EVEN",
+      "disposition": "DEFER_TO_EVIDENCE_STAGE"
+    },
+    {
+      "researchEvidenceId": "EV_PAYOUT_3PLUS",
+      "disposition": "DEFER_TO_EVIDENCE_STAGE"
+    },
+    {
+      "researchEvidenceId": "EV_PAYOUT_4PLUS",
+      "disposition": "DEFER_TO_EVIDENCE_STAGE"
+    },
+    {
+      "researchEvidenceId": "EV_PAYOUT_5PLUS",
+      "disposition": "DEFER_TO_EVIDENCE_STAGE"
+    },
+    {
+      "researchEvidenceId": "EV_PAYOUT_6",
+      "disposition": "DEFER_TO_EVIDENCE_STAGE"
+    },
+    {
+      "researchEvidenceId": "EV_CZ_PERCENT_4PLUS",
+      "disposition": "DEFER_TO_EVIDENCE_STAGE"
+    },
+    {
+      "researchEvidenceId": "EV_CZ_PERCENT_5PLUS",
+      "disposition": "DEFER_TO_EVIDENCE_STAGE"
+    },
+    {
+      "researchEvidenceId": "EV_CZ_PERCENT_6",
+      "disposition": "DEFER_TO_EVIDENCE_STAGE"
+    },
+    {
+      "researchEvidenceId": "EV_MAGIC_STORY_2PLUS",
+      "disposition": "DEFER_TO_EVIDENCE_STAGE"
+    },
+    {
+      "researchEvidenceId": "EV_MAGIC_STORY_4PLUS",
+      "disposition": "DEFER_TO_EVIDENCE_STAGE"
+    },
+    {
+      "researchEvidenceId": "EV_MAGIC_STORY_6",
+      "disposition": "DEFER_TO_EVIDENCE_STAGE"
+    },
+    {
+      "researchEvidenceId": "EV_AT_START_EVEN",
+      "disposition": "DEFER_TO_EVIDENCE_STAGE"
+    },
+    {
+      "researchEvidenceId": "EV_AT_START_4PLUS",
+      "disposition": "DEFER_TO_EVIDENCE_STAGE"
+    },
+    {
+      "researchEvidenceId": "EV_AT_START_5PLUS",
+      "disposition": "DEFER_TO_EVIDENCE_STAGE"
+    },
+    {
+      "researchEvidenceId": "EV_AT_START_6",
+      "disposition": "DEFER_TO_EVIDENCE_STAGE"
+    },
+    {
+      "researchEvidenceId": "EV_ENDING_DENY_1",
+      "disposition": "DEFER_TO_EVIDENCE_STAGE"
+    },
+    {
+      "researchEvidenceId": "EV_ENDING_DENY_2",
+      "disposition": "DEFER_TO_EVIDENCE_STAGE"
+    },
+    {
+      "researchEvidenceId": "EV_ENDING_DENY_3",
+      "disposition": "DEFER_TO_EVIDENCE_STAGE"
+    },
+    {
+      "researchEvidenceId": "EV_ENDING_3PLUS",
+      "disposition": "DEFER_TO_EVIDENCE_STAGE"
+    },
+    {
+      "researchEvidenceId": "EV_ENDING_4PLUS",
+      "disposition": "DEFER_TO_EVIDENCE_STAGE"
+    },
+    {
+      "researchEvidenceId": "EV_ENDING_5PLUS",
+      "disposition": "DEFER_TO_EVIDENCE_STAGE"
+    },
+    {
+      "researchEvidenceId": "EV_ENDING_6",
+      "disposition": "DEFER_TO_EVIDENCE_STAGE"
+    }
+  ],
+  "selectionSummaryContract": {
+    "evaluatedCount": 7,
+    "selectedCount": 1,
+    "displayOnlyCount": 2,
+    "rejectedCount": 4
+  },
+  "linkedPlayResearch": {
+    "status": "UNRESOLVED",
+    "stage": "POST_SELECTION",
+    "automaticImportCapability": "SEPARATE_NOT_ESTABLISHED"
+  }
+}
