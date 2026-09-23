@@ -161,6 +161,10 @@ OBS-003: Observation defines numerator/denominator acquisition together when bot
 OBS-004: Observation Action such as “PUSHで確認” is first-class data and MUST propagate to user-facing UI when useful.
 OBS-005: Observation MUST determine natural section co-location; Canonical UI may not reconstruct it from feature type.
 OBS-006: Unobserved and observed-zero semantics are explicit and testable.
+OBS-007: Selection disposition and Observation disposition are independent. A researched Numeric candidate rejected from inference MAY remain observable when the player can record its exact conditional trial universe without guessing.
+OBS-008: Such a candidate MUST be marked as CONDITIONAL_OBSERVATION and MUST remain computationally excluded unless Selection is explicitly re-run and adopts it. Observation or UI availability MUST NOT promote a rejected feature into inference.
+OBS-009: CONDITIONAL_OBSERVATION MUST define the observable opportunity/denominator, outcome input(s), applicable/excluded states, and user-facing counting instruction. If the conditional opportunity itself cannot be identified reliably in play, the observation remains UNRESOLVED and MUST NOT be materialized as an input.
+OBS-010: Canonical UI SHOULD render conditional observations with generic denominator/opportunity plus outcome controls. Machine-specific renderer branches are prohibited when the interaction can be expressed by the common conditional-observation contract.
 
 ## 12. HighLowDiscrimination
 
