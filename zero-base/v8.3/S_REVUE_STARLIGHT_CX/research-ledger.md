@@ -441,3 +441,68 @@ This cross-check materially strengthens the resolver validation:
 CZ and AT are now fully authorized for game-based benchmark scoring using NORMAL_GAME_TRIAL. LED remains LIVE_CONDITIONAL with IGPerEligibleTrial and no benchmark exposure. Realized bonus families remain excluded pending denominator resolution.
 
 The next mechanical step is to use the Manifest's canonical SelectionScore implementation/formula for CZ and AT rather than introducing a new hand-calculated score definition.
+
+
+## Focused re-audit — five specific rare-role bonus events
+
+### Fresh-source convergence
+Independent public analysis sources converge that there are exactly five setting-difference “specific bonus” joint events:
+1. Kirameki-me + REG
+2. chance-me + REG
+3. watermelon + REG
+4. watermelon + blue BIG
+5. chance-me + blue BIG
+
+The published setting-specific 1/N values are reproduced across NanaPress, Hisshobon, 1geki, Hazuse and other analysis pages. Hisshobon explicitly calls these 特定ボーナス確率 and says all five are setting-discrimination targets. NanaPress/Hazuse call them 特定ボーナス出現率 / REG同時当選の出現率.
+
+### Critical semantic distinction
+The same sources separately publish:
+- per-role bonus hit expectation at setting 1 (e.g. watermelon 18.8%, chance-me 39.3%), and
+- the five joint-event occurrence rates in 1/N.
+
+Therefore the five setting-specific 1/N values are NOT the same observable as “given a watermelon/chance-me, what percentage wins this bonus”. They are published as joint-event occurrence frequencies.
+
+The raw role probabilities are also published for setting 1 only, e.g. watermelon 1/95.4 and chance-me 1/292.6. A simple conditional reinterpretation would require complete setting-specific role probabilities and bonus-type conditional allocation, which are not available. Do not transform the five 1/N tables into role-conditioned percentages.
+
+### Reproduction-mode interaction
+Public mechanics establish that an internally established bonus can remain pending and later produce special reach-me behavior. Public sources also distinguish visible bonus occurrence from effective/internal bonus winning rate.
+However, the five “specific bonus” tables are described as rare-role + bonus simultaneous establishment / specific-bonus probabilities, not merely the later visible bonus-display count.
+This means they are semantically closer to the underlying joint draw event than the surface red/blue/REG occurrence table.
+
+### Trial Universe Resolver result
+Observed event: establishment of a specific rare-role + specified bonus joint event.
+
+Candidate denominator possibilities:
+A. GAME_TRIAL joint-event rate: count every eligible game and count the joint event when the specified rare role and bonus are established together.
+B. ROLE_TRIAL conditional rate: count only occurrences of the specified rare role and record whether the specified bonus was won.
+
+Fresh public tables provide complete setting-specific 1/N for A, but only setting-1 role probabilities/expectations for B. Multiple sources call the 1/N values “出現率”, “確率”, or “同時成立確率” and distinguish them from per-role “同時当選期待度”.
+
+Under DEN-002B..D, the lexical 1/N alone is insufficient; mechanics must establish the complete game eligibility boundary. Fresh sources establish that bonus simultaneous establishment is primarily driven by game-level rare-role draws, but state-dependent rare-role behavior exists (e.g. cherry probabilities can change by state; Kirameki flash behavior can be suppressed in premonition), and the inspected sources do not explicitly close whether each published specific-bonus 1/N uses all games, normal games, or another effective game exposure.
+
+Therefore:
+- do NOT keep the earlier blanket assumption that these are merely subclasses of visible bonus occurrence with the same unresolved denominator;
+- classify them as a distinct JOINT_EVENT family;
+- likelihood completeness: COMPLETE for the published joint 1/N values;
+- trial-universe class: JOINT_GAME_EVENT_SOURCE_UNRESOLVED;
+- live observability of numerator: generally DIRECTLY_COUNTABLE when the triggering role and bonus type can be identified;
+- live denominator / benchmark exposure: unresolved until the source game universe is proven;
+- numeric inference: BLOCKED_UNRESOLVED_DENOMINATOR for now.
+
+### Dependency revision
+The five specific-bonus joint events must NOT be suppressed merely because aggregate visible blue-BIG/REG counts exist. They observe the causal establishment route and may carry setting information not represented equivalently by surface bonus occurrence, especially on this machine where internal establishment and visible realization diverge.
+They are dependent with:
+- aggregate/internal bonus-winning families,
+- raw rare-role occurrence,
+- any future complete joint bonus model.
+They are NOT automatically equivalent to the later visible REG/blue-BIG occurrence counters.
+
+A future inference contract may choose either:
+1. a complete joint-event model using game exposure and these five event counts; or
+2. a role-conditioned model using role counts plus complete setting-specific conditional bonus probabilities;
+but MUST NOT mix both representations as independent evidence.
+
+### Re-audit conclusion
+The user's concern is confirmed: the five specific-trigger bonus events are important setting-discrimination candidates and deserve their own Trial Universe analysis. They remain alive in Selection Research and are not rejected for low usefulness or hidden under aggregate bonus counts.
+
+The blocker is narrower than previously stated: not likelihood completeness, but the exact game-exposure denominator of the published joint 1/N tables.
