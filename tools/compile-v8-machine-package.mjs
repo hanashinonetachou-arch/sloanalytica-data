@@ -80,5 +80,18 @@ export function compileV8MachinePackage({research,selection,observation,evidence
     for(const [key,value] of Object.entries(expected)) if(provenance[key]!==value) throw new Error(`invalid V8 provenance ${key}`);
     for(const [label,source] of [['canonical',canonical.provenance],['summary',summary?.provenance]]) if(source&&JSON.stringify(source)!==JSON.stringify(provenance)) throw new Error(`V8 provenance mismatch: ${label}`);
   }
-  return {schemaVersion:1,provenance,machine:{schemaVersion:'2.0.0',machineId:id,machineDataVersion:selection.machineDataVersion??'repro-v8',displayName:research.machine.displayName,modelName:research.machine.modelName??research.machine.displayName,manufacturer:research.machine.manufacturer,settings:clone(research.machine.settings),packagePolicy:{offlineCapable:true,containsImages:false,containsExecutableCode:false}},inputs:{schemaVersion:'2.0.0',inputs},features:{schemaVersion:'2.0.0',features},evidence:runtimeEvidenceSection,ui,manifestRevision:canonical.manifestRevision,v8:{source:'REPRO_V8_UPSTREAM_ONLY',provenance:clone(provenance),researchSchemaVersion:research.schemaVersion,selection:clone(selection),observation:clone(observation),evidence:clone(evidence),highLowDiscrimination:clone(highLow),machineResearchSummary:clone(summary)}};
+  const linkedPlaySelection=clone(selection.linkedPlayResearch);
+  const linkedPlaySummary=clone(summary?.linkedPlay);
+  let linkedPlay;
+  if(provenance){
+    if(!linkedPlaySelection||!linkedPlaySummary) throw new Error('V8 linked-play research missing');
+    const allowed=new Set(['AVAILABLE','NOT_AVAILABLE','UNRESOLVED']);
+    if(!allowed.has(linkedPlaySelection.status)||!allowed.has(linkedPlaySummary.status)) throw new Error('invalid V8 linked-play status');
+    if(linkedPlaySelection.stage!=='POST_SELECTION') throw new Error('V8 linked-play research must be POST_SELECTION');
+    if(linkedPlaySelection.status!==linkedPlaySummary.status) throw new Error('V8 linked-play status mismatch');
+    if(linkedPlaySelection.automaticImportCapability==null||linkedPlaySummary.automaticImportCapability==null) throw new Error('V8 linked-play automatic import capability missing');
+    if(linkedPlaySelection.status==='AVAILABLE'&&!linkedPlaySummary.service&&!linkedPlaySummary.serviceCandidate) throw new Error('AVAILABLE linked-play service missing');
+    linkedPlay=linkedPlaySummary;
+  }
+  return {schemaVersion:1,provenance,linkedPlay:clone(linkedPlay),machine:{schemaVersion:'2.0.0',machineId:id,machineDataVersion:selection.machineDataVersion??'repro-v8',displayName:research.machine.displayName,modelName:research.machine.modelName??research.machine.displayName,manufacturer:research.machine.manufacturer,settings:clone(research.machine.settings),packagePolicy:{offlineCapable:true,containsImages:false,containsExecutableCode:false}},inputs:{schemaVersion:'2.0.0',inputs},features:{schemaVersion:'2.0.0',features},evidence:runtimeEvidenceSection,ui,manifestRevision:canonical.manifestRevision,v8:{source:'REPRO_V8_UPSTREAM_ONLY',provenance:clone(provenance),linkedPlay:clone(linkedPlay),researchSchemaVersion:research.schemaVersion,selection:clone(selection),observation:clone(observation),evidence:clone(evidence),highLowDiscrimination:clone(highLow),machineResearchSummary:clone(summary)}};
 }
