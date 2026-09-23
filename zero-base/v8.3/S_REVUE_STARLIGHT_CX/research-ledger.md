@@ -1001,3 +1001,30 @@ Evidence choices:
 - 666 OVER: 6
 
 Section descriptions carry shared observation conditions once; item labels remain short. Evidence sections follow numeric play-flow sections.
+
+
+## HighLowDiscrimination checkpoint — model definition
+
+Manifest HLD-001 requires LOW={1,2} versus HIGH={5,6} at 1500/3000/7000G. Setting4 is excluded from this benchmark only.
+
+Benchmark features admitted:
+- CZ initial occurrence: NORMAL_GAME_TRIAL.
+- AT initial occurrence: NORMAL_GAME_TRIAL.
+- LED categorical observation: only the source-proven guaranteed-minimum opportunity path is eligible for conservative HLD; unquantified fake-premonition opportunities are not guessed.
+- five-specific-bonus aggregate: excluded from HLD because benchmark exposure remains unresolved, despite valid exact live inference.
+
+Fresh-source recheck continues to reproduce:
+CZ denominators LOW 265.9/254.7, HIGH 190.3/179.5;
+AT denominators LOW 359.6/346.8, HIGH 255.7/232.5;
+LED five-category distributions with higher purple/green share at higher settings.
+
+HLD simulation contract:
+- class prior LOW/HIGH = 0.5/0.5;
+- within-class setting prior = equal over {1,2} or {5,6};
+- observations generated from the declared setting likelihood;
+- classifier compares class-marginal likelihoods, not a hand-tuned threshold;
+- report Balanced Accuracy;
+- CZ and AT benchmark counts use their selected aggregate likelihoods.
+- LED lower-bound opportunities use a common conservative count derived from the LOW/HIGH minimum source-proven CZ-ending exposure; additional fake-premonition LED opportunities are ignored, so HLD does not claim their unknown benefit.
+
+Implementation note: formal numeric HLD values must be produced by the project HLD pipeline or an equivalent deterministic implementation committed/tested in-repo. Do not substitute SelectionScore or an ad-hoc spreadsheet result.
