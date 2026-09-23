@@ -164,3 +164,100 @@ The main public setting-difference universe now has a stable shape:
 - source-denominator audit remains mandatory before benchmark scoring of published 1/N families.
 
 No SelectionScore has been computed in this pass.
+
+
+## Fresh public-source candidate universe — pass 4: completeness closure
+
+### Newly confirmed / corrected source semantics
+- Independent fresh sources converge on the same core setting-difference set: CZ occurrence, AT occurrence, realized bonus occurrence, specific simultaneous REG/blue-BIG, conditional rare-role AT direct hit, CZ-table/LED relation, bonus-end Evidence, acquired-coins Evidence, and AT-end voice Evidence.
+- One source explicitly states BIG-end screens only and REG has no setting-hint screen. Another analysis source previously suggested BIG/REG. This remains a genuine public-source conflict; do not choose a semantic truth merely by majority. Numeric bonus-end screen use remains blocked until authoritative eligibility is resolved. Evidence should retain the conflict/provenance and avoid claiming REG eligibility.
+- The published ordinary bonus-end screen percentages sum to 100% at setting 1 but leave residual mass at settings 2/4/5/6 exactly where confirmation categories can occur. They therefore cannot be treated as an unconditional exhaustive three-category likelihood.
+- The same structural issue applies to ordinary AT-end voice percentages when confirmation voices are possible.
+
+### Search for omitted setting differences
+- CZ table 1/2 exact hit rates remain publicly unresolved; table 3=50%, table 4=100% is repeatedly published.
+- Higher settings selecting higher CZ tables is repeatedly published, but complete setting-by-table selection probabilities were not found.
+- No complete setting-specific raw small-role probabilities were found; sources characterize the useful setting differences as rare-role + bonus simultaneous occurrences instead.
+- Normal-state/high-state transition probabilities were not found across all settings. Published 300G/600G direct-hit-high transition values are setting-1 references and that special state's direct-hit probability is stated to have no setting difference.
+- No additional complete setting-specific stage-transition, CZ-level-success, mode-transition, or special-draw family was found in this closure pass.
+- User-play reports mentioning CZ behavior or icon acquisition are observational anecdotes, not published complete likelihoods; retain only as discovery leads, not Research probability facts.
+
+### Research completeness decision
+Research completeness for the publicly discoverable setting-difference universe is now CLOSED_WITH_EXPLICIT_UNRESOLVED_ITEMS for this construction run.
+
+This does NOT mean every public mechanism has complete numbers. It means:
+1. all discovered setting-difference families are retained;
+2. incomplete/conflicting families are explicitly represented rather than dropped;
+3. no further complete setting-specific candidate family was found after targeted searches across setting summaries, mechanics pages, and independent analysis sources;
+4. unresolved facts will fail closed downstream.
+
+## Denominator / Trial Universe classification — formal pass
+
+### D1 CZ occurrence
+- Numerator: observed CZ initial occurrences.
+- Published unit: 1/N machine occurrence probability.
+- Source-defined denominator wording: not explicitly resolved to total normal games in the inspected setting table.
+- Classification: SOURCE_UNRESOLVED for a model that requires relabeling N as total-game trials.
+- Runtime total-game counter is observable, but source equivalence is not to be invented under DEN-002A.
+
+### D2 AT occurrence
+- Numerator: observed AT initial occurrences.
+- Published unit: 1/N machine occurrence probability.
+- Exact denominator wording: SOURCE_UNRESOLVED for total-game relabeling.
+- Aggregate AT also contains multiple routes; dependency must be preserved.
+
+### D3 realized red BIG / blue BIG / REG occurrence
+- Numerator: realized/displayed bonus occurrence of each type.
+- Published unit: 1/N occurrence probability.
+- Separate from effective winning probability because internal bonus-established state can delay realization.
+- Exact source denominator wording for total-game modeling remains SOURCE_UNRESOLVED unless a source explicitly defines it.
+- Red BIG has virtually no setting separation but remains Research knowledge.
+
+### D4 specific rare-role + REG / blue BIG occurrence
+- Numerator: realized bonus of the specified type associated with the specified rare-role trigger.
+- Published unit: 1/N occurrence probability.
+- These are subclasses/components of aggregate bonus occurrence and require suppressed/alternative dependency treatment if aggregate bonus likelihood is used.
+- Exact denominator relabeling to total games remains SOURCE_UNRESOLVED at this stage.
+
+### D5 conditional rare-role AT direct hit
+- Numerator: AT direct-hit success.
+- Eligible trial: strong cherry or chance-me while in the source-defined eligible internal state.
+- Conditional percentage is source-defined.
+- Exact live eligible denominator cannot currently be player-counted reproducibly because ordinary high-state membership is not deterministically visible.
+- Classification: CONDITIONAL_DENOMINATOR_DEFINED / LIVE_DENOMINATOR_NOT_OBSERVABLE -> BLOCKED_OBSERVABILITY.
+
+### D6 LED five-color distribution
+- Numerator: one of white/blue/green/red/purple.
+- Eligible trial: source-defined LED observation at CZ/fake-premonition end, excluding setting-change and AT-end contexts.
+- Categories are mutually exclusive and the published percentages sum to approximately 100% per setting (rounding).
+- Exact runtime denominator can be constructed as sum of the five actually recorded eligible outcomes when the player records only source-eligible contexts.
+- Classification: CONDITIONAL_EXHAUSTIVE_CATEGORICAL / LIVE_DENOMINATOR_DIRECTLY_COUNTABLE.
+- Benchmark path from 7000G to eligible LED opportunities remains UNRESOLVED. Do not substitute CZ occurrence.
+
+### D7 bonus-end screen numeric ordinary categories
+- Eligible event itself is source-conflicted (BIG-only versus BIG/REG wording).
+- Ordinary numeric categories are not an unconditional exhaustive distribution once Evidence categories can occur.
+- Classification: SOURCE_CONFLICT + INCOMPLETE_OUTCOME_DISTRIBUTION -> numeric inference BLOCKED.
+- Confirmation outcomes remain Evidence with source-specific eligibility provenance.
+
+### D8 AT-end voice numeric ordinary categories
+- Eligible event: AT end with touch action.
+- Ordinary numeric categories omit confirmation-category probabilities.
+- Classification: INCOMPLETE_OUTCOME_DISTRIBUTION -> numeric inference BLOCKED.
+- Confirmation outcomes remain Evidence.
+
+### D9 CZ table selection / CZ success / raw small roles / state-stage transitions
+- Public setting difference exists or is suggested, but complete setting-specific likelihood is absent.
+- Classification: RESEARCHED_INCOMPLETE -> Selection scoring prohibited.
+
+## Exposure resolver — initial classification
+
+- LED: benchmarkExposureClass = UNRESOLVED after testing DIRECT_PUBLISHED, DERIVED_EXACT, DERIVED_APPROXIMATED, and bounded routes. No fresh public proof found that a quantified event class is necessarily contained in every eligible LED opportunity in a way sufficient to establish a benchmark lower bound.
+- Conditional AT direct hit: benchmark exposure UNRESOLVED and live exact denominator blocked by observability.
+- CZ/AT/bonus 1/N families: exposure/scoring remains BLOCKED on DEN-002A source-denominator semantics, rather than assuming 7000/N.
+- Incomplete categorical/mechanism families: exposure is irrelevant until likelihood completeness is resolved.
+- Evidence: no Numeric SelectionScore.
+
+## Gate to next stage
+
+Dependency can now be formalized for the candidates that survived denominator validity. Selection computation is currently authorized only where both likelihood and required exposure semantics are valid. At this checkpoint, LED has valid live conditional likelihood but unresolved benchmark exposure; several familiar 1/N families are intentionally not yet authorized for 7000G scoring because v8.3 forbids silently interpreting source N as total games.
