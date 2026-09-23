@@ -1,6 +1,6 @@
-# SloAnalytica Reproducible Machine Research & UX Construction Manifest v8.3
+# SloAnalytica Reproducible Machine Research & UX Construction Manifest v8.4
 
-Status: DRAFT — Reference-machine validation required  
+Status: DRAFT — v8.4 Exposure Reconstruction reference-machine validation required  
 Date: 2026-09-23  
 Supersedes as execution source: Machine Research & Construction Pipeline v1 and the active rules of MachineData・UX Construction Manifest v7.2.  
 Preserves: applicable v7.2/v7.1/v6.15 UX knowledge, Core Policy, User-Verified UX Contract Policy, and established statistical invariants.
@@ -109,6 +109,31 @@ EXP-005: Benchmark exposure and live-observation exposure are separate contracts
 EXP-006: A conditional Trial Universe MAY be used for live numeric inference when the player can directly and reproducibly observe the exact eligible denominator/opportunity count without estimation, and Research provides a complete setting-specific likelihood for the observed outcome(s). The directly observed denominator is authoritative for that live observation.
 
 EXP-007: For EXHAUSTIVE categorical observations, the sum of mutually exclusive category counts MAY constitute the directly observed trial count when Research establishes that every eligible opportunity produces exactly one recorded category. No game-count-derived exposure is required for live inference in that case.
+
+EXP-007A: When the statistical Trial Universe is valid but is not identical to a single raw player counter, the pipeline MUST attempt Exposure Reconstruction before declaring the live denominator unobservable. Reconstruction MUST preserve the exact eligibility boundary established by Denominator / Trial Universe Research.
+
+EXP-007B: Live Exposure Reconstruction classes are:
+- DIRECT: the eligible denominator itself is directly and exactly countable.
+- DERIVED_EXACT: the eligible denominator is deterministically calculable from exact observed/source-defined counters without estimating an unobserved quantity.
+- DIRECT_SUBTRACTION: an exact broader counter minus one or more exact directly countable ineligible intervals.
+- DERIVED_SUBTRACTION: an exact broader counter minus one or more exact deterministically derivable ineligible intervals.
+- HYBRID_EXACT: an exact algebraic reconstruction combining direct counters and deterministically derived counters/intervals.
+- APPROXIMATED: at least one live component is estimated rather than exactly observed/derived.
+- UNRESOLVED: no reproducible reconstruction is available.
+
+EXP-007C: DIRECT, DERIVED_EXACT, DIRECT_SUBTRACTION, DERIVED_SUBTRACTION and HYBRID_EXACT MAY enter ProbabilityEngine as authoritative live exposure only when every term is exact, non-overlapping as required by the expression, shares the same observation/reset boundary, and the final expression is reproducible. APPROXIMATED live exposure MUST NOT enter ProbabilityEngine unless a future Manifest rule explicitly defines an inference model that propagates denominator uncertainty. Benchmark-only approximation rules do not authorize approximate live likelihood denominators.
+
+EXP-007D: A reconstructed denominator MUST store its algebraic expression and provenance for every term. Canonical form SHOULD be explicit, e.g. eligibleTrials = broaderTrials - excludedIntervalA - excludedIntervalB. The pipeline MUST test for overlap, omission, double subtraction, reset mismatch and session-boundary leakage.
+
+EXP-007E: A machine-specific state with variable duration is NOT by itself an observability blocker. If entry and exit are player-visible and each in-state game can be directly counted, its duration is DIRECT even when not predictable in advance. Fixed-duration states MAY be DERIVED_EXACT when Research proves the duration and occurrence count/reset boundary.
+
+EXP-007F: Conditional manual counters are permitted when they are necessary to reconstruct an exact live denominator. Observation/UI MUST request only the irreducible directly observed term(s), derive all deterministic terms automatically, and explain in natural player language what to count. If an optional required term is omitted, only dependent likelihood features MUST be disabled; unrelated features remain active.
+
+EXP-007G: If an ineligible interval is caused by an internally held event, the exclusion begins and ends at the source-proven eligibility boundaries, not merely at a later display/consumption event. Delayed realization MUST NOT be counted as fresh eligible exposure while the underlying lottery is disabled.
+
+EXP-007H: Exposure Reconstruction changes only the mapping from play observations to the already-resolved Trial Universe. It MUST NOT change the candidate's likelihood, invent setting differences, convert a conditional probability into a game probability, or repair incomplete Research.
+
+EXP-007I: Before using a reconstructed denominator for a candidate family, the executor MUST rerun Dependency analysis against the reconstruction terms. A counter used to reconstruct exposure MUST NOT also be added as independent setting evidence when doing so would count the same mechanism twice.
 
 EXP-008: Difficulty/HighLow benchmark participation is independent from live inference eligibility. Before declaring benchmark exposure unresolved, the pipeline MUST attempt the deterministic benchmark-exposure hierarchy in EXP-009. If no permitted benchmark exposure can be constructed, HighLow/Difficulty for that feature/group MUST be marked excluded, unresolved, or otherwise non-participating while preserving a valid live-inference contract.
 
