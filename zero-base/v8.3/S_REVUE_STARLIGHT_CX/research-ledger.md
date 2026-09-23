@@ -411,3 +411,33 @@ For a 7000 NORMAL_GAME_TRIAL benchmark:
 These are benchmark expectations derived from now-resolved NORMAL_GAME_TRIAL occurrence rates, not fabricated observed counts.
 
 Before committing final SelectionScore values, the scoring implementation/formula in the Manifest/tooling must be applied mechanically and independently verified. Realized bonus families remain excluded from that computation until their own trial universes resolve.
+
+
+## Trial Universe Resolver validation — public observed-data cross-check
+
+A fresh public 2950G setting-6 trial report provides a useful denominator cross-check:
+- total games = 2950G
+- normal games = 1626G
+- bonus games = 687G
+- AT games = 637G
+- CZ = 5, reported occurrence = 1/325.2
+- AT initial hits = 4, reported occurrence = 1/406.5
+- each realized bonus type = 5, reported occurrence = 1/452.6; combined bonuses = 15, reported occurrence = 1/150.9
+
+Arithmetic identifies the report's denominator semantics:
+- 1626 / 5 = 325.2 for CZ.
+- 1626 / 4 = 406.5 for AT initial hits.
+Therefore CZ and AT published/observed occurrence metrics use NORMAL_GAME_TRIAL in this public analysis convention.
+
+For realized bonuses, 5 * 452.6 = 2263G and 15 * 150.9 = 2263.5G. This denominator is neither total games (2950) nor normal games (1626). It is consistent with a source-specific effective game exposure that excludes some game classes / adjusts for the real-bonus architecture, but the report does not label the 2263G denominator in the inspected text. Therefore DEN-002B..F correctly keeps realized bonus occurrence SOURCE_UNRESOLVED rather than forcing TOTAL_GAME_TRIAL.
+
+This cross-check materially strengthens the resolver validation:
+- CZ = NORMAL_GAME_TRIAL: source-observed arithmetic proof.
+- AT initial hit = NORMAL_GAME_TRIAL: source-observed arithmetic proof.
+- realized bonus = distinct unresolved trial universe in this machine: source-observed arithmetic proves it is not simply TOTAL_GAME_TRIAL or NORMAL_GAME_TRIAL.
+
+## Selection scoring gate after cross-check
+
+CZ and AT are now fully authorized for game-based benchmark scoring using NORMAL_GAME_TRIAL. LED remains LIVE_CONDITIONAL with IGPerEligibleTrial and no benchmark exposure. Realized bonus families remain excluded pending denominator resolution.
+
+The next mechanical step is to use the Manifest's canonical SelectionScore implementation/formula for CZ and AT rather than introducing a new hand-calculated score definition.
