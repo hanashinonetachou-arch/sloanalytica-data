@@ -12,6 +12,7 @@ const canonicalFixture = {
       title: "通常時",
       collapsible: true,
       defaultExpanded: false,
+      headerToggle: true,
       items: [{
         id: "ITEM_NUMERIC",
         title: "通常時",
@@ -31,6 +32,7 @@ const canonicalFixture = {
       title: "終了画面",
       collapsible: true,
       defaultExpanded: false,
+      headerToggle: true,
       items: [{
         id: "ITEM_EVIDENCE",
         title: "終了画面",
@@ -45,7 +47,9 @@ const canonicalFixture = {
       id: "SEC_SUMMARY",
       title: "この機種の設定推測について",
       collapsible: true,
-      defaultExpanded: false
+      defaultExpanded: false,
+      headerToggle: true,
+      content: { summaryRef: "fixture-machine-research-summary.json", displayOrder: ["HIGH_LOW","ADOPTED","REJECTED","UNRESOLVED"] }
     }
   ],
   layoutRules: { columns: 2, denominatorsFullWidth: true, multipleQuickAddForcesFullWidth: true, oddEligibleLeavesEmptyCell: true, noInferenceRoleHeadings: true, noGenericEditButton: true, sectionHeaderIsToggle: true, explanationIndependentFromSection: true },
