@@ -170,6 +170,54 @@
           "reason": "対象ゲーム数は通常時・CZ中・AT中の観測対象区間に限定し、内部赤BIG成立後の再生産モードは通常時固定20G、CZ中実G、AT中実Gの3項で完全に除外する。これら以外の保持赤BIG区間を対象ゲーム数へ含めない。"
         }
       }
+    },
+    {
+      "featureId": "FEAT_BIG_END_HINT_MULTINOMIAL",
+      "context": "BIG終了時",
+      "runtimeRole": "LIVE_CONDITIONAL_EXACT_CATEGORICAL",
+      "how": "BIG終了時、青・赤・金・虹の設定確定/下限エフェクトが出なかった機会だけ、デフォルト・高設定示唆（弱）・高設定示唆（強）のいずれか1つを記録",
+      "model": "multinomial",
+      "denominator": {
+        "type": "DERIVED_SUM",
+        "inputIds": [
+          "INP_BIG_END_DEFAULT",
+          "INP_BIG_END_HIGH_WEAK",
+          "INP_BIG_END_HIGH_STRONG"
+        ]
+      },
+      "inputs": [
+        {
+          "id": "INP_BIG_END_DEFAULT",
+          "label": "デフォルト",
+          "type": "counter",
+          "unit": "回"
+        },
+        {
+          "id": "INP_BIG_END_HIGH_WEAK",
+          "label": "高設定示唆・弱",
+          "type": "counter",
+          "unit": "回"
+        },
+        {
+          "id": "INP_BIG_END_HIGH_STRONG",
+          "label": "高設定示唆・強",
+          "type": "counter",
+          "unit": "回"
+        }
+      ],
+      "exclusionRule": {
+        "excludedEvidenceOutcomes": [
+          "EV_BONUS_END_2PLUS",
+          "EV_BONUS_END_4PLUS",
+          "EV_BONUS_END_5PLUS",
+          "EV_BONUS_END_6"
+        ],
+        "reason": "公開された3カテゴリ分布は特定設定示唆を除いた条件付き分布。Evidence発生機会をNumeric分母へ含めない。"
+      },
+      "stateSemantics": {
+        "unobserved": null,
+        "observedZero": 0
+      }
     }
   ],
   "evidenceRef": "repro-v8/S_REVUE_STARLIGHT_CX/evidence-contract.json",
@@ -188,7 +236,8 @@
     "normal-game denominator is entered once and shared by CZ/AT",
     "LED denominator is derived from the five exhaustive color counts",
     "missing reconstructed bonus exposure disables only the specific-bonus feature",
-    "fixed-duration exclusions are derived by the app where exact"
+    "fixed-duration exclusions are derived by the app where exact",
+    "BIG-end hint likelihood uses only non-confirmation BIG-end trials; blue/red/gold/rainbow remain Evidence and are excluded from the Numeric denominator"
   ],
   "conditional": []
 }
