@@ -31,6 +31,10 @@ if(declaredProvenance){
   if(pkg?.v8?.provenance?.[key]!==value) throw new Error(`v8 provenance missing/invalid: ${key}`);
  }
  if(JSON.stringify(pkg.provenance)!==JSON.stringify(pkg.v8.provenance)) throw new Error("machine-package/v8 provenance mismatch");
+ const linkedPlay=pkg?.linkedPlay;
+ if(!linkedPlay||JSON.stringify(linkedPlay)!==JSON.stringify(pkg?.v8?.linkedPlay)) throw new Error("machine-package/v8 linked-play missing or mismatch");
+ if(!["AVAILABLE","NOT_AVAILABLE","UNRESOLVED"].includes(linkedPlay.status)) throw new Error("machine-package linked-play status invalid");
+ if(linkedPlay.automaticImportCapability==null) throw new Error("machine-package linked-play automatic import capability missing");
 }
 if(pkg?.machine?.machineId!==id) throw new Error("generated machineId mismatch");
 if(pkg?.ui?.source!=="CANONICAL_UI") throw new Error("runtime UI is not canonical-ui sourced");
