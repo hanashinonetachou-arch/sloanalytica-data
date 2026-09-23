@@ -261,3 +261,46 @@ This does NOT mean every public mechanism has complete numbers. It means:
 ## Gate to next stage
 
 Dependency can now be formalized for the candidates that survived denominator validity. Selection computation is currently authorized only where both likelihood and required exposure semantics are valid. At this checkpoint, LED has valid live conditional likelihood but unresolved benchmark exposure; several familiar 1/N families are intentionally not yet authorized for 7000G scoring because v8.3 forbids silently interpreting source N as total games.
+
+
+## Dependency + Selection pass 1
+
+### Formal dependency graph
+- LED five-color observation: PRIMARY live conditional categorical candidate. It is a downstream observable proxy of CZ-table selection; unresolved latent CZ-table selection is SUPPRESSED_BY_LED for live inference unless a future joint hierarchical model is defined.
+- CZ occurrence: aggregate outcome of point/table mechanics; independent use alongside LED is not automatically prohibited because LED describes table-selection proxy while CZ occurrence describes event frequency, but any shared latent mechanism must be documented. Benchmark scoring remains blocked by denominator semantics in this run.
+- AT occurrence: aggregate primary event family. Conditional rare-role AT direct hit is a constituent route and is ALTERNATIVE/SUPPRESSED relative to aggregate AT if both would count the same AT event; conditional route is additionally blocked by live observability.
+- Bonus combined: DERIVED from red BIG + blue BIG + REG realized occurrences and MUST NOT be multiplied independently with all three components.
+- Red BIG / blue BIG / REG: mutually exclusive realized bonus-type outcomes within the realized-bonus family when modeled from a shared denominator; specific rare-role+bonus observations are subclasses of blue BIG/REG and therefore HIERARCHICAL/ALTERNATIVE, not independent additions.
+- Specific rare-role+bonus subclasses may become a joint categorical refinement only if the complete complementary outcome structure and denominator semantics are defined; current 1/N subclass rates are not enough to create an exhaustive multinomial.
+- Bonus-end screen and AT-end voice ordinary categories are numerically BLOCKED_INCOMPLETE; confirmation categories remain Evidence, so no dependency score is assigned to the incomplete ordinary distribution.
+
+### LED IGPerEligibleTrial
+Using the Manifest equal-setting prior over settings {1,2,4,5,6} and the complete five-color conditional distribution:
+- IGPerEligibleTrial = approximately 0.03235 bits per eligible LED observation.
+- This is diagnostic conditional information only.
+- benchmarkExposureClass = UNRESOLVED.
+- benchmarkScoreStatus = BLOCKED_UNRESOLVED.
+- SelectionScore MUST NOT be created by multiplying 0.03235 by a guessed LED count.
+- It MUST NOT alone justify CORE/PRIMARY or an importance tier.
+- liveInference authorization remains valid because the exact runtime denominator is the sum of the five recorded eligible colors.
+
+### Provisional Selection dispositions
+- LED five-color: LIVE_CONDITIONAL, numeric inference authorized for directly recorded eligible trials; IGPerEligibleTrial ~0.03235 bits; benchmark score blocked.
+- Conditional rare-role AT direct hit: RESEARCHED_COMPLETE_LIKELIHOOD but BLOCKED_OBSERVABILITY for live numeric inference; no score.
+- CZ occurrence: BLOCKED_UNRESOLVED_DENOMINATOR for benchmark/runtime model requiring total-game interpretation.
+- AT occurrence: BLOCKED_UNRESOLVED_DENOMINATOR under the same v8.3 denominator rule.
+- Realized red BIG / blue BIG / REG and bonus combined: BLOCKED_UNRESOLVED_DENOMINATOR for a total-game occurrence model; bonus combined additionally DERIVED/OVERLAPPING.
+- Specific rare-role + bonus occurrence: BLOCKED_UNRESOLVED_DENOMINATOR and HIERARCHICAL with aggregate bonus types.
+- CZ-table selection: REJECT_NUMERIC_INCOMPLETE while retained in Research.
+- CZ success: REJECT_NUMERIC_INCOMPLETE while retained in Research.
+- Raw small-role distributions: REJECT_NUMERIC_INCOMPLETE.
+- State/stage transitions: REJECT_NUMERIC_INCOMPLETE.
+- Bonus-end ordinary screen distribution: BLOCKED_SOURCE_CONFLICT_AND_INCOMPLETE.
+- AT-end ordinary voice distribution: BLOCKED_INCOMPLETE.
+- Confirmation screens/voices/acquired-coins: Evidence path only, no SelectionScore.
+
+### Important reproducibility consequence
+Under strict v8.3 DEN-002A, the fresh zero-base construction does NOT automatically recover familiar total-game counters from conventional 1/N notation. This is not a machine-specific exception. If the intended generic pipeline considers a machine-level published occurrence probability sufficient to establish a per-game denominator, that equivalence must be stated generically in the Manifest or proven from source semantics; otherwise fail-closed behavior is correct.
+
+## Next stage
+Before finalizing Selection, verify the IGPerEligibleTrial calculation independently and decide whether any source wording can close the denominator semantics for machine-level CZ/AT/bonus occurrence probabilities without relying on convention. If not, preserve the blocks and proceed to Evidence/Observation with LED as the only currently authorized numeric live-inference feature.
