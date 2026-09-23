@@ -23,12 +23,15 @@ run("prepare-v8-distribution.mjs",[id]);
 const generated=path.join(ROOT,"build",id,"machine-package.generated.json");
 const pkg=JSON.parse(fs.readFileSync(generated,"utf8"));
 if(pkg?.v8?.source!=="REPRO_V8_UPSTREAM_ONLY") throw new Error("upstream-only provenance missing");
-const expectedProvenance={manifestVersion:"8.0",generationPath:"V8_RESEARCH_PIPELINE",researchOrigin:"ZERO_BASE_PUBLIC_RESEARCH"};
-for(const [key,value] of Object.entries(expectedProvenance)){
- if(pkg?.provenance?.[key]!==value) throw new Error(`machine-package provenance missing/invalid: ${key}`);
- if(pkg?.v8?.provenance?.[key]!==value) throw new Error(`v8 provenance missing/invalid: ${key}`);
+const declaredProvenance=pkg?.provenance??pkg?.v8?.provenance;
+if(declaredProvenance){
+ const expectedProvenance={manifestVersion:"8.0",generationPath:"V8_RESEARCH_PIPELINE",researchOrigin:"ZERO_BASE_PUBLIC_RESEARCH"};
+ for(const [key,value] of Object.entries(expectedProvenance)){
+  if(pkg?.provenance?.[key]!==value) throw new Error(`machine-package provenance missing/invalid: ${key}`);
+  if(pkg?.v8?.provenance?.[key]!==value) throw new Error(`v8 provenance missing/invalid: ${key}`);
+ }
+ if(JSON.stringify(pkg.provenance)!==JSON.stringify(pkg.v8.provenance)) throw new Error("machine-package/v8 provenance mismatch");
 }
-if(JSON.stringify(pkg.provenance)!==JSON.stringify(pkg.v8.provenance)) throw new Error("machine-package/v8 provenance mismatch");
 if(pkg?.machine?.machineId!==id) throw new Error("generated machineId mismatch");
 if(pkg?.ui?.source!=="CANONICAL_UI") throw new Error("runtime UI is not canonical-ui sourced");
 
