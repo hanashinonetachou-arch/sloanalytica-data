@@ -617,3 +617,37 @@ If only the five specific events are countable but OTHER/internal red-BIG establ
 
 ### Validation conclusion
 The composition idea is statistically valid and reproduces the published setting-difference structure. The remaining issue is no longer probability completeness; it is strictly whether the all-internal-bonus denominator is exactly observable in live play.
+
+
+## Trial Universe re-audit — five-specific-bonus aggregate
+
+Fresh-source convergence:
+- Hisshobon publishes the five mutually named specific bonuses and their aggregate occurrence rates 1/468, 1/452, 1/379, 1/356, 1/333.
+- Hisshobon separately labels per-established-role percentages as 同時当選期待度 and labels the 1/N table 特定ボーナス確率.
+- NanaPress likewise separates setting-1 per-role bonus expectation from setting-specific 特定ボーナス出現率.
+- HAZUSE uses the same separation and notes that some per-role expectations are normal-state-only because role probabilities can be state-dependent.
+
+Therefore the aggregate 1/N is not a role-conditioned denominator. It is a game-exposure joint-event occurrence metric.
+
+### Denominator resolution
+The strongest semantic evidence is that the published aggregate is obtained by summing the five joint-event probabilities:
+p_specific(s)=Σ_i 1/N_i(s), reported as approximately 1/468,1/452,1/379,1/356,1/333.
+This is a per-game probability construction, not a conditional-on-role composition.
+
+The effective/internal total bonus rates are also published as game-level lottery probabilities and the five joint-event probabilities subtract cleanly from them, leaving ~1/290 invariant across settings. This provides an independent algebraic consistency check that the five joint-event 1/N values live in the same effective game-lottery probability space.
+
+However, because public sources note state-dependent role probabilities and do not explicitly state whether the effective bonus lottery denominator includes every physical game or excludes periods in which a bonus is already internally established, the canonical physical-game universe must not be overclaimed as TOTAL_GAME_TRIAL.
+
+Resolve the statistical trial universe as:
+EFFECTIVE_BONUS_LOTTERY_GAME_TRIAL
+= each game on which the machine performs the relevant fresh bonus lottery; games with an already-held internal bonus are not presumed eligible without source proof.
+
+This closes the semantic denominator of the published 1/N values but does not yet prove that a player can reconstruct the exact eligible-game count from ordinary displayed game counters.
+
+### Selection consequence
+- five-specific aggregate likelihood: COMPLETE.
+- denominator semantics: RESOLVED as EFFECTIVE_BONUS_LOTTERY_GAME_TRIAL.
+- benchmark exposure from raw displayed total/normal games: NOT YET DIRECTLY RESOLVED.
+- direct 7000G expected-count score remains blocked unless eligible lottery-game exposure can be derived.
+- do not discard the feature; retain as a valid high-discrimination research candidate awaiting exposure mapping.
+- role-conditioned reinterpretation remains prohibited.
