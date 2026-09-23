@@ -718,3 +718,77 @@ SEL-008A as written names EXP-006/007 direct observation and does not explicitly
 Do not independently multiply this aggregate with its five component joint events.
 Do not independently multiply it with a reconstructed effective-total-bonus model if that model uses the same bonus-lottery probability space without a joint factorization.
 The aggregate is a compact alternative representation of the five setting-difference events.
+
+
+## v8.4 full Selection pass — current disposition
+
+Fresh-source cross-check reconfirms the public setting-difference universe used in this zero-base run: CZ initial occurrence, AT initial occurrence, visible bonus rates, five specific bonus joint events, conditional AT direct-hit lottery, CZ/fake-premonition-end LED distribution, and Evidence families.
+
+### Numeric candidates
+
+1. CZ initial occurrence
+- likelihood: complete settings 1/2/4/5/6.
+- trial universe: NORMAL_GAME_TRIAL, independently arithmetic-cross-checked in public setting-6 play data.
+- dependency: aggregate outcome of upstream CZ-table/point mechanism; do not independently add an incomplete latent table-selection model.
+- disposition: INCLUDE_NUMERIC / benchmark-score calculation pending final common scoring pass.
+
+2. AT initial occurrence
+- likelihood: complete.
+- trial universe: NORMAL_GAME_TRIAL, independently arithmetic-cross-checked in public setting-6 play data.
+- dependency: aggregate AT initial hit; conditional direct-hit route is constituent/conditional and must not be naively multiplied without factorization.
+- disposition: INCLUDE_NUMERIC / benchmark-score calculation pending final common scoring pass.
+
+3. LED at eligible CZ/fake-premonition endings
+- complete five-category distribution for all declared settings.
+- live denominator: exact eligible LED observations; exhaustive categorical.
+- benchmark exposure: unresolved as exact point exposure, but lower-bound/approximate hierarchy remains available because CZ endings are a quantified subset of LED opportunities.
+- IGPerEligibleTrial already computed ≈0.03235 bit.
+- disposition: LIVE_CONDITIONAL authorized; benchmark classification to be computed from permitted exposure hierarchy.
+
+4. Any-of-five specific bonus aggregate
+- complete Bernoulli likelihood: 1/468,1/452,1/379,1/356,1/333.
+- statistical trial universe: EFFECTIVE_BONUS_LOTTERY_GAME_TRIAL.
+- live exposure: authorized only when exact v8.4 reconstruction succeeds (HYBRID_EXACT).
+- benchmark exposure: currently unresolved because expected excluded reproduction-mode games have not been deterministically quantified.
+- IGPerEligibleTrial ≈0.00003213 bit.
+- disposition: LIVE_CONDITIONAL via exact reconstructed exposure; benchmark score blocked only.
+
+5. Five individual specific bonus joint events
+- complete setting-specific joint-event likelihoods.
+- same effective bonus-lottery trial universe.
+- dependent components of the aggregate.
+- disposition: ALTERNATIVE/SUPPRESSED for inference when aggregate is selected, while retained in Research and potentially useful as UI detail. Do not multiply aggregate plus components independently.
+
+6. Visible red BIG / blue BIG / REG / bonus combined
+- public visible occurrence distributions complete, but fresh observed-data arithmetic shows their effective exposure is not simply normal or total games, and internal holding delays realization.
+- red BIG itself has essentially no setting difference; blue/REG differences overlap the five specific setting-difference establishment routes.
+- disposition: do not select as independent numeric features at this checkpoint; preserve as researched alternatives until a non-overlapping likelihood factorization is proven.
+
+7. High-state / post-normal-REG conditional AT direct-hit
+- complete setting-specific conditional hit probability.
+- exact eligible denominator is not reliably player-visible because qualifying internal high state is not deterministically observable in all cases.
+- disposition: BLOCKED_OBSERVABILITY for numeric inference.
+
+8. CZ table selection / CZ success by level / raw small roles / stage transitions
+- incomplete setting-specific distributions or incomplete observable-state contract.
+- disposition: REJECT/UNRESOLVED according to the recorded deficiency; do not fill missing likelihoods.
+
+### Evidence
+Confirmation/lower-bound Evidence remains outside Numeric SelectionScore:
+- bonus-end confirmation screens;
+- AT-end touch voices;
+- acquired-coin confirmation displays.
+Incomplete ordinary screen/voice distributions are not converted into numeric likelihoods.
+
+### Current selected inference set before benchmark scoring
+Numeric:
+- CZ initial occurrence
+- AT initial occurrence
+- LED LIVE_CONDITIONAL
+- five-specific-bonus aggregate LIVE_CONDITIONAL when exact reconstructed exposure exists
+Evidence:
+- confirmation/lower-bound screen/voice/coin events
+
+This set is dependency-safe at the current level: it excludes the incomplete latent CZ-table model, suppresses five specific-bonus components beneath their aggregate, and does not double-count visible bonus-type rates against the specific-bonus establishment family.
+
+Next checkpoint: calculate deterministic benchmark IG/SelectionScore for CZ, AT, and the permitted LED guaranteed-minimum/approximate exposure path, then assign CORE/SUPPORT/JOINT classes.
