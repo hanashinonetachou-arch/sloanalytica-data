@@ -1,0 +1,59 @@
+name: Manifest V8 Production Line
+
+on:
+  workflow_dispatch:
+    inputs:
+      machine_id:
+        description: Machine ID to build from repro-v8 upstream contracts
+        required: true
+        type: string
+      publish:
+        description: Publish package and refresh catalog/registry on this branch
+        required: true
+        default: false
+        type: boolean
+  pull_request:
+    branches:
+      - prototype-multi-machine
+    paths:
+      - 'repro-v8/**'
+      - 'tools/*v8*.mjs'
+      - 'test/v8-*.test.mjs'
+      - '.github/workflows/v8-production-line.yml'
+      - 'package.json'
+
+permissions:
+  contents: write
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.sha || github.ref }}
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - name: Run V8 production-line regression suite
+        run: npm run test:v8-production-line
+      - name: Build selected V8 machine
+        if: github.event_name == 'workflow_dispatch'
+        run: npm run machine:v8 -- "${{ inputs.machine_id }}"
+      - name: Publish selected V8 machine
+        if: github.event_name == 'workflow_dispatch' && inputs.publish
+        run: npm run machine:v8:publish -- "${{ inputs.machine_id }}"
+      - name: Commit published distribution metadata
+        if: github.event_name == 'workflow_dispatch' && inputs.publish
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git add catalog.json machine-registry.json "machines/${{ inputs.machine_id }}/machine-package.json"
+          if git diff --cached --quiet; then
+            echo "Published distribution already current."
+            exit 0
+          fi
+          git commit -m "publish: Manifest v8 ${{ inputs.machine_id }} [skip ci]"
+          git push origin "HEAD:${{ github.ref_name }}"
