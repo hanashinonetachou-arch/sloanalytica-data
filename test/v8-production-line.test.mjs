@@ -106,4 +106,13 @@ test("Revue v8.4 production package preserves conditional and categorical infere
   {inputId:"INP_CZ_REPRODUCTION_GAMES",multiplier:-1},
   {inputId:"INP_AT_REPRODUCTION_GAMES",multiplier:-1},
  ]);
+ const evidenceSections=pkg.ui.sections.filter(s=>["SEC_BONUS_END","SEC_KIRIN_VOICE","SEC_PAYOUT"].includes(s.id));
+ for(const section of evidenceSections){
+  const interaction=section.items?.[0]?.interaction;
+  assert.equal(interaction?.categoryCoverage,"NON_EXHAUSTIVE");
+  assert.equal(interaction?.totalOpportunities,"NOT_REQUIRED");
+  assert.equal(interaction?.opportunityTracking?.type,"NONE");
+  assert.equal(interaction?.absenceIsNegativeEvidence,false);
+ }
+ assert.equal(specificBonus?.numeratorInputId,"INP_SPECIFIC_BONUS_5_AGG");
 });
