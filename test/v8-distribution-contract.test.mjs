@@ -17,11 +17,11 @@ test("V8 distribution materialization is upstream-only and publish-ready for eve
   const hadProd=fs.existsSync(prod); if(hadProd)fs.renameSync(prod,hidden);
   try{
    const r=run("prepare-v8-distribution.mjs",[id]);
-   assert.equal(r.status,0,\`${id}\\n${r.stderr||r.stdout}\`);
+   assert.equal(r.status,0,`${id}\n${r.stderr||r.stdout}`);
    const out=path.join(ROOT,"build",id,"machine-package.generated.json");
    const pkg=JSON.parse(fs.readFileSync(out,"utf8"));
    assert.equal(pkg.v8.source,"REPRO_V8_UPSTREAM_ONLY");
-   assert.match(pkg.machine.machineDataVersion,/^\\d+\\.\\d+\\.\\d+(?:[-+][0-9A-Za-z.-]+)?$/);
+   assert.match(pkg.machine.machineDataVersion,/^\d+\.\d+\.\d+(?:[-+][0-9A-Za-z.-]+)?$/);
    assert.equal(pkg.machine.machineId,id);
   } finally { if(hadProd)fs.renameSync(hidden,prod); }
  }
