@@ -56,3 +56,59 @@ Existing schemas/builders/validators may be consulted later only for mechanical 
 
 ## Next pass
 Continue public-source completeness search for CZ table-selection probabilities, CZ success-rate setting differences, mode/state transition differences, rare-role probabilities, other conditional draws, and exact eligibility/exclusion semantics. No SelectionScore is authorized until denominator, exposure, and dependency passes are completed.
+
+
+## Fresh public-source candidate universe — pass 2
+
+### CZ-table mechanics and LED eligibility
+- CZ points are accumulated by rare-role draws and normal REG; each 10pt arrival triggers a CZ draw using the current CZ table.
+- Four CZ tables exist. Public values currently resolve table 3 = 50% and table 4 = 100%; tables 1/2 remain under investigation.
+- Public source says the next-table draw occurs at the regulated-point CZ draw.
+- LED setting-difference distribution is explicitly associated with fake-premonition / CZ end, excluding setting-change and AT-end.
+- This creates an exact live observation context only when the player records eligible LED outcomes themselves. The public aggregate CZ occurrence rate is NOT automatically the LED denominator: fake-premonition endings are an additional opportunity class, and the source does not define the aggregate opportunity rate.
+- Therefore LED benchmark exposure remains unresolved at this pass. No CZ-rate-derived lower bound is asserted unless a fresh public implication proof is independently established.
+
+### CZ success-rate audit
+- Public sources report an overall CZ success expectation around 37%, but the detailed CZ-level success table currently found is explicitly setting 1 only (level 1 11.2%, level 2 16.2%, level 3 30.9%, level 4 73.3%, episode CZ 100%).
+- Because a complete setting-specific conditional likelihood has not been found, CZ success rate is presently RESEARCHED_INCOMPLETE for numeric setting inference; do not create LIVE_CONDITIONAL from the setting-1-only table.
+
+### CZ-table selection-rate audit
+- Fresh sources state qualitatively that higher settings select higher CZ tables more often.
+- No complete setting-by-table selection distribution was found in this pass.
+- Therefore table selection itself is a public setting difference but currently PUBLISHED_INCOMPLETE; it remains in Research and is not silently represented by LED probabilities.
+
+### Small-role audit
+- Setting-1 reference probabilities are publicly available for Kirameki-me, watermelon, weak cherry, strong cherry, chance-me and middle cherry.
+- Fresh source states the small-role probabilities themselves have little setting difference while rare-role + bonus simultaneous hits carry the useful published differences.
+- No complete setting-specific raw small-role distribution was found. Raw small roles therefore remain researched but incomplete as setting-likelihood candidates.
+
+### Dependency findings
+- Aggregate CZ occurrence is a downstream result of CZ-point/table mechanics; do not combine an unobserved latent table-selection model with aggregate CZ as independent evidence.
+- LED color is a proxy for the next CZ table and therefore hierarchically related to CZ-table selection. If LED is selected, table selection cannot independently contribute without a joint model.
+- Aggregate bonus counts contain the specific simultaneous-bonus subclasses. Specific REG/blue-BIG simultaneous counts are candidate alternatives/components, not automatically independent of their aggregate bonus type.
+- Aggregate AT occurrence contains multiple entry routes. The conditional high-state/post-REG rare-role direct-hit draw is a constituent route and must not be naively multiplied with aggregate AT likelihood as independent information.
+- CZ success is conditional on CZ entry and CZ-level/participant state; even if complete setting-specific success likelihood is later found, it requires a conditional/hierarchical contract rather than a total-game binomial.
+
+## Pass-2 provisional completeness states
+
+- CZ occurrence: COMPLETE_VALUES / denominator semantics audit pending.
+- AT occurrence: COMPLETE_VALUES / denominator semantics audit pending.
+- Red BIG occurrence: COMPLETE_VALUES / near-zero setting information expected but score not yet computed.
+- Blue BIG occurrence: COMPLETE_VALUES / dependency audit pending.
+- REG occurrence: COMPLETE_VALUES / dependency audit pending.
+- Bonus combined occurrence: COMPLETE_VALUES / derived overlap with component bonus types.
+- Specific simultaneous REG / blue BIG: COMPLETE_VALUES / dependency audit pending.
+- Conditional AT direct-hit draw: COMPLETE_CONDITIONAL_LIKELIHOOD / eligible-trial observability audit pending.
+- LED five-color distribution: COMPLETE_CONDITIONAL_LIKELIHOOD / live eligibility likely countable; benchmark exposure UNRESOLVED at this pass.
+- CZ table selection: PUBLISHED_INCOMPLETE.
+- CZ success by level: PUBLISHED_INCOMPLETE_FOR_SETTINGS.
+- Raw small-role setting distributions: PUBLISHED_INCOMPLETE.
+- Evidence constraints: researched separately; no Numeric SelectionScore.
+
+## Pass-2 decision checkpoint
+
+Research is not yet declared complete. The next pass must resolve:
+1. exact denominator semantics for published CZ/AT/bonus occurrence and 'winning-rate' tables;
+2. whether the high-state/post-REG conditional AT-direct-hit eligible trials are reproducibly observable in live play;
+3. whether full non-confirmation distributions for bonus-end screens and AT-end voices include/exclude Evidence outcomes, to avoid treating partial distributions as exhaustive;
+4. additional public setting differences in state transition / stage-change / special draws not present in the main setting-difference summary.
