@@ -43,6 +43,35 @@
           "shared": true
         }
       ]
+    },
+    {
+      "featureId": "FEAT_LZ_FAIL_AT",
+      "context": "LOVE ZONE失敗時",
+      "runtimeRole": "LIVE_CONDITIONAL",
+      "how": "LOVE ZONEが失敗したと確定した時だけ分母を+1し、その失敗後にAT本前兆へ移行した場合だけ分子を+1する。LOVE ZONE成功、Wご指名チャンス、未確定の失敗は分母に含めない。",
+      "eligibilityRule": "COUNT_ONLY_CONFIRMED_LOVE_ZONE_FAILURES",
+      "inputs": [
+        {
+          "id": "INP_LZ_FAILED",
+          "label": "LOVE ZONE失敗",
+          "type": "counter",
+          "unit": "回",
+          "directNumeric": true
+        },
+        {
+          "id": "INP_LZ_FAIL_AT",
+          "label": "失敗後AT本前兆",
+          "type": "counter",
+          "unit": "回",
+          "directNumeric": true,
+          "parentInputId": "INP_LZ_FAILED"
+        }
+      ],
+      "validation": [
+        "INP_LZ_FAIL_AT <= INP_LZ_FAILED",
+        "未観測は0ではなくnull",
+        "通常時ゲーム数から失敗回数を推定しない"
+      ]
     }
   ],
   "evidenceRef": "repro-v8/L_LOVEJOU3_M4/evidence-contract.json",
@@ -59,6 +88,8 @@
   "assertions": [
     "UNOBSERVED and OBSERVED_ZERO remain distinct",
     "normal-game denominator is entered once",
-    "AT initial hit is display-only and not multiplied with LOVE ZONE"
+    "AT initial hit is display-only and not multiplied with LOVE ZONE",
+    "LIVE_CONDITIONAL uses exact observed LOVE ZONE failures as trials; benchmark exposure remains unresolved",
+    "failed-CZ AT numerator cannot exceed confirmed failed-CZ denominator"
   ]
 }
