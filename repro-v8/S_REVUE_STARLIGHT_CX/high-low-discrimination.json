@@ -1,5 +1,5 @@
 {
-  "schemaVersion": "high-low-discrimination-v8-repro",
+  "schemaVersion": "high-low-discrimination-v8.4-repro",
   "machineId": "S_REVUE_STARLIGHT_CX",
   "generatedAt": "2026-09-23",
   "benchmark": {
@@ -14,46 +14,69 @@
     "excludedSettings": [
       "SET_4"
     ],
-    "priorWithinGroup": "equal",
+    "classPrior": "equal",
+    "withinGroupPrior": "equal",
+    "classifier": "CLASS_MARGINAL_LIKELIHOOD",
     "features": [
-      "FEAT_CZ"
+      "FEAT_CZ_INITIAL",
+      "FEAT_AT_INITIAL",
+      "FEAT_CZ_FAKE_END_LED"
     ],
-    "dependencyPolicy": "CZ is the sole primary numeric likelihood. AT initial hit is DISPLAY_ONLY and is not multiplied.",
-    "exposureAssumption": "benchmark N games means N observed normal-game trials for CZ. Runtime confidence remains separate."
+    "excludedFeatures": [
+      {
+        "featureId": "FEAT_SPECIFIC_BONUS_5_AGG",
+        "reason": "BLOCKED_UNRESOLVED_EXPOSURE"
+      }
+    ],
+    "dependencyPolicy": "Use only frozen dependency-safe HLD set. LED is not combined with an incomplete latent CZ-table model; specific-bonus components are not added."
   },
   "simulation": {
-    "seed": 20260920,
+    "seed": 20260923,
     "samplesPerGroup": 20000,
-    "method": "Repository generic seeded Monte Carlo calculator",
-    "calculator": "tools/calculate-high-low-discrimination.mjs",
-    "featureConstruction": "FEAT_CZ binomial reconstructed from fresh Research + Selection"
+    "method": "SEEDED_MONTE_CARLO",
+    "calculator": "tools/high-low-discrimination-engine.mjs",
+    "input": "repro-v8/S_REVUE_STARLIGHT_CX/high-low-discrimination-input.json"
   },
   "results": [
     {
       "games": 1500,
-      "lowRecallPercent": 64.41,
-      "highRecallPercent": 70.05,
-      "balancedAccuracyPercent": 67.23
+      "featureExposures": {
+        "FEAT_CZ_INITIAL": 1500,
+        "FEAT_AT_INITIAL": 1500,
+        "FEAT_CZ_FAKE_END_LED": 5
+      },
+      "lowRecallPercent": 79.53,
+      "highRecallPercent": 75.72,
+      "balancedAccuracyPercent": 77.63
     },
     {
       "games": 3000,
-      "lowRecallPercent": 73.15,
-      "highRecallPercent": 74.4,
-      "balancedAccuracyPercent": 73.78
+      "featureExposures": {
+        "FEAT_CZ_INITIAL": 3000,
+        "FEAT_AT_INITIAL": 3000,
+        "FEAT_CZ_FAKE_END_LED": 11
+      },
+      "lowRecallPercent": 86.84,
+      "highRecallPercent": 84.95,
+      "balancedAccuracyPercent": 85.9
     },
     {
       "games": 7000,
-      "lowRecallPercent": 85.56,
-      "highRecallPercent": 80.25,
-      "balancedAccuracyPercent": 82.9
+      "featureExposures": {
+        "FEAT_CZ_INITIAL": 7000,
+        "FEAT_AT_INITIAL": 7000,
+        "FEAT_CZ_FAKE_END_LED": 26
+      },
+      "lowRecallPercent": 94.96,
+      "highRecallPercent": 94.47,
+      "balancedAccuracyPercent": 94.71
     }
   ],
-  "status": "VERIFIED_GENERIC_CALCULATOR",
+  "status": "FORMAL_V8_4_GENERIC_HLD",
   "notes": [
-    "Settings outside low/high groups are excluded from this benchmark by Manifest definition.",
-    "Evidence constraints are not included in HighLowDiscrimination.",
-    "This benchmark is setting-group discrimination reference information, not runtime 判定信頼度.",
-    "AT initial hit is intentionally excluded to preserve the dependency boundary with CZ.",
-    "Values exactly match tools/calculate-high-low-discrimination.mjs with seed 20260920 and 20000 samples/group."
+    "LED exposure is floored from the common conservative CZ-ending lower-bound 1/265.9; no fake-premonition opportunities are guessed.",
+    "Multinomial source percentages are normalized only for likelihood arithmetic because published rounded categories sum to approximately 1.",
+    "Specific-bonus aggregate remains live-inference eligible with exact reconstructed exposure but is excluded from benchmark HLD.",
+    "SelectionScore is not used as the HLD classifier."
   ]
 }

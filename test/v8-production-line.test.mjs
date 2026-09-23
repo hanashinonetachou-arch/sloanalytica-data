@@ -72,7 +72,50 @@ test("materialized V8 HighLow results are reproducible by the generic calculator
   const highPath=path.join(ROOT,"repro-v8",id,"high-low-discrimination.json");
   if(!fs.existsSync(highPath)) continue;
   const artifact=JSON.parse(fs.readFileSync(highPath,"utf8"));
-  const calculated=calculate(id,artifact.status==="PROVISIONAL_PENDING_GENERIC_CALCULATOR_VERIFICATION"?20000:(artifact.simulation?.samplesPerGroup??20000),artifact.simulation?.seed??20260920,null,path.join("repro-v8",id));
-  assert.deepEqual(calculated,artifact.results,`${id} HighLow artifact must equal generic calculator output`);
+  if(artifact.schemaVersion==="high-low-discrimination-v8.4-repro"){
+   const {calculateHighLow}=await import("../tools/high-low-discrimination-engine.mjs");
+   const input=JSON.parse(fs.readFileSync(path.join(ROOT,"repro-v8",id,"high-low-discrimination-input.json"),"utf8"));
+   assert.deepEqual(calculateHighLow(input),artifact.results,`${id} v8.4 HighLow artifact must equal generic HLD engine output`);
+  }else{
+   const calculated=calculate(id,artifact.status==="PROVISIONAL_PENDING_GENERIC_CALCULATOR_VERIFICATION"?20000:(artifact.simulation?.samplesPerGroup??20000),artifact.simulation?.seed??20260920,null,path.join("repro-v8",id));
+   assert.deepEqual(calculated,artifact.results,`${id} HighLow artifact must equal generic calculator output`);
+  }
  }
+});
+
+
+test("Revue v8.4 production package preserves conditional and categorical inference",()=>{
+ const r=run("S_REVUE_STARLIGHT_CX"); assert.equal(r.status,0,r.stderr||r.stdout);
+ const pkg=JSON.parse(fs.readFileSync(path.join(ROOT,"build","S_REVUE_STARLIGHT_CX","machine-package.generated.json"),"utf8"));
+ const byId=new Map(pkg.features.features.map(x=>[x.featureId,x]));
+ assert.equal(byId.get("FEAT_CZ_INITIAL")?.probabilityEngineUsage,true);
+ assert.equal(byId.get("FEAT_AT_INITIAL")?.probabilityEngineUsage,true);
+ assert.equal(byId.get("FEAT_CZ_FAKE_END_LED")?.modelType,"multinomial");
+ assert.equal(byId.get("FEAT_CZ_FAKE_END_LED")?.categoryInputIds?.length,4);
+ assert.equal(byId.get("FEAT_SPECIFIC_BONUS_5_AGG")?.adoptionCategory,"LIVE_CONDITIONAL");
+ assert.equal(byId.get("FEAT_SPECIFIC_BONUS_5_AGG")?.inferenceGate,"EXACT_EXPOSURE_RECONSTRUCTION_COMPLETE");
+ const specificBonus=byId.get("FEAT_SPECIFIC_BONUS_5_AGG");
+ assert.equal(specificBonus?.runtimeInferenceEnabled,true);
+ assert.equal(specificBonus?.runtimeBlockReason,undefined);
+ assert.match(specificBonus?.denominatorInputId,/^DERIVED_.*ELIGIBLE_TRIALS$/);
+ const exposureInput=pkg.inputs.inputs.find(x=>x.id===specificBonus.denominatorInputId);
+ assert.equal(exposureInput?.derivedCalculation,"linear_combination");
+ assert.deepEqual(exposureInput?.derivedTerms,[
+  {inputId:"INP_BONUS_BROADER_GAMES",multiplier:1},
+  {inputId:"INP_NORMAL_REPRODUCTION_ENTRIES",multiplier:-20},
+  {inputId:"INP_CZ_REPRODUCTION_GAMES",multiplier:-1},
+  {inputId:"INP_AT_REPRODUCTION_GAMES",multiplier:-1},
+ ]);
+ const evidenceSections=pkg.ui.sections.filter(s=>["SEC_BONUS_END","SEC_KIRIN_VOICE","SEC_PAYOUT"].includes(s.id));
+ for(const section of evidenceSections){
+  const interaction=section.items?.[0]?.interaction;
+  assert.equal(interaction?.categoryCoverage,"NON_EXHAUSTIVE");
+  assert.equal(interaction?.totalOpportunities,"NOT_REQUIRED");
+  assert.equal(interaction?.opportunityTracking?.type,"NONE");
+  assert.equal(interaction?.absenceIsNegativeEvidence,false);
+ }
+ assert.equal(specificBonus?.numeratorInputId,"INP_SPECIFIC_BONUS_5_AGG");
+ assert.equal(specificBonus?.exposureReconstruction?.termSetCompleteness,"COMPLETE_FOR_DEFINED_BROADER_GAME_SCOPE");
+ assert.equal(specificBonus?.exposureReconstruction?.additionalExcludedTerms?.status,"NONE_WITHIN_DEFINED_SCOPE");
+ assert.equal(specificBonus?.exposureReconstruction?.expression,"eligibleBonusLotteryGames = broaderGameCount - normalReproductionEntryCount*20 - czReproductionExcludedGames - atReproductionExcludedGames");
 });

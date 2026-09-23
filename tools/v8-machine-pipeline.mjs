@@ -25,7 +25,10 @@ const pkg=JSON.parse(fs.readFileSync(generated,"utf8"));
 if(pkg?.v8?.source!=="REPRO_V8_UPSTREAM_ONLY") throw new Error("upstream-only provenance missing");
 const declaredProvenance=pkg?.provenance??pkg?.v8?.provenance;
 if(declaredProvenance){
- const expectedProvenance={manifestVersion:"8.0",generationPath:"V8_RESEARCH_PIPELINE",researchOrigin:"ZERO_BASE_PUBLIC_RESEARCH"};
+ const expectedProvenance={generationPath:"V8_RESEARCH_PIPELINE",researchOrigin:"ZERO_BASE_PUBLIC_RESEARCH"};
+ const manifestVersion=String(pkg?.provenance?.manifestVersion??"");
+ if(!/^8(?:\.\d+)?(?:-[A-Z0-9._-]+)?$/i.test(manifestVersion)) throw new Error("machine-package provenance missing/invalid: manifestVersion");
+ if(pkg?.v8?.provenance?.manifestVersion!==manifestVersion) throw new Error("v8 provenance missing/invalid: manifestVersion");
  for(const [key,value] of Object.entries(expectedProvenance)){
   if(pkg?.provenance?.[key]!==value) throw new Error(`machine-package provenance missing/invalid: ${key}`);
   if(pkg?.v8?.provenance?.[key]!==value) throw new Error(`v8 provenance missing/invalid: ${key}`);
