@@ -3,41 +3,47 @@
   "machineId": "S_REVUE_STARLIGHT_CX",
   "generatedAt": "2026-09-23",
   "provenance": {
-    "manifestVersion": "8.0",
+    "manifestVersion": "8.4-DRAFT",
     "generationPath": "V8_RESEARCH_PIPELINE",
     "researchOrigin": "ZERO_BASE_PUBLIC_RESEARCH"
   },
-  "researchStatus": "COMPLETE_WITH_DECLARED_UNRESOLVED",
+  "researchStatus": "CLOSED_WITH_EXPLICIT_UNRESOLVED_ITEMS",
   "selection": {
     "primary": [
       {
-        "featureId": "FEAT_CZ",
-        "label": "CZ",
-        "selectionScore": 82.05,
-        "reason": "7000G基準で最大の有効情報量。通常時ゲーム数を直接母数として観測可能。"
-      }
-    ],
-    "displayOnly": [
+        "featureId": "FEAT_CZ_INITIAL",
+        "label": "CZ初当り",
+        "selectionScore": 82.32755826,
+        "classification": "CORE",
+        "reason": "通常ゲーム数を母数として直接観測でき、7000G基準で十分な設定判別情報がある。"
+      },
       {
         "featureId": "FEAT_AT_INITIAL",
         "label": "AT初当り",
-        "selectionScore": 75.54,
-        "reason": "有用な設定差はあるがCZとの独立性を証明できないため二重評価しない。"
+        "selectionScore": 75.7422585,
+        "classification": "CORE",
+        "reason": "通常ゲーム数を母数として直接観測でき、全設定の初当り確率が揃っている。"
+      },
+      {
+        "featureId": "FEAT_CZ_FAKE_END_LED",
+        "label": "CZ・フェイク前兆終了時LED",
+        "guaranteedMinimumSelectionScore": 92.54490548,
+        "classification": "CORE",
+        "reason": "5色を漏れなく記録でき、CZ終了分だけを使う保守的な最低機会数でもCORE基準を満たす。"
       }
     ],
-    "excluded": [
+    "liveConditional": [
       {
-        "featureId": "FEAT_BONUS_COMBINED",
-        "reason": "再生産モードの影響で表示出現率と実質抽選率が一致しない。"
-      },
-      {
-        "featureId": "FEAT_RARE_ROLE_REG",
-        "reason": "トリガー分類の実戦観測契約と依存関係が未確立。"
-      },
-      {
-        "featureId": "FEAT_CZ_END_LED",
-        "reason": "条件付き機会母数を7000Gから一意に導けないため尤度化しない。"
+        "featureId": "FEAT_SPECIFIC_BONUS_5_AGG",
+        "label": "特定ボーナス",
+        "benchmarkScoreStatus": "BLOCKED_UNRESOLVED_EXPOSURE",
+        "reason": "対象5契機の合算。ボーナス抽選が行われない区間を正確に除外できた実戦だけ推測へ使用する。"
       }
+    ],
+    "suppressed": [
+      "特定ボーナス5種の個別イベントは合算との二重評価を避ける。",
+      "表示上の赤BIG・青BIG・REG・ボーナス合算は特定ボーナス成立経路と重なるため独立評価しない。",
+      "条件付きAT直撃は正確な対象機会を常に観測できないため数値入力化しない。"
     ]
   },
   "evidence": {
@@ -85,22 +91,57 @@
     "automaticImportCapability": "NOT_ESTABLISHED"
   },
   "uiGuidance": {
-    "primaryInput": "通常時ゲーム数 + CZ回数",
-    "referenceInput": "AT初当り回数は参考表示のみ",
-    "evidenceGrouping": [
-      "ボーナス終了画面",
-      "AT中の獲得枚数表示",
-      "AT終了時のキリンボイス"
+    "sectionOrder": [
+      "通常時",
+      "CZ・フェイク前兆終了時のLED",
+      "特定ボーナス",
+      "BIG終了時の設定示唆",
+      "AT終了時の設定示唆",
+      "獲得枚数の設定示唆"
     ],
+    "normalInput": "通常ゲーム数 + CZ初当り + AT初当り",
+    "ledInput": "白/青/緑/赤/紫を各1回加算。確認回数は自動合計。",
+    "specificBonus": "特定ボーナス回数と、正確な抽選対象Gを復元するため不可避な項目だけ入力。固定除外Gは自動計算。",
     "internalIdsMustNotAppear": true
   },
   "unresolved": [
     "linked-play official availability/mapping",
-    "conditional-exposure CZ-end LED excluded from inference"
+    "specific-bonus benchmark exposure; live inference remains available when exact exposure reconstruction is complete"
   ],
   "contaminationBoundary": {
     "existingMachinePackageInspected": false,
     "legacySelectionInspected": false,
     "legacyCanonicalUiInspected": false
+  },
+  "highLow": {
+    "rule": "HLD-001",
+    "lowSettings": [
+      "SET_1",
+      "SET_2"
+    ],
+    "highSettings": [
+      "SET_5",
+      "SET_6"
+    ],
+    "results": [
+      {
+        "games": 1500,
+        "balancedAccuracyPercent": 77.62
+      },
+      {
+        "games": 3000,
+        "balancedAccuracyPercent": 85.9
+      },
+      {
+        "games": 7000,
+        "balancedAccuracyPercent": 94.71
+      }
+    ],
+    "features": [
+      "CZ初当り",
+      "AT初当り",
+      "CZ・フェイク前兆終了時LED"
+    ],
+    "note": "LEDはCZ終了分だけの保守的最低機会数を使用し、フェイク前兆終了分を推定加算していない。"
   }
 }
