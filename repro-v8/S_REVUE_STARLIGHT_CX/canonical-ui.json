@@ -3,7 +3,7 @@
   "machineId": "S_REVUE_STARLIGHT_CX",
   "generatedAt": "2026-09-23",
   "provenance": {
-    "manifestVersion": "8.0",
+    "manifestVersion": "8.4-DRAFT",
     "generationPath": "V8_RESEARCH_PIPELINE",
     "researchOrigin": "ZERO_BASE_PUBLIC_RESEARCH"
   },
@@ -15,7 +15,7 @@
     {
       "id": "SEC_NORMAL",
       "title": "通常時",
-      "description": "通常時ゲーム数とCZを記録します。AT初当りは参考表示のみで、CZと同時に設定推測へ重ねて評価しません。",
+      "description": "通常ゲーム数と、その通常時に確認したCZ・AT初当り回数を入力します。",
       "descriptionPresentation": {
         "collapsible": true,
         "label": "説明",
@@ -32,9 +32,9 @@
           "inputs": [
             {
               "id": "INP_NORMAL_GAMES",
-              "label": "通常時ゲーム数",
+              "label": "通常ゲーム数",
               "input": "denominator",
-              "trialUniverse": "通常時消化ゲーム",
+              "trialUniverse": "通常ゲーム",
               "gridSpan": 12,
               "directNumeric": true,
               "quickAdd": [
@@ -44,16 +44,15 @@
             },
             {
               "id": "INP_CZ",
-              "label": "CZ",
+              "label": "CZ初当り",
               "input": "counter",
               "gridSpan": 6
             },
             {
               "id": "INP_AT_INITIAL",
-              "label": "AT初当り（参考）",
+              "label": "AT初当り",
               "input": "counter",
-              "gridSpan": 6,
-              "displayOnly": true
+              "gridSpan": 6
             }
           ]
         }
@@ -61,8 +60,8 @@
     },
     {
       "id": "SEC_CZ_END_LED",
-      "title": "CZ・フェイク前兆終了時LED",
-      "description": "CZフェイク前兆終了時またはCZ終了時に、筐体右側LEDの色を記録します。設定変更時・AT終了後は対象外です。この項目は記録用で、現在の設定推測計算には使用しません。",
+      "title": "CZ・フェイク前兆終了時のLED",
+      "description": "設定変更時・AT終了後を除き、CZまたはフェイク前兆終了時に筐体右側LEDで確認した色を1回ずつ加算します。確認回数は5色の合計から自動計算します。",
       "descriptionPresentation": {
         "collapsible": true,
         "label": "説明",
@@ -75,8 +74,6 @@
       "items": [
         {
           "id": "OBS_CZ_END_LED",
-          "observationDisposition": "CONDITIONAL_OBSERVATION",
-          "inferenceDisposition": "EXCLUDE",
           "observationMultiplicity": "REPEATED_CATEGORICAL_EVENT",
           "interaction": {
             "type": "CATEGORY_COUNTERS",
@@ -87,28 +84,23 @@
             "categories": [
               {
                 "id": "INP_CZ_LED_WHITE",
-                "label": "白",
-                "meaning": "観測したLED色（記録用）"
+                "label": "白"
               },
               {
                 "id": "INP_CZ_LED_BLUE",
-                "label": "青",
-                "meaning": "観測したLED色（記録用）"
+                "label": "青"
               },
               {
                 "id": "INP_CZ_LED_GREEN",
-                "label": "緑",
-                "meaning": "観測したLED色（記録用）"
+                "label": "緑"
               },
               {
                 "id": "INP_CZ_LED_RED",
-                "label": "赤",
-                "meaning": "観測したLED色（記録用）"
+                "label": "赤"
               },
               {
                 "id": "INP_CZ_LED_PURPLE",
-                "label": "紫",
-                "meaning": "観測したLED色（記録用）"
+                "label": "紫"
               }
             ]
           }
@@ -116,9 +108,57 @@
       ]
     },
     {
+      "id": "SEC_SPECIFIC_BONUS",
+      "title": "特定ボーナス",
+      "description": "対象5契機のボーナスを記録します。ボーナス抽選が行われない区間まで正確に把握できた場合だけ設定推測に使用します。自動算出できる除外Gはアプリが計算します。",
+      "descriptionPresentation": {
+        "collapsible": true,
+        "label": "説明",
+        "defaultExpanded": false
+      },
+      "collapsible": true,
+      "defaultExpanded": false,
+      "headerToggle": true,
+      "genericEditButton": false,
+      "items": [
+        {
+          "id": "GRP_SPECIFIC_BONUS",
+          "inferenceReadiness": {
+            "readyLabel": "推測に使用できます",
+            "incompleteLabel": "追加のゲーム数記録が必要です"
+          },
+          "inputs": [
+            {
+              "id": "INP_SPECIFIC_BONUS_5_AGG",
+              "label": "特定ボーナス",
+              "input": "counter",
+              "gridSpan": 6
+            },
+            {
+              "id": "INP_BONUS_BROADER_GAMES",
+              "label": "対象ゲーム数",
+              "input": "denominator",
+              "gridSpan": 12,
+              "directNumeric": true,
+              "unobservedDisplay": "—"
+            },
+            {
+              "id": "INP_AT_REPRODUCTION_GAMES",
+              "label": "AT中の再生産モードG",
+              "input": "denominator",
+              "gridSpan": 12,
+              "directNumeric": true,
+              "unobservedDisplay": "—",
+              "observedZeroValid": true
+            }
+          ]
+        }
+      ]
+    },
+    {
       "id": "SEC_BONUS_END",
-      "title": "ボーナス終了画面",
-      "description": "確認した設定確定情報を記録します。出現しなかったことは設定否定には使いません。",
+      "title": "BIG終了時の設定示唆",
+      "description": "BIG終了時に確認した設定確定・下限情報を記録します。出現しなかったことは設定否定には使いません。",
       "descriptionPresentation": {
         "collapsible": true,
         "label": "説明",
@@ -139,12 +179,7 @@
             "preservePriorObservations": true,
             "showAccumulatedCounts": true,
             "categoryCoverage": "NON_EXHAUSTIVE",
-            "totalOpportunities": "SEPARATE_COUNTER",
-            "opportunityTracking": {
-              "type": "SEPARATE_COUNTER",
-              "inputId": "INP_BONUS_END_CHECKS",
-              "label": "ボーナス終了画面を確認した回数"
-            },
+            "totalOpportunities": "NOT_REQUIRED_FOR_HARD_EVIDENCE",
             "categories": [
               {
                 "id": "EVI_BONUS_END_C1",
@@ -172,60 +207,9 @@
       ]
     },
     {
-      "id": "SEC_PAYOUT",
-      "title": "AT中の獲得枚数表示",
-      "description": "確認した設定確定情報を記録します。出現しなかったことは設定否定には使いません。",
-      "descriptionPresentation": {
-        "collapsible": true,
-        "label": "説明",
-        "defaultExpanded": false
-      },
-      "collapsible": true,
-      "evidenceGroupId": "EVI_PAYOUT",
-      "interaction": "CATEGORY_COUNTERS",
-      "defaultExpanded": false,
-      "headerToggle": true,
-      "genericEditButton": false,
-      "items": [
-        {
-          "id": "EVI_PAYOUT",
-          "observationMultiplicity": "REPEATED_CATEGORICAL_EVENT",
-          "interaction": {
-            "type": "CATEGORY_COUNTERS",
-            "preservePriorObservations": true,
-            "showAccumulatedCounts": true,
-            "categoryCoverage": "NON_EXHAUSTIVE",
-            "totalOpportunities": "SEPARATE_COUNTER",
-            "opportunityTracking": {
-              "type": "SEPARATE_COUNTER",
-              "inputId": "INP_PAYOUT_CHECKS",
-              "label": "獲得枚数表示を確認した回数"
-            },
-            "categories": [
-              {
-                "id": "EVI_PAYOUT_C1",
-                "label": "99枚OVER",
-                "meaning": "設定5以上"
-              },
-              {
-                "id": "EVI_PAYOUT_C2",
-                "label": "456枚OVER",
-                "meaning": "設定4以上"
-              },
-              {
-                "id": "EVI_PAYOUT_C3",
-                "label": "666枚OVER",
-                "meaning": "設定6"
-              }
-            ]
-          }
-        }
-      ]
-    },
-    {
       "id": "SEC_KIRIN_VOICE",
-      "title": "AT終了時のキリンボイス",
-      "description": "確認した設定確定情報を記録します。出現しなかったことは設定否定には使いません。",
+      "title": "AT終了時の設定示唆",
+      "description": "AT終了時に筐体上部の「アタシ再生産」役物をタッチし、確認した設定確定・下限情報を記録します。",
       "descriptionPresentation": {
         "collapsible": true,
         "label": "説明",
@@ -246,12 +230,7 @@
             "preservePriorObservations": true,
             "showAccumulatedCounts": true,
             "categoryCoverage": "NON_EXHAUSTIVE",
-            "totalOpportunities": "SEPARATE_COUNTER",
-            "opportunityTracking": {
-              "type": "SEPARATE_COUNTER",
-              "inputId": "INP_KIRIN_VOICE_CHECKS",
-              "label": "AT終了時のキリンボイスを確認した回数"
-            },
+            "totalOpportunities": "NOT_REQUIRED_FOR_HARD_EVIDENCE",
             "categories": [
               {
                 "id": "EVI_KIRIN_VOICE_C1",
@@ -266,6 +245,52 @@
               {
                 "id": "EVI_KIRIN_VOICE_C3",
                 "label": "これこそ私が観たかった舞台",
+                "meaning": "設定6"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "SEC_PAYOUT",
+      "title": "獲得枚数の設定示唆",
+      "description": "AT中の獲得枚数表示で確認した設定確定・下限情報を記録します。",
+      "descriptionPresentation": {
+        "collapsible": true,
+        "label": "説明",
+        "defaultExpanded": false
+      },
+      "collapsible": true,
+      "evidenceGroupId": "EVI_PAYOUT",
+      "interaction": "CATEGORY_COUNTERS",
+      "defaultExpanded": false,
+      "headerToggle": true,
+      "genericEditButton": false,
+      "items": [
+        {
+          "id": "EVI_PAYOUT",
+          "observationMultiplicity": "REPEATED_CATEGORICAL_EVENT",
+          "interaction": {
+            "type": "CATEGORY_COUNTERS",
+            "preservePriorObservations": true,
+            "showAccumulatedCounts": true,
+            "categoryCoverage": "NON_EXHAUSTIVE",
+            "totalOpportunities": "NOT_REQUIRED_FOR_HARD_EVIDENCE",
+            "categories": [
+              {
+                "id": "EVI_PAYOUT_C1",
+                "label": "99枚OVER",
+                "meaning": "設定5以上"
+              },
+              {
+                "id": "EVI_PAYOUT_C2",
+                "label": "456枚OVER",
+                "meaning": "設定4以上"
+              },
+              {
+                "id": "EVI_PAYOUT_C3",
+                "label": "666枚OVER",
                 "meaning": "設定6"
               }
             ]
@@ -290,7 +315,8 @@
         "displayOrder": [
           "HIGH_LOW",
           "ADOPTED",
-          "REJECTED",
+          "CONDITIONAL",
+          "SUPPRESSED",
           "UNRESOLVED"
         ]
       }
@@ -316,10 +342,11 @@
     "single-open accordion",
     "large denominators direct numeric",
     "UNOBSERVED distinct from OBSERVED_ZERO",
-    "AT initial hit is display-only and not multiplied with CZ",
-    "summary renders adopted/rejected/unresolved",
+    "CZ and AT initial hits both participate in inference",
+    "LED denominator derives from five category counts",
+    "specific-bonus inference requires complete exact exposure reconstruction",
     "Evidence category counters accumulate rather than overwrite",
-    "conditional observation UI does not promote rejected LED distribution into inference"
+    "internal Exposure terminology is not user-facing"
   ],
   "manifestRef": "docs/SloAnalytica-Reproducible-Machine-Research-UX-Manifest-v8.md",
   "previewCheckpoint": {
