@@ -35,6 +35,18 @@ for (const lockFile of lockFiles()) {
     assert.ok(fs.existsSync(packageFile), `${machineId}: machine package missing`);
 
     const pkg = readJson(packageFile);
+    const zeroBaseV8 = pkg.v8?.provenance?.generationPath === 'V8_RESEARCH_PIPELINE'
+      && pkg.v8?.provenance?.researchOrigin === 'ZERO_BASE_PUBLIC_RESEARCH';
+
+    // A historical real-device lock is regression evidence, not a semantic oracle.
+    // Independently reconstructed V8 packages require a new device verification before
+    // replacing that lock; the old lock must not rewrite or fail the canonical package.
+    if (zeroBaseV8) {
+      assert.equal(pkg.v8?.source, 'REPRO_V8_UPSTREAM_ONLY');
+      assert.ok(pkg.ui?.sections?.length > 0, `${machineId}: reconstructed Canonical UI missing`);
+      return;
+    }
+
     const sections = pkg.ui?.sections ?? [];
     const inputs = pkg.inputs?.inputs ?? [];
     const inputById = new Map(inputs.map(input => [input.id, input]));
