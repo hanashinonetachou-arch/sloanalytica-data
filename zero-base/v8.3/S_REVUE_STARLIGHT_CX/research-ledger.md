@@ -304,3 +304,35 @@ Under strict v8.3 DEN-002A, the fresh zero-base construction does NOT automatica
 
 ## Next stage
 Before finalizing Selection, verify the IGPerEligibleTrial calculation independently and decide whether any source wording can close the denominator semantics for machine-level CZ/AT/bonus occurrence probabilities without relying on convention. If not, preserve the blocks and proceed to Evidence/Observation with LED as the only currently authorized numeric live-inference feature.
+
+
+## Denominator semantic escalation — pass 5
+
+### Fresh source evidence
+- Multiple independent analysis pages label the CZ and AT values specifically as CZ初当たり / AT初当たり probabilities, and present them as normal-play setting-discrimination values.
+- A fresh analysis page goes further and explicitly computes expected AT initial-hit counts as 通常G数 ÷ 公表AT初当り分母 (e.g. 3000G / 359.6 = 8.3 for setting 1), identifying the numerator exposure as normal games.
+- This is machine-specific public evidence that the published AT initial-hit denominator is intended as a normal-game occurrence denominator.
+- For CZ, sources consistently label the value CZ初当たり and discuss it as a normal-play occurrence rate, but the inspected pages do not provide an equally explicit arithmetic statement mapping normal G count to expected CZ count.
+- Bonus sources explicitly distinguish 表面上/出現率 from 実質抽選/当選率 because internal bonus establishment delays visible realization. Realized bonus occurrence is countable, but the exact exposure wording for a total-normal-game statistical model is still less explicit than the AT source proof.
+
+### Updated denominator decisions
+- AT occurrence: denominator semantics CLOSED_BY_SOURCE for normal-game exposure. Candidate may proceed to benchmark exposure and Selection scoring, subject to aggregate-route dependency.
+- CZ occurrence: still SOURCE_UNRESOLVED under strict DEN-002A. Strong conventional/contextual evidence exists, but no equally explicit source proof was found in this pass.
+- Realized bonus occurrence: still SOURCE_UNRESOLVED for total-normal-game model; preserve distinction from effective winning probability.
+- Specific simultaneous bonus occurrence: remains SOURCE_UNRESOLVED and hierarchical.
+
+### Generic Manifest reproducibility finding
+The zero-base run exposes a generic reproducibility problem: two implementers can reasonably diverge on whether conventional pachislot labels such as AT初当り 1/N or CZ初当り 1/N are themselves sufficient denominator definitions. v8.3 DEN-002A says context alone cannot relabel a denominator, but it does not yet define whether the lexical form 初当り確率 1/N carries a canonical trial-unit meaning.
+
+AT can be rescued here by an unusually explicit third-party arithmetic statement. CZ cannot be closed to the same proof standard despite the same table structure and conventional presentation. That asymmetry is source-accidental rather than machine-mechanic.
+
+Therefore the correct next action is NOT to invent a Revue exception. A generic Manifest clarification is warranted before final Selection if the project intends published machine-level 初当り/出現率 1/N to be reproducibly usable as game-exposure probabilities.
+
+### Proposed generic clarification for user decision
+Define a source-semantic acceptance rule, for example:
+- A published machine-level occurrence/initial-hit probability in 1/N may establish GAME_TRIAL denominator only when the source explicitly labels the metric as an occurrence/initial-hit probability for normal play AND no narrower conditional state/event denominator is stated.
+- Contextual percentages, success rates, 振り分け, 当選率 per role/state, or values under a named condition do not qualify.
+- If the source distinguishes visible occurrence from internal winning probability, retain those as different observables even when both are game-trial rates.
+- Ambiguous 1/N without an occurrence/initial-hit semantic label remains SOURCE_UNRESOLVED.
+
+This would be generic and machine-independent, and would allow future researchers to reproduce the same denominator decision without requiring a lucky page that demonstrates G数÷分母 arithmetic.
