@@ -15,6 +15,20 @@ test("every materialized repro-v8 machine passes the generic production-line bui
  for(const id of ids){const r=run(id);assert.equal(r.status,0,`${id}\n${r.stderr||r.stdout}`);}
 });
 
+test("materialized provenance-declared V8 packages preserve linked-play contract",()=>{
+ for(const id of ids){
+  const dir=path.join(ROOT,"repro-v8",id);
+  const selection=JSON.parse(fs.readFileSync(path.join(dir,"selection-data.json"),"utf8"));
+  if(!selection.provenance) continue;
+  const summary=JSON.parse(fs.readFileSync(path.join(dir,"machine-research-summary.json"),"utf8"));
+  assert.ok(selection.linkedPlayResearch,\`${id} selection linked-play research missing\`);
+  assert.equal(selection.linkedPlayResearch.stage,"POST_SELECTION",\`${id} linked-play stage\`);
+  assert.ok(["AVAILABLE","NOT_AVAILABLE","UNRESOLVED"].includes(selection.linkedPlayResearch.status),\`${id} linked-play status\`);
+  assert.equal(summary.linkedPlay?.status,selection.linkedPlayResearch.status,\`${id} linked-play status must survive Summary\`);
+  assert.ok(summary.linkedPlay?.automaticImportCapability!=null,\`${id} automatic import capability must remain separate\`);
+ }
+});
+
 test("generic V8 production line contains no machine-specific identity",()=>{
  const src=fs.readFileSync(path.join(ROOT,"tools","v8-machine-pipeline.mjs"),"utf8");
  assert.equal(src.includes("L_SMASLO_KAIJI_KYOEN_FJ"),false);
