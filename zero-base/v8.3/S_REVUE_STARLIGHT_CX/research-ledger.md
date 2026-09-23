@@ -922,3 +922,82 @@ Natural section order:
 6. 獲得枚数の設定示唆
 
 The specific-bonus section is conditional: it may always record the specific-bonus count, but inference requires complete exact exposure reconstruction. Runtime must not interpret a missing AT-reproduction counter as zero when the state occurred; Observation needs an explicit not-observed/observed-zero distinction.
+
+
+## v8.4 Machine Research Summary — zero-base reference output
+
+Research status: CLOSED_WITH_EXPLICIT_UNRESOLVED_ITEMS.
+App/package status: NOT_YET_COMPLETE.
+
+### Adopted numeric information
+- CZ initial occurrence: CORE, ordinary SelectionScore 82.33 at 7000 NORMAL_GAME_TRIAL.
+- AT initial occurrence: CORE, ordinary SelectionScore 75.74 at 7000 NORMAL_GAME_TRIAL.
+- CZ/fake-premonition-end LED: CORE by conservative GuaranteedMinimumSelectionScore 92.54; runtime uses exact five-color categorical counts.
+- Any-of-five specific bonus aggregate: live inference authorized only with exact reconstructed EFFECTIVE_BONUS_LOTTERY_GAME_TRIAL; benchmark score remains blocked.
+
+### Adopted Evidence
+- BIG-end confirmation screen/effect: setting 2+, 4+, 5+, exact 6 variants.
+- AT-end touch voice: setting 2+, 4+, exact 6 variants; user must perform the touch action at AT end.
+- AT acquired-coin display: 456 OVER => 4+, 99 OVER => 5+, 666 OVER => exact 6.
+
+### Researched but not independently used
+- five individual specific-bonus joint events: retained as components; aggregate selected to avoid duplicate likelihood.
+- visible red/blue/REG/combined bonus occurrence: retained but suppressed until a non-overlapping factorization is proven.
+- ordinary BIG-end screen probabilities / ordinary AT-end voice probabilities: incomplete category space because confirmation categories consume residual probability; no renormalization.
+- conditional AT direct hit: complete probability but exact qualifying opportunity is not reliably visible.
+- CZ table selection/success/raw small roles/stage transitions: incomplete setting likelihood and/or observation contract.
+
+### Practical observation guidance
+- Enter normal games once and share it between CZ/AT initial-hit features.
+- At each eligible CZ/fake-premonition ending, record exactly one LED color; no separate LED denominator input.
+- For the specific-bonus feature, record the selected five trigger+bonus events and exact excluded no-fresh-bonus-lottery games. Fixed exclusions are derived where possible; variable AT reproduction-mode games are counted directly.
+- Missing exact reconstructed exposure disables only the specific-bonus likelihood.
+- Confirmation Evidence should be entered when seen; AT-end voice requires touching the upper reproduction-mode role/object at the end screen.
+
+### Important dependency notes
+- LED is a downstream observable proxy of CZ-table behavior; do not also multiply an incomplete latent table-selection model.
+- specific-bonus aggregate and its five components are alternatives, not independent features.
+- visible bonus-type rates overlap the establishment-route family and are not independently multiplied at this stage.
+
+### HighLow status
+Formal 1500/3000/7000 HighLowDiscrimination simulation is still pending. Selection benchmark scores are not a substitute for the HLD report.
+
+### Canonical UI input contract — draft from Summary + Observation
+Global: single-open accordion.
+
+1. 通常時
+Description: 通常ゲーム数と、その通常時に確認したCZ・AT初当り回数を入力。
+- 通常ゲーム数: full width, direct numeric
+- CZ初当り: compact counter
+- AT初当り: compact counter
+CZ/AT counters may share one row.
+
+2. CZ・フェイク前兆終了時のLED
+Description: 設定変更時・AT終了後を除き、CZまたはフェイク前兆終了時に筐体右LEDで確認した色を1回ずつ加算。
+- 白 / 青 / 緑 / 赤 / 紫: compact +1 counters
+Denominator hidden/derived = sum of five counts.
+
+3. 特定ボーナス
+Description: 対象5契機のボーナスと、ボーナス抽選が行われない区間を正確に記録できる場合に推測へ使用。自動算出できる除外Gはアプリが計算する。
+- 特定ボーナス: compact +1 counter
+- broader session/game counter required by reconstruction: full width, only if not already available from a semantically identical runtime session counter
+- AT中の再生産モードG: full width/direct numeric or +1 counter optimized for direct counting
+Derived fixed-duration exclusion terms are not user inputs.
+Show inference-readiness state in user language: exact exposure complete / additional count required. Do not expose HYBRID_EXACT token.
+
+4. BIG終了時の設定示唆
+Evidence choices for confirmation effects only: 2以上 / 4以上 / 5以上 / 6.
+Do not present incomplete ordinary-screen numeric distributions as inference inputs.
+
+5. AT終了時の設定示唆
+Instruction: AT終了時に筐体上部の「アタシ再生産」役物をタッチして確認。
+Evidence choices: 2以上 / 4以上 / 6.
+Ordinary weak/strong voice numeric distributions remain excluded in this zero-base package.
+
+6. 獲得枚数の設定示唆
+Evidence choices:
+- 456 OVER: 4以上
+- 99 OVER: 5以上
+- 666 OVER: 6
+
+Section descriptions carry shared observation conditions once; item labels remain short. Evidence sections follow numeric play-flow sections.
