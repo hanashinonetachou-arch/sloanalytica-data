@@ -84,7 +84,7 @@ export function compileV8MachinePackage({research,selection,observation,evidence
   const provenance=clone(selection.provenance??canonical.provenance??summary?.provenance);
   if(provenance){
     const expected={generationPath:'V8_RESEARCH_PIPELINE',researchOrigin:'ZERO_BASE_PUBLIC_RESEARCH'};
-    if(!/^8(?:\\.\\d+)?(?:-[A-Z0-9._-]+)?$/i.test(String(provenance.manifestVersion??''))) throw new Error('invalid V8 provenance manifestVersion');
+    if(!/^8(?:\.\d+)?(?:-[A-Z0-9._-]+)?$/i.test(String(provenance.manifestVersion??''))) throw new Error('invalid V8 provenance manifestVersion');
     for(const [key,value] of Object.entries(expected)) if(provenance[key]!==value) throw new Error(`invalid V8 provenance ${key}`);
     for(const [label,source] of [['canonical',canonical.provenance],['summary',summary?.provenance]]) if(source&&JSON.stringify(source)!==JSON.stringify(provenance)) throw new Error(`V8 provenance mismatch: ${label}`);
   }
