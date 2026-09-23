@@ -686,3 +686,35 @@ Reference-machine result:
 v8.4 reproduces the Revue conclusion through generic stages:
 Event -> Trial Universe -> eligibility exclusions -> exact reconstruction -> observability -> dependency -> likelihood.
 No machine-specific Manifest patch is required for the fixed/variable state distinction.
+
+
+## v8.4 Selection checkpoint — five-specific-bonus aggregate
+
+Fresh-source recheck confirms the five-specific aggregate rates:
+settings 1/2/4/5/6 = 1/468, 1/452, 1/379, 1/356, 1/333.
+The source separately publishes role-conditioned simultaneous-win expectation percentages, so the aggregate remains a game-lottery joint-event occurrence metric rather than a role-count denominator.
+
+### Live inference model
+Candidate: ANY_OF_FIVE_SPECIFIC_BONUS.
+Outcome per eligible effective bonus-lottery game: specific-five event occurred / did not occur.
+Likelihood family: Bernoulli.
+p_s = [1/468, 1/452, 1/379, 1/356, 1/333].
+
+Exact live exposure is authorized when v8.4 Exposure Reconstruction succeeds:
+eligibleBonusLotteryGames = broader observed games - exact internally-held/red-BIG no-fresh-lottery intervals.
+Normal fixed-duration exclusions may be derived exactly; variable visible intervals may be directly counted; combined result is HYBRID_EXACT.
+If any required exact exclusion term is missing, this candidate is disabled for that observation interval rather than using an approximate denominator.
+
+Equal-setting-prior information per one eligible lottery game for the aggregate Bernoulli model is approximately 0.00003213 bit. This is intentionally tiny per game because the event is rare; practical information depends on thousands of eligible lottery games.
+
+### Benchmark score status
+Do NOT yet compute ordinary IG7000 / SelectionScore from raw 7000 displayed games. v8.4 resolves the live denominator reconstruction but the benchmark still needs a deterministic expected excluded-game exposure model. Therefore:
+benchmarkScoreStatus = BLOCKED_UNRESOLVED_EXPOSURE
+liveInference = AUTHORIZED_WHEN_HYBRID_EXACT_EXPOSURE_PRESENT
+
+SEL-008A as written names EXP-006/007 direct observation and does not explicitly include v8.4 reconstructed exact exposure classes. This is a generic Manifest integration gap introduced by v8.4: Selection must recognize EXP-007A..I exact reconstruction as equivalent authoritative live exposure. Amend Manifest before final disposition.
+
+### Dependency
+Do not independently multiply this aggregate with its five component joint events.
+Do not independently multiply it with a reconstructed effective-total-bonus model if that model uses the same bonus-lottery probability space without a joint factorization.
+The aggregate is a compact alternative representation of the five setting-difference events.
