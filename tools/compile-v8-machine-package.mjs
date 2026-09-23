@@ -6,8 +6,8 @@ const observationByFeature=o=>new Map((o.numeric??[]).map(x=>[x.featureId,x]));
 function compileInputs(observation,evidence){
   const inputs=new Map();
   for(const feature of observation.numeric??[]) for(const x of feature.inputs??[]){
-    if(!x.engineInputId) continue;
-    inputs.set(x.engineInputId,{id:x.engineInputId,name:x.label??x.id,type:x.type==='integer'?'integer':'counter',category:'NUMERIC',unit:x.unit??'',inferenceRole:'INCLUDE_PRIMARY',defaultValue:null,minimum:0});
+    const engineInputId=x.engineInputId??x.id; if(!engineInputId) continue;
+    inputs.set(engineInputId,{id:engineInputId,name:x.label??x.id,type:x.type==='integer'?'integer':'counter',category:'NUMERIC',unit:x.unit??'',inferenceRole:feature.runtimeRole?.startsWith('LIVE_CONDITIONAL')?'LIVE_CONDITIONAL':'INCLUDE_PRIMARY',defaultValue:null,minimum:0});
   }
   const runtimeEvidence=clone(evidence??{groups:[]});
   for(const group of runtimeEvidence.groups??[]){
@@ -34,25 +34,32 @@ function compileInputs(observation,evidence){
 function compileFeatures(research,selection,observation){
   const rb=researchById(research), ob=observationByFeature(observation), out=[];
   for(const selected of selection.features??[]){
-    if(!String(selected.adoptionCategory??'').startsWith('INCLUDE_')) continue;
+    if(!String(selected.adoptionCategory??'').startsWith('INCLUDE_')&&selected.adoptionCategory!=='LIVE_CONDITIONAL') continue;
     const obs=ob.get(selected.featureId); if(!obs) throw new Error(`${selected.featureId} observation contract missing`);
     const sources=(selected.sourceResearchFeatureIds?.length?selected.sourceResearchFeatureIds:[selected.researchFeatureId]).map(id=>rb.get(id));
     if(sources.some(x=>!x)) throw new Error(`${selected.featureId} research source missing`);
-    const engineInputs=(obs.inputs??[]).filter(x=>x.engineInputId);
+    const engineInputs=(obs.inputs??[]).filter(x=>x.id||x.engineInputId).map(x=>({...x,engineInputId:x.engineInputId??x.id}));
     const denominator=engineInputs.find(x=>x.type==='integer'||/GAMES/.test(x.engineInputId));
-    const counters=engineInputs.filter(x=>x!==denominator&&x.shared!==true);
-    const model=selected.dependencyContract?.combinationPolicy==='JOINT_MULTINOMIAL'?'multinomial':sources[0].candidateModel;
+    const counters=engineInputs.filter(x=>x!==denominator&&x.shared!==true&&x.type!=='integer');
+    const model=selected.model??(selected.dependencyContract?.combinationPolicy==='JOINT_MULTINOMIAL'?'multinomial':sources[0].candidateModel);
     if(model==='multinomial'){
-      if(counters.length!==sources.length) throw new Error(`${selected.featureId} multinomial category/input mismatch`);
-      const categoryProbabilities={};
-      for(const setting of research.machine?.settings??[]) categoryProbabilities[setting]=sources.map(x=>x.settingValues?.[setting]?.probability);
+      let categoryLabels,categoryProbabilities;
+      if(sources.length===1&&sources[0].settingValues&&Object.values(sources[0].settingValues).every(v=>v&&typeof v==='object'&&!Number.isFinite(v.probability))){
+        categoryLabels=Object.keys(sources[0].settingValues[research.machine.settings[0]]??{});
+        if(counters.length!==categoryLabels.length) throw new Error(`${selected.featureId} multinomial category/input mismatch`);
+        categoryProbabilities=Object.fromEntries((research.machine?.settings??[]).map(setting=>[setting,categoryLabels.map(label=>sources[0].settingValues?.[setting]?.[label])]));
+      }else{
+        if(counters.length!==sources.length) throw new Error(`${selected.featureId} multinomial category/input mismatch`);
+        categoryLabels=sources.map(x=>x.researchFeatureId);
+        categoryProbabilities={}; for(const setting of research.machine?.settings??[]) categoryProbabilities[setting]=sources.map(x=>x.settingValues?.[setting]?.probability);
+      }
       if(Object.values(categoryProbabilities).some(a=>a.some(p=>!Number.isFinite(p)))) throw new Error(`${selected.featureId} incomplete multinomial probabilities`);
-      out.push({featureId:selected.featureId,name:obs.context??sources[0].name??selected.featureId,adoptionCategory:selected.adoptionCategory,calculationRole:'PROBABILITY',probabilityEngineUsage:true,modelType:'multinomial',numeratorInputId:counters[0].engineInputId,categoryInputIds:counters.slice(1).map(x=>x.engineInputId),denominatorInputId:denominator?.engineInputId,probabilities:{},categoryLabels:sources.map(x=>x.researchFeatureId),categoryProbabilities,categoryConditioning:{excludedCategories:[],normalization:'RENORMALIZE_INCLUDED',residualCategory:selected.dependencyContract?.residualCategory??'OTHER'},sourceResearchFeatureIds:selected.sourceResearchFeatureIds??[selected.researchFeatureId]});
+      out.push({featureId:selected.featureId,name:obs.context??sources[0].name??selected.featureId,adoptionCategory:selected.adoptionCategory,calculationRole:'PROBABILITY',probabilityEngineUsage:true,modelType:'multinomial',numeratorInputId:counters[0].engineInputId,categoryInputIds:counters.slice(1).map(x=>x.engineInputId),denominatorInputId:denominator?.engineInputId,probabilities:{},categoryLabels,categoryProbabilities,categoryConditioning:{excludedCategories:[],normalization:'RENORMALIZE_INCLUDED'},sourceResearchFeatureIds:selected.sourceResearchFeatureIds??[selected.researchFeatureId]});
     }else{
       const source=sources[0], probabilities=Object.fromEntries((research.machine?.settings??[]).map(s=>[s,source.settingValues?.[s]?.probability]));
       if(Object.values(probabilities).some(p=>!Number.isFinite(p))) throw new Error(`${selected.featureId} incomplete probabilities`);
       const primary=selected.dependencyContract?.preferredPrimary;
-      out.push({featureId:selected.featureId,name:source.name??selected.featureId,adoptionCategory:selected.adoptionCategory,calculationRole:'PROBABILITY',probabilityEngineUsage:true,modelType:model,numeratorInputId:counters[0]?.engineInputId,denominatorInputId:denominator?.engineInputId,displayFormat:'ratio_1_over_n',probabilities,...(primary&&primary!==selected.featureId?{suppressedByFeatureIds:[primary]}:{}),sourceResearchFeatureIds:[selected.researchFeatureId]});
+      out.push({featureId:selected.featureId,name:source.name??selected.featureId,adoptionCategory:selected.adoptionCategory,calculationRole:'PROBABILITY',probabilityEngineUsage:true,modelType:model,numeratorInputId:counters[0]?.engineInputId,denominatorInputId:denominator?.engineInputId,displayFormat:'ratio_1_over_n',probabilities,...(selected.adoptionCategory==='LIVE_CONDITIONAL'?{inferenceGate:selected.liveInferenceGate,exposureReconstruction:clone(obs.exposureReconstruction)}:{}),...(primary&&primary!==selected.featureId?{suppressedByFeatureIds:[primary]}:{}),sourceResearchFeatureIds:[selected.researchFeatureId]});
     }
   }
   return out;
@@ -76,7 +83,8 @@ export function compileV8MachinePackage({research,selection,observation,evidence
   const ui=materializeUi(canonical,{observationContract:observation,evidenceContract:runtimeEvidence});
   const provenance=clone(selection.provenance??canonical.provenance??summary?.provenance);
   if(provenance){
-    const expected={manifestVersion:'8.0',generationPath:'V8_RESEARCH_PIPELINE',researchOrigin:'ZERO_BASE_PUBLIC_RESEARCH'};
+    const expected={generationPath:'V8_RESEARCH_PIPELINE',researchOrigin:'ZERO_BASE_PUBLIC_RESEARCH'};
+    if(!/^8(?:\\.\\d+)?(?:-[A-Z0-9._-]+)?$/i.test(String(provenance.manifestVersion??''))) throw new Error('invalid V8 provenance manifestVersion');
     for(const [key,value] of Object.entries(expected)) if(provenance[key]!==value) throw new Error(`invalid V8 provenance ${key}`);
     for(const [label,source] of [['canonical',canonical.provenance],['summary',summary?.provenance]]) if(source&&JSON.stringify(source)!==JSON.stringify(provenance)) throw new Error(`V8 provenance mismatch: ${label}`);
   }
