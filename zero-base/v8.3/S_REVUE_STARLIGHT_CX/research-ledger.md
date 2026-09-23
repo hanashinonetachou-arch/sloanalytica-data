@@ -1051,3 +1051,25 @@ For Revue, the HLD input contract is now fully frozen:
 - no rejected/incomplete feature may enter.
 
 This is a clean handoff boundary: research semantics and HLD inputs are frozen; remaining work is generic deterministic HLD execution, formal artifact materialization, then MachinePackage production-line binding.
+
+
+## v8.4 Exposure Reconstruction — source closure follow-up (2026-09-23)
+
+Fresh public-source replay closes and corrects the reproduction-mode exclusion terms:
+
+- Reproduction mode is entered only after internal red BIG establishment; while internally holding red BIG, no fresh bonus lottery is performed. Therefore every game spent in reproduction mode is outside EFFECTIVE_BONUS_LOTTERY_GAME_TRIAL.
+- Normal-play reproduction mode has a source-proven fixed duration of 20G. An exact observed normal-play reproduction-mode entry count can therefore derive `normalReproductionExcludedGames = normalReproductionEntryCount * 20`.
+- CZ reproduction mode is NOT a fixed 20G interval. When red BIG establishes during the CZ first half, reproduction mode continues for the remaining CZ games. Therefore it must not be folded into the normal fixed-duration derivation. Its exact excluded games require a separately exact live term (direct count or a future deterministic boundary-aware derivation).
+- AT reproduction mode is variable: it normally continues to the end of the current set, and public analysis also documents a condition where the internally-held red BIG state can carry into the next set. Therefore a fixed AT-duration derivation is invalid; exact direct game counting remains required.
+- The current Observation contract, which contains only broaderGameCount and AT reproduction-mode games, is insufficient to prove complete HYBRID_EXACT exposure because it lacks an exact normal-entry term and an exact CZ reproduction-mode term.
+- Runtime must remain fail-closed for FEAT_SPECIFIC_BONUS_5_AGG until those terms are materialized and share the same reset/session boundary.
+
+Source lineage for this closure:
+- NanaPress, 「再生産モード」の移行条件・性能: internal red BIG established state; no bonus lottery during reproduction mode.
+- 一撃, 「再生産モードについて」: normal-play duration 20G; CZ duration is the remaining games after red BIG establishment.
+- HAZUSE, 「再生産モードについて」: normal 20G; CZ remaining games; AT continues to set end and can conditionally carry the internally-held state across a set boundary.
+
+Correct canonical expression at this checkpoint:
+`eligibleBonusLotteryGames = broaderGameCount - normalReproductionEntryCount*20 - czReproductionExcludedGames - atReproductionExcludedGames - otherExactHeldRedBigExcludedGames(if any)`.
+
+No omitted term may default to zero merely because its input is absent. An observed zero is valid only when the corresponding interval/opportunity was actually observed.
