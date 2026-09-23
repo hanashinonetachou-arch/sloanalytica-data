@@ -115,4 +115,7 @@ test("Revue v8.4 production package preserves conditional and categorical infere
   assert.equal(interaction?.absenceIsNegativeEvidence,false);
  }
  assert.equal(specificBonus?.numeratorInputId,"INP_SPECIFIC_BONUS_5_AGG");
+ assert.equal(specificBonus?.exposureReconstruction?.termSetCompleteness,"COMPLETE_FOR_DEFINED_BROADER_GAME_SCOPE");
+ assert.equal(specificBonus?.exposureReconstruction?.additionalExcludedTerms?.status,"NONE_WITHIN_DEFINED_SCOPE");
+ assert.equal(specificBonus?.exposureReconstruction?.expression,"eligibleBonusLotteryGames = broaderGameCount - normalReproductionEntryCount*20 - czReproductionExcludedGames - atReproductionExcludedGames");
 });
