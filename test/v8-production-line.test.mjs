@@ -50,3 +50,16 @@ test("next-machine readiness: adding another materialized machine needs no produ
  assert.match(pipeline,/path\.join\(ROOT,"repro-v8",id\)/,"upstream source must be selected by machine ID");
  assert.doesNotMatch(pipeline,/switch\s*\(\s*id\s*\)|if\s*\(\s*id\s*===/,"pipeline must not branch on machine identity");
 });
+
+
+test("materialized V8 HighLow results are reproducible by the generic calculator",async()=>{
+ const {calculate}=await import("../tools/calculate-high-low-discrimination.mjs");
+ for(const id of ids){
+  const highPath=path.join(ROOT,"repro-v8",id,"high-low-discrimination.json");
+  if(!fs.existsSync(highPath)) continue;
+  const artifact=JSON.parse(fs.readFileSync(highPath,"utf8"));
+  if(artifact.status==="PROVISIONAL_PENDING_GENERIC_CALCULATOR_VERIFICATION") continue;
+  const calculated=calculate(id,artifact.simulation?.samplesPerGroup??20000,artifact.simulation?.seed??20260920,null,path.join("repro-v8",id));
+  assert.deepEqual(calculated,artifact.results,\`\${id} HighLow artifact must equal generic calculator output\`);
+ }
+});
