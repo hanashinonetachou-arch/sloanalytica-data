@@ -98,6 +98,14 @@ EXP-002: UNKNOWN exposure MUST NOT be converted into a guessed trial count.
 EXP-003: Exposure assumptions MUST be traceable to Research/Observation.
 EXP-004: Input burden alone is not a Selection criterion.
 
+EXP-005: Benchmark exposure and live-observation exposure are separate contracts. Failure to derive a candidate's eligible trial count from 1500G/3000G/7000G MUST NOT by itself make the candidate invalid for live numeric inference.
+
+EXP-006: A conditional Trial Universe MAY be used for live numeric inference when the player can directly and reproducibly observe the exact eligible denominator/opportunity count without estimation, and Research provides a complete setting-specific likelihood for the observed outcome(s). The directly observed denominator is authoritative for that live observation.
+
+EXP-007: For EXHAUSTIVE categorical observations, the sum of mutually exclusive category counts MAY constitute the directly observed trial count when Research establishes that every eligible opportunity produces exactly one recorded category. No game-count-derived exposure is required for live inference in that case.
+
+EXP-008: Difficulty/HighLow benchmark participation is independent from live inference eligibility. When realistic benchmark exposure cannot be derived without fabrication, HighLow/Difficulty for that feature/group MUST be marked excluded, unresolved, or otherwise non-participating while preserving a valid live-inference contract.
+
 ## 7. Dependency
 
 DEP-001: Candidate relationships MUST be classified before Selection.
@@ -114,6 +122,12 @@ SEL-002: CORE >= 20; SUPPORT >= 10; JOINT_ELIGIBLE >= 5; below 5 = REJECT, subje
 SEL-003: Standalone Numeric feature requires IG7000 >= 0.05 bit. Joint participation requires >= 0.025 bit and the joint feature must reach >= 0.05 bit.
 SEL-004: Selection MUST occur only after completeness, denominator, exposure and dependency are sufficiently resolved.
 SEL-005: For every candidate preserve disposition, IG, SelectionScore, class, relevant trial/exposure basis, dependency and a concrete reason.
+
+SEL-006: Selection MUST NOT reject a candidate solely because its conditional trial count cannot be derived from benchmark game count. Before rejection, Selection MUST test whether Observation can directly capture the exact conditional denominator/opportunity count and whether Research supplies a complete setting-specific likelihood over that Trial Universe.
+
+SEL-007: When direct conditional observation satisfies EXP-006/EXP-007, Selection SHALL evaluate the candidate for live inference using the observed-trial likelihood. If benchmark IG7000/SelectionScore cannot be computed without fabricated exposure, that score is BLOCKED_UNRESOLVED for benchmark scoring only; the candidate's live-inference disposition MUST be decided from statistical validity, dependency/double-counting, observation reproducibility, and available setting-specific likelihood rather than from the missing benchmark exposure alone.
+
+SEL-008: CONDITIONAL_OBSERVATION is an Observation classification, not a Selection disposition. No rule may infer EXCLUDE, DISPLAY_ONLY, INCLUDE_SUPPORT, or INCLUDE_PRIMARY from CONDITIONAL_OBSERVATION alone.
 SEL-006: “推測計算に採用しています” is not an acceptable adoption reason. A reason MUST explain why the information is useful, including quantitative basis where available.
 SEL-007: Rejection reasons MUST distinguish causes such as weak information, insufficient practical exposure, unavailable observation, incomplete public distribution, dependency/double counting, invalid denominator or unresolved semantics.
 SEL-008: User-facing explanations MUST not expose internal tokens such as INCLUDE_PRIMARY, Gate names or schema IDs.
@@ -163,6 +177,10 @@ OBS-005: Observation MUST determine natural section co-location; Canonical UI ma
 OBS-006: Unobserved and observed-zero semantics are explicit and testable.
 OBS-007: Selection disposition and Observation disposition are independent. A researched Numeric candidate rejected from inference MAY remain observable when the player can record its exact conditional trial universe without guessing.
 OBS-008: Such a candidate MUST be marked as CONDITIONAL_OBSERVATION and MUST remain computationally excluded unless Selection is explicitly re-run and adopts it. Observation or UI availability MUST NOT promote a rejected feature into inference.
+
+OBS-009: CONDITIONAL_OBSERVATION MAY belong to an adopted Numeric Feature. Its Observation contract MUST define the eligible Trial Universe, exact denominator acquisition, outcome acquisition, exclusions, and state semantics sufficiently to prevent guessed opportunities from entering inference.
+
+OBS-010: For an adopted conditional feature, Canonical UI/runtime recording and ProbabilityEngine binding MUST remain distinct responsibilities: the UI records the exact observations defined by Observation, while inference participation is authorized only by Selection. Conditional status itself MUST NOT suppress an adopted feature, and UI recordability itself MUST NOT promote a rejected feature.
 OBS-009: CONDITIONAL_OBSERVATION MUST define the observable opportunity/denominator, outcome input(s), applicable/excluded states, and user-facing counting instruction. If the conditional opportunity itself cannot be identified reliably in play, the observation remains UNRESOLVED and MUST NOT be materialized as an input.
 OBS-010: Canonical UI SHOULD render conditional observations with generic denominator/opportunity plus outcome controls. Machine-specific renderer branches are prohibited when the interaction can be expressed by the common conditional-observation contract.
 
@@ -172,6 +190,8 @@ HLD-001: Evaluate LOW=settings 1–2 vs HIGH=settings 5–6 at 1500/3000/7000G. 
 HLD-002: Record the defined discrimination metric(s), including Balanced Accuracy when used by the adopted pipeline, assumptions and usable features.
 HLD-003: HighLowDiscrimination is not merely an internal report. Machine Research Summary and MachinePackage MUST expose enough structured information for the app to show the player the machine’s discrimination quality by play length.
 HLD-004: The legacy “判定信頼度” of a particular inference result MUST NOT be presented as a substitute for HighLowDiscrimination.
+
+HLD-005: A feature may be valid for live inference yet non-participating in 1500G/3000G/7000G HighLow simulation when its realistic benchmark opportunity rate is unknown. HighLow MUST NOT fabricate an opportunity rate merely to score that feature, and lack of a benchmark exposure MUST NOT retroactively invalidate Selection when SEL-006/SEL-007 are satisfied.
 HLD-005: If a benchmark cannot be computed honestly, display/record unresolved or insufficient data rather than fabricate precision.
 
 ## 13. Machine Research Summary
