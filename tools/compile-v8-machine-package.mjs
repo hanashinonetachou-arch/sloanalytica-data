@@ -74,5 +74,11 @@ export function compileV8MachinePackage({research,selection,observation,evidence
   const features=compileFeatures(research,selection,observation);
   const runtimeEvidenceSection=compileEvidence(runtimeEvidence);
   const ui=materializeUi(canonical,{observationContract:observation,evidenceContract:runtimeEvidence});
-  return {schemaVersion:1,machine:{schemaVersion:'2.0.0',machineId:id,machineDataVersion:selection.machineDataVersion??'repro-v8',displayName:research.machine.displayName,modelName:research.machine.modelName??research.machine.displayName,manufacturer:research.machine.manufacturer,settings:clone(research.machine.settings),packagePolicy:{offlineCapable:true,containsImages:false,containsExecutableCode:false}},inputs:{schemaVersion:'2.0.0',inputs},features:{schemaVersion:'2.0.0',features},evidence:runtimeEvidenceSection,ui,manifestRevision:canonical.manifestRevision,v8:{source:'REPRO_V8_UPSTREAM_ONLY',researchSchemaVersion:research.schemaVersion,selection:clone(selection),observation:clone(observation),evidence:clone(evidence),highLowDiscrimination:clone(highLow),machineResearchSummary:clone(summary)}};
+  const provenance=clone(selection.provenance??canonical.provenance??summary?.provenance);
+  if(provenance){
+    const expected={manifestVersion:'8.0',generationPath:'V8_RESEARCH_PIPELINE',researchOrigin:'ZERO_BASE_PUBLIC_RESEARCH'};
+    for(const [key,value] of Object.entries(expected)) if(provenance[key]!==value) throw new Error(`invalid V8 provenance ${key}`);
+    for(const [label,source] of [['canonical',canonical.provenance],['summary',summary?.provenance]]) if(source&&JSON.stringify(source)!==JSON.stringify(provenance)) throw new Error(`V8 provenance mismatch: ${label}`);
+  }
+  return {schemaVersion:1,provenance,machine:{schemaVersion:'2.0.0',machineId:id,machineDataVersion:selection.machineDataVersion??'repro-v8',displayName:research.machine.displayName,modelName:research.machine.modelName??research.machine.displayName,manufacturer:research.machine.manufacturer,settings:clone(research.machine.settings),packagePolicy:{offlineCapable:true,containsImages:false,containsExecutableCode:false}},inputs:{schemaVersion:'2.0.0',inputs},features:{schemaVersion:'2.0.0',features},evidence:runtimeEvidenceSection,ui,manifestRevision:canonical.manifestRevision,v8:{source:'REPRO_V8_UPSTREAM_ONLY',provenance:clone(provenance),researchSchemaVersion:research.schemaVersion,selection:clone(selection),observation:clone(observation),evidence:clone(evidence),highLowDiscrimination:clone(highLow),machineResearchSummary:clone(summary)}};
 }

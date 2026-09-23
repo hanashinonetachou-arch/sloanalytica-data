@@ -136,10 +136,22 @@ EVI-009: Evidence constraints and Numeric inference remain computationally separ
 LINK-001: Linked play/service data is researched after Selection and is an Observation source for adopted information; availability MUST NOT retroactively make a statistically invalid feature valid.
 LINK-002: Record machine-level linked-play capability/status and which adopted observations can actually be obtained.
 LINK-003: Service labels and aggregation scope SHOULD be preserved when that prevents input ambiguity.
-LINK-004: Linked-play availability is determined from the manufacturer's official linked-play/service machine support information. If the machine is listed, status = AVAILABLE; if it is not listed, status = NOT_AVAILABLE. Do not expand the search to unrelated secondary sources merely to overturn that official support result.
+LINK-004: Linked-play availability is determined from the manufacturer's official linked-play/service machine support information. If the machine is explicitly listed, status = AVAILABLE. If the official support information explicitly identifies the applicable machine universe/list and the machine is absent from that complete applicable list, status = NOT_AVAILABLE. Mere failure to find a machine name, a generic service page, or an incomplete/unknown support list is insufficient for NOT_AVAILABLE and remains UNRESOLVED. Do not expand the search to unrelated secondary sources merely to overturn a conclusive official support result.
 LINK-005: Use UNRESOLVED only when the official support information itself cannot be confirmed or is genuinely ambiguous. Only when status = AVAILABLE, map which selected Numeric Features/Evidence can be obtained from the linked service.
 PRE-001: Predecessor/seated observations are researched only where relevant and MUST not be fabricated from missing historical UX.
 PRE-002: Predecessor data may participate in live inference when statistically valid but MUST NOT automatically be treated as the standard HighLow benchmark play interval.
+
+### 10.1 V8 provenance and linked-play persistence
+
+PROV-001: A machine reconstructed from zero through this Manifest MUST carry machine-readable provenance identifying the governing Manifest version and generation path.
+PROV-002: `generationPath = V8_RESEARCH_PIPELINE` is permitted only when the machine was reconstructed from Research under Manifest v8; converting or adapting Legacy MachineData into a V8-shaped artifact MUST NOT receive this provenance.
+PROV-003: At minimum preserve `manifestVersion`, `generationPath`, and `researchOrigin` through Machine Research Summary → Canonical UI → MachinePackage → Distribution. Translation/materialization MUST NOT drop or rewrite them.
+PROV-004: For zero-base public reconstruction under this Manifest, `researchOrigin = ZERO_BASE_PUBLIC_RESEARCH`. If a future permitted origin is introduced it MUST be explicitly defined by the governing Manifest rather than inferred downstream.
+PROV-005: Validation MUST BLOCK a package claiming `V8_RESEARCH_PIPELINE` when the required V8 upstream artifacts/provenance chain are absent, and MUST BLOCK a valid V8 upstream path when provenance is lost before MachinePackage/Distribution.
+
+LINK-006: Linked-play research is a mandatory post-Selection stage for every machine. Its machine-level status MUST be one of AVAILABLE, NOT_AVAILABLE, or UNRESOLVED according to LINK-004/LINK-005; absence of research is not equivalent to NOT_AVAILABLE.
+LINK-007: The linked-play result MUST persist through Machine Research Summary → Canonical UI → MachinePackage → Distribution as machine-readable status. When AVAILABLE, preserve the official service name and mappings from adopted observations to obtainable linked-play data when publicly verifiable.
+LINK-008: Linked-play capability/status is provenance of observation acquisition, not a Selection criterion and not proof that the app itself performs automatic import. Any future automatic-import capability MUST be represented separately from service availability.
 
 ## 11. Observation
 
