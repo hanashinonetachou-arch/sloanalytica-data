@@ -94,4 +94,6 @@ test("Revue v8.4 production package preserves conditional and categorical infere
  assert.equal(byId.get("FEAT_CZ_FAKE_END_LED")?.categoryInputIds?.length,4);
  assert.equal(byId.get("FEAT_SPECIFIC_BONUS_5_AGG")?.adoptionCategory,"LIVE_CONDITIONAL");
  assert.equal(byId.get("FEAT_SPECIFIC_BONUS_5_AGG")?.inferenceGate,"EXACT_EXPOSURE_RECONSTRUCTION_COMPLETE");
+ assert.equal(byId.get("FEAT_SPECIFIC_BONUS_5_AGG")?.runtimeInferenceEnabled,false);
+ assert.equal(byId.get("FEAT_SPECIFIC_BONUS_5_AGG")?.runtimeBlockReason,"EXACT_EXPOSURE_RUNTIME_BINDING_REQUIRED");
 });
