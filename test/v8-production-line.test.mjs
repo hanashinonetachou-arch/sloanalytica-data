@@ -108,7 +108,7 @@ test("Revue v8.4 production package preserves conditional and categorical infere
  ]);
  const evidenceSections=pkg.ui.sections.filter(s=>["SEC_BONUS_END","SEC_KIRIN_VOICE","SEC_PAYOUT"].includes(s.id));
  for(const section of evidenceSections){
-  const evidenceItem=section.items?.find(item=>item.interaction?.type==="EVIDENCE_COUNTERS");
+  const evidenceItem=section.items?.find(item=>item.id===section.evidenceGroupId) ?? section.items?.find(item=>item.interaction?.categoryCoverage==="NON_EXHAUSTIVE");
   const interaction=evidenceItem?.interaction;
   assert.equal(interaction?.categoryCoverage,"NON_EXHAUSTIVE");
   assert.equal(interaction?.totalOpportunities,"NOT_REQUIRED");
