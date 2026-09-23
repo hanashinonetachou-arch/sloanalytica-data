@@ -792,3 +792,53 @@ Evidence:
 This set is dependency-safe at the current level: it excludes the incomplete latent CZ-table model, suppresses five specific-bonus components beneath their aggregate, and does not double-count visible bonus-type rates against the specific-bonus establishment family.
 
 Next checkpoint: calculate deterministic benchmark IG/SelectionScore for CZ, AT, and the permitted LED guaranteed-minimum/approximate exposure path, then assign CORE/SUPPORT/JOINT classes.
+
+
+## v8.4 benchmark Selection scoring
+
+Equal prior over settings {1,2,4,5,6}; benchmark = 7000 eligible NORMAL_GAME_TRIAL for CZ/AT, using the Manifest fixed-trial likelihood model.
+
+### CZ initial occurrence
+p_s = 1/[265.9,254.7,207.6,190.3,179.5].
+Fixed n=7000 Bernoulli/Binomial observation model:
+IG7000 = 0.4116377913 bit.
+SelectionScore = 82.32755826.
+Classification under SEL-002: CORE.
+
+### AT initial occurrence
+p_s = 1/[359.6,346.8,277.1,255.7,232.5].
+Fixed n=7000 Bernoulli/Binomial observation model:
+IG7000 = 0.3787112925 bit.
+SelectionScore = 75.74225850.
+Classification under SEL-002: CORE.
+
+### LED guaranteed-minimum benchmark
+Every source-eligible CZ ending supplies an LED observation opportunity; fake-premonition endings add further opportunities but are not quantified. Therefore use CZ occurrence as a source-supported lower bound only, not equality.
+
+For 7000 NORMAL_GAME_TRIAL:
+L_s = 7000 / CZ_denominator_s.
+Common guaranteed exposure L* = min_s(L_s) = 7000/265.9 = 26.32568635 eligible LED observations.
+
+Per EXP-014D1..D3, use common L* for all settings and linearly interpolate fixed categorical models at n=26 and n=27:
+IG(26)=0.4586170921 bit
+IG(27)=0.4712287210 bit
+GuaranteedMinimumIG7000=0.4627245274 bit
+GuaranteedMinimumSelectionScore=92.54490548.
+
+Because this guaranteed minimum itself exceeds CORE threshold 20, LED satisfies the CORE threshold conservatively. Preserve the metric as GuaranteedMinimumSelectionScore, not ordinary SelectionScore. Actual benchmark information is expected to be higher because eligible fake-premonition endings contribute additional LED opportunities, but that increment is not guessed.
+
+### Specific-bonus aggregate
+No ordinary or guaranteed 7000G score is assigned yet. Exact runtime HYBRID_EXACT exposure is authorized, but no deterministic benchmark model for excluded internally-held-red-BIG games has yet been established.
+benchmarkScoreStatus=BLOCKED_UNRESOLVED_EXPOSURE.
+liveInference remains authorized when exact reconstructed exposure is present.
+
+### Benchmark Selection result
+CORE numeric/conditional candidates:
+- CZ initial occurrence — ordinary SelectionScore 82.33
+- AT initial occurrence — ordinary SelectionScore 75.74
+- LED — GuaranteedMinimumSelectionScore 92.54 (lower-bound metric)
+
+LIVE_CONDITIONAL without benchmark tier:
+- five-specific-bonus aggregate — exact reconstructed exposure required
+
+These score classifications do not override dependency rules and do not convert lower-bound/conditional metrics into independent evidence.
