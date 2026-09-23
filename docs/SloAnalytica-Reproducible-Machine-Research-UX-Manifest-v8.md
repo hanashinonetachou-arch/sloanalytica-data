@@ -161,6 +161,10 @@ OBS-003: Observation defines numerator/denominator acquisition together when bot
 OBS-004: Observation Action such as “PUSHで確認” is first-class data and MUST propagate to user-facing UI when useful.
 OBS-005: Observation MUST determine natural section co-location; Canonical UI may not reconstruct it from feature type.
 OBS-006: Unobserved and observed-zero semantics are explicit and testable.
+OBS-007: Selection disposition and Observation disposition are independent. A researched Numeric candidate rejected from inference MAY remain observable when the player can record its exact conditional trial universe without guessing.
+OBS-008: Such a candidate MUST be marked as CONDITIONAL_OBSERVATION and MUST remain computationally excluded unless Selection is explicitly re-run and adopts it. Observation or UI availability MUST NOT promote a rejected feature into inference.
+OBS-009: CONDITIONAL_OBSERVATION MUST define the observable opportunity/denominator, outcome input(s), applicable/excluded states, and user-facing counting instruction. If the conditional opportunity itself cannot be identified reliably in play, the observation remains UNRESOLVED and MUST NOT be materialized as an input.
+OBS-010: Canonical UI SHOULD render conditional observations with generic denominator/opportunity plus outcome controls. Machine-specific renderer branches are prohibited when the interaction can be expressed by the common conditional-observation contract.
 
 ## 12. HighLowDiscrimination
 
@@ -343,6 +347,15 @@ REF-006: If a mismatch is caused by missing/ambiguous general rules, revise this
 REF-007: If the Manifest explicitly and unambiguously required the correct result but implementation lost it, fix the generic pipeline/adapter/renderer and rerun generation; do not alter machine semantics.
 REF-008: Love嬢3 passing proves the first reference only, not fleet reproducibility. Additional structurally different reference machines are required before mass production.
 REF-009: Mass-production readiness means a fresh AI/session can follow this Manifest without relying on hidden prior-chat decisions and reach equivalent-quality artifacts.
+
+## 20A. User-Verified UX contracts during zero-base reconstruction
+
+UVX-001: A prior User-Verified UI Lock is empirical real-device UX evidence, not a Research/Selection/Observation semantic oracle. Zero-base Research MUST NOT read it to decide machine facts, probabilities, feature adoption, dependency, or Evidence meaning.
+UVX-002: After an independent Canonical UI has been materialized, Runtime Contract Verification MUST compare it with any existing User-Verified UI Lock before that lock is replaced or declared obsolete.
+UVX-003: A mismatch with a User-Verified UI Lock is a real-device re-verification requirement, not permission to copy the legacy layout into the new Canonical UI. The zero-base Canonical UI remains authoritative when it is reproducible from current upstream contracts.
+UVX-004: CI MUST distinguish a pending re-verification mismatch from semantic corruption. A historical lock MAY remain as the previous verified baseline while the new Canonical UI is marked pending real-device verification; it MUST NOT silently block or rewrite the new canonical contract.
+UVX-005: Only a successful real-device verification may supersede the prior lock. The replacement lock MUST be regenerated from the verified current Canonical UI/package and record its verification date/version/provenance.
+UVX-006: If real-device verification rejects the new UI, return to the earliest affected Manifest/Canonical rule per PREVIEW-005/006; do not restore legacy machine semantics as an oracle.
 
 ## 21. Mandatory anti-omission checklist
 

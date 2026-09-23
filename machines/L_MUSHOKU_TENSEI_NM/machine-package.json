@@ -13,7 +13,7 @@
   "machine": {
     "schemaVersion": "2.0.0",
     "machineId": "L_MUSHOKU_TENSEI_NM",
-    "machineDataVersion": "0.3.0",
+    "machineDataVersion": "0.3.1",
     "displayName": "L 無職転生 ～異世界行ったら本気だす～",
     "modelName": "L 無職転生 ～異世界行ったら本気だす～",
     "manufacturer": "ニューギン",
@@ -1095,6 +1095,50 @@
         ]
       },
       {
+        "id": "SEC_HITOGAMI_WHITE_MOVE",
+        "title": "白マスからのステージ移行（参考記録）",
+        "description": "白マスの移行抽選機会と、そのうちヒトガミの空間へ移行した回数を記録します。条件付き母数のため、現在の設定推測計算には使用しません。未確認と0回は区別して保存します。",
+        "descriptionPresentation": {
+          "collapsible": true,
+          "label": "説明",
+          "defaultExpanded": false
+        },
+        "collapsible": true,
+        "defaultExpanded": false,
+        "headerToggle": true,
+        "genericEditButton": false,
+        "groups": [],
+        "items": [
+          {
+            "id": "GRP_HITOGAMI_WHITE_MOVE",
+            "title": "白マス移行抽選",
+            "observationDisposition": "CONDITIONAL_OBSERVATION",
+            "inferenceDisposition": "EXCLUDE",
+            "inputs": [
+              {
+                "id": "INP_WHITE_CELL_OPPORTUNITIES",
+                "label": "白マス移行抽選機会",
+                "input": "denominator",
+                "gridSpan": 12,
+                "directNumeric": true,
+                "quickAdd": [
+                  1
+                ],
+                "unobservedDisplay": "—",
+                "trialUniverse": "白マス移行抽選機会"
+              },
+              {
+                "id": "INP_HITOGAMI_WHITE_MOVES",
+                "label": "ヒトガミの空間へ移行",
+                "input": "counter",
+                "gridSpan": 12,
+                "unobservedDisplay": "—"
+              }
+            ]
+          }
+        ]
+      },
+      {
         "id": "SEC_END_SCREEN",
         "title": "ボーナス・AT終了画面",
         "description": "確認した設定確定・否定情報を記録します。出現しなかったことは設定否定には使いません。",
@@ -1625,7 +1669,7 @@
     "selection": {
       "schemaVersion": "selection-data-v1",
       "machineId": "L_MUSHOKU_TENSEI_NM",
-      "machineDataVersion": "0.3.0",
+      "machineDataVersion": "0.3.1",
       "provenance": {
         "manifestVersion": "8.0",
         "generationPath": "V8_RESEARCH_PIPELINE",
@@ -1963,7 +2007,33 @@
       "assertions": [
         "UNOBSERVED and OBSERVED_ZERO remain distinct",
         "normal-game denominator is entered once",
-        "bonus initial hit and CZ are display-only and not multiplied with AT initial hit"
+        "bonus initial hit and CZ are display-only and not multiplied with AT initial hit",
+        "conditional white-cell transition recording remains excluded from inference"
+      ],
+      "conditional": [
+        {
+          "featureId": "FEAT_HITOGAMI_WHITE_MOVE",
+          "researchFeatureId": "RF_HITOGAMI_WHITE_MOVE",
+          "observationDisposition": "CONDITIONAL_OBSERVATION",
+          "inferenceDisposition": "EXCLUDE",
+          "context": "白マスからの移行抽選",
+          "how": "白マスの移行抽選機会を母数として数え、そのうちヒトガミの空間へ移行した回数を記録",
+          "trialUniverse": "ELIGIBLE_WHITE_CELL_TRANSITIONS",
+          "inputs": [
+            {
+              "id": "INP_WHITE_CELL_OPPORTUNITIES",
+              "label": "白マス移行抽選機会",
+              "type": "counter",
+              "role": "CONDITIONAL_DENOMINATOR"
+            },
+            {
+              "id": "INP_HITOGAMI_WHITE_MOVES",
+              "label": "ヒトガミの空間へ移行",
+              "type": "counter",
+              "role": "CONDITIONAL_OUTCOME"
+            }
+          ]
+        }
       ]
     },
     "evidence": {
