@@ -1028,3 +1028,26 @@ HLD simulation contract:
 - LED lower-bound opportunities use a common conservative count derived from the LOW/HIGH minimum source-proven CZ-ending exposure; additional fake-premonition LED opportunities are ignored, so HLD does not claim their unknown benefit.
 
 Implementation note: formal numeric HLD values must be produced by the project HLD pipeline or an equivalent deterministic implementation committed/tested in-repo. Do not substitute SelectionScore or an ad-hoc spreadsheet result.
+
+
+## HighLow implementation readiness checkpoint
+
+Repository code search did not expose an indexed existing HLD/Balanced-Accuracy implementation on the current Data branch. This is an infrastructure-discovery limitation, not evidence that the production pipeline lacks HLD.
+
+Do not write a one-off machine-specific HLD calculator. The next implementation must be generic and accept:
+- declared LOW/HIGH setting sets;
+- per-feature likelihood family;
+- per-setting parameters;
+- benchmark exposure model and quality;
+- dependency-safe selected feature set;
+- deterministic simulation/enumeration controls.
+
+For Revue, the HLD input contract is now fully frozen:
+- settings LOW={1,2}, HIGH={5,6};
+- horizons 1500/3000/7000 NORMAL_GAME_TRIAL;
+- CZ and AT admitted with direct benchmark exposure;
+- LED admitted only through conservative source-proven lower-bound exposure;
+- specific-bonus feature excluded from benchmark HLD while benchmark exposure is unresolved;
+- no rejected/incomplete feature may enter.
+
+This is a clean handoff boundary: research semantics and HLD inputs are frozen; remaining work is generic deterministic HLD execution, formal artifact materialization, then MachinePackage production-line binding.
