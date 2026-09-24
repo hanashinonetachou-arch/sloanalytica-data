@@ -22,6 +22,7 @@ test("v8 compiler preserves runtime evaluation metadata without embedding policy
  assert.ok(byId.get("FEAT_CZ_INITIAL").evaluation.value>0);
  assert.equal(byId.get("FEAT_BIG_END_HINT_MULTINOMIAL").evaluation.metric,"PER_ELIGIBLE_TRIAL_POWER");
  assert.ok(byId.get("FEAT_BIG_END_HINT_MULTINOMIAL").evaluation.value>0);
+ assert.equal(byId.get("FEAT_BIG_END_HINT_MULTINOMIAL").importance,"補助","per-trial evaluation uses provisional support importance");
  assert.equal(JSON.stringify(pkg).includes("thresholds"),false,"MachineData must not embed mutable Runtime Policy thresholds");
 });
 test("shared runtime policy has selection threshold and intentionally no per-trial threshold",()=>{
