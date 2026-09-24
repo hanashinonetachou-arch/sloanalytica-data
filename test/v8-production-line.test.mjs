@@ -120,7 +120,7 @@ test("Revue v8.4 production package preserves conditional and categorical infere
  assert.equal(bigHint?.denominatorRule,"SUM_CATEGORY_COUNTS");
  assert.equal(bigHint?.categoryConditioning?.normalization,"SOURCE_CONDITIONAL_NO_RENORMALIZATION");
  assert.deepEqual(bigHint?.categoryConditioning?.excludedCategories,["EV_BONUS_END_2PLUS","EV_BONUS_END_4PLUS","EV_BONUS_END_5PLUS","EV_BONUS_END_6"]);
- assert.equal(pkg.machine?.machineDataVersion,"0.3.1");
+ assert.equal(pkg.machine?.machineDataVersion,"0.3.3");
  assert.equal(pkg.v8?.source,"REPRO_V8_UPSTREAM_ONLY");
  assert.deepEqual(bigHint?.categoryInputIds,["INP_BIG_END_HIGH_WEAK","INP_BIG_END_HIGH_STRONG"]);
  assert.equal(bigHint?.denominatorInputId,"INP_BIG_END_DEFAULT");
@@ -135,4 +135,12 @@ test("Revue v8.4 production package preserves conditional and categorical infere
  assert.equal(specificBonus?.exposureReconstruction?.termSetCompleteness,"COMPLETE_FOR_DEFINED_BROADER_GAME_SCOPE");
  assert.equal(specificBonus?.exposureReconstruction?.additionalExcludedTerms?.status,"NONE_WITHIN_DEFINED_SCOPE");
  assert.equal(specificBonus?.exposureReconstruction?.expression,"eligibleBonusLotteryGames = broaderGameCount - normalReproductionEntryCount*20 - czReproductionExcludedGames - atReproductionExcludedGames");
+});
+
+
+test("publish path fails closed on machineDataVersion downgrade and same-version content replacement",()=>{
+ const src=fs.readFileSync(path.join(ROOT,"tools","publish-machine-data.mjs"),"utf8");
+ assert.match(src,/machineDataVersion downgrade blocked/);
+ assert.match(src,/machineDataVersion must increase when package content changes/);
+ assert.match(src,/compareSemverCore\(nextVersion,existingVersion\)/);
 });
