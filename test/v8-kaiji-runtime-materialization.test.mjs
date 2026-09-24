@@ -18,7 +18,7 @@ test("Kaiji v8 runtime UI is deterministically wired from upstream contracts",()
  assert.equal(roles.find(x=>x.id==="INP_WATERMELON").engineBinding.inputId,"INP_FEAT_RARE_ROLE_MULTI_WATERMELON");
  const payout=ui.sections.find(s=>s.id==="SEC_PAYOUT").items[0];
  assert.equal(payout.interaction.totalOpportunities,"NOT_REQUIRED");
- assert.equal(payout.interaction.opportunityTracking,undefined);
+ assert.deepEqual(payout.interaction.opportunityTracking,{type:"NONE",reason:"absence is not used as negative Evidence"});
  const c456=payout.interaction.categories.find(x=>x.label==="456突破");
  assert.deepEqual(c456.engineBinding,{mode:"MULTI_ENUM_PRESENCE",inputId:"INP_EVI_PAYOUT",triggerValue:"456枚突破"});
  const tr=ui.sections.find(s=>s.id==="SEC_TR_RESET").items[0];
