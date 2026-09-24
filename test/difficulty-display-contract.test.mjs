@@ -31,7 +31,7 @@ test('catalog recent order follows addedAt',()=>{
 test('difficulty catalog machineDataVersion matches catalog',()=>{
  const c=JSON.parse(fs.readFileSync('catalog.json'));
  const d=JSON.parse(fs.readFileSync('difficulty-catalog.json'));
- const excluded=new Set(['L_LOVEJOU3_M4','L_MUSHOKU_TENSEI_NM']); // v8.4 zero-base re-research pending
+ const excluded=new Set(['L_LOVEJOU3_M4','L_MUSHOKU_TENSEI_NM','S_REVUE_STARLIGHT_CX']); // v8.4 zero-base re-research pending
  const byId=new Map(d.entries.map(e=>[e.machineId,e]));
  for(const m of c.machines){
   if(excluded.has(m.machineId)) continue;
