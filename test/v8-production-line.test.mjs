@@ -124,8 +124,9 @@ test("Revue v8.4 production package preserves conditional and categorical infere
  assert.equal(pkg.v8?.source,"REPRO_V8_UPSTREAM_ONLY");
  assert.deepEqual(bigHint?.categoryInputIds,["INP_BIG_END_HIGH_WEAK","INP_BIG_END_HIGH_STRONG"]);
  assert.equal(bigHint?.denominatorInputId,"INP_BIG_END_DEFAULT");
- assert.deepEqual(bigHint?.categoryProbabilities?.SET_1,[0.062,0.0125]);
- assert.deepEqual(bigHint?.categoryProbabilities?.SET_6,[0.094,0.075]);
+ assert.deepEqual(bigHint?.categoryLabels,["DEFAULT","HIGH_WEAK","HIGH_STRONG"]);
+ assert.deepEqual(bigHint?.categoryProbabilities?.SET_1,[0.9255,0.062,0.0125]);
+ assert.deepEqual(bigHint?.categoryProbabilities?.SET_6,[0.831,0.094,0.075]);
  const bonusEnd=pkg.ui.sections.find(section=>section.id==="SEC_BONUS_END");
  assert.ok(bonusEnd?.items?.some(item=>item.id==="OBS_BIG_END_HINT"));
  assert.ok(bonusEnd?.items?.some(item=>item.id===bonusEnd.evidenceGroupId));
