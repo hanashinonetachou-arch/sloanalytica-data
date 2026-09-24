@@ -108,12 +108,29 @@ test("Revue v8.4 production package preserves conditional and categorical infere
  ]);
  const evidenceSections=pkg.ui.sections.filter(s=>["SEC_BONUS_END","SEC_KIRIN_VOICE","SEC_PAYOUT"].includes(s.id));
  for(const section of evidenceSections){
-  const interaction=section.items?.[0]?.interaction;
+  const evidenceItem=section.items?.find(item=>item.id===section.evidenceGroupId) ?? section.items?.find(item=>item.interaction?.categoryCoverage==="NON_EXHAUSTIVE");
+  const interaction=evidenceItem?.interaction;
   assert.equal(interaction?.categoryCoverage,"NON_EXHAUSTIVE");
   assert.equal(interaction?.totalOpportunities,"NOT_REQUIRED");
   assert.equal(interaction?.opportunityTracking?.type,"NONE");
   assert.equal(interaction?.absenceIsNegativeEvidence,false);
  }
+ const bigHint=byId.get("FEAT_BIG_END_HINT_MULTINOMIAL");
+ assert.equal(bigHint?.modelType,"multinomial");
+ assert.equal(bigHint?.denominatorRule,"SUM_CATEGORY_COUNTS");
+ assert.equal(bigHint?.categoryConditioning?.normalization,"SOURCE_CONDITIONAL_NO_RENORMALIZATION");
+ assert.deepEqual(bigHint?.categoryConditioning?.excludedCategories,["EV_BONUS_END_2PLUS","EV_BONUS_END_4PLUS","EV_BONUS_END_5PLUS","EV_BONUS_END_6"]);
+ assert.equal(pkg.machine?.machineDataVersion,"0.3.1");
+ assert.equal(pkg.v8?.source,"REPRO_V8_UPSTREAM_ONLY");
+ assert.deepEqual(bigHint?.categoryInputIds,["INP_BIG_END_HIGH_WEAK","INP_BIG_END_HIGH_STRONG"]);
+ assert.equal(bigHint?.denominatorInputId,"INP_BIG_END_DEFAULT");
+ assert.deepEqual(bigHint?.categoryLabels,["DEFAULT","HIGH_WEAK","HIGH_STRONG"]);
+ assert.deepEqual(bigHint?.categoryProbabilities?.SET_1,[0.9255,0.062,0.0125]);
+ assert.deepEqual(bigHint?.categoryProbabilities?.SET_6,[0.831,0.094,0.075]);
+ const bonusEnd=pkg.ui.sections.find(section=>section.id==="SEC_BONUS_END");
+ assert.ok(bonusEnd?.items?.some(item=>item.id==="OBS_BIG_END_HINT"));
+ assert.ok(bonusEnd?.items?.some(item=>item.id===bonusEnd.evidenceGroupId || item.interaction?.categoryCoverage==="NON_EXHAUSTIVE"));
+ assert.equal(byId.has("FEAT_AT_END_KIRIN_HINT_MULTINOMIAL"),false);
  assert.equal(specificBonus?.numeratorInputId,"INP_SPECIFIC_BONUS_5_AGG");
  assert.equal(specificBonus?.exposureReconstruction?.termSetCompleteness,"COMPLETE_FOR_DEFINED_BROADER_GAME_SCOPE");
  assert.equal(specificBonus?.exposureReconstruction?.additionalExcludedTerms?.status,"NONE_WITHIN_DEFINED_SCOPE");

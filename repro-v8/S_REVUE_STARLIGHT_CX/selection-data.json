@@ -1,7 +1,7 @@
 {
   "schemaVersion": "selection-data-v1",
   "machineId": "S_REVUE_STARLIGHT_CX",
-  "machineDataVersion": "0.3.0",
+  "machineDataVersion": "0.3.1",
   "provenance": {
     "manifestVersion": "8.4-DRAFT",
     "generationPath": "V8_RESEARCH_PIPELINE",
@@ -128,6 +128,60 @@
       "unit": "G",
       "displayOrder": 52,
       "inferenceRole": "EXPOSURE_RECONSTRUCTION"
+    },
+    {
+      "id": "INP_BIG_END_DEFAULT",
+      "name": "デフォルト",
+      "type": "counter",
+      "category": "BIG終了画面",
+      "unit": "回",
+      "displayOrder": 60,
+      "inferenceRole": "LIVE_CONDITIONAL"
+    },
+    {
+      "id": "INP_BIG_END_HIGH_WEAK",
+      "name": "高設定示唆・弱",
+      "type": "counter",
+      "category": "BIG終了画面",
+      "unit": "回",
+      "displayOrder": 61,
+      "inferenceRole": "LIVE_CONDITIONAL"
+    },
+    {
+      "id": "INP_BIG_END_HIGH_STRONG",
+      "name": "高設定示唆・強",
+      "type": "counter",
+      "category": "BIG終了画面",
+      "unit": "回",
+      "displayOrder": 62,
+      "inferenceRole": "LIVE_CONDITIONAL"
+    },
+    {
+      "id": "INP_AT_END_VOICE_DEFAULT",
+      "name": "デフォルト",
+      "type": "counter",
+      "category": "AT終了時キリンボイス",
+      "unit": "回",
+      "displayOrder": 70,
+      "inferenceRole": "LIVE_CONDITIONAL"
+    },
+    {
+      "id": "INP_AT_END_VOICE_HIGH_WEAK",
+      "name": "高設定示唆・弱",
+      "type": "counter",
+      "category": "AT終了時キリンボイス",
+      "unit": "回",
+      "displayOrder": 71,
+      "inferenceRole": "LIVE_CONDITIONAL"
+    },
+    {
+      "id": "INP_AT_END_VOICE_HIGH_STRONG",
+      "name": "高設定示唆・強",
+      "type": "counter",
+      "category": "AT終了時キリンボイス",
+      "unit": "回",
+      "displayOrder": 72,
+      "inferenceRole": "LIVE_CONDITIONAL"
     }
   ],
   "features": [
@@ -190,6 +244,36 @@
         "relationship": "AGGREGATE_OF_FIVE_SPECIFIC_BONUS_EVENTS",
         "combinationPolicy": "SUPPRESS_COMPONENTS_WHEN_AGGREGATE_SELECTED"
       }
+    },
+    {
+      "researchFeatureId": "RF_BIG_END_HINT_DISTRIBUTION",
+      "featureId": "FEAT_BIG_END_HINT_MULTINOMIAL",
+      "adoptionCategory": "LIVE_CONDITIONAL",
+      "model": "multinomial",
+      "trialUniverse": "BIG_END_NON_CONFIRMATION_SCREEN_TRIAL",
+      "denominatorRule": "SUM_CATEGORY_COUNTS",
+      "benchmarkScoreStatus": "BLOCKED_UNRESOLVED_EXPOSURE",
+      "liveInferenceGate": "EXACT_CATEGORY_COUNTS_COMPLETE",
+      "perOpportunityInformationBits": 0.016395578045057285,
+      "userReason": "BIG終了時のデフォルト・高設定示唆弱・強には全設定の公開振り分けがあり、3カテゴリを漏れなく記録した実戦では条件付き尤度として利用できる。確定エフェクトはEvidenceとして別処理する。",
+      "dependencyContract": {
+        "relationship": "COLOCATED_WITH_BONUS_END_EVIDENCE",
+        "combinationPolicy": "CONDITIONAL_NUMERIC_EXCLUDES_CONFIRMATION_EVIDENCE_TRIALS"
+      }
+    },
+    {
+      "researchFeatureId": "RF_AT_END_KIRIN_HINT_DISTRIBUTION",
+      "featureId": "FEAT_AT_END_KIRIN_HINT_MULTINOMIAL",
+      "adoptionCategory": "BLOCKED_UNRESOLVED",
+      "model": "multinomial",
+      "trialUniverse": "AT_END_TOUCH_VOICE_TRIAL",
+      "benchmarkScoreStatus": "BLOCKED_UNRESOLVED_EXPOSURE",
+      "liveInferenceGate": "BLOCKED_INCOMPLETE_CATEGORICAL_MASS",
+      "userReason": "弱/強の設定差は公開されているが、公開3カテゴリの合計が100%未満で設定2以上・4以上・6ボイスの発生率が別掲されていないため、現時点では完全なカテゴリ尤度を構成しない。",
+      "dependencyContract": {
+        "relationship": "COLOCATED_WITH_AT_END_VOICE_EVIDENCE",
+        "combinationPolicy": "DO_NOT_FABRICATE_RESIDUAL_OR_NORMALIZE"
+      }
     }
   ],
   "evidenceDecisions": [
@@ -235,10 +319,11 @@
     }
   ],
   "selectionSummaryContract": {
-    "evaluatedCount": 4,
+    "evaluatedCount": 6,
     "selectedCount": 3,
-    "liveConditionalCount": 1,
-    "benchmarkBlockedCount": 1
+    "liveConditionalCount": 2,
+    "benchmarkBlockedCount": 3,
+    "unresolvedCount": 1
   },
   "linkedPlayResearch": {
     "status": "UNRESOLVED",

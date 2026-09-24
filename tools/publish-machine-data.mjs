@@ -56,6 +56,10 @@ function approve(id,sourceArg){
  if(!exists(source)) die(`承認対象がありません: ${source}`);
  const pkg=readJson(source);
  if(pkg.machine?.machineId!==id) die("承認対象のmachineIdが一致しません。");
+ if(pkg?.v8?.source==="REPRO_V8_UPSTREAM_ONLY"){
+   const expected=path.resolve(p.generated);
+   if(path.resolve(source)!==expected) die("V8 packageは build/<machineId>/machine-package.generated.json からのみapproveできます。");
+ }
  fs.mkdirSync(p.build,{recursive:true});
  const approvedBytes=canonicalJsonBuffer(source);
  fs.writeFileSync(p.approved,approvedBytes);
@@ -89,6 +93,13 @@ function publish(id,apply,deferAudit=false){
  if(approval.machineId!==id || approval.approvedSha256!==actualSha) die("承認後にapproved packageが変更されています。再approveしてください。");
  const pkg=JSON.parse(approvedBytes.toString("utf8"));
  if(pkg.machine?.machineId!==id) die("approved packageのmachineIdが一致しません。");
+ if(pkg?.v8?.source==="REPRO_V8_UPSTREAM_ONLY"){
+   const expectedSource=path.relative(ROOT,p.generated).replaceAll("\\","/");
+   if(approval.source!==expectedSource) die("V8 approval sourceがupstream-only generated packageではありません。再approveしてください。");
+   if(!exists(p.generated)) die("V8 generated packageがありません。再buildしてください。");
+   const generatedSha=sha256Buffer(canonicalJsonBuffer(p.generated));
+   if(generatedSha!==actualSha) die("V8 generated packageとapproved packageが一致しません。再approveしてください。");
+ }
  const catalog=readJson(CATALOG);
  const machines=Array.isArray(catalog.machines)?catalog.machines:[];
  const idx=machines.findIndex(m=>m.machineId===id);

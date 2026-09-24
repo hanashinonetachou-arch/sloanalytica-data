@@ -74,6 +74,20 @@ RES-004: Evidence is researched as evidence and is not forced through Numeric Se
 RES-005: Unknown Research facts MUST remain unknown. No fabricated probabilities, factual exposure counts, factual trial counts, denominators or setting mappings. Explicit benchmark-only exposure estimates permitted by EXP-009..EXP-016 are derived Selection artifacts, not replacements for unknown Research facts.
 RES-006: Research completeness and inference usefulness are separate dimensions.
 
+RES-007: Observation Surface Completeness. When Research identifies a public observation surface or action (for example an end screen, post-event voice, lamp/LED, trophy, payout display, touch action or similar result surface), Research MUST enumerate every publicly documented outcome on that surface before classifying usefulness. The executor MUST NOT stop after finding only confirmed/lower-bound Evidence outcomes or only Numeric outcomes.
+
+RES-008: Surface outcome classification occurs only after enumeration. Each documented outcome or mutually exclusive outcome family MUST be classified independently as one or more of: NUMERIC_CANDIDATE, EVIDENCE_CANDIDATE, QUALITATIVE_ONLY, NON_SETTING_INFORMATION, or UNRESOLVED. A source label such as “高設定示唆”, “示唆”, “チャンス”, “濃厚”, or “確定” MUST NOT by itself determine the computational class.
+
+RES-009: For every qualitative setting-hint outcome found on a researched surface, Research MUST explicitly check whether public setting-specific occurrence probabilities or a complete categorical distribution are available. When complete setting-specific probabilities exist for a reproducibly observable trial universe, the outcome family MUST enter the Numeric candidate universe even if the same surface also contains Hard Evidence. When the probabilities are absent or incomplete, preserve the hint as QUALITATIVE_ONLY or UNRESOLVED with source/provenance; do not invent likelihoods.
+
+RES-010: A single observation surface MAY yield both Numeric candidates and Evidence candidates. Colocation MUST NOT cause either class to suppress the other. Numeric likelihood and Evidence constraints remain computationally separate under EVI-009, including when Canonical UI later colocates them.
+
+RES-011: For a published categorical distribution, Research MUST determine whether the published percentages describe all outcomes, a named subset, or a distribution explicitly excluding special/confirmed outcomes. EXHAUSTIVE status may be assigned only when the source semantics establish that every eligible trial produces exactly one member of the modeled category family. Otherwise preserve the published conditional/subset scope exactly and do not fabricate a residual category.
+
+RES-012: Surface scope conflicts between sources (for example BIG-only versus BIG-or-REG) MUST be resolved conservatively. A Numeric candidate MAY use the narrowest source-supported common scope for which the complete likelihood is reproducible. Broader disputed scope remains UNRESOLVED and MUST NOT be silently generalized.
+
+COMP-000A: Surface Completeness Gate. Before Research may be declared complete, every discovered observation surface MUST have an auditable outcome inventory and classification required by RES-007..RES-012. A known qualitative setting hint with an unchecked quantitative-distribution status is a blocking completeness defect, not a Summary-only unresolved shortcut.
+
 ## 4. Data Completeness
 
 COMP-001: Every researched candidate receives a completeness state.
