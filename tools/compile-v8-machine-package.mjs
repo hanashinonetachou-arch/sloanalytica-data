@@ -43,6 +43,21 @@ function compileInputs(observation,evidence){
   return {inputs:[...inputs.values()],runtimeEvidence,derivedExposureInputs};
 }
 
+function runtimeEvaluation(selected){
+  const selectionScore=Number.isFinite(selected.selectionScore)?selected.selectionScore:(Number.isFinite(selected.guaranteedMinimumSelectionScore)?selected.guaranteedMinimumSelectionScore:null);
+  const perTrialBits=Number.isFinite(selected.igPerEligibleTrial)?selected.igPerEligibleTrial:(Number.isFinite(selected.perOpportunityInformationBits)?selected.perOpportunityInformationBits:null);
+  const evaluation=selectionScore!=null
+    ? {metric:"SELECTION_SCORE",value:selectionScore}
+    : perTrialBits!=null
+      ? {metric:"PER_ELIGIBLE_TRIAL_POWER",value:perTrialBits*200}
+      : {metric:"UNAVAILABLE",value:null};
+  let importance=null;
+  if(selectionScore!=null) importance=selectionScore>=20?"主要":selectionScore>=10?"有力":selectionScore>=5?"補助":"微小";
+  else if(perTrialBits!=null) importance="補助";
+  else if(selected.adoptionCategory==="LIVE_CONDITIONAL") importance="補助";
+  return {eligibility:"ELIGIBLE",evaluation,importance};
+}
+
 function compileFeatures(research,selection,observation){
   const rb=researchById(research), ob=observationByFeature(observation), out=[];
   for(const selected of selection.features??[]){
@@ -67,12 +82,12 @@ function compileFeatures(research,selection,observation){
         categoryProbabilities={}; for(const setting of research.machine?.settings??[]) categoryProbabilities[setting]=sources.map(x=>x.settingValues?.[setting]?.probability);
       }
       if(Object.values(categoryProbabilities).some(a=>a.some(p=>!Number.isFinite(p)))) throw new Error(`${selected.featureId} incomplete multinomial probabilities`);
-      out.push({featureId:selected.featureId,name:obs.context??sources[0].name??selected.featureId,adoptionCategory:selected.adoptionCategory,calculationRole:'PROBABILITY',probabilityEngineUsage:true,modelType:'multinomial',numeratorInputId:counters[0].engineInputId,categoryInputIds:counters.slice(1).map(x=>x.engineInputId),denominatorInputId:denominator?.engineInputId??(obs.denominator?.type==='DERIVED_SUM'?counters[0]?.engineInputId:undefined),denominatorRule:obs.denominator?.type==='DERIVED_SUM'?'SUM_CATEGORY_COUNTS':undefined,probabilities:{},categoryLabels,categoryProbabilities,categoryConditioning:{excludedCategories:clone(obs.exclusionRule?.excludedEvidenceOutcomes??[]),normalization:obs.exclusionRule?'SOURCE_CONDITIONAL_NO_RENORMALIZATION':'RENORMALIZE_INCLUDED'},sourceResearchFeatureIds:selected.sourceResearchFeatureIds??[selected.researchFeatureId]});
+      out.push({featureId:selected.featureId,name:obs.context??sources[0].name??selected.featureId,adoptionCategory:selected.adoptionCategory,...runtimeEvaluation(selected),calculationRole:'PROBABILITY',probabilityEngineUsage:true,modelType:'multinomial',numeratorInputId:counters[0].engineInputId,categoryInputIds:counters.slice(1).map(x=>x.engineInputId),denominatorInputId:denominator?.engineInputId??(obs.denominator?.type==='DERIVED_SUM'?counters[0]?.engineInputId:undefined),denominatorRule:obs.denominator?.type==='DERIVED_SUM'?'SUM_CATEGORY_COUNTS':undefined,probabilities:{},categoryLabels,categoryProbabilities,categoryConditioning:{excludedCategories:clone(obs.exclusionRule?.excludedEvidenceOutcomes??[]),normalization:obs.exclusionRule?'SOURCE_CONDITIONAL_NO_RENORMALIZATION':'RENORMALIZE_INCLUDED'},sourceResearchFeatureIds:selected.sourceResearchFeatureIds??[selected.researchFeatureId]});
     }else{
       const source=sources[0], probabilities=Object.fromEntries((research.machine?.settings??[]).map(s=>[s,source.settingValues?.[s]?.probability]));
       if(Object.values(probabilities).some(p=>!Number.isFinite(p))) throw new Error(`${selected.featureId} incomplete probabilities`);
       const primary=selected.dependencyContract?.preferredPrimary;
-      out.push({featureId:selected.featureId,name:source.name??selected.featureId,adoptionCategory:selected.adoptionCategory,calculationRole:'PROBABILITY',probabilityEngineUsage:true,modelType:model,numeratorInputId:selectedNumerator?.engineInputId??counters[0]?.engineInputId,denominatorInputId:denominator?.engineInputId,displayFormat:'ratio_1_over_n',probabilities,...(selected.adoptionCategory==='LIVE_CONDITIONAL'?{inferenceGate:selected.liveInferenceGate,exposureReconstruction:clone(obs.exposureReconstruction),runtimeInferenceEnabled:false,runtimeBlockReason:'EXACT_EXPOSURE_RUNTIME_BINDING_REQUIRED'}:{}),...(primary&&primary!==selected.featureId?{suppressedByFeatureIds:[primary]}:{}),sourceResearchFeatureIds:[selected.researchFeatureId]});
+      out.push({featureId:selected.featureId,name:source.name??selected.featureId,adoptionCategory:selected.adoptionCategory,...runtimeEvaluation(selected),calculationRole:'PROBABILITY',probabilityEngineUsage:true,modelType:model,numeratorInputId:selectedNumerator?.engineInputId??counters[0]?.engineInputId,denominatorInputId:denominator?.engineInputId,displayFormat:'ratio_1_over_n',probabilities,...(selected.adoptionCategory==='LIVE_CONDITIONAL'?{inferenceGate:selected.liveInferenceGate,exposureReconstruction:clone(obs.exposureReconstruction),runtimeInferenceEnabled:false,runtimeBlockReason:'EXACT_EXPOSURE_RUNTIME_BINDING_REQUIRED'}:{}),...(primary&&primary!==selected.featureId?{suppressedByFeatureIds:[primary]}:{}),sourceResearchFeatureIds:[selected.researchFeatureId]});
     }
   }
   return out;
