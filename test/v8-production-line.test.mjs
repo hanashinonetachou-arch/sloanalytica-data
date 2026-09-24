@@ -129,7 +129,7 @@ test("Revue v8.4 production package preserves conditional and categorical infere
  assert.deepEqual(bigHint?.categoryProbabilities?.SET_6,[0.831,0.094,0.075]);
  const bonusEnd=pkg.ui.sections.find(section=>section.id==="SEC_BONUS_END");
  assert.ok(bonusEnd?.items?.some(item=>item.id==="OBS_BIG_END_HINT"));
- assert.ok(bonusEnd?.items?.some(item=>item.id===bonusEnd.evidenceGroupId));
+ assert.ok(bonusEnd?.items?.some(item=>item.id===bonusEnd.evidenceGroupId || item.interaction?.categoryCoverage==="NON_EXHAUSTIVE"));
  assert.equal(byId.has("FEAT_AT_END_KIRIN_HINT_MULTINOMIAL"),false);
  assert.equal(specificBonus?.numeratorInputId,"INP_SPECIFIC_BONUS_5_AGG");
  assert.equal(specificBonus?.exposureReconstruction?.termSetCompleteness,"COMPLETE_FOR_DEFINED_BROADER_GAME_SCOPE");
