@@ -181,6 +181,12 @@ EXP-014E: DERIVED_LOWER_BOUNDED and its guaranteed-minimum score MUST NOT enter 
 
 EXP-014F: Before classifying benchmark exposure UNRESOLVED, the resolver MUST test, in order, whether a DIRECT_PUBLISHED, DERIVED_EXACT, DERIVED_APPROXIMATED, or defensible bounded relation exists. In particular, if a broader observation opportunity necessarily contains a publicly quantified event class, failure to quantify the additional opportunities is not by itself sufficient for UNRESOLVED; preserve the supported lower bound.
 
+EXP-014G: A no-exclusion or zero-occurrence scenario MAY define DERIVED_UPPER_BOUNDED when Research proves that every excluded interval can only reduce eligible exposure from the benchmark game count. For a benchmark of G games, if eligibleTrials = G - excludedTrials and excludedTrials >= 0, then eligibleTrials <= G. This is an upper bound only; it MUST NOT be described as a guaranteed minimum, ordinary SelectionScore, or evidence that an adoption threshold is met.
+
+EXP-014H: For a complete Bernoulli/categorical likelihood whose information is monotone non-decreasing with eligible trials, DERIVED_UPPER_BOUNDED MAY produce MaximumBenchmarkIG / MaximumSelectionScore as diagnostic metadata. If that upper-bound score is below a threshold, the candidate cannot meet that threshold at any valid exposure under the same model. If the upper-bound score meets a threshold, this proves only possibility, not guaranteed practical exposure, and MUST NOT by itself authorize benchmark-threshold adoption.
+
+EXP-014I: A candidate with exact runtime Exposure Reconstruction and only an upper benchmark bound remains eligible for the LIVE_CONDITIONAL path under SEL-007..SEL-008C. The runtime denominator MUST use the reconstructed exact eligible exposure; the upper-bound benchmark count MUST never enter ProbabilityEngine.
+
 EXP-015: Every benchmarked candidate MUST preserve exposureClass, benchmarkGames, expectedTrials (or bounds), derivation expression, source lineage, assumptions, and an exposureQuality flag. Approximate exposure MUST remain auditable downstream even when SelectionScore is a single number.
 
 EXP-016: Benchmark exposure assumptions are allowed because SelectionScore is a practical ranking/screening measure. They MUST NOT be rendered to users as expected actual counts unless clearly identified as estimates. Real runtime inference always uses the player's directly observed eligible trials under Observation.
