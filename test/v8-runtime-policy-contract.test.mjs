@@ -31,19 +31,3 @@ test("shared runtime policy has selection threshold and intentionally no per-tri
  assert.equal(typeof p.thresholds.SELECTION_SCORE,"number");
  assert.equal(Object.hasOwn(p.thresholds,"PER_ELIGIBLE_TRIAL_POWER"),false);
 });
-
-
-test("per-eligible-trial power stays a distinct calibration axis and does not infer a production threshold",()=>{
- const policy=read("runtime-policy.json");
- assert.equal(Object.hasOwn(policy.thresholds,"PER_ELIGIBLE_TRIAL_POWER"),false,"production threshold remains unset until multi-fixture calibration supports one");
- const examples=[
-  {bits:0.0005,power:0.1},
-  {bits:0.005,power:1.0},
-  {bits:0.016395578045057285,power:3.279115609011457},
-  {bits:0.05,power:10.0},
-  {bits:0.1,power:20.0}
- ];
- for(const x of examples) assert.ok(Math.abs(x.bits*200-x.power)<1e-12);
- assert.equal(examples[2].power>examples[1].power,true);
- assert.equal(examples[2].power<examples[3].power,true);
-});
