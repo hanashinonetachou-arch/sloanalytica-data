@@ -53,6 +53,7 @@ function runtimeEvaluation(selected){
       : {metric:"UNAVAILABLE",value:null};
   let importance=null;
   if(selectionScore!=null) importance=selectionScore>=20?"主要":selectionScore>=10?"有力":selectionScore>=5?"補助":"微小";
+  else if(perTrialBits!=null) importance="補助";
   else if(selected.adoptionCategory==="LIVE_CONDITIONAL") importance="補助";
   return {eligibility:"ELIGIBLE",evaluation,importance};
 }
