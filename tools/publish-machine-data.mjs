@@ -20,6 +20,16 @@ function canonicalJsonBuffer(p){
 function sha256Buffer(buffer){ return crypto.createHash("sha256").update(buffer).digest("hex"); }
 function exists(p){ return fs.existsSync(p); }
 function validId(id){ return /^[A-Z0-9_]+$/.test(id); }
+function semverCore(v){
+ const m=String(v??"").match(/^(\d+)\.(\d+)\.(\d+)(?:[-+].*)?$/);
+ return m?m.slice(1,4).map(Number):null;
+}
+function compareSemverCore(a,b){
+ const av=semverCore(a),bv=semverCore(b);
+ if(!av||!bv) return null;
+ for(let i=0;i<3;i++) if(av[i]!==bv[i]) return av[i]<bv[i]?-1:1;
+ return 0;
+}
 
 function paths(id){
  const b=path.join(BUILD_ROOT,id);
@@ -104,6 +114,14 @@ function publish(id,apply,deferAudit=false){
  const machines=Array.isArray(catalog.machines)?catalog.machines:[];
  const idx=machines.findIndex(m=>m.machineId===id);
  const existing=idx>=0?machines[idx]:null;
+ const nextVersion=pkg.machine?.machineDataVersion;
+ const existingVersion=existing?.machineDataVersion;
+ if(existingVersion){
+   const order=compareSemverCore(nextVersion,existingVersion);
+   if(order===null) die(`machineDataVersionを比較できません: existing=${existingVersion} next=${nextVersion}`);
+   if(order<0) die(`machineDataVersion downgrade blocked: existing=${existingVersion} next=${nextVersion}`);
+   if(order===0 && existing?.sha256!==actualSha) die(`machineDataVersion must increase when package content changes: existing=${existingVersion} next=${nextVersion}`);
+ }
  const packageBytes=approvedBytes.length;
  const now=new Date().toISOString();
  const timestamps=resolveCatalogTimestamps(existing,actualSha,now);
