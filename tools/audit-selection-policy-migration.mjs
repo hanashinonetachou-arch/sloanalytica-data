@@ -24,10 +24,11 @@ function reviewActiveSetDiff(machineId,diff){
  return {...diff,reviewStatus:'APPROVED_SAFETY_REMOVAL',reason:policy.reason};
 }
 
-export function auditSelectionPolicyMigration(root){
+export function auditSelectionPolicyMigration(root,{excludeMachineIds=[]}={}){
+ const excluded=new Set(excludeMachineIds);
  const reports=[]; const rr=path.join(root,'research');
  for(const de of fs.readdirSync(rr,{withFileTypes:true}).filter(x=>x.isDirectory()&&!x.name.startsWith('_'))){
-  const mid=de.name, rp=path.join(rr,mid,'research-data.json'),sp=path.join(rr,mid,'selection-data.json'),mp=path.join(root,'machines',mid,'machine-package.json');
+  const mid=de.name; if(excluded.has(mid)) continue; const rp=path.join(rr,mid,'research-data.json'),sp=path.join(rr,mid,'selection-data.json'),mp=path.join(root,'machines',mid,'machine-package.json');
   if(!exists(rp)||!exists(sp)||!exists(mp)) continue;
   const research=read(rp),selection=read(sp),published=read(mp); const statp=path.join(rr,mid,'statistics-report.json');
   let generated,error=null; try{generated=buildMachineData(research,selection,exists(statp)?read(statp):null);}catch(e){error=e?.message??String(e);}
