@@ -4,7 +4,7 @@ import fs from "node:fs";
 import path from "node:path";
 import {fileURLToPath} from "node:url";
 import {compileV8MachinePackage} from "../tools/compile-v8-machine-package.mjs";
-import {materializeCanonicalUi} from "../tools/materialize-v8-canonical-ui.mjs";
+import {materializeCanonicalUiV8} from "../tools/materialize-canonical-ui-v8-runtime.mjs";
 
 const ROOT=path.resolve(path.dirname(fileURLToPath(import.meta.url)),"..");
 const read=(p)=>JSON.parse(fs.readFileSync(path.join(ROOT,p),"utf8"));
@@ -14,7 +14,7 @@ test("v8 compiler preserves runtime evaluation metadata without embedding policy
   research:read(`${base}/research-data.json`),selection:read(`${base}/selection-data.json`),
   observation:read(`${base}/observation-contract.json`),evidence:read(`${base}/evidence-contract.json`),
   highLow:read(`${base}/high-low-discrimination.json`),summary:read(`${base}/machine-research-summary.json`),
-  canonical:read(`${base}/canonical-ui.json`),materializeUi:materializeCanonicalUi
+  canonical:read(`${base}/canonical-ui.json`),materializeUi:materializeCanonicalUiV8
  });
  const byId=new Map(pkg.features.features.map(x=>[x.featureId,x]));
  assert.equal(byId.get("FEAT_CZ_INITIAL").eligibility,"ELIGIBLE");
