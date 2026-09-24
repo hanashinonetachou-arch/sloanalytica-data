@@ -120,6 +120,16 @@ test("Revue v8.4 production package preserves conditional and categorical infere
  assert.equal(bigHint?.denominatorRule,"SUM_CATEGORY_COUNTS");
  assert.equal(bigHint?.categoryConditioning?.normalization,"SOURCE_CONDITIONAL_NO_RENORMALIZATION");
  assert.deepEqual(bigHint?.categoryConditioning?.excludedCategories,["EV_BONUS_END_2PLUS","EV_BONUS_END_4PLUS","EV_BONUS_END_5PLUS","EV_BONUS_END_6"]);
+ assert.equal(pkg.machine?.machineDataVersion,"0.3.0");
+ assert.equal(pkg.v8?.source,"REPRO_V8_UPSTREAM_ONLY");
+ assert.deepEqual(bigHint?.categoryInputIds,["INP_BIG_END_HIGH_WEAK","INP_BIG_END_HIGH_STRONG"]);
+ assert.equal(bigHint?.denominatorInputId,"INP_BIG_END_DEFAULT");
+ assert.deepEqual(bigHint?.categoryProbabilities?.SET_1,[0.062,0.0125]);
+ assert.deepEqual(bigHint?.categoryProbabilities?.SET_6,[0.094,0.075]);
+ const bonusEnd=pkg.ui.sections.find(section=>section.id==="SEC_BONUS_END");
+ assert.ok(bonusEnd?.items?.some(item=>item.id==="OBS_BIG_END_HINT"));
+ assert.ok(bonusEnd?.items?.some(item=>item.id===bonusEnd.evidenceGroupId));
+ assert.equal(byId.has("FEAT_AT_END_KIRIN_HINT_MULTINOMIAL"),false);
  assert.equal(specificBonus?.numeratorInputId,"INP_SPECIFIC_BONUS_5_AGG");
  assert.equal(specificBonus?.exposureReconstruction?.termSetCompleteness,"COMPLETE_FOR_DEFINED_BROADER_GAME_SCOPE");
  assert.equal(specificBonus?.exposureReconstruction?.additionalExcludedTerms?.status,"NONE_WITHIN_DEFINED_SCOPE");
