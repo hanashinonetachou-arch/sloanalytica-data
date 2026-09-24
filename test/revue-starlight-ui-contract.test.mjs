@@ -26,10 +26,10 @@ test('Revue Starlight conditional LED observation uses exhaustive generic catego
   );
 });
 
-test('Revue Starlight conditional LED observation remains record-only', () => {
+test('Revue Starlight conditional LED observation remains upstream-bound without UI engine wiring', () => {
   const serialized = JSON.stringify(conditional);
   assert.match(serialized, /INP_CZ_LED_PURPLE/);
   assert.doesNotMatch(serialized, /engineBinding/);
-  const live = summary.selection?.liveConditional ?? [];
-  assert.ok(live.some(item => item.featureId === 'FEAT_CZ_FAKE_END_LED'));
+  const primary = summary.selection?.primary ?? [];
+  assert.ok(primary.some(item => item.featureId === 'FEAT_CZ_FAKE_END_LED'));
 });
