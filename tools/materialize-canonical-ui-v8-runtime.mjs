@@ -55,7 +55,7 @@ export function materializeCanonicalUiV8(canonicalUi,{observationContract=null,e
   contractVersion:"runtime-ui-v8",source:"CANONICAL_UI",sourceSchemaVersion:canonicalUi.schemaVersion,
   manifestRevision:canonicalUi.manifestRevision,accordion:clone(canonicalUi.accordion),quickInput:clone(canonicalUi.quickInput??{enabled:false}),
   sections:(canonicalUi.sections??[]).map(s=>({
-   id:s.id,title:s.title,description:s.description,descriptionPresentation:clone(s.descriptionPresentation??null),
+   id:s.id,title:s.title,description:s.description,descriptionPresentation:clone(s.descriptionPresentation??null),\n   ...(s.importance?{importance:s.importance}:{}),
    collapsible:s.collapsible,defaultExpanded:s.defaultExpanded,headerToggle:s.headerToggle===true,genericEditButton:s.genericEditButton===true,
    ...(s.observationContext?{observationContext:s.observationContext}:{}),...(s.observationAction?{observationAction:s.observationAction}:{}),
    groups:(s.groups??[]).map(g=>({...mapNode(g),inputs:(g.inputs??[]).map(mapNode)})),
