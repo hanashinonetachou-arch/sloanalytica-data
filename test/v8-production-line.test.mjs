@@ -120,7 +120,7 @@ test("Revue v8.4 production package preserves conditional and categorical infere
  assert.equal(bigHint?.denominatorRule,"SUM_CATEGORY_COUNTS");
  assert.equal(bigHint?.categoryConditioning?.normalization,"SOURCE_CONDITIONAL_NO_RENORMALIZATION");
  assert.deepEqual(bigHint?.categoryConditioning?.excludedCategories,["EV_BONUS_END_2PLUS","EV_BONUS_END_4PLUS","EV_BONUS_END_5PLUS","EV_BONUS_END_6"]);
- assert.equal(pkg.machine?.machineDataVersion,"0.3.3");
+ assert.equal(pkg.machine?.machineDataVersion,"0.3.4");
  assert.equal(pkg.v8?.source,"REPRO_V8_UPSTREAM_ONLY");
  assert.deepEqual(bigHint?.categoryInputIds,["INP_BIG_END_HIGH_WEAK","INP_BIG_END_HIGH_STRONG"]);
  assert.equal(bigHint?.denominatorInputId,"INP_BIG_END_DEFAULT");
