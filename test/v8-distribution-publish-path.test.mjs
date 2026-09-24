@@ -11,6 +11,16 @@ const id="L_SMASLO_KAIJI_KYOEN_FJ";
 const run=(script,args=[])=>spawnSync(process.execPath,[path.join(ROOT,"tools",script),...args],{cwd:ROOT,encoding:"utf8"});
 const copy=(src,dst)=>{fs.mkdirSync(path.dirname(dst),{recursive:true});fs.copyFileSync(src,dst);};
 
+test("V8 approval rejects legacy or alternate package paths",()=>{
+ const prep=run("prepare-v8-distribution.mjs",[id]);assert.equal(prep.status,0,prep.stderr||prep.stdout);
+ const generated=path.join(ROOT,"build",id,"machine-package.generated.json");
+ const alternate=path.join(ROOT,"repro-v8",id,"machine-package.generated.json");
+ const rejected=run("publish-machine-data.mjs",["approve",id,alternate]);
+ assert.notEqual(rejected.status,0);
+ assert.match(rejected.stderr||rejected.stdout,/build\/.*machine-package\.generated\.json|V8 package/);
+ const approved=run("publish-machine-data.mjs",["approve",id,generated]);assert.equal(approved.status,0,approved.stderr||approved.stdout);
+});
+
 test("V8 approve/publish/catalog/registry path is reproducible without production package as build input",()=>{
  const tmp=fs.mkdtempSync(path.join(os.tmpdir(),"slo-v8-dist-"));
  const files=["catalog.json","machine-registry.json",`machines/${id}/machine-package.json`];
