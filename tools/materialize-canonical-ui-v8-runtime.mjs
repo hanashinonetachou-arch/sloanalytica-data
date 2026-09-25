@@ -48,6 +48,12 @@ export function materializeCanonicalUiV8(canonicalUi,{observationContract=null,e
  const mapNode=n=>{
   let out=clone(n);
   if(numericBindings.has(out.id)){ const binding=numericBindings.get(out.id); out.engineBinding=clone(binding.engineBinding); out.featureId=binding.featureId; }
+  if(out.interaction?.type==="CATEGORY_COUNTERS"){
+   out.interaction={...out.interaction,categories:(out.interaction.categories??[]).map(cat=>{
+    const binding=numericBindings.get(cat.id);
+    return binding?{...cat,engineBinding:clone(binding.engineBinding),featureId:binding.featureId}:cat;
+   })};
+  }
   out=bindEvidenceNode(out,evidenceCtx);
   return out;
  };
