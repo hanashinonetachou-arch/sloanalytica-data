@@ -179,6 +179,13 @@ test("MachineData preserves immutable Selection Candidate Contract for every mat
  }
 });
 
+test("Distribution publisher preserves the full approved MachinePackage bytes",()=>{
+ const src=fs.readFileSync(path.join(ROOT,"tools","publish-machine-data.mjs"),"utf8");
+ assert.match(src,/const approvedBytes=canonicalJsonBuffer\(p\.approved\)/);
+ assert.match(src,/fs\.writeFileSync\(p\.target,approvedBytes\)/);
+ assert.doesNotMatch(src,/delete\s+pkg\.features\??\.candidates/);
+});
+
 test("Revue MachineData Candidate Contract preserves v8.4 metric boundaries",()=>{
  const r=run("S_REVUE_STARLIGHT_CX"); assert.equal(r.status,0,r.stderr||r.stdout);
  const pkg=JSON.parse(fs.readFileSync(path.join(ROOT,"build","S_REVUE_STARLIGHT_CX","machine-package.generated.json"),"utf8"));
