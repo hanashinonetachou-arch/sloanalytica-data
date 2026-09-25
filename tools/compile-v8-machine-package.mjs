@@ -43,6 +43,16 @@ function compileInputs(observation,evidence){
   return {inputs:[...inputs.values()],runtimeEvidence,derivedExposureInputs};
 }
 
+function compileCandidates(selection){
+  return (selection.features??[]).map(selected=>({
+    featureId:selected.featureId,
+    eligibility:selected.eligibility,
+    evaluation:clone(selected.evaluation),
+    runtimePolicyBinding:clone(selected.runtimePolicyBinding),
+    ...(selected.importance!=null?{importance:selected.importance}:{})
+  }));
+}
+
 function compileFeatures(research,selection,observation){
   const rb=researchById(research), ob=observationByFeature(observation), out=[];
   for(const selected of selection.features??[]){
@@ -91,6 +101,7 @@ export function compileV8MachinePackage({research,selection,observation,evidence
   const id=research.machine?.machineId;
   if(!id||selection.machineId!==id||observation.machineId!==id||canonical.machineId!==id) throw new Error('v8 machineId mismatch');
   const {inputs,runtimeEvidence,derivedExposureInputs}=compileInputs(observation,evidence);
+  const candidates=compileCandidates(selection);
   const features=compileFeatures(research,selection,observation);
   for(const binding of derivedExposureInputs){ const feature=features.find(x=>x.featureId===binding.featureId); if(!feature) continue; feature.denominatorInputId=binding.inputId; feature.runtimeInferenceEnabled=true; delete feature.runtimeBlockReason; }
   const runtimeEvidenceSection=compileEvidence(runtimeEvidence);
@@ -115,5 +126,5 @@ export function compileV8MachinePackage({research,selection,observation,evidence
     if(linkedPlaySelection.status==='AVAILABLE'&&!linkedPlaySummary.service&&!linkedPlaySummary.serviceCandidate) throw new Error('AVAILABLE linked-play service missing');
     linkedPlay=linkedPlaySummary;
   }
-  return {schemaVersion:1,provenance,linkedPlay:clone(linkedPlay),machine:{schemaVersion:'2.0.0',machineId:id,machineDataVersion:selection.machineDataVersion??'repro-v8',displayName:research.machine.displayName,modelName:research.machine.modelName??research.machine.displayName,manufacturer:research.machine.manufacturer,settings:clone(research.machine.settings),packagePolicy:{offlineCapable:true,containsImages:false,containsExecutableCode:false}},inputs:{schemaVersion:'2.0.0',inputs},features:{schemaVersion:'2.0.0',features},evidence:runtimeEvidenceSection,ui,manifestRevision:canonical.manifestRevision,v8:{source:'REPRO_V8_UPSTREAM_ONLY',provenance:clone(provenance),linkedPlay:clone(linkedPlay),researchSchemaVersion:research.schemaVersion,selection:clone(selection),observation:clone(observation),evidence:clone(evidence),highLowDiscrimination:clone(highLow),machineResearchSummary:clone(summary)}};
+  return {schemaVersion:1,provenance,linkedPlay:clone(linkedPlay),machine:{schemaVersion:'2.0.0',machineId:id,machineDataVersion:selection.machineDataVersion??'repro-v8',displayName:research.machine.displayName,modelName:research.machine.modelName??research.machine.displayName,manufacturer:research.machine.manufacturer,settings:clone(research.machine.settings),packagePolicy:{offlineCapable:true,containsImages:false,containsExecutableCode:false}},inputs:{schemaVersion:'2.0.0',inputs},features:{schemaVersion:'2.0.0',candidates,features},evidence:runtimeEvidenceSection,ui,manifestRevision:canonical.manifestRevision,v8:{source:'REPRO_V8_UPSTREAM_ONLY',provenance:clone(provenance),linkedPlay:clone(linkedPlay),researchSchemaVersion:research.schemaVersion,selection:clone(selection),observation:clone(observation),evidence:clone(evidence),highLowDiscrimination:clone(highLow),machineResearchSummary:clone(summary)}};
 }
