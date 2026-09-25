@@ -179,6 +179,36 @@ test("MachineData preserves immutable Selection Candidate Contract for every mat
  }
 });
 
+test("Runtime Projection is metric-driven, reversible, and preserves Candidate Contract",()=>{
+ const compiler=fs.readFileSync(path.join(ROOT,"tools","compile-v8-machine-package.mjs"),"utf8");
+ assert.match(compiler,/const metric=candidate\.evaluation\?\.metric/);
+ assert.match(compiler,/const threshold=thresholds\[metric\]/);
+ assert.doesNotMatch(compiler,/binding\?\.mode!=='THRESHOLD'/);
+ const original=JSON.parse(fs.readFileSync(path.join(ROOT,"runtime-policy.json"),"utf8"));
+ const policyPath=path.join(ROOT,"runtime-policy.json");
+ try{
+  for(const [threshold,expected] of [[5,['ACTIVE','ACTIVE','ACTIVE']],[80,['INACTIVE','ACTIVE','ACTIVE']],[90,['INACTIVE','INACTIVE','ACTIVE']],[5,['ACTIVE','ACTIVE','ACTIVE']]]){
+   fs.writeFileSync(policyPath,JSON.stringify({...original,thresholds:{...original.thresholds,SELECTION_SCORE:threshold}},null,2)+'\n');
+   const r=run("S_REVUE_STARLIGHT_CX"); assert.equal(r.status,0,r.stderr||r.stdout);
+   const pkg=JSON.parse(fs.readFileSync(path.join(ROOT,"build","S_REVUE_STARLIGHT_CX","machine-package.generated.json"),"utf8"));
+   const projection=new Map(pkg.features.runtimeProjection.map(x=>[x.featureId,x]));
+   assert.deepEqual(['FEAT_AT_INITIAL','FEAT_CZ_INITIAL','FEAT_CZ_FAKE_END_LED'].map(id=>projection.get(id)?.runtimeStatus),expected);
+   assert.equal(projection.get('FEAT_SPECIFIC_BONUS_5_AGG')?.runtimeStatus,'ACTIVE');
+   assert.equal(projection.get('FEAT_BIG_END_HINT_MULTINOMIAL')?.runtimeStatus,'ACTIVE');
+   assert.equal(projection.get('FEAT_AT_END_KIRIN_HINT_MULTINOMIAL')?.runtimeStatus,'INACTIVE');
+   const selection=JSON.parse(fs.readFileSync(path.join(ROOT,'repro-v8','S_REVUE_STARLIGHT_CX','selection-data.json'),'utf8'));
+   const expectedCandidates=(selection.features??[]).map(feature=>({featureId:feature.featureId,...(feature.eligibility!=null?{eligibility:feature.eligibility}:{}),...(feature.evaluation!=null?{evaluation:structuredClone(feature.evaluation)}:{}),...(feature.runtimePolicyBinding!=null?{runtimePolicyBinding:structuredClone(feature.runtimePolicyBinding)}:{}),...(feature.importance!=null?{importance:feature.importance}:{})}));
+   assert.deepEqual(pkg.features.candidates,expectedCandidates);
+  }
+  fs.writeFileSync(policyPath,JSON.stringify({...original,thresholds:{...original.thresholds,MAXIMUM_SELECTION_SCORE:40,PER_ELIGIBLE_TRIAL_POWER:3.3}},null,2)+'\n');
+  const r=run("S_REVUE_STARLIGHT_CX"); assert.equal(r.status,0,r.stderr||r.stdout);
+  const pkg=JSON.parse(fs.readFileSync(path.join(ROOT,"build","S_REVUE_STARLIGHT_CX","machine-package.generated.json"),"utf8"));
+  const projection=new Map(pkg.features.runtimeProjection.map(x=>[x.featureId,x]));
+  assert.equal(projection.get('FEAT_SPECIFIC_BONUS_5_AGG')?.runtimeStatus,'INACTIVE');
+  assert.equal(projection.get('FEAT_BIG_END_HINT_MULTINOMIAL')?.runtimeStatus,'INACTIVE');
+ } finally { fs.writeFileSync(policyPath,JSON.stringify(original,null,2)+'\n'); }
+});
+
 test("Distribution publisher preserves the full approved MachinePackage bytes",()=>{
  const src=fs.readFileSync(path.join(ROOT,"tools","publish-machine-data.mjs"),"utf8");
  assert.match(src,/const approvedBytes=canonicalJsonBuffer\(p\.approved\)/);
