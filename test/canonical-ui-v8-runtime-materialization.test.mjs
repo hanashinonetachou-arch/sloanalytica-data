@@ -77,3 +77,34 @@ test("runtime mutation fails semantic equality",()=>{
   r.sections[0].items[0].inputs[0].label="母数";
   assert.throws(()=>assertCanonicalRuntimeUiEquality(canonicalFixture,r));
 });
+
+
+test("numeric and CATEGORY_COUNTERS bindings retain generic feature identity",()=>{
+  const canonical={
+    ...structuredClone(canonicalFixture),
+    sections:[{
+      id:"SEC_LED",title:"LED",collapsible:true,defaultExpanded:false,headerToggle:true,
+      items:[{id:"OBS_LED",observationMultiplicity:"REPEATED_CATEGORICAL_EVENT",interaction:{
+        type:"CATEGORY_COUNTERS",categoryCoverage:"EXHAUSTIVE",totalOpportunities:"DERIVE_FROM_CATEGORY_COUNTS",
+        categories:[
+          {id:"INP_LED_WHITE",label:"白",meaning:"白"},
+          {id:"INP_LED_BLUE",label:"青",meaning:"青"}
+        ]
+      }}]
+    }]
+  };
+  const observation={numeric:[{
+    featureId:"FEAT_LED",
+    denominator:{type:"DERIVED_SUM",inputIds:["INP_LED_WHITE","INP_LED_BLUE"]},
+    inputs:[
+      {id:"INP_LED_WHITE",label:"白",type:"counter"},
+      {id:"INP_LED_BLUE",label:"青",type:"counter"}
+    ]
+  }]};
+  const ui=materializeCanonicalUiV8(canonical,{observationContract:observation});
+  const cats=ui.sections[0].items[0].interaction.categories;
+  assert.equal(cats[0].featureId,"FEAT_LED");
+  assert.equal(cats[0].engineBinding.inputId,"INP_LED_WHITE");
+  assert.equal(cats[1].featureId,"FEAT_LED");
+  assert.equal(cats[1].engineBinding.inputId,"INP_LED_BLUE");
+});
