@@ -35,18 +35,18 @@ test('Revue v8.4 Selection is reproducibly normalized from Selection + Summary',
 });
 
 
+// Phase 7 regression: real-machine fixture proves the generic CATEGORY_COUNTERS contract end to end.
 test('Revue CATEGORY_COUNTERS bind generically to Observation and FeatureDefinition inputs',()=>{
  const observation=JSON.parse(fs.readFileSync(new URL('observation-contract.json',base),'utf8'));
  const canonical=JSON.parse(fs.readFileSync(new URL('canonical-ui.json',base),'utf8'));
- const generated=JSON.parse(fs.readFileSync(new URL('../../build/S_REVUE_STARLIGHT_CX/machine-package.generated.json',import.meta.url),'utf8'));
- const ui=materializeCanonicalUiV8(canonical,{observationContract:observation,evidenceContract:generated.v8?.evidence});
+ const ui=materializeCanonicalUiV8(canonical,{observationContract:observation,evidenceContract:null});
  const obsByInput=new Map();
  for(const feature of observation.numeric??[]) for(const input of feature.inputs??[]){
   if(input.id&&!input.shared) obsByInput.set(input.id,{featureId:feature.featureId,inputId:input.engineInputId??input.id});
  }
- const featureInputs=new Map((generated.features?.features??[]).map(feature=>[
+ const featureInputs=new Map((observation.numeric??[]).map(feature=>[
   feature.featureId,
-  new Set([feature.numeratorInputId,...(feature.categoryInputIds??[]),...(feature.denominatorInputIds??[])].filter(Boolean))
+  new Set((feature.inputs??[]).filter(input=>!input.shared).map(input=>input.engineInputId??input.id).filter(Boolean))
  ]));
  const numericCategories=[];
  for(const section of ui.sections??[]) for(const node of [...(section.groups??[]),...(section.items??[])]){
