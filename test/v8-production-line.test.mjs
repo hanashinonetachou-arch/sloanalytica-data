@@ -88,11 +88,16 @@ test("Revue v8.4 production package preserves conditional and categorical infere
  const r=run("S_REVUE_STARLIGHT_CX"); assert.equal(r.status,0,r.stderr||r.stdout);
  const pkg=JSON.parse(fs.readFileSync(path.join(ROOT,"build","S_REVUE_STARLIGHT_CX","machine-package.generated.json"),"utf8"));
  const byId=new Map(pkg.features.features.map(x=>[x.featureId,x]));
+ const candidatesById=new Map(pkg.features.candidates.map(x=>[x.featureId,x]));
+ assert.ok(pkg.features.candidates.length>=pkg.features.features.length);
+ assert.equal(pkg.runtimePolicyBaseline?.thresholds?.SELECTION_SCORE,5);
+ assert.equal(candidatesById.get("FEAT_CZ_INITIAL")?.runtimePolicyBinding?.metric,"SELECTION_SCORE");
+ assert.equal(candidatesById.get("FEAT_BIG_END_HINT_MULTINOMIAL")?.runtimePolicyBinding?.mode,"NOT_THRESHOLD_CONTROLLED");
  assert.equal(byId.get("FEAT_CZ_INITIAL")?.probabilityEngineUsage,true);
  assert.equal(byId.get("FEAT_AT_INITIAL")?.probabilityEngineUsage,true);
  assert.equal(byId.get("FEAT_CZ_FAKE_END_LED")?.modelType,"multinomial");
  assert.equal(byId.get("FEAT_CZ_FAKE_END_LED")?.categoryInputIds?.length,4);
- assert.equal(byId.get("FEAT_SPECIFIC_BONUS_5_AGG")?.adoptionCategory,"LIVE_CONDITIONAL");
+ assert.equal(byId.get("FEAT_SPECIFIC_BONUS_5_AGG")?.eligibility,"ELIGIBLE");
  assert.equal(byId.get("FEAT_SPECIFIC_BONUS_5_AGG")?.inferenceGate,"EXACT_EXPOSURE_RECONSTRUCTION_COMPLETE");
  const specificBonus=byId.get("FEAT_SPECIFIC_BONUS_5_AGG");
  assert.equal(specificBonus?.runtimeInferenceEnabled,true);
@@ -131,8 +136,25 @@ test("Revue v8.4 production package preserves conditional and categorical infere
  assert.ok(bonusEnd?.items?.some(item=>item.id==="OBS_BIG_END_HINT"));
  assert.ok(bonusEnd?.items?.some(item=>item.id===bonusEnd.evidenceGroupId || item.interaction?.categoryCoverage==="NON_EXHAUSTIVE"));
  assert.equal(byId.has("FEAT_AT_END_KIRIN_HINT_MULTINOMIAL"),false);
+ assert.equal(candidatesById.has("FEAT_AT_END_KIRIN_HINT_MULTINOMIAL"),false);
+ const ineligible=pkg.v8?.selection?.features?.find(x=>x.featureId==="FEAT_AT_END_KIRIN_HINT_MULTINOMIAL");
+ assert.equal(ineligible?.eligibility,"INELIGIBLE");
+ assert.equal(ineligible?.ineligibilityReason,"INCOMPLETE_LIKELIHOOD");
  assert.equal(specificBonus?.numeratorInputId,"INP_SPECIFIC_BONUS_5_AGG");
  assert.equal(specificBonus?.exposureReconstruction?.termSetCompleteness,"COMPLETE_FOR_DEFINED_BROADER_GAME_SCOPE");
  assert.equal(specificBonus?.exposureReconstruction?.additionalExcludedTerms?.status,"NONE_WITHIN_DEFINED_SCOPE");
  assert.equal(specificBonus?.exposureReconstruction?.expression,"eligibleBonusLotteryGames = broaderGameCount - normalReproductionEntryCount*20 - czReproductionExcludedGames - atReproductionExcludedGames");
+});
+
+
+test("v8.4 candidate source is policy-independent and baseline projection is derived",()=>{
+ const r=run("S_REVUE_STARLIGHT_CX"); assert.equal(r.status,0,r.stderr||r.stdout);
+ const pkg=JSON.parse(fs.readFileSync(path.join(ROOT,"build","S_REVUE_STARLIGHT_CX","machine-package.generated.json"),"utf8"));
+ const source=JSON.stringify(pkg.features.candidates);
+ const project=threshold=>pkg.features.candidates.filter(c=>c.runtimePolicyBinding?.mode!=="THRESHOLD"||c.evaluation?.metric!=="SELECTION_SCORE"||c.evaluation?.value>=threshold).map(c=>c.featureId);
+ const at5=project(5),at4=project(4),at6=project(6),backTo5=project(5);
+ assert.deepEqual(backTo5,at5,"5 -> 4 -> 6 -> 5 must be reversible from the same candidate source");
+ assert.equal(JSON.stringify(pkg.features.candidates),source,"projection must not mutate candidates");
+ assert.ok(at4.length>=at5.length);
+ assert.ok(at6.length<=at5.length);
 });

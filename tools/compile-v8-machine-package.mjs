@@ -43,7 +43,7 @@ function compileInputs(observation,evidence){
   return {inputs:[...inputs.values()],runtimeEvidence,derivedExposureInputs};
 }
 
-function runtimeEvaluation(selected){
+function candidateEvaluation(selected){
   const selectionScore=Number.isFinite(selected.selectionScore)?selected.selectionScore:(Number.isFinite(selected.guaranteedMinimumSelectionScore)?selected.guaranteedMinimumSelectionScore:null);
   const perTrialBits=Number.isFinite(selected.igPerEligibleTrial)?selected.igPerEligibleTrial:(Number.isFinite(selected.perOpportunityInformationBits)?selected.perOpportunityInformationBits:null);
   const evaluation=selectionScore!=null
@@ -54,14 +54,22 @@ function runtimeEvaluation(selected){
   let importance=null;
   if(selectionScore!=null) importance=selectionScore>=20?"主要":selectionScore>=10?"有力":selectionScore>=5?"補助":"微小";
   else if(perTrialBits!=null) importance="補助";
-  else if(selected.adoptionCategory==="LIVE_CONDITIONAL") importance="補助";
-  return {eligibility:"ELIGIBLE",evaluation,importance};
+  const runtimePolicyBinding=evaluation.metric==="SELECTION_SCORE"
+    ? {mode:"THRESHOLD",metric:"SELECTION_SCORE"}
+    : {mode:"NOT_THRESHOLD_CONTROLLED"};
+  return {evaluation,importance,runtimePolicyBinding};
+}
+
+function eligibilityOf(selected){
+  if(selected.eligibility==="ELIGIBLE"||selected.eligibility==="INELIGIBLE") return selected.eligibility;
+  return String(selected.adoptionCategory??"").startsWith("INCLUDE_")||selected.adoptionCategory==="LIVE_CONDITIONAL"?"ELIGIBLE":"INELIGIBLE";
 }
 
 function compileFeatures(research,selection,observation){
   const rb=researchById(research), ob=observationByFeature(observation), out=[];
   for(const selected of selection.features??[]){
-    if(!String(selected.adoptionCategory??'').startsWith('INCLUDE_')&&selected.adoptionCategory!=='LIVE_CONDITIONAL') continue;
+    const eligibility=eligibilityOf(selected);
+    if(eligibility!=="ELIGIBLE") continue;
     const obs=ob.get(selected.featureId); if(!obs) throw new Error(`${selected.featureId} observation contract missing`);
     const sources=(selected.sourceResearchFeatureIds?.length?selected.sourceResearchFeatureIds:[selected.researchFeatureId]).map(id=>rb.get(id));
     if(sources.some(x=>!x)) throw new Error(`${selected.featureId} research source missing`);
@@ -82,12 +90,12 @@ function compileFeatures(research,selection,observation){
         categoryProbabilities={}; for(const setting of research.machine?.settings??[]) categoryProbabilities[setting]=sources.map(x=>x.settingValues?.[setting]?.probability);
       }
       if(Object.values(categoryProbabilities).some(a=>a.some(p=>!Number.isFinite(p)))) throw new Error(`${selected.featureId} incomplete multinomial probabilities`);
-      out.push({featureId:selected.featureId,name:obs.context??sources[0].name??selected.featureId,adoptionCategory:selected.adoptionCategory,...runtimeEvaluation(selected),calculationRole:'PROBABILITY',probabilityEngineUsage:true,modelType:'multinomial',numeratorInputId:counters[0].engineInputId,categoryInputIds:counters.slice(1).map(x=>x.engineInputId),denominatorInputId:denominator?.engineInputId??(obs.denominator?.type==='DERIVED_SUM'?counters[0]?.engineInputId:undefined),denominatorRule:obs.denominator?.type==='DERIVED_SUM'?'SUM_CATEGORY_COUNTS':undefined,probabilities:{},categoryLabels,categoryProbabilities,categoryConditioning:{excludedCategories:clone(obs.exclusionRule?.excludedEvidenceOutcomes??[]),normalization:obs.exclusionRule?'SOURCE_CONDITIONAL_NO_RENORMALIZATION':'RENORMALIZE_INCLUDED'},sourceResearchFeatureIds:selected.sourceResearchFeatureIds??[selected.researchFeatureId]});
+      out.push({featureId:selected.featureId,name:obs.context??sources[0].name??selected.featureId,adoptionCategory:selected.adoptionCategory,eligibility,...candidateEvaluation(selected),calculationRole:'PROBABILITY',probabilityEngineUsage:true,modelType:'multinomial',numeratorInputId:counters[0].engineInputId,categoryInputIds:counters.slice(1).map(x=>x.engineInputId),denominatorInputId:denominator?.engineInputId??(obs.denominator?.type==='DERIVED_SUM'?counters[0]?.engineInputId:undefined),denominatorRule:obs.denominator?.type==='DERIVED_SUM'?'SUM_CATEGORY_COUNTS':undefined,probabilities:{},categoryLabels,categoryProbabilities,categoryConditioning:{excludedCategories:clone(obs.exclusionRule?.excludedEvidenceOutcomes??[]),normalization:obs.exclusionRule?'SOURCE_CONDITIONAL_NO_RENORMALIZATION':'RENORMALIZE_INCLUDED'},observationContract:clone(obs),dependencyContract:clone(selected.dependencyContract),uiBinding:{featureId:selected.featureId},summaryMetadata:{label:selected.label??obs.context??sources[0].name??selected.featureId},sourceSelection:clone(selected),sourceResearchFeatureIds:selected.sourceResearchFeatureIds??[selected.researchFeatureId]});
     }else{
       const source=sources[0], probabilities=Object.fromEntries((research.machine?.settings??[]).map(s=>[s,source.settingValues?.[s]?.probability]));
       if(Object.values(probabilities).some(p=>!Number.isFinite(p))) throw new Error(`${selected.featureId} incomplete probabilities`);
       const primary=selected.dependencyContract?.preferredPrimary;
-      out.push({featureId:selected.featureId,name:source.name??selected.featureId,adoptionCategory:selected.adoptionCategory,...runtimeEvaluation(selected),calculationRole:'PROBABILITY',probabilityEngineUsage:true,modelType:model,numeratorInputId:selectedNumerator?.engineInputId??counters[0]?.engineInputId,denominatorInputId:denominator?.engineInputId,displayFormat:'ratio_1_over_n',probabilities,...(selected.adoptionCategory==='LIVE_CONDITIONAL'?{inferenceGate:selected.liveInferenceGate,exposureReconstruction:clone(obs.exposureReconstruction),runtimeInferenceEnabled:false,runtimeBlockReason:'EXACT_EXPOSURE_RUNTIME_BINDING_REQUIRED'}:{}),...(primary&&primary!==selected.featureId?{suppressedByFeatureIds:[primary]}:{}),sourceResearchFeatureIds:[selected.researchFeatureId]});
+      out.push({featureId:selected.featureId,name:source.name??selected.featureId,adoptionCategory:selected.adoptionCategory,eligibility,...candidateEvaluation(selected),calculationRole:'PROBABILITY',probabilityEngineUsage:true,modelType:model,numeratorInputId:selectedNumerator?.engineInputId??counters[0]?.engineInputId,denominatorInputId:denominator?.engineInputId,displayFormat:'ratio_1_over_n',probabilities,...((selected.runtimeInferenceGate??selected.liveInferenceGate)?{runtimeInferenceGate:selected.runtimeInferenceGate??selected.liveInferenceGate,inferenceGate:selected.runtimeInferenceGate??selected.liveInferenceGate}:{}),...(obs.exposureReconstruction?{exposureReconstruction:clone(obs.exposureReconstruction)}:{}),...(primary&&primary!==selected.featureId?{suppressedByFeatureIds:[primary]}:{}),observationContract:clone(obs),dependencyContract:clone(selected.dependencyContract),uiBinding:{featureId:selected.featureId},summaryMetadata:{label:selected.label??source.name??selected.featureId},sourceSelection:clone(selected),sourceResearchFeatureIds:[selected.researchFeatureId]});
     }
   }
   return out;
@@ -106,8 +114,8 @@ export function compileV8MachinePackage({research,selection,observation,evidence
   const id=research.machine?.machineId;
   if(!id||selection.machineId!==id||observation.machineId!==id||canonical.machineId!==id) throw new Error('v8 machineId mismatch');
   const {inputs,runtimeEvidence,derivedExposureInputs}=compileInputs(observation,evidence);
-  const features=compileFeatures(research,selection,observation);
-  for(const binding of derivedExposureInputs){ const feature=features.find(x=>x.featureId===binding.featureId); if(!feature) continue; feature.denominatorInputId=binding.inputId; feature.runtimeInferenceEnabled=true; delete feature.runtimeBlockReason; }
+  const candidates=compileFeatures(research,selection,observation);
+  for(const binding of derivedExposureInputs){ const feature=candidates.find(x=>x.featureId===binding.featureId); if(!feature) continue; feature.denominatorInputId=binding.inputId; feature.runtimeInferenceEnabled=true; delete feature.runtimeBlockReason; }
   const runtimeEvidenceSection=compileEvidence(runtimeEvidence);
   const ui=materializeUi(canonical,{observationContract:observation,evidenceContract:runtimeEvidence});
   const provenance=clone(selection.provenance??canonical.provenance??summary?.provenance);
@@ -130,5 +138,7 @@ export function compileV8MachinePackage({research,selection,observation,evidence
     if(linkedPlaySelection.status==='AVAILABLE'&&!linkedPlaySummary.service&&!linkedPlaySummary.serviceCandidate) throw new Error('AVAILABLE linked-play service missing');
     linkedPlay=linkedPlaySummary;
   }
-  return {schemaVersion:1,provenance,linkedPlay:clone(linkedPlay),machine:{schemaVersion:'2.0.0',machineId:id,machineDataVersion:selection.machineDataVersion??'repro-v8',displayName:research.machine.displayName,modelName:research.machine.modelName??research.machine.displayName,manufacturer:research.machine.manufacturer,settings:clone(research.machine.settings),packagePolicy:{offlineCapable:true,containsImages:false,containsExecutableCode:false}},inputs:{schemaVersion:'2.0.0',inputs},features:{schemaVersion:'2.0.0',features},evidence:runtimeEvidenceSection,ui,manifestRevision:canonical.manifestRevision,v8:{source:'REPRO_V8_UPSTREAM_ONLY',provenance:clone(provenance),linkedPlay:clone(linkedPlay),researchSchemaVersion:research.schemaVersion,selection:clone(selection),observation:clone(observation),evidence:clone(evidence),highLowDiscrimination:clone(highLow),machineResearchSummary:clone(summary)}};
+  const runtimePolicyBaseline={schemaVersion:1,policyVersion:"v8.4-package-baseline",thresholds:{SELECTION_SCORE:5.0}};
+  const features=candidates.filter(candidate=>candidate.runtimePolicyBinding?.mode!=="THRESHOLD"||candidate.evaluation?.metric!=="SELECTION_SCORE"||candidate.evaluation?.value>=runtimePolicyBaseline.thresholds.SELECTION_SCORE);
+  return {schemaVersion:1,provenance,linkedPlay:clone(linkedPlay),runtimePolicyBaseline,machine:{schemaVersion:'2.0.0',machineId:id,machineDataVersion:selection.machineDataVersion??'repro-v8',displayName:research.machine.displayName,modelName:research.machine.modelName??research.machine.displayName,manufacturer:research.machine.manufacturer,settings:clone(research.machine.settings),packagePolicy:{offlineCapable:true,containsImages:false,containsExecutableCode:false}},inputs:{schemaVersion:'2.0.0',inputs},features:{schemaVersion:'2.0.0',candidates,features},evidence:runtimeEvidenceSection,ui,manifestRevision:canonical.manifestRevision,v8:{source:'REPRO_V8_UPSTREAM_ONLY',provenance:clone(provenance),linkedPlay:clone(linkedPlay),researchSchemaVersion:research.schemaVersion,selection:clone(selection),observation:clone(observation),evidence:clone(evidence),highLowDiscrimination:clone(highLow),machineResearchSummary:clone(summary)}};
 }

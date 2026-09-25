@@ -712,3 +712,36 @@ These rules close a reproducibility gap discovered by the Kaiji zero-base rerun.
 - **SUMUI-014C**: An ALTERNATIVE/FALLBACK element suppressed by `DO_NOT_MULTIPLY` does not become 「主要」 merely because its standalone score is high. If it is retained as an actual user-observable fallback inference path, its importance is one tier below the importance its score would otherwise produce, with a floor of 「微小」. If it is not an active inference path, it is not an adopted element and receives no importance label.
 - **SUMUI-014D**: Evidence constraints are not assigned these numeric importance labels unless a future Manifest rule defines an Evidence-specific quantitative usefulness measure. They remain Evidence, computationally separate from numeric Selection.
 - **SUMUI-014E**: An adopted LIVE_CONDITIONAL element follows the ordinary score-derived importance rule when a permitted single-value benchmark exposure (DIRECT_PUBLISHED, DERIVED_EXACT, or DERIVED_APPROXIMATED) yields SelectionScore, while preserving exposure quality in technical provenance. If benchmarkScoreStatus=BLOCKED_UNRESOLVED, it receives the user-facing importance 「補助」 while exposure remains unresolved. A DERIVED_BOUNDED score range that crosses importance thresholds MUST use the lower supported tier or remain explicitly unresolved; it MUST NOT be upgraded from the favorable bound alone.
+
+
+## v8.4 Candidate Contract / Runtime Projection responsibility amendment
+
+SEL-RT-001: SelectionScore and related information measures are Evaluation outputs. They MUST NOT by themselves determine structural Eligibility or permanently delete a Numeric candidate.
+
+SEL-RT-002: User-facing importance derived from SelectionScore is presentation metadata only: score >=20 = 主要, >=10 and <20 = 有力, >=5 and <10 = 補助, <5 = 微小. These labels MUST NOT be interpreted as Eligibility or Runtime Activation.
+
+ELI-001: Every researched Numeric candidate MUST receive an explicit Eligibility state, ELIGIBLE or INELIGIBLE, after likelihood completeness, denominator/Observation validity and Dependency checks.
+
+ELI-002: INELIGIBLE is reserved for structural inference failure such as incomplete likelihood, invalid/unobservable denominator, unresolved double counting/dependency, missing likelihood, or statistically invalid construction. INELIGIBLE items remain in Research/Evaluation/Summary but MUST NOT enter MachinePackage features.candidates and MUST NOT be revived by Runtime Policy.
+
+ELI-003: LIVE_CONDITIONAL is not an Eligibility category. A conditionally usable Numeric feature is ELIGIBLE and declares a runtimeInferenceGate such as EXACT_EXPOSURE_RECONSTRUCTION_COMPLETE or EXACT_CATEGORY_COUNTS_COMPLETE. Runtime Activation and per-session inference-gate satisfaction are independent decisions.
+
+OBS-RT-001: Observation MUST preserve a complete Observation Contract for every ELIGIBLE Numeric candidate even when the current Runtime Policy would make it inactive. Runtime Policy changes MUST be able to reactivate it without rerunning Selection or regenerating MachineData.
+
+PKG-RT-001: MachinePackage MUST preserve every ELIGIBLE Numeric candidate as a complete immutable features.candidates contract. The contract MUST retain feature identity, likelihood/model and probabilities, numerator/denominator bindings, Observation contract, Evaluation, Eligibility, Dependency, runtimeInferenceGate when applicable, UI binding, Summary metadata and Runtime Policy binding.
+
+PKG-RT-002: MachinePackage generation MUST NOT delete an ELIGIBLE candidate because of the current Runtime Policy. INELIGIBLE items MUST NOT be copied into features.candidates.
+
+PKG-RT-003: Runtime Policy binding MUST be explicit. SELECTION_SCORE uses {mode: THRESHOLD, metric: SELECTION_SCORE}. Metrics without an approved activation threshold, including PER_ELIGIBLE_TRIAL_POWER, use NOT_THRESHOLD_CONTROLLED. MAXIMUM_SELECTION_SCORE is UPPER_BOUND_ONLY and MUST NOT be used as the ordinary activation threshold.
+
+PKG-RT-004: MachinePackage MUST carry runtimePolicyBaseline sufficient to reproduce the activation policy at package generation time. For v8.4 the normal SELECTION_SCORE baseline threshold is 5.0.
+
+RUN-RT-001: Runtime Projection MUST always start from immutable features.candidates. Policy changes such as 5.0 -> 4.0 -> 6.0 -> 5.0 MUST be reversible from the same source contract; projection MUST NOT cumulatively delete candidates.
+
+RUN-RT-002: Runtime Projection emits ACTIVE candidates to features.features for the existing FeatureEngine/ProbabilityEngine boundary. Threshold logic MUST NOT move into ProbabilityEngine.
+
+RUN-RT-003: Runtime Policy resolution order is Network Runtime Policy -> Cached Runtime Policy -> MachinePackage runtimePolicyBaseline -> fail-safe. If a new Candidate Contract has no usable policy or baseline, THRESHOLD-controlled candidates MUST NOT fail open. Legacy packages without Candidate Contract retain their compatibility behavior.
+
+SUM-RT-001: machineResearchSummary is immutable research/evaluation/eligibility Source of Truth. Runtime Policy MUST produce runtimeMachineResearchSummary as a projection and MUST NOT rewrite the source summary.
+
+UI-RT-001: Canonical UI owns presentation placement and binding, not a second copy of Summary truth. UI bindings for all ELIGIBLE candidates MUST survive into the source contract; Runtime Projection shows only currently ACTIVE bindings in runtimeUi.
