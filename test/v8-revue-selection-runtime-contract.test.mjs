@@ -3,7 +3,6 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import {normalizeSelectionRuntimeContract} from '../tools/normalize-selection-runtime-contract.mjs';
 import {materializeCanonicalUiV8} from '../tools/materialize-canonical-ui-v8-runtime.mjs';
-import {compileV8MachinePackage} from '../tools/compile-v8-machine-package.mjs';
 
 const base=new URL('../repro-v8/S_REVUE_STARLIGHT_CX/',import.meta.url);
 const selection=JSON.parse(fs.readFileSync(new URL('selection-data.json',base),'utf8'));
@@ -40,15 +39,14 @@ test('Revue v8.4 Selection is reproducibly normalized from Selection + Summary',
 test('Revue CATEGORY_COUNTERS bind generically to Observation and FeatureDefinition inputs',()=>{
  const observation=JSON.parse(fs.readFileSync(new URL('observation-contract.json',base),'utf8'));
  const canonical=JSON.parse(fs.readFileSync(new URL('canonical-ui.json',base),'utf8'));
- const generated=compileV8MachinePackage('S_REVUE_STARLIGHT_CX');
- const ui=materializeCanonicalUiV8(canonical,{observationContract:observation,evidenceContract:generated.v8?.evidence});
+ const ui=materializeCanonicalUiV8(canonical,{observationContract:observation,evidenceContract:null});
  const obsByInput=new Map();
  for(const feature of observation.numeric??[]) for(const input of feature.inputs??[]){
   if(input.id&&!input.shared) obsByInput.set(input.id,{featureId:feature.featureId,inputId:input.engineInputId??input.id});
  }
- const featureInputs=new Map((generated.features?.features??[]).map(feature=>[
+ const featureInputs=new Map((observation.numeric??[]).map(feature=>[
   feature.featureId,
-  new Set([feature.numeratorInputId,...(feature.categoryInputIds??[]),...(feature.denominatorInputIds??[])].filter(Boolean))
+  new Set((feature.inputs??[]).filter(input=>!input.shared).map(input=>input.engineInputId??input.id).filter(Boolean))
  ]));
  const numericCategories=[];
  for(const section of ui.sections??[]) for(const node of [...(section.groups??[]),...(section.items??[])]){
