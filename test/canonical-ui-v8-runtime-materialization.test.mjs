@@ -107,4 +107,6 @@ test("numeric and CATEGORY_COUNTERS bindings retain generic feature identity",()
   assert.equal(cats[0].engineBinding.inputId,"INP_LED_WHITE");
   assert.equal(cats[1].featureId,"FEAT_LED");
   assert.equal(cats[1].engineBinding.inputId,"INP_LED_BLUE");
+  const feature={featureId:"FEAT_LED",numeratorInputId:"INP_LED_WHITE",categoryInputIds:["INP_LED_BLUE"]};
+  assert.deepEqual(cats.map(x=>x.engineBinding.inputId),[feature.numeratorInputId,...feature.categoryInputIds]);
 });
