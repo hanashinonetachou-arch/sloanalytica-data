@@ -8,7 +8,8 @@ const selection=JSON.parse(fs.readFileSync(new URL('selection-data.json',base),'
 const summary=JSON.parse(fs.readFileSync(new URL('machine-research-summary.json',base),'utf8'));
 
 test('Revue v8.4 Selection is reproducibly normalized from Selection + Summary',()=>{
- const regenerated=normalizeSelectionRuntimeContract(selection,summary);
+ const source={...selection,features:selection.features.map(({eligibility,importance,evaluation,runtimePolicyBinding,...feature})=>feature)};
+ const regenerated=normalizeSelectionRuntimeContract(source,summary);
  assert.deepEqual(regenerated.features,selection.features,'checked-in Selection feature contracts must equal generic normalization output');
  const byId=new Map(selection.features.map(x=>[x.featureId,x]));
  const expected=[
