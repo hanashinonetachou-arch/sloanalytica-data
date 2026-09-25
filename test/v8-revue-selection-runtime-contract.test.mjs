@@ -2,6 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import {normalizeSelectionRuntimeContract} from '../tools/normalize-selection-runtime-contract.mjs';
+import {materializeCanonicalUiV8} from '../tools/materialize-canonical-ui-v8-runtime.mjs';
 
 const base=new URL('../repro-v8/S_REVUE_STARLIGHT_CX/',import.meta.url);
 const selection=JSON.parse(fs.readFileSync(new URL('selection-data.json',base),'utf8'));
@@ -31,4 +32,36 @@ test('Revue v8.4 Selection is reproducibly normalized from Selection + Summary',
  assert.equal(blocked?.eligibility,'INELIGIBLE');
  assert.equal(blocked?.evaluation?.metric,'UNAVAILABLE');
  assert.equal(blocked?.evaluation?.value,null);
+});
+
+
+test('Revue CATEGORY_COUNTERS bind generically to Observation and FeatureDefinition inputs',()=>{
+ const observation=JSON.parse(fs.readFileSync(new URL('observation-contract.json',base),'utf8'));
+ const canonical=JSON.parse(fs.readFileSync(new URL('canonical-ui.json',base),'utf8'));
+ const generated=JSON.parse(fs.readFileSync(new URL('../../build/S_REVUE_STARLIGHT_CX/machine-package.generated.json',import.meta.url),'utf8'));
+ const ui=materializeCanonicalUiV8(canonical,{observationContract:observation,evidenceContract:generated.v8?.evidence});
+ const obsByInput=new Map();
+ for(const feature of observation.numeric??[]) for(const input of feature.inputs??[]){
+  if(input.id&&!input.shared) obsByInput.set(input.id,{featureId:feature.featureId,inputId:input.engineInputId??input.id});
+ }
+ const featureInputs=new Map((generated.features?.features??[]).map(feature=>[
+  feature.featureId,
+  new Set([feature.numeratorInputId,...(feature.categoryInputIds??[]),...(feature.denominatorInputIds??[])].filter(Boolean))
+ ]));
+ const numericCategories=[];
+ for(const section of ui.sections??[]) for(const node of [...(section.groups??[]),...(section.items??[])]){
+  if(node.interaction?.type!=='CATEGORY_COUNTERS') continue;
+  for(const category of node.interaction.categories??[]){
+   const expected=obsByInput.get(category.id);
+   if(!expected) continue; // Evidence CATEGORY_COUNTERS are governed by the Evidence contract, not numeric FeatureDefinition.
+   numericCategories.push(category.id);
+   assert.equal(category.featureId,expected.featureId,category.id);
+   assert.equal(category.engineBinding?.inputId,expected.inputId,category.id);
+   assert.equal(featureInputs.get(expected.featureId)?.has(expected.inputId),true,category.id);
+  }
+ }
+ assert.deepEqual(numericCategories,[
+  'INP_CZ_LED_WHITE','INP_CZ_LED_BLUE','INP_CZ_LED_GREEN','INP_CZ_LED_RED','INP_CZ_LED_PURPLE',
+  'INP_BIG_END_DEFAULT','INP_BIG_END_HIGH_WEAK','INP_BIG_END_HIGH_STRONG'
+ ]);
 });
