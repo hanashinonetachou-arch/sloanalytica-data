@@ -42,6 +42,13 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 24
+      - name: Prepare selected V8 machine for regression
+        if: github.event_name == 'push'
+        shell: bash
+        run: |
+          set -euo pipefail
+          MACHINE_ID="$(node -p "require('./.v8-production-request.json').machineId")"
+          npm run machine:v8 -- "$MACHINE_ID"
       - name: Run V8 production-line regression suite
         run: npm run test:v8-production-line
       - name: Build selected V8 machine
