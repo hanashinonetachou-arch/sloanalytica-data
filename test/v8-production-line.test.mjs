@@ -166,9 +166,9 @@ test("MachineData preserves immutable Selection Candidate Contract for every mat
   const pkg=JSON.parse(fs.readFileSync(path.join(ROOT,"build",id,"machine-package.generated.json"),"utf8"));
   const expected=(selection.features??[]).map(feature=>({
    featureId:feature.featureId,
-   eligibility:feature.eligibility,
-   evaluation:structuredClone(feature.evaluation),
-   runtimePolicyBinding:structuredClone(feature.runtimePolicyBinding),
+   ...(feature.eligibility!=null?{eligibility:feature.eligibility}:{}),
+   ...(feature.evaluation!=null?{evaluation:structuredClone(feature.evaluation)}:{}),
+   ...(feature.runtimePolicyBinding!=null?{runtimePolicyBinding:structuredClone(feature.runtimePolicyBinding)}:{}),
    ...(feature.importance!=null?{importance:feature.importance}:{})
   }));
   assert.deepEqual(pkg.features?.candidates,expected,`${id} Candidate Contract must be copied losslessly from Selection`);
