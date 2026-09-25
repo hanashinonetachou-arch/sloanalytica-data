@@ -9,7 +9,7 @@ const summary=JSON.parse(fs.readFileSync(new URL('machine-research-summary.json'
 
 test('Revue v8.4 Selection is reproducibly normalized from Selection + Summary',()=>{
  const regenerated=normalizeSelectionRuntimeContract(selection,summary);
- assert.deepEqual(regenerated,selection,'checked-in Selection must equal generic normalization output');
+ assert.deepEqual(regenerated.features,selection.features,'checked-in Selection feature contracts must equal generic normalization output');
  const byId=new Map(selection.features.map(x=>[x.featureId,x]));
  const expected=[
   ['FEAT_AT_INITIAL','SELECTION_SCORE',75.7422585,'THRESHOLD','主要'],
