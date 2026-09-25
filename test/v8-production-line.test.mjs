@@ -157,3 +157,42 @@ test("publish path fails closed on machineDataVersion downgrade and same-version
  assert.match(src,/machineDataVersion must increase when package content changes/);
  assert.match(src,/compareSemverCore\(nextVersion,existingVersion\)/);
 });
+
+
+test("MachineData preserves immutable Selection Candidate Contract for every materialized V8 machine",()=>{
+ for(const id of ids){
+  const r=run(id); assert.equal(r.status,0,`${id}\n${r.stderr||r.stdout}`);
+  const selection=JSON.parse(fs.readFileSync(path.join(ROOT,"repro-v8",id,"selection-data.json"),"utf8"));
+  const pkg=JSON.parse(fs.readFileSync(path.join(ROOT,"build",id,"machine-package.generated.json"),"utf8"));
+  const expected=(selection.features??[]).map(feature=>({
+   featureId:feature.featureId,
+   eligibility:feature.eligibility,
+   evaluation:structuredClone(feature.evaluation),
+   runtimePolicyBinding:structuredClone(feature.runtimePolicyBinding),
+   ...(feature.importance!=null?{importance:feature.importance}:{})
+  }));
+  assert.deepEqual(pkg.features?.candidates,expected,`${id} Candidate Contract must be copied losslessly from Selection`);
+  const runtimeIds=new Set((pkg.features?.features??[]).map(feature=>feature.featureId));
+  for(const candidate of expected){
+   if(candidate.eligibility==="INELIGIBLE") assert.equal(runtimeIds.has(candidate.featureId),false,`${id} ${candidate.featureId} INELIGIBLE candidate must not become a Runtime Feature`);
+  }
+ }
+});
+
+test("Revue MachineData Candidate Contract preserves v8.4 metric boundaries",()=>{
+ const r=run("S_REVUE_STARLIGHT_CX"); assert.equal(r.status,0,r.stderr||r.stdout);
+ const pkg=JSON.parse(fs.readFileSync(path.join(ROOT,"build","S_REVUE_STARLIGHT_CX","machine-package.generated.json"),"utf8"));
+ const byId=new Map(pkg.features.candidates.map(x=>[x.featureId,x]));
+ assert.deepEqual(byId.get("FEAT_AT_INITIAL"),{featureId:"FEAT_AT_INITIAL",eligibility:"ELIGIBLE",evaluation:{metric:"SELECTION_SCORE",value:75.7422585,status:"FORMAL"},runtimePolicyBinding:{mode:"THRESHOLD",metric:"SELECTION_SCORE"},importance:"主要"});
+ assert.deepEqual(byId.get("FEAT_CZ_INITIAL"),{featureId:"FEAT_CZ_INITIAL",eligibility:"ELIGIBLE",evaluation:{metric:"SELECTION_SCORE",value:82.32755826,status:"FORMAL"},runtimePolicyBinding:{mode:"THRESHOLD",metric:"SELECTION_SCORE"},importance:"主要"});
+ assert.deepEqual(byId.get("FEAT_CZ_FAKE_END_LED"),{featureId:"FEAT_CZ_FAKE_END_LED",eligibility:"ELIGIBLE",evaluation:{metric:"SELECTION_SCORE",value:92.54490548,status:"GUARANTEED_MINIMUM"},runtimePolicyBinding:{mode:"THRESHOLD",metric:"SELECTION_SCORE"},importance:"主要"});
+ assert.equal(byId.get("FEAT_SPECIFIC_BONUS_5_AGG")?.evaluation?.metric,"MAXIMUM_SELECTION_SCORE");
+ assert.equal(byId.get("FEAT_SPECIFIC_BONUS_5_AGG")?.evaluation?.value,39.14810014303639);
+ assert.equal(byId.get("FEAT_SPECIFIC_BONUS_5_AGG")?.runtimePolicyBinding?.mode,"NOT_THRESHOLD_CONTROLLED");
+ assert.equal(byId.get("FEAT_BIG_END_HINT_MULTINOMIAL")?.evaluation?.metric,"PER_ELIGIBLE_TRIAL_POWER");
+ assert.equal(byId.get("FEAT_BIG_END_HINT_MULTINOMIAL")?.evaluation?.value,3.2791156090114573);
+ assert.equal(byId.get("FEAT_BIG_END_HINT_MULTINOMIAL")?.runtimePolicyBinding?.mode,"NOT_THRESHOLD_CONTROLLED");
+ assert.equal(byId.get("FEAT_AT_END_KIRIN_HINT_MULTINOMIAL")?.eligibility,"INELIGIBLE");
+ assert.equal(byId.get("FEAT_AT_END_KIRIN_HINT_MULTINOMIAL")?.evaluation?.metric,"UNAVAILABLE");
+ assert.equal(pkg.features.features.some(x=>x.featureId==="FEAT_AT_END_KIRIN_HINT_MULTINOMIAL"),false);
+});
