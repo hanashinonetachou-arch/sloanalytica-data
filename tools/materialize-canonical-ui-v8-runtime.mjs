@@ -19,8 +19,8 @@ function buildNumericBindings(observationContract){
     if(shared) targets.push(shared.engineInputId??shared.id);
    }
    const unique=[...new Set(targets)];
-   if(unique.length===1) bindings.set(input.id,{inputId:unique[0]});
-   else if(unique.length>1) bindings.set(input.id,{inputIds:unique});
+   const engineBinding=unique.length===1?{inputId:unique[0]}:unique.length>1?{inputIds:unique}:null;
+   if(engineBinding) bindings.set(input.id,{engineBinding,featureId:feature.featureId});
   }
  }
  return bindings;
@@ -47,7 +47,7 @@ export function materializeCanonicalUiV8(canonicalUi,{observationContract=null,e
  const evidenceCtx=buildEvidenceBindings(evidenceContract);
  const mapNode=n=>{
   let out=clone(n);
-  if(numericBindings.has(out.id)) out.engineBinding=clone(numericBindings.get(out.id));
+  if(numericBindings.has(out.id)){ const binding=numericBindings.get(out.id); out.engineBinding=clone(binding.engineBinding); out.featureId=binding.featureId; }
   out=bindEvidenceNode(out,evidenceCtx);
   return out;
  };
