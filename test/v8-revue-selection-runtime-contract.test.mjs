@@ -35,6 +35,7 @@ test('Revue v8.4 Selection is reproducibly normalized from Selection + Summary',
 });
 
 
+// Phase 7 regression: real-machine fixture proves the generic CATEGORY_COUNTERS contract end to end.
 test('Revue CATEGORY_COUNTERS bind generically to Observation and FeatureDefinition inputs',()=>{
  const observation=JSON.parse(fs.readFileSync(new URL('observation-contract.json',base),'utf8'));
  const canonical=JSON.parse(fs.readFileSync(new URL('canonical-ui.json',base),'utf8'));
