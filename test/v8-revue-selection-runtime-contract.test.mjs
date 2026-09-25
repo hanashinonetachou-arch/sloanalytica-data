@@ -38,7 +38,8 @@ test('Revue v8.4 Selection is reproducibly normalized from Selection + Summary',
 test('Revue CATEGORY_COUNTERS bind generically to Observation and FeatureDefinition inputs',()=>{
  const observation=JSON.parse(fs.readFileSync(new URL('observation-contract.json',base),'utf8'));
  const canonical=JSON.parse(fs.readFileSync(new URL('canonical-ui.json',base),'utf8'));
- const generated=JSON.parse(fs.readFileSync(new URL('../../build/S_REVUE_STARLIGHT_CX/machine-package.generated.json',import.meta.url),'utf8'));
+ const generatedPath=new URL('../build/S_REVUE_STARLIGHT_CX/machine-package.generated.json',import.meta.url);
+ const generated=JSON.parse(fs.readFileSync(generatedPath,'utf8'));
  const ui=materializeCanonicalUiV8(canonical,{observationContract:observation,evidenceContract:generated.v8?.evidence});
  const obsByInput=new Map();
  for(const feature of observation.numeric??[]) for(const input of feature.inputs??[]){
