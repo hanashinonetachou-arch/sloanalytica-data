@@ -188,7 +188,7 @@ test("Runtime Projection is metric-driven, reversible, and preserves Candidate C
  const policyPath=path.join(ROOT,"runtime-policy.json");
  try{
   for(const [threshold,expected] of [[5,['ACTIVE','ACTIVE','ACTIVE']],[80,['INACTIVE','ACTIVE','ACTIVE']],[90,['INACTIVE','INACTIVE','ACTIVE']],[5,['ACTIVE','ACTIVE','ACTIVE']]]){
-   fs.writeFileSync(policyPath,JSON.stringify({...original,thresholds:{...original.thresholds,SELECTION_SCORE:threshold}},null,2)+'\\n');
+   fs.writeFileSync(policyPath,JSON.stringify({...original,thresholds:{...original.thresholds,SELECTION_SCORE:threshold}},null,2)+'\n');
    const r=run("S_REVUE_STARLIGHT_CX"); assert.equal(r.status,0,r.stderr||r.stdout);
    const pkg=JSON.parse(fs.readFileSync(path.join(ROOT,"build","S_REVUE_STARLIGHT_CX","machine-package.generated.json"),"utf8"));
    const projection=new Map(pkg.features.runtimeProjection.map(x=>[x.featureId,x]));
@@ -200,13 +200,13 @@ test("Runtime Projection is metric-driven, reversible, and preserves Candidate C
    const expectedCandidates=(selection.features??[]).map(feature=>({featureId:feature.featureId,...(feature.eligibility!=null?{eligibility:feature.eligibility}:{}),...(feature.evaluation!=null?{evaluation:structuredClone(feature.evaluation)}:{}),...(feature.runtimePolicyBinding!=null?{runtimePolicyBinding:structuredClone(feature.runtimePolicyBinding)}:{}),...(feature.importance!=null?{importance:feature.importance}:{})}));
    assert.deepEqual(pkg.features.candidates,expectedCandidates);
   }
-  fs.writeFileSync(policyPath,JSON.stringify({...original,thresholds:{...original.thresholds,MAXIMUM_SELECTION_SCORE:40,PER_ELIGIBLE_TRIAL_POWER:3.3}},null,2)+'\\n');
+  fs.writeFileSync(policyPath,JSON.stringify({...original,thresholds:{...original.thresholds,MAXIMUM_SELECTION_SCORE:40,PER_ELIGIBLE_TRIAL_POWER:3.3}},null,2)+'\n');
   const r=run("S_REVUE_STARLIGHT_CX"); assert.equal(r.status,0,r.stderr||r.stdout);
   const pkg=JSON.parse(fs.readFileSync(path.join(ROOT,"build","S_REVUE_STARLIGHT_CX","machine-package.generated.json"),"utf8"));
   const projection=new Map(pkg.features.runtimeProjection.map(x=>[x.featureId,x]));
   assert.equal(projection.get('FEAT_SPECIFIC_BONUS_5_AGG')?.runtimeStatus,'INACTIVE');
   assert.equal(projection.get('FEAT_BIG_END_HINT_MULTINOMIAL')?.runtimeStatus,'INACTIVE');
- } finally { fs.writeFileSync(policyPath,JSON.stringify(original,null,2)+'\\n'); }
+ } finally { fs.writeFileSync(policyPath,JSON.stringify(original,null,2)+'\n'); }
 });
 
 test("Distribution publisher preserves the full approved MachinePackage bytes",()=>{
