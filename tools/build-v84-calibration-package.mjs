@@ -14,7 +14,8 @@ export function compileV84CalibrationPackage({machineData,runtimeBinding}){
  const inputs=[];
  const inputSeen=new Set();
  const addInput=(id,label,role)=>{if(inputSeen.has(id))return;inputSeen.add(id);inputs.push({id,name:label??id,type:role==="DENOMINATOR"?"integer":"counter",category:"NUMERIC",unit:role==="DENOMINATOR"?"G":"回",inferenceRole:"INCLUDE_PRIMARY",defaultValue:null,minimum:0});};
- const featureName=new Map((machineData.summary?.adopted??[]).map(x=>[x.featureId,x.name]));\n const labelByObs=new Map();
+ const featureName=new Map((machineData.summary?.adopted??[]).map(x=>[x.featureId,x.name]));
+ const labelByObs=new Map();
  for(const s of machineData.canonicalUi.sections??[]) for(const x of s.inputs??[]) labelByObs.set(x.observationId,x.label);
  for(const o of machineData.observationContracts??[]) for(const x of o.inputs??[]) addInput(x.id,labelByObs.get(x.id),x.role);
  const features=[];
@@ -68,5 +69,6 @@ if(process.argv[1]&&fileURLToPath(import.meta.url)===path.resolve(process.argv[1
  const md=JSON.parse(fs.readFileSync(path.join(d,"phase6-machine-data-runtime-v84-production-calibration.json"),"utf8"));
  const binding=JSON.parse(fs.readFileSync(path.join(d,"phase6-runtime-binding-v84-production-calibration.json"),"utf8"));
  const pkg=compileV84CalibrationPackage({machineData:md,runtimeBinding:binding});
- const out=path.join(d,"machine-package.generated.json");fs.writeFileSync(out,JSON.stringify(pkg,null,2)+"\n");console.log(out);
+ const out=path.join(d,"machine-package.generated.json");fs.writeFileSync(out,JSON.stringify(pkg,null,2)+"
+");console.log(out);
 }
