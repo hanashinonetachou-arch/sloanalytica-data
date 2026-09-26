@@ -182,7 +182,7 @@ test("MachineData preserves immutable Selection Candidate Contract for every mat
 
 test("Runtime Projection is metric-driven, reversible, and preserves Candidate Contract",()=>{
  const compiler=fs.readFileSync(path.join(ROOT,"tools","compile-v8-machine-package.mjs"),"utf8");
- assert.match(compiler,/const metric=candidate\.evaluation\?\.metric/);
+ assert.match(compiler,/const metric=binding\.metric\?\?candidate\.evaluation\?\.metric/);
  assert.match(compiler,/const threshold=thresholds\[metric\]/);
  assert.match(compiler,/binding\?\.mode!=='THRESHOLD'/);
  const original=JSON.parse(fs.readFileSync(path.join(ROOT,"runtime-policy.json"),"utf8"));
