@@ -224,6 +224,44 @@ SEL-010: Rejection reasons MUST distinguish causes such as weak information, ins
 SEL-011: User-facing explanations MUST not expose internal tokens such as INCLUDE_PRIMARY, Gate names or schema IDs.
 SEL-012: Detailed technical metrics may remain in research artifacts, but the user-facing reason must preserve the actual rationale rather than replacing it with a generic sentence.
 
+### 8.1 Selection Candidate Contract and Runtime Policy boundary
+
+RTP-001: Selection owns the immutable Candidate Contract for runtime policy purposes. For every Numeric candidate, Selection MUST persist the candidate's Evaluation, Eligibility, and `runtimePolicyBinding` needed by downstream Runtime Projection. A Runtime Policy threshold change MUST NOT require Selection to be re-run.
+
+RTP-002: Runtime inactivity is not Selection rejection and MUST NOT delete, rewrite, or demote the Candidate Contract. An ELIGIBLE candidate that becomes runtime INACTIVE remains an ELIGIBLE candidate and MUST be able to return to ACTIVE from the same Candidate Contract when the governing Runtime Policy again permits it.
+
+RTP-003: A threshold-controlled Candidate Contract MUST bind the Runtime Policy metric explicitly. Runtime Projection MUST compare the persisted Evaluation value only against the threshold for that bound metric. It MUST NOT recalculate Evaluation, SelectionScore, IGPerEligibleTrial, Eligibility, importance, dependency, or any other Selection decision.
+
+RTP-004: Runtime Policy is an execution-time activation policy over preserved Candidate Contracts, not a second Selection stage. App Runtime, Renderer, Distribution and other downstream stages MUST NOT independently implement or reinterpret threshold semantics.
+
+RTP-005: Runtime Projection MUST be deterministic and non-mutating. Given the same Candidate Contract and Runtime Policy it MUST produce the same runtime status/reason without modifying the Candidate Contract.
+
+RTP-006: The normative Runtime Projection states/reasons are:
+- ELIGIBLE + THRESHOLD binding + finite matching Evaluation + finite threshold + value >= threshold => `ACTIVE / THRESHOLD_MET`.
+- the same contract with value < threshold => `INACTIVE / THRESHOLD_NOT_MET`.
+- INELIGIBLE => `INACTIVE / INELIGIBLE`.
+- THRESHOLD binding whose bound metric does not match the persisted Evaluation metric => `INACTIVE / RUNTIME_POLICY_BINDING_MISMATCH`.
+- THRESHOLD binding with a governing finite threshold but unusable/non-finite Evaluation value => `INACTIVE / EVALUATION_UNAVAILABLE`.
+- a candidate not controlled by a threshold => `ACTIVE / NOT_THRESHOLD_CONTROLLED`.
+- a valid THRESHOLD-bound candidate for which Runtime Policy defines no finite threshold => `ACTIVE / NO_RUNTIME_THRESHOLD`, preserving the established compatibility contract until a future Manifest revision explicitly changes it.
+
+RTP-007: Fail-closed Runtime Projection reasons MUST NOT be repaired downstream by guessing a metric/value, silently substituting another threshold, re-running Selection, or deleting the Candidate Contract.
+
+RTP-008: Canonical UI remains the upstream UI design contract. A Runtime Policy change MUST NOT directly edit Canonical UI. Runtime Projection controls which already-contracted Numeric inference features are active/materialized at runtime beneath Canonical UI.
+
+RTP-009: When a Numeric inference feature is runtime INACTIVE, App Runtime MUST exclude it from inference, hide its Numeric input controls and feature-specific inference explanation, and suppress a section/group that becomes empty solely because all of its runtime Numeric inference content is inactive. Generic materialization/filtering MUST implement this behavior; machine-specific branches are prohibited.
+
+RTP-010: Evidence is an independent contract under EVI-009. Runtime inactivity of a Numeric feature MUST NOT hide or delete Evidence merely because it shares an Observation Context, surface, section, or visual group with that feature. A section/group that still contains applicable Evidence is not empty.
+
+RTP-011: Runtime Projection is the single authority for threshold activation consumed by MachinePackage/App Runtime. The app MUST consume projected status rather than recomputing Evaluation or applying its own threshold comparison.
+
+RTP-012: Runtime Policy changes that alter generated MachinePackage bytes MUST follow normal package/distribution versioning. They MUST NOT publish different bytes under an already-published package version. Catalog version, sha256 and packageSize MUST correspond to the exact published bytes, and stale generated/published byte mismatches remain build/distribution failures.
+
+RTP-013: Runtime Policy reversibility is a required production-line invariant. Generic regression MUST prove ACTIVE -> INACTIVE -> ACTIVE from the same preserved Candidate Contract for every threshold metric class supported by the production Runtime Policy, without requiring Selection regeneration.
+
+RTP-014: Runtime Policy contract verification MUST include fail-closed coverage for binding mismatch and unavailable Evaluation, INELIGIBLE handling, NOT_THRESHOLD_CONTROLLED isolation, and the established NO_RUNTIME_THRESHOLD compatibility behavior. Machine-specific integration fixtures MAY supplement but MUST NOT replace this generic contract.
+
+
 ## 9. Evidence Research
 
 EVI-001: First determine whether adopted Evidence exists. No Evidence => NO_EVIDENCE; do not create an empty Evidence section.
