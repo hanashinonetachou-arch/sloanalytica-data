@@ -9,7 +9,8 @@ const id=process.argv[2];
 if(!id) throw new Error("Usage: node tools/prepare-v8-distribution.mjs MACHINE_ID");
 const run=(script,args=[])=>{const r=spawnSync(process.execPath,[path.join(ROOT,"tools",script),...args],{cwd:ROOT,encoding:"utf8"});if(r.status!==0)throw new Error((r.stderr||r.stdout||script).trim());return r;};
 
-run("build-v8-reference-package.mjs",[id]);
+const calibration=fs.existsSync(path.join(ROOT,"repro-v8",id,"phase6-machine-data-runtime-v84-production-calibration.json"))&&fs.existsSync(path.join(ROOT,"repro-v8",id,"phase6-runtime-binding-v84-production-calibration.json"));
+run(calibration?"build-v84-calibration-package.mjs":"build-v8-reference-package.mjs",[id]);
 const source=path.join(ROOT,"repro-v8",id,"machine-package.generated.json");
 if(!fs.existsSync(source)) throw new Error("V8 generated package missing: "+source);
 const pkg=JSON.parse(fs.readFileSync(source,"utf8"));

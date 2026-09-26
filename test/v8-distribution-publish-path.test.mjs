@@ -40,14 +40,15 @@ test("V8 approve/publish/catalog/registry path is reproducible without productio
   catalogBefore.machines=catalogBefore.machines.filter(x=>x.machineId!==id);
   fs.writeFileSync(catalogPath,JSON.stringify(catalogBefore,null,2)+"\n","utf8");
   const generated=path.join(build,"machine-package.generated.json");
+  const generatedVersion=JSON.parse(fs.readFileSync(generated,"utf8")).machine.machineDataVersion;
   const approve=run("publish-machine-data.mjs",["approve",id,generated]);assert.equal(approve.status,0,approve.stderr||approve.stdout);
   const publish=run("publish-machine-data.mjs",["publish",id,"--apply","--defer-audit"]);assert.equal(publish.status,0,publish.stderr||publish.stdout);
   const target=run("audit-v8-distribution-target.mjs",[id]);assert.equal(target.status,0,target.stderr||target.stdout);
   const sync=run("sync-machine-registry.mjs");assert.equal(sync.status,0,sync.stderr||sync.stdout);
   const catalog=JSON.parse(fs.readFileSync(path.join(ROOT,"catalog.json"),"utf8"));
-  const entry=catalog.machines.find(x=>x.machineId===id);assert.equal(entry.machineDataVersion,"0.2.0");
+  const entry=catalog.machines.find(x=>x.machineId===id);assert.equal(entry.machineDataVersion,generatedVersion);
   const registry=JSON.parse(fs.readFileSync(path.join(ROOT,"machine-registry.json"),"utf8"));
-  const reg=registry.machines.find(x=>x.machineId===id);assert.equal(reg?.machineDataVersion,"0.2.0");assert.equal(reg?.releaseDate,"2025-03-03");
+  const reg=registry.machines.find(x=>x.machineId===id);assert.equal(reg?.machineDataVersion,generatedVersion);assert.equal(reg?.releaseDate,"2025-03-03");
  } finally {
   for(const [rel,bytes] of saved){const p=path.join(ROOT,rel);if(bytes===null)fs.rmSync(p,{force:true});else{fs.mkdirSync(path.dirname(p),{recursive:true});fs.writeFileSync(p,bytes);}}
   fs.rmSync(build,{recursive:true,force:true});if(buildSaved){fs.mkdirSync(build,{recursive:true});fs.cpSync(buildSaved,build,{recursive:true});fs.rmSync(buildSaved,{recursive:true,force:true});}

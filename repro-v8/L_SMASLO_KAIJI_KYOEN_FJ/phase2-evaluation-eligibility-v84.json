@@ -1,0 +1,365 @@
+{
+  "schemaVersion": "v8.4-phase2-evaluation-v1",
+  "machineId": "L_SMASLO_KAIJI_KYOEN_FJ",
+  "phase": "PHASE_2_EVALUATION_ELIGIBILITY",
+  "researchAuthority": "Manifest v8.4 + Phase 1 zero-base public research",
+  "legacyOracleUsed": false,
+  "notes": [
+    "旧Kaiji MachineData/Selection/UIは正解として使用しない。",
+    "旧repro-v8 research-dataは公開設定値の補助照合にのみ使用し、Phase 1で修正されたTrial Universe意味論を優先する。",
+    "PER_ELIGIBLE_TRIAL_POWER = IGPerEligibleTrial(bits) * 200。",
+    "7000GはTOTAL_GAME_TRIALと同義ではない候補へ自動置換しない。"
+  ],
+  "evaluations": [
+    {
+      "featureIdCandidate": "FEAT_BONUS_INITIAL",
+      "likelihoodModel": "BINOMIAL",
+      "trialUniverse": "NORMAL_GAME_TRIAL",
+      "expectedEligibleTrialsAt7000G": {
+        "status": "UPPER_BOUND_ONLY",
+        "maximum": 7000,
+        "reason": "通常時Gは7000総G以下。通常時実遊技量のbenchmark point estimateはPhase 1公開情報だけでは確定しない。"
+      },
+      "evaluationMetric": "MAXIMUM_SELECTION_SCORE",
+      "evaluationValue": 30.68902605080806,
+      "selectionScore": {
+        "status": "UPPER_BOUND_ONLY",
+        "value": null,
+        "maximum": 30.68902605080806
+      },
+      "IGPerEligibleTrial": 0.000024464636458370465,
+      "perEligibleTrialPower": 0.004892927291674093,
+      "observability": "DIRECT_MANUAL_EXACT",
+      "exposureReconstruction": "NOT_REQUIRED_IF_NORMAL_GAMES_DIRECTLY_COUNTED",
+      "dependency": [
+        "CZ初当りと通常時区間を共有するが別イベント。独立尤度としての同時利用可否はPhase 3 dependency contractで固定する。",
+        "ボーナス合算値を別featureとして同時使用しない。"
+      ],
+      "evaluationCompleteness": "COMPLETE_LIKELIHOOD_BENCHMARK_UPPER_BOUND_ONLY",
+      "eligibility": "ELIGIBLE",
+      "eligibilityReason": "全設定likelihoodと正確に観測可能な通常時G分母を持つ。benchmark point score欠落だけではlive inferenceを失格にしない。",
+      "unresolvedIssues": [
+        "7000総Gから通常時Gへのbenchmark exposure point estimate"
+      ]
+    },
+    {
+      "featureIdCandidate": "FEAT_CZ_UNPITENPU_INITIAL",
+      "likelihoodModel": "BINOMIAL",
+      "trialUniverse": "NORMAL_GAME_EXCLUDING_POST_BONUS_CZ_TRIAL",
+      "expectedEligibleTrialsAt7000G": {
+        "status": "UPPER_BOUND_ONLY",
+        "maximum": 7000,
+        "reason": "ボーナス後CZを除く通常時eligible Gを7000総Gから直接同一視できない。"
+      },
+      "evaluationMetric": "MAXIMUM_SELECTION_SCORE",
+      "evaluationValue": 59.226228095115296,
+      "selectionScore": {
+        "status": "UPPER_BOUND_ONLY",
+        "value": null,
+        "maximum": 59.226228095115296
+      },
+      "IGPerEligibleTrial": 0.000052663172545305836,
+      "perEligibleTrialPower": 0.010532634509061167,
+      "observability": "EXACT_WITH_SCOPE_TRACKING",
+      "exposureReconstruction": "REQUIRED_IF_NORMAL_G_COUNTER_INCLUDES_POST_BONUS_INELIGIBLE_INTERVAL",
+      "dependency": [
+        "ボーナス後CZを分子・分母へ混ぜない。",
+        "CZ成功率の機会数を生成する上流イベントだが、成功率likelihoodへCZ初当り率を二重注入しない。"
+      ],
+      "evaluationCompleteness": "COMPLETE_LIKELIHOOD_BENCHMARK_UPPER_BOUND_ONLY",
+      "eligibility": "ELIGIBLE",
+      "eligibilityReason": "設定別likelihoodは完全。liveではボーナス後除外境界を正確に守れる場合のみ使用可能。",
+      "unresolvedIssues": [
+        "ボーナス後除外区間を最小入力で正確に再構成するObservation契約"
+      ]
+    },
+    {
+      "featureIdCandidate": "FEAT_CZ_SUCCESS",
+      "likelihoodModel": "BINOMIAL",
+      "trialUniverse": "CZ_ENTRY_TRIAL",
+      "expectedEligibleTrialsAt7000G": {
+        "status": "BLOCKED_UNRESOLVED",
+        "value": null,
+        "reason": "7000総Gから対象CZ突入回数への設定非依存benchmark opportunity modelをPhase 1だけでは確定しない。"
+      },
+      "evaluationMetric": "PER_ELIGIBLE_TRIAL_POWER",
+      "evaluationValue": 0.03968760350410161,
+      "selectionScore": {
+        "status": "BLOCKED_UNRESOLVED",
+        "value": null
+      },
+      "IGPerEligibleTrial": 0.00019843801752050805,
+      "perEligibleTrialPower": 0.03968760350410161,
+      "observability": "DIRECT_EXACT",
+      "exposureReconstruction": "NOT_REQUIRED",
+      "dependency": [
+        "CZ種類・条件差が成功率表の母集団に含まれることを維持し、種類別期待度を独立featureとして重複加算しない。",
+        "CZ初当り率とは別の条件付きlikelihood。"
+      ],
+      "evaluationCompleteness": "COMPLETE_LIKELIHOOD_BENCHMARK_EXPOSURE_UNRESOLVED",
+      "eligibility": "ELIGIBLE",
+      "eligibilityReason": "CZ突入回数と成功回数を直接正確に数えられ、全設定likelihoodが完全かつ非ゼロ情報。SEL-006〜008CのLIVE_CONDITIONAL要件を満たす。",
+      "unresolvedIssues": [
+        "benchmark expected CZ opportunities"
+      ]
+    },
+    {
+      "featureIdCandidate": "FEAT_WATERMELON",
+      "likelihoodModel": "BINOMIAL",
+      "trialUniverse": "TOTAL_GAME_TRIAL",
+      "expectedEligibleTrialsAt7000G": {
+        "status": "DIRECT",
+        "value": 7000
+      },
+      "evaluationMetric": "SELECTION_SCORE",
+      "evaluationValue": 12.52895676311096,
+      "selectionScore": {
+        "status": "FORMAL",
+        "value": 12.52895676311096
+      },
+      "IG7000": 0.0626447838155548,
+      "IGPerEligibleTrial": 0.000009358476834905871,
+      "perEligibleTrialPower": 0.0018716953669811742,
+      "observability": "DIRECT_EXACT",
+      "exposureReconstruction": "NOT_REQUIRED",
+      "dependency": [
+        "弱チャンス目・弱チェリー・強チェリーと同一ゲーム上で相互排他的。4本のBinomialを独立尤度として単純積しない。"
+      ],
+      "evaluationCompleteness": "COMPLETE",
+      "eligibility": "ELIGIBLE",
+      "eligibilityReason": "7000GでSUPPORT帯の情報量を持つ。小役familyのjoint/dependency処理をPhase 3で固定する。",
+      "unresolvedIssues": [
+        "個別feature採用かjoint multinomial化かはPhase 3 Selection責任"
+      ]
+    },
+    {
+      "featureIdCandidate": "FEAT_WEAK_CHANCE",
+      "likelihoodModel": "BINOMIAL",
+      "trialUniverse": "TOTAL_GAME_TRIAL",
+      "expectedEligibleTrialsAt7000G": {
+        "status": "DIRECT",
+        "value": 7000
+      },
+      "evaluationMetric": "SELECTION_SCORE",
+      "evaluationValue": 10.37878308748209,
+      "selectionScore": {
+        "status": "FORMAL",
+        "value": 10.37878308748209
+      },
+      "IG7000": 0.05189391543741045,
+      "IGPerEligibleTrial": 0.000007685737080528887,
+      "perEligibleTrialPower": 0.0015371474161057774,
+      "observability": "DIRECT_EXACT",
+      "exposureReconstruction": "NOT_REQUIRED",
+      "dependency": [
+        "設定差小役family内で相互排他的。独立Binomialの単純積は禁止。"
+      ],
+      "evaluationCompleteness": "COMPLETE",
+      "eligibility": "ELIGIBLE",
+      "eligibilityReason": "7000GでSUPPORT帯。",
+      "unresolvedIssues": [
+        "joint/dependency処理はPhase 3"
+      ]
+    },
+    {
+      "featureIdCandidate": "FEAT_WEAK_CHERRY",
+      "likelihoodModel": "BINOMIAL",
+      "trialUniverse": "TOTAL_GAME_TRIAL",
+      "expectedEligibleTrialsAt7000G": {
+        "status": "DIRECT",
+        "value": 7000
+      },
+      "evaluationMetric": "SELECTION_SCORE",
+      "evaluationValue": 19.696781083424387,
+      "selectionScore": {
+        "status": "FORMAL",
+        "value": 19.696781083424387
+      },
+      "IG7000": 0.09848390541712193,
+      "IGPerEligibleTrial": 0.000015083554008261946,
+      "perEligibleTrialPower": 0.003016710801652389,
+      "observability": "DIRECT_EXACT",
+      "exposureReconstruction": "NOT_REQUIRED",
+      "dependency": [
+        "設定差小役family内で相互排他的。独立Binomialの単純積は禁止。",
+        "ざわ高確featureのeligible opportunitiesを構成する弱レア役の一部であり、上流小役出現率をざわ高確条件付きlikelihoodへ再注入しない。"
+      ],
+      "evaluationCompleteness": "COMPLETE",
+      "eligibility": "ELIGIBLE",
+      "eligibilityReason": "7000GでSUPPORT帯上限近くの情報量。",
+      "unresolvedIssues": [
+        "joint/dependency処理はPhase 3"
+      ]
+    },
+    {
+      "featureIdCandidate": "FEAT_STRONG_CHERRY",
+      "likelihoodModel": "BINOMIAL",
+      "trialUniverse": "TOTAL_GAME_TRIAL",
+      "expectedEligibleTrialsAt7000G": {
+        "status": "DIRECT",
+        "value": 7000
+      },
+      "evaluationMetric": "SELECTION_SCORE",
+      "evaluationValue": 5.284491787088271,
+      "selectionScore": {
+        "status": "FORMAL",
+        "value": 5.284491787088271
+      },
+      "IG7000": 0.026422458935441356,
+      "IGPerEligibleTrial": 0.000003844471830511537,
+      "perEligibleTrialPower": 0.0007688943661023073,
+      "observability": "DIRECT_EXACT",
+      "exposureReconstruction": "NOT_REQUIRED",
+      "dependency": [
+        "設定差小役family内で相互排他的。独立Binomialの単純積は禁止。"
+      ],
+      "evaluationCompleteness": "COMPLETE",
+      "eligibility": "ELIGIBLE",
+      "eligibilityReason": "7000GでJOINT_ELIGIBLE帯。単独の主要feature扱いをPhase 2では決めない。",
+      "unresolvedIssues": [
+        "joint/dependency処理はPhase 3"
+      ]
+    },
+    {
+      "featureIdCandidate": "FEAT_ZAWA_HIGH_FROM_WEAK_RARE",
+      "likelihoodModel": "BINOMIAL",
+      "trialUniverse": "WEAK_RARE_ROLE_ELIGIBLE_TRIAL",
+      "expectedEligibleTrialsAt7000G": {
+        "status": "BLOCKED_UNRESOLVED",
+        "value": null,
+        "reason": "live分母は弱レア役成立回数として直接数えられるが、7000総Gにおける通常時弱レア役機会数をPhase 1だけから設定非依存point exposureへ確定しない。"
+      },
+      "evaluationMetric": "PER_ELIGIBLE_TRIAL_POWER",
+      "evaluationValue": 0.3985967411179958,
+      "selectionScore": {
+        "status": "BLOCKED_UNRESOLVED",
+        "value": null
+      },
+      "IGPerEligibleTrial": 0.001992983705589979,
+      "perEligibleTrialPower": 0.3985967411179958,
+      "observability": "DIRECT_EXACT",
+      "exposureReconstruction": "NOT_REQUIRED_WHEN_ELIGIBLE_WEAK_RARE_TRIALS_DIRECTLY_COUNTED",
+      "dependency": [
+        "スイカ・弱チャンス目・弱チェリーの出現率とは条件付き段階が異なる。ざわ高確likelihoodは弱レア役成立後の移行のみを評価し、上流小役出現率を重複加算しない。"
+      ],
+      "evaluationCompleteness": "COMPLETE_LIKELIHOOD_BENCHMARK_EXPOSURE_UNRESOLVED",
+      "eligibility": "ELIGIBLE",
+      "eligibilityReason": "全設定likelihood、正確なeligible trial count、非ゼロ情報を持つLIVE_CONDITIONAL候補。",
+      "unresolvedIssues": [
+        "benchmark exposure point estimate"
+      ]
+    },
+    {
+      "featureIdCandidate": "FEAT_RED7_FIRST_BAR_BENEFIT",
+      "likelihoodModel": "MULTINOMIAL",
+      "trialUniverse": "RED7_BIG_FIRST_BAR_HIT_TRIAL",
+      "expectedEligibleTrialsAt7000G": {
+        "status": "BLOCKED_UNRESOLVED",
+        "value": null,
+        "reason": "赤7BIG→初回BAR揃いまでの7000G opportunity chainを公開情報だけで再現できない。"
+      },
+      "evaluationMetric": "PER_ELIGIBLE_TRIAL_POWER",
+      "evaluationValue": 1.6137365615545654,
+      "selectionScore": {
+        "status": "BLOCKED_UNRESOLVED",
+        "value": null
+      },
+      "IGPerEligibleTrial": 0.008068682807772827,
+      "perEligibleTrialPower": 1.6137365615545654,
+      "observability": "DIRECT_EXACT_EXHAUSTIVE_CATEGORIES",
+      "exposureReconstruction": "NOT_REQUIRED_FOR_LIVE_IF_CATEGORY_SUM_IS_DENOMINATOR",
+      "dependency": [
+        "BAR揃い出現率とは別。初回BAR揃い後の恩恵3カテゴリのみを条件付きlikelihoodとする。"
+      ],
+      "evaluationCompleteness": "COMPLETE_LIKELIHOOD_BENCHMARK_EXPOSURE_UNRESOLVED",
+      "eligibility": "ELIGIBLE",
+      "eligibilityReason": "3カテゴリが完全で、カテゴリ合計から正確なtrial数を復元でき、全設定で非ゼロ情報を持つ。",
+      "unresolvedIssues": [
+        "benchmark opportunity frequency"
+      ]
+    },
+    {
+      "featureIdCandidate": "FEAT_MODE_AFTER_CHAIN",
+      "likelihoodModel": "MULTINOMIAL_CANDIDATE",
+      "trialUniverse": "POST_CHAIN_END_TRIAL",
+      "expectedEligibleTrialsAt7000G": {
+        "status": "BLOCKED_UNRESOLVED",
+        "value": null
+      },
+      "evaluationMetric": "UNAVAILABLE",
+      "evaluationValue": null,
+      "selectionScore": {
+        "status": "BLOCKED_UNRESOLVED",
+        "value": null
+      },
+      "IGPerEligibleTrial": null,
+      "perEligibleTrialPower": null,
+      "observability": "LATENT_INTERNAL_MODE_UNRESOLVED",
+      "exposureReconstruction": "UNRESOLVED",
+      "dependency": [
+        "設定変更後・単発終了後・連チャン終了後を混ぜない。"
+      ],
+      "evaluationCompleteness": "INCOMPLETE_CATEGORICAL_MASS_AND_LATENT_OBSERVATION",
+      "eligibility": "INELIGIBLE",
+      "eligibilityReason": "公表A/B/C/D確率の合計が1.0未満で残差意味論が未解決。内部モードも直接観測できず、推測カテゴリを入力させることはできない。",
+      "unresolvedIssues": [
+        "欠落確率質量の意味",
+        "内部モードA/B/C/Dをexact observationへ写像する公開規則"
+      ]
+    },
+    {
+      "featureIdCandidate": "FEAT_TONEGAWA_DIRECT_FROM_HIRAMEKI",
+      "likelihoodModel": "BINOMIAL_CANDIDATE",
+      "trialUniverse": "ELIGIBLE_HIRAMEKI_PREMONITION_TRIAL",
+      "expectedEligibleTrialsAt7000G": {
+        "status": "BLOCKED_UNRESOLVED",
+        "value": null
+      },
+      "evaluationMetric": "UNAVAILABLE",
+      "evaluationValue": null,
+      "selectionScore": {
+        "status": "BLOCKED_UNRESOLVED",
+        "value": null
+      },
+      "IGPerEligibleTrial": null,
+      "perEligibleTrialPower": null,
+      "observability": "DIRECT_CONDITIONAL_POSSIBLE",
+      "exposureReconstruction": "NOT_THE_PRIMARY_BLOCKER",
+      "dependency": [],
+      "evaluationCompleteness": "INCOMPLETE_SETTINGS_2_TO_5",
+      "eligibility": "INELIGIBLE",
+      "eligibilityReason": "設定1・6のみでは6設定likelihoodを構築できない。EXP-011のbenchmark exposure近似はlikelihood欠損の補間を許可しない。",
+      "unresolvedIssues": [
+        "設定2〜5の直撃率"
+      ]
+    }
+  ],
+  "dependencyFindings": {
+    "bonusAggregate": "ボーナス初当りと別のボーナス合算を同一観測から二重使用しない。Phase 1入力に独立した完全なボーナス合算candidateがないため、新規likelihoodを捏造しない。",
+    "bonusCz": "ボーナス初当り/CZ初当り/CZ成功は条件段階が異なる。CZ成功はCZ突入を条件とするため、上流CZ発生率を成功likelihoodへ再注入しない。",
+    "smallRoles": "4設定差小役は同一ゲーム上の相互排他的カテゴリ。各単独評価値は有効だが、同時推論時に4 Bernoulliを独立積してはならない。Phase 3でjoint multinomialまたはsuppression contractを選ぶ。",
+    "zawa": "弱レア役出現率と弱レア役後ざわ移行率はchainの別段階。条件付きfeatureは観測した弱レア役回数だけを分母とする。",
+    "mode": "latent mode推定を別の観測結果と同一視しない。"
+  },
+  "productionCalibrationFindings": [
+    {
+      "severity": "GENERALIZATION_REQUIRED",
+      "finding": "Phase 2にはSelection前のEvaluation/Eligibilityを独立保存する標準artifact/schemaがまだ明示されていない。",
+      "action": "このPhase 2 reportをcalibration artifactとして保存し、Phase 3でCandidate Contractへ写像する。Manifest責任境界を崩してSelectionを先取りしない。"
+    },
+    {
+      "severity": "GENERALIZATION_REQUIRED",
+      "finding": "同一trial上の複数相互排他的小役について、単独Bernoulli評価からjoint multinomial評価へ昇格する汎用Evaluation手順をProduction Line contractとして明文化する余地がある。",
+      "action": "Phase 2では重複禁止を確定し、Phase 3のSelection/dependency決定を先取りしない。"
+    }
+  ],
+  "phase2Summary": {
+    "evaluatedNumericCandidates": 11,
+    "eligible": 9,
+    "ineligible": 2,
+    "formalSelectionScoreCandidates": 4,
+    "liveConditionalOrUpperBoundCandidates": 5,
+    "unavailableEvaluationCandidates": 2,
+    "phase3Started": false
+  }
+}

@@ -10,7 +10,10 @@ if(!id) throw new Error("Usage: node tools/v8-machine-pipeline.mjs MACHINE_ID [-
 if(!["--build","--publish"].includes(mode)) throw new Error("mode must be --build or --publish");
 
 const sourceDir=path.join(ROOT,"repro-v8",id);
-const required=["research-data.json","selection-data.json","observation-contract.json","machine-research-summary.json","canonical-ui.json","high-low-discrimination.json"];
+const calibrationRequired=["phase6-machine-data-runtime-v84-production-calibration.json","phase6-runtime-binding-v84-production-calibration.json"];
+const referenceRequired=["research-data.json","selection-data.json","observation-contract.json","machine-research-summary.json","canonical-ui.json","high-low-discrimination.json"];
+const isCalibration=calibrationRequired.every(name=>fs.existsSync(path.join(sourceDir,name)));
+const required=isCalibration?calibrationRequired:referenceRequired;
 for(const name of required) if(!fs.existsSync(path.join(sourceDir,name))) throw new Error(`V8 upstream contract missing: repro-v8/${id}/${name}`);
 
 const run=(script,args=[])=>{
