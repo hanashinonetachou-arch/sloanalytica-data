@@ -182,9 +182,9 @@ test("MachineData preserves immutable Selection Candidate Contract for every mat
 
 test("Runtime Projection is metric-driven, reversible, and preserves Candidate Contract",()=>{
  const compiler=fs.readFileSync(path.join(ROOT,"tools","compile-v8-machine-package.mjs"),"utf8");
- assert.match(compiler,/const metric=candidate\.evaluation\?\.metric/);
+ assert.match(compiler,/const metric=binding\.metric\?\?candidate\.evaluation\?\.metric/);
  assert.match(compiler,/const threshold=thresholds\[metric\]/);
- assert.doesNotMatch(compiler,/binding\?\.mode!=='THRESHOLD'/);
+ assert.match(compiler,/binding\?\.mode!=='THRESHOLD'/);
  const original=JSON.parse(fs.readFileSync(path.join(ROOT,"runtime-policy.json"),"utf8"));
  const policyPath=path.join(ROOT,"runtime-policy.json");
  try{
@@ -205,8 +205,14 @@ test("Runtime Projection is metric-driven, reversible, and preserves Candidate C
   const r=run("S_REVUE_STARLIGHT_CX"); assert.equal(r.status,0,r.stderr||r.stdout);
   const pkg=JSON.parse(fs.readFileSync(path.join(ROOT,"build","S_REVUE_STARLIGHT_CX","machine-package.generated.json"),"utf8"));
   const projection=new Map(pkg.features.runtimeProjection.map(x=>[x.featureId,x]));
-  assert.equal(projection.get('FEAT_SPECIFIC_BONUS_5_AGG')?.runtimeStatus,'INACTIVE');
+  assert.equal(projection.get('FEAT_SPECIFIC_BONUS_5_AGG')?.runtimeStatus,'ACTIVE','NOT_THRESHOLD_CONTROLLED candidate ignores same-name policy keys');
   assert.equal(projection.get('FEAT_BIG_END_HINT_MULTINOMIAL')?.runtimeStatus,'INACTIVE');
+  assert.equal(projection.get('FEAT_BIG_END_HINT_MULTINOMIAL')?.runtimeReason,'THRESHOLD_NOT_MET');
+  fs.writeFileSync(policyPath,JSON.stringify(original,null,2)+'\n');
+  const rollback=run("S_REVUE_STARLIGHT_CX"); assert.equal(rollback.status,0,rollback.stderr||rollback.stdout);
+  const rollbackPkg=JSON.parse(fs.readFileSync(path.join(ROOT,"build","S_REVUE_STARLIGHT_CX","machine-package.generated.json"),"utf8"));
+  const rollbackProjection=new Map(rollbackPkg.features.runtimeProjection.map(x=>[x.featureId,x]));
+  assert.equal(rollbackProjection.get('FEAT_BIG_END_HINT_MULTINOMIAL')?.runtimeStatus,'ACTIVE','same Candidate Contract reactivates without Selection rerun');
  } finally { fs.writeFileSync(policyPath,JSON.stringify(original,null,2)+'\n'); }
 });
 
@@ -229,7 +235,7 @@ test("Revue MachineData Candidate Contract preserves v8.4 metric boundaries",()=
  assert.equal(byId.get("FEAT_SPECIFIC_BONUS_5_AGG")?.runtimePolicyBinding?.mode,"NOT_THRESHOLD_CONTROLLED");
  assert.equal(byId.get("FEAT_BIG_END_HINT_MULTINOMIAL")?.evaluation?.metric,"PER_ELIGIBLE_TRIAL_POWER");
  assert.equal(byId.get("FEAT_BIG_END_HINT_MULTINOMIAL")?.evaluation?.value,3.2791156090114573);
- assert.equal(byId.get("FEAT_BIG_END_HINT_MULTINOMIAL")?.runtimePolicyBinding?.mode,"NOT_THRESHOLD_CONTROLLED");
+ assert.deepEqual(byId.get("FEAT_BIG_END_HINT_MULTINOMIAL")?.runtimePolicyBinding,{mode:"THRESHOLD",metric:"PER_ELIGIBLE_TRIAL_POWER"});
  assert.equal(byId.get("FEAT_AT_END_KIRIN_HINT_MULTINOMIAL")?.eligibility,"INELIGIBLE");
  assert.equal(byId.get("FEAT_AT_END_KIRIN_HINT_MULTINOMIAL")?.evaluation?.metric,"UNAVAILABLE");
  assert.equal(pkg.features.features.some(x=>x.featureId==="FEAT_AT_END_KIRIN_HINT_MULTINOMIAL"),false);

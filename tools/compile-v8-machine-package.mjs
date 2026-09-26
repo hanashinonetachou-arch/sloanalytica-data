@@ -57,7 +57,10 @@ function projectRuntimeCandidates(candidates,runtimePolicy){
   const thresholds=runtimePolicy?.thresholds??{};
   return (candidates??[]).map(candidate=>{
     if(candidate.eligibility==='INELIGIBLE') return {...clone(candidate),runtimeStatus:'INACTIVE',runtimeReason:'INELIGIBLE'};
-    const metric=candidate.evaluation?.metric;
+    const binding=candidate.runtimePolicyBinding;
+    if(binding?.mode!=='THRESHOLD') return {...clone(candidate),runtimeStatus:'ACTIVE',runtimeReason:'NOT_THRESHOLD_CONTROLLED'};
+    const metric=binding.metric??candidate.evaluation?.metric;
+    if(metric!==candidate.evaluation?.metric) return {...clone(candidate),runtimeStatus:'INACTIVE',runtimeReason:'RUNTIME_POLICY_BINDING_MISMATCH'};
     const threshold=thresholds[metric];
     if(!Number.isFinite(threshold)) return {...clone(candidate),runtimeStatus:'ACTIVE',runtimeReason:'NO_RUNTIME_THRESHOLD'};
     const value=candidate.evaluation?.value;

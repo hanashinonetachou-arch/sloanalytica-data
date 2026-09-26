@@ -23,10 +23,10 @@ export function normalizeSelectionRuntimeContract(selection,summary){
    x.runtimePolicyBinding={mode:'NOT_THRESHOLD_CONTROLLED'};
   }else if(Number.isFinite(x.perOpportunityInformationBits)){
    x.evaluation={metric:'PER_ELIGIBLE_TRIAL_POWER',value:x.perOpportunityInformationBits*200,status:'FORMAL'};
-   x.runtimePolicyBinding={mode:'NOT_THRESHOLD_CONTROLLED'};
+   x.runtimePolicyBinding={mode:'THRESHOLD',metric:'PER_ELIGIBLE_TRIAL_POWER'};
   }else if(Number.isFinite(x.perEligibleTrialPower)){
    x.evaluation={metric:'PER_ELIGIBLE_TRIAL_POWER',value:x.perEligibleTrialPower,status:'FORMAL'};
-   x.runtimePolicyBinding={mode:'NOT_THRESHOLD_CONTROLLED'};
+   x.runtimePolicyBinding={mode:'THRESHOLD',metric:'PER_ELIGIBLE_TRIAL_POWER'};
   }else{
    x.evaluation={metric:'UNAVAILABLE',value:null,status:'UNRESOLVED'};
    x.runtimePolicyBinding={mode:'NOT_THRESHOLD_CONTROLLED'};
