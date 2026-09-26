@@ -18,7 +18,7 @@ function compileInputs(observation,evidence){
     const base=r.terms.filter(x=>x.role==='BASE');
     const subtract=r.terms.filter(x=>x.role==='SUBTRACT_DIRECT_GAMES'||x.role==='SUBTRACT_FIXED_PER_OCCURRENCE');
     if(base.length!==1||subtract.length<1) continue;
-    inputs.set(outputId,{id:outputId,name:`${feature.context??feature.featureId} 実効抽選G`,type:'integer',category:'DERIVED',inferenceRole:'LIVE_CONDITIONAL',defaultValue:null,minimum:0,derivedCalculation:'linear_combination',derivedTerms:[{inputId:base[0].inputId,multiplier:1},...subtract.map(x=>({inputId:x.inputId,multiplier:x.role==='SUBTRACT_FIXED_PER_OCCURRENCE'?-(x.gamesPerOccurrence??0):-1}))]});
+    inputs.set(outputId,{id:outputId,name:`${feature.context??feature.featureId} 実効抽選G`,type:'integer',category:'DERIVED',inferenceRole:'LIVE_CONDITIONAL',defaultValue:null,minimum:0,derivedCalculation:'linear_combination',derivedTerms:[{inputId:base[0].inputId,multiplier:1,...(base[0].observedZeroAllowed===true?{observedZeroAllowed:true}:{})},...subtract.map(x=>({inputId:x.inputId,multiplier:x.role==='SUBTRACT_FIXED_PER_OCCURRENCE'?-(x.gamesPerOccurrence??0):-1,...(x.observedZeroAllowed===true?{observedZeroAllowed:true}:{})}))]});
     derivedExposureInputs.push({featureId:feature.featureId,inputId:outputId});
   }
   const runtimeEvidence=clone(evidence??{groups:[]});
