@@ -7,7 +7,7 @@ import { fileURLToPath } from "node:url";
 
 const ROOT=path.resolve(path.dirname(fileURLToPath(import.meta.url)),"..");
 const run=id=>spawnSync(process.execPath,[path.join(ROOT,"tools","v8-machine-pipeline.mjs"),id,"--build"],{cwd:ROOT,encoding:"utf8"});
-const productionTools=["v8-machine-pipeline.mjs","build-v8-reference-package.mjs","compile-v8-machine-package.mjs","materialize-canonical-ui-v8-runtime.mjs","prepare-v8-distribution.mjs","audit-v8-distribution-target.mjs"];
+const productionTools=["v8-machine-pipeline.mjs","build-v84-calibration-package.mjs","build-v8-reference-package.mjs","compile-v8-machine-package.mjs","materialize-canonical-ui-v8-runtime.mjs","prepare-v8-distribution.mjs","audit-v8-distribution-target.mjs"];
 const ids=fs.readdirSync(path.join(ROOT,"repro-v8"),{withFileTypes:true}).filter(x=>x.isDirectory()&&fs.existsSync(path.join(ROOT,"repro-v8",x.name,"canonical-ui.json"))).map(x=>x.name);
 
 test("every materialized repro-v8 machine passes the generic production-line build",()=>{
