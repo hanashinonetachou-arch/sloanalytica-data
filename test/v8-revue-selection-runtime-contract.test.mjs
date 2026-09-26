@@ -66,3 +66,17 @@ test('Revue CATEGORY_COUNTERS bind generically to Observation and FeatureDefinit
   'INP_BIG_END_DEFAULT','INP_BIG_END_HIGH_WEAK','INP_BIG_END_HIGH_STRONG'
  ]);
 });
+
+
+test('Revue exact-exposure exclusions preserve observed-zero semantics through generated package',()=>{
+ const observation=JSON.parse(fs.readFileSync(new URL('observation-contract.json',base),'utf8'));
+ const feature=observation.numeric.find(x=>x.featureId==='FEAT_SPECIFIC_BONUS_5_AGG');
+ const zeroIds=['INP_NORMAL_REPRODUCTION_ENTRIES','INP_CZ_REPRODUCTION_GAMES','INP_AT_REPRODUCTION_GAMES'];
+ for(const id of zeroIds){
+  assert.equal(feature.exposureReconstruction.terms.find(x=>x.inputId===id)?.observedZeroAllowed,true,id);
+  assert.equal(feature.inputs.find(x=>x.id===id)?.observedZeroAllowed,true,id);
+ }
+ const generated=JSON.parse(fs.readFileSync(new URL('../build/S_REVUE_STARLIGHT_CX/machine-package.generated.json',import.meta.url),'utf8'));
+ const derived=generated.inputs.inputs.find(x=>x.id==='DERIVED_FEAT_SPECIFIC_BONUS_5_AGG_ELIGIBLE_TRIALS');
+ for(const id of zeroIds) assert.equal(derived?.derivedTerms?.find(x=>x.inputId===id)?.observedZeroAllowed,true,'generated '+id);
+});
