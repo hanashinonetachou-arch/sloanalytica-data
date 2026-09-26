@@ -1,0 +1,36 @@
+name: V84 Kaiji Phase 8 Distribution Calibration
+on:
+  push:
+    branches:
+      - calibration/v84-kaiji-phase8-distribution-20260926
+permissions:
+  contents: write
+jobs:
+  publish-calibration:
+    if: ${{ !startsWith(github.event.head_commit.message, 'chore(distribution): materialize') }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: calibration/v84-kaiji-phase8-distribution-20260926
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - name: Phase 8 lossless distribution regression
+        run: node --test test/v84-phase8-distribution-calibration.test.mjs test/v84-phase7-calibration-production-line.test.mjs
+      - name: Materialize approved V8.4 distribution
+        run: node tools/v8-machine-pipeline.mjs L_SMASLO_KAIJI_KYOEN_FJ --publish
+      - name: Verify published target
+        run: node tools/audit-v8-distribution-target.mjs L_SMASLO_KAIJI_KYOEN_FJ
+      - name: Commit distribution materialization
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add machines/L_SMASLO_KAIJI_KYOEN_FJ/machine-package.json catalog.json machine-registry.json
+          if git diff --cached --quiet; then
+            echo "No distribution changes to commit"
+          else
+            git commit -m "chore(distribution): materialize Kaiji v8.4 calibration"
+            git push origin HEAD:calibration/v84-kaiji-phase8-distribution-20260926
+          fi
