@@ -1,0 +1,21 @@
+import test from "node:test";
+import assert from "node:assert/strict";
+import fs from "node:fs";
+import path from "node:path";
+import {fileURLToPath} from "node:url";
+const ROOT=path.resolve(path.dirname(fileURLToPath(import.meta.url)),"..");
+const D=path.join(ROOT,"repro-v8","L_SMASLO_KAIJI_KYOEN_FJ");
+const read=n=>JSON.parse(fs.readFileSync(path.join(D,n),"utf8"));
+test("Phase 6 runtime binding is explicit, total for ELIGIBLE, and absent for INELIGIBLE",()=>{
+ const s=read("selection-data-v84-production-calibration.json");
+ const b=read("phase6-runtime-binding-v84-production-calibration.json");
+ const m=read("phase6-machine-data-runtime-v84-production-calibration.json");
+ const eligible=s.candidateContracts.filter(x=>x.eligibility==="ELIGIBLE").map(x=>x.featureId).sort();
+ const bound=b.featureBindings.map(x=>x.featureId).sort();
+ const blocked=s.candidateContracts.filter(x=>x.eligibility==="INELIGIBLE").map(x=>x.featureId).sort();
+ assert.deepEqual(bound,eligible);
+ assert.deepEqual(b.blockedBindings.map(x=>x.featureId).sort(),blocked);
+ assert.equal(b.rules.noNameHeuristicBinding,true);
+ assert.equal(b.rules.noLegacyOracle,true);
+ assert.equal(m.runtimeBindingArtifact,"phase6-runtime-binding-v84-production-calibration.json");
+});
