@@ -135,7 +135,7 @@ function publish(id,apply,deferAudit=false){
    ...(existing?.machineType!==undefined?{machineType:existing.machineType}:{}),
    ...(existing?.gameType!==undefined?{gameType:existing.gameType}:{}),
    requiredCapabilities: deriveCapabilities(pkg),
-   packageUrl: existing?.packageUrl ?? defaultPackageUrl(id),
+   packageUrl: pkg?.v8?.source==="REPRO_V8_UPSTREAM_ONLY" ? defaultPackageUrl(id) : (existing?.packageUrl ?? defaultPackageUrl(id)),
    sha256:actualSha,
    packageSizeBytes:packageBytes,
    status:existing?.status ?? "available",
