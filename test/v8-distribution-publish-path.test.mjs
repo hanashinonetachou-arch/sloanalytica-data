@@ -40,6 +40,7 @@ test("V8 approve/publish/catalog/registry path is reproducible without productio
   catalogBefore.machines=catalogBefore.machines.filter(x=>x.machineId!==id);
   fs.writeFileSync(catalogPath,JSON.stringify(catalogBefore,null,2)+"\n","utf8");
   const generated=path.join(build,"machine-package.generated.json");
+  const generatedVersion=JSON.parse(fs.readFileSync(generated,"utf8")).machine.machineDataVersion;
   const approve=run("publish-machine-data.mjs",["approve",id,generated]);assert.equal(approve.status,0,approve.stderr||approve.stdout);
   const publish=run("publish-machine-data.mjs",["publish",id,"--apply","--defer-audit"]);assert.equal(publish.status,0,publish.stderr||publish.stdout);
   const target=run("audit-v8-distribution-target.mjs",[id]);assert.equal(target.status,0,target.stderr||target.stdout);
