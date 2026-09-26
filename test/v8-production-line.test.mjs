@@ -102,9 +102,9 @@ test("Revue v8.4 production package preserves conditional and categorical infere
  assert.equal(exposureInput?.derivedCalculation,"linear_combination");
  assert.deepEqual(exposureInput?.derivedTerms,[
   {inputId:"INP_BONUS_BROADER_GAMES",multiplier:1},
-  {inputId:"INP_NORMAL_REPRODUCTION_ENTRIES",multiplier:-20},
-  {inputId:"INP_CZ_REPRODUCTION_GAMES",multiplier:-1},
-  {inputId:"INP_AT_REPRODUCTION_GAMES",multiplier:-1},
+  {inputId:"INP_NORMAL_REPRODUCTION_ENTRIES",multiplier:-20,observedZeroAllowed:true},
+  {inputId:"INP_CZ_REPRODUCTION_GAMES",multiplier:-1,observedZeroAllowed:true},
+  {inputId:"INP_AT_REPRODUCTION_GAMES",multiplier:-1,observedZeroAllowed:true},
  ]);
  const evidenceSections=pkg.ui.sections.filter(s=>["SEC_BONUS_END","SEC_KIRIN_VOICE","SEC_PAYOUT"].includes(s.id));
  for(const section of evidenceSections){
