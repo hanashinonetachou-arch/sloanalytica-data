@@ -189,7 +189,7 @@ test("Runtime Projection is metric-driven, reversible, and preserves Candidate C
  const policyPath=path.join(ROOT,"runtime-policy.json");
  try{
   for(const [threshold,expected] of [[5,['ACTIVE','ACTIVE','ACTIVE']],[80,['INACTIVE','ACTIVE','ACTIVE']],[90,['INACTIVE','INACTIVE','ACTIVE']],[5,['ACTIVE','ACTIVE','ACTIVE']]]){
-   fs.writeFileSync(policyPath,JSON.stringify({...original,thresholds:{...original.thresholds,SELECTION_SCORE:threshold}},null,2)+'\n');
+   fs.writeFileSync(policyPath,JSON.stringify({...original,thresholds:{...original.thresholds,SELECTION_SCORE:threshold,PER_ELIGIBLE_TRIAL_POWER:0}},null,2)+'\n');
    const r=run("S_REVUE_STARLIGHT_CX"); assert.equal(r.status,0,r.stderr||r.stdout);
    const pkg=JSON.parse(fs.readFileSync(path.join(ROOT,"build","S_REVUE_STARLIGHT_CX","machine-package.generated.json"),"utf8"));
    const projection=new Map(pkg.features.runtimeProjection.map(x=>[x.featureId,x]));
@@ -208,7 +208,7 @@ test("Runtime Projection is metric-driven, reversible, and preserves Candidate C
   assert.equal(projection.get('FEAT_SPECIFIC_BONUS_5_AGG')?.runtimeStatus,'ACTIVE','NOT_THRESHOLD_CONTROLLED candidate ignores same-name policy keys');
   assert.equal(projection.get('FEAT_BIG_END_HINT_MULTINOMIAL')?.runtimeStatus,'INACTIVE');
   assert.equal(projection.get('FEAT_BIG_END_HINT_MULTINOMIAL')?.runtimeReason,'THRESHOLD_NOT_MET');
-  fs.writeFileSync(policyPath,JSON.stringify(original,null,2)+'\n');
+  fs.writeFileSync(policyPath,JSON.stringify({...original,thresholds:{...original.thresholds,PER_ELIGIBLE_TRIAL_POWER:0}},null,2)+'\n');
   const rollback=run("S_REVUE_STARLIGHT_CX"); assert.equal(rollback.status,0,rollback.stderr||rollback.stdout);
   const rollbackPkg=JSON.parse(fs.readFileSync(path.join(ROOT,"build","S_REVUE_STARLIGHT_CX","machine-package.generated.json"),"utf8"));
   const rollbackProjection=new Map(rollbackPkg.features.runtimeProjection.map(x=>[x.featureId,x]));
