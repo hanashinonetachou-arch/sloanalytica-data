@@ -1,7 +1,6 @@
 import fs from "node:fs";
 import path from "node:path";
 import {fileURLToPath} from "node:url";
-import {materializeCanonicalUiV8} from "./materialize-canonical-ui-v8-runtime.mjs";
 const ROOT=path.resolve(path.dirname(fileURLToPath(import.meta.url)),"..");
 const clone=x=>structuredClone(x);
 const safe=x=>String(x).replace(/[^A-Z0-9_]/gi,"_").toUpperCase();
@@ -54,7 +53,11 @@ export function compileV84CalibrationPackage({machineData,runtimeBinding}){
   const inputId="INP_"+safe(o.evidenceId); evidenceInputs.push({id:inputId,name:o.name,type:"counter",category:"EVIDENCE",unit:"回",inferenceRole:o.type==="HARD_SETTING_CONSTRAINT"?"INCLUDE_SUPPORT":"DISPLAY_ONLY",defaultValue:null,minimum:0});
   evidences.push({id:o.evidenceId,name:o.name,displayName:o.name,inputId,confirmedSettings:clone(o.allowedSettings??[]),deniedSettings:clone(o.deniedSettings??[]),hasImage:false,type:o.type==="HARD_SETTING_CONSTRAINT"?"SETTING_CONSTRAINT":"DISPLAY_ONLY",sourceEvidenceRefs:[o.evidenceId]});
  }
- const runtimeUi=materializeCanonicalUiV8(machineData.canonicalUi,{observationContract:{numeric:machineData.observationContracts},evidenceContract:machineData.evidence});
+ const runtimeUi={...clone(machineData.canonicalUi),contractVersion:"runtime-ui-v8",source:"CANONICAL_UI",sourceSchemaVersion:machineData.canonicalUi.schemaVersion,sections:(machineData.canonicalUi.sections??[]).map(s=>{
+   if(s.inputs) return {...clone(s),items:[{id:"GRP_"+safe(s.id),title:s.title,inputs:s.inputs.map(x=>({id:x.observationId,label:x.label,input:x.role==="DENOMINATOR"?"denominator":"counter",gridSpan:x.role==="DENOMINATOR"?12:6}))}]};
+   if(s.evidenceGroupId){const g=machineData.evidence.groups.find(x=>x.groupId===s.evidenceGroupId);return {...clone(s),items:[{id:s.evidenceGroupId,interaction:{type:"CATEGORY_COUNTERS",preservePriorObservations:true,showAccumulatedCounts:true,categoryCoverage:"NON_EXHAUSTIVE",totalOpportunities:"NOT_REQUIRED",opportunityTracking:{type:"NONE"},categories:(g?.items??[]).map(o=>({id:o.evidenceId,label:o.name,meaning:"観測した回数"}))}}]};}
+   return clone(s);
+ })};
  const projection=clone(machineData.runtimeProjection).map(x=>({...x,importance:candidates.find(c=>c.featureId===x.featureId)?.importance}));
  const provenance={manifestVersion:"8.4",generationPath:"V8_RESEARCH_PIPELINE",researchOrigin:"ZERO_BASE_PUBLIC_RESEARCH",legacyOracleUsed:false};
  const linkedPlay={service:machineData.linkedPlay?.service,status:machineData.linkedPlay?.supportStatus==="CONFIRMED"?"AVAILABLE":"UNRESOLVED",availableFieldsStatus:machineData.linkedPlay?.availableFieldsStatus??"UNRESOLVED",automaticImportCapability:"UNRESOLVED"};
