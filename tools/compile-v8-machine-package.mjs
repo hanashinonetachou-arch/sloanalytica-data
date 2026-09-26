@@ -53,7 +53,7 @@ function compileCandidates(selection){
   }));
 }
 
-function projectRuntimeCandidates(candidates,runtimePolicy){
+export function projectRuntimeCandidates(candidates,runtimePolicy){
   const thresholds=runtimePolicy?.thresholds??{};
   return (candidates??[]).map(candidate=>{
     if(candidate.eligibility==='INELIGIBLE') return {...clone(candidate),runtimeStatus:'INACTIVE',runtimeReason:'INELIGIBLE'};
