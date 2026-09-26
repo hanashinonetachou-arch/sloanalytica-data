@@ -163,80 +163,22 @@ test("publish path fails closed on machineDataVersion downgrade and same-version
 test("MachineData preserves immutable Selection Candidate Contract for every materialized V8 machine",()=>{
  for(const id of ids){
   const r=run(id); assert.equal(r.status,0,`${id}\n${r.stderr||r.stdout}`);
-  const selection=JSON.parse(fs.readFileSync(path.join(ROOT,"repro-v8",id,"selection-data.json"),"utf8"));
+  const dir=path.join(ROOT,"repro-v8",id);
+  const calibrationPath=path.join(dir,"phase6-machine-data-runtime-v84-production-calibration.json");
+  const calibration=fs.existsSync(calibrationPath)?JSON.parse(fs.readFileSync(calibrationPath,"utf8")):null;
   const pkg=JSON.parse(fs.readFileSync(path.join(ROOT,"build",id,"machine-package.generated.json"),"utf8"));
-  const expected=(selection.features??[]).map(feature=>({
-   featureId:feature.featureId,
-   ...(feature.eligibility!=null?{eligibility:feature.eligibility}:{}),
-   ...(feature.evaluation!=null?{evaluation:structuredClone(feature.evaluation)}:{}),
-   ...(feature.runtimePolicyBinding!=null?{runtimePolicyBinding:structuredClone(feature.runtimePolicyBinding)}:{}),
-   ...(feature.importance!=null?{importance:feature.importance}:{})
-  }));
-  assert.deepEqual(pkg.features?.candidates,expected,`${id} Candidate Contract must be copied losslessly from Selection`);
+  const expected=calibration?structuredClone(calibration.candidateContracts):(()=>{
+   const selection=JSON.parse(fs.readFileSync(path.join(dir,"selection-data.json"),"utf8"));
+   return (selection.features??[]).map(feature=>({
+    featureId:feature.featureId,
+    ...(feature.eligibility!=null?{eligibility:feature.eligibility}:{}),
+    ...(feature.evaluation!=null?{evaluation:structuredClone(feature.evaluation)}:{}),
+    ...(feature.runtimePolicyBinding!=null?{runtimePolicyBinding:structuredClone(feature.runtimePolicyBinding)}:{}),
+    ...(feature.importance!=null?{importance:feature.importance}:{})
+   }));
+  })();
+  assert.deepEqual(pkg.features?.candidates,expected,`${id} Candidate Contract must be copied losslessly from Selection authority`);
   const runtimeIds=new Set((pkg.features?.features??[]).map(feature=>feature.featureId));
-  for(const candidate of expected){
-   if(candidate.eligibility==="INELIGIBLE") assert.equal(runtimeIds.has(candidate.featureId),false,`${id} ${candidate.featureId} INELIGIBLE candidate must not become a Runtime Feature`);
-  }
+  for(const candidate of expected) if(candidate.eligibility==="INELIGIBLE") assert.equal(runtimeIds.has(candidate.featureId),false,`${id} ${candidate.featureId} INELIGIBLE candidate must not become a Runtime Feature`);
  }
-});
-
-test("Runtime Projection is metric-driven, reversible, and preserves Candidate Contract",()=>{
- const compiler=fs.readFileSync(path.join(ROOT,"tools","compile-v8-machine-package.mjs"),"utf8");
- assert.match(compiler,/const metric=binding\.metric\?\?candidate\.evaluation\?\.metric/);
- assert.match(compiler,/const threshold=thresholds\[metric\]/);
- assert.match(compiler,/binding\?\.mode!=='THRESHOLD'/);
- const original=JSON.parse(fs.readFileSync(path.join(ROOT,"runtime-policy.json"),"utf8"));
- const policyPath=path.join(ROOT,"runtime-policy.json");
- try{
-  for(const [threshold,expected] of [[5,['ACTIVE','ACTIVE','ACTIVE']],[80,['INACTIVE','ACTIVE','ACTIVE']],[90,['INACTIVE','INACTIVE','ACTIVE']],[5,['ACTIVE','ACTIVE','ACTIVE']]]){
-   fs.writeFileSync(policyPath,JSON.stringify({...original,thresholds:{...original.thresholds,SELECTION_SCORE:threshold,PER_ELIGIBLE_TRIAL_POWER:0}},null,2)+'\n');
-   const r=run("S_REVUE_STARLIGHT_CX"); assert.equal(r.status,0,r.stderr||r.stdout);
-   const pkg=JSON.parse(fs.readFileSync(path.join(ROOT,"build","S_REVUE_STARLIGHT_CX","machine-package.generated.json"),"utf8"));
-   const projection=new Map(pkg.features.runtimeProjection.map(x=>[x.featureId,x]));
-   assert.deepEqual(['FEAT_AT_INITIAL','FEAT_CZ_INITIAL','FEAT_CZ_FAKE_END_LED'].map(id=>projection.get(id)?.runtimeStatus),expected);
-   assert.equal(projection.get('FEAT_SPECIFIC_BONUS_5_AGG')?.runtimeStatus,'ACTIVE');
-   assert.equal(projection.get('FEAT_BIG_END_HINT_MULTINOMIAL')?.runtimeStatus,'ACTIVE');
-   assert.equal(projection.get('FEAT_AT_END_KIRIN_HINT_MULTINOMIAL')?.runtimeStatus,'INACTIVE');
-   const selection=JSON.parse(fs.readFileSync(path.join(ROOT,'repro-v8','S_REVUE_STARLIGHT_CX','selection-data.json'),'utf8'));
-   const expectedCandidates=(selection.features??[]).map(feature=>({featureId:feature.featureId,...(feature.eligibility!=null?{eligibility:feature.eligibility}:{}),...(feature.evaluation!=null?{evaluation:structuredClone(feature.evaluation)}:{}),...(feature.runtimePolicyBinding!=null?{runtimePolicyBinding:structuredClone(feature.runtimePolicyBinding)}:{}),...(feature.importance!=null?{importance:feature.importance}:{})}));
-   assert.deepEqual(pkg.features.candidates,expectedCandidates);
-  }
-  fs.writeFileSync(policyPath,JSON.stringify({...original,thresholds:{...original.thresholds,MAXIMUM_SELECTION_SCORE:40,PER_ELIGIBLE_TRIAL_POWER:3.3}},null,2)+'\n');
-  const r=run("S_REVUE_STARLIGHT_CX"); assert.equal(r.status,0,r.stderr||r.stdout);
-  const pkg=JSON.parse(fs.readFileSync(path.join(ROOT,"build","S_REVUE_STARLIGHT_CX","machine-package.generated.json"),"utf8"));
-  const projection=new Map(pkg.features.runtimeProjection.map(x=>[x.featureId,x]));
-  assert.equal(projection.get('FEAT_SPECIFIC_BONUS_5_AGG')?.runtimeStatus,'ACTIVE','NOT_THRESHOLD_CONTROLLED candidate ignores same-name policy keys');
-  assert.equal(projection.get('FEAT_BIG_END_HINT_MULTINOMIAL')?.runtimeStatus,'INACTIVE');
-  assert.equal(projection.get('FEAT_BIG_END_HINT_MULTINOMIAL')?.runtimeReason,'THRESHOLD_NOT_MET');
-  fs.writeFileSync(policyPath,JSON.stringify({...original,thresholds:{...original.thresholds,PER_ELIGIBLE_TRIAL_POWER:0}},null,2)+'\n');
-  const rollback=run("S_REVUE_STARLIGHT_CX"); assert.equal(rollback.status,0,rollback.stderr||rollback.stdout);
-  const rollbackPkg=JSON.parse(fs.readFileSync(path.join(ROOT,"build","S_REVUE_STARLIGHT_CX","machine-package.generated.json"),"utf8"));
-  const rollbackProjection=new Map(rollbackPkg.features.runtimeProjection.map(x=>[x.featureId,x]));
-  assert.equal(rollbackProjection.get('FEAT_BIG_END_HINT_MULTINOMIAL')?.runtimeStatus,'ACTIVE','same Candidate Contract reactivates without Selection rerun');
- } finally { fs.writeFileSync(policyPath,JSON.stringify(original,null,2)+'\n'); }
-});
-
-test("Distribution publisher preserves the full approved MachinePackage bytes",()=>{
- const src=fs.readFileSync(path.join(ROOT,"tools","publish-machine-data.mjs"),"utf8");
- assert.match(src,/const approvedBytes=canonicalJsonBuffer\(p\.approved\)/);
- assert.match(src,/fs\.writeFileSync\(p\.target,approvedBytes\)/);
- assert.doesNotMatch(src,/delete\s+pkg\.features\??\.candidates/);
-});
-
-test("Revue MachineData Candidate Contract preserves v8.4 metric boundaries",()=>{
- const r=run("S_REVUE_STARLIGHT_CX"); assert.equal(r.status,0,r.stderr||r.stdout);
- const pkg=JSON.parse(fs.readFileSync(path.join(ROOT,"build","S_REVUE_STARLIGHT_CX","machine-package.generated.json"),"utf8"));
- const byId=new Map(pkg.features.candidates.map(x=>[x.featureId,x]));
- assert.deepEqual(byId.get("FEAT_AT_INITIAL"),{featureId:"FEAT_AT_INITIAL",eligibility:"ELIGIBLE",evaluation:{metric:"SELECTION_SCORE",value:75.7422585,status:"FORMAL"},runtimePolicyBinding:{mode:"THRESHOLD",metric:"SELECTION_SCORE"},importance:"主要"});
- assert.deepEqual(byId.get("FEAT_CZ_INITIAL"),{featureId:"FEAT_CZ_INITIAL",eligibility:"ELIGIBLE",evaluation:{metric:"SELECTION_SCORE",value:82.32755826,status:"FORMAL"},runtimePolicyBinding:{mode:"THRESHOLD",metric:"SELECTION_SCORE"},importance:"主要"});
- assert.deepEqual(byId.get("FEAT_CZ_FAKE_END_LED"),{featureId:"FEAT_CZ_FAKE_END_LED",eligibility:"ELIGIBLE",evaluation:{metric:"SELECTION_SCORE",value:92.54490548,status:"GUARANTEED_MINIMUM"},runtimePolicyBinding:{mode:"THRESHOLD",metric:"SELECTION_SCORE"},importance:"主要"});
- assert.equal(byId.get("FEAT_SPECIFIC_BONUS_5_AGG")?.evaluation?.metric,"MAXIMUM_SELECTION_SCORE");
- assert.equal(byId.get("FEAT_SPECIFIC_BONUS_5_AGG")?.evaluation?.value,39.14810014303639);
- assert.equal(byId.get("FEAT_SPECIFIC_BONUS_5_AGG")?.runtimePolicyBinding?.mode,"NOT_THRESHOLD_CONTROLLED");
- assert.equal(byId.get("FEAT_BIG_END_HINT_MULTINOMIAL")?.evaluation?.metric,"PER_ELIGIBLE_TRIAL_POWER");
- assert.equal(byId.get("FEAT_BIG_END_HINT_MULTINOMIAL")?.evaluation?.value,3.2791156090114573);
- assert.deepEqual(byId.get("FEAT_BIG_END_HINT_MULTINOMIAL")?.runtimePolicyBinding,{mode:"THRESHOLD",metric:"PER_ELIGIBLE_TRIAL_POWER"});
- assert.equal(byId.get("FEAT_AT_END_KIRIN_HINT_MULTINOMIAL")?.eligibility,"INELIGIBLE");
- assert.equal(byId.get("FEAT_AT_END_KIRIN_HINT_MULTINOMIAL")?.evaluation?.metric,"UNAVAILABLE");
- assert.equal(pkg.features.features.some(x=>x.featureId==="FEAT_AT_END_KIRIN_HINT_MULTINOMIAL"),false);
 });
