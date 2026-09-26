@@ -42,6 +42,7 @@ test("Phase 8 calibration publish is lossless through package/catalog/registry",
   assert.equal(entry.machineDataVersion,pkg.machine.machineDataVersion);
   assert.equal(entry.packageSizeBytes,published.length);
   assert.equal(entry.sha256,sha(published));
+  assert.equal(entry.packageUrl,`https://raw.githubusercontent.com/hanashinonetachou-arch/sloanalytica-data/prototype-multi-machine/machines/${id}/machine-package.json`);
   const registry=read(path.join(ROOT,"machine-registry.json"));
   assert.equal(registry.machines.find(x=>x.machineId===id).machineDataVersion,pkg.machine.machineDataVersion);
  } finally {
