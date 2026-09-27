@@ -37,6 +37,12 @@ test("Phase 8 calibration publish is lossless through package/catalog/registry",
   assert.equal(joint.modelType,"multinomial");
   assert.equal(joint.derivedResidualCategory.id,"OBS_OTHER");
   assert.equal(pkg.provenance.legacyOracleUsed,false);
+  assert.equal(pkg.ui.contractVersion,"runtime-ui-v8");
+  assert.equal(pkg.ui.source,"CANONICAL_UI");
+  assert.equal(pkg.ui.sourceSchemaVersion,"v8.4-canonical-ui-calibration-v1");
+  assert.equal(pkg.ui.sections.some(x=>x.title==="この機種の設定推測について"),false);
+  assert.ok(pkg.v8.machineResearchSummary);
+  assert.equal(pkg.v8.machineResearchSummary.title,"この機種の設定推測について");
   const catalog=read(path.join(ROOT,"catalog.json"));
   const entry=catalog.machines.find(x=>x.machineId===id);
   assert.equal(entry.machineDataVersion,pkg.machine.machineDataVersion);

@@ -44,6 +44,9 @@ if(declaredProvenance){
 }
 if(pkg?.machine?.machineId!==id) throw new Error("generated machineId mismatch");
 if(pkg?.ui?.source!=="CANONICAL_UI") throw new Error("runtime UI is not canonical-ui sourced");
+if(pkg?.ui?.contractVersion!=="runtime-ui-v8") throw new Error("runtime UI contractVersion is not runtime-ui-v8");
+if(!pkg?.ui?.sourceSchemaVersion) throw new Error("runtime UI sourceSchemaVersion missing");
+if(!pkg?.v8?.machineResearchSummary) throw new Error("V8 machine research summary missing");
 
 const serialized=JSON.stringify(pkg.ui);
 for(const f of pkg.features?.features??[]){
