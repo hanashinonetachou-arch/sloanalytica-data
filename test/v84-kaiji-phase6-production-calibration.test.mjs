@@ -99,3 +99,24 @@ test("Phase 6 source authority remains Phase 1-5 calibration artifacts only",()=
  assert.equal(md.observationContracts.length,p4.observationContracts.length);
  assert.equal(md.canonicalUi.phase,"PHASE_5_CANONICAL_UI");
 });
+
+
+test("game-count observations explicitly support direct numeric entry",()=>{
+ const directIds=ui.sections.flatMap(s=>s.inputs??[]).filter(x=>x.directNumeric===true).map(x=>x.observationId).sort();
+ assert.deepEqual(directIds,["OBS_CZ_ELIGIBLE_NORMAL_GAMES","OBS_NORMAL_GAMES","OBS_TOTAL_GAMES"]);
+ assert.equal(ui.sections.find(x=>x.id==="SEC_CZ").inputs.find(x=>x.observationId==="OBS_CZ_ENTRY_COUNT").directNumeric,undefined);
+});
+
+
+test("play-data binding is explicit, opt-in, and trial-universe safe",()=>{
+ const byId=new Map(ui.sections.flatMap(s=>s.inputs??[]).map(x=>[x.observationId,x]));
+ assert.equal(byId.get("OBS_NORMAL_GAMES").playDataBinding?.source,"PLAY_NORMAL_GAME_DELTA");
+ assert.equal(byId.get("OBS_TOTAL_GAMES").playDataBinding?.source,"PLAY_TOTAL_GAME_DELTA");
+ assert.equal(byId.get("OBS_NORMAL_GAMES").playDataBinding?.mode,"USER_OPT_IN_LIVE_LINK");
+ assert.equal(byId.get("OBS_TOTAL_GAMES").playDataBinding?.mode,"USER_OPT_IN_LIVE_LINK");
+ assert.equal(byId.get("OBS_CZ_ELIGIBLE_NORMAL_GAMES").playDataBinding,undefined);
+ const obsInputs=md.observationContracts.flatMap(x=>x.inputs??[]);
+ assert.equal(obsInputs.find(x=>x.id==="OBS_NORMAL_GAMES").playDataBinding?.source,"PLAY_NORMAL_GAME_DELTA");
+ assert.equal(obsInputs.find(x=>x.id==="OBS_TOTAL_GAMES").playDataBinding?.source,"PLAY_TOTAL_GAME_DELTA");
+ assert.equal(obsInputs.find(x=>x.id==="OBS_CZ_ELIGIBLE_NORMAL_GAMES").playDataBinding,undefined);
+});
