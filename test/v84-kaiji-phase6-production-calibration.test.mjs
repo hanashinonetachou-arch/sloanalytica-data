@@ -99,3 +99,10 @@ test("Phase 6 source authority remains Phase 1-5 calibration artifacts only",()=
  assert.equal(md.observationContracts.length,p4.observationContracts.length);
  assert.equal(md.canonicalUi.phase,"PHASE_5_CANONICAL_UI");
 });
+
+
+test("game-count observations explicitly support direct numeric entry",()=>{
+ const directIds=ui.sections.flatMap(s=>s.inputs??[]).filter(x=>x.directNumeric===true).map(x=>x.observationId).sort();
+ assert.deepEqual(directIds,["OBS_CZ_ELIGIBLE_NORMAL_GAMES","OBS_NORMAL_GAMES","OBS_TOTAL_GAMES"]);
+ assert.equal(ui.sections.find(x=>x.id==="SEC_CZ").inputs.find(x=>x.observationId==="OBS_CZ_ENTRY_COUNT").directNumeric,undefined);
+});
