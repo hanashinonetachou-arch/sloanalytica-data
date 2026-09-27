@@ -106,3 +106,17 @@ test("game-count observations explicitly support direct numeric entry",()=>{
  assert.deepEqual(directIds,["OBS_CZ_ELIGIBLE_NORMAL_GAMES","OBS_NORMAL_GAMES","OBS_TOTAL_GAMES"]);
  assert.equal(ui.sections.find(x=>x.id==="SEC_CZ").inputs.find(x=>x.observationId==="OBS_CZ_ENTRY_COUNT").directNumeric,undefined);
 });
+
+
+test("play-data binding is explicit, opt-in, and trial-universe safe",()=>{
+ const byId=new Map(ui.sections.flatMap(s=>s.inputs??[]).map(x=>[x.observationId,x]));
+ assert.equal(byId.get("OBS_NORMAL_GAMES").playDataBinding?.source,"PLAY_NORMAL_GAME_DELTA");
+ assert.equal(byId.get("OBS_TOTAL_GAMES").playDataBinding?.source,"PLAY_TOTAL_GAME_DELTA");
+ assert.equal(byId.get("OBS_NORMAL_GAMES").playDataBinding?.mode,"USER_OPT_IN_LIVE_LINK");
+ assert.equal(byId.get("OBS_TOTAL_GAMES").playDataBinding?.mode,"USER_OPT_IN_LIVE_LINK");
+ assert.equal(byId.get("OBS_CZ_ELIGIBLE_NORMAL_GAMES").playDataBinding,undefined);
+ const obsInputs=md.observationContracts.flatMap(x=>x.inputs??[]);
+ assert.equal(obsInputs.find(x=>x.id==="OBS_NORMAL_GAMES").playDataBinding?.source,"PLAY_NORMAL_GAME_DELTA");
+ assert.equal(obsInputs.find(x=>x.id==="OBS_TOTAL_GAMES").playDataBinding?.source,"PLAY_TOTAL_GAME_DELTA");
+ assert.equal(obsInputs.find(x=>x.id==="OBS_CZ_ELIGIBLE_NORMAL_GAMES").playDataBinding,undefined);
+});
