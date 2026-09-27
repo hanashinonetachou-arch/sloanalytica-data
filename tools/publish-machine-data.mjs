@@ -30,6 +30,18 @@ function compareSemverCore(a,b){
  for(let i=0;i<3;i++) if(av[i]!==bv[i]) return av[i]<bv[i]?-1:1;
  return 0;
 }
+function calibrationRevision(v){
+ const m=String(v??"").match(/-calibration\.(\d+)(?:[.+-].*)?$/i);
+ return m?Number(m[1]):null;
+}
+function compareMachineDataVersion(a,b){
+ const core=compareSemverCore(a,b);
+ if(core===null||core!==0) return core;
+ if(a===b) return 0;
+ const ac=calibrationRevision(a),bc=calibrationRevision(b);
+ if(ac!==null&&bc!==null&&ac!==bc) return ac<bc?-1:1;
+ return 0;
+}
 
 function paths(id){
  const b=path.join(BUILD_ROOT,id);
@@ -117,7 +129,7 @@ function publish(id,apply,deferAudit=false){
  const nextVersion=pkg.machine?.machineDataVersion;
  const existingVersion=existing?.machineDataVersion;
  if(existingVersion){
-   const order=compareSemverCore(nextVersion,existingVersion);
+   const order=compareMachineDataVersion(nextVersion,existingVersion);
    if(order===null) die(`machineDataVersionを比較できません: existing=${existingVersion} next=${nextVersion}`);
    if(order<0) die(`machineDataVersion downgrade blocked: existing=${existingVersion} next=${nextVersion}`);
    if(order===0 && existing?.sha256!==actualSha) die(`machineDataVersion must increase when package content changes: existing=${existingVersion} next=${nextVersion}`);
