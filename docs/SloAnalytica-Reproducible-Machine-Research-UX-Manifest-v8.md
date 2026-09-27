@@ -1,9 +1,11 @@
-# SloAnalytica Reproducible Machine Research & UX Construction Manifest v8.4
+# SloAnalytica Reproducible Machine Research & UX Construction Manifest v8.5
 
-Status: DRAFT — v8.4 Exposure Reconstruction reference-machine validation required  
+Status: DRAFT — v8.5 reference-machine validation required  
 Date: 2026-09-28  
 Supersedes as execution source: Machine Research & Construction Pipeline v1 and the active rules of MachineData・UX Construction Manifest v7.2.  
 Preserves: applicable v7.2/v7.1/v6.15 UX knowledge, Core Policy, User-Verified UX Contract Policy, and established statistical invariants.
+
+Version lineage: v8.5 preserves all normative v8.4 Runtime Policy / Candidate Contract rules unless explicitly superseded below. v8.5 introduces the common play-session seated-counter and Observation-owned denominator UX contract defined in INPUTUX-007..INPUTUX-014 and ASSERT-UI-007A. Existing artifacts generated under v8.4 remain v8.4 artifacts until regenerated under v8.5; changing this Manifest version does not relabel prior machine artifacts.
 
 ## 0. Purpose and acceptance criterion
 
