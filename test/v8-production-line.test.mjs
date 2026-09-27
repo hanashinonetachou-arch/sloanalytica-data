@@ -156,7 +156,7 @@ test("publish path fails closed on machineDataVersion downgrade and same-version
  const src=fs.readFileSync(path.join(ROOT,"tools","publish-machine-data.mjs"),"utf8");
  assert.match(src,/machineDataVersion downgrade blocked/);
  assert.match(src,/machineDataVersion must increase when package content changes/);
- assert.match(src,/compareSemverCore\(nextVersion,existingVersion\)/);
+ assert.match(src,/compareMachineDataVersion\(nextVersion,existingVersion\)/);\n assert.match(src,/calibrationRevision/);
 });
 
 
