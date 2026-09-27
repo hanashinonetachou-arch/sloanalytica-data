@@ -1,9 +1,11 @@
-# SloAnalytica Reproducible Machine Research & UX Construction Manifest v8.4
+# SloAnalytica Reproducible Machine Research & UX Construction Manifest v8.5
 
-Status: DRAFT — v8.4 Exposure Reconstruction reference-machine validation required  
-Date: 2026-09-23  
+Status: DRAFT — v8.5 reference-machine validation required  
+Date: 2026-09-28  
 Supersedes as execution source: Machine Research & Construction Pipeline v1 and the active rules of MachineData・UX Construction Manifest v7.2.  
 Preserves: applicable v7.2/v7.1/v6.15 UX knowledge, Core Policy, User-Verified UX Contract Policy, and established statistical invariants.
+
+Version lineage: v8.5 preserves all normative v8.4 Runtime Policy / Candidate Contract rules unless explicitly superseded below. v8.5 introduces the common play-session seated-counter and Observation-owned denominator UX contract defined in INPUTUX-007..INPUTUX-014 and ASSERT-UI-007A. Existing artifacts generated under v8.4 remain v8.4 artifacts until regenerated under v8.5; changing this Manifest version does not relabel prior machine artifacts.
 
 ## 0. Purpose and acceptance criterion
 
@@ -679,6 +681,34 @@ LOVE ZONE、AT初当り、Evidenceカテゴリ等の低〜中頻度の発生回�
 
 ### INPUTUX-006 — 同一ラベルの重複を避ける
 グループ見出し、入力カード見出し、入力コントロール内で同じ自然言語ラベルを反復してはならない。文脈を失わない範囲で1つの入力対象につき主ラベルは1回を原則とする。グループ説明や母数範囲の説明は独立した説明UIに保持する。
+
+### INPUTUX-007 — 遊技情報はセッション情報と着席時カウンターを保持する
+共通の遊技情報は、履歴管理に必要なセッション情報（日付・店舗・台番号）と、着席時点の基準カウンター（総ゲーム数・通常ゲーム数）を保持する。共通遊技情報に「現在ゲーム数」を別の永続 raw source of truth として要求してはならない。着席時カウンターは Observation が明示的に利用を許可した場合だけ差分計算の基準値となる。
+
+### INPUTUX-008 — Observation が着席時との差分利用可否を宣言する
+ゲーム数を母数とする Observation は、対応する着席時カウンターとの差分を利用可能かを Observation contract / Canonical UI まで明示的に伝播しなければならない。App Runtime / Renderer は Observation 名、DENOMINATOR role、機種名、画面上の近接関係などから差分利用可否や参照カウンターを推測してはならない。契約がない Observation は従来どおり directNumeric 等で定義された直接入力のみを使用する。
+
+### INPUTUX-009 — 着席時との差分を使用する入力モード
+差分利用可能な Observation にはユーザー操作として「着席時との差分を使用」を提供する。ON のとき入力欄は「現在の通常ゲーム数」「現在の総ゲーム数」等、契約されたカウンター種別に対応する現在値として表示し、推論に渡す母数は `currentCounter - sessionStartCounter` とする。OFF のとき入力欄は「消化した通常ゲーム数」「消化した総ゲーム数」等の直接母数として表示し、入力値そのものを使用する。差分が負、基準値未入力、現在値未入力その他 exact に解決できない状態を 0 で代用してはならない。
+
+### INPUTUX-010 — 着席時カウンター入力済みなら初期差分モードを ON とする
+Observation が差分利用を許可し、かつ対応する着席時カウンターが入力済みである場合、その Observation の初回モードは「着席時との差分を使用」ON とする。対応する着席時カウンターが未入力なら初期 OFF とする。総ゲーム数と通常ゲーム数は独立に判定する。一度ユーザーがモードを明示変更した後はその選択を優先し、着席時カウンターの編集だけを理由に自動で ON へ戻してはならない。
+
+### INPUTUX-011 — directNumeric と着席時差分契約は独立する
+directNumeric はユーザーが Observation 母数を直接入力できる能力を表し、着席時差分契約は共通の着席時カウンターを基準に現在値から母数を exact に導出できる能力を表す。両者を同一視してはならない。差分モードを OFF にしたときは directNumeric が許可されている限り直接母数入力へ戻れること。差分モードから離脱する際、最後に exact に解決できていた母数値は直接入力値として保持してよい。
+
+### INPUTUX-012 — 明示的な長時間無抽選区間だけ除外ゲーム数を許可する
+Research / Denominator / Exposure Reconstruction が、母数から除外すべき無抽選・非 eligible 区間をプレイヤーが明示的かつ再現可能に判定でき、かつその区間が実戦上無視しにくい長さになり得ると確認した場合に限り、Observation contract は「除外ゲーム数」入力を要求してよい。この場合の exact 母数は原則 `currentCounter - sessionStartCounter - excludedGames` とし、除外項の eligibility boundary、reset/session boundary、重複禁止条件および provenance を EXP-007A..EXP-007I に従って保持する。
+
+### INPUTUX-013 — 理論上の微小除外より実戦操作性を優先する
+数ゲーム程度の短い非 eligible 区間、発生時点や境界を厳密に追跡するために過大な操作を要求する区間、または設定推測上の影響が通常の実戦誤差の範囲に留まる区間について、Canonical UI は厳密性だけを目的として除外ゲーム数入力を追加してはならない。典型例としてリアルボーナス当選から図柄を揃えるまでの数ゲームは、Research が機種固有に「無視できない明示的区間」と立証しない限り誤差として扱う。採否理由は machine research artifact に残し、Renderer が独自判断してはならない。
+
+### INPUTUX-014 — eligible 母数を単純差分へ強制変換しない
+CZ 初当り対象通常ゲーム数など、単純な着席時差分では exact な eligible denominator を得られない Observation に対し、差分チェックや除外ゲーム数方式を便宜的に付与してはならない。exact な直接母数入力、または EXP-007A..EXP-007I で許可された再現可能な Exposure Reconstruction を使用する。UI の簡略化を理由に eligibility semantics を変更してはならない。
+
+### ASSERT-UI-007A — 着席時差分・除外ゲーム数の fail-closed 検証
+Preview / Runtime Contract Verification は、(a) 差分モードが契約された Observation のみに表示される、(b) 対応する着席時カウンター入力済みの場合のみ初期 ON になる、(c) ON/OFF で「現在の…ゲーム数」と「消化した…ゲーム数」の意味が正しく切り替わる、(d) unresolved/negative difference を 0 扱いしない、(e) 除外ゲーム数は明示的な契約がある場合だけ表示される、(f) eligible 母数を単純差分へ誤変換しないことを確認する。違反時は機種固有 Renderer branch ではなく Manifest / schema / generic runtime contract を修正する。
+
 
 ### ASSERT-UI-007 — 実機入力操作性の fail-closed 検証
 Preview / Runtime Contract Verification は、(a) 大きな母数が直接入力可能、(b) UNOBSERVED と OBSERVED_ZERO が区別される、(c) 未観測表示が重複しない、(d) 同一入力ラベルが不必要に反復されないことを確認する。違反時は機種固有UIで補正せず、Canonical規則または汎用Rendererを修正する。
