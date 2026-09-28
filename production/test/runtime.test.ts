@@ -17,3 +17,25 @@ test('one machine terminal failure does not block other machines in batch schedu
 test('production request declares stage artifact contract and committed result records provenance',()=>{const {s,o}=setup();const worker=new MockWorkerAdapter();let x=o.stage('bat_dry','M1','RESEARCH');const a=o.createAttempt(x),l=o.acquire(x,a);x=o.transition(o.stage('bat_dry','M1','RESEARCH'),'LEASED','D',a.workId);x=o.transition(x,'RUNNING','S',a.workId);const q=productionRequest(o,x,a,l);assert.equal(q.workerType,'SEMANTIC');assert.equal(q.expectedOutputs[0].kind,'research');const r=worker.execute(q);r.producedArtifacts=[{artifactId:'r1',kind:'research',path:'production/batches/bat_dry/artifacts/M1/research/result.json',sha256:'abc',producerWorkId:r.workId}];assert.equal(acceptAndRecord(o,s,r,'semantic-mock','deterministic').kind,'COMMITTED');const p=fs.readFileSync(s.p('batches','bat_dry','provenance','chain.jsonl'),'utf8').trim();assert.equal(JSON.parse(p).outputArtifacts[0].artifactId,'r1')});
 
 test('artifact contract violation is rejected before authoritative COMPLETE',()=>{const {s,o}=setup();const worker=new MockWorkerAdapter();let x=o.stage('bat_dry','M1','RESEARCH');const a=o.createAttempt(x),l=o.acquire(x,a);x=o.transition(o.stage('bat_dry','M1','RESEARCH'),'LEASED','D',a.workId);x=o.transition(x,'RUNNING','S',a.workId);const r=worker.execute(productionRequest(o,x,a,l));r.producedArtifacts=[{artifactId:'bad',kind:'wrong',path:'production/batches/bat_dry/artifacts/M1/research/bad.json',sha256:'abc',producerWorkId:r.workId}];assert.throws(()=>acceptAndRecord(o,s,r,'semantic-mock','deterministic'),/ARTIFACT_CONTRACT_VIOLATION/);assert.equal(o.stage('bat_dry','M1','RESEARCH').state,'RUNNING')});
+
+test('formal dispatch path keeps wave gate and creates authoritative attempt/lease/request',()=>{
+ const {s,o}=setup();const c={semanticSlots:2,productionSlots:2,validationSlots:2,integrationSlots:1};
+ const selected=scheduleByKind(o,s,'bat_dry',c,'SEMANTIC');
+ assert.deepEqual(selected.map(x=>x.machineId),['M1','M2']);
+ for(const candidate of selected){
+  let x=o.stage('bat_dry',candidate.machineId,candidate.name);
+  const a=o.createAttempt(x),l=o.acquire(x,a);
+  x=o.transition(o.stage('bat_dry',candidate.machineId,candidate.name),'LEASED','DISPATCH',a.workId);
+  x=o.transition(x,'RUNNING','WORKER_START',a.workId);
+  const q=productionRequest(o,x,a,l);
+  s.write(q,'batches','bat_dry','work-requests',q.workId+'.json');
+  assert.equal(q.workerType,'SEMANTIC');assert.equal(q.stage,'RESEARCH');
+  assert.equal(o.stage('bat_dry',candidate.machineId,'RESEARCH').state,'RUNNING');
+  assert.ok(s.exists('batches','bat_dry','work-requests',q.workId+'.json'));
+ }
+ assert.equal(o.stage('bat_dry','M3','RESEARCH').state,'READY');
+ assert.equal(o.stage('bat_dry','M6','RESEARCH').state,'READY');
+ assert.equal(activeResearchWave(s,'bat_dry'),'w1');
+});
+
+test('result ingestion contract commits research provenance and promotes only EVALUATION',()=>{const {s,o}=setup();const worker=new MockWorkerAdapter();let x=o.stage('bat_dry','M1','RESEARCH');const a=o.createAttempt(x),l=o.acquire(x,a);x=o.transition(o.stage('bat_dry','M1','RESEARCH'),'LEASED','DISPATCH',a.workId);x=o.transition(x,'RUNNING','WORKER_START',a.workId);const q=productionRequest(o,x,a,l);const r=worker.execute(q);r.producedArtifacts=[{artifactId:'research-result',kind:'research',path:'production/batches/bat_dry/artifacts/M1/research/result.json',sha256:'abc',producerWorkId:r.workId}];const accepted=acceptAndRecord(o,s,r,'semantic-worker','deterministic');assert.equal(accepted.kind,'COMMITTED');if(accepted.kind==='COMMITTED')promoteDependencies(o,accepted.stage.batchId,accepted.stage.machineId);assert.equal(o.stage('bat_dry','M1','RESEARCH').state,'COMPLETE');assert.equal(o.stage('bat_dry','M1','EVALUATION').state,'READY');assert.equal(o.stage('bat_dry','M1','ELIGIBILITY').state,'PENDING');const p=fs.readFileSync(s.p('batches','bat_dry','provenance','chain.jsonl'),'utf8').trim();assert.equal(JSON.parse(p).workerAdapter,'semantic-worker')});
