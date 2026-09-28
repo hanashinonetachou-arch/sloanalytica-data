@@ -1,0 +1,3 @@
+import test from 'node:test';import assert from 'node:assert/strict';import path from 'node:path';import {normalizeMigrationPaths} from '../src/finalize-migration.ts';
+test('normalizes production-relative migration files to repository-root paths',()=>{const repo=path.resolve('repo');const prod=path.join(repo,'production');assert.deepEqual(normalizeMigrationPaths(prod,repo,['batches/b/stages.json']),['production/batches/b/stages.json'])});
+test('does not duplicate production prefix',()=>{const repo=path.resolve('repo');const prod=path.join(repo,'production');const [p]=normalizeMigrationPaths(prod,repo,['batches/b/x.json']);assert.equal(p.includes('production/production/'),false)});
