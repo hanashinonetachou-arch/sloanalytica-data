@@ -26,9 +26,9 @@ export function validateCandidateContractDocument(doc:any,eligibility:any,evalua
  if(doc.dependencyGroups.length!==expectedGroups.size)fail('GROUP_COVERAGE');
  const seen=new Set<string>();
  for(const g of doc.dependencyGroups){
-  if(!nonEmpty(g.groupId)||seen.has(g.groupId)||!['MUTUALLY_EXCLUSIVE_CATEGORICAL','CONDITIONALLY_SEPARATE','SINGLE_MEMBER_SELECTED'].includes(g.resolution)||!nonEmpty(g.reason)||!Array.isArray(g.members))fail('GROUP_SHAPE');
+  if(!nonEmpty(g.groupId)||seen.has(g.groupId)||!['MUTUALLY_EXCLUSIVE_CATEGORICAL','CONDITIONALLY_SEPARATE','SINGLE_MEMBER_SELECTED','HELD_NO_JOINT_MODEL'].includes(g.resolution)||!nonEmpty(g.reason)||!Array.isArray(g.members))fail('GROUP_SHAPE');
   seen.add(g.groupId);const exp=expectedGroups.get(g.groupId);if(!exp||canonical([...g.members].sort())!==canonical([...exp].sort()))fail('GROUP_MEMBERS:'+g.groupId);
-  if(g.resolution==='SINGLE_MEMBER_SELECTED'&&(!nonEmpty(g.selectedFindingId)||!g.members.includes(g.selectedFindingId)||!nonEmpty(g.selectionRationale)))fail('GROUP_SELECTION:'+g.groupId);
+  if(g.resolution==='SINGLE_MEMBER_SELECTED'&&(!nonEmpty(g.selectedFindingId)||!g.members.includes(g.selectedFindingId)||!nonEmpty(g.selectionRationale)))fail('GROUP_SELECTION:'+g.groupId);if(g.resolution==='HELD_NO_JOINT_MODEL'&&(g.runtimeInferenceAllowed!==false||!nonEmpty(g.reevaluationCondition)))fail('GROUP_HOLD:'+g.groupId);
  }
  return [{validator:CANDIDATE_CONTRACT_VALIDATOR_CONTRACT,candidates:eligible.length,excluded:excluded.length,dependencyGroups:expectedGroups.size}];
 }
