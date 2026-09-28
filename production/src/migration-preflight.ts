@@ -1,6 +1,6 @@
 import fs from 'node:fs';
 import {RepoStore} from './core.ts';
-import type {Stage,Lease} from './core.ts';
+import type {Stage,Lease,Attempt} from './core.ts';
 import type {BatchSpec} from './runtime.ts';
 
 export function migrationPreflight(root:string,batchId:string){
@@ -12,7 +12,12 @@ export function migrationPreflight(root:string,batchId:string){
   const research=s.read<Stage>('batches',batchId,'machines',machineId,'stages','RESEARCH.json');
   const evaluation=s.read<Stage>('batches',batchId,'machines',machineId,'stages','EVALUATION.json');
   if(research.state!=='COMPLETE') throw new Error(`MIGRATION_RESEARCH_NOT_COMPLETE:${machineId}:${research.state}`);
-  if(research.activeAttemptId||research.activeLeaseId) throw new Error(`MIGRATION_RESEARCH_WRITER_ACTIVE:${machineId}`);
+  if(!research.activeAttemptId||!research.activeLeaseId) throw new Error(`MIGRATION_RESEARCH_COMPLETION_REFS_MISSING:${machineId}`);
+  const attempt=s.read<Attempt>('batches',batchId,'machines',machineId,'attempts',research.activeAttemptId+'.json');
+  const lease=s.read<Lease>('batches',batchId,'leases',research.activeLeaseId+'.json');
+  if(attempt.status!=='COMPLETE') throw new Error(`MIGRATION_RESEARCH_ATTEMPT_NOT_COMPLETE:${machineId}:${attempt.status}`);
+  if(lease.status!=='RELEASED') throw new Error(`MIGRATION_RESEARCH_LEASE_NOT_RELEASED:${machineId}:${lease.status}`);
+  if(attempt.attemptId!==lease.attemptId||attempt.workId!==lease.workId||lease.machineId!==machineId||lease.stage!=='RESEARCH') throw new Error(`MIGRATION_RESEARCH_COMPLETION_REF_MISMATCH:${machineId}`);
   if(evaluation.state!=='READY') throw new Error(`MIGRATION_EVALUATION_NOT_READY:${machineId}:${evaluation.state}`);
   const artifact=s.p('batches',batchId,'artifacts',machineId,'research','result.json');
   if(!fs.existsSync(artifact)) throw new Error(`MIGRATION_RESEARCH_ARTIFACT_MISSING:${machineId}`);
