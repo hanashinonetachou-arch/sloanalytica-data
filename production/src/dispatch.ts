@@ -11,7 +11,8 @@ const s=new RepoStore(process.cwd());
 const config=JSON.parse(fs.readFileSync(s.p('config','orchestrator.json'),'utf8')) as {concurrency:Concurrency;manifestVersion:string};
 const o=new Orchestrator(s);
 const selected=scheduleByKind(o,s,batchId,config.concurrency,kind);
-const unsupported=selected.find(candidate=>candidate.name==='ELIGIBILITY');
+const supported=new Set(['RESEARCH','EVALUATION','ELIGIBILITY']);
+const unsupported=selected.find(candidate=>!supported.has(candidate.name));
 if(unsupported) throw new Error(`DETERMINISTIC_VALIDATOR_REQUIRED:${unsupported.name}:${unsupported.machineId}`);
 const requests=selected.map(candidate=>{
   let x=o.stage(batchId,candidate.machineId,candidate.name);
