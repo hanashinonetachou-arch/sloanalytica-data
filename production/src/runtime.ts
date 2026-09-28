@@ -1,0 +1,37 @@
+import fs from 'node:fs'; import path from 'node:path';
+import {RepoStore,Orchestrator,dispatchable,schedule,fingerprint} from './core.ts';
+import type {Stage,WorkRequest,WorkResult,Concurrency} from './core.ts';
+
+export const PRODUCTION_STAGES=[
+  'RESEARCH','EVALUATION','ELIGIBILITY','CANDIDATE_CONTRACT','OBSERVATION_EVIDENCE',
+  'CANONICAL_UI','MACHINE_DATA','RUNTIME_POLICY','RUNTIME_PROJECTION','APP_RUNTIME','DISTRIBUTION','DEVICE_QA'
+] as const;
+export type ProductionStage=typeof PRODUCTION_STAGES[number];
+export type WorkerKind='SEMANTIC'|'PRODUCTION'|'VALIDATOR'|'INTEGRATION'|'HUMAN';
+export const STAGE_WORKER:Record<ProductionStage,WorkerKind>={
+ RESEARCH:'SEMANTIC',EVALUATION:'SEMANTIC',ELIGIBILITY:'SEMANTIC',CANDIDATE_CONTRACT:'SEMANTIC',
+ OBSERVATION_EVIDENCE:'SEMANTIC',CANONICAL_UI:'SEMANTIC',MACHINE_DATA:'PRODUCTION',RUNTIME_POLICY:'PRODUCTION',
+ RUNTIME_PROJECTION:'PRODUCTION',APP_RUNTIME:'PRODUCTION',DISTRIBUTION:'INTEGRATION',DEVICE_QA:'HUMAN'};
+export interface BatchSpec{batchId:string;manifestVersion:string;waves:{waveId:string;machineIds:string[]}[]}
+export interface ArtifactRef{artifactId:string;kind:string;path:string;sha256:string;producerWorkId:string}
+export interface ProvenanceRecord{workId:string;attemptId:string;machineId:string;stage:string;inputArtifacts:ArtifactRef[];outputArtifacts:ArtifactRef[];workerAdapter:string;validatorAdapter:string;recordedAt:string}
+export interface WorkerAdapter{kind:'SEMANTIC'|'PRODUCTION'|'INTEGRATION';execute(q:WorkRequest):Promise<WorkResult>|WorkResult}
+export interface ValidatorAdapter{name:string;validate(r:WorkResult):{ok:boolean;evidence:any[]}}
+export const ARTIFACT_KIND:Record<ProductionStage,string>={RESEARCH:'research',EVALUATION:'evaluation',ELIGIBILITY:'eligibility',CANDIDATE_CONTRACT:'candidate-contract',OBSERVATION_EVIDENCE:'observation-evidence',CANONICAL_UI:'canonical-ui',MACHINE_DATA:'machine-data',RUNTIME_POLICY:'runtime-policy',RUNTIME_PROJECTION:'runtime-projection',APP_RUNTIME:'app-runtime',DISTRIBUTION:'distribution',DEVICE_QA:'device-qa'};
+export function expectedArtifact(b:string,m:string,stage:ProductionStage){return {kind:ARTIFACT_KIND[stage],pathPrefix:`production/batches/${b}/artifacts/${m}/${stage.toLowerCase()}/`}}
+export function productionRequest(o:Orchestrator,x:Stage,a:any,l:any,manifestVersion='8.5'){const q=o.request(x,a,l);const stage=x.name as ProductionStage;q.workerType=STAGE_WORKER[stage];q.manifestVersion=manifestVersion;q.expectedOutputs=[expectedArtifact(x.batchId,x.machineId,stage)];return q}
+export function acceptAndRecord(o:Orchestrator,s:RepoStore,r:WorkResult,workerAdapter:string,validatorAdapter:string){const a=o.findAttempt(o.findBatch(r),r.attemptId);if(!a)throw new Error('UNKNOWN_ATTEMPT');const stage=a.stage as ProductionStage;const expected=expectedArtifact(a.batchId,a.machineId,stage);const outputs=(r.producedArtifacts||[]) as ArtifactRef[];if(r.status==='SUCCESS'&&outputs.some(x=>x.kind!==expected.kind||!x.path.startsWith(expected.pathPrefix)||x.producerWorkId!==r.workId))throw new Error('ARTIFACT_CONTRACT_VIOLATION');const accepted=o.accept(r);if(accepted.kind==='COMMITTED')appendProvenance(s,accepted.stage.batchId,{workId:r.workId,attemptId:r.attemptId,machineId:accepted.stage.machineId,stage,inputArtifacts:[],outputArtifacts:outputs,workerAdapter,validatorAdapter,recordedAt:o.now().toISOString()});return accepted}
+export const deps=(stage:ProductionStage)=>{const i=PRODUCTION_STAGES.indexOf(stage);return i===0?[]:[PRODUCTION_STAGES[i-1]]}
+export function initializeBatch(s:RepoStore,spec:BatchSpec,contract='production-1'){
+ const ids=spec.waves.flatMap(w=>w.machineIds);
+ if(spec.waves.length!==2||spec.waves.some(w=>w.machineIds.length!==5)||ids.length!==10||new Set(ids).size!==10)throw new Error('INVALID_BATCH_SHAPE');
+ s.write(spec,'batches',spec.batchId,'batch.json');
+ for(const w of spec.waves){s.write(w,'batches',spec.batchId,'waves',w.waveId+'.json');for(const m of w.machineIds){
+  s.write({machineId:m,waveId:w.waveId},'batches',spec.batchId,'machines',m,'machine.json');
+  for(const name of PRODUCTION_STAGES){const x:Stage={batchId:spec.batchId,machineId:m,name,state:name==='RESEARCH'?'READY':'PENDING',revision:0,dependencies:deps(name),authoritativeInputFingerprint:fingerprint({machineId:m,stage:name,manifestVersion:spec.manifestVersion}),contractVersion:contract};s.write(x,'batches',spec.batchId,'machines',m,'stages',name+'.json')}
+ }}}
+export function promoteDependencies(o:Orchestrator,b:string,m:string){for(const name of PRODUCTION_STAGES){let x=o.stage(b,m,name);if(x.state==='PENDING'&&x.dependencies.every(d=>o.stage(b,m,d).state==='COMPLETE'))o.transition(x,'READY','DEPENDENCY_COMPLETE',x.dependencies.join(','))}}
+export function appendProvenance(s:RepoStore,b:string,p:ProvenanceRecord){s.append(p,'batches',b,'provenance','chain.jsonl')}
+export function dashboard(s:RepoStore,b:string){const md=s.p('batches',b,'machines');const machines=fs.readdirSync(md).sort().map(machineId=>{const stages=PRODUCTION_STAGES.map(name=>s.read<Stage>('batches',b,'machines',machineId,'stages',name+'.json'));const active=stages.find(x=>!['PENDING','COMPLETE'].includes(x.state))??stages.at(-1)!;return {machineId,stage:active.name,state:active.state,revision:active.revision,blocked:active.state==='WAIT_EXTERNAL'||active.state==='HUMAN_REQUIRED',failed:active.state==='FAILED'}});return {batchId:b,machines,counts:machines.reduce((a,x)=>(a[x.state]=(a[x.state]||0)+1,a),{} as Record<string,number>)}}
+export function reconcileBatch(o:Orchestrator,s:RepoStore,b:string){const md=s.p('batches',b,'machines');for(const m of fs.readdirSync(md)){for(const n of PRODUCTION_STAGES)o.reconcile(b,m,n);promoteDependencies(o,b,m)}return dashboard(s,b)}
+export function scheduleByKind(o:Orchestrator,s:RepoStore,b:string,c:Concurrency,kind:Exclude<WorkerKind,'VALIDATOR'|'HUMAN'>){const all:Record<string,Stage>={};const candidates:Stage[]=[];for(const m of fs.readdirSync(s.p('batches',b,'machines'))){for(const n of PRODUCTION_STAGES){const x=o.stage(b,m,n);all[m+':'+n]=x;if(STAGE_WORKER[n]===kind)candidates.push({...x,dependencies:x.dependencies.map(d=>m+':'+d)})}}const slots=kind==='SEMANTIC'?c.semanticSlots:kind==='PRODUCTION'?c.productionSlots:c.integrationSlots;return schedule(candidates,all,slots,o.now()).map(x=>({...x,dependencies:x.dependencies.map(d=>d.split(':').at(-1)!)}))}
