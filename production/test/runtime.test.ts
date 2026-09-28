@@ -48,3 +48,14 @@ test('RESEARCH validator rejects tampered artifact SHA before state transition',
 test('RESEARCH validator rejects BLOCK without reevaluation condition',()=>{const {s,o}=setup();const worker=new MockWorkerAdapter();let x=o.stage('bat_dry','M1','RESEARCH');const a=o.createAttempt(x),l=o.acquire(x,a);x=o.transition(o.stage('bat_dry','M1','RESEARCH'),'LEASED','D',a.workId);x=o.transition(x,'RUNNING','S',a.workId);const r=worker.execute(productionRequest(o,x,a,l));const ref=researchArtifact(s,'bat_dry','M1',r.workId);const file=s.p(ref.path.slice('production/'.length));const d=JSON.parse(fs.readFileSync(file,'utf8'));d.blockedItems[0].reevaluationCondition='';const bytes=Buffer.from(JSON.stringify(d,null,2)+'\n');fs.writeFileSync(file,bytes);ref.sha256=crypto.createHash('sha256').update(bytes).digest('hex');r.producedArtifacts=[ref];assert.throws(()=>acceptAndRecord(o,s,r,'semantic-worker','deterministic'),/BLOCK_REEVALUATION_REQUIRED/);assert.equal(o.stage('bat_dry','M1','RESEARCH').state,'RUNNING')});
 
 test('RESEARCH validator rejects explicitly inferred setting values',()=>{const {s,o}=setup();const worker=new MockWorkerAdapter();let x=o.stage('bat_dry','M1','RESEARCH');const a=o.createAttempt(x),l=o.acquire(x,a);x=o.transition(o.stage('bat_dry','M1','RESEARCH'),'LEASED','D',a.workId);x=o.transition(x,'RUNNING','S',a.workId);const r=worker.execute(productionRequest(o,x,a,l));const ref=researchArtifact(s,'bat_dry','M1',r.workId);const file=s.p(ref.path.slice('production/'.length));const d=JSON.parse(fs.readFileSync(file,'utf8'));d.findings[0].inferred=true;const bytes=Buffer.from(JSON.stringify(d,null,2)+'\n');fs.writeFileSync(file,bytes);ref.sha256=crypto.createHash('sha256').update(bytes).digest('hex');r.producedArtifacts=[ref];assert.throws(()=>acceptAndRecord(o,s,r,'semantic-worker','deterministic'),/INFERRED_VALUE_FORBIDDEN/);assert.equal(o.stage('bat_dry','M1','RESEARCH').state,'RUNNING')});
+
+test('active RESEARCH wave keeps semantic slots off downstream stages until the wave settles',()=>{
+ const {s,o}=setup();const worker=new MockWorkerAdapter();
+ let x=o.stage('bat_dry','M1','RESEARCH');const a=o.createAttempt(x),l=o.acquire(x,a);x=o.transition(o.stage('bat_dry','M1','RESEARCH'),'LEASED','D',a.workId);x=o.transition(x,'RUNNING','S',a.workId);
+ const r=worker.execute(productionRequest(o,x,a,l));r.producedArtifacts=[researchArtifact(s,'bat_dry','M1',r.workId)];
+ const accepted=acceptAndRecord(o,s,r,'semantic-worker','deterministic');assert.equal(accepted.kind,'COMMITTED');promoteDependencies(o,'bat_dry','M1');
+ assert.equal(o.stage('bat_dry','M1','EVALUATION').state,'READY');
+ const next=scheduleByKind(o,s,'bat_dry',{semanticSlots:2,productionSlots:2,validationSlots:2,integrationSlots:1},'SEMANTIC');
+ assert.deepEqual(next.map(z=>z.name),['RESEARCH','RESEARCH']);
+ assert.ok(next.every(z=>z.machineId!=='M1'));
+});
