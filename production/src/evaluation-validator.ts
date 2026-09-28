@@ -4,6 +4,9 @@ const fail=(m:string):never=>{throw new Error('EVALUATION_VALIDATION_FAILED:'+m)
 function probability(v:any){if(typeof v==='number'&&v>=0&&v<=1)return v;if(typeof v==='string'&&v.startsWith('1/')){const d=Number(v.slice(2));if(Number.isFinite(d)&&d>0)return 1/d;}fail('INVALID_PROBABILITY:'+String(v))}
 function h2(p:number){if(p===0||p===1)return 0;return -p*Math.log2(p)-(1-p)*Math.log2(1-p)}
 function perTrialIg(ps:number[]){const mean=ps.reduce((a,b)=>a+b,0)/ps.length;return h2(mean)-ps.reduce((a,p)=>a+h2(p),0)/ps.length}
+function categorical(v:any){if(typeof v==='number')return [v,1-v];if(typeof v==='string'){const xs=[...v.matchAll(/(\\d+(?:\\.\\d+)?)%/g)].map(m=>Number(m[1])/100);if(xs.length){const sum=xs.reduce((a,b)=>a+b,0);if(sum>1.000000001)fail('INVALID_CATEGORY_SUM:'+v);return [...xs,Math.max(0,1-sum)]}}fail('INVALID_CATEGORY_DISTRIBUTION:'+String(v))}
+function entropy(ps:number[]){return -ps.reduce((a,p)=>a+(p>0?p*Math.log2(p):0),0)}
+function categoricalIg(vs:any[]){const rows=vs.map(categorical),k=rows[0].length;if(rows.some(r=>r.length!==k))fail('CATEGORY_SHAPE_MISMATCH');const mean=Array.from({length:k},(_,i)=>rows.reduce((a,r)=>a+r[i],0)/rows.length);return entropy(mean)-rows.reduce((a,r)=>a+entropy(r),0)/rows.length}
 function logBinomial(k:number,n:number,p:number){if(p===0)return k===0?0:-Infinity;if(p===1)return k===n?0:-Infinity;let c=0;const j=Math.min(k,n-k);for(let i=1;i<=j;i++)c+=Math.log(n-j+i)-Math.log(i);return c+k*Math.log(p)+(n-k)*Math.log1p(-p)}
 function binomialIg(ps:number[],n:number){let total=0;for(let k=0;k<=n;k++){const logs=ps.map(p=>logBinomial(k,n,p));const mx=Math.max(...logs);if(!Number.isFinite(mx))continue;const rel=logs.map(x=>Number.isFinite(x)?Math.exp(x-mx):0);const avg=rel.reduce((a,b)=>a+b,0)/rel.length;const scale=Math.exp(mx);if(scale===0)continue;for(const v of rel)if(v>0)total+=(scale*v/rel.length)*Math.log2(v/avg)}return total}
 function near(a:number,b:number,tol=1e-8){return Number.isFinite(a)&&Number.isFinite(b)&&Math.abs(a-b)<=tol*Math.max(1,Math.abs(a),Math.abs(b))}
@@ -31,7 +34,8 @@ export function validateEvaluationDocument(doc:any,research:any){
   if(keys.length<2)fail('INSUFFICIENT_SETTINGS:'+f.findingId);
   const ps=keys.map(k=>probability(f.settingDistribution[k]));let ig:number,metric:string;
   if(f.observationType==='probability'){metric='SELECTION_SCORE';if(e.benchmarkGames!==7000)fail('BENCHMARK:'+f.findingId);ig=binomialIg(ps,7000)}
-  else if(f.observationType==='conditional_probability'||f.observationType==='appearance_distribution'){metric='PER_ELIGIBLE_TRIAL_POWER';ig=perTrialIg(ps)}
+  else if(f.observationType==='conditional_probability'){metric='PER_ELIGIBLE_TRIAL_POWER';ig=perTrialIg(ps)}
+  else if(f.observationType==='appearance_distribution'){metric='PER_ELIGIBLE_TRIAL_POWER';ig=categoricalIg(keys.map(k=>f.settingDistribution[k]))}
   else fail('UNSUPPORTED_OBSERVATION:'+f.findingId);
   if(e.metric!==metric)fail('METRIC:'+f.findingId);
   if(!near(e.rawInformationGainBits,ig)||!near(e.value,ig*200))fail('SCORE:'+f.findingId);
