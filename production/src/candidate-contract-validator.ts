@@ -19,7 +19,7 @@ export function validateCandidateContractDocument(doc:any,eligibility:any,evalua
   if(c.runtimePolicyBinding?.metric!=='PER_ELIGIBLE_TRIAL_POWER'||typeof c.runtimePolicyBinding?.value!=='number'||!Number.isFinite(c.runtimePolicyBinding.value)||Math.abs(c.runtimePolicyBinding.value-e.metrics.perEligibleTrialPower)>1e-12)fail('RUNTIME_BINDING:'+d.findingId);
   if(c.settingDistribution===undefined||canonical(c.settingDistribution)!==canonical(e.settingDistribution))fail('LIKELIHOOD_COPY:'+d.findingId);
   const expectedGroup=e.dependency?.status==='DEFERRED_TO_CANDIDATE_CONTRACT'?e.dependency.groupId:null;
-  if((c.dependencyGroupId??null)!==(expectedGroup??null))fail('DEPENDENCY_GROUP:'+d.findingId);
+  if((c.dependencyGroupId??null)!==(expectedGroup??null))fail('DEPENDENCY_GROUP:'+d.findingId);if(expectedGroup?c.runtimeInferenceAllowed!==false:c.runtimeInferenceAllowed!==true)fail('RUNTIME_PERMISSION:'+d.findingId);
  }
  const expectedGroups=new Map<string,string[]>();
  for(const d of eligible){const e:any=evalBy.get(d.findingId);if(e?.dependency?.status==='DEFERRED_TO_CANDIDATE_CONTRACT'){const id=e.dependency.groupId;if(!nonEmpty(id))fail('GROUP_ID:'+d.findingId);const a=expectedGroups.get(id)??[];a.push(d.findingId);expectedGroups.set(id,a)}}
