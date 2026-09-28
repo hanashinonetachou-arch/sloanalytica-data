@@ -1,6 +1,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import crypto from 'node:crypto';
+import {fileURLToPath} from 'node:url';
 import {RepoStore,Orchestrator} from './core.ts';
 import {acceptAndRecord,promoteDependencies,scheduleByKind,productionRequest} from './runtime.ts';
 import type {WorkRequest,WorkResult,Concurrency} from './core.ts';
@@ -46,7 +47,7 @@ export function completeResearch(root:string,batchId:string,machineIds:string[])
  return {batchId,completed,dispatched};
 }
 
-const direct=process.argv[1]&&path.resolve(process.argv[1])===path.resolve(new URL(import.meta.url).pathname);
+const direct=process.argv[1]&&path.resolve(process.argv[1])===path.resolve(fileURLToPath(import.meta.url));
 if(direct){
  const batchId=process.argv[2],machineIds=process.argv.slice(3);
  if(!batchId||machineIds.length===0)throw new Error('USAGE: complete-research <batch-id> <machine-id> [machine-id...]');
