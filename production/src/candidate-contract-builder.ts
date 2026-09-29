@@ -77,7 +77,8 @@ export function buildCandidateContract(evaluation:any,eligibility:any,evaluation
    const sourceMembers=members.filter(c=>resolution.jointSourceFindingIds.includes(c.findingId));
    const leader=members.find(c=>c.findingId===resolution.jointFindingId);
    if(!leader)throw new Error('CANDIDATE_JOINT_LEADER:'+groupId);
-   leader.model='CATEGORICAL';leader.settingDistribution=jointDistribution(sourceMembers);leader.runtimeInferenceAllowed=true;leader.dependencyResolution='MUTUALLY_EXCLUSIVE_CATEGORICAL';leader.jointSourceFindingIds=[...resolution.jointSourceFindingIds];leader.runtimePolicyBinding={metric:'PER_ELIGIBLE_TRIAL_POWER',value:jointPower(sourceMembers),thresholdSource:'RUNTIME_POLICY'};
+   const jointDist=jointDistribution(sourceMembers),power=jointPower(sourceMembers);
+   leader.model='CATEGORICAL';leader.settingDistribution=jointDist;leader.runtimeInferenceAllowed=true;leader.dependencyResolution='MUTUALLY_EXCLUSIVE_CATEGORICAL';leader.jointSourceFindingIds=[...resolution.jointSourceFindingIds];leader.runtimePolicyBinding={metric:'PER_ELIGIBLE_TRIAL_POWER',value:power,thresholdSource:'RUNTIME_POLICY'};
    for(const c of members)if(c!==leader){c.runtimeInferenceAllowed=false;c.dependencyResolution='RESOLVED_IN_JOINT_MODEL';c.resolvedIntoFindingId=leader.findingId}
   }else if(resolution.resolution==='SINGLE_MEMBER_SELECTED'){
    for(const c of members){
