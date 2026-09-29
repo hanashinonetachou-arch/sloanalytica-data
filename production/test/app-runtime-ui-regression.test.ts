@@ -39,7 +39,8 @@ test('PER adoption hides unavailable Selection Score reason and collapses explan
   const app=buildAppRuntime(baseProjection(),{path:'p'});
   const section=app.package.ui.v8Sections[0];
   const node=section.items[0];
-  assert.equal(section.description,'1回の判別力：7.250');
+  assert.match(section.description,/通常ゲーム数に対する該当回数/);
+  assert.match(section.description,/1回の判別力：7.250/);
   assert.deepEqual(section.descriptionPresentation,{collapsible:true,label:'説明',defaultExpanded:false});
   assert.equal(node.description,undefined);
   assert.doesNotMatch(section.description,/算出不可|観測条件不足/);
@@ -58,4 +59,15 @@ test('PER feature without Selection Score importance still gets a visible import
   const app=buildAppRuntime(projection,{path:'p'});
   assert.equal(app.package.features.runtimeProjection[0].importance,'補助');
   assert.equal(app.package.v8.machineResearchSummary.adopted[0].importance,'補助');
+});
+
+
+test('conditional Bernoulli inputs use compact two-column labels',()=>{
+  const projection=baseProjection({activeFeatures:[{...baseProjection().activeFeatures[0],trialUniverse:'MILE_CHARGE_4PLUS_END_TRIAL'}],runtimeUi:{...baseProjection().runtimeUi,numericSections:[{...baseProjection().runtimeUi.numericSections[0],inputs:baseProjection().runtimeUi.numericSections[0].inputs}]}});
+  const app=buildAppRuntime(projection,{path:'p'});
+  const inputs=app.package.ui.v8Sections[0].items[0].inputs;
+  assert.equal(inputs[0].label,'対象回数');
+  assert.equal(inputs[0].gridSpan,6);
+  assert.equal(inputs[1].label,'回数');
+  assert.equal(inputs[1].gridSpan,6);
 });
