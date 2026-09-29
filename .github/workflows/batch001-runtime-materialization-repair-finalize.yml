@@ -80,11 +80,17 @@ jobs:
               if(model==='multinomial'&&!caps.includes('multinomial'))caps.push('multinomial');
             }
             if((pkg.evidence?.references??[]).length>0&&!caps.includes('evidence'))caps.push('evidence');
+            const nextHash=sha256(bytes);
+            const changed=
+              entry.machineDataVersion!==pkg.machine.machineDataVersion ||
+              entry.sha256!==nextHash ||
+              entry.packageSizeBytes!==bytes.length ||
+              JSON.stringify(entry.requiredCapabilities??[])!==JSON.stringify(caps);
             entry.machineDataVersion=pkg.machine.machineDataVersion;
-            entry.sha256=sha256(bytes);
+            entry.sha256=nextHash;
             entry.packageSizeBytes=bytes.length;
             entry.requiredCapabilities=caps;
-            entry.updatedAt=new Date().toISOString();
+            if(changed)entry.updatedAt=new Date().toISOString();
 
             metadata[machineId]={
               machineId,
@@ -143,8 +149,12 @@ jobs:
             machines/L_TONDEMO_SKILL_KM/machine-package.json \
             machines/L_YAJIKITA_MAIRU_BG/machine-package.json \
             machines/L_YABACHIBA_ZM/machine-package.json
-          git commit -m "Publish repaired Batch 001 runtime packages [skip ci]"
-          git push origin HEAD:prototype-multi-machine
+          if git diff --cached --quiet; then
+            echo "Prototype repaired packages are already current."
+          else
+            git commit -m "Publish repaired Batch 001 runtime packages [skip ci]"
+            git push origin HEAD:prototype-multi-machine
+          fi
           echo "PROTOTYPE_COMMIT=$(git rev-parse HEAD)" >> "$GITHUB_ENV"
 
       - name: Dispatch Pages deployment from prototype branch
@@ -153,7 +163,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          gh workflow run deploy-pages.yml --ref prototype-multi-machine
+          gh workflow run deploy-pages.yml --ref prototype-multi-machine --repo "$GITHUB_REPOSITORY"
           run_id=""
           for _ in $(seq 1 30); do
             run_id="$(gh api "repos/$GITHUB_REPOSITORY/actions/workflows/deploy-pages.yml/runs?branch=prototype-multi-machine&event=workflow_dispatch&per_page=20" --jq ".workflow_runs[] | select(.head_sha == \"$PROTOTYPE_COMMIT\") | .id" | head -n1 || true)"
@@ -161,7 +171,7 @@ jobs:
             sleep 2
           done
           test -n "$run_id" || { echo "Pages workflow_dispatch run was not created."; exit 1; }
-          gh run watch "$run_id" --exit-status
+          gh run watch "$run_id" --repo "$GITHUB_REPOSITORY" --exit-status
           echo "PAGES_RUN_ID=$run_id" >> "$GITHUB_ENV"
 
       - name: Build verified Distribution attestation
