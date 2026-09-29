@@ -33,9 +33,12 @@ export function validateAppRuntimeDocument(doc:any,projection:any,projectionArti
  }
  if(!Array.isArray(p.features?.runtimeProjection)||p.features.runtimeProjection.length!==active.length+inactive.length)fail('RUNTIME_PROJECTION_COVERAGE');
  const rpBy=new Map(p.features.runtimeProjection.map((x:any)=>[x.featureId,x]));
- for(const x of active)if(rpBy.get(x.findingId)?.runtimeStatus!=='ACTIVE')fail('RUNTIME_ACTIVE:'+x.findingId);
+ const importanceVocabulary=new Set(['主要','有力','補助','微小']);
+ for(const x of active){const rp:any=rpBy.get(x.findingId);if(rp?.runtimeStatus!=='ACTIVE')fail('RUNTIME_ACTIVE:'+x.findingId);if(!importanceVocabulary.has(rp?.importance))fail('RUNTIME_IMPORTANCE:'+x.findingId);}
  for(const x of inactive)if(rpBy.get(x.findingId)?.runtimeStatus!=='INACTIVE')fail('RUNTIME_INACTIVE:'+x.findingId);
  if(p.ui?.contractVersion!=='runtime-ui-v8'||p.ui?.source!=='CANONICAL_UI'||p.ui?.sourceSchemaVersion!==projection.runtimeUi?.schemaVersion||p.ui?.accordion?.singleOpen!==true||p.ui?.quickInput?.enabled!==false)fail('UI_HEADER');
+ if(p.ui?.playInfo?.visible!==true||!p.ui?.playInfo?.useDifference)fail('UI_PLAY_INFO');
+ for(const s of (p.ui?.v8Sections??[]).filter((x:any)=>String(x.id??'').startsWith('OBS_'))){if(typeof s.description!=='string'||!s.description.trim())fail('NUMERIC_DESCRIPTION:'+s.id);if(s.descriptionPresentation?.collapsible!==true)fail('NUMERIC_DESCRIPTION_PRESENTATION:'+s.id);}
  const expectedUiCount=(projection.runtimeUi?.numericSections??[]).length+(projection.runtimeUi?.evidenceSections??[]).length;
  if((p.ui?.v8Sections??[]).length!==expectedUiCount)fail('UI_SECTION_COVERAGE');
  const expectedIds=[...(projection.runtimeUi?.numericSections??[]).map((s:any)=>s.id),...(projection.runtimeUi?.evidenceSections??[]).map((s:any)=>s.id)];
@@ -44,7 +47,8 @@ export function validateAppRuntimeDocument(doc:any,projection:any,projectionArti
  const expectedEvidenceIds=(projection.evidence??[]).flatMap((s:any)=>(s.evidenceItems??[]).map((e:any)=>e.findingId));
  const materializedEvidenceIds=(p.evidence.evidences??[]).map((e:any)=>e.id);
  if(canonical(materializedEvidenceIds)!==canonical(expectedEvidenceIds))fail('EVIDENCE_MATERIALIZATION');
- for(const e of p.evidence.evidences??[])if(e.type!=='REFERENCE_ONLY'||typeof e.inputId!=='string'||!e.inputId||!Array.isArray(e.confirmedSettings)||!Array.isArray(e.deniedSettings))fail('EVIDENCE_DEFINITION');
+ const evidenceSourceBy=new Map((projection.evidence??[]).flatMap((s:any)=>(s.evidenceItems??[]).map((e:any)=>[e.findingId,e])));
+ for(const e of p.evidence.evidences??[]){const src:any=evidenceSourceBy.get(e.id);if(e.type!=='REFERENCE_ONLY'||typeof e.inputId!=='string'||!e.inputId||!Array.isArray(e.details)||canonical(e.details)!==canonical(src?.details??[])||!Array.isArray(e.confirmedSettings)||!Array.isArray(e.deniedSettings))fail('EVIDENCE_DEFINITION');}
  for(const s of (p.ui?.v8Sections??[]).filter((x:any)=>String(x.id??'').startsWith('EVI_')))if(typeof s.description!=='string'||!s.description.trim())fail('EVIDENCE_UI_RENDERABLE');
  const summary=p.v8?.machineResearchSummary;if(!summary)fail('V8_SUMMARY');
  const rejectedIds=new Set((summary.notAdopted??[]).map((x:any)=>x.featureId));

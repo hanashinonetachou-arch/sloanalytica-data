@@ -21,7 +21,7 @@ export function validateMachineQaReadiness(machineId:string,stageStates:Record<s
  if(renderReport?.status!=='PASS')fail(machineId+':RENDERED_UI_VALIDATION');
  if(renderReport?.contractVersion!=='rendered-canonical-ui-v1'||renderReport?.renderer!=='MANIFEST_V8'||renderReport?.source!=='CANONICAL_UI'||renderReport?.manifestRevision!=='8.5')fail(machineId+':RENDER_CONTRACT');
  const checks=renderReport?.checks??{};
- for(const key of ['noDuplicateUi','noEmptySections','evidenceCoverage','summaryCoverage','noInternalWording','noLegacyRendererFallback','denominatorBinding'])if(checks[key]!==true)fail(machineId+':RENDER_CHECK_'+key);
+ for(const key of ['noDuplicateUi','noEmptySections','evidenceCoverage','summaryCoverage','noInternalWording','noLegacyRendererFallback','denominatorBinding','importanceCoverage','explanationCoverage','evidenceBodyCoverage'])if(checks[key]!==true)fail(machineId+':RENDER_CHECK_'+key);
  return {machineId,status:'QA_READY',evidenceCount:actual.length,renderedUi:'PASS'};
 }
 

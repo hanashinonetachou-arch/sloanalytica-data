@@ -37,14 +37,25 @@ const baseProjection=(overrides:any={})=>({
 
 test('PER adoption hides unavailable Selection Score reason and collapses explanation',()=>{
   const app=buildAppRuntime(baseProjection(),{path:'p'});
-  const node=app.package.ui.v8Sections[0].items[0];
-  assert.equal(node.description,'1回の判別力：7.250');
-  assert.deepEqual(node.descriptionPresentation,{collapsible:true,label:'説明',defaultExpanded:false});
-  assert.doesNotMatch(node.description,/算出不可|観測条件不足/);
+  const section=app.package.ui.v8Sections[0];
+  const node=section.items[0];
+  assert.equal(section.description,'1回の判別力：7.250');
+  assert.deepEqual(section.descriptionPresentation,{collapsible:true,label:'説明',defaultExpanded:false});
+  assert.equal(node.description,undefined);
+  assert.doesNotMatch(section.description,/算出不可|観測条件不足/);
 });
 
 test('bonus-eligible game denominator can bind to normal-game session difference',()=>{
   const app=buildAppRuntime(baseProjection(),{path:'p'});
   const trial=app.package.ui.v8Sections[0].items[0].inputs[0];
   assert.deepEqual(trial.playDataBinding,{source:'PLAY_NORMAL_GAME_DELTA'});
+});
+
+
+test('PER feature without Selection Score importance still gets a visible importance label',()=>{
+  const projection=baseProjection();
+  delete projection.activeFeatures[0].score.importance;
+  const app=buildAppRuntime(projection,{path:'p'});
+  assert.equal(app.package.features.runtimeProjection[0].importance,'補助');
+  assert.equal(app.package.v8.machineResearchSummary.adopted[0].importance,'補助');
 });
