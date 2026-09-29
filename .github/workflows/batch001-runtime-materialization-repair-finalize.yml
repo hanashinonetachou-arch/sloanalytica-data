@@ -63,13 +63,16 @@ jobs:
             const app=JSON.parse(fs.readFileSync(appPath,'utf8'));
             const pkg=app.package;
             if(pkg?.machine?.machineId!==machineId)throw new Error('PACKAGE_IDENTITY:'+machineId);
+            const entry=byId.get(machineId);
+            if(!entry)throw new Error('CATALOG_ENTRY_MISSING:'+machineId);
+            pkg.machine.introductionDate=entry.introductionDate;
+            pkg.machine.machineType=entry.machineType;
+            pkg.machine.gameType=entry.gameType;
             const bytes=Buffer.from(JSON.stringify(pkg,null,2)+'\n','utf8');
             const target=path.join(proto,'machines',machineId,'machine-package.json');
             fs.mkdirSync(path.dirname(target),{recursive:true});
             fs.writeFileSync(target,bytes);
 
-            const entry=byId.get(machineId);
-            if(!entry)throw new Error('CATALOG_ENTRY_MISSING:'+machineId);
             const caps=[];
             for(const feature of pkg.features?.features??[]){
               const model=String(feature.modelType??'').toLowerCase();
