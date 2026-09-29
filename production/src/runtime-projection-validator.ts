@@ -23,6 +23,9 @@ export function validateRuntimeProjectionDocument(doc:any,machineData:any,policy
   if(canonical(doc.runtimeUi)!==canonical(expectedUi)) fail('UI_PROJECTION');
   if(canonical(doc.evidence)!==canonical(machineData.evidence??[])||(doc.evidence??[]).some((x:any)=>x.runtimePolicyControlled!==false)) fail('EVIDENCE_COPY');
   if(canonical(doc.heldObservations)!==canonical(machineData.heldObservations??[])) fail('HELD_COPY');
+  if(canonical(doc.nonRuntimeCandidates??[])!==canonical(machineData.nonRuntimeCandidates??[])) fail('NON_RUNTIME_COPY');
+  if(canonical(doc.excludedDecisions??[])!==canonical(machineData.excludedDecisions??[])) fail('EXCLUDED_COPY');
+  if(canonical(doc.blockedItems??[])!==canonical(machineData.blockedItems??[])) fail('BLOCKED_COPY');
   if(canonical(doc.settings)!==canonical(machineData.settings)||canonical(doc.packagePolicy)!==canonical(machineData.packagePolicy)||canonical(doc.highLowDiscrimination)!==canonical(machineData.highLowDiscrimination)) fail('MACHINE_COPY');
   return [{validator:RUNTIME_PROJECTION_VALIDATOR_CONTRACT,active:expectedActive.length,inactive:expectedInactive.length,evidence:(doc.evidence??[]).length}];
 }
