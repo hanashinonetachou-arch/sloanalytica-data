@@ -163,15 +163,19 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          gh workflow run deploy-pages.yml --ref prototype-multi-machine --repo "$GITHUB_REPOSITORY"
-          run_id=""
-          for _ in $(seq 1 30); do
-            run_id="$(gh api "repos/$GITHUB_REPOSITORY/actions/workflows/deploy-pages.yml/runs?branch=prototype-multi-machine&event=workflow_dispatch&per_page=20" --jq ".workflow_runs[] | select(.head_sha == \"$PROTOTYPE_COMMIT\") | .id" | head -n1 || true)"
-            if [ -n "$run_id" ]; then break; fi
-            sleep 2
-          done
-          test -n "$run_id" || { echo "Pages workflow_dispatch run was not created."; exit 1; }
-          gh run watch "$run_id" --repo "$GITHUB_REPOSITORY" --exit-status
+          run_id="$(gh api "repos/$GITHUB_REPOSITORY/actions/runs?branch=prototype-multi-machine&event=workflow_dispatch&per_page=30" --jq ".workflow_runs[] | select(.name == \"Deploy SloAnalytica Data Pages\" and .head_sha == \"$PROTOTYPE_COMMIT\" and .conclusion == \"success\") | .id" | head -n1 || true)"
+          if [ -n "$run_id" ]; then
+            echo "Reusing successful Pages deployment $run_id for $PROTOTYPE_COMMIT."
+          else
+            gh workflow run deploy-pages.yml --ref prototype-multi-machine --repo "$GITHUB_REPOSITORY"
+            for _ in $(seq 1 30); do
+              run_id="$(gh api "repos/$GITHUB_REPOSITORY/actions/runs?branch=prototype-multi-machine&event=workflow_dispatch&per_page=30" --jq ".workflow_runs[] | select(.name == \"Deploy SloAnalytica Data Pages\" and .head_sha == \"$PROTOTYPE_COMMIT\") | .id" | head -n1 || true)"
+              if [ -n "$run_id" ]; then break; fi
+              sleep 2
+            done
+            test -n "$run_id" || { echo "Pages workflow_dispatch run was not created."; exit 1; }
+            gh run watch "$run_id" --repo "$GITHUB_REPOSITORY" --exit-status
+          fi
           echo "PAGES_RUN_ID=$run_id" >> "$GITHUB_ENV"
 
       - name: Build verified Distribution attestation
