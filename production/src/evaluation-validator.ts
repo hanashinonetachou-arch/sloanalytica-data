@@ -13,6 +13,8 @@ function binomialIg(ps:number[],n:number){let total=0;for(let k=0;k<=n;k++){cons
 function near(a:any,b:number,tol=1e-8){return typeof a==='number'&&Number.isFinite(a)&&Math.abs(a-b)<=tol*Math.max(1,Math.abs(a),Math.abs(b))}
 const liveStatuses=new Set(['DIRECT_EXACT','EXACT_WITH_SCOPE_TRACKING','EXHAUSTIVE_CATEGORICAL','RETROSPECTIVE_EXACT','UNRESOLVED']);
 const depStatuses=new Set(['NONE','DEFERRED_TO_CANDIDATE_CONTRACT','UNRESOLVED']);
+const exactBenchmarkTrialUniverses=new Set(['NORMAL_GAME_TRIAL','BONUS_ELIGIBLE_GAME_TRIAL']);
+const selectionClass=(score:number)=>score>=20?'CORE':score>=10?'SUPPORT':score>=5?'JOINT_ELIGIBLE':'EXCLUDE';
 export function validateEvaluationDocument(doc:any,research:any){
  if(doc?.schemaVersion!=='evaluation-v2'||doc?.manifestVersion!=='8.5')fail('HEADER');
  if(doc.batchId!==research.batchId||doc.machineId!==research.machineId)fail('IDENTITY');
@@ -37,15 +39,21 @@ export function validateEvaluationDocument(doc:any,research:any){
   if(f.observationType==='probability'||f.observationType==='conditional_probability'||(f.observationType==='appearance_distribution'&&keys.every(k=>typeof f.settingDistribution[k]==='number'))){
    const ps=keys.map(k=>probability(f.settingDistribution[k]));if(e.model!=='BERNOULLI')fail('MODEL:'+f.findingId);ig=perTrialIg(ps);
    if(f.observationType==='probability'){
-    if(e.benchmarkExposure?.status!=='UPPER_BOUND_ONLY'||e.benchmarkExposure.maximumTrials!==7000||!near(e.metrics?.maximumSelectionScore,binomialIg(ps,7000)*200))fail('PROBABILITY_BENCHMARK:'+f.findingId);
+    const score=binomialIg(ps,7000)*200;
+    if(exactBenchmarkTrialUniverses.has(e.trialUniverse)){
+     if(e.benchmarkExposure?.status!=='EXACT'||e.benchmarkExposure.trials!==7000||e.metrics?.selectionScore?.status!=='COMPUTED'||!near(e.metrics.selectionScore.value,score)||e.selectionClass!==selectionClass(score))fail('PROBABILITY_EXACT_BENCHMARK:'+f.findingId);
+    }else{
+     if(e.benchmarkExposure?.status!=='UPPER_BOUND_ONLY'||e.benchmarkExposure.maximumTrials!==7000||!near(e.metrics?.maximumSelectionScore,score)||e.metrics?.selectionScore?.status!=='BLOCKED_UNRESOLVED'||e.metrics?.selectionScore?.value!==null)fail('PROBABILITY_BENCHMARK:'+f.findingId);
+    }
    }else if(e.benchmarkExposure?.status!=='BLOCKED_UNRESOLVED')fail('CONDITIONAL_BENCHMARK:'+f.findingId);
   }else if(f.observationType==='appearance_distribution'){
    if(e.model!=='CATEGORICAL')fail('MODEL:'+f.findingId);ig=categoricalIg(keys.map(k=>f.settingDistribution[k]),e.categoryModel?.residualPolicy);
    if(e.benchmarkExposure?.status!=='BLOCKED_UNRESOLVED')fail('APPEARANCE_BENCHMARK:'+f.findingId);
   }else fail('UNSUPPORTED:'+f.findingId);
   if(!near(e.metrics?.igPerEligibleTrial,ig)||!near(e.metrics?.perEligibleTrialPower,ig*200))fail('PER_TRIAL_METRIC:'+f.findingId);
-  if(e.metrics?.selectionScore?.status!=='BLOCKED_UNRESOLVED'||e.metrics?.selectionScore?.value!==null)fail('FORMAL_SELECTION_SCORE_FORBIDDEN:'+f.findingId);
-  if(e.evaluationCompleteness!=='COMPLETE_LIKELIHOOD_BENCHMARK_UNRESOLVED')fail('COMPLETENESS:'+f.findingId);
+  const exactSelection=f.observationType==='probability'&&exactBenchmarkTrialUniverses.has(e.trialUniverse);
+  if(!exactSelection&&(e.metrics?.selectionScore?.status!=='BLOCKED_UNRESOLVED'||e.metrics?.selectionScore?.value!==null))fail('FORMAL_SELECTION_SCORE_FORBIDDEN:'+f.findingId);
+  if(exactSelection?e.evaluationCompleteness!=='COMPLETE':e.evaluationCompleteness!=='COMPLETE_LIKELIHOOD_BENCHMARK_UNRESOLVED')fail('COMPLETENESS:'+f.findingId);
   complete++;
  }
  if(canonical(doc.blockedItems)!==canonical(research.blockedItems??[]))fail('BLOCKED_ITEMS_CHANGED');
