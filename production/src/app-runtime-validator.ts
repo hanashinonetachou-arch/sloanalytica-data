@@ -47,7 +47,8 @@ export function validateAppRuntimeDocument(doc:any,projection:any,projectionArti
  const expectedEvidenceIds=(projection.evidence??[]).flatMap((s:any)=>(s.evidenceItems??[]).map((e:any)=>e.findingId));
  const materializedEvidenceIds=(p.evidence.evidences??[]).map((e:any)=>e.id);
  if(canonical(materializedEvidenceIds)!==canonical(expectedEvidenceIds))fail('EVIDENCE_MATERIALIZATION');
- for(const e of p.evidence.evidences??[])if(e.type!=='REFERENCE_ONLY'||typeof e.inputId!=='string'||!e.inputId||!Array.isArray(e.confirmedSettings)||!Array.isArray(e.deniedSettings))fail('EVIDENCE_DEFINITION');
+ const evidenceSourceBy=new Map((projection.evidence??[]).flatMap((s:any)=>(s.evidenceItems??[]).map((e:any)=>[e.findingId,e])));
+ for(const e of p.evidence.evidences??[]){const src:any=evidenceSourceBy.get(e.id);if(e.type!=='REFERENCE_ONLY'||typeof e.inputId!=='string'||!e.inputId||!Array.isArray(e.details)||canonical(e.details)!==canonical(src?.details??[])||!Array.isArray(e.confirmedSettings)||!Array.isArray(e.deniedSettings))fail('EVIDENCE_DEFINITION');}
  for(const s of (p.ui?.v8Sections??[]).filter((x:any)=>String(x.id??'').startsWith('EVI_')))if(typeof s.description!=='string'||!s.description.trim())fail('EVIDENCE_UI_RENDERABLE');
  const summary=p.v8?.machineResearchSummary;if(!summary)fail('V8_SUMMARY');
  const rejectedIds=new Set((summary.notAdopted??[]).map((x:any)=>x.featureId));
