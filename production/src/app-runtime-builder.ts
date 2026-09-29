@@ -1,4 +1,4 @@
-const heldReason=(x:any)=>x?.status==='HELD_NO_JOINT_MODEL'?'依存関係またはjoint modelが未確立のため、現在は数値推測に使用しません。':String(x?.status??'未解決');
+const heldReason=(x:any)=>x?.status==='HELD_NO_JOINT_MODEL'?'複数要素をまとめて評価するための条件が確定していないため、現在は数値推測に使用しません。':'現在は数値推測に必要な条件が確定していません。';
 const probability=(v:any):number=>{if(typeof v==='number'&&Number.isFinite(v)&&v>=0&&v<=1)return v;if(typeof v==='string'&&v.startsWith('1/')){const d=Number(v.slice(2));if(Number.isFinite(d)&&d>0)return 1/d}throw new Error('APP_RUNTIME_PROBABILITY_INVALID:'+String(v))};
 const settingKey=(k:string)=>k.startsWith('SET_')?k:'SET_'+k;
 export const categoricalProbabilityRow=(row:any,labels:string[],findingId:string,setting:string):number[]=>{
@@ -83,8 +83,8 @@ export function buildAppRuntime(projection:any,projectionArtifact:any){
  if(projection.settings?.status!=='SOURCE_DERIVED'||!(projection.settings?.values?.length>0))throw new Error('APP_RUNTIME_SETTINGS_REQUIRED');
  const version='8.5.0-'+projection.batchId,held=projection.heldObservations??[],hld=projection.highLowDiscrimination;
  const features=buildFeatures(projection),inputs=buildInputs(projection),rp=runtimeProjection(projection);
- const adopted=(projection.activeFeatures??[]).map((f:any)=>({featureId:f.findingId,label:f.name,importance:f.score?.importance,selectionScore:f.score?.status==='COMPUTED'?f.score.value:undefined,evaluation:{userLabel:f.score?.status==='COMPUTED'?'設定判別スコア':'1回の判別力',value:f.score?.status==='COMPUTED'?f.score.value:f.runtimePolicyBinding?.value},reason:'Runtime PolicyでACTIVEのため現在の設定推測に使用します。'}));
- const inactive=(projection.inactiveFeatures??[]).map((f:any)=>({featureId:f.findingId,label:f.findingId,reason:'Runtime Policyの閾値未満のため現在は設定推測に使用しません。'}));
+ const adopted=(projection.activeFeatures??[]).map((f:any)=>({featureId:f.findingId,label:f.name,importance:f.score?.importance,selectionScore:f.score?.status==='COMPUTED'?f.score.value:undefined,evaluation:{userLabel:f.score?.status==='COMPUTED'?'設定判別スコア':'1回の判別力',value:f.score?.status==='COMPUTED'?f.score.value:f.runtimePolicyBinding?.value},reason:'現在の採用基準を満たしているため、設定推測に使用します。'}));
+ const inactive=(projection.inactiveFeatures??[]).map((f:any)=>({featureId:f.findingId,label:f.findingId,reason:'現在の採用基準を満たしていないため、設定推測に使用しません。'}));
  const allLabels=[...(projection.activeFeatures??[]).map((x:any)=>({findingId:x.findingId,label:x.name})),...(projection.nonRuntimeCandidates??[])];
  const resolved=(projection.nonRuntimeCandidates??[]).map((x:any)=>({featureId:x.findingId,label:x.label,reason:nonRuntimeReason(x,allLabels.find((y:any)=>y.findingId===x.resolvedIntoFindingId)?.label)}));
  const excluded=(projection.excludedDecisions??[]).map((x:any)=>({featureId:x.findingId,label:x.label,reason:userFacingExcludedReason(x),reevaluationCondition:userFacingReevaluation(x)}));
