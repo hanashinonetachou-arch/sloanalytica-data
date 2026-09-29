@@ -9,8 +9,7 @@ on:
 
 permissions:
   contents: write
-  pages: write
-  id-token: write
+  actions: write
 
 concurrency:
   group: batch001-repaired-runtime-integration
@@ -19,9 +18,6 @@ concurrency:
 jobs:
   integrate:
     runs-on: ubuntu-latest
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
     steps:
       - name: Checkout authoritative production state
         uses: actions/checkout@v4
@@ -36,12 +32,6 @@ jobs:
           ref: prototype-multi-machine
           path: prototype
           fetch-depth: 0
-
-      - name: Checkout production distribution branch
-        uses: actions/checkout@v4
-        with:
-          ref: main
-          path: source-main
 
       - uses: actions/setup-node@v4
         with:
@@ -63,8 +53,8 @@ jobs:
           const catalog=JSON.parse(fs.readFileSync(catalogPath,'utf8'));
           const byId=new Map(catalog.machines.map(x=>[x.machineId,x]));
           const metadata={};
-
           const sha256=(buf)=>crypto.createHash('sha256').update(buf).digest('hex');
+
           for(const machineId of machines){
             const stagePath=path.join(prod,'production','batches',batchId,'machines',machineId,'stages','APP_RUNTIME.json');
             const stage=JSON.parse(fs.readFileSync(stagePath,'utf8'));
@@ -81,10 +71,10 @@ jobs:
             const entry=byId.get(machineId);
             if(!entry)throw new Error('CATALOG_ENTRY_MISSING:'+machineId);
             const caps=[];
-            for(const f of pkg.features?.features??[]){
-              const m=String(f.modelType??'').toLowerCase();
-              if(m==='binomial'&&!caps.includes('binomial'))caps.push('binomial');
-              if(m==='multinomial'&&!caps.includes('multinomial'))caps.push('multinomial');
+            for(const feature of pkg.features?.features??[]){
+              const model=String(feature.modelType??'').toLowerCase();
+              if(model==='binomial'&&!caps.includes('binomial'))caps.push('binomial');
+              if(model==='multinomial'&&!caps.includes('multinomial'))caps.push('multinomial');
             }
             if((pkg.evidence?.references??[]).length>0&&!caps.includes('evidence'))caps.push('evidence');
             entry.machineDataVersion=pkg.machine.machineDataVersion;
@@ -104,6 +94,7 @@ jobs:
               gameType:entry.gameType
             };
           }
+
           fs.writeFileSync(catalogPath,JSON.stringify(catalog,null,2)+'\n','utf8');
           fs.writeFileSync(process.env.RUNNER_TEMP+'/batch001-package-metadata.json',JSON.stringify(metadata,null,2)+'\n','utf8');
           NODE
@@ -153,53 +144,22 @@ jobs:
           git push origin HEAD:prototype-multi-machine
           echo "PROTOTYPE_COMMIT=$(git rev-parse HEAD)" >> "$GITHUB_ENV"
 
-      - name: Build composite Pages artifact
+      - name: Dispatch Pages deployment from prototype branch
+        env:
+          GH_TOKEN: ${{ github.token }}
         shell: bash
         run: |
           set -euo pipefail
-          node <<'NODE'
-          const fs=require('fs'),path=require('path'),crypto=require('crypto');
-          const BASE_URL='https://hanashinonetachou-arch.github.io/sloanalytica-data';
-          const SITE=path.resolve('site');
-          function readJson(f){return JSON.parse(fs.readFileSync(f,'utf8'))}
-          function writeJson(f,v){fs.mkdirSync(path.dirname(f),{recursive:true});fs.writeFileSync(f,JSON.stringify(v,null,2)+'\n','utf8')}
-          function sha256(f){return crypto.createHash('sha256').update(fs.readFileSync(f)).digest('hex')}
-          function buildVariant(sourceDir,outputPrefix){
-            const catalog=readJson(path.join(sourceDir,'catalog.json'));
-            const diff=path.join(sourceDir,'difficulty-catalog.json');
-            const prefix=outputPrefix?outputPrefix+'/':'';
-            const out=path.join(SITE,outputPrefix);
-            fs.mkdirSync(out,{recursive:true});
-            if(fs.existsSync(diff)){fs.copyFileSync(diff,path.join(out,'difficulty-catalog.json'));catalog.difficultyCatalogUrl=BASE_URL+'/'+prefix+'difficulty-catalog.json'}else delete catalog.difficultyCatalogUrl;
-            for(const machine of catalog.machines){
-              const source=path.join(sourceDir,'machines',machine.machineId,'machine-package.json');
-              if(!fs.existsSync(source))throw new Error('MISSING_PACKAGE:'+machine.machineId);
-              if(fs.statSync(source).size!==machine.packageSizeBytes)throw new Error('SIZE:'+machine.machineId);
-              if(sha256(source).toLowerCase()!==String(machine.sha256||'').toLowerCase())throw new Error('SHA:'+machine.machineId);
-              const target=path.join(out,'machines',machine.machineId,'machine-package.json');
-              fs.mkdirSync(path.dirname(target),{recursive:true});fs.copyFileSync(source,target);
-              machine.packageUrl=BASE_URL+'/'+prefix+'machines/'+encodeURIComponent(machine.machineId)+'/machine-package.json';
-            }
-            writeJson(path.join(out,'catalog.json'),catalog);
-          }
-          fs.rmSync(SITE,{recursive:true,force:true});fs.mkdirSync(SITE,{recursive:true});
-          buildVariant(path.resolve('source-main'),'');
-          buildVariant(path.resolve('prototype'),'prototype');
-          fs.writeFileSync(path.join(SITE,'index.html'),'<!doctype html><meta charset="utf-8"><title>SloAnalytica Data</title>\n','utf8');
-          fs.writeFileSync(path.join(SITE,'.nojekyll'),'','utf8');
-          NODE
-
-      - name: Configure Pages
-        uses: actions/configure-pages@v5
-
-      - name: Upload Pages artifact
-        uses: actions/upload-pages-artifact@v4
-        with:
-          path: site
-
-      - name: Deploy repaired prototype data to Pages
-        id: deployment
-        uses: actions/deploy-pages@v4
+          gh workflow run deploy-pages.yml --ref prototype-multi-machine
+          run_id=""
+          for _ in $(seq 1 30); do
+            run_id="$(gh api "repos/$GITHUB_REPOSITORY/actions/workflows/deploy-pages.yml/runs?branch=prototype-multi-machine&event=workflow_dispatch&per_page=20" --jq ".workflow_runs[] | select(.head_sha == \"$PROTOTYPE_COMMIT\") | .id" | head -n1 || true)"
+            if [ -n "$run_id" ]; then break; fi
+            sleep 2
+          done
+          test -n "$run_id" || { echo "Pages workflow_dispatch run was not created."; exit 1; }
+          gh run watch "$run_id" --exit-status
+          echo "PAGES_RUN_ID=$run_id" >> "$GITHUB_ENV"
 
       - name: Build verified Distribution attestation
         shell: bash
@@ -209,7 +169,8 @@ jobs:
           const fs=require('fs'),path=require('path');
           const batchId='batch-20260928-001';
           const packages=JSON.parse(fs.readFileSync(process.env.RUNNER_TEMP+'/batch001-package-metadata.json','utf8'));
-          const runId=Number(process.env.GITHUB_RUN_ID);
+          const boundaryRunId=Number(process.env.GITHUB_RUN_ID);
+          const pagesRunId=Number(process.env.PAGES_RUN_ID);
           const doc={
             batchId,
             integration:{
@@ -220,9 +181,9 @@ jobs:
             packages,
             checks:{
               catalogIntegrity:true,
-              pagesDeployment:{runId,conclusion:'success'},
-              uxContractAudit:{runId,conclusion:'success'},
-              machineIdentityConsistency:{runId,conclusion:'success',batchMachineVerified:true}
+              pagesDeployment:{runId:pagesRunId,conclusion:'success'},
+              uxContractAudit:{runId:boundaryRunId,conclusion:'success'},
+              machineIdentityConsistency:{runId:boundaryRunId,conclusion:'success',batchMachineVerified:true}
             }
           };
           const p=path.resolve('production-state','production','batches',batchId,'distribution-repair-attestation.json');
