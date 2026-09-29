@@ -10,6 +10,6 @@ export function buildObservationEvidence(candidate:any,research:any,candidateArt
   }
   return {findingId:c.findingId,label:c.label,model:c.model,trialUniverse:c.trialUniverse,liveInferenceRoute:c.liveInferenceRoute,runtimeInferenceAllowed:c.runtimeInferenceAllowed,dependencyResolution:c.dependencyResolution,observationStatus:status,collectionContract,resolvedIntoFindingId:c.resolvedIntoFindingId};
  });
- const evidence=(candidate.evidenceCandidates??[]).map((e:any)=>({findingId:e.findingId,label:e.label,sourceIds:e.sourceIds??[],runtimePolicyControlled:false,status:'SOURCE_REFERENCED'}));
+ const evidence=(candidate.evidenceCandidates??[]).map((e:any)=>({findingId:e.findingId,label:e.label,sourceIds:e.sourceIds??[],details:Array.isArray(e.details)?e.details:[],runtimePolicyControlled:false,status:'SOURCE_REFERENCED'}));
  return {schemaVersion:'observation-evidence-v1',manifestVersion:'8.5',batchId:candidate.batchId,machineId:candidate.machineId,machineName:candidate.machineName,candidateContractArtifact:candidateArtifact,observations,evidence,sourceReferences:research.sources??[],blockedItems:candidate.blockedItems??[],sourceIntegrityIssues:candidate.sourceIntegrityIssues??[],highLowDiscrimination:buildHighLowDiscrimination(candidate)};
 }
