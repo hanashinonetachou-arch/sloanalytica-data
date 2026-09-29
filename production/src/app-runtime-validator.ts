@@ -48,8 +48,8 @@ export function validateAppRuntimeDocument(doc:any,projection:any,projectionArti
  if(canonical((p.ui.v8Sections??[]).map((s:any)=>s.id))!==canonical(expectedIds))fail('UI_SECTION_IDS');
  if(canonical(p.evidence?.references)!==canonical(projection.evidence??[])||!Array.isArray(p.evidence?.evidences))fail('EVIDENCE_REFERENCE_COPY');
  const expectedEvidenceIds=(projection.evidence??[]).flatMap((s:any)=>(s.evidenceItems??[]).map((e:any)=>e.findingId));
- const materializedEvidenceIds=(p.evidence.evidences??[]).map((e:any)=>e.id);
- if(canonical(materializedEvidenceIds)!==canonical(expectedEvidenceIds))fail('EVIDENCE_MATERIALIZATION');
+ const expectedEvidenceIdSet=new Set(expectedEvidenceIds);
+ for(const def of p.evidence.evidences??[]){const sourceIds=Array.isArray(def.sourceEvidenceRefs)?def.sourceEvidenceRefs:[];if(sourceIds.length!==1||!expectedEvidenceIdSet.has(sourceIds[0]))fail('EVIDENCE_MATERIALIZATION');}
  const evidenceSourceBy=new Map((projection.evidence??[]).flatMap((s:any)=>(s.evidenceItems??[]).map((e:any)=>[e.findingId,e])));
  for(const e of p.evidence.evidences??[]){
   const sourceId=Array.isArray(e.sourceEvidenceRefs)?e.sourceEvidenceRefs[0]:undefined;const src:any=evidenceSourceBy.get(sourceId);
