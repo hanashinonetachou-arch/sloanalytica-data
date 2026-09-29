@@ -11,10 +11,14 @@ export const categoricalProbabilityRow=(row:any,labels:string[],findingId:string
 const importanceToAdoption=(importance:any)=>importance==='主要'?'INCLUDE_PRIMARY':'INCLUDE_SUPPORT';
 const scoreDescription=(section:any)=>{
  const score=section?.score;const power=section?.perEligibleTrialPower;
- const scoreText=score?.status==='COMPUTED'&&typeof score.value==='number'?`設定判別スコア：${Number(score.value).toFixed(1)}`:`設定判別スコア：算出不可${score?.reason?'（'+score.reason+'）':''}`;
- const powerText=typeof power?.value==='number'?`1回の判別力：${Number(power.value).toFixed(3)}`:null;
- return [scoreText,powerText].filter(Boolean).join('\n');
+ const powerText=typeof power?.value==='number'?\`1回の判別力：\${Number(power.value).toFixed(3)}\`:null;
+ const scoreText=score?.status==='COMPUTED'&&typeof score.value==='number'
+  ?\`設定判別スコア：\${Number(score.value).toFixed(1)}\`
+  :powerText?null:\`設定判別スコア：算出不可\${score?.reason?'（'+score.reason+'）':''}\`;
+ return [scoreText,powerText].filter(Boolean).join('\\n');
 };
+const playDataSourceForTrialUniverse=(trialUniverse:any)=>
+ trialUniverse==='NORMAL_GAME_TRIAL'||trialUniverse==='BONUS_ELIGIBLE_GAME_TRIAL'?'PLAY_NORMAL_GAME_DELTA':undefined;
 const numericUiSections=(projection:any)=>{
  const src=projection.runtimeUi??{};const activeBy=new Map((projection.activeFeatures??[]).map((x:any)=>[x.findingId,x]));
  return (src.numericSections??[]).map((s:any)=>{
@@ -24,13 +28,13 @@ const numericUiSections=(projection:any)=>{
    const trial=inputs.find((x:any)=>x.role==='trial'),success=inputs.find((x:any)=>x.role==='success');
    if(!trial||!success)throw new Error('APP_RUNTIME_BERNOULLI_UI:'+f.findingId);
    const trialNode:any={id:trial.id,label:trial.label,input:'denominator',inputId:trial.id,engineBinding:{inputId:trial.id},gridSpan:12,directNumeric:true,quickAdd:trial.quickAdd??[50],unobservedDisplay:'—'};
-   if(f.trialUniverse==='NORMAL_GAME_TRIAL')trialNode.playDataBinding={source:'PLAY_NORMAL_GAME_DELTA'};
-   return {id:s.id,title:s.title,collapsible:s.collapsible!==false,defaultExpanded:s.defaultExpanded===true,descriptionPresentation:s.descriptionPresentation??{collapsible:true,label:'説明',defaultExpanded:false},items:[{id:'NODE_'+f.findingId,featureId:f.findingId,title:s.title,description:scoreDescription(s),descriptionPresentation:{collapsible:false},inputs:[trialNode,{id:success.id,label:success.label,input:'counter',inputId:success.id,engineBinding:{inputId:success.id},gridSpan:6,directNumeric:true,quickAdd:success.quickAdd??[1],unobservedDisplay:'—'}]}]};
+   const playDataSource=playDataSourceForTrialUniverse(f.trialUniverse);if(playDataSource)trialNode.playDataBinding={source:playDataSource};
+   return {id:s.id,title:s.title,collapsible:s.collapsible!==false,defaultExpanded:s.defaultExpanded===true,descriptionPresentation:s.descriptionPresentation??{collapsible:true,label:'説明',defaultExpanded:false},items:[{id:'NODE_'+f.findingId,featureId:f.findingId,title:s.title,description:scoreDescription(s),descriptionPresentation:{collapsible:true,label:'説明',defaultExpanded:false},inputs:[trialNode,{id:success.id,label:success.label,input:'counter',inputId:success.id,engineBinding:{inputId:success.id},gridSpan:6,directNumeric:true,quickAdd:success.quickAdd??[1],unobservedDisplay:'—'}]}]};
   }
   if(f.model==='CATEGORICAL'){
    const trial=inputs.find((x:any)=>x.role==='trial'),cats=inputs.filter((x:any)=>x.role==='categoryCount');
    if(!trial||cats.length<2)throw new Error('APP_RUNTIME_CATEGORICAL_UI:'+f.findingId);
-   return {id:s.id,title:s.title,collapsible:s.collapsible!==false,defaultExpanded:s.defaultExpanded===true,descriptionPresentation:s.descriptionPresentation??{collapsible:true,label:'説明',defaultExpanded:false},items:[{id:'NODE_'+f.findingId,featureId:f.findingId,title:s.title,description:scoreDescription(s),descriptionPresentation:{collapsible:false},interaction:{type:'CATEGORY_COUNTERS',preservePriorObservations:true,showAccumulatedCounts:true,categoryCoverage:'NON_EXHAUSTIVE',totalOpportunities:'SEPARATE_COUNTER',opportunityTracking:{type:'SEPARATE_COUNTER',inputId:trial.id,label:trial.label},categories:cats.map((x:any)=>({id:x.id,inputId:x.id,label:x.label,meaning:'観測した回数'}))}}]};
+   return {id:s.id,title:s.title,collapsible:s.collapsible!==false,defaultExpanded:s.defaultExpanded===true,descriptionPresentation:s.descriptionPresentation??{collapsible:true,label:'説明',defaultExpanded:false},items:[{id:'NODE_'+f.findingId,featureId:f.findingId,title:s.title,description:scoreDescription(s),descriptionPresentation:{collapsible:true,label:'説明',defaultExpanded:false},interaction:{type:'CATEGORY_COUNTERS',preservePriorObservations:true,showAccumulatedCounts:true,categoryCoverage:'NON_EXHAUSTIVE',totalOpportunities:'SEPARATE_COUNTER',opportunityTracking:{type:'SEPARATE_COUNTER',inputId:trial.id,label:trial.label},categories:cats.map((x:any)=>({id:x.id,inputId:x.id,label:x.label,meaning:'観測した回数'}))}}]};
   }
   throw new Error('APP_RUNTIME_MODEL_UNSUPPORTED:'+f.model);
  });
