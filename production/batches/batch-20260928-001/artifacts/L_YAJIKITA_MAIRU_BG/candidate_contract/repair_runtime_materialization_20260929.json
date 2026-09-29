@@ -1,0 +1,235 @@
+{
+  "schemaVersion": "candidate-contract-v1",
+  "manifestVersion": "8.5",
+  "batchId": "batch-20260928-001",
+  "machineId": "L_YAJIKITA_MAIRU_BG",
+  "machineName": "スマスロ やじきた道中記参る！",
+  "evaluationArtifact": {
+    "artifactId": "evaluation-L_YAJIKITA_MAIRU_BG",
+    "kind": "evaluation",
+    "path": "production/batches/batch-20260928-001/artifacts/L_YAJIKITA_MAIRU_BG/evaluation/repair_runtime_materialization_20260929.json",
+    "sha256": "6a19c1cfc7303f91abd3772283317a94237b13e7b0b9ef6c3a66be6f3c437d6a",
+    "producerWorkId": "wrk_rtm20260929_l_yajikita_mairu_bg_evaluation"
+  },
+  "eligibilityArtifact": {
+    "artifactId": "eligibility-L_YAJIKITA_MAIRU_BG",
+    "kind": "eligibility",
+    "path": "production/batches/batch-20260928-001/artifacts/L_YAJIKITA_MAIRU_BG/eligibility/repair_runtime_materialization_20260929.json",
+    "sha256": "87a087afa087ec4beef855215644558cb597f798a577878727ede587550aa22a",
+    "producerWorkId": "wrk_rtm20260929_l_yajikita_mairu_bg_eligibility"
+  },
+  "candidates": [
+    {
+      "findingId": "cz-first-hit",
+      "label": "CZ「関所チャレンジ」初当り確率",
+      "model": "BERNOULLI",
+      "trialUniverse": "NORMAL_GAME_TRIAL",
+      "liveInferenceRoute": "LIVE_CONDITIONAL",
+      "settingDistribution": {
+        "1": "1/231.1",
+        "2": "1/222.7",
+        "3": "1/209.5",
+        "4": "1/191.5",
+        "5": "1/173.1",
+        "6": "1/157.5"
+      },
+      "dependencyGroupId": "YAJIKITA_INITIAL_HIT_FAMILY",
+      "runtimeInferenceAllowed": true,
+      "dependencyResolution": "SINGLE_MEMBER_SELECTED",
+      "runtimePolicyBinding": {
+        "metric": "SELECTION_SCORE",
+        "value": 74.91055290761662,
+        "thresholdSource": "RUNTIME_POLICY"
+      }
+    },
+    {
+      "findingId": "at-first-hit",
+      "label": "AT「やじきた祭」初当り確率",
+      "model": "BERNOULLI",
+      "trialUniverse": "NORMAL_GAME_TRIAL",
+      "liveInferenceRoute": "LIVE_CONDITIONAL",
+      "settingDistribution": {
+        "1": "1/473.9",
+        "2": "1/457.5",
+        "3": "1/431.6",
+        "4": "1/388.1",
+        "5": "1/352.1",
+        "6": "1/318.3"
+      },
+      "dependencyGroupId": "YAJIKITA_INITIAL_HIT_FAMILY",
+      "runtimeInferenceAllowed": false,
+      "dependencyResolution": "RESOLVED_BY_SINGLE_MEMBER",
+      "runtimePolicyBinding": {
+        "metric": "SELECTION_SCORE",
+        "value": 45.131280176104354,
+        "thresholdSource": "RUNTIME_POLICY"
+      },
+      "resolvedIntoFindingId": "cz-first-hit"
+    },
+    {
+      "findingId": "hot-spring-mile-charge",
+      "label": "まいるチャージ4回以上終了時 温泉ステージ移行率",
+      "model": "BERNOULLI",
+      "trialUniverse": "MILE_CHARGE_4PLUS_END_TRIAL",
+      "liveInferenceRoute": "LIVE_CONDITIONAL",
+      "settingDistribution": {
+        "1": 0.047,
+        "2": 0.047,
+        "3": 0.047,
+        "4": 0.07,
+        "5": 0.07,
+        "6": 0.117
+      },
+      "dependencyGroupId": "YAJIKITA_HOT_SPRING_FAMILY",
+      "runtimeInferenceAllowed": true,
+      "dependencyResolution": "CONDITIONALLY_SEPARATE",
+      "runtimePolicyBinding": {
+        "metric": "PER_ELIGIBLE_TRIAL_POWER",
+        "value": 1.3156414463610822,
+        "thresholdSource": "RUNTIME_POLICY"
+      }
+    },
+    {
+      "findingId": "hot-spring-cz-prelude",
+      "label": "CZ本前兆時 温泉ステージ移行率",
+      "model": "BERNOULLI",
+      "trialUniverse": "CZ_TRUE_PREMONITION_TRIAL",
+      "liveInferenceRoute": "LIVE_CONDITIONAL",
+      "settingDistribution": {
+        "1": 0.047,
+        "2": 0.047,
+        "3": 0.047,
+        "4": 0.07,
+        "5": 0.07,
+        "6": 0.117
+      },
+      "dependencyGroupId": "YAJIKITA_HOT_SPRING_FAMILY",
+      "runtimeInferenceAllowed": true,
+      "dependencyResolution": "CONDITIONALLY_SEPARATE",
+      "runtimePolicyBinding": {
+        "metric": "PER_ELIGIBLE_TRIAL_POWER",
+        "value": 1.3156414463610822,
+        "thresholdSource": "RUNTIME_POLICY"
+      }
+    }
+  ],
+  "dependencyGroups": [
+    {
+      "groupId": "YAJIKITA_INITIAL_HIT_FAMILY",
+      "resolution": "SINGLE_MEMBER_SELECTED",
+      "members": [
+        "cz-first-hit",
+        "at-first-hit"
+      ],
+      "runtimeInferenceAllowed": true,
+      "selectedFindingId": "cz-first-hit",
+      "selectionRationale": "依存関係を仮定せず二重評価を避けるため、同一trial universe内で正式な7000G設定判別スコアが最大の候補を代表Featureとして使用する。",
+      "reason": "正式な設定判別スコアを比較できる候補から、最も情報量の高い1要素のみを採用する。"
+    },
+    {
+      "groupId": "YAJIKITA_HOT_SPRING_FAMILY",
+      "resolution": "CONDITIONALLY_SEPARATE",
+      "members": [
+        "hot-spring-mile-charge",
+        "hot-spring-cz-prelude"
+      ],
+      "runtimeInferenceAllowed": true,
+      "reason": "各候補のeligible trial universeが相互に異なり、実戦入力でも分母を別々に観測できるため条件別Featureとして分離する。"
+    }
+  ],
+  "excludedDecisions": [
+    {
+      "findingId": "at-direct-setting1",
+      "label": "AT直撃当選確率（設定1公開値）",
+      "supportingSourceIds": [
+        "nana-main"
+      ],
+      "liveObservationStatus": "EXACT_WITH_SCOPE_TRACKING",
+      "dependencyStatus": "NONE",
+      "eligibility": "INELIGIBLE",
+      "liveInferenceRoute": "NONE",
+      "ruleRefs": [
+        "REP-002",
+        "SEL-003",
+        "SEL-008A"
+      ],
+      "reason": "設定別likelihoodが不完全で補間は禁止。",
+      "reevaluationCondition": "全declared settingの完全なlikelihoodが公開されること。"
+    },
+    {
+      "findingId": "cz-at-bonus-setting1",
+      "label": "CZ・AT中ボーナス合算確率（設定1公開値）",
+      "supportingSourceIds": [
+        "nana-main"
+      ],
+      "liveObservationStatus": "EXACT_WITH_SCOPE_TRACKING",
+      "dependencyStatus": "NONE",
+      "eligibility": "INELIGIBLE",
+      "liveInferenceRoute": "NONE",
+      "ruleRefs": [
+        "REP-002",
+        "SEL-003",
+        "SEL-008A"
+      ],
+      "reason": "設定別likelihoodが不完全で補間は禁止。",
+      "reevaluationCondition": "全declared settingの完全なlikelihoodが公開されること。"
+    }
+  ],
+  "blockedItems": [
+    {
+      "blockId": "at-direct-settings2-6",
+      "label": "AT直撃当選確率の設定2〜6原分布",
+      "reason": "設定差の存在は確認できるが今回確認した公開値は設定1のみ。補間・推定は行わない",
+      "reevaluationCondition": "AT直撃当選確率の設定2〜6が信頼できる解析資料で公開される"
+    },
+    {
+      "blockId": "cz-at-bonus-settings2-6",
+      "label": "CZ・AT中ボーナス合算確率の設定2〜6原分布",
+      "reason": "設定差の存在は確認できるが公開値は設定1のみ",
+      "reevaluationCondition": "CZ・AT中ボーナス合算確率の設定2〜6が公開される"
+    },
+    {
+      "blockId": "at-end-appearance-rates",
+      "label": "AT終了画面・ユニバプレートの設定別出現率",
+      "reason": "示唆内容は確認できるが設定別出現率を確認できない",
+      "reevaluationCondition": "AT終了画面およびユニバプレートの設定別出現率が公開される"
+    },
+    {
+      "blockId": "karuta-appearance-rates",
+      "label": "かるたの設定別出現率",
+      "reason": "示唆内容は確認できるが設定別出現率を確認できない",
+      "reevaluationCondition": "かるたパターン別の設定別出現率が公開される"
+    }
+  ],
+  "evidenceCandidates": [
+    {
+      "findingId": "akane-add-evidence",
+      "label": "あっぱれチャンス「茜ちゃん」上乗せ演出",
+      "sourceIds": [
+        "nana-setting"
+      ]
+    },
+    {
+      "findingId": "karuta-evidence",
+      "label": "サブ液晶かるた",
+      "sourceIds": [
+        "nana-setting"
+      ]
+    },
+    {
+      "findingId": "at-end-evidence",
+      "label": "AT終了画面・ユニバプレート",
+      "sourceIds": [
+        "nana-setting"
+      ]
+    },
+    {
+      "findingId": "ending-pass-evidence",
+      "label": "エンディング中の通行手形",
+      "sourceIds": [
+        "nana-setting"
+      ]
+    }
+  ],
+  "sourceIntegrityIssues": []
+}
