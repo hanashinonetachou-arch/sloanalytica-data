@@ -30,12 +30,70 @@
   },
   "inputs": {
     "schemaVersion": "2.0.0",
-    "inputs": []
+    "inputs": [
+      {
+        "id": "bonus-combined.eligibleTrialCount",
+        "name": "観測機会数",
+        "category": "V8_NUMERIC",
+        "type": "integer",
+        "unit": "回",
+        "defaultValue": 0,
+        "minimum": 0,
+        "displayOrder": 1,
+        "inferenceRole": "INCLUDE_PRIMARY"
+      },
+      {
+        "id": "bonus-combined.successCount",
+        "name": "該当回数",
+        "category": "V8_NUMERIC",
+        "type": "counter",
+        "unit": "回",
+        "defaultValue": 0,
+        "minimum": 0,
+        "displayOrder": 2,
+        "parentInputId": "bonus-combined.eligibleTrialCount",
+        "inferenceRole": "INCLUDE_PRIMARY"
+      }
+    ]
   },
   "features": {
     "version": "8.5-runtime",
-    "features": [],
-    "runtimeProjection": []
+    "features": [
+      {
+        "featureId": "bonus-combined",
+        "name": "ボーナス合成確率",
+        "adoptionCategory": "INCLUDE_PRIMARY",
+        "calculationRole": "PROBABILITY",
+        "probabilityEngineUsage": true,
+        "denominatorInputId": "bonus-combined.eligibleTrialCount",
+        "probabilities": {
+          "SET_1": 0.005371146202599634,
+          "SET_2": 0.005676335357892945,
+          "SET_3": 0.00598157674362962,
+          "SET_4": 0.006393453104021482,
+          "SET_5": 0.00682081713389264,
+          "SET_6": 0.007232749891508752
+        },
+        "selectionRationale": {
+          "summary": "Manifest v8.5 Production Lineで採用された設定推測要素。",
+          "adoptionReason": "EligibilityとCandidate Contractを通過した観測可能likelihoodを使用します。",
+          "shortTermReason": "標本が少ない間は結果の振れが大きくなります。",
+          "longTermReason": "観測数が増えるほど設定別likelihoodの比較が安定します。"
+        },
+        "modelType": "binomial",
+        "numeratorInputId": "bonus-combined.successCount",
+        "displayFormat": "percentage"
+      }
+    ],
+    "runtimeProjection": [
+      {
+        "featureId": "bonus-combined",
+        "runtimeStatus": "ACTIVE",
+        "metric": "SELECTION_SCORE",
+        "metricValue": 55.009376546828726,
+        "importance": "主要"
+      }
+    ]
   },
   "evidence": {
     "version": "8.5-runtime",
@@ -55,7 +113,62 @@
     "quickInput": {
       "enabled": false
     },
-    "v8Sections": []
+    "v8Sections": [
+      {
+        "id": "OBS_bonus-combined",
+        "title": "ボーナス合成確率",
+        "collapsible": true,
+        "defaultExpanded": false,
+        "descriptionPresentation": {
+          "collapsible": true,
+          "label": "説明",
+          "defaultExpanded": false
+        },
+        "items": [
+          {
+            "id": "NODE_bonus-combined",
+            "featureId": "bonus-combined",
+            "title": "ボーナス合成確率",
+            "description": "設定判別スコア：55.0\n1回の判別力：55.009",
+            "descriptionPresentation": {
+              "collapsible": false
+            },
+            "inputs": [
+              {
+                "id": "bonus-combined.eligibleTrialCount",
+                "label": "観測機会数",
+                "input": "denominator",
+                "inputId": "bonus-combined.eligibleTrialCount",
+                "engineBinding": {
+                  "inputId": "bonus-combined.eligibleTrialCount"
+                },
+                "gridSpan": 12,
+                "directNumeric": true,
+                "quickAdd": [
+                  50
+                ],
+                "unobservedDisplay": "—"
+              },
+              {
+                "id": "bonus-combined.successCount",
+                "label": "該当回数",
+                "input": "counter",
+                "inputId": "bonus-combined.successCount",
+                "engineBinding": {
+                  "inputId": "bonus-combined.successCount"
+                },
+                "gridSpan": 6,
+                "directNumeric": true,
+                "quickAdd": [
+                  1
+                ],
+                "unobservedDisplay": "—"
+              }
+            ]
+          }
+        ]
+      }
+    ]
   },
   "metadata": {
     "machineId": "LB_TRIPLE_CROWN_X300",
@@ -73,24 +186,20 @@
   "v8": {
     "machineResearchSummary": {
       "title": "この機種の設定推測について",
-      "adopted": [],
-      "notAdopted": [
-        {
-          "featureId": "bb-probability",
-          "label": "BB確率",
-          "reason": "依存関係またはjoint modelが未確立のため、現在は数値推測に使用しません。"
-        },
-        {
-          "featureId": "rb-probability",
-          "label": "RB確率",
-          "reason": "依存関係またはjoint modelが未確立のため、現在は数値推測に使用しません。"
-        },
+      "adopted": [
         {
           "featureId": "bonus-combined",
           "label": "ボーナス合成確率",
-          "reason": "依存関係またはjoint modelが未確立のため、現在は数値推測に使用しません。"
+          "importance": "主要",
+          "selectionScore": 55,
+          "evaluation": {
+            "userLabel": "設定判別スコア",
+            "value": 55
+          },
+          "reason": "Runtime PolicyでACTIVEのため現在の設定推測に使用します。"
         }
       ],
+      "notAdopted": [],
       "unresolved": [
         {
           "label": "高低判別精度",
