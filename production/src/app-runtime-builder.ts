@@ -50,7 +50,7 @@ const numericUiSections=(projection:any)=>{
   throw new Error('APP_RUNTIME_MODEL_UNSUPPORTED:'+f.model);
  });
 };
-const evidenceUiSections=(projection:any)=>(projection.runtimeUi?.evidenceSections??[]).map((s:any)=>({id:s.id,title:s.title,description:'確認した設定示唆を選択して記録します。設定推測の確率計算には使用しません。',collapsible:s.collapsible!==false,defaultExpanded:s.defaultExpanded===true,descriptionPresentation:s.descriptionPresentation??{collapsible:true,label:'説明',defaultExpanded:false},items:(s.evidenceItems??[]).map((e:any)=>{const details=Array.isArray(e.details)?e.details.filter((x:any)=>typeof x==='string'&&x.trim()):[];return {id:'REF_'+e.findingId,evidenceId:e.findingId,label:e.label,inputId:'REF_'+e.findingId,interaction:{type:'REFERENCE_MULTI_SELECT',categories:details.map((label:string,i:number)=>({id:`REF_${e.findingId}_${i+1}`,label,meaning:'確認した設定示唆'}))}}})}));
+const evidenceUiSections=(projection:any)=>(projection.runtimeUi?.evidenceSections??[]).map((s:any)=>({id:s.id,title:s.title,description:'確認した設定示唆の回数を記録します。設定推測の確率計算には使用しません。',collapsible:s.collapsible!==false,defaultExpanded:s.defaultExpanded===true,descriptionPresentation:s.descriptionPresentation??{collapsible:true,label:'説明',defaultExpanded:false},items:(s.evidenceItems??[]).map((e:any)=>{const details=Array.isArray(e.details)?e.details.filter((x:any)=>typeof x==='string'&&x.trim()):[];const labels=details.length?details:[e.label];return {id:'REF_'+e.findingId,evidenceId:e.findingId,label:e.label,interaction:{type:'CATEGORY_COUNTERS',preservePriorObservations:true,showAccumulatedCounts:true,categoryCoverage:'NON_EXHAUSTIVE',totalOpportunities:'NONE',categories:labels.map((label:string,i:number)=>({id:`REF_${e.findingId}_${i+1}`,inputId:`REF_${e.findingId}_${i+1}`,label,meaning:'観測回数'}))}}})}));
 const toUi=(projection:any)=>{const src=projection.runtimeUi??{};return {schemaVersion:'v8.5-runtime-ui-v1',contractVersion:'runtime-ui-v8',source:'CANONICAL_UI',sourceSchemaVersion:src.schemaVersion,manifestRevision:'8.5',playInfo:src.playInfo,accordion:{enabled:true,singleOpen:true},quickInput:{enabled:false},v8Sections:[...numericUiSections(projection),...evidenceUiSections(projection)]}};
 const buildInputs=(projection:any)=>{
  const out:any[]=[];const seen=new Set<string>();let order=1;
@@ -64,9 +64,12 @@ const buildInputs=(projection:any)=>{
  }
  for(const s of projection.evidence??[]){
   for(const e of s.evidenceItems??[]){
-   const id='REF_'+e.findingId;if(seen.has(id))continue;seen.add(id);
    const details=Array.isArray(e.details)?e.details.filter((x:any)=>typeof x==='string'&&x.trim()):[];
-   out.push({id,name:e.label,category:'EVIDENCE_REFERENCE',type:'multi_enum',defaultValue:null,options:details.map((label:string,i:number)=>({key:String(i+1),label,value:String(i+1)})),displayOrder:order++,inferenceRole:'DISPLAY_ONLY'});
+   const labels=details.length?details:[e.label];
+   for(const [i,label] of labels.entries()){
+    const id=`REF_${e.findingId}_${i+1}`;if(seen.has(id))continue;seen.add(id);
+    out.push({id,name:label,category:'EVIDENCE_REFERENCE',type:'counter',unit:'回',defaultValue:0,minimum:0,displayOrder:order++,inferenceRole:'DISPLAY_ONLY'});
+   }
   }
  }
  return out;
