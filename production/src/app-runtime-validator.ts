@@ -40,8 +40,16 @@ export function validateAppRuntimeDocument(doc:any,projection:any,projectionArti
  if((p.ui?.v8Sections??[]).length!==expectedUiCount)fail('UI_SECTION_COVERAGE');
  const expectedIds=[...(projection.runtimeUi?.numericSections??[]).map((s:any)=>s.id),...(projection.runtimeUi?.evidenceSections??[]).map((s:any)=>s.id)];
  if(canonical((p.ui.v8Sections??[]).map((s:any)=>s.id))!==canonical(expectedIds))fail('UI_SECTION_IDS');
- if(canonical(p.evidence?.references)!==canonical(projection.evidence??[])||!Array.isArray(p.evidence?.evidences)||p.evidence.evidences.length!==0)fail('EVIDENCE_REFERENCE_ONLY');
- const summary=p.v8?.machineResearchSummary;if(!summary)fail('V8_SUMMARY');if(projection.highLowDiscrimination?.status==='COMPUTED'){if(canonical(summary.highLowDiscrimination)!==canonical(projection.highLowDiscrimination)||summary.unresolved?.some((x:any)=>x?.label==='高低判別精度'))fail('HLD_COMPUTED');}else{if(summary.highLowDiscrimination!==undefined||!summary.unresolved?.some((x:any)=>x?.label==='高低判別精度'&&x?.reason===projection.highLowDiscrimination?.reason))fail('HLD_UNRESOLVED');}
+ if(canonical(p.evidence?.references)!==canonical(projection.evidence??[])||!Array.isArray(p.evidence?.evidences))fail('EVIDENCE_REFERENCE_COPY');
+ const expectedEvidenceIds=(projection.evidence??[]).flatMap((s:any)=>(s.evidenceItems??[]).map((e:any)=>e.findingId));
+ const materializedEvidenceIds=(p.evidence.evidences??[]).map((e:any)=>e.id);
+ if(canonical(materializedEvidenceIds)!==canonical(expectedEvidenceIds))fail('EVIDENCE_MATERIALIZATION');
+ for(const e of p.evidence.evidences??[])if(e.type!=='REFERENCE_ONLY'||typeof e.inputId!=='string'||!e.inputId||!Array.isArray(e.confirmedSettings)||!Array.isArray(e.deniedSettings))fail('EVIDENCE_DEFINITION');
+ for(const s of (p.ui?.v8Sections??[]).filter((x:any)=>String(x.id??'').startsWith('EVI_')))if(typeof s.description!=='string'||!s.description.trim())fail('EVIDENCE_UI_RENDERABLE');
+ const summary=p.v8?.machineResearchSummary;if(!summary)fail('V8_SUMMARY');
+ const rejectedIds=new Set((summary.notAdopted??[]).map((x:any)=>x.featureId));
+ for(const x of projection.nonRuntimeCandidates??[])if(!rejectedIds.has(x.findingId))fail('SUMMARY_NON_RUNTIME_MISSING:'+x.findingId);
+ for(const x of projection.excludedDecisions??[])if(!rejectedIds.has(x.findingId))fail('SUMMARY_EXCLUDED_MISSING:'+x.findingId);if(projection.highLowDiscrimination?.status==='COMPUTED'){if(canonical(summary.highLowDiscrimination)!==canonical(projection.highLowDiscrimination)||summary.unresolved?.some((x:any)=>x?.label==='高低判別精度'))fail('HLD_COMPUTED');}else{if(summary.highLowDiscrimination!==undefined||!summary.unresolved?.some((x:any)=>x?.label==='高低判別精度'&&x?.reason===projection.highLowDiscrimination?.reason))fail('HLD_UNRESOLVED');}
  if(p.provenance?.legacyOracleUsed!==false||p.provenance?.generationPath!=='V8_5_PRODUCTION_PIPELINE')fail('PROVENANCE');
  return [{validator:APP_RUNTIME_VALIDATOR_CONTRACT,sections:(p.ui.v8Sections??[]).length,evidenceReferences:(projection.evidence??[]).length,settings:p.machine.settings.length,features:active.length,inputs:expectedInputs.length}];
 }
