@@ -9,13 +9,18 @@ const probability=(v:any):number=>{
   throw new Error('HLD_PROBABILITY_INVALID:'+String(v));
 };
 
+const logFactorialCache=new Map<number,number[]>();
+const logFactorials=(n:number)=>{
+  const cached=logFactorialCache.get(n);if(cached)return cached;
+  const values=Array<number>(n+1);values[0]=0;
+  for(let i=1;i<=n;i++)values[i]=values[i-1]+Math.log(i);
+  logFactorialCache.set(n,values);return values;
+};
 const logBinomial=(k:number,n:number,p:number)=>{
   if(p===0)return k===0?0:-Infinity;
   if(p===1)return k===n?0:-Infinity;
-  let c=0;
-  const j=Math.min(k,n-k);
-  for(let i=1;i<=j;i++)c+=Math.log(n-j+i)-Math.log(i);
-  return c+k*Math.log(p)+(n-k)*Math.log1p(-p);
+  const lf=logFactorials(n);
+  return lf[n]-lf[k]-lf[n-k]+k*Math.log(p)+(n-k)*Math.log1p(-p);
 };
 
 const mixtureMass=(ps:number[],n:number,k:number)=>{
