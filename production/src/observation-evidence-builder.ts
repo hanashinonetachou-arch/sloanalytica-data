@@ -1,6 +1,6 @@
 export function buildObservationEvidence(candidate:any,research:any,candidateArtifact:any){
  const observations=(candidate.candidates??[]).map((c:any)=>{
-  const status=c.runtimeInferenceAllowed?'READY':c.dependencyResolution==='RESOLVED_IN_JOINT_MODEL'?'RESOLVED_IN_JOINT_MODEL':'HELD_NO_JOINT_MODEL';
+  const status=c.runtimeInferenceAllowed?'READY':c.dependencyResolution==='RESOLVED_IN_JOINT_MODEL'?'RESOLVED_IN_JOINT_MODEL':c.dependencyResolution==='RESOLVED_BY_SINGLE_MEMBER'?'RESOLVED_BY_SINGLE_MEMBER':'HELD_NO_JOINT_MODEL';
   let collectionContract:any=null;
   if(c.runtimeInferenceAllowed){
    if(c.model==='BERNOULLI')collectionContract={type:'SUCCESS_TRIAL_COUNTS',successField:'successCount',trialField:'eligibleTrialCount'};
