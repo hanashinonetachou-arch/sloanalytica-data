@@ -84,7 +84,7 @@ function researchRef(batchId:string,machineId:string,research:any){
 function appendRepairState(batchId:string,machineId:string,stage:string,artifactRef:any,inputArtifacts:any[]){
   const p=stagePath(batchId,machineId,stage);
   const current=readJson<any>(p);
-  if(current.state!=='COMPLETE')throw new Error(`REPAIR_STAGE_NOT_COMPLETE:${machineId}:${stage}:${current.state}`);
+  if(!['COMPLETE','READY'].includes(current.state))throw new Error(`REPAIR_STAGE_NOT_REPAIRABLE:${machineId}:${stage}:${current.state}`);
   const stamp='rtm20260929';
   const slug=machineId.toLowerCase().replace(/[^a-z0-9]+/g,'_');
   const lower=stage.toLowerCase();
@@ -93,19 +93,26 @@ function appendRepairState(batchId:string,machineId:string,stage:string,artifact
   const leaseId=`lea_${stamp}_${slug}_${lower}`;
   const t0=current.revision;
   const ts=nowIso();
-  const transitions=[
-    ['COMPLETE','READY','AUTHORITATIVE_OUTPUT_INVALIDATED','batch001-runtime-materialization-repair'],
-    ['READY','LEASED','DISPATCH',workId],
-    ['LEASED','RUNNING','WORKER_START',workId],
-    ['RUNNING','VALIDATING','WORK_RESULT',workId],
-    ['VALIDATING','COMPLETE','VALIDATOR',workId],
-  ];
+  const transitions=current.state==='COMPLETE'
+    ? [
+        ['COMPLETE','READY','AUTHORITATIVE_OUTPUT_INVALIDATED','batch001-runtime-materialization-repair'],
+        ['READY','LEASED','DISPATCH',workId],
+        ['LEASED','RUNNING','WORKER_START',workId],
+        ['RUNNING','VALIDATING','WORK_RESULT',workId],
+        ['VALIDATING','COMPLETE','VALIDATOR',workId],
+      ]
+    : [
+        ['READY','LEASED','DISPATCH',workId],
+        ['LEASED','RUNNING','WORKER_START',workId],
+        ['RUNNING','VALIDATING','WORK_RESULT',workId],
+        ['VALIDATING','COMPLETE','VALIDATOR',workId],
+      ];
   transitions.forEach((x,i)=>appendJsonl(path.join(batchRoot(batchId),'transitions','history.jsonl'),{
     transitionId:`trn_${stamp}_${slug}_${lower}_${i+1}`,batchId,machineId,stage,
     fromState:x[0],toState:x[1],causeType:x[2],causeId:x[3],
     expectedRevision:t0+i,committedRevision:t0+i+1,committedAt:ts,orchestratorContractVersion:'orch-1'
   }));
-  const updated={...current,state:'COMPLETE',revision:t0+5,activeAttemptId:attemptId,activeLeaseId:leaseId,authoritativeOutputRef:artifactRef};
+  const updated={...current,state:'COMPLETE',revision:t0+transitions.length,activeAttemptId:attemptId,activeLeaseId:leaseId,authoritativeOutputRef:artifactRef};
   writeJson(p,updated);
   writeJson(path.join(batchRoot(batchId),'machines',machineId,'attempts',attemptId+'.json'),{
     attemptId,workId,batchId,machineId,stage,number:999,inputFingerprint:current.authoritativeInputFingerprint,
