@@ -9,14 +9,14 @@
       "artifactId": "machine-data-L_TOARU_INDEX2_FA",
       "kind": "machine-data",
       "path": "production/batches/batch-20260928-001/artifacts/L_TOARU_INDEX2_FA/machine_data/repair_runtime_materialization_20260929.json",
-      "sha256": "57449c7cdc53c47b02ba003fe75b2f2a480c3bad8d32a9832c042887e62a2bd1",
+      "sha256": "3b70cf10fdbedac2e71d8113f374a329e754d6a01b2f1ffb8bd0a756fae232b0",
       "producerWorkId": "wrk_rtm20260929_l_toaru_index2_fa_machine_data"
     },
     "runtimePolicy": {
       "artifactId": "runtime-policy-L_TOARU_INDEX2_FA",
       "kind": "runtime-policy",
       "path": "production/batches/batch-20260928-001/artifacts/L_TOARU_INDEX2_FA/runtime_policy/repair_runtime_materialization_20260929.json",
-      "sha256": "e6d14cb9d43ac78bd60bd6a45bd4cfa4d679868cbd8a9948ff9582f97041d621",
+      "sha256": "6aeedfe71a7f11a038e765712d6f1a5a8db60ddb6b8f622e7d0292176dd7d1bb",
       "producerWorkId": "wrk_rtm20260929_l_toaru_index2_fa_runtime_policy"
     }
   },
@@ -170,7 +170,7 @@
         "artifactId": "observation-evidence-L_TOARU_INDEX2_FA",
         "kind": "observation-evidence",
         "path": "production/batches/batch-20260928-001/artifacts/L_TOARU_INDEX2_FA/observation_evidence/repair_runtime_materialization_20260929.json",
-        "sha256": "144dcec4f2a67871d288d66af65d927bc820ee69171abdbbf43938b4b2f8d411",
+        "sha256": "4c2ffc83adb14e1cfce59e54caca37dfa8fcb9801561eccc087d0c8cbd31b21d",
         "producerWorkId": "wrk_rtm20260929_l_toaru_index2_fa_observation_evidence"
       },
       "evaluation": {
@@ -185,8 +185,39 @@
       "title": "この機種の設定推測について",
       "position": "TOP_ONLY",
       "highLowDiscrimination": {
-        "status": "NOT_COMPUTED",
-        "reason": "targetGamesへ対応するexact exposure modelまたはdependency/joint modelが未確立の候補を含むため、独立近似や任意換算でHighLowDiscriminationを生成しない。"
+        "status": "COMPUTED",
+        "method": "BEST_SINGLE_EXACT_ACTIVE_FEATURE",
+        "bandDefinition": {
+          "lowSettings": "SETTING_1_TO_3",
+          "highSettings": "SETTING_4_TO_6",
+          "classPrior": "BALANCED"
+        },
+        "results": [
+          {
+            "games": 1500,
+            "balancedAccuracyPercent": 54.22
+          },
+          {
+            "games": 3000,
+            "balancedAccuracyPercent": 55.95
+          },
+          {
+            "games": 7000,
+            "balancedAccuracyPercent": 59
+          }
+        ],
+        "eligibleFeatureIds": [
+          "cz-first-hit"
+        ],
+        "selectedFeatureId": "cz-first-hit",
+        "selectedFeatureLabel": "CZ初当り確率",
+        "excludedFeatures": [
+          {
+            "findingId": "end-weak",
+            "reason": "BENCHMARK_EXPOSURE_UNRESOLVED"
+          }
+        ],
+        "note": "7000Gへ正確に換算できるACTIVE要素だけを候補とし、要素間の独立性を仮定せず、単独で最も高い判別精度を持つ要素から保守的に算出しています。条件付き要素はこの指標には含めませんが、実戦中に実際の観測回数が入力された場合は設定推測に使用します。"
       }
     },
     "playInfo": {
@@ -420,6 +451,7 @@
         "kind": "EVIDENCE",
         "collapsible": true,
         "defaultExpanded": false,
+        "description": "設定示唆として確認できる項目です。設定別の完全な出現率が公開されていないため数値推測には使用しませんが、実戦時の判断材料として参照できます。",
         "descriptionPresentation": {
           "collapsible": true,
           "label": "説明",
@@ -471,6 +503,7 @@
       "kind": "EVIDENCE",
       "collapsible": true,
       "defaultExpanded": false,
+      "description": "設定示唆として確認できる項目です。設定別の完全な出現率が公開されていないため数値推測には使用しませんが、実戦時の判断材料として参照できます。",
       "descriptionPresentation": {
         "collapsible": true,
         "label": "説明",
@@ -491,8 +524,131 @@
     }
   ],
   "heldObservations": [],
+  "nonRuntimeCandidates": [
+    {
+      "findingId": "at-first-hit",
+      "label": "AT初当り確率",
+      "dependencyResolution": "RESOLVED_BY_SINGLE_MEMBER",
+      "resolvedIntoFindingId": "cz-first-hit"
+    },
+    {
+      "findingId": "at-direct",
+      "label": "AT直撃確率（天井・超レア小役除外）",
+      "dependencyResolution": "RESOLVED_BY_SINGLE_MEMBER",
+      "resolvedIntoFindingId": "cz-first-hit"
+    },
+    {
+      "findingId": "end-medium",
+      "label": "AT終了画面 一方通行＆番外個体 出現率",
+      "dependencyResolution": "RESOLVED_IN_JOINT_MODEL",
+      "resolvedIntoFindingId": "end-weak"
+    },
+    {
+      "findingId": "end-even",
+      "label": "AT終了画面 アリサ＆シャットアウラ 出現率",
+      "dependencyResolution": "RESOLVED_IN_JOINT_MODEL",
+      "resolvedIntoFindingId": "end-weak"
+    },
+    {
+      "findingId": "end-4plus",
+      "label": "AT終了画面 美琴＆初春 出現率",
+      "dependencyResolution": "RESOLVED_IN_JOINT_MODEL",
+      "resolvedIntoFindingId": "end-weak"
+    },
+    {
+      "findingId": "end-6",
+      "label": "AT終了画面 当麻＆ヒロイン5人 出現率",
+      "dependencyResolution": "RESOLVED_IN_JOINT_MODEL",
+      "resolvedIntoFindingId": "end-weak"
+    }
+  ],
+  "excludedDecisions": [
+    {
+      "findingId": "watermelon-high",
+      "label": "通常時スイカ契機 高確移行率",
+      "supportingSourceIds": [
+        "nana-setting"
+      ],
+      "liveObservationStatus": "UNRESOLVED",
+      "dependencyStatus": "DEFERRED_TO_CANDIDATE_CONTRACT",
+      "eligibility": "UNRESOLVED",
+      "liveInferenceRoute": "NONE",
+      "ruleRefs": [
+        "REP-002",
+        "DEN-002E",
+        "EXP-006",
+        "SEL-008A"
+      ],
+      "reason": "exactなeligible denominatorまたは結果分類を再現できない。",
+      "reevaluationCondition": "source-supported exact observation/reconstruction contractが確立すること。"
+    },
+    {
+      "findingId": "watermelon-mikoto",
+      "label": "通常滞在時スイカ契機 美琴高確移行率",
+      "supportingSourceIds": [
+        "nana-setting"
+      ],
+      "liveObservationStatus": "UNRESOLVED",
+      "dependencyStatus": "DEFERRED_TO_CANDIDATE_CONTRACT",
+      "eligibility": "UNRESOLVED",
+      "liveInferenceRoute": "NONE",
+      "ruleRefs": [
+        "REP-002",
+        "DEN-002E",
+        "EXP-006",
+        "SEL-008A"
+      ],
+      "reason": "exactなeligible denominatorまたは結果分類を再現できない。",
+      "reevaluationCondition": "source-supported exact observation/reconstruction contractが確立すること。"
+    }
+  ],
+  "blockedItems": [
+    {
+      "blockId": "fujimaru-appearance-rates",
+      "label": "藤丸コイン通常条件の設定別出現率",
+      "reason": "示唆内容と店舗カスタム仕様は確認できるが、通常条件の完全な設定別出現率を今回の公開資料で確認できない",
+      "reevaluationCondition": "通常条件の設定別藤丸コイン出現率が信頼できる解析資料で公開される"
+    },
+    {
+      "blockId": "ed-dialogue-appearance-rates",
+      "label": "エンディング中ラストオーダーセリフの設定別出現率",
+      "reason": "各セリフの示唆内容は確認できるが完全な設定別出現率を確認できない",
+      "reevaluationCondition": "セリフ別の設定別出現率が公開される"
+    }
+  ],
   "highLowDiscrimination": {
-    "status": "NOT_COMPUTED",
-    "reason": "targetGamesへ対応するexact exposure modelまたはdependency/joint modelが未確立の候補を含むため、独立近似や任意換算でHighLowDiscriminationを生成しない。"
+    "status": "COMPUTED",
+    "method": "BEST_SINGLE_EXACT_ACTIVE_FEATURE",
+    "bandDefinition": {
+      "lowSettings": "SETTING_1_TO_3",
+      "highSettings": "SETTING_4_TO_6",
+      "classPrior": "BALANCED"
+    },
+    "results": [
+      {
+        "games": 1500,
+        "balancedAccuracyPercent": 54.22
+      },
+      {
+        "games": 3000,
+        "balancedAccuracyPercent": 55.95
+      },
+      {
+        "games": 7000,
+        "balancedAccuracyPercent": 59
+      }
+    ],
+    "eligibleFeatureIds": [
+      "cz-first-hit"
+    ],
+    "selectedFeatureId": "cz-first-hit",
+    "selectedFeatureLabel": "CZ初当り確率",
+    "excludedFeatures": [
+      {
+        "findingId": "end-weak",
+        "reason": "BENCHMARK_EXPOSURE_UNRESOLVED"
+      }
+    ],
+    "note": "7000Gへ正確に換算できるACTIVE要素だけを候補とし、要素間の独立性を仮定せず、単独で最も高い判別精度を持つ要素から保守的に算出しています。条件付き要素はこの指標には含めませんが、実戦中に実際の観測回数が入力された場合は設定推測に使用します。"
   }
 }

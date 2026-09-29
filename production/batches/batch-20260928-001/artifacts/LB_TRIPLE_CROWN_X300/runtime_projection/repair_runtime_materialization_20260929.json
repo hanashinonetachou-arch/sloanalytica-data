@@ -9,14 +9,14 @@
       "artifactId": "machine-data-LB_TRIPLE_CROWN_X300",
       "kind": "machine-data",
       "path": "production/batches/batch-20260928-001/artifacts/LB_TRIPLE_CROWN_X300/machine_data/repair_runtime_materialization_20260929.json",
-      "sha256": "1f95a817c08b040f8e1aac4cd51e820581a6ceaf9b50554613c1131ab269d0ae",
+      "sha256": "22c58750d90a3d8df82438351cd3e247a298b96756c74426ee2a53cd2f7475f0",
       "producerWorkId": "wrk_rtm20260929_lb_triple_crown_x300_machine_data"
     },
     "runtimePolicy": {
       "artifactId": "runtime-policy-LB_TRIPLE_CROWN_X300",
       "kind": "runtime-policy",
       "path": "production/batches/batch-20260928-001/artifacts/LB_TRIPLE_CROWN_X300/runtime_policy/repair_runtime_materialization_20260929.json",
-      "sha256": "e56321dda50ae7d64548fcccdb87f633ec65fffe4cb3a12299289ff69eed4f16",
+      "sha256": "3c3547d4c394b570aa937a8d3c5f06aa704015c81ace046af1269d610798d13a",
       "producerWorkId": "wrk_rtm20260929_lb_triple_crown_x300_runtime_policy"
     }
   },
@@ -94,7 +94,7 @@
         "artifactId": "observation-evidence-LB_TRIPLE_CROWN_X300",
         "kind": "observation-evidence",
         "path": "production/batches/batch-20260928-001/artifacts/LB_TRIPLE_CROWN_X300/observation_evidence/repair_runtime_materialization_20260929.json",
-        "sha256": "bf09fa06b52c7f43c2193e69061da0f1b1272da9a5c556cdef77fe37ffc82a3e",
+        "sha256": "79d36eeb815f466ea5924542a8abbc9d68383b2e04d20d36c3a4017dd759feea",
         "producerWorkId": "wrk_rtm20260929_lb_triple_crown_x300_observation_evidence"
       },
       "evaluation": {
@@ -109,8 +109,34 @@
       "title": "この機種の設定推測について",
       "position": "TOP_ONLY",
       "highLowDiscrimination": {
-        "status": "NOT_COMPUTED",
-        "reason": "targetGamesへ対応するexact exposure modelまたはdependency/joint modelが未確立の候補を含むため、独立近似や任意換算でHighLowDiscriminationを生成しない。"
+        "status": "COMPUTED",
+        "method": "BEST_SINGLE_EXACT_ACTIVE_FEATURE",
+        "bandDefinition": {
+          "lowSettings": "SETTING_1_TO_3",
+          "highSettings": "SETTING_4_TO_6",
+          "classPrior": "BALANCED"
+        },
+        "results": [
+          {
+            "games": 1500,
+            "balancedAccuracyPercent": 60.95
+          },
+          {
+            "games": 3000,
+            "balancedAccuracyPercent": 65.11
+          },
+          {
+            "games": 7000,
+            "balancedAccuracyPercent": 71.8
+          }
+        ],
+        "eligibleFeatureIds": [
+          "bonus-combined"
+        ],
+        "selectedFeatureId": "bonus-combined",
+        "selectedFeatureLabel": "ボーナス合成確率",
+        "excludedFeatures": [],
+        "note": "7000Gへ正確に換算できるACTIVE要素だけを候補とし、要素間の独立性を仮定せず、単独で最も高い判別精度を持つ要素から保守的に算出しています。条件付き要素はこの指標には含めませんが、実戦中に実際の観測回数が入力された場合は設定推測に使用します。"
       }
     },
     "playInfo": {
@@ -257,8 +283,80 @@
   },
   "evidence": [],
   "heldObservations": [],
+  "nonRuntimeCandidates": [
+    {
+      "findingId": "bb-probability",
+      "label": "BB確率",
+      "dependencyResolution": "RESOLVED_BY_SINGLE_MEMBER",
+      "resolvedIntoFindingId": "bonus-combined"
+    },
+    {
+      "findingId": "rb-probability",
+      "label": "RB確率",
+      "dependencyResolution": "RESOLVED_BY_SINGLE_MEMBER",
+      "resolvedIntoFindingId": "bonus-combined"
+    }
+  ],
+  "excludedDecisions": [
+    {
+      "findingId": "payout-rate",
+      "label": "出玉率",
+      "supportingSourceIds": [
+        "hazuse-current"
+      ],
+      "liveObservationStatus": "UNRESOLVED",
+      "dependencyStatus": "NONE",
+      "eligibility": "NOT_APPLICABLE",
+      "liveInferenceRoute": "NONE",
+      "ruleRefs": [
+        "COMP-003",
+        "COMP-004"
+      ],
+      "reason": "参考分布であり反復観測likelihoodではない。"
+    }
+  ],
+  "blockedItems": [
+    {
+      "blockId": "small-role-setting-distribution",
+      "label": "通常時小役の設定別原分布",
+      "reason": "今回確認できた現行機資料では設定1の50枚あたり約38Gというベース情報のみで、小役別・設定別確率を確認できない",
+      "reevaluationCondition": "LBトリプルクラウンX-300の小役別設定1〜6確率が信頼できる解析資料で公開される"
+    },
+    {
+      "blockId": "bonus-indication-distribution",
+      "label": "ボーナス中・終了時の設定示唆と設定別出現率",
+      "reason": "旧作にはバックライトやサイドランプ等の示唆情報が存在するが、現行LBトリプルクラウンX-300について同一仕様・定量値を確認できないため流用しない",
+      "reevaluationCondition": "現行LBトリプルクラウンX-300固有の設定示唆内容および設定別出現率が信頼できる資料で公開される"
+    }
+  ],
   "highLowDiscrimination": {
-    "status": "NOT_COMPUTED",
-    "reason": "targetGamesへ対応するexact exposure modelまたはdependency/joint modelが未確立の候補を含むため、独立近似や任意換算でHighLowDiscriminationを生成しない。"
+    "status": "COMPUTED",
+    "method": "BEST_SINGLE_EXACT_ACTIVE_FEATURE",
+    "bandDefinition": {
+      "lowSettings": "SETTING_1_TO_3",
+      "highSettings": "SETTING_4_TO_6",
+      "classPrior": "BALANCED"
+    },
+    "results": [
+      {
+        "games": 1500,
+        "balancedAccuracyPercent": 60.95
+      },
+      {
+        "games": 3000,
+        "balancedAccuracyPercent": 65.11
+      },
+      {
+        "games": 7000,
+        "balancedAccuracyPercent": 71.8
+      }
+    ],
+    "eligibleFeatureIds": [
+      "bonus-combined"
+    ],
+    "selectedFeatureId": "bonus-combined",
+    "selectedFeatureLabel": "ボーナス合成確率",
+    "excludedFeatures": [],
+    "note": "7000Gへ正確に換算できるACTIVE要素だけを候補とし、要素間の独立性を仮定せず、単独で最も高い判別精度を持つ要素から保守的に算出しています。条件付き要素はこの指標には含めませんが、実戦中に実際の観測回数が入力された場合は設定推測に使用します。"
   }
 }
