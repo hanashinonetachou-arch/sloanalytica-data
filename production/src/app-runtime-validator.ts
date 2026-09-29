@@ -13,10 +13,13 @@ export function validateAppRuntimeDocument(doc:any,projection:any,projectionArti
  const p=doc.package;if(p?.schemaVersion!==1||p.machine?.machineId!==projection.machineId||p.machine?.displayName!==projection.machineName||p.machine?.machineDataVersion!=='8.5.0-'+projection.batchId)fail('MACHINE');
  if(canonical(p.machine?.settings)!==canonical(projection.settings.values)||canonical(p.metadata?.settings)!==canonical(projection.settings.values)||p.metadata?.settingsStatus!=='SOURCE_DERIVED')fail('SETTINGS_COPY');
  const expectedSections=projection.runtimeUi?.numericSections??[],active=projection.activeFeatures??[],inactive=projection.inactiveFeatures??[];
- const expectedInputs=expectedSections.flatMap((s:any)=>s.inputs??[]);
+ const expectedNumericInputs=expectedSections.flatMap((s:any)=>s.inputs??[]);
+ const expectedEvidenceInputs=(projection.evidence??[]).flatMap((s:any)=>(s.evidenceItems??[]).map((e:any)=>({id:'REF_'+e.findingId,label:e.label,details:Array.isArray(e.details)?e.details:[]})));
+ const expectedInputs=[...expectedNumericInputs,...expectedEvidenceInputs];
  if(!Array.isArray(p.inputs?.inputs)||p.inputs.inputs.length!==expectedInputs.length)fail('INPUT_COVERAGE');
  const inputBy=new Map((p.inputs.inputs??[]).map((x:any)=>[x.id,x]));if(inputBy.size!==expectedInputs.length)fail('INPUT_DUPLICATE');
- for(const x of expectedInputs){const a:any=inputBy.get(x.id);if(!a||a.name!==x.label||!['integer','counter'].includes(a.type))fail('INPUT:'+x.id)}
+ for(const x of expectedNumericInputs){const a:any=inputBy.get(x.id);if(!a||a.name!==x.label||!['integer','counter'].includes(a.type))fail('INPUT:'+x.id)}
+ for(const x of expectedEvidenceInputs){const a:any=inputBy.get(x.id);if(!a||a.name!==x.label||a.type!=='multi_enum'||a.inferenceRole!=='DISPLAY_ONLY'||!Array.isArray(a.options)||a.options.length!==x.details.length)fail('EVIDENCE_INPUT:'+x.id)}
  if(!Array.isArray(p.features?.features)||p.features.features.length!==active.length)fail('FEATURE_COVERAGE');
  const featureBy=new Map((p.features.features??[]).map((x:any)=>[x.featureId,x]));
  const secBy=new Map(expectedSections.map((s:any)=>[s.sourceFindingId,s]));
@@ -49,7 +52,10 @@ export function validateAppRuntimeDocument(doc:any,projection:any,projectionArti
  if(canonical(materializedEvidenceIds)!==canonical(expectedEvidenceIds))fail('EVIDENCE_MATERIALIZATION');
  const evidenceSourceBy=new Map((projection.evidence??[]).flatMap((s:any)=>(s.evidenceItems??[]).map((e:any)=>[e.findingId,e])));
  for(const e of p.evidence.evidences??[]){const src:any=evidenceSourceBy.get(e.id);if(e.type!=='REFERENCE_ONLY'||typeof e.inputId!=='string'||!e.inputId||!Array.isArray(e.details)||canonical(e.details)!==canonical(src?.details??[])||!Array.isArray(e.confirmedSettings)||!Array.isArray(e.deniedSettings))fail('EVIDENCE_DEFINITION');}
- for(const s of (p.ui?.v8Sections??[]).filter((x:any)=>String(x.id??'').startsWith('EVI_')))if(typeof s.description!=='string'||!s.description.trim())fail('EVIDENCE_UI_RENDERABLE');
+ for(const s of (p.ui?.v8Sections??[]).filter((x:any)=>String(x.id??'').startsWith('EVI_'))){
+  if(typeof s.description!=='string'||!s.description.trim()||/Evidence/i.test(s.description))fail('EVIDENCE_UI_RENDERABLE');
+  const item=(s.items??[])[0];if(!item?.inputId||item?.interaction?.type!=='REFERENCE_MULTI_SELECT'||!Array.isArray(item?.interaction?.categories))fail('EVIDENCE_UI_INPUT');
+ }
  const summary=p.v8?.machineResearchSummary;if(!summary)fail('V8_SUMMARY');
  const rejectedIds=new Set((summary.notAdopted??[]).map((x:any)=>x.featureId));
  for(const x of projection.nonRuntimeCandidates??[])if(!rejectedIds.has(x.findingId))fail('SUMMARY_NON_RUNTIME_MISSING:'+x.findingId);
