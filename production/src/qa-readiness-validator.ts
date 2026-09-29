@@ -1,3 +1,4 @@
+import fs from 'node:fs';import path from 'node:path';import {pathToFileURL} from 'node:url';
 export const QA_REQUIRED_STAGES=['CANONICAL_UI','MACHINE_DATA','RUNTIME_POLICY','RUNTIME_PROJECTION','APP_RUNTIME','DISTRIBUTION'] as const;
 const fail=(m:string):never=>{throw new Error('QA_READINESS_FAILED:'+m)};
 export function validateMachineQaReadiness(machineId:string,stageStates:Record<string,any>,pkg:any){
@@ -19,3 +20,12 @@ export function validateMachineQaReadiness(machineId:string,stageStates:Record<s
  for(const s of uiEvidence)if(typeof s?.description!=='string'||!s.description.trim())fail(machineId+':EVIDENCE_UI_RENDERABLE');
  return {machineId,status:'QA_READY',evidenceCount:actual.length};
 }
+
+export function validateMachineQaReadinessFromFiles(productionRoot:string,distributionRoot:string,batchId:string,machineId:string){
+ const stageStates:any={};
+ for(const stage of QA_REQUIRED_STAGES)stageStates[stage]=JSON.parse(fs.readFileSync(path.join(productionRoot,'batches',batchId,'machines',machineId,'stages',stage+'.json'),'utf8'));
+ const pkg=JSON.parse(fs.readFileSync(path.join(distributionRoot,'machines',machineId,'machine-package.json'),'utf8'));
+ return validateMachineQaReadiness(machineId,stageStates,pkg);
+}
+function main(){const [productionRoot,distributionRoot,batchId,...machineIds]=process.argv.slice(2);if(!productionRoot||!distributionRoot||!batchId||!machineIds.length)throw new Error('USAGE: qa-readiness-validator <productionRoot> <distributionRoot> <batchId> <machineId...>');const results=machineIds.map(m=>validateMachineQaReadinessFromFiles(productionRoot,distributionRoot,batchId,m));console.log(JSON.stringify(results,null,2))}
+if(process.argv[1]&&import.meta.url===pathToFileURL(process.argv[1]).href)main();
