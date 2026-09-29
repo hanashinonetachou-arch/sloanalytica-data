@@ -1,0 +1,237 @@
+name: Batch001 High-Low Calibration Integration Boundary
+
+on:
+  push:
+    branches:
+      - production/batch-20260928-001
+    paths:
+      - production/.batch001-high-low-integration-trigger
+
+permissions:
+  contents: write
+  actions: write
+
+concurrency:
+  group: batch001-high-low-integration
+  cancel-in-progress: false
+
+jobs:
+  integrate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout authoritative production state
+        uses: actions/checkout@v4
+        with:
+          ref: production/batch-20260928-001
+          path: production-state
+          fetch-depth: 0
+
+      - name: Checkout prototype distribution branch
+        uses: actions/checkout@v4
+        with:
+          ref: prototype-multi-machine
+          path: prototype
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+
+      - name: Materialize repaired App Runtime packages into prototype catalog
+        shell: bash
+        run: |
+          set -euo pipefail
+          node <<'NODE'
+          const fs=require('fs');
+          const path=require('path');
+          const crypto=require('crypto');
+          const batchId='batch-20260928-001';
+          const machines=['L_TOARU_INDEX2_FA','LB_TRIPLE_CROWN_X300','L_TONDEMO_SKILL_KM','L_YAJIKITA_MAIRU_BG','L_YABACHIBA_ZM','L_KARAKURI_CIRCUS2_JG','L_NANGOKU_SPECIAL_M1','L_SENGOKU_COLLECTION6_KS','L_ULTRAMAN_FINAL_BATTLE_ME','L_WORLD_DAI_STAR_PA3'];
+          const prod=path.resolve('production-state');
+          const proto=path.resolve('prototype');
+          const catalogPath=path.join(proto,'catalog.json');
+          const catalog=JSON.parse(fs.readFileSync(catalogPath,'utf8'));
+          const byId=new Map(catalog.machines.map(x=>[x.machineId,x]));
+          const metadata={};
+          const sha256=(buf)=>crypto.createHash('sha256').update(buf).digest('hex');
+
+          for(const machineId of machines){
+            const stagePath=path.join(prod,'production','batches',batchId,'machines',machineId,'stages','APP_RUNTIME.json');
+            const stage=JSON.parse(fs.readFileSync(stagePath,'utf8'));
+            if(stage.state!=='COMPLETE'||!stage.authoritativeOutputRef?.path)throw new Error('APP_RUNTIME_NOT_COMPLETE:'+machineId);
+            const appPath=path.join(prod,stage.authoritativeOutputRef.path);
+            const app=JSON.parse(fs.readFileSync(appPath,'utf8'));
+            const pkg=app.package;
+            if(pkg?.machine?.machineId!==machineId)throw new Error('PACKAGE_IDENTITY:'+machineId);
+            const entry=byId.get(machineId);
+            if(!entry)throw new Error('CATALOG_ENTRY_MISSING:'+machineId);
+            pkg.machine.introductionDate=entry.introductionDate;
+            pkg.machine.machineType=entry.machineType;
+            pkg.machine.gameType=entry.gameType;
+            const bytes=Buffer.from(JSON.stringify(pkg,null,2)+'\n','utf8');
+            const target=path.join(proto,'machines',machineId,'machine-package.json');
+            fs.mkdirSync(path.dirname(target),{recursive:true});
+            fs.writeFileSync(target,bytes);
+
+            const caps=[];
+            for(const feature of pkg.features?.features??[]){
+              const model=String(feature.modelType??'').toLowerCase();
+              if(model==='binomial'&&!caps.includes('binomial'))caps.push('binomial');
+              if(model==='multinomial'&&!caps.includes('multinomial'))caps.push('multinomial');
+            }
+            if((pkg.evidence?.references??[]).length>0&&!caps.includes('evidence'))caps.push('evidence');
+            const nextHash=sha256(bytes);
+            const changed=
+              entry.machineDataVersion!==pkg.machine.machineDataVersion ||
+              entry.sha256!==nextHash ||
+              entry.packageSizeBytes!==bytes.length ||
+              JSON.stringify(entry.requiredCapabilities??[])!==JSON.stringify(caps);
+            entry.machineDataVersion=pkg.machine.machineDataVersion;
+            entry.sha256=nextHash;
+            entry.packageSizeBytes=bytes.length;
+            entry.requiredCapabilities=caps;
+            if(changed)entry.updatedAt=new Date().toISOString();
+
+            metadata[machineId]={
+              machineId,
+              machineDataVersion:pkg.machine.machineDataVersion,
+              settings:pkg.machine.settings,
+              sha256:entry.sha256,
+              packageSizeBytes:entry.packageSizeBytes,
+              introductionDate:entry.introductionDate,
+              machineType:entry.machineType,
+              gameType:entry.gameType
+            };
+          }
+
+          fs.writeFileSync(catalogPath,JSON.stringify(catalog,null,2)+'\n','utf8');
+          fs.writeFileSync(process.env.RUNNER_TEMP+'/batch001-package-metadata.json',JSON.stringify(metadata,null,2)+'\n','utf8');
+          NODE
+
+      - name: Verify catalog package integrity locally
+        shell: bash
+        working-directory: prototype
+        run: |
+          set -euo pipefail
+          node <<'NODE'
+          const fs=require('fs'),path=require('path'),crypto=require('crypto');
+          const catalog=JSON.parse(fs.readFileSync('catalog.json','utf8'));
+          const targets=new Set(['L_TOARU_INDEX2_FA','LB_TRIPLE_CROWN_X300','L_TONDEMO_SKILL_KM','L_YAJIKITA_MAIRU_BG','L_YABACHIBA_ZM','L_KARAKURI_CIRCUS2_JG','L_NANGOKU_SPECIAL_M1','L_SENGOKU_COLLECTION6_KS','L_ULTRAMAN_FINAL_BATTLE_ME','L_WORLD_DAI_STAR_PA3']);
+          for(const item of catalog.machines.filter(x=>targets.has(x.machineId))){
+            const p=path.join('machines',item.machineId,'machine-package.json');
+            const b=fs.readFileSync(p);
+            const h=crypto.createHash('sha256').update(b).digest('hex');
+            if(b.length!==item.packageSizeBytes)throw new Error('SIZE:'+item.machineId);
+            if(h!==item.sha256)throw new Error('SHA:'+item.machineId);
+          }
+          NODE
+
+      - name: Run user-verified UX contract audit
+        working-directory: prototype
+        run: |
+          npm run ux-contract:audit
+          node --test --test-concurrency=1 test/user-verified-ux-contracts.test.mjs
+
+      - name: Verify machine identity consistency
+        working-directory: prototype
+        run: node tools/apply-machine-identity-classification.mjs --verify
+
+      - name: Commit prototype distribution atomically
+        shell: bash
+        working-directory: prototype
+        run: |
+          set -euo pipefail
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git add catalog.json \
+            machines/L_TOARU_INDEX2_FA/machine-package.json \
+            machines/LB_TRIPLE_CROWN_X300/machine-package.json \
+            machines/L_TONDEMO_SKILL_KM/machine-package.json \
+            machines/L_YAJIKITA_MAIRU_BG/machine-package.json \
+            machines/L_YABACHIBA_ZM/machine-package.json \
+            machines/L_KARAKURI_CIRCUS2_JG/machine-package.json \
+            machines/L_NANGOKU_SPECIAL_M1/machine-package.json \
+            machines/L_SENGOKU_COLLECTION6_KS/machine-package.json \
+            machines/L_ULTRAMAN_FINAL_BATTLE_ME/machine-package.json \
+            machines/L_WORLD_DAI_STAR_PA3/machine-package.json
+          if git diff --cached --quiet; then
+            echo "Prototype repaired packages are already current."
+          else
+            git commit -m "Publish Batch 001 high-low calibrated packages [skip ci]"
+            git push origin HEAD:prototype-multi-machine
+          fi
+          echo "PROTOTYPE_COMMIT=$(git rev-parse HEAD)" >> "$GITHUB_ENV"
+
+      - name: Dispatch Pages deployment from prototype branch
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          run_id="$(gh api "repos/$GITHUB_REPOSITORY/actions/runs?branch=prototype-multi-machine&event=workflow_dispatch&per_page=30" --jq ".workflow_runs[] | select(.name == \"Deploy SloAnalytica Data Pages\" and .head_sha == \"$PROTOTYPE_COMMIT\" and .conclusion == \"success\") | .id" | head -n1 || true)"
+          if [ -n "$run_id" ]; then
+            echo "Reusing successful Pages deployment $run_id for $PROTOTYPE_COMMIT."
+          else
+            gh workflow run deploy-pages.yml --ref prototype-multi-machine --repo "$GITHUB_REPOSITORY"
+            for _ in $(seq 1 30); do
+              run_id="$(gh api "repos/$GITHUB_REPOSITORY/actions/runs?branch=prototype-multi-machine&event=workflow_dispatch&per_page=30" --jq ".workflow_runs[] | select(.name == \"Deploy SloAnalytica Data Pages\" and .head_sha == \"$PROTOTYPE_COMMIT\") | .id" | head -n1 || true)"
+              if [ -n "$run_id" ]; then break; fi
+              sleep 2
+            done
+            test -n "$run_id" || { echo "Pages workflow_dispatch run was not created."; exit 1; }
+            gh run watch "$run_id" --repo "$GITHUB_REPOSITORY" --exit-status
+          fi
+          echo "PAGES_RUN_ID=$run_id" >> "$GITHUB_ENV"
+
+      - name: Build verified Distribution attestation
+        shell: bash
+        run: |
+          set -euo pipefail
+          node <<'NODE'
+          const fs=require('fs'),path=require('path');
+          const batchId='batch-20260928-001';
+          const packages=JSON.parse(fs.readFileSync(process.env.RUNNER_TEMP+'/batch001-package-metadata.json','utf8'));
+          const boundaryRunId=Number(process.env.GITHUB_RUN_ID);
+          const pagesRunId=Number(process.env.PAGES_RUN_ID);
+          const doc={
+            batchId,
+            integration:{
+              repository:'hanashinonetachou-arch/sloanalytica-data',
+              branch:'prototype-multi-machine',
+              commit:process.env.PROTOTYPE_COMMIT
+            },
+            packages,
+            checks:{
+              catalogIntegrity:true,
+              pagesDeployment:{runId:pagesRunId,conclusion:'success'},
+              uxContractAudit:{runId:boundaryRunId,conclusion:'success'},
+              machineIdentityConsistency:{runId:boundaryRunId,conclusion:'success',batchMachineVerified:true}
+            }
+          };
+          const p=path.resolve('production-state','production','batches',batchId,'distribution-repair-attestation.json');
+          fs.writeFileSync(p,JSON.stringify(doc,null,2)+'\n','utf8');
+          NODE
+
+      - name: Finalize authoritative Distribution state
+        working-directory: production-state/production
+        run: node --experimental-strip-types src/repair-batch001-high-low-calibration.ts finalize batch-20260928-001 batches/batch-20260928-001/distribution-repair-attestation.json
+
+      - name: Validate production state after finalization
+        working-directory: production-state/production
+        run: npm test
+
+      - name: Commit finalized authoritative production state
+        shell: bash
+        working-directory: production-state
+        run: |
+          set -euo pipefail
+          git fetch origin production/batch-20260928-001
+          test "$(git rev-parse HEAD)" = "$(git rev-parse origin/production/batch-20260928-001)" || {
+            echo "Production branch moved during integration; refusing non-CAS publication."
+            exit 1
+          }
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git add production/batches/batch-20260928-001
+          git commit -m "Finalize Batch 001 high-low calibrated Distribution [skip ci]"
+          git push origin HEAD:production/batch-20260928-001

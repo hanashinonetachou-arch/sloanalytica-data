@@ -1,3 +1,4 @@
+import {buildHighLowDiscrimination} from './high-low-discrimination.ts';
 export const OBSERVATION_EVIDENCE_VALIDATOR_CONTRACT='observation-evidence-v1';
 const canonical=(v:any):string=>Array.isArray(v)?`[${v.map(canonical).join(',')}]`:v&&typeof v==='object'?`{${Object.keys(v).sort().map(k=>JSON.stringify(k)+':'+canonical(v[k])).join(',')}}`:JSON.stringify(v);
 const fail=(m:string):never=>{throw new Error('OBSERVATION_EVIDENCE_VALIDATION_FAILED:'+m)};
@@ -31,7 +32,7 @@ export function validateObservationEvidenceDocument(doc:any,candidate:any,resear
  for(const e of doc.evidence)for(const id of e.sourceIds)if(!sourceIds.has(id))fail('SOURCE_UNRESOLVED:'+id);
  if(canonical(doc.sourceReferences)!==canonical(research.sources??[]))fail('SOURCE_COPY');
  if(canonical(doc.blockedItems)!==canonical(candidate.blockedItems??[])||canonical(doc.sourceIntegrityIssues)!==canonical(candidate.sourceIntegrityIssues??[]))fail('PRESERVATION');
- if(doc.highLowDiscrimination?.status!=='NOT_COMPUTED'||typeof doc.highLowDiscrimination?.reason!=='string'||!doc.highLowDiscrimination.reason)fail('HLD');
+ const expectedHld=buildHighLowDiscrimination(candidate);if(canonical(doc.highLowDiscrimination)!==canonical(expectedHld))fail('HLD');
  return [{validator:OBSERVATION_EVIDENCE_VALIDATOR_CONTRACT,observations:doc.observations.length,evidence:doc.evidence.length,readyObservations:doc.observations.filter((x:any)=>x.observationStatus==='READY').length,heldObservations:doc.observations.filter((x:any)=>x.observationStatus==='HELD_NO_JOINT_MODEL').length,resolvedMembers:doc.observations.filter((x:any)=>x.observationStatus==='RESOLVED_IN_JOINT_MODEL'||x.observationStatus==='RESOLVED_BY_SINGLE_MEMBER').length}];
 }
 export function validateObservationEvidenceArtifacts(s:any,a:any,r:any){
