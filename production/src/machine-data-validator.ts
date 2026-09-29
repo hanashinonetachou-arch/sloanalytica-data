@@ -17,6 +17,9 @@ export function validateMachineDataDocument(doc:any,canonicalUi:any,candidate:an
  const heldIds=new Set((canonicalUi.heldObservations??[]).map((x:any)=>x.findingId));if(features.some((x:any)=>heldIds.has(x.findingId)))fail('HELD_MATERIALIZED');
  if(canonical(doc.evidence)!==canonical(canonicalUi.evidenceSections??[]))fail('EVIDENCE_COPY');if((doc.evidence??[]).some((x:any)=>x.runtimePolicyControlled!==false))fail('EVIDENCE_RUNTIME_POLICY');
  if(canonical(doc.heldObservations)!==canonical(canonicalUi.heldObservations??[]))fail('HELD_COPY');
+ const expectedNonRuntime=(candidate.candidates??[]).filter((x:any)=>x.runtimeInferenceAllowed!==true).map((x:any)=>({findingId:x.findingId,label:x.label,dependencyResolution:x.dependencyResolution,resolvedIntoFindingId:x.resolvedIntoFindingId}));
+ if(canonical(doc.nonRuntimeCandidates??[])!==canonical(expectedNonRuntime))fail('NON_RUNTIME_CANDIDATES');
+ if(canonical(doc.excludedDecisions??[])!==canonical(candidate.excludedDecisions??[]))fail('EXCLUDED_DECISIONS');
  if(canonical(doc.highLowDiscrimination)!==canonical(canonicalUi.machineInferenceSummary?.highLowDiscrimination))fail('HLD_COPY');
  if(canonical(doc.blockedItems)!==canonical(observation.blockedItems??[])||canonical(doc.sourceReferences)!==canonical(observation.sourceReferences??[]))fail('OBSERVATION_METADATA');
  return [{validator:MACHINE_DATA_VALIDATOR_CONTRACT,features:features.length,evidence:(doc.evidence??[]).length,held:(doc.heldObservations??[]).length,settingsStatus:doc.settings.status}];

@@ -1,0 +1,7 @@
+import test from 'node:test';import assert from 'node:assert/strict';import {validateMachineQaReadiness,QA_REQUIRED_STAGES} from '../src/qa-readiness-validator.ts';
+const stages=Object.fromEntries(QA_REQUIRED_STAGES.map(s=>[s,{state:'COMPLETE',authoritativeOutputRef:{path:'p/'+s}}]));
+const pkg:any={schemaVersion:1,provenance:{manifestVersion:'8.5',generationPath:'V8_5_PRODUCTION_PIPELINE',legacyOracleUsed:false},machine:{machineId:'M',machineDataVersion:'8.5.0-batch-x'},ui:{contractVersion:'runtime-ui-v8',source:'CANONICAL_UI',v8Sections:[{id:'EVI_e',description:'設定示唆',items:[{evidenceId:'e'}]}]},evidence:{references:[{evidenceItems:[{findingId:'e'}]}],evidences:[{id:'e'}]}};
+test('accepts only fully completed v8.5 package with materialized Evidence',()=>{assert.equal(validateMachineQaReadiness('M',stages,pkg).status,'QA_READY')});
+test('rejects old package even when files exist',()=>{assert.throws(()=>validateMachineQaReadiness('M',stages,{...pkg,provenance:undefined,machine:{machineId:'M',machineDataVersion:'0.1.0'},ui:{}}),/V8_PROVENANCE/)});
+test('rejects pending downstream stage',()=>{assert.throws(()=>validateMachineQaReadiness('M',{...stages,APP_RUNTIME:{state:'PENDING'}},pkg),/STAGE_APP_RUNTIME/)});
+test('rejects Evidence references without materialized definitions',()=>{assert.throws(()=>validateMachineQaReadiness('M',stages,{...pkg,evidence:{...pkg.evidence,evidences:[]}}),/EVIDENCE_MATERIALIZATION/)});
