@@ -1,0 +1,46 @@
+name: Batch001 Runtime Materialization Repair Finalize
+
+on:
+  push:
+    branches:
+      - production/batch-20260928-001
+    paths:
+      - production/batches/batch-20260928-001/distribution-repair-attestation.json
+
+permissions:
+  contents: write
+
+concurrency:
+  group: batch001-runtime-materialization-repair
+  cancel-in-progress: false
+
+jobs:
+  finalize:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: production/batch-20260928-001
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - name: Finalize Distribution from verified integration attestation
+        working-directory: production
+        run: node --experimental-strip-types src/repair-batch001-runtime-materialization.ts finalize batch-20260928-001 batches/batch-20260928-001/distribution-repair-attestation.json
+      - name: Validate production orchestrator after Distribution finalization
+        working-directory: production
+        run: npm test
+      - name: Commit Distribution repair state
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git add production/batches/batch-20260928-001
+          if git diff --cached --quiet; then
+            echo "No Distribution changes to commit."
+            exit 0
+          fi
+          git commit -m "Finalize Batch 001 repaired Distribution [skip ci]"
+          git push origin HEAD:production/batch-20260928-001
