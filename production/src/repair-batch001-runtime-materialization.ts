@@ -149,8 +149,9 @@ function writeStageArtifact(batchId:string,machineId:string,stage:string,doc:any
   return ref;
 }
 
-export function repairEvaluationDocument(source:any){
+export function repairEvaluationDocument(source:any,research:any=null){
   const doc=structuredClone(source);
+  if(research){doc.evidenceCandidates=(research.findings??[]).filter((x:any)=>x.observationType==='evidence').map((x:any)=>({findingId:x.findingId,label:x.label,sourceIds:x.sourceIds??[],details:Array.isArray(x.details)?x.details:[]}));}
   for(const e of doc.evaluations??[]){
     if(e.observationType!=='probability'||!exactBenchmarkTrialUniverses.has(e.trialUniverse))continue;
     const score=e.metrics?.maximumSelectionScore;
@@ -189,12 +190,13 @@ export function repairBatch(batchId:string){
     const researchArtifact=researchRef(batchId,machineId,research);
 
     const oldEvalStage=readJson<any>(stagePath(batchId,machineId,'EVALUATION'));
-    const repairedEvaluation=repairEvaluationDocument(refDoc(oldEvalStage.authoritativeOutputRef));
+    const repairedEvaluation=repairEvaluationDocument(refDoc(oldEvalStage.authoritativeOutputRef),research);
     validateEvaluationDocument(repairedEvaluation,research);
     const evaluationRef=writeStageArtifact(batchId,machineId,'EVALUATION',repairedEvaluation,[researchArtifact]);
 
     const oldEligibilityStage=readJson<any>(stagePath(batchId,machineId,'ELIGIBILITY'));
     const eligibility=structuredClone(refDoc(oldEligibilityStage.authoritativeOutputRef));
+    eligibility.evidenceCandidates=structuredClone(repairedEvaluation.evidenceCandidates??[]);
     validateEligibilityDocument(eligibility,repairedEvaluation,research);
     const eligibilityRef=writeStageArtifact(batchId,machineId,'ELIGIBILITY',eligibility,[researchArtifact,evaluationRef]);
 
