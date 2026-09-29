@@ -51,7 +51,12 @@ export function validateAppRuntimeDocument(doc:any,projection:any,projectionArti
  const materializedEvidenceIds=(p.evidence.evidences??[]).map((e:any)=>e.id);
  if(canonical(materializedEvidenceIds)!==canonical(expectedEvidenceIds))fail('EVIDENCE_MATERIALIZATION');
  const evidenceSourceBy=new Map((projection.evidence??[]).flatMap((s:any)=>(s.evidenceItems??[]).map((e:any)=>[e.findingId,e])));
- for(const e of p.evidence.evidences??[]){const src:any=evidenceSourceBy.get(e.id);if(e.type!=='REFERENCE_ONLY'||typeof e.inputId!=='string'||!e.inputId||!Array.isArray(e.details)||canonical(e.details)!==canonical(src?.details??[])||!Array.isArray(e.confirmedSettings)||!Array.isArray(e.deniedSettings))fail('EVIDENCE_DEFINITION');}
+ for(const e of p.evidence.evidences??[]){
+  const sourceId=Array.isArray(e.sourceEvidenceRefs)?e.sourceEvidenceRefs[0]:undefined;const src:any=evidenceSourceBy.get(sourceId);
+  const hasConstraint=(Array.isArray(e.confirmedSettings)&&e.confirmedSettings.length>0)||(Array.isArray(e.deniedSettings)&&e.deniedSettings.length>0);
+  if(!src||e.type!=='SETTING_CONSTRAINT'||typeof e.inputId!=='string'||!e.inputId||!Array.isArray(e.details)||e.details.length!==1||!hasConstraint||!Array.isArray(e.confirmedSettings)||!Array.isArray(e.deniedSettings))fail('EVIDENCE_DEFINITION');
+  const input:any=inputBy.get(e.inputId);if(!input||input.type!=='counter'||input.inferenceRole!=='DISPLAY_ONLY')fail('EVIDENCE_INPUT_BINDING');
+ }
  for(const s of (p.ui?.v8Sections??[]).filter((x:any)=>String(x.id??'').startsWith('EVI_'))){
   if(typeof s.description!=='string'||!s.description.trim()||/Evidence/i.test(s.description))fail('EVIDENCE_UI_RENDERABLE');
   const item=(s.items??[])[0];if(item?.interaction?.type!=='CATEGORY_COUNTERS'||item?.interaction?.categoryCoverage!=='NON_EXHAUSTIVE'||item?.interaction?.totalOpportunities!=='NONE'||!Array.isArray(item?.interaction?.categories)||item.interaction.categories.length===0)fail('EVIDENCE_UI_INPUT');
