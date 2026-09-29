@@ -11,10 +11,10 @@ export const categoricalProbabilityRow=(row:any,labels:string[],findingId:string
 const importanceToAdoption=(importance:any)=>importance==='主要'?'INCLUDE_PRIMARY':'INCLUDE_SUPPORT';
 const scoreDescription=(section:any)=>{
  const score=section?.score;const power=section?.perEligibleTrialPower;
- const powerText=typeof power?.value==='number'?\`1回の判別力：\${Number(power.value).toFixed(3)}\`:null;
+ const powerText=typeof power?.value==='number'?`1回の判別力：${Number(power.value).toFixed(3)}`:null;
  const scoreText=score?.status==='COMPUTED'&&typeof score.value==='number'
-  ?\`設定判別スコア：\${Number(score.value).toFixed(1)}\`
-  :powerText?null:\`設定判別スコア：算出不可\${score?.reason?'（'+score.reason+'）':''}\`;
+  ?`設定判別スコア：${Number(score.value).toFixed(1)}`
+  :powerText?null:`設定判別スコア：算出不可${score?.reason?'（'+score.reason+'）':''}`;
  return [scoreText,powerText].filter(Boolean).join('\\n');
 };
 const playDataSourceForTrialUniverse=(trialUniverse:any)=>
