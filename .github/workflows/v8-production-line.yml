@@ -1,12 +1,6 @@
 name: Manifest V8 Production Line
 
 on:
-  push:
-    branches:
-      - fix/batch001-runtime-feature-materialization-20260929
-    paths:
-      - 'production/**'
-      - '.github/workflows/v8-production-line.yml'
   workflow_dispatch:
     inputs:
       machine_id:
@@ -44,10 +38,10 @@ jobs:
         with:
           node-version: 24
       - name: Run V8 production-line regression suite
-        if: ${{ github.event_name != 'push' && !startsWith(github.base_ref, 'production/') }}
+        if: ${{ !startsWith(github.base_ref, 'production/') }}
         run: npm run test:v8-production-line
       - name: Run repository-persisted production orchestrator tests
-        if: ${{ github.event_name == 'push' || startsWith(github.base_ref, 'production/') }}
+        if: ${{ startsWith(github.base_ref, 'production/') }}
         working-directory: production
         run: npm test
       - name: Build selected V8 machine
