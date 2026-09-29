@@ -7,7 +7,7 @@ import {buildRuntimeProjection} from './runtime-projection-builder.ts';import {v
 import {buildAppRuntime} from './app-runtime-builder.ts';import {validateAppRuntimeDocument} from './app-runtime-validator.ts';
 import {buildDistribution} from './distribution-builder.ts';import {validateDistributionDocument} from './distribution-validator.ts';
 
-export const TARGETS=['L_TOARU_INDEX2_FA','LB_TRIPLE_CROWN_X300','L_TONDEMO_SKILL_KM','L_YAJIKITA_MAIRU_BG','L_YABACHIBA_ZM','L_KARAKURI_CIRCUS2_JG','L_NANGOKU_SPECIAL_M1','L_SENGOKU_COLLECTION6_KS','L_ULTRAMAN_FINAL_BATTLE_ME','L_WORLD_DAI_STAR_PA3'] as const;
+export const TARGETS=['L_TOARU_INDEX2_FA','LB_TRIPLE_CROWN_X300','L_TONDEMO_SKILL_KM','L_YAJIKITA_MAIRU_BG'] as const;
 const STAMP='hld20260929';
 const KIND:Record<string,string>={OBSERVATION_EVIDENCE:'observation-evidence',CANONICAL_UI:'canonical-ui',MACHINE_DATA:'machine-data',RUNTIME_POLICY:'runtime-policy',RUNTIME_PROJECTION:'runtime-projection',APP_RUNTIME:'app-runtime',DISTRIBUTION:'distribution'};
 const VALIDATOR:Record<string,string>={OBSERVATION_EVIDENCE:'observation-evidence-v1',CANONICAL_UI:'canonical-ui-v1',MACHINE_DATA:'machine-data-v1',RUNTIME_POLICY:'runtime-policy-v1',RUNTIME_PROJECTION:'runtime-projection-v1',APP_RUNTIME:'app-runtime-v1',DISTRIBUTION:'distribution-v1'};
