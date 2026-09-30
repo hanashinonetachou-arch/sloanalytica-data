@@ -22,11 +22,14 @@ export function validateMachineQaReadiness(machineId:string,stageStates:Record<s
  }
  const uiEvidence=(pkg?.ui?.v8Sections??[]).filter((s:any)=>String(s?.id??'').startsWith('EVI_'));
  if(expected.length&&uiEvidence.length!==refs.length)fail(machineId+':EVIDENCE_UI_COVERAGE');
+ const blockedFindingIds=new Set((pkg?.blockedItems??[]).flatMap((b:any)=>Array.isArray(b?.blockedFindingIds)?b.blockedFindingIds:[]));
  for(const ref of refs){
   const items=Array.isArray(ref?.evidenceItems)?ref.evidenceItems:[];
-  if(items.length!==1)fail(machineId+':EVIDENCE_DETAIL_CONTRACT:'+String(ref?.id??'UNKNOWN'));
-  const details=items[0]?.details;
-  if(!Array.isArray(details)||details.length===0||details.some((x:any)=>typeof x!=='string'||!x.trim()))fail(machineId+':EVIDENCE_DETAILS_MISSING:'+String(ref?.id??'UNKNOWN'));
+  if(items.length===0)fail(machineId+':EVIDENCE_DETAIL_CONTRACT:'+String(ref?.id??'UNKNOWN'));
+  const findingIds=items.map((x:any)=>x?.findingId).filter((x:any)=>typeof x==='string');
+  if(findingIds.some((id:string)=>blockedFindingIds.has(id)))fail(machineId+':BLOCKED_EVIDENCE_RESURRECTION:'+String(ref?.id??'UNKNOWN'));
+  const details=items.flatMap((x:any)=>Array.isArray(x?.details)?x.details:[]);
+  if(details.length===0||details.some((x:any)=>typeof x!=='string'||!x.trim()))fail(machineId+':EVIDENCE_DETAILS_MISSING:'+String(ref?.id??'UNKNOWN'));
   const section=uiEvidence.find((s:any)=>s?.id===ref?.id);
   const node=section?.items?.find((i:any)=>i?.evidenceId===ref?.sourceFindingId);
   const categories=node?.interaction?.type==='CATEGORY_COUNTERS'?node?.interaction?.categories?.map((c:any)=>c?.label):null;
