@@ -1,0 +1,58 @@
+name: Code Geass C.C. Calibration Run
+on:
+  push:
+    branches:
+      - production/calibration-geass-cc-run
+    paths:
+      - production/.geass-cc-calibration-trigger
+permissions:
+  contents: write
+concurrency:
+  group: geass-cc-calibration
+  cancel-in-progress: false
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: production/calibration-geass-cc-run
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - name: Validate baseline
+        working-directory: production
+        run: npm test
+      - name: Initialize calibration batch and dispatch Research
+        working-directory: production
+        run: |
+          npm run init-batch -- calibration/code-geass-r2-cc/batch.json
+          npm run dispatch -- batch-20260930-calibration-geass-cc SEMANTIC
+      - name: Bind researched fixture to authoritative WorkRequest
+        working-directory: production
+        shell: bash
+        run: |
+          set -euo pipefail
+          B=batch-20260930-calibration-geass-cc
+          M=S_CODE_GEASS_R2_CC_ZS
+          Q=$(ls "batches/$B/work-requests/"*.json | head -n1)
+          W=$(jq -r '.workId' "$Q")
+          mkdir -p "batches/$B/artifacts/$M/research"
+          jq --arg b "$B" --arg w "$W" '.batchId=$b | .workId=$w' test-fixtures/code-geass-r2-cc/research.json > "batches/$B/artifacts/$M/research/result.json"
+          npm run complete-research -- "$B" "$M"
+      - name: Advance deterministic stages through App Runtime
+        working-directory: production
+        run: node --experimental-strip-types src/deterministic-production-worker.ts batch-20260930-calibration-geass-cc
+      - name: Validate generated state
+        working-directory: production
+        run: npm test
+      - name: Commit authoritative calibration state
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git add production/batches/batch-20260930-calibration-geass-cc
+          git commit -m "Run Code Geass C.C. v8.5 calibration through App Runtime [skip ci]"
+          git push origin HEAD:production/calibration-geass-cc-run
