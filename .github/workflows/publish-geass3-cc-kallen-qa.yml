@@ -35,14 +35,18 @@ jobs:
           git fetch origin prototype-multi-machine
           git checkout -B prototype-multi-machine origin/prototype-multi-machine
           mkdir -p machines/S_CODE_GEASS_3_CC_FS
-          cp /tmp/generated-geass3/machine_package.json machines/S_CODE_GEASS_3_CC_FS/machine-package.json
-          node --experimental-strip-types /tmp/publish-geass3-catalog.ts machines/S_CODE_GEASS_3_CC_FS/machine-package.json
-          git config user.name github-actions[bot]
-          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
-          git add catalog.json machines/S_CODE_GEASS_3_CC_FS/machine-package.json
-          git commit -m "publish: canonical Code Geass 3 C.C. Kallen v8.5 QA package [skip ci]"
-          PACKAGE_COMMIT="$(git rev-parse HEAD)"
-          git push origin HEAD:prototype-multi-machine
+          if cmp -s /tmp/generated-geass3/machine_package.json machines/S_CODE_GEASS_3_CC_FS/machine-package.json && node -e "const c=require('./catalog.json');const a=c.machines.find(x=>x.machineId==='S_CODE_GEASS_3_CC_FS');const r=c.machines.find(x=>x.machineId==='S_CODE_GEASS_R2_CC_ZS');if(!a||a.status!=='available'||r?.status!=='withdrawn')process.exit(1)"; then
+            PACKAGE_COMMIT="$(git rev-parse HEAD)"
+          else
+            cp /tmp/generated-geass3/machine_package.json machines/S_CODE_GEASS_3_CC_FS/machine-package.json
+            node --experimental-strip-types /tmp/publish-geass3-catalog.ts machines/S_CODE_GEASS_3_CC_FS/machine-package.json
+            git config user.name github-actions[bot]
+            git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+            git add catalog.json machines/S_CODE_GEASS_3_CC_FS/machine-package.json
+            git commit -m "publish: canonical Code Geass 3 C.C. Kallen v8.5 QA package [skip ci]"
+            PACKAGE_COMMIT="$(git rev-parse HEAD)"
+            git push origin HEAD:prototype-multi-machine
+          fi
           echo "PACKAGE_COMMIT=$PACKAGE_COMMIT" >> "$GITHUB_ENV"
       - name: Verify published content identity
         run: |
@@ -51,7 +55,7 @@ jobs:
           url="https://raw.githubusercontent.com/hanashinonetachou-arch/sloanalytica-data/prototype-multi-machine/machines/S_CODE_GEASS_3_CC_FS/machine-package.json"
           ok=0
           for i in 1 2 3 4 5 6; do
-            curl -fsSL --no-cache "$url?verify=$GITHUB_RUN_ID-$i" -o /tmp/published-geass3.json || true
+            curl -fsSL -H "Cache-Control: no-cache" "$url?verify=$GITHUB_RUN_ID-$i" -o /tmp/published-geass3.json || true
             actual="$(sha256sum /tmp/published-geass3.json 2>/dev/null | awk '{print $1}' || true)"
             if [ "$actual" = "$expected" ]; then ok=1; break; fi
             sleep 5
