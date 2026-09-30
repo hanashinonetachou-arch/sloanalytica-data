@@ -23,7 +23,7 @@ export const STAGE_WORKER:Record<ProductionStage,WorkerKind>={
  RESEARCH:'SEMANTIC',EVALUATION:'SEMANTIC',ELIGIBILITY:'SEMANTIC',CANDIDATE_CONTRACT:'SEMANTIC',
  OBSERVATION_EVIDENCE:'SEMANTIC',CANONICAL_UI:'SEMANTIC',MACHINE_DATA:'PRODUCTION',RUNTIME_POLICY:'PRODUCTION',
  RUNTIME_PROJECTION:'PRODUCTION',APP_RUNTIME:'PRODUCTION',DISTRIBUTION:'INTEGRATION',DEVICE_QA:'HUMAN'};
-export interface BatchSpec{batchId:string;manifestVersion:string;waves:{waveId:string;machineIds:string[]}[]}
+export interface BatchSpec{batchId:string;manifestVersion:string;mode?:'PRODUCTION'|'CALIBRATION';waves:{waveId:string;machineIds:string[]}[]}
 export interface ArtifactRef{artifactId:string;kind:string;path:string;sha256:string;producerWorkId:string}
 export interface ProvenanceRecord{workId:string;attemptId:string;machineId:string;stage:string;inputArtifacts:ArtifactRef[];outputArtifacts:ArtifactRef[];workerAdapter:string;validatorAdapter:string;recordedAt:string}
 export interface WorkerAdapter{kind:'SEMANTIC'|'PRODUCTION'|'INTEGRATION';execute(q:WorkRequest):Promise<WorkResult>|WorkResult}
@@ -44,7 +44,10 @@ if(stage==='EVALUATION'&&r.status==='SUCCESS')r.validationEvidence=validateEvalu
 export const deps=(stage:ProductionStage)=>{const i=PRODUCTION_STAGES.indexOf(stage);return i===0?[]:[PRODUCTION_STAGES[i-1]]}
 export function initializeBatch(s:RepoStore,spec:BatchSpec,contract='production-1'){
  const ids=spec.waves.flatMap(w=>w.machineIds);
- if(spec.waves.length!==2||spec.waves.some(w=>w.machineIds.length!==5)||ids.length!==10||new Set(ids).size!==10)throw new Error('INVALID_BATCH_SHAPE');
+ const unique=new Set(ids).size===ids.length;
+ const productionShape=spec.waves.length===2&&spec.waves.every(w=>w.machineIds.length===5)&&ids.length===10;
+ const calibrationShape=spec.mode==='CALIBRATION'&&spec.waves.length===1&&ids.length>=1&&ids.length<=3;
+ if(!unique||(!productionShape&&!calibrationShape))throw new Error('INVALID_BATCH_SHAPE');
  s.write(spec,'batches',spec.batchId,'batch.json');
  for(const w of spec.waves){s.write(w,'batches',spec.batchId,'waves',w.waveId+'.json');for(const m of w.machineIds){
   s.write({machineId:m,waveId:w.waveId},'batches',spec.batchId,'machines',m,'machine.json');
