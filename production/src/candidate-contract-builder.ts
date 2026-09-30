@@ -89,5 +89,5 @@ export function buildCandidateContract(evaluation:any,eligibility:any,evaluation
    for(const c of members){c.runtimeInferenceAllowed=false;c.dependencyResolution='HELD_NO_JOINT_MODEL'}
   }
  }
- return {schemaVersion:'candidate-contract-v1',manifestVersion:'8.5',batchId:eligibility.batchId,machineId:eligibility.machineId,machineName:eligibility.machineName,evaluationArtifact,eligibilityArtifact,candidates,dependencyGroups,excludedDecisions:(eligibility.decisions??[]).filter((x:any)=>x.eligibility!=='ELIGIBLE'),blockedItems:eligibility.blockedItems??[],evidenceCandidates:eligibility.evidenceCandidates??[],sourceIntegrityIssues:eligibility.sourceIntegrityIssues??[]};
+ return {schemaVersion:'candidate-contract-v1',manifestVersion:'8.5',batchId:eligibility.batchId,machineId:eligibility.machineId,machineName:eligibility.machineName,machineIdentity:structuredClone(evaluation.machineIdentity??eligibility.machineIdentity),evaluationArtifact,eligibilityArtifact,candidates,dependencyGroups,excludedDecisions:(eligibility.decisions??[]).filter((x:any)=>x.eligibility!=='ELIGIBLE'),blockedItems:eligibility.blockedItems??[],evidenceCandidates:eligibility.evidenceCandidates??[],sourceIntegrityIssues:eligibility.sourceIntegrityIssues??[]};
 }
