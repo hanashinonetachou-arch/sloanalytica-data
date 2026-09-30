@@ -20,6 +20,8 @@ function validateMachineIdentity(d:any){
   }
   if(norm(mi.formalName)!==norm(d.machineName)) throw new Error('RESEARCH_VALIDATION:MACHINE_IDENTITY_NAME_MISMATCH');
   if(!Array.isArray(d.sources)||d.sources.length<2) throw new Error('RESEARCH_VALIDATION:MACHINE_IDENTITY_INDEPENDENT_SOURCES_REQUIRED');
+  const sourceHosts=new Set(d.sources.map((src:any)=>{try{return new URL(src.url).hostname.replace(/^www\\./,'')}catch{return ''}}).filter(Boolean));
+  if(sourceHosts.size<2) throw new Error('RESEARCH_VALIDATION:MACHINE_IDENTITY_INDEPENDENT_SOURCES_REQUIRED');
 
   let matched=0;
   let strongMatched=0;
