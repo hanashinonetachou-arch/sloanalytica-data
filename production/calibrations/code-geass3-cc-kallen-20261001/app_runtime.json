@@ -16,7 +16,7 @@
     "artifactId": "runtime-projection-S_CODE_GEASS_3_CC_FS",
     "kind": "runtime-projection",
     "path": "production/calibrations/code-geass3-cc-kallen-20261001/runtime_projection.json",
-    "sha256": "d5b0c91f5e219aa101f8a6fee1e7a176bfc20412065ee947179013b285647d3a",
+    "sha256": "559704b9f74d50d3e9d8a2da456f5de52f922b75b3ac03ed50ba44767532ca4a",
     "producerWorkId": "wrk_geass3_cc_kallen_zero_base_v2"
   },
   "package": {
@@ -341,6 +341,7 @@
             "at-end-screen-distribution.categoryCounts.7_設定5以上濃厚",
             "at-end-screen-distribution.categoryCounts.8_設定6濃厚"
           ],
+          "denominatorRule": "SUM_CATEGORY_COUNTS",
           "categoryProbabilities": {
             "SET_1": [
               0.668,
@@ -885,7 +886,7 @@
           "title": "AT終了画面",
           "collapsible": true,
           "defaultExpanded": false,
-          "description": "対象となる機会の回数と、そのうち該当した回数を入力します。\\n1回の判別力：8.035",
+          "description": "表示された各項目の回数を入力します。入力した回数の合計を観測回数として自動計算します。\\n1回の判別力：8.035",
           "descriptionPresentation": {
             "collapsible": true,
             "label": "説明",
@@ -900,13 +901,8 @@
                 "type": "CATEGORY_COUNTERS",
                 "preservePriorObservations": true,
                 "showAccumulatedCounts": true,
-                "categoryCoverage": "NON_EXHAUSTIVE",
-                "totalOpportunities": "SEPARATE_COUNTER",
-                "opportunityTracking": {
-                  "type": "SEPARATE_COUNTER",
-                  "inputId": "at-end-screen-distribution.eligibleTrialCount",
-                  "label": "観測機会数"
-                },
+                "categoryCoverage": "EXHAUSTIVE",
+                "totalOpportunities": "SUM_CATEGORY_COUNTS",
                 "categories": [
                   {
                     "id": "at-end-screen-distribution.categoryCounts.1_デフォルト",
@@ -1163,7 +1159,32 @@
             "reason": "現在の採用基準を満たしているため、設定推測に使用します。"
           }
         ],
-        "notAdopted": [],
+        "notAdopted": [
+          {
+            "featureId": "ending-screen-probabilities",
+            "label": "エンディング終了画面の設定別出現率",
+            "reason": "エンディング終了画面は高設定示唆であることを確認できますが、設定別の出現率を確認できないため、現在は記録のみで数値推測には使用していません。",
+            "reevaluationCondition": "追加の公開データや安全な評価方法が確立した場合に再評価します。"
+          },
+          {
+            "featureId": "bonus-detail-overlap",
+            "label": "ボーナス内訳・同時当選役の個別Runtime採用",
+            "reason": "BIG・REGなどのボーナス内訳や同時当選役には設定差がありますが、小役やボーナス合算と同じ成立ゲームを重ねて評価すると同じ情報を二重に数える可能性があるため、現在は単独の設定推測要素として使用していません。設定別の元データは保存しています。",
+            "reevaluationCondition": "追加の公開データや安全な評価方法が確立した場合に再評価します。"
+          },
+          {
+            "featureId": "small-role-separate-overlap",
+            "label": "チェリー・スイカの個別Runtime採用",
+            "reason": "チェリーとスイカは個別の設定差を保存していますが、同じ通常ゲームを分母に独立した要素として重ねると二重評価になるため、現在は「チェリーまたはスイカ」の合算要素として使用しています。",
+            "reevaluationCondition": "追加の公開データや安全な評価方法が確立した場合に再評価します。"
+          },
+          {
+            "featureId": "bonus-total-overlap",
+            "label": "ボーナス合算のRuntime採用",
+            "reason": "ボーナス合算には設定差がありますが、小役成立と同じゲームで重なる場合があり、現在の推測モデルで小役と同時に使うと同じ情報を二重評価する可能性があるため、現在は設定推測に使用していません。設定別の元データは保存しています。",
+            "reevaluationCondition": "追加の公開データや安全な評価方法が確立した場合に再評価します。"
+          }
+        ],
         "highLowDiscrimination": {
           "status": "COMPUTED",
           "method": "BEST_SINGLE_EXACT_ACTIVE_FEATURE",
