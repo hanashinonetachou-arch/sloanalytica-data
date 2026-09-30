@@ -9,6 +9,6 @@ r.findings=[
 {findingId:'payout-display',label:'獲得枚数表示',observationType:'evidence',sourceIds:['slobase-setting','jugglersnet-setting'],details:['246枚OVER：設定2・4・6','456枚OVER：設定4以上','666枚OVER：設定6']}
 ];
 r.blockedItems=[{blockId:'at-end-screen-rates',label:'AT終了画面の設定別出現率',reason:'示唆内容は確認できるが設定別出現率は公開確認できないため架空weightを作らない',reevaluationCondition:'AT終了画面パターン別の設定別出現率が信頼できる解析資料で公開される'},{blockId:'payout-display-rates',label:'獲得枚数示唆の設定別出現率',reason:'示唆内容は確認できるが設定別出現率は公開確認できないため架空weightを作らない',reevaluationCondition:'獲得枚数パターン別の設定別出現率が信頼できる解析資料で公開される'}];
-fs.writeFileSync(p,JSON.stringify(r,null,2)+'\n');const rs=o.stage(batchId,m,'RESEARCH');if(!rs.authoritativeOutputRef)throw new Error('RESEARCH_REF');rs.authoritativeOutputRef.sha256=crypto.createHash('sha256').update(fs.readFileSync(p)).digest('hex');o.saveStage(rs);
+fs.writeFileSync(p,JSON.stringify(r,null,2)+'\n');
 for(const name of ['APP_RUNTIME','RUNTIME_PROJECTION','RUNTIME_POLICY','MACHINE_DATA','CANONICAL_UI','OBSERVATION_EVIDENCE','CANDIDATE_CONTRACT','ELIGIBILITY','EVALUATION']){const x=o.stage(batchId,m,name);if(x.state==='COMPLETE')o.transition(x,'READY','AUTHORITATIVE_OUTPUT_INVALIDATED','ultraman-research-semantic-repair-20260930');}
 console.log(JSON.stringify({machineId:m,findings:r.findings.length,blockedItems:r.blockedItems.length},null,2));
