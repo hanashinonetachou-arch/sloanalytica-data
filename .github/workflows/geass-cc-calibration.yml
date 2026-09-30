@@ -28,13 +28,13 @@ jobs:
         working-directory: production
         run: |
           npm run init-batch -- calibration/code-geass-r2-cc/batch.json
-          npm run dispatch -- batch-20260930-calibration-geass-cc SEMANTIC
+          npm run dispatch -- batch-20260930-calibration-geass-cc-r2 SEMANTIC
       - name: Bind researched fixture to authoritative WorkRequest
         working-directory: production
         shell: bash
         run: |
           set -euo pipefail
-          B=batch-20260930-calibration-geass-cc
+          B=batch-20260930-calibration-geass-cc-r2
           M=S_CODE_GEASS_R2_CC_ZS
           Q=$(ls "batches/$B/work-requests/"*.json | head -n1)
           W=$(jq -r '.workId' "$Q")
@@ -45,12 +45,12 @@ jobs:
         working-directory: production
         shell: bash
         run: |
-          cat > batches/batch-20260930-calibration-geass-cc/runtime-policy-config.json <<'JSON'
+          cat > batches/batch-20260930-calibration-geass-cc-r2/runtime-policy-config.json <<'JSON'
           {"schemaVersion":"runtime-policy-config-v1","manifestVersion":"8.5","policyVersion":"v8.5-calibration-baseline-20260930","thresholds":{"SELECTION_SCORE":{"status":"FIXED","value":5},"PER_ELIGIBLE_TRIAL_POWER":{"status":"FIXED","value":0}}}
           JSON
       - name: Advance deterministic stages through App Runtime
         working-directory: production
-        run: node --experimental-strip-types src/deterministic-production-worker.ts batch-20260930-calibration-geass-cc
+        run: node --experimental-strip-types src/deterministic-production-worker.ts batch-20260930-calibration-geass-cc-r2
       - name: Validate generated state
         working-directory: production
         run: npm test
@@ -60,6 +60,6 @@ jobs:
           set -euo pipefail
           git config user.name github-actions[bot]
           git config user.email 41898282+github-actions[bot]@users.noreply.github.com
-          git add production/batches/batch-20260930-calibration-geass-cc
+          git add production/batches/batch-20260930-calibration-geass-cc-r2
           git commit -m "Run Code Geass C.C. v8.5 calibration through App Runtime [skip ci]"
           git push origin HEAD:production/calibration-geass-cc-run
