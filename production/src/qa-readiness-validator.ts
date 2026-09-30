@@ -31,8 +31,7 @@ export function validateMachineQaReadiness(machineId:string,stageStates:Record<s
   const details=items.flatMap((x:any)=>Array.isArray(x?.details)?x.details:[]);
   if(details.length===0||details.some((x:any)=>typeof x!=='string'||!x.trim()))fail(machineId+':EVIDENCE_DETAILS_MISSING:'+String(ref?.id??'UNKNOWN'));
   const section=uiEvidence.find((s:any)=>s?.id===ref?.id);
-  const node=section?.items?.find((i:any)=>i?.evidenceId===ref?.sourceFindingId);
-  const categories=node?.interaction?.type==='CATEGORY_COUNTERS'?node?.interaction?.categories?.map((c:any)=>c?.label):null;
+  const categories=(section?.items??[]).flatMap((node:any)=>node?.interaction?.type==='CATEGORY_COUNTERS'?(node?.interaction?.categories??[]).map((c:any)=>c?.label):[]);
   if(!sameStrings(details,categories))fail(machineId+':EVIDENCE_CATEGORY_MISMATCH:'+String(ref?.id??'UNKNOWN'));
  }
  if(renderReport?.schemaVersion!=='rendered-ui-validation-v1'||renderReport?.machineId!==machineId)fail(machineId+':RENDER_REPORT_IDENTITY');
