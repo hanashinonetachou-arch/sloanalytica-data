@@ -1,0 +1,11 @@
+import fs from 'node:fs';import crypto from 'node:crypto';
+const p=process.argv[2];if(!p)throw new Error('PACKAGE_PATH_REQUIRED');
+const b=fs.readFileSync(p),pkg=JSON.parse(b.toString('utf8')),catalog=JSON.parse(fs.readFileSync('catalog.json','utf8'));
+const machineId='S_CODE_GEASS_3_CC_FS',withdrawnId='S_CODE_GEASS_R2_CC_ZS';
+if(pkg.machine?.machineId!==machineId||pkg.machine?.machineIdentity?.typeCode!=='2S1060')throw new Error('CANONICAL_GEASS3_PACKAGE_REQUIRED');
+const now=new Date().toISOString(),old=catalog.machines.find((x:any)=>x.machineId===machineId);
+const featureTypes=new Set((pkg.features?.features??[]).map((x:any)=>x.modelType));
+const requiredCapabilities=[...(featureTypes.has('binomial')?['binomial']:[]),...(featureTypes.has('multinomial')?['multinomial']:[]),...((pkg.evidence?.evidences??[]).length|| (pkg.evidence?.references??[]).length?['evidence']:[])];
+const row={machineId,displayName:pkg.machine.displayName,manufacturer:'ロデオ / サミー',machineDataVersion:pkg.machine.machineDataVersion,requiredCapabilities,packageUrl:'https://raw.githubusercontent.com/hanashinonetachou-arch/sloanalytica-data/prototype-multi-machine/machines/'+machineId+'/machine-package.json',sha256:crypto.createHash('sha256').update(b).digest('hex'),packageSizeBytes:b.length,status:'available',addedAt:old?.addedAt??now,updatedAt:now,introductionDate:'2023-06-05',machineType:'MEDAL',gameType:'A_AT'};
+catalog.machines=catalog.machines.map((x:any)=>x.machineId===withdrawnId?{...x,status:'withdrawn',updatedAt:now,supersededByMachineId:machineId,withdrawalReason:'INVALID_MACHINE_IDENTITY_FOR_GEASS3_QA'}:x).filter((x:any)=>x.machineId!==machineId);
+catalog.machines.unshift(row);catalog.generatedAt=now;fs.writeFileSync('catalog.json',JSON.stringify(catalog,null,2)+'\n');console.log(JSON.stringify(row));

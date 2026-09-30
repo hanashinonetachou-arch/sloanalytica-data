@@ -1,0 +1,50 @@
+import fs from 'node:fs';import path from 'node:path';import crypto from 'node:crypto';
+import {buildEvaluation} from './evaluation-builder.ts';import {validateEvaluationDocument} from './evaluation-validator.ts';
+import {buildEligibility} from './eligibility-builder.ts';import {validateEligibilityDocument} from './eligibility-validator.ts';
+import {buildCandidateContract} from './candidate-contract-builder.ts';import {validateCandidateContractDocument} from './candidate-contract-validator.ts';
+import {buildObservationEvidence} from './observation-evidence-builder.ts';import {validateObservationEvidenceDocument} from './observation-evidence-validator.ts';
+import {buildCanonicalUi} from './canonical-ui-builder.ts';import {validateCanonicalUiDocument} from './canonical-ui-validator.ts';
+import {buildMachineData} from './machine-data-builder.ts';import {validateMachineDataDocument} from './machine-data-validator.ts';
+import {buildRuntimePolicy} from './runtime-policy-builder.ts';import {validateRuntimePolicyDocument} from './runtime-policy-validator.ts';
+import {buildRuntimeProjection} from './runtime-projection-builder.ts';import {validateRuntimeProjectionDocument} from './runtime-projection-validator.ts';
+import {buildAppRuntime} from './app-runtime-builder.ts';import {validateAppRuntimeDocument} from './app-runtime-validator.ts';
+
+const MACHINE_ID='S_CODE_GEASS_3_CC_FS';
+const CALIBRATION='code-geass3-cc-kallen-20261001';
+const out=path.resolve(process.argv[2]??('../generated-'+CALIBRATION));
+fs.mkdirSync(out,{recursive:true});
+const sha=(b:Buffer)=>crypto.createHash('sha256').update(b).digest('hex');
+const refs:any={};
+function write(name:string,kind:string,doc:any){
+ const bytes=Buffer.from(JSON.stringify(doc,null,2)+'\n');fs.writeFileSync(path.join(out,name+'.json'),bytes);
+ const ref={artifactId:kind+'-'+MACHINE_ID,kind,path:'production/calibrations/'+CALIBRATION+'/'+name+'.json',sha256:sha(bytes),producerWorkId:'wrk_geass3_cc_kallen_zero_base_v2'};
+ refs[name]=ref;return ref;
+}
+const source=JSON.parse(fs.readFileSync(new URL('../test-fixtures/code-geass3-cc-kallen/research.json',import.meta.url),'utf8'));
+if(source.machineId!==MACHINE_ID||source.machineIdentity?.typeCode!=='2S1060')throw new Error('GEASS3_CANONICAL_IDENTITY_REQUIRED');
+const researchRef=write('research','research',source);
+const evaluation=buildEvaluation(source);validateEvaluationDocument(evaluation,source);const evaluationRef=write('evaluation','evaluation',evaluation);
+const eligibility=buildEligibility(evaluation);validateEligibilityDocument(eligibility,evaluation,source);const eligibilityRef=write('eligibility','eligibility',eligibility);
+const candidate=buildCandidateContract(evaluation,eligibility,evaluationRef,eligibilityRef);validateCandidateContractDocument(candidate,eligibility,evaluation);const candidateRef=write('candidate_contract','candidate-contract',candidate);
+const observation=buildObservationEvidence(candidate,source,candidateRef);validateObservationEvidenceDocument(observation,candidate,source);const observationRef=write('observation_evidence','observation-evidence',observation);
+const canonical=buildCanonicalUi(candidate,observation,evaluation,candidateRef,observationRef,evaluationRef);validateCanonicalUiDocument(canonical,candidate,observation,evaluation,candidateRef,observationRef,evaluationRef);const canonicalRef=write('canonical_ui','canonical-ui',canonical);
+const md=buildMachineData(canonical,candidate,observation,canonicalRef,candidateRef,observationRef,source,researchRef);validateMachineDataDocument(md,canonical,candidate,observation,canonicalRef,candidateRef,observationRef,source,researchRef);const mdRef=write('machine_data','machine-data',md);
+const cfg:any={schemaVersion:'runtime-policy-config-v1',manifestVersion:'8.5',policyVersion:'geass3-cc-kallen-20261001',thresholds:{SELECTION_SCORE:{status:'FIXED',value:5},PER_ELIGIBLE_TRIAL_POWER:{status:'FIXED',value:0}}};const cfgRef=write('runtime_policy_config','runtime-policy-config',cfg);
+const policy=buildRuntimePolicy(md,cfg,mdRef,cfgRef);validateRuntimePolicyDocument(policy,md,cfg,mdRef,cfgRef);const policyRef=write('runtime_policy','runtime-policy',policy);
+const projection=buildRuntimeProjection(md,policy,mdRef,policyRef);validateRuntimeProjectionDocument(projection,md,policy,mdRef,policyRef);const projectionRef=write('runtime_projection','runtime-projection',projection);
+const app=buildAppRuntime(projection,projectionRef);validateAppRuntimeDocument(app,projection,projectionRef);const appRef=write('app_runtime','app-runtime',app);
+write('machine_package','machine-package',app.package);
+
+const pkg=app.package,serialized=JSON.stringify(pkg);
+const featureIds=(pkg.features?.features??[]).map((x:any)=>x.featureId);
+if(pkg.machine?.machineId!==MACHINE_ID||pkg.machine?.machineIdentity?.typeCode!=='2S1060')throw new Error('PACKAGE_MACHINE_IDENTITY');
+if(serialized.includes('S_CODE_GEASS_R2_CC_ZS')||serialized.includes('7S1251')||serialized.includes('R2 C.C.ver.')||serialized.includes('RT50')||serialized.includes('ゼロレクイエム'))throw new Error('R2_CONTAMINATION');
+if(featureIds.includes('bonus-total')||featureIds.some((x:string)=>['hbb-total','bb-total','reg','cherry','watermelon','common-bell-red-big','cherry-reg','chance-reg'].includes(x)))throw new Error('OVERLAPPING_LIKELIHOOD');
+if(!featureIds.includes('small-role-cherry-or-watermelon')||!featureIds.includes('reg50-infinite-at')||!featureIds.includes('at-end-screen-distribution'))throw new Error('EXPECTED_RUNTIME_FEATURE_MISSING');
+if(!(pkg.evidence?.evidences??[]).some((x:any)=>String(x.name).includes('設定6')))throw new Error('EXACT_EVIDENCE_MISSING');
+if(!(pkg.ui?.v8Sections??[]).length)throw new Error('UI_SECTIONS_EMPTY');
+if((pkg.ui?.v8Sections??[]).some((s:any)=>!(s.items??[]).length))throw new Error('UI_EMPTY_SECTION');
+if(serialized.includes('/n')||/opportunity model/i.test(serialized))throw new Error('INTERNAL_UI_TERM');
+if(!Array.isArray(source.rawSettingDistributions)||source.rawSettingDistributions.length<9)throw new Error('RAW_DISTRIBUTIONS_NOT_PRESERVED');
+fs.writeFileSync(path.join(out,'artifact_refs.json'),JSON.stringify({machineId:MACHINE_ID,calibration:CALIBRATION,refs,featureIds},null,2)+'\n');
+console.log(JSON.stringify({machineId:MACHINE_ID,machineDataVersion:pkg.machine.machineDataVersion,features:featureIds,evidence:(pkg.evidence?.evidences??[]).length,sections:(pkg.ui?.v8Sections??[]).length,out}));

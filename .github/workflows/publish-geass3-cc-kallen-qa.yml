@@ -1,0 +1,69 @@
+name: Publish Code Geass 3 C.C. Kallen v8.5 QA
+on:
+  push:
+    branches: [production/v85-geass3-package-distribution-20261001]
+    paths: [.github/geass3-package-trigger]
+permissions:
+  contents: write
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - name: Deterministic production validation
+        working-directory: production
+        run: npm test
+      - name: Generate validated v8.5 chain
+        working-directory: production
+        run: node --experimental-strip-types src/generate-geass3-cc-kallen-package.ts ../generated-geass3
+      - name: Stage publisher and source
+        run: |
+          cp production/src/publish-geass3-catalog.ts /tmp/publish-geass3-catalog.ts
+          cp production/src/finalize-geass3-distribution.ts /tmp/finalize-geass3-distribution.ts
+          mkdir -p /tmp/geass-production-src
+          cp production/src/distribution-builder.ts /tmp/geass-production-src/distribution-builder.ts
+          cp production/src/distribution-validator.ts /tmp/geass-production-src/distribution-validator.ts
+          cp production/src/finalize-geass3-distribution.ts /tmp/geass-production-src/finalize-geass3-distribution.ts
+          cp -R generated-geass3 /tmp/generated-geass3
+      - name: Publish canonical package and withdraw invalid R2 QA entry
+        run: |
+          git fetch origin prototype-multi-machine
+          git checkout -B prototype-multi-machine origin/prototype-multi-machine
+          mkdir -p machines/S_CODE_GEASS_3_CC_FS
+          cp /tmp/generated-geass3/machine_package.json machines/S_CODE_GEASS_3_CC_FS/machine-package.json
+          node --experimental-strip-types /tmp/publish-geass3-catalog.ts machines/S_CODE_GEASS_3_CC_FS/machine-package.json
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git add catalog.json machines/S_CODE_GEASS_3_CC_FS/machine-package.json
+          git commit -m "publish: canonical Code Geass 3 C.C. Kallen v8.5 QA package [skip ci]"
+          PACKAGE_COMMIT="$(git rev-parse HEAD)"
+          git push origin HEAD:prototype-multi-machine
+          echo "PACKAGE_COMMIT=$PACKAGE_COMMIT" >> "$GITHUB_ENV"
+      - name: Verify published content identity
+        run: |
+          set -euo pipefail
+          expected="$(sha256sum /tmp/generated-geass3/machine_package.json | awk '{print $1}')"
+          url="https://raw.githubusercontent.com/hanashinonetachou-arch/sloanalytica-data/prototype-multi-machine/machines/S_CODE_GEASS_3_CC_FS/machine-package.json"
+          ok=0
+          for i in 1 2 3 4 5 6; do
+            curl -fsSL --no-cache "$url?verify=$GITHUB_RUN_ID-$i" -o /tmp/published-geass3.json || true
+            actual="$(sha256sum /tmp/published-geass3.json 2>/dev/null | awk '{print $1}' || true)"
+            if [ "$actual" = "$expected" ]; then ok=1; break; fi
+            sleep 5
+          done
+          test "$ok" = "1"
+      - name: Persist provenance chain and validated distribution
+        run: |
+          mkdir -p production/calibrations/code-geass3-cc-kallen-20261001
+          cp /tmp/generated-geass3/*.json production/calibrations/code-geass3-cc-kallen-20261001/
+          cd /tmp/geass-production-src
+          node --experimental-strip-types finalize-geass3-distribution.ts "$GITHUB_WORKSPACE/production/calibrations/code-geass3-cc-kallen-20261001" "$PACKAGE_COMMIT" "$GITHUB_RUN_ID"
+          cd "$GITHUB_WORKSPACE"
+          git add production/calibrations/code-geass3-cc-kallen-20261001
+          git commit -m "provenance: persist Geass 3 C.C. Kallen v8.5 production chain [skip ci]"
+          git push origin HEAD:prototype-multi-machine
