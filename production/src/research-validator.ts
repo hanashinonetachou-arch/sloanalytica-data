@@ -10,7 +10,7 @@ const nonEmpty=(x:any)=>typeof x==='string'&&x.trim().length>0;
 const hex64=(x:any)=>typeof x==='string'&&/^[a-f0-9]{64}$/i.test(x);
 const repoRelative=(p:string)=>p.startsWith('production/')?p.slice('production/'.length):p;
 const sha256=(b:Buffer)=>crypto.createHash('sha256').update(b).digest('hex');
-const norm=(x:any)=>String(x??'').normalize('NFKC').toLowerCase().replace(/[\s・･._&＆\-－/／]/g,'');
+const norm=(x:any)=>String(x??'').normalize('NFKC').toLowerCase().replace(/[\s・･._&＆\-－\/／]/g,'');
 const month=(x:any)=>String(x??'').slice(0,7);
 
 function validateMachineIdentity(d:any){
