@@ -1,0 +1,690 @@
+{
+  "schemaVersion": "app-runtime-v1",
+  "manifestVersion": "8.5",
+  "batchId": "batch-20260928-001",
+  "machineId": "L_WORLD_DAI_STAR_PA3",
+  "machineName": "スロット ワールドダイスター",
+  "sourceArtifact": {
+    "artifactId": "runtime-projection-L_WORLD_DAI_STAR_PA3",
+    "kind": "runtime-projection",
+    "path": "production/batches/batch-20260928-001/artifacts/L_WORLD_DAI_STAR_PA3/runtime_projection/repair_runtime_materialization_20260929.json",
+    "sha256": "7fcaaf8043cf23d297e34fb3a31acacbb6504737daae5890c2af619b353b89cd",
+    "producerWorkId": "wrk_rtm20260929_l_world_dai_star_pa3_runtime_projection"
+  },
+  "package": {
+    "schemaVersion": 1,
+    "provenance": {
+      "manifestVersion": "8.5",
+      "generationPath": "V8_5_PRODUCTION_PIPELINE",
+      "legacyOracleUsed": false
+    },
+    "machine": {
+      "schemaVersion": "2.0.0",
+      "machineId": "L_WORLD_DAI_STAR_PA3",
+      "machineDataVersion": "8.5.0-batch-20260928-001",
+      "displayName": "スロット ワールドダイスター",
+      "modelName": "スロット ワールドダイスター",
+      "settings": [
+        "SET_1",
+        "SET_2",
+        "SET_3",
+        "SET_4",
+        "SET_5",
+        "SET_6"
+      ],
+      "packagePolicy": {
+        "offlineCapable": true,
+        "containsImages": false,
+        "containsExecutableCode": false
+      }
+    },
+    "inputs": {
+      "schemaVersion": "2.0.0",
+      "inputs": [
+        {
+          "id": "bonus-first-hit.eligibleTrialCount",
+          "name": "観測機会数",
+          "category": "V8_NUMERIC",
+          "type": "integer",
+          "unit": "G",
+          "defaultValue": 0,
+          "minimum": 0,
+          "displayOrder": 1,
+          "inferenceRole": "INCLUDE_PRIMARY"
+        },
+        {
+          "id": "bonus-first-hit.successCount",
+          "name": "該当回数",
+          "category": "V8_NUMERIC",
+          "type": "counter",
+          "unit": "回",
+          "defaultValue": 0,
+          "minimum": 0,
+          "displayOrder": 2,
+          "parentInputId": "bonus-first-hit.eligibleTrialCount",
+          "inferenceRole": "INCLUDE_PRIMARY"
+        },
+        {
+          "id": "climax-story.eligibleTrialCount",
+          "name": "観測機会数",
+          "category": "V8_NUMERIC",
+          "type": "integer",
+          "unit": "回",
+          "defaultValue": 0,
+          "minimum": 0,
+          "displayOrder": 3,
+          "inferenceRole": "INCLUDE_SUPPORT"
+        },
+        {
+          "id": "climax-story.successCount",
+          "name": "該当回数",
+          "category": "V8_NUMERIC",
+          "type": "counter",
+          "unit": "回",
+          "defaultValue": 0,
+          "minimum": 0,
+          "displayOrder": 4,
+          "parentInputId": "climax-story.eligibleTrialCount",
+          "inferenceRole": "INCLUDE_SUPPORT"
+        },
+        {
+          "id": "REF_kopanda-trophy_1",
+          "name": "コパンダトロフィー",
+          "category": "EVIDENCE_REFERENCE",
+          "type": "counter",
+          "unit": "回",
+          "defaultValue": 0,
+          "minimum": 0,
+          "displayOrder": 5,
+          "inferenceRole": "DISPLAY_ONLY"
+        },
+        {
+          "id": "REF_ending-sign-voice_1",
+          "name": "エンディング中サイン・ランプ・ボイス",
+          "category": "EVIDENCE_REFERENCE",
+          "type": "counter",
+          "unit": "回",
+          "defaultValue": 0,
+          "minimum": 0,
+          "displayOrder": 6,
+          "inferenceRole": "DISPLAY_ONLY"
+        },
+        {
+          "id": "REF_st-end-screen_1",
+          "name": "ST終了画面",
+          "category": "EVIDENCE_REFERENCE",
+          "type": "counter",
+          "unit": "回",
+          "defaultValue": 0,
+          "minimum": 0,
+          "displayOrder": 7,
+          "inferenceRole": "DISPLAY_ONLY"
+        }
+      ]
+    },
+    "features": {
+      "version": "8.5-runtime",
+      "features": [
+        {
+          "featureId": "bonus-first-hit",
+          "name": "ボーナス初当り確率",
+          "trialUniverse": "NORMAL_GAME_TRIAL",
+          "adoptionCategory": "INCLUDE_PRIMARY",
+          "calculationRole": "PROBABILITY",
+          "probabilityEngineUsage": true,
+          "denominatorInputId": "bonus-first-hit.eligibleTrialCount",
+          "probabilities": {
+            "SET_1": 0.0032626427406199023,
+            "SET_2": 0.0033658700774150114,
+            "SET_3": 0.0035198873636043643,
+            "SET_4": 0.003815337657382678,
+            "SET_5": 0.0038895371450797353,
+            "SET_6": 0.0040551500405515
+          },
+          "selectionRationale": {
+            "summary": "Manifest v8.5 Production Lineで採用された設定推測要素。",
+            "adoptionReason": "EligibilityとCandidate Contractを通過した観測可能likelihoodを使用します。",
+            "shortTermReason": "標本が少ない間は結果の振れが大きくなります。",
+            "longTermReason": "観測数が増えるほど設定別likelihoodの比較が安定します。"
+          },
+          "modelType": "binomial",
+          "numeratorInputId": "bonus-first-hit.successCount",
+          "displayFormat": "percentage"
+        },
+        {
+          "featureId": "climax-story",
+          "name": "上位ST後クライマックスストーリー移行率（オペラ座の怪人失敗後を除外）",
+          "trialUniverse": "UPPER_ST_END_EXCLUDING_PHANTOM_OPERA_FAILURE_TRIAL",
+          "adoptionCategory": "INCLUDE_SUPPORT",
+          "calculationRole": "PROBABILITY",
+          "probabilityEngineUsage": true,
+          "denominatorInputId": "climax-story.eligibleTrialCount",
+          "probabilities": {
+            "SET_1": 0.125,
+            "SET_2": 0.125,
+            "SET_3": 0.16,
+            "SET_4": 0.16,
+            "SET_5": 0.225,
+            "SET_6": 0.255
+          },
+          "selectionRationale": {
+            "summary": "Manifest v8.5 Production Lineで採用された設定推測要素。",
+            "adoptionReason": "EligibilityとCandidate Contractを通過した観測可能likelihoodを使用します。",
+            "shortTermReason": "標本が少ない間は結果の振れが大きくなります。",
+            "longTermReason": "観測数が増えるほど設定別likelihoodの比較が安定します。"
+          },
+          "modelType": "binomial",
+          "numeratorInputId": "climax-story.successCount",
+          "displayFormat": "percentage"
+        }
+      ],
+      "runtimeProjection": [
+        {
+          "featureId": "bonus-first-hit",
+          "runtimeStatus": "ACTIVE",
+          "metric": "SELECTION_SCORE",
+          "metricValue": 21.350158297515485,
+          "importance": "主要"
+        },
+        {
+          "featureId": "climax-story",
+          "runtimeStatus": "ACTIVE",
+          "metric": "PER_ELIGIBLE_TRIAL_POWER",
+          "metricValue": 2.334900193944134,
+          "importance": "微小"
+        }
+      ]
+    },
+    "evidence": {
+      "version": "8.5-runtime",
+      "evidences": [],
+      "references": [
+        {
+          "id": "EVI_kopanda-trophy",
+          "sourceFindingId": "kopanda-trophy",
+          "title": "コパンダトロフィー",
+          "kind": "EVIDENCE",
+          "collapsible": true,
+          "defaultExpanded": false,
+          "description": "設定示唆として確認できる項目です。数値による設定推測とは別に、実戦時の判断材料として参照できます。",
+          "descriptionPresentation": {
+            "collapsible": true,
+            "label": "説明",
+            "defaultExpanded": false
+          },
+          "runtimePolicyControlled": false,
+          "evidenceItems": [
+            {
+              "findingId": "kopanda-trophy",
+              "label": "コパンダトロフィー",
+              "sourceIds": [
+                "slobase-main"
+              ],
+              "details": [],
+              "runtimePolicyControlled": false,
+              "status": "SOURCE_REFERENCED",
+              "interaction": "REFERENCE_ONLY"
+            }
+          ]
+        },
+        {
+          "id": "EVI_ending-sign-voice",
+          "sourceFindingId": "ending-sign-voice",
+          "title": "エンディング中サイン・ランプ・ボイス",
+          "kind": "EVIDENCE",
+          "collapsible": true,
+          "defaultExpanded": false,
+          "description": "設定示唆として確認できる項目です。数値による設定推測とは別に、実戦時の判断材料として参照できます。",
+          "descriptionPresentation": {
+            "collapsible": true,
+            "label": "説明",
+            "defaultExpanded": false
+          },
+          "runtimePolicyControlled": false,
+          "evidenceItems": [
+            {
+              "findingId": "ending-sign-voice",
+              "label": "エンディング中サイン・ランプ・ボイス",
+              "sourceIds": [
+                "slobase-main"
+              ],
+              "details": [],
+              "runtimePolicyControlled": false,
+              "status": "SOURCE_REFERENCED",
+              "interaction": "REFERENCE_ONLY"
+            }
+          ]
+        },
+        {
+          "id": "EVI_st-end-screen",
+          "sourceFindingId": "st-end-screen",
+          "title": "ST終了画面",
+          "kind": "EVIDENCE",
+          "collapsible": true,
+          "defaultExpanded": false,
+          "description": "設定示唆として確認できる項目です。数値による設定推測とは別に、実戦時の判断材料として参照できます。",
+          "descriptionPresentation": {
+            "collapsible": true,
+            "label": "説明",
+            "defaultExpanded": false
+          },
+          "runtimePolicyControlled": false,
+          "evidenceItems": [
+            {
+              "findingId": "st-end-screen",
+              "label": "ST終了画面",
+              "sourceIds": [
+                "slobase-main"
+              ],
+              "details": [],
+              "runtimePolicyControlled": false,
+              "status": "SOURCE_REFERENCED",
+              "interaction": "REFERENCE_ONLY"
+            }
+          ]
+        }
+      ]
+    },
+    "blockedItems": [
+      {
+        "blockId": "actor-episode-200-rate",
+        "label": "アクターズエピソード200枚選択率の設定別原分布",
+        "reason": "高設定ほど200枚が選択されやすい傾向は確認できるが、今回確認した公開資料では全設定の選択率を確認できない",
+        "reevaluationCondition": "アクターズエピソード100枚/200枚の設定別振り分けが信頼できる解析資料で公開される"
+      },
+      {
+        "blockId": "trophy-appearance-rates",
+        "label": "コパンダトロフィーの設定別出現率",
+        "reason": "色別の設定示唆下限は確認できるが設定別出現率を確認できない",
+        "reevaluationCondition": "コパンダトロフィー色別の設定別出現率が公開される"
+      },
+      {
+        "blockId": "st-end-screen-rates",
+        "label": "ST終了画面の設定別出現率",
+        "reason": "各画面の示唆内容は確認できるが設定別出現率を確認できない",
+        "reevaluationCondition": "ST終了画面パターン別の設定別出現率が公開される"
+      }
+    ],
+    "ui": {
+      "schemaVersion": "v8.5-runtime-ui-v1",
+      "contractVersion": "runtime-ui-v8",
+      "source": "CANONICAL_UI",
+      "sourceSchemaVersion": "canonical-ui-v1",
+      "manifestRevision": "8.5",
+      "playInfo": {
+        "visible": true,
+        "collapsible": false,
+        "sessionFields": [
+          {
+            "id": "date",
+            "label": "日付",
+            "mode": "DATE"
+          },
+          {
+            "id": "storeName",
+            "label": "店舗名",
+            "mode": "TEXT"
+          },
+          {
+            "id": "machineNumber",
+            "label": "台番号",
+            "mode": "TEXT"
+          }
+        ],
+        "startFields": [
+          {
+            "id": "startTotalGames",
+            "label": "着席時 総ゲーム数",
+            "mode": "NUMBER",
+            "directNumeric": true
+          },
+          {
+            "id": "startNormalGames",
+            "label": "着席時 通常ゲーム数",
+            "mode": "NUMBER",
+            "directNumeric": true
+          }
+        ],
+        "currentFields": [
+          {
+            "id": "currentTotalGames",
+            "label": "現在 総ゲーム数",
+            "mode": "NUMBER",
+            "directNumeric": true
+          },
+          {
+            "id": "currentNormalGames",
+            "label": "現在 通常ゲーム数",
+            "mode": "NUMBER",
+            "directNumeric": true
+          }
+        ],
+        "difference": {
+          "autoCalculate": true
+        },
+        "useDifference": {
+          "label": "着席時との差分を使用",
+          "defaultWhenStartNormalGamesPresent": true
+        }
+      },
+      "accordion": {
+        "enabled": true,
+        "singleOpen": true
+      },
+      "quickInput": {
+        "enabled": false
+      },
+      "v8Sections": [
+        {
+          "id": "OBS_bonus-first-hit",
+          "title": "ボーナス初当り確率",
+          "collapsible": true,
+          "defaultExpanded": false,
+          "description": "通常ゲーム数に対する該当回数を入力します。「着席時との差分を使用」がONの場合、通常ゲーム数は遊技情報から自動反映されます。\\n設定判別スコア：21.4\\n1回の判別力：21.350",
+          "descriptionPresentation": {
+            "collapsible": true,
+            "label": "説明",
+            "defaultExpanded": false
+          },
+          "items": [
+            {
+              "id": "NODE_bonus-first-hit",
+              "featureId": "bonus-first-hit",
+              "title": "ボーナス初当り確率",
+              "inputs": [
+                {
+                  "id": "bonus-first-hit.eligibleTrialCount",
+                  "label": "通常ゲーム数",
+                  "input": "denominator",
+                  "inputId": "bonus-first-hit.eligibleTrialCount",
+                  "engineBinding": {
+                    "inputId": "bonus-first-hit.eligibleTrialCount"
+                  },
+                  "gridSpan": 12,
+                  "directNumeric": true,
+                  "quickAdd": [
+                    50
+                  ],
+                  "unobservedDisplay": "—",
+                  "playDataBinding": {
+                    "source": "PLAY_NORMAL_GAME_DELTA"
+                  }
+                },
+                {
+                  "id": "bonus-first-hit.successCount",
+                  "label": "回数",
+                  "input": "counter",
+                  "inputId": "bonus-first-hit.successCount",
+                  "engineBinding": {
+                    "inputId": "bonus-first-hit.successCount"
+                  },
+                  "gridSpan": 6,
+                  "directNumeric": true,
+                  "quickAdd": [
+                    1
+                  ],
+                  "unobservedDisplay": "—"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "OBS_climax-story",
+          "title": "上位ST後クライマックスストーリー移行率（オペラ座の怪人失敗後を除外）",
+          "collapsible": true,
+          "defaultExpanded": false,
+          "description": "対象となる機会の回数と、そのうち該当した回数を入力します。\\n1回の判別力：2.335",
+          "descriptionPresentation": {
+            "collapsible": true,
+            "label": "説明",
+            "defaultExpanded": false
+          },
+          "items": [
+            {
+              "id": "NODE_climax-story",
+              "featureId": "climax-story",
+              "title": "上位ST後クライマックスストーリー移行率（オペラ座の怪人失敗後を除外）",
+              "inputs": [
+                {
+                  "id": "climax-story.eligibleTrialCount",
+                  "label": "対象回数",
+                  "input": "denominator",
+                  "inputId": "climax-story.eligibleTrialCount",
+                  "engineBinding": {
+                    "inputId": "climax-story.eligibleTrialCount"
+                  },
+                  "gridSpan": 6,
+                  "directNumeric": true,
+                  "quickAdd": [
+                    50
+                  ],
+                  "unobservedDisplay": "—"
+                },
+                {
+                  "id": "climax-story.successCount",
+                  "label": "回数",
+                  "input": "counter",
+                  "inputId": "climax-story.successCount",
+                  "engineBinding": {
+                    "inputId": "climax-story.successCount"
+                  },
+                  "gridSpan": 6,
+                  "directNumeric": true,
+                  "quickAdd": [
+                    1
+                  ],
+                  "unobservedDisplay": "—"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "EVI_kopanda-trophy",
+          "title": "コパンダトロフィー",
+          "description": "確認した設定示唆の回数を記録します。設定推測の確率計算には使用しません。",
+          "collapsible": true,
+          "defaultExpanded": false,
+          "descriptionPresentation": {
+            "collapsible": true,
+            "label": "説明",
+            "defaultExpanded": false
+          },
+          "items": [
+            {
+              "id": "REF_kopanda-trophy",
+              "evidenceId": "kopanda-trophy",
+              "label": "コパンダトロフィー",
+              "interaction": {
+                "type": "CATEGORY_COUNTERS",
+                "preservePriorObservations": true,
+                "showAccumulatedCounts": true,
+                "categoryCoverage": "NON_EXHAUSTIVE",
+                "totalOpportunities": "NONE",
+                "categories": [
+                  {
+                    "id": "REF_kopanda-trophy_1",
+                    "inputId": "REF_kopanda-trophy_1",
+                    "label": "コパンダトロフィー",
+                    "meaning": "観測回数"
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "id": "EVI_ending-sign-voice",
+          "title": "エンディング中サイン・ランプ・ボイス",
+          "description": "確認した設定示唆の回数を記録します。設定推測の確率計算には使用しません。",
+          "collapsible": true,
+          "defaultExpanded": false,
+          "descriptionPresentation": {
+            "collapsible": true,
+            "label": "説明",
+            "defaultExpanded": false
+          },
+          "items": [
+            {
+              "id": "REF_ending-sign-voice",
+              "evidenceId": "ending-sign-voice",
+              "label": "エンディング中サイン・ランプ・ボイス",
+              "interaction": {
+                "type": "CATEGORY_COUNTERS",
+                "preservePriorObservations": true,
+                "showAccumulatedCounts": true,
+                "categoryCoverage": "NON_EXHAUSTIVE",
+                "totalOpportunities": "NONE",
+                "categories": [
+                  {
+                    "id": "REF_ending-sign-voice_1",
+                    "inputId": "REF_ending-sign-voice_1",
+                    "label": "エンディング中サイン・ランプ・ボイス",
+                    "meaning": "観測回数"
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "id": "EVI_st-end-screen",
+          "title": "ST終了画面",
+          "description": "確認した設定示唆の回数を記録します。設定推測の確率計算には使用しません。",
+          "collapsible": true,
+          "defaultExpanded": false,
+          "descriptionPresentation": {
+            "collapsible": true,
+            "label": "説明",
+            "defaultExpanded": false
+          },
+          "items": [
+            {
+              "id": "REF_st-end-screen",
+              "evidenceId": "st-end-screen",
+              "label": "ST終了画面",
+              "interaction": {
+                "type": "CATEGORY_COUNTERS",
+                "preservePriorObservations": true,
+                "showAccumulatedCounts": true,
+                "categoryCoverage": "NON_EXHAUSTIVE",
+                "totalOpportunities": "NONE",
+                "categories": [
+                  {
+                    "id": "REF_st-end-screen_1",
+                    "inputId": "REF_st-end-screen_1",
+                    "label": "ST終了画面",
+                    "meaning": "観測回数"
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    "metadata": {
+      "machineId": "L_WORLD_DAI_STAR_PA3",
+      "displayName": "スロット ワールドダイスター",
+      "settings": [
+        "SET_1",
+        "SET_2",
+        "SET_3",
+        "SET_4",
+        "SET_5",
+        "SET_6"
+      ],
+      "settingsStatus": "SOURCE_DERIVED"
+    },
+    "v8": {
+      "machineResearchSummary": {
+        "title": "この機種の設定推測について",
+        "adopted": [
+          {
+            "featureId": "bonus-first-hit",
+            "label": "ボーナス初当り確率",
+            "importance": "主要",
+            "selectionScore": 21.4,
+            "evaluation": {
+              "userLabel": "設定判別スコア",
+              "value": 21.4
+            },
+            "reason": "現在の採用基準を満たしているため、設定推測に使用します。"
+          },
+          {
+            "featureId": "climax-story",
+            "label": "上位ST後クライマックスストーリー移行率（オペラ座の怪人失敗後を除外）",
+            "importance": "微小",
+            "evaluation": {
+              "userLabel": "1回の判別力",
+              "value": 2.334900193944134
+            },
+            "reason": "現在の採用基準を満たしているため、設定推測に使用します。"
+          }
+        ],
+        "notAdopted": [
+          {
+            "featureId": "cz-first-hit",
+            "label": "CZ初当り確率",
+            "reason": "同じ観測内容を二重に評価しないため、ボーナス初当り確率へ統合し、単独では数値推測に使用しません。"
+          },
+          {
+            "featureId": "lucky-mode-normal",
+            "label": "ST終了時ラッキーモード移行率（通常条件）",
+            "reason": "正確な観測回数を扱うための情報が不足しているため、現在は数値推測に使用しません。",
+            "reevaluationCondition": "必要な設定別データや観測条件が確認できれば再評価します。"
+          },
+          {
+            "featureId": "lucky-mode-run-through",
+            "label": "ST駆け抜け時ラッキーモード移行率",
+            "reason": "正確な観測回数を扱うための情報が不足しているため、現在は数値推測に使用しません。",
+            "reevaluationCondition": "必要な設定別データや観測条件が確認できれば再評価します。"
+          },
+          {
+            "featureId": "lucky-mode-upper-st",
+            "label": "上位ST後ラッキーモード移行率",
+            "reason": "正確な観測回数を扱うための情報が不足しているため、現在は数値推測に使用しません。",
+            "reevaluationCondition": "必要な設定別データや観測条件が確認できれば再評価します。"
+          }
+        ],
+        "highLowDiscrimination": {
+          "status": "COMPUTED",
+          "method": "BEST_SINGLE_EXACT_ACTIVE_FEATURE",
+          "bandDefinition": {
+            "lowSettings": "SETTING_1_TO_3",
+            "highSettings": "SETTING_4_TO_6",
+            "classPrior": "BALANCED"
+          },
+          "results": [
+            {
+              "games": 1500,
+              "balancedAccuracyPercent": 56.89
+            },
+            {
+              "games": 3000,
+              "balancedAccuracyPercent": 59.57
+            },
+            {
+              "games": 7000,
+              "balancedAccuracyPercent": 64.42
+            }
+          ],
+          "eligibleFeatureIds": [
+            "bonus-first-hit"
+          ],
+          "selectedFeatureId": "bonus-first-hit",
+          "selectedFeatureLabel": "ボーナス初当り確率",
+          "excludedFeatures": [
+            {
+              "findingId": "climax-story",
+              "reason": "BENCHMARK_EXPOSURE_UNRESOLVED"
+            }
+          ],
+          "note": "7000Gへ正確に換算できるACTIVE要素だけを候補とし、要素間の独立性を仮定せず、単独で最も高い判別精度を持つ要素から保守的に算出しています。条件付き要素はこの指標には含めませんが、実戦中に実際の観測回数が入力された場合は設定推測に使用します。"
+        },
+        "unresolved": []
+      }
+    }
+  }
+}
