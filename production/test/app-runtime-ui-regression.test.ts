@@ -71,3 +71,6 @@ test('conditional Bernoulli inputs use compact two-column labels',()=>{
   assert.equal(inputs[1].label,'回数');
   assert.equal(inputs[1].gridSpan,6);
 });
+
+
+test('Evidence runtime consumes explicit semantics and never promotes probability-unknown hints to constraints',()=>{const projection:any=baseProjection({runtimeUi:{numericSections:[],evidenceSections:[{id:'EVI_e',title:'終了画面',evidenceItems:[{findingId:'e',label:'終了画面',details:['金：設定4以上','高設定示唆（強）'],categorySemantics:[{label:'金：設定4以上',semantic:'EXACT_CONSTRAINT'},{label:'高設定示唆（強）',semantic:'PROBABILITY_UNKNOWN'}]}]}]},activeFeatures:[],evidence:[{id:'EVI_e',evidenceItems:[{findingId:'e',label:'終了画面',details:['金：設定4以上','高設定示唆（強）'],categorySemantics:[{label:'金：設定4以上',semantic:'EXACT_CONSTRAINT'},{label:'高設定示唆（強）',semantic:'PROBABILITY_UNKNOWN'}]}]}]});const app=buildAppRuntime(projection,{path:'p'});assert.equal(app.package.evidence.evidences.length,1);assert.equal(app.package.evidence.evidences[0].name,'金：設定4以上');assert.match(app.package.ui.v8Sections[0].description,/現在の設定推測計算には直接反映していません/);assert.match(app.package.ui.v8Sections[0].description,/反映できる可能性があります/);});

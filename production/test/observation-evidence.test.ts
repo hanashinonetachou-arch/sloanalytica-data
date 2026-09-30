@@ -13,3 +13,6 @@ test('materializes ready Bernoulli/categorical and preserves joint-resolved memb
  assert.equal(d.observations.find((x:any)=>x.findingId==='h').observationStatus,'HELD_NO_JOINT_MODEL');
  assert.doesNotThrow(()=>validateObservationEvidenceDocument(d,candidate,research));
 });
+
+
+test('materializes explicit Evidence semantics instead of leaving downstream label inference implicit',()=>{const candidate:any={batchId:'b',machineId:'M',machineName:'M',candidates:[],evidenceCandidates:[{findingId:'e',label:'終了画面',sourceIds:['s'],details:['金：設定4以上','高設定示唆（強）','基本パターン']}],blockedItems:[{label:'終了画面の設定別出現率',reason:'設定別出現率を確認できない'}],sourceIntegrityIssues:[]};const d=buildObservationEvidence(candidate,research,{path:'c'});assert.deepEqual(d.evidence[0].categorySemantics,[{label:'金：設定4以上',semantic:'EXACT_CONSTRAINT'},{label:'高設定示唆（強）',semantic:'PROBABILITY_UNKNOWN'},{label:'基本パターン',semantic:'PROBABILITY_UNKNOWN'}]);assert.doesNotThrow(()=>validateObservationEvidenceDocument(d,candidate,research));});
