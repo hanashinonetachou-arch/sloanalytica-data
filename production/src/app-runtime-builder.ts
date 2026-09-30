@@ -68,7 +68,7 @@ const buildInputs=(projection:any)=>{
   const f=(projection.activeFeatures??[]).find((x:any)=>x.findingId===s.sourceFindingId);if(!f)continue;
   const trialId=(s.inputs??[]).find((x:any)=>x.role==='trial')?.id;
   for(const x of s.inputs??[]){
-   if(seen.has(x.id))throw new Error('APP_RUNTIME_DUPLICATE_INPUT:'+x.id);seen.add(x.id);
+   if(seen.has(x.id)){if(x.role==='trial'&&x.id==='shared.NORMAL_GAME_TRIAL')continue;throw new Error('APP_RUNTIME_DUPLICATE_INPUT:'+x.id);}seen.add(x.id);
    out.push({id:x.id,name:x.label,category:'V8_NUMERIC',type:x.role==='trial'?'integer':'counter',unit:x.role==='trial'&&f.trialUniverse==='NORMAL_GAME_TRIAL'?'G':'回',defaultValue:0,minimum:0,displayOrder:order++,parentInputId:x.role==='trial'?undefined:trialId,inferenceRole:importanceToAdoption(runtimeImportance(f))});
   }
  }
