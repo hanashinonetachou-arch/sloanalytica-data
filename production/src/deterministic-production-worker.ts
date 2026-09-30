@@ -11,6 +11,7 @@ import {buildCanonicalUi} from './canonical-ui-builder.ts';
 import {buildMachineData} from './machine-data-builder.ts';
 import {buildRuntimePolicy} from './runtime-policy-builder.ts';
 import {buildRuntimeProjection} from './runtime-projection-builder.ts';
+import {buildDistribution} from './distribution-builder.ts';
 import {buildAppRuntime} from './app-runtime-builder.ts';
 import type {WorkRequest,WorkResult} from './core.ts';
 
@@ -49,6 +50,8 @@ function execute(q:WorkRequest):WorkResult{
    doc=buildRuntimeProjection(readRef(mdRef),readRef(rpRef),mdRef,rpRef);
  } else if(q.stage==='APP_RUNTIME'){
    const rpRef=q.inputArtifacts.find((x:any)=>x.kind==='runtime-projection'); doc=buildAppRuntime(readRef(rpRef),rpRef);
+ } else if(q.stage==='DISTRIBUTION'){
+   const arRef=q.inputArtifacts.find((x:any)=>x.kind==='app-runtime'); doc=buildDistribution(readRef(arRef),arRef);
  } else throw new Error(`UNSUPPORTED_PRODUCTION_STAGE:${q.stage}`);
  const ref=writeArtifact(q,doc);
  return {workId:q.workId,attemptId:q.attemptId,leaseId:q.leaseId,leaseGeneration:q.leaseGeneration,status:'SUCCESS',observedInputFingerprint:q.authoritativeInputFingerprint,producedArtifacts:[ref],validationEvidence:[],requestedActions:[],proposedNextState:'COMPLETE',provenance:{inputArtifacts:q.inputArtifacts,worker:'deterministic-production-worker-v1'}};
