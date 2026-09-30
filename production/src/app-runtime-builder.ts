@@ -52,7 +52,7 @@ const numericUiSections=(projection:any)=>{
  });
 };
 const evidenceExplanation=(s:any)=>{
- const types=[...new Set((s.evidenceItems??[]).map((e:any)=>e.semanticType).filter(Boolean))];
+ const types=[...new Set((s.evidenceItems??[]).flatMap((e:any)=>Array.isArray(e.semanticCategories)?e.semanticCategories.map((x:any)=>x.semanticType):[e.semanticType]).filter(Boolean))];
  if(types.includes('EXACT_CONSTRAINT')&&types.some((x:any)=>x!=='EXACT_CONSTRAINT'))return evidenceSemanticExplanation('EXACT_CONSTRAINT')+' '+types.filter((x:any)=>x!=='EXACT_CONSTRAINT').map((x:any)=>evidenceSemanticExplanation(x)).join(' ');
  return evidenceSemanticExplanation((types[0]??'DISPLAY_ONLY') as any);
 };
@@ -115,7 +115,7 @@ const materializedEvidences=(projection:any)=>{
   const details=Array.isArray(e.details)?e.details.filter((x:any)=>typeof x==='string'&&x.trim()):[];
   const labels=details.length?details:[e.label];
   return labels.flatMap((label:string,i:number)=>{
-   if(e.semanticType!=='EXACT_CONSTRAINT')return [];const constraint=evidenceConstraintFromLabel(label,allSettings);if(!constraint)throw new Error('APP_RUNTIME_EXACT_CONSTRAINT_UNPARSEABLE:'+e.findingId+':'+label);
+   const categorySemantic=e.semanticCategories?.find((x:any)=>x.label===label)?.semanticType??e.semanticType;if(categorySemantic!=='EXACT_CONSTRAINT')return [];const constraint=evidenceConstraintFromLabel(label,allSettings);if(!constraint)throw new Error('APP_RUNTIME_EXACT_CONSTRAINT_UNPARSEABLE:'+e.findingId+':'+label);
    return [{id:`${e.findingId}__${i+1}`,name:label,displayName:label,inputId:`REF_${e.findingId}_${i+1}`,details:[label],confirmedSettings:constraint.confirmedSettings,deniedSettings:constraint.deniedSettings,hasImage:false,type:'SETTING_CONSTRAINT',sourceEvidenceRefs:[e.findingId]}];
   });
  }));
