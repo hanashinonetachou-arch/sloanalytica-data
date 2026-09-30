@@ -3,6 +3,8 @@ import path from 'node:path';
 import crypto from 'node:crypto';
 import {RepoStore,Orchestrator} from './core.ts';
 import {productionRequest,acceptAndRecord,promoteDependencies,reconcileBatch,scheduleByKind} from './runtime.ts';
+import {buildCanonicalUi} from './canonical-ui-builder.ts';
+import {buildMachineData} from './machine-data-builder.ts';
 import {buildRuntimePolicy} from './runtime-policy-builder.ts';
 import {buildRuntimeProjection} from './runtime-projection-builder.ts';
 import {buildAppRuntime} from './app-runtime-builder.ts';
@@ -22,7 +24,13 @@ function writeArtifact(q:WorkRequest,doc:any){
 }
 function execute(q:WorkRequest):WorkResult{
  let doc:any;
- if(q.stage==='RUNTIME_POLICY'){
+ if(q.stage==='CANONICAL_UI'){
+   const cRef=q.inputArtifacts.find((x:any)=>x.kind==='candidate-contract'); const oRef=q.inputArtifacts.find((x:any)=>x.kind==='observation-evidence'); const eRef=q.inputArtifacts.find((x:any)=>x.kind==='evaluation');
+   doc=buildCanonicalUi(readRef(cRef),readRef(oRef),readRef(eRef),cRef,oRef,eRef);
+ } else if(q.stage==='MACHINE_DATA'){
+   const uRef=q.inputArtifacts.find((x:any)=>x.kind==='canonical-ui'); const cRef=q.inputArtifacts.find((x:any)=>x.kind==='candidate-contract'); const oRef=q.inputArtifacts.find((x:any)=>x.kind==='observation-evidence'); const rRef=q.inputArtifacts.find((x:any)=>x.kind==='research');
+   doc=buildMachineData(readRef(uRef),readRef(cRef),readRef(oRef),uRef,cRef,oRef,readRef(rRef),rRef);
+ } else if(q.stage==='RUNTIME_POLICY'){
    const mdRef=q.inputArtifacts.find((x:any)=>x.kind==='machine-data'); const md=readRef(mdRef);
    const cfgRef=q.inputArtifacts.find((x:any)=>x.kind==='runtime-policy-config'); const policy=cfgRef?readRef(cfgRef):null;
    doc=buildRuntimePolicy(md,policy,mdRef,cfgRef??null);
@@ -38,7 +46,9 @@ function execute(q:WorkRequest):WorkResult{
 const completed:any[]=[];
 for(let guard=0;guard<100;guard++){
  reconcileBatch(o,s,batchId);
- const selected=scheduleByKind(o,s,batchId,cfg.concurrency,'PRODUCTION');
+ const semantic=scheduleByKind(o,s,batchId,cfg.concurrency,'SEMANTIC').filter((x:any)=>x.name==='CANONICAL_UI');
+ const production=scheduleByKind(o,s,batchId,cfg.concurrency,'PRODUCTION');
+ const selected=[...semantic,...production];
  if(selected.length===0) break;
  for(const candidate of selected){
    let x=o.stage(batchId,candidate.machineId,candidate.name); const a=o.createAttempt(x); const l=o.acquire(x,a,300000);
