@@ -30,6 +30,7 @@ export function validateMachineQaReadiness(machineId:string,stageStates:Record<s
   if(findingIds.some((id:string)=>blockedFindingIds.has(id)))fail(machineId+':BLOCKED_EVIDENCE_RESURRECTION:'+String(ref?.id??'UNKNOWN'));
   const details=items.flatMap((x:any)=>Array.isArray(x?.details)?x.details:[]);
   if(details.length===0||details.some((x:any)=>typeof x!=='string'||!x.trim()))fail(machineId+':EVIDENCE_DETAILS_MISSING:'+String(ref?.id??'UNKNOWN'));
+  for(const item of items){const cats=Array.isArray(item?.semanticCategories)?item.semanticCategories:[];if(cats.length!==item.details.length||cats.some((x:any,i:number)=>x?.label!==item.details[i]||!['EXACT_CONSTRAINT','PROBABILITY_BACKED','PROBABILITY_UNKNOWN','DISPLAY_ONLY','BLOCK'].includes(x?.semanticType)))fail(machineId+':EVIDENCE_SEMANTICS:'+String(ref?.id??'UNKNOWN'));}
   const section=uiEvidence.find((s:any)=>s?.id===ref?.id);
   const categories=(section?.items??[]).flatMap((node:any)=>node?.interaction?.type==='CATEGORY_COUNTERS'?(node?.interaction?.categories??[]).map((c:any)=>c?.label):[]);
   if(!sameStrings(details,categories))fail(machineId+':EVIDENCE_CATEGORY_MISMATCH:'+String(ref?.id??'UNKNOWN'));

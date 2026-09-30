@@ -11,5 +11,6 @@ test('materializes ready Bernoulli/categorical and preserves joint-resolved memb
  assert.equal(d.observations.find((x:any)=>x.findingId==='j').collectionContract.trialField,'eligibleTrialCount');
  assert.equal(d.observations.find((x:any)=>x.findingId==='m').observationStatus,'RESOLVED_IN_JOINT_MODEL');
  assert.equal(d.observations.find((x:any)=>x.findingId==='h').observationStatus,'HELD_NO_JOINT_MODEL');
+ assert.equal(d.evidence[0].semanticType,'DISPLAY_ONLY');
  assert.doesNotThrow(()=>validateObservationEvidenceDocument(d,candidate,research));
 });
