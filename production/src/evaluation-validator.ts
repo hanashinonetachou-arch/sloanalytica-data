@@ -57,7 +57,7 @@ export function validateEvaluationDocument(doc:any,research:any){
   complete++;
  }
  if(canonical(doc.blockedItems)!==canonical(research.blockedItems??[]))fail('BLOCKED_ITEMS_CHANGED');
- const evidence=(research.findings??[]).filter((x:any)=>x.observationType==='evidence').map((x:any)=>({findingId:x.findingId,label:x.label,sourceIds:x.sourceIds??[],details:Array.isArray(x.details)?x.details:[]}));
+ const evidence=(research.findings??[]).filter((x:any)=>x.observationType==='evidence').map((x:any)=>({findingId:x.findingId,label:x.label,sourceIds:x.sourceIds??[],details:Array.isArray(x.details)?x.details:[],categorySemantics:Array.isArray(x.categorySemantics)?structuredClone(x.categorySemantics):undefined}));
  if(canonical(doc.evidenceCandidates)!==canonical(evidence))fail('EVIDENCE_CHANGED');
  return [{validator:EVALUATION_VALIDATOR_CONTRACT,candidates:candidates.length,complete,unavailable,reference,evidenceCandidates:evidence.length,blockedItems:(research.blockedItems??[]).length}];
 }
