@@ -64,7 +64,7 @@ export function validateResearchArtifacts(s:RepoStore,a:Attempt,r:WorkResult){
     if(!nonEmpty(f.findingId)||!nonEmpty(f.label)||!nonEmpty(f.observationType)||!Array.isArray(f.sourceIds)||f.sourceIds.length===0||f.sourceIds.some((x:any)=>!sourceIds.has(x))) throw new Error('RESEARCH_VALIDATION:FINDING_PROVENANCE');
     if(f.settingDistribution!==undefined){
       if(!f.settingDistribution||typeof f.settingDistribution!=='object'||Array.isArray(f.settingDistribution)||Object.keys(f.settingDistribution).length===0) throw new Error('RESEARCH_VALIDATION:RAW_DISTRIBUTION');
-      for(const [k,v] of Object.entries(f.settingDistribution)) if(!/^([1-6])$/.test(k)||!(typeof v==='number'||nonEmpty(v))) throw new Error('RESEARCH_VALIDATION:RAW_DISTRIBUTION');
+      for(const [k,v] of Object.entries(f.settingDistribution)){if(!/^([1-6])$/.test(k))throw new Error('RESEARCH_VALIDATION:RAW_DISTRIBUTION');const validScalar=typeof v==='number'||nonEmpty(v);const validCategorical=v&&typeof v==='object'&&!Array.isArray(v)&&Object.keys(v).length>0&&Object.values(v).every((x:any)=>typeof x==='number'&&Number.isFinite(x)&&x>=0&&x<=1);if(!validScalar&&!validCategorical)throw new Error('RESEARCH_VALIDATION:RAW_DISTRIBUTION');}
     }
     if(f.inferred===true) throw new Error('RESEARCH_VALIDATION:INFERRED_VALUE_FORBIDDEN');
     if(f.categorySemantics!==undefined){
