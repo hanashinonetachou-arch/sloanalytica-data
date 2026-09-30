@@ -41,7 +41,7 @@ if(pkg.machine?.machineId!==MACHINE_ID||pkg.machine?.machineIdentity?.typeCode!=
 if(serialized.includes('S_CODE_GEASS_R2_CC_ZS')||serialized.includes('7S1251')||serialized.includes('R2 C.C.ver.')||serialized.includes('RT50')||serialized.includes('ゼロレクイエム'))throw new Error('R2_CONTAMINATION');
 if(featureIds.includes('bonus-total')||featureIds.some((x:string)=>['hbb-total','bb-total','reg','cherry','watermelon','common-bell-red-big','cherry-reg','chance-reg'].includes(x)))throw new Error('OVERLAPPING_LIKELIHOOD');
 if(!featureIds.includes('small-role-cherry-or-watermelon')||!featureIds.includes('reg50-infinite-at')||!featureIds.includes('at-end-screen-distribution'))throw new Error('EXPECTED_RUNTIME_FEATURE_MISSING');
-if(!(pkg.evidence?.evidences??[]).some((x:any)=>String(x.name).includes('設定6')))throw new Error('EXACT_EVIDENCE_MISSING');
+if(!(pkg.evidence?.evidences??[]).some((x:any)=>Array.isArray(x.confirmedSettings)&&x.confirmedSettings.length===1&&x.confirmedSettings[0]==='SET_6'))throw new Error('EXACT_EVIDENCE_MISSING');
 if(!(pkg.ui?.v8Sections??[]).length)throw new Error('UI_SECTIONS_EMPTY');
 if((pkg.ui?.v8Sections??[]).some((s:any)=>!(s.items??[]).length))throw new Error('UI_EMPTY_SECTION');
 if(serialized.includes('/n')||/opportunity model/i.test(serialized))throw new Error('INTERNAL_UI_TERM');
