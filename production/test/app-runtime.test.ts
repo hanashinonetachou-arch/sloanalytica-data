@@ -23,3 +23,5 @@ test('keeps internal runtime terminology out of research summary copy',()=>{cons
 
 
 test('fails closed when v8.5 play-data difference control is not declared',()=>{const p:any={...base,runtimeUi:{...base.runtimeUi,playInfo:undefined}};const d=buildAppRuntime(p,ref);assert.throws(()=>validateAppRuntimeDocument(d,p,ref),/UI_PLAY_INFO/)});
+
+test('materializes enumerated explicit setting constraints without invented weights',()=>{const ev={id:'EVI_e',sourceFindingId:'e',title:'示唆',description:'x',runtimePolicyControlled:false,evidenceItems:[{findingId:'e',label:'示唆',details:['246枚：設定2・4・6','舞坂：設定1・5・6濃厚']}]};const p:any={...base,settings:{status:'SOURCE_DERIVED',values:['SET_1','SET_2','SET_3','SET_4','SET_5','SET_6']},evidence:[ev],runtimeUi:{...base.runtimeUi,evidenceSections:[ev]}};const d=buildAppRuntime(p,ref);assert.deepEqual(d.package.evidence.evidences[0].confirmedSettings,['SET_2','SET_4','SET_6']);assert.deepEqual(d.package.evidence.evidences[1].confirmedSettings,['SET_1','SET_5','SET_6']);assert.doesNotThrow(()=>validateAppRuntimeDocument(d,p,ref))});
