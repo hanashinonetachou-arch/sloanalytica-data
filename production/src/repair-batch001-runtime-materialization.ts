@@ -151,7 +151,10 @@ function writeStageArtifact(batchId:string,machineId:string,stage:string,doc:any
 
 export function repairEvaluationDocument(source:any,research:any=null){
   const doc=structuredClone(source);
-  if(research){doc.evidenceCandidates=(research.findings??[]).filter((x:any)=>x.observationType==='evidence').map((x:any)=>({findingId:x.findingId,label:x.label,sourceIds:x.sourceIds??[],details:Array.isArray(x.details)?x.details:[]}));}
+  if(research){
+    doc.evidenceCandidates=(research.findings??[]).filter((x:any)=>x.observationType==='evidence').map((x:any)=>({findingId:x.findingId,label:x.label,sourceIds:x.sourceIds??[],details:Array.isArray(x.details)?x.details:[]}));
+    doc.blockedItems=structuredClone(research.blockedItems??[]);
+  }
   for(const e of doc.evaluations??[]){
     if(e.observationType!=='probability'||!exactBenchmarkTrialUniverses.has(e.trialUniverse))continue;
     const score=e.metrics?.maximumSelectionScore;
