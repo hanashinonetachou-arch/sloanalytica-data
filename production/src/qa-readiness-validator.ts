@@ -1,6 +1,7 @@
 import fs from 'node:fs';import path from 'node:path';import {pathToFileURL} from 'node:url';
 export const QA_REQUIRED_STAGES=['CANONICAL_UI','MACHINE_DATA','RUNTIME_POLICY','RUNTIME_PROJECTION','APP_RUNTIME','DISTRIBUTION'] as const;
 const fail=(m:string):never=>{throw new Error('QA_READINESS_FAILED:'+m)};
+const sameStrings=(a:unknown,b:unknown)=>Array.isArray(a)&&Array.isArray(b)&&a.length===b.length&&a.every((x,i)=>typeof x==='string'&&x===b[i]);
 export function validateMachineQaReadiness(machineId:string,stageStates:Record<string,any>,pkg:any,renderReport:any){
  for(const stage of QA_REQUIRED_STAGES){
   const s=stageStates?.[stage];
@@ -21,6 +22,16 @@ export function validateMachineQaReadiness(machineId:string,stageStates:Record<s
  }
  const uiEvidence=(pkg?.ui?.v8Sections??[]).filter((s:any)=>String(s?.id??'').startsWith('EVI_'));
  if(expected.length&&uiEvidence.length!==refs.length)fail(machineId+':EVIDENCE_UI_COVERAGE');
+ for(const ref of refs){
+  const items=Array.isArray(ref?.evidenceItems)?ref.evidenceItems:[];
+  if(items.length!==1)fail(machineId+':EVIDENCE_DETAIL_CONTRACT:'+String(ref?.id??'UNKNOWN'));
+  const details=items[0]?.details;
+  if(!Array.isArray(details)||details.length===0||details.some((x:any)=>typeof x!=='string'||!x.trim()))fail(machineId+':EVIDENCE_DETAILS_MISSING:'+String(ref?.id??'UNKNOWN'));
+  const section=uiEvidence.find((s:any)=>s?.id===ref?.id);
+  const node=section?.items?.find((i:any)=>i?.evidenceId===ref?.sourceFindingId);
+  const categories=node?.interaction?.type==='CATEGORY_COUNTERS'?node?.interaction?.categories?.map((c:any)=>c?.label):null;
+  if(!sameStrings(details,categories))fail(machineId+':EVIDENCE_CATEGORY_MISMATCH:'+String(ref?.id??'UNKNOWN'));
+ }
  if(renderReport?.schemaVersion!=='rendered-ui-validation-v1'||renderReport?.machineId!==machineId)fail(machineId+':RENDER_REPORT_IDENTITY');
  if(renderReport?.status!=='PASS')fail(machineId+':RENDERED_UI_VALIDATION');
  if(renderReport?.contractVersion!=='rendered-canonical-ui-v1'||renderReport?.renderer!=='MANIFEST_V8'||renderReport?.source!=='CANONICAL_UI'||renderReport?.manifestRevision!=='8.5')fail(machineId+':RENDER_CONTRACT');
