@@ -1,3 +1,4 @@
+import {evidenceSemanticExplanation} from './evidence-semantics.ts';
 const heldReason=(x:any)=>x?.status==='HELD_NO_JOINT_MODEL'?'複数要素をまとめて評価するための条件が確定していないため、現在は数値推測に使用しません。':'現在は数値推測に必要な条件が確定していません。';
 const probability=(v:any):number=>{if(typeof v==='number'&&Number.isFinite(v)&&v>=0&&v<=1)return v;if(typeof v==='string'&&v.startsWith('1/')){const d=Number(v.slice(2));if(Number.isFinite(d)&&d>0)return 1/d}throw new Error('APP_RUNTIME_PROBABILITY_INVALID:'+String(v))};
 const settingKey=(k:string)=>k.startsWith('SET_')?k:'SET_'+k;
@@ -50,14 +51,10 @@ const numericUiSections=(projection:any)=>{
   throw new Error('APP_RUNTIME_MODEL_UNSUPPORTED:'+f.model);
  });
 };
-const evidenceLabelHasExactConstraint=(label:string)=>/設定[1-6]以上|設定[1-6]否定|設定[1-6](?:[・,／\\/][1-6])+(?:濃厚)?|(?:^|[:：=]\\s*)設定[1-6](?:濃厚)?\\s*$/.test(label);
 const evidenceExplanation=(s:any)=>{
- const labels=(s.evidenceItems??[]).flatMap((e:any)=>{const details=Array.isArray(e.details)?e.details.filter((x:any)=>typeof x==='string'&&x.trim()):[];return details.length?details:[e.label].filter(Boolean)});
- const hasExact=labels.some((label:string)=>evidenceLabelHasExactConstraint(label));
- const hasDirectional=labels.some((label:string)=>!evidenceLabelHasExactConstraint(label)&&/示唆|期待度|デフォルト|基本/.test(label));
- if(hasExact&&hasDirectional)return '設定確定・設定否定など条件が明確な項目は設定候補の絞り込みに反映します。設定別の出現率が公表・確認されていない示唆は、観測回数を記録できますが、現在の設定推測計算には直接反映していません。設定別の出現率が確認できた場合は、今後のデータ更新で設定推測へ反映できる可能性があります。';
- if(hasExact)return '設定確定・設定否定など条件が明確な項目は、観測すると設定候補の絞り込みに反映します。';
- return 'この示唆については設定別の出現率が公表・確認されていないため、観測回数を記録できますが、現在の設定推測計算には直接反映していません。設定別の出現率が確認できた場合は、今後のデータ更新で設定推測へ反映できる可能性があります。';
+ const types=[...new Set((s.evidenceItems??[]).map((e:any)=>e.semanticType).filter(Boolean))];
+ if(types.includes('EXACT_CONSTRAINT')&&types.some((x:any)=>x!=='EXACT_CONSTRAINT'))return evidenceSemanticExplanation('EXACT_CONSTRAINT')+' '+types.filter((x:any)=>x!=='EXACT_CONSTRAINT').map((x:any)=>evidenceSemanticExplanation(x)).join(' ');
+ return evidenceSemanticExplanation((types[0]??'DISPLAY_ONLY') as any);
 };
 const evidenceUiSections=(projection:any)=>(projection.runtimeUi?.evidenceSections??[]).map((s:any)=>({id:s.id,title:s.title,description:evidenceExplanation(s),collapsible:s.collapsible!==false,defaultExpanded:s.defaultExpanded===true,descriptionPresentation:s.descriptionPresentation??{collapsible:true,label:'説明',defaultExpanded:false},items:(s.evidenceItems??[]).map((e:any)=>{const details=Array.isArray(e.details)?e.details.filter((x:any)=>typeof x==='string'&&x.trim()):[];const labels=details.length?details:[e.label];return {id:'REF_'+e.findingId,evidenceId:e.findingId,label:e.label,interaction:{type:'CATEGORY_COUNTERS',preservePriorObservations:true,showAccumulatedCounts:true,categoryCoverage:'NON_EXHAUSTIVE',totalOpportunities:'NONE',categories:labels.map((label:string,i:number)=>({id:`REF_${e.findingId}_${i+1}`,inputId:`REF_${e.findingId}_${i+1}`,label,meaning:'観測回数'}))}}})}));
 const toUi=(projection:any)=>{const src=projection.runtimeUi??{};return {schemaVersion:'v8.5-runtime-ui-v1',contractVersion:'runtime-ui-v8',source:'CANONICAL_UI',sourceSchemaVersion:src.schemaVersion,manifestRevision:'8.5',playInfo:src.playInfo,accordion:{enabled:true,singleOpen:true},quickInput:{enabled:false},v8Sections:[...numericUiSections(projection),...evidenceUiSections(projection)]}};
@@ -118,7 +115,7 @@ const materializedEvidences=(projection:any)=>{
   const details=Array.isArray(e.details)?e.details.filter((x:any)=>typeof x==='string'&&x.trim()):[];
   const labels=details.length?details:[e.label];
   return labels.flatMap((label:string,i:number)=>{
-   const constraint=evidenceConstraintFromLabel(label,allSettings);if(!constraint)return [];
+   if(e.semanticType!=='EXACT_CONSTRAINT')return [];const constraint=evidenceConstraintFromLabel(label,allSettings);if(!constraint)throw new Error('APP_RUNTIME_EXACT_CONSTRAINT_UNPARSEABLE:'+e.findingId+':'+label);
    return [{id:`${e.findingId}__${i+1}`,name:label,displayName:label,inputId:`REF_${e.findingId}_${i+1}`,details:[label],confirmedSettings:constraint.confirmedSettings,deniedSettings:constraint.deniedSettings,hasImage:false,type:'SETTING_CONSTRAINT',sourceEvidenceRefs:[e.findingId]}];
   });
  }));
