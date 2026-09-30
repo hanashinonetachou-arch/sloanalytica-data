@@ -2,14 +2,14 @@ export const EVIDENCE_SEMANTIC_TYPES=['EXACT_CONSTRAINT','PROBABILITY_BACKED','P
 export type EvidenceSemanticType=typeof EVIDENCE_SEMANTIC_TYPES[number];
 const exact=(s:string)=>/設定[1-6]以上|設定[1-6]否定|設定[1-6](?:[・,／\\/][1-6])+(?:濃厚)?|(?:^|[:：=]\\s*)設定[1-6](?:濃厚)?\\s*$/.test(s);
 const directional=(s:string)=>/示唆|期待度|デフォルト|基本|奇数|偶数|高設定|低設定/.test(s);
+export function classifyEvidenceLabel(label:string):EvidenceSemanticType{if(exact(label))return 'EXACT_CONSTRAINT';if(directional(label))return 'PROBABILITY_UNKNOWN';return 'DISPLAY_ONLY';}
 export function classifyEvidenceSemantic(e:any):EvidenceSemanticType{
  if(e?.status==='BLOCK'||e?.blocked===true)return 'BLOCK';
  if(e?.settingDistribution&&typeof e.settingDistribution==='object'&&Object.keys(e.settingDistribution).length>0)return 'PROBABILITY_BACKED';
  const details=Array.isArray(e?.details)?e.details.filter((x:any)=>typeof x==='string'&&x.trim()):[];
  const labels=details.length?details:[e?.label].filter((x:any)=>typeof x==='string'&&x.trim());
- if(labels.length&&labels.every(exact))return 'EXACT_CONSTRAINT';
- if(labels.some(exact))return 'EXACT_CONSTRAINT';
- if(labels.some(directional))return 'PROBABILITY_UNKNOWN';
+ const types=[...new Set(labels.map(classifyEvidenceLabel))];
+ if(types.length===1)return types[0];
  return 'DISPLAY_ONLY';
 }
 export function evidenceSemanticExplanation(type:EvidenceSemanticType){
