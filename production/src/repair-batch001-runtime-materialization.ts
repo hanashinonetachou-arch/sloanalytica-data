@@ -200,6 +200,7 @@ export function repairBatch(batchId:string){
     const oldEligibilityStage=readJson<any>(stagePath(batchId,machineId,'ELIGIBILITY'));
     const eligibility=structuredClone(refDoc(oldEligibilityStage.authoritativeOutputRef));
     eligibility.evidenceCandidates=structuredClone(repairedEvaluation.evidenceCandidates??[]);
+    eligibility.blockedItems=structuredClone(repairedEvaluation.blockedItems??[]);
     validateEligibilityDocument(eligibility,repairedEvaluation,research);
     const eligibilityRef=writeStageArtifact(batchId,machineId,'ELIGIBILITY',eligibility,[researchArtifact,evaluationRef]);
 
