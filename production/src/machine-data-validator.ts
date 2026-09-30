@@ -1,7 +1,7 @@
 import fs from 'node:fs';
 import crypto from 'node:crypto';
 export const MACHINE_DATA_VALIDATOR_CONTRACT='machine-data-v1';
-const canonical=(v:any):string=>Array.isArray(v)?'['+v.map(canonical).join(',')+']':v&&typeof v==='object'?'{'+Object.keys(v).sort().map(k=>JSON.stringify(k)+':'+canonical(v[k])).join(',')+'}':JSON.stringify(v);
+const canonical=(v:any):string=>Array.isArray(v)?'['+v.map(canonical).join(',')+']':v&&typeof v==='object'?'{'+Object.keys(v).filter(k=>v[k]!==undefined).sort().map(k=>JSON.stringify(k)+':'+canonical(v[k])).join(',')+'}':JSON.stringify(v);
 const fail=(m:string):never=>{throw new Error('MACHINE_DATA_VALIDATION_FAILED:'+m)};
 const settingKeys=(candidate:any)=>{const out=new Set<string>();for(const c of candidate?.candidates??[])for(const k of Object.keys(c?.settingDistribution??{}))out.add(k);return [...out].sort((a,b)=>Number(a)-Number(b))}
 const researchSettingKeys=(research:any)=>{const out=new Set<string>();for(const f of research?.findings??[])for(const k of Object.keys(f?.settingDistribution??{}))out.add(k);return [...out].sort((a,b)=>Number(a)-Number(b))}
