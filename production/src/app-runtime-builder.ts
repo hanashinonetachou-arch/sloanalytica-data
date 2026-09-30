@@ -50,7 +50,7 @@ const numericUiSections=(projection:any)=>{
   throw new Error('APP_RUNTIME_MODEL_UNSUPPORTED:'+f.model);
  });
 };
-const evidenceSemanticRows=(e:any)=>{const details=Array.isArray(e.details)&&e.details.length?e.details:[e.label];const rows=Array.isArray(e.categorySemantics)?e.categorySemantics:[];if(rows.length!==details.length)throw new Error('APP_RUNTIME_EVIDENCE_SEMANTICS_REQUIRED:'+e.findingId);return details.map((label:string,i:number)=>{const row=rows[i];if(row?.label!==label||!['EXACT_CONSTRAINT','PROBABILITY_BACKED','PROBABILITY_UNKNOWN','DISPLAY_ONLY','BLOCK'].includes(row?.semantic))throw new Error('APP_RUNTIME_EVIDENCE_SEMANTIC_INVALID:'+e.findingId+':'+i);return {label,semantic:row.semantic};});};
+const evidenceSemanticRows=(e:any)=>{const details=Array.isArray(e.details)&&e.details.length?e.details:[e.label];const rows=Array.isArray(e.categorySemantics)?e.categorySemantics:[];if(rows.length!==details.length)throw new Error('APP_RUNTIME_EVIDENCE_SEMANTICS_REQUIRED:'+e.findingId);return details.map((label:string,i:number)=>{const row=rows[i];if(row?.label!==label||!['EXACT_CONSTRAINT','PROBABILITY_BACKED','PROBABILITY_UNKNOWN','DISPLAY_ONLY','BLOCK'].includes(row?.semantic))throw new Error('APP_RUNTIME_EVIDENCE_SEMANTIC_INVALID:'+e.findingId+':'+i);return {label,semantic:row.semantic,confirmedSettings:row.confirmedSettings,deniedSettings:row.deniedSettings,observationContext:row.observationContext};});};
 const evidenceExplanation=(s:any)=>{
  const semantics=(s.evidenceItems??[]).flatMap((e:any)=>evidenceSemanticRows(e).map((x:any)=>x.semantic));
  const hasExact=semantics.includes('EXACT_CONSTRAINT'),hasBacked=semantics.includes('PROBABILITY_BACKED'),hasUnknown=semantics.includes('PROBABILITY_UNKNOWN');
@@ -120,7 +120,7 @@ const materializedEvidences=(projection:any)=>{
   const rows=evidenceSemanticRows(e);
   return rows.flatMap(({label,semantic}:any,i:number)=>{
    if(semantic!=='EXACT_CONSTRAINT')return [];
-   const constraint=evidenceConstraintFromLabel(label,allSettings);if(!constraint)throw new Error('APP_RUNTIME_EXACT_CONSTRAINT_UNPARSEABLE:'+e.findingId+':'+label);
+   const structured=(Array.isArray(arguments as any),null);const constraint=Array.isArray((rows as any))?null:null;const explicit=(arguments as any); const parsed=evidenceConstraintFromLabel(label,allSettings);const constraint=parsed;if(!constraint)throw new Error('APP_RUNTIME_EXACT_CONSTRAINT_UNPARSEABLE:'+e.findingId+':'+label);
    return [{id:`${e.findingId}__${i+1}`,name:label,displayName:label,inputId:`REF_${e.findingId}_${i+1}`,details:[label],confirmedSettings:constraint.confirmedSettings,deniedSettings:constraint.deniedSettings,hasImage:false,type:'SETTING_CONSTRAINT',sourceEvidenceRefs:[e.findingId]}];
   });
  }));
