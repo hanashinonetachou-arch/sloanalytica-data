@@ -25,7 +25,7 @@ const base=()=>({
   schemaVersion:'research-v1',
   manifestVersion:'8.5',
   batchId:'b',
-  machineId:'S_CODE_GEASS3_CC_FS',
+  machineId:'S_CODE_GEASS_3_CC_FS',
   machineName:'パチスロ コードギアス 反逆のルルーシュ3 C.C.&Kallen ver.',
   workId:'w',
   machineIdentity:{
