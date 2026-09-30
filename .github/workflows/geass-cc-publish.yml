@@ -1,0 +1,65 @@
+name: Publish Code Geass C.C. Calibration
+on:
+  push:
+    branches:
+      - production/calibration-geass-cc-run
+    paths:
+      - production/.geass-cc-publish-trigger
+permissions:
+  contents: write
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: production/calibration-geass-cc-run
+          fetch-depth: 0
+      - name: Verify App Runtime is authoritative
+        shell: bash
+        run: |
+          set -euo pipefail
+          B=batch-20260930-calibration-geass-cc-r2
+          M=S_CODE_GEASS_R2_CC_ZS
+          test "$(jq -r '.state' production/batches/$B/machines/$M/stages/APP_RUNTIME.json)" = "COMPLETE"
+          test "$(jq -r '.state' production/batches/$B/machines/$M/stages/DISTRIBUTION.json)" = "READY"
+          jq '.package' production/batches/$B/artifacts/$M/app_runtime/result.json > /tmp/machine-package.json
+      - name: Publish package and catalog metadata
+        shell: bash
+        run: |
+          set -euo pipefail
+          M=S_CODE_GEASS_R2_CC_ZS
+          git fetch origin prototype-multi-machine
+          git worktree add /tmp/dist origin/prototype-multi-machine
+          mkdir -p /tmp/dist/machines/$M
+          cp /tmp/machine-package.json /tmp/dist/machines/$M/machine-package.json
+          SHA=$(sha256sum /tmp/dist/machines/$M/machine-package.json | awk '{print $1}')
+          SIZE=$(wc -c < /tmp/dist/machines/$M/machine-package.json | tr -d ' ')
+          VER=$(jq -r '.machine.machineDataVersion' /tmp/machine-package.json)
+          NOW=$(date -u +%Y-%m-%dT%H:%M:%S.000Z)
+          URL="https://raw.githubusercontent.com/hanashinonetachou-arch/sloanalytica-data/prototype-multi-machine/machines/$M/machine-package.json"
+          jq --arg id "$M" --arg ver "$VER" --arg sha "$SHA" --argjson size "$SIZE" --arg now "$NOW" --arg url "$URL" '
+            .generatedAt=$now |
+            .machines |= (map(select(.machineId!=$id)) + [{
+              machineId:$id,displayName:"パチスロ コードギアス 反逆のルルーシュR2 C.C.ver.",manufacturer:"サミー",
+              machineDataVersion:$ver,requiredCapabilities:["binomial","evidence"],packageUrl:$url,sha256:$sha,packageSizeBytes:$size,
+              status:"available",addedAt:$now,updatedAt:$now,introductionDate:"2018-01-09",machineType:"MEDAL",gameType:"A_RT"
+            }])' /tmp/dist/catalog.json > /tmp/catalog.json
+          mv /tmp/catalog.json /tmp/dist/catalog.json
+          jq --arg id "$M" --arg ver "$VER" --arg now "$NOW" '
+            .generatedAt=$now |
+            .machines |= (map(select(.machineId!=$id)) + [{
+              provisionalRegistrationId:null,registrationId:null,machineId:$id,
+              displayName:"パチスロ コードギアス 反逆のルルーシュR2 C.C.ver.",manufacturer:"サミー",
+              releaseDate:"2018-01-09",releaseDateStatus:"VERIFIED",introducedAt:"2018-01-09",
+              marketStatus:"UNKNOWN",marketLastCheckedAt:null,marketSources:[],appStatus:"INCLUDED",
+              researchStatus:"RESEARCH_DATA_PRESENT",fieldTestStatus:"NOT_TESTED",machineDataVersion:$ver,
+              priority:"CALIBRATION",notes:"Manifest v8.5 unknown-machine calibration; source Production State batch-20260930-calibration-geass-cc-r2."
+            }])' /tmp/dist/machine-registry.json > /tmp/registry.json
+          mv /tmp/registry.json /tmp/dist/machine-registry.json
+          cd /tmp/dist
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git add catalog.json machine-registry.json machines/$M/machine-package.json
+          git commit -m "publish: Code Geass R2 C.C. v8.5 calibration [skip ci]"
+          git push origin HEAD:prototype-multi-machine
