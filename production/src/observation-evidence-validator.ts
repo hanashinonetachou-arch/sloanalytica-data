@@ -1,4 +1,5 @@
 import {buildHighLowDiscrimination} from './high-low-discrimination.ts';
+import {classifyEvidenceCategory,EVIDENCE_SEMANTICS} from './observation-evidence-builder.ts';
 export const OBSERVATION_EVIDENCE_VALIDATOR_CONTRACT='observation-evidence-v1';
 const canonical=(v:any):string=>Array.isArray(v)?`[${v.map(canonical).join(',')}]`:v&&typeof v==='object'?`{${Object.keys(v).sort().map(k=>JSON.stringify(k)+':'+canonical(v[k])).join(',')}}`:JSON.stringify(v);
 const fail=(m:string):never=>{throw new Error('OBSERVATION_EVIDENCE_VALIDATION_FAILED:'+m)};
@@ -27,7 +28,7 @@ export function validateObservationEvidenceDocument(doc:any,candidate:any,resear
  const expectedEvidence=candidate.evidenceCandidates??[];
  if(doc.evidence.length!==expectedEvidence.length)fail('EVIDENCE_COVERAGE');
  const evBy=new Map(doc.evidence.map((x:any)=>[x.findingId,x]));
- for(const e of expectedEvidence){const x:any=evBy.get(e.findingId);if(!x||x.label!==e.label||canonical(x.sourceIds)!==canonical(e.sourceIds??[])||canonical(x.details??[])!==canonical(e.details??[])||x.runtimePolicyControlled!==false||x.status!=='SOURCE_REFERENCED')fail('EVIDENCE:'+e.findingId)}
+ for(const e of expectedEvidence){const x:any=evBy.get(e.findingId);if(!x||x.label!==e.label||canonical(x.sourceIds)!==canonical(e.sourceIds??[])||canonical(x.details??[])!==canonical(e.details??[])||x.runtimePolicyControlled!==false||x.status!=='SOURCE_REFERENCED')fail('EVIDENCE:'+e.findingId);const details=Array.isArray(e.details)&&e.details.length?e.details:[e.label];if(!Array.isArray(x.categorySemantics)||x.categorySemantics.length!==details.length)fail('EVIDENCE_SEMANTIC_COVERAGE:'+e.findingId);for(let i=0;i<details.length;i++){const c=x.categorySemantics[i];const expected=Array.isArray(e.categorySemantics)&&e.categorySemantics.length===details.length?e.categorySemantics[i]:{label:details[i],semantic:classifyEvidenceCategory(details[i],e,candidate.blockedItems??[])};if(c?.label!==details[i]||!EVIDENCE_SEMANTICS.includes(c?.semantic)||canonical(c)!==canonical(expected))fail('EVIDENCE_SEMANTIC:'+e.findingId+':'+i)}}
  const sourceIds=new Set((research.sources??[]).map((x:any)=>x.sourceId));
  for(const e of doc.evidence)for(const id of e.sourceIds)if(!sourceIds.has(id))fail('SOURCE_UNRESOLVED:'+id);
  if(canonical(doc.sourceReferences)!==canonical(research.sources??[]))fail('SOURCE_COPY');

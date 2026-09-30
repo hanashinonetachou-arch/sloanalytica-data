@@ -34,6 +34,10 @@ export function validateResearchArtifacts(s:RepoStore,a:Attempt,r:WorkResult){
       for(const [k,v] of Object.entries(f.settingDistribution)) if(!/^([1-6])$/.test(k)||!(typeof v==='number'||nonEmpty(v))) throw new Error('RESEARCH_VALIDATION:RAW_DISTRIBUTION');
     }
     if(f.inferred===true) throw new Error('RESEARCH_VALIDATION:INFERRED_VALUE_FORBIDDEN');
+    if(f.categorySemantics!==undefined){
+      if(f.observationType!=='evidence'||!Array.isArray(f.categorySemantics)||!Array.isArray(f.details)||f.categorySemantics.length!==f.details.length) throw new Error('RESEARCH_VALIDATION:EVIDENCE_SEMANTIC_COVERAGE');
+      for(let i=0;i<f.categorySemantics.length;i++){const c=f.categorySemantics[i];if(c?.label!==f.details[i]||!['EXACT_CONSTRAINT','PROBABILITY_BACKED','PROBABILITY_UNKNOWN','DISPLAY_ONLY','BLOCK'].includes(c?.semantic)) throw new Error('RESEARCH_VALIDATION:EVIDENCE_SEMANTIC');if(c.semantic==='EXACT_CONSTRAINT'&&!Array.isArray(c.confirmedSettings)&&!Array.isArray(c.deniedSettings)) throw new Error('RESEARCH_VALIDATION:EXACT_CONSTRAINT_PAYLOAD');}
+    }
   }
   for(const b of d.blockedItems){
     if(!nonEmpty(b.blockId)||!nonEmpty(b.label)||!nonEmpty(b.reason)||!nonEmpty(b.reevaluationCondition)) throw new Error('RESEARCH_VALIDATION:BLOCK_REEVALUATION_REQUIRED');

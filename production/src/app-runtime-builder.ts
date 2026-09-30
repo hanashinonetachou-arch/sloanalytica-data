@@ -50,16 +50,17 @@ const numericUiSections=(projection:any)=>{
   throw new Error('APP_RUNTIME_MODEL_UNSUPPORTED:'+f.model);
  });
 };
-const evidenceLabelHasExactConstraint=(label:string)=>/設定[1-6]以上|設定[1-6]否定|設定[1-6](?:[・,／\\/][1-6])+(?:濃厚)?|(?:^|[:：=]\\s*)設定[1-6](?:濃厚)?\\s*$/.test(label);
+const evidenceSemanticRows=(e:any)=>{const details=Array.isArray(e.details)&&e.details.length?e.details:[e.label];const rows=Array.isArray(e.categorySemantics)?e.categorySemantics:[];if(rows.length!==details.length)throw new Error('APP_RUNTIME_EVIDENCE_SEMANTICS_REQUIRED:'+e.findingId);return details.map((label:string,i:number)=>{const row=rows[i];if(row?.label!==label||!['EXACT_CONSTRAINT','PROBABILITY_BACKED','PROBABILITY_UNKNOWN','DISPLAY_ONLY','BLOCK'].includes(row?.semantic))throw new Error('APP_RUNTIME_EVIDENCE_SEMANTIC_INVALID:'+e.findingId+':'+i);return {label,semantic:row.semantic,confirmedSettings:row.confirmedSettings,deniedSettings:row.deniedSettings,observationContext:row.observationContext};});};
 const evidenceExplanation=(s:any)=>{
- const labels=(s.evidenceItems??[]).flatMap((e:any)=>{const details=Array.isArray(e.details)?e.details.filter((x:any)=>typeof x==='string'&&x.trim()):[];return details.length?details:[e.label].filter(Boolean)});
- const hasExact=labels.some((label:string)=>evidenceLabelHasExactConstraint(label));
- const hasDirectional=labels.some((label:string)=>!evidenceLabelHasExactConstraint(label)&&/示唆|期待度|デフォルト|基本/.test(label));
- if(hasExact&&hasDirectional)return '設定確定・設定否定など条件が明確な項目は設定候補の絞り込みに反映します。設定別の出現率が公表・確認されていない示唆は、観測回数を記録できますが、現在の設定推測計算には直接反映していません。設定別の出現率が確認できた場合は、今後のデータ更新で設定推測へ反映できる可能性があります。';
+ const semantics=(s.evidenceItems??[]).flatMap((e:any)=>evidenceSemanticRows(e).map((x:any)=>x.semantic));
+ const hasExact=semantics.includes('EXACT_CONSTRAINT'),hasBacked=semantics.includes('PROBABILITY_BACKED'),hasUnknown=semantics.includes('PROBABILITY_UNKNOWN');
+ if(hasExact&&(hasUnknown||hasBacked))return hasUnknown?'設定確定・設定否定など条件が明確な項目は設定候補の絞り込みに反映します。設定別の出現率が公表・確認されていない示唆は、観測回数を記録できますが、現在の設定推測計算には直接反映していません。設定別の出現率が確認できた場合は、今後のデータ更新で設定推測へ反映できる可能性があります。':'設定確定・設定否定など条件が明確な項目は設定候補の絞り込みに反映し、設定別出現率が確認できる示唆は確認済みの分布に基づいて設定推測へ使用します。';
  if(hasExact)return '設定確定・設定否定など条件が明確な項目は、観測すると設定候補の絞り込みに反映します。';
- return 'この示唆については設定別の出現率が公表・確認されていないため、観測回数を記録できますが、現在の設定推測計算には直接反映していません。設定別の出現率が確認できた場合は、今後のデータ更新で設定推測へ反映できる可能性があります。';
+ if(hasBacked&&!hasUnknown)return '設定別の出現率が確認できる示唆は、確認済みの分布に基づいて設定推測へ使用します。';
+ if(hasUnknown)return 'この示唆については設定別の出現率が公表・確認されていないため、観測回数を記録できますが、現在の設定推測計算には直接反映していません。設定別の出現率が確認できた場合は、今後のデータ更新で設定推測へ反映できる可能性があります。';
+ return 'この項目は観測回数を記録するための参考情報で、現在の設定推測計算には直接反映していません。';
 };
-const evidenceUiSections=(projection:any)=>(projection.runtimeUi?.evidenceSections??[]).map((s:any)=>({id:s.id,title:s.title,description:evidenceExplanation(s),collapsible:s.collapsible!==false,defaultExpanded:s.defaultExpanded===true,descriptionPresentation:s.descriptionPresentation??{collapsible:true,label:'説明',defaultExpanded:false},items:(s.evidenceItems??[]).map((e:any)=>{const details=Array.isArray(e.details)?e.details.filter((x:any)=>typeof x==='string'&&x.trim()):[];const labels=details.length?details:[e.label];return {id:'REF_'+e.findingId,evidenceId:e.findingId,label:e.label,interaction:{type:'CATEGORY_COUNTERS',preservePriorObservations:true,showAccumulatedCounts:true,categoryCoverage:'NON_EXHAUSTIVE',totalOpportunities:'NONE',categories:labels.map((label:string,i:number)=>({id:`REF_${e.findingId}_${i+1}`,inputId:`REF_${e.findingId}_${i+1}`,label,meaning:'観測回数'}))}}})}));
+const evidenceUiSections=(projection:any)=>(projection.runtimeUi?.evidenceSections??[]).map((s:any)=>({id:s.id,title:s.title,description:evidenceExplanation(s),collapsible:s.collapsible!==false,defaultExpanded:s.defaultExpanded===true,descriptionPresentation:s.descriptionPresentation??{collapsible:true,label:'説明',defaultExpanded:false},items:(s.evidenceItems??[]).map((e:any)=>{const details=Array.isArray(e.details)?e.details.filter((x:any)=>typeof x==='string'&&x.trim()):[];const labels=evidenceSemanticRows(e).map((x:any)=>x.label);return {id:'REF_'+e.findingId,evidenceId:e.findingId,label:e.label,interaction:{type:'CATEGORY_COUNTERS',preservePriorObservations:true,showAccumulatedCounts:true,categoryCoverage:'NON_EXHAUSTIVE',totalOpportunities:'NONE',categories:labels.map((label:string,i:number)=>({id:`REF_${e.findingId}_${i+1}`,inputId:`REF_${e.findingId}_${i+1}`,label,meaning:'観測回数'}))}}})}));
 const toUi=(projection:any)=>{const src=projection.runtimeUi??{};return {schemaVersion:'v8.5-runtime-ui-v1',contractVersion:'runtime-ui-v8',source:'CANONICAL_UI',sourceSchemaVersion:src.schemaVersion,manifestRevision:'8.5',playInfo:src.playInfo,accordion:{enabled:true,singleOpen:true},quickInput:{enabled:false},v8Sections:[...numericUiSections(projection),...evidenceUiSections(projection)]}};
 const buildInputs=(projection:any)=>{
  const out:any[]=[];const seen=new Set<string>();let order=1;
@@ -74,7 +75,7 @@ const buildInputs=(projection:any)=>{
  for(const s of projection.evidence??[]){
   for(const e of s.evidenceItems??[]){
    const details=Array.isArray(e.details)?e.details.filter((x:any)=>typeof x==='string'&&x.trim()):[];
-   const labels=details.length?details:[e.label];
+   const labels=evidenceSemanticRows(e).map((x:any)=>x.label);
    for(const [i,label] of labels.entries()){
     const id=`REF_${e.findingId}_${i+1}`;if(seen.has(id))continue;seen.add(id);
     out.push({id,name:label,category:'EVIDENCE_REFERENCE',type:'counter',unit:'回',defaultValue:0,minimum:0,displayOrder:order++,inferenceRole:'DISPLAY_ONLY'});
@@ -116,9 +117,11 @@ const materializedEvidences=(projection:any)=>{
  const allSettings=Array.isArray(projection.settings?.values)?projection.settings.values:[];
  return (projection.evidence??[]).flatMap((s:any)=>(s.evidenceItems??[]).flatMap((e:any)=>{
   const details=Array.isArray(e.details)?e.details.filter((x:any)=>typeof x==='string'&&x.trim()):[];
-  const labels=details.length?details:[e.label];
-  return labels.flatMap((label:string,i:number)=>{
-   const constraint=evidenceConstraintFromLabel(label,allSettings);if(!constraint)return [];
+  const rows=evidenceSemanticRows(e);
+  return rows.flatMap(({label,semantic,confirmedSettings,deniedSettings}:any,i:number)=>{
+   if(semantic!=='EXACT_CONSTRAINT')return [];
+   const explicitConstraint=(Array.isArray(confirmedSettings)||Array.isArray(deniedSettings))?{confirmedSettings:(confirmedSettings??[]).map(settingKey),deniedSettings:(deniedSettings??[]).map(settingKey)}:null;
+   const constraint=explicitConstraint??evidenceConstraintFromLabel(label,allSettings);if(!constraint)throw new Error('APP_RUNTIME_EXACT_CONSTRAINT_UNPARSEABLE:'+e.findingId+':'+label);
    return [{id:`${e.findingId}__${i+1}`,name:label,displayName:label,inputId:`REF_${e.findingId}_${i+1}`,details:[label],confirmedSettings:constraint.confirmedSettings,deniedSettings:constraint.deniedSettings,hasImage:false,type:'SETTING_CONSTRAINT',sourceEvidenceRefs:[e.findingId]}];
   });
  }));

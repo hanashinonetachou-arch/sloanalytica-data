@@ -51,6 +51,9 @@ export function validateAppRuntimeDocument(doc:any,projection:any,projectionArti
  const expectedEvidenceIdSet=new Set(expectedEvidenceIds);
  for(const def of p.evidence.evidences??[]){const sourceIds=Array.isArray(def.sourceEvidenceRefs)?def.sourceEvidenceRefs:[];if(sourceIds.length!==1||!expectedEvidenceIdSet.has(sourceIds[0]))fail('EVIDENCE_MATERIALIZATION');}
  const evidenceSourceBy=new Map((projection.evidence??[]).flatMap((s:any)=>(s.evidenceItems??[]).map((e:any)=>[e.findingId,e])));
+ const semantics=new Set(['EXACT_CONSTRAINT','PROBABILITY_BACKED','PROBABILITY_UNKNOWN','DISPLAY_ONLY','BLOCK']);let expectedExactConstraints=0;
+ for(const src of evidenceSourceBy.values() as any){const details=Array.isArray(src.details)&&src.details.length?src.details:[src.label];const rows=Array.isArray(src.categorySemantics)?src.categorySemantics:[];if(rows.length!==details.length)fail('EVIDENCE_SEMANTIC_COVERAGE:'+src.findingId);for(let i=0;i<details.length;i++){if(rows[i]?.label!==details[i]||!semantics.has(rows[i]?.semantic))fail('EVIDENCE_SEMANTIC:'+src.findingId+':'+i);if(rows[i].semantic==='EXACT_CONSTRAINT')expectedExactConstraints++;}}
+ if((p.evidence.evidences??[]).length!==expectedExactConstraints)fail('EVIDENCE_EXACT_CONSTRAINT_COVERAGE');
  for(const e of p.evidence.evidences??[]){
   const sourceId=Array.isArray(e.sourceEvidenceRefs)?e.sourceEvidenceRefs[0]:undefined;const src:any=evidenceSourceBy.get(sourceId);
   const hasConstraint=(Array.isArray(e.confirmedSettings)&&e.confirmedSettings.length>0)||(Array.isArray(e.deniedSettings)&&e.deniedSettings.length>0);
