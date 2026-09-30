@@ -118,9 +118,10 @@ const materializedEvidences=(projection:any)=>{
  return (projection.evidence??[]).flatMap((s:any)=>(s.evidenceItems??[]).flatMap((e:any)=>{
   const details=Array.isArray(e.details)?e.details.filter((x:any)=>typeof x==='string'&&x.trim()):[];
   const rows=evidenceSemanticRows(e);
-  return rows.flatMap(({label,semantic}:any,i:number)=>{
+  return rows.flatMap(({label,semantic,confirmedSettings,deniedSettings}:any,i:number)=>{
    if(semantic!=='EXACT_CONSTRAINT')return [];
-   const structured=(Array.isArray(arguments as any),null);const constraint=Array.isArray((rows as any))?null:null;const explicit=(arguments as any); const parsed=evidenceConstraintFromLabel(label,allSettings);const constraint=parsed;if(!constraint)throw new Error('APP_RUNTIME_EXACT_CONSTRAINT_UNPARSEABLE:'+e.findingId+':'+label);
+   const explicitConstraint=(Array.isArray(confirmedSettings)||Array.isArray(deniedSettings))?{confirmedSettings:(confirmedSettings??[]).map(settingKey),deniedSettings:(deniedSettings??[]).map(settingKey)}:null;
+   const constraint=explicitConstraint??evidenceConstraintFromLabel(label,allSettings);if(!constraint)throw new Error('APP_RUNTIME_EXACT_CONSTRAINT_UNPARSEABLE:'+e.findingId+':'+label);
    return [{id:`${e.findingId}__${i+1}`,name:label,displayName:label,inputId:`REF_${e.findingId}_${i+1}`,details:[label],confirmedSettings:constraint.confirmedSettings,deniedSettings:constraint.deniedSettings,hasImage:false,type:'SETTING_CONSTRAINT',sourceEvidenceRefs:[e.findingId]}];
   });
  }));
