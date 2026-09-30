@@ -41,6 +41,13 @@ jobs:
           mkdir -p "batches/$B/artifacts/$M/research"
           jq --arg b "$B" --arg w "$W" '.batchId=$b | .workId=$w' test-fixtures/code-geass-r2-cc/research.json > "batches/$B/artifacts/$M/research/result.json"
           npm run complete-research -- "$B" "$M"
+      - name: Bind approved v8.5 baseline Runtime Policy
+        working-directory: production
+        shell: bash
+        run: |
+          cat > batches/batch-20260930-calibration-geass-cc/runtime-policy-config.json <<'JSON'
+          {"schemaVersion":"runtime-policy-config-v1","manifestVersion":"8.5","policyVersion":"v8.5-calibration-baseline-20260930","thresholds":{"SELECTION_SCORE":{"status":"FIXED","value":5},"PER_ELIGIBLE_TRIAL_POWER":{"status":"FIXED","value":0}}}
+          JSON
       - name: Advance deterministic stages through App Runtime
         working-directory: production
         run: node --experimental-strip-types src/deterministic-production-worker.ts batch-20260930-calibration-geass-cc
