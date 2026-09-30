@@ -157,7 +157,7 @@ export function repairEvaluationDocument(source:any,research:any=null){
   }
   for(const e of doc.evaluations??[]){
     if(e.observationType!=='probability'||!exactBenchmarkTrialUniverses.has(e.trialUniverse))continue;
-    const score=e.metrics?.maximumSelectionScore;
+    const score=e.metrics?.selectionScore?.status==='COMPUTED'?e.metrics.selectionScore.value:e.metrics?.maximumSelectionScore;
     if(typeof score!=='number'||!Number.isFinite(score))throw new Error('EXACT_SCORE_SOURCE_MISSING:'+e.findingId);
     e.benchmarkExposure={status:'EXACT',trials:7000,reason:'基準遊技量7000Gを、そのままeligible game trialsとして使用できるtrial universe。'};
     e.metrics.selectionScore={status:'COMPUTED',value:score};
