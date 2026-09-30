@@ -11,7 +11,7 @@ export function validateObservationEvidenceDocument(doc:any,candidate:any,resear
  const byId=new Map(doc.observations.map((x:any)=>[x.findingId,x]));
  for(const c of candidate.candidates){
   const o:any=byId.get(c.findingId);if(!o)fail('MISSING:'+c.findingId);
-  if(o.model!==c.model||o.trialUniverse!==c.trialUniverse||o.liveInferenceRoute!==c.liveInferenceRoute||o.runtimeInferenceAllowed!==c.runtimeInferenceAllowed||o.dependencyResolution!==c.dependencyResolution)fail('COPY:'+c.findingId);
+  if(o.model!==c.model||o.trialUniverse!==c.trialUniverse||canonical(o.observationScope??null)!==canonical(c.observationScope??null)||canonical(o.denominatorBinding??null)!==canonical(c.denominatorBinding??null)||canonical(o.categoryModel??null)!==canonical(c.categoryModel??null)||o.liveInferenceRoute!==c.liveInferenceRoute||o.runtimeInferenceAllowed!==c.runtimeInferenceAllowed||o.dependencyResolution!==c.dependencyResolution)fail('COPY:'+c.findingId);
   if(c.runtimeInferenceAllowed===false){
    if(c.dependencyResolution==='RESOLVED_IN_JOINT_MODEL'){
     if(o.observationStatus!=='RESOLVED_IN_JOINT_MODEL'||o.collectionContract!==null||o.resolvedIntoFindingId!==c.resolvedIntoFindingId)fail('RESOLVED_MEMBER:'+c.findingId);
