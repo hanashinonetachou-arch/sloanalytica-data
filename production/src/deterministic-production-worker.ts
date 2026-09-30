@@ -3,6 +3,9 @@ import path from 'node:path';
 import crypto from 'node:crypto';
 import {RepoStore,Orchestrator} from './core.ts';
 import {productionRequest,acceptAndRecord,promoteDependencies,reconcileBatch,scheduleByKind} from './runtime.ts';
+import {buildEvaluation} from './evaluation-builder.ts';
+import {buildEligibility} from './eligibility-builder.ts';
+import {buildCandidateContract} from './candidate-contract-builder.ts';
 import {buildObservationEvidence} from './observation-evidence-builder.ts';
 import {buildCanonicalUi} from './canonical-ui-builder.ts';
 import {buildMachineData} from './machine-data-builder.ts';
@@ -25,7 +28,10 @@ function writeArtifact(q:WorkRequest,doc:any){
 }
 function execute(q:WorkRequest):WorkResult{
  let doc:any;
- if(q.stage==='OBSERVATION_EVIDENCE'){
+ if(q.stage==='EVALUATION'){const rRef=q.inputArtifacts.find((x:any)=>x.kind==='research');doc=buildEvaluation(readRef(rRef));
+ } else if(q.stage==='ELIGIBILITY'){const eRef=q.inputArtifacts.find((x:any)=>x.kind==='evaluation');doc=buildEligibility(readRef(eRef));
+ } else if(q.stage==='CANDIDATE_CONTRACT'){const eRef=q.inputArtifacts.find((x:any)=>x.kind==='evaluation'),gRef=q.inputArtifacts.find((x:any)=>x.kind==='eligibility');doc=buildCandidateContract(readRef(eRef),readRef(gRef),eRef,gRef);
+ } else if(q.stage==='OBSERVATION_EVIDENCE'){
    const cRef=q.inputArtifacts.find((x:any)=>x.kind==='candidate-contract'); const rRef=q.inputArtifacts.find((x:any)=>x.kind==='research');
    doc=buildObservationEvidence(readRef(cRef),readRef(rRef),cRef);
  } else if(q.stage==='CANONICAL_UI'){
@@ -50,7 +56,7 @@ function execute(q:WorkRequest):WorkResult{
 const completed:any[]=[];
 for(let guard=0;guard<100;guard++){
  reconcileBatch(o,s,batchId);
- const semantic=scheduleByKind(o,s,batchId,cfg.concurrency,'SEMANTIC').filter((x:any)=>x.name==='OBSERVATION_EVIDENCE'||x.name==='CANONICAL_UI');
+ const semantic=scheduleByKind(o,s,batchId,cfg.concurrency,'SEMANTIC').filter((x:any)=>['EVALUATION','ELIGIBILITY','CANDIDATE_CONTRACT','OBSERVATION_EVIDENCE','CANONICAL_UI'].includes(x.name));
  const production=scheduleByKind(o,s,batchId,cfg.concurrency,'PRODUCTION');
  const selected=[...semantic,...production];
  if(selected.length===0) break;
