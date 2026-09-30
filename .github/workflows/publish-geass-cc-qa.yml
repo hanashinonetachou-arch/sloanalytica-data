@@ -1,8 +1,7 @@
 name: Publish Code Geass C.C. QA Package
 on:
-  pull_request:
-    branches: ['production/**']
-    paths: ['.github/workflows/publish-geass-cc-qa.yml']
+  push:
+    branches: [production/v85-geass-cc-package-20260930]
 permissions:
   contents: write
 jobs:
@@ -10,26 +9,23 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-        with: {ref: ${{ github.event.pull_request.head.sha }}}
       - uses: actions/setup-node@v4
-        with: {node-version: 24}
+        with:
+          node-version: 24
       - name: Generate validated package
         working-directory: production
         run: node --experimental-strip-types src/generate-code-geass-cc-test-package.ts ../generated-code-geass-cc
       - name: Publish prototype distribution
-        shell: bash
         run: |
-          set -euo pipefail
           cp generated-code-geass-cc/machine_package.json /tmp/geass.json
+          cp production/src/publish-geass-catalog.ts /tmp/publish-geass-catalog.ts
           git fetch origin prototype-multi-machine
           git checkout -B prototype-multi-machine origin/prototype-multi-machine
           mkdir -p machines/S_CODE_GEASS_R2_CC_ZS
           cp /tmp/geass.json machines/S_CODE_GEASS_R2_CC_ZS/machine-package.json
-          node - <<'NODE'
-          const fs=require('fs'),crypto=require('crypto');const p='machines/S_CODE_GEASS_R2_CC_ZS/machine-package.json',b=fs.readFileSync(p),pkg=JSON.parse(b),c=JSON.parse(fs.readFileSync('catalog.json','utf8')),now=new Date().toISOString();const old=c.machines.find(x=>x.machineId===pkg.machine.machineId);const row={machineId:pkg.machine.machineId,displayName:pkg.machine.displayName,manufacturer:'サミー',machineDataVersion:pkg.machine.machineDataVersion,requiredCapabilities:['binomial','evidence'],packageUrl:'https://raw.githubusercontent.com/hanashinonetachou-arch/sloanalytica-data/prototype-multi-machine/machines/S_CODE_GEASS_R2_CC_ZS/machine-package.json',sha256:crypto.createHash('sha256').update(b).digest('hex'),packageSizeBytes:b.length,status:'available',addedAt:old?.addedAt??now,updatedAt:now,introductionDate:'2018-01-09',machineType:'MEDAL',gameType:'A_RT'};c.machines=c.machines.filter(x=>x.machineId!==row.machineId);c.machines.unshift(row);c.generatedAt=now;fs.writeFileSync('catalog.json',JSON.stringify(c,null,2)+'\n');
-          NODE
+          node --experimental-strip-types /tmp/publish-geass-catalog.ts machines/S_CODE_GEASS_R2_CC_ZS/machine-package.json
           git config user.name github-actions[bot]
           git config user.email 41898282+github-actions[bot]@users.noreply.github.com
           git add catalog.json machines/S_CODE_GEASS_R2_CC_ZS/machine-package.json
-          git commit -m 'publish: Code Geass R2 C.C. v8.5 QA package [skip ci]'
+          git commit -m "publish: Code Geass R2 C.C. v8.5 QA package [skip ci]"
           git push origin HEAD:prototype-multi-machine
