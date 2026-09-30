@@ -19,7 +19,7 @@ const scoreDescription=(section:any)=>{
   :powerText?null:`設定判別スコア：算出不可${score?.reason?'（'+score.reason+'）':''}`;
  return [scoreText,powerText].filter(Boolean).join('\\n');
 };
-const trialLabelFor=(trialUniverse:any)=>trialUniverse==='NORMAL_GAME_TRIAL'||trialUniverse==='BONUS_ELIGIBLE_GAME_TRIAL'?'通常ゲーム数':'対象回数';
+const trialLabelFor=(trialUniverse:any)=>trialUniverse==='NORMAL_GAME_TRIAL'||trialUniverse==='BONUS_ELIGIBLE_GAME_TRIAL'?'通常ゲーム数':trialUniverse==='PREDECESSOR_TOTAL_GAME_TRIAL'?'着席時総ゲーム数':'対象回数';
 const sectionExplanation=(f:any,s:any)=>{
  const metric=scoreDescription(s);
  let guide=s?.model==='CATEGORICAL'&&s?.categoryCoverage==='EXHAUSTIVE'
@@ -28,6 +28,7 @@ const sectionExplanation=(f:any,s:any)=>{
  if(f.trialUniverse==='NORMAL_GAME_TRIAL'||f.trialUniverse==='BONUS_ELIGIBLE_GAME_TRIAL')guide='通常ゲーム数に対する該当回数を入力します。「着席時との差分を使用」がONの場合、通常ゲーム数は遊技情報から自動反映されます。';
  else if(f.trialUniverse==='MILE_CHARGE_4PLUS_END_TRIAL')guide='まいるチャージ4回以上で終了した回数を「対象回数」、そのうち温泉ステージへ移行した回数を「回数」に入力します。';
  else if(f.trialUniverse==='CZ_TRUE_PREMONITION_TRIAL')guide='CZ本前兆となった回数を「対象回数」、そのうち温泉ステージへ移行した回数を「回数」に入力します。';
+ else if(f.trialUniverse==='PREDECESSOR_TOTAL_GAME_TRIAL')guide='着席時点のBIG・REG回数を入力します。母数には遊技情報の「着席時 総ゲーム数」を自動使用し、自身の遊技区間とは分けて設定推測へ反映します。';
  return [guide,metric].filter(Boolean).join('\\n');
 };
 const playDataSourceForTrialUniverse=(trialUniverse:any)=>
@@ -49,7 +50,7 @@ const numericUiSections=(projection:any)=>{
    if(!trial||cats.length<2)throw new Error('APP_RUNTIME_CATEGORICAL_UI:'+f.findingId);
    const exhaustive=s.categoryCoverage==='EXHAUSTIVE';
    const interaction:any={type:'CATEGORY_COUNTERS',preservePriorObservations:true,showAccumulatedCounts:true,categoryCoverage:exhaustive?'EXHAUSTIVE':'NON_EXHAUSTIVE',totalOpportunities:exhaustive?'SUM_CATEGORY_COUNTS':'SEPARATE_COUNTER',categories:cats.map((x:any)=>({id:x.id,inputId:x.id,label:x.label,meaning:'観測した回数'}))};
-   if(!exhaustive)interaction.opportunityTracking={type:'SEPARATE_COUNTER',inputId:trial.id,label:trial.label};
+   if(!exhaustive)interaction.opportunityTracking={type:'SEPARATE_COUNTER',inputId:trial.id,label:trial.label,...(trial.playDataBinding?{playDataBinding:trial.playDataBinding}:{})};
    return {id:s.id,title:s.title,collapsible:s.collapsible!==false,defaultExpanded:s.defaultExpanded===true,description:sectionExplanation(f,s),descriptionPresentation:{collapsible:true,label:'説明',defaultExpanded:false},items:[{id:'NODE_'+f.findingId,featureId:f.findingId,title:s.title,interaction}]};
   }
   throw new Error('APP_RUNTIME_MODEL_UNSUPPORTED:'+f.model);
@@ -74,7 +75,7 @@ const buildInputs=(projection:any)=>{
   const trialId=(s.inputs??[]).find((x:any)=>x.role==='trial')?.id;
   for(const x of s.inputs??[]){
    if(seen.has(x.id)){if(x.role==='trial'&&x.id==='shared.NORMAL_GAME_TRIAL')continue;throw new Error('APP_RUNTIME_DUPLICATE_INPUT:'+x.id);}seen.add(x.id);
-   out.push({id:x.id,name:x.label,category:'V8_NUMERIC',type:x.role==='trial'?'integer':'counter',unit:x.role==='trial'&&f.trialUniverse==='NORMAL_GAME_TRIAL'?'G':'回',defaultValue:0,minimum:0,displayOrder:order++,parentInputId:x.role==='trial'?undefined:trialId,inferenceRole:importanceToAdoption(runtimeImportance(f))});
+   out.push({id:x.id,name:x.label,category:'V8_NUMERIC',type:x.role==='trial'?'integer':'counter',unit:x.role==='trial'&&(f.trialUniverse==='NORMAL_GAME_TRIAL'||f.trialUniverse==='PREDECESSOR_TOTAL_GAME_TRIAL')?'G':'回',defaultValue:0,minimum:0,displayOrder:order++,parentInputId:x.role==='trial'?undefined:trialId,inferenceRole:importanceToAdoption(runtimeImportance(f)),observationScope:x.observationScope??f.observationScope,inputVisible:x.playDataBinding?.mode==='AUTO_EXACT'?false:undefined});
   }
  }
  for(const s of projection.evidence??[]){
@@ -94,7 +95,7 @@ const buildFeatures=(projection:any)=>{
  return (projection.activeFeatures??[]).map((f:any)=>{
   const s:any=secBy.get(f.findingId);if(!s)throw new Error('APP_RUNTIME_FEATURE_UI_MISSING:'+f.findingId);
   const trial=s.inputs?.find((x:any)=>x.role==='trial');if(!trial)throw new Error('APP_RUNTIME_FEATURE_TRIAL:'+f.findingId);
-  const base:any={featureId:f.findingId,name:f.name,trialUniverse:f.trialUniverse,adoptionCategory:importanceToAdoption(runtimeImportance(f)),calculationRole:'PROBABILITY',probabilityEngineUsage:true,denominatorInputId:trial.id,probabilities:{},selectionRationale:{summary:'Manifest v8.5 Production Lineで採用された設定推測要素。',adoptionReason:'EligibilityとCandidate Contractを通過した観測可能likelihoodを使用します。',shortTermReason:'標本が少ない間は結果の振れが大きくなります。',longTermReason:'観測数が増えるほど設定別likelihoodの比較が安定します。'}};
+  const base:any={featureId:f.findingId,name:f.name,trialUniverse:f.trialUniverse,observationScope:f.observationScope,adoptionCategory:importanceToAdoption(runtimeImportance(f)),calculationRole:'PROBABILITY',probabilityEngineUsage:true,denominatorInputId:trial.id,probabilities:{},selectionRationale:{summary:'Manifest v8.5 Production Lineで採用された設定推測要素。',adoptionReason:'EligibilityとCandidate Contractを通過した観測可能likelihoodを使用します。',shortTermReason:'標本が少ない間は結果の振れが大きくなります。',longTermReason:'観測数が増えるほど設定別likelihoodの比較が安定します。'}};
   if(f.model==='BERNOULLI'){
    const success=s.inputs?.find((x:any)=>x.role==='success');if(!success)throw new Error('APP_RUNTIME_FEATURE_SUCCESS:'+f.findingId);
    base.modelType='binomial';base.numeratorInputId=success.id;base.displayFormat='percentage';
