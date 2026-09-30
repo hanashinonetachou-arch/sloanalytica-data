@@ -1,5 +1,15 @@
 import {buildHighLowDiscrimination} from './high-low-discrimination.ts';
 export const EVIDENCE_SEMANTICS=['EXACT_CONSTRAINT','PROBABILITY_BACKED','PROBABILITY_UNKNOWN','DISPLAY_ONLY','BLOCK'] as const;
+const isExhaustiveCategoricalDistribution=(distribution:any)=>{
+ const rows=Object.values(distribution??{});if(rows.length===0)return false;
+ return rows.every((row:any)=>{
+  if(!row||typeof row!=='object'||Array.isArray(row))return false;
+  const values=Object.values(row);if(values.length<2||!values.every((v:any)=>typeof v==='number'&&Number.isFinite(v)&&v>=0&&v<=1))return false;
+  const sum=(values as number[]).reduce((a,b)=>a+b,0);
+  // Published categorical tables are often rounded to 0.1% increments.
+  return sum>=0.995&&sum<=1.005;
+ });
+};
 export function classifyEvidenceCategory(label:any,evidence:any,blockedItems:any[]=[]){
  const text=String(label??'').trim();
  if(!text)return 'DISPLAY_ONLY';
@@ -18,7 +28,7 @@ export function buildObservationEvidence(candidate:any,research:any,candidateArt
   let collectionContract:any=null;
   if(c.runtimeInferenceAllowed){
    if(c.model==='BERNOULLI')collectionContract={type:'SUCCESS_TRIAL_COUNTS',successField:'successCount',trialField:'eligibleTrialCount'};
-   else if(c.model==='CATEGORICAL')collectionContract={type:'CATEGORY_COUNTS',countsField:'categoryCounts',trialField:'eligibleTrialCount',categoryCoverage:'NON_EXHAUSTIVE'};
+   else if(c.model==='CATEGORICAL')collectionContract={type:'CATEGORY_COUNTS',countsField:'categoryCounts',trialField:'eligibleTrialCount',categoryCoverage:isExhaustiveCategoricalDistribution(c.settingDistribution)?'EXHAUSTIVE':'NON_EXHAUSTIVE'};
    else throw new Error('OBSERVATION_COLLECTION_UNSUPPORTED:'+c.findingId);
   }
   return {findingId:c.findingId,label:c.label,model:c.model,trialUniverse:c.trialUniverse,liveInferenceRoute:c.liveInferenceRoute,runtimeInferenceAllowed:c.runtimeInferenceAllowed,dependencyResolution:c.dependencyResolution,observationStatus:status,collectionContract,resolvedIntoFindingId:c.resolvedIntoFindingId};
