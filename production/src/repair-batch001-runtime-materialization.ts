@@ -22,11 +22,11 @@ import {buildDistribution} from './distribution-builder.ts';
 import {validateDistributionDocument} from './distribution-validator.ts';
 
 const TARGETS=[
-  'L_TOARU_INDEX2_FA',
-  'LB_TRIPLE_CROWN_X300',
-  'L_TONDEMO_SKILL_KM',
-  'L_YAJIKITA_MAIRU_BG',
-  'L_YABACHIBA_ZM',
+  'L_WORLD_DAI_STAR_PA3',
+  'L_ULTRAMAN_FINAL_BATTLE_ME',
+  'L_KARAKURI_CIRCUS2_JG',
+  'L_SENGOKU_COLLECTION6_KS',
+  'L_NANGOKU_SPECIAL_M1',
 ] as const;
 
 const KIND:Record<string,string>={
