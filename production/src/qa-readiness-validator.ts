@@ -15,6 +15,9 @@ export function validateMachineQaReadiness(machineId:string,stageStates:Record<s
  if(!Array.isArray(refs)||!Array.isArray(defs))fail(machineId+':EVIDENCE_ARRAYS');
  const expected=refs.flatMap((s:any)=>(s?.evidenceItems??[]).map((e:any)=>e.findingId));
  const expectedSet=new Set(expected);
+ let expectedExactConstraints=0;const semanticVocabulary=new Set(['EXACT_CONSTRAINT','PROBABILITY_BACKED','PROBABILITY_UNKNOWN','DISPLAY_ONLY','BLOCK']);
+ for(const ref of refs)for(const item of (ref?.evidenceItems??[])){const details=Array.isArray(item?.details)&&item.details.length?item.details:[item?.label];const rows=Array.isArray(item?.categorySemantics)?item.categorySemantics:[];if(rows.length!==details.length)fail(machineId+':EVIDENCE_SEMANTIC_COVERAGE:'+String(item?.findingId??'UNKNOWN'));for(let i=0;i<details.length;i++){if(rows[i]?.label!==details[i]||!semanticVocabulary.has(rows[i]?.semantic))fail(machineId+':EVIDENCE_SEMANTIC:'+String(item?.findingId??'UNKNOWN')+':'+i);if(rows[i].semantic==='EXACT_CONSTRAINT')expectedExactConstraints++;}}
+ if(defs.length!==expectedExactConstraints)fail(machineId+':EVIDENCE_EXACT_CONSTRAINT_COVERAGE');
  for(const def of defs){
   const sourceIds=Array.isArray(def?.sourceEvidenceRefs)?def.sourceEvidenceRefs:[];
   const hasConstraint=(Array.isArray(def?.confirmedSettings)&&def.confirmedSettings.length>0)||(Array.isArray(def?.deniedSettings)&&def.deniedSettings.length>0);
