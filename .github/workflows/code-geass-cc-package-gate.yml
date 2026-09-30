@@ -1,0 +1,25 @@
+name: Code Geass C.C. Package Gate
+on:
+  pull_request:
+    branches: ['production/**']
+    paths:
+      - 'production/src/generate-code-geass-cc-test-package.ts'
+      - 'production/test-fixtures/code-geass-r2-cc/**'
+      - 'production/src/**'
+permissions:
+  contents: read
+jobs:
+  package:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: {node-version: 24}
+      - name: Generate and validate package
+        working-directory: production
+        run: node --experimental-strip-types src/generate-code-geass-cc-test-package.ts ../generated-code-geass-cc
+      - uses: actions/upload-artifact@v4
+        with:
+          name: code-geass-cc-v85-package
+          path: generated-code-geass-cc/
+          if-no-files-found: error

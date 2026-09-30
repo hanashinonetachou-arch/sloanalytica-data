@@ -1,0 +1,31 @@
+name: Publish Code Geass C.C. QA Package
+on:
+  push:
+    branches: [production/v85-geass-cc-package-20260930]
+permissions:
+  contents: write
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - name: Generate validated package
+        working-directory: production
+        run: node --experimental-strip-types src/generate-code-geass-cc-test-package.ts ../generated-code-geass-cc
+      - name: Publish prototype distribution
+        run: |
+          cp generated-code-geass-cc/machine_package.json /tmp/geass.json
+          cp production/src/publish-geass-catalog.ts /tmp/publish-geass-catalog.ts
+          git fetch origin prototype-multi-machine
+          git checkout -B prototype-multi-machine origin/prototype-multi-machine
+          mkdir -p machines/S_CODE_GEASS_R2_CC_ZS
+          cp /tmp/geass.json machines/S_CODE_GEASS_R2_CC_ZS/machine-package.json
+          node --experimental-strip-types /tmp/publish-geass-catalog.ts machines/S_CODE_GEASS_R2_CC_ZS/machine-package.json
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git add catalog.json machines/S_CODE_GEASS_R2_CC_ZS/machine-package.json
+          git commit -m "publish: Code Geass R2 C.C. v8.5 QA package [skip ci]"
+          git push origin HEAD:prototype-multi-machine
