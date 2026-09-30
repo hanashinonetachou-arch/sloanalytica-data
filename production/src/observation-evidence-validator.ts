@@ -21,7 +21,7 @@ export function validateObservationEvidenceDocument(doc:any,candidate:any,resear
   }else{
    if(o.observationStatus!=='READY')fail('READY:'+c.findingId);
    if(c.model==='BERNOULLI'&&o.collectionContract?.type!=='SUCCESS_TRIAL_COUNTS')fail('BERNOULLI:'+c.findingId);
-   if(c.model==='CATEGORICAL'&&(o.collectionContract?.type!=='CATEGORY_COUNTS'||o.collectionContract?.categoryCoverage!=='NON_EXHAUSTIVE'||!o.collectionContract?.trialField))fail('CATEGORICAL:'+c.findingId);
+   if(c.model==='CATEGORICAL'&&(o.collectionContract?.type!=='CATEGORY_COUNTS'||!['EXHAUSTIVE','NON_EXHAUSTIVE'].includes(o.collectionContract?.categoryCoverage)||!o.collectionContract?.trialField))fail('CATEGORICAL:'+c.findingId);
    if(!['BERNOULLI','CATEGORICAL'].includes(c.model))fail('UNSUPPORTED_MODEL:'+c.findingId);
   }
  }
