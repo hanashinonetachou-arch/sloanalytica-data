@@ -22,7 +22,9 @@ const scoreDescription=(section:any)=>{
 const trialLabelFor=(trialUniverse:any)=>trialUniverse==='NORMAL_GAME_TRIAL'||trialUniverse==='BONUS_ELIGIBLE_GAME_TRIAL'?'通常ゲーム数':'対象回数';
 const sectionExplanation=(f:any,s:any)=>{
  const metric=scoreDescription(s);
- let guide='対象となる機会の回数と、そのうち該当した回数を入力します。';
+ let guide=s?.model==='CATEGORICAL'&&s?.categoryCoverage==='EXHAUSTIVE'
+  ?'表示された各項目の回数を入力します。入力した回数の合計を観測回数として自動計算します。'
+  :'対象となる機会の回数と、そのうち該当した回数を入力します。';
  if(f.trialUniverse==='NORMAL_GAME_TRIAL'||f.trialUniverse==='BONUS_ELIGIBLE_GAME_TRIAL')guide='通常ゲーム数に対する該当回数を入力します。「着席時との差分を使用」がONの場合、通常ゲーム数は遊技情報から自動反映されます。';
  else if(f.trialUniverse==='MILE_CHARGE_4PLUS_END_TRIAL')guide='まいるチャージ4回以上で終了した回数を「対象回数」、そのうち温泉ステージへ移行した回数を「回数」に入力します。';
  else if(f.trialUniverse==='CZ_TRUE_PREMONITION_TRIAL')guide='CZ本前兆となった回数を「対象回数」、そのうち温泉ステージへ移行した回数を「回数」に入力します。';
@@ -45,7 +47,10 @@ const numericUiSections=(projection:any)=>{
   if(f.model==='CATEGORICAL'){
    const trial=inputs.find((x:any)=>x.role==='trial'),cats=inputs.filter((x:any)=>x.role==='categoryCount');
    if(!trial||cats.length<2)throw new Error('APP_RUNTIME_CATEGORICAL_UI:'+f.findingId);
-   return {id:s.id,title:s.title,collapsible:s.collapsible!==false,defaultExpanded:s.defaultExpanded===true,description:sectionExplanation(f,s),descriptionPresentation:{collapsible:true,label:'説明',defaultExpanded:false},items:[{id:'NODE_'+f.findingId,featureId:f.findingId,title:s.title,interaction:{type:'CATEGORY_COUNTERS',preservePriorObservations:true,showAccumulatedCounts:true,categoryCoverage:'NON_EXHAUSTIVE',totalOpportunities:'SEPARATE_COUNTER',opportunityTracking:{type:'SEPARATE_COUNTER',inputId:trial.id,label:trial.label},categories:cats.map((x:any)=>({id:x.id,inputId:x.id,label:x.label,meaning:'観測した回数'}))}}]};
+   const exhaustive=s.categoryCoverage==='EXHAUSTIVE';
+   const interaction:any={type:'CATEGORY_COUNTERS',preservePriorObservations:true,showAccumulatedCounts:true,categoryCoverage:exhaustive?'EXHAUSTIVE':'NON_EXHAUSTIVE',totalOpportunities:exhaustive?'SUM_CATEGORY_COUNTS':'SEPARATE_COUNTER',categories:cats.map((x:any)=>({id:x.id,inputId:x.id,label:x.label,meaning:'観測した回数'}))};
+   if(!exhaustive)interaction.opportunityTracking={type:'SEPARATE_COUNTER',inputId:trial.id,label:trial.label};
+   return {id:s.id,title:s.title,collapsible:s.collapsible!==false,defaultExpanded:s.defaultExpanded===true,description:sectionExplanation(f,s),descriptionPresentation:{collapsible:true,label:'説明',defaultExpanded:false},items:[{id:'NODE_'+f.findingId,featureId:f.findingId,title:s.title,interaction}]};
   }
   throw new Error('APP_RUNTIME_MODEL_UNSUPPORTED:'+f.model);
  });
@@ -99,6 +104,7 @@ const buildFeatures=(projection:any)=>{
   if(f.model==='CATEGORICAL'){
    const cats=(s.inputs??[]).filter((x:any)=>x.role==='categoryCount');if(cats.length<2)throw new Error('APP_RUNTIME_FEATURE_CATEGORIES:'+f.findingId);
    base.modelType='multinomial';base.numeratorInputId=cats[0].id;base.categoryInputIds=cats.slice(1).map((x:any)=>x.id);
+   if(s.categoryCoverage==='EXHAUSTIVE')base.denominatorRule='SUM_CATEGORY_COUNTS';
    base.categoryProbabilities=Object.fromEntries(Object.entries(f.settingDistribution??{}).map(([k,row]:any)=>[settingKey(k),categoricalProbabilityRow(row,cats.map((x:any)=>x.label),f.findingId,k)]));
    return base;
   }
@@ -129,6 +135,14 @@ const materializedEvidences=(projection:any)=>{
 const nonRuntimeReason=(x:any,targetLabel?:string)=>x?.dependencyResolution==='RESOLVED_BY_SINGLE_MEMBER'&&x?.resolvedIntoFindingId?`同じ観測内容を二重に評価しないため、${targetLabel??'代表となる設定推測要素'}へ統合し、単独では数値推測に使用しません。`:x?.dependencyResolution==='RESOLVED_IN_JOINT_MODEL'&&x?.resolvedIntoFindingId?`同じ観測内の項目をまとめて評価するため、${targetLabel??'代表となる設定推測要素'}へ統合しています。`:'現在は単独の数値推測要素として使用しません。';
 const userFacingExcludedReason=(x:any)=>{const reason=String(x?.reason??'');if(/likelihood|補間|設定別/.test(reason))return '設定ごとの判別に必要な数値が揃っていないため、現在は数値推測に使用しません。';if(/denominator|観測機会|reconstruction|再現/.test(reason))return '正確な観測回数を扱うための情報が不足しているため、現在は数値推測に使用しません。';return '現在は数値推測に必要な情報が十分でないため使用しません。';};
 const userFacingReevaluation=(x:any)=>x?.reevaluationCondition?'必要な設定別データや観測条件が確認できれば再評価します。':undefined;
+const userFacingBlockedReason=(x:any)=>{
+ const id=String(x?.blockId??'');
+ if(id==='bonus-total-overlap')return 'ボーナス合算には設定差がありますが、小役成立と同じゲームで重なる場合があり、現在の推測モデルで小役と同時に使うと同じ情報を二重評価する可能性があるため、現在は設定推測に使用していません。設定別の元データは保存しています。';
+ if(id==='bonus-detail-overlap')return 'BIG・REGなどのボーナス内訳や同時当選役には設定差がありますが、小役やボーナス合算と同じ成立ゲームを重ねて評価すると同じ情報を二重に数える可能性があるため、現在は単独の設定推測要素として使用していません。設定別の元データは保存しています。';
+ if(id==='small-role-separate-overlap')return 'チェリーとスイカは個別の設定差を保存していますが、同じ通常ゲームを分母に独立した要素として重ねると二重評価になるため、現在は「チェリーまたはスイカ」の合算要素として使用しています。';
+ if(id==='ending-screen-probabilities')return 'エンディング終了画面は高設定示唆であることを確認できますが、設定別の出現率を確認できないため、現在は記録のみで数値推測には使用していません。';
+ return String(x?.reason??'現在は安全に数値推測へ使用するための条件が確定していません。');
+};
 const dedupeSummary=(items:any[])=>{const seen=new Set<string>();return items.filter((x:any)=>{const k=String(x?.featureId??x?.label??'');if(!k||seen.has(k))return false;seen.add(k);return true})};
 const runtimeProjection=(projection:any)=>[
  ...(projection.activeFeatures??[]).map((f:any)=>({featureId:f.findingId,runtimeStatus:'ACTIVE',metric:f.runtimePolicyBinding?.metric,metricValue:f.runtimePolicyBinding?.value,importance:runtimeImportance(f)})),
@@ -143,6 +157,7 @@ export function buildAppRuntime(projection:any,projectionArtifact:any){
  const allLabels=[...(projection.activeFeatures??[]).map((x:any)=>({findingId:x.findingId,label:x.name})),...(projection.nonRuntimeCandidates??[])];
  const resolved=(projection.nonRuntimeCandidates??[]).map((x:any)=>({featureId:x.findingId,label:x.label,reason:nonRuntimeReason(x,allLabels.find((y:any)=>y.findingId===x.resolvedIntoFindingId)?.label)}));
  const excluded=(projection.excludedDecisions??[]).map((x:any)=>({featureId:x.findingId,label:x.label,reason:userFacingExcludedReason(x),reevaluationCondition:userFacingReevaluation(x)}));
- const notAdopted=dedupeSummary([...inactive,...held.map((x:any)=>({featureId:x.findingId,label:x.label,reason:heldReason(x)})),...resolved,...excluded]);
+ const blocked=(projection.blockedItems??[]).map((x:any)=>({featureId:x.blockId??x.findingId??x.label,label:x.label,reason:userFacingBlockedReason(x),reevaluationCondition:x.reevaluationCondition?'追加の公開データや安全な評価方法が確立した場合に再評価します。':undefined}));
+ const notAdopted=dedupeSummary([...inactive,...held.map((x:any)=>({featureId:x.findingId,label:x.label,reason:heldReason(x)})),...resolved,...excluded,...blocked]);
  return {schemaVersion:'app-runtime-v1',manifestVersion:'8.5',batchId:projection.batchId,machineId:projection.machineId,machineName:projection.machineName,machineIdentity:structuredClone(projection.machineIdentity),sourceArtifact:projectionArtifact,package:{schemaVersion:1,provenance:{manifestVersion:'8.5',generationPath:'V8_5_PRODUCTION_PIPELINE',legacyOracleUsed:false,machineIdentity:structuredClone(projection.machineIdentity)},machine:{schemaVersion:'2.0.0',machineId:projection.machineId,machineDataVersion:version,displayName:projection.machineName,modelName:projection.machineName,machineIdentity:structuredClone(projection.machineIdentity),settings:projection.settings.values,packagePolicy:projection.packagePolicy},inputs:{schemaVersion:'2.0.0',inputs},features:{version:'8.5-runtime',features,runtimeProjection:rp},evidence:{version:'8.5-runtime',evidences:materializedEvidences(projection),references:projection.evidence??[]},blockedItems:structuredClone(projection.blockedItems??[]),ui:toUi(projection),metadata:{machineId:projection.machineId,displayName:projection.machineName,machineIdentity:structuredClone(projection.machineIdentity),settings:projection.settings.values,settingsStatus:projection.settings.status},v8:{machineResearchSummary:{title:'この機種の設定推測について',adopted,notAdopted,highLowDiscrimination:hld?.status==='COMPUTED'?hld:undefined,unresolved:hld?.status==='NOT_COMPUTED'?[{label:'高低判別精度',reason:hld.reason}]:[]}}}};
 }
