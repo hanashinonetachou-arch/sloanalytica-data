@@ -1,0 +1,51 @@
+name: Batch001 Remaining Production Worker
+
+on:
+  push:
+    branches:
+      - production/batch-20260928-001
+    paths:
+      - production/.batch001-remaining-production-trigger
+
+permissions:
+  contents: write
+
+concurrency:
+  group: batch001-remaining-production
+  cancel-in-progress: false
+
+jobs:
+  produce:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: production/batch-20260928-001
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - name: Reconcile and validate before production
+        working-directory: production
+        run: |
+          node --experimental-strip-types src/reconcile-batch.ts batch-20260928-001
+          npm test
+      - name: Run deterministic production worker
+        working-directory: production
+        run: node --experimental-strip-types src/deterministic-production-worker.ts batch-20260928-001
+      - name: Validate resulting production state
+        working-directory: production
+        run: npm test
+      - name: Commit authoritative state
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git add production/batches/batch-20260928-001
+          if git diff --cached --quiet; then
+            echo "Production state already current."
+            exit 0
+          fi
+          git commit -m "Advance remaining Batch 001 production stages [skip ci]"
+          git push origin HEAD:production/batch-20260928-001
