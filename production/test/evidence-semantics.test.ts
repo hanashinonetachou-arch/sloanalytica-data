@@ -6,3 +6,5 @@ test('falls back to display-only for non-inferential references',()=>assert.equa
 test('probability-unknown copy preserves uncertainty',()=>{const s=evidenceSemanticExplanation('PROBABILITY_UNKNOWN');assert.match(s,/公表・確認されていない/);assert.match(s,/直接反映していません/);assert.match(s,/反映できる可能性があります/);assert.doesNotMatch(s,/反映できます。/)});
 
 test('mixed evidence stays aggregate-neutral while categories remain explicit',()=>{assert.equal(classifyEvidenceSemantic({label:'終了画面',details:['虹：設定6','制服：高設定示唆（強）']}),'DISPLAY_ONLY');assert.equal(classifyEvidenceLabel('虹：設定6'),'EXACT_CONSTRAINT');assert.equal(classifyEvidenceLabel('制服：高設定示唆（強）'),'PROBABILITY_UNKNOWN')});
+
+test('classifies parity-rich exact constraints',()=>{assert.equal(classifyEvidenceLabel('246枚：偶数設定濃厚'),'EXACT_CONSTRAINT');assert.equal(classifyEvidenceLabel('奇数設定濃厚'),'EXACT_CONSTRAINT');assert.equal(classifyEvidenceLabel('偶数設定示唆'),'PROBABILITY_UNKNOWN')});
