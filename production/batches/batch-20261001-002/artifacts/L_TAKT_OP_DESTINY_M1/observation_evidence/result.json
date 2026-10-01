@@ -1,0 +1,169 @@
+{
+  "schemaVersion": "observation-evidence-v1",
+  "manifestVersion": "8.5",
+  "batchId": "batch-20261001-002",
+  "machineId": "L_TAKT_OP_DESTINY_M1",
+  "machineName": "Ｌタクトオーパス デスティニー",
+  "candidateContractArtifact": {
+    "artifactId": "candidate-contract-L_TAKT_OP_DESTINY_M1",
+    "kind": "candidate-contract",
+    "path": "production/batches/batch-20261001-002/artifacts/L_TAKT_OP_DESTINY_M1/candidate_contract/result.json",
+    "sha256": "bcb1470cb602990aa9d0253234a1a0200d37b893d5768f8e59f470a18eba04cf",
+    "producerWorkId": "wrk_e1710304fd13434d"
+  },
+  "observations": [
+    {
+      "findingId": "at-first-hit",
+      "label": "AT初当り",
+      "model": "BERNOULLI",
+      "trialUniverse": "NORMAL_GAME_TRIAL",
+      "liveInferenceRoute": "LIVE_CONDITIONAL",
+      "runtimeInferenceAllowed": true,
+      "dependencyResolution": "NONE",
+      "observationStatus": "READY",
+      "collectionContract": {
+        "type": "SUCCESS_TRIAL_COUNTS",
+        "successField": "successCount",
+        "trialField": "eligibleTrialCount"
+      }
+    },
+    {
+      "findingId": "orphe-loop-return",
+      "label": "オルフェループ30G復帰",
+      "model": "BERNOULLI",
+      "trialUniverse": "UPPER_AT_30G_RETURN_TRIAL",
+      "liveInferenceRoute": "LIVE_CONDITIONAL",
+      "runtimeInferenceAllowed": true,
+      "dependencyResolution": "NONE",
+      "observationStatus": "READY",
+      "collectionContract": {
+        "type": "SUCCESS_TRIAL_COUNTS",
+        "successField": "successCount",
+        "trialField": "eligibleTrialCount"
+      }
+    }
+  ],
+  "evidence": [
+    {
+      "findingId": "at-end-stamp",
+      "label": "AT終了画面スタンプ",
+      "sourceIds": [
+        "pachinavi-takt"
+      ],
+      "details": [
+        "可：設定2以上濃厚",
+        "吉：設定3以上濃厚",
+        "良：設定4以上濃厚",
+        "優：設定5以上濃厚",
+        "極：設定6濃厚"
+      ],
+      "semanticType": "EXACT_CONSTRAINT",
+      "semanticCategories": [
+        {
+          "label": "可：設定2以上濃厚",
+          "semanticType": "EXACT_CONSTRAINT"
+        },
+        {
+          "label": "吉：設定3以上濃厚",
+          "semanticType": "EXACT_CONSTRAINT"
+        },
+        {
+          "label": "良：設定4以上濃厚",
+          "semanticType": "EXACT_CONSTRAINT"
+        },
+        {
+          "label": "優：設定5以上濃厚",
+          "semanticType": "EXACT_CONSTRAINT"
+        },
+        {
+          "label": "極：設定6濃厚",
+          "semanticType": "EXACT_CONSTRAINT"
+        }
+      ],
+      "runtimePolicyControlled": false,
+      "status": "SOURCE_REFERENCED"
+    }
+  ],
+  "sourceReferences": [
+    {
+      "sourceId": "hazuse-takt",
+      "url": "https://data.hazuse.com/?genre=208&machine_code=5S1493",
+      "title": "Lタクトオーパス デスティニー 設定判別",
+      "sourceType": "primary_analysis",
+      "claims": [
+        "AT初当り設定差",
+        "CZ成功時AT昇格率",
+        "AT終了後内部モード振り分け"
+      ]
+    },
+    {
+      "sourceId": "pachinavi-takt",
+      "url": "https://pachinavi.net/machines/smasloth-tact-opus/settei/",
+      "title": "スマスロ タクトオーパス 設定差",
+      "sourceType": "secondary_analysis",
+      "claims": [
+        "AT初当り設定別確率",
+        "AT終了画面スタンプ示唆"
+      ]
+    },
+    {
+      "sourceId": "pachinavi-takt-play",
+      "url": "https://pachinavi.net/machines/smasloth-tact-opus/uchikata/",
+      "title": "スマスロ タクトオーパス 打ち方・解析",
+      "sourceType": "secondary_analysis",
+      "claims": [
+        "上位ATオルフェループ30G復帰率"
+      ]
+    }
+  ],
+  "blockedItems": [
+    {
+      "blockId": "takt-at-setting4-source-discrepancy",
+      "label": "AT初当り設定4の資料差",
+      "reason": "確認資料間で設定4が1/299.3と1/299.5に分かれている。現行Researchでは複数解析で確認できた1/299.3を採用した。",
+      "reevaluationCondition": "メーカー公式または一次性の高い資料で設定4の正値を確定できる。"
+    },
+    {
+      "blockId": "takt-cz-promotion-56",
+      "label": "CZ成功時AT昇格率の設定5・6",
+      "reason": "設定1〜4の値は確認できるが、今回確認した資料断片では設定5・6の個別値を確定できない。",
+      "reevaluationCondition": "設定5・6を含む全設定のCZ成功時AT昇格率を信頼できる資料で確認できる。"
+    }
+  ],
+  "sourceIntegrityIssues": [],
+  "highLowDiscrimination": {
+    "status": "COMPUTED",
+    "method": "BEST_SINGLE_EXACT_ACTIVE_FEATURE",
+    "bandDefinition": {
+      "lowSettings": "SETTING_1_TO_3",
+      "highSettings": "SETTING_4_TO_6",
+      "classPrior": "BALANCED"
+    },
+    "results": [
+      {
+        "games": 1500,
+        "balancedAccuracyPercent": 56.45
+      },
+      {
+        "games": 3000,
+        "balancedAccuracyPercent": 59.03
+      },
+      {
+        "games": 7000,
+        "balancedAccuracyPercent": 63.57
+      }
+    ],
+    "eligibleFeatureIds": [
+      "at-first-hit"
+    ],
+    "selectedFeatureId": "at-first-hit",
+    "selectedFeatureLabel": "AT初当り",
+    "excludedFeatures": [
+      {
+        "findingId": "orphe-loop-return",
+        "reason": "BENCHMARK_EXPOSURE_UNRESOLVED"
+      }
+    ],
+    "note": "7000Gへ正確に換算できるACTIVE要素だけを候補とし、要素間の独立性を仮定せず、単独で最も高い判別精度を持つ要素から保守的に算出しています。条件付き要素はこの指標には含めませんが、実戦中に実際の観測回数が入力された場合は設定推測に使用します。"
+  }
+}
