@@ -1,14 +1,16 @@
 export const EVIDENCE_SEMANTIC_TYPES=['EXACT_CONSTRAINT','PROBABILITY_BACKED','PROBABILITY_UNKNOWN','DISPLAY_ONLY','BLOCK'] as const;
 export type EvidenceSemanticType=typeof EVIDENCE_SEMANTIC_TYPES[number];
-const exact=(s:string)=>/設定[1-6]以上|設定[1-6]否定|設定[1-6](?:[・,／\\/][1-6])+(?:濃厚)?|(?:奇数|偶数)設定濃厚|(?:^|[:：=]\s*)設定[1-6](?:濃厚)?\s*$/.test(s);
+const exact=(s:string)=>!/示唆|期待|アップ|出現しやすい/.test(s)&&/設定[1-6]以上|設定[1-6]否定|設定[1-6](?:[・,／\\/][1-6])+(?:濃厚)?|(?:奇数|偶数)設定濃厚|(?:^|[:：=]\s*)設定[1-6](?:濃厚)?\s*$/.test(s);
 const directional=(s:string)=>/示唆|期待度|デフォルト|基本|奇数|偶数|高設定|低設定/.test(s);
 export function classifyEvidenceLabel(label:string):EvidenceSemanticType{if(exact(label))return 'EXACT_CONSTRAINT';if(directional(label))return 'PROBABILITY_UNKNOWN';return 'DISPLAY_ONLY';}
 export function classifyEvidenceSemantic(e:any):EvidenceSemanticType{
  if(e?.status==='BLOCK'||e?.blocked===true)return 'BLOCK';
  if(e?.settingDistribution&&typeof e.settingDistribution==='object'&&Object.keys(e.settingDistribution).length>0)return 'PROBABILITY_BACKED';
+ const categories=Array.isArray(e?.semanticCategories)?e.semanticCategories.filter((x:any)=>x&&typeof x==='object'&&typeof x.label==='string'&&x.label.trim()):[];
  const details=Array.isArray(e?.details)?e.details.filter((x:any)=>typeof x==='string'&&x.trim()):[];
- const labels=details.length?details:[e?.label].filter((x:any)=>typeof x==='string'&&x.trim());
- const types=[...new Set(labels.map(classifyEvidenceLabel))];
+ const types=categories.length
+  ?[...new Set(categories.map((x:any)=>x.semanticType??classifyEvidenceLabel([x.label,x.meaning].filter(Boolean).join('：'))))]
+  :[...new Set((details.length?details:[e?.label].filter((x:any)=>typeof x==='string'&&x.trim())).map(classifyEvidenceLabel))];
  if(types.length===1)return types[0];
  return 'DISPLAY_ONLY';
 }
