@@ -1,0 +1,391 @@
+{
+  "schemaVersion": "research-v1",
+  "manifestVersion": "8.5",
+  "batchId": "batch-20261002-003",
+  "machineId": "L_GUNDAM_UNICORN_KAKUSEI_DRIVE_2JA",
+  "machineName": "Ｌパチスロ 機動戦士ガンダムユニコーン 覚醒DRIVE",
+  "workId": "__WORK_ID__",
+  "researchedAt": "2026-10-02",
+  "settings": {
+    "status": "SOURCE_DERIVED",
+    "values": [
+      "SET_1",
+      "SET_2",
+      "SET_3",
+      "SET_4",
+      "SET_5",
+      "SET_6"
+    ]
+  },
+  "sources": [
+    {
+      "sourceId": "sankyo-unicorn-kakusei",
+      "url": "https://www.sankyo-fever.jp/collection/994/",
+      "title": "SANKYOオンライン博物館 機種詳細",
+      "sourceType": "manufacturer",
+      "claims": [
+        "型式・導入時期",
+        "設定別AT初当り確率"
+      ]
+    },
+    {
+      "sourceId": "nana-unicorn-kakusei",
+      "url": "https://nana-press.com/kaiseki/machine/1123/36305/",
+      "title": "ガンダムユニコーン2 スマスロ 設定判別",
+      "sourceType": "primary_analysis",
+      "claims": [
+        "設定別CZ・AT確率",
+        "AT終了画面",
+        "STAND BY移行時キャラ振分",
+        "CZ裏ボタン",
+        "MSジャッジ導光板",
+        "エンディング示唆",
+        "獲得枚数表示"
+      ]
+    },
+    {
+      "sourceId": "pworld-unicorn-kakusei",
+      "url": "https://www.p-world.co.jp/machine/database/10468",
+      "title": "P-WORLD 機種データベース",
+      "sourceType": "secondary_analysis",
+      "claims": [
+        "CZ・AT確率",
+        "STAND BYキャラ振分",
+        "CZ裏ボタン示唆"
+      ]
+    }
+  ],
+  "findings": [
+    {
+      "findingId": "cz-first-hit",
+      "label": "CZ「彗星決戦」初当り",
+      "observationType": "probability",
+      "sourceIds": [
+        "nana-unicorn-kakusei",
+        "pworld-unicorn-kakusei"
+      ],
+      "settingDistribution": {
+        "1": "1/298.5",
+        "2": "1/287.0",
+        "3": "1/265.1",
+        "4": "1/247.7",
+        "5": "1/243.9",
+        "6": "1/239.8"
+      },
+      "trialUniverse": "NORMAL_GAME_TRIAL",
+      "denominatorSemantics": "通常時ゲーム数に対するCZ「彗星決戦」の実突入回数。AT中のCZ相当区間は含めない。",
+      "dependencyGroup": "unicorn-normal-first-hit",
+      "dependencyReason": "AT初当りは通常時からCZ等を経て到達するため、CZ初当りと同じ通常時進行に由来する情報が重なる。独立加算せずCandidate Contractで代表Featureまたはjoint化を検討する。"
+    },
+    {
+      "findingId": "at-first-hit",
+      "label": "AT「可能性の獣」初当り",
+      "observationType": "probability",
+      "sourceIds": [
+        "sankyo-unicorn-kakusei",
+        "nana-unicorn-kakusei",
+        "pworld-unicorn-kakusei"
+      ],
+      "settingDistribution": {
+        "1": "1/471.9",
+        "2": "1/456.6",
+        "3": "1/427.8",
+        "4": "1/403.9",
+        "5": "1/398.3",
+        "6": "1/392.3"
+      },
+      "trialUniverse": "NORMAL_GAME_TRIAL",
+      "denominatorSemantics": "通常時ゲーム数に対するAT初当り回数。AT終了後の引き戻し・上位AT復帰は初当りに含めない。",
+      "dependencyGroup": "unicorn-normal-first-hit",
+      "dependencyReason": "CZ初当りと同一通常時進行に由来し、CZ経由AT当選を含むため、完全独立として二重評価しない。"
+    },
+    {
+      "findingId": "standby-character-parity",
+      "label": "STAND BY移行時キャラ",
+      "observationType": "probability",
+      "sourceIds": [
+        "nana-unicorn-kakusei",
+        "pworld-unicorn-kakusei"
+      ],
+      "trialUniverse": "STANDBY_CHARACTER_TRIAL",
+      "denominatorSemantics": "STAND BY状態へ移行し、男性/女性キャラを確認できた回数の合計を観測母数とする。",
+      "settingDistribution": {
+        "1": {
+          "male": 0.6,
+          "female": 0.4
+        },
+        "2": {
+          "male": 0.4,
+          "female": 0.6
+        },
+        "3": {
+          "male": 0.6,
+          "female": 0.4
+        },
+        "4": {
+          "male": 0.4,
+          "female": 0.6
+        },
+        "5": {
+          "male": 0.6,
+          "female": 0.4
+        },
+        "6": {
+          "male": 0.4,
+          "female": 0.6
+        }
+      },
+      "perEligibleTrial": true,
+      "combinedFeatureRationale": "男性/女性は同一観測機会の排他カテゴリなので、2カテゴリを一つのcategorical likelihoodとして扱う。"
+    },
+    {
+      "findingId": "at-end-screen",
+      "label": "AT終了画面",
+      "observationType": "evidence",
+      "sourceIds": [
+        "nana-unicorn-kakusei"
+      ],
+      "trialUniverse": "AT_END_SCREEN_TRIAL",
+      "semanticType": "MIXED_CATEGORICAL",
+      "semanticCategories": [
+        {
+          "label": "デフォルト①",
+          "meaning": "奇数設定示唆",
+          "semanticType": "PROBABILITY_UNKNOWN"
+        },
+        {
+          "label": "デフォルト②",
+          "meaning": "偶数設定示唆",
+          "semanticType": "PROBABILITY_UNKNOWN"
+        },
+        {
+          "label": "バナージ＆ミネバ",
+          "meaning": "高設定示唆（弱）",
+          "semanticType": "PROBABILITY_UNKNOWN"
+        },
+        {
+          "label": "マリーダ＆ジンネマン",
+          "meaning": "高設定示唆（強）",
+          "semanticType": "PROBABILITY_UNKNOWN"
+        },
+        {
+          "label": "フル・フロンタル",
+          "meaning": "設定2以上濃厚",
+          "semanticType": "EXACT_CONSTRAINT"
+        },
+        {
+          "label": "女性キャラ3人",
+          "meaning": "設定3以上濃厚",
+          "semanticType": "EXACT_CONSTRAINT"
+        },
+        {
+          "label": "マリーダ4段アイス",
+          "meaning": "設定4以上濃厚",
+          "semanticType": "EXACT_CONSTRAINT"
+        },
+        {
+          "label": "ミネバ海老ドッグ",
+          "meaning": "設定5以上濃厚",
+          "semanticType": "EXACT_CONSTRAINT"
+        },
+        {
+          "label": "女性キャラ6人",
+          "meaning": "設定6濃厚",
+          "semanticType": "EXACT_CONSTRAINT"
+        }
+      ]
+    },
+    {
+      "findingId": "cz-secret-button",
+      "label": "CZ中の裏ボタン告知",
+      "observationType": "evidence",
+      "sourceIds": [
+        "nana-unicorn-kakusei",
+        "pworld-unicorn-kakusei"
+      ],
+      "trialUniverse": "CZ_SECRET_BUTTON_ANNOUNCEMENT_TRIAL",
+      "semanticType": "MIXED_CATEGORICAL",
+      "denominatorSemantics": "CZ後半で裏ボタン告知が発生し、告知までのPUSH回数を確認できた機会。告知自体は成功時の一部で発生するため、CZ突入回数と同一母数にしない。",
+      "semanticCategories": [
+        {
+          "label": "1回",
+          "meaning": "設定2以上の期待大",
+          "semanticType": "PROBABILITY_UNKNOWN"
+        },
+        {
+          "label": "2回",
+          "meaning": "設定2否定",
+          "semanticType": "EXACT_CONSTRAINT"
+        },
+        {
+          "label": "3回",
+          "meaning": "奇数設定示唆",
+          "semanticType": "PROBABILITY_UNKNOWN"
+        },
+        {
+          "label": "4回",
+          "meaning": "設定4以上濃厚",
+          "semanticType": "EXACT_CONSTRAINT"
+        },
+        {
+          "label": "6回",
+          "meaning": "設定6濃厚",
+          "semanticType": "EXACT_CONSTRAINT"
+        },
+        {
+          "label": "7回",
+          "meaning": "設定6期待度アップ（ミネバボーナス濃厚を兼ねる）",
+          "semanticType": "PROBABILITY_UNKNOWN"
+        },
+        {
+          "label": "8回",
+          "meaning": "偶数設定示唆",
+          "semanticType": "PROBABILITY_UNKNOWN"
+        },
+        {
+          "label": "9回",
+          "meaning": "設定2以上の期待大",
+          "semanticType": "PROBABILITY_UNKNOWN"
+        },
+        {
+          "label": "10回",
+          "meaning": "高設定示唆",
+          "semanticType": "PROBABILITY_UNKNOWN"
+        }
+      ]
+    },
+    {
+      "findingId": "ms-judge-lamp",
+      "label": "MSジャッジ成功時の導光板",
+      "observationType": "evidence",
+      "sourceIds": [
+        "nana-unicorn-kakusei"
+      ],
+      "trialUniverse": "MS_JUDGE_SUCCESS_TRIAL",
+      "semanticType": "MIXED_CATEGORICAL",
+      "semanticCategories": [
+        {
+          "label": "赤→100枚",
+          "meaning": "設定4以上濃厚",
+          "semanticType": "EXACT_CONSTRAINT"
+        },
+        {
+          "label": "虹→500枚",
+          "meaning": "設定6濃厚",
+          "semanticType": "EXACT_CONSTRAINT"
+        }
+      ]
+    },
+    {
+      "findingId": "ending-lamp",
+      "label": "エンディング中レア役時の筐体上部ランプ",
+      "observationType": "evidence",
+      "sourceIds": [
+        "nana-unicorn-kakusei"
+      ],
+      "trialUniverse": "ENDING_RARE_ROLE_LAMP_TRIAL",
+      "semanticType": "MIXED_CATEGORICAL",
+      "semanticCategories": [
+        {
+          "label": "青",
+          "meaning": "奇数設定示唆",
+          "semanticType": "PROBABILITY_UNKNOWN"
+        },
+        {
+          "label": "黄",
+          "meaning": "偶数設定示唆",
+          "semanticType": "PROBABILITY_UNKNOWN"
+        },
+        {
+          "label": "緑",
+          "meaning": "高設定示唆",
+          "semanticType": "PROBABILITY_UNKNOWN"
+        },
+        {
+          "label": "赤",
+          "meaning": "設定2以上示唆",
+          "semanticType": "PROBABILITY_UNKNOWN"
+        },
+        {
+          "label": "紫",
+          "meaning": "設定4以上濃厚",
+          "semanticType": "EXACT_CONSTRAINT"
+        },
+        {
+          "label": "虹",
+          "meaning": "設定6濃厚",
+          "semanticType": "EXACT_CONSTRAINT"
+        }
+      ]
+    },
+    {
+      "findingId": "ending-end-screen",
+      "label": "エンディング終了画面",
+      "observationType": "evidence",
+      "sourceIds": [
+        "nana-unicorn-kakusei"
+      ],
+      "trialUniverse": "ENDING_END_SCREEN_TRIAL",
+      "semanticType": "MIXED_CATEGORICAL",
+      "semanticCategories": [
+        {
+          "label": "ミネバ",
+          "meaning": "高設定示唆",
+          "semanticType": "PROBABILITY_UNKNOWN"
+        }
+      ]
+    },
+    {
+      "findingId": "payout-display",
+      "label": "獲得枚数表示",
+      "observationType": "evidence",
+      "sourceIds": [
+        "nana-unicorn-kakusei"
+      ],
+      "trialUniverse": "PAYOUT_DISPLAY_TRIAL",
+      "semanticType": "MIXED_CATEGORICAL",
+      "semanticCategories": [
+        {
+          "label": "246OVER",
+          "meaning": "設定2・4・6濃厚",
+          "semanticType": "EXACT_CONSTRAINT"
+        },
+        {
+          "label": "456OVER",
+          "meaning": "設定4以上濃厚",
+          "semanticType": "EXACT_CONSTRAINT"
+        },
+        {
+          "label": "666OVER",
+          "meaning": "設定6濃厚",
+          "semanticType": "EXACT_CONSTRAINT"
+        },
+        {
+          "label": "7777OVER",
+          "meaning": "高設定示唆",
+          "semanticType": "PROBABILITY_UNKNOWN"
+        }
+      ]
+    }
+  ],
+  "blockedItems": [
+    {
+      "blockId": "unicorn-evidence-rates",
+      "label": "各種設定示唆の設定別出現率",
+      "reason": "AT終了画面・CZ裏ボタン・エンディング示唆・獲得枚数表示は意味を確認できるが、多くの設定別出現率は公開確認できない。",
+      "reevaluationCondition": "各示唆の設定別出現率が信頼できる資料で公開・確認される。"
+    },
+    {
+      "blockId": "unicorn-possible-role-setting-diff",
+      "label": "可能性役・小役の追加設定差",
+      "reason": "現時点で設定別の数値分布を確認できないため数値Likelihoodには採用しない。",
+      "reevaluationCondition": "可能性役または小役について設定別の成立率・当選率が公開される。"
+    },
+    {
+      "blockId": "unicorn-cz-at-joint",
+      "label": "CZ初当りとAT初当りの同時独立加算",
+      "reason": "両者は同じ通常時進行に由来し、AT初当りにはCZ経由の当選が含まれるため独立性を仮定した単純加算は避ける。",
+      "reevaluationCondition": "CZ→AT遷移を含むsource-supportedなjoint model、または条件付き分布が得られる。"
+    }
+  ]
+}
