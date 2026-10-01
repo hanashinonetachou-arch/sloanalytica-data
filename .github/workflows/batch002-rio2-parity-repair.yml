@@ -1,0 +1,95 @@
+name: Batch002 Rio2 Parity Evidence Repair
+
+on:
+  push:
+    branches:
+      - production/v85-batch-002-foundation-20261001
+    paths:
+      - production/.batch002-rio2-parity-repair-trigger
+
+permissions:
+  contents: write
+
+concurrency:
+  group: batch002-rio2-parity-evidence-repair
+  cancel-in-progress: false
+
+jobs:
+  repair:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: production/v85-batch-002-foundation-20261001
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+
+      - name: Validate parity Evidence contract
+        working-directory: production
+        run: npm test
+
+      - name: Invalidate Rio2 App Runtime
+        working-directory: production
+        run: |
+          node --experimental-strip-types - <<'NODE'
+          const {RepoStore,Orchestrator}=await import('./src/core.ts');
+          const s=new RepoStore(process.cwd()),o=new Orchestrator(s);
+          const batch='batch-20261001-002',machine='L_SUPER_RIO_ACE2_ND02H';
+          let x=o.stage(batch,machine,'APP_RUNTIME');
+          if(x.state==='COMPLETE')o.transition(x,'READY','AUTHORITATIVE_OUTPUT_INVALIDATED','parity-evidence-contract-v1');
+          else if(x.state!=='READY')throw new Error('APP_RUNTIME_NOT_REPAIRABLE:'+x.state);
+          NODE
+
+      - name: Rebuild Rio2 App Runtime
+        working-directory: production
+        run: node --experimental-strip-types src/deterministic-production-worker.ts batch-20261001-002 --through APP_RUNTIME
+
+      - name: Verify Rio2 even-setting Evidence materialization
+        working-directory: production
+        run: |
+          node <<'NODE'
+          const fs=require('fs');
+          const p='batches/batch-20261001-002/artifacts/L_SUPER_RIO_ACE2_ND02H/app_runtime/result.json';
+          const d=JSON.parse(fs.readFileSync(p,'utf8'));
+          const ev=(d.package.evidence.evidences||[]).find(x=>x.name==='246枚：偶数設定濃厚');
+          if(!ev)throw new Error('RIO2_EVEN_EVIDENCE_MISSING');
+          const expected=['SET_2','SET_4','SET_6'];
+          if(JSON.stringify(ev.confirmedSettings)!==JSON.stringify(expected))throw new Error('RIO2_EVEN_EVIDENCE_WRONG:'+JSON.stringify(ev.confirmedSettings));
+          console.log(JSON.stringify(ev,null,2));
+          NODE
+
+      - name: Invalidate Rio2 Distribution and release integration boundary
+        working-directory: production
+        run: |
+          node --experimental-strip-types - <<'NODE'
+          const fs=await import('node:fs');
+          const {RepoStore,Orchestrator}=await import('./src/core.ts');
+          const s=new RepoStore(process.cwd()),o=new Orchestrator(s);
+          const batch='batch-20261001-002',machine='L_SUPER_RIO_ACE2_ND02H';
+          let x=o.stage(batch,machine,'DISTRIBUTION');
+          if(x.state==='COMPLETE')o.transition(x,'READY','AUTHORITATIVE_OUTPUT_INVALIDATED','parity-evidence-contract-v1');
+          else if(x.state!=='READY')throw new Error('DISTRIBUTION_NOT_REPAIRABLE:'+x.state);
+          fs.writeFileSync('.batch002-wave2-integration-trigger',
+            'Batch #002 Wave #2 Distribution integration trigger\n'+
+            'batch: batch-20261001-002\n'+
+            'wave: wave-2\n'+
+            'repair: rio2-parity-evidence\n'+
+            'source-head: '+process.env.GITHUB_SHA+'\n');
+          NODE
+
+      - name: Validate repaired production state
+        working-directory: production
+        run: npm test
+
+      - name: Commit authoritative repair state
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git add production/batches/batch-20261001-002 production/.batch002-wave2-integration-trigger
+          git commit -m "Repair Rio2 parity Evidence materialization"
+          git push origin HEAD:production/v85-batch-002-foundation-20261001
