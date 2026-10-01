@@ -53,3 +53,11 @@ test('shows evidence object name next to its user-facing meaning',()=>{
 });
 
 test('materializes exact parity constraints',()=>{const ev:any={id:'EVI_parity',sourceFindingId:'parity',title:'獲得枚数表示',runtimePolicyControlled:false,evidenceItems:[{findingId:'parity',label:'獲得枚数表示',semanticType:'EXACT_CONSTRAINT',semanticCategories:[{label:'246枚：偶数設定濃厚',semanticType:'EXACT_CONSTRAINT'},{label:'135枚：奇数設定濃厚',semanticType:'EXACT_CONSTRAINT'}],details:['246枚：偶数設定濃厚','135枚：奇数設定濃厚']}]};const p:any={...base,settings:{status:'SOURCE_DERIVED',values:['SET_1','SET_2','SET_3','SET_4','SET_5','SET_6']},evidence:[ev],runtimeUi:{...base.runtimeUi,evidenceSections:[ev]}};const d=buildAppRuntime(p,ref);assert.deepEqual(d.package.evidence.evidences[0].confirmedSettings,['SET_2','SET_4','SET_6']);assert.deepEqual(d.package.evidence.evidences[1].confirmedSettings,['SET_1','SET_3','SET_5']);assert.doesNotThrow(()=>validateAppRuntimeDocument(d,p,ref))});
+
+
+test('sanitizes internal terminology from blocked summary and feature rationale',()=>{
+ const p:any={...base,activeFeatures:[{findingId:'f',name:'CZ初当り',model:'BERNOULLI',trialUniverse:'NORMAL_GAME_TRIAL',settingDistribution:{'1':'1/200','2':'1/150'},runtimePolicyBinding:{metric:'PER_ELIGIBLE_TRIAL_POWER',value:2},score:{status:'NOT_COMPUTED'}}],blockedItems:[{blockId:'b',label:'追加設定差',reason:'設定別likelihoodが不足しjoint model未確立。',reevaluationCondition:'source-supportedなdependency modelが得られる。'}],runtimeUi:{...base.runtimeUi,numericSections:[{id:'OBS_f',sourceFindingId:'f',title:'CZ初当り',inputs:[{id:'f.eligibleTrialCount',label:'観測機会数',role:'trial'},{id:'f.successCount',label:'該当回数',role:'success'}]}]}};
+ const d=buildAppRuntime(p,ref);const text=JSON.stringify({summary:d.package.v8.machineResearchSummary,rationale:d.package.features.features[0].selectionRationale});
+ assert.doesNotMatch(text,/likelihood|joint model|dependency model|candidate contract|runtime policy|research|evaluation/i);
+ assert.match(text,/数値推測/);assert.match(text,/要素を同時に扱う統計モデル/);assert.match(text,/採用条件/);
+});
