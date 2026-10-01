@@ -8,8 +8,8 @@
     "artifactId": "runtime-projection-L_SUPER_RIO_ACE2_ND02H",
     "kind": "runtime-projection",
     "path": "production/batches/batch-20261001-002/artifacts/L_SUPER_RIO_ACE2_ND02H/runtime_projection/result.json",
-    "sha256": "88c9ce2553ba86f733eaac2b8ebdaeb374c05db76a9cb6f98c2880dc4a3382fb",
-    "producerWorkId": "wrk_c1c2b27d39574b1f"
+    "sha256": "80f9916a8674295bf303b52e3511d9ad9b6488a6e6cd59dd429d615be9e0daa1",
+    "producerWorkId": "wrk_d8f54520b7b542e3"
   },
   "package": {
     "schemaVersion": 1,
@@ -142,7 +142,16 @@
           "defaultValue": 0,
           "minimum": 0,
           "displayOrder": 9,
-          "inferenceRole": "INCLUDE_SUPPORT"
+          "inferenceRole": "INCLUDE_SUPPORT",
+          "inputVisible": false,
+          "derivedCalculation": "sum",
+          "derivedFromInputIds": [
+            "ending-voice.categoryCounts.1_青",
+            "ending-voice.categoryCounts.2_黄",
+            "ending-voice.categoryCounts.3_緑",
+            "ending-voice.categoryCounts.4_赤",
+            "ending-voice.categoryCounts.5_虹"
+          ]
         },
         {
           "id": "ending-voice.categoryCounts.1_青",
@@ -380,12 +389,13 @@
             "ending-voice.categoryCounts.4_赤",
             "ending-voice.categoryCounts.5_虹"
           ],
+          "denominatorRule": "SUM_CATEGORY_COUNTS",
           "categoryProbabilities": {
             "SET_1": [
-              0.59,
-              0.3,
-              0.1,
-              0.01,
+              0.5900000000000001,
+              0.30000000000000004,
+              0.10000000000000002,
+              0.010000000000000002,
               0
             ],
             "SET_2": [
@@ -681,10 +691,10 @@
       "v8Sections": [
         {
           "id": "OBS_SHARED_NORMAL_GAME_TRIAL",
-          "title": "通常ゲーム数",
+          "title": "ボーナス・AT合算・ノワールルーム",
           "collapsible": true,
           "defaultExpanded": false,
-          "description": "同じ通常ゲーム数を母数に使う設定推測要素をまとめています。母数は1回だけ入力し、各項目の回数だけを記録します。",
+          "description": "「通常ゲーム数」を共通の母数として使う項目をまとめています。母数は1回だけ入力し、各項目の回数を記録します。",
           "descriptionPresentation": {
             "collapsible": true,
             "label": "説明",
@@ -724,6 +734,7 @@
                 "label": "説明",
                 "defaultExpanded": false
               },
+              "gridSpan": 6,
               "inputs": [
                 {
                   "id": "initial-hit.successCount",
@@ -752,6 +763,7 @@
                 "label": "説明",
                 "defaultExpanded": false
               },
+              "gridSpan": 6,
               "inputs": [
                 {
                   "id": "noir-room-entry.successCount",
@@ -777,7 +789,7 @@
           "title": "ハワードゲーム当選",
           "collapsible": true,
           "defaultExpanded": false,
-          "description": "対象となる機会の回数と、そのうち該当した回数を入力します。\\n1回の判別力：0.990",
+          "description": "通常時に規定リプレイ50回へ到達した回数を母数、そのうちハワードゲームに当選した回数を入力します。\\n1回の判別力：0.990",
           "descriptionPresentation": {
             "collapsible": true,
             "label": "説明",
@@ -791,7 +803,7 @@
               "inputs": [
                 {
                   "id": "howard-game.eligibleTrialCount",
-                  "label": "対象回数",
+                  "label": "規定リプレイ50回到達回数",
                   "input": "denominator",
                   "inputId": "howard-game.eligibleTrialCount",
                   "engineBinding": {
@@ -894,43 +906,33 @@
                 "type": "CATEGORY_COUNTERS",
                 "preservePriorObservations": true,
                 "showAccumulatedCounts": true,
-                "categoryCoverage": "NON_EXHAUSTIVE",
-                "totalOpportunities": "SEPARATE_COUNTER",
-                "opportunityTracking": {
-                  "type": "SEPARATE_COUNTER",
-                  "inputId": "ending-voice.eligibleTrialCount",
-                  "label": "観測機会数"
-                },
+                "categoryCoverage": "EXHAUSTIVE",
+                "totalOpportunities": "SUM_CATEGORY_COUNTS",
                 "categories": [
                   {
                     "id": "ending-voice.categoryCounts.1_青",
                     "inputId": "ending-voice.categoryCounts.1_青",
-                    "label": "青",
-                    "meaning": "観測した回数"
+                    "label": "青"
                   },
                   {
                     "id": "ending-voice.categoryCounts.2_黄",
                     "inputId": "ending-voice.categoryCounts.2_黄",
-                    "label": "黄",
-                    "meaning": "観測した回数"
+                    "label": "黄"
                   },
                   {
                     "id": "ending-voice.categoryCounts.3_緑",
                     "inputId": "ending-voice.categoryCounts.3_緑",
-                    "label": "緑",
-                    "meaning": "観測した回数"
+                    "label": "緑"
                   },
                   {
                     "id": "ending-voice.categoryCounts.4_赤",
                     "inputId": "ending-voice.categoryCounts.4_赤",
-                    "label": "赤",
-                    "meaning": "観測した回数"
+                    "label": "赤"
                   },
                   {
                     "id": "ending-voice.categoryCounts.5_虹",
                     "inputId": "ending-voice.categoryCounts.5_虹",
-                    "label": "虹",
-                    "meaning": "観測した回数"
+                    "label": "虹"
                   }
                 ]
               }
@@ -1061,7 +1063,14 @@
             "reason": "現在の採用基準を満たしているため、設定推測に使用します。"
           }
         ],
-        "notAdopted": [],
+        "notAdopted": [
+          {
+            "featureId": "rio2-direct-bonus-setting-values",
+            "label": "ボーナス直撃の設定別個別確率",
+            "reason": "設定差がある範囲値は確認できるが、各設定の個別値を今回の確認資料から確定できない。",
+            "reevaluationCondition": "信頼できる資料で設定1〜6のボーナス直撃個別確率を確認できる。"
+          }
+        ],
         "highLowDiscrimination": {
           "status": "COMPUTED",
           "method": "BEST_SINGLE_EXACT_ACTIVE_FEATURE",

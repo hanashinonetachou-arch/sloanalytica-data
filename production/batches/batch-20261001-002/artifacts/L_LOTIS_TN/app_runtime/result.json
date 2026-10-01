@@ -8,8 +8,8 @@
     "artifactId": "runtime-projection-L_LOTIS_TN",
     "kind": "runtime-projection",
     "path": "production/batches/batch-20261001-002/artifacts/L_LOTIS_TN/runtime_projection/result.json",
-    "sha256": "3979456a1f21102d51d4bc84ad60f48bc44dd94886055dc60079a294ead075fd",
-    "producerWorkId": "wrk_20cdb16cc2c748ba"
+    "sha256": "8624586d3c92845c9994c752d4dd63f5d8f62244f216f176bffc760979f88d3c",
+    "producerWorkId": "wrk_4ab417ce530d47b3"
   },
   "package": {
     "schemaVersion": 1,
@@ -72,7 +72,7 @@
           "defaultValue": 0,
           "minimum": 0,
           "displayOrder": 3,
-          "inferenceRole": "INCLUDE_PRIMARY"
+          "inferenceRole": "INCLUDE_SUPPORT"
         },
         {
           "id": "real-cherry-b.successCount",
@@ -84,7 +84,7 @@
           "minimum": 0,
           "displayOrder": 4,
           "parentInputId": "real-cherry-b.eligibleTrialCount",
-          "inferenceRole": "INCLUDE_PRIMARY"
+          "inferenceRole": "INCLUDE_SUPPORT"
         },
         {
           "id": "bonus-end-panel-flash.eligibleTrialCount",
@@ -95,7 +95,14 @@
           "defaultValue": 0,
           "minimum": 0,
           "displayOrder": 5,
-          "inferenceRole": "INCLUDE_SUPPORT"
+          "inferenceRole": "INCLUDE_SUPPORT",
+          "inputVisible": false,
+          "derivedCalculation": "sum",
+          "derivedFromInputIds": [
+            "bonus-end-panel-flash.categoryCounts.1_通常点滅",
+            "bonus-end-panel-flash.categoryCounts.2_高速点滅",
+            "bonus-end-panel-flash.categoryCounts.3_その他"
+          ]
         },
         {
           "id": "bonus-end-panel-flash.categoryCounts.1_通常点滅",
@@ -166,8 +173,8 @@
         {
           "featureId": "real-cherry-b",
           "name": "平行揃いチェリー（リアルチェリーB）",
-          "trialUniverse": "NORMAL_GAME_TRIAL",
-          "adoptionCategory": "INCLUDE_PRIMARY",
+          "trialUniverse": "TOTAL_GAME_TRIAL",
+          "adoptionCategory": "INCLUDE_SUPPORT",
           "calculationRole": "PROBABILITY",
           "probabilityEngineUsage": true,
           "denominatorInputId": "real-cherry-b.eligibleTrialCount",
@@ -209,6 +216,7 @@
             "bonus-end-panel-flash.categoryCounts.2_高速点滅",
             "bonus-end-panel-flash.categoryCounts.3_その他"
           ],
+          "denominatorRule": "SUM_CATEGORY_COUNTS",
           "categoryProbabilities": {
             "SET_1": [
               0,
@@ -249,9 +257,9 @@
         {
           "featureId": "real-cherry-b",
           "runtimeStatus": "ACTIVE",
-          "metric": "SELECTION_SCORE",
-          "metricValue": 22.40659900287665,
-          "importance": "主要"
+          "metric": "PER_ELIGIBLE_TRIAL_POWER",
+          "metricValue": 0.003460207460295739,
+          "importance": "微小"
         },
         {
           "featureId": "bonus-end-panel-flash",
@@ -284,7 +292,7 @@
       "playInfo": {
         "visible": true,
         "collapsible": false,
-        "mode": "TOTAL_AND_NORMAL",
+        "mode": "TOTAL_ONLY",
         "sessionFields": [
           {
             "id": "date",
@@ -308,24 +316,12 @@
             "label": "着席時 総ゲーム数",
             "mode": "NUMBER",
             "directNumeric": true
-          },
-          {
-            "id": "startNormalGames",
-            "label": "着席時 通常ゲーム数",
-            "mode": "NUMBER",
-            "directNumeric": true
           }
         ],
         "currentFields": [
           {
             "id": "currentTotalGames",
             "label": "現在 総ゲーム数",
-            "mode": "NUMBER",
-            "directNumeric": true
-          },
-          {
-            "id": "currentNormalGames",
-            "label": "現在 通常ゲーム数",
             "mode": "NUMBER",
             "directNumeric": true
           }
@@ -355,7 +351,7 @@
           "title": "ボーナス初当り",
           "collapsible": true,
           "defaultExpanded": false,
-          "description": "対象区間で実際に消化したゲーム数と、そのうち該当した回数を入力します。\\n1回の判別力：0.001",
+          "description": "総ゲーム数から「除外ゲーム数（連荘中のゲーム数）」を差し引いたゲーム数を母数として使用します。除外ゲーム数はこの要素だけに適用します。\\n1回の判別力：0.001",
           "descriptionPresentation": {
             "collapsible": true,
             "label": "説明",
@@ -369,7 +365,7 @@
               "inputs": [
                 {
                   "id": "bonus-first-hit.eligibleTrialCount",
-                  "label": "対象ゲーム数",
+                  "label": "連荘中を除くゲーム数",
                   "input": "denominator",
                   "inputId": "bonus-first-hit.eligibleTrialCount",
                   "engineBinding": {
@@ -382,7 +378,8 @@
                   ],
                   "unobservedDisplay": "—",
                   "playDataBinding": {
-                    "source": "PLAY_NORMAL_GAME_DELTA"
+                    "source": "PLAY_TOTAL_GAME_DELTA_EXCLUDED",
+                    "mode": "AUTO_EXACT"
                   }
                 },
                 {
@@ -409,7 +406,7 @@
           "title": "平行揃いチェリー（リアルチェリーB）",
           "collapsible": true,
           "defaultExpanded": false,
-          "description": "通常ゲーム数に対する該当回数を入力します。「着席時との差分を使用」がONの場合、通常ゲーム数は遊技情報から自動反映されます。\\n設定判別スコア：22.4\\n1回の判別力：22.407",
+          "description": "総ゲーム数に対する該当回数を入力します。「着席時との差分を使用」がONの場合、総ゲーム数は遊技情報から自動反映できます。\\n1回の判別力：0.003",
           "descriptionPresentation": {
             "collapsible": true,
             "label": "説明",
@@ -423,7 +420,7 @@
               "inputs": [
                 {
                   "id": "real-cherry-b.eligibleTrialCount",
-                  "label": "通常ゲーム数",
+                  "label": "総ゲーム数",
                   "input": "denominator",
                   "inputId": "real-cherry-b.eligibleTrialCount",
                   "engineBinding": {
@@ -436,7 +433,7 @@
                   ],
                   "unobservedDisplay": "—",
                   "playDataBinding": {
-                    "source": "PLAY_NORMAL_GAME_DELTA"
+                    "source": "PLAY_TOTAL_GAME_DELTA"
                   }
                 },
                 {
@@ -478,31 +475,23 @@
                 "type": "CATEGORY_COUNTERS",
                 "preservePriorObservations": true,
                 "showAccumulatedCounts": true,
-                "categoryCoverage": "NON_EXHAUSTIVE",
-                "totalOpportunities": "SEPARATE_COUNTER",
-                "opportunityTracking": {
-                  "type": "SEPARATE_COUNTER",
-                  "inputId": "bonus-end-panel-flash.eligibleTrialCount",
-                  "label": "観測機会数"
-                },
+                "categoryCoverage": "EXHAUSTIVE",
+                "totalOpportunities": "SUM_CATEGORY_COUNTS",
                 "categories": [
                   {
                     "id": "bonus-end-panel-flash.categoryCounts.1_通常点滅",
                     "inputId": "bonus-end-panel-flash.categoryCounts.1_通常点滅",
-                    "label": "通常点滅",
-                    "meaning": "観測した回数"
+                    "label": "通常点滅"
                   },
                   {
                     "id": "bonus-end-panel-flash.categoryCounts.2_高速点滅",
                     "inputId": "bonus-end-panel-flash.categoryCounts.2_高速点滅",
-                    "label": "高速点滅",
-                    "meaning": "観測した回数"
+                    "label": "高速点滅"
                   },
                   {
                     "id": "bonus-end-panel-flash.categoryCounts.3_その他",
                     "inputId": "bonus-end-panel-flash.categoryCounts.3_その他",
-                    "label": "その他",
-                    "meaning": "観測した回数"
+                    "label": "その他"
                   }
                 ]
               }
@@ -540,11 +529,10 @@
           {
             "featureId": "real-cherry-b",
             "label": "平行揃いチェリー（リアルチェリーB）",
-            "importance": "主要",
-            "selectionScore": 22.4,
+            "importance": "微小",
             "evaluation": {
-              "userLabel": "設定判別スコア",
-              "value": 22.4
+              "userLabel": "1回の判別力",
+              "value": 0.003460207460295739
             },
             "reason": "現在の採用基準を満たしているため、設定推測に使用します。"
           },
@@ -559,47 +547,20 @@
             "reason": "現在の採用基準を満たしているため、設定推測に使用します。"
           }
         ],
-        "notAdopted": [],
-        "highLowDiscrimination": {
-          "status": "COMPUTED",
-          "method": "BEST_SINGLE_EXACT_ACTIVE_FEATURE",
-          "bandDefinition": {
-            "lowSettings": "SETTING_1_TO_3",
-            "highSettings": "SETTING_4_TO_6",
-            "classPrior": "BALANCED"
-          },
-          "results": [
-            {
-              "games": 1500,
-              "balancedAccuracyPercent": 56.67
-            },
-            {
-              "games": 3000,
-              "balancedAccuracyPercent": 59.46
-            },
-            {
-              "games": 7000,
-              "balancedAccuracyPercent": 64.08
-            }
-          ],
-          "eligibleFeatureIds": [
-            "real-cherry-b"
-          ],
-          "selectedFeatureId": "real-cherry-b",
-          "selectedFeatureLabel": "平行揃いチェリー（リアルチェリーB）",
-          "excludedFeatures": [
-            {
-              "findingId": "bonus-first-hit",
-              "reason": "BENCHMARK_EXPOSURE_UNRESOLVED"
-            },
-            {
-              "findingId": "bonus-end-panel-flash",
-              "reason": "BENCHMARK_EXPOSURE_UNRESOLVED"
-            }
-          ],
-          "note": "7000Gへ正確に換算できるACTIVE要素だけを候補とし、要素間の独立性を仮定せず、単独で最も高い判別精度を持つ要素から保守的に算出しています。条件付き要素はこの指標には含めませんが、実戦中に実際の観測回数が入力された場合は設定推測に使用します。"
-        },
-        "unresolved": []
+        "notAdopted": [
+          {
+            "featureId": "lotis-chain-denominator-auto",
+            "label": "ボーナス初当りの通常区間分母の自動算出",
+            "reason": "総ゲーム数だけでは32G以内連チャン区間を正確に除外できない。",
+            "reevaluationCondition": "ボーナス履歴から通常区間ゲーム数を決定論的に再構築するProduction Contractが実装される。"
+          }
+        ],
+        "unresolved": [
+          {
+            "label": "高低判別精度",
+            "reason": "基準ゲーム数へ正確に換算できる設定推測要素がないため、高低判別精度を算出していません。"
+          }
+        ]
       }
     }
   }
