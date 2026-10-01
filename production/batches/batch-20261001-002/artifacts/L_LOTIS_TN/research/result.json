@@ -1,0 +1,132 @@
+{
+  "schemaVersion": "research-v1",
+  "manifestVersion": "8.5",
+  "batchId": "batch-20261001-002",
+  "machineId": "L_LOTIS_TN",
+  "machineName": "スマスロ ローティス",
+  "workId": "wrk_r_l_lotis_tn_001",
+  "researchedAt": "2026-10-01",
+  "settings": {
+    "status": "SOURCE_DERIVED",
+    "values": [
+      "SET_1",
+      "SET_2",
+      "SET_4",
+      "SET_5",
+      "SET_6"
+    ]
+  },
+  "sources": [
+    {
+      "sourceId": "upslot-lotis",
+      "url": "https://up-slot.com/sumaslo-lotis-tool/",
+      "title": "ローティス（スマスロローティス）設定判別ツール",
+      "sourceType": "secondary_analysis",
+      "claims": [
+        "通常区間33G以降と連チャン区間32G以内を分離",
+        "リアルチェリーBを判別対象",
+        "ボーナス終了時下パネル点滅は確認回数を分母に記録"
+      ]
+    },
+    {
+      "sourceId": "pacnk-lotis",
+      "url": "https://pacnk.com/slot/tools/sh_lotis.html",
+      "title": "ローティス 設定判別ツール",
+      "sourceType": "secondary_analysis",
+      "claims": [
+        "設定1/2/4/5/6",
+        "ボーナス初当り・リアルチェリーB・通常点滅・高速点滅の設定別値"
+      ]
+    },
+    {
+      "sourceId": "hazuse-lotis",
+      "url": "https://hazuse.com/machine/pachislot/SX0132/",
+      "title": "ローティス｜天井・設定判別・機械割",
+      "sourceType": "primary_analysis",
+      "claims": [
+        "通常点滅は設定2以上濃厚",
+        "高速点滅は設定4以上濃厚",
+        "ボーナス終了時パネルフラッシュ設定別発生率"
+      ]
+    }
+  ],
+  "findings": [
+    {
+      "findingId": "bonus-first-hit",
+      "label": "ボーナス初当り",
+      "observationType": "probability",
+      "sourceIds": [
+        "upslot-lotis",
+        "pacnk-lotis"
+      ],
+      "settingDistribution": {
+        "1": "1/287.2",
+        "2": "1/281.2",
+        "4": "1/271.8",
+        "5": "1/264.8",
+        "6": "1/260.3"
+      },
+      "trialUniverse": "LOTIS_NON_CHAIN_GAME_TRIAL",
+      "denominatorSemantics": "33G以降の通常区間ゲーム数。32G以内の連チャン区間を除外する。",
+      "overlapDependency": "ボーナス履歴から通常区間/連チャン区間を再構築して分母を確定する。"
+    },
+    {
+      "findingId": "real-cherry-b",
+      "label": "リアルチェリーB",
+      "observationType": "probability",
+      "sourceIds": [
+        "upslot-lotis",
+        "pacnk-lotis"
+      ],
+      "settingDistribution": {
+        "1": "1/993.0",
+        "2": "1/885.6",
+        "4": "1/799.2",
+        "5": "1/728.2",
+        "6": "1/668.7"
+      },
+      "trialUniverse": "NORMAL_GAME_TRIAL",
+      "denominatorSemantics": "通常時ゲーム数。チェリー平行揃い（リアルチェリーB）の成立回数を数える。"
+    },
+    {
+      "findingId": "bonus-end-panel-flash",
+      "label": "ボーナス終了時の下パネル点滅",
+      "observationType": "categorical_probability",
+      "sourceIds": [
+        "upslot-lotis",
+        "pacnk-lotis",
+        "hazuse-lotis"
+      ],
+      "settingDistribution": {
+        "1": "通常点滅0% / 高速点滅0%",
+        "2": "通常点滅3.1% / 高速点滅0%",
+        "4": "通常点滅2.3% / 高速点滅1.2%",
+        "5": "通常点滅2.7% / 高速点滅1.6%",
+        "6": "通常点滅3.1% / 高速点滅2.0%"
+      },
+      "trialUniverse": "BONUS_END_PANEL_CHECK_TRIAL",
+      "denominatorSemantics": "ボーナス終了時に下パネルを確認できた回数。",
+      "semanticType": "MIXED_CATEGORICAL",
+      "semanticCategories": [
+        {
+          "label": "通常点滅",
+          "meaning": "設定2以上濃厚",
+          "semanticType": "EXACT_CONSTRAINT"
+        },
+        {
+          "label": "高速点滅",
+          "meaning": "設定4以上濃厚",
+          "semanticType": "EXACT_CONSTRAINT"
+        }
+      ]
+    }
+  ],
+  "blockedItems": [
+    {
+      "blockId": "lotis-chain-denominator-auto",
+      "label": "ボーナス初当りの通常区間分母の自動算出",
+      "reason": "総ゲーム数だけでは32G以内連チャン区間を正確に除外できない。",
+      "reevaluationCondition": "ボーナス履歴から通常区間ゲーム数を決定論的に再構築するProduction Contractが実装される。"
+    }
+  ]
+}
