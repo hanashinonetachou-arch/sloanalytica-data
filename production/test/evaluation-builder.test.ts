@@ -9,3 +9,14 @@ test('TOTAL_GAME_TRIAL receives exact 7000G selection score',()=>{
  assert.ok(e.metrics.selectionScore.value>20);
  assert.equal(e.selectionClass,'CORE');
 });
+
+
+test('source categorical distribution uses strings and rejects object rows before production',()=>{
+ const research={manifestVersion:'8.5',batchId:'b',machineId:'M',machineName:'M',findings:[{findingId:'f',label:'男女比',observationType:'appearance_distribution',sourceIds:['s'],trialUniverse:'STANDBY_CHARACTER_TRIAL',settingDistribution:{'1':'男性 60% / 女性 40%','2':'男性 40% / 女性 60%','3':'男性 60% / 女性 40%','4':'男性 40% / 女性 60%','5':'男性 60% / 女性 40%','6':'男性 40% / 女性 60%'},categoryModel:{residualPolicy:'SOURCE_EXHAUSTIVE'}}],blockedItems:[]};
+ const d=buildEvaluation(research);const e=d.evaluations[0];
+ assert.equal(e.model,'CATEGORICAL');
+ assert.ok(e.metrics.perEligibleTrialPower>0);
+ const invalid=structuredClone(research) as any;
+ invalid.findings[0].settingDistribution={'1':{male:0.6,female:0.4},'2':{male:0.4,female:0.6}};
+ assert.throws(()=>buildEvaluation(invalid),/EVAL_CATEGORY/);
+});
