@@ -7,7 +7,7 @@ function categoricalIg(vs:any[],residualPolicy:string){const rows=vs.map(v=>cate
 function logBinomial(k:number,n:number,p:number){if(p===0)return k===0?0:-Infinity;if(p===1)return k===n?0:-Infinity;let c=0,j=Math.min(k,n-k);for(let i=1;i<=j;i++)c+=Math.log(n-j+i)-Math.log(i);return c+k*Math.log(p)+(n-k)*Math.log1p(-p)}
 function binomialIg(ps:number[],n:number){let total=0;for(let k=0;k<=n;k++){const logs=ps.map(p=>logBinomial(k,n,p)),mx=Math.max(...logs);if(!Number.isFinite(mx))continue;const rel=logs.map(x=>Number.isFinite(x)?Math.exp(x-mx):0),avg=rel.reduce((a,b)=>a+b,0)/rel.length,scale=Math.exp(mx);if(!scale)continue;for(const v of rel)if(v>0)total+=(scale*v/rel.length)*Math.log2(v/avg)}return total}
 const cls=(s:number)=>s>=20?'CORE':s>=10?'SUPPORT':s>=5?'JOINT_ELIGIBLE':'EXCLUDE';
-const exactBenchmark=new Set(['NORMAL_GAME_TRIAL','BONUS_ELIGIBLE_GAME_TRIAL']);
+const exactBenchmark=new Set(['TOTAL_GAME_TRIAL','NORMAL_GAME_TRIAL','BONUS_ELIGIBLE_GAME_TRIAL']);
 const liveStatus=(f:any)=>f.liveObservation?.status??(f.trialUniverse==='LOTIS_NON_CHAIN_GAME_TRIAL'||f.trialUniverse==='NON_CHAIN_BONUS_INITIAL_GAME_TRIAL'?'RETROSPECTIVE_EXACT':'DIRECT_EXACT');
 const liveReason=(f:any)=>f.liveObservation?.reason??(f.denominatorSemantics?String(f.denominatorSemantics):'対象となる試行数と観測回数を実戦で記録できる。');
 const dependency=(f:any)=>{const id=f.dependencyGroupId??f.dependencyGroup;return id?{status:'DEFERRED_TO_CANDIDATE_CONTRACT',groupId:String(id),reason:f.dependencyReason??'同一exposureを共有する候補との二重評価を避けるためCandidate Contractで解決する。'}:{status:'NONE',reason:'source上で独立した観測要素として扱う。'}};
