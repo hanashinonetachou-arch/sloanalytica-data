@@ -1,0 +1,182 @@
+name: Batch002 Rio2 Evidence Semantic Repair
+
+on:
+  push:
+    branches:
+      - production/v85-batch-002-foundation-20261001
+    paths:
+      - production/.batch002-rio2-evidence-repair-trigger
+
+permissions:
+  contents: write
+  actions: write
+
+concurrency:
+  group: batch002-rio2-evidence-semantic-repair
+  cancel-in-progress: false
+
+jobs:
+  repair:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout authoritative production state
+        uses: actions/checkout@v4
+        with:
+          ref: production/v85-batch-002-foundation-20261001
+          path: production-state
+          fetch-depth: 0
+
+      - name: Checkout prototype distribution branch
+        uses: actions/checkout@v4
+        with:
+          ref: prototype-multi-machine
+          path: prototype
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+
+      - name: Validate repaired common contracts
+        working-directory: production-state/production
+        run: npm test
+
+      - name: Rebuild Rio2 downstream from Observation Evidence
+        working-directory: production-state/production
+        run: |
+          node --experimental-strip-types src/invalidate-machine-downstream.ts batch-20261001-002 L_SUPER_RIO_ACE2_ND02H
+          node --experimental-strip-types src/deterministic-production-worker.ts batch-20261001-002 --through APP_RUNTIME
+          npm test
+
+      - name: Materialize repaired Rio2 package
+        shell: bash
+        run: |
+          set -euo pipefail
+          node <<'NODE'
+          const fs=require('fs'),path=require('path'),crypto=require('crypto');
+          const batchId='batch-20261001-002',machineId='L_SUPER_RIO_ACE2_ND02H';
+          const prod=path.resolve('production-state'),proto=path.resolve('prototype');
+          const stage=JSON.parse(fs.readFileSync(path.join(prod,'production','batches',batchId,'machines',machineId,'stages','APP_RUNTIME.json'),'utf8'));
+          if(stage.state!=='COMPLETE'||!stage.authoritativeOutputRef?.path)throw new Error('APP_RUNTIME_NOT_COMPLETE');
+          const app=JSON.parse(fs.readFileSync(path.join(prod,stage.authoritativeOutputRef.path),'utf8'));
+          const pkg=app.package;
+          const catalogPath=path.join(proto,'catalog.json');
+          const catalog=JSON.parse(fs.readFileSync(catalogPath,'utf8'));
+          const entry=catalog.machines.find(x=>x.machineId===machineId);
+          if(!entry)throw new Error('CATALOG_ENTRY_MISSING');
+          pkg.machine.introductionDate=entry.introductionDate;
+          pkg.machine.machineType=entry.machineType;
+          pkg.machine.gameType=entry.gameType;
+          const bytes=Buffer.from(JSON.stringify(pkg,null,2)+'\n','utf8');
+          fs.writeFileSync(path.join(proto,'machines',machineId,'machine-package.json'),bytes);
+          const caps=[];
+          for(const feature of pkg.features?.features??[]){
+            const model=String(feature.modelType??'').toLowerCase();
+            if(model==='binomial'&&!caps.includes('binomial'))caps.push('binomial');
+            if(model==='multinomial'&&!caps.includes('multinomial'))caps.push('multinomial');
+          }
+          if((pkg.evidence?.references??[]).length>0&&!caps.includes('evidence'))caps.push('evidence');
+          entry.machineDataVersion=pkg.machine.machineDataVersion;
+          entry.sha256=crypto.createHash('sha256').update(bytes).digest('hex');
+          entry.packageSizeBytes=bytes.length;
+          entry.requiredCapabilities=caps;
+          entry.updatedAt=new Date().toISOString();
+          fs.writeFileSync(catalogPath,JSON.stringify(catalog,null,2)+'\n');
+          fs.writeFileSync(process.env.RUNNER_TEMP+'/rio2-package-metadata.json',JSON.stringify({
+            [machineId]:{machineId,machineDataVersion:pkg.machine.machineDataVersion,settings:pkg.machine.settings,sha256:entry.sha256,packageSizeBytes:entry.packageSizeBytes,introductionDate:entry.introductionDate,machineType:entry.machineType,gameType:entry.gameType}
+          },null,2)+'\n');
+          NODE
+
+      - name: Verify semantic repair
+        shell: bash
+        working-directory: prototype
+        run: |
+          set -euo pipefail
+          npm run ux-contract:audit
+          node --test --test-concurrency=1 test/user-verified-ux-contracts.test.mjs
+          node tools/apply-machine-identity-classification.mjs --apply
+          node tools/apply-machine-identity-classification.mjs --verify
+          node <<'NODE'
+          const fs=require('fs');
+          const p=JSON.parse(fs.readFileSync('machines/L_SUPER_RIO_ACE2_ND02H/machine-package.json','utf8'));
+          const e=(p.evidence?.evidences??[]).find(x=>x.inputId==='REF_payout-hint_1');
+          if(!e)throw new Error('RIO2_246_EVIDENCE_NOT_MATERIALIZED');
+          const actual=JSON.stringify(e.confirmedSettings);
+          const expected=JSON.stringify(['SET_2','SET_4','SET_6']);
+          if(actual!==expected)throw new Error('RIO2_246_PARITY_CONSTRAINT:'+actual);
+          NODE
+
+      - name: Commit repaired prototype package
+        shell: bash
+        working-directory: prototype
+        run: |
+          set -euo pipefail
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git add -u
+          git add catalog.json machines/L_SUPER_RIO_ACE2_ND02H/machine-package.json
+          if ! git diff --cached --quiet; then
+            git commit -m "Repair Rio2 parity Evidence semantics [skip ci]"
+            git push origin HEAD:prototype-multi-machine
+          fi
+          echo "PROTOTYPE_COMMIT=$(git rev-parse HEAD)" >> "$GITHUB_ENV"
+
+      - name: Deploy Pages
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          gh workflow run deploy-pages.yml --ref prototype-multi-machine --repo "$GITHUB_REPOSITORY"
+          run_id=""
+          for _ in $(seq 1 30); do
+            run_id="$(gh api "repos/$GITHUB_REPOSITORY/actions/runs?branch=prototype-multi-machine&event=workflow_dispatch&per_page=30" --jq ".workflow_runs[] | select(.name == \"Deploy SloAnalytica Data Pages\" and .head_sha == \"$PROTOTYPE_COMMIT\") | .id" | head -n1 || true)"
+            [ -n "$run_id" ] && break
+            sleep 2
+          done
+          test -n "$run_id"
+          gh run watch "$run_id" --repo "$GITHUB_REPOSITORY" --exit-status
+          echo "PAGES_RUN_ID=$run_id" >> "$GITHUB_ENV"
+
+      - name: Build repair Distribution attestation
+        shell: bash
+        run: |
+          set -euo pipefail
+          node <<'NODE'
+          const fs=require('fs'),path=require('path');
+          const doc={
+            batchId:'batch-20261001-002',
+            integration:{repository:'hanashinonetachou-arch/sloanalytica-data',branch:'prototype-multi-machine',commit:process.env.PROTOTYPE_COMMIT},
+            packages:JSON.parse(fs.readFileSync(process.env.RUNNER_TEMP+'/rio2-package-metadata.json','utf8')),
+            checks:{
+              catalogIntegrity:true,
+              pagesDeployment:{runId:Number(process.env.PAGES_RUN_ID),conclusion:'success'},
+              uxContractAudit:{runId:Number(process.env.GITHUB_RUN_ID),conclusion:'success'},
+              machineIdentityConsistency:{runId:Number(process.env.GITHUB_RUN_ID),conclusion:'success',batchMachineVerified:true}
+            }
+          };
+          const p=path.resolve('production-state','production','batches','batch-20261001-002','rio2-evidence-repair-attestation.json');
+          fs.writeFileSync(p,JSON.stringify(doc,null,2)+'\n');
+          NODE
+
+      - name: Finalize repaired Rio2 Distribution
+        working-directory: production-state/production
+        run: |
+          node --experimental-strip-types src/finalize-batch-distribution.ts batch-20261001-002 batches/batch-20261001-002/rio2-evidence-repair-attestation.json wave-2
+          npm test
+
+      - name: Commit repaired authoritative state
+        shell: bash
+        working-directory: production-state
+        run: |
+          set -euo pipefail
+          git fetch origin production/v85-batch-002-foundation-20261001
+          test "$(git rev-parse HEAD)" = "$(git rev-parse origin/production/v85-batch-002-foundation-20261001)" || {
+            echo "Production branch moved during repair; refusing non-CAS publication."
+            exit 1
+          }
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git add production/batches/batch-20261001-002
+          git commit -m "Finalize Rio2 Evidence semantic repair [skip ci]"
+          git push origin HEAD:production/v85-batch-002-foundation-20261001
