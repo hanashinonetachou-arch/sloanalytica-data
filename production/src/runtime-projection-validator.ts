@@ -13,7 +13,7 @@ export function validateRuntimeProjectionDocument(doc:any,machineData:any,policy
     const d:any=decisions.get(f.findingId);
     if(!d) fail('DECISION:'+f.findingId);
     if(d.state==='ACTIVE') expectedActive.push(f);
-    else if(d.state==='INACTIVE') expectedInactive.push({findingId:f.findingId,metric:d.metric,value:d.value,threshold:d.threshold,reason:'THRESHOLD_NOT_MET'});
+    else if(d.state==='INACTIVE') expectedInactive.push({findingId:f.findingId,name:f.name,metric:d.metric,value:d.value,threshold:d.threshold,reason:'THRESHOLD_NOT_MET'});
     else fail('DECISION_STATE:'+f.findingId);
   }
   if(canonical(doc.activeFeatures)!==canonical(expectedActive)||canonical(doc.inactiveFeatures)!==canonical(expectedInactive)) fail('FEATURE_PROJECTION');

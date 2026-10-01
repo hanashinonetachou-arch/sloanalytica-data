@@ -8,7 +8,7 @@ export function buildRuntimeProjection(machineData:any,policy:any,machineDataArt
     const d:any=decisions.get(f.findingId);
     if(!d) throw new Error('RUNTIME_PROJECTION_DECISION_MISSING:'+f.findingId);
     if(d.state==='ACTIVE') activeFeatures.push(f);
-    else if(d.state==='INACTIVE') inactiveFeatures.push({findingId:f.findingId,metric:d.metric,value:d.value,threshold:d.threshold,reason:'THRESHOLD_NOT_MET'});
+    else if(d.state==='INACTIVE') inactiveFeatures.push({findingId:f.findingId,name:f.name,metric:d.metric,value:d.value,threshold:d.threshold,reason:'THRESHOLD_NOT_MET'});
     else throw new Error('RUNTIME_PROJECTION_DECISION_STATE:'+f.findingId);
   }
   const activeIds=new Set(activeFeatures.map((x:any)=>x.findingId));

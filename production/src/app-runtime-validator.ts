@@ -30,7 +30,7 @@ export function validateAppRuntimeDocument(doc:any,projection:any,projectionArti
    const success=s.inputs?.find((x:any)=>x.role==='success');if(a.modelType!=='binomial'||a.numeratorInputId!==success?.id)fail('FEATURE_BERNOULLI:'+src.findingId);
    for(const [k,v] of Object.entries(src.settingDistribution??{}))if(!near(a.probabilities?.[settingKey(k)],probability(v)))fail('FEATURE_PROB:'+src.findingId+':'+k);
   }else if(src.model==='CATEGORICAL'){
-   const cats=s.inputs?.filter((x:any)=>x.role==='categoryCount')??[];if(a.modelType!=='multinomial'||a.numeratorInputId!==cats[0]?.id||canonical(a.categoryInputIds??[])!==canonical(cats.slice(1).map((x:any)=>x.id)))fail('FEATURE_CATEGORICAL:'+src.findingId);
+   const cats=s.inputs?.filter((x:any)=>x.role==='categoryCount')??[];const sumMode=['SOURCE_EXHAUSTIVE','SOURCE_EXPLICIT_OTHER'].includes(String(src.categoryModel?.residualPolicy??''));if(a.modelType!=='multinomial'||a.numeratorInputId!==cats[0]?.id||canonical(a.categoryInputIds??[])!==canonical(cats.slice(1).map((x:any)=>x.id))||(sumMode?a.denominatorRule!=='SUM_CATEGORY_COUNTS':a.denominatorRule!==undefined))fail('FEATURE_CATEGORICAL:'+src.findingId);
    for(const [k,row] of Object.entries(src.settingDistribution??{}) as any){const expected=categoricalProbabilityRow(row,cats.map((x:any)=>x.label),src.findingId,k);if(canonical(a.categoryProbabilities?.[settingKey(k)])!==canonical(expected))fail('FEATURE_CATEGORY_PROB:'+src.findingId+':'+k)}
   }else fail('FEATURE_MODEL:'+src.findingId);
  }
@@ -42,10 +42,10 @@ export function validateAppRuntimeDocument(doc:any,projection:any,projectionArti
  if(p.ui?.contractVersion!=='runtime-ui-v8'||p.ui?.source!=='CANONICAL_UI'||p.ui?.sourceSchemaVersion!==projection.runtimeUi?.schemaVersion||p.ui?.accordion?.singleOpen!==true||p.ui?.quickInput?.enabled!==false)fail('UI_HEADER');
  if(p.ui?.playInfo?.visible!==true||!p.ui?.playInfo?.useDifference)fail('UI_PLAY_INFO');
  for(const s of (p.ui?.v8Sections??[]).filter((x:any)=>String(x.id??'').startsWith('OBS_'))){if(typeof s.description!=='string'||!s.description.trim())fail('NUMERIC_DESCRIPTION:'+s.id);if(s.descriptionPresentation?.collapsible!==true)fail('NUMERIC_DESCRIPTION_PRESENTATION:'+s.id);}
- const expectedUiCount=(projection.runtimeUi?.numericSections??[]).length+(projection.runtimeUi?.evidenceSections??[]).length;
- if((p.ui?.v8Sections??[]).length!==expectedUiCount)fail('UI_SECTION_COVERAGE');
- const expectedIds=[...(projection.runtimeUi?.numericSections??[]).map((s:any)=>s.id),...(projection.runtimeUi?.evidenceSections??[]).map((s:any)=>s.id)];
- if(canonical((p.ui.v8Sections??[]).map((s:any)=>s.id))!==canonical(expectedIds))fail('UI_SECTION_IDS');
+ const uiSections=p.ui?.v8Sections??[];const featureIds:string[]=[];const visit=(n:any)=>{if(n?.featureId)featureIds.push(n.featureId);for(const child of n?.inputs??[])visit(child)};for(const s of uiSections){for(const n of s.groups??[])visit(n);for(const n of s.items??[])visit(n)}
+ const expectedFeatureIds=active.map((x:any)=>x.findingId).sort();if(canonical([...featureIds].sort())!==canonical(expectedFeatureIds))fail('UI_FEATURE_COVERAGE');
+ const expectedEvidenceSectionIds=(projection.runtimeUi?.evidenceSections??[]).map((s:any)=>s.id).sort();const actualEvidenceSectionIds=uiSections.filter((s:any)=>String(s.id??'').startsWith('EVI_')).map((s:any)=>s.id).sort();if(canonical(actualEvidenceSectionIds)!==canonical(expectedEvidenceSectionIds))fail('UI_EVIDENCE_SECTION_COVERAGE');
+ const sectionIds=uiSections.map((s:any)=>s.id);if(new Set(sectionIds).size!==sectionIds.length)fail('UI_SECTION_DUPLICATE');
  if(canonical(p.evidence?.references)!==canonical(projection.evidence??[])||!Array.isArray(p.evidence?.evidences))fail('EVIDENCE_REFERENCE_COPY');
  const expectedEvidenceIds=(projection.evidence??[]).flatMap((s:any)=>(s.evidenceItems??[]).map((e:any)=>e.findingId));
  const expectedEvidenceIdSet=new Set(expectedEvidenceIds);
@@ -62,6 +62,7 @@ export function validateAppRuntimeDocument(doc:any,projection:any,projectionArti
   const item=(s.items??[])[0];if(item?.interaction?.type!=='CATEGORY_COUNTERS'||item?.interaction?.categoryCoverage!=='NON_EXHAUSTIVE'||item?.interaction?.totalOpportunities!=='NONE'||!Array.isArray(item?.interaction?.categories)||item.interaction.categories.length===0)fail('EVIDENCE_UI_INPUT');
  }
  const summary=p.v8?.machineResearchSummary;if(!summary)fail('V8_SUMMARY');
+ for(const x of summary.notAdopted??[]){const label=String(x?.label??'').trim();const featureId=String(x?.featureId??'').trim();if(!label||label==='設定推測要素'||label==='調査継続項目'||(featureId&&label===featureId))fail('SUMMARY_LABEL:'+featureId);if(typeof x?.reason!=='string'||!x.reason.trim())fail('SUMMARY_REASON:'+featureId);}
  const rejectedIds=new Set((summary.notAdopted??[]).map((x:any)=>x.featureId));
  for(const x of projection.nonRuntimeCandidates??[])if(!rejectedIds.has(x.findingId))fail('SUMMARY_NON_RUNTIME_MISSING:'+x.findingId);
  for(const x of projection.excludedDecisions??[])if(!rejectedIds.has(x.findingId))fail('SUMMARY_EXCLUDED_MISSING:'+x.findingId);if(projection.highLowDiscrimination?.status==='COMPUTED'){if(canonical(summary.highLowDiscrimination)!==canonical(projection.highLowDiscrimination)||summary.unresolved?.some((x:any)=>x?.label==='高低判別精度'))fail('HLD_COMPUTED');}else{if(summary.highLowDiscrimination!==undefined||!summary.unresolved?.some((x:any)=>x?.label==='高低判別精度'&&x?.reason===projection.highLowDiscrimination?.reason))fail('HLD_UNRESOLVED');}

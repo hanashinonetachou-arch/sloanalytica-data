@@ -2,6 +2,10 @@ import fs from 'node:fs';import path from 'node:path';import {pathToFileURL} fro
 export const QA_REQUIRED_STAGES=['CANONICAL_UI','MACHINE_DATA','RUNTIME_POLICY','RUNTIME_PROJECTION','APP_RUNTIME','DISTRIBUTION'] as const;
 const fail=(m:string):never=>{throw new Error('QA_READINESS_FAILED:'+m)};
 const sameStrings=(a:unknown,b:unknown)=>Array.isArray(a)&&Array.isArray(b)&&a.length===b.length&&a.every((x,i)=>typeof x==='string'&&x===b[i]);
+const sameEvidencePresentation=(details:unknown,categories:any[])=>Array.isArray(details)&&Array.isArray(categories)&&details.length===categories.length&&details.every((raw:any,i:number)=>{
+ if(typeof raw!=='string')return false;const c=categories[i];if(!c||typeof c.label!=='string')return false;if(c.label===raw)return true;
+ return typeof c.meaning==='string'&&`${c.label}：${c.meaning}`===raw;
+});
 export function validateMachineQaReadiness(machineId:string,stageStates:Record<string,any>,pkg:any,renderReport:any){
  for(const stage of QA_REQUIRED_STAGES){
   const s=stageStates?.[stage];
@@ -33,7 +37,7 @@ export function validateMachineQaReadiness(machineId:string,stageStates:Record<s
   for(const item of items){const cats=Array.isArray(item?.semanticCategories)?item.semanticCategories:[];if(cats.length!==item.details.length||cats.some((x:any,i:number)=>x?.label!==item.details[i]||!['EXACT_CONSTRAINT','PROBABILITY_BACKED','PROBABILITY_UNKNOWN','DISPLAY_ONLY','BLOCK'].includes(x?.semanticType)))fail(machineId+':EVIDENCE_SEMANTICS:'+String(ref?.id??'UNKNOWN'));}
   const section=uiEvidence.find((s:any)=>s?.id===ref?.id);
   const categories=(section?.items??[]).flatMap((node:any)=>node?.interaction?.type==='CATEGORY_COUNTERS'?(node?.interaction?.categories??[]).map((c:any)=>c?.label):[]);
-  if(!sameStrings(details,categories))fail(machineId+':EVIDENCE_CATEGORY_MISMATCH:'+String(ref?.id??'UNKNOWN'));
+  if(!sameEvidencePresentation(details,(section?.items??[]).flatMap((node:any)=>node?.interaction?.type==='CATEGORY_COUNTERS'?(node?.interaction?.categories??[]):[])))fail(machineId+':EVIDENCE_CATEGORY_MISMATCH:'+String(ref?.id??'UNKNOWN'));
  }
  if(renderReport?.schemaVersion!=='rendered-ui-validation-v1'||renderReport?.machineId!==machineId)fail(machineId+':RENDER_REPORT_IDENTITY');
  if(renderReport?.status!=='PASS')fail(machineId+':RENDERED_UI_VALIDATION');

@@ -1,0 +1,88 @@
+name: Batch002 Wave2 Production Worker
+
+on:
+  push:
+    branches:
+      - production/v85-batch-002-foundation-20261001
+    paths:
+      - production/.batch002-wave2-production-trigger
+
+permissions:
+  contents: write
+
+concurrency:
+  group: batch002-wave2-production
+  cancel-in-progress: false
+
+jobs:
+  produce:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: production/v85-batch-002-foundation-20261001
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+
+      - name: Validate Batch 002 foundation
+        working-directory: production
+        run: |
+          node --experimental-strip-types src/reconcile-batch.ts batch-20261001-002
+          npm test
+
+      - name: Materialize Wave 2 Research with orchestrator authority
+        working-directory: production
+        run: node --experimental-strip-types src/materialize-research-drafts.ts batch-20261001-002 wave-2
+
+      - name: Invalidate Batch 002 from Evaluation after QA semantic repair
+        working-directory: production
+        shell: bash
+        run: |
+          set -euo pipefail
+          for machine in \
+            L_LOTIS_TN L_DARK_HAIBI_SB L_SENGOKU_OTOME5_L8 L_SAO2_PA1 L_BIRDIE_WING_BC \
+            L_SUPER_RIO_ACE2_ND02H L_TAKT_OP_DESTINY_M1 L_BIOHAZARD_RE3_ZD L_BIG_DREAM_GOLDEN_PUSHER_KR L_ANIMAL_SLOT_DOCCHI_ZT
+          do
+            node --experimental-strip-types src/invalidate-machine-downstream.ts batch-20261001-002 "$machine"
+          done
+
+      - name: Validate Research artifacts
+        working-directory: production
+        run: npm test
+
+      - name: Regenerate Batch 002 through App Runtime
+        working-directory: production
+        run: node --experimental-strip-types src/deterministic-production-worker.ts batch-20261001-002 --through APP_RUNTIME
+
+      - name: Validate resulting production state
+        working-directory: production
+        run: npm test
+
+      - name: Commit authoritative Wave 2 state and release Integration boundary
+        shell: bash
+        run: |
+          set -euo pipefail
+          printf '%s\n' \
+            'Batch #002 Wave #1 Distribution integration trigger after QA repair' \
+            'batch: batch-20261001-002' \
+            'wave: wave-1' \
+            "source-head: $(git rev-parse HEAD)" \
+            > production/.batch002-wave1-integration-trigger
+          printf '%s\n' \
+            'Batch #002 Wave #2 Distribution integration trigger after QA repair' \
+            'batch: batch-20261001-002' \
+            'wave: wave-2' \
+            "source-head: $(git rev-parse HEAD)" \
+            > production/.batch002-wave2-integration-trigger
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git add production/batches/batch-20261001-002 production/.batch002-wave1-integration-trigger production/.batch002-wave2-integration-trigger
+          if git diff --cached --quiet; then
+            echo "Batch 002 Wave 2 state already current."
+            exit 0
+          fi
+          git commit -m "Advance Batch 002 Wave 2 through app runtime"
+          git push origin HEAD:production/v85-batch-002-foundation-20261001
