@@ -42,10 +42,10 @@ export function validateAppRuntimeDocument(doc:any,projection:any,projectionArti
  if(p.ui?.contractVersion!=='runtime-ui-v8'||p.ui?.source!=='CANONICAL_UI'||p.ui?.sourceSchemaVersion!==projection.runtimeUi?.schemaVersion||p.ui?.accordion?.singleOpen!==true||p.ui?.quickInput?.enabled!==false)fail('UI_HEADER');
  if(p.ui?.playInfo?.visible!==true||!p.ui?.playInfo?.useDifference)fail('UI_PLAY_INFO');
  for(const s of (p.ui?.v8Sections??[]).filter((x:any)=>String(x.id??'').startsWith('OBS_'))){if(typeof s.description!=='string'||!s.description.trim())fail('NUMERIC_DESCRIPTION:'+s.id);if(s.descriptionPresentation?.collapsible!==true)fail('NUMERIC_DESCRIPTION_PRESENTATION:'+s.id);}
- const expectedUiCount=(projection.runtimeUi?.numericSections??[]).length+(projection.runtimeUi?.evidenceSections??[]).length;
- if((p.ui?.v8Sections??[]).length!==expectedUiCount)fail('UI_SECTION_COVERAGE');
- const expectedIds=[...(projection.runtimeUi?.numericSections??[]).map((s:any)=>s.id),...(projection.runtimeUi?.evidenceSections??[]).map((s:any)=>s.id)];
- if(canonical((p.ui.v8Sections??[]).map((s:any)=>s.id))!==canonical(expectedIds))fail('UI_SECTION_IDS');
+ const uiSections=p.ui?.v8Sections??[];const featureIds:string[]=[];const visit=(n:any)=>{if(n?.featureId)featureIds.push(n.featureId);for(const child of n?.inputs??[])visit(child)};for(const s of uiSections){for(const n of s.groups??[])visit(n);for(const n of s.items??[])visit(n)}
+ const expectedFeatureIds=active.map((x:any)=>x.findingId).sort();if(canonical([...featureIds].sort())!==canonical(expectedFeatureIds))fail('UI_FEATURE_COVERAGE');
+ const expectedEvidenceSectionIds=(projection.runtimeUi?.evidenceSections??[]).map((s:any)=>s.id).sort();const actualEvidenceSectionIds=uiSections.filter((s:any)=>String(s.id??'').startsWith('EVI_')).map((s:any)=>s.id).sort();if(canonical(actualEvidenceSectionIds)!==canonical(expectedEvidenceSectionIds))fail('UI_EVIDENCE_SECTION_COVERAGE');
+ const sectionIds=uiSections.map((s:any)=>s.id);if(new Set(sectionIds).size!==sectionIds.length)fail('UI_SECTION_DUPLICATE');
  if(canonical(p.evidence?.references)!==canonical(projection.evidence??[])||!Array.isArray(p.evidence?.evidences))fail('EVIDENCE_REFERENCE_COPY');
  const expectedEvidenceIds=(projection.evidence??[]).flatMap((s:any)=>(s.evidenceItems??[]).map((e:any)=>e.findingId));
  const expectedEvidenceIdSet=new Set(expectedEvidenceIds);
