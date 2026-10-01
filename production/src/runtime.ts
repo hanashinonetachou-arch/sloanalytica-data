@@ -55,5 +55,25 @@ export function appendProvenance(s:RepoStore,b:string,p:ProvenanceRecord){s.appe
 export function dashboard(s:RepoStore,b:string){const md=s.p('batches',b,'machines');const machines=fs.readdirSync(md).sort().map(machineId=>{const stages=PRODUCTION_STAGES.map(name=>s.read<Stage>('batches',b,'machines',machineId,'stages',name+'.json'));const active=stages.find(x=>!['PENDING','COMPLETE'].includes(x.state))??stages.at(-1)!;return {machineId,stage:active.name,state:active.state,revision:active.revision,blocked:active.state==='WAIT_EXTERNAL'||active.state==='HUMAN_REQUIRED',failed:active.state==='FAILED'}});return {batchId:b,machines,counts:machines.reduce((a,x)=>(a[x.state]=(a[x.state]||0)+1,a),{} as Record<string,number>)}}
 export function reconcileBatch(o:Orchestrator,s:RepoStore,b:string){const md=s.p('batches',b,'machines');for(const m of fs.readdirSync(md)){for(const n of PRODUCTION_STAGES)o.reconcile(b,m,n);promoteDependencies(o,b,m)}return dashboard(s,b)}
 const RESEARCH_WAVE_SETTLED=new Set(['COMPLETE','FAILED','WAIT_EXTERNAL','HUMAN_REQUIRED']);
-export function activeResearchWave(s:RepoStore,b:string){const spec=s.read<BatchSpec>('batches',b,'batch.json');for(const w of spec.waves){if(w.machineIds.some(m=>!RESEARCH_WAVE_SETTLED.has(s.read<Stage>('batches',b,'machines',m,'stages','RESEARCH.json').state)))return w.waveId}return undefined}
+const WAVE_BOUNDARY_SETTLED=new Set(['COMPLETE','FAILED','WAIT_EXTERNAL','HUMAN_REQUIRED']);
+const distributionIndex=PRODUCTION_STAGES.indexOf('DISTRIBUTION');
+function machineSettledAtWaveBoundary(s:RepoStore,b:string,m:string){
+ const distribution=s.read<Stage>('batches',b,'machines',m,'stages','DISTRIBUTION.json');
+ if(WAVE_BOUNDARY_SETTLED.has(distribution.state))return true;
+ for(const stage of PRODUCTION_STAGES.slice(0,distributionIndex)){
+  const state=s.read<Stage>('batches',b,'machines',m,'stages',stage+'.json').state;
+  if(state==='FAILED'||state==='WAIT_EXTERNAL'||state==='HUMAN_REQUIRED')return true;
+ }
+ return false;
+}
+export function activeResearchWave(s:RepoStore,b:string){
+ const spec=s.read<BatchSpec>('batches',b,'batch.json');
+ for(let i=0;i<spec.waves.length;i++){
+  const w=spec.waves[i];
+  if(!w.machineIds.some(m=>!RESEARCH_WAVE_SETTLED.has(s.read<Stage>('batches',b,'machines',m,'stages','RESEARCH.json').state)))continue;
+  const previousReleased=spec.waves.slice(0,i).every(prev=>prev.machineIds.every(m=>machineSettledAtWaveBoundary(s,b,m)));
+  return previousReleased?w.waveId:undefined;
+ }
+ return undefined;
+}
 export function scheduleByKind(o:Orchestrator,s:RepoStore,b:string,c:Concurrency,kind:Exclude<WorkerKind,'VALIDATOR'|'HUMAN'>){const all:Record<string,Stage>={};const candidates:Stage[]=[];const spec=s.read<BatchSpec>('batches',b,'batch.json');const activeWave=activeResearchWave(s,b);const researchIds=new Set(spec.waves.find(w=>w.waveId===activeWave)?.machineIds??[]);for(const m of fs.readdirSync(s.p('batches',b,'machines'))){for(const n of PRODUCTION_STAGES){const x=o.stage(b,m,n);all[m+':'+n]=x;if(STAGE_WORKER[n]===kind&&(n!=='RESEARCH'||researchIds.has(m))&&!(kind==='SEMANTIC'&&activeWave&&n!=='RESEARCH'))candidates.push({...x,dependencies:x.dependencies.map(d=>m+':'+d)})}}const slots=kind==='SEMANTIC'?c.semanticSlots:kind==='PRODUCTION'?c.productionSlots:c.integrationSlots;return schedule(candidates,all,slots,o.now()).map(x=>({...x,dependencies:x.dependencies.map(d=>d.split(':').at(-1)!)}))}
