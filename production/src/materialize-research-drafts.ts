@@ -7,7 +7,9 @@ import type {WorkRequest,WorkResult,Concurrency} from './core.ts';
 
 const batchId=process.argv[2];
 const waveId=process.argv[3];
-if(!batchId||!waveId)throw new Error('USAGE: materialize-research-drafts <batch-id> <wave-id>');
+const forceMachineArg=process.argv.find(x=>x.startsWith('--force-machine='));
+const forceMachineId=forceMachineArg?.slice('--force-machine='.length);
+if(!batchId||!waveId)throw new Error('USAGE: materialize-research-drafts <batch-id> <wave-id> [--force-machine=<machine-id>]');
 
 const s=new RepoStore(process.cwd());
 const o=new Orchestrator(s);
@@ -52,10 +54,18 @@ function materialize(candidate:any){
 }
 
 const completed:any[]=[];
+if(forceMachineId){
+  if(!targets.has(forceMachineId))throw new Error('FORCE_MACHINE_NOT_IN_WAVE:'+forceMachineId);
+  reconcileBatch(o,s,batchId);
+  const forced=o.stage(batchId,forceMachineId,'RESEARCH');
+  if(forced.state!=='READY')throw new Error('FORCE_RESEARCH_NOT_READY:'+forceMachineId+':'+forced.state);
+  completed.push(materialize({machineId:forceMachineId}));
+}
 for(let guard=0;guard<20;guard++){
   reconcileBatch(o,s,batchId);
   const remaining=[...targets].filter(machineId=>o.stage(batchId,machineId,'RESEARCH').state!=='COMPLETE');
   if(remaining.length===0)break;
+  if(forceMachineId&&remaining.every(machineId=>machineId===forceMachineId))throw new Error('FORCE_RESEARCH_INCOMPLETE:'+forceMachineId);
   const selected=scheduleByKind(o,s,batchId,cfg.concurrency,'SEMANTIC')
     .filter((x:any)=>x.name==='RESEARCH'&&targets.has(x.machineId));
   if(selected.length===0)throw new Error('RESEARCH_WAVE_STALLED:'+remaining.join(','));
