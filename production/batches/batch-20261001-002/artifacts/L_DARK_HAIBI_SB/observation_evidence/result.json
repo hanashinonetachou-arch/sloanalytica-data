@@ -1,0 +1,184 @@
+{
+  "schemaVersion": "observation-evidence-v1",
+  "manifestVersion": "8.5",
+  "batchId": "batch-20261001-002",
+  "machineId": "L_DARK_HAIBI_SB",
+  "machineName": "スマート沖スロ ダークハイビ",
+  "candidateContractArtifact": {
+    "artifactId": "candidate-contract-L_DARK_HAIBI_SB",
+    "kind": "candidate-contract",
+    "path": "production/batches/batch-20261001-002/artifacts/L_DARK_HAIBI_SB/candidate_contract/result.json",
+    "sha256": "82a422091d1da523222245bd9687b4957deef8da4487d87ea2549990a8fc8c3a",
+    "producerWorkId": "wrk_feb64ba99f1c490e"
+  },
+  "observations": [
+    {
+      "findingId": "bonus-first-hit",
+      "label": "ボーナス初当り",
+      "model": "BERNOULLI",
+      "trialUniverse": "NON_CHAIN_BONUS_INITIAL_GAME_TRIAL",
+      "liveInferenceRoute": "LIVE_CONDITIONAL",
+      "runtimeInferenceAllowed": true,
+      "dependencyResolution": "NONE",
+      "observationStatus": "READY",
+      "collectionContract": {
+        "type": "SUCCESS_TRIAL_COUNTS",
+        "successField": "successCount",
+        "trialField": "eligibleTrialCount"
+      }
+    },
+    {
+      "findingId": "bonus-combined",
+      "label": "ボーナス合算",
+      "model": "BERNOULLI",
+      "trialUniverse": "NORMAL_GAME_TRIAL",
+      "liveInferenceRoute": "LIVE_CONDITIONAL",
+      "runtimeInferenceAllowed": true,
+      "dependencyResolution": "CONDITIONALLY_SEPARATE",
+      "observationStatus": "READY",
+      "collectionContract": {
+        "type": "SUCCESS_TRIAL_COUNTS",
+        "successField": "successCount",
+        "trialField": "eligibleTrialCount"
+      }
+    }
+  ],
+  "evidence": [
+    {
+      "findingId": "bonus-end-feather",
+      "label": "ボーナス終了時フェザーランプ",
+      "sourceIds": [
+        "1geki-dark",
+        "slobase-dark"
+      ],
+      "details": [
+        "青：奇数示唆",
+        "黄：偶数示唆",
+        "緑：奇数＆高設定示唆",
+        "赤：偶数＆高設定示唆",
+        "紫：設定4以上濃厚",
+        "虹：設定6濃厚"
+      ],
+      "semanticType": "DISPLAY_ONLY",
+      "semanticCategories": [
+        {
+          "label": "青：奇数示唆",
+          "semanticType": "PROBABILITY_UNKNOWN"
+        },
+        {
+          "label": "黄：偶数示唆",
+          "semanticType": "PROBABILITY_UNKNOWN"
+        },
+        {
+          "label": "緑：奇数＆高設定示唆",
+          "semanticType": "PROBABILITY_UNKNOWN"
+        },
+        {
+          "label": "赤：偶数＆高設定示唆",
+          "semanticType": "PROBABILITY_UNKNOWN"
+        },
+        {
+          "label": "紫：設定4以上濃厚",
+          "semanticType": "EXACT_CONSTRAINT"
+        },
+        {
+          "label": "虹：設定6濃厚",
+          "semanticType": "EXACT_CONSTRAINT"
+        }
+      ],
+      "runtimePolicyControlled": false,
+      "status": "SOURCE_REFERENCED"
+    },
+    {
+      "findingId": "bonus-bgm-hotaru",
+      "label": "ボーナス中BGM「蛍の光」",
+      "sourceIds": [
+        "1geki-dark"
+      ],
+      "details": [
+        "蛍の光：設定6濃厚"
+      ],
+      "semanticType": "EXACT_CONSTRAINT",
+      "semanticCategories": [
+        {
+          "label": "蛍の光：設定6濃厚",
+          "semanticType": "EXACT_CONSTRAINT"
+        }
+      ],
+      "runtimePolicyControlled": false,
+      "status": "SOURCE_REFERENCED"
+    }
+  ],
+  "sourceReferences": [
+    {
+      "sourceId": "1geki-dark",
+      "url": "https://1geki.jp/slot/l_dark_haibi/0/",
+      "title": "ダークハイビ 設定差・設定判別要素まとめ",
+      "sourceType": "primary_analysis",
+      "claims": [
+        "初当り設定差",
+        "BB/RB/合算設定差",
+        "終了時フェザーランプ色の示唆",
+        "蛍の光で設定6濃厚"
+      ]
+    },
+    {
+      "sourceId": "slobase-dark",
+      "url": "https://slobase.jp/machines/dark-hibi",
+      "title": "スマート沖スロ ダークハイビ",
+      "sourceType": "secondary_analysis",
+      "claims": [
+        "通常時G中のBB/RB/合算入力",
+        "設定1/2/4/5/6",
+        "紫=設定4以上・虹=設定6"
+      ]
+    }
+  ],
+  "blockedItems": [
+    {
+      "blockId": "dark-feather-directional-rates",
+      "label": "フェザーランプ青/黄/緑/赤の設定別出現率",
+      "reason": "示唆方向は確認できるが設定別発生率は確認できない。",
+      "reevaluationCondition": "信頼できる資料で各色の設定別出現率が公開される。",
+      "blockedFindingIds": [
+        "bonus-end-feather"
+      ]
+    }
+  ],
+  "sourceIntegrityIssues": [],
+  "highLowDiscrimination": {
+    "status": "COMPUTED",
+    "method": "BEST_SINGLE_EXACT_ACTIVE_FEATURE",
+    "bandDefinition": {
+      "lowSettings": "SETTING_1_TO_3",
+      "highSettings": "SETTING_4_TO_6",
+      "classPrior": "BALANCED"
+    },
+    "results": [
+      {
+        "games": 1500,
+        "balancedAccuracyPercent": 60.66
+      },
+      {
+        "games": 3000,
+        "balancedAccuracyPercent": 64.79
+      },
+      {
+        "games": 7000,
+        "balancedAccuracyPercent": 71.38
+      }
+    ],
+    "eligibleFeatureIds": [
+      "bonus-combined"
+    ],
+    "selectedFeatureId": "bonus-combined",
+    "selectedFeatureLabel": "ボーナス合算",
+    "excludedFeatures": [
+      {
+        "findingId": "bonus-first-hit",
+        "reason": "BENCHMARK_EXPOSURE_UNRESOLVED"
+      }
+    ],
+    "note": "7000Gへ正確に換算できるACTIVE要素だけを候補とし、要素間の独立性を仮定せず、単独で最も高い判別精度を持つ要素から保守的に算出しています。条件付き要素はこの指標には含めませんが、実戦中に実際の観測回数が入力された場合は設定推測に使用します。"
+  }
+}

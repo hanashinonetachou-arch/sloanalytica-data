@@ -1,0 +1,145 @@
+{
+  "schemaVersion": "observation-evidence-v1",
+  "manifestVersion": "8.5",
+  "batchId": "batch-20261001-002",
+  "machineId": "L_LOTIS_TN",
+  "machineName": "スマスロ ローティス",
+  "candidateContractArtifact": {
+    "artifactId": "candidate-contract-L_LOTIS_TN",
+    "kind": "candidate-contract",
+    "path": "production/batches/batch-20261001-002/artifacts/L_LOTIS_TN/candidate_contract/result.json",
+    "sha256": "8e071bed72d713e6af22d1d0b005ff43fa163606308ac200e9b181604d164a7b",
+    "producerWorkId": "wrk_f18d97e199c34d58"
+  },
+  "observations": [
+    {
+      "findingId": "bonus-first-hit",
+      "label": "ボーナス初当り",
+      "model": "BERNOULLI",
+      "trialUniverse": "LOTIS_NON_CHAIN_GAME_TRIAL",
+      "liveInferenceRoute": "LIVE_CONDITIONAL",
+      "runtimeInferenceAllowed": true,
+      "dependencyResolution": "NONE",
+      "observationStatus": "READY",
+      "collectionContract": {
+        "type": "SUCCESS_TRIAL_COUNTS",
+        "successField": "successCount",
+        "trialField": "eligibleTrialCount"
+      }
+    },
+    {
+      "findingId": "real-cherry-b",
+      "label": "リアルチェリーB",
+      "model": "BERNOULLI",
+      "trialUniverse": "NORMAL_GAME_TRIAL",
+      "liveInferenceRoute": "LIVE_CONDITIONAL",
+      "runtimeInferenceAllowed": true,
+      "dependencyResolution": "NONE",
+      "observationStatus": "READY",
+      "collectionContract": {
+        "type": "SUCCESS_TRIAL_COUNTS",
+        "successField": "successCount",
+        "trialField": "eligibleTrialCount"
+      }
+    },
+    {
+      "findingId": "bonus-end-panel-flash",
+      "label": "ボーナス終了時の下パネル点滅",
+      "model": "CATEGORICAL",
+      "trialUniverse": "BONUS_END_PANEL_CHECK_TRIAL",
+      "liveInferenceRoute": "LIVE_CONDITIONAL",
+      "runtimeInferenceAllowed": true,
+      "dependencyResolution": "NONE",
+      "observationStatus": "READY",
+      "collectionContract": {
+        "type": "CATEGORY_COUNTS",
+        "countsField": "categoryCounts",
+        "trialField": "eligibleTrialCount",
+        "categoryCoverage": "NON_EXHAUSTIVE"
+      }
+    }
+  ],
+  "evidence": [],
+  "sourceReferences": [
+    {
+      "sourceId": "upslot-lotis",
+      "url": "https://up-slot.com/sumaslo-lotis-tool/",
+      "title": "ローティス（スマスロローティス）設定判別ツール",
+      "sourceType": "secondary_analysis",
+      "claims": [
+        "通常区間33G以降と連チャン区間32G以内を分離",
+        "リアルチェリーBを判別対象",
+        "ボーナス終了時下パネル点滅は確認回数を分母に記録"
+      ]
+    },
+    {
+      "sourceId": "pacnk-lotis",
+      "url": "https://pacnk.com/slot/tools/sh_lotis.html",
+      "title": "ローティス 設定判別ツール",
+      "sourceType": "secondary_analysis",
+      "claims": [
+        "設定1/2/4/5/6",
+        "ボーナス初当り・リアルチェリーB・通常点滅・高速点滅の設定別値"
+      ]
+    },
+    {
+      "sourceId": "hazuse-lotis",
+      "url": "https://hazuse.com/machine/pachislot/SX0132/",
+      "title": "ローティス｜天井・設定判別・機械割",
+      "sourceType": "primary_analysis",
+      "claims": [
+        "通常点滅は設定2以上濃厚",
+        "高速点滅は設定4以上濃厚",
+        "ボーナス終了時パネルフラッシュ設定別発生率"
+      ]
+    }
+  ],
+  "blockedItems": [
+    {
+      "blockId": "lotis-chain-denominator-auto",
+      "label": "ボーナス初当りの通常区間分母の自動算出",
+      "reason": "総ゲーム数だけでは32G以内連チャン区間を正確に除外できない。",
+      "reevaluationCondition": "ボーナス履歴から通常区間ゲーム数を決定論的に再構築するProduction Contractが実装される。"
+    }
+  ],
+  "sourceIntegrityIssues": [],
+  "highLowDiscrimination": {
+    "status": "COMPUTED",
+    "method": "BEST_SINGLE_EXACT_ACTIVE_FEATURE",
+    "bandDefinition": {
+      "lowSettings": "SETTING_1_TO_3",
+      "highSettings": "SETTING_4_TO_6",
+      "classPrior": "BALANCED"
+    },
+    "results": [
+      {
+        "games": 1500,
+        "balancedAccuracyPercent": 56.67
+      },
+      {
+        "games": 3000,
+        "balancedAccuracyPercent": 59.46
+      },
+      {
+        "games": 7000,
+        "balancedAccuracyPercent": 64.08
+      }
+    ],
+    "eligibleFeatureIds": [
+      "real-cherry-b"
+    ],
+    "selectedFeatureId": "real-cherry-b",
+    "selectedFeatureLabel": "リアルチェリーB",
+    "excludedFeatures": [
+      {
+        "findingId": "bonus-first-hit",
+        "reason": "BENCHMARK_EXPOSURE_UNRESOLVED"
+      },
+      {
+        "findingId": "bonus-end-panel-flash",
+        "reason": "BENCHMARK_EXPOSURE_UNRESOLVED"
+      }
+    ],
+    "note": "7000Gへ正確に換算できるACTIVE要素だけを候補とし、要素間の独立性を仮定せず、単独で最も高い判別精度を持つ要素から保守的に算出しています。条件付き要素はこの指標には含めませんが、実戦中に実際の観測回数が入力された場合は設定推測に使用します。"
+  }
+}
