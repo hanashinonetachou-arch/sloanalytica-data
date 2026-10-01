@@ -1,0 +1,188 @@
+{
+  "schemaVersion": "candidate-contract-v1",
+  "manifestVersion": "8.5",
+  "batchId": "batch-20261002-003",
+  "machineId": "L_SHINUCHI_YOSHIMUNE_A1",
+  "machineName": "真打 吉宗",
+  "evaluationArtifact": {
+    "artifactId": "evaluation-L_SHINUCHI_YOSHIMUNE_A1",
+    "kind": "evaluation",
+    "path": "production/batches/batch-20261002-003/artifacts/L_SHINUCHI_YOSHIMUNE_A1/evaluation/result.json",
+    "sha256": "ad43c1a1be7295de01056d4588e43df42ae87afc971049399d224b8c05074b64",
+    "producerWorkId": "wrk_bd2432316a554aa8"
+  },
+  "eligibilityArtifact": {
+    "artifactId": "eligibility-L_SHINUCHI_YOSHIMUNE_A1",
+    "kind": "eligibility",
+    "path": "production/batches/batch-20261002-003/artifacts/L_SHINUCHI_YOSHIMUNE_A1/eligibility/result.json",
+    "sha256": "83c790ab29ad00fd2162f7337cbe963852a5390d7074facfd85eba5cdc44c467",
+    "producerWorkId": "wrk_1205d8d1e19a4b07"
+  },
+  "candidates": [
+    {
+      "findingId": "cz-first-hit",
+      "label": "CZ「悪人成敗チャンス」初当たり",
+      "model": "BERNOULLI",
+      "trialUniverse": "NORMAL_GAME_TRIAL",
+      "liveInferenceRoute": "LIVE_CONDITIONAL",
+      "settingDistribution": {
+        "1": "1/313.0",
+        "2": "1/303.0",
+        "3": "1/283.5",
+        "4": "1/267.1",
+        "5": "1/256.9",
+        "6": "1/250.6"
+      },
+      "dependencyGroupId": "yoshimune-normal-first-hit",
+      "runtimeInferenceAllowed": false,
+      "dependencyResolution": "RESOLVED_BY_SINGLE_MEMBER",
+      "runtimePolicyBinding": {
+        "metric": "SELECTION_SCORE",
+        "value": 22.508390687710385,
+        "thresholdSource": "RUNTIME_POLICY"
+      },
+      "resolvedIntoFindingId": "at-first-hit"
+    },
+    {
+      "findingId": "at-first-hit",
+      "label": "AT「勧善懲悪ラッシュ」初当たり",
+      "model": "BERNOULLI",
+      "trialUniverse": "NORMAL_GAME_TRIAL",
+      "liveInferenceRoute": "LIVE_CONDITIONAL",
+      "settingDistribution": {
+        "1": "1/488.9",
+        "2": "1/471.5",
+        "3": "1/438.5",
+        "4": "1/398.1",
+        "5": "1/377.0",
+        "6": "1/354.9"
+      },
+      "dependencyGroupId": "yoshimune-normal-first-hit",
+      "runtimeInferenceAllowed": true,
+      "dependencyResolution": "SINGLE_MEMBER_SELECTED",
+      "runtimePolicyBinding": {
+        "metric": "SELECTION_SCORE",
+        "value": 29.567945084395397,
+        "thresholdSource": "RUNTIME_POLICY"
+      }
+    },
+    {
+      "findingId": "batto-max-hit",
+      "label": "抜刀メーターMAX時の抜刀チャンス当選",
+      "model": "BERNOULLI",
+      "trialUniverse": "BATTO_METER_MAX_ELIGIBLE_TRIAL",
+      "liveInferenceRoute": "LIVE_CONDITIONAL",
+      "settingDistribution": {
+        "1": 0.2031,
+        "2": 0.2227,
+        "3": 0.2227,
+        "4": 0.2422,
+        "5": 0.2422,
+        "6": 0.2578
+      },
+      "dependencyGroupId": null,
+      "runtimeInferenceAllowed": true,
+      "dependencyResolution": "NONE",
+      "runtimePolicyBinding": {
+        "metric": "PER_ELIGIBLE_TRIAL_POWER",
+        "value": 0.2551968491389722,
+        "thresholdSource": "RUNTIME_POLICY"
+      }
+    },
+    {
+      "findingId": "yagyu-selection",
+      "label": "CZ当選時の柳生選択",
+      "model": "BERNOULLI",
+      "trialUniverse": "CZ_AWARD_TRIAL",
+      "liveInferenceRoute": "LIVE_CONDITIONAL",
+      "settingDistribution": {
+        "1": 0.037,
+        "2": 0.039,
+        "3": 0.047,
+        "4": 0.062,
+        "5": 0.0781,
+        "6": 0.087
+      },
+      "dependencyGroupId": null,
+      "runtimeInferenceAllowed": true,
+      "dependencyResolution": "NONE",
+      "runtimePolicyBinding": {
+        "metric": "PER_ELIGIBLE_TRIAL_POWER",
+        "value": 0.9478293535153504,
+        "thresholdSource": "RUNTIME_POLICY"
+      }
+    }
+  ],
+  "dependencyGroups": [
+    {
+      "groupId": "yoshimune-normal-first-hit",
+      "resolution": "SINGLE_MEMBER_SELECTED",
+      "members": [
+        "cz-first-hit",
+        "at-first-hit"
+      ],
+      "runtimeInferenceAllowed": true,
+      "selectedFindingId": "at-first-hit",
+      "selectionRationale": "依存関係を仮定せず二重評価を避けるため、同一trial universe内で正式な7000G設定判別スコアが最大の候補を代表Featureとして使用する。",
+      "reason": "正式な設定判別スコアを比較できる候補から、最も情報量の高い1要素のみを採用する。"
+    }
+  ],
+  "excludedDecisions": [],
+  "blockedItems": [
+    {
+      "blockId": "yoshimune-first-hit-dependency",
+      "label": "CZとAT初当たりの同時独立加算",
+      "reason": "AT初当たりにCZ経由当選を含み同一通常時進行に由来するため独立加算を避ける。",
+      "reevaluationCondition": "source-supported joint/conditional modelが得られる。"
+    },
+    {
+      "blockId": "yoshimune-evidence-rates",
+      "label": "各設定示唆演出の設定別出現率",
+      "reason": "示唆内容は確認できるが設定別出現率は確認できない。",
+      "reevaluationCondition": "AT終了画面・御白州ビジョン・ボイス・トロフィー等の設定別出現率が公開される。"
+    },
+    {
+      "blockId": "yoshimune-menu-character",
+      "label": "メニュー画面のメインキャラ示唆",
+      "reason": "設定示唆であることは確認できるがキャラごとの正式な示唆内容が調査中。",
+      "reevaluationCondition": "吉宗・越前・天英院の正式な示唆内容が公開される。"
+    }
+  ],
+  "evidenceCandidates": [
+    {
+      "findingId": "oshiro-vision",
+      "label": "御白州ビジョン",
+      "sourceIds": [
+        "nana-yoshimune"
+      ],
+      "details": []
+    },
+    {
+      "findingId": "at-end-screen",
+      "label": "AT終了画面",
+      "sourceIds": [
+        "nana-yoshimune",
+        "slomiru-yoshimune"
+      ],
+      "details": []
+    },
+    {
+      "findingId": "payout-display",
+      "label": "獲得枚数表示",
+      "sourceIds": [
+        "slomiru-yoshimune",
+        "nana-yoshimune"
+      ],
+      "details": []
+    },
+    {
+      "findingId": "kopanda-trophy",
+      "label": "コパンダトロフィー",
+      "sourceIds": [
+        "slomiru-yoshimune"
+      ],
+      "details": []
+    }
+  ],
+  "sourceIntegrityIssues": []
+}
