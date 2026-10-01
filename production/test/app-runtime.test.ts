@@ -57,7 +57,8 @@ test('materializes exact parity constraints',()=>{const ev:any={id:'EVI_parity',
 
 test('sanitizes internal terminology from blocked summary and feature rationale',()=>{
  const p:any={...base,activeFeatures:[{findingId:'f',name:'CZ初当り',model:'BERNOULLI',trialUniverse:'NORMAL_GAME_TRIAL',settingDistribution:{'1':'1/200','2':'1/150'},runtimePolicyBinding:{metric:'PER_ELIGIBLE_TRIAL_POWER',value:2},score:{status:'NOT_COMPUTED'}}],blockedItems:[{blockId:'b',label:'追加設定差',reason:'設定別likelihoodが不足しjoint model未確立。',reevaluationCondition:'source-supportedなdependency modelが得られる。'}],runtimeUi:{...base.runtimeUi,numericSections:[{id:'OBS_f',sourceFindingId:'f',title:'CZ初当り',inputs:[{id:'f.eligibleTrialCount',label:'観測機会数',role:'trial'},{id:'f.successCount',label:'該当回数',role:'success'}]}]}};
- const d=buildAppRuntime(p,ref);const text=JSON.stringify({summary:d.package.v8.machineResearchSummary,rationale:d.package.features.features[0].selectionRationale});
- assert.doesNotMatch(text,/likelihood|joint model|dependency model|candidate contract|runtime policy|research|evaluation/i);
- assert.match(text,/数値推測/);assert.match(text,/要素を同時に扱う統計モデル/);assert.match(text,/採用条件/);
+ const d=buildAppRuntime(p,ref);const summary=d.package.v8.machineResearchSummary;const rationale=d.package.features.features[0].selectionRationale;
+ const visible=[...(summary.adopted??[]).flatMap((x:any)=>[x.label,x.reason]),...(summary.notAdopted??[]).flatMap((x:any)=>[x.label,x.reason,x.reevaluationCondition]),...(summary.unresolved??[]).flatMap((x:any)=>[x.label,x.reason]),...Object.values(rationale)].filter(Boolean).join(' ');
+ assert.doesNotMatch(visible,/likelihood|joint model|dependency model|candidate contract|runtime policy|research|evaluation/i);
+ assert.match(visible,/数値推測/);assert.match(visible,/要素を同時に扱う統計モデル/);assert.match(visible,/採用条件/);
 });
