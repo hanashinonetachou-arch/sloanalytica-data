@@ -39,26 +39,20 @@ const sectionExplanation=(f:any,s:any)=>{
 };
 const playDataSourceForTrialUniverse=(trialUniverse:any)=>
  trialUniverse==='TOTAL_GAME_TRIAL'?'PLAY_TOTAL_GAME_DELTA':
- trialUniverse==='NORMAL_GAME_TRIAL'||trialUniverse==='BONUS_ELIGIBLE_GAME_TRIAL'?'PLAY_NORMAL_GAME_DELTA':undefined;
+ trialUniverse==='NORMAL_GAME_TRIAL'||trialUniverse==='BONUS_ELIGIBLE_GAME_TRIAL'||trialUniverse==='LOTIS_NON_CHAIN_GAME_TRIAL'||trialUniverse==='NON_CHAIN_BONUS_INITIAL_GAME_TRIAL'?'PLAY_NORMAL_GAME_DELTA':undefined;
 const numericUiSections=(projection:any)=>{
  const src=projection.runtimeUi??{};const activeBy=new Map((projection.activeFeatures??[]).map((x:any)=>[x.findingId,x]));
- return (src.numericSections??[]).map((s:any)=>{
-  const f:any=activeBy.get(s.sourceFindingId);if(!f)throw new Error('APP_RUNTIME_UI_FEATURE_MISSING:'+s.sourceFindingId);
-  const inputs=s.inputs??[];
-  if(f.model==='BERNOULLI'){
-   const trial=inputs.find((x:any)=>x.role==='trial'),success=inputs.find((x:any)=>x.role==='success');
-   if(!trial||!success)throw new Error('APP_RUNTIME_BERNOULLI_UI:'+f.findingId);
-   const trialNode:any={id:trial.id,label:trialLabelFor(f.trialUniverse),input:'denominator',inputId:trial.id,engineBinding:{inputId:trial.id},gridSpan:playDataSourceForTrialUniverse(f.trialUniverse)?12:6,directNumeric:true,quickAdd:trial.quickAdd??[50],unobservedDisplay:'—'};
-   const playDataSource=playDataSourceForTrialUniverse(f.trialUniverse);if(playDataSource)trialNode.playDataBinding={source:playDataSource};
-   return {id:s.id,title:s.title,collapsible:s.collapsible!==false,defaultExpanded:s.defaultExpanded===true,description:sectionExplanation(f,s),descriptionPresentation:{collapsible:true,label:'説明',defaultExpanded:false},items:[{id:'NODE_'+f.findingId,featureId:f.findingId,title:s.title,inputs:[trialNode,{id:success.id,label:'回数',input:'counter',inputId:success.id,engineBinding:{inputId:success.id},gridSpan:6,directNumeric:true,quickAdd:success.quickAdd??[1],unobservedDisplay:'—'}]}]};
-  }
-  if(f.model==='CATEGORICAL'){
-   const trial=inputs.find((x:any)=>x.role==='trial'),cats=inputs.filter((x:any)=>x.role==='categoryCount');
-   if(!trial||cats.length<2)throw new Error('APP_RUNTIME_CATEGORICAL_UI:'+f.findingId);
-   return {id:s.id,title:s.title,collapsible:s.collapsible!==false,defaultExpanded:s.defaultExpanded===true,description:sectionExplanation(f,s),descriptionPresentation:{collapsible:true,label:'説明',defaultExpanded:false},items:[{id:'NODE_'+f.findingId,featureId:f.findingId,title:s.title,interaction:{type:'CATEGORY_COUNTERS',preservePriorObservations:true,showAccumulatedCounts:true,categoryCoverage:'NON_EXHAUSTIVE',totalOpportunities:'SEPARATE_COUNTER',opportunityTracking:{type:'SEPARATE_COUNTER',inputId:trial.id,label:trial.label},categories:cats.map((x:any)=>({id:x.id,inputId:x.id,label:x.label,meaning:'観測した回数'}))}}]};
-  }
-  throw new Error('APP_RUNTIME_MODEL_UNSUPPORTED:'+f.model);
- });
+ const rows=(src.numericSections??[]).map((s:any)=>{const f:any=activeBy.get(s.sourceFindingId);if(!f)throw new Error('APP_RUNTIME_UI_FEATURE_MISSING:'+s.sourceFindingId);return {s,f,inputs:s.inputs??[],playDataSource:playDataSourceForTrialUniverse(f.trialUniverse)}});
+ const groups=new Map<string,any[]>();for(const row of rows){if(row.f.model==='BERNOULLI'&&row.playDataSource){const key=String(row.f.trialUniverse)+'|'+row.playDataSource;groups.set(key,[...(groups.get(key)??[]),row])}}
+ const consumed=new Set<string>();const out:any[]=[];
+ for(const row of rows){if(consumed.has(row.s.sourceFindingId))continue;const key=String(row.f.trialUniverse)+'|'+String(row.playDataSource??'');const peers=row.f.model==='BERNOULLI'&&row.playDataSource?(groups.get(key)??[row]):[row];
+  if(peers.length>1){const trials=peers.map((p:any)=>p.inputs.find((x:any)=>x.role==='trial'));if(trials.some((x:any)=>!x))throw new Error('APP_RUNTIME_SHARED_DENOMINATOR_TRIAL');for(const p of peers)consumed.add(p.s.sourceFindingId);const label=trialLabelFor(row.f.trialUniverse);out.push({id:'OBS_SHARED_'+String(row.f.trialUniverse),title:label,collapsible:true,defaultExpanded:false,description:'同じ'+label+'を母数に使う設定推測要素をまとめています。母数は1回だけ入力し、各項目の回数だけを記録します。',descriptionPresentation:{collapsible:true,label:'説明',defaultExpanded:false},groups:[{id:'DENOM_'+String(row.f.trialUniverse),label,input:'denominator',inputId:trials[0].id,engineBinding:{inputIds:trials.map((x:any)=>x.id)},gridSpan:12,directNumeric:true,quickAdd:trials[0].quickAdd??[50],unobservedDisplay:'—',playDataBinding:{source:row.playDataSource}}],items:peers.map((p:any)=>{const success=p.inputs.find((x:any)=>x.role==='success');if(!success)throw new Error('APP_RUNTIME_BERNOULLI_UI:'+p.f.findingId);return {id:'NODE_'+p.f.findingId,featureId:p.f.findingId,title:p.s.title,description:sectionExplanation(p.f,p.s),descriptionPresentation:{collapsible:true,label:'説明',defaultExpanded:false},inputs:[{id:success.id,label:'回数',input:'counter',inputId:success.id,engineBinding:{inputId:success.id},gridSpan:12,directNumeric:true,quickAdd:success.quickAdd??[1],unobservedDisplay:'—'}]}})});continue}
+  consumed.add(row.s.sourceFindingId);const {s,f,inputs}=row;
+  if(f.model==='BERNOULLI'){const trial=inputs.find((x:any)=>x.role==='trial'),success=inputs.find((x:any)=>x.role==='success');if(!trial||!success)throw new Error('APP_RUNTIME_BERNOULLI_UI:'+f.findingId);const trialNode:any={id:trial.id,label:trialLabelFor(f.trialUniverse),input:'denominator',inputId:trial.id,engineBinding:{inputId:trial.id},gridSpan:row.playDataSource?12:6,directNumeric:true,quickAdd:trial.quickAdd??[50],unobservedDisplay:'—'};if(row.playDataSource)trialNode.playDataBinding={source:row.playDataSource};out.push({id:s.id,title:s.title,collapsible:s.collapsible!==false,defaultExpanded:s.defaultExpanded===true,description:sectionExplanation(f,s),descriptionPresentation:{collapsible:true,label:'説明',defaultExpanded:false},items:[{id:'NODE_'+f.findingId,featureId:f.findingId,title:s.title,inputs:[trialNode,{id:success.id,label:'回数',input:'counter',inputId:success.id,engineBinding:{inputId:success.id},gridSpan:6,directNumeric:true,quickAdd:success.quickAdd??[1],unobservedDisplay:'—'}]}]});continue}
+  if(f.model==='CATEGORICAL'){const trial=inputs.find((x:any)=>x.role==='trial'),cats=inputs.filter((x:any)=>x.role==='categoryCount');if(!trial||cats.length<2)throw new Error('APP_RUNTIME_CATEGORICAL_UI:'+f.findingId);const sumMode=['SOURCE_EXHAUSTIVE','SOURCE_EXPLICIT_OTHER'].includes(String(f.categoryModel?.residualPolicy??''));out.push({id:s.id,title:s.title,collapsible:s.collapsible!==false,defaultExpanded:s.defaultExpanded===true,description:sectionExplanation(f,s),descriptionPresentation:{collapsible:true,label:'説明',defaultExpanded:false},items:[{id:'NODE_'+f.findingId,featureId:f.findingId,title:s.title,interaction:{type:'CATEGORY_COUNTERS',preservePriorObservations:true,showAccumulatedCounts:true,categoryCoverage:sumMode?'EXHAUSTIVE':'NON_EXHAUSTIVE',totalOpportunities:sumMode?'SUM_OF_CATEGORY_COUNTS':'SEPARATE_COUNTER',...(sumMode?{}:{opportunityTracking:{type:'SEPARATE_COUNTER',inputId:trial.id,label:trial.label}}),categories:cats.map((x:any)=>({id:x.id,inputId:x.id,label:x.label,meaning:'観測した回数'}))}}]});continue}
+  throw new Error('APP_RUNTIME_MODEL_UNSUPPORTED:'+f.model)
+ }
+ return out;
 };
 const evidenceExplanation=(s:any)=>{
  const types=[...new Set((s.evidenceItems??[]).flatMap((e:any)=>Array.isArray(e.semanticCategories)?e.semanticCategories.map((x:any)=>x.semanticType):[e.semanticType]).filter(Boolean))];
@@ -79,7 +73,7 @@ const buildInputs=(projection:any)=>{
   const trialId=(s.inputs??[]).find((x:any)=>x.role==='trial')?.id;
   for(const x of s.inputs??[]){
    if(seen.has(x.id))throw new Error('APP_RUNTIME_DUPLICATE_INPUT:'+x.id);seen.add(x.id);
-   out.push({id:x.id,name:x.label,category:'V8_NUMERIC',type:x.role==='trial'?'integer':'counter',unit:x.role==='trial'?trialUnitFor(f.trialUniverse):'回',defaultValue:0,minimum:0,displayOrder:order++,parentInputId:x.role==='trial'?undefined:trialId,inferenceRole:importanceToAdoption(runtimeImportance(f))});
+   const sumMode=f.model==='CATEGORICAL'&&['SOURCE_EXHAUSTIVE','SOURCE_EXPLICIT_OTHER'].includes(String(f.categoryModel?.residualPolicy??''));const categoryIds=(s.inputs??[]).filter((i:any)=>i.role==='categoryCount').map((i:any)=>i.id);out.push({id:x.id,name:x.label,category:'V8_NUMERIC',type:x.role==='trial'?'integer':'counter',unit:x.role==='trial'?trialUnitFor(f.trialUniverse):'回',defaultValue:0,minimum:0,displayOrder:order++,parentInputId:x.role==='trial'?undefined:trialId,inferenceRole:importanceToAdoption(runtimeImportance(f)),...(sumMode&&x.role==='trial'?{inputVisible:false,derivedCalculation:'sum',derivedFromInputIds:categoryIds}:{})});
   }
  }
  for(const s of projection.evidence??[]){
