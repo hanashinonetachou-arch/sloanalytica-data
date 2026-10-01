@@ -12,11 +12,6 @@ on:
         required: true
         default: false
         type: boolean
-  push:
-    branches:
-      - 'production/**'
-    paths:
-      - '.github/v8-publish-trigger'
   pull_request:
     branches:
       - prototype-multi-machine
@@ -42,45 +37,27 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 24
-      - name: Resolve selected V8 machine
-        id: selected
-        if: ${{ github.event_name == 'workflow_dispatch' || github.event_name == 'push' }}
-        shell: bash
-        run: |
-          set -euo pipefail
-          if [[ "${GITHUB_EVENT_NAME}" == "workflow_dispatch" ]]; then
-            machine_id="${{ inputs.machine_id }}"
-            publish="${{ inputs.publish }}"
-          else
-            test -f .github/v8-publish-trigger
-            machine_id="$(sed -n 's/^machineId:[[:space:]]*//p' .github/v8-publish-trigger | tail -1 | tr -d '\r')"
-            publish="$(sed -n 's/^publish:[[:space:]]*//p' .github/v8-publish-trigger | tail -1 | tr -d '\r')"
-          fi
-          test -n "$machine_id" || { echo "Missing machineId"; exit 1; }
-          [[ "$publish" == "true" || "$publish" == "false" ]] || { echo "publish must be true or false"; exit 1; }
-          echo "machine_id=$machine_id" >> "$GITHUB_OUTPUT"
-          echo "publish=$publish" >> "$GITHUB_OUTPUT"
       - name: Run V8 production-line regression suite
-        if: ${{ github.event_name == 'workflow_dispatch' || (github.event_name == 'pull_request' && !startsWith(github.base_ref, 'production/')) }}
+        if: ${{ !startsWith(github.base_ref, 'production/') }}
         run: npm run test:v8-production-line
       - name: Run repository-persisted production orchestrator tests
-        if: ${{ github.event_name == 'push' || (github.event_name == 'pull_request' && startsWith(github.base_ref, 'production/')) }}
+        if: ${{ startsWith(github.base_ref, 'production/') }}
         working-directory: production
         run: npm test
       - name: Build selected V8 machine
-        if: ${{ github.event_name == 'workflow_dispatch' || github.event_name == 'push' }}
-        run: npm run machine:v8 -- "${{ steps.selected.outputs.machine_id }}"
+        if: github.event_name == 'workflow_dispatch'
+        run: npm run machine:v8 -- "${{ inputs.machine_id }}"
       - name: Publish selected V8 machine
-        if: ${{ (github.event_name == 'workflow_dispatch' || github.event_name == 'push') && steps.selected.outputs.publish == 'true' }}
-        run: npm run machine:v8:publish -- "${{ steps.selected.outputs.machine_id }}" --publish
+        if: github.event_name == 'workflow_dispatch' && inputs.publish
+        run: npm run machine:v8:publish -- "${{ inputs.machine_id }}" --publish
       - name: Commit published distribution metadata
-        if: ${{ (github.event_name == 'workflow_dispatch' || github.event_name == 'push') && steps.selected.outputs.publish == 'true' }}
+        if: github.event_name == 'workflow_dispatch' && inputs.publish
         shell: bash
         run: |
           set -euo pipefail
           git config user.name github-actions[bot]
           git config user.email 41898282+github-actions[bot]@users.noreply.github.com
-          git add catalog.json machine-registry.json "machines/${{ steps.selected.outputs.machine_id }}/machine-package.json"
+          git add catalog.json machine-registry.json "machines/${{ inputs.machine_id }}/machine-package.json"
           if git diff --cached --quiet; then
             echo "Published distribution already current."
             exit 0
