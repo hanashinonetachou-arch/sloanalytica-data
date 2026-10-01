@@ -1,12 +1,16 @@
 {
   "schemaVersion": 1,
+  "provenance": {
+    "manifestVersion": "8.5",
+    "generationPath": "V8_5_PRODUCTION_PIPELINE",
+    "legacyOracleUsed": false
+  },
   "machine": {
     "schemaVersion": "2.0.0",
     "machineId": "L_MILLION_GOD_KISEKI_CX",
-    "machineDataVersion": "0.1.0",
+    "machineDataVersion": "8.5.0-batch-20261002-003",
     "displayName": "スマスロ ミリオンゴッド-神々の軌跡-",
-    "modelName": "L／ミリオンゴッド／CX",
-    "manufacturer": "ミズホ",
+    "modelName": "スマスロ ミリオンゴッド-神々の軌跡-",
     "settings": [
       "SET_1",
       "SET_2",
@@ -28,151 +32,101 @@
     "schemaVersion": "2.0.0",
     "inputs": [
       {
-        "id": "INP_GG_INITIAL_COUNT",
-        "name": "GG初当り回数",
-        "type": "counter",
-        "category": "SEL_RF_GG_INITIAL",
-        "unit": "回",
-        "displayOrder": 10,
-        "inferenceRole": "INCLUDE_PRIMARY",
-        "defaultValue": "",
-        "minimum": 0
-      },
-      {
-        "id": "INP_NORMAL_GAMES",
-        "name": "通常ゲーム",
+        "id": "gg-first-hit.eligibleTrialCount",
+        "name": "観測機会数",
+        "category": "V8_NUMERIC",
         "type": "integer",
-        "category": "SHARED_DENOM_VALUE",
         "unit": "G",
-        "displayOrder": 11,
-        "inferenceRole": "INCLUDE_PRIMARY",
-        "defaultValue": "",
-        "minimum": 0
+        "defaultValue": 0,
+        "minimum": 0,
+        "displayOrder": 1,
+        "inferenceRole": "INCLUDE_PRIMARY"
       },
       {
-        "id": "INP_NON_GAIA_ZZONE_COUNT",
-        "name": "Z-ZONEへ移行した回数",
+        "id": "gg-first-hit.successCount",
+        "name": "該当回数",
+        "category": "V8_NUMERIC",
         "type": "counter",
-        "category": "SEL_RF_NON_GAIA_ZZONE",
         "unit": "回",
-        "displayOrder": 12,
-        "inferenceRole": "INCLUDE_SUPPORT",
-        "defaultValue": "",
-        "minimum": 0
+        "defaultValue": 0,
+        "minimum": 0,
+        "displayOrder": 2,
+        "parentInputId": "gg-first-hit.eligibleTrialCount",
+        "inferenceRole": "INCLUDE_PRIMARY"
       },
       {
-        "id": "INP_NON_GAIA_ZZONE_TRIALS",
-        "name": "非ガイアステージでGG当選した回数",
-        "type": "counter",
-        "category": "SEL_RF_NON_GAIA_ZZONE",
+        "id": "z-zone-upgrade.eligibleTrialCount",
+        "name": "観測機会数",
+        "category": "V8_NUMERIC",
+        "type": "integer",
         "unit": "回",
-        "displayOrder": 13,
-        "inferenceRole": "INCLUDE_SUPPORT",
-        "defaultValue": "",
-        "minimum": 0
+        "defaultValue": 0,
+        "minimum": 0,
+        "displayOrder": 3,
+        "inferenceRole": "INCLUDE_SUPPORT"
       },
       {
-        "id": "INP_EVIDENCE_UNIPLATE_BRONZE",
-        "name": "ユニプレート銅",
+        "id": "z-zone-upgrade.successCount",
+        "name": "該当回数",
+        "category": "V8_NUMERIC",
         "type": "counter",
-        "category": "EVIDENCE",
         "unit": "回",
-        "displayOrder": 14,
-        "inferenceRole": "INCLUDE_SUPPORT",
-        "defaultValue": "",
-        "minimum": 0
+        "defaultValue": 0,
+        "minimum": 0,
+        "displayOrder": 4,
+        "parentInputId": "z-zone-upgrade.eligibleTrialCount",
+        "inferenceRole": "INCLUDE_SUPPORT"
       },
       {
-        "id": "INP_EVIDENCE_UNIPLATE_SILVER",
-        "name": "ユニプレート銀",
+        "id": "REF_universal-plate_1",
+        "name": "GG終了時ユニバプレート",
+        "category": "EVIDENCE_REFERENCE",
         "type": "counter",
-        "category": "EVIDENCE",
         "unit": "回",
-        "displayOrder": 15,
-        "inferenceRole": "INCLUDE_SUPPORT",
-        "defaultValue": "",
-        "minimum": 0
-      },
-      {
-        "id": "INP_EVIDENCE_UNIPLATE_GOLD",
-        "name": "ユニプレート金",
-        "type": "counter",
-        "category": "EVIDENCE",
-        "unit": "回",
-        "displayOrder": 16,
-        "inferenceRole": "INCLUDE_SUPPORT",
-        "defaultValue": "",
-        "minimum": 0
-      },
-      {
-        "id": "INP_EVIDENCE_UNIPLATE_FIREWORKS",
-        "name": "ユニプレート花火",
-        "type": "counter",
-        "category": "EVIDENCE",
-        "unit": "回",
-        "displayOrder": 17,
-        "inferenceRole": "INCLUDE_SUPPORT",
-        "defaultValue": "",
-        "minimum": 0
-      },
-      {
-        "id": "INP_EVIDENCE_UNIPLATE_RAINBOW",
-        "name": "ユニプレート虹",
-        "type": "counter",
-        "category": "EVIDENCE",
-        "unit": "回",
-        "displayOrder": 18,
-        "inferenceRole": "INCLUDE_SUPPORT",
-        "defaultValue": "",
-        "minimum": 0
+        "defaultValue": 0,
+        "minimum": 0,
+        "displayOrder": 5,
+        "inferenceRole": "DISPLAY_ONLY"
       }
     ]
   },
   "features": {
-    "schemaVersion": "2.0.0",
+    "version": "8.5-runtime",
     "features": [
       {
-        "featureId": "FEAT_GG_INITIAL",
-        "name": "GG初当り",
+        "featureId": "gg-first-hit",
+        "name": "GG初当たり",
+        "trialUniverse": "NORMAL_GAME_TRIAL",
         "adoptionCategory": "INCLUDE_PRIMARY",
         "calculationRole": "PROBABILITY",
         "probabilityEngineUsage": true,
-        "modelType": "binomial",
-        "minimumSample": 1,
-        "sampleRecommendation": 1,
-        "reliabilityProfile": {
-          "weight": 1
-        },
-        "denominatorInputId": "INP_NORMAL_GAMES",
-        "numeratorInputId": "INP_GG_INITIAL_COUNT",
-        "displayFormat": "ratio_1_over_n",
+        "denominatorInputId": "gg-first-hit.eligibleTrialCount",
         "probabilities": {
-          "SET_1": 0.00187617260788,
-          "SET_2": 0.002380952380952,
-          "SET_3": 0.002016129032258,
-          "SET_4": 0.002958579881657,
-          "SET_5": 0.002197802197802,
-          "SET_6": 0.003389830508475
+          "SET_1": 0.001876172607879925,
+          "SET_2": 0.002380952380952381,
+          "SET_3": 0.0020161290322580645,
+          "SET_4": 0.0029585798816568047,
+          "SET_5": 0.002197802197802198,
+          "SET_6": 0.003389830508474576
         },
-        "sourceEvidenceRefs": [
-          "SRC_SETTING"
-        ]
+        "selectionRationale": {
+          "summary": "Manifest v8.5 Production Lineで採用された設定推測要素。",
+          "adoptionReason": "EligibilityとCandidate Contractを通過した観測可能likelihoodを使用します。",
+          "shortTermReason": "標本が少ない間は結果の振れが大きくなります。",
+          "longTermReason": "観測数が増えるほど設定別likelihoodの比較が安定します。"
+        },
+        "modelType": "binomial",
+        "numeratorInputId": "gg-first-hit.successCount",
+        "displayFormat": "percentage"
       },
       {
-        "featureId": "FEAT_NON_GAIA_ZZONE",
-        "name": "非ガイアステージGG当選後Z-ZONE移行",
+        "featureId": "z-zone-upgrade",
+        "name": "GG当選時のZ-ZONE昇格",
+        "trialUniverse": "GG_NON_GAIA_INITIAL_HIT_TRIAL",
         "adoptionCategory": "INCLUDE_SUPPORT",
         "calculationRole": "PROBABILITY",
         "probabilityEngineUsage": true,
-        "modelType": "binomial",
-        "minimumSample": 1,
-        "sampleRecommendation": 1,
-        "reliabilityProfile": {
-          "weight": 1
-        },
-        "denominatorInputId": "INP_NON_GAIA_ZZONE_TRIALS",
-        "numeratorInputId": "INP_NON_GAIA_ZZONE_COUNT",
-        "displayFormat": "ratio_1_over_n",
+        "denominatorInputId": "z-zone-upgrade.eligibleTrialCount",
         "probabilities": {
           "SET_1": 0.012,
           "SET_2": 0.01,
@@ -181,368 +135,306 @@
           "SET_5": 0.116,
           "SET_6": 0.01
         },
-        "sourceEvidenceRefs": [
-          "SRC_SETTING"
-        ]
+        "selectionRationale": {
+          "summary": "Manifest v8.5 Production Lineで採用された設定推測要素。",
+          "adoptionReason": "EligibilityとCandidate Contractを通過した観測可能likelihoodを使用します。",
+          "shortTermReason": "標本が少ない間は結果の振れが大きくなります。",
+          "longTermReason": "観測数が増えるほど設定別likelihoodの比較が安定します。"
+        },
+        "modelType": "binomial",
+        "numeratorInputId": "z-zone-upgrade.successCount",
+        "displayFormat": "percentage"
+      }
+    ],
+    "runtimeProjection": [
+      {
+        "featureId": "gg-first-hit",
+        "runtimeStatus": "ACTIVE",
+        "metric": "SELECTION_SCORE",
+        "metricValue": 82.26148972431947,
+        "importance": "主要"
+      },
+      {
+        "featureId": "z-zone-upgrade",
+        "runtimeStatus": "ACTIVE",
+        "metric": "PER_ELIGIBLE_TRIAL_POWER",
+        "metricValue": 5.325190432010202,
+        "importance": "補助"
       }
     ]
   },
   "evidence": {
-    "version": "1.0.0",
-    "evidences": [
+    "version": "8.5-runtime",
+    "evidences": [],
+    "references": [
       {
-        "id": "EVI_UNIPLATE_BRONZE",
-        "name": "ユニプレート銅",
-        "displayName": "ユニプレート銅",
-        "inputId": "INP_EVIDENCE_UNIPLATE_BRONZE",
-        "confirmedSettings": [
-          "SET_2",
-          "SET_3",
-          "SET_4",
-          "SET_5",
-          "SET_6"
-        ],
-        "deniedSettings": [
-          "SET_1"
-        ],
-        "hasImage": false,
-        "sourceEvidenceRefs": [
-          "SRC_SETTING"
-        ],
-        "type": "SETTING_CONFIRMATION"
-      },
-      {
-        "id": "EVI_UNIPLATE_SILVER",
-        "name": "ユニプレート銀",
-        "displayName": "ユニプレート銀",
-        "inputId": "INP_EVIDENCE_UNIPLATE_SILVER",
-        "confirmedSettings": [
-          "SET_3",
-          "SET_4",
-          "SET_5",
-          "SET_6"
-        ],
-        "deniedSettings": [
-          "SET_1",
-          "SET_2"
-        ],
-        "hasImage": false,
-        "sourceEvidenceRefs": [
-          "SRC_SETTING"
-        ],
-        "type": "SETTING_CONFIRMATION"
-      },
-      {
-        "id": "EVI_UNIPLATE_GOLD",
-        "name": "ユニプレート金",
-        "displayName": "ユニプレート金",
-        "inputId": "INP_EVIDENCE_UNIPLATE_GOLD",
-        "confirmedSettings": [
-          "SET_4",
-          "SET_5",
-          "SET_6"
-        ],
-        "deniedSettings": [
-          "SET_1",
-          "SET_2",
-          "SET_3"
-        ],
-        "hasImage": false,
-        "sourceEvidenceRefs": [
-          "SRC_SETTING"
-        ],
-        "type": "SETTING_CONFIRMATION"
-      },
-      {
-        "id": "EVI_UNIPLATE_FIREWORKS",
-        "name": "ユニプレート花火",
-        "displayName": "ユニプレート花火",
-        "inputId": "INP_EVIDENCE_UNIPLATE_FIREWORKS",
-        "confirmedSettings": [
-          "SET_5",
-          "SET_6"
-        ],
-        "deniedSettings": [
-          "SET_1",
-          "SET_2",
-          "SET_3",
-          "SET_4"
-        ],
-        "hasImage": false,
-        "sourceEvidenceRefs": [
-          "SRC_SETTING"
-        ],
-        "type": "SETTING_CONFIRMATION"
-      },
-      {
-        "id": "EVI_UNIPLATE_RAINBOW",
-        "name": "ユニプレート虹",
-        "displayName": "ユニプレート虹",
-        "inputId": "INP_EVIDENCE_UNIPLATE_RAINBOW",
-        "confirmedSettings": [
-          "SET_6"
-        ],
-        "deniedSettings": [
-          "SET_1",
-          "SET_2",
-          "SET_3",
-          "SET_4",
-          "SET_5"
-        ],
-        "hasImage": false,
-        "sourceEvidenceRefs": [
-          "SRC_SETTING"
-        ],
-        "type": "SETTING_CONFIRMATION"
-      }
-    ],
-    "sources": [
-      {
-        "id": "SRC_SETTING",
-        "classification": "ANALYSIS",
-        "pageName": "ミリオンゴッド-神々の軌跡- 設定判別まとめ",
-        "url": "https://nana-press.com/kaiseki/machine/1112/35714/",
-        "checkedAt": "2026-09-07"
-      },
-      {
-        "id": "SRC_MODE",
-        "classification": "ANALYSIS",
-        "pageName": "ミリオンゴッド-神々の軌跡- モード詳細・GG当選率",
-        "url": "https://nana-press.com/kaiseki/machine/1112/35719/",
-        "checkedAt": "2026-09-07"
-      },
-      {
-        "id": "SRC_UNIMEMO",
-        "classification": "OFFICIAL",
-        "pageName": "ユニメモ 対応機種・利用方法",
-        "url": "https://www.universal-777.com/fun/unimemo/",
-        "checkedAt": "2026-09-07"
-      },
-      {
-        "id": "SRC_UNIMEMO_MACHINE",
-        "classification": "ANALYSIS",
-        "pageName": "ミリオンゴッド-神々の軌跡- ユニメモ カスタム機能/裏ボタン",
-        "url": "https://1geki.jp/slot/l_milliongod_kiseki/6/",
-        "checkedAt": "2026-09-07"
-      }
-    ]
-  },
-  "ui": {
-    "sections": [
-      {
-        "id": "UI_DESIGN_1",
-        "title": "GG初当り回数",
-        "displayOrder": 1,
-        "description": "通常ゲーム数とGG初当り回数を記録します。",
-        "collapsible": false,
-        "defaultExpanded": true,
-        "items": [
-          {
-            "type": "input",
-            "inputId": "INP_NORMAL_GAMES",
-            "label": "通常ゲーム",
-            "widget": "number",
-            "gridSpan": 12,
-            "config": {
-              "directInput": true,
-              "quickAdd": [
-                50
-              ],
-              "emptyMeansUnobserved": true,
-              "observedZeroAllowed": true
-            }
-          },
-          {
-            "type": "input",
-            "inputId": "INP_GG_INITIAL_COUNT",
-            "label": "GG初当り回数",
-            "widget": "counter",
-            "gridSpan": 6,
-            "config": {
-              "directInput": false,
-              "compact": true,
-              "quickAdd": [
-                1
-              ],
-              "step": 1,
-              "emptyMeansUnobserved": true,
-              "observedZeroAllowed": true
-            }
-          }
-        ]
-      },
-      {
-        "id": "UI_DESIGN_2",
-        "title": "非ガイアステージGG当選後Z-ZONE移行",
-        "displayOrder": 2,
-        "description": "ガイアステージ以外でGGへ当選した回数を母数にし、その後Z-ZONEへ移行した回数を記録します。",
-        "collapsible": false,
-        "defaultExpanded": true,
-        "items": [
-          {
-            "type": "input",
-            "inputId": "INP_NON_GAIA_ZZONE_COUNT",
-            "label": "Z-ZONEへ移行した回数",
-            "widget": "counter",
-            "gridSpan": 6,
-            "config": {
-              "directInput": false,
-              "compact": true,
-              "quickAdd": [
-                1
-              ],
-              "step": 1,
-              "emptyMeansUnobserved": true,
-              "observedZeroAllowed": true
-            }
-          },
-          {
-            "type": "input",
-            "inputId": "INP_NON_GAIA_ZZONE_TRIALS",
-            "label": "非ガイアステージでGG当選した回数",
-            "widget": "counter",
-            "gridSpan": 6,
-            "config": {
-              "directInput": false,
-              "compact": true,
-              "quickAdd": [
-                1
-              ],
-              "step": 1,
-              "emptyMeansUnobserved": true,
-              "observedZeroAllowed": true
-            }
-          }
-        ]
-      },
-      {
-        "id": "UI_DESIGN_3",
-        "title": "設定示唆・確定情報",
-        "displayOrder": 3,
-        "description": "実戦中に確認した設定確定・否定演出を入力します。通常の確率推測とは分離して扱います。",
+        "id": "EVI_universal-plate",
+        "sourceFindingId": "universal-plate",
+        "title": "GG終了時ユニバプレート",
+        "kind": "EVIDENCE",
         "collapsible": true,
         "defaultExpanded": false,
+        "description": "設定示唆として確認できる項目です。数値による設定推測とは別に、実戦時の判断材料として参照できます。",
+        "descriptionPresentation": {
+          "collapsible": true,
+          "label": "説明",
+          "defaultExpanded": false
+        },
+        "runtimePolicyControlled": false,
+        "evidenceItems": [
+          {
+            "findingId": "universal-plate",
+            "label": "GG終了時ユニバプレート",
+            "sourceIds": [
+              "flick7-milliongod",
+              "kenslo-milliongod"
+            ],
+            "details": [],
+            "semanticType": "DISPLAY_ONLY",
+            "semanticCategories": [
+              {
+                "label": "GG終了時ユニバプレート",
+                "semanticType": "DISPLAY_ONLY"
+              }
+            ],
+            "runtimePolicyControlled": false,
+            "status": "SOURCE_REFERENCED",
+            "interaction": "REFERENCE_ONLY"
+          }
+        ]
+      }
+    ]
+  },
+  "blockedItems": [
+    {
+      "blockId": "milliongod-blue7-full-settings",
+      "label": "青7連GG当選率の全設定分布",
+      "reason": "設定1・2は確認できるが設定3～6の数値が未公表。",
+      "reevaluationCondition": "青7の3連・4連時GG当選率が設定3～6までsource-supportedで公開される。"
+    },
+    {
+      "blockId": "milliongod-gaia-z-zone-full-settings",
+      "label": "ガイアステージ中Z-ZONE当選率",
+      "reason": "設定1の15.0%のみ確認でき、他設定の数値が未公表。",
+      "reevaluationCondition": "ガイアステージ中のZ-ZONE当選率が全設定で公開される。"
+    },
+    {
+      "blockId": "milliongod-plate-rates",
+      "label": "ユニバプレート設定別出現率",
+      "reason": "示唆内容は確認できるが設定別出現率は確認できない。",
+      "reevaluationCondition": "各プレートの設定別出現率が公開される。"
+    }
+  ],
+  "ui": {
+    "schemaVersion": "v8.5-runtime-ui-v1",
+    "contractVersion": "runtime-ui-v8",
+    "source": "CANONICAL_UI",
+    "sourceSchemaVersion": "canonical-ui-v1",
+    "manifestRevision": "8.5",
+    "playInfo": {
+      "visible": true,
+      "collapsible": false,
+      "mode": "TOTAL_AND_NORMAL",
+      "sessionFields": [
+        {
+          "id": "date",
+          "label": "日付",
+          "mode": "DATE"
+        },
+        {
+          "id": "storeName",
+          "label": "店舗名",
+          "mode": "TEXT"
+        },
+        {
+          "id": "machineNumber",
+          "label": "台番号",
+          "mode": "TEXT"
+        }
+      ],
+      "startFields": [
+        {
+          "id": "startTotalGames",
+          "label": "着席時 総ゲーム数",
+          "mode": "NUMBER",
+          "directNumeric": true
+        },
+        {
+          "id": "startNormalGames",
+          "label": "着席時 通常ゲーム数",
+          "mode": "NUMBER",
+          "directNumeric": true
+        }
+      ],
+      "currentFields": [
+        {
+          "id": "currentTotalGames",
+          "label": "現在 総ゲーム数",
+          "mode": "NUMBER",
+          "directNumeric": true
+        },
+        {
+          "id": "currentNormalGames",
+          "label": "現在 通常ゲーム数",
+          "mode": "NUMBER",
+          "directNumeric": true
+        }
+      ],
+      "difference": {
+        "autoCalculate": true
+      },
+      "useDifference": {
+        "label": "着席時との差分を使用",
+        "defaultWhenStartNormalGamesPresent": true
+      }
+    },
+    "accordion": {
+      "enabled": true,
+      "singleOpen": true
+    },
+    "quickInput": {
+      "enabled": false
+    },
+    "v8Sections": [
+      {
+        "id": "OBS_gg-first-hit",
+        "title": "GG初当たり",
+        "collapsible": true,
+        "defaultExpanded": false,
+        "description": "通常ゲーム数に対する該当回数を入力します。「着席時との差分を使用」がONの場合、通常ゲーム数は遊技情報から自動反映されます。\\n設定判別スコア：82.3\\n1回の判別力：82.261",
+        "descriptionPresentation": {
+          "collapsible": true,
+          "label": "説明",
+          "defaultExpanded": false
+        },
         "items": [
           {
-            "type": "input",
-            "inputId": "INP_EVIDENCE_UNIPLATE_BRONZE",
-            "label": "ユニプレート銅",
-            "widget": "counter",
-            "gridSpan": 6,
-            "config": {
-              "directInput": false,
-              "compact": true,
-              "quickAdd": [
-                1
-              ],
-              "step": 1,
-              "emptyMeansUnobserved": true,
-              "observedZeroAllowed": true
-            }
-          },
+            "id": "NODE_gg-first-hit",
+            "featureId": "gg-first-hit",
+            "title": "GG初当たり",
+            "inputs": [
+              {
+                "id": "gg-first-hit.eligibleTrialCount",
+                "label": "通常ゲーム数",
+                "input": "denominator",
+                "inputId": "gg-first-hit.eligibleTrialCount",
+                "engineBinding": {
+                  "inputId": "gg-first-hit.eligibleTrialCount"
+                },
+                "gridSpan": 12,
+                "directNumeric": true,
+                "quickAdd": [
+                  50
+                ],
+                "unobservedDisplay": "—",
+                "playDataBinding": {
+                  "source": "PLAY_NORMAL_GAME_DELTA"
+                }
+              },
+              {
+                "id": "gg-first-hit.successCount",
+                "label": "回数",
+                "input": "counter",
+                "inputId": "gg-first-hit.successCount",
+                "engineBinding": {
+                  "inputId": "gg-first-hit.successCount"
+                },
+                "gridSpan": 6,
+                "directNumeric": true,
+                "quickAdd": [
+                  1
+                ],
+                "unobservedDisplay": "—"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "OBS_z-zone-upgrade",
+        "title": "GG当選時のZ-ZONE昇格",
+        "collapsible": true,
+        "defaultExpanded": false,
+        "description": "対象となる機会の回数と、そのうち該当した回数を入力します。\\n1回の判別力：5.325",
+        "descriptionPresentation": {
+          "collapsible": true,
+          "label": "説明",
+          "defaultExpanded": false
+        },
+        "items": [
           {
-            "type": "input",
-            "inputId": "INP_EVIDENCE_UNIPLATE_SILVER",
-            "label": "ユニプレート銀",
-            "widget": "counter",
-            "gridSpan": 6,
-            "config": {
-              "directInput": false,
-              "compact": true,
-              "quickAdd": [
-                1
-              ],
-              "step": 1,
-              "emptyMeansUnobserved": true,
-              "observedZeroAllowed": true
-            }
-          },
+            "id": "NODE_z-zone-upgrade",
+            "featureId": "z-zone-upgrade",
+            "title": "GG当選時のZ-ZONE昇格",
+            "inputs": [
+              {
+                "id": "z-zone-upgrade.eligibleTrialCount",
+                "label": "対象回数",
+                "input": "denominator",
+                "inputId": "z-zone-upgrade.eligibleTrialCount",
+                "engineBinding": {
+                  "inputId": "z-zone-upgrade.eligibleTrialCount"
+                },
+                "gridSpan": 6,
+                "directNumeric": true,
+                "quickAdd": [],
+                "unobservedDisplay": "—"
+              },
+              {
+                "id": "z-zone-upgrade.successCount",
+                "label": "回数",
+                "input": "counter",
+                "inputId": "z-zone-upgrade.successCount",
+                "engineBinding": {
+                  "inputId": "z-zone-upgrade.successCount"
+                },
+                "gridSpan": 6,
+                "directNumeric": true,
+                "quickAdd": [
+                  1
+                ],
+                "unobservedDisplay": "—"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "EVI_universal-plate",
+        "title": "GG終了時ユニバプレート",
+        "description": "観測内容を記録・参照できますが、現在の設定推測計算には直接反映していません。",
+        "collapsible": true,
+        "defaultExpanded": false,
+        "descriptionPresentation": {
+          "collapsible": true,
+          "label": "説明",
+          "defaultExpanded": false
+        },
+        "items": [
           {
-            "type": "input",
-            "inputId": "INP_EVIDENCE_UNIPLATE_GOLD",
-            "label": "ユニプレート金",
-            "widget": "counter",
-            "gridSpan": 6,
-            "config": {
-              "directInput": false,
-              "compact": true,
-              "quickAdd": [
-                1
-              ],
-              "step": 1,
-              "emptyMeansUnobserved": true,
-              "observedZeroAllowed": true
-            }
-          },
-          {
-            "type": "input",
-            "inputId": "INP_EVIDENCE_UNIPLATE_FIREWORKS",
-            "label": "ユニプレート花火",
-            "widget": "counter",
-            "gridSpan": 6,
-            "config": {
-              "directInput": false,
-              "compact": true,
-              "quickAdd": [
-                1
-              ],
-              "step": 1,
-              "emptyMeansUnobserved": true,
-              "observedZeroAllowed": true
-            }
-          },
-          {
-            "type": "input",
-            "inputId": "INP_EVIDENCE_UNIPLATE_RAINBOW",
-            "label": "ユニプレート虹",
-            "widget": "counter",
-            "gridSpan": 6,
-            "config": {
-              "directInput": false,
-              "compact": true,
-              "quickAdd": [
-                1
-              ],
-              "step": 1,
-              "emptyMeansUnobserved": true,
-              "observedZeroAllowed": true
+            "id": "REF_universal-plate",
+            "evidenceId": "universal-plate",
+            "label": "GG終了時ユニバプレート",
+            "interaction": {
+              "type": "CATEGORY_COUNTERS",
+              "preservePriorObservations": true,
+              "showAccumulatedCounts": true,
+              "categoryCoverage": "NON_EXHAUSTIVE",
+              "totalOpportunities": "NONE",
+              "categories": [
+                {
+                  "id": "REF_universal-plate_1",
+                  "inputId": "REF_universal-plate_1",
+                  "label": "GG終了時ユニバプレート",
+                  "meaning": "観測回数"
+                }
+              ]
             }
           }
         ]
       }
     ]
   },
-  "selectionSummary": {
-    "schemaVersion": "selection-summary-v1",
-    "evaluatedCount": 4,
-    "selectedCount": 2,
-    "rejectedCount": 2,
-    "selected": [
-      {
-        "featureId": "FEAT_GG_INITIAL",
-        "name": "GG初当り",
-        "reason": "全設定の公開確率と「通常ゲーム」という再現可能な分母が揃い、主要な設定差を直接評価できるため主Featureとして採用する。"
-      },
-      {
-        "featureId": "FEAT_NON_GAIA_ZZONE",
-        "name": "非ガイアステージGG当選後Z-ZONE移行",
-        "reason": "非ガイアステージでのGG当選という観測可能な分母に対するZ-ZONE移行率が全設定で公開され、初当りとは異なる奇偶情報を持つため補助Featureとして採用する。"
-      }
-    ],
-    "rejected": [
-      {
-        "featureId": "FEAT_LOW_MODE_BASE_GG",
-        "name": "低確A/B・天国準備滞在時 レア役以外GG当選率",
-        "reason": "内部モードを完全判別できず条件分母を再現できないため不採用。"
-      },
-      {
-        "featureId": "FEAT_NORMAL_MODE_BASE_GG",
-        "name": "通常モード滞在時 レア役以外GG当選率",
-        "reason": "内部モードを完全判別できず条件分母を再現できないため不採用。"
-      }
-    ]
-  },
-  "reliability": {},
   "metadata": {
     "machineId": "L_MILLION_GOD_KISEKI_CX",
     "displayName": "スマスロ ミリオンゴッド-神々の軌跡-",
@@ -554,12 +446,101 @@
       "SET_5",
       "SET_6"
     ],
-    "uiDesignMaterialized": true,
-    "uiDesignSchemaVersion": "ui-design-data-v1",
-    "uiDesignStatus": "PASS_WITH_UNRESOLVED"
+    "settingsStatus": "SOURCE_DERIVED"
   },
-  "validation": {
-    "cases": []
-  },
-  "statistics": {}
+  "v8": {
+    "machineResearchSummary": {
+      "title": "この機種の設定推測について",
+      "adopted": [
+        {
+          "featureId": "gg-first-hit",
+          "label": "GG初当たり",
+          "importance": "主要",
+          "selectionScore": 82.3,
+          "evaluation": {
+            "userLabel": "設定判別スコア",
+            "value": 82.3
+          },
+          "reason": "現在の採用基準を満たしているため、設定推測に使用します。"
+        },
+        {
+          "featureId": "z-zone-upgrade",
+          "label": "GG当選時のZ-ZONE昇格",
+          "importance": "補助",
+          "evaluation": {
+            "userLabel": "1回の判別力",
+            "value": 5.325190432010202
+          },
+          "reason": "現在の採用基準を満たしているため、設定推測に使用します。"
+        }
+      ],
+      "notAdopted": [
+        {
+          "featureId": "blue7-three-chain",
+          "label": "青7・3連時のGG当選",
+          "reason": "設定ごとの判別に必要な数値が揃っていないため、現在は数値推測に使用しません。",
+          "reevaluationCondition": "必要な設定別データや観測条件が確認できれば再評価します。"
+        },
+        {
+          "featureId": "low-normal-gg-hit",
+          "label": "低確A/B・天国準備・通常滞在時の特定役GG当選",
+          "reason": "現在は数値推測に必要な情報が十分でないため使用しません。"
+        },
+        {
+          "featureId": "milliongod-blue7-full-settings",
+          "label": "青7連GG当選率の全設定分布",
+          "reason": "設定1・2は確認できるが設定3～6の数値が未公表。",
+          "reevaluationCondition": "青7の3連・4連時GG当選率が設定3～6までsource-supportedで公開される。"
+        },
+        {
+          "featureId": "milliongod-gaia-z-zone-full-settings",
+          "label": "ガイアステージ中Z-ZONE当選率",
+          "reason": "設定1の15.0%のみ確認でき、他設定の数値が未公表。",
+          "reevaluationCondition": "ガイアステージ中のZ-ZONE当選率が全設定で公開される。"
+        },
+        {
+          "featureId": "milliongod-plate-rates",
+          "label": "ユニバプレート設定別出現率",
+          "reason": "示唆内容は確認できるが設定別出現率は確認できない。",
+          "reevaluationCondition": "各プレートの設定別出現率が公開される。"
+        }
+      ],
+      "highLowDiscrimination": {
+        "status": "COMPUTED",
+        "method": "BEST_SINGLE_EXACT_ACTIVE_FEATURE",
+        "bandDefinition": {
+          "lowSettings": "SETTING_1_TO_3",
+          "highSettings": "SETTING_4_TO_6",
+          "classPrior": "BALANCED"
+        },
+        "results": [
+          {
+            "games": 1500,
+            "balancedAccuracyPercent": 61.09
+          },
+          {
+            "games": 3000,
+            "balancedAccuracyPercent": 65.1
+          },
+          {
+            "games": 7000,
+            "balancedAccuracyPercent": 70.7
+          }
+        ],
+        "eligibleFeatureIds": [
+          "gg-first-hit"
+        ],
+        "selectedFeatureId": "gg-first-hit",
+        "selectedFeatureLabel": "GG初当たり",
+        "excludedFeatures": [
+          {
+            "findingId": "z-zone-upgrade",
+            "reason": "BENCHMARK_EXPOSURE_UNRESOLVED"
+          }
+        ],
+        "note": "7000Gへ正確に換算できるACTIVE要素だけを候補とし、要素間の独立性を仮定せず、単独で最も高い判別精度を持つ要素から保守的に算出しています。条件付き要素はこの指標には含めませんが、実戦中に実際の観測回数が入力された場合は設定推測に使用します。"
+      },
+      "unresolved": []
+    }
+  }
 }
