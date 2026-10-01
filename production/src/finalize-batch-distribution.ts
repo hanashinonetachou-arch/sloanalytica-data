@@ -7,11 +7,14 @@ import {buildDistribution} from './distribution-builder.ts';
 
 const batchId=process.argv[2];
 const attestationPath=process.argv[3];
-if(!batchId||!attestationPath)throw new Error('USAGE: finalize-batch-distribution <batch-id> <attestation.json>');
+const waveId=process.argv[4]??'wave-1';
+if(!batchId||!attestationPath)throw new Error('USAGE: finalize-batch-distribution <batch-id> <attestation.json> [wave-id]');
 const s=new RepoStore(process.cwd());
 const o=new Orchestrator(s);
 const spec=s.read<any>('batches',batchId,'batch.json');
-const targets=spec.waves?.[0]?.machineIds??[];
+const wave=spec.waves?.find((w:any)=>w.waveId===waveId);
+if(!wave)throw new Error('UNKNOWN_WAVE:'+waveId);
+const targets=wave.machineIds??[];
 const all=JSON.parse(fs.readFileSync(path.resolve(attestationPath),'utf8'));
 if(all.batchId!==batchId||!all.integration||!all.checks||!all.packages)throw new Error('INVALID_DISTRIBUTION_ATTESTATION');
 const sha=(p:string)=>crypto.createHash('sha256').update(fs.readFileSync(p)).digest('hex');
