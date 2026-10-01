@@ -6,7 +6,7 @@ if(!batchId||!machineId)throw new Error('USAGE: invalidate-machine-downstream <b
 
 const s=new RepoStore(process.cwd());
 const o=new Orchestrator(s);
-const stages=['OBSERVATION_EVIDENCE','CANONICAL_UI','MACHINE_DATA','RUNTIME_POLICY','RUNTIME_PROJECTION','APP_RUNTIME','DISTRIBUTION'] as const;
+const stages=['EVALUATION','ELIGIBILITY','CANDIDATE_CONTRACT','OBSERVATION_EVIDENCE','CANONICAL_UI','MACHINE_DATA','RUNTIME_POLICY','RUNTIME_PROJECTION','APP_RUNTIME','DISTRIBUTION'] as const;
 const changed:any[]=[];
 for(const stage of stages){
   let x=o.stage(batchId,machineId,stage);
