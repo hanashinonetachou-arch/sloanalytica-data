@@ -7,7 +7,9 @@ export const categoricalProbabilityRow=(row:any,labels:string[],findingId:string
  if(typeof row!=='string')throw new Error('APP_RUNTIME_CATEGORY_DISTRIBUTION:'+findingId+':'+setting);
  const parsed=new Map<string,number>();let explicitSum=0;
  for(const raw of row.split('/')){const part=raw.trim();const m=part.match(/^(.*?)(?:\s*:\s*|\s*)(\d+(?:\.\d+)?)%\s*$/);if(!m)continue;const label=m[1].trim();const value=Number(m[2])/100;if(!label||!Number.isFinite(value)||value<0||value>1)throw new Error('APP_RUNTIME_CATEGORY_DISTRIBUTION:'+findingId+':'+setting+':'+part);parsed.set(label,value);explicitSum+=value;}
- return labels.map(label=>{if(parsed.has(label))return parsed.get(label)!;if(label==='その他'){const residual=1-explicitSum;if(residual>=-1e-9&&residual<=1+1e-9)return Math.max(0,Math.min(1,residual));}throw new Error('APP_RUNTIME_CATEGORY_PROBABILITY:'+findingId+':'+setting+':'+label)});
+ const hasResidualCategory=labels.includes('その他');
+ const normalizeExhaustive=!hasResidualCategory&&Math.abs(explicitSum-1)<=0.005;
+ return labels.map(label=>{if(parsed.has(label)){const value=parsed.get(label)!;return normalizeExhaustive?value/explicitSum:value;}if(label==='その他'){const residual=1-explicitSum;if(residual>=-1e-9&&residual<=1+1e-9)return Math.max(0,Math.min(1,residual));}throw new Error('APP_RUNTIME_CATEGORY_PROBABILITY:'+findingId+':'+setting+':'+label)});
 };
 const importanceForMetricValue=(value:any)=>{const n=Number(value);if(!Number.isFinite(n))return undefined;return n>=20?'主要':n>=10?'有力':n>=5?'補助':'微小';};
 const runtimeImportance=(f:any)=>f?.score?.importance??importanceForMetricValue(f?.runtimePolicyBinding?.value);
