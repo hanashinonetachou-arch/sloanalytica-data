@@ -30,7 +30,7 @@ export function validateAppRuntimeDocument(doc:any,projection:any,projectionArti
    const success=s.inputs?.find((x:any)=>x.role==='success');if(a.modelType!=='binomial'||a.numeratorInputId!==success?.id)fail('FEATURE_BERNOULLI:'+src.findingId);
    for(const [k,v] of Object.entries(src.settingDistribution??{}))if(!near(a.probabilities?.[settingKey(k)],probability(v)))fail('FEATURE_PROB:'+src.findingId+':'+k);
   }else if(src.model==='CATEGORICAL'){
-   const cats=s.inputs?.filter((x:any)=>x.role==='categoryCount')??[];if(a.modelType!=='multinomial'||a.numeratorInputId!==cats[0]?.id||canonical(a.categoryInputIds??[])!==canonical(cats.slice(1).map((x:any)=>x.id)))fail('FEATURE_CATEGORICAL:'+src.findingId);
+   const cats=s.inputs?.filter((x:any)=>x.role==='categoryCount')??[];const sumMode=['SOURCE_EXHAUSTIVE','SOURCE_EXPLICIT_OTHER'].includes(String(src.categoryModel?.residualPolicy??''));if(a.modelType!=='multinomial'||a.numeratorInputId!==cats[0]?.id||canonical(a.categoryInputIds??[])!==canonical(cats.slice(1).map((x:any)=>x.id))||(sumMode?a.denominatorRule!=='SUM_CATEGORY_COUNTS':a.denominatorRule!==undefined))fail('FEATURE_CATEGORICAL:'+src.findingId);
    for(const [k,row] of Object.entries(src.settingDistribution??{}) as any){const expected=categoricalProbabilityRow(row,cats.map((x:any)=>x.label),src.findingId,k);if(canonical(a.categoryProbabilities?.[settingKey(k)])!==canonical(expected))fail('FEATURE_CATEGORY_PROB:'+src.findingId+':'+k)}
   }else fail('FEATURE_MODEL:'+src.findingId);
  }
