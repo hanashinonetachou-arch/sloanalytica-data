@@ -20,16 +20,25 @@ const scoreDescription=(section:any)=>{
   :powerText?null:`設定判別スコア：算出不可${score?.reason?'（'+score.reason+'）':''}`;
  return [scoreText,powerText].filter(Boolean).join('\\n');
 };
-const trialLabelFor=(trialUniverse:any)=>trialUniverse==='NORMAL_GAME_TRIAL'||trialUniverse==='BONUS_ELIGIBLE_GAME_TRIAL'?'通常ゲーム数':'対象回数';
+const trialLabelFor=(trialUniverse:any)=>{
+ if(trialUniverse==='TOTAL_GAME_TRIAL')return '総ゲーム数';
+ if(trialUniverse==='NORMAL_GAME_TRIAL'||trialUniverse==='BONUS_ELIGIBLE_GAME_TRIAL')return '通常ゲーム数';
+ if(typeof trialUniverse==='string'&&trialUniverse.includes('GAME_TRIAL'))return '対象ゲーム数';
+ return '対象回数';
+};
+const trialUnitFor=(trialUniverse:any)=>trialLabelFor(trialUniverse).endsWith('ゲーム数')?'G':'回';
 const sectionExplanation=(f:any,s:any)=>{
  const metric=scoreDescription(s);
  let guide='対象となる機会の回数と、そのうち該当した回数を入力します。';
- if(f.trialUniverse==='NORMAL_GAME_TRIAL'||f.trialUniverse==='BONUS_ELIGIBLE_GAME_TRIAL')guide='通常ゲーム数に対する該当回数を入力します。「着席時との差分を使用」がONの場合、通常ゲーム数は遊技情報から自動反映されます。';
+ if(f.trialUniverse==='TOTAL_GAME_TRIAL')guide='総ゲーム数に対する該当回数を入力します。「着席時との差分を使用」がONの場合、総ゲーム数は遊技情報から自動反映できます。';
+ else if(f.trialUniverse==='NORMAL_GAME_TRIAL'||f.trialUniverse==='BONUS_ELIGIBLE_GAME_TRIAL')guide='通常ゲーム数に対する該当回数を入力します。「着席時との差分を使用」がONの場合、通常ゲーム数は遊技情報から自動反映されます。';
+ else if(typeof f.trialUniverse==='string'&&f.trialUniverse.includes('GAME_TRIAL'))guide='対象区間で実際に消化したゲーム数と、そのうち該当した回数を入力します。';
  else if(f.trialUniverse==='MILE_CHARGE_4PLUS_END_TRIAL')guide='まいるチャージ4回以上で終了した回数を「対象回数」、そのうち温泉ステージへ移行した回数を「回数」に入力します。';
  else if(f.trialUniverse==='CZ_TRUE_PREMONITION_TRIAL')guide='CZ本前兆となった回数を「対象回数」、そのうち温泉ステージへ移行した回数を「回数」に入力します。';
  return [guide,metric].filter(Boolean).join('\\n');
 };
 const playDataSourceForTrialUniverse=(trialUniverse:any)=>
+ trialUniverse==='TOTAL_GAME_TRIAL'?'PLAY_TOTAL_GAME_DELTA':
  trialUniverse==='NORMAL_GAME_TRIAL'||trialUniverse==='BONUS_ELIGIBLE_GAME_TRIAL'?'PLAY_NORMAL_GAME_DELTA':undefined;
 const numericUiSections=(projection:any)=>{
  const src=projection.runtimeUi??{};const activeBy=new Map((projection.activeFeatures??[]).map((x:any)=>[x.findingId,x]));
@@ -56,7 +65,12 @@ const evidenceExplanation=(s:any)=>{
  if(types.includes('EXACT_CONSTRAINT')&&types.some((x:any)=>x!=='EXACT_CONSTRAINT'))return evidenceSemanticExplanation('EXACT_CONSTRAINT')+' '+types.filter((x:any)=>x!=='EXACT_CONSTRAINT').map((x:any)=>evidenceSemanticExplanation(x)).join(' ');
  return evidenceSemanticExplanation((types[0]??'DISPLAY_ONLY') as any);
 };
-const evidenceUiSections=(projection:any)=>(projection.runtimeUi?.evidenceSections??[]).map((s:any)=>({id:s.id,title:s.title,description:evidenceExplanation(s),collapsible:s.collapsible!==false,defaultExpanded:s.defaultExpanded===true,descriptionPresentation:s.descriptionPresentation??{collapsible:true,label:'説明',defaultExpanded:false},items:(s.evidenceItems??[]).map((e:any)=>{const details=Array.isArray(e.details)?e.details.filter((x:any)=>typeof x==='string'&&x.trim()):[];const labels=details.length?details:[e.label];return {id:'REF_'+e.findingId,evidenceId:e.findingId,label:e.label,interaction:{type:'CATEGORY_COUNTERS',preservePriorObservations:true,showAccumulatedCounts:true,categoryCoverage:'NON_EXHAUSTIVE',totalOpportunities:'NONE',categories:labels.map((label:string,i:number)=>({id:`REF_${e.findingId}_${i+1}`,inputId:`REF_${e.findingId}_${i+1}`,label,meaning:'観測回数'}))}}})}));
+const evidenceCategoryPresentation=(raw:string)=>{
+ const m=raw.match(/^(.+?)[：:]\s*(.+)$/);
+ if(m&&/設定|示唆|濃厚|否定|以上|奇数|偶数|高設定|低設定/.test(m[2]))return {label:m[1].trim(),meaning:m[2].trim()};
+ return {label:raw,meaning:'観測回数'};
+};
+const evidenceUiSections=(projection:any)=>(projection.runtimeUi?.evidenceSections??[]).map((s:any)=>({id:s.id,title:s.title,description:evidenceExplanation(s),collapsible:s.collapsible!==false,defaultExpanded:s.defaultExpanded===true,descriptionPresentation:s.descriptionPresentation??{collapsible:true,label:'説明',defaultExpanded:false},items:(s.evidenceItems??[]).map((e:any)=>{const details=Array.isArray(e.details)?e.details.filter((x:any)=>typeof x==='string'&&x.trim()):[];const labels=details.length?details:[e.label];return {id:'REF_'+e.findingId,evidenceId:e.findingId,label:e.label,interaction:{type:'CATEGORY_COUNTERS',preservePriorObservations:true,showAccumulatedCounts:true,categoryCoverage:'NON_EXHAUSTIVE',totalOpportunities:'NONE',categories:labels.map((raw:string,i:number)=>{const p=evidenceCategoryPresentation(raw);return {id:`REF_${e.findingId}_${i+1}`,inputId:`REF_${e.findingId}_${i+1}`,label:p.label,meaning:p.meaning}})}}})}));
 const toUi=(projection:any)=>{const src=projection.runtimeUi??{};return {schemaVersion:'v8.5-runtime-ui-v1',contractVersion:'runtime-ui-v8',source:'CANONICAL_UI',sourceSchemaVersion:src.schemaVersion,manifestRevision:'8.5',playInfo:src.playInfo,accordion:{enabled:true,singleOpen:true},quickInput:{enabled:false},v8Sections:[...numericUiSections(projection),...evidenceUiSections(projection)]}};
 const buildInputs=(projection:any)=>{
  const out:any[]=[];const seen=new Set<string>();let order=1;
@@ -65,7 +79,7 @@ const buildInputs=(projection:any)=>{
   const trialId=(s.inputs??[]).find((x:any)=>x.role==='trial')?.id;
   for(const x of s.inputs??[]){
    if(seen.has(x.id))throw new Error('APP_RUNTIME_DUPLICATE_INPUT:'+x.id);seen.add(x.id);
-   out.push({id:x.id,name:x.label,category:'V8_NUMERIC',type:x.role==='trial'?'integer':'counter',unit:x.role==='trial'&&f.trialUniverse==='NORMAL_GAME_TRIAL'?'G':'回',defaultValue:0,minimum:0,displayOrder:order++,parentInputId:x.role==='trial'?undefined:trialId,inferenceRole:importanceToAdoption(runtimeImportance(f))});
+   out.push({id:x.id,name:x.label,category:'V8_NUMERIC',type:x.role==='trial'?'integer':'counter',unit:x.role==='trial'?trialUnitFor(f.trialUniverse):'回',defaultValue:0,minimum:0,displayOrder:order++,parentInputId:x.role==='trial'?undefined:trialId,inferenceRole:importanceToAdoption(runtimeImportance(f))});
   }
  }
  for(const s of projection.evidence??[]){
