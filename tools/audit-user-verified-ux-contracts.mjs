@@ -34,8 +34,19 @@ export function auditUserVerifiedUxContracts({ machineIds = null } = {}) {
     const pkg = readJson(packagePath);
     const inputs = new Map((pkg.inputs?.inputs ?? []).map(input => [input.id, input]));
     const uiItems = new Map();
-    for (const section of pkg.ui?.sections ?? []) {
-      for (const item of section.items ?? []) if (item.inputId) uiItems.set(item.inputId, { section, item });
+    const visitUiNode = (section, node) => {
+      if (!node || typeof node !== 'object') return;
+      if (node.inputId) uiItems.set(node.inputId, { section, item: node });
+      for (const child of node.inputs ?? []) visitUiNode(section, child);
+      for (const child of node.items ?? []) visitUiNode(section, child);
+      for (const child of node.groups ?? []) visitUiNode(section, child);
+      for (const category of node.interaction?.categories ?? []) {
+        if (category?.inputId) uiItems.set(category.inputId, { section, item: category });
+      }
+    };
+    for (const section of pkg.ui?.sections ?? pkg.ui?.v8Sections ?? []) {
+      for (const item of section.items ?? []) visitUiNode(section, item);
+      for (const group of section.groups ?? []) visitUiNode(section, group);
     }
 
     for (const protectedInput of contract.protectedInputs ?? []) {
@@ -55,7 +66,7 @@ export function auditUserVerifiedUxContracts({ machineIds = null } = {}) {
           continue;
         }
         for (const [key, expected] of Object.entries(protectedInput.expectedUi)) {
-          const actual = key === 'quickAdd' ? ui.config?.quickAdd : ui[key];
+          const actual = key === 'quickAdd' ? (ui.config?.quickAdd ?? ui.quickAdd) : ui[key];
           if (!sameJson(actual, expected)) errors.push(`${machineId}/${inputId}: protected UI ${key} changed; expected ${JSON.stringify(expected)}, got ${JSON.stringify(actual)}`);
         }
       }
