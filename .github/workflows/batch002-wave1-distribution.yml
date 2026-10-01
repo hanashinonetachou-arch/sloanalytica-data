@@ -114,9 +114,11 @@ jobs:
           npm run ux-contract:audit
           node --test --test-concurrency=1 test/user-verified-ux-contracts.test.mjs
 
-      - name: Verify machine identity consistency
+      - name: Apply and verify machine identity consistency
         working-directory: prototype
-        run: node tools/apply-machine-identity-classification.mjs --verify
+        run: |
+          node tools/apply-machine-identity-classification.mjs --apply
+          node tools/apply-machine-identity-classification.mjs --verify
 
       - name: Commit prototype distribution atomically
         shell: bash
@@ -125,6 +127,7 @@ jobs:
           set -euo pipefail
           git config user.name github-actions[bot]
           git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git add -u
           git add catalog.json \
             machines/L_LOTIS_TN/machine-package.json \
             machines/L_DARK_HAIBI_SB/machine-package.json \
