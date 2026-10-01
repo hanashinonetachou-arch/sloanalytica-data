@@ -13,7 +13,7 @@ function binomialIg(ps:number[],n:number){let total=0;for(let k=0;k<=n;k++){cons
 function near(a:any,b:number,tol=1e-8){return typeof a==='number'&&Number.isFinite(a)&&Math.abs(a-b)<=tol*Math.max(1,Math.abs(a),Math.abs(b))}
 const liveStatuses=new Set(['DIRECT_EXACT','EXACT_WITH_SCOPE_TRACKING','EXHAUSTIVE_CATEGORICAL','RETROSPECTIVE_EXACT','UNRESOLVED']);
 const depStatuses=new Set(['NONE','DEFERRED_TO_CANDIDATE_CONTRACT','UNRESOLVED']);
-const exactBenchmarkTrialUniverses=new Set(['NORMAL_GAME_TRIAL','BONUS_ELIGIBLE_GAME_TRIAL']);
+const exactBenchmarkTrialUniverses=new Set(['NORMAL_GAME_TRIAL','TOTAL_GAME_TRIAL','BONUS_ELIGIBLE_GAME_TRIAL']);
 const selectionClass=(score:number)=>score>=20?'CORE':score>=10?'SUPPORT':score>=5?'JOINT_ELIGIBLE':'EXCLUDE';
 export function validateEvaluationDocument(doc:any,research:any){
  if(doc?.schemaVersion!=='evaluation-v2'||doc?.manifestVersion!=='8.5')fail('HEADER');
