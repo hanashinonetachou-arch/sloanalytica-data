@@ -120,6 +120,7 @@ const evidenceConstraintFromLabel=(label:string,allSettings:string[])=>{
  const above=label.match(/設定([1-6])以上/);if(above){const n=Number(above[1]);return {confirmedSettings:settings.filter(s=>Number(String(s).replace('SET_',''))>=n),deniedSettings:[]};}
  const denied=label.match(/設定([1-6])否定/);if(denied)return {confirmedSettings:[],deniedSettings:['SET_'+denied[1]]};
  const listed=label.match(/設定([1-6](?:[・,／\/][1-6])+)(?:濃厚)?/);if(listed){const nums=listed[1].split(/[・,／\/]/);return {confirmedSettings:settings.filter(s=>nums.includes(String(s).replace('SET_',''))),deniedSettings:[]};}
+ const parity=label.match(/(奇数|偶数)設定濃厚/);if(parity){const odd=parity[1]==='奇数';return {confirmedSettings:settings.filter(s=>{const n=Number(String(s).replace('SET_',''));return odd?n%2===1:n%2===0}),deniedSettings:[]};}
  const exact=label.match(/(?:^|[:：=]\s*)設定([1-6])(?:濃厚)?\s*$/);if(exact)return {confirmedSettings:['SET_'+exact[1]],deniedSettings:[]};
  return null;
 };
