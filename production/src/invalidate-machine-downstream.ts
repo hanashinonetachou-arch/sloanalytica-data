@@ -2,11 +2,13 @@ import {RepoStore,Orchestrator} from './core.ts';
 
 const batchId=process.argv[2];
 const machineId=process.argv[3];
-if(!batchId||!machineId)throw new Error('USAGE: invalidate-machine-downstream <batch-id> <machine-id>');
+const includeResearch=process.argv.includes('--include-research');
+if(!batchId||!machineId)throw new Error('USAGE: invalidate-machine-downstream <batch-id> <machine-id> [--include-research]');
 
 const s=new RepoStore(process.cwd());
 const o=new Orchestrator(s);
-const stages=['EVALUATION','ELIGIBILITY','CANDIDATE_CONTRACT','OBSERVATION_EVIDENCE','CANONICAL_UI','MACHINE_DATA','RUNTIME_POLICY','RUNTIME_PROJECTION','APP_RUNTIME','DISTRIBUTION'] as const;
+const downstreamStages=['EVALUATION','ELIGIBILITY','CANDIDATE_CONTRACT','OBSERVATION_EVIDENCE','CANONICAL_UI','MACHINE_DATA','RUNTIME_POLICY','RUNTIME_PROJECTION','APP_RUNTIME','DISTRIBUTION'] as const;
+const stages=(includeResearch?['RESEARCH',...downstreamStages]:downstreamStages) as readonly string[];
 const changed:any[]=[];
 for(const stage of stages){
   let x=o.stage(batchId,machineId,stage);
@@ -18,4 +20,4 @@ for(const stage of stages){
   if(x.state==='READY'){changed.push({stage,revision:x.revision,state:x.state});continue}
   throw new Error('DOWNSTREAM_INVALIDATION_STATE:'+stage+':'+x.state);
 }
-console.log(JSON.stringify({batchId,machineId,changed},null,2));
+console.log(JSON.stringify({batchId,machineId,includeResearch,changed},null,2));
