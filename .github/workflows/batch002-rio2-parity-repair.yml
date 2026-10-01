@@ -31,19 +31,22 @@ jobs:
         working-directory: production
         run: npm test
 
-      - name: Invalidate Rio2 App Runtime
+      - name: Invalidate Rio2 semantic-to-runtime chain
         working-directory: production
         run: |
           node --experimental-strip-types - <<'NODE'
           const {RepoStore,Orchestrator}=await import('./src/core.ts');
           const s=new RepoStore(process.cwd()),o=new Orchestrator(s);
           const batch='batch-20261001-002',machine='L_SUPER_RIO_ACE2_ND02H';
-          let x=o.stage(batch,machine,'APP_RUNTIME');
-          if(x.state==='COMPLETE')o.transition(x,'READY','AUTHORITATIVE_OUTPUT_INVALIDATED','parity-evidence-contract-v1');
-          else if(x.state!=='READY')throw new Error('APP_RUNTIME_NOT_REPAIRABLE:'+x.state);
+          const stages=['OBSERVATION_EVIDENCE','CANONICAL_UI','MACHINE_DATA','RUNTIME_POLICY','RUNTIME_PROJECTION','APP_RUNTIME'];
+          for(const stage of stages){
+            let x=o.stage(batch,machine,stage);
+            if(x.state==='COMPLETE')o.transition(x,'READY','AUTHORITATIVE_OUTPUT_INVALIDATED','parity-evidence-contract-v1');
+            else if(x.state!=='READY')throw new Error(stage+'_NOT_REPAIRABLE:'+x.state);
+          }
           NODE
 
-      - name: Rebuild Rio2 App Runtime
+      - name: Rebuild Rio2 semantic-to-runtime chain
         working-directory: production
         run: node --experimental-strip-types src/deterministic-production-worker.ts batch-20261001-002 --through APP_RUNTIME
 
