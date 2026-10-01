@@ -61,10 +61,10 @@ jobs:
           echo "machine_id=$machine_id" >> "$GITHUB_OUTPUT"
           echo "publish=$publish" >> "$GITHUB_OUTPUT"
       - name: Run V8 production-line regression suite
-        if: ${{ !startsWith(github.base_ref, 'production/') }}
+        if: ${{ github.event_name == 'workflow_dispatch' || (github.event_name == 'pull_request' && !startsWith(github.base_ref, 'production/')) }}
         run: npm run test:v8-production-line
       - name: Run repository-persisted production orchestrator tests
-        if: ${{ startsWith(github.base_ref, 'production/') }}
+        if: ${{ github.event_name == 'push' || (github.event_name == 'pull_request' && startsWith(github.base_ref, 'production/')) }}
         working-directory: production
         run: npm test
       - name: Build selected V8 machine
