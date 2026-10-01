@@ -16,7 +16,11 @@ import {buildAppRuntime} from './app-runtime-builder.ts';
 import type {WorkRequest,WorkResult} from './core.ts';
 
 const batchId=process.argv[2];
-if(!batchId) throw new Error('USAGE: deterministic-production-worker <batch-id>');
+const throughFlag=process.argv[3]==='--through'?process.argv[4]:undefined;
+const stageOrder=['RESEARCH','EVALUATION','ELIGIBILITY','CANDIDATE_CONTRACT','OBSERVATION_EVIDENCE','CANONICAL_UI','MACHINE_DATA','RUNTIME_POLICY','RUNTIME_PROJECTION','APP_RUNTIME','DISTRIBUTION','DEVICE_QA'];
+if(!batchId) throw new Error('USAGE: deterministic-production-worker <batch-id> [--through <stage>]');
+if(throughFlag&&!stageOrder.includes(throughFlag)) throw new Error('INVALID_THROUGH_STAGE:'+throughFlag);
+const withinThrough=(stage:string)=>!throughFlag||stageOrder.indexOf(stage)<=stageOrder.indexOf(throughFlag);
 const s=new RepoStore(process.cwd());
 const o=new Orchestrator(s);
 const cfg=JSON.parse(fs.readFileSync(s.p('config','orchestrator.json'),'utf8'));
@@ -61,7 +65,7 @@ for(let guard=0;guard<100;guard++){
  reconcileBatch(o,s,batchId);
  const semantic=scheduleByKind(o,s,batchId,cfg.concurrency,'SEMANTIC').filter((x:any)=>['EVALUATION','ELIGIBILITY','CANDIDATE_CONTRACT','OBSERVATION_EVIDENCE','CANONICAL_UI'].includes(x.name));
  const production=scheduleByKind(o,s,batchId,cfg.concurrency,'PRODUCTION');
- const selected=[...semantic,...production];
+ const selected=[...semantic,...production].filter((candidate:any)=>withinThrough(candidate.name));
  if(selected.length===0) break;
  for(const candidate of selected){
    let x=o.stage(batchId,candidate.machineId,candidate.name); const a=o.createAttempt(x); const l=o.acquire(x,a,300000);
@@ -73,4 +77,4 @@ for(let guard=0;guard<100;guard++){
  }
 }
 reconcileBatch(o,s,batchId);
-console.log(JSON.stringify({batchId,completed},null,2));
+console.log(JSON.stringify({batchId,through:throughFlag??'DISTRIBUTION',completed},null,2));
