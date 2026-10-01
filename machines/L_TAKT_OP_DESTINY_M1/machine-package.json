@@ -78,6 +78,60 @@
         "inferenceRole": "INCLUDE_SUPPORT"
       },
       {
+        "id": "musicart-chance-type.eligibleTrialCount",
+        "name": "観測機会数",
+        "category": "V8_NUMERIC",
+        "type": "integer",
+        "unit": "回",
+        "defaultValue": 0,
+        "minimum": 0,
+        "displayOrder": 5,
+        "inferenceRole": "INCLUDE_SUPPORT",
+        "inputVisible": false,
+        "derivedCalculation": "sum",
+        "derivedFromInputIds": [
+          "musicart-chance-type.categoryCounts.1_巨人",
+          "musicart-chance-type.categoryCounts.2_運命",
+          "musicart-chance-type.categoryCounts.3_シカゴ"
+        ]
+      },
+      {
+        "id": "musicart-chance-type.categoryCounts.1_巨人",
+        "name": "巨人",
+        "category": "V8_NUMERIC",
+        "type": "counter",
+        "unit": "回",
+        "defaultValue": 0,
+        "minimum": 0,
+        "displayOrder": 6,
+        "parentInputId": "musicart-chance-type.eligibleTrialCount",
+        "inferenceRole": "INCLUDE_SUPPORT"
+      },
+      {
+        "id": "musicart-chance-type.categoryCounts.2_運命",
+        "name": "運命",
+        "category": "V8_NUMERIC",
+        "type": "counter",
+        "unit": "回",
+        "defaultValue": 0,
+        "minimum": 0,
+        "displayOrder": 7,
+        "parentInputId": "musicart-chance-type.eligibleTrialCount",
+        "inferenceRole": "INCLUDE_SUPPORT"
+      },
+      {
+        "id": "musicart-chance-type.categoryCounts.3_シカゴ",
+        "name": "シカゴ",
+        "category": "V8_NUMERIC",
+        "type": "counter",
+        "unit": "回",
+        "defaultValue": 0,
+        "minimum": 0,
+        "displayOrder": 8,
+        "parentInputId": "musicart-chance-type.eligibleTrialCount",
+        "inferenceRole": "INCLUDE_SUPPORT"
+      },
+      {
         "id": "REF_at-end-stamp_1",
         "name": "可：設定2以上濃厚",
         "category": "EVIDENCE_REFERENCE",
@@ -85,7 +139,7 @@
         "unit": "回",
         "defaultValue": 0,
         "minimum": 0,
-        "displayOrder": 5,
+        "displayOrder": 9,
         "inferenceRole": "DISPLAY_ONLY"
       },
       {
@@ -96,7 +150,7 @@
         "unit": "回",
         "defaultValue": 0,
         "minimum": 0,
-        "displayOrder": 6,
+        "displayOrder": 10,
         "inferenceRole": "DISPLAY_ONLY"
       },
       {
@@ -107,7 +161,7 @@
         "unit": "回",
         "defaultValue": 0,
         "minimum": 0,
-        "displayOrder": 7,
+        "displayOrder": 11,
         "inferenceRole": "DISPLAY_ONLY"
       },
       {
@@ -118,7 +172,7 @@
         "unit": "回",
         "defaultValue": 0,
         "minimum": 0,
-        "displayOrder": 8,
+        "displayOrder": 12,
         "inferenceRole": "DISPLAY_ONLY"
       },
       {
@@ -129,7 +183,7 @@
         "unit": "回",
         "defaultValue": 0,
         "minimum": 0,
-        "displayOrder": 9,
+        "displayOrder": 13,
         "inferenceRole": "DISPLAY_ONLY"
       }
     ]
@@ -188,6 +242,61 @@
         "modelType": "binomial",
         "numeratorInputId": "orphe-loop-return.successCount",
         "displayFormat": "percentage"
+      },
+      {
+        "featureId": "musicart-chance-type",
+        "name": "ムジカートチャンス種別",
+        "trialUniverse": "MUSICART_CHANCE_TYPE_TRIAL",
+        "adoptionCategory": "INCLUDE_SUPPORT",
+        "calculationRole": "PROBABILITY",
+        "probabilityEngineUsage": true,
+        "denominatorInputId": "musicart-chance-type.eligibleTrialCount",
+        "probabilities": {},
+        "selectionRationale": {
+          "summary": "Manifest v8.5 Production Lineで採用された設定推測要素。",
+          "adoptionReason": "EligibilityとCandidate Contractを通過した観測可能likelihoodを使用します。",
+          "shortTermReason": "標本が少ない間は結果の振れが大きくなります。",
+          "longTermReason": "観測数が増えるほど設定別likelihoodの比較が安定します。"
+        },
+        "modelType": "multinomial",
+        "numeratorInputId": "musicart-chance-type.categoryCounts.1_巨人",
+        "categoryInputIds": [
+          "musicart-chance-type.categoryCounts.2_運命",
+          "musicart-chance-type.categoryCounts.3_シカゴ"
+        ],
+        "denominatorRule": "SUM_CATEGORY_COUNTS",
+        "categoryProbabilities": {
+          "SET_1": [
+            0.737,
+            0.255,
+            0.008
+          ],
+          "SET_2": [
+            0.7252747252747254,
+            0.2667332667332668,
+            0.007992007992007994
+          ],
+          "SET_3": [
+            0.696,
+            0.29600000000000004,
+            0.008
+          ],
+          "SET_4": [
+            0.6409999999999999,
+            0.35100000000000003,
+            0.008
+          ],
+          "SET_5": [
+            0.64,
+            0.35200000000000004,
+            0.008
+          ],
+          "SET_6": [
+            0.64,
+            0.35200000000000004,
+            0.008
+          ]
+        }
       }
     ],
     "runtimeProjection": [
@@ -204,6 +313,13 @@
         "metric": "PER_ELIGIBLE_TRIAL_POWER",
         "metricValue": 9.298113416286856,
         "importance": "補助"
+      },
+      {
+        "featureId": "musicart-chance-type",
+        "runtimeStatus": "ACTIVE",
+        "metric": "PER_ELIGIBLE_TRIAL_POWER",
+        "metricValue": 1.1647444021972486,
+        "importance": "微小"
       }
     ]
   },
@@ -381,14 +497,8 @@
     {
       "blockId": "takt-cz-promotion-56",
       "label": "CZ成功時AT昇格率の設定5・6",
-      "reason": "設定1〜4の値は確認できるが、今回確認した資料断片では設定5・6の個別値を確定できない。",
-      "reevaluationCondition": "設定5・6を含む全設定のCZ成功時AT昇格率を信頼できる資料で確認できる。"
-    },
-    {
-      "blockId": "takt-qa-blank-chance-identification",
-      "label": "QAで指摘された「無地カー／チャンス」の内訳",
-      "reason": "今回確認できた信頼できる解析資料では、この語を独立した設定推測要素として一意に同定できず、別の演出名や「ムジカートチャンス」との表記混同を排除できないため、推測で採用しない。",
-      "reevaluationCondition": "観測場面・正式名称・設定別振り分けを同一の信頼できる資料で確認できる。"
+      "reason": "CZ当選時のAT昇格率は設定1〜6まで確認できたが、ムジカートチャンス種別との観測順序・排他関係を同一モデルへ安全に組み込む契約が未確立のため、今回の数値推測には追加しない。",
+      "reevaluationCondition": "CZ当選→AT直撃昇格→ムジカートチャンス種別の関係を二重評価せず扱える観測契約を確定する。"
     }
   ],
   "ui": {
@@ -568,6 +678,49 @@
         ]
       },
       {
+        "id": "OBS_musicart-chance-type",
+        "title": "ムジカートチャンス種別",
+        "collapsible": true,
+        "defaultExpanded": false,
+        "description": "対象となる機会の回数と、そのうち該当した回数を入力します。\\n1回の判別力：1.165",
+        "descriptionPresentation": {
+          "collapsible": true,
+          "label": "説明",
+          "defaultExpanded": false
+        },
+        "items": [
+          {
+            "id": "NODE_musicart-chance-type",
+            "featureId": "musicart-chance-type",
+            "title": "ムジカートチャンス種別",
+            "interaction": {
+              "type": "CATEGORY_COUNTERS",
+              "preservePriorObservations": true,
+              "showAccumulatedCounts": true,
+              "categoryCoverage": "EXHAUSTIVE",
+              "totalOpportunities": "SUM_CATEGORY_COUNTS",
+              "categories": [
+                {
+                  "id": "musicart-chance-type.categoryCounts.1_巨人",
+                  "inputId": "musicart-chance-type.categoryCounts.1_巨人",
+                  "label": "巨人"
+                },
+                {
+                  "id": "musicart-chance-type.categoryCounts.2_運命",
+                  "inputId": "musicart-chance-type.categoryCounts.2_運命",
+                  "label": "運命"
+                },
+                {
+                  "id": "musicart-chance-type.categoryCounts.3_シカゴ",
+                  "inputId": "musicart-chance-type.categoryCounts.3_シカゴ",
+                  "label": "シカゴ"
+                }
+              ]
+            }
+          }
+        ]
+      },
+      {
         "id": "EVI_at-end-stamp",
         "title": "AT終了画面スタンプ",
         "description": "設定確定・設定否定など条件が明確な項目は、観測すると設定候補の絞り込みに反映します。",
@@ -664,9 +817,32 @@
             "value": 9.298113416286856
           },
           "reason": "現在の採用基準を満たしているため、設定推測に使用します。"
+        },
+        {
+          "featureId": "musicart-chance-type",
+          "label": "ムジカートチャンス種別",
+          "importance": "微小",
+          "evaluation": {
+            "userLabel": "1回の判別力",
+            "value": 1.1647444021972486
+          },
+          "reason": "現在の採用基準を満たしているため、設定推測に使用します。"
         }
       ],
-      "notAdopted": [],
+      "notAdopted": [
+        {
+          "featureId": "takt-at-setting4-source-discrepancy",
+          "label": "AT初当り設定4の資料差",
+          "reason": "確認資料間で設定4が1/299.3と1/299.5に分かれている。現行Researchでは複数解析で確認できた1/299.3を採用した。",
+          "reevaluationCondition": "メーカー公式または一次性の高い資料で設定4の正値を確定できる。"
+        },
+        {
+          "featureId": "takt-cz-promotion-56",
+          "label": "CZ成功時AT昇格率の設定5・6",
+          "reason": "CZ当選時のAT昇格率は設定1〜6まで確認できたが、ムジカートチャンス種別との観測順序・排他関係を同一モデルへ安全に組み込む契約が未確立のため、今回の数値推測には追加しない。",
+          "reevaluationCondition": "CZ当選→AT直撃昇格→ムジカートチャンス種別の関係を二重評価せず扱える観測契約を確定する。"
+        }
+      ],
       "highLowDiscrimination": {
         "status": "COMPUTED",
         "method": "BEST_SINGLE_EXACT_ACTIVE_FEATURE",
@@ -697,6 +873,10 @@
         "excludedFeatures": [
           {
             "findingId": "orphe-loop-return",
+            "reason": "BENCHMARK_EXPOSURE_UNRESOLVED"
+          },
+          {
+            "findingId": "musicart-chance-type",
             "reason": "BENCHMARK_EXPOSURE_UNRESOLVED"
           }
         ],
