@@ -17,7 +17,7 @@ for(const stage of stages){
     changed.push({stage,revision:x.revision,state:x.state});
     continue;
   }
-  if(x.state==='READY'){changed.push({stage,revision:x.revision,state:x.state});continue}
+  if(x.state==='READY'||x.state==='PENDING'){changed.push({stage,revision:x.revision,state:x.state});continue}
   throw new Error('DOWNSTREAM_INVALIDATION_STATE:'+stage+':'+x.state);
 }
 console.log(JSON.stringify({batchId,machineId,includeResearch,changed},null,2));
