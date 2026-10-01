@@ -41,9 +41,9 @@ const numericUiSections=(projection:any)=>{
   if(f.model==='BERNOULLI'){
    const trial=inputs.find((x:any)=>x.role==='trial'),success=inputs.find((x:any)=>x.role==='success');
    if(!trial||!success)throw new Error('APP_RUNTIME_BERNOULLI_UI:'+f.findingId);
-   const trialNode:any={id:trial.id,label:trial.label??trialLabelFor(f.trialUniverse),input:'denominator',inputId:trial.id,engineBinding:{inputId:trial.id},gridSpan:playDataSourceForTrialUniverse(f.trialUniverse)?12:6,directNumeric:true,quickAdd:trial.quickAdd??[50],unobservedDisplay:'—'};
+   const trialNode:any={id:trial.id,label:trial.label&&trial.label!=='観測機会数'?trial.label:trialLabelFor(f.trialUniverse),input:'denominator',inputId:trial.id,engineBinding:{inputId:trial.id},gridSpan:playDataSourceForTrialUniverse(f.trialUniverse)?12:6,directNumeric:true,quickAdd:trial.quickAdd??[50],unobservedDisplay:'—'};
    const playDataSource=playDataSourceForTrialUniverse(f.trialUniverse);if(playDataSource)trialNode.playDataBinding={source:playDataSource};
-   return {id:s.id,title:s.title,collapsible:s.collapsible!==false,defaultExpanded:s.defaultExpanded===true,description:sectionExplanation(f,s),descriptionPresentation:{collapsible:true,label:'説明',defaultExpanded:false},items:[{id:'NODE_'+f.findingId,featureId:f.findingId,title:s.title,inputs:[trialNode,{id:success.id,label:success.label??'回数',input:'counter',inputId:success.id,engineBinding:{inputId:success.id},gridSpan:6,directNumeric:true,quickAdd:success.quickAdd??[1],unobservedDisplay:'—'}]}]};
+   return {id:s.id,title:s.title,collapsible:s.collapsible!==false,defaultExpanded:s.defaultExpanded===true,description:sectionExplanation(f,s),descriptionPresentation:{collapsible:true,label:'説明',defaultExpanded:false},items:[{id:'NODE_'+f.findingId,featureId:f.findingId,title:s.title,inputs:[trialNode,{id:success.id,label:success.label&&success.label!=='該当回数'?success.label:'回数',input:'counter',inputId:success.id,engineBinding:{inputId:success.id},gridSpan:6,directNumeric:true,quickAdd:success.quickAdd??[1],unobservedDisplay:'—'}]}]};
   }
   if(f.model==='CATEGORICAL'){
    const trial=inputs.find((x:any)=>x.role==='trial'),cats=inputs.filter((x:any)=>x.role==='categoryCount');
@@ -61,7 +61,7 @@ const evidenceExplanation=(s:any)=>{
  const semantics=(s.evidenceItems??[]).flatMap((e:any)=>evidenceSemanticRows(e).map((x:any)=>x.semantic));
  const hasExact=semantics.includes('EXACT_CONSTRAINT'),hasBacked=semantics.includes('PROBABILITY_BACKED'),hasUnknown=semantics.includes('PROBABILITY_UNKNOWN');
  if(hasExact&&(hasUnknown||hasBacked))return hasUnknown?'設定確定・設定否定など条件が明確な項目は設定候補の絞り込みに反映します。設定別の出現率が公表・確認されていない示唆は、観測回数を記録できますが、現在の設定推測計算には直接反映していません。設定別の出現率が確認できた場合は、今後のデータ更新で設定推測へ反映できる可能性があります。':'設定確定・設定否定など条件が明確な項目は設定候補の絞り込みに反映し、設定別出現率が確認できる示唆は確認済みの分布に基づいて設定推測へ使用します。';
- if(hasExact)return '確認した項目に応じて、設定候補を確定・除外します。';
+ if(hasExact)return '確認した項目に応じて、設定候補の絞り込みに反映し、確定・除外します。';
  if(hasBacked&&!hasUnknown)return '設定別の出現率が確認できる示唆は、確認済みの分布に基づいて設定推測へ使用します。';
  if(hasUnknown)return 'この示唆については設定別の出現率が公表・確認されていないため、観測回数を記録できますが、現在の設定推測計算には直接反映していません。設定別の出現率が確認できた場合は、今後のデータ更新で設定推測へ反映できる可能性があります。';
  return 'この項目は観測回数を記録するための参考情報で、現在の設定推測計算には直接反映していません。';
