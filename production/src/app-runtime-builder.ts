@@ -1,5 +1,5 @@
 import {evidenceSemanticExplanation} from './evidence-semantics.ts';
-const heldReason=(x:any)=>x?.status==='HELD_NO_JOINT_MODEL'?'複数要素をまとめて評価するための条件が確定していないため、現在は数値推測に使用しません。':'現在は数値推測に必要な条件が確定していません。';
+const heldReason=(x:any)=>x?.status==='HELD_NO_JOINT_MODEL'?'同じ観測範囲を使う複数要素を独立に加算すると、同じ設定差を重複評価する可能性があります。重複を避けて正しくまとめる方法が確定するまで、単独では数値推測に使用しません。':'現在は数値推測に必要な条件が確定していません。';
 const probability=(v:any):number=>{if(typeof v==='number'&&Number.isFinite(v)&&v>=0&&v<=1)return v;if(typeof v==='string'&&v.startsWith('1/')){const d=Number(v.slice(2));if(Number.isFinite(d)&&d>0)return 1/d}throw new Error('APP_RUNTIME_PROBABILITY_INVALID:'+String(v))};
 const settingKey=(k:string)=>k.startsWith('SET_')?k:'SET_'+k;
 export const categoricalProbabilityRow=(row:any,labels:string[],findingId:string,setting:string):number[]=>{
@@ -142,7 +142,7 @@ export function buildAppRuntime(projection:any,projectionArtifact:any){
  const version='8.5.0-'+projection.batchId,held=projection.heldObservations??[],hld=projection.highLowDiscrimination;
  const features=buildFeatures(projection),inputs=buildInputs(projection),rp=runtimeProjection(projection);
  const adopted=(projection.activeFeatures??[]).map((f:any)=>({featureId:f.findingId,label:f.name,importance:runtimeImportance(f),selectionScore:f.score?.status==='COMPUTED'?f.score.value:undefined,evaluation:{userLabel:f.score?.status==='COMPUTED'?'設定判別スコア':'1回の判別力',value:f.score?.status==='COMPUTED'?f.score.value:f.runtimePolicyBinding?.value},reason:'現在の採用基準を満たしているため、設定推測に使用します。'}));
- const inactive=(projection.inactiveFeatures??[]).map((f:any)=>({featureId:f.findingId,label:f.findingId,reason:'現在の採用基準を満たしていないため、設定推測に使用しません。'}));
+ const inactive=(projection.inactiveFeatures??[]).map((f:any)=>({featureId:f.findingId,label:f.name??f.label??'設定推測要素',reason:'現在の採用基準を満たしていないため、設定推測に使用しません。'}));
  const allLabels=[...(projection.activeFeatures??[]).map((x:any)=>({findingId:x.findingId,label:x.name})),...(projection.nonRuntimeCandidates??[])];
  const resolved=(projection.nonRuntimeCandidates??[]).map((x:any)=>({featureId:x.findingId,label:x.label,reason:nonRuntimeReason(x,allLabels.find((y:any)=>y.findingId===x.resolvedIntoFindingId)?.label)}));
  const excluded=(projection.excludedDecisions??[]).map((x:any)=>({featureId:x.findingId,label:x.label,reason:userFacingExcludedReason(x),reevaluationCondition:userFacingReevaluation(x)}));
