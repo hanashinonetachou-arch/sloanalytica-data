@@ -62,6 +62,7 @@ export function validateAppRuntimeDocument(doc:any,projection:any,projectionArti
   const item=(s.items??[])[0];if(item?.interaction?.type!=='CATEGORY_COUNTERS'||item?.interaction?.categoryCoverage!=='NON_EXHAUSTIVE'||item?.interaction?.totalOpportunities!=='NONE'||!Array.isArray(item?.interaction?.categories)||item.interaction.categories.length===0)fail('EVIDENCE_UI_INPUT');
  }
  const summary=p.v8?.machineResearchSummary;if(!summary)fail('V8_SUMMARY');
+ for(const x of summary.notAdopted??[]){const label=String(x?.label??'').trim();const featureId=String(x?.featureId??'').trim();if(!label||label==='設定推測要素'||label==='調査継続項目'||(featureId&&label===featureId))fail('SUMMARY_LABEL:'+featureId);if(typeof x?.reason!=='string'||!x.reason.trim())fail('SUMMARY_REASON:'+featureId);}
  const rejectedIds=new Set((summary.notAdopted??[]).map((x:any)=>x.featureId));
  for(const x of projection.nonRuntimeCandidates??[])if(!rejectedIds.has(x.findingId))fail('SUMMARY_NON_RUNTIME_MISSING:'+x.findingId);
  for(const x of projection.excludedDecisions??[])if(!rejectedIds.has(x.findingId))fail('SUMMARY_EXCLUDED_MISSING:'+x.findingId);if(projection.highLowDiscrimination?.status==='COMPUTED'){if(canonical(summary.highLowDiscrimination)!==canonical(projection.highLowDiscrimination)||summary.unresolved?.some((x:any)=>x?.label==='高低判別精度'))fail('HLD_COMPUTED');}else{if(summary.highLowDiscrimination!==undefined||!summary.unresolved?.some((x:any)=>x?.label==='高低判別精度'&&x?.reason===projection.highLowDiscrimination?.reason))fail('HLD_UNRESOLVED');}
