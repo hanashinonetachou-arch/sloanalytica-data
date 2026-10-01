@@ -21,7 +21,7 @@ export function validateCandidateContractDocument(doc:any,eligibility:any,evalua
   if((c.dependencyGroupId??null)!==(expectedGroup??null))fail('DEPENDENCY_GROUP:'+d.findingId);
   const g:any=expectedGroup?groupBy.get(expectedGroup):null;
   if(!g){
-   if(c.runtimeInferenceAllowed!==true||c.dependencyResolution!=='NONE'||c.model!==e.model||c.trialUniverse!==e.trialUniverse||canonical(c.settingDistribution)!==canonical(e.settingDistribution)||!bindingMatches(c,e))fail('UNGROUPED:'+d.findingId);
+   if(c.runtimeInferenceAllowed!==true||c.dependencyResolution!=='NONE'||c.model!==e.model||c.trialUniverse!==e.trialUniverse||canonical(c.settingDistribution)!==canonical(e.settingDistribution)||canonical(c.categoryModel)!==canonical(e.categoryModel)||!bindingMatches(c,e))fail('UNGROUPED:'+d.findingId);
    continue;
   }
   if(g.resolution==='HELD_NO_JOINT_MODEL'){
