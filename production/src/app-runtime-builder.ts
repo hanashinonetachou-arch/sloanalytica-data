@@ -32,34 +32,52 @@ const trialLabelFor=(trialUniverse:any)=>{
  return '対象回数';
 };
 const trialUnitFor=(trialUniverse:any)=>trialLabelFor(trialUniverse).endsWith('ゲーム数')?'G':'回';
-const sectionExplanation=(f:any,s:any)=>{
- const metric=scoreDescription(s);
- let guide='対象となる機会の回数と、そのうち該当した回数を入力します。';
- if(f.trialUniverse==='TOTAL_GAME_TRIAL')guide='総ゲーム数に対する該当回数を入力します。「着席時との差分を使用」がONの場合、総ゲーム数は遊技情報から自動反映できます。';
- else if(f.trialUniverse==='NORMAL_GAME_TRIAL'||f.trialUniverse==='BONUS_ELIGIBLE_GAME_TRIAL')guide='通常ゲーム数に対する該当回数を入力します。「着席時との差分を使用」がONの場合、通常ゲーム数は遊技情報から自動反映されます。';
- else if(f.trialUniverse==='LOTIS_NON_CHAIN_GAME_TRIAL'||f.trialUniverse==='NON_CHAIN_BONUS_INITIAL_GAME_TRIAL')guide='総ゲーム数から「除外ゲーム数（連荘中のゲーム数）」を差し引いたゲーム数を母数として使用します。除外ゲーム数はこの要素だけに適用します。';
- else if(f.trialUniverse==='DAITOMO_NORMAL_PLAY_TRIAL')guide='ダイトモに表示される「通常プレイ数」を母数として入力します。総ゲーム数や遊技情報の通常ゲーム数との差分では代用しません。';
- else if(f.trialUniverse==='HOWARD_GAME_50_REPLAY_TRIAL')guide='通常時に規定リプレイ50回へ到達した回数を母数、そのうちハワードゲームに当選した回数を入力します。';
- else if(typeof f.trialUniverse==='string'&&f.trialUniverse.includes('GAME_TRIAL'))guide='対象区間で実際に消化したゲーム数と、そのうち該当した回数を入力します。';
- else if(f.trialUniverse==='MILE_CHARGE_4PLUS_END_TRIAL')guide='まいるチャージ4回以上で終了した回数を「対象回数」、そのうち温泉ステージへ移行した回数を「回数」に入力します。';
- else if(f.trialUniverse==='CZ_TRUE_PREMONITION_TRIAL')guide='CZ本前兆となった回数を「対象回数」、そのうち温泉ステージへ移行した回数を「回数」に入力します。';
- const details=Array.isArray(f.details)?f.details.filter((x:any)=>typeof x==='string'&&x.trim()):[];
- return [...details,guide,metric].filter(Boolean).join('\\n');
-};
+const sectionExplanation=(_f:any,s:any)=>String(s?.description??'').trim();
+const compactEvidenceText=(v:any)=>String(v??'').normalize('NFKC').replace(/[\\s（）()「」『』【】・：:、,／\\/_-]+/g,'');
+const evidenceLinkKey=(findingId:any,index:number)=>String(findingId)+':'+index;
+export function resolveEvidenceInputLinks(projection:any){
+ const numeric=(projection.runtimeUi?.numericSections??[]).filter((s:any)=>s?.model==='CATEGORICAL');
+ const categoryInputIdByKey=new Map<string,string>(),linkedEvidenceIds=new Set<string>(),featureEvidenceIds=new Map<string,string[]>();
+ for(const section of projection.evidence??[])for(const e of section.evidenceItems??[]){
+  const cats=Array.isArray(e.semanticCategories)?e.semanticCategories:[];
+  if(!e.trialUniverse||cats.length===0||cats.some((x:any)=>x?.semanticType!=='EXACT_CONSTRAINT'))continue;
+  const candidates=numeric.filter((s:any)=>s.trialUniverse===e.trialUniverse);
+  let chosen:any=null;const local:string[]=[];
+  for(const s of candidates){
+   const inputs=(s.inputs??[]).filter((x:any)=>x.role==='categoryCount');const ids:string[]=[];let ok=true;
+   for(let i=0;i<cats.length;i++){
+    const cat=cats[i],meaning=compactEvidenceText(cat.meaning),raw=compactEvidenceText(cat.label);
+    let matches=inputs.filter((x:any)=>meaning&&compactEvidenceText(x.label).includes(meaning));
+    if(matches.length!==1&&matches.length>0){
+     const tokens=String(cat.label??'').replace(/[（）()]/g,'・').split(/[・：:\\s／\\/]+/).map(compactEvidenceText).filter((t:string)=>t.length>=2&&!/^設定[1-6]/.test(t)&&!/(?:濃厚|否定|示唆)$/.test(t));
+     const narrowed=matches.filter((x:any)=>tokens.some((t:string)=>compactEvidenceText(x.label).includes(t))||raw&&compactEvidenceText(x.label).includes(raw));
+     if(narrowed.length===1)matches=narrowed;
+    }
+    if(matches.length!==1){ok=false;break}ids.push(matches[0].id);
+   }
+   if(ok){if(chosen){chosen=null;break}chosen={section:s,ids};}
+  }
+  if(!chosen)continue;
+  cats.forEach((_x:any,i:number)=>categoryInputIdByKey.set(evidenceLinkKey(e.findingId,i),chosen.ids[i]));linkedEvidenceIds.add(e.findingId);
+  const list=featureEvidenceIds.get(chosen.section.sourceFindingId)??[];list.push(e.findingId);featureEvidenceIds.set(chosen.section.sourceFindingId,list);
+ }
+ return {categoryInputIdByKey,linkedEvidenceIds,featureEvidenceIds};
+}
+const appendLinkedEvidenceNote=(description:string,featureId:any,links:any)=>links.featureEvidenceIds.has(featureId)?[description,'・反映：同じ入力から設定確定・設定否定の条件にも自動反映します。別の欄へ重ねて入力する必要はありません'].filter(Boolean).join('\\n'):description;
 const playDataSourceForTrialUniverse=(trialUniverse:any)=>
  trialUniverse==='TOTAL_GAME_TRIAL'?'PLAY_TOTAL_GAME_DELTA':
  trialUniverse==='LOTIS_NON_CHAIN_GAME_TRIAL'||trialUniverse==='NON_CHAIN_BONUS_INITIAL_GAME_TRIAL'?'PLAY_TOTAL_GAME_DELTA_EXCLUDED':
  trialUniverse==='NORMAL_GAME_TRIAL'||trialUniverse==='BONUS_ELIGIBLE_GAME_TRIAL'?'PLAY_NORMAL_GAME_DELTA':undefined;
 const playDataBindingFor=(source:any)=>source?{source,...(source==='PLAY_TOTAL_GAME_DELTA_EXCLUDED'?{mode:'AUTO_EXACT'}:{})}:undefined;
 const numericUiSections=(projection:any)=>{
- const src=projection.runtimeUi??{};const activeBy=new Map((projection.activeFeatures??[]).map((x:any)=>[x.findingId,x]));
+ const src=projection.runtimeUi??{},links=resolveEvidenceInputLinks(projection);const activeBy=new Map((projection.activeFeatures??[]).map((x:any)=>[x.findingId,x]));
  const rows=(src.numericSections??[]).map((s:any)=>{const f:any=activeBy.get(s.sourceFindingId);if(!f)throw new Error('APP_RUNTIME_UI_FEATURE_MISSING:'+s.sourceFindingId);return {s,f,inputs:s.inputs??[],playDataSource:playDataSourceForTrialUniverse(f.trialUniverse)}});
  const groups=new Map<string,any[]>();for(const row of rows){if(row.f.model==='BERNOULLI'&&row.playDataSource){const key=String(row.f.trialUniverse)+'|'+row.playDataSource;groups.set(key,[...(groups.get(key)??[]),row])}}
  const consumed=new Set<string>();const out:any[]=[];
  for(const row of rows){if(consumed.has(row.s.sourceFindingId))continue;const key=String(row.f.trialUniverse)+'|'+String(row.playDataSource??'');const peers=row.f.model==='BERNOULLI'&&row.playDataSource?(groups.get(key)??[row]):[row];
-  if(peers.length>1){const trials=peers.map((p:any)=>p.inputs.find((x:any)=>x.role==='trial'));if(trials.some((x:any)=>!x))throw new Error('APP_RUNTIME_SHARED_DENOMINATOR_TRIAL');for(const p of peers)consumed.add(p.s.sourceFindingId);const label=trialLabelFor(row.f.trialUniverse);const sharedTitle=peers.map((p:any)=>String(p.s.title)).join('・');out.push({id:'OBS_SHARED_'+String(row.f.trialUniverse),title:sharedTitle,collapsible:true,defaultExpanded:false,description:'「'+label+'」を共通の母数として使う項目をまとめています。母数は1回だけ入力し、各項目の回数を記録します。',descriptionPresentation:{collapsible:true,label:'説明',defaultExpanded:false},groups:[{id:'DENOM_'+String(row.f.trialUniverse),label,input:'denominator',inputId:trials[0].id,engineBinding:{inputIds:trials.map((x:any)=>x.id)},gridSpan:12,directNumeric:true,quickAdd:trials[0].quickAdd??[50],unobservedDisplay:'—',playDataBinding:playDataBindingFor(row.playDataSource)}],items:peers.map((p:any)=>{const success=p.inputs.find((x:any)=>x.role==='success');if(!success)throw new Error('APP_RUNTIME_BERNOULLI_UI:'+p.f.findingId);return {id:'NODE_'+p.f.findingId,featureId:p.f.findingId,title:p.s.title,description:sectionExplanation(p.f,p.s),descriptionPresentation:{collapsible:true,label:'説明',defaultExpanded:false},gridSpan:6,inputs:[{id:success.id,label:'回数',input:'counter',inputId:success.id,engineBinding:{inputId:success.id},gridSpan:12,directNumeric:true,quickAdd:success.quickAdd??[1],unobservedDisplay:'—'}]}})});continue}
+  if(peers.length>1){const trials=peers.map((p:any)=>p.inputs.find((x:any)=>x.role==='trial'));if(trials.some((x:any)=>!x))throw new Error('APP_RUNTIME_SHARED_DENOMINATOR_TRIAL');for(const p of peers)consumed.add(p.s.sourceFindingId);const label=trials[0].label;const sharedTitle=peers.map((p:any)=>String(p.s.title)).join('・');out.push({id:'OBS_SHARED_'+String(row.f.trialUniverse),title:sharedTitle,collapsible:true,defaultExpanded:false,description:'・基準：'+label+'\\n・入力方法：'+label+'は1回だけ入力し、各項目の回数を記録します',descriptionPresentation:{collapsible:true,label:'説明',defaultExpanded:false},groups:[{id:'DENOM_'+String(row.f.trialUniverse),label,input:'denominator',inputId:trials[0].id,engineBinding:{inputIds:trials.map((x:any)=>x.id)},gridSpan:12,directNumeric:true,quickAdd:trials[0].quickAdd??[50],unobservedDisplay:'—',playDataBinding:playDataBindingFor(row.playDataSource)}],items:peers.map((p:any)=>{const success=p.inputs.find((x:any)=>x.role==='success');if(!success)throw new Error('APP_RUNTIME_BERNOULLI_UI:'+p.f.findingId);return {id:'NODE_'+p.f.findingId,featureId:p.f.findingId,title:p.s.title,description:appendLinkedEvidenceNote(sectionExplanation(p.f,p.s),p.f.findingId,links),descriptionPresentation:{collapsible:true,label:'説明',defaultExpanded:false},gridSpan:6,inputs:[{id:success.id,label:success.label,input:'counter',inputId:success.id,engineBinding:{inputId:success.id},gridSpan:12,directNumeric:true,quickAdd:success.quickAdd??[1],unobservedDisplay:'—'}]}})});continue}
   consumed.add(row.s.sourceFindingId);const {s,f,inputs}=row;
-  if(f.model==='BERNOULLI'){const trial=inputs.find((x:any)=>x.role==='trial'),success=inputs.find((x:any)=>x.role==='success');if(!trial||!success)throw new Error('APP_RUNTIME_BERNOULLI_UI:'+f.findingId);const trialNode:any={id:trial.id,label:trialLabelFor(f.trialUniverse),input:'denominator',inputId:trial.id,engineBinding:{inputId:trial.id},gridSpan:row.playDataSource?12:6,directNumeric:true,quickAdd:trial.quickAdd??[50],unobservedDisplay:'—'};if(row.playDataSource)trialNode.playDataBinding=playDataBindingFor(row.playDataSource);out.push({id:s.id,title:s.title,collapsible:s.collapsible!==false,defaultExpanded:s.defaultExpanded===true,description:sectionExplanation(f,s),descriptionPresentation:{collapsible:true,label:'説明',defaultExpanded:false},items:[{id:'NODE_'+f.findingId,featureId:f.findingId,title:s.title,inputs:[trialNode,{id:success.id,label:'回数',input:'counter',inputId:success.id,engineBinding:{inputId:success.id},gridSpan:6,directNumeric:true,quickAdd:success.quickAdd??[1],unobservedDisplay:'—'}]}]});continue}
+  if(f.model==='BERNOULLI'){const trial=inputs.find((x:any)=>x.role==='trial'),success=inputs.find((x:any)=>x.role==='success');if(!trial||!success)throw new Error('APP_RUNTIME_BERNOULLI_UI:'+f.findingId);const trialNode:any={id:trial.id,label:trial.label,input:'denominator',inputId:trial.id,engineBinding:{inputId:trial.id},gridSpan:row.playDataSource?12:6,directNumeric:true,quickAdd:trial.quickAdd??[50],unobservedDisplay:'—'};if(row.playDataSource)trialNode.playDataBinding=playDataBindingFor(row.playDataSource);out.push({id:s.id,title:s.title,collapsible:s.collapsible!==false,defaultExpanded:s.defaultExpanded===true,description:appendLinkedEvidenceNote(sectionExplanation(f,s),f.findingId,links),descriptionPresentation:{collapsible:true,label:'説明',defaultExpanded:false},items:[{id:'NODE_'+f.findingId,featureId:f.findingId,title:s.title,inputs:[trialNode,{id:success.id,label:success.label,input:'counter',inputId:success.id,engineBinding:{inputId:success.id},gridSpan:6,directNumeric:true,quickAdd:success.quickAdd??[1],unobservedDisplay:'—'}]}]});continue}
   if(f.model==='CATEGORICAL'){const trial=inputs.find((x:any)=>x.role==='trial'),cats=inputs.filter((x:any)=>x.role==='categoryCount');if(!trial||cats.length<2)throw new Error('APP_RUNTIME_CATEGORICAL_UI:'+f.findingId);const sumMode=['SOURCE_EXHAUSTIVE','SOURCE_EXPLICIT_OTHER'].includes(String(f.categoryModel?.residualPolicy??''));out.push({id:s.id,title:s.title,collapsible:s.collapsible!==false,defaultExpanded:s.defaultExpanded===true,description:sectionExplanation(f,s),descriptionPresentation:{collapsible:true,label:'説明',defaultExpanded:false},items:[{id:'NODE_'+f.findingId,featureId:f.findingId,title:s.title,interaction:{type:'CATEGORY_COUNTERS',preservePriorObservations:true,showAccumulatedCounts:true,categoryCoverage:sumMode?'EXHAUSTIVE':'NON_EXHAUSTIVE',totalOpportunities:sumMode?'SUM_CATEGORY_COUNTS':'SEPARATE_COUNTER',...(sumMode?{}:{opportunityTracking:{type:'SEPARATE_COUNTER',inputId:trial.id,label:trial.label}}),categories:cats.map((x:any)=>({id:x.id,inputId:x.id,label:x.label}))}}]});continue}
   throw new Error('APP_RUNTIME_MODEL_UNSUPPORTED:'+f.model)
  }
