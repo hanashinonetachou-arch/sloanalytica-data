@@ -105,8 +105,16 @@ jobs:
             const exactExpected=(research.findings??[]).filter(x=>x.observationType==='evidence').flatMap(x=>x.semanticCategories??[]).filter(x=>x.semanticType==='EXACT_CONSTRAINT').length;
             if((pkg.evidence?.evidences??[]).length!==exactExpected)fail('EXACT_EVIDENCE_COUNT:'+id+':'+exactExpected+':'+(pkg.evidence?.evidences??[]).length);
             for(const e of pkg.evidence?.evidences??[])if(/示唆|期待|アップ|出現しやすい/.test(e.name??''))fail('SOFT_HINT_CONSTRAINED:'+id+':'+e.name);
-            const summary=JSON.stringify(pkg.v8?.machineResearchSummary??{});
-            if(/likelihood|source-supported|joint|conditional|categorical|candidate contract|runtime policy|research|evaluation/i.test(summary))fail('INTERNAL_WORDING:'+id);
+            const summary=pkg.v8?.machineResearchSummary??{};
+            const visibleSummaryText=[
+              summary.title,
+              ...(summary.adopted??[]).flatMap(x=>[x.label,x.reason,x.evaluation?.userLabel]),
+              ...(summary.notAdopted??[]).flatMap(x=>[x.label,x.reason,x.reevaluationCondition]),
+              ...(summary.unresolved??[]).flatMap(x=>[x.label,x.reason]),
+              summary.highLowDiscrimination?.selectedFeatureLabel,
+              summary.highLowDiscrimination?.note
+            ].filter(Boolean).join(' ');
+            if(/likelihood|source-supported|joint|conditional|categorical|candidate contract|runtime policy|research|evaluation/i.test(visibleSummaryText))fail('INTERNAL_WORDING:'+id);
             for(const section of (pkg.ui?.v8Sections??[]).filter(x=>String(x.id).startsWith('OBS_'))){
               if(/設定判別スコア/.test(section.description??'')&&/1回の判別力/.test(section.description??''))fail('DOUBLE_METRIC:'+id+':'+section.title);
             }
