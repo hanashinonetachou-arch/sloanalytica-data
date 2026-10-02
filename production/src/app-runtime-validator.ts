@@ -1,4 +1,4 @@
-import {categoricalProbabilityRow} from './app-runtime-builder.ts';
+import {categoricalProbabilityRow,evidenceCategoryRecords} from './app-runtime-builder.ts';
 export const APP_RUNTIME_VALIDATOR_CONTRACT='app-runtime-v1';
 const canonical=(v:any):string=>Array.isArray(v)?'['+v.map(canonical).join(',')+']':v&&typeof v==='object'?'{'+Object.keys(v).sort().map(k=>JSON.stringify(k)+':'+canonical(v[k])).join(',')+'}':JSON.stringify(v);
 const fail=(m:string):never=>{throw new Error('APP_RUNTIME_VALIDATION_FAILED:'+m)};
@@ -14,7 +14,7 @@ export function validateAppRuntimeDocument(doc:any,projection:any,projectionArti
  if(canonical(p.machine?.settings)!==canonical(projection.settings.values)||canonical(p.metadata?.settings)!==canonical(projection.settings.values)||p.metadata?.settingsStatus!=='SOURCE_DERIVED')fail('SETTINGS_COPY');
  const expectedSections=projection.runtimeUi?.numericSections??[],active=projection.activeFeatures??[],inactive=projection.inactiveFeatures??[];
  const expectedNumericInputs=expectedSections.flatMap((s:any)=>s.inputs??[]);
- const expectedEvidenceInputs=(projection.evidence??[]).flatMap((s:any)=>(s.evidenceItems??[]).flatMap((e:any)=>{const details=Array.isArray(e.details)?e.details.filter((x:any)=>typeof x==='string'&&x.trim()):[];const labels=details.length?details:[e.label];return labels.map((label:string,i:number)=>({id:`REF_${e.findingId}_${i+1}`,label}))}));
+ const expectedEvidenceInputs=(projection.evidence??[]).flatMap((s:any)=>(s.evidenceItems??[]).flatMap((e:any)=>evidenceCategoryRecords(e).map((category:any,i:number)=>({id:`REF_${e.findingId}_${i+1}`,label:category.raw}))));
  const expectedInputs=[...expectedNumericInputs,...expectedEvidenceInputs];
  if(!Array.isArray(p.inputs?.inputs)||p.inputs.inputs.length!==expectedInputs.length)fail('INPUT_COVERAGE');
  const inputBy=new Map((p.inputs.inputs??[]).map((x:any)=>[x.id,x]));if(inputBy.size!==expectedInputs.length)fail('INPUT_DUPLICATE');
