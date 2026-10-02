@@ -36,7 +36,7 @@ test('numeric candidate details survive evaluation for user-facing runtime expla
 
 
 test('accepts published categorical rows with up to 1.5% rounding drift without rewriting source values',()=>{
- const research:any={manifestVersion:'8.5',batchId:'b',machineId:'M',machineName:'M',findings:[{findingId:'f',label:'公開丸め表',observationType:'appearance_distribution',sourceIds:['s'],trialUniverse:'EVENT_TRIAL',settingDistribution:{'1':'A 54% / B 36% / C 4% / D 1% / E 2% / F 2% / G 2%','6':'A 34% / B 52% / C 4% / D 1% / E 2% / F 2% / G 2%'},categoryModel:{residualPolicy:'SOURCE_EXHAUSTIVE'}}],blockedItems:[]};
+ const research:any={manifestVersion:'8.5',batchId:'b',machineId:'M',machineName:'M',findings:[{findingId:'f',label:'公開丸め表',observationType:'appearance_distribution',sourceIds:['s'],trialUniverse:'EVENT_TRIAL',settingDistribution:{'1':'A 54% / B 36% / C 4% / D 1% / E 2% / F 2% / G 2%','6':'A 34% / B 52% / C 4% / D 1% / E 2% / F 3% / G 3%'},categoryModel:{residualPolicy:'SOURCE_EXHAUSTIVE'}}],blockedItems:[]};
  const before=structuredClone(research.findings[0].settingDistribution);
  const d=buildEvaluation(research);
  assert.equal(d.evaluations[0].model,'CATEGORICAL');
