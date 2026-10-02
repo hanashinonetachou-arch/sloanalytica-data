@@ -1,4 +1,4 @@
-import {categoricalProbabilityRow,evidenceCategoryRecords} from './app-runtime-builder.ts';
+import {categoricalProbabilityRow,evidenceCategoryRecords,resolveEvidenceInputLinks} from './app-runtime-builder.ts';
 export const APP_RUNTIME_VALIDATOR_CONTRACT='app-runtime-v1';
 const canonical=(v:any):string=>Array.isArray(v)?'['+v.map(canonical).join(',')+']':v&&typeof v==='object'?'{'+Object.keys(v).sort().map(k=>JSON.stringify(k)+':'+canonical(v[k])).join(',')+'}':JSON.stringify(v);
 const fail=(m:string):never=>{throw new Error('APP_RUNTIME_VALIDATION_FAILED:'+m)};
@@ -12,13 +12,13 @@ export function validateAppRuntimeDocument(doc:any,projection:any,projectionArti
  if(projection.settings?.status!=='SOURCE_DERIVED'||!(projection.settings?.values?.length>0))fail('SETTINGS_REQUIRED');
  const p=doc.package;if(p?.schemaVersion!==1||p.machine?.machineId!==projection.machineId||p.machine?.displayName!==projection.machineName||p.machine?.machineDataVersion!=='8.5.0-'+projection.batchId)fail('MACHINE');
  if(canonical(p.machine?.settings)!==canonical(projection.settings.values)||canonical(p.metadata?.settings)!==canonical(projection.settings.values)||p.metadata?.settingsStatus!=='SOURCE_DERIVED')fail('SETTINGS_COPY');
- const expectedSections=projection.runtimeUi?.numericSections??[],active=projection.activeFeatures??[],inactive=projection.inactiveFeatures??[];
+ const expectedSections=projection.runtimeUi?.numericSections??[],active=projection.activeFeatures??[],inactive=projection.inactiveFeatures??[],links=resolveEvidenceInputLinks(projection);
  const expectedNumericInputs=expectedSections.flatMap((s:any)=>s.inputs??[]);
- const expectedEvidenceInputs=(projection.evidence??[]).flatMap((s:any)=>(s.evidenceItems??[]).flatMap((e:any)=>evidenceCategoryRecords(e).map((category:any,i:number)=>({id:`REF_${e.findingId}_${i+1}`,label:category.raw}))));
+ const expectedEvidenceInputs=(projection.evidence??[]).flatMap((s:any)=>(s.evidenceItems??[]).flatMap((e:any)=>evidenceCategoryRecords(e).flatMap((category:any,i:number)=>links.categoryInputIdByKey.has(String(e.findingId)+':'+i)?[]:[{id:`REF_${e.findingId}_${i+1}`,label:category.raw}])));
  const expectedInputs=[...expectedNumericInputs,...expectedEvidenceInputs];
  if(!Array.isArray(p.inputs?.inputs)||p.inputs.inputs.length!==expectedInputs.length)fail('INPUT_COVERAGE');
  const inputBy=new Map((p.inputs.inputs??[]).map((x:any)=>[x.id,x]));if(inputBy.size!==expectedInputs.length)fail('INPUT_DUPLICATE');
- for(const x of expectedNumericInputs){const a:any=inputBy.get(x.id);if(!a||a.name!==x.label||!['integer','counter'].includes(a.type))fail('INPUT:'+x.id)}
+ for(const x of expectedNumericInputs){const a:any=inputBy.get(x.id);if(!a||a.name!==x.label||!['integer','counter'].includes(a.type))fail('INPUT:'+x.id);if(['対象回数','回数','観測機会数','該当回数'].includes(String(a.name)))fail('ABSTRACT_INPUT_LABEL:'+x.id)}
  for(const x of expectedEvidenceInputs){const a:any=inputBy.get(x.id);if(!a||a.name!==x.label||a.type!=='counter'||a.inferenceRole!=='DISPLAY_ONLY'||a.unit!=='回')fail('EVIDENCE_INPUT:'+x.id)}
  if(!Array.isArray(p.features?.features)||p.features.features.length!==active.length)fail('FEATURE_COVERAGE');
  const featureBy=new Map((p.features.features??[]).map((x:any)=>[x.featureId,x]));
@@ -44,7 +44,7 @@ export function validateAppRuntimeDocument(doc:any,projection:any,projectionArti
  for(const s of (p.ui?.v8Sections??[]).filter((x:any)=>String(x.id??'').startsWith('OBS_'))){if(typeof s.description!=='string'||!s.description.trim())fail('NUMERIC_DESCRIPTION:'+s.id);if(s.descriptionPresentation?.collapsible!==true)fail('NUMERIC_DESCRIPTION_PRESENTATION:'+s.id);}
  const uiSections=p.ui?.v8Sections??[];const featureIds:string[]=[];const visit=(n:any)=>{if(n?.featureId)featureIds.push(n.featureId);for(const child of n?.inputs??[])visit(child)};for(const s of uiSections){for(const n of s.groups??[])visit(n);for(const n of s.items??[])visit(n)}
  const expectedFeatureIds=active.map((x:any)=>x.findingId).sort();if(canonical([...featureIds].sort())!==canonical(expectedFeatureIds))fail('UI_FEATURE_COVERAGE');
- const expectedEvidenceSectionIds=(projection.runtimeUi?.evidenceSections??[]).map((s:any)=>s.id).sort();const actualEvidenceSectionIds=uiSections.filter((s:any)=>String(s.id??'').startsWith('EVI_')).map((s:any)=>s.id).sort();if(canonical(actualEvidenceSectionIds)!==canonical(expectedEvidenceSectionIds))fail('UI_EVIDENCE_SECTION_COVERAGE');
+ const expectedEvidenceSectionIds=(projection.runtimeUi?.evidenceSections??[]).filter((s:any)=>(s.evidenceItems??[]).some((e:any)=>!links.linkedEvidenceIds.has(e.findingId))).map((s:any)=>s.id).sort();const actualEvidenceSectionIds=uiSections.filter((s:any)=>String(s.id??'').startsWith('EVI_')).map((s:any)=>s.id).sort();if(canonical(actualEvidenceSectionIds)!==canonical(expectedEvidenceSectionIds))fail('UI_EVIDENCE_SECTION_COVERAGE');
  const sectionIds=uiSections.map((s:any)=>s.id);if(new Set(sectionIds).size!==sectionIds.length)fail('UI_SECTION_DUPLICATE');
  if(canonical(p.evidence?.references)!==canonical(projection.evidence??[])||!Array.isArray(p.evidence?.evidences))fail('EVIDENCE_REFERENCE_COPY');
  const expectedEvidenceIds=(projection.evidence??[]).flatMap((s:any)=>(s.evidenceItems??[]).map((e:any)=>e.findingId));
@@ -55,7 +55,9 @@ export function validateAppRuntimeDocument(doc:any,projection:any,projectionArti
   const sourceId=Array.isArray(e.sourceEvidenceRefs)?e.sourceEvidenceRefs[0]:undefined;const src:any=evidenceSourceBy.get(sourceId);
   const hasConstraint=(Array.isArray(e.confirmedSettings)&&e.confirmedSettings.length>0)||(Array.isArray(e.deniedSettings)&&e.deniedSettings.length>0);
   if(!src||e.type!=='SETTING_CONSTRAINT'||typeof e.inputId!=='string'||!e.inputId||!Array.isArray(e.details)||e.details.length!==1||!hasConstraint||!Array.isArray(e.confirmedSettings)||!Array.isArray(e.deniedSettings))fail('EVIDENCE_DEFINITION');
-  const input:any=inputBy.get(e.inputId);if(!input||input.type!=='counter'||input.inferenceRole!=='DISPLAY_ONLY')fail('EVIDENCE_INPUT_BINDING');
+  const index=Number(String(e.id??'').split('__').pop())-1,linked=links.categoryInputIdByKey.get(String(sourceId)+':'+index),expectedInputId=linked??('REF_'+sourceId+'_'+(index+1));
+  if(!Number.isInteger(index)||index<0||e.inputId!==expectedInputId)fail('EVIDENCE_INPUT_LINK:'+String(sourceId));
+  const input:any=inputBy.get(e.inputId);if(!input||input.type!=='counter'||(!linked&&input.inferenceRole!=='DISPLAY_ONLY')||(linked&&input.inferenceRole==='DISPLAY_ONLY'))fail('EVIDENCE_INPUT_BINDING');
  }
  for(const s of (p.ui?.v8Sections??[]).filter((x:any)=>String(x.id??'').startsWith('EVI_'))){
   if(typeof s.description!=='string'||!s.description.trim()||/Evidence/i.test(s.description))fail('EVIDENCE_UI_RENDERABLE');
