@@ -1,6 +1,6 @@
 import test from 'node:test';import assert from 'node:assert/strict';import {buildAppRuntime} from '../src/app-runtime-builder.ts';import {validateAppRuntimeDocument} from '../src/app-runtime-validator.ts';
 const ref={path:'p'};
-const base={batchId:'batch-x',machineId:'M',machineName:'Machine',activeFeatures:[],inactiveFeatures:[],settings:{status:'SOURCE_DERIVED',values:['SET_1','SET_2']},packagePolicy:{offlineCapable:true},evidence:[],heldObservations:[{findingId:'h',label:'Held',status:'HELD_NO_JOINT_MODEL'}],highLowDiscrimination:{status:'NOT_COMPUTED',reason:'x'},runtimeUi:{schemaVersion:'canonical-ui-v1',playInfo:{visible:true,useDifference:{label:'着席時との差分を使用'}},numericSections:[],evidenceSections:[]}};
+const base={batchId:'batch-x',machineId:'M',machineName:'Machine',activeFeatures:[],inactiveFeatures:[],settings:{status:'SOURCE_DERIVED',values:['SET_1','SET_2']},packagePolicy:{offlineCapable:true},evidence:[],heldObservations:[{findingId:'h',label:'Held',status:'HELD_NO_JOINT_MODEL'}],highLowDiscrimination:{status:'NOT_COMPUTED',reason:'x'},runtimeUi:{schemaVersion:'canonical-ui-v1',playInfo:{visible:true,mode:'NONE',useDifference:{label:'着席時との差分を使用'}},numericSections:[],evidenceSections:[]}};
 test('builds app-compatible reference-only package',()=>{const d=buildAppRuntime(base,ref);assert.equal(d.package.schemaVersion,1);assert.equal(d.package.ui.contractVersion,'runtime-ui-v8');assert.equal(d.package.features.features.length,0);assert.doesNotThrow(()=>validateAppRuntimeDocument(d,base,ref))});
 test('fails closed for unresolved settings',()=>{assert.throws(()=>buildAppRuntime({...base,settings:{status:'UNRESOLVED',values:[]}},ref),/SETTINGS_REQUIRED/)});
 test('materializes active Bernoulli feature and play-data binding',()=>{const p:any={...base,activeFeatures:[{findingId:'f',name:'CZ初当り',model:'BERNOULLI',trialUniverse:'NORMAL_GAME_TRIAL',settingDistribution:{'1':'1/200','2':'1/150'},runtimePolicyBinding:{metric:'PER_ELIGIBLE_TRIAL_POWER',value:2},score:{status:'NOT_COMPUTED'}}],runtimeUi:{...base.runtimeUi,numericSections:[{id:'OBS_f',sourceFindingId:'f',title:'CZ初当り',inputs:[{id:'f.eligibleTrialCount',label:'確認した回数',role:'trial',quickAdd:[50]},{id:'f.successCount',label:'該当した回数',role:'success',quickAdd:[1]}]}]}};const d=buildAppRuntime(p,ref);assert.equal(d.package.features.features[0].modelType,'binomial');assert.equal(d.package.inputs.inputs.length,2);assert.equal(d.package.ui.v8Sections[0].items[0].inputs[0].label,'確認した回数');assert.equal(d.package.ui.v8Sections[0].items[0].inputs[1].label,'該当した回数');assert.equal(d.package.ui.v8Sections[0].items[0].inputs[0].playDataBinding.source,'PLAY_NORMAL_GAME_DELTA');assert.doesNotThrow(()=>validateAppRuntimeDocument(d,p,ref))});
@@ -77,17 +77,17 @@ test('structured Evidence categories survive to UI and only exact categories con
 test('shows only the formal metric appropriate to the feature',()=>{
  const p:any={...base,activeFeatures:[{findingId:'f',name:'初当り',model:'BERNOULLI',trialUniverse:'NORMAL_GAME_TRIAL',settingDistribution:{'1':'1/200','2':'1/150'},runtimePolicyBinding:{metric:'SELECTION_SCORE',value:12},score:{status:'COMPUTED',value:12}}],runtimeUi:{...base.runtimeUi,numericSections:[{id:'OBS_f',sourceFindingId:'f',title:'初当り',score:{status:'COMPUTED',value:12},perEligibleTrialPower:{value:12},inputs:[{id:'f.eligibleTrialCount',label:'確認した回数',role:'trial'},{id:'f.successCount',label:'該当した回数',role:'success'}]}]}};
  const d=buildAppRuntime(p,ref);const description=d.package.ui.v8Sections[0].description;
- assert.doesNotMatch(description,/設定判別スコア|1回の判別力/);assert.match(description,/・数えるもの：/);
+ assert.doesNotMatch(description,/設定判別スコア|1回の判別力|・数えるもの：|・基準：/);assert.match(description,/同じ観測の母数と該当数/);
 });
 
 
 test('reuses one categorical input for exact Evidence when mapping is unambiguous',()=>{
- const numeric={id:'OBS_reg',sourceFindingId:'reg',title:'REG中キャラ紹介シナリオの設定別選択率',model:'CATEGORICAL',trialUniverse:'REG_CHARACTER_SCENARIO_TRIAL',description:'・数えるもの：REG中キャラ紹介シナリオ\n・入力方法：REGごとに最後まで確認し、該当シナリオを1回加算します',inputs:[
+ const numeric={id:'OBS_reg',sourceFindingId:'reg',title:'REG中キャラ紹介シナリオの設定別選択率',model:'CATEGORICAL',trialUniverse:'REG_CHARACTER_SCENARIO_TRIAL',description:'REGごとにキャラ紹介を最後まで確認し、表示されたシナリオを1回加算して記録します。',inputs:[
   {id:'reg.eligibleTrialCount',label:'REGを最後まで確認した回数',role:'trial'},
   {id:'reg.categoryCounts.1',label:'アイリス①（1人目まもるくん・設定1否定）',role:'categoryCount'},
   {id:'reg.categoryCounts.2',label:'アイリス⑥（まもるくん無し・設定6濃厚）',role:'categoryCount'}
  ]};
- const ev={id:'EVI_mamoru',sourceFindingId:'mamoru',title:'REGキャラ・まもるくん',trialUniverse:'REG_CHARACTER_SCENARIO_TRIAL',description:'・数えるもの：REGキャラ・まもるくん',evidenceItems:[{findingId:'mamoru',label:'REGキャラ・まもるくん',trialUniverse:'REG_CHARACTER_SCENARIO_TRIAL',semanticType:'EXACT_CONSTRAINT',semanticCategories:[
+ const ev={id:'EVI_mamoru',sourceFindingId:'mamoru',title:'REGキャラ・まもるくん',trialUniverse:'REG_CHARACTER_SCENARIO_TRIAL',description:'REG中のキャラ紹介で、まもるくんの出現パターンを記録します。',evidenceItems:[{findingId:'mamoru',label:'REGキャラ・まもるくん',trialUniverse:'REG_CHARACTER_SCENARIO_TRIAL',semanticType:'EXACT_CONSTRAINT',semanticCategories:[
   {label:'1人目にまもるくん',meaning:'設定1否定',semanticType:'EXACT_CONSTRAINT'},
   {label:'まもるくん無し（全員アイリス）',meaning:'設定6濃厚',semanticType:'EXACT_CONSTRAINT'}
  ]}]};

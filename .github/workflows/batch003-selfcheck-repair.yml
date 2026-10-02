@@ -112,14 +112,36 @@ jobs:
             ].filter(Boolean).join(' ');
             if(/likelihood|source-supported|joint|conditional|categorical|candidate contract|runtime policy|research|evaluation/i.test(visibleSummaryText))fail('INTERNAL_WORDING:'+id);
             const abstractLabels=new Set(['対象回数','回数','観測機会数','該当回数']);
+            const compact=v=>String(v??'').normalize('NFKC').replace(/[\\s・：:「」『』（）()、,.。．!?！？]/g,'').trim();
+            const restates=(description,label)=>{const d=compact(description).replace(/数えるもの|入力方法|基準|記録します|入力します|確認します|回数|ゲーム数/g,''),l=compact(label).replace(/回数|ゲーム数/g,'');return Boolean(d&&l&&(d===l||(Math.min(d.length,l.length)>=4&&(d.includes(l)||l.includes(d))&&Math.min(d.length,l.length)/Math.max(d.length,l.length)>=0.85)))};
             for(const input of pkg.inputs?.inputs??[])if(input.category==='V8_NUMERIC'&&abstractLabels.has(String(input.name)))fail('ABSTRACT_NUMERIC_LABEL:'+id+':'+input.id);
             for(const section of (pkg.ui?.v8Sections??[]).filter(x=>String(x.id).startsWith('OBS_'))){
               const description=String(section.description??'');
+              if(!description.trim())fail('DESCRIPTION_MISSING:'+id+':'+section.title);
               if(/設定判別スコア|1回の判別力/.test(description))fail('METRIC_IN_DESCRIPTION:'+id+':'+section.title);
               if(/Evidence|denominator|trial universe|Candidate Contract|Runtime Policy|Opportunity model|joint model/i.test(description))fail('INTERNAL_DESCRIPTION_WORDING:'+id+':'+section.title);
-              if(!String(section.id).startsWith('OBS_SHARED_')&&!/・数えるもの：/.test(description))fail('COUNT_GUIDANCE_MISSING:'+id+':'+section.title);
-              for(const item of section.items??[])if(item.description&&!/・数えるもの：/.test(item.description))fail('ITEM_COUNT_GUIDANCE_MISSING:'+id+':'+(item.title??item.id));
+              if(/・数えるもの：|・基準：/.test(description))fail('MECHANICAL_DESCRIPTION:'+id+':'+section.title);
+              for(const node of [...(section.groups??[]),...(section.items??[])]){
+                for(const input of node.inputs??[]){
+                  if(abstractLabels.has(String(input.label??'')))fail('ABSTRACT_UI_INPUT:'+id+':'+input.id);
+                  if(restates(description,input.label))fail('DESCRIPTION_INPUT_RESTATEMENT:'+id+':'+input.id);
+                }
+              }
             }
+            const features=pkg.features?.features??[];
+            const universes=features.map(x=>String(x.trialUniverse??''));
+            const needsNormal=universes.some(x=>x==='NORMAL_GAME_TRIAL'||x==='BONUS_ELIGIBLE_GAME_TRIAL');
+            const needsExcluded=universes.some(x=>x==='LOTIS_NON_CHAIN_GAME_TRIAL'||x==='NON_CHAIN_BONUS_INITIAL_GAME_TRIAL');
+            const needsTotal=needsExcluded||universes.includes('TOTAL_GAME_TRIAL');
+            const expectedMode=needsTotal&&needsNormal?'TOTAL_AND_NORMAL':needsTotal?'TOTAL_ONLY':needsNormal?'NORMAL_ONLY':'NONE';
+            const playInfo=pkg.ui?.playInfo??{};
+            if(playInfo.mode!==expectedMode)fail('PLAY_INFO_MODE:'+id+':'+playInfo.mode+':'+expectedMode);
+            const start=(playInfo.startFields??[]).map(x=>x.label);
+            const current=(playInfo.currentFields??[]).map(x=>x.label);
+            const expectedStart=[...(needsTotal?['着席時 総ゲーム数']:[]),...(needsNormal?['着席時 通常ゲーム数']:[])];
+            const expectedCurrent=[...(needsTotal?['現在 総ゲーム数']:[]),...(needsNormal?['現在 通常ゲーム数']:[])];
+            if(JSON.stringify(start)!==JSON.stringify(expectedStart)||JSON.stringify(current)!==JSON.stringify(expectedCurrent))fail('PLAY_INFO_UNUSED_OR_MISSING:'+id);
+            if(Boolean(playInfo.exclusionGames?.visible===true)!==needsExcluded)fail('PLAY_INFO_EXCLUSION:'+id);
             for(const r of pkg.features?.runtimeProjection??[]){
               if(r.runtimeStatus==='ACTIVE'&&r.metric==='SELECTION_SCORE'&&r.importance!==expectedImportance(Number(r.metricValue)))fail('IMPORTANCE_RAW_THRESHOLD:'+id+':'+r.featureId);
             }

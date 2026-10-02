@@ -18,17 +18,31 @@ const knownTrialLabel=(u:any)=>{
 };
 const normalizeTrialLabel=(raw:any)=>{
  let s=clean(raw).replace(/^通常時ゲーム数$/,'通常ゲーム数').replace(/^通常時のゲーム数$/,'通常ゲーム数');
- s=s.replace(/抽選機会$/,'抽選を受けた回数').replace(/確認機会$/,'確認した回数').replace(/機会$/,'回数');
+ s=s.replace(/抽選機会$/,'抽選回数').replace(/確認機会$/,'確認回数').replace(/を受けた回数$/,'回数').replace(/を確認した回数$/,'回数').replace(/機会$/,'回数');
  return s;
 };
 const normalizeSuccessLabel=(raw:any,fallback:any)=>{
  let s=clean(raw).replace(/^そのうち[、,]?/,'').replace(/を数える$/,'').replace(/を記録する$/,'');
  if(!s)s=clean(fallback);
- s=s.replace(/の設定別(?:選択率|振り分け)$/,'').replace(/設定別(?:選択率|振り分け)$/,'').replace(/発生率$/,'発生回数').replace(/選択率$/,'選択回数').replace(/獲得率$/,'獲得回数').replace(/移行率$/,'移行回数').replace(/当選率$/,'当選回数');
+ s=s.replace(/エピソードボーナス/g,'EPボーナス').replace(/の設定別(?:選択率|振り分け)$/,'').replace(/設定別(?:選択率|振り分け)$/,'').replace(/発生率$/,'発生回数').replace(/選択率$/,'選択回数').replace(/獲得率$/,'獲得回数').replace(/移行率$/,'移行回数').replace(/当選率$/,'当選回数');
  if(/確率$/.test(s))s=s.replace(/確率$/,'回数');
  if(!/(?:回数|ゲーム数|G数)$/.test(s))s+='回数';
  return s;
 };
+const sharedContextBoundary=(title:string,label:string)=>{
+ const max=Math.min(title.length,label.length);let i=0;while(i<max&&title[i]===label[i])i++;
+ const prefix=label.slice(0,i);let cut=-1;
+ for(const token of ['の','時','中','後']){const p=prefix.lastIndexOf(token);if(p>=2)cut=Math.max(cut,p+token.length)}
+ return cut;
+};
+const compactContextualInputLabel=(raw:any,sectionTitle:any)=>{
+ let label=clean(raw).replace(/エピソードボーナス/g,'EPボーナス');
+ const title=clean(sectionTitle).replace(/エピソードボーナス/g,'EPボーナス');
+ const cut=sharedContextBoundary(title,label);if(cut>0&&label.length-cut>=2)label=label.slice(cut).replace(/^の/,'');
+ label=label.replace(/を受けた回数$/,'回数').replace(/を確認した回数$/,'回数');
+ return label||clean(raw);
+};
+const countSubject=(label:string)=>label.replace(/回数$/,'').replace(/ゲーム数$/,'ゲーム').replace(/G数$/,'G');
 const semanticNotes=(o:any)=>{
  const ss=sentences(o?.denominatorSemantics);if(!ss.length)return [];
  const first=ss[0],against=first.match(/^(.+?)に対する[、,]?(.+)$/);
@@ -47,6 +61,7 @@ export function deriveObservationInputLabels(o:any){
  }
  if(!trial||ABSTRACT_INPUT_LABELS.has(trial))trial=normalizeTrialLabel((o?.label??'観測内容')+'を確認した回数');
  if(!success||ABSTRACT_INPUT_LABELS.has(success))success=normalizeSuccessLabel('',o?.label);
+ trial=compactContextualInputLabel(trial,o?.label);success=compactContextualInputLabel(success,o?.label);
  return {trialLabel:trial,successLabel:success};
 }
 const isSettingMeaning=(s:string)=>/設定[1-6]|高設定|低設定|奇数|偶数|示唆|濃厚|否定/.test(s);
@@ -56,24 +71,33 @@ const categoricalSubject=(label:any)=>clean(label).replace(/の設定別(?:選�
 export function buildObservationDescription(o:any,model:any,residualPolicy:any){
  const labels=deriveObservationInputLabels(o),lines:string[]=[];
  if(model==='CATEGORICAL'){
-  lines.push('・数えるもの：'+categoricalSubject(o?.label));
-  const reason=clean(o?.liveObservation?.reason);
-  lines.push('・入力方法：'+(reason||'確認するたび、該当する項目を1回加算します'));
-  if(!['SOURCE_EXHAUSTIVE','SOURCE_EXPLICIT_OTHER'].includes(String(residualPolicy??'')))lines.push('・基準：'+labels.trialLabel);
+  const subject=categoricalSubject(o?.label),reason=clean(o?.liveObservation?.reason);
+  if(reason&&!/^(確認するたび|該当する項目)/.test(reason))lines.push(reason+'。');
+  else lines.push(subject+'を確認したときに、該当する項目を1回加算して記録します。');
+  if(!['SOURCE_EXHAUSTIVE','SOURCE_EXPLICIT_OTHER'].includes(String(residualPolicy??'')))lines.push('確認した全体回数も記録し、その中で各項目がどれだけ出たかを比較します。');
+ }else if(labels.trialLabel==='通常ゲーム数'){
+  lines.push('通常時の'+countSubject(labels.successLabel)+'を記録します。通常ゲーム数を基準に、実戦中の出現割合を設定別に比較します。');
+ }else if(labels.trialLabel==='総ゲーム数'){
+  lines.push(countSubject(labels.successLabel)+'を記録します。総ゲーム数を基準に、実戦中の出現割合を設定別に比較します。');
  }else{
-  lines.push('・数えるもの：'+labels.successLabel);
-  lines.push('・基準：'+labels.trialLabel);
+  lines.push('「'+labels.trialLabel+'」を対象数として、そのうち「'+labels.successLabel+'」に該当した回数を記録します。2つの入力は同じ観測の母数と該当数です。');
  }
  const notes=unique([...semanticNotes(o),...operationalDetails(o)]).slice(0,2);
  for(const note of notes)lines.push('・注意：'+note);
  return lines.join('\n');
+}
+export function derivePlayInfoRequirement(trialUniverses:Iterable<string>){
+ const values=[...trialUniverses].map(String);const normalUniverses=new Set(['NORMAL_GAME_TRIAL','BONUS_ELIGIBLE_GAME_TRIAL']);const excludedTotalUniverses=new Set(['LOTIS_NON_CHAIN_GAME_TRIAL','NON_CHAIN_BONUS_INITIAL_GAME_TRIAL']);
+ const needsNormal=values.some(x=>normalUniverses.has(x));const needsExcludedGames=values.some(x=>excludedTotalUniverses.has(x));const needsTotal=needsExcludedGames||values.includes('TOTAL_GAME_TRIAL');
+ const mode=needsTotal&&needsNormal?'TOTAL_AND_NORMAL':needsTotal?'TOTAL_ONLY':needsNormal?'NORMAL_ONLY':'NONE';
+ return {mode,needsTotal,needsNormal,needsExcludedGames};
 }
 function evidenceDescription(x:any){
  const categories=Array.isArray(x?.semanticCategories)?x.semanticCategories:[];
  const categoryText=new Set(categories.flatMap((c:any)=>[clean(c?.label),clean([c?.label,c?.meaning].filter(Boolean).join('：'))]));
  const details=(Array.isArray(x?.details)?x.details:[]).filter((v:any)=>typeof v==='string'&&v.trim()).map(clean).filter((v:string)=>!categoryText.has(v)&&!/同じ.+(?:数値入力|別欄).*(?:1回|入力)|重ねて入力/.test(v));
  const types=[...new Set(categories.map((c:any)=>c?.semanticType??x?.semanticType).filter(Boolean))];
- const lines=['・数えるもの：'+clean(x?.label),'・入力方法：確認するたび、該当する項目を1回加算します'];
+ const lines=[clean(x?.label)+'を確認したときに、該当する項目を1回加算して記録します。'];
  for(const d of unique(details).slice(0,2))lines.push('・注意：'+d);
  if(types.includes('EXACT_CONSTRAINT'))lines.push('・反映：設定確定・設定否定の条件は、設定候補の絞り込みに自動反映します');
  if(types.some((t:any)=>t==='PROBABILITY_UNKNOWN'||t==='DISPLAY_ONLY'))lines.push('・反映：設定別出現率が未確認の項目は記録のみです。出現率確認後は設定推測へ反映できる可能性があります');
@@ -93,12 +117,12 @@ export function buildCanonicalUi(candidate:any,observation:any,evaluation:any,ca
   }else throw new Error('CANONICAL_UI_COLLECTION_UNSUPPORTED:'+o.findingId);
   return {id:'OBS_'+o.findingId,sourceFindingId:o.findingId,title:o.label,kind:'NUMERIC_OBSERVATION',model:o.model,trialUniverse:o.trialUniverse,description:buildObservationDescription(o,o.model,e.categoryModel?.residualPolicy),collapsible:true,defaultExpanded:false,descriptionPresentation:{collapsible:true,label:'説明',defaultExpanded:false},score:scoreView(e),perEligibleTrialPower:{label:'1回の判別力',value:c.runtimePolicyBinding.value,metric:'PER_ELIGIBLE_TRIAL_POWER',thresholdSource:'RUNTIME_POLICY'},inputs};
  });
- const trialUniverses=new Set(numericSections.map((x:any)=>String(x.trialUniverse)));const commonNormalGameUniverses=new Set(['NORMAL_GAME_TRIAL','BONUS_ELIGIBLE_GAME_TRIAL']);const playInfoMode=[...trialUniverses].some(x=>commonNormalGameUniverses.has(x))?'TOTAL_AND_NORMAL':'TOTAL_ONLY';const needsExcludedGames=[...trialUniverses].some(x=>['LOTIS_NON_CHAIN_GAME_TRIAL','NON_CHAIN_BONUS_INITIAL_GAME_TRIAL'].includes(x));
+ const trialUniverses=new Set(numericSections.map((x:any)=>String(x.trialUniverse)));const playInfoRequirement=derivePlayInfoRequirement(trialUniverses);const playInfoMode=playInfoRequirement.mode;const needsExcludedGames=playInfoRequirement.needsExcludedGames;
  const evidenceSections=(observation.evidence??[]).map((x:any)=>{
   const details=Array.isArray(x.details)?x.details.filter((v:any)=>typeof v==='string'&&v.trim()):[];
   return {id:'EVI_'+x.findingId,sourceFindingId:x.findingId,title:x.label,kind:'EVIDENCE',trialUniverse:x.trialUniverse,collapsible:true,defaultExpanded:false,description:evidenceDescription(x),descriptionPresentation:{collapsible:true,label:'説明',defaultExpanded:false},runtimePolicyControlled:false,evidenceItems:[{findingId:x.findingId,label:x.label,sourceIds:x.sourceIds??[],trialUniverse:x.trialUniverse,denominatorSemantics:x.denominatorSemantics,details,semanticType:x.semanticType,semanticCategories:x.semanticCategories,settingDistribution:x.settingDistribution,runtimePolicyControlled:false,status:x.status,interaction:'REFERENCE_ONLY'}]};
  });
  const dependencyGroupByFindingId=new Map<string,any>();for(const group of candidate.dependencyGroups??[])for(const findingId of group.members??[])dependencyGroupByFindingId.set(findingId,group);
  const heldObservations=(observation.observations??[]).filter((o:any)=>o.observationStatus==='HELD_NO_JOINT_MODEL').map((o:any)=>{const group=dependencyGroupByFindingId.get(o.findingId);return {findingId:o.findingId,label:o.label,status:o.observationStatus,materialized:false,reason:group?.reason,reevaluationCondition:group?.reevaluationCondition}});
- return {schemaVersion:'canonical-ui-v1',manifestVersion:'8.5',batchId:candidate.batchId,machineId:candidate.machineId,machineName:candidate.machineName,sourceArtifacts:{candidateContract:candidateArtifact,observationEvidence:observationArtifact,evaluation:evaluationArtifact},machineInferenceSummary:{title:'この機種の設定推測について',position:'TOP_ONLY',highLowDiscrimination:observation.highLowDiscrimination},playInfo:{visible:true,collapsible:false,mode:playInfoMode,sessionFields:[{id:'date',label:'日付',mode:'DATE'},{id:'storeName',label:'店舗名',mode:'TEXT'},{id:'machineNumber',label:'台番号',mode:'TEXT'}],startFields:[{id:'startTotalGames',label:'着席時 総ゲーム数',mode:'NUMBER',directNumeric:true},...(playInfoMode==='TOTAL_AND_NORMAL'?[{id:'startNormalGames',label:'着席時 通常ゲーム数',mode:'NUMBER',directNumeric:true}]:[])],currentFields:[{id:'currentTotalGames',label:'現在 総ゲーム数',mode:'NUMBER',directNumeric:true},...(playInfoMode==='TOTAL_AND_NORMAL'?[{id:'currentNormalGames',label:'現在 通常ゲーム数',mode:'NUMBER',directNumeric:true}]:[])],difference:{autoCalculate:true},useDifference:{label:'着席時との差分を使用',defaultWhenStartNormalGamesPresent:true},...(needsExcludedGames?{exclusionGames:{visible:true,label:'除外ゲーム数（連荘中のゲーム数）'}}:{})},accordion:{enabled:true,singleOpen:true},numericSections,evidenceSections,heldObservations,layoutRules:{hideEmptySections:true,twoColumnWhen:{minimumNumericSections:2,minimumEvidenceSections:2},quickAddPolicy:[1,50],directNumericRequired:true},inputRules:{partialInputAllowed:true,missingSubItemTreatment:'ZERO_WHEN_PARENT_OBSERVED'},importanceVocabulary:[...IMPORTANCE_LABELS]};
+ return {schemaVersion:'canonical-ui-v1',manifestVersion:'8.5',batchId:candidate.batchId,machineId:candidate.machineId,machineName:candidate.machineName,sourceArtifacts:{candidateContract:candidateArtifact,observationEvidence:observationArtifact,evaluation:evaluationArtifact},machineInferenceSummary:{title:'この機種の設定推測について',position:'TOP_ONLY',highLowDiscrimination:observation.highLowDiscrimination},playInfo:{visible:true,collapsible:false,mode:playInfoMode,sessionFields:[{id:'date',label:'日付',mode:'DATE'},{id:'storeName',label:'店舗名',mode:'TEXT'},{id:'machineNumber',label:'台番号',mode:'TEXT'}],startFields:[...(playInfoRequirement.needsTotal?[{id:'startTotalGames',label:'着席時 総ゲーム数',mode:'NUMBER',directNumeric:true}]:[]),...(playInfoRequirement.needsNormal?[{id:'startNormalGames',label:'着席時 通常ゲーム数',mode:'NUMBER',directNumeric:true}]:[])],currentFields:[...(playInfoRequirement.needsTotal?[{id:'currentTotalGames',label:'現在 総ゲーム数',mode:'NUMBER',directNumeric:true}]:[]),...(playInfoRequirement.needsNormal?[{id:'currentNormalGames',label:'現在 通常ゲーム数',mode:'NUMBER',directNumeric:true}]:[])],difference:{autoCalculate:true},useDifference:{label:'着席時との差分を使用',defaultWhenStartNormalGamesPresent:true},...(needsExcludedGames?{exclusionGames:{visible:true,label:'除外ゲーム数（連荘中のゲーム数）'}}:{})},accordion:{enabled:true,singleOpen:true},numericSections,evidenceSections,heldObservations,layoutRules:{hideEmptySections:true,twoColumnWhen:{minimumNumericSections:2,minimumEvidenceSections:2},quickAddPolicy:[1,50],directNumericRequired:true},inputRules:{partialInputAllowed:true,missingSubItemTreatment:'ZERO_WHEN_PARENT_OBSERVED'},importanceVocabulary:[...IMPORTANCE_LABELS]};
 }

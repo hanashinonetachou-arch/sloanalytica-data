@@ -1,3 +1,4 @@
+import {derivePlayInfoRequirement} from './canonical-ui-builder.ts';
 export const RUNTIME_PROJECTION_VALIDATOR_CONTRACT='runtime-projection-v1';
 const canonical=(v:any):string=>Array.isArray(v)?'['+v.map(canonical).join(',')+']':v&&typeof v==='object'?'{'+Object.keys(v).sort().map(k=>JSON.stringify(k)+':'+canonical(v[k])).join(',')+'}':JSON.stringify(v);
 const fail=(m:string):never=>{throw new Error('RUNTIME_PROJECTION_VALIDATION_FAILED:'+m)};
@@ -20,6 +21,15 @@ export function validateRuntimeProjectionDocument(doc:any,machineData:any,policy
   const activeIds=new Set(expectedActive.map((x:any)=>x.findingId));
   const expectedUi=structuredClone(machineData.uiContract);
   expectedUi.numericSections=(expectedUi.numericSections??[]).filter((x:any)=>activeIds.has(x.sourceFindingId));
+  const playRequirement=derivePlayInfoRequirement((expectedUi.numericSections??[]).map((x:any)=>String(x.trialUniverse)));
+  if(expectedUi.playInfo){
+    expectedUi.playInfo.mode=playRequirement.mode;
+    expectedUi.playInfo.startFields=(expectedUi.playInfo.startFields??[]).filter((x:any)=>playRequirement.needsTotal?x.id==='startTotalGames':playRequirement.needsNormal?x.id==='startNormalGames':false);
+    if(playRequirement.needsTotal&&playRequirement.needsNormal)expectedUi.playInfo.startFields=(machineData.uiContract?.playInfo?.startFields??[]).filter((x:any)=>x.id==='startTotalGames'||x.id==='startNormalGames');
+    expectedUi.playInfo.currentFields=(expectedUi.playInfo.currentFields??[]).filter((x:any)=>playRequirement.needsTotal?x.id==='currentTotalGames':playRequirement.needsNormal?x.id==='currentNormalGames':false);
+    if(playRequirement.needsTotal&&playRequirement.needsNormal)expectedUi.playInfo.currentFields=(machineData.uiContract?.playInfo?.currentFields??[]).filter((x:any)=>x.id==='currentTotalGames'||x.id==='currentNormalGames');
+    if(!playRequirement.needsExcludedGames)delete expectedUi.playInfo.exclusionGames;
+  }
   if(canonical(doc.runtimeUi)!==canonical(expectedUi)) fail('UI_PROJECTION');
   if(canonical(doc.evidence)!==canonical(machineData.evidence??[])||(doc.evidence??[]).some((x:any)=>x.runtimePolicyControlled!==false)) fail('EVIDENCE_COPY');
   if(canonical(doc.heldObservations)!==canonical(machineData.heldObservations??[])) fail('HELD_COPY');

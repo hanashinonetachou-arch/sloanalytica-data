@@ -40,8 +40,8 @@ export function validateAppRuntimeDocument(doc:any,projection:any,projectionArti
  for(const x of active){const rp:any=rpBy.get(x.findingId);if(rp?.runtimeStatus!=='ACTIVE')fail('RUNTIME_ACTIVE:'+x.findingId);if(!importanceVocabulary.has(rp?.importance))fail('RUNTIME_IMPORTANCE:'+x.findingId);}
  for(const x of inactive)if(rpBy.get(x.findingId)?.runtimeStatus!=='INACTIVE')fail('RUNTIME_INACTIVE:'+x.findingId);
  if(p.ui?.contractVersion!=='runtime-ui-v8'||p.ui?.source!=='CANONICAL_UI'||p.ui?.sourceSchemaVersion!==projection.runtimeUi?.schemaVersion||p.ui?.accordion?.singleOpen!==true||p.ui?.quickInput?.enabled!==false)fail('UI_HEADER');
- if(p.ui?.playInfo?.visible!==true||!p.ui?.playInfo?.useDifference)fail('UI_PLAY_INFO');
- for(const s of (p.ui?.v8Sections??[]).filter((x:any)=>String(x.id??'').startsWith('OBS_'))){if(typeof s.description!=='string'||!s.description.trim())fail('NUMERIC_DESCRIPTION:'+s.id);if(s.descriptionPresentation?.collapsible!==true)fail('NUMERIC_DESCRIPTION_PRESENTATION:'+s.id);}
+ if(p.ui?.playInfo?.visible!==true||!p.ui?.playInfo?.useDifference||canonical(p.ui?.playInfo)!==canonical(projection.runtimeUi?.playInfo))fail('UI_PLAY_INFO_COPY');if(!['TOTAL_ONLY','NORMAL_ONLY','TOTAL_AND_NORMAL','NONE'].includes(String(p.ui?.playInfo?.mode??'')))fail('UI_PLAY_INFO_MODE');
+ for(const s of (p.ui?.v8Sections??[]).filter((x:any)=>String(x.id??'').startsWith('OBS_'))){if(typeof s.description!=='string'||!s.description.trim())fail('NUMERIC_DESCRIPTION:'+s.id);if(/・数えるもの：|・基準：|opportunity model|candidate contract|runtime policy|denominator|benchmark/i.test(s.description))fail('NUMERIC_DESCRIPTION_RESPONSIBILITY:'+s.id);if(s.descriptionPresentation?.collapsible!==true)fail('NUMERIC_DESCRIPTION_PRESENTATION:'+s.id);}
  const uiSections=p.ui?.v8Sections??[];const featureIds:string[]=[];const visit=(n:any)=>{if(n?.featureId)featureIds.push(n.featureId);for(const child of n?.inputs??[])visit(child)};for(const s of uiSections){for(const n of s.groups??[])visit(n);for(const n of s.items??[])visit(n)}
  const expectedFeatureIds=active.map((x:any)=>x.findingId).sort();if(canonical([...featureIds].sort())!==canonical(expectedFeatureIds))fail('UI_FEATURE_COVERAGE');
  const expectedEvidenceSectionIds=(projection.runtimeUi?.evidenceSections??[]).filter((s:any)=>(s.evidenceItems??[]).some((e:any)=>!links.linkedEvidenceIds.has(e.findingId))).map((s:any)=>s.id).sort();const actualEvidenceSectionIds=uiSections.filter((s:any)=>String(s.id??'').startsWith('EVI_')).map((s:any)=>s.id).sort();if(canonical(actualEvidenceSectionIds)!==canonical(expectedEvidenceSectionIds))fail('UI_EVIDENCE_SECTION_COVERAGE');
@@ -60,7 +60,7 @@ export function validateAppRuntimeDocument(doc:any,projection:any,projectionArti
   const input:any=inputBy.get(e.inputId);if(!input||input.type!=='counter'||(!linked&&input.inferenceRole!=='DISPLAY_ONLY')||(linked&&input.inferenceRole==='DISPLAY_ONLY'))fail('EVIDENCE_INPUT_BINDING');
  }
  for(const s of (p.ui?.v8Sections??[]).filter((x:any)=>String(x.id??'').startsWith('EVI_'))){
-  if(typeof s.description!=='string'||!s.description.trim()||/Evidence/i.test(s.description))fail('EVIDENCE_UI_RENDERABLE');
+  if(typeof s.description!=='string'||!s.description.trim()||/Evidence|・数えるもの：|・基準：|opportunity model|candidate contract|runtime policy|denominator|benchmark/i.test(s.description))fail('EVIDENCE_UI_RENDERABLE');
   const item=(s.items??[])[0];if(item?.interaction?.type!=='CATEGORY_COUNTERS'||item?.interaction?.categoryCoverage!=='NON_EXHAUSTIVE'||item?.interaction?.totalOpportunities!=='NONE'||!Array.isArray(item?.interaction?.categories)||item.interaction.categories.length===0)fail('EVIDENCE_UI_INPUT');
  }
  const summary=p.v8?.machineResearchSummary;if(!summary)fail('V8_SUMMARY');
