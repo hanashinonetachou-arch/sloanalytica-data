@@ -36,13 +36,6 @@ jobs:
         run: |
           set -euo pipefail
           machines=(
-            L_GUNDAM_UNICORN_KAKUSEI_DRIVE_2JA
-            L_MILLION_GOD_KISEKI_CX
-            L_AKUDAMA_DRIVE_TP
-            L_KYOKOU_SUIRI_ST
-            L_SHINUCHI_YOSHIMUNE_A1
-            LB_TRIPLE_CROWN_SEVEN_FG
-            L_JORMUNGAND_ND01G
             L_KABANERI_UNATO_KESSEN_XX
             L_UMINEKO_2_A1
             L_FIRE_FORCE_2
@@ -51,17 +44,16 @@ jobs:
             node --experimental-strip-types src/invalidate-machine-downstream.ts batch-20261002-003 "$machine" --include-research
           done
 
-      - name: Rematerialize all ten researched machines
+      - name: Rematerialize the three audited machines
         working-directory: production
         shell: bash
         run: |
           set -euo pipefail
-          wave1=(L_GUNDAM_UNICORN_KAKUSEI_DRIVE_2JA L_MILLION_GOD_KISEKI_CX L_AKUDAMA_DRIVE_TP L_KYOKOU_SUIRI_ST L_SHINUCHI_YOSHIMUNE_A1)
-          wave2=(LB_TRIPLE_CROWN_SEVEN_FG L_JORMUNGAND_ND01G L_KABANERI_UNATO_KESSEN_XX L_UMINEKO_2_A1 L_FIRE_FORCE_2)
-          for machine in "${wave1[@]}"; do node --experimental-strip-types src/materialize-research-drafts.ts batch-20261002-003 wave-1 --force-machine="$machine" --force-only; done
-          for machine in "${wave2[@]}"; do node --experimental-strip-types src/materialize-research-drafts.ts batch-20261002-003 wave-2 --force-machine="$machine" --force-only; done
-
-      - name: Regenerate all ten machines through App Runtime
+          machines=(L_KABANERI_UNATO_KESSEN_XX L_UMINEKO_2_A1 L_FIRE_FORCE_2)
+          for machine in "${machines[@]}"; do
+            node --experimental-strip-types src/materialize-research-drafts.ts batch-20261002-003 wave-2 --force-machine="$machine" --force-only
+          done
+      - name: Regenerate audited machines through App Runtime
         working-directory: production
         run: node --experimental-strip-types src/deterministic-production-worker.ts batch-20261002-003 --through APP_RUNTIME
 
@@ -127,10 +119,21 @@ jobs:
           for(const id of ids){
             const research=read(path.join('batches',batch,'artifacts',id,'research','result.json'));
             if(!research.researchCompleteness||research.researchCompleteness.domains?.length<20)fail('RESEARCH_COMPLETENESS_MISSING:'+id);
+            if(['L_KABANERI_UNATO_KESSEN_XX','L_UMINEKO_2_A1','L_FIRE_FORCE_2'].includes(id)&&research.researchCompleteness.version!==2)fail('RESEARCH_COMPLETENESS_V2_MISSING:'+id);
             const blockText=(research.blockedItems??[]).map(x=>x.label).join(' ');
             if(/設定示唆演出.*設定別出現率|有利区間リセット後の恩恵|外部集計に依存する要素/.test(blockText))fail('ABSTRACT_RESEARCH_BUCKET:'+id);
             for(const finding of research.findings??[])if(finding.settingDistribution===undefined&&finding.observationType!=='evidence')fail('UNROUTED_RESEARCH_FINDING:'+id+':'+finding.findingId);
           }
+          const fire=read(path.join('batches',batch,'artifacts','L_FIRE_FORCE_2','app_runtime','result.json')).package;
+          for(const fid of ['reg-character-scenario-selection','bonus-end-reg-accel-gray-distribution','bonus-end-fire-bonus-distribution']){
+            const rp=(fire.features?.runtimeProjection??[]).find(x=>x.featureId===fid);
+            if(!rp||rp.runtimeStatus!=='ACTIVE')fail('FIRE_PROBABILITY_ROUTE_INACTIVE:'+fid);
+          }
+          const fireText=JSON.stringify(fire.ui?.v8Sections??[]);
+          if(/設定別の出現率が公表・確認されていない/.test(fireText))fail('FIRE_STALE_UNKNOWN_PROBABILITY_TEXT');
+          const kab=read(path.join('batches',batch,'artifacts','L_KABANERI_UNATO_KESSEN_XX','app_runtime','result.json')).package;
+          const kabText=JSON.stringify(kab.ui?.v8Sections??[]);
+          for(const label of ['アイテムくじ','カバネリATTACK中の連打上乗せ','サミートロフィー'])if(!kabText.includes(label))fail('KABANERI_EVIDENCE_MISSING:'+label);
           console.log(JSON.stringify({status:'PASS',machines:ids.length},null,2));
           NODE
 
