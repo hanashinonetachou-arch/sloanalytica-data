@@ -95,11 +95,9 @@ const buildInputs=(projection:any)=>{
  }
  for(const s of projection.evidence??[]){
   for(const e of s.evidenceItems??[]){
-   const details=Array.isArray(e.details)?e.details.filter((x:any)=>typeof x==='string'&&x.trim()):[];
-   const labels=details.length?details:[e.label];
-   for(const [i,label] of labels.entries()){
+   for(const [i,category] of evidenceCategoryRecords(e).entries()){
     const id=`REF_${e.findingId}_${i+1}`;if(seen.has(id))continue;seen.add(id);
-    out.push({id,name:label,category:'EVIDENCE_REFERENCE',type:'counter',unit:'回',defaultValue:0,minimum:0,displayOrder:order++,inferenceRole:'DISPLAY_ONLY'});
+    out.push({id,name:category.raw,category:'EVIDENCE_REFERENCE',type:'counter',unit:'回',defaultValue:0,minimum:0,displayOrder:order++,inferenceRole:'DISPLAY_ONLY'});
    }
   }
  }
