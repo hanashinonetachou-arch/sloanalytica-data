@@ -18,11 +18,9 @@ const runtimeImportance=(f:any)=>f?.score?.importance??importanceForMetricValue(
 const importanceToAdoption=(importance:any)=>importance==='主要'?'INCLUDE_PRIMARY':'INCLUDE_SUPPORT';
 const scoreDescription=(section:any)=>{
  const score=section?.score;const power=section?.perEligibleTrialPower;
- const powerText=typeof power?.value==='number'?`1回の判別力：${Number(power.value).toFixed(3)}`:null;
- const scoreText=score?.status==='COMPUTED'&&typeof score.value==='number'
-  ?`設定判別スコア：${Number(score.value).toFixed(1)}`
-  :powerText?null:`設定判別スコア：算出不可${score?.reason?'（'+score.reason+'）':''}`;
- return [scoreText,powerText].filter(Boolean).join('\\n');
+ if(score?.status==='COMPUTED'&&typeof score.value==='number')return `設定判別スコア：${Number(score.value).toFixed(1)}`;
+ if(typeof power?.value==='number')return `1回の判別力：${Number(power.value).toFixed(3)}`;
+ return `設定判別スコア：算出不可${score?.reason?'（'+score.reason+'）':''}`;
 };
 const trialLabelFor=(trialUniverse:any)=>{
  if(trialUniverse==='TOTAL_GAME_TRIAL')return '総ゲーム数';
@@ -76,7 +74,14 @@ const evidenceCategoryPresentation=(raw:string)=>{
  if(m&&/設定|示唆|濃厚|否定|以上|奇数|偶数|高設定|低設定/.test(m[2]))return {label:m[1].trim(),meaning:m[2].trim()};
  return {label:raw,meaning:'観測回数'};
 };
-const evidenceUiSections=(projection:any)=>(projection.runtimeUi?.evidenceSections??[]).map((s:any)=>({id:s.id,title:s.title,description:evidenceExplanation(s),collapsible:s.collapsible!==false,defaultExpanded:s.defaultExpanded===true,descriptionPresentation:s.descriptionPresentation??{collapsible:true,label:'説明',defaultExpanded:false},items:(s.evidenceItems??[]).map((e:any)=>{const details=Array.isArray(e.details)?e.details.filter((x:any)=>typeof x==='string'&&x.trim()):[];const labels=details.length?details:[e.label];return {id:'REF_'+e.findingId,evidenceId:e.findingId,label:e.label,interaction:{type:'CATEGORY_COUNTERS',preservePriorObservations:true,showAccumulatedCounts:true,categoryCoverage:'NON_EXHAUSTIVE',totalOpportunities:'NONE',categories:labels.map((raw:string,i:number)=>{const p=evidenceCategoryPresentation(raw);return {id:`REF_${e.findingId}_${i+1}`,inputId:`REF_${e.findingId}_${i+1}`,label:p.label,meaning:p.meaning}})}}})}));
+const evidenceCategoryRecords=(e:any)=>{
+ const structured=Array.isArray(e.semanticCategories)?e.semanticCategories.filter((x:any)=>x&&typeof x==='object'&&typeof x.label==='string'&&x.label.trim()):[];
+ if(structured.length)return structured.map((x:any)=>{const label=String(x.label).trim(),meaning=typeof x.meaning==='string'&&x.meaning.trim()?x.meaning.trim():'観測回数';return {label,meaning,semanticType:x.semanticType??e.semanticType,raw:meaning==='観測回数'?label:`${label}：${meaning}`};});
+ const details=Array.isArray(e.details)?e.details.filter((x:any)=>typeof x==='string'&&x.trim()):[];
+ const labels=details.length?details:[e.label];
+ return labels.map((raw:string)=>{const p=evidenceCategoryPresentation(raw);return {...p,semanticType:e.semanticType,raw};});
+};
+const evidenceUiSections=(projection:any)=>(projection.runtimeUi?.evidenceSections??[]).map((s:any)=>({id:s.id,title:s.title,description:evidenceExplanation(s),collapsible:s.collapsible!==false,defaultExpanded:s.defaultExpanded===true,descriptionPresentation:s.descriptionPresentation??{collapsible:true,label:'説明',defaultExpanded:false},items:(s.evidenceItems??[]).map((e:any)=>({id:'REF_'+e.findingId,evidenceId:e.findingId,label:e.label,interaction:{type:'CATEGORY_COUNTERS',preservePriorObservations:true,showAccumulatedCounts:true,categoryCoverage:'NON_EXHAUSTIVE',totalOpportunities:'NONE',categories:evidenceCategoryRecords(e).map((p:any,i:number)=>({id:`REF_${e.findingId}_${i+1}`,inputId:`REF_${e.findingId}_${i+1}`,label:p.label,meaning:p.meaning}))}}))}));
 const toUi=(projection:any)=>{const src=projection.runtimeUi??{};return {schemaVersion:'v8.5-runtime-ui-v1',contractVersion:'runtime-ui-v8',source:'CANONICAL_UI',sourceSchemaVersion:src.schemaVersion,manifestRevision:'8.5',playInfo:src.playInfo,accordion:{enabled:true,singleOpen:true},quickInput:{enabled:false},v8Sections:[...numericUiSections(projection),...evidenceUiSections(projection)]}};
 const buildInputs=(projection:any)=>{
  const out:any[]=[];const seen=new Set<string>();let order=1;
@@ -144,7 +149,7 @@ const materializedEvidences=(projection:any)=>{
 const nonRuntimeReason=(x:any,targetLabel?:string)=>x?.dependencyResolution==='RESOLVED_BY_SINGLE_MEMBER'&&x?.resolvedIntoFindingId?`同じ観測内容を二重に評価しないため、${targetLabel??'代表となる設定推測要素'}へ統合し、単独では数値推測に使用しません。`:x?.dependencyResolution==='RESOLVED_IN_JOINT_MODEL'&&x?.resolvedIntoFindingId?`同じ観測内の項目をまとめて評価するため、${targetLabel??'代表となる設定推測要素'}へ統合しています。`:'現在は単独の数値推測要素として使用しません。';
 const userFacingExcludedReason=(x:any)=>{const reason=String(x?.reason??'');if(/likelihood|補間|設定別/.test(reason))return '設定ごとの判別に必要な数値が揃っていないため、現在は数値推測に使用しません。';if(/denominator|観測機会|reconstruction|再現/.test(reason))return '正確な観測回数を扱うための情報が不足しているため、現在は数値推測に使用しません。';return '現在は数値推測に必要な情報が十分でないため使用しません。';};
 const userFacingReevaluation=(x:any)=>x?.reevaluationCondition?'必要な設定別データや観測条件が確認できれば再評価します。':undefined;
-const userFacingBlockedText=(raw:any)=>String(raw??'').replace(/likelihood/gi,'数値推測').replace(/source-supportedな/gi,'信頼できる資料で確認できる').replace(/source-supported/gi,'信頼できる資料で確認できる').replace(/joint\s*model/gi,'要素を同時に扱う統計モデル').replace(/dependency\s*model/gi,'要素間の関係を扱う方法').replace(/candidate\s*contract/gi,'採用判定').replace(/runtime\s*policy/gi,'採用基準').replace(/research/gi,'調査').replace(/evaluation/gi,'評価');
+const userFacingBlockedText=(raw:any)=>String(raw??'').replace(/likelihood/gi,'数値推測').replace(/source-supportedな/gi,'信頼できる資料で確認できる').replace(/source-supported/gi,'信頼できる資料で確認できる').replace(/joint\s*\/\s*conditional\s*model/gi,'要素間の関係を扱う統計モデル').replace(/joint\s*\/\s*dependency\s*model/gi,'要素間の関係を扱う統計モデル').replace(/joint\s*categorical\s*model/gi,'複数カテゴリを同時に扱う統計モデル').replace(/joint\s*model/gi,'要素を同時に扱う統計モデル').replace(/dependency\s*model/gi,'要素間の関係を扱う方法').replace(/candidate\s*contract/gi,'採用判定').replace(/runtime\s*policy/gi,'採用基準').replace(/\bjoint\b/gi,'複数要素の同時評価').replace(/\bconditional\b/gi,'条件付き').replace(/\bcategorical\b/gi,'カテゴリ別').replace(/\bmodel\b/gi,'統計モデル').replace(/research/gi,'調査').replace(/evaluation/gi,'評価');
 const dedupeSummary=(items:any[])=>{const seen=new Set<string>();return items.filter((x:any)=>{const k=String(x?.featureId??x?.label??'');if(!k||seen.has(k))return false;seen.add(k);return true})};
 const runtimeProjection=(projection:any)=>[
  ...(projection.activeFeatures??[]).map((f:any)=>({featureId:f.findingId,runtimeStatus:'ACTIVE',metric:f.runtimePolicyBinding?.metric,metricValue:f.runtimePolicyBinding?.value,importance:runtimeImportance(f)})),
