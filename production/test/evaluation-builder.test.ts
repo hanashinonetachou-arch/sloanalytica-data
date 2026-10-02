@@ -33,3 +33,15 @@ test('numeric candidate details survive evaluation for user-facing runtime expla
  const research:any={manifestVersion:'8.5',batchId:'b',machineId:'M',machineName:'M',findings:[{findingId:'f',label:'条件別分布',observationType:'appearance_distribution',sourceIds:['s'],trialUniverse:'EVENT_TRIAL',details:['条件Aと条件Bを混ぜずに記録します。'],settingDistribution:{'1':'A 60% / B 40%','6':'A 40% / B 60%'},categoryModel:{residualPolicy:'SOURCE_EXHAUSTIVE'}}],blockedItems:[]};
  const d=buildEvaluation(research);assert.deepEqual(d.evaluations[0].details,research.findings[0].details);
 });
+
+
+test('accepts published categorical rows with up to 1.5% rounding drift without rewriting source values',()=>{
+ const research:any={manifestVersion:'8.5',batchId:'b',machineId:'M',machineName:'M',findings:[{findingId:'f',label:'公開丸め表',observationType:'appearance_distribution',sourceIds:['s'],trialUniverse:'EVENT_TRIAL',settingDistribution:{'1':'A 54% / B 36% / C 4% / D 1% / E 2% / F 2% / G 2%','6':'A 34% / B 52% / C 4% / D 1% / E 2% / F 2% / G 2%'},categoryModel:{residualPolicy:'SOURCE_EXHAUSTIVE'}}],blockedItems:[]};
+ const before=structuredClone(research.findings[0].settingDistribution);
+ const d=buildEvaluation(research);
+ assert.equal(d.evaluations[0].model,'CATEGORICAL');
+ assert.ok(d.evaluations[0].metrics.perEligibleTrialPower>0);
+ assert.deepEqual(research.findings[0].settingDistribution,before,'published rounded values remain immutable');
+ const invalid=structuredClone(research);invalid.findings[0].settingDistribution['1']='A 60% / B 45%';
+ assert.throws(()=>buildEvaluation(invalid),/EVAL_CATEGORY_SUM/);
+});
