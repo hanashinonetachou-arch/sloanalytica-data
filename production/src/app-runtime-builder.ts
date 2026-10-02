@@ -68,9 +68,8 @@ const numericUiSections=(projection:any)=>{
 const evidenceExplanation=(s:any)=>{
  const types=[...new Set((s.evidenceItems??[]).flatMap((e:any)=>Array.isArray(e.semanticCategories)?e.semanticCategories.map((x:any)=>x.semanticType):[e.semanticType]).filter(Boolean))];
  const details=(s.evidenceItems??[]).flatMap((e:any)=>Array.isArray(e.details)?e.details:[]).filter((x:any)=>typeof x==='string'&&x.trim());
- if(details.length){const exact=types.includes('EXACT_CONSTRAINT')?evidenceSemanticExplanation('EXACT_CONSTRAINT'):'';return [...details,exact].filter(Boolean).join('\\n');}
- if(types.includes('EXACT_CONSTRAINT')&&types.some((x:any)=>x!=='EXACT_CONSTRAINT'))return evidenceSemanticExplanation('EXACT_CONSTRAINT')+' '+types.filter((x:any)=>x!=='EXACT_CONSTRAINT').map((x:any)=>evidenceSemanticExplanation(x)).join(' ');
- return evidenceSemanticExplanation((types[0]??'DISPLAY_ONLY') as any);
+ const semantic=types.includes('EXACT_CONSTRAINT')&&types.some((x:any)=>x!=='EXACT_CONSTRAINT')?evidenceSemanticExplanation('EXACT_CONSTRAINT')+' '+types.filter((x:any)=>x!=='EXACT_CONSTRAINT').map((x:any)=>evidenceSemanticExplanation(x)).join(' '):evidenceSemanticExplanation((types[0]??'DISPLAY_ONLY') as any);
+ return [...details,semantic].filter(Boolean).join('\\n');
 };
 const evidenceCategoryPresentation=(raw:string)=>{
  const m=raw.match(/^(.+?)[：:]\s*(.+)$/);
