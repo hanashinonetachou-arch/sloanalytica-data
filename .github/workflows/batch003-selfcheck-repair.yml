@@ -36,24 +36,43 @@ jobs:
         run: |
           set -euo pipefail
           machines=(
-            L_KABANERI_UNATO_KESSEN_XX
-            L_UMINEKO_2_A1
+            L_GUNDAM_UNICORN_KAKUSEI_DRIVE_2JA
+            L_MILLION_GOD_KISEKI_CX
+            L_AKUDAMA_DRIVE_TP
+            L_KYOKOU_SUIRI_ST
+            L_SHINUCHI_YOSHIMUNE_A1
+            LB_TRIPLE_CROWN_SEVEN_FG
+            L_JORMUNGAND_ND01G
             L_FIRE_FORCE_2
           )
           for machine in "${machines[@]}"; do
             node --experimental-strip-types src/invalidate-machine-downstream.ts batch-20261002-003 "$machine" --include-research
           done
 
-      - name: Rematerialize the three audited machines
+      - name: Rematerialize the seven-machine re-audit plus Fire Force
         working-directory: production
         shell: bash
         run: |
           set -euo pipefail
-          machines=(L_KABANERI_UNATO_KESSEN_XX L_UMINEKO_2_A1 L_FIRE_FORCE_2)
-          for machine in "${machines[@]}"; do
+          wave1=(
+            L_GUNDAM_UNICORN_KAKUSEI_DRIVE_2JA
+            L_MILLION_GOD_KISEKI_CX
+            L_AKUDAMA_DRIVE_TP
+            L_KYOKOU_SUIRI_ST
+            L_SHINUCHI_YOSHIMUNE_A1
+          )
+          wave2=(
+            LB_TRIPLE_CROWN_SEVEN_FG
+            L_JORMUNGAND_ND01G
+            L_FIRE_FORCE_2
+          )
+          for machine in "${wave1[@]}"; do
+            node --experimental-strip-types src/materialize-research-drafts.ts batch-20261002-003 wave-1 --force-machine="$machine" --force-only
+          done
+          for machine in "${wave2[@]}"; do
             node --experimental-strip-types src/materialize-research-drafts.ts batch-20261002-003 wave-2 --force-machine="$machine" --force-only
           done
-      - name: Regenerate audited machines through App Runtime
+      - name: Regenerate re-audited machines through App Runtime
         working-directory: production
         run: node --experimental-strip-types src/deterministic-production-worker.ts batch-20261002-003 --through APP_RUNTIME
 
@@ -119,22 +138,42 @@ jobs:
           for(const id of ids){
             const research=read(path.join('batches',batch,'artifacts',id,'research','result.json'));
             if(!research.researchCompleteness||research.researchCompleteness.domains?.length<20)fail('RESEARCH_COMPLETENESS_MISSING:'+id);
-            if(['L_KABANERI_UNATO_KESSEN_XX','L_UMINEKO_2_A1','L_FIRE_FORCE_2'].includes(id)&&research.researchCompleteness.version!==2)fail('RESEARCH_COMPLETENESS_V2_MISSING:'+id);
+            if(research.researchCompleteness.version!==2)fail('RESEARCH_COMPLETENESS_V2_MISSING:'+id);
             const blockText=(research.blockedItems??[]).map(x=>x.label).join(' ');
             if(/設定示唆演出.*設定別出現率|有利区間リセット後の恩恵|外部集計に依存する要素/.test(blockText))fail('ABSTRACT_RESEARCH_BUCKET:'+id);
             for(const finding of research.findings??[])if(finding.settingDistribution===undefined&&finding.observationType!=='evidence')fail('UNROUTED_RESEARCH_FINDING:'+id+':'+finding.findingId);
           }
+          const active=(pkg,fid)=>(pkg.features?.runtimeProjection??[]).find(x=>x.featureId===fid)?.runtimeStatus==='ACTIVE';
+          const uiText=pkg=>JSON.stringify(pkg.ui?.v8Sections??[]);
+          const hardEvidenceText=pkg=>JSON.stringify(pkg.evidence?.evidences??[]);
+
           const fire=read(path.join('batches',batch,'artifacts','L_FIRE_FORCE_2','app_runtime','result.json')).package;
-          for(const fid of ['reg-character-scenario-selection','bonus-end-reg-accel-gray-distribution','bonus-end-fire-bonus-distribution']){
-            const rp=(fire.features?.runtimeProjection??[]).find(x=>x.featureId===fid);
-            if(!rp||rp.runtimeStatus!=='ACTIVE')fail('FIRE_PROBABILITY_ROUTE_INACTIVE:'+fid);
+          for(const fid of ['reg-character-scenario-selection','bonus-end-reg-accel-gray-distribution','bonus-end-fire-bonus-distribution'])if(!active(fire,fid))fail('FIRE_PROBABILITY_ROUTE_INACTIVE:'+fid);
+          if(!uiText(fire).includes('REGキャラ・まもるくん'))fail('FIRE_MAMORU_EVIDENCE_MISSING');
+          for(const label of ['1人目にまもるくん','2人目にまもるくん','3人目にまもるくん','4人目にまもるくん','5人目にまもるくん','まもるくん無し（全員アイリス）'])if(!uiText(fire).includes(label))fail('FIRE_MAMORU_CATEGORY_MISSING:'+label);
+          if(/設定別の出現率が公表・確認されていない/.test(uiText(fire)))fail('FIRE_STALE_UNKNOWN_PROBABILITY_TEXT');
+
+          const akudama=read(path.join('batches',batch,'artifacts','L_AKUDAMA_DRIVE_TP','app_runtime','result.json')).package;
+          if(!uiText(akudama).includes('ST終了画面後の処刑課バトル規定セット否定'))fail('AKUDAMA_DELAYED_DENIAL_EVIDENCE_MISSING');
+          if(active(akudama,'cz-mode-upgrade-after-tank-failure'))fail('AKUDAMA_INTERNAL_MODE_REFERENCE_BECAME_ACTIVE');
+
+          const kyokou=read(path.join('batches',batch,'artifacts','L_KYOKOU_SUIRI_ST','app_runtime','result.json')).package;
+          for(const fid of ['bonus-end-screen-distribution','ayakashi-bonus-character-distribution'])if(!active(kyokou,fid))fail('KYOKOU_PROBABILITY_ROUTE_INACTIVE:'+fid);
+          if(!uiText(kyokou).includes('あやかしぼーなす中キャラ紹介・設定否定/確定系'))fail('KYOKOU_AYAKASHI_EVIDENCE_MISSING');
+
+          const yoshimune=read(path.join('batches',batch,'artifacts','L_SHINUCHI_YOSHIMUNE_A1','app_runtime','result.json')).package;
+          if(!active(yoshimune,'at-end-screen-distribution'))fail('YOSHIMUNE_AT_END_DISTRIBUTION_INACTIVE');
+
+          const jorm=read(path.join('batches',batch,'artifacts','L_JORMUNGAND_ND01G','app_runtime','result.json')).package;
+          for(const fid of ['reg-character-first-second-distribution','reg-character-third-distribution','bonus-end-screen-distribution'])if(!active(jorm,fid))fail('JORM_PROBABILITY_ROUTE_INACTIVE:'+fid);
+          for(const label of ['サブ液晶・設定示唆カード','特定獲得枚数表示','エンディング中の筐体枠ランプ','ケロットトロフィー'])if(!uiText(jorm).includes(label))fail('JORM_EVIDENCE_MISSING:'+label);
+          if(/ケロットトロフィー/.test(hardEvidenceText(jorm)))fail('JORM_TROPHY_MUST_NOT_HARD_CONSTRAIN');
+
+          for(const id of ['L_GUNDAM_UNICORN_KAKUSEI_DRIVE_2JA','L_MILLION_GOD_KISEKI_CX','LB_TRIPLE_CROWN_SEVEN_FG']){
+            const research=read(path.join('batches',batch,'artifacts',id,'research','result.json'));
+            if(research.researchCompleteness?.reaudit?.status!=='NO_ADDITIONAL_SETTING_ROUTE')fail('REAUDIT_STATUS_MISSING:'+id);
           }
-          const fireText=JSON.stringify(fire.ui?.v8Sections??[]);
-          if(/設定別の出現率が公表・確認されていない/.test(fireText))fail('FIRE_STALE_UNKNOWN_PROBABILITY_TEXT');
-          const kab=read(path.join('batches',batch,'artifacts','L_KABANERI_UNATO_KESSEN_XX','app_runtime','result.json')).package;
-          const kabText=JSON.stringify(kab.ui?.v8Sections??[]);
-          for(const label of ['アイテムくじ','カバネリATTACK中の連打上乗せ','サミートロフィー'])if(!kabText.includes(label))fail('KABANERI_EVIDENCE_MISSING:'+label);
-          console.log(JSON.stringify({status:'PASS',machines:ids.length},null,2));
+          console.log(JSON.stringify({status:'PASS',machines:ids.length,reaudited:8},null,2));
           NODE
 
       - name: Commit repaired Batch 003 state
