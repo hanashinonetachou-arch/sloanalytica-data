@@ -6,6 +6,9 @@ import {RepoStore} from './core.ts';
 import {EVIDENCE_SEMANTIC_TYPES,classifyEvidenceLabel} from './evidence-semantics.ts';
 
 export const RESEARCH_VALIDATOR_CONTRACT='research-v1';
+export const RESEARCH_COMPLETENESS_DOMAINS=["INITIAL_HIT","BONUS","SMALL_ROLE","CZ","AT","INTERNAL_CONDITIONAL_DRAW","MODE_TRANSITION","STATE_TRANSITION","SUCCESS_RATE","POINTS_GAME_DISTRIBUTION","CARRY_OVER","THRESHOLD_BEHAVIOR","RESET_BEHAVIOR","POST_EVENT_TRANSITION","NAVIGATION","ROLE_CONDITIONAL_DISTRIBUTION","BONUS_TYPE_CONDITIONAL","EVIDENCE","EXTERNAL_DATA_ONLY","MACHINE_SPECIFIC"] as const;
+const researchCompletenessStatuses=new Set(['CHECKED','NOT_APPLICABLE']);
+const abstractResearchLabels=[/^設定推測要素$/,/設定示唆演出.*設定別出現率/,/有利区間リセット後の恩恵/,/外部集計に依存する要素/];
 
 const nonEmpty=(x:any)=>typeof x==='string'&&x.trim().length>0;
 const hex64=(x:any)=>typeof x==='string'&&/^[a-f0-9]{64}$/i.test(x);
@@ -28,6 +31,18 @@ export function validateResearchArtifacts(s:RepoStore,a:Attempt,r:WorkResult){
     if(!nonEmpty(src.sourceId)||!nonEmpty(src.url)||!/^https?:\/\//.test(src.url)||!nonEmpty(src.title)||!nonEmpty(src.sourceType)||!Array.isArray(src.claims)||src.claims.length===0) throw new Error('RESEARCH_VALIDATION:SOURCE_PROVENANCE');
   }
   const sourceIds=new Set(d.sources.map((x:any)=>x.sourceId));
+  const completeness=d.researchCompleteness;
+  if(!completeness||completeness.version!==1||!Array.isArray(completeness.domains)||!Array.isArray(completeness.machineSpecificQueries)||completeness.machineSpecificQueries.length<3) throw new Error('RESEARCH_VALIDATION:COMPLETENESS_REQUIRED');
+  const coverage=new Map<string,any>();
+  for(const row of completeness.domains){
+    if(!nonEmpty(row?.domain)||coverage.has(row.domain)) throw new Error('RESEARCH_VALIDATION:COMPLETENESS_DOMAIN_DUPLICATE');
+    if(!researchCompletenessStatuses.has(row.status)||!nonEmpty(row.note)||!Array.isArray(row.sourceIds)) throw new Error('RESEARCH_VALIDATION:COMPLETENESS_DOMAIN_INVALID:'+row.domain);
+    if(row.status==='CHECKED'&&(row.sourceIds.length===0||row.sourceIds.some((x:any)=>!sourceIds.has(x)))) throw new Error('RESEARCH_VALIDATION:COMPLETENESS_PROVENANCE:'+row.domain);
+    coverage.set(row.domain,row);
+  }
+  for(const domain of RESEARCH_COMPLETENESS_DOMAINS) if(!coverage.has(domain)) throw new Error('RESEARCH_VALIDATION:COMPLETENESS_DOMAIN_MISSING:'+domain);
+  for(const domain of coverage.keys()) if(!(RESEARCH_COMPLETENESS_DOMAINS as readonly string[]).includes(domain)) throw new Error('RESEARCH_VALIDATION:COMPLETENESS_DOMAIN_UNKNOWN:'+domain);
+  if(completeness.machineSpecificQueries.some((x:any)=>!nonEmpty(x))) throw new Error('RESEARCH_VALIDATION:MACHINE_SPECIFIC_QUERY_INVALID');
   for(const f of d.findings){
     if(!nonEmpty(f.findingId)||!nonEmpty(f.label)||!nonEmpty(f.observationType)||!Array.isArray(f.sourceIds)||f.sourceIds.length===0||f.sourceIds.some((x:any)=>!sourceIds.has(x))) throw new Error('RESEARCH_VALIDATION:FINDING_PROVENANCE');
     if(f.settingDistribution!==undefined){
@@ -42,10 +57,12 @@ export function validateResearchArtifacts(s:RepoStore,a:Attempt,r:WorkResult){
         if(category.semanticType==='EXACT_CONSTRAINT'&&classifyEvidenceLabel(semanticText)!=='EXACT_CONSTRAINT') throw new Error('RESEARCH_VALIDATION:EVIDENCE_EXACT_MISMATCH:'+f.findingId+':'+category.label);
       }
     }
+    if(f.settingDistribution===undefined&&f.observationType!=='evidence') throw new Error('RESEARCH_VALIDATION:UNROUTED_FINDING:'+f.findingId);
     if(f.inferred===true) throw new Error('RESEARCH_VALIDATION:INFERRED_VALUE_FORBIDDEN');
   }
   for(const b of d.blockedItems){
     if(!nonEmpty(b.blockId)||!nonEmpty(b.label)||!nonEmpty(b.reason)||!nonEmpty(b.reevaluationCondition)) throw new Error('RESEARCH_VALIDATION:BLOCK_REEVALUATION_REQUIRED');
+    if(abstractResearchLabels.some(re=>re.test(b.label))) throw new Error('RESEARCH_VALIDATION:ABSTRACT_BLOCK_LABEL:'+b.blockId);
   }
-  return [{validator:RESEARCH_VALIDATOR_CONTRACT,ok:true,artifactPath:ref.path,sha256:ref.sha256,sources:d.sources.length,findings:d.findings.length,blockedItems:d.blockedItems.length}];
+  return [{validator:RESEARCH_VALIDATOR_CONTRACT,ok:true,artifactPath:ref.path,sha256:ref.sha256,sources:d.sources.length,findings:d.findings.length,blockedItems:d.blockedItems.length,coverageDomains:coverage.size}];
 }
