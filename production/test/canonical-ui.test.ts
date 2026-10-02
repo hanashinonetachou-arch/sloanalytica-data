@@ -45,7 +45,7 @@ test('shortens contextual input names while descriptions explain the relationshi
  const labels=deriveObservationInputLabels(o);
  assert.deepEqual(labels,{trialLabel:'昇格抽選回数',successLabel:'EPボーナス昇格回数'});
  const description=buildObservationDescription(o,'BERNOULLI',undefined);
- assert.match(description,/まず「アクダマボーナス当選時の昇格抽選を受けた回数」を数え/);
+ assert.match(description,/まず「アクダマボーナス当選時の昇格抽選回数」を数え/);
  assert.doesNotMatch(description,/・数えるもの：|・基準：/);
  assert.notEqual(description,labels.trialLabel);
  assert.notEqual(description,labels.successLabel);
