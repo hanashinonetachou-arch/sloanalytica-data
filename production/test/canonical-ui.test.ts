@@ -45,8 +45,72 @@ test('shortens contextual input names while descriptions explain the relationshi
  const labels=deriveObservationInputLabels(o);
  assert.deepEqual(labels,{trialLabel:'昇格抽選回数',successLabel:'EPボーナス昇格回数'});
  const description=buildObservationDescription(o,'BERNOULLI',undefined);
- assert.match(description,/同じ観測の母数と該当数/);
+ assert.match(description,/まず「アクダマボーナス当選時の昇格抽選を受けた回数」を数え/);
  assert.doesNotMatch(description,/・数えるもの：|・基準：/);
  assert.notEqual(description,labels.trialLabel);
  assert.notEqual(description,labels.successLabel);
+});
+
+
+test('moves detailed eligibility conditions into descriptions while keeping inputs concise',()=>{
+ const cases:any[]=[
+  {
+   label:'450G＋α仮天井選択',
+   denominatorSemantics:'設定変更時・上位CZ後など選択条件が異なるケースを除いた、通常の天井ゲーム数選択回数に対する、450G＋αが選ばれた回数。',
+   expected:{trialLabel:'天井ゲーム数選択回数',successLabel:'450G＋α選択回数'},
+   detail:/設定変更時・上位CZ後など選択条件が異なるケースを除いた/,
+  },
+  {
+   label:'GG当選時のZ-ZONE昇格',
+   denominatorSemantics:'ガイアステージ中を除くGG当選時に前兆ゲーム数がセットされた回数に対する、Z-ZONEへ昇格した回数。',
+   expected:{trialLabel:'GG当選時の前兆セット回数',successLabel:'Z-ZONE昇格回数'},
+   detail:/ガイアステージ中を除く/,
+  },
+  {
+   label:'駿城ボーナス中・単独チャンス目の3000pt獲得率',
+   denominatorSemantics:'駿城ボーナス中に単独チャンス目が成立した回数に対する、3000pt獲得回数。',
+   expected:{trialLabel:'単独チャンス目成立回数',successLabel:'3000pt獲得回数'},
+   detail:/駿城ボーナス中に単独チャンス目が成立した回数/,
+  },
+  {
+   label:'運命分岐モード・REG後/ART後/周期経由のLV2ナビ発生率',
+   denominatorSemantics:'REG後・ART消化後・周期経由で運命分岐モードへ突入した回数に対する、LV2ナビ発生回数。',
+   expected:{trialLabel:'運命分岐モード突入回数',successLabel:'LV2ナビ発生回数'},
+   detail:/REG後・ART消化後・周期経由/,
+  },
+  {
+   label:'ART未突入で運命分岐モード転落時の100G引き継ぎ選択率',
+   denominatorSemantics:'ART未突入で運命分岐モードから転落し、引き継ぎが発生した回数に対する、100G選択回数。',
+   expected:{trialLabel:'引き継ぎ発生回数',successLabel:'100G選択回数'},
+   detail:/ART未突入で運命分岐モードから転落/,
+  },
+ ];
+ for(const c of cases){
+  const {expected,detail,...rest}=c;
+  const o:any={...rest,trialUniverse:'CUSTOM_TRIAL'};
+  assert.deepEqual(deriveObservationInputLabels(o),expected);
+  assert.match(buildObservationDescription(o,'BERNOULLI',undefined),detail);
+ }
+});
+
+test('contextual compaction keeps the raw conditions in the explanation',()=>{
+ const o:any={label:'450G＋α仮天井選択',trialUniverse:'CUSTOM_TRIAL',denominatorSemantics:'設定変更時・上位CZ後など選択条件が異なるケースを除いた、通常の天井ゲーム数選択回数に対する、450G＋αが選ばれた回数。'};
+ assert.deepEqual(deriveObservationInputLabels(o),{trialLabel:'天井ゲーム数選択回数',successLabel:'450G＋α選択回数'});
+ const description=buildObservationDescription(o,'BERNOULLI',undefined);
+ assert.match(description,/設定変更時・上位CZ後など選択条件が異なるケースを除いた/);
+ assert.doesNotMatch(description,/母数|・数えるもの：|・基準：/);
+});
+
+test('normalizes literal escaped line breaks before user-facing copy',()=>{
+ const o:any={label:'REG中キャラ紹介',trialUniverse:'REG_TRIAL',denominatorSemantics:'REG回数に対する、特定シナリオ回数。',details:['REGごとに最後まで確認する\\n・反映：別の欄へ重ねて入力する必要はありません']};
+ const description=buildObservationDescription(o,'BERNOULLI',undefined);
+ assert.doesNotMatch(description,/\\n|\/n/);
+ assert.match(description,/REGごとに最後まで確認する/);
+});
+
+test('validator rejects long or particle-prefixed numeric input labels',()=>{
+ const d:any=buildCanonicalUi(candidate,observation,evaluation,ca,oa,ea);
+ d.numericSections[0].inputs[0].role='trial';
+ d.numericSections[0].inputs[0].label='に'+('長'.repeat(31));
+ assert.throws(()=>validateCanonicalUiDocument(d,candidate,observation,evaluation,ca,oa,ea),/INPUT_LABEL_NOT_CONCISE/);
 });
