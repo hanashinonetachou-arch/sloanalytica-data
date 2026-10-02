@@ -36,18 +36,20 @@ jobs:
         run: |
           set -euo pipefail
           machines=(
+            L_GUNDAM_UNICORN_KAKUSEI_DRIVE_2JA
+            L_MILLION_GOD_KISEKI_CX
+            L_AKUDAMA_DRIVE_TP
             L_KYOKOU_SUIRI_ST
+            L_SHINUCHI_YOSHIMUNE_A1
+            LB_TRIPLE_CROWN_SEVEN_FG
+            L_JORMUNGAND_ND01G
+            L_KABANERI_UNATO_KESSEN_XX
+            L_UMINEKO_2_A1
+            L_FIRE_FORCE_2
           )
           for machine in "${machines[@]}"; do
-            node --experimental-strip-types src/invalidate-machine-downstream.ts batch-20261002-003 "$machine" --include-research
+            node --experimental-strip-types src/invalidate-machine-downstream.ts batch-20261002-003 "$machine"
           done
-
-      - name: Rematerialize Kyokou copy repair
-        working-directory: production
-        shell: bash
-        run: |
-          set -euo pipefail
-          node --experimental-strip-types src/materialize-research-drafts.ts batch-20261002-003 wave-1 --force-machine="L_KYOKOU_SUIRI_ST" --force-only
       - name: Regenerate re-audited machines through App Runtime
         working-directory: production
         run: node --experimental-strip-types src/deterministic-production-worker.ts batch-20261002-003 --through APP_RUNTIME
@@ -82,7 +84,12 @@ jobs:
             for(const finding of (research.findings??[]).filter(x=>x.observationType==='evidence')){
               const categories=finding.semanticCategories??[];
               const section=sections.get(finding.findingId);
-              if(!section)fail('EVIDENCE_SECTION_MISSING:'+id+':'+finding.findingId);
+              if(!section){
+                const linked=(pkg.evidence?.evidences??[]).filter(x=>(x.sourceEvidenceRefs??[]).includes(finding.findingId));
+                const exactOnly=categories.length>0&&categories.every(x=>x.semanticType==='EXACT_CONSTRAINT');
+                if(!exactOnly||linked.length!==categories.length||linked.some(x=>String(x.inputId??'').startsWith('REF_')))fail('EVIDENCE_SECTION_MISSING:'+id+':'+finding.findingId);
+                continue;
+              }
               const actual=section.items?.[0]?.interaction?.categories??[];
               if(actual.length!==categories.length)fail('EVIDENCE_CATEGORY_COUNT:'+id+':'+finding.findingId+':'+categories.length+':'+actual.length);
               categories.forEach((c,i)=>{
@@ -104,8 +111,14 @@ jobs:
               summary.highLowDiscrimination?.note
             ].filter(Boolean).join(' ');
             if(/likelihood|source-supported|joint|conditional|categorical|candidate contract|runtime policy|research|evaluation/i.test(visibleSummaryText))fail('INTERNAL_WORDING:'+id);
+            const abstractLabels=new Set(['対象回数','回数','観測機会数','該当回数']);
+            for(const input of pkg.inputs?.inputs??[])if(input.category==='V8_NUMERIC'&&abstractLabels.has(String(input.name)))fail('ABSTRACT_NUMERIC_LABEL:'+id+':'+input.id);
             for(const section of (pkg.ui?.v8Sections??[]).filter(x=>String(x.id).startsWith('OBS_'))){
-              if(/設定判別スコア/.test(section.description??'')&&/1回の判別力/.test(section.description??''))fail('DOUBLE_METRIC:'+id+':'+section.title);
+              const description=String(section.description??'');
+              if(/設定判別スコア|1回の判別力/.test(description))fail('METRIC_IN_DESCRIPTION:'+id+':'+section.title);
+              if(/Evidence|denominator|trial universe|Candidate Contract|Runtime Policy|Opportunity model|joint model/i.test(description))fail('INTERNAL_DESCRIPTION_WORDING:'+id+':'+section.title);
+              if(!String(section.id).startsWith('OBS_SHARED_')&&!/・数えるもの：/.test(description))fail('COUNT_GUIDANCE_MISSING:'+id+':'+section.title);
+              for(const item of section.items??[])if(item.description&&!/・数えるもの：/.test(item.description))fail('ITEM_COUNT_GUIDANCE_MISSING:'+id+':'+(item.title??item.id));
             }
             for(const r of pkg.features?.runtimeProjection??[]){
               if(r.runtimeStatus==='ACTIVE'&&r.metric==='SELECTION_SCORE'&&r.importance!==expectedImportance(Number(r.metricValue)))fail('IMPORTANCE_RAW_THRESHOLD:'+id+':'+r.featureId);
@@ -133,9 +146,13 @@ jobs:
           if(!JSON.stringify(million.ui?.v8Sections??[]).includes('本機の確定解析は未確認'))fail('MILLION_GOD_PLATE_CAUTION_MISSING');
           const fire=read(path.join('batches',batch,'artifacts','L_FIRE_FORCE_2','app_runtime','result.json')).package;
           for(const fid of ['reg-character-scenario-selection','bonus-end-reg-accel-gray-distribution','bonus-end-fire-bonus-distribution'])if(!active(fire,fid))fail('FIRE_PROBABILITY_ROUTE_INACTIVE:'+fid);
-          if(!uiText(fire).includes('REGキャラ・まもるくん'))fail('FIRE_MAMORU_EVIDENCE_MISSING');
-          for(const label of ['1人目にまもるくん','2人目にまもるくん','3人目にまもるくん','4人目にまもるくん','5人目にまもるくん','まもるくん無し（全員アイリス）'])if(!uiText(fire).includes(label))fail('FIRE_MAMORU_CATEGORY_MISSING:'+label);
-          if(/設定別の出現率が公表・確認されていない/.test(uiText(fire)))fail('FIRE_STALE_UNKNOWN_PROBABILITY_TEXT');
+          if((fire.ui?.v8Sections??[]).some(x=>x.id==='EVI_reg-mamoru-kun'))fail('FIRE_MAMORU_DUPLICATE_SECTION');
+          if((fire.inputs?.inputs??[]).some(x=>String(x.id).startsWith('REF_reg-mamoru-kun_')))fail('FIRE_MAMORU_DUPLICATE_INPUT');
+          const mamoruDefs=(fire.evidence?.evidences??[]).filter(x=>(x.sourceEvidenceRefs??[]).includes('reg-mamoru-kun'));
+          if(mamoruDefs.length!==6||mamoruDefs.some(x=>!String(x.inputId).startsWith('reg-character-scenario-selection.categoryCounts.')))fail('FIRE_MAMORU_NOT_LINKED_TO_NUMERIC_INPUT');
+          const regSection=(fire.ui?.v8Sections??[]).find(x=>x.id==='OBS_reg-character-scenario-selection');
+          if(!regSection||!/別の欄へ重ねて入力する必要はありません/.test(regSection.description??''))fail('FIRE_MAMORU_AUTO_REFLECTION_GUIDANCE_MISSING');
+          for(const label of ['1人目まもるくん','2人目まもるくん','3人目まもるくん','4人目まもるくん','5人目まもるくん','まもるくん無し'])if(!uiText(fire).includes(label))fail('FIRE_MAMORU_CATEGORY_MISSING:'+label);
 
           const akudama=read(path.join('batches',batch,'artifacts','L_AKUDAMA_DRIVE_TP','app_runtime','result.json')).package;
           if(!uiText(akudama).includes('ST終了画面後の処刑課バトル規定セット否定'))fail('AKUDAMA_DELAYED_DENIAL_EVIDENCE_MISSING');
