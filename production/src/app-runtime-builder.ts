@@ -68,7 +68,7 @@ export function resolveEvidenceInputLinks(projection:any){
  }
  return {categoryInputIdByKey,linkedEvidenceIds,featureEvidenceIds};
 }
-const appendLinkedEvidenceNote=(description:string,featureId:any,links:any)=>links.featureEvidenceIds.has(featureId)?[description,'・反映：同じ入力から設定確定・設定否定の条件にも自動反映します。別の欄へ重ねて入力する必要はありません'].filter(Boolean).join('\\n'):description;
+const appendLinkedEvidenceNote=(description:string,featureId:any,links:any)=>links.featureEvidenceIds.has(featureId)?[description,'・反映：同じ入力から設定確定・設定否定の条件にも自動反映します。別の欄へ重ねて入力する必要はありません'].filter(Boolean).join('\n'):description;
 const playDataSourceForTrialUniverse=(trialUniverse:any)=>
  trialUniverse==='TOTAL_GAME_TRIAL'?'PLAY_TOTAL_GAME_DELTA':
  trialUniverse==='LOTIS_NON_CHAIN_GAME_TRIAL'||trialUniverse==='NON_CHAIN_BONUS_INITIAL_GAME_TRIAL'?'PLAY_TOTAL_GAME_DELTA_EXCLUDED':
