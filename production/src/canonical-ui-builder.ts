@@ -32,7 +32,7 @@ const normalizeSuccessLabel=(raw:any,fallback:any)=>{
 const sharedContextBoundary=(title:string,label:string)=>{
  const max=Math.min(title.length,label.length);let i=0;while(i<max&&title[i]===label[i])i++;
  const prefix=label.slice(0,i);let cut=-1;
- for(const token of ['の','時','中','後']){const p=prefix.lastIndexOf(token);if(p>=5)cut=Math.max(cut,p+token.length)}
+ for(const token of ['の','時','中','後']){const p=prefix.lastIndexOf(token);if(p>=2)cut=Math.max(cut,p+token.length)}
  return cut;
 };
 const compactContextualInputLabel=(raw:any,sectionTitle:any)=>{
