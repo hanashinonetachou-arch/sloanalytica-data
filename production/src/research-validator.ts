@@ -89,7 +89,6 @@ export function validateResearchArtifacts(s:RepoStore,a:Attempt,r:WorkResult){
   for(const domain of RESEARCH_COMPLETENESS_DOMAINS) if(!coverage.has(domain)) throw new Error('RESEARCH_VALIDATION:COMPLETENESS_DOMAIN_MISSING:'+domain);
   for(const domain of coverage.keys()) if(!(RESEARCH_COMPLETENESS_DOMAINS as readonly string[]).includes(domain)) throw new Error('RESEARCH_VALIDATION:COMPLETENESS_DOMAIN_UNKNOWN:'+domain);
   if(completeness.machineSpecificQueries.some((x:any)=>!nonEmpty(x))) throw new Error('RESEARCH_VALIDATION:MACHINE_SPECIFIC_QUERY_INVALID');
-  const ledgerValidation=validateResearchCandidateLedger(d,sourceIds);
   for(const f of d.findings){
     if(!nonEmpty(f.findingId)||!nonEmpty(f.label)||!nonEmpty(f.observationType)||!Array.isArray(f.sourceIds)||f.sourceIds.length===0||f.sourceIds.some((x:any)=>!sourceIds.has(x))) throw new Error('RESEARCH_VALIDATION:FINDING_PROVENANCE');
     if(f.settingDistribution!==undefined){
@@ -111,5 +110,6 @@ export function validateResearchArtifacts(s:RepoStore,a:Attempt,r:WorkResult){
     if(!nonEmpty(b.blockId)||!nonEmpty(b.label)||!nonEmpty(b.reason)||!nonEmpty(b.reevaluationCondition)) throw new Error('RESEARCH_VALIDATION:BLOCK_REEVALUATION_REQUIRED');
     if(abstractResearchLabels.some(re=>re.test(b.label))) throw new Error('RESEARCH_VALIDATION:ABSTRACT_BLOCK_LABEL:'+b.blockId);
   }
+  const ledgerValidation=validateResearchCandidateLedger(d,sourceIds);
   return [{validator:RESEARCH_VALIDATOR_CONTRACT,ok:true,artifactPath:ref.path,sha256:ref.sha256,sources:d.sources.length,findings:d.findings.length,blockedItems:d.blockedItems.length,coverageDomains:coverage.size,...ledgerValidation}];
 }
