@@ -20,3 +20,10 @@ test('source categorical distribution uses strings and rejects object rows befor
  invalid.findings[0].settingDistribution={'1':{male:0.6,female:0.4},'2':{male:0.4,female:0.6}};
  assert.throws(()=>buildEvaluation(invalid),/EVAL_CATEGORY/);
 });
+
+test('preserves structured Evidence semantics from Research',()=>{
+ const research:any={manifestVersion:'8.5',batchId:'b',machineId:'M',machineName:'M',findings:[{findingId:'e',label:'終了画面',observationType:'evidence',sourceIds:['s'],semanticType:'MIXED_CATEGORICAL',semanticCategories:[{label:'制服',meaning:'高設定示唆',semanticType:'PROBABILITY_UNKNOWN'},{label:'虹',meaning:'設定6濃厚',semanticType:'EXACT_CONSTRAINT'}]}],blockedItems:[]};
+ const d=buildEvaluation(research);
+ assert.deepEqual(d.evidenceCandidates[0].semanticCategories,research.findings[0].semanticCategories);
+ assert.equal(d.evidenceCandidates[0].semanticType,'MIXED_CATEGORICAL');
+});
