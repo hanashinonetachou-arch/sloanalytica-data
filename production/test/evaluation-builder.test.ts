@@ -27,3 +27,9 @@ test('preserves structured Evidence semantics from Research',()=>{
  assert.deepEqual(d.evidenceCandidates[0].semanticCategories,research.findings[0].semanticCategories);
  assert.equal(d.evidenceCandidates[0].semanticType,'MIXED_CATEGORICAL');
 });
+
+
+test('numeric candidate details survive evaluation for user-facing runtime explanations',()=>{
+ const research:any={manifestVersion:'8.5',batchId:'b',machineId:'M',machineName:'M',findings:[{findingId:'f',label:'条件別分布',observationType:'appearance_distribution',sourceIds:['s'],trialUniverse:'EVENT_TRIAL',details:['条件Aと条件Bを混ぜずに記録します。'],settingDistribution:{'1':'A 60% / B 40%','6':'A 40% / B 60%'},categoryModel:{residualPolicy:'SOURCE_EXHAUSTIVE'}}],blockedItems:[]};
+ const d=buildEvaluation(research);assert.deepEqual(d.evaluations[0].details,research.findings[0].details);
+});
