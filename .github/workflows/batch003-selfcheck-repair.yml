@@ -1,0 +1,128 @@
+name: Batch003 Selfcheck Semantic Repair
+
+on:
+  push:
+    branches:
+      - production/v85-batch-003-foundation-20261002
+    paths:
+      - production/.batch003-selfcheck-repair-trigger
+
+permissions:
+  contents: write
+
+concurrency:
+  group: batch003-selfcheck-semantic-repair
+  cancel-in-progress: false
+
+jobs:
+  repair:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: production/v85-batch-003-foundation-20261002
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+
+      - name: Validate repaired production contracts
+        working-directory: production
+        run: npm test
+
+      - name: Invalidate Batch 003 downstream state
+        working-directory: production
+        shell: bash
+        run: |
+          set -euo pipefail
+          machines=(
+            L_GUNDAM_UNICORN_KAKUSEI_DRIVE_2JA
+            L_MILLION_GOD_KISEKI_CX
+            L_AKUDAMA_DRIVE_TP
+            L_KYOKOU_SUIRI_ST
+            L_SHINUCHI_YOSHIMUNE_A1
+            LB_TRIPLE_CROWN_SEVEN_FG
+            L_JORMUNGAND_ND01G
+            L_KABANERI_UNATO_KESSEN_XX
+            L_UMINEKO_2_A1
+            L_FIRE_FORCE_2
+          )
+          for machine in "${machines[@]}"; do
+            if [ "$machine" = "L_JORMUNGAND_ND01G" ]; then
+              node --experimental-strip-types src/invalidate-machine-downstream.ts batch-20261002-003 "$machine" --include-research
+            else
+              node --experimental-strip-types src/invalidate-machine-downstream.ts batch-20261002-003 "$machine"
+            fi
+          done
+
+      - name: Rematerialize corrected Jormungand research
+        working-directory: production
+        run: node --experimental-strip-types src/materialize-research-drafts.ts batch-20261002-003 wave-2 --force-machine=L_JORMUNGAND_ND01G
+
+      - name: Regenerate all ten machines through App Runtime
+        working-directory: production
+        run: node --experimental-strip-types src/deterministic-production-worker.ts batch-20261002-003 --through APP_RUNTIME
+
+      - name: Validate regenerated production state
+        working-directory: production
+        run: |
+          npm test
+          node --experimental-strip-types src/reconcile-batch.ts batch-20261002-003
+
+      - name: Audit Research to App Runtime semantic fidelity
+        working-directory: production
+        shell: bash
+        run: |
+          node <<'NODE'
+          const fs=require('fs'),path=require('path');
+          const batch='batch-20261002-003';
+          const ids=[
+            'L_GUNDAM_UNICORN_KAKUSEI_DRIVE_2JA','L_MILLION_GOD_KISEKI_CX','L_AKUDAMA_DRIVE_TP','L_KYOKOU_SUIRI_ST','L_SHINUCHI_YOSHIMUNE_A1',
+            'LB_TRIPLE_CROWN_SEVEN_FG','L_JORMUNGAND_ND01G','L_KABANERI_UNATO_KESSEN_XX','L_UMINEKO_2_A1','L_FIRE_FORCE_2'
+          ];
+          const read=p=>JSON.parse(fs.readFileSync(p,'utf8'));
+          const fail=m=>{throw new Error(m)};
+          const expectedImportance=n=>n>=20?'主要':n>=10?'有力':n>=5?'補助':'微小';
+          for(const id of ids){
+            const research=read(path.join('batches',batch,'artifacts',id,'research','result.json'));
+            const stage=read(path.join('batches',batch,'machines',id,'stages','APP_RUNTIME.json'));
+            if(stage.state!=='COMPLETE'||!stage.authoritativeOutputRef?.path)fail('APP_RUNTIME_NOT_COMPLETE:'+id);
+            const app=read(stage.authoritativeOutputRef.path.replace(/^production\//,''));
+            const pkg=app.package;
+            const sections=new Map((pkg.ui?.v8Sections??[]).filter(x=>String(x.id).startsWith('EVI_')).map(x=>[String(x.id).slice(4),x]));
+            for(const finding of (research.findings??[]).filter(x=>x.observationType==='evidence')){
+              const categories=finding.semanticCategories??[];
+              const section=sections.get(finding.findingId);
+              if(!section)fail('EVIDENCE_SECTION_MISSING:'+id+':'+finding.findingId);
+              const actual=section.items?.[0]?.interaction?.categories??[];
+              if(actual.length!==categories.length)fail('EVIDENCE_CATEGORY_COUNT:'+id+':'+finding.findingId+':'+categories.length+':'+actual.length);
+              categories.forEach((c,i)=>{
+                if(actual[i]?.label!==c.label)fail('EVIDENCE_LABEL:'+id+':'+finding.findingId+':'+i);
+                const expectedMeaning=c.meaning??'観測回数';
+                if(actual[i]?.meaning!==expectedMeaning)fail('EVIDENCE_MEANING:'+id+':'+finding.findingId+':'+i);
+              });
+            }
+            const exactExpected=(research.findings??[]).filter(x=>x.observationType==='evidence').flatMap(x=>x.semanticCategories??[]).filter(x=>x.semanticType==='EXACT_CONSTRAINT').length;
+            if((pkg.evidence?.evidences??[]).length!==exactExpected)fail('EXACT_EVIDENCE_COUNT:'+id+':'+exactExpected+':'+(pkg.evidence?.evidences??[]).length);
+            for(const e of pkg.evidence?.evidences??[])if(/示唆|期待|アップ|出現しやすい/.test(e.name??''))fail('SOFT_HINT_CONSTRAINED:'+id+':'+e.name);
+            const summary=JSON.stringify(pkg.v8?.machineResearchSummary??{});
+            if(/likelihood|source-supported|joint|conditional|categorical|candidate contract|runtime policy|research|evaluation/i.test(summary))fail('INTERNAL_WORDING:'+id);
+            for(const section of (pkg.ui?.v8Sections??[]).filter(x=>String(x.id).startsWith('OBS_'))){
+              if(/設定判別スコア/.test(section.description??'')&&/1回の判別力/.test(section.description??''))fail('DOUBLE_METRIC:'+id+':'+section.title);
+            }
+            for(const r of pkg.features?.runtimeProjection??[]){
+              if(r.runtimeStatus==='ACTIVE'&&r.metric==='SELECTION_SCORE'&&r.importance!==expectedImportance(Number(r.metricValue)))fail('IMPORTANCE_RAW_THRESHOLD:'+id+':'+r.featureId);
+            }
+          }
+          console.log(JSON.stringify({status:'PASS',machines:ids.length},null,2));
+          NODE
+
+      - name: Commit repaired Batch 003 state
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git add production/batches/batch-20261002-003
+          git commit -m "Repair Batch 003 semantic fidelity [skip ci]"
+          git push origin HEAD:production/v85-batch-003-foundation-20261002
