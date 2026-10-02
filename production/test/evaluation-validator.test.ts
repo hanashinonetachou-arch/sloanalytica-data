@@ -8,3 +8,12 @@ const ps=[1/200,1/150],ig=perTrialIg(ps),score=binomialIg(ps,7000)*200;
 const base:any={schemaVersion:'evaluation-v2',manifestVersion:'8.5',batchId:'b',machineId:'M',evaluations:[{findingId:'f',label:'初当り',observationType:'probability',sourceIds:['s'],settingDistribution:research.findings[0].settingDistribution,trialUniverse:'NORMAL_GAME_TRIAL',liveObservation:{status:'DIRECT_EXACT',reason:'direct'},dependency:{status:'NONE',reason:'none'},model:'BERNOULLI',benchmarkExposure:{status:'EXACT',trials:7000,reason:'7000 normal game trials'},metrics:{igPerEligibleTrial:ig,perEligibleTrialPower:ig*200,selectionScore:{status:'COMPUTED',value:score}},selectionClass:score>=20?'CORE':score>=10?'SUPPORT':score>=5?'JOINT_ELIGIBLE':'EXCLUDE',evaluationCompleteness:'COMPLETE'}],blockedItems:[],evidenceCandidates:[]};
 test('accepts formal selection score for exact normal-game benchmark',()=>{assert.doesNotThrow(()=>validateEvaluationDocument(base,research))});
 test('rejects upper-bound-only downgrade for exact normal-game benchmark',()=>{const d=structuredClone(base);d.evaluations[0].benchmarkExposure={status:'UPPER_BOUND_ONLY',maximumTrials:7000};d.evaluations[0].metrics.selectionScore={status:'BLOCKED_UNRESOLVED',value:null};d.evaluations[0].metrics.maximumSelectionScore=score;d.evaluations[0].evaluationCompleteness='COMPLETE_LIKELIHOOD_BENCHMARK_UNRESOLVED';assert.throws(()=>validateEvaluationDocument(d,research),/PROBABILITY_EXACT_BENCHMARK/)});
+
+
+test('validator accepts bounded published categorical rounding',()=>{
+ const roundedResearch:any={batchId:'b',machineId:'M',blockedItems:[],findings:[{findingId:'c',label:'公開丸め表',observationType:'appearance_distribution',sourceIds:['s'],trialUniverse:'EVENT_TRIAL',settingDistribution:{'1':'A 54% / B 36% / C 4% / D 1% / E 2% / F 2% / G 2%','6':'A 34% / B 52% / C 4% / D 1% / E 2% / F 3% / G 3%'},categoryModel:{residualPolicy:'SOURCE_EXHAUSTIVE'}}]};
+ const built=(await import('../src/evaluation-builder.ts')).buildEvaluation(roundedResearch);
+ assert.doesNotThrow(()=>validateEvaluationDocument(built,roundedResearch));
+ const badResearch=structuredClone(roundedResearch);badResearch.findings[0].settingDistribution['1']='A 60% / B 45%';
+ assert.throws(()=>{const bad=(await import('../src/evaluation-builder.ts')).buildEvaluation(badResearch);validateEvaluationDocument(bad,badResearch)},/EVAL_CATEGORY_SUM|INVALID_CATEGORY_SUM/);
+});
