@@ -89,7 +89,7 @@ const numericUiSections=(projection:any)=>{
  return out;
 };
 const evidenceExplanation=(s:any)=>{
- const existing=String(s?.description??'').trim();if(existing)return existing;
+ const existing=String(s?.description??'').trim();if(existing&&/設定別出現率が未確認|設定候補の絞り込み|記録のみ/.test(existing))return existing;
  const types=[...new Set((s.evidenceItems??[]).flatMap((e:any)=>Array.isArray(e.semanticCategories)?e.semanticCategories.map((x:any)=>x.semanticType):[e.semanticType]).filter(Boolean))];
  const details=(s.evidenceItems??[]).flatMap((e:any)=>Array.isArray(e.details)?e.details:[]).filter((x:any)=>typeof x==='string'&&x.trim());
  const semantic=types.includes('EXACT_CONSTRAINT')&&types.some((x:any)=>x!=='EXACT_CONSTRAINT')?evidenceSemanticExplanation('EXACT_CONSTRAINT')+' '+types.filter((x:any)=>x!=='EXACT_CONSTRAINT').map((x:any)=>evidenceSemanticExplanation(x)).join(' '):evidenceSemanticExplanation((types[0]??'DISPLAY_ONLY') as any);
