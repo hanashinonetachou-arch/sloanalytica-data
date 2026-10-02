@@ -160,7 +160,10 @@ jobs:
 
           const kyokou=read(path.join('batches',batch,'artifacts','L_KYOKOU_SUIRI_ST','app_runtime','result.json')).package;
           for(const fid of ['bonus-end-screen-distribution','ayakashi-bonus-character-distribution'])if(!active(kyokou,fid))fail('KYOKOU_PROBABILITY_ROUTE_INACTIVE:'+fid);
-          if(!uiText(kyokou).includes('あやかしぼーなす中キャラ紹介・設定否定/確定系'))fail('KYOKOU_AYAKASHI_EVIDENCE_MISSING');
+          if((kyokou.ui?.v8Sections??[]).some(x=>x.id==='EVI_ayakashi-bonus-character-exact'))fail('KYOKOU_AYAKASHI_DUPLICATE_SECTION');
+          if((kyokou.inputs?.inputs??[]).some(x=>String(x.id).startsWith('REF_ayakashi-bonus-character-exact_')))fail('KYOKOU_AYAKASHI_DUPLICATE_INPUT');
+          const ayakashiDefs=(kyokou.evidence?.evidences??[]).filter(x=>(x.sourceEvidenceRefs??[]).includes('ayakashi-bonus-character-exact'));
+          if(ayakashiDefs.length!==6||ayakashiDefs.some(x=>!String(x.inputId).startsWith('ayakashi-bonus-character-distribution.categoryCounts.')))fail('KYOKOU_AYAKASHI_NOT_LINKED_TO_NUMERIC_INPUT');
 
           const yoshimune=read(path.join('batches',batch,'artifacts','L_SHINUCHI_YOSHIMUNE_A1','app_runtime','result.json')).package;
           if(!active(yoshimune,'at-end-screen-distribution'))fail('YOSHIMUNE_AT_END_DISTRIBUTION_INACTIVE');
