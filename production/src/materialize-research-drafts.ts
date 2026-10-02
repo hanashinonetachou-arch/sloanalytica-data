@@ -9,6 +9,7 @@ const batchId=process.argv[2];
 const waveId=process.argv[3];
 const forceMachineArg=process.argv.find(x=>x.startsWith('--force-machine='));
 const forceMachineId=forceMachineArg?.slice('--force-machine='.length);
+const forceOnly=process.argv.includes('--force-only');
 if(!batchId||!waveId)throw new Error('USAGE: materialize-research-drafts <batch-id> <wave-id> [--force-machine=<machine-id>]');
 
 const s=new RepoStore(process.cwd());
@@ -61,7 +62,7 @@ if(forceMachineId){
   if(forced.state!=='READY')throw new Error('FORCE_RESEARCH_NOT_READY:'+forceMachineId+':'+forced.state);
   completed.push(materialize({machineId:forceMachineId}));
 }
-for(let guard=0;guard<20;guard++){
+if(!forceOnly)for(let guard=0;guard<20;guard++){
   reconcileBatch(o,s,batchId);
   const remaining=[...targets].filter(machineId=>o.stage(batchId,machineId,'RESEARCH').state!=='COMPLETE');
   if(remaining.length===0)break;
@@ -72,5 +73,5 @@ for(let guard=0;guard<20;guard++){
   for(const candidate of selected)completed.push(materialize(candidate));
 }
 const incomplete=[...targets].filter(machineId=>o.stage(batchId,machineId,'RESEARCH').state!=='COMPLETE');
-if(incomplete.length)throw new Error('RESEARCH_WAVE_INCOMPLETE:'+incomplete.join(','));
+if(incomplete.length&&!forceOnly)throw new Error('RESEARCH_WAVE_INCOMPLETE:'+incomplete.join(','));
 console.log(JSON.stringify({batchId,waveId,completed,dashboard:reconcileBatch(o,s,batchId)},null,2));
