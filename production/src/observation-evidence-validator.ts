@@ -28,7 +28,7 @@ export function validateObservationEvidenceDocument(doc:any,candidate:any,resear
  const expectedEvidence=candidate.evidenceCandidates??[];
  if(doc.evidence.length!==expectedEvidence.length)fail('EVIDENCE_COVERAGE');
  const evBy=new Map(doc.evidence.map((x:any)=>[x.findingId,x]));
- for(const e of expectedEvidence){const x:any=evBy.get(e.findingId);if(!x||x.label!==e.label||canonical(x.sourceIds)!==canonical(e.sourceIds??[])||canonical(x.details??[])!==canonical(e.details??[])||!EVIDENCE_SEMANTIC_TYPES.includes(x.semanticType)||x.semanticType!==classifyEvidenceSemantic(e)||!Array.isArray(x.semanticCategories)||x.semanticCategories.some((y:any)=>!EVIDENCE_SEMANTIC_TYPES.includes(y.semanticType))||x.runtimePolicyControlled!==false||x.status!=='SOURCE_REFERENCED')fail('EVIDENCE:'+e.findingId)}
+ for(const e of expectedEvidence){const x:any=evBy.get(e.findingId);const sourceCategories=Array.isArray(e.semanticCategories)?e.semanticCategories:[];if(!x||x.label!==e.label||canonical(x.sourceIds)!==canonical(e.sourceIds??[])||canonical(x.details??[])!==canonical(e.details??[])||!EVIDENCE_SEMANTIC_TYPES.includes(x.semanticType)||x.semanticType!==classifyEvidenceSemantic(e)||!Array.isArray(x.semanticCategories)||x.semanticCategories.some((y:any)=>!EVIDENCE_SEMANTIC_TYPES.includes(y.semanticType))||(sourceCategories.length>0&&canonical(x.semanticCategories)!==canonical(sourceCategories))||x.runtimePolicyControlled!==false||x.status!=='SOURCE_REFERENCED')fail('EVIDENCE:'+e.findingId)}
  const sourceIds=new Set((research.sources??[]).map((x:any)=>x.sourceId));
  for(const e of doc.evidence)for(const id of e.sourceIds)if(!sourceIds.has(id))fail('SOURCE_UNRESOLVED:'+id);
  if(canonical(doc.sourceReferences)!==canonical(research.sources??[]))fail('SOURCE_COPY');
