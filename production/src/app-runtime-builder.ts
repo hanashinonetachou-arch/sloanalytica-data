@@ -1,4 +1,3 @@
-import {evidenceSemanticExplanation} from './evidence-semantics.ts';
 const heldReason=(x:any)=>x?.status==='HELD_NO_JOINT_MODEL'?'設定別出現率自体は確認できていますが、同じ観測範囲を使う複数要素を互いに独立とみなして同時加算できる根拠が確定していません。二重評価を避けるため、現在は単独の数値推測に使用していません。':'現在は数値推測に必要な条件が確定していません。';
 const heldReevaluation=(x:any)=>x?.status==='HELD_NO_JOINT_MODEL'?'同じ観測範囲の要素を同時に扱える依存関係モデル、または代表要素を選ぶ明示的な選定基準が確定したら再評価します。':undefined;
 const summaryLabel=(x:any,id:any)=>{const label=String(x?.name??x?.label??'').trim();const key=String(id??'').trim();if(!label||label==='設定推測要素'||label==='調査継続項目'||(key&&label===key))throw new Error('APP_RUNTIME_SUMMARY_LABEL_REQUIRED:'+key);return label;};
@@ -32,7 +31,12 @@ const trialLabelFor=(trialUniverse:any)=>{
  return '対象回数';
 };
 const trialUnitFor=(trialUniverse:any)=>trialLabelFor(trialUniverse).endsWith('ゲーム数')?'G':'回';
-const sectionExplanation=(_f:any,s:any)=>String(s?.description??'').trim();
+const sectionExplanation=(f:any,s:any)=>{
+ const existing=String(s?.description??'').trim();if(existing)return existing;
+ const inputs=s?.inputs??[],trial=inputs.find((x:any)=>x.role==='trial'),success=inputs.find((x:any)=>x.role==='success');
+ if(f?.model==='CATEGORICAL')return '・数えるもの：'+String(s?.title??f?.name??'観測内容')+'\n・入力方法：確認するたび、該当する項目を1回加算します';
+ return '・数えるもの：'+String(success?.label??f?.name??'観測回数')+'\n・基準：'+String(trial?.label??'確認した回数');
+};
 const compactEvidenceText=(v:any)=>String(v??'').normalize('NFKC').replace(/[\\s（）()「」『』【】・：:、,／\\/_-]+/g,'');
 const evidenceLinkKey=(findingId:any,index:number)=>String(findingId)+':'+index;
 export function resolveEvidenceInputLinks(projection:any){
@@ -42,7 +46,7 @@ export function resolveEvidenceInputLinks(projection:any){
   const cats=Array.isArray(e.semanticCategories)?e.semanticCategories:[];
   if(!e.trialUniverse||cats.length===0||cats.some((x:any)=>x?.semanticType!=='EXACT_CONSTRAINT'))continue;
   const candidates=numeric.filter((s:any)=>s.trialUniverse===e.trialUniverse);
-  let chosen:any=null;const local:string[]=[];
+  let chosen:any=null;
   for(const s of candidates){
    const inputs=(s.inputs??[]).filter((x:any)=>x.role==='categoryCount');const ids:string[]=[];let ok=true;
    for(let i=0;i<cats.length;i++){
@@ -78,16 +82,14 @@ const numericUiSections=(projection:any)=>{
   if(peers.length>1){const trials=peers.map((p:any)=>p.inputs.find((x:any)=>x.role==='trial'));if(trials.some((x:any)=>!x))throw new Error('APP_RUNTIME_SHARED_DENOMINATOR_TRIAL');for(const p of peers)consumed.add(p.s.sourceFindingId);const label=trials[0].label;const sharedTitle=peers.map((p:any)=>String(p.s.title)).join('・');out.push({id:'OBS_SHARED_'+String(row.f.trialUniverse),title:sharedTitle,collapsible:true,defaultExpanded:false,description:'・基準：'+label+'\\n・入力方法：'+label+'は1回だけ入力し、各項目の回数を記録します',descriptionPresentation:{collapsible:true,label:'説明',defaultExpanded:false},groups:[{id:'DENOM_'+String(row.f.trialUniverse),label,input:'denominator',inputId:trials[0].id,engineBinding:{inputIds:trials.map((x:any)=>x.id)},gridSpan:12,directNumeric:true,quickAdd:trials[0].quickAdd??[50],unobservedDisplay:'—',playDataBinding:playDataBindingFor(row.playDataSource)}],items:peers.map((p:any)=>{const success=p.inputs.find((x:any)=>x.role==='success');if(!success)throw new Error('APP_RUNTIME_BERNOULLI_UI:'+p.f.findingId);return {id:'NODE_'+p.f.findingId,featureId:p.f.findingId,title:p.s.title,description:appendLinkedEvidenceNote(sectionExplanation(p.f,p.s),p.f.findingId,links),descriptionPresentation:{collapsible:true,label:'説明',defaultExpanded:false},gridSpan:6,inputs:[{id:success.id,label:success.label,input:'counter',inputId:success.id,engineBinding:{inputId:success.id},gridSpan:12,directNumeric:true,quickAdd:success.quickAdd??[1],unobservedDisplay:'—'}]}})});continue}
   consumed.add(row.s.sourceFindingId);const {s,f,inputs}=row;
   if(f.model==='BERNOULLI'){const trial=inputs.find((x:any)=>x.role==='trial'),success=inputs.find((x:any)=>x.role==='success');if(!trial||!success)throw new Error('APP_RUNTIME_BERNOULLI_UI:'+f.findingId);const trialNode:any={id:trial.id,label:trial.label,input:'denominator',inputId:trial.id,engineBinding:{inputId:trial.id},gridSpan:row.playDataSource?12:6,directNumeric:true,quickAdd:trial.quickAdd??[50],unobservedDisplay:'—'};if(row.playDataSource)trialNode.playDataBinding=playDataBindingFor(row.playDataSource);out.push({id:s.id,title:s.title,collapsible:s.collapsible!==false,defaultExpanded:s.defaultExpanded===true,description:appendLinkedEvidenceNote(sectionExplanation(f,s),f.findingId,links),descriptionPresentation:{collapsible:true,label:'説明',defaultExpanded:false},items:[{id:'NODE_'+f.findingId,featureId:f.findingId,title:s.title,inputs:[trialNode,{id:success.id,label:success.label,input:'counter',inputId:success.id,engineBinding:{inputId:success.id},gridSpan:6,directNumeric:true,quickAdd:success.quickAdd??[1],unobservedDisplay:'—'}]}]});continue}
-  if(f.model==='CATEGORICAL'){const trial=inputs.find((x:any)=>x.role==='trial'),cats=inputs.filter((x:any)=>x.role==='categoryCount');if(!trial||cats.length<2)throw new Error('APP_RUNTIME_CATEGORICAL_UI:'+f.findingId);const sumMode=['SOURCE_EXHAUSTIVE','SOURCE_EXPLICIT_OTHER'].includes(String(f.categoryModel?.residualPolicy??''));out.push({id:s.id,title:s.title,collapsible:s.collapsible!==false,defaultExpanded:s.defaultExpanded===true,description:sectionExplanation(f,s),descriptionPresentation:{collapsible:true,label:'説明',defaultExpanded:false},items:[{id:'NODE_'+f.findingId,featureId:f.findingId,title:s.title,interaction:{type:'CATEGORY_COUNTERS',preservePriorObservations:true,showAccumulatedCounts:true,categoryCoverage:sumMode?'EXHAUSTIVE':'NON_EXHAUSTIVE',totalOpportunities:sumMode?'SUM_CATEGORY_COUNTS':'SEPARATE_COUNTER',...(sumMode?{}:{opportunityTracking:{type:'SEPARATE_COUNTER',inputId:trial.id,label:trial.label}}),categories:cats.map((x:any)=>({id:x.id,inputId:x.id,label:x.label}))}}]});continue}
+  if(f.model==='CATEGORICAL'){const trial=inputs.find((x:any)=>x.role==='trial'),cats=inputs.filter((x:any)=>x.role==='categoryCount');if(!trial||cats.length<2)throw new Error('APP_RUNTIME_CATEGORICAL_UI:'+f.findingId);const sumMode=['SOURCE_EXHAUSTIVE','SOURCE_EXPLICIT_OTHER'].includes(String(f.categoryModel?.residualPolicy??''));out.push({id:s.id,title:s.title,collapsible:s.collapsible!==false,defaultExpanded:s.defaultExpanded===true,description:appendLinkedEvidenceNote(sectionExplanation(f,s),f.findingId,links),descriptionPresentation:{collapsible:true,label:'説明',defaultExpanded:false},items:[{id:'NODE_'+f.findingId,featureId:f.findingId,title:s.title,interaction:{type:'CATEGORY_COUNTERS',preservePriorObservations:true,showAccumulatedCounts:true,categoryCoverage:sumMode?'EXHAUSTIVE':'NON_EXHAUSTIVE',totalOpportunities:sumMode?'SUM_CATEGORY_COUNTS':'SEPARATE_COUNTER',...(sumMode?{}:{opportunityTracking:{type:'SEPARATE_COUNTER',inputId:trial.id,label:trial.label}}),categories:cats.map((x:any)=>({id:x.id,inputId:x.id,label:x.label}))}}]});continue}
   throw new Error('APP_RUNTIME_MODEL_UNSUPPORTED:'+f.model)
  }
  return out;
 };
 const evidenceExplanation=(s:any)=>{
- const types=[...new Set((s.evidenceItems??[]).flatMap((e:any)=>Array.isArray(e.semanticCategories)?e.semanticCategories.map((x:any)=>x.semanticType):[e.semanticType]).filter(Boolean))];
- const details=(s.evidenceItems??[]).flatMap((e:any)=>Array.isArray(e.details)?e.details:[]).filter((x:any)=>typeof x==='string'&&x.trim());
- const semantic=types.includes('EXACT_CONSTRAINT')&&types.some((x:any)=>x!=='EXACT_CONSTRAINT')?evidenceSemanticExplanation('EXACT_CONSTRAINT')+' '+types.filter((x:any)=>x!=='EXACT_CONSTRAINT').map((x:any)=>evidenceSemanticExplanation(x)).join(' '):evidenceSemanticExplanation((types[0]??'DISPLAY_ONLY') as any);
- return [...details,semantic].filter(Boolean).join('\\n');
+ const existing=String(s?.description??'').trim();if(existing)return existing;
+ return '・数えるもの：'+String(s?.title??'設定示唆')+'\n・入力方法：確認するたび、該当する項目を1回加算します';
 };
 const evidenceCategoryPresentation=(raw:string)=>{
  const m=raw.match(/^(.+?)[：:]\s*(.+)$/);
@@ -101,10 +103,17 @@ export const evidenceCategoryRecords=(e:any)=>{
  const labels=details.length?details:[e.label];
  return labels.map((raw:string)=>{const p=evidenceCategoryPresentation(raw);return {...p,semanticType:e.semanticType,raw};});
 };
-const evidenceUiSections=(projection:any)=>(projection.runtimeUi?.evidenceSections??[]).map((s:any)=>({id:s.id,title:s.title,description:evidenceExplanation(s),collapsible:s.collapsible!==false,defaultExpanded:s.defaultExpanded===true,descriptionPresentation:s.descriptionPresentation??{collapsible:true,label:'説明',defaultExpanded:false},items:(s.evidenceItems??[]).map((e:any)=>({id:'REF_'+e.findingId,evidenceId:e.findingId,label:e.label,interaction:{type:'CATEGORY_COUNTERS',preservePriorObservations:true,showAccumulatedCounts:true,categoryCoverage:'NON_EXHAUSTIVE',totalOpportunities:'NONE',categories:evidenceCategoryRecords(e).map((p:any,i:number)=>({id:`REF_${e.findingId}_${i+1}`,inputId:`REF_${e.findingId}_${i+1}`,label:p.label,meaning:p.meaning}))}}))}));
+const evidenceUiSections=(projection:any)=>{
+ const links=resolveEvidenceInputLinks(projection),out:any[]=[];
+ for(const s of projection.runtimeUi?.evidenceSections??[]){
+  const items=(s.evidenceItems??[]).filter((e:any)=>!links.linkedEvidenceIds.has(e.findingId)).map((e:any)=>({id:'REF_'+e.findingId,evidenceId:e.findingId,label:e.label,interaction:{type:'CATEGORY_COUNTERS',preservePriorObservations:true,showAccumulatedCounts:true,categoryCoverage:'NON_EXHAUSTIVE',totalOpportunities:'NONE',categories:evidenceCategoryRecords(e).map((p:any,i:number)=>({id:'REF_'+e.findingId+'_'+(i+1),inputId:'REF_'+e.findingId+'_'+(i+1),label:p.label,meaning:p.meaning}))}}));
+  if(items.length)out.push({id:s.id,title:s.title,description:evidenceExplanation(s),collapsible:s.collapsible!==false,defaultExpanded:s.defaultExpanded===true,descriptionPresentation:s.descriptionPresentation??{collapsible:true,label:'説明',defaultExpanded:false},items});
+ }
+ return out;
+};
 const toUi=(projection:any)=>{const src=projection.runtimeUi??{};return {schemaVersion:'v8.5-runtime-ui-v1',contractVersion:'runtime-ui-v8',source:'CANONICAL_UI',sourceSchemaVersion:src.schemaVersion,manifestRevision:'8.5',playInfo:src.playInfo,accordion:{enabled:true,singleOpen:true},quickInput:{enabled:false},v8Sections:[...numericUiSections(projection),...evidenceUiSections(projection)]}};
 const buildInputs=(projection:any)=>{
- const out:any[]=[];const seen=new Set<string>();let order=1;
+ const out:any[]=[];const seen=new Set<string>();let order=1;const links=resolveEvidenceInputLinks(projection);
  for(const s of projection.runtimeUi?.numericSections??[]){
   const f=(projection.activeFeatures??[]).find((x:any)=>x.findingId===s.sourceFindingId);if(!f)continue;
   const trialId=(s.inputs??[]).find((x:any)=>x.role==='trial')?.id;
@@ -116,6 +125,7 @@ const buildInputs=(projection:any)=>{
  for(const s of projection.evidence??[]){
   for(const e of s.evidenceItems??[]){
    for(const [i,category] of evidenceCategoryRecords(e).entries()){
+    if(links.categoryInputIdByKey.has(evidenceLinkKey(e.findingId,i)))continue;
     const id=`REF_${e.findingId}_${i+1}`;if(seen.has(id))continue;seen.add(id);
     out.push({id,name:category.raw,category:'EVIDENCE_REFERENCE',type:'counter',unit:'回',defaultValue:0,minimum:0,displayOrder:order++,inferenceRole:'DISPLAY_ONLY'});
    }
@@ -155,11 +165,12 @@ const evidenceConstraintFromLabel=(label:string,allSettings:string[])=>{
  return null;
 };
 const materializedEvidences=(projection:any)=>{
- const allSettings=Array.isArray(projection.settings?.values)?projection.settings.values:[];
+ const allSettings=Array.isArray(projection.settings?.values)?projection.settings.values:[],links=resolveEvidenceInputLinks(projection);
  return (projection.evidence??[]).flatMap((s:any)=>(s.evidenceItems??[]).flatMap((e:any)=>evidenceCategoryRecords(e).flatMap((category:any,i:number)=>{
   if(category.semanticType!=='EXACT_CONSTRAINT')return [];
   const constraint=evidenceConstraintFromLabel(category.meaning==='観測回数'?category.raw:category.meaning,allSettings);if(!constraint)throw new Error('APP_RUNTIME_EXACT_CONSTRAINT_UNPARSEABLE:'+e.findingId+':'+category.raw);
-  return [{id:`${e.findingId}__${i+1}`,name:category.raw,displayName:category.raw,inputId:`REF_${e.findingId}_${i+1}`,details:[category.raw],confirmedSettings:constraint.confirmedSettings,deniedSettings:constraint.deniedSettings,hasImage:false,type:'SETTING_CONSTRAINT',sourceEvidenceRefs:[e.findingId]}];
+  const inputId=links.categoryInputIdByKey.get(evidenceLinkKey(e.findingId,i))??('REF_'+e.findingId+'_'+(i+1));
+  return [{id:e.findingId+'__'+(i+1),name:category.raw,displayName:category.raw,inputId,details:[category.raw],confirmedSettings:constraint.confirmedSettings,deniedSettings:constraint.deniedSettings,hasImage:false,type:'SETTING_CONSTRAINT',sourceEvidenceRefs:[e.findingId]}];
  })));
 };
 const nonRuntimeReason=(x:any,targetLabel?:string)=>x?.dependencyResolution==='RESOLVED_BY_SINGLE_MEMBER'&&x?.resolvedIntoFindingId?`同じ観測内容を二重に評価しないため、${targetLabel??'代表となる設定推測要素'}へ統合し、単独では数値推測に使用しません。`:x?.dependencyResolution==='RESOLVED_IN_JOINT_MODEL'&&x?.resolvedIntoFindingId?`同じ観測内の項目をまとめて評価するため、${targetLabel??'代表となる設定推測要素'}へ統合しています。`:'現在は単独の数値推測要素として使用しません。';
