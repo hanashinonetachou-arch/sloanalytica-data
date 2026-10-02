@@ -6,8 +6,9 @@ function scoreView(e:any){const s=e?.metrics?.selectionScore;if(s?.status==='COM
 function categoryLabels(distribution:any){const out:string[]=[];for(const v of Object.values(distribution??{})){if(v&&typeof v==='object'&&!Array.isArray(v)){for(const k of Object.keys(v))if(!out.includes(k))out.push(k);continue}if(typeof v!=='string')continue;for(const raw of v.split('/')){const label=raw.trim().replace(/[:\s]*[-+]?\d+(?:\.\d+)?%\s*$/,'').trim();if(label&&!out.includes(label))out.push(label)}}return out}
 const safeKey=(s:string,i:number)=>(i+1)+'_'+s.replace(/[^A-Za-z0-9一-龠ぁ-んァ-ヶー＋+_-]+/g,'_');
 const trialQuickAdd=(trialUniverse:any)=>typeof trialUniverse==='string'&&trialUniverse.includes('GAME_TRIAL')?[50]:[];
-const clean=(v:any)=>String(v??'').trim().replace(/[。．]+$/,'').trim();
-const sentences=(v:any)=>String(v??'').split(/[。．]/).map(clean).filter(Boolean);
+const normalizeUserText=(v:any)=>String(v??'').replace(/\\n/g,'\n').replace(/\/n/gi,'\n');
+const clean=(v:any)=>normalizeUserText(v).trim().replace(/[。．]+$/,'').trim();
+const sentences=(v:any)=>normalizeUserText(v).split(/[。．]|\n+/).map(clean).filter(Boolean);
 const knownTrialLabel=(u:any)=>{
  if(u==='TOTAL_GAME_TRIAL')return '総ゲーム数';
  if(u==='NORMAL_GAME_TRIAL'||u==='BONUS_ELIGIBLE_GAME_TRIAL')return '通常ゲーム数';
@@ -38,8 +39,24 @@ const sharedContextBoundary=(title:string,label:string)=>{
 const compactContextualInputLabel=(raw:any,sectionTitle:any)=>{
  let label=clean(raw).replace(/エピソードボーナス/g,'EPボーナス');
  const title=clean(sectionTitle).replace(/エピソードボーナス/g,'EPボーナス');
- const cut=sharedContextBoundary(title,label);if(cut>0&&label.length-cut>=2)label=label.slice(cut).replace(/^の/,'');
- label=label.replace(/を受けた回数$/,'回数').replace(/を確認した回数$/,'回数');
+ const cut=sharedContextBoundary(title,label);if(cut>0&&label.length-cut>=2)label=label.slice(cut);
+ label=label
+  .replace(/^(?:の|に|で|を|が|へ|から)+/,'')
+  .replace(/^.+?を除いた[、,]?(?:通常の)?(.+)$/,'$1')
+  .replace(/^.+?を除く(.+)$/,'$1')
+  .replace(/^.+が0ptへ到達して(.+)$/,'0pt到達時$1')
+  .replace(/^前回ボーナスから(\d+G以内)に成立した(BIG|REG)回数$/,'$1$2回数')
+  .replace(/^.+(?:後|時)に(.+へ突入した回数)$/,'$1')
+  .replace(/^.+(?:で|から)(.+へ突入した回数)$/,'$1')
+  .replace(/^.+から転落し[、,]?(.+)が発生した回数$/,'$1発生回数')
+  .replace(/^(.+)に前兆ゲーム数がセットされた回数$/,'$1の前兆セット回数')
+  .replace(/へ突入した回数$/,'突入回数')
+  .replace(/へ昇格した回数$/,'昇格回数')
+  .replace(/が成立した回数$/,'成立回数')
+  .replace(/が選ばれた回数$/,'選択回数')
+  .replace(/まで到達した回数$/,'到達回数')
+  .replace(/を受けた回数$/,'回数')
+  .replace(/を確認した回数$/,'回数');
  return label||clean(raw);
 };
 const countSubject=(label:string)=>label.replace(/回数$/,'').replace(/ゲーム数$/,'ゲーム').replace(/G数$/,'G');
@@ -66,7 +83,7 @@ export function deriveObservationInputLabels(o:any){
 }
 const isSettingMeaning=(s:string)=>/設定[1-6]|高設定|低設定|奇数|偶数|示唆|濃厚|否定/.test(s);
 const unique=(xs:string[])=>xs.filter((x,i)=>x&&xs.indexOf(x)===i);
-const operationalDetails=(o:any)=>unique((Array.isArray(o?.details)?o.details:[]).filter((x:any)=>typeof x==='string'&&x.trim()).map(clean).filter((x:string)=>!isSettingMeaning(x)&&!/同じ.+(?:数値入力|別欄).*(?:1回|入力)|重ねて入力/.test(x)));
+const operationalDetails=(o:any)=>unique((Array.isArray(o?.details)?o.details:[]).filter((x:any)=>typeof x==='string'&&x.trim()).flatMap((x:any)=>normalizeUserText(x).split(/\n+/).map(clean)).filter((x:string)=>!isSettingMeaning(x)&&!/同じ.+(?:数値入力|別欄).*(?:1回|入力)|重ねて入力/.test(x)));
 const categoricalSubject=(label:any)=>clean(label).replace(/の設定別(?:選択率|振り分け)$/,'').replace(/設定別(?:選択率|振り分け)$/,'');
 export function buildObservationDescription(o:any,model:any,residualPolicy:any){
  const labels=deriveObservationInputLabels(o),lines:string[]=[];
@@ -80,7 +97,9 @@ export function buildObservationDescription(o:any,model:any,residualPolicy:any){
  }else if(labels.trialLabel==='総ゲーム数'){
   lines.push(countSubject(labels.successLabel)+'を記録します。総ゲーム数を基準に、実戦中の出現割合を設定別に比較します。');
  }else{
-  lines.push('「'+labels.trialLabel+'」を対象数として、そのうち「'+labels.successLabel+'」に該当した回数を記録します。2つの入力は同じ観測の母数と該当数です。');
+  const first=sentences(o?.denominatorSemantics)[0]??'',against=first.match(/^(.+?)に対する[、,]?(.+)$/);
+  if(against)lines.push('まず「'+normalizeTrialLabel(against[1])+'」を数え、そのうち「'+normalizeSuccessLabel(against[2],o?.label)+'」に該当した回数を入力します。');
+  else lines.push('「'+labels.trialLabel+'」を数え、そのうち「'+labels.successLabel+'」に該当した回数を入力します。');
  }
  const notes=unique([...semanticNotes(o),...operationalDetails(o)]).slice(0,2);
  for(const note of notes)lines.push('・注意：'+note);
@@ -95,7 +114,7 @@ export function derivePlayInfoRequirement(trialUniverses:Iterable<string>){
 function evidenceDescription(x:any){
  const categories=Array.isArray(x?.semanticCategories)?x.semanticCategories:[];
  const categoryText=new Set(categories.flatMap((c:any)=>[clean(c?.label),clean([c?.label,c?.meaning].filter(Boolean).join('：'))]));
- const details=(Array.isArray(x?.details)?x.details:[]).filter((v:any)=>typeof v==='string'&&v.trim()).map(clean).filter((v:string)=>!categoryText.has(v)&&!/同じ.+(?:数値入力|別欄).*(?:1回|入力)|重ねて入力/.test(v));
+ const details=(Array.isArray(x?.details)?x.details:[]).filter((v:any)=>typeof v==='string'&&v.trim()).flatMap((v:any)=>normalizeUserText(v).split(/\n+/).map(clean)).filter((v:string)=>!categoryText.has(v)&&!/同じ.+(?:数値入力|別欄).*(?:1回|入力)|重ねて入力/.test(v));
  const types=[...new Set(categories.map((c:any)=>c?.semanticType??x?.semanticType).filter(Boolean))];
  const lines=[clean(x?.label)+'を確認したときに、該当する項目を1回加算して記録します。'];
  for(const d of unique(details).slice(0,2))lines.push('・注意：'+d);

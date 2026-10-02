@@ -36,7 +36,7 @@ const sectionExplanation=(f:any,s:any)=>{
  const existing=String(s?.description??'').trim();if(existing)return existing;
  const inputs=s?.inputs??[],trial=inputs.find((x:any)=>x.role==='trial'),success=inputs.find((x:any)=>x.role==='success');
  if(f?.model==='CATEGORICAL')return String(s?.title??f?.name??'観測内容')+'を確認したときに、該当する項目を1回加算して記録します。';
- return '「'+String(trial?.label??'対象数')+'」を基準に、「'+String(success?.label??f?.name??'該当回数')+'」を記録します。2つの入力は同じ観測の母数と該当数です。';
+ return '「'+String(trial?.label??'対象数')+'」を数え、そのうち「'+String(success?.label??f?.name??'該当回数')+'」に該当した回数を入力します。';
 };
 const compactEvidenceText=(v:any)=>String(v??'').normalize('NFKC').replace(/[\\s（）()「」『』【】・：:、,／\\/_-]+/g,'');
 const evidenceLinkKey=(findingId:any,index:number)=>String(findingId)+':'+index;
@@ -68,7 +68,7 @@ export function resolveEvidenceInputLinks(projection:any){
  }
  return {categoryInputIdByKey,linkedEvidenceIds,featureEvidenceIds};
 }
-const appendLinkedEvidenceNote=(description:string,featureId:any,links:any)=>links.featureEvidenceIds.has(featureId)?[description,'・反映：同じ入力から設定確定・設定否定の条件にも自動反映します。別の欄へ重ねて入力する必要はありません'].filter(Boolean).join('\\n'):description;
+const appendLinkedEvidenceNote=(description:string,featureId:any,links:any)=>links.featureEvidenceIds.has(featureId)?[description,'・反映：同じ入力から設定確定・設定否定の条件にも自動反映します。別の欄へ重ねて入力する必要はありません'].filter(Boolean).join('\n'):description;
 const playDataSourceForTrialUniverse=(trialUniverse:any)=>
  trialUniverse==='TOTAL_GAME_TRIAL'?'PLAY_TOTAL_GAME_DELTA':
  trialUniverse==='LOTIS_NON_CHAIN_GAME_TRIAL'||trialUniverse==='NON_CHAIN_BONUS_INITIAL_GAME_TRIAL'?'PLAY_TOTAL_GAME_DELTA_EXCLUDED':

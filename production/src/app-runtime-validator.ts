@@ -18,7 +18,7 @@ export function validateAppRuntimeDocument(doc:any,projection:any,projectionArti
  const expectedInputs=[...expectedNumericInputs,...expectedEvidenceInputs];
  if(!Array.isArray(p.inputs?.inputs)||p.inputs.inputs.length!==expectedInputs.length)fail('INPUT_COVERAGE');
  const inputBy=new Map((p.inputs.inputs??[]).map((x:any)=>[x.id,x]));if(inputBy.size!==expectedInputs.length)fail('INPUT_DUPLICATE');
- for(const x of expectedNumericInputs){const a:any=inputBy.get(x.id);if(!a||a.name!==x.label||!['integer','counter'].includes(a.type))fail('INPUT:'+x.id);if(['対象回数','回数','観測機会数','該当回数'].includes(String(a.name)))fail('ABSTRACT_INPUT_LABEL:'+x.id)}
+ for(const x of expectedNumericInputs){const a:any=inputBy.get(x.id);if(!a||a.name!==x.label||!['integer','counter'].includes(a.type))fail('INPUT:'+x.id);if(['対象回数','回数','観測機会数','該当回数'].includes(String(a.name)))fail('ABSTRACT_INPUT_LABEL:'+x.id);if(['trial','success'].includes(String(x.role??''))&&(String(a.name??'').length>30||/^(?:に|で|を|が|へ|から)/.test(String(a.name??''))))fail('INPUT_LABEL_NOT_CONCISE:'+x.id)}
  for(const x of expectedEvidenceInputs){const a:any=inputBy.get(x.id);if(!a||a.name!==x.label||a.type!=='counter'||a.inferenceRole!=='DISPLAY_ONLY'||a.unit!=='回')fail('EVIDENCE_INPUT:'+x.id)}
  if(!Array.isArray(p.features?.features)||p.features.features.length!==active.length)fail('FEATURE_COVERAGE');
  const featureBy=new Map((p.features.features??[]).map((x:any)=>[x.featureId,x]));
@@ -41,7 +41,7 @@ export function validateAppRuntimeDocument(doc:any,projection:any,projectionArti
  for(const x of inactive)if(rpBy.get(x.findingId)?.runtimeStatus!=='INACTIVE')fail('RUNTIME_INACTIVE:'+x.findingId);
  if(p.ui?.contractVersion!=='runtime-ui-v8'||p.ui?.source!=='CANONICAL_UI'||p.ui?.sourceSchemaVersion!==projection.runtimeUi?.schemaVersion||p.ui?.accordion?.singleOpen!==true||p.ui?.quickInput?.enabled!==false)fail('UI_HEADER');
  if(p.ui?.playInfo?.visible!==true||!p.ui?.playInfo?.useDifference||canonical(p.ui?.playInfo)!==canonical(projection.runtimeUi?.playInfo))fail('UI_PLAY_INFO_COPY');if(!['TOTAL_ONLY','NORMAL_ONLY','TOTAL_AND_NORMAL','NONE'].includes(String(p.ui?.playInfo?.mode??'')))fail('UI_PLAY_INFO_MODE');
- for(const s of (p.ui?.v8Sections??[]).filter((x:any)=>String(x.id??'').startsWith('OBS_'))){if(typeof s.description!=='string'||!s.description.trim())fail('NUMERIC_DESCRIPTION:'+s.id);if(/・数えるもの：|・基準：|opportunity model|candidate contract|runtime policy|denominator|benchmark/i.test(s.description))fail('NUMERIC_DESCRIPTION_RESPONSIBILITY:'+s.id);if(s.descriptionPresentation?.collapsible!==true)fail('NUMERIC_DESCRIPTION_PRESENTATION:'+s.id);}
+ for(const s of (p.ui?.v8Sections??[]).filter((x:any)=>String(x.id??'').startsWith('OBS_'))){if(typeof s.description!=='string'||!s.description.trim())fail('NUMERIC_DESCRIPTION:'+s.id);if(/・数えるもの：|・基準：|opportunity model|candidate contract|runtime policy|denominator|benchmark/i.test(s.description)||/\\n|\/n/i.test(s.description))fail('NUMERIC_DESCRIPTION_RESPONSIBILITY:'+s.id);if(s.descriptionPresentation?.collapsible!==true)fail('NUMERIC_DESCRIPTION_PRESENTATION:'+s.id);}
  const uiSections=p.ui?.v8Sections??[];const featureIds:string[]=[];const visit=(n:any)=>{if(n?.featureId)featureIds.push(n.featureId);for(const child of n?.inputs??[])visit(child)};for(const s of uiSections){for(const n of s.groups??[])visit(n);for(const n of s.items??[])visit(n)}
  const expectedFeatureIds=active.map((x:any)=>x.findingId).sort();if(canonical([...featureIds].sort())!==canonical(expectedFeatureIds))fail('UI_FEATURE_COVERAGE');
  const expectedEvidenceSectionIds=(projection.runtimeUi?.evidenceSections??[]).filter((s:any)=>(s.evidenceItems??[]).some((e:any)=>!links.linkedEvidenceIds.has(e.findingId))).map((s:any)=>s.id).sort();const actualEvidenceSectionIds=uiSections.filter((s:any)=>String(s.id??'').startsWith('EVI_')).map((s:any)=>s.id).sort();if(canonical(actualEvidenceSectionIds)!==canonical(expectedEvidenceSectionIds))fail('UI_EVIDENCE_SECTION_COVERAGE');
@@ -60,7 +60,7 @@ export function validateAppRuntimeDocument(doc:any,projection:any,projectionArti
   const input:any=inputBy.get(e.inputId);if(!input||input.type!=='counter'||(!linked&&input.inferenceRole!=='DISPLAY_ONLY')||(linked&&input.inferenceRole==='DISPLAY_ONLY'))fail('EVIDENCE_INPUT_BINDING');
  }
  for(const s of (p.ui?.v8Sections??[]).filter((x:any)=>String(x.id??'').startsWith('EVI_'))){
-  if(typeof s.description!=='string'||!s.description.trim()||/Evidence|・数えるもの：|・基準：|opportunity model|candidate contract|runtime policy|denominator|benchmark/i.test(s.description))fail('EVIDENCE_UI_RENDERABLE');
+  if(typeof s.description!=='string'||!s.description.trim()||/Evidence|・数えるもの：|・基準：|opportunity model|candidate contract|runtime policy|denominator|benchmark/i.test(s.description)||/\\n|\/n/i.test(s.description))fail('EVIDENCE_UI_RENDERABLE');
   const item=(s.items??[])[0];if(item?.interaction?.type!=='CATEGORY_COUNTERS'||item?.interaction?.categoryCoverage!=='NON_EXHAUSTIVE'||item?.interaction?.totalOpportunities!=='NONE'||!Array.isArray(item?.interaction?.categories)||item.interaction.categories.length===0)fail('EVIDENCE_UI_INPUT');
  }
  const summary=p.v8?.machineResearchSummary;if(!summary)fail('V8_SUMMARY');

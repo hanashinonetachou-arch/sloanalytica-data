@@ -121,9 +121,12 @@ jobs:
               if(/設定判別スコア|1回の判別力/.test(description))fail('METRIC_IN_DESCRIPTION:'+id+':'+section.title);
               if(/Evidence|denominator|trial universe|Candidate Contract|Runtime Policy|Opportunity model|joint model/i.test(description))fail('INTERNAL_DESCRIPTION_WORDING:'+id+':'+section.title);
               if(/・数えるもの：|・基準：/.test(description))fail('MECHANICAL_DESCRIPTION:'+id+':'+section.title);
+              if(/\\n|\/n/i.test(description))fail('LITERAL_BREAK_TOKEN:'+id+':'+section.title);
               for(const node of [...(section.groups??[]),...(section.items??[])]){
                 for(const input of node.inputs??[]){
-                  if(abstractLabels.has(String(input.label??'')))fail('ABSTRACT_UI_INPUT:'+id+':'+input.id);
+                  const label=String(input.label??'');
+                  if(abstractLabels.has(label))fail('ABSTRACT_UI_INPUT:'+id+':'+input.id);
+                  if(['denominator','counter'].includes(String(input.input??''))&&(label.length>30||/^(?:に|で|を|が|へ|から)/.test(label)))fail('NON_CONCISE_UI_INPUT:'+id+':'+input.id+':'+label);
                   if(restates(description,input.label))fail('DESCRIPTION_INPUT_RESTATEMENT:'+id+':'+input.id);
                 }
               }
