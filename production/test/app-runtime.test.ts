@@ -62,3 +62,20 @@ test('sanitizes internal terminology from blocked summary and feature rationale'
  assert.doesNotMatch(visible,/likelihood|joint model|dependency model|candidate contract|runtime policy|research|evaluation/i);
  assert.match(visible,/数値推測/);assert.match(visible,/要素を同時に扱う統計モデル/);assert.match(visible,/採用条件/);
 });
+
+test('structured Evidence categories survive to UI and only exact categories constrain settings',()=>{
+ const ev:any={id:'EVI_e',sourceFindingId:'e',title:'終了画面',runtimePolicyControlled:false,evidenceItems:[{findingId:'e',label:'終了画面',semanticType:'MIXED_CATEGORICAL',semanticCategories:[{label:'制服',meaning:'設定2以上示唆',semanticType:'PROBABILITY_UNKNOWN'},{label:'虹',meaning:'設定6濃厚',semanticType:'EXACT_CONSTRAINT'}],details:[]}]};
+ const p:any={...base,settings:{status:'SOURCE_DERIVED',values:['SET_1','SET_2','SET_3','SET_4','SET_5','SET_6']},evidence:[ev],runtimeUi:{...base.runtimeUi,evidenceSections:[ev]}};
+ const d=buildAppRuntime(p,ref);const section=d.package.ui.v8Sections.find((x:any)=>x.id==='EVI_e');
+ assert.deepEqual(section.items[0].interaction.categories.map((x:any)=>[x.label,x.meaning]),[['制服','設定2以上示唆'],['虹','設定6濃厚']]);
+ assert.equal(d.package.evidence.evidences.length,1);
+ assert.deepEqual(d.package.evidence.evidences[0].confirmedSettings,['SET_6']);
+ assert.match(section.description,/公表・確認されていない/);
+ assert.doesNotThrow(()=>validateAppRuntimeDocument(d,p,ref));
+});
+
+test('shows only the formal metric appropriate to the feature',()=>{
+ const p:any={...base,activeFeatures:[{findingId:'f',name:'初当り',model:'BERNOULLI',trialUniverse:'NORMAL_GAME_TRIAL',settingDistribution:{'1':'1/200','2':'1/150'},runtimePolicyBinding:{metric:'SELECTION_SCORE',value:12},score:{status:'COMPUTED',value:12}}],runtimeUi:{...base.runtimeUi,numericSections:[{id:'OBS_f',sourceFindingId:'f',title:'初当り',score:{status:'COMPUTED',value:12},perEligibleTrialPower:{value:12},inputs:[{id:'f.eligibleTrialCount',label:'観測機会数',role:'trial'},{id:'f.successCount',label:'該当回数',role:'success'}]}]}};
+ const d=buildAppRuntime(p,ref);const description=d.package.ui.v8Sections[0].description;
+ assert.match(description,/設定判別スコア/);assert.doesNotMatch(description,/1回の判別力/);
+});
