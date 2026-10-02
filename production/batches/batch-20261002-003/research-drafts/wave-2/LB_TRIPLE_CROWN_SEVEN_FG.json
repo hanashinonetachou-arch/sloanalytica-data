@@ -49,6 +49,19 @@
         "MB入賞時点灯",
         "BGM示唆"
       ]
+    },
+    {
+      "sourceId": "hazuse-triple-seven",
+      "url": "https://hazuse.com/machine/pachislot/5S1007/",
+      "title": "LBトリプルクラウンセブン 解析・設定推測",
+      "sourceType": "primary_analysis",
+      "claims": [
+        "搭載設定1・2・5・6",
+        "契機別BIG/REG実質出現率",
+        "100G連BGM設定別発生率",
+        "MB入賞時トロフィー点灯方向",
+        "BB/RB終了時LED・スペシャルトロフィー設定別出現率"
+      ]
     }
   ],
   "findings": [
@@ -210,44 +223,285 @@
     {
       "findingId": "mb-trophy-direction",
       "label": "BIG後半開始時MB入賞のトロフィー点灯方向",
-      "observationType": "evidence",
+      "observationType": "appearance_distribution",
       "sourceIds": [
-        "amuse-triple"
+        "hazuse-triple-seven"
       ],
       "trialUniverse": "BIG_MB_ENTRY_TRIAL",
-      "semanticType": "MIXED_CATEGORICAL",
-      "semanticCategories": [
-        {
-          "label": "下から上",
-          "meaning": "奇数設定示唆（弱）",
-          "semanticType": "PROBABILITY_UNKNOWN"
-        },
-        {
-          "label": "上から下",
-          "meaning": "偶数設定示唆（弱）",
-          "semanticType": "PROBABILITY_UNKNOWN"
-        }
-      ]
+      "settingDistribution": {
+        "1": "下から上 55% / 上から下 45%",
+        "2": "下から上 45% / 上から下 55%",
+        "5": "下から上 60% / 上から下 40%",
+        "6": "下から上 40% / 上から下 60%"
+      },
+      "categoryModel": {
+        "residualPolicy": "SOURCE_EXHAUSTIVE"
+      },
+      "denominatorSemantics": "BIG後半開始時にMBが入賞した回数に対する点灯方向（下から上/上から下）の内訳。"
+    },
+    {
+      "findingId": "single-bonus-trigger",
+      "label": "単独ボーナスの実質出現率",
+      "observationType": "reference_distribution",
+      "sourceIds": [
+        "hazuse-triple-seven"
+      ],
+      "settingDistribution": {
+        "1": "BIG 1/5957.8 / REG 1/13107.2",
+        "2": "BIG 1/5461.3 / REG 1/13107.2",
+        "5": "BIG 1/4096.0 / REG 1/10922.7",
+        "6": "BIG 1/2849.4 / REG 1/8192.0"
+      },
+      "trialUniverse": "TOTAL_GAME_TRIAL",
+      "denominatorSemantics": "総ゲーム数に対する単独BIG/REGの実質出現率。ボーナス合算・個別BIG/REGと重複するため参照保持する。"
+    },
+    {
+      "findingId": "replay-bonus-trigger",
+      "label": "リプレイ契機ボーナスの実質出現率",
+      "observationType": "reference_distribution",
+      "sourceIds": [
+        "hazuse-triple-seven"
+      ],
+      "settingDistribution": {
+        "1": "BIG 1/293.9 / REG 1/668.7",
+        "2": "BIG 1/291.3 / REG 1/668.7",
+        "5": "BIG 1/274.2 / REG 1/612.5",
+        "6": "BIG 1/257.0 / REG 1/560.1"
+      },
+      "trialUniverse": "REPLAY_ROLE_TRIAL",
+      "denominatorSemantics": "リプレイ成立を含む実質出現率。ボーナス・成立役と二重評価しないため参照保持する。"
+    },
+    {
+      "findingId": "cherry-bonus-trigger",
+      "label": "チェリー契機ボーナスの実質出現率",
+      "observationType": "reference_distribution",
+      "sourceIds": [
+        "hazuse-triple-seven"
+      ],
+      "settingDistribution": {
+        "1": "BIG 1/6553.6 / REG 1/16384",
+        "2": "BIG 1/5957.8 / REG 1/13107.2",
+        "5": "BIG 1/4369.1 / REG 1/10922.7",
+        "6": "BIG 1/2978.9 / REG 1/8192"
+      },
+      "trialUniverse": "CHERRY_ROLE_TRIAL",
+      "denominatorSemantics": "チェリー契機BIG/REGの実質出現率。チェリー成立回数・ボーナス回数との依存があるため参照保持する。"
+    },
+    {
+      "findingId": "plum-bonus-trigger",
+      "label": "プラム契機ボーナスの実質出現率",
+      "observationType": "reference_distribution",
+      "sourceIds": [
+        "hazuse-triple-seven"
+      ],
+      "settingDistribution": {
+        "1": "BIG 1/6553.6 / REG 1/16384",
+        "2": "BIG 1/5957.8 / REG 1/13107.2",
+        "5": "BIG 1/4369.1 / REG 1/10922.7",
+        "6": "BIG 1/2978.9 / REG 1/8192"
+      },
+      "trialUniverse": "PLUM_ROLE_TRIAL",
+      "denominatorSemantics": "プラム契機BIG/REGの実質出現率。プラム成立回数・ボーナス回数との依存があるため参照保持する。"
+    },
+    {
+      "findingId": "bb-in-bb-replay-big",
+      "label": "BB中BB当選・リプレイ契機BIGの実質出現率",
+      "observationType": "reference_distribution",
+      "sourceIds": [
+        "hazuse-triple-seven"
+      ],
+      "settingDistribution": {
+        "1": "1/293.9",
+        "2": "1/291.3",
+        "5": "1/274.2",
+        "6": "1/257.0"
+      },
+      "trialUniverse": "BB_GAME_TRIAL",
+      "denominatorSemantics": "BB消化中のリプレイ契機BIG。通常時ボーナスと観測機会が異なるため参照保持する。"
+    },
+    {
+      "findingId": "bb-100g-chain-ryukyu-bgm",
+      "label": "BIG 100G以内連チャン時「琉球メドレー」発生率",
+      "observationType": "conditional_probability",
+      "sourceIds": [
+        "hazuse-triple-seven"
+      ],
+      "settingDistribution": {
+        "1": 0.02,
+        "2": 0.03,
+        "5": 0.04,
+        "6": 0.04
+      },
+      "trialUniverse": "BB_WITHIN_100G_CHAIN_TRIAL",
+      "denominatorSemantics": "前回ボーナスから100G以内に成立したBIG回数に対する「琉球メドレー」発生回数。"
+    },
+    {
+      "findingId": "rb-100g-chain-asadoya-bgm",
+      "label": "REG 100G以内連チャン時「安里屋ユンタ」発生率",
+      "observationType": "conditional_probability",
+      "sourceIds": [
+        "hazuse-triple-seven"
+      ],
+      "settingDistribution": {
+        "1": 0.06,
+        "2": 0.12,
+        "5": 0.06,
+        "6": 0.15
+      },
+      "trialUniverse": "REG_WITHIN_100G_CHAIN_TRIAL",
+      "denominatorSemantics": "前回ボーナスから100G以内に成立したREG回数に対する「安里屋ユンタ」発生回数。"
+    },
+    {
+      "findingId": "bb-end-led-under-1000",
+      "label": "BIG終了時ランプ振り分け（累計獲得1000枚未満）",
+      "observationType": "reference_distribution",
+      "sourceIds": [
+        "hazuse-triple-seven"
+      ],
+      "settingDistribution": {
+        "1": "変化なし93% / クラウン7% / 下パネル0% / バット青0%",
+        "2": "変化なし91% / クラウン8% / 下パネル1% / バット青0%",
+        "5": "変化なし88.61% / クラウン10% / 下パネル1% / バット青0.39%",
+        "6": "変化なし88.61% / クラウン10% / 下パネル1% / バット青0.39%"
+      },
+      "trialUniverse": "BB_END_UNDER_1000_TRIAL",
+      "denominatorSemantics": "BIG終了時かつ当該BBまでの累計獲得枚数が1000枚未満の確認回数。Exact Evidenceとの二重入力を避け参照保持する。"
+    },
+    {
+      "findingId": "bb-end-led-1000-1999",
+      "label": "BIG終了時ランプ振り分け（累計獲得1000〜1999枚）",
+      "observationType": "reference_distribution",
+      "sourceIds": [
+        "hazuse-triple-seven"
+      ],
+      "settingDistribution": {
+        "1": "変化なし93% / クラウン7% / 下パネル0% / バット青0%",
+        "2": "変化なし90.98% / クラウン8% / 下パネル1.02% / バット青0%",
+        "5": "変化なし88.22% / クラウン10% / 下パネル1.39% / バット青0.39%",
+        "6": "変化なし87.61% / クラウン10% / 下パネル1.88% / バット青0.51%"
+      },
+      "trialUniverse": "BB_END_1000_1999_TRIAL",
+      "denominatorSemantics": "BIG終了時かつ累計獲得1000〜1999枚の確認回数。Exact Evidenceとの二重入力を避け参照保持する。"
+    },
+    {
+      "findingId": "bb-end-led-2000-plus",
+      "label": "BIG終了時ランプ振り分け（累計獲得2000枚以上）",
+      "observationType": "reference_distribution",
+      "sourceIds": [
+        "hazuse-triple-seven"
+      ],
+      "settingDistribution": {
+        "1": "変化なし93% / クラウン7% / 下パネル0% / バット青0%",
+        "2": "変化なし90.60% / クラウン8% / 下パネル1.39% / バット青0%",
+        "5": "変化なし87.22% / クラウン10% / 下パネル2.28% / バット青0.50%",
+        "6": "変化なし86.90% / クラウン10% / 下パネル2.63% / バット青0.46%"
+      },
+      "trialUniverse": "BB_END_2000_PLUS_TRIAL",
+      "denominatorSemantics": "BIG終了時かつ累計獲得2000枚以上の確認回数。Exact Evidenceとの二重入力を避け参照保持する。"
+    },
+    {
+      "findingId": "bb-in-bb-end-led",
+      "label": "BB中BB終了時ランプ振り分け",
+      "observationType": "reference_distribution",
+      "sourceIds": [
+        "hazuse-triple-seven"
+      ],
+      "settingDistribution": {
+        "1": "変化なし93% / クラウン7% / 下パネル0% / バット青0%",
+        "2": "変化なし90.60% / クラウン8% / 下パネル1.39% / バット青0%",
+        "5": "変化なし87.41% / クラウン10% / 下パネル2.09% / バット青0.50%",
+        "6": "変化なし86.50% / クラウン10% / 下パネル2.55% / バット青0.95%"
+      },
+      "trialUniverse": "BB_IN_BB_END_TRIAL",
+      "denominatorSemantics": "BB中BB終了時のランプ確認回数。Exact Evidenceとの二重入力を避け参照保持する。"
+    },
+    {
+      "findingId": "bb-trophy-under-1000",
+      "label": "BIG終了時スペシャルトロフィー振り分け（累計獲得1000枚未満）",
+      "observationType": "reference_distribution",
+      "sourceIds": [
+        "hazuse-triple-seven"
+      ],
+      "settingDistribution": {
+        "1": "なし99.74% / 緑0.22% / 赤0.04% / 虹0%",
+        "2": "なし98.46% / 緑1.43% / 赤0.10% / 虹0%",
+        "5": "なし97.66% / 緑1.68% / 赤0.66% / 虹0%",
+        "6": "なし97.29% / 緑1.75% / 赤0.76% / 虹0.20%"
+      },
+      "trialUniverse": "BB_TROPHY_UNDER_1000_TRIAL",
+      "denominatorSemantics": "BIG終了時かつ累計獲得1000枚未満のトロフィー確認回数。Exact Evidenceとの二重入力を避け参照保持する。"
+    },
+    {
+      "findingId": "bb-trophy-1000-1999",
+      "label": "BIG終了時スペシャルトロフィー振り分け（累計獲得1000〜1999枚）",
+      "observationType": "reference_distribution",
+      "sourceIds": [
+        "hazuse-triple-seven"
+      ],
+      "settingDistribution": {
+        "1": "なし99.74% / 緑0.22% / 赤0.04% / 虹0%",
+        "2": "なし98.39% / 緑1.50% / 赤0.12% / 虹0%",
+        "5": "なし96.80% / 緑2.42% / 赤0.78% / 虹0%",
+        "6": "なし95.41% / 緑3.32% / 赤1.07% / 虹0.20%"
+      },
+      "trialUniverse": "BB_TROPHY_1000_1999_TRIAL",
+      "denominatorSemantics": "BIG終了時かつ累計獲得1000〜1999枚のトロフィー確認回数。Exact Evidenceとの二重入力を避け参照保持する。"
+    },
+    {
+      "findingId": "bb-trophy-2000-plus",
+      "label": "BIG終了時スペシャルトロフィー振り分け（累計獲得2000枚以上）",
+      "observationType": "reference_distribution",
+      "sourceIds": [
+        "hazuse-triple-seven"
+      ],
+      "settingDistribution": {
+        "1": "なし99.44% / 緑0.44% / 赤0.12% / 虹0%",
+        "2": "なし96.85% / 緑2.71% / 赤0.44% / 虹0%",
+        "5": "なし94.58% / 緑4.02% / 赤1.40% / 虹0%",
+        "6": "なし92.90% / 緑5.08% / 赤1.61% / 虹0.42%"
+      },
+      "trialUniverse": "BB_TROPHY_2000_PLUS_TRIAL",
+      "denominatorSemantics": "BIG終了時かつ累計獲得2000枚以上のトロフィー確認回数。Exact Evidenceとの二重入力を避け参照保持する。"
+    },
+    {
+      "findingId": "bb-in-bb-trophy",
+      "label": "BB中BB終了時スペシャルトロフィー振り分け",
+      "observationType": "reference_distribution",
+      "sourceIds": [
+        "hazuse-triple-seven"
+      ],
+      "settingDistribution": {
+        "1": "なし98.88% / 緑0.88% / 赤0.24% / 虹0%",
+        "2": "なし95.77% / 緑3.45% / 赤0.78% / 虹0%",
+        "5": "なし91.36% / 緑6.17% / 赤2.47% / 虹0%",
+        "6": "なし87.70% / 緑7.60% / 赤3.43% / 虹1.27%"
+      },
+      "trialUniverse": "BB_IN_BB_TROPHY_TRIAL",
+      "denominatorSemantics": "BB中BB終了時のトロフィー確認回数。Exact Evidenceとの二重入力を避け参照保持する。"
+    },
+    {
+      "findingId": "rb-end-led",
+      "label": "REG終了時ランプ振り分け",
+      "observationType": "reference_distribution",
+      "sourceIds": [
+        "hazuse-triple-seven"
+      ],
+      "settingDistribution": {
+        "1": "変化なし100% / 下パネル0% / バット青0%",
+        "2": "変化なし100% / 下パネル0% / バット青0%",
+        "5": "変化なし99% / 下パネル1% / バット青0%",
+        "6": "変化なし98.81% / 下パネル1% / バット青0.20%"
+      },
+      "trialUniverse": "REG_END_TRIAL",
+      "denominatorSemantics": "REG終了時のランプ確認回数。Exact Evidenceとの二重入力を避け参照保持する。"
     }
   ],
   "blockedItems": [
-    {
-      "blockId": "triple-settings-3-4",
-      "label": "設定3・4の原分布",
-      "reason": "公開解析で設定3・4のBIG・REG・小役確率を確認できず、推定補完値は使用しない。",
-      "reevaluationCondition": "設定3・4の公表・解析値が信頼できる資料で確認できる。"
-    },
     {
       "blockId": "triple-bell",
       "label": "ベル確率",
       "reason": "正式な設定別ベル確率は未公表で、ショールーム実戦値のみの資料は原分布として採用しない。",
       "reevaluationCondition": "設定別ベル確率の解析値が公開される。"
-    },
-    {
-      "blockId": "triple-trigger-bonus",
-      "label": "プラム・チェリー契機ボーナス当選率",
-      "reason": "高設定ほど優遇という傾向は確認できるが設定別数値が未公表。",
-      "reevaluationCondition": "契機別ボーナス当選率が設定別に公開される。"
     }
   ],
   "researchCompleteness": {
@@ -259,7 +513,8 @@
         "sourceIds": [
           "onegeki-triple",
           "pachinavi-triple",
-          "amuse-triple"
+          "amuse-triple",
+          "hazuse-triple-seven"
         ],
         "note": "機種固有の解析ページと設定判別資料を横断確認し、確認できた設定差候補は findings または blockedItems に着地させた。該当する公表設定差がない場合も確認済みとして記録。"
       },
@@ -269,7 +524,8 @@
         "sourceIds": [
           "onegeki-triple",
           "pachinavi-triple",
-          "amuse-triple"
+          "amuse-triple",
+          "hazuse-triple-seven"
         ],
         "note": "機種固有の解析ページと設定判別資料を横断確認し、確認できた設定差候補は findings または blockedItems に着地させた。該当する公表設定差がない場合も確認済みとして記録。"
       },
@@ -279,7 +535,8 @@
         "sourceIds": [
           "onegeki-triple",
           "pachinavi-triple",
-          "amuse-triple"
+          "amuse-triple",
+          "hazuse-triple-seven"
         ],
         "note": "機種固有の解析ページと設定判別資料を横断確認し、確認できた設定差候補は findings または blockedItems に着地させた。該当する公表設定差がない場合も確認済みとして記録。"
       },
@@ -289,7 +546,8 @@
         "sourceIds": [
           "onegeki-triple",
           "pachinavi-triple",
-          "amuse-triple"
+          "amuse-triple",
+          "hazuse-triple-seven"
         ],
         "note": "機種固有の解析ページと設定判別資料を横断確認し、確認できた設定差候補は findings または blockedItems に着地させた。該当する公表設定差がない場合も確認済みとして記録。"
       },
@@ -299,7 +557,8 @@
         "sourceIds": [
           "onegeki-triple",
           "pachinavi-triple",
-          "amuse-triple"
+          "amuse-triple",
+          "hazuse-triple-seven"
         ],
         "note": "機種固有の解析ページと設定判別資料を横断確認し、確認できた設定差候補は findings または blockedItems に着地させた。該当する公表設定差がない場合も確認済みとして記録。"
       },
@@ -309,7 +568,8 @@
         "sourceIds": [
           "onegeki-triple",
           "pachinavi-triple",
-          "amuse-triple"
+          "amuse-triple",
+          "hazuse-triple-seven"
         ],
         "note": "機種固有の解析ページと設定判別資料を横断確認し、確認できた設定差候補は findings または blockedItems に着地させた。該当する公表設定差がない場合も確認済みとして記録。"
       },
@@ -319,7 +579,8 @@
         "sourceIds": [
           "onegeki-triple",
           "pachinavi-triple",
-          "amuse-triple"
+          "amuse-triple",
+          "hazuse-triple-seven"
         ],
         "note": "機種固有の解析ページと設定判別資料を横断確認し、確認できた設定差候補は findings または blockedItems に着地させた。該当する公表設定差がない場合も確認済みとして記録。"
       },
@@ -329,7 +590,8 @@
         "sourceIds": [
           "onegeki-triple",
           "pachinavi-triple",
-          "amuse-triple"
+          "amuse-triple",
+          "hazuse-triple-seven"
         ],
         "note": "機種固有の解析ページと設定判別資料を横断確認し、確認できた設定差候補は findings または blockedItems に着地させた。該当する公表設定差がない場合も確認済みとして記録。"
       },
@@ -339,7 +601,8 @@
         "sourceIds": [
           "onegeki-triple",
           "pachinavi-triple",
-          "amuse-triple"
+          "amuse-triple",
+          "hazuse-triple-seven"
         ],
         "note": "機種固有の解析ページと設定判別資料を横断確認し、確認できた設定差候補は findings または blockedItems に着地させた。該当する公表設定差がない場合も確認済みとして記録。"
       },
@@ -349,7 +612,8 @@
         "sourceIds": [
           "onegeki-triple",
           "pachinavi-triple",
-          "amuse-triple"
+          "amuse-triple",
+          "hazuse-triple-seven"
         ],
         "note": "機種固有の解析ページと設定判別資料を横断確認し、確認できた設定差候補は findings または blockedItems に着地させた。該当する公表設定差がない場合も確認済みとして記録。"
       },
@@ -359,7 +623,8 @@
         "sourceIds": [
           "onegeki-triple",
           "pachinavi-triple",
-          "amuse-triple"
+          "amuse-triple",
+          "hazuse-triple-seven"
         ],
         "note": "機種固有の解析ページと設定判別資料を横断確認し、確認できた設定差候補は findings または blockedItems に着地させた。該当する公表設定差がない場合も確認済みとして記録。"
       },
@@ -369,7 +634,8 @@
         "sourceIds": [
           "onegeki-triple",
           "pachinavi-triple",
-          "amuse-triple"
+          "amuse-triple",
+          "hazuse-triple-seven"
         ],
         "note": "機種固有の解析ページと設定判別資料を横断確認し、確認できた設定差候補は findings または blockedItems に着地させた。該当する公表設定差がない場合も確認済みとして記録。"
       },
@@ -379,7 +645,8 @@
         "sourceIds": [
           "onegeki-triple",
           "pachinavi-triple",
-          "amuse-triple"
+          "amuse-triple",
+          "hazuse-triple-seven"
         ],
         "note": "機種固有の解析ページと設定判別資料を横断確認し、確認できた設定差候補は findings または blockedItems に着地させた。該当する公表設定差がない場合も確認済みとして記録。"
       },
@@ -389,7 +656,8 @@
         "sourceIds": [
           "onegeki-triple",
           "pachinavi-triple",
-          "amuse-triple"
+          "amuse-triple",
+          "hazuse-triple-seven"
         ],
         "note": "機種固有の解析ページと設定判別資料を横断確認し、確認できた設定差候補は findings または blockedItems に着地させた。該当する公表設定差がない場合も確認済みとして記録。"
       },
@@ -399,7 +667,8 @@
         "sourceIds": [
           "onegeki-triple",
           "pachinavi-triple",
-          "amuse-triple"
+          "amuse-triple",
+          "hazuse-triple-seven"
         ],
         "note": "機種固有の解析ページと設定判別資料を横断確認し、確認できた設定差候補は findings または blockedItems に着地させた。該当する公表設定差がない場合も確認済みとして記録。"
       },
@@ -409,7 +678,8 @@
         "sourceIds": [
           "onegeki-triple",
           "pachinavi-triple",
-          "amuse-triple"
+          "amuse-triple",
+          "hazuse-triple-seven"
         ],
         "note": "機種固有の解析ページと設定判別資料を横断確認し、確認できた設定差候補は findings または blockedItems に着地させた。該当する公表設定差がない場合も確認済みとして記録。"
       },
@@ -419,7 +689,8 @@
         "sourceIds": [
           "onegeki-triple",
           "pachinavi-triple",
-          "amuse-triple"
+          "amuse-triple",
+          "hazuse-triple-seven"
         ],
         "note": "機種固有の解析ページと設定判別資料を横断確認し、確認できた設定差候補は findings または blockedItems に着地させた。該当する公表設定差がない場合も確認済みとして記録。"
       },
@@ -429,7 +700,8 @@
         "sourceIds": [
           "onegeki-triple",
           "pachinavi-triple",
-          "amuse-triple"
+          "amuse-triple",
+          "hazuse-triple-seven"
         ],
         "note": "機種固有の解析ページと設定判別資料を横断確認し、確認できた設定差候補は findings または blockedItems に着地させた。該当する公表設定差がない場合も確認済みとして記録。"
       },
@@ -439,7 +711,8 @@
         "sourceIds": [
           "onegeki-triple",
           "pachinavi-triple",
-          "amuse-triple"
+          "amuse-triple",
+          "hazuse-triple-seven"
         ],
         "note": "機種固有の解析ページと設定判別資料を横断確認し、確認できた設定差候補は findings または blockedItems に着地させた。該当する公表設定差がない場合も確認済みとして記録。"
       },
@@ -449,7 +722,8 @@
         "sourceIds": [
           "onegeki-triple",
           "pachinavi-triple",
-          "amuse-triple"
+          "amuse-triple",
+          "hazuse-triple-seven"
         ],
         "note": "機種固有の解析ページと設定判別資料を横断確認し、確認できた設定差候補は findings または blockedItems に着地させた。該当する公表設定差がない場合も確認済みとして記録。"
       }
@@ -459,7 +733,11 @@
       "プラム チェリー 契機 ボーナス 当選率",
       "単独ボーナス 設定差",
       "BIG REG 終了ランプ",
-      "スペシャルトロフィー MB 点灯方向"
+      "スペシャルトロフィー MB 点灯方向",
+      "単独 リプレイ チェリー プラム 同時当選 設定差",
+      "100G連 BGM 琉球メドレー 安里屋ユンタ 設定差",
+      "累計獲得枚数 終了ランプ トロフィー 振り分け",
+      "MB トロフィー点灯方向 設定別"
     ]
   }
 }
