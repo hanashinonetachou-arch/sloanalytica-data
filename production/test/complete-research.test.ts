@@ -6,6 +6,7 @@ import path from 'node:path';
 import {RepoStore,Orchestrator} from '../src/core.ts';
 import {initializeBatch,productionRequest} from '../src/runtime.ts';
 import {completeResearch} from '../src/complete-research.ts';
+import {RESEARCH_COMPLETENESS_DOMAINS} from '../src/research-validator.ts';
 
 test('complete-research computes SHA, commits through orchestrator, promotes dependency, and fills freed research slots',()=>{
  const root=fs.mkdtempSync(path.join(os.tmpdir(),'complete-research-'));
@@ -16,7 +17,7 @@ test('complete-research computes SHA, commits through orchestrator, promotes dep
  const o=new Orchestrator(s);
  for(const m of ['M1','M2']){
   let x=o.stage('b',m,'RESEARCH');const a=o.createAttempt(x),l=o.acquire(x,a);x=o.transition(o.stage('b',m,'RESEARCH'),'LEASED','DISPATCH',a.workId);x=o.transition(x,'RUNNING','WORKER_START',a.workId);const q=productionRequest(o,x,a,l);s.write(q,'batches','b','work-requests',q.workId+'.json');
-  const d={schemaVersion:'research-v1',manifestVersion:'8.5',batchId:'b',machineId:m,machineName:m,workId:q.workId,sources:[{sourceId:'s1',url:'https://example.com',title:'Source',sourceType:'official',claims:['c']}],findings:[{findingId:'f1',label:'rate',observationType:'probability',sourceIds:['s1'],settingDistribution:{'1':0.1,'6':0.2}}],blockedItems:[{blockId:'b1',label:'unknown',reason:'not published',reevaluationCondition:'publish values'}]};
+  const d={schemaVersion:'research-v1',manifestVersion:'8.5',batchId:'b',machineId:m,machineName:m,workId:q.workId,researchCompleteness:{version:1,domains:RESEARCH_COMPLETENESS_DOMAINS.map(domain=>({domain,status:'CHECKED',sourceIds:['s1'],note:'covered by source'})),machineSpecificQueries:['mode','distribution','reset']},sources:[{sourceId:'s1',url:'https://example.com',title:'Source',sourceType:'official',claims:['c']}],findings:[{findingId:'f1',label:'rate',observationType:'probability',sourceIds:['s1'],settingDistribution:{'1':0.1,'6':0.2}}],blockedItems:[{blockId:'b1',label:'unknown',reason:'not published',reevaluationCondition:'publish values'}]};
   const f=s.p('batches','b','artifacts',m,'research','result.json');fs.mkdirSync(path.dirname(f),{recursive:true});fs.writeFileSync(f,JSON.stringify(d,null,2));
  }
  const r=completeResearch(root,'b',['M1','M2']);
