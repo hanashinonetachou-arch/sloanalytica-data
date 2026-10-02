@@ -8,3 +8,10 @@ test('probability-unknown copy preserves uncertainty',()=>{const s=evidenceSeman
 test('mixed evidence stays aggregate-neutral while categories remain explicit',()=>{assert.equal(classifyEvidenceSemantic({label:'終了画面',details:['虹：設定6','制服：高設定示唆（強）']}),'DISPLAY_ONLY');assert.equal(classifyEvidenceLabel('虹：設定6'),'EXACT_CONSTRAINT');assert.equal(classifyEvidenceLabel('制服：高設定示唆（強）'),'PROBABILITY_UNKNOWN')});
 
 test('classifies parity-rich exact constraints',()=>{assert.equal(classifyEvidenceLabel('246枚：偶数設定濃厚'),'EXACT_CONSTRAINT');assert.equal(classifyEvidenceLabel('奇数設定濃厚'),'EXACT_CONSTRAINT');assert.equal(classifyEvidenceLabel('偶数設定示唆'),'PROBABILITY_UNKNOWN')});
+
+test('does not upgrade directional wording into an exact setting constraint',()=>{
+ assert.equal(classifyEvidenceLabel('1回：設定2以上の期待大'),'PROBABILITY_UNKNOWN');
+ assert.equal(classifyEvidenceLabel('赤：設定2以上示唆'),'PROBABILITY_UNKNOWN');
+ assert.equal(classifyEvidenceLabel('ヨナ＆ココ：設定2・4・6示唆'),'PROBABILITY_UNKNOWN');
+ assert.equal(classifyEvidenceLabel('金：設定4以上濃厚'),'EXACT_CONSTRAINT');
+});
