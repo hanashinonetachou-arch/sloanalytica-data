@@ -147,6 +147,30 @@ jobs:
           const uiText=pkg=>JSON.stringify(pkg.ui?.v8Sections??[]);
           const hardEvidenceText=pkg=>JSON.stringify(pkg.evidence?.evidences??[]);
 
+          const reauditIds=['L_GUNDAM_UNICORN_KAKUSEI_DRIVE_2JA','L_MILLION_GOD_KISEKI_CX','L_AKUDAMA_DRIVE_TP','L_KYOKOU_SUIRI_ST','L_SHINUCHI_YOSHIMUNE_A1','LB_TRIPLE_CROWN_SEVEN_FG','L_JORMUNGAND_ND01G'];
+          for(const id of reauditIds){
+            const research=read(path.join('batches',batch,'artifacts',id,'research','result.json'));
+            if(!research.researchCompleteness?.reaudit)fail('READAUDIT_MISSING:'+id);
+          }
+          const million=read(path.join('batches',batch,'artifacts','L_MILLION_GOD_KISEKI_CX','app_runtime','result.json')).package;
+          if(JSON.stringify(million.evidence?.evidences??[]).includes('ユニバプレート'))fail('MILLION_GOD_PLATE_WRONGLY_EXACT');
+          if(!JSON.stringify(million.ui?.v8Sections??[]).includes('本機の確定解析は未確認'))fail('MILLION_GOD_PLATE_CAUTION_MISSING');
+          const akudama=read(path.join('batches',batch,'artifacts','L_AKUDAMA_DRIVE_TP','app_runtime','result.json')).package;
+          if(!JSON.stringify(akudama.ui?.v8Sections??[]).includes('ST終了画面後の処刑課バトル規定セット否定'))fail('AKUDAMA_ST_DENIAL_MISSING');
+          const kyokou=read(path.join('batches',batch,'artifacts','L_KYOKOU_SUIRI_ST','app_runtime','result.json')).package;
+          for(const fid of ['bonus-end-screen-distribution','ayakashi-bonus-character-distribution']){
+            const rp=(kyokou.features?.runtimeProjection??[]).find(x=>x.featureId===fid);
+            if(!rp||rp.runtimeStatus!=='ACTIVE')fail('KYOKOU_ROUTE_INACTIVE:'+fid);
+          }
+          const yoshi=read(path.join('batches',batch,'artifacts','L_SHINUCHI_YOSHIMUNE_A1','app_runtime','result.json')).package;
+          if(!(yoshi.features?.runtimeProjection??[]).some(x=>x.featureId==='at-end-screen-distribution'&&x.runtimeStatus==='ACTIVE'))fail('YOSHIMUNE_AT_END_ROUTE_INACTIVE');
+          const jorm=read(path.join('batches',batch,'artifacts','L_JORMUNGAND_ND01G','app_runtime','result.json')).package;
+          for(const fid of ['reg-character-first-second-distribution','reg-character-third-distribution','bonus-end-screen-distribution']){
+            const rp=(jorm.features?.runtimeProjection??[]).find(x=>x.featureId===fid);
+            if(!rp||rp.runtimeStatus!=='ACTIVE')fail('JORM_ROUTE_INACTIVE:'+fid);
+          }
+          if(!JSON.stringify(jorm.ui?.v8Sections??[]).includes('222OVER'))fail('JORM_PAYOUT_EVIDENCE_MISSING');
+          if(!JSON.stringify(jorm.ui?.v8Sections??[]).includes('サブ液晶・設定示唆カード'))fail('JORM_SUBLCD_EVIDENCE_MISSING');
           const fire=read(path.join('batches',batch,'artifacts','L_FIRE_FORCE_2','app_runtime','result.json')).package;
           for(const fid of ['reg-character-scenario-selection','bonus-end-reg-accel-gray-distribution','bonus-end-fire-bonus-distribution'])if(!active(fire,fid))fail('FIRE_PROBABILITY_ROUTE_INACTIVE:'+fid);
           if(!uiText(fire).includes('REGキャラ・まもるくん'))fail('FIRE_MAMORU_EVIDENCE_MISSING');
