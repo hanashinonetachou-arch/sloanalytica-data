@@ -11,3 +11,14 @@ test('materializes source-explicit residual category',()=>{const c=structuredClo
 test('normalizes internal benchmark wording before user UI',()=>{const d=buildCanonicalUi(candidate,observation,evaluation,ca,oa,ea);for(const section of d.numericSections){assert.doesNotMatch(String(section.score?.reason??''),/opportunity model|research|exact exposure|denominator/i);assert.match(String(section.score?.reason??''),/観測条件/);}});
 
 test('shows +50 only for game-count denominators',()=>{const d=buildCanonicalUi(candidate,observation,evaluation,ca,oa,ea);assert.deepEqual(d.numericSections[0].inputs[0].quickAdd,[50]);assert.deepEqual(d.numericSections[1].inputs[0].quickAdd,[]);assert.equal(d.numericSections[0].inputs[1].quickAdd[0],1);assert.equal(d.numericSections[1].inputs[1].quickAdd[0],1);assert.doesNotThrow(()=>validateCanonicalUiDocument(d,candidate,observation,evaluation,ca,oa,ea))});
+
+test('uses unrounded selection score for importance threshold',()=>{
+ const c:any=structuredClone(candidate),o:any=structuredClone(observation),e:any=structuredClone(evaluation);
+ c.candidates=[{findingId:'b1',label:'初当り',model:'BERNOULLI',trialUniverse:'NORMAL_GAME_TRIAL',runtimeInferenceAllowed:true,settingDistribution:{'1':'1/100','6':'1/80'},runtimePolicyBinding:{metric:'SELECTION_SCORE',value:9.9802,thresholdSource:'RUNTIME_POLICY'}}];
+ o.observations=[{findingId:'b1',label:'初当り',model:'BERNOULLI',trialUniverse:'NORMAL_GAME_TRIAL',runtimeInferenceAllowed:true,observationStatus:'READY',collectionContract:{type:'SUCCESS_TRIAL_COUNTS',successField:'successCount',trialField:'eligibleTrialCount'}}];o.evidence=[];
+ e.evaluations=[{findingId:'b1',metrics:{selectionScore:{status:'COMPUTED',value:9.9802}},benchmarkExposure:{status:'EXACT',trials:7000}}];
+ const d=buildCanonicalUi(c,o,e,ca,oa,ea);
+ assert.equal(d.numericSections[0].score.value,10);
+ assert.equal(d.numericSections[0].score.importance,'補助');
+ assert.doesNotThrow(()=>validateCanonicalUiDocument(d,c,o,e,ca,oa,ea));
+});
