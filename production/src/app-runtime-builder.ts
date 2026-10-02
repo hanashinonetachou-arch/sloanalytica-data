@@ -1,3 +1,4 @@
+import {evidenceSemanticExplanation} from './evidence-semantics.ts';
 const heldReason=(x:any)=>x?.status==='HELD_NO_JOINT_MODEL'?'設定別出現率自体は確認できていますが、同じ観測範囲を使う複数要素を互いに独立とみなして同時加算できる根拠が確定していません。二重評価を避けるため、現在は単独の数値推測に使用していません。':'現在は数値推測に必要な条件が確定していません。';
 const heldReevaluation=(x:any)=>x?.status==='HELD_NO_JOINT_MODEL'?'同じ観測範囲の要素を同時に扱える依存関係モデル、または代表要素を選ぶ明示的な選定基準が確定したら再評価します。':undefined;
 const summaryLabel=(x:any,id:any)=>{const label=String(x?.name??x?.label??'').trim();const key=String(id??'').trim();if(!label||label==='設定推測要素'||label==='調査継続項目'||(key&&label===key))throw new Error('APP_RUNTIME_SUMMARY_LABEL_REQUIRED:'+key);return label;};
@@ -88,8 +89,11 @@ const numericUiSections=(projection:any)=>{
  return out;
 };
 const evidenceExplanation=(s:any)=>{
- const existing=String(s?.description??'').trim();if(existing)return existing;
- return '・数えるもの：'+String(s?.title??'設定示唆')+'\n・入力方法：確認するたび、該当する項目を1回加算します';
+ const existing=String(s?.description??'').trim();if(existing.includes('・数えるもの：'))return existing;
+ const types=[...new Set((s.evidenceItems??[]).flatMap((e:any)=>Array.isArray(e.semanticCategories)?e.semanticCategories.map((x:any)=>x.semanticType):[e.semanticType]).filter(Boolean))];
+ const details=(s.evidenceItems??[]).flatMap((e:any)=>Array.isArray(e.details)?e.details:[]).filter((x:any)=>typeof x==='string'&&x.trim());
+ const semantic=types.includes('EXACT_CONSTRAINT')&&types.some((x:any)=>x!=='EXACT_CONSTRAINT')?evidenceSemanticExplanation('EXACT_CONSTRAINT')+' '+types.filter((x:any)=>x!=='EXACT_CONSTRAINT').map((x:any)=>evidenceSemanticExplanation(x)).join(' '):evidenceSemanticExplanation((types[0]??'DISPLAY_ONLY') as any);
+ return [existing,...details,semantic].filter(Boolean).join('\n');
 };
 const evidenceCategoryPresentation=(raw:string)=>{
  const m=raw.match(/^(.+?)[：:]\s*(.+)$/);
