@@ -6,7 +6,7 @@ function scoreView(e:any){const s=e?.metrics?.selectionScore;if(s?.status==='COM
 function categoryLabels(distribution:any){const out:string[]=[];for(const v of Object.values(distribution??{})){if(v&&typeof v==='object'&&!Array.isArray(v)){for(const k of Object.keys(v))if(!out.includes(k))out.push(k);continue}if(typeof v!=='string')continue;for(const raw of v.split('/')){const label=raw.trim().replace(/[:\s]*[-+]?\d+(?:\.\d+)?%\s*$/,'').trim();if(label&&!out.includes(label))out.push(label)}}return out}
 const safeKey=(s:string,i:number)=>(i+1)+'_'+s.replace(/[^A-Za-z0-9一-龠ぁ-んァ-ヶー＋+_-]+/g,'_');
 const trialQuickAdd=(trialUniverse:any)=>typeof trialUniverse==='string'&&trialUniverse.includes('GAME_TRIAL')?[50]:[];
-const normalizeUserText=(v:any)=>String(v??'').replace(/\\\\n/g,'\n').replace(/\/n/gi,'\n');
+const normalizeUserText=(v:any)=>String(v??'').replace(/\\n/g,'\n').replace(/\/n/gi,'\n');
 const clean=(v:any)=>normalizeUserText(v).trim().replace(/[。．]+$/,'').trim();
 const sentences=(v:any)=>normalizeUserText(v).split(/[。．]|\n+/).map(clean).filter(Boolean);
 const knownTrialLabel=(u:any)=>{
