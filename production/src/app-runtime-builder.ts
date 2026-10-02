@@ -76,7 +76,7 @@ const evidenceCategoryPresentation=(raw:string)=>{
 };
 const evidenceCategoryRecords=(e:any)=>{
  const structured=Array.isArray(e.semanticCategories)?e.semanticCategories.filter((x:any)=>x&&typeof x==='object'&&typeof x.label==='string'&&x.label.trim()):[];
- if(structured.length)return structured.map((x:any)=>{const label=String(x.label).trim(),meaning=typeof x.meaning==='string'&&x.meaning.trim()?x.meaning.trim():'観測回数';return {label,meaning,semanticType:x.semanticType??e.semanticType,raw:meaning==='観測回数'?label:`${label}：${meaning}`};});
+ if(structured.length)return structured.map((x:any)=>{const rawLabel=String(x.label).trim();const parsed=evidenceCategoryPresentation(rawLabel);const explicitMeaning=typeof x.meaning==='string'&&x.meaning.trim()?x.meaning.trim():undefined;const label=explicitMeaning?rawLabel:parsed.label,meaning=explicitMeaning??parsed.meaning;return {label,meaning,semanticType:x.semanticType??e.semanticType,raw:explicitMeaning?`${label}：${meaning}`:rawLabel};});
  const details=Array.isArray(e.details)?e.details.filter((x:any)=>typeof x==='string'&&x.trim()):[];
  const labels=details.length?details:[e.label];
  return labels.map((raw:string)=>{const p=evidenceCategoryPresentation(raw);return {...p,semanticType:e.semanticType,raw};});
