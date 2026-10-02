@@ -8,10 +8,11 @@ export function validateObservationEvidenceDocument(doc:any,candidate:any,resear
  if(doc.batchId!==candidate.batchId||doc.machineId!==candidate.machineId||doc.machineId!==research.machineId)fail('IDENTITY');
  if(!Array.isArray(doc.observations)||!Array.isArray(doc.evidence)||!Array.isArray(doc.sourceReferences)||!Array.isArray(doc.blockedItems)||!Array.isArray(doc.sourceIntegrityIssues))fail('ARRAYS');
  if(doc.observations.length!==candidate.candidates.length)fail('OBSERVATION_COVERAGE');
- const byId=new Map(doc.observations.map((x:any)=>[x.findingId,x]));
+ const byId=new Map(doc.observations.map((x:any)=>[x.findingId,x]));const researchBy=new Map((research.findings??[]).map((x:any)=>[x.findingId,x]));
  for(const c of candidate.candidates){
-  const o:any=byId.get(c.findingId);if(!o)fail('MISSING:'+c.findingId);
+  const o:any=byId.get(c.findingId),r:any=researchBy.get(c.findingId);if(!o)fail('MISSING:'+c.findingId);
   if(o.model!==c.model||o.trialUniverse!==c.trialUniverse||o.liveInferenceRoute!==c.liveInferenceRoute||o.runtimeInferenceAllowed!==c.runtimeInferenceAllowed||o.dependencyResolution!==c.dependencyResolution)fail('COPY:'+c.findingId);
+  if(o.observationType!==r?.observationType||o.denominatorSemantics!==r?.denominatorSemantics||canonical(o.liveObservation)!==canonical(r?.liveObservation))fail('SEMANTICS:'+c.findingId);
   if(c.runtimeInferenceAllowed===false){
    if(c.dependencyResolution==='RESOLVED_IN_JOINT_MODEL'){
     if(o.observationStatus!=='RESOLVED_IN_JOINT_MODEL'||o.collectionContract!==null||o.resolvedIntoFindingId!==c.resolvedIntoFindingId)fail('RESOLVED_MEMBER:'+c.findingId);
@@ -28,7 +29,7 @@ export function validateObservationEvidenceDocument(doc:any,candidate:any,resear
  const expectedEvidence=candidate.evidenceCandidates??[];
  if(doc.evidence.length!==expectedEvidence.length)fail('EVIDENCE_COVERAGE');
  const evBy=new Map(doc.evidence.map((x:any)=>[x.findingId,x]));
- for(const e of expectedEvidence){const x:any=evBy.get(e.findingId);const sourceCategories=Array.isArray(e.semanticCategories)?e.semanticCategories:[];if(!x||x.label!==e.label||canonical(x.sourceIds)!==canonical(e.sourceIds??[])||canonical(x.details??[])!==canonical(e.details??[])||!EVIDENCE_SEMANTIC_TYPES.includes(x.semanticType)||x.semanticType!==classifyEvidenceSemantic(e)||!Array.isArray(x.semanticCategories)||x.semanticCategories.some((y:any)=>!EVIDENCE_SEMANTIC_TYPES.includes(y.semanticType))||(sourceCategories.length>0&&canonical(x.semanticCategories)!==canonical(sourceCategories))||x.runtimePolicyControlled!==false||x.status!=='SOURCE_REFERENCED')fail('EVIDENCE:'+e.findingId)}
+ for(const e of expectedEvidence){const x:any=evBy.get(e.findingId),r:any=researchBy.get(e.findingId);const sourceCategories=Array.isArray(e.semanticCategories)?e.semanticCategories:[];if(!x||x.label!==e.label||canonical(x.sourceIds)!==canonical(e.sourceIds??[])||canonical(x.details??[])!==canonical(e.details??[])||x.observationType!==(r?.observationType??'evidence')||x.trialUniverse!==r?.trialUniverse||x.denominatorSemantics!==r?.denominatorSemantics||!EVIDENCE_SEMANTIC_TYPES.includes(x.semanticType)||x.semanticType!==classifyEvidenceSemantic(e)||!Array.isArray(x.semanticCategories)||x.semanticCategories.some((y:any)=>!EVIDENCE_SEMANTIC_TYPES.includes(y.semanticType))||(sourceCategories.length>0&&canonical(x.semanticCategories)!==canonical(sourceCategories))||x.runtimePolicyControlled!==false||x.status!=='SOURCE_REFERENCED')fail('EVIDENCE:'+e.findingId)}
  const sourceIds=new Set((research.sources??[]).map((x:any)=>x.sourceId));
  for(const e of doc.evidence)for(const id of e.sourceIds)if(!sourceIds.has(id))fail('SOURCE_UNRESOLVED:'+id);
  if(canonical(doc.sourceReferences)!==canonical(research.sources??[]))fail('SOURCE_COPY');
