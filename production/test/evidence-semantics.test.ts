@@ -15,3 +15,6 @@ test('does not upgrade directional wording into an exact setting constraint',()=
  assert.equal(classifyEvidenceLabel('ヨナ＆ココ：設定2・4・6示唆'),'PROBABILITY_UNKNOWN');
  assert.equal(classifyEvidenceLabel('金：設定4以上濃厚'),'EXACT_CONSTRAINT');
 });
+
+
+test('multi-setting denial is an exact constraint',()=>{ assert.equal(classifyEvidenceLabel('来栖の刀：設定2・3否定'),'EXACT_CONSTRAINT'); });

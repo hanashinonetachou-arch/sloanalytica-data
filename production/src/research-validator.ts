@@ -15,6 +15,52 @@ const hex64=(x:any)=>typeof x==='string'&&/^[a-f0-9]{64}$/i.test(x);
 const repoRelative=(p:string)=>p.startsWith('production/')?p.slice('production/'.length):p;
 const sha256=(b:Buffer)=>crypto.createHash('sha256').update(b).digest('hex');
 
+export function validateResearchCandidateLedger(d:any,sourceIds:Set<any>){
+  const completeness=d.researchCompleteness;
+  const ledger=completeness?.candidateLedger;
+  if(!Array.isArray(ledger)||ledger.length===0) throw new Error('RESEARCH_VALIDATION:CANDIDATE_LEDGER_REQUIRED');
+  const sourceClaimKeys=new Set<string>();
+  for(const src of d.sources??[]) for(const claim of src.claims??[]){
+    if(!nonEmpty(claim)) throw new Error('RESEARCH_VALIDATION:SOURCE_CLAIM_INVALID:'+String(src?.sourceId??''));
+    sourceClaimKeys.add(String(src.sourceId)+'\u0000'+String(claim));
+  }
+  const findingIds=new Set<string>((d.findings??[]).map((x:any)=>String(x.findingId)));
+  const blockIds=new Set<string>((d.blockedItems??[]).map((x:any)=>String(x.blockId)));
+  const querySet=new Set<string>((completeness.machineSpecificQueries??[]).map((x:any)=>String(x)));
+  const coveredClaims=new Set<string>(),coveredQueries=new Set<string>(),coveredFindings=new Set<string>(),coveredBlocks=new Set<string>(),candidateIds=new Set<string>();
+  for(const row of ledger){
+    if(!nonEmpty(row?.candidateId)||candidateIds.has(row.candidateId)) throw new Error('RESEARCH_VALIDATION:CANDIDATE_LEDGER_ID');
+    candidateIds.add(row.candidateId);
+    if(!nonEmpty(row?.label)||!Array.isArray(row.sourceClaims)||!Array.isArray(row.discoveryQueries)||!row.disposition) throw new Error('RESEARCH_VALIDATION:CANDIDATE_LEDGER_ROW:'+row.candidateId);
+    if(row.sourceClaims.length===0&&row.discoveryQueries.length===0) throw new Error('RESEARCH_VALIDATION:CANDIDATE_LEDGER_UNTRACED:'+row.candidateId);
+    for(const sc of row.sourceClaims){
+      if(!nonEmpty(sc?.sourceId)||!nonEmpty(sc?.claim)||!sourceIds.has(sc.sourceId)) throw new Error('RESEARCH_VALIDATION:CANDIDATE_LEDGER_SOURCE:'+row.candidateId);
+      const key=String(sc.sourceId)+'\u0000'+String(sc.claim);
+      if(!sourceClaimKeys.has(key)) throw new Error('RESEARCH_VALIDATION:CANDIDATE_LEDGER_CLAIM:'+row.candidateId);
+      coveredClaims.add(key);
+    }
+    for(const q of row.discoveryQueries){
+      if(!nonEmpty(q)||!querySet.has(q)) throw new Error('RESEARCH_VALIDATION:CANDIDATE_LEDGER_QUERY:'+row.candidateId);
+      coveredQueries.add(q);
+    }
+    const disp=row.disposition;
+    if(disp.type==='FINDING'){
+      if(!nonEmpty(disp.refId)||!findingIds.has(disp.refId)) throw new Error('RESEARCH_VALIDATION:CANDIDATE_LEDGER_FINDING:'+row.candidateId);
+      coveredFindings.add(disp.refId);
+    }else if(disp.type==='BLOCKED'){
+      if(!nonEmpty(disp.refId)||!blockIds.has(disp.refId)) throw new Error('RESEARCH_VALIDATION:CANDIDATE_LEDGER_BLOCK:'+row.candidateId);
+      coveredBlocks.add(disp.refId);
+    }else if(disp.type==='NO_SETTING_DIFFERENCE'){
+      if(!nonEmpty(disp.reason)) throw new Error('RESEARCH_VALIDATION:CANDIDATE_LEDGER_NO_DIFF_REASON:'+row.candidateId);
+    }else throw new Error('RESEARCH_VALIDATION:CANDIDATE_LEDGER_DISPOSITION:'+row.candidateId);
+  }
+  for(const key of sourceClaimKeys) if(!coveredClaims.has(key)) throw new Error('RESEARCH_VALIDATION:SOURCE_CLAIM_UNCOVERED:'+key.replace('\u0000',':'));
+  for(const q of querySet) if(!coveredQueries.has(q)) throw new Error('RESEARCH_VALIDATION:QUERY_UNCOVERED:'+q);
+  for(const id of findingIds) if(!coveredFindings.has(id)) throw new Error('RESEARCH_VALIDATION:FINDING_UNLEDGERED:'+id);
+  for(const id of blockIds) if(!coveredBlocks.has(id)) throw new Error('RESEARCH_VALIDATION:BLOCK_UNLEDGERED:'+id);
+  return {ledgerCandidates:ledger.length,coveredSourceClaims:coveredClaims.size,coveredQueries:coveredQueries.size};
+}
+
 export function validateResearchArtifacts(s:RepoStore,a:Attempt,r:WorkResult){
   if(a.stage!=='RESEARCH'||r.status!=='SUCCESS') return [{validator:RESEARCH_VALIDATOR_CONTRACT,ok:true,skipped:a.stage!=='RESEARCH'}];
   if(r.producedArtifacts.length!==1) throw new Error('RESEARCH_VALIDATION:EXACTLY_ONE_ARTIFACT_REQUIRED');
@@ -32,7 +78,7 @@ export function validateResearchArtifacts(s:RepoStore,a:Attempt,r:WorkResult){
   }
   const sourceIds=new Set(d.sources.map((x:any)=>x.sourceId));
   const completeness=d.researchCompleteness;
-  if(!completeness||completeness.version!==1||!Array.isArray(completeness.domains)||!Array.isArray(completeness.machineSpecificQueries)||completeness.machineSpecificQueries.length<3) throw new Error('RESEARCH_VALIDATION:COMPLETENESS_REQUIRED');
+  if(!completeness||completeness.version!==2||!Array.isArray(completeness.domains)||!Array.isArray(completeness.machineSpecificQueries)||completeness.machineSpecificQueries.length<3||!Array.isArray(completeness.candidateLedger)||completeness.candidateLedger.length===0) throw new Error('RESEARCH_VALIDATION:COMPLETENESS_REQUIRED');
   const coverage=new Map<string,any>();
   for(const row of completeness.domains){
     if(!nonEmpty(row?.domain)||coverage.has(row.domain)) throw new Error('RESEARCH_VALIDATION:COMPLETENESS_DOMAIN_DUPLICATE');
@@ -43,6 +89,7 @@ export function validateResearchArtifacts(s:RepoStore,a:Attempt,r:WorkResult){
   for(const domain of RESEARCH_COMPLETENESS_DOMAINS) if(!coverage.has(domain)) throw new Error('RESEARCH_VALIDATION:COMPLETENESS_DOMAIN_MISSING:'+domain);
   for(const domain of coverage.keys()) if(!(RESEARCH_COMPLETENESS_DOMAINS as readonly string[]).includes(domain)) throw new Error('RESEARCH_VALIDATION:COMPLETENESS_DOMAIN_UNKNOWN:'+domain);
   if(completeness.machineSpecificQueries.some((x:any)=>!nonEmpty(x))) throw new Error('RESEARCH_VALIDATION:MACHINE_SPECIFIC_QUERY_INVALID');
+  const ledgerValidation=validateResearchCandidateLedger(d,sourceIds);
   for(const f of d.findings){
     if(!nonEmpty(f.findingId)||!nonEmpty(f.label)||!nonEmpty(f.observationType)||!Array.isArray(f.sourceIds)||f.sourceIds.length===0||f.sourceIds.some((x:any)=>!sourceIds.has(x))) throw new Error('RESEARCH_VALIDATION:FINDING_PROVENANCE');
     if(f.settingDistribution!==undefined){
@@ -64,5 +111,5 @@ export function validateResearchArtifacts(s:RepoStore,a:Attempt,r:WorkResult){
     if(!nonEmpty(b.blockId)||!nonEmpty(b.label)||!nonEmpty(b.reason)||!nonEmpty(b.reevaluationCondition)) throw new Error('RESEARCH_VALIDATION:BLOCK_REEVALUATION_REQUIRED');
     if(abstractResearchLabels.some(re=>re.test(b.label))) throw new Error('RESEARCH_VALIDATION:ABSTRACT_BLOCK_LABEL:'+b.blockId);
   }
-  return [{validator:RESEARCH_VALIDATOR_CONTRACT,ok:true,artifactPath:ref.path,sha256:ref.sha256,sources:d.sources.length,findings:d.findings.length,blockedItems:d.blockedItems.length,coverageDomains:coverage.size}];
+  return [{validator:RESEARCH_VALIDATOR_CONTRACT,ok:true,artifactPath:ref.path,sha256:ref.sha256,sources:d.sources.length,findings:d.findings.length,blockedItems:d.blockedItems.length,coverageDomains:coverage.size,...ledgerValidation}];
 }

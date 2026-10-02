@@ -43,7 +43,8 @@ const sectionExplanation=(f:any,s:any)=>{
  else if(typeof f.trialUniverse==='string'&&f.trialUniverse.includes('GAME_TRIAL'))guide='対象区間で実際に消化したゲーム数と、そのうち該当した回数を入力します。';
  else if(f.trialUniverse==='MILE_CHARGE_4PLUS_END_TRIAL')guide='まいるチャージ4回以上で終了した回数を「対象回数」、そのうち温泉ステージへ移行した回数を「回数」に入力します。';
  else if(f.trialUniverse==='CZ_TRUE_PREMONITION_TRIAL')guide='CZ本前兆となった回数を「対象回数」、そのうち温泉ステージへ移行した回数を「回数」に入力します。';
- return [guide,metric].filter(Boolean).join('\\n');
+ const details=Array.isArray(f.details)?f.details.filter((x:any)=>typeof x==='string'&&x.trim()):[];
+ return [...details,guide,metric].filter(Boolean).join('\\n');
 };
 const playDataSourceForTrialUniverse=(trialUniverse:any)=>
  trialUniverse==='TOTAL_GAME_TRIAL'?'PLAY_TOTAL_GAME_DELTA':
@@ -66,6 +67,8 @@ const numericUiSections=(projection:any)=>{
 };
 const evidenceExplanation=(s:any)=>{
  const types=[...new Set((s.evidenceItems??[]).flatMap((e:any)=>Array.isArray(e.semanticCategories)?e.semanticCategories.map((x:any)=>x.semanticType):[e.semanticType]).filter(Boolean))];
+ const details=(s.evidenceItems??[]).flatMap((e:any)=>Array.isArray(e.details)?e.details:[]).filter((x:any)=>typeof x==='string'&&x.trim());
+ if(details.length){const exact=types.includes('EXACT_CONSTRAINT')?evidenceSemanticExplanation('EXACT_CONSTRAINT'):'';return [...details,exact].filter(Boolean).join('\\n');}
  if(types.includes('EXACT_CONSTRAINT')&&types.some((x:any)=>x!=='EXACT_CONSTRAINT'))return evidenceSemanticExplanation('EXACT_CONSTRAINT')+' '+types.filter((x:any)=>x!=='EXACT_CONSTRAINT').map((x:any)=>evidenceSemanticExplanation(x)).join(' ');
  return evidenceSemanticExplanation((types[0]??'DISPLAY_ONLY') as any);
 };
@@ -127,6 +130,7 @@ const buildFeatures=(projection:any)=>{
 const evidenceConstraintFromLabel=(label:string,allSettings:string[])=>{
  const settings=[...allSettings];
  const above=label.match(/設定([1-6])以上/);if(above){const n=Number(above[1]);return {confirmedSettings:settings.filter(s=>Number(String(s).replace('SET_',''))>=n),deniedSettings:[]};}
+ const deniedList=label.match(/設定([1-6](?:[・,／\\/][1-6])+)否定/);if(deniedList){const nums=deniedList[1].split(/[・,／\\/]/);return {confirmedSettings:[],deniedSettings:settings.filter(s=>nums.includes(String(s).replace('SET_','')))};}
  const denied=label.match(/設定([1-6])否定/);if(denied)return {confirmedSettings:[],deniedSettings:['SET_'+denied[1]]};
  const listed=label.match(/設定([1-6](?:[・,／\/][1-6])+)(?:濃厚)?/);if(listed){const nums=listed[1].split(/[・,／\/]/);return {confirmedSettings:settings.filter(s=>nums.includes(String(s).replace('SET_',''))),deniedSettings:[]};}
  const parity=label.match(/(奇数|偶数)設定濃厚/);if(parity){const odd=parity[1]==='奇数';return {confirmedSettings:settings.filter(s=>{const n=Number(String(s).replace('SET_',''));return odd?n%2===1:n%2===0}),deniedSettings:[]};}
