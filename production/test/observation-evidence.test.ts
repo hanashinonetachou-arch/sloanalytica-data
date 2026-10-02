@@ -14,3 +14,10 @@ test('materializes ready Bernoulli/categorical and preserves joint-resolved memb
  assert.equal(d.evidence[0].semanticType,'DISPLAY_ONLY');
  assert.doesNotThrow(()=>validateObservationEvidenceDocument(d,candidate,research));
 });
+
+test('preserves Research Evidence category labels meanings and semantic types',()=>{
+ const candidate:any={batchId:'b',machineId:'M',machineName:'M',candidates:[],evidenceCandidates:[{findingId:'e',label:'終了画面',sourceIds:['s'],semanticType:'MIXED_CATEGORICAL',semanticCategories:[{label:'制服',meaning:'高設定示唆',semanticType:'PROBABILITY_UNKNOWN'},{label:'虹',meaning:'設定6濃厚',semanticType:'EXACT_CONSTRAINT'}]}],blockedItems:[],sourceIntegrityIssues:[]};
+ const d=buildObservationEvidence(candidate,research,{path:'c'});
+ assert.deepEqual(d.evidence[0].semanticCategories,candidate.evidenceCandidates[0].semanticCategories);
+ assert.doesNotThrow(()=>validateObservationEvidenceDocument(d,candidate,research));
+});
