@@ -1,4 +1,4 @@
-import test from 'node:test';import assert from 'node:assert/strict';import {validateEvaluationDocument} from '../src/evaluation-validator.ts';
+import test from 'node:test';import assert from 'node:assert/strict';import {validateEvaluationDocument} from '../src/evaluation-validator.ts';import {buildEvaluation} from '../src/evaluation-builder.ts';
 function h2(p:number){if(p===0||p===1)return 0;return -p*Math.log2(p)-(1-p)*Math.log2(1-p)}
 function perTrialIg(ps:number[]){const mean=ps.reduce((a,b)=>a+b,0)/ps.length;return h2(mean)-ps.reduce((a,p)=>a+h2(p),0)/ps.length}
 function logBinomial(k:number,n:number,p:number){if(p===0)return k===0?0:-Infinity;if(p===1)return k===n?0:-Infinity;let c=0;const j=Math.min(k,n-k);for(let i=1;i<=j;i++)c+=Math.log(n-j+i)-Math.log(i);return c+k*Math.log(p)+(n-k)*Math.log1p(-p)}
@@ -12,8 +12,8 @@ test('rejects upper-bound-only downgrade for exact normal-game benchmark',()=>{c
 
 test('validator accepts bounded published categorical rounding',()=>{
  const roundedResearch:any={batchId:'b',machineId:'M',blockedItems:[],findings:[{findingId:'c',label:'公開丸め表',observationType:'appearance_distribution',sourceIds:['s'],trialUniverse:'EVENT_TRIAL',settingDistribution:{'1':'A 54% / B 36% / C 4% / D 1% / E 2% / F 2% / G 2%','6':'A 34% / B 52% / C 4% / D 1% / E 2% / F 3% / G 3%'},categoryModel:{residualPolicy:'SOURCE_EXHAUSTIVE'}}]};
- const built=(await import('../src/evaluation-builder.ts')).buildEvaluation(roundedResearch);
+ const built=buildEvaluation(roundedResearch);
  assert.doesNotThrow(()=>validateEvaluationDocument(built,roundedResearch));
  const badResearch=structuredClone(roundedResearch);badResearch.findings[0].settingDistribution['1']='A 60% / B 45%';
- assert.throws(()=>{const bad=(await import('../src/evaluation-builder.ts')).buildEvaluation(badResearch);validateEvaluationDocument(bad,badResearch)},/EVAL_CATEGORY_SUM|INVALID_CATEGORY_SUM/);
+ assert.throws(()=>{const bad=buildEvaluation(badResearch);validateEvaluationDocument(bad,badResearch)},/EVAL_CATEGORY_SUM|INVALID_CATEGORY_SUM/);
 });
