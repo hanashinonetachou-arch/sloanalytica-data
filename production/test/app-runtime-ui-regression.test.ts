@@ -24,9 +24,10 @@ const baseProjection=(overrides:any={})=>({
       id:'OBS_f1',sourceFindingId:'f1',title:'ボーナス合成確率',
       score:{status:'BLOCKED_UNRESOLVED',reason:'観測条件不足'},
       perEligibleTrialPower:{value:7.25},
+      description:'・数えるもの：ボーナス当選回数\n・基準：通常ゲーム数',
       inputs:[
-        {id:'f1.eligibleTrialCount',label:'観測機会数',role:'trial',mode:'NUMBER',directNumeric:true,quickAdd:[50]},
-        {id:'f1.successCount',label:'該当回数',role:'success',mode:'NUMBER',directNumeric:true,quickAdd:[1]},
+        {id:'f1.eligibleTrialCount',label:'通常ゲーム数',role:'trial',mode:'NUMBER',directNumeric:true,quickAdd:[50]},
+        {id:'f1.successCount',label:'ボーナス当選回数',role:'success',mode:'NUMBER',directNumeric:true,quickAdd:[1]},
       ],
     }],
     evidenceSections:[],
@@ -39,8 +40,9 @@ test('PER adoption hides unavailable Selection Score reason and collapses explan
   const app=buildAppRuntime(baseProjection(),{path:'p'});
   const section=app.package.ui.v8Sections[0];
   const node=section.items[0];
-  assert.match(section.description,/通常ゲーム数に対する該当回数/);
-  assert.match(section.description,/1回の判別力：7.250/);
+  assert.match(section.description,/・数えるもの：ボーナス当選回数/);
+  assert.match(section.description,/・基準：通常ゲーム数/);
+  assert.doesNotMatch(section.description,/設定判別スコア|1回の判別力/);
   assert.deepEqual(section.descriptionPresentation,{collapsible:true,label:'説明',defaultExpanded:false});
   assert.equal(node.description,undefined);
   assert.doesNotMatch(section.description,/算出不可|観測条件不足/);
@@ -63,18 +65,18 @@ test('PER feature without Selection Score importance still gets a visible import
 
 
 test('conditional Bernoulli inputs use compact two-column labels',()=>{
-  const projection=baseProjection({activeFeatures:[{...baseProjection().activeFeatures[0],trialUniverse:'MILE_CHARGE_4PLUS_END_TRIAL'}],runtimeUi:{...baseProjection().runtimeUi,numericSections:[{...baseProjection().runtimeUi.numericSections[0],inputs:baseProjection().runtimeUi.numericSections[0].inputs}]}});
+  const projection=baseProjection({activeFeatures:[{...baseProjection().activeFeatures[0],trialUniverse:'MILE_CHARGE_4PLUS_END_TRIAL'}],runtimeUi:{...baseProjection().runtimeUi,numericSections:[{...baseProjection().runtimeUi.numericSections[0],description:'・数えるもの：温泉ステージへ移行した回数\n・基準：まいるチャージ4回以上で終了した回数',inputs:[{...baseProjection().runtimeUi.numericSections[0].inputs[0],label:'まいるチャージ4回以上で終了した回数'},{...baseProjection().runtimeUi.numericSections[0].inputs[1],label:'温泉ステージへ移行した回数'}]}]}});
   const app=buildAppRuntime(projection,{path:'p'});
   const inputs=app.package.ui.v8Sections[0].items[0].inputs;
-  assert.equal(inputs[0].label,'対象回数');
+  assert.equal(inputs[0].label,'まいるチャージ4回以上で終了した回数');
   assert.equal(inputs[0].gridSpan,6);
-  assert.equal(inputs[1].label,'回数');
+  assert.equal(inputs[1].label,'温泉ステージへ移行した回数');
   assert.equal(inputs[1].gridSpan,6);
 });
 
 
 test('numeric details are shown before metric guidance',()=>{
- const projection=baseProjection();projection.activeFeatures[0].details=['REG系と炎炎ボーナスを混ぜずに記録します。'];
+ const projection=baseProjection();projection.runtimeUi.numericSections[0].description+='\n・注意：REG系と炎炎ボーナスを混ぜずに記録します';
  const app=buildAppRuntime(projection,{path:'p'});
  assert.match(app.package.ui.v8Sections[0].description,/REG系と炎炎ボーナスを混ぜずに記録/);
 });
@@ -89,7 +91,7 @@ test('multi-setting denial Evidence eliminates every denied setting with one cou
 
 
 test('Evidence details replace stale unknown-probability fallback',()=>{
- const projection:any=baseProjection({activeFeatures:[],runtimeUi:{numericSections:[],evidenceSections:[{id:'EVI_e',title:'REG中の特殊キャラ',evidenceItems:[{findingId:'e',label:'REG中の特殊キャラ',details:['通常シナリオは別の設定推測入力で扱います。'],semanticType:'EXACT_CONSTRAINT',semanticCategories:[{label:'黒野',meaning:'設定4以上濃厚',semanticType:'EXACT_CONSTRAINT'}]}]}]},evidence:[{evidenceItems:[{findingId:'e',label:'REG中の特殊キャラ',details:['通常シナリオは別の設定推測入力で扱います。'],semanticType:'EXACT_CONSTRAINT',semanticCategories:[{label:'黒野',meaning:'設定4以上濃厚',semanticType:'EXACT_CONSTRAINT'}]}]}]});
+ const projection:any=baseProjection({activeFeatures:[],runtimeUi:{numericSections:[],evidenceSections:[{id:'EVI_e',title:'REG中の特殊キャラ',description:'・数えるもの：REG中の特殊キャラ\n・入力方法：確認するたび、該当する項目を1回加算します\n・注意：通常シナリオは別の設定推測入力で扱います',evidenceItems:[{findingId:'e',label:'REG中の特殊キャラ',details:['通常シナリオは別の設定推測入力で扱います。'],semanticType:'EXACT_CONSTRAINT',semanticCategories:[{label:'黒野',meaning:'設定4以上濃厚',semanticType:'EXACT_CONSTRAINT'}]}]}]},evidence:[{evidenceItems:[{findingId:'e',label:'REG中の特殊キャラ',details:['通常シナリオは別の設定推測入力で扱います。'],semanticType:'EXACT_CONSTRAINT',semanticCategories:[{label:'黒野',meaning:'設定4以上濃厚',semanticType:'EXACT_CONSTRAINT'}]}]}]});
  const app=buildAppRuntime(projection,{path:'p'});const section=app.package.ui.v8Sections[0];
  assert.match(section.description,/通常シナリオは別の設定推測入力/);assert.doesNotMatch(section.description,/設定別の出現率が公表・確認されていない/);
 });
