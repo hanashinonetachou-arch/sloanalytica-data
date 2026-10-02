@@ -36,42 +36,18 @@ jobs:
         run: |
           set -euo pipefail
           machines=(
-            L_GUNDAM_UNICORN_KAKUSEI_DRIVE_2JA
-            L_MILLION_GOD_KISEKI_CX
-            L_AKUDAMA_DRIVE_TP
             L_KYOKOU_SUIRI_ST
-            L_SHINUCHI_YOSHIMUNE_A1
-            LB_TRIPLE_CROWN_SEVEN_FG
-            L_JORMUNGAND_ND01G
-            L_FIRE_FORCE_2
           )
           for machine in "${machines[@]}"; do
             node --experimental-strip-types src/invalidate-machine-downstream.ts batch-20261002-003 "$machine" --include-research
           done
 
-      - name: Rematerialize the seven-machine re-audit plus Fire Force
+      - name: Rematerialize Kyokou copy repair
         working-directory: production
         shell: bash
         run: |
           set -euo pipefail
-          wave1=(
-            L_GUNDAM_UNICORN_KAKUSEI_DRIVE_2JA
-            L_MILLION_GOD_KISEKI_CX
-            L_AKUDAMA_DRIVE_TP
-            L_KYOKOU_SUIRI_ST
-            L_SHINUCHI_YOSHIMUNE_A1
-          )
-          wave2=(
-            LB_TRIPLE_CROWN_SEVEN_FG
-            L_JORMUNGAND_ND01G
-            L_FIRE_FORCE_2
-          )
-          for machine in "${wave1[@]}"; do
-            node --experimental-strip-types src/materialize-research-drafts.ts batch-20261002-003 wave-1 --force-machine="$machine" --force-only
-          done
-          for machine in "${wave2[@]}"; do
-            node --experimental-strip-types src/materialize-research-drafts.ts batch-20261002-003 wave-2 --force-machine="$machine" --force-only
-          done
+          node --experimental-strip-types src/materialize-research-drafts.ts batch-20261002-003 wave-1 --force-machine="L_KYOKOU_SUIRI_ST" --force-only
       - name: Regenerate re-audited machines through App Runtime
         working-directory: production
         run: node --experimental-strip-types src/deterministic-production-worker.ts batch-20261002-003 --through APP_RUNTIME
