@@ -74,7 +74,7 @@ const evidenceCategoryPresentation=(raw:string)=>{
  if(m&&/設定|示唆|濃厚|否定|以上|奇数|偶数|高設定|低設定/.test(m[2]))return {label:m[1].trim(),meaning:m[2].trim()};
  return {label:raw,meaning:'観測回数'};
 };
-const evidenceCategoryRecords=(e:any)=>{
+export const evidenceCategoryRecords=(e:any)=>{
  const structured=Array.isArray(e.semanticCategories)?e.semanticCategories.filter((x:any)=>x&&typeof x==='object'&&typeof x.label==='string'&&x.label.trim()):[];
  if(structured.length)return structured.map((x:any)=>{const rawLabel=String(x.label).trim();const parsed=evidenceCategoryPresentation(rawLabel);const explicitMeaning=typeof x.meaning==='string'&&x.meaning.trim()?x.meaning.trim():undefined;const label=explicitMeaning?rawLabel:parsed.label,meaning=explicitMeaning??parsed.meaning;return {label,meaning,semanticType:x.semanticType??e.semanticType,raw:explicitMeaning?`${label}：${meaning}`:rawLabel};});
  const details=Array.isArray(e.details)?e.details.filter((x:any)=>typeof x==='string'&&x.trim()):[];
