@@ -71,3 +71,25 @@ test('conditional Bernoulli inputs use compact two-column labels',()=>{
   assert.equal(inputs[1].label,'回数');
   assert.equal(inputs[1].gridSpan,6);
 });
+
+
+test('numeric details are shown before metric guidance',()=>{
+ const projection=baseProjection();projection.activeFeatures[0].details=['REG系と炎炎ボーナスを混ぜずに記録します。'];
+ const app=buildAppRuntime(projection,{path:'p'});
+ assert.match(app.package.ui.v8Sections[0].description,/REG系と炎炎ボーナスを混ぜずに記録/);
+});
+
+
+test('multi-setting denial Evidence eliminates every denied setting with one counter',()=>{
+ const projection:any=baseProjection({activeFeatures:[],runtimeUi:{numericSections:[],evidenceSections:[{id:'EVI_e',title:'アイテムくじ',evidenceItems:[{findingId:'e',label:'アイテムくじ',semanticType:'EXACT_CONSTRAINT',semanticCategories:[{label:'来栖の刀',meaning:'設定2・3否定',semanticType:'EXACT_CONSTRAINT'}]}]}]},evidence:[{evidenceItems:[{findingId:'e',label:'アイテムくじ',semanticType:'EXACT_CONSTRAINT',semanticCategories:[{label:'来栖の刀',meaning:'設定2・3否定',semanticType:'EXACT_CONSTRAINT'}]}]}]});
+ projection.settings.values=['SET_1','SET_2','SET_3','SET_4','SET_5','SET_6'];
+ const app=buildAppRuntime(projection,{path:'p'});
+ assert.deepEqual(app.package.evidence.evidences[0].deniedSettings,['SET_2','SET_3']);
+});
+
+
+test('Evidence details replace stale unknown-probability fallback',()=>{
+ const projection:any=baseProjection({activeFeatures:[],runtimeUi:{numericSections:[],evidenceSections:[{id:'EVI_e',title:'REG中の特殊キャラ',evidenceItems:[{findingId:'e',label:'REG中の特殊キャラ',details:['通常シナリオは別の設定推測入力で扱います。'],semanticType:'EXACT_CONSTRAINT',semanticCategories:[{label:'黒野',meaning:'設定4以上濃厚',semanticType:'EXACT_CONSTRAINT'}]}]}]},evidence:[{evidenceItems:[{findingId:'e',label:'REG中の特殊キャラ',details:['通常シナリオは別の設定推測入力で扱います。'],semanticType:'EXACT_CONSTRAINT',semanticCategories:[{label:'黒野',meaning:'設定4以上濃厚',semanticType:'EXACT_CONSTRAINT'}]}]}]});
+ const app=buildAppRuntime(projection,{path:'p'});const section=app.package.ui.v8Sections[0];
+ assert.match(section.description,/通常シナリオは別の設定推測入力/);assert.doesNotMatch(section.description,/設定別の出現率が公表・確認されていない/);
+});
