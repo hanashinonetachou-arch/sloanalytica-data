@@ -34,6 +34,45 @@
         "live-observation-contract"
       ],
       "liveInferenceRoute": "LIVE_CONDITIONAL"
+    },
+    {
+      "findingId": "reg-character-scenario-selection",
+      "label": "REG中キャラ紹介シナリオの設定別選択率",
+      "supportingSourceIds": [
+        "nana-fire-reg-character"
+      ],
+      "eligibility": "NOT_APPLICABLE",
+      "reason": "参考分布として保存するが設定推測Featureには使用しない。",
+      "ruleRefs": [
+        "manifest-v8.5-reference-only"
+      ],
+      "liveInferenceRoute": "NONE"
+    },
+    {
+      "findingId": "bonus-end-reg-accel-gray-distribution",
+      "label": "REG・アクセル・灰焰ボーナス終了画面の設定別振り分け",
+      "supportingSourceIds": [
+        "nana-fire-bonus-end"
+      ],
+      "eligibility": "NOT_APPLICABLE",
+      "reason": "参考分布として保存するが設定推測Featureには使用しない。",
+      "ruleRefs": [
+        "manifest-v8.5-reference-only"
+      ],
+      "liveInferenceRoute": "NONE"
+    },
+    {
+      "findingId": "bonus-end-fire-bonus-distribution",
+      "label": "炎炎ボーナス終了画面の設定別振り分け",
+      "supportingSourceIds": [
+        "nana-fire-bonus-end"
+      ],
+      "eligibility": "NOT_APPLICABLE",
+      "reason": "参考分布として保存するが設定推測Featureには使用しない。",
+      "ruleRefs": [
+        "manifest-v8.5-reference-only"
+      ],
+      "liveInferenceRoute": "NONE"
     }
   ],
   "blockedItems": [
@@ -51,15 +90,9 @@
     },
     {
       "blockId": "fire-reset-benefit",
-      "label": "有利区間リセット後の恩恵",
-      "reason": "高設定優遇は確認できるが設定別の完全な数値分布がない。",
-      "reevaluationCondition": "恩恵振り分けが設定別に公開される。"
-    },
-    {
-      "blockId": "fire-evidence-rates",
-      "label": "設定示唆演出の設定別出現率",
-      "reason": "示唆内容は確認できるが全演出の設定別出現率が揃っていない。",
-      "reevaluationCondition": "終了画面・キャラ・枚数表示等の設定別出現率が公開される。"
+      "label": "有利区間リセット後の炎炎大戦・紅J大戦選択率",
+      "reason": "炎炎大戦・紅J大戦が高設定ほど選ばれやすいことは確認できるが、全設定別の選択率が公開されていない。",
+      "reevaluationCondition": "有利区間リセット後の炎炎大戦・紅J大戦選択率が全設定別に公開される。"
     }
   ],
   "evidenceCandidates": [
@@ -102,26 +135,101 @@
     },
     {
       "findingId": "reg-character",
-      "label": "REG中キャラ紹介",
+      "label": "REG中キャラ紹介シナリオ",
       "sourceIds": [
         "nana-fire-setting",
-        "nana-fire-reg"
+        "nana-fire-reg-character"
       ],
-      "details": [],
+      "details": [
+        "REG中は5人のキャラ紹介を1シナリオ単位で確認する。",
+        "アイリス①〜⑤は設定1〜5をそれぞれ否定。まもるくんの登場位置で判別できる。",
+        "アイリス⑥は設定6濃厚。アイリスシナリオでまもるくんが1人も出なければアイリス⑥に該当する。",
+        "設定別シナリオ選択率も公開されているが、Evidenceの確定・否定条件と二重入力させないため別candidateとして保持する。"
+      ],
       "semanticType": "MIXED_CATEGORICAL",
       "semanticCategories": [
         {
-          "label": "第8③/第8④/大隊長/黒野",
-          "meaning": "設定4以上濃厚を含むパターン",
+          "label": "第8②",
+          "meaning": "偶数設定示唆",
+          "semanticType": "PROBABILITY_UNKNOWN"
+        },
+        {
+          "label": "第8③",
+          "meaning": "設定4以上濃厚",
           "semanticType": "EXACT_CONSTRAINT"
         },
         {
-          "label": "伝導者④/ジョーカー",
+          "label": "第8④",
+          "meaning": "設定6濃厚",
+          "semanticType": "EXACT_CONSTRAINT"
+        },
+        {
+          "label": "伝導者①",
+          "meaning": "奇数設定示唆",
+          "semanticType": "PROBABILITY_UNKNOWN"
+        },
+        {
+          "label": "伝導者②",
+          "meaning": "高設定示唆（弱）",
+          "semanticType": "PROBABILITY_UNKNOWN"
+        },
+        {
+          "label": "伝導者③",
+          "meaning": "高設定示唆（強）",
+          "semanticType": "PROBABILITY_UNKNOWN"
+        },
+        {
+          "label": "伝導者④",
           "meaning": "設定5以上濃厚",
           "semanticType": "EXACT_CONSTRAINT"
         },
         {
-          "label": "シンラ（死ノ圧）",
+          "label": "アイリス①（1人目まもるくん）",
+          "meaning": "設定1否定",
+          "semanticType": "EXACT_CONSTRAINT"
+        },
+        {
+          "label": "アイリス②（2人目まもるくん）",
+          "meaning": "設定2否定",
+          "semanticType": "EXACT_CONSTRAINT"
+        },
+        {
+          "label": "アイリス③（3人目まもるくん）",
+          "meaning": "設定3否定",
+          "semanticType": "EXACT_CONSTRAINT"
+        },
+        {
+          "label": "アイリス④（4人目まもるくん）",
+          "meaning": "設定4否定",
+          "semanticType": "EXACT_CONSTRAINT"
+        },
+        {
+          "label": "アイリス⑤（5人目まもるくん）",
+          "meaning": "設定5否定",
+          "semanticType": "EXACT_CONSTRAINT"
+        },
+        {
+          "label": "アイリス⑥（まもるくん無し・全赤）",
+          "meaning": "設定6濃厚",
+          "semanticType": "EXACT_CONSTRAINT"
+        },
+        {
+          "label": "大隊長",
+          "meaning": "設定4以上濃厚",
+          "semanticType": "EXACT_CONSTRAINT"
+        },
+        {
+          "label": "特殊キャラ 優一郎 黒野",
+          "meaning": "設定4以上濃厚",
+          "semanticType": "EXACT_CONSTRAINT"
+        },
+        {
+          "label": "特殊キャラ ジョーカー",
+          "meaning": "設定5以上濃厚",
+          "semanticType": "EXACT_CONSTRAINT"
+        },
+        {
+          "label": "特殊キャラ シンラ（死ノ圧）",
           "meaning": "設定6濃厚",
           "semanticType": "EXACT_CONSTRAINT"
         }
