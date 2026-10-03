@@ -6,7 +6,7 @@ import path from 'node:path';
 import {RepoStore,Orchestrator} from '../src/core.ts';
 import {initializeBatch,productionRequest} from '../src/runtime.ts';
 import {completeResearch} from '../src/complete-research.ts';
-import {RESEARCH_COMPLETENESS_DOMAINS,validateResearchCandidateLedger} from '../src/research-validator.ts';
+import {RESEARCH_COMPLETENESS_DOMAINS,validateResearchCandidateLedger,validateResearchLiveObservationContract} from '../src/research-validator.ts';
 
 test('complete-research computes SHA, commits through orchestrator, promotes dependency, and fills freed research slots',()=>{
  const root=fs.mkdtempSync(path.join(os.tmpdir(),'complete-research-'));
@@ -36,4 +36,12 @@ test('research completeness v2 ledger rejects silent source/query/finding omissi
  const missingClaim=structuredClone(d);missingClaim.researchCompleteness.candidateLedger[1].sourceClaims=[];assert.throws(()=>validateResearchCandidateLedger(missingClaim,new Set(['s1'])),/CANDIDATE_LEDGER_UNTRACED|SOURCE_CLAIM_UNCOVERED/);
  const missingQuery=structuredClone(d);missingQuery.researchCompleteness.candidateLedger[0].discoveryQueries=[];assert.throws(()=>validateResearchCandidateLedger(missingQuery,new Set(['s1'])),/QUERY_UNCOVERED/);
  const missingFinding=structuredClone(d);missingFinding.researchCompleteness.candidateLedger[0].disposition={type:'NO_SETTING_DIFFERENCE',reason:'none'};assert.throws(()=>validateResearchCandidateLedger(missingFinding,new Set(['s1'])),/FINDING_UNLEDGERED/);
+});
+
+
+test('rejects unsupported live-observation vocabulary at Research boundary',()=>{
+ assert.doesNotThrow(()=>validateResearchLiveObservationContract({findingId:'f',liveObservation:{status:'DIRECT_EXACT',reason:'対象回数と成功回数を実戦で記録できる。'}}));
+ assert.doesNotThrow(()=>validateResearchLiveObservationContract({findingId:'f'}));
+ assert.throws(()=>validateResearchLiveObservationContract({findingId:'f',liveObservation:{status:'OBSERVABLE_BY_VISUAL_HACK',reason:'独自語彙'}}),/LIVE_OBSERVATION_CONTRACT:f/);
+ assert.throws(()=>validateResearchLiveObservationContract({findingId:'f',liveObservation:{status:'EXACT_WITH_SCOPE_TRACKING',reason:''}}),/LIVE_OBSERVATION_CONTRACT:f/);
 });
