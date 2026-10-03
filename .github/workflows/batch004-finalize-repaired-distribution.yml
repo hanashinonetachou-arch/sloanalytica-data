@@ -1,0 +1,57 @@
+name: Batch004 Finalize Repaired Distribution
+
+on:
+  push:
+    branches:
+      - production/v85-batch-004-foundation-20261003
+    paths:
+      - production/.batch004-finalize-repaired-distribution-trigger
+
+permissions:
+  contents: write
+
+concurrency:
+  group: batch004-finalize-repaired-distribution
+  cancel-in-progress: false
+
+jobs:
+  finalize:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: production/v85-batch-004-foundation-20261003
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - name: Finalize Wave 1 and Wave 2 using the published repair attestation
+        working-directory: production
+        run: |
+          node --experimental-strip-types src/finalize-batch-distribution.ts batch-20261003-004 batches/batch-20261003-004/distribution-repair-attestation.json wave-1
+          node --experimental-strip-types src/finalize-batch-distribution.ts batch-20261003-004 batches/batch-20261003-004/distribution-repair-attestation.json wave-2
+          npm test
+          node --experimental-strip-types src/reconcile-batch.ts batch-20261003-004
+      - name: Assert all Batch 004 Distribution stages complete
+        working-directory: production
+        run: |
+          node <<'NODE'
+          const fs=require('fs'),path=require('path');
+          const ids=['L_BURNING_EXPRESS_ZN','L_PRISM_NANA_CC','L_GINGA_EIYUU_DNT_GH','L_HIHODEN_PA7','L_OKIDOKI_DUO_ENCORE_FR','L_HOKUTO_TENSEI_2_MW','L_TEKKEN_6_YD01H','L_HANMA_BAKI_L5','L_GOBLIN_SLAYER_2_JZ','L_GHOST_IN_THE_SHELL_ZS'];
+          for(const id of ids){
+            const s=JSON.parse(fs.readFileSync(path.join('batches','batch-20261003-004','machines',id,'stages','DISTRIBUTION.json'),'utf8'));
+            if(s.state!=='COMPLETE')throw new Error('DISTRIBUTION_NOT_COMPLETE:'+id+':'+s.state);
+          }
+          console.log(JSON.stringify({status:'PASS',distributionComplete:ids.length},null,2));
+          NODE
+      - name: Commit finalized state
+        shell: bash
+        run: |
+          set -euo pipefail
+          git fetch origin production/v85-batch-004-foundation-20261003
+          test "$(git rev-parse HEAD)" = "$(git rev-parse origin/production/v85-batch-004-foundation-20261003)" || exit 1
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git add production/batches/batch-20261003-004
+          git commit -m "Finalize repaired Batch 004 Distribution stages [skip ci]"
+          git push origin HEAD:production/v85-batch-004-foundation-20261003
