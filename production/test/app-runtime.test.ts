@@ -100,3 +100,18 @@ test('reuses one categorical input for exact Evidence when mapping is unambiguou
  assert.match(d.package.ui.v8Sections.find((s:any)=>s.id==='OBS_reg').description,/別の欄へ重ねて入力する必要はありません/);
  assert.doesNotThrow(()=>validateAppRuntimeDocument(d,p,ref));
 });
+
+
+test('reference-only decision preserves its concrete user-facing reason',()=>{
+ const p:any={...base,excludedDecisions:[{
+   findingId:'ref',label:'内部モード別の当選率',eligibility:'NOT_APPLICABLE',
+   reason:'参考分布として保存するが設定推測Featureには使用しない。',
+   userFacingReason:'内部モードを実戦中に常時確定できないため、設定別原分布は参考情報として保持します。',
+   reevaluationCondition:'内部モードを全サンプルで確定できる観測方法が確立すること。'
+ }]};
+ const d=buildAppRuntime(p,ref);
+ const entry=d.package.v8.machineResearchSummary.notAdopted.find((x:any)=>x.featureId==='ref');
+ assert.equal(entry.reason,'内部モードを実戦中に常時確定できないため、設定別原分布は参考情報として保持します。');
+ assert.match(entry.reevaluationCondition,/観測条件/);
+ assert.doesNotThrow(()=>validateAppRuntimeDocument(d,p,ref));
+});
