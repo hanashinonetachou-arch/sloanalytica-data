@@ -6,7 +6,7 @@ import path from 'node:path';
 import {RepoStore,Orchestrator} from '../src/core.ts';
 import {initializeBatch,productionRequest} from '../src/runtime.ts';
 import {completeResearch} from '../src/complete-research.ts';
-import {RESEARCH_COMPLETENESS_DOMAINS,validateResearchCandidateLedger,validateResearchLiveObservationContract} from '../src/research-validator.ts';
+import {RESEARCH_COMPLETENESS_DOMAINS,validateResearchCandidateLedger,validateResearchLiveObservationContract,validateResearchUserFacingTextContract} from '../src/research-validator.ts';
 
 test('complete-research computes SHA, commits through orchestrator, promotes dependency, and fills freed research slots',()=>{
  const root=fs.mkdtempSync(path.join(os.tmpdir(),'complete-research-'));
@@ -44,4 +44,11 @@ test('rejects unsupported live-observation vocabulary at Research boundary',()=>
  assert.doesNotThrow(()=>validateResearchLiveObservationContract({findingId:'f'}));
  assert.throws(()=>validateResearchLiveObservationContract({findingId:'f',liveObservation:{status:'OBSERVABLE_BY_VISUAL_HACK',reason:'独自語彙'}}),/LIVE_OBSERVATION_CONTRACT:f/);
  assert.throws(()=>validateResearchLiveObservationContract({findingId:'f',liveObservation:{status:'EXACT_WITH_SCOPE_TRACKING',reason:''}}),/LIVE_OBSERVATION_CONTRACT:f/);
+});
+
+
+test('rejects internal user-facing Research text before Canonical UI',()=>{
+ assert.doesNotThrow(()=>validateResearchUserFacingTextContract({findingId:'f',label:'終了画面',details:['設定別の出現率は未確認のため記録のみです。']}));
+ assert.throws(()=>validateResearchUserFacingTextContract({findingId:'f',label:'終了画面',details:['Evidenceとして記録します。']}),/USER_FACING_INTERNAL_TEXT:f/);
+ assert.throws(()=>validateResearchUserFacingTextContract({findingId:'f',label:'終了画面',details:['説明\/n改行']}),/USER_FACING_INTERNAL_TEXT:f/);
 });

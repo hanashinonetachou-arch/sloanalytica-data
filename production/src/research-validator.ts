@@ -17,6 +17,12 @@ export function validateResearchLiveObservationContract(f:any){
   if(f?.liveObservation===undefined)return;
   if(!researchLiveObservationStatuses.has(String(f.liveObservation?.status??''))||!nonEmpty(f.liveObservation?.reason)) throw new Error('RESEARCH_VALIDATION:LIVE_OBSERVATION_CONTRACT:'+String(f?.findingId??''));
 }
+const forbiddenUserFacingResearchText=/opportunity model|candidate contract|runtime policy|denominator|benchmark|Evidence\b|\\n|\/n/i;
+export function validateResearchUserFacingTextContract(f:any){
+  const values:any[]=[f?.label,f?.denominatorSemantics,f?.liveObservation?.reason,...(Array.isArray(f?.details)?f.details:[])];
+  for(const c of Array.isArray(f?.semanticCategories)?f.semanticCategories:[]) values.push(c?.label,c?.meaning);
+  for(const value of values) if(typeof value==='string'&&forbiddenUserFacingResearchText.test(value)) throw new Error('RESEARCH_VALIDATION:USER_FACING_INTERNAL_TEXT:'+String(f?.findingId??''));
+}
 const hex64=(x:any)=>typeof x==='string'&&/^[a-f0-9]{64}$/i.test(x);
 const repoRelative=(p:string)=>p.startsWith('production/')?p.slice('production/'.length):p;
 const sha256=(b:Buffer)=>crypto.createHash('sha256').update(b).digest('hex');
@@ -98,6 +104,7 @@ export function validateResearchArtifacts(s:RepoStore,a:Attempt,r:WorkResult){
   for(const f of d.findings){
     if(!nonEmpty(f.findingId)||!nonEmpty(f.label)||!nonEmpty(f.observationType)||!Array.isArray(f.sourceIds)||f.sourceIds.length===0||f.sourceIds.some((x:any)=>!sourceIds.has(x))) throw new Error('RESEARCH_VALIDATION:FINDING_PROVENANCE');
     validateResearchLiveObservationContract(f);
+    validateResearchUserFacingTextContract(f);
     if(f.settingDistribution!==undefined){
       if(!f.settingDistribution||typeof f.settingDistribution!=='object'||Array.isArray(f.settingDistribution)||Object.keys(f.settingDistribution).length===0) throw new Error('RESEARCH_VALIDATION:RAW_DISTRIBUTION');
       for(const [k,v] of Object.entries(f.settingDistribution)) if(!/^([1-6])$/.test(k)||!(typeof v==='number'||nonEmpty(v))) throw new Error('RESEARCH_VALIDATION:RAW_DISTRIBUTION');
