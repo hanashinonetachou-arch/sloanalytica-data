@@ -36,7 +36,10 @@ const sectionExplanation=(f:any,s:any)=>{
  const existing=String(s?.description??'').trim();if(existing)return existing;
  const inputs=s?.inputs??[],trial=inputs.find((x:any)=>x.role==='trial'),success=inputs.find((x:any)=>x.role==='success');
  if(f?.model==='CATEGORICAL')return String(s?.title??f?.name??'観測内容')+'を確認したときに、該当する項目を1回加算して記録します。';
- return '「'+String(trial?.label??'対象数')+'」を数え、そのうち「'+String(success?.label??f?.name??'該当回数')+'」に該当した回数を入力します。';
+ const trialLabel=String(trial?.label??'').trim(),successLabel=String(success?.label??'').trim();
+ const successSubject=['','回数','対象回数','該当回数','該当した回数'].includes(successLabel)?String(f?.name??s?.title??'該当内容'):successLabel.replace(/回数$/,'').replace(/ゲーム数$/,'ゲーム').replace(/G数$/,'G');
+ if(trialLabel.endsWith('ゲーム数'))return trialLabel+'を基準に、'+successSubject+'の出現割合を設定別に比較します。';
+ return '対象となる機会のうち、'+successSubject+'が実際に起きた割合を設定別に比較します。';
 };
 const compactEvidenceText=(v:any)=>String(v??'').normalize('NFKC').replace(/[\\s（）()「」『』【】・：:、,／\\/_-]+/g,'');
 const evidenceLinkKey=(findingId:any,index:number)=>String(findingId)+':'+index;
