@@ -45,10 +45,10 @@ test('shortens contextual input names while descriptions explain the relationshi
  const labels=deriveObservationInputLabels(o);
  assert.deepEqual(labels,{trialLabel:'昇格抽選回数',successLabel:'EPボーナス昇格回数'});
  const description=buildObservationDescription(o,'BERNOULLI',undefined);
- assert.match(description,/まず「アクダマボーナス当選時の昇格抽選回数」を数え/);
+ assert.match(description,/エピソードボーナス昇格について記録します/);
+ assert.match(description,/対象となる機会のうち、実際に該当した割合を設定別に比較します/);
+ assert.doesNotMatch(description,/「昇格抽選回数」を数え|「EPボーナス昇格回数」/);
  assert.doesNotMatch(description,/・数えるもの：|・基準：/);
- assert.notEqual(description,labels.trialLabel);
- assert.notEqual(description,labels.successLabel);
 });
 
 
@@ -58,37 +58,37 @@ test('moves detailed eligibility conditions into descriptions while keeping inpu
    label:'450G＋α仮天井選択',
    denominatorSemantics:'設定変更時・上位CZ後など選択条件が異なるケースを除いた、通常の天井ゲーム数選択回数に対する、450G＋αが選ばれた回数。',
    expected:{trialLabel:'天井ゲーム数選択回数',successLabel:'450G＋α選択回数'},
-   detail:/設定変更時・上位CZ後など選択条件が異なるケースを除いた/,
+   detail:/設定変更時・上位CZ後など選択条件が異なるケースは対象に含めません/,
   },
   {
    label:'GG当選時のZ-ZONE昇格',
    denominatorSemantics:'ガイアステージ中を除くGG当選時に前兆ゲーム数がセットされた回数に対する、Z-ZONEへ昇格した回数。',
    expected:{trialLabel:'GG当選時の前兆セット回数',successLabel:'Z-ZONE昇格回数'},
-   detail:/ガイアステージ中を除く/,
+   detail:/ガイアステージ中は対象に含めません/,
   },
   {
    label:'駿城ボーナス中・単独チャンス目の3000pt獲得率',
    denominatorSemantics:'駿城ボーナス中に単独チャンス目が成立した回数に対する、3000pt獲得回数。',
    expected:{trialLabel:'単独チャンス目成立回数',successLabel:'3000pt獲得回数'},
-   detail:/駿城ボーナス中に単独チャンス目が成立した回数/,
+   detail:/3000pt獲得率について記録します/,
   },
   {
    label:'運命分岐モード・REG後/ART後/周期経由のLV2ナビ発生率',
    denominatorSemantics:'REG後・ART消化後・周期経由で運命分岐モードへ突入した回数に対する、LV2ナビ発生回数。',
    expected:{trialLabel:'運命分岐モード突入回数',successLabel:'LV2ナビ発生回数'},
-   detail:/REG後・ART消化後・周期経由/,
+   detail:/LV2ナビ発生率について記録します/,
   },
   {
    label:'ART未突入で運命分岐モード転落時の100G引き継ぎ選択率',
    denominatorSemantics:'ART未突入で運命分岐モードから転落し、引き継ぎが発生した回数に対する、100G選択回数。',
    expected:{trialLabel:'引き継ぎ発生回数',successLabel:'100G選択回数'},
-   detail:/ART未突入で運命分岐モードから転落/,
+   detail:/100G引き継ぎ選択率について記録します/,
   },
   {
    label:'通常初当たりCZの開始エピソード振り分け',
    denominatorSemantics:'虚構連モード直後・設定変更直後を除く通常初当たりCZの開始回数に対する開始エピソード内訳。',
    expected:{trialLabel:'開始回数',successLabel:'開始エピソード内訳回数'},
-   detail:/虚構連モード直後・設定変更直後を除く/,
+   detail:/虚構連モード直後・設定変更直後は対象に含めません/,
   },
  ];
  for(const c of cases){
@@ -103,8 +103,25 @@ test('contextual compaction keeps the raw conditions in the explanation',()=>{
  const o:any={label:'450G＋α仮天井選択',trialUniverse:'CUSTOM_TRIAL',denominatorSemantics:'設定変更時・上位CZ後など選択条件が異なるケースを除いた、通常の天井ゲーム数選択回数に対する、450G＋αが選ばれた回数。'};
  assert.deepEqual(deriveObservationInputLabels(o),{trialLabel:'天井ゲーム数選択回数',successLabel:'450G＋α選択回数'});
  const description=buildObservationDescription(o,'BERNOULLI',undefined);
- assert.match(description,/設定変更時・上位CZ後など選択条件が異なるケースを除いた/);
+ assert.match(description,/設定変更時・上位CZ後など選択条件が異なるケースは対象に含めません/);
  assert.doesNotMatch(description,/母数|・数えるもの：|・基準：/);
+});
+
+test('actual Z-ZONE semantics keep the exclusion but do not replay both input labels',()=>{
+ const o:any={label:'GG当選時のZ-ZONE昇格',trialUniverse:'GG_NON_GAIA_INITIAL_HIT_TRIAL',denominatorSemantics:'ガイアステージ中を除くGG当選時に前兆ゲーム数がセットされた機会。Z-ZONEへ昇格した回数を数える。'};
+ const labels=deriveObservationInputLabels(o);
+ assert.deepEqual(labels,{trialLabel:'GG当選時の前兆セット回数',successLabel:'Z-ZONE昇格回数'});
+ const description=buildObservationDescription(o,'BERNOULLI',undefined);
+ assert.match(description,/GG当選時のZ-ZONE昇格について記録します/);
+ assert.match(description,/ガイアステージ中は対象に含めません/);
+ assert.ok(!description.includes(labels.trialLabel)||!description.includes(labels.successLabel),'description must not replay both numeric input labels');
+});
+
+test('validator rejects prose that replays multiple numeric input labels',()=>{
+ const d:any=buildCanonicalUi(candidate,observation,evaluation,ca,oa,ea);
+ const section=d.numericSections[0];
+ section.description='「'+section.inputs[0].label+'」を数え、そのうち「'+section.inputs[1].label+'」を入力します。';
+ assert.throws(()=>validateCanonicalUiDocument(d,candidate,observation,evaluation,ca,oa,ea),/DESCRIPTION_REPEATS_INPUT_LABELS|DESCRIPTION/);
 });
 
 test('compacts observed-total denominator wording into a short input label',()=>{
