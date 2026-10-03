@@ -108,8 +108,7 @@ export function buildObservationDescription(o:any,model:any,residualPolicy:any){
  }else if(labels.trialLabel==='総ゲーム数'){
   lines.push(countSubject(labels.successLabel)+'を記録します。総ゲーム数を基準に、実戦中の出現割合を設定別に比較します。');
  }else{
-  lines.push(categoricalSubject(o?.label)+'について記録します。');
-  lines.push('対象となる機会のうち、実際に該当した割合を設定別に比較します。');
+  lines.push('対象となる機会のうち、'+countSubject(labels.successLabel)+'が実際に起きた割合を設定別に比較します。');
  }
  const notes=unique([...userFacingEligibilityNotes(o),...operationalDetails(o).map((x:string)=>x.endsWith('。')?x:x+'。')]).slice(0,2);
  for(const note of notes)lines.push('・注意：'+note);
