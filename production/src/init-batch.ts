@@ -11,4 +11,11 @@ const spec=JSON.parse(fs.readFileSync(absolute,'utf8')) as BatchSpec;
 const store=new RepoStore(process.cwd());
 if(store.exists('batches',spec.batchId)) throw new Error('BATCH_ALREADY_EXISTS');
 initializeBatch(store,spec);
+if(spec.manifestVersion==='8.5'){
+  const baselinePath=store.p('config','runtime-policy-v8.5.json');
+  if(!fs.existsSync(baselinePath)) throw new Error('RUNTIME_POLICY_BASELINE_REQUIRED');
+  const policy=JSON.parse(fs.readFileSync(baselinePath,'utf8'));
+  if(policy?.schemaVersion!=='runtime-policy-config-v1'||policy?.manifestVersion!==spec.manifestVersion) throw new Error('RUNTIME_POLICY_BASELINE_INVALID');
+  store.write(policy,'batches',spec.batchId,'runtime-policy-config.json');
+}
 console.log(JSON.stringify({batchId:spec.batchId,waves:spec.waves.map(w=>({waveId:w.waveId,machineCount:w.machineIds.length})),machineCount:spec.waves.flatMap(w=>w.machineIds).length},null,2));
