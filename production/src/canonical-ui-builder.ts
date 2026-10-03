@@ -64,12 +64,19 @@ const compactContextualInputLabel=(raw:any,sectionTitle:any)=>{
  return label||clean(raw);
 };
 const countSubject=(label:string)=>label.replace(/回数$/,'').replace(/ゲーム数$/,'ゲーム').replace(/G数$/,'G');
-const semanticNotes=(o:any)=>{
- const ss=sentences(o?.denominatorSemantics);if(!ss.length)return [];
- const first=ss[0],against=first.match(/^(.+?)に対する[、,]?(.+)$/);
- const used=new Set<number>([0]);
- if(!against){const idx=ss.findIndex((x:string,i:number)=>i>0&&/を数える$|を記録する$/.test(x));if(idx>=0)used.add(idx)}
- return ss.filter((_x:string,i:number)=>!used.has(i));
+const userFacingEligibilityNotes=(o:any)=>{
+ const ss=sentences(o?.denominatorSemantics),out:string[]=[];
+ for(let i=0;i<ss.length;i++){
+  const raw=ss[i];
+  const excluded=raw.match(/^(.+?)を除いた[、,]?(?:通常の)?(.+)$/)||raw.match(/^(.+?)を除く(.+)$/);
+  if(excluded){out.push(excluded[1]+'は対象に含めません。');continue}
+  const explicitExclude=raw.match(/^(.+?)は(?:対象から)?除外する$/);
+  if(explicitExclude){out.push(explicitExclude[1]+'は対象に含めません。');continue}
+  if(i===0)continue;
+  if(/を数える$|を記録する$/.test(raw))continue;
+  out.push(raw+'。');
+ }
+ return unique(out);
 };
 export function deriveObservationInputLabels(o:any){
  const ss=sentences(o?.denominatorSemantics),first=ss[0]??'',against=first.match(/^(.+?)に対する[、,]?(.+)$/);
@@ -101,11 +108,10 @@ export function buildObservationDescription(o:any,model:any,residualPolicy:any){
  }else if(labels.trialLabel==='総ゲーム数'){
   lines.push(countSubject(labels.successLabel)+'を記録します。総ゲーム数を基準に、実戦中の出現割合を設定別に比較します。');
  }else{
-  const first=sentences(o?.denominatorSemantics)[0]??'',against=first.match(/^(.+?)に対する[、,]?(.+)$/);
-  if(against)lines.push('まず「'+normalizeTrialLabel(against[1])+'」を数え、そのうち「'+normalizeSuccessLabel(against[2],o?.label)+'」に該当した回数を入力します。');
-  else lines.push('「'+labels.trialLabel+'」を数え、そのうち「'+labels.successLabel+'」に該当した回数を入力します。');
+  lines.push(categoricalSubject(o?.label)+'について記録します。');
+  lines.push('対象となる機会のうち、実際に該当した割合を設定別に比較します。');
  }
- const notes=unique([...semanticNotes(o),...operationalDetails(o)]).slice(0,2);
+ const notes=unique([...userFacingEligibilityNotes(o),...operationalDetails(o).map((x:string)=>x.endsWith('。')?x:x+'。')]).slice(0,2);
  for(const note of notes)lines.push('・注意：'+note);
  return lines.join('\n');
 }
