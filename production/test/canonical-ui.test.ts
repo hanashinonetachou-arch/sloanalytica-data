@@ -45,7 +45,7 @@ test('shortens contextual input names while descriptions explain the relationshi
  const labels=deriveObservationInputLabels(o);
  assert.deepEqual(labels,{trialLabel:'昇格抽選回数',successLabel:'EPボーナス昇格回数'});
  const description=buildObservationDescription(o,'BERNOULLI',undefined);
- assert.match(description,/エピソードボーナス昇格について記録します/);
+ assert.match(description,/EPボーナス昇格が実際に起きた割合を設定別に比較します/);
  assert.match(description,/対象となる機会のうち、実際に該当した割合を設定別に比較します/);
  assert.doesNotMatch(description,/「昇格抽選回数」を数え|「EPボーナス昇格回数」/);
  assert.doesNotMatch(description,/・数えるもの：|・基準：/);
@@ -70,19 +70,19 @@ test('moves detailed eligibility conditions into descriptions while keeping inpu
    label:'駿城ボーナス中・単独チャンス目の3000pt獲得率',
    denominatorSemantics:'駿城ボーナス中に単独チャンス目が成立した回数に対する、3000pt獲得回数。',
    expected:{trialLabel:'単独チャンス目成立回数',successLabel:'3000pt獲得回数'},
-   detail:/3000pt獲得率について記録します/,
+   detail:/3000pt獲得が実際に起きた割合を設定別に比較します/,
   },
   {
    label:'運命分岐モード・REG後/ART後/周期経由のLV2ナビ発生率',
    denominatorSemantics:'REG後・ART消化後・周期経由で運命分岐モードへ突入した回数に対する、LV2ナビ発生回数。',
    expected:{trialLabel:'運命分岐モード突入回数',successLabel:'LV2ナビ発生回数'},
-   detail:/LV2ナビ発生率について記録します/,
+   detail:/LV2ナビ発生が実際に起きた割合を設定別に比較します/,
   },
   {
    label:'ART未突入で運命分岐モード転落時の100G引き継ぎ選択率',
    denominatorSemantics:'ART未突入で運命分岐モードから転落し、引き継ぎが発生した回数に対する、100G選択回数。',
    expected:{trialLabel:'引き継ぎ発生回数',successLabel:'100G選択回数'},
-   detail:/100G引き継ぎ選択率について記録します/,
+   detail:/100G選択が実際に起きた割合を設定別に比較します/,
   },
   {
    label:'通常初当たりCZの開始エピソード振り分け',
@@ -112,7 +112,7 @@ test('actual Z-ZONE semantics keep the exclusion but do not replay both input la
  const labels=deriveObservationInputLabels(o);
  assert.deepEqual(labels,{trialLabel:'GG当選時の前兆セット回数',successLabel:'Z-ZONE昇格回数'});
  const description=buildObservationDescription(o,'BERNOULLI',undefined);
- assert.match(description,/GG当選時のZ-ZONE昇格について記録します/);
+ assert.match(description,/Z-ZONE昇格が実際に起きた割合を設定別に比較します/);
  assert.match(description,/ガイアステージ中は対象に含めません/);
  assert.ok(!description.includes(labels.trialLabel)||!description.includes(labels.successLabel),'description must not replay both numeric input labels');
 });
