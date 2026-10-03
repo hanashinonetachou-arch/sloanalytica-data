@@ -84,6 +84,12 @@ test('moves detailed eligibility conditions into descriptions while keeping inpu
    expected:{trialLabel:'引き継ぎ発生回数',successLabel:'100G選択回数'},
    detail:/ART未突入で運命分岐モードから転落/,
   },
+  {
+   label:'通常初当たりCZの開始エピソード振り分け',
+   denominatorSemantics:'虚構連モード直後・設定変更直後を除く通常初当たりCZの開始回数に対する開始エピソード内訳。',
+   expected:{trialLabel:'開始回数',successLabel:'開始エピソード内訳回数'},
+   detail:/虚構連モード直後・設定変更直後を除く/,
+  },
  ];
  for(const c of cases){
   const {expected,detail,...rest}=c;

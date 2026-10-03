@@ -59,6 +59,8 @@ const compactContextualInputLabel=(raw:any,sectionTitle:any)=>{
   .replace(/まで到達した回数$/,'到達回数')
   .replace(/を受けた回数$/,'回数')
   .replace(/を確認した回数$/,'回数');
+ const max=Math.min(title.length,label.length);let shared=0;while(shared<max&&title[shared]===label[shared])shared++;
+ const secondCut=sharedContextBoundary(title,label);if(shared>=7&&secondCut>0&&label.length-secondCut>=2)label=label.slice(secondCut).replace(/^(?:の|に|で|を|が|へ|から)+/,'');
  return label||clean(raw);
 };
 const countSubject=(label:string)=>label.replace(/回数$/,'').replace(/ゲーム数$/,'ゲーム').replace(/G数$/,'G');
