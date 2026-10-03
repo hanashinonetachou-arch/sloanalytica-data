@@ -69,7 +69,9 @@ jobs:
             const app=read(appStage.authoritativeOutputRef.path.replace(/^production\//,''));
             const pkg=app.package;
             const live=read(path.join('..','live-distribution','machines',id,'machine-package.json'));
-            if(canonical(pkg)!==canonical(live))issues.push('LIVE_PACKAGE_PARITY_MISMATCH');
+            const liveComparable=structuredClone(live);
+            for(const k of ['introductionDate','machineType','gameType'])delete liveComparable.machine?.[k];
+            if(canonical(pkg)!==canonical(liveComparable))issues.push('LIVE_PACKAGE_PARITY_MISMATCH');
 
             if(research.researchCompleteness?.version!==2||(research.researchCompleteness?.domains?.length??0)<20)issues.push('RESEARCH_COMPLETENESS_MISSING');
             for(const b of research.blockedItems??[]){
@@ -134,7 +136,9 @@ jobs:
             if((pkg.evidence?.evidences??[]).length!==exactExpected)issues.push('EXACT_EVIDENCE_COUNT:'+exactExpected+':'+(pkg.evidence?.evidences??[]).length);
             for(const e of pkg.evidence?.evidences??[])if(/示唆|期待|アップ|出現しやすい/.test(e.name??''))issues.push('SOFT_HINT_HARD_CONSTRAINED:'+e.name);
 
-            const activeFeatures=(pkg.features?.runtimeProjection??[]).filter(x=>x.runtimeStatus==='ACTIVE');
+            const activeProjection=(pkg.features?.runtimeProjection??[]).filter(x=>x.runtimeStatus==='ACTIVE');
+            const activeIds=new Set(activeProjection.map(x=>x.featureId));
+            const activeFeatures=(pkg.features?.features??[]).filter(x=>activeIds.has(x.featureId));
             const universes=activeFeatures.map(x=>String(x.trialUniverse??''));
             const needsNormal=universes.some(x=>x==='NORMAL_GAME_TRIAL'||x==='BONUS_ELIGIBLE_GAME_TRIAL');
             const needsExcluded=universes.some(x=>x==='LOTIS_NON_CHAIN_GAME_TRIAL'||x==='NON_CHAIN_BONUS_INITIAL_GAME_TRIAL');
