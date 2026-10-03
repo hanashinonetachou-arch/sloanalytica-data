@@ -103,7 +103,7 @@ test('contextual compaction keeps the raw conditions in the explanation',()=>{
 
 test('compacts observed-total denominator wording into a short input label',()=>{
  const o:any={label:'STAND BY移行時キャラ',trialUniverse:'STANDBY_CHARACTER_TRIAL',denominatorSemantics:'STAND BY状態へ移行し、男性/女性キャラを確認できた回数の合計を観測母数とする。'};
- assert.deepEqual(deriveObservationInputLabels(o),{trialLabel:'男性/女性キャラ確認回数',successLabel:'STAND BY移行時キャラ回数'});
+ assert.deepEqual(deriveObservationInputLabels(o),{trialLabel:'男性/女性キャラ確認回数',successLabel:'キャラ回数'});
  assert.ok(deriveObservationInputLabels(o).trialLabel.length<=30);
 });
 
