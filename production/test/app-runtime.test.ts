@@ -77,7 +77,7 @@ test('structured Evidence categories survive to UI and only exact categories con
 test('shows only the formal metric appropriate to the feature',()=>{
  const p:any={...base,activeFeatures:[{findingId:'f',name:'初当り',model:'BERNOULLI',trialUniverse:'NORMAL_GAME_TRIAL',settingDistribution:{'1':'1/200','2':'1/150'},runtimePolicyBinding:{metric:'SELECTION_SCORE',value:12},score:{status:'COMPUTED',value:12}}],runtimeUi:{...base.runtimeUi,numericSections:[{id:'OBS_f',sourceFindingId:'f',title:'初当り',score:{status:'COMPUTED',value:12},perEligibleTrialPower:{value:12},inputs:[{id:'f.eligibleTrialCount',label:'確認した回数',role:'trial'},{id:'f.successCount',label:'該当した回数',role:'success'}]}]}};
  const d=buildAppRuntime(p,ref);const description=d.package.ui.v8Sections[0].description;
- assert.doesNotMatch(description,/設定判別スコア|1回の判別力|・数えるもの：|・基準：|母数/);assert.match(description,/そのうち/);
+ assert.doesNotMatch(description,/設定判別スコア|1回の判別力|・数えるもの：|・基準：|母数|そのうち/);assert.match(description,/設定別に比較/);
 });
 
 
