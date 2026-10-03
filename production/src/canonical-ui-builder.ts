@@ -80,7 +80,8 @@ const userFacingEligibilityNotes=(o:any)=>{
 };
 export function deriveObservationInputLabels(o:any){
  const ss=sentences(o?.denominatorSemantics),first=ss[0]??'',against=first.match(/^(.+?)に対する[、,]?(.+)$/);
- let trial=knownTrialLabel(o?.trialUniverse),success='';
+ const canonicalTrialLabel=knownTrialLabel(o?.trialUniverse);
+ let trial=canonicalTrialLabel,success='';
  if(against){trial=trial??normalizeTrialLabel(against[1]);success=normalizeSuccessLabel(against[2],o?.label)}
  else{
   trial=trial??normalizeTrialLabel(first||((o?.label??'観測内容')+'を確認した回数'));
@@ -89,7 +90,7 @@ export function deriveObservationInputLabels(o:any){
  }
  if(!trial||ABSTRACT_INPUT_LABELS.has(trial))trial=normalizeTrialLabel((o?.label??'観測内容')+'を確認した回数');
  if(!success||ABSTRACT_INPUT_LABELS.has(success))success=normalizeSuccessLabel('',o?.label);
- trial=compactContextualInputLabel(trial,o?.label);success=compactContextualInputLabel(success,o?.label);
+ trial=canonicalTrialLabel??compactContextualInputLabel(trial,o?.label);success=compactContextualInputLabel(success,o?.label);
  return {trialLabel:trial,successLabel:success};
 }
 const isSettingMeaning=(s:string)=>/設定[1-6]|高設定|低設定|奇数|偶数|示唆|濃厚|否定/.test(s);

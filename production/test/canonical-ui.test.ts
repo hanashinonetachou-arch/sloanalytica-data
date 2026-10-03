@@ -142,3 +142,12 @@ test('validator rejects long or particle-prefixed numeric input labels',()=>{
  d.numericSections[0].inputs[0].label='に'+('長'.repeat(31));
  assert.throws(()=>validateCanonicalUiDocument(d,candidate,observation,evaluation,ca,oa,ea),/INPUT_LABEL_NOT_CONCISE/);
 });
+
+
+test('preserves canonical labels for known game-count trial universes',()=>{
+ const excluded:any={label:'連チャン中を除くボーナス初当たり',trialUniverse:'NON_CHAIN_BONUS_INITIAL_GAME_TRIAL',denominatorSemantics:'総ゲーム数から連チャン中のゲーム数を除いたゲーム数に対するボーナス初当たり回数。'};
+ assert.deepEqual(deriveObservationInputLabels(excluded),{trialLabel:'連荘中を除くゲーム数',successLabel:'ボーナス初当たり回数'});
+ const total:any={label:'チェリー',trialUniverse:'TOTAL_GAME_TRIAL',denominatorSemantics:'総ゲーム数に対するチェリー成立回数。'};
+ assert.deepEqual(deriveObservationInputLabels(total),{trialLabel:'総ゲーム数',successLabel:'チェリー成立回数'});
+ assert.deepEqual(derivePlayInfoRequirement(['NON_CHAIN_BONUS_INITIAL_GAME_TRIAL']),{mode:'TOTAL_ONLY',needsTotal:true,needsNormal:false,needsExcludedGames:true});
+});
