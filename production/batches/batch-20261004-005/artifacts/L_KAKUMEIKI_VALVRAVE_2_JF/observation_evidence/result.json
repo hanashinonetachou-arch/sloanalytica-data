@@ -8,8 +8,8 @@
     "artifactId": "candidate-contract-L_KAKUMEIKI_VALVRAVE_2_JF",
     "kind": "candidate-contract",
     "path": "production/batches/batch-20261004-005/artifacts/L_KAKUMEIKI_VALVRAVE_2_JF/candidate_contract/result.json",
-    "sha256": "1ff5f9d83b0b72c720fdd8ab10cc710368f257cb996ca24065398829127839ae",
-    "producerWorkId": "wrk_b005_cand_9"
+    "sha256": "155987cc2439dec6d36d3423064398ed1d2475accd42e98486d5998511fe4036",
+    "producerWorkId": "wrk_08d582bc6ccf49a5"
   },
   "observations": [
     {
@@ -18,10 +18,10 @@
       "model": "BERNOULLI",
       "observationType": "probability",
       "trialUniverse": "NORMAL_GAME_TRIAL",
-      "denominatorSemantics": "通常ゲーム数に対する革命ボーナス・決戦ボーナス・AT/上位AT直撃の初当たり合算回数。",
+      "denominatorSemantics": "通常ゲーム数に対する初当たり合算回数。革命ボーナス・決戦ボーナス・AT/上位AT直撃を合算します。",
       "liveObservation": {
         "status": "DIRECT_EXACT",
-        "reason": "初当たり種別を問わず合算回数を通常ゲーム数に対して記録できる。"
+        "reason": "通常ゲーム数と、対象となる各初当たりの合算回数を記録できる。"
       },
       "liveInferenceRoute": "LIVE_CONDITIONAL",
       "runtimeInferenceAllowed": true,
@@ -55,56 +55,46 @@
         "trialField": "eligibleTrialCount"
       },
       "details": []
+    },
+    {
+      "findingId": "cz-bonus-end-screen-distribution",
+      "label": "CZ・ボーナス終了画面",
+      "model": "CATEGORICAL",
+      "observationType": "appearance_distribution",
+      "trialUniverse": "VALVRAVE2_CZ_BONUS_END_SCREEN_CUSTOM_OFF_TRIAL",
+      "denominatorSemantics": "カスタム未使用時のCZ・ボーナス終了回数。終了画面カスタム使用中は対象に含めません。",
+      "liveObservation": {
+        "status": "EXACT_WITH_SCOPE_TRACKING",
+        "reason": "デモ画面でカスタム設定の有無を確認し、カスタム未使用時のCZ・ボーナス終了画面を種類別に記録できる。"
+      },
+      "liveInferenceRoute": "LIVE_CONDITIONAL",
+      "runtimeInferenceAllowed": true,
+      "dependencyResolution": "NONE",
+      "observationStatus": "READY",
+      "collectionContract": {
+        "type": "CATEGORY_COUNTS",
+        "countsField": "categoryCounts",
+        "trialField": "eligibleTrialCount",
+        "categoryCoverage": "NON_EXHAUSTIVE"
+      },
+      "details": [
+        "公開値は約値です。終了画面カスタム使用中は出現割合が変わるため数値推測には使用しません。"
+      ]
     }
   ],
   "evidence": [
     {
       "findingId": "valvrave2-hints",
-      "label": "終了画面・マギウスマーク・ラウンド開始画面",
+      "label": "マギウスマーク・ラウンド開始画面",
       "sourceIds": [
         "nana-valvrave2-setting"
       ],
       "observationType": "evidence",
       "details": [
-        "終了画面カスタムの有無で示唆出現率が変わるため、設定別出現率が不明な画面は記録のみとする。"
+        "設定確定条件は設定候補の絞り込みに反映します。"
       ],
-      "semanticType": "DISPLAY_ONLY",
+      "semanticType": "EXACT_CONSTRAINT",
       "semanticCategories": [
-        {
-          "label": "青枠 ライゾウ達",
-          "meaning": "奇数かつ高設定示唆（弱）",
-          "semanticType": "PROBABILITY_UNKNOWN"
-        },
-        {
-          "label": "青枠 サキ",
-          "meaning": "偶数設定示唆",
-          "semanticType": "PROBABILITY_UNKNOWN"
-        },
-        {
-          "label": "赤枠 コックピット",
-          "meaning": "高設定示唆（弱）",
-          "semanticType": "PROBABILITY_UNKNOWN"
-        },
-        {
-          "label": "赤枠 ドルシア軍4人",
-          "meaning": "高設定示唆（強）",
-          "semanticType": "PROBABILITY_UNKNOWN"
-        },
-        {
-          "label": "紫枠 ショーコ＆サキ",
-          "meaning": "設定2以上",
-          "semanticType": "EXACT_CONSTRAINT"
-        },
-        {
-          "label": "銀枠 ピノ＆プルー",
-          "meaning": "設定4以上",
-          "semanticType": "EXACT_CONSTRAINT"
-        },
-        {
-          "label": "金枠 集合画面",
-          "meaning": "設定6",
-          "semanticType": "EXACT_CONSTRAINT"
-        },
         {
           "label": "マギウスマーク4個",
           "meaning": "設定4以上",
@@ -133,6 +123,42 @@
       ],
       "runtimePolicyControlled": false,
       "status": "SOURCE_REFERENCED"
+    },
+    {
+      "findingId": "valvrave2-end-screen-exact",
+      "label": "CZ・ボーナス終了画面の設定確定パターン",
+      "sourceIds": [
+        "nana-valvrave2-end-screen"
+      ],
+      "observationType": "evidence",
+      "trialUniverse": "VALVRAVE2_CZ_BONUS_END_SCREEN_CUSTOM_OFF_TRIAL",
+      "denominatorSemantics": "終了画面カスタムを使用していないCZ・ボーナス終了画面。",
+      "details": [
+        "同じ終了画面入力から設定確定条件にも自動反映します。"
+      ],
+      "semanticType": "EXACT_CONSTRAINT",
+      "semanticCategories": [
+        {
+          "label": "ショーコ＆サキ（紫枠）",
+          "meaning": "設定2以上",
+          "semanticType": "EXACT_CONSTRAINT",
+          "linkedFindingId": "cz-bonus-end-screen-distribution"
+        },
+        {
+          "label": "ピノ＆プルー（銀枠）",
+          "meaning": "設定4以上",
+          "semanticType": "EXACT_CONSTRAINT",
+          "linkedFindingId": "cz-bonus-end-screen-distribution"
+        },
+        {
+          "label": "集合画面（金枠）",
+          "meaning": "設定6",
+          "semanticType": "EXACT_CONSTRAINT",
+          "linkedFindingId": "cz-bonus-end-screen-distribution"
+        }
+      ],
+      "runtimePolicyControlled": false,
+      "status": "SOURCE_REFERENCED"
     }
   ],
   "sourceReferences": [
@@ -143,6 +169,15 @@
       "sourceType": "primary_analysis",
       "claims": [
         "初当たり・BAR揃いAT直撃・特殊テーブル・ハラキリドライブ・終了画面等の設定差を確認"
+      ]
+    },
+    {
+      "sourceId": "nana-valvrave2-end-screen",
+      "url": "https://nana-press.com/kaiseki/machine/1040/32833/",
+      "title": "スマスロ 革命機ヴァルヴレイヴ2 CZ・ボーナス終了画面の設定示唆",
+      "sourceType": "primary_analysis",
+      "claims": [
+        "終了画面カスタム未使用時のCZ・ボーナス終了画面8カテゴリの設定別出現割合を確認"
       ]
     }
   ],
@@ -191,6 +226,10 @@
     "excludedFeatures": [
       {
         "findingId": "bar-at-direct",
+        "reason": "BENCHMARK_EXPOSURE_UNRESOLVED"
+      },
+      {
+        "findingId": "cz-bonus-end-screen-distribution",
         "reason": "BENCHMARK_EXPOSURE_UNRESOLVED"
       }
     ],

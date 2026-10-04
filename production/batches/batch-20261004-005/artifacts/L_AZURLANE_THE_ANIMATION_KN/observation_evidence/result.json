@@ -8,8 +8,8 @@
     "artifactId": "candidate-contract-L_AZURLANE_THE_ANIMATION_KN",
     "kind": "candidate-contract",
     "path": "production/batches/batch-20261004-005/artifacts/L_AZURLANE_THE_ANIMATION_KN/candidate_contract/result.json",
-    "sha256": "4bec3c047414bd8509f2e66ae66bed67027d15b0ec72c2307a932e5f3ea2f6ee",
-    "producerWorkId": "wrk_b005_cand_1"
+    "sha256": "3c55042c88bde6a88ebb6a290cfe983058dc21162542675d9590e114cd50d83b",
+    "producerWorkId": "wrk_81faff3e47cb4db3"
   },
   "observations": [
     {
@@ -81,6 +81,31 @@
         "trialField": "eligibleTrialCount"
       },
       "details": []
+    },
+    {
+      "findingId": "at-end-screen-distribution",
+      "label": "海戦ボーナス・AT終了画面",
+      "model": "CATEGORICAL",
+      "observationType": "appearance_distribution",
+      "trialUniverse": "AZUR_END_SCREEN_TRIAL",
+      "denominatorSemantics": "AT非当選時の海戦ボーナス終了回数とAT終了回数。終了画面ごとに1回ずつ記録する。",
+      "liveObservation": {
+        "status": "EXHAUSTIVE_CATEGORICAL",
+        "reason": "対象となる終了時に必ず1種類の終了画面を確認でき、7カテゴリへ排他的に記録できる。"
+      },
+      "liveInferenceRoute": "LIVE_CONDITIONAL",
+      "runtimeInferenceAllowed": true,
+      "dependencyResolution": "NONE",
+      "observationStatus": "READY",
+      "collectionContract": {
+        "type": "CATEGORY_COUNTS",
+        "countsField": "categoryCounts",
+        "trialField": "eligibleTrialCount",
+        "categoryCoverage": "NON_EXHAUSTIVE"
+      },
+      "details": [
+        "デフォルト画面も含む全7カテゴリの分布として数値推測に使用します。"
+      ]
     }
   ],
   "evidence": [
@@ -88,23 +113,34 @@
       "findingId": "at-end-screen",
       "label": "海戦ボーナス・AT終了画面",
       "sourceIds": [
-        "nana-azur-setting"
+        "nana-azur-setting",
+        "nana-azur-end-screen"
       ],
       "observationType": "evidence",
+      "trialUniverse": "AZUR_END_SCREEN_TRIAL",
+      "denominatorSemantics": "AT非当選時の海戦ボーナス終了画面とAT終了画面。",
       "details": [
-        "終了画面の種類ごとに回数を記録し、設定確定条件は設定候補の絞り込みに使う。"
+        "同じ終了画面入力から設定確定条件にも自動反映します。"
       ],
       "semanticType": "EXACT_CONSTRAINT",
       "semanticCategories": [
         {
+          "label": "全員集合",
+          "meaning": "設定2以上",
+          "semanticType": "EXACT_CONSTRAINT",
+          "linkedFindingId": "at-end-screen-distribution"
+        },
+        {
           "label": "加賀＆赤城",
           "meaning": "設定4以上",
-          "semanticType": "EXACT_CONSTRAINT"
+          "semanticType": "EXACT_CONSTRAINT",
+          "linkedFindingId": "at-end-screen-distribution"
         },
         {
           "label": "パーティ",
           "meaning": "設定6",
-          "semanticType": "EXACT_CONSTRAINT"
+          "semanticType": "EXACT_CONSTRAINT",
+          "linkedFindingId": "at-end-screen-distribution"
         }
       ],
       "runtimePolicyControlled": false,
@@ -119,6 +155,15 @@
       "sourceType": "primary_analysis",
       "claims": [
         "初当たり・小役・青7ボーナス・内部状態・設定示唆の公開値を確認"
+      ]
+    },
+    {
+      "sourceId": "nana-azur-end-screen",
+      "url": "https://nana-press.com/kaiseki/machine/993/31213/",
+      "title": "アズールレーン ボーナス・AT終了画面の設定示唆",
+      "sourceType": "primary_analysis",
+      "claims": [
+        "海戦ボーナス・AT終了画面7カテゴリの設定別出現率を設定1～6で確認"
       ]
     }
   ],
@@ -181,6 +226,10 @@
       {
         "findingId": "blue-seven-bonus",
         "reason": "CONSERVATIVE_SINGLE_FEATURE_NO_INDEPENDENCE_ASSUMPTION"
+      },
+      {
+        "findingId": "at-end-screen-distribution",
+        "reason": "BENCHMARK_EXPOSURE_UNRESOLVED"
       }
     ],
     "note": "7000Gへ正確に換算できるACTIVE要素だけを候補とし、要素間の独立性を仮定せず、単独で最も高い判別精度を持つ要素から保守的に算出しています。条件付き要素はこの指標には含めませんが、実戦中に実際の観測回数が入力された場合は設定推測に使用します。"

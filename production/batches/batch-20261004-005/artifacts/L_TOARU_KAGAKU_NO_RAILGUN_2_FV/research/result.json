@@ -4,7 +4,6 @@
   "batchId": "batch-20261004-005",
   "machineId": "L_TOARU_KAGAKU_NO_RAILGUN_2_FV",
   "machineName": "スマスロ とある科学の超電磁砲2",
-  "workId": "wrk_b005_research_07",
   "researchedAt": "2026-10-04",
   "settings": {
     "status": "SOURCE_DERIVED",
@@ -24,7 +23,8 @@
       "title": "スマスロ とある科学の超電磁砲2 設定差・設定示唆演出まとめ",
       "sourceType": "primary_analysis",
       "claims": [
-        "AT・CZ・エピソードBONUS直撃・コイン時CZ抽選・AT終了画面・藤丸コイン・獲得枚数表示の設定差を確認"
+        "AT・CZ・エピソードBONUS直撃・コイン時CZ抽選・AT終了画面・藤丸コイン・獲得枚数表示の設定差を確認",
+        "上位CZ実質出現率・AT開始時ステージ選択率の設定差を確認"
       ]
     }
   ],
@@ -219,6 +219,60 @@
       "details": [
         "設定別出現率が未確認の示唆は回数記録のみとし、設定確定条件は候補の絞り込みに反映する。"
       ]
+    },
+    {
+      "findingId": "railgun-upper-cz-share",
+      "label": "CZ当選時の上位CZ割合",
+      "observationType": "conditional_probability",
+      "trialUniverse": "RAILGUN_CZ_OCCURRENCE_TRIAL",
+      "denominatorSemantics": "CZ当選回数に対する上位CZ回数。GIRLS JUDGEと上位CZを区別して記録する。",
+      "liveObservation": {
+        "status": "DIRECT_EXACT",
+        "reason": "CZ突入時にGIRLS JUDGEか上位CZかを区別でき、CZ総回数と上位CZ回数を直接記録できる。"
+      },
+      "settingDistribution": {
+        "1": 0.0235710511,
+        "2": 0.0286505841,
+        "3": 0.0284395943,
+        "4": 0.0406397068,
+        "5": 0.0509277219,
+        "6": 0.0531609751
+      },
+      "details": [
+        "公開されているCZ合算実質出現率と上位CZ実質出現率から、CZ当選時に上位CZだった割合を算出した値です。CZ合算とは条件付きに分けて扱うため、同じ当選を二重に数えません。"
+      ],
+      "sourceIds": [
+        "nana-railgun2-setting"
+      ],
+      "sourceDerivedFormula": "P(upperCZ | anyCZ) = upperCZ rate / totalCZ rate"
+    },
+    {
+      "findingId": "railgun-at-start-stage",
+      "label": "AT開始時のステージ",
+      "observationType": "appearance_distribution",
+      "trialUniverse": "RAILGUN_AT_START_BASE_SELECTION_TRIAL",
+      "denominatorSemantics": "AT開始時の基本ステージ抽選回数。GIRLS JUDGEの7揃い経由など、ステージ昇格が別途発生する開始契機は対象に含めません。",
+      "liveObservation": {
+        "status": "EXACT_WITH_SCOPE_TRACKING",
+        "reason": "AT開始時のステージを毎回確認でき、別途ステージ昇格が発生する開始契機を区別して除外できる。"
+      },
+      "settingDistribution": {
+        "1": "駆動鎧 34.77% / ドッペルゲンガー 64.06% / BUNNY DANCE 1.17%",
+        "2": "駆動鎧 34.38% / ドッペルゲンガー 64.45% / BUNNY DANCE 1.17%",
+        "3": "駆動鎧 33.20% / ドッペルゲンガー 64.84% / BUNNY DANCE 1.95%",
+        "4": "駆動鎧 31.64% / ドッペルゲンガー 66.02% / BUNNY DANCE 2.34%",
+        "5": "駆動鎧 30.86% / ドッペルゲンガー 66.41% / BUNNY DANCE 2.73%",
+        "6": "駆動鎧 30.08% / ドッペルゲンガー 66.80% / BUNNY DANCE 3.13%"
+      },
+      "categoryModel": {
+        "residualPolicy": "SOURCE_EXHAUSTIVE"
+      },
+      "details": [
+        "3種類のステージを排他的なカテゴリとしてまとめて比較します。"
+      ],
+      "sourceIds": [
+        "nana-railgun2-setting"
+      ]
     }
   ],
   "blockedItems": [
@@ -227,12 +281,6 @@
       "label": "通常時の高確・コイン準備移行率",
       "reason": "設定差は公開されているが、各小役成立時の内部状態を常に一意に判定できず試行母数を再現できない。",
       "reevaluationCondition": "成立ゲームごとの内部状態を確定できる観測方法が確立すること。"
-    },
-    {
-      "blockId": "railgun-at-start-stage",
-      "label": "AT開始時のステージ選択率",
-      "reason": "設定別振り分けは公開されているが、現行の数値入力Contractは排他的カテゴリ分布のUIを安全に生成できないため保留する。",
-      "reevaluationCondition": "排他的カテゴリをjoint categoricalとして入力・評価するUI Contractが固定されること。"
     }
   ],
   "researchCompleteness": {
@@ -500,20 +548,36 @@
         }
       },
       {
-        "candidateId": "block:railgun-at-start-stage",
-        "label": "AT開始時のステージ選択率",
+        "candidateId": "finding:railgun-upper-cz-share",
+        "label": "CZ当選時の上位CZ割合",
         "sourceClaims": [
           {
             "sourceId": "nana-railgun2-setting",
-            "claim": "AT・CZ・エピソードBONUS直撃・コイン時CZ抽選・AT終了画面・藤丸コイン・獲得枚数表示の設定差を確認"
+            "claim": "上位CZ実質出現率・AT開始時ステージ選択率の設定差を確認"
           }
         ],
         "discoveryQueries": [],
         "disposition": {
-          "type": "BLOCKED",
+          "type": "FINDING",
+          "refId": "railgun-upper-cz-share"
+        }
+      },
+      {
+        "candidateId": "finding:railgun-at-start-stage",
+        "label": "AT開始時のステージ",
+        "sourceClaims": [
+          {
+            "sourceId": "nana-railgun2-setting",
+            "claim": "上位CZ実質出現率・AT開始時ステージ選択率の設定差を確認"
+          }
+        ],
+        "discoveryQueries": [],
+        "disposition": {
+          "type": "FINDING",
           "refId": "railgun-at-start-stage"
         }
       }
     ]
-  }
+  },
+  "workId": "wrk_a89208c558a74380"
 }
