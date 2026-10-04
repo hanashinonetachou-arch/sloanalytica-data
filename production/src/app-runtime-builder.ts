@@ -45,7 +45,7 @@ const sectionExplanation=(f:any,s:any)=>{
 const compactEvidenceText=(v:any)=>String(v??'').normalize('NFKC').replace(/[\\s（）()「」『』【】・：:、,／\\/_-]+/g,'');
 const evidenceLinkKey=(findingId:any,index:number)=>String(findingId)+':'+index;
 export function resolveEvidenceInputLinks(projection:any){
- const numeric=(projection.runtimeUi?.numericSections??[]).filter((s:any)=>s?.model==='CATEGORICAL');
+ const numeric=(projection.runtimeUi?.numericSections??[]);
  const categoryInputIdByKey=new Map<string,string>(),linkedEvidenceIds=new Set<string>(),featureEvidenceIds=new Map<string,string[]>();
  for(const section of projection.evidence??[])for(const e of section.evidenceItems??[]){
   const cats=Array.isArray(e.semanticCategories)?e.semanticCategories:[];
@@ -63,7 +63,7 @@ export function resolveEvidenceInputLinks(projection:any){
   }
   if(cats.length&&cats.every((_x:any,i:number)=>categoryInputIdByKey.has(evidenceLinkKey(e.findingId,i)))){linkedEvidenceIds.add(e.findingId);continue;}
   if(!e.trialUniverse||cats.length===0||cats.some((x:any)=>x?.semanticType!=='EXACT_CONSTRAINT'))continue;
-  const candidates=numeric.filter((s:any)=>s.trialUniverse===e.trialUniverse);
+  const candidates=numeric.filter((s:any)=>s?.model==='CATEGORICAL'&&s.trialUniverse===e.trialUniverse);
   let chosen:any=null;
   for(const s of candidates){
    const inputs=(s.inputs??[]).filter((x:any)=>x.role==='categoryCount');const ids:string[]=[];let ok=true;
