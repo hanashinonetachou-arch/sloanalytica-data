@@ -243,15 +243,20 @@ function emit(wave:string,doc:any){
 // 5) Tokyo Revengers
 {
  const d=base('L_SMASLO_TOKYO_REVENGERS_ZF');
- const grouped=new Set(['initial-hit','at-first-hit','common-bell','middle-cherry','midnight-mode','kisaki-conspiracy']);
- const reason='いずれも同じ通常ゲーム区間から得られる設定差情報で、公開資料だけでは要素間の相関を正確に分離できない。複数を同時に使って判別力を過大評価しないよう、代表1要素を選んで使用する。';
- for(const f of d.findings??[])if(grouped.has(f.findingId)){
-  f.dependencyGroupId='tokyo-normal-shared-information';
-  f.dependencyKind='SHARED_OBSERVATION_RANGE';
-  f.dependencyReason=reason;
- }
- const initial=d.findings.find((x:any)=>x.findingId==='initial-hit');
- if(initial)initial.details=['初当たり確率には設定差がありますが、他の通常時要素と同時に使う際の相関が公開情報だけでは確定できないため、代表要素との二重評価を避けます。'];
+ const byId=new Map((d.findings??[]).map((x:any)=>[x.findingId,x]));
+ const resetDependency=(f:any)=>{if(!f)return;delete f.dependencyGroupId;delete f.dependencyGroup;delete f.dependencyKind;delete f.dependencyReason;delete f.dependencyFallbackRank;delete f.dependencyReview};
+ for(const id of ['initial-hit','at-first-hit','common-bell','middle-cherry','midnight-mode','kisaki-conspiracy','tooman-chance-weak-role-at'])resetDependency(byId.get(id));
+ const sharedReason='同じ通常ゲーム数を分母に使いますが、同じ成功事象や当選経路を重ねて数える関係ではないため、別の設定差情報として扱います。';
+ for(const id of ['common-bell','middle-cherry']){const f:any=byId.get(id);if(f)f.dependencyReview={status:'SHARED_DENOMINATOR',reason:sharedReason};}
+ const pathGroup='tokyo-rush-path-overlap';
+ const initial:any=byId.get('initial-hit'),at:any=byId.get('at-first-hit'),midnight:any=byId.get('midnight-mode'),kisaki:any=byId.get('kisaki-conspiracy'),chance:any=byId.get('tooman-chance-weak-role-at');
+ if(initial){initial.dependencyGroupId=pathGroup;initial.dependencyKind='NESTED_OUTCOME';initial.dependencyReason='初当たり後に東卍RUSHへ直接入る場合や、東卍CHANCEから昇格する場合があり、東卍RUSH初当たりと同じ当選の流れを一部共有する。';initial.details=['初当りには設定差があります。ただし、初当り後に東卍RUSHへ直接入る場合や、東卍CHANCEから昇格する場合など、東卍RUSH初当りと同じ当選の流れを一部共有しています。両方を別々に計算すると同じ当たりを重ねて評価する可能性があるため、現在は設定判別力の高い「東卍RUSH初当り」を代表して使用しています。'];}
+ if(at){at.dependencyGroupId=pathGroup;at.dependencyKind='NESTED_OUTCOME';at.dependencyReason='初当たり・CZ・東卍CHANCE中のAT当選など複数の経路から到達する最終的な東卍RUSH初当たりであり、経路側の数値とは同じ当選を一部共有する。';}
+ for(const f of [midnight,kisaki,chance])if(f){f.dependencyGroupId=pathGroup;f.dependencyKind='CAUSAL_PATH_OVERLAP';f.dependencyReason='東卍RUSH初当たりへ至る途中経路の一部であり、東卍RUSH初当たりと別々に計算すると同じ当選を重ねて評価する可能性がある。';}
+ if(midnight)midnight.details=['設定差はありますが、東卍RUSH初当りへ至る経路の一部なので、現在は東卍RUSH初当りと別々には計算しません。'];
+ if(kisaki)kisaki.details=['設定差はありますが、東卍RUSH初当りへ至る経路の一部なので、現在は東卍RUSH初当りと別々には計算しません。'];
+ if(chance)chance.details=['条件付きのAT当選率には設定差がありますが、成功した当選は東卍RUSH初当りの一部になるため、現在は東卍RUSH初当りと別々には計算しません。'];
+ const middle:any=byId.get('middle-cherry');if(middle)middle.details=['設定差はありますが、7000G基準では出現機会が少なく、設定判別に使える情報量が基準未満です。'];
  const block=d.blockedItems.find((x:any)=>x.blockId==='tokyo-revenge-mixed');
  if(block)block.reevaluationCondition='各終了条件ごとに、試行回数と真のリベンジ発生を区別して安定して記録できる観測方法が確立すること。';
  emit('wave-1',d);
