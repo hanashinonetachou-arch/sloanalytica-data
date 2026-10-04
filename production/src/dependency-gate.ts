@@ -35,7 +35,7 @@ export function buildDependencyReview(findings:any[]){
  }
  const components=new Map<number,any[]>();for(let i=0;i<pending.length;i++){const root=find(i),xs=components.get(root)??[];xs.push(pending[i]);components.set(root,xs)}
  for(const xs of components.values()){
-  if(xs.length===1){const f=xs[0];byId.set(f.findingId,{status:'NONE',kind:'REVIEWED_NO_OVERLAP',reason:'Dependency / Overlap Reviewで、同じ観測母数または包含関係にある観測母数へ競合する数値候補がないことを確認した。'});continue;}
+  if(xs.length===1){const f=xs[0];byId.set(f.findingId,{status:'NONE',kind:'REVIEWED_NO_OVERLAP',reason:'Dependency / Overlap Reviewで、同じ観測母数に競合する数値候補がないことを確認した。'});continue;}
   const trials=[...new Set(xs.map((f:any)=>String(f.trialUniverse??'NORMAL_GAME_TRIAL')))],sameTrial=trials.length===1;
   const groupId=sameTrial?autoGroupId(trials[0]):crossGroupId(trials);
   const kind=sameTrial?'OVERLAP_UNRESOLVED':'CROSS_UNIVERSE_OVERLAP_UNRESOLVED';
