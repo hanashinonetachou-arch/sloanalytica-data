@@ -28,7 +28,8 @@
         "設定変更時256あべし以内選択率",
         "天撃中ハズレ成功率",
         "伝承モード終了時の内部状態",
-        "筐体上部ランプとサミートロフィー"
+        "筐体上部ランプとサミートロフィー",
+        "低確・通常滞在時の弱チェリー・スイカからの天破当選率"
       ]
     },
     {
@@ -39,6 +40,15 @@
       "claims": [
         "型式L スマスロ北斗の拳 転生の章2 MW・導入日2026年1月5日",
         "設定1～6搭載・ATタイプ"
+      ]
+    },
+    {
+      "sourceId": "nana-hokuto2-lamp",
+      "url": "https://nana-press.com/kaiseki/machine/1059/34308/",
+      "title": "北斗の拳 転生の章2 筐体上部ランプの設定示唆",
+      "sourceType": "primary_analysis",
+      "claims": [
+        "100Gごとの筐体上部中央ランプ白点灯・白点滅の設定別比率"
       ]
     }
   ],
@@ -63,7 +73,8 @@
       "denominatorSemantics": "通常ゲーム数に対するAT初当たり回数。",
       "dependencyGroupId": "hokuto-at-tenha-overlap",
       "dependencyKind": "CAUSAL_OVERLAP",
-      "dependencyReason": "天破の刻は通常時から突入し、あべし獲得を通じてAT初当たり経路へつながる上流要素であるため、AT初当たりと天破突入率を独立な設定差として同時加算しない。"
+      "dependencyReason": "天破の刻は通常時から突入し、あべし獲得を通じてAT初当たり経路へつながるため、両方を同時には加算しません。天破の刻を記録できた場合は天破突入率を優先し、記録していない場合はAT初当たりを使用します。",
+      "dependencyFallbackRank": 2
     },
     {
       "findingId": "tenha-entry",
@@ -88,7 +99,8 @@
       },
       "dependencyGroupId": "hokuto-at-tenha-overlap",
       "dependencyKind": "CAUSAL_OVERLAP",
-      "dependencyReason": "天破の刻は通常時から突入し、あべし獲得を通じてAT初当たり経路へつながる上流要素であるため、AT初当たりと天破突入率を独立な設定差として同時加算しない。"
+      "dependencyReason": "天破の刻は通常時から突入し、あべし獲得を通じてAT初当たり経路へつながるため、両方を同時には加算しません。天破の刻を記録できた場合は天破突入率を優先し、記録していない場合はAT初当たりを使用します。",
+      "dependencyFallbackRank": 1
     },
     {
       "findingId": "reset-256-abeshi",
@@ -155,6 +167,34 @@
       ]
     },
     {
+      "findingId": "central-lamp-white-ratio",
+      "label": "100Gごとの中央ランプ 白点灯・白点滅",
+      "observationType": "appearance_distribution",
+      "sourceIds": [
+        "nana-hokuto2-lamp"
+      ],
+      "settingDistribution": {
+        "1": "白点灯 50.0% / 白点滅 50.0%",
+        "2": "白点灯 60.0% / 白点滅 40.0%",
+        "3": "白点灯 40.0% / 白点滅 60.0%",
+        "4": "白点灯 60.0% / 白点滅 40.0%",
+        "5": "白点灯 40.0% / 白点滅 60.0%",
+        "6": "白点灯 50.0% / 白点滅 50.0%"
+      },
+      "trialUniverse": "CENTRAL_LAMP_WHITE_TRIAL",
+      "denominatorSemantics": "白点灯または白点滅を確認した回数に対する各発光回数。",
+      "categoryModel": {
+        "residualPolicy": "SOURCE_EXHAUSTIVE"
+      },
+      "liveObservation": {
+        "status": "DIRECT_EXACT",
+        "reason": "白点灯または白点滅を確認したときに、それぞれの回数を記録できます。"
+      },
+      "details": [
+        "白点灯と白点滅の2種類だけを同じ観測群として比較します。"
+      ]
+    },
+    {
       "findingId": "central-lamp-hints",
       "label": "100Gごとの筐体上部中央ランプ",
       "observationType": "evidence",
@@ -164,16 +204,6 @@
       "trialUniverse": "CENTRAL_LAMP_TRIAL",
       "semanticType": "DISPLAY_ONLY",
       "semanticCategories": [
-        {
-          "label": "白点灯",
-          "meaning": "設定2・4示唆",
-          "semanticType": "PROBABILITY_UNKNOWN"
-        },
-        {
-          "label": "白点滅",
-          "meaning": "設定3・5示唆",
-          "semanticType": "PROBABILITY_UNKNOWN"
-        },
         {
           "label": "水色点灯",
           "meaning": "高設定示唆・弱",
@@ -201,7 +231,7 @@
         }
       ],
       "details": [
-        "通常時100G消化ごとの発光を確認します。白点灯・白点滅は設定別比率が公表されていますが、ほかの色を含む全体分布ではないため、現在は設定示唆として記録します。"
+        "通常時100G消化ごとの発光を確認します。水色の設定示唆と、黄緑・金の設定確定条件を記録します。白点灯・白点滅は別の設定推測欄で回数を記録します。"
       ]
     },
     {
@@ -281,6 +311,12 @@
       "label": "モードB以上移行率",
       "reason": "高設定ほど優遇されることは確認できるが、全設定別の移行率は公表ページ上で確認できず、掲載表は設定1の状況別振り分けのみ。",
       "reevaluationCondition": "設定2～6を含むモードB以上の設定別移行率が公開される。"
+    },
+    {
+      "blockId": "hokuto-low-normal-weak-role-tenha",
+      "label": "低確・通常滞在時の弱チェリー・スイカからの天破当選",
+      "reason": "設定差は確認できますが、実戦中に低確・通常の内部状態を毎回一意に確定できず、対象となる小役成立回数を正確に切り分けられません。",
+      "reevaluationCondition": "内部状態を実戦で再現可能に判定できる方法、または状態不明を安全に扱える条件付き推測方法が確立したら再評価します。"
     }
   ],
   "researchCompleteness": {
@@ -634,6 +670,40 @@
         "disposition": {
           "type": "BLOCKED",
           "refId": "hokuto-mode-b-plus"
+        }
+      },
+      {
+        "candidateId": "finding:central-lamp-white-ratio",
+        "label": "100Gごとの中央ランプ 白点灯・白点滅",
+        "sourceClaims": [
+          {
+            "sourceId": "nana-hokuto2-lamp",
+            "claim": "100Gごとの筐体上部中央ランプ白点灯・白点滅の設定別比率"
+          }
+        ],
+        "discoveryQueries": [
+          "北斗転生2 ランプ サミートロフィー 設定示唆"
+        ],
+        "disposition": {
+          "type": "FINDING",
+          "refId": "central-lamp-white-ratio"
+        }
+      },
+      {
+        "candidateId": "block:hokuto-low-normal-weak-role-tenha",
+        "label": "低確・通常滞在時の弱チェリー・スイカからの天破当選",
+        "sourceClaims": [
+          {
+            "sourceId": "nana-hokuto2-setting",
+            "claim": "低確・通常滞在時の弱チェリー・スイカからの天破当選率"
+          }
+        ],
+        "discoveryQueries": [
+          "北斗の拳 転生の章2 AT 天破 設定差"
+        ],
+        "disposition": {
+          "type": "BLOCKED",
+          "refId": "hokuto-low-normal-weak-role-tenha"
         }
       }
     ]
