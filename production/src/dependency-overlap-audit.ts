@@ -21,6 +21,9 @@ export function auditDependencyProjection(research:any,evaluation:any,candidate:
    if(allowed.length!==members.length)issues.push('CONDITIONALLY_SEPARATE_MEMBER_DISABLED:'+group.groupId);
   }else if(group.resolution==='SINGLE_MEMBER_SELECTED'){
    if(allowed.length!==1||allowed[0]?.findingId!==group.selectedFindingId)issues.push('SINGLE_MEMBER_RESOLUTION_INVALID:'+group.groupId);
+  }else if(group.resolution==='PREFERRED_WITH_FALLBACK'){
+   if(allowed.length!==members.length)issues.push('PREFERRED_FALLBACK_MEMBER_DISABLED:'+group.groupId);
+   const order=Array.isArray(group.fallbackOrder)?group.fallbackOrder:[];for(const c of members){const index=order.indexOf(c.findingId);const expected=index>0?order.slice(0,index):[];if(index<0||canonical(c.suppressedByFeatureIds??[])!==canonical(expected))issues.push('PREFERRED_FALLBACK_SUPPRESSION:'+group.groupId+':'+c.findingId)}
   }else if(group.resolution==='MUTUALLY_EXCLUSIVE_CATEGORICAL'){
    if(allowed.length!==1)issues.push('CATEGORICAL_GROUP_RUNTIME_COUNT:'+group.groupId+':'+allowed.length);
   }else if(group.resolution==='HELD_NO_JOINT_MODEL'){
@@ -32,9 +35,11 @@ export function auditDependencyProjection(research:any,evaluation:any,candidate:
  if(research?.machineId==='L_HOKUTO_TENSEI_2_MW'){
   const group=(candidate?.dependencyGroups??[]).find((x:any)=>x.groupId==='hokuto-at-tenha-overlap');
   if(!group)issues.push('HOKUTO_AT_TENHA_GROUP_MISSING');
-  else if(group.resolution!=='SINGLE_MEMBER_SELECTED'||group.selectedFindingId!=='at-first-hit')issues.push('HOKUTO_AT_TENHA_RESOLUTION:'+String(group.resolution)+':'+String(group.selectedFindingId));
-  if(active.has('tenha-entry'))issues.push('HOKUTO_TENHA_DUPLICATE_ACTIVE');
-  if(!active.has('at-first-hit'))issues.push('HOKUTO_AT_REPRESENTATIVE_INACTIVE');
+  else if(group.resolution!=='PREFERRED_WITH_FALLBACK'||group.preferredFindingId!=='tenha-entry'||canonical(group.fallbackOrder)!==canonical(['tenha-entry','at-first-hit']))issues.push('HOKUTO_AT_TENHA_RESOLUTION:'+String(group.resolution)+':'+String(group.preferredFindingId));
+  if(!active.has('tenha-entry'))issues.push('HOKUTO_TENHA_PREFERRED_INACTIVE');
+  if(!active.has('at-first-hit'))issues.push('HOKUTO_AT_FALLBACK_INACTIVE');
+  const at:any=candBy.get('at-first-hit');if(canonical(at?.suppressedByFeatureIds??[])!==canonical(['tenha-entry']))issues.push('HOKUTO_AT_FALLBACK_SUPPRESSION');
+  if(!active.has('central-lamp-white-ratio'))issues.push('HOKUTO_WHITE_LAMP_NUMERIC_INACTIVE');
  }
  if(research?.machineId==='L_BURNING_EXPRESS_ZN'){
   for(const [groupId,members] of [['burning-suika-bonus-overlap',['suika-lock-bonus','suika-bonus']],['burning-cherry-bonus-overlap',['cherry-lock-bonus','cherry-bonus']]] as any[]){
