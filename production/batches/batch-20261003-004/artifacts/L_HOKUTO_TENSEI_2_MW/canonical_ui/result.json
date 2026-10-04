@@ -9,22 +9,22 @@
       "artifactId": "candidate-contract-L_HOKUTO_TENSEI_2_MW",
       "kind": "candidate-contract",
       "path": "production/batches/batch-20261003-004/artifacts/L_HOKUTO_TENSEI_2_MW/candidate_contract/result.json",
-      "sha256": "5bfa875efd11832124c1ed15271676e1cca899aed9ad7ef41b70442e99a7058a",
-      "producerWorkId": "wrk_2a6481422ae64a14"
+      "sha256": "2987d8990215ddba8b0ac22891c658e3949bc4ee7cafd8df60e3f948a35b348b",
+      "producerWorkId": "wrk_21a58bd3fec843ef"
     },
     "observationEvidence": {
       "artifactId": "observation-evidence-L_HOKUTO_TENSEI_2_MW",
       "kind": "observation-evidence",
       "path": "production/batches/batch-20261003-004/artifacts/L_HOKUTO_TENSEI_2_MW/observation_evidence/result.json",
-      "sha256": "d69cf68ab2c8f2d1d7db91b6039c480de8dc28fce746366052d227ceccffd128",
-      "producerWorkId": "wrk_b11ba8abb5b54f9d"
+      "sha256": "e4df4db48b24767078a21c77a12bbcba1a02e95feef36f359f46580b57215a70",
+      "producerWorkId": "wrk_ee32976243d04c16"
     },
     "evaluation": {
       "artifactId": "evaluation-L_HOKUTO_TENSEI_2_MW",
       "kind": "evaluation",
       "path": "production/batches/batch-20261003-004/artifacts/L_HOKUTO_TENSEI_2_MW/evaluation/result.json",
-      "sha256": "4164117a9b578fd04d5c9459c770afc63955b5a5a274481542cec63af94500a2",
-      "producerWorkId": "wrk_1cf241412856468f"
+      "sha256": "2d16cb1e339ab0ac7e9eb2eca745d24076db94a6ba2673411ae07c2c0dd96b88",
+      "producerWorkId": "wrk_2c1057891e58435d"
     }
   },
   "machineInferenceSummary": {
@@ -59,11 +59,19 @@
       "selectedFeatureLabel": "AT初当たり",
       "excludedFeatures": [
         {
+          "findingId": "tenha-entry",
+          "reason": "BENCHMARK_EXPOSURE_UNRESOLVED"
+        },
+        {
           "findingId": "reset-256-abeshi",
           "reason": "BENCHMARK_EXPOSURE_UNRESOLVED"
         },
         {
           "findingId": "tengeki-miss-success",
+          "reason": "BENCHMARK_EXPOSURE_UNRESOLVED"
+        },
+        {
+          "findingId": "central-lamp-white-ratio",
           "reason": "BENCHMARK_EXPOSURE_UNRESOLVED"
         }
       ],
@@ -127,7 +135,7 @@
       "kind": "NUMERIC_OBSERVATION",
       "model": "BERNOULLI",
       "trialUniverse": "NORMAL_GAME_TRIAL",
-      "description": "通常時のAT初当たりを記録します。通常ゲーム数を基準に、実戦中の出現割合を設定別に比較します。",
+      "description": "通常時のAT初当たりを記録します。通常ゲーム数を基準に、実戦中の出現割合を設定別に比較します。\n・注意：天破の刻を記録していない場合の補助として使用します。天破の記録がある場合は、二重評価を避けるためAT初当たりを同時に加算しません。",
       "collapsible": true,
       "defaultExpanded": false,
       "descriptionPresentation": {
@@ -164,6 +172,62 @@
         {
           "id": "at-first-hit.successCount",
           "label": "AT初当たり回数",
+          "role": "success",
+          "mode": "NUMBER",
+          "directNumeric": true,
+          "quickAdd": [
+            1
+          ],
+          "partialInputAllowed": true,
+          "emptyMeansUnobserved": true,
+          "missingSubItemTreatment": "ZERO_WHEN_PARENT_OBSERVED"
+        }
+      ]
+    },
+    {
+      "id": "OBS_tenha-entry",
+      "sourceFindingId": "tenha-entry",
+      "title": "天破の刻突入",
+      "kind": "NUMERIC_OBSERVATION",
+      "model": "BERNOULLI",
+      "trialUniverse": "NON_TENHA_NORMAL_GAME_TRIAL",
+      "description": "対象となる機会のうち、天破突入が実際に起きた割合を設定別に比較します。\n・注意：天破の刻中は対象に含めません。\n・注意：天破を記録した場合はこちらを優先し、AT初当たりは同時に加算しません。",
+      "collapsible": true,
+      "defaultExpanded": false,
+      "descriptionPresentation": {
+        "collapsible": true,
+        "label": "説明",
+        "defaultExpanded": false
+      },
+      "score": {
+        "label": "設定判別スコア",
+        "status": "NOT_COMPUTED",
+        "display": "算出不可",
+        "reason": "基準遊技量7000Gでの判別力を算出するための観測条件が確定していないため算出できません。",
+        "sourceReason": "基準遊技量に対応するexact exposure modelが未確立のため算出しない。"
+      },
+      "perEligibleTrialPower": {
+        "label": "1回の判別力",
+        "value": 0.009812709404311004,
+        "metric": "PER_ELIGIBLE_TRIAL_POWER",
+        "thresholdSource": "RUNTIME_POLICY"
+      },
+      "inputs": [
+        {
+          "id": "tenha-entry.eligibleTrialCount",
+          "label": "天破中を除く通常ゲーム数",
+          "role": "trial",
+          "mode": "NUMBER",
+          "directNumeric": true,
+          "quickAdd": [
+            50
+          ],
+          "partialInputAllowed": true,
+          "emptyMeansUnobserved": true
+        },
+        {
+          "id": "tenha-entry.successCount",
+          "label": "天破突入回数",
           "role": "success",
           "mode": "NUMBER",
           "directNumeric": true,
@@ -283,6 +347,73 @@
           "missingSubItemTreatment": "ZERO_WHEN_PARENT_OBSERVED"
         }
       ]
+    },
+    {
+      "id": "OBS_central-lamp-white-ratio",
+      "sourceFindingId": "central-lamp-white-ratio",
+      "title": "100Gごとの中央ランプ 白点灯・白点滅",
+      "kind": "NUMERIC_OBSERVATION",
+      "model": "CATEGORICAL",
+      "trialUniverse": "CENTRAL_LAMP_WHITE_TRIAL",
+      "description": "白点灯または白点滅を確認したときに、それぞれの回数を記録できます。\n・注意：白点灯と白点滅の2種類だけを同じ観測群として比較します。",
+      "collapsible": true,
+      "defaultExpanded": false,
+      "descriptionPresentation": {
+        "collapsible": true,
+        "label": "説明",
+        "defaultExpanded": false
+      },
+      "score": {
+        "label": "設定判別スコア",
+        "status": "NOT_COMPUTED",
+        "display": "算出不可",
+        "reason": "基準遊技量7000Gでの判別力を算出するための観測条件が確定していないため算出できません。",
+        "sourceReason": "基準遊技量に対応するexact exposure modelが未確立のため算出しない。"
+      },
+      "perEligibleTrialPower": {
+        "label": "1回の判別力",
+        "value": 3.8732540727108633,
+        "metric": "PER_ELIGIBLE_TRIAL_POWER",
+        "thresholdSource": "RUNTIME_POLICY"
+      },
+      "inputs": [
+        {
+          "id": "central-lamp-white-ratio.eligibleTrialCount",
+          "label": "白点灯または白点滅回数",
+          "role": "trial",
+          "mode": "NUMBER",
+          "directNumeric": true,
+          "quickAdd": [],
+          "partialInputAllowed": true,
+          "emptyMeansUnobserved": true
+        },
+        {
+          "id": "central-lamp-white-ratio.categoryCounts.1_白点灯",
+          "label": "白点灯",
+          "role": "categoryCount",
+          "mode": "NUMBER",
+          "directNumeric": true,
+          "quickAdd": [
+            1
+          ],
+          "partialInputAllowed": true,
+          "emptyMeansUnobserved": true,
+          "missingSubItemTreatment": "ZERO_WHEN_PARENT_OBSERVED"
+        },
+        {
+          "id": "central-lamp-white-ratio.categoryCounts.2_白点滅",
+          "label": "白点滅",
+          "role": "categoryCount",
+          "mode": "NUMBER",
+          "directNumeric": true,
+          "quickAdd": [
+            1
+          ],
+          "partialInputAllowed": true,
+          "emptyMeansUnobserved": true,
+          "missingSubItemTreatment": "ZERO_WHEN_PARENT_OBSERVED"
+        }
+      ]
     }
   ],
   "evidenceSections": [
@@ -294,7 +425,7 @@
       "trialUniverse": "CENTRAL_LAMP_TRIAL",
       "collapsible": true,
       "defaultExpanded": false,
-      "description": "100Gごとの筐体上部中央ランプを確認したときに、該当する項目を1回加算して記録します。\n・注意：通常時100G消化ごとの発光を確認します。白点灯・白点滅は設定別比率が公表されていますが、ほかの色を含む全体分布ではないため、現在は設定示唆として記録します\n・反映：設定確定・設定否定の条件は、設定候補の絞り込みに自動反映します\n・反映：設定別出現率が未確認の項目は記録のみです。出現率確認後は設定推測へ反映できる可能性があります",
+      "description": "100Gごとの筐体上部中央ランプを確認したときに、該当する項目を1回加算して記録します。\n・注意：通常時100G消化ごとの発光を確認します。水色の設定示唆と、黄緑・金の設定確定条件を記録します。白点灯・白点滅は別の設定推測欄で回数を記録します\n・反映：設定確定・設定否定の条件は、設定候補の絞り込みに自動反映します\n・反映：設定別出現率が未確認の項目は記録のみです。出現率確認後は設定推測へ反映できる可能性があります",
       "descriptionPresentation": {
         "collapsible": true,
         "label": "説明",
@@ -310,20 +441,10 @@
           ],
           "trialUniverse": "CENTRAL_LAMP_TRIAL",
           "details": [
-            "通常時100G消化ごとの発光を確認します。白点灯・白点滅は設定別比率が公表されていますが、ほかの色を含む全体分布ではないため、現在は設定示唆として記録します。"
+            "通常時100G消化ごとの発光を確認します。水色の設定示唆と、黄緑・金の設定確定条件を記録します。白点灯・白点滅は別の設定推測欄で回数を記録します。"
           ],
           "semanticType": "DISPLAY_ONLY",
           "semanticCategories": [
-            {
-              "label": "白点灯",
-              "meaning": "設定2・4示唆",
-              "semanticType": "PROBABILITY_UNKNOWN"
-            },
-            {
-              "label": "白点滅",
-              "meaning": "設定3・5示唆",
-              "semanticType": "PROBABILITY_UNKNOWN"
-            },
             {
               "label": "水色点灯",
               "meaning": "高設定示唆・弱",

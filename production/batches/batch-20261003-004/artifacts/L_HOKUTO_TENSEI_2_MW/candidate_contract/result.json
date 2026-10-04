@@ -8,15 +8,15 @@
     "artifactId": "evaluation-L_HOKUTO_TENSEI_2_MW",
     "kind": "evaluation",
     "path": "production/batches/batch-20261003-004/artifacts/L_HOKUTO_TENSEI_2_MW/evaluation/result.json",
-    "sha256": "4164117a9b578fd04d5c9459c770afc63955b5a5a274481542cec63af94500a2",
-    "producerWorkId": "wrk_1cf241412856468f"
+    "sha256": "2d16cb1e339ab0ac7e9eb2eca745d24076db94a6ba2673411ae07c2c0dd96b88",
+    "producerWorkId": "wrk_2c1057891e58435d"
   },
   "eligibilityArtifact": {
     "artifactId": "eligibility-L_HOKUTO_TENSEI_2_MW",
     "kind": "eligibility",
     "path": "production/batches/batch-20261003-004/artifacts/L_HOKUTO_TENSEI_2_MW/eligibility/result.json",
-    "sha256": "23794043f27eaee3e4f21663391f47dad6124a7dcadccbe7448dc2ce7362a62e",
-    "producerWorkId": "wrk_2ca867793718401b"
+    "sha256": "29c0a5f2fbdae8e6c0892ef6500ed20abd16a64ad14b099e6a41b6719aaf92f3",
+    "producerWorkId": "wrk_2f2652ac223049cf"
   },
   "candidates": [
     {
@@ -33,17 +33,23 @@
         "5": "1/283.2",
         "6": "1/273.1"
       },
-      "details": [],
+      "details": [
+        "天破の刻を記録していない場合の補助として使用します。天破の記録がある場合は、二重評価を避けるためAT初当たりを同時に加算しません。"
+      ],
       "dependencyGroupId": "hokuto-at-tenha-overlap",
       "dependencyKind": "CAUSAL_OVERLAP",
-      "dependencyReason": "天破の刻は通常時から突入し、あべし獲得を通じてAT初当たり経路へつながる上流要素であるため、AT初当たりと天破突入率を独立な設定差として同時加算しない。",
+      "dependencyReason": "天破の刻は通常時から突入し、あべし獲得を通じてAT初当たり経路へつながるため、両方を同時には加算しません。天破の刻を記録できた場合は天破突入率を優先し、記録していない場合はAT初当たりを使用します。",
+      "dependencyFallbackRank": 2,
       "runtimeInferenceAllowed": true,
-      "dependencyResolution": "SINGLE_MEMBER_SELECTED",
+      "dependencyResolution": "FALLBACK_MEMBER",
       "runtimePolicyBinding": {
         "metric": "SELECTION_SCORE",
         "value": 36.01882366718446,
         "thresholdSource": "RUNTIME_POLICY"
-      }
+      },
+      "suppressedByFeatureIds": [
+        "tenha-entry"
+      ]
     },
     {
       "findingId": "tenha-entry",
@@ -59,18 +65,21 @@
         "5": "1/85.8",
         "6": "1/81.3"
       },
-      "details": [],
+      "details": [
+        "天破を記録した場合はこちらを優先し、AT初当たりは同時に加算しません。"
+      ],
       "dependencyGroupId": "hokuto-at-tenha-overlap",
       "dependencyKind": "CAUSAL_OVERLAP",
-      "dependencyReason": "天破の刻は通常時から突入し、あべし獲得を通じてAT初当たり経路へつながる上流要素であるため、AT初当たりと天破突入率を独立な設定差として同時加算しない。",
-      "runtimeInferenceAllowed": false,
-      "dependencyResolution": "RESOLVED_BY_SINGLE_MEMBER",
+      "dependencyReason": "天破の刻は通常時から突入し、あべし獲得を通じてAT初当たり経路へつながるため、両方を同時には加算しません。天破の刻を記録できた場合は天破突入率を優先し、記録していない場合はAT初当たりを使用します。",
+      "dependencyFallbackRank": 1,
+      "runtimeInferenceAllowed": true,
+      "dependencyResolution": "PREFERRED_MEMBER",
       "runtimePolicyBinding": {
         "metric": "PER_ELIGIBLE_TRIAL_POWER",
         "value": 0.009812709404311004,
         "thresholdSource": "RUNTIME_POLICY"
       },
-      "resolvedIntoFindingId": "at-first-hit"
+      "suppressedByFeatureIds": []
     },
     {
       "findingId": "reset-256-abeshi",
@@ -123,20 +132,55 @@
         "value": 3.2117779060682805,
         "thresholdSource": "RUNTIME_POLICY"
       }
+    },
+    {
+      "findingId": "central-lamp-white-ratio",
+      "label": "100Gごとの中央ランプ 白点灯・白点滅",
+      "model": "CATEGORICAL",
+      "trialUniverse": "CENTRAL_LAMP_WHITE_TRIAL",
+      "liveInferenceRoute": "LIVE_CONDITIONAL",
+      "settingDistribution": {
+        "1": "白点灯 50.0% / 白点滅 50.0%",
+        "2": "白点灯 60.0% / 白点滅 40.0%",
+        "3": "白点灯 40.0% / 白点滅 60.0%",
+        "4": "白点灯 60.0% / 白点滅 40.0%",
+        "5": "白点灯 40.0% / 白点滅 60.0%",
+        "6": "白点灯 50.0% / 白点滅 50.0%"
+      },
+      "categoryModel": {
+        "residualPolicy": "SOURCE_EXHAUSTIVE"
+      },
+      "details": [
+        "白点灯と白点滅の2種類だけを同じ観測群として比較します。"
+      ],
+      "dependencyGroupId": null,
+      "dependencyKind": "REVIEWED_NO_OVERLAP",
+      "dependencyReason": "Dependency / Overlap Reviewで、同じ観測母数に競合する数値候補がないことを確認した。",
+      "runtimeInferenceAllowed": true,
+      "dependencyResolution": "NONE",
+      "runtimePolicyBinding": {
+        "metric": "PER_ELIGIBLE_TRIAL_POWER",
+        "value": 3.8732540727108633,
+        "thresholdSource": "RUNTIME_POLICY"
+      }
     }
   ],
   "dependencyGroups": [
     {
       "groupId": "hokuto-at-tenha-overlap",
-      "resolution": "SINGLE_MEMBER_SELECTED",
+      "resolution": "PREFERRED_WITH_FALLBACK",
       "members": [
         "at-first-hit",
         "tenha-entry"
       ],
       "runtimeInferenceAllowed": true,
-      "selectedFindingId": "at-first-hit",
-      "selectionRationale": "依存関係を仮定せず二重評価を避けるため、依存関係グループ内で正式な7000G設定判別スコアが最大の候補を代表Featureとして使用する。",
-      "reason": "正式な設定判別スコアを比較できる候補から、最も情報量の高い1要素のみを採用する。"
+      "preferredFindingId": "tenha-entry",
+      "fallbackOrder": [
+        "tenha-entry",
+        "at-first-hit"
+      ],
+      "reason": "依存関係がある候補を同時加算せず、観測できた優先Featureを使用し、未観測時だけ次順位のFeatureへ自動フォールバックする。",
+      "selectionRationale": "Researchで明示された優先順位に従い、同一セッションで重複情報を同時加算しない。"
     }
   ],
   "excludedDecisions": [
@@ -161,6 +205,12 @@
       "label": "モードB以上移行率",
       "reason": "高設定ほど優遇されることは確認できるが、全設定別の移行率は公表ページ上で確認できず、掲載表は設定1の状況別振り分けのみ。",
       "reevaluationCondition": "設定2～6を含むモードB以上の設定別移行率が公開される。"
+    },
+    {
+      "blockId": "hokuto-low-normal-weak-role-tenha",
+      "label": "低確・通常滞在時の弱チェリー・スイカからの天破当選",
+      "reason": "設定差は確認できますが、実戦中に低確・通常の内部状態を毎回一意に確定できず、対象となる小役成立回数を正確に切り分けられません。",
+      "reevaluationCondition": "内部状態を実戦で再現可能に判定できる方法、または状態不明を安全に扱える条件付き推測方法が確立したら再評価します。"
     }
   ],
   "evidenceCandidates": [
@@ -171,20 +221,10 @@
         "nana-hokuto2-setting"
       ],
       "details": [
-        "通常時100G消化ごとの発光を確認します。白点灯・白点滅は設定別比率が公表されていますが、ほかの色を含む全体分布ではないため、現在は設定示唆として記録します。"
+        "通常時100G消化ごとの発光を確認します。水色の設定示唆と、黄緑・金の設定確定条件を記録します。白点灯・白点滅は別の設定推測欄で回数を記録します。"
       ],
       "semanticType": "DISPLAY_ONLY",
       "semanticCategories": [
-        {
-          "label": "白点灯",
-          "meaning": "設定2・4示唆",
-          "semanticType": "PROBABILITY_UNKNOWN"
-        },
-        {
-          "label": "白点滅",
-          "meaning": "設定3・5示唆",
-          "semanticType": "PROBABILITY_UNKNOWN"
-        },
         {
           "label": "水色点灯",
           "meaning": "高設定示唆・弱",

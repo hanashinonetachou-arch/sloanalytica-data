@@ -8,8 +8,8 @@
     "artifactId": "candidate-contract-L_HOKUTO_TENSEI_2_MW",
     "kind": "candidate-contract",
     "path": "production/batches/batch-20261003-004/artifacts/L_HOKUTO_TENSEI_2_MW/candidate_contract/result.json",
-    "sha256": "5bfa875efd11832124c1ed15271676e1cca899aed9ad7ef41b70442e99a7058a",
-    "producerWorkId": "wrk_2a6481422ae64a14"
+    "sha256": "2987d8990215ddba8b0ac22891c658e3949bc4ee7cafd8df60e3f948a35b348b",
+    "producerWorkId": "wrk_21a58bd3fec843ef"
   },
   "observations": [
     {
@@ -21,14 +21,16 @@
       "denominatorSemantics": "通常ゲーム数に対するAT初当たり回数。",
       "liveInferenceRoute": "LIVE_CONDITIONAL",
       "runtimeInferenceAllowed": true,
-      "dependencyResolution": "SINGLE_MEMBER_SELECTED",
+      "dependencyResolution": "FALLBACK_MEMBER",
       "observationStatus": "READY",
       "collectionContract": {
         "type": "SUCCESS_TRIAL_COUNTS",
         "successField": "successCount",
         "trialField": "eligibleTrialCount"
       },
-      "details": []
+      "details": [
+        "天破の刻を記録していない場合の補助として使用します。天破の記録がある場合は、二重評価を避けるためAT初当たりを同時に加算しません。"
+      ]
     },
     {
       "findingId": "tenha-entry",
@@ -42,12 +44,17 @@
         "reason": "天破の刻中のゲーム数を除外し、通常時ゲーム数と突入回数を記録できる。"
       },
       "liveInferenceRoute": "LIVE_CONDITIONAL",
-      "runtimeInferenceAllowed": false,
-      "dependencyResolution": "RESOLVED_BY_SINGLE_MEMBER",
-      "observationStatus": "RESOLVED_BY_SINGLE_MEMBER",
-      "collectionContract": null,
-      "details": [],
-      "resolvedIntoFindingId": "at-first-hit"
+      "runtimeInferenceAllowed": true,
+      "dependencyResolution": "PREFERRED_MEMBER",
+      "observationStatus": "READY",
+      "collectionContract": {
+        "type": "SUCCESS_TRIAL_COUNTS",
+        "successField": "successCount",
+        "trialField": "eligibleTrialCount"
+      },
+      "details": [
+        "天破を記録した場合はこちらを優先し、AT初当たりは同時に加算しません。"
+      ]
     },
     {
       "findingId": "reset-256-abeshi",
@@ -92,6 +99,31 @@
         "trialField": "eligibleTrialCount"
       },
       "details": []
+    },
+    {
+      "findingId": "central-lamp-white-ratio",
+      "label": "100Gごとの中央ランプ 白点灯・白点滅",
+      "model": "CATEGORICAL",
+      "observationType": "appearance_distribution",
+      "trialUniverse": "CENTRAL_LAMP_WHITE_TRIAL",
+      "denominatorSemantics": "白点灯または白点滅を確認した回数に対する各発光回数。",
+      "liveObservation": {
+        "status": "DIRECT_EXACT",
+        "reason": "白点灯または白点滅を確認したときに、それぞれの回数を記録できます。"
+      },
+      "liveInferenceRoute": "LIVE_CONDITIONAL",
+      "runtimeInferenceAllowed": true,
+      "dependencyResolution": "NONE",
+      "observationStatus": "READY",
+      "collectionContract": {
+        "type": "CATEGORY_COUNTS",
+        "countsField": "categoryCounts",
+        "trialField": "eligibleTrialCount",
+        "categoryCoverage": "NON_EXHAUSTIVE"
+      },
+      "details": [
+        "白点灯と白点滅の2種類だけを同じ観測群として比較します。"
+      ]
     }
   ],
   "evidence": [
@@ -104,20 +136,10 @@
       "observationType": "evidence",
       "trialUniverse": "CENTRAL_LAMP_TRIAL",
       "details": [
-        "通常時100G消化ごとの発光を確認します。白点灯・白点滅は設定別比率が公表されていますが、ほかの色を含む全体分布ではないため、現在は設定示唆として記録します。"
+        "通常時100G消化ごとの発光を確認します。水色の設定示唆と、黄緑・金の設定確定条件を記録します。白点灯・白点滅は別の設定推測欄で回数を記録します。"
       ],
       "semanticType": "DISPLAY_ONLY",
       "semanticCategories": [
-        {
-          "label": "白点灯",
-          "meaning": "設定2・4示唆",
-          "semanticType": "PROBABILITY_UNKNOWN"
-        },
-        {
-          "label": "白点滅",
-          "meaning": "設定3・5示唆",
-          "semanticType": "PROBABILITY_UNKNOWN"
-        },
         {
           "label": "水色点灯",
           "meaning": "高設定示唆・弱",
@@ -233,7 +255,8 @@
         "設定変更時256あべし以内選択率",
         "天撃中ハズレ成功率",
         "伝承モード終了時の内部状態",
-        "筐体上部ランプとサミートロフィー"
+        "筐体上部ランプとサミートロフィー",
+        "低確・通常滞在時の弱チェリー・スイカからの天破当選率"
       ]
     },
     {
@@ -245,6 +268,15 @@
         "型式L スマスロ北斗の拳 転生の章2 MW・導入日2026年1月5日",
         "設定1～6搭載・ATタイプ"
       ]
+    },
+    {
+      "sourceId": "nana-hokuto2-lamp",
+      "url": "https://nana-press.com/kaiseki/machine/1059/34308/",
+      "title": "北斗の拳 転生の章2 筐体上部ランプの設定示唆",
+      "sourceType": "primary_analysis",
+      "claims": [
+        "100Gごとの筐体上部中央ランプ白点灯・白点滅の設定別比率"
+      ]
     }
   ],
   "blockedItems": [
@@ -253,6 +285,12 @@
       "label": "モードB以上移行率",
       "reason": "高設定ほど優遇されることは確認できるが、全設定別の移行率は公表ページ上で確認できず、掲載表は設定1の状況別振り分けのみ。",
       "reevaluationCondition": "設定2～6を含むモードB以上の設定別移行率が公開される。"
+    },
+    {
+      "blockId": "hokuto-low-normal-weak-role-tenha",
+      "label": "低確・通常滞在時の弱チェリー・スイカからの天破当選",
+      "reason": "設定差は確認できますが、実戦中に低確・通常の内部状態を毎回一意に確定できず、対象となる小役成立回数を正確に切り分けられません。",
+      "reevaluationCondition": "内部状態を実戦で再現可能に判定できる方法、または状態不明を安全に扱える条件付き推測方法が確立したら再評価します。"
     }
   ],
   "sourceIntegrityIssues": [],
@@ -285,11 +323,19 @@
     "selectedFeatureLabel": "AT初当たり",
     "excludedFeatures": [
       {
+        "findingId": "tenha-entry",
+        "reason": "BENCHMARK_EXPOSURE_UNRESOLVED"
+      },
+      {
         "findingId": "reset-256-abeshi",
         "reason": "BENCHMARK_EXPOSURE_UNRESOLVED"
       },
       {
         "findingId": "tengeki-miss-success",
+        "reason": "BENCHMARK_EXPOSURE_UNRESOLVED"
+      },
+      {
+        "findingId": "central-lamp-white-ratio",
         "reason": "BENCHMARK_EXPOSURE_UNRESOLVED"
       }
     ],
