@@ -123,7 +123,7 @@ test('reference-only decision preserves its concrete user-facing reason',()=>{
 
 
 test('explicit Evidence links reuse Bernoulli success inputs while leaving unrelated categories visible',()=>{
- const numeric={id:'OBS_direct',sourceFindingId:'direct',title:'通常時 強チェリーからボーナス直撃',model:'BERNOULLI',trialUniverse:'STRONG_CHERRY_TRIAL',description:'強チェリー成立回数に対するボーナス直撃回数を比較します。',inputs:[
+ const numeric={id:'OBS_direct',sourceFindingId:'direct',title:'通常時 強チェリーからボーナス直撃',model:'BERNOULLI',trialUniverse:'STRONG_CHERRY_TRIAL',description:'対象となる成立役のうち、直撃が起きた割合を設定別に比較します。',inputs:[
   {id:'direct.trials',label:'強チェリー成立回数',role:'trial'},
   {id:'direct.success',label:'ボーナス直撃回数',role:'success'}
  ]};
