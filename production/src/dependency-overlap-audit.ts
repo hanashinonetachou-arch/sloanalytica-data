@@ -29,6 +29,23 @@ export function auditDependencyProjection(research:any,evaluation:any,candidate:
  }
  const highLow=pkg?.v8?.machineResearchSummary?.highLowDiscrimination;
  if(highLow?.selectedFeatureId){const c:any=candBy.get(highLow.selectedFeatureId);if(c&&c.runtimeInferenceAllowed!==true)issues.push('HIGH_LOW_NON_RUNTIME_SELECTION:'+highLow.selectedFeatureId)}
+ if(research?.machineId==='L_HOKUTO_TENSEI_2_MW'){
+  const group=(candidate?.dependencyGroups??[]).find((x:any)=>x.groupId==='hokuto-at-tenha-overlap');
+  if(!group)issues.push('HOKUTO_AT_TENHA_GROUP_MISSING');
+  else if(group.resolution!=='SINGLE_MEMBER_SELECTED'||group.selectedFindingId!=='at-first-hit')issues.push('HOKUTO_AT_TENHA_RESOLUTION:'+String(group.resolution)+':'+String(group.selectedFindingId));
+  if(active.has('tenha-entry'))issues.push('HOKUTO_TENHA_DUPLICATE_ACTIVE');
+  if(!active.has('at-first-hit'))issues.push('HOKUTO_AT_REPRESENTATIVE_INACTIVE');
+ }
+ if(research?.machineId==='L_BURNING_EXPRESS_ZN'){
+  for(const [groupId,members] of [['burning-suika-bonus-overlap',['suika-lock-bonus','suika-bonus']],['burning-cherry-bonus-overlap',['cherry-lock-bonus','cherry-bonus']]] as any[]){
+   const group=(candidate?.dependencyGroups??[]).find((x:any)=>x.groupId===groupId);
+   if(!group)issues.push('BURNING_DEPENDENCY_GROUP_MISSING:'+groupId);
+   else{
+    if(group.resolution!=='HELD_NO_JOINT_MODEL')issues.push('BURNING_DEPENDENCY_RESOLUTION:'+groupId+':'+String(group.resolution));
+    for(const id of members){if(!(group.members??[]).includes(id))issues.push('BURNING_GROUP_MEMBER_MISSING:'+id);if(active.has(id))issues.push('BURNING_OVERLAP_ACTIVE:'+id)}
+   }
+  }
+ }
  if(research?.machineId==='L_GOBLIN_SLAYER_2_JZ'){
   const ids=['cz-first-hit','at-first-hit','weak-role-cz','zone-300-500-cz'];
   const group=(candidate?.dependencyGroups??[]).find((x:any)=>x.groupId==='goblin-cz-at-overlap');
