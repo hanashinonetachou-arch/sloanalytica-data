@@ -26,6 +26,8 @@ const fail=(m:string)=>{throw new Error(m)};
  if(feature(p,'cz-bonus-end-screen-distribution')?.modelType!=='multinomial')fail('VALVRAVE_END_SCREEN_NOT_MULTINOMIAL');
  const linked=(p.evidence?.evidences??[]).filter((x:any)=>(x.sourceEvidenceRefs??[]).includes('valvrave2-end-screen-exact'));
  if(linked.length!==3||linked.some((x:any)=>String(x.inputId??'').startsWith('REF_')))fail('VALVRAVE_EXACT_NOT_LINKED:'+linked.length);
+ const expected=new Map([['ショーコ＆サキ（紫枠）：設定2以上','ショーコ_サキ_紫枠'],['ピノ＆プルー（銀枠）：設定4以上','ピノ_プルー_銀枠'],['集合画面（金枠）：設定6','集合画面_金枠']]);
+ for(const x of linked)if(!String(x.inputId??'').includes(expected.get(x.name)??'__MISSING__'))fail('VALVRAVE_EXACT_WRONG_INPUT:'+x.name+':'+x.inputId);
 }
 {
  const p=app('L_AZURLANE_THE_ANIMATION_KN');
@@ -33,6 +35,8 @@ const fail=(m:string)=>{throw new Error(m)};
  if(feature(p,'at-end-screen-distribution')?.modelType!=='multinomial')fail('AZUR_END_SCREEN_NOT_MULTINOMIAL');
  const linked=(p.evidence?.evidences??[]).filter((x:any)=>(x.sourceEvidenceRefs??[]).includes('at-end-screen'));
  if(linked.length!==3||linked.some((x:any)=>String(x.inputId??'').startsWith('REF_')))fail('AZUR_EXACT_NOT_LINKED:'+linked.length);
+ const expected=new Map([['全員集合：設定2以上','全員集合'],['加賀＆赤城：設定4以上','加賀_赤城'],['パーティ：設定6','パーティ']]);
+ for(const x of linked)if(!String(x.inputId??'').includes(expected.get(x.name)??'__MISSING__'))fail('AZUR_EXACT_WRONG_INPUT:'+x.name+':'+x.inputId);
 }
 {
  const p=app('L_SMASLO_TOKYO_REVENGERS_ZF');
