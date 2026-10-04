@@ -60,7 +60,7 @@ function resolveGroup(groupId:string,members:any[],evalBy:Map<string,any>){
  const ranked=members.map(c=>({c,e:evalBy.get(c.findingId),score:computedSelectionScore(evalBy.get(c.findingId))})).filter(x=>x.score!==null).sort((a,b)=>(b.score as number)-(a.score as number)||String(a.c.findingId).localeCompare(String(b.c.findingId)));
  if(ranked.length){
   const selected=ranked[0];
-  return {resolution:'SINGLE_MEMBER_SELECTED',members:members.map(c=>c.findingId),runtimeInferenceAllowed:true,selectedFindingId:selected.c.findingId,selectionRationale:'依存関係を仮定せず二重評価を避けるため、同一trial universe内で正式な7000G設定判別スコアが最大の候補を代表Featureとして使用する。',reason:'正式な設定判別スコアを比較できる候補から、最も情報量の高い1要素のみを採用する。'};
+  return {resolution:'SINGLE_MEMBER_SELECTED',members:members.map(c=>c.findingId),runtimeInferenceAllowed:true,selectedFindingId:selected.c.findingId,selectionRationale:'依存関係を仮定せず二重評価を避けるため、依存関係グループ内で正式な7000G設定判別スコアが最大の候補を代表Featureとして使用する。',reason:'正式な設定判別スコアを比較できる候補から、最も情報量の高い1要素のみを採用する。'};
  }
  return {resolution:'HELD_NO_JOINT_MODEL',members:members.map(c=>c.findingId),runtimeInferenceAllowed:false,reason:'source-supported joint/dependency modelが未確立で、正式な設定判別スコアによる単一候補選択もできないため独立性を仮定しない。',reevaluationCondition:'source-supported joint/dependency modelまたは明示的なSelection REVIEW決定が確立すること。'};
 }
