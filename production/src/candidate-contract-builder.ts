@@ -43,7 +43,7 @@ function resolveGroup(groupId:string,members:any[],evalBy:Map<string,any>){
  const evals=members.map(c=>evalBy.get(c.findingId)).filter(Boolean);
  const trialUniverses=[...new Set(evals.map((e:any)=>e.trialUniverse))];
  const kinds=evals.map((e:any)=>String(e?.dependency?.kind??''));
- const reasons=evals.map((e:any)=>String(e?.dependency?.reason??'')).join(' ');
+ const reasons=[...new Set(evals.map((e:any)=>String(e?.dependency?.reason??'').trim()).filter(Boolean))].join(' ');
  const explicitConditionalSeparation=(kinds.length>0&&kinds.every((k:string)=>k==='CONDITIONALLY_SEPARATE'))||/条件別(?:Feature|likelihood)|条件ごとに独立/.test(reasons);
  if(trialUniverses.length===members.length&&explicitConditionalSeparation){return {resolution:'CONDITIONALLY_SEPARATE',members:members.map(c=>c.findingId),runtimeInferenceAllowed:true,reason:'観測条件ごとに別の母数を記録し、条件別Featureとして分離できることが明示確認されている。'};}
  if(kinds.includes('UNRESOLVED'))return {resolution:'HELD_NO_JOINT_MODEL',members:members.map(c=>c.findingId),runtimeInferenceAllowed:false,reason:'候補間の依存関係が未解決のため、独立性を仮定しない。',reevaluationCondition:'候補間の包含・上流下流・条件付き関係が確認されること。'};
