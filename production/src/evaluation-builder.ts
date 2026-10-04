@@ -34,6 +34,6 @@ export function buildEvaluation(research:any){
   }
   return {...base,model,metrics,benchmarkExposure,selectionClass,evaluationCompleteness,...(categoryModel?{categoryModel}:{})};
  });
- const evidenceCandidates=(research.findings??[]).filter((f:any)=>f.observationType==='evidence').map((f:any)=>({findingId:f.findingId,label:f.label,sourceIds:f.sourceIds??[],details:Array.isArray(f.details)?structuredClone(f.details):[],semanticType:f.semanticType,semanticCategories:Array.isArray(f.semanticCategories)?structuredClone(f.semanticCategories):[],...(f.settingDistribution?{settingDistribution:structuredClone(f.settingDistribution)}:{})}));
+ const evidenceCandidates=(research.findings??[]).filter((f:any)=>f.observationType==='evidence').map((f:any)=>({findingId:f.findingId,label:f.label,sourceIds:f.sourceIds??[],details:Array.isArray(f.details)?structuredClone(f.details):[],...(f.semanticType?{semanticType:f.semanticType}:{}),semanticCategories:Array.isArray(f.semanticCategories)?structuredClone(f.semanticCategories):[],...(f.settingDistribution?{settingDistribution:structuredClone(f.settingDistribution)}:{})}));
  return {schemaVersion:'evaluation-v2',manifestVersion:'8.5',batchId:research.batchId,machineId:research.machineId,machineName:research.machineName,dependencyReview:dependencyReview.summary,evaluations,blockedItems:research.blockedItems??[],evidenceCandidates};
 }
