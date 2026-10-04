@@ -123,7 +123,7 @@ export function derivePlayInfoRequirement(trialUniverses:Iterable<string>){
  const exclusionGames=hasTenhaExclusion?{visible:true,label:'天破中ゲーム数',quickAdd:[7,14,21],base:'NORMAL',resultLabel:'天破中を除く通常ゲーム数',description:'通常ゲーム数の差分から自動で差し引きます。通常の天破は終了時に+7 / +14 / +21を使えます。無限天破は直接ゲーム数を入力してください。'}:hasTotalExclusion?{visible:true,label:'除外ゲーム数（連荘中のゲーム数）',quickAdd:[50],base:'TOTAL',resultLabel:'除外後の実戦ゲーム数'}:undefined;
  const needsExcludedGames=Boolean(exclusionGames);const needsTotal=hasTotalExclusion||values.includes('TOTAL_GAME_TRIAL');
  const mode=needsTotal&&needsNormal?'TOTAL_AND_NORMAL':needsTotal?'TOTAL_ONLY':needsNormal?'NORMAL_ONLY':'NONE';
- return {mode,needsTotal,needsNormal,needsExcludedGames,exclusionGames};
+ return {mode,needsTotal,needsNormal,needsExcludedGames,...(exclusionGames?{exclusionGames}:{})};
 }
 function evidenceDescription(x:any){
  const categories=Array.isArray(x?.semanticCategories)?x.semanticCategories:[];
