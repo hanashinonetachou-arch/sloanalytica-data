@@ -26,7 +26,7 @@ export function validateAppRuntimeDocument(doc:any,projection:any,projectionArti
  const secBy=new Map(expectedSections.map((s:any)=>[s.sourceFindingId,s]));
  for(const src of active){
   const a:any=featureBy.get(src.findingId),s:any=secBy.get(src.findingId);if(!a||!s)fail('FEATURE:'+src.findingId);
-  const trial=s.inputs?.find((x:any)=>x.role==='trial');if(!trial||a.denominatorInputId!==trial.id||a.probabilityEngineUsage!==true||a.calculationRole!=='PROBABILITY')fail('FEATURE_BASE:'+src.findingId);
+  const trial=s.inputs?.find((x:any)=>x.role==='trial');if(!trial||a.denominatorInputId!==trial.id||a.probabilityEngineUsage!==true||a.calculationRole!=='PROBABILITY'||canonical(a.suppressedByFeatureIds??[])!==canonical(src.suppressedByFeatureIds??[]))fail('FEATURE_BASE:'+src.findingId);
   if(src.model==='BERNOULLI'){
    const success=s.inputs?.find((x:any)=>x.role==='success');if(a.modelType!=='binomial'||a.numeratorInputId!==success?.id)fail('FEATURE_BERNOULLI:'+src.findingId);
    for(const [k,v] of Object.entries(src.settingDistribution??{}))if(!near(a.probabilities?.[settingKey(k)],probability(v)))fail('FEATURE_PROB:'+src.findingId+':'+k);
