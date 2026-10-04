@@ -55,7 +55,13 @@ export function resolveEvidenceInputLinks(projection:any){
    let input:any;
    if(target.model==='BERNOULLI')input=(target.inputs??[]).find((x:any)=>x.role==='success');
    else if(target.model==='CATEGORICAL'){
-    const raw=compactEvidenceText(cat?.label);input=(target.inputs??[]).filter((x:any)=>x.role==='categoryCount').find((x:any)=>{const label=compactEvidenceText(x.label);return label===raw||label.includes(raw)||raw.includes(label)});
+    const raw=compactEvidenceText(cat?.label),categoryInputs=(target.inputs??[]).filter((x:any)=>x.role==='categoryCount');
+    const exact=categoryInputs.filter((x:any)=>compactEvidenceText(x.label)===raw);
+    if(exact.length===1)input=exact[0];
+    else if(exact.length===0){
+      const partial=categoryInputs.filter((x:any)=>{const label=compactEvidenceText(x.label);return label.includes(raw)||raw.includes(label)});
+      if(partial.length===1)input=partial[0];
+    }
    }
    if(!input)continue;
    categoryInputIdByKey.set(evidenceLinkKey(e.findingId,i),input.id);
