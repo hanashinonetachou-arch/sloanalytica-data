@@ -57,6 +57,7 @@ export function resolveEvidenceInputLinks(projection:any){
    for(let i=0;i<cats.length;i++){
     const cat=cats[i],meaning=compactEvidenceText(cat.meaning),raw=compactEvidenceText(cat.label);
     let matches=inputs.filter((x:any)=>meaning&&compactEvidenceText(x.label).includes(meaning));
+    if(matches.length===0&&raw)matches=inputs.filter((x:any)=>{const label=compactEvidenceText(x.label);return label===raw||label.includes(raw)||raw.includes(label)});
     if(matches.length!==1&&matches.length>0){
      const tokens=String(cat.label??'').replace(/[（）()]/g,'・').split(/[・：:\\s／\\/]+/).map(compactEvidenceText).filter((t:string)=>t.length>=2&&!/^設定[1-6]/.test(t)&&!/(?:濃厚|否定|示唆)$/.test(t));
      const narrowed=matches.filter((x:any)=>tokens.some((t:string)=>compactEvidenceText(x.label).includes(t))||raw&&compactEvidenceText(x.label).includes(raw));
