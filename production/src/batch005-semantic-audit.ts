@@ -40,9 +40,14 @@ const fail=(m:string)=>{throw new Error(m)};
 }
 {
  const p=app('L_SMASLO_TOKYO_REVENGERS_ZF');
+ if(!active(p,'common-bell'))fail('TOKYO_COMMON_BELL_INACTIVE');
+ if(!active(p,'at-first-hit'))fail('TOKYO_RUSH_FIRST_HIT_INACTIVE');
  const row=(p.v8?.machineResearchSummary?.notAdopted??[]).find((x:any)=>x.featureId==='initial-hit');
  const reason=String(row?.reason??'');
- if(!/設定差のある数値/.test(reason)||!/共通ベル/.test(reason)||!/過大/.test(reason))fail('TOKYO_INITIAL_REASON:'+reason);
+ if(!/設定差のある数値/.test(reason)||!/東卍RUSH初当たり/.test(reason)||!/過大/.test(reason))fail('TOKYO_INITIAL_REASON:'+reason);
+ const middle=(p.v8?.machineResearchSummary?.notAdopted??[]).find((x:any)=>x.featureId==='middle-cherry');
+ const middleReason=String(middle?.reason??'');
+ if(!/7000G|7000/.test(middleReason)||!/基準未満|情報量/.test(middleReason))fail('TOKYO_MIDDLE_CHERRY_REASON:'+middleReason);
 }
 for(const id of ['L_TOARU_KAGAKU_NO_RAILGUN_2_FV','L_ZETTAI_SHOGEKI_FORCE_FH','L_KAKUMEIKI_VALVRAVE_2_JF','L_AZURLANE_THE_ANIMATION_KN','L_SMASLO_TOKYO_REVENGERS_ZF']){
  const p=app(id),summary=JSON.stringify(p.v8?.machineResearchSummary??{});
