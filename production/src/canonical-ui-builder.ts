@@ -92,6 +92,10 @@ export function deriveObservationInputLabels(o:any){
  if(!trial||ABSTRACT_INPUT_LABELS.has(trial))trial=normalizeTrialLabel((o?.label??'観測内容')+'を確認した回数');
  if(!success||ABSTRACT_INPUT_LABELS.has(success))success=normalizeSuccessLabel('',o?.label);
  trial=canonicalTrialLabel??compactContextualInputLabel(trial,o?.label);success=compactContextualInputLabel(success,o?.label);
+ const sectionTitle=clean(o?.label);
+ const kinds=sectionTitle.match(/(\\d+)種合算/);
+ if(success.length>30&&kinds&&/合算回数$/.test(success))success=kinds[1]+'種合算回数';
+ if(trial.length>30&&/レア役/.test(sectionTitle)&&/(?:チェリー|スイカ|レア役).*(?:成立回数|回数)$/.test(trial))trial='対象レア役成立回数';
  return {trialLabel:trial,successLabel:success};
 }
 const isSettingMeaning=(s:string)=>/設定[1-6]|高設定|低設定|奇数|偶数|示唆|濃厚|否定/.test(s);
