@@ -1,4 +1,4 @@
-import test from 'node:test';import assert from 'node:assert/strict';import {buildEvaluation} from '../src/evaluation-builder.ts';
+import test from 'node:test';import assert from 'node:assert/strict';import {buildEvaluation} from '../src/evaluation-builder.ts';import {validateEvaluationDocument} from '../src/evaluation-validator.ts';
 
 test('TOTAL_GAME_TRIAL receives exact 7000G selection score',()=>{
  const research={manifestVersion:'8.5',batchId:'b',machineId:'M',machineName:'M',findings:[{findingId:'f',label:'総ゲーム数要素',observationType:'probability',sourceIds:['s'],trialUniverse:'TOTAL_GAME_TRIAL',denominatorSemantics:'総ゲーム数に対する回数。',settingDistribution:{'1':'1/22.2','2':'1/21.8','3':'1/21.4','4':'1/21.0','5':'1/20.6','6':'1/20.2'}}],blockedItems:[]};
@@ -51,4 +51,14 @@ test('same trial universe candidates are deferred instead of assumed independent
  const research:any={manifestVersion:'8.5',batchId:'b',machineId:'M',machineName:'M',findings:[{findingId:'cz',label:'CZ初当たり',observationType:'probability',sourceIds:['s'],trialUniverse:'NORMAL_GAME_TRIAL',settingDistribution:{'1':'1/240','6':'1/180'}},{findingId:'at',label:'AT初当たり',observationType:'probability',sourceIds:['s'],trialUniverse:'NORMAL_GAME_TRIAL',settingDistribution:{'1':'1/540','6':'1/400'}}],blockedItems:[]};
  const d=buildEvaluation(research);const a=d.evaluations.find((x:any)=>x.findingId==='cz'),b=d.evaluations.find((x:any)=>x.findingId==='at');
  assert.equal(a.dependency.status,'DEFERRED_TO_CANDIDATE_CONTRACT');assert.equal(a.dependency.groupId,b.dependency.groupId);assert.equal(a.dependency.kind,'OVERLAP_UNRESOLVED');assert.equal(d.dependencyReview.status,'COMPLETE');
+});
+
+
+test('evidence without top-level semanticType round-trips through JSON and validation',()=>{
+ const research:any={manifestVersion:'8.5',batchId:'b',machineId:'M',machineName:'M',findings:[{findingId:'e',label:'終了画面',observationType:'evidence',sourceIds:['s'],semanticCategories:[{label:'虹',meaning:'設定6',semanticType:'EXACT_CONSTRAINT',linkedFindingId:'screen-dist'}]}],blockedItems:[]};
+ const built=buildEvaluation(research);
+ const persisted=JSON.parse(JSON.stringify(built));
+ assert.equal(Object.hasOwn(persisted.evidenceCandidates[0],'semanticType'),false);
+ assert.equal(persisted.evidenceCandidates[0].semanticCategories[0].linkedFindingId,'screen-dist');
+ assert.doesNotThrow(()=>validateEvaluationDocument(persisted,research));
 });
