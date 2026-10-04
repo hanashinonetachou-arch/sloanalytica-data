@@ -10,7 +10,7 @@ export function auditDependencyProjection(research:any,evaluation:any,candidate:
  }
  const candBy=new Map((candidate?.candidates??[]).map((x:any)=>[x.findingId,x]));
  const active=new Set((pkg?.features?.runtimeProjection??[]).filter((x:any)=>x.runtimeStatus==='ACTIVE').map((x:any)=>x.featureId));
- for(const c:any of candidate?.candidates??[]){
+ for(const c of candidate?.candidates??[]){
   if(c.dependencyResolution==='UNRESOLVED')issues.push('CANDIDATE_DEPENDENCY_UNRESOLVED:'+c.findingId);
   if(c.runtimeInferenceAllowed!==true&&active.has(c.findingId))issues.push('NON_RUNTIME_CANDIDATE_ACTIVE:'+c.findingId);
  }
