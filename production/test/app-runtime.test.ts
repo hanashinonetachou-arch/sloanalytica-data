@@ -144,3 +144,22 @@ test('explicit Evidence links reuse Bernoulli success inputs while leaving unrel
  assert.match(d.package.ui.v8Sections.find((s:any)=>s.id==='OBS_direct').description,/別の欄へ重ねて入力する必要はありません/);
  assert.doesNotThrow(()=>validateAppRuntimeDocument(d,p,ref));
 });
+
+
+test('explicit categorical Evidence links prefer exact category names over substring matches',()=>{
+ const numeric:any={id:'OBS_screen',sourceFindingId:'screen',title:'終了画面',model:'CATEGORICAL',trialUniverse:'END_SCREEN_TRIAL',description:'終了時に確認した画面を種類別に記録します。',inputs:[
+  {id:'screen.trials',label:'終了画面確認回数',role:'trial'},
+  {id:'screen.categoryCounts.1',label:'赤城',role:'categoryCount'},
+  {id:'screen.categoryCounts.2',label:'加賀＆赤城',role:'categoryCount'},
+  {id:'screen.categoryCounts.3',label:'パーティ',role:'categoryCount'}
+ ]};
+ const ev:any={id:'EVI_exact',sourceFindingId:'exact',title:'終了画面の設定確定パターン',evidenceItems:[{findingId:'exact',label:'終了画面の設定確定パターン',semanticType:'EXACT_CONSTRAINT',semanticCategories:[
+  {label:'加賀＆赤城',meaning:'設定4以上',semanticType:'EXACT_CONSTRAINT',linkedFindingId:'screen'}
+ ]}]};
+ const p:any={...base,settings:{status:'SOURCE_DERIVED',values:['SET_1','SET_2','SET_3','SET_4','SET_5','SET_6']},activeFeatures:[{findingId:'screen',name:'終了画面',model:'CATEGORICAL',trialUniverse:'END_SCREEN_TRIAL',categoryModel:{residualPolicy:'SOURCE_EXHAUSTIVE'},settingDistribution:{'1':'赤城 50% / 加賀＆赤城 0% / パーティ 50%','6':'赤城 30% / 加賀＆赤城 20% / パーティ 50%'},runtimePolicyBinding:{metric:'PER_ELIGIBLE_TRIAL_POWER',value:1},score:{status:'NOT_COMPUTED'}}],runtimeUi:{...base.runtimeUi,numericSections:[numeric],evidenceSections:[ev]},evidence:[ev]};
+ const d=buildAppRuntime(p,ref);
+ const constraint=d.package.evidence.evidences.find((x:any)=>(x.sourceEvidenceRefs??[]).includes('exact'));
+ assert.equal(constraint.inputId,'screen.categoryCounts.2');
+ assert.equal(d.package.inputs.inputs.some((x:any)=>x.id==='REF_exact_1'),false);
+ assert.doesNotThrow(()=>validateAppRuntimeDocument(d,p,ref));
+});
