@@ -120,3 +120,27 @@ test('reference-only decision preserves its concrete user-facing reason',()=>{
  assert.match(entry.reevaluationCondition,/観測条件/);
  assert.doesNotThrow(()=>validateAppRuntimeDocument(d,p,ref));
 });
+
+
+test('explicit Evidence links reuse Bernoulli success inputs while leaving unrelated categories visible',()=>{
+ const numeric={id:'OBS_direct',sourceFindingId:'direct',title:'通常時 強チェリーからボーナス直撃',model:'BERNOULLI',trialUniverse:'STRONG_CHERRY_TRIAL',description:'強チェリー成立回数に対するボーナス直撃回数を比較します。',inputs:[
+  {id:'direct.trials',label:'強チェリー成立回数',role:'trial'},
+  {id:'direct.success',label:'ボーナス直撃回数',role:'success'}
+ ]};
+ const ev:any={id:'EVI_hints',sourceFindingId:'hints',title:'直撃契機・設定確定演出',description:'確認した項目を記録します。',evidenceItems:[{findingId:'hints',label:'直撃契機・設定確定演出',semanticType:'EXACT_CONSTRAINT',semanticCategories:[
+  {label:'通常時 強チェリーから直撃',meaning:'設定2以上',semanticType:'EXACT_CONSTRAINT',linkedFindingId:'direct'},
+  {label:'虹トロフィー',meaning:'設定6',semanticType:'EXACT_CONSTRAINT'}
+ ]}]};
+ const p:any={...base,settings:{status:'SOURCE_DERIVED',values:['SET_1','SET_2','SET_3','SET_4','SET_5','SET_6']},activeFeatures:[{findingId:'direct',name:numeric.title,model:'BERNOULLI',trialUniverse:'STRONG_CHERRY_TRIAL',settingDistribution:{'1':0,'2':0.02,'3':0.02,'4':0.02,'5':0.02,'6':0.03},runtimePolicyBinding:{metric:'PER_ELIGIBLE_TRIAL_POWER',value:1},score:{status:'NOT_COMPUTED'}}],runtimeUi:{...base.runtimeUi,numericSections:[numeric],evidenceSections:[ev]},evidence:[ev]};
+ const d=buildAppRuntime(p,ref);
+ const evidenceSection=d.package.ui.v8Sections.find((s:any)=>s.id==='EVI_hints');
+ assert.equal(evidenceSection.items[0].interaction.categories.length,1);
+ assert.equal(evidenceSection.items[0].interaction.categories[0].label,'虹トロフィー');
+ assert.equal(d.package.inputs.inputs.some((x:any)=>x.id==='REF_hints_1'),false);
+ assert.equal(d.package.inputs.inputs.some((x:any)=>x.id==='REF_hints_2'),true);
+ const constraints=d.package.evidence.evidences.filter((x:any)=>(x.sourceEvidenceRefs??[]).includes('hints'));
+ assert.equal(constraints[0].inputId,'direct.success');
+ assert.equal(constraints[1].inputId,'REF_hints_2');
+ assert.match(d.package.ui.v8Sections.find((s:any)=>s.id==='OBS_direct').description,/別の欄へ重ねて入力する必要はありません/);
+ assert.doesNotThrow(()=>validateAppRuntimeDocument(d,p,ref));
+});
