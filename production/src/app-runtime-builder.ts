@@ -25,6 +25,7 @@ const scoreDescription=(section:any)=>{
 const trialLabelFor=(trialUniverse:any)=>{
  if(trialUniverse==='TOTAL_GAME_TRIAL')return '総ゲーム数';
  if(trialUniverse==='NORMAL_GAME_TRIAL'||trialUniverse==='BONUS_ELIGIBLE_GAME_TRIAL')return '通常ゲーム数';
+ if(trialUniverse==='NON_TENHA_NORMAL_GAME_TRIAL')return '天破中を除く通常ゲーム数';
  if(trialUniverse==='LOTIS_NON_CHAIN_GAME_TRIAL'||trialUniverse==='NON_CHAIN_BONUS_INITIAL_GAME_TRIAL')return '連荘中を除くゲーム数';
  if(trialUniverse==='DAITOMO_NORMAL_PLAY_TRIAL')return 'ダイトモ通常プレイ数';
  if(trialUniverse==='HOWARD_GAME_50_REPLAY_TRIAL')return '規定リプレイ50回到達回数';
@@ -75,8 +76,9 @@ const appendLinkedEvidenceNote=(description:string,featureId:any,links:any)=>lin
 const playDataSourceForTrialUniverse=(trialUniverse:any)=>
  trialUniverse==='TOTAL_GAME_TRIAL'?'PLAY_TOTAL_GAME_DELTA':
  trialUniverse==='LOTIS_NON_CHAIN_GAME_TRIAL'||trialUniverse==='NON_CHAIN_BONUS_INITIAL_GAME_TRIAL'?'PLAY_TOTAL_GAME_DELTA_EXCLUDED':
+ trialUniverse==='NON_TENHA_NORMAL_GAME_TRIAL'?'PLAY_NORMAL_GAME_DELTA_EXCLUDED':
  trialUniverse==='NORMAL_GAME_TRIAL'||trialUniverse==='BONUS_ELIGIBLE_GAME_TRIAL'?'PLAY_NORMAL_GAME_DELTA':undefined;
-const playDataBindingFor=(source:any)=>source?{source,...(source==='PLAY_TOTAL_GAME_DELTA_EXCLUDED'?{mode:'AUTO_EXACT'}:{})}:undefined;
+const playDataBindingFor=(source:any)=>source?{source,...(source==='PLAY_TOTAL_GAME_DELTA_EXCLUDED'||source==='PLAY_NORMAL_GAME_DELTA_EXCLUDED'?{mode:'AUTO_EXACT'}:{})}:undefined;
 const numericUiSections=(projection:any)=>{
  const src=projection.runtimeUi??{},links=resolveEvidenceInputLinks(projection);const activeBy=new Map((projection.activeFeatures??[]).map((x:any)=>[x.findingId,x]));
  const rows=(src.numericSections??[]).map((s:any)=>{const f:any=activeBy.get(s.sourceFindingId);if(!f)throw new Error('APP_RUNTIME_UI_FEATURE_MISSING:'+s.sourceFindingId);return {s,f,inputs:s.inputs??[],playDataSource:playDataSourceForTrialUniverse(f.trialUniverse)}});
