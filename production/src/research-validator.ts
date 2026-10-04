@@ -4,6 +4,7 @@ import crypto from 'node:crypto';
 import type {Attempt,WorkResult} from './core.ts';
 import {RepoStore} from './core.ts';
 import {EVIDENCE_SEMANTIC_TYPES,classifyEvidenceLabel} from './evidence-semantics.ts';
+import {buildDependencyReview} from './dependency-gate.ts';
 
 export const RESEARCH_VALIDATOR_CONTRACT='research-v1';
 export const RESEARCH_COMPLETENESS_DOMAINS=["INITIAL_HIT","BONUS","SMALL_ROLE","CZ","AT","INTERNAL_CONDITIONAL_DRAW","MODE_TRANSITION","STATE_TRANSITION","SUCCESS_RATE","POINTS_GAME_DISTRIBUTION","CARRY_OVER","THRESHOLD_BEHAVIOR","RESET_BEHAVIOR","POST_EVENT_TRANSITION","NAVIGATION","ROLE_CONDITIONAL_DISTRIBUTION","BONUS_TYPE_CONDITIONAL","EVIDENCE","EXTERNAL_DATA_ONLY","MACHINE_SPECIFIC"] as const;
@@ -120,10 +121,11 @@ export function validateResearchArtifacts(s:RepoStore,a:Attempt,r:WorkResult){
     if(f.settingDistribution===undefined&&f.observationType!=='evidence') throw new Error('RESEARCH_VALIDATION:UNROUTED_FINDING:'+f.findingId);
     if(f.inferred===true) throw new Error('RESEARCH_VALIDATION:INFERRED_VALUE_FORBIDDEN');
   }
+  const dependencyAudit=buildDependencyReview(d.findings);
   for(const b of d.blockedItems){
     if(!nonEmpty(b.blockId)||!nonEmpty(b.label)||!nonEmpty(b.reason)||!nonEmpty(b.reevaluationCondition)) throw new Error('RESEARCH_VALIDATION:BLOCK_REEVALUATION_REQUIRED');
     if(abstractResearchLabels.some(re=>re.test(b.label))) throw new Error('RESEARCH_VALIDATION:ABSTRACT_BLOCK_LABEL:'+b.blockId);
   }
   const ledgerValidation=validateResearchCandidateLedger(d,sourceIds);
-  return [{validator:RESEARCH_VALIDATOR_CONTRACT,ok:true,artifactPath:ref.path,sha256:ref.sha256,sources:d.sources.length,findings:d.findings.length,blockedItems:d.blockedItems.length,coverageDomains:coverage.size,...ledgerValidation}];
+  return [{validator:RESEARCH_VALIDATOR_CONTRACT,ok:true,artifactPath:ref.path,sha256:ref.sha256,sources:d.sources.length,findings:d.findings.length,blockedItems:d.blockedItems.length,coverageDomains:coverage.size,dependencyCandidates:dependencyAudit.summary.candidateCount,dependencyGroups:dependencyAudit.summary.groupCount,...ledgerValidation}];
 }

@@ -1,3 +1,4 @@
+import {buildDependencyReview} from './dependency-gate.ts';
 export const EVALUATION_VALIDATOR_CONTRACT='evaluation-v2';
 const canonical=(v:any):string=>Array.isArray(v)?`[${v.map(canonical).join(',')}]`:v&&typeof v==='object'?`{${Object.keys(v).sort().map(k=>JSON.stringify(k)+':'+canonical(v[k])).join(',')}}`:JSON.stringify(v);
 const fail=(m:string):never=>{throw new Error('EVALUATION_VALIDATION_FAILED:'+m)};
@@ -22,12 +23,16 @@ export function validateEvaluationDocument(doc:any,research:any){
  const candidates=(research.findings??[]).filter((x:any)=>x.settingDistribution);
  if(doc.evaluations.length!==candidates.length)fail('CANDIDATE_COVERAGE');
  const byId=new Map(doc.evaluations.map((x:any)=>[x.findingId,x]));
+ const dependencyReview=buildDependencyReview(research.findings??[]);
+ if(canonical(doc.dependencyReview)!==canonical(dependencyReview.summary))fail('DEPENDENCY_REVIEW_SUMMARY');
  let complete=0,unavailable=0,reference=0;
  for(const f of candidates){
   const e:any=byId.get(f.findingId);if(!e)fail('MISSING:'+f.findingId);
   if(e.label!==f.label||e.observationType!==f.observationType||canonical(e.sourceIds)!==canonical(f.sourceIds??[])||canonical(e.settingDistribution)!==canonical(f.settingDistribution))fail('SOURCE_COPY:'+f.findingId);
   if(!nonEmpty(e.trialUniverse)||!e.liveObservation||!liveStatuses.has(e.liveObservation.status)||!nonEmpty(e.liveObservation.reason)||!e.dependency||!depStatuses.has(e.dependency.status)||!nonEmpty(e.dependency.reason))fail('SEMANTIC_CONTRACT:'+f.findingId);
   if(e.dependency.status==='DEFERRED_TO_CANDIDATE_CONTRACT'&&!nonEmpty(e.dependency.groupId))fail('DEPENDENCY_GROUP:'+f.findingId);
+  const expectedDependency=dependencyReview.decisions.get(f.findingId)??{status:'NONE',kind:'NOT_APPLICABLE',reason:'参照専用または不完全な設定別分布のため、数値推測のDependency / Overlap Review対象外です。'};
+  if(canonical(e.dependency)!==canonical(expectedDependency))fail('DEPENDENCY_REVIEW:'+f.findingId);
   if(f.observationType==='partial_distribution'){
    if(e.model!=='UNAVAILABLE'||e.evaluationCompleteness!=='INCOMPLETE_SETTING_DISTRIBUTION'||e.metrics?.igPerEligibleTrial!==null||e.metrics?.perEligibleTrialPower!==null||e.benchmarkExposure?.status!=='BLOCKED_UNRESOLVED')fail('PARTIAL:'+f.findingId);unavailable++;continue;
   }
