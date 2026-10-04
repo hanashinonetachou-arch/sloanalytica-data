@@ -95,6 +95,7 @@ export function deriveObservationInputLabels(o:any){
  const sectionTitle=clean(o?.label);
  const kinds=sectionTitle.match(/(\\d+)種合算/);
  if(success.length>30&&kinds&&/合算回数$/.test(success))success=kinds[1]+'種合算回数';
+ if(success.length>30&&/初当たり合算回数$/.test(success))success='初当たり合算回数';
  if(trial.length>30&&/レア役/.test(sectionTitle)&&/(?:チェリー|スイカ|レア役).*(?:成立回数|回数)$/.test(trial))trial='対象レア役成立回数';
  return {trialLabel:trial,successLabel:success};
 }
