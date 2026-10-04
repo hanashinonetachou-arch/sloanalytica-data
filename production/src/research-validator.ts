@@ -24,6 +24,14 @@ export function validateResearchUserFacingTextContract(f:any){
   for(const c of Array.isArray(f?.semanticCategories)?f.semanticCategories:[]) values.push(c?.label,c?.meaning);
   for(const value of values) if(typeof value==='string'&&forbiddenUserFacingResearchText.test(value)) throw new Error('RESEARCH_VALIDATION:USER_FACING_INTERNAL_TEXT:'+String(f?.findingId??''));
 }
+export function validateResearchProbabilityRouteContract(f:any){
+  if(f?.observationType==='evidence'&&f?.settingDistribution!==undefined) throw new Error('RESEARCH_VALIDATION:PROBABILITY_KNOWN_EVIDENCE_ONLY:'+String(f?.findingId??''));
+}
+const forbiddenBlockedImplementationText=/UI\s*Contract|数値入力Contract|UI契約|joint\b|categorical\b|candidate\s*contract|runtime\s*policy|dependency\s*model/i;
+export function validateResearchBlockedUserFacingTextContract(b:any){
+  const values=[b?.reason,b?.reevaluationCondition];
+  for(const value of values) if(typeof value==='string'&&forbiddenBlockedImplementationText.test(value)) throw new Error('RESEARCH_VALIDATION:BLOCK_INTERNAL_IMPLEMENTATION_TEXT:'+String(b?.blockId??''));
+}
 const hex64=(x:any)=>typeof x==='string'&&/^[a-f0-9]{64}$/i.test(x);
 const repoRelative=(p:string)=>p.startsWith('production/')?p.slice('production/'.length):p;
 const sha256=(b:Buffer)=>crypto.createHash('sha256').update(b).digest('hex');
@@ -106,6 +114,7 @@ export function validateResearchArtifacts(s:RepoStore,a:Attempt,r:WorkResult){
     if(!nonEmpty(f.findingId)||!nonEmpty(f.label)||!nonEmpty(f.observationType)||!Array.isArray(f.sourceIds)||f.sourceIds.length===0||f.sourceIds.some((x:any)=>!sourceIds.has(x))) throw new Error('RESEARCH_VALIDATION:FINDING_PROVENANCE');
     validateResearchLiveObservationContract(f);
     validateResearchUserFacingTextContract(f);
+    validateResearchProbabilityRouteContract(f);
     if(f.settingDistribution!==undefined){
       if(!f.settingDistribution||typeof f.settingDistribution!=='object'||Array.isArray(f.settingDistribution)||Object.keys(f.settingDistribution).length===0) throw new Error('RESEARCH_VALIDATION:RAW_DISTRIBUTION');
       for(const [k,v] of Object.entries(f.settingDistribution)) if(!/^([1-6])$/.test(k)||!(typeof v==='number'||nonEmpty(v))) throw new Error('RESEARCH_VALIDATION:RAW_DISTRIBUTION');
@@ -125,6 +134,7 @@ export function validateResearchArtifacts(s:RepoStore,a:Attempt,r:WorkResult){
   for(const b of d.blockedItems){
     if(!nonEmpty(b.blockId)||!nonEmpty(b.label)||!nonEmpty(b.reason)||!nonEmpty(b.reevaluationCondition)) throw new Error('RESEARCH_VALIDATION:BLOCK_REEVALUATION_REQUIRED');
     if(abstractResearchLabels.some(re=>re.test(b.label))) throw new Error('RESEARCH_VALIDATION:ABSTRACT_BLOCK_LABEL:'+b.blockId);
+    validateResearchBlockedUserFacingTextContract(b);
   }
   const ledgerValidation=validateResearchCandidateLedger(d,sourceIds);
   return [{validator:RESEARCH_VALIDATOR_CONTRACT,ok:true,artifactPath:ref.path,sha256:ref.sha256,sources:d.sources.length,findings:d.findings.length,blockedItems:d.blockedItems.length,coverageDomains:coverage.size,dependencyCandidates:dependencyAudit.summary.candidateCount,dependencyGroups:dependencyAudit.summary.groupCount,...ledgerValidation}];
