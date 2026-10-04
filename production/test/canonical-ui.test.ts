@@ -150,4 +150,7 @@ test('preserves canonical labels for known game-count trial universes',()=>{
  const total:any={label:'チェリー',trialUniverse:'TOTAL_GAME_TRIAL',denominatorSemantics:'総ゲーム数に対するチェリー成立回数。'};
  assert.deepEqual(deriveObservationInputLabels(total),{trialLabel:'総ゲーム数',successLabel:'チェリー成立回数'});
  assert.deepEqual(derivePlayInfoRequirement(['NON_CHAIN_BONUS_INITIAL_GAME_TRIAL']),{mode:'TOTAL_ONLY',needsTotal:true,needsNormal:false,needsExcludedGames:true});
+ const tenha:any={label:'天破の刻突入',trialUniverse:'NON_TENHA_NORMAL_GAME_TRIAL',denominatorSemantics:'通常時ゲーム数に対する天破突入回数。天破の刻中は対象に含めません。'};
+ assert.deepEqual(deriveObservationInputLabels(tenha),{trialLabel:'天破中を除く通常ゲーム数',successLabel:'天破突入回数'});
+ assert.deepEqual(derivePlayInfoRequirement(['NON_TENHA_NORMAL_GAME_TRIAL']),{mode:'NORMAL_ONLY',needsTotal:false,needsNormal:true,needsExcludedGames:false});
 });
