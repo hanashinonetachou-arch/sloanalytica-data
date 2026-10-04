@@ -47,10 +47,10 @@ test('accepts published categorical rows with up to 1.5% rounding drift without 
 });
 
 
-test('same trial universe candidates are deferred instead of assumed independent',()=>{
+test('same trial universe alone does not create dependency',()=>{
  const research:any={manifestVersion:'8.5',batchId:'b',machineId:'M',machineName:'M',findings:[{findingId:'cz',label:'CZ初当たり',observationType:'probability',sourceIds:['s'],trialUniverse:'NORMAL_GAME_TRIAL',settingDistribution:{'1':'1/240','6':'1/180'}},{findingId:'at',label:'AT初当たり',observationType:'probability',sourceIds:['s'],trialUniverse:'NORMAL_GAME_TRIAL',settingDistribution:{'1':'1/540','6':'1/400'}}],blockedItems:[]};
  const d=buildEvaluation(research);const a=d.evaluations.find((x:any)=>x.findingId==='cz'),b=d.evaluations.find((x:any)=>x.findingId==='at');
- assert.equal(a.dependency.status,'DEFERRED_TO_CANDIDATE_CONTRACT');assert.equal(a.dependency.groupId,b.dependency.groupId);assert.equal(a.dependency.kind,'OVERLAP_UNRESOLVED');assert.equal(d.dependencyReview.status,'COMPLETE');
+ assert.equal(a.dependency.status,'NONE');assert.equal(b.dependency.status,'NONE');assert.equal(a.dependency.kind,'REVIEWED_NO_SEMANTIC_OVERLAP');assert.equal(b.dependency.kind,'REVIEWED_NO_SEMANTIC_OVERLAP');assert.equal(d.dependencyReview.groupCount,0);assert.equal(d.dependencyReview.status,'COMPLETE');
 });
 
 
