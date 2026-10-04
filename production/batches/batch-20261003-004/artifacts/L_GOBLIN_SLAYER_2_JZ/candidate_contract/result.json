@@ -8,15 +8,15 @@
     "artifactId": "evaluation-L_GOBLIN_SLAYER_2_JZ",
     "kind": "evaluation",
     "path": "production/batches/batch-20261003-004/artifacts/L_GOBLIN_SLAYER_2_JZ/evaluation/result.json",
-    "sha256": "0ffb6faa3a8ee3d4c524004a799cbd917cfb37e2cb47b71e6742786f9bd99de3",
-    "producerWorkId": "wrk_6c6f0105b5ae44e5"
+    "sha256": "f1eee811ac8d5c0142eeb91c4d00a2de58fc1cbf6ecc1287c2453e08ac3ca9c3",
+    "producerWorkId": "wrk_c5cfdf2344594364"
   },
   "eligibilityArtifact": {
     "artifactId": "eligibility-L_GOBLIN_SLAYER_2_JZ",
     "kind": "eligibility",
     "path": "production/batches/batch-20261003-004/artifacts/L_GOBLIN_SLAYER_2_JZ/eligibility/result.json",
     "sha256": "aa7de892086b405d1215feabde8a084e7f79d5663ea52b7a1af212aed974bbdc",
-    "producerWorkId": "wrk_f361faca1c5e44cd"
+    "producerWorkId": "wrk_5b8e11299b674b4a"
   },
   "candidates": [
     {
@@ -34,9 +34,11 @@
         "6": "1/181.9"
       },
       "details": [],
-      "dependencyGroupId": null,
+      "dependencyGroupId": "goblin-cz-at-overlap",
+      "dependencyKind": "CAUSAL_OVERLAP",
+      "dependencyReason": "CZ初当たりはAT初当たりや特定契機のCZ当選と同じ通常時進行の情報を一部共有します。これらを独立した要素として同時に計算すると設定差を重複評価する可能性があります。",
       "runtimeInferenceAllowed": true,
-      "dependencyResolution": "NONE",
+      "dependencyResolution": "SINGLE_MEMBER_SELECTED",
       "runtimePolicyBinding": {
         "metric": "SELECTION_SCORE",
         "value": 45.90550393401527,
@@ -58,14 +60,17 @@
         "6": "1/402.4"
       },
       "details": [],
-      "dependencyGroupId": null,
-      "runtimeInferenceAllowed": true,
-      "dependencyResolution": "NONE",
+      "dependencyGroupId": "goblin-cz-at-overlap",
+      "dependencyKind": "CAUSAL_OVERLAP",
+      "dependencyReason": "AT初当たりにはCZ経由の当選が含まれ、CZ初当たりと同じ設定差情報を一部共有します。両方を独立した要素として同時に計算すると設定差を重複評価する可能性があります。",
+      "runtimeInferenceAllowed": false,
+      "dependencyResolution": "RESOLVED_BY_SINGLE_MEMBER",
       "runtimePolicyBinding": {
         "metric": "SELECTION_SCORE",
         "value": 25.726892148710505,
         "thresholdSource": "RUNTIME_POLICY"
-      }
+      },
+      "resolvedIntoFindingId": "cz-first-hit"
     },
     {
       "findingId": "weak-role-cz",
@@ -82,14 +87,17 @@
         "6": 0.023
       },
       "details": [],
-      "dependencyGroupId": null,
-      "runtimeInferenceAllowed": true,
-      "dependencyResolution": "NONE",
+      "dependencyGroupId": "goblin-cz-at-overlap",
+      "dependencyKind": "CAUSAL_OVERLAP",
+      "dependencyReason": "弱チェリー・スイカからのCZ当選はCZ初当たり全体の一部に含まれます。CZ初当たりと同時に独立計算すると、同じCZ当選を重複して評価する可能性があります。",
+      "runtimeInferenceAllowed": false,
+      "dependencyResolution": "RESOLVED_BY_SINGLE_MEMBER",
       "runtimePolicyBinding": {
         "metric": "PER_ELIGIBLE_TRIAL_POWER",
         "value": 0.5038136679572064,
         "thresholdSource": "RUNTIME_POLICY"
-      }
+      },
+      "resolvedIntoFindingId": "cz-first-hit"
     },
     {
       "findingId": "zone-300-500-cz",
@@ -106,14 +114,17 @@
         "6": 0.102
       },
       "details": [],
-      "dependencyGroupId": null,
-      "runtimeInferenceAllowed": true,
-      "dependencyResolution": "NONE",
+      "dependencyGroupId": "goblin-cz-at-overlap",
+      "dependencyKind": "CAUSAL_OVERLAP",
+      "dependencyReason": "300G・500G到達時のCZ当選はCZ初当たり全体の一部に含まれます。CZ初当たりと同時に独立計算すると、同じCZ当選を重複して評価する可能性があります。",
+      "runtimeInferenceAllowed": false,
+      "dependencyResolution": "RESOLVED_BY_SINGLE_MEMBER",
       "runtimePolicyBinding": {
         "metric": "PER_ELIGIBLE_TRIAL_POWER",
         "value": 0.7046154349229283,
         "thresholdSource": "RUNTIME_POLICY"
-      }
+      },
+      "resolvedIntoFindingId": "cz-first-hit"
     },
     {
       "findingId": "common-bell",
@@ -133,6 +144,8 @@
         "1枚ベルと10枚ベルの合算を記録します。"
       ],
       "dependencyGroupId": null,
+      "dependencyKind": "REVIEWED_NO_OVERLAP",
+      "dependencyReason": "Dependency / Overlap Reviewで、同じ観測母数に競合する数値候補がないことを確認した。",
       "runtimeInferenceAllowed": true,
       "dependencyResolution": "NONE",
       "runtimePolicyBinding": {
@@ -142,7 +155,22 @@
       }
     }
   ],
-  "dependencyGroups": [],
+  "dependencyGroups": [
+    {
+      "groupId": "goblin-cz-at-overlap",
+      "resolution": "SINGLE_MEMBER_SELECTED",
+      "members": [
+        "cz-first-hit",
+        "at-first-hit",
+        "weak-role-cz",
+        "zone-300-500-cz"
+      ],
+      "runtimeInferenceAllowed": true,
+      "selectedFindingId": "cz-first-hit",
+      "selectionRationale": "依存関係を仮定せず二重評価を避けるため、同一trial universe内で正式な7000G設定判別スコアが最大の候補を代表Featureとして使用する。",
+      "reason": "正式な設定判別スコアを比較できる候補から、最も情報量の高い1要素のみを採用する。"
+    }
+  ],
   "excludedDecisions": [
     {
       "findingId": "fate-battle-partial",
