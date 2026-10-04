@@ -1,5 +1,5 @@
 import {evidenceSemanticExplanation} from './evidence-semantics.ts';
-const heldReason=(x:any)=>x?.status==='HELD_NO_JOINT_MODEL'?'設定別出現率自体は確認できていますが、同じ観測範囲を使う複数要素を互いに独立とみなして同時加算できる根拠が確定していません。二重評価を避けるため、現在は単独の数値推測に使用していません。':'現在は数値推測に必要な条件が確定していません。';
+const heldReason=(x:any)=>{if(x?.status!=='HELD_NO_JOINT_MODEL')return '現在は数値推測に必要な条件が確定していません。';const concrete=String(x?.reason??'').trim();return concrete?userFacingBlockedText(concrete)+' 二重評価を避けるため、現在は単独の数値推測に使用していません。':'設定別出現率自体は確認できていますが、同じ観測範囲を使う複数要素を互いに独立とみなして同時加算できる根拠が確定していません。二重評価を避けるため、現在は単独の数値推測に使用していません。';};
 const heldReevaluation=(x:any)=>x?.status==='HELD_NO_JOINT_MODEL'?'同じ観測範囲の要素を同時に扱える依存関係モデル、または代表要素を選ぶ明示的な選定基準が確定したら再評価します。':undefined;
 const summaryLabel=(x:any,id:any)=>{const label=String(x?.name??x?.label??'').trim();const key=String(id??'').trim();if(!label||label==='設定推測要素'||label==='調査継続項目'||(key&&label===key))throw new Error('APP_RUNTIME_SUMMARY_LABEL_REQUIRED:'+key);return label;};
 const probability=(v:any):number=>{if(typeof v==='number'&&Number.isFinite(v)&&v>=0&&v<=1)return v;if(typeof v==='string'&&v.startsWith('1/')){const d=Number(v.slice(2));if(Number.isFinite(d)&&d>0)return 1/d}throw new Error('APP_RUNTIME_PROBABILITY_INVALID:'+String(v))};
