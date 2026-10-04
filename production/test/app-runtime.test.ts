@@ -163,3 +163,6 @@ test('explicit categorical Evidence links prefer exact category names over subst
  assert.equal(d.package.inputs.inputs.some((x:any)=>x.id==='REF_exact_1'),false);
  assert.doesNotThrow(()=>validateAppRuntimeDocument(d,p,ref));
 });
+
+
+test('inactive selection-score reason explains 7000G information threshold',()=>{const p:any={...base,inactiveFeatures:[{findingId:'middle',name:'中段チェリー',metric:'SELECTION_SCORE',value:1.7762,threshold:5}]};const d=buildAppRuntime(p,ref);const entry=d.package.v8.machineResearchSummary.notAdopted.find((x:any)=>x.featureId==='middle');assert.match(entry.reason,/7000G/);assert.match(entry.reason,/設定判別スコアが1\.8/);assert.match(entry.reason,/採用基準5\.0未満/);});
