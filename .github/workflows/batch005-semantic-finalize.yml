@@ -1,0 +1,52 @@
+name: Batch005 Semantic Finalize
+
+on:
+  push:
+    branches:
+      - production/v85-batch-005-foundation-20261004
+    paths:
+      - production/.batch005-semantic-finalize-trigger
+
+permissions:
+  contents: write
+
+concurrency:
+  group: batch005-semantic-finalize
+  cancel-in-progress: false
+
+jobs:
+  finalize:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: production/v85-batch-005-foundation-20261004
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+
+      - name: Finalize Distribution from existing attestation
+        working-directory: production
+        run: |
+          node --experimental-strip-types src/finalize-batch-distribution.ts batch-20261004-005 batches/batch-20261004-005/distribution-repair-attestation.json wave-1
+          node --experimental-strip-types src/finalize-batch-distribution.ts batch-20261004-005 batches/batch-20261004-005/distribution-repair-attestation.json wave-2
+
+      - name: Validate finalized state
+        working-directory: production
+        run: |
+          node --experimental-strip-types src/batch005-semantic-audit.ts
+          npm test
+          node --experimental-strip-types src/reconcile-batch.ts batch-20261004-005
+
+      - name: Commit finalized authoritative state
+        shell: bash
+        run: |
+          set -euo pipefail
+          git fetch origin production/v85-batch-005-foundation-20261004
+          test "$(git rev-parse HEAD)" = "$(git rev-parse origin/production/v85-batch-005-foundation-20261004)"
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git add production/batches/batch-20261004-005
+          git commit -m "Finalize Batch 005 semantic repair distribution [skip ci]"
+          git push origin HEAD:production/v85-batch-005-foundation-20261004
