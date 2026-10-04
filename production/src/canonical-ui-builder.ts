@@ -12,6 +12,7 @@ const sentences=(v:any)=>normalizeUserText(v).split(/[。．]|\n+/).map(clean).f
 const knownTrialLabel=(u:any)=>{
  if(u==='TOTAL_GAME_TRIAL')return '総ゲーム数';
  if(u==='NORMAL_GAME_TRIAL'||u==='BONUS_ELIGIBLE_GAME_TRIAL')return '通常ゲーム数';
+ if(u==='NON_TENHA_NORMAL_GAME_TRIAL')return '天破中を除く通常ゲーム数';
  if(u==='LOTIS_NON_CHAIN_GAME_TRIAL'||u==='NON_CHAIN_BONUS_INITIAL_GAME_TRIAL')return '連荘中を除くゲーム数';
  if(u==='DAITOMO_NORMAL_PLAY_TRIAL')return 'ダイトモ通常プレイ数';
  if(u==='HOWARD_GAME_50_REPLAY_TRIAL')return '規定リプレイ50回到達回数';
@@ -116,7 +117,7 @@ export function buildObservationDescription(o:any,model:any,residualPolicy:any){
  return lines.join('\n');
 }
 export function derivePlayInfoRequirement(trialUniverses:Iterable<string>){
- const values=[...trialUniverses].map(String);const normalUniverses=new Set(['NORMAL_GAME_TRIAL','BONUS_ELIGIBLE_GAME_TRIAL']);const excludedTotalUniverses=new Set(['LOTIS_NON_CHAIN_GAME_TRIAL','NON_CHAIN_BONUS_INITIAL_GAME_TRIAL']);
+ const values=[...trialUniverses].map(String);const normalUniverses=new Set(['NORMAL_GAME_TRIAL','BONUS_ELIGIBLE_GAME_TRIAL','NON_TENHA_NORMAL_GAME_TRIAL']);const excludedTotalUniverses=new Set(['LOTIS_NON_CHAIN_GAME_TRIAL','NON_CHAIN_BONUS_INITIAL_GAME_TRIAL']);
  const needsNormal=values.some(x=>normalUniverses.has(x));const needsExcludedGames=values.some(x=>excludedTotalUniverses.has(x));const needsTotal=needsExcludedGames||values.includes('TOTAL_GAME_TRIAL');
  const mode=needsTotal&&needsNormal?'TOTAL_AND_NORMAL':needsTotal?'TOTAL_ONLY':needsNormal?'NORMAL_ONLY':'NONE';
  return {mode,needsTotal,needsNormal,needsExcludedGames};
