@@ -49,6 +49,19 @@ export function resolveEvidenceInputLinks(projection:any){
  const categoryInputIdByKey=new Map<string,string>(),linkedEvidenceIds=new Set<string>(),featureEvidenceIds=new Map<string,string[]>();
  for(const section of projection.evidence??[])for(const e of section.evidenceItems??[]){
   const cats=Array.isArray(e.semanticCategories)?e.semanticCategories:[];
+  for(let i=0;i<cats.length;i++){
+   const cat=cats[i],linked=String(cat?.linkedFindingId??'').trim();if(!linked)continue;
+   const target=numeric.find((s:any)=>s.sourceFindingId===linked);if(!target)continue;
+   let input:any;
+   if(target.model==='BERNOULLI')input=(target.inputs??[]).find((x:any)=>x.role==='success');
+   else if(target.model==='CATEGORICAL'){
+    const raw=compactEvidenceText(cat?.label);input=(target.inputs??[]).filter((x:any)=>x.role==='categoryCount').find((x:any)=>{const label=compactEvidenceText(x.label);return label===raw||label.includes(raw)||raw.includes(label)});
+   }
+   if(!input)continue;
+   categoryInputIdByKey.set(evidenceLinkKey(e.findingId,i),input.id);
+   const list=featureEvidenceIds.get(linked)??[];if(!list.includes(e.findingId))list.push(e.findingId);featureEvidenceIds.set(linked,list);
+  }
+  if(cats.length&&cats.every((_x:any,i:number)=>categoryInputIdByKey.has(evidenceLinkKey(e.findingId,i)))){linkedEvidenceIds.add(e.findingId);continue;}
   if(!e.trialUniverse||cats.length===0||cats.some((x:any)=>x?.semanticType!=='EXACT_CONSTRAINT'))continue;
   const candidates=numeric.filter((s:any)=>s.trialUniverse===e.trialUniverse);
   let chosen:any=null;
@@ -68,7 +81,7 @@ export function resolveEvidenceInputLinks(projection:any){
    if(ok){if(chosen){chosen=null;break}chosen={section:s,ids};}
   }
   if(!chosen)continue;
-  cats.forEach((_x:any,i:number)=>categoryInputIdByKey.set(evidenceLinkKey(e.findingId,i),chosen.ids[i]));linkedEvidenceIds.add(e.findingId);
+  cats.forEach((_x:any,i:number)=>{const key=evidenceLinkKey(e.findingId,i);if(!categoryInputIdByKey.has(key))categoryInputIdByKey.set(key,chosen.ids[i])});if(cats.every((_x:any,i:number)=>categoryInputIdByKey.has(evidenceLinkKey(e.findingId,i))))linkedEvidenceIds.add(e.findingId);
   const list=featureEvidenceIds.get(chosen.section.sourceFindingId)??[];list.push(e.findingId);featureEvidenceIds.set(chosen.section.sourceFindingId,list);
  }
  return {categoryInputIdByKey,linkedEvidenceIds,featureEvidenceIds};
@@ -108,7 +121,7 @@ const evidenceCategoryPresentation=(raw:string)=>{
 };
 export const evidenceCategoryRecords=(e:any)=>{
  const structured=Array.isArray(e.semanticCategories)?e.semanticCategories.filter((x:any)=>x&&typeof x==='object'&&typeof x.label==='string'&&x.label.trim()):[];
- if(structured.length)return structured.map((x:any)=>{const rawLabel=String(x.label).trim();const parsed=evidenceCategoryPresentation(rawLabel);const explicitMeaning=typeof x.meaning==='string'&&x.meaning.trim()?x.meaning.trim():undefined;const label=explicitMeaning?rawLabel:parsed.label,meaning=explicitMeaning??parsed.meaning;return {label,meaning,semanticType:x.semanticType??e.semanticType,raw:explicitMeaning?`${label}：${meaning}`:rawLabel};});
+ if(structured.length)return structured.map((x:any)=>{const rawLabel=String(x.label).trim();const parsed=evidenceCategoryPresentation(rawLabel);const explicitMeaning=typeof x.meaning==='string'&&x.meaning.trim()?x.meaning.trim():undefined;const label=explicitMeaning?rawLabel:parsed.label,meaning=explicitMeaning??parsed.meaning;return {label,meaning,semanticType:x.semanticType??e.semanticType,linkedFindingId:x.linkedFindingId,raw:explicitMeaning?`${label}：${meaning}`:rawLabel};});
  const details=Array.isArray(e.details)?e.details.filter((x:any)=>typeof x==='string'&&x.trim()):[];
  const labels=details.length?details:[e.label];
  return labels.map((raw:string)=>{const p=evidenceCategoryPresentation(raw);return {...p,semanticType:e.semanticType,raw};});
@@ -116,7 +129,7 @@ export const evidenceCategoryRecords=(e:any)=>{
 const evidenceUiSections=(projection:any)=>{
  const links=resolveEvidenceInputLinks(projection),out:any[]=[];
  for(const s of projection.runtimeUi?.evidenceSections??[]){
-  const items=(s.evidenceItems??[]).filter((e:any)=>!links.linkedEvidenceIds.has(e.findingId)).map((e:any)=>({id:'REF_'+e.findingId,evidenceId:e.findingId,label:e.label,interaction:{type:'CATEGORY_COUNTERS',preservePriorObservations:true,showAccumulatedCounts:true,categoryCoverage:'NON_EXHAUSTIVE',totalOpportunities:'NONE',categories:evidenceCategoryRecords(e).map((p:any,i:number)=>({id:'REF_'+e.findingId+'_'+(i+1),inputId:'REF_'+e.findingId+'_'+(i+1),label:p.label,meaning:p.meaning}))}}));
+  const items=(s.evidenceItems??[]).flatMap((e:any)=>{const records=evidenceCategoryRecords(e).map((p:any,i:number)=>({p,i})).filter(({i}:any)=>!links.categoryInputIdByKey.has(evidenceLinkKey(e.findingId,i)));if(!records.length)return [];return [{id:'REF_'+e.findingId,evidenceId:e.findingId,label:e.label,interaction:{type:'CATEGORY_COUNTERS',preservePriorObservations:true,showAccumulatedCounts:true,categoryCoverage:'NON_EXHAUSTIVE',totalOpportunities:'NONE',categories:records.map(({p,i}:any)=>({id:'REF_'+e.findingId+'_'+(i+1),inputId:'REF_'+e.findingId+'_'+(i+1),label:p.label,meaning:p.meaning}))}}]});
   if(items.length)out.push({id:s.id,title:s.title,description:evidenceExplanation(s),collapsible:s.collapsible!==false,defaultExpanded:s.defaultExpanded===true,descriptionPresentation:s.descriptionPresentation??{collapsible:true,label:'説明',defaultExpanded:false},items});
  }
  return out;
