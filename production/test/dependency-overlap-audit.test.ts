@@ -1,0 +1,7 @@
+import test from 'node:test';import assert from 'node:assert/strict';import {auditDependencyProjection} from '../src/dependency-overlap-audit.ts';
+const research={machineId:'M',findings:[{findingId:'a',settingDistribution:{'1':0.1,'6':0.2}},{findingId:'b',settingDistribution:{'1':0.05,'6':0.1}}]};
+const evaluation={dependencyReview:{status:'COMPLETE'},evaluations:[{findingId:'a',settingDistribution:{'1':0.1,'6':0.2}},{findingId:'b',settingDistribution:{'1':0.05,'6':0.1}}]};
+const candidate={candidates:[{findingId:'a',runtimeInferenceAllowed:true,dependencyResolution:'SINGLE_MEMBER_SELECTED'},{findingId:'b',runtimeInferenceAllowed:false,dependencyResolution:'RESOLVED_BY_SINGLE_MEMBER',resolvedIntoFindingId:'a'}],dependencyGroups:[{groupId:'g',members:['a','b'],resolution:'SINGLE_MEMBER_SELECTED',selectedFindingId:'a'}]};
+const app={package:{features:{runtimeProjection:[{featureId:'a',runtimeStatus:'ACTIVE'}]},v8:{machineResearchSummary:{notAdopted:[{featureId:'b',reason:'同じ設定差情報を共有するため、重複評価を避けて代表項目へ統合し、単独では数値推測に使用しません。'}]}}}};
+test('passes resolved single-member overlap',()=>assert.equal(auditDependencyProjection(research,evaluation,candidate,app).status,'PASS'));
+test('rejects non-runtime member resurrected as active',()=>{const bad=structuredClone(app);bad.package.features.runtimeProjection.push({featureId:'b',runtimeStatus:'ACTIVE'});assert.equal(auditDependencyProjection(research,evaluation,candidate,bad).status,'FAIL')});

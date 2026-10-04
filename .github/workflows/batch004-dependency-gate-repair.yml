@@ -1,0 +1,260 @@
+name: Batch004 Dependency Gate Repair
+
+on:
+  push:
+    branches:
+      - production/v85-batch-004-foundation-20261003
+    paths:
+      - production/.batch004-dependency-gate-repair-trigger
+
+permissions:
+  contents: write
+  actions: write
+
+concurrency:
+  group: batch004-dependency-gate-repair
+  cancel-in-progress: false
+
+jobs:
+  repair:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout authoritative production state
+        uses: actions/checkout@v4
+        with:
+          ref: production/v85-batch-004-foundation-20261003
+          path: production-state
+          fetch-depth: 0
+
+      - name: Checkout prototype distribution branch
+        uses: actions/checkout@v4
+        with:
+          ref: prototype-multi-machine
+          path: prototype
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+
+      - name: Validate Dependency Gate contracts
+        working-directory: production-state/production
+        run: npm test
+
+      - name: Invalidate Batch 004 from the semantic dependency boundary
+        working-directory: production-state/production
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --experimental-strip-types src/invalidate-machine-downstream.ts batch-20261003-004 L_GOBLIN_SLAYER_2_JZ --include-research
+          machines=(
+            L_BURNING_EXPRESS_ZN
+            L_PRISM_NANA_CC
+            L_GINGA_EIYUU_DNT_GH
+            L_HIHODEN_PA7
+            L_OKIDOKI_DUO_ENCORE_FR
+            L_HOKUTO_TENSEI_2_MW
+            L_TEKKEN_6_YD01H
+            L_HANMA_BAKI_L5
+            L_GHOST_IN_THE_SHELL_ZS
+          )
+          for machine in "${machines[@]}"; do
+            node --experimental-strip-types src/invalidate-machine-downstream.ts batch-20261003-004 "$machine"
+          done
+
+      - name: Rematerialize Goblin Slayer II Research with explicit causal overlap
+        working-directory: production-state/production
+        run: node --experimental-strip-types src/materialize-research-drafts.ts batch-20261003-004 wave-2 --force-machine=L_GOBLIN_SLAYER_2_JZ --force-only
+
+      - name: Regenerate all Batch 004 machines through App Runtime
+        working-directory: production-state/production
+        run: node --experimental-strip-types src/deterministic-production-worker.ts batch-20261003-004 --through APP_RUNTIME
+
+      - name: Audit Dependency Gate and Batch 004 regression
+        working-directory: production-state/production
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm test
+          node --experimental-strip-types src/dependency-overlap-audit.ts batch-20261003-004
+          node --experimental-strip-types src/reconcile-batch.ts batch-20261003-004
+          node <<'NODE'
+          const fs=require('fs'),path=require('path');
+          const ids=[
+            'L_BURNING_EXPRESS_ZN','L_PRISM_NANA_CC','L_GINGA_EIYUU_DNT_GH','L_HIHODEN_PA7','L_OKIDOKI_DUO_ENCORE_FR',
+            'L_HOKUTO_TENSEI_2_MW','L_TEKKEN_6_YD01H','L_HANMA_BAKI_L5','L_GOBLIN_SLAYER_2_JZ','L_GHOST_IN_THE_SHELL_ZS'
+          ];
+          const batch='batch-20261003-004';
+          for(const id of ids){
+            const app=JSON.parse(fs.readFileSync(path.join('batches',batch,'machines',id,'stages','APP_RUNTIME.json'),'utf8'));
+            if(app.state!=='COMPLETE'||!app.authoritativeOutputRef?.path)throw new Error('APP_RUNTIME_NOT_COMPLETE:'+id+':'+app.state);
+          }
+          const research=JSON.parse(fs.readFileSync(path.join('batches',batch,'artifacts','L_GOBLIN_SLAYER_2_JZ','research','result.json'),'utf8'));
+          for(const fid of ['cz-first-hit','at-first-hit','weak-role-cz','zone-300-500-cz']){
+            const f=research.findings.find(x=>x.findingId===fid);
+            if(!f||f.dependencyGroupId!=='goblin-cz-at-overlap'||f.dependencyKind!=='CAUSAL_OVERLAP')throw new Error('GOBLIN_RESEARCH_DEPENDENCY:'+fid);
+          }
+          console.log(JSON.stringify({status:'PASS',batch004AppRuntimeComplete:ids.length,goblinDependencyFindings:4},null,2));
+          NODE
+
+      - name: Commit regenerated authoritative pre-distribution state
+        shell: bash
+        working-directory: production-state
+        run: |
+          set -euo pipefail
+          git fetch origin production/v85-batch-004-foundation-20261003
+          test "$(git rev-parse HEAD)" = "$(git rev-parse origin/production/v85-batch-004-foundation-20261003)" || exit 1
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git add production/batches/batch-20261003-004
+          git commit -m "Regenerate Batch 004 after Dependency Gate repair [skip ci]"
+          git push origin HEAD:production/v85-batch-004-foundation-20261003
+          echo "PRE_DISTRIBUTION_PROD_COMMIT=$(git rev-parse HEAD)" >> "$GITHUB_ENV"
+
+      - name: Materialize all Batch 004 live packages
+        shell: bash
+        run: |
+          set -euo pipefail
+          node <<'NODE'
+          const fs=require('fs'),path=require('path'),crypto=require('crypto');
+          const batchId='batch-20261003-004';
+          const machines=[
+            'L_BURNING_EXPRESS_ZN','L_PRISM_NANA_CC','L_GINGA_EIYUU_DNT_GH','L_HIHODEN_PA7','L_OKIDOKI_DUO_ENCORE_FR',
+            'L_HOKUTO_TENSEI_2_MW','L_TEKKEN_6_YD01H','L_HANMA_BAKI_L5','L_GOBLIN_SLAYER_2_JZ','L_GHOST_IN_THE_SHELL_ZS'
+          ];
+          const prod=path.resolve('production-state'),proto=path.resolve('prototype');
+          const catalogPath=path.join(proto,'catalog.json');
+          const catalog=JSON.parse(fs.readFileSync(catalogPath,'utf8'));
+          const byId=new Map(catalog.machines.map(x=>[x.machineId,x]));
+          const metadata={},sha=b=>crypto.createHash('sha256').update(b).digest('hex');
+          for(const machineId of machines){
+            const stage=JSON.parse(fs.readFileSync(path.join(prod,'production','batches',batchId,'machines',machineId,'stages','APP_RUNTIME.json'),'utf8'));
+            if(stage.state!=='COMPLETE'||!stage.authoritativeOutputRef?.path)throw new Error('APP_RUNTIME_NOT_COMPLETE:'+machineId);
+            const app=JSON.parse(fs.readFileSync(path.join(prod,stage.authoritativeOutputRef.path),'utf8'));
+            const pkg=app.package,entry=byId.get(machineId);
+            if(!entry)throw new Error('CATALOG_ENTRY_MISSING:'+machineId);
+            pkg.machine.introductionDate=entry.introductionDate;
+            pkg.machine.machineType=entry.machineType;
+            pkg.machine.gameType=entry.gameType;
+            const bytes=Buffer.from(JSON.stringify(pkg,null,2)+'\n','utf8');
+            const target=path.join(proto,'machines',machineId,'machine-package.json');
+            fs.mkdirSync(path.dirname(target),{recursive:true});
+            fs.writeFileSync(target,bytes);
+            const caps=[];
+            for(const feature of pkg.features?.features??[]){
+              const model=String(feature.modelType??'').toLowerCase();
+              if(model==='binomial'&&!caps.includes('binomial'))caps.push('binomial');
+              if(model==='multinomial'&&!caps.includes('multinomial'))caps.push('multinomial');
+            }
+            if((pkg.evidence?.references??[]).length>0&&!caps.includes('evidence'))caps.push('evidence');
+            const nextHash=sha(bytes);
+            const changed=entry.machineDataVersion!==pkg.machine.machineDataVersion||entry.sha256!==nextHash||entry.packageSizeBytes!==bytes.length||JSON.stringify(entry.requiredCapabilities??[])!==JSON.stringify(caps);
+            entry.machineDataVersion=pkg.machine.machineDataVersion;
+            entry.sha256=nextHash;
+            entry.packageSizeBytes=bytes.length;
+            entry.requiredCapabilities=caps;
+            if(changed)entry.updatedAt=new Date().toISOString();
+            metadata[machineId]={machineId,machineDataVersion:pkg.machine.machineDataVersion,settings:pkg.machine.settings,sha256:nextHash,packageSizeBytes:bytes.length,introductionDate:entry.introductionDate,machineType:entry.machineType,gameType:entry.gameType};
+          }
+          fs.writeFileSync(catalogPath,JSON.stringify(catalog,null,2)+'\n');
+          fs.writeFileSync(process.env.RUNNER_TEMP+'/batch004-dependency-gate-metadata.json',JSON.stringify(metadata,null,2)+'\n');
+          NODE
+
+      - name: Validate live distribution and Goblin non-adopted projection
+        working-directory: prototype
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm run ux-contract:audit
+          node --test --test-concurrency=1 test/user-verified-ux-contracts.test.mjs
+          node tools/apply-machine-identity-classification.mjs --apply
+          node tools/apply-machine-identity-classification.mjs --verify
+          node <<'NODE'
+          const fs=require('fs'),path=require('path'),crypto=require('crypto');
+          const ids=new Set(['L_BURNING_EXPRESS_ZN','L_PRISM_NANA_CC','L_GINGA_EIYUU_DNT_GH','L_HIHODEN_PA7','L_OKIDOKI_DUO_ENCORE_FR','L_HOKUTO_TENSEI_2_MW','L_TEKKEN_6_YD01H','L_HANMA_BAKI_L5','L_GOBLIN_SLAYER_2_JZ','L_GHOST_IN_THE_SHELL_ZS']);
+          const catalog=JSON.parse(fs.readFileSync('catalog.json','utf8'));
+          for(const item of catalog.machines.filter(x=>ids.has(x.machineId))){
+            const b=fs.readFileSync(path.join('machines',item.machineId,'machine-package.json'));
+            if(b.length!==item.packageSizeBytes)throw new Error('SIZE:'+item.machineId);
+            if(crypto.createHash('sha256').update(b).digest('hex')!==item.sha256)throw new Error('SHA:'+item.machineId);
+          }
+          const gob=JSON.parse(fs.readFileSync('machines/L_GOBLIN_SLAYER_2_JZ/machine-package.json','utf8'));
+          const active=new Set((gob.features?.runtimeProjection??[]).filter(x=>x.runtimeStatus==='ACTIVE').map(x=>x.featureId));
+          if(!active.has('cz-first-hit'))throw new Error('GOBLIN_CZ_NOT_ACTIVE_LIVE');
+          for(const id of ['at-first-hit','weak-role-cz','zone-300-500-cz'])if(active.has(id))throw new Error('GOBLIN_OVERLAP_ACTIVE_LIVE:'+id);
+          const notAdopted=new Map((gob.v8?.machineResearchSummary?.notAdopted??[]).map(x=>[x.featureId,x]));
+          for(const id of ['at-first-hit','weak-role-cz','zone-300-500-cz']){
+            const reason=String(notAdopted.get(id)?.reason??'');
+            if(reason.length<40||!/重複|共有|含まれ/.test(reason))throw new Error('GOBLIN_REASON_MISSING_LIVE:'+id+':'+reason);
+          }
+          console.log(JSON.stringify({status:'PASS',catalogPackages:ids.size,goblinRepresentative:'cz-first-hit',goblinRejectedOverlap:3},null,2));
+          NODE
+
+      - name: Commit Batch 004 distribution atomically
+        shell: bash
+        working-directory: prototype
+        run: |
+          set -euo pipefail
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git add -u
+          git add catalog.json machines/L_BURNING_EXPRESS_ZN/machine-package.json machines/L_PRISM_NANA_CC/machine-package.json machines/L_GINGA_EIYUU_DNT_GH/machine-package.json machines/L_HIHODEN_PA7/machine-package.json machines/L_OKIDOKI_DUO_ENCORE_FR/machine-package.json machines/L_HOKUTO_TENSEI_2_MW/machine-package.json machines/L_TEKKEN_6_YD01H/machine-package.json machines/L_HANMA_BAKI_L5/machine-package.json machines/L_GOBLIN_SLAYER_2_JZ/machine-package.json machines/L_GHOST_IN_THE_SHELL_ZS/machine-package.json
+          if ! git diff --cached --quiet; then
+            git commit -m "Publish Batch 004 Dependency Gate repair [skip ci]"
+            git push origin HEAD:prototype-multi-machine
+          fi
+          echo "PROTOTYPE_COMMIT=$(git rev-parse HEAD)" >> "$GITHUB_ENV"
+
+      - name: Deploy Pages
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          gh workflow run deploy-pages.yml --ref prototype-multi-machine --repo "$GITHUB_REPOSITORY"
+          run_id=""
+          for _ in $(seq 1 30); do
+            run_id="$(gh api "repos/$GITHUB_REPOSITORY/actions/runs?branch=prototype-multi-machine&event=workflow_dispatch&per_page=30" --jq ".workflow_runs[] | select(.name == \"Deploy SloAnalytica Data Pages\" and .head_sha == \"$PROTOTYPE_COMMIT\") | .id" | head -n1 || true)"
+            [ -n "$run_id" ] && break
+            sleep 2
+          done
+          test -n "$run_id"
+          gh run watch "$run_id" --repo "$GITHUB_REPOSITORY" --exit-status
+          echo "PAGES_RUN_ID=$run_id" >> "$GITHUB_ENV"
+
+      - name: Build Batch 004 Dependency Gate attestation
+        shell: bash
+        run: |
+          set -euo pipefail
+          node <<'NODE'
+          const fs=require('fs'),path=require('path');
+          const doc={
+            batchId:'batch-20261003-004',
+            repair:'DEPENDENCY_OVERLAP_GATE',
+            integration:{repository:'hanashinonetachou-arch/sloanalytica-data',branch:'prototype-multi-machine',commit:process.env.PROTOTYPE_COMMIT},
+            packages:JSON.parse(fs.readFileSync(process.env.RUNNER_TEMP+'/batch004-dependency-gate-metadata.json','utf8')),
+            checks:{dependencyOverlapAudit:true,catalogIntegrity:true,pagesDeployment:{runId:Number(process.env.PAGES_RUN_ID),conclusion:'success'},uxContractAudit:{runId:Number(process.env.GITHUB_RUN_ID),conclusion:'success'},machineIdentityConsistency:{runId:Number(process.env.GITHUB_RUN_ID),conclusion:'success',batchMachineVerified:true}}
+          };
+          fs.writeFileSync(path.resolve('production-state','production','batches','batch-20261003-004','distribution-repair-attestation.json'),JSON.stringify(doc,null,2)+'\n');
+          NODE
+
+      - name: Finalize Batch 004 Distribution states and re-audit
+        working-directory: production-state/production
+        run: |
+          node --experimental-strip-types src/deterministic-production-worker.ts batch-20261003-004 --through DISTRIBUTION
+          npm test
+          node --experimental-strip-types src/dependency-overlap-audit.ts batch-20261003-004
+          node --experimental-strip-types src/reconcile-batch.ts batch-20261003-004
+
+      - name: Commit finalized authoritative Dependency Gate state
+        shell: bash
+        working-directory: production-state
+        run: |
+          set -euo pipefail
+          git fetch origin production/v85-batch-004-foundation-20261003
+          test "$PRE_DISTRIBUTION_PROD_COMMIT" = "$(git rev-parse origin/production/v85-batch-004-foundation-20261003)" || exit 1
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git add production/batches/batch-20261003-004
+          git commit -m "Finalize Batch 004 Dependency Gate repair [skip ci]"
+          git push origin HEAD:production/v85-batch-004-foundation-20261003
