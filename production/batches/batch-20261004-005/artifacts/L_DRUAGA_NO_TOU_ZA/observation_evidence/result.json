@@ -1,0 +1,166 @@
+{
+  "schemaVersion": "observation-evidence-v1",
+  "manifestVersion": "8.5",
+  "batchId": "batch-20261004-005",
+  "machineId": "L_DRUAGA_NO_TOU_ZA",
+  "machineName": "スマスロ/SLOT ドルアーガの塔",
+  "candidateContractArtifact": {
+    "artifactId": "candidate-contract-L_DRUAGA_NO_TOU_ZA",
+    "kind": "candidate-contract",
+    "path": "production/batches/batch-20261004-005/artifacts/L_DRUAGA_NO_TOU_ZA/candidate_contract/result.json",
+    "sha256": "f9f5b495074ced5dce98567691a719170f3eb27b31047aa8b99671eda7c26fc5",
+    "producerWorkId": "wrk_b005_cand_2"
+  },
+  "observations": [
+    {
+      "findingId": "bonus-combined",
+      "label": "ボーナス初当たり合算",
+      "model": "BERNOULLI",
+      "observationType": "probability",
+      "trialUniverse": "TOTAL_GAME_TRIAL",
+      "denominatorSemantics": "総ゲーム数に対するBIG・REGの合算初当たり回数。",
+      "liveObservation": {
+        "status": "DIRECT_EXACT",
+        "reason": "A+AT機で総ゲーム数とBIG・REG回数をそのまま記録できる。"
+      },
+      "liveInferenceRoute": "LIVE_CONDITIONAL",
+      "runtimeInferenceAllowed": false,
+      "dependencyResolution": "RESOLVED_BY_SINGLE_MEMBER",
+      "observationStatus": "RESOLVED_BY_SINGLE_MEMBER",
+      "collectionContract": null,
+      "details": [],
+      "resolvedIntoFindingId": "specific-bonus-combined"
+    },
+    {
+      "findingId": "specific-bonus-combined",
+      "label": "特定ボーナス4種合算",
+      "model": "BERNOULLI",
+      "observationType": "probability",
+      "trialUniverse": "TOTAL_GAME_TRIAL",
+      "denominatorSemantics": "総ゲーム数に対する平行スイカ+ギルBIG、平行スイカ+赤7BIG、斜めスイカ+赤7BIG、チェリー+REGの合算回数。",
+      "liveObservation": {
+        "status": "DIRECT_EXACT",
+        "reason": "対象4種類はいずれも出目とボーナス種別から判別して記録できる。"
+      },
+      "liveInferenceRoute": "LIVE_CONDITIONAL",
+      "runtimeInferenceAllowed": true,
+      "dependencyResolution": "SINGLE_MEMBER_SELECTED",
+      "observationStatus": "READY",
+      "collectionContract": {
+        "type": "SUCCESS_TRIAL_COUNTS",
+        "successField": "successCount",
+        "trialField": "eligibleTrialCount"
+      },
+      "details": []
+    },
+    {
+      "findingId": "dc-normal-square-treasure",
+      "label": "DC通常マスのレア役から宝箱獲得",
+      "model": "BERNOULLI",
+      "observationType": "conditional_probability",
+      "trialUniverse": "DC_NORMAL_SQUARE_RARE_ROLE_TRIAL",
+      "denominatorSemantics": "ドルアーガチャレンジ中、モンスターマス・鍵マス以外でチェリーまたはスイカが成立した回数に対する宝箱獲得回数。",
+      "liveObservation": {
+        "status": "EXACT_WITH_SCOPE_TRACKING",
+        "reason": "対象マスでのレア役成立と宝箱獲得をセットで記録できる。"
+      },
+      "liveInferenceRoute": "LIVE_CONDITIONAL",
+      "runtimeInferenceAllowed": true,
+      "dependencyResolution": "NONE",
+      "observationStatus": "READY",
+      "collectionContract": {
+        "type": "SUCCESS_TRIAL_COUNTS",
+        "successField": "successCount",
+        "trialField": "eligibleTrialCount"
+      },
+      "details": []
+    }
+  ],
+  "evidence": [
+    {
+      "findingId": "reg-bgm-ishitar",
+      "label": "REG中BGM「イシターの復活」メインテーマ",
+      "sourceIds": [
+        "nana-druaga-setting"
+      ],
+      "observationType": "evidence",
+      "details": [
+        "通常時REG中のBGMで確認した場合に記録する。"
+      ],
+      "semanticType": "EXACT_CONSTRAINT",
+      "semanticCategories": [
+        {
+          "label": "イシターの復活 メインテーマ",
+          "meaning": "設定2以上",
+          "semanticType": "EXACT_CONSTRAINT"
+        }
+      ],
+      "runtimePolicyControlled": false,
+      "status": "SOURCE_REFERENCED"
+    }
+  ],
+  "sourceReferences": [
+    {
+      "sourceId": "nana-druaga-setting",
+      "url": "https://nana-press.com/kaiseki/machine/1012/31659/",
+      "title": "SLOT ドルアーガの塔 設定判別",
+      "sourceType": "primary_analysis",
+      "claims": [
+        "ボーナス・特定ボーナス・DC宝箱・AT中REGポイント・REG中BGMの公開値を確認"
+      ]
+    },
+    {
+      "sourceId": "pacnk-druaga-specific",
+      "url": "https://pacnk.com/slot/tools/sh_doruaganotoslop.html",
+      "title": "スマスロ ドルアーガの塔 設定判別ツール",
+      "sourceType": "secondary_analysis",
+      "claims": [
+        "特定ボーナス4種合算の設定別確率を確認"
+      ]
+    }
+  ],
+  "blockedItems": [
+    {
+      "blockId": "druaga-big-point",
+      "label": "AT中REG当選時のドルアーガBIGポイント加算",
+      "reason": "設定別当選率は公開されているが、内部ポイントの加算成否を各REGごとに直接確認できない。",
+      "reevaluationCondition": "各REGでポイント加算成否を一意に観測できる手段が確認されること。"
+    }
+  ],
+  "sourceIntegrityIssues": [],
+  "highLowDiscrimination": {
+    "status": "COMPUTED",
+    "method": "BEST_SINGLE_EXACT_ACTIVE_FEATURE",
+    "bandDefinition": {
+      "lowSettings": "SETTING_1_TO_3",
+      "highSettings": "SETTING_4_TO_6",
+      "classPrior": "BALANCED"
+    },
+    "results": [
+      {
+        "games": 1500,
+        "balancedAccuracyPercent": 62.09
+      },
+      {
+        "games": 3000,
+        "balancedAccuracyPercent": 67.08
+      },
+      {
+        "games": 7000,
+        "balancedAccuracyPercent": 74.27
+      }
+    ],
+    "eligibleFeatureIds": [
+      "specific-bonus-combined"
+    ],
+    "selectedFeatureId": "specific-bonus-combined",
+    "selectedFeatureLabel": "特定ボーナス4種合算",
+    "excludedFeatures": [
+      {
+        "findingId": "dc-normal-square-treasure",
+        "reason": "BENCHMARK_EXPOSURE_UNRESOLVED"
+      }
+    ],
+    "note": "7000Gへ正確に換算できるACTIVE要素だけを候補とし、要素間の独立性を仮定せず、単独で最も高い判別精度を持つ要素から保守的に算出しています。条件付き要素はこの指標には含めませんが、実戦中に実際の観測回数が入力された場合は設定推測に使用します。"
+  }
+}
