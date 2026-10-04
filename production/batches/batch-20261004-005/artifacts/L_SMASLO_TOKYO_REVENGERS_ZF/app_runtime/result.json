@@ -8,8 +8,8 @@
     "artifactId": "runtime-projection-L_SMASLO_TOKYO_REVENGERS_ZF",
     "kind": "runtime-projection",
     "path": "production/batches/batch-20261004-005/artifacts/L_SMASLO_TOKYO_REVENGERS_ZF/runtime_projection/result.json",
-    "sha256": "302c1dcb4408fedb5c90aa931d0b4edf3e5a562fbc89c1226df49572940b592f",
-    "producerWorkId": "wrk_66d41757a7ab4273"
+    "sha256": "d5e5bddc19decd90078a418087590834d8af095c7c936faacf3a9d317f4365e4",
+    "producerWorkId": "wrk_c5417d751f7741bd"
   },
   "package": {
     "schemaVersion": 1,
@@ -42,7 +42,7 @@
       "schemaVersion": "2.0.0",
       "inputs": [
         {
-          "id": "common-bell.eligibleTrialCount",
+          "id": "at-first-hit.eligibleTrialCount",
           "name": "通常ゲーム数",
           "category": "V8_NUMERIC",
           "type": "integer",
@@ -53,6 +53,29 @@
           "inferenceRole": "INCLUDE_PRIMARY"
         },
         {
+          "id": "at-first-hit.successCount",
+          "name": "東卍RUSH初当たり回数",
+          "category": "V8_NUMERIC",
+          "type": "counter",
+          "unit": "回",
+          "defaultValue": 0,
+          "minimum": 0,
+          "displayOrder": 2,
+          "parentInputId": "at-first-hit.eligibleTrialCount",
+          "inferenceRole": "INCLUDE_PRIMARY"
+        },
+        {
+          "id": "common-bell.eligibleTrialCount",
+          "name": "通常ゲーム数",
+          "category": "V8_NUMERIC",
+          "type": "integer",
+          "unit": "G",
+          "defaultValue": 0,
+          "minimum": 0,
+          "displayOrder": 3,
+          "inferenceRole": "INCLUDE_PRIMARY"
+        },
+        {
           "id": "common-bell.successCount",
           "name": "共通ベル回数",
           "category": "V8_NUMERIC",
@@ -60,32 +83,9 @@
           "unit": "回",
           "defaultValue": 0,
           "minimum": 0,
-          "displayOrder": 2,
+          "displayOrder": 4,
           "parentInputId": "common-bell.eligibleTrialCount",
           "inferenceRole": "INCLUDE_PRIMARY"
-        },
-        {
-          "id": "tooman-chance-weak-role-at.eligibleTrialCount",
-          "name": "スイカ・弱チェリー成立回数",
-          "category": "V8_NUMERIC",
-          "type": "integer",
-          "unit": "回",
-          "defaultValue": 0,
-          "minimum": 0,
-          "displayOrder": 3,
-          "inferenceRole": "INCLUDE_SUPPORT"
-        },
-        {
-          "id": "tooman-chance-weak-role-at.successCount",
-          "name": "東卍RUSH当選回数",
-          "category": "V8_NUMERIC",
-          "type": "counter",
-          "unit": "回",
-          "defaultValue": 0,
-          "minimum": 0,
-          "displayOrder": 4,
-          "parentInputId": "tooman-chance-weak-role-at.eligibleTrialCount",
-          "inferenceRole": "INCLUDE_SUPPORT"
         },
         {
           "id": "REF_tokyo-set-end-hints_1",
@@ -170,6 +170,32 @@
       "version": "8.5-runtime",
       "features": [
         {
+          "featureId": "at-first-hit",
+          "name": "東卍RUSH初当たり",
+          "trialUniverse": "NORMAL_GAME_TRIAL",
+          "adoptionCategory": "INCLUDE_PRIMARY",
+          "calculationRole": "PROBABILITY",
+          "probabilityEngineUsage": true,
+          "denominatorInputId": "at-first-hit.eligibleTrialCount",
+          "probabilities": {
+            "SET_1": 0.002073828287017835,
+            "SET_2": 0.002106593638087213,
+            "SET_3": 0.002188662727073758,
+            "SET_4": 0.0024154589371980675,
+            "SET_5": 0.0025393600812595226,
+            "SET_6": 0.002680246582685607
+          },
+          "selectionRationale": {
+            "summary": "設定推測に採用された要素です。",
+            "adoptionReason": "採用条件を満たし、実戦で観測できる設定差を使用します。",
+            "shortTermReason": "標本が少ない間は結果の振れが大きくなります。",
+            "longTermReason": "観測数が増えるほど設定別の比較が安定します。"
+          },
+          "modelType": "binomial",
+          "numeratorInputId": "at-first-hit.successCount",
+          "displayFormat": "percentage"
+        },
+        {
           "featureId": "common-bell",
           "name": "通常時の共通ベル",
           "trialUniverse": "NORMAL_GAME_TRIAL",
@@ -194,35 +220,16 @@
           "modelType": "binomial",
           "numeratorInputId": "common-bell.successCount",
           "displayFormat": "percentage"
-        },
-        {
-          "featureId": "tooman-chance-weak-role-at",
-          "name": "東卍チャンス中のスイカ・弱チェリーからAT当選",
-          "trialUniverse": "TOOMAN_CHANCE_WEAK_ROLE_TRIAL",
-          "adoptionCategory": "INCLUDE_SUPPORT",
-          "calculationRole": "PROBABILITY",
-          "probabilityEngineUsage": true,
-          "denominatorInputId": "tooman-chance-weak-role-at.eligibleTrialCount",
-          "probabilities": {
-            "SET_1": 0.102,
-            "SET_2": 0.105,
-            "SET_3": 0.109,
-            "SET_4": 0.125,
-            "SET_5": 0.148,
-            "SET_6": 0.164
-          },
-          "selectionRationale": {
-            "summary": "設定推測に採用された要素です。",
-            "adoptionReason": "採用条件を満たし、実戦で観測できる設定差を使用します。",
-            "shortTermReason": "標本が少ない間は結果の振れが大きくなります。",
-            "longTermReason": "観測数が増えるほど設定別の比較が安定します。"
-          },
-          "modelType": "binomial",
-          "numeratorInputId": "tooman-chance-weak-role-at.successCount",
-          "displayFormat": "percentage"
         }
       ],
       "runtimeProjection": [
+        {
+          "featureId": "at-first-hit",
+          "runtimeStatus": "ACTIVE",
+          "metric": "SELECTION_SCORE",
+          "metricValue": 20.643640129854507,
+          "importance": "主要"
+        },
         {
           "featureId": "common-bell",
           "runtimeStatus": "ACTIVE",
@@ -231,11 +238,12 @@
           "importance": "主要"
         },
         {
-          "featureId": "tooman-chance-weak-role-at",
-          "runtimeStatus": "ACTIVE",
-          "metric": "PER_ELIGIBLE_TRIAL_POWER",
-          "metricValue": 0.692823589304381,
-          "importance": "微小"
+          "featureId": "middle-cherry",
+          "runtimeStatus": "INACTIVE",
+          "metric": "SELECTION_SCORE",
+          "metricValue": 1.7761941000625892,
+          "threshold": 5,
+          "runtimeReason": "THRESHOLD_NOT_MET"
         }
       ]
     },
@@ -488,40 +496,81 @@
       },
       "v8Sections": [
         {
-          "id": "OBS_common-bell",
-          "title": "通常時の共通ベル",
+          "id": "OBS_SHARED_NORMAL_GAME_TRIAL",
+          "title": "東卍RUSH初当たり・通常時の共通ベル",
           "collapsible": true,
           "defaultExpanded": false,
-          "description": "通常時の共通ベルを記録します。通常ゲーム数を基準に、実戦中の出現割合を設定別に比較します。\n・注意：AT中は押し順ベルとの判別が困難なため含めない。",
+          "description": "複数の設定推測項目で同じ「通常ゲーム数」を共通の基準として使用します。通常ゲーム数は1回だけ入力し、各項目では該当した回数だけを記録してください。",
           "descriptionPresentation": {
             "collapsible": true,
             "label": "説明",
             "defaultExpanded": false
           },
+          "groups": [
+            {
+              "id": "DENOM_NORMAL_GAME_TRIAL",
+              "label": "通常ゲーム数",
+              "input": "denominator",
+              "inputId": "at-first-hit.eligibleTrialCount",
+              "engineBinding": {
+                "inputIds": [
+                  "at-first-hit.eligibleTrialCount",
+                  "common-bell.eligibleTrialCount"
+                ]
+              },
+              "gridSpan": 12,
+              "directNumeric": true,
+              "quickAdd": [
+                50
+              ],
+              "unobservedDisplay": "—",
+              "playDataBinding": {
+                "source": "PLAY_NORMAL_GAME_DELTA"
+              }
+            }
+          ],
           "items": [
             {
-              "id": "NODE_common-bell",
-              "featureId": "common-bell",
-              "title": "通常時の共通ベル",
+              "id": "NODE_at-first-hit",
+              "featureId": "at-first-hit",
+              "title": "東卍RUSH初当たり",
+              "description": "通常時の東卍RUSH初当たりを記録します。通常ゲーム数を基準に、実戦中の出現割合を設定別に比較します。",
+              "descriptionPresentation": {
+                "collapsible": true,
+                "label": "説明",
+                "defaultExpanded": false
+              },
+              "gridSpan": 6,
               "inputs": [
                 {
-                  "id": "common-bell.eligibleTrialCount",
-                  "label": "通常ゲーム数",
-                  "input": "denominator",
-                  "inputId": "common-bell.eligibleTrialCount",
+                  "id": "at-first-hit.successCount",
+                  "label": "東卍RUSH初当たり回数",
+                  "input": "counter",
+                  "inputId": "at-first-hit.successCount",
                   "engineBinding": {
-                    "inputId": "common-bell.eligibleTrialCount"
+                    "inputId": "at-first-hit.successCount"
                   },
                   "gridSpan": 12,
                   "directNumeric": true,
                   "quickAdd": [
-                    50
+                    1
                   ],
-                  "unobservedDisplay": "—",
-                  "playDataBinding": {
-                    "source": "PLAY_NORMAL_GAME_DELTA"
-                  }
-                },
+                  "unobservedDisplay": "—"
+                }
+              ]
+            },
+            {
+              "id": "NODE_common-bell",
+              "featureId": "common-bell",
+              "title": "通常時の共通ベル",
+              "description": "通常時の共通ベルを記録します。通常ゲーム数を基準に、実戦中の出現割合を設定別に比較します。\n・注意：AT中は押し順ベルとの判別が困難なため含めない。",
+              "descriptionPresentation": {
+                "collapsible": true,
+                "label": "説明",
+                "defaultExpanded": false
+              },
+              "gridSpan": 6,
+              "inputs": [
                 {
                   "id": "common-bell.successCount",
                   "label": "共通ベル回数",
@@ -530,56 +579,7 @@
                   "engineBinding": {
                     "inputId": "common-bell.successCount"
                   },
-                  "gridSpan": 6,
-                  "directNumeric": true,
-                  "quickAdd": [
-                    1
-                  ],
-                  "unobservedDisplay": "—"
-                }
-              ]
-            }
-          ]
-        },
-        {
-          "id": "OBS_tooman-chance-weak-role-at",
-          "title": "東卍チャンス中のスイカ・弱チェリーからAT当選",
-          "collapsible": true,
-          "defaultExpanded": false,
-          "description": "対象となる機会のうち、東卍RUSH当選が実際に起きた割合を設定別に比較します。",
-          "descriptionPresentation": {
-            "collapsible": true,
-            "label": "説明",
-            "defaultExpanded": false
-          },
-          "items": [
-            {
-              "id": "NODE_tooman-chance-weak-role-at",
-              "featureId": "tooman-chance-weak-role-at",
-              "title": "東卍チャンス中のスイカ・弱チェリーからAT当選",
-              "inputs": [
-                {
-                  "id": "tooman-chance-weak-role-at.eligibleTrialCount",
-                  "label": "スイカ・弱チェリー成立回数",
-                  "input": "denominator",
-                  "inputId": "tooman-chance-weak-role-at.eligibleTrialCount",
-                  "engineBinding": {
-                    "inputId": "tooman-chance-weak-role-at.eligibleTrialCount"
-                  },
-                  "gridSpan": 6,
-                  "directNumeric": true,
-                  "quickAdd": [],
-                  "unobservedDisplay": "—"
-                },
-                {
-                  "id": "tooman-chance-weak-role-at.successCount",
-                  "label": "東卍RUSH当選回数",
-                  "input": "counter",
-                  "inputId": "tooman-chance-weak-role-at.successCount",
-                  "engineBinding": {
-                    "inputId": "tooman-chance-weak-role-at.successCount"
-                  },
-                  "gridSpan": 6,
+                  "gridSpan": 12,
                   "directNumeric": true,
                   "quickAdd": [
                     1
@@ -680,6 +680,17 @@
         "title": "この機種の設定推測について",
         "adopted": [
           {
+            "featureId": "at-first-hit",
+            "label": "東卍RUSH初当たり",
+            "importance": "主要",
+            "selectionScore": 20.6,
+            "evaluation": {
+              "userLabel": "設定判別スコア",
+              "value": 20.6
+            },
+            "reason": "現在の採用基準を満たしているため、設定推測に使用します。"
+          },
+          {
             "featureId": "common-bell",
             "label": "通常時の共通ベル",
             "importance": "主要",
@@ -689,43 +700,33 @@
               "value": 78.5
             },
             "reason": "現在の採用基準を満たしているため、設定推測に使用します。"
-          },
-          {
-            "featureId": "tooman-chance-weak-role-at",
-            "label": "東卍チャンス中のスイカ・弱チェリーからAT当選",
-            "importance": "微小",
-            "evaluation": {
-              "userLabel": "1回の判別力",
-              "value": 0.692823589304381
-            },
-            "reason": "現在の採用基準を満たしているため、設定推測に使用します。"
           }
         ],
         "notAdopted": [
           {
-            "featureId": "initial-hit",
-            "label": "初当たり",
-            "reason": "この項目にも設定差のある数値は確認できています。いずれも同じ通常ゲーム区間から得られる設定差情報で、公開資料だけでは要素間の相関を正確に分離できない。複数を同時に使って判別力を過大評価しないよう、代表1要素を選んで使用する。 同じ情報を重ねて評価して判別力を過大に見積もらないため、現在は設定判別スコア等を比較して「通常時の共通ベル」を代表として使用し、この項目は単独では数値推測に使用しません。"
-          },
-          {
-            "featureId": "at-first-hit",
-            "label": "東卍RUSH初当たり",
-            "reason": "この項目にも設定差のある数値は確認できています。いずれも同じ通常ゲーム区間から得られる設定差情報で、公開資料だけでは要素間の相関を正確に分離できない。複数を同時に使って判別力を過大評価しないよう、代表1要素を選んで使用する。 同じ情報を重ねて評価して判別力を過大に見積もらないため、現在は設定判別スコア等を比較して「通常時の共通ベル」を代表として使用し、この項目は単独では数値推測に使用しません。"
-          },
-          {
             "featureId": "middle-cherry",
             "label": "通常時の中段チェリー",
-            "reason": "この項目にも設定差のある数値は確認できています。いずれも同じ通常ゲーム区間から得られる設定差情報で、公開資料だけでは要素間の相関を正確に分離できない。複数を同時に使って判別力を過大評価しないよう、代表1要素を選んで使用する。 同じ情報を重ねて評価して判別力を過大に見積もらないため、現在は設定判別スコア等を比較して「通常時の共通ベル」を代表として使用し、この項目は単独では数値推測に使用しません。"
+            "reason": "基準遊技量7000Gで得られる情報量を表す設定判別スコアが1.8で、現在の採用基準5.0未満のため、設定推測に使用しません。"
+          },
+          {
+            "featureId": "initial-hit",
+            "label": "初当たり",
+            "reason": "この項目にも設定差のある数値は確認できています。初当たり後に東卍RUSHへ直接入る場合や、東卍CHANCEから昇格する場合があり、東卍RUSH初当たりと同じ当選の流れを一部共有する。 同じ情報を重ねて評価して判別力を過大に見積もらないため、現在は設定判別スコア等を比較して「東卍RUSH初当たり」を代表として使用し、この項目は単独では数値推測に使用しません。"
           },
           {
             "featureId": "midnight-mode",
             "label": "ミッドナイトモード突入",
-            "reason": "この項目にも設定差のある数値は確認できています。いずれも同じ通常ゲーム区間から得られる設定差情報で、公開資料だけでは要素間の相関を正確に分離できない。複数を同時に使って判別力を過大評価しないよう、代表1要素を選んで使用する。 同じ情報を重ねて評価して判別力を過大に見積もらないため、現在は設定判別スコア等を比較して「通常時の共通ベル」を代表として使用し、この項目は単独では数値推測に使用しません。"
+            "reason": "この項目にも設定差のある数値は確認できています。東卍RUSH初当たりへ至る途中経路の一部であり、東卍RUSH初当たりと別々に計算すると同じ当選を重ねて評価する可能性がある。 同じ情報を重ねて評価して判別力を過大に見積もらないため、現在は設定判別スコア等を比較して「東卍RUSH初当たり」を代表として使用し、この項目は単独では数値推測に使用しません。"
           },
           {
             "featureId": "kisaki-conspiracy",
             "label": "稀咲陰謀突入",
-            "reason": "この項目にも設定差のある数値は確認できています。いずれも同じ通常ゲーム区間から得られる設定差情報で、公開資料だけでは要素間の相関を正確に分離できない。複数を同時に使って判別力を過大評価しないよう、代表1要素を選んで使用する。 同じ情報を重ねて評価して判別力を過大に見積もらないため、現在は設定判別スコア等を比較して「通常時の共通ベル」を代表として使用し、この項目は単独では数値推測に使用しません。"
+            "reason": "この項目にも設定差のある数値は確認できています。東卍RUSH初当たりへ至る途中経路の一部であり、東卍RUSH初当たりと別々に計算すると同じ当選を重ねて評価する可能性がある。 同じ情報を重ねて評価して判別力を過大に見積もらないため、現在は設定判別スコア等を比較して「東卍RUSH初当たり」を代表として使用し、この項目は単独では数値推測に使用しません。"
+          },
+          {
+            "featureId": "tooman-chance-weak-role-at",
+            "label": "東卍チャンス中のスイカ・弱チェリーからAT当選",
+            "reason": "この項目にも設定差のある数値は確認できています。東卍RUSH初当たりへ至る途中経路の一部であり、東卍RUSH初当たりと別々に計算すると同じ当選を重ねて評価する可能性がある。 同じ情報を重ねて評価して判別力を過大に見積もらないため、現在は設定判別スコア等を比較して「東卍RUSH初当たり」を代表として使用し、この項目は単独では数値推測に使用しません。"
           },
           {
             "featureId": "tokyo-state-chance-cz",
@@ -763,14 +764,20 @@
             }
           ],
           "eligibleFeatureIds": [
-            "common-bell"
+            "at-first-hit",
+            "common-bell",
+            "middle-cherry"
           ],
           "selectedFeatureId": "common-bell",
           "selectedFeatureLabel": "通常時の共通ベル",
           "excludedFeatures": [
             {
-              "findingId": "tooman-chance-weak-role-at",
-              "reason": "BENCHMARK_EXPOSURE_UNRESOLVED"
+              "findingId": "at-first-hit",
+              "reason": "CONSERVATIVE_SINGLE_FEATURE_NO_INDEPENDENCE_ASSUMPTION"
+            },
+            {
+              "findingId": "middle-cherry",
+              "reason": "CONSERVATIVE_SINGLE_FEATURE_NO_INDEPENDENCE_ASSUMPTION"
             }
           ],
           "note": "7000Gへ正確に換算できるACTIVE要素だけを候補とし、要素間の独立性を仮定せず、単独で最も高い判別精度を持つ要素から保守的に算出しています。条件付き要素はこの指標には含めませんが、実戦中に実際の観測回数が入力された場合は設定推測に使用します。"
