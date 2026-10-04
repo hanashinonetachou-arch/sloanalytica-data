@@ -1,0 +1,216 @@
+name: Batch004 Distribution Finalization Repair
+
+on:
+  push:
+    branches:
+      - production/v85-batch-004-foundation-20261003
+    paths:
+      - production/.batch004-distribution-finalization-repair-trigger
+
+permissions:
+  contents: write
+
+jobs:
+  repair-and-selfcheck:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout authoritative production state
+        uses: actions/checkout@v4
+        with:
+          ref: production/v85-batch-004-foundation-20261003
+          fetch-depth: 0
+
+      - name: Checkout live distribution
+        uses: actions/checkout@v4
+        with:
+          ref: prototype-multi-machine
+          path: live-distribution
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+
+      - name: Finalize Batch 004 Distribution through integration boundary
+        working-directory: production
+        run: |
+          node --experimental-strip-types src/finalize-batch-distribution.ts batch-20261003-004 batches/batch-20261003-004/distribution-repair-attestation.json wave-1
+          node --experimental-strip-types src/finalize-batch-distribution.ts batch-20261003-004 batches/batch-20261003-004/distribution-repair-attestation.json wave-2
+
+      - name: Run production regression suite
+        working-directory: production
+        run: |
+          npm test
+          node --experimental-strip-types src/dependency-overlap-audit.ts batch-20261003-004 \
+            L_BURNING_EXPRESS_ZN L_PRISM_NANA_CC L_GINGA_EIYUU_DNT_GH L_HIHODEN_PA7 L_OKIDOKI_DUO_ENCORE_FR \
+            L_HOKUTO_TENSEI_2_MW L_TEKKEN_6_YD01H L_HANMA_BAKI_L5 L_GHOST_IN_THE_SHELL_ZS
+          node --experimental-strip-types src/reconcile-batch.ts batch-20261003-004
+
+      - name: Audit Batch 004 semantic fidelity and live-package parity
+        working-directory: production
+        shell: bash
+        run: |
+          mkdir -p selfcheck
+          node <<'NODE'
+          const fs=require('fs'),path=require('path'),crypto=require('crypto');
+          const batch='batch-20261003-004';
+          const ids=[
+            'L_BURNING_EXPRESS_ZN','L_PRISM_NANA_CC','L_GINGA_EIYUU_DNT_GH','L_HIHODEN_PA7','L_OKIDOKI_DUO_ENCORE_FR',
+            'L_HOKUTO_TENSEI_2_MW','L_TEKKEN_6_YD01H','L_HANMA_BAKI_L5','L_GHOST_IN_THE_SHELL_ZS'
+          ];
+          const read=p=>JSON.parse(fs.readFileSync(p,'utf8'));
+          const canonical=v=>Array.isArray(v)?'['+v.map(canonical).join(',')+']':v&&typeof v==='object'?'{'+Object.keys(v).sort().map(k=>JSON.stringify(k)+':'+canonical(v[k])).join(',')+'}':JSON.stringify(v);
+          const abstractLabels=new Set(['対象回数','回数','観測機会数','該当回数']);
+          const forbidden=/Evidence|denominator|trial universe|Candidate Contract|Runtime Policy|Opportunity model|joint model|source-supported|likelihood/i;
+          const compact=v=>String(v??'').normalize('NFKC').replace(/[\s・：:「」『』（）()、,.。．!?！？]/g,'').trim();
+          const restates=(description,label)=>{
+            const d=compact(description).replace(/数えるもの|入力方法|基準|記録します|入力します|確認します|回数|ゲーム数/g,'');
+            const l=compact(label).replace(/回数|ゲーム数/g,'');
+            return Boolean(d&&l&&(d===l||(Math.min(d.length,l.length)>=4&&(d.includes(l)||l.includes(d))&&Math.min(d.length,l.length)/Math.max(d.length,l.length)>=0.85)));
+          };
+          const report={schemaVersion:'batch004-nine-machine-current-standard-selfcheck-v1',batchId:batch,checkedAt:new Date().toISOString(),machines:[],summary:{total:ids.length,passed:0,failed:0,warnings:0}};
+          for(const id of ids){
+            const issues=[],warnings=[];
+            const research=read(path.join('batches',batch,'artifacts',id,'research','result.json'));
+            const appStage=read(path.join('batches',batch,'machines',id,'stages','APP_RUNTIME.json'));
+            const distStage=read(path.join('batches',batch,'machines',id,'stages','DISTRIBUTION.json'));
+            if(appStage.state!=='COMPLETE'||!appStage.authoritativeOutputRef?.path)issues.push('APP_RUNTIME_NOT_COMPLETE');
+            if(distStage.state!=='COMPLETE')issues.push('DISTRIBUTION_NOT_COMPLETE');
+            const app=read(appStage.authoritativeOutputRef.path.replace(/^production\//,''));
+            const pkg=app.package;
+            const live=read(path.join('..','live-distribution','machines',id,'machine-package.json'));
+            const liveComparable=structuredClone(live);
+            for(const k of ['introductionDate','machineType','gameType'])delete liveComparable.machine?.[k];
+            if(canonical(pkg)!==canonical(liveComparable))issues.push('LIVE_PACKAGE_PARITY_MISMATCH');
+
+            if(research.researchCompleteness?.version!==2||(research.researchCompleteness?.domains?.length??0)<20)issues.push('RESEARCH_COMPLETENESS_MISSING');
+            for(const b of research.blockedItems??[]){
+              if(!String(b.reason??'').trim()||!String(b.reevaluationCondition??'').trim())issues.push('BLOCK_REASON_OR_REEVALUATION_MISSING:'+b.blockId);
+              if(/設定推測要素|設定示唆演出.*設定別出現率|有利区間リセット後の恩恵|外部集計に依存する要素/.test(String(b.label)))issues.push('ABSTRACT_BLOCK_LABEL:'+b.blockId);
+            }
+            for(const f of research.findings??[]){
+              if(f.settingDistribution===undefined&&f.observationType!=='evidence')issues.push('UNROUTED_FINDING:'+f.findingId);
+              const vals=[f.label,f.denominatorSemantics,f.liveObservation?.reason,...(f.details??[]),...(f.semanticCategories??[]).flatMap(c=>[c.label,c.meaning])];
+              if(vals.some(v=>typeof v==='string'&&(forbidden.test(v)||/\\n|\/n/i.test(v))))issues.push('RESEARCH_USER_FACING_INTERNAL_TEXT:'+f.findingId);
+            }
+
+            const summary=pkg.v8?.machineResearchSummary??{};
+            const visibleSummaryText=[summary.title,...(summary.adopted??[]).flatMap(x=>[x.label,x.reason,x.evaluation?.userLabel]),...(summary.notAdopted??[]).flatMap(x=>[x.label,x.reason,x.reevaluationCondition]),...(summary.unresolved??[]).flatMap(x=>[x.label,x.reason]),summary.highLowDiscrimination?.selectedFeatureLabel,summary.highLowDiscrimination?.note].filter(Boolean).join(' ');
+            if(forbidden.test(visibleSummaryText))issues.push('SUMMARY_INTERNAL_WORDING');
+            if(/\\n|\/n/i.test(visibleSummaryText))issues.push('SUMMARY_LITERAL_BREAK');
+
+            for(const input of pkg.inputs?.inputs??[]){
+              if(input.category==='V8_NUMERIC'&&abstractLabels.has(String(input.name)))issues.push('ABSTRACT_NUMERIC_LABEL:'+input.id);
+            }
+            const obs=(pkg.ui?.v8Sections??[]).filter(x=>String(x.id).startsWith('OBS_'));
+            const evi=(pkg.ui?.v8Sections??[]).filter(x=>String(x.id).startsWith('EVI_'));
+            if(obs.some(x=>(x.groups?.length??0)+(x.items?.length??0)===0))issues.push('EMPTY_OBSERVATION_SECTION');
+            if(evi.some(x=>(x.groups?.length??0)+(x.items?.length??0)===0))issues.push('EMPTY_EVIDENCE_SECTION');
+            for(const section of obs){
+              const description=String(section.description??'').trim();
+              if(!description)issues.push('DESCRIPTION_MISSING:'+section.id);
+              if(description.length<18)warnings.push('THIN_DESCRIPTION:'+section.id);
+              if(/設定判別スコア|1回の判別力/.test(description))issues.push('METRIC_IN_DESCRIPTION:'+section.id);
+              if(forbidden.test(description))issues.push('INTERNAL_DESCRIPTION_WORDING:'+section.id);
+              if(/・数えるもの：|・基準：/.test(description))issues.push('MECHANICAL_DESCRIPTION:'+section.id);
+              if(/\\n|\/n/i.test(description))issues.push('LITERAL_BREAK_TOKEN:'+section.id);
+              for(const node of [...(section.groups??[]),...(section.items??[])]){
+                for(const input of node.inputs??[]){
+                  const label=String(input.label??'');
+                  if(abstractLabels.has(label))issues.push('ABSTRACT_UI_INPUT:'+input.id);
+                  if(['denominator','counter'].includes(String(input.input??''))&&(label.length>30||/^(?:に|で|を|が|へ|から)/.test(label)))issues.push('NON_CONCISE_UI_INPUT:'+input.id+':'+label);
+                  if(restates(description,label))issues.push('DESCRIPTION_INPUT_RESTATEMENT:'+input.id);
+                }
+              }
+            }
+
+            const evidenceFindings=(research.findings??[]).filter(x=>x.observationType==='evidence');
+            const sections=new Map(evi.map(x=>[String(x.id).slice(4),x]));
+            for(const finding of evidenceFindings){
+              const categories=finding.semanticCategories??[];
+              const section=sections.get(finding.findingId);
+              if(section){
+                const actual=section.items?.[0]?.interaction?.categories??[];
+                if(actual.length!==categories.length)issues.push('EVIDENCE_CATEGORY_COUNT:'+finding.findingId);
+                categories.forEach((c,i)=>{
+                  if(actual[i]?.label!==c.label)issues.push('EVIDENCE_LABEL:'+finding.findingId+':'+i);
+                  if(actual[i]?.meaning!==(c.meaning??'観測回数'))issues.push('EVIDENCE_MEANING:'+finding.findingId+':'+i);
+                });
+              }else{
+                const linked=(pkg.evidence?.evidences??[]).filter(x=>(x.sourceEvidenceRefs??[]).includes(finding.findingId));
+                const exactOnly=categories.length>0&&categories.every(x=>x.semanticType==='EXACT_CONSTRAINT');
+                if(!exactOnly||linked.length!==categories.length||linked.some(x=>String(x.inputId??'').startsWith('REF_')))issues.push('EVIDENCE_SECTION_MISSING:'+finding.findingId);
+              }
+            }
+            const exactExpected=evidenceFindings.flatMap(x=>x.semanticCategories??[]).filter(x=>x.semanticType==='EXACT_CONSTRAINT').length;
+            if((pkg.evidence?.evidences??[]).length!==exactExpected)issues.push('EXACT_EVIDENCE_COUNT:'+exactExpected+':'+(pkg.evidence?.evidences??[]).length);
+            for(const e of pkg.evidence?.evidences??[])if(/示唆|期待|アップ|出現しやすい/.test(e.name??''))issues.push('SOFT_HINT_HARD_CONSTRAINED:'+e.name);
+
+            const activeProjection=(pkg.features?.runtimeProjection??[]).filter(x=>x.runtimeStatus==='ACTIVE');
+            const activeIds=new Set(activeProjection.map(x=>x.featureId));
+            const activeFeatures=(pkg.features?.features??[]).filter(x=>activeIds.has(x.featureId));
+            const universes=activeFeatures.map(x=>String(x.trialUniverse??''));
+            const needsNormal=universes.some(x=>x==='NORMAL_GAME_TRIAL'||x==='BONUS_ELIGIBLE_GAME_TRIAL');
+            const needsExcluded=universes.some(x=>x==='LOTIS_NON_CHAIN_GAME_TRIAL'||x==='NON_CHAIN_BONUS_INITIAL_GAME_TRIAL');
+            const needsTotal=needsExcluded||universes.includes('TOTAL_GAME_TRIAL');
+            const expectedMode=needsTotal&&needsNormal?'TOTAL_AND_NORMAL':needsTotal?'TOTAL_ONLY':needsNormal?'NORMAL_ONLY':'NONE';
+            const playInfo=pkg.ui?.playInfo??{};
+            if(playInfo.mode!==expectedMode)issues.push('PLAY_INFO_MODE:'+playInfo.mode+':'+expectedMode);
+            if(Boolean(playInfo.exclusionGames?.visible===true)!==needsExcluded)issues.push('PLAY_INFO_EXCLUSION');
+            const start=(playInfo.startFields??[]).map(x=>x.label);
+            const current=(playInfo.currentFields??[]).map(x=>x.label);
+            const expectedStart=[...(needsTotal?['着席時 総ゲーム数']:[]),...(needsNormal?['着席時 通常ゲーム数']:[])];
+            const expectedCurrent=[...(needsTotal?['現在 総ゲーム数']:[]),...(needsNormal?['現在 通常ゲーム数']:[])];
+            if(JSON.stringify(start)!==JSON.stringify(expectedStart)||JSON.stringify(current)!==JSON.stringify(expectedCurrent))issues.push('PLAY_INFO_UNUSED_OR_MISSING');
+
+            // +50 must only belong to game-count fields.
+            const json=JSON.stringify(pkg.ui??{});
+            if(/\+50/.test(json)){
+              const suspicious=[];
+              const walk=(v,p=[])=>{
+                if(!v||typeof v!=='object')return;
+                if(Array.isArray(v)){v.forEach((x,i)=>walk(x,[...p,i]));return;}
+                const flat=JSON.stringify(v);
+                if(/\+50/.test(flat)){
+                  const label=String(v.label??v.title??v.name??'');
+                  const idv=String(v.inputId??v.id??'');
+                  if(label&&!/ゲーム数/.test(label)&&idv&&!/game/i.test(idv))suspicious.push(label+'|'+idv);
+                }
+                for(const [k,x] of Object.entries(v))walk(x,[...p,k]);
+              };
+              walk(pkg.ui);
+              if(suspicious.length)warnings.push('REVIEW_PLUS50_SCOPE:'+suspicious.slice(0,4).join(','));
+            }
+
+            const uniqIssues=[...new Set(issues)],uniqWarnings=[...new Set(warnings)];
+            const status=uniqIssues.length?'FAIL':'PASS';
+            if(status==='PASS')report.summary.passed++;else report.summary.failed++;
+            report.summary.warnings+=uniqWarnings.length;
+            report.machines.push({machineId:id,status,issues:uniqIssues,warnings:uniqWarnings,activeFeatures:activeFeatures.length,evidenceFindings:evidenceFindings.length,hardEvidence:(pkg.evidence?.evidences??[]).length,playInfoMode:playInfo.mode});
+          }
+          fs.writeFileSync('selfcheck/report.json',JSON.stringify(report,null,2)+'\n');
+          console.log(JSON.stringify(report,null,2));
+          if(report.summary.failed)process.exit(1);
+          NODE
+
+      - name: Upload selfcheck report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: batch004-distribution-finalization-repair-selfcheck
+          path: production/selfcheck/report.json
+          retention-days: 30
+
+
+      - name: Commit finalized authoritative Distribution state
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git add production/batches/batch-20261003-004
+          if git diff --cached --quiet; then
+            echo "No Distribution finalization changes to commit"
+            exit 0
+          fi
+          git commit -m "Finalize Batch 004 Distribution state correctly [skip ci]"
+          git push origin HEAD:production/v85-batch-004-foundation-20261003
