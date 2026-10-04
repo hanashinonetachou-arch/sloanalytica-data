@@ -151,13 +151,18 @@ function emit(wave:string,doc:any){
  const d=base('L_KAKUMEIKI_VALVRAVE_2_JF');
  const src='nana-valvrave2-end-screen';
  const sourceClaim='終了画面カスタム未使用時のCZ・ボーナス終了画面8カテゴリの設定別出現割合を確認';
+ const initial=d.findings.find((x:any)=>x.findingId==='initial-hit');
+ if(initial){
+  initial.denominatorSemantics='通常ゲーム数に対する初当たり合算回数。革命ボーナス・決戦ボーナス・AT/上位AT直撃を合算します。';
+  initial.liveObservation={status:'DIRECT_EXACT',reason:'通常ゲーム数と、対象となる各初当たりの合算回数を記録できる。'};
+ }
  addSource(d,{sourceId:src,url:'https://nana-press.com/kaiseki/machine/1040/32833/',title:'スマスロ 革命機ヴァルヴレイヴ2 CZ・ボーナス終了画面の設定示唆',sourceType:'primary_analysis',claims:[sourceClaim]});
  addFinding(d,{
   findingId:'cz-bonus-end-screen-distribution',
   label:'CZ・ボーナス終了画面',
   observationType:'appearance_distribution',
   trialUniverse:'VALVRAVE2_CZ_BONUS_END_SCREEN_CUSTOM_OFF_TRIAL',
-  denominatorSemantics:'終了画面カスタムを使用していないCZ・ボーナス終了回数。カスタム使用中の画面は対象に含めません。',
+  denominatorSemantics:'カスタム未使用時のCZ・ボーナス終了回数。終了画面カスタム使用中は対象に含めません。',
   liveObservation:{status:'EXACT_WITH_SCOPE_TRACKING',reason:'デモ画面でカスタム設定の有無を確認し、カスタム未使用時のCZ・ボーナス終了画面を種類別に記録できる。'},
   settingDistribution:{
    '1':'コックピット（白枠） 74% / ライゾウ達（青枠） 8% / サキ（青枠） 8% / コックピット（赤枠） 7% / ドルシア軍4人（赤枠） 3% / ショーコ＆サキ（紫枠） 0% / ピノ＆プルー（銀枠） 0% / 集合画面（金枠） 0%',
