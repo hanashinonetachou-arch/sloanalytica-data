@@ -133,7 +133,16 @@ function emit(wave:string,doc:any){
   addLedgerFinding(d,id,label,src,sourceClaim);
  }
  const ev=d.findings.find((x:any)=>x.findingId==='zettaishogeki-direct-hints');
- if(ev&&!ev.sourceIds.includes(src))ev.sourceIds.push(src);
+ if(ev){
+  if(!ev.sourceIds.includes(src))ev.sourceIds.push(src);
+  const links=new Map([
+   ['通常時 強チェリーから直撃','direct-normal-strong-cherry'],
+   ['通常時 弱スイカから直撃','direct-normal-weak-watermelon'],
+   ['通常時 弱チェリーから直撃','direct-normal-weak-cherry'],
+   ['日曜日 弱チェリーから直撃','direct-sunday-weak-cherry']
+  ]);
+  for(const cat of ev.semanticCategories??[]){const target=links.get(cat.label);if(target)cat.linkedFindingId=target;}
+ }
  emit('wave-2',d);
 }
 
@@ -176,9 +185,9 @@ function emit(wave:string,doc:any){
   denominatorSemantics:'終了画面カスタムを使用していないCZ・ボーナス終了画面。',
   details:['同じ終了画面入力から設定確定条件にも自動反映します。'],
   semanticCategories:[
-   {label:'ショーコ＆サキ（紫枠）',meaning:'設定2以上',semanticType:'EXACT_CONSTRAINT'},
-   {label:'ピノ＆プルー（銀枠）',meaning:'設定4以上',semanticType:'EXACT_CONSTRAINT'},
-   {label:'集合画面（金枠）',meaning:'設定6',semanticType:'EXACT_CONSTRAINT'}
+   {label:'ショーコ＆サキ（紫枠）',meaning:'設定2以上',semanticType:'EXACT_CONSTRAINT',linkedFindingId:'cz-bonus-end-screen-distribution'},
+   {label:'ピノ＆プルー（銀枠）',meaning:'設定4以上',semanticType:'EXACT_CONSTRAINT',linkedFindingId:'cz-bonus-end-screen-distribution'},
+   {label:'集合画面（金枠）',meaning:'設定6',semanticType:'EXACT_CONSTRAINT',linkedFindingId:'cz-bonus-end-screen-distribution'}
   ],
   sourceIds:[src]
  });
@@ -218,9 +227,9 @@ function emit(wave:string,doc:any){
  ev.denominatorSemantics='AT非当選時の海戦ボーナス終了画面とAT終了画面。';
  ev.details=['同じ終了画面入力から設定確定条件にも自動反映します。'];
  ev.semanticCategories=[
-  {label:'全員集合',meaning:'設定2以上',semanticType:'EXACT_CONSTRAINT'},
-  {label:'加賀＆赤城',meaning:'設定4以上',semanticType:'EXACT_CONSTRAINT'},
-  {label:'パーティ',meaning:'設定6',semanticType:'EXACT_CONSTRAINT'}
+  {label:'全員集合',meaning:'設定2以上',semanticType:'EXACT_CONSTRAINT',linkedFindingId:'at-end-screen-distribution'},
+  {label:'加賀＆赤城',meaning:'設定4以上',semanticType:'EXACT_CONSTRAINT',linkedFindingId:'at-end-screen-distribution'},
+  {label:'パーティ',meaning:'設定6',semanticType:'EXACT_CONSTRAINT',linkedFindingId:'at-end-screen-distribution'}
  ];
  if(!ev.sourceIds.includes(src))ev.sourceIds.push(src);
  emit('wave-1',d);
