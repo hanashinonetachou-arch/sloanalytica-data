@@ -45,6 +45,9 @@ function resolveGroup(groupId:string,members:any[],evalBy:Map<string,any>){
  const kinds=evals.map((e:any)=>String(e?.dependency?.kind??''));
  const reasons=[...new Set(evals.map((e:any)=>String(e?.dependency?.reason??'').trim()).filter(Boolean))].join(' ');
  const explicitConditionalSeparation=(kinds.length>0&&kinds.every((k:string)=>k==='CONDITIONALLY_SEPARATE'))||/条件別(?:Feature|likelihood)|条件ごとに独立/.test(reasons);
+ const rankedFallback=members.map((c:any)=>({c,rank:Number(c.dependencyFallbackRank)}));
+ const explicitPreferredFallback=members.length>=2&&rankedFallback.every((x:any)=>Number.isInteger(x.rank)&&x.rank>0)&&new Set(rankedFallback.map((x:any)=>x.rank)).size===members.length;
+ if(explicitPreferredFallback){const ordered=rankedFallback.sort((a:any,b:any)=>a.rank-b.rank||String(a.c.findingId).localeCompare(String(b.c.findingId))).map((x:any)=>x.c.findingId);return {resolution:'PREFERRED_WITH_FALLBACK',members:members.map(c=>c.findingId),runtimeInferenceAllowed:true,preferredFindingId:ordered[0],fallbackOrder:ordered,reason:'依存関係がある候補を同時加算せず、観測できた優先Featureを使用し、未観測時だけ次順位のFeatureへ自動フォールバックする。',selectionRationale:'Researchで明示された優先順位に従い、同一セッションで重複情報を同時加算しない。'};}
  if(trialUniverses.length===members.length&&explicitConditionalSeparation){return {resolution:'CONDITIONALLY_SEPARATE',members:members.map(c=>c.findingId),runtimeInferenceAllowed:true,reason:'観測条件ごとに別の母数を記録し、条件別Featureとして分離できることが明示確認されている。'};}
  if(kinds.includes('UNRESOLVED'))return {resolution:'HELD_NO_JOINT_MODEL',members:members.map(c=>c.findingId),runtimeInferenceAllowed:false,reason:'候補間の依存関係が未解決のため、独立性を仮定しない。',reevaluationCondition:'候補間の包含・上流下流・条件付き関係が確認されること。'};
  if(/排他的/.test(reasons)){
@@ -67,7 +70,7 @@ function resolveGroup(groupId:string,members:any[],evalBy:Map<string,any>){
 export function buildCandidateContract(evaluation:any,eligibility:any,evaluationArtifact:any,eligibilityArtifact:any){
  const evalBy=new Map((evaluation.evaluations??[]).map((x:any)=>[x.findingId,x]));
  const eligible=(eligibility.decisions??[]).filter((x:any)=>x.eligibility==='ELIGIBLE');
- const candidates=eligible.map((d:any)=>{const e:any=evalBy.get(d.findingId);if(!e)throw new Error('EVALUATION_MISSING:'+d.findingId);const group=e.dependency?.status==='DEFERRED_TO_CANDIDATE_CONTRACT'?e.dependency.groupId:null;return {findingId:d.findingId,label:d.label,model:e.model,trialUniverse:e.trialUniverse,liveInferenceRoute:d.liveInferenceRoute,settingDistribution:e.settingDistribution,categoryModel:e.categoryModel,details:Array.isArray(e.details)?structuredClone(e.details):[],dependencyGroupId:group,dependencyKind:e.dependency?.kind,dependencyReason:e.dependency?.reason,runtimeInferenceAllowed:!group,dependencyResolution:group?'UNRESOLVED':'NONE',runtimePolicyBinding:policyBindingForEvaluation(e)}});
+ const candidates=eligible.map((d:any)=>{const e:any=evalBy.get(d.findingId);if(!e)throw new Error('EVALUATION_MISSING:'+d.findingId);const group=e.dependency?.status==='DEFERRED_TO_CANDIDATE_CONTRACT'?e.dependency.groupId:null;return {findingId:d.findingId,label:d.label,model:e.model,trialUniverse:e.trialUniverse,liveInferenceRoute:d.liveInferenceRoute,settingDistribution:e.settingDistribution,categoryModel:e.categoryModel,details:Array.isArray(e.details)?structuredClone(e.details):[],dependencyGroupId:group,dependencyKind:e.dependency?.kind,dependencyReason:e.dependency?.reason,dependencyFallbackRank:e.dependencyFallbackRank,runtimeInferenceAllowed:!group,dependencyResolution:group?'UNRESOLVED':'NONE',runtimePolicyBinding:policyBindingForEvaluation(e)}});
  const groups=new Map<string,any[]>();for(const c of candidates)if(c.dependencyGroupId){const a=groups.get(c.dependencyGroupId)??[];a.push(c);groups.set(c.dependencyGroupId,a)}
  const dependencyGroups:any[]=[];
  for(const [groupId,members] of groups){
@@ -86,6 +89,9 @@ export function buildCandidateContract(evaluation:any,eligibility:any,evaluation
     if(c.findingId===resolution.selectedFindingId){c.runtimeInferenceAllowed=true;c.dependencyResolution='SINGLE_MEMBER_SELECTED'}
     else{c.runtimeInferenceAllowed=false;c.dependencyResolution='RESOLVED_BY_SINGLE_MEMBER';c.resolvedIntoFindingId=resolution.selectedFindingId}
    }
+  }else if(resolution.resolution==='PREFERRED_WITH_FALLBACK'){
+   const order:string[]=resolution.fallbackOrder??[];
+   for(const c of members){const index=order.indexOf(c.findingId);if(index<0)throw new Error('CANDIDATE_FALLBACK_ORDER:'+groupId+':'+c.findingId);c.runtimeInferenceAllowed=true;c.dependencyResolution=index===0?'PREFERRED_MEMBER':'FALLBACK_MEMBER';c.suppressedByFeatureIds=order.slice(0,index)}
   }else{
    for(const c of members){c.runtimeInferenceAllowed=false;c.dependencyResolution='HELD_NO_JOINT_MODEL'}
   }
