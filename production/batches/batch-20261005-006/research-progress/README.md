@@ -75,3 +75,11 @@ Research正本はresearch-draftsとRESEARCH authoritativeOutputRef。research-pr
 追加修正：Evidenceの構図名とmeaningを分離して確定条件を判定。categoricalのSOURCE_EXHAUSTIVEを既存categoryModel.residualPolicyへ正しくbinding。長い分母説明を入力名へ出さず、説明に残す。元の全設定値は保存。
 
 次は10機種のパッケージ／catalog統合、App rendered UI QA、60機種whiteout互換性、固定署名APKのIntegration Boundary。Actions未実行。
+
+## 2026-10-05 Integration Boundary — 最新復旧地点
+
+Research 10機種はCOMPLETE。修正版Distribution `daf39320e54eb3984c203c038429e166f88fea5a` とApp `059835d18644626439c2cb34ec01b09fcbb199fe` の統合QA Run `37310289321` はsuccess。10機種Rendered UI、60機種whiteout、固定署名APK生成・検証がPASS。APKは `SloAnalytica-Batch006-10Machine-vc2002773765.apk`、GitHub artifact `11346175117`。
+
+初回QAの3件のFAILから、共有入力に示唆の意味を表示し、確定条件がない項目の説明を修正。App監査は全カテゴリ・意味・実際の入力を照合し、欠落をFAILする。Production 191テストとローカル10機種描画QAはPASS。machineDataVersionは8.5.1、manifestVersionは8.5。
+
+その後、作業環境のexec_commandとdownload_fileが応答しなくなったため、APKの取り出し・保存とProductionの最終登録を未完了として記録。既存stageのauthoritativeOutputRefを手書きで置き換えていない。準備済みgenerator／validator／testは `integration-checkpoints/r2-source/`、正確なSHA・Actions・再開手順は `integration-checkpoints/checkpoint.json` を参照。現在のProduction stageは初回生成の受理状態を保持しており、修正版の完了証明とは扱わない。完了カーソルは進めていない。新Batchを作らずこの地点から再開する。
