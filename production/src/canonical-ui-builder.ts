@@ -97,6 +97,8 @@ export function deriveObservationInputLabels(o:any){
  if(success.length>30&&kinds&&/合算回数$/.test(success))success=kinds[1]+'種合算回数';
  if(success.length>30&&/初当たり合算回数$/.test(success))success='初当たり合算回数';
  if(trial.length>30&&/レア役/.test(sectionTitle)&&/(?:チェリー|スイカ|レア役).*(?:成立回数|回数)$/.test(trial))trial='対象レア役成立回数';
+ if(trial.length>30&&/(?:ボーナス|ぼーなす)消化ゲーム数$/.test(trial))trial='対象ボーナス消化ゲーム数';
+ if(o?.model==='CATEGORICAL'&&!canonicalTrialLabel&&(trial.length>30||/を全件記録|を記録|を数える/.test(trial)))trial=compactContextualInputLabel(normalizeTrialLabel(sectionTitle+'を確認した回数'),sectionTitle);
  return {trialLabel:trial,successLabel:success};
 }
 const isSettingMeaning=(s:string)=>/設定[1-6]|高設定|低設定|奇数|偶数|示唆|濃厚|否定/.test(s);

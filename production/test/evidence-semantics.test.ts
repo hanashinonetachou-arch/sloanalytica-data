@@ -1,4 +1,4 @@
-import test from 'node:test';import assert from 'node:assert/strict';import {classifyEvidenceLabel,classifyEvidenceSemantic,evidenceSemanticExplanation} from '../src/evidence-semantics.ts';
+import test from 'node:test';import assert from 'node:assert/strict';import {classifyEvidenceLabel,classifyEvidenceCategory,classifyEvidenceSemantic,evidenceSemanticExplanation} from '../src/evidence-semantics.ts';
 test('classifies exact constraints',()=>assert.equal(classifyEvidenceSemantic({label:'示唆',details:['金：設定4以上']}),'EXACT_CONSTRAINT'));
 test('classifies probability-backed evidence only with source distribution',()=>assert.equal(classifyEvidenceSemantic({label:'終了画面',details:['高設定示唆'],settingDistribution:{SET_1:0.01,SET_6:0.10}}),'PROBABILITY_BACKED'));
 test('classifies directional hints without invented probability',()=>assert.equal(classifyEvidenceSemantic({label:'終了画面',details:['高設定示唆（強）']}),'PROBABILITY_UNKNOWN'));
@@ -18,3 +18,10 @@ test('does not upgrade directional wording into an exact setting constraint',()=
 
 
 test('multi-setting denial is an exact constraint',()=>{ assert.equal(classifyEvidenceLabel('来栖の刀：設定2・3否定'),'EXACT_CONSTRAINT'); });
+test('physical close-up labels do not weaken a separately published exact condition',()=>{
+ assert.equal(classifyEvidenceCategory({label:'アクア：ドアップ',meaning:'設定6'}),'EXACT_CONSTRAINT');
+ assert.equal(classifyEvidenceSemantic({semanticCategories:[{label:'アクア：ドアップ',meaning:'設定6'}]}),'EXACT_CONSTRAINT');
+ assert.equal(classifyEvidenceCategory({label:'設定6',meaning:'高設定示唆（強）'}),'PROBABILITY_UNKNOWN');
+ assert.equal(classifyEvidenceCategory({label:'ドアップ',meaning:'設定6の期待度アップ'}),'PROBABILITY_UNKNOWN');
+ assert.equal(classifyEvidenceCategory({label:'虹：設定6'}),'EXACT_CONSTRAINT');
+});

@@ -9,7 +9,7 @@ function categoryLabels(distribution:any){const out:string[]=[];for(const v of O
 const trialQuickAddExpected=(trialUniverse:any)=>typeof trialUniverse==='string'&&trialUniverse.includes('GAME_TRIAL')?[50]:[];
 const compactText=(v:any)=>String(v??'').replace(/[\s・：:「」『』（）()、,.。．!?！？]/g,'').trim();
 const descriptionIsSimpleRestatement=(description:any,label:any)=>{const d=compactText(description).replace(/数えるもの|入力方法|基準|記録します|入力します|確認します|回数|ゲーム数/g,''),l=compactText(label).replace(/回数|ゲーム数/g,'');return Boolean(d&&l&&(d===l||(Math.min(d.length,l.length)>=4&&(d.includes(l)||l.includes(d))&&Math.min(d.length,l.length)/Math.max(d.length,l.length)>=0.85)))};
-const hasRedundantSectionPrefix=(title:any,label:any)=>{const t=String(title??''),l=String(label??'');const max=Math.min(t.length,l.length);let i=0;while(i<max&&t[i]===l[i])i++;const prefix=l.slice(0,i);return i>=7&&/[の時中後]/.test(prefix)&&l.length-i>=2};
+const hasRedundantSectionPrefix=(title:any,label:any)=>{const t=String(title??''),l=String(label??'');const max=Math.min(t.length,l.length);let i=0;while(i<max&&t[i]===l[i])i++;const prefix=l.slice(0,i);return i>=7&&['の','時','中','後'].some(token=>prefix.lastIndexOf(token)>=2)&&l.length-i>=2};
 const hasInternalWording=(v:any)=>/opportunity model|candidate contract|runtime policy|denominator|benchmark|Evidence\b/i.test(String(v??''));
 const hasLiteralBreakToken=(v:any)=>/\\n|\/n/i.test(String(v??''));
 const invalidConciseInputLabel=(x:any)=>['trial','success'].includes(String(x?.role??''))&&(String(x?.label??'').length>30||/^(?:に|で|を|が|へ|から)/.test(String(x?.label??'')));

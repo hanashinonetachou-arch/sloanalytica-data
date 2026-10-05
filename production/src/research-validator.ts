@@ -3,7 +3,7 @@ import path from 'node:path';
 import crypto from 'node:crypto';
 import type {Attempt,WorkResult} from './core.ts';
 import {RepoStore} from './core.ts';
-import {EVIDENCE_SEMANTIC_TYPES,classifyEvidenceLabel} from './evidence-semantics.ts';
+import {EVIDENCE_SEMANTIC_TYPES,classifyEvidenceCategory} from './evidence-semantics.ts';
 import {buildDependencyReview} from './dependency-gate.ts';
 
 export const RESEARCH_VALIDATOR_CONTRACT='research-v1';
@@ -123,8 +123,7 @@ export function validateResearchArtifacts(s:RepoStore,a:Attempt,r:WorkResult){
       for(const category of f.semanticCategories){
         if(!nonEmpty(category?.label)||!EVIDENCE_SEMANTIC_TYPES.includes(category?.semanticType)) throw new Error('RESEARCH_VALIDATION:EVIDENCE_SEMANTIC_CATEGORY');
         if(category.meaning!==undefined&&!nonEmpty(category.meaning)) throw new Error('RESEARCH_VALIDATION:EVIDENCE_SEMANTIC_MEANING');
-        const semanticText=[category.label,category.meaning].filter(nonEmpty).join('：');
-        if(category.semanticType==='EXACT_CONSTRAINT'&&classifyEvidenceLabel(semanticText)!=='EXACT_CONSTRAINT') throw new Error('RESEARCH_VALIDATION:EVIDENCE_EXACT_MISMATCH:'+f.findingId+':'+category.label);
+        if(category.semanticType==='EXACT_CONSTRAINT'&&classifyEvidenceCategory(category)!=='EXACT_CONSTRAINT') throw new Error('RESEARCH_VALIDATION:EVIDENCE_EXACT_MISMATCH:'+f.findingId+':'+category.label);
       }
     }
     if(f.settingDistribution===undefined&&f.observationType!=='evidence') throw new Error('RESEARCH_VALIDATION:UNROUTED_FINDING:'+f.findingId);

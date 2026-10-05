@@ -1,4 +1,4 @@
-# Batch #006 — Research開始地点
+# Batch #006 — Research / App Runtime checkpoint
 
 Manifest 8.5 / 2026-10-05 / status: IN_PROGRESS
 
@@ -65,3 +65,13 @@ node --experimental-strip-types src/batch006-research-discovery-audit.ts --ident
 5. wave gateを守り、Integration BoundaryでまとめてDistribution・App QA・固定署名APKへ進む。
 
 Batch初期化を重複実行しない。再開時はこのブランチの最新HEAD、stage状態、この調査途中データを読み、既存候補を上書きで失わずに調査を続ける。
+
+## 2026-10-05 現在地点（上記は発見時点の履歴）
+
+Researchは10機種すべて正規validatorでCOMPLETE。EvaluationからAPP_RUNTIMEまで上流から再生成済み。Distributionはwave-1が全10機種の統合を待つWAIT_EXTERNAL、wave-2がREADY。DEVICE_QAは未実施。完了カーソルは進めていない。
+
+Research正本はresearch-draftsとRESEARCH authoritativeOutputRef。research-progress各JSONとaudit.jsonは初期発見の履歴であり、現在の採用結果ではない。楽園追放の終了画面構図・累積G条件・400枚エピソード名の資料矛盾は保留理由と再評価条件を保存。未確認の画像名を生成していない。
+
+追加修正：Evidenceの構図名とmeaningを分離して確定条件を判定。categoricalのSOURCE_EXHAUSTIVEを既存categoryModel.residualPolicyへ正しくbinding。長い分母説明を入力名へ出さず、説明に残す。元の全設定値は保存。
+
+次は10機種のパッケージ／catalog統合、App rendered UI QA、60機種whiteout互換性、固定署名APKのIntegration Boundary。Actions未実行。
