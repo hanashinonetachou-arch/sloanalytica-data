@@ -1,12 +1,16 @@
 {
   "schemaVersion": 1,
+  "provenance": {
+    "manifestVersion": "8.5",
+    "generationPath": "V8_5_PRODUCTION_PIPELINE",
+    "legacyOracleUsed": false
+  },
   "machine": {
     "schemaVersion": "2.0.0",
     "machineId": "LB_TRIPLE_CROWN_SF4",
-    "machineDataVersion": "0.1.0",
+    "machineDataVersion": "8.5.0-batch-20261005-006",
     "displayName": "LBトリプルクラウン",
-    "modelName": "LBTCSF4",
-    "manufacturer": "岡崎産業",
+    "modelName": "LBトリプルクラウン",
     "settings": [
       "SET_1",
       "SET_2",
@@ -20,414 +24,1044 @@
     },
     "introductionDate": "2025-07-07",
     "machineType": "SMART_SLOT",
-    "gameType": "BT"
+    "gameType": "BT",
+    "manufacturer": "岡崎産業"
   },
   "inputs": {
     "schemaVersion": "2.0.0",
     "inputs": [
       {
-        "id": "INP_BIG_COUNT",
-        "name": "BIG",
-        "category": "SEL_FEAT_BIG",
-        "type": "counter",
-        "unit": "回",
-        "displayOrder": 10,
-        "inferenceRole": "INCLUDE_PRIMARY",
-        "defaultValue": "",
-        "minimum": 0
-      },
-      {
-        "id": "INP_REG_COUNT",
-        "name": "REG",
-        "category": "SEL_FEAT_REG",
-        "type": "counter",
-        "unit": "回",
-        "displayOrder": 12,
-        "inferenceRole": "INCLUDE_PRIMARY",
-        "defaultValue": "",
-        "minimum": 0
-      },
-      {
-        "id": "INP_CHERRY_COUNT",
-        "name": "チェリー",
-        "category": "SEL_FEAT_CHERRY",
-        "type": "counter",
-        "unit": "回",
-        "displayOrder": 14,
-        "inferenceRole": "INCLUDE_SUPPORT",
-        "defaultValue": "",
-        "minimum": 0
-      },
-      {
-        "id": "INP_PLUM_COUNT",
-        "name": "プラム",
-        "category": "SEL_FEAT_PLUM",
-        "type": "counter",
-        "unit": "回",
-        "displayOrder": 16,
-        "inferenceRole": "INCLUDE_SUPPORT",
-        "defaultValue": "",
-        "minimum": 0
-      },
-      {
-        "id": "INP_EVI_EVG_REG_END_LED",
-        "name": "REG終了時LED",
-        "type": "multi_enum",
-        "category": "EVIDENCE",
-        "unit": "",
-        "displayOrder": 100,
-        "inferenceRole": "INCLUDE_SUPPORT",
-        "options": [
-          {
-            "key": "V1",
-            "label": "クラウンランプ＆下パネル点滅",
-            "value": "V1"
-          },
-          {
-            "key": "V2",
-            "label": "バットランプ・青点滅",
-            "value": "V2"
-          }
-        ],
-        "defaultValue": []
-      },
-      {
-        "id": "INP_NORMAL_GAMES",
-        "name": "通常時ゲーム数",
-        "category": "SEL_FEAT_NORMAL_COUNTS",
+        "id": "cherry.eligibleTrialCount",
+        "name": "総ゲーム数",
+        "category": "V8_NUMERIC",
         "type": "integer",
         "unit": "G",
+        "defaultValue": 0,
+        "minimum": 0,
+        "displayOrder": 1,
+        "inferenceRole": "INCLUDE_PRIMARY"
+      },
+      {
+        "id": "cherry.successCount",
+        "name": "チェリー回数",
+        "category": "V8_NUMERIC",
+        "type": "counter",
+        "unit": "回",
+        "defaultValue": 0,
+        "minimum": 0,
+        "displayOrder": 2,
+        "parentInputId": "cherry.eligibleTrialCount",
+        "inferenceRole": "INCLUDE_PRIMARY"
+      },
+      {
+        "id": "plum.eligibleTrialCount",
+        "name": "総ゲーム数",
+        "category": "V8_NUMERIC",
+        "type": "integer",
+        "unit": "G",
+        "defaultValue": 0,
+        "minimum": 0,
+        "displayOrder": 3,
+        "inferenceRole": "INCLUDE_PRIMARY"
+      },
+      {
+        "id": "plum.successCount",
+        "name": "プラム回数",
+        "category": "V8_NUMERIC",
+        "type": "counter",
+        "unit": "回",
+        "defaultValue": 0,
+        "minimum": 0,
+        "displayOrder": 4,
+        "parentInputId": "plum.eligibleTrialCount",
+        "inferenceRole": "INCLUDE_PRIMARY"
+      },
+      {
+        "id": "cherry-total-effective.eligibleTrialCount",
+        "name": "総ゲーム数",
+        "category": "V8_NUMERIC",
+        "type": "integer",
+        "unit": "G",
+        "defaultValue": 0,
+        "minimum": 0,
+        "displayOrder": 5,
+        "inferenceRole": "INCLUDE_PRIMARY"
+      },
+      {
+        "id": "cherry-total-effective.successCount",
+        "name": "実質出現率回数",
+        "category": "V8_NUMERIC",
+        "type": "counter",
+        "unit": "回",
+        "defaultValue": 0,
+        "minimum": 0,
+        "displayOrder": 6,
+        "parentInputId": "cherry-total-effective.eligibleTrialCount",
+        "inferenceRole": "INCLUDE_PRIMARY"
+      },
+      {
+        "id": "REF_big-end-led_1",
+        "name": "クラウンランプ点滅：高設定示唆",
+        "category": "EVIDENCE_REFERENCE",
+        "type": "counter",
+        "unit": "回",
+        "defaultValue": 0,
+        "minimum": 0,
+        "displayOrder": 7,
+        "inferenceRole": "DISPLAY_ONLY"
+      },
+      {
+        "id": "REF_big-end-led_2",
+        "name": "クラウン＋下パネル点滅：設定2以上",
+        "category": "EVIDENCE_REFERENCE",
+        "type": "counter",
+        "unit": "回",
+        "defaultValue": 0,
+        "minimum": 0,
+        "displayOrder": 8,
+        "inferenceRole": "DISPLAY_ONLY"
+      },
+      {
+        "id": "REF_big-end-led_3",
+        "name": "バットランプ青点滅：設定5以上",
+        "category": "EVIDENCE_REFERENCE",
+        "type": "counter",
+        "unit": "回",
+        "defaultValue": 0,
+        "minimum": 0,
         "displayOrder": 9,
-        "inferenceRole": "INCLUDE_PRIMARY",
-        "defaultValue": "",
-        "minimum": 0
+        "inferenceRole": "DISPLAY_ONLY"
+      },
+      {
+        "id": "REF_big-end-special_1",
+        "name": "緑：高設定示唆（弱）",
+        "category": "EVIDENCE_REFERENCE",
+        "type": "counter",
+        "unit": "回",
+        "defaultValue": 0,
+        "minimum": 0,
+        "displayOrder": 10,
+        "inferenceRole": "DISPLAY_ONLY"
+      },
+      {
+        "id": "REF_big-end-special_2",
+        "name": "赤：高設定示唆（強）",
+        "category": "EVIDENCE_REFERENCE",
+        "type": "counter",
+        "unit": "回",
+        "defaultValue": 0,
+        "minimum": 0,
+        "displayOrder": 11,
+        "inferenceRole": "DISPLAY_ONLY"
+      },
+      {
+        "id": "REF_big-end-special_3",
+        "name": "レインボー：設定6",
+        "category": "EVIDENCE_REFERENCE",
+        "type": "counter",
+        "unit": "回",
+        "defaultValue": 0,
+        "minimum": 0,
+        "displayOrder": 12,
+        "inferenceRole": "DISPLAY_ONLY"
+      },
+      {
+        "id": "REF_mb-special_1",
+        "name": "下から上：奇数設定示唆",
+        "category": "EVIDENCE_REFERENCE",
+        "type": "counter",
+        "unit": "回",
+        "defaultValue": 0,
+        "minimum": 0,
+        "displayOrder": 13,
+        "inferenceRole": "DISPLAY_ONLY"
+      },
+      {
+        "id": "REF_mb-special_2",
+        "name": "上から下：偶数設定示唆",
+        "category": "EVIDENCE_REFERENCE",
+        "type": "counter",
+        "unit": "回",
+        "defaultValue": 0,
+        "minimum": 0,
+        "displayOrder": 14,
+        "inferenceRole": "DISPLAY_ONLY"
+      },
+      {
+        "id": "REF_reg-end_1",
+        "name": "クラウン＋下パネル点滅：設定5以上",
+        "category": "EVIDENCE_REFERENCE",
+        "type": "counter",
+        "unit": "回",
+        "defaultValue": 0,
+        "minimum": 0,
+        "displayOrder": 15,
+        "inferenceRole": "DISPLAY_ONLY"
+      },
+      {
+        "id": "REF_reg-end_2",
+        "name": "バットランプ青点滅：設定6",
+        "category": "EVIDENCE_REFERENCE",
+        "type": "counter",
+        "unit": "回",
+        "defaultValue": 0,
+        "minimum": 0,
+        "displayOrder": 16,
+        "inferenceRole": "DISPLAY_ONLY"
+      },
+      {
+        "id": "REF_chain-music_1",
+        "name": "BIG：琉球メドレー：高設定示唆",
+        "category": "EVIDENCE_REFERENCE",
+        "type": "counter",
+        "unit": "回",
+        "defaultValue": 0,
+        "minimum": 0,
+        "displayOrder": 17,
+        "inferenceRole": "DISPLAY_ONLY"
+      },
+      {
+        "id": "REF_chain-music_2",
+        "name": "REG：安里屋ユンタ：偶数設定示唆",
+        "category": "EVIDENCE_REFERENCE",
+        "type": "counter",
+        "unit": "回",
+        "defaultValue": 0,
+        "minimum": 0,
+        "displayOrder": 18,
+        "inferenceRole": "DISPLAY_ONLY"
       }
     ]
   },
   "features": {
-    "schemaVersion": "2.0.0",
+    "version": "8.5-runtime",
     "features": [
       {
-        "featureId": "FEAT_BIG",
-        "name": "BIG",
-        "adoptionCategory": "INCLUDE_PRIMARY",
-        "calculationRole": "PROBABILITY",
-        "probabilityEngineUsage": true,
-        "modelType": "binomial",
-        "minimumSample": 1,
-        "sampleRecommendation": 1,
-        "reliabilityProfile": {
-          "weight": 1
-        },
-        "denominatorInputId": "INP_NORMAL_GAMES",
-        "numeratorInputId": "INP_BIG_COUNT",
-        "displayFormat": "ratio_1_over_n",
-        "probabilities": {
-          "SET_1": 0.003616636528028933,
-          "SET_2": 0.0036616623947272058,
-          "SET_5": 0.003982477100756671,
-          "SET_6": 0.004393673110720563
-        },
-        "sourceEvidenceRefs": [
-          "SRC_PWORLD",
-          "SRC_HAZUSE"
-        ]
-      },
-      {
-        "featureId": "FEAT_REG",
-        "name": "REG",
-        "adoptionCategory": "INCLUDE_PRIMARY",
-        "calculationRole": "PROBABILITY",
-        "probabilityEngineUsage": true,
-        "modelType": "binomial",
-        "minimumSample": 1,
-        "sampleRecommendation": 1,
-        "reliabilityProfile": {
-          "weight": 1
-        },
-        "denominatorInputId": "INP_NORMAL_GAMES",
-        "numeratorInputId": "INP_REG_COUNT",
-        "displayFormat": "ratio_1_over_n",
-        "probabilities": {
-          "SET_1": 0.0024108003857280617,
-          "SET_2": 0.0025484199796126403,
-          "SET_5": 0.0028835063437139563,
-          "SET_6": 0.0033112582781456954
-        },
-        "sourceEvidenceRefs": [
-          "SRC_PWORLD",
-          "SRC_HAZUSE"
-        ]
-      },
-      {
-        "featureId": "FEAT_CHERRY",
+        "featureId": "cherry",
         "name": "チェリー",
-        "adoptionCategory": "INCLUDE_SUPPORT",
+        "trialUniverse": "TOTAL_GAME_TRIAL",
+        "adoptionCategory": "INCLUDE_PRIMARY",
         "calculationRole": "PROBABILITY",
         "probabilityEngineUsage": true,
-        "modelType": "binomial",
-        "minimumSample": 1,
-        "sampleRecommendation": 1,
-        "reliabilityProfile": {
-          "weight": 1
-        },
-        "denominatorInputId": "INP_NORMAL_GAMES",
-        "numeratorInputId": "INP_CHERRY_COUNT",
-        "displayFormat": "ratio_1_over_n",
+        "denominatorInputId": "cherry.eligibleTrialCount",
         "probabilities": {
           "SET_1": 0.02004008016032064,
           "SET_2": 0.02074688796680498,
           "SET_5": 0.021929824561403508,
           "SET_6": 0.02358490566037736
         },
-        "sourceEvidenceRefs": [
-          "SRC_PWORLD",
-          "SRC_HAZUSE"
-        ]
+        "selectionRationale": {
+          "summary": "設定推測に採用された要素です。",
+          "adoptionReason": "採用条件を満たし、実戦で観測できる設定差を使用します。",
+          "shortTermReason": "標本が少ない間は結果の振れが大きくなります。",
+          "longTermReason": "観測数が増えるほど設定別の比較が安定します。"
+        },
+        "modelType": "binomial",
+        "numeratorInputId": "cherry.successCount",
+        "displayFormat": "percentage"
       },
       {
-        "featureId": "FEAT_PLUM",
+        "featureId": "plum",
         "name": "プラム",
-        "adoptionCategory": "INCLUDE_SUPPORT",
+        "trialUniverse": "TOTAL_GAME_TRIAL",
+        "adoptionCategory": "INCLUDE_PRIMARY",
         "calculationRole": "PROBABILITY",
         "probabilityEngineUsage": true,
-        "modelType": "binomial",
-        "minimumSample": 1,
-        "sampleRecommendation": 1,
-        "reliabilityProfile": {
-          "weight": 1
-        },
-        "denominatorInputId": "INP_NORMAL_GAMES",
-        "numeratorInputId": "INP_PLUM_COUNT",
-        "displayFormat": "ratio_1_over_n",
+        "denominatorInputId": "plum.eligibleTrialCount",
         "probabilities": {
           "SET_1": 0.015479876160990714,
           "SET_2": 0.015873015873015872,
           "SET_5": 0.016835016835016835,
           "SET_6": 0.018214936247723135
         },
-        "sourceEvidenceRefs": [
-          "SRC_PWORLD",
-          "SRC_HAZUSE"
-        ]
+        "selectionRationale": {
+          "summary": "設定推測に採用された要素です。",
+          "adoptionReason": "採用条件を満たし、実戦で観測できる設定差を使用します。",
+          "shortTermReason": "標本が少ない間は結果の振れが大きくなります。",
+          "longTermReason": "観測数が増えるほど設定別の比較が安定します。"
+        },
+        "modelType": "binomial",
+        "numeratorInputId": "plum.successCount",
+        "displayFormat": "percentage"
+      },
+      {
+        "featureId": "cherry-total-effective",
+        "name": "チェリー重複ボーナス合算の実質出現率",
+        "trialUniverse": "TOTAL_GAME_TRIAL",
+        "adoptionCategory": "INCLUDE_PRIMARY",
+        "calculationRole": "PROBABILITY",
+        "probabilityEngineUsage": true,
+        "denominatorInputId": "cherry-total-effective.eligibleTrialCount",
+        "probabilities": {
+          "SET_1": 0.00021362500267031251,
+          "SET_2": 0.0002899138955730148,
+          "SET_5": 0.0005645889792231255,
+          "SET_6": 0.0009002520705797623
+        },
+        "selectionRationale": {
+          "summary": "設定推測に採用された要素です。",
+          "adoptionReason": "採用条件を満たし、実戦で観測できる設定差を使用します。",
+          "shortTermReason": "標本が少ない間は結果の振れが大きくなります。",
+          "longTermReason": "観測数が増えるほど設定別の比較が安定します。"
+        },
+        "modelType": "binomial",
+        "numeratorInputId": "cherry-total-effective.successCount",
+        "displayFormat": "percentage"
+      }
+    ],
+    "runtimeProjection": [
+      {
+        "featureId": "cherry",
+        "runtimeStatus": "ACTIVE",
+        "metric": "SELECTION_SCORE",
+        "metricValue": 66.58802384245053,
+        "importance": "主要"
+      },
+      {
+        "featureId": "plum",
+        "runtimeStatus": "ACTIVE",
+        "metric": "SELECTION_SCORE",
+        "metricValue": 55.308056532913696,
+        "importance": "主要"
+      },
+      {
+        "featureId": "cherry-total-effective",
+        "runtimeStatus": "ACTIVE",
+        "metric": "SELECTION_SCORE",
+        "metricValue": 99.49203010592802,
+        "importance": "主要"
       }
     ]
   },
   "evidence": {
-    "version": "1.0.0",
+    "version": "8.5-runtime",
     "evidences": [
       {
-        "id": "EVI_EVG_REG_END_LED_V1",
-        "name": "クラウンランプ＆下パネル点滅",
-        "displayName": "クラウンランプ＆下パネル点滅",
-        "inputId": "INP_EVI_EVG_REG_END_LED",
-        "triggerValue": "V1",
+        "id": "big-end-led__2",
+        "name": "クラウン＋下パネル点滅：設定2以上",
+        "displayName": "クラウン＋下パネル点滅：設定2以上",
+        "inputId": "REF_big-end-led_2",
+        "details": [
+          "クラウン＋下パネル点滅：設定2以上"
+        ],
+        "confirmedSettings": [
+          "SET_2",
+          "SET_5",
+          "SET_6"
+        ],
+        "deniedSettings": [],
+        "hasImage": false,
+        "type": "SETTING_CONSTRAINT",
+        "sourceEvidenceRefs": [
+          "big-end-led"
+        ]
+      },
+      {
+        "id": "big-end-led__3",
+        "name": "バットランプ青点滅：設定5以上",
+        "displayName": "バットランプ青点滅：設定5以上",
+        "inputId": "REF_big-end-led_3",
+        "details": [
+          "バットランプ青点滅：設定5以上"
+        ],
         "confirmedSettings": [
           "SET_5",
           "SET_6"
         ],
         "deniedSettings": [],
         "hasImage": false,
-        "type": "SETTING_CONFIRMATION",
+        "type": "SETTING_CONSTRAINT",
         "sourceEvidenceRefs": [
-          "RE_GATE_D_REG_END_LED"
+          "big-end-led"
         ]
       },
       {
-        "id": "EVI_EVG_REG_END_LED_V2",
-        "name": "バットランプ・青点滅",
-        "displayName": "バットランプ・青点滅",
-        "inputId": "INP_EVI_EVG_REG_END_LED",
-        "triggerValue": "V2",
+        "id": "big-end-special__3",
+        "name": "レインボー：設定6",
+        "displayName": "レインボー：設定6",
+        "inputId": "REF_big-end-special_3",
+        "details": [
+          "レインボー：設定6"
+        ],
         "confirmedSettings": [
           "SET_6"
         ],
         "deniedSettings": [],
         "hasImage": false,
-        "type": "SETTING_CONFIRMATION",
+        "type": "SETTING_CONSTRAINT",
         "sourceEvidenceRefs": [
-          "RE_GATE_D_REG_END_LED"
+          "big-end-special"
+        ]
+      },
+      {
+        "id": "reg-end__1",
+        "name": "クラウン＋下パネル点滅：設定5以上",
+        "displayName": "クラウン＋下パネル点滅：設定5以上",
+        "inputId": "REF_reg-end_1",
+        "details": [
+          "クラウン＋下パネル点滅：設定5以上"
+        ],
+        "confirmedSettings": [
+          "SET_5",
+          "SET_6"
+        ],
+        "deniedSettings": [],
+        "hasImage": false,
+        "type": "SETTING_CONSTRAINT",
+        "sourceEvidenceRefs": [
+          "reg-end"
+        ]
+      },
+      {
+        "id": "reg-end__2",
+        "name": "バットランプ青点滅：設定6",
+        "displayName": "バットランプ青点滅：設定6",
+        "inputId": "REF_reg-end_2",
+        "details": [
+          "バットランプ青点滅：設定6"
+        ],
+        "confirmedSettings": [
+          "SET_6"
+        ],
+        "deniedSettings": [],
+        "hasImage": false,
+        "type": "SETTING_CONSTRAINT",
+        "sourceEvidenceRefs": [
+          "reg-end"
         ]
       }
     ],
-    "sources": [
+    "references": [
       {
-        "id": "SRC_PWORLD",
-        "classification": "ANALYSIS",
-        "pageName": "設定判別・解析",
-        "url": "https://www.p-world.co.jp/machine/database/10299",
-        "checkedAt": "2026-09-04"
+        "id": "EVI_big-end-led",
+        "sourceFindingId": "big-end-led",
+        "title": "BIG終了時のLED",
+        "kind": "EVIDENCE",
+        "collapsible": true,
+        "defaultExpanded": false,
+        "description": "BIG終了時のLEDを確認したときに、該当する項目を1回加算して記録します。\n・反映：設定確定・設定否定の条件は、設定候補の絞り込みに自動反映します\n・反映：設定別出現率が未確認の項目は記録のみです。出現率確認後は設定推測へ反映できる可能性があります",
+        "descriptionPresentation": {
+          "collapsible": true,
+          "label": "説明",
+          "defaultExpanded": false
+        },
+        "runtimePolicyControlled": false,
+        "evidenceItems": [
+          {
+            "findingId": "big-end-led",
+            "label": "BIG終了時のLED",
+            "sourceIds": [
+              "analysis"
+            ],
+            "details": [],
+            "semanticType": "DISPLAY_ONLY",
+            "semanticCategories": [
+              {
+                "label": "クラウンランプ点滅",
+                "meaning": "高設定示唆",
+                "semanticType": "PROBABILITY_UNKNOWN"
+              },
+              {
+                "label": "クラウン＋下パネル点滅",
+                "meaning": "設定2以上",
+                "semanticType": "EXACT_CONSTRAINT"
+              },
+              {
+                "label": "バットランプ青点滅",
+                "meaning": "設定5以上",
+                "semanticType": "EXACT_CONSTRAINT"
+              }
+            ],
+            "runtimePolicyControlled": false,
+            "status": "SOURCE_REFERENCED",
+            "interaction": "REFERENCE_ONLY"
+          }
+        ]
       },
       {
-        "id": "SRC_HAZUSE",
-        "classification": "ANALYSIS",
-        "pageName": "設定判別・解析",
-        "url": "https://hazuse.com/machine/pachislot/4S1919/",
-        "checkedAt": "2026-09-04"
+        "id": "EVI_big-end-special",
+        "sourceFindingId": "big-end-special",
+        "title": "BIG終了時のSpecialトロフィー",
+        "kind": "EVIDENCE",
+        "collapsible": true,
+        "defaultExpanded": false,
+        "description": "BIG終了時のSpecialトロフィーを確認したときに、該当する項目を1回加算して記録します。\n・注意：BIG終了時にPUSHが点灯した場合に押して確認します。MB入賞時の点灯方向とは別です\n・反映：設定確定・設定否定の条件は、設定候補の絞り込みに自動反映します\n・反映：設定別出現率が未確認の項目は記録のみです。出現率確認後は設定推測へ反映できる可能性があります",
+        "descriptionPresentation": {
+          "collapsible": true,
+          "label": "説明",
+          "defaultExpanded": false
+        },
+        "runtimePolicyControlled": false,
+        "evidenceItems": [
+          {
+            "findingId": "big-end-special",
+            "label": "BIG終了時のSpecialトロフィー",
+            "sourceIds": [
+              "analysis"
+            ],
+            "details": [
+              "BIG終了時にPUSHが点灯した場合に押して確認します。MB入賞時の点灯方向とは別です。"
+            ],
+            "semanticType": "DISPLAY_ONLY",
+            "semanticCategories": [
+              {
+                "label": "緑",
+                "meaning": "高設定示唆（弱）",
+                "semanticType": "PROBABILITY_UNKNOWN"
+              },
+              {
+                "label": "赤",
+                "meaning": "高設定示唆（強）",
+                "semanticType": "PROBABILITY_UNKNOWN"
+              },
+              {
+                "label": "レインボー",
+                "meaning": "設定6",
+                "semanticType": "EXACT_CONSTRAINT"
+              }
+            ],
+            "runtimePolicyControlled": false,
+            "status": "SOURCE_REFERENCED",
+            "interaction": "REFERENCE_ONLY"
+          }
+        ]
       },
       {
-        "id": "SRC_EVIDENCE_PWORLD",
-        "classification": "ANALYSIS",
-        "pageName": "LBトリプルクラウン 設定推測",
-        "url": "https://www.p-world.co.jp/machine/database/10299",
-        "checkedAt": "2026-09-04"
+        "id": "EVI_mb-special",
+        "sourceFindingId": "mb-special",
+        "title": "MB入賞時のSpecialトロフィー",
+        "kind": "EVIDENCE",
+        "collapsible": true,
+        "defaultExpanded": false,
+        "description": "MB入賞時のSpecialトロフィーを確認したときに、該当する項目を1回加算して記録します。\n・反映：設定別出現率が未確認の項目は記録のみです。出現率確認後は設定推測へ反映できる可能性があります",
+        "descriptionPresentation": {
+          "collapsible": true,
+          "label": "説明",
+          "defaultExpanded": false
+        },
+        "runtimePolicyControlled": false,
+        "evidenceItems": [
+          {
+            "findingId": "mb-special",
+            "label": "MB入賞時のSpecialトロフィー",
+            "sourceIds": [
+              "analysis"
+            ],
+            "details": [],
+            "semanticType": "PROBABILITY_UNKNOWN",
+            "semanticCategories": [
+              {
+                "label": "下から上",
+                "meaning": "奇数設定示唆",
+                "semanticType": "PROBABILITY_UNKNOWN"
+              },
+              {
+                "label": "上から下",
+                "meaning": "偶数設定示唆",
+                "semanticType": "PROBABILITY_UNKNOWN"
+              }
+            ],
+            "runtimePolicyControlled": false,
+            "status": "SOURCE_REFERENCED",
+            "interaction": "REFERENCE_ONLY"
+          }
+        ]
+      },
+      {
+        "id": "EVI_reg-end",
+        "sourceFindingId": "reg-end",
+        "title": "REG終了時のLED",
+        "kind": "EVIDENCE",
+        "collapsible": true,
+        "defaultExpanded": false,
+        "description": "REG終了時のLEDを確認したときに、該当する項目を1回加算して記録します。\n・反映：設定確定・設定否定の条件は、設定候補の絞り込みに自動反映します",
+        "descriptionPresentation": {
+          "collapsible": true,
+          "label": "説明",
+          "defaultExpanded": false
+        },
+        "runtimePolicyControlled": false,
+        "evidenceItems": [
+          {
+            "findingId": "reg-end",
+            "label": "REG終了時のLED",
+            "sourceIds": [
+              "analysis"
+            ],
+            "details": [],
+            "semanticType": "EXACT_CONSTRAINT",
+            "semanticCategories": [
+              {
+                "label": "クラウン＋下パネル点滅",
+                "meaning": "設定5以上",
+                "semanticType": "EXACT_CONSTRAINT"
+              },
+              {
+                "label": "バットランプ青点滅",
+                "meaning": "設定6",
+                "semanticType": "EXACT_CONSTRAINT"
+              }
+            ],
+            "runtimePolicyControlled": false,
+            "status": "SOURCE_REFERENCED",
+            "interaction": "REFERENCE_ONLY"
+          }
+        ]
+      },
+      {
+        "id": "EVI_chain-music",
+        "sourceFindingId": "chain-music",
+        "title": "100G以内連続ボーナスの楽曲",
+        "kind": "EVIDENCE",
+        "collapsible": true,
+        "defaultExpanded": false,
+        "description": "100G以内連続ボーナスの楽曲を確認したときに、該当する項目を1回加算して記録します。\n・注意：ボーナス間100G以内の連続当選時だけが対象です。琉球メドレーはじんじん・てぃんさぐぬ花・安里屋ユンタの順です\n・反映：設定別出現率が未確認の項目は記録のみです。出現率確認後は設定推測へ反映できる可能性があります",
+        "descriptionPresentation": {
+          "collapsible": true,
+          "label": "説明",
+          "defaultExpanded": false
+        },
+        "runtimePolicyControlled": false,
+        "evidenceItems": [
+          {
+            "findingId": "chain-music",
+            "label": "100G以内連続ボーナスの楽曲",
+            "sourceIds": [
+              "analysis"
+            ],
+            "details": [
+              "ボーナス間100G以内の連続当選時だけが対象です。琉球メドレーはじんじん・てぃんさぐぬ花・安里屋ユンタの順です。"
+            ],
+            "semanticType": "PROBABILITY_UNKNOWN",
+            "semanticCategories": [
+              {
+                "label": "BIG：琉球メドレー",
+                "meaning": "高設定示唆",
+                "semanticType": "PROBABILITY_UNKNOWN"
+              },
+              {
+                "label": "REG：安里屋ユンタ",
+                "meaning": "偶数設定示唆",
+                "semanticType": "PROBABILITY_UNKNOWN"
+              }
+            ],
+            "runtimePolicyControlled": false,
+            "status": "SOURCE_REFERENCED",
+            "interaction": "REFERENCE_ONLY"
+          }
+        ]
       }
     ]
   },
+  "blockedItems": [
+    {
+      "blockId": "led-rate",
+      "label": "BIG終了LED・Specialトロフィーの条件別出現率",
+      "reason": "連チャン獲得枚数・BB in BBで出やすさが変わりますが、設定別の数値出現率は未公表です。",
+      "reevaluationCondition": "連チャン獲得枚数等の条件別・設定別の全出現率が公表されること。",
+      "sourceIds": [
+        "analysis"
+      ]
+    }
+  ],
   "ui": {
-    "sections": [
+    "schemaVersion": "v8.5-runtime-ui-v1",
+    "contractVersion": "runtime-ui-v8",
+    "source": "CANONICAL_UI",
+    "sourceSchemaVersion": "canonical-ui-v1",
+    "manifestRevision": "8.5",
+    "playInfo": {
+      "visible": true,
+      "collapsible": false,
+      "mode": "TOTAL_ONLY",
+      "sessionFields": [
+        {
+          "id": "date",
+          "label": "日付",
+          "mode": "DATE"
+        },
+        {
+          "id": "storeName",
+          "label": "店舗名",
+          "mode": "TEXT"
+        },
+        {
+          "id": "machineNumber",
+          "label": "台番号",
+          "mode": "TEXT"
+        }
+      ],
+      "startFields": [
+        {
+          "id": "startTotalGames",
+          "label": "着席時 総ゲーム数",
+          "mode": "NUMBER",
+          "directNumeric": true
+        }
+      ],
+      "currentFields": [
+        {
+          "id": "currentTotalGames",
+          "label": "現在 総ゲーム数",
+          "mode": "NUMBER",
+          "directNumeric": true
+        }
+      ],
+      "difference": {
+        "autoCalculate": true
+      },
+      "useDifference": {
+        "label": "着席時との差分を使用",
+        "defaultWhenStartNormalGamesPresent": true
+      }
+    },
+    "accordion": {
+      "enabled": true,
+      "singleOpen": true
+    },
+    "quickInput": {
+      "enabled": false
+    },
+    "v8Sections": [
       {
-        "id": "UI_NORMAL_COUNTS",
-        "title": "通常時",
-        "displayOrder": 1,
-        "description": "BIG・REG・チェリー・プラムは、すべて同じ通常時ゲーム数を分母として計算します。通常時ゲーム数は1回だけ入力してください。",
-        "collapsible": false,
-        "defaultExpanded": true,
+        "id": "OBS_SHARED_TOTAL_GAME_TRIAL",
+        "title": "チェリー・プラム・チェリー重複ボーナス合算の実質出現率",
+        "collapsible": true,
+        "defaultExpanded": false,
+        "description": "複数の設定推測項目で同じ「総ゲーム数」を共通の基準として使用します。総ゲーム数は1回だけ入力し、各項目では該当した回数だけを記録してください。",
+        "descriptionPresentation": {
+          "collapsible": true,
+          "label": "説明",
+          "defaultExpanded": false
+        },
+        "groups": [
+          {
+            "id": "DENOM_TOTAL_GAME_TRIAL",
+            "label": "総ゲーム数",
+            "input": "denominator",
+            "inputId": "cherry.eligibleTrialCount",
+            "engineBinding": {
+              "inputIds": [
+                "cherry.eligibleTrialCount",
+                "plum.eligibleTrialCount",
+                "cherry-total-effective.eligibleTrialCount"
+              ]
+            },
+            "gridSpan": 12,
+            "directNumeric": true,
+            "quickAdd": [
+              50
+            ],
+            "unobservedDisplay": "—",
+            "playDataBinding": {
+              "source": "PLAY_TOTAL_GAME_DELTA"
+            }
+          }
+        ],
         "items": [
           {
-            "type": "input",
-            "inputId": "INP_NORMAL_GAMES",
-            "label": "通常時ゲーム数",
-            "widget": "number",
-            "gridSpan": 12,
-            "config": {
-              "directInput": true,
-              "quickAdd": [
-                50
-              ],
-              "emptyMeansUnobserved": true,
-              "observedZeroAllowed": true
-            }
+            "id": "NODE_cherry",
+            "featureId": "cherry",
+            "title": "チェリー",
+            "description": "チェリーを記録します。総ゲーム数を基準に、実戦中の出現割合を設定別に比較します。\n・注意：総ゲーム数（ボーナス・BTは対象に含めません。\n・注意：ボーナス中・BT中の当選・小役は含めない。",
+            "descriptionPresentation": {
+              "collapsible": true,
+              "label": "説明",
+              "defaultExpanded": false
+            },
+            "gridSpan": 6,
+            "inputs": [
+              {
+                "id": "cherry.successCount",
+                "label": "チェリー回数",
+                "input": "counter",
+                "inputId": "cherry.successCount",
+                "engineBinding": {
+                  "inputId": "cherry.successCount"
+                },
+                "gridSpan": 12,
+                "directNumeric": true,
+                "quickAdd": [
+                  1
+                ],
+                "unobservedDisplay": "—"
+              }
+            ]
           },
           {
-            "type": "input",
-            "inputId": "INP_BIG_COUNT",
-            "label": "BIG",
-            "widget": "counter",
+            "id": "NODE_plum",
+            "featureId": "plum",
+            "title": "プラム",
+            "description": "プラムを記録します。総ゲーム数を基準に、実戦中の出現割合を設定別に比較します。\n・注意：総ゲーム数（ボーナス・BTは対象に含めません。\n・注意：ボーナス中・BT中の当選・小役は含めない。",
+            "descriptionPresentation": {
+              "collapsible": true,
+              "label": "説明",
+              "defaultExpanded": false
+            },
             "gridSpan": 6,
-            "config": {
-              "directInput": false,
-              "compact": true,
-              "quickAdd": [
-                1
-              ],
-              "step": 1,
-              "emptyMeansUnobserved": true,
-              "observedZeroAllowed": true
-            }
+            "inputs": [
+              {
+                "id": "plum.successCount",
+                "label": "プラム回数",
+                "input": "counter",
+                "inputId": "plum.successCount",
+                "engineBinding": {
+                  "inputId": "plum.successCount"
+                },
+                "gridSpan": 12,
+                "directNumeric": true,
+                "quickAdd": [
+                  1
+                ],
+                "unobservedDisplay": "—"
+              }
+            ]
           },
           {
-            "type": "input",
-            "inputId": "INP_REG_COUNT",
-            "label": "REG",
-            "widget": "counter",
+            "id": "NODE_cherry-total-effective",
+            "featureId": "cherry-total-effective",
+            "title": "チェリー重複ボーナス合算の実質出現率",
+            "description": "実質出現率を記録します。総ゲーム数を基準に、実戦中の出現割合を設定別に比較します。\n・注意：総ゲーム数（ボーナス・BTは対象に含めません。\n・注意：ボーナス中・BT中の当選・小役は含めない。",
+            "descriptionPresentation": {
+              "collapsible": true,
+              "label": "説明",
+              "defaultExpanded": false
+            },
             "gridSpan": 6,
-            "config": {
-              "directInput": false,
-              "compact": true,
-              "quickAdd": [
-                1
-              ],
-              "step": 1,
-              "emptyMeansUnobserved": true,
-              "observedZeroAllowed": true
-            }
-          },
+            "inputs": [
+              {
+                "id": "cherry-total-effective.successCount",
+                "label": "実質出現率回数",
+                "input": "counter",
+                "inputId": "cherry-total-effective.successCount",
+                "engineBinding": {
+                  "inputId": "cherry-total-effective.successCount"
+                },
+                "gridSpan": 12,
+                "directNumeric": true,
+                "quickAdd": [
+                  1
+                ],
+                "unobservedDisplay": "—"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "EVI_big-end-led",
+        "title": "BIG終了時のLED",
+        "description": "BIG終了時のLEDを確認したときに、該当する項目を1回加算して記録します。\n・反映：設定確定・設定否定の条件は、設定候補の絞り込みに自動反映します\n・反映：設定別出現率が未確認の項目は記録のみです。出現率確認後は設定推測へ反映できる可能性があります",
+        "collapsible": true,
+        "defaultExpanded": false,
+        "descriptionPresentation": {
+          "collapsible": true,
+          "label": "説明",
+          "defaultExpanded": false
+        },
+        "items": [
           {
-            "type": "input",
-            "inputId": "INP_CHERRY_COUNT",
-            "label": "チェリー",
-            "widget": "counter",
-            "gridSpan": 6,
-            "config": {
-              "directInput": false,
-              "compact": true,
-              "quickAdd": [
-                1
-              ],
-              "step": 1,
-              "emptyMeansUnobserved": true,
-              "observedZeroAllowed": true
+            "id": "REF_big-end-led",
+            "evidenceId": "big-end-led",
+            "label": "BIG終了時のLED",
+            "interaction": {
+              "type": "CATEGORY_COUNTERS",
+              "preservePriorObservations": true,
+              "showAccumulatedCounts": true,
+              "categoryCoverage": "NON_EXHAUSTIVE",
+              "totalOpportunities": "NONE",
+              "categories": [
+                {
+                  "id": "REF_big-end-led_1",
+                  "inputId": "REF_big-end-led_1",
+                  "label": "クラウンランプ点滅",
+                  "meaning": "高設定示唆"
+                },
+                {
+                  "id": "REF_big-end-led_2",
+                  "inputId": "REF_big-end-led_2",
+                  "label": "クラウン＋下パネル点滅",
+                  "meaning": "設定2以上"
+                },
+                {
+                  "id": "REF_big-end-led_3",
+                  "inputId": "REF_big-end-led_3",
+                  "label": "バットランプ青点滅",
+                  "meaning": "設定5以上"
+                }
+              ]
             }
-          },
+          }
+        ]
+      },
+      {
+        "id": "EVI_big-end-special",
+        "title": "BIG終了時のSpecialトロフィー",
+        "description": "BIG終了時のSpecialトロフィーを確認したときに、該当する項目を1回加算して記録します。\n・注意：BIG終了時にPUSHが点灯した場合に押して確認します。MB入賞時の点灯方向とは別です\n・反映：設定確定・設定否定の条件は、設定候補の絞り込みに自動反映します\n・反映：設定別出現率が未確認の項目は記録のみです。出現率確認後は設定推測へ反映できる可能性があります",
+        "collapsible": true,
+        "defaultExpanded": false,
+        "descriptionPresentation": {
+          "collapsible": true,
+          "label": "説明",
+          "defaultExpanded": false
+        },
+        "items": [
           {
-            "type": "input",
-            "inputId": "INP_PLUM_COUNT",
-            "label": "プラム",
-            "widget": "counter",
-            "gridSpan": 6,
-            "config": {
-              "directInput": false,
-              "compact": true,
-              "quickAdd": [
-                1
-              ],
-              "step": 1,
-              "emptyMeansUnobserved": true,
-              "observedZeroAllowed": true
+            "id": "REF_big-end-special",
+            "evidenceId": "big-end-special",
+            "label": "BIG終了時のSpecialトロフィー",
+            "interaction": {
+              "type": "CATEGORY_COUNTERS",
+              "preservePriorObservations": true,
+              "showAccumulatedCounts": true,
+              "categoryCoverage": "NON_EXHAUSTIVE",
+              "totalOpportunities": "NONE",
+              "categories": [
+                {
+                  "id": "REF_big-end-special_1",
+                  "inputId": "REF_big-end-special_1",
+                  "label": "緑",
+                  "meaning": "高設定示唆（弱）"
+                },
+                {
+                  "id": "REF_big-end-special_2",
+                  "inputId": "REF_big-end-special_2",
+                  "label": "赤",
+                  "meaning": "高設定示唆（強）"
+                },
+                {
+                  "id": "REF_big-end-special_3",
+                  "inputId": "REF_big-end-special_3",
+                  "label": "レインボー",
+                  "meaning": "設定6"
+                }
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "id": "EVI_mb-special",
+        "title": "MB入賞時のSpecialトロフィー",
+        "description": "MB入賞時のSpecialトロフィーを確認したときに、該当する項目を1回加算して記録します。\n・反映：設定別出現率が未確認の項目は記録のみです。出現率確認後は設定推測へ反映できる可能性があります",
+        "collapsible": true,
+        "defaultExpanded": false,
+        "descriptionPresentation": {
+          "collapsible": true,
+          "label": "説明",
+          "defaultExpanded": false
+        },
+        "items": [
+          {
+            "id": "REF_mb-special",
+            "evidenceId": "mb-special",
+            "label": "MB入賞時のSpecialトロフィー",
+            "interaction": {
+              "type": "CATEGORY_COUNTERS",
+              "preservePriorObservations": true,
+              "showAccumulatedCounts": true,
+              "categoryCoverage": "NON_EXHAUSTIVE",
+              "totalOpportunities": "NONE",
+              "categories": [
+                {
+                  "id": "REF_mb-special_1",
+                  "inputId": "REF_mb-special_1",
+                  "label": "下から上",
+                  "meaning": "奇数設定示唆"
+                },
+                {
+                  "id": "REF_mb-special_2",
+                  "inputId": "REF_mb-special_2",
+                  "label": "上から下",
+                  "meaning": "偶数設定示唆"
+                }
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "id": "EVI_reg-end",
+        "title": "REG終了時のLED",
+        "description": "REG終了時のLEDを確認したときに、該当する項目を1回加算して記録します。\n・反映：設定確定・設定否定の条件は、設定候補の絞り込みに自動反映します",
+        "collapsible": true,
+        "defaultExpanded": false,
+        "descriptionPresentation": {
+          "collapsible": true,
+          "label": "説明",
+          "defaultExpanded": false
+        },
+        "items": [
+          {
+            "id": "REF_reg-end",
+            "evidenceId": "reg-end",
+            "label": "REG終了時のLED",
+            "interaction": {
+              "type": "CATEGORY_COUNTERS",
+              "preservePriorObservations": true,
+              "showAccumulatedCounts": true,
+              "categoryCoverage": "NON_EXHAUSTIVE",
+              "totalOpportunities": "NONE",
+              "categories": [
+                {
+                  "id": "REF_reg-end_1",
+                  "inputId": "REF_reg-end_1",
+                  "label": "クラウン＋下パネル点滅",
+                  "meaning": "設定5以上"
+                },
+                {
+                  "id": "REF_reg-end_2",
+                  "inputId": "REF_reg-end_2",
+                  "label": "バットランプ青点滅",
+                  "meaning": "設定6"
+                }
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "id": "EVI_chain-music",
+        "title": "100G以内連続ボーナスの楽曲",
+        "description": "100G以内連続ボーナスの楽曲を確認したときに、該当する項目を1回加算して記録します。\n・注意：ボーナス間100G以内の連続当選時だけが対象です。琉球メドレーはじんじん・てぃんさぐぬ花・安里屋ユンタの順です\n・反映：設定別出現率が未確認の項目は記録のみです。出現率確認後は設定推測へ反映できる可能性があります",
+        "collapsible": true,
+        "defaultExpanded": false,
+        "descriptionPresentation": {
+          "collapsible": true,
+          "label": "説明",
+          "defaultExpanded": false
+        },
+        "items": [
+          {
+            "id": "REF_chain-music",
+            "evidenceId": "chain-music",
+            "label": "100G以内連続ボーナスの楽曲",
+            "interaction": {
+              "type": "CATEGORY_COUNTERS",
+              "preservePriorObservations": true,
+              "showAccumulatedCounts": true,
+              "categoryCoverage": "NON_EXHAUSTIVE",
+              "totalOpportunities": "NONE",
+              "categories": [
+                {
+                  "id": "REF_chain-music_1",
+                  "inputId": "REF_chain-music_1",
+                  "label": "BIG：琉球メドレー",
+                  "meaning": "高設定示唆"
+                },
+                {
+                  "id": "REF_chain-music_2",
+                  "inputId": "REF_chain-music_2",
+                  "label": "REG：安里屋ユンタ",
+                  "meaning": "偶数設定示唆"
+                }
+              ]
             }
           }
         ]
       }
     ]
   },
-  "selectionSummary": {
-    "schemaVersion": "selection-summary-v1",
-    "evaluatedCount": 6,
-    "selectedCount": 4,
-    "rejectedCount": 2,
-    "selected": [
-      {
-        "featureId": "FEAT_BIG",
-        "name": "BIG",
-        "reason": "BIGは通常時ゲーム数を分母として設定差を評価でき、同じ観測区間で継続して数えられるため採用。",
-        "requiredTrials": {
-          "value": 48317,
-          "unit": "BIG抽選の対象ゲーム"
-        }
-      },
-      {
-        "featureId": "FEAT_REG",
-        "name": "REG",
-        "reason": "REGは通常時ゲーム数を分母として設定差を評価でき、同じ観測区間で継続して数えられるため採用。",
-        "requiredTrials": {
-          "value": 25631,
-          "unit": "REG抽選の対象ゲーム"
-        }
-      },
-      {
-        "featureId": "FEAT_CHERRY",
-        "name": "チェリー",
-        "reason": "チェリーは通常時ゲーム数を分母として設定差を評価でき、同じ観測区間で継続して数えられるため採用。",
-        "requiredTrials": {
-          "value": 12427,
-          "unit": "通常時のチェリーを数える対象ゲーム"
-        }
-      },
-      {
-        "featureId": "FEAT_PLUM",
-        "name": "プラム",
-        "reason": "プラムは通常時ゲーム数を分母として設定差を評価でき、同じ観測区間で継続して数えられるため採用。",
-        "requiredTrials": {
-          "value": 16205,
-          "unit": "通常時のプラムを数える対象ゲーム"
-        }
-      }
-    ],
-    "rejected": [
-      {
-        "featureId": "FEAT_REF_BONUS_TOTAL",
-        "name": "ボーナス合算",
-        "reason": "BIG+REGの決定的集計値であり、採用済みBIG/REGと同時利用すると同一事象を重複評価するため除外。"
-      },
-      {
-        "featureId": "FEAT_REF_ROLE_BONUS_OVERLAP",
-        "name": "小役別ボーナス同時当選",
-        "reason": "採用済み小役とボーナス事象を同じ観測から再利用する構成で、依存関係を考慮した統合計算なしでは独立尤度として扱えず二重計上となるため数値推測には採用しない。"
-      }
-    ]
-  },
-  "reliability": {},
   "metadata": {
     "machineId": "LB_TRIPLE_CROWN_SF4",
     "displayName": "LBトリプルクラウン",
@@ -437,12 +1071,161 @@
       "SET_5",
       "SET_6"
     ],
-    "uiDesignMaterialized": true,
-    "uiDesignSchemaVersion": "ui-design-data-v1",
-    "uiDesignStatus": "PASS_WITH_UNRESOLVED"
+    "settingsStatus": "SOURCE_DERIVED"
   },
-  "validation": {
-    "cases": []
-  },
-  "statistics": {}
+  "v8": {
+    "machineResearchSummary": {
+      "title": "この機種の設定推測について",
+      "adopted": [
+        {
+          "featureId": "cherry",
+          "label": "チェリー",
+          "importance": "主要",
+          "selectionScore": 66.6,
+          "evaluation": {
+            "userLabel": "設定判別スコア",
+            "value": 66.6
+          },
+          "reason": "現在の採用基準を満たしているため、設定推測に使用します。"
+        },
+        {
+          "featureId": "plum",
+          "label": "プラム",
+          "importance": "主要",
+          "selectionScore": 55.3,
+          "evaluation": {
+            "userLabel": "設定判別スコア",
+            "value": 55.3
+          },
+          "reason": "現在の採用基準を満たしているため、設定推測に使用します。"
+        },
+        {
+          "featureId": "cherry-total-effective",
+          "label": "チェリー重複ボーナス合算の実質出現率",
+          "importance": "主要",
+          "selectionScore": 99.5,
+          "evaluation": {
+            "userLabel": "設定判別スコア",
+            "value": 99.5
+          },
+          "reason": "現在の採用基準を満たしているため、設定推測に使用します。"
+        }
+      ],
+      "notAdopted": [
+        {
+          "featureId": "bb",
+          "label": "BIG",
+          "reason": "この項目にも設定差のある数値は確認できています。当選経路または同じ当選の内訳を共有するため、別々に掛け合わせない。 同じ情報を重ねて評価して判別力を過大に見積もらないため、現在は設定判別スコア等を比較して「チェリー重複ボーナス合算の実質出現率」を代表として使用し、この項目は単独では数値推測に使用しません。"
+        },
+        {
+          "featureId": "reg",
+          "label": "REG",
+          "reason": "この項目にも設定差のある数値は確認できています。当選経路または同じ当選の内訳を共有するため、別々に掛け合わせない。 同じ情報を重ねて評価して判別力を過大に見積もらないため、現在は設定判別スコア等を比較して「チェリー重複ボーナス合算の実質出現率」を代表として使用し、この項目は単独では数値推測に使用しません。"
+        },
+        {
+          "featureId": "bonus-total",
+          "label": "ボーナス合算",
+          "reason": "この項目にも設定差のある数値は確認できています。当選経路または同じ当選の内訳を共有するため、別々に掛け合わせない。 同じ情報を重ねて評価して判別力を過大に見積もらないため、現在は設定判別スコア等を比較して「チェリー重複ボーナス合算の実質出現率」を代表として使用し、この項目は単独では数値推測に使用しません。"
+        },
+        {
+          "featureId": "cherry-bonus",
+          "label": "チェリー重複ボーナス",
+          "reason": "この項目にも設定差のある数値は確認できています。当選経路または同じ当選の内訳を共有するため、別々に掛け合わせない。 同じ情報を重ねて評価して判別力を過大に見積もらないため、現在は設定判別スコア等を比較して「チェリー重複ボーナス合算の実質出現率」を代表として使用し、この項目は単独では数値推測に使用しません。"
+        },
+        {
+          "featureId": "plum-bonus",
+          "label": "プラム重複ボーナス",
+          "reason": "この項目にも設定差のある数値は確認できています。当選経路または同じ当選の内訳を共有するため、別々に掛け合わせない。 同じ情報を重ねて評価して判別力を過大に見積もらないため、現在は設定判別スコア等を比較して「チェリー重複ボーナス合算の実質出現率」を代表として使用し、この項目は単独では数値推測に使用しません。"
+        },
+        {
+          "featureId": "single-bb",
+          "label": "単独BIG",
+          "reason": "この項目にも設定差のある数値は確認できています。当選経路または同じ当選の内訳を共有するため、別々に掛け合わせない。 同じ情報を重ねて評価して判別力を過大に見積もらないため、現在は設定判別スコア等を比較して「チェリー重複ボーナス合算の実質出現率」を代表として使用し、この項目は単独では数値推測に使用しません。"
+        },
+        {
+          "featureId": "single-reg",
+          "label": "単独REG",
+          "reason": "この項目にも設定差のある数値は確認できています。当選経路または同じ当選の内訳を共有するため、別々に掛け合わせない。 同じ情報を重ねて評価して判別力を過大に見積もらないため、現在は設定判別スコア等を比較して「チェリー重複ボーナス合算の実質出現率」を代表として使用し、この項目は単独では数値推測に使用しません。"
+        },
+        {
+          "featureId": "single-total",
+          "label": "単独ボーナス合算",
+          "reason": "この項目にも設定差のある数値は確認できています。当選経路または同じ当選の内訳を共有するため、別々に掛け合わせない。 同じ情報を重ねて評価して判別力を過大に見積もらないため、現在は設定判別スコア等を比較して「チェリー重複ボーナス合算の実質出現率」を代表として使用し、この項目は単独では数値推測に使用しません。"
+        },
+        {
+          "featureId": "cherry-bb-effective",
+          "label": "チェリー重複BIGの実質出現率",
+          "reason": "この項目にも設定差のある数値は確認できています。ボーナス全体の内訳であり、親の合算値と別々に掛け合わせない。 同じ情報を重ねて評価して判別力を過大に見積もらないため、現在は設定判別スコア等を比較して「チェリー重複ボーナス合算の実質出現率」を代表として使用し、この項目は単独では数値推測に使用しません。"
+        },
+        {
+          "featureId": "cherry-reg-effective",
+          "label": "チェリー重複REGの実質出現率",
+          "reason": "この項目にも設定差のある数値は確認できています。ボーナス全体の内訳であり、親の合算値と別々に掛け合わせない。 同じ情報を重ねて評価して判別力を過大に見積もらないため、現在は設定判別スコア等を比較して「チェリー重複ボーナス合算の実質出現率」を代表として使用し、この項目は単独では数値推測に使用しません。"
+        },
+        {
+          "featureId": "plum-bb-effective",
+          "label": "プラム重複BIGの実質出現率",
+          "reason": "この項目にも設定差のある数値は確認できています。ボーナス全体の内訳であり、親の合算値と別々に掛け合わせない。 同じ情報を重ねて評価して判別力を過大に見積もらないため、現在は設定判別スコア等を比較して「チェリー重複ボーナス合算の実質出現率」を代表として使用し、この項目は単独では数値推測に使用しません。"
+        },
+        {
+          "featureId": "plum-reg-effective",
+          "label": "プラム重複REGの実質出現率",
+          "reason": "この項目にも設定差のある数値は確認できています。ボーナス全体の内訳であり、親の合算値と別々に掛け合わせない。 同じ情報を重ねて評価して判別力を過大に見積もらないため、現在は設定判別スコア等を比較して「チェリー重複ボーナス合算の実質出現率」を代表として使用し、この項目は単独では数値推測に使用しません。"
+        },
+        {
+          "featureId": "plum-total-effective",
+          "label": "プラム重複ボーナス合算の実質出現率",
+          "reason": "この項目にも設定差のある数値は確認できています。ボーナス全体の内訳であり、親の合算値と別々に掛け合わせない。 同じ情報を重ねて評価して判別力を過大に見積もらないため、現在は設定判別スコア等を比較して「チェリー重複ボーナス合算の実質出現率」を代表として使用し、この項目は単独では数値推測に使用しません。"
+        },
+        {
+          "featureId": "led-rate",
+          "label": "BIG終了LED・Specialトロフィーの条件別出現率",
+          "reason": "連チャン獲得枚数・BB in BBで出やすさが変わりますが、設定別の数値出現率は未公表です。",
+          "reevaluationCondition": "連チャン獲得枚数等の条件別・設定別の全出現率が公表されること。"
+        }
+      ],
+      "highLowDiscrimination": {
+        "status": "COMPUTED",
+        "method": "BEST_SINGLE_EXACT_ACTIVE_FEATURE",
+        "bandDefinition": {
+          "lowSettings": "SETTING_1_TO_3",
+          "highSettings": "SETTING_4_TO_6",
+          "classPrior": "BALANCED"
+        },
+        "results": [
+          {
+            "games": 1500,
+            "balancedAccuracyPercent": 67.14
+          },
+          {
+            "games": 3000,
+            "balancedAccuracyPercent": 72.61
+          },
+          {
+            "games": 7000,
+            "balancedAccuracyPercent": 80.45
+          }
+        ],
+        "eligibleFeatureIds": [
+          "cherry",
+          "plum",
+          "cherry-total-effective"
+        ],
+        "selectedFeatureId": "cherry-total-effective",
+        "selectedFeatureLabel": "チェリー重複ボーナス合算の実質出現率",
+        "excludedFeatures": [
+          {
+            "findingId": "cherry",
+            "reason": "CONSERVATIVE_SINGLE_FEATURE_NO_INDEPENDENCE_ASSUMPTION"
+          },
+          {
+            "findingId": "plum",
+            "reason": "CONSERVATIVE_SINGLE_FEATURE_NO_INDEPENDENCE_ASSUMPTION"
+          }
+        ],
+        "note": "7000Gへ正確に換算できるACTIVE要素だけを候補とし、要素間の独立性を仮定せず、単独で最も高い判別精度を持つ要素から保守的に算出しています。条件付き要素はこの指標には含めませんが、実戦中に実際の観測回数が入力された場合は設定推測に使用します。"
+      },
+      "unresolved": []
+    }
+  }
 }
