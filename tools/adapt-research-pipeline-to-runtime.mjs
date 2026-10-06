@@ -59,7 +59,7 @@ export function adaptSelection(research, selection, observation, canonicalUi) {
       if(aliases[sf.featureId]) featureResearch.set(sf.featureId,aliases[sf.featureId]);
     }
   }
-  const inputs=[],features=[];let order=1;
+  const inputs=[],features=[];let order=1;\n  const canonicalNumericSection=(canonicalUi.sections??[]).find(s=>s.kind==="NUMERIC");\n  const canonicalInputByFeature=new Map((canonicalNumericSection?.inputs??[]).map(x=>[x.featureId,x]));
   for(const sf of selection.features??[]){
     if(!String(sf.disposition).startsWith("ADOPT")) continue;
     const rid=featureResearch.get(sf.featureId),rf=rfById.get(rid),o=obs.get(sf.featureId);
@@ -71,9 +71,9 @@ export function adaptSelection(research, selection, observation, canonicalUi) {
       features.push({...sf,researchFeatureId:rid,adoptionCategory:role,modelTypeOverride:"multinomial",numeratorInputId:catIds[0],categoryInputIds:catIds.slice(1),residualCategoryLabel:"OTHER",denominatorInputId:totalId,...(suppressedByFeatureIds?{suppressedByFeatureIds}:{})});
     } else {
       const num=`INP_${sf.featureId}_COUNT`,den=`INP_${sf.featureId}_GAMES`;
-      inputs.push({id:num,name:rf.name,type:"counter",category:"NUMERIC",unit:"回",displayOrder:order++,inferenceRole:role},{id:den,name:o.denominator??rf.denominator?.target??"対象ゲーム",type:"counter",category:"NUMERIC",unit:"G",displayOrder:order++,inferenceRole:role});
+      const canonicalInput=canonicalInputByFeature.get(sf.featureId)??{};\n      inputs.push({id:num,name:canonicalInput.label??rf.name,type:"counter",category:"NUMERIC",unit:"回",displayOrder:order++,inferenceRole:role,uiGridSpan:6,uiCompactCounter:true},{id:den,name:canonicalInput.denominatorLabel??o.denominator??rf.denominator?.target??"対象ゲーム",type:"counter",category:"NUMERIC",unit:"G",displayOrder:order++,inferenceRole:role,uiGridSpan:6,uiCompactCounter:true});
       features.push({...sf,researchFeatureId:rid,adoptionCategory:role,numeratorInputId:num,denominatorInputId:den,...(suppressedByFeatureIds?{suppressedByFeatureIds}:{})});
     }
   }
-  return {...selection,inputs,features,evidenceContract:compileEvidenceContract(research,canonicalUi),uiCategoryLabels:{NUMERIC:(canonicalUi.sections??[]).find(s=>s.kind==="NUMERIC")?.title??"実戦データ",...Object.fromEntries((canonicalUi.sections??[]).filter(s=>s.kind==="EVIDENCE").map(s=>[s.id,s.title]))}};
+  return {...selection,inputs,features,evidenceContract:compileEvidenceContract(research,canonicalUi),uiCategoryLabels:{NUMERIC:canonicalNumericSection?.title??"実戦データ",...Object.fromEntries((canonicalUi.sections??[]).filter(s=>s.kind==="EVIDENCE").map(s=>[s.id,s.title]))},uiCategoryDescriptions:Object.fromEntries((canonicalUi.sections??[]).filter(s=>s.kind==="EVIDENCE"&&s.observationAction).map(s=>[s.id,s.observationAction]))};
 }
