@@ -56,6 +56,29 @@
         "inferenceRole": "INCLUDE_PRIMARY"
       },
       {
+        "id": "common-bell.eligibleTrialCount",
+        "name": "総ゲーム数",
+        "category": "V8_NUMERIC",
+        "type": "integer",
+        "unit": "G",
+        "defaultValue": 0,
+        "minimum": 0,
+        "displayOrder": 3,
+        "inferenceRole": "INCLUDE_PRIMARY"
+      },
+      {
+        "id": "common-bell.successCount",
+        "name": "共通ベル回数",
+        "category": "V8_NUMERIC",
+        "type": "counter",
+        "unit": "回",
+        "defaultValue": 0,
+        "minimum": 0,
+        "displayOrder": 4,
+        "parentInputId": "common-bell.eligibleTrialCount",
+        "inferenceRole": "INCLUDE_PRIMARY"
+      },
+      {
         "id": "episode150.eligibleTrialCount",
         "name": "150秒防衛のタイムエピソード回数",
         "category": "V8_NUMERIC",
@@ -63,7 +86,18 @@
         "unit": "回",
         "defaultValue": 0,
         "minimum": 0,
-        "displayOrder": 3,
+        "displayOrder": 7,
+        "inferenceRole": "INCLUDE_SUPPORT"
+      },
+      {
+        "id": "episode400.eligibleTrialCount",
+        "name": "400秒防衛のタイムエピソード回数",
+        "category": "V8_NUMERIC",
+        "type": "integer",
+        "unit": "回",
+        "defaultValue": 0,
+        "minimum": 0,
+        "displayOrder": 7,
         "inferenceRole": "INCLUDE_SUPPORT"
       },
       {
@@ -74,8 +108,20 @@
         "unit": "回",
         "defaultValue": 0,
         "minimum": 0,
-        "displayOrder": 4,
+        "displayOrder": 8,
         "parentInputId": "episode150.eligibleTrialCount",
+        "inferenceRole": "INCLUDE_SUPPORT"
+      },
+      {
+        "id": "episode400.successCount",
+        "name": "結束出現回数",
+        "category": "V8_NUMERIC",
+        "type": "counter",
+        "unit": "回",
+        "defaultValue": 0,
+        "minimum": 0,
+        "displayOrder": 8,
+        "parentInputId": "episode400.eligibleTrialCount",
         "inferenceRole": "INCLUDE_SUPPORT"
       },
       {
@@ -86,7 +132,7 @@
         "unit": "回",
         "defaultValue": 0,
         "minimum": 0,
-        "displayOrder": 5,
+        "displayOrder": 9,
         "inferenceRole": "INCLUDE_SUPPORT"
       },
       {
@@ -97,7 +143,7 @@
         "unit": "回",
         "defaultValue": 0,
         "minimum": 0,
-        "displayOrder": 6,
+        "displayOrder": 10,
         "parentInputId": "episode900.eligibleTrialCount",
         "inferenceRole": "INCLUDE_SUPPORT"
       },
@@ -109,7 +155,7 @@
         "unit": "回",
         "defaultValue": 0,
         "minimum": 0,
-        "displayOrder": 7,
+        "displayOrder": 11,
         "inferenceRole": "DISPLAY_ONLY"
       },
       {
@@ -120,7 +166,7 @@
         "unit": "回",
         "defaultValue": 0,
         "minimum": 0,
-        "displayOrder": 8,
+        "displayOrder": 12,
         "inferenceRole": "DISPLAY_ONLY"
       },
       {
@@ -131,7 +177,7 @@
         "unit": "回",
         "defaultValue": 0,
         "minimum": 0,
-        "displayOrder": 9,
+        "displayOrder": 13,
         "inferenceRole": "DISPLAY_ONLY"
       },
       {
@@ -142,7 +188,7 @@
         "unit": "回",
         "defaultValue": 0,
         "minimum": 0,
-        "displayOrder": 10,
+        "displayOrder": 14,
         "inferenceRole": "DISPLAY_ONLY"
       }
     ]
@@ -177,6 +223,32 @@
         "displayFormat": "percentage"
       },
       {
+        "featureId": "common-bell",
+        "name": "共通ベル",
+        "trialUniverse": "TOTAL_GAME_TRIAL",
+        "adoptionCategory": "INCLUDE_PRIMARY",
+        "calculationRole": "PROBABILITY",
+        "probabilityEngineUsage": true,
+        "denominatorInputId": "common-bell.eligibleTrialCount",
+        "probabilities": {
+          "SET_1": 0.0027464982147761604,
+          "SET_2": 0.0028993911278631487,
+          "SET_3": 0.003051571559353067,
+          "SET_4": 0.0036616623947272058,
+          "SET_5": 0.004347826086956522,
+          "SET_6": 0.005035246727089627
+        },
+        "selectionRationale": {
+          "summary": "設定推測に採用された要素です。",
+          "adoptionReason": "マイスロLv4以上で共通ベル回数を取得でき、総ゲーム数を母数として設定差を比較できます。",
+          "shortTermReason": "出現頻度が低いため、短い遊技では結果が大きく振れることがあります。",
+          "longTermReason": "総ゲーム数と観測数が増えるほど設定別の比較が安定します。"
+        },
+        "modelType": "binomial",
+        "numeratorInputId": "common-bell.successCount",
+        "displayFormat": "ratio_1_over_n"
+      },
+      {
         "featureId": "episode150",
         "name": "150秒防衛時の仁義",
         "trialUniverse": "DEFENSE_150_EPISODE_TRIAL",
@@ -200,6 +272,32 @@
         },
         "modelType": "binomial",
         "numeratorInputId": "episode150.successCount",
+        "displayFormat": "percentage"
+      },
+      {
+        "featureId": "episode400",
+        "name": "400秒防衛時の結束",
+        "trialUniverse": "DEFENSE_400_EPISODE_TRIAL",
+        "adoptionCategory": "INCLUDE_SUPPORT",
+        "calculationRole": "PROBABILITY",
+        "probabilityEngineUsage": true,
+        "denominatorInputId": "episode400.eligibleTrialCount",
+        "probabilities": {
+          "SET_1": 0.0625,
+          "SET_2": 0.1875,
+          "SET_3": 0.0625,
+          "SET_4": 0.1875,
+          "SET_5": 0.0625,
+          "SET_6": 0.1875
+        },
+        "selectionRationale": {
+          "summary": "設定推測に採用された要素です。",
+          "adoptionReason": "400秒防衛時に出現する特殊エピソード「結束」の設定別出現率が確認できています。",
+          "shortTermReason": "観測機会が少ないため、少数回では結果の振れが大きくなります。",
+          "longTermReason": "400秒防衛の観測回数が増えるほど偶奇の比較が安定します。"
+        },
+        "modelType": "binomial",
+        "numeratorInputId": "episode400.successCount",
         "displayFormat": "percentage"
       },
       {
@@ -238,11 +336,25 @@
         "importance": "主要"
       },
       {
+        "featureId": "common-bell",
+        "runtimeStatus": "ACTIVE",
+        "metric": "SELECTION_SCORE",
+        "metricValue": 115.74598510991872,
+        "importance": "主要"
+      },
+      {
         "featureId": "episode150",
         "runtimeStatus": "ACTIVE",
         "metric": "PER_ELIGIBLE_TRIAL_POWER",
         "metricValue": 1.6874467629448442,
         "importance": "微小"
+      },
+      {
+        "featureId": "episode400",
+        "runtimeStatus": "ACTIVE",
+        "metric": "PER_ELIGIBLE_TRIAL_POWER",
+        "metricValue": 5.362655965703311,
+        "importance": "補助"
       },
       {
         "featureId": "episode900",
@@ -531,7 +643,7 @@
     "playInfo": {
       "visible": true,
       "collapsible": false,
-      "mode": "NORMAL_ONLY",
+      "mode": "TOTAL_AND_NORMAL",
       "sessionFields": [
         {
           "id": "date",
@@ -551,6 +663,12 @@
       ],
       "startFields": [
         {
+          "id": "startTotalGames",
+          "label": "着席時 総ゲーム数",
+          "mode": "NUMBER",
+          "directNumeric": true
+        },
+        {
           "id": "startNormalGames",
           "label": "着席時 通常ゲーム数",
           "mode": "NUMBER",
@@ -558,6 +676,12 @@
         }
       ],
       "currentFields": [
+        {
+          "id": "currentTotalGames",
+          "label": "現在 総ゲーム数",
+          "mode": "NUMBER",
+          "directNumeric": true
+        },
         {
           "id": "currentNormalGames",
           "label": "現在 通常ゲーム数",
@@ -636,6 +760,60 @@
         ]
       },
       {
+        "id": "OBS_common-bell",
+        "title": "共通ベル",
+        "collapsible": true,
+        "defaultExpanded": false,
+        "description": "マイスロLv4以上で確認できる共通ベル回数を記録します。総ゲーム数を基準に、設定別の出現率を比較します。\n・注意：見た目の押し順ベルとは区別できないため、マイスロに表示された共通ベル回数を使用してください。",
+        "descriptionPresentation": {
+          "collapsible": true,
+          "label": "説明",
+          "defaultExpanded": false
+        },
+        "items": [
+          {
+            "id": "NODE_common-bell",
+            "featureId": "common-bell",
+            "title": "共通ベル",
+            "inputs": [
+              {
+                "id": "common-bell.eligibleTrialCount",
+                "label": "総ゲーム数",
+                "input": "denominator",
+                "inputId": "common-bell.eligibleTrialCount",
+                "engineBinding": {
+                  "inputId": "common-bell.eligibleTrialCount"
+                },
+                "gridSpan": 12,
+                "directNumeric": true,
+                "quickAdd": [
+                  50
+                ],
+                "unobservedDisplay": "—",
+                "playDataBinding": {
+                  "source": "PLAY_TOTAL_GAME_DELTA"
+                }
+              },
+              {
+                "id": "common-bell.successCount",
+                "label": "共通ベル回数",
+                "input": "counter",
+                "inputId": "common-bell.successCount",
+                "engineBinding": {
+                  "inputId": "common-bell.successCount"
+                },
+                "gridSpan": 6,
+                "directNumeric": true,
+                "quickAdd": [
+                  1
+                ],
+                "unobservedDisplay": "—"
+              }
+            ]
+          }
+        ]
+      },
+      {
         "id": "OBS_episode150",
         "title": "150秒防衛時の仁義",
         "collapsible": true,
@@ -672,6 +850,55 @@
                 "inputId": "episode150.successCount",
                 "engineBinding": {
                   "inputId": "episode150.successCount"
+                },
+                "gridSpan": 6,
+                "directNumeric": true,
+                "quickAdd": [
+                  1
+                ],
+                "unobservedDisplay": "—"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "OBS_episode400",
+        "title": "400秒防衛時の結束",
+        "collapsible": true,
+        "defaultExpanded": false,
+        "description": "400秒防衛のタイムエピソードを確認した回数と、そのうち赤枠の特殊エピソード「結束」が出現した回数を記録します。\n・示唆：「結束」は偶数設定で出現しやすい強い偶数設定示唆です。\n・注意：150秒・900秒など、400秒以外の防衛時間はこの母数に含めません。",
+        "descriptionPresentation": {
+          "collapsible": true,
+          "label": "説明",
+          "defaultExpanded": false
+        },
+        "items": [
+          {
+            "id": "NODE_episode400",
+            "featureId": "episode400",
+            "title": "400秒防衛時の結束",
+            "inputs": [
+              {
+                "id": "episode400.eligibleTrialCount",
+                "label": "400秒防衛のタイムエピソード回数",
+                "input": "denominator",
+                "inputId": "episode400.eligibleTrialCount",
+                "engineBinding": {
+                  "inputId": "episode400.eligibleTrialCount"
+                },
+                "gridSpan": 6,
+                "directNumeric": true,
+                "quickAdd": [],
+                "unobservedDisplay": "—"
+              },
+              {
+                "id": "episode400.successCount",
+                "label": "結束出現回数",
+                "input": "counter",
+                "inputId": "episode400.successCount",
+                "engineBinding": {
+                  "inputId": "episode400.successCount"
                 },
                 "gridSpan": 6,
                 "directNumeric": true,
@@ -798,7 +1025,8 @@
       "SET_5",
       "SET_6"
     ],
-    "settingsStatus": "SOURCE_DERIVED"
+    "settingsStatus": "SOURCE_DERIVED",
+    "machineDataVersion": "8.5.2-batch-20261005-006"
   },
   "v8": {
     "machineResearchSummary": {
@@ -814,6 +1042,17 @@
             "value": 144.8
           },
           "reason": "現在の採用基準を満たしているため、設定推測に使用します。"
+        },
+        {
+          "featureId": "common-bell",
+          "label": "共通ベル",
+          "importance": "主要",
+          "selectionScore": 115.74598510991872,
+          "evaluation": {
+            "userLabel": "設定判別スコア",
+            "value": 115.74598510991872
+          },
+          "reason": "マイスロLv4以上で共通ベル回数を取得でき、総ゲーム数を母数に設定差を比較できるため、設定推測に使用します。"
         },
         {
           "featureId": "episode150",
@@ -834,6 +1073,16 @@
             "value": 3.575103977135541
           },
           "reason": "現在の採用基準を満たしているため、設定推測に使用します。"
+        },
+        {
+          "featureId": "episode400",
+          "label": "400秒防衛時の結束",
+          "importance": "補助",
+          "evaluation": {
+            "userLabel": "1回の判別力",
+            "value": 5.362655965703311
+          },
+          "reason": "400秒防衛時の特殊エピソード「結束」の設定別出現率が確認でき、実機画像でも名称を確認済みのため、条件付きの設定推測に使用します。"
         }
       ],
       "notAdopted": [
@@ -846,12 +1095,6 @@
           "featureId": "initial-total",
           "label": "AT・BB・RD初当り合算",
           "reason": "この項目にも設定差のある数値は確認できています。当選経路または同じ当選の内訳を共有するため、別々に掛け合わせない。 同じ情報を重ねて評価して判別力を過大に見積もらないため、現在は設定判別スコア等を比較して「RD初当り」を代表として使用し、この項目は単独では数値推測に使用しません。"
-        },
-        {
-          "featureId": "common-bell",
-          "label": "共通ベル",
-          "reason": "現在は数値推測に必要な情報が十分でないため使用しません。",
-          "reevaluationCondition": "必要な設定別データや観測条件が確認できれば再評価します。"
         },
         {
           "featureId": "role-通常-チェリー-RD",
@@ -916,8 +1159,7 @@
         {
           "featureId": "adv-rd",
           "label": "有利区間移行時だけのRD抽選",
-          "reason": "30G特殊抽選による当選と同じ前兆で告知されるため、移行時だけの当選を全件分けられません。",
-          "reevaluationCondition": "必要な設定別データや観測条件が確認できれば再評価します。"
+          "reason": "RD初当り確率だけで実用上の設定判別ができ、同じRD当選経路を重ねて評価する必要性が低いため使用しません。また、有利区間移行時だけの当選を実戦で全件識別しにくい点も考慮しています。"
         },
         {
           "featureId": "adv-30-total",
@@ -952,104 +1194,82 @@
         {
           "featureId": "end-distribution-0",
           "label": "RD終了画面 0～1000G間(復活なし時)",
-          "reason": "終了画面の原画像と構図名の対応、出現率を切り替える消化ゲーム数の起点を一意に確認できていません。原表の設定別分布を保持し、構図を推測した入力項目は作りません。",
-          "reevaluationCondition": "必要な設定別データや観測条件が確認できれば再評価します。"
+          "reason": "消化ゲーム帯と復活の有無で条件分岐が多く、入力負担が大きいため、現在は数値推測に使用しません。必要な設定確定・否定情報は別の示唆項目で扱います。"
         },
         {
           "featureId": "end-distribution-1",
           "label": "RD終了画面 1001～3000G間(復活なし時)",
-          "reason": "終了画面の原画像と構図名の対応、出現率を切り替える消化ゲーム数の起点を一意に確認できていません。原表の設定別分布を保持し、構図を推測した入力項目は作りません。",
-          "reevaluationCondition": "必要な設定別データや観測条件が確認できれば再評価します。"
+          "reason": "消化ゲーム帯と復活の有無で条件分岐が多く、入力負担が大きいため、現在は数値推測に使用しません。必要な設定確定・否定情報は別の示唆項目で扱います。"
         },
         {
           "featureId": "end-distribution-2",
           "label": "RD終了画面 3001～5000G間(復活なし時)",
-          "reason": "終了画面の原画像と構図名の対応、出現率を切り替える消化ゲーム数の起点を一意に確認できていません。原表の設定別分布を保持し、構図を推測した入力項目は作りません。",
-          "reevaluationCondition": "必要な設定別データや観測条件が確認できれば再評価します。"
+          "reason": "消化ゲーム帯と復活の有無で条件分岐が多く、入力負担が大きいため、現在は数値推測に使用しません。必要な設定確定・否定情報は別の示唆項目で扱います。"
         },
         {
           "featureId": "end-distribution-3",
           "label": "RD終了画面 5001G以降(復活なし時)",
-          "reason": "終了画面の原画像と構図名の対応、出現率を切り替える消化ゲーム数の起点を一意に確認できていません。原表の設定別分布を保持し、構図を推測した入力項目は作りません。",
-          "reevaluationCondition": "必要な設定別データや観測条件が確認できれば再評価します。"
+          "reason": "消化ゲーム帯と復活の有無で条件分岐が多く、入力負担が大きいため、現在は数値推測に使用しません。必要な設定確定・否定情報は別の示唆項目で扱います。"
         },
         {
           "featureId": "end-distribution-4",
           "label": "RD終了画面 0～1000G間(復活時)",
-          "reason": "終了画面の原画像と構図名の対応、出現率を切り替える消化ゲーム数の起点を一意に確認できていません。原表の設定別分布を保持し、構図を推測した入力項目は作りません。",
-          "reevaluationCondition": "必要な設定別データや観測条件が確認できれば再評価します。"
+          "reason": "消化ゲーム帯と復活の有無で条件分岐が多く、入力負担が大きいため、現在は数値推測に使用しません。必要な設定確定・否定情報は別の示唆項目で扱います。"
         },
         {
           "featureId": "end-distribution-5",
           "label": "RD終了画面 1001～3000G間(復活時)",
-          "reason": "終了画面の原画像と構図名の対応、出現率を切り替える消化ゲーム数の起点を一意に確認できていません。原表の設定別分布を保持し、構図を推測した入力項目は作りません。",
-          "reevaluationCondition": "必要な設定別データや観測条件が確認できれば再評価します。"
+          "reason": "消化ゲーム帯と復活の有無で条件分岐が多く、入力負担が大きいため、現在は数値推測に使用しません。必要な設定確定・否定情報は別の示唆項目で扱います。"
         },
         {
           "featureId": "end-distribution-6",
           "label": "RD終了画面 3001～5000G間(復活時)",
-          "reason": "終了画面の原画像と構図名の対応、出現率を切り替える消化ゲーム数の起点を一意に確認できていません。原表の設定別分布を保持し、構図を推測した入力項目は作りません。",
-          "reevaluationCondition": "必要な設定別データや観測条件が確認できれば再評価します。"
+          "reason": "消化ゲーム帯と復活の有無で条件分岐が多く、入力負担が大きいため、現在は数値推測に使用しません。必要な設定確定・否定情報は別の示唆項目で扱います。"
         },
         {
           "featureId": "end-distribution-7",
           "label": "RD終了画面 5001G以降(復活時)",
-          "reason": "終了画面の原画像と構図名の対応、出現率を切り替える消化ゲーム数の起点を一意に確認できていません。原表の設定別分布を保持し、構図を推測した入力項目は作りません。",
-          "reevaluationCondition": "必要な設定別データや観測条件が確認できれば再評価します。"
+          "reason": "消化ゲーム帯と復活の有無で条件分岐が多く、入力負担が大きいため、現在は数値推測に使用しません。必要な設定確定・否定情報は別の示唆項目で扱います。"
         },
         {
           "featureId": "end-distribution-8",
           "label": "AT終了画面 0～1000G間(復活なし時)",
-          "reason": "終了画面の原画像と構図名の対応、出現率を切り替える消化ゲーム数の起点を一意に確認できていません。原表の設定別分布を保持し、構図を推測した入力項目は作りません。",
-          "reevaluationCondition": "必要な設定別データや観測条件が確認できれば再評価します。"
+          "reason": "消化ゲーム帯と復活の有無で条件分岐が多く、入力負担が大きいため、現在は数値推測に使用しません。必要な設定確定・否定情報は別の示唆項目で扱います。"
         },
         {
           "featureId": "end-distribution-9",
           "label": "AT終了画面 1001～3000G間(復活なし時)",
-          "reason": "終了画面の原画像と構図名の対応、出現率を切り替える消化ゲーム数の起点を一意に確認できていません。原表の設定別分布を保持し、構図を推測した入力項目は作りません。",
-          "reevaluationCondition": "必要な設定別データや観測条件が確認できれば再評価します。"
+          "reason": "消化ゲーム帯と復活の有無で条件分岐が多く、入力負担が大きいため、現在は数値推測に使用しません。必要な設定確定・否定情報は別の示唆項目で扱います。"
         },
         {
           "featureId": "end-distribution-10",
           "label": "AT終了画面 3001～5000G間(復活なし時)",
-          "reason": "終了画面の原画像と構図名の対応、出現率を切り替える消化ゲーム数の起点を一意に確認できていません。原表の設定別分布を保持し、構図を推測した入力項目は作りません。",
-          "reevaluationCondition": "必要な設定別データや観測条件が確認できれば再評価します。"
+          "reason": "消化ゲーム帯と復活の有無で条件分岐が多く、入力負担が大きいため、現在は数値推測に使用しません。必要な設定確定・否定情報は別の示唆項目で扱います。"
         },
         {
           "featureId": "end-distribution-11",
           "label": "AT終了画面 5001G以降(復活なし時)",
-          "reason": "終了画面の原画像と構図名の対応、出現率を切り替える消化ゲーム数の起点を一意に確認できていません。原表の設定別分布を保持し、構図を推測した入力項目は作りません。",
-          "reevaluationCondition": "必要な設定別データや観測条件が確認できれば再評価します。"
+          "reason": "消化ゲーム帯と復活の有無で条件分岐が多く、入力負担が大きいため、現在は数値推測に使用しません。必要な設定確定・否定情報は別の示唆項目で扱います。"
         },
         {
           "featureId": "end-distribution-12",
           "label": "AT終了画面 0～1000G間(復活時)",
-          "reason": "終了画面の原画像と構図名の対応、出現率を切り替える消化ゲーム数の起点を一意に確認できていません。原表の設定別分布を保持し、構図を推測した入力項目は作りません。",
-          "reevaluationCondition": "必要な設定別データや観測条件が確認できれば再評価します。"
+          "reason": "消化ゲーム帯と復活の有無で条件分岐が多く、入力負担が大きいため、現在は数値推測に使用しません。必要な設定確定・否定情報は別の示唆項目で扱います。"
         },
         {
           "featureId": "end-distribution-13",
           "label": "AT終了画面 1001～3000G間(復活時)",
-          "reason": "終了画面の原画像と構図名の対応、出現率を切り替える消化ゲーム数の起点を一意に確認できていません。原表の設定別分布を保持し、構図を推測した入力項目は作りません。",
-          "reevaluationCondition": "必要な設定別データや観測条件が確認できれば再評価します。"
+          "reason": "消化ゲーム帯と復活の有無で条件分岐が多く、入力負担が大きいため、現在は数値推測に使用しません。必要な設定確定・否定情報は別の示唆項目で扱います。"
         },
         {
           "featureId": "end-distribution-14",
           "label": "AT終了画面 3001～5000G間(復活時)",
-          "reason": "終了画面の原画像と構図名の対応、出現率を切り替える消化ゲーム数の起点を一意に確認できていません。原表の設定別分布を保持し、構図を推測した入力項目は作りません。",
-          "reevaluationCondition": "必要な設定別データや観測条件が確認できれば再評価します。"
+          "reason": "消化ゲーム帯と復活の有無で条件分岐が多く、入力負担が大きいため、現在は数値推測に使用しません。必要な設定確定・否定情報は別の示唆項目で扱います。"
         },
         {
           "featureId": "end-distribution-15",
           "label": "AT終了画面 5001G以降(復活時)",
-          "reason": "終了画面の原画像と構図名の対応、出現率を切り替える消化ゲーム数の起点を一意に確認できていません。原表の設定別分布を保持し、構図を推測した入力項目は作りません。",
-          "reevaluationCondition": "必要な設定別データや観測条件が確認できれば再評価します。"
-        },
-        {
-          "featureId": "episode400",
-          "label": "400秒防衛時の特殊エピソード",
-          "reason": "資料でタイトルが「約束」と「結束」に分かれ、原画像との照合を要します。全設定の発生率は原値を保持し、タイトルを推測した入力は作りません。",
-          "reevaluationCondition": "必要な設定別データや観測条件が確認できれば再評価します。"
+          "reason": "消化ゲーム帯と復活の有無で条件分岐が多く、入力負担が大きいため、現在は数値推測に使用しません。必要な設定確定・否定情報は別の示唆項目で扱います。"
         },
         {
           "featureId": "normal-suika-bb",
@@ -1093,7 +1313,8 @@
           }
         ],
         "eligibleFeatureIds": [
-          "rd"
+          "rd",
+          "common-bell"
         ],
         "selectedFeatureId": "rd",
         "selectedFeatureLabel": "RD初当り",
