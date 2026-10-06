@@ -160,6 +160,9 @@ test('explicit categorical Evidence links prefer exact category names over subst
  const d=buildAppRuntime(p,ref);
  const constraint=d.package.evidence.evidences.find((x:any)=>(x.sourceEvidenceRefs??[]).includes('exact'));
  assert.equal(constraint.inputId,'screen.categoryCounts.2');
+ const category=d.package.ui.v8Sections.flatMap((s:any)=>s.items??[]).flatMap((n:any)=>n.interaction?.categories??[]).find((c:any)=>c.inputId==='screen.categoryCounts.2');
+ assert.equal(category.meaning,'設定4以上');
+ assert.match(d.package.ui.v8Sections.find((s:any)=>s.id==='OBS_screen').description,/加賀＆赤城：設定4以上/);
  assert.equal(d.package.inputs.inputs.some((x:any)=>x.id==='REF_exact_1'),false);
  assert.doesNotThrow(()=>validateAppRuntimeDocument(d,p,ref));
 });

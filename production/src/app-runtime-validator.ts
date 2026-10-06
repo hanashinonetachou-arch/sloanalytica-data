@@ -1,4 +1,4 @@
-import {categoricalProbabilityRow,evidenceCategoryRecords,resolveEvidenceInputLinks} from './app-runtime-builder.ts';
+import {appRuntimeMachineDataVersion,categoricalProbabilityRow,evidenceCategoryRecords,resolveEvidenceInputLinks} from './app-runtime-builder.ts';
 export const APP_RUNTIME_VALIDATOR_CONTRACT='app-runtime-v1';
 const canonical=(v:any):string=>Array.isArray(v)?'['+v.map(canonical).join(',')+']':v&&typeof v==='object'?'{'+Object.keys(v).sort().map(k=>JSON.stringify(k)+':'+canonical(v[k])).join(',')+'}':JSON.stringify(v);
 const fail=(m:string):never=>{throw new Error('APP_RUNTIME_VALIDATION_FAILED:'+m)};
@@ -11,7 +11,7 @@ export function validateAppRuntimeDocument(doc:any,projection:any,projectionArti
  if(doc.batchId!==projection.batchId||doc.machineId!==projection.machineId||doc.machineName!==projection.machineName)fail('IDENTITY');
  if(canonical(doc.sourceArtifact)!==canonical(projectionArtifact))fail('LINKAGE');
  if(projection.settings?.status!=='SOURCE_DERIVED'||!(projection.settings?.values?.length>0))fail('SETTINGS_REQUIRED');
- const p=doc.package;if(p?.schemaVersion!==1||p.machine?.machineId!==projection.machineId||p.machine?.displayName!==projection.machineName||p.machine?.machineDataVersion!=='8.5.0-'+projection.batchId)fail('MACHINE');
+ const p=doc.package;if(p?.schemaVersion!==1||p.machine?.machineId!==projection.machineId||p.machine?.displayName!==projection.machineName||p.machine?.machineDataVersion!==appRuntimeMachineDataVersion(projection.batchId))fail('MACHINE');
  if(canonical(p.machine?.settings)!==canonical(projection.settings.values)||canonical(p.metadata?.settings)!==canonical(projection.settings.values)||p.metadata?.settingsStatus!=='SOURCE_DERIVED')fail('SETTINGS_COPY');
  const expectedSections=projection.runtimeUi?.numericSections??[],active=projection.activeFeatures??[],inactive=projection.inactiveFeatures??[],links=resolveEvidenceInputLinks(projection);
  const expectedNumericInputs=expectedSections.flatMap((s:any)=>s.inputs??[]);
