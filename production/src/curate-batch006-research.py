@@ -277,8 +277,21 @@ for i,t in enumerate(json.load(open(BASE/'source-tables/rakuen-end-distributions
  vals={k:' / '.join(f'{a} {v}%' for a,v in zip(labels,row)) for k,row in t['rows'].items()}
  f=r.raw('end-distribution-'+str(i),t['phase']+'終了画面 '+t['games']+t['revival'],vals,'設定別出現率は条件別に公開されています。ただし定量推測には、各観測を消化ゲーム帯・復活有無・画面カテゴリへ正しく結び付ける必要があります。現行Runtimeでこの条件付き観測を誤りなく入力できる契約が未確立のため、原表を保持して直接推測にはまだ使用しません。',['analysis','rd-end' if t['phase']=='RD' else 'at-end'],trial='END_PICTURE_'+str(i)+'_TRIAL')
  f['sourceCondition']={'games':t['games'],'revival':t['revival'],'imageIdentityStatus':'UNRESOLVED','rounding':'SOURCE_ORIGINAL_NOT_NORMALIZED'}
-r.block('rd-picture-identity','RD終了画面の構図','12種類の原画像と設定示唆は公開されていますが、今回取得できた資料の文字情報では構図名を一意に照合できません。復活なしの場合だけの設定否定条件もあります。','原画像を照合して具体的な構図名を確定し、復活条件とゲーム数区間を区別すること。',['rd-end'],raw={'nonRevivalConstraints':{'image-deny124':'設定1・2・4否定','image-deny13':'設定1・3否定'},'unconditionalConstraints':['設定2以上','設定3以上','設定4以上','設定5以上','設定6']})
-r.block('at-picture-identity','AT終了画面の構図','7種類の原画像の構図名を一意に照合できません。復活示唆画像は非復活で設定4・6となるため、復活の有無を混ぜて確定扱いできません。','原画像と具体的構図名を照合し、復活条件とゲーム数区間を区別すること。',['at-end'],raw={'nonRevivalOnly':'設定4・6濃厚','unconditionalConstraints':['設定4以上','設定5以上','設定6']})
+r.evidence('rd-end-exact','RD終了画面の設定確定・否定',[
+ ('復活なし＋復活示唆','設定1・2・4否定',X),
+ ('復活なし＋復活示唆（強）','設定1・3否定',X),
+ ('設定2以上画面','設定2以上',X),
+ ('設定3以上画面','設定3以上',X),
+ ('設定4以上画面','設定4以上',X),
+ ('設定5以上画面','設定5以上',X),
+ ('設定6画面','設定6',X)
+])
+r.evidence('at-end-exact','AT終了画面の設定確定',[
+ ('復活なし＋復活示唆','設定4または6',X),
+ ('設定4以上画面','設定4以上',X),
+ ('設定5以上画面','設定5以上',X),
+ ('設定6画面','設定6',X)
+])
 for sec,fid,label,vals in [(150,'episode150','150秒防衛時の仁義',[6.25,12.5,6.25,12.5,6.25,12.5]),(900,'episode900','900秒防衛時の邂逅',[6.25,6.25,12.5,12.5,18.75,18.75])]:
  r.add({'findingId':fid,'label':label,'observationType':'conditional_probability','settingDistribution':nums(vals),'sourceIds':['episode','episode-nana','analysis'],'trialUniverse':'DEFENSE_'+str(sec)+'_EPISODE_TRIAL','denominatorSemantics':f'{sec}秒防衛のタイムエピソードを確認した回数に対する、赤枠の特殊エピソード出現回数。その他の防衛時間や通常エピソード以外の当選は混ぜない。','liveObservation':{'status':'DIRECT_EXACT','reason':'規定防衛時間とタイトル・赤枠を直接確認できる。'}})
  linked(r,fid+'-hint',label,[(label,'偶数設定示唆（弱）' if sec==150 else '高設定示唆',B)],fid)
@@ -286,4 +299,4 @@ r.add({'findingId':'episode400','label':'400秒防衛時の結束','observationT
 linked(r,'episode400-hint','400秒防衛時の結束',[('400秒防衛時の結束','偶数設定示唆（強）',B)],'episode400')
 r.evidence('win-count','ATの特別獲得枚数表示',[(f'{i}{i}{i}枚OVER','設定6' if i==6 else f'設定{i}以上',X) for i in [2,4,5,6]])
 r.fact('role-common','高確チェリーBB30%・高確弱スイカBB10%','analysis','全設定共通の当選率。')
-r.done('wave-2',{'INITIAL_HIT':'AT・RD・BBを含む合算の経路を確認。','SMALL_ROLE':'共通ベルは目視識別不可だが、マイスロLv4以上で回数取得可能。分母は総ゲーム数として扱う。','MODE_TRANSITION':'状態別レア役当選とNAH内部3状態を保持。内部状態の完全識別は未確立。','STATE_TRANSITION':'有利区間開始抽選と30G特殊抽選を区別。','POINTS_GAME_DISTRIBUTION':'NAH50/200/400G、150/400/900秒エピソードを確認。','RESET_BEHAVIOR':'有利区間開始時RD抽選を別候補として保持。','POST_EVENT_TRANSITION':'AT/RD終了画面16条件別の設定別出現率を保持。数値自体は確認済みで、条件付き観測をRuntimeへ安全に結び付ける契約の確立待ち。','EVIDENCE':'獲得枚数4種類を展開。終了画面の具体名は画像照合待ち、設定条件と原表は保留保存。','EXTERNAL_DATA_ONLY':'2021年マイスロ対応・Lv4共通ベル回数取得を確認。','MACHINE_SPECIFIC':'400秒特殊エピソードは複数ソース照合で「結束」と確定し、条件付き数値推測候補へ昇格。'},['楽園追放 RD終了画面 アンジェラ ディンゴ 復活','楽園追放 AT終了画面 フロンティアセッター 原っぱ 共通ベル マイスロ','楽園追放 設定 RD 終了画面 消化ゲーム数 有利区間 リセット'])
+r.done('wave-2',{'INITIAL_HIT':'AT・RD・BBを含む合算の経路を確認。','SMALL_ROLE':'共通ベルは目視識別不可だが、マイスロLv4以上で回数取得可能。分母は総ゲーム数として扱う。','MODE_TRANSITION':'状態別レア役当選とNAH内部3状態を保持。内部状態の完全識別は未確立。','STATE_TRANSITION':'有利区間開始抽選と30G特殊抽選を区別。','POINTS_GAME_DISTRIBUTION':'NAH50/200/400G、150/400/900秒エピソードを確認。','RESET_BEHAVIOR':'有利区間開始時RD抽選を別候補として保持。','POST_EVENT_TRANSITION':'AT/RD終了画面16条件別の設定別出現率を保持。数値自体は確認済みで、条件付き観測をRuntimeへ安全に結び付ける契約の確立待ち。','EVIDENCE':'獲得枚数4種類に加え、RD/AT終了画面の設定確定・設定否定条件をExact Constraintとして採用。条件付き出現率そのものは数値推測に使用しない。','EXTERNAL_DATA_ONLY':'2021年マイスロ対応・Lv4共通ベル回数取得を確認。','MACHINE_SPECIFIC':'400秒特殊エピソードは複数ソース照合で「結束」と確定し、条件付き数値推測候補へ昇格。'},['楽園追放 RD終了画面 アンジェラ ディンゴ 復活','楽園追放 AT終了画面 フロンティアセッター 原っぱ 共通ベル マイスロ','楽園追放 設定 RD 終了画面 消化ゲーム数 有利区間 リセット'])
