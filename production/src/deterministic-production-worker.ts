@@ -65,7 +65,8 @@ for(let guard=0;guard<100;guard++){
  reconcileBatch(o,s,batchId);
  const semantic=scheduleByKind(o,s,batchId,cfg.concurrency,'SEMANTIC').filter((x:any)=>['EVALUATION','ELIGIBILITY','CANDIDATE_CONTRACT','OBSERVATION_EVIDENCE','CANONICAL_UI'].includes(x.name));
  const production=scheduleByKind(o,s,batchId,cfg.concurrency,'PRODUCTION');
- const selected=[...semantic,...production].filter((candidate:any)=>withinThrough(candidate.name));
+ const integration=scheduleByKind(o,s,batchId,cfg.concurrency,'INTEGRATION');
+ const selected=[...semantic,...production,...integration].filter((candidate:any)=>withinThrough(candidate.name));
  if(selected.length===0) break;
  for(const candidate of selected){
    let x=o.stage(batchId,candidate.machineId,candidate.name); const a=o.createAttempt(x); const l=o.acquire(x,a,300000);
