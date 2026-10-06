@@ -1,0 +1,154 @@
+{
+  "schemaVersion": "candidate-contract-v1",
+  "manifestVersion": "8.5",
+  "batchId": "batch-20261007-007",
+  "machineId": "LB_JACKPOT_CY1",
+  "machineName": "LBジャックポット",
+  "evaluationArtifact": {
+    "artifactId": "evaluation-LB_JACKPOT_CY1",
+    "kind": "evaluation",
+    "path": "production/batches/batch-20261007-007/artifacts/LB_JACKPOT_CY1/evaluation/result.json",
+    "sha256": "85d3e62a33520872ebb29781e61965863d4167a905af14a863f17269910e7ac2",
+    "producerWorkId": "wrk_4e37a075250f497c"
+  },
+  "eligibilityArtifact": {
+    "artifactId": "eligibility-LB_JACKPOT_CY1",
+    "kind": "eligibility",
+    "path": "production/batches/batch-20261007-007/artifacts/LB_JACKPOT_CY1/eligibility/result.json",
+    "sha256": "fc9a5594c7767eb49602053ce395ddeaa6a45d5e723fc6454500056623b66297",
+    "producerWorkId": "wrk_55f5074398bb411f"
+  },
+  "candidates": [
+    {
+      "findingId": "big",
+      "label": "BIG",
+      "model": "BERNOULLI",
+      "trialUniverse": "NORMAL_GAME_TRIAL",
+      "liveInferenceRoute": "LIVE_CONDITIONAL",
+      "settingDistribution": {
+        "1": "1/348.6",
+        "2": "1/341.3",
+        "5": "1/313.6",
+        "6": "1/290.0"
+      },
+      "details": [],
+      "dependencyGroupId": "jackpot-bonus-family",
+      "dependencyKind": "NESTED_OUTCOME",
+      "dependencyReason": "同じ当選系列の内訳または包含関係を持つため同時加算しない。",
+      "dependencyFallbackRank": 3,
+      "runtimeInferenceAllowed": true,
+      "dependencyResolution": "FALLBACK_MEMBER",
+      "runtimePolicyBinding": {
+        "metric": "SELECTION_SCORE",
+        "value": 16.11028788344202,
+        "thresholdSource": "RUNTIME_POLICY"
+      },
+      "suppressedByFeatureIds": [
+        "reg",
+        "bonus-total"
+      ]
+    },
+    {
+      "findingId": "reg",
+      "label": "REG",
+      "model": "BERNOULLI",
+      "trialUniverse": "NORMAL_GAME_TRIAL",
+      "liveInferenceRoute": "LIVE_CONDITIONAL",
+      "settingDistribution": {
+        "1": "1/524.3",
+        "2": "1/448.9",
+        "5": "1/360.1",
+        "6": "1/290.0"
+      },
+      "details": [],
+      "dependencyGroupId": "jackpot-bonus-family",
+      "dependencyKind": "NESTED_OUTCOME",
+      "dependencyReason": "同じ当選系列の内訳または包含関係を持つため同時加算しない。",
+      "dependencyFallbackRank": 1,
+      "runtimeInferenceAllowed": true,
+      "dependencyResolution": "PREFERRED_MEMBER",
+      "runtimePolicyBinding": {
+        "metric": "SELECTION_SCORE",
+        "value": 92.50570375312196,
+        "thresholdSource": "RUNTIME_POLICY"
+      },
+      "suppressedByFeatureIds": []
+    },
+    {
+      "findingId": "bonus-total",
+      "label": "ボーナス合算",
+      "model": "BERNOULLI",
+      "trialUniverse": "NORMAL_GAME_TRIAL",
+      "liveInferenceRoute": "LIVE_CONDITIONAL",
+      "settingDistribution": {
+        "1": "1/209.4",
+        "2": "1/193.9",
+        "5": "1/167.6",
+        "6": "1/145.0"
+      },
+      "details": [],
+      "dependencyGroupId": "jackpot-bonus-family",
+      "dependencyKind": "NESTED_OUTCOME",
+      "dependencyReason": "同じ当選系列の内訳または包含関係を持つため同時加算しない。",
+      "dependencyFallbackRank": 2,
+      "runtimeInferenceAllowed": true,
+      "dependencyResolution": "FALLBACK_MEMBER",
+      "runtimePolicyBinding": {
+        "metric": "SELECTION_SCORE",
+        "value": 84.33672012039905,
+        "thresholdSource": "RUNTIME_POLICY"
+      },
+      "suppressedByFeatureIds": [
+        "reg"
+      ]
+    },
+    {
+      "findingId": "reg-backlight-off",
+      "label": "REG終了時リールバックランプ消灯",
+      "model": "BERNOULLI",
+      "trialUniverse": "REG_END_TRIAL",
+      "liveInferenceRoute": "LIVE_CONDITIONAL",
+      "settingDistribution": {
+        "1": 0.1,
+        "2": 0.13,
+        "5": 0.17,
+        "6": 0.2
+      },
+      "details": [],
+      "dependencyGroupId": null,
+      "dependencyKind": "REVIEWED_NO_SEMANTIC_OVERLAP",
+      "dependencyReason": "同じ観測母数を使うことだけでは情報重複とはみなさず、同じ成功事象・包含関係・上流下流関係が明示されていないため別の設定差情報として扱う。",
+      "runtimeInferenceAllowed": true,
+      "dependencyResolution": "NONE",
+      "runtimePolicyBinding": {
+        "metric": "PER_ELIGIBLE_TRIAL_POWER",
+        "value": 1.6647283308374838,
+        "thresholdSource": "RUNTIME_POLICY"
+      }
+    }
+  ],
+  "dependencyGroups": [
+    {
+      "groupId": "jackpot-bonus-family",
+      "resolution": "PREFERRED_WITH_FALLBACK",
+      "members": [
+        "big",
+        "reg",
+        "bonus-total"
+      ],
+      "runtimeInferenceAllowed": true,
+      "preferredFindingId": "reg",
+      "fallbackOrder": [
+        "reg",
+        "bonus-total",
+        "big"
+      ],
+      "reason": "依存関係がある候補を同時加算せず、観測できた優先Featureを使用し、未観測時だけ次順位のFeatureへ自動フォールバックする。",
+      "selectionRationale": "Researchで明示された優先順位に従い、同一セッションで重複情報を同時加算しない。"
+    }
+  ],
+  "excludedDecisions": [],
+  "blockedItems": [],
+  "evidenceCandidates": [],
+  "sourceIntegrityIssues": []
+}
