@@ -1,12 +1,16 @@
 {
   "schemaVersion": 1,
+  "provenance": {
+    "manifestVersion": "8.5",
+    "generationPath": "V8_5_PRODUCTION_PIPELINE",
+    "legacyOracleUsed": false
+  },
   "machine": {
     "schemaVersion": "2.0.0",
     "machineId": "L_HANAGASA_NA",
-    "machineDataVersion": "0.1.0",
+    "machineDataVersion": "8.5.1-batch-20261007-007",
     "displayName": "花笠",
-    "modelName": "LハナガサNA",
-    "manufacturer": "ネット",
+    "modelName": "花笠",
     "settings": [
       "SET_1",
       "SET_2",
@@ -27,47 +31,214 @@
     "schemaVersion": "2.0.0",
     "inputs": [
       {
-        "id": "INP_FIRST_HIT_COUNT",
-        "name": "初当り確率",
-        "category": "SEL_RF_FIRST_HIT",
-        "type": "counter",
-        "unit": "回",
-        "displayOrder": 10,
-        "inferenceRole": "INCLUDE_PRIMARY",
-        "defaultValue": "",
-        "minimum": 0
+        "id": "big.eligibleTrialCount",
+        "name": "通常ゲーム数",
+        "category": "V8_NUMERIC",
+        "type": "integer",
+        "unit": "G",
+        "defaultValue": 0,
+        "minimum": 0,
+        "displayOrder": 1,
+        "inferenceRole": "INCLUDE_PRIMARY"
       },
       {
-        "id": "INP_FIRST_HIT_TRIALS",
-        "name": "初当り確率 対象",
-        "category": "SEL_RF_FIRST_HIT",
-        "type": "integer",
+        "id": "big.successCount",
+        "name": "BIG初当り回数",
+        "category": "V8_NUMERIC",
+        "type": "counter",
         "unit": "回",
-        "displayOrder": 11,
-        "inferenceRole": "INCLUDE_PRIMARY",
-        "defaultValue": "",
-        "minimum": 0
+        "defaultValue": 0,
+        "minimum": 0,
+        "displayOrder": 2,
+        "parentInputId": "big.eligibleTrialCount",
+        "inferenceRole": "INCLUDE_PRIMARY"
+      },
+      {
+        "id": "reg.eligibleTrialCount",
+        "name": "通常ゲーム数",
+        "category": "V8_NUMERIC",
+        "type": "integer",
+        "unit": "G",
+        "defaultValue": 0,
+        "minimum": 0,
+        "displayOrder": 3,
+        "inferenceRole": "INCLUDE_SUPPORT"
+      },
+      {
+        "id": "reg.successCount",
+        "name": "REG初当り回数",
+        "category": "V8_NUMERIC",
+        "type": "counter",
+        "unit": "回",
+        "defaultValue": 0,
+        "minimum": 0,
+        "displayOrder": 4,
+        "parentInputId": "reg.eligibleTrialCount",
+        "inferenceRole": "INCLUDE_SUPPORT"
+      },
+      {
+        "id": "bonus-total.eligibleTrialCount",
+        "name": "通常ゲーム数",
+        "category": "V8_NUMERIC",
+        "type": "integer",
+        "unit": "G",
+        "defaultValue": 0,
+        "minimum": 0,
+        "displayOrder": 5,
+        "inferenceRole": "INCLUDE_PRIMARY"
+      },
+      {
+        "id": "bonus-total.successCount",
+        "name": "BIGとREGの合算初当り回数",
+        "category": "V8_NUMERIC",
+        "type": "counter",
+        "unit": "回",
+        "defaultValue": 0,
+        "minimum": 0,
+        "displayOrder": 6,
+        "parentInputId": "bonus-total.eligibleTrialCount",
+        "inferenceRole": "INCLUDE_PRIMARY"
+      },
+      {
+        "id": "first-hit.eligibleTrialCount",
+        "name": "通常ゲーム数",
+        "category": "V8_NUMERIC",
+        "type": "integer",
+        "unit": "G",
+        "defaultValue": 0,
+        "minimum": 0,
+        "displayOrder": 7,
+        "inferenceRole": "INCLUDE_PRIMARY"
+      },
+      {
+        "id": "first-hit.successCount",
+        "name": "ボーナス初当り回数",
+        "category": "V8_NUMERIC",
+        "type": "counter",
+        "unit": "回",
+        "defaultValue": 0,
+        "minimum": 0,
+        "displayOrder": 8,
+        "parentInputId": "first-hit.eligibleTrialCount",
+        "inferenceRole": "INCLUDE_PRIMARY"
+      },
+      {
+        "id": "REF_voice_1",
+        "name": "特殊ボイス（弱）：高設定示唆",
+        "category": "EVIDENCE_REFERENCE",
+        "type": "counter",
+        "unit": "回",
+        "defaultValue": 0,
+        "minimum": 0,
+        "displayOrder": 9,
+        "inferenceRole": "DISPLAY_ONLY"
+      },
+      {
+        "id": "REF_voice_2",
+        "name": "特殊ボイス（強）：高設定示唆（強）",
+        "category": "EVIDENCE_REFERENCE",
+        "type": "counter",
+        "unit": "回",
+        "defaultValue": 0,
+        "minimum": 0,
+        "displayOrder": 10,
+        "inferenceRole": "DISPLAY_ONLY"
       }
     ]
   },
   "features": {
-    "schemaVersion": "2.0.0",
+    "version": "8.5-runtime",
     "features": [
       {
-        "featureId": "FEAT_FIRST_HIT",
-        "name": "初当り確率",
+        "featureId": "big",
+        "name": "BIG",
+        "trialUniverse": "NORMAL_GAME_TRIAL",
         "adoptionCategory": "INCLUDE_PRIMARY",
         "calculationRole": "PROBABILITY",
         "probabilityEngineUsage": true,
-        "modelType": "binomial",
-        "minimumSample": 1,
-        "sampleRecommendation": 1,
-        "reliabilityProfile": {
-          "weight": 1
+        "denominatorInputId": "big.eligibleTrialCount",
+        "probabilities": {
+          "SET_1": 0.0072992700729927005,
+          "SET_2": 0.007633587786259542,
+          "SET_4": 0.008620689655172414,
+          "SET_5": 0.00980392156862745,
+          "SET_6": 0.01098901098901099
         },
-        "denominatorInputId": "INP_FIRST_HIT_TRIALS",
-        "numeratorInputId": "INP_FIRST_HIT_COUNT",
-        "displayFormat": "ratio_1_over_n",
+        "selectionRationale": {
+          "summary": "設定推測に採用された要素です。",
+          "adoptionReason": "採用条件を満たし、実戦で観測できる設定差を使用します。",
+          "shortTermReason": "標本が少ない間は結果の振れが大きくなります。",
+          "longTermReason": "観測数が増えるほど設定別の比較が安定します。"
+        },
+        "modelType": "binomial",
+        "numeratorInputId": "big.successCount",
+        "displayFormat": "percentage"
+      },
+      {
+        "featureId": "reg",
+        "name": "REG",
+        "trialUniverse": "NORMAL_GAME_TRIAL",
+        "adoptionCategory": "INCLUDE_SUPPORT",
+        "calculationRole": "PROBABILITY",
+        "probabilityEngineUsage": true,
+        "denominatorInputId": "reg.eligibleTrialCount",
+        "suppressedByFeatureIds": [
+          "big",
+          "bonus-total"
+        ],
+        "probabilities": {
+          "SET_1": 0.0045662100456621,
+          "SET_2": 0.0047169811320754715,
+          "SET_4": 0.005128205128205128,
+          "SET_5": 0.005263157894736842,
+          "SET_6": 0.0049504950495049506
+        },
+        "selectionRationale": {
+          "summary": "設定推測に採用された要素です。",
+          "adoptionReason": "採用条件を満たし、実戦で観測できる設定差を使用します。",
+          "shortTermReason": "標本が少ない間は結果の振れが大きくなります。",
+          "longTermReason": "観測数が増えるほど設定別の比較が安定します。"
+        },
+        "modelType": "binomial",
+        "numeratorInputId": "reg.successCount",
+        "displayFormat": "percentage"
+      },
+      {
+        "featureId": "bonus-total",
+        "name": "ボーナス合算",
+        "trialUniverse": "NORMAL_GAME_TRIAL",
+        "adoptionCategory": "INCLUDE_PRIMARY",
+        "calculationRole": "PROBABILITY",
+        "probabilityEngineUsage": true,
+        "denominatorInputId": "bonus-total.eligibleTrialCount",
+        "suppressedByFeatureIds": [
+          "big"
+        ],
+        "probabilities": {
+          "SET_1": 0.011904761904761904,
+          "SET_2": 0.012345679012345678,
+          "SET_4": 0.0136986301369863,
+          "SET_5": 0.015151515151515152,
+          "SET_6": 0.015873015873015872
+        },
+        "selectionRationale": {
+          "summary": "設定推測に採用された要素です。",
+          "adoptionReason": "採用条件を満たし、実戦で観測できる設定差を使用します。",
+          "shortTermReason": "標本が少ない間は結果の振れが大きくなります。",
+          "longTermReason": "観測数が増えるほど設定別の比較が安定します。"
+        },
+        "modelType": "binomial",
+        "numeratorInputId": "bonus-total.successCount",
+        "displayFormat": "percentage"
+      },
+      {
+        "featureId": "first-hit",
+        "name": "ボーナス初当り",
+        "trialUniverse": "NORMAL_GAME_TRIAL",
+        "adoptionCategory": "INCLUDE_PRIMARY",
+        "calculationRole": "PROBABILITY",
+        "probabilityEngineUsage": true,
+        "denominatorInputId": "first-hit.eligibleTrialCount",
         "probabilities": {
           "SET_1": 0.005154639175257732,
           "SET_2": 0.005376344086021506,
@@ -75,125 +246,364 @@
           "SET_5": 0.006172839506172839,
           "SET_6": 0.006578947368421052
         },
-        "sourceEvidenceRefs": [
-          "SRC_PWORLD"
-        ]
+        "selectionRationale": {
+          "summary": "設定推測に採用された要素です。",
+          "adoptionReason": "採用条件を満たし、実戦で観測できる設定差を使用します。",
+          "shortTermReason": "標本が少ない間は結果の振れが大きくなります。",
+          "longTermReason": "観測数が増えるほど設定別の比較が安定します。"
+        },
+        "modelType": "binomial",
+        "numeratorInputId": "first-hit.successCount",
+        "displayFormat": "percentage"
+      }
+    ],
+    "runtimeProjection": [
+      {
+        "featureId": "big",
+        "runtimeStatus": "ACTIVE",
+        "metric": "SELECTION_SCORE",
+        "metricValue": 127.30284863364723,
+        "importance": "主要"
+      },
+      {
+        "featureId": "reg",
+        "runtimeStatus": "ACTIVE",
+        "metric": "SELECTION_SCORE",
+        "metricValue": 12.963816046279518,
+        "importance": "有力"
+      },
+      {
+        "featureId": "bonus-total",
+        "runtimeStatus": "ACTIVE",
+        "metric": "SELECTION_SCORE",
+        "metricValue": 112.39451040140412,
+        "importance": "主要"
+      },
+      {
+        "featureId": "first-hit",
+        "runtimeStatus": "ACTIVE",
+        "metric": "SELECTION_SCORE",
+        "metricValue": 40.407655327925276,
+        "importance": "主要"
       }
     ]
   },
   "evidence": {
-    "version": "1.0.0",
+    "version": "8.5-runtime",
     "evidences": [],
-    "sources": [
+    "references": [
       {
-        "id": "SRC_PWORLD",
-        "classification": "ANALYSIS",
-        "pageName": "花笠 機種情報・設定推測",
-        "url": "https://www.p-world.co.jp/machine/database/10267",
-        "checkedAt": "2026-09-03"
-      },
-      {
-        "id": "SRC_PWORLD_R3",
-        "classification": "ANALYSIS",
-        "pageName": "花笠 設定推測・ボーナス告知時ボイス",
-        "url": "https://www.p-world.co.jp/machine/database/10267",
-        "checkedAt": "2026-09-03"
+        "id": "EVI_voice",
+        "sourceFindingId": "voice",
+        "title": "ボーナス告知時の特殊ボイス",
+        "kind": "EVIDENCE",
+        "collapsible": true,
+        "defaultExpanded": false,
+        "description": "ボーナス告知時の特殊ボイスを確認したときに、該当する項目を1回加算して記録します。\n・注意：出現率の全設定値は公開されていないため記録のみ\n・反映：設定別出現率が未確認の項目は記録のみです。出現率確認後は設定推測へ反映できる可能性があります",
+        "descriptionPresentation": {
+          "collapsible": true,
+          "label": "説明",
+          "defaultExpanded": false
+        },
+        "runtimePolicyControlled": false,
+        "evidenceItems": [
+          {
+            "findingId": "voice",
+            "label": "ボーナス告知時の特殊ボイス",
+            "sourceIds": [
+              "hazuse"
+            ],
+            "details": [
+              "出現率の全設定値は公開されていないため記録のみ。"
+            ],
+            "semanticType": "PROBABILITY_UNKNOWN",
+            "semanticCategories": [
+              {
+                "label": "特殊ボイス（弱）",
+                "meaning": "高設定示唆",
+                "semanticType": "PROBABILITY_UNKNOWN"
+              },
+              {
+                "label": "特殊ボイス（強）",
+                "meaning": "高設定示唆（強）",
+                "semanticType": "PROBABILITY_UNKNOWN"
+              }
+            ],
+            "runtimePolicyControlled": false,
+            "status": "SOURCE_REFERENCED",
+            "interaction": "REFERENCE_ONLY"
+          }
+        ]
       }
     ]
   },
+  "blockedItems": [
+    {
+      "blockId": "setting-l",
+      "label": "設定L",
+      "reason": "設定L搭載は確認できるが、通常設定と同じ判別用数値が公開されていない。",
+      "reevaluationCondition": "設定Lの設定別確率と通常設定との比較方法が公表されること。",
+      "sourceIds": [
+        "pworld"
+      ]
+    }
+  ],
   "ui": {
-    "sections": [
+    "schemaVersion": "v8.5-runtime-ui-v1",
+    "contractVersion": "runtime-ui-v8",
+    "source": "CANONICAL_UI",
+    "sourceSchemaVersion": "canonical-ui-v1",
+    "manifestRevision": "8.5",
+    "playInfo": {
+      "visible": true,
+      "collapsible": false,
+      "mode": "NORMAL_ONLY",
+      "sessionFields": [
+        {
+          "id": "date",
+          "label": "日付",
+          "mode": "DATE"
+        },
+        {
+          "id": "storeName",
+          "label": "店舗名",
+          "mode": "TEXT"
+        },
+        {
+          "id": "machineNumber",
+          "label": "台番号",
+          "mode": "TEXT"
+        }
+      ],
+      "startFields": [
+        {
+          "id": "startNormalGames",
+          "label": "着席時 通常ゲーム数",
+          "mode": "NUMBER",
+          "directNumeric": true
+        }
+      ],
+      "currentFields": [
+        {
+          "id": "currentNormalGames",
+          "label": "現在 通常ゲーム数",
+          "mode": "NUMBER",
+          "directNumeric": true
+        }
+      ],
+      "difference": {
+        "autoCalculate": true
+      },
+      "useDifference": {
+        "label": "着席時との差分を使用",
+        "defaultWhenStartNormalGamesPresent": true
+      }
+    },
+    "accordion": {
+      "enabled": true,
+      "singleOpen": true
+    },
+    "quickInput": {
+      "enabled": false
+    },
+    "v8Sections": [
       {
-        "id": "UI_DESIGN_1",
-        "title": "初当り",
-        "displayOrder": 1,
-        "description": "自己実戦中に「有効通常ゲーム」を単位として記録",
-        "collapsible": false,
-        "defaultExpanded": true,
+        "id": "OBS_SHARED_NORMAL_GAME_TRIAL",
+        "title": "BIG・REG・ボーナス合算・ボーナス初当り",
+        "collapsible": true,
+        "defaultExpanded": false,
+        "description": "複数の設定推測項目で同じ「通常ゲーム数」を共通の基準として使用します。通常ゲーム数は1回だけ入力し、各項目では該当した回数だけを記録してください。",
+        "descriptionPresentation": {
+          "collapsible": true,
+          "label": "説明",
+          "defaultExpanded": false
+        },
+        "groups": [
+          {
+            "id": "DENOM_NORMAL_GAME_TRIAL",
+            "label": "通常ゲーム数",
+            "input": "denominator",
+            "inputId": "big.eligibleTrialCount",
+            "engineBinding": {
+              "inputIds": [
+                "big.eligibleTrialCount",
+                "reg.eligibleTrialCount",
+                "bonus-total.eligibleTrialCount",
+                "first-hit.eligibleTrialCount"
+              ]
+            },
+            "gridSpan": 12,
+            "directNumeric": true,
+            "quickAdd": [
+              50
+            ],
+            "unobservedDisplay": "—",
+            "playDataBinding": {
+              "source": "PLAY_NORMAL_GAME_DELTA"
+            }
+          }
+        ],
         "items": [
           {
-            "type": "input",
-            "inputId": "INP_FIRST_HIT_COUNT",
-            "label": "初当り確率",
-            "widget": "counter",
+            "id": "NODE_big",
+            "featureId": "big",
+            "title": "BIG",
+            "description": "通常時のBIG初当りを記録します。通常ゲーム数を基準に、実戦中の出現割合を設定別に比較します。\n・注意：連チャン中の継続ボーナスを初当りとして重複計上しない。",
+            "descriptionPresentation": {
+              "collapsible": true,
+              "label": "説明",
+              "defaultExpanded": false
+            },
             "gridSpan": 6,
-            "config": {
-              "directInput": false,
-              "compact": true,
-              "quickAdd": [
-                1
-              ],
-              "step": 1,
-              "emptyMeansUnobserved": true,
-              "observedZeroAllowed": true
-            }
+            "inputs": [
+              {
+                "id": "big.successCount",
+                "label": "BIG初当り回数",
+                "input": "counter",
+                "inputId": "big.successCount",
+                "engineBinding": {
+                  "inputId": "big.successCount"
+                },
+                "gridSpan": 12,
+                "directNumeric": true,
+                "quickAdd": [
+                  1
+                ],
+                "unobservedDisplay": "—"
+              }
+            ]
           },
           {
-            "type": "input",
-            "inputId": "INP_FIRST_HIT_TRIALS",
-            "label": "初当り確率 対象",
-            "widget": "number",
-            "gridSpan": 12,
-            "config": {
-              "directInput": true,
-              "quickAdd": [
-                50
-              ],
-              "emptyMeansUnobserved": true,
-              "observedZeroAllowed": true
+            "id": "NODE_reg",
+            "featureId": "reg",
+            "title": "REG",
+            "description": "通常時のREG初当りを記録します。通常ゲーム数を基準に、実戦中の出現割合を設定別に比較します。\n・注意：連チャン中の継続ボーナスを重複計上しない。",
+            "descriptionPresentation": {
+              "collapsible": true,
+              "label": "説明",
+              "defaultExpanded": false
+            },
+            "gridSpan": 6,
+            "inputs": [
+              {
+                "id": "reg.successCount",
+                "label": "REG初当り回数",
+                "input": "counter",
+                "inputId": "reg.successCount",
+                "engineBinding": {
+                  "inputId": "reg.successCount"
+                },
+                "gridSpan": 12,
+                "directNumeric": true,
+                "quickAdd": [
+                  1
+                ],
+                "unobservedDisplay": "—"
+              }
+            ]
+          },
+          {
+            "id": "NODE_bonus-total",
+            "featureId": "bonus-total",
+            "title": "ボーナス合算",
+            "description": "通常時のBIGとREGの合算初当りを記録します。通常ゲーム数を基準に、実戦中の出現割合を設定別に比較します。",
+            "descriptionPresentation": {
+              "collapsible": true,
+              "label": "説明",
+              "defaultExpanded": false
+            },
+            "gridSpan": 6,
+            "inputs": [
+              {
+                "id": "bonus-total.successCount",
+                "label": "BIGとREGの合算初当り回数",
+                "input": "counter",
+                "inputId": "bonus-total.successCount",
+                "engineBinding": {
+                  "inputId": "bonus-total.successCount"
+                },
+                "gridSpan": 12,
+                "directNumeric": true,
+                "quickAdd": [
+                  1
+                ],
+                "unobservedDisplay": "—"
+              }
+            ]
+          },
+          {
+            "id": "NODE_first-hit",
+            "featureId": "first-hit",
+            "title": "ボーナス初当り",
+            "description": "通常時のボーナス初当りを記録します。通常ゲーム数を基準に、実戦中の出現割合を設定別に比較します。",
+            "descriptionPresentation": {
+              "collapsible": true,
+              "label": "説明",
+              "defaultExpanded": false
+            },
+            "gridSpan": 6,
+            "inputs": [
+              {
+                "id": "first-hit.successCount",
+                "label": "ボーナス初当り回数",
+                "input": "counter",
+                "inputId": "first-hit.successCount",
+                "engineBinding": {
+                  "inputId": "first-hit.successCount"
+                },
+                "gridSpan": 12,
+                "directNumeric": true,
+                "quickAdd": [
+                  1
+                ],
+                "unobservedDisplay": "—"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "EVI_voice",
+        "title": "ボーナス告知時の特殊ボイス",
+        "description": "ボーナス告知時の特殊ボイスを確認したときに、該当する項目を1回加算して記録します。\n・注意：出現率の全設定値は公開されていないため記録のみ\n・反映：設定別出現率が未確認の項目は記録のみです。出現率確認後は設定推測へ反映できる可能性があります",
+        "collapsible": true,
+        "defaultExpanded": false,
+        "descriptionPresentation": {
+          "collapsible": true,
+          "label": "説明",
+          "defaultExpanded": false
+        },
+        "items": [
+          {
+            "id": "REF_voice",
+            "evidenceId": "voice",
+            "label": "ボーナス告知時の特殊ボイス",
+            "interaction": {
+              "type": "CATEGORY_COUNTERS",
+              "preservePriorObservations": true,
+              "showAccumulatedCounts": true,
+              "categoryCoverage": "NON_EXHAUSTIVE",
+              "totalOpportunities": "NONE",
+              "categories": [
+                {
+                  "id": "REF_voice_1",
+                  "inputId": "REF_voice_1",
+                  "label": "特殊ボイス（弱）",
+                  "meaning": "高設定示唆"
+                },
+                {
+                  "id": "REF_voice_2",
+                  "inputId": "REF_voice_2",
+                  "label": "特殊ボイス（強）",
+                  "meaning": "高設定示唆（強）"
+                }
+              ]
             }
           }
         ]
       }
     ]
   },
-  "selectionSummary": {
-    "schemaVersion": "selection-summary-v1",
-    "evaluatedCount": 4,
-    "selectedCount": 1,
-    "rejectedCount": 3,
-    "selected": [
-      {
-        "featureId": "FEAT_FIRST_HIT",
-        "name": "初当り確率",
-        "reason": "公開全設定値と正しい有効通常ゲームが揃い、他の主要候補の代表として設定差を直接評価できるため主Featureとして採用する。",
-        "requiredTrials": {
-          "value": 20997,
-          "unit": "有効通常ゲーム"
-        }
-      }
-    ],
-    "rejected": [
-      {
-        "featureId": "FEAT_BIG",
-        "name": "BIG確率",
-        "reason": "BIG回数は初当り後の1G連を含み初当りと同じボーナス系列を再利用するため、独立尤度として掛けず初当りを代表採用する。",
-        "requiredTrials": {
-          "value": 4829,
-          "unit": "通常時ゲーム"
-        }
-      },
-      {
-        "featureId": "FEAT_REG",
-        "name": "REG確率",
-        "reason": "REG回数は初当り後の連チャンを含むボーナス系列で初当りと依存するため、二重評価を避け初当りのみを代表採用する。",
-        "requiredTrials": {
-          "value": 234977,
-          "unit": "通常時ゲーム"
-        }
-      },
-      {
-        "featureId": "FEAT_BONUS_AGG",
-        "name": "BIG+REG合算",
-        "reason": "BIG+REG合算は同じボーナス系列の集約で初当りと強く依存するため、独立尤度へ追加せず初当りを代表採用する。",
-        "requiredTrials": {
-          "value": 6343,
-          "unit": "通常時ゲーム"
-        }
-      }
-    ]
-  },
-  "reliability": {},
   "metadata": {
     "machineId": "L_HANAGASA_NA",
     "displayName": "花笠",
@@ -204,12 +614,112 @@
       "SET_5",
       "SET_6"
     ],
-    "uiDesignMaterialized": true,
-    "uiDesignSchemaVersion": "ui-design-data-v1",
-    "uiDesignStatus": "PASS_WITH_UNRESOLVED"
+    "settingsStatus": "SOURCE_DERIVED"
   },
-  "validation": {
-    "cases": []
-  },
-  "statistics": {}
+  "v8": {
+    "machineResearchSummary": {
+      "title": "この機種の設定推測について",
+      "adopted": [
+        {
+          "featureId": "big",
+          "label": "BIG",
+          "importance": "主要",
+          "selectionScore": 127.3,
+          "evaluation": {
+            "userLabel": "設定判別スコア",
+            "value": 127.3
+          },
+          "reason": "現在の採用基準を満たしているため、設定推測に使用します。"
+        },
+        {
+          "featureId": "reg",
+          "label": "REG",
+          "importance": "有力",
+          "selectionScore": 13,
+          "evaluation": {
+            "userLabel": "設定判別スコア",
+            "value": 13
+          },
+          "reason": "優先する設定推測項目を記録していない場合の補助として使用します。優先項目を記録した場合は、同じ設定差を重ねて評価しないよう自動で推測から外れます。"
+        },
+        {
+          "featureId": "bonus-total",
+          "label": "ボーナス合算",
+          "importance": "主要",
+          "selectionScore": 112.4,
+          "evaluation": {
+            "userLabel": "設定判別スコア",
+            "value": 112.4
+          },
+          "reason": "優先する設定推測項目を記録していない場合の補助として使用します。優先項目を記録した場合は、同じ設定差を重ねて評価しないよう自動で推測から外れます。"
+        },
+        {
+          "featureId": "first-hit",
+          "label": "ボーナス初当り",
+          "importance": "主要",
+          "selectionScore": 40.4,
+          "evaluation": {
+            "userLabel": "設定判別スコア",
+            "value": 40.4
+          },
+          "reason": "現在の採用基準を満たしているため、設定推測に使用します。"
+        }
+      ],
+      "notAdopted": [
+        {
+          "featureId": "setting-l",
+          "label": "設定L",
+          "reason": "設定L搭載は確認できるが、通常設定と同じ判別用数値が公開されていない。",
+          "reevaluationCondition": "設定Lの設定別確率と通常設定との比較方法が公表されること。"
+        }
+      ],
+      "highLowDiscrimination": {
+        "status": "COMPUTED",
+        "method": "BEST_SINGLE_EXACT_ACTIVE_FEATURE",
+        "bandDefinition": {
+          "lowSettings": "SETTING_1_TO_3",
+          "highSettings": "SETTING_4_TO_6",
+          "classPrior": "BALANCED"
+        },
+        "results": [
+          {
+            "games": 1500,
+            "balancedAccuracyPercent": 67.61
+          },
+          {
+            "games": 3000,
+            "balancedAccuracyPercent": 73.65
+          },
+          {
+            "games": 7000,
+            "balancedAccuracyPercent": 81.97
+          }
+        ],
+        "eligibleFeatureIds": [
+          "big",
+          "reg",
+          "bonus-total",
+          "first-hit"
+        ],
+        "selectedFeatureId": "bonus-total",
+        "selectedFeatureLabel": "ボーナス合算",
+        "excludedFeatures": [
+          {
+            "findingId": "big",
+            "reason": "CONSERVATIVE_SINGLE_FEATURE_NO_INDEPENDENCE_ASSUMPTION"
+          },
+          {
+            "findingId": "reg",
+            "reason": "CONSERVATIVE_SINGLE_FEATURE_NO_INDEPENDENCE_ASSUMPTION"
+          },
+          {
+            "findingId": "first-hit",
+            "reason": "CONSERVATIVE_SINGLE_FEATURE_NO_INDEPENDENCE_ASSUMPTION"
+          }
+        ],
+        "note": "7000Gへ正確に換算できるACTIVE要素だけを候補とし、要素間の独立性を仮定せず、単独で最も高い判別精度を持つ要素から保守的に算出しています。条件付き要素はこの指標には含めませんが、実戦中に実際の観測回数が入力された場合は設定推測に使用します。"
+      },
+      "unresolved": []
+    }
+  }
 }

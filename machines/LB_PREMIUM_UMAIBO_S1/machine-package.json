@@ -1,12 +1,16 @@
 {
   "schemaVersion": 1,
+  "provenance": {
+    "manifestVersion": "8.5",
+    "generationPath": "V8_5_PRODUCTION_PIPELINE",
+    "legacyOracleUsed": false
+  },
   "machine": {
     "schemaVersion": "2.0.0",
     "machineId": "LB_PREMIUM_UMAIBO_S1",
-    "machineDataVersion": "0.1.0",
+    "machineDataVersion": "8.5.1-batch-20261007-007",
     "displayName": "LBプレミアムうまい棒",
-    "modelName": "LBプレミアムうまい棒S1",
-    "manufacturer": "オリンピアエステート",
+    "modelName": "LBプレミアムうまい棒",
     "settings": [
       "SET_1",
       "SET_2",
@@ -26,205 +30,305 @@
     "schemaVersion": "2.0.0",
     "inputs": [
       {
-        "id": "INP_REG_COUNT",
-        "name": "REG確率",
-        "category": "SEL_RF_REG",
-        "type": "counter",
-        "unit": "回",
-        "displayOrder": 10,
-        "inferenceRole": "INCLUDE_PRIMARY",
-        "defaultValue": "",
-        "minimum": 0
+        "id": "reg.eligibleTrialCount",
+        "name": "通常ゲーム数",
+        "category": "V8_NUMERIC",
+        "type": "integer",
+        "unit": "G",
+        "defaultValue": 0,
+        "minimum": 0,
+        "displayOrder": 1,
+        "inferenceRole": "INCLUDE_PRIMARY"
       },
       {
-        "id": "INP_REG_TRIALS",
-        "name": "REG確率 対象",
-        "category": "SEL_RF_REG",
-        "type": "integer",
+        "id": "reg.successCount",
+        "name": "REG回数",
+        "category": "V8_NUMERIC",
+        "type": "counter",
         "unit": "回",
-        "displayOrder": 11,
-        "inferenceRole": "INCLUDE_PRIMARY",
-        "defaultValue": "",
-        "minimum": 0
+        "defaultValue": 0,
+        "minimum": 0,
+        "displayOrder": 2,
+        "parentInputId": "reg.eligibleTrialCount",
+        "inferenceRole": "INCLUDE_PRIMARY"
+      },
+      {
+        "id": "bonus-total.eligibleTrialCount",
+        "name": "通常ゲーム数",
+        "category": "V8_NUMERIC",
+        "type": "integer",
+        "unit": "G",
+        "defaultValue": 0,
+        "minimum": 0,
+        "displayOrder": 3,
+        "inferenceRole": "INCLUDE_PRIMARY"
+      },
+      {
+        "id": "bonus-total.successCount",
+        "name": "BIGとREGの合算回数",
+        "category": "V8_NUMERIC",
+        "type": "counter",
+        "unit": "回",
+        "defaultValue": 0,
+        "minimum": 0,
+        "displayOrder": 4,
+        "parentInputId": "bonus-total.eligibleTrialCount",
+        "inferenceRole": "INCLUDE_PRIMARY"
       }
     ]
   },
   "features": {
-    "schemaVersion": "2.0.0",
+    "version": "8.5-runtime",
     "features": [
       {
-        "featureId": "FEAT_REG",
-        "name": "REG確率",
+        "featureId": "reg",
+        "name": "REG",
+        "trialUniverse": "NORMAL_GAME_TRIAL",
         "adoptionCategory": "INCLUDE_PRIMARY",
         "calculationRole": "PROBABILITY",
         "probabilityEngineUsage": true,
-        "modelType": "binomial",
-        "minimumSample": 1,
-        "sampleRecommendation": 1,
-        "reliabilityProfile": {
-          "weight": 1
-        },
-        "denominatorInputId": "INP_REG_TRIALS",
-        "numeratorInputId": "INP_REG_COUNT",
-        "displayFormat": "ratio_1_over_n",
+        "denominatorInputId": "reg.eligibleTrialCount",
         "probabilities": {
           "SET_1": 0.0021208907741251328,
           "SET_2": 0.002197319270490002,
           "SET_5": 0.002960331557134399,
           "SET_6": 0.0034328870580157913
         },
-        "sourceEvidenceRefs": [
-          "SRC_1GEKI",
-          "SRC_NANA"
-        ]
+        "selectionRationale": {
+          "summary": "設定推測に採用された要素です。",
+          "adoptionReason": "採用条件を満たし、実戦で観測できる設定差を使用します。",
+          "shortTermReason": "標本が少ない間は結果の振れが大きくなります。",
+          "longTermReason": "観測数が増えるほど設定別の比較が安定します。"
+        },
+        "modelType": "binomial",
+        "numeratorInputId": "reg.successCount",
+        "displayFormat": "percentage"
+      },
+      {
+        "featureId": "bonus-total",
+        "name": "ボーナス合算",
+        "trialUniverse": "NORMAL_GAME_TRIAL",
+        "adoptionCategory": "INCLUDE_PRIMARY",
+        "calculationRole": "PROBABILITY",
+        "probabilityEngineUsage": true,
+        "denominatorInputId": "bonus-total.eligibleTrialCount",
+        "suppressedByFeatureIds": [
+          "reg"
+        ],
+        "probabilities": {
+          "SET_1": 0.005461496450027308,
+          "SET_2": 0.005567928730512249,
+          "SET_5": 0.0063613231552162855,
+          "SET_6": 0.006868131868131868
+        },
+        "selectionRationale": {
+          "summary": "設定推測に採用された要素です。",
+          "adoptionReason": "採用条件を満たし、実戦で観測できる設定差を使用します。",
+          "shortTermReason": "標本が少ない間は結果の振れが大きくなります。",
+          "longTermReason": "観測数が増えるほど設定別の比較が安定します。"
+        },
+        "modelType": "binomial",
+        "numeratorInputId": "bonus-total.successCount",
+        "displayFormat": "percentage"
+      }
+    ],
+    "runtimeProjection": [
+      {
+        "featureId": "reg",
+        "runtimeStatus": "ACTIVE",
+        "metric": "SELECTION_SCORE",
+        "metricValue": 81.50241708552491,
+        "importance": "主要"
+      },
+      {
+        "featureId": "bonus-total",
+        "runtimeStatus": "ACTIVE",
+        "metric": "SELECTION_SCORE",
+        "metricValue": 47.080994012893115,
+        "importance": "主要"
+      },
+      {
+        "featureId": "big",
+        "runtimeStatus": "INACTIVE",
+        "metric": "SELECTION_SCORE",
+        "metricValue": 0.3477682957043843,
+        "threshold": 5,
+        "runtimeReason": "THRESHOLD_NOT_MET"
       }
     ]
   },
   "evidence": {
-    "version": "1.0.0",
+    "version": "8.5-runtime",
     "evidences": [],
-    "sources": [
-      {
-        "id": "SRC_1GEKI",
-        "classification": "ANALYSIS",
-        "pageName": "LBプレミアムうまい棒 設定差・設定判別要素まとめ",
-        "url": "https://1geki.jp/slot/lb_umaibou/0/",
-        "checkedAt": "2026-09-03"
-      },
-      {
-        "id": "SRC_NANA",
-        "classification": "ANALYSIS",
-        "pageName": "LBプレミアムうまい棒 設定判別",
-        "url": "https://nana-press.com/kaiseki/machine/957/30078/",
-        "checkedAt": "2026-09-03"
-      }
-    ]
+    "references": []
   },
+  "blockedItems": [
+    {
+      "blockId": "other-setting-elements",
+      "label": "その他の設定差要素",
+      "reason": "現時点の公開解析ではボーナス確率以外の確定した設定差が十分に公開されていない。",
+      "reevaluationCondition": "追加解析で設定別数値または確定条件が公開されること。",
+      "sourceIds": [
+        "analysis"
+      ]
+    }
+  ],
   "ui": {
-    "sections": [
+    "schemaVersion": "v8.5-runtime-ui-v1",
+    "contractVersion": "runtime-ui-v8",
+    "source": "CANONICAL_UI",
+    "sourceSchemaVersion": "canonical-ui-v1",
+    "manifestRevision": "8.5",
+    "playInfo": {
+      "visible": true,
+      "collapsible": false,
+      "mode": "NORMAL_ONLY",
+      "sessionFields": [
+        {
+          "id": "date",
+          "label": "日付",
+          "mode": "DATE"
+        },
+        {
+          "id": "storeName",
+          "label": "店舗名",
+          "mode": "TEXT"
+        },
+        {
+          "id": "machineNumber",
+          "label": "台番号",
+          "mode": "TEXT"
+        }
+      ],
+      "startFields": [
+        {
+          "id": "startNormalGames",
+          "label": "着席時 通常ゲーム数",
+          "mode": "NUMBER",
+          "directNumeric": true
+        }
+      ],
+      "currentFields": [
+        {
+          "id": "currentNormalGames",
+          "label": "現在 通常ゲーム数",
+          "mode": "NUMBER",
+          "directNumeric": true
+        }
+      ],
+      "difference": {
+        "autoCalculate": true
+      },
+      "useDifference": {
+        "label": "着席時との差分を使用",
+        "defaultWhenStartNormalGamesPresent": true
+      }
+    },
+    "accordion": {
+      "enabled": true,
+      "singleOpen": true
+    },
+    "quickInput": {
+      "enabled": false
+    },
+    "v8Sections": [
       {
-        "id": "UI_DESIGN_1",
-        "title": "REG",
-        "displayOrder": 1,
-        "description": "自己実戦中に「通常時ゲーム」を単位として記録",
-        "collapsible": false,
-        "defaultExpanded": true,
+        "id": "OBS_SHARED_NORMAL_GAME_TRIAL",
+        "title": "REG・ボーナス合算",
+        "collapsible": true,
+        "defaultExpanded": false,
+        "description": "複数の設定推測項目で同じ「通常ゲーム数」を共通の基準として使用します。通常ゲーム数は1回だけ入力し、各項目では該当した回数だけを記録してください。",
+        "descriptionPresentation": {
+          "collapsible": true,
+          "label": "説明",
+          "defaultExpanded": false
+        },
+        "groups": [
+          {
+            "id": "DENOM_NORMAL_GAME_TRIAL",
+            "label": "通常ゲーム数",
+            "input": "denominator",
+            "inputId": "reg.eligibleTrialCount",
+            "engineBinding": {
+              "inputIds": [
+                "reg.eligibleTrialCount",
+                "bonus-total.eligibleTrialCount"
+              ]
+            },
+            "gridSpan": 12,
+            "directNumeric": true,
+            "quickAdd": [
+              50
+            ],
+            "unobservedDisplay": "—",
+            "playDataBinding": {
+              "source": "PLAY_NORMAL_GAME_DELTA"
+            }
+          }
+        ],
         "items": [
           {
-            "type": "input",
-            "inputId": "INP_REG_COUNT",
-            "label": "REG確率",
-            "widget": "counter",
+            "id": "NODE_reg",
+            "featureId": "reg",
+            "title": "REG",
+            "description": "通常時のREGを記録します。通常ゲーム数を基準に、実戦中の出現割合を設定別に比較します。",
+            "descriptionPresentation": {
+              "collapsible": true,
+              "label": "説明",
+              "defaultExpanded": false
+            },
             "gridSpan": 6,
-            "config": {
-              "directInput": false,
-              "compact": true,
-              "quickAdd": [
-                1
-              ],
-              "step": 1,
-              "emptyMeansUnobserved": true,
-              "observedZeroAllowed": true
-            }
+            "inputs": [
+              {
+                "id": "reg.successCount",
+                "label": "REG回数",
+                "input": "counter",
+                "inputId": "reg.successCount",
+                "engineBinding": {
+                  "inputId": "reg.successCount"
+                },
+                "gridSpan": 12,
+                "directNumeric": true,
+                "quickAdd": [
+                  1
+                ],
+                "unobservedDisplay": "—"
+              }
+            ]
           },
           {
-            "type": "input",
-            "inputId": "INP_REG_TRIALS",
-            "label": "REG確率 対象",
-            "widget": "number",
-            "gridSpan": 12,
-            "config": {
-              "directInput": true,
-              "quickAdd": [
-                50
-              ],
-              "emptyMeansUnobserved": true,
-              "observedZeroAllowed": true
-            }
+            "id": "NODE_bonus-total",
+            "featureId": "bonus-total",
+            "title": "ボーナス合算",
+            "description": "通常時のBIGとREGの合算を記録します。通常ゲーム数を基準に、実戦中の出現割合を設定別に比較します。",
+            "descriptionPresentation": {
+              "collapsible": true,
+              "label": "説明",
+              "defaultExpanded": false
+            },
+            "gridSpan": 6,
+            "inputs": [
+              {
+                "id": "bonus-total.successCount",
+                "label": "BIGとREGの合算回数",
+                "input": "counter",
+                "inputId": "bonus-total.successCount",
+                "engineBinding": {
+                  "inputId": "bonus-total.successCount"
+                },
+                "gridSpan": 12,
+                "directNumeric": true,
+                "quickAdd": [
+                  1
+                ],
+                "unobservedDisplay": "—"
+              }
+            ]
           }
         ]
       }
     ]
   },
-  "selectionSummary": {
-    "schemaVersion": "selection-summary-v1",
-    "evaluatedCount": 8,
-    "selectedCount": 1,
-    "rejectedCount": 7,
-    "selected": [
-      {
-        "featureId": "FEAT_REG",
-        "name": "REG確率",
-        "reason": "公開全設定値と正しい通常時ゲームが揃い、他の主要候補の代表として設定差を直接評価できるため主Featureとして採用する。",
-        "requiredTrials": {
-          "value": 11626,
-          "unit": "通常時ゲーム"
-        }
-      }
-    ],
-    "rejected": [
-      {
-        "featureId": "FEAT_BIG",
-        "name": "BIG確率",
-        "reason": "BIG・REG・合算は同一通常ゲーム上の排他的ボーナス結果で、独立二項として同時利用すると同じ試行を重複評価するため、設定分離が大きいREGを代表採用する。",
-        "requiredTrials": {
-          "value": 2938737,
-          "unit": "通常時ゲーム"
-        }
-      },
-      {
-        "featureId": "FEAT_BONUS_AGG",
-        "name": "ボーナス合算",
-        "reason": "合算はBIGとREGを内包し、代表採用するREGと同じボーナス事象を再利用するため独立尤度には採用しない。",
-        "requiredTrials": {
-          "value": 22625,
-          "unit": "通常時ゲーム"
-        }
-      },
-      {
-        "featureId": "FEAT_SOLO_BIG",
-        "name": "単独BIG",
-        "reason": "単独BIGはBIGの部分集合であり、ボーナス系列の別Featureと独立に掛けるための完全な条件付き分解表がないため採用しない。",
-        "requiredTrials": {
-          "value": 8496904,
-          "unit": "通常時ゲーム"
-        }
-      },
-      {
-        "featureId": "FEAT_SOLO_REG",
-        "name": "単独REG",
-        "reason": "単独REGはREGの部分集合で、代表REGと同じ当選を再利用するため独立尤度として採用しない。",
-        "requiredTrials": {
-          "value": 9419,
-          "unit": "通常時ゲーム"
-        }
-      },
-      {
-        "featureId": "FEAT_CHERRY_BIG",
-        "name": "チェリー同時当選BIG",
-        "reason": "チェリー同時当選BIGはBIGの部分集合で、完全なボーナス契機分布がないため独立尤度化すると同じ当選を二重評価する。",
-        "requiredTrials": {
-          "value": 2320985,
-          "unit": "通常時ゲーム"
-        }
-      },
-      {
-        "featureId": "FEAT_CHERRY_REG",
-        "name": "チェリー同時当選REG",
-        "reason": "チェリー同時当選REGは代表REGの部分集合であり、同一REG当選を再利用するため独立尤度には採用しない。",
-        "requiredTrials": {
-          "value": 2320985,
-          "unit": "通常時ゲーム"
-        }
-      },
-      {
-        "featureId": "FEAT_RARE_CHERRY_BIG",
-        "name": "レアチェリー同時当選BIG",
-        "reason": "全設定共通1/3276.8で設定分離がなく、設定推測の尤度比が1となるため採用しない。"
-      }
-    ]
-  },
-  "reliability": {},
   "metadata": {
     "machineId": "LB_PREMIUM_UMAIBO_S1",
     "displayName": "LBプレミアムうまい棒",
@@ -234,12 +338,90 @@
       "SET_5",
       "SET_6"
     ],
-    "uiDesignMaterialized": true,
-    "uiDesignSchemaVersion": "ui-design-data-v1",
-    "uiDesignStatus": "PASS_WITH_UNRESOLVED"
+    "settingsStatus": "SOURCE_DERIVED"
   },
-  "validation": {
-    "cases": []
-  },
-  "statistics": {}
+  "v8": {
+    "machineResearchSummary": {
+      "title": "この機種の設定推測について",
+      "adopted": [
+        {
+          "featureId": "reg",
+          "label": "REG",
+          "importance": "主要",
+          "selectionScore": 81.5,
+          "evaluation": {
+            "userLabel": "設定判別スコア",
+            "value": 81.5
+          },
+          "reason": "現在の採用基準を満たしているため、設定推測に使用します。"
+        },
+        {
+          "featureId": "bonus-total",
+          "label": "ボーナス合算",
+          "importance": "主要",
+          "selectionScore": 47.1,
+          "evaluation": {
+            "userLabel": "設定判別スコア",
+            "value": 47.1
+          },
+          "reason": "優先する設定推測項目を記録していない場合の補助として使用します。優先項目を記録した場合は、同じ設定差を重ねて評価しないよう自動で推測から外れます。"
+        }
+      ],
+      "notAdopted": [
+        {
+          "featureId": "big",
+          "label": "BIG",
+          "reason": "基準遊技量7000Gで得られる情報量を表す設定判別スコアが0.3で、現在の採用基準5.0未満のため、設定推測に使用しません。"
+        },
+        {
+          "featureId": "other-setting-elements",
+          "label": "その他の設定差要素",
+          "reason": "現時点の公開解析ではボーナス確率以外の確定した設定差が十分に公開されていない。",
+          "reevaluationCondition": "追加解析で設定別数値または確定条件が公開されること。"
+        }
+      ],
+      "highLowDiscrimination": {
+        "status": "COMPUTED",
+        "method": "BEST_SINGLE_EXACT_ACTIVE_FEATURE",
+        "bandDefinition": {
+          "lowSettings": "SETTING_1_TO_3",
+          "highSettings": "SETTING_4_TO_6",
+          "classPrior": "BALANCED"
+        },
+        "results": [
+          {
+            "games": 1500,
+            "balancedAccuracyPercent": 64.79
+          },
+          {
+            "games": 3000,
+            "balancedAccuracyPercent": 70.51
+          },
+          {
+            "games": 7000,
+            "balancedAccuracyPercent": 79.33
+          }
+        ],
+        "eligibleFeatureIds": [
+          "big",
+          "reg",
+          "bonus-total"
+        ],
+        "selectedFeatureId": "reg",
+        "selectedFeatureLabel": "REG",
+        "excludedFeatures": [
+          {
+            "findingId": "big",
+            "reason": "CONSERVATIVE_SINGLE_FEATURE_NO_INDEPENDENCE_ASSUMPTION"
+          },
+          {
+            "findingId": "bonus-total",
+            "reason": "CONSERVATIVE_SINGLE_FEATURE_NO_INDEPENDENCE_ASSUMPTION"
+          }
+        ],
+        "note": "7000Gへ正確に換算できるACTIVE要素だけを候補とし、要素間の独立性を仮定せず、単独で最も高い判別精度を持つ要素から保守的に算出しています。条件付き要素はこの指標には含めませんが、実戦中に実際の観測回数が入力された場合は設定推測に使用します。"
+      },
+      "unresolved": []
+    }
+  }
 }
