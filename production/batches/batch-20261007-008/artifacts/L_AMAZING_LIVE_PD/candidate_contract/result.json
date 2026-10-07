@@ -1,0 +1,152 @@
+{
+  "schemaVersion": "candidate-contract-v1",
+  "manifestVersion": "8.5",
+  "batchId": "batch-20261007-008",
+  "machineId": "L_AMAZING_LIVE_PD",
+  "machineName": "スマート沖スロ アメイジングライブ",
+  "evaluationArtifact": {
+    "artifactId": "evaluation-L_AMAZING_LIVE_PD",
+    "kind": "evaluation",
+    "path": "production/batches/batch-20261007-008/artifacts/L_AMAZING_LIVE_PD/evaluation/result.json",
+    "sha256": "f574d620882630cd0645fe67d3bccf14340618e7024a07177985470b79b9974f",
+    "producerWorkId": "wrk_b7d6e5ca175349b6"
+  },
+  "eligibilityArtifact": {
+    "artifactId": "eligibility-L_AMAZING_LIVE_PD",
+    "kind": "eligibility",
+    "path": "production/batches/batch-20261007-008/artifacts/L_AMAZING_LIVE_PD/eligibility/result.json",
+    "sha256": "89bff9e8d2aa8805d69c54dcc3807be2fb40af37ea2247d7463b8babfc3099fa",
+    "producerWorkId": "wrk_6814ab124f1d4486"
+  },
+  "candidates": [
+    {
+      "findingId": "initial",
+      "label": "ボーナス初当たり",
+      "model": "BERNOULLI",
+      "trialUniverse": "NON_CHAIN_BONUS_INITIAL_GAME_TRIAL",
+      "liveInferenceRoute": "LIVE_CONDITIONAL",
+      "settingDistribution": {
+        "1": "1/274",
+        "2": "1/259.6",
+        "4": "1/229.3",
+        "5": "1/206.9",
+        "6": "1/189.9"
+      },
+      "details": [],
+      "dependencyGroupId": "amazing-bonus-path",
+      "dependencyKind": "CAUSAL_PATH_OVERLAP",
+      "dependencyReason": "通常初当たりが33G以内の連続当たりや1G連を生み、BIG・REG合算へ影響します。初当たり、BIG、REGの順で代用し、同時に加算しません。",
+      "dependencyFallbackRank": 1,
+      "runtimeInferenceAllowed": true,
+      "dependencyResolution": "PREFERRED_MEMBER",
+      "runtimePolicyBinding": {
+        "metric": "PER_ELIGIBLE_TRIAL_POWER",
+        "value": 0.011853846857393102,
+        "thresholdSource": "RUNTIME_POLICY"
+      },
+      "suppressedByFeatureIds": []
+    },
+    {
+      "findingId": "big-total",
+      "label": "BIG合算",
+      "model": "BERNOULLI",
+      "trialUniverse": "TOTAL_GAME_TRIAL",
+      "liveInferenceRoute": "LIVE_CONDITIONAL",
+      "settingDistribution": {
+        "1": "1/213",
+        "2": "1/202.5",
+        "4": "1/181.6",
+        "5": "1/165.7",
+        "6": "1/153.4"
+      },
+      "details": [],
+      "dependencyGroupId": "amazing-bonus-path",
+      "dependencyKind": "CAUSAL_PATH_OVERLAP",
+      "dependencyReason": "通常初当たりが33G以内の連続当たりや1G連を生み、BIG・REG合算へ影響します。初当たり、BIG、REGの順で代用し、同時に加算しません。",
+      "dependencyFallbackRank": 2,
+      "runtimeInferenceAllowed": true,
+      "dependencyResolution": "FALLBACK_MEMBER",
+      "runtimePolicyBinding": {
+        "metric": "SELECTION_SCORE",
+        "value": 65.49504586216983,
+        "thresholdSource": "RUNTIME_POLICY"
+      },
+      "suppressedByFeatureIds": [
+        "initial"
+      ]
+    },
+    {
+      "findingId": "reg-total",
+      "label": "REG合算",
+      "model": "BERNOULLI",
+      "trialUniverse": "TOTAL_GAME_TRIAL",
+      "liveInferenceRoute": "LIVE_CONDITIONAL",
+      "settingDistribution": {
+        "1": "1/370",
+        "2": "1/349.5",
+        "4": "1/310.2",
+        "5": "1/280.7",
+        "6": "1/258"
+      },
+      "details": [],
+      "dependencyGroupId": "amazing-bonus-path",
+      "dependencyKind": "CAUSAL_PATH_OVERLAP",
+      "dependencyReason": "通常初当たりが33G以内の連続当たりや1G連を生み、BIG・REG合算へ影響します。初当たり、BIG、REGの順で代用し、同時に加算しません。",
+      "dependencyFallbackRank": 3,
+      "runtimeInferenceAllowed": true,
+      "dependencyResolution": "FALLBACK_MEMBER",
+      "runtimePolicyBinding": {
+        "metric": "SELECTION_SCORE",
+        "value": 49.051036956624614,
+        "thresholdSource": "RUNTIME_POLICY"
+      },
+      "suppressedByFeatureIds": [
+        "initial",
+        "big-total"
+      ]
+    }
+  ],
+  "dependencyGroups": [
+    {
+      "groupId": "amazing-bonus-path",
+      "resolution": "PREFERRED_WITH_FALLBACK",
+      "members": [
+        "initial",
+        "big-total",
+        "reg-total"
+      ],
+      "runtimeInferenceAllowed": true,
+      "preferredFindingId": "initial",
+      "fallbackOrder": [
+        "initial",
+        "big-total",
+        "reg-total"
+      ],
+      "reason": "依存関係がある候補を同時加算せず、観測できた優先Featureを使用し、未観測時だけ次順位のFeatureへ自動フォールバックする。",
+      "selectionRationale": "Researchで明示された優先順位に従い、同一セッションで重複情報を同時加算しない。"
+    }
+  ],
+  "excludedDecisions": [],
+  "blockedItems": [
+    {
+      "blockId": "mode",
+      "label": "AC・CEX・天国モードの選択と継続",
+      "reason": "モードやACによる連チャンの仕様は公開されていますが、全設定の移行率・継続率は未公表です。",
+      "reevaluationCondition": "本機の全設定の数値と、対象の抽選条件・結果を正確に確認する方法が公表されること。",
+      "sourceIds": [
+        "analysis"
+      ]
+    },
+    {
+      "blockId": "cycle",
+      "label": "ゾロ目ゲーム数・レア役規定回数",
+      "reason": "設定差を持つ全設定の規定回数・当選率は未公表です。",
+      "reevaluationCondition": "本機の全設定の数値と、対象の抽選条件・結果を正確に確認する方法が公表されること。",
+      "sourceIds": [
+        "analysis"
+      ]
+    }
+  ],
+  "evidenceCandidates": [],
+  "sourceIntegrityIssues": []
+}
