@@ -1,12 +1,16 @@
 {
   "schemaVersion": 1,
+  "provenance": {
+    "manifestVersion": "8.5",
+    "generationPath": "V8_5_PRODUCTION_PIPELINE",
+    "legacyOracleUsed": false
+  },
   "machine": {
     "schemaVersion": "2.0.0",
     "machineId": "L_GODZILLA_NS",
-    "machineDataVersion": "0.1.1",
+    "machineDataVersion": "8.5.1-batch-20261007-008",
     "displayName": "Lゴジラ",
-    "modelName": "LゴジラNS",
-    "manufacturer": "ニューギン",
+    "modelName": "Lゴジラ",
     "settings": [
       "SET_1",
       "SET_2",
@@ -28,371 +32,608 @@
     "schemaVersion": "2.0.0",
     "inputs": [
       {
-        "id": "INP_AT_FIRST_HIT_COUNT",
-        "name": "G-RUSH初当り 回数",
-        "category": "SEL_RF_AT_FIRST_HIT",
-        "type": "counter",
-        "unit": "回",
-        "displayOrder": 10,
-        "inferenceRole": "INCLUDE_PRIMARY",
-        "defaultValue": "",
-        "minimum": 0
-      },
-      {
-        "id": "INP_AT_FIRST_HIT_TRIALS",
+        "id": "at.eligibleTrialCount",
         "name": "通常ゲーム数",
-        "category": "SEL_RF_AT_FIRST_HIT",
+        "category": "V8_NUMERIC",
         "type": "integer",
         "unit": "G",
-        "displayOrder": 11,
-        "inferenceRole": "INCLUDE_PRIMARY",
-        "defaultValue": "",
-        "minimum": 0
+        "defaultValue": 0,
+        "minimum": 0,
+        "displayOrder": 1,
+        "inferenceRole": "INCLUDE_PRIMARY"
       },
       {
-        "id": "INP_SHURAI_OPPONENT_CAT_RODAN",
+        "id": "at.successCount",
+        "name": "ゴジラバトル初当たり回数",
+        "category": "V8_NUMERIC",
+        "type": "counter",
+        "unit": "回",
+        "defaultValue": 0,
+        "minimum": 0,
+        "displayOrder": 2,
+        "parentInputId": "at.eligibleTrialCount",
+        "inferenceRole": "INCLUDE_PRIMARY"
+      },
+      {
+        "id": "opponent.eligibleTrialCount",
+        "name": "CZ突入回数",
+        "category": "V8_NUMERIC",
+        "type": "integer",
+        "unit": "回",
+        "defaultValue": 0,
+        "minimum": 0,
+        "displayOrder": 3,
+        "inferenceRole": "INCLUDE_SUPPORT",
+        "inputVisible": false,
+        "derivedCalculation": "sum",
+        "derivedFromInputIds": [
+          "opponent.categoryCounts.1_ラドン",
+          "opponent.categoryCounts.2_ガイガン",
+          "opponent.categoryCounts.3_ビオランテ",
+          "opponent.categoryCounts.4_デストロイア",
+          "opponent.categoryCounts.5_キングギドラ"
+        ]
+      },
+      {
+        "id": "opponent.categoryCounts.1_ラドン",
         "name": "ラドン",
-        "category": "SEL_RF_SHURAI_OPPONENT",
+        "category": "V8_NUMERIC",
         "type": "counter",
         "unit": "回",
-        "displayOrder": 15,
-        "inferenceRole": "INCLUDE_SUPPORT",
-        "defaultValue": "",
-        "minimum": 0
+        "defaultValue": 0,
+        "minimum": 0,
+        "displayOrder": 4,
+        "parentInputId": "opponent.eligibleTrialCount",
+        "inferenceRole": "INCLUDE_SUPPORT"
       },
       {
-        "id": "INP_SHURAI_OPPONENT_CAT_GIGAN",
+        "id": "opponent.categoryCounts.2_ガイガン",
         "name": "ガイガン",
-        "category": "SEL_RF_SHURAI_OPPONENT",
+        "category": "V8_NUMERIC",
         "type": "counter",
         "unit": "回",
-        "displayOrder": 16,
-        "inferenceRole": "INCLUDE_SUPPORT",
-        "defaultValue": "",
-        "minimum": 0
+        "defaultValue": 0,
+        "minimum": 0,
+        "displayOrder": 5,
+        "parentInputId": "opponent.eligibleTrialCount",
+        "inferenceRole": "INCLUDE_SUPPORT"
       },
       {
-        "id": "INP_SHURAI_OPPONENT_CAT_BIOLLANTE",
+        "id": "opponent.categoryCounts.3_ビオランテ",
         "name": "ビオランテ",
-        "category": "SEL_RF_SHURAI_OPPONENT",
+        "category": "V8_NUMERIC",
         "type": "counter",
         "unit": "回",
-        "displayOrder": 17,
-        "inferenceRole": "INCLUDE_SUPPORT",
-        "defaultValue": "",
-        "minimum": 0
+        "defaultValue": 0,
+        "minimum": 0,
+        "displayOrder": 6,
+        "parentInputId": "opponent.eligibleTrialCount",
+        "inferenceRole": "INCLUDE_SUPPORT"
       },
       {
-        "id": "INP_SHURAI_OPPONENT_CAT_DESTOROYAH",
+        "id": "opponent.categoryCounts.4_デストロイア",
         "name": "デストロイア",
-        "category": "SEL_RF_SHURAI_OPPONENT",
+        "category": "V8_NUMERIC",
         "type": "counter",
         "unit": "回",
-        "displayOrder": 18,
-        "inferenceRole": "INCLUDE_SUPPORT",
-        "defaultValue": "",
-        "minimum": 0
+        "defaultValue": 0,
+        "minimum": 0,
+        "displayOrder": 7,
+        "parentInputId": "opponent.eligibleTrialCount",
+        "inferenceRole": "INCLUDE_SUPPORT"
       },
       {
-        "id": "INP_SHURAI_OPPONENT_CAT_KING_GHIDORAH",
+        "id": "opponent.categoryCounts.5_キングギドラ",
         "name": "キングギドラ",
-        "category": "SEL_RF_SHURAI_OPPONENT",
+        "category": "V8_NUMERIC",
         "type": "counter",
         "unit": "回",
+        "defaultValue": 0,
+        "minimum": 0,
+        "displayOrder": 8,
+        "parentInputId": "opponent.eligibleTrialCount",
+        "inferenceRole": "INCLUDE_SUPPORT"
+      },
+      {
+        "id": "REF_menu_1",
+        "name": "ヘリコプター：偶数設定示唆",
+        "category": "EVIDENCE_REFERENCE",
+        "type": "counter",
+        "unit": "回",
+        "defaultValue": 0,
+        "minimum": 0,
+        "displayOrder": 9,
+        "inferenceRole": "DISPLAY_ONLY"
+      },
+      {
+        "id": "REF_menu_2",
+        "name": "戦車：高設定示唆（弱）",
+        "category": "EVIDENCE_REFERENCE",
+        "type": "counter",
+        "unit": "回",
+        "defaultValue": 0,
+        "minimum": 0,
+        "displayOrder": 10,
+        "inferenceRole": "DISPLAY_ONLY"
+      },
+      {
+        "id": "REF_menu_3",
+        "name": "メーサー殺獣光線車：高設定示唆（強）",
+        "category": "EVIDENCE_REFERENCE",
+        "type": "counter",
+        "unit": "回",
+        "defaultValue": 0,
+        "minimum": 0,
+        "displayOrder": 11,
+        "inferenceRole": "DISPLAY_ONLY"
+      },
+      {
+        "id": "REF_menu_4",
+        "name": "轟天号：設定2以上",
+        "category": "EVIDENCE_REFERENCE",
+        "type": "counter",
+        "unit": "回",
+        "defaultValue": 0,
+        "minimum": 0,
+        "displayOrder": 12,
+        "inferenceRole": "DISPLAY_ONLY"
+      },
+      {
+        "id": "REF_menu_5",
+        "name": "スーパーXIII：設定4以上",
+        "category": "EVIDENCE_REFERENCE",
+        "type": "counter",
+        "unit": "回",
+        "defaultValue": 0,
+        "minimum": 0,
+        "displayOrder": 13,
+        "inferenceRole": "DISPLAY_ONLY"
+      },
+      {
+        "id": "REF_menu_6",
+        "name": "3式機龍：設定6",
+        "category": "EVIDENCE_REFERENCE",
+        "type": "counter",
+        "unit": "回",
+        "defaultValue": 0,
+        "minimum": 0,
+        "displayOrder": 14,
+        "inferenceRole": "DISPLAY_ONLY"
+      },
+      {
+        "id": "REF_end_1",
+        "name": "ヘドラ・アンギラス：基本パターン",
+        "category": "EVIDENCE_REFERENCE",
+        "type": "counter",
+        "unit": "回",
+        "defaultValue": 0,
+        "minimum": 0,
+        "displayOrder": 15,
+        "inferenceRole": "DISPLAY_ONLY"
+      },
+      {
+        "id": "REF_end_2",
+        "name": "ラドン：奇数設定示唆",
+        "category": "EVIDENCE_REFERENCE",
+        "type": "counter",
+        "unit": "回",
+        "defaultValue": 0,
+        "minimum": 0,
+        "displayOrder": 16,
+        "inferenceRole": "DISPLAY_ONLY"
+      },
+      {
+        "id": "REF_end_3",
+        "name": "ガイガン：偶数設定示唆",
+        "category": "EVIDENCE_REFERENCE",
+        "type": "counter",
+        "unit": "回",
+        "defaultValue": 0,
+        "minimum": 0,
+        "displayOrder": 17,
+        "inferenceRole": "DISPLAY_ONLY"
+      },
+      {
+        "id": "REF_end_4",
+        "name": "ビオランテ：奇数設定・高設定示唆",
+        "category": "EVIDENCE_REFERENCE",
+        "type": "counter",
+        "unit": "回",
+        "defaultValue": 0,
+        "minimum": 0,
+        "displayOrder": 18,
+        "inferenceRole": "DISPLAY_ONLY"
+      },
+      {
+        "id": "REF_end_5",
+        "name": "デストロイア：偶数設定・高設定示唆",
+        "category": "EVIDENCE_REFERENCE",
+        "type": "counter",
+        "unit": "回",
+        "defaultValue": 0,
+        "minimum": 0,
         "displayOrder": 19,
-        "inferenceRole": "INCLUDE_SUPPORT",
-        "defaultValue": "",
-        "minimum": 0
+        "inferenceRole": "DISPLAY_ONLY"
       },
       {
-        "id": "INP_MENU_2PLUS_COUNT",
-        "name": "メニュー 轟天号",
-        "category": "EVIDENCE",
+        "id": "REF_end_6",
+        "name": "キングギドラ：設定4以上",
+        "category": "EVIDENCE_REFERENCE",
         "type": "counter",
         "unit": "回",
+        "defaultValue": 0,
+        "minimum": 0,
+        "displayOrder": 20,
+        "inferenceRole": "DISPLAY_ONLY"
+      },
+      {
+        "id": "REF_end_7",
+        "name": "赤いゴジラ：設定5以上",
+        "category": "EVIDENCE_REFERENCE",
+        "type": "counter",
+        "unit": "回",
+        "defaultValue": 0,
+        "minimum": 0,
         "displayOrder": 21,
-        "inferenceRole": "INCLUDE_SUPPORT",
-        "defaultValue": "",
-        "minimum": 0
+        "inferenceRole": "DISPLAY_ONLY"
       },
       {
-        "id": "INP_MENU_4PLUS_COUNT",
-        "name": "メニュー スーパーXⅢ",
-        "category": "EVIDENCE",
+        "id": "REF_end_8",
+        "name": "白黒ゴジラ：設定6",
+        "category": "EVIDENCE_REFERENCE",
         "type": "counter",
         "unit": "回",
+        "defaultValue": 0,
+        "minimum": 0,
         "displayOrder": 22,
-        "inferenceRole": "INCLUDE_SUPPORT",
-        "defaultValue": "",
-        "minimum": 0
+        "inferenceRole": "DISPLAY_ONLY"
       },
       {
-        "id": "INP_MENU_6_COUNT",
-        "name": "メニュー 3式機龍",
-        "category": "EVIDENCE",
+        "id": "REF_trophy_1",
+        "name": "銅：設定2以上",
+        "category": "EVIDENCE_REFERENCE",
         "type": "counter",
         "unit": "回",
+        "defaultValue": 0,
+        "minimum": 0,
         "displayOrder": 23,
-        "inferenceRole": "INCLUDE_SUPPORT",
-        "defaultValue": "",
-        "minimum": 0
+        "inferenceRole": "DISPLAY_ONLY"
       },
       {
-        "id": "INP_OPERATOR_2PLUS_COUNT",
-        "name": "オペレーター 設定2以上セリフ群",
-        "category": "EVIDENCE",
+        "id": "REF_trophy_2",
+        "name": "銀：設定3以上",
+        "category": "EVIDENCE_REFERENCE",
         "type": "counter",
         "unit": "回",
+        "defaultValue": 0,
+        "minimum": 0,
         "displayOrder": 24,
-        "inferenceRole": "INCLUDE_SUPPORT",
-        "defaultValue": "",
-        "minimum": 0
+        "inferenceRole": "DISPLAY_ONLY"
       },
       {
-        "id": "INP_OPERATOR_3PLUS_COUNT",
-        "name": "オペレーター 設定3以上セリフ群",
-        "category": "EVIDENCE",
+        "id": "REF_trophy_3",
+        "name": "金：設定4以上",
+        "category": "EVIDENCE_REFERENCE",
         "type": "counter",
         "unit": "回",
+        "defaultValue": 0,
+        "minimum": 0,
         "displayOrder": 25,
-        "inferenceRole": "INCLUDE_SUPPORT",
-        "defaultValue": "",
-        "minimum": 0
+        "inferenceRole": "DISPLAY_ONLY"
       },
       {
-        "id": "INP_OPERATOR_4PLUS_COUNT",
-        "name": "オペレーター 設定4以上セリフ群",
-        "category": "EVIDENCE",
+        "id": "REF_trophy_4",
+        "name": "虎柄：設定5以上",
+        "category": "EVIDENCE_REFERENCE",
         "type": "counter",
         "unit": "回",
+        "defaultValue": 0,
+        "minimum": 0,
         "displayOrder": 26,
-        "inferenceRole": "INCLUDE_SUPPORT",
-        "defaultValue": "",
-        "minimum": 0
+        "inferenceRole": "DISPLAY_ONLY"
       },
       {
-        "id": "INP_OPERATOR_5PLUS_COUNT",
-        "name": "オペレーター 設定5以上セリフ群",
-        "category": "EVIDENCE",
+        "id": "REF_trophy_5",
+        "name": "虹：設定6",
+        "category": "EVIDENCE_REFERENCE",
         "type": "counter",
         "unit": "回",
+        "defaultValue": 0,
+        "minimum": 0,
         "displayOrder": 27,
-        "inferenceRole": "INCLUDE_SUPPORT",
-        "defaultValue": "",
-        "minimum": 0
+        "inferenceRole": "DISPLAY_ONLY"
       },
       {
-        "id": "INP_OPERATOR_6_COUNT",
-        "name": "オペレーター 設定6セリフ群",
-        "category": "EVIDENCE",
+        "id": "REF_movie_1",
+        "name": "①：基本パターン",
+        "category": "EVIDENCE_REFERENCE",
         "type": "counter",
         "unit": "回",
+        "defaultValue": 0,
+        "minimum": 0,
         "displayOrder": 28,
-        "inferenceRole": "INCLUDE_SUPPORT",
-        "defaultValue": "",
-        "minimum": 0
+        "inferenceRole": "DISPLAY_ONLY"
       },
       {
-        "id": "INP_BONUS_END_4PLUS_COUNT",
-        "name": "ボーナス終了 キングギドラ",
-        "category": "EVIDENCE",
+        "id": "REF_movie_2",
+        "name": "②：高設定示唆（弱）",
+        "category": "EVIDENCE_REFERENCE",
         "type": "counter",
         "unit": "回",
+        "defaultValue": 0,
+        "minimum": 0,
         "displayOrder": 29,
-        "inferenceRole": "INCLUDE_SUPPORT",
-        "defaultValue": "",
-        "minimum": 0
+        "inferenceRole": "DISPLAY_ONLY"
       },
       {
-        "id": "INP_BONUS_END_5PLUS_COUNT",
-        "name": "ボーナス終了 ゴジラ（赤）",
-        "category": "EVIDENCE",
+        "id": "REF_movie_3",
+        "name": "③：高設定示唆（中）",
+        "category": "EVIDENCE_REFERENCE",
         "type": "counter",
         "unit": "回",
+        "defaultValue": 0,
+        "minimum": 0,
         "displayOrder": 30,
-        "inferenceRole": "INCLUDE_SUPPORT",
-        "defaultValue": "",
-        "minimum": 0
+        "inferenceRole": "DISPLAY_ONLY"
       },
       {
-        "id": "INP_BONUS_END_6_COUNT",
-        "name": "ボーナス終了 ゴジラ（白黒）",
-        "category": "EVIDENCE",
+        "id": "REF_movie_4",
+        "name": "④：高設定示唆（強）",
+        "category": "EVIDENCE_REFERENCE",
         "type": "counter",
         "unit": "回",
+        "defaultValue": 0,
+        "minimum": 0,
         "displayOrder": 31,
-        "inferenceRole": "INCLUDE_SUPPORT",
-        "defaultValue": "",
-        "minimum": 0
+        "inferenceRole": "DISPLAY_ONLY"
       },
       {
-        "id": "INP_EX_MOVIE_5PLUS_COUNT",
-        "name": "EXボーナス ムービー5",
-        "category": "EVIDENCE",
+        "id": "REF_movie_5",
+        "name": "⑤：設定5以上",
+        "category": "EVIDENCE_REFERENCE",
         "type": "counter",
         "unit": "回",
+        "defaultValue": 0,
+        "minimum": 0,
         "displayOrder": 32,
-        "inferenceRole": "INCLUDE_SUPPORT",
-        "defaultValue": "",
-        "minimum": 0
+        "inferenceRole": "DISPLAY_ONLY"
       },
       {
-        "id": "INP_TROPHY_2PLUS_COUNT",
-        "name": "ギンちゃんトロフィー 銅",
-        "category": "EVIDENCE",
+        "id": "REF_operator_1",
+        "name": "ゴジラの怒りを秘める：高設定示唆",
+        "category": "EVIDENCE_REFERENCE",
         "type": "counter",
         "unit": "回",
+        "defaultValue": 0,
+        "minimum": 0,
         "displayOrder": 33,
-        "inferenceRole": "INCLUDE_SUPPORT",
-        "defaultValue": "",
-        "minimum": 0
+        "inferenceRole": "DISPLAY_ONLY"
       },
       {
-        "id": "INP_TROPHY_3PLUS_COUNT",
-        "name": "ギンちゃんトロフィー 銀",
-        "category": "EVIDENCE",
+        "id": "REF_operator_2",
+        "name": "ゴジラの力強さ：高設定示唆",
+        "category": "EVIDENCE_REFERENCE",
         "type": "counter",
         "unit": "回",
+        "defaultValue": 0,
+        "minimum": 0,
         "displayOrder": 34,
-        "inferenceRole": "INCLUDE_SUPPORT",
-        "defaultValue": "",
-        "minimum": 0
+        "inferenceRole": "DISPLAY_ONLY"
       },
       {
-        "id": "INP_TROPHY_4PLUS_COUNT",
-        "name": "ギンちゃんトロフィー 金",
-        "category": "EVIDENCE",
+        "id": "REF_operator_3",
+        "name": "巨大な力が眠る：高設定示唆",
+        "category": "EVIDENCE_REFERENCE",
         "type": "counter",
         "unit": "回",
+        "defaultValue": 0,
+        "minimum": 0,
         "displayOrder": 35,
-        "inferenceRole": "INCLUDE_SUPPORT",
-        "defaultValue": "",
-        "minimum": 0
+        "inferenceRole": "DISPLAY_ONLY"
       },
       {
-        "id": "INP_TROPHY_5PLUS_COUNT",
-        "name": "ギンちゃんトロフィー トラ柄",
-        "category": "EVIDENCE",
+        "id": "REF_operator_4",
+        "name": "怪獣の世界に足を踏み入れる：設定2以上",
+        "category": "EVIDENCE_REFERENCE",
         "type": "counter",
         "unit": "回",
+        "defaultValue": 0,
+        "minimum": 0,
         "displayOrder": 36,
-        "inferenceRole": "INCLUDE_SUPPORT",
-        "defaultValue": "",
-        "minimum": 0
+        "inferenceRole": "DISPLAY_ONLY"
       },
       {
-        "id": "INP_TROPHY_6_COUNT",
-        "name": "ギンちゃんトロフィー 虹",
-        "category": "EVIDENCE",
+        "id": "REF_operator_5",
+        "name": "最後の一匹とは思えない：設定2以上",
+        "category": "EVIDENCE_REFERENCE",
         "type": "counter",
         "unit": "回",
+        "defaultValue": 0,
+        "minimum": 0,
         "displayOrder": 37,
-        "inferenceRole": "INCLUDE_SUPPORT",
-        "defaultValue": "",
-        "minimum": 0
+        "inferenceRole": "DISPLAY_ONLY"
+      },
+      {
+        "id": "REF_operator_6",
+        "name": "怪獣の力が宿る：設定3以上",
+        "category": "EVIDENCE_REFERENCE",
+        "type": "counter",
+        "unit": "回",
+        "defaultValue": 0,
+        "minimum": 0,
+        "displayOrder": 38,
+        "inferenceRole": "DISPLAY_ONLY"
+      },
+      {
+        "id": "REF_operator_7",
+        "name": "巨大な怪獣の目覚め：設定3以上",
+        "category": "EVIDENCE_REFERENCE",
+        "type": "counter",
+        "unit": "回",
+        "defaultValue": 0,
+        "minimum": 0,
+        "displayOrder": 39,
+        "inferenceRole": "DISPLAY_ONLY"
+      },
+      {
+        "id": "REF_operator_8",
+        "name": "怒りの象徴：設定4以上",
+        "category": "EVIDENCE_REFERENCE",
+        "type": "counter",
+        "unit": "回",
+        "defaultValue": 0,
+        "minimum": 0,
+        "displayOrder": 40,
+        "inferenceRole": "DISPLAY_ONLY"
+      },
+      {
+        "id": "REF_operator_9",
+        "name": "心の闇を映す鏡：設定4以上",
+        "category": "EVIDENCE_REFERENCE",
+        "type": "counter",
+        "unit": "回",
+        "defaultValue": 0,
+        "minimum": 0,
+        "displayOrder": 41,
+        "inferenceRole": "DISPLAY_ONLY"
+      },
+      {
+        "id": "REF_operator_10",
+        "name": "地球の守護者：設定5以上",
+        "category": "EVIDENCE_REFERENCE",
+        "type": "counter",
+        "unit": "回",
+        "defaultValue": 0,
+        "minimum": 0,
+        "displayOrder": 42,
+        "inferenceRole": "DISPLAY_ONLY"
+      },
+      {
+        "id": "REF_operator_11",
+        "name": "未来を守るために戦う：設定5以上",
+        "category": "EVIDENCE_REFERENCE",
+        "type": "counter",
+        "unit": "回",
+        "defaultValue": 0,
+        "minimum": 0,
+        "displayOrder": 43,
+        "inferenceRole": "DISPLAY_ONLY"
+      },
+      {
+        "id": "REF_operator_12",
+        "name": "伝説が息づく：設定6",
+        "category": "EVIDENCE_REFERENCE",
+        "type": "counter",
+        "unit": "回",
+        "defaultValue": 0,
+        "minimum": 0,
+        "displayOrder": 44,
+        "inferenceRole": "DISPLAY_ONLY"
+      },
+      {
+        "id": "REF_operator_13",
+        "name": "伝説が刻まれる：設定6",
+        "category": "EVIDENCE_REFERENCE",
+        "type": "counter",
+        "unit": "回",
+        "defaultValue": 0,
+        "minimum": 0,
+        "displayOrder": 45,
+        "inferenceRole": "DISPLAY_ONLY"
       }
     ]
   },
   "features": {
-    "schemaVersion": "2.0.0",
+    "version": "8.5-runtime",
     "features": [
       {
-        "featureId": "FEAT_AT_FIRST_HIT",
-        "name": "G-RUSH初当り",
+        "featureId": "at",
+        "name": "AT初当たり",
+        "trialUniverse": "NORMAL_GAME_TRIAL",
         "adoptionCategory": "INCLUDE_PRIMARY",
         "calculationRole": "PROBABILITY",
         "probabilityEngineUsage": true,
-        "modelType": "binomial",
-        "minimumSample": 1,
-        "sampleRecommendation": 1,
-        "reliabilityProfile": {
-          "weight": 1
-        },
-        "denominatorInputId": "INP_AT_FIRST_HIT_TRIALS",
-        "numeratorInputId": "INP_AT_FIRST_HIT_COUNT",
-        "displayFormat": "ratio_1_over_n",
+        "denominatorInputId": "at.eligibleTrialCount",
         "probabilities": {
-          "SET_1": 0.001468644441181,
-          "SET_2": 0.001509206157561,
-          "SET_3": 0.001636661211129,
-          "SET_4": 0.001955798943869,
-          "SET_5": 0.002236636099307,
-          "SET_6": 0.002378686964795
+          "SET_1": 0.00146864444118079,
+          "SET_2": 0.0015092061575611227,
+          "SET_3": 0.0016366612111292963,
+          "SET_4": 0.0019557989438685705,
+          "SET_5": 0.0022366360993066425,
+          "SET_6": 0.002378686964795433
         },
-        "sourceEvidenceRefs": [
-          "SRC_1GEKI"
-        ]
+        "selectionRationale": {
+          "summary": "設定推測に採用された要素です。",
+          "adoptionReason": "採用条件を満たし、実戦で観測できる設定差を使用します。",
+          "shortTermReason": "標本が少ない間は結果の振れが大きくなります。",
+          "longTermReason": "観測数が増えるほど設定別の比較が安定します。"
+        },
+        "modelType": "binomial",
+        "numeratorInputId": "at.successCount",
+        "displayFormat": "percentage"
       },
       {
-        "featureId": "FEAT_SHURAI_OPPONENT",
-        "name": "襲来ZONE対戦怪獣振り分け",
+        "featureId": "opponent",
+        "name": "CZの対戦相手",
+        "trialUniverse": "GODZILLA_CZ_ENTRY_TRIAL",
         "adoptionCategory": "INCLUDE_SUPPORT",
         "calculationRole": "PROBABILITY",
         "probabilityEngineUsage": true,
-        "modelType": "multinomial",
-        "minimumSample": 1,
-        "sampleRecommendation": 1,
-        "reliabilityProfile": {
-          "weight": 1
-        },
-        "inputTransform": "sum_inputs_to_trials",
-        "numeratorInputId": "INP_SHURAI_OPPONENT_CAT_RODAN",
-        "denominatorInputIds": [
-          "INP_SHURAI_OPPONENT_CAT_RODAN",
-          "INP_SHURAI_OPPONENT_CAT_GIGAN",
-          "INP_SHURAI_OPPONENT_CAT_BIOLLANTE",
-          "INP_SHURAI_OPPONENT_CAT_DESTOROYAH",
-          "INP_SHURAI_OPPONENT_CAT_KING_GHIDORAH"
-        ],
-        "categoryInputIds": [
-          "INP_SHURAI_OPPONENT_CAT_GIGAN",
-          "INP_SHURAI_OPPONENT_CAT_BIOLLANTE",
-          "INP_SHURAI_OPPONENT_CAT_DESTOROYAH",
-          "INP_SHURAI_OPPONENT_CAT_KING_GHIDORAH"
+        "denominatorInputId": "opponent.eligibleTrialCount",
+        "suppressedByFeatureIds": [
+          "at"
         ],
         "probabilities": {},
-        "categoryLabels": [
-          "RODAN",
-          "GIGAN",
-          "BIOLLANTE",
-          "DESTOROYAH",
-          "KING_GHIDORAH"
+        "selectionRationale": {
+          "summary": "設定推測に採用された要素です。",
+          "adoptionReason": "採用条件を満たし、実戦で観測できる設定差を使用します。",
+          "shortTermReason": "標本が少ない間は結果の振れが大きくなります。",
+          "longTermReason": "観測数が増えるほど設定別の比較が安定します。"
+        },
+        "modelType": "multinomial",
+        "numeratorInputId": "opponent.categoryCounts.1_ラドン",
+        "categoryInputIds": [
+          "opponent.categoryCounts.2_ガイガン",
+          "opponent.categoryCounts.3_ビオランテ",
+          "opponent.categoryCounts.4_デストロイア",
+          "opponent.categoryCounts.5_キングギドラ"
         ],
+        "denominatorRule": "SUM_CATEGORY_COUNTS",
         "categoryProbabilities": {
           "SET_1": [
-            0.414,
-            0.366,
-            0.168,
-            0.05,
-            0.001
+            0.41441441441441434,
+            0.3663663663663663,
+            0.16816816816816815,
+            0.050050050050050046,
+            0.001001001001001001
           ],
           "SET_2": [
             0.396,
             0.37,
             0.179,
-            0.054,
+            0.054000000000000006,
             0.001
           ],
           "SET_3": [
-            0.38,
-            0.372,
-            0.187,
-            0.059,
-            0.001
+            0.38038038038038036,
+            0.37237237237237236,
+            0.18718718718718716,
+            0.05905905905905905,
+            0.001001001001001001
           ],
           "SET_4": [
-            0.358,
-            0.364,
-            0.209,
-            0.067,
-            0.001
+            0.35835835835835833,
+            0.36436436436436437,
+            0.2092092092092092,
+            0.06706706706706707,
+            0.001001001001001001
           ],
           "SET_5": [
-            0.339,
-            0.351,
-            0.233,
-            0.075,
-            0.001
+            0.33933933933933935,
+            0.3513513513513514,
+            0.23323323323323328,
+            0.07507507507507508,
+            0.0010010010010010012
           ],
           "SET_6": [
             0.322,
@@ -401,21 +642,45 @@
             0.081,
             0.001
           ]
-        },
-        "sourceEvidenceRefs": [
-          "SRC_1GEKI"
-        ]
+        }
+      }
+    ],
+    "runtimeProjection": [
+      {
+        "featureId": "at",
+        "runtimeStatus": "ACTIVE",
+        "metric": "SELECTION_SCORE",
+        "metricValue": 54.67857546926733,
+        "importance": "主要"
+      },
+      {
+        "featureId": "opponent",
+        "runtimeStatus": "ACTIVE",
+        "metric": "PER_ELIGIBLE_TRIAL_POWER",
+        "metricValue": 1.3294311307073148,
+        "importance": "微小"
+      },
+      {
+        "featureId": "cz",
+        "runtimeStatus": "INACTIVE",
+        "metric": "SELECTION_SCORE",
+        "metricValue": 0.47596015734605657,
+        "threshold": 5,
+        "runtimeReason": "THRESHOLD_NOT_MET"
       }
     ]
   },
   "evidence": {
-    "version": "1.0.0",
+    "version": "8.5-runtime",
     "evidences": [
       {
-        "id": "EVI_MENU_2PLUS",
-        "name": "メニュー 轟天号",
-        "displayName": "メニュー 轟天号",
-        "inputId": "INP_MENU_2PLUS_COUNT",
+        "id": "menu__4",
+        "name": "轟天号：設定2以上",
+        "displayName": "轟天号：設定2以上",
+        "inputId": "REF_menu_4",
+        "details": [
+          "轟天号：設定2以上"
+        ],
         "confirmedSettings": [
           "SET_2",
           "SET_3",
@@ -423,263 +688,116 @@
           "SET_5",
           "SET_6"
         ],
-        "deniedSettings": [
-          "SET_1"
-        ],
+        "deniedSettings": [],
         "hasImage": false,
+        "type": "SETTING_CONSTRAINT",
         "sourceEvidenceRefs": [
-          "SRC_NANA_SETTING",
-          "SRC_NANA_TROPHY"
-        ],
-        "type": "SETTING_CONFIRMATION"
+          "menu"
+        ]
       },
       {
-        "id": "EVI_MENU_4PLUS",
-        "name": "メニュー スーパーXⅢ",
-        "displayName": "メニュー スーパーXⅢ",
-        "inputId": "INP_MENU_4PLUS_COUNT",
+        "id": "menu__5",
+        "name": "スーパーXIII：設定4以上",
+        "displayName": "スーパーXIII：設定4以上",
+        "inputId": "REF_menu_5",
+        "details": [
+          "スーパーXIII：設定4以上"
+        ],
         "confirmedSettings": [
           "SET_4",
           "SET_5",
           "SET_6"
         ],
-        "deniedSettings": [
-          "SET_1",
-          "SET_2",
-          "SET_3"
-        ],
+        "deniedSettings": [],
         "hasImage": false,
+        "type": "SETTING_CONSTRAINT",
         "sourceEvidenceRefs": [
-          "SRC_NANA_SETTING",
-          "SRC_NANA_TROPHY"
-        ],
-        "type": "SETTING_CONFIRMATION"
+          "menu"
+        ]
       },
       {
-        "id": "EVI_MENU_6",
-        "name": "メニュー 3式機龍",
-        "displayName": "メニュー 3式機龍",
-        "inputId": "INP_MENU_6_COUNT",
+        "id": "menu__6",
+        "name": "3式機龍：設定6",
+        "displayName": "3式機龍：設定6",
+        "inputId": "REF_menu_6",
+        "details": [
+          "3式機龍：設定6"
+        ],
         "confirmedSettings": [
           "SET_6"
         ],
-        "deniedSettings": [
-          "SET_1",
-          "SET_2",
-          "SET_3",
-          "SET_4",
-          "SET_5"
-        ],
+        "deniedSettings": [],
         "hasImage": false,
+        "type": "SETTING_CONSTRAINT",
         "sourceEvidenceRefs": [
-          "SRC_NANA_SETTING",
-          "SRC_NANA_TROPHY"
-        ],
-        "type": "SETTING_CONFIRMATION"
+          "menu"
+        ]
       },
       {
-        "id": "EVI_OPERATOR_2PLUS",
-        "name": "オペレーター 設定2以上セリフ群",
-        "displayName": "オペレーター 設定2以上セリフ群",
-        "inputId": "INP_OPERATOR_2PLUS_COUNT",
-        "confirmedSettings": [
-          "SET_2",
-          "SET_3",
-          "SET_4",
-          "SET_5",
-          "SET_6"
+        "id": "end__6",
+        "name": "キングギドラ：設定4以上",
+        "displayName": "キングギドラ：設定4以上",
+        "inputId": "REF_end_6",
+        "details": [
+          "キングギドラ：設定4以上"
         ],
-        "deniedSettings": [
-          "SET_1"
-        ],
-        "hasImage": false,
-        "sourceEvidenceRefs": [
-          "SRC_NANA_SETTING",
-          "SRC_NANA_TROPHY"
-        ],
-        "type": "SETTING_CONFIRMATION"
-      },
-      {
-        "id": "EVI_OPERATOR_3PLUS",
-        "name": "オペレーター 設定3以上セリフ群",
-        "displayName": "オペレーター 設定3以上セリフ群",
-        "inputId": "INP_OPERATOR_3PLUS_COUNT",
-        "confirmedSettings": [
-          "SET_3",
-          "SET_4",
-          "SET_5",
-          "SET_6"
-        ],
-        "deniedSettings": [
-          "SET_1",
-          "SET_2"
-        ],
-        "hasImage": false,
-        "sourceEvidenceRefs": [
-          "SRC_NANA_SETTING",
-          "SRC_NANA_TROPHY"
-        ],
-        "type": "SETTING_CONFIRMATION"
-      },
-      {
-        "id": "EVI_OPERATOR_4PLUS",
-        "name": "オペレーター 設定4以上セリフ群",
-        "displayName": "オペレーター 設定4以上セリフ群",
-        "inputId": "INP_OPERATOR_4PLUS_COUNT",
         "confirmedSettings": [
           "SET_4",
           "SET_5",
           "SET_6"
         ],
-        "deniedSettings": [
-          "SET_1",
-          "SET_2",
-          "SET_3"
-        ],
+        "deniedSettings": [],
         "hasImage": false,
+        "type": "SETTING_CONSTRAINT",
         "sourceEvidenceRefs": [
-          "SRC_NANA_SETTING",
-          "SRC_NANA_TROPHY"
-        ],
-        "type": "SETTING_CONFIRMATION"
+          "end"
+        ]
       },
       {
-        "id": "EVI_OPERATOR_5PLUS",
-        "name": "オペレーター 設定5以上セリフ群",
-        "displayName": "オペレーター 設定5以上セリフ群",
-        "inputId": "INP_OPERATOR_5PLUS_COUNT",
+        "id": "end__7",
+        "name": "赤いゴジラ：設定5以上",
+        "displayName": "赤いゴジラ：設定5以上",
+        "inputId": "REF_end_7",
+        "details": [
+          "赤いゴジラ：設定5以上"
+        ],
         "confirmedSettings": [
           "SET_5",
           "SET_6"
         ],
-        "deniedSettings": [
-          "SET_1",
-          "SET_2",
-          "SET_3",
-          "SET_4"
-        ],
+        "deniedSettings": [],
         "hasImage": false,
+        "type": "SETTING_CONSTRAINT",
         "sourceEvidenceRefs": [
-          "SRC_NANA_SETTING",
-          "SRC_NANA_TROPHY"
-        ],
-        "type": "SETTING_CONFIRMATION"
+          "end"
+        ]
       },
       {
-        "id": "EVI_OPERATOR_6",
-        "name": "オペレーター 設定6セリフ群",
-        "displayName": "オペレーター 設定6セリフ群",
-        "inputId": "INP_OPERATOR_6_COUNT",
+        "id": "end__8",
+        "name": "白黒ゴジラ：設定6",
+        "displayName": "白黒ゴジラ：設定6",
+        "inputId": "REF_end_8",
+        "details": [
+          "白黒ゴジラ：設定6"
+        ],
         "confirmedSettings": [
           "SET_6"
         ],
-        "deniedSettings": [
-          "SET_1",
-          "SET_2",
-          "SET_3",
-          "SET_4",
-          "SET_5"
-        ],
+        "deniedSettings": [],
         "hasImage": false,
+        "type": "SETTING_CONSTRAINT",
         "sourceEvidenceRefs": [
-          "SRC_NANA_SETTING",
-          "SRC_NANA_TROPHY"
-        ],
-        "type": "SETTING_CONFIRMATION"
+          "end"
+        ]
       },
       {
-        "id": "EVI_BONUS_END_4PLUS",
-        "name": "ボーナス終了 キングギドラ",
-        "displayName": "ボーナス終了 キングギドラ",
-        "inputId": "INP_BONUS_END_4PLUS_COUNT",
-        "confirmedSettings": [
-          "SET_4",
-          "SET_5",
-          "SET_6"
+        "id": "trophy__1",
+        "name": "銅：設定2以上",
+        "displayName": "銅：設定2以上",
+        "inputId": "REF_trophy_1",
+        "details": [
+          "銅：設定2以上"
         ],
-        "deniedSettings": [
-          "SET_1",
-          "SET_2",
-          "SET_3"
-        ],
-        "hasImage": false,
-        "sourceEvidenceRefs": [
-          "SRC_NANA_SETTING",
-          "SRC_NANA_TROPHY"
-        ],
-        "type": "SETTING_CONFIRMATION"
-      },
-      {
-        "id": "EVI_BONUS_END_5PLUS",
-        "name": "ボーナス終了 ゴジラ（赤）",
-        "displayName": "ボーナス終了 ゴジラ（赤）",
-        "inputId": "INP_BONUS_END_5PLUS_COUNT",
-        "confirmedSettings": [
-          "SET_5",
-          "SET_6"
-        ],
-        "deniedSettings": [
-          "SET_1",
-          "SET_2",
-          "SET_3",
-          "SET_4"
-        ],
-        "hasImage": false,
-        "sourceEvidenceRefs": [
-          "SRC_NANA_SETTING",
-          "SRC_NANA_TROPHY"
-        ],
-        "type": "SETTING_CONFIRMATION"
-      },
-      {
-        "id": "EVI_BONUS_END_6",
-        "name": "ボーナス終了 ゴジラ（白黒）",
-        "displayName": "ボーナス終了 ゴジラ（白黒）",
-        "inputId": "INP_BONUS_END_6_COUNT",
-        "confirmedSettings": [
-          "SET_6"
-        ],
-        "deniedSettings": [
-          "SET_1",
-          "SET_2",
-          "SET_3",
-          "SET_4",
-          "SET_5"
-        ],
-        "hasImage": false,
-        "sourceEvidenceRefs": [
-          "SRC_NANA_SETTING",
-          "SRC_NANA_TROPHY"
-        ],
-        "type": "SETTING_CONFIRMATION"
-      },
-      {
-        "id": "EVI_EX_MOVIE_5PLUS",
-        "name": "EXボーナス ムービー5",
-        "displayName": "EXボーナス ムービー5",
-        "inputId": "INP_EX_MOVIE_5PLUS_COUNT",
-        "confirmedSettings": [
-          "SET_5",
-          "SET_6"
-        ],
-        "deniedSettings": [
-          "SET_1",
-          "SET_2",
-          "SET_3",
-          "SET_4"
-        ],
-        "hasImage": false,
-        "sourceEvidenceRefs": [
-          "SRC_NANA_SETTING",
-          "SRC_NANA_TROPHY"
-        ],
-        "type": "SETTING_CONFIRMATION"
-      },
-      {
-        "id": "EVI_TROPHY_2PLUS",
-        "name": "ギンちゃんトロフィー 銅",
-        "displayName": "ギンちゃんトロフィー 銅",
-        "inputId": "INP_TROPHY_2PLUS_COUNT",
         "confirmedSettings": [
           "SET_2",
           "SET_3",
@@ -687,661 +805,1221 @@
           "SET_5",
           "SET_6"
         ],
-        "deniedSettings": [
-          "SET_1"
-        ],
+        "deniedSettings": [],
         "hasImage": false,
+        "type": "SETTING_CONSTRAINT",
         "sourceEvidenceRefs": [
-          "SRC_NANA_SETTING",
-          "SRC_NANA_TROPHY"
-        ],
-        "type": "SETTING_CONFIRMATION"
+          "trophy"
+        ]
       },
       {
-        "id": "EVI_TROPHY_3PLUS",
-        "name": "ギンちゃんトロフィー 銀",
-        "displayName": "ギンちゃんトロフィー 銀",
-        "inputId": "INP_TROPHY_3PLUS_COUNT",
+        "id": "trophy__2",
+        "name": "銀：設定3以上",
+        "displayName": "銀：設定3以上",
+        "inputId": "REF_trophy_2",
+        "details": [
+          "銀：設定3以上"
+        ],
         "confirmedSettings": [
           "SET_3",
           "SET_4",
           "SET_5",
           "SET_6"
         ],
-        "deniedSettings": [
-          "SET_1",
-          "SET_2"
-        ],
+        "deniedSettings": [],
         "hasImage": false,
+        "type": "SETTING_CONSTRAINT",
         "sourceEvidenceRefs": [
-          "SRC_NANA_SETTING",
-          "SRC_NANA_TROPHY"
-        ],
-        "type": "SETTING_CONFIRMATION"
+          "trophy"
+        ]
       },
       {
-        "id": "EVI_TROPHY_4PLUS",
-        "name": "ギンちゃんトロフィー 金",
-        "displayName": "ギンちゃんトロフィー 金",
-        "inputId": "INP_TROPHY_4PLUS_COUNT",
+        "id": "trophy__3",
+        "name": "金：設定4以上",
+        "displayName": "金：設定4以上",
+        "inputId": "REF_trophy_3",
+        "details": [
+          "金：設定4以上"
+        ],
         "confirmedSettings": [
           "SET_4",
           "SET_5",
           "SET_6"
         ],
-        "deniedSettings": [
-          "SET_1",
-          "SET_2",
-          "SET_3"
-        ],
+        "deniedSettings": [],
         "hasImage": false,
+        "type": "SETTING_CONSTRAINT",
         "sourceEvidenceRefs": [
-          "SRC_NANA_SETTING",
-          "SRC_NANA_TROPHY"
-        ],
-        "type": "SETTING_CONFIRMATION"
+          "trophy"
+        ]
       },
       {
-        "id": "EVI_TROPHY_5PLUS",
-        "name": "ギンちゃんトロフィー トラ柄",
-        "displayName": "ギンちゃんトロフィー トラ柄",
-        "inputId": "INP_TROPHY_5PLUS_COUNT",
+        "id": "trophy__4",
+        "name": "虎柄：設定5以上",
+        "displayName": "虎柄：設定5以上",
+        "inputId": "REF_trophy_4",
+        "details": [
+          "虎柄：設定5以上"
+        ],
         "confirmedSettings": [
           "SET_5",
           "SET_6"
         ],
-        "deniedSettings": [
-          "SET_1",
-          "SET_2",
-          "SET_3",
-          "SET_4"
-        ],
+        "deniedSettings": [],
         "hasImage": false,
+        "type": "SETTING_CONSTRAINT",
         "sourceEvidenceRefs": [
-          "SRC_NANA_SETTING",
-          "SRC_NANA_TROPHY"
-        ],
-        "type": "SETTING_CONFIRMATION"
+          "trophy"
+        ]
       },
       {
-        "id": "EVI_TROPHY_6",
-        "name": "ギンちゃんトロフィー 虹",
-        "displayName": "ギンちゃんトロフィー 虹",
-        "inputId": "INP_TROPHY_6_COUNT",
+        "id": "trophy__5",
+        "name": "虹：設定6",
+        "displayName": "虹：設定6",
+        "inputId": "REF_trophy_5",
+        "details": [
+          "虹：設定6"
+        ],
         "confirmedSettings": [
           "SET_6"
         ],
-        "deniedSettings": [
-          "SET_1",
+        "deniedSettings": [],
+        "hasImage": false,
+        "type": "SETTING_CONSTRAINT",
+        "sourceEvidenceRefs": [
+          "trophy"
+        ]
+      },
+      {
+        "id": "movie__5",
+        "name": "⑤：設定5以上",
+        "displayName": "⑤：設定5以上",
+        "inputId": "REF_movie_5",
+        "details": [
+          "⑤：設定5以上"
+        ],
+        "confirmedSettings": [
+          "SET_5",
+          "SET_6"
+        ],
+        "deniedSettings": [],
+        "hasImage": false,
+        "type": "SETTING_CONSTRAINT",
+        "sourceEvidenceRefs": [
+          "movie"
+        ]
+      },
+      {
+        "id": "operator__4",
+        "name": "怪獣の世界に足を踏み入れる：設定2以上",
+        "displayName": "怪獣の世界に足を踏み入れる：設定2以上",
+        "inputId": "REF_operator_4",
+        "details": [
+          "怪獣の世界に足を踏み入れる：設定2以上"
+        ],
+        "confirmedSettings": [
           "SET_2",
           "SET_3",
           "SET_4",
-          "SET_5"
+          "SET_5",
+          "SET_6"
         ],
+        "deniedSettings": [],
         "hasImage": false,
+        "type": "SETTING_CONSTRAINT",
         "sourceEvidenceRefs": [
-          "SRC_NANA_SETTING",
-          "SRC_NANA_TROPHY"
+          "operator"
+        ]
+      },
+      {
+        "id": "operator__5",
+        "name": "最後の一匹とは思えない：設定2以上",
+        "displayName": "最後の一匹とは思えない：設定2以上",
+        "inputId": "REF_operator_5",
+        "details": [
+          "最後の一匹とは思えない：設定2以上"
         ],
-        "type": "SETTING_CONFIRMATION"
+        "confirmedSettings": [
+          "SET_2",
+          "SET_3",
+          "SET_4",
+          "SET_5",
+          "SET_6"
+        ],
+        "deniedSettings": [],
+        "hasImage": false,
+        "type": "SETTING_CONSTRAINT",
+        "sourceEvidenceRefs": [
+          "operator"
+        ]
+      },
+      {
+        "id": "operator__6",
+        "name": "怪獣の力が宿る：設定3以上",
+        "displayName": "怪獣の力が宿る：設定3以上",
+        "inputId": "REF_operator_6",
+        "details": [
+          "怪獣の力が宿る：設定3以上"
+        ],
+        "confirmedSettings": [
+          "SET_3",
+          "SET_4",
+          "SET_5",
+          "SET_6"
+        ],
+        "deniedSettings": [],
+        "hasImage": false,
+        "type": "SETTING_CONSTRAINT",
+        "sourceEvidenceRefs": [
+          "operator"
+        ]
+      },
+      {
+        "id": "operator__7",
+        "name": "巨大な怪獣の目覚め：設定3以上",
+        "displayName": "巨大な怪獣の目覚め：設定3以上",
+        "inputId": "REF_operator_7",
+        "details": [
+          "巨大な怪獣の目覚め：設定3以上"
+        ],
+        "confirmedSettings": [
+          "SET_3",
+          "SET_4",
+          "SET_5",
+          "SET_6"
+        ],
+        "deniedSettings": [],
+        "hasImage": false,
+        "type": "SETTING_CONSTRAINT",
+        "sourceEvidenceRefs": [
+          "operator"
+        ]
+      },
+      {
+        "id": "operator__8",
+        "name": "怒りの象徴：設定4以上",
+        "displayName": "怒りの象徴：設定4以上",
+        "inputId": "REF_operator_8",
+        "details": [
+          "怒りの象徴：設定4以上"
+        ],
+        "confirmedSettings": [
+          "SET_4",
+          "SET_5",
+          "SET_6"
+        ],
+        "deniedSettings": [],
+        "hasImage": false,
+        "type": "SETTING_CONSTRAINT",
+        "sourceEvidenceRefs": [
+          "operator"
+        ]
+      },
+      {
+        "id": "operator__9",
+        "name": "心の闇を映す鏡：設定4以上",
+        "displayName": "心の闇を映す鏡：設定4以上",
+        "inputId": "REF_operator_9",
+        "details": [
+          "心の闇を映す鏡：設定4以上"
+        ],
+        "confirmedSettings": [
+          "SET_4",
+          "SET_5",
+          "SET_6"
+        ],
+        "deniedSettings": [],
+        "hasImage": false,
+        "type": "SETTING_CONSTRAINT",
+        "sourceEvidenceRefs": [
+          "operator"
+        ]
+      },
+      {
+        "id": "operator__10",
+        "name": "地球の守護者：設定5以上",
+        "displayName": "地球の守護者：設定5以上",
+        "inputId": "REF_operator_10",
+        "details": [
+          "地球の守護者：設定5以上"
+        ],
+        "confirmedSettings": [
+          "SET_5",
+          "SET_6"
+        ],
+        "deniedSettings": [],
+        "hasImage": false,
+        "type": "SETTING_CONSTRAINT",
+        "sourceEvidenceRefs": [
+          "operator"
+        ]
+      },
+      {
+        "id": "operator__11",
+        "name": "未来を守るために戦う：設定5以上",
+        "displayName": "未来を守るために戦う：設定5以上",
+        "inputId": "REF_operator_11",
+        "details": [
+          "未来を守るために戦う：設定5以上"
+        ],
+        "confirmedSettings": [
+          "SET_5",
+          "SET_6"
+        ],
+        "deniedSettings": [],
+        "hasImage": false,
+        "type": "SETTING_CONSTRAINT",
+        "sourceEvidenceRefs": [
+          "operator"
+        ]
+      },
+      {
+        "id": "operator__12",
+        "name": "伝説が息づく：設定6",
+        "displayName": "伝説が息づく：設定6",
+        "inputId": "REF_operator_12",
+        "details": [
+          "伝説が息づく：設定6"
+        ],
+        "confirmedSettings": [
+          "SET_6"
+        ],
+        "deniedSettings": [],
+        "hasImage": false,
+        "type": "SETTING_CONSTRAINT",
+        "sourceEvidenceRefs": [
+          "operator"
+        ]
+      },
+      {
+        "id": "operator__13",
+        "name": "伝説が刻まれる：設定6",
+        "displayName": "伝説が刻まれる：設定6",
+        "inputId": "REF_operator_13",
+        "details": [
+          "伝説が刻まれる：設定6"
+        ],
+        "confirmedSettings": [
+          "SET_6"
+        ],
+        "deniedSettings": [],
+        "hasImage": false,
+        "type": "SETTING_CONSTRAINT",
+        "sourceEvidenceRefs": [
+          "operator"
+        ]
       }
     ],
-    "sources": [
+    "references": [
       {
-        "id": "SRC_1GEKI",
-        "classification": "ANALYSIS",
-        "pageName": "ゴジラ（スマスロ）設定差・設定判別要素まとめ",
-        "url": "https://1geki.jp/slot/l_godzilla/0/",
-        "checkedAt": "2026-09-01"
+        "id": "EVI_menu",
+        "sourceFindingId": "menu",
+        "title": "メニュー画面",
+        "kind": "EVIDENCE",
+        "collapsible": true,
+        "defaultExpanded": false,
+        "description": "メニュー画面を確認したときに、該当する項目を1回加算して記録します。\n・注意：出現率は未公表です。設定が限定される表示だけを確定条件に使用し、それ以外は記録します\n・反映：設定確定・設定否定の条件は、設定候補の絞り込みに自動反映します\n・反映：設定別出現率が未確認の項目は記録のみです。出現率確認後は設定推測へ反映できる可能性があります",
+        "descriptionPresentation": {
+          "collapsible": true,
+          "label": "説明",
+          "defaultExpanded": false
+        },
+        "runtimePolicyControlled": false,
+        "evidenceItems": [
+          {
+            "findingId": "menu",
+            "label": "メニュー画面",
+            "sourceIds": [
+              "analysis"
+            ],
+            "details": [
+              "出現率は未公表です。設定が限定される表示だけを確定条件に使用し、それ以外は記録します。"
+            ],
+            "semanticType": "DISPLAY_ONLY",
+            "semanticCategories": [
+              {
+                "label": "ヘリコプター",
+                "meaning": "偶数設定示唆",
+                "semanticType": "PROBABILITY_UNKNOWN"
+              },
+              {
+                "label": "戦車",
+                "meaning": "高設定示唆（弱）",
+                "semanticType": "PROBABILITY_UNKNOWN"
+              },
+              {
+                "label": "メーサー殺獣光線車",
+                "meaning": "高設定示唆（強）",
+                "semanticType": "PROBABILITY_UNKNOWN"
+              },
+              {
+                "label": "轟天号",
+                "meaning": "設定2以上",
+                "semanticType": "EXACT_CONSTRAINT"
+              },
+              {
+                "label": "スーパーXIII",
+                "meaning": "設定4以上",
+                "semanticType": "EXACT_CONSTRAINT"
+              },
+              {
+                "label": "3式機龍",
+                "meaning": "設定6",
+                "semanticType": "EXACT_CONSTRAINT"
+              }
+            ],
+            "runtimePolicyControlled": false,
+            "status": "SOURCE_REFERENCED",
+            "interaction": "REFERENCE_ONLY"
+          }
+        ]
       },
       {
-        "id": "SRC_NANA_SETTING",
-        "classification": "ANALYSIS",
-        "pageName": "スマスロ ゴジラ 設定判別",
-        "url": "https://nana-press.com/kaiseki/machine/919/28861/",
-        "checkedAt": "2026-09-01"
+        "id": "EVI_end",
+        "sourceFindingId": "end",
+        "title": "ゴジラボーナス終了画面",
+        "kind": "EVIDENCE",
+        "collapsible": true,
+        "defaultExpanded": false,
+        "description": "ゴジラボーナス終了画面を確認したときに、該当する項目を1回加算して記録します。\n・注意：出現率は未公表です。設定が限定される表示だけを確定条件に使用し、それ以外は記録します\n・反映：設定確定・設定否定の条件は、設定候補の絞り込みに自動反映します\n・反映：設定別出現率が未確認の項目は記録のみです。出現率確認後は設定推測へ反映できる可能性があります",
+        "descriptionPresentation": {
+          "collapsible": true,
+          "label": "説明",
+          "defaultExpanded": false
+        },
+        "runtimePolicyControlled": false,
+        "evidenceItems": [
+          {
+            "findingId": "end",
+            "label": "ゴジラボーナス終了画面",
+            "sourceIds": [
+              "analysis"
+            ],
+            "details": [
+              "出現率は未公表です。設定が限定される表示だけを確定条件に使用し、それ以外は記録します。"
+            ],
+            "semanticType": "DISPLAY_ONLY",
+            "semanticCategories": [
+              {
+                "label": "ヘドラ・アンギラス",
+                "meaning": "基本パターン",
+                "semanticType": "DISPLAY_ONLY"
+              },
+              {
+                "label": "ラドン",
+                "meaning": "奇数設定示唆",
+                "semanticType": "PROBABILITY_UNKNOWN"
+              },
+              {
+                "label": "ガイガン",
+                "meaning": "偶数設定示唆",
+                "semanticType": "PROBABILITY_UNKNOWN"
+              },
+              {
+                "label": "ビオランテ",
+                "meaning": "奇数設定・高設定示唆",
+                "semanticType": "PROBABILITY_UNKNOWN"
+              },
+              {
+                "label": "デストロイア",
+                "meaning": "偶数設定・高設定示唆",
+                "semanticType": "PROBABILITY_UNKNOWN"
+              },
+              {
+                "label": "キングギドラ",
+                "meaning": "設定4以上",
+                "semanticType": "EXACT_CONSTRAINT"
+              },
+              {
+                "label": "赤いゴジラ",
+                "meaning": "設定5以上",
+                "semanticType": "EXACT_CONSTRAINT"
+              },
+              {
+                "label": "白黒ゴジラ",
+                "meaning": "設定6",
+                "semanticType": "EXACT_CONSTRAINT"
+              }
+            ],
+            "runtimePolicyControlled": false,
+            "status": "SOURCE_REFERENCED",
+            "interaction": "REFERENCE_ONLY"
+          }
+        ]
       },
       {
-        "id": "SRC_NANA_TROPHY",
-        "classification": "ANALYSIS",
-        "pageName": "スマスロ ゴジラ ギンちゃんトロフィー",
-        "url": "https://nana-press.com/kaiseki/machine/919/28845/",
-        "checkedAt": "2026-09-01"
+        "id": "EVI_trophy",
+        "sourceFindingId": "trophy",
+        "title": "AT終了時のトロフィー",
+        "kind": "EVIDENCE",
+        "collapsible": true,
+        "defaultExpanded": false,
+        "description": "AT終了時のトロフィーを確認したときに、該当する項目を1回加算して記録します。\n・注意：出現率は未公表です。設定が限定される表示だけを確定条件に使用し、それ以外は記録します\n・反映：設定確定・設定否定の条件は、設定候補の絞り込みに自動反映します",
+        "descriptionPresentation": {
+          "collapsible": true,
+          "label": "説明",
+          "defaultExpanded": false
+        },
+        "runtimePolicyControlled": false,
+        "evidenceItems": [
+          {
+            "findingId": "trophy",
+            "label": "AT終了時のトロフィー",
+            "sourceIds": [
+              "analysis"
+            ],
+            "details": [
+              "出現率は未公表です。設定が限定される表示だけを確定条件に使用し、それ以外は記録します。"
+            ],
+            "semanticType": "EXACT_CONSTRAINT",
+            "semanticCategories": [
+              {
+                "label": "銅",
+                "meaning": "設定2以上",
+                "semanticType": "EXACT_CONSTRAINT"
+              },
+              {
+                "label": "銀",
+                "meaning": "設定3以上",
+                "semanticType": "EXACT_CONSTRAINT"
+              },
+              {
+                "label": "金",
+                "meaning": "設定4以上",
+                "semanticType": "EXACT_CONSTRAINT"
+              },
+              {
+                "label": "虎柄",
+                "meaning": "設定5以上",
+                "semanticType": "EXACT_CONSTRAINT"
+              },
+              {
+                "label": "虹",
+                "meaning": "設定6",
+                "semanticType": "EXACT_CONSTRAINT"
+              }
+            ],
+            "runtimePolicyControlled": false,
+            "status": "SOURCE_REFERENCED",
+            "interaction": "REFERENCE_ONLY"
+          }
+        ]
+      },
+      {
+        "id": "EVI_movie",
+        "sourceFindingId": "movie",
+        "title": "EX終了ムービー",
+        "kind": "EVIDENCE",
+        "collapsible": true,
+        "defaultExpanded": false,
+        "description": "EX終了ムービーを確認したときに、該当する項目を1回加算して記録します。\n・注意：出現率は未公表です。設定が限定される表示だけを確定条件に使用し、それ以外は記録します\n・反映：設定確定・設定否定の条件は、設定候補の絞り込みに自動反映します\n・反映：設定別出現率が未確認の項目は記録のみです。出現率確認後は設定推測へ反映できる可能性があります",
+        "descriptionPresentation": {
+          "collapsible": true,
+          "label": "説明",
+          "defaultExpanded": false
+        },
+        "runtimePolicyControlled": false,
+        "evidenceItems": [
+          {
+            "findingId": "movie",
+            "label": "EX終了ムービー",
+            "sourceIds": [
+              "analysis"
+            ],
+            "details": [
+              "出現率は未公表です。設定が限定される表示だけを確定条件に使用し、それ以外は記録します。"
+            ],
+            "semanticType": "DISPLAY_ONLY",
+            "semanticCategories": [
+              {
+                "label": "①",
+                "meaning": "基本パターン",
+                "semanticType": "DISPLAY_ONLY"
+              },
+              {
+                "label": "②",
+                "meaning": "高設定示唆（弱）",
+                "semanticType": "PROBABILITY_UNKNOWN"
+              },
+              {
+                "label": "③",
+                "meaning": "高設定示唆（中）",
+                "semanticType": "PROBABILITY_UNKNOWN"
+              },
+              {
+                "label": "④",
+                "meaning": "高設定示唆（強）",
+                "semanticType": "PROBABILITY_UNKNOWN"
+              },
+              {
+                "label": "⑤",
+                "meaning": "設定5以上",
+                "semanticType": "EXACT_CONSTRAINT"
+              }
+            ],
+            "runtimePolicyControlled": false,
+            "status": "SOURCE_REFERENCED",
+            "interaction": "REFERENCE_ONLY"
+          }
+        ]
+      },
+      {
+        "id": "EVI_operator",
+        "sourceFindingId": "operator",
+        "title": "通常時のオペレーター",
+        "kind": "EVIDENCE",
+        "collapsible": true,
+        "defaultExpanded": false,
+        "description": "通常時のオペレーターを確認したときに、該当する項目を1回加算して記録します。\n・注意：通常時のオペレーターが話したセリフの内容で分類します。通常のゴジラ目撃情報は設定示唆ではありません\n・反映：設定確定・設定否定の条件は、設定候補の絞り込みに自動反映します\n・反映：設定別出現率が未確認の項目は記録のみです。出現率確認後は設定推測へ反映できる可能性があります",
+        "descriptionPresentation": {
+          "collapsible": true,
+          "label": "説明",
+          "defaultExpanded": false
+        },
+        "runtimePolicyControlled": false,
+        "evidenceItems": [
+          {
+            "findingId": "operator",
+            "label": "通常時のオペレーター",
+            "sourceIds": [
+              "cross"
+            ],
+            "details": [
+              "通常時のオペレーターが話したセリフの内容で分類します。通常のゴジラ目撃情報は設定示唆ではありません。"
+            ],
+            "semanticType": "DISPLAY_ONLY",
+            "semanticCategories": [
+              {
+                "label": "ゴジラの怒りを秘める",
+                "meaning": "高設定示唆",
+                "semanticType": "PROBABILITY_UNKNOWN"
+              },
+              {
+                "label": "ゴジラの力強さ",
+                "meaning": "高設定示唆",
+                "semanticType": "PROBABILITY_UNKNOWN"
+              },
+              {
+                "label": "巨大な力が眠る",
+                "meaning": "高設定示唆",
+                "semanticType": "PROBABILITY_UNKNOWN"
+              },
+              {
+                "label": "怪獣の世界に足を踏み入れる",
+                "meaning": "設定2以上",
+                "semanticType": "EXACT_CONSTRAINT"
+              },
+              {
+                "label": "最後の一匹とは思えない",
+                "meaning": "設定2以上",
+                "semanticType": "EXACT_CONSTRAINT"
+              },
+              {
+                "label": "怪獣の力が宿る",
+                "meaning": "設定3以上",
+                "semanticType": "EXACT_CONSTRAINT"
+              },
+              {
+                "label": "巨大な怪獣の目覚め",
+                "meaning": "設定3以上",
+                "semanticType": "EXACT_CONSTRAINT"
+              },
+              {
+                "label": "怒りの象徴",
+                "meaning": "設定4以上",
+                "semanticType": "EXACT_CONSTRAINT"
+              },
+              {
+                "label": "心の闇を映す鏡",
+                "meaning": "設定4以上",
+                "semanticType": "EXACT_CONSTRAINT"
+              },
+              {
+                "label": "地球の守護者",
+                "meaning": "設定5以上",
+                "semanticType": "EXACT_CONSTRAINT"
+              },
+              {
+                "label": "未来を守るために戦う",
+                "meaning": "設定5以上",
+                "semanticType": "EXACT_CONSTRAINT"
+              },
+              {
+                "label": "伝説が息づく",
+                "meaning": "設定6",
+                "semanticType": "EXACT_CONSTRAINT"
+              },
+              {
+                "label": "伝説が刻まれる",
+                "meaning": "設定6",
+                "semanticType": "EXACT_CONSTRAINT"
+              }
+            ],
+            "runtimePolicyControlled": false,
+            "status": "SOURCE_REFERENCED",
+            "interaction": "REFERENCE_ONLY"
+          }
+        ]
       }
     ]
   },
+  "blockedItems": [
+    {
+      "blockId": "search",
+      "label": "探索ZONE出現",
+      "reason": "設定1・6の出現値のみで、設定2～5の値は未公表です。",
+      "reevaluationCondition": "本機の全設定の数値と、対象の抽選条件・結果を正確に確認する方法が公表されること。",
+      "sourceIds": [
+        "analysis"
+      ],
+      "rawSourceValues": {
+        "1": "1/91.3",
+        "6": "1/72.5"
+      }
+    },
+    {
+      "blockId": "replay-point",
+      "label": "リプレイから粉砕ポイント",
+      "reason": "設定1の獲得率だけで、設定2～6の数値は未公表です。",
+      "reevaluationCondition": "本機の全設定の数値と、対象の抽選条件・結果を正確に確認する方法が公表されること。",
+      "sourceIds": [
+        "analysis"
+      ],
+      "rawSourceValues": {
+        "1": 0.152
+      }
+    }
+  ],
   "ui": {
-    "sections": [
-      {
-        "id": "UI_DESIGN_1",
-        "title": "G-RUSH初当り",
-        "displayOrder": 1,
-        "description": "G-RUSH初当り回数と、自分で把握した有効通常ゲーム数を入力します。PUSHメニューの総ゲーム数はAT中を含むため使用しません。",
-        "collapsible": false,
-        "defaultExpanded": true,
-        "items": [
-          {
-            "type": "input",
-            "inputId": "INP_AT_FIRST_HIT_COUNT",
-            "label": "G-RUSH初当り 回数",
-            "widget": "counter",
-            "gridSpan": 12,
-            "config": {
-              "directInput": false,
-              "compact": true,
-              "quickAdd": [
-                1
-              ],
-              "step": 1,
-              "emptyMeansUnobserved": true,
-              "observedZeroAllowed": true
-            }
-          },
-          {
-            "type": "input",
-            "inputId": "INP_AT_FIRST_HIT_TRIALS",
-            "label": "通常ゲーム数",
-            "widget": "number",
-            "gridSpan": 12,
-            "config": {
-              "directInput": true,
-              "quickAdd": [
-                50
-              ],
-              "emptyMeansUnobserved": true,
-              "observedZeroAllowed": true
-            }
-          }
-        ]
+    "schemaVersion": "v8.5-runtime-ui-v1",
+    "contractVersion": "runtime-ui-v8",
+    "source": "CANONICAL_UI",
+    "sourceSchemaVersion": "canonical-ui-v1",
+    "manifestRevision": "8.5",
+    "playInfo": {
+      "visible": true,
+      "collapsible": false,
+      "mode": "NORMAL_ONLY",
+      "sessionFields": [
+        {
+          "id": "date",
+          "label": "日付",
+          "mode": "DATE"
+        },
+        {
+          "id": "storeName",
+          "label": "店舗名",
+          "mode": "TEXT"
+        },
+        {
+          "id": "machineNumber",
+          "label": "台番号",
+          "mode": "TEXT"
+        }
+      ],
+      "startFields": [
+        {
+          "id": "startNormalGames",
+          "label": "着席時 通常ゲーム数",
+          "mode": "NUMBER",
+          "directNumeric": true
+        }
+      ],
+      "currentFields": [
+        {
+          "id": "currentNormalGames",
+          "label": "現在 通常ゲーム数",
+          "mode": "NUMBER",
+          "directNumeric": true
+        }
+      ],
+      "difference": {
+        "autoCalculate": true
       },
+      "useDifference": {
+        "label": "着席時との差分を使用",
+        "defaultWhenStartNormalGamesPresent": true
+      }
+    },
+    "accordion": {
+      "enabled": true,
+      "singleOpen": true
+    },
+    "quickInput": {
+      "enabled": false
+    },
+    "v8Sections": [
       {
-        "id": "UI_DESIGN_2",
-        "title": "襲来ZONE対戦怪獣",
-        "displayOrder": 2,
-        "description": "PUSHメニューの襲来CZ履歴から、各怪獣の右側に表示される「総回数」を入力します。左側の成功回数はここでは使用しません。",
-        "collapsible": false,
-        "defaultExpanded": true,
-        "items": [
-          {
-            "type": "input",
-            "inputId": "INP_SHURAI_OPPONENT_CAT_RODAN",
-            "label": "ラドン",
-            "widget": "counter",
-            "gridSpan": 6,
-            "config": {
-              "directInput": false,
-              "compact": true,
-              "quickAdd": [
-                1
-              ],
-              "step": 1,
-              "emptyMeansUnobserved": true,
-              "observedZeroAllowed": true
-            }
-          },
-          {
-            "type": "input",
-            "inputId": "INP_SHURAI_OPPONENT_CAT_GIGAN",
-            "label": "ガイガン",
-            "widget": "counter",
-            "gridSpan": 6,
-            "config": {
-              "directInput": false,
-              "compact": true,
-              "quickAdd": [
-                1
-              ],
-              "step": 1,
-              "emptyMeansUnobserved": true,
-              "observedZeroAllowed": true
-            }
-          },
-          {
-            "type": "input",
-            "inputId": "INP_SHURAI_OPPONENT_CAT_BIOLLANTE",
-            "label": "ビオランテ",
-            "widget": "counter",
-            "gridSpan": 6,
-            "config": {
-              "directInput": false,
-              "compact": true,
-              "quickAdd": [
-                1
-              ],
-              "step": 1,
-              "emptyMeansUnobserved": true,
-              "observedZeroAllowed": true
-            }
-          },
-          {
-            "type": "input",
-            "inputId": "INP_SHURAI_OPPONENT_CAT_DESTOROYAH",
-            "label": "デストロイア",
-            "widget": "counter",
-            "gridSpan": 6,
-            "config": {
-              "directInput": false,
-              "compact": true,
-              "quickAdd": [
-                1
-              ],
-              "step": 1,
-              "emptyMeansUnobserved": true,
-              "observedZeroAllowed": true
-            }
-          },
-          {
-            "type": "input",
-            "inputId": "INP_SHURAI_OPPONENT_CAT_KING_GHIDORAH",
-            "label": "キングギドラ",
-            "widget": "counter",
-            "gridSpan": 6,
-            "config": {
-              "directInput": false,
-              "compact": true,
-              "quickAdd": [
-                1
-              ],
-              "step": 1,
-              "emptyMeansUnobserved": true,
-              "observedZeroAllowed": true
-            }
-          }
-        ]
-      },
-      {
-        "id": "UI_DESIGN_3",
-        "title": "PUSHメニュー",
-        "displayOrder": 3,
-        "description": "PUSHメニューで確認した設定確定情報を入力します。",
+        "id": "OBS_at",
+        "title": "AT初当たり",
         "collapsible": true,
         "defaultExpanded": false,
+        "description": "通常時のゴジラバトル初当たりを記録します。通常ゲーム数を基準に、実戦中の出現割合を設定別に比較します。\n・注意：継続バトルは除きます。",
+        "descriptionPresentation": {
+          "collapsible": true,
+          "label": "説明",
+          "defaultExpanded": false
+        },
         "items": [
           {
-            "type": "input",
-            "inputId": "INP_MENU_2PLUS_COUNT",
-            "label": "メニュー 轟天号",
-            "widget": "counter",
-            "gridSpan": 6,
-            "config": {
-              "directInput": false,
-              "compact": true,
-              "quickAdd": [
-                1
-              ],
-              "step": 1,
-              "emptyMeansUnobserved": true,
-              "observedZeroAllowed": true
-            }
-          },
+            "id": "NODE_at",
+            "featureId": "at",
+            "title": "AT初当たり",
+            "inputs": [
+              {
+                "id": "at.eligibleTrialCount",
+                "label": "通常ゲーム数",
+                "input": "denominator",
+                "inputId": "at.eligibleTrialCount",
+                "engineBinding": {
+                  "inputId": "at.eligibleTrialCount"
+                },
+                "gridSpan": 12,
+                "directNumeric": true,
+                "quickAdd": [
+                  50
+                ],
+                "unobservedDisplay": "—",
+                "playDataBinding": {
+                  "source": "PLAY_NORMAL_GAME_DELTA"
+                }
+              },
+              {
+                "id": "at.successCount",
+                "label": "ゴジラバトル初当たり回数",
+                "input": "counter",
+                "inputId": "at.successCount",
+                "engineBinding": {
+                  "inputId": "at.successCount"
+                },
+                "gridSpan": 6,
+                "directNumeric": true,
+                "quickAdd": [
+                  1
+                ],
+                "unobservedDisplay": "—"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "OBS_opponent",
+        "title": "CZの対戦相手",
+        "collapsible": true,
+        "defaultExpanded": false,
+        "description": "CZ突入時に決まった対戦相手を1回ずつ記録します。\n・注意：CZ突入時に決まった対戦相手を1回ずつ記録します。\n・注意：公表値の丸め誤差のみ補正し、未公表の設定値は補いません。",
+        "descriptionPresentation": {
+          "collapsible": true,
+          "label": "説明",
+          "defaultExpanded": false
+        },
+        "items": [
           {
-            "type": "input",
-            "inputId": "INP_MENU_4PLUS_COUNT",
-            "label": "メニュー スーパーXⅢ",
-            "widget": "counter",
-            "gridSpan": 6,
-            "config": {
-              "directInput": false,
-              "compact": true,
-              "quickAdd": [
-                1
-              ],
-              "step": 1,
-              "emptyMeansUnobserved": true,
-              "observedZeroAllowed": true
-            }
-          },
-          {
-            "type": "input",
-            "inputId": "INP_MENU_6_COUNT",
-            "label": "メニュー 3式機龍",
-            "widget": "counter",
-            "gridSpan": 6,
-            "config": {
-              "directInput": false,
-              "compact": true,
-              "quickAdd": [
-                1
-              ],
-              "step": 1,
-              "emptyMeansUnobserved": true,
-              "observedZeroAllowed": true
+            "id": "NODE_opponent",
+            "featureId": "opponent",
+            "title": "CZの対戦相手",
+            "interaction": {
+              "type": "CATEGORY_COUNTERS",
+              "preservePriorObservations": true,
+              "showAccumulatedCounts": true,
+              "categoryCoverage": "EXHAUSTIVE",
+              "totalOpportunities": "SUM_CATEGORY_COUNTS",
+              "categories": [
+                {
+                  "id": "opponent.categoryCounts.1_ラドン",
+                  "inputId": "opponent.categoryCounts.1_ラドン",
+                  "label": "ラドン"
+                },
+                {
+                  "id": "opponent.categoryCounts.2_ガイガン",
+                  "inputId": "opponent.categoryCounts.2_ガイガン",
+                  "label": "ガイガン"
+                },
+                {
+                  "id": "opponent.categoryCounts.3_ビオランテ",
+                  "inputId": "opponent.categoryCounts.3_ビオランテ",
+                  "label": "ビオランテ"
+                },
+                {
+                  "id": "opponent.categoryCounts.4_デストロイア",
+                  "inputId": "opponent.categoryCounts.4_デストロイア",
+                  "label": "デストロイア"
+                },
+                {
+                  "id": "opponent.categoryCounts.5_キングギドラ",
+                  "inputId": "opponent.categoryCounts.5_キングギドラ",
+                  "label": "キングギドラ"
+                }
+              ]
             }
           }
         ]
       },
       {
-        "id": "UI_DESIGN_4",
-        "title": "オペレーターセリフ",
-        "displayOrder": 4,
-        "description": "オペレーターのセリフで設定確定パターンを確認したときに入力します。",
+        "id": "EVI_menu",
+        "title": "メニュー画面",
+        "description": "メニュー画面を確認したときに、該当する項目を1回加算して記録します。\n・注意：出現率は未公表です。設定が限定される表示だけを確定条件に使用し、それ以外は記録します\n・反映：設定確定・設定否定の条件は、設定候補の絞り込みに自動反映します\n・反映：設定別出現率が未確認の項目は記録のみです。出現率確認後は設定推測へ反映できる可能性があります",
         "collapsible": true,
         "defaultExpanded": false,
+        "descriptionPresentation": {
+          "collapsible": true,
+          "label": "説明",
+          "defaultExpanded": false
+        },
         "items": [
           {
-            "type": "input",
-            "inputId": "INP_OPERATOR_2PLUS_COUNT",
-            "label": "オペレーター 設定2以上セリフ群",
-            "widget": "counter",
-            "gridSpan": 6,
-            "config": {
-              "directInput": false,
-              "compact": true,
-              "quickAdd": [
-                1
-              ],
-              "step": 1,
-              "emptyMeansUnobserved": true,
-              "observedZeroAllowed": true
-            }
-          },
-          {
-            "type": "input",
-            "inputId": "INP_OPERATOR_3PLUS_COUNT",
-            "label": "オペレーター 設定3以上セリフ群",
-            "widget": "counter",
-            "gridSpan": 6,
-            "config": {
-              "directInput": false,
-              "compact": true,
-              "quickAdd": [
-                1
-              ],
-              "step": 1,
-              "emptyMeansUnobserved": true,
-              "observedZeroAllowed": true
-            }
-          },
-          {
-            "type": "input",
-            "inputId": "INP_OPERATOR_4PLUS_COUNT",
-            "label": "オペレーター 設定4以上セリフ群",
-            "widget": "counter",
-            "gridSpan": 6,
-            "config": {
-              "directInput": false,
-              "compact": true,
-              "quickAdd": [
-                1
-              ],
-              "step": 1,
-              "emptyMeansUnobserved": true,
-              "observedZeroAllowed": true
-            }
-          },
-          {
-            "type": "input",
-            "inputId": "INP_OPERATOR_5PLUS_COUNT",
-            "label": "オペレーター 設定5以上セリフ群",
-            "widget": "counter",
-            "gridSpan": 6,
-            "config": {
-              "directInput": false,
-              "compact": true,
-              "quickAdd": [
-                1
-              ],
-              "step": 1,
-              "emptyMeansUnobserved": true,
-              "observedZeroAllowed": true
-            }
-          },
-          {
-            "type": "input",
-            "inputId": "INP_OPERATOR_6_COUNT",
-            "label": "オペレーター 設定6セリフ群",
-            "widget": "counter",
-            "gridSpan": 6,
-            "config": {
-              "directInput": false,
-              "compact": true,
-              "quickAdd": [
-                1
-              ],
-              "step": 1,
-              "emptyMeansUnobserved": true,
-              "observedZeroAllowed": true
+            "id": "REF_menu",
+            "evidenceId": "menu",
+            "label": "メニュー画面",
+            "interaction": {
+              "type": "CATEGORY_COUNTERS",
+              "preservePriorObservations": true,
+              "showAccumulatedCounts": true,
+              "categoryCoverage": "NON_EXHAUSTIVE",
+              "totalOpportunities": "NONE",
+              "categories": [
+                {
+                  "id": "REF_menu_1",
+                  "inputId": "REF_menu_1",
+                  "label": "ヘリコプター",
+                  "meaning": "偶数設定示唆"
+                },
+                {
+                  "id": "REF_menu_2",
+                  "inputId": "REF_menu_2",
+                  "label": "戦車",
+                  "meaning": "高設定示唆（弱）"
+                },
+                {
+                  "id": "REF_menu_3",
+                  "inputId": "REF_menu_3",
+                  "label": "メーサー殺獣光線車",
+                  "meaning": "高設定示唆（強）"
+                },
+                {
+                  "id": "REF_menu_4",
+                  "inputId": "REF_menu_4",
+                  "label": "轟天号",
+                  "meaning": "設定2以上"
+                },
+                {
+                  "id": "REF_menu_5",
+                  "inputId": "REF_menu_5",
+                  "label": "スーパーXIII",
+                  "meaning": "設定4以上"
+                },
+                {
+                  "id": "REF_menu_6",
+                  "inputId": "REF_menu_6",
+                  "label": "3式機龍",
+                  "meaning": "設定6"
+                }
+              ]
             }
           }
         ]
       },
       {
-        "id": "UI_DESIGN_5",
-        "title": "ボーナス終了時",
-        "displayOrder": 5,
-        "description": "ボーナス終了時に設定確定パターンを確認したときに入力します。",
+        "id": "EVI_end",
+        "title": "ゴジラボーナス終了画面",
+        "description": "ゴジラボーナス終了画面を確認したときに、該当する項目を1回加算して記録します。\n・注意：出現率は未公表です。設定が限定される表示だけを確定条件に使用し、それ以外は記録します\n・反映：設定確定・設定否定の条件は、設定候補の絞り込みに自動反映します\n・反映：設定別出現率が未確認の項目は記録のみです。出現率確認後は設定推測へ反映できる可能性があります",
         "collapsible": true,
         "defaultExpanded": false,
+        "descriptionPresentation": {
+          "collapsible": true,
+          "label": "説明",
+          "defaultExpanded": false
+        },
         "items": [
           {
-            "type": "input",
-            "inputId": "INP_BONUS_END_4PLUS_COUNT",
-            "label": "ボーナス終了 キングギドラ",
-            "widget": "counter",
-            "gridSpan": 6,
-            "config": {
-              "directInput": false,
-              "compact": true,
-              "quickAdd": [
-                1
-              ],
-              "step": 1,
-              "emptyMeansUnobserved": true,
-              "observedZeroAllowed": true
-            }
-          },
-          {
-            "type": "input",
-            "inputId": "INP_BONUS_END_5PLUS_COUNT",
-            "label": "ボーナス終了 ゴジラ（赤）",
-            "widget": "counter",
-            "gridSpan": 6,
-            "config": {
-              "directInput": false,
-              "compact": true,
-              "quickAdd": [
-                1
-              ],
-              "step": 1,
-              "emptyMeansUnobserved": true,
-              "observedZeroAllowed": true
-            }
-          },
-          {
-            "type": "input",
-            "inputId": "INP_BONUS_END_6_COUNT",
-            "label": "ボーナス終了 ゴジラ（白黒）",
-            "widget": "counter",
-            "gridSpan": 6,
-            "config": {
-              "directInput": false,
-              "compact": true,
-              "quickAdd": [
-                1
-              ],
-              "step": 1,
-              "emptyMeansUnobserved": true,
-              "observedZeroAllowed": true
+            "id": "REF_end",
+            "evidenceId": "end",
+            "label": "ゴジラボーナス終了画面",
+            "interaction": {
+              "type": "CATEGORY_COUNTERS",
+              "preservePriorObservations": true,
+              "showAccumulatedCounts": true,
+              "categoryCoverage": "NON_EXHAUSTIVE",
+              "totalOpportunities": "NONE",
+              "categories": [
+                {
+                  "id": "REF_end_1",
+                  "inputId": "REF_end_1",
+                  "label": "ヘドラ・アンギラス",
+                  "meaning": "基本パターン"
+                },
+                {
+                  "id": "REF_end_2",
+                  "inputId": "REF_end_2",
+                  "label": "ラドン",
+                  "meaning": "奇数設定示唆"
+                },
+                {
+                  "id": "REF_end_3",
+                  "inputId": "REF_end_3",
+                  "label": "ガイガン",
+                  "meaning": "偶数設定示唆"
+                },
+                {
+                  "id": "REF_end_4",
+                  "inputId": "REF_end_4",
+                  "label": "ビオランテ",
+                  "meaning": "奇数設定・高設定示唆"
+                },
+                {
+                  "id": "REF_end_5",
+                  "inputId": "REF_end_5",
+                  "label": "デストロイア",
+                  "meaning": "偶数設定・高設定示唆"
+                },
+                {
+                  "id": "REF_end_6",
+                  "inputId": "REF_end_6",
+                  "label": "キングギドラ",
+                  "meaning": "設定4以上"
+                },
+                {
+                  "id": "REF_end_7",
+                  "inputId": "REF_end_7",
+                  "label": "赤いゴジラ",
+                  "meaning": "設定5以上"
+                },
+                {
+                  "id": "REF_end_8",
+                  "inputId": "REF_end_8",
+                  "label": "白黒ゴジラ",
+                  "meaning": "設定6"
+                }
+              ]
             }
           }
         ]
       },
       {
-        "id": "UI_DESIGN_6",
-        "title": "EXボーナス",
-        "displayOrder": 6,
-        "description": "EXボーナス中のムービーで設定確定パターンを確認したときに入力します。",
+        "id": "EVI_trophy",
+        "title": "AT終了時のトロフィー",
+        "description": "AT終了時のトロフィーを確認したときに、該当する項目を1回加算して記録します。\n・注意：出現率は未公表です。設定が限定される表示だけを確定条件に使用し、それ以外は記録します\n・反映：設定確定・設定否定の条件は、設定候補の絞り込みに自動反映します",
         "collapsible": true,
         "defaultExpanded": false,
+        "descriptionPresentation": {
+          "collapsible": true,
+          "label": "説明",
+          "defaultExpanded": false
+        },
         "items": [
           {
-            "type": "input",
-            "inputId": "INP_EX_MOVIE_5PLUS_COUNT",
-            "label": "EXボーナス ムービー5",
-            "widget": "counter",
-            "gridSpan": 6,
-            "config": {
-              "directInput": false,
-              "compact": true,
-              "quickAdd": [
-                1
-              ],
-              "step": 1,
-              "emptyMeansUnobserved": true,
-              "observedZeroAllowed": true
+            "id": "REF_trophy",
+            "evidenceId": "trophy",
+            "label": "AT終了時のトロフィー",
+            "interaction": {
+              "type": "CATEGORY_COUNTERS",
+              "preservePriorObservations": true,
+              "showAccumulatedCounts": true,
+              "categoryCoverage": "NON_EXHAUSTIVE",
+              "totalOpportunities": "NONE",
+              "categories": [
+                {
+                  "id": "REF_trophy_1",
+                  "inputId": "REF_trophy_1",
+                  "label": "銅",
+                  "meaning": "設定2以上"
+                },
+                {
+                  "id": "REF_trophy_2",
+                  "inputId": "REF_trophy_2",
+                  "label": "銀",
+                  "meaning": "設定3以上"
+                },
+                {
+                  "id": "REF_trophy_3",
+                  "inputId": "REF_trophy_3",
+                  "label": "金",
+                  "meaning": "設定4以上"
+                },
+                {
+                  "id": "REF_trophy_4",
+                  "inputId": "REF_trophy_4",
+                  "label": "虎柄",
+                  "meaning": "設定5以上"
+                },
+                {
+                  "id": "REF_trophy_5",
+                  "inputId": "REF_trophy_5",
+                  "label": "虹",
+                  "meaning": "設定6"
+                }
+              ]
             }
           }
         ]
       },
       {
-        "id": "UI_DESIGN_7",
-        "title": "ギンちゃんトロフィー",
-        "displayOrder": 7,
-        "description": "ギンちゃんトロフィーが出現したときに該当する色を入力します。",
+        "id": "EVI_movie",
+        "title": "EX終了ムービー",
+        "description": "EX終了ムービーを確認したときに、該当する項目を1回加算して記録します。\n・注意：出現率は未公表です。設定が限定される表示だけを確定条件に使用し、それ以外は記録します\n・反映：設定確定・設定否定の条件は、設定候補の絞り込みに自動反映します\n・反映：設定別出現率が未確認の項目は記録のみです。出現率確認後は設定推測へ反映できる可能性があります",
         "collapsible": true,
         "defaultExpanded": false,
+        "descriptionPresentation": {
+          "collapsible": true,
+          "label": "説明",
+          "defaultExpanded": false
+        },
         "items": [
           {
-            "type": "input",
-            "inputId": "INP_TROPHY_2PLUS_COUNT",
-            "label": "ギンちゃんトロフィー 銅",
-            "widget": "counter",
-            "gridSpan": 6,
-            "config": {
-              "directInput": false,
-              "compact": true,
-              "quickAdd": [
-                1
-              ],
-              "step": 1,
-              "emptyMeansUnobserved": true,
-              "observedZeroAllowed": true
+            "id": "REF_movie",
+            "evidenceId": "movie",
+            "label": "EX終了ムービー",
+            "interaction": {
+              "type": "CATEGORY_COUNTERS",
+              "preservePriorObservations": true,
+              "showAccumulatedCounts": true,
+              "categoryCoverage": "NON_EXHAUSTIVE",
+              "totalOpportunities": "NONE",
+              "categories": [
+                {
+                  "id": "REF_movie_1",
+                  "inputId": "REF_movie_1",
+                  "label": "①",
+                  "meaning": "基本パターン"
+                },
+                {
+                  "id": "REF_movie_2",
+                  "inputId": "REF_movie_2",
+                  "label": "②",
+                  "meaning": "高設定示唆（弱）"
+                },
+                {
+                  "id": "REF_movie_3",
+                  "inputId": "REF_movie_3",
+                  "label": "③",
+                  "meaning": "高設定示唆（中）"
+                },
+                {
+                  "id": "REF_movie_4",
+                  "inputId": "REF_movie_4",
+                  "label": "④",
+                  "meaning": "高設定示唆（強）"
+                },
+                {
+                  "id": "REF_movie_5",
+                  "inputId": "REF_movie_5",
+                  "label": "⑤",
+                  "meaning": "設定5以上"
+                }
+              ]
             }
-          },
+          }
+        ]
+      },
+      {
+        "id": "EVI_operator",
+        "title": "通常時のオペレーター",
+        "description": "通常時のオペレーターを確認したときに、該当する項目を1回加算して記録します。\n・注意：通常時のオペレーターが話したセリフの内容で分類します。通常のゴジラ目撃情報は設定示唆ではありません\n・反映：設定確定・設定否定の条件は、設定候補の絞り込みに自動反映します\n・反映：設定別出現率が未確認の項目は記録のみです。出現率確認後は設定推測へ反映できる可能性があります",
+        "collapsible": true,
+        "defaultExpanded": false,
+        "descriptionPresentation": {
+          "collapsible": true,
+          "label": "説明",
+          "defaultExpanded": false
+        },
+        "items": [
           {
-            "type": "input",
-            "inputId": "INP_TROPHY_3PLUS_COUNT",
-            "label": "ギンちゃんトロフィー 銀",
-            "widget": "counter",
-            "gridSpan": 6,
-            "config": {
-              "directInput": false,
-              "compact": true,
-              "quickAdd": [
-                1
-              ],
-              "step": 1,
-              "emptyMeansUnobserved": true,
-              "observedZeroAllowed": true
-            }
-          },
-          {
-            "type": "input",
-            "inputId": "INP_TROPHY_4PLUS_COUNT",
-            "label": "ギンちゃんトロフィー 金",
-            "widget": "counter",
-            "gridSpan": 6,
-            "config": {
-              "directInput": false,
-              "compact": true,
-              "quickAdd": [
-                1
-              ],
-              "step": 1,
-              "emptyMeansUnobserved": true,
-              "observedZeroAllowed": true
-            }
-          },
-          {
-            "type": "input",
-            "inputId": "INP_TROPHY_5PLUS_COUNT",
-            "label": "ギンちゃんトロフィー トラ柄",
-            "widget": "counter",
-            "gridSpan": 6,
-            "config": {
-              "directInput": false,
-              "compact": true,
-              "quickAdd": [
-                1
-              ],
-              "step": 1,
-              "emptyMeansUnobserved": true,
-              "observedZeroAllowed": true
-            }
-          },
-          {
-            "type": "input",
-            "inputId": "INP_TROPHY_6_COUNT",
-            "label": "ギンちゃんトロフィー 虹",
-            "widget": "counter",
-            "gridSpan": 6,
-            "config": {
-              "directInput": false,
-              "compact": true,
-              "quickAdd": [
-                1
-              ],
-              "step": 1,
-              "emptyMeansUnobserved": true,
-              "observedZeroAllowed": true
+            "id": "REF_operator",
+            "evidenceId": "operator",
+            "label": "通常時のオペレーター",
+            "interaction": {
+              "type": "CATEGORY_COUNTERS",
+              "preservePriorObservations": true,
+              "showAccumulatedCounts": true,
+              "categoryCoverage": "NON_EXHAUSTIVE",
+              "totalOpportunities": "NONE",
+              "categories": [
+                {
+                  "id": "REF_operator_1",
+                  "inputId": "REF_operator_1",
+                  "label": "ゴジラの怒りを秘める",
+                  "meaning": "高設定示唆"
+                },
+                {
+                  "id": "REF_operator_2",
+                  "inputId": "REF_operator_2",
+                  "label": "ゴジラの力強さ",
+                  "meaning": "高設定示唆"
+                },
+                {
+                  "id": "REF_operator_3",
+                  "inputId": "REF_operator_3",
+                  "label": "巨大な力が眠る",
+                  "meaning": "高設定示唆"
+                },
+                {
+                  "id": "REF_operator_4",
+                  "inputId": "REF_operator_4",
+                  "label": "怪獣の世界に足を踏み入れる",
+                  "meaning": "設定2以上"
+                },
+                {
+                  "id": "REF_operator_5",
+                  "inputId": "REF_operator_5",
+                  "label": "最後の一匹とは思えない",
+                  "meaning": "設定2以上"
+                },
+                {
+                  "id": "REF_operator_6",
+                  "inputId": "REF_operator_6",
+                  "label": "怪獣の力が宿る",
+                  "meaning": "設定3以上"
+                },
+                {
+                  "id": "REF_operator_7",
+                  "inputId": "REF_operator_7",
+                  "label": "巨大な怪獣の目覚め",
+                  "meaning": "設定3以上"
+                },
+                {
+                  "id": "REF_operator_8",
+                  "inputId": "REF_operator_8",
+                  "label": "怒りの象徴",
+                  "meaning": "設定4以上"
+                },
+                {
+                  "id": "REF_operator_9",
+                  "inputId": "REF_operator_9",
+                  "label": "心の闇を映す鏡",
+                  "meaning": "設定4以上"
+                },
+                {
+                  "id": "REF_operator_10",
+                  "inputId": "REF_operator_10",
+                  "label": "地球の守護者",
+                  "meaning": "設定5以上"
+                },
+                {
+                  "id": "REF_operator_11",
+                  "inputId": "REF_operator_11",
+                  "label": "未来を守るために戦う",
+                  "meaning": "設定5以上"
+                },
+                {
+                  "id": "REF_operator_12",
+                  "inputId": "REF_operator_12",
+                  "label": "伝説が息づく",
+                  "meaning": "設定6"
+                },
+                {
+                  "id": "REF_operator_13",
+                  "inputId": "REF_operator_13",
+                  "label": "伝説が刻まれる",
+                  "meaning": "設定6"
+                }
+              ]
             }
           }
         ]
       }
     ]
   },
-  "selectionSummary": {
-    "schemaVersion": "selection-summary-v1",
-    "evaluatedCount": 5,
-    "selectedCount": 2,
-    "rejectedCount": 3,
-    "selected": [
-      {
-        "featureId": "FEAT_AT_FIRST_HIT",
-        "name": "G-RUSH初当り",
-        "reason": "G-RUSH初当りには設定差があり、自己実戦で有効通常ゲーム数を正しく把握できる場合に評価へ使用する。実機PUSHメニューの総ゲーム数はAT中を含むため分母には使用しない。",
-        "requiredTrials": {
-          "value": 16753,
-          "unit": "有効通常ゲーム"
-        }
-      },
-      {
-        "featureId": "FEAT_SHURAI_OPPONENT",
-        "name": "襲来ZONE対戦怪獣振り分け",
-        "reason": "襲来ZONEで選ばれた対戦怪獣の振り分けに設定差があるため補助的に使用する。PUSHメニューの各怪獣表示は「成功回数/総回数」で、推測には総回数を使用する。",
-        "requiredTrials": {
-          "value": 140,
-          "unit": "襲来ZONE突入1回"
-        }
-      }
-    ],
-    "rejected": [
-      {
-        "featureId": "FEAT_CZ_FIRST_HIT",
-        "name": "CZ初当り",
-        "reason": "AT初当りの主要経路と情報が重複し、設定差も小さいため、独立尤度として二重評価せずAT初当りを代表採用する。",
-        "requiredTrials": {
-          "value": 1535463,
-          "unit": "有効通常ゲーム"
-        }
-      },
-      {
-        "featureId": "FEAT_EXPLORATION_ZONE",
-        "name": "探索ZONE突入率",
-        "reason": "全設定の公開値または条件別テーブルが揃っておらず、欠損設定を補間・推定せずResearch未解決のまま推測から除外する。",
-        "requiredTrials": {
-          "value": 11068,
-          "unit": "有効通常ゲーム"
-        }
-      },
-      {
-        "featureId": "FEAT_REPLAY_POINT_CZ",
-        "name": "リプレイポイント契機CZ抽選",
-        "reason": "全設定の公開値または条件別テーブルが揃っておらず、欠損設定を補間・推定せずResearch未解決のまま推測から除外する。"
-      }
-    ]
-  },
-  "reliability": {},
   "metadata": {
     "machineId": "L_GODZILLA_NS",
     "displayName": "Lゴジラ",
@@ -1353,12 +2031,94 @@
       "SET_5",
       "SET_6"
     ],
-    "uiDesignMaterialized": true,
-    "uiDesignSchemaVersion": "ui-design-data-v1",
-    "uiDesignStatus": "PASS"
+    "settingsStatus": "SOURCE_DERIVED"
   },
-  "validation": {
-    "cases": []
-  },
-  "statistics": {}
+  "v8": {
+    "machineResearchSummary": {
+      "title": "この機種の設定推測について",
+      "adopted": [
+        {
+          "featureId": "at",
+          "label": "AT初当たり",
+          "importance": "主要",
+          "selectionScore": 54.7,
+          "evaluation": {
+            "userLabel": "設定判別スコア",
+            "value": 54.7
+          },
+          "reason": "現在の採用基準を満たしているため、設定推測に使用します。"
+        },
+        {
+          "featureId": "opponent",
+          "label": "CZの対戦相手",
+          "importance": "微小",
+          "evaluation": {
+            "userLabel": "1回の判別力",
+            "value": 1.3294311307073148
+          },
+          "reason": "優先する設定推測項目を記録していない場合の補助として使用します。優先項目を記録した場合は、同じ設定差を重ねて評価しないよう自動で推測から外れます。"
+        }
+      ],
+      "notAdopted": [
+        {
+          "featureId": "cz",
+          "label": "CZ初当たり",
+          "reason": "基準遊技量7000Gで得られる情報量を表す設定判別スコアが0.5で、現在の採用基準5.0未満のため、設定推測に使用しません。"
+        },
+        {
+          "featureId": "search",
+          "label": "探索ZONE出現",
+          "reason": "設定1・6の出現値のみで、設定2～5の値は未公表です。",
+          "reevaluationCondition": "本機の全設定の数値と、対象の抽選条件・結果を正確に確認する方法が公表されること。"
+        },
+        {
+          "featureId": "replay-point",
+          "label": "リプレイから粉砕ポイント",
+          "reason": "設定1の獲得率だけで、設定2～6の数値は未公表です。",
+          "reevaluationCondition": "本機の全設定の数値と、対象の抽選条件・結果を正確に確認する方法が公表されること。"
+        }
+      ],
+      "highLowDiscrimination": {
+        "status": "COMPUTED",
+        "method": "BEST_SINGLE_EXACT_ACTIVE_FEATURE",
+        "bandDefinition": {
+          "lowSettings": "SETTING_1_TO_3",
+          "highSettings": "SETTING_4_TO_6",
+          "classPrior": "BALANCED"
+        },
+        "results": [
+          {
+            "games": 1500,
+            "balancedAccuracyPercent": 61.47
+          },
+          {
+            "games": 3000,
+            "balancedAccuracyPercent": 65.99
+          },
+          {
+            "games": 7000,
+            "balancedAccuracyPercent": 72.98
+          }
+        ],
+        "eligibleFeatureIds": [
+          "at",
+          "cz"
+        ],
+        "selectedFeatureId": "at",
+        "selectedFeatureLabel": "AT初当たり",
+        "excludedFeatures": [
+          {
+            "findingId": "cz",
+            "reason": "CONSERVATIVE_SINGLE_FEATURE_NO_INDEPENDENCE_ASSUMPTION"
+          },
+          {
+            "findingId": "opponent",
+            "reason": "BENCHMARK_EXPOSURE_UNRESOLVED"
+          }
+        ],
+        "note": "7000Gへ正確に換算できるACTIVE要素だけを候補とし、要素間の独立性を仮定せず、単独で最も高い判別精度を持つ要素から保守的に算出しています。条件付き要素はこの指標には含めませんが、実戦中に実際の観測回数が入力された場合は設定推測に使用します。"
+      },
+      "unresolved": []
+    }
+  }
 }
