@@ -21,3 +21,14 @@ test('rejects verbose input labels or broken compact layout checks',()=>{assert.
 test('rejects non-counter setting-hint coverage',()=>{assert.throws(()=>validateMachineQaReadiness('M',stages,pkg,{...renderReport,checks:{...renderReport.checks,evidenceCounterCoverage:false}}),/RENDER_CHECK_evidenceCounterCoverage/)});
 
 test('rejects Evidence semantic loss before device QA',()=>{const bad=structuredClone(pkg);delete bad.evidence.references[0].evidenceItems[0].semanticCategories;assert.throws(()=>validateMachineQaReadiness('M',stages,bad,renderReport),/EVIDENCE_SEMANTICS/)});
+
+
+test('allows v8.5 patch updates while rejecting other minor versions',()=>{
+ const next={...pkg,machine:{...pkg.machine,machineDataVersion:'8.5.1-batch-20261007-008'}};assert.equal(validateMachineQaReadiness('M',stages,next,renderReport).status,'QA_READY');
+ for(const version of ['8.4.1-batch-x','8.6.0-batch-x','8.5.bad-batch-x'])assert.throws(()=>validateMachineQaReadiness('M',stages,{...next,machine:{...next.machine,machineDataVersion:version}},renderReport),/V8_VERSION/);
+});
+
+test('structured setting hints keep explanation details separate and preserve explicit meanings',()=>{
+ const good=structuredClone(pkg);good.evidence.references[0].evidenceItems[0].details=['出現率は未公表。確定条件だけを反映します。'];good.evidence.references[0].evidenceItems[0].semanticCategories=[{label:'銅',meaning:'設定2以上',semanticType:'EXACT_CONSTRAINT'}];good.ui.v8Sections[0].items[0].interaction.categories=[{label:'銅',meaning:'設定2以上'}];
+ assert.equal(validateMachineQaReadiness('M',stages,good,renderReport).status,'QA_READY');good.ui.v8Sections[0].items[0].interaction.categories[0].meaning='高設定示唆';assert.throws(()=>validateMachineQaReadiness('M',stages,good,renderReport),/EVIDENCE_CATEGORY_MISMATCH/);
+});

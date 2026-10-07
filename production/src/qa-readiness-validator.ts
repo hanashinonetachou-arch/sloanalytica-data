@@ -14,7 +14,7 @@ export function validateMachineQaReadiness(machineId:string,stageStates:Record<s
  if(pkg?.schemaVersion!==1||pkg?.machine?.machineId!==machineId)fail(machineId+':PACKAGE_IDENTITY');
  if(pkg?.provenance?.manifestVersion!=='8.5'||pkg?.provenance?.generationPath!=='V8_5_PRODUCTION_PIPELINE'||pkg?.provenance?.legacyOracleUsed!==false)fail(machineId+':V8_PROVENANCE');
  if(pkg?.ui?.contractVersion!=='runtime-ui-v8'||pkg?.ui?.source!=='CANONICAL_UI')fail(machineId+':CANONICAL_UI_PACKAGE');
- if(typeof pkg?.machine?.machineDataVersion!=='string'||!pkg.machine.machineDataVersion.startsWith('8.5.0-batch-'))fail(machineId+':V8_VERSION');
+ if(typeof pkg?.machine?.machineDataVersion!=='string'||!/^8\.5\.\d+-batch-/.test(pkg.machine.machineDataVersion))fail(machineId+':V8_VERSION');
  const refs=pkg?.evidence?.references??[],defs=pkg?.evidence?.evidences??[];
  if(!Array.isArray(refs)||!Array.isArray(defs))fail(machineId+':EVIDENCE_ARRAYS');
  const expected=refs.flatMap((s:any)=>(s?.evidenceItems??[]).map((e:any)=>e.findingId));
@@ -34,10 +34,11 @@ export function validateMachineQaReadiness(machineId:string,stageStates:Record<s
   if(findingIds.some((id:string)=>blockedFindingIds.has(id)))fail(machineId+':BLOCKED_EVIDENCE_RESURRECTION:'+String(ref?.id??'UNKNOWN'));
   const details=items.flatMap((x:any)=>Array.isArray(x?.details)?x.details:[]);
   if(details.length===0||details.some((x:any)=>typeof x!=='string'||!x.trim()))fail(machineId+':EVIDENCE_DETAILS_MISSING:'+String(ref?.id??'UNKNOWN'));
-  for(const item of items){const cats=Array.isArray(item?.semanticCategories)?item.semanticCategories:[];if(cats.length!==item.details.length||cats.some((x:any,i:number)=>x?.label!==item.details[i]||!['EXACT_CONSTRAINT','PROBABILITY_BACKED','PROBABILITY_UNKNOWN','DISPLAY_ONLY','BLOCK'].includes(x?.semanticType)))fail(machineId+':EVIDENCE_SEMANTICS:'+String(ref?.id??'UNKNOWN'));}
+  for(const item of items){const cats=Array.isArray(item?.semanticCategories)?item.semanticCategories:[];if(cats.length===0||cats.some((x:any)=>typeof x?.label!=='string'||!x.label.trim()||!['EXACT_CONSTRAINT','PROBABILITY_BACKED','PROBABILITY_UNKNOWN','DISPLAY_ONLY','BLOCK'].includes(x?.semanticType))||(cats.some((x:any)=>x.meaning!==undefined)?cats.some((x:any)=>typeof x.meaning!=='string'||!x.meaning.trim()):cats.length!==item.details.length||cats.some((x:any,i:number)=>x.label!==item.details[i])))fail(machineId+':EVIDENCE_SEMANTICS:'+String(ref?.id??'UNKNOWN'));}
   const section=uiEvidence.find((s:any)=>s?.id===ref?.id);
   const categories=(section?.items??[]).flatMap((node:any)=>node?.interaction?.type==='CATEGORY_COUNTERS'?(node?.interaction?.categories??[]).map((c:any)=>c?.label):[]);
-  if(!sameEvidencePresentation(details,(section?.items??[]).flatMap((node:any)=>node?.interaction?.type==='CATEGORY_COUNTERS'?(node?.interaction?.categories??[]):[])))fail(machineId+':EVIDENCE_CATEGORY_MISMATCH:'+String(ref?.id??'UNKNOWN'));
+  const categoryDetails=items.flatMap((item:any)=>item.semanticCategories.map((c:any)=>c.meaning?`${c.label}：${c.meaning}`:c.label));
+  if(!sameEvidencePresentation(categoryDetails,(section?.items??[]).flatMap((node:any)=>node?.interaction?.type==='CATEGORY_COUNTERS'?(node?.interaction?.categories??[]):[])))fail(machineId+':EVIDENCE_CATEGORY_MISMATCH:'+String(ref?.id??'UNKNOWN'));
  }
  if(renderReport?.schemaVersion!=='rendered-ui-validation-v1'||renderReport?.machineId!==machineId)fail(machineId+':RENDER_REPORT_IDENTITY');
  if(renderReport?.status!=='PASS')fail(machineId+':RENDERED_UI_VALIDATION');
@@ -56,3 +57,4 @@ export function validateMachineQaReadinessFromFiles(productionRoot:string,distri
 }
 function main(){const [productionRoot,distributionRoot,renderReportRoot,batchId,...machineIds]=process.argv.slice(2);if(!productionRoot||!distributionRoot||!renderReportRoot||!batchId||!machineIds.length)throw new Error('USAGE: qa-readiness-validator <productionRoot> <distributionRoot> <renderReportRoot> <batchId> <machineId...>');const results=machineIds.map(m=>validateMachineQaReadinessFromFiles(productionRoot,distributionRoot,renderReportRoot,batchId,m));console.log(JSON.stringify(results,null,2))}
 if(process.argv[1]&&import.meta.url===pathToFileURL(process.argv[1]).href)main();
+
