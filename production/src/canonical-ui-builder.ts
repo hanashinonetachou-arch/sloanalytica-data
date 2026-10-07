@@ -10,6 +10,17 @@ const normalizeUserText=(v:any)=>String(v??'').replace(/\\n/g,'\n').replace(/\/n
 const clean=(v:any)=>normalizeUserText(v).trim().replace(/[。．]+$/,'').trim();
 const sentences=(v:any)=>normalizeUserText(v).split(/[。．]|\n+/).map(clean).filter(Boolean);
 const knownTrialLabel=(u:any)=>{
+ const batch008Labels:Record<string,string>={
+  KAIJI_CZ_COMPLETED_TRIAL:'CZ完走回数',KAIJI_RED7_FIRST_BAR_TRIAL:'対象の初回BAR回数',
+  LOVEJOU_CZ_START_TRIAL:'CZ開始回数',GOBLIN_REPLAY3_TRIAL:'リプレイ3連回数',
+  GOBLIN_G300_TRIAL:'300G到達回数',GOBLIN_G500_TRIAL:'500G到達回数',
+  GOBLIN_WATER3_RESET_TRIAL:'変更・AT後の3回到達回数',GOBLIN_WATER3_CZ_TRIAL:'CZ後の3回到達回数',
+  GOBLIN_WATER_MULTIPLE_TRIAL:'6回以降の3倍数到達回数',GOBLIN_CHAIN_CZ_TRIAL:'リプ・ベル連CZ回数',
+  GODZILLA_CZ_ENTRY_TRIAL:'CZ突入回数',YOSHIMUNE_NON_PREMONITION_GAME_TRIAL:'対象の通常ゲーム数',
+  MAHJONG_AT_ELIGIBLE_GAME_TRIAL:'対象ATゲーム数',YOUJITSU_POST_AT_CZ_ELIGIBLE_TRIAL:'対象CZ突入回数',
+  YOUJITSU_CZ_SUCCESS_TRIAL:'CZ成功回数',YOUJITSU_CONTINUOUS_EFFECT_TRIAL:'対象連続演出回数'
+ };
+ if(batch008Labels[u])return batch008Labels[u];
  if(u==='TOTAL_GAME_TRIAL')return '総ゲーム数';
  if(u==='NORMAL_GAME_TRIAL'||u==='BONUS_ELIGIBLE_GAME_TRIAL')return '通常ゲーム数';
  if(u==='NON_TENHA_NORMAL_GAME_TRIAL')return '天破中を除く通常ゲーム数';

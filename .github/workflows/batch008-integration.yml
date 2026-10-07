@@ -1,0 +1,212 @@
+name: Batch008 10-Machine Integration Boundary
+
+on:
+  push:
+    branches:
+      - production/v85-batch-008-foundation-20261008
+    paths:
+      - production/.batch008-integration-trigger
+      - .github/workflows/batch008-integration.yml
+
+permissions:
+  contents: write
+  actions: write
+
+concurrency:
+  group: batch008-integration
+  cancel-in-progress: false
+
+jobs:
+  integrate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout authoritative production state
+        uses: actions/checkout@v4
+        with:
+          ref: production/v85-batch-008-foundation-20261008
+          path: production-state
+          fetch-depth: 0
+
+      - name: Checkout prototype distribution
+        uses: actions/checkout@v4
+        with:
+          ref: prototype-multi-machine
+          path: prototype
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+
+      - name: Bootstrap Batch 008 and validate foundation
+        working-directory: production-state/production
+        run: |
+          node --experimental-strip-types src/validate-batch008-drafts.ts
+          npm test
+
+      - name: Materialize Wave 1 Research and advance through App Runtime
+        working-directory: production-state/production
+        run: |
+          node --experimental-strip-types src/materialize-research-drafts.ts batch-20261008-008 wave-1
+          node --experimental-strip-types src/deterministic-production-worker.ts batch-20261008-008 --through APP_RUNTIME
+          npm test
+          node --experimental-strip-types src/reconcile-batch.ts batch-20261008-008
+
+      - name: Install prototype dependencies
+        working-directory: prototype
+        run: npm ci
+
+      - name: Publish Wave 1 packages
+        shell: bash
+        run: |
+          set -euo pipefail
+          MACHINES="L_SMASLO_KAIJI_KYOEN_FJ L_LOVEJOU3_M4 L_GOBLIN_SLAYER_RD L_GODZILLA_NS L_USHIO_TORA_HAKUMEN_VH"
+          MACHINES="$MACHINES" node <<'NODE'
+          const fs=require('fs'),path=require('path'),crypto=require('crypto');
+          const batchId='batch-20261008-008',machines=process.env.MACHINES.split(/\s+/).filter(Boolean);
+          const prod=path.resolve('production-state'),proto=path.resolve('prototype');
+          const catalogPath=path.join(proto,'catalog.json'),catalog=JSON.parse(fs.readFileSync(catalogPath,'utf8'));
+          const byId=new Map(catalog.machines.map(x=>[x.machineId,x])),sha=b=>crypto.createHash('sha256').update(b).digest('hex'),metadata={};
+          for(const machineId of machines){
+            const stage=JSON.parse(fs.readFileSync(path.join(prod,'production','batches',batchId,'machines',machineId,'stages','APP_RUNTIME.json'),'utf8'));
+            if(stage.state!=='COMPLETE'||!stage.authoritativeOutputRef?.path)throw new Error('APP_RUNTIME_NOT_COMPLETE:'+machineId);
+            const app=JSON.parse(fs.readFileSync(path.join(prod,stage.authoritativeOutputRef.path),'utf8'));
+            const pkg=app.package,entry=byId.get(machineId); if(!entry)throw new Error('CATALOG_ENTRY_MISSING:'+machineId);
+            pkg.machine.introductionDate=entry.introductionDate;pkg.machine.machineType=entry.machineType;pkg.machine.gameType=entry.gameType;
+            const bytes=Buffer.from(JSON.stringify(pkg,null,2)+'\n','utf8');
+            const target=path.join(proto,'machines',machineId,'machine-package.json');fs.mkdirSync(path.dirname(target),{recursive:true});fs.writeFileSync(target,bytes);
+            const caps=[];for(const f of pkg.features?.features??[]){const model=String(f.modelType??'').toLowerCase();if(model==='binomial'&&!caps.includes('binomial'))caps.push('binomial');if(model==='multinomial'&&!caps.includes('multinomial'))caps.push('multinomial');}
+            if((pkg.evidence?.references??[]).length&&!caps.includes('evidence'))caps.push('evidence');
+            entry.machineDataVersion=pkg.machine.machineDataVersion;entry.sha256=sha(bytes);entry.packageSizeBytes=bytes.length;entry.requiredCapabilities=caps;entry.updatedAt=new Date().toISOString();
+            metadata[machineId]={machineId,machineDataVersion:pkg.machine.machineDataVersion,settings:pkg.machine.settings,sha256:entry.sha256,packageSizeBytes:bytes.length,introductionDate:entry.introductionDate,machineType:entry.machineType,gameType:entry.gameType};
+          }
+          catalog.generatedAt=new Date().toISOString();fs.writeFileSync(catalogPath,JSON.stringify(catalog,null,2)+'\n');
+          fs.writeFileSync(process.env.RUNNER_TEMP+'/batch008-wave1-metadata.json',JSON.stringify(metadata,null,2)+'\n');
+          NODE
+          cd prototype
+          npm run ux-contract:audit
+          node tools/apply-machine-identity-classification.mjs --apply
+          node tools/apply-machine-identity-classification.mjs --verify
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git add catalog.json machines/L_SMASLO_KAIJI_KYOEN_FJ/machine-package.json machines/L_LOVEJOU3_M4/machine-package.json machines/L_GOBLIN_SLAYER_RD/machine-package.json machines/L_GODZILLA_NS/machine-package.json machines/L_USHIO_TORA_HAKUMEN_VH/machine-package.json
+          git commit -m "Publish Batch 008 Wave 1 [skip ci]"
+          git push origin HEAD:prototype-multi-machine
+          echo "WAVE1_COMMIT=$(git rev-parse HEAD)" >> "$GITHUB_ENV"
+
+      - name: Deploy Wave 1 data pages
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          gh workflow run deploy-pages.yml --ref prototype-multi-machine --repo "$GITHUB_REPOSITORY"
+          run_id=""
+          for _ in $(seq 1 40); do
+            run_id="$(gh api "repos/$GITHUB_REPOSITORY/actions/runs?branch=prototype-multi-machine&event=workflow_dispatch&per_page=40" --jq ".workflow_runs[] | select(.name == \"Deploy SloAnalytica Data Pages\" and .head_sha == \"$WAVE1_COMMIT\") | .id" | head -n1 || true)"
+            [ -n "$run_id" ] && break
+            sleep 3
+          done
+          test -n "$run_id"; gh run watch "$run_id" --repo "$GITHUB_REPOSITORY" --exit-status
+          echo "WAVE1_PAGES_RUN_ID=$run_id" >> "$GITHUB_ENV"
+
+      - name: Finalize Wave 1 Distribution
+        shell: bash
+        run: |
+          set -euo pipefail
+          node <<'NODE'
+          const fs=require('fs'),path=require('path');const metadata=JSON.parse(fs.readFileSync(process.env.RUNNER_TEMP+'/batch008-wave1-metadata.json','utf8'));
+          for(const x of Object.values(metadata)){x.packagePath='machines/'+x.machineId+'/machine-package.json';}
+          const doc={batchId:'batch-20261008-008',integration:{repository:'hanashinonetachou-arch/sloanalytica-data',branch:'prototype-multi-machine',commit:process.env.WAVE1_COMMIT,packagePath:'',catalogPath:'catalog.json'},packages:metadata,checks:{catalogIntegrity:true,pagesDeployment:{runId:Number(process.env.WAVE1_PAGES_RUN_ID),conclusion:'success'},uxContractAudit:{runId:Number(process.env.GITHUB_RUN_ID),conclusion:'success'},machineIdentityConsistency:{runId:Number(process.env.GITHUB_RUN_ID),conclusion:'success',batchMachineVerified:true}}};
+          fs.writeFileSync(path.resolve('production-state/production/batches/batch-20261008-008/distribution-repair-attestation.json'),JSON.stringify(doc,null,2)+'\n');
+          NODE
+          cd production-state/production
+          node --experimental-strip-types src/deterministic-production-worker.ts batch-20261008-008 --through DISTRIBUTION
+          npm test
+
+      - name: Materialize Wave 2 Research and advance through App Runtime
+        working-directory: production-state/production
+        run: |
+          node --experimental-strip-types src/materialize-research-drafts.ts batch-20261008-008 wave-2
+          node --experimental-strip-types src/deterministic-production-worker.ts batch-20261008-008 --through APP_RUNTIME
+          npm test
+
+      - name: Publish Wave 2 packages
+        shell: bash
+        run: |
+          set -euo pipefail
+          MACHINES="L_AMAZING_LIVE_PD L_YOSHIMUNE_SC2 L_MAHJONG_MONOGATARI_S2 L_IDOLMASTER_MILLION_LIVE_HC L_YOUJITSU_DE"
+          MACHINES="$MACHINES" node <<'NODE'
+          const fs=require('fs'),path=require('path'),crypto=require('crypto');
+          const batchId='batch-20261008-008',machines=process.env.MACHINES.split(/\s+/).filter(Boolean);
+          const prod=path.resolve('production-state'),proto=path.resolve('prototype');
+          const catalogPath=path.join(proto,'catalog.json'),catalog=JSON.parse(fs.readFileSync(catalogPath,'utf8'));
+          const byId=new Map(catalog.machines.map(x=>[x.machineId,x])),sha=b=>crypto.createHash('sha256').update(b).digest('hex'),metadata={};
+          for(const machineId of machines){
+            const stage=JSON.parse(fs.readFileSync(path.join(prod,'production','batches',batchId,'machines',machineId,'stages','APP_RUNTIME.json'),'utf8'));
+            if(stage.state!=='COMPLETE'||!stage.authoritativeOutputRef?.path)throw new Error('APP_RUNTIME_NOT_COMPLETE:'+machineId);
+            const app=JSON.parse(fs.readFileSync(path.join(prod,stage.authoritativeOutputRef.path),'utf8'));
+            const pkg=app.package,entry=byId.get(machineId); if(!entry)throw new Error('CATALOG_ENTRY_MISSING:'+machineId);
+            pkg.machine.introductionDate=entry.introductionDate;pkg.machine.machineType=entry.machineType;pkg.machine.gameType=entry.gameType;
+            const bytes=Buffer.from(JSON.stringify(pkg,null,2)+'\n','utf8');
+            const target=path.join(proto,'machines',machineId,'machine-package.json');fs.mkdirSync(path.dirname(target),{recursive:true});fs.writeFileSync(target,bytes);
+            const caps=[];for(const f of pkg.features?.features??[]){const model=String(f.modelType??'').toLowerCase();if(model==='binomial'&&!caps.includes('binomial'))caps.push('binomial');if(model==='multinomial'&&!caps.includes('multinomial'))caps.push('multinomial');}
+            if((pkg.evidence?.references??[]).length&&!caps.includes('evidence'))caps.push('evidence');
+            entry.machineDataVersion=pkg.machine.machineDataVersion;entry.sha256=sha(bytes);entry.packageSizeBytes=bytes.length;entry.requiredCapabilities=caps;entry.updatedAt=new Date().toISOString();
+            metadata[machineId]={machineId,machineDataVersion:pkg.machine.machineDataVersion,settings:pkg.machine.settings,sha256:entry.sha256,packageSizeBytes:bytes.length,introductionDate:entry.introductionDate,machineType:entry.machineType,gameType:entry.gameType};
+          }
+          catalog.generatedAt=new Date().toISOString();fs.writeFileSync(catalogPath,JSON.stringify(catalog,null,2)+'\n');
+          fs.writeFileSync(process.env.RUNNER_TEMP+'/batch008-wave2-metadata.json',JSON.stringify(metadata,null,2)+'\n');
+          NODE
+          cd prototype
+          npm run ux-contract:audit
+          node tools/apply-machine-identity-classification.mjs --apply
+          node tools/apply-machine-identity-classification.mjs --verify
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git add catalog.json machines/L_AMAZING_LIVE_PD/machine-package.json machines/L_YOSHIMUNE_SC2/machine-package.json machines/L_MAHJONG_MONOGATARI_S2/machine-package.json machines/L_IDOLMASTER_MILLION_LIVE_HC/machine-package.json machines/L_YOUJITSU_DE/machine-package.json
+          git commit -m "Publish Batch 008 Wave 2 [skip ci]"
+          git push origin HEAD:prototype-multi-machine
+          echo "WAVE2_COMMIT=$(git rev-parse HEAD)" >> "$GITHUB_ENV"
+
+      - name: Deploy Wave 2 data pages
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          gh workflow run deploy-pages.yml --ref prototype-multi-machine --repo "$GITHUB_REPOSITORY"
+          run_id=""
+          for _ in $(seq 1 40); do
+            run_id="$(gh api "repos/$GITHUB_REPOSITORY/actions/runs?branch=prototype-multi-machine&event=workflow_dispatch&per_page=40" --jq ".workflow_runs[] | select(.name == \"Deploy SloAnalytica Data Pages\" and .head_sha == \"$WAVE2_COMMIT\") | .id" | head -n1 || true)"
+            [ -n "$run_id" ] && break
+            sleep 3
+          done
+          test -n "$run_id"; gh run watch "$run_id" --repo "$GITHUB_REPOSITORY" --exit-status
+          echo "WAVE2_PAGES_RUN_ID=$run_id" >> "$GITHUB_ENV"
+
+      - name: Finalize Wave 2 Distribution and authoritative state
+        shell: bash
+        run: |
+          set -euo pipefail
+          node <<'NODE'
+          const fs=require('fs'),path=require('path');const metadata=JSON.parse(fs.readFileSync(process.env.RUNNER_TEMP+'/batch008-wave2-metadata.json','utf8'));
+          const doc={batchId:'batch-20261008-008',integration:{repository:'hanashinonetachou-arch/sloanalytica-data',branch:'prototype-multi-machine',commit:process.env.WAVE2_COMMIT,packagePath:'',catalogPath:'catalog.json'},packages:metadata,checks:{catalogIntegrity:true,pagesDeployment:{runId:Number(process.env.WAVE2_PAGES_RUN_ID),conclusion:'success'},uxContractAudit:{runId:Number(process.env.GITHUB_RUN_ID),conclusion:'success'},machineIdentityConsistency:{runId:Number(process.env.GITHUB_RUN_ID),conclusion:'success',batchMachineVerified:true}}};
+          fs.writeFileSync(path.resolve('production-state/production/batches/batch-20261008-008/distribution-repair-attestation.json'),JSON.stringify(doc,null,2)+'\n');
+          NODE
+          cd production-state/production
+          node --experimental-strip-types src/deterministic-production-worker.ts batch-20261008-008 --through DISTRIBUTION
+          npm test
+          node --experimental-strip-types src/reconcile-batch.ts batch-20261008-008
+
+      - name: Commit authoritative Batch 008 state
+        shell: bash
+        working-directory: production-state
+        run: |
+          set -euo pipefail
+          git fetch origin production/v85-batch-008-foundation-20261008
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git add production/batches/batch-20261008-008
+          git commit -m "Advance Batch 008 through Distribution [skip ci]"
+          git push origin HEAD:production/v85-batch-008-foundation-20261008

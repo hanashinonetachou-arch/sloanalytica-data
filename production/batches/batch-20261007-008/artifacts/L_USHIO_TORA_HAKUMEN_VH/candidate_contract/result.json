@@ -1,0 +1,242 @@
+{
+  "schemaVersion": "candidate-contract-v1",
+  "manifestVersion": "8.5",
+  "batchId": "batch-20261007-008",
+  "machineId": "L_USHIO_TORA_HAKUMEN_VH",
+  "machineName": "Lうしおととら 白面決戦",
+  "evaluationArtifact": {
+    "artifactId": "evaluation-L_USHIO_TORA_HAKUMEN_VH",
+    "kind": "evaluation",
+    "path": "production/batches/batch-20261007-008/artifacts/L_USHIO_TORA_HAKUMEN_VH/evaluation/result.json",
+    "sha256": "00742e7fbedb623933666a653dbf30eb667dbc63010489e311dee5092c15f644",
+    "producerWorkId": "wrk_68e363eafded4134"
+  },
+  "eligibilityArtifact": {
+    "artifactId": "eligibility-L_USHIO_TORA_HAKUMEN_VH",
+    "kind": "eligibility",
+    "path": "production/batches/batch-20261007-008/artifacts/L_USHIO_TORA_HAKUMEN_VH/eligibility/result.json",
+    "sha256": "27c7e1562277f679f9c320dd304fd786ab7d2334e10da65d69b46b30797968ac",
+    "producerWorkId": "wrk_d1f5fa85253e47ac"
+  },
+  "candidates": [
+    {
+      "findingId": "cz",
+      "label": "CZ初当たり",
+      "model": "BERNOULLI",
+      "trialUniverse": "NORMAL_GAME_TRIAL",
+      "liveInferenceRoute": "LIVE_CONDITIONAL",
+      "settingDistribution": {
+        "1": "1/178",
+        "2": "1/175.6",
+        "3": "1/169.7",
+        "4": "1/164.5",
+        "5": "1/161.9",
+        "6": "1/159"
+      },
+      "details": [],
+      "dependencyGroupId": "ushio-cz-at-path",
+      "dependencyKind": "CAUSAL_PATH_OVERLAP",
+      "dependencyReason": "CZ成功からATへ進む経路を含みます。ATを優先し、未観測の場合だけCZを使用します。",
+      "dependencyFallbackRank": 2,
+      "runtimeInferenceAllowed": true,
+      "dependencyResolution": "FALLBACK_MEMBER",
+      "runtimePolicyBinding": {
+        "metric": "SELECTION_SCORE",
+        "value": 9.939989384421095,
+        "thresholdSource": "RUNTIME_POLICY"
+      },
+      "suppressedByFeatureIds": [
+        "at"
+      ]
+    },
+    {
+      "findingId": "at",
+      "label": "AT初当たり",
+      "model": "BERNOULLI",
+      "trialUniverse": "NORMAL_GAME_TRIAL",
+      "liveInferenceRoute": "LIVE_CONDITIONAL",
+      "settingDistribution": {
+        "1": "1/397.3",
+        "2": "1/389.6",
+        "3": "1/378",
+        "4": "1/365.6",
+        "5": "1/360",
+        "6": "1/356.1"
+      },
+      "details": [],
+      "dependencyGroupId": "ushio-cz-at-path",
+      "dependencyKind": "CAUSAL_PATH_OVERLAP",
+      "dependencyReason": "CZ成功からATへ進む経路を含みます。ATを優先し、未観測の場合だけCZを使用します。",
+      "dependencyFallbackRank": 1,
+      "runtimeInferenceAllowed": true,
+      "dependencyResolution": "PREFERRED_MEMBER",
+      "runtimePolicyBinding": {
+        "metric": "SELECTION_SCORE",
+        "value": 4.3330197795366665,
+        "thresholdSource": "RUNTIME_POLICY"
+      },
+      "suppressedByFeatureIds": []
+    }
+  ],
+  "dependencyGroups": [
+    {
+      "groupId": "ushio-cz-at-path",
+      "resolution": "PREFERRED_WITH_FALLBACK",
+      "members": [
+        "cz",
+        "at"
+      ],
+      "runtimeInferenceAllowed": true,
+      "preferredFindingId": "at",
+      "fallbackOrder": [
+        "at",
+        "cz"
+      ],
+      "reason": "依存関係がある候補を同時加算せず、観測できた優先Featureを使用し、未観測時だけ次順位のFeatureへ自動フォールバックする。",
+      "selectionRationale": "Researchで明示された優先順位に従い、同一セッションで重複情報を同時加算しない。"
+    }
+  ],
+  "excludedDecisions": [],
+  "blockedItems": [
+    {
+      "blockId": "reset-ceiling",
+      "label": "設定変更後のAT間天井",
+      "reason": "設定別の2000・2250・2500G振り分けは公開されていますが、先にATへ当選した場合の選択天井を確定できません。",
+      "reevaluationCondition": "本機の全設定の数値と、対象の抽選条件・結果を正確に確認する方法が公表されること。",
+      "sourceIds": [
+        "analysis"
+      ],
+      "rawSourceValues": {
+        "2000": [
+          15.5,
+          23.25,
+          27.91,
+          46.51,
+          55.81,
+          56.59
+        ],
+        "2250": [
+          0.39,
+          0.39,
+          0.39,
+          0.39,
+          0.39,
+          0.39
+        ],
+        "2500": [
+          84.11,
+          76.35,
+          71.7,
+          53.1,
+          43.8,
+          43.02
+        ]
+      }
+    },
+    {
+      "blockId": "role-cz",
+      "label": "内部状態別・成立役別のCZ抽選",
+      "reason": "状態別の設定1の値は公開されていますが、全設定の率が揃わず、内部状態の示唆ステージも確定条件にはできません。",
+      "reevaluationCondition": "本機の全設定の数値と、対象の抽選条件・結果を正確に確認する方法が公表されること。",
+      "sourceIds": [
+        "draw"
+      ]
+    },
+    {
+      "blockId": "ushitora-mode",
+      "label": "うしとらモード移行",
+      "reason": "CZ失敗回数やリセットでの内部モード移行は、その後のCZ種別だけから全件確定できません。",
+      "reevaluationCondition": "本機の全設定の数値と、対象の抽選条件・結果を正確に確認する方法が公表されること。",
+      "sourceIds": [
+        "analysis"
+      ]
+    }
+  ],
+  "evidenceCandidates": [
+    {
+      "findingId": "trophy",
+      "label": "ダイナマイトトロフィー",
+      "sourceIds": [
+        "analysis"
+      ],
+      "details": [
+        "出現率は未公表です。設定が限定される表示だけを確定条件に使用し、それ以外は記録します。"
+      ],
+      "semanticCategories": [
+        {
+          "label": "銅",
+          "meaning": "設定2以上",
+          "semanticType": "EXACT_CONSTRAINT"
+        },
+        {
+          "label": "銀",
+          "meaning": "設定3以上",
+          "semanticType": "EXACT_CONSTRAINT"
+        },
+        {
+          "label": "金",
+          "meaning": "設定4以上",
+          "semanticType": "EXACT_CONSTRAINT"
+        },
+        {
+          "label": "てんとう虫柄",
+          "meaning": "設定5以上",
+          "semanticType": "EXACT_CONSTRAINT"
+        },
+        {
+          "label": "虹",
+          "meaning": "設定6",
+          "semanticType": "EXACT_CONSTRAINT"
+        }
+      ]
+    },
+    {
+      "findingId": "count",
+      "label": "獲得枚数表示",
+      "sourceIds": [
+        "analysis"
+      ],
+      "details": [
+        "出現率は未公表です。設定が限定される表示だけを確定条件に使用し、それ以外は記録します。"
+      ],
+      "semanticCategories": [
+        {
+          "label": "222枚",
+          "meaning": "設定2以上",
+          "semanticType": "EXACT_CONSTRAINT"
+        },
+        {
+          "label": "333枚",
+          "meaning": "設定3以上",
+          "semanticType": "EXACT_CONSTRAINT"
+        },
+        {
+          "label": "444枚",
+          "meaning": "設定4以上",
+          "semanticType": "EXACT_CONSTRAINT"
+        },
+        {
+          "label": "555枚",
+          "meaning": "設定5以上",
+          "semanticType": "EXACT_CONSTRAINT"
+        },
+        {
+          "label": "666枚",
+          "meaning": "設定6",
+          "semanticType": "EXACT_CONSTRAINT"
+        },
+        {
+          "label": "246枚",
+          "meaning": "設定2・4・6",
+          "semanticType": "EXACT_CONSTRAINT"
+        },
+        {
+          "label": "456枚",
+          "meaning": "設定4以上",
+          "semanticType": "EXACT_CONSTRAINT"
+        }
+      ]
+    }
+  ],
+  "sourceIntegrityIssues": []
+}
