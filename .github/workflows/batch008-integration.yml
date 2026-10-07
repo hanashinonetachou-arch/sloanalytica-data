@@ -3,7 +3,7 @@ name: Batch008 10-Machine Integration Boundary
 on:
   push:
     branches:
-      - production/v85-batch-008-foundation-20261008
+      - production/v85-batch-008-foundation-20261007
     paths:
       - production/.batch008-integration-trigger
       - .github/workflows/batch008-integration.yml
@@ -23,7 +23,7 @@ jobs:
       - name: Checkout authoritative production state
         uses: actions/checkout@v4
         with:
-          ref: production/v85-batch-008-foundation-20261008
+          ref: production/v85-batch-008-foundation-20261007
           path: production-state
           fetch-depth: 0
 
@@ -47,10 +47,10 @@ jobs:
       - name: Materialize Wave 1 Research and advance through App Runtime
         working-directory: production-state/production
         run: |
-          node --experimental-strip-types src/materialize-research-drafts.ts batch-20261008-008 wave-1
-          node --experimental-strip-types src/deterministic-production-worker.ts batch-20261008-008 --through APP_RUNTIME
+          node --experimental-strip-types src/materialize-research-drafts.ts batch-20261007-008 wave-1
+          node --experimental-strip-types src/deterministic-production-worker.ts batch-20261007-008 --through APP_RUNTIME
           npm test
-          node --experimental-strip-types src/reconcile-batch.ts batch-20261008-008
+          node --experimental-strip-types src/reconcile-batch.ts batch-20261007-008
 
       - name: Install prototype dependencies
         working-directory: prototype
@@ -63,7 +63,7 @@ jobs:
           MACHINES="L_SMASLO_KAIJI_KYOEN_FJ L_LOVEJOU3_M4 L_GOBLIN_SLAYER_RD L_GODZILLA_NS L_USHIO_TORA_HAKUMEN_VH"
           MACHINES="$MACHINES" node <<'NODE'
           const fs=require('fs'),path=require('path'),crypto=require('crypto');
-          const batchId='batch-20261008-008',machines=process.env.MACHINES.split(/\s+/).filter(Boolean);
+          const batchId='batch-20261007-008',machines=process.env.MACHINES.split(/\s+/).filter(Boolean);
           const prod=path.resolve('production-state'),proto=path.resolve('prototype');
           const catalogPath=path.join(proto,'catalog.json'),catalog=JSON.parse(fs.readFileSync(catalogPath,'utf8'));
           const byId=new Map(catalog.machines.map(x=>[x.machineId,x])),sha=b=>crypto.createHash('sha256').update(b).digest('hex'),metadata={};
@@ -117,18 +117,18 @@ jobs:
           node <<'NODE'
           const fs=require('fs'),path=require('path');const metadata=JSON.parse(fs.readFileSync(process.env.RUNNER_TEMP+'/batch008-wave1-metadata.json','utf8'));
           for(const x of Object.values(metadata)){x.packagePath='machines/'+x.machineId+'/machine-package.json';}
-          const doc={batchId:'batch-20261008-008',integration:{repository:'hanashinonetachou-arch/sloanalytica-data',branch:'prototype-multi-machine',commit:process.env.WAVE1_COMMIT,packagePath:'',catalogPath:'catalog.json'},packages:metadata,checks:{catalogIntegrity:true,pagesDeployment:{runId:Number(process.env.WAVE1_PAGES_RUN_ID),conclusion:'success'},uxContractAudit:{runId:Number(process.env.GITHUB_RUN_ID),conclusion:'success'},machineIdentityConsistency:{runId:Number(process.env.GITHUB_RUN_ID),conclusion:'success',batchMachineVerified:true}}};
-          fs.writeFileSync(path.resolve('production-state/production/batches/batch-20261008-008/distribution-repair-attestation.json'),JSON.stringify(doc,null,2)+'\n');
+          const doc={batchId:'batch-20261007-008',integration:{repository:'hanashinonetachou-arch/sloanalytica-data',branch:'prototype-multi-machine',commit:process.env.WAVE1_COMMIT,packagePath:'',catalogPath:'catalog.json'},packages:metadata,checks:{catalogIntegrity:true,pagesDeployment:{runId:Number(process.env.WAVE1_PAGES_RUN_ID),conclusion:'success'},uxContractAudit:{runId:Number(process.env.GITHUB_RUN_ID),conclusion:'success'},machineIdentityConsistency:{runId:Number(process.env.GITHUB_RUN_ID),conclusion:'success',batchMachineVerified:true}}};
+          fs.writeFileSync(path.resolve('production-state/production/batches/batch-20261007-008/distribution-repair-attestation.json'),JSON.stringify(doc,null,2)+'\n');
           NODE
           cd production-state/production
-          node --experimental-strip-types src/deterministic-production-worker.ts batch-20261008-008 --through DISTRIBUTION
+          node --experimental-strip-types src/deterministic-production-worker.ts batch-20261007-008 --through DISTRIBUTION
           npm test
 
       - name: Materialize Wave 2 Research and advance through App Runtime
         working-directory: production-state/production
         run: |
-          node --experimental-strip-types src/materialize-research-drafts.ts batch-20261008-008 wave-2
-          node --experimental-strip-types src/deterministic-production-worker.ts batch-20261008-008 --through APP_RUNTIME
+          node --experimental-strip-types src/materialize-research-drafts.ts batch-20261007-008 wave-2
+          node --experimental-strip-types src/deterministic-production-worker.ts batch-20261007-008 --through APP_RUNTIME
           npm test
 
       - name: Publish Wave 2 packages
@@ -138,7 +138,7 @@ jobs:
           MACHINES="L_AMAZING_LIVE_PD L_YOSHIMUNE_SC2 L_MAHJONG_MONOGATARI_S2 L_IDOLMASTER_MILLION_LIVE_HC L_YOUJITSU_DE"
           MACHINES="$MACHINES" node <<'NODE'
           const fs=require('fs'),path=require('path'),crypto=require('crypto');
-          const batchId='batch-20261008-008',machines=process.env.MACHINES.split(/\s+/).filter(Boolean);
+          const batchId='batch-20261007-008',machines=process.env.MACHINES.split(/\s+/).filter(Boolean);
           const prod=path.resolve('production-state'),proto=path.resolve('prototype');
           const catalogPath=path.join(proto,'catalog.json'),catalog=JSON.parse(fs.readFileSync(catalogPath,'utf8'));
           const byId=new Map(catalog.machines.map(x=>[x.machineId,x])),sha=b=>crypto.createHash('sha256').update(b).digest('hex'),metadata={};
@@ -191,22 +191,22 @@ jobs:
           set -euo pipefail
           node <<'NODE'
           const fs=require('fs'),path=require('path');const metadata=JSON.parse(fs.readFileSync(process.env.RUNNER_TEMP+'/batch008-wave2-metadata.json','utf8'));
-          const doc={batchId:'batch-20261008-008',integration:{repository:'hanashinonetachou-arch/sloanalytica-data',branch:'prototype-multi-machine',commit:process.env.WAVE2_COMMIT,packagePath:'',catalogPath:'catalog.json'},packages:metadata,checks:{catalogIntegrity:true,pagesDeployment:{runId:Number(process.env.WAVE2_PAGES_RUN_ID),conclusion:'success'},uxContractAudit:{runId:Number(process.env.GITHUB_RUN_ID),conclusion:'success'},machineIdentityConsistency:{runId:Number(process.env.GITHUB_RUN_ID),conclusion:'success',batchMachineVerified:true}}};
-          fs.writeFileSync(path.resolve('production-state/production/batches/batch-20261008-008/distribution-repair-attestation.json'),JSON.stringify(doc,null,2)+'\n');
+          const doc={batchId:'batch-20261007-008',integration:{repository:'hanashinonetachou-arch/sloanalytica-data',branch:'prototype-multi-machine',commit:process.env.WAVE2_COMMIT,packagePath:'',catalogPath:'catalog.json'},packages:metadata,checks:{catalogIntegrity:true,pagesDeployment:{runId:Number(process.env.WAVE2_PAGES_RUN_ID),conclusion:'success'},uxContractAudit:{runId:Number(process.env.GITHUB_RUN_ID),conclusion:'success'},machineIdentityConsistency:{runId:Number(process.env.GITHUB_RUN_ID),conclusion:'success',batchMachineVerified:true}}};
+          fs.writeFileSync(path.resolve('production-state/production/batches/batch-20261007-008/distribution-repair-attestation.json'),JSON.stringify(doc,null,2)+'\n');
           NODE
           cd production-state/production
-          node --experimental-strip-types src/deterministic-production-worker.ts batch-20261008-008 --through DISTRIBUTION
+          node --experimental-strip-types src/deterministic-production-worker.ts batch-20261007-008 --through DISTRIBUTION
           npm test
-          node --experimental-strip-types src/reconcile-batch.ts batch-20261008-008
+          node --experimental-strip-types src/reconcile-batch.ts batch-20261007-008
 
       - name: Commit authoritative Batch 008 state
         shell: bash
         working-directory: production-state
         run: |
           set -euo pipefail
-          git fetch origin production/v85-batch-008-foundation-20261008
+          git fetch origin production/v85-batch-008-foundation-20261007
           git config user.name github-actions[bot]
           git config user.email 41898282+github-actions[bot]@users.noreply.github.com
-          git add production/batches/batch-20261008-008
+          git add production/batches/batch-20261007-008
           git commit -m "Advance Batch 008 through Distribution [skip ci]"
-          git push origin HEAD:production/v85-batch-008-foundation-20261008
+          git push origin HEAD:production/v85-batch-008-foundation-20261007
