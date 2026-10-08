@@ -87,6 +87,10 @@ export function validateResearchPromotionReadiness(d:any){
     throw new Error('RESEARCH_VALIDATION:PENDING_SCOPE_PROMOTION_FORBIDDEN');
   // A recorded setting hint cannot also act as an independent categorical
   // likelihood for the very same observation without a proven UI/runtime link.
+  for(const finding of d?.findings??[]){
+    if(finding?.settingDistribution&&['probability','conditional_probability','appearance_distribution'].includes(finding.observationType)&&finding?.liveObservation?.status==='UNRESOLVED')
+      throw new Error('RESEARCH_VALIDATION:UNRESOLVED_NUMERIC_OBSERVATION_PROMOTION_FORBIDDEN:'+String(finding.findingId));
+  }
   const evidenceIds=new Set((d?.findings??[]).filter((f:any)=>f?.observationType==='evidence').map((f:any)=>f.findingId));
   for(const finding of d?.findings??[]){
     if(finding?.mirrorsEvidenceFindingId&&evidenceIds.has(finding.mirrorsEvidenceFindingId))
