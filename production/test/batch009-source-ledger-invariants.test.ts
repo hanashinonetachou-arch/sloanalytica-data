@@ -252,3 +252,41 @@ test('Sister Quest 10G aftercare AT direct-hit table is an unstratified referenc
   assert.ok(!d.findings.some((x:any)=>x.findingId==='sister-aftercare-setting-rate'));
  }
 });
+
+test('Tida small-role source conflict remains excluded from numerical setting inference',()=>{
+ for(const scope of ['research-working','research-evidence-staged']){
+  const d=read(scope,'wave-1','L_TIDADONDON_PA5.json');
+  const dom=d.researchCompleteness.domains.find((x:any)=>x.domain==='SMALL_ROLE');
+  assert.equal(dom.status,'CHECKED');
+  const conflict=dom.publishedRateConflict;
+  assert.equal(conflict.status,'UNRESOLVED_SOURCE_LABEL_MAPPING');
+  assert.equal(conflict.runtimeInference,'FORBIDDEN_NO_SETTING_DIFFERENCE');
+  assert.equal(conflict.useNamedReferenceRates,false);
+  assert.deepEqual(conflict.entries.map((x:any)=>[x.role,x.hazuse,x.nanaPress]),[
+   ['チェリー','1/89.8','1/69.4'],
+   ['スイカ','1/69.4','1/89.8'],
+   ['確定役','1/8192','1/8192']
+  ]);
+  const row=d.researchCompleteness.candidateLedger.find((x:any)=>x.candidateId==='smallrole-publication-discrepancy');
+  assert.equal(row?.disposition.type,'NO_SETTING_DIFFERENCE');
+  assert.equal(row.sourceClaims.length,3);
+ }
+});
+test('Tida mechanics are checked but cannot become unreviewed setting likelihoods',()=>{
+ for(const scope of ['research-working','research-evidence-staged']){
+  const d=read(scope,'wave-1','L_TIDADONDON_PA5.json');
+  for(const domain of ['BONUS','BONUS_TYPE_CONDITIONAL','RESET_BEHAVIOR','THRESHOLD_BEHAVIOR','POST_EVENT_TRANSITION','NAVIGATION','SUCCESS_RATE','SMALL_ROLE'])
+   assert.equal(d.researchCompleteness.domains.find((x:any)=>x.domain===domain)?.status,'CHECKED',domain);
+  for(const code of ['bonus-mechanics','bonus-type','reset','ceiling','afterbonus','state-display','heaven-success']){
+   const id='tida-'+code+'-not-setting';
+   const block=d.blockedItems.find((x:any)=>x.blockId===id);
+   const ledger=d.researchCompleteness.candidateLedger.find((x:any)=>x.candidateId==='block:'+id);
+   assert.ok(block?.reason&&block.sourceIds.length===2,id);
+   assert.equal(ledger?.disposition.type,'BLOCKED',id);
+   for(const sc of ledger.sourceClaims)
+    assert.ok(d.sources.some((s:any)=>s.sourceId===sc.sourceId&&s.claims.includes(sc.claim)),id);
+  }
+  assert.equal(d.researchCompleteness.status,'INCOMPLETE');
+  assert.deepEqual(d.settings.values,['SET_2','SET_3','SET_4','SET_5','SET_6']);
+ }
+});
