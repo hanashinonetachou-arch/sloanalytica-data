@@ -51,6 +51,11 @@ test('Sister Quest rare monster four-way rate is conditional on observing a rare
   const table=src.findings.find((x:any)=>x.findingId==='at-monster-setting-distribution');
   const d=read('research-evidence-staged','wave-1','L_SISTER_QUEST_CA.json');
   const f=d.findings.find((x:any)=>x.findingId==='at-monster-categorical');
+  assert.equal(f?.mirrorsEvidenceFindingId,'reviewed-at-monster');
+  const mirror=d.findings.find((x:any)=>x.findingId==='reviewed-at-monster');
+  assert.ok(mirror);
+  assert.deepEqual(mirror.semanticCategories.map((x:any)=>x.label),table.categories);
+  assert.ok(mirror.semanticCategories.every((x:any)=>x.semanticType==='PROBABILITY_BACKED'));
   assert.ok(f);
   assert.equal(f.trialUniverse,'SISTER_RARE_MONSTER_APPEARANCE');
   assert.equal(f.categoryModel.residualPolicy,'SOURCE_EXHAUSTIVE');
