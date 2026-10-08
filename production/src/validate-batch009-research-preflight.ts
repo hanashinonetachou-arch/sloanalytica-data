@@ -29,6 +29,24 @@ for(const [index,machineId] of machines.entries()){
  try{validateResearchCandidateLedger(work,new Set(work.sources.map((s:any)=>s.sourceId)))}catch(e){errors.push(String(e))}
  if((ev.openChecks||ev.unresolved||[]).length)errors.push('EVIDENCE_REVIEW_OPEN');
  const evidence=work.findings.filter((f:any)=>f.observationType==='evidence');
+ const findingIds=work.findings.map((f:any)=>String(f.findingId));
+ if(new Set(findingIds).size!==findingIds.length)errors.push('DUPLICATE_FINDING_ID');
+ const sourceIds=new Set(work.sources.map((s:any)=>String(s.sourceId)));
+ for(const f of work.findings){
+  if(!Array.isArray(f.sourceIds)||!f.sourceIds.length||f.sourceIds.some((id:any)=>!sourceIds.has(String(id))))errors.push('MISSING_FINDING_SOURCE_'+f.findingId);
+  if(f.observationType==='evidence' && (!Array.isArray(f.semanticCategories)||!f.semanticCategories.length))errors.push('EMPTY_EVIDENCE_CATEGORIES_'+f.findingId);
+ }
+ for(const expected of ev.evidenceCandidates||[]){
+  const f=evidence.find((x:any)=>x.findingId==='reviewed-'+expected.findingId);
+  if(!f)continue;
+  if(JSON.stringify(f.semanticCategories)!==JSON.stringify(expected.semanticCategories))errors.push('EVIDENCE_CATEGORY_MISMATCH_'+expected.findingId);
+ }
+ if((ev.categoryRates?.percentRows?.length??0)>0){
+  const expectedName=ev.evidenceCandidates?.[0]?.findingId;
+  const f=evidence.find((x:any)=>x.findingId==='reviewed-'+expectedName);
+  if(f && f.observationType==='evidence')errors.push('KNOWN_CATEGORY_RATES_STILL_EVIDENCE_ONLY_'+expectedName);
+ }
+ if(work.researchCompleteness?.evidenceSourceReview?.status==='STAGED_NOT_APPROVED')errors.push('EVIDENCE_NOT_APPROVED');
  if((ev.evidenceCandidates||[]).length && (ev.evidenceCandidates||[]).some((x:any)=>!evidence.some((f:any)=>f.findingId==='reviewed-'+x.findingId)))errors.push('EVIDENCE_NOT_MERGED');
  if(!evidence.length&&!ev.noSettingEvidenceAttestation)errors.push('NO_EVIDENCE_ATTESTATION');
  if(machineId==='S_BOOWY_SV'&&work.settings.values.includes('SET_L'))errors.push('BOOWY_SETTING_L_INCLUDED');
