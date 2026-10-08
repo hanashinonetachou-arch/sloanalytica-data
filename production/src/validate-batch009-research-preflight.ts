@@ -1,6 +1,7 @@
 /** Batch009 non-destructive research promotion gate. Run from production/. */
 import fs from 'node:fs';
 import path from 'node:path';
+import {validateCategoryRates} from './batch009-rate-matrix.ts';
 import {RESEARCH_COMPLETENESS_DOMAINS,validateResearchCandidateLedger,validateResearchLiveObservationContract,validateResearchUserFacingTextContract,validateResearchProbabilityRouteContract} from './research-validator.ts';
 const batch='batch-20261008-009';
 const root=path.resolve('batches',batch);
@@ -40,6 +41,9 @@ for(const [index,machineId] of machines.entries()){
   const f=evidence.find((x:any)=>x.findingId==='reviewed-'+expected.findingId);
   if(!f)continue;
   if(JSON.stringify(f.semanticCategories)!==JSON.stringify(expected.semanticCategories))errors.push('EVIDENCE_CATEGORY_MISMATCH_'+expected.findingId);
+ }
+ if(ev.categoryRates){
+  for(const err of validateCategoryRates(ev.categoryRates))errors.push(err);
  }
  if((ev.categoryRates?.percentRows?.length??0)>0){
   const expectedName=ev.evidenceCandidates?.[0]?.findingId;
