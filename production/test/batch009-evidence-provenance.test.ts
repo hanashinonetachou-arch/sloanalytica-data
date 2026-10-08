@@ -62,3 +62,31 @@ test('BIG島唄 has conditional rates but no invented numerical hint evidence',(
   for(const f of d.findings.filter((x:any)=>x.observationType==='appearance_distribution'))assert.equal(f.liveObservation.status,'UNRESOLVED');
   assert.equal(d.researchCompleteness.domains.filter((x:any)=>x.status==='CHECKED').length,2);
 });
+
+test('てぃだどんどん covers the five supported settings and only uses seven-segment exact hints',()=>{
+  const d=read('research-evidence-staged','wave-1','L_TIDADONDON_PA5.json');
+  assert.deepEqual(d.settings.values,['SET_2','SET_3','SET_4','SET_5','SET_6']);
+  const f=d.findings.find((x:any)=>x.findingId==='reviewed-big-seven-seg');
+  assert.ok(f);
+  const categories=new Map(f.semanticCategories.map((c:any)=>[c.label,c]));
+  for(const [label,meaning] of [['黄','設定3以上'],['緑','設定4以上'],['緑＆赤','設定6']]){
+    const x:any=categories.get(label);
+    assert.equal(x?.meaning,meaning);
+    assert.equal(x?.semanticType,'EXACT_CONSTRAINT');
+  }
+  assert.equal(d.blockedItems.some((x:any)=>x.blockId==='seven-segment'),false);
+  assert.ok(d.blockedItems.some((x:any)=>x.blockId==='small-role-no-setting-difference'));
+  assert.equal(d.researchCompleteness.domains.find((x:any)=>x.domain==='SMALL_ROLE')?.status,'CHECKED');
+  assert.equal(d.findings.find((x:any)=>x.findingId==='bonus-initial')?.liveObservation?.status,'UNRESOLVED');
+});
+test('BOØWY public small-role rates do not become a fabricated feature',()=>{
+  const d=read('research-evidence-staged','wave-2','S_BOOWY_SV.json');
+  assert.deepEqual(d.settings.values,['SET_1','SET_2','SET_4','SET_5','SET_6']);
+  assert.equal(d.findings.filter((x:any)=>x.settingDistribution).length,1);
+  assert.equal(d.findings[0].liveObservation.status,'UNRESOLVED');
+  assert.ok(d.blockedItems.some((x:any)=>x.blockId==='small-role-common'));
+  const c=d.findings.find((x:any)=>x.findingId==='reviewed-at-end-screen');
+  const high=c.semanticCategories.find((x:any)=>x.label==='氷室＆高橋');
+  assert.equal(high.semanticType,'PROBABILITY_UNKNOWN');
+  assert.equal(d.researchCompleteness.domains.find((x:any)=>x.domain==='SMALL_ROLE')?.status,'CHECKED');
+});
