@@ -2,6 +2,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import {validateCategoryRates} from './batch009-rate-matrix.ts';
+import {auditBatch009Staging} from './batch009-staging-integrity.ts';
 import {RESEARCH_COMPLETENESS_DOMAINS,validateResearchCandidateLedger,validateResearchLiveObservationContract,validateResearchUserFacingTextContract,validateResearchProbabilityRouteContract,validateResearchPromotionReadiness} from './research-validator.ts';
 const batch='batch-20261008-009';
 const root=path.resolve('batches',batch);
@@ -14,7 +15,9 @@ for(const [index,machineId] of machines.entries()){
  const wave=index<5?'wave-1':'wave-2';
  const work=JSON.parse(fs.readFileSync(path.join(root,'research-evidence-staged',wave,machineId+'.json'),'utf8'));
  const ev=JSON.parse(fs.readFileSync(path.join(root,'research-evidence-reviewed',machineId+'.json'),'utf8'));
+ const original=JSON.parse(fs.readFileSync(path.join(root,'research-working',wave,machineId+'.json'),'utf8'));
  const errors:string[]=[];
+ for(const issue of auditBatch009Staging(original,ev,work))errors.push(issue);
  if(work.machineId!==machineId||ev.machineId!==machineId||work.batchId!==batch)errors.push('IDENTITY_MISMATCH');
  if(work.researchStage!=='SOURCE_REVIEWED_COMPLETE'||work.researchCompleteness?.status!=='COMPLETE')errors.push('RESEARCH_NOT_APPROVED');
  const present=new Map((work.researchCompleteness?.domains||[]).map((d:any)=>[d.domain,d]));
