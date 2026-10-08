@@ -15,7 +15,7 @@ test('BOØWY follows all twenty research domains without inferring hidden settin
  const twenty=['INITIAL_HIT','BONUS','SMALL_ROLE','CZ','AT','INTERNAL_CONDITIONAL_DRAW','MODE_TRANSITION','STATE_TRANSITION','SUCCESS_RATE','POINTS_GAME_DISTRIBUTION','CARRY_OVER','THRESHOLD_BEHAVIOR','RESET_BEHAVIOR','POST_EVENT_TRANSITION','NAVIGATION','ROLE_CONDITIONAL_DISTRIBUTION','BONUS_TYPE_CONDITIONAL','EVIDENCE','EXTERNAL_DATA_ONLY','MACHINE_SPECIFIC'];
  for(const name of twenty)assert.ok(d.has(name),name);
  for(const name of ['BONUS','BONUS_TYPE_CONDITIONAL'])assert.equal(d.get(name).status,'NOT_APPLICABLE',name);
- for(const name of ['SMALL_ROLE','CZ','INTERNAL_CONDITIONAL_DRAW','SUCCESS_RATE','POINTS_GAME_DISTRIBUTION','CARRY_OVER','THRESHOLD_BEHAVIOR','RESET_BEHAVIOR','POST_EVENT_TRANSITION','NAVIGATION','ROLE_CONDITIONAL_DISTRIBUTION','EXTERNAL_DATA_ONLY'])
+ for(const name of ['SMALL_ROLE','CZ','INTERNAL_CONDITIONAL_DRAW','SUCCESS_RATE','POINTS_GAME_DISTRIBUTION','CARRY_OVER','THRESHOLD_BEHAVIOR','RESET_BEHAVIOR','POST_EVENT_TRANSITION','NAVIGATION','ROLE_CONDITIONAL_DISTRIBUTION','EXTERNAL_DATA_ONLY','AT'])
    assert.equal(d.get(name).status,'CHECKED',name);
  const enabled=staged.findings.filter((x:any)=>x.settingDistribution&&x.liveObservation?.status!=='UNRESOLVED');
  assert.equal(enabled.length,0);
@@ -57,4 +57,19 @@ test('BOØWY ending screen and setting L cannot be confused with independent num
  assert.equal(categories.find((x:any)=>x.label==='氷室＆高橋')?.semanticType,'PROBABILITY_UNKNOWN');
  assert.equal(categories.find((x:any)=>x.label==='全員集合')?.semanticType,'EXACT_CONSTRAINT');
  assert.equal(categories.find((x:any)=>x.label==='氷室1人（影）')?.meaning,'設定1否定');
+});
+
+test('BOØWY AT progression can be source-checked while AT initial-hit denominator remains unresolved',()=>{
+ const d=read('research-evidence-staged','wave-2','S_BOOWY_SV.json');
+ const at=d.researchCompleteness.domains.find((x:any)=>x.domain==='AT');
+ const hit=d.researchCompleteness.domains.find((x:any)=>x.domain==='INITIAL_HIT');
+ assert.equal(at?.status,'CHECKED');
+ assert.equal(hit?.status,'PARTIAL');
+ assert.ok(at.sourceIds.includes('boowy-v19-gigs-nana'));
+ assert.ok(at.sourceIds.includes('boowy-v19-gigs-pworld'));
+ const initial=d.findings.find((x:any)=>x.findingId==='at-initial');
+ assert.equal(initial.liveObservation?.status,'UNRESOLVED');
+ const blocked=d.blockedItems.find((x:any)=>x.blockId==='at-upper-promotion-not-independent');
+ assert.ok(blocked?.sourceIds.includes('boowy-v19-gigs-nana'));
+ assert.ok(d.researchCompleteness.candidateLedger.some((x:any)=>x.disposition?.refId===blocked.blockId));
 });
