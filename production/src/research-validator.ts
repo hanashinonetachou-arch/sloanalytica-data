@@ -85,6 +85,13 @@ export function validateResearchCandidateLedger(d:any,sourceIds:Set<any>){
 export function validateResearchPromotionReadiness(d:any){
   if((d?.researchCompleteness?.candidateLedger??[]).some((row:any)=>row?.disposition?.type==='FINDING_PENDING_SCOPE_VALIDATION'))
     throw new Error('RESEARCH_VALIDATION:PENDING_SCOPE_PROMOTION_FORBIDDEN');
+  // A recorded setting hint cannot also act as an independent categorical
+  // likelihood for the very same observation without a proven UI/runtime link.
+  const evidenceIds=new Set((d?.findings??[]).filter((f:any)=>f?.observationType==='evidence').map((f:any)=>f.findingId));
+  for(const finding of d?.findings??[]){
+    if(finding?.mirrorsEvidenceFindingId&&evidenceIds.has(finding.mirrorsEvidenceFindingId))
+      throw new Error('RESEARCH_VALIDATION:MIRRORED_CATEGORICAL_EVIDENCE_NOT_RECONCILED:'+String(finding.findingId));
+  }
 }
 
 export function validateResearchArtifacts(s:RepoStore,a:Attempt,r:WorkResult){
