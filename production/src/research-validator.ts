@@ -92,6 +92,10 @@ export function validateResearchPromotionReadiness(d:any){
     if(finding?.settingDistribution&&['probability','conditional_probability','appearance_distribution'].includes(finding.observationType)&&finding?.liveObservation?.status==='UNRESOLVED')
       throw new Error('RESEARCH_VALIDATION:UNRESOLVED_NUMERIC_OBSERVATION_PROMOTION_FORBIDDEN:'+String(finding.findingId));
   }
+  for(const finding of d?.findings??[]){
+    if(finding?.settingDistribution && String(finding?.dependencyScopeAudit?.status??'').startsWith('UNRESOLVED_'))
+      throw new Error('RESEARCH_VALIDATION:UNRESOLVED_CAUSAL_DEPENDENCY_PROMOTION_FORBIDDEN:'+String(finding.findingId));
+  }
   const categoricalIssues=categoricalEvidenceMirrorIssues(d);
   if(categoricalIssues.length)
     throw new Error('RESEARCH_VALIDATION:'+categoricalIssues[0]);
