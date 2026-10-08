@@ -54,3 +54,26 @@ test('バイオ5 special 256枚 is a noncontiguous setting constraint', () => {
   assert.equal(c?.meaning, '設定2・5・6');
   assert.equal(f.semanticCategories.some((x: any) => x.label === '246枚OVER'), false);
 });
+
+test('BIG島唄 two distinct reset mode tables never become numeric setting likelihoods',()=>{
+ const d=read('research-quantitative-addenda/S_BIG_SHIMAUTA_E2_30.json');
+ assert.equal(d.referenceModeRateTables.length,2);
+ const [change,afterBonus]=d.referenceModeRateTables;
+ assert.equal(change.event,'SETTING_CHANGE');
+ assert.equal(afterBonus.event,'BONUS_END_PARTIAL_ADVANTAGE_INTERVAL_RESET');
+ assert.deepEqual(change.percentages,{'通常A':9.8,'通常B':9.8,'チャンス':30,'天国準備A':50,'天国準備B':0.4});
+ assert.deepEqual(afterBonus.percentages,{'通常B':25,'天国準備A':25,'天国準備B':50});
+ for(const t of [change,afterBonus]){
+  assert.equal(t.numericInference,'FORBIDDEN_NO_SETTING_DIFFERENCE');
+  assert.ok(t.sources.length>=2);
+  assert.ok(t.sampleSpace&&t.event);
+  assert.equal(Object.values(t.percentages).reduce((a:any,b:any)=>a+b,0),100);
+ }
+ const stage=read('research-evidence-staged/wave-2/S_BIG_SHIMAUTA_E2_30.json');
+ assert.equal(stage.settings.values.includes('SET_4'),false);
+ assert.equal(stage.settings.values.includes('SET_L'),false);
+ assert.equal(stage.researchCompleteness.domains.find((x:any)=>x.domain==='RESET_BEHAVIOR').status,'CHECKED');
+ for(const id of ['bonus-end-reset-shared-modes','mode-specific-ceilings-are-not-settings','no-visible-reset-lamp'])
+  assert.ok(stage.blockedItems.some((x:any)=>x.blockId===id));
+ assert.equal(stage.researchCompleteness.status,'INCOMPLETE');
+});
