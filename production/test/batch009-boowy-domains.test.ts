@@ -33,3 +33,28 @@ test('BOØWY verified no-setting-difference decisions are source-traced and plai
  }
  assert.equal(staged.settings.values.includes('SET_L'),false);
 });
+
+test('BOØWY ending screen and setting L cannot be confused with independent numeric likelihoods',()=>{
+ for(const scope of ['research-working','research-evidence-staged']){
+  const d=read(scope,'wave-2','S_BOOWY_SV.json');
+  const evidence=d.researchCompleteness.domains.find((x:any)=>x.domain==='EVIDENCE');
+  const specific=d.researchCompleteness.domains.find((x:any)=>x.domain==='MACHINE_SPECIFIC');
+  assert.equal(evidence?.status,'CHECKED');
+  assert.equal(specific?.status,'CHECKED');
+  assert.ok(evidence.sourceIds.includes('boowy-at-end-nanapress-20261009'));
+  assert.ok(specific.sourceIds.includes('boowy-settingl-nanapress'));
+  assert.ok(specific.sourceIds.includes('boowy-settingl-hissho'));
+  const rateBlock=d.blockedItems.find((x:any)=>x.blockId==='boowy-screen-setting-rates-unpublished');
+  assert.ok(rateBlock?.reason);
+  assert.ok(d.researchCompleteness.candidateLedger.some((x:any)=>x.disposition?.refId===rateBlock.blockId));
+  assert.deepEqual(d.settings.values,['SET_1','SET_2','SET_4','SET_5','SET_6']);
+  assert.equal(d.researchCompleteness.status,'INCOMPLETE');
+ }
+ const stage=read('research-evidence-staged','wave-2','S_BOOWY_SV.json');
+ const hint=stage.findings.find((x:any)=>x.findingId==='reviewed-at-end-screen');
+ assert.equal(hint?.observationType,'evidence');
+ const categories=hint.semanticCategories;
+ assert.equal(categories.find((x:any)=>x.label==='氷室＆高橋')?.semanticType,'PROBABILITY_UNKNOWN');
+ assert.equal(categories.find((x:any)=>x.label==='全員集合')?.semanticType,'EXACT_CONSTRAINT');
+ assert.equal(categories.find((x:any)=>x.label==='氷室1人（影）')?.meaning,'設定1否定');
+});
