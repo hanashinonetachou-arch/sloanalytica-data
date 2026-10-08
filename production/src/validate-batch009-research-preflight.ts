@@ -11,7 +11,7 @@ if(machines.length!==10||new Set(machines).size!==10||JSON.stringify(machines)!=
 let blocked=0;
 for(const [index,machineId] of machines.entries()){
  const wave=index<5?'wave-1':'wave-2';
- const work=JSON.parse(fs.readFileSync(path.join(root,'research-working',wave,machineId+'.json'),'utf8'));
+ const work=JSON.parse(fs.readFileSync(path.join(root,'research-evidence-staged',wave,machineId+'.json'),'utf8'));
  const ev=JSON.parse(fs.readFileSync(path.join(root,'research-evidence-reviewed',machineId+'.json'),'utf8'));
  const errors:string[]=[];
  if(work.machineId!==machineId||ev.machineId!==machineId||work.batchId!==batch)errors.push('IDENTITY_MISMATCH');
@@ -19,9 +19,9 @@ for(const [index,machineId] of machines.entries()){
  const present=new Map((work.researchCompleteness?.domains||[]).map((d:any)=>[d.domain,d]));
  for(const domain of RESEARCH_COMPLETENESS_DOMAINS){
   const d:any=present.get(domain);
-  if(!d||!['CHECKED','NOT_APPLICABLE'].includes(d.status)||!d.note||!d.sourceIds?.length)errors.push('DOMAIN_'+domain);
+  if(!d||!['CHECKED','NOT_APPLICABLE'].includes(d.status)||!d.note||(d.status==='CHECKED'&&!d.sourceIds?.length))errors.push('DOMAIN_'+domain);
  }
- if(!work.researchCompleteness?.machineSpecificQueries?.length)errors.push('MACHINE_SPECIFIC_QUERIES');
+ if((work.researchCompleteness?.machineSpecificQueries?.length??0)<3)errors.push('MACHINE_SPECIFIC_QUERIES');
  for(const finding of work.findings){
   try{validateResearchLiveObservationContract(finding);validateResearchUserFacingTextContract(finding);validateResearchProbabilityRouteContract(finding)}catch(e){errors.push(String(e))}
   if(finding.liveObservation?.status==='UNRESOLVED'||finding.liveObservation?.status==='REQUIRES_FINAL_SCOPE_VALIDATION')errors.push('UNRESOLVED_OBSERVATION_'+finding.findingId);
@@ -29,7 +29,7 @@ for(const [index,machineId] of machines.entries()){
  try{validateResearchCandidateLedger(work,new Set(work.sources.map((s:any)=>s.sourceId)))}catch(e){errors.push(String(e))}
  if((ev.openChecks||ev.unresolved||[]).length)errors.push('EVIDENCE_REVIEW_OPEN');
  const evidence=work.findings.filter((f:any)=>f.observationType==='evidence');
- if((ev.evidenceCandidates||[]).length && evidence.length<(ev.evidenceCandidates||[]).length)errors.push('EVIDENCE_NOT_MERGED');
+ if((ev.evidenceCandidates||[]).length && (ev.evidenceCandidates||[]).some((x:any)=>!evidence.some((f:any)=>f.findingId==='reviewed-'+x.findingId)))errors.push('EVIDENCE_NOT_MERGED');
  if(!evidence.length&&!ev.noSettingEvidenceAttestation)errors.push('NO_EVIDENCE_ATTESTATION');
  if(machineId==='S_BOOWY_SV'&&work.settings.values.includes('SET_L'))errors.push('BOOWY_SETTING_L_INCLUDED');
  if(errors.length)blocked++;
