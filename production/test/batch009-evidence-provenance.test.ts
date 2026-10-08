@@ -107,3 +107,21 @@ test('Sister Quest TALK black replies and unverified C/B gacha remain distinct a
   assert.match(c?.meaning??'',/調査中/);
  }
 });
+
+
+test('BOØWY threshold, reset and post-event domains are source checked but not setting-rate evidence',()=>{
+ const d=read('research-evidence-staged','wave-2','S_BOOWY_SV.json');
+ const checked=['SMALL_ROLE','THRESHOLD_BEHAVIOR','RESET_BEHAVIOR','POST_EVENT_TRANSITION'];
+ for(const domain of checked){
+   const row=d.researchCompleteness.domains.find((x:any)=>x.domain===domain);
+   assert.equal(row?.status,'CHECKED',domain);
+   assert.ok(row.sourceIds?.length>=1,domain+':source');
+ }
+ for(const blockId of ['ceiling-1480-no-setting-rate','reset-internal-mode-no-setting-rate','super-heaven-return-no-setting-rate']){
+   const item=d.blockedItems.find((x:any)=>x.blockId===blockId);
+   assert.ok(item?.reason&&item.reevaluationCondition,blockId+':explanation');
+   assert.ok(d.researchCompleteness.candidateLedger.some((x:any)=>x.disposition?.type==='BLOCKED'&&x.disposition.refId===blockId),blockId+':ledger');
+ }
+ assert.equal(d.researchCompleteness.status,'INCOMPLETE');
+ assert.equal(d.findings.find((x:any)=>x.findingId==='at-initial').liveObservation.status,'UNRESOLVED');
+});
