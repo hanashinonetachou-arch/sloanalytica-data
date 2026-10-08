@@ -84,3 +84,19 @@ test('Laughing Salesman revival-inclusive bonus rate is reference-only',()=>{
  assert.equal(f.observationType,'reference_distribution');
  assert.equal(f.liveObservation.status,'UNRESOLVED');
 });
+
+test('Batch009 machine Research uses canonical observation status and never pretends unresolved means exact',()=>{
+ const statuses=new Set(['DIRECT_EXACT','EXACT_WITH_SCOPE_TRACKING','EXHAUSTIVE_CATEGORICAL','RETROSPECTIVE_EXACT','UNRESOLVED']);
+ for(const [i,id] of machines.entries()){
+  const wave=i<5?'wave-1':'wave-2';
+  for(const stage of ['research-working','research-evidence-staged']){
+   const d=read(stage,wave,id+'.json');
+   for(const f of d.findings){
+    if(f.liveObservation!==undefined){
+     assert.ok(statuses.has(f.liveObservation.status),id+':'+stage+':unsupported live status '+f.findingId);
+     assert.ok(f.liveObservation.reason,id+':'+stage+':missing observation reason');
+    }
+   }
+  }
+ }
+});
