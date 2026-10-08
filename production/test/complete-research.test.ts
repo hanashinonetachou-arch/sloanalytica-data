@@ -6,7 +6,7 @@ import path from 'node:path';
 import {RepoStore,Orchestrator} from '../src/core.ts';
 import {initializeBatch,productionRequest} from '../src/runtime.ts';
 import {completeResearch} from '../src/complete-research.ts';
-import {RESEARCH_COMPLETENESS_DOMAINS,validateResearchCandidateLedger,validateResearchLiveObservationContract,validateResearchUserFacingTextContract} from '../src/research-validator.ts';
+import {RESEARCH_COMPLETENESS_DOMAINS,validateResearchCandidateLedger,validateResearchLiveObservationContract,validateResearchUserFacingTextContract,validateResearchPromotionReadiness} from '../src/research-validator.ts';
 
 test('complete-research computes SHA, commits through orchestrator, promotes dependency, and fills freed research slots',()=>{
  const root=fs.mkdtempSync(path.join(os.tmpdir(),'complete-research-'));
@@ -51,4 +51,13 @@ test('rejects internal user-facing Research text before Canonical UI',()=>{
  assert.doesNotThrow(()=>validateResearchUserFacingTextContract({findingId:'f',label:'終了画面',details:['設定別の出現率は未確認のため記録のみです。']}));
  assert.throws(()=>validateResearchUserFacingTextContract({findingId:'f',label:'終了画面',details:['Evidenceとして記録します。']}),/USER_FACING_INTERNAL_TEXT:f/);
  assert.throws(()=>validateResearchUserFacingTextContract({findingId:'f',label:'終了画面',details:['説明\/n改行']}),/USER_FACING_INTERNAL_TEXT:f/);
+});
+
+
+test('pending research findings may be ledger-traced but never promoted',()=>{
+ const d:any={sources:[{sourceId:'s1',claims:['published rate']}],findings:[{findingId:'f1'}],blockedItems:[],researchCompleteness:{machineSpecificQueries:['specific q'],candidateLedger:[{candidateId:'finding:f1',label:'new setting rate',sourceClaims:[{sourceId:'s1',claim:'published rate'}],discoveryQueries:['specific q'],disposition:{type:'FINDING_PENDING_SCOPE_VALIDATION',refId:'f1'}}]}};
+ assert.doesNotThrow(()=>validateResearchCandidateLedger(d,new Set(['s1'])));
+ assert.throws(()=>validateResearchPromotionReadiness(d),/PENDING_SCOPE_PROMOTION_FORBIDDEN/);
+ d.researchCompleteness.candidateLedger[0].disposition.type='FINDING';
+ assert.doesNotThrow(()=>validateResearchPromotionReadiness(d));
 });
