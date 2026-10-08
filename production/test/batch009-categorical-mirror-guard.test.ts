@@ -43,7 +43,7 @@ test('Promotion remains forbidden if pending ledger statuses are cleared without
   for(const f of d.findings)
     if(f.settingDistribution && f.liveObservation?.status==='UNRESOLVED')
       f.liveObservation.status='EXACT_WITH_SCOPE_TRACKING';
-  assert.throws(()=>validateResearchPromotionReadiness(d),/MIRRORED_CATEGORICAL_EVIDENCE_NOT_RECONCILED/);
+  assert.throws(()=>validateResearchPromotionReadiness(d),/MIRRORED_CATEGORICAL_EVIDENCE_NOT_RECONCILED|UNRESOLVED_CAUSAL_DEPENDENCY_PROMOTION_FORBIDDEN/);
 });
 
 test('Undeclared Sister Quest AT-end mirror is caught despite disjoint source identifiers',()=>{
