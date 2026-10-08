@@ -151,3 +151,35 @@ test('Sister Quest 400/600EXP high-setting tendency never becomes an invented se
   assert.notEqual(d.researchCompleteness.status,'COMPLETE');
  }
 });
+
+test('Sister Quest BONUS is an AT-side mechanic and not a normal initial bonus setting distribution',()=>{
+ for(const scope of ['research-working','research-evidence-staged']){
+  const d=read(scope,'wave-1','L_SISTER_QUEST_CA.json');
+  const status=(domain:string)=>d.researchCompleteness.domains.find((x:any)=>x.domain===domain)?.status;
+  for(const domain of ['BONUS','BONUS_TYPE_CONDITIONAL','STATE_TRANSITION','NAVIGATION','SUCCESS_RATE','CARRY_OVER'])
+   assert.equal(status(domain),'CHECKED',scope+':'+domain);
+  for(const domain of ['MODE_TRANSITION','POST_EVENT_TRANSITION','ROLE_CONDITIONAL_DISTRIBUTION'])
+   assert.equal(status(domain),'PARTIAL',scope+':'+domain);
+  for(const code of ['bonus','bonus-conditional','state','navigation','cz-win-rate','carry-over','mode','post-event','role-conditional']){
+   const id='sister-'+code+'-unusable-for-setting';
+   const blocked=d.blockedItems.find((x:any)=>x.blockId===id);
+   const ledger=d.researchCompleteness.candidateLedger.find((x:any)=>x.candidateId==='block:'+id);
+   assert.ok(blocked?.reason&&blocked?.sourceIds.length>=2,scope+':'+id);
+   assert.equal(ledger?.disposition.type,'BLOCKED');
+   assert.equal(ledger?.disposition.refId,id);
+   for(const source of ledger.sourceClaims){
+    assert.ok(d.sources.some((s:any)=>s.sourceId===source.sourceId&&s.claims.includes(source.claim)),source.sourceId);
+   }
+  }
+  assert.ok(!d.findings.some((x:any)=>x.findingId==='sister-bonus-initial'));
+  assert.equal(d.researchCompleteness.status,'INCOMPLETE');
+ }
+});
+
+test('Sister Quest does not convert whole-CZ success rate or internal mode cues into setting-specific probabilities',()=>{
+ const d=read('research-evidence-staged','wave-1','L_SISTER_QUEST_CA.json');
+ const prohibited=['sister-cz-win-rate','sister-state','sister-navigation','sister-bonus'];
+ assert.ok(prohibited.every(id=>!d.findings.some((x:any)=>x.findingId===id)));
+ assert.match(d.blockedItems.find((b:any)=>b.blockId==='sister-cz-win-rate-unusable-for-setting').reason,/約60%は全体の目安/);
+ assert.match(d.blockedItems.find((b:any)=>b.blockId==='sister-navigation-unusable-for-setting').reason,/内部状態や次回のCZ/);
+});
