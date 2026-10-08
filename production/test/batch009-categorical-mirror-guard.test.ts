@@ -45,3 +45,25 @@ test('Promotion remains forbidden if pending ledger statuses are cleared without
       f.liveObservation.status='EXACT_WITH_SCOPE_TRACKING';
   assert.throws(()=>validateResearchPromotionReadiness(d),/MIRRORED_CATEGORICAL_EVIDENCE_NOT_RECONCILED/);
 });
+
+test('Undeclared Sister Quest AT-end mirror is caught despite disjoint source identifiers',()=>{
+  const d=staged();
+  const numeric=candidate(d,'at-end-categorical');
+  const hint=candidate(d,'reviewed-at-end');
+  assert.equal(numeric.sourceIds.some((x:string)=>hint.sourceIds.includes(x)),false);
+  delete numeric.mirrorsEvidenceFindingId;
+  delete numeric.numericRouteStatus;
+  assert.ok(categoricalEvidenceMirrorIssues(d).includes('UNDECLARED_CATEGORICAL_EVIDENCE_MIRROR:at-end-categorical'));
+});
+
+test('Two unrelated generic categories without shared source do not imply the same observation',()=>{
+  const d={
+    findings:[
+      {findingId:'numeric',observationType:'appearance_distribution',sourceIds:['independent-a'],
+       settingDistribution:{'1':'通常:60.0%/特殊:40.0%','2':'通常:50.0%/特殊:50.0%'}},
+      {findingId:'evidence',observationType:'evidence',sourceIds:['independent-b'],
+       semanticCategories:[{label:'通常'},{label:'特殊'}]}
+    ]
+  };
+  assert.deepEqual(categoricalEvidenceMirrorIssues(d),[]);
+});
