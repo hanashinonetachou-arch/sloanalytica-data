@@ -43,7 +43,7 @@ test('緑ドン reach-me replay retains all six public rates while research rema
   assert.ok(f);
   assert.deepEqual(f.settingDistribution, {'1':'1/2978.9','2':'1/2978.9','3':'1/2520.6','4':'1/2520.6','5':'1/2048.0','6':'1/2048.0'});
   assert.notEqual(d.researchCompleteness.status, 'COMPLETE');
-  assert.equal(f.liveObservation.status, 'REQUIRES_FINAL_SCOPE_VALIDATION');
+  assert.equal(f.liveObservation.status, 'UNRESOLVED');
 });
 test('バイオ5 special 256枚 is a noncontiguous setting constraint', () => {
   const d = read('research-evidence-reviewed/L_BIOHAZARD5_ZE.json');
