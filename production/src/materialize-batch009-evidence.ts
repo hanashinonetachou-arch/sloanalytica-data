@@ -42,8 +42,19 @@ for (const [index,machineId] of machineIds.entries()){
   for(const c of ev.semanticCategories){
    if(!['EXACT_CONSTRAINT','PROBABILITY_UNKNOWN','DISPLAY_ONLY'].includes(c.semanticType)||!c.label||!c.meaning)throw new Error('INVALID_SEMANTIC_CATEGORY:'+id);
   }
+  // Optional per-candidate provenance: do not attach every page in the
+  // machine-wide review to an unrelated screenshot, trophy, or voice.
+  const scopedUrls=ev.sourceUrls;
+  if(scopedUrls!==undefined && (!Array.isArray(scopedUrls)||!scopedUrls.length))
+    throw new Error('INVALID_SCOPED_EVIDENCE_SOURCES:'+machineId+':'+id);
+  const candidateSourceIds=scopedUrls===undefined?importedSourceIds:scopedUrls.map((url:any)=>{
+    if(typeof url!=='string'||!url.startsWith('https://'))throw new Error('INVALID_EVIDENCE_SOURCE_URL:'+machineId+':'+id);
+    const source=d.sources.find((s:any)=>s.url===url);
+    if(!source||!importedSourceIds.includes(source.sourceId))throw new Error('UNREVIEWED_EVIDENCE_SOURCE:'+machineId+':'+id+':'+url);
+    return source.sourceId;
+  });
   const condition=ev.observationCondition||'観測の契機を確認して、該当した表示を1回記録します。';
-  const finding={findingId:id,label:ev.label,observationType:'evidence',sourceIds:[...new Set(importedSourceIds)],semanticCategories:ev.semanticCategories,details:[condition,'設定別の出現率が未公表の示唆は記録だけ行います。確定した条件のみ設定推測に反映します。']};
+  const finding={findingId:id,label:ev.label,observationType:'evidence',sourceIds:[...new Set(candidateSourceIds)],semanticCategories:ev.semanticCategories,details:[condition,'設定別の出現率が未公表の示唆は記録だけ行います。確定した条件のみ設定推測に反映します。']};
   validateResearchUserFacingTextContract(finding);
   validateResearchProbabilityRouteContract(finding);
   validateResearchLiveObservationContract(finding);
