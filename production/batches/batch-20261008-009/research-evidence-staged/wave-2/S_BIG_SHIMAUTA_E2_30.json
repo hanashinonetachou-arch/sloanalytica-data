@@ -60,6 +60,39 @@
       "claims": [
         "設定共通の小役確率と設定Lの下パネル常時消灯"
       ]
+    },
+    {
+      "sourceId": "hazuse-shimauta-ceiling",
+      "url": "https://hazuse.com/machine/pachislot/2S0592/genre/207/",
+      "title": "S BIG島唄30 モード別ゲーム数天井・スイカ天井・設定変更モード",
+      "sourceType": "secondary_analysis",
+      "checkedAt": "2026-10-09",
+      "claims": [
+        "設定変更時の全設定共通モード振り分け（通常A9.8/B9.8/チャンス30/天国準備A50/B0.4）",
+        "通常800G、チャンス200G、天国準備B32G、SPストック810Gおよびスイカ10回天井"
+      ]
+    },
+    {
+      "sourceId": "nanapress-shimauta-reset",
+      "url": "https://nana-press.com/kaiseki/machine/430/11746/",
+      "title": "BIG島唄30 有利区間リセット・ボーナス終了後モード移行",
+      "sourceType": "secondary_analysis",
+      "checkedAt": "2026-10-09",
+      "claims": [
+        "一部のボーナス終了後有利区間リセットでは通常B25%、天国準備A25%、B50%",
+        "有利区間ランプ非搭載のため見た目で設定変更を判別できない"
+      ]
+    },
+    {
+      "sourceId": "chonborista-shimauta-reset",
+      "url": "https://chonborista.com/slot/orinpia-slot/171917/comment-page-7/",
+      "title": "BIG島唄30 設定変更時と有利区間リセット時の異なるモード振り分け",
+      "sourceType": "secondary_analysis",
+      "checkedAt": "2026-10-09",
+      "claims": [
+        "設定変更時の全設定共通モード振り分け（通常A9.8/B9.8/チャンス30/天国準備A50/B0.4）",
+        "一部のボーナス終了後有利区間リセットでは通常B25%、天国準備A25%、B50%"
+      ]
     }
   ],
   "findings": [
@@ -198,11 +231,41 @@
     {
       "blockId": "reset-transition-no-setting-data",
       "label": "設定変更時・リセット時のモード振り分け",
-      "reason": "設定変更や有利区間リセット時のモード振り分けは公表されていますが、設定1・2・3・5・6ごとの選択率は確認できないため、設定推測には加えません。",
+      "reason": "設定変更時は通常A9.8%・通常B9.8%・チャンス30.0%・天国準備A50.0%・天国準備B0.4%でモードを選びます。この割合は設定1・2・3・5・6の共通値であり、高設定の証拠として加点できません。",
       "sourceIds": [
-        "hazuse-shimauta"
+        "hazuse-shimauta",
+        "hazuse-shimauta-ceiling",
+        "chonborista-shimauta-reset"
       ],
-      "reevaluationCondition": "設定ごとのモード選択率と、実戦でのモード判別方法が公開された場合に再検証します。"
+      "reevaluationCondition": "設定変更時の移行先が設定1・2・3・5・6によって異なることを示す新たな公表値が出た場合のみ再検討します。"
+    },
+    {
+      "blockId": "bonus-end-reset-shared-modes",
+      "label": "ボーナス終了後の有利区間リセット",
+      "reason": "一部のボーナス終了後は有利区間がリセットされ、通常B25%・天国準備A25%・天国準備B50%へ移行します。設定変更時のモード振り分けとは別の抽選なので、混ぜて判別してはいけません。",
+      "reevaluationCondition": "このリセット後の移行割合に設定別の差が公表されたときに再評価します。",
+      "sourceIds": [
+        "nanapress-shimauta-reset",
+        "chonborista-shimauta-reset"
+      ]
+    },
+    {
+      "blockId": "mode-specific-ceilings-are-not-settings",
+      "label": "通常・天国準備・SPストックの天井差",
+      "reason": "通常A/Bなどは最大800G、チャンス・引き戻しは200G、天国準備Bは32G、SPストックは810Gとモードで天井が異なります。スイカ10回天井もありますが、これだけでは設定番号を判別できません。",
+      "reevaluationCondition": "設定ごとのモード選択率と滞在モードを正確に確認できる観測方法が公開された場合に見直します。",
+      "sourceIds": [
+        "hazuse-shimauta-ceiling"
+      ]
+    },
+    {
+      "blockId": "no-visible-reset-lamp",
+      "label": "有利区間ランプでのリセット判別",
+      "reason": "本機には有利区間ランプがないため、台のランプ表示だけで設定変更や有利区間リセットを判別することはできません。",
+      "reevaluationCondition": "メーカー・実機資料で設定変更や有利区間リセットを直接判別できる方法が確認された場合に見直します。",
+      "sourceIds": [
+        "nanapress-shimauta-reset"
+      ]
     }
   ],
   "researchCompleteness": {
@@ -247,18 +310,38 @@
       {
         "domain": "MODE_TRANSITION",
         "status": "PARTIAL",
-        "note": "滞在モード・リセット時の振り分けを確認。設定変更後と有利区間リセット後を混同しない。通常時の設定別モード移行率は公開・観測条件を引き続き調査。",
+        "note": "設定変更時とボーナス終了後の有利区間リセットの2つのモード振り分けを別々に確認。通常時・各モード間の設定別移行率は未公開のため引き続き調査。",
         "sourceIds": [
-          "hazuse-shimauta"
+          "hazuse-shimauta-ceiling",
+          "nanapress-shimauta-reset",
+          "chonborista-shimauta-reset"
         ]
       },
       {
         "domain": "RESET_BEHAVIOR",
-        "status": "PARTIAL",
-        "note": "設定変更時のモード分布と下パネル消灯を確認。設定Lは数値推測から除外。その他の設定別差・演出は追加調査。",
+        "status": "CHECKED",
+        "note": "設定変更時の共通モード振り分け＝通常A9.8/B9.8/チャンス30.0/天国準備A50.0/B0.4。一方ボーナス終了後の一部有利区間リセットは通常B25/天国準備A25/B50。これらは異なる事象なので混同しない。",
         "sourceIds": [
-          "hazuse-shimauta",
-          "pworld-shimauta"
+          "hazuse-shimauta-ceiling",
+          "nanapress-shimauta-reset",
+          "chonborista-shimauta-reset"
+        ]
+      },
+      {
+        "domain": "THRESHOLD_BEHAVIOR",
+        "status": "CHECKED",
+        "note": "通常A/B・天国準備Aは800G、チャンス・引き戻しは200G、天国準備Bは32G、SPストックは810G。通常のスイカ10回天井はSPストック中不発動。設定別の選択率は未確認。",
+        "sourceIds": [
+          "hazuse-shimauta-ceiling"
+        ]
+      },
+      {
+        "domain": "POST_EVENT_TRANSITION",
+        "status": "CHECKED",
+        "note": "一部のボーナス終了時の有利区間リセットは通常B25%、天国準備A25%、天国準備B50%。設定変更時のモード振り分けとは異なる。各設定間で選択率差は未確認。",
+        "sourceIds": [
+          "nanapress-shimauta-reset",
+          "chonborista-shimauta-reset"
         ]
       }
     ],
@@ -409,14 +492,78 @@
           {
             "sourceId": "hazuse-shimauta",
             "claim": "設定変更時・リセット時のモード振り分け"
+          },
+          {
+            "sourceId": "hazuse-shimauta-ceiling",
+            "claim": "設定変更時の全設定共通モード振り分け（通常A9.8/B9.8/チャンス30/天国準備A50/B0.4）"
+          },
+          {
+            "sourceId": "chonborista-shimauta-reset",
+            "claim": "設定変更時の全設定共通モード振り分け（通常A9.8/B9.8/チャンス30/天国準備A50/B0.4）"
           }
         ],
         "discoveryQueries": [
-          "S BIG島唄30 小役確率 モード移行率 設定差 セグ"
+          "S BIG島唄30 小役確率 モード移行率 設定差 セグ",
+          "S BIG島唄30 設定変更時モード 通常A 通常B チャンス 天国準備A B 9.8 30 50 0.4"
         ],
         "disposition": {
           "type": "BLOCKED",
           "refId": "reset-transition-no-setting-data"
+        }
+      },
+      {
+        "candidateId": "block:bonus-end-reset-shared-modes",
+        "label": "ボーナス終了後の有利区間リセット",
+        "sourceClaims": [
+          {
+            "sourceId": "nanapress-shimauta-reset",
+            "claim": "一部のボーナス終了後有利区間リセットでは通常B25%、天国準備A25%、B50%"
+          },
+          {
+            "sourceId": "chonborista-shimauta-reset",
+            "claim": "一部のボーナス終了後有利区間リセットでは通常B25%、天国準備A25%、B50%"
+          }
+        ],
+        "discoveryQueries": [
+          "S BIG島唄30 設定変更時モード 通常A 通常B チャンス 天国準備A B 9.8 30 50 0.4"
+        ],
+        "disposition": {
+          "type": "BLOCKED",
+          "refId": "bonus-end-reset-shared-modes"
+        }
+      },
+      {
+        "candidateId": "block:mode-specific-ceilings-are-not-settings",
+        "label": "通常・天国準備・SPストックの天井差",
+        "sourceClaims": [
+          {
+            "sourceId": "hazuse-shimauta-ceiling",
+            "claim": "通常800G、チャンス200G、天国準備B32G、SPストック810Gおよびスイカ10回天井"
+          }
+        ],
+        "discoveryQueries": [
+          "S BIG島唄30 ボーナス終了時一部 有利区間リセット 通常B25 天国準備A25 B50"
+        ],
+        "disposition": {
+          "type": "BLOCKED",
+          "refId": "mode-specific-ceilings-are-not-settings"
+        }
+      },
+      {
+        "candidateId": "block:no-visible-reset-lamp",
+        "label": "有利区間ランプでのリセット判別",
+        "sourceClaims": [
+          {
+            "sourceId": "nanapress-shimauta-reset",
+            "claim": "有利区間ランプ非搭載のため見た目で設定変更を判別できない"
+          }
+        ],
+        "discoveryQueries": [
+          "S BIG島唄30 モード別 800G 200G 32G 810G スイカ10回 天井 例外"
+        ],
+        "disposition": {
+          "type": "BLOCKED",
+          "refId": "no-visible-reset-lamp"
         }
       }
     ],
@@ -436,7 +583,10 @@
     "machineSpecificQueries": [
       "S BIG島唄30 設定示唆 終了画面 ボイス 設定確定 ランプ",
       "S BIG島唄30 ドンドンランプ 設定示唆 セリフ 偶数 奇数 示唆 設定差",
-      "S BIG島唄30 小役確率 モード移行率 設定差 セグ"
+      "S BIG島唄30 小役確率 モード移行率 設定差 セグ",
+      "S BIG島唄30 設定変更時モード 通常A 通常B チャンス 天国準備A B 9.8 30 50 0.4",
+      "S BIG島唄30 ボーナス終了時一部 有利区間リセット 通常B25 天国準備A25 B50",
+      "S BIG島唄30 モード別 800G 200G 32G 810G スイカ10回 天井 例外"
     ]
   }
 }
