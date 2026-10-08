@@ -90,3 +90,20 @@ test('BOØWY public small-role rates do not become a fabricated feature',()=>{
   assert.equal(high.semanticType,'PROBABILITY_UNKNOWN');
   assert.equal(d.researchCompleteness.domains.find((x:any)=>x.domain==='SMALL_ROLE')?.status,'CHECKED');
 });
+
+
+test('Sister Quest TALK black replies and unverified C/B gacha remain distinct and honest',()=>{
+ const d=read('research-evidence-staged','wave-1','L_SISTER_QUEST_CA.json');
+ const talk=d.findings.find((x:any)=>x.findingId==='reviewed-smart-talk');
+ assert.ok(talk);
+ assert.ok(talk.semanticCategories.some((x:any)=>x.label==='今日の調子：黒（もしかしたら…）'&&x.semanticType==='DISPLAY_ONLY'));
+ assert.ok(talk.semanticCategories.some((x:any)=>x.label==='今日の調子：黒（まあまあ…）'&&x.semanticType==='PROBABILITY_UNKNOWN'));
+ assert.equal(talk.semanticCategories.some((x:any)=>/黒文字[①②]/.test(x.label)),false);
+ const gacha=d.findings.find((x:any)=>x.findingId==='reviewed-gacha-rank');
+ assert.ok(gacha);
+ for(const label of ['ランクB','ランクC']){
+  const c=gacha.semanticCategories.find((x:any)=>x.label===label);
+  assert.equal(c?.semanticType,'DISPLAY_ONLY');
+  assert.match(c?.meaning??'',/調査中/);
+ }
+});
