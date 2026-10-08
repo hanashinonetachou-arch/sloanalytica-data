@@ -48,8 +48,17 @@ for(const [index,machineId] of machines.entries()){
  }
  if((ev.categoryRates?.percentRows?.length??0)>0){
   const expectedName=ev.evidenceCandidates?.[0]?.findingId;
-  const f=evidence.find((x:any)=>x.findingId==='reviewed-'+expectedName);
-  if(f && f.observationType==='evidence')errors.push('KNOWN_CATEGORY_RATES_STILL_EVIDENCE_ONLY_'+expectedName);
+  const mirrorId='reviewed-'+expectedName;
+  const mirrored=evidence.find((x:any)=>x.findingId===mirrorId);
+  const numeric=work.findings.find((x:any)=>x.mirrorsEvidenceFindingId===mirrorId&&x.observationType==='appearance_distribution');
+  if(!numeric)errors.push('KNOWN_CATEGORY_RATES_MISSING_NUMERIC_ROUTE_'+expectedName);
+  else{
+    for(const [i,setting] of ev.categoryRates.settings.entries()){
+      const expected=ev.categoryRates.categories.map((c:string,j:number)=>c+':'+ev.categoryRates.percentRows[i][j].toFixed(1)+'%').join('/');
+      if(numeric.settingDistribution?.[setting]!==expected)errors.push('KNOWN_CATEGORY_RATE_DRIFT_'+expectedName+'_'+setting);
+    }
+    if(mirrored)errors.push('KNOWN_CATEGORY_RATES_EVIDENCE_NUMERIC_DEDUP_PENDING_'+expectedName);
+  }
  }
  if(work.researchCompleteness?.evidenceSourceReview?.status==='STAGED_NOT_APPROVED')errors.push('EVIDENCE_NOT_APPROVED');
  if((ev.evidenceCandidates||[]).length && (ev.evidenceCandidates||[]).some((x:any)=>!evidence.some((f:any)=>f.findingId==='reviewed-'+x.findingId)))errors.push('EVIDENCE_NOT_MERGED');
