@@ -205,3 +205,36 @@ test('Sister Quest all twenty research domains are represented but only source-c
   assert.notEqual(d.researchCompleteness.status,'COMPLETE');
  }
 });
+
+test('Green Don ceiling/reset/stage research retains source-backed non-setting reasons',()=>{
+ for(const folder of ['research-working','research-evidence-staged']){
+  const d=read(folder,'wave-1','L_MIDORIDON_VIVA_REVIVAL_FY.json');
+  for(const domain of ['THRESHOLD_BEHAVIOR','RESET_BEHAVIOR','NAVIGATION']){
+   const x=d.researchCompleteness.domains.find((v:any)=>v.domain===domain);
+   assert.equal(x?.status,'CHECKED',domain);
+   assert.equal(x.sourceIds.length,2);
+  }
+  for(const code of ['ceiling','reset','navigation']){
+   const blockId='green-'+code+'-not-setting-inference';
+   const b=d.blockedItems.find((x:any)=>x.blockId===blockId);
+   const ledger=d.researchCompleteness.candidateLedger.find((x:any)=>x.candidateId==='block:'+blockId);
+   assert.ok(b?.reason&&b?.sourceIds.length===2,blockId);
+   assert.equal(ledger?.disposition.type,'BLOCKED');
+   assert.equal(ledger?.disposition.refId,blockId);
+  }
+  assert.ok(!d.findings.some((x:any)=>/green-(ceiling|reset|navigation)-not-setting-inference/.test(x.findingId)));
+  assert.notEqual(d.researchCompleteness.status,'COMPLETE');
+ }
+});
+
+test('Sister Quest lower-panel rare monster review aids observation without approving the four-category likelihood',()=>{
+ for(const folder of ['research-working','research-evidence-staged']){
+  const d=read(folder,'wave-1','L_SISTER_QUEST_CA.json');
+  const monster=d.findings.find((x:any)=>x.findingId==='at-monster-categorical');
+  assert.ok(monster.sourceIds.includes('sister-rare-monster-panel-chonbo'));
+  assert.equal(monster.liveObservation.status,'UNRESOLVED');
+  assert.match(monster.liveObservation.reason,/下パネル/);
+  const ledger=d.researchCompleteness.candidateLedger.find((x:any)=>x.candidateId==='finding:at-monster-categorical');
+  assert.ok(ledger.sourceClaims.some((x:any)=>x.sourceId==='sister-rare-monster-panel-chonbo'));
+ }
+});
