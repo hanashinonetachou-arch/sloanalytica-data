@@ -68,6 +68,30 @@
       "claims": [
         "AT終了画面の演出内容と観測条件"
       ]
+    },
+    {
+      "sourceId": "chonborista-boowy",
+      "url": "https://chonborista.com/slot/d-light/171041/",
+      "title": "BOØWYの天井・設定変更・AT終了後の超天国",
+      "sourceType": "secondary_analysis",
+      "checkedAt": "2026-10-09",
+      "claims": [
+        "AT間1480G+αで上位ATに当選する天井仕様",
+        "設定変更時は天井と内部状態をリセット・電源OFF/ON時は引き継ぐ",
+        "AT終了後は必ず超天国・100G以内のAT期待度は約25%"
+      ]
+    },
+    {
+      "sourceId": "flick7-boowy",
+      "url": "https://flick7.net/slot/boowy.php",
+      "title": "BOØWYのAT間天井・朝一挙動・超天国の解析",
+      "sourceType": "secondary_analysis",
+      "checkedAt": "2026-10-09",
+      "claims": [
+        "AT間1480G+αで上位ATに当選する天井仕様",
+        "設定変更時は天井と内部状態をリセット・電源OFF/ON時は引き継ぐ",
+        "AT終了後は必ず超天国・100G以内のAT期待度は約25%"
+      ]
     }
   ],
   "findings": [
@@ -91,7 +115,7 @@
       "denominatorSemantics": "通常遊技のAT初当たりを通常ゲーム数に対応させて記録します。AT終了後の超天国中のAT引き戻しを同じ通常時と扱ってよいか、公開確率の対象範囲を検証中です。",
       "liveObservation": {
         "status": "UNRESOLVED",
-        "reason": "AT終了後の超天国で100G以内に引き戻したATを、公表初当たり確率と同一母数に含めるか確定するまで正式採用しません。"
+        "reason": "AT終了後は必ず超天国へ入り100G以内の引き戻し抽選を受けるため、公表AT初当たり確率に対応するゲーム数と再当選の区別を確認するまで正式採用しません。"
       },
       "details": [
         "AT初当たりは設定1・2・4・5・6の5設定です。設定Lは除外します。"
@@ -163,6 +187,36 @@
         "nanapress-spec"
       ],
       "reevaluationCondition": "小役やBOØWY揃いの設定別確率が新たに公表された場合に再評価します。"
+    },
+    {
+      "blockId": "ceiling-1480-no-setting-rate",
+      "label": "1480G天井到達",
+      "reason": "通常時に1480G＋前兆で上位ATに当選する天井は公開されていますが、天井ゲーム数に設定別の振り分けがあるとは公表されていないため、到達だけで設定は判別できません。",
+      "reevaluationCondition": "天井選択や到達率について設定別の公表値が確認できる場合に見直します。",
+      "sourceIds": [
+        "chonborista-boowy",
+        "flick7-boowy"
+      ]
+    },
+    {
+      "blockId": "reset-internal-mode-no-setting-rate",
+      "label": "設定変更・朝一の内部状態",
+      "reason": "設定変更では天井や内部状態がリセットされ、電源の入れ直しだけでは引き継ぐとされています。ただし設定ごとの開始状態の割合が公表されていないため、朝一挙動をそのまま設定推測には使いません。",
+      "reevaluationCondition": "設定変更時の開始モードについて設定別の選択率が公開されたときに再評価します。",
+      "sourceIds": [
+        "chonborista-boowy",
+        "flick7-boowy"
+      ]
+    },
+    {
+      "blockId": "super-heaven-return-no-setting-rate",
+      "label": "AT終了後100G以内の引き戻し",
+      "reason": "AT終了後は超天国へ移行し、100G以内のAT期待度は約25%です。この割合は設定1・2・4・5・6別の数値として公表されていないため、引き戻しだけで設定を判断できません。",
+      "reevaluationCondition": "超天国中の引き戻し率について設定別の公表値と集計対象が確認された場合に再評価します。",
+      "sourceIds": [
+        "chonborista-boowy",
+        "flick7-boowy"
+      ]
     }
   ],
   "researchCompleteness": {
@@ -207,12 +261,38 @@
       },
       {
         "domain": "POST_EVENT_TRANSITION",
+        "status": "CHECKED",
+        "sourceIds": [
+          "chonborista-boowy",
+          "flick7-boowy"
+        ],
+        "note": "AT終了後は超天国モードへ移行し、100G以内のAT期待度は約25%。設定別の当選率ではないため単独で設定判別しない。"
+      },
+      {
+        "domain": "THRESHOLD_BEHAVIOR",
+        "status": "CHECKED",
+        "sourceIds": [
+          "chonborista-boowy",
+          "flick7-boowy"
+        ],
+        "note": "通常時1480G＋α（前兆最大32G）で上位AT LAST GIGS。別設定の天井選択率が公表されておらず、ゲーム数天井だけでは判別しない。"
+      },
+      {
+        "domain": "RESET_BEHAVIOR",
+        "status": "CHECKED",
+        "sourceIds": [
+          "chonborista-boowy",
+          "flick7-boowy"
+        ],
+        "note": "設定変更時に天井と内部状態がリセットされ、電源OFF/ON時は引き継ぐ。開始モードの設定別選択率は未確認なので推測への採用対象外。"
+      },
+      {
+        "domain": "CZ",
         "status": "PARTIAL",
         "sourceIds": [
-          "hazuse",
-          "pworld"
+          "chonborista-boowy"
         ],
-        "note": "AT終了後は超天国に移行し、約25%で100G以内にAT引き戻し。初当たりとの重複・通常ゲーム数の範囲を未評価。"
+        "note": "JUSTY CHALLENGE等を経由するCZが搭載。設定別CZ確率・成功経路の公表値は未照合。"
       }
     ],
     "candidateLedger": [
@@ -294,12 +374,78 @@
           "type": "FINDING",
           "refId": "reviewed-at-end-screen"
         }
+      },
+      {
+        "candidateId": "block:ceiling-1480-no-setting-rate",
+        "label": "1480G天井到達",
+        "sourceClaims": [
+          {
+            "sourceId": "chonborista-boowy",
+            "claim": "AT間1480G+αで上位ATに当選する天井仕様"
+          },
+          {
+            "sourceId": "flick7-boowy",
+            "claim": "AT間1480G+αで上位ATに当選する天井仕様"
+          }
+        ],
+        "discoveryQueries": [
+          "パチスロBOØWY 天井1480G LAST GIGS 最大32G 前兆 設定差"
+        ],
+        "disposition": {
+          "type": "BLOCKED",
+          "refId": "ceiling-1480-no-setting-rate"
+        }
+      },
+      {
+        "candidateId": "block:reset-internal-mode-no-setting-rate",
+        "label": "設定変更・朝一の内部状態",
+        "sourceClaims": [
+          {
+            "sourceId": "chonborista-boowy",
+            "claim": "設定変更時は天井と内部状態をリセット・電源OFF/ON時は引き継ぐ"
+          },
+          {
+            "sourceId": "flick7-boowy",
+            "claim": "設定変更時は天井と内部状態をリセット・電源OFF/ON時は引き継ぐ"
+          }
+        ],
+        "discoveryQueries": [
+          "パチスロBOØWY 設定変更 リセット 電源OFF ON 天井 内部状態 朝一"
+        ],
+        "disposition": {
+          "type": "BLOCKED",
+          "refId": "reset-internal-mode-no-setting-rate"
+        }
+      },
+      {
+        "candidateId": "block:super-heaven-return-no-setting-rate",
+        "label": "AT終了後100G以内の引き戻し",
+        "sourceClaims": [
+          {
+            "sourceId": "chonborista-boowy",
+            "claim": "AT終了後は必ず超天国・100G以内のAT期待度は約25%"
+          },
+          {
+            "sourceId": "flick7-boowy",
+            "claim": "AT終了後は必ず超天国・100G以内のAT期待度は約25%"
+          }
+        ],
+        "discoveryQueries": [
+          "パチスロBOØWY AT終了後 超天国 移行 100G以内 25% 設定差"
+        ],
+        "disposition": {
+          "type": "BLOCKED",
+          "refId": "super-heaven-return-no-setting-rate"
+        }
       }
     ],
     "machineSpecificQueries": [
       "パチスロ BOØWY AT初当たり 1/498 1/464 1/377 1/325 1/294 設定L",
       "パチスロ BOØWY 小役確率 リプレイ ベル BOØWY揃い 設定差 全設定共通",
-      "パチスロ BOØWY AT終了画面 氷室 松井 布袋 高橋 全員集合 設定6"
+      "パチスロ BOØWY AT終了画面 氷室 松井 布袋 高橋 全員集合 設定6",
+      "パチスロBOØWY 天井1480G LAST GIGS 最大32G 前兆 設定差",
+      "パチスロBOØWY 設定変更 リセット 電源OFF ON 天井 内部状態 朝一",
+      "パチスロBOØWY AT終了後 超天国 移行 100G以内 25% 設定差"
     ],
     "pendingRouteValidation": true,
     "evidenceSourceReview": {
