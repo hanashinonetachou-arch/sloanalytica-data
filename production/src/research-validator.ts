@@ -82,6 +82,11 @@ export function validateResearchCandidateLedger(d:any,sourceIds:Set<any>){
   return {ledgerCandidates:ledger.length,coveredSourceClaims:coveredClaims.size,coveredQueries:coveredQueries.size};
 }
 
+export function validateResearchPromotionReadiness(d:any){
+  if((d?.researchCompleteness?.candidateLedger??[]).some((row:any)=>row?.disposition?.type==='FINDING_PENDING_SCOPE_VALIDATION'))
+    throw new Error('RESEARCH_VALIDATION:PENDING_SCOPE_PROMOTION_FORBIDDEN');
+}
+
 export function validateResearchArtifacts(s:RepoStore,a:Attempt,r:WorkResult){
   if(a.stage!=='RESEARCH'||r.status!=='SUCCESS') return [{validator:RESEARCH_VALIDATOR_CONTRACT,ok:true,skipped:a.stage!=='RESEARCH'}];
   if(r.producedArtifacts.length!==1) throw new Error('RESEARCH_VALIDATION:EXACTLY_ONE_ARTIFACT_REQUIRED');
@@ -138,6 +143,6 @@ export function validateResearchArtifacts(s:RepoStore,a:Attempt,r:WorkResult){
   const ledgerValidation=validateResearchCandidateLedger(d,sourceIds);
   // Staging may trace a finding without being scientifically ready. A fully
   // committed Research artifact must not contain such provisional dispositions.
-  if(completeness.candidateLedger.some((row:any)=>row.disposition?.type==='FINDING_PENDING_SCOPE_VALIDATION')) throw new Error('RESEARCH_VALIDATION:PENDING_SCOPE_PROMOTION_FORBIDDEN');
+  validateResearchPromotionReadiness(d);
   return [{validator:RESEARCH_VALIDATOR_CONTRACT,ok:true,artifactPath:ref.path,sha256:ref.sha256,sources:d.sources.length,findings:d.findings.length,blockedItems:d.blockedItems.length,coverageDomains:coverage.size,dependencyCandidates:dependencyAudit.summary.candidateCount,dependencyGroups:dependencyAudit.summary.groupCount,...ledgerValidation}];
 }
