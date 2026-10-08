@@ -158,7 +158,7 @@ test('Sister Quest BONUS is an AT-side mechanic and not a normal initial bonus s
   const status=(domain:string)=>d.researchCompleteness.domains.find((x:any)=>x.domain===domain)?.status;
   for(const domain of ['BONUS','BONUS_TYPE_CONDITIONAL','STATE_TRANSITION','NAVIGATION','SUCCESS_RATE','CARRY_OVER'])
    assert.equal(status(domain),'CHECKED',scope+':'+domain);
-  for(const domain of ['MODE_TRANSITION','POST_EVENT_TRANSITION','ROLE_CONDITIONAL_DISTRIBUTION'])
+  for(const domain of ['MODE_TRANSITION','ROLE_CONDITIONAL_DISTRIBUTION'])
    assert.equal(status(domain),'PARTIAL',scope+':'+domain);
   for(const code of ['bonus','bonus-conditional','state','navigation','cz-win-rate','carry-over','mode','post-event','role-conditional']){
    const id='sister-'+code+'-unusable-for-setting';
@@ -190,8 +190,8 @@ test('Sister Quest all twenty research domains are represented but only source-c
   const domains=d.researchCompleteness.domains;
   assert.equal(domains.length,20);
   assert.equal(new Set(domains.map((x:any)=>x.domain)).size,20);
-  assert.equal(domains.filter((x:any)=>x.status==='CHECKED'||x.status==='NOT_APPLICABLE').length,8);
-  assert.equal(domains.filter((x:any)=>x.status==='PARTIAL').length,12);
+  assert.equal(domains.filter((x:any)=>x.status==='CHECKED'||x.status==='NOT_APPLICABLE').length,9);
+  assert.equal(domains.filter((x:any)=>x.status==='PARTIAL').length,11);
   for(const key of ['AT','EXTERNAL_DATA_ONLY','MACHINE_SPECIFIC']) {
    assert.equal(domains.find((x:any)=>x.domain===key)?.status,'PARTIAL');
   }
@@ -236,5 +236,19 @@ test('Sister Quest lower-panel rare monster review aids observation without appr
   assert.match(monster.liveObservation.reason,/下パネル/);
   const ledger=d.researchCompleteness.candidateLedger.find((x:any)=>x.candidateId==='finding:at-monster-categorical');
   assert.ok(ledger.sourceClaims.some((x:any)=>x.sourceId==='sister-rare-monster-panel-chonbo'));
+ }
+});
+
+test('Sister Quest 10G aftercare AT direct-hit table is an unstratified reference only',()=>{
+ for(const folder of ['research-working','research-evidence-staged']){
+  const d=read(folder,'wave-1','L_SISTER_QUEST_CA.json');
+  const dom=d.researchCompleteness.domains.find((x:any)=>x.domain==='POST_EVENT_TRANSITION');
+  assert.equal(dom?.status,'CHECKED');
+  assert.equal(dom.referenceConditionalRates?.status,'PUBLISHED_UNSTRATIFIED_DO_NOT_USE_AS_SETTING_LIKELIHOOD');
+  assert.deepEqual(dom.referenceConditionalRates.rows.map((x:any)=>x.percent),[0.1,0.1,0.4,12.5]);
+  assert.equal(dom.referenceConditionalRates.settingSpecificRatesAvailable,false);
+  const block=d.blockedItems.find((x:any)=>x.blockId==='sister-post-event-unusable-for-setting');
+  assert.ok(block?.sourceIds.includes('sister-aftercare-direct-at-nana-20261009'));
+  assert.ok(!d.findings.some((x:any)=>x.findingId==='sister-aftercare-setting-rate'));
  }
 });
