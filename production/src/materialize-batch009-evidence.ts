@@ -1,13 +1,16 @@
 /**
  * Batch009: materialize reviewed evidence into separate RESEARCH STAGING files.
  * Does not modify research-working, approved research-drafts, runtime or distribution.
- * Use: cd production && node --experimental-strip-types src/materialize-batch009-evidence.ts
+ * Use: cd production && node --experimental-strip-types src/materialize-batch009-evidence.ts --check
+ * Existing curated staging is never overwritten; --write only creates missing files.
  */
 import fs from 'node:fs';
 import path from 'node:path';
 import {validateResearchLiveObservationContract,validateResearchUserFacingTextContract,validateResearchProbabilityRouteContract} from './research-validator.ts';
 import {EVIDENCE_SEMANTIC_TYPES} from './evidence-semantics.ts';
+import {auditBatch009Staging} from './batch009-staging-integrity.ts';
 const batch='batch-20261008-009';
+const writeMissing=process.argv.includes('--write');
 const root=path.resolve('batches',batch);
 const batchSpec=JSON.parse(fs.readFileSync(path.join(root,'batch.json'),'utf8'));
 const selected=JSON.parse(fs.readFileSync(path.join(root,'selected-machines.json'),'utf8'));
@@ -83,7 +86,15 @@ for (const [index,machineId] of machineIds.entries()){
  // Do not validate candidate ledger as approved: previous working files may lack
  // full source-claim and blocked item coverage. This stage is intentionally incomplete.
  const dest=path.join(root,'research-evidence-staged',wave,machineId+'.json');
+ if(fs.existsSync(dest)){
+  const existing=JSON.parse(fs.readFileSync(dest,'utf8'));
+  const issues=auditBatch009Staging(original,reviewed,existing);
+  if(issues.length)throw new Error('STAGING_INTEGRITY_MISMATCH:'+machineId+':'+issues.join(';'));
+  console.log(JSON.stringify({machineId,status:'VERIFIED_EXISTING_NO_WRITE',evidenceImported:added,output:dest}));
+  continue;
+ }
+ if(!writeMissing)throw new Error('MISSING_STAGING_FILE:'+machineId+':run --write only to create a new staged file');
  fs.mkdirSync(path.dirname(dest),{recursive:true});
  fs.writeFileSync(dest,JSON.stringify(d,null,2)+'\n');
- console.log(JSON.stringify({machineId,evidenceImported:added,stage:d.researchStage,output:dest}));
+ console.log(JSON.stringify({machineId,status:'CREATED_MISSING_STAGING',evidenceImported:added,stage:d.researchStage,output:dest}));
 }
