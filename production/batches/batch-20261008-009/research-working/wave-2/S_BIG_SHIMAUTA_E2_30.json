@@ -26,6 +26,40 @@
       "claims": [
         "BIG初当たりの掲載値を照合"
       ]
+    },
+    {
+      "sourceId": "hazuse-shimauta",
+      "url": "https://hazuse.com/machine/pachislot/2S0592/genre/209/",
+      "title": "S BIG島唄30 AT関連・モード別当選率",
+      "sourceType": "secondary_analysis",
+      "checkedAt": "2026-10-09",
+      "claims": [
+        "通常A・通常B・天国準備Aでの非レア役・チェリー当選率の設定差",
+        "小役確率が全設定共通",
+        "設定変更時・リセット時のモード振り分け"
+      ]
+    },
+    {
+      "sourceId": "nanapress-shimauta",
+      "url": "https://nana-press.com/kaiseki/machine/430/11985/",
+      "title": "S BIG島唄30 設定判別要素",
+      "sourceType": "secondary_analysis",
+      "checkedAt": "2026-10-09",
+      "claims": [
+        "ボーナス初当たりは連チャンを除いた確率",
+        "スイカ・確定役以外とスイカ契機のボーナス種別振り分け",
+        "設定示唆の確認状況と設定Lの扱い"
+      ]
+    },
+    {
+      "sourceId": "pworld-shimauta",
+      "url": "https://data.hazuse.com/?machine_code=2S0592",
+      "title": "S BIG島唄30 基本仕様・全設定共通小役確率",
+      "sourceType": "secondary_analysis",
+      "checkedAt": "2026-10-09",
+      "claims": [
+        "設定共通の小役確率と設定Lの下パネル常時消灯"
+      ]
     }
   ],
   "findings": [
@@ -41,16 +75,76 @@
         "6": "1/222.7"
       },
       "sourceIds": [
-        "candidate"
+        "candidate",
+        "nanapress-shimauta"
       ],
-      "trialUniverse": "NORMAL_GAME_TRIAL",
-      "denominatorSemantics": "通常ゲーム数に対するBIG初当たり回数。機種固有の内部状態・引き戻し除外・抽選対象ゲームの確認は未完了。",
+      "trialUniverse": "NON_CHAIN_BONUS_INITIAL_GAME_TRIAL",
+      "denominatorSemantics": "通常時のボーナス初当たりだけを記録し、32G以内の連チャンと1G連ボーナスを母数・成功数の両方から除外できるようにします。",
       "liveObservation": {
-        "status": "REQUIRES_FINAL_SCOPE_VALIDATION",
-        "reason": "現場で観測可能な母数・当たりの区分を確定するまで配信しない。"
+        "status": "UNRESOLVED",
+        "reason": "連チャンと1G連を除いた初当たり抽選対象ゲーム数を実機履歴から正確に再現できるか、まだ検証が必要です。"
       },
       "details": [
-        "公開表の転記候補。観測条件、設定差の評価と重複経路の再確認が必要。"
+        "設定1・2・3・5・6の初当たり確率は複数の公開資料で一致しています。",
+        "設定Lは通常の数値設定には含めません。"
+      ]
+    },
+    {
+      "findingId": "bonus-type-other-trigger",
+      "label": "スイカ・確定役以外のボーナス種別",
+      "observationType": "appearance_distribution",
+      "settingDistribution": {
+        "1": "BIG:98.4%/シーサーBIG:1.6%",
+        "2": "BIG:98%/シーサーBIG:2%",
+        "3": "BIG:97.7%/シーサーBIG:2.3%",
+        "5": "BIG:97.3%/シーサーBIG:2.7%",
+        "6": "BIG:96.9%/シーサーBIG:3.1%"
+      },
+      "categoryModel": {
+        "residualPolicy": "SOURCE_EXHAUSTIVE"
+      },
+      "trialUniverse": "BONUS_HIT_EXCLUDING_WATERMELON_CONFIRMED_ROLE",
+      "denominatorSemantics": "成立契機が特定できたボーナス1回を1試行とし、BIG・シーサーBIGのいずれかを記録します。別の成立契機のボーナスは混ぜないでください。",
+      "liveObservation": {
+        "status": "UNRESOLVED",
+        "reason": "連チャンや内部状態を含め、ボーナス当選契機を表示から個別に確定できるか未検証のため、現在は数値推測へ採用しません。"
+      },
+      "sourceIds": [
+        "hazuse-shimauta",
+        "nanapress-shimauta"
+      ],
+      "details": [
+        "当選契機別のボーナス種別選択率の公表値です。",
+        "当選契機を判別できない回はどちらにも加算しないでください。"
+      ]
+    },
+    {
+      "findingId": "bonus-type-watermelon-trigger",
+      "label": "スイカ契機のボーナス種別",
+      "observationType": "appearance_distribution",
+      "settingDistribution": {
+        "1": "BIG:75%/シーサーBIG:25%",
+        "2": "BIG:72.7%/シーサーBIG:27.3%",
+        "3": "BIG:69.9%/シーサーBIG:30.1%",
+        "5": "BIG:68.8%/シーサーBIG:31.3%",
+        "6": "BIG:66.8%/シーサーBIG:33.2%"
+      },
+      "categoryModel": {
+        "residualPolicy": "SOURCE_EXHAUSTIVE"
+      },
+      "trialUniverse": "BONUS_HIT_TRIGGERED_BY_WATERMELON",
+      "denominatorSemantics": "成立契機が特定できたボーナス1回を1試行とし、BIG・シーサーBIGのいずれかを記録します。別の成立契機のボーナスは混ぜないでください。",
+      "liveObservation": {
+        "status": "UNRESOLVED",
+        "reason": "スイカ成立後のボーナス当選契機を直接確認できず、別契機の当選と混同する可能性があるため、数値推測へ採用しません。"
+      },
+      "sourceIds": [
+        "hazuse-shimauta",
+        "nanapress-shimauta"
+      ],
+      "details": [
+        "当選契機別のボーナス種別選択率の公表値です。",
+        "当選契機を判別できない回はどちらにも加算しないでください。"
       ]
     }
   ],
@@ -72,6 +166,34 @@
         "candidate"
       ],
       "reevaluationCondition": "機種固有の解析と実機から確認できる観測条件を確定すること。"
+    },
+    {
+      "blockId": "mode-conditioned-draws",
+      "label": "通常モード別のボーナス当選率",
+      "reason": "内部モードごとに設定差がありますが、現在のモードをすべてのゲームで確定して記録することは難しいため、通常ゲーム数全体へ当選率を当てはめることはできません。",
+      "sourceIds": [
+        "hazuse-shimauta"
+      ],
+      "reevaluationCondition": "通常A・B・天国準備Aの滞在範囲を客観的に特定してゲーム数と当選回数を記録できる方法が確認できること。"
+    },
+    {
+      "blockId": "small-role-no-difference",
+      "label": "小役の出現確率",
+      "reason": "公開されているチェリー・スイカ・ベル・リプレイなどの確率は全設定共通で、出現回数から設定を判別できません。",
+      "sourceIds": [
+        "hazuse-shimauta",
+        "pworld-shimauta"
+      ],
+      "reevaluationCondition": "設定別小役確率の新しい公表情報が出た場合に確認します。"
+    },
+    {
+      "blockId": "mode-lamps-not-setting",
+      "label": "ドンドンランプ・音符ランプなど",
+      "reason": "ランプ・フグボイス・パネルフラッシュは内部モードや連チャン期待度の示唆であり、設定番号を示す演出ではありません。",
+      "sourceIds": [
+        "nanapress-shimauta"
+      ],
+      "reevaluationCondition": "機種固有の設定確定・設定別示唆が新たに公開された場合に確認します。"
     }
   ],
   "researchCompleteness": {
@@ -82,17 +204,53 @@
         "domain": "INITIAL_HIT",
         "status": "PARTIAL",
         "sourceIds": [
-          "candidate"
+          "candidate",
+          "nanapress-shimauta"
         ],
-        "note": "設定別確率の一次照合済み。ただし使用母数・因果関係・示唆演出は未検証。"
+        "note": "設定別初当たり確率を複数ソースで照合。連チャンを除いた遊技ゲーム数母数の正確な定義が未確定。"
       },
       {
         "domain": "EVIDENCE",
-        "status": "NOT_YET_REVIEWED",
+        "status": "PARTIAL",
         "sourceIds": [
-          "candidate"
+          "nanapress-shimauta"
         ],
-        "note": "示唆演出・確定条件の網羅調査が未完了。"
+        "note": "ドンドンランプ、音符ランプ、フグボイス、上下パネルは設定ではなくモード・連チャンを示すことを確認。機種固有の設定示唆の不存在については最終確認が必要。"
+      },
+      {
+        "domain": "SMALL_ROLE",
+        "status": "CHECKED",
+        "note": "チェリー・スイカ・リプレイ・ベルなどについて、全設定共通の出現確率表を照合。小役回数そのものは判別力がない。",
+        "sourceIds": [
+          "hazuse-shimauta",
+          "pworld-shimauta"
+        ]
+      },
+      {
+        "domain": "BONUS_TYPE_CONDITIONAL",
+        "status": "CHECKED",
+        "note": "スイカ・確定役以外／スイカ／確定役の3群についてボーナス種別の設定別公表表を照合。契機の観測可能性が未確定なので数値反映は保留。",
+        "sourceIds": [
+          "nanapress-shimauta",
+          "hazuse-shimauta"
+        ]
+      },
+      {
+        "domain": "MODE_TRANSITION",
+        "status": "PARTIAL",
+        "note": "滞在モード・リセット時の振り分けを確認。設定変更後と有利区間リセット後を混同しない。通常時の設定別モード移行率は公開・観測条件を引き続き調査。",
+        "sourceIds": [
+          "hazuse-shimauta"
+        ]
+      },
+      {
+        "domain": "RESET_BEHAVIOR",
+        "status": "PARTIAL",
+        "note": "設定変更時のモード分布と下パネル消灯を確認。設定Lは数値推測から除外。その他の設定別差・演出は追加調査。",
+        "sourceIds": [
+          "hazuse-shimauta",
+          "pworld-shimauta"
+        ]
       }
     ],
     "candidateLedger": [
@@ -102,15 +260,144 @@
         "sourceClaims": [
           {
             "sourceId": "candidate",
-            "claim": "BIG初当たりの公開表"
+            "claim": "BIG初当たりの掲載値を照合"
+          },
+          {
+            "sourceId": "nanapress-shimauta",
+            "claim": "ボーナス初当たりは連チャンを除いた確率"
           }
         ],
-        "discoveryQueries": [],
+        "discoveryQueries": [
+          "S BIG島唄30 設定示唆 終了画面 ボイス 設定確定 ランプ"
+        ],
         "disposition": {
           "type": "FINDING_PENDING_SCOPE_VALIDATION",
           "refId": "big-initial"
         }
+      },
+      {
+        "candidateId": "finding:bonus-type-other-trigger",
+        "label": "スイカ・確定役以外のボーナス種別",
+        "sourceClaims": [
+          {
+            "sourceId": "nanapress-shimauta",
+            "claim": "スイカ・確定役以外とスイカ契機のボーナス種別振り分け"
+          }
+        ],
+        "discoveryQueries": [
+          "S BIG島唄30 設定示唆 終了画面 ボイス 設定確定 ランプ"
+        ],
+        "disposition": {
+          "type": "FINDING_PENDING_SCOPE_VALIDATION",
+          "refId": "bonus-type-other-trigger"
+        }
+      },
+      {
+        "candidateId": "finding:bonus-type-watermelon-trigger",
+        "label": "スイカ契機のボーナス種別",
+        "sourceClaims": [
+          {
+            "sourceId": "nanapress-shimauta",
+            "claim": "スイカ・確定役以外とスイカ契機のボーナス種別振り分け"
+          }
+        ],
+        "discoveryQueries": [
+          "S BIG島唄30 設定示唆 終了画面 ボイス 設定確定 ランプ"
+        ],
+        "disposition": {
+          "type": "FINDING_PENDING_SCOPE_VALIDATION",
+          "refId": "bonus-type-watermelon-trigger"
+        }
+      },
+      {
+        "candidateId": "block:continuation",
+        "label": "連チャン中のBIG",
+        "sourceClaims": [],
+        "discoveryQueries": [
+          "S BIG島唄30 ドンドンランプ 設定示唆 セリフ 偶数 奇数 示唆 設定差",
+          "S BIG島唄30 小役確率 モード移行率 設定差 セグ"
+        ],
+        "disposition": {
+          "type": "BLOCKED",
+          "refId": "continuation"
+        }
+      },
+      {
+        "candidateId": "block:setting-l",
+        "label": "設定Lの扱い",
+        "sourceClaims": [],
+        "discoveryQueries": [
+          "S BIG島唄30 ドンドンランプ 設定示唆 セリフ 偶数 奇数 示唆 設定差",
+          "S BIG島唄30 小役確率 モード移行率 設定差 セグ"
+        ],
+        "disposition": {
+          "type": "BLOCKED",
+          "refId": "setting-l"
+        }
+      },
+      {
+        "candidateId": "block:mode-conditioned-draws",
+        "label": "通常モード別のボーナス当選率",
+        "sourceClaims": [
+          {
+            "sourceId": "hazuse-shimauta",
+            "claim": "通常A・通常B・天国準備Aでの非レア役・チェリー当選率の設定差"
+          }
+        ],
+        "discoveryQueries": [
+          "S BIG島唄30 ドンドンランプ 設定示唆 セリフ 偶数 奇数 示唆 設定差",
+          "S BIG島唄30 小役確率 モード移行率 設定差 セグ"
+        ],
+        "disposition": {
+          "type": "BLOCKED",
+          "refId": "mode-conditioned-draws"
+        }
+      },
+      {
+        "candidateId": "block:small-role-no-difference",
+        "label": "小役の出現確率",
+        "sourceClaims": [
+          {
+            "sourceId": "hazuse-shimauta",
+            "claim": "小役確率が全設定共通"
+          },
+          {
+            "sourceId": "pworld-shimauta",
+            "claim": "設定共通の小役確率と設定Lの下パネル常時消灯"
+          }
+        ],
+        "discoveryQueries": [
+          "S BIG島唄30 ドンドンランプ 設定示唆 セリフ 偶数 奇数 示唆 設定差",
+          "S BIG島唄30 小役確率 モード移行率 設定差 セグ"
+        ],
+        "disposition": {
+          "type": "BLOCKED",
+          "refId": "small-role-no-difference"
+        }
+      },
+      {
+        "candidateId": "block:mode-lamps-not-setting",
+        "label": "ドンドンランプ・音符ランプなど",
+        "sourceClaims": [
+          {
+            "sourceId": "nanapress-shimauta",
+            "claim": "設定示唆の確認状況と設定Lの扱い"
+          }
+        ],
+        "discoveryQueries": [
+          "S BIG島唄30 ドンドンランプ 設定示唆 セリフ 偶数 奇数 示唆 設定差",
+          "S BIG島唄30 小役確率 モード移行率 設定差 セグ"
+        ],
+        "disposition": {
+          "type": "BLOCKED",
+          "refId": "mode-lamps-not-setting"
+        }
       }
+    ],
+    "machineSpecificQueries": [
+      "S BIG島唄30 設定示唆 終了画面 ボイス 設定確定 ランプ",
+      "S BIG島唄30 ドンドンランプ 設定示唆 セリフ 偶数 奇数 示唆 設定差",
+      "S BIG島唄30 小役確率 モード移行率 設定差 セグ"
     ]
   }
 }
