@@ -119,3 +119,20 @@ test('Sister Quest small-role rates are source-checked as no-setting-difference,
  }
 });
 const idForFailure=(folder:string,id:string)=>folder+':missing source '+id;
+
+test('Sister Quest reset mode table is retained as a blocked non-setting-specific reference',()=>{
+ for(const folder of ['research-working','research-evidence-staged']){
+  const d=read(folder,'wave-1','L_SISTER_QUEST_CA.json');
+  const reset=d.researchCompleteness.domains.find((x:any)=>x.domain==='RESET_BEHAVIOR');
+  assert.equal(reset?.status,'CHECKED');
+  assert.equal(reset.sourceIds.length,2);
+  const b=d.blockedItems.find((x:any)=>x.blockId==='sister-reset-mode-unverified-setting-distribution');
+  assert.ok(b);
+  assert.match(b.reason,/設定ごとの違いは確認できません/);
+  const ledger=d.researchCompleteness.candidateLedger.find((x:any)=>x.candidateId==='block:'+b.blockId);
+  assert.equal(ledger?.disposition.type,'BLOCKED');
+  assert.equal(ledger?.disposition.refId,b.blockId);
+  assert.ok(!d.findings.some((f:any)=>f.findingId==='sister-reset-mode'));
+  assert.equal(d.researchCompleteness.status,'INCOMPLETE');
+ }
+});
