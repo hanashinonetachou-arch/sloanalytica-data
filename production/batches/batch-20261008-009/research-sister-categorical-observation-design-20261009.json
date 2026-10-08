@@ -1,0 +1,60 @@
+{
+  "schemaVersion": "batch009-categorical-observation-design-draft-v1",
+  "batchId": "batch-20261008-009",
+  "machineId": "L_SISTER_QUEST_CA",
+  "checkedAt": "2026-10-09",
+  "status": "RESEARCH_DESIGN_ONLY_NOT_APPROVED_NOT_FOR_RUNTIME",
+  "goal": "Avoid counting one observed end screen/rare monster as both an independent exact-hint Evidence outcome and a categorical setting-likelihood outcome.",
+  "sourceMaterial": [
+    "https://nana-press.com/kaiseki/machine/906/27956/",
+    "https://www.p-world.co.jp/machine/database/10209",
+    "https://1geki.jp/slot/l_sisterquest/0/"
+  ],
+  "observations": [
+    {
+      "numericFindingId": "at-end-categorical",
+      "evidenceFindingId": "reviewed-at-end",
+      "trialUniverse": "SISTER_AT_END_SCREEN",
+      "categoryCount": 7,
+      "eligibleEvent": "One distinct screen actually shown at the end of 冒険RUSH or 超冒険RUSH.",
+      "counting": "One record per actual final result; do not count the same ended AT twice after a comeback/replay. Category count is one of the seven observed screens.",
+      "denominator": "Sum of all seven observed categories, if the interface provides complete observations; never use total game count or AT game count as the number of end screens.",
+      "deterministicHints": {
+        "シフォン＆ステラ": "SET_2_OR_ABOVE",
+        "シフォン＆仲間3人": "SET_4_OR_ABOVE",
+        "水晶姫クレア": "SET_6_ONLY"
+      },
+      "proposal": "Use a single canonical category-count input. Derive deterministic setting constraints from matching categories in this same count vector; apply its categorical likelihood once, never add an independent Evidence hint probability. Keep category meaning visible in UI.",
+      "unresolved": "Confirm that every displayed AT-end screen belongs to these seven and that repeated displays after resurrection are uniquely handled by user-visible UI semantics. Require denominator and interaction specification reviewed before enabling likelihood."
+    },
+    {
+      "numericFindingId": "at-monster-categorical",
+      "evidenceFindingId": "reviewed-at-monster",
+      "trialUniverse": "SISTER_RARE_MONSTER_APPEARANCE",
+      "categoryCount": 4,
+      "eligibleEvent": "A distinguishable appearance of ネクロマンティス / ダークキメラ / ピットデーモン / グランキャンドロス while in a monster battle during AT.",
+      "counting": "Increment exactly one of four concrete monster categories per eligible appearance. Ordinary other monsters are excluded from the *conditional* denominator.",
+      "denominator": "Sum of the four rare-monster counts only; do not use all monster battles or all enemy appearances.",
+      "proposal": "One conditional categorical input model, with its Evidence count display sourced from the same records; avoid independent probability and Evidence counters. Preserve non-rare enemies as excluded unless a separately sourced baseline rate exists.",
+      "unresolved": "Independently verify whether these 4 percentages are conditional on all four appearances and whether in-game recording can be complete; do not infer occurrence of rare monsters from the conditional shares."
+    }
+  ],
+  "commonGeneratorValidatorRequirements": [
+    "Use one observation identity per machine+trialUniverse+event; numeric and Evidence UI must refer to the same storage counts and not separately increment evidence and likelihood.",
+    "Require exact one-to-one map of numeric category labels to reviewed Evidence categories, including semantic type and setting constraints.",
+    "At research/promotion stages reject any explicit mirrored candidate until the canonical shared-input route is approved and implemented. Missing mirror metadata must not silently authorize an independent route.",
+    "Apply each single observation's setting-conditional likelihood at most once; derived constraints from deterministic category outcomes must not multiply a second independent likelihood.",
+    "Do not turn per-event conditional information gain times 200 into a 7000G selection score without actual eligible-trial exposure at the benchmark.",
+    "Require all candidate setting rows from the same source's explicitly rounded exhaustive category distributions; normalization must not invent unknown residual categories.",
+    "Until end-to-end runtime and QA checks pass, keep numericRouteStatus=PENDING_* and Research not promoted."
+  ],
+  "testsToImplementBeforePromotion": [
+    "Record one AT screen and verify a single categorical likelihood update plus corresponding derived constraint (no second Evidence likelihood).",
+    "Verify a 4-monster eligible count of 1 excludes all other observed enemies from its denominator.",
+    "Disallow category counts with missing/unrecognized outcome labels; require one category per result.",
+    "Rebuild contract and runtime from the same source snapshot deterministically; ensure round-trip saved counts keep category identity.",
+    "Verify that two numeric findings cannot both mirror one Evidence ID and that erased mirror declarations fail promotion."
+  ],
+  "productDecisionRequiredBeforeRuntime": false,
+  "notes": "This is a research-only design proposal, not a change to canonical UI/runtime contracts. Final observability and statistical assumptions remain unresolved."
+}
