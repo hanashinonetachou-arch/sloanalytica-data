@@ -95,6 +95,29 @@
         "AT初当たりの設定別初当たり確率",
         "上位AT初当たりの設定別初当たり確率"
       ]
+    },
+    {
+      "sourceId": "ichigeki-deno-ceiling",
+      "url": "https://1geki.jp/slot/l_kmnr_deno/3/",
+      "title": "電王の888G天井・AT間6回目天井・設定変更と電源OFF/ON",
+      "sourceType": "secondary_analysis",
+      "checkedAt": "2026-10-09",
+      "claims": [
+        "ボーナス間888G+前兆と5スルー後6回目電王BONUSのAT確定天井",
+        "設定変更時はゲーム数/モード/CZポイントをリセット、電源OFF/ONでは引き継ぐ"
+      ]
+    },
+    {
+      "sourceId": "pworld-deno-mechanics",
+      "url": "https://www.p-world.co.jp/machine/database/10220",
+      "title": "電王の通常A/B/C/天国別天井と設定1のみの小役確率表",
+      "sourceType": "secondary_analysis",
+      "checkedAt": "2026-10-09",
+      "claims": [
+        "内部モード通常A888G・B777G・C444G・天国111Gでボーナス当選",
+        "公表されている小役出現率の行は設定1のみで他設定の完全表は掲載されていない",
+        "100ptごとにCZ抽選しボーナス終了後もCZポイントを持ち越す"
+      ]
     }
   ],
   "findings": [
@@ -391,6 +414,51 @@
         "candidate"
       ],
       "reevaluationCondition": "機種固有の解析と実機から確認できる観測条件を確定すること。"
+    },
+    {
+      "blockId": "deno-normal-modes-ceilings",
+      "label": "通常A/B/C・天国のモード別ゲーム数天井",
+      "reason": "通常Aは888G、Bは777G、Cは444G、天国は111Gでボーナス天井に到達します。この違いは内部モードによるもので、設定番号別の天井ではありません。",
+      "reevaluationCondition": "設定ごとのモード選択率が公表され、内部モードを正確に観測できる場合に再評価します。",
+      "sourceIds": [
+        "pworld-deno-mechanics"
+      ]
+    },
+    {
+      "blockId": "deno-sixth-bonus-at-ceiling",
+      "label": "電王BONUSの6回目でAT当選",
+      "reason": "AT非当選の電王BONUSが5回続いた場合、次の6回目の電王BONUSでAT当選濃厚となります。これは救済天井なので、天井経由のATを通常抽選による高設定示唆として数えません。",
+      "reevaluationCondition": "設定ごとに異なるAT間天井や選択率が公表された場合に再評価します。",
+      "sourceIds": [
+        "ichigeki-deno-ceiling"
+      ]
+    },
+    {
+      "blockId": "deno-setting-change-reset",
+      "label": "設定変更時の天井・CZポイントのリセット",
+      "reason": "設定変更時はゲーム数・内部モード・CZポイントがリセットされ、電源の入れ直しだけでは引き継がれます。この挙動自体は設定番号を判断する材料ではありません。",
+      "reevaluationCondition": "設定ごとの開始状態振り分けが公開された場合に見直します。",
+      "sourceIds": [
+        "ichigeki-deno-ceiling"
+      ]
+    },
+    {
+      "blockId": "deno-small-role-only-setting1-reference",
+      "label": "リプレイ・ベル・レア小役の設定別出現率",
+      "reason": "公開小役表にはリプレイ1/7.3・共通ベル1/14.1など設定1の参考値が掲載されていますが、設定2・4・5・6の比較表は確認できません。全設定共通とも設定差ありとも断定せず、記録だけで推測に反映しません。",
+      "reevaluationCondition": "設定1・2・4・5・6の小役確率が正式に公開され、互いに比較できるようになった場合に確認します。",
+      "sourceIds": [
+        "pworld-deno-mechanics"
+      ]
+    },
+    {
+      "blockId": "deno-100pt-cz-ceiling-independent",
+      "label": "100ptごとのCZ抽選と天井経由のボーナス",
+      "reason": "小役ポイント100pt到達時にCZ抽選を行いますが、BONUS5スルー後のAT救済天井とは異なる試行です。CZ当選とAT初当たりを同じ成功事象として重複加点しません。",
+      "reevaluationCondition": "100pt到達・CZ当落・AT当落が時系列で観測でき、抽選経路を分離できた場合に再評価します。",
+      "sourceIds": [
+        "pworld-deno-mechanics"
+      ]
     }
   ],
   "researchCompleteness": {
@@ -409,11 +477,11 @@
       },
       {
         "domain": "EVIDENCE",
-        "status": "NOT_YET_REVIEWED",
+        "status": "PARTIAL",
         "sourceIds": [
-          "candidate"
+          "pworld-deno"
         ],
-        "note": "示唆演出・確定条件の網羅調査が未完了。"
+        "note": "AT終了画面・玉ちゃんトロフィー・上位AT中ボーナス終了画面・AT告知タイミング・ポイント追加表示の5群をEvidenceレビュー済み。原画像との対応はなお要確認。"
       },
       {
         "domain": "INTERNAL_CONDITIONAL_DRAW",
@@ -429,6 +497,48 @@
         "note": "憑依ポイント経由のCZ当選率の設定別公表値を確認。母数と直接AT・上位CZ経路の整理は未完了。",
         "sourceIds": [
           "nanapress-deno"
+        ]
+      },
+      {
+        "domain": "THRESHOLD_BEHAVIOR",
+        "status": "CHECKED",
+        "note": "ボーナス間天井は通常A888G、B777G、C444G、天国111G。電王BONUS5スルー後の6回目がAT確定天井。どちらも設定別の当選率とは区別して不採用。",
+        "sourceIds": [
+          "pworld-deno-mechanics",
+          "ichigeki-deno-ceiling"
+        ]
+      },
+      {
+        "domain": "RESET_BEHAVIOR",
+        "status": "CHECKED",
+        "note": "設定変更時はボーナス天井ゲーム数・内部モード・CZポイントをリセット、電源OFF/ONでは引き継ぐ。設定ごとの開始状態差は未確認。",
+        "sourceIds": [
+          "ichigeki-deno-ceiling"
+        ]
+      },
+      {
+        "domain": "SMALL_ROLE",
+        "status": "PARTIAL",
+        "note": "リプレイ1/7.3・共通ベル1/14.1・弱チェリー1/65.5・スイカ1/83.2など設定1の小役表は確認。他設定の完全な比較表がないため、全設定共通と断定しない。",
+        "sourceIds": [
+          "pworld-deno-mechanics"
+        ]
+      },
+      {
+        "domain": "MODE_TRANSITION",
+        "status": "PARTIAL",
+        "note": "通常A/B/C・天国の4モードと終了後の移行タイミングを確認。設定変更時などの設定別モード選択率は非公開。",
+        "sourceIds": [
+          "pworld-deno-mechanics",
+          "ichigeki-deno-ceiling"
+        ]
+      },
+      {
+        "domain": "POST_EVENT_TRANSITION",
+        "status": "PARTIAL",
+        "note": "電王BONUS終了後はCZポイントを引き継ぎ、設定変更時はリセット。AT終了後モードも移行抽選するが設定別内訳は未確認。",
+        "sourceIds": [
+          "pworld-deno-mechanics"
         ]
       }
     ],
@@ -651,6 +761,91 @@
           "type": "BLOCKED",
           "refId": "at-path"
         }
+      },
+      {
+        "candidateId": "block:deno-normal-modes-ceilings",
+        "label": "通常A/B/C・天国のモード別ゲーム数天井",
+        "sourceClaims": [
+          {
+            "sourceId": "pworld-deno-mechanics",
+            "claim": "内部モード通常A888G・B777G・C444G・天国111Gでボーナス当選"
+          }
+        ],
+        "discoveryQueries": [
+          "電王 888 777 444 111G 天井 通常A B C 天国"
+        ],
+        "disposition": {
+          "type": "BLOCKED",
+          "refId": "deno-normal-modes-ceilings"
+        }
+      },
+      {
+        "candidateId": "block:deno-sixth-bonus-at-ceiling",
+        "label": "電王BONUSの6回目でAT当選",
+        "sourceClaims": [
+          {
+            "sourceId": "ichigeki-deno-ceiling",
+            "claim": "ボーナス間888G+前兆と5スルー後6回目電王BONUSのAT確定天井"
+          }
+        ],
+        "discoveryQueries": [
+          "電王 電王BONUS 5回スルー 6回目 俺FEVER 天井"
+        ],
+        "disposition": {
+          "type": "BLOCKED",
+          "refId": "deno-sixth-bonus-at-ceiling"
+        }
+      },
+      {
+        "candidateId": "block:deno-setting-change-reset",
+        "label": "設定変更時の天井・CZポイントのリセット",
+        "sourceClaims": [
+          {
+            "sourceId": "ichigeki-deno-ceiling",
+            "claim": "設定変更時はゲーム数/モード/CZポイントをリセット、電源OFF/ONでは引き継ぐ"
+          }
+        ],
+        "discoveryQueries": [
+          "電王 設定変更 CZポイント 天井 モード リセット 電源OFF 引継ぎ"
+        ],
+        "disposition": {
+          "type": "BLOCKED",
+          "refId": "deno-setting-change-reset"
+        }
+      },
+      {
+        "candidateId": "block:deno-small-role-only-setting1-reference",
+        "label": "リプレイ・ベル・レア小役の設定別出現率",
+        "sourceClaims": [
+          {
+            "sourceId": "pworld-deno-mechanics",
+            "claim": "公表されている小役出現率の行は設定1のみで他設定の完全表は掲載されていない"
+          }
+        ],
+        "discoveryQueries": [
+          "電王 設定1 リプレイ 共通ベル 弱チェリー スイカ 他設定 確率"
+        ],
+        "disposition": {
+          "type": "BLOCKED",
+          "refId": "deno-small-role-only-setting1-reference"
+        }
+      },
+      {
+        "candidateId": "block:deno-100pt-cz-ceiling-independent",
+        "label": "100ptごとのCZ抽選と天井経由のボーナス",
+        "sourceClaims": [
+          {
+            "sourceId": "pworld-deno-mechanics",
+            "claim": "100ptごとにCZ抽選しボーナス終了後もCZポイントを持ち越す"
+          }
+        ],
+        "discoveryQueries": [
+          "電王 100pt CZ 抽選 途中前兆 ポイント 継続 ボーナス後"
+        ],
+        "disposition": {
+          "type": "BLOCKED",
+          "refId": "deno-100pt-cz-ceiling-independent"
+        }
       }
     ],
     "evidenceSourceReview": {
@@ -668,7 +863,12 @@
     "machineSpecificQueries": [
       "L仮面ライダー電王 電王ボーナス AT 上位AT 設定別 1/254.5 1/477.7 1/1357.2",
       "L仮面ライダー電王 憑依ポイント 100pt CZ 設定差 48.9 49.2 49.8 50.0",
-      "L仮面ライダー電王 ボーナス AT 上位AT 経路 包含 二重計算 憑依ポイント"
+      "L仮面ライダー電王 ボーナス AT 上位AT 経路 包含 二重計算 憑依ポイント",
+      "電王 888 777 444 111G 天井 通常A B C 天国",
+      "電王 電王BONUS 5回スルー 6回目 俺FEVER 天井",
+      "電王 設定変更 CZポイント 天井 モード リセット 電源OFF 引継ぎ",
+      "電王 設定1 リプレイ 共通ベル 弱チェリー スイカ 他設定 確率",
+      "電王 100pt CZ 抽選 途中前兆 ポイント 継続 ボーナス後"
     ]
   }
 }
