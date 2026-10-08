@@ -5,7 +5,14 @@ import {productionRequest,acceptAndRecord} from './runtime.ts';
 const batchId=process.argv[2],s=new RepoStore(process.cwd()),o=new Orchestrator(s);
 if(!batchId)throw Error('BATCH_ID_REQUIRED');
 const ids=s.read<any>('batches',batchId,'batch.json').waves.flatMap((w:any)=>w.machineIds);
-const decision={schemaVersion:'device-qa-acceptance-v1',batchId,status:'PASS',acceptedBy:'USER',acceptedAt:'2026-10-07',statement:'今回の機種調査は問題ありませんでした。',source:'User-authorized attached handoff 20261007-125207',appCommit:'3bef2eadbc17dca47de7a60a698c6b65aea543bb',distributionCommit:'c3728e85d36517898fe25c7ae6cf039f83a58e06',qaRunId:'37548381546',versionCode:2002787132,machineIds:ids};
+const supplied=process.argv[3] ? JSON.parse(fs.readFileSync(process.argv[3],'utf8')) : null;
+if(supplied){
+ const h=s.read<any>('batches',batchId,'device-qa','handoff.json');
+ if(supplied.batchId!==batchId||supplied.status!=='PASS'||supplied.acceptedBy!=='USER'||!supplied.statement||!supplied.acceptedAt)throw Error('INVALID_USER_ACCEPTANCE');
+ if(JSON.stringify(supplied.machineIds)!==JSON.stringify(ids)||supplied.appCommit!==h.appCommit||supplied.distributionCommit!==h.dataCommit||supplied.versionCode!==h.apk.versionCode||String(supplied.qaRunId)!==String(h.qaRunId))throw Error('ACCEPTANCE_HANDOFF_MISMATCH');
+}
+const decision=supplied??{schemaVersion:'device-qa-acceptance-v1',batchId,status:'PASS',acceptedBy:'USER',acceptedAt:'2026-10-07',statement:'今回の機種調査は問題ありませんでした。',source:'User-authorized attached handoff 20261007-125207',appCommit:'3bef2eadbc17dca47de7a60a698c6b65aea543bb',distributionCommit:'c3728e85d36517898fe25c7ae6cf039f83a58e06',qaRunId:'37548381546',versionCode:2002787132,machineIds:ids};
+if(!supplied&&batchId!=='batch-20261007-007')throw Error('EXPLICIT_ACCEPTANCE_REQUIRED');
 s.write(decision,'batches',batchId,'device-qa','acceptance.json');
 for(const machineId of ids){
  if(o.stage(batchId,machineId,'DISTRIBUTION').state!=='COMPLETE')throw Error('DISTRIBUTION_REQUIRED:'+machineId);
