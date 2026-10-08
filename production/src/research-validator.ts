@@ -5,6 +5,7 @@ import type {Attempt,WorkResult} from './core.ts';
 import {RepoStore} from './core.ts';
 import {EVIDENCE_SEMANTIC_TYPES,classifyEvidenceCategory} from './evidence-semantics.ts';
 import {buildDependencyReview} from './dependency-gate.ts';
+import {categoricalEvidenceMirrorIssues} from './categorical-evidence-mirror.ts';
 
 export const RESEARCH_VALIDATOR_CONTRACT='research-v1';
 export const RESEARCH_COMPLETENESS_DOMAINS=["INITIAL_HIT","BONUS","SMALL_ROLE","CZ","AT","INTERNAL_CONDITIONAL_DRAW","MODE_TRANSITION","STATE_TRANSITION","SUCCESS_RATE","POINTS_GAME_DISTRIBUTION","CARRY_OVER","THRESHOLD_BEHAVIOR","RESET_BEHAVIOR","POST_EVENT_TRANSITION","NAVIGATION","ROLE_CONDITIONAL_DISTRIBUTION","BONUS_TYPE_CONDITIONAL","EVIDENCE","EXTERNAL_DATA_ONLY","MACHINE_SPECIFIC"] as const;
@@ -91,11 +92,9 @@ export function validateResearchPromotionReadiness(d:any){
     if(finding?.settingDistribution&&['probability','conditional_probability','appearance_distribution'].includes(finding.observationType)&&finding?.liveObservation?.status==='UNRESOLVED')
       throw new Error('RESEARCH_VALIDATION:UNRESOLVED_NUMERIC_OBSERVATION_PROMOTION_FORBIDDEN:'+String(finding.findingId));
   }
-  const evidenceIds=new Set((d?.findings??[]).filter((f:any)=>f?.observationType==='evidence').map((f:any)=>f.findingId));
-  for(const finding of d?.findings??[]){
-    if(finding?.mirrorsEvidenceFindingId&&evidenceIds.has(finding.mirrorsEvidenceFindingId))
-      throw new Error('RESEARCH_VALIDATION:MIRRORED_CATEGORICAL_EVIDENCE_NOT_RECONCILED:'+String(finding.findingId));
-  }
+  const categoricalIssues=categoricalEvidenceMirrorIssues(d);
+  if(categoricalIssues.length)
+    throw new Error('RESEARCH_VALIDATION:'+categoricalIssues[0]);
 }
 
 export function validateResearchArtifacts(s:RepoStore,a:Attempt,r:WorkResult){
