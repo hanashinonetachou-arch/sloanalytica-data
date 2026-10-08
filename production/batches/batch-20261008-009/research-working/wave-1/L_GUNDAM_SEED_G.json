@@ -25,7 +25,18 @@
       "sourceType": "secondary_analysis",
       "checkedAt": "2026-10-08",
       "claims": [
-        "AT初当たりの設定別確率"
+        "AT初当たりの設定別確率",
+        "CZストライクアタックの設定別出現率"
+      ]
+    },
+    {
+      "sourceId": "nanapress-seed-setting",
+      "url": "https://nana-press.com/kaiseki/machine/930/29292/",
+      "title": "ガンダムSEED CZ・AT初当たり確率",
+      "sourceType": "secondary_analysis",
+      "checkedAt": "2026-10-09",
+      "claims": [
+        "CZストライクアタックの設定別出現率"
       ]
     }
   ],
@@ -53,18 +64,54 @@
       },
       "details": [
         "公開値を確認済み。観測条件と依存関係の最終検証前の作業データ。"
-      ]
+      ],
+      "dependencyGroupId": "seed-cz-at",
+      "dependencyKind": "CAUSAL_PATH_OVERLAP",
+      "dependencyFallbackRank": 1,
+      "dependencyReason": "CZからボーナス・STへ到達する経路を含み、同一当選を独立の根拠として二重計上しないため。"
+    },
+    {
+      "findingId": "cz-strike-attack",
+      "label": "CZストライクアタック出現",
+      "observationType": "probability",
+      "settingDistribution": {
+        "1": "1/362.2",
+        "2": "1/377.3",
+        "3": "1/349.1",
+        "4": "1/309.7",
+        "5": "1/301.6",
+        "6": "1/266.9"
+      },
+      "sourceIds": [
+        "pachinavi",
+        "nanapress-seed-setting"
+      ],
+      "trialUniverse": "NORMAL_GAME_TRIAL",
+      "denominatorSemantics": "通常ゲーム数に対するCZストライクアタック出現回数。AT・ST中およびボーナス中のゲーム数を混ぜないでください。",
+      "liveObservation": {
+        "status": "REQUIRES_FINAL_SCOPE_VALIDATION",
+        "reason": "通常ゲーム数とCZ・STの当選経路を照合し、同じ当選をAT初当たりと重複加算しない方法が確定するまで正式採用しません。"
+      },
+      "details": [
+        "複数の公開解析サイトに設定1～6の出現率が掲載されています。",
+        "設定2は設定1よりCZが重いので、単純な設定順の補間は行いません。"
+      ],
+      "dependencyGroupId": "seed-cz-at",
+      "dependencyKind": "CAUSAL_PATH_OVERLAP",
+      "dependencyFallbackRank": 2,
+      "dependencyReason": "CZを経由したボーナス・ST当選をAT初当たりと二重計上しないため。"
     }
   ],
   "blockedItems": [
     {
       "blockId": "cz-discrepancy",
-      "label": "CZストライクアタックの設定別確率",
-      "reason": "CZ表の数値について掲載先同士の照合・試行対象の確定が未完了です。正式推測には反映しません。",
+      "label": "CZとATの計測経路の重複",
+      "reason": "CZの設定別出現率は複数の解析サイトで確認できました。ただし、そのCZから繋がるボーナス・AT初当たりを別々の当選として重複加算しないよう検証中です。",
       "sourceIds": [
-        "pachinavi"
+        "pachinavi",
+        "nanapress-seed-setting"
       ],
-      "reevaluationCondition": "観測条件・公開数値・機種固有の抽選仕様を再照合すること。"
+      "reevaluationCondition": "CZを経由した当選と直接当選の区別・通常遊技の集計範囲を確認します。"
     },
     {
       "blockId": "bonus-overlap",
@@ -95,6 +142,15 @@
           "pachinavi"
         ],
         "note": "示唆演出と確定条件の全種照合は未完了。"
+      },
+      {
+        "domain": "CZ",
+        "status": "PARTIAL",
+        "sourceIds": [
+          "pachinavi",
+          "nanapress-seed-setting"
+        ],
+        "note": "CZ確率の設定別公開値を複数サイトで照合。AT初当たりとの当選経路と観測母数を検証中。"
       }
     ],
     "candidateLedger": [
@@ -107,12 +163,65 @@
             "claim": "AT初当たりの設定別確率"
           }
         ],
-        "discoveryQueries": [],
+        "discoveryQueries": [
+          "スマスロ 機動戦士ガンダムSEED 設定差 設定判別 CZ ST 終了画面"
+        ],
         "disposition": {
           "type": "FINDING_PENDING_SCOPE_VALIDATION",
           "refId": "at-initial"
         }
+      },
+      {
+        "candidateId": "finding:cz-strike-attack",
+        "label": "CZストライクアタック出現",
+        "sourceClaims": [
+          {
+            "sourceId": "pachinavi",
+            "claim": "CZストライクアタックの設定別出現率"
+          },
+          {
+            "sourceId": "nanapress-seed-setting",
+            "claim": "CZストライクアタックの設定別出現率"
+          }
+        ],
+        "discoveryQueries": [
+          "L機動戦士ガンダムSEED CZストライクアタック 設定別当選 1/362.2 1/377.3 AT",
+          "L ガンダム SEED CZ ストライクアタック 設定差 1/377.3 1/266.9"
+        ],
+        "disposition": {
+          "type": "FINDING_PENDING_SCOPE_VALIDATION",
+          "refId": "cz-strike-attack"
+        }
+      },
+      {
+        "candidateId": "block:cz-discrepancy",
+        "label": "CZとATの計測経路の重複",
+        "sourceClaims": [],
+        "discoveryQueries": [
+          "L ガンダム SEED CZ ストライクアタック 設定差 1/377.3 1/266.9"
+        ],
+        "disposition": {
+          "type": "BLOCKED",
+          "refId": "cz-discrepancy"
+        }
+      },
+      {
+        "candidateId": "block:bonus-overlap",
+        "label": "ATとボーナス初当たり",
+        "sourceClaims": [],
+        "discoveryQueries": [
+          "L ガンダム SEED CZ ストライクアタック 設定差 1/377.3 1/266.9"
+        ],
+        "disposition": {
+          "type": "BLOCKED",
+          "refId": "bonus-overlap"
+        }
       }
+    ],
+    "machineSpecificQueries": [
+      "L機動戦士ガンダムSEED CZストライクアタック 設定別当選 1/362.2 1/377.3 AT",
+      "L ガンダム SEED CZ ストライクアタック 設定差 1/377.3 1/266.9",
+      "スマスロ 機動戦士ガンダムSEED 設定差 設定判別 CZ ST 終了画面"
     ]
   }
 }
