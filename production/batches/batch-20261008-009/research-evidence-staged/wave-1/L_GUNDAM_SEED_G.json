@@ -59,7 +59,9 @@
         "通常時小役確率は全設定共通",
         "通常時の5モードと設定変更・ST終了後の移行抽選",
         "設定別CZとAT初当たりの確率",
-        "CZ・ST終了画面の演出内容と観測条件"
+        "CZ・ST終了画面の演出内容と観測条件",
+        "CZ間最大777G・天国モード99G、AT間1280G＋α・設定変更またはST駆け抜け時750G短縮",
+        "通常・高確・超高確の小役契機CZ当選率は内部状態別で設定別ではない"
       ]
     },
     {
@@ -271,6 +273,24 @@
         "chonborista-seed"
       ],
       "reevaluationCondition": "設定別のモード移行割合が公表され、実戦で母数を定義できる場合に検証します。"
+    },
+    {
+      "blockId": "gundam-mode-ceiling-not-setting",
+      "label": "CZ・ATの天井と短縮",
+      "reason": "CZ間は最大777G、天国モードでは99G、AT間は最大1280G＋前兆です。設定変更後やST駆け抜け後はAT天井が最大750Gに短縮されますが、これだけでは設定番号を判断できません。",
+      "reevaluationCondition": "設定番号ごとの天井モード振り分けが公開され、抽選対象を正しく観測できる場合に再検討します。",
+      "sourceIds": [
+        "pworld-seed-analysis"
+      ]
+    },
+    {
+      "blockId": "gundam-cz-state-conditioned",
+      "label": "内部状態ごとのCZ当選抽選",
+      "reason": "同じレア小役でも通常・高確・超高確にいるかでCZ当選率が変わります。内部状態の設定別の割合と当選時の正確な滞在状態を把握できないため、成立役回数に固定の設定差を当てはめません。",
+      "reevaluationCondition": "通常・高確・超高確の設定別滞在割合と、その状態での抽選結果を正確に数えられる方法が確認できること。",
+      "sourceIds": [
+        "pworld-seed-analysis"
+      ]
     }
   ],
   "researchCompleteness": {
@@ -329,6 +349,38 @@
         "sourceIds": [
           "chonborista-seed"
         ]
+      },
+      {
+        "domain": "THRESHOLD_BEHAVIOR",
+        "status": "CHECKED",
+        "sourceIds": [
+          "pworld-seed-analysis"
+        ],
+        "note": "P-WORLDの機種解析でCZ間777G、天国99G、AT間1280G＋α、設定変更後・ST駆け抜け後AT間750G短縮を照合。設定別差は確認できず、天井だけで設定推測に加えない。"
+      },
+      {
+        "domain": "RESET_BEHAVIOR",
+        "status": "PARTIAL",
+        "sourceIds": [
+          "pworld-seed-analysis"
+        ],
+        "note": "設定変更後AT間天井が750Gに短縮される挙動を確認。設定別のモード分布・有利区間リセット挙動は要調査。"
+      },
+      {
+        "domain": "INTERNAL_CONDITIONAL_DRAW",
+        "status": "PARTIAL",
+        "sourceIds": [
+          "pworld-seed-analysis"
+        ],
+        "note": "通常/高確/超高確のCZ抽選（弱スイカなどの役別）を確認したが、設定別の差でなく内部状態差。状態別の正確な母数と設定別滞在割合が不明。"
+      },
+      {
+        "domain": "POST_EVENT_TRANSITION",
+        "status": "PARTIAL",
+        "sourceIds": [
+          "pworld-seed-analysis"
+        ],
+        "note": "ST終了後に内部モード移行抽選。ST駆け抜け時はAT間天井750G短縮。設定ごとの選択率は未確認。"
       }
     ],
     "candidateLedger": [
@@ -475,6 +527,40 @@
           "type": "BLOCKED",
           "refId": "mode-stage-is-not-setting"
         }
+      },
+      {
+        "candidateId": "block:gundam-mode-ceiling-not-setting",
+        "label": "CZ・ATの天井と短縮",
+        "sourceClaims": [
+          {
+            "sourceId": "pworld-seed-analysis",
+            "claim": "CZ間最大777G・天国モード99G、AT間1280G＋α・設定変更またはST駆け抜け時750G短縮"
+          }
+        ],
+        "discoveryQueries": [
+          "LガンダムSEED CZ777G 天国99G AT間1280G 設定変更 ST駆け抜け 750G"
+        ],
+        "disposition": {
+          "type": "BLOCKED",
+          "refId": "gundam-mode-ceiling-not-setting"
+        }
+      },
+      {
+        "candidateId": "block:gundam-cz-state-conditioned",
+        "label": "内部状態ごとのCZ当選抽選",
+        "sourceClaims": [
+          {
+            "sourceId": "pworld-seed-analysis",
+            "claim": "通常・高確・超高確の小役契機CZ当選率は内部状態別で設定別ではない"
+          }
+        ],
+        "discoveryQueries": [
+          "LガンダムSEED 通常 高確 超高確 チャンス目 スイカ CZ当選率 設定差 0.4 5.4 40.1"
+        ],
+        "disposition": {
+          "type": "BLOCKED",
+          "refId": "gundam-cz-state-conditioned"
+        }
       }
     ],
     "machineSpecificQueries": [
@@ -482,7 +568,9 @@
       "L ガンダム SEED CZ ストライクアタック 設定差 1/377.3 1/266.9",
       "スマスロ 機動戦士ガンダムSEED 設定差 設定判別 CZ ST 終了画面",
       "L機動戦士ガンダムSEED 通常時 小役確率 設定差 共通 ベル リプレイ 強チェリー 弱スイカ",
-      "L機動戦士ガンダムSEED ゲーム数モード 通常A 通常B 通常C 天国 設定別移行率"
+      "L機動戦士ガンダムSEED ゲーム数モード 通常A 通常B 通常C 天国 設定別移行率",
+      "LガンダムSEED CZ777G 天国99G AT間1280G 設定変更 ST駆け抜け 750G",
+      "LガンダムSEED 通常 高確 超高確 チャンス目 スイカ CZ当選率 設定差 0.4 5.4 40.1"
     ],
     "pendingRouteValidation": true,
     "evidenceSourceReview": {
