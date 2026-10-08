@@ -6,6 +6,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import {validateResearchLiveObservationContract,validateResearchUserFacingTextContract,validateResearchProbabilityRouteContract} from './research-validator.ts';
+import {EVIDENCE_SEMANTIC_TYPES} from './evidence-semantics.ts';
 const batch='batch-20261008-009';
 const root=path.resolve('batches',batch);
 const batchSpec=JSON.parse(fs.readFileSync(path.join(root,'batch.json'),'utf8'));
@@ -40,7 +41,7 @@ for (const [index,machineId] of machineIds.entries()){
   if(ids.has(id))throw new Error('FINDING_CONFLICT:'+machineId+':'+id);
   if(!importedSourceIds.length)throw new Error('MISSING_EVIDENCE_SOURCE:'+machineId);
   for(const c of ev.semanticCategories){
-   if(!['EXACT_CONSTRAINT','PROBABILITY_UNKNOWN','DISPLAY_ONLY'].includes(c.semanticType)||!c.label||!c.meaning)throw new Error('INVALID_SEMANTIC_CATEGORY:'+id);
+   if(!EVIDENCE_SEMANTIC_TYPES.includes(c.semanticType)||!c.label||!c.meaning)throw new Error('INVALID_SEMANTIC_CATEGORY:'+id);
   }
   // Optional per-candidate provenance: do not attach every page in the
   // machine-wide review to an unrelated screenshot, trophy, or voice.
@@ -54,7 +55,7 @@ for (const [index,machineId] of machineIds.entries()){
     return source.sourceId;
   });
   const condition=ev.observationCondition||'観測の契機を確認して、該当した表示を1回記録します。';
-  const finding={findingId:id,label:ev.label,observationType:'evidence',sourceIds:[...new Set(candidateSourceIds)],semanticCategories:ev.semanticCategories,details:[condition,'設定別の出現率が未公表の示唆は記録だけ行います。確定した条件のみ設定推測に反映します。']};
+  const finding={findingId:id,label:ev.label,observationType:'evidence',sourceIds:[...new Set(candidateSourceIds)],semanticCategories:ev.semanticCategories,details:[condition,ev.semanticCategories.some((x:any)=>x.semanticType==='PROBABILITY_BACKED')?'設定別の出現割合は公表されています。数値推測への反映は観測条件と二重計上防止の確認後に判断します。':'設定別の出現率が未公表の示唆は記録だけ行います。確定した条件のみ設定推測に反映します。']};
   validateResearchUserFacingTextContract(finding);
   validateResearchProbabilityRouteContract(finding);
   validateResearchLiveObservationContract(finding);
