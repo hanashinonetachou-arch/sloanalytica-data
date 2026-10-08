@@ -34,6 +34,9 @@ test('Sister Quest AT-end 7-way numeric likelihood is source-identical but not p
   const mirror=d.findings.find((x:any)=>x.findingId==='reviewed-at-end');
   assert.ok(mirror,'do not drop existing exact setting hints before the runtime is deduplicated');
   assert.deepEqual(mirror.semanticCategories,src.evidenceCandidates[0].semanticCategories);
+  assert.equal(mirror.semanticCategories.filter((x:any)=>x.semanticType==='PROBABILITY_BACKED').length,4);
+  assert.equal(mirror.semanticCategories.filter((x:any)=>x.semanticType==='EXACT_CONSTRAINT').length,3);
+  assert.equal(mirror.semanticCategories.some((x:any)=>x.semanticType==='PROBABILITY_UNKNOWN'),false);
   assert.throws(()=>validateResearchPromotionReadiness(d),/PENDING_SCOPE_PROMOTION_FORBIDDEN|MIRRORED_CATEGORICAL_EVIDENCE_NOT_RECONCILED/);
 });
 test('Mirrored numeric/hint evidence independently blocks promotion even if ledger is marked complete',()=>{
