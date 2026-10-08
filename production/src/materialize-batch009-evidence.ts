@@ -5,7 +5,7 @@
  */
 import fs from 'node:fs';
 import path from 'node:path';
-import {validateResearchLiveObservationContract,validateResearchUserFacingTextContract,validateResearchProbabilityRouteContract,validateResearchCandidateLedger} from './research-validator.ts';
+import {validateResearchLiveObservationContract,validateResearchUserFacingTextContract,validateResearchProbabilityRouteContract} from './research-validator.ts';
 const batch='batch-20261008-009';
 const root=path.resolve('batches',batch);
 const batchSpec=JSON.parse(fs.readFileSync(path.join(root,'batch.json'),'utf8'));
@@ -47,16 +47,20 @@ for (const [index,machineId] of machineIds.entries()){
   validateResearchUserFacingTextContract(finding);
   validateResearchProbabilityRouteContract(finding);
   validateResearchLiveObservationContract(finding);
+  if(reviewed.categoryRates?.categories?.length && reviewed.evidenceCandidates?.[0]?.findingId===ev.findingId){
+    d.researchCompleteness.knownRateEvidenceRequiresNumericRouting=true;
+  }
   d.findings.push(finding);ids.add(id);
   const sourceClaims:any[]=[];
   for(const sid of finding.sourceIds){ const s=d.sources.find((x:any)=>x.sourceId===sid);const claim=ev.label+'の演出内容と観測条件';if(!s.claims.includes(claim))s.claims.push(claim);sourceClaims.push({sourceId:sid,claim}); }
   ledger.push({candidateId:'finding:'+id,label:ev.label,sourceClaims,discoveryQueries:[],disposition:{type:'FINDING',refId:id}});
   added++;
  }
- // Normalize previously provisional ledger references into valid dispositions,
- // without claiming approval of unresolved numeric observation routes.
+ // Preserve unresolved route provenance. Approval must occur in a later,
+ // source-validated Research curation step; staging must not silently upgrade it.
  for(const row of ledger){
-  if(row.disposition?.type==='FINDING_PENDING_SCOPE_VALIDATION')row.disposition={type:'FINDING',refId:row.disposition.refId};
+  if(row.disposition?.type==='FINDING_PENDING_SCOPE_VALIDATION')
+   d.researchCompleteness.pendingRouteValidation=true;
  }
  // Keep evidence-free case explicit and unapproved unless a positive attestation exists.
  if(!added && !reviewed.noSettingEvidenceAttestation)
