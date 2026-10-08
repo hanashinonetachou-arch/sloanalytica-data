@@ -61,3 +61,14 @@ test('pending research findings may be ledger-traced but never promoted',()=>{
  d.researchCompleteness.candidateLedger[0].disposition.type='FINDING';
  assert.doesNotThrow(()=>validateResearchPromotionReadiness(d));
 });
+
+
+test('source-traced but unobservable numeric candidates cannot be promoted as Research',()=>{
+ const d:any={researchCompleteness:{candidateLedger:[]},findings:[{
+  findingId:'state-conditioned-cz',label:'CZ',observationType:'conditional_probability',
+  settingDistribution:{'1':0.1,'6':0.2},liveObservation:{status:'UNRESOLVED',reason:'内部状態を目で確定できない。'}
+ }]};
+ assert.throws(()=>validateResearchPromotionReadiness(d),/UNRESOLVED_NUMERIC_OBSERVATION_PROMOTION_FORBIDDEN/);
+ d.findings[0].liveObservation.status='EXACT_WITH_SCOPE_TRACKING';
+ assert.doesNotThrow(()=>validateResearchPromotionReadiness(d));
+});
