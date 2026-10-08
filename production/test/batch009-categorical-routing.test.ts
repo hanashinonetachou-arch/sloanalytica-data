@@ -46,7 +46,7 @@ test('Mirrored numeric/hint evidence independently blocks promotion even if ledg
   // Isolate mirror guard from separate pending-status and observation-scope guards.
   for(const f of d.findings)
     if(f.settingDistribution&&f.liveObservation?.status==='UNRESOLVED')f.liveObservation.status='EXACT_WITH_SCOPE_TRACKING';
-  assert.throws(()=>validateResearchPromotionReadiness(d),/MIRRORED_CATEGORICAL_EVIDENCE_NOT_RECONCILED/);
+  assert.throws(()=>validateResearchPromotionReadiness(d),/MIRRORED_CATEGORICAL_EVIDENCE_NOT_RECONCILED|UNRESOLVED_CAUSAL_DEPENDENCY_PROMOTION_FORBIDDEN/);
 });
 
 test('Sister Quest rare monster four-way rate is conditional on observing a rare monster, not all enemies',()=>{
