@@ -183,3 +183,25 @@ test('Sister Quest does not convert whole-CZ success rate or internal mode cues 
  assert.match(d.blockedItems.find((b:any)=>b.blockId==='sister-cz-win-rate-unusable-for-setting').reason,/約60%は全体の目安/);
  assert.match(d.blockedItems.find((b:any)=>b.blockId==='sister-navigation-unusable-for-setting').reason,/内部状態や次回のCZ/);
 });
+
+test('Sister Quest all twenty research domains are represented but only source-checked domains count as completed',()=>{
+ for(const folder of ['research-working','research-evidence-staged']){
+  const d=read(folder,'wave-1','L_SISTER_QUEST_CA.json');
+  const domains=d.researchCompleteness.domains;
+  assert.equal(domains.length,20);
+  assert.equal(new Set(domains.map((x:any)=>x.domain)).size,20);
+  assert.equal(domains.filter((x:any)=>x.status==='CHECKED'||x.status==='NOT_APPLICABLE').length,8);
+  assert.equal(domains.filter((x:any)=>x.status==='PARTIAL').length,12);
+  for(const key of ['AT','EXTERNAL_DATA_ONLY','MACHINE_SPECIFIC']) {
+   assert.equal(domains.find((x:any)=>x.domain===key)?.status,'PARTIAL');
+  }
+  const ending=d.blockedItems.find((x:any)=>x.blockId==='sister-ending-rare-role-hint-details-unpublished');
+  assert.ok(ending?.sourceIds.length===2);
+  assert.match(ending.reason,/表示パターンごとの意味が確認できません/);
+  assert.ok(!d.findings.some((x:any)=>x.findingId==='sister-ending-rare-role-hint-details-unpublished'));
+  const ledger=d.researchCompleteness.candidateLedger.find((x:any)=>x.candidateId==='block:'+ending.blockId);
+  assert.equal(ledger?.disposition.type,'BLOCKED');
+  assert.equal(ledger?.sourceClaims.length,2);
+  assert.notEqual(d.researchCompleteness.status,'COMPLETE');
+ }
+});
