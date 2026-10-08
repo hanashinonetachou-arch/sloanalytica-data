@@ -24,7 +24,7 @@
       "sourceType": "secondary_analysis",
       "checkedAt": "2026-10-08",
       "claims": [
-        "ボーナス初当たり合算の公表値照合"
+        "ボーナス初当たり合算の設定別確率"
       ]
     },
     {
@@ -34,7 +34,51 @@
       "sourceType": "secondary_analysis",
       "checkedAt": "2026-10-08",
       "claims": [
-        "ボーナス初当たり合算の公表値照合"
+        "ボーナス初当たり合算の設定別確率"
+      ]
+    },
+    {
+      "sourceId": "nanapress-setting",
+      "url": "https://nana-press.com/kaiseki/machine/939/28170/",
+      "title": "てぃだどんどん 設定判別・設定示唆",
+      "sourceType": "secondary_analysis",
+      "checkedAt": "2026-10-09",
+      "claims": [
+        "設定2～6のボーナス初当たり合算の公表値",
+        "BIG入賞時の7セグ色の設定確定条件"
+      ]
+    },
+    {
+      "sourceId": "chonborista",
+      "url": "https://chonborista.com/slot/daito-slot/231988/",
+      "title": "てぃだどんどん 設定判別・小役確率",
+      "sourceType": "secondary_analysis",
+      "checkedAt": "2026-10-09",
+      "claims": [
+        "スイカ・チェリー・確定役の小役確率は設定共通",
+        "BIG入賞時の7セグ色の設定確定条件"
+      ]
+    },
+    {
+      "sourceId": "pworld-tida",
+      "url": "https://www.p-world.co.jp/machine/database/10226",
+      "title": "てぃだどんどん 初当たり・設定示唆・天井",
+      "sourceType": "secondary_analysis",
+      "checkedAt": "2026-10-09",
+      "claims": [
+        "設定2～6のボーナス初当たり合算の公表値",
+        "BIG入賞時の7セグ色の設定確定条件",
+        "天井は状態と設定変更契機で変わる"
+      ]
+    },
+    {
+      "sourceId": "nana-seven-seg",
+      "url": "https://nana-press.com/kaiseki/machine/939/28180/",
+      "title": "てぃだどんどん BIG入賞時の7セグ",
+      "sourceType": "secondary_analysis",
+      "checkedAt": "2026-10-09",
+      "claims": [
+        "BIG入賞時の7セグ色の設定確定条件"
       ]
     }
   ],
@@ -52,16 +96,19 @@
       },
       "sourceIds": [
         "pachinavi",
-        "pacnk"
+        "pacnk",
+        "nanapress-setting",
+        "pworld-tida"
       ],
-      "trialUniverse": "NORMAL_GAME_TRIAL",
-      "denominatorSemantics": "通常ゲーム数に対する初当たり。連チャン中のボーナスは母数と回数から除外する必要があります。",
+      "trialUniverse": "NON_CHAIN_BONUS_INITIAL_GAME_TRIAL",
+      "denominatorSemantics": "ヘブン高確率やでびるで連チャンしたボーナス、ストック放出、1G連などは初当たりに含めません。連チャン中の対象外ゲーム数を除いて、初当たりが発生した抽選対象ゲームを記録します。",
       "liveObservation": {
-        "status": "REQUIRES_FINAL_SCOPE_VALIDATION",
-        "reason": "通常ゲーム数に対する初当たり。連チャン中のボーナスは母数と回数から除外する必要があります。"
+        "status": "UNRESOLVED",
+        "reason": "通常時からの初当たりと、ボーナス後のヘブン高確率・でびる・ストック放出を実戦履歴から正確に分離できることを確認するまで数値推測に採用しません。"
       },
       "details": [
-        "暫定調査。必要な観測ゲーム数の除外条件と重複回避を完成させるまでは配信不可。"
+        "公表初当たり確率は設定2・3・4・5・6の5段階です。",
+        "天井短縮時や連チャン中の当選を混ぜずに観測できるか検証中です。"
       ]
     }
   ],
@@ -77,14 +124,33 @@
       ]
     },
     {
-      "blockId": "seven-segment",
-      "label": "BIG入賞時7セグ色の確定反映",
-      "reason": "黄・緑・緑赤緑の確定示唆が掲載されていますが、表示条件と実機での観測可能性・名称を正式なEvidence分類へ反映する前に確認します。",
-      "reevaluationCondition": "同一機種の公表資料と実機で観測できる条件を再確認すること。",
+      "blockId": "small-role-no-setting-difference",
+      "label": "チェリー・スイカ・確定役の出現率",
+      "reason": "公開されている小役の出現率は設定2～6で共通なので、引いた回数だけでは設定を判別できません。",
       "sourceIds": [
-        "pachinavi",
-        "pacnk"
-      ]
+        "chonborista",
+        "pachinavi"
+      ],
+      "reevaluationCondition": "設定別の小役出現率が新たに公表された場合に再評価します。"
+    },
+    {
+      "blockId": "heaven-and-devil-loop",
+      "label": "ヘブン高確率・でびる中の連チャン",
+      "reason": "ボーナス後に発生する連チャンを初当たりと一緒に数えると、公表初当たり確率とは異なる値になります。",
+      "sourceIds": [
+        "chonborista",
+        "pworld-tida"
+      ],
+      "reevaluationCondition": "ボーナス後高確率・ストック放出・でびるを実戦で区別し、正しい母数を入力できることを確認します。"
+    },
+    {
+      "blockId": "game-ceiling-conditional",
+      "label": "通常時のゲーム数天井",
+      "reason": "通常時の天井999Gと、設定変更後などの555G短縮は遊技状況による違いです。これだけで設定番号を判別することはできません。",
+      "sourceIds": [
+        "pworld-tida"
+      ],
+      "reevaluationCondition": "設定ごとの天井選択率や発動率が公開された場合に見直します。"
     }
   ],
   "researchCompleteness": {
@@ -96,18 +162,46 @@
         "status": "PARTIAL",
         "sourceIds": [
           "pachinavi",
-          "pacnk"
+          "nanapress-setting",
+          "pworld-tida"
         ],
-        "note": "公表値は照合したが条件付き試行数と除外Gの検証は未完了。"
+        "note": "設定2～6初当たり公表値一致。連チャンを除いた試行母数が実機履歴から正確に取得できるか要検証。"
       },
       {
         "domain": "EVIDENCE",
-        "status": "NOT_YET_REVIEWED",
+        "status": "PARTIAL",
+        "sourceIds": [
+          "nanapress-setting",
+          "nana-seven-seg",
+          "pworld-tida"
+        ],
+        "note": "BIG入賞時7セグ白・赤・黄・緑・緑＆赤の5カテゴリと設定確定条件を検証。ほかの設定示唆がないことの網羅確認は続行。"
+      },
+      {
+        "domain": "SMALL_ROLE",
+        "status": "CHECKED",
+        "note": "チェリー・スイカ・確定役が全設定共通の公表確率であることを複数の解析サイトで確認しました。出現回数の設定推測採用は不要です。",
         "sourceIds": [
           "pachinavi",
-          "pacnk"
-        ],
-        "note": "全示唆演出・実機観測要件の網羅確認は未完了。"
+          "chonborista"
+        ]
+      },
+      {
+        "domain": "BONUS",
+        "status": "PARTIAL",
+        "note": "公表初当たり値を3サイトで照合しました。ボーナス後のヘブン高確率・でびる・1G連・ストックの除外条件は未完成。",
+        "sourceIds": [
+          "nanapress-setting",
+          "pworld-tida"
+        ]
+      },
+      {
+        "domain": "THRESHOLD_BEHAVIOR",
+        "status": "PARTIAL",
+        "note": "通常999G、設定変更後など555Gの天井短縮を確認。設定別振り分けがなく判別要素としては使わない。",
+        "sourceIds": [
+          "pworld-tida"
+        ]
       }
     ],
     "candidateLedger": [
@@ -122,13 +216,107 @@
           {
             "sourceId": "pacnk",
             "claim": "ボーナス初当たり合算の設定別確率"
+          },
+          {
+            "sourceId": "nanapress-setting",
+            "claim": "設定2～6のボーナス初当たり合算の公表値"
+          },
+          {
+            "sourceId": "pworld-tida",
+            "claim": "設定2～6のボーナス初当たり合算の公表値"
           }
         ],
-        "discoveryQueries": [],
+        "discoveryQueries": [
+          "てぃだどんどん 設定判別 ボーナス合算 設定2 設定3 設定4 設定5 設定6"
+        ],
         "disposition": {
           "type": "FINDING_PENDING_SCOPE_VALIDATION",
           "refId": "bonus-initial"
         }
+      },
+      {
+        "candidateId": "block:setting-1",
+        "label": "設定1の補完禁止",
+        "sourceClaims": [],
+        "discoveryQueries": [
+          "てぃだどんどん BIG入賞時 7セグ 黄 緑 緑赤 設定示唆",
+          "てぃだどんどん 小役確率 全設定共通 スイカ チェリー 確定役"
+        ],
+        "disposition": {
+          "type": "BLOCKED",
+          "refId": "setting-1"
+        }
+      },
+      {
+        "candidateId": "block:small-role-no-setting-difference",
+        "label": "チェリー・スイカ・確定役の出現率",
+        "sourceClaims": [
+          {
+            "sourceId": "chonborista",
+            "claim": "スイカ・チェリー・確定役の小役確率は設定共通"
+          }
+        ],
+        "discoveryQueries": [
+          "てぃだどんどん BIG入賞時 7セグ 黄 緑 緑赤 設定示唆",
+          "てぃだどんどん 小役確率 全設定共通 スイカ チェリー 確定役"
+        ],
+        "disposition": {
+          "type": "BLOCKED",
+          "refId": "small-role-no-setting-difference"
+        }
+      },
+      {
+        "candidateId": "block:heaven-and-devil-loop",
+        "label": "ヘブン高確率・でびる中の連チャン",
+        "sourceClaims": [
+          {
+            "sourceId": "pworld-tida",
+            "claim": "天井は状態と設定変更契機で変わる"
+          }
+        ],
+        "discoveryQueries": [
+          "てぃだどんどん BIG入賞時 7セグ 黄 緑 緑赤 設定示唆",
+          "てぃだどんどん 小役確率 全設定共通 スイカ チェリー 確定役"
+        ],
+        "disposition": {
+          "type": "BLOCKED",
+          "refId": "heaven-and-devil-loop"
+        }
+      },
+      {
+        "candidateId": "block:game-ceiling-conditional",
+        "label": "通常時のゲーム数天井",
+        "sourceClaims": [
+          {
+            "sourceId": "pworld-tida",
+            "claim": "天井は状態と設定変更契機で変わる"
+          }
+        ],
+        "discoveryQueries": [
+          "てぃだどんどん BIG入賞時 7セグ 黄 緑 緑赤 設定示唆",
+          "てぃだどんどん 小役確率 全設定共通 スイカ チェリー 確定役"
+        ],
+        "disposition": {
+          "type": "BLOCKED",
+          "refId": "game-ceiling-conditional"
+        }
+      }
+    ],
+    "machineSpecificQueries": [
+      "てぃだどんどん 設定判別 ボーナス合算 設定2 設定3 設定4 設定5 設定6",
+      "てぃだどんどん BIG入賞時 7セグ 黄 緑 緑赤 設定示唆",
+      "てぃだどんどん 小役確率 全設定共通 スイカ チェリー 確定役"
+    ],
+    "resolvedSourceConflicts": [
+      {
+        "blockId": "seven-segment",
+        "reason": "7セグの黄→3以上、緑→4以上、緑＆赤→6の表示条件を複数の独立資料で確認し、Evidence分類に追加済み。",
+        "status": "RESOLVED_COVERED_IN_REVIEWED_EVIDENCE",
+        "sourceIds": [
+          "nana-seven-seg",
+          "chonborista",
+          "pworld-tida"
+        ]
       }
     ]
   }
