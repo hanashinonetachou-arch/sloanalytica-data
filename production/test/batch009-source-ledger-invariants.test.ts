@@ -136,3 +136,18 @@ test('Sister Quest reset mode table is retained as a blocked non-setting-specifi
   assert.equal(d.researchCompleteness.status,'INCOMPLETE');
  }
 });
+
+test('Sister Quest 400/600EXP high-setting tendency never becomes an invented settings table',()=>{
+ for(const folder of ['research-working','research-evidence-staged']){
+  const d=read(folder,'wave-1','L_SISTER_QUEST_CA.json');
+  const dom=d.researchCompleteness.domains.find((x:any)=>x.domain==='POINTS_GAME_DISTRIBUTION');
+  assert.equal(dom?.status,'PARTIAL');
+  const b=d.blockedItems.find((x:any)=>x.blockId==='sister-exp-400-600-setting-rate-not-published');
+  assert.ok(b?.sourceIds.length>=2);
+  assert.match(b.reason,/設定ごとの当選率を確認できません/);
+  const ledger=d.researchCompleteness.candidateLedger.find((x:any)=>x.candidateId==='block:'+b.blockId);
+  assert.equal(ledger?.disposition.type,'BLOCKED');
+  assert.ok(!d.findings.some((x:any)=>x.findingId==='sister-exp-400-600-setting-rate-not-published'));
+  assert.notEqual(d.researchCompleteness.status,'COMPLETE');
+ }
+});
