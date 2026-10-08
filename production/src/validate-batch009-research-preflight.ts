@@ -2,7 +2,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import {validateCategoryRates} from './batch009-rate-matrix.ts';
-import {RESEARCH_COMPLETENESS_DOMAINS,validateResearchCandidateLedger,validateResearchLiveObservationContract,validateResearchUserFacingTextContract,validateResearchProbabilityRouteContract} from './research-validator.ts';
+import {RESEARCH_COMPLETENESS_DOMAINS,validateResearchCandidateLedger,validateResearchLiveObservationContract,validateResearchUserFacingTextContract,validateResearchProbabilityRouteContract,validateResearchPromotionReadiness} from './research-validator.ts';
 const batch='batch-20261008-009';
 const root=path.resolve('batches',batch);
 const selected=JSON.parse(fs.readFileSync(path.join(root,'selected-machines.json'),'utf8'));
@@ -28,6 +28,7 @@ for(const [index,machineId] of machines.entries()){
   if(finding.liveObservation?.status==='UNRESOLVED'||finding.liveObservation?.status==='REQUIRES_FINAL_SCOPE_VALIDATION')errors.push('UNRESOLVED_OBSERVATION_'+finding.findingId);
  }
  try{validateResearchCandidateLedger(work,new Set(work.sources.map((s:any)=>s.sourceId)))}catch(e){errors.push(String(e))}
+ try{validateResearchPromotionReadiness(work)}catch(e){errors.push(String(e))}
  if((ev.openChecks||ev.unresolved||[]).length)errors.push('EVIDENCE_REVIEW_OPEN');
  const evidence=work.findings.filter((f:any)=>f.observationType==='evidence');
  const findingIds=work.findings.map((f:any)=>String(f.findingId));
