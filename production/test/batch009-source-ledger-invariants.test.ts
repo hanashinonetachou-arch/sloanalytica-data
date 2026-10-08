@@ -100,3 +100,22 @@ test('Batch009 machine Research uses canonical observation status and never pret
   }
  }
 });
+
+test('Sister Quest small-role rates are source-checked as no-setting-difference, not a live feature',()=>{
+ for(const folder of ['research-working','research-evidence-staged']){
+  const d=read(folder,'wave-1','L_SISTER_QUEST_CA.json');
+  const row=d.researchCompleteness.domains.find((x:any)=>x.domain==='SMALL_ROLE');
+  assert.equal(row?.status,'CHECKED');
+  assert.equal(row.sourceIds.length,2);
+  for(const sourceId of row.sourceIds){
+   const source=d.sources.find((s:any)=>s.sourceId===sourceId);
+   assert.ok(source?.url&&source.claims.length,idForFailure(folder,sourceId));
+  }
+  const ledger=d.researchCompleteness.candidateLedger.find((x:any)=>x.candidateId==='no-setting-difference:sister-small-role');
+  assert.equal(ledger?.disposition.type,'NO_SETTING_DIFFERENCE');
+  assert.equal(ledger.sourceClaims.length,2);
+  assert.ok(!d.findings.some((x:any)=>x.findingId==='sister-small-role'));
+  assert.equal(d.researchCompleteness.status,'INCOMPLETE');
+ }
+});
+const idForFailure=(folder:string,id:string)=>folder+':missing source '+id;
