@@ -49,7 +49,7 @@
       "sourceType": "secondary_analysis",
       "checkedAt": "2026-10-09",
       "claims": [
-        "AT開始時中段赤7揃いからのインフェクション設定別当選率"
+        "AT初回の赤7狙えナビ中段7揃い時のインフェクション設定別当選率"
       ]
     },
     {
@@ -59,7 +59,27 @@
       "sourceType": "secondary_analysis",
       "checkedAt": "2026-10-09",
       "claims": [
-        "AT開始時中段赤7揃いからのインフェクション設定別当選率"
+        "AT初回の赤7狙えナビ中段7揃い時のインフェクション設定別当選率"
+      ]
+    },
+    {
+      "sourceId": "hazuse-bio5-infection",
+      "url": "https://data.hazuse.com/?genre=209&machine_code=4S1201",
+      "title": "HAZUSE DATA バイオハザード5 インフェクション初回赤7揃い条件と設定別抽選率",
+      "sourceType": "secondary_analysis",
+      "checkedAt": "2026-10-09",
+      "claims": [
+        "AT初回の赤7狙えナビ中段7揃い時のインフェクション設定別当選率"
+      ]
+    },
+    {
+      "sourceId": "hisshobon-bio5-infection",
+      "url": "https://p.hisshobon.jp/machine/4474/1/111164",
+      "title": "必勝本 スマスロバイオ5 インフェクション中段7揃い設定差",
+      "sourceType": "secondary_analysis",
+      "checkedAt": "2026-10-09",
+      "claims": [
+        "AT初回の赤7狙えナビ中段7揃い時のインフェクション設定別当選率"
       ]
     }
   ],
@@ -153,6 +173,38 @@
       "dependencyKind": "CAUSAL_PATH_OVERLAP",
       "dependencyFallbackRank": 3,
       "dependencyReason": "CZ合算にパニックゾーンを含み、AT当選まで因果的につながる。観測母数と独立項目の評価を済ませるまで重複計上を禁止。"
+    },
+    {
+      "findingId": "infection-midline-first-seven",
+      "label": "初回中段7揃いからのインフェクション",
+      "observationType": "conditional_probability",
+      "settingDistribution": {
+        "1": 0.167,
+        "2": 0.167,
+        "3": 0.175,
+        "4": 0.198,
+        "5": 0.202,
+        "6": 0.218
+      },
+      "sourceIds": [
+        "pworld-bio5",
+        "hazuse-bio5-infection",
+        "hisshobon-bio5-infection"
+      ],
+      "trialUniverse": "AT_ENTRY_FIRST_7_NAV_MIDDLE_7_TRIAL",
+      "denominatorSemantics": "AT突入時の最初の「赤7を狙え」ナビで7が中段に揃った回数を母数とし、その条件でインフェクションに当選した回数を数えます。斜め揃い（全設定100%）や2回目以降のナビは含めません。",
+      "liveObservation": {
+        "status": "UNRESOLVED",
+        "reason": "初回ナビ・中段7揃い・インフェクションの結果を実戦中に必ず見分けて記録できるか検証が必要です。AT初当たりと同じ当選経路なので、独立加点は避けます。"
+      },
+      "dependencyGroupId": "bio5-cz-at-path",
+      "dependencyKind": "CONDITIONAL",
+      "dependencyReason": "AT初当たり後の初回ナビを条件とする抽選であり、AT初当たりの当選経路と独立ではありません。",
+      "details": [
+        "設定1と2は16.7%、設定3は17.5%、設定4は19.8%、設定5は20.2%、設定6は21.8%です。",
+        "設定4の19.2%表記は、ほかの主要資料と一致しないため採用しません。",
+        "斜め7揃いは全設定共通で100%となるため、母数・成功数に含めません。"
+      ]
     }
   ],
   "blockedItems": [
@@ -167,14 +219,15 @@
       ]
     },
     {
-      "blockId": "infection-middle7-conflict",
-      "label": "AT開始時の中段赤7揃いからのインフェクション当選率",
-      "reason": "公開情報の設定4の数値が19.8%と19.2%で食い違っています。数値を確定し、当選契機の数え方を確認するまで推測への反映を保留します。",
+      "blockId": "infection-first-navi-scope",
+      "label": "インフェクションの初回ナビ対象条件",
+      "reason": "初回の赤7狙えで中段揃いした回だけが公表された抽選の対象です。斜め揃いは設定に関係なく100%なので、2回目以降や斜め揃いを同じ回数に含めると判別を誤ります。",
       "sourceIds": [
         "pworld-bio5",
-        "ichigeki-bio5"
+        "hazuse-bio5-infection",
+        "hisshobon-bio5-infection"
       ],
-      "reevaluationCondition": "機種固有の複数資料と出現条件を照合し、設定4の数値と中段7揃いの試行単位を確定すること。"
+      "reevaluationCondition": "初回ナビと中段揃い、当選の有無を実機で区別して記録できること。"
     }
   ],
   "researchCompleteness": {
@@ -203,11 +256,11 @@
         "domain": "AT",
         "status": "PARTIAL",
         "sourceIds": [
-          "nanapress",
           "pworld-bio5",
-          "ichigeki-bio5"
+          "hazuse-bio5-infection",
+          "hisshobon-bio5-infection"
         ],
-        "note": "AT開始時のインフェクション抽選に設定差があるが、設定4の率にサイト間の不一致があり正式採用保留。"
+        "note": "AT突入初回の中段7揃いでインフェクション当選率に設定差。設定4はHAZUSE・P-WORLD・必勝本で19.8%一致。初回ナビ試行とAT当選依存を検証中。"
       },
       {
         "domain": "CZ",
@@ -217,6 +270,16 @@
           "slotseven"
         ],
         "note": "CZ合算とパニックゾーンは包含関係。重複加点を禁止し、母数・優先利用方式を精査。"
+      },
+      {
+        "domain": "INTERNAL_CONDITIONAL_DRAW",
+        "status": "PARTIAL",
+        "note": "初回の赤7狙え、中段7揃い、インフェクション当選の条件付き抽選に設定差。中段と斜めを区別し、初回のみの試行機会を記録できるか未検証。",
+        "sourceIds": [
+          "pworld-bio5",
+          "hisshobon-bio5-infection",
+          "hazuse-bio5-infection"
+        ]
       }
     ],
     "candidateLedger": [
@@ -296,31 +359,57 @@
         }
       },
       {
-        "candidateId": "block:infection-middle7-conflict",
-        "label": "AT開始時の中段赤7揃いからのインフェクション当選率",
+        "candidateId": "finding:infection-midline-first-seven",
+        "label": "初回中段7揃いからのインフェクション",
         "sourceClaims": [
           {
             "sourceId": "pworld-bio5",
-            "claim": "AT開始時中段赤7揃いからのインフェクション設定別当選率"
+            "claim": "AT初回の赤7狙えナビ中段7揃い時のインフェクション設定別当選率"
           },
           {
-            "sourceId": "ichigeki-bio5",
-            "claim": "AT開始時中段赤7揃いからのインフェクション設定別当選率"
+            "sourceId": "hazuse-bio5-infection",
+            "claim": "AT初回の赤7狙えナビ中段7揃い時のインフェクション設定別当選率"
+          },
+          {
+            "sourceId": "hisshobon-bio5-infection",
+            "claim": "AT初回の赤7狙えナビ中段7揃い時のインフェクション設定別当選率"
           }
         ],
         "discoveryQueries": [
-          "スマスロ バイオハザード5 インフェクション 19.2 19.8 設定4"
+          "スマスロ バイオハザード5 AT初回 赤7狙え 中段揃い インフェクション 設定4 19.8% 19.2%"
+        ],
+        "disposition": {
+          "type": "FINDING_PENDING_SCOPE_VALIDATION",
+          "refId": "infection-midline-first-seven"
+        }
+      },
+      {
+        "candidateId": "block:infection-first-navi-scope",
+        "label": "インフェクションの初回ナビ対象条件",
+        "sourceClaims": [
+          {
+            "sourceId": "pworld-bio5",
+            "claim": "AT初回の赤7狙えナビ中段7揃い時のインフェクション設定別当選率"
+          },
+          {
+            "sourceId": "hazuse-bio5-infection",
+            "claim": "AT初回の赤7狙えナビ中段7揃い時のインフェクション設定別当選率"
+          }
+        ],
+        "discoveryQueries": [
+          "スマスロ バイオハザード5 AT初回 赤7狙え 中段揃い インフェクション 設定4 19.8% 19.2%"
         ],
         "disposition": {
           "type": "BLOCKED",
-          "refId": "infection-middle7-conflict"
+          "refId": "infection-first-navi-scope"
         }
       }
     ],
     "machineSpecificQueries": [
       "スマスロ バイオハザード5 獲得枚数 256枚OVER 246枚OVER 設定2 5 6 確定",
       "スマスロ バイオハザード5 エンタトロフィー 256枚 246枚",
-      "スマスロ バイオハザード5 インフェクション 19.2 19.8 設定4"
+      "スマスロ バイオハザード5 インフェクション 19.2 19.8 設定4",
+      "スマスロ バイオハザード5 AT初回 赤7狙え 中段揃い インフェクション 設定4 19.8% 19.2%"
     ],
     "resolvedSourceConflicts": [
       {
@@ -334,6 +423,18 @@
         ],
         "contradictorySource": "https://slot-seven.com/",
         "status": "RESOLVED_256_VERIFIED"
+      },
+      {
+        "topic": "初回中段7揃いインフェクション設定4 19.8% vs 19.2%",
+        "resolution": "19.8%",
+        "agreementSources": [
+          "https://www.p-world.co.jp/machine/database/10217",
+          "https://data.hazuse.com/?genre=209&machine_code=4S1201",
+          "https://p.hisshobon.jp/machine/4474/1/111164"
+        ],
+        "disagreementSource": "https://altema.jp/pachimo/lbiohazard5",
+        "observationCondition": "AT初回の赤7狙えナビ時、中段7揃いのみ（斜め7揃いを除外）",
+        "status": "RESOLVED_SOURCE_VALUE_PENDING_LIVE_OBSERVATION"
       }
     ]
   }
