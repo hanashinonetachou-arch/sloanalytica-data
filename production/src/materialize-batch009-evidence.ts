@@ -78,7 +78,7 @@ for (const [index,machineId] of machineIds.entries()){
   d.researchCompleteness.evidenceGate='OPEN_NO_SETTING_EVIDENCE_ATTESTATION';
  d.researchStage='EVIDENCE_STAGED_NOT_APPROVED';
  d.researchCompleteness.status='INCOMPLETE';
- d.researchCompleteness.evidenceSourceReview={status:'STAGED',sourceFile:'research-evidence-reviewed/'+machineId+'.json',candidateCount:added,openChecks:reviewed.openChecks??reviewed.unresolved??[]};
+ d.researchCompleteness.evidenceSourceReview={status:'STAGED',sourceFile:'research-evidence-reviewed/'+machineId+'.json',candidateCount:added,openChecks:reviewed.openChecks??reviewed.unresolved??[],...(Array.isArray(reviewed.completedReviewChecks)?{completedChecks:reviewed.completedReviewChecks}:{})};
  // Do not validate candidate ledger as approved: previous working files may lack
  // full source-claim and blocked item coverage. This stage is intentionally incomplete.
  const dest=path.join(root,'research-evidence-staged',wave,machineId+'.json');
