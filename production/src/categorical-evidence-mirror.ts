@@ -50,11 +50,14 @@ export function categoricalEvidenceMirrorIssues(research: any): string[] {
         errors.push('MIRRORED_CATEGORICAL_EVIDENCE_NOT_RECONCILED:' + id);
       }
     } else if (cats) {
-      // Missing mirror links must not bypass the gate: check exact ordered
-      // category names plus shared source IDs before allowing promotion.
+      // Missing mirror links must not bypass the gate. Identical ordered
+      // sets of >=3 concrete categories identify the same observation even
+      // when source *IDs* differ (e.g. independently reviewed articles).
+      // For small/generic category sets, require an overlapping source ID.
       for (const e of evidence) {
         const sharedSource = (f.sourceIds ?? []).some((sid: string) => (e.sourceIds ?? []).includes(sid));
-        if (sharedSource && equalLabels(cats, labels(e))) {
+        const unambiguousCategories = cats.length >= 3 && new Set(cats).size === cats.length;
+        if ((sharedSource || unambiguousCategories) && equalLabels(cats, labels(e))) {
           errors.push('UNDECLARED_CATEGORICAL_EVIDENCE_MIRROR:' + id);
           break;
         }
