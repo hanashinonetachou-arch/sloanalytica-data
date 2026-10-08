@@ -7,8 +7,14 @@
   "researchedAt": "2026-10-08",
   "researchStage": "PARTIAL_SOURCE_VERIFIED_NOT_APPROVED",
   "settings": {
-    "status": "NOT_VERIFIED",
-    "values": []
+    "status": "SOURCE_DERIVED",
+    "values": [
+      "SET_1",
+      "SET_2",
+      "SET_4",
+      "SET_5",
+      "SET_6"
+    ]
   },
   "sources": [
     {
@@ -20,18 +26,65 @@
       "claims": [
         "パチスロ BOØWYの設定別確率表を探索・継続確認中"
       ]
+    },
+    {
+      "sourceId": "hazuse",
+      "url": "https://hazuse.com/machine/pachislot/2S0625/genre/201/",
+      "title": "BOØWY AT初当たり・設定L",
+      "sourceType": "primary_analysis",
+      "checkedAt": "2026-10-08",
+      "claims": [
+        "設定1/2/4/5/6のAT初当たり確率"
+      ]
+    },
+    {
+      "sourceId": "pworld",
+      "url": "https://www.p-world.co.jp/machine/database/9675",
+      "title": "BOØWY機種スペック",
+      "sourceType": "primary_analysis",
+      "checkedAt": "2026-10-08",
+      "claims": [
+        "設定1/2/4/5/6のAT初当たり確率"
+      ]
     }
   ],
-  "findings": [],
+  "findings": [
+    {
+      "findingId": "at-initial",
+      "label": "AT初当たり",
+      "observationType": "probability",
+      "settingDistribution": {
+        "1": "1/498",
+        "2": "1/464",
+        "4": "1/377",
+        "5": "1/325",
+        "6": "1/294"
+      },
+      "sourceIds": [
+        "hazuse",
+        "pworld"
+      ],
+      "trialUniverse": "NORMAL_GAME_TRIAL",
+      "denominatorSemantics": "通常ゲーム数に対するAT初当たり回数。AT中のセット継続・ENCORE TIMEの引き戻しは初当たりに数えず、実機での通常ゲーム数を正確に記録する。",
+      "liveObservation": {
+        "status": "REQUIRES_FINAL_SCOPE_VALIDATION",
+        "reason": "通常ゲーム数に対するAT初当たり回数。AT中のセット継続・ENCORE TIMEの引き戻しは初当たりに数えず、実機での通常ゲーム数を正確に記録する。"
+      },
+      "details": [
+        "設定Lは通常設定の推測対象とせず確率を補完しません。"
+      ]
+    }
+  ],
   "blockedItems": [
     {
-      "blockId": "at-table",
-      "label": "AT初当たり設定別確率",
-      "reason": "機種固有の設定別確率表と全設定値を確認できていません。別機種の数値を流用しません。",
+      "blockId": "setting-l-rate",
+      "label": "設定LのAT確率",
+      "reason": "設定Lの公表値が存在しないため、通常設定の確率表に含められません。",
+      "reevaluationCondition": "設定Lの正式数値と用途が公表された場合に再検討する。",
       "sourceIds": [
-        "candidate"
-      ],
-      "reevaluationCondition": "機種固有の解析と実機から確認できる観測条件を確定すること。"
+        "hazuse",
+        "pworld"
+      ]
     }
   ],
   "researchCompleteness": {
@@ -53,8 +106,37 @@
           "candidate"
         ],
         "note": "示唆演出・確定条件の網羅調査が未完了。"
+      },
+      {
+        "domain": "MACHINE_SPECIFIC",
+        "status": "PARTIAL",
+        "sourceIds": [
+          "hazuse",
+          "pworld"
+        ],
+        "note": "設定Lの下パネル消灯は注意喚起とし、確率を補間しない。AT終了画面は個別Evidence台帳に記録済み。"
       }
     ],
-    "candidateLedger": []
+    "candidateLedger": [
+      {
+        "candidateId": "finding:at-initial",
+        "label": "AT初当たり",
+        "sourceClaims": [
+          {
+            "sourceId": "hazuse",
+            "claim": "AT初当たり設定別確率"
+          },
+          {
+            "sourceId": "pworld",
+            "claim": "AT初当たり設定別確率"
+          }
+        ],
+        "discoveryQueries": [],
+        "disposition": {
+          "type": "FINDING_PENDING_SCOPE_VALIDATION",
+          "refId": "at-initial"
+        }
+      }
+    ]
   }
 }
