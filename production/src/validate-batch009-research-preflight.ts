@@ -17,7 +17,11 @@ for(const [index,machineId] of machines.entries()){
  const ev=JSON.parse(fs.readFileSync(path.join(root,'research-evidence-reviewed',machineId+'.json'),'utf8'));
  const original=JSON.parse(fs.readFileSync(path.join(root,'research-working',wave,machineId+'.json'),'utf8'));
  const errors:string[]=[];
- for(const issue of auditBatch009Staging(original,ev,work))errors.push(issue);
+ // Verify the unapproved staging snapshot against working source material.
+ // Once source review is formally complete, changed eligibility/observation
+ // decisions must be judged by promotion validators, not frozen stage equality.
+ if(work.researchStage==='EVIDENCE_STAGED_NOT_APPROVED')
+  for(const issue of auditBatch009Staging(original,ev,work))errors.push(issue);
  if(work.machineId!==machineId||ev.machineId!==machineId||work.batchId!==batch)errors.push('IDENTITY_MISMATCH');
  if(work.researchStage!=='SOURCE_REVIEWED_COMPLETE'||work.researchCompleteness?.status!=='COMPLETE')errors.push('RESEARCH_NOT_APPROVED');
  const present=new Map((work.researchCompleteness?.domains||[]).map((d:any)=>[d.domain,d]));
@@ -45,6 +49,11 @@ for(const [index,machineId] of machines.entries()){
   const f=evidence.find((x:any)=>x.findingId==='reviewed-'+expected.findingId);
   if(!f)continue;
   if(JSON.stringify(f.semanticCategories)!==JSON.stringify(expected.semanticCategories))errors.push('EVIDENCE_CATEGORY_MISMATCH_'+expected.findingId);
+  if(Array.isArray(expected.sourceUrls)){
+   const actualUrls=(f.sourceIds??[]).map((id:string)=>work.sources.find((s:any)=>s.sourceId===id)?.url).sort();
+   const expectedUrls=[...new Set<string>(expected.sourceUrls)].sort();
+   if(JSON.stringify(actualUrls)!==JSON.stringify(expectedUrls))errors.push('EVIDENCE_SOURCE_SCOPE_MISMATCH_'+expected.findingId);
+  }
  }
  if(ev.categoryRates){
   for(const err of validateCategoryRates(ev.categoryRates))errors.push(err);
