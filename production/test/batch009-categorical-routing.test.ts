@@ -42,3 +42,25 @@ test('Mirrored numeric/hint evidence independently blocks promotion even if ledg
     if(row.disposition?.type==='FINDING_PENDING_SCOPE_VALIDATION')row.disposition.type='FINDING';
   assert.throws(()=>validateResearchPromotionReadiness(d),/MIRRORED_CATEGORICAL_EVIDENCE_NOT_RECONCILED/);
 });
+
+test('Sister Quest rare monster four-way rate is conditional on observing a rare monster, not all enemies',()=>{
+  const src=read('research-quantitative-addenda','L_SISTER_QUEST_CA.json');
+  const table=src.findings.find((x:any)=>x.findingId==='at-monster-setting-distribution');
+  const d=read('research-evidence-staged','wave-1','L_SISTER_QUEST_CA.json');
+  const f=d.findings.find((x:any)=>x.findingId==='at-monster-categorical');
+  assert.ok(f);
+  assert.equal(f.trialUniverse,'SISTER_RARE_MONSTER_APPEARANCE');
+  assert.equal(f.categoryModel.residualPolicy,'SOURCE_EXHAUSTIVE');
+  assert.match(f.denominatorSemantics,/その他の敵モンスターは対象回数に含めません/);
+  assert.equal(f.liveObservation.status,'UNRESOLVED');
+  const settings=Object.keys(table.settingPercentRows);
+  for(const setting of settings){
+    const expected=table.categories.map((cat:string,i:number)=>cat+':'+table.settingPercentRows[setting][i].toFixed(1)+'%').join('/');
+    assert.equal(f.settingDistribution[setting],expected);
+  }
+  const evaluated=buildEvaluation(d);
+  const n=evaluated.evaluations.find((e:any)=>e.findingId===f.findingId);
+  assert.equal(n.model,'CATEGORICAL');
+  assert.ok(n.metrics.perEligibleTrialPower>0);
+  assert.equal(buildEligibility(evaluated).decisions.find((e:any)=>e.findingId===f.findingId).eligibility,'UNRESOLVED');
+});
