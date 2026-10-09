@@ -64,3 +64,14 @@ test('Tida working data, reviewed Evidence and staging remain aligned',()=>{
  const review=read('research-evidence-reviewed',id+'.json');
  assert.deepEqual(auditBatch009Staging(w,review,stage),[]);
 });
+
+test('an unresolved scope cannot cite a missing source or a source outside the finding',()=>{
+ const d=read('research-evidence-staged','wave-1',id+'.json');
+ const sources=new Set(d.sources.map((x:any)=>x.sourceId));
+ const hit=d.findings.find((x:any)=>x.findingId==='bonus-initial');
+ hit.dependencyScopeAudit.evidenceSourceIds=['unregistered-source'];
+ assert.throws(()=>validateResearchCandidateLedger(d,sources),/DEPENDENCY_SCOPE_PROVENANCE/);
+ hit.dependencyScopeAudit.evidenceSourceIds=['tida-v25-noisy-state-emission-1'];
+ hit.sourceIds=hit.sourceIds.filter((x:string)=>x!=='tida-v25-noisy-state-emission-1');
+ assert.throws(()=>validateResearchCandidateLedger(d,sources),/DEPENDENCY_SCOPE_PROVENANCE/);
+});
