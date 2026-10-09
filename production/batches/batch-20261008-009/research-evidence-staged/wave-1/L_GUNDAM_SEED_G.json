@@ -315,6 +315,16 @@
       "claims": [
         "エンディング終了画面は枠なしトリィが基本、金枠アスラン＆カガリ＆キラ＆ラクスは設定6。"
       ]
+    },
+    {
+      "sourceId": "seed-v35-cz-state-table",
+      "url": "https://nana-press.com/kaiseki/machine/930/29299/",
+      "title": "通常時内部状態・ラクスチャンス内外のCZ抽選",
+      "sourceType": "secondary_analysis",
+      "checkedAt": "2026-10-09",
+      "claims": [
+        "ラクスチャンス内外と通常/高確/超高確によるCZ役別表を確認。設定別ではなく、ステージは状態示唆。ラクスチャンス内外で同じ役に異なる抽選値を適用する"
+      ]
     }
   ],
   "findings": [
@@ -591,8 +601,89 @@
       "reason": "同じレア小役でも通常・高確・超高確にいるかでCZ当選率が変わります。内部状態の設定別の割合と当選時の正確な滞在状態を把握できないため、成立役回数に固定の設定差を当てはめません。",
       "reevaluationCondition": "通常・高確・超高確の設定別滞在割合と、その状態での抽選結果を正確に数えられる方法が確認できること。",
       "sourceIds": [
-        "pworld-seed-analysis"
-      ]
+        "pworld-seed-analysis",
+        "seed-v35-cz-state-table"
+      ],
+      "referenceConditionalDistribution": {
+        "status": "SETTING_UNSTRATIFIED_REFERENCE_ONLY",
+        "trialUnit": "ELIGIBLE_ROLE_AT_KNOWN_INTERNAL_STATE_AND_LACUS_CONTEXT",
+        "states": [
+          "通常",
+          "高確",
+          "超高確"
+        ],
+        "percentOutsideLacus": {
+          "チャンス目": [
+            0.4,
+            5.4,
+            40.1
+          ],
+          "弱スイカ": [
+            0.4,
+            10.5,
+            40.1
+          ],
+          "強チェリー": [
+            25,
+            39.8,
+            100
+          ],
+          "強スイカ": [
+            25,
+            39.8,
+            100
+          ]
+        },
+        "percentInsideLacus": {
+          "リプレイ": [
+            25,
+            39.8,
+            100
+          ],
+          "ベル": [
+            25,
+            39.8,
+            100
+          ],
+          "弱チェリー": [
+            39.8,
+            100,
+            100
+          ],
+          "弱スイカ": [
+            39.8,
+            100,
+            100
+          ],
+          "チャンス目": [
+            39.8,
+            100,
+            100
+          ],
+          "強チェリー": [
+            100,
+            100,
+            100
+          ],
+          "強スイカ": [
+            100,
+            100,
+            100
+          ]
+        },
+        "sourceIds": [
+          "seed-v35-cz-state-table"
+        ],
+        "runtimeSettingLikelihood": "DISABLED"
+      },
+      "observationScopeAudit": {
+        "status": "UNRESOLVED_OBSERVATION_SCOPE",
+        "sourceIds": [
+          "seed-v35-cz-state-table"
+        ],
+        "runtimeSettingLikelihood": "DISABLED",
+        "reason": "ラクスチャンス内外を区別し、状態示唆を全件確定した内部状態に置換しない。設定別滞在割合が不明なまま各状態のCZ率を設定別尤度に使わず、seed-cz-at経路へ独立加点しない。"
+      }
     },
     {
       "blockId": "seed-bonus-mechanics-setting-rate-unconfirmed",
@@ -790,11 +881,12 @@
       },
       {
         "domain": "INTERNAL_CONDITIONAL_DRAW",
-        "status": "PARTIAL",
+        "status": "CHECKED",
         "sourceIds": [
-          "pworld-seed-analysis"
+          "pworld-seed-analysis",
+          "seed-v35-cz-state-table"
         ],
-        "note": "通常/高確/超高確のCZ抽選（弱スイカなどの役別）を確認したが、設定別の差でなく内部状態差。状態別の正確な母数と設定別滞在割合が不明。"
+        "note": "通常/高確/超高確×ラクスチャンス内外のCZ成立役別表を照合し、設定非層別Referenceで保持。強レア役・ラクス中の弱役/ベル/リプレイを区別。内部状態の示唆・設定別滞在割合の未確認は数値採用保留として保持し、CZ/AT依存グループへ独立加点しない。Research領域確認と正式採用は別。"
       },
       {
         "domain": "POST_EVENT_TRANSITION",
@@ -1360,6 +1452,21 @@
         "disposition": {
           "type": "BLOCKED",
           "refId": "seed-v28-ending-appearance"
+        }
+      },
+      {
+        "candidateId": "block:seed-v35-cz-state-table",
+        "label": "CZ内部状態別の条件付き参考表",
+        "sourceClaims": [
+          {
+            "sourceId": "seed-v35-cz-state-table",
+            "claim": "ラクスチャンス内外と通常/高確/超高確によるCZ役別表を確認。設定別ではなく、ステージは状態示唆。ラクスチャンス内外で同じ役に異なる抽選値を適用する"
+          }
+        ],
+        "discoveryQueries": [],
+        "disposition": {
+          "type": "BLOCKED",
+          "refId": "gundam-cz-state-conditioned"
         }
       }
     ],
