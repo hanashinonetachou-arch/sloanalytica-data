@@ -325,6 +325,16 @@
       "claims": [
         "ラクスチャンス内外と通常/高確/超高確によるCZ役別表を確認。設定別ではなく、ステージは状態示唆。ラクスチャンス内外で同じ役に異なる抽選値を適用する"
       ]
+    },
+    {
+      "sourceId": "seed-v38-window-audit",
+      "url": "https://nana-press.com/kaiseki/machine/930/29301/",
+      "title": "当選区間・モード抽選の試行条件と公開表整合性",
+      "sourceType": "secondary_analysis",
+      "checkedAt": "2026-10-09",
+      "claims": [
+        "0～49Gと50～99Gは100G試行の排他的な当選時期の内訳で、後半生存条件付き当選率ではない。設定5は5.39+30.07=35.46%だが公表合計35.45%。独立加点・勝手な補正を禁止し公表合計を維持する。"
+      ]
     }
   ],
   "findings": [
@@ -518,7 +528,8 @@
       },
       "details": [
         "なな徹調べの設定別100G以内CZ/ボーナス率。設定変更後とST終了後で掲載値は共通です。",
-        "0～49G/50～99Gは同じ100G試行の内訳であり、別の独立試行に分割しません。"
+        "0～49G/50～99Gは同じ100G試行の内訳であり、別の独立試行に分割しません。",
+        "0～49Gと50～99Gは100G試行の排他的な当選時期の内訳で、後半生存条件付き当選率ではない。設定5は5.39+30.07=35.46%だが公表合計35.45%。独立加点・勝手な補正を禁止し公表合計を維持する。"
       ]
     },
     {
@@ -780,9 +791,63 @@
       "reason": "100G以内の当選率には設定差がありますが、CZやボーナスの初当たりと同じ当選を含みます。さらにリセット判別とST終了後を混ぜず1回ずつ観測できるか未確認のため、数値推測にはまだ採用しません。",
       "sourceIds": [
         "seed-v21-post-st-100-1",
-        "seed-v21-post-st-100-2"
+        "seed-v21-post-st-100-2",
+        "seed-v38-window-audit"
       ],
-      "reevaluationCondition": "独立した設定別確率、観測可能な試行単位、CZ・AT重複解決が確認できた場合に再評価する。"
+      "reevaluationCondition": "独立した設定別確率、観測可能な試行単位、CZ・AT重複解決が確認できた場合に再評価する。",
+      "referenceConditionalDistribution": {
+        "sourceIds": [
+          "seed-v38-window-audit"
+        ],
+        "runtimeSettingLikelihood": "DISABLED",
+        "windowPercentBySetting": {
+          "1": [
+            4.28,
+            27.58,
+            31.86
+          ],
+          "2": [
+            4.31,
+            27.73,
+            32.04
+          ],
+          "3": [
+            4.47,
+            28.14,
+            32.61
+          ],
+          "4": [
+            5.07,
+            29.73,
+            34.8
+          ],
+          "5": [
+            5.39,
+            30.07,
+            35.45
+          ],
+          "6": [
+            6.91,
+            32.08,
+            38.99
+          ]
+        },
+        "columns": [
+          "0_TO_49G",
+          "50_TO_99G",
+          "PUBLISHED_TOTAL"
+        ],
+        "windowSemantics": "MUTUALLY_EXCLUSIVE_OUTCOMES_WITHIN_ONE_EPISODE",
+        "roundingPolicy": "PRESERVE_PUBLISHED_TOTAL_NO_RENORMALIZATION",
+        "setting5SumDifferencePercentagePoints": 0.01
+      },
+      "observationScopeAudit": {
+        "sourceIds": [
+          "seed-v38-window-audit"
+        ],
+        "status": "UNRESOLVED_SOURCE_TABLE_SCOPE",
+        "reason": "0～49Gと50～99Gは100G試行の排他的な当選時期の内訳で、後半生存条件付き当選率ではない。設定5は5.39+30.07=35.46%だが公表合計35.45%。独立加点・勝手な補正を禁止し公表合計を維持する。"
+      }
     },
     {
       "blockId": "seed-v25-external-simulation",
@@ -894,9 +959,10 @@
         "sourceIds": [
           "pworld-seed-analysis",
           "seed-v21-post-st-100-1",
-          "seed-v21-post-st-100-2"
+          "seed-v21-post-st-100-2",
+          "seed-v38-window-audit"
         ],
-        "note": "ST終了後に内部モード移行抽選。ST駆け抜け時はAT間天井750G短縮。設定ごとの選択率は未確認。 なな徹調べの設定別100G以内初回CZ/ボーナス当選31.86～38.99%を別Research候補に登録。ST後とリセット後の試行条件・CZ/AT依存が未解決のためPARTIALを維持。"
+        "note": "ST終了後に内部モード移行抽選。ST駆け抜け時はAT間天井750G短縮。設定ごとの選択率は未確認。 なな徹調べの設定別100G以内初回CZ/ボーナス当選31.86～38.99%を別Research候補に登録。ST後とリセット後の試行条件・CZ/AT依存が未解決のためPARTIALを維持。 0～49Gと50～99Gは100G試行の排他的な当選時期の内訳で、後半生存条件付き当選率ではない。設定5は5.39+30.07=35.46%だが公表合計35.45%。独立加点・勝手な補正を禁止し公表合計を維持する。"
       },
       {
         "domain": "BONUS",
@@ -1372,6 +1438,10 @@
           {
             "sourceId": "seed-v21-post-st-100-2",
             "claim": "ST駆け抜け後はボーナス間天井750G、ST終了後100G以内のCZかボーナス当選率は設定別だが同一なな徹調査に基づく"
+          },
+          {
+            "sourceId": "seed-v38-window-audit",
+            "claim": "0～49Gと50～99Gは100G試行の排他的な当選時期の内訳で、後半生存条件付き当選率ではない。設定5は5.39+30.07=35.46%だが公表合計35.45%。独立加点・勝手な補正を禁止し公表合計を維持する。"
           }
         ],
         "discoveryQueries": [

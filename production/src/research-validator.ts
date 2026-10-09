@@ -44,6 +44,9 @@ export function validateResearchCandidateLedger(d:any,sourceIds:Set<any>){
       throw new Error('RESEARCH_VALIDATION:DEPENDENCY_SCOPE_PROVENANCE:'+finding.findingId);
   }
   for(const block of d.blockedItems??[]){
+    const reference=block.referenceConditionalDistribution;
+    if(reference?.vectorAudit==='INVALID_EXCLUSIVE_OUTCOME_MASS'&&reference.runtimeSettingLikelihood!=='DISABLED')
+      throw new Error('RESEARCH_VALIDATION:INVALID_REFERENCE_LIKELIHOOD:'+block.blockId);
     for(const key of ['observationScopeAudit','referenceConditionalDistribution']){
       const ids=block[key]?.sourceIds;
       if(ids!==undefined&&(!Array.isArray(ids)||ids.length===0||ids.some((id:any)=>!sourceIds.has(id)||!block.sourceIds?.includes(id))))
