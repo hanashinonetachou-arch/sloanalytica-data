@@ -15,6 +15,11 @@ export function categoricalEvidenceMirrorIssues(research: any): string[] {
     : [];
   const equalLabels = (a: string[], b: string[]) =>
     a.length === b.length && a.every((s, i) => s === b[i]);
+  const equalCategorySets = (a: string[], b: string[]) => {
+    const members = new Set(a);
+    return a.length === b.length && members.size === a.length
+      && new Set(b).size === b.length && b.every(s => members.has(s));
+  };
   const numericLabels = (f: any): string[] | null => {
     if (!f?.settingDistribution || typeof f.settingDistribution !== 'object') return null;
     const rows = Object.values(f.settingDistribution);
@@ -50,14 +55,14 @@ export function categoricalEvidenceMirrorIssues(research: any): string[] {
         errors.push('MIRRORED_CATEGORICAL_EVIDENCE_NOT_RECONCILED:' + id);
       }
     } else if (cats) {
-      // Missing mirror links must not bypass the gate. Identical ordered
+      // Missing mirror links must not bypass the gate. Identical
       // sets of >=3 concrete categories identify the same observation even
       // when source *IDs* differ (e.g. independently reviewed articles).
       // For small/generic category sets, require an overlapping source ID.
       for (const e of evidence) {
         const sharedSource = (f.sourceIds ?? []).some((sid: string) => (e.sourceIds ?? []).includes(sid));
         const unambiguousCategories = cats.length >= 3 && new Set(cats).size === cats.length;
-        if ((sharedSource || unambiguousCategories) && equalLabels(cats, labels(e))) {
+        if ((sharedSource || unambiguousCategories) && equalCategorySets(cats, labels(e))) {
           errors.push('UNDECLARED_CATEGORICAL_EVIDENCE_MIRROR:' + id);
           break;
         }

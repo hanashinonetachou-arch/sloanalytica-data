@@ -26,7 +26,7 @@ test('RE2 common small roles, two ceilings, and reset behavior are sourced, not 
   assert.equal(domain(d,name)?.status,'CHECKED',name);
  for(const id of ['re2-small-roles-common','re2-dual-ceiling-not-setting','re2-reset-weapon-high-no-settings','re2-stage-voice-is-cz-ceiling','re2-rare-role-cz-shared'])
   block(d,id);
- assert.equal(domain(d,'EVIDENCE')?.status,'PARTIAL');
+ assert.equal(domain(d,'EVIDENCE')?.status,'CHECKED');
  assert.equal(d.findings.filter((x:any)=>x.observationType==='evidence').length,1);
 });
 test('RE2 Tyant high and 4-way AT level rates remain source verified but latent and never fake live observation',()=>{
@@ -61,6 +61,6 @@ test('Den-O source only gives setting-1 small-role odds; refrain from inferring 
  block(d,'deno-small-role-only-setting1-reference');
  for(const id of ['deno-normal-modes-ceilings','deno-sixth-bonus-at-ceiling','deno-setting-change-reset','deno-100pt-cz-ceiling-independent'])block(d,id);
  assert.deepEqual(d.settings.values,['SET_1','SET_2','SET_4','SET_5','SET_6']);
- assert.equal(domain(d,'EVIDENCE')?.status,'PARTIAL');
+ assert.equal(domain(d,'EVIDENCE')?.status,'CHECKED');
  assert.equal(d.findings.filter((x:any)=>x.observationType==='evidence').length,6);
 });

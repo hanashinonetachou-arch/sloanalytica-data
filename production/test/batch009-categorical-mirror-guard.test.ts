@@ -67,3 +67,12 @@ test('Two unrelated generic categories without shared source do not imply the sa
   };
   assert.deepEqual(categoricalEvidenceMirrorIssues(d),[]);
 });
+
+test('Reordering categories and deleting mirror metadata cannot bypass duplicate-observation protection',()=>{
+  const d=staged();
+  const numeric=candidate(d,'at-end-categorical');
+  delete numeric.mirrorsEvidenceFindingId;
+  delete numeric.numericRouteStatus;
+  candidate(d,'reviewed-at-end').semanticCategories.reverse();
+  assert.ok(categoricalEvidenceMirrorIssues(d).includes('UNDECLARED_CATEGORICAL_EVIDENCE_MIRROR:at-end-categorical'));
+});
