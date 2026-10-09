@@ -22,8 +22,9 @@ test('Bio5 shared rare roles and three ceilings are excluded; setting1-only mode
  const check=new Map(staged.researchCompleteness.domains.map((d:any)=>[d.domain,d]));
  for(const name of ['SMALL_ROLE','THRESHOLD_BEHAVIOR','RESET_BEHAVIOR'])
   assert.equal(check.get(name)?.status,'CHECKED',name);
- for(const name of ['MODE_TRANSITION','POST_EVENT_TRANSITION','EVIDENCE'])
+ for(const name of ['MODE_TRANSITION','POST_EVENT_TRANSITION'])
   assert.equal(check.get(name)?.status,'PARTIAL',name);
+ assert.equal(check.get('EVIDENCE')?.status,'CHECKED');
  const sources=new Map(staged.sources.map((s:any)=>[s.sourceId,s]));
  for(const id of ['bio5-small-role-shared','bio5-ceiling-999-666-99','bio5-mode-stage-not-setting','bio5-mode-initial-setting1-only']){
   const b=staged.blockedItems.find((x:any)=>x.blockId===id);

@@ -49,7 +49,8 @@ test('Warausalesman4 all-setting-common mode C is not mistaken for a high-settin
   assert.equal(domain(d,name)?.status,'CHECKED',name);
  for(const id of ['warau4-timing-ceiling-mode-specific','warau4-setting-change-mode-c','warau4-293-cz-conditional-mode','warau4-post-big-revival-overlap','warau4-mode-stage-not-setting','warau4-role-draws-state-common'])block(d,id);
  assert.equal(d.findings.find((x:any)=>x.findingId==='bonus-total').observationType,'reference_distribution');
- assert.equal(domain(d,'EVIDENCE')?.status,'PARTIAL');
+ assert.equal(domain(d,'EVIDENCE')?.status,'CHECKED');
+ block(d,'warau-v39-evidence-unknown-rates');
  assert.equal(d.findings.filter((x:any)=>x.observationType==='evidence').length,4);
 });
 test('Den-O source only gives setting-1 small-role odds; refrain from inferring they are common across settings',()=>{
@@ -61,5 +62,5 @@ test('Den-O source only gives setting-1 small-role odds; refrain from inferring 
  for(const id of ['deno-normal-modes-ceilings','deno-sixth-bonus-at-ceiling','deno-setting-change-reset','deno-100pt-cz-ceiling-independent'])block(d,id);
  assert.deepEqual(d.settings.values,['SET_1','SET_2','SET_4','SET_5','SET_6']);
  assert.equal(domain(d,'EVIDENCE')?.status,'PARTIAL');
- assert.equal(d.findings.filter((x:any)=>x.observationType==='evidence').length,5);
+ assert.equal(d.findings.filter((x:any)=>x.observationType==='evidence').length,6);
 });
