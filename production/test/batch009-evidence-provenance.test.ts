@@ -52,7 +52,9 @@ test('Bio5 four independent hint groups retain their own evidence sources',()=>{
   const medals=evidence.find((x:any)=>x.findingId==='reviewed-special-medal');
   assert.ok(medals.semanticCategories.some((x:any)=>x.label==='256枚OVER'&&x.meaning==='設定2・5・6'));
   assert.equal(d.blockedItems.some((b:any)=>b.blockId==='medal-display'),false);
-  assert.ok(d.blockedItems.some((b:any)=>b.blockId==='infection-middle7-conflict'));
+  assert.equal(d.blockedItems.some((b:any)=>b.blockId==='infection-middle7-conflict'),false);
+  assert.ok(d.researchCompleteness.resolvedSourceConflicts.some((x:any)=>x.resolution==='19.8%'));
+  assert.ok(d.blockedItems.some((b:any)=>b.blockId==='infection-first-navi-scope'));
 });
 test('BIG島唄 has conditional rates but no invented numerical hint evidence',()=>{
   const d=read('research-evidence-staged','wave-2','S_BIG_SHIMAUTA_E2_30.json');
@@ -60,7 +62,9 @@ test('BIG島唄 has conditional rates but no invented numerical hint evidence',(
   assert.equal(d.findings.filter((x:any)=>x.observationType==='appearance_distribution').length,2);
   assert.equal(d.findings.filter((x:any)=>x.observationType==='evidence').length,0);
   for(const f of d.findings.filter((x:any)=>x.observationType==='appearance_distribution'))assert.equal(f.liveObservation.status,'UNRESOLVED');
-  assert.equal(d.researchCompleteness.domains.filter((x:any)=>x.status==='CHECKED').length,2);
+  for(const domain of ['INITIAL_HIT','MODE_TRANSITION'])
+    assert.equal(d.researchCompleteness.domains.find((x:any)=>x.domain===domain)?.status,'PARTIAL');
+  assert.equal(d.researchCompleteness.status,'INCOMPLETE');
 });
 
 test('てぃだどんどん covers the five supported settings and only uses seven-segment exact hints',()=>{

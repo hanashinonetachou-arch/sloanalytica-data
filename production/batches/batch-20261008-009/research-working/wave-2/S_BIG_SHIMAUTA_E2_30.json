@@ -233,6 +233,46 @@
       "claims": [
         "チャンスチェリーのボーナス当選率とハズレ後1G連ストック率は異なる条件付き抽選。スイカの3/5/10回天井抽選もある"
       ]
+    },
+    {
+      "sourceId": "shimauta-v23-mode-counter-scope-1",
+      "url": "https://nana-press.com/kaiseki/machine/430/11748/",
+      "title": "なな徹：通常モードとシーサーBIGモード",
+      "sourceType": "secondary_analysis",
+      "checkedAt": "2026-10-09",
+      "claims": [
+        "7通常モードとシーサーBIGモード。モード別スイカ3/5/10回天井、10回到達でシーサーBIG+モード移行、SPストック中はスイカ天井なし。"
+      ]
+    },
+    {
+      "sourceId": "shimauta-v23-mode-counter-scope-2",
+      "url": "https://hazuse.com/machine/pachislot/2S0592/genre/209/",
+      "title": "HAZUSE：内部モード",
+      "sourceType": "secondary_analysis",
+      "checkedAt": "2026-10-09",
+      "claims": [
+        "通常モードは初当り抽選・天井・モード移行に影響し、有利区間リセット/ボーナス/スイカで移行抽選。"
+      ]
+    },
+    {
+      "sourceId": "shimauta-v23-sp-stock-1",
+      "url": "https://nana-press.com/kaiseki/machine/430/11748/",
+      "title": "なな徹：SPストック",
+      "sourceType": "secondary_analysis",
+      "checkedAt": "2026-10-09",
+      "claims": [
+        "SPストックは800～809Gに毎G約50%で1G連1～5個、810G天井前の自力当選で50%フリーズ。"
+      ]
+    },
+    {
+      "sourceId": "shimauta-v23-sp-stock-2",
+      "url": "https://hazuse.com/machine/pachislot/2S0592/genre/209/",
+      "title": "HAZUSE：SPストックモード",
+      "sourceType": "secondary_analysis",
+      "checkedAt": "2026-10-09",
+      "claims": [
+        "SPストック800～809Gはストック超高確率、天井前ボーナスで50%ロングフリーズ。"
+      ]
     }
   ],
   "findings": [
@@ -529,6 +569,26 @@
         "shimauta-role-condition-review-20261009",
         "shimauta-role-condition-cross-20261009"
       ]
+    },
+    {
+      "blockId": "shimauta-v23-mode-counter-scope",
+      "label": "内部モードとスイカ回数天井",
+      "reason": "スイカ回数天井は滞在モードで選ばれる回数が変わり、SPストック中は対象外です。画面から毎回モードを確定できないため、スイカ回数とボーナス当選を別々の独立した設定差として加算しません。",
+      "reevaluationCondition": "設定別の抽選条件と、実機で正確に数えられる試行回数・結果の対応が確認できた場合に再評価します。",
+      "sourceIds": [
+        "shimauta-v23-mode-counter-scope-1",
+        "shimauta-v23-mode-counter-scope-2"
+      ]
+    },
+    {
+      "blockId": "shimauta-v23-sp-stock",
+      "label": "SPストック800～809Gの特殊抽選",
+      "reason": "800～809Gのストック優遇やフリーズはSPストックモード中の特殊な抽選です。設定ごとの発生割合は確認できないため、通常初当たりや1G連回数に追加して推測へ加算しません。",
+      "reevaluationCondition": "設定別の抽選条件と、実機で正確に数えられる試行回数・結果の対応が確認できた場合に再評価します。",
+      "sourceIds": [
+        "shimauta-v23-sp-stock-1",
+        "shimauta-v23-sp-stock-2"
+      ]
     }
   ],
   "researchCompleteness": {
@@ -668,6 +728,33 @@
         "sourceIds": [
           "shimauta-role-condition-review-20261009",
           "shimauta-role-condition-cross-20261009"
+        ]
+      },
+      {
+        "domain": "STATE_TRANSITION",
+        "status": "CHECKED",
+        "note": "通常7モードとシーサーBIGモードは別管理。通常モード別3/5/10回のスイカ天井は内部モードを条件に振り分け、10回でシーサーBIG+モード移行。SPストックはこの天井が適用されない。モード示唆演出は毎回全モードを確定しない。設定別モード率・初当り母数は未解決。",
+        "sourceIds": [
+          "shimauta-v23-mode-counter-scope-1",
+          "shimauta-v23-mode-counter-scope-2"
+        ]
+      },
+      {
+        "domain": "POINTS_GAME_DISTRIBUTION",
+        "status": "CHECKED",
+        "note": "通常7モードとシーサーBIGモードは別管理。通常モード別3/5/10回のスイカ天井は内部モードを条件に振り分け、10回でシーサーBIG+モード移行。SPストックはこの天井が適用されない。モード示唆演出は毎回全モードを確定しない。設定別モード率・初当り母数は未解決。",
+        "sourceIds": [
+          "shimauta-v23-mode-counter-scope-1",
+          "shimauta-v23-mode-counter-scope-2"
+        ]
+      },
+      {
+        "domain": "MACHINE_SPECIFIC",
+        "status": "CHECKED",
+        "note": "SPストックは800～809Gに毎G約50%で1G連1～5個ストック、810G天井前の自力当選では50%ロングフリーズ。これは内部モード×G到達を条件とする仕様で設定別の独立確率ではない。通常初当り・既存1G連振り分けへ重複加点しない。",
+        "sourceIds": [
+          "shimauta-v23-sp-stock-1",
+          "shimauta-v23-sp-stock-2"
         ]
       }
     ],
@@ -1047,6 +1134,48 @@
           "type": "BLOCKED",
           "refId": "shimauta-role-condition-not-independent"
         }
+      },
+      {
+        "candidateId": "block:shimauta-v23-mode-counter-scope",
+        "label": "内部モードとスイカ回数天井",
+        "sourceClaims": [
+          {
+            "sourceId": "shimauta-v23-mode-counter-scope-1",
+            "claim": "7通常モードとシーサーBIGモード。モード別スイカ3/5/10回天井、10回到達でシーサーBIG+モード移行、SPストック中はスイカ天井なし。"
+          },
+          {
+            "sourceId": "shimauta-v23-mode-counter-scope-2",
+            "claim": "通常モードは初当り抽選・天井・モード移行に影響し、有利区間リセット/ボーナス/スイカで移行抽選。"
+          }
+        ],
+        "discoveryQueries": [
+          "BIG島唄30 7モード シーサーBIGモード スイカ3 5 10回 SPストック天井なし"
+        ],
+        "disposition": {
+          "type": "BLOCKED",
+          "refId": "shimauta-v23-mode-counter-scope"
+        }
+      },
+      {
+        "candidateId": "block:shimauta-v23-sp-stock",
+        "label": "SPストック800～809Gの特殊抽選",
+        "sourceClaims": [
+          {
+            "sourceId": "shimauta-v23-sp-stock-1",
+            "claim": "SPストックは800～809Gに毎G約50%で1G連1～5個、810G天井前の自力当選で50%フリーズ。"
+          },
+          {
+            "sourceId": "shimauta-v23-sp-stock-2",
+            "claim": "SPストック800～809Gはストック超高確率、天井前ボーナスで50%ロングフリーズ。"
+          }
+        ],
+        "discoveryQueries": [
+          "BIG島唄30 SPストック 800 809 810G 50% 1G連 フリーズ"
+        ],
+        "disposition": {
+          "type": "BLOCKED",
+          "refId": "shimauta-v23-sp-stock"
+        }
       }
     ],
     "machineSpecificQueries": [
@@ -1063,7 +1192,9 @@
       "S BIG島唄30 ストック 1G連 通常時 ボーナス開始1G目 消化中 ストック",
       "S BIG島唄30 ドンドンランプ 音符ランプ モード示唆 設定判別 違い",
       "S BIG島唄30 チャンスチェリー 50% ボーナス ハズレ 50% 1G連ストック スイカ10回",
-      "S BIG島唄30 初当たり ときめきゾーン 1G連ストック 逆回転 二重加算 通常時"
+      "S BIG島唄30 初当たり ときめきゾーン 1G連ストック 逆回転 二重加算 通常時",
+      "BIG島唄30 7モード シーサーBIGモード スイカ3 5 10回 SPストック天井なし",
+      "BIG島唄30 SPストック 800 809 810G 50% 1G連 フリーズ"
     ]
   }
 }

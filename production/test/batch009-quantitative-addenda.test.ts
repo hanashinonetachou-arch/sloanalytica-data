@@ -44,6 +44,11 @@ test('緑ドン reach-me replay retains all six public rates while research rema
   assert.deepEqual(f.settingDistribution, {'1':'1/2978.9','2':'1/2978.9','3':'1/2520.6','4':'1/2520.6','5':'1/2048.0','6':'1/2048.0'});
   assert.notEqual(d.researchCompleteness.status, 'COMPLETE');
   assert.equal(f.liveObservation.status, 'UNRESOLVED');
+  assert.equal(f.trialUniverse,'TOTAL_GAME_TRIAL');
+  assert.equal(f.sourceVerification.status,'PUBLISHED_FULL_SIX_SETTING_TABLE_TWO_PUBLISHERS');
+  assert.ok(f.sourceIds.includes('green-v23-full-small-role-scope'));
+  assert.match(f.denominatorSemantics,/総ゲーム数/);
+  assert.match(f.liveObservation.reason,/停止手順/);
 });
 test('バイオ5 special 256枚 is a noncontiguous setting constraint', () => {
   const d = read('research-evidence-reviewed/L_BIOHAZARD5_ZE.json');

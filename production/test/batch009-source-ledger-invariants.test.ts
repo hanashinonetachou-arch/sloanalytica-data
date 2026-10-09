@@ -190,9 +190,14 @@ test('Sister Quest all twenty research domains are represented but only source-c
   const domains=d.researchCompleteness.domains;
   assert.equal(domains.length,20);
   assert.equal(new Set(domains.map((x:any)=>x.domain)).size,20);
-  assert.equal(domains.filter((x:any)=>x.status==='CHECKED'||x.status==='NOT_APPLICABLE').length,9);
-  assert.equal(domains.filter((x:any)=>x.status==='PARTIAL').length,11);
-  for(const key of ['AT','EXTERNAL_DATA_ONLY','MACHINE_SPECIFIC']) {
+  const ceiling=domains.find((x:any)=>x.domain==='THRESHOLD_BEHAVIOR');
+  assert.equal(ceiling.status,'CHECKED');
+  assert.equal(ceiling.conditionalReference.observedArrivalIsSelection,false);
+  assert.equal(ceiling.conditionalReference.settingLikelihoodAllowed,false);
+  assert.deepEqual(ceiling.conditionalReference.shortCeilingSelectionPercent,{'1':0.8,'2':5.5,'3':10.2,'4':10.9,'5':11.7,'6':12.5});
+  assert.equal(domains.find((x:any)=>x.domain==='EXTERNAL_DATA_ONLY').status,'CHECKED');
+  assert.equal(domains.find((x:any)=>x.domain==='INITIAL_HIT').status,'PARTIAL');
+  for(const key of ['AT','MACHINE_SPECIFIC']) {
    assert.equal(domains.find((x:any)=>x.domain===key)?.status,'PARTIAL');
   }
   const ending=d.blockedItems.find((x:any)=>x.blockId==='sister-ending-rare-role-hint-details-unpublished');

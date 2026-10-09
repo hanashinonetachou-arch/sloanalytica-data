@@ -416,6 +416,36 @@
       "claims": [
         "CZ敗北・AT終了後の10G中にAT直撃抽選がありベル/リプレイ0.1%、弱レア役0.4%、強レア役12.5%"
       ]
+    },
+    {
+      "sourceId": "sister-v23-ceiling-censoring-1",
+      "url": "https://nana-press.com/kaiseki/machine/906/27930/",
+      "title": "なな徹：CZ間・AT間・CZスルー天井",
+      "sourceType": "secondary_analysis",
+      "checkedAt": "2026-10-09",
+      "claims": [
+        "AT間999G選択率設定1～6が0.8/5.5/10.2/10.9/11.7/12.5%、設定変更時999G固定。CZ間EXP天井・CZスルー天井と異なる。"
+      ]
+    },
+    {
+      "sourceId": "sister-v23-ceiling-censoring-2",
+      "url": "https://1geki.jp/slot/l_sisterquest/0/",
+      "title": "一撃：AT間天井の設定差",
+      "sourceType": "secondary_analysis",
+      "checkedAt": "2026-10-09",
+      "claims": [
+        "AT間天井の999/2000G振り分けには設定差があり、設定変更後天井短縮と区別する。"
+      ]
+    },
+    {
+      "sourceId": "sister-v23-external-simulation-1",
+      "url": "https://nana-press.com/kaiseki/machine/906/27930/",
+      "title": "なな徹：天井期待値算出条件",
+      "sourceType": "secondary_analysis",
+      "checkedAt": "2026-10-09",
+      "claims": [
+        "天井期待値は設定1独自シミュレーター、AT終了即ヤメ、CZ間/スルー天井非考慮、獲得枚数一定などを仮定。"
+      ]
     }
   ],
   "findings": [
@@ -783,6 +813,25 @@
         "sister-ending-rare-altema",
         "sister-ending-rare-slothack"
       ]
+    },
+    {
+      "blockId": "sister-v23-ceiling-censoring",
+      "label": "AT間天井の選択と実際の到達",
+      "reason": "999Gの天井が選ばれる割合には設定差がありますが、途中でATに当たると、どちらの天井が選ばれていたか分かりません。実際の999G到達回数は天井の選択割合とは異なり、設定変更後は条件も違うため、単純な当選回数として採用しません。",
+      "reevaluationCondition": "設定別の抽選条件と、実機で正確に数えられる試行回数・結果の対応が確認できた場合に再評価します。",
+      "sourceIds": [
+        "sister-v23-ceiling-censoring-1",
+        "sister-v23-ceiling-censoring-2"
+      ]
+    },
+    {
+      "blockId": "sister-v23-external-simulation",
+      "label": "天井期待値と設定単独の参考データ",
+      "reason": "天井期待値は条件を固定したシミュレーションです。実際の設定別の発生確率ではないため、期待値表や1つの設定だけの実戦例から推測用の確率を作りません。",
+      "reevaluationCondition": "設定別の抽選条件と、実機で正確に数えられる試行回数・結果の対応が確認できた場合に再評価します。",
+      "sourceIds": [
+        "sister-v23-external-simulation-1"
+      ]
     }
   ],
   "researchCompleteness": {
@@ -824,11 +873,25 @@
       },
       {
         "domain": "THRESHOLD_BEHAVIOR",
-        "status": "PARTIAL",
+        "status": "CHECKED",
         "sourceIds": [
-          "nanapress"
+          "sister-v23-ceiling-censoring-1",
+          "sister-v23-ceiling-censoring-2"
         ],
-        "note": "設定変更時以外にAT間999Gと2000Gの天井を選択、設定別割合を公開。途中当選で内部選択を知れないため参考情報。"
+        "note": "通常時AT間999/2000G選択に設定差（999G選択0.8/5.5/10.2/10.9/11.7/12.5%）。設定変更は999G固定、CZはEXP天井/スルー天井を別管理。先にAT当選した試行の内部天井選択は見えないため、999G到達率を選択率へ置換しない。競合当選による打切りを含む観測モデルは未解決で数値採用しない。",
+        "conditionalReference": {
+          "status": "SETTING_DIFFERENCE_CENSORED_OBSERVATION_UNRESOLVED",
+          "shortCeilingSelectionPercent": {
+            "1": 0.8,
+            "2": 5.5,
+            "3": 10.2,
+            "4": 10.9,
+            "5": 11.7,
+            "6": 12.5
+          },
+          "observedArrivalIsSelection": false,
+          "settingLikelihoodAllowed": false
+        }
       },
       {
         "domain": "CZ",
@@ -991,11 +1054,11 @@
       },
       {
         "domain": "EXTERNAL_DATA_ONLY",
-        "status": "PARTIAL",
+        "status": "CHECKED",
         "sourceIds": [
-          "sister-external-sample-source-1"
+          "sister-v23-external-simulation-1"
         ],
-        "note": "設定6の3000G実戦スランプ例は存在する。設定1～5の同条件・十分なサンプルを揃えた設定別分布ではないため、設定別確率の補間には使わない。研究対象として記録し他データの探索は継続。"
+        "note": "なな徹の天井期待値は設定1、AT後即ヤメ、固定コイン持ち・平均純増・獲得枚数、非前兆中、CZ間/スルー天井非考慮などのシミュレーション条件。設定別観測確率ではない。設定6単独実戦も既存の参考情報扱いを維持。"
       },
       {
         "domain": "MACHINE_SPECIFIC",
@@ -1522,6 +1585,44 @@
           "type": "BLOCKED",
           "refId": "sister-ending-rare-role-hint-details-unpublished"
         }
+      },
+      {
+        "candidateId": "block:sister-v23-ceiling-censoring",
+        "label": "AT間天井の選択と実際の到達",
+        "sourceClaims": [
+          {
+            "sourceId": "sister-v23-ceiling-censoring-1",
+            "claim": "AT間999G選択率設定1～6が0.8/5.5/10.2/10.9/11.7/12.5%、設定変更時999G固定。CZ間EXP天井・CZスルー天井と異なる。"
+          },
+          {
+            "sourceId": "sister-v23-ceiling-censoring-2",
+            "claim": "AT間天井の999/2000G振り分けには設定差があり、設定変更後天井短縮と区別する。"
+          }
+        ],
+        "discoveryQueries": [
+          "シスタークエスト AT間天井999 2000 選択率 設定変更 途中当選 打切り"
+        ],
+        "disposition": {
+          "type": "BLOCKED",
+          "refId": "sister-v23-ceiling-censoring"
+        }
+      },
+      {
+        "candidateId": "block:sister-v23-external-simulation",
+        "label": "天井期待値と設定単独の参考データ",
+        "sourceClaims": [
+          {
+            "sourceId": "sister-v23-external-simulation-1",
+            "claim": "天井期待値は設定1独自シミュレーター、AT終了即ヤメ、CZ間/スルー天井非考慮、獲得枚数一定などを仮定。"
+          }
+        ],
+        "discoveryQueries": [
+          "シスタークエスト 天井期待値 算出条件 独自シミュレーター 設定1 CZ天井考慮しない"
+        ],
+        "disposition": {
+          "type": "BLOCKED",
+          "refId": "sister-v23-external-simulation"
+        }
       }
     ],
     "machineSpecificQueries": [
@@ -1546,7 +1647,9 @@
       "Sister Quest エンディング中 レア役 設定示唆 演出 詳細 色 声 意味 一覧 未公表",
       "Sister Quest レアモンスター AT終了時 下パネル 出現状況 確認 回数 網羅",
       "シスタークエスト Quest Battle CZ成功 冒険RUSH 初当たり 目覚めの呪文 10G 直撃 母数 重複",
-      "Sister Quest 目覚めの呪文 黒10G ベル リプレイ 0.1 弱レア 0.4 強レア12.5 AT直撃"
+      "Sister Quest 目覚めの呪文 黒10G ベル リプレイ 0.1 弱レア 0.4 強レア12.5 AT直撃",
+      "シスタークエスト AT間天井999 2000 選択率 設定変更 途中当選 打切り",
+      "シスタークエスト 天井期待値 算出条件 独自シミュレーター 設定1 CZ天井考慮しない"
     ],
     "knownRateEvidenceRequiresNumericRouting": true,
     "categoryEvidenceDedupe": "PENDING",

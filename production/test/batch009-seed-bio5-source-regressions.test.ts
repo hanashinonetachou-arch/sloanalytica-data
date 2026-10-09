@@ -28,7 +28,9 @@ test('Gundam SEED common roles and ceiling variants never become invented settin
    assert.equal(d.researchCompleteness.domains.find((x:any)=>x.domain===domain)?.status,'CHECKED');
  for(const id of ['small-role-settings-common','mode-stage-is-not-setting','gundam-mode-ceiling-not-setting','gundam-cz-state-conditioned'])
    assert.ok(d.blockedItems.some((x:any)=>x.blockId===id),'missing '+id);
- assert.equal(d.findings.filter((x:any)=>x.settingDistribution).length,2);
+ assert.deepEqual(d.findings.filter((x:any)=>x.settingDistribution).map((x:any)=>x.findingId).sort(),
+   ['at-initial','cz-strike-attack','post-st-reset-100g-first-cz-or-bonus'].sort());
+ for(const f of d.findings.filter((x:any)=>x.settingDistribution))assert.equal(f.liveObservation.status,'UNRESOLVED');
  assert.equal(d.researchCompleteness.status,'INCOMPLETE');
 });
 test('Biohazard5 middle-seven infection 19.8% is a conditional draw with first-cutin eligibility only',()=>{

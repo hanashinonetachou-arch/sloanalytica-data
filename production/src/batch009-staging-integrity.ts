@@ -17,6 +17,15 @@ export function auditBatch009Staging(working:any,reviewed:any,staged:any):string
   const stagedSources=byId(staged.sources,'sourceId');
   const workingLedger=byId(working.researchCompleteness?.candidateLedger,'candidateId');
   const stagedLedger=byId(staged.researchCompleteness?.candidateLedger,'candidateId');
+  const stagedDomains=byId(staged.researchCompleteness?.domains,'domain');
+  for(const domain of staged.researchCompleteness?.domains??[]){
+    if(domain.status==='CHECKED'&&(!domain.sourceIds?.length||domain.sourceIds.some((id:string)=>!stagedSources.has(id))))
+      errors.push('STAGE_DOMAIN_SOURCE_MISSING:'+domain.domain);
+  }
+  for(const domain of working.researchCompleteness?.domains??[]){
+    if(JSON.stringify(stagedDomains.get(domain.domain))!==JSON.stringify(domain))
+      errors.push('STAGE_WORKING_DOMAIN_DRIFT:'+domain.domain);
+  }
   if(stagedSources.size!==(staged.sources??[]).length)errors.push('STAGE_DUPLICATE_SOURCE_ID');
   if(stagedFindings.size!==(staged.findings??[]).length)errors.push('STAGE_DUPLICATE_FINDING_ID');
   if(stagedLedger.size!==(staged.researchCompleteness?.candidateLedger??[]).length)errors.push('STAGE_DUPLICATE_LEDGER_ID');
