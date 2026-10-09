@@ -158,7 +158,8 @@ test('Sister Quest BONUS is an AT-side mechanic and not a normal initial bonus s
   const status=(domain:string)=>d.researchCompleteness.domains.find((x:any)=>x.domain===domain)?.status;
   for(const domain of ['BONUS','BONUS_TYPE_CONDITIONAL','STATE_TRANSITION','NAVIGATION','SUCCESS_RATE','CARRY_OVER'])
    assert.equal(status(domain),'CHECKED',scope+':'+domain);
-  for(const domain of ['MODE_TRANSITION','ROLE_CONDITIONAL_DISTRIBUTION'])
+  assert.equal(status('ROLE_CONDITIONAL_DISTRIBUTION'),'CHECKED',scope+':ROLE_CONDITIONAL_DISTRIBUTION');
+  for(const domain of ['MODE_TRANSITION'])
    assert.equal(status(domain),'PARTIAL',scope+':'+domain);
   for(const code of ['bonus','bonus-conditional','state','navigation','cz-win-rate','carry-over','mode','post-event','role-conditional']){
    const id='sister-'+code+'-unusable-for-setting';
