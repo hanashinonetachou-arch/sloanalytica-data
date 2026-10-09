@@ -3,8 +3,10 @@ import {buildResearchWorkQueue} from './research-work-queue.ts';
 import {summarizeResearchProgress} from './research-progress.ts';
 import {auditBatch009Staging} from './batch009-staging-integrity.ts';
 import {validateResearchCandidateLedger} from './research-validator.ts';
-const [basisAudit,output]=process.argv.slice(2);
+import {buildResearchResolutionRequirements} from './research-resolution-requirements.ts';
+const [basisAudit,output,reviewPath,resolutionOutput]=process.argv.slice(2);
 if(!basisAudit||!output)throw new Error('Usage: basis-audit-path output-path');
+if(Boolean(reviewPath)!==Boolean(resolutionOutput))throw new Error('Usage: optional review-path and resolution-output-path must be supplied together');
 const audit=JSON.parse(fs.readFileSync(basisAudit,'utf8')),batch=path.dirname(basisAudit);
 const drafts=audit.machineRows.map((row:any)=>{
  const wave=fs.existsSync(path.join(batch,'research-working/wave-1',row.machineId+'.json'))?'wave-1':'wave-2';
@@ -14,5 +16,9 @@ const drafts=audit.machineRows.map((row:any)=>{
  const errors=auditBatch009Staging(working,reviewed,staged);if(errors.length)throw new Error(row.machineId+':'+errors.join(','));
  return working;
 });
-fs.writeFileSync(output,JSON.stringify(buildResearchWorkQueue(drafts,path.basename(basisAudit)),null,2)+'\n');
+const queue=buildResearchWorkQueue(drafts,path.basename(basisAudit));
+const resolution=reviewPath?buildResearchResolutionRequirements(drafts,
+ JSON.parse(fs.readFileSync(reviewPath,'utf8')).rows,path.basename(basisAudit)):null;
+fs.writeFileSync(output,JSON.stringify(queue,null,2)+'\n');
+if(resolution)fs.writeFileSync(resolutionOutput!,JSON.stringify(resolution,null,2)+'\n');
 console.log(JSON.stringify(summarizeResearchProgress(drafts)));

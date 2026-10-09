@@ -43,7 +43,7 @@ const sectionExplanation=(f:any,s:any)=>{
  if(trialLabel.endsWith('ゲーム数'))return trialLabel+'を基準に、'+successSubject+'の出現割合を設定別に比較します。';
  return '対象となる機会のうち、'+successSubject+'が実際に起きた割合を設定別に比較します。';
 };
-const compactEvidenceText=(v:any)=>String(v??'').normalize('NFKC').replace(/[\\s（）()「」『』【】・：:、,／\\/_-]+/g,'');
+const compactEvidenceText=(v:any)=>String(v??'').normalize('NFKC').replace(/[\s（）()「」『』【】・：:、,／\\/_-]+/g,'');
 const evidenceLinkKey=(findingId:any,index:number)=>String(findingId)+':'+index;
 export function resolveEvidenceInputLinks(projection:any){
  const numeric=(projection.runtimeUi?.numericSections??[]);
@@ -79,7 +79,7 @@ export function resolveEvidenceInputLinks(projection:any){
     let matches=inputs.filter((x:any)=>meaning&&compactEvidenceText(x.label).includes(meaning));
     if(matches.length===0&&raw)matches=inputs.filter((x:any)=>{const label=compactEvidenceText(x.label);return label===raw||label.includes(raw)||raw.includes(label)});
     if(matches.length!==1&&matches.length>0){
-     const tokens=String(cat.label??'').replace(/[（）()]/g,'・').split(/[・：:\\s／\\/]+/).map(compactEvidenceText).filter((t:string)=>t.length>=2&&!/^設定[1-6]/.test(t)&&!/(?:濃厚|否定|示唆)$/.test(t));
+     const tokens=String(cat.label??'').replace(/[（）()]/g,'・').split(/[・：:\s／\\/]+/).map(compactEvidenceText).filter((t:string)=>t.length>=2&&!/^設定[1-6]/.test(t)&&!/(?:濃厚|否定|示唆)$/.test(t));
      const narrowed=matches.filter((x:any)=>tokens.some((t:string)=>compactEvidenceText(x.label).includes(t))||raw&&compactEvidenceText(x.label).includes(raw));
      if(narrowed.length===1)matches=narrowed;
     }
