@@ -246,6 +246,16 @@
       "claims": [
         "設定1・AT終了後即ヤメ・非前兆でCZスルー回数とCZハマリは打ち出し時平均値、武器獲得を考慮しないの独自シミュレーターで天井期待値を算出"
       ]
+    },
+    {
+      "sourceId": "re2-v30-developer-observation",
+      "url": "https://pachiseven.jp/articles/detail/17931",
+      "title": "バイオハザードRE:2 開発者インタビュー（2023-04-24）",
+      "sourceType": "secondary_analysis",
+      "checkedAt": "2026-10-09",
+      "claims": [
+        "開発者インタビューで心音表示の遅れ、昇格前兆中の抽選優先順、タイラント高確の条件付き濃厚演出とCZ中減算停止を確認"
+      ]
     }
   ],
   "findings": [
@@ -263,7 +273,8 @@
       },
       "sourceIds": [
         "candidate",
-        "pworld-re2"
+        "pworld-re2",
+        "re2-v30-developer-observation"
       ],
       "trialUniverse": "NORMAL_GAME_TRIAL",
       "denominatorSemantics": "通常ゲーム数に対し、通常時から新たに当選したATの回数を記録します。AT中の継続・CZ経由の昇格による重複入力は避けてください。",
@@ -272,8 +283,17 @@
         "reason": "通常ゲーム数に含める当選区間と、CZ・AT直撃が同一の初当たりに含まれる関係を確認するまで正式採用しません。"
       },
       "details": [
-        "公開表の転記候補。観測条件、設定差の評価と重複経路の再確認が必要。"
-      ]
+        "公開表の転記候補。観測条件、設定差の評価と重複経路の再確認が必要。",
+        "開発者確認：昇格前兆中は表示色より内部心音が高い場合があり、武器獲得前兆・連続演出前兆中の心音昇格は告知されない場合がある。表示色別リプレイ回数を内部状態別試行母数として採用しない。"
+      ],
+      "dependencyGroup": "re2-cz-direct-at",
+      "dependencyScopeAudit": {
+        "status": "UNRESOLVED_OBSERVATION_SCOPE",
+        "evidenceSourceIds": [
+          "re2-v30-developer-observation"
+        ],
+        "reason": "心音昇格前兆中はAT直撃→タイラントバトル（高確中）→GバトルCZ→心音昇格→ミッションの順に抽選し、上流当選後の抽選を行わない。通常ゲーム数の対象区間と同一ATへ至る経路を分離できるまで独立尤度にしない。"
+      }
     }
   ],
   "blockedItems": [
@@ -283,18 +303,89 @@
       "reason": "リプレイ時の心音状態別CZ当選率には設定差がありますが、前兆中に内部的な心音状態が変化することがあり、毎回正しい状態で当選したかを判別できません。",
       "sourceIds": [
         "pworld-re2",
-        "chonborista-re2"
+        "chonborista-re2",
+        "re2-v30-developer-observation",
+        "nana-re2-setting"
       ],
-      "reevaluationCondition": "CZ抽選が行われた瞬間の内部心音状態を実戦で正確に確認できる観測方法が検証されること。"
+      "reevaluationCondition": "CZ抽選が行われた瞬間の内部心音状態を実戦で正確に確認できる観測方法が検証されること。",
+      "observationScopeAudit": {
+        "status": "UNRESOLVED_OBSERVATION_SCOPE",
+        "sourceIds": [
+          "re2-v30-developer-observation"
+        ],
+        "runtimeSettingLikelihood": "DISABLED",
+        "reason": "開発者確認：昇格前兆中は表示色より内部心音が高い場合があり、武器獲得前兆・連続演出前兆中の心音昇格は告知されない場合がある。表示色別リプレイ回数を内部状態別試行母数として採用しない。"
+      },
+      "referenceConditionalDistribution": {
+        "status": "SETTING_STRATIFIED_REFERENCE_ONLY",
+        "trialUnit": "REPLAY_AT_KNOWN_INTERNAL_HEARTBEAT_STATE",
+        "states": [
+          "低",
+          "中",
+          "高",
+          "超高"
+        ],
+        "percentBySetting": {
+          "1": [
+            0.4,
+            0.4,
+            3.1,
+            50
+          ],
+          "2": [
+            0.4,
+            0.8,
+            4.7,
+            51.2
+          ],
+          "3": [
+            0.4,
+            0.8,
+            7,
+            53.9
+          ],
+          "4": [
+            0.8,
+            1.2,
+            8.6,
+            56.3
+          ],
+          "5": [
+            1.2,
+            1.6,
+            9.4,
+            57.8
+          ],
+          "6": [
+            1.6,
+            1.6,
+            10.2,
+            58.6
+          ]
+        },
+        "sourceIds": [
+          "nana-re2-setting"
+        ],
+        "runtimeSettingLikelihood": "DISABLED"
+      }
     },
     {
       "blockId": "direct-at-role",
       "label": "成立役別AT直撃当選率",
       "reason": "リプレイ・弱レア役・強レア役での直撃抽選率には設定差がありますが、CZ経由当選と直撃を混ぜず、どの成立役が原因だったかを正確に数える必要があるため採用を保留します。",
       "sourceIds": [
-        "chonborista-re2"
+        "chonborista-re2",
+        "re2-v30-developer-observation"
       ],
-      "reevaluationCondition": "成立役とAT直撃の因果関係が追跡でき、通常時のAT初当たりとの重複を防げること。"
+      "reevaluationCondition": "成立役とAT直撃の因果関係が追跡でき、通常時のAT初当たりとの重複を防げること。",
+      "observationScopeAudit": {
+        "status": "UNRESOLVED_OBSERVATION_SCOPE",
+        "sourceIds": [
+          "re2-v30-developer-observation"
+        ],
+        "runtimeSettingLikelihood": "DISABLED",
+        "reason": "心音昇格前兆中はAT直撃→タイラントバトル（高確中）→GバトルCZ→心音昇格→ミッションの順に抽選し、上流当選後の抽選を行わない。通常ゲーム数の対象区間と同一ATへ至る経路を分離できるまで独立尤度にしない。"
+      }
     },
     {
       "blockId": "re2-small-roles-common",
@@ -313,8 +404,17 @@
       "sourceIds": [
         "pworld-re2",
         "chonborista-re2",
-        "nana-re2-setting"
-      ]
+        "nana-re2-setting",
+        "re2-v30-developer-observation"
+      ],
+      "observationScopeAudit": {
+        "status": "UNRESOLVED_OBSERVATION_SCOPE",
+        "sourceIds": [
+          "re2-v30-developer-observation"
+        ],
+        "runtimeSettingLikelihood": "DISABLED",
+        "reason": "CZ失敗後の足音、または2回目以降かつリプレイ成立時の足音は高確濃厚。初回の足音は確定ではなく、これらの濃厚演出がないことを非移行と判定しない。30G高確の減算はCZ中停止する。"
+      }
     },
     {
       "blockId": "re2-at-level-latent",
@@ -428,9 +528,18 @@
       "reason": "偶数百Gで高確移行率には設定差がありますが、足音が出ても非高確の可能性があります。高確への移行結果を毎回確定できないため、設定別移行回数として加点しません。",
       "sourceIds": [
         "re2-v21-even-game-tyrant-1",
-        "re2-v21-even-game-tyrant-2"
+        "re2-v21-even-game-tyrant-2",
+        "re2-v30-developer-observation"
       ],
-      "reevaluationCondition": "設定別の抽選値と正しい観測結果を区別できる資料が揃った場合に再評価します。"
+      "reevaluationCondition": "設定別の抽選値と正しい観測結果を区別できる資料が揃った場合に再評価します。",
+      "observationScopeAudit": {
+        "status": "UNRESOLVED_OBSERVATION_SCOPE",
+        "sourceIds": [
+          "re2-v30-developer-observation"
+        ],
+        "runtimeSettingLikelihood": "DISABLED",
+        "reason": "CZ失敗後の足音、または2回目以降かつリプレイ成立時の足音は高確濃厚。初回の足音は確定ではなく、これらの濃厚演出がないことを非移行と判定しない。30G高確の減算はCZ中停止する。"
+      }
     },
     {
       "blockId": "re2-v21-at-level-prologue-not-independent",
@@ -450,6 +559,15 @@
       "sourceIds": [
         "re2-v25-external-simulation-1"
       ]
+    },
+    {
+      "blockId": "re2-v30-developer-observation",
+      "label": "心音表示・足音の観測条件",
+      "sourceIds": [
+        "re2-v30-developer-observation"
+      ],
+      "reason": "開発者確認：昇格前兆中は表示色より内部心音が高い場合があり、武器獲得前兆・連続演出前兆中の心音昇格は告知されない場合がある。表示色別リプレイ回数を内部状態別試行母数として採用しない。 一部の足音法則が高確濃厚でも、非発生を陰性として全試行の当落を埋めない。",
+      "reevaluationCondition": "全試行の内部状態・抽選機会と当選経路を正確に観測できる方法を確認した場合。"
     }
   ],
   "researchCompleteness": {
@@ -461,9 +579,10 @@
         "status": "PARTIAL",
         "sourceIds": [
           "candidate",
-          "pworld-re2"
+          "pworld-re2",
+          "re2-v30-developer-observation"
         ],
-        "note": "設定1～6のAT初当たり公表値を照合。CZ経由・直撃とゲーム数の抽選対象区間を要検証。"
+        "note": "設定1～6のAT初当たり公表値を照合。CZ経由・直撃とゲーム数の抽選対象区間を要検証。 心音昇格前兆中はAT直撃→タイラントバトル（高確中）→GバトルCZ→心音昇格→ミッションの順に抽選し、上流当選後の抽選を行わない。通常ゲーム数の対象区間と同一ATへ至る経路を分離できるまで独立尤度にしない。"
       },
       {
         "domain": "EVIDENCE",
@@ -479,18 +598,20 @@
         "sourceIds": [
           "pworld-re2",
           "chonborista-re2",
-          "nana-re2-setting"
+          "nana-re2-setting",
+          "re2-v30-developer-observation"
         ],
-        "note": "リプレイ心音別CZ当選・成立役別AT直撃に加え、200/400/600/800Gでのタイラント高確移行率に設定差。高確の内部当落は足音演出だけから確定できない。"
+        "note": "リプレイ心音別CZ当選・成立役別AT直撃に加え、200/400/600/800Gでのタイラント高確移行率に設定差。高確の内部当落は足音演出だけから確定できない。 開発者確認：昇格前兆中は表示色より内部心音が高い場合があり、武器獲得前兆・連続演出前兆中の心音昇格は告知されない場合がある。表示色別リプレイ回数を内部状態別試行母数として採用しない。"
       },
       {
         "domain": "CZ",
         "status": "PARTIAL",
         "sourceIds": [
           "pworld-re2",
-          "chonborista-re2"
+          "chonborista-re2",
+          "re2-v30-developer-observation"
         ],
-        "note": "心音状態に応じたCZ当選率に設定差があるが、前兆中の内部昇格を正確に識別できず、記録用の数値推測には未採用。"
+        "note": "心音状態に応じたCZ当選率に設定差があるが、前兆中の内部昇格を正確に識別できず、記録用の数値推測には未採用。 開発者確認：昇格前兆中は表示色より内部心音が高い場合があり、武器獲得前兆・連続演出前兆中の心音昇格は告知されない場合がある。表示色別リプレイ回数を内部状態別試行母数として採用しない。"
       },
       {
         "domain": "SMALL_ROLE",
@@ -627,10 +748,11 @@
       {
         "domain": "POINTS_GAME_DISTRIBUTION",
         "status": "CHECKED",
-        "note": "200/400/600/800G到達時のタイラント高確移行抽選と30G間滞在を確認。設定別確率12.5/13.3/14.8/17.2/19.1/20.3%は公表されるが、足音が移行時25%・非移行時15%でも発生するため観測した足音を移行成功として数値採用不可。累積ポイントではなく到達ゲーム数を試行機会とする。",
+        "note": "200/400/600/800G到達時のタイラント高確移行抽選と30G間滞在を確認。設定別確率12.5/13.3/14.8/17.2/19.1/20.3%は公表されるが、足音が移行時25%・非移行時15%でも発生するため観測した足音を移行成功として数値採用不可。累積ポイントではなく到達ゲーム数を試行機会とする。 条件付き濃厚演出は一部の陽性確認に限られ、不発生を移行失敗と扱わない。CZ中は30G高確の減算停止。",
         "sourceIds": [
           "re2-v21-even-game-tyrant-1",
-          "re2-v21-even-game-tyrant-2"
+          "re2-v21-even-game-tyrant-2",
+          "re2-v30-developer-observation"
         ]
       },
       {
@@ -1022,6 +1144,21 @@
         "disposition": {
           "type": "BLOCKED",
           "refId": "re2-v25-external-simulation"
+        }
+      },
+      {
+        "candidateId": "block:re2-v30-developer-observation",
+        "label": "内部心音と抽選順の観測監査",
+        "sourceClaims": [
+          {
+            "sourceId": "re2-v30-developer-observation",
+            "claim": "開発者インタビューで心音表示の遅れ、昇格前兆中の抽選優先順、タイラント高確の条件付き濃厚演出とCZ中減算停止を確認"
+          }
+        ],
+        "discoveryQueries": [],
+        "disposition": {
+          "type": "BLOCKED",
+          "refId": "re2-v30-developer-observation"
         }
       }
     ],
