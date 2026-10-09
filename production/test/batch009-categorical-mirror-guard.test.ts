@@ -76,3 +76,18 @@ test('Reordering categories and deleting mirror metadata cannot bypass duplicate
   candidate(d,'reviewed-at-end').semanticCategories.reverse();
   assert.ok(categoricalEvidenceMirrorIssues(d).includes('UNDECLARED_CATEGORICAL_EVIDENCE_MIRROR:at-end-categorical'));
 });
+
+test('Reordering one setting row cannot hide an undeclared mirror',()=>{
+  const d=staged();
+  const numeric=candidate(d,'at-end-categorical');
+  delete numeric.mirrorsEvidenceFindingId;
+  delete numeric.numericRouteStatus;
+  numeric.settingDistribution['2']=numeric.settingDistribution['2'].split('/').reverse().join('/');
+  assert.ok(categoricalEvidenceMirrorIssues(d).includes('UNDECLARED_CATEGORICAL_EVIDENCE_MIRROR:at-end-categorical'));
+});
+
+test('Malformed categorical rows cannot bypass an explicit mirror category check',()=>{
+  const d=staged();
+  candidate(d,'at-end-categorical').settingDistribution['2']='invalid';
+  assert.ok(categoricalEvidenceMirrorIssues(d).includes('INVALID_CATEGORICAL_MIRROR_DISTRIBUTION:at-end-categorical'));
+});
