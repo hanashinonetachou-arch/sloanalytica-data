@@ -43,6 +43,13 @@ export function validateResearchCandidateLedger(d:any,sourceIds:Set<any>){
     if(ids!==undefined&&(!Array.isArray(ids)||ids.length===0||ids.some((id:any)=>!sourceIds.has(id)||!finding.sourceIds?.includes(id))))
       throw new Error('RESEARCH_VALIDATION:DEPENDENCY_SCOPE_PROVENANCE:'+finding.findingId);
   }
+  for(const block of d.blockedItems??[]){
+    for(const key of ['observationScopeAudit','referenceConditionalDistribution']){
+      const ids=block[key]?.sourceIds;
+      if(ids!==undefined&&(!Array.isArray(ids)||ids.length===0||ids.some((id:any)=>!sourceIds.has(id)||!block.sourceIds?.includes(id))))
+        throw new Error('RESEARCH_VALIDATION:BLOCK_REFERENCE_PROVENANCE:'+block.blockId+':'+key);
+    }
+  }
   const completeness=d.researchCompleteness;
   const ledger=completeness?.candidateLedger;
   if(!Array.isArray(ledger)||ledger.length===0) throw new Error('RESEARCH_VALIDATION:CANDIDATE_LEDGER_REQUIRED');

@@ -387,6 +387,16 @@
       "claims": [
         "エンディング中の18設定示唆トリックと、必ず出現する12種類・抽選で出現する8種類の示唆なしトリックを掲載。"
       ]
+    },
+    {
+      "sourceId": "green-v32-high-state-trial",
+      "url": "https://nana-press.com/kaiseki/machine/936/29342/",
+      "title": "通常時の高確昇格抽選と終了後状態",
+      "sourceType": "secondary_analysis",
+      "checkedAt": "2026-10-09",
+      "claims": [
+        "0.4/0.8%の高確移行率は通常→高確の成立役抽選。リプレイ・押し順ベルを除き、高確滞在中や設定変更・BIG/REG/XR終了後の移行とは試行母数が異なる"
+      ]
     }
   ],
   "findings": [
@@ -810,11 +820,56 @@
     {
       "blockId": "high-state-transition-observation",
       "label": "ハズレ・ベル・チャンス目での高確移行",
-      "reason": "通常時の特定役から高確へ移行する確率は設定1～4が0.4%、設定5・6が0.8%と公表されています。しかし高確移行が起きたかどうかを毎回画面から正確に判断できないため、回数での推測には採用しません。",
+      "reason": "通常時の特定役から高確へ移行する確率は設定1～4が0.4%、設定5・6が0.8%と公表されています。しかし高確移行が起きたかどうかを毎回画面から正確に判断できないため、回数での推測には採用しません。 対象は内部通常状態からの昇格であり、高確中の対象役や終了後の状態選択を試行母数に含めません。",
       "reevaluationCondition": "高確移行が起きたゲームと対象成立役を区別し、対象抽選回数と成功回数を確実に数えられるか検証します。",
       "sourceIds": [
-        "pachinavi-midori-high-state"
-      ]
+        "pachinavi-midori-high-state",
+        "green-v32-high-state-trial"
+      ],
+      "referenceConditionalDistribution": {
+        "status": "SETTING_STRATIFIED_REFERENCE_ONLY",
+        "trialUnit": "ELIGIBLE_ROLE_WHILE_INTERNAL_NORMAL",
+        "eligibleRoles": [
+          "ハズレ",
+          "ベル（押し順ベル以外）",
+          "弱波",
+          "強波",
+          "チャンス目"
+        ],
+        "percentBySetting": {
+          "1": 0.4,
+          "2": 0.4,
+          "3": 0.4,
+          "4": 0.4,
+          "5": 0.8,
+          "6": 0.8
+        },
+        "sourceIds": [
+          "green-v32-high-state-trial"
+        ],
+        "runtimeSettingLikelihood": "DISABLED"
+      },
+      "observationScopeAudit": {
+        "status": "UNRESOLVED_OBSERVATION_SCOPE",
+        "sourceIds": [
+          "green-v32-high-state-trial"
+        ],
+        "runtimeSettingLikelihood": "DISABLED",
+        "reason": "通常→高確の昇格試行は内部通常状態かつ対象役成立時に限定。ステージは示唆であり内部通常の全試行を特定できない。",
+        "excludedContexts": [
+          "ALREADY_HIGH_STATE",
+          "REPLAY",
+          "ORDERED_BELL",
+          "SETTING_CHANGE",
+          "BIG_END",
+          "REG_END",
+          "XR_CHALLENGE_END"
+        ],
+        "notDerivable": [
+          "総ゲーム数または対象役の全状態合計を0.4/0.8%の母数にしない",
+          "設定変更・BIG後の50%やREG/XR後の100%を成立役による昇格成功に加えない"
+        ]
+      }
     },
     {
       "blockId": "green-ceiling-not-setting-inference",
@@ -1029,9 +1084,10 @@
         "domain": "INTERNAL_CONDITIONAL_DRAW",
         "status": "PARTIAL",
         "sourceIds": [
-          "pachinavi-midori-high-state"
+          "pachinavi-midori-high-state",
+          "green-v32-high-state-trial"
         ],
-        "note": "ハズレ・ベル・チャンス目契機の設定別高確移行率を確認したが、内部抽選の成功を直接数えられるか未解決。"
+        "note": "ハズレ・ベル・チャンス目契機の設定別高確移行率を確認したが、内部抽選の成功を直接数えられるか未解決。 通常→高確の対象役抽選と変更/終了後の状態選択を区別。内部通常を全試行で判別できずPARTIAL維持。"
       },
       {
         "domain": "THRESHOLD_BEHAVIOR",
@@ -1745,6 +1801,21 @@
         "disposition": {
           "type": "BLOCKED",
           "refId": "green-v27-ending-context"
+        }
+      },
+      {
+        "candidateId": "block:green-v32-high-state-trial",
+        "label": "通常から高確への昇格試行",
+        "sourceClaims": [
+          {
+            "sourceId": "green-v32-high-state-trial",
+            "claim": "0.4/0.8%の高確移行率は通常→高確の成立役抽選。リプレイ・押し順ベルを除き、高確滞在中や設定変更・BIG/REG/XR終了後の移行とは試行母数が異なる"
+          }
+        ],
+        "discoveryQueries": [],
+        "disposition": {
+          "type": "BLOCKED",
+          "refId": "high-state-transition-observation"
         }
       }
     ],
