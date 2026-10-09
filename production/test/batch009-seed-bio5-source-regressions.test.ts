@@ -12,14 +12,14 @@ test('Gundam SEED records full CZ/ST hints including setting-neutral and suggest
  const d=read('L_GUNDAM_SEED_G');
  const f=d.findings.find((x:any)=>x.findingId==='reviewed-cz-st-end');
  assert.ok(f);
- assert.equal(f.semanticCategories.length,13);
+ assert.equal(f.semanticCategories.length,14);
  const rows=new Map<string,any>(f.semanticCategories.map((x:any)=>[x.label,x]));
- for(const label of ['枠色なし・通常','白枠・奇数設定示唆','白枠・偶数設定示唆','赤枠・高設定示唆（弱）','赤枠・高設定示唆（強）','紫枠・設定変更示唆','紫枠・偶数設定'])
+ for(const label of ['枠色なし・キャラなし（CZ）','白枠・アークエンジェル船員','白枠・ザフト軍パイロット','赤枠・ストライク＆味方集合','赤枠・アスラン＆キラ','紫枠・アスラン＆カガリ','紫枠・キラ＆ラクス'])
    assert.ok(rows.has(label),'missing '+label);
- assert.equal(rows.get('紫枠・設定変更示唆').semanticType,'DISPLAY_ONLY');
- assert.equal(rows.get('紫枠・偶数設定').semanticType,'EXACT_CONSTRAINT');
- assert.equal(classifyEvidenceCategory(rows.get('紫枠・偶数設定')),'EXACT_CONSTRAINT');
- assert.equal(rows.get('白枠・奇数設定示唆').semanticType,'PROBABILITY_UNKNOWN');
+ assert.equal(rows.get('紫枠・アスラン＆カガリ').semanticType,'DISPLAY_ONLY');
+ assert.equal(rows.get('紫枠・キラ＆ラクス').semanticType,'EXACT_CONSTRAINT');
+ assert.equal(classifyEvidenceCategory(rows.get('紫枠・キラ＆ラクス')),'EXACT_CONSTRAINT');
+ assert.equal(rows.get('白枠・アークエンジェル船員').semanticType,'PROBABILITY_UNKNOWN');
  for(const x of f.semanticCategories)assert.ok(x.label&&x.meaning&&x.semanticType);
 });
 test('Gundam SEED common roles and ceiling variants never become invented setting odds',()=>{

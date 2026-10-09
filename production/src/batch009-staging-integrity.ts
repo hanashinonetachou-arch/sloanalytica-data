@@ -64,6 +64,10 @@ export function auditBatch009Staging(working:any,reviewed:any,staged:any):string
     }
     if(JSON.stringify(f.semanticCategories)!==JSON.stringify(ev.semanticCategories))
       errors.push('STAGE_EVIDENCE_CATEGORY_DRIFT:'+ref);
+    // A correct category must still retain the reviewed event/operation scope.
+    if(typeof ev.observationCondition==='string'&&ev.observationCondition&&
+       !(f.details??[]).includes(ev.observationCondition))
+      errors.push('STAGE_EVIDENCE_OBSERVATION_CONDITION_DRIFT:'+ref);
     const urls=(f.sourceIds??[]).map((s:string)=>allUrls.get(s));
     if(urls.some((u:string|undefined)=>!u||!reviewSourceUrls.has(u)))
       errors.push('STAGE_EVIDENCE_UNREVIEWED_SOURCE:'+ref);
