@@ -10,11 +10,11 @@ const researchPath=path.resolve('batches','batch-20261008-009',
 const staged=()=>JSON.parse(fs.readFileSync(researchPath,'utf8'));
 const candidate=(d:any,id:string)=>d.findings.find((f:any)=>f.findingId===id);
 
-test('Sister Quest has two independently verified mirrored categorical outcomes, neither deployable',()=>{
+test('Sister Quest mirrors are linked while monster observation scope remains pending',()=>{
   const d=staged();
   const issues=categoricalEvidenceMirrorIssues(d);
-  assert.equal(issues.filter(x=>x.startsWith('MIRRORED_CATEGORICAL_EVIDENCE_NOT_RECONCILED:')).length,2);
-  assert.ok(issues.some(x=>x==='PENDING_CATEGORICAL_ROUTE:at-end-categorical'));
+  assert.equal(issues.filter(x=>x.startsWith('MIRRORED_CATEGORICAL_EVIDENCE_NOT_RECONCILED:')).length,0);
+  assert.ok(!issues.some(x=>x==='PENDING_CATEGORICAL_ROUTE:at-end-categorical'));
   assert.ok(issues.some(x=>x==='PENDING_CATEGORICAL_ROUTE:at-monster-categorical'));
 });
 

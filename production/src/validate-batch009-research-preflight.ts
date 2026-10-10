@@ -1,6 +1,7 @@
 /** Batch009 non-destructive research promotion gate. Run from production/. */
 import fs from 'node:fs';
 import path from 'node:path';
+import {categoricalEvidenceMirrorIssues} from './categorical-evidence-mirror.ts';
 import {validateCategoryRates} from './batch009-rate-matrix.ts';
 import {auditBatch009Staging} from './batch009-staging-integrity.ts';
 import {RESEARCH_COMPLETENESS_DOMAINS,validateResearchCandidateLedger,validateResearchLiveObservationContract,validateResearchUserFacingTextContract,validateResearchProbabilityRouteContract,validateResearchPromotionReadiness} from './research-validator.ts';
@@ -69,7 +70,7 @@ for(const [index,machineId] of machines.entries()){
       const expected=ev.categoryRates.categories.map((c:string,j:number)=>c+':'+ev.categoryRates.percentRows[i][j].toFixed(1)+'%').join('/');
       if(numeric.settingDistribution?.[setting]!==expected)errors.push('KNOWN_CATEGORY_RATE_DRIFT_'+expectedName+'_'+setting);
     }
-    if(mirrored)errors.push('KNOWN_CATEGORY_RATES_EVIDENCE_NUMERIC_DEDUP_PENDING_'+expectedName);
+    if(mirrored && categoricalEvidenceMirrorIssues(work).some(x=>x==='MIRRORED_CATEGORICAL_EVIDENCE_NOT_RECONCILED:'+numeric.findingId))errors.push('KNOWN_CATEGORY_RATES_EVIDENCE_NUMERIC_DEDUP_PENDING_'+expectedName);
   }
  }
  if(work.researchCompleteness?.evidenceSourceReview?.status==='STAGED_NOT_APPROVED')errors.push('EVIDENCE_NOT_APPROVED');

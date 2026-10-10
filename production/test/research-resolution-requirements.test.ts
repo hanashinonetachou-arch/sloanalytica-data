@@ -5,7 +5,7 @@ import path from 'node:path';
 import {buildResearchResolutionRequirements} from '../src/research-resolution-requirements.ts';
 
 const batch='batches/batch-20261008-009';
-const review=()=>JSON.parse(fs.readFileSync(path.join(batch,'research-resolution-review-v47-20261010.json'),'utf8')).rows;
+const review=()=>JSON.parse(fs.readFileSync(path.join(batch,'research-resolution-review-v48-20261010.json'),'utf8')).rows;
 const drafts=()=>{
  const audit=JSON.parse(fs.readFileSync(path.join(batch,'research-progress-audit-v42-20261009.json'),'utf8'));
  return audit.machineRows.map((m:any)=>{
@@ -18,15 +18,15 @@ test('Resolution review covers every remaining domain and numeric candidate with
  const d=drafts(),before=JSON.stringify(d);
  const result=buildResearchResolutionRequirements(d,review(),'v42');
  assert.equal(result.remainingDomains,36);
- assert.equal(result.unresolvedNumericCandidates,22);
- assert.equal(result.rows.length,58);
+ assert.equal(result.unresolvedNumericCandidates,21);
+ assert.equal(result.rows.length,57);
  assert.equal(JSON.stringify(d),before);
  assert.ok(result.rows.every(r=>r.resolutionStatus==='OPEN'&&r.approvalRequired===false));
  assert.deepEqual(result.machineOrder,d.map(x=>x.machineId));
  const internal=result.rows.find(r=>r.machineId==='S_BIOHAZARD_RE2_XB'&&r.refId==='CZ')!;
  assert.ok(internal.blockerKinds.includes('LATENT_STATE_NOT_IDENTIFIABLE'));
- const end=result.rows.find(r=>r.refId==='at-end-categorical')!;
- assert.deepEqual(end.blockerKinds,['OBSERVATION_RECONCILIATION_NOT_IMPLEMENTED']);
+ assert.ok(!result.rows.some(r=>r.refId==='at-end-categorical'));
+ const monster=result.rows.find(r=>r.refId==='at-monster-categorical')!;assert.ok(monster.requiredProof.length>0);
 });
 
 test('New pending candidate cannot silently disappear from the resolution work queue',()=>{

@@ -65,8 +65,19 @@ export function categoricalEvidenceMirrorIssues(research: any): string[] {
         if (!cats) errors.push('INVALID_CATEGORICAL_MIRROR_DISTRIBUTION:' + id);
         if (cats && !equalLabels(cats, labels(target)))
           errors.push('MIRROR_CATEGORY_MISMATCH:' + id);
-        // No independent numerical and exact-hint updates for the same input.
-        errors.push('MIRRORED_CATEGORICAL_EVIDENCE_NOT_RECONCILED:' + id);
+        // Runtime already resolves explicit category links into the numerical
+        // counter and reuses it for exact constraints. Require every reviewed
+        // category to link to this same finding; a status flag alone is insufficient.
+        const reconciliation = f.categoricalEvidenceReconciliation;
+        const allLinked = Array.isArray(target.semanticCategories)
+          && target.semanticCategories.length > 0
+          && target.semanticCategories.every((c: any) => c.linkedFindingId === id);
+        const reconciled = reconciliation?.type === 'SINGLE_CANONICAL_CATEGORY_INPUT'
+          && reconciliation.evidenceFindingId === mirrorId
+          && reconciliation.runtimeLinkContract === 'EXPLICIT_CATEGORY_LINK_V1'
+          && cats !== null && equalLabels(cats, labels(target)) && allLinked;
+        if (!reconciled)
+          errors.push('MIRRORED_CATEGORICAL_EVIDENCE_NOT_RECONCILED:' + id);
       }
     } else if (categorySet) {
       // Missing mirror links must not bypass the gate. Identical

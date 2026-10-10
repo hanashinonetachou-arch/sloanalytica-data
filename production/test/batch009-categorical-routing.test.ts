@@ -10,7 +10,7 @@ import {validateResearchPromotionReadiness} from '../src/research-validator.ts';
 const root=path.resolve('batches','batch-20261008-009');
 const read=(...p:string[])=>JSON.parse(fs.readFileSync(path.join(root,...p),'utf8'));
 
-test('Sister Quest AT-end 7-way numeric likelihood is source-identical but not prematurely live',()=>{
+test('Sister Quest AT-end rates remain source-identical after canonical input reconciliation',()=>{
   const src=read('research-evidence-reviewed','L_SISTER_QUEST_CA.json');
   const d=read('research-evidence-staged','wave-1','L_SISTER_QUEST_CA.json');
   assert.deepEqual(validateCategoryRates(src.categoryRates),[]);
@@ -19,7 +19,7 @@ test('Sister Quest AT-end 7-way numeric likelihood is source-identical but not p
   assert.equal(f.observationType,'appearance_distribution');
   assert.equal(f.categoryModel.residualPolicy,'SOURCE_EXHAUSTIVE');
   assert.equal(f.trialUniverse,'SISTER_AT_END_SCREEN');
-  assert.equal(f.numericRouteStatus,'PENDING_EVIDENCE_DEDUPLICATION');
+  assert.equal(f.numericRouteStatus,'CANONICAL_CATEGORY_INPUT_LINKED');
   for(const [i,setting] of src.categoryRates.settings.entries()){
     const expected=src.categoryRates.categories.map((cat:string,j:number)=>cat+':'+src.categoryRates.percentRows[i][j].toFixed(1)+'%').join('/');
     assert.equal(f.settingDistribution[setting],expected,'source rate mismatch for setting '+setting);
@@ -29,8 +29,8 @@ test('Sister Quest AT-end 7-way numeric likelihood is source-identical but not p
   assert.equal(row.model,'CATEGORICAL');
   assert.ok(row.metrics.perEligibleTrialPower>0);
   const decision=buildEligibility(e).decisions.find((x:any)=>x.findingId===f.findingId);
-  assert.equal(decision.eligibility,'UNRESOLVED');
-  assert.equal(decision.liveInferenceRoute,'NONE');
+  assert.equal(decision.eligibility,'ELIGIBLE');
+  assert.equal(decision.liveInferenceRoute,'LIVE_CONDITIONAL');
   const mirror=d.findings.find((x:any)=>x.findingId==='reviewed-at-end');
   assert.ok(mirror,'do not drop existing exact setting hints before the runtime is deduplicated');
   assert.deepEqual(mirror.semanticCategories,src.evidenceCandidates[0].semanticCategories);
