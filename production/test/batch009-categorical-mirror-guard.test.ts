@@ -91,3 +91,20 @@ test('Malformed categorical rows cannot bypass an explicit mirror category check
   candidate(d,'at-end-categorical').settingDistribution['2']='invalid';
   assert.ok(categoricalEvidenceMirrorIssues(d).includes('INVALID_CATEGORICAL_MIRROR_DISTRIBUTION:at-end-categorical'));
 });
+
+test('Deleting mirror metadata and corrupting a setting row cannot bypass the promotion guard',()=>{
+  const d=staged();
+  const numeric=candidate(d,'at-end-categorical');
+  delete numeric.mirrorsEvidenceFindingId;
+  delete numeric.numericRouteStatus;
+  numeric.settingDistribution['2']='invalid';
+  assert.ok(categoricalEvidenceMirrorIssues(d).includes('INVALID_CATEGORICAL_MIRROR_DISTRIBUTION:at-end-categorical'));
+});
+
+test('Legacy percentage suffix notation still identifies the same concrete observation',()=>{
+ const d={findings:[
+  {findingId:'numeric',observationType:'appearance_distribution',sourceIds:['a'],settingDistribution:{'1':'画面A 60% / 画面B 30% / 画面C 10%','2':'画面C 20% / 画面A 50% / 画面B 30%'}},
+  {findingId:'hint',observationType:'evidence',sourceIds:['b'],semanticCategories:[{label:'画面A'},{label:'画面B'},{label:'画面C'}]}
+ ]};
+ assert.ok(categoricalEvidenceMirrorIssues(d).includes('UNDECLARED_CATEGORICAL_EVIDENCE_MIRROR:numeric'));
+});

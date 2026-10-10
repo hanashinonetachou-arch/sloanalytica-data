@@ -29,9 +29,16 @@ export function categoricalEvidenceMirrorIssues(research: any): string[] {
       const tokens = (row as string).split('/');
       const parsed: string[] = [];
       for (const token of tokens) {
-        const match = token.match(/^(.+):(\d+(?:\.\d+)?)%$/);
+        // Research also retains the established "label 60%" notation.
+        // Parse both spellings without changing the concrete label identity.
+        const normalized = token.trim();
+        const match = normalized.includes(':')
+          ? normalized.match(/^(.+?)\s*:\s*(\d+(?:\.\d+)?)%$/)
+          : normalized.match(/^(.+?)\s*(\d+(?:\.\d+)?)%$/);
         if (!match) return null;
-        parsed.push(match[1]);
+        const label = match[1].trim();
+        if (!label || Number(match[2]) > 100) return null;
+        parsed.push(label);
       }
       if (new Set(parsed).size !== parsed.length) return null;
       if (canonical !== null && !(unordered ? equalCategorySets(canonical, parsed) : equalLabels(canonical, parsed))) return null;
@@ -45,6 +52,10 @@ export function categoricalEvidenceMirrorIssues(research: any): string[] {
     const cats = numericLabels(f);
     const categorySet = numericLabels(f, true);
     const mirrorId = f?.mirrorsEvidenceFindingId;
+    // Malformed or inconsistent rows must not suppress all mirror detection
+    // when the explicit link has also been removed.
+    if (!categorySet && !mirrorId)
+      errors.push('INVALID_CATEGORICAL_MIRROR_DISTRIBUTION:' + id);
     if (mirrorId) {
       const target = evidence.find(e => e.findingId === mirrorId);
       if (!target) errors.push('MIRROR_EVIDENCE_NOT_FOUND:' + id);
