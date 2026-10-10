@@ -1,0 +1,692 @@
+{
+  "schemaVersion": "candidate-contract-v1",
+  "manifestVersion": "8.5",
+  "batchId": "batch-20261010-010",
+  "machineId": "S_PERSONA5_FR",
+  "machineName": "パチスロペルソナ5",
+  "evaluationArtifact": {
+    "artifactId": "evaluation-S_PERSONA5_FR",
+    "kind": "evaluation",
+    "path": "production/batches/batch-20261010-010/artifacts/S_PERSONA5_FR/evaluation/result.json",
+    "sha256": "8ea37496aa7be07be80404e579bb6b89291400fff9a92f78ff591749bc513bb6",
+    "producerWorkId": "wrk_0a474d8196cd4dc5"
+  },
+  "eligibilityArtifact": {
+    "artifactId": "eligibility-S_PERSONA5_FR",
+    "kind": "eligibility",
+    "path": "production/batches/batch-20261010-010/artifacts/S_PERSONA5_FR/eligibility/result.json",
+    "sha256": "ece2306785a4f43803d335b1d32436d1d60a5310a37019b3230c175ce103fe75",
+    "producerWorkId": "wrk_d23f5668c40b4e05"
+  },
+  "candidates": [
+    {
+      "findingId": "at-initial",
+      "label": "AT初当たり",
+      "model": "BERNOULLI",
+      "trialUniverse": "NORMAL_GAME_TRIAL",
+      "liveInferenceRoute": "LIVE_CONDITIONAL",
+      "settingDistribution": {
+        "1": "1/338.8",
+        "2": "1/322.6",
+        "3": "1/321.1",
+        "4": "1/290",
+        "5": "1/289.7",
+        "6": "1/251.5"
+      },
+      "details": [
+        "通常時の初当たりを数えます。継続・AT中のPCや上乗せは含めません。明確な引き戻し区間がある場合は終了後の当選を数え、公表集計との一致は未確認として保持します。",
+        "PCとATは同じ経路を含むため、AT優先・未入力時のみPC＋AT合算を代用します。"
+      ],
+      "dependencyGroupId": "persona-role-pc-at",
+      "dependencyKind": "CAUSAL_PATH_OVERLAP",
+      "dependencyReason": "PCからATへ至る同じ当選系列。",
+      "dependencyFallbackRank": 1,
+      "runtimeInferenceAllowed": true,
+      "dependencyResolution": "PREFERRED_MEMBER",
+      "runtimePolicyBinding": {
+        "metric": "SELECTION_SCORE",
+        "value": 30.397858255618925,
+        "thresholdSource": "RUNTIME_POLICY"
+      },
+      "suppressedByFeatureIds": []
+    },
+    {
+      "findingId": "pc-at-initial",
+      "label": "PC＋AT初当たり合算",
+      "model": "BERNOULLI",
+      "trialUniverse": "NORMAL_GAME_TRIAL",
+      "liveInferenceRoute": "LIVE_CONDITIONAL",
+      "settingDistribution": {
+        "1": "1/127.5",
+        "2": "1/125.2",
+        "3": "1/122",
+        "4": "1/118.6",
+        "5": "1/116",
+        "6": "1/111"
+      },
+      "details": [
+        "通常時の初当たりを数えます。継続・AT中のPCや上乗せは含めません。明確な引き戻し区間がある場合は終了後の当選を数え、公表集計との一致は未確認として保持します。",
+        "PCとATは同じ経路を含むため、AT優先・未入力時のみPC＋AT合算を代用します。"
+      ],
+      "dependencyGroupId": "persona-role-pc-at",
+      "dependencyKind": "CAUSAL_PATH_OVERLAP",
+      "dependencyReason": "PCからATへ至る同じ当選系列。",
+      "dependencyFallbackRank": 2,
+      "runtimeInferenceAllowed": true,
+      "dependencyResolution": "FALLBACK_MEMBER",
+      "runtimePolicyBinding": {
+        "metric": "SELECTION_SCORE",
+        "value": 17.60632048041505,
+        "thresholdSource": "RUNTIME_POLICY"
+      },
+      "suppressedByFeatureIds": [
+        "at-initial"
+      ]
+    },
+    {
+      "findingId": "watermelon",
+      "label": "スイカ",
+      "model": "BERNOULLI",
+      "trialUniverse": "NORMAL_GAME_TRIAL",
+      "liveInferenceRoute": "LIVE_CONDITIONAL",
+      "settingDistribution": {
+        "1": "1/119.2",
+        "2": "1/117",
+        "3": "1/114.8",
+        "4": "1/112.8",
+        "5": "1/110.9",
+        "6": "1/108.9"
+      },
+      "details": [
+        "通常時のスイカを数え、同じ期間のゲーム数を入力。内部ボーナスの有無で掲載確率が変わらないため、隠れた内部状態を判定して分ける必要はありません。"
+      ],
+      "dependencyGroupId": "persona-role-pc-at",
+      "dependencyKind": "CAUSAL_PATH_OVERLAP",
+      "dependencyReason": "スイカがPCや高確を経てATへつながる経路との重複。",
+      "dependencyFallbackRank": 3,
+      "runtimeInferenceAllowed": true,
+      "dependencyResolution": "FALLBACK_MEMBER",
+      "runtimePolicyBinding": {
+        "metric": "SELECTION_SCORE",
+        "value": 8.216024544989175,
+        "thresholdSource": "RUNTIME_POLICY"
+      },
+      "suppressedByFeatureIds": [
+        "at-initial",
+        "pc-at-initial"
+      ]
+    },
+    {
+      "findingId": "pseudo-head",
+      "label": "疑似PCの頭図柄",
+      "model": "CATEGORICAL",
+      "trialUniverse": "PSEUDO_HEAD_TRIAL",
+      "liveInferenceRoute": "LIVE_CONDITIONAL",
+      "settingDistribution": {
+        "1": "赤頭:55%/黒頭:45%",
+        "2": "赤頭:45%/黒頭:55%",
+        "3": "赤頭:55%/黒頭:45%",
+        "4": "赤頭:45%/黒頭:55%",
+        "5": "赤頭:55%/黒頭:45%",
+        "6": "赤頭:45%/黒頭:55%"
+      },
+      "categoryModel": {
+        "residualPolicy": "SOURCE_EXHAUSTIVE"
+      },
+      "details": [
+        "自動で図柄が揃い、揃う時にリールが震える疑似PCだけを対象にします。目押ししないと開始しないリアルPCを混ぜず、赤同色・赤赤黒は赤頭、黒同色・黒黒赤は黒頭として1回記録。"
+      ],
+      "dependencyGroupId": "persona-role-pc-at",
+      "dependencyKind": "CAUSAL_PATH_OVERLAP",
+      "dependencyReason": "PC種別やAT当選経路と同じ系列の記録。",
+      "dependencyFallbackRank": 4,
+      "runtimeInferenceAllowed": true,
+      "dependencyResolution": "FALLBACK_MEMBER",
+      "runtimePolicyBinding": {
+        "metric": "PER_ELIGIBLE_TRIAL_POWER",
+        "value": 1.445109202438366,
+        "thresholdSource": "RUNTIME_POLICY"
+      },
+      "suppressedByFeatureIds": [
+        "at-initial",
+        "pc-at-initial",
+        "watermelon"
+      ]
+    },
+    {
+      "findingId": "reach-ab-color",
+      "label": "リーチ目A・BからのPC",
+      "model": "CATEGORICAL",
+      "trialUniverse": "REACH_AB_COLOR_TRIAL",
+      "liveInferenceRoute": "LIVE_CONDITIONAL",
+      "settingDistribution": {
+        "1": "同色:50%/異色:50%",
+        "2": "同色:50%/異色:50%",
+        "3": "同色:44.4%/異色:55.6%",
+        "4": "同色:44.4%/異色:55.6%",
+        "5": "同色:40%/異色:60%",
+        "6": "同色:36.4%/異色:63.6%"
+      },
+      "categoryModel": {
+        "residualPolicy": "SOURCE_EXHAUSTIVE"
+      },
+      "details": [
+        "ボーナス未成立時のリーチ目リプレイA・BからのPCだけを記録。掲載停止形とVフラッシュの有無で種類を区別できた分だけを対象とし、C・Dやボーナス成立後を含めません。"
+      ],
+      "dependencyGroupId": "persona-role-pc-at",
+      "dependencyKind": "CAUSAL_PATH_OVERLAP",
+      "dependencyReason": "PC種別やAT当選経路と同じ系列の記録。",
+      "dependencyFallbackRank": 5,
+      "runtimeInferenceAllowed": true,
+      "dependencyResolution": "FALLBACK_MEMBER",
+      "runtimePolicyBinding": {
+        "metric": "PER_ELIGIBLE_TRIAL_POWER",
+        "value": 1.4287030267335465,
+        "thresholdSource": "RUNTIME_POLICY"
+      },
+      "suppressedByFeatureIds": [
+        "at-initial",
+        "pc-at-initial",
+        "watermelon",
+        "pseudo-head"
+      ]
+    },
+    {
+      "findingId": "trophy-early",
+      "label": "トロフィー（当日5000G以内）",
+      "model": "CATEGORICAL",
+      "trialUniverse": "TROPHY_EARLY_TRIAL",
+      "liveInferenceRoute": "LIVE_CONDITIONAL",
+      "settingDistribution": {
+        "1": "表示なし:100%/銅:0%/銀:0%/金:0%/キリン柄:0%/レインボー:0%",
+        "2": "表示なし:94.5%/銅:5.5%/銀:0%/金:0%/キリン柄:0%/レインボー:0%",
+        "3": "表示なし:93.3%/銅:5.5%/銀:1.2%/金:0%/キリン柄:0%/レインボー:0%",
+        "4": "表示なし:92.7%/銅:5.5%/銀:1.2%/金:0.6%/キリン柄:0%/レインボー:0%",
+        "5": "表示なし:92.4%/銅:5.5%/銀:1.2%/金:0.6%/キリン柄:0.3%/レインボー:0%",
+        "6": "表示なし:92.3%/銅:5.5%/銀:1.2%/金:0.6%/キリン柄:0.3%/レインボー:0.1%"
+      },
+      "categoryModel": {
+        "residualPolicy": "SOURCE_EXHAUSTIVE"
+      },
+      "details": [
+        "当日5000G以内のAT終了時に1カテゴリだけ記録。当日の回転数は電源OFF・ONでもリセットされ、今回の着席後ゲーム数とは異なります。"
+      ],
+      "dependencyGroupId": "persona-trophy-game-stratum",
+      "dependencyKind": "MUTUALLY_EXCLUSIVE",
+      "dependencyReason": "当日のゲーム数により出現率が変わる別区間。",
+      "dependencyFallbackRank": 1,
+      "runtimeInferenceAllowed": true,
+      "dependencyResolution": "PREFERRED_MEMBER",
+      "runtimePolicyBinding": {
+        "metric": "PER_ELIGIBLE_TRIAL_POWER",
+        "value": 4.460082323603631,
+        "thresholdSource": "RUNTIME_POLICY"
+      },
+      "suppressedByFeatureIds": []
+    },
+    {
+      "findingId": "trophy-late",
+      "label": "トロフィー（当日5001G以降）",
+      "model": "CATEGORICAL",
+      "trialUniverse": "TROPHY_LATE_TRIAL",
+      "liveInferenceRoute": "LIVE_CONDITIONAL",
+      "settingDistribution": {
+        "1": "表示なし:100%/銅:0%/銀:0%/金:0%/キリン柄:0%/レインボー:0%",
+        "2": "表示なし:89%/銅:11%/銀:0%/金:0%/キリン柄:0%/レインボー:0%",
+        "3": "表示なし:86.5%/銅:11%/銀:2.5%/金:0%/キリン柄:0%/レインボー:0%",
+        "4": "表示なし:84.0%/銅:11%/銀:2.5%/金:2.5%/キリン柄:0%/レインボー:0%",
+        "5": "表示なし:81.5%/銅:11%/銀:2.5%/金:2.5%/キリン柄:2.5%/レインボー:0%",
+        "6": "表示なし:79.0%/銅:11%/銀:2.5%/金:2.5%/キリン柄:2.5%/レインボー:2.5%"
+      },
+      "categoryModel": {
+        "residualPolicy": "SOURCE_EXHAUSTIVE"
+      },
+      "details": [
+        "当日5001G以降のAT終了時に1カテゴリだけ記録。当日の回転数は電源OFF・ONでもリセットされ、今回の着席後ゲーム数とは異なります。"
+      ],
+      "dependencyGroupId": "persona-trophy-game-stratum",
+      "dependencyKind": "MUTUALLY_EXCLUSIVE",
+      "dependencyReason": "当日のゲーム数により出現率が変わる別区間。",
+      "dependencyFallbackRank": 2,
+      "runtimeInferenceAllowed": true,
+      "dependencyResolution": "FALLBACK_MEMBER",
+      "runtimePolicyBinding": {
+        "metric": "PER_ELIGIBLE_TRIAL_POWER",
+        "value": 14.816298965660657,
+        "thresholdSource": "RUNTIME_POLICY"
+      },
+      "suppressedByFeatureIds": [
+        "trophy-early"
+      ]
+    },
+    {
+      "findingId": "chance-eye-a",
+      "label": "スイカ外れチャンス目",
+      "model": "BERNOULLI",
+      "trialUniverse": "NORMAL_GAME_TRIAL",
+      "liveInferenceRoute": "LIVE_CONDITIONAL",
+      "settingDistribution": {
+        "1": "1/327.7",
+        "2": "1/327.7",
+        "3": "1/326",
+        "4": "1/326",
+        "5": "1/326",
+        "6": "1/324.4"
+      },
+      "details": [
+        "スイカ外れとベル外れを別に記録。判断できない停止形を推定して足しません。"
+      ],
+      "dependencyGroupId": "persona-role-pc-at",
+      "dependencyKind": "CAUSAL_PATH_OVERLAP",
+      "dependencyReason": "対象役からPC・ATへつながる当選系列。",
+      "dependencyFallbackRank": 6,
+      "runtimeInferenceAllowed": true,
+      "dependencyResolution": "FALLBACK_MEMBER",
+      "runtimePolicyBinding": {
+        "metric": "SELECTION_SCORE",
+        "value": 0.0379377752922822,
+        "thresholdSource": "RUNTIME_POLICY"
+      },
+      "suppressedByFeatureIds": [
+        "at-initial",
+        "pc-at-initial",
+        "watermelon",
+        "pseudo-head",
+        "reach-ab-color"
+      ]
+    },
+    {
+      "findingId": "chance-eye-b",
+      "label": "ベル外れチャンス目",
+      "model": "BERNOULLI",
+      "trialUniverse": "NORMAL_GAME_TRIAL",
+      "liveInferenceRoute": "LIVE_CONDITIONAL",
+      "settingDistribution": {
+        "1": "1/327.7",
+        "2": "1/327.7",
+        "3": "1/326",
+        "4": "1/326",
+        "5": "1/326",
+        "6": "1/324.4"
+      },
+      "details": [
+        "スイカ外れとベル外れを別に記録。判断できない停止形を推定して足しません。"
+      ],
+      "dependencyGroupId": "persona-role-pc-at",
+      "dependencyKind": "CAUSAL_PATH_OVERLAP",
+      "dependencyReason": "対象役からPC・ATへつながる当選系列。",
+      "dependencyFallbackRank": 7,
+      "runtimeInferenceAllowed": true,
+      "dependencyResolution": "FALLBACK_MEMBER",
+      "runtimePolicyBinding": {
+        "metric": "SELECTION_SCORE",
+        "value": 0.0379377752922822,
+        "thresholdSource": "RUNTIME_POLICY"
+      },
+      "suppressedByFeatureIds": [
+        "at-initial",
+        "pc-at-initial",
+        "watermelon",
+        "pseudo-head",
+        "reach-ab-color",
+        "chance-eye-a"
+      ]
+    }
+  ],
+  "dependencyGroups": [
+    {
+      "groupId": "persona-role-pc-at",
+      "resolution": "PREFERRED_WITH_FALLBACK",
+      "members": [
+        "at-initial",
+        "pc-at-initial",
+        "watermelon",
+        "pseudo-head",
+        "reach-ab-color",
+        "chance-eye-a",
+        "chance-eye-b"
+      ],
+      "runtimeInferenceAllowed": true,
+      "preferredFindingId": "at-initial",
+      "fallbackOrder": [
+        "at-initial",
+        "pc-at-initial",
+        "watermelon",
+        "pseudo-head",
+        "reach-ab-color",
+        "chance-eye-a",
+        "chance-eye-b"
+      ],
+      "reason": "依存関係がある候補を同時加算せず、観測できた優先Featureを使用し、未観測時だけ次順位のFeatureへ自動フォールバックする。",
+      "selectionRationale": "Researchで明示された優先順位に従い、同一セッションで重複情報を同時加算しない。"
+    },
+    {
+      "groupId": "persona-trophy-game-stratum",
+      "resolution": "PREFERRED_WITH_FALLBACK",
+      "members": [
+        "trophy-early",
+        "trophy-late"
+      ],
+      "runtimeInferenceAllowed": true,
+      "preferredFindingId": "trophy-early",
+      "fallbackOrder": [
+        "trophy-early",
+        "trophy-late"
+      ],
+      "reason": "依存関係がある候補を同時加算せず、観測できた優先Featureを使用し、未観測時だけ次順位のFeatureへ自動フォールバックする。",
+      "selectionRationale": "Researchで明示された優先順位に従い、同一セッションで重複情報を同時加算しない。"
+    }
+  ],
+  "excludedDecisions": [],
+  "blockedItems": [
+    {
+      "blockId": "weak-real-overlap",
+      "label": "弱チェリー・スイカのリアルボーナス重複",
+      "reason": "公表値は内部非ボーナス時または内部通常・高確時の試行が対象。各ゲームの内部状態を画面だけで全件分けられないため、総ゲーム数をそのまま母数にはしません。",
+      "reevaluationCondition": "対象の内部状態に属する全試行を実際に区別できる集計手順が公開された場合。",
+      "sourceIds": [
+        "nana-setting",
+        "nana-normal"
+      ],
+      "referenceConditionalDistribution": {
+        "publishedValues": {
+          "1": 16384,
+          "2": 16384,
+          "3": 13107.2,
+          "4": 13107.2,
+          "5": 13107.2,
+          "6": 10922.7
+        },
+        "runtimeSettingLikelihood": "DISABLED"
+      },
+      "observationScopeAudit": {
+        "status": "CLOSED_EXCLUDED",
+        "runtimeSettingLikelihood": "DISABLED"
+      }
+    },
+    {
+      "blockId": "at-direct-normal",
+      "label": "低確AT直撃",
+      "reason": "公表値は内部非ボーナス時または内部通常・高確時の試行が対象。各ゲームの内部状態を画面だけで全件分けられないため、総ゲーム数をそのまま母数にはしません。",
+      "reevaluationCondition": "対象の内部状態に属する全試行を実際に区別できる集計手順が公開された場合。",
+      "sourceIds": [
+        "nana-setting",
+        "nana-normal"
+      ],
+      "referenceConditionalDistribution": {
+        "publishedValues": {
+          "1": 65536,
+          "2": 32768,
+          "3": 32768,
+          "4": 10922.7,
+          "5": 5461.3,
+          "6": 4096
+        },
+        "runtimeSettingLikelihood": "DISABLED"
+      },
+      "observationScopeAudit": {
+        "status": "CLOSED_EXCLUDED",
+        "runtimeSettingLikelihood": "DISABLED"
+      }
+    },
+    {
+      "blockId": "at-direct-high",
+      "label": "高確・超高確AT直撃",
+      "reason": "公表値は内部非ボーナス時または内部通常・高確時の試行が対象。各ゲームの内部状態を画面だけで全件分けられないため、総ゲーム数をそのまま母数にはしません。",
+      "reevaluationCondition": "対象の内部状態に属する全試行を実際に区別できる集計手順が公開された場合。",
+      "sourceIds": [
+        "nana-setting",
+        "nana-normal"
+      ],
+      "referenceConditionalDistribution": {
+        "publishedValues": {
+          "1": 16384,
+          "2": 10922.7,
+          "3": 8192,
+          "4": 4096,
+          "5": 2730.7,
+          "6": 2048
+        },
+        "runtimeSettingLikelihood": "DISABLED"
+      },
+      "observationScopeAudit": {
+        "status": "CLOSED_EXCLUDED",
+        "runtimeSettingLikelihood": "DISABLED"
+      }
+    },
+    {
+      "blockId": "weak-high",
+      "label": "弱チェリーから高確",
+      "reason": "高確移行と高確ゲーム数の上乗せを同じ率で抽選。渋谷ステージは示唆であり、移行・上乗せの成功を各成立役で確定できないため数値から除外します。",
+      "reevaluationCondition": "対象役ごとの高確移行・上乗せ成功を直接確認できる告知が公開された場合。",
+      "sourceIds": [
+        "nana-setting",
+        "nana-normal"
+      ],
+      "referenceConditionalDistribution": {
+        "percentBySetting": {
+          "1": 30.1,
+          "2": 30.9,
+          "3": 31.6,
+          "4": 32.4,
+          "5": 33.2,
+          "6": 34
+        },
+        "runtimeSettingLikelihood": "DISABLED"
+      },
+      "observationScopeAudit": {
+        "status": "CLOSED_EXCLUDED",
+        "runtimeSettingLikelihood": "DISABLED"
+      }
+    },
+    {
+      "blockId": "water-high",
+      "label": "スイカから高確",
+      "reason": "高確移行と高確ゲーム数の上乗せを同じ率で抽選。渋谷ステージは示唆であり、移行・上乗せの成功を各成立役で確定できないため数値から除外します。",
+      "reevaluationCondition": "対象役ごとの高確移行・上乗せ成功を直接確認できる告知が公開された場合。",
+      "sourceIds": [
+        "nana-setting",
+        "nana-normal"
+      ],
+      "referenceConditionalDistribution": {
+        "percentBySetting": {
+          "1": 40.2,
+          "2": 41,
+          "3": 41.8,
+          "4": 42.6,
+          "5": 43.4,
+          "6": 44.1
+        },
+        "runtimeSettingLikelihood": "DISABLED"
+      },
+      "observationScopeAudit": {
+        "status": "CLOSED_EXCLUDED",
+        "runtimeSettingLikelihood": "DISABLED"
+      }
+    },
+    {
+      "blockId": "reset-loop",
+      "label": "変更後初回ATの75%ループ",
+      "reason": "追加抽選の当選を継続回数から直接判定できません。通常ループ、セットストックや上乗せでも継続するため、長く続いたことを当選回数へ置き換えません。",
+      "reevaluationCondition": "対象の追加抽選や移行の当選を、他契機と区別して直接確認できる公開手順が追加された場合。",
+      "sourceIds": [
+        "slopachi-followup"
+      ],
+      "referenceConditionalDistribution": {
+        "percentBySetting": {
+          "1": 1.6,
+          "2": 2.3,
+          "3": 10.9,
+          "4": 5.1,
+          "5": 11.7,
+          "6": 12.5
+        },
+        "runtimeSettingLikelihood": "DISABLED"
+      },
+      "observationScopeAudit": {
+        "status": "CLOSED_EXCLUDED",
+        "runtimeSettingLikelihood": "DISABLED"
+      }
+    },
+    {
+      "blockId": "ura-other",
+      "label": "その他役で裏モード移行",
+      "reason": "有利区間移行時の対象役と移行当否を全件識別できず、裏モード示唆だけで成功数と母数を復元しません。",
+      "reevaluationCondition": "対象の追加抽選や移行の当選を、他契機と区別して直接確認できる公開手順が追加された場合。",
+      "sourceIds": [
+        "slopachi-followup"
+      ],
+      "referenceConditionalDistribution": {
+        "percentBySetting": {
+          "1": 0.8,
+          "2": 0.8,
+          "3": 1.6,
+          "4": 1.2,
+          "5": 1.6,
+          "6": 2
+        },
+        "runtimeSettingLikelihood": "DISABLED"
+      },
+      "observationScopeAudit": {
+        "status": "CLOSED_EXCLUDED",
+        "runtimeSettingLikelihood": "DISABLED"
+      }
+    }
+  ],
+  "evidenceCandidates": [
+    {
+      "findingId": "pc-background",
+      "label": "PC終了画面",
+      "sourceIds": [
+        "nana-setting",
+        "nana-screen"
+      ],
+      "details": [
+        "赤・紫を見ただけでは設定確定になりません。復活がなく、次回PCでもATに入らなかった場合にだけ対応する確定カテゴリを記録します。"
+      ],
+      "semanticCategories": [
+        {
+          "label": "赤（復活なし・次回PCもAT非当選）",
+          "meaning": "設定2以上",
+          "semanticType": "EXACT_CONSTRAINT"
+        },
+        {
+          "label": "紫（復活なし・次回PCもAT非当選）",
+          "meaning": "設定4以上",
+          "semanticType": "EXACT_CONSTRAINT"
+        },
+        {
+          "label": "赤（追加条件未確認）",
+          "meaning": "PC天井まで残り1回または復活の示唆",
+          "semanticType": "DISPLAY_ONLY"
+        },
+        {
+          "label": "紫（追加条件未確認）",
+          "meaning": "PC天井まで残り1回または復活の示唆",
+          "semanticType": "DISPLAY_ONLY"
+        }
+      ]
+    },
+    {
+      "findingId": "trophy-early-evidence",
+      "label": "トロフィー（当日5000G以内）",
+      "sourceIds": [
+        "nana-setting",
+        "nana-trophy",
+        "slopachi-followup"
+      ],
+      "details": [
+        "当日5000G以内のAT終了時に1カテゴリだけ記録。当日の回転数は電源OFF・ONでもリセットされ、今回の着席後ゲーム数とは異なります。"
+      ],
+      "semanticCategories": [
+        {
+          "label": "表示なし",
+          "meaning": "基本パターン",
+          "semanticType": "DISPLAY_ONLY",
+          "linkedFindingId": "trophy-early"
+        },
+        {
+          "label": "銅",
+          "meaning": "設定2以上",
+          "semanticType": "EXACT_CONSTRAINT",
+          "linkedFindingId": "trophy-early"
+        },
+        {
+          "label": "銀",
+          "meaning": "設定3以上",
+          "semanticType": "EXACT_CONSTRAINT",
+          "linkedFindingId": "trophy-early"
+        },
+        {
+          "label": "金",
+          "meaning": "設定4以上",
+          "semanticType": "EXACT_CONSTRAINT",
+          "linkedFindingId": "trophy-early"
+        },
+        {
+          "label": "キリン柄",
+          "meaning": "設定5以上",
+          "semanticType": "EXACT_CONSTRAINT",
+          "linkedFindingId": "trophy-early"
+        },
+        {
+          "label": "レインボー",
+          "meaning": "設定6",
+          "semanticType": "EXACT_CONSTRAINT",
+          "linkedFindingId": "trophy-early"
+        }
+      ]
+    },
+    {
+      "findingId": "trophy-late-evidence",
+      "label": "トロフィー（当日5001G以降）",
+      "sourceIds": [
+        "nana-setting",
+        "nana-trophy",
+        "slopachi-followup"
+      ],
+      "details": [
+        "当日5001G以降のAT終了時に1カテゴリだけ記録。当日の回転数は電源OFF・ONでもリセットされ、今回の着席後ゲーム数とは異なります。"
+      ],
+      "semanticCategories": [
+        {
+          "label": "表示なし",
+          "meaning": "基本パターン",
+          "semanticType": "DISPLAY_ONLY",
+          "linkedFindingId": "trophy-late"
+        },
+        {
+          "label": "銅",
+          "meaning": "設定2以上",
+          "semanticType": "EXACT_CONSTRAINT",
+          "linkedFindingId": "trophy-late"
+        },
+        {
+          "label": "銀",
+          "meaning": "設定3以上",
+          "semanticType": "EXACT_CONSTRAINT",
+          "linkedFindingId": "trophy-late"
+        },
+        {
+          "label": "金",
+          "meaning": "設定4以上",
+          "semanticType": "EXACT_CONSTRAINT",
+          "linkedFindingId": "trophy-late"
+        },
+        {
+          "label": "キリン柄",
+          "meaning": "設定5以上",
+          "semanticType": "EXACT_CONSTRAINT",
+          "linkedFindingId": "trophy-late"
+        },
+        {
+          "label": "レインボー",
+          "meaning": "設定6",
+          "semanticType": "EXACT_CONSTRAINT",
+          "linkedFindingId": "trophy-late"
+        }
+      ]
+    }
+  ],
+  "sourceIntegrityIssues": []
+}

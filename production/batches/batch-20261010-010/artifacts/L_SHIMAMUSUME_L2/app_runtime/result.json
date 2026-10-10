@@ -1,0 +1,555 @@
+{
+  "schemaVersion": "app-runtime-v1",
+  "manifestVersion": "8.5",
+  "batchId": "batch-20261010-010",
+  "machineId": "L_SHIMAMUSUME_L2",
+  "machineName": "L島娘",
+  "sourceArtifact": {
+    "artifactId": "runtime-projection-L_SHIMAMUSUME_L2",
+    "kind": "runtime-projection",
+    "path": "production/batches/batch-20261010-010/artifacts/L_SHIMAMUSUME_L2/runtime_projection/result.json",
+    "sha256": "632ae53573ae2260000ebdc626b36276746eb7331d7b9fa0b47c479bf69591b8",
+    "producerWorkId": "wrk_dedee624154c4371"
+  },
+  "package": {
+    "schemaVersion": 1,
+    "provenance": {
+      "manifestVersion": "8.5",
+      "generationPath": "V8_5_PRODUCTION_PIPELINE",
+      "legacyOracleUsed": false
+    },
+    "machine": {
+      "schemaVersion": "2.0.0",
+      "machineId": "L_SHIMAMUSUME_L2",
+      "machineDataVersion": "8.5.1-batch-20261010-010",
+      "displayName": "L島娘",
+      "modelName": "L島娘",
+      "settings": [
+        "SET_1",
+        "SET_2",
+        "SET_3",
+        "SET_5",
+        "SET_6"
+      ],
+      "packagePolicy": {
+        "offlineCapable": true,
+        "containsImages": false,
+        "containsExecutableCode": false
+      }
+    },
+    "inputs": {
+      "schemaVersion": "2.0.0",
+      "inputs": [
+        {
+          "id": "bonus-initial.eligibleTrialCount",
+          "name": "連荘中を除くゲーム数",
+          "category": "V8_NUMERIC",
+          "type": "integer",
+          "unit": "G",
+          "defaultValue": 0,
+          "minimum": 0,
+          "displayOrder": 1,
+          "inferenceRole": "INCLUDE_SUPPORT"
+        },
+        {
+          "id": "bonus-initial.successCount",
+          "name": "ボーナス初当たり回数",
+          "category": "V8_NUMERIC",
+          "type": "counter",
+          "unit": "回",
+          "defaultValue": 0,
+          "minimum": 0,
+          "displayOrder": 2,
+          "parentInputId": "bonus-initial.eligibleTrialCount",
+          "inferenceRole": "INCLUDE_SUPPORT"
+        },
+        {
+          "id": "cherry-bonus.eligibleTrialCount",
+          "name": "チェリーからボーナス回数",
+          "category": "V8_NUMERIC",
+          "type": "integer",
+          "unit": "回",
+          "defaultValue": 0,
+          "minimum": 0,
+          "displayOrder": 3,
+          "inferenceRole": "INCLUDE_SUPPORT"
+        },
+        {
+          "id": "cherry-bonus.successCount",
+          "name": "チェリーからボーナス回数",
+          "category": "V8_NUMERIC",
+          "type": "counter",
+          "unit": "回",
+          "defaultValue": 0,
+          "minimum": 0,
+          "displayOrder": 4,
+          "parentInputId": "cherry-bonus.eligibleTrialCount",
+          "inferenceRole": "INCLUDE_SUPPORT"
+        }
+      ]
+    },
+    "features": {
+      "version": "8.5-runtime",
+      "features": [
+        {
+          "featureId": "bonus-initial",
+          "name": "ボーナス初当たり",
+          "trialUniverse": "NON_CHAIN_BONUS_INITIAL_GAME_TRIAL",
+          "adoptionCategory": "INCLUDE_SUPPORT",
+          "calculationRole": "PROBABILITY",
+          "probabilityEngineUsage": true,
+          "denominatorInputId": "bonus-initial.eligibleTrialCount",
+          "probabilities": {
+            "SET_1": 0.00506842372022301,
+            "SET_2": 0.005175983436853002,
+            "SET_3": 0.005521811154058531,
+            "SET_5": 0.00608272506082725,
+            "SET_6": 0.006527415143603134
+          },
+          "selectionRationale": {
+            "summary": "設定推測に採用された要素です。",
+            "adoptionReason": "採用条件を満たし、実戦で観測できる設定差を使用します。",
+            "shortTermReason": "標本が少ない間は結果の振れが大きくなります。",
+            "longTermReason": "観測数が増えるほど設定別の比較が安定します。"
+          },
+          "modelType": "binomial",
+          "numeratorInputId": "bonus-initial.successCount",
+          "displayFormat": "percentage"
+        },
+        {
+          "featureId": "cherry-bonus",
+          "name": "チェリーからボーナス",
+          "trialUniverse": "CHERRY_BONUS_TRIAL",
+          "adoptionCategory": "INCLUDE_SUPPORT",
+          "calculationRole": "PROBABILITY",
+          "probabilityEngineUsage": true,
+          "denominatorInputId": "cherry-bonus.eligibleTrialCount",
+          "suppressedByFeatureIds": [
+            "bonus-initial"
+          ],
+          "probabilities": {
+            "SET_1": 0.02,
+            "SET_2": 0.021,
+            "SET_3": 0.028999999999999998,
+            "SET_5": 0.031,
+            "SET_6": 0.037000000000000005
+          },
+          "selectionRationale": {
+            "summary": "設定推測に採用された要素です。",
+            "adoptionReason": "採用条件を満たし、実戦で観測できる設定差を使用します。",
+            "shortTermReason": "標本が少ない間は結果の振れが大きくなります。",
+            "longTermReason": "観測数が増えるほど設定別の比較が安定します。"
+          },
+          "modelType": "binomial",
+          "numeratorInputId": "cherry-bonus.successCount",
+          "displayFormat": "percentage"
+        }
+      ],
+      "runtimeProjection": [
+        {
+          "featureId": "bonus-initial",
+          "runtimeStatus": "ACTIVE",
+          "metric": "PER_ELIGIBLE_TRIAL_POWER",
+          "metricValue": 0.007758854151984629,
+          "importance": "微小"
+        },
+        {
+          "featureId": "cherry-bonus",
+          "runtimeStatus": "ACTIVE",
+          "metric": "PER_ELIGIBLE_TRIAL_POWER",
+          "metricValue": 0.2195606371138692,
+          "importance": "微小"
+        }
+      ]
+    },
+    "evidence": {
+      "version": "8.5-runtime",
+      "evidences": [],
+      "references": []
+    },
+    "blockedItems": [
+      {
+        "blockId": "direct-big",
+        "label": "BIG直撃",
+        "reason": "フリーズ・BIG準備経由のBIGと成立役不問の直撃抽選は別経路です。単に通常からBIGが揃った結果だけでは直撃当選を全件区別できません。",
+        "reevaluationCondition": "対象の全契機または全滞在区間を直接識別する新しい公開手順が得られた場合。",
+        "sourceIds": [
+          "source-1",
+          "source-2",
+          "mode"
+        ],
+        "referenceConditionalDistribution": {
+          "settings": [
+            1,
+            2,
+            3,
+            5,
+            6
+          ],
+          "publishedValues": {
+            "1": 16889.3,
+            "2": 14949.3,
+            "3": 10191.2,
+            "5": 8623,
+            "6": 7711.6
+          },
+          "runtimeSettingLikelihood": "DISABLED"
+        },
+        "observationScopeAudit": {
+          "status": "CLOSED_EXCLUDED",
+          "runtimeSettingLikelihood": "DISABLED"
+        }
+      },
+      {
+        "blockId": "big-prep",
+        "label": "REGスルー後のBIG準備",
+        "reason": "REG5・10スルーで選ばれた内部BIG準備モードの移行当否は直接表示されません。次のBIG結果を移行成功と断定しません。",
+        "reevaluationCondition": "対象の全契機または全滞在区間を直接識別する新しい公開手順が得られた場合。",
+        "sourceIds": [
+          "source-1",
+          "source-2",
+          "mode"
+        ],
+        "referenceConditionalDistribution": {
+          "settings": [
+            1,
+            2,
+            3,
+            5,
+            6
+          ],
+          "publishedValues": {
+            "0": [
+              0.4,
+              0.4,
+              0.4,
+              0.4,
+              0.4
+            ],
+            "5": [
+              10.2,
+              10.2,
+              11,
+              12.2,
+              12.5
+            ],
+            "10": [
+              10,
+              10.5,
+              11,
+              12.1,
+              24.7
+            ],
+            "15": [
+              100,
+              100,
+              100,
+              100,
+              100
+            ]
+          },
+          "runtimeSettingLikelihood": "DISABLED"
+        },
+        "observationScopeAudit": {
+          "status": "CLOSED_EXCLUDED",
+          "runtimeSettingLikelihood": "DISABLED"
+        }
+      },
+      {
+        "blockId": "mode-bonus",
+        "label": "内部モード別初当たり",
+        "reason": "入賞ラインや楽曲は一部のモード示唆であり、全Gの滞在モードを分けられません。内部モード別Gを推定して数値を混合しません。",
+        "reevaluationCondition": "対象の全契機または全滞在区間を直接識別する新しい公開手順が得られた場合。",
+        "sourceIds": [
+          "source-1",
+          "source-2",
+          "mode"
+        ],
+        "referenceConditionalDistribution": {
+          "settings": [
+            1,
+            2,
+            3,
+            5,
+            6
+          ],
+          "publishedValues": {
+            "通常": [
+              224.6,
+              221,
+              207.5,
+              187.1,
+              174.2
+            ],
+            "チャンス": [
+              74.9,
+              74.5,
+              74,
+              73.7,
+              73
+            ],
+            "高確": [
+              218.3,
+              212.6,
+              198,
+              178.1,
+              165
+            ],
+            "BIG準備": [
+              221.3,
+              217,
+              198.3,
+              176.3,
+              159.2
+            ]
+          },
+          "runtimeSettingLikelihood": "DISABLED"
+        },
+        "observationScopeAudit": {
+          "status": "CLOSED_EXCLUDED",
+          "runtimeSettingLikelihood": "DISABLED"
+        }
+      }
+    ],
+    "ui": {
+      "schemaVersion": "v8.5-runtime-ui-v1",
+      "contractVersion": "runtime-ui-v8",
+      "source": "CANONICAL_UI",
+      "sourceSchemaVersion": "canonical-ui-v1",
+      "manifestRevision": "8.5",
+      "playInfo": {
+        "visible": true,
+        "collapsible": false,
+        "mode": "TOTAL_ONLY",
+        "sessionFields": [
+          {
+            "id": "date",
+            "label": "日付",
+            "mode": "DATE"
+          },
+          {
+            "id": "storeName",
+            "label": "店舗名",
+            "mode": "TEXT"
+          },
+          {
+            "id": "machineNumber",
+            "label": "台番号",
+            "mode": "TEXT"
+          }
+        ],
+        "startFields": [
+          {
+            "id": "startTotalGames",
+            "label": "着席時 総ゲーム数",
+            "mode": "NUMBER",
+            "directNumeric": true
+          }
+        ],
+        "currentFields": [
+          {
+            "id": "currentTotalGames",
+            "label": "現在 総ゲーム数",
+            "mode": "NUMBER",
+            "directNumeric": true
+          }
+        ],
+        "difference": {
+          "autoCalculate": true
+        },
+        "useDifference": {
+          "label": "着席時との差分を使用",
+          "defaultWhenStartNormalGamesPresent": true
+        },
+        "exclusionGames": {
+          "visible": true,
+          "label": "除外ゲーム数",
+          "quickAdd": [
+            50
+          ],
+          "base": "TOTAL",
+          "resultLabel": "除外後の実戦ゲーム数",
+          "description": "連チャンゾーン中に消化したゲーム数を入力してください。総ゲーム数から差し引きます。ゾーン内の当選はすべて連チャンとして初当たりから除外します。"
+        }
+      },
+      "accordion": {
+        "enabled": true,
+        "singleOpen": true
+      },
+      "quickInput": {
+        "enabled": false
+      },
+      "v8Sections": [
+        {
+          "id": "OBS_bonus-initial",
+          "title": "ボーナス初当たり",
+          "collapsible": true,
+          "defaultExpanded": false,
+          "description": "対象となる機会のうち、ボーナス初当たりが実際に起きた割合を設定別に比較します。\n・注意：ボーナス後ときめきゾーンは5Gで6G目告知もあり、BIG連・花笠連終了後の引き戻しは32Gです。\n・注意：実際の連チャン区間と引き戻し区間のGを除外Gに記録し、総G−除外Gを母数にします。",
+          "descriptionPresentation": {
+            "collapsible": true,
+            "label": "説明",
+            "defaultExpanded": false
+          },
+          "items": [
+            {
+              "id": "NODE_bonus-initial",
+              "featureId": "bonus-initial",
+              "title": "ボーナス初当たり",
+              "inputs": [
+                {
+                  "id": "bonus-initial.eligibleTrialCount",
+                  "label": "連荘中を除くゲーム数",
+                  "input": "denominator",
+                  "inputId": "bonus-initial.eligibleTrialCount",
+                  "engineBinding": {
+                    "inputId": "bonus-initial.eligibleTrialCount"
+                  },
+                  "gridSpan": 12,
+                  "directNumeric": true,
+                  "quickAdd": [
+                    50
+                  ],
+                  "unobservedDisplay": "—",
+                  "playDataBinding": {
+                    "source": "PLAY_TOTAL_GAME_DELTA_EXCLUDED",
+                    "mode": "AUTO_EXACT"
+                  }
+                },
+                {
+                  "id": "bonus-initial.successCount",
+                  "label": "ボーナス初当たり回数",
+                  "input": "counter",
+                  "inputId": "bonus-initial.successCount",
+                  "engineBinding": {
+                    "inputId": "bonus-initial.successCount"
+                  },
+                  "gridSpan": 6,
+                  "directNumeric": true,
+                  "quickAdd": [
+                    1
+                  ],
+                  "unobservedDisplay": "—"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "OBS_cherry-bonus",
+          "title": "チェリーからボーナス",
+          "collapsible": true,
+          "defaultExpanded": false,
+          "description": "対象となる機会のうち、チェリーからボーナスが実際に起きた割合を設定別に比較します。\n・注意：通常時で引き戻しモード・連チャン区間は対象に含めません。\n・注意：チャンスチェリーは別役。",
+          "descriptionPresentation": {
+            "collapsible": true,
+            "label": "説明",
+            "defaultExpanded": false
+          },
+          "items": [
+            {
+              "id": "NODE_cherry-bonus",
+              "featureId": "cherry-bonus",
+              "title": "チェリーからボーナス",
+              "inputs": [
+                {
+                  "id": "cherry-bonus.eligibleTrialCount",
+                  "label": "チェリーからボーナス回数",
+                  "input": "denominator",
+                  "inputId": "cherry-bonus.eligibleTrialCount",
+                  "engineBinding": {
+                    "inputId": "cherry-bonus.eligibleTrialCount"
+                  },
+                  "gridSpan": 6,
+                  "directNumeric": true,
+                  "quickAdd": [],
+                  "unobservedDisplay": "—"
+                },
+                {
+                  "id": "cherry-bonus.successCount",
+                  "label": "チェリーからボーナス回数",
+                  "input": "counter",
+                  "inputId": "cherry-bonus.successCount",
+                  "engineBinding": {
+                    "inputId": "cherry-bonus.successCount"
+                  },
+                  "gridSpan": 6,
+                  "directNumeric": true,
+                  "quickAdd": [
+                    1
+                  ],
+                  "unobservedDisplay": "—"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    "metadata": {
+      "machineId": "L_SHIMAMUSUME_L2",
+      "displayName": "L島娘",
+      "settings": [
+        "SET_1",
+        "SET_2",
+        "SET_3",
+        "SET_5",
+        "SET_6"
+      ],
+      "settingsStatus": "SOURCE_DERIVED"
+    },
+    "v8": {
+      "machineResearchSummary": {
+        "title": "この機種の設定推測について",
+        "adopted": [
+          {
+            "featureId": "bonus-initial",
+            "label": "ボーナス初当たり",
+            "importance": "微小",
+            "evaluation": {
+              "userLabel": "1回の判別力",
+              "value": 0.007758854151984629
+            },
+            "reason": "現在の採用基準を満たしているため、設定推測に使用します。"
+          },
+          {
+            "featureId": "cherry-bonus",
+            "label": "チェリーからボーナス",
+            "importance": "微小",
+            "evaluation": {
+              "userLabel": "1回の判別力",
+              "value": 0.2195606371138692
+            },
+            "reason": "優先する設定推測項目を記録していない場合の補助として使用します。優先項目を記録した場合は、同じ設定差を重ねて評価しないよう自動で推測から外れます。"
+          }
+        ],
+        "notAdopted": [
+          {
+            "featureId": "direct-big",
+            "label": "BIG直撃",
+            "reason": "フリーズ・BIG準備経由のBIGと成立役不問の直撃抽選は別経路です。単に通常からBIGが揃った結果だけでは直撃当選を全件区別できません。",
+            "reevaluationCondition": "対象の全契機または全滞在区間を直接識別する新しい公開手順が得られた場合。"
+          },
+          {
+            "featureId": "big-prep",
+            "label": "REGスルー後のBIG準備",
+            "reason": "REG5・10スルーで選ばれた内部BIG準備モードの移行当否は直接表示されません。次のBIG結果を移行成功と断定しません。",
+            "reevaluationCondition": "対象の全契機または全滞在区間を直接識別する新しい公開手順が得られた場合。"
+          },
+          {
+            "featureId": "mode-bonus",
+            "label": "内部モード別初当たり",
+            "reason": "入賞ラインや楽曲は一部のモード示唆であり、全Gの滞在モードを分けられません。内部モード別Gを推定して数値を混合しません。",
+            "reevaluationCondition": "対象の全契機または全滞在区間を直接識別する新しい公開手順が得られた場合。"
+          }
+        ],
+        "unresolved": [
+          {
+            "label": "高低判別精度",
+            "reason": "基準ゲーム数へ正確に換算できる設定推測要素がないため、高低判別精度を算出していません。"
+          }
+        ]
+      }
+    }
+  }
+}

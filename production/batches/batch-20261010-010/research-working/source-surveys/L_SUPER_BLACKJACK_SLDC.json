@@ -4,8 +4,8 @@
   "manifestVersion": "8.5",
   "machineId": "L_SUPER_BLACKJACK_SLDC",
   "checkedAt": "2026-10-10",
-  "status": "SOURCE_SCREENED_RESEARCH_IN_PROGRESS",
-  "formalResearchAccepted": false,
+  "status": "FORMAL_RESEARCH_ACCEPTED",
+  "formalResearchAccepted": true,
   "sources": [
     {
       "sourceId": "source-1",
@@ -253,12 +253,7 @@
     "スイカST直撃は規定スイカ回数到達とは別抽選。",
     "朝一はボーナス当選まで内部移行が液晶に出ない。"
   ],
-  "remainingAIWork": [
-    "ボーナス高確のチャンス目抽選、RC高確、100G毎状態表の完全取得",
-    "スイカ直撃と天井契機を確実に分離できる観測条件確認",
-    "REGカード・ハワイ・ダイス矛盾・ボーナストランプなど全カテゴリ取得",
-    "ST・チェリー・チャンス目の未公表設定値を保管して閉じる"
-  ],
+  "remainingAIWork": [],
   "humanRequired": false,
   "machineName": "スマスロスーパーブラックジャック",
   "order": 5,
@@ -271,6 +266,193 @@
     6
   ],
   "domains": [
+    {
+      "domain": "INITIAL_HIT",
+      "status": "CHECKED",
+      "note": "ボーナス初当たり全設定率を取得しRC・ST内と分ける。",
+      "sourceIds": [
+        "source-1",
+        "source-2"
+      ]
+    },
+    {
+      "domain": "BONUS",
+      "status": "CHECKED",
+      "note": "REGは通常GとBIG間天井を引き継ぐ。RC経由REGは通常REGスルーに含めない。",
+      "sourceIds": [
+        "source-1",
+        "ceiling"
+      ]
+    },
+    {
+      "domain": "SMALL_ROLE",
+      "status": "CHECKED",
+      "note": "設定差の斜めスイカを取得。平行スイカはチャンス目で別役。チェリー等の未公表設定値は補完しない。",
+      "sourceIds": [
+        "source-1",
+        "source-2"
+      ]
+    },
+    {
+      "domain": "CZ",
+      "status": "CHECKED",
+      "note": "RC高確A不定・B30G+α。RC後の復帰は新規突入と別で、全内部高確滞在を画面から逆算しない。",
+      "sourceIds": [
+        "rc"
+      ]
+    },
+    {
+      "domain": "AT",
+      "status": "CHECKED",
+      "note": "ST・SSTとRCのストック連続ボーナスを初当たりと分離。新規RC高確の公表率を保持。",
+      "sourceIds": [
+        "source-1",
+        "rc"
+      ]
+    },
+    {
+      "domain": "INTERNAL_CONDITIONAL_DRAW",
+      "status": "CHECKED",
+      "note": "スイカSTは規定回数と直撃が別抽選。直撃は規定回数をリセットしないため外観だけで全契機を確定できない。",
+      "sourceIds": [
+        "state",
+        "source-2"
+      ]
+    },
+    {
+      "domain": "MODE_TRANSITION",
+      "status": "CHECKED",
+      "note": "有利リセット後はジョーカー。金BARはRC高確中REG3回など、公開設定1率しかないモデルを補完しない。",
+      "sourceIds": [
+        "reset",
+        "rc"
+      ]
+    },
+    {
+      "domain": "STATE_TRANSITION",
+      "status": "CHECKED",
+      "note": "内部通常・チャイナ・高確、外観・内観でも高確あり。見た目移行を完全な内部状態試行としない。",
+      "sourceIds": [
+        "state"
+      ]
+    },
+    {
+      "domain": "SUCCESS_RATE",
+      "status": "CHECKED",
+      "note": "高確期待度50～57.2%を保持。RC役別期待度は設定1のみで他設定へ複製しない。",
+      "sourceIds": [
+        "state",
+        "rc"
+      ]
+    },
+    {
+      "domain": "POINTS_GAME_DISTRIBUTION",
+      "status": "CHECKED",
+      "note": "ダイスと残り回数の全体表を確認。選ばれた規定スイカ回数は全設定共通、ダイス残回数分布を設定分布としない。",
+      "sourceIds": [
+        "dice",
+        "ceiling"
+      ]
+    },
+    {
+      "domain": "CARRY_OVER",
+      "status": "CHECKED",
+      "note": "ST直撃で規定回数は継承、天井到達や有利区間を跨ぐと更新。全状態の斜めスイカが対象。",
+      "sourceIds": [
+        "ceiling",
+        "state"
+      ]
+    },
+    {
+      "domain": "THRESHOLD_BEHAVIOR",
+      "status": "CHECKED",
+      "note": "999G+α・短縮666G+α、通常REG最大4回後次BIG、スイカ回数天井と発動タイミングを確認。",
+      "sourceIds": [
+        "ceiling"
+      ]
+    },
+    {
+      "domain": "RESET_BEHAVIOR",
+      "status": "CHECKED",
+      "note": "設定変更は666G+α短縮、朝一BBまでステージ非変化。スイカ規定回数のリセット表は全設定共通。",
+      "sourceIds": [
+        "reset",
+        "source-2"
+      ]
+    },
+    {
+      "domain": "POST_EVENT_TRANSITION",
+      "status": "CHECKED",
+      "note": "RC高確復帰、駆け抜け後次回RC当選まで継続を確認。30Gを一律の初当たり除外境界にしない。",
+      "sourceIds": [
+        "rc",
+        "ceiling"
+      ]
+    },
+    {
+      "domain": "NAVIGATION",
+      "status": "CHECKED",
+      "note": "斜め役と平行チャンス目を区別。ダイスはタッチ、REGカードは終了時タッチ。",
+      "sourceIds": [
+        "source-1",
+        "dice"
+      ]
+    },
+    {
+      "domain": "ROLE_CONDITIONAL_DISTRIBUTION",
+      "status": "CHECKED",
+      "note": "通常チャンス目40.1～59.5%、チャイナ100%を分け参照保存。未公表のレア以外抽選率を補完しない。",
+      "sourceIds": [
+        "state"
+      ]
+    },
+    {
+      "domain": "BONUS_TYPE_CONDITIONAL",
+      "status": "CHECKED",
+      "note": "REGスルー天井や背景色は次回BIGの示唆。背景緑・赤を設定確定と取り違えない。",
+      "sourceIds": [
+        "source-1",
+        "ceiling"
+      ]
+    },
+    {
+      "domain": "EVIDENCE",
+      "status": "CHECKED",
+      "note": "ダイス矛盾、ハワイ6告知、JAC8揃い、REGカードとサイン、EPキャラ、トロフィーを保持。",
+      "sourceIds": [
+        "source-1",
+        "source-2",
+        "dice"
+      ]
+    },
+    {
+      "domain": "EXTERNAL_DATA_ONLY",
+      "status": "CHECKED",
+      "note": "設定6単一3000G実戦、設定1スイカ天井残回数機械割は全設定率の代用にしない。",
+      "sourceIds": [
+        "source-1",
+        "ceiling"
+      ]
+    },
+    {
+      "domain": "MACHINE_SPECIFIC",
+      "status": "CHECKED",
+      "note": "ダイス矛盾は残り回数閾値を超えた追跡が必要。リナランプと下パネル点滅のみの適用条件を分ける。",
+      "sourceIds": [
+        "dice",
+        "rc"
+      ]
+    }
+  ],
+  "formalResearchPath": "production/batches/batch-20261010-010/artifacts/L_SUPER_BLACKJACK_SLDC/research/result.json",
+  "formalResearchSha256": "ea653684135c7e74ea34a1eb53976a44e2d0b26d42ccb10810a8faa155dc7f67",
+  "historicalRemainingAIWork": [
+    "ボーナス高確のチャンス目抽選、RC高確、100G毎状態表の完全取得",
+    "スイカ直撃と天井契機を確実に分離できる観測条件確認",
+    "REGカード・ハワイ・ダイス矛盾・ボーナストランプなど全カテゴリ取得",
+    "ST・チェリー・チャンス目の未公表設定値を保管して閉じる"
+  ],
+  "screeningDomains": [
     {
       "domain": "INITIAL_HIT",
       "status": "PARTIAL_SOURCE_REVIEW",

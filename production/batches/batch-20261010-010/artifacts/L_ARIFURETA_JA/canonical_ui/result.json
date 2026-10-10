@@ -1,0 +1,1291 @@
+{
+  "schemaVersion": "canonical-ui-v1",
+  "manifestVersion": "8.5",
+  "batchId": "batch-20261010-010",
+  "machineId": "L_ARIFURETA_JA",
+  "machineName": "Lパチスロ ありふれた職業で世界最強",
+  "sourceArtifacts": {
+    "candidateContract": {
+      "artifactId": "candidate-contract-L_ARIFURETA_JA",
+      "kind": "candidate-contract",
+      "path": "production/batches/batch-20261010-010/artifacts/L_ARIFURETA_JA/candidate_contract/result.json",
+      "sha256": "26c665ff0c7ca75b3b3625e1ac32341a9156bea271c58617efd4a98f3e220e18",
+      "producerWorkId": "wrk_fcd86b7ced334a40"
+    },
+    "observationEvidence": {
+      "artifactId": "observation-evidence-L_ARIFURETA_JA",
+      "kind": "observation-evidence",
+      "path": "production/batches/batch-20261010-010/artifacts/L_ARIFURETA_JA/observation_evidence/result.json",
+      "sha256": "6af17923d62e21ba2aa5a4b70e80acd4c74657edc33b069ba0a059e98024c3d4",
+      "producerWorkId": "wrk_d1254da606034dda"
+    },
+    "evaluation": {
+      "artifactId": "evaluation-L_ARIFURETA_JA",
+      "kind": "evaluation",
+      "path": "production/batches/batch-20261010-010/artifacts/L_ARIFURETA_JA/evaluation/result.json",
+      "sha256": "cc2a3ace7a44090bd81943b0254cfdf8fe3f36a29c3b6fa74ac77f1dd9f17206",
+      "producerWorkId": "wrk_15a017732f8145ae"
+    }
+  },
+  "machineInferenceSummary": {
+    "title": "この機種の設定推測について",
+    "position": "TOP_ONLY",
+    "highLowDiscrimination": {
+      "status": "COMPUTED",
+      "method": "BEST_SINGLE_EXACT_ACTIVE_FEATURE",
+      "bandDefinition": {
+        "lowSettings": "SETTING_1_TO_3",
+        "highSettings": "SETTING_4_TO_6",
+        "classPrior": "BALANCED"
+      },
+      "results": [
+        {
+          "games": 1500,
+          "balancedAccuracyPercent": 60.3
+        },
+        {
+          "games": 3000,
+          "balancedAccuracyPercent": 64.07
+        },
+        {
+          "games": 7000,
+          "balancedAccuracyPercent": 70.54
+        }
+      ],
+      "eligibleFeatureIds": [
+        "at-initial",
+        "initial-combined",
+        "myu-initial",
+        "at-upper"
+      ],
+      "selectedFeatureId": "at-initial",
+      "selectedFeatureLabel": "AT初当たり",
+      "excludedFeatures": [
+        {
+          "findingId": "initial-combined",
+          "reason": "CONSERVATIVE_SINGLE_FEATURE_NO_INDEPENDENCE_ASSUMPTION"
+        },
+        {
+          "findingId": "myu-initial",
+          "reason": "CONSERVATIVE_SINGLE_FEATURE_NO_INDEPENDENCE_ASSUMPTION"
+        },
+        {
+          "findingId": "at-upper",
+          "reason": "CONSERVATIVE_SINGLE_FEATURE_NO_INDEPENDENCE_ASSUMPTION"
+        },
+        {
+          "findingId": "awakening",
+          "reason": "BENCHMARK_EXPOSURE_UNRESOLVED"
+        },
+        {
+          "findingId": "myu-scenario",
+          "reason": "BENCHMARK_EXPOSURE_UNRESOLVED"
+        },
+        {
+          "findingId": "at-screen-middle",
+          "reason": "BENCHMARK_EXPOSURE_UNRESOLVED"
+        },
+        {
+          "findingId": "at-screen-late",
+          "reason": "BENCHMARK_EXPOSURE_UNRESOLVED"
+        },
+        {
+          "findingId": "cz-100-success",
+          "reason": "BENCHMARK_EXPOSURE_UNRESOLVED"
+        }
+      ],
+      "note": "7000Gへ正確に換算できるACTIVE要素だけを候補とし、要素間の独立性を仮定せず、単独で最も高い判別精度を持つ要素から保守的に算出しています。条件付き要素はこの指標には含めませんが、実戦中に実際の観測回数が入力された場合は設定推測に使用します。"
+    }
+  },
+  "playInfo": {
+    "visible": true,
+    "collapsible": false,
+    "mode": "NORMAL_ONLY",
+    "sessionFields": [
+      {
+        "id": "date",
+        "label": "日付",
+        "mode": "DATE"
+      },
+      {
+        "id": "storeName",
+        "label": "店舗名",
+        "mode": "TEXT"
+      },
+      {
+        "id": "machineNumber",
+        "label": "台番号",
+        "mode": "TEXT"
+      }
+    ],
+    "startFields": [
+      {
+        "id": "startNormalGames",
+        "label": "着席時 通常ゲーム数",
+        "mode": "NUMBER",
+        "directNumeric": true
+      }
+    ],
+    "currentFields": [
+      {
+        "id": "currentNormalGames",
+        "label": "現在 通常ゲーム数",
+        "mode": "NUMBER",
+        "directNumeric": true
+      }
+    ],
+    "difference": {
+      "autoCalculate": true
+    },
+    "useDifference": {
+      "label": "着席時との差分を使用",
+      "defaultWhenStartNormalGamesPresent": true
+    }
+  },
+  "accordion": {
+    "enabled": true,
+    "singleOpen": true
+  },
+  "numericSections": [
+    {
+      "id": "OBS_at-initial",
+      "sourceFindingId": "at-initial",
+      "title": "AT初当たり",
+      "kind": "NUMERIC_OBSERVATION",
+      "model": "BERNOULLI",
+      "trialUniverse": "NORMAL_GAME_TRIAL",
+      "description": "通常時のAT初当たりを記録します。通常ゲーム数を基準に、実戦中の出現割合を設定別に比較します。\n・注意：上位AT・エンディング後の4G覚醒チャレンジ内の引き戻しは初当たりに含めず、除外ゲーム数に記録します。\n・注意：総ゲーム数−除外ゲーム数を母数とし、公表集計との完全一致は未確認として保持します。",
+      "collapsible": true,
+      "defaultExpanded": false,
+      "descriptionPresentation": {
+        "collapsible": true,
+        "label": "説明",
+        "defaultExpanded": false
+      },
+      "score": {
+        "label": "設定判別スコア",
+        "status": "COMPUTED",
+        "value": 48.8,
+        "precision": 1,
+        "importance": "主要"
+      },
+      "perEligibleTrialPower": {
+        "label": "1回の判別力",
+        "value": 48.80015013643917,
+        "metric": "PER_ELIGIBLE_TRIAL_POWER",
+        "thresholdSource": "RUNTIME_POLICY"
+      },
+      "inputs": [
+        {
+          "id": "at-initial.eligibleTrialCount",
+          "label": "通常ゲーム数",
+          "role": "trial",
+          "mode": "NUMBER",
+          "directNumeric": true,
+          "quickAdd": [
+            50
+          ],
+          "partialInputAllowed": true,
+          "emptyMeansUnobserved": true
+        },
+        {
+          "id": "at-initial.successCount",
+          "label": "AT初当たり回数",
+          "role": "success",
+          "mode": "NUMBER",
+          "directNumeric": true,
+          "quickAdd": [
+            1
+          ],
+          "partialInputAllowed": true,
+          "emptyMeansUnobserved": true,
+          "missingSubItemTreatment": "ZERO_WHEN_PARENT_OBSERVED"
+        }
+      ]
+    },
+    {
+      "id": "OBS_initial-combined",
+      "sourceFindingId": "initial-combined",
+      "title": "ミュウボーナス＋AT初当たり合算",
+      "kind": "NUMERIC_OBSERVATION",
+      "model": "BERNOULLI",
+      "trialUniverse": "NORMAL_GAME_TRIAL",
+      "description": "通常時のミュウボーナス＋AT初当たり合算を記録します。通常ゲーム数を基準に、実戦中の出現割合を設定別に比較します。\n・注意：上位AT・エンディング後の4G覚醒チャレンジ内の引き戻しは初当たりに含めず、除外ゲーム数に記録します。\n・注意：総ゲーム数−除外ゲーム数を母数とし、公表集計との完全一致は未確認として保持します。",
+      "collapsible": true,
+      "defaultExpanded": false,
+      "descriptionPresentation": {
+        "collapsible": true,
+        "label": "説明",
+        "defaultExpanded": false
+      },
+      "score": {
+        "label": "設定判別スコア",
+        "status": "COMPUTED",
+        "value": 30.2,
+        "precision": 1,
+        "importance": "主要"
+      },
+      "perEligibleTrialPower": {
+        "label": "1回の判別力",
+        "value": 30.2414612447878,
+        "metric": "PER_ELIGIBLE_TRIAL_POWER",
+        "thresholdSource": "RUNTIME_POLICY"
+      },
+      "inputs": [
+        {
+          "id": "initial-combined.eligibleTrialCount",
+          "label": "通常ゲーム数",
+          "role": "trial",
+          "mode": "NUMBER",
+          "directNumeric": true,
+          "quickAdd": [
+            50
+          ],
+          "partialInputAllowed": true,
+          "emptyMeansUnobserved": true
+        },
+        {
+          "id": "initial-combined.successCount",
+          "label": "ミュウボーナス＋AT初当たり合算回数",
+          "role": "success",
+          "mode": "NUMBER",
+          "directNumeric": true,
+          "quickAdd": [
+            1
+          ],
+          "partialInputAllowed": true,
+          "emptyMeansUnobserved": true,
+          "missingSubItemTreatment": "ZERO_WHEN_PARENT_OBSERVED"
+        }
+      ]
+    },
+    {
+      "id": "OBS_myu-initial",
+      "sourceFindingId": "myu-initial",
+      "title": "ミュウボーナス初当たり",
+      "kind": "NUMERIC_OBSERVATION",
+      "model": "BERNOULLI",
+      "trialUniverse": "NORMAL_GAME_TRIAL",
+      "description": "通常時のミュウボーナス初当たりを記録します。通常ゲーム数を基準に、実戦中の出現割合を設定別に比較します。\n・注意：上位AT・エンディング後の4G覚醒チャレンジ内の引き戻しは初当たりに含めず、除外ゲーム数に記録します。\n・注意：総ゲーム数−除外ゲーム数を母数とし、公表集計との完全一致は未確認として保持します。",
+      "collapsible": true,
+      "defaultExpanded": false,
+      "descriptionPresentation": {
+        "collapsible": true,
+        "label": "説明",
+        "defaultExpanded": false
+      },
+      "score": {
+        "label": "設定判別スコア",
+        "status": "COMPUTED",
+        "value": 11.8,
+        "precision": 1,
+        "importance": "有力"
+      },
+      "perEligibleTrialPower": {
+        "label": "1回の判別力",
+        "value": 11.782232128634714,
+        "metric": "PER_ELIGIBLE_TRIAL_POWER",
+        "thresholdSource": "RUNTIME_POLICY"
+      },
+      "inputs": [
+        {
+          "id": "myu-initial.eligibleTrialCount",
+          "label": "通常ゲーム数",
+          "role": "trial",
+          "mode": "NUMBER",
+          "directNumeric": true,
+          "quickAdd": [
+            50
+          ],
+          "partialInputAllowed": true,
+          "emptyMeansUnobserved": true
+        },
+        {
+          "id": "myu-initial.successCount",
+          "label": "ミュウボーナス初当たり回数",
+          "role": "success",
+          "mode": "NUMBER",
+          "directNumeric": true,
+          "quickAdd": [
+            1
+          ],
+          "partialInputAllowed": true,
+          "emptyMeansUnobserved": true,
+          "missingSubItemTreatment": "ZERO_WHEN_PARENT_OBSERVED"
+        }
+      ]
+    },
+    {
+      "id": "OBS_at-upper",
+      "sourceFindingId": "at-upper",
+      "title": "上位AT出現",
+      "kind": "NUMERIC_OBSERVATION",
+      "model": "BERNOULLI",
+      "trialUniverse": "NORMAL_GAME_TRIAL",
+      "description": "通常時の上位AT出現を記録します。通常ゲーム数を基準に、実戦中の出現割合を設定別に比較します。\n・注意：上位AT・エンディング後の4G覚醒チャレンジ内の引き戻しは初当たりに含めず、除外ゲーム数に記録します。\n・注意：総ゲーム数−除外ゲーム数を母数とし、公表集計との完全一致は未確認として保持します。",
+      "collapsible": true,
+      "defaultExpanded": false,
+      "descriptionPresentation": {
+        "collapsible": true,
+        "label": "説明",
+        "defaultExpanded": false
+      },
+      "score": {
+        "label": "設定判別スコア",
+        "status": "COMPUTED",
+        "value": 11.7,
+        "precision": 1,
+        "importance": "有力"
+      },
+      "perEligibleTrialPower": {
+        "label": "1回の判別力",
+        "value": 11.692247453500638,
+        "metric": "PER_ELIGIBLE_TRIAL_POWER",
+        "thresholdSource": "RUNTIME_POLICY"
+      },
+      "inputs": [
+        {
+          "id": "at-upper.eligibleTrialCount",
+          "label": "通常ゲーム数",
+          "role": "trial",
+          "mode": "NUMBER",
+          "directNumeric": true,
+          "quickAdd": [
+            50
+          ],
+          "partialInputAllowed": true,
+          "emptyMeansUnobserved": true
+        },
+        {
+          "id": "at-upper.successCount",
+          "label": "上位AT出現回数",
+          "role": "success",
+          "mode": "NUMBER",
+          "directNumeric": true,
+          "quickAdd": [
+            1
+          ],
+          "partialInputAllowed": true,
+          "emptyMeansUnobserved": true,
+          "missingSubItemTreatment": "ZERO_WHEN_PARENT_OBSERVED"
+        }
+      ]
+    },
+    {
+      "id": "OBS_awakening",
+      "sourceFindingId": "awakening",
+      "title": "覚醒チャレンジ成功",
+      "kind": "NUMERIC_OBSERVATION",
+      "model": "BERNOULLI",
+      "trialUniverse": "AWAKENING_TRIAL",
+      "description": "対象となる機会のうち、覚醒チャレンジ成功が実際に起きた割合を設定別に比較します。\n・注意：成功後の残りGで行うビッグトリガー上乗せを追加成功に数えません。\n・注意：上位AT・エンディング終了後に入る4Gの覚醒チャレンジを1試行として、引き戻し成功を数えます。成功後の残りGで行うビッグトリガー上乗せを追加成功に数えません。",
+      "collapsible": true,
+      "defaultExpanded": false,
+      "descriptionPresentation": {
+        "collapsible": true,
+        "label": "説明",
+        "defaultExpanded": false
+      },
+      "score": {
+        "label": "設定判別スコア",
+        "status": "NOT_COMPUTED",
+        "display": "算出不可",
+        "reason": "基準遊技量7000Gでの判別力を算出するための観測条件が確定していないため算出できません。",
+        "sourceReason": "基準遊技量に対応するexact exposure modelが未確立のため算出しない。"
+      },
+      "perEligibleTrialPower": {
+        "label": "1回の判別力",
+        "value": 1.3383111434765338,
+        "metric": "PER_ELIGIBLE_TRIAL_POWER",
+        "thresholdSource": "RUNTIME_POLICY"
+      },
+      "inputs": [
+        {
+          "id": "awakening.eligibleTrialCount",
+          "label": "覚醒チャレンジ成功回数",
+          "role": "trial",
+          "mode": "NUMBER",
+          "directNumeric": true,
+          "quickAdd": [],
+          "partialInputAllowed": true,
+          "emptyMeansUnobserved": true
+        },
+        {
+          "id": "awakening.successCount",
+          "label": "覚醒チャレンジ成功回数",
+          "role": "success",
+          "mode": "NUMBER",
+          "directNumeric": true,
+          "quickAdd": [
+            1
+          ],
+          "partialInputAllowed": true,
+          "emptyMeansUnobserved": true,
+          "missingSubItemTreatment": "ZERO_WHEN_PARENT_OBSERVED"
+        }
+      ]
+    },
+    {
+      "id": "OBS_myu-scenario",
+      "sourceFindingId": "myu-scenario",
+      "title": "ミュウのキャラ紹介",
+      "kind": "NUMERIC_OBSERVATION",
+      "model": "CATEGORICAL",
+      "trialUniverse": "MYU_SCENARIO_TRIAL",
+      "description": "ミュウボーナスの3人の紹介。特殊キャラで3人目が置き換わった場合も1人目・2人目の組み合わせで基本8シナリオを区別できる。同じ紹介を数値と示唆に別々に入力しません。\n・注意：特殊キャラで3人目が置き換わった場合も1人目・2人目の組み合わせで基本8シナリオを区別できる。\n・注意：同じ紹介を数値と示唆に別々に入力しません。",
+      "collapsible": true,
+      "defaultExpanded": false,
+      "descriptionPresentation": {
+        "collapsible": true,
+        "label": "説明",
+        "defaultExpanded": false
+      },
+      "score": {
+        "label": "設定判別スコア",
+        "status": "NOT_COMPUTED",
+        "display": "算出不可",
+        "reason": "基準遊技量7000Gでの判別力を算出するための観測条件が確定していないため算出できません。",
+        "sourceReason": "基準遊技量に対応するexact exposure modelが未確立のため算出しない。"
+      },
+      "perEligibleTrialPower": {
+        "label": "1回の判別力",
+        "value": 9.104228660875613,
+        "metric": "PER_ELIGIBLE_TRIAL_POWER",
+        "thresholdSource": "RUNTIME_POLICY"
+      },
+      "inputs": [
+        {
+          "id": "myu-scenario.eligibleTrialCount",
+          "label": "ミュウボーナスの3人の紹介",
+          "role": "trial",
+          "mode": "NUMBER",
+          "directNumeric": true,
+          "quickAdd": [],
+          "partialInputAllowed": true,
+          "emptyMeansUnobserved": true
+        },
+        {
+          "id": "myu-scenario.categoryCounts.1_ハジメ_香織_愛子",
+          "label": "ハジメ→香織→愛子",
+          "role": "categoryCount",
+          "mode": "NUMBER",
+          "directNumeric": true,
+          "quickAdd": [
+            1
+          ],
+          "partialInputAllowed": true,
+          "emptyMeansUnobserved": true,
+          "missingSubItemTreatment": "ZERO_WHEN_PARENT_OBSERVED"
+        },
+        {
+          "id": "myu-scenario.categoryCounts.2_ユエ_シア_ティオ",
+          "label": "ユエ→シア→ティオ",
+          "role": "categoryCount",
+          "mode": "NUMBER",
+          "directNumeric": true,
+          "quickAdd": [
+            1
+          ],
+          "partialInputAllowed": true,
+          "emptyMeansUnobserved": true,
+          "missingSubItemTreatment": "ZERO_WHEN_PARENT_OBSERVED"
+        },
+        {
+          "id": "myu-scenario.categoryCounts.3_光輝_雫_坂上",
+          "label": "光輝→雫→坂上",
+          "role": "categoryCount",
+          "mode": "NUMBER",
+          "directNumeric": true,
+          "quickAdd": [
+            1
+          ],
+          "partialInputAllowed": true,
+          "emptyMeansUnobserved": true,
+          "missingSubItemTreatment": "ZERO_WHEN_PARENT_OBSERVED"
+        },
+        {
+          "id": "myu-scenario.categoryCounts.4_フリード_ミハイル_カトレア",
+          "label": "フリード→ミハイル→カトレア",
+          "role": "categoryCount",
+          "mode": "NUMBER",
+          "directNumeric": true,
+          "quickAdd": [
+            1
+          ],
+          "partialInputAllowed": true,
+          "emptyMeansUnobserved": true,
+          "missingSubItemTreatment": "ZERO_WHEN_PARENT_OBSERVED"
+        },
+        {
+          "id": "myu-scenario.categoryCounts.5_ノイント_檜山_清水",
+          "label": "ノイント→檜山→清水",
+          "role": "categoryCount",
+          "mode": "NUMBER",
+          "directNumeric": true,
+          "quickAdd": [
+            1
+          ],
+          "partialInputAllowed": true,
+          "emptyMeansUnobserved": true,
+          "missingSubItemTreatment": "ZERO_WHEN_PARENT_OBSERVED"
+        },
+        {
+          "id": "myu-scenario.categoryCounts.6_ミュウ_レミア_リリアーナ",
+          "label": "ミュウ→レミア→リリアーナ",
+          "role": "categoryCount",
+          "mode": "NUMBER",
+          "directNumeric": true,
+          "quickAdd": [
+            1
+          ],
+          "partialInputAllowed": true,
+          "emptyMeansUnobserved": true,
+          "missingSubItemTreatment": "ZERO_WHEN_PARENT_OBSERVED"
+        },
+        {
+          "id": "myu-scenario.categoryCounts.7_ハジメ_ユエ_愛子",
+          "label": "ハジメ→ユエ→愛子",
+          "role": "categoryCount",
+          "mode": "NUMBER",
+          "directNumeric": true,
+          "quickAdd": [
+            1
+          ],
+          "partialInputAllowed": true,
+          "emptyMeansUnobserved": true,
+          "missingSubItemTreatment": "ZERO_WHEN_PARENT_OBSERVED"
+        },
+        {
+          "id": "myu-scenario.categoryCounts.8_ユエ_ハジメ_ティオ",
+          "label": "ユエ→ハジメ→ティオ",
+          "role": "categoryCount",
+          "mode": "NUMBER",
+          "directNumeric": true,
+          "quickAdd": [
+            1
+          ],
+          "partialInputAllowed": true,
+          "emptyMeansUnobserved": true,
+          "missingSubItemTreatment": "ZERO_WHEN_PARENT_OBSERVED"
+        }
+      ]
+    },
+    {
+      "id": "OBS_at-screen-middle",
+      "sourceFindingId": "at-screen-middle",
+      "title": "AT終了画面（当日2000～5999G）",
+      "kind": "NUMERIC_OBSERVATION",
+      "model": "CATEGORICAL",
+      "trialUniverse": "AT_SCREEN_MIDDLE_TRIAL",
+      "description": "当日2000～5999GのAT終了時に1カテゴリを記録。着席後の総Gと当日Gを混同せず、当日Gが不明なら数値表を代用しません。\n・注意：着席後の総Gと当日Gを混同せず、当日Gが不明なら数値表を代用しません。\n・注意：当日2000～5999GのAT終了時に1カテゴリを記録。着席後の総Gと当日Gを混同せず、当日Gが不明なら数値表を代用しません。",
+      "collapsible": true,
+      "defaultExpanded": false,
+      "descriptionPresentation": {
+        "collapsible": true,
+        "label": "説明",
+        "defaultExpanded": false
+      },
+      "score": {
+        "label": "設定判別スコア",
+        "status": "NOT_COMPUTED",
+        "display": "算出不可",
+        "reason": "基準遊技量7000Gでの判別力を算出するための観測条件が確定していないため算出できません。",
+        "sourceReason": "基準遊技量に対応するexact exposure modelが未確立のため算出しない。"
+      },
+      "perEligibleTrialPower": {
+        "label": "1回の判別力",
+        "value": 7.686503870821038,
+        "metric": "PER_ELIGIBLE_TRIAL_POWER",
+        "thresholdSource": "RUNTIME_POLICY"
+      },
+      "inputs": [
+        {
+          "id": "at-screen-middle.eligibleTrialCount",
+          "label": "AT終了画面（当日2000～5999G）回数",
+          "role": "trial",
+          "mode": "NUMBER",
+          "directNumeric": true,
+          "quickAdd": [],
+          "partialInputAllowed": true,
+          "emptyMeansUnobserved": true
+        },
+        {
+          "id": "at-screen-middle.categoryCounts.1_銃",
+          "label": "銃",
+          "role": "categoryCount",
+          "mode": "NUMBER",
+          "directNumeric": true,
+          "quickAdd": [
+            1
+          ],
+          "partialInputAllowed": true,
+          "emptyMeansUnobserved": true,
+          "missingSubItemTreatment": "ZERO_WHEN_PARENT_OBSERVED"
+        },
+        {
+          "id": "at-screen-middle.categoryCounts.2_ティオ_シア_ユエ",
+          "label": "ティオ・シア・ユエ",
+          "role": "categoryCount",
+          "mode": "NUMBER",
+          "directNumeric": true,
+          "quickAdd": [
+            1
+          ],
+          "partialInputAllowed": true,
+          "emptyMeansUnobserved": true,
+          "missingSubItemTreatment": "ZERO_WHEN_PARENT_OBSERVED"
+        },
+        {
+          "id": "at-screen-middle.categoryCounts.3_ハジメ",
+          "label": "ハジメ",
+          "role": "categoryCount",
+          "mode": "NUMBER",
+          "directNumeric": true,
+          "quickAdd": [
+            1
+          ],
+          "partialInputAllowed": true,
+          "emptyMeansUnobserved": true,
+          "missingSubItemTreatment": "ZERO_WHEN_PARENT_OBSERVED"
+        },
+        {
+          "id": "at-screen-middle.categoryCounts.4_ユエ",
+          "label": "ユエ",
+          "role": "categoryCount",
+          "mode": "NUMBER",
+          "directNumeric": true,
+          "quickAdd": [
+            1
+          ],
+          "partialInputAllowed": true,
+          "emptyMeansUnobserved": true,
+          "missingSubItemTreatment": "ZERO_WHEN_PARENT_OBSERVED"
+        },
+        {
+          "id": "at-screen-middle.categoryCounts.5_レミア_ミュウ_ユエ",
+          "label": "レミア・ミュウ・ユエ",
+          "role": "categoryCount",
+          "mode": "NUMBER",
+          "directNumeric": true,
+          "quickAdd": [
+            1
+          ],
+          "partialInputAllowed": true,
+          "emptyMeansUnobserved": true,
+          "missingSubItemTreatment": "ZERO_WHEN_PARENT_OBSERVED"
+        }
+      ]
+    },
+    {
+      "id": "OBS_at-screen-late",
+      "sourceFindingId": "at-screen-late",
+      "title": "AT終了画面（当日6000G以上）",
+      "kind": "NUMERIC_OBSERVATION",
+      "model": "CATEGORICAL",
+      "trialUniverse": "AT_SCREEN_LATE_TRIAL",
+      "description": "当日6000G以上のAT終了時に1カテゴリを記録。着席後の総Gと当日Gを混同せず、当日Gが不明なら数値表を代用しません。\n・注意：着席後の総Gと当日Gを混同せず、当日Gが不明なら数値表を代用しません。\n・注意：当日6000G以上のAT終了時に1カテゴリを記録。着席後の総Gと当日Gを混同せず、当日Gが不明なら数値表を代用しません。",
+      "collapsible": true,
+      "defaultExpanded": false,
+      "descriptionPresentation": {
+        "collapsible": true,
+        "label": "説明",
+        "defaultExpanded": false
+      },
+      "score": {
+        "label": "設定判別スコア",
+        "status": "NOT_COMPUTED",
+        "display": "算出不可",
+        "reason": "基準遊技量7000Gでの判別力を算出するための観測条件が確定していないため算出できません。",
+        "sourceReason": "基準遊技量に対応するexact exposure modelが未確立のため算出しない。"
+      },
+      "perEligibleTrialPower": {
+        "label": "1回の判別力",
+        "value": 14.201700291265706,
+        "metric": "PER_ELIGIBLE_TRIAL_POWER",
+        "thresholdSource": "RUNTIME_POLICY"
+      },
+      "inputs": [
+        {
+          "id": "at-screen-late.eligibleTrialCount",
+          "label": "AT終了画面（当日6000G以上）回数",
+          "role": "trial",
+          "mode": "NUMBER",
+          "directNumeric": true,
+          "quickAdd": [],
+          "partialInputAllowed": true,
+          "emptyMeansUnobserved": true
+        },
+        {
+          "id": "at-screen-late.categoryCounts.1_銃",
+          "label": "銃",
+          "role": "categoryCount",
+          "mode": "NUMBER",
+          "directNumeric": true,
+          "quickAdd": [
+            1
+          ],
+          "partialInputAllowed": true,
+          "emptyMeansUnobserved": true,
+          "missingSubItemTreatment": "ZERO_WHEN_PARENT_OBSERVED"
+        },
+        {
+          "id": "at-screen-late.categoryCounts.2_ティオ_シア_ユエ",
+          "label": "ティオ・シア・ユエ",
+          "role": "categoryCount",
+          "mode": "NUMBER",
+          "directNumeric": true,
+          "quickAdd": [
+            1
+          ],
+          "partialInputAllowed": true,
+          "emptyMeansUnobserved": true,
+          "missingSubItemTreatment": "ZERO_WHEN_PARENT_OBSERVED"
+        },
+        {
+          "id": "at-screen-late.categoryCounts.3_ハジメ",
+          "label": "ハジメ",
+          "role": "categoryCount",
+          "mode": "NUMBER",
+          "directNumeric": true,
+          "quickAdd": [
+            1
+          ],
+          "partialInputAllowed": true,
+          "emptyMeansUnobserved": true,
+          "missingSubItemTreatment": "ZERO_WHEN_PARENT_OBSERVED"
+        },
+        {
+          "id": "at-screen-late.categoryCounts.4_ユエ",
+          "label": "ユエ",
+          "role": "categoryCount",
+          "mode": "NUMBER",
+          "directNumeric": true,
+          "quickAdd": [
+            1
+          ],
+          "partialInputAllowed": true,
+          "emptyMeansUnobserved": true,
+          "missingSubItemTreatment": "ZERO_WHEN_PARENT_OBSERVED"
+        },
+        {
+          "id": "at-screen-late.categoryCounts.5_レミア_ミュウ_ユエ",
+          "label": "レミア・ミュウ・ユエ",
+          "role": "categoryCount",
+          "mode": "NUMBER",
+          "directNumeric": true,
+          "quickAdd": [
+            1
+          ],
+          "partialInputAllowed": true,
+          "emptyMeansUnobserved": true,
+          "missingSubItemTreatment": "ZERO_WHEN_PARENT_OBSERVED"
+        }
+      ]
+    },
+    {
+      "id": "OBS_cz-100-success",
+      "sourceFindingId": "cz-100-success",
+      "title": "100GのCZ当選",
+      "kind": "NUMERIC_OBSERVATION",
+      "model": "BERNOULLI",
+      "trialUniverse": "CZ_100_SUCCESS_TRIAL",
+      "description": "対象となる機会のうち、CZ当選が実際に起きた割合を設定別に比較します。\n・注意：天国天井・小役契機と区別できた試行だけ対象とします。\n・注意：AT間100Gのゾーンを1回の試行として、ゾーン契機の嫁チャレンジまたは香織降臨に当選した回数を記録。天国天井・小役契機と区別できた試行だけ対象とします。",
+      "collapsible": true,
+      "defaultExpanded": false,
+      "descriptionPresentation": {
+        "collapsible": true,
+        "label": "説明",
+        "defaultExpanded": false
+      },
+      "score": {
+        "label": "設定判別スコア",
+        "status": "NOT_COMPUTED",
+        "display": "算出不可",
+        "reason": "基準遊技量7000Gでの判別力を算出するための観測条件が確定していないため算出できません。",
+        "sourceReason": "基準遊技量に対応するexact exposure modelが未確立のため算出しない。"
+      },
+      "perEligibleTrialPower": {
+        "label": "1回の判別力",
+        "value": 3.448148593133782,
+        "metric": "PER_ELIGIBLE_TRIAL_POWER",
+        "thresholdSource": "RUNTIME_POLICY"
+      },
+      "inputs": [
+        {
+          "id": "cz-100-success.eligibleTrialCount",
+          "label": "CZ当選回数",
+          "role": "trial",
+          "mode": "NUMBER",
+          "directNumeric": true,
+          "quickAdd": [],
+          "partialInputAllowed": true,
+          "emptyMeansUnobserved": true
+        },
+        {
+          "id": "cz-100-success.successCount",
+          "label": "CZ当選回数",
+          "role": "success",
+          "mode": "NUMBER",
+          "directNumeric": true,
+          "quickAdd": [
+            1
+          ],
+          "partialInputAllowed": true,
+          "emptyMeansUnobserved": true,
+          "missingSubItemTreatment": "ZERO_WHEN_PARENT_OBSERVED"
+        }
+      ]
+    }
+  ],
+  "evidenceSections": [
+    {
+      "id": "EVI_myu-scenario-evidence",
+      "sourceFindingId": "myu-scenario-evidence",
+      "title": "ミュウのキャラ紹介",
+      "kind": "EVIDENCE",
+      "collapsible": true,
+      "defaultExpanded": false,
+      "description": "ミュウのキャラ紹介を確認したときに、該当する項目を1回加算して記録します。\n・注意：ミュウボーナスの3人の紹介。特殊キャラで3人目が置き換わった場合も1人目・2人目の組み合わせで基本8シナリオを区別できる。同じ紹介を数値と示唆に別々に入力しません\n・反映：設定確定・設定否定の条件は、設定候補の絞り込みに自動反映します",
+      "descriptionPresentation": {
+        "collapsible": true,
+        "label": "説明",
+        "defaultExpanded": false
+      },
+      "runtimePolicyControlled": false,
+      "evidenceItems": [
+        {
+          "findingId": "myu-scenario-evidence",
+          "label": "ミュウのキャラ紹介",
+          "sourceIds": [
+            "source-4"
+          ],
+          "details": [
+            "ミュウボーナスの3人の紹介。特殊キャラで3人目が置き換わった場合も1人目・2人目の組み合わせで基本8シナリオを区別できる。同じ紹介を数値と示唆に別々に入力しません。"
+          ],
+          "semanticType": "DISPLAY_ONLY",
+          "semanticCategories": [
+            {
+              "label": "ハジメ→香織→愛子",
+              "meaning": "基本パターン",
+              "semanticType": "PROBABILITY_BACKED",
+              "linkedFindingId": "myu-scenario"
+            },
+            {
+              "label": "ユエ→シア→ティオ",
+              "meaning": "基本パターン",
+              "semanticType": "PROBABILITY_BACKED",
+              "linkedFindingId": "myu-scenario"
+            },
+            {
+              "label": "光輝→雫→坂上",
+              "meaning": "基本パターン",
+              "semanticType": "PROBABILITY_BACKED",
+              "linkedFindingId": "myu-scenario"
+            },
+            {
+              "label": "フリード→ミハイル→カトレア",
+              "meaning": "基本パターン",
+              "semanticType": "PROBABILITY_BACKED",
+              "linkedFindingId": "myu-scenario"
+            },
+            {
+              "label": "ノイント→檜山→清水",
+              "meaning": "設定2・4・6",
+              "semanticType": "EXACT_CONSTRAINT",
+              "linkedFindingId": "myu-scenario"
+            },
+            {
+              "label": "ミュウ→レミア→リリアーナ",
+              "meaning": "設定2以上",
+              "semanticType": "EXACT_CONSTRAINT",
+              "linkedFindingId": "myu-scenario"
+            },
+            {
+              "label": "ハジメ→ユエ→愛子",
+              "meaning": "設定2以上",
+              "semanticType": "EXACT_CONSTRAINT",
+              "linkedFindingId": "myu-scenario"
+            },
+            {
+              "label": "ユエ→ハジメ→ティオ",
+              "meaning": "設定2以上",
+              "semanticType": "EXACT_CONSTRAINT",
+              "linkedFindingId": "myu-scenario"
+            }
+          ],
+          "runtimePolicyControlled": false,
+          "status": "SOURCE_REFERENCED",
+          "interaction": "REFERENCE_ONLY"
+        }
+      ]
+    },
+    {
+      "id": "EVI_at-screen-middle-evidence",
+      "sourceFindingId": "at-screen-middle-evidence",
+      "title": "AT終了画面（当日2000～5999G）",
+      "kind": "EVIDENCE",
+      "collapsible": true,
+      "defaultExpanded": false,
+      "description": "AT終了画面（当日2000～5999G）を確認したときに、該当する項目を1回加算して記録します。\n・注意：当日2000～5999GのAT終了時に1カテゴリを記録。着席後の総Gと当日Gを混同せず、当日Gが不明なら数値表を代用しません\n・反映：設定確定・設定否定の条件は、設定候補の絞り込みに自動反映します",
+      "descriptionPresentation": {
+        "collapsible": true,
+        "label": "説明",
+        "defaultExpanded": false
+      },
+      "runtimePolicyControlled": false,
+      "evidenceItems": [
+        {
+          "findingId": "at-screen-middle-evidence",
+          "label": "AT終了画面（当日2000～5999G）",
+          "sourceIds": [
+            "source-3"
+          ],
+          "details": [
+            "当日2000～5999GのAT終了時に1カテゴリを記録。着席後の総Gと当日Gを混同せず、当日Gが不明なら数値表を代用しません。"
+          ],
+          "semanticType": "DISPLAY_ONLY",
+          "semanticCategories": [
+            {
+              "label": "銃",
+              "meaning": "基本パターン",
+              "semanticType": "PROBABILITY_BACKED",
+              "linkedFindingId": "at-screen-middle"
+            },
+            {
+              "label": "ティオ・シア・ユエ",
+              "meaning": "基本パターン",
+              "semanticType": "PROBABILITY_BACKED",
+              "linkedFindingId": "at-screen-middle"
+            },
+            {
+              "label": "ハジメ",
+              "meaning": "設定4以上",
+              "semanticType": "EXACT_CONSTRAINT",
+              "linkedFindingId": "at-screen-middle"
+            },
+            {
+              "label": "ユエ",
+              "meaning": "設定5以上",
+              "semanticType": "EXACT_CONSTRAINT",
+              "linkedFindingId": "at-screen-middle"
+            },
+            {
+              "label": "レミア・ミュウ・ユエ",
+              "meaning": "設定6",
+              "semanticType": "EXACT_CONSTRAINT",
+              "linkedFindingId": "at-screen-middle"
+            }
+          ],
+          "runtimePolicyControlled": false,
+          "status": "SOURCE_REFERENCED",
+          "interaction": "REFERENCE_ONLY"
+        }
+      ]
+    },
+    {
+      "id": "EVI_at-screen-late-evidence",
+      "sourceFindingId": "at-screen-late-evidence",
+      "title": "AT終了画面（当日6000G以上）",
+      "kind": "EVIDENCE",
+      "collapsible": true,
+      "defaultExpanded": false,
+      "description": "AT終了画面（当日6000G以上）を確認したときに、該当する項目を1回加算して記録します。\n・注意：当日6000G以上のAT終了時に1カテゴリを記録。着席後の総Gと当日Gを混同せず、当日Gが不明なら数値表を代用しません\n・反映：設定確定・設定否定の条件は、設定候補の絞り込みに自動反映します",
+      "descriptionPresentation": {
+        "collapsible": true,
+        "label": "説明",
+        "defaultExpanded": false
+      },
+      "runtimePolicyControlled": false,
+      "evidenceItems": [
+        {
+          "findingId": "at-screen-late-evidence",
+          "label": "AT終了画面（当日6000G以上）",
+          "sourceIds": [
+            "source-3"
+          ],
+          "details": [
+            "当日6000G以上のAT終了時に1カテゴリを記録。着席後の総Gと当日Gを混同せず、当日Gが不明なら数値表を代用しません。"
+          ],
+          "semanticType": "DISPLAY_ONLY",
+          "semanticCategories": [
+            {
+              "label": "銃",
+              "meaning": "基本パターン",
+              "semanticType": "PROBABILITY_BACKED",
+              "linkedFindingId": "at-screen-late"
+            },
+            {
+              "label": "ティオ・シア・ユエ",
+              "meaning": "基本パターン",
+              "semanticType": "PROBABILITY_BACKED",
+              "linkedFindingId": "at-screen-late"
+            },
+            {
+              "label": "ハジメ",
+              "meaning": "設定4以上",
+              "semanticType": "EXACT_CONSTRAINT",
+              "linkedFindingId": "at-screen-late"
+            },
+            {
+              "label": "ユエ",
+              "meaning": "設定5以上",
+              "semanticType": "EXACT_CONSTRAINT",
+              "linkedFindingId": "at-screen-late"
+            },
+            {
+              "label": "レミア・ミュウ・ユエ",
+              "meaning": "設定6",
+              "semanticType": "EXACT_CONSTRAINT",
+              "linkedFindingId": "at-screen-late"
+            }
+          ],
+          "runtimePolicyControlled": false,
+          "status": "SOURCE_REFERENCED",
+          "interaction": "REFERENCE_ONLY"
+        }
+      ]
+    },
+    {
+      "id": "EVI_at-screen-early-evidence",
+      "sourceFindingId": "at-screen-early-evidence",
+      "title": "AT終了画面（1999G以下・G数不明）",
+      "kind": "EVIDENCE",
+      "collapsible": true,
+      "defaultExpanded": false,
+      "description": "AT終了画面（1999G以下・G数不明）を確認したときに、該当する項目を1回加算して記録します。\n・注意：1999G以下には1%未満とだけ公表される項目があります。区間値を補完せず示唆を記録。当日G不明時も確定制約は有効です\n・反映：設定確定・設定否定の条件は、設定候補の絞り込みに自動反映します\n・反映：設定別出現率が未確認の項目は記録のみです。出現率確認後は設定推測へ反映できる可能性があります",
+      "descriptionPresentation": {
+        "collapsible": true,
+        "label": "説明",
+        "defaultExpanded": false
+      },
+      "runtimePolicyControlled": false,
+      "evidenceItems": [
+        {
+          "findingId": "at-screen-early-evidence",
+          "label": "AT終了画面（1999G以下・G数不明）",
+          "sourceIds": [
+            "source-3"
+          ],
+          "details": [
+            "1999G以下には1%未満とだけ公表される項目があります。区間値を補完せず示唆を記録。当日G不明時も確定制約は有効です。"
+          ],
+          "semanticType": "DISPLAY_ONLY",
+          "semanticCategories": [
+            {
+              "label": "銃",
+              "meaning": "基本パターン",
+              "semanticType": "PROBABILITY_UNKNOWN"
+            },
+            {
+              "label": "ティオ・シア・ユエ",
+              "meaning": "高設定示唆",
+              "semanticType": "PROBABILITY_UNKNOWN"
+            },
+            {
+              "label": "ハジメ",
+              "meaning": "設定4以上",
+              "semanticType": "EXACT_CONSTRAINT"
+            },
+            {
+              "label": "ユエ",
+              "meaning": "設定5以上",
+              "semanticType": "EXACT_CONSTRAINT"
+            },
+            {
+              "label": "レミア・ミュウ・ユエ",
+              "meaning": "設定6",
+              "semanticType": "EXACT_CONSTRAINT"
+            }
+          ],
+          "runtimePolicyControlled": false,
+          "status": "SOURCE_REFERENCED",
+          "interaction": "REFERENCE_ONLY"
+        }
+      ]
+    },
+    {
+      "id": "EVI_special-character-evidence",
+      "sourceFindingId": "special-character-evidence",
+      "title": "ミュウの特殊キャラ",
+      "kind": "EVIDENCE",
+      "collapsible": true,
+      "defaultExpanded": false,
+      "description": "ミュウの特殊キャラを確認したときに、該当する項目を1回加算して記録します。\n・注意：3人目が特殊キャラに置き換わる場合の確定示唆。基本シナリオは1人目・2人目で判別し、特殊キャラ回数の別入力を必須にしません\n・反映：設定確定・設定否定の条件は、設定候補の絞り込みに自動反映します",
+      "descriptionPresentation": {
+        "collapsible": true,
+        "label": "説明",
+        "defaultExpanded": false
+      },
+      "runtimePolicyControlled": false,
+      "evidenceItems": [
+        {
+          "findingId": "special-character-evidence",
+          "label": "ミュウの特殊キャラ",
+          "sourceIds": [
+            "source-4"
+          ],
+          "details": [
+            "3人目が特殊キャラに置き換わる場合の確定示唆。基本シナリオは1人目・2人目で判別し、特殊キャラ回数の別入力を必須にしません。"
+          ],
+          "semanticType": "EXACT_CONSTRAINT",
+          "semanticCategories": [
+            {
+              "label": "香織（使徒の姿）",
+              "meaning": "設定4以上",
+              "semanticType": "EXACT_CONSTRAINT"
+            },
+            {
+              "label": "ユエ（吸血姫）",
+              "meaning": "設定5以上",
+              "semanticType": "EXACT_CONSTRAINT"
+            },
+            {
+              "label": "ハジメ（学生）",
+              "meaning": "設定6",
+              "semanticType": "EXACT_CONSTRAINT"
+            }
+          ],
+          "runtimePolicyControlled": false,
+          "status": "SOURCE_REFERENCED",
+          "interaction": "REFERENCE_ONLY"
+        }
+      ]
+    },
+    {
+      "id": "EVI_ending-image",
+      "sourceFindingId": "ending-image",
+      "title": "エンディングの一枚絵",
+      "kind": "EVIDENCE",
+      "collapsible": true,
+      "defaultExpanded": false,
+      "description": "エンディングの一枚絵を確認したときに、該当する項目を1回加算して記録します。\n・注意：エンディング中のレア小役で出現する枠色・キャラを記録。出現率不明の示唆は確率を補完しません\n・反映：設定確定・設定否定の条件は、設定候補の絞り込みに自動反映します\n・反映：設定別出現率が未確認の項目は記録のみです。出現率確認後は設定推測へ反映できる可能性があります",
+      "descriptionPresentation": {
+        "collapsible": true,
+        "label": "説明",
+        "defaultExpanded": false
+      },
+      "runtimePolicyControlled": false,
+      "evidenceItems": [
+        {
+          "findingId": "ending-image",
+          "label": "エンディングの一枚絵",
+          "sourceIds": [
+            "source-1",
+            "source-2"
+          ],
+          "details": [
+            "エンディング中のレア小役で出現する枠色・キャラを記録。出現率不明の示唆は確率を補完しません。"
+          ],
+          "semanticType": "DISPLAY_ONLY",
+          "semanticCategories": [
+            {
+              "label": "銅枠シア",
+              "meaning": "奇数設定示唆",
+              "semanticType": "PROBABILITY_UNKNOWN"
+            },
+            {
+              "label": "銅枠ティオ",
+              "meaning": "偶数設定示唆",
+              "semanticType": "PROBABILITY_UNKNOWN"
+            },
+            {
+              "label": "銅枠ユエ",
+              "meaning": "高設定示唆（弱）",
+              "semanticType": "PROBABILITY_UNKNOWN"
+            },
+            {
+              "label": "銅枠香織",
+              "meaning": "高設定示唆（強）",
+              "semanticType": "PROBABILITY_UNKNOWN"
+            },
+            {
+              "label": "銀枠ハジメ",
+              "meaning": "設定4以上",
+              "semanticType": "EXACT_CONSTRAINT"
+            },
+            {
+              "label": "金枠ユエ",
+              "meaning": "設定5以上",
+              "semanticType": "EXACT_CONSTRAINT"
+            },
+            {
+              "label": "虹枠ミュウ",
+              "meaning": "設定6",
+              "semanticType": "EXACT_CONSTRAINT"
+            }
+          ],
+          "runtimePolicyControlled": false,
+          "status": "SOURCE_REFERENCED",
+          "interaction": "REFERENCE_ONLY"
+        }
+      ]
+    },
+    {
+      "id": "EVI_over-display",
+      "sourceFindingId": "over-display",
+      "title": "獲得枚数表示",
+      "kind": "EVIDENCE",
+      "collapsible": true,
+      "defaultExpanded": false,
+      "description": "獲得枚数表示を確認したときに、該当する項目を1回加算して記録します。\n・注意：AT中に実際に表示された特殊枚数を記録。当日Gによる出現率の変化を未公表率で補完しません\n・反映：設定確定・設定否定の条件は、設定候補の絞り込みに自動反映します",
+      "descriptionPresentation": {
+        "collapsible": true,
+        "label": "説明",
+        "defaultExpanded": false
+      },
+      "runtimePolicyControlled": false,
+      "evidenceItems": [
+        {
+          "findingId": "over-display",
+          "label": "獲得枚数表示",
+          "sourceIds": [
+            "source-1",
+            "source-2"
+          ],
+          "details": [
+            "AT中に実際に表示された特殊枚数を記録。当日Gによる出現率の変化を未公表率で補完しません。"
+          ],
+          "semanticType": "EXACT_CONSTRAINT",
+          "semanticCategories": [
+            {
+              "label": "456OVER",
+              "meaning": "設定4以上",
+              "semanticType": "EXACT_CONSTRAINT"
+            },
+            {
+              "label": "666OVER",
+              "meaning": "設定6",
+              "semanticType": "EXACT_CONSTRAINT"
+            }
+          ],
+          "runtimePolicyControlled": false,
+          "status": "SOURCE_REFERENCED",
+          "interaction": "REFERENCE_ONLY"
+        }
+      ]
+    }
+  ],
+  "heldObservations": [],
+  "layoutRules": {
+    "hideEmptySections": true,
+    "twoColumnWhen": {
+      "minimumNumericSections": 2,
+      "minimumEvidenceSections": 2
+    },
+    "quickAddPolicy": [
+      1,
+      50
+    ],
+    "directNumericRequired": true
+  },
+  "inputRules": {
+    "partialInputAllowed": true,
+    "missingSubItemTreatment": "ZERO_WHEN_PARENT_OBSERVED"
+  },
+  "importanceVocabulary": [
+    "主要",
+    "有力",
+    "補助",
+    "微小"
+  ]
+}

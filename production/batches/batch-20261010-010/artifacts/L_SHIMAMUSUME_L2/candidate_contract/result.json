@@ -1,0 +1,248 @@
+{
+  "schemaVersion": "candidate-contract-v1",
+  "manifestVersion": "8.5",
+  "batchId": "batch-20261010-010",
+  "machineId": "L_SHIMAMUSUME_L2",
+  "machineName": "L島娘",
+  "evaluationArtifact": {
+    "artifactId": "evaluation-L_SHIMAMUSUME_L2",
+    "kind": "evaluation",
+    "path": "production/batches/batch-20261010-010/artifacts/L_SHIMAMUSUME_L2/evaluation/result.json",
+    "sha256": "e331599bd57dc37fcc1771c8de062f7bf9215f95633b777b5e71e266f80ac446",
+    "producerWorkId": "wrk_e286943f3ba14eb1"
+  },
+  "eligibilityArtifact": {
+    "artifactId": "eligibility-L_SHIMAMUSUME_L2",
+    "kind": "eligibility",
+    "path": "production/batches/batch-20261010-010/artifacts/L_SHIMAMUSUME_L2/eligibility/result.json",
+    "sha256": "215c75f5caa2ea0a6bbc2aca8fa4c92e0cf9385a8d222f1a9fd4e3a3d5ea5e73",
+    "producerWorkId": "wrk_f4b7d2ea74534f13"
+  },
+  "candidates": [
+    {
+      "findingId": "bonus-initial",
+      "label": "ボーナス初当たり",
+      "model": "BERNOULLI",
+      "trialUniverse": "NON_CHAIN_BONUS_INITIAL_GAME_TRIAL",
+      "liveInferenceRoute": "LIVE_CONDITIONAL",
+      "settingDistribution": {
+        "1": "1/197.3",
+        "2": "1/193.2",
+        "3": "1/181.1",
+        "5": "1/164.4",
+        "6": "1/153.2"
+      },
+      "details": [
+        "連チャン区間内の当選を除外して通常時の初当たりを数えます。ボーナス後ときめきゾーンは5Gで6G目告知もあり、BIG連・花笠連終了後の引き戻しは32Gです。実際の連チャン区間と引き戻し区間のGを除外Gに記録し、総G−除外Gを母数にします。両区間を重複して足しません。"
+      ],
+      "dependencyGroupId": "shimamusume-initial-path",
+      "dependencyKind": "CAUSAL_PATH_OVERLAP",
+      "dependencyReason": "初当たりからボーナス・AT・引き戻しへつながる同じ当選経路。",
+      "dependencyFallbackRank": 1,
+      "runtimeInferenceAllowed": true,
+      "dependencyResolution": "PREFERRED_MEMBER",
+      "runtimePolicyBinding": {
+        "metric": "PER_ELIGIBLE_TRIAL_POWER",
+        "value": 0.007758854151984629,
+        "thresholdSource": "RUNTIME_POLICY"
+      },
+      "suppressedByFeatureIds": []
+    },
+    {
+      "findingId": "cherry-bonus",
+      "label": "チェリーからボーナス",
+      "model": "BERNOULLI",
+      "trialUniverse": "CHERRY_BONUS_TRIAL",
+      "liveInferenceRoute": "LIVE_CONDITIONAL",
+      "settingDistribution": {
+        "1": 0.02,
+        "2": 0.021,
+        "3": 0.028999999999999998,
+        "5": 0.031,
+        "6": 0.037000000000000005
+      },
+      "details": [
+        "通常時で引き戻しモード・連チャン区間を除いたチェリー成立を試行として、その役契機で当選したボーナスを数えます。チャンスチェリーは別役。規定G契機と分けられた試行だけ記録し、32G引き戻し内の全設定10.2%を混ぜません。"
+      ],
+      "dependencyGroupId": "shimamusume-initial-path",
+      "dependencyKind": "CAUSAL_PATH_OVERLAP",
+      "dependencyReason": "初当たりからボーナス・AT・引き戻しへつながる同じ当選経路。",
+      "dependencyFallbackRank": 2,
+      "runtimeInferenceAllowed": true,
+      "dependencyResolution": "FALLBACK_MEMBER",
+      "runtimePolicyBinding": {
+        "metric": "PER_ELIGIBLE_TRIAL_POWER",
+        "value": 0.2195606371138692,
+        "thresholdSource": "RUNTIME_POLICY"
+      },
+      "suppressedByFeatureIds": [
+        "bonus-initial"
+      ]
+    }
+  ],
+  "dependencyGroups": [
+    {
+      "groupId": "shimamusume-initial-path",
+      "resolution": "PREFERRED_WITH_FALLBACK",
+      "members": [
+        "bonus-initial",
+        "cherry-bonus"
+      ],
+      "runtimeInferenceAllowed": true,
+      "preferredFindingId": "bonus-initial",
+      "fallbackOrder": [
+        "bonus-initial",
+        "cherry-bonus"
+      ],
+      "reason": "依存関係がある候補を同時加算せず、観測できた優先Featureを使用し、未観測時だけ次順位のFeatureへ自動フォールバックする。",
+      "selectionRationale": "Researchで明示された優先順位に従い、同一セッションで重複情報を同時加算しない。"
+    }
+  ],
+  "excludedDecisions": [],
+  "blockedItems": [
+    {
+      "blockId": "direct-big",
+      "label": "BIG直撃",
+      "reason": "フリーズ・BIG準備経由のBIGと成立役不問の直撃抽選は別経路です。単に通常からBIGが揃った結果だけでは直撃当選を全件区別できません。",
+      "reevaluationCondition": "対象の全契機または全滞在区間を直接識別する新しい公開手順が得られた場合。",
+      "sourceIds": [
+        "source-1",
+        "source-2",
+        "mode"
+      ],
+      "referenceConditionalDistribution": {
+        "settings": [
+          1,
+          2,
+          3,
+          5,
+          6
+        ],
+        "publishedValues": {
+          "1": 16889.3,
+          "2": 14949.3,
+          "3": 10191.2,
+          "5": 8623,
+          "6": 7711.6
+        },
+        "runtimeSettingLikelihood": "DISABLED"
+      },
+      "observationScopeAudit": {
+        "status": "CLOSED_EXCLUDED",
+        "runtimeSettingLikelihood": "DISABLED"
+      }
+    },
+    {
+      "blockId": "big-prep",
+      "label": "REGスルー後のBIG準備",
+      "reason": "REG5・10スルーで選ばれた内部BIG準備モードの移行当否は直接表示されません。次のBIG結果を移行成功と断定しません。",
+      "reevaluationCondition": "対象の全契機または全滞在区間を直接識別する新しい公開手順が得られた場合。",
+      "sourceIds": [
+        "source-1",
+        "source-2",
+        "mode"
+      ],
+      "referenceConditionalDistribution": {
+        "settings": [
+          1,
+          2,
+          3,
+          5,
+          6
+        ],
+        "publishedValues": {
+          "0": [
+            0.4,
+            0.4,
+            0.4,
+            0.4,
+            0.4
+          ],
+          "5": [
+            10.2,
+            10.2,
+            11,
+            12.2,
+            12.5
+          ],
+          "10": [
+            10,
+            10.5,
+            11,
+            12.1,
+            24.7
+          ],
+          "15": [
+            100,
+            100,
+            100,
+            100,
+            100
+          ]
+        },
+        "runtimeSettingLikelihood": "DISABLED"
+      },
+      "observationScopeAudit": {
+        "status": "CLOSED_EXCLUDED",
+        "runtimeSettingLikelihood": "DISABLED"
+      }
+    },
+    {
+      "blockId": "mode-bonus",
+      "label": "内部モード別初当たり",
+      "reason": "入賞ラインや楽曲は一部のモード示唆であり、全Gの滞在モードを分けられません。内部モード別Gを推定して数値を混合しません。",
+      "reevaluationCondition": "対象の全契機または全滞在区間を直接識別する新しい公開手順が得られた場合。",
+      "sourceIds": [
+        "source-1",
+        "source-2",
+        "mode"
+      ],
+      "referenceConditionalDistribution": {
+        "settings": [
+          1,
+          2,
+          3,
+          5,
+          6
+        ],
+        "publishedValues": {
+          "通常": [
+            224.6,
+            221,
+            207.5,
+            187.1,
+            174.2
+          ],
+          "チャンス": [
+            74.9,
+            74.5,
+            74,
+            73.7,
+            73
+          ],
+          "高確": [
+            218.3,
+            212.6,
+            198,
+            178.1,
+            165
+          ],
+          "BIG準備": [
+            221.3,
+            217,
+            198.3,
+            176.3,
+            159.2
+          ]
+        },
+        "runtimeSettingLikelihood": "DISABLED"
+      },
+      "observationScopeAudit": {
+        "status": "CLOSED_EXCLUDED",
+        "runtimeSettingLikelihood": "DISABLED"
+      }
+    }
+  ],
+  "evidenceCandidates": [],
+  "sourceIntegrityIssues": []
+}

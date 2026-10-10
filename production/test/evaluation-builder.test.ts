@@ -62,3 +62,12 @@ test('evidence without top-level semanticType round-trips through JSON and valid
  assert.equal(persisted.evidenceCandidates[0].semanticCategories[0].linkedFindingId,'screen-dist');
  assert.doesNotThrow(()=>validateEvaluationDocument(persisted,research));
 });
+
+
+test('percent signs in concrete category labels are not likelihood values',()=>{
+ const research:any={manifestVersion:'8.5',batchId:'b',machineId:'M',machineName:'M',findings:[{findingId:'panel',label:'パネル表示',observationType:'appearance_distribution',sourceIds:['s'],trialUniverse:'PANEL_TRIAL',settingDistribution:{'1':'45.6%表示:0%/その他の数字:100%','4':'45.6%表示:2%/その他の数字:98%'},categoryModel:{residualPolicy:'SOURCE_EXHAUSTIVE'}}],blockedItems:[]};
+ const doc=buildEvaluation(research);
+ assert.ok(doc.evaluations[0].metrics.perEligibleTrialPower>0);
+ assert.doesNotThrow(()=>validateEvaluationDocument(doc,research));
+ assert.equal(doc.evaluations[0].settingDistribution['4'],'45.6%表示:2%/その他の数字:98%');
+});

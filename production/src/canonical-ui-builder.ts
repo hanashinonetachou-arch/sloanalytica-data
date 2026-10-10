@@ -110,6 +110,9 @@ export function deriveObservationInputLabels(o:any){
  if(trial.length>30&&/レア役/.test(sectionTitle)&&/(?:チェリー|スイカ|レア役).*(?:成立回数|回数)$/.test(trial))trial='対象レア役成立回数';
  if(trial.length>30&&/(?:ボーナス|ぼーなす)消化ゲーム数$/.test(trial))trial='対象ボーナス消化ゲーム数';
  if(o?.model==='CATEGORICAL'&&!canonicalTrialLabel&&(trial.length>30||/を全件記録|を記録|を数える/.test(trial)))trial=compactContextualInputLabel(normalizeTrialLabel(sectionTitle+'を確認した回数'),sectionTitle);
+ // Scope prose belongs in the description; keep an unknown trial's input
+ // grounded in its section subject instead of copying a complete sentence.
+ if(!canonicalTrialLabel&&trial.length>30)trial=compactContextualInputLabel(normalizeTrialLabel(sectionTitle+'を確認した回数'),sectionTitle);
  return {trialLabel:trial,successLabel:success};
 }
 const isSettingMeaning=(s:string)=>/設定[1-6]|高設定|低設定|奇数|偶数|示唆|濃厚|否定/.test(s);

@@ -163,3 +163,12 @@ test('preserves canonical labels for known game-count trial universes',()=>{
  assert.deepEqual(deriveObservationInputLabels(tenha),{trialLabel:'天破中を除く通常ゲーム数',successLabel:'天破突入回数'});
  assert.deepEqual(derivePlayInfoRequirement(['NON_TENHA_NORMAL_GAME_TRIAL']),{mode:'NORMAL_ONLY',needsTotal:false,needsNormal:true,needsExcludedGames:true,exclusionGames:{visible:true,label:'天破中ゲーム数',quickAdd:[7,14,21],base:'NORMAL',resultLabel:'天破中を除く通常ゲーム数',description:'通常ゲーム数の差分から自動で差し引きます。通常の天破は終了時に+7 / +14 / +21を使えます。無限天破は直接ゲーム数を入力してください。'}});
 });
+
+test('long conditional trial scope stays in the description and uses a concise subject label',()=>{
+ const o={label:'覚醒チャレンジ成功',model:'BERNOULLI',trialUniverse:'AWAKENING_TRIAL',denominatorSemantics:'上位AT・エンディング終了後に入る4Gの覚醒チャレンジを1試行として、引き戻し成功を数えます。成功後の残りGで行う上乗せを追加成功に数えません。'};
+ const labels=deriveObservationInputLabels(o);
+ assert.ok(labels.trialLabel.includes('覚醒チャレンジ'));
+ assert.ok(labels.trialLabel.length<=30);
+ assert.ok(!labels.trialLabel.includes('1試行として'));
+ assert.ok(buildObservationDescription(o,o.model).includes('追加成功'));
+});
