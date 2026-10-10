@@ -10,7 +10,10 @@ export function buildResearchWorkQueue(drafts:any[],basisAudit:string){
    const nextCheck=row.domain==='EVIDENCE'?'演出ごとの適用区間・既存レビューとの対応・出典不一致を照合':
     ['INITIAL_HIT','CZ','AT','INTERNAL_CONDITIONAL_DRAW'].includes(row.domain)?'公表数値の試行条件・観測可能性・上流下流の重複を確認':
     '公開表と適用条件を追加資料で確認。未公表値を補完しない';
-   return {machineId:machine.machineId,...row,sourceUrls:[...new Set(row.sourceIds.map((id:string)=>sources.get(id).url))],nextCheck,approvalRequired:false};
+   const planned=row.nextWorkDisposition;
+   return {machineId:machine.machineId,...row,sourceUrls:[...new Set(row.sourceIds.map((id:string)=>sources.get(id).url))],
+    nextCheck:planned?.repeatPublicSearch===false
+      ? planned.owner+': '+planned.requiredProof.join(' / '):nextCheck,approvalRequired:false};
   });
  });
  return {schemaVersion:'batch009-remaining-domain-research-queue-v2',basisAudit,

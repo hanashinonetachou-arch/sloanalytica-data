@@ -57,7 +57,9 @@ test('Den-O source only gives setting-1 small-role odds; refrain from inferring 
  const d=stage('L_KAMEN_RIDER_DEN_O_UD');
  assert.equal(domain(d,'THRESHOLD_BEHAVIOR')?.status,'CHECKED');
  assert.equal(domain(d,'RESET_BEHAVIOR')?.status,'CHECKED');
- assert.equal(domain(d,'SMALL_ROLE')?.status,'PARTIAL');
+ assert.equal(domain(d,'SMALL_ROLE')?.status,'CHECKED');
+ assert.equal(domain(d,'SMALL_ROLE')?.publicSearchClosure.runtimeUse,'DISABLED');
+ assert.match(domain(d,'SMALL_ROLE')?.publicSearchClosure.missingInformation,/設定2/);
  block(d,'deno-small-role-only-setting1-reference');
  for(const id of ['deno-normal-modes-ceilings','deno-sixth-bonus-at-ceiling','deno-setting-change-reset','deno-100pt-cz-ceiling-independent'])block(d,id);
  assert.deepEqual(d.settings.values,['SET_1','SET_2','SET_4','SET_5','SET_6']);

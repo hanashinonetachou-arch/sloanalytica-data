@@ -14,7 +14,8 @@ test('Shimauta mode lamps cannot become stronger mode or setting constraints',()
  assert.match(r.notSettingEvidence.find((x:any)=>x.label==='告知時の下パネル消灯').reason,/設定Lの常時消灯と区別/);
  for(const d of [w,s]){
   assert.deepEqual(d.settings.values,['SET_1','SET_2','SET_3','SET_5','SET_6']);
-  assert.equal(d.researchCompleteness.domains.find((x:any)=>x.domain==='EVIDENCE').status,'PARTIAL');
+  const domain=d.researchCompleteness.domains.find((x:any)=>x.domain==='EVIDENCE');
+  assert.equal(domain.status,'CHECKED');assert.equal(domain.publicSearchClosure.disposition,'PUBLIC_INFORMATION_NOT_FOUND_EXCLUDED');assert.equal(domain.publicSearchClosure.runtimeUse,'DISABLED');
   assert.match(d.blockedItems.find((x:any)=>x.blockId==='mode-lamps-not-setting').reason,/設定番号の確定制約として使いません/);
   assert.equal(d.findings.find((x:any)=>x.findingId==='big-initial').liveObservation.status,'UNRESOLVED');
  }

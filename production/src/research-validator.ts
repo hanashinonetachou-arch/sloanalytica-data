@@ -1,3 +1,4 @@
+import {validatePublicSearchClosure} from './research-public-search-closure.ts';
 import fs from 'node:fs';
 import path from 'node:path';
 import crypto from 'node:crypto';
@@ -139,6 +140,7 @@ export function validateResearchArtifacts(s:RepoStore,a:Attempt,r:WorkResult){
     if(!nonEmpty(row?.domain)||coverage.has(row.domain)) throw new Error('RESEARCH_VALIDATION:COMPLETENESS_DOMAIN_DUPLICATE');
     if(!researchCompletenessStatuses.has(row.status)||!nonEmpty(row.note)||!Array.isArray(row.sourceIds)) throw new Error('RESEARCH_VALIDATION:COMPLETENESS_DOMAIN_INVALID:'+row.domain);
     if(row.status==='CHECKED'&&(row.sourceIds.length===0||row.sourceIds.some((x:any)=>!sourceIds.has(x)))) throw new Error('RESEARCH_VALIDATION:COMPLETENESS_PROVENANCE:'+row.domain);
+    validatePublicSearchClosure(d,row);
     coverage.set(row.domain,row);
   }
   for(const domain of RESEARCH_COMPLETENESS_DOMAINS) if(!coverage.has(domain)) throw new Error('RESEARCH_VALIDATION:COMPLETENESS_DOMAIN_MISSING:'+domain);
