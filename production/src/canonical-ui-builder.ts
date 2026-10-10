@@ -138,7 +138,7 @@ export function derivePlayInfoRequirement(trialUniverses:Iterable<string>){
  const values=[...trialUniverses].map(String);const normalUniverses=new Set(['NORMAL_GAME_TRIAL','BONUS_ELIGIBLE_GAME_TRIAL','NON_TENHA_NORMAL_GAME_TRIAL']);const excludedTotalUniverses=new Set(['LOTIS_NON_CHAIN_GAME_TRIAL','NON_CHAIN_BONUS_INITIAL_GAME_TRIAL']);
  const needsNormal=values.some(x=>normalUniverses.has(x));const hasTenhaExclusion=values.includes('NON_TENHA_NORMAL_GAME_TRIAL');const hasTotalExclusion=values.some(x=>excludedTotalUniverses.has(x));
  if(hasTenhaExclusion&&hasTotalExclusion)throw new Error('PLAY_INFO_MULTIPLE_EXCLUSION_SEMANTICS');
- const exclusionGames=hasTenhaExclusion?{visible:true,label:'天破中ゲーム数',quickAdd:[7,14,21],base:'NORMAL',resultLabel:'天破中を除く通常ゲーム数',description:'通常ゲーム数の差分から自動で差し引きます。通常の天破は終了時に+7 / +14 / +21を使えます。無限天破は直接ゲーム数を入力してください。'}:hasTotalExclusion?{visible:true,label:'除外ゲーム数（連荘中のゲーム数）',quickAdd:[50],base:'TOTAL',resultLabel:'除外後の実戦ゲーム数'}:undefined;
+ const exclusionGames=hasTenhaExclusion?{visible:true,label:'天破中ゲーム数',quickAdd:[7,14,21],base:'NORMAL',resultLabel:'天破中を除く通常ゲーム数',description:'通常ゲーム数の差分から自動で差し引きます。通常の天破は終了時に+7 / +14 / +21を使えます。無限天破は直接ゲーム数を入力してください。'}:hasTotalExclusion?{visible:true,label:'除外ゲーム数',quickAdd:[50],base:'TOTAL',resultLabel:'除外後の実戦ゲーム数',description:'連チャンゾーン中に消化したゲーム数を入力してください。総ゲーム数から差し引きます。ゾーン内の当選はすべて連チャンとして初当たりから除外します。'}:undefined;
  const needsExcludedGames=Boolean(exclusionGames);const needsTotal=hasTotalExclusion||values.includes('TOTAL_GAME_TRIAL');
  const mode=needsTotal&&needsNormal?'TOTAL_AND_NORMAL':needsTotal?'TOTAL_ONLY':needsNormal?'NORMAL_ONLY':'NONE';
  return {mode,needsTotal,needsNormal,needsExcludedGames,...(exclusionGames?{exclusionGames}:{})};

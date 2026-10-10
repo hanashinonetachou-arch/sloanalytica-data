@@ -38,7 +38,7 @@ test('derives only the game-count ranges consumed by adopted observations',()=>{
  assert.deepEqual(derivePlayInfoRequirement(['NORMAL_GAME_TRIAL']),{mode:'NORMAL_ONLY',needsTotal:false,needsNormal:true,needsExcludedGames:false});
  assert.deepEqual(derivePlayInfoRequirement(['TOTAL_GAME_TRIAL','BONUS_ELIGIBLE_GAME_TRIAL']),{mode:'TOTAL_AND_NORMAL',needsTotal:true,needsNormal:true,needsExcludedGames:false});
  assert.deepEqual(derivePlayInfoRequirement(['END_SCREEN_TRIAL']),{mode:'NONE',needsTotal:false,needsNormal:false,needsExcludedGames:false});
- assert.deepEqual(derivePlayInfoRequirement(['LOTIS_NON_CHAIN_GAME_TRIAL']),{mode:'TOTAL_ONLY',needsTotal:true,needsNormal:false,needsExcludedGames:true,exclusionGames:{visible:true,label:'除外ゲーム数（連荘中のゲーム数）',quickAdd:[50],base:'TOTAL',resultLabel:'除外後の実戦ゲーム数'}});
+ assert.deepEqual(derivePlayInfoRequirement(['LOTIS_NON_CHAIN_GAME_TRIAL']),{mode:'TOTAL_ONLY',needsTotal:true,needsNormal:false,needsExcludedGames:true,exclusionGames:{visible:true,label:'除外ゲーム数',quickAdd:[50],base:'TOTAL',resultLabel:'除外後の実戦ゲーム数',description:'連チャンゾーン中に消化したゲーム数を入力してください。総ゲーム数から差し引きます。ゾーン内の当選はすべて連チャンとして初当たりから除外します。'}});
 });
 
 test('rejects a displayed game-count range that no adopted observation consumes',()=>{
@@ -158,7 +158,7 @@ test('preserves canonical labels for known game-count trial universes',()=>{
  assert.deepEqual(deriveObservationInputLabels(excluded),{trialLabel:'連荘中を除くゲーム数',successLabel:'ボーナス初当たり回数'});
  const total:any={label:'チェリー',trialUniverse:'TOTAL_GAME_TRIAL',denominatorSemantics:'総ゲーム数に対するチェリー成立回数。'};
  assert.deepEqual(deriveObservationInputLabels(total),{trialLabel:'総ゲーム数',successLabel:'チェリー成立回数'});
- assert.deepEqual(derivePlayInfoRequirement(['NON_CHAIN_BONUS_INITIAL_GAME_TRIAL']),{mode:'TOTAL_ONLY',needsTotal:true,needsNormal:false,needsExcludedGames:true,exclusionGames:{visible:true,label:'除外ゲーム数（連荘中のゲーム数）',quickAdd:[50],base:'TOTAL',resultLabel:'除外後の実戦ゲーム数'}});
+ assert.deepEqual(derivePlayInfoRequirement(['NON_CHAIN_BONUS_INITIAL_GAME_TRIAL']),{mode:'TOTAL_ONLY',needsTotal:true,needsNormal:false,needsExcludedGames:true,exclusionGames:{visible:true,label:'除外ゲーム数',quickAdd:[50],base:'TOTAL',resultLabel:'除外後の実戦ゲーム数',description:'連チャンゾーン中に消化したゲーム数を入力してください。総ゲーム数から差し引きます。ゾーン内の当選はすべて連チャンとして初当たりから除外します。'}});
  const tenha:any={label:'天破の刻突入',trialUniverse:'NON_TENHA_NORMAL_GAME_TRIAL',denominatorSemantics:'通常時ゲーム数に対する天破突入回数。天破の刻中は対象に含めません。'};
  assert.deepEqual(deriveObservationInputLabels(tenha),{trialLabel:'天破中を除く通常ゲーム数',successLabel:'天破突入回数'});
  assert.deepEqual(derivePlayInfoRequirement(['NON_TENHA_NORMAL_GAME_TRIAL']),{mode:'NORMAL_ONLY',needsTotal:false,needsNormal:true,needsExcludedGames:true,exclusionGames:{visible:true,label:'天破中ゲーム数',quickAdd:[7,14,21],base:'NORMAL',resultLabel:'天破中を除く通常ゲーム数',description:'通常ゲーム数の差分から自動で差し引きます。通常の天破は終了時に+7 / +14 / +21を使えます。無限天破は直接ゲーム数を入力してください。'}});

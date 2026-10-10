@@ -29,7 +29,7 @@ test('Gundam SEED common roles and ceiling variants never become invented settin
  for(const id of ['small-role-settings-common','mode-stage-is-not-setting','gundam-mode-ceiling-not-setting','gundam-cz-state-conditioned'])
    assert.ok(d.blockedItems.some((x:any)=>x.blockId===id),'missing '+id);
  assert.deepEqual(d.findings.filter((x:any)=>x.settingDistribution).map((x:any)=>x.findingId).sort(),
-   ['at-initial','cz-strike-attack','post-st-reset-100g-first-cz-or-bonus'].sort());
+   ['at-initial','cz-strike-attack'].sort());
  for(const f of d.findings.filter((x:any)=>x.settingDistribution))assert.equal(f.liveObservation.status,'UNRESOLVED');
  assert.equal(d.researchCompleteness.status,'INCOMPLETE');
 });

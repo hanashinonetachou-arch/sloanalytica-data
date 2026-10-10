@@ -36,26 +36,22 @@ test('34-78G can include a new initial hit, so game-clock thresholds cannot auto
  const hit=d.findings.find((x:any)=>x.findingId==='bonus-initial');
  assert.ok(hit);
  assert.equal(hit.trialUniverse,'NON_CHAIN_BONUS_INITIAL_GAME_TRIAL');
- assert.equal(hit.liveObservation.status,'UNRESOLVED');
- assert.equal(hit.dependencyScopeAudit.status,'UNRESOLVED_OBSERVATION_SCOPE');
- assert.match(hit.dependencyScopeAudit.forbiddenSimplification,/34～78G/);
- assert.match(hit.denominatorSemantics,/34～78G/);
+ assert.equal(hit.liveObservation.status,'DIRECT_EXACT');
+ assert.equal(hit.dependencyScopeAudit.status,'USER_DEFINED_PRACTICAL_SCOPE');
+ assert.match(hit.historicalObservationScopeAudit.forbiddenSimplification,/34～78G/);
+ assert.match(hit.denominatorSemantics,/除外/);
+ assert.equal(hit.dependencyScopeAudit.publishedDenominatorEquivalence,'NOT_ASSERTED');
  assert.ok(hit.sourceIds.includes('tida-v22-heaven-initial-scope'));
 });
 
-test('even a manually toggled exact observation does not allow unresolved Tida first-hit promotion',()=>{
+test('User-defined Tida counting resolves observation scope without claiming publisher equivalence',()=>{
  const d=read('research-evidence-staged','wave-1',id+'.json');
- for(const row of d.researchCompleteness.candidateLedger)
-  if(row.disposition?.type==='FINDING_PENDING_SCOPE_VALIDATION')row.disposition.type='FINDING';
  const hit=d.findings.find((x:any)=>x.findingId==='bonus-initial');
- hit.liveObservation.status='DIRECT_EXACT';
- assert.throws(()=>validateResearchPromotionReadiness(d),/UNRESOLVED_CAUSAL_DEPENDENCY_PROMOTION_FORBIDDEN/);
- const e=buildEvaluation(d);
- assert.equal(e.evaluations.find((x:any)=>x.findingId==='bonus-initial').dependencyScopeAudit.status,'UNRESOLVED_OBSERVATION_SCOPE');
- const decisions=buildEligibility(e);
- const decision=decisions.decisions.find((x:any)=>x.findingId==='bonus-initial');
- assert.equal(decision?.eligibility,'UNRESOLVED');
- assert.equal(decision?.liveInferenceRoute,'NONE');
+ assert.equal(hit.liveObservation.status,'DIRECT_EXACT');
+ assert.equal(hit.dependencyScopeAudit.status,'USER_DEFINED_PRACTICAL_SCOPE');
+ assert.equal(hit.operationalCounting.publishedDenominatorEquivalence,'NOT_ASSERTED');
+ const evaluation=buildEvaluation(d);
+ assert.equal(evaluation.evaluations.find((x:any)=>x.findingId==='bonus-initial').dependencyScopeAudit.status,'USER_DEFINED_PRACTICAL_SCOPE');
 });
 
 test('Tida working data, reviewed Evidence and staging remain aligned',()=>{

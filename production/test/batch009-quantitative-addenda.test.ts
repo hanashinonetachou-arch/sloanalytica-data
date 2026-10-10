@@ -37,18 +37,18 @@ test('BIG島唄 conditional outcomes are source-tracked and omit nonexistent set
   }
   assert.notEqual(d.findings[1].trialUniverse, d.findings[2].trialUniverse);
 });
-test('緑ドン reach-me replay retains all six public rates while research remains pending', () => {
+test('緑ドン user-counted reach-me replay retains all six public rates', () => {
   const d = read('research-evidence-staged/wave-1/L_MIDORIDON_VIVA_REVIVAL_FY.json');
   const f = d.findings.find((x: any) => x.findingId === 'reach-me-replay');
   assert.ok(f);
   assert.deepEqual(f.settingDistribution, {'1':'1/2978.9','2':'1/2978.9','3':'1/2520.6','4':'1/2520.6','5':'1/2048.0','6':'1/2048.0'});
   assert.notEqual(d.researchCompleteness.status, 'COMPLETE');
-  assert.equal(f.liveObservation.status, 'UNRESOLVED');
+  assert.equal(f.liveObservation.status, 'DIRECT_EXACT');
   assert.equal(f.trialUniverse,'TOTAL_GAME_TRIAL');
   assert.equal(f.sourceVerification.status,'PUBLISHED_FULL_SIX_SETTING_TABLE_TWO_PUBLISHERS');
   assert.ok(f.sourceIds.includes('green-v23-full-small-role-scope'));
   assert.match(f.denominatorSemantics,/総ゲーム数/);
-  assert.match(f.liveObservation.reason,/停止手順/);
+  assert.match(f.liveObservation.reason,/自己判断/);
 });
 test('バイオ5 special 256枚 is a noncontiguous setting constraint', () => {
   const d = read('research-evidence-reviewed/L_BIOHAZARD5_ZE.json');

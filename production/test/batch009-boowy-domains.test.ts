@@ -18,7 +18,7 @@ test('BOØWY follows all twenty research domains without inferring hidden settin
  for(const name of ['SMALL_ROLE','CZ','INTERNAL_CONDITIONAL_DRAW','SUCCESS_RATE','POINTS_GAME_DISTRIBUTION','CARRY_OVER','THRESHOLD_BEHAVIOR','RESET_BEHAVIOR','POST_EVENT_TRANSITION','NAVIGATION','ROLE_CONDITIONAL_DISTRIBUTION','EXTERNAL_DATA_ONLY','AT'])
    assert.equal(d.get(name).status,'CHECKED',name);
  const enabled=staged.findings.filter((x:any)=>x.settingDistribution&&x.liveObservation?.status!=='UNRESOLVED');
- assert.equal(enabled.length,0);
+ assert.deepEqual(enabled.map((x:any)=>x.findingId),['at-initial']);
 });
 test('BOØWY verified no-setting-difference decisions are source-traced and plain Japanese',()=>{
  const staged=read('research-evidence-staged','wave-2','S_BOOWY_SV.json');
@@ -68,7 +68,8 @@ test('BOØWY AT progression can be source-checked while AT initial-hit denominat
  assert.ok(at.sourceIds.includes('boowy-v19-gigs-nana'));
  assert.ok(at.sourceIds.includes('boowy-v19-gigs-pworld'));
  const initial=d.findings.find((x:any)=>x.findingId==='at-initial');
- assert.equal(initial.liveObservation?.status,'UNRESOLVED');
+ assert.equal(initial.liveObservation?.status,'DIRECT_EXACT');
+ assert.equal(initial.dependencyScopeAudit.publishedDenominatorEquivalence,'NOT_ASSERTED');
  const blocked=d.blockedItems.find((x:any)=>x.blockId==='at-upper-promotion-not-independent');
  assert.ok(blocked?.sourceIds.includes('boowy-v19-gigs-nana'));
  assert.ok(d.researchCompleteness.candidateLedger.some((x:any)=>x.disposition?.refId===blocked.blockId));

@@ -1,3 +1,4 @@
+import {validatePracticalObservationPolicy} from './practical-observation-policy.ts';
 import {validatePublicSearchClosure} from './research-public-search-closure.ts';
 import fs from 'node:fs';
 import path from 'node:path';
@@ -39,6 +40,7 @@ const repoRelative=(p:string)=>p.startsWith('production/')?p.slice('production/'
 const sha256=(b:Buffer)=>crypto.createHash('sha256').update(b).digest('hex');
 
 export function validateResearchCandidateLedger(d:any,sourceIds:Set<any>){
+ validatePracticalObservationPolicy(d);
   for(const finding of d.findings??[]){
     const ids=finding.dependencyScopeAudit?.evidenceSourceIds;
     if(ids!==undefined&&(!Array.isArray(ids)||ids.length===0||ids.some((id:any)=>!sourceIds.has(id)||!finding.sourceIds?.includes(id))))

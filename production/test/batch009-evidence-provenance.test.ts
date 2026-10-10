@@ -81,13 +81,13 @@ test('てぃだどんどん covers the five supported settings and only uses sev
   assert.equal(d.blockedItems.some((x:any)=>x.blockId==='seven-segment'),false);
   assert.ok(d.blockedItems.some((x:any)=>x.blockId==='small-role-no-setting-difference'));
   assert.equal(d.researchCompleteness.domains.find((x:any)=>x.domain==='SMALL_ROLE')?.status,'CHECKED');
-  assert.equal(d.findings.find((x:any)=>x.findingId==='bonus-initial')?.liveObservation?.status,'UNRESOLVED');
+  assert.equal(d.findings.find((x:any)=>x.findingId==='bonus-initial')?.liveObservation?.status,'DIRECT_EXACT');
 });
 test('BOØWY public small-role rates do not become a fabricated feature',()=>{
   const d=read('research-evidence-staged','wave-2','S_BOOWY_SV.json');
   assert.deepEqual(d.settings.values,['SET_1','SET_2','SET_4','SET_5','SET_6']);
   assert.equal(d.findings.filter((x:any)=>x.settingDistribution).length,1);
-  assert.equal(d.findings[0].liveObservation.status,'UNRESOLVED');
+  assert.equal(d.findings[0].liveObservation.status,'DIRECT_EXACT');
   assert.ok(d.blockedItems.some((x:any)=>x.blockId==='small-role-common'));
   const c=d.findings.find((x:any)=>x.findingId==='reviewed-at-end-screen');
   const high=c.semanticCategories.find((x:any)=>x.label==='氷室＆高橋');
@@ -127,5 +127,5 @@ test('BOØWY threshold, reset and post-event domains are source checked but not 
    assert.ok(d.researchCompleteness.candidateLedger.some((x:any)=>x.disposition?.type==='BLOCKED'&&x.disposition.refId===blockId),blockId+':ledger');
  }
  assert.equal(d.researchCompleteness.status,'INCOMPLETE');
- assert.equal(d.findings.find((x:any)=>x.findingId==='at-initial').liveObservation.status,'UNRESOLVED');
+ assert.equal(d.findings.find((x:any)=>x.findingId==='at-initial').liveObservation.status,'DIRECT_EXACT');
 });

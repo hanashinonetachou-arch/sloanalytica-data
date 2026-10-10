@@ -5,7 +5,7 @@ import path from 'node:path';
 import {buildResearchResolutionRequirements} from '../src/research-resolution-requirements.ts';
 
 const batch='batches/batch-20261008-009';
-const review=()=>JSON.parse(fs.readFileSync(path.join(batch,'research-resolution-review-v46-20261010.json'),'utf8')).rows;
+const review=()=>JSON.parse(fs.readFileSync(path.join(batch,'research-resolution-review-v47-20261010.json'),'utf8')).rows;
 const drafts=()=>{
  const audit=JSON.parse(fs.readFileSync(path.join(batch,'research-progress-audit-v42-20261009.json'),'utf8'));
  return audit.machineRows.map((m:any)=>{
@@ -18,8 +18,8 @@ test('Resolution review covers every remaining domain and numeric candidate with
  const d=drafts(),before=JSON.stringify(d);
  const result=buildResearchResolutionRequirements(d,review(),'v42');
  assert.equal(result.remainingDomains,36);
- assert.equal(result.unresolvedNumericCandidates,28);
- assert.equal(result.rows.length,64);
+ assert.equal(result.unresolvedNumericCandidates,22);
+ assert.equal(result.rows.length,58);
  assert.equal(JSON.stringify(d),before);
  assert.ok(result.rows.every(r=>r.resolutionStatus==='OPEN'&&r.approvalRequired===false));
  assert.deepEqual(result.machineOrder,d.map(x=>x.machineId));

@@ -18,7 +18,8 @@ test('Shimauta 32G cutoff does not establish the published initial-hit trial',()
  const hit=s.findings.find((f:any)=>f.findingId==='big-initial');
  assert.equal(hit.liveObservation.status,'UNRESOLVED');
  assert.match(hit.denominatorSemantics,/32G以内には初当たりと連チャンが混在/);
- assert.match(hit.dependencyScopeAudit.forbiddenSimplification,/32G以内/);
+ assert.match(hit.dependencyScopeAudit.forbiddenSimplification,/独立加点しない/);
+ assert.match(hit.operationalCounting.rule,/連チャンゾーン内/);
  assert.deepEqual(hit.dependencyScopeAudit.evidenceSourceIds,['shimauta-v39-initial-window']);
  // Changing only the observation flag must not bypass the causal scope gate.
  for(const finding of s.findings)
