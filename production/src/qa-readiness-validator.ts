@@ -25,7 +25,24 @@ export function validateMachineQaReadiness(machineId:string,stageStates:Record<s
   if(sourceIds.length!==1||!expectedSet.has(sourceIds[0])||!hasConstraint||def?.type!=='SETTING_CONSTRAINT')fail(machineId+':EVIDENCE_MATERIALIZATION');
  }
  const uiEvidence=(pkg?.ui?.v8Sections??[]).filter((s:any)=>String(s?.id??'').startsWith('EVI_'));
- if(expected.length&&uiEvidence.length!==refs.length)fail(machineId+':EVIDENCE_UI_COVERAGE');
+ // Explicit linked categories are rendered by their numeric counter section.
+ // Never require a second Evidence section for the same observation.
+ const linkedSectionFor=(ref:any)=>{
+  const cats=(ref.evidenceItems??[]).flatMap((e:any)=>e.semanticCategories??[]);
+  if(!cats.length||cats.some((c:any)=>!c.linkedFindingId))return undefined;
+  const ids=[...new Set(cats.map((c:any)=>c.linkedFindingId))];if(ids.length!==1)return undefined;
+  const sections=(pkg?.ui?.v8Sections??[]).filter((s:any)=>(s.items??[]).some((n:any)=>n.featureId===ids[0]&&n.interaction?.type==='CATEGORY_COUNTERS'));
+  if(sections.length!==1)return undefined;
+  const categories=sections[0].items.flatMap((n:any)=>n.featureId===ids[0]?n.interaction?.categories??[]:[]);
+  if(categories.length!==cats.length||categories.some((c:any,i:number)=>c.label!==cats[i].label||c.meaning!==cats[i].meaning||!pkg.inputs?.inputs?.some((input:any)=>input.id===c.inputId)))return undefined;
+  for(const def of defs.filter((e:any)=>e.sourceEvidenceRefs?.some((id:string)=>ref.evidenceItems.some((item:any)=>item.findingId===id)))){
+   const index=Number(String(def.id).split('__').pop())-1;
+   if(!categories[index]||def.inputId!==categories[index].inputId)fail(machineId+':LINKED_EVIDENCE_INPUT_MISMATCH');
+  }
+  return sections[0];
+ };
+
+ if(expected.length&&uiEvidence.length!==refs.filter((ref:any)=>!linkedSectionFor(ref)).length)fail(machineId+':EVIDENCE_UI_COVERAGE');
  const blockedFindingIds=new Set((pkg?.blockedItems??[]).flatMap((b:any)=>Array.isArray(b?.blockedFindingIds)?b.blockedFindingIds:[]));
  for(const ref of refs){
   const items=Array.isArray(ref?.evidenceItems)?ref.evidenceItems:[];
@@ -35,7 +52,7 @@ export function validateMachineQaReadiness(machineId:string,stageStates:Record<s
   const details=items.flatMap((x:any)=>Array.isArray(x?.details)?x.details:[]);
   if(details.length===0||details.some((x:any)=>typeof x!=='string'||!x.trim()))fail(machineId+':EVIDENCE_DETAILS_MISSING:'+String(ref?.id??'UNKNOWN'));
   for(const item of items){const cats=Array.isArray(item?.semanticCategories)?item.semanticCategories:[];if(cats.length===0||cats.some((x:any)=>typeof x?.label!=='string'||!x.label.trim()||!['EXACT_CONSTRAINT','PROBABILITY_BACKED','PROBABILITY_UNKNOWN','DISPLAY_ONLY','BLOCK'].includes(x?.semanticType))||(cats.some((x:any)=>x.meaning!==undefined)?cats.some((x:any)=>typeof x.meaning!=='string'||!x.meaning.trim()):cats.length!==item.details.length||cats.some((x:any,i:number)=>x.label!==item.details[i])))fail(machineId+':EVIDENCE_SEMANTICS:'+String(ref?.id??'UNKNOWN'));}
-  const section=uiEvidence.find((s:any)=>s?.id===ref?.id);
+  const section=uiEvidence.find((s:any)=>s?.id===ref?.id)??linkedSectionFor(ref);
   const categories=(section?.items??[]).flatMap((node:any)=>node?.interaction?.type==='CATEGORY_COUNTERS'?(node?.interaction?.categories??[]).map((c:any)=>c?.label):[]);
   const categoryDetails=items.flatMap((item:any)=>item.semanticCategories.map((c:any)=>c.meaning?`${c.label}：${c.meaning}`:c.label));
   if(!sameEvidencePresentation(categoryDetails,(section?.items??[]).flatMap((node:any)=>node?.interaction?.type==='CATEGORY_COUNTERS'?(node?.interaction?.categories??[]):[])))fail(machineId+':EVIDENCE_CATEGORY_MISMATCH:'+String(ref?.id??'UNKNOWN'));
@@ -44,7 +61,9 @@ export function validateMachineQaReadiness(machineId:string,stageStates:Record<s
  if(renderReport?.status!=='PASS')fail(machineId+':RENDERED_UI_VALIDATION');
  if(renderReport?.contractVersion!=='rendered-canonical-ui-v1'||renderReport?.renderer!=='MANIFEST_V8'||renderReport?.source!=='CANONICAL_UI'||renderReport?.manifestRevision!=='8.5')fail(machineId+':RENDER_CONTRACT');
  const checks=renderReport?.checks??{};
- for(const key of ['noDuplicateUi','noEmptySections','evidenceCoverage','summaryCoverage','noInternalWording','noLegacyRendererFallback','denominatorBinding','importanceCoverage','explanationCoverage','evidenceBodyCoverage','sectionGuidance','conciseInputLabels','compactTwoColumnLayout','evidenceCounterCoverage'])if(checks[key]!==true)fail(machineId+':RENDER_CHECK_'+key);
+ for(const key of ['noDuplicateUi','noEmptySections','evidenceCoverage','summaryCoverage','noInternalWording','noLegacyRendererFallback','denominatorBinding','importanceCoverage','explanationCoverage','evidenceBodyCoverage','sectionGuidance','conciseInputLabels','evidenceCounterCoverage'])if(checks[key]!==true)fail(machineId+':RENDER_CHECK_'+key);
+ const counters=(pkg.ui.v8Sections??[]).flatMap((s:any)=>s.items??[]).flatMap((n:any)=>(n.inputs??[]).filter((i:any)=>i.input==='counter').map((i:any)=>({gridSpan:(n.gridSpan??12)*(i.gridSpan??12)/12})));
+ if(checks.compactTwoColumnLayout!==true && !(checks.compactTwoColumnLayout===undefined && checks.gameCountInputs===true && counters.every((n:any)=>n.gridSpan===6)))fail(machineId+':RENDER_CHECK_compactTwoColumnLayout');
  return {machineId,status:'QA_READY',evidenceCount:defs.length,renderedUi:'PASS'};
 }
 

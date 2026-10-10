@@ -32,3 +32,16 @@ test('structured setting hints keep explanation details separate and preserve ex
  const good=structuredClone(pkg);good.evidence.references[0].evidenceItems[0].details=['出現率は未公表。確定条件だけを反映します。'];good.evidence.references[0].evidenceItems[0].semanticCategories=[{label:'銅',meaning:'設定2以上',semanticType:'EXACT_CONSTRAINT'}];good.ui.v8Sections[0].items[0].interaction.categories=[{label:'銅',meaning:'設定2以上'}];
  assert.equal(validateMachineQaReadiness('M',stages,good,renderReport).status,'QA_READY');good.ui.v8Sections[0].items[0].interaction.categories[0].meaning='高設定示唆';assert.throws(()=>validateMachineQaReadiness('M',stages,good,renderReport),/EVIDENCE_CATEGORY_MISMATCH/);
 });
+
+import fs from 'node:fs';
+test('current Sister Quest single numeric screen counter is QA-ready without duplicate Evidence input',()=>{
+ const root='batches/batch-20261008-009';
+ const actual=JSON.parse(fs.readFileSync(root+'/artifacts/L_SISTER_QUEST_CA/app_runtime/result.json','utf8')).package;
+ const states=Object.fromEntries(QA_REQUIRED_STAGES.map(stage=>[stage,JSON.parse(fs.readFileSync(root+'/machines/L_SISTER_QUEST_CA/stages/'+stage+'.json','utf8'))]));
+ const report={...renderReport,machineId:actual.machine.machineId,checks:{...renderReport.checks,compactTwoColumnLayout:undefined,gameCountInputs:true}};
+ assert.equal(validateMachineQaReadiness(actual.machine.machineId,states,actual,report).status,'QA_READY');
+ const wrong=structuredClone(actual);wrong.evidence.evidences.find((e:any)=>e.sourceEvidenceRefs.includes('reviewed-at-end')).inputId='wrong-counter';
+ assert.throws(()=>validateMachineQaReadiness(wrong.machine.machineId,states,wrong,report),/LINKED_EVIDENCE_INPUT_MISMATCH/);
+ const layout=structuredClone(actual);const wide=layout.ui.v8Sections.flatMap((s:any)=>s.items).find((n:any)=>n.inputs?.some((i:any)=>i.input==='counter'));wide.gridSpan=12;wide.inputs.find((i:any)=>i.input==='counter').gridSpan=12;
+ assert.throws(()=>validateMachineQaReadiness(layout.machine.machineId,states,layout,report),/compactTwoColumnLayout/);
+});
