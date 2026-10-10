@@ -1,12 +1,16 @@
 {
   "schemaVersion": 1,
+  "provenance": {
+    "manifestVersion": "8.5",
+    "generationPath": "V8_5_PRODUCTION_PIPELINE",
+    "legacyOracleUsed": false
+  },
   "machine": {
     "schemaVersion": "2.0.0",
     "machineId": "L_TIDADONDON_PA5",
-    "machineDataVersion": "0.1.0",
+    "machineDataVersion": "8.5.1-batch-20261008-009",
     "displayName": "てぃだどんどん",
-    "modelName": "L/てぃだどんどん/PA5",
-    "manufacturer": "パオン・ディーピー",
+    "modelName": "てぃだどんどん",
     "settings": [
       "SET_2",
       "SET_3",
@@ -27,98 +31,135 @@
     "schemaVersion": "2.0.0",
     "inputs": [
       {
-        "id": "INP_NORMAL_GAMES",
-        "name": "通常ゲーム数",
+        "id": "bonus-initial.eligibleTrialCount",
+        "name": "連荘中を除くゲーム数",
+        "category": "V8_NUMERIC",
         "type": "integer",
-        "category": "NUMERIC",
         "unit": "G",
-        "displayOrder": 10,
-        "inferenceRole": "INCLUDE_PRIMARY",
         "defaultValue": 0,
-        "minimum": 0
+        "minimum": 0,
+        "displayOrder": 1,
+        "inferenceRole": "INCLUDE_SUPPORT"
       },
       {
-        "id": "INP_BONUS_FIRST_HIT",
-        "name": "ボーナス初当り",
+        "id": "bonus-initial.successCount",
+        "name": "ボーナス初当たり合算回数",
+        "category": "V8_NUMERIC",
         "type": "counter",
-        "category": "NUMERIC",
         "unit": "回",
-        "displayOrder": 11,
-        "inferenceRole": "INCLUDE_PRIMARY",
-        "parentInputId": "INP_NORMAL_GAMES",
         "defaultValue": 0,
-        "minimum": 0
+        "minimum": 0,
+        "displayOrder": 2,
+        "parentInputId": "bonus-initial.eligibleTrialCount",
+        "inferenceRole": "INCLUDE_SUPPORT"
       },
       {
-        "id": "INP_EVI_BIG_SEGMENT",
-        "name": "BIG入賞時7セグ",
-        "type": "multi_enum",
-        "category": "EVIDENCE",
-        "unit": "",
-        "displayOrder": 100,
-        "inferenceRole": "INCLUDE_SUPPORT",
-        "options": [
-          {
-            "key": "YELLOW",
-            "label": "黄（設定3以上）",
-            "value": "YELLOW"
-          },
-          {
-            "key": "GREEN",
-            "label": "緑（設定4以上）",
-            "value": "GREEN"
-          },
-          {
-            "key": "GREEN_RED",
-            "label": "緑＆赤（設定6）",
-            "value": "GREEN_RED"
-          }
-        ],
-        "defaultValue": []
+        "id": "REF_reviewed-big-seven-seg_1",
+        "name": "白（白7）：基本パターン",
+        "category": "EVIDENCE_REFERENCE",
+        "type": "counter",
+        "unit": "回",
+        "defaultValue": 0,
+        "minimum": 0,
+        "displayOrder": 3,
+        "inferenceRole": "DISPLAY_ONLY"
+      },
+      {
+        "id": "REF_reviewed-big-seven-seg_2",
+        "name": "赤（赤7）：基本パターン",
+        "category": "EVIDENCE_REFERENCE",
+        "type": "counter",
+        "unit": "回",
+        "defaultValue": 0,
+        "minimum": 0,
+        "displayOrder": 4,
+        "inferenceRole": "DISPLAY_ONLY"
+      },
+      {
+        "id": "REF_reviewed-big-seven-seg_3",
+        "name": "黄：設定3以上",
+        "category": "EVIDENCE_REFERENCE",
+        "type": "counter",
+        "unit": "回",
+        "defaultValue": 0,
+        "minimum": 0,
+        "displayOrder": 5,
+        "inferenceRole": "DISPLAY_ONLY"
+      },
+      {
+        "id": "REF_reviewed-big-seven-seg_4",
+        "name": "緑：設定4以上",
+        "category": "EVIDENCE_REFERENCE",
+        "type": "counter",
+        "unit": "回",
+        "defaultValue": 0,
+        "minimum": 0,
+        "displayOrder": 6,
+        "inferenceRole": "DISPLAY_ONLY"
+      },
+      {
+        "id": "REF_reviewed-big-seven-seg_5",
+        "name": "緑＆赤：設定6",
+        "category": "EVIDENCE_REFERENCE",
+        "type": "counter",
+        "unit": "回",
+        "defaultValue": 0,
+        "minimum": 0,
+        "displayOrder": 7,
+        "inferenceRole": "DISPLAY_ONLY"
       }
     ]
   },
   "features": {
-    "schemaVersion": "2.0.0",
+    "version": "8.5-runtime",
     "features": [
       {
-        "featureId": "FEAT_BONUS_FIRST_HIT",
-        "name": "ボーナス初当り",
-        "adoptionCategory": "INCLUDE_PRIMARY",
+        "featureId": "bonus-initial",
+        "name": "ボーナス初当たり合算",
+        "trialUniverse": "NON_CHAIN_BONUS_INITIAL_GAME_TRIAL",
+        "adoptionCategory": "INCLUDE_SUPPORT",
         "calculationRole": "PROBABILITY",
         "probabilityEngineUsage": true,
-        "modelType": "binomial",
-        "minimumSample": 4375,
-        "sampleRecommendation": 13125,
-        "reliabilityProfile": {
-          "weight": 1
-        },
-        "denominatorInputId": "INP_NORMAL_GAMES",
-        "numeratorInputId": "INP_BONUS_FIRST_HIT",
-        "displayFormat": "ratio_1_over_n",
+        "denominatorInputId": "bonus-initial.eligibleTrialCount",
         "probabilities": {
-          "SET_2": 0.003381806,
-          "SET_3": 0.003534818,
-          "SET_4": 0.004027386,
-          "SET_5": 0.004486317,
-          "SET_6": 0.004892368
+          "SET_2": 0.003381805884342239,
+          "SET_3": 0.0035348179568752214,
+          "SET_4": 0.004027386226339105,
+          "SET_5": 0.004486316733961417,
+          "SET_6": 0.004892367906066536
         },
-        "sourceEvidenceRefs": [
-          "SRC_DMM",
-          "SRC_TOOL"
-        ]
+        "selectionRationale": {
+          "summary": "設定推測に採用された要素です。",
+          "adoptionReason": "採用条件を満たし、実戦で観測できる設定差を使用します。",
+          "shortTermReason": "標本が少ない間は結果の振れが大きくなります。",
+          "longTermReason": "観測数が増えるほど設定別の比較が安定します。"
+        },
+        "modelType": "binomial",
+        "numeratorInputId": "bonus-initial.successCount",
+        "displayFormat": "percentage"
+      }
+    ],
+    "runtimeProjection": [
+      {
+        "featureId": "bonus-initial",
+        "runtimeStatus": "ACTIVE",
+        "metric": "PER_ELIGIBLE_TRIAL_POWER",
+        "metricValue": 0.011438718767974032,
+        "importance": "微小"
       }
     ]
   },
   "evidence": {
-    "version": "1.0.0",
+    "version": "8.5-runtime",
     "evidences": [
       {
-        "id": "EVI_BIG_SEGMENT_YELLOW",
-        "name": "黄（設定3以上）",
-        "displayName": "黄（設定3以上）",
-        "inputId": "INP_EVI_BIG_SEGMENT",
-        "triggerValue": "YELLOW",
+        "id": "reviewed-big-seven-seg__3",
+        "name": "黄：設定3以上",
+        "displayName": "黄：設定3以上",
+        "inputId": "REF_reviewed-big-seven-seg_3",
+        "details": [
+          "黄：設定3以上"
+        ],
         "confirmedSettings": [
           "SET_3",
           "SET_4",
@@ -127,17 +168,19 @@
         ],
         "deniedSettings": [],
         "hasImage": false,
-        "type": "SETTING_CONFIRMATION",
+        "type": "SETTING_CONSTRAINT",
         "sourceEvidenceRefs": [
-          "RE_BIG_ENTRY_SEGMENT"
+          "reviewed-big-seven-seg"
         ]
       },
       {
-        "id": "EVI_BIG_SEGMENT_GREEN",
-        "name": "緑（設定4以上）",
-        "displayName": "緑（設定4以上）",
-        "inputId": "INP_EVI_BIG_SEGMENT",
-        "triggerValue": "GREEN",
+        "id": "reviewed-big-seven-seg__4",
+        "name": "緑：設定4以上",
+        "displayName": "緑：設定4以上",
+        "inputId": "REF_reviewed-big-seven-seg_4",
+        "details": [
+          "緑：設定4以上"
+        ],
         "confirmedSettings": [
           "SET_4",
           "SET_5",
@@ -145,121 +188,496 @@
         ],
         "deniedSettings": [],
         "hasImage": false,
-        "type": "SETTING_CONFIRMATION",
+        "type": "SETTING_CONSTRAINT",
         "sourceEvidenceRefs": [
-          "RE_BIG_ENTRY_SEGMENT"
+          "reviewed-big-seven-seg"
         ]
       },
       {
-        "id": "EVI_BIG_SEGMENT_GREEN_RED",
-        "name": "緑＆赤（設定6）",
-        "displayName": "緑＆赤（設定6）",
-        "inputId": "INP_EVI_BIG_SEGMENT",
-        "triggerValue": "GREEN_RED",
+        "id": "reviewed-big-seven-seg__5",
+        "name": "緑＆赤：設定6",
+        "displayName": "緑＆赤：設定6",
+        "inputId": "REF_reviewed-big-seven-seg_5",
+        "details": [
+          "緑＆赤：設定6"
+        ],
         "confirmedSettings": [
           "SET_6"
         ],
         "deniedSettings": [],
         "hasImage": false,
-        "type": "SETTING_CONFIRMATION",
+        "type": "SETTING_CONSTRAINT",
         "sourceEvidenceRefs": [
-          "RE_BIG_ENTRY_SEGMENT"
+          "reviewed-big-seven-seg"
         ]
       }
     ],
-    "sources": [
+    "references": [
       {
-        "id": "SRC_DMM",
-        "classification": "ANALYSIS",
-        "pageName": "てぃだどんどん",
-        "url": "https://p-town.dmm.com/machines/4757",
-        "checkedAt": "2026-08-31"
-      },
-      {
-        "id": "SRC_TOOL",
-        "classification": "ANALYSIS",
-        "pageName": "てぃだどんどん 設定判別",
-        "url": "https://pacnk.com/slot/tools/sh_teidadondon.html",
-        "checkedAt": "2026-08-31"
+        "id": "EVI_reviewed-big-seven-seg",
+        "sourceFindingId": "reviewed-big-seven-seg",
+        "title": "BIG入賞時の7セグ",
+        "kind": "EVIDENCE",
+        "collapsible": true,
+        "defaultExpanded": false,
+        "description": "BIG入賞時の7セグを確認したときに、該当する項目を1回加算して記録します。\n・注意：BIG入賞時にリール下に表示される777の色を記録する\n・注意：設定別の出現率が未公表の示唆は記録だけ行います。確定した条件のみ設定推測に反映します\n・反映：設定確定・設定否定の条件は、設定候補の絞り込みに自動反映します\n・反映：設定別出現率が未確認の項目は記録のみです。出現率確認後は設定推測へ反映できる可能性があります",
+        "descriptionPresentation": {
+          "collapsible": true,
+          "label": "説明",
+          "defaultExpanded": false
+        },
+        "runtimePolicyControlled": false,
+        "evidenceItems": [
+          {
+            "findingId": "reviewed-big-seven-seg",
+            "label": "BIG入賞時の7セグ",
+            "sourceIds": [
+              "evidence-source-1",
+              "evidence-source-2",
+              "pworld-tida"
+            ],
+            "details": [
+              "BIG入賞時にリール下に表示される777の色を記録する。",
+              "設定別の出現率が未公表の示唆は記録だけ行います。確定した条件のみ設定推測に反映します。"
+            ],
+            "semanticType": "DISPLAY_ONLY",
+            "semanticCategories": [
+              {
+                "label": "白（白7）",
+                "meaning": "基本パターン",
+                "semanticType": "DISPLAY_ONLY"
+              },
+              {
+                "label": "赤（赤7）",
+                "meaning": "基本パターン",
+                "semanticType": "DISPLAY_ONLY"
+              },
+              {
+                "label": "黄",
+                "meaning": "設定3以上",
+                "semanticType": "EXACT_CONSTRAINT"
+              },
+              {
+                "label": "緑",
+                "meaning": "設定4以上",
+                "semanticType": "EXACT_CONSTRAINT"
+              },
+              {
+                "label": "緑＆赤",
+                "meaning": "設定6",
+                "semanticType": "EXACT_CONSTRAINT"
+              }
+            ],
+            "runtimePolicyControlled": false,
+            "status": "SOURCE_REFERENCED",
+            "interaction": "REFERENCE_ONLY"
+          }
+        ]
       }
     ]
   },
+  "blockedItems": [
+    {
+      "blockId": "setting-1",
+      "label": "設定1の補完禁止",
+      "reason": "本機の設定段階は2〜6で設定1を搭載していません。設定1の確率を作らないでください。",
+      "reevaluationCondition": "同一機種の公表資料と実機で観測できる条件を再確認すること。",
+      "sourceIds": [
+        "pachinavi",
+        "pacnk"
+      ]
+    },
+    {
+      "blockId": "small-role-no-setting-difference",
+      "label": "チェリー・スイカ・確定役の出現率",
+      "reason": "公開されている小役の出現率は設定2～6で共通なので、引いた回数だけでは設定を判別できません。",
+      "sourceIds": [
+        "chonborista",
+        "pachinavi"
+      ],
+      "reevaluationCondition": "設定別の小役出現率が新たに公表された場合に再評価します。"
+    },
+    {
+      "blockId": "heaven-and-devil-loop",
+      "label": "ヘブン高確率・でびる中の連チャン",
+      "reason": "連チャン中の当選を新しい初当たりへ加算しません。初当たりの数え方はユーザー定義を使用し、公表資料の集計方法との一致は主張しません。",
+      "sourceIds": [
+        "chonborista",
+        "pworld-tida",
+        "tida-v22-heaven-initial-scope"
+      ],
+      "reevaluationCondition": "連チャン率を独立した設定差として扱える設定別資料が確認された場合。"
+    },
+    {
+      "blockId": "game-ceiling-conditional",
+      "label": "通常時のゲーム数天井",
+      "reason": "通常時の天井999Gと、設定変更後などの555G短縮は遊技状況による違いです。これだけで設定番号を判別することはできません。",
+      "sourceIds": [
+        "pworld-tida"
+      ],
+      "reevaluationCondition": "設定ごとの天井選択率や発動率が公開された場合に見直します。"
+    },
+    {
+      "blockId": "tida-bonus-mechanics-not-setting",
+      "label": "BIGとREGの合算カウント",
+      "reason": "BIGとREGは継続条件が異なり、連チャン中にも当たります。設定別の単独BIG・REG初当たり確率は確認できないため、種類別の回数を個別に加点しません。",
+      "sourceIds": [
+        "tida-bonus-mechanics-1",
+        "tida-bonus-mechanics-2"
+      ],
+      "reevaluationCondition": "同じ抽選条件について設定別の出現割合が公開され、実機で試行回数と成功回数を正確に区別できること。"
+    },
+    {
+      "blockId": "tida-bonus-type-not-setting",
+      "label": "BIG・REGの振り分け",
+      "reason": "BIGとREGの違いは分かりますが、設定ごとのBIG・REG選択割合が確認できません。合算初当たりから種別の出現率を作らないため、数値推測に使用しません。",
+      "sourceIds": [
+        "tida-bonus-type-1",
+        "tida-bonus-type-2"
+      ],
+      "reevaluationCondition": "同じ抽選条件について設定別の出現割合が公開され、実機で試行回数と成功回数を正確に区別できること。"
+    },
+    {
+      "blockId": "tida-reset-not-setting",
+      "label": "設定変更後の555G天井",
+      "reason": "設定変更後などは天井が999Gから555Gへ短縮されますが、これは設定変更や滞在モードによる違いです。高設定ほど起きやすいと示す公表値はなく、数値推測には使いません。",
+      "sourceIds": [
+        "tida-reset-1",
+        "tida-reset-2"
+      ],
+      "reevaluationCondition": "同じ抽選条件について設定別の出現割合が公開され、実機で試行回数と成功回数を正確に区別できること。"
+    },
+    {
+      "blockId": "tida-ceiling-not-setting",
+      "label": "ゲーム数・連チャンスルー天井",
+      "reason": "999G・555Gの天井や連チャンスルー救済は、遊技状態と履歴で変わります。設定ごとの天井選択確率が分からないため、設定推測に使いません。",
+      "sourceIds": [
+        "tida-ceiling-1",
+        "tida-ceiling-2"
+      ],
+      "reevaluationCondition": "同じ抽選条件について設定別の出現割合が公開され、実機で試行回数と成功回数を正確に区別できること。"
+    },
+    {
+      "blockId": "tida-afterbonus-not-setting",
+      "label": "ボーナス後33Gの高確率",
+      "reason": "ボーナス後は通常時と違い33G以上の連チャンしやすい状態に入ります。その区間の当たりを通常時初当たりと同じ母数で数えると誤差が生じるため、設定別の数値として採用しません。",
+      "sourceIds": [
+        "tida-afterbonus-1",
+        "tida-afterbonus-2"
+      ],
+      "reevaluationCondition": "同じ抽選条件について設定別の出現割合が公開され、実機で試行回数と成功回数を正確に区別できること。"
+    },
+    {
+      "blockId": "tida-state-display-not-setting",
+      "label": "シーサーの目・内部状態ランプ",
+      "reason": "シーサーの目の色は連チャンしやすさを示すもので、設定番号そのものを示しません。BIG入賞時の7セグとは区別して扱います。",
+      "sourceIds": [
+        "tida-state-display-1",
+        "tida-state-display-2"
+      ],
+      "reevaluationCondition": "同じ抽選条件について設定別の出現割合が公開され、実機で試行回数と成功回数を正確に区別できること。"
+    },
+    {
+      "blockId": "tida-heaven-success-not-setting",
+      "label": "ヘブン中のボーナス期待度",
+      "reason": "ヘブン中の当たりやすさは、どの連レベルに滞在しているかによって大きく変わります。40～93%は設定ごとの確率ではないため、数値推測に使いません。",
+      "sourceIds": [
+        "tida-heaven-success-1",
+        "tida-heaven-success-2"
+      ],
+      "reevaluationCondition": "同じ抽選条件について設定別の出現割合が公開され、実機で試行回数と成功回数を正確に区別できること。"
+    },
+    {
+      "blockId": "tida-v22-independent-cz-not-setting",
+      "label": "独立CZ初当たり",
+      "reason": "本機のヘブンはボーナスの高確率状態であり、独立したCZの当選回数ではありません。ヘブン突入とボーナス初当たりを別々に加点しません。",
+      "sourceIds": [
+        "tida-v22-independent-cz-1",
+        "tida-v22-independent-cz-2"
+      ],
+      "reevaluationCondition": "独立した設定別出現率と試行・成功の正確な観測がそろった場合に再評価します。"
+    },
+    {
+      "blockId": "tida-v22-pseudo-at-not-setting",
+      "label": "ボーナスとは別のAT初当たり",
+      "reason": "BIG・REG自体がAT方式のボーナスです。同じ当選を別のAT初当たりとして二重に数えません。",
+      "sourceIds": [
+        "tida-v22-pseudo-at-1",
+        "tida-v22-pseudo-at-2"
+      ],
+      "reevaluationCondition": "独立した設定別出現率と試行・成功の正確な観測がそろった場合に再評価します。"
+    },
+    {
+      "blockId": "tida-v22-heaven-state-not-setting",
+      "label": "ヘブン状態への移行",
+      "reason": "ヘブンの滞在やタッチ音は内部状態の示唆です。設定ごとの移行率が確認できないため、表示回数をそのまま設定推測へ反映しません。",
+      "sourceIds": [
+        "tida-v22-heaven-state-1",
+        "tida-v22-heaven-state-2"
+      ],
+      "reevaluationCondition": "独立した設定別出現率と試行・成功の正確な観測がそろった場合に再評価します。"
+    },
+    {
+      "blockId": "tida-v22-heaven-trial-not-setting",
+      "label": "ヘブン中のゲーム別抽選",
+      "reason": "1～4G目と5G目は抽選率が異なり、スイカ成立時も条件が変わります。これらは設定別の公表確率ではなく、ボーナス初当たりと重複するため採用しません。",
+      "sourceIds": [
+        "tida-v22-heaven-trial-1",
+        "tida-v22-heaven-trial-2"
+      ],
+      "reevaluationCondition": "独立した設定別出現率と試行・成功の正確な観測がそろった場合に再評価します。"
+    },
+    {
+      "blockId": "tida-v22-mode-carry-not-setting",
+      "label": "連レベルの引き継ぎ",
+      "reason": "引き戻し時には前回の連レベルを引き継ぐ場合があります。連チャン中の当たりは独立した通常初当たりではないため、繰り返し加点しません。",
+      "sourceIds": [
+        "tida-v22-mode-carry-1",
+        "tida-v22-mode-carry-2"
+      ],
+      "reevaluationCondition": "独立した設定別出現率と試行・成功の正確な観測がそろった場合に再評価します。"
+    },
+    {
+      "blockId": "tida-v22-role-to-heaven-not-setting",
+      "label": "成立役別ヘブン移行",
+      "reason": "スイカとリプレイ2連では内部モードや条件が異なります。約33%・約40%は設定別の確率ではなく、現在の内部モードも確定できないため採用しません。",
+      "sourceIds": [
+        "tida-v22-role-to-heaven-1",
+        "tida-v22-role-to-heaven-2"
+      ],
+      "reevaluationCondition": "独立した設定別出現率と試行・成功の正確な観測がそろった場合に再評価します。"
+    },
+    {
+      "blockId": "tida-v22-repeated-digits-not-setting",
+      "label": "ゾロ目ゲーム数での当選",
+      "reason": "111Gなどのゾロ目ゲーム数では当選抽選がありますが、設定別の確率は確認できません。天井や通常初当たりと同じ当選を別々に数えません。",
+      "sourceIds": [
+        "tida-v22-repeated-digits-1",
+        "tida-v22-repeated-digits-2"
+      ],
+      "reevaluationCondition": "独立した設定別出現率と試行・成功の正確な観測がそろった場合に再評価します。"
+    },
+    {
+      "blockId": "tida-v25-mode-conditions",
+      "label": "引き戻し・リプ連チャンスモード",
+      "reason": "モードへの移行条件と設定変更後の参考割合を確認しましたが、全設定の移行率と実際の滞在は確定できません。モード示唆回数やモード別当選期待度を設定別の確率として使いません。",
+      "reevaluationCondition": "公表数値に対応する試行条件と実機での正確な観測方法を確認した場合に再評価します。",
+      "sourceIds": [
+        "tida-v25-mode-conditions-1"
+      ]
+    },
+    {
+      "blockId": "tida-v25-chance-stock",
+      "label": "チャンス目の予約当選とでびる",
+      "reason": "チャンス目の予約当選、自力初当たり、ストック放出、でびる中BIGは同じボーナス系列に関係します。次のゾロ目までの当選や早い告知を別々の設定推測要素として加算しません。",
+      "reevaluationCondition": "公表数値に対応する試行条件と実機での正確な観測方法を確認した場合に再評価します。",
+      "sourceIds": [
+        "tida-v25-chance-stock-1"
+      ]
+    },
+    {
+      "blockId": "tida-v25-external-trial",
+      "label": "設定6試打の初当たり分類",
+      "reason": "単独設定6の試打では全ボーナス21回と初当たり6回が分けられていますが、内部状態を毎回特定する集計手順は確認できません。この分類をそのまま実機入力の判定規則にしたり、他設定の確率を補完したりしません。",
+      "reevaluationCondition": "公表数値に対応する試行条件と実機での正確な観測方法を確認した場合に再評価します。",
+      "sourceIds": [
+        "tida-v25-external-trial-1"
+      ]
+    },
+    {
+      "blockId": "tida-v25-noisy-state-emission",
+      "label": "34～78Gの消灯は状態確定ではない",
+      "reason": "34～78Gのリプレイ＋第1消灯はヘブン高確率中33.3%、通常時6.0%と掲載されています。通常時にも発生するため、消灯の有無だけで内部状態や初当たりを確定することはできません。これは状態別の参考値であり、設定別の出現率ではありません。",
+      "reevaluationCondition": "公表数値に対応する試行条件と実機での正確な観測方法を確認した場合に再評価します。",
+      "sourceIds": [
+        "tida-v25-noisy-state-emission-1"
+      ]
+    }
+  ],
   "ui": {
-    "sections": [
-      {
-        "id": "UI_DESIGN_1",
-        "title": "ボーナス初当り",
-        "displayOrder": 1,
-        "items": [
-          {
-            "type": "input",
-            "inputId": "INP_NORMAL_GAMES",
-            "label": "通常ゲーム数",
-            "widget": "number",
-            "gridSpan": 12,
-            "config": {
-              "directInput": true
-            }
-          },
-          {
-            "type": "input",
-            "inputId": "INP_BONUS_FIRST_HIT",
-            "label": "ボーナス初当り",
-            "widget": "counter",
-            "gridSpan": 12,
-            "config": {
-              "directInput": true
-            }
-          }
-        ]
-      },
-      {
-        "id": "UI_DESIGN_2",
-        "title": "BIG入賞時7セグ",
-        "displayOrder": 2,
-        "description": "黄・緑・緑＆赤の確定系だけを記録します。白・赤は各BIG図柄のデフォルトなので推測入力にしません。",
-        "items": [
-          {
-            "type": "input",
-            "inputId": "INP_EVI_BIG_SEGMENT",
-            "label": "BIG入賞時7セグ",
-            "widget": "multi_select",
-            "gridSpan": 12
-          }
-        ]
-      }
-    ]
-  },
-  "selectionSummary": {
-    "schemaVersion": "selection-summary-v1",
-    "evaluatedCount": 3,
-    "selectedCount": 1,
-    "rejectedCount": 2,
-    "selected": [
-      {
-        "featureId": "FEAT_BONUS_FIRST_HIT",
-        "name": "ボーナス初当り",
-        "reason": "現時点で公開されている主要な数値設定差で、通常ゲーム数とボーナス初当り回数から直接観測できるため主軸採用します。",
-        "requiredTrials": {
-          "value": 13125,
-          "unit": "通常ゲーム"
+    "schemaVersion": "v8.5-runtime-ui-v1",
+    "contractVersion": "runtime-ui-v8",
+    "source": "CANONICAL_UI",
+    "sourceSchemaVersion": "canonical-ui-v1",
+    "manifestRevision": "8.5",
+    "playInfo": {
+      "visible": true,
+      "collapsible": false,
+      "mode": "TOTAL_ONLY",
+      "sessionFields": [
+        {
+          "id": "date",
+          "label": "日付",
+          "mode": "DATE"
+        },
+        {
+          "id": "storeName",
+          "label": "店舗名",
+          "mode": "TEXT"
+        },
+        {
+          "id": "machineNumber",
+          "label": "台番号",
+          "mode": "TEXT"
         }
+      ],
+      "startFields": [
+        {
+          "id": "startTotalGames",
+          "label": "着席時 総ゲーム数",
+          "mode": "NUMBER",
+          "directNumeric": true
+        }
+      ],
+      "currentFields": [
+        {
+          "id": "currentTotalGames",
+          "label": "現在 総ゲーム数",
+          "mode": "NUMBER",
+          "directNumeric": true
+        }
+      ],
+      "difference": {
+        "autoCalculate": true
+      },
+      "useDifference": {
+        "label": "着席時との差分を使用",
+        "defaultWhenStartNormalGamesPresent": true
+      },
+      "exclusionGames": {
+        "visible": true,
+        "label": "除外ゲーム数",
+        "quickAdd": [
+          50
+        ],
+        "base": "TOTAL",
+        "resultLabel": "除外後の実戦ゲーム数",
+        "description": "連チャンゾーン中に消化したゲーム数を入力してください。総ゲーム数から差し引きます。ゾーン内の当選はすべて連チャンとして初当たりから除外します。"
       }
-    ],
-    "rejected": [
+    },
+    "accordion": {
+      "enabled": true,
+      "singleOpen": true
+    },
+    "quickInput": {
+      "enabled": false
+    },
+    "v8Sections": [
       {
-        "featureId": "FEAT_BIG_REG_COMPOSITION_EXCLUDED",
-        "name": "BIG/REG内訳候補",
-        "reason": "BIG/REG内訳に独立した設定別分布が公開されていないため、合算初当りと重ねて使える尤度を構成できません。"
+        "id": "OBS_bonus-initial",
+        "title": "ボーナス初当たり合算",
+        "collapsible": true,
+        "defaultExpanded": false,
+        "description": "対象となる機会のうち、ボーナス初当たり合算が実際に起きた割合を設定別に比較します。\n・注意：ゾーン内の当選はすべて連チャンとして除外。\n・注意：天井短縮時や連チャン中の当選を混ぜずに観測できるか検証中です。",
+        "descriptionPresentation": {
+          "collapsible": true,
+          "label": "説明",
+          "defaultExpanded": false
+        },
+        "items": [
+          {
+            "id": "NODE_bonus-initial",
+            "featureId": "bonus-initial",
+            "title": "ボーナス初当たり合算",
+            "inputs": [
+              {
+                "id": "bonus-initial.eligibleTrialCount",
+                "label": "連荘中を除くゲーム数",
+                "input": "denominator",
+                "inputId": "bonus-initial.eligibleTrialCount",
+                "engineBinding": {
+                  "inputId": "bonus-initial.eligibleTrialCount"
+                },
+                "gridSpan": 12,
+                "directNumeric": true,
+                "quickAdd": [
+                  50
+                ],
+                "unobservedDisplay": "—",
+                "playDataBinding": {
+                  "source": "PLAY_TOTAL_GAME_DELTA_EXCLUDED",
+                  "mode": "AUTO_EXACT"
+                }
+              },
+              {
+                "id": "bonus-initial.successCount",
+                "label": "ボーナス初当たり合算回数",
+                "input": "counter",
+                "inputId": "bonus-initial.successCount",
+                "engineBinding": {
+                  "inputId": "bonus-initial.successCount"
+                },
+                "gridSpan": 6,
+                "directNumeric": true,
+                "quickAdd": [
+                  1
+                ],
+                "unobservedDisplay": "—"
+              }
+            ]
+          }
+        ]
       },
       {
-        "featureId": "FEAT_HEAVEN_STATE_BEHAVIOR_EXCLUDED",
-        "name": "ヘブン状態関連候補",
-        "reason": "ヘブン関連抽選の設定別数値と実戦上の正しい観測条件が不足しているため不採用です。"
+        "id": "EVI_reviewed-big-seven-seg",
+        "title": "BIG入賞時の7セグ",
+        "description": "BIG入賞時の7セグを確認したときに、該当する項目を1回加算して記録します。\n・注意：BIG入賞時にリール下に表示される777の色を記録する\n・注意：設定別の出現率が未公表の示唆は記録だけ行います。確定した条件のみ設定推測に反映します\n・反映：設定確定・設定否定の条件は、設定候補の絞り込みに自動反映します\n・反映：設定別出現率が未確認の項目は記録のみです。出現率確認後は設定推測へ反映できる可能性があります",
+        "collapsible": true,
+        "defaultExpanded": false,
+        "descriptionPresentation": {
+          "collapsible": true,
+          "label": "説明",
+          "defaultExpanded": false
+        },
+        "items": [
+          {
+            "id": "REF_reviewed-big-seven-seg",
+            "evidenceId": "reviewed-big-seven-seg",
+            "label": "BIG入賞時の7セグ",
+            "interaction": {
+              "type": "CATEGORY_COUNTERS",
+              "preservePriorObservations": true,
+              "showAccumulatedCounts": true,
+              "categoryCoverage": "NON_EXHAUSTIVE",
+              "totalOpportunities": "NONE",
+              "categories": [
+                {
+                  "id": "REF_reviewed-big-seven-seg_1",
+                  "inputId": "REF_reviewed-big-seven-seg_1",
+                  "label": "白（白7）",
+                  "meaning": "基本パターン"
+                },
+                {
+                  "id": "REF_reviewed-big-seven-seg_2",
+                  "inputId": "REF_reviewed-big-seven-seg_2",
+                  "label": "赤（赤7）",
+                  "meaning": "基本パターン"
+                },
+                {
+                  "id": "REF_reviewed-big-seven-seg_3",
+                  "inputId": "REF_reviewed-big-seven-seg_3",
+                  "label": "黄",
+                  "meaning": "設定3以上"
+                },
+                {
+                  "id": "REF_reviewed-big-seven-seg_4",
+                  "inputId": "REF_reviewed-big-seven-seg_4",
+                  "label": "緑",
+                  "meaning": "設定4以上"
+                },
+                {
+                  "id": "REF_reviewed-big-seven-seg_5",
+                  "inputId": "REF_reviewed-big-seven-seg_5",
+                  "label": "緑＆赤",
+                  "meaning": "設定6"
+                }
+              ]
+            }
+          }
+        ]
       }
     ]
   },
-  "reliability": {},
   "metadata": {
     "machineId": "L_TIDADONDON_PA5",
     "displayName": "てぃだどんどん",
@@ -270,12 +688,163 @@
       "SET_5",
       "SET_6"
     ],
-    "uiDesignMaterialized": true,
-    "uiDesignSchemaVersion": "ui-design-data-v1",
-    "uiDesignStatus": "PASS"
+    "settingsStatus": "SOURCE_DERIVED"
   },
-  "validation": {
-    "cases": []
-  },
-  "statistics": {}
+  "v8": {
+    "machineResearchSummary": {
+      "title": "この機種の設定推測について",
+      "adopted": [
+        {
+          "featureId": "bonus-initial",
+          "label": "ボーナス初当たり合算",
+          "importance": "微小",
+          "evaluation": {
+            "userLabel": "1回の判別力",
+            "value": 0.011438718767974032
+          },
+          "reason": "現在の採用基準を満たしているため、設定推測に使用します。"
+        }
+      ],
+      "notAdopted": [
+        {
+          "featureId": "setting-1",
+          "label": "設定1の補完禁止",
+          "reason": "本機の設定段階は2〜6で設定1を搭載していません。設定1の確率を作らないでください。",
+          "reevaluationCondition": "同一機種の公表資料と実機で観測できる条件を再確認すること。"
+        },
+        {
+          "featureId": "small-role-no-setting-difference",
+          "label": "チェリー・スイカ・確定役の出現率",
+          "reason": "公開されている小役の出現率は設定2～6で共通なので、引いた回数だけでは設定を判別できません。",
+          "reevaluationCondition": "設定別の小役出現率が新たに公表された場合に再評価します。"
+        },
+        {
+          "featureId": "heaven-and-devil-loop",
+          "label": "ヘブン高確率・でびる中の連チャン",
+          "reason": "連チャン中の当選を新しい初当たりへ加算しません。初当たりの数え方はユーザー定義を使用し、公表資料の集計方法との一致は主張しません。",
+          "reevaluationCondition": "連チャン率を独立した設定差として扱える設定別資料が確認された場合。"
+        },
+        {
+          "featureId": "game-ceiling-conditional",
+          "label": "通常時のゲーム数天井",
+          "reason": "通常時の天井999Gと、設定変更後などの555G短縮は遊技状況による違いです。これだけで設定番号を判別することはできません。",
+          "reevaluationCondition": "設定ごとの天井選択率や発動率が公開された場合に見直します。"
+        },
+        {
+          "featureId": "tida-bonus-mechanics-not-setting",
+          "label": "BIGとREGの合算カウント",
+          "reason": "BIGとREGは継続条件が異なり、連チャン中にも当たります。設定別の単独BIG・REG初当たり確率は確認できないため、種類別の回数を個別に加点しません。",
+          "reevaluationCondition": "同じ抽選条件について設定別の出現割合が公開され、実機で試行回数と成功回数を正確に区別できること。"
+        },
+        {
+          "featureId": "tida-bonus-type-not-setting",
+          "label": "BIG・REGの振り分け",
+          "reason": "BIGとREGの違いは分かりますが、設定ごとのBIG・REG選択割合が確認できません。合算初当たりから種別の出現率を作らないため、数値推測に使用しません。",
+          "reevaluationCondition": "同じ抽選条件について設定別の出現割合が公開され、実機で試行回数と成功回数を正確に区別できること。"
+        },
+        {
+          "featureId": "tida-reset-not-setting",
+          "label": "設定変更後の555G天井",
+          "reason": "設定変更後などは天井が999Gから555Gへ短縮されますが、これは設定変更や滞在モードによる違いです。高設定ほど起きやすいと示す公表値はなく、数値推測には使いません。",
+          "reevaluationCondition": "同じ抽選条件について設定別の出現割合が公開され、実機で試行回数と成功回数を正確に区別できること。"
+        },
+        {
+          "featureId": "tida-ceiling-not-setting",
+          "label": "ゲーム数・連チャンスルー天井",
+          "reason": "999G・555Gの天井や連チャンスルー救済は、遊技状態と履歴で変わります。設定ごとの天井選択確率が分からないため、設定推測に使いません。",
+          "reevaluationCondition": "同じ抽選条件について設定別の出現割合が公開され、実機で試行回数と成功回数を正確に区別できること。"
+        },
+        {
+          "featureId": "tida-afterbonus-not-setting",
+          "label": "ボーナス後33Gの高確率",
+          "reason": "ボーナス後は通常時と違い33G以上の連チャンしやすい状態に入ります。その区間の当たりを通常時初当たりと同じ母数で数えると誤差が生じるため、設定別の数値として採用しません。",
+          "reevaluationCondition": "同じ抽選条件について設定別の出現割合が公開され、実機で試行回数と成功回数を正確に区別できること。"
+        },
+        {
+          "featureId": "tida-state-display-not-setting",
+          "label": "シーサーの目・内部状態ランプ",
+          "reason": "シーサーの目の色は連チャンしやすさを示すもので、設定番号そのものを示しません。BIG入賞時の7セグとは区別して扱います。",
+          "reevaluationCondition": "同じ抽選条件について設定別の出現割合が公開され、実機で試行回数と成功回数を正確に区別できること。"
+        },
+        {
+          "featureId": "tida-heaven-success-not-setting",
+          "label": "ヘブン中のボーナス期待度",
+          "reason": "ヘブン中の当たりやすさは、どの連レベルに滞在しているかによって大きく変わります。40～93%は設定ごとの確率ではないため、数値推測に使いません。",
+          "reevaluationCondition": "同じ抽選条件について設定別の出現割合が公開され、実機で試行回数と成功回数を正確に区別できること。"
+        },
+        {
+          "featureId": "tida-v22-independent-cz-not-setting",
+          "label": "独立CZ初当たり",
+          "reason": "本機のヘブンはボーナスの高確率状態であり、独立したCZの当選回数ではありません。ヘブン突入とボーナス初当たりを別々に加点しません。",
+          "reevaluationCondition": "独立した設定別出現率と試行・成功の正確な観測がそろった場合に再評価します。"
+        },
+        {
+          "featureId": "tida-v22-pseudo-at-not-setting",
+          "label": "ボーナスとは別のAT初当たり",
+          "reason": "BIG・REG自体がAT方式のボーナスです。同じ当選を別のAT初当たりとして二重に数えません。",
+          "reevaluationCondition": "独立した設定別出現率と試行・成功の正確な観測がそろった場合に再評価します。"
+        },
+        {
+          "featureId": "tida-v22-heaven-state-not-setting",
+          "label": "ヘブン状態への移行",
+          "reason": "ヘブンの滞在やタッチ音は内部状態の示唆です。設定ごとの移行率が確認できないため、表示回数をそのまま設定推測へ反映しません。",
+          "reevaluationCondition": "独立した設定別出現率と試行・成功の正確な観測がそろった場合に再評価します。"
+        },
+        {
+          "featureId": "tida-v22-heaven-trial-not-setting",
+          "label": "ヘブン中のゲーム別抽選",
+          "reason": "1～4G目と5G目は抽選率が異なり、スイカ成立時も条件が変わります。これらは設定別の公表確率ではなく、ボーナス初当たりと重複するため採用しません。",
+          "reevaluationCondition": "独立した設定別出現率と試行・成功の正確な観測がそろった場合に再評価します。"
+        },
+        {
+          "featureId": "tida-v22-mode-carry-not-setting",
+          "label": "連レベルの引き継ぎ",
+          "reason": "引き戻し時には前回の連レベルを引き継ぐ場合があります。連チャン中の当たりは独立した通常初当たりではないため、繰り返し加点しません。",
+          "reevaluationCondition": "独立した設定別出現率と試行・成功の正確な観測がそろった場合に再評価します。"
+        },
+        {
+          "featureId": "tida-v22-role-to-heaven-not-setting",
+          "label": "成立役別ヘブン移行",
+          "reason": "スイカとリプレイ2連では内部モードや条件が異なります。約33%・約40%は設定別の確率ではなく、現在の内部モードも確定できないため採用しません。",
+          "reevaluationCondition": "独立した設定別出現率と試行・成功の正確な観測がそろった場合に再評価します。"
+        },
+        {
+          "featureId": "tida-v22-repeated-digits-not-setting",
+          "label": "ゾロ目ゲーム数での当選",
+          "reason": "111Gなどのゾロ目ゲーム数では当選抽選がありますが、設定別の確率は確認できません。天井や通常初当たりと同じ当選を別々に数えません。",
+          "reevaluationCondition": "独立した設定別出現率と試行・成功の正確な観測がそろった場合に再評価します。"
+        },
+        {
+          "featureId": "tida-v25-mode-conditions",
+          "label": "引き戻し・リプ連チャンスモード",
+          "reason": "モードへの移行条件と設定変更後の参考割合を確認しましたが、全設定の移行率と実際の滞在は確定できません。モード示唆回数やモード別当選期待度を設定別の確率として使いません。",
+          "reevaluationCondition": "公表数値に対応する試行条件と実機での正確な観測方法を確認した場合に再評価します。"
+        },
+        {
+          "featureId": "tida-v25-chance-stock",
+          "label": "チャンス目の予約当選とでびる",
+          "reason": "チャンス目の予約当選、自力初当たり、ストック放出、でびる中BIGは同じボーナス系列に関係します。次のゾロ目までの当選や早い告知を別々の設定推測要素として加算しません。",
+          "reevaluationCondition": "公表数値に対応する試行条件と実機での正確な観測方法を確認した場合に再評価します。"
+        },
+        {
+          "featureId": "tida-v25-external-trial",
+          "label": "設定6試打の初当たり分類",
+          "reason": "単独設定6の試打では全ボーナス21回と初当たり6回が分けられていますが、内部状態を毎回特定する集計手順は確認できません。この分類をそのまま実機入力の判定規則にしたり、他設定の確率を補完したりしません。",
+          "reevaluationCondition": "公表数値に対応する試行条件と実機での正確な観測方法を確認した場合に再評価します。"
+        },
+        {
+          "featureId": "tida-v25-noisy-state-emission",
+          "label": "34～78Gの消灯は状態確定ではない",
+          "reason": "34～78Gのリプレイ＋第1消灯はヘブン高確率中33.3%、通常時6.0%と掲載されています。通常時にも発生するため、消灯の有無だけで内部状態や初当たりを確定することはできません。これは状態別の参考値であり、設定別の出現率ではありません。",
+          "reevaluationCondition": "公表数値に対応する試行条件と実機での正確な観測方法を確認した場合に再評価します。"
+        }
+      ],
+      "unresolved": [
+        {
+          "label": "高低判別精度",
+          "reason": "基準ゲーム数へ正確に換算できる設定推測要素がないため、高低判別精度を算出していません。"
+        }
+      ]
+    }
+  }
 }
