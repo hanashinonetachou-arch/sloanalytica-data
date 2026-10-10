@@ -1,3 +1,4 @@
+// Historical v48 input fixture. Current production routes are tested in batch009-process-resumption.test.ts.
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
@@ -14,7 +15,7 @@ const id='L_GUNDAM_SEED_G',wave='wave-1';
 const target='post-st-reset-100g-first-cz-or-bonus';
 
 test('Gundam SEED retains source-supported 100G rates as user-excluded reference',()=>{
- for(const folder of ['research-working','research-evidence-staged']){
+ for(const folder of ['research-history/v48/research-working','research-history/v48/research-evidence-staged']){
   const d=get(folder,wave,id+'.json');
   validateResearchCandidateLedger(d,new Set(d.sources.map((x:any)=>x.sourceId)));
   for(const domain of ['AT','STATE_TRANSITION','POINTS_GAME_DISTRIBUTION','ROLE_CONDITIONAL_DISTRIBUTION','MACHINE_SPECIFIC'])
@@ -37,14 +38,14 @@ test('Gundam SEED retains source-supported 100G rates as user-excluded reference
 });
 
 test('Gundam SEED user-excluded 100G rate does not reach Evaluation or Eligibility',()=>{
- const d=get('research-evidence-staged',wave,id+'.json');
+ const d=get('research-history/v48/research-evidence-staged',wave,id+'.json');
  const evaluation=buildEvaluation(d);
  assert.ok(!evaluation.evaluations.some((x:any)=>x.findingId===target));
  assert.ok(!buildEligibility(evaluation).decisions.some((x:any)=>x.findingId===target));
 });
 
 test('Gundam SEED unresolved shared-event audit forbids promotion even after clearing pending ledgers',()=>{
- const d=get('research-evidence-staged',wave,id+'.json');
+ const d=get('research-history/v48/research-evidence-staged',wave,id+'.json');
  d.findings.push(structuredClone(d.blockedItems.find((b:any)=>b.blockId==='seed-v47-100g-user-exclusion').referenceFinding));
  for(const l of d.researchCompleteness.candidateLedger)
   if(l.disposition?.type==='FINDING_PENDING_SCOPE_VALIDATION')l.disposition.type='FINDING';
@@ -54,7 +55,7 @@ test('Gundam SEED unresolved shared-event audit forbids promotion even after cle
 });
 
 test('Gundam SEED new research is a non-destructive staging extension',()=>{
- const w=get('research-working',wave,id+'.json'),s=get('research-evidence-staged',wave,id+'.json');
- const reviewed=get('research-evidence-reviewed',id+'.json');
+ const w=get('research-history/v48/research-working',wave,id+'.json'),s=get('research-history/v48/research-evidence-staged',wave,id+'.json');
+ const reviewed=get('research-history/v48/research-evidence-reviewed',id+'.json');
  assert.deepEqual(auditBatch009Staging(w,reviewed,s),[]);
 });

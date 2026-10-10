@@ -1,3 +1,4 @@
+// Historical v48 input fixture. Current production routes are tested in batch009-process-resumption.test.ts.
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
@@ -7,7 +8,7 @@ import {buildEligibility} from '../src/eligibility-builder.ts';
 
 const read=(scope:string)=>JSON.parse(fs.readFileSync(`batches/batch-20261008-009/${scope}/wave-2/L_KAMEN_RIDER_DEN_O_UD.json`,'utf8'));
 test('DenO point draws, stocks and downstream hits remain blocked even when observation status is toggled',()=>{
- const d=read('research-evidence-staged');
+ const d=read('research-history/v48/research-evidence-staged');
  for(const row of d.researchCompleteness.candidateLedger)
   if(row.disposition.type==='FINDING_PENDING_SCOPE_VALIDATION')row.disposition.type='FINDING';
  for(const f of d.findings)

@@ -1,8 +1,9 @@
+// Historical v48 input fixture. Current production routes are tested in batch009-process-resumption.test.ts.
 import test from 'node:test';import assert from 'node:assert/strict';import fs from 'node:fs';
 import {validateResearchCandidateLedger} from '../src/research-validator.ts';
 const root='batches/batch-20261008-009/';
 for(const [id,wave,blockId] of [['L_BIOHAZARD5_ZE',1,'bio5-v19-mode-promotion-not-setting'],['L_SISTER_QUEST_CA',1,'sister-mode-unusable-for-setting'],['S_WARAU4_KH',2,'warau4-293-cz-conditional-mode']])test(`${id} mode scope remains reference only`,()=>{
- const d=JSON.parse(fs.readFileSync(`${root}research-working/wave-${wave}/${id}.json`,'utf8'));const s=JSON.parse(fs.readFileSync(`${root}research-evidence-staged/wave-${wave}/${id}.json`,'utf8'));
+ const d=JSON.parse(fs.readFileSync(`${root}research-history/v48/research-working/wave-${wave}/${id}.json`,'utf8'));const s=JSON.parse(fs.readFileSync(`${root}research-history/v48/research-evidence-staged/wave-${wave}/${id}.json`,'utf8'));
  validateResearchCandidateLedger(d,new Set(d.sources.map((x:any)=>x.sourceId)));
  const b=d.blockedItems.find((x:any)=>x.blockId===blockId),r=b.referenceConditionalDistribution;
  assert.equal(r.runtimeSettingLikelihood,'DISABLED');assert.equal(b.observationScopeAudit.status,'UNRESOLVED_OBSERVATION_SCOPE');for(const src of d.sources.filter((x:any)=>x.sourceId.includes("v36")))assert.deepEqual(s.sources.find((x:any)=>x.sourceId===src.sourceId),src);assert.deepEqual(s.blockedItems,d.blockedItems);

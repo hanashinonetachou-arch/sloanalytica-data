@@ -1,3 +1,4 @@
+// Historical v48 input fixture. Current production routes are tested in batch009-process-resumption.test.ts.
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
@@ -8,7 +9,7 @@ import {validateResearchCandidateLedger} from '../src/research-validator.ts';
 const root=path.resolve('batches','batch-20261008-009');
 const read=(...s:string[])=>JSON.parse(fs.readFileSync(path.join(root,...s),'utf8'));
 test('緑ドンREVIVAL bonus, AT, CZ and aftercare mechanics are checked, not independent setting rates',()=>{
- for(const folder of ['research-working','research-evidence-staged']){
+ for(const folder of ['research-history/v48/research-working','research-history/v48/research-evidence-staged']){
   const d=read(folder,'wave-1','L_MIDORIDON_VIVA_REVIVAL_FY.json');
   const domains=d.researchCompleteness.domains;
   for(const domain of ['BONUS','BONUS_TYPE_CONDITIONAL','CZ','AT','POST_EVENT_TRANSITION','SUCCESS_RATE']){
@@ -30,13 +31,13 @@ test('緑ドンREVIVAL bonus, AT, CZ and aftercare mechanics are checked, not in
  }
 });
 test('Green Don Research and Evidence staging preserve all source claims and reviewed categories',()=>{
- const w=read('research-working','wave-1','L_MIDORIDON_VIVA_REVIVAL_FY.json');
- const review=read('research-evidence-reviewed','L_MIDORIDON_VIVA_REVIVAL_FY.json');
- const stage=read('research-evidence-staged','wave-1','L_MIDORIDON_VIVA_REVIVAL_FY.json');
+ const w=read('research-history/v48/research-working','wave-1','L_MIDORIDON_VIVA_REVIVAL_FY.json');
+ const review=read('research-history/v48/research-evidence-reviewed','L_MIDORIDON_VIVA_REVIVAL_FY.json');
+ const stage=read('research-history/v48/research-evidence-staged','wave-1','L_MIDORIDON_VIVA_REVIVAL_FY.json');
  assert.deepEqual(auditBatch009Staging(w,review,stage),[]);
 });
 test('Conditional BIG/REG select rates and 4G comeback do not become standalone numeric findings',()=>{
- const d=read('research-evidence-staged','wave-1','L_MIDORIDON_VIVA_REVIVAL_FY.json');
+ const d=read('research-history/v48/research-evidence-staged','wave-1','L_MIDORIDON_VIVA_REVIVAL_FY.json');
  for(const id of ['green-v20-bonus-conditional-not-independent','green-v20-xr-aftercare-not-independent']){
   assert.ok(d.blockedItems.some((x:any)=>x.blockId===id));
   assert.ok(!d.findings.some((x:any)=>x.findingId===id));

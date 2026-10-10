@@ -1,0 +1,539 @@
+{
+  "schemaVersion": "candidate-contract-v1",
+  "manifestVersion": "8.5",
+  "batchId": "batch-20261008-009",
+  "machineId": "S_WARAU4_KH",
+  "machineName": "S笑ゥせぇるすまん4",
+  "evaluationArtifact": {
+    "artifactId": "evaluation-S_WARAU4_KH",
+    "kind": "evaluation",
+    "path": "production/batches/batch-20261008-009/artifacts/S_WARAU4_KH/evaluation/result.json",
+    "sha256": "a69ac2544122e1cc50064c1a6ea3faea47bc81d71bd59d019019dce5437c5a2b",
+    "producerWorkId": "wrk_dfe657b9db1a413b"
+  },
+  "eligibilityArtifact": {
+    "artifactId": "eligibility-S_WARAU4_KH",
+    "kind": "eligibility",
+    "path": "production/batches/batch-20261008-009/artifacts/S_WARAU4_KH/eligibility/result.json",
+    "sha256": "2ee494d4955737a1c521dc4155aabba37357028d9bfc04f0f967189ab9a401ca",
+    "producerWorkId": "wrk_21d6300037274e90"
+  },
+  "candidates": [
+    {
+      "findingId": "bonus-initial",
+      "label": "ボーナス初当たり",
+      "model": "BERNOULLI",
+      "trialUniverse": "NORMAL_GAME_TRIAL",
+      "liveInferenceRoute": "LIVE_CONDITIONAL",
+      "settingDistribution": {
+        "1": "1/287.6",
+        "2": "1/268.7",
+        "4": "1/237.2",
+        "5": "1/217.7",
+        "6": "1/195.1"
+      },
+      "details": [
+        "通常時の対象回数を数えます。初当たりは明確な引き戻しゾーン終了後の当選を数え、継続・引き戻し中の当選を含めません。",
+        "同じ当選系列の項目を独立した根拠として同時に加算しません。"
+      ],
+      "dependencyGroupId": "S_WARAU4_KH-event-path",
+      "dependencyKind": "CAUSAL_PATH_OVERLAP",
+      "dependencyReason": "同じ当選系列を含むため同時加算しません。優先する項目が未入力のときだけ次の項目を使用します。",
+      "dependencyFallbackRank": 1,
+      "runtimeInferenceAllowed": true,
+      "dependencyResolution": "PREFERRED_MEMBER",
+      "runtimePolicyBinding": {
+        "metric": "SELECTION_SCORE",
+        "value": 65.9186768573015,
+        "thresholdSource": "RUNTIME_POLICY"
+      },
+      "suppressedByFeatureIds": []
+    },
+    {
+      "findingId": "cz",
+      "label": "CZ出現率",
+      "model": "BERNOULLI",
+      "trialUniverse": "NORMAL_GAME_TRIAL",
+      "liveInferenceRoute": "LIVE_CONDITIONAL",
+      "settingDistribution": {
+        "1": "1/209.8",
+        "2": "1/198.1",
+        "4": "1/168.8",
+        "5": "1/159.1",
+        "6": "1/147.6"
+      },
+      "details": [
+        "通常時の対象回数を数えます。初当たりは明確な引き戻しゾーン終了後の当選を数え、継続・引き戻し中の当選を含めません。",
+        "同じ当選系列の項目を独立した根拠として同時に加算しません。"
+      ],
+      "dependencyGroupId": "S_WARAU4_KH-event-path",
+      "dependencyKind": "CAUSAL_PATH_OVERLAP",
+      "dependencyReason": "同じ当選系列を含むため同時加算しません。優先する項目が未入力のときだけ次の項目を使用します。",
+      "dependencyFallbackRank": 3,
+      "runtimeInferenceAllowed": true,
+      "dependencyResolution": "FALLBACK_MEMBER",
+      "runtimePolicyBinding": {
+        "metric": "SELECTION_SCORE",
+        "value": 75.78836535862324,
+        "thresholdSource": "RUNTIME_POLICY"
+      },
+      "suppressedByFeatureIds": [
+        "bonus-initial"
+      ]
+    }
+  ],
+  "dependencyGroups": [
+    {
+      "groupId": "S_WARAU4_KH-event-path",
+      "resolution": "PREFERRED_WITH_FALLBACK",
+      "members": [
+        "bonus-initial",
+        "cz"
+      ],
+      "runtimeInferenceAllowed": true,
+      "preferredFindingId": "bonus-initial",
+      "fallbackOrder": [
+        "bonus-initial",
+        "cz"
+      ],
+      "reason": "依存関係がある候補を同時加算せず、観測できた優先Featureを使用し、未観測時だけ次順位のFeatureへ自動フォールバックする。",
+      "selectionRationale": "Researchで明示された優先順位に従い、同一セッションで重複情報を同時加算しない。"
+    }
+  ],
+  "excludedDecisions": [
+    {
+      "findingId": "bonus-total",
+      "label": "ボーナス出現率（引き戻し込み）",
+      "supportingSourceIds": [
+        "candidate",
+        "ichigeki-warau4",
+        "hazuse-warau4",
+        "warau-v29-prelude-stock"
+      ],
+      "eligibility": "NOT_APPLICABLE",
+      "reason": "参考分布として保存するが設定推測Featureには使用しない。",
+      "ruleRefs": [
+        "manifest-v8.5-reference-only"
+      ],
+      "liveInferenceRoute": "NONE",
+      "userFacingReason": "引き戻し込みのボーナス出現率は比較用の参考値です。"
+    }
+  ],
+  "blockedItems": [
+    {
+      "blockId": "cz-entry-winning",
+      "label": "CZ突入時の成功抽選",
+      "reason": "CZ突入時のボーナス抽選には設定差がありますが、突入時に当選したのかCZ中に当選したのか実機では区別しにくいため、設定推測への今回の数値推測から除外します。",
+      "sourceIds": [
+        "candidate",
+        "ichigeki-warau4"
+      ],
+      "reevaluationCondition": "機種固有の解析と実機から確認できる観測条件を確定すること。"
+    },
+    {
+      "blockId": "bonus-overlap",
+      "label": "初当たりと引き戻し込みボーナス",
+      "reason": "引き戻し込み出現率はボーナス初当たりを含むため、両方を独立した当たりとして設定推測に加えることはできません。",
+      "sourceIds": [
+        "candidate",
+        "hazuse-warau4"
+      ],
+      "reevaluationCondition": "機種固有の解析と実機から確認できる観測条件を確定すること。"
+    },
+    {
+      "blockId": "small-role-common",
+      "label": "リプレイ・弱チェリー・スイカなどの小役出現率",
+      "reason": "公表されているリプレイ・チェリー・スイカ・チャンス目・BAR揃いなどの出現確率は全設定共通なので、成立回数だけでは設定を判別できません。",
+      "sourceIds": [
+        "hazuse-warau4"
+      ],
+      "reevaluationCondition": "各小役の設定別確率が新たに発表されたときに見直します。"
+    },
+    {
+      "blockId": "warau4-timing-ceiling-mode-specific",
+      "label": "通常時555G天井と119モード",
+      "reason": "通常時は555G＋前兆でボーナスに当選し、119モード中は119・199・209・219Gのいずれかが天井です。モードによる違いであり、天井ゲーム数だけで設定番号を判断できません。",
+      "reevaluationCondition": "モード選択率が設定別に公表され、モードの試行母数を正確に数えられる方法が確認された場合に見直します。",
+      "sourceIds": [
+        "pworld-warau4-detailed"
+      ]
+    },
+    {
+      "blockId": "warau4-setting-change-mode-c",
+      "label": "設定変更後のモードC",
+      "reason": "設定変更後は全設定でモードCが選択され、293Gで確定CZに当選する仕様です。特定の設定だけの恩恵ではないため、モードC移行を高設定の証拠として加点しません。",
+      "reevaluationCondition": "設定変更時の移行先に設定別の差が公表された場合に再評価します。",
+      "sourceIds": [
+        "pworld-warau4-detailed"
+      ]
+    },
+    {
+      "blockId": "warau4-293-cz-conditional-mode",
+      "label": "293GでのCZ当選率",
+      "reason": "293G到達時のCZ当選率はモードA12.5%、B33.6%、C100%ですが、設定別確率ではなく内部モード別の共通値です。モードを特定せずにこの割合を設定推測へ当てはめません。",
+      "reevaluationCondition": "モード別の設定差と、実戦での内部モードの正確な判定方法が公開されること。",
+      "sourceIds": [
+        "pworld-warau4-detailed",
+        "warau-v36-mode-scope"
+      ],
+      "referenceConditionalDistribution": {
+        "sourceIds": [
+          "warau-v36-mode-scope"
+        ],
+        "runtimeSettingLikelihood": "DISABLED",
+        "settingStratification": "NOT_SETTING_STRATIFIED",
+        "usualModeResetEvents": [
+          "SETTING_CHANGE",
+          "DESIRE_REINCARNATION_END",
+          "REG_END"
+        ],
+        "settingChangeUsualMode": "C",
+        "usualModeCZAt293GPercent": {
+          "A": 12.5,
+          "B": 33.59,
+          "C": 100
+        },
+        "mode119IndependentAxis": true,
+        "mode119Entry": "PART_OF_BIG_END",
+        "mode119CeilingsG": [
+          119,
+          199,
+          209,
+          219
+        ],
+        "mode119ThirdBonusEnd": "CONTINUATION_DRAW_NOT_FORCED_EXIT",
+        "mode119ContinuationRate": "UNPUBLISHED"
+      },
+      "observationScopeAudit": {
+        "sourceIds": [
+          "warau-v36-mode-scope"
+        ],
+        "status": "CLOSED_EXCLUDED",
+        "reason": "293G到達時のCZ当選率はモードA12.5%、B33.6%、C100%ですが、設定別確率ではなく内部モード別の共通値です。モードを特定せずにこの割合を設定推測へ当てはめません。",
+        "historicalStatus": "UNRESOLVED_OBSERVATION_SCOPE"
+      }
+    },
+    {
+      "blockId": "warau4-post-big-revival-overlap",
+      "label": "BIG後の欲望輪廻による引き戻し",
+      "reason": "BIG終了後は必ず欲望輪廻に入り、REG終了後は通常モードの移行抽選です。引き戻しを通常時の初当たりへ重複して数えると公表確率と一致しません。",
+      "reevaluationCondition": "欲望輪廻中を除いたゲーム数・引き戻し回数を実機で正確に記録できる方法を確定すること。",
+      "sourceIds": [
+        "pworld-warau4-detailed"
+      ]
+    },
+    {
+      "blockId": "warau4-mode-stage-not-setting",
+      "label": "ボーナス後アイキャッチとCZ終了ステージ",
+      "reason": "アイキャッチの色やCZ失敗後のステージは通常モードや119モードの示唆です。設定確定アイコンやエンディングセリフとは異なり、設定番号の証拠にはなりません。",
+      "reevaluationCondition": "これらのステージ・アイキャッチの設定別出現率が独立して公表された場合に見直します。",
+      "sourceIds": [
+        "pworld-warau4-detailed"
+      ]
+    },
+    {
+      "blockId": "warau4-role-draws-state-common",
+      "label": "渦巻ク欲望中の成立役別ボーナス抽選",
+      "reason": "渦巻ク欲望中の弱チェリー・スイカは0.8%、強チェリー・チャンス目は100%で当選しますが、これらは全設定共通の抽選値で、設定差のある初当たり率と重複加点できません。",
+      "reevaluationCondition": "渦巻ク欲望中の抽選値に設定ごとの差が公開された場合に再確認します。",
+      "sourceIds": [
+        "pworld-warau4-detailed"
+      ]
+    },
+    {
+      "blockId": "warau4-bonus-nonindependent",
+      "label": "BIG・REGと引き戻し込みの総出現率",
+      "reason": "欲望輪廻などの引き戻しを含む出現率には通常初当たりが含まれます。2つの数字を別々の独立した当たりとして足すと同じ当選を重複計算するため、総出現率は単独の推測情報に使いません。",
+      "reevaluationCondition": "設定別の正確な抽選条件および実機での観測結果・試行母数の対応が確認できた場合に再評価します。",
+      "sourceIds": [
+        "warau4-bonus-source-1",
+        "warau4-bonus-source-2"
+      ]
+    },
+    {
+      "blockId": "warau4-at-nonindependent",
+      "label": "ボーナスと別のAT初当たり",
+      "reason": "本機のボーナスはATの出玉区間です。ボーナス当選を別のAT初当たりとしてもう一度数えないため、独立したAT推測項目を作りません。",
+      "reevaluationCondition": "設定別の正確な抽選条件および実機での観測結果・試行母数の対応が確認できた場合に再評価します。",
+      "sourceIds": [
+        "warau4-at-source-1",
+        "warau4-at-source-2"
+      ]
+    },
+    {
+      "blockId": "warau4-high-state-nonindependent",
+      "label": "低確・高確の内部状態",
+      "reason": "黄昏刻ステージは高確を示唆しますが、全ゲームの内部状態が確定して分かるわけではありません。設定ごとの内部状態滞在率も確認できないため、設定推測に使用しません。",
+      "reevaluationCondition": "設定別の正確な抽選条件および実機での観測結果・試行母数の対応が確認できた場合に再評価します。",
+      "sourceIds": [
+        "warau4-high-state-source-1",
+        "warau4-high-state-source-2"
+      ]
+    },
+    {
+      "blockId": "warau4-cz-entry-role-nonindependent",
+      "label": "CZ突入時のボーナス当選",
+      "reason": "CZ突入時には設定差のある当選抽選がありますが、突入時に当たったのかCZ中に小役で当たったのか区別できません。判別できない成功回数を使わず、公開値だけを参照用に保持します。",
+      "reevaluationCondition": "設定別の正確な抽選条件および実機での観測結果・試行母数の対応が確認できた場合に再評価します。",
+      "sourceIds": [
+        "warau4-cz-entry-role-source-1",
+        "warau4-cz-entry-role-source-2"
+      ]
+    },
+    {
+      "blockId": "warau4-cz-expectation-nonindependent",
+      "label": "CZのキャラ別勝利期待度",
+      "reason": "CZの勝ちやすさは相手キャラや所持するドーン玉で変わります。37%・53%は設定ごとの成功率ではないため、CZ初当たりと独立して設定推測に加算しません。",
+      "reevaluationCondition": "設定別の正確な抽選条件および実機での観測結果・試行母数の対応が確認できた場合に再評価します。",
+      "sourceIds": [
+        "warau4-cz-expectation-source-1",
+        "warau4-cz-expectation-source-2"
+      ]
+    },
+    {
+      "blockId": "warau4-v23-history-carry",
+      "label": "笑マーク履歴とCZストック",
+      "reason": "笑マークの連続成立や前兆中のCZストックは、通常の新しい当選とは条件が異なります。CZが画面に出た時点だけでは当選した抽選を毎回区別できないため、独立した設定推測の回数として加算しません。",
+      "reevaluationCondition": "設定別の抽選条件と、実機で正確に数えられる試行回数・結果の対応が確認できた場合に再評価します。",
+      "sourceIds": [
+        "warau4-v23-history-carry-1",
+        "warau4-v23-history-carry-2"
+      ]
+    },
+    {
+      "blockId": "warau4-v23-bonus-type-scope",
+      "label": "BIG・REG振り分けと昇格",
+      "reason": "ボーナスは準備中やREG中にBIGへ昇格する場合があります。公表されている55.3%・44.7%は設定1の参考値なので、最終的なBIG・REG回数を全設定の振り分けとして推測には使いません。",
+      "reevaluationCondition": "設定別の抽選条件と、実機で正確に数えられる試行回数・結果の対応が確認できた場合に再評価します。",
+      "sourceIds": [
+        "warau4-v23-bonus-type-scope-1"
+      ]
+    },
+    {
+      "blockId": "warau4-v23-setting-minus",
+      "label": "特殊な「設定ー」",
+      "reason": "通常の設定1・2・4・5・6とは別に「設定ー」がありますが、初当たりなどの数値は公表されていません。既存の設定表から推定した数値は作らず、数値推測の対象には追加しません。",
+      "reevaluationCondition": "設定別の抽選条件と、実機で正確に数えられる試行回数・結果の対応が確認できた場合に再評価します。",
+      "sourceIds": [
+        "warau4-v23-setting-minus-1"
+      ]
+    },
+    {
+      "blockId": "warau-v25-external-simulation",
+      "label": "天井期待値の算出条件",
+      "reason": "天井期待値は設定1と特定の遊技条件を仮定した計算結果です。開始ゲーム数ごとの実質初当たり確率や収支を、設定別の実測確率として推測へ反映しません。",
+      "reevaluationCondition": "公表数値に対応する試行条件と実機での正確な観測方法を確認した場合に再評価します。",
+      "sourceIds": [
+        "warau-v25-external-simulation-1"
+      ]
+    },
+    {
+      "blockId": "warau-v39-evidence-unknown-rates",
+      "label": "設定示唆の未公表出現率",
+      "reason": "REG終了時のみPUSHでアイコン（BIG・欲望輪廻終了時は対象外）。特定獲得枚数5種、エンディングセリフ4種、弱/強レア役別ランタン6カテゴリを登録済みレビューと照合。非確定示唆の設定別出現率は確認資料に掲載なしで記録のみ。確定制約のみ反映し通常ランタン演出を混ぜない。",
+      "sourceIds": [
+        "warau-v39-evidence-timing"
+      ],
+      "reevaluationCondition": "設定別の演出出現率が公表され、同一観測の数値推測との二重反映を防ぐ経路を確認できた場合。"
+    },
+    {
+      "blockId": "warau-v42-success-timing-pending",
+      "label": "CZ突入時成功の復元不能",
+      "reason": "最終G告知は突入時当選だけを示さない。消化中の非レア役当選も同じ告知時点であり、告知時点から突入時成功数を復元しない。",
+      "reevaluationCondition": "対象試行・観測結果・同一事象の対応を検証し、正確な集計を再現できること。",
+      "sourceIds": [
+        "warau-v42-success-timing"
+      ]
+    },
+    {
+      "blockId": "warau-v45-dmm-cz-timing-pending",
+      "label": "CZ開始時抽選の精度と告知の重なり",
+      "reason": "既存一桁表示とDMM二桁表示を資料値として分離保持する。最終G告知から開始時成功を全件復元できないためReferenceのみ、Runtime投入禁止。",
+      "sourceIds": [
+        "warau-v45-dmm-cz-timing"
+      ],
+      "reevaluationCondition": "開始時内部成功と消化中成功を区別する全件根拠を取得する。最終G告知やレア役非成立だけで開始時成功とは判定しない。",
+      "sourceReportedSettingRates": {
+        "1": 0.0234,
+        "2": 0.0313,
+        "4": 0.0469,
+        "5": 0.0547,
+        "6": 0.0625
+      },
+      "numericUse": "REFERENCE_ONLY_RUNTIME_DISABLED"
+    }
+  ],
+  "evidenceCandidates": [
+    {
+      "findingId": "reviewed-evidence-1",
+      "label": "REG終了画面アイコン",
+      "sourceIds": [
+        "reviewed-evidence-source-1",
+        "reviewed-evidence-source-2",
+        "reviewed-evidence-source-3"
+      ],
+      "details": [
+        "REG終了画面でPUSHボタンが点滅したときに押して出現したアイコン",
+        "出現率不明の示唆は記録のみ。確定条件だけを反映します。"
+      ],
+      "semanticCategories": [
+        {
+          "label": "アイコンなし",
+          "meaning": "基本パターン",
+          "semanticType": "DISPLAY_ONLY"
+        },
+        {
+          "label": "名刺",
+          "meaning": "奇数設定示唆",
+          "semanticType": "PROBABILITY_UNKNOWN"
+        },
+        {
+          "label": "帽子",
+          "meaning": "偶数設定示唆",
+          "semanticType": "PROBABILITY_UNKNOWN"
+        },
+        {
+          "label": "鞄",
+          "meaning": "高設定示唆",
+          "semanticType": "PROBABILITY_UNKNOWN"
+        },
+        {
+          "label": "笑（銀）",
+          "meaning": "設定4以上",
+          "semanticType": "EXACT_CONSTRAINT"
+        },
+        {
+          "label": "笑（金）",
+          "meaning": "設定5以上",
+          "semanticType": "EXACT_CONSTRAINT"
+        },
+        {
+          "label": "笑（虹）",
+          "meaning": "設定6",
+          "semanticType": "EXACT_CONSTRAINT"
+        }
+      ]
+    },
+    {
+      "findingId": "reviewed-evidence-2",
+      "label": "特定獲得枚数表示",
+      "sourceIds": [
+        "reviewed-evidence-source-1",
+        "reviewed-evidence-source-2",
+        "reviewed-evidence-source-3"
+      ],
+      "details": [
+        "AT・ボーナス中に表示された特定枚数",
+        "出現率不明の示唆は記録のみ。確定条件だけを反映します。"
+      ],
+      "semanticCategories": [
+        {
+          "label": "293枚OVER",
+          "meaning": "設定2以上",
+          "semanticType": "EXACT_CONSTRAINT"
+        },
+        {
+          "label": "456枚OVER",
+          "meaning": "設定4以上",
+          "semanticType": "EXACT_CONSTRAINT"
+        },
+        {
+          "label": "555枚OVER",
+          "meaning": "設定5以上",
+          "semanticType": "EXACT_CONSTRAINT"
+        },
+        {
+          "label": "666枚OVER",
+          "meaning": "設定6",
+          "semanticType": "EXACT_CONSTRAINT"
+        },
+        {
+          "label": "341枚OVER",
+          "meaning": "設定6",
+          "semanticType": "EXACT_CONSTRAINT"
+        }
+      ]
+    },
+    {
+      "findingId": "reviewed-evidence-3",
+      "label": "エンディング記者会見セリフ",
+      "sourceIds": [
+        "reviewed-evidence-source-1",
+        "reviewed-evidence-source-2",
+        "reviewed-evidence-source-3"
+      ],
+      "details": [
+        "エンディング中に喪黒のセリフの色を確認",
+        "出現率不明の示唆は記録のみ。確定条件だけを反映します。"
+      ],
+      "semanticCategories": [
+        {
+          "label": "紫",
+          "meaning": "基本パターン",
+          "semanticType": "DISPLAY_ONLY"
+        },
+        {
+          "label": "橙",
+          "meaning": "高設定示唆",
+          "semanticType": "PROBABILITY_UNKNOWN"
+        },
+        {
+          "label": "赤",
+          "meaning": "設定4以上",
+          "semanticType": "EXACT_CONSTRAINT"
+        },
+        {
+          "label": "虹",
+          "meaning": "設定6",
+          "semanticType": "EXACT_CONSTRAINT"
+        }
+      ]
+    },
+    {
+      "findingId": "reviewed-evidence-4",
+      "label": "エンディングのランタン",
+      "sourceIds": [
+        "reviewed-evidence-source-1",
+        "reviewed-evidence-source-2",
+        "reviewed-evidence-source-3"
+      ],
+      "details": [
+        "エンディング中のレア役成立時のランタン発光色",
+        "出現率不明の示唆は記録のみ。確定条件だけを反映します。"
+      ],
+      "semanticCategories": [
+        {
+          "label": "弱レア役・白",
+          "meaning": "基本パターン",
+          "semanticType": "DISPLAY_ONLY"
+        },
+        {
+          "label": "弱レア役・青",
+          "meaning": "高設定示唆（弱）",
+          "semanticType": "PROBABILITY_UNKNOWN"
+        },
+        {
+          "label": "強レア役・青",
+          "meaning": "基本パターン",
+          "semanticType": "DISPLAY_ONLY"
+        },
+        {
+          "label": "黄",
+          "meaning": "高設定示唆",
+          "semanticType": "PROBABILITY_UNKNOWN"
+        },
+        {
+          "label": "緑",
+          "meaning": "設定4以上",
+          "semanticType": "EXACT_CONSTRAINT"
+        },
+        {
+          "label": "赤",
+          "meaning": "設定5以上",
+          "semanticType": "EXACT_CONSTRAINT"
+        }
+      ]
+    }
+  ],
+  "sourceIntegrityIssues": []
+}

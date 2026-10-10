@@ -1,6 +1,7 @@
+// Historical v48 input fixture. Current production routes are tested in batch009-process-resumption.test.ts.
 import test from 'node:test';import assert from 'node:assert/strict';import fs from 'node:fs';
 import {validateResearchCandidateLedger} from '../src/research-validator.ts';
-const read=()=>JSON.parse(fs.readFileSync('batches/batch-20261008-009/research-working/wave-1/L_MIDORIDON_VIVA_REVIVAL_FY.json','utf8'));
+const read=()=>JSON.parse(fs.readFileSync('batches/batch-20261008-009/research-history/v48/research-working/wave-1/L_MIDORIDON_VIVA_REVIVAL_FY.json','utf8'));
 test('reference provenance cannot use unregistered or out-of-scope sources',()=>{
  for(const key of ['observationScopeAudit','referenceConditionalDistribution'])for(const source of ['missing','green-v27-setting-audit']){
   const d=read();const block=d.blockedItems.find((x:any)=>x.blockId==='high-state-transition-observation');block[key].sourceIds=[source];

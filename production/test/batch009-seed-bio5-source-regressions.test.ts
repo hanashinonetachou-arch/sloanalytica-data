@@ -1,3 +1,4 @@
+// Historical v48 input fixture. Current production routes are tested in batch009-process-resumption.test.ts.
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
@@ -7,7 +8,7 @@ import {buildEligibility} from '../src/eligibility-builder.ts';
 import {classifyEvidenceCategory} from '../src/evidence-semantics.ts';
 
 const base=path.resolve('batches','batch-20261008-009');
-const read=(id:string)=>JSON.parse(fs.readFileSync(path.join(base,'research-evidence-staged','wave-1',id+'.json'),'utf8'));
+const read=(id:string)=>JSON.parse(fs.readFileSync(path.join(base,'research-history/v48/research-evidence-staged','wave-1',id+'.json'),'utf8'));
 test('Gundam SEED records full CZ/ST hints including setting-neutral and suggestive frames',()=>{
  const d=read('L_GUNDAM_SEED_G');
  const f=d.findings.find((x:any)=>x.findingId==='reviewed-cz-st-end');

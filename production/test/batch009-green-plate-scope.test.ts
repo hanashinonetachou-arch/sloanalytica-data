@@ -1,3 +1,4 @@
+// Historical v48 input fixture. Current production routes are tested in batch009-process-resumption.test.ts.
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
@@ -6,7 +7,7 @@ const root='batches/batch-20261008-009/',id='L_MIDORIDON_VIVA_REVIVAL_FY';
 const read=(p:string)=>JSON.parse(fs.readFileSync(root+p+'/'+id+'.json','utf8'));
 
 test('Green plate categories retain exact constraints without appearance likelihood or nonappearance inference',()=>{
- const w=read('research-working/wave-1'),r=read('research-evidence-reviewed'),s=read('research-evidence-staged/wave-1');
+ const w=read('research-history/v48/research-working/wave-1'),r=read('research-history/v48/research-evidence-reviewed'),s=read('research-history/v48/research-evidence-staged/wave-1');
  const ev=r.evidenceCandidates.find((x:any)=>x.findingId==='univer-plate');
  assert.deepEqual(ev.semanticCategories.map((x:any)=>[x.label,x.meaning]),
   [['銅','設定2以上'],['銀','設定3以上'],['金','設定4以上'],['花火柄','設定5以上'],['虹','設定6']]);
@@ -22,7 +23,7 @@ test('Green plate categories retain exact constraints without appearance likelih
 });
 
 test('Adding a plate source to unrelated existing groups violates scoped provenance',()=>{
- const w=read('research-working/wave-1'),r=read('research-evidence-reviewed'),s=read('research-evidence-staged/wave-1');
+ const w=read('research-history/v48/research-working/wave-1'),r=read('research-history/v48/research-evidence-reviewed'),s=read('research-history/v48/research-evidence-staged/wave-1');
  for(const ev of r.evidenceCandidates)assert.ok(ev.sourceUrls?.length);
  const f=s.findings.find((x:any)=>x.findingId==='reviewed-bonus-end');
  assert.ok(!f.sourceIds.includes('green-v44-dmm-body'));

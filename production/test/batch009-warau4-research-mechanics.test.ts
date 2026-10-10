@@ -1,3 +1,4 @@
+// Historical v48 input fixture. Current production routes are tested in batch009-process-resumption.test.ts.
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
@@ -8,7 +9,7 @@ const root=path.resolve('batches','batch-20261008-009');
 const read=(folder:string,id:string)=>JSON.parse(fs.readFileSync(path.join(root,folder,id+'.json'),'utf8'));
 
 test('笑ゥせぇるすまん4 keeps CZ entry setting difference as source-checked reference only',()=>{
- for(const folder of ['research-working/wave-2','research-evidence-staged/wave-2']){
+ for(const folder of ['research-history/v48/research-working/wave-2','research-history/v48/research-evidence-staged/wave-2']){
   const d=read(folder,'S_WARAU4_KH');
   validateResearchCandidateLedger(d,new Set(d.sources.map((s:any)=>s.sourceId)));
   for(const domain of ['BONUS','AT','STATE_TRANSITION','ROLE_CONDITIONAL_DISTRIBUTION','SUCCESS_RATE']){
@@ -24,7 +25,7 @@ test('笑ゥせぇるすまん4 keeps CZ entry setting difference as source-chec
  }
 });
 test('Warau4 does not conflate pooled CZ success with setting-specific CZ entry rates',()=>{
- const d=read('research-evidence-staged/wave-2','S_WARAU4_KH');
+ const d=read('research-history/v48/research-evidence-staged/wave-2','S_WARAU4_KH');
  for(const slug of ['bonus','at','high-state','cz-entry-role','cz-expectation']){
   const id='warau4-'+slug+'-nonindependent';
   const block=d.blockedItems.find((x:any)=>x.blockId===id);
@@ -33,8 +34,8 @@ test('Warau4 does not conflate pooled CZ success with setting-specific CZ entry 
  }
 });
 test('Warau4 source-vs-evidence staging remains non-destructive',()=>{
- const work=read('research-working/wave-2','S_WARAU4_KH');
- const staged=read('research-evidence-staged/wave-2','S_WARAU4_KH');
- const reviewed=read('research-evidence-reviewed','S_WARAU4_KH');
+ const work=read('research-history/v48/research-working/wave-2','S_WARAU4_KH');
+ const staged=read('research-history/v48/research-evidence-staged/wave-2','S_WARAU4_KH');
+ const reviewed=read('research-history/v48/research-evidence-reviewed','S_WARAU4_KH');
  assert.deepEqual(auditBatch009Staging(work,reviewed,staged),[]);
 });

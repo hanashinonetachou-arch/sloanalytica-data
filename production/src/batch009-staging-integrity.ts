@@ -6,7 +6,8 @@ export function auditBatch009Staging(working:any,reviewed:any,staged:any):string
     return ['STAGE_MACHINE_IDENTITY'];
   if(working.batchId!==staged.batchId||working.batchId!==reviewed.batchId)
     errors.push('STAGE_BATCH_IDENTITY');
-  if(staged.researchStage!=='EVIDENCE_STAGED_NOT_APPROVED'||staged.researchCompleteness?.status!=='INCOMPLETE')
+  const reviewedComplete=working.researchStage==='SOURCE_REVIEWED_COMPLETE' && staged.researchStage==='SOURCE_REVIEWED_COMPLETE' && working.researchCompleteness?.status==='COMPLETE' && staged.researchCompleteness?.status==='COMPLETE';
+  if(!reviewedComplete && (staged.researchStage!=='EVIDENCE_STAGED_NOT_APPROVED'||staged.researchCompleteness?.status!=='INCOMPLETE'))
     errors.push('STAGE_PREMATURE_APPROVAL');
   const byId=(items:any[],key:string)=>new Map((items??[]).map(x=>[x[key],x]));
   const workingFindings=byId(working.findings,'findingId');

@@ -1,3 +1,4 @@
+// Historical v48 input fixture. Current production routes are tested in batch009-process-resumption.test.ts.
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
@@ -10,9 +11,9 @@ test('Batch009 evidence remains staged, source-linked, and non-deployable',()=>{
   assert.equal(machines.length,10);
   for(const [i,machineId] of machines.entries()){
     const wave=i<5?'wave-1':'wave-2';
-    const working=read('research-working',wave,machineId+'.json');
-    const staged=read('research-evidence-staged',wave,machineId+'.json');
-    const reviewed=read('research-evidence-reviewed',machineId+'.json');
+    const working=read('research-history/v48/research-working',wave,machineId+'.json');
+    const staged=read('research-history/v48/research-evidence-staged',wave,machineId+'.json');
+    const reviewed=read('research-history/v48/research-evidence-reviewed',machineId+'.json');
     assert.equal(working.machineId,machineId);
     assert.equal(staged.machineId,machineId);
     assert.equal(reviewed.machineId,machineId);
@@ -38,7 +39,7 @@ test('Batch009 evidence remains staged, source-linked, and non-deployable',()=>{
   }
 });
 test('Bio5 four independent hint groups retain their own evidence sources',()=>{
-  const d=read('research-evidence-staged','wave-1','L_BIOHAZARD5_ZE.json');
+  const d=read('research-history/v48/research-evidence-staged','wave-1','L_BIOHAZARD5_ZE.json');
   const evidence=d.findings.filter((x:any)=>x.observationType==='evidence');
   assert.equal(evidence.length,4);
   for(const f of evidence)assert.equal(f.sourceIds.length,2,f.findingId);
@@ -57,7 +58,7 @@ test('Bio5 four independent hint groups retain their own evidence sources',()=>{
   assert.ok(d.blockedItems.some((b:any)=>b.blockId==='infection-first-navi-scope'));
 });
 test('BIG島唄 has conditional rates but no invented numerical hint evidence',()=>{
-  const d=read('research-evidence-staged','wave-2','S_BIG_SHIMAUTA_E2_30.json');
+  const d=read('research-history/v48/research-evidence-staged','wave-2','S_BIG_SHIMAUTA_E2_30.json');
   assert.deepEqual(d.settings.values,['SET_1','SET_2','SET_3','SET_5','SET_6']);
   assert.equal(d.findings.filter((x:any)=>x.observationType==='appearance_distribution').length,2);
   assert.equal(d.findings.filter((x:any)=>x.observationType==='evidence').length,0);
@@ -68,7 +69,7 @@ test('BIG島唄 has conditional rates but no invented numerical hint evidence',(
 });
 
 test('てぃだどんどん covers the five supported settings and only uses seven-segment exact hints',()=>{
-  const d=read('research-evidence-staged','wave-1','L_TIDADONDON_PA5.json');
+  const d=read('research-history/v48/research-evidence-staged','wave-1','L_TIDADONDON_PA5.json');
   assert.deepEqual(d.settings.values,['SET_2','SET_3','SET_4','SET_5','SET_6']);
   const f=d.findings.find((x:any)=>x.findingId==='reviewed-big-seven-seg');
   assert.ok(f);
@@ -84,7 +85,7 @@ test('てぃだどんどん covers the five supported settings and only uses sev
   assert.equal(d.findings.find((x:any)=>x.findingId==='bonus-initial')?.liveObservation?.status,'DIRECT_EXACT');
 });
 test('BOØWY public small-role rates do not become a fabricated feature',()=>{
-  const d=read('research-evidence-staged','wave-2','S_BOOWY_SV.json');
+  const d=read('research-history/v48/research-evidence-staged','wave-2','S_BOOWY_SV.json');
   assert.deepEqual(d.settings.values,['SET_1','SET_2','SET_4','SET_5','SET_6']);
   assert.equal(d.findings.filter((x:any)=>x.settingDistribution).length,1);
   assert.equal(d.findings[0].liveObservation.status,'DIRECT_EXACT');
@@ -97,7 +98,7 @@ test('BOØWY public small-role rates do not become a fabricated feature',()=>{
 
 
 test('Sister Quest TALK black replies and unverified C/B gacha remain distinct and honest',()=>{
- const d=read('research-evidence-staged','wave-1','L_SISTER_QUEST_CA.json');
+ const d=read('research-history/v48/research-evidence-staged','wave-1','L_SISTER_QUEST_CA.json');
  const talk=d.findings.find((x:any)=>x.findingId==='reviewed-smart-talk');
  assert.ok(talk);
  assert.ok(talk.semanticCategories.some((x:any)=>x.label==='今日の調子：黒（もしかしたら…）'&&x.semanticType==='DISPLAY_ONLY'));
@@ -114,7 +115,7 @@ test('Sister Quest TALK black replies and unverified C/B gacha remain distinct a
 
 
 test('BOØWY threshold, reset and post-event domains are source checked but not setting-rate evidence',()=>{
- const d=read('research-evidence-staged','wave-2','S_BOOWY_SV.json');
+ const d=read('research-history/v48/research-evidence-staged','wave-2','S_BOOWY_SV.json');
  const checked=['SMALL_ROLE','THRESHOLD_BEHAVIOR','RESET_BEHAVIOR','POST_EVENT_TRANSITION'];
  for(const domain of checked){
    const row=d.researchCompleteness.domains.find((x:any)=>x.domain===domain);

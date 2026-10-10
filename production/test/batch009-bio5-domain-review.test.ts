@@ -1,3 +1,4 @@
+// Historical v48 input fixture. Current production routes are tested in batch009-process-resumption.test.ts.
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
@@ -7,9 +8,9 @@ const root=path.resolve('batches','batch-20261008-009');
 const read=(...parts:string[])=>JSON.parse(fs.readFileSync(path.join(root,...parts),'utf8'));
 const machine='L_BIOHAZARD5_ZE';
 test('Bio5 stages preserve source claims, numeric infection finding and four reviewed evidence groups',()=>{
- const original=read('research-working','wave-1',machine+'.json');
- const review=read('research-evidence-reviewed',machine+'.json');
- const staged=read('research-evidence-staged','wave-1',machine+'.json');
+ const original=read('research-history/v48/research-working','wave-1',machine+'.json');
+ const review=read('research-history/v48/research-evidence-reviewed',machine+'.json');
+ const staged=read('research-history/v48/research-evidence-staged','wave-1',machine+'.json');
  assert.deepEqual(auditBatch009Staging(original,review,staged),[]);
  assert.equal(staged.findings.filter((f:any)=>f.observationType==='evidence').length,4);
  assert.equal(staged.researchCompleteness.status,'INCOMPLETE');
@@ -18,7 +19,7 @@ test('Bio5 stages preserve source claims, numeric infection finding and four rev
  assert.equal(inf.liveObservation.status,'UNRESOLVED');
 });
 test('Bio5 shared rare roles and three ceilings are excluded; setting1-only mode split is not inferred for other settings',()=>{
- const staged=read('research-evidence-staged','wave-1',machine+'.json');
+ const staged=read('research-history/v48/research-evidence-staged','wave-1',machine+'.json');
  const check=new Map(staged.researchCompleteness.domains.map((d:any)=>[d.domain,d]));
  for(const name of ['SMALL_ROLE','THRESHOLD_BEHAVIOR','RESET_BEHAVIOR'])
   assert.equal(check.get(name)?.status,'CHECKED',name);

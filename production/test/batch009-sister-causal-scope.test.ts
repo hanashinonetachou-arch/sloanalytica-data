@@ -1,3 +1,4 @@
+// Historical v48 input fixture. Current production routes are tested in batch009-process-resumption.test.ts.
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
@@ -11,7 +12,7 @@ const root=path.resolve('batches','batch-20261008-009');
 const sample=(folder:string)=>JSON.parse(fs.readFileSync(path.join(root,folder,'wave-1','L_SISTER_QUEST_CA.json'),'utf8'));
 
 test('Sister Quest CZ/AT share one unresolved causal group rather than independent likelihoods',()=>{
-  for(const folder of ['research-working','research-evidence-staged']){
+  for(const folder of ['research-history/v48/research-working','research-history/v48/research-evidence-staged']){
     const d=sample(folder);
     const ids=['at-initial','cz-quest-battle'];
     const review=buildDependencyReview(d.findings);
@@ -29,7 +30,7 @@ test('Sister Quest CZ/AT share one unresolved causal group rather than independe
 });
 
 test('Changing ledger and live status alone never promotes a causal overlap whose audit remains unresolved',()=>{
-  const d=sample('research-evidence-staged');
+  const d=sample('research-history/v48/research-evidence-staged');
   for(const x of d.researchCompleteness.candidateLedger)
     if(x.disposition?.type==='FINDING_PENDING_SCOPE_VALIDATION')
       x.disposition.type='FINDING';
@@ -39,7 +40,7 @@ test('Changing ledger and live status alone never promotes a causal overlap whos
 });
 
 test('CZ and AT published rates are both evaluated but not independently eligible',()=>{
-  const d=sample('research-evidence-staged');
+  const d=sample('research-history/v48/research-evidence-staged');
   const evalResult=buildEvaluation(d);
   const eligibility=buildEligibility(evalResult);
   for(const id of ['at-initial','cz-quest-battle']){

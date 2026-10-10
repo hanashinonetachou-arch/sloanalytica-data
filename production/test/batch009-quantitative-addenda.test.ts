@@ -1,3 +1,4 @@
+// Historical v48 input fixture. Current production routes are tested in batch009-process-resumption.test.ts.
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
@@ -38,7 +39,7 @@ test('BIG島唄 conditional outcomes are source-tracked and omit nonexistent set
   assert.notEqual(d.findings[1].trialUniverse, d.findings[2].trialUniverse);
 });
 test('緑ドン user-counted reach-me replay retains all six public rates', () => {
-  const d = read('research-evidence-staged/wave-1/L_MIDORIDON_VIVA_REVIVAL_FY.json');
+  const d = read('research-history/v48/research-evidence-staged/wave-1/L_MIDORIDON_VIVA_REVIVAL_FY.json');
   const f = d.findings.find((x: any) => x.findingId === 'reach-me-replay');
   assert.ok(f);
   assert.deepEqual(f.settingDistribution, {'1':'1/2978.9','2':'1/2978.9','3':'1/2520.6','4':'1/2520.6','5':'1/2048.0','6':'1/2048.0'});
@@ -51,7 +52,7 @@ test('緑ドン user-counted reach-me replay retains all six public rates', () =
   assert.match(f.liveObservation.reason,/自己判断/);
 });
 test('バイオ5 special 256枚 is a noncontiguous setting constraint', () => {
-  const d = read('research-evidence-reviewed/L_BIOHAZARD5_ZE.json');
+  const d = read('research-history/v48/research-evidence-reviewed/L_BIOHAZARD5_ZE.json');
   const f = d.evidenceCandidates.find((x: any) => x.findingId === 'special-medal');
   assert.ok(f);
   const c = f.semanticCategories.find((x: any) => x.label === '256枚OVER');
@@ -74,7 +75,7 @@ test('BIG島唄 two distinct reset mode tables never become numeric setting like
   assert.ok(t.sampleSpace&&t.event);
   assert.equal(Object.values(t.percentages).reduce((a:any,b:any)=>a+b,0),100);
  }
- const stage=read('research-evidence-staged/wave-2/S_BIG_SHIMAUTA_E2_30.json');
+ const stage=read('research-history/v48/research-evidence-staged/wave-2/S_BIG_SHIMAUTA_E2_30.json');
  assert.equal(stage.settings.values.includes('SET_4'),false);
  assert.equal(stage.settings.values.includes('SET_L'),false);
  assert.equal(stage.researchCompleteness.domains.find((x:any)=>x.domain==='RESET_BEHAVIOR').status,'CHECKED');

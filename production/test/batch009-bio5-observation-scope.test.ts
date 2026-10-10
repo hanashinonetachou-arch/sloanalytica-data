@@ -1,3 +1,4 @@
+// Historical v48 input fixture. Current production routes are tested in batch009-process-resumption.test.ts.
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
@@ -8,7 +9,7 @@ import {buildEligibility} from '../src/eligibility-builder.ts';
 const read=(scope:string)=>JSON.parse(fs.readFileSync(`batches/batch-20261008-009/${scope}/wave-1/L_BIOHAZARD5_ZE.json`,'utf8'));
 
 test('Bio5 CZ loop, stock and delayed carry-over cannot be promoted by toggling observation status',()=>{
- const d=read('research-evidence-staged');
+ const d=read('research-history/v48/research-evidence-staged');
  for(const row of d.researchCompleteness.candidateLedger)
   if(row.disposition.type==='FINDING_PENDING_SCOPE_VALIDATION')row.disposition.type='FINDING';
  for(const f of d.findings)
@@ -23,7 +24,7 @@ test('Bio5 CZ loop, stock and delayed carry-over cannot be promoted by toggling 
 });
 
 test('Bio5 personal trial reports remain blocked without fabricated per-setting probabilities',()=>{
- for(const scope of ['research-working','research-evidence-staged']){
+ for(const scope of ['research-history/v48/research-working','research-history/v48/research-evidence-staged']){
   const d=read(scope);
   assert.equal(d.researchCompleteness.domains.find((x:any)=>x.domain==='EXTERNAL_DATA_ONLY').status,'CHECKED');
   const row=d.researchCompleteness.candidateLedger.find((x:any)=>x.candidateId==='block:bio5-v24-external-trial');

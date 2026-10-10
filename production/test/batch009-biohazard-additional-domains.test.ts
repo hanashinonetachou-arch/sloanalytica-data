@@ -1,3 +1,4 @@
+// Historical v48 input fixture. Current production routes are tested in batch009-process-resumption.test.ts.
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
@@ -10,7 +11,7 @@ const read=(...parts:string[])=>JSON.parse(fs.readFileSync(path.join(root,...par
 const checked=(d:any,domain:string)=>d.researchCompleteness.domains.find((x:any)=>x.domain===domain);
 
 test('Biohazard5 keeps 4G small-role history and CZ / icon stocks separate',()=>{
- for(const dir of ['research-working','research-evidence-staged']){
+ for(const dir of ['research-history/v48/research-working','research-history/v48/research-evidence-staged']){
   const d=read(dir,'wave-1','L_BIOHAZARD5_ZE.json');
   for(const domain of ['CARRY_OVER','POINTS_GAME_DISTRIBUTION','BONUS_TYPE_CONDITIONAL','STATE_TRANSITION','MACHINE_SPECIFIC']){
    const dom=checked(d,domain);
@@ -31,7 +32,7 @@ test('Biohazard5 keeps 4G small-role history and CZ / icon stocks separate',()=>
 });
 
 test('RE2 4th-reel selection is explicitly conditional on the successful challenge and has no per-setting rate',()=>{
- for(const dir of ['research-working','research-evidence-staged']){
+ for(const dir of ['research-history/v48/research-working','research-history/v48/research-evidence-staged']){
   const d=read(dir,'wave-2','S_BIOHAZARD_RE2_XB.json');
   for(const domain of ['BONUS_TYPE_CONDITIONAL','CARRY_OVER','POINTS_GAME_DISTRIBUTION','MACHINE_SPECIFIC'])
    assert.equal(checked(d,domain)?.status,'CHECKED',domain);
@@ -53,8 +54,8 @@ test('RE2 4th-reel selection is explicitly conditional on the successful challen
 
 test('both biohazard machines retain reviewed Evidence exactly after new Research additions',()=>{
  for(const [wave,id] of [['wave-1','L_BIOHAZARD5_ZE'],['wave-2','S_BIOHAZARD_RE2_XB']]){
-  const w=read('research-working',wave,id+'.json'),s=read('research-evidence-staged',wave,id+'.json');
-  const review=read('research-evidence-reviewed',id+'.json');
+  const w=read('research-history/v48/research-working',wave,id+'.json'),s=read('research-history/v48/research-evidence-staged',wave,id+'.json');
+  const review=read('research-history/v48/research-evidence-reviewed',id+'.json');
   assert.deepEqual(auditBatch009Staging(w,review,s),[],id);
  }
 });

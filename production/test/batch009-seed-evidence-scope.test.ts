@@ -1,10 +1,11 @@
+// Historical v48 input fixture. Current production routes are tested in batch009-process-resumption.test.ts.
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import {auditBatch009Staging} from '../src/batch009-staging-integrity.ts';
 const root='batches/batch-20261008-009/',id='L_GUNDAM_SEED_G',read=(p:string)=>JSON.parse(fs.readFileSync(root+p,'utf8'));
 test('Seed ending evidence has its own reviewed source and cannot inherit CZ/ST sources or observation scope',()=>{
- const r=read(`research-evidence-reviewed/${id}.json`),w=read(`research-working/wave-1/${id}.json`),s=read(`research-evidence-staged/wave-1/${id}.json`);
+ const r=read(`research-history/v48/research-evidence-reviewed/${id}.json`),w=read(`research-history/v48/research-working/wave-1/${id}.json`),s=read(`research-history/v48/research-evidence-staged/wave-1/${id}.json`);
  assert.deepEqual(auditBatch009Staging(w,r,s),[]);
  const cz=s.findings.find((x:any)=>x.findingId==='reviewed-cz-st-end'),end=s.findings.find((x:any)=>x.findingId==='reviewed-ending-end');
  assert.equal(cz.semanticCategories.length,14);assert.equal(end.semanticCategories.length,2);

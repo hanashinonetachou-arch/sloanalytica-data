@@ -12,6 +12,12 @@ const drafts=audit.machineRows.map((row:any)=>{
  const wave=fs.existsSync(path.join(batch,'research-working/wave-1',row.machineId+'.json'))?'wave-1':'wave-2';
  const read=(part:string)=>JSON.parse(fs.readFileSync(path.join(batch,part,row.machineId+'.json'),'utf8'));
  const working=read('research-working/'+wave),staged=read('research-evidence-staged/'+wave),reviewed=read('research-evidence-reviewed');
+ if(fs.existsSync(path.join(batch,'research-drafts',wave,row.machineId+'.json'))){
+  const current=read('research-drafts/'+wave);
+  if(JSON.stringify(current)!==JSON.stringify(working)||JSON.stringify(current)!==JSON.stringify(staged))throw new Error('CURRENT_RESEARCH_SYNC_DRIFT:'+row.machineId);
+  validateResearchCandidateLedger(current,new Set(current.sources.map((s:any)=>s.sourceId)));
+  return current;
+ }
  for(const d of [working,staged])validateResearchCandidateLedger(d,new Set(d.sources.map((s:any)=>s.sourceId)));
  const errors=auditBatch009Staging(working,reviewed,staged);if(errors.length)throw new Error(row.machineId+':'+errors.join(','));
  return working;

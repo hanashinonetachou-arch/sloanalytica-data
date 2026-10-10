@@ -1,3 +1,4 @@
+// Historical v48 input fixture. Current production routes are tested in batch009-process-resumption.test.ts.
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
@@ -6,9 +7,9 @@ import {auditBatch009Staging} from '../src/batch009-staging-integrity.ts';
 const root=path.resolve('batches','batch-20261008-009');
 const read=(...s:string[])=>JSON.parse(fs.readFileSync(path.join(root,...s),'utf8'));
 function stage(id:string){
-  const a=read('research-working','wave-2',id+'.json');
-  const b=read('research-evidence-reviewed',id+'.json');
-  const c=read('research-evidence-staged','wave-2',id+'.json');
+  const a=read('research-history/v48/research-working','wave-2',id+'.json');
+  const b=read('research-history/v48/research-evidence-reviewed',id+'.json');
+  const c=read('research-history/v48/research-evidence-staged','wave-2',id+'.json');
   assert.deepEqual(auditBatch009Staging(a,b,c),[],id+':staging drift');
   assert.equal(c.researchCompleteness.status,'INCOMPLETE');
   return c;

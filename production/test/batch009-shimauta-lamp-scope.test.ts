@@ -1,3 +1,4 @@
+// Historical v48 input fixture. Current production routes are tested in batch009-process-resumption.test.ts.
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
@@ -6,7 +7,7 @@ const root='batches/batch-20261008-009/';
 const read=(p:string)=>JSON.parse(fs.readFileSync(root+p,'utf8'));
 test('Shimauta mode lamps cannot become stronger mode or setting constraints',()=>{
  const id='S_BIG_SHIMAUTA_E2_30';
- const w=read(`research-working/wave-2/${id}.json`),s=read(`research-evidence-staged/wave-2/${id}.json`),r=read(`research-evidence-reviewed/${id}.json`);
+ const w=read(`research-history/v48/research-working/wave-2/${id}.json`),s=read(`research-history/v48/research-evidence-staged/wave-2/${id}.json`),r=read(`research-history/v48/research-evidence-reviewed/${id}.json`);
  assert.deepEqual(auditBatch009Staging(w,r,s),[]);
  assert.equal(r.evidenceCandidates.length,0);
  assert.equal(r.noSettingEvidenceAttestation,undefined);

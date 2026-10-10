@@ -1,3 +1,4 @@
+// Historical v48 input fixture. Current production routes are tested in batch009-process-resumption.test.ts.
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
@@ -12,9 +13,9 @@ const names=read('batch.json').waves.flatMap((w:any)=>w.machineIds) as string[];
 function readTriplet(id:string,i:number){
  const wave=i<5?'wave-1':'wave-2';
  return {
-  original:read('research-working',wave,id+'.json'),
-  reviewed:read('research-evidence-reviewed',id+'.json'),
-  staged:read('research-evidence-staged',wave,id+'.json')
+  original:read('research-history/v48/research-working',wave,id+'.json'),
+  reviewed:read('research-history/v48/research-evidence-reviewed',id+'.json'),
+  staged:read('research-history/v48/research-evidence-staged',wave,id+'.json')
  };
 }
 test('all ten current staged machine drafts preserve source/ledger and every reviewed evidence category',()=>{

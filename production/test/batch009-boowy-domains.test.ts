@@ -1,3 +1,4 @@
+// Historical v48 input fixture. Current production routes are tested in batch009-process-resumption.test.ts.
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
@@ -6,9 +7,9 @@ import {auditBatch009Staging} from '../src/batch009-staging-integrity.ts';
 const base=path.resolve('batches','batch-20261008-009');
 const read=(...parts:string[])=>JSON.parse(fs.readFileSync(path.join(base,...parts),'utf8'));
 test('BOØWY follows all twenty research domains without inferring hidden settings',()=>{
- const work=read('research-working','wave-2','S_BOOWY_SV.json');
- const staged=read('research-evidence-staged','wave-2','S_BOOWY_SV.json');
- const reviewed=read('research-evidence-reviewed','S_BOOWY_SV.json');
+ const work=read('research-history/v48/research-working','wave-2','S_BOOWY_SV.json');
+ const staged=read('research-history/v48/research-evidence-staged','wave-2','S_BOOWY_SV.json');
+ const reviewed=read('research-history/v48/research-evidence-reviewed','S_BOOWY_SV.json');
  assert.deepEqual(auditBatch009Staging(work,reviewed,staged),[]);
  assert.equal(staged.researchCompleteness.status,'INCOMPLETE');
  const d=new Map(staged.researchCompleteness.domains.map((x:any)=>[x.domain,x]));
@@ -21,7 +22,7 @@ test('BOØWY follows all twenty research domains without inferring hidden settin
  assert.deepEqual(enabled.map((x:any)=>x.findingId),['at-initial']);
 });
 test('BOØWY verified no-setting-difference decisions are source-traced and plain Japanese',()=>{
- const staged=read('research-evidence-staged','wave-2','S_BOOWY_SV.json');
+ const staged=read('research-history/v48/research-evidence-staged','wave-2','S_BOOWY_SV.json');
  const sourceIds=new Set(staged.sources.map((s:any)=>s.sourceId));
  const ledger=staged.researchCompleteness.candidateLedger;
  for(const id of ['lcd-stages-only-mode','replay-streak-not-setting-distribution','beat-revolution-carryover-no-setting','countdown-cz-success-no-setting-table','at-upper-promotion-not-independent','beat-cz-countdown-distribution-not-setting','single-setting-trial-not-probability-distribution']){
@@ -35,7 +36,7 @@ test('BOØWY verified no-setting-difference decisions are source-traced and plai
 });
 
 test('BOØWY ending screen and setting L cannot be confused with independent numeric likelihoods',()=>{
- for(const scope of ['research-working','research-evidence-staged']){
+ for(const scope of ['research-history/v48/research-working','research-history/v48/research-evidence-staged']){
   const d=read(scope,'wave-2','S_BOOWY_SV.json');
   const evidence=d.researchCompleteness.domains.find((x:any)=>x.domain==='EVIDENCE');
   const specific=d.researchCompleteness.domains.find((x:any)=>x.domain==='MACHINE_SPECIFIC');
@@ -50,7 +51,7 @@ test('BOØWY ending screen and setting L cannot be confused with independent num
   assert.deepEqual(d.settings.values,['SET_1','SET_2','SET_4','SET_5','SET_6']);
   assert.equal(d.researchCompleteness.status,'INCOMPLETE');
  }
- const stage=read('research-evidence-staged','wave-2','S_BOOWY_SV.json');
+ const stage=read('research-history/v48/research-evidence-staged','wave-2','S_BOOWY_SV.json');
  const hint=stage.findings.find((x:any)=>x.findingId==='reviewed-at-end-screen');
  assert.equal(hint?.observationType,'evidence');
  const categories=hint.semanticCategories;
@@ -60,7 +61,7 @@ test('BOØWY ending screen and setting L cannot be confused with independent num
 });
 
 test('BOØWY AT progression can be source-checked while AT initial-hit denominator remains unresolved',()=>{
- const d=read('research-evidence-staged','wave-2','S_BOOWY_SV.json');
+ const d=read('research-history/v48/research-evidence-staged','wave-2','S_BOOWY_SV.json');
  const at=d.researchCompleteness.domains.find((x:any)=>x.domain==='AT');
  const hit=d.researchCompleteness.domains.find((x:any)=>x.domain==='INITIAL_HIT');
  assert.equal(at?.status,'CHECKED');

@@ -1,3 +1,4 @@
+// Historical v48 planning fixture; current completion is checked in batch009-process-resumption.test.ts.
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
@@ -9,8 +10,8 @@ const review=()=>JSON.parse(fs.readFileSync(path.join(batch,'research-resolution
 const drafts=()=>{
  const audit=JSON.parse(fs.readFileSync(path.join(batch,'research-progress-audit-v42-20261009.json'),'utf8'));
  return audit.machineRows.map((m:any)=>{
-  const wave=fs.existsSync(path.join(batch,'research-working/wave-1',m.machineId+'.json'))?'wave-1':'wave-2';
-  return JSON.parse(fs.readFileSync(path.join(batch,'research-working',wave,m.machineId+'.json'),'utf8'));
+  const wave=fs.existsSync(path.join(batch,'research-history/v48/research-working/wave-1',m.machineId+'.json'))?'wave-1':'wave-2';
+  return JSON.parse(fs.readFileSync(path.join(batch,'research-history/v48/research-working',wave,m.machineId+'.json'),'utf8'));
  });
 };
 

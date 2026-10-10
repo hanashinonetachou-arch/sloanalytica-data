@@ -1,3 +1,4 @@
+// Historical v48 planning fixture; current completion is checked in batch009-process-resumption.test.ts.
 import test from 'node:test';import assert from 'node:assert/strict';
 import {classifyPracticalHit,practicalNonChainGames} from '../src/practical-observation-policy.ts';
 test('AT hits after a completed return zone are initial hits regardless of elapsed games',()=>{
@@ -22,7 +23,7 @@ test('Unknown or mismatched zones cannot be silently treated as initial hits',()
 import fs from 'node:fs';
 import {validateResearchCandidateLedger} from '../src/research-validator.ts';
 import {derivePlayInfoRequirement} from '../src/canonical-ui-builder.ts';
-const readPolicyDraft=(machine:string,wave:string)=>JSON.parse(fs.readFileSync(`batches/batch-20261008-009/research-working/${wave}/${machine}.json`,'utf8'));
+const readPolicyDraft=(machine:string,wave:string)=>JSON.parse(fs.readFileSync(`batches/batch-20261008-009/research-history/v48/research-working/${wave}/${machine}.json`,'utf8'));
 test('User-excluded SEED candidate cannot silently be returned to the active ledger',()=>{
  const d=readPolicyDraft('L_GUNDAM_SEED_G','wave-1');
  d.findings.push(d.blockedItems.find((b:any)=>b.blockId==='seed-v47-100g-user-exclusion').referenceFinding);

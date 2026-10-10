@@ -1,3 +1,4 @@
+// Historical v48 input fixture. Current production routes are tested in batch009-process-resumption.test.ts.
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
@@ -7,7 +8,7 @@ import {buildEligibility} from '../src/eligibility-builder.ts';
 const root='batches/batch-20261008-009/',id='L_MIDORIDON_VIVA_REVIVAL_FY';
 const read=(p:string)=>JSON.parse(fs.readFileSync(root+p,'utf8'));
 test('Green trick review preserves concrete categories and exact constraints without invented appearance rates',()=>{
- const r=read(`research-evidence-reviewed/${id}.json`),w=read(`research-working/wave-1/${id}.json`),s=read(`research-evidence-staged/wave-1/${id}.json`);
+ const r=read(`research-history/v48/research-evidence-reviewed/${id}.json`),w=read(`research-history/v48/research-working/wave-1/${id}.json`),s=read(`research-history/v48/research-evidence-staged/wave-1/${id}.json`);
  assert.deepEqual(auditBatch009Staging(w,r,s),[]);
  const f=r.evidenceCandidates.find((x:any)=>x.findingId==='ending-trick');
  assert.equal(f.semanticCategories.length,18);
@@ -21,7 +22,7 @@ test('Green trick review preserves concrete categories and exact constraints wit
  assert.ok(auditBatch009Staging(w,r,s).includes('STAGE_EVIDENCE_CATEGORY_DRIFT:reviewed-ending-trick'));
 });
 test('Green bonus and AT marginals cannot become independent likelihoods by changing observation labels',()=>{
- const d=read(`research-evidence-staged/wave-1/${id}.json`);
+ const d=read(`research-history/v48/research-evidence-staged/wave-1/${id}.json`);
  for(const f of d.findings)if(['bonus-initial','at-initial'].includes(f.findingId))f.liveObservation.status='DIRECT_EXACT';
  const out=buildEligibility(buildEvaluation(d));
  for(const id of ['bonus-initial','at-initial']){

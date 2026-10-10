@@ -1,3 +1,4 @@
+// Historical v48 input fixture. Current production routes are tested in batch009-process-resumption.test.ts.
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
@@ -6,7 +7,7 @@ import {categoricalEvidenceMirrorIssues} from '../src/categorical-evidence-mirro
 import {validateResearchPromotionReadiness} from '../src/research-validator.ts';
 
 const researchPath=path.resolve('batches','batch-20261008-009',
-  'research-evidence-staged','wave-1','L_SISTER_QUEST_CA.json');
+  'research-history/v48/research-evidence-staged','wave-1','L_SISTER_QUEST_CA.json');
 const staged=()=>JSON.parse(fs.readFileSync(researchPath,'utf8'));
 const candidate=(d:any,id:string)=>d.findings.find((f:any)=>f.findingId===id);
 

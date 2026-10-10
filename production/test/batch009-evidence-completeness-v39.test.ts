@@ -1,12 +1,13 @@
+// Historical v48 input fixture. Current production routes are tested in batch009-process-resumption.test.ts.
 import test from 'node:test';import assert from 'node:assert/strict';import fs from 'node:fs';import {auditBatch009Staging} from '../src/batch009-staging-integrity.ts';
 const root='batches/batch-20261008-009/';const read=(p:string)=>JSON.parse(fs.readFileSync(root+p,'utf8'));
 test('DenO new mini-character scope preserves original evidence and has no fabricated numeric route',()=>{
- const id='L_KAMEN_RIDER_DEN_O_UD',w=read(`research-working/wave-2/${id}.json`),s=read(`research-evidence-staged/wave-2/${id}.json`),r=read(`research-evidence-reviewed/${id}.json`);
+ const id='L_KAMEN_RIDER_DEN_O_UD',w=read(`research-history/v48/research-working/wave-2/${id}.json`),s=read(`research-history/v48/research-evidence-staged/wave-2/${id}.json`),r=read(`research-history/v48/research-evidence-reviewed/${id}.json`);
  assert.deepEqual(auditBatch009Staging(w,r,s),[]);const f=s.findings.find((x:any)=>x.findingId==='reviewed-mini-character');assert.equal(f.semanticCategories.length,5);assert.equal(f.semanticCategories.filter((c:any)=>c.semanticType==='EXACT_CONSTRAINT').length,2);assert.equal(f.settingDistribution,undefined);
  assert.equal(f.sourceIds.length,1);assert.match(f.details[0],/押し忘れ/);assert.match(f.details[0],/通常時.*AT中/);assert.equal(r.evidenceCandidates.length,6);
 });
 test('SEED purple reset screen uses inspected character identity and matching reviewed source scope',()=>{
- const id='L_GUNDAM_SEED_G',w=read(`research-working/wave-1/${id}.json`),s=read(`research-evidence-staged/wave-1/${id}.json`),r=read(`research-evidence-reviewed/${id}.json`);
+ const id='L_GUNDAM_SEED_G',w=read(`research-history/v48/research-working/wave-1/${id}.json`),s=read(`research-history/v48/research-evidence-staged/wave-1/${id}.json`),r=read(`research-history/v48/research-evidence-reviewed/${id}.json`);
  assert.deepEqual(auditBatch009Staging(w,r,s),[]);
  assert.equal(w.researchCompleteness.domains.find((x:any)=>x.domain==='EVIDENCE').status,'CHECKED');
  const f=s.findings.find((x:any)=>x.findingId==='reviewed-cz-st-end');
@@ -22,7 +23,7 @@ test('SEED purple reset screen uses inspected character identity and matching re
 });
 test('completed Bio5 and Warau evidence research leaves numerical trials and promotion unresolved',()=>{
  for(const [id,wave,count] of [['L_BIOHAZARD5_ZE',1,4],['S_WARAU4_KH',2,4]]){
- const w=read(`research-working/wave-${wave}/${id}.json`),s=read(`research-evidence-staged/wave-${wave}/${id}.json`),r=read(`research-evidence-reviewed/${id}.json`);assert.deepEqual(auditBatch009Staging(w,r,s),[]);
+ const w=read(`research-history/v48/research-working/wave-${wave}/${id}.json`),s=read(`research-history/v48/research-evidence-staged/wave-${wave}/${id}.json`),r=read(`research-history/v48/research-evidence-reviewed/${id}.json`);assert.deepEqual(auditBatch009Staging(w,r,s),[]);
  assert.equal(w.researchCompleteness.domains.find((x:any)=>x.domain==='EVIDENCE').status,'CHECKED');assert.equal(s.findings.filter((x:any)=>x.observationType==='evidence').length,count);
  assert.equal(s.researchCompleteness.status,'INCOMPLETE');assert.ok(w.findings.some((x:any)=>x.liveObservation?.status==='UNRESOLVED'));
  }

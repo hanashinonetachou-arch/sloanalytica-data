@@ -1,3 +1,4 @@
+// Historical v48 input fixture. Current production routes are tested in batch009-process-resumption.test.ts.
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
@@ -11,9 +12,9 @@ const id='S_BIG_SHIMAUTA_E2_30';
 const read=(p:string)=>JSON.parse(fs.readFileSync(root+p,'utf8'));
 
 test('Shimauta 32G cutoff does not establish the published initial-hit trial',()=>{
- const w=read(`research-working/wave-2/${id}.json`);
- const s=read(`research-evidence-staged/wave-2/${id}.json`);
- const r=read(`research-evidence-reviewed/${id}.json`);
+ const w=read(`research-history/v48/research-working/wave-2/${id}.json`);
+ const s=read(`research-history/v48/research-evidence-staged/wave-2/${id}.json`);
+ const r=read(`research-history/v48/research-evidence-reviewed/${id}.json`);
  assert.deepEqual(auditBatch009Staging(w,r,s),[]);
  const hit=s.findings.find((f:any)=>f.findingId==='big-initial');
  assert.equal(hit.liveObservation.status,'UNRESOLVED');

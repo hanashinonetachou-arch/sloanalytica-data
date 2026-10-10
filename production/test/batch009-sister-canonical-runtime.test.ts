@@ -1,10 +1,11 @@
+// Historical v48 input fixture. Current production routes are tested in batch009-process-resumption.test.ts.
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import {buildAppRuntime} from '../src/app-runtime-builder.ts';
 import {validateAppRuntimeDocument} from '../src/app-runtime-validator.ts';
 import {categoricalEvidenceMirrorIssues} from '../src/categorical-evidence-mirror.ts';
-const read=()=>JSON.parse(fs.readFileSync('batches/batch-20261008-009/research-evidence-staged/wave-1/L_SISTER_QUEST_CA.json','utf8'));
+const read=()=>JSON.parse(fs.readFileSync('batches/batch-20261008-009/research-history/v48/research-evidence-staged/wave-1/L_SISTER_QUEST_CA.json','utf8'));
 // Validation fixture only: this does not approve Research or publish Batch009 Runtime.
 test('Sister Quest actual mirrored categories use one counter each and exact constraints reuse those counters',()=>{
  const d=read(),ids=['at-end-categorical','at-monster-categorical'];

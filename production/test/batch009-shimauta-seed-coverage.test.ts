@@ -1,3 +1,4 @@
+// Historical v48 input fixture. Current production routes are tested in batch009-process-resumption.test.ts.
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
@@ -13,7 +14,7 @@ const sourceChecked=(d:any)=>{
   validateResearchCandidateLedger(d,new Set(d.sources.map((x:any)=>x.sourceId)));
 };
 test('BIG島唄 keeps BONUS and bonus-AT in one sample family, 1G stock not an independent initial hit',()=>{
- for(const folder of ['research-working','research-evidence-staged']){
+ for(const folder of ['research-history/v48/research-working','research-history/v48/research-evidence-staged']){
   const d=read(folder,'wave-2','S_BIG_SHIMAUTA_E2_30');
   sourceChecked(d);
   for(const dom of ['BONUS','AT','INTERNAL_CONDITIONAL_DRAW','CARRY_OVER','NAVIGATION','ROLE_CONDITIONAL_DISTRIBUTION'])
@@ -33,20 +34,20 @@ test('BIG島唄 keeps BONUS and bonus-AT in one sample family, 1G stock not an i
  }
 });
 test('Changing stock-family live flags and pending ledger does not silently promote BIG島唄',()=>{
- const d=read('research-evidence-staged','wave-2','S_BIG_SHIMAUTA_E2_30');
+ const d=read('research-history/v48/research-evidence-staged','wave-2','S_BIG_SHIMAUTA_E2_30');
  for(const row of d.researchCompleteness.candidateLedger)
    if(row.disposition?.type==='FINDING_PENDING_SCOPE_VALIDATION')row.disposition.type='FINDING';
  for(const x of d.findings)if(x.liveObservation?.status==='UNRESOLVED')x.liveObservation.status='DIRECT_EXACT';
  assert.throws(()=>validateResearchPromotionReadiness(d),/UNRESOLVED_CAUSAL_DEPENDENCY_PROMOTION_FORBIDDEN/);
 });
 test('BIG島唄 working/staging integrity persists when the seven mechanical domains are checked',()=>{
- const work=read('research-working','wave-2','S_BIG_SHIMAUTA_E2_30');
- const stage=read('research-evidence-staged','wave-2','S_BIG_SHIMAUTA_E2_30');
- const review=JSON.parse(fs.readFileSync(path.join(root,'research-evidence-reviewed','S_BIG_SHIMAUTA_E2_30.json'),'utf8'));
+ const work=read('research-history/v48/research-working','wave-2','S_BIG_SHIMAUTA_E2_30');
+ const stage=read('research-history/v48/research-evidence-staged','wave-2','S_BIG_SHIMAUTA_E2_30');
+ const review=JSON.parse(fs.readFileSync(path.join(root,'research-history/v48/research-evidence-reviewed','S_BIG_SHIMAUTA_E2_30.json'),'utf8'));
  assert.deepEqual(auditBatch009Staging(work,review,stage),[]);
 });
 test('ガンダムSEED verifies bonus, conditional type, CZ/ST success, cumulative points, mode displays',()=>{
- for(const folder of ['research-working','research-evidence-staged']){
+ for(const folder of ['research-history/v48/research-working','research-history/v48/research-evidence-staged']){
   const d=read(folder,'wave-1','L_GUNDAM_SEED_G');
   sourceChecked(d);
   for(const dom of ['BONUS','BONUS_TYPE_CONDITIONAL','SUCCESS_RATE','CARRY_OVER','NAVIGATION'])
@@ -57,8 +58,8 @@ test('ガンダムSEED verifies bonus, conditional type, CZ/ST success, cumulati
  }
 });
 test('ガンダムSEED working/staging source and category mapping remains intact',()=>{
- const work=read('research-working','wave-1','L_GUNDAM_SEED_G');
- const stage=read('research-evidence-staged','wave-1','L_GUNDAM_SEED_G');
- const review=JSON.parse(fs.readFileSync(path.join(root,'research-evidence-reviewed','L_GUNDAM_SEED_G.json'),'utf8'));
+ const work=read('research-history/v48/research-working','wave-1','L_GUNDAM_SEED_G');
+ const stage=read('research-history/v48/research-evidence-staged','wave-1','L_GUNDAM_SEED_G');
+ const review=JSON.parse(fs.readFileSync(path.join(root,'research-history/v48/research-evidence-reviewed','L_GUNDAM_SEED_G.json'),'utf8'));
  assert.deepEqual(auditBatch009Staging(work,review,stage),[]);
 });

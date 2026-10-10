@@ -1,3 +1,4 @@
+// Historical v48 input fixture. Current production routes are tested in batch009-process-resumption.test.ts.
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
@@ -12,7 +13,7 @@ const read=(...parts:string[])=>JSON.parse(fs.readFileSync(path.join(root,...par
 const id='L_TIDADONDON_PA5';
 
 test('Tida v22 mechanics and BIG-entry hint are source-checked, not independent numeric features',()=>{
- for(const scope of ['research-working','research-evidence-staged']){
+ for(const scope of ['research-history/v48/research-working','research-history/v48/research-evidence-staged']){
   const d=read(scope,'wave-1',id+'.json');
   const checked=['CZ','AT','STATE_TRANSITION','INTERNAL_CONDITIONAL_DRAW','CARRY_OVER','ROLE_CONDITIONAL_DISTRIBUTION','POINTS_GAME_DISTRIBUTION','EVIDENCE'];
   for(const domain of checked){
@@ -23,7 +24,7 @@ test('Tida v22 mechanics and BIG-entry hint are source-checked, not independent 
   assert.equal(d.researchCompleteness.status,'INCOMPLETE');
   validateResearchCandidateLedger(d,new Set(d.sources.map((x:any)=>x.sourceId)));
  }
- const d=read('research-evidence-staged','wave-1',id+'.json');
+ const d=read('research-history/v48/research-evidence-staged','wave-1',id+'.json');
  const hint=d.findings.find((x:any)=>x.findingId==='reviewed-big-seven-seg');
  assert.deepEqual(hint.semanticCategories.map((x:any)=>x.label),['白（白7）','赤（赤7）','黄','緑','緑＆赤']);
  assert.deepEqual(hint.semanticCategories.map((x:any)=>x.semanticType),[
@@ -32,7 +33,7 @@ test('Tida v22 mechanics and BIG-entry hint are source-checked, not independent 
 });
 
 test('34-78G can include a new initial hit, so game-clock thresholds cannot auto-classify a Tida bonus',()=>{
- const d=read('research-evidence-staged','wave-1',id+'.json');
+ const d=read('research-history/v48/research-evidence-staged','wave-1',id+'.json');
  const hit=d.findings.find((x:any)=>x.findingId==='bonus-initial');
  assert.ok(hit);
  assert.equal(hit.trialUniverse,'NON_CHAIN_BONUS_INITIAL_GAME_TRIAL');
@@ -45,7 +46,7 @@ test('34-78G can include a new initial hit, so game-clock thresholds cannot auto
 });
 
 test('User-defined Tida counting resolves observation scope without claiming publisher equivalence',()=>{
- const d=read('research-evidence-staged','wave-1',id+'.json');
+ const d=read('research-history/v48/research-evidence-staged','wave-1',id+'.json');
  const hit=d.findings.find((x:any)=>x.findingId==='bonus-initial');
  assert.equal(hit.liveObservation.status,'DIRECT_EXACT');
  assert.equal(hit.dependencyScopeAudit.status,'USER_DEFINED_PRACTICAL_SCOPE');
@@ -55,14 +56,14 @@ test('User-defined Tida counting resolves observation scope without claiming pub
 });
 
 test('Tida working data, reviewed Evidence and staging remain aligned',()=>{
- const w=read('research-working','wave-1',id+'.json');
- const stage=read('research-evidence-staged','wave-1',id+'.json');
- const review=read('research-evidence-reviewed',id+'.json');
+ const w=read('research-history/v48/research-working','wave-1',id+'.json');
+ const stage=read('research-history/v48/research-evidence-staged','wave-1',id+'.json');
+ const review=read('research-history/v48/research-evidence-reviewed',id+'.json');
  assert.deepEqual(auditBatch009Staging(w,review,stage),[]);
 });
 
 test('an unresolved scope cannot cite a missing source or a source outside the finding',()=>{
- const d=read('research-evidence-staged','wave-1',id+'.json');
+ const d=read('research-history/v48/research-evidence-staged','wave-1',id+'.json');
  const sources=new Set(d.sources.map((x:any)=>x.sourceId));
  const hit=d.findings.find((x:any)=>x.findingId==='bonus-initial');
  hit.dependencyScopeAudit.evidenceSourceIds=['unregistered-source'];

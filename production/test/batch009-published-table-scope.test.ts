@@ -1,6 +1,7 @@
+// Historical v48 input fixture. Current production routes are tested in batch009-process-resumption.test.ts.
 import test from 'node:test';import assert from 'node:assert/strict';import fs from 'node:fs';
 import {validateResearchCandidateLedger} from '../src/research-validator.ts';
-const read=(id:string,w:number)=>JSON.parse(fs.readFileSync(`batches/batch-20261008-009/research-working/wave-${w}/${id}.json`,'utf8'));
+const read=(id:string,w:number)=>JSON.parse(fs.readFileSync(`batches/batch-20261008-009/research-history/v48/research-working/wave-${w}/${id}.json`,'utf8'));
 test('SEED time windows retain one episode and the unmodified published total',()=>{
  const d=read('L_GUNDAM_SEED_G',1);validateResearchCandidateLedger(d,new Set(d.sources.map((x:any)=>x.sourceId)));
  const b=d.blockedItems.find((x:any)=>x.blockId==='seed-v21-post-st-100-nonindependent').referenceConditionalDistribution;

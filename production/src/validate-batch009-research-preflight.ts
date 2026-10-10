@@ -18,6 +18,11 @@ for(const [index,machineId] of machines.entries()){
  const ev=JSON.parse(fs.readFileSync(path.join(root,'research-evidence-reviewed',machineId+'.json'),'utf8'));
  const original=JSON.parse(fs.readFileSync(path.join(root,'research-working',wave,machineId+'.json'),'utf8'));
  const errors:string[]=[];
+ if(work.researchStage==='SOURCE_REVIEWED_COMPLETE'){
+  const currentPath=path.join(root,'research-drafts',wave,machineId+'.json');
+  if(!fs.existsSync(currentPath)||fs.readFileSync(currentPath,'utf8')!==fs.readFileSync(path.join(root,'research-evidence-staged',wave,machineId+'.json'),'utf8'))errors.push('CURRENT_RESEARCH_DRAFT_DRIFT');
+ }
+
  // Verify the unapproved staging snapshot against working source material.
  // Once source review is formally complete, changed eligibility/observation
  // decisions must be judged by promotion validators, not frozen stage equality.

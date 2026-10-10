@@ -1,3 +1,4 @@
+// Historical v48 input fixture. Current production routes are tested in batch009-process-resumption.test.ts.
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
@@ -17,7 +18,7 @@ test('Batch009 preserves all ten machines in source manifest order',()=>{
 });
 test('No research source claim, numeric finding, or blocked user reason is lost from ledgers',()=>{
  for(const [i,id] of machines.entries()){
-  const wave=i<5?'wave-1':'wave-2',d=read('research-evidence-staged',wave,id+'.json');
+  const wave=i<5?'wave-1':'wave-2',d=read('research-history/v48/research-evidence-staged',wave,id+'.json');
   const c=d.researchCompleteness,ledger=c.candidateLedger;
   assert.equal(d.machineId,id);
   assert.equal(c.version,2);
@@ -70,7 +71,7 @@ test('RE2 source-backed internal state and AT direct probabilities stay non-runt
  assert.match(a.status,/REFERENCE_ONLY/);
 });
 test('Den-O 100pt CZ finding uses a conditional trial and is never marked live exact',()=>{
- const d=read('research-evidence-staged','wave-2','L_KAMEN_RIDER_DEN_O_UD.json');
+ const d=read('research-history/v48/research-evidence-staged','wave-2','L_KAMEN_RIDER_DEN_O_UD.json');
  const f=d.findings.find((x:any)=>x.findingId==='possession-100-cz');
  assert.ok(f);
  assert.equal(f.observationType,'conditional_probability');
@@ -79,7 +80,7 @@ test('Den-O 100pt CZ finding uses a conditional trial and is never marked live e
  assert.equal(f.liveObservation.status,'UNRESOLVED');
 });
 test('Laughing Salesman revival-inclusive bonus rate is reference-only',()=>{
- const d=read('research-evidence-staged','wave-2','S_WARAU4_KH.json');
+ const d=read('research-history/v48/research-evidence-staged','wave-2','S_WARAU4_KH.json');
  const f=d.findings.find((x:any)=>x.findingId==='bonus-total');
  assert.equal(f.observationType,'reference_distribution');
  assert.equal(f.liveObservation.status,'UNRESOLVED');
@@ -89,7 +90,7 @@ test('Batch009 machine Research uses canonical observation status and never pret
  const statuses=new Set(['DIRECT_EXACT','EXACT_WITH_SCOPE_TRACKING','EXHAUSTIVE_CATEGORICAL','RETROSPECTIVE_EXACT','UNRESOLVED']);
  for(const [i,id] of machines.entries()){
   const wave=i<5?'wave-1':'wave-2';
-  for(const stage of ['research-working','research-evidence-staged']){
+  for(const stage of ['research-history/v48/research-working','research-history/v48/research-evidence-staged']){
    const d=read(stage,wave,id+'.json');
    for(const f of d.findings){
     if(f.liveObservation!==undefined){
@@ -102,7 +103,7 @@ test('Batch009 machine Research uses canonical observation status and never pret
 });
 
 test('Sister Quest small-role rates are source-checked as no-setting-difference, not a live feature',()=>{
- for(const folder of ['research-working','research-evidence-staged']){
+ for(const folder of ['research-history/v48/research-working','research-history/v48/research-evidence-staged']){
   const d=read(folder,'wave-1','L_SISTER_QUEST_CA.json');
   const row=d.researchCompleteness.domains.find((x:any)=>x.domain==='SMALL_ROLE');
   assert.equal(row?.status,'CHECKED');
@@ -121,7 +122,7 @@ test('Sister Quest small-role rates are source-checked as no-setting-difference,
 const idForFailure=(folder:string,id:string)=>folder+':missing source '+id;
 
 test('Sister Quest reset mode table is retained as a blocked non-setting-specific reference',()=>{
- for(const folder of ['research-working','research-evidence-staged']){
+ for(const folder of ['research-history/v48/research-working','research-history/v48/research-evidence-staged']){
   const d=read(folder,'wave-1','L_SISTER_QUEST_CA.json');
   const reset=d.researchCompleteness.domains.find((x:any)=>x.domain==='RESET_BEHAVIOR');
   assert.equal(reset?.status,'CHECKED');
@@ -138,7 +139,7 @@ test('Sister Quest reset mode table is retained as a blocked non-setting-specifi
 });
 
 test('Sister Quest 400/600EXP high-setting tendency never becomes an invented settings table',()=>{
- for(const folder of ['research-working','research-evidence-staged']){
+ for(const folder of ['research-history/v48/research-working','research-history/v48/research-evidence-staged']){
   const d=read(folder,'wave-1','L_SISTER_QUEST_CA.json');
   const dom=d.researchCompleteness.domains.find((x:any)=>x.domain==='POINTS_GAME_DISTRIBUTION');
   assert.equal(dom?.status,'PARTIAL');
@@ -153,7 +154,7 @@ test('Sister Quest 400/600EXP high-setting tendency never becomes an invented se
 });
 
 test('Sister Quest BONUS is an AT-side mechanic and not a normal initial bonus setting distribution',()=>{
- for(const scope of ['research-working','research-evidence-staged']){
+ for(const scope of ['research-history/v48/research-working','research-history/v48/research-evidence-staged']){
   const d=read(scope,'wave-1','L_SISTER_QUEST_CA.json');
   const status=(domain:string)=>d.researchCompleteness.domains.find((x:any)=>x.domain===domain)?.status;
   for(const domain of ['BONUS','BONUS_TYPE_CONDITIONAL','STATE_TRANSITION','NAVIGATION','SUCCESS_RATE','CARRY_OVER'])
@@ -178,7 +179,7 @@ test('Sister Quest BONUS is an AT-side mechanic and not a normal initial bonus s
 });
 
 test('Sister Quest does not convert whole-CZ success rate or internal mode cues into setting-specific probabilities',()=>{
- const d=read('research-evidence-staged','wave-1','L_SISTER_QUEST_CA.json');
+ const d=read('research-history/v48/research-evidence-staged','wave-1','L_SISTER_QUEST_CA.json');
  const prohibited=['sister-cz-win-rate','sister-state','sister-navigation','sister-bonus'];
  assert.ok(prohibited.every(id=>!d.findings.some((x:any)=>x.findingId===id)));
  assert.match(d.blockedItems.find((b:any)=>b.blockId==='sister-cz-win-rate-unusable-for-setting').reason,/約60%は全体の目安/);
@@ -186,7 +187,7 @@ test('Sister Quest does not convert whole-CZ success rate or internal mode cues 
 });
 
 test('Sister Quest all twenty research domains are represented but only source-checked domains count as completed',()=>{
- for(const folder of ['research-working','research-evidence-staged']){
+ for(const folder of ['research-history/v48/research-working','research-history/v48/research-evidence-staged']){
   const d=read(folder,'wave-1','L_SISTER_QUEST_CA.json');
   const domains=d.researchCompleteness.domains;
   assert.equal(domains.length,20);
@@ -213,7 +214,7 @@ test('Sister Quest all twenty research domains are represented but only source-c
 });
 
 test('Green Don ceiling/reset/stage research retains source-backed non-setting reasons',()=>{
- for(const folder of ['research-working','research-evidence-staged']){
+ for(const folder of ['research-history/v48/research-working','research-history/v48/research-evidence-staged']){
   const d=read(folder,'wave-1','L_MIDORIDON_VIVA_REVIVAL_FY.json');
   for(const domain of ['THRESHOLD_BEHAVIOR','RESET_BEHAVIOR','NAVIGATION']){
    const x=d.researchCompleteness.domains.find((v:any)=>v.domain===domain);
@@ -234,7 +235,7 @@ test('Green Don ceiling/reset/stage research retains source-backed non-setting r
 });
 
 test('Sister Quest lower-panel rare monster review aids observation without approving the four-category likelihood',()=>{
- for(const folder of ['research-working','research-evidence-staged']){
+ for(const folder of ['research-history/v48/research-working','research-history/v48/research-evidence-staged']){
   const d=read(folder,'wave-1','L_SISTER_QUEST_CA.json');
   const monster=d.findings.find((x:any)=>x.findingId==='at-monster-categorical');
   assert.ok(monster.sourceIds.includes('sister-rare-monster-panel-chonbo'));
@@ -246,7 +247,7 @@ test('Sister Quest lower-panel rare monster review aids observation without appr
 });
 
 test('Sister Quest 10G aftercare AT direct-hit table is an unstratified reference only',()=>{
- for(const folder of ['research-working','research-evidence-staged']){
+ for(const folder of ['research-history/v48/research-working','research-history/v48/research-evidence-staged']){
   const d=read(folder,'wave-1','L_SISTER_QUEST_CA.json');
   const dom=d.researchCompleteness.domains.find((x:any)=>x.domain==='POST_EVENT_TRANSITION');
   assert.equal(dom?.status,'CHECKED');
@@ -260,7 +261,7 @@ test('Sister Quest 10G aftercare AT direct-hit table is an unstratified referenc
 });
 
 test('Tida small-role source conflict remains excluded from numerical setting inference',()=>{
- for(const scope of ['research-working','research-evidence-staged']){
+ for(const scope of ['research-history/v48/research-working','research-history/v48/research-evidence-staged']){
   const d=read(scope,'wave-1','L_TIDADONDON_PA5.json');
   const dom=d.researchCompleteness.domains.find((x:any)=>x.domain==='SMALL_ROLE');
   assert.equal(dom.status,'CHECKED');
@@ -279,7 +280,7 @@ test('Tida small-role source conflict remains excluded from numerical setting in
  }
 });
 test('Tida mechanics are checked but cannot become unreviewed setting likelihoods',()=>{
- for(const scope of ['research-working','research-evidence-staged']){
+ for(const scope of ['research-history/v48/research-working','research-history/v48/research-evidence-staged']){
   const d=read(scope,'wave-1','L_TIDADONDON_PA5.json');
   for(const domain of ['BONUS','BONUS_TYPE_CONDITIONAL','RESET_BEHAVIOR','THRESHOLD_BEHAVIOR','POST_EVENT_TRANSITION','NAVIGATION','SUCCESS_RATE','SMALL_ROLE'])
    assert.equal(d.researchCompleteness.domains.find((x:any)=>x.domain===domain)?.status,'CHECKED',domain);

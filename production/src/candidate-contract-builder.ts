@@ -50,6 +50,7 @@ function resolveGroup(groupId:string,members:any[],evalBy:Map<string,any>){
  if(explicitPreferredFallback){const ordered=rankedFallback.sort((a:any,b:any)=>a.rank-b.rank||String(a.c.findingId).localeCompare(String(b.c.findingId))).map((x:any)=>x.c.findingId);return {resolution:'PREFERRED_WITH_FALLBACK',members:members.map(c=>c.findingId),runtimeInferenceAllowed:true,preferredFindingId:ordered[0],fallbackOrder:ordered,reason:'依存関係がある候補を同時加算せず、観測できた優先Featureを使用し、未観測時だけ次順位のFeatureへ自動フォールバックする。',selectionRationale:'Researchで明示された優先順位に従い、同一セッションで重複情報を同時加算しない。'};}
  if(trialUniverses.length===members.length&&explicitConditionalSeparation){return {resolution:'CONDITIONALLY_SEPARATE',members:members.map(c=>c.findingId),runtimeInferenceAllowed:true,reason:'観測条件ごとに別の母数を記録し、条件別Featureとして分離できることが明示確認されている。'};}
  if(kinds.includes('UNRESOLVED'))return {resolution:'HELD_NO_JOINT_MODEL',members:members.map(c=>c.findingId),runtimeInferenceAllowed:false,reason:'候補間の依存関係が未解決のため、独立性を仮定しない。',reevaluationCondition:'候補間の包含・上流下流・条件付き関係が確認されること。'};
+
  if(/排他的/.test(reasons)){
   const leader=members[0];
   return {resolution:'MUTUALLY_EXCLUSIVE_CATEGORICAL',members:members.map(c=>c.findingId),runtimeInferenceAllowed:true,jointFindingId:leader.findingId,jointSourceFindingIds:members.map(c=>c.findingId),reason:'同一trial universeで排他的な観測カテゴリをjoint multinomialとして評価し、カテゴリ間の二重評価を避ける。'};
@@ -65,6 +66,8 @@ function resolveGroup(groupId:string,members:any[],evalBy:Map<string,any>){
   const selected=ranked[0];
   return {resolution:'SINGLE_MEMBER_SELECTED',members:members.map(c=>c.findingId),runtimeInferenceAllowed:true,selectedFindingId:selected.c.findingId,selectionRationale:'依存関係を仮定せず二重評価を避けるため、依存関係グループ内で正式な7000G設定判別スコアが最大の候補を代表Featureとして使用する。',reason:'正式な設定判別スコアを比較できる候補から、最も情報量の高い1要素のみを採用する。'};
  }
+ // One known-overlap member cannot duplicate another excluded likelihood. Preserve the policy metric.
+ if(members.length===1)return {resolution:'SINGLE_MEMBER_SELECTED',members:[members[0].findingId],runtimeInferenceAllowed:true,selectedFindingId:members[0].findingId,selectionRationale:'他の依存候補は除外され、観測可能な候補が1件だけ残るため単一要素として扱う。設定判別スコア未算出なら既存の試行あたり評価と閾値を維持する。',reason:'同じ当選系列の別尤度を追加せず、残る1候補だけを既存の採用基準で評価する。'};
  return {resolution:'HELD_NO_JOINT_MODEL',members:members.map(c=>c.findingId),runtimeInferenceAllowed:false,reason:reasons.trim()||'source-supported joint/dependency modelが未確立で、正式な設定判別スコアによる単一候補選択もできないため独立性を仮定しない。',reevaluationCondition:'source-supported joint/dependency modelまたは明示的なSelection REVIEW決定が確立すること。'};
 }
 export function buildCandidateContract(evaluation:any,eligibility:any,evaluationArtifact:any,eligibilityArtifact:any){
