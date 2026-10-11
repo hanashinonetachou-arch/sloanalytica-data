@@ -94,6 +94,15 @@ jobs:
             }
 
             for (const machine of catalog.machines) {
+              // The prototype APK reads the raw catalog directly, not the rewritten Pages copy.
+              // A stale commit-pinned URL may silently serve an older package even if local
+              // catalog size/SHA and local files are correct. Treat this as a release blocker.
+              if (outputPrefix === 'prototype') {
+                const expected = `https://raw.githubusercontent.com/hanashinonetachou-arch/sloanalytica-data/prototype-multi-machine/machines/${encodeURIComponent(machine.machineId)}/machine-package.json`;
+                if (machine.packageUrl !== expected) {
+                  throw new Error(`Non-canonical prototype package URL for ${machine.machineId}: ${machine.packageUrl}`);
+                }
+              }
               const sourcePackage = path.join(sourceDir, 'machines', machine.machineId, 'machine-package.json');
               if (!fs.existsSync(sourcePackage)) {
                 throw new Error(`Missing package for ${machine.machineId}: ${sourcePackage}`);
