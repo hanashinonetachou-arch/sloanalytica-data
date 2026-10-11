@@ -1,0 +1,78 @@
+name: Batch010 Three Reviewed Machines Device QA Handoff
+
+on:
+  push:
+    branches:
+      - production/v85-batch-010-research-20261010
+    paths:
+      - production/.batch010-three-machine-qa-trigger
+      - .github/workflows/batch010-three-machine-device-qa.yml
+
+permissions:
+  contents: write
+
+concurrency:
+  group: batch010-three-machine-device-qa
+  cancel-in-progress: false
+
+jobs:
+  record-device-qa:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: production/v85-batch-010-research-20261010
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - name: Verify revised signed APK and preserve historical acceptance
+        working-directory: production
+        run: |
+          node --input-type=module <<'NODE'
+          import fs from 'node:fs';
+          const base='batches/batch-20261010-010';
+          const h=JSON.parse(fs.readFileSync(base+'/device-qa/handoff.json','utf8'));
+          const prior=JSON.parse(fs.readFileSync(base+'/device-qa/acceptance-partial-20261011.json','utf8'));
+          const revised=['S_DANMACHI_GAIDEN_XR','S_MAHOIKU_NB','S_TOARU_RAILGUN_FB'];
+          const previous=['L_ARIFURETA_JA','L_SHAMANKING_SS'];
+          const preserved=['S_SUPER_RIO_ACE_CC','S_PERSONA5_FR','L_SUPER_BLACKJACK_SLDC','L_SHIMAMUSUME_L2','S_TEKKEN4_ULTIMATE_DEVIL_TCD'];
+          if(h.dataCommit!=='4a22475a888235379132351e52d340596de3d694'||h.appCommit!=='e0183bcae6fd7983e3762d4a7d58803afbc557ad'||h.qaRunId!==38113040925||h.qaArtifactId!==11692805885||h.apk.versionCode!==2002831470||h.apk.sha256!=='10f6de40cb6edfb7251063562daa532a8f745a00e3db513501853f34a93acc6c')throw Error('QA_HANDOFF_IDENTITY');
+          if(h.renderedUiPassed!==10||h.fleetPassed!==100||h.fleetFailed!==0||h.apk.libraryFileKind!=='QA_BUNDLE_ZIP_CONTAINING_SIGNED_APK')throw Error('QA_VALIDATION_OR_APK_MISSING');
+          for(const id of revised)if(!prior.machineIds.includes(id)||h.acceptedMachineIds.includes(id)||!h.deviceQaTargets.includes(id)||h.machineDataVersions[id]!=='8.5.2-batch-20261010-010')throw Error('REVISED_MACHINE_HISTORY_LOST:'+id);
+          for(const id of previous)if(!h.deviceQaTargets.includes(id))throw Error('PREVIOUS_REQA_NOT_PRESERVED:'+id);
+          for(const id of preserved)if(!h.acceptedMachineIds.includes(id))throw Error('ACCEPTED_MACHINE_NOT_PRESERVED:'+id);
+          NODE
+      - name: Register pending QA without changing prior acceptance
+        working-directory: production
+        run: |
+          node --experimental-strip-types src/request-batch-device-qa.ts batch-20261010-010
+          node --experimental-strip-types src/reconcile-batch.ts batch-20261010-010
+          node --input-type=module --experimental-strip-types <<'NODE'
+          import {RepoStore,Orchestrator} from './src/core.ts';
+          import fs from 'node:fs';
+          const o=new Orchestrator(new RepoStore(process.cwd())),b='batch-20261010-010';
+          const revised=['S_DANMACHI_GAIDEN_XR','S_MAHOIKU_NB','S_TOARU_RAILGUN_FB'];
+          for(const m of revised){
+            const x=o.stage(b,m,'DEVICE_QA');
+            if(x.state!=='HUMAN_REQUIRED'||x.humanResolved===true||x.authoritativeOutputRef)throw Error('REVISED_MACHINE_REQA_NOT_PENDING:'+m);
+          }
+          for(const m of ['L_ARIFURETA_JA','L_SHAMANKING_SS']){
+            if(o.stage(b,m,'DEVICE_QA').state!=='HUMAN_REQUIRED')throw Error('PREVIOUS_DEVICE_QA_NOT_PRESERVED:'+m);
+          }
+          for(const m of ['S_SUPER_RIO_ACE_CC','S_PERSONA5_FR','L_SUPER_BLACKJACK_SLDC','L_SHIMAMUSUME_L2','S_TEKKEN4_ULTIMATE_DEVIL_TCD']){
+            if(o.stage(b,m,'DEVICE_QA').state!=='COMPLETE')throw Error('ACCEPTED_DEVICE_QA_NOT_PRESERVED:'+m);
+          }
+          const accepted=JSON.parse(fs.readFileSync('batches/'+b+'/device-qa/acceptance-partial-20261011.json','utf8'));
+          for(const m of revised)if(!accepted.machineIds.includes(m))throw Error('PRIOR_ACCEPTANCE_LOST:'+m);
+          NODE
+      - name: Commit QA action and authoritative state
+        run: |
+          set -euo pipefail
+          git fetch origin production/v85-batch-010-research-20261010
+          test "$(git rev-parse HEAD)" = "$(git rev-parse FETCH_HEAD)"
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git add production/batches/batch-20261010-010
+          git commit -m "Register three machine revised device QA [skip ci]"
+          git push origin HEAD:production/v85-batch-010-research-20261010
