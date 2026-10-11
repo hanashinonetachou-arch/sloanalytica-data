@@ -1,0 +1,13 @@
+import fs from 'node:fs';
+import {guardApprovedAdoptionReasons} from './adoption-reason-guard.ts';
+import {isGenericAdoptionReason} from './adoption-reason.ts';
+const [previousPath,nextPath,approvalPath]=process.argv.slice(2);
+if(!previousPath||!nextPath)throw Error('USAGE: verify-adoption-reasons <published-package.json> <candidate-package.json> [reviewed-changes.json]');
+const read=(p:string)=>JSON.parse(fs.readFileSync(p,'utf8'));
+const previous=read(previousPath),next=read(nextPath);
+if(previous.machine?.machineId!==next.machine?.machineId)throw Error('ADOPTION_GUARD_MACHINE_IDENTITY');
+const changes=approvalPath?read(approvalPath):[];
+if(!Array.isArray(changes)||changes.some((x:any)=>typeof x!=='string'))throw Error('ADOPTION_GUARD_APPROVAL_FORMAT');
+for(const e of next?.v8?.machineResearchSummary?.adopted??[])if(isGenericAdoptionReason(e.reason))throw Error('ADOPTION_GUARD_GENERIC:'+e.featureId);
+const result=guardApprovedAdoptionReasons(previous,next,changes);
+console.log(JSON.stringify({machineId:next.machine.machineId,...result}));
