@@ -44,10 +44,34 @@ export function completeOpportunityTabGroups(policy:any,sections:any[]){
   if(new Set(contexts.map((c:any)=>c.groupTitle)).size!==1)continue;
   const id='OPPORTUNITY_'+opportunityId;
   if(usedIds.has(id))throw Error('UI_PRESENTATION_GENERATED_ID_COLLISION:'+id);
-  out.tabGroups.push({id,title:contexts[0].groupTitle,tabs:members.map((s:any)=>({sectionId:s.id,label:s.observationContext.conditionLabel}))});
+  out.tabGroups.push({id,title:contexts[0].groupTitle,origin:'APPROVED_OBSERVATION_CONTEXT',tabs:members.map((s:any)=>({sectionId:s.id,label:s.observationContext.conditionLabel}))});
   usedIds.add(id);
  }
  return out;
+}
+/** An explicitly linked evidence mirror uses the numeric collection surface.
+ * Keep both source records intact; choose only the visible surface for tabs.
+ */
+export function opportunitySurfaceSections(numeric:any[],evidence:any[]){
+ const findingId=(s:any)=>s.sourceFindingId??s.findingId;
+ const ready=new Map(numeric.map(s=>[findingId(s),s]));
+ const sections=numeric.map(s=>({id:s.id??'OBS_'+findingId(s),observationContext:s.observationContext}));
+ for(const e of evidence){
+  const categories=e.semanticCategories??e.evidenceItems?.[0]?.semanticCategories??[];
+  const links=new Set(categories.map((c:any)=>c.linkedFindingId));
+  const target:any=categories.length>0&&links.size===1?ready.get([...links][0]):undefined;
+  const context=e.observationContext,other=target?.observationContext;
+  const sameContext=context?.groupingApproved===true&&other?.groupingApproved===true&&context.opportunityId===other.opportunityId&&context.conditionId===other.conditionId&&context.groupTitle===other.groupTitle&&context.conditionLabel===other.conditionLabel;
+  if(target&&sameContext)continue;
+  sections.push({id:e.id??'EVI_'+findingId(e),observationContext:context});
+ }
+ return sections;
+}
+export function projectOpportunityTabGroups(policy:any,numeric:any[],evidence:any[]){
+ if(!policy)return policy;
+ const authored=structuredClone(policy);
+ authored.tabGroups=(authored.tabGroups??[]).filter((g:any)=>g.origin!=='APPROVED_OBSERVATION_CONTEXT');
+ return completeOpportunityTabGroups(authored,opportunitySurfaceSections(numeric,evidence));
 }
 export function applyUiPresentation(sections:any[],policy:any){
  if(!policy)return sections;

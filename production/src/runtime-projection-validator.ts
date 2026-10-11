@@ -1,4 +1,5 @@
 import {derivePlayInfoRequirement} from './canonical-ui-builder.ts';
+import {projectOpportunityTabGroups} from './ui-presentation.ts';
 export const RUNTIME_PROJECTION_VALIDATOR_CONTRACT='runtime-projection-v1';
 const canonical=(v:any):string=>Array.isArray(v)?'['+v.map(canonical).join(',')+']':v&&typeof v==='object'?'{'+Object.keys(v).sort().map(k=>JSON.stringify(k)+':'+canonical(v[k])).join(',')+'}':JSON.stringify(v);
 const fail=(m:string):never=>{throw new Error('RUNTIME_PROJECTION_VALIDATION_FAILED:'+m)};
@@ -21,6 +22,7 @@ export function validateRuntimeProjectionDocument(doc:any,machineData:any,policy
   const activeIds=new Set(expectedActive.map((x:any)=>x.findingId));
   const expectedUi=structuredClone(machineData.uiContract);
   expectedUi.numericSections=(expectedUi.numericSections??[]).filter((x:any)=>activeIds.has(x.sourceFindingId));
+  if(expectedUi.uiPresentation)expectedUi.uiPresentation=projectOpportunityTabGroups(expectedUi.uiPresentation,expectedUi.numericSections,expectedUi.evidenceSections??[]);
   const playRequirement=derivePlayInfoRequirement((expectedUi.numericSections??[]).map((x:any)=>String(x.trialUniverse)));
   if(expectedUi.playInfo){
     expectedUi.playInfo.mode=playRequirement.mode;

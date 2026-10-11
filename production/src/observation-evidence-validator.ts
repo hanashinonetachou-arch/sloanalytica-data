@@ -1,4 +1,4 @@
-import {completeOpportunityTabGroups} from './ui-presentation.ts';
+import {completeOpportunityTabGroups,opportunitySurfaceSections} from './ui-presentation.ts';
 import {EVIDENCE_SEMANTIC_TYPES,classifyEvidenceSemantic} from './evidence-semantics.ts';
 import {buildHighLowDiscrimination} from './high-low-discrimination.ts';
 export const OBSERVATION_EVIDENCE_VALIDATOR_CONTRACT='observation-evidence-v1';
@@ -8,7 +8,7 @@ export function validateObservationEvidenceDocument(doc:any,candidate:any,resear
  if(doc?.schemaVersion!=='observation-evidence-v1'||doc?.manifestVersion!=='8.5')fail('HEADER');
  if(doc.batchId!==candidate.batchId||doc.machineId!==candidate.machineId||doc.machineId!==research.machineId)fail('IDENTITY');
  if(!Array.isArray(doc.observations)||!Array.isArray(doc.evidence)||!Array.isArray(doc.sourceReferences)||!Array.isArray(doc.blockedItems)||!Array.isArray(doc.sourceIntegrityIssues))fail('ARRAYS');
- const sections=[...doc.observations.filter((x:any)=>x.observationStatus==='READY').map((x:any)=>({id:'OBS_'+x.findingId,observationContext:x.observationContext})),...doc.evidence.map((x:any)=>({id:'EVI_'+x.findingId,observationContext:x.observationContext}))];
+ const sections=opportunitySurfaceSections(doc.observations.filter((x:any)=>x.observationStatus==='READY'),doc.evidence);
  const hasApprovedContext=sections.some((x:any)=>x.observationContext?.groupingApproved===true);
  const expectedPresentation=research.uiPresentation||hasApprovedContext?completeOpportunityTabGroups(research.uiPresentation??{hiddenDerivedFindingIds:[],sectionOrder:[],evidenceSectionMerges:[],tabGroups:[]},sections):undefined;
  if(canonical(doc.uiPresentation)!==canonical(expectedPresentation))fail('UI_PRESENTATION_COPY');

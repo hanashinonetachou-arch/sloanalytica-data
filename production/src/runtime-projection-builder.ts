@@ -1,4 +1,5 @@
 import {derivePlayInfoRequirement} from './canonical-ui-builder.ts';
+import {projectOpportunityTabGroups} from './ui-presentation.ts';
 export function buildRuntimeProjection(machineData:any,policy:any,machineDataArtifact:any,policyArtifact:any){
   if(machineData?.machineId!==policy?.machineId||machineData?.batchId!==policy?.batchId) throw new Error('RUNTIME_PROJECTION_IDENTITY');
   const decisions=new Map((policy.featureDecisions??[]).map((x:any)=>[x.findingId,x]));
@@ -15,6 +16,7 @@ export function buildRuntimeProjection(machineData:any,policy:any,machineDataArt
   const activeIds=new Set(activeFeatures.map((x:any)=>x.findingId));
   const runtimeUi=structuredClone(machineData.uiContract);
   runtimeUi.numericSections=(runtimeUi.numericSections??[]).filter((x:any)=>activeIds.has(x.sourceFindingId));
+  if(runtimeUi.uiPresentation)runtimeUi.uiPresentation=projectOpportunityTabGroups(runtimeUi.uiPresentation,runtimeUi.numericSections,runtimeUi.evidenceSections??[]);
   const playRequirement=derivePlayInfoRequirement((runtimeUi.numericSections??[]).map((x:any)=>String(x.trialUniverse)));
   if(runtimeUi.playInfo){
     runtimeUi.playInfo.mode=playRequirement.mode;
