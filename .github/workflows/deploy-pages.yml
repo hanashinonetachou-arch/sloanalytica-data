@@ -11,6 +11,8 @@ on:
       - prototype-multi-machine
     paths:
       - 'catalog.json'
+      - 'tools/guard-approved-adoption-reasons.mjs'
+      - 'approved-adoption-reason-changes.json'
       - 'difficulty-catalog.json'
       - 'machines/**/machine-package.json'
       - '.github/workflows/deploy-pages.yml'
@@ -48,6 +50,18 @@ jobs:
         with:
           ref: prototype-multi-machine
           path: source-prototype
+
+      - name: Checkout approved v8.5 explanation baseline
+        uses: actions/checkout@v4
+        with:
+          ref: 1363fefe9ab7ca7b1819c4f29b7cf21ad795fddf
+          path: approved-v85-baseline
+
+      - name: Block unreviewed adopted-reason regressions
+        shell: bash
+        run: |
+          set -euo pipefail
+          node source-prototype/tools/guard-approved-adoption-reasons.mjs approved-v85-baseline source-prototype source-prototype/approved-adoption-reason-changes.json
 
       - name: Build Pages artifact
         shell: bash
