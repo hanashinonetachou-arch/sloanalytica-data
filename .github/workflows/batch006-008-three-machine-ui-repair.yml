@@ -38,63 +38,26 @@ jobs:
         with:
           node-version: 24
 
-      - name: Regenerate three machines by their original batch contracts
-        working-directory: production-state/production
+      - name: Validate Research presentation and existing runtime packages
         shell: bash
         run: |
           set -euo pipefail
-          for record in "batch-20261007-008|wave-1|L_GOBLIN_SLAYER_RD" "batch-20261005-006|wave-2|S_KONOSUBA_ZR" "batch-20261005-006|wave-2|S_RAKUEN_TSUHO_FS"; do
-            IFS='|' read -r batch wave machine <<< "$record"
-            node --experimental-strip-types src/invalidate-machine-downstream.ts "$batch" "$machine" --include-research
-            node --experimental-strip-types src/materialize-research-drafts.ts "$batch" "$wave" --force-machine="$machine" --force-only
-          done
-          for batch in batch-20261007-008 batch-20261005-006; do
-            node --experimental-strip-types src/deterministic-production-worker.ts "$batch" --through APP_RUNTIME
-          done
-          node --input-type=module --experimental-strip-types <<'NODE'
-          import {RepoStore,Orchestrator} from './src/core.ts';
-          const o=new Orchestrator(new RepoStore(process.cwd()));
-          for(const [b,id] of [
-            ['batch-20261007-008','L_GOBLIN_SLAYER_RD'],
-            ['batch-20261005-006','S_KONOSUBA_ZR'],
-            ['batch-20261005-006','S_RAKUEN_TSUHO_FS']
+          node <<'NODE'
+          const fs=require('fs'),path=require('path');
+          for(const [batch,wave,id,oldVer,features,groups,tabs] of [
+            ['batch-20261007-008','wave-1','L_GOBLIN_SLAYER_RD','8.5.1-batch-20261007-008',11,3,9],
+            ['batch-20261005-006','wave-2','S_KONOSUBA_ZR','8.5.1-batch-20261005-006',5,3,12],
+            ['batch-20261005-006','wave-2','S_RAKUEN_TSUHO_FS','8.5.3-batch-20261005-006',5,2,5]
           ]){
-            let x=o.stage(b,id,'DEVICE_QA');
-            if(x.state==='COMPLETE'||x.state==='HUMAN_REQUIRED')x=o.transition(x,'READY','AUTHORITATIVE_OUTPUT_INVALIDATED','three-machine-ui-20261011');
-            if(x.state!=='READY')throw Error('DEVICE_QA_REVIEW_STATE:'+id+':'+x.state);
-            x.humanResolved=false;
-            delete x.authoritativeOutputRef;
-            o.saveStage(x);
+            const source=JSON.parse(fs.readFileSync(path.resolve('production-state/production/batches',batch,'research-drafts',wave,id+'.json'),'utf8'));
+            const pkg=JSON.parse(fs.readFileSync(path.resolve('prototype/machines',id,'machine-package.json'),'utf8'));
+            const policy=source.uiPresentation,existing=pkg.ui.v8Sections.map(s=>s.id);
+            if(!policy||!Array.isArray(policy.sectionOrder)||!Array.isArray(policy.tabGroups)||pkg.machine.machineDataVersion!==oldVer||pkg.features.features.length!==features)throw Error('BASELINE_OR_RESEARCH_MISMATCH:'+id);
+            if(existing.length!==policy.sectionOrder.length||new Set(policy.sectionOrder).size!==existing.length||existing.some(id=>!policy.sectionOrder.includes(id)))throw Error('UI_ORDER_MISMATCH:'+id);
+            if(policy.tabGroups.length!==groups||policy.tabGroups.flatMap(g=>g.tabs).length!==tabs)throw Error('UI_TAB_COUNT_MISMATCH:'+id);
+            console.log('RESEARCH_UI_BASELINE_PASS',id);
           }
           NODE
-      - name: Validate regenerated UI and full Production suite
-        working-directory: production-state/production
-        shell: bash
-        run: |
-          set -euo pipefail
-          npm test
-          node --input-type=module <<'NODE'
-          import fs from 'node:fs';
-          const cases=[
-            ['batch-20261007-008','L_GOBLIN_SLAYER_RD',11,3,9,'8.5.2-batch-20261007-008'],
-            ['batch-20261005-006','S_KONOSUBA_ZR',5,3,12,'8.5.2-batch-20261005-006'],
-            ['batch-20261005-006','S_RAKUEN_TSUHO_FS',5,2,5,'8.5.4-batch-20261005-006']
-          ];
-          for(const [batch,id,count,groups,tabs,version] of cases){
-            const stage=JSON.parse(fs.readFileSync('batches/'+batch+'/machines/'+id+'/stages/APP_RUNTIME.json','utf8'));
-            if(stage.state!=='COMPLETE'||!stage.authoritativeOutputRef?.path)throw Error('APP_RUNTIME_INCOMPLETE:'+id);
-            const p=JSON.parse(fs.readFileSync(stage.authoritativeOutputRef.path.replace(/^production\//,''),'utf8')).package;
-            if(p.machine.machineDataVersion!==version||p.features.features.length!==count)throw Error('FEATURE_LOSS_OR_REVISION:'+id);
-            const secs=p.ui.v8Sections;
-            const withTabs=secs.filter(x=>x.tabGroup);
-            if(withTabs.length!==tabs||new Set(withTabs.map(x=>x.tabGroup.id)).size!==groups)throw Error('TAB_COVERAGE:'+id);
-            const allFeatures=secs.flatMap(x=>x.items??[]).filter(x=>x.featureId);
-            if(allFeatures.length!==count||new Set(allFeatures.map(x=>x.featureId)).size!==count)throw Error('UI_FEATURE_COVERAGE:'+id);
-            for(const sec of secs)for(const item of sec.items??[])if(item.inputs?.length===2&&item.inputs[0].label===item.inputs[1].label)throw Error('DUPLICATE_COUNTERS:'+id+':'+item.id);
-            console.log('UI_GATE_PASS',id,version,count,groups,tabs);
-          }
-          NODE
-
       - name: Install prototype dependencies
         working-directory: prototype
         run: npm ci
@@ -111,18 +74,32 @@ jobs:
           const catalogPath=path.join(proto,'catalog.json'),catalog=JSON.parse(fs.readFileSync(catalogPath,'utf8'));
           const byId=new Map(catalog.machines.map(x=>[x.machineId,x])),sha=b=>crypto.createHash('sha256').update(b).digest('hex'),metadata={};
           for(const machineId of machines){
-            const stage=JSON.parse(fs.readFileSync(path.join(prod,'production','batches',batches[machineId],'machines',machineId,'stages','APP_RUNTIME.json'),'utf8'));
-            if(stage.state!=='COMPLETE'||!stage.authoritativeOutputRef?.path)throw new Error('APP_RUNTIME_NOT_COMPLETE:'+machineId);
-            const app=JSON.parse(fs.readFileSync(path.join(prod,stage.authoritativeOutputRef.path),'utf8'));
-            const pkg=app.package,entry=byId.get(machineId); if(!entry)throw new Error('CATALOG_ENTRY_MISSING:'+machineId);
-            pkg.machine.introductionDate=entry.introductionDate;pkg.machine.machineType=entry.machineType;pkg.machine.gameType=entry.gameType;
+            const batch=batches[machineId],wave=machineId==='L_GOBLIN_SLAYER_RD'?'wave-1':'wave-2';
+            const research=JSON.parse(fs.readFileSync(path.join(prod,'production','batches',batch,'research-drafts',wave,machineId+'.json'),'utf8'));
+            const entry=byId.get(machineId);if(!entry)throw Error('CATALOG_ENTRY_MISSING:'+machineId);
+            const original=JSON.parse(fs.readFileSync(path.join(proto,'machines',machineId,'machine-package.json'),'utf8'));
+            const pkg=structuredClone(original),policy=research.uiPresentation,sections=pkg.ui.v8Sections;
+            if(!policy||policy.evidenceSectionMerges.length||policy.hiddenDerivedFindingIds.length)throw Error('UI_ONLY_REVIEW_POLICY_EXPECTED:'+machineId);
+            for(const sec of sections){
+              delete sec.tabGroup;
+              const found=policy.tabGroups.flatMap(g=>g.tabs.map(t=>({group:g,tab:t}))).find(x=>x.tab.sectionId===sec.id);
+              if(found)sec.tabGroup={id:found.group.id,title:found.group.title,label:found.tab.label};
+            }
+            const rank=new Map(policy.sectionOrder.map((id,i)=>[id,i]));
+            sections.sort((a,b)=>rank.get(a.id)-rank.get(b.id));
+            const actual=sections.flatMap(s=>s.items??[]).filter(x=>x.featureId);
+            if(actual.length!==original.features.features.length)throw Error('FEATURES_HIDDEN:'+machineId);
+            const version=machineId==='L_GOBLIN_SLAYER_RD'?'8.5.2-batch-20261007-008':machineId==='S_KONOSUBA_ZR'?'8.5.2-batch-20261005-006':'8.5.4-batch-20261005-006';
+            pkg.machine.machineDataVersion=version;
+            // Fail closed if anything except runtime UI and declared version changes.
+            const stable=p=>{const x=structuredClone(p);delete x.ui;delete x.machine.machineDataVersion;return JSON.stringify(x)};
+            if(stable(pkg)!==stable(original))throw Error('NON_UI_OR_INFERENCE_CHANGED:'+machineId);
             const bytes=Buffer.from(JSON.stringify(pkg,null,2)+'\n','utf8');
-            if(pkg.machine.machineDataVersion!==(machineId==='L_GOBLIN_SLAYER_RD'?'8.5.2-batch-20261007-008':machineId==='S_KONOSUBA_ZR'?'8.5.2-batch-20261005-006':'8.5.4-batch-20261005-006'))throw new Error('QA_PACKAGE_REVISION_MISMATCH:'+machineId+':'+pkg.machine.machineDataVersion);
-            const target=path.join(proto,'machines',machineId,'machine-package.json');fs.mkdirSync(path.dirname(target),{recursive:true});fs.writeFileSync(target,bytes);
-            const caps=[];for(const f of pkg.features?.features??[]){const model=String(f.modelType??'').toLowerCase();if(model==='binomial'&&!caps.includes('binomial'))caps.push('binomial');if(model==='multinomial'&&!caps.includes('multinomial'))caps.push('multinomial');}
-            if((pkg.evidence?.references??[]).length&&!caps.includes('evidence'))caps.push('evidence');
-            entry.machineDataVersion=pkg.machine.machineDataVersion;entry.packageUrl=`https://raw.githubusercontent.com/hanashinonetachou-arch/sloanalytica-data/prototype-multi-machine/machines/${encodeURIComponent(machineId)}/machine-package.json`;entry.sha256=sha(bytes);entry.packageSizeBytes=bytes.length;entry.requiredCapabilities=caps;entry.updatedAt=new Date().toISOString();
-            metadata[machineId]={machineId,machineDataVersion:pkg.machine.machineDataVersion,settings:pkg.machine.settings,sha256:entry.sha256,packageSizeBytes:bytes.length,introductionDate:entry.introductionDate,machineType:entry.machineType,gameType:entry.gameType};
+            fs.writeFileSync(path.join(proto,'machines',machineId,'machine-package.json'),bytes);
+            entry.machineDataVersion=version;
+            entry.packageUrl=`https://raw.githubusercontent.com/hanashinonetachou-arch/sloanalytica-data/prototype-multi-machine/machines/${encodeURIComponent(machineId)}/machine-package.json`;
+            entry.sha256=sha(bytes);entry.packageSizeBytes=bytes.length;entry.updatedAt=new Date().toISOString();
+            metadata[machineId]={machineId,machineDataVersion:version,settings:pkg.machine.settings,sha256:entry.sha256,packageSizeBytes:bytes.length,reviewType:'PRESENTATION_ONLY_AFTER_APP_RUNTIME',sourceBatch:batch,inferenceSha256:sha(Buffer.from(stable(pkg)))};
           }
           // A successful local checksum is not enough if catalog.packageUrl is pinned
           // to an earlier commit; that serves old bytes to the Android app.
@@ -148,7 +125,7 @@ jobs:
           git push origin HEAD:prototype-multi-machine
           echo "REVIEW_COMMIT=$(git rev-parse HEAD)" >> "$GITHUB_ENV"
 
-      - name: Deploy Batch010 data pages
+      - name: Deploy updated catalog and three UI overlays
         env:
           GH_TOKEN: ${{ github.token }}
         shell: bash
@@ -164,29 +141,31 @@ jobs:
           test -n "$run_id"; gh run watch "$run_id" --repo "$GITHUB_REPOSITORY" --exit-status
           echo "REVIEW_PAGES_RUN_ID=$run_id" >> "$GITHUB_ENV"
 
-      - name: Finalize original batch Distribution contracts
+      - name: Record immutable original-batch UI overlay attestation and re-QA need
+        working-directory: production-state/production
         shell: bash
         run: |
           set -euo pipefail
-          node <<'NODE'
-          const fs=require('fs'),path=require('path');
-          const all=JSON.parse(fs.readFileSync(process.env.RUNNER_TEMP+'/batch006008-metadata.json','utf8'));
-          for(const [batch,attestation,ids] of [
-            ['batch-20261007-008','distribution-repair-attestation.json',['L_GOBLIN_SLAYER_RD']],
-            ['batch-20261005-006','distribution-r2-attestation.json',['S_KONOSUBA_ZR','S_RAKUEN_TSUHO_FS']]
-          ]){
-            const file=path.resolve('production-state/production/batches',batch,attestation);
-            const old=JSON.parse(fs.readFileSync(file,'utf8')),packages={...old.packages};
-            for(const id of ids)packages[id]=all[id];
-            const doc={...old,batchId:batch,integration:{...old.integration,repository:'hanashinonetachou-arch/sloanalytica-data',branch:'prototype-multi-machine',commit:process.env.REVIEW_COMMIT,packagePath:'',catalogPath:'catalog.json'},packages,checks:{...old.checks,catalogIntegrity:true,pagesDeployment:{runId:Number(process.env.REVIEW_PAGES_RUN_ID),conclusion:'success'},uxContractAudit:{runId:Number(process.env.GITHUB_RUN_ID),conclusion:'success'},machineIdentityConsistency:{runId:Number(process.env.GITHUB_RUN_ID),conclusion:'success',batchMachineVerified:true}}};
-            fs.writeFileSync(file,JSON.stringify(doc,null,2)+'\n');
+          node --input-type=module --experimental-strip-types <<'NODE'
+          import fs from 'node:fs';
+          import {RepoStore,Orchestrator} from './src/core.ts';
+          const s=new RepoStore(process.cwd()),o=new Orchestrator(s);
+          const metadata=JSON.parse(fs.readFileSync(process.env.RUNNER_TEMP+'/batch006008-metadata.json','utf8'));
+          const rows=[
+            ['batch-20261007-008','L_GOBLIN_SLAYER_RD'],
+            ['batch-20261005-006','S_KONOSUBA_ZR'],
+            ['batch-20261005-006','S_RAKUEN_TSUHO_FS']
+          ];
+          for(const [batch,id] of rows){
+            const p=s.p('batches',batch,'device-qa','ui-overlay-20261011-'+id+'.json');
+            fs.mkdirSync(p.slice(0,p.lastIndexOf('/')),{recursive:true});
+            fs.writeFileSync(p,JSON.stringify({schemaVersion:'qa-presentation-only-v1',batchId:batch,machineId:id,state:'HUMAN_REQUIRED',historicalAcceptancePreserved:true,originalAppRuntimePreserved:true,requiresHumanDeviceQa:true,distributionCommit:process.env.REVIEW_COMMIT,productionWorkflowRunId:Number(process.env.GITHUB_RUN_ID),pagesRunId:Number(process.env.REVIEW_PAGES_RUN_ID),metadata:metadata[id]},null,2)+'\n');
+            let q=o.stage(batch,id,'DEVICE_QA');
+            if(q.state==='COMPLETE'||q.state==='HUMAN_REQUIRED')q=o.transition(q,'READY','AUTHORITATIVE_OUTPUT_INVALIDATED','ui-presentation-review-20261011');
+            if(q.state!=='READY')throw Error('DEVICE_QA_NOT_READY:'+id+':'+q.state);
+            q.humanResolved=false;delete q.authoritativeOutputRef;o.saveStage(q);
           }
           NODE
-          cd production-state/production
-          for batch in batch-20261007-008 batch-20261005-006; do
-            node --experimental-strip-types src/deterministic-production-worker.ts "$batch" --through DISTRIBUTION
-            node --experimental-strip-types src/reconcile-batch.ts "$batch"
-          done
 
       - name: Commit revised original batch states
         shell: bash
@@ -198,5 +177,5 @@ jobs:
           git config user.name github-actions[bot]
           git config user.email 41898282+github-actions[bot]@users.noreply.github.com
           git add production/batches/batch-20261007-008 production/batches/batch-20261005-006
-          git commit -m "Regenerate Goblin Konosuba Rakuen source UI through Distribution [skip ci]"
+          git commit -m "Record user-reviewed Goblin Konosuba Rakuen UI overlay [skip ci]"
           git push origin HEAD:production/v85-batch-010-research-20261010
