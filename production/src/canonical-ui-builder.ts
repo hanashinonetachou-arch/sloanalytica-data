@@ -25,6 +25,7 @@ const knownTrialLabel=(u:any)=>{
  if(u==='NORMAL_GAME_TRIAL'||u==='BONUS_ELIGIBLE_GAME_TRIAL')return '通常ゲーム数';
  if(u==='NON_TENHA_NORMAL_GAME_TRIAL')return '天破中を除く通常ゲーム数';
  if(u==='LOTIS_NON_CHAIN_GAME_TRIAL'||u==='NON_CHAIN_BONUS_INITIAL_GAME_TRIAL')return '連荘中を除くゲーム数';
+ if(u==='AWAKENING_TRIAL')return '覚醒チャレンジ突入回数';
  if(u==='DAITOMO_NORMAL_PLAY_TRIAL')return 'ダイトモ通常プレイ数';
  if(u==='HOWARD_GAME_50_REPLAY_TRIAL')return '規定リプレイ50回到達回数';
  return undefined;
@@ -157,6 +158,12 @@ function evidenceDescription(x:any){
  if(types.some((t:any)=>t==='PROBABILITY_UNKNOWN'||t==='DISPLAY_ONLY'))lines.push('・反映：設定別出現率が未確認の項目は記録のみです。出現率確認後は設定推測へ反映できる可能性があります');
  return lines.join('\n');
 }
+export function derivedSuccessCount(o:any,observations:any[]){
+ const composition=o?.liveObservation?.successCountComposition;if(!composition)return undefined;
+ const ids=composition.findingIds;if(composition.operation!=='SUM'||!Array.isArray(ids)||ids.length<2||new Set(ids).size!==ids.length||ids.includes(o.findingId))throw Error('INVALID_SUCCESS_COMPOSITION:'+o.findingId);
+ for(const id of ids){const source=observations.find((x:any)=>x.findingId===id);if(!source||source.model!=='BERNOULLI'||source.observationStatus!=='READY'||source.trialUniverse!==o.trialUniverse||source.liveObservation?.successCountComposition)throw Error('SUCCESS_COMPOSITION_SOURCE:'+id);}
+ return {derivedCalculation:'sum',derivedFromInputIds:ids.map((id:string)=>id+'.successCount')};
+}
 export function buildCanonicalUi(candidate:any,observation:any,evaluation:any,candidateArtifact:any,observationArtifact:any,evaluationArtifact:any){
  if(candidate.machineId!==observation.machineId||candidate.machineId!==evaluation.machineId)throw new Error('CANONICAL_UI_BUILD_IDENTITY');
  const cBy=new Map((candidate.candidates??[]).map((x:any)=>[x.findingId,x]));const eBy=new Map((evaluation.evaluations??[]).map((x:any)=>[x.findingId,x]));
@@ -169,6 +176,7 @@ export function buildCanonicalUi(candidate:any,observation:any,evaluation:any,ca
    const categoryNames=categoryLabels(c.settingDistribution);if(e.categoryModel?.residualPolicy==='SOURCE_EXPLICIT_OTHER'&&!categoryNames.includes('その他'))categoryNames.push('その他');if(categoryNames.length<2)throw new Error('CANONICAL_UI_CATEGORIES_UNRESOLVED:'+o.findingId);
    inputs=[{id:o.findingId+'.'+o.collectionContract.trialField,label:labels.trialLabel,role:'trial',mode:'NUMBER',directNumeric:true,quickAdd:trialQuickAdd(o.trialUniverse),partialInputAllowed:true,emptyMeansUnobserved:true},...categoryNames.map((label:string,i:number)=>({id:o.findingId+'.'+o.collectionContract.countsField+'.'+safeKey(label,i),label,role:'categoryCount',mode:'NUMBER',directNumeric:true,quickAdd:[1],partialInputAllowed:true,emptyMeansUnobserved:true,missingSubItemTreatment:'ZERO_WHEN_PARENT_OBSERVED'}))];
   }else throw new Error('CANONICAL_UI_COLLECTION_UNSUPPORTED:'+o.findingId);
+  const derived=derivedSuccessCount(o,observation.observations??[]);if(derived)Object.assign(inputs.find((x:any)=>x.role==='success'),derived);
   return {id:'OBS_'+o.findingId,sourceFindingId:o.findingId,title:o.label,kind:'NUMERIC_OBSERVATION',model:o.model,trialUniverse:o.trialUniverse,description:buildObservationDescription(o,o.model,e.categoryModel?.residualPolicy),collapsible:true,defaultExpanded:false,descriptionPresentation:{collapsible:true,label:'説明',defaultExpanded:false},score:scoreView(e),perEligibleTrialPower:{label:'1回の判別力',value:c.runtimePolicyBinding.value,metric:'PER_ELIGIBLE_TRIAL_POWER',thresholdSource:'RUNTIME_POLICY'},inputs};
  });
  const trialUniverses=new Set(numericSections.map((x:any)=>String(x.trialUniverse)));const playInfoRequirement=derivePlayInfoRequirement(trialUniverses);const playInfoMode=playInfoRequirement.mode;const needsExcludedGames=playInfoRequirement.needsExcludedGames;

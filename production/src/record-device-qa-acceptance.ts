@@ -5,16 +5,18 @@ import {productionRequest,acceptAndRecord} from './runtime.ts';
 const batchId=process.argv[2],s=new RepoStore(process.cwd()),o=new Orchestrator(s);
 if(!batchId)throw Error('BATCH_ID_REQUIRED');
 const ids=s.read<any>('batches',batchId,'batch.json').waves.flatMap((w:any)=>w.machineIds);
+const partial=process.argv.includes('--partial');
 const supplied=process.argv[3] ? JSON.parse(fs.readFileSync(process.argv[3],'utf8')) : null;
 if(supplied){
  const h=s.read<any>('batches',batchId,'device-qa','handoff.json');
- if(supplied.batchId!==batchId||supplied.status!=='PASS'||supplied.acceptedBy!=='USER'||!supplied.statement||!supplied.acceptedAt)throw Error('INVALID_USER_ACCEPTANCE');
- if(JSON.stringify(supplied.machineIds)!==JSON.stringify(ids)||supplied.appCommit!==h.appCommit||supplied.distributionCommit!==h.dataCommit||supplied.versionCode!==h.apk.versionCode||String(supplied.qaRunId)!==String(h.qaRunId))throw Error('ACCEPTANCE_HANDOFF_MISMATCH');
+ if(supplied.batchId!==batchId||supplied.status!==(partial?'PARTIAL_PASS':'PASS')||supplied.acceptedBy!=='USER'||!supplied.statement||!supplied.acceptedAt)throw Error('INVALID_USER_ACCEPTANCE');
+ if((partial?(!Array.isArray(supplied.machineIds)||supplied.machineIds.length===0||supplied.machineIds.length>=ids.length||new Set(supplied.machineIds).size!==supplied.machineIds.length||supplied.machineIds.some((id:string)=>!ids.includes(id))):JSON.stringify(supplied.machineIds)!==JSON.stringify(ids))||supplied.appCommit!==h.appCommit||supplied.distributionCommit!==h.dataCommit||supplied.versionCode!==h.apk.versionCode||String(supplied.qaRunId)!==String(h.qaRunId))throw Error('ACCEPTANCE_HANDOFF_MISMATCH');
 }
 const decision=supplied??{schemaVersion:'device-qa-acceptance-v1',batchId,status:'PASS',acceptedBy:'USER',acceptedAt:'2026-10-07',statement:'今回の機種調査は問題ありませんでした。',source:'User-authorized attached handoff 20261007-125207',appCommit:'3bef2eadbc17dca47de7a60a698c6b65aea543bb',distributionCommit:'c3728e85d36517898fe25c7ae6cf039f83a58e06',qaRunId:'37548381546',versionCode:2002787132,machineIds:ids};
 if(!supplied&&batchId!=='batch-20261007-007')throw Error('EXPLICIT_ACCEPTANCE_REQUIRED');
-s.write(decision,'batches',batchId,'device-qa','acceptance.json');
-for(const machineId of ids){
+const decisionFile=partial?'acceptance-partial-20261011.json':'acceptance.json';
+s.write(decision,'batches',batchId,'device-qa',decisionFile);
+for(const machineId of (partial?supplied.machineIds:ids)){
  if(o.stage(batchId,machineId,'DISTRIBUTION').state!=='COMPLETE')throw Error('DISTRIBUTION_REQUIRED:'+machineId);
  let x=o.stage(batchId,machineId,'DEVICE_QA'); if(x.state==='COMPLETE')continue;
  if(x.state==='PENDING')x=o.transition(x,'READY','DEPENDENCY_COMPLETE','DISTRIBUTION');
@@ -27,7 +29,7 @@ for(const machineId of ids){
  const p=`batches/${batchId}/artifacts/${machineId}/device_qa/result.json`;
  s.write({...decision,machineId,workId:q.workId},p);
  const ref={artifactId:'device-qa-'+machineId,kind:'device-qa',path:'production/'+p,sha256:crypto.createHash('sha256').update(fs.readFileSync(s.p(p))).digest('hex'),producerWorkId:q.workId};
- const r=acceptAndRecord(o,s,{workId:q.workId,attemptId:q.attemptId,leaseId:q.leaseId,leaseGeneration:q.leaseGeneration,status:'SUCCESS',observedInputFingerprint:q.authoritativeInputFingerprint,producedArtifacts:[ref],validationEvidence:[{validator:'human-device-qa',ok:true,decisionPath:`production/batches/${batchId}/device-qa/acceptance.json`}],requestedActions:[],proposedNextState:'COMPLETE',provenance:{userDecision:decision.statement}},'user-device-qa-acceptance','human-device-qa');
+ const r=acceptAndRecord(o,s,{workId:q.workId,attemptId:q.attemptId,leaseId:q.leaseId,leaseGeneration:q.leaseGeneration,status:'SUCCESS',observedInputFingerprint:q.authoritativeInputFingerprint,producedArtifacts:[ref],validationEvidence:[{validator:'human-device-qa',ok:true,decisionPath:`production/batches/${batchId}/device-qa/${decisionFile}`}],requestedActions:[],proposedNextState:'COMPLETE',provenance:{userDecision:decision.statement}},'user-device-qa-acceptance','human-device-qa');
  if(r.kind!=='COMMITTED')throw Error('QA_NOT_COMMITTED:'+machineId);
 }
-console.log(JSON.stringify({batchId,status:'DEVICE_QA_PASS',count:ids.length}));
+console.log(JSON.stringify({batchId,status:partial?'PARTIAL_DEVICE_QA_PASS':'DEVICE_QA_PASS',count:partial?supplied.machineIds.length:ids.length}));

@@ -172,3 +172,8 @@ test('long conditional trial scope stays in the description and uses a concise s
  assert.ok(!labels.trialLabel.includes('1試行として'));
  assert.ok(buildObservationDescription(o,o.model).includes('追加成功'));
 });
+
+test('awakening challenge distinguishes entries from successes',()=>{
+ const o={label:'覚醒チャレンジ成功',trialUniverse:'AWAKENING_TRIAL',model:'BERNOULLI',denominatorSemantics:'上位AT・エンディング終了後に入る4Gの覚醒チャレンジを1試行として、引き戻し成功を数えます。'};
+ assert.deepEqual(deriveObservationInputLabels(o),{trialLabel:'覚醒チャレンジ突入回数',successLabel:'覚醒チャレンジ成功回数'});
+});

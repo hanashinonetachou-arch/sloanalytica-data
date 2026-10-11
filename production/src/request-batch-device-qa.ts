@@ -6,7 +6,7 @@ const qa=s.read<any>('batches',b,'device-qa','handoff.json');
 if(qa.status!=='AWAITING_USER_DEVICE_QA'||qa.renderedUiPassed!==ids.length||qa.fleetPassed<80||qa.fleetFailed!==0||!qa.apk.libraryFileId)throw new Error('QA_HANDOFF_NOT_READY');
 for(const m of ids){
  const dist=o.stage(b,m,'DISTRIBUTION');if(dist.state!=='COMPLETE')throw new Error('DISTRIBUTION_NOT_COMPLETE:'+m);
- let x=o.reconcile(b,m,'DEVICE_QA');if(x.state==='HUMAN_REQUIRED')continue;
+ let x=o.reconcile(b,m,'DEVICE_QA');if(x.state==='HUMAN_REQUIRED'||x.state==='COMPLETE')continue;
  if(x.state!=='READY')throw new Error('DEVICE_QA_NOT_READY:'+m);
  const a=o.createAttempt(x),l=o.acquire(x,a,300000);
  x=o.transition(o.stage(b,m,'DEVICE_QA'),'LEASED','DISPATCH',a.workId);

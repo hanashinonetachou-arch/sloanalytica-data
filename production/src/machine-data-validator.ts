@@ -11,6 +11,7 @@ export function validateMachineDataDocument(doc:any,canonicalUi:any,candidate:an
  if(doc.provenance?.generationPath!=='V8_5_PRODUCTION_PIPELINE'||doc.provenance?.legacyOracleUsed!==false)fail('PROVENANCE');
  if(canonical(doc.sourceArtifacts?.canonicalUi)!==canonical(canonicalArtifact)||canonical(doc.sourceArtifacts?.candidateContract)!==canonical(candidateArtifact)||canonical(doc.sourceArtifacts?.observationEvidence)!==canonical(observationArtifact)||canonical(doc.sourceArtifacts?.research)!==canonical(researchArtifact))fail('LINKAGE');
  if(doc.packagePolicy?.offlineCapable!==true||doc.packagePolicy?.containsImages!==false||doc.packagePolicy?.containsExecutableCode!==false)fail('PACKAGE_POLICY');
+ if((doc.packagePolicy?.machineDataRevision??1)!==(research?.packageRevision??1))fail('PACKAGE_REVISION');
  if(canonical(doc.uiContract)!==canonical(canonicalUi))fail('UI_COPY');
  const candidateKeys=settingKeys(candidate),keys=candidateKeys.length?candidateKeys:researchSettingKeys(research),expectedSettings={status:keys.length?'SOURCE_DERIVED':'UNRESOLVED',values:keys.map(k=>'SET_'+k)};if(canonical(doc.settings)!==canonical(expectedSettings))fail('SETTINGS');
  const sections=canonicalUi.numericSections??[],features=doc.features??[];if(!Array.isArray(features)||features.length!==sections.length)fail('FEATURE_COVERAGE');
