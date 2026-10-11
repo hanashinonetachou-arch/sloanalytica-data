@@ -1,0 +1,63 @@
+name: Batch010 Shaman King Device QA Handoff
+
+on:
+  push:
+    branches:
+      - production/v85-batch-010-research-20261010
+    paths:
+      - production/.batch010-shamanking-qa-trigger
+      - .github/workflows/batch010-shamanking-device-qa.yml
+
+permissions:
+  contents: write
+
+concurrency:
+  group: batch010-shamanking-device-qa
+  cancel-in-progress: false
+
+jobs:
+  record-device-qa:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: production/v85-batch-010-research-20261010
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - name: Verify final signed APK handoff and historical acceptance
+        working-directory: production
+        run: |
+          node --input-type=module <<'NODE'
+          import fs from 'node:fs';
+          const base='batches/batch-20261010-010';
+          const h=JSON.parse(fs.readFileSync(base+'/device-qa/handoff.json','utf8'));
+          const old=JSON.parse(fs.readFileSync(base+'/device-qa/acceptance-partial-20261011.json','utf8'));
+          if(h.dataCommit!=='6bc840f1043c85e22c4a677cbc7410a728f7aaf0'||h.appCommit!=='a0956e1d7a50685a3808ceab409cb5be4a3fd906'||h.qaRunId!==38106326272||h.qaArtifactId!==11689982530||h.apk.versionCode!==2002830842||h.apk.sha256!=='b119c8b8a3fb74491d048ab31a4156ba54c3664b53a36ea2eb62f1363a6dad18')throw Error('QA_HANDOFF_IDENTITY');
+          if(!old.machineIds.includes('L_SHAMANKING_SS')||h.acceptedMachineIds.includes('L_SHAMANKING_SS')||!h.deviceQaTargets.includes('L_SHAMANKING_SS')||h.renderedUiPassed!==10||h.fleetPassed!==100||h.fleetFailed!==0)throw Error('QA_HISTORY_OR_VALIDATION');
+          NODE
+      - name: Register pending QA without changing prior acceptance
+        working-directory: production
+        run: |
+          node --experimental-strip-types src/request-batch-device-qa.ts batch-20261010-010
+          node --experimental-strip-types src/reconcile-batch.ts batch-20261010-010
+          node --input-type=module --experimental-strip-types <<'NODE'
+          import {RepoStore,Orchestrator} from './src/core.ts';
+          import fs from 'node:fs';
+          const o=new Orchestrator(new RepoStore(process.cwd())),b='batch-20261010-010',m='L_SHAMANKING_SS';
+          const x=o.stage(b,m,'DEVICE_QA');
+          if(x.state!=='HUMAN_REQUIRED'||x.humanResolved===true||x.authoritativeOutputRef)throw Error('SHAMANKING_REQA_NOT_PENDING');
+          const accepted=JSON.parse(fs.readFileSync('batches/'+b+'/device-qa/acceptance-partial-20261011.json','utf8'));
+          if(!accepted.machineIds.includes(m))throw Error('PRIOR_ACCEPTANCE_LOST');
+          NODE
+      - name: Commit QA action and authoritative state
+        run: |
+          set -euo pipefail
+          git fetch origin production/v85-batch-010-research-20261010
+          test "$(git rev-parse HEAD)" = "$(git rev-parse FETCH_HEAD)"
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git add production/batches/batch-20261010-010
+          git commit -m "Register Shaman King revised device QA [skip ci]"
+          git push origin HEAD:production/v85-batch-010-research-20261010
