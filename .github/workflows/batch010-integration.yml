@@ -38,6 +38,22 @@ jobs:
         with:
           node-version: 24
 
+      - name: Regenerate Shaman King from reviewed Research (machine only)
+        working-directory: production-state/production
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --experimental-strip-types src/invalidate-machine-downstream.ts batch-20261010-010 L_SHAMANKING_SS --include-research
+          node --experimental-strip-types src/materialize-research-drafts.ts batch-20261010-010 wave-1 --force-machine=L_SHAMANKING_SS --force-only
+          node --experimental-strip-types src/deterministic-production-worker.ts batch-20261010-010 --through APP_RUNTIME
+          node --input-type=module --experimental-strip-types <<'NODE'
+          import {RepoStore,Orchestrator} from './src/core.ts';
+          const s=new RepoStore(process.cwd()),o=new Orchestrator(s);
+          const x=o.stage('batch-20261010-010','L_SHAMANKING_SS','DEVICE_QA');
+          if(x.state==='COMPLETE')o.transition(x,'READY','AUTHORITATIVE_OUTPUT_INVALIDATED','shamanking-ui-reqa-20261011');
+          else if(x.state!=='READY')throw Error('SHAMANKING_QA_UNEXPECTED_STATE:'+x.state);
+          NODE
+
       - name: Verify Batch010 authoritative Research and Runtime
         working-directory: production-state/production
         run: |
@@ -49,11 +65,11 @@ jobs:
         working-directory: prototype
         run: npm ci
 
-      - name: Publish Arifureta device QA repair
+      - name: Publish Shaman King contextual UI repair
         shell: bash
         run: |
           set -euo pipefail
-          MACHINES="L_ARIFURETA_JA"
+          MACHINES="L_SHAMANKING_SS"
           MACHINES="$MACHINES" node <<'NODE'
           const fs=require('fs'),path=require('path'),crypto=require('crypto');
           const batchId='batch-20261010-010',machines=process.env.MACHINES.split(/\s+/).filter(Boolean);
@@ -67,7 +83,7 @@ jobs:
             const pkg=app.package,entry=byId.get(machineId); if(!entry)throw new Error('CATALOG_ENTRY_MISSING:'+machineId);
             pkg.machine.introductionDate=entry.introductionDate;pkg.machine.machineType=entry.machineType;pkg.machine.gameType=entry.gameType;
             const bytes=Buffer.from(JSON.stringify(pkg,null,2)+'\n','utf8');
-            if(machineId==='L_ARIFURETA_JA'&&sha(bytes)!=='b89e667295ca5b480aca4e671bac63f4b61b1e408fe77f8d95341117a7512c35')throw new Error('QA_PACKAGE_HASH_MISMATCH');
+            if(machineId==='L_SHAMANKING_SS'&&pkg.machine.machineDataVersion!=='8.5.2-batch-20261010-010')throw new Error('QA_PACKAGE_REVISION_MISMATCH');
             const target=path.join(proto,'machines',machineId,'machine-package.json');fs.mkdirSync(path.dirname(target),{recursive:true});fs.writeFileSync(target,bytes);
             const caps=[];for(const f of pkg.features?.features??[]){const model=String(f.modelType??'').toLowerCase();if(model==='binomial'&&!caps.includes('binomial'))caps.push('binomial');if(model==='multinomial'&&!caps.includes('multinomial'))caps.push('multinomial');}
             if((pkg.evidence?.references??[]).length&&!caps.includes('evidence'))caps.push('evidence');
@@ -82,10 +98,10 @@ jobs:
           node tools/apply-machine-identity-classification.mjs --verify
           git config user.name github-actions[bot]
           git config user.email 41898282+github-actions[bot]@users.noreply.github.com
-          git add catalog.json machines/L_ARIFURETA_JA/machine-package.json
-          git commit -m "Publish Arifureta QA tabs revision4 [skip ci]"
+          git add catalog.json machines/L_SHAMANKING_SS/machine-package.json
+          git commit -m "Publish Shaman King contextual UI tabs [skip ci]"
           git push origin HEAD:prototype-multi-machine
-          echo "BATCH009_COMMIT=$(git rev-parse HEAD)" >> "$GITHUB_ENV"
+          echo "BATCH010_COMMIT=$(git rev-parse HEAD)" >> "$GITHUB_ENV"
 
       - name: Deploy Batch010 data pages
         env:
@@ -96,12 +112,12 @@ jobs:
           gh workflow run deploy-pages.yml --ref prototype-multi-machine --repo "$GITHUB_REPOSITORY"
           run_id=""
           for _ in $(seq 1 40); do
-            run_id="$(gh api "repos/$GITHUB_REPOSITORY/actions/runs?branch=prototype-multi-machine&event=workflow_dispatch&per_page=40" --jq ".workflow_runs[] | select(.name == \"Deploy SloAnalytica Data Pages\" and .head_sha == \"$BATCH009_COMMIT\") | .id" | head -n1 || true)"
+            run_id="$(gh api "repos/$GITHUB_REPOSITORY/actions/runs?branch=prototype-multi-machine&event=workflow_dispatch&per_page=40" --jq ".workflow_runs[] | select(.name == \"Deploy SloAnalytica Data Pages\" and .head_sha == \"$BATCH010_COMMIT\") | .id" | head -n1 || true)"
             [ -n "$run_id" ] && break
             sleep 3
           done
           test -n "$run_id"; gh run watch "$run_id" --repo "$GITHUB_REPOSITORY" --exit-status
-          echo "BATCH009_PAGES_RUN_ID=$run_id" >> "$GITHUB_ENV"
+          echo "BATCH010_PAGES_RUN_ID=$run_id" >> "$GITHUB_ENV"
 
       - name: Finalize Batch010 Distribution and authoritative state
         shell: bash
@@ -109,7 +125,7 @@ jobs:
           set -euo pipefail
           node <<'NODE'
           const fs=require('fs'),path=require('path');const metadata=JSON.parse(fs.readFileSync(process.env.RUNNER_TEMP+'/batch010-all-metadata.json','utf8'));
-          const doc={batchId:'batch-20261010-010',integration:{repository:'hanashinonetachou-arch/sloanalytica-data',branch:'prototype-multi-machine',commit:process.env.BATCH009_COMMIT,packagePath:'',catalogPath:'catalog.json'},packages:{...JSON.parse(fs.readFileSync(path.resolve('production-state/production/batches/batch-20261010-010/distribution-repair-attestation.json'),'utf8')).packages,...metadata},checks:{catalogIntegrity:true,pagesDeployment:{runId:Number(process.env.BATCH009_PAGES_RUN_ID),conclusion:'success'},uxContractAudit:{runId:Number(process.env.GITHUB_RUN_ID),conclusion:'success'},machineIdentityConsistency:{runId:Number(process.env.GITHUB_RUN_ID),conclusion:'success',batchMachineVerified:true}}};
+          const doc={batchId:'batch-20261010-010',integration:{repository:'hanashinonetachou-arch/sloanalytica-data',branch:'prototype-multi-machine',commit:process.env.BATCH010_COMMIT,packagePath:'',catalogPath:'catalog.json'},packages:{...JSON.parse(fs.readFileSync(path.resolve('production-state/production/batches/batch-20261010-010/distribution-repair-attestation.json'),'utf8')).packages,...metadata},checks:{catalogIntegrity:true,pagesDeployment:{runId:Number(process.env.BATCH010_PAGES_RUN_ID),conclusion:'success'},uxContractAudit:{runId:Number(process.env.GITHUB_RUN_ID),conclusion:'success'},machineIdentityConsistency:{runId:Number(process.env.GITHUB_RUN_ID),conclusion:'success',batchMachineVerified:true}}};
           fs.writeFileSync(path.resolve('production-state/production/batches/batch-20261010-010/distribution-repair-attestation.json'),JSON.stringify(doc,null,2)+'\n');
           NODE
           cd production-state/production

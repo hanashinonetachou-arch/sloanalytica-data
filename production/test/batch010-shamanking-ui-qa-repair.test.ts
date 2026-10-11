@@ -22,13 +22,13 @@ test('Shaman King observation context tabs preserve all inference and evidence',
  assert.equal(new Set(features.map((x:any)=>x.featureId)).size,25);
  for(const feature of features){
   const inputs=feature.inputs??[];
-  if(inputs.some((x:any)=>x.role==='trial')&&inputs.some((x:any)=>x.role==='success')){
-   assert.notEqual(inputs.find((x:any)=>x.role==='trial').label,inputs.find((x:any)=>x.role==='success').label,feature.featureId);
+  if(inputs.length===2){
+   assert.notEqual(inputs[0].label,inputs[1].label,feature.featureId);
   }
  }
  const fortune=sections.find((s:any)=>s.id==='OBS_fortune-reward');
  assert.ok(fortune.items.some((x:any)=>x.evidenceId==='fortune-letter'));
  assert.equal(sections.some((s:any)=>s.id==='EVI_fortune-letter'),false);
- assert.equal(pkg.evidence.evidences.length,5);
+ assert.equal(pkg.evidence.evidences.length,22);
  assert.doesNotThrow(()=>validateAppRuntimeDocument(runtime,projection,stage.authoritativeOutputRef));
 });
