@@ -8,7 +8,7 @@
   "machine": {
     "schemaVersion": "2.0.0",
     "machineId": "L_ARIFURETA_JA",
-    "machineDataVersion": "8.5.2-batch-20261010-010",
+    "machineDataVersion": "8.5.3-batch-20261010-010",
     "displayName": "Lパチスロ ありふれた職業で世界最強",
     "modelName": "Lパチスロ ありふれた職業で世界最強",
     "settings": [
@@ -23,7 +23,7 @@
       "offlineCapable": true,
       "containsImages": false,
       "containsExecutableCode": false,
-      "machineDataRevision": 2
+      "machineDataRevision": 3
     },
     "introductionDate": "2025-02-03",
     "machineType": "SMART_SLOT",
@@ -434,7 +434,7 @@
       },
       {
         "id": "cz-100-success.eligibleTrialCount",
-        "name": "CZ当選回数",
+        "name": "100Gゾーン到達回数",
         "category": "V8_NUMERIC",
         "type": "integer",
         "unit": "回",
@@ -2367,7 +2367,7 @@
     "v8Sections": [
       {
         "id": "OBS_SHARED_NORMAL_GAME_TRIAL",
-        "title": "AT初当たり・ミュウボーナス＋AT初当たり合算・ミュウボーナス初当たり・上位AT出現",
+        "title": "AT初当たり・ミュウボーナス初当たり・上位AT出現",
         "collapsible": true,
         "defaultExpanded": false,
         "description": "複数の設定推測項目で同じ「通常ゲーム数」を共通の基準として使用します。通常ゲーム数は1回だけ入力し、各項目では該当した回数だけを記録してください。",
@@ -2426,37 +2426,6 @@
                 "quickAdd": [
                   1
                 ],
-                "gridSpan": 12,
-                "unobservedDisplay": "—"
-              }
-            ]
-          },
-          {
-            "id": "NODE_initial-combined",
-            "featureId": "initial-combined",
-            "title": "ミュウボーナス＋AT初当たり合算",
-            "description": "通常時のミュウボーナス＋AT初当たり合算を記録します。通常ゲーム数を基準に、実戦中の出現割合を設定別に比較します。\n・注意：上位AT・エンディング後の4G覚醒チャレンジ内の引き戻しは初当たりに含めず、除外ゲーム数に記録します。\n・注意：総ゲーム数−除外ゲーム数を母数とし、公表集計との完全一致は未確認として保持します。",
-            "descriptionPresentation": {
-              "collapsible": true,
-              "label": "説明",
-              "defaultExpanded": false
-            },
-            "gridSpan": 6,
-            "inputs": [
-              {
-                "id": "initial-combined.successCount",
-                "label": "ミュウボーナス＋AT初当たり合算回数",
-                "input": "counter",
-                "inputId": "initial-combined.successCount",
-                "engineBinding": {
-                  "mode": "SUM_COUNTS",
-                  "inputIds": [
-                    "at-initial.successCount",
-                    "myu-initial.successCount"
-                  ]
-                },
-                "directNumeric": false,
-                "quickAdd": [],
                 "gridSpan": 12,
                 "unobservedDisplay": "—"
               }
@@ -2572,6 +2541,55 @@
         ]
       },
       {
+        "id": "OBS_cz-100-success",
+        "title": "100GのCZ当選",
+        "collapsible": true,
+        "defaultExpanded": false,
+        "description": "対象となる機会のうち、CZ当選が実際に起きた割合を設定別に比較します。\n・注意：天国天井・小役契機と区別できた試行だけ対象とします。\n・注意：AT間100Gのゾーンを1回の試行として、ゾーン契機の嫁チャレンジまたは香織降臨に当選した回数を記録。天国天井・小役契機と区別できた試行だけ対象とします。",
+        "descriptionPresentation": {
+          "collapsible": true,
+          "label": "説明",
+          "defaultExpanded": false
+        },
+        "items": [
+          {
+            "id": "NODE_cz-100-success",
+            "featureId": "cz-100-success",
+            "title": "100GのCZ当選",
+            "inputs": [
+              {
+                "id": "cz-100-success.eligibleTrialCount",
+                "label": "100Gゾーン到達回数",
+                "input": "denominator",
+                "inputId": "cz-100-success.eligibleTrialCount",
+                "engineBinding": {
+                  "inputId": "cz-100-success.eligibleTrialCount"
+                },
+                "gridSpan": 6,
+                "directNumeric": true,
+                "quickAdd": [],
+                "unobservedDisplay": "—"
+              },
+              {
+                "id": "cz-100-success.successCount",
+                "label": "CZ当選回数",
+                "input": "counter",
+                "inputId": "cz-100-success.successCount",
+                "engineBinding": {
+                  "inputId": "cz-100-success.successCount"
+                },
+                "directNumeric": true,
+                "quickAdd": [
+                  1
+                ],
+                "gridSpan": 6,
+                "unobservedDisplay": "—"
+              }
+            ]
+          }
+        ]
+      },
+      {
         "id": "OBS_myu-scenario",
         "title": "ミュウボーナス中のキャラ紹介",
         "collapsible": true,
@@ -2641,6 +2659,102 @@
                   "inputId": "myu-scenario.categoryCounts.8_ユエ_ハジメ_ティオ",
                   "label": "ユエ→ハジメ→ティオ",
                   "meaning": "設定2以上"
+                }
+              ]
+            }
+          },
+          {
+            "id": "REF_special-character-evidence",
+            "evidenceId": "special-character-evidence",
+            "label": "ミュウの特殊キャラ",
+            "interaction": {
+              "type": "CATEGORY_COUNTERS",
+              "preservePriorObservations": true,
+              "showAccumulatedCounts": true,
+              "categoryCoverage": "NON_EXHAUSTIVE",
+              "totalOpportunities": "NONE",
+              "categories": [
+                {
+                  "id": "REF_special-character-evidence_1",
+                  "inputId": "REF_special-character-evidence_1",
+                  "label": "香織（使徒の姿）",
+                  "meaning": "設定4以上"
+                },
+                {
+                  "id": "REF_special-character-evidence_2",
+                  "inputId": "REF_special-character-evidence_2",
+                  "label": "ユエ（吸血姫）",
+                  "meaning": "設定5以上"
+                },
+                {
+                  "id": "REF_special-character-evidence_3",
+                  "inputId": "REF_special-character-evidence_3",
+                  "label": "ハジメ（学生）",
+                  "meaning": "設定6"
+                }
+              ]
+            },
+            "description": "ミュウの特殊キャラを確認したときに、該当する項目を1回加算して記録します。\n・注意：3人目が特殊キャラに置き換わる場合の確定示唆。基本シナリオは1人目・2人目で判別し、特殊キャラ回数の別入力を必須にしません\n・反映：設定確定・設定否定の条件は、設定候補の絞り込みに自動反映します",
+            "descriptionPresentation": {
+              "collapsible": true,
+              "label": "説明",
+              "defaultExpanded": false
+            }
+          }
+        ]
+      },
+      {
+        "id": "EVI_at-screen-early-evidence",
+        "title": "AT終了画面（1999G以下・G数不明）",
+        "description": "AT終了画面（1999G以下・G数不明）を確認したときに、該当する項目を1回加算して記録します。\n・注意：1999G以下には1%未満とだけ公表される項目があります。区間値を補完せず示唆を記録。当日G不明時も確定制約は有効です\n・反映：設定確定・設定否定の条件は、設定候補の絞り込みに自動反映します\n・反映：設定別出現率が未確認の項目は記録のみです。出現率確認後は設定推測へ反映できる可能性があります",
+        "collapsible": true,
+        "defaultExpanded": false,
+        "descriptionPresentation": {
+          "collapsible": true,
+          "label": "説明",
+          "defaultExpanded": false
+        },
+        "items": [
+          {
+            "id": "REF_at-screen-early-evidence",
+            "evidenceId": "at-screen-early-evidence",
+            "label": "AT終了画面（1999G以下・G数不明）",
+            "interaction": {
+              "type": "CATEGORY_COUNTERS",
+              "preservePriorObservations": true,
+              "showAccumulatedCounts": true,
+              "categoryCoverage": "NON_EXHAUSTIVE",
+              "totalOpportunities": "NONE",
+              "categories": [
+                {
+                  "id": "REF_at-screen-early-evidence_1",
+                  "inputId": "REF_at-screen-early-evidence_1",
+                  "label": "銃",
+                  "meaning": "基本パターン"
+                },
+                {
+                  "id": "REF_at-screen-early-evidence_2",
+                  "inputId": "REF_at-screen-early-evidence_2",
+                  "label": "ティオ・シア・ユエ",
+                  "meaning": "高設定示唆"
+                },
+                {
+                  "id": "REF_at-screen-early-evidence_3",
+                  "inputId": "REF_at-screen-early-evidence_3",
+                  "label": "ハジメ",
+                  "meaning": "設定4以上"
+                },
+                {
+                  "id": "REF_at-screen-early-evidence_4",
+                  "inputId": "REF_at-screen-early-evidence_4",
+                  "label": "ユエ",
+                  "meaning": "設定5以上"
+                },
+                {
+                  "id": "REF_at-screen-early-evidence_5",
+                  "inputId": "REF_at-screen-early-evidence_5",
+                  "label": "レミア・ミュウ・ユエ",
+                  "meaning": "設定6"
                 }
               ]
             }
@@ -2756,159 +2870,6 @@
                   "id": "at-screen-late.categoryCounts.5_レミア_ミュウ_ユエ",
                   "inputId": "at-screen-late.categoryCounts.5_レミア_ミュウ_ユエ",
                   "label": "レミア・ミュウ・ユエ",
-                  "meaning": "設定6"
-                }
-              ]
-            }
-          }
-        ]
-      },
-      {
-        "id": "OBS_cz-100-success",
-        "title": "100GのCZ当選",
-        "collapsible": true,
-        "defaultExpanded": false,
-        "description": "対象となる機会のうち、CZ当選が実際に起きた割合を設定別に比較します。\n・注意：天国天井・小役契機と区別できた試行だけ対象とします。\n・注意：AT間100Gのゾーンを1回の試行として、ゾーン契機の嫁チャレンジまたは香織降臨に当選した回数を記録。天国天井・小役契機と区別できた試行だけ対象とします。",
-        "descriptionPresentation": {
-          "collapsible": true,
-          "label": "説明",
-          "defaultExpanded": false
-        },
-        "items": [
-          {
-            "id": "NODE_cz-100-success",
-            "featureId": "cz-100-success",
-            "title": "100GのCZ当選",
-            "inputs": [
-              {
-                "id": "cz-100-success.eligibleTrialCount",
-                "label": "CZ当選回数",
-                "input": "denominator",
-                "inputId": "cz-100-success.eligibleTrialCount",
-                "engineBinding": {
-                  "inputId": "cz-100-success.eligibleTrialCount"
-                },
-                "gridSpan": 6,
-                "directNumeric": true,
-                "quickAdd": [],
-                "unobservedDisplay": "—"
-              },
-              {
-                "id": "cz-100-success.successCount",
-                "label": "CZ当選回数",
-                "input": "counter",
-                "inputId": "cz-100-success.successCount",
-                "engineBinding": {
-                  "inputId": "cz-100-success.successCount"
-                },
-                "directNumeric": true,
-                "quickAdd": [
-                  1
-                ],
-                "gridSpan": 6,
-                "unobservedDisplay": "—"
-              }
-            ]
-          }
-        ]
-      },
-      {
-        "id": "EVI_at-screen-early-evidence",
-        "title": "AT終了画面（1999G以下・G数不明）",
-        "description": "AT終了画面（1999G以下・G数不明）を確認したときに、該当する項目を1回加算して記録します。\n・注意：1999G以下には1%未満とだけ公表される項目があります。区間値を補完せず示唆を記録。当日G不明時も確定制約は有効です\n・反映：設定確定・設定否定の条件は、設定候補の絞り込みに自動反映します\n・反映：設定別出現率が未確認の項目は記録のみです。出現率確認後は設定推測へ反映できる可能性があります",
-        "collapsible": true,
-        "defaultExpanded": false,
-        "descriptionPresentation": {
-          "collapsible": true,
-          "label": "説明",
-          "defaultExpanded": false
-        },
-        "items": [
-          {
-            "id": "REF_at-screen-early-evidence",
-            "evidenceId": "at-screen-early-evidence",
-            "label": "AT終了画面（1999G以下・G数不明）",
-            "interaction": {
-              "type": "CATEGORY_COUNTERS",
-              "preservePriorObservations": true,
-              "showAccumulatedCounts": true,
-              "categoryCoverage": "NON_EXHAUSTIVE",
-              "totalOpportunities": "NONE",
-              "categories": [
-                {
-                  "id": "REF_at-screen-early-evidence_1",
-                  "inputId": "REF_at-screen-early-evidence_1",
-                  "label": "銃",
-                  "meaning": "基本パターン"
-                },
-                {
-                  "id": "REF_at-screen-early-evidence_2",
-                  "inputId": "REF_at-screen-early-evidence_2",
-                  "label": "ティオ・シア・ユエ",
-                  "meaning": "高設定示唆"
-                },
-                {
-                  "id": "REF_at-screen-early-evidence_3",
-                  "inputId": "REF_at-screen-early-evidence_3",
-                  "label": "ハジメ",
-                  "meaning": "設定4以上"
-                },
-                {
-                  "id": "REF_at-screen-early-evidence_4",
-                  "inputId": "REF_at-screen-early-evidence_4",
-                  "label": "ユエ",
-                  "meaning": "設定5以上"
-                },
-                {
-                  "id": "REF_at-screen-early-evidence_5",
-                  "inputId": "REF_at-screen-early-evidence_5",
-                  "label": "レミア・ミュウ・ユエ",
-                  "meaning": "設定6"
-                }
-              ]
-            }
-          }
-        ]
-      },
-      {
-        "id": "EVI_special-character-evidence",
-        "title": "ミュウの特殊キャラ",
-        "description": "ミュウの特殊キャラを確認したときに、該当する項目を1回加算して記録します。\n・注意：3人目が特殊キャラに置き換わる場合の確定示唆。基本シナリオは1人目・2人目で判別し、特殊キャラ回数の別入力を必須にしません\n・反映：設定確定・設定否定の条件は、設定候補の絞り込みに自動反映します",
-        "collapsible": true,
-        "defaultExpanded": false,
-        "descriptionPresentation": {
-          "collapsible": true,
-          "label": "説明",
-          "defaultExpanded": false
-        },
-        "items": [
-          {
-            "id": "REF_special-character-evidence",
-            "evidenceId": "special-character-evidence",
-            "label": "ミュウの特殊キャラ",
-            "interaction": {
-              "type": "CATEGORY_COUNTERS",
-              "preservePriorObservations": true,
-              "showAccumulatedCounts": true,
-              "categoryCoverage": "NON_EXHAUSTIVE",
-              "totalOpportunities": "NONE",
-              "categories": [
-                {
-                  "id": "REF_special-character-evidence_1",
-                  "inputId": "REF_special-character-evidence_1",
-                  "label": "香織（使徒の姿）",
-                  "meaning": "設定4以上"
-                },
-                {
-                  "id": "REF_special-character-evidence_2",
-                  "inputId": "REF_special-character-evidence_2",
-                  "label": "ユエ（吸血姫）",
-                  "meaning": "設定5以上"
-                },
-                {
-                  "id": "REF_special-character-evidence_3",
-                  "inputId": "REF_special-character-evidence_3",
-                  "label": "ハジメ（学生）",
                   "meaning": "設定6"
                 }
               ]
