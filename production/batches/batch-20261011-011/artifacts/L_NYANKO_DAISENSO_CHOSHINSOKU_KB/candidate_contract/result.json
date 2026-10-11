@@ -1,0 +1,245 @@
+{
+  "schemaVersion": "candidate-contract-v1",
+  "manifestVersion": "8.5",
+  "batchId": "batch-20261011-011",
+  "machineId": "L_NYANKO_DAISENSO_CHOSHINSOKU_KB",
+  "machineName": "にゃんこ大戦争 超神速",
+  "evaluationArtifact": {
+    "artifactId": "evaluation-L_NYANKO_DAISENSO_CHOSHINSOKU_KB",
+    "kind": "evaluation",
+    "path": "production/batches/batch-20261011-011/artifacts/L_NYANKO_DAISENSO_CHOSHINSOKU_KB/evaluation/result.json",
+    "sha256": "bfe29be30367979bc030ca6ae6e1438a5a9c7585f35f9f7fad7f82bf8ee35453",
+    "producerWorkId": "wrk_3701443a45784dfa"
+  },
+  "eligibilityArtifact": {
+    "artifactId": "eligibility-L_NYANKO_DAISENSO_CHOSHINSOKU_KB",
+    "kind": "eligibility",
+    "path": "production/batches/batch-20261011-011/artifacts/L_NYANKO_DAISENSO_CHOSHINSOKU_KB/eligibility/result.json",
+    "sha256": "5622db605d1c0f4a59654b3d39b6ea6d95c6b26cbdafaa02034350b593aafddf",
+    "producerWorkId": "wrk_718617ed04d642a1"
+  },
+  "candidates": [
+    {
+      "findingId": "at-initial",
+      "label": "AT初当たり",
+      "model": "BERNOULLI",
+      "trialUniverse": "NORMAL_GAME_TRIAL",
+      "liveInferenceRoute": "LIVE_CONDITIONAL",
+      "settingDistribution": {
+        "1": "1/395",
+        "2": "1/383",
+        "4": "1/336",
+        "5": "1/313",
+        "6": "1/303"
+      },
+      "details": [
+        "通常時の新しい当選だけを記録します。連荘・AT中の継続・引き戻しを足しません。対象外の区間はG数からも除きます。公表資料の集計母数との完全一致は確認していません。"
+      ],
+      "dependencyGroupId": "initial-result-path",
+      "dependencyKind": "CAUSAL_PATH_OVERLAP",
+      "dependencyReason": "同じ当選経路または合算に含まれる結果を重ねて計測するため。",
+      "dependencyFallbackRank": 1,
+      "runtimeInferenceAllowed": true,
+      "dependencyResolution": "PREFERRED_MEMBER",
+      "runtimePolicyBinding": {
+        "metric": "SELECTION_SCORE",
+        "value": 29.5260078125337,
+        "thresholdSource": "RUNTIME_POLICY"
+      },
+      "suppressedByFeatureIds": []
+    },
+    {
+      "findingId": "cz-initial",
+      "label": "CZ初当たり",
+      "model": "BERNOULLI",
+      "trialUniverse": "NORMAL_GAME_TRIAL",
+      "liveInferenceRoute": "LIVE_CONDITIONAL",
+      "settingDistribution": {
+        "1": "1/544",
+        "2": "1/538",
+        "4": "1/489",
+        "5": "1/464",
+        "6": "1/461"
+      },
+      "details": [
+        "通常時の新しい当選だけを記録します。連荘・AT中の継続・引き戻しを足しません。対象外の区間はG数からも除きます。公表資料の集計母数との完全一致は確認していません。"
+      ],
+      "dependencyGroupId": "initial-result-path",
+      "dependencyKind": "CAUSAL_PATH_OVERLAP",
+      "dependencyReason": "同じ当選経路または合算に含まれる結果を重ねて計測するため。",
+      "dependencyFallbackRank": 2,
+      "runtimeInferenceAllowed": true,
+      "dependencyResolution": "FALLBACK_MEMBER",
+      "runtimePolicyBinding": {
+        "metric": "SELECTION_SCORE",
+        "value": 9.7645922711168,
+        "thresholdSource": "RUNTIME_POLICY"
+      },
+      "suppressedByFeatureIds": [
+        "at-initial"
+      ]
+    }
+  ],
+  "dependencyGroups": [
+    {
+      "groupId": "initial-result-path",
+      "resolution": "PREFERRED_WITH_FALLBACK",
+      "members": [
+        "at-initial",
+        "cz-initial"
+      ],
+      "runtimeInferenceAllowed": true,
+      "preferredFindingId": "at-initial",
+      "fallbackOrder": [
+        "at-initial",
+        "cz-initial"
+      ],
+      "reason": "依存関係がある候補を同時加算せず、観測できた優先Featureを使用し、未観測時だけ次順位のFeatureへ自動フォールバックする。",
+      "selectionRationale": "Researchで明示された優先順位に従い、同一セッションで重複情報を同時加算しない。"
+    }
+  ],
+  "excludedDecisions": [],
+  "blockedItems": [
+    {
+      "blockId": "latent-mode",
+      "label": "通常モード限定AT",
+      "reason": "内部モードを毎G正確に見分けられず、通常モードだけのG数を集計できません。",
+      "reevaluationCondition": "不足している設定別数値または観測手順を示す新しい具体的な公開資料が確認できた場合。",
+      "sourceIds": [
+        "cross"
+      ],
+      "publishedReference": {
+        "1": "1/2020",
+        "2": "1/886",
+        "4": "1/472",
+        "5": "1/362",
+        "6": "1/253"
+      }
+    },
+    {
+      "blockId": "狂乱-high",
+      "label": "狂乱高確への移行",
+      "reason": "内部状態の移行を全試行で識別する手順が不足しています。ベル後の示唆だけを移行結果として数えません。",
+      "reevaluationCondition": "不足している設定別数値または観測手順を示す新しい具体的な公開資料が確認できた場合。",
+      "sourceIds": [
+        "cross"
+      ],
+      "publishedConditionalReference": {
+        "settingOrder": [
+          1,
+          2,
+          4,
+          5,
+          6
+        ],
+        "lowerBellPercent": [
+          0.4,
+          0.4,
+          0.4,
+          0.8,
+          0.8
+        ],
+        "upperRightBellPercent": [
+          3.1,
+          3.1,
+          6.3,
+          6.6,
+          7
+        ],
+        "middleBellPercent": 10.2,
+        "sourceIds": [
+          "overview"
+        ],
+        "runtimeUse": "DISABLED"
+      }
+    },
+    {
+      "blockId": "musou",
+      "label": "夢想までの勝利回数",
+      "reason": "通常AT・BIGBANG経由・差枚数到達・エンディング後で条件が異なり、設定別の完全な選択表が不足しています。",
+      "reevaluationCondition": "不足している設定別数値または観測手順を示す新しい具体的な公開資料が確認できた場合。",
+      "sourceIds": [
+        "cross"
+      ]
+    }
+  ],
+  "evidenceCandidates": [
+    {
+      "findingId": "trophy",
+      "label": "玉ちゃんトロフィー",
+      "sourceIds": [
+        "cross"
+      ],
+      "details": [
+        "AT終了時に新しく出た色だけ。金は5・6の期待もありますが、確定範囲は4以上です。"
+      ],
+      "semanticCategories": [
+        {
+          "label": "銅",
+          "meaning": "設定2以上",
+          "semanticType": "EXACT_CONSTRAINT"
+        },
+        {
+          "label": "銀",
+          "meaning": "設定4以上",
+          "semanticType": "EXACT_CONSTRAINT"
+        },
+        {
+          "label": "金",
+          "meaning": "設定4以上",
+          "semanticType": "EXACT_CONSTRAINT"
+        },
+        {
+          "label": "ゼブラ",
+          "meaning": "設定5以上",
+          "semanticType": "EXACT_CONSTRAINT"
+        },
+        {
+          "label": "虹",
+          "meaning": "設定6",
+          "semanticType": "EXACT_CONSTRAINT"
+        }
+      ]
+    },
+    {
+      "findingId": "bgm",
+      "label": "神さま勝撫のBGM",
+      "sourceIds": [
+        "cross"
+      ],
+      "details": [
+        "神さま勝撫で実際に変化した曲だけを記録。勝利確定と設定4以上確定を取り違えません。出現率は未確認。"
+      ],
+      "semanticCategories": [
+        {
+          "label": "1・2セット目に変化",
+          "meaning": "高設定示唆",
+          "semanticType": "PROBABILITY_UNKNOWN"
+        },
+        {
+          "label": "後のセットで変化",
+          "meaning": "高設定示唆",
+          "semanticType": "PROBABILITY_UNKNOWN"
+        }
+      ]
+    },
+    {
+      "findingId": "ceiling222",
+      "label": "222G付近の天井",
+      "sourceIds": [
+        "cross"
+      ],
+      "details": [
+        "天井としての発動を確認できる場合だけ記録。単に付近で当選したものを天井選択として数えません。"
+      ],
+      "semanticCategories": [
+        {
+          "label": "222G+前兆で発動",
+          "meaning": "高設定示唆",
+          "semanticType": "PROBABILITY_UNKNOWN"
+        }
+      ]
+    }
+  ],
+  "sourceIntegrityIssues": []
+}

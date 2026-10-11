@@ -1,0 +1,428 @@
+{
+  "schemaVersion": "candidate-contract-v1",
+  "manifestVersion": "8.5",
+  "batchId": "batch-20261011-011",
+  "machineId": "L_NANATSU_NO_MAKEN_PU",
+  "machineName": "七つの魔剣が支配する",
+  "evaluationArtifact": {
+    "artifactId": "evaluation-L_NANATSU_NO_MAKEN_PU",
+    "kind": "evaluation",
+    "path": "production/batches/batch-20261011-011/artifacts/L_NANATSU_NO_MAKEN_PU/evaluation/result.json",
+    "sha256": "824e2dcf3c7c6c636bd75edb7a4c6b9ccf98e939840d7ff924ffd57b7a915fd0",
+    "producerWorkId": "wrk_5cf859c29cc64e2e"
+  },
+  "eligibilityArtifact": {
+    "artifactId": "eligibility-L_NANATSU_NO_MAKEN_PU",
+    "kind": "eligibility",
+    "path": "production/batches/batch-20261011-011/artifacts/L_NANATSU_NO_MAKEN_PU/eligibility/result.json",
+    "sha256": "db09c80e968ec62322cbe0f9075a82714dcd564c77cd8ee5882e5c2ae1983256",
+    "producerWorkId": "wrk_91b9045881954145"
+  },
+  "candidates": [
+    {
+      "findingId": "bonus-initial",
+      "label": "ボーナス初当たり",
+      "model": "BERNOULLI",
+      "trialUniverse": "NORMAL_GAME_TRIAL",
+      "liveInferenceRoute": "LIVE_CONDITIONAL",
+      "settingDistribution": {
+        "1": "1/228",
+        "2": "1/222",
+        "3": "1/209.7",
+        "4": "1/185.6",
+        "5": "1/173.5",
+        "6": "1/164.7"
+      },
+      "details": [
+        "通常時の新しい当選だけを記録します。連荘・AT中の継続・引き戻しを足しません。対象外の区間はG数からも除きます。公表資料の集計母数との完全一致は確認していません。"
+      ],
+      "dependencyGroupId": "initial-result-path",
+      "dependencyKind": "CAUSAL_PATH_OVERLAP",
+      "dependencyReason": "同じ当選経路または合算に含まれる結果を重ねて計測するため。",
+      "dependencyFallbackRank": 1,
+      "runtimeInferenceAllowed": true,
+      "dependencyResolution": "PREFERRED_MEMBER",
+      "runtimePolicyBinding": {
+        "metric": "SELECTION_SCORE",
+        "value": 62.96361049102822,
+        "thresholdSource": "RUNTIME_POLICY"
+      },
+      "suppressedByFeatureIds": []
+    },
+    {
+      "findingId": "st-initial",
+      "label": "初当たり合算",
+      "model": "BERNOULLI",
+      "trialUniverse": "NORMAL_GAME_TRIAL",
+      "liveInferenceRoute": "LIVE_CONDITIONAL",
+      "settingDistribution": {
+        "1": "1/408.3",
+        "2": "1/394.9",
+        "3": "1/366.4",
+        "4": "1/314",
+        "5": "1/289.2",
+        "6": "1/272.3"
+      },
+      "details": [
+        "通常時の新しい当選だけを記録します。連荘・AT中の継続・引き戻しを足しません。対象外の区間はG数からも除きます。公表資料の集計母数との完全一致は確認していません。"
+      ],
+      "dependencyGroupId": "initial-result-path",
+      "dependencyKind": "CAUSAL_PATH_OVERLAP",
+      "dependencyReason": "同じ当選経路または合算に含まれる結果を重ねて計測するため。",
+      "dependencyFallbackRank": 2,
+      "runtimeInferenceAllowed": true,
+      "dependencyResolution": "FALLBACK_MEMBER",
+      "runtimePolicyBinding": {
+        "metric": "SELECTION_SCORE",
+        "value": 58.361284610088845,
+        "thresholdSource": "RUNTIME_POLICY"
+      },
+      "suppressedByFeatureIds": [
+        "bonus-initial"
+      ]
+    }
+  ],
+  "dependencyGroups": [
+    {
+      "groupId": "initial-result-path",
+      "resolution": "PREFERRED_WITH_FALLBACK",
+      "members": [
+        "bonus-initial",
+        "st-initial"
+      ],
+      "runtimeInferenceAllowed": true,
+      "preferredFindingId": "bonus-initial",
+      "fallbackOrder": [
+        "bonus-initial",
+        "st-initial"
+      ],
+      "reason": "依存関係がある候補を同時加算せず、観測できた優先Featureを使用し、未観測時だけ次順位のFeatureへ自動フォールバックする。",
+      "selectionRationale": "Researchで明示された優先順位に従い、同一セッションで重複情報を同時加算しない。"
+    }
+  ],
+  "excludedDecisions": [],
+  "blockedItems": [
+    {
+      "blockId": "zone250",
+      "label": "250Gでのボーナス",
+      "reason": "設定差は確認できますが、全設定の当選率が不足しています。実際の当選Gだけを規定G選択の分布へ置き換えません。",
+      "reevaluationCondition": "不足している設定別数値または観測手順を示す新しい具体的な公開資料が確認できた場合。",
+      "sourceIds": [
+        "cross"
+      ]
+    },
+    {
+      "blockId": "latent-bonus-level",
+      "label": "ボーナスレベル",
+      "reason": "レベル別のプロローグ選択表を、内部レベルが不明のボーナスへ直接適用しません。",
+      "reevaluationCondition": "不足している設定別数値または観測手順を示す新しい具体的な公開資料が確認できた場合。",
+      "sourceIds": [
+        "overview"
+      ]
+    }
+  ],
+  "evidenceCandidates": [
+    {
+      "findingId": "st-end",
+      "label": "ST終了画面",
+      "sourceIds": [
+        "cross"
+      ],
+      "details": [
+        "新しいST終了画面だけを記録。ボーナス終了時の画面と混ぜません。"
+      ],
+      "semanticCategories": [
+        {
+          "label": "基本A・B・C",
+          "meaning": "基本パターン",
+          "semanticType": "PROBABILITY_UNKNOWN"
+        },
+        {
+          "label": "オリバー&ナナオA",
+          "meaning": "偶数設定示唆",
+          "semanticType": "PROBABILITY_UNKNOWN"
+        },
+        {
+          "label": "オリバー&ナナオB",
+          "meaning": "設定2以上",
+          "semanticType": "EXACT_CONSTRAINT"
+        },
+        {
+          "label": "オリバー&ナナオC",
+          "meaning": "設定4以上",
+          "semanticType": "EXACT_CONSTRAINT"
+        },
+        {
+          "label": "ナナオと箒",
+          "meaning": "設定3以上",
+          "semanticType": "EXACT_CONSTRAINT"
+        },
+        {
+          "label": "剣花団",
+          "meaning": "設定6",
+          "semanticType": "EXACT_CONSTRAINT"
+        }
+      ]
+    },
+    {
+      "findingId": "kimberly-char",
+      "label": "キンバリーの紹介キャラ",
+      "sourceIds": [
+        "cross"
+      ],
+      "details": [
+        "キンバリーBONUSの新しい紹介キャラを記録。各キャラの設定別出現率は未確認。"
+      ],
+      "semanticCategories": [
+        {
+          "label": "グレンヴィル",
+          "meaning": "奇数設定示唆",
+          "semanticType": "PROBABILITY_UNKNOWN"
+        },
+        {
+          "label": "エスメラルダ",
+          "meaning": "偶数設定示唆",
+          "semanticType": "PROBABILITY_UNKNOWN"
+        },
+        {
+          "label": "カルステ",
+          "meaning": "高設定示唆",
+          "semanticType": "PROBABILITY_UNKNOWN"
+        },
+        {
+          "label": "カルロス",
+          "meaning": "偶数設定・高設定示唆",
+          "semanticType": "PROBABILITY_UNKNOWN"
+        },
+        {
+          "label": "ゴッドフレイ",
+          "meaning": "奇数設定・高設定示唆",
+          "semanticType": "PROBABILITY_UNKNOWN"
+        },
+        {
+          "label": "オフィーリア",
+          "meaning": "高設定示唆（強）",
+          "semanticType": "PROBABILITY_UNKNOWN"
+        }
+      ]
+    },
+    {
+      "findingId": "prologue-end",
+      "label": "プロローグ終了画面",
+      "sourceIds": [
+        "cross"
+      ],
+      "details": [
+        "プロローグBONUSの終了画面だけ。キンバリー終了のボーナスレベル示唆は混ぜません。"
+      ],
+      "semanticCategories": [
+        {
+          "label": "ナナオ",
+          "meaning": "基本パターン",
+          "semanticType": "PROBABILITY_UNKNOWN"
+        },
+        {
+          "label": "裏切りの月夜",
+          "meaning": "奇数設定示唆",
+          "semanticType": "PROBABILITY_UNKNOWN"
+        },
+        {
+          "label": "オリバーVSグレンヴィル",
+          "meaning": "偶数設定示唆",
+          "semanticType": "PROBABILITY_UNKNOWN"
+        }
+      ]
+    },
+    {
+      "findingId": "ending-voice",
+      "label": "エンディングボイス",
+      "sourceIds": [
+        "overview"
+      ],
+      "details": [
+        "エンディング中のレア役成立時にチャンスボタンを押して確認した新しいボイスだけを記録。"
+      ],
+      "semanticCategories": [
+        {
+          "label": "オリバー",
+          "meaning": "基本パターン",
+          "semanticType": "PROBABILITY_UNKNOWN"
+        },
+        {
+          "label": "ピート",
+          "meaning": "奇数設定示唆",
+          "semanticType": "PROBABILITY_UNKNOWN"
+        },
+        {
+          "label": "ガイ",
+          "meaning": "偶数設定示唆",
+          "semanticType": "PROBABILITY_UNKNOWN"
+        },
+        {
+          "label": "カティ",
+          "meaning": "設定2以上",
+          "semanticType": "EXACT_CONSTRAINT"
+        },
+        {
+          "label": "シェラ",
+          "meaning": "設定4以上",
+          "semanticType": "EXACT_CONSTRAINT"
+        },
+        {
+          "label": "ナナオ",
+          "meaning": "設定6",
+          "semanticType": "EXACT_CONSTRAINT"
+        }
+      ]
+    },
+    {
+      "findingId": "esmeralda-2000",
+      "label": "エスメラルダボイス",
+      "sourceIds": [
+        "esmeralda"
+      ],
+      "details": [
+        "累計2000G台の新しい選択ボイスだけを記録。過去のG数帯を混ぜず、同じ音声を再加算しません。設定別出現率は未確認。"
+      ],
+      "semanticCategories": [
+        {
+          "label": "準備の説明",
+          "meaning": "基本パターン",
+          "semanticType": "PROBABILITY_UNKNOWN"
+        },
+        {
+          "label": "15枚ベルの説明",
+          "meaning": "偶数設定示唆",
+          "semanticType": "PROBABILITY_UNKNOWN"
+        },
+        {
+          "label": "七つのトリガーの説明",
+          "meaning": "高設定示唆",
+          "semanticType": "PROBABILITY_UNKNOWN"
+        },
+        {
+          "label": "デュアル状態の説明",
+          "meaning": "設定2以上",
+          "semanticType": "EXACT_CONSTRAINT"
+        },
+        {
+          "label": "第四魔剣の説明",
+          "meaning": "設定4以上",
+          "semanticType": "EXACT_CONSTRAINT"
+        }
+      ]
+    },
+    {
+      "findingId": "esmeralda-4000",
+      "label": "エスメラルダボイス",
+      "sourceIds": [
+        "esmeralda"
+      ],
+      "details": [
+        "累計4000G台の新しい選択ボイスだけを記録。過去のG数帯を混ぜず、同じ音声を再加算しません。設定別出現率は未確認。"
+      ],
+      "semanticCategories": [
+        {
+          "label": "準備の説明",
+          "meaning": "基本パターン",
+          "semanticType": "PROBABILITY_UNKNOWN"
+        },
+        {
+          "label": "15枚ベルの説明",
+          "meaning": "偶数設定示唆",
+          "semanticType": "PROBABILITY_UNKNOWN"
+        },
+        {
+          "label": "七つのトリガーの説明",
+          "meaning": "高設定示唆",
+          "semanticType": "PROBABILITY_UNKNOWN"
+        },
+        {
+          "label": "デュアル状態の説明",
+          "meaning": "設定2以上",
+          "semanticType": "EXACT_CONSTRAINT"
+        },
+        {
+          "label": "第四魔剣の説明",
+          "meaning": "設定4以上",
+          "semanticType": "EXACT_CONSTRAINT"
+        }
+      ]
+    },
+    {
+      "findingId": "esmeralda-6000",
+      "label": "エスメラルダボイス",
+      "sourceIds": [
+        "esmeralda"
+      ],
+      "details": [
+        "累計6000G台の新しい選択ボイスだけを記録。過去のG数帯を混ぜず、同じ音声を再加算しません。設定別出現率は未確認。"
+      ],
+      "semanticCategories": [
+        {
+          "label": "準備の説明",
+          "meaning": "基本パターン",
+          "semanticType": "PROBABILITY_UNKNOWN"
+        },
+        {
+          "label": "15枚ベルの説明",
+          "meaning": "偶数設定示唆",
+          "semanticType": "PROBABILITY_UNKNOWN"
+        },
+        {
+          "label": "七つのトリガーの説明",
+          "meaning": "高設定示唆",
+          "semanticType": "PROBABILITY_UNKNOWN"
+        },
+        {
+          "label": "デュアル状態の説明",
+          "meaning": "設定2以上",
+          "semanticType": "EXACT_CONSTRAINT"
+        },
+        {
+          "label": "第四魔剣の説明",
+          "meaning": "設定4以上",
+          "semanticType": "EXACT_CONSTRAINT"
+        }
+      ]
+    },
+    {
+      "findingId": "esmeralda-8000",
+      "label": "エスメラルダボイス",
+      "sourceIds": [
+        "esmeralda"
+      ],
+      "details": [
+        "累計8000G台の新しい選択ボイスだけを記録。過去のG数帯を混ぜず、同じ音声を再加算しません。設定別出現率は未確認。"
+      ],
+      "semanticCategories": [
+        {
+          "label": "準備の説明",
+          "meaning": "基本パターン",
+          "semanticType": "PROBABILITY_UNKNOWN"
+        },
+        {
+          "label": "15枚ベルの説明",
+          "meaning": "偶数設定示唆",
+          "semanticType": "PROBABILITY_UNKNOWN"
+        },
+        {
+          "label": "七つのトリガーの説明",
+          "meaning": "高設定示唆",
+          "semanticType": "PROBABILITY_UNKNOWN"
+        },
+        {
+          "label": "デュアル状態の説明",
+          "meaning": "設定2以上",
+          "semanticType": "EXACT_CONSTRAINT"
+        },
+        {
+          "label": "第四魔剣の説明",
+          "meaning": "設定4以上",
+          "semanticType": "EXACT_CONSTRAINT"
+        }
+      ]
+    }
+  ],
+  "sourceIntegrityIssues": []
+}

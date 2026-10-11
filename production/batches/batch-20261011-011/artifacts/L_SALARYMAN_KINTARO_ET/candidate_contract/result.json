@@ -1,0 +1,440 @@
+{
+  "schemaVersion": "candidate-contract-v1",
+  "manifestVersion": "8.5",
+  "batchId": "batch-20261011-011",
+  "machineId": "L_SALARYMAN_KINTARO_ET",
+  "machineName": "サラリーマン金太郎",
+  "evaluationArtifact": {
+    "artifactId": "evaluation-L_SALARYMAN_KINTARO_ET",
+    "kind": "evaluation",
+    "path": "production/batches/batch-20261011-011/artifacts/L_SALARYMAN_KINTARO_ET/evaluation/result.json",
+    "sha256": "cf0453244e329c3140c711693a987455c13def66f1df11ba3fc848a20cf73ff7",
+    "producerWorkId": "wrk_934e7cabc54d4f75"
+  },
+  "eligibilityArtifact": {
+    "artifactId": "eligibility-L_SALARYMAN_KINTARO_ET",
+    "kind": "eligibility",
+    "path": "production/batches/batch-20261011-011/artifacts/L_SALARYMAN_KINTARO_ET/eligibility/result.json",
+    "sha256": "94ddcf008951bc83b5599e983fa873a68da7b0d9191ee9b9e8d8003997a43c30",
+    "producerWorkId": "wrk_2d8fdff44d5a406b"
+  },
+  "candidates": [
+    {
+      "findingId": "bonus-initial",
+      "label": "ボーナス初当たり",
+      "model": "BERNOULLI",
+      "trialUniverse": "NORMAL_GAME_TRIAL",
+      "liveInferenceRoute": "LIVE_CONDITIONAL",
+      "settingDistribution": {
+        "1": "1/417",
+        "2": "1/408",
+        "3": "1/400",
+        "4": "1/387",
+        "5": "1/373",
+        "6": "1/356"
+      },
+      "details": [
+        "通常時の新しい当選だけを記録します。連荘・AT中の継続・引き戻しを足しません。対象外の区間はG数からも除きます。公表資料の集計母数との完全一致は確認していません。"
+      ],
+      "dependencyGroupId": "initial-result-path",
+      "dependencyKind": "CAUSAL_PATH_OVERLAP",
+      "dependencyReason": "同じ当選経路または合算に含まれる結果を重ねて計測するため。",
+      "dependencyFallbackRank": 1,
+      "runtimeInferenceAllowed": true,
+      "dependencyResolution": "PREFERRED_MEMBER",
+      "runtimePolicyBinding": {
+        "metric": "SELECTION_SCORE",
+        "value": 7.5023203337569235,
+        "thresholdSource": "RUNTIME_POLICY"
+      },
+      "suppressedByFeatureIds": []
+    },
+    {
+      "findingId": "at-initial",
+      "label": "AT初当たり",
+      "model": "BERNOULLI",
+      "trialUniverse": "NORMAL_GAME_TRIAL",
+      "liveInferenceRoute": "LIVE_CONDITIONAL",
+      "settingDistribution": {
+        "1": "1/844",
+        "2": "1/813",
+        "3": "1/781",
+        "4": "1/712",
+        "5": "1/641",
+        "6": "1/574"
+      },
+      "details": [
+        "通常時の新しい当選だけを記録します。連荘・AT中の継続・引き戻しを足しません。対象外の区間はG数からも除きます。公表資料の集計母数との完全一致は確認していません。"
+      ],
+      "dependencyGroupId": "initial-result-path",
+      "dependencyKind": "CAUSAL_PATH_OVERLAP",
+      "dependencyReason": "同じ当選経路または合算に含まれる結果を重ねて計測するため。",
+      "dependencyFallbackRank": 2,
+      "runtimeInferenceAllowed": true,
+      "dependencyResolution": "FALLBACK_MEMBER",
+      "runtimePolicyBinding": {
+        "metric": "SELECTION_SCORE",
+        "value": 24.93432445742957,
+        "thresholdSource": "RUNTIME_POLICY"
+      },
+      "suppressedByFeatureIds": [
+        "bonus-initial"
+      ]
+    }
+  ],
+  "dependencyGroups": [
+    {
+      "groupId": "initial-result-path",
+      "resolution": "PREFERRED_WITH_FALLBACK",
+      "members": [
+        "bonus-initial",
+        "at-initial"
+      ],
+      "runtimeInferenceAllowed": true,
+      "preferredFindingId": "bonus-initial",
+      "fallbackOrder": [
+        "bonus-initial",
+        "at-initial"
+      ],
+      "reason": "依存関係がある候補を同時加算せず、観測できた優先Featureを使用し、未観測時だけ次順位のFeatureへ自動フォールバックする。",
+      "selectionRationale": "Researchで明示された優先順位に従い、同一セッションで重複情報を同時加算しない。"
+    }
+  ],
+  "excludedDecisions": [],
+  "blockedItems": [
+    {
+      "blockId": "chance-aggregate",
+      "label": "チャンス目合算",
+      "reason": "判別できないチャンス目を含む公開値です。見えるチャンス目だけを合算の成立回数として使えません。",
+      "reevaluationCondition": "不足している設定別数値または観測手順を示す新しい具体的な公開資料が確認できた場合。",
+      "sourceIds": [
+        "cross"
+      ],
+      "publishedReference": {
+        "1": "1/147.6",
+        "2": "1/146.3",
+        "3": "1/145",
+        "4": "1/143.7",
+        "5": "1/142.5",
+        "6": "1/141.2"
+      }
+    },
+    {
+      "blockId": "conditional-draw",
+      "label": "状態別チャンス目当選",
+      "reason": "通常・高確で当選率が変わり、抽選前の状態と判別できない成立役をすべて数える手順が不足しています。",
+      "reevaluationCondition": "不足している設定別数値または観測手順を示す新しい具体的な公開資料が確認できた場合。",
+      "sourceIds": [
+        "cross"
+      ],
+      "publishedConditionalReference": {
+        "settingOrder": [
+          1,
+          2,
+          3,
+          4,
+          5,
+          6
+        ],
+        "bonusNormalPercent": [
+          37.5,
+          37.9,
+          38.7,
+          39.5,
+          41,
+          42.2
+        ],
+        "bonusHighPercent": [
+          15.2,
+          15.6,
+          16,
+          16.4,
+          16.8,
+          17.2
+        ],
+        "atNormalPercent": [
+          0.8,
+          1.2,
+          1.6,
+          2,
+          2.3,
+          2.7
+        ],
+        "atHighPercent": [
+          30.1,
+          30.5,
+          30.9,
+          31.3,
+          31.6,
+          32
+        ],
+        "runtimeUse": "DISABLED",
+        "sourceIds": [
+          "overview"
+        ]
+      }
+    },
+    {
+      "blockId": "single-bonus",
+      "label": "シングル中のAT抽選",
+      "reason": "正解時の設定別公開値はありますが、抽選前の通常・高確状態を全試行で判別できる条件を確認できません。",
+      "reevaluationCondition": "不足している設定別数値または観測手順を示す新しい具体的な公開資料が確認できた場合。",
+      "sourceIds": [
+        "cross"
+      ],
+      "publishedConditionalReference": {
+        "settingOrder": [
+          1,
+          2,
+          3,
+          4,
+          5,
+          6
+        ],
+        "normalPercent": [
+          1.6,
+          2,
+          2.3,
+          3.1,
+          4.3,
+          5.9
+        ],
+        "highPercent": 19.9,
+        "runtimeUse": "DISABLED",
+        "sourceIds": [
+          "overview"
+        ]
+      }
+    }
+  ],
+  "evidenceCandidates": [
+    {
+      "findingId": "trophy",
+      "label": "トロフィー",
+      "sourceIds": [
+        "cross"
+      ],
+      "details": [
+        "新しく出たトロフィーだけを記録。通常のボーナス画面はATストック示唆のため、設定示唆として混ぜません。"
+      ],
+      "semanticCategories": [
+        {
+          "label": "銅",
+          "meaning": "設定2以上",
+          "semanticType": "EXACT_CONSTRAINT"
+        },
+        {
+          "label": "銀",
+          "meaning": "設定3以上",
+          "semanticType": "EXACT_CONSTRAINT"
+        },
+        {
+          "label": "金",
+          "meaning": "設定4以上",
+          "semanticType": "EXACT_CONSTRAINT"
+        },
+        {
+          "label": "虎",
+          "meaning": "設定5以上",
+          "semanticType": "EXACT_CONSTRAINT"
+        },
+        {
+          "label": "虹",
+          "meaning": "設定6",
+          "semanticType": "EXACT_CONSTRAINT"
+        }
+      ]
+    },
+    {
+      "findingId": "rank-bonus",
+      "label": "ランキング文字色",
+      "sourceIds": [
+        "cross"
+      ],
+      "details": [
+        "新しい終了時のRANK IN文字色だけ。過去ランキングの再閲覧を加算しません。"
+      ],
+      "semanticCategories": [
+        {
+          "label": "白",
+          "meaning": "奇数設定示唆",
+          "semanticType": "PROBABILITY_UNKNOWN"
+        },
+        {
+          "label": "青",
+          "meaning": "偶数設定示唆",
+          "semanticType": "PROBABILITY_UNKNOWN"
+        },
+        {
+          "label": "赤",
+          "meaning": "設定2以上",
+          "semanticType": "EXACT_CONSTRAINT"
+        },
+        {
+          "label": "金",
+          "meaning": "設定4以上",
+          "semanticType": "EXACT_CONSTRAINT"
+        },
+        {
+          "label": "虎",
+          "meaning": "設定6",
+          "semanticType": "EXACT_CONSTRAINT"
+        }
+      ]
+    },
+    {
+      "findingId": "rank-at",
+      "label": "ランキング文字色",
+      "sourceIds": [
+        "cross"
+      ],
+      "details": [
+        "新しい終了時のRANK IN文字色だけ。過去ランキングの再閲覧を加算しません。"
+      ],
+      "semanticCategories": [
+        {
+          "label": "白",
+          "meaning": "奇数設定示唆",
+          "semanticType": "PROBABILITY_UNKNOWN"
+        },
+        {
+          "label": "青",
+          "meaning": "偶数設定示唆",
+          "semanticType": "PROBABILITY_UNKNOWN"
+        },
+        {
+          "label": "赤",
+          "meaning": "設定2以上",
+          "semanticType": "EXACT_CONSTRAINT"
+        },
+        {
+          "label": "金",
+          "meaning": "設定4以上",
+          "semanticType": "EXACT_CONSTRAINT"
+        },
+        {
+          "label": "虎",
+          "meaning": "設定6",
+          "semanticType": "EXACT_CONSTRAINT"
+        }
+      ]
+    },
+    {
+      "findingId": "coins",
+      "label": "獲得枚数表示",
+      "sourceIds": [
+        "cross"
+      ],
+      "details": [
+        "AT中に専用表示を確認したときだけ記録。実際の獲得数だけを確定表示へ代用しません。"
+      ],
+      "semanticCategories": [
+        {
+          "label": "456枚",
+          "meaning": "設定4以上",
+          "semanticType": "EXACT_CONSTRAINT"
+        },
+        {
+          "label": "555枚",
+          "meaning": "設定5以上",
+          "semanticType": "EXACT_CONSTRAINT"
+        },
+        {
+          "label": "666枚",
+          "meaning": "設定6",
+          "semanticType": "EXACT_CONSTRAINT"
+        }
+      ]
+    },
+    {
+      "findingId": "ending",
+      "label": "エンディングボイス",
+      "sourceIds": [
+        "cross"
+      ],
+      "details": [
+        "エンディングのレア役時の新しいボイスだけを記録。キャラとセリフを対応させ、普段の演出を混ぜません。"
+      ],
+      "semanticCategories": [
+        {
+          "label": "金太郎・会社との恋愛",
+          "meaning": "奇数設定示唆",
+          "semanticType": "PROBABILITY_UNKNOWN"
+        },
+        {
+          "label": "金太郎・責任を果たした後",
+          "meaning": "偶数設定示唆",
+          "semanticType": "PROBABILITY_UNKNOWN"
+        },
+        {
+          "label": "竜太",
+          "meaning": "高設定示唆（弱）",
+          "semanticType": "PROBABILITY_UNKNOWN"
+        },
+        {
+          "label": "椎名",
+          "meaning": "高設定示唆（強）",
+          "semanticType": "PROBABILITY_UNKNOWN"
+        },
+        {
+          "label": "大和",
+          "meaning": "設定2否定",
+          "semanticType": "EXACT_CONSTRAINT"
+        },
+        {
+          "label": "三田",
+          "meaning": "設定3否定",
+          "semanticType": "EXACT_CONSTRAINT"
+        },
+        {
+          "label": "黒川",
+          "meaning": "設定2以上",
+          "semanticType": "EXACT_CONSTRAINT"
+        },
+        {
+          "label": "加代",
+          "meaning": "設定2・4・6",
+          "semanticType": "EXACT_CONSTRAINT"
+        },
+        {
+          "label": "美鈴",
+          "meaning": "設定4以上",
+          "semanticType": "EXACT_CONSTRAINT"
+        },
+        {
+          "label": "美々",
+          "meaning": "設定5以上",
+          "semanticType": "EXACT_CONSTRAINT"
+        },
+        {
+          "label": "明美",
+          "meaning": "設定6",
+          "semanticType": "EXACT_CONSTRAINT"
+        }
+      ]
+    },
+    {
+      "findingId": "bonus-end",
+      "label": "ボーナス終了画面",
+      "sourceIds": [
+        "overview"
+      ],
+      "details": [
+        "PUSHで切り替えた新しい終了画面を記録。ATストックだけの示唆画面は設定示唆へ加算しません。"
+      ],
+      "semanticCategories": [
+        {
+          "label": "金太郎・漁師",
+          "meaning": "奇数設定示唆",
+          "semanticType": "PROBABILITY_UNKNOWN"
+        },
+        {
+          "label": "金太郎・真顔",
+          "meaning": "偶数設定示唆",
+          "semanticType": "PROBABILITY_UNKNOWN"
+        }
+      ]
+    }
+  ],
+  "sourceIntegrityIssues": []
+}

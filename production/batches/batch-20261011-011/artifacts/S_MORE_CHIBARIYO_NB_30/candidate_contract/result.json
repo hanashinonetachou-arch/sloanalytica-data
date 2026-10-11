@@ -1,0 +1,121 @@
+{
+  "schemaVersion": "candidate-contract-v1",
+  "manifestVersion": "8.5",
+  "batchId": "batch-20261011-011",
+  "machineId": "S_MORE_CHIBARIYO_NB_30",
+  "machineName": "もっと！チバリヨ-30",
+  "evaluationArtifact": {
+    "artifactId": "evaluation-S_MORE_CHIBARIYO_NB_30",
+    "kind": "evaluation",
+    "path": "production/batches/batch-20261011-011/artifacts/S_MORE_CHIBARIYO_NB_30/evaluation/result.json",
+    "sha256": "09c8a7ec9180bfad2a182f9483ec6fcba158ce81ecfc859d5442b194ed557d92",
+    "producerWorkId": "wrk_2ce0b6c541e247b8"
+  },
+  "eligibilityArtifact": {
+    "artifactId": "eligibility-S_MORE_CHIBARIYO_NB_30",
+    "kind": "eligibility",
+    "path": "production/batches/batch-20261011-011/artifacts/S_MORE_CHIBARIYO_NB_30/eligibility/result.json",
+    "sha256": "d8115c213be01ec7b783b5a6163c54d8ce7a4a722e01b9a14c3cd61e746fd068",
+    "producerWorkId": "wrk_62fd4df8cc384991"
+  },
+  "candidates": [
+    {
+      "findingId": "bonus-initial",
+      "label": "ボーナス初当たり",
+      "model": "BERNOULLI",
+      "trialUniverse": "LOTIS_NON_CHAIN_GAME_TRIAL",
+      "liveInferenceRoute": "LIVE_CONDITIONAL",
+      "settingDistribution": {
+        "1": "1/255",
+        "2": "1/252",
+        "3": "1/237",
+        "4": "1/224",
+        "5": "1/211",
+        "6": "1/202"
+      },
+      "details": [
+        "ボーナス中と連荘を調べる32Gの区間を除き、同じ期間の新しいボーナス当選とG数を記録します。途中着席ではそれ以前の当選を足しません。公表資料の集計母数との完全一致は確認していません。"
+      ],
+      "dependencyGroupId": "initial-result-path",
+      "dependencyKind": "CAUSAL_PATH_OVERLAP",
+      "dependencyReason": "同じ当選経路または合算に含まれる結果を重ねて計測するため。",
+      "dependencyFallbackRank": 1,
+      "runtimeInferenceAllowed": true,
+      "dependencyResolution": "SINGLE_MEMBER_SELECTED",
+      "runtimePolicyBinding": {
+        "metric": "PER_ELIGIBLE_TRIAL_POWER",
+        "value": 0.004764345456516328,
+        "thresholdSource": "RUNTIME_POLICY"
+      }
+    }
+  ],
+  "dependencyGroups": [
+    {
+      "groupId": "initial-result-path",
+      "resolution": "SINGLE_MEMBER_SELECTED",
+      "members": [
+        "bonus-initial"
+      ],
+      "runtimeInferenceAllowed": true,
+      "selectedFindingId": "bonus-initial",
+      "selectionRationale": "他の依存候補は除外され、観測可能な候補が1件だけ残るため単一要素として扱う。設定判別スコア未算出なら既存の試行あたり評価と閾値を維持する。",
+      "reason": "同じ当選系列の別尤度を追加せず、残る1候補だけを既存の採用基準で評価する。"
+    }
+  ],
+  "excludedDecisions": [
+    {
+      "findingId": "weak-cherry-bonus-reference",
+      "label": "弱チェリーの公開当選率",
+      "supportingSourceIds": [
+        "cross"
+      ],
+      "eligibility": "NOT_APPLICABLE",
+      "reason": "参考分布として保存するが設定推測Featureには使用しない。",
+      "ruleRefs": [
+        "manifest-v8.5-reference-only"
+      ],
+      "liveInferenceRoute": "NONE",
+      "userFacingReason": "擬似遊技の弱チェリーからの抽選。規定回数・規定G・別契機と区別した当選結果の観測手順が確定するまで参照のみ。"
+    }
+  ],
+  "blockedItems": [
+    {
+      "blockId": "cherry-occurrence",
+      "label": "チェリー出現率",
+      "reason": "チェリーは擬似遊技で、通常と前兆で出現率が違います。実際のG数とデータカウンタにも差があるため、全区間共通の設定別確率として使いません。",
+      "reevaluationCondition": "不足している設定別数値または観測手順を示す新しい具体的な公開資料が確認できた場合。",
+      "sourceIds": [
+        "cross"
+      ]
+    },
+    {
+      "blockId": "mode-transitions",
+      "label": "モード移行の出現率",
+      "reason": "内部リセットや元のモードを毎回厳密には確認できず、全設定の移行表も不足しています。",
+      "reevaluationCondition": "不足している設定別数値または観測手順を示す新しい具体的な公開資料が確認できた場合。",
+      "sourceIds": [
+        "cross"
+      ]
+    }
+  ],
+  "evidenceCandidates": [
+    {
+      "findingId": "voice",
+      "label": "具志堅ボイス",
+      "sourceIds": [
+        "setting"
+      ],
+      "details": [
+        "ボーナスのテンパイで確認した新しいボイスだけ。停止ボタンごとの再生を別の設定試行に分割しません。"
+      ],
+      "semanticCategories": [
+        {
+          "label": "具志堅用高",
+          "meaning": "高設定示唆",
+          "semanticType": "PROBABILITY_UNKNOWN"
+        }
+      ]
+    }
+  ],
+  "sourceIntegrityIssues": []
+}
