@@ -7,9 +7,9 @@ import {validateAppRuntimeDocument} from '../src/app-runtime-validator.ts';
 const batch='batch-20261010-010';
 const read=(p:string)=>JSON.parse(fs.readFileSync(p,'utf8'));
 for(const [machineId,features,evidence,groups,tabs] of [
- ['S_DANMACHI_GAIDEN_XR',7,10,1,3],
- ['S_MAHOIKU_NB',33,16,6,22],
- ['S_TOARU_RAILGUN_FB',28,21,7,22],
+ ['S_DANMACHI_GAIDEN_XR',7,25,1,3],
+ ['S_MAHOIKU_NB',33,26,6,22],
+ ['S_TOARU_RAILGUN_FB',28,46,7,22],
 ] as const){
  test(machineId+' contextual UI review does not lose numeric inputs or Evidence',()=>{
   const base='batches/'+batch+'/artifacts/'+machineId;
