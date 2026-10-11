@@ -18,6 +18,37 @@ export function validateUiPresentation(policy:any,numeric:any[],evidence:any[]){
  }
  const merged=new Set();for(const merge of policy.evidenceSectionMerges){const s=evidence.find(x=>x.sourceFindingId===merge.findingId);if(!s||!numeric.some(x=>x.id===merge.targetSectionId)||merged.has(merge.findingId))throw Error('UI_PRESENTATION_MERGE_TARGET:'+merge.findingId);merged.add(merge.findingId);}
 }
+/**
+ * Generate presentation-only tabs from explicitly audited observation context.
+ * Never guess an opportunity from a title or trialUniverse. A group requires
+ * matching opportunityId and distinct conditionId values. Legacy documents
+ * without metadata keep their authored tabGroups unchanged.
+ */
+export function completeOpportunityTabGroups(policy:any,sections:any[]){
+ if(!policy)return policy;
+ const out=structuredClone(policy);
+ const assigned=new Set((out.tabGroups??[]).flatMap((g:any)=>(g.tabs??[]).map((t:any)=>t.sectionId)));
+ const candidates=new Map<string,any[]>();
+ for(const section of sections){
+  const context=section.observationContext;
+  if(!context||context.groupingApproved!==true||!context.opportunityId||!context.conditionId||!context.groupTitle||!context.conditionLabel||assigned.has(section.id))continue;
+  const arr=candidates.get(context.opportunityId)??[];arr.push(section);candidates.set(context.opportunityId,arr);
+ }
+ out.tabGroups??=[];
+ const usedIds=new Set(out.tabGroups.map((g:any)=>g.id));
+ for(const [opportunityId,members] of candidates){
+  if(members.length<2)continue;
+  const contexts=members.map((s:any)=>s.observationContext);
+  if(new Set(contexts.map((c:any)=>c.conditionId)).size!==contexts.length)continue;
+  if(new Set(contexts.map((c:any)=>c.conditionLabel)).size!==contexts.length)continue;
+  if(new Set(contexts.map((c:any)=>c.groupTitle)).size!==1)continue;
+  const id='OPPORTUNITY_'+opportunityId;
+  if(usedIds.has(id))throw Error('UI_PRESENTATION_GENERATED_ID_COLLISION:'+id);
+  out.tabGroups.push({id,title:contexts[0].groupTitle,tabs:members.map((s:any)=>({sectionId:s.id,label:s.observationContext.conditionLabel}))});
+  usedIds.add(id);
+ }
+ return out;
+}
 export function applyUiPresentation(sections:any[],policy:any){
  if(!policy)return sections;
  const out=structuredClone(sections);
