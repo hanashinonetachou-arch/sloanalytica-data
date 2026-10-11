@@ -7,6 +7,7 @@ export function validateObservationEvidenceDocument(doc:any,candidate:any,resear
  if(doc?.schemaVersion!=='observation-evidence-v1'||doc?.manifestVersion!=='8.5')fail('HEADER');
  if(doc.batchId!==candidate.batchId||doc.machineId!==candidate.machineId||doc.machineId!==research.machineId)fail('IDENTITY');
  if(!Array.isArray(doc.observations)||!Array.isArray(doc.evidence)||!Array.isArray(doc.sourceReferences)||!Array.isArray(doc.blockedItems)||!Array.isArray(doc.sourceIntegrityIssues))fail('ARRAYS');
+ if(canonical(doc.uiPresentation)!==canonical(research.uiPresentation))fail('UI_PRESENTATION_COPY');
  if(doc.observations.length!==candidate.candidates.length)fail('OBSERVATION_COVERAGE');
  const byId=new Map(doc.observations.map((x:any)=>[x.findingId,x]));const researchBy=new Map((research.findings??[]).map((x:any)=>[x.findingId,x]));
  for(const c of candidate.candidates){
