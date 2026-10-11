@@ -12,3 +12,7 @@ Use the existing Orchestrator stage files, attempts, provenance and repository C
 8. End each completed responsibility stage by publishing its checkpoint. A new Work resumes from the last published valid state, without regenerating outputs or marking device QA complete.
 
 Normal commits include `[skip ci]`. Integration Boundary is the only normal Actions trigger. HUMAN_REQUIRED stays reserved for actual human work; read failures remain recorded external blockers.
+
+## Enforced attempt budget
+
+Batch011 opts into `work-recovery-policy.json`. `Orchestrator` counts failed attempts for the same machine, stage, input fingerprint and contract. Three retryable failures or expired running leases end in existing `FAILED`; the next attempt is rejected after exhaustion, including an expired undispatched lease. A new Work uses the same persisted attempts. Legacy batches without this policy retain their existing behavior. Other timeout values describe bounded operator execution, not Work stream controls.
