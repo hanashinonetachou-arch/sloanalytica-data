@@ -106,7 +106,7 @@ const appendLinkedEvidenceNote=(description:string,featureId:any,links:any)=>{
  const reflection=cats.some((c:any)=>c.semanticType==='EXACT_CONSTRAINT')
   ?'同じ入力から設定確定・設定否定の条件も反映します。'
   :'出現回数の内訳を設定別の割合と比較します。';
- return [description,...(hints.length?['・示唆：'+hints.join('、')]:[]),'・反映：'+reflection+'別の欄への重複入力は不要です。'].join('\n');
+ return [description,...(hints.length?['・示唆：'+hints.join('、')]:[]),'・反映：'+reflection+'別の欄へ重ねて入力する必要はありません。'].join('\n');
 };
 const playDataSourceForTrialUniverse=(trialUniverse:any)=>
  trialUniverse==='TOTAL_GAME_TRIAL'?'PLAY_TOTAL_GAME_DELTA':
