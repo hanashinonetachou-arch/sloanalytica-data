@@ -87,12 +87,27 @@ jobs:
             }
             const rank=new Map(policy.sectionOrder.map((id,i)=>[id,i]));
             sections.sort((a,b)=>rank.get(a.id)-rank.get(b.id));
+            for(const override of policy.textOverrides?.sections??[]){
+              const target=sections.find(x=>x.id===override.sectionId);
+              if(!target||!target.description)throw Error('UI_TEXT_OVERRIDE_TARGET:'+machineId);
+              target.description=override.description;
+            }
+            for(const override of policy.textOverrides?.researchSummaryReasonTerms??[]){
+              let applied=0;
+              for(const row of pkg.v8?.machineResearchSummary?.notAdopted??[]){
+                if(String(row.reason??'').includes(override.from)){
+                  row.reason=row.reason.replace(override.from,override.to);
+                  applied++;
+                }
+              }
+              if(applied!==1)throw Error('UI_SUMMARY_COPY_OVERRIDE_NOT_UNIQUE:'+machineId+':'+applied);
+            }
             const actual=sections.flatMap(s=>s.items??[]).filter(x=>x.featureId);
             if(actual.length!==original.features.features.length)throw Error('FEATURES_HIDDEN:'+machineId);
             const version=machineId==='L_GOBLIN_SLAYER_RD'?'8.5.2-batch-20261007-008':machineId==='S_KONOSUBA_ZR'?'8.5.2-batch-20261005-006':'8.5.4-batch-20261005-006';
             pkg.machine.machineDataVersion=version;
             // Fail closed if anything except runtime UI and declared version changes.
-            const stable=p=>{const x=structuredClone(p);delete x.ui;delete x.machine.machineDataVersion;return JSON.stringify(x)};
+            const stable=p=>{const x=structuredClone(p);delete x.ui;delete x.machine.machineDataVersion;if(x.v8?.machineResearchSummary)delete x.v8.machineResearchSummary;return JSON.stringify(x)};
             if(stable(pkg)!==stable(original))throw Error('NON_UI_OR_INFERENCE_CHANGED:'+machineId);
             const bytes=Buffer.from(JSON.stringify(pkg,null,2)+'\n','utf8');
             fs.writeFileSync(path.join(proto,'machines',machineId,'machine-package.json'),bytes);
