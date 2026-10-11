@@ -2,6 +2,7 @@ import fs from 'node:fs';import path from 'node:path';import {pathToFileURL} fro
 export const QA_REQUIRED_STAGES=['CANONICAL_UI','MACHINE_DATA','RUNTIME_POLICY','RUNTIME_PROJECTION','APP_RUNTIME','DISTRIBUTION'] as const;
 const fail=(m:string):never=>{throw new Error('QA_READINESS_FAILED:'+m)};
 const sameStrings=(a:unknown,b:unknown)=>Array.isArray(a)&&Array.isArray(b)&&a.length===b.length&&a.every((x,i)=>typeof x==='string'&&x===b[i]);
+const linkedCategoryMeaning=(category:any)=>category?.semanticType==='PROBABILITY_BACKED'&&['設定別の公開出現率で評価','観測回数'].includes(category?.meaning)?undefined:category?.meaning;
 const sameEvidencePresentation=(details:unknown,categories:any[])=>Array.isArray(details)&&Array.isArray(categories)&&details.length===categories.length&&details.every((raw:any,i:number)=>{
  if(typeof raw!=='string')return false;const c=categories[i];if(!c||typeof c.label!=='string')return false;if(c.label===raw)return true;
  return typeof c.meaning==='string'&&`${c.label}：${c.meaning}`===raw;
@@ -34,7 +35,7 @@ export function validateMachineQaReadiness(machineId:string,stageStates:Record<s
   const sections=(pkg?.ui?.v8Sections??[]).filter((s:any)=>(s.items??[]).some((n:any)=>n.featureId===ids[0]&&n.interaction?.type==='CATEGORY_COUNTERS'));
   if(sections.length!==1)return undefined;
   const categories=sections[0].items.flatMap((n:any)=>n.featureId===ids[0]?n.interaction?.categories??[]:[]);
-  if(categories.length!==cats.length||categories.some((c:any,i:number)=>c.label!==cats[i].label||c.meaning!==cats[i].meaning||!pkg.inputs?.inputs?.some((input:any)=>input.id===c.inputId)))return undefined;
+  if(categories.length!==cats.length||categories.some((c:any,i:number)=>c.label!==cats[i].label||c.meaning!==linkedCategoryMeaning(cats[i])||!pkg.inputs?.inputs?.some((input:any)=>input.id===c.inputId)))return undefined;
   for(const def of defs.filter((e:any)=>e.sourceEvidenceRefs?.some((id:string)=>ref.evidenceItems.some((item:any)=>item.findingId===id)))){
    const index=Number(String(def.id).split('__').pop())-1;
    if(!categories[index]||def.inputId!==categories[index].inputId)fail(machineId+':LINKED_EVIDENCE_INPUT_MISMATCH');
@@ -54,7 +55,7 @@ export function validateMachineQaReadiness(machineId:string,stageStates:Record<s
   for(const item of items){const cats=Array.isArray(item?.semanticCategories)?item.semanticCategories:[];if(cats.length===0||cats.some((x:any)=>typeof x?.label!=='string'||!x.label.trim()||!['EXACT_CONSTRAINT','PROBABILITY_BACKED','PROBABILITY_UNKNOWN','DISPLAY_ONLY','BLOCK'].includes(x?.semanticType))||(cats.some((x:any)=>x.meaning!==undefined)?cats.some((x:any)=>typeof x.meaning!=='string'||!x.meaning.trim()):cats.length!==item.details.length||cats.some((x:any,i:number)=>x.label!==item.details[i])))fail(machineId+':EVIDENCE_SEMANTICS:'+String(ref?.id??'UNKNOWN'));}
   const section=uiEvidence.find((s:any)=>s?.id===ref?.id)??linkedSectionFor(ref);
   const categories=(section?.items??[]).flatMap((node:any)=>node?.interaction?.type==='CATEGORY_COUNTERS'?(node?.interaction?.categories??[]).map((c:any)=>c?.label):[]);
-  const categoryDetails=items.flatMap((item:any)=>item.semanticCategories.map((c:any)=>c.meaning?`${c.label}：${c.meaning}`:c.label));
+  const linked=Boolean(linkedSectionFor(ref));const categoryDetails=items.flatMap((item:any)=>item.semanticCategories.map((c:any)=>{const meaning=linked?linkedCategoryMeaning(c):c.meaning;return meaning?`${c.label}：${meaning}`:c.label}));
   if(!sameEvidencePresentation(categoryDetails,(section?.items??[]).flatMap((node:any)=>node?.interaction?.type==='CATEGORY_COUNTERS'?(node?.interaction?.categories??[]):[])))fail(machineId+':EVIDENCE_CATEGORY_MISMATCH:'+String(ref?.id??'UNKNOWN'));
  }
  if(renderReport?.schemaVersion!=='rendered-ui-validation-v1'||renderReport?.machineId!==machineId)fail(machineId+':RENDER_REPORT_IDENTITY');
