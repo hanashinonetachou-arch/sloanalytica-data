@@ -9,7 +9,7 @@ test('Shaman King observation context tabs preserve all inference and evidence',
  const projection=read(base+'/runtime_projection/result.json');
  const stage=read('batches/batch-20261010-010/machines/L_SHAMANKING_SS/stages/RUNTIME_PROJECTION.json');
  const runtime=buildAppRuntime(projection,stage.authoritativeOutputRef),pkg=runtime.package;
- assert.equal(pkg.machine.machineDataVersion,'8.5.2-batch-20261010-010');
+ assert.equal(pkg.machine.machineDataVersion,'8.5.3-batch-20261010-010');
  const sections=pkg.ui.v8Sections;
  assert.deepEqual(sections.map((s:any)=>s.id),projection.runtimeUi.uiPresentation.sectionOrder);
  for(const [id,length] of [['SHAMAN_FORE',6],['SHAMAN_CZ_TYPE',2],['SHAMAN_CZ_WIN',4],['SHAMAN_HP',4],['SHAMAN_PRELIM',3],['SHAMAN_ENDING',2]] as const){
