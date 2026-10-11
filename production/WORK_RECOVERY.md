@@ -16,3 +16,9 @@ Normal commits include `[skip ci]`. Integration Boundary is the only normal Acti
 ## Enforced attempt budget
 
 Batch011 opts into `work-recovery-policy.json`. `Orchestrator` counts failed attempts for the same machine, stage, input fingerprint and contract. Three retryable failures or expired running leases end in existing `FAILED`; the next attempt is rejected after exhaustion, including an expired undispatched lease. A new Work uses the same persisted attempts. Legacy batches without this policy retain their existing behavior. Other timeout values describe bounded operator execution, not Work stream controls.
+
+## Distribution catalog timestamp gate
+
+At every MachineData integration, preserve each entry's original `addedAt` and set `updatedAt` when the package bytes change. Reuse the existing distribution helper `tools/catalog-update-timestamp.mjs` (`resolveCatalogTimestamps`) with the previous catalog entry and actual new package SHA256; do not hand-build a replacement entry that drops timestamps. Retain `updatedAt` on unchanged republishes. Metadata repair of a missed timestamp must be explicit and recorded separately from a package change.
+
+Before advancing the distribution ref, run the actual App `getVisibleMachineCatalog(..., {sort:'RECENTLY_UPDATED'})` against the prepared catalog. Verify the just-updated Batch appears at the front, and save the result under Batch validation. Catalog publication, Pages completion and fetched public catalog confirmation are one Integration Boundary. Sorting by date never changes the canonical machine-production selection order.
