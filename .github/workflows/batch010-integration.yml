@@ -49,11 +49,11 @@ jobs:
         working-directory: prototype
         run: npm ci
 
-      - name: Publish all ten Batch010 packages
+      - name: Publish Arifureta device QA repair
         shell: bash
         run: |
           set -euo pipefail
-          MACHINES="S_SUPER_RIO_ACE_CC S_PERSONA5_FR L_ARIFURETA_JA L_SHAMANKING_SS L_SUPER_BLACKJACK_SLDC L_SHIMAMUSUME_L2 S_MAHOIKU_NB S_DANMACHI_GAIDEN_XR S_TEKKEN4_ULTIMATE_DEVIL_TCD S_TOARU_RAILGUN_FB"
+          MACHINES="L_ARIFURETA_JA"
           MACHINES="$MACHINES" node <<'NODE'
           const fs=require('fs'),path=require('path'),crypto=require('crypto');
           const batchId='batch-20261010-010',machines=process.env.MACHINES.split(/\s+/).filter(Boolean);
@@ -67,6 +67,7 @@ jobs:
             const pkg=app.package,entry=byId.get(machineId); if(!entry)throw new Error('CATALOG_ENTRY_MISSING:'+machineId);
             pkg.machine.introductionDate=entry.introductionDate;pkg.machine.machineType=entry.machineType;pkg.machine.gameType=entry.gameType;
             const bytes=Buffer.from(JSON.stringify(pkg,null,2)+'\n','utf8');
+            if(machineId==='L_ARIFURETA_JA'&&sha(bytes)!=='aa9bbd4db60d4a0873eca8be6392fca4a1b58c7d981cf198ce6d90e357de688d')throw new Error('QA_PACKAGE_HASH_MISMATCH');
             const target=path.join(proto,'machines',machineId,'machine-package.json');fs.mkdirSync(path.dirname(target),{recursive:true});fs.writeFileSync(target,bytes);
             const caps=[];for(const f of pkg.features?.features??[]){const model=String(f.modelType??'').toLowerCase();if(model==='binomial'&&!caps.includes('binomial'))caps.push('binomial');if(model==='multinomial'&&!caps.includes('multinomial'))caps.push('multinomial');}
             if((pkg.evidence?.references??[]).length&&!caps.includes('evidence'))caps.push('evidence');
@@ -81,8 +82,8 @@ jobs:
           node tools/apply-machine-identity-classification.mjs --verify
           git config user.name github-actions[bot]
           git config user.email 41898282+github-actions[bot]@users.noreply.github.com
-          git add catalog.json machines/S_SUPER_RIO_ACE_CC/machine-package.json machines/S_PERSONA5_FR/machine-package.json machines/L_ARIFURETA_JA/machine-package.json machines/L_SHAMANKING_SS/machine-package.json machines/L_SUPER_BLACKJACK_SLDC/machine-package.json machines/L_SHIMAMUSUME_L2/machine-package.json machines/S_MAHOIKU_NB/machine-package.json machines/S_DANMACHI_GAIDEN_XR/machine-package.json machines/S_TEKKEN4_ULTIMATE_DEVIL_TCD/machine-package.json machines/S_TOARU_RAILGUN_FB/machine-package.json
-          git commit -m "Publish Batch 010 Batch010 [skip ci]"
+          git add catalog.json machines/L_ARIFURETA_JA/machine-package.json
+          git commit -m "Publish Arifureta QA repair revision2 [skip ci]"
           git push origin HEAD:prototype-multi-machine
           echo "BATCH009_COMMIT=$(git rev-parse HEAD)" >> "$GITHUB_ENV"
 
@@ -108,7 +109,7 @@ jobs:
           set -euo pipefail
           node <<'NODE'
           const fs=require('fs'),path=require('path');const metadata=JSON.parse(fs.readFileSync(process.env.RUNNER_TEMP+'/batch010-all-metadata.json','utf8'));
-          const doc={batchId:'batch-20261010-010',integration:{repository:'hanashinonetachou-arch/sloanalytica-data',branch:'prototype-multi-machine',commit:process.env.BATCH009_COMMIT,packagePath:'',catalogPath:'catalog.json'},packages:metadata,checks:{catalogIntegrity:true,pagesDeployment:{runId:Number(process.env.BATCH009_PAGES_RUN_ID),conclusion:'success'},uxContractAudit:{runId:Number(process.env.GITHUB_RUN_ID),conclusion:'success'},machineIdentityConsistency:{runId:Number(process.env.GITHUB_RUN_ID),conclusion:'success',batchMachineVerified:true}}};
+          const doc={batchId:'batch-20261010-010',integration:{repository:'hanashinonetachou-arch/sloanalytica-data',branch:'prototype-multi-machine',commit:process.env.BATCH009_COMMIT,packagePath:'',catalogPath:'catalog.json'},packages:{...JSON.parse(fs.readFileSync(path.resolve('production-state/production/batches/batch-20261010-010/distribution-repair-attestation.json'),'utf8')).packages,...metadata},checks:{catalogIntegrity:true,pagesDeployment:{runId:Number(process.env.BATCH009_PAGES_RUN_ID),conclusion:'success'},uxContractAudit:{runId:Number(process.env.GITHUB_RUN_ID),conclusion:'success'},machineIdentityConsistency:{runId:Number(process.env.GITHUB_RUN_ID),conclusion:'success',batchMachineVerified:true}}};
           fs.writeFileSync(path.resolve('production-state/production/batches/batch-20261010-010/distribution-repair-attestation.json'),JSON.stringify(doc,null,2)+'\n');
           NODE
           cd production-state/production
