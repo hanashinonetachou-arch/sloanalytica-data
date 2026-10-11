@@ -3,7 +3,19 @@ export function validateUiPresentation(policy:any,numeric:any[],evidence:any[]){
  if(!Array.isArray(policy.hiddenDerivedFindingIds)||!Array.isArray(policy.sectionOrder)||!Array.isArray(policy.evidenceSectionMerges))throw Error('UI_PRESENTATION_SHAPE');
  for(const id of policy.hiddenDerivedFindingIds){const s=numeric.find(x=>x.sourceFindingId===id);if(!s||(s.inputs??[]).find((x:any)=>x.role==='success')?.derivedCalculation!=='sum')throw Error('UI_PRESENTATION_HIDE_REQUIRES_DERIVED:'+id);}
  if(new Set(policy.sectionOrder).size!==policy.sectionOrder.length)throw Error('UI_PRESENTATION_ORDER_DUPLICATE');
- for(const g of policy.tabGroups??[]){const ids=g.tabs?.map((t:any)=>t.sectionId);if(!g.id||!g.title||!Array.isArray(ids)||ids.length<2||new Set(ids).size!==ids.length||g.tabs.some((t:any)=>!t.label||![...numeric,...evidence].some((s:any)=>s.id===t.sectionId)))throw Error('UI_PRESENTATION_TABS');}
+ // A section may be presented in one tab group only.  These checks protect
+ // distinct input/evidence identities; grouping is strictly a view operation.
+ const groupIds=new Set<string>(),tabbedSections=new Set<string>();
+ const sourceSections=[...numeric,...evidence];
+ if(new Set(sourceSections.map((s:any)=>s.id)).size!==sourceSections.length)throw Error('UI_PRESENTATION_SECTION_ID_DUPLICATE');
+ for(const g of policy.tabGroups??[]){
+  const tabs=g.tabs,ids=Array.isArray(tabs)?tabs.map((t:any)=>t.sectionId):[];
+  if(!g.id||!g.title||!Array.isArray(tabs)||ids.length<2||new Set(ids).size!==ids.length||tabs.some((t:any)=>!t.label||!sourceSections.some((s:any)=>s.id===t.sectionId)))throw Error('UI_PRESENTATION_TABS');
+  if(groupIds.has(g.id))throw Error('UI_PRESENTATION_GROUP_ID_DUPLICATE:'+g.id);
+  groupIds.add(g.id);
+  if(new Set(tabs.map((t:any)=>t.label)).size!==tabs.length)throw Error('UI_PRESENTATION_TAB_LABEL_DUPLICATE:'+g.id);
+  for(const id of ids){if(tabbedSections.has(id))throw Error('UI_PRESENTATION_SECTION_IN_MULTIPLE_GROUPS:'+id);tabbedSections.add(id);}
+ }
  const merged=new Set();for(const merge of policy.evidenceSectionMerges){const s=evidence.find(x=>x.sourceFindingId===merge.findingId);if(!s||!numeric.some(x=>x.id===merge.targetSectionId)||merged.has(merge.findingId))throw Error('UI_PRESENTATION_MERGE_TARGET:'+merge.findingId);merged.add(merge.findingId);}
 }
 export function applyUiPresentation(sections:any[],policy:any){
