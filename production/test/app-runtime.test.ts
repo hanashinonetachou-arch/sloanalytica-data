@@ -65,7 +65,7 @@ test('sanitizes internal terminology from blocked summary and feature rationale'
  const d=buildAppRuntime(p,ref);const summary=d.package.v8.machineResearchSummary;const rationale=d.package.features.features[0].selectionRationale;
  const visible=[...(summary.adopted??[]).flatMap((x:any)=>[x.label,x.reason]),...(summary.notAdopted??[]).flatMap((x:any)=>[x.label,x.reason,x.reevaluationCondition]),...(summary.unresolved??[]).flatMap((x:any)=>[x.label,x.reason]),...Object.values(rationale)].filter(Boolean).join(' ');
  assert.doesNotMatch(visible,/likelihood|joint model|dependency model|candidate contract|runtime policy|research|evaluation/i);
- assert.match(visible,/数値推測/);assert.match(visible,/要素を同時に扱う統計モデル/);assert.match(visible,/採用条件/);
+ assert.match(visible,/数値推測/);assert.match(visible,/要素を同時に扱う統計モデル/);assert.match(visible,/設定1 1\/200、設定2 1\/150/);
 });
 
 test('structured Evidence categories survive to UI and only exact categories constrain settings',()=>{

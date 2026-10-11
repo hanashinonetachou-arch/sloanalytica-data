@@ -1,3 +1,4 @@
+import {concreteAdoptionReason,isGenericAdoptionReason} from './adoption-reason.ts';
 import {appRuntimeMachineDataVersion,categoricalProbabilityRow,evidenceCategoryRecords,resolveEvidenceInputLinks} from './app-runtime-builder.ts';
 export const APP_RUNTIME_VALIDATOR_CONTRACT='app-runtime-v1';
 const canonical=(v:any):string=>Array.isArray(v)?'['+v.map(canonical).join(',')+']':v&&typeof v==='object'?'{'+Object.keys(v).sort().map(k=>JSON.stringify(k)+':'+canonical(v[k])).join(',')+'}':JSON.stringify(v);
@@ -68,6 +69,7 @@ export function validateAppRuntimeDocument(doc:any,projection:any,projectionArti
   const item=(s.items??[])[0];if(item?.interaction?.type!=='CATEGORY_COUNTERS'||item?.interaction?.categoryCoverage!=='NON_EXHAUSTIVE'||item?.interaction?.totalOpportunities!=='NONE'||!Array.isArray(item?.interaction?.categories)||item.interaction.categories.length===0)fail('EVIDENCE_UI_INPUT');
  }
  const summary=p.v8?.machineResearchSummary;if(!summary)fail('V8_SUMMARY');
+ for(const entry of summary.adopted??[]){if(isGenericAdoptionReason(entry.reason)||entry.reason!==concreteAdoptionReason(p,entry.featureId))fail('ADOPTION_REASON:'+entry.featureId);}
  for(const x of summary.notAdopted??[]){const label=String(x?.label??'').trim();const featureId=String(x?.featureId??'').trim();if(!label||label==='設定推測要素'||label==='調査継続項目'||(featureId&&label===featureId))fail('SUMMARY_LABEL:'+featureId);if(typeof x?.reason!=='string'||!x.reason.trim())fail('SUMMARY_REASON:'+featureId);}
  const rejectedIds=new Set((summary.notAdopted??[]).map((x:any)=>x.featureId));
  for(const x of projection.nonRuntimeCandidates??[])if(!rejectedIds.has(x.findingId))fail('SUMMARY_NON_RUNTIME_MISSING:'+x.findingId);
