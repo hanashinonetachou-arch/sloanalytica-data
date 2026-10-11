@@ -1,12 +1,16 @@
 {
   "schemaVersion": 1,
+  "provenance": {
+    "manifestVersion": "8.5",
+    "generationPath": "V8_5_PRODUCTION_PIPELINE",
+    "legacyOracleUsed": false
+  },
   "machine": {
     "schemaVersion": "2.0.0",
     "machineId": "S_MORE_CHIBARIYO_NB_30",
-    "machineDataVersion": "0.1.0",
+    "machineDataVersion": "8.5.1-batch-20261011-011",
     "displayName": "もっと！チバリヨ-30",
-    "modelName": "SもっとチバリヨNB-30",
-    "manufacturer": "ネット株式会社",
+    "modelName": "もっと！チバリヨ-30",
     "settings": [
       "SET_1",
       "SET_2",
@@ -28,49 +32,52 @@
     "schemaVersion": "2.0.0",
     "inputs": [
       {
-        "id": "INP_NORMAL_GAMES",
-        "name": "通常ゲーム数",
+        "id": "bonus-initial.eligibleTrialCount",
+        "name": "連荘中を除くゲーム数",
+        "category": "V8_NUMERIC",
         "type": "integer",
-        "category": "NUMERIC",
         "unit": "G",
-        "displayOrder": 10,
-        "inferenceRole": "INCLUDE_PRIMARY",
-        "defaultValue": null,
-        "observationScope": "SELF_PLAY",
-        "minimum": 0
+        "defaultValue": 0,
+        "minimum": 0,
+        "displayOrder": 1,
+        "inferenceRole": "INCLUDE_SUPPORT"
       },
       {
-        "id": "INP_BONUS_FIRST_HIT_COUNT",
-        "name": "ボーナス初当り",
+        "id": "bonus-initial.successCount",
+        "name": "ボーナス初当たり回数",
+        "category": "V8_NUMERIC",
         "type": "counter",
-        "category": "NUMERIC",
         "unit": "回",
-        "displayOrder": 11,
-        "inferenceRole": "INCLUDE_PRIMARY",
-        "defaultValue": null,
-        "parentInputId": "INP_NORMAL_GAMES",
-        "minimum": 0
+        "defaultValue": 0,
+        "minimum": 0,
+        "displayOrder": 2,
+        "parentInputId": "bonus-initial.eligibleTrialCount",
+        "inferenceRole": "INCLUDE_SUPPORT"
+      },
+      {
+        "id": "REF_voice_1",
+        "name": "具志堅用高：高設定示唆",
+        "category": "EVIDENCE_REFERENCE",
+        "type": "counter",
+        "unit": "回",
+        "defaultValue": 0,
+        "minimum": 0,
+        "displayOrder": 3,
+        "inferenceRole": "DISPLAY_ONLY"
       }
     ]
   },
   "features": {
-    "schemaVersion": "2.0.0",
+    "version": "8.5-runtime",
     "features": [
       {
-        "featureId": "FEAT_BONUS_FIRST_HIT",
-        "name": "ボーナス初当り",
-        "adoptionCategory": "INCLUDE_PRIMARY",
+        "featureId": "bonus-initial",
+        "name": "ボーナス初当たり",
+        "trialUniverse": "LOTIS_NON_CHAIN_GAME_TRIAL",
+        "adoptionCategory": "INCLUDE_SUPPORT",
         "calculationRole": "PROBABILITY",
         "probabilityEngineUsage": true,
-        "modelType": "binomial",
-        "minimumSample": 10159,
-        "sampleRecommendation": 30476,
-        "reliabilityProfile": {
-          "weight": 1
-        },
-        "denominatorInputId": "INP_NORMAL_GAMES",
-        "numeratorInputId": "INP_BONUS_FIRST_HIT_COUNT",
-        "displayFormat": "ratio_1_over_n",
+        "denominatorInputId": "bonus-initial.eligibleTrialCount",
         "probabilities": {
           "SET_1": 0.00392156862745098,
           "SET_2": 0.003968253968253968,
@@ -79,130 +86,251 @@
           "SET_5": 0.004739336492890996,
           "SET_6": 0.0049504950495049506
         },
-        "sourceEvidenceRefs": [
-          "SRC_PWORLD",
-          "SRC_HAZUSE",
-          "SRC_NANAPRESS",
-          "SRC_HISSHOBON",
-          "SRC_VISTA"
-        ]
+        "selectionRationale": {
+          "summary": "設定推測に採用された要素です。",
+          "adoptionReason": "採用条件を満たし、実戦で観測できる設定差を使用します。",
+          "shortTermReason": "標本が少ない間は結果の振れが大きくなります。",
+          "longTermReason": "観測数が増えるほど設定別の比較が安定します。"
+        },
+        "modelType": "binomial",
+        "numeratorInputId": "bonus-initial.successCount",
+        "displayFormat": "percentage"
+      }
+    ],
+    "runtimeProjection": [
+      {
+        "featureId": "bonus-initial",
+        "runtimeStatus": "ACTIVE",
+        "metric": "PER_ELIGIBLE_TRIAL_POWER",
+        "metricValue": 0.004764345456516328,
+        "importance": "微小"
       }
     ]
   },
   "evidence": {
-    "version": "1.0.0",
+    "version": "8.5-runtime",
     "evidences": [],
-    "sources": [
+    "references": [
       {
-        "id": "SRC_NET_OFFICIAL",
-        "classification": "OFFICIAL",
-        "pageName": "もっと！チバリヨ-30・25 製品情報",
-        "url": "https://www.net-fun.co.jp/product/page/2",
-        "checkedAt": "2026-08-27"
-      },
-      {
-        "id": "SRC_PWORLD",
-        "classification": "ANALYSIS",
-        "pageName": "もっと!チバリヨ-30",
-        "url": "https://www.p-world.co.jp/machine/database/9728",
-        "checkedAt": "2026-08-27"
-      },
-      {
-        "id": "SRC_HAZUSE",
-        "classification": "ANALYSIS",
-        "pageName": "もっと！チバリヨ-30",
-        "url": "https://hazuse.com/machine/pachislot/1S1924/genre/201/",
-        "checkedAt": "2026-08-27"
-      },
-      {
-        "id": "SRC_NANAPRESS",
-        "classification": "ANALYSIS",
-        "pageName": "もっと！チバリヨ-30 設定差のある要素や設定示唆演出まとめ",
-        "url": "https://nana-press.com/kaiseki/machine/473/12914/",
-        "checkedAt": "2026-08-27"
-      },
-      {
-        "id": "SRC_HISSHOBON",
-        "classification": "ANALYSIS",
-        "pageName": "もっと！チバリヨ-30 基本スペック・設定看破ポイント",
-        "url": "https://p.hisshobon.jp/machine/4001/1/92779",
-        "checkedAt": "2026-08-27"
-      },
-      {
-        "id": "SRC_VISTA",
-        "classification": "ANALYSIS",
-        "pageName": "もっと！チバリヨ-30 機種情報",
-        "url": "https://www.pachinkovista.com/pfactory/model.php?nid=22979",
-        "checkedAt": "2026-08-27"
+        "id": "EVI_voice",
+        "sourceFindingId": "voice",
+        "title": "具志堅ボイス",
+        "kind": "EVIDENCE",
+        "collapsible": true,
+        "defaultExpanded": false,
+        "description": "具志堅ボイスを確認したときに、該当する項目を1回加算して記録します。\n・注意：ボーナスのテンパイで確認した新しいボイスだけ。停止ボタンごとの再生を別の設定試行に分割しません\n・反映：設定別出現率が未確認の項目は記録のみです。出現率確認後は設定推測へ反映できる可能性があります",
+        "descriptionPresentation": {
+          "collapsible": true,
+          "label": "説明",
+          "defaultExpanded": false
+        },
+        "runtimePolicyControlled": false,
+        "evidenceItems": [
+          {
+            "findingId": "voice",
+            "label": "具志堅ボイス",
+            "sourceIds": [
+              "setting"
+            ],
+            "details": [
+              "ボーナスのテンパイで確認した新しいボイスだけ。停止ボタンごとの再生を別の設定試行に分割しません。"
+            ],
+            "semanticType": "PROBABILITY_UNKNOWN",
+            "semanticCategories": [
+              {
+                "label": "具志堅用高",
+                "meaning": "高設定示唆",
+                "semanticType": "PROBABILITY_UNKNOWN"
+              }
+            ],
+            "runtimePolicyControlled": false,
+            "status": "SOURCE_REFERENCED",
+            "interaction": "REFERENCE_ONLY"
+          }
+        ]
       }
     ]
   },
+  "blockedItems": [
+    {
+      "blockId": "cherry-occurrence",
+      "label": "チェリー出現率",
+      "reason": "チェリーは擬似遊技で、通常と前兆で出現率が違います。実際のG数とデータカウンタにも差があるため、全区間共通の設定別確率として使いません。",
+      "reevaluationCondition": "不足している設定別数値または観測手順を示す新しい具体的な公開資料が確認できた場合。",
+      "sourceIds": [
+        "cross"
+      ]
+    },
+    {
+      "blockId": "mode-transitions",
+      "label": "モード移行の出現率",
+      "reason": "内部リセットや元のモードを毎回厳密には確認できず、全設定の移行表も不足しています。",
+      "reevaluationCondition": "不足している設定別数値または観測手順を示す新しい具体的な公開資料が確認できた場合。",
+      "sourceIds": [
+        "cross"
+      ]
+    }
+  ],
   "ui": {
-    "sections": [
+    "schemaVersion": "v8.5-runtime-ui-v1",
+    "contractVersion": "runtime-ui-v8",
+    "source": "CANONICAL_UI",
+    "sourceSchemaVersion": "canonical-ui-v1",
+    "manifestRevision": "8.5",
+    "playInfo": {
+      "visible": true,
+      "collapsible": false,
+      "mode": "TOTAL_ONLY",
+      "sessionFields": [
+        {
+          "id": "date",
+          "label": "日付",
+          "mode": "DATE"
+        },
+        {
+          "id": "storeName",
+          "label": "店舗名",
+          "mode": "TEXT"
+        },
+        {
+          "id": "machineNumber",
+          "label": "台番号",
+          "mode": "TEXT"
+        }
+      ],
+      "startFields": [
+        {
+          "id": "startTotalGames",
+          "label": "着席時 総ゲーム数",
+          "mode": "NUMBER",
+          "directNumeric": true
+        }
+      ],
+      "currentFields": [
+        {
+          "id": "currentTotalGames",
+          "label": "現在 総ゲーム数",
+          "mode": "NUMBER",
+          "directNumeric": true
+        }
+      ],
+      "difference": {
+        "autoCalculate": true
+      },
+      "useDifference": {
+        "label": "着席時との差分を使用",
+        "defaultWhenStartNormalGamesPresent": true
+      },
+      "exclusionGames": {
+        "visible": true,
+        "label": "除外ゲーム数",
+        "quickAdd": [
+          50
+        ],
+        "base": "TOTAL",
+        "resultLabel": "除外後の実戦ゲーム数",
+        "description": "連チャンゾーン中に消化したゲーム数を入力してください。総ゲーム数から差し引きます。ゾーン内の当選はすべて連チャンとして初当たりから除外します。"
+      }
+    },
+    "accordion": {
+      "enabled": true,
+      "singleOpen": true
+    },
+    "quickInput": {
+      "enabled": false
+    },
+    "v8Sections": [
       {
-        "id": "UI_DESIGN_1",
-        "title": "通常時・ボーナス",
-        "displayOrder": 1,
+        "id": "OBS_bonus-initial",
+        "title": "ボーナス初当たり",
+        "collapsible": true,
+        "defaultExpanded": false,
+        "description": "対象となる機会のうち、ボーナス初当たりが実際に起きた割合を設定別に比較します。\n・注意：途中着席ではそれ以前の当選を足しません。\n・注意：公表資料の集計母数との完全一致は確認していません。",
+        "descriptionPresentation": {
+          "collapsible": true,
+          "label": "説明",
+          "defaultExpanded": false
+        },
         "items": [
           {
-            "type": "input",
-            "inputId": "INP_NORMAL_GAMES",
-            "label": "通常ゲーム数",
-            "widget": "number",
-            "gridSpan": 12,
-            "config": {
-              "directInput": true
-            }
-          },
+            "id": "NODE_bonus-initial",
+            "featureId": "bonus-initial",
+            "title": "ボーナス初当たり",
+            "inputs": [
+              {
+                "id": "bonus-initial.eligibleTrialCount",
+                "label": "連荘中を除くゲーム数",
+                "input": "denominator",
+                "inputId": "bonus-initial.eligibleTrialCount",
+                "engineBinding": {
+                  "inputId": "bonus-initial.eligibleTrialCount"
+                },
+                "gridSpan": 12,
+                "directNumeric": true,
+                "quickAdd": [
+                  50
+                ],
+                "unobservedDisplay": "—",
+                "playDataBinding": {
+                  "source": "PLAY_TOTAL_GAME_DELTA_EXCLUDED",
+                  "mode": "AUTO_EXACT"
+                }
+              },
+              {
+                "id": "bonus-initial.successCount",
+                "label": "ボーナス初当たり回数",
+                "input": "counter",
+                "inputId": "bonus-initial.successCount",
+                "engineBinding": {
+                  "inputId": "bonus-initial.successCount"
+                },
+                "directNumeric": true,
+                "quickAdd": [
+                  1
+                ],
+                "gridSpan": 6,
+                "unobservedDisplay": "—"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "EVI_voice",
+        "title": "具志堅ボイス",
+        "description": "具志堅ボイスを確認したときに、該当する項目を1回加算して記録します。\n・注意：ボーナスのテンパイで確認した新しいボイスだけ。停止ボタンごとの再生を別の設定試行に分割しません\n・反映：設定別出現率が未確認の項目は記録のみです。出現率確認後は設定推測へ反映できる可能性があります",
+        "collapsible": true,
+        "defaultExpanded": false,
+        "descriptionPresentation": {
+          "collapsible": true,
+          "label": "説明",
+          "defaultExpanded": false
+        },
+        "items": [
           {
-            "type": "input",
-            "inputId": "INP_BONUS_FIRST_HIT_COUNT",
-            "label": "ボーナス初当り",
-            "widget": "counter",
-            "gridSpan": 6,
-            "config": {
-              "directInput": false,
-              "compact": true
+            "id": "REF_voice",
+            "evidenceId": "voice",
+            "label": "具志堅ボイス",
+            "interaction": {
+              "type": "CATEGORY_COUNTERS",
+              "preservePriorObservations": true,
+              "showAccumulatedCounts": true,
+              "categoryCoverage": "NON_EXHAUSTIVE",
+              "totalOpportunities": "NONE",
+              "categories": [
+                {
+                  "id": "REF_voice_1",
+                  "inputId": "REF_voice_1",
+                  "label": "具志堅用高",
+                  "meaning": "高設定示唆"
+                }
+              ]
             }
           }
         ]
       }
     ]
   },
-  "selectionSummary": {
-    "schemaVersion": "selection-summary-v1",
-    "evaluatedCount": 3,
-    "selectedCount": 1,
-    "rejectedCount": 2,
-    "selected": [
-      {
-        "featureId": "FEAT_BONUS_FIRST_HIT",
-        "name": "ボーナス初当り",
-        "reason": "ボーナス初当りはデータカウンターから自然に観測でき、設定差は弱いものの低負担で継続的な母数を確保できるため主軸として採用します。",
-        "requiredTrials": {
-          "value": 30476,
-          "unit": "通常ゲーム"
-        }
-      }
-    ],
-    "rejected": [
-      {
-        "featureId": "FEAT_WEAK_CHERRY_BONUS_EXCLUDED",
-        "name": "弱チェリー時ボーナス当選",
-        "reason": "弱チェリー契機当選は設定差が非常に小さく必要試行量が大きいうえ、疑似遊技チェリーと実ゲーム数の分母定義に注意が必要なため不採用です。",
-        "requiredTrials": {
-          "value": 101233,
-          "unit": "弱チェリー1回"
-        }
-      },
-      {
-        "featureId": "FEAT_TEMPAI_VOICE_EXCLUDED",
-        "name": "ボーナス告知・テンパイ時 具志堅用高ボイス",
-        "reason": "テンパイボイスは高設定示唆の存在のみ公開され、設定別出現率が公開されていないため数値推測には不採用です。"
-      }
-    ]
-  },
-  "reliability": {},
   "metadata": {
     "machineId": "S_MORE_CHIBARIYO_NB_30",
     "displayName": "もっと！チバリヨ-30",
@@ -214,12 +342,48 @@
       "SET_5",
       "SET_6"
     ],
-    "uiDesignMaterialized": true,
-    "uiDesignSchemaVersion": "ui-design-data-v1",
-    "uiDesignStatus": "PASS_WITH_UNRESOLVED"
+    "settingsStatus": "SOURCE_DERIVED"
   },
-  "validation": {
-    "cases": []
-  },
-  "statistics": {}
+  "v8": {
+    "machineResearchSummary": {
+      "title": "この機種の設定推測について",
+      "adopted": [
+        {
+          "featureId": "bonus-initial",
+          "label": "ボーナス初当たり",
+          "importance": "微小",
+          "evaluation": {
+            "userLabel": "1回の判別力",
+            "value": 0.004764345456516328
+          },
+          "reason": "現在の採用基準を満たしているため、設定推測に使用します。"
+        }
+      ],
+      "notAdopted": [
+        {
+          "featureId": "weak-cherry-bonus-reference",
+          "label": "弱チェリーの公開当選率",
+          "reason": "擬似遊技の弱チェリーからの抽選。規定回数・規定G・別契機と区別した当選結果の観測手順が確定するまで参照のみ。"
+        },
+        {
+          "featureId": "cherry-occurrence",
+          "label": "チェリー出現率",
+          "reason": "チェリーは擬似遊技で、通常と前兆で出現率が違います。実際のG数とデータカウンタにも差があるため、全区間共通の設定別確率として使いません。",
+          "reevaluationCondition": "不足している設定別数値または観測手順を示す新しい具体的な公開資料が確認できた場合。"
+        },
+        {
+          "featureId": "mode-transitions",
+          "label": "モード移行の出現率",
+          "reason": "内部リセットや元のモードを毎回厳密には確認できず、全設定の移行表も不足しています。",
+          "reevaluationCondition": "不足している設定別数値または観測手順を示す新しい具体的な公開資料が確認できた場合。"
+        }
+      ],
+      "unresolved": [
+        {
+          "label": "高低判別精度",
+          "reason": "基準ゲーム数へ正確に換算できる設定推測要素がないため、高低判別精度を算出していません。"
+        }
+      ]
+    }
+  }
 }
