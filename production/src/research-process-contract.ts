@@ -1,6 +1,8 @@
+import {validateSourceConflictStandard} from './source-conflict-standard.ts';
 /** Research verifies public facts; downstream contracts resolve implementation. */
 export const RESEARCH_PROCESS_CONTRACT='research-process-v1';
 export function validateResearchProcessContract(d:any){
+ validateSourceConflictStandard(d);
  for(const stop of d.researchStops??[]){
   if(!stop.basis||!stop.ownerStage||!stop.releaseCondition)throw new Error('RESEARCH_STOP_AUTHORITY_REQUIRED');
   if(['CANDIDATE_CONTRACT','OBSERVATION_EVIDENCE','CANONICAL_UI','RUNTIME'].includes(stop.ownerStage))
