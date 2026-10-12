@@ -8,20 +8,20 @@
     "artifactId": "candidate-contract-S_SENGOKU_COLLECTION5_PS",
     "kind": "candidate-contract",
     "path": "production/batches/batch-20261012-013/artifacts/S_SENGOKU_COLLECTION5_PS/candidate_contract/result.json",
-    "sha256": "44fe526aa83fcd9f396156d788e11689c8a9030c51d555abee1058713f93ec02",
-    "producerWorkId": "wrk_d18fac15b0b1414b"
+    "sha256": "4a6c48ba3b470e995990cb57a6c4733ce1412717003b500dd4f6f42519545c95",
+    "producerWorkId": "wrk_1b12924f3bab4bec"
   },
   "observations": [
     {
       "findingId": "primary-setting-difference",
-      "label": "AT初当たり確率",
+      "label": "AT初当たり",
       "model": "BERNOULLI",
       "observationType": "probability",
       "trialUniverse": "NORMAL_GAME_TRIAL",
-      "denominatorSemantics": "通常時ゲーム数に対するAT初当たり回数。AT継続当選は含めない。",
+      "denominatorSemantics": "通常時ゲーム数に対する異世界制覇ラッシュ初当たり。AT中の継続は数えません。",
       "liveObservation": {
         "status": "EXACT_WITH_SCOPE_TRACKING",
-        "reason": "通常時ゲーム数に対するAT初当たり回数。AT継続当選は含めない。"
+        "reason": "通常時ゲーム数に対する異世界制覇ラッシュ初当たり。AT中の継続は数えません。"
       },
       "liveInferenceRoute": "LIVE_CONDITIONAL",
       "runtimeInferenceAllowed": true,
@@ -32,37 +32,314 @@
         "successField": "successCount",
         "trialField": "eligibleTrialCount"
       },
-      "details": [
-        "AT初当たりの設定別確率を記録。",
-        "武器UIの示唆やCZ抽選は別候補として扱う。"
-      ]
+      "details": []
+    },
+    {
+      "findingId": "vacance-roulette",
+      "label": "バカンスルーレット当選率",
+      "model": "BERNOULLI",
+      "observationType": "conditional_probability",
+      "trialUniverse": "VACANCE_ROULETTE_TRIAL",
+      "denominatorSemantics": "ルーレット抽選回数に対するCZ当選回数。バカンスポイント10pt到達時のルーレット抽選回数と、鬼ヶ島バカンス当選回数。通常ゲーム数を母数にしません。",
+      "liveObservation": {
+        "status": "EXACT_WITH_SCOPE_TRACKING",
+        "reason": "ルーレット抽選回数に対するCZ当選回数。バカンスポイント10pt到達時のルーレット抽選回数と、鬼ヶ島バカンス当選回数。通常ゲーム数を母数にしません。"
+      },
+      "liveInferenceRoute": "LIVE_CONDITIONAL",
+      "runtimeInferenceAllowed": true,
+      "dependencyResolution": "NONE",
+      "observationStatus": "READY",
+      "collectionContract": {
+        "type": "SUCCESS_TRIAL_COUNTS",
+        "successField": "successCount",
+        "trialField": "eligibleTrialCount"
+      },
+      "details": []
+    },
+    {
+      "findingId": "seven-flash",
+      "label": "7揃い後のフラッシュ",
+      "model": "CATEGORICAL",
+      "observationType": "appearance_distribution",
+      "trialUniverse": "SEVEN_FLASH_TRIAL",
+      "denominatorSemantics": "7揃い後のフラッシュ確認回数に対する各点灯の出現回数。AT中に7が揃った後、フラッシュを最後まで確認した回数。通常・4の形・7の形を毎回記録します。",
+      "liveObservation": {
+        "status": "EXHAUSTIVE_CATEGORICAL",
+        "reason": "7揃い後のフラッシュ確認回数に対する各点灯の出現回数。AT中に7が揃った後、フラッシュを最後まで確認した回数。通常・4の形・7の形を毎回記録します。"
+      },
+      "liveInferenceRoute": "LIVE_CONDITIONAL",
+      "runtimeInferenceAllowed": false,
+      "dependencyResolution": "HELD_NO_JOINT_MODEL",
+      "observationStatus": "HELD_NO_JOINT_MODEL",
+      "collectionContract": null,
+      "details": []
+    },
+    {
+      "findingId": "seven-picture",
+      "label": "7揃い後の1枚絵",
+      "model": "CATEGORICAL",
+      "observationType": "appearance_distribution",
+      "trialUniverse": "SEVEN_PICTURE_TRIAL",
+      "denominatorSemantics": "7揃い後の1枚絵確認回数に対する各画面の出現回数。AT中7揃い後の1枚絵を確認した回数。該当する3種類以外もその他として記録します。",
+      "liveObservation": {
+        "status": "EXHAUSTIVE_CATEGORICAL",
+        "reason": "7揃い後の1枚絵確認回数に対する各画面の出現回数。AT中7揃い後の1枚絵を確認した回数。該当する3種類以外もその他として記録します。"
+      },
+      "liveInferenceRoute": "LIVE_CONDITIONAL",
+      "runtimeInferenceAllowed": false,
+      "dependencyResolution": "HELD_NO_JOINT_MODEL",
+      "observationStatus": "HELD_NO_JOINT_MODEL",
+      "collectionContract": null,
+      "details": []
     }
   ],
-  "evidence": [],
+  "evidence": [
+    {
+      "findingId": "seven-flash-constraints",
+      "label": "7揃い後のフラッシュ",
+      "sourceIds": [
+        "review"
+      ],
+      "observationType": "evidence",
+      "details": [
+        "AT中に7が揃った後、フラッシュを最後まで確認した回数。通常・4の形・7の形を毎回記録します。"
+      ],
+      "semanticType": "DISPLAY_ONLY",
+      "semanticCategories": [
+        {
+          "label": "4の形",
+          "meaning": "設定4以上",
+          "semanticType": "EXACT_CONSTRAINT",
+          "linkedFindingId": "seven-flash"
+        },
+        {
+          "label": "7の形",
+          "meaning": "設定6",
+          "semanticType": "EXACT_CONSTRAINT",
+          "linkedFindingId": "seven-flash"
+        },
+        {
+          "label": "通常",
+          "meaning": "基本パターン",
+          "semanticType": "PROBABILITY_UNKNOWN",
+          "linkedFindingId": "seven-flash"
+        }
+      ],
+      "runtimePolicyControlled": false,
+      "status": "SOURCE_REFERENCED"
+    },
+    {
+      "findingId": "seven-picture-constraints",
+      "label": "7揃い後の1枚絵",
+      "sourceIds": [
+        "review"
+      ],
+      "observationType": "evidence",
+      "details": [
+        "AT中7揃い後の1枚絵を確認した回数。該当する3種類以外もその他として記録します。"
+      ],
+      "semanticType": "DISPLAY_ONLY",
+      "semanticCategories": [
+        {
+          "label": "和服2人",
+          "meaning": "設定2以上",
+          "semanticType": "EXACT_CONSTRAINT",
+          "linkedFindingId": "seven-picture"
+        },
+        {
+          "label": "クリスマス",
+          "meaning": "設定4以上",
+          "semanticType": "EXACT_CONSTRAINT",
+          "linkedFindingId": "seven-picture"
+        },
+        {
+          "label": "ハロウィン",
+          "meaning": "設定6",
+          "semanticType": "EXACT_CONSTRAINT",
+          "linkedFindingId": "seven-picture"
+        },
+        {
+          "label": "その他",
+          "meaning": "基本パターン",
+          "semanticType": "PROBABILITY_UNKNOWN",
+          "linkedFindingId": "seven-picture"
+        }
+      ],
+      "runtimePolicyControlled": false,
+      "status": "SOURCE_REFERENCED"
+    },
+    {
+      "findingId": "custom-ui",
+      "label": "巫女のぬさ",
+      "sourceIds": [
+        "review"
+      ],
+      "observationType": "evidence",
+      "details": [
+        "メニューで巫女の表示を選び、弱チャンス目以外のレア小役成立時にぬさが動いた場合だけ記録します。"
+      ],
+      "semanticType": "EXACT_CONSTRAINT",
+      "semanticCategories": [
+        {
+          "label": "きつね巫女が動く",
+          "meaning": "設定2以上",
+          "semanticType": "EXACT_CONSTRAINT"
+        },
+        {
+          "label": "うさぎ巫女が動く",
+          "meaning": "設定4以上",
+          "semanticType": "EXACT_CONSTRAINT"
+        },
+        {
+          "label": "ねこ巫女が動く",
+          "meaning": "設定6",
+          "semanticType": "EXACT_CONSTRAINT"
+        }
+      ],
+      "runtimePolicyControlled": false,
+      "status": "SOURCE_REFERENCED"
+    },
+    {
+      "findingId": "at-screen",
+      "label": "AT終了画面",
+      "sourceIds": [
+        "review"
+      ],
+      "observationType": "evidence",
+      "details": [
+        "AT終了画面の背景絵を確認します。背景色・コナミコマンドのボイスはモード示唆なので設定番号の確定条件へ混ぜません。"
+      ],
+      "semanticType": "EXACT_CONSTRAINT",
+      "semanticCategories": [
+        {
+          "label": "信長・赤ドレス",
+          "meaning": "設定4以上",
+          "semanticType": "EXACT_CONSTRAINT"
+        },
+        {
+          "label": "信長たちのデフォルメイラスト",
+          "meaning": "設定6",
+          "semanticType": "EXACT_CONSTRAINT"
+        }
+      ],
+      "runtimePolicyControlled": false,
+      "status": "SOURCE_REFERENCED"
+    }
+  ],
   "sourceReferences": [
     {
-      "sourceId": "pacnavi",
-      "url": "https://pachinavi.net/machines/smasloth-sengoku-collection-5/settei/",
-      "title": "スマスロ 戦国コレクション5 設定判別",
+      "sourceId": "review",
+      "url": "https://nana-press.com/kaiseki/machine/506/13995/",
+      "title": "S戦国コレクション5 設定差・設定示唆の公開解析",
       "sourceType": "published_analysis",
       "checkedAt": "2026-10-12",
       "claims": [
-        "AT初当たりの設定別確率を記録。",
-        "武器UIの示唆やCZ抽選は別候補として扱う。"
+        "AT初当たりの設定別公開値と対象条件：通常時ゲーム数に対する異世界制覇ラッシュ初当たり。AT中の継続は数えません。",
+        "AT当選コレ数の分布：設定1は128コレ以内約30%・384コレ以内約68%ですが、他設定の比較表がありません。途中の当選やコレ数加算を、内部規定値の選択結果へ置き換えません。",
+        "弱チェリー・スイカのCZ抽選：弱チェリーやスイカから当選するほど高設定に期待という説明はありますが、設定別の当選率が未公表です。",
+        "モードCの129～256コレ：モードCに滞在している条件を常に確定できず、設定別のゾーン選択率も公表されていません。",
+        "極楽後のモードB移行：移行先モードBが高設定ほど選ばれやすいと公表されていますが、実際の移行を毎回識別できず設定別の割合もありません。",
+        "7揃い後のフラッシュの設定別公開値と対象条件：7揃い後のフラッシュ確認回数に対する各点灯の出現回数。AT中に7が揃った後、フラッシュを最後まで確認した回数。通常・4の形・7の形を毎回記録します。",
+        "7揃い後のフラッシュ：AT中に7が揃った後、フラッシュを最後まで確認した回数。通常・4の形・7の形を毎回記録します。",
+        "7揃い後の1枚絵の設定別公開値と対象条件：7揃い後の1枚絵確認回数に対する各画面の出現回数。AT中7揃い後の1枚絵を確認した回数。該当する3種類以外もその他として記録します。",
+        "7揃い後の1枚絵：AT中7揃い後の1枚絵を確認した回数。該当する3種類以外もその他として記録します。",
+        "巫女のぬさ：メニューで巫女の表示を選び、弱チャンス目以外のレア小役成立時にぬさが動いた場合だけ記録します。",
+        "AT終了画面：AT終了画面の背景絵を確認します。背景色・コナミコマンドのボイスはモード示唆なので設定番号の確定条件へ混ぜません。",
+        "その他のAT終了画面：公開資料に基本・復活・高設定示唆・設定2以上の画面がありますが、今回取得できた画像の具体的な識別名を確定できていません。画面の対応が不明なまま設定2以上の入力を作りません。",
+        "5000枚到達率・MY：公表値は1回の観測試行に対応する当選率ではなく、実戦全体の出玉性能です。ゲーム数や当たり回数の設定別確率へ変換しません。"
       ]
     },
     {
-      "sourceId": "nana",
-      "url": "https://nana-press.com/kaiseki/machine/506/13995/",
-      "title": "戦国コレクション5 設定差のある要素",
+      "sourceId": "verified",
+      "url": "https://1geki.jp/slot/s_sengokucollection5/0/",
+      "title": "メダル機戦国コレクション5の当選率・設定示唆",
       "sourceType": "published_analysis",
       "checkedAt": "2026-10-12",
       "claims": [
-        "武器UI設定とAT初当たり候補を照合。"
+        "バカンスルーレット当選率の設定別公開値と対象条件：ルーレット抽選回数に対するCZ当選回数。バカンスポイント10pt到達時のルーレット抽選回数と、鬼ヶ島バカンス当選回数。通常ゲーム数を母数にしません。"
       ]
     }
   ],
-  "blockedItems": [],
+  "blockedItems": [
+    {
+      "blockId": "collection-zone",
+      "label": "AT当選コレ数の分布",
+      "reason": "設定1は128コレ以内約30%・384コレ以内約68%ですが、他設定の比較表がありません。途中の当選やコレ数加算を、内部規定値の選択結果へ置き換えません。",
+      "reevaluationCondition": "対象条件を識別でき、設定別の公開値と観測回数の対応を確認できる新しい資料が得られた場合。",
+      "sourceIds": [
+        "review"
+      ],
+      "publishedSettingDistribution": {
+        "1": {
+          "within128": 30,
+          "within384": 68
+        }
+      }
+    },
+    {
+      "blockId": "rare-role-cz",
+      "label": "弱チェリー・スイカのCZ抽選",
+      "reason": "弱チェリーやスイカから当選するほど高設定に期待という説明はありますが、設定別の当選率が未公表です。",
+      "reevaluationCondition": "対象条件を識別でき、設定別の公開値と観測回数の対応を確認できる新しい資料が得られた場合。",
+      "sourceIds": [
+        "review"
+      ]
+    },
+    {
+      "blockId": "mode-c-zone",
+      "label": "モードCの129～256コレ",
+      "reason": "モードCに滞在している条件を常に確定できず、設定別のゾーン選択率も公表されていません。",
+      "reevaluationCondition": "対象条件を識別でき、設定別の公開値と観測回数の対応を確認できる新しい資料が得られた場合。",
+      "sourceIds": [
+        "review"
+      ]
+    },
+    {
+      "blockId": "after-gokuraku",
+      "label": "極楽後のモードB移行",
+      "reason": "移行先モードBが高設定ほど選ばれやすいと公表されていますが、実際の移行を毎回識別できず設定別の割合もありません。",
+      "reevaluationCondition": "対象条件を識別でき、設定別の公開値と観測回数の対応を確認できる新しい資料が得られた場合。",
+      "sourceIds": [
+        "review"
+      ]
+    },
+    {
+      "blockId": "other-end-screen",
+      "label": "その他のAT終了画面",
+      "reason": "公開資料に基本・復活・高設定示唆・設定2以上の画面がありますが、今回取得できた画像の具体的な識別名を確定できていません。画面の対応が不明なまま設定2以上の入力を作りません。",
+      "reevaluationCondition": "対象条件を識別でき、設定別の公開値と観測回数の対応を確認できる新しい資料が得られた場合。",
+      "sourceIds": [
+        "review"
+      ]
+    },
+    {
+      "blockId": "payout-statistics",
+      "label": "5000枚到達率・MY",
+      "reason": "公表値は1回の観測試行に対応する当選率ではなく、実戦全体の出玉性能です。ゲーム数や当たり回数の設定別確率へ変換しません。",
+      "reevaluationCondition": "対象条件を識別でき、設定別の公開値と観測回数の対応を確認できる新しい資料が得られた場合。",
+      "sourceIds": [
+        "review"
+      ],
+      "publishedSettingDistribution": {
+        "over5000": [
+          28.8,
+          20.1,
+          30.4,
+          21.1,
+          33.4,
+          22.3
+        ],
+        "MY": [
+          4011,
+          3809,
+          4175,
+          3916,
+          4405,
+          4022
+        ]
+      }
+    }
+  ],
   "sourceIntegrityIssues": [],
   "highLowDiscrimination": {
     "status": "COMPUTED",
@@ -75,23 +352,28 @@
     "results": [
       {
         "games": 1500,
-        "balancedAccuracyPercent": 55.35
+        "balancedAccuracyPercent": 62.42
       },
       {
         "games": 3000,
-        "balancedAccuracyPercent": 57.54
+        "balancedAccuracyPercent": 67.21
       },
       {
         "games": 7000,
-        "balancedAccuracyPercent": 61.33
+        "balancedAccuracyPercent": 74.68
       }
     ],
     "eligibleFeatureIds": [
       "primary-setting-difference"
     ],
     "selectedFeatureId": "primary-setting-difference",
-    "selectedFeatureLabel": "AT初当たり確率",
-    "excludedFeatures": [],
+    "selectedFeatureLabel": "AT初当たり",
+    "excludedFeatures": [
+      {
+        "findingId": "vacance-roulette",
+        "reason": "BENCHMARK_EXPOSURE_UNRESOLVED"
+      }
+    ],
     "note": "7000Gへ正確に換算できるACTIVE要素だけを候補とし、要素間の独立性を仮定せず、単独で最も高い判別精度を持つ要素から保守的に算出しています。条件付き要素はこの指標には含めませんが、実戦中に実際の観測回数が入力された場合は設定推測に使用します。"
   }
 }

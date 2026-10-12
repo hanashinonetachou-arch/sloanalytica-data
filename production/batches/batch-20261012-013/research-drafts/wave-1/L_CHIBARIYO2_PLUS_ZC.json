@@ -18,185 +18,429 @@
   },
   "sources": [
     {
-      "sourceId": "nana",
+      "sourceId": "review",
       "url": "https://nana-press.com/kaiseki/machine/858/26541/",
-      "title": "チバリヨ2プラス 設定差のある抽選値",
+      "title": "チバリヨ2プラス 設定差・設定示唆の公開解析",
       "sourceType": "published_analysis",
       "checkedAt": "2026-10-12",
       "claims": [
-        "初当たり確率は設定1・2・4・5・6の公表値を記録。",
-        "設定3の値は公表表にないため補完しない。"
+        "ボーナス初当たりの設定別公開値と対象条件：通常時のゲーム数と、連チャンに入る最初のボーナス回数。連チャン中のボーナスは含めません。",
+        "ボーナス合算確率：連チャン中の当たりを含む合算値です。通常時の初当たりと同時に独立加算すると同じ当選経路を重ねて評価するため、今回の初当たり入力とは分けて保存します。",
+        "弱チェリー直撃率の設定別公開値と対象条件：通常時の弱チェリー回数に対する直撃ボーナス当選回数。通常時の弱チェリー回数と、規定チェリー回数での当選を除く直撃ボーナス回数。直撃を区別できない当たりは数えません。",
+        "チェリー出現時のボーナス期待度：規定チェリー回数到達による当選を含む期待度と、直撃抽選の当選率は別の値です。通常A等のモードと規定回数の選択を含むため、弱チェリー直撃の分子へ混ぜません。",
+        "共通ベル：設定1の値のみ公表されており、設定2・4・5・6の確率を確認できません。平均コイン持ちから他設定の確率を逆算しません。",
+        "押し順12枚ベル：設定1の値のみ公表されており、設定2・4・5・6の確率を確認できません。平均コイン持ちから他設定の確率を逆算しません。",
+        "350G天井選択率：高設定ほど350G天井を選びやすいという説明はありますが、通常モード別の設定別選択率がありません。途中のチェリー当選を350G天井の選択結果に置き換えません。",
+        "50枚あたりのゲーム数：公表値は複数の小役と払い出しをまとめた平均です。単一のベル確率や独立した当選回数の確率には変換できません。"
       ]
     },
     {
-      "sourceId": "pacnk",
-      "url": "https://pacnk.com/slot/tools/sh_chibariyotsupurasu.html",
-      "title": "チバリヨ2プラス 設定判別ツール",
+      "sourceId": "lamp",
+      "url": "https://1geki.jp/slot/l_cbry2_plus/63/",
+      "title": "ボーナス終了トップランプの示唆",
       "sourceType": "published_analysis",
       "checkedAt": "2026-10-12",
       "claims": [
-        "設定別初当たり確率と小役候補の公開表を照合。"
+        "ボーナス終了トップランプ：トップランプは継続期待度・次回モードの示唆です。虹は高継続の示唆で、設定6の確定条件には使いません。設定別出現率も確認できません。"
       ]
     }
   ],
   "findings": [
     {
       "findingId": "primary-setting-difference",
-      "label": "初当たり確率",
+      "label": "ボーナス初当たり",
       "observationType": "probability",
       "sourceIds": [
-        "nana"
+        "review"
       ],
+      "settingDistribution": {
+        "1": "1/328",
+        "2": "1/313",
+        "4": "1/280",
+        "5": "1/251",
+        "6": "1/224"
+      },
       "trialUniverse": "NORMAL_GAME_TRIAL",
-      "denominatorSemantics": "通常時のゲーム数に対する初当たり回数。ボーナス合算は別候補として混ぜない。",
+      "denominatorSemantics": "通常時のゲーム数と、連チャンに入る最初のボーナス回数。連チャン中のボーナスは含めません。",
       "liveObservation": {
         "status": "EXACT_WITH_SCOPE_TRACKING",
-        "reason": "通常時のゲーム数に対する初当たり回数。ボーナス合算は別候補として混ぜない。"
+        "reason": "通常時のゲーム数と、連チャンに入る最初のボーナス回数。連チャン中のボーナスは含めません。"
       },
+      "details": [],
+      "dependencyGroupId": "chibariyo-entry",
+      "dependencyKind": "CAUSAL_PATH_OVERLAP",
+      "dependencyReason": "初当たりにつながる同じ抽選経路を含むため、同時に独立加算しません。"
+    },
+    {
+      "findingId": "weak-cherry-direct",
+      "label": "弱チェリー直撃率",
+      "observationType": "conditional_probability",
+      "sourceIds": [
+        "review"
+      ],
       "settingDistribution": {
-        "1": "1/328.0",
-        "2": "1/313.0",
-        "4": "1/280.0",
-        "5": "1/251.0",
-        "6": "1/224.0"
+        "1": 0.0259,
+        "2": 0.0282,
+        "4": 0.0304,
+        "5": 0.0305,
+        "6": 0.0305
       },
-      "details": [
-        "初当たり確率は設定1・2・4・5・6の公表値を記録。",
-        "設定3の値は公表表にないため補完しない。"
+      "trialUniverse": "WEAK_CHERRY_DIRECT_TRIAL",
+      "denominatorSemantics": "通常時の弱チェリー回数に対する直撃ボーナス当選回数。通常時の弱チェリー回数と、規定チェリー回数での当選を除く直撃ボーナス回数。直撃を区別できない当たりは数えません。",
+      "liveObservation": {
+        "status": "EXACT_WITH_SCOPE_TRACKING",
+        "reason": "通常時の弱チェリー回数に対する直撃ボーナス当選回数。通常時の弱チェリー回数と、規定チェリー回数での当選を除く直撃ボーナス回数。直撃を区別できない当たりは数えません。"
+      },
+      "details": [],
+      "dependencyGroupId": "chibariyo-entry",
+      "dependencyKind": "CAUSAL_PATH_OVERLAP",
+      "dependencyReason": "初当たりにつながる同じ抽選経路を含むため、同時に独立加算しません。"
+    }
+  ],
+  "blockedItems": [
+    {
+      "blockId": "bonus-total",
+      "label": "ボーナス合算確率",
+      "reason": "連チャン中の当たりを含む合算値です。通常時の初当たりと同時に独立加算すると同じ当選経路を重ねて評価するため、今回の初当たり入力とは分けて保存します。",
+      "reevaluationCondition": "対象条件を識別でき、設定別の公開値と観測回数の対応を確認できる新しい資料が得られた場合。",
+      "sourceIds": [
+        "review"
+      ],
+      "publishedSettingDistribution": {
+        "1": "1/108.4",
+        "2": "1/104.2",
+        "4": "1/93.7",
+        "5": "1/83.9",
+        "6": "1/74.8"
+      }
+    },
+    {
+      "blockId": "cherry-total-expectation",
+      "label": "チェリー出現時のボーナス期待度",
+      "reason": "規定チェリー回数到達による当選を含む期待度と、直撃抽選の当選率は別の値です。通常A等のモードと規定回数の選択を含むため、弱チェリー直撃の分子へ混ぜません。",
+      "reevaluationCondition": "対象条件を識別でき、設定別の公開値と観測回数の対応を確認できる新しい資料が得られた場合。",
+      "sourceIds": [
+        "review"
+      ],
+      "publishedSettingDistribution": {
+        "weak": {
+          "1": 0.0592,
+          "2": 0.062400000000000004,
+          "4": 0.0681,
+          "5": 0.0704,
+          "6": 0.0691
+        },
+        "strong": {
+          "1": 0.5618,
+          "2": 0.5640999999999999,
+          "4": 0.5725,
+          "5": 0.5814,
+          "6": 0.5896
+        }
+      }
+    },
+    {
+      "blockId": "common-bell",
+      "label": "共通ベル",
+      "reason": "設定1の値のみ公表されており、設定2・4・5・6の確率を確認できません。平均コイン持ちから他設定の確率を逆算しません。",
+      "reevaluationCondition": "対象条件を識別でき、設定別の公開値と観測回数の対応を確認できる新しい資料が得られた場合。",
+      "sourceIds": [
+        "review"
+      ],
+      "publishedSettingDistribution": {
+        "1": "1/32.19"
+      }
+    },
+    {
+      "blockId": "ordered-bell",
+      "label": "押し順12枚ベル",
+      "reason": "設定1の値のみ公表されており、設定2・4・5・6の確率を確認できません。平均コイン持ちから他設定の確率を逆算しません。",
+      "reevaluationCondition": "対象条件を識別でき、設定別の公開値と観測回数の対応を確認できる新しい資料が得られた場合。",
+      "sourceIds": [
+        "review"
+      ],
+      "publishedSettingDistribution": {
+        "1": "1/7.8"
+      }
+    },
+    {
+      "blockId": "short-ceiling",
+      "label": "350G天井選択率",
+      "reason": "高設定ほど350G天井を選びやすいという説明はありますが、通常モード別の設定別選択率がありません。途中のチェリー当選を350G天井の選択結果に置き換えません。",
+      "reevaluationCondition": "対象条件を識別でき、設定別の公開値と観測回数の対応を確認できる新しい資料が得られた場合。",
+      "sourceIds": [
+        "review"
+      ]
+    },
+    {
+      "blockId": "coin-base",
+      "label": "50枚あたりのゲーム数",
+      "reason": "公表値は複数の小役と払い出しをまとめた平均です。単一のベル確率や独立した当選回数の確率には変換できません。",
+      "reevaluationCondition": "対象条件を識別でき、設定別の公開値と観測回数の対応を確認できる新しい資料が得られた場合。",
+      "sourceIds": [
+        "review"
+      ],
+      "publishedSettingDistribution": {
+        "1": 27.9,
+        "2": 28.2,
+        "3": 28.7,
+        "4": 29.1,
+        "6": 29.8
+      }
+    },
+    {
+      "blockId": "top-lamp",
+      "label": "ボーナス終了トップランプ",
+      "reason": "トップランプは継続期待度・次回モードの示唆です。虹は高継続の示唆で、設定6の確定条件には使いません。設定別出現率も確認できません。",
+      "reevaluationCondition": "対象条件を識別でき、設定別の公開値と観測回数の対応を確認できる新しい資料が得られた場合。",
+      "sourceIds": [
+        "lamp"
       ]
     }
   ],
-  "blockedItems": [],
   "researchCompleteness": {
     "version": 2,
     "domains": [
       {
         "domain": "INITIAL_HIT",
         "status": "CHECKED",
-        "note": "設定判別総覧の該当範囲を確認し、候補台帳に対象条件・採否を記録。",
+        "note": "チバリヨ2プラス：初当たりの確認結果はボーナス初当たりとして個別の公開値・条件・採否経路を記録。",
         "sourceIds": [
-          "nana",
-          "pacnk"
+          "review",
+          "lamp"
+        ],
+        "reviewedCandidateIds": [
+          "candidate-primary-setting-difference"
         ]
       },
       {
         "domain": "BONUS",
-        "status": "NOT_APPLICABLE",
-        "note": "今回照合した設定判別総覧の範囲では本ドメインに採用可能な設定別候補を確認しなかった。未公表情報の不存在は主張しない。",
-        "sourceIds": []
+        "status": "CHECKED",
+        "note": "チバリヨ2プラス：ボーナスの確認結果はボーナス初当たり、ボーナス合算確率、弱チェリー直撃率として個別の公開値・条件・採否経路を記録。",
+        "sourceIds": [
+          "review",
+          "lamp"
+        ],
+        "reviewedCandidateIds": [
+          "candidate-primary-setting-difference",
+          "candidate-bonus-total",
+          "candidate-weak-cherry-direct"
+        ]
       },
       {
         "domain": "SMALL_ROLE",
-        "status": "NOT_APPLICABLE",
-        "note": "今回照合した設定判別総覧の範囲では本ドメインに採用可能な設定別候補を確認しなかった。未公表情報の不存在は主張しない。",
-        "sourceIds": []
+        "status": "CHECKED",
+        "note": "チバリヨ2プラス：小役の確認結果は共通ベル、押し順12枚ベル、50枚あたりのゲーム数として個別の公開値・条件・採否経路を記録。",
+        "sourceIds": [
+          "review",
+          "lamp"
+        ],
+        "reviewedCandidateIds": [
+          "candidate-common-bell",
+          "candidate-ordered-bell",
+          "candidate-coin-base"
+        ]
       },
       {
         "domain": "CZ",
-        "status": "NOT_APPLICABLE",
-        "note": "今回照合した設定判別総覧の範囲では本ドメインに採用可能な設定別候補を確認しなかった。未公表情報の不存在は主張しない。",
-        "sourceIds": []
+        "status": "CHECKED",
+        "note": "チバリヨ2プラスの今回確認した設定判別総覧では、CZについて上記候補と別に評価できる設定別情報の掲載を確認していない。確認範囲は登録した公開総覧であり、非公表情報や他資料の不存在は意味しない。",
+        "sourceIds": [
+          "review",
+          "lamp"
+        ],
+        "reviewedCandidateIds": []
       },
       {
         "domain": "AT",
-        "status": "NOT_APPLICABLE",
-        "note": "今回照合した設定判別総覧の範囲では本ドメインに採用可能な設定別候補を確認しなかった。未公表情報の不存在は主張しない。",
-        "sourceIds": []
+        "status": "CHECKED",
+        "note": "チバリヨ2プラスの今回確認した設定判別総覧では、ATについて上記候補と別に評価できる設定別情報の掲載を確認していない。確認範囲は登録した公開総覧であり、非公表情報や他資料の不存在は意味しない。",
+        "sourceIds": [
+          "review",
+          "lamp"
+        ],
+        "reviewedCandidateIds": []
       },
       {
         "domain": "INTERNAL_CONDITIONAL_DRAW",
-        "status": "NOT_APPLICABLE",
-        "note": "今回照合した設定判別総覧の範囲では本ドメインに採用可能な設定別候補を確認しなかった。未公表情報の不存在は主張しない。",
-        "sourceIds": []
+        "status": "CHECKED",
+        "note": "チバリヨ2プラス：内部条件付き抽選の確認結果はチェリー出現時のボーナス期待度として個別の公開値・条件・採否経路を記録。",
+        "sourceIds": [
+          "review",
+          "lamp"
+        ],
+        "reviewedCandidateIds": [
+          "candidate-cherry-total-expectation"
+        ]
       },
       {
         "domain": "MODE_TRANSITION",
-        "status": "NOT_APPLICABLE",
-        "note": "今回照合した設定判別総覧の範囲では本ドメインに採用可能な設定別候補を確認しなかった。未公表情報の不存在は主張しない。",
-        "sourceIds": []
+        "status": "CHECKED",
+        "note": "チバリヨ2プラス：モード移行の確認結果は350G天井選択率、ボーナス終了トップランプとして個別の公開値・条件・採否経路を記録。",
+        "sourceIds": [
+          "review",
+          "lamp"
+        ],
+        "reviewedCandidateIds": [
+          "candidate-short-ceiling",
+          "candidate-top-lamp"
+        ]
       },
       {
         "domain": "STATE_TRANSITION",
-        "status": "NOT_APPLICABLE",
-        "note": "今回照合した設定判別総覧の範囲では本ドメインに採用可能な設定別候補を確認しなかった。未公表情報の不存在は主張しない。",
-        "sourceIds": []
+        "status": "CHECKED",
+        "note": "チバリヨ2プラスの今回確認した設定判別総覧では、状態移行について上記候補と別に評価できる設定別情報の掲載を確認していない。確認範囲は登録した公開総覧であり、非公表情報や他資料の不存在は意味しない。",
+        "sourceIds": [
+          "review",
+          "lamp"
+        ],
+        "reviewedCandidateIds": []
       },
       {
         "domain": "SUCCESS_RATE",
-        "status": "NOT_APPLICABLE",
-        "note": "今回照合した設定判別総覧の範囲では本ドメインに採用可能な設定別候補を確認しなかった。未公表情報の不存在は主張しない。",
-        "sourceIds": []
+        "status": "CHECKED",
+        "note": "チバリヨ2プラスの今回確認した設定判別総覧では、成功率について上記候補と別に評価できる設定別情報の掲載を確認していない。確認範囲は登録した公開総覧であり、非公表情報や他資料の不存在は意味しない。",
+        "sourceIds": [
+          "review",
+          "lamp"
+        ],
+        "reviewedCandidateIds": []
       },
       {
         "domain": "POINTS_GAME_DISTRIBUTION",
-        "status": "NOT_APPLICABLE",
-        "note": "今回照合した設定判別総覧の範囲では本ドメインに採用可能な設定別候補を確認しなかった。未公表情報の不存在は主張しない。",
-        "sourceIds": []
+        "status": "CHECKED",
+        "note": "チバリヨ2プラス：規定ゲーム数・ポイントの確認結果は350G天井選択率として個別の公開値・条件・採否経路を記録。",
+        "sourceIds": [
+          "review",
+          "lamp"
+        ],
+        "reviewedCandidateIds": [
+          "candidate-short-ceiling"
+        ]
       },
       {
         "domain": "CARRY_OVER",
-        "status": "NOT_APPLICABLE",
-        "note": "今回照合した設定判別総覧の範囲では本ドメインに採用可能な設定別候補を確認しなかった。未公表情報の不存在は主張しない。",
-        "sourceIds": []
+        "status": "CHECKED",
+        "note": "チバリヨ2プラス：持ち越しの確認結果はボーナス合算確率として個別の公開値・条件・採否経路を記録。",
+        "sourceIds": [
+          "review",
+          "lamp"
+        ],
+        "reviewedCandidateIds": [
+          "candidate-bonus-total"
+        ]
       },
       {
         "domain": "THRESHOLD_BEHAVIOR",
-        "status": "NOT_APPLICABLE",
-        "note": "今回照合した設定判別総覧の範囲では本ドメインに採用可能な設定別候補を確認しなかった。未公表情報の不存在は主張しない。",
-        "sourceIds": []
+        "status": "CHECKED",
+        "note": "チバリヨ2プラス：天井到達の確認結果は350G天井選択率として個別の公開値・条件・採否経路を記録。",
+        "sourceIds": [
+          "review",
+          "lamp"
+        ],
+        "reviewedCandidateIds": [
+          "candidate-short-ceiling"
+        ]
       },
       {
         "domain": "RESET_BEHAVIOR",
-        "status": "NOT_APPLICABLE",
-        "note": "今回照合した設定判別総覧の範囲では本ドメインに採用可能な設定別候補を確認しなかった。未公表情報の不存在は主張しない。",
-        "sourceIds": []
+        "status": "CHECKED",
+        "note": "チバリヨ2プラスの今回確認した設定判別総覧では、設定変更について上記候補と別に評価できる設定別情報の掲載を確認していない。確認範囲は登録した公開総覧であり、非公表情報や他資料の不存在は意味しない。",
+        "sourceIds": [
+          "review",
+          "lamp"
+        ],
+        "reviewedCandidateIds": []
       },
       {
         "domain": "POST_EVENT_TRANSITION",
-        "status": "NOT_APPLICABLE",
-        "note": "今回照合した設定判別総覧の範囲では本ドメインに採用可能な設定別候補を確認しなかった。未公表情報の不存在は主張しない。",
-        "sourceIds": []
+        "status": "CHECKED",
+        "note": "チバリヨ2プラス：終了後の移行の確認結果はボーナス終了トップランプとして個別の公開値・条件・採否経路を記録。",
+        "sourceIds": [
+          "review",
+          "lamp"
+        ],
+        "reviewedCandidateIds": [
+          "candidate-top-lamp"
+        ]
       },
       {
         "domain": "NAVIGATION",
-        "status": "NOT_APPLICABLE",
-        "note": "今回照合した設定判別総覧の範囲では本ドメインに採用可能な設定別候補を確認しなかった。未公表情報の不存在は主張しない。",
-        "sourceIds": []
+        "status": "CHECKED",
+        "note": "チバリヨ2プラス：操作・ナビの確認結果はボーナス終了トップランプとして個別の公開値・条件・採否経路を記録。",
+        "sourceIds": [
+          "review",
+          "lamp"
+        ],
+        "reviewedCandidateIds": [
+          "candidate-top-lamp"
+        ]
       },
       {
         "domain": "ROLE_CONDITIONAL_DISTRIBUTION",
-        "status": "NOT_APPLICABLE",
-        "note": "今回照合した設定判別総覧の範囲では本ドメインに採用可能な設定別候補を確認しなかった。未公表情報の不存在は主張しない。",
-        "sourceIds": []
+        "status": "CHECKED",
+        "note": "チバリヨ2プラス：成立役別の抽選の確認結果は弱チェリー直撃率、チェリー出現時のボーナス期待度として個別の公開値・条件・採否経路を記録。",
+        "sourceIds": [
+          "review",
+          "lamp"
+        ],
+        "reviewedCandidateIds": [
+          "candidate-weak-cherry-direct",
+          "candidate-cherry-total-expectation"
+        ]
       },
       {
         "domain": "BONUS_TYPE_CONDITIONAL",
-        "status": "NOT_APPLICABLE",
-        "note": "今回照合した設定判別総覧の範囲では本ドメインに採用可能な設定別候補を確認しなかった。未公表情報の不存在は主張しない。",
-        "sourceIds": []
+        "status": "CHECKED",
+        "note": "チバリヨ2プラスの今回確認した設定判別総覧では、ボーナス種別について上記候補と別に評価できる設定別情報の掲載を確認していない。確認範囲は登録した公開総覧であり、非公表情報や他資料の不存在は意味しない。",
+        "sourceIds": [
+          "review",
+          "lamp"
+        ],
+        "reviewedCandidateIds": []
       },
       {
         "domain": "EVIDENCE",
         "status": "CHECKED",
-        "note": "設定判別総覧の該当範囲を確認し、候補台帳に対象条件・採否を記録。",
+        "note": "チバリヨ2プラス：設定示唆の確認結果はボーナス終了トップランプとして個別の公開値・条件・採否経路を記録。",
         "sourceIds": [
-          "nana",
-          "pacnk"
+          "review",
+          "lamp"
+        ],
+        "reviewedCandidateIds": [
+          "candidate-top-lamp"
         ]
       },
       {
         "domain": "EXTERNAL_DATA_ONLY",
-        "status": "NOT_APPLICABLE",
-        "note": "今回照合した設定判別総覧の範囲では本ドメインに採用可能な設定別候補を確認しなかった。未公表情報の不存在は主張しない。",
-        "sourceIds": []
+        "status": "CHECKED",
+        "note": "チバリヨ2プラス：外部集計の確認結果は50枚あたりのゲーム数として個別の公開値・条件・採否経路を記録。",
+        "sourceIds": [
+          "review",
+          "lamp"
+        ],
+        "reviewedCandidateIds": [
+          "candidate-coin-base"
+        ]
       },
       {
         "domain": "MACHINE_SPECIFIC",
         "status": "CHECKED",
-        "note": "設定判別総覧の該当範囲を確認し、候補台帳に対象条件・採否を記録。",
+        "note": "チバリヨ2プラス：機種固有の抽選の確認結果はボーナス初当たり、ボーナス合算確率、弱チェリー直撃率、チェリー出現時のボーナス期待度、共通ベル、押し順12枚ベル、350G天井選択率、50枚あたりのゲーム数、ボーナス終了トップランプとして個別の公開値・条件・採否経路を記録。",
         "sourceIds": [
-          "nana",
-          "pacnk"
+          "review",
+          "lamp"
+        ],
+        "reviewedCandidateIds": [
+          "candidate-primary-setting-difference",
+          "candidate-bonus-total",
+          "candidate-weak-cherry-direct",
+          "candidate-cherry-total-expectation",
+          "candidate-common-bell",
+          "candidate-ordered-bell",
+          "candidate-short-ceiling",
+          "candidate-coin-base",
+          "candidate-top-lamp"
         ]
       }
     ],
@@ -208,19 +452,11 @@
     "candidateLedger": [
       {
         "candidateId": "candidate-primary-setting-difference",
-        "label": "初当たり確率",
+        "label": "ボーナス初当たり",
         "sourceClaims": [
           {
-            "sourceId": "nana",
-            "claim": "初当たり確率は設定1・2・4・5・6の公表値を記録。"
-          },
-          {
-            "sourceId": "nana",
-            "claim": "設定3の値は公表表にないため補完しない。"
-          },
-          {
-            "sourceId": "pacnk",
-            "claim": "設定別初当たり確率と小役候補の公開表を照合。"
+            "sourceId": "review",
+            "claim": "ボーナス初当たりの設定別公開値と対象条件：通常時のゲーム数と、連チャンに入る最初のボーナス回数。連チャン中のボーナスは含めません。"
           }
         ],
         "discoveryQueries": [
@@ -232,15 +468,168 @@
           "type": "FINDING",
           "refId": "primary-setting-difference"
         }
+      },
+      {
+        "candidateId": "candidate-bonus-total",
+        "label": "ボーナス合算確率",
+        "sourceClaims": [
+          {
+            "sourceId": "review",
+            "claim": "ボーナス合算確率：連チャン中の当たりを含む合算値です。通常時の初当たりと同時に独立加算すると同じ当選経路を重ねて評価するため、今回の初当たり入力とは分けて保存します。"
+          }
+        ],
+        "discoveryQueries": [
+          "チバリヨ2プラス 設定差 初当たり確率 設定別 公開値",
+          "チバリヨ2プラス 設定判別 初当たり CZ AT 条件",
+          "チバリヨ2プラス 終了画面 設定示唆 確定条件"
+        ],
+        "disposition": {
+          "type": "BLOCKED",
+          "refId": "bonus-total"
+        }
+      },
+      {
+        "candidateId": "candidate-weak-cherry-direct",
+        "label": "弱チェリー直撃率",
+        "sourceClaims": [
+          {
+            "sourceId": "review",
+            "claim": "弱チェリー直撃率の設定別公開値と対象条件：通常時の弱チェリー回数に対する直撃ボーナス当選回数。通常時の弱チェリー回数と、規定チェリー回数での当選を除く直撃ボーナス回数。直撃を区別できない当たりは数えません。"
+          }
+        ],
+        "discoveryQueries": [
+          "チバリヨ2プラス 設定差 初当たり確率 設定別 公開値",
+          "チバリヨ2プラス 設定判別 初当たり CZ AT 条件",
+          "チバリヨ2プラス 終了画面 設定示唆 確定条件"
+        ],
+        "disposition": {
+          "type": "FINDING",
+          "refId": "weak-cherry-direct"
+        }
+      },
+      {
+        "candidateId": "candidate-cherry-total-expectation",
+        "label": "チェリー出現時のボーナス期待度",
+        "sourceClaims": [
+          {
+            "sourceId": "review",
+            "claim": "チェリー出現時のボーナス期待度：規定チェリー回数到達による当選を含む期待度と、直撃抽選の当選率は別の値です。通常A等のモードと規定回数の選択を含むため、弱チェリー直撃の分子へ混ぜません。"
+          }
+        ],
+        "discoveryQueries": [
+          "チバリヨ2プラス 設定差 初当たり確率 設定別 公開値",
+          "チバリヨ2プラス 設定判別 初当たり CZ AT 条件",
+          "チバリヨ2プラス 終了画面 設定示唆 確定条件"
+        ],
+        "disposition": {
+          "type": "BLOCKED",
+          "refId": "cherry-total-expectation"
+        }
+      },
+      {
+        "candidateId": "candidate-common-bell",
+        "label": "共通ベル",
+        "sourceClaims": [
+          {
+            "sourceId": "review",
+            "claim": "共通ベル：設定1の値のみ公表されており、設定2・4・5・6の確率を確認できません。平均コイン持ちから他設定の確率を逆算しません。"
+          }
+        ],
+        "discoveryQueries": [
+          "チバリヨ2プラス 設定差 初当たり確率 設定別 公開値",
+          "チバリヨ2プラス 設定判別 初当たり CZ AT 条件",
+          "チバリヨ2プラス 終了画面 設定示唆 確定条件"
+        ],
+        "disposition": {
+          "type": "BLOCKED",
+          "refId": "common-bell"
+        }
+      },
+      {
+        "candidateId": "candidate-ordered-bell",
+        "label": "押し順12枚ベル",
+        "sourceClaims": [
+          {
+            "sourceId": "review",
+            "claim": "押し順12枚ベル：設定1の値のみ公表されており、設定2・4・5・6の確率を確認できません。平均コイン持ちから他設定の確率を逆算しません。"
+          }
+        ],
+        "discoveryQueries": [
+          "チバリヨ2プラス 設定差 初当たり確率 設定別 公開値",
+          "チバリヨ2プラス 設定判別 初当たり CZ AT 条件",
+          "チバリヨ2プラス 終了画面 設定示唆 確定条件"
+        ],
+        "disposition": {
+          "type": "BLOCKED",
+          "refId": "ordered-bell"
+        }
+      },
+      {
+        "candidateId": "candidate-short-ceiling",
+        "label": "350G天井選択率",
+        "sourceClaims": [
+          {
+            "sourceId": "review",
+            "claim": "350G天井選択率：高設定ほど350G天井を選びやすいという説明はありますが、通常モード別の設定別選択率がありません。途中のチェリー当選を350G天井の選択結果に置き換えません。"
+          }
+        ],
+        "discoveryQueries": [
+          "チバリヨ2プラス 設定差 初当たり確率 設定別 公開値",
+          "チバリヨ2プラス 設定判別 初当たり CZ AT 条件",
+          "チバリヨ2プラス 終了画面 設定示唆 確定条件"
+        ],
+        "disposition": {
+          "type": "BLOCKED",
+          "refId": "short-ceiling"
+        }
+      },
+      {
+        "candidateId": "candidate-coin-base",
+        "label": "50枚あたりのゲーム数",
+        "sourceClaims": [
+          {
+            "sourceId": "review",
+            "claim": "50枚あたりのゲーム数：公表値は複数の小役と払い出しをまとめた平均です。単一のベル確率や独立した当選回数の確率には変換できません。"
+          }
+        ],
+        "discoveryQueries": [
+          "チバリヨ2プラス 設定差 初当たり確率 設定別 公開値",
+          "チバリヨ2プラス 設定判別 初当たり CZ AT 条件",
+          "チバリヨ2プラス 終了画面 設定示唆 確定条件"
+        ],
+        "disposition": {
+          "type": "BLOCKED",
+          "refId": "coin-base"
+        }
+      },
+      {
+        "candidateId": "candidate-top-lamp",
+        "label": "ボーナス終了トップランプ",
+        "sourceClaims": [
+          {
+            "sourceId": "lamp",
+            "claim": "ボーナス終了トップランプ：トップランプは継続期待度・次回モードの示唆です。虹は高継続の示唆で、設定6の確定条件には使いません。設定別出現率も確認できません。"
+          }
+        ],
+        "discoveryQueries": [
+          "チバリヨ2プラス 設定差 初当たり確率 設定別 公開値",
+          "チバリヨ2プラス 設定判別 初当たり CZ AT 条件",
+          "チバリヨ2プラス 終了画面 設定示唆 確定条件"
+        ],
+        "disposition": {
+          "type": "BLOCKED",
+          "refId": "top-lamp"
+        }
       }
     ],
-    "surveyBoundary": "本日、機種別の設定判別総覧・公開解析の設定差、観測条件、確定演出を候補単位で照合した範囲。公開資料の全網羅や非公表情報の不存在は主張しない。資料矛盾は候補別に閉じ、新しい具体的資料のみで再評価する。"
+    "surveyBoundary": "2026-10-12に登録した公開設定判別総覧の抽選値・設定示唆見出しと、候補に記載した追加資料を確認。掲載候補を評価前に台帳化。未公開・識別不能の候補は理由と公表済み値を保持し不採用で閉じる。非公表情報や公開全資料の完全網羅は主張しない。"
   },
   "reviewCheckpoint": {
     "status": "AWAITING_FORMAL_RESEARCH_VALIDATOR",
     "pending": [
-      "正式Validatorと候補採否のオーケストレーター確定"
+      "正式ValidatorとOrchestratorによる確定"
     ],
     "runtimeModified": false
-  }
+  },
+  "packageRevision": 2
 }

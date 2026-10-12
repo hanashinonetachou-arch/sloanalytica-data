@@ -7,9 +7,23 @@
   "decisions": [
     {
       "findingId": "primary-setting-difference",
-      "label": "初当たり確率",
+      "label": "ボーナス初当たり",
       "supportingSourceIds": [
-        "nana"
+        "review"
+      ],
+      "eligibility": "ELIGIBLE",
+      "reason": "設定間の情報量があり、実戦で試行単位を再現可能に観測できる。",
+      "ruleRefs": [
+        "manifest-v8.5-information-gain",
+        "live-observation-contract"
+      ],
+      "liveInferenceRoute": "LIVE_CONDITIONAL"
+    },
+    {
+      "findingId": "weak-cherry-direct",
+      "label": "弱チェリー直撃率",
+      "supportingSourceIds": [
+        "review"
       ],
       "eligibility": "ELIGIBLE",
       "reason": "設定間の情報量があり、実戦で試行単位を再現可能に観測できる。",
@@ -20,7 +34,107 @@
       "liveInferenceRoute": "LIVE_CONDITIONAL"
     }
   ],
-  "blockedItems": [],
+  "blockedItems": [
+    {
+      "blockId": "bonus-total",
+      "label": "ボーナス合算確率",
+      "reason": "連チャン中の当たりを含む合算値です。通常時の初当たりと同時に独立加算すると同じ当選経路を重ねて評価するため、今回の初当たり入力とは分けて保存します。",
+      "reevaluationCondition": "対象条件を識別でき、設定別の公開値と観測回数の対応を確認できる新しい資料が得られた場合。",
+      "sourceIds": [
+        "review"
+      ],
+      "publishedSettingDistribution": {
+        "1": "1/108.4",
+        "2": "1/104.2",
+        "4": "1/93.7",
+        "5": "1/83.9",
+        "6": "1/74.8"
+      }
+    },
+    {
+      "blockId": "cherry-total-expectation",
+      "label": "チェリー出現時のボーナス期待度",
+      "reason": "規定チェリー回数到達による当選を含む期待度と、直撃抽選の当選率は別の値です。通常A等のモードと規定回数の選択を含むため、弱チェリー直撃の分子へ混ぜません。",
+      "reevaluationCondition": "対象条件を識別でき、設定別の公開値と観測回数の対応を確認できる新しい資料が得られた場合。",
+      "sourceIds": [
+        "review"
+      ],
+      "publishedSettingDistribution": {
+        "weak": {
+          "1": 0.0592,
+          "2": 0.062400000000000004,
+          "4": 0.0681,
+          "5": 0.0704,
+          "6": 0.0691
+        },
+        "strong": {
+          "1": 0.5618,
+          "2": 0.5640999999999999,
+          "4": 0.5725,
+          "5": 0.5814,
+          "6": 0.5896
+        }
+      }
+    },
+    {
+      "blockId": "common-bell",
+      "label": "共通ベル",
+      "reason": "設定1の値のみ公表されており、設定2・4・5・6の確率を確認できません。平均コイン持ちから他設定の確率を逆算しません。",
+      "reevaluationCondition": "対象条件を識別でき、設定別の公開値と観測回数の対応を確認できる新しい資料が得られた場合。",
+      "sourceIds": [
+        "review"
+      ],
+      "publishedSettingDistribution": {
+        "1": "1/32.19"
+      }
+    },
+    {
+      "blockId": "ordered-bell",
+      "label": "押し順12枚ベル",
+      "reason": "設定1の値のみ公表されており、設定2・4・5・6の確率を確認できません。平均コイン持ちから他設定の確率を逆算しません。",
+      "reevaluationCondition": "対象条件を識別でき、設定別の公開値と観測回数の対応を確認できる新しい資料が得られた場合。",
+      "sourceIds": [
+        "review"
+      ],
+      "publishedSettingDistribution": {
+        "1": "1/7.8"
+      }
+    },
+    {
+      "blockId": "short-ceiling",
+      "label": "350G天井選択率",
+      "reason": "高設定ほど350G天井を選びやすいという説明はありますが、通常モード別の設定別選択率がありません。途中のチェリー当選を350G天井の選択結果に置き換えません。",
+      "reevaluationCondition": "対象条件を識別でき、設定別の公開値と観測回数の対応を確認できる新しい資料が得られた場合。",
+      "sourceIds": [
+        "review"
+      ]
+    },
+    {
+      "blockId": "coin-base",
+      "label": "50枚あたりのゲーム数",
+      "reason": "公表値は複数の小役と払い出しをまとめた平均です。単一のベル確率や独立した当選回数の確率には変換できません。",
+      "reevaluationCondition": "対象条件を識別でき、設定別の公開値と観測回数の対応を確認できる新しい資料が得られた場合。",
+      "sourceIds": [
+        "review"
+      ],
+      "publishedSettingDistribution": {
+        "1": 27.9,
+        "2": 28.2,
+        "3": 28.7,
+        "4": 29.1,
+        "6": 29.8
+      }
+    },
+    {
+      "blockId": "top-lamp",
+      "label": "ボーナス終了トップランプ",
+      "reason": "トップランプは継続期待度・次回モードの示唆です。虹は高継続の示唆で、設定6の確定条件には使いません。設定別出現率も確認できません。",
+      "reevaluationCondition": "対象条件を識別でき、設定別の公開値と観測回数の対応を確認できる新しい資料が得られた場合。",
+      "sourceIds": [
+        "lamp"
+      ]
+    }
+  ],
   "evidenceCandidates": [],
   "sourceIntegrityIssues": []
 }

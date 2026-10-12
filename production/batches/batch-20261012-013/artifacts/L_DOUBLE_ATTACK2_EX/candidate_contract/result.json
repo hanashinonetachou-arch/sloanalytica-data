@@ -8,36 +8,302 @@
     "artifactId": "evaluation-L_DOUBLE_ATTACK2_EX",
     "kind": "evaluation",
     "path": "production/batches/batch-20261012-013/artifacts/L_DOUBLE_ATTACK2_EX/evaluation/result.json",
-    "sha256": "f75e4efa461eb72d10c980b8867f91c0b53e085fad7a6ef186e9efe407c86194",
-    "producerWorkId": "wrk_21bdd7632eae4b0b"
+    "sha256": "6472917b2ae0333200e1be9890a85899d262513e40853a9a9a526bef9931a54c",
+    "producerWorkId": "wrk_5b4218d777884ad4"
   },
   "eligibilityArtifact": {
     "artifactId": "eligibility-L_DOUBLE_ATTACK2_EX",
     "kind": "eligibility",
     "path": "production/batches/batch-20261012-013/artifacts/L_DOUBLE_ATTACK2_EX/eligibility/result.json",
-    "sha256": "192bcc14fde7d423001c59fffe1ba56d234b98c5705effef0f63f1f22be1e340",
-    "producerWorkId": "wrk_8049d7b7190f4080"
+    "sha256": "6093655b8bc3406e4357827ada2d4b26dfe62e0ef209e1712e95925a6bf973cd",
+    "producerWorkId": "wrk_28f6bcac7c724a11"
   },
-  "candidates": [],
-  "dependencyGroups": [],
+  "candidates": [
+    {
+      "findingId": "at-initial",
+      "label": "AT初当たり",
+      "model": "BERNOULLI",
+      "trialUniverse": "NORMAL_GAME_TRIAL",
+      "liveInferenceRoute": "LIVE_CONDITIONAL",
+      "settingDistribution": {
+        "1": "1/259.9",
+        "2": "1/250.3",
+        "3": "1/237.1",
+        "4": "1/217.4",
+        "5": "1/200.2",
+        "6": "1/189.5"
+      },
+      "details": [],
+      "dependencyGroupId": "double-attack-entry",
+      "dependencyKind": "CAUSAL_PATH_OVERLAP",
+      "dependencyReason": "初当たりにつながる同じ抽選経路を含むため、同時に独立加算しません。",
+      "runtimeInferenceAllowed": true,
+      "dependencyResolution": "SINGLE_MEMBER_SELECTED",
+      "runtimePolicyBinding": {
+        "metric": "SELECTION_SCORE",
+        "value": 50.36419804859605,
+        "thresholdSource": "RUNTIME_POLICY"
+      }
+    },
+    {
+      "findingId": "cz-lower",
+      "label": "チャンスゾーンセブン",
+      "model": "BERNOULLI",
+      "trialUniverse": "NORMAL_GAME_TRIAL",
+      "liveInferenceRoute": "LIVE_CONDITIONAL",
+      "settingDistribution": {
+        "1": "1/433.4",
+        "2": "1/414.6",
+        "3": "1/402.4",
+        "4": "1/349.9",
+        "5": "1/317.3",
+        "6": "1/296.5"
+      },
+      "details": [],
+      "dependencyGroupId": "double-attack-entry",
+      "dependencyKind": "CAUSAL_PATH_OVERLAP",
+      "dependencyReason": "初当たりにつながる同じ抽選経路を含むため、同時に独立加算しません。",
+      "runtimeInferenceAllowed": false,
+      "dependencyResolution": "RESOLVED_BY_SINGLE_MEMBER",
+      "runtimePolicyBinding": {
+        "metric": "SELECTION_SCORE",
+        "value": 47.63890866183021,
+        "thresholdSource": "RUNTIME_POLICY"
+      },
+      "resolvedIntoFindingId": "at-initial"
+    },
+    {
+      "findingId": "cz-upper",
+      "label": "ビッグポットチャンスセブン",
+      "model": "BERNOULLI",
+      "trialUniverse": "NORMAL_GAME_TRIAL",
+      "liveInferenceRoute": "LIVE_CONDITIONAL",
+      "settingDistribution": {
+        "1": "1/13538",
+        "2": "1/13023",
+        "3": "1/12031",
+        "4": "1/10716",
+        "5": "1/8881",
+        "6": "1/7816"
+      },
+      "details": [],
+      "dependencyGroupId": "double-attack-entry",
+      "dependencyKind": "CAUSAL_PATH_OVERLAP",
+      "dependencyReason": "初当たりにつながる同じ抽選経路を含むため、同時に独立加算しません。",
+      "runtimeInferenceAllowed": false,
+      "dependencyResolution": "RESOLVED_BY_SINGLE_MEMBER",
+      "runtimePolicyBinding": {
+        "metric": "SELECTION_SCORE",
+        "value": 3.945172368510161,
+        "thresholdSource": "RUNTIME_POLICY"
+      },
+      "resolvedIntoFindingId": "at-initial"
+    }
+  ],
+  "dependencyGroups": [
+    {
+      "groupId": "double-attack-entry",
+      "resolution": "SINGLE_MEMBER_SELECTED",
+      "members": [
+        "at-initial",
+        "cz-lower",
+        "cz-upper"
+      ],
+      "runtimeInferenceAllowed": true,
+      "selectedFindingId": "at-initial",
+      "selectionRationale": "依存関係を仮定せず二重評価を避けるため、依存関係グループ内で正式な7000G設定判別スコアが最大の候補を代表Featureとして使用する。",
+      "reason": "正式な設定判別スコアを比較できる候補から、最も情報量の高い1要素のみを採用する。"
+    }
+  ],
   "excludedDecisions": [],
-  "blockedItems": [],
+  "blockedItems": [
+    {
+      "blockId": "chance-mode",
+      "label": "チャンス目成立時のCZ抽選",
+      "reason": "通常・高確・超高確で当選率が異なります。演出だけで内部状態を確定できず、状態別のチャンス目母数を分けられないため数値推測に使いません。",
+      "reevaluationCondition": "対象条件を識別でき、設定別の公開値と観測回数の対応を確認できる新しい資料が得られた場合。",
+      "sourceIds": [
+        "review"
+      ],
+      "publishedSettingDistribution": {
+        "normal": {
+          "1": 0.094,
+          "2": 0.099,
+          "3": 0.1,
+          "4": 0.13,
+          "5": 0.151,
+          "6": 0.165
+        },
+        "high": {
+          "1": 0.264,
+          "2": 0.27,
+          "3": 0.272,
+          "4": 0.317,
+          "5": 0.35,
+          "6": 0.371
+        },
+        "superHigh": 75
+      }
+    },
+    {
+      "blockId": "reset-mode",
+      "label": "設定変更時のモード振り分け",
+      "reason": "設定変更時は通常B以上ですが、実際のモードを毎回識別できません。最初のATが早かったかどうかを、内部モードの選択結果に置き換えません。",
+      "reevaluationCondition": "対象条件を識別でき、設定別の公開値と観測回数の対応を確認できる新しい資料が得られた場合。",
+      "sourceIds": [
+        "review"
+      ]
+    },
+    {
+      "blockId": "mode-movement",
+      "label": "AT終了後のモード移行",
+      "reason": "移行元のモード別に公開表があります。前回・次回の規定シンボル回数からモードを一意に確定できず、直撃もあるため、移行元・移行先を推測した回数を確率計算に使いません。",
+      "reevaluationCondition": "対象条件を識別でき、設定別の公開値と観測回数の対応を確認できる新しい資料が得られた場合。",
+      "sourceIds": [
+        "review"
+      ]
+    },
+    {
+      "blockId": "common-bell",
+      "label": "共通ベル",
+      "reason": "設定別の出現率が公開されていません。設定別のコイン持ちから共通ベル確率を逆算しません。",
+      "reevaluationCondition": "対象条件を識別でき、設定別の公開値と観測回数の対応を確認できる新しい資料が得られた場合。",
+      "sourceIds": [
+        "spec"
+      ]
+    },
+    {
+      "blockId": "symbol-state",
+      "label": "シンボル出現率",
+      "reason": "出現率は通常1/18.3・高確1/10.2・超高確1/4.5という内部状態別の値です。設定別確率ではなく、状態の見えない実戦の合算値を独立した設定差にはしません。",
+      "reevaluationCondition": "対象条件を識別でき、設定別の公開値と観測回数の対応を確認できる新しい資料が得られた場合。",
+      "sourceIds": [
+        "spec"
+      ]
+    },
+    {
+      "blockId": "coin-base",
+      "label": "50枚あたりのゲーム数",
+      "reason": "設定別の平均コイン持ちはありますが、小役をまとめた平均なので単一の独立した当選確率として使いません。",
+      "reevaluationCondition": "対象条件を識別でき、設定別の公開値と観測回数の対応を確認できる新しい資料が得られた場合。",
+      "sourceIds": [
+        "spec"
+      ],
+      "publishedSettingDistribution": {
+        "1": 33.4,
+        "2": 33.7,
+        "3": 34,
+        "4": 34.4,
+        "5": 34.7,
+        "6": 35
+      }
+    },
+    {
+      "blockId": "coin-special-pattern",
+      "label": "コインくんの設定5以上特殊柄",
+      "reason": "ナナプレスはトランプ柄、一撃は羽柄と表記しています。同一画像の対応を今回確定できていないため、表記を混ぜた確定入力を作りません。特殊柄の画像対応が確認された場合に再評価します。",
+      "reevaluationCondition": "対象条件を識別でき、設定別の公開値と観測回数の対応を確認できる新しい資料が得られた場合。",
+      "sourceIds": [
+        "second"
+      ],
+      "publishedSettingDistribution": {
+        "nana": "トランプ柄：設定5以上",
+        "1geki": "羽柄：設定5以上"
+      }
+    }
+  ],
   "evidenceCandidates": [
     {
       "findingId": "primary-setting-difference",
-      "label": "AT終了時コインくん色",
+      "label": "AT終了時コインくん",
       "sourceIds": [
-        "onegeki"
+        "review"
       ],
       "details": [
-        "終了画面の色別情報は設定示唆で、設定別出現率は未確認。",
-        "設定示唆の観測は数値確率へ変換せず記録に留める。"
+        "通常AT・上位ATの終了画面に出たコインくんを確認します。設定5以上の特殊柄は資料間の識別表記が一致しないため、この入力から除外しています。"
       ],
       "semanticCategories": [
         {
-          "label": "終了時コインくん色",
-          "semanticType": "PROBABILITY_UNKNOWN",
-          "meaning": "終了時コインくん色は設定示唆。設定別出現率は未確認のため記録のみ。"
+          "label": "出現せず",
+          "meaning": "基本パターン",
+          "semanticType": "PROBABILITY_UNKNOWN"
+        },
+        {
+          "label": "青",
+          "meaning": "偶数設定示唆",
+          "semanticType": "PROBABILITY_UNKNOWN"
+        },
+        {
+          "label": "黄",
+          "meaning": "高設定示唆",
+          "semanticType": "PROBABILITY_UNKNOWN"
+        },
+        {
+          "label": "銅",
+          "meaning": "設定2以上",
+          "semanticType": "EXACT_CONSTRAINT"
+        },
+        {
+          "label": "銀",
+          "meaning": "設定3以上",
+          "semanticType": "EXACT_CONSTRAINT"
+        },
+        {
+          "label": "金",
+          "meaning": "設定4以上",
+          "semanticType": "EXACT_CONSTRAINT"
+        },
+        {
+          "label": "虹",
+          "meaning": "設定6",
+          "semanticType": "EXACT_CONSTRAINT"
+        }
+      ]
+    },
+    {
+      "findingId": "ending-lamp",
+      "label": "エンディングの梁ランプ",
+      "sourceIds": [
+        "review"
+      ],
+      "details": [
+        "エンディング中のレア小役成立時にPUSHを押して、梁ランプの色を確認します。ボイスと色は同じ演出なので二重入力しません。"
+      ],
+      "semanticCategories": [
+        {
+          "label": "白",
+          "meaning": "基本パターン",
+          "semanticType": "PROBABILITY_UNKNOWN"
+        },
+        {
+          "label": "青",
+          "meaning": "奇数設定示唆",
+          "semanticType": "PROBABILITY_UNKNOWN"
+        },
+        {
+          "label": "黄",
+          "meaning": "偶数設定示唆",
+          "semanticType": "PROBABILITY_UNKNOWN"
+        },
+        {
+          "label": "緑",
+          "meaning": "高設定示唆",
+          "semanticType": "PROBABILITY_UNKNOWN"
+        },
+        {
+          "label": "赤",
+          "meaning": "設定4以上",
+          "semanticType": "EXACT_CONSTRAINT"
+        },
+        {
+          "label": "紫",
+          "meaning": "設定5以上",
+          "semanticType": "EXACT_CONSTRAINT"
+        },
+        {
+          "label": "虹",
+          "meaning": "設定6",
+          "semanticType": "EXACT_CONSTRAINT"
         }
       ]
     }

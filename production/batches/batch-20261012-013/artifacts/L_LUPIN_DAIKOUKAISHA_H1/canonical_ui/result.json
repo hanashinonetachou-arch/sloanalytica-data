@@ -9,43 +9,71 @@
       "artifactId": "candidate-contract-L_LUPIN_DAIKOUKAISHA_H1",
       "kind": "candidate-contract",
       "path": "production/batches/batch-20261012-013/artifacts/L_LUPIN_DAIKOUKAISHA_H1/candidate_contract/result.json",
-      "sha256": "150b12a0063e14d5c8524c3869b5bde6acdf15bca42918e54d6526d95f32c4ed",
-      "producerWorkId": "wrk_5a9a89cdec554186"
+      "sha256": "58d98e04590810ac95d29a4333aef705c79e2ffd942ffcd82d1916120c27dead",
+      "producerWorkId": "wrk_bfa27b5668e54331"
     },
     "observationEvidence": {
       "artifactId": "observation-evidence-L_LUPIN_DAIKOUKAISHA_H1",
       "kind": "observation-evidence",
       "path": "production/batches/batch-20261012-013/artifacts/L_LUPIN_DAIKOUKAISHA_H1/observation_evidence/result.json",
-      "sha256": "789341f1063a86c9c6851ffad475cbb6508dd744aa2a10656178b64c93676725",
-      "producerWorkId": "wrk_a07484e2f0eb47d1"
+      "sha256": "486594744fe3dac8b114341f42d2eea8fbd32c03b991a5eb0c6f3d89850c69d1",
+      "producerWorkId": "wrk_7db7db7578194ec1"
     },
     "evaluation": {
       "artifactId": "evaluation-L_LUPIN_DAIKOUKAISHA_H1",
       "kind": "evaluation",
       "path": "production/batches/batch-20261012-013/artifacts/L_LUPIN_DAIKOUKAISHA_H1/evaluation/result.json",
-      "sha256": "6546a8f14e2b93862beab2a3f95b5ab8a0360262fd9c26216431508412f9f01f",
-      "producerWorkId": "wrk_b2b4612d714d424b"
+      "sha256": "a99009ce98f445934017714165dbf00b4a475bcdafe2f22d4781b83776005eed",
+      "producerWorkId": "wrk_2a5085a64dbe40ce"
     }
   },
   "machineInferenceSummary": {
     "title": "この機種の設定推測について",
     "position": "TOP_ONLY",
     "highLowDiscrimination": {
-      "status": "NOT_COMPUTED",
-      "reason": "基準ゲーム数へ正確に換算できる設定推測要素がないため、高低判別精度を算出していません。",
-      "eligibleFeatureIds": [],
+      "status": "COMPUTED",
+      "method": "BEST_SINGLE_EXACT_ACTIVE_FEATURE",
+      "bandDefinition": {
+        "lowSettings": "SETTING_1_TO_3",
+        "highSettings": "SETTING_4_TO_6",
+        "classPrior": "BALANCED"
+      },
+      "results": [
+        {
+          "games": 1500,
+          "balancedAccuracyPercent": 59.82
+        },
+        {
+          "games": 3000,
+          "balancedAccuracyPercent": 63.78
+        },
+        {
+          "games": 7000,
+          "balancedAccuracyPercent": 70.38
+        }
+      ],
+      "eligibleFeatureIds": [
+        "initial-total"
+      ],
+      "selectedFeatureId": "initial-total",
+      "selectedFeatureLabel": "初当たり合算",
       "excludedFeatures": [
         {
-          "findingId": "primary-setting-difference",
+          "findingId": "bonus-character",
+          "reason": "BENCHMARK_EXPOSURE_UNRESOLVED"
+        },
+        {
+          "findingId": "lupin-game-rate",
           "reason": "BENCHMARK_EXPOSURE_UNRESOLVED"
         }
-      ]
+      ],
+      "note": "7000Gへ正確に換算できるACTIVE要素だけを候補とし、要素間の独立性を仮定せず、単独で最も高い判別精度を持つ要素から保守的に算出しています。条件付き要素はこの指標には含めませんが、実戦中に実際の観測回数が入力された場合は設定推測に使用します。"
     }
   },
   "playInfo": {
     "visible": true,
     "collapsible": false,
-    "mode": "NONE",
+    "mode": "NORMAL_ONLY",
     "sessionFields": [
       {
         "id": "date",
@@ -63,8 +91,22 @@
         "mode": "TEXT"
       }
     ],
-    "startFields": [],
-    "currentFields": [],
+    "startFields": [
+      {
+        "id": "startNormalGames",
+        "label": "着席時 通常ゲーム数",
+        "mode": "NUMBER",
+        "directNumeric": true
+      }
+    ],
+    "currentFields": [
+      {
+        "id": "currentNormalGames",
+        "label": "現在 通常ゲーム数",
+        "mode": "NUMBER",
+        "directNumeric": true
+      }
+    ],
     "difference": {
       "autoCalculate": true
     },
@@ -77,15 +119,97 @@
     "enabled": true,
     "singleOpen": true
   },
+  "uiPresentation": {
+    "hiddenDerivedFindingIds": [],
+    "sectionOrder": [],
+    "evidenceSectionMerges": [],
+    "tabGroups": [
+      {
+        "id": "OPPORTUNITY_single-bonus-end-voice",
+        "title": "ボーナス終了ボイス",
+        "origin": "APPROVED_OBSERVATION_CONTEXT",
+        "tabs": [
+          {
+            "sectionId": "EVI_voice-lupin",
+            "label": "ルパン"
+          },
+          {
+            "sectionId": "EVI_voice-jigen",
+            "label": "次元"
+          },
+          {
+            "sectionId": "EVI_voice-goemon",
+            "label": "五ェ門"
+          }
+        ]
+      }
+    ]
+  },
   "numericSections": [
     {
-      "id": "OBS_primary-setting-difference",
-      "sourceFindingId": "primary-setting-difference",
-      "title": "ICPOチャレンジ成功期待度",
+      "id": "OBS_initial-total",
+      "sourceFindingId": "initial-total",
+      "title": "初当たり合算",
       "kind": "NUMERIC_OBSERVATION",
       "model": "BERNOULLI",
-      "trialUniverse": "CZ_TRIAL",
-      "description": "対象となる機会のうち、成功が実際に起きた割合を設定別に比較します。\n・注意：AT直撃やCZ突入率は含めない。\n・注意：ICPOチャレンジ成功期待度をCZ実施1回ごとの条件付き候補として記録。",
+      "trialUniverse": "NORMAL_GAME_TRIAL",
+      "description": "通常時のシングル・ダブルセブンの初当たり合計を記録します。通常ゲーム数を基準に、実戦中の出現割合を設定別に比較します。\n・注意：ボーナス経由でATへ移行しても初当たりを二重に数えません。",
+      "collapsible": true,
+      "defaultExpanded": false,
+      "descriptionPresentation": {
+        "collapsible": true,
+        "label": "説明",
+        "defaultExpanded": false
+      },
+      "score": {
+        "label": "設定判別スコア",
+        "status": "COMPUTED",
+        "value": 41.3,
+        "precision": 1,
+        "importance": "主要"
+      },
+      "perEligibleTrialPower": {
+        "label": "1回の判別力",
+        "value": 41.312856122879495,
+        "metric": "PER_ELIGIBLE_TRIAL_POWER",
+        "thresholdSource": "RUNTIME_POLICY"
+      },
+      "inputs": [
+        {
+          "id": "initial-total.eligibleTrialCount",
+          "label": "通常ゲーム数",
+          "role": "trial",
+          "mode": "NUMBER",
+          "directNumeric": true,
+          "quickAdd": [
+            50
+          ],
+          "partialInputAllowed": true,
+          "emptyMeansUnobserved": true
+        },
+        {
+          "id": "initial-total.successCount",
+          "label": "シングル・ダブルセブンの初当たり合計回数",
+          "role": "success",
+          "mode": "NUMBER",
+          "directNumeric": true,
+          "quickAdd": [
+            1
+          ],
+          "partialInputAllowed": true,
+          "emptyMeansUnobserved": true,
+          "missingSubItemTreatment": "ZERO_WHEN_PARENT_OBSERVED"
+        }
+      ]
+    },
+    {
+      "id": "OBS_bonus-character",
+      "sourceFindingId": "bonus-character",
+      "title": "初当たりボーナスの種類",
+      "kind": "NUMERIC_OBSERVATION",
+      "model": "CATEGORICAL",
+      "trialUniverse": "BONUS_CHARACTER_TRIAL",
+      "description": "初当たりボーナス確認回数に対する各ボーナスの選択回数。初当たりで選ばれたボーナスの種類を記録します。消化中に不二子ボーナスへ昇格した場合は不二子の初期選択として数えません。\n・注意：初当たりで選ばれたボーナスの種類を記録します。\n・注意：消化中に不二子ボーナスへ昇格した場合は不二子の初期選択として数えません。",
       "collapsible": true,
       "defaultExpanded": false,
       "descriptionPresentation": {
@@ -102,14 +226,14 @@
       },
       "perEligibleTrialPower": {
         "label": "1回の判別力",
-        "value": 0.6195669356063638,
+        "value": 8.057621737658028,
         "metric": "PER_ELIGIBLE_TRIAL_POWER",
         "thresholdSource": "RUNTIME_POLICY"
       },
       "inputs": [
         {
-          "id": "primary-setting-difference.eligibleTrialCount",
-          "label": "ICPOチャレンジを実施した回数",
+          "id": "bonus-character.eligibleTrialCount",
+          "label": "初当たりボーナス確認回数",
           "role": "trial",
           "mode": "NUMBER",
           "directNumeric": true,
@@ -118,8 +242,103 @@
           "emptyMeansUnobserved": true
         },
         {
-          "id": "primary-setting-difference.successCount",
-          "label": "成功回数",
+          "id": "bonus-character.categoryCounts.1_ルパン",
+          "label": "ルパン",
+          "role": "categoryCount",
+          "mode": "NUMBER",
+          "directNumeric": true,
+          "quickAdd": [
+            1
+          ],
+          "partialInputAllowed": true,
+          "emptyMeansUnobserved": true,
+          "missingSubItemTreatment": "ZERO_WHEN_PARENT_OBSERVED"
+        },
+        {
+          "id": "bonus-character.categoryCounts.2_次元",
+          "label": "次元",
+          "role": "categoryCount",
+          "mode": "NUMBER",
+          "directNumeric": true,
+          "quickAdd": [
+            1
+          ],
+          "partialInputAllowed": true,
+          "emptyMeansUnobserved": true,
+          "missingSubItemTreatment": "ZERO_WHEN_PARENT_OBSERVED"
+        },
+        {
+          "id": "bonus-character.categoryCounts.3_五ェ門",
+          "label": "五ェ門",
+          "role": "categoryCount",
+          "mode": "NUMBER",
+          "directNumeric": true,
+          "quickAdd": [
+            1
+          ],
+          "partialInputAllowed": true,
+          "emptyMeansUnobserved": true,
+          "missingSubItemTreatment": "ZERO_WHEN_PARENT_OBSERVED"
+        },
+        {
+          "id": "bonus-character.categoryCounts.4_不二子",
+          "label": "不二子",
+          "role": "categoryCount",
+          "mode": "NUMBER",
+          "directNumeric": true,
+          "quickAdd": [
+            1
+          ],
+          "partialInputAllowed": true,
+          "emptyMeansUnobserved": true,
+          "missingSubItemTreatment": "ZERO_WHEN_PARENT_OBSERVED"
+        }
+      ]
+    },
+    {
+      "id": "OBS_lupin-game-rate",
+      "sourceFindingId": "lupin-game-rate",
+      "title": "AT中のルパンゲーム",
+      "kind": "NUMERIC_OBSERVATION",
+      "model": "BERNOULLI",
+      "trialUniverse": "AT_GAME_TRIAL",
+      "description": "対象となる機会のうち、ルパンゲーム当選が実際に起きた割合を設定別に比較します。\n・注意：ルパンゲーム・上位AT・特化ゾーンの消化ゲーム数は含めません。",
+      "collapsible": true,
+      "defaultExpanded": false,
+      "descriptionPresentation": {
+        "collapsible": true,
+        "label": "説明",
+        "defaultExpanded": false
+      },
+      "score": {
+        "label": "設定判別スコア",
+        "status": "NOT_COMPUTED",
+        "display": "算出不可",
+        "reason": "基準遊技量7000Gでの判別力を算出するための観測条件が確定していないため算出できません。",
+        "sourceReason": "基準遊技量に対応するexact exposure modelが未確立のため算出しない。"
+      },
+      "perEligibleTrialPower": {
+        "label": "1回の判別力",
+        "value": 0.0005830175278248584,
+        "metric": "PER_ELIGIBLE_TRIAL_POWER",
+        "thresholdSource": "RUNTIME_POLICY"
+      },
+      "inputs": [
+        {
+          "id": "lupin-game-rate.eligibleTrialCount",
+          "label": "通常のスーパーヒーロー消化ゲーム数",
+          "role": "trial",
+          "mode": "NUMBER",
+          "directNumeric": true,
+          "quickAdd": [
+            50
+          ],
+          "partialInputAllowed": true,
+          "emptyMeansUnobserved": true
+        },
+        {
+          "id": "lupin-game-rate.successCount",
+          "label": "ルパンゲーム当選回数",
           "role": "success",
           "mode": "NUMBER",
           "directNumeric": true,
@@ -133,7 +352,463 @@
       ]
     }
   ],
-  "evidenceSections": [],
+  "evidenceSections": [
+    {
+      "id": "EVI_lupin-tv",
+      "sourceFindingId": "lupin-tv",
+      "title": "ルパンTVスタンプ",
+      "kind": "EVIDENCE",
+      "collapsible": true,
+      "defaultExpanded": false,
+      "description": "ルパンTVスタンプを確認したときに、該当する項目を1回加算して記録します。\n・注意：通常時にルパンTVへ実際に出たスタンプを記録します\n・反映：設定確定・設定否定の条件は、設定候補の絞り込みに自動反映します",
+      "descriptionPresentation": {
+        "collapsible": true,
+        "label": "説明",
+        "defaultExpanded": false
+      },
+      "runtimePolicyControlled": false,
+      "evidenceItems": [
+        {
+          "findingId": "lupin-tv",
+          "label": "ルパンTVスタンプ",
+          "sourceIds": [
+            "review"
+          ],
+          "details": [
+            "通常時にルパンTVへ実際に出たスタンプを記録します。"
+          ],
+          "semanticType": "EXACT_CONSTRAINT",
+          "semanticCategories": [
+            {
+              "label": "可",
+              "meaning": "設定2以上",
+              "semanticType": "EXACT_CONSTRAINT"
+            },
+            {
+              "label": "吉",
+              "meaning": "設定3以上",
+              "semanticType": "EXACT_CONSTRAINT"
+            },
+            {
+              "label": "良",
+              "meaning": "設定4以上",
+              "semanticType": "EXACT_CONSTRAINT"
+            },
+            {
+              "label": "優",
+              "meaning": "設定5以上",
+              "semanticType": "EXACT_CONSTRAINT"
+            },
+            {
+              "label": "極",
+              "meaning": "設定6",
+              "semanticType": "EXACT_CONSTRAINT"
+            }
+          ],
+          "runtimePolicyControlled": false,
+          "status": "SOURCE_REFERENCED",
+          "interaction": "REFERENCE_ONLY"
+        }
+      ]
+    },
+    {
+      "id": "EVI_at-stamp",
+      "sourceFindingId": "at-stamp",
+      "title": "AT終了画面スタンプ",
+      "kind": "EVIDENCE",
+      "collapsible": true,
+      "defaultExpanded": false,
+      "description": "AT終了画面スタンプを確認したときに、該当する項目を1回加算して記録します。\n・注意：AT終了画面のスタンプを記録します。通常時ルパンTVとは別の入力です\n・反映：設定確定・設定否定の条件は、設定候補の絞り込みに自動反映します\n・反映：設定別出現率が未確認の項目は記録のみです。出現率確認後は設定推測へ反映できる可能性があります",
+      "descriptionPresentation": {
+        "collapsible": true,
+        "label": "説明",
+        "defaultExpanded": false
+      },
+      "runtimePolicyControlled": false,
+      "evidenceItems": [
+        {
+          "findingId": "at-stamp",
+          "label": "AT終了画面スタンプ",
+          "sourceIds": [
+            "review"
+          ],
+          "details": [
+            "AT終了画面のスタンプを記録します。通常時ルパンTVとは別の入力です。"
+          ],
+          "semanticType": "DISPLAY_ONLY",
+          "semanticCategories": [
+            {
+              "label": "ルパン逃走",
+              "meaning": "基本パターン",
+              "semanticType": "PROBABILITY_UNKNOWN"
+            },
+            {
+              "label": "ルパン一味",
+              "meaning": "高設定示唆",
+              "semanticType": "PROBABILITY_UNKNOWN"
+            },
+            {
+              "label": "可",
+              "meaning": "設定2以上",
+              "semanticType": "EXACT_CONSTRAINT"
+            },
+            {
+              "label": "吉",
+              "meaning": "設定3以上",
+              "semanticType": "EXACT_CONSTRAINT"
+            },
+            {
+              "label": "良",
+              "meaning": "設定4以上",
+              "semanticType": "EXACT_CONSTRAINT"
+            },
+            {
+              "label": "優",
+              "meaning": "設定5以上",
+              "semanticType": "EXACT_CONSTRAINT"
+            },
+            {
+              "label": "極",
+              "meaning": "設定6",
+              "semanticType": "EXACT_CONSTRAINT"
+            }
+          ],
+          "runtimePolicyControlled": false,
+          "status": "SOURCE_REFERENCED",
+          "interaction": "REFERENCE_ONLY"
+        }
+      ]
+    },
+    {
+      "id": "EVI_haruruna",
+      "sourceFindingId": "haruruna",
+      "title": "ハルルナPUSH",
+      "kind": "EVIDENCE",
+      "collapsible": true,
+      "defaultExpanded": false,
+      "description": "ハルルナPUSHを確認したときに、該当する項目を1回加算して記録します。\n・注意：通常時の連続演出やICPOチャレンジの当否告知で出現した場合に記録します\n・反映：設定確定・設定否定の条件は、設定候補の絞り込みに自動反映します",
+      "descriptionPresentation": {
+        "collapsible": true,
+        "label": "説明",
+        "defaultExpanded": false
+      },
+      "runtimePolicyControlled": false,
+      "evidenceItems": [
+        {
+          "findingId": "haruruna",
+          "label": "ハルルナPUSH",
+          "sourceIds": [
+            "review"
+          ],
+          "details": [
+            "通常時の連続演出やICPOチャレンジの当否告知で出現した場合に記録します。"
+          ],
+          "semanticType": "EXACT_CONSTRAINT",
+          "semanticCategories": [
+            {
+              "label": "ハルルナPUSH",
+              "meaning": "設定4以上",
+              "semanticType": "EXACT_CONSTRAINT"
+            }
+          ],
+          "runtimePolicyControlled": false,
+          "status": "SOURCE_REFERENCED",
+          "interaction": "REFERENCE_ONLY"
+        }
+      ]
+    },
+    {
+      "id": "EVI_round-panels",
+      "sourceFindingId": "round-panels",
+      "title": "セット開始画面",
+      "kind": "EVIDENCE",
+      "collapsible": true,
+      "defaultExpanded": false,
+      "description": "セット開始画面を確認したときに、該当する項目を1回加算して記録します。\n・注意：ATのセット開始時に出たパネルを記録します\n・反映：設定確定・設定否定の条件は、設定候補の絞り込みに自動反映します",
+      "descriptionPresentation": {
+        "collapsible": true,
+        "label": "説明",
+        "defaultExpanded": false
+      },
+      "runtimePolicyControlled": false,
+      "evidenceItems": [
+        {
+          "findingId": "round-panels",
+          "label": "セット開始画面",
+          "sourceIds": [
+            "review"
+          ],
+          "details": [
+            "ATのセット開始時に出たパネルを記録します。"
+          ],
+          "semanticType": "EXACT_CONSTRAINT",
+          "semanticCategories": [
+            {
+              "label": "初代銭形",
+              "meaning": "設定5以上",
+              "semanticType": "EXACT_CONSTRAINT"
+            },
+            {
+              "label": "不二子2",
+              "meaning": "設定6",
+              "semanticType": "EXACT_CONSTRAINT"
+            }
+          ],
+          "runtimePolicyControlled": false,
+          "status": "SOURCE_REFERENCED",
+          "interaction": "REFERENCE_ONLY"
+        }
+      ]
+    },
+    {
+      "id": "EVI_voice-lupin",
+      "observationContext": {
+        "groupingApproved": true,
+        "opportunityId": "single-bonus-end-voice",
+        "conditionId": "ルパン",
+        "groupTitle": "ボーナス終了ボイス",
+        "conditionLabel": "ルパン"
+      },
+      "sourceFindingId": "voice-lupin",
+      "title": "ルパンのボーナス終了ボイス",
+      "kind": "EVIDENCE",
+      "collapsible": true,
+      "defaultExpanded": false,
+      "description": "ルパンのボーナス終了ボイスを確認したときに、該当する項目を1回加算して記録します。\n・注意：AT非当選時のルパンボーナス終了画面でボタンを押して、ボイスの文字色を確認します\n・反映：設定確定・設定否定の条件は、設定候補の絞り込みに自動反映します\n・反映：設定別出現率が未確認の項目は記録のみです。出現率確認後は設定推測へ反映できる可能性があります",
+      "descriptionPresentation": {
+        "collapsible": true,
+        "label": "説明",
+        "defaultExpanded": false
+      },
+      "runtimePolicyControlled": false,
+      "evidenceItems": [
+        {
+          "findingId": "voice-lupin",
+          "label": "ルパンのボーナス終了ボイス",
+          "sourceIds": [
+            "review"
+          ],
+          "details": [
+            "AT非当選時のルパンボーナス終了画面でボタンを押して、ボイスの文字色を確認します。"
+          ],
+          "semanticType": "DISPLAY_ONLY",
+          "semanticCategories": [
+            {
+              "label": "白文字",
+              "meaning": "基本パターン",
+              "semanticType": "PROBABILITY_UNKNOWN"
+            },
+            {
+              "label": "青文字",
+              "meaning": "高設定示唆・弱",
+              "semanticType": "PROBABILITY_UNKNOWN"
+            },
+            {
+              "label": "緑文字",
+              "meaning": "高設定示唆・強",
+              "semanticType": "PROBABILITY_UNKNOWN"
+            },
+            {
+              "label": "赤文字",
+              "meaning": "設定4以上",
+              "semanticType": "EXACT_CONSTRAINT"
+            },
+            {
+              "label": "紫文字",
+              "meaning": "設定6",
+              "semanticType": "EXACT_CONSTRAINT"
+            }
+          ],
+          "runtimePolicyControlled": false,
+          "status": "SOURCE_REFERENCED",
+          "interaction": "REFERENCE_ONLY"
+        }
+      ]
+    },
+    {
+      "id": "EVI_voice-jigen",
+      "observationContext": {
+        "groupingApproved": true,
+        "opportunityId": "single-bonus-end-voice",
+        "conditionId": "次元",
+        "groupTitle": "ボーナス終了ボイス",
+        "conditionLabel": "次元"
+      },
+      "sourceFindingId": "voice-jigen",
+      "title": "次元のボーナス終了ボイス",
+      "kind": "EVIDENCE",
+      "collapsible": true,
+      "defaultExpanded": false,
+      "description": "次元のボーナス終了ボイスを確認したときに、該当する項目を1回加算して記録します。\n・注意：AT非当選時の次元ボーナス終了画面でボタンを押して、ボイスの文字色を確認します\n・反映：設定確定・設定否定の条件は、設定候補の絞り込みに自動反映します\n・反映：設定別出現率が未確認の項目は記録のみです。出現率確認後は設定推測へ反映できる可能性があります",
+      "descriptionPresentation": {
+        "collapsible": true,
+        "label": "説明",
+        "defaultExpanded": false
+      },
+      "runtimePolicyControlled": false,
+      "evidenceItems": [
+        {
+          "findingId": "voice-jigen",
+          "label": "次元のボーナス終了ボイス",
+          "sourceIds": [
+            "review"
+          ],
+          "details": [
+            "AT非当選時の次元ボーナス終了画面でボタンを押して、ボイスの文字色を確認します。"
+          ],
+          "semanticType": "DISPLAY_ONLY",
+          "semanticCategories": [
+            {
+              "label": "白文字",
+              "meaning": "基本パターン",
+              "semanticType": "PROBABILITY_UNKNOWN"
+            },
+            {
+              "label": "青文字",
+              "meaning": "高設定示唆・弱",
+              "semanticType": "PROBABILITY_UNKNOWN"
+            },
+            {
+              "label": "緑文字",
+              "meaning": "高設定示唆・強",
+              "semanticType": "PROBABILITY_UNKNOWN"
+            },
+            {
+              "label": "赤文字",
+              "meaning": "設定4以上",
+              "semanticType": "EXACT_CONSTRAINT"
+            },
+            {
+              "label": "紫文字",
+              "meaning": "設定6",
+              "semanticType": "EXACT_CONSTRAINT"
+            }
+          ],
+          "runtimePolicyControlled": false,
+          "status": "SOURCE_REFERENCED",
+          "interaction": "REFERENCE_ONLY"
+        }
+      ]
+    },
+    {
+      "id": "EVI_voice-goemon",
+      "observationContext": {
+        "groupingApproved": true,
+        "opportunityId": "single-bonus-end-voice",
+        "conditionId": "五ェ門",
+        "groupTitle": "ボーナス終了ボイス",
+        "conditionLabel": "五ェ門"
+      },
+      "sourceFindingId": "voice-goemon",
+      "title": "五ェ門のボーナス終了ボイス",
+      "kind": "EVIDENCE",
+      "collapsible": true,
+      "defaultExpanded": false,
+      "description": "五ェ門のボーナス終了ボイスを確認したときに、該当する項目を1回加算して記録します。\n・注意：AT非当選時の五ェ門ボーナス終了画面でボタンを押して、ボイスの文字色を確認します\n・反映：設定確定・設定否定の条件は、設定候補の絞り込みに自動反映します\n・反映：設定別出現率が未確認の項目は記録のみです。出現率確認後は設定推測へ反映できる可能性があります",
+      "descriptionPresentation": {
+        "collapsible": true,
+        "label": "説明",
+        "defaultExpanded": false
+      },
+      "runtimePolicyControlled": false,
+      "evidenceItems": [
+        {
+          "findingId": "voice-goemon",
+          "label": "五ェ門のボーナス終了ボイス",
+          "sourceIds": [
+            "review"
+          ],
+          "details": [
+            "AT非当選時の五ェ門ボーナス終了画面でボタンを押して、ボイスの文字色を確認します。"
+          ],
+          "semanticType": "DISPLAY_ONLY",
+          "semanticCategories": [
+            {
+              "label": "白文字",
+              "meaning": "基本パターン",
+              "semanticType": "PROBABILITY_UNKNOWN"
+            },
+            {
+              "label": "青文字",
+              "meaning": "高設定示唆・弱",
+              "semanticType": "PROBABILITY_UNKNOWN"
+            },
+            {
+              "label": "緑文字",
+              "meaning": "高設定示唆・強",
+              "semanticType": "PROBABILITY_UNKNOWN"
+            },
+            {
+              "label": "赤文字",
+              "meaning": "設定4以上",
+              "semanticType": "EXACT_CONSTRAINT"
+            },
+            {
+              "label": "紫文字",
+              "meaning": "設定6",
+              "semanticType": "EXACT_CONSTRAINT"
+            }
+          ],
+          "runtimePolicyControlled": false,
+          "status": "SOURCE_REFERENCED",
+          "interaction": "REFERENCE_ONLY"
+        }
+      ]
+    },
+    {
+      "id": "EVI_menu-lines",
+      "sourceFindingId": "menu-lines",
+      "title": "メニュー画面の示唆",
+      "kind": "EVIDENCE",
+      "collapsible": true,
+      "defaultExpanded": false,
+      "description": "メニュー画面の示唆を確認したときに、該当する項目を1回加算して記録します。\n・注意：ボーナス・AT終了後1G以上消化したメニューで確認します。銀・金は示唆と規定ゲーム数天井の矛盾を確認した場合だけ対象です。途中の小役当選は天井到達と見なしません\n・反映：設定確定・設定否定の条件は、設定候補の絞り込みに自動反映します\n・反映：設定別出現率が未確認の項目は記録のみです。出現率確認後は設定推測へ反映できる可能性があります",
+      "descriptionPresentation": {
+        "collapsible": true,
+        "label": "説明",
+        "defaultExpanded": false
+      },
+      "runtimePolicyControlled": false,
+      "evidenceItems": [
+        {
+          "findingId": "menu-lines",
+          "label": "メニュー画面の示唆",
+          "sourceIds": [
+            "review"
+          ],
+          "details": [
+            "ボーナス・AT終了後1G以上消化したメニューで確認します。銀・金は示唆と規定ゲーム数天井の矛盾を確認した場合だけ対象です。途中の小役当選は天井到達と見なしません。"
+          ],
+          "semanticType": "DISPLAY_ONLY",
+          "semanticCategories": [
+            {
+              "label": "謎は解けるまでが楽しいのよ",
+              "meaning": "偶数設定示唆",
+              "semanticType": "PROBABILITY_UNKNOWN"
+            },
+            {
+              "label": "道が無けりゃ作っていくまでよ",
+              "meaning": "設定3・5・6示唆",
+              "semanticType": "PROBABILITY_UNKNOWN"
+            },
+            {
+              "label": "銀セリフ・300Gまたは400G天井",
+              "meaning": "設定4以上",
+              "semanticType": "EXACT_CONSTRAINT"
+            },
+            {
+              "label": "金セリフ・200Gまたは300G天井",
+              "meaning": "設定4以上",
+              "semanticType": "EXACT_CONSTRAINT"
+            }
+          ],
+          "runtimePolicyControlled": false,
+          "status": "SOURCE_REFERENCED",
+          "interaction": "REFERENCE_ONLY"
+        }
+      ]
+    }
+  ],
   "heldObservations": [],
   "layoutRules": {
     "hideEmptySections": true,

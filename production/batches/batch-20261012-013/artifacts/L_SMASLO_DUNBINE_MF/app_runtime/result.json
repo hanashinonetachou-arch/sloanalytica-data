@@ -8,8 +8,8 @@
     "artifactId": "runtime-projection-L_SMASLO_DUNBINE_MF",
     "kind": "runtime-projection",
     "path": "production/batches/batch-20261012-013/artifacts/L_SMASLO_DUNBINE_MF/runtime_projection/result.json",
-    "sha256": "e28b253f257efb219fd85307d4305f82b0315249893351b2aaf783e6dcb8b872",
-    "producerWorkId": "wrk_ba392445c6d44238"
+    "sha256": "99eddd946609abfbcf4bec28567073a172d8cdc7723b8eba6f9d43a4b31f6698",
+    "producerWorkId": "wrk_46a37d31ffe04881"
   },
   "package": {
     "schemaVersion": 1,
@@ -21,7 +21,7 @@
     "machine": {
       "schemaVersion": "2.0.0",
       "machineId": "L_SMASLO_DUNBINE_MF",
-      "machineDataVersion": "8.5.1-batch-20261012-013",
+      "machineDataVersion": "8.5.2-batch-20261012-013",
       "displayName": "スマスロ 聖戦士ダンバイン",
       "modelName": "スマスロ 聖戦士ダンバイン",
       "settings": [
@@ -35,14 +35,15 @@
       "packagePolicy": {
         "offlineCapable": true,
         "containsImages": false,
-        "containsExecutableCode": false
+        "containsExecutableCode": false,
+        "machineDataRevision": 2
       }
     },
     "inputs": {
       "schemaVersion": "2.0.0",
       "inputs": [
         {
-          "id": "primary-setting-difference.eligibleTrialCount",
+          "id": "bonus-initial.eligibleTrialCount",
           "name": "通常ゲーム数",
           "category": "V8_NUMERIC",
           "type": "integer",
@@ -53,16 +54,390 @@
           "inferenceRole": "INCLUDE_SUPPORT"
         },
         {
-          "id": "primary-setting-difference.successCount",
-          "name": "AT初当たり回数",
+          "id": "bonus-initial.successCount",
+          "name": "ボーナス初当たり回数",
           "category": "V8_NUMERIC",
           "type": "counter",
           "unit": "回",
           "defaultValue": 0,
           "minimum": 0,
           "displayOrder": 2,
-          "parentInputId": "primary-setting-difference.eligibleTrialCount",
+          "parentInputId": "bonus-initial.eligibleTrialCount",
           "inferenceRole": "INCLUDE_SUPPORT"
+        },
+        {
+          "id": "rush-carry.eligibleTrialCount",
+          "name": "対象の上位RUSH終了回数",
+          "category": "V8_NUMERIC",
+          "type": "integer",
+          "unit": "回",
+          "defaultValue": 0,
+          "minimum": 0,
+          "displayOrder": 3,
+          "inferenceRole": "INCLUDE_SUPPORT"
+        },
+        {
+          "id": "rush-carry.successCount",
+          "name": "RUSH持ち越し回数",
+          "category": "V8_NUMERIC",
+          "type": "counter",
+          "unit": "回",
+          "defaultValue": 0,
+          "minimum": 0,
+          "displayOrder": 4,
+          "parentInputId": "rush-carry.eligibleTrialCount",
+          "inferenceRole": "INCLUDE_SUPPORT"
+        },
+        {
+          "id": "chum-lamp.eligibleTrialCount",
+          "name": "対象の狙え成功回数",
+          "category": "V8_NUMERIC",
+          "type": "integer",
+          "unit": "回",
+          "defaultValue": 0,
+          "minimum": 0,
+          "displayOrder": 5,
+          "inferenceRole": "INCLUDE_SUPPORT",
+          "inputVisible": false,
+          "derivedCalculation": "sum",
+          "derivedFromInputIds": [
+            "chum-lamp.categoryCounts.1_緑",
+            "chum-lamp.categoryCounts.2_赤",
+            "chum-lamp.categoryCounts.3_その他"
+          ]
+        },
+        {
+          "id": "chum-lamp.categoryCounts.1_緑",
+          "name": "緑",
+          "category": "V8_NUMERIC",
+          "type": "counter",
+          "unit": "回",
+          "defaultValue": 0,
+          "minimum": 0,
+          "displayOrder": 6,
+          "parentInputId": "chum-lamp.eligibleTrialCount",
+          "inferenceRole": "INCLUDE_SUPPORT"
+        },
+        {
+          "id": "chum-lamp.categoryCounts.2_赤",
+          "name": "赤",
+          "category": "V8_NUMERIC",
+          "type": "counter",
+          "unit": "回",
+          "defaultValue": 0,
+          "minimum": 0,
+          "displayOrder": 7,
+          "parentInputId": "chum-lamp.eligibleTrialCount",
+          "inferenceRole": "INCLUDE_SUPPORT"
+        },
+        {
+          "id": "chum-lamp.categoryCounts.3_その他",
+          "name": "その他",
+          "category": "V8_NUMERIC",
+          "type": "counter",
+          "unit": "回",
+          "defaultValue": 0,
+          "minimum": 0,
+          "displayOrder": 8,
+          "parentInputId": "chum-lamp.eligibleTrialCount",
+          "inferenceRole": "INCLUDE_SUPPORT"
+        },
+        {
+          "id": "REF_remaining-bells_1",
+          "name": "あと4回：設定4以上",
+          "category": "EVIDENCE_REFERENCE",
+          "type": "counter",
+          "unit": "回",
+          "defaultValue": 0,
+          "minimum": 0,
+          "displayOrder": 9,
+          "inferenceRole": "DISPLAY_ONLY"
+        },
+        {
+          "id": "REF_remaining-bells_2",
+          "name": "あと5回：設定5以上",
+          "category": "EVIDENCE_REFERENCE",
+          "type": "counter",
+          "unit": "回",
+          "defaultValue": 0,
+          "minimum": 0,
+          "displayOrder": 10,
+          "inferenceRole": "DISPLAY_ONLY"
+        },
+        {
+          "id": "REF_remaining-bells_3",
+          "name": "あと6回：設定6",
+          "category": "EVIDENCE_REFERENCE",
+          "type": "counter",
+          "unit": "回",
+          "defaultValue": 0,
+          "minimum": 0,
+          "displayOrder": 11,
+          "inferenceRole": "DISPLAY_ONLY"
+        },
+        {
+          "id": "REF_attack-counts_1",
+          "name": "1001機スタート：設定6",
+          "category": "EVIDENCE_REFERENCE",
+          "type": "counter",
+          "unit": "回",
+          "defaultValue": 0,
+          "minimum": 0,
+          "displayOrder": 12,
+          "inferenceRole": "DISPLAY_ONLY"
+        },
+        {
+          "id": "REF_attack-counts_2",
+          "name": "22機撃破：設定2以上",
+          "category": "EVIDENCE_REFERENCE",
+          "type": "counter",
+          "unit": "回",
+          "defaultValue": 0,
+          "minimum": 0,
+          "displayOrder": 13,
+          "inferenceRole": "DISPLAY_ONLY"
+        },
+        {
+          "id": "REF_attack-counts_3",
+          "name": "33機撃破：設定3以上",
+          "category": "EVIDENCE_REFERENCE",
+          "type": "counter",
+          "unit": "回",
+          "defaultValue": 0,
+          "minimum": 0,
+          "displayOrder": 14,
+          "inferenceRole": "DISPLAY_ONLY"
+        },
+        {
+          "id": "REF_attack-counts_4",
+          "name": "44機撃破：設定4以上",
+          "category": "EVIDENCE_REFERENCE",
+          "type": "counter",
+          "unit": "回",
+          "defaultValue": 0,
+          "minimum": 0,
+          "displayOrder": 15,
+          "inferenceRole": "DISPLAY_ONLY"
+        },
+        {
+          "id": "REF_attack-counts_5",
+          "name": "55機撃破：設定5以上",
+          "category": "EVIDENCE_REFERENCE",
+          "type": "counter",
+          "unit": "回",
+          "defaultValue": 0,
+          "minimum": 0,
+          "displayOrder": 16,
+          "inferenceRole": "DISPLAY_ONLY"
+        },
+        {
+          "id": "REF_attack-counts_6",
+          "name": "66機撃破：設定6",
+          "category": "EVIDENCE_REFERENCE",
+          "type": "counter",
+          "unit": "回",
+          "defaultValue": 0,
+          "minimum": 0,
+          "displayOrder": 17,
+          "inferenceRole": "DISPLAY_ONLY"
+        },
+        {
+          "id": "REF_payout_1",
+          "name": "222枚OVER：設定2以上",
+          "category": "EVIDENCE_REFERENCE",
+          "type": "counter",
+          "unit": "回",
+          "defaultValue": 0,
+          "minimum": 0,
+          "displayOrder": 18,
+          "inferenceRole": "DISPLAY_ONLY"
+        },
+        {
+          "id": "REF_payout_2",
+          "name": "246枚OVER：設定2・4・6",
+          "category": "EVIDENCE_REFERENCE",
+          "type": "counter",
+          "unit": "回",
+          "defaultValue": 0,
+          "minimum": 0,
+          "displayOrder": 19,
+          "inferenceRole": "DISPLAY_ONLY"
+        },
+        {
+          "id": "REF_payout_3",
+          "name": "333枚OVER：設定3以上",
+          "category": "EVIDENCE_REFERENCE",
+          "type": "counter",
+          "unit": "回",
+          "defaultValue": 0,
+          "minimum": 0,
+          "displayOrder": 20,
+          "inferenceRole": "DISPLAY_ONLY"
+        },
+        {
+          "id": "REF_payout_4",
+          "name": "444枚OVER：設定4以上",
+          "category": "EVIDENCE_REFERENCE",
+          "type": "counter",
+          "unit": "回",
+          "defaultValue": 0,
+          "minimum": 0,
+          "displayOrder": 21,
+          "inferenceRole": "DISPLAY_ONLY"
+        },
+        {
+          "id": "REF_payout_5",
+          "name": "555枚OVER：設定5以上",
+          "category": "EVIDENCE_REFERENCE",
+          "type": "counter",
+          "unit": "回",
+          "defaultValue": 0,
+          "minimum": 0,
+          "displayOrder": 22,
+          "inferenceRole": "DISPLAY_ONLY"
+        },
+        {
+          "id": "REF_payout_6",
+          "name": "666枚OVER：設定6",
+          "category": "EVIDENCE_REFERENCE",
+          "type": "counter",
+          "unit": "回",
+          "defaultValue": 0,
+          "minimum": 0,
+          "displayOrder": 23,
+          "inferenceRole": "DISPLAY_ONLY"
+        },
+        {
+          "id": "REF_road-games_1",
+          "name": "初期20G（LAST19G）：設定2以上",
+          "category": "EVIDENCE_REFERENCE",
+          "type": "counter",
+          "unit": "回",
+          "defaultValue": 0,
+          "minimum": 0,
+          "displayOrder": 24,
+          "inferenceRole": "DISPLAY_ONLY"
+        },
+        {
+          "id": "REF_road-games_2",
+          "name": "初期30G（LAST29G）：設定3以上",
+          "category": "EVIDENCE_REFERENCE",
+          "type": "counter",
+          "unit": "回",
+          "defaultValue": 0,
+          "minimum": 0,
+          "displayOrder": 25,
+          "inferenceRole": "DISPLAY_ONLY"
+        },
+        {
+          "id": "REF_st-voice_1",
+          "name": "来ます！悪しきオーラ力！：高設定示唆・弱",
+          "category": "EVIDENCE_REFERENCE",
+          "type": "counter",
+          "unit": "回",
+          "defaultValue": 0,
+          "minimum": 0,
+          "displayOrder": 26,
+          "inferenceRole": "DISPLAY_ONLY"
+        },
+        {
+          "id": "REF_st-voice_2",
+          "name": "私が受けた屈辱 この恨み 貴様に分るか！ショウ！：高設定示唆・中",
+          "category": "EVIDENCE_REFERENCE",
+          "type": "counter",
+          "unit": "回",
+          "defaultValue": 0,
+          "minimum": 0,
+          "displayOrder": 27,
+          "inferenceRole": "DISPLAY_ONLY"
+        },
+        {
+          "id": "REF_st-voice_3",
+          "name": "俺は人は殺さない！その怨念を殺す！：設定2以上",
+          "category": "EVIDENCE_REFERENCE",
+          "type": "counter",
+          "unit": "回",
+          "defaultValue": 0,
+          "minimum": 0,
+          "displayOrder": 28,
+          "inferenceRole": "DISPLAY_ONLY"
+        },
+        {
+          "id": "REF_st-voice_4",
+          "name": "私が欲しいのはLikemeじゃないわ Lovemeよ：設定4以上",
+          "category": "EVIDENCE_REFERENCE",
+          "type": "counter",
+          "unit": "回",
+          "defaultValue": 0,
+          "minimum": 0,
+          "displayOrder": 29,
+          "inferenceRole": "DISPLAY_ONLY"
+        },
+        {
+          "id": "REF_st-voice_5",
+          "name": "人々よ！バイストンウェルに帰還します！：設定6",
+          "category": "EVIDENCE_REFERENCE",
+          "type": "counter",
+          "unit": "回",
+          "defaultValue": 0,
+          "minimum": 0,
+          "displayOrder": 30,
+          "inferenceRole": "DISPLAY_ONLY"
+        },
+        {
+          "id": "REF_trophy_1",
+          "name": "銅：設定2以上",
+          "category": "EVIDENCE_REFERENCE",
+          "type": "counter",
+          "unit": "回",
+          "defaultValue": 0,
+          "minimum": 0,
+          "displayOrder": 31,
+          "inferenceRole": "DISPLAY_ONLY"
+        },
+        {
+          "id": "REF_trophy_2",
+          "name": "銀：設定3以上",
+          "category": "EVIDENCE_REFERENCE",
+          "type": "counter",
+          "unit": "回",
+          "defaultValue": 0,
+          "minimum": 0,
+          "displayOrder": 32,
+          "inferenceRole": "DISPLAY_ONLY"
+        },
+        {
+          "id": "REF_trophy_3",
+          "name": "金：設定4以上",
+          "category": "EVIDENCE_REFERENCE",
+          "type": "counter",
+          "unit": "回",
+          "defaultValue": 0,
+          "minimum": 0,
+          "displayOrder": 33,
+          "inferenceRole": "DISPLAY_ONLY"
+        },
+        {
+          "id": "REF_trophy_4",
+          "name": "キリン柄：設定5以上",
+          "category": "EVIDENCE_REFERENCE",
+          "type": "counter",
+          "unit": "回",
+          "defaultValue": 0,
+          "minimum": 0,
+          "displayOrder": 34,
+          "inferenceRole": "DISPLAY_ONLY"
+        },
+        {
+          "id": "REF_trophy_5",
+          "name": "虹：設定6",
+          "category": "EVIDENCE_REFERENCE",
+          "type": "counter",
+          "unit": "回",
+          "defaultValue": 0,
+          "minimum": 0,
+          "displayOrder": 35,
+          "inferenceRole": "DISPLAY_ONLY"
         }
       ]
     },
@@ -70,48 +445,1119 @@
       "version": "8.5-runtime",
       "features": [
         {
-          "featureId": "primary-setting-difference",
-          "name": "AT初当たり確率",
+          "featureId": "bonus-initial",
+          "name": "ボーナス初当たり",
           "trialUniverse": "NORMAL_GAME_TRIAL",
           "adoptionCategory": "INCLUDE_SUPPORT",
           "calculationRole": "PROBABILITY",
           "probabilityEngineUsage": true,
-          "denominatorInputId": "primary-setting-difference.eligibleTrialCount",
+          "denominatorInputId": "bonus-initial.eligibleTrialCount",
           "probabilities": {
-            "SET_1": 0.0016730801405387317,
-            "SET_2": 0.001699524133242692,
-            "SET_3": 0.0017467248908296944,
-            "SET_4": 0.0018099547511312218,
-            "SET_5": 0.001893939393939394,
-            "SET_6": 0.0019778481012658225
+            "SET_1": 0.0028105677346824056,
+            "SET_2": 0.002844141069397042,
+            "SET_3": 0.0029180040852057193,
+            "SET_4": 0.00300390507659958,
+            "SET_5": 0.0031279324366593683,
+            "SET_6": 0.0032499187520311995
           },
           "selectionRationale": {
             "summary": "設定推測に採用された要素です。",
-            "adoptionReason": "AT初当たり確率は設定1 1/597.7、設定6 1/505.6と設定差があります。「通常ゲーム数」に対する「AT初当たり回数」の発生割合を比較して推測に使用します。 観測条件：通常時のAT初当たりを記録します。",
+            "adoptionReason": "ボーナス初当たりは設定1 1/355.8、設定6 1/307.7と設定差があります。「通常ゲーム数」に対する「ボーナス初当たり回数」の発生割合を比較して推測に使用します。 観測条件：通常時のボーナス初当たりを記録します。",
             "shortTermReason": "標本が少ない間は結果の振れが大きくなります。",
             "longTermReason": "観測数が増えるほど設定別の比較が安定します。"
           },
           "modelType": "binomial",
-          "numeratorInputId": "primary-setting-difference.successCount",
+          "numeratorInputId": "bonus-initial.successCount",
           "displayFormat": "percentage"
+        },
+        {
+          "featureId": "rush-carry",
+          "name": "上位RUSH持ち越し率",
+          "trialUniverse": "RUSH_CARRY_TRIAL",
+          "adoptionCategory": "INCLUDE_SUPPORT",
+          "calculationRole": "PROBABILITY",
+          "probabilityEngineUsage": true,
+          "denominatorInputId": "rush-carry.eligibleTrialCount",
+          "probabilities": {
+            "SET_1": 0.004,
+            "SET_2": 0.008,
+            "SET_3": 0.02,
+            "SET_4": 0.063,
+            "SET_5": 0.102,
+            "SET_6": 0.152
+          },
+          "selectionRationale": {
+            "summary": "設定推測に採用された要素です。",
+            "adoptionReason": "上位RUSH持ち越し率は設定1 0.4%、設定6 15.2%と設定差があります。「対象の上位RUSH終了回数」に対する「RUSH持ち越し回数」の発生割合を比較して推測に使用します。 観測条件：対象となる機会のうち、RUSH持ち越しが実際に起きた割合を設定別に比較します。",
+            "shortTermReason": "標本が少ない間は結果の振れが大きくなります。",
+            "longTermReason": "観測数が増えるほど設定別の比較が安定します。"
+          },
+          "modelType": "binomial",
+          "numeratorInputId": "rush-carry.successCount",
+          "displayFormat": "percentage"
+        },
+        {
+          "featureId": "chum-lamp",
+          "name": "チャムランプ色",
+          "trialUniverse": "CHUM_LAMP_TRIAL",
+          "adoptionCategory": "INCLUDE_SUPPORT",
+          "calculationRole": "PROBABILITY",
+          "probabilityEngineUsage": true,
+          "denominatorInputId": "chum-lamp.eligibleTrialCount",
+          "probabilities": {},
+          "selectionRationale": {
+            "summary": "設定推測に採用された要素です。",
+            "adoptionReason": "チャムランプ色の「その他」の割合は設定6 93.8%、設定1 96.1%と設定差があります。「対象の狙え成功回数」を基準に、記録したカテゴリの振り分けを比較して推測に使用します。 観測条件：対象の狙え成功回数に対する各ランプ色の出現回数。",
+            "shortTermReason": "標本が少ない間は結果の振れが大きくなります。",
+            "longTermReason": "観測数が増えるほど設定別の比較が安定します。"
+          },
+          "modelType": "multinomial",
+          "numeratorInputId": "chum-lamp.categoryCounts.1_緑",
+          "categoryInputIds": [
+            "chum-lamp.categoryCounts.2_赤",
+            "chum-lamp.categoryCounts.3_その他"
+          ],
+          "denominatorRule": "SUM_CATEGORY_COUNTS",
+          "categoryProbabilities": {
+            "SET_1": [
+              0.031,
+              0.008,
+              0.961
+            ],
+            "SET_2": [
+              0.033,
+              0.009000000000000001,
+              0.958
+            ],
+            "SET_3": [
+              0.036000000000000004,
+              0.01,
+              0.9540000000000001
+            ],
+            "SET_4": [
+              0.039,
+              0.011000000000000001,
+              0.95
+            ],
+            "SET_5": [
+              0.043,
+              0.013000000000000001,
+              0.9440000000000001
+            ],
+            "SET_6": [
+              0.048,
+              0.013999999999999999,
+              0.938
+            ]
+          }
         }
       ],
       "runtimeProjection": [
         {
-          "featureId": "primary-setting-difference",
+          "featureId": "bonus-initial",
           "runtimeStatus": "ACTIVE",
           "metric": "SELECTION_SCORE",
-          "metricValue": 6.327106184550027,
+          "metricValue": 7.922329274479413,
           "importance": "補助"
+        },
+        {
+          "featureId": "rush-carry",
+          "runtimeStatus": "ACTIVE",
+          "metric": "PER_ELIGIBLE_TRIAL_POWER",
+          "metricValue": 8.16973267572525,
+          "importance": "補助"
+        },
+        {
+          "featureId": "chum-lamp",
+          "runtimeStatus": "ACTIVE",
+          "metric": "PER_ELIGIBLE_TRIAL_POWER",
+          "metricValue": 0.19483902842410972,
+          "importance": "微小"
         }
       ]
     },
     "evidence": {
       "version": "8.5-runtime",
-      "evidences": [],
-      "references": []
+      "evidences": [
+        {
+          "id": "remaining-bells__1",
+          "name": "あと4回：設定4以上",
+          "displayName": "あと4回：設定4以上",
+          "inputId": "REF_remaining-bells_1",
+          "details": [
+            "あと4回：設定4以上"
+          ],
+          "confirmedSettings": [
+            "SET_4",
+            "SET_5",
+            "SET_6"
+          ],
+          "deniedSettings": [],
+          "hasImage": false,
+          "type": "SETTING_CONSTRAINT",
+          "sourceEvidenceRefs": [
+            "remaining-bells"
+          ]
+        },
+        {
+          "id": "remaining-bells__2",
+          "name": "あと5回：設定5以上",
+          "displayName": "あと5回：設定5以上",
+          "inputId": "REF_remaining-bells_2",
+          "details": [
+            "あと5回：設定5以上"
+          ],
+          "confirmedSettings": [
+            "SET_5",
+            "SET_6"
+          ],
+          "deniedSettings": [],
+          "hasImage": false,
+          "type": "SETTING_CONSTRAINT",
+          "sourceEvidenceRefs": [
+            "remaining-bells"
+          ]
+        },
+        {
+          "id": "remaining-bells__3",
+          "name": "あと6回：設定6",
+          "displayName": "あと6回：設定6",
+          "inputId": "REF_remaining-bells_3",
+          "details": [
+            "あと6回：設定6"
+          ],
+          "confirmedSettings": [
+            "SET_6"
+          ],
+          "deniedSettings": [],
+          "hasImage": false,
+          "type": "SETTING_CONSTRAINT",
+          "sourceEvidenceRefs": [
+            "remaining-bells"
+          ]
+        },
+        {
+          "id": "attack-counts__1",
+          "name": "1001機スタート：設定6",
+          "displayName": "1001機スタート：設定6",
+          "inputId": "REF_attack-counts_1",
+          "details": [
+            "1001機スタート：設定6"
+          ],
+          "confirmedSettings": [
+            "SET_6"
+          ],
+          "deniedSettings": [],
+          "hasImage": false,
+          "type": "SETTING_CONSTRAINT",
+          "sourceEvidenceRefs": [
+            "attack-counts"
+          ]
+        },
+        {
+          "id": "attack-counts__2",
+          "name": "22機撃破：設定2以上",
+          "displayName": "22機撃破：設定2以上",
+          "inputId": "REF_attack-counts_2",
+          "details": [
+            "22機撃破：設定2以上"
+          ],
+          "confirmedSettings": [
+            "SET_2",
+            "SET_3",
+            "SET_4",
+            "SET_5",
+            "SET_6"
+          ],
+          "deniedSettings": [],
+          "hasImage": false,
+          "type": "SETTING_CONSTRAINT",
+          "sourceEvidenceRefs": [
+            "attack-counts"
+          ]
+        },
+        {
+          "id": "attack-counts__3",
+          "name": "33機撃破：設定3以上",
+          "displayName": "33機撃破：設定3以上",
+          "inputId": "REF_attack-counts_3",
+          "details": [
+            "33機撃破：設定3以上"
+          ],
+          "confirmedSettings": [
+            "SET_3",
+            "SET_4",
+            "SET_5",
+            "SET_6"
+          ],
+          "deniedSettings": [],
+          "hasImage": false,
+          "type": "SETTING_CONSTRAINT",
+          "sourceEvidenceRefs": [
+            "attack-counts"
+          ]
+        },
+        {
+          "id": "attack-counts__4",
+          "name": "44機撃破：設定4以上",
+          "displayName": "44機撃破：設定4以上",
+          "inputId": "REF_attack-counts_4",
+          "details": [
+            "44機撃破：設定4以上"
+          ],
+          "confirmedSettings": [
+            "SET_4",
+            "SET_5",
+            "SET_6"
+          ],
+          "deniedSettings": [],
+          "hasImage": false,
+          "type": "SETTING_CONSTRAINT",
+          "sourceEvidenceRefs": [
+            "attack-counts"
+          ]
+        },
+        {
+          "id": "attack-counts__5",
+          "name": "55機撃破：設定5以上",
+          "displayName": "55機撃破：設定5以上",
+          "inputId": "REF_attack-counts_5",
+          "details": [
+            "55機撃破：設定5以上"
+          ],
+          "confirmedSettings": [
+            "SET_5",
+            "SET_6"
+          ],
+          "deniedSettings": [],
+          "hasImage": false,
+          "type": "SETTING_CONSTRAINT",
+          "sourceEvidenceRefs": [
+            "attack-counts"
+          ]
+        },
+        {
+          "id": "attack-counts__6",
+          "name": "66機撃破：設定6",
+          "displayName": "66機撃破：設定6",
+          "inputId": "REF_attack-counts_6",
+          "details": [
+            "66機撃破：設定6"
+          ],
+          "confirmedSettings": [
+            "SET_6"
+          ],
+          "deniedSettings": [],
+          "hasImage": false,
+          "type": "SETTING_CONSTRAINT",
+          "sourceEvidenceRefs": [
+            "attack-counts"
+          ]
+        },
+        {
+          "id": "payout__1",
+          "name": "222枚OVER：設定2以上",
+          "displayName": "222枚OVER：設定2以上",
+          "inputId": "REF_payout_1",
+          "details": [
+            "222枚OVER：設定2以上"
+          ],
+          "confirmedSettings": [
+            "SET_2",
+            "SET_3",
+            "SET_4",
+            "SET_5",
+            "SET_6"
+          ],
+          "deniedSettings": [],
+          "hasImage": false,
+          "type": "SETTING_CONSTRAINT",
+          "sourceEvidenceRefs": [
+            "payout"
+          ]
+        },
+        {
+          "id": "payout__2",
+          "name": "246枚OVER：設定2・4・6",
+          "displayName": "246枚OVER：設定2・4・6",
+          "inputId": "REF_payout_2",
+          "details": [
+            "246枚OVER：設定2・4・6"
+          ],
+          "confirmedSettings": [
+            "SET_2",
+            "SET_4",
+            "SET_6"
+          ],
+          "deniedSettings": [],
+          "hasImage": false,
+          "type": "SETTING_CONSTRAINT",
+          "sourceEvidenceRefs": [
+            "payout"
+          ]
+        },
+        {
+          "id": "payout__3",
+          "name": "333枚OVER：設定3以上",
+          "displayName": "333枚OVER：設定3以上",
+          "inputId": "REF_payout_3",
+          "details": [
+            "333枚OVER：設定3以上"
+          ],
+          "confirmedSettings": [
+            "SET_3",
+            "SET_4",
+            "SET_5",
+            "SET_6"
+          ],
+          "deniedSettings": [],
+          "hasImage": false,
+          "type": "SETTING_CONSTRAINT",
+          "sourceEvidenceRefs": [
+            "payout"
+          ]
+        },
+        {
+          "id": "payout__4",
+          "name": "444枚OVER：設定4以上",
+          "displayName": "444枚OVER：設定4以上",
+          "inputId": "REF_payout_4",
+          "details": [
+            "444枚OVER：設定4以上"
+          ],
+          "confirmedSettings": [
+            "SET_4",
+            "SET_5",
+            "SET_6"
+          ],
+          "deniedSettings": [],
+          "hasImage": false,
+          "type": "SETTING_CONSTRAINT",
+          "sourceEvidenceRefs": [
+            "payout"
+          ]
+        },
+        {
+          "id": "payout__5",
+          "name": "555枚OVER：設定5以上",
+          "displayName": "555枚OVER：設定5以上",
+          "inputId": "REF_payout_5",
+          "details": [
+            "555枚OVER：設定5以上"
+          ],
+          "confirmedSettings": [
+            "SET_5",
+            "SET_6"
+          ],
+          "deniedSettings": [],
+          "hasImage": false,
+          "type": "SETTING_CONSTRAINT",
+          "sourceEvidenceRefs": [
+            "payout"
+          ]
+        },
+        {
+          "id": "payout__6",
+          "name": "666枚OVER：設定6",
+          "displayName": "666枚OVER：設定6",
+          "inputId": "REF_payout_6",
+          "details": [
+            "666枚OVER：設定6"
+          ],
+          "confirmedSettings": [
+            "SET_6"
+          ],
+          "deniedSettings": [],
+          "hasImage": false,
+          "type": "SETTING_CONSTRAINT",
+          "sourceEvidenceRefs": [
+            "payout"
+          ]
+        },
+        {
+          "id": "road-games__1",
+          "name": "初期20G（LAST19G）：設定2以上",
+          "displayName": "初期20G（LAST19G）：設定2以上",
+          "inputId": "REF_road-games_1",
+          "details": [
+            "初期20G（LAST19G）：設定2以上"
+          ],
+          "confirmedSettings": [
+            "SET_2",
+            "SET_3",
+            "SET_4",
+            "SET_5",
+            "SET_6"
+          ],
+          "deniedSettings": [],
+          "hasImage": false,
+          "type": "SETTING_CONSTRAINT",
+          "sourceEvidenceRefs": [
+            "road-games"
+          ]
+        },
+        {
+          "id": "road-games__2",
+          "name": "初期30G（LAST29G）：設定3以上",
+          "displayName": "初期30G（LAST29G）：設定3以上",
+          "inputId": "REF_road-games_2",
+          "details": [
+            "初期30G（LAST29G）：設定3以上"
+          ],
+          "confirmedSettings": [
+            "SET_3",
+            "SET_4",
+            "SET_5",
+            "SET_6"
+          ],
+          "deniedSettings": [],
+          "hasImage": false,
+          "type": "SETTING_CONSTRAINT",
+          "sourceEvidenceRefs": [
+            "road-games"
+          ]
+        },
+        {
+          "id": "st-voice__3",
+          "name": "俺は人は殺さない！その怨念を殺す！：設定2以上",
+          "displayName": "俺は人は殺さない！その怨念を殺す！：設定2以上",
+          "inputId": "REF_st-voice_3",
+          "details": [
+            "俺は人は殺さない！その怨念を殺す！：設定2以上"
+          ],
+          "confirmedSettings": [
+            "SET_2",
+            "SET_3",
+            "SET_4",
+            "SET_5",
+            "SET_6"
+          ],
+          "deniedSettings": [],
+          "hasImage": false,
+          "type": "SETTING_CONSTRAINT",
+          "sourceEvidenceRefs": [
+            "st-voice"
+          ]
+        },
+        {
+          "id": "st-voice__4",
+          "name": "私が欲しいのはLikemeじゃないわ Lovemeよ：設定4以上",
+          "displayName": "私が欲しいのはLikemeじゃないわ Lovemeよ：設定4以上",
+          "inputId": "REF_st-voice_4",
+          "details": [
+            "私が欲しいのはLikemeじゃないわ Lovemeよ：設定4以上"
+          ],
+          "confirmedSettings": [
+            "SET_4",
+            "SET_5",
+            "SET_6"
+          ],
+          "deniedSettings": [],
+          "hasImage": false,
+          "type": "SETTING_CONSTRAINT",
+          "sourceEvidenceRefs": [
+            "st-voice"
+          ]
+        },
+        {
+          "id": "st-voice__5",
+          "name": "人々よ！バイストンウェルに帰還します！：設定6",
+          "displayName": "人々よ！バイストンウェルに帰還します！：設定6",
+          "inputId": "REF_st-voice_5",
+          "details": [
+            "人々よ！バイストンウェルに帰還します！：設定6"
+          ],
+          "confirmedSettings": [
+            "SET_6"
+          ],
+          "deniedSettings": [],
+          "hasImage": false,
+          "type": "SETTING_CONSTRAINT",
+          "sourceEvidenceRefs": [
+            "st-voice"
+          ]
+        },
+        {
+          "id": "trophy__1",
+          "name": "銅：設定2以上",
+          "displayName": "銅：設定2以上",
+          "inputId": "REF_trophy_1",
+          "details": [
+            "銅：設定2以上"
+          ],
+          "confirmedSettings": [
+            "SET_2",
+            "SET_3",
+            "SET_4",
+            "SET_5",
+            "SET_6"
+          ],
+          "deniedSettings": [],
+          "hasImage": false,
+          "type": "SETTING_CONSTRAINT",
+          "sourceEvidenceRefs": [
+            "trophy"
+          ]
+        },
+        {
+          "id": "trophy__2",
+          "name": "銀：設定3以上",
+          "displayName": "銀：設定3以上",
+          "inputId": "REF_trophy_2",
+          "details": [
+            "銀：設定3以上"
+          ],
+          "confirmedSettings": [
+            "SET_3",
+            "SET_4",
+            "SET_5",
+            "SET_6"
+          ],
+          "deniedSettings": [],
+          "hasImage": false,
+          "type": "SETTING_CONSTRAINT",
+          "sourceEvidenceRefs": [
+            "trophy"
+          ]
+        },
+        {
+          "id": "trophy__3",
+          "name": "金：設定4以上",
+          "displayName": "金：設定4以上",
+          "inputId": "REF_trophy_3",
+          "details": [
+            "金：設定4以上"
+          ],
+          "confirmedSettings": [
+            "SET_4",
+            "SET_5",
+            "SET_6"
+          ],
+          "deniedSettings": [],
+          "hasImage": false,
+          "type": "SETTING_CONSTRAINT",
+          "sourceEvidenceRefs": [
+            "trophy"
+          ]
+        },
+        {
+          "id": "trophy__4",
+          "name": "キリン柄：設定5以上",
+          "displayName": "キリン柄：設定5以上",
+          "inputId": "REF_trophy_4",
+          "details": [
+            "キリン柄：設定5以上"
+          ],
+          "confirmedSettings": [
+            "SET_5",
+            "SET_6"
+          ],
+          "deniedSettings": [],
+          "hasImage": false,
+          "type": "SETTING_CONSTRAINT",
+          "sourceEvidenceRefs": [
+            "trophy"
+          ]
+        },
+        {
+          "id": "trophy__5",
+          "name": "虹：設定6",
+          "displayName": "虹：設定6",
+          "inputId": "REF_trophy_5",
+          "details": [
+            "虹：設定6"
+          ],
+          "confirmedSettings": [
+            "SET_6"
+          ],
+          "deniedSettings": [],
+          "hasImage": false,
+          "type": "SETTING_CONSTRAINT",
+          "sourceEvidenceRefs": [
+            "trophy"
+          ]
+        }
+      ],
+      "references": [
+        {
+          "id": "EVI_remaining-bells",
+          "sourceFindingId": "remaining-bells",
+          "title": "残小Vベル表示",
+          "kind": "EVIDENCE",
+          "collapsible": true,
+          "defaultExpanded": false,
+          "description": "残小Vベル表示を確認したときに、該当する項目を1回加算して記録します。\n・注意：起動ミッション突入前に実際に表示された残り回数を記録します\n・反映：設定確定・設定否定の条件は、設定候補の絞り込みに自動反映します",
+          "descriptionPresentation": {
+            "collapsible": true,
+            "label": "説明",
+            "defaultExpanded": false
+          },
+          "runtimePolicyControlled": false,
+          "evidenceItems": [
+            {
+              "findingId": "remaining-bells",
+              "label": "残小Vベル表示",
+              "sourceIds": [
+                "review"
+              ],
+              "details": [
+                "起動ミッション突入前に実際に表示された残り回数を記録します。"
+              ],
+              "semanticType": "EXACT_CONSTRAINT",
+              "semanticCategories": [
+                {
+                  "label": "あと4回",
+                  "meaning": "設定4以上",
+                  "semanticType": "EXACT_CONSTRAINT"
+                },
+                {
+                  "label": "あと5回",
+                  "meaning": "設定5以上",
+                  "semanticType": "EXACT_CONSTRAINT"
+                },
+                {
+                  "label": "あと6回",
+                  "meaning": "設定6",
+                  "semanticType": "EXACT_CONSTRAINT"
+                }
+              ],
+              "runtimePolicyControlled": false,
+              "status": "SOURCE_REFERENCED",
+              "interaction": "REFERENCE_ONLY"
+            }
+          ]
+        },
+        {
+          "id": "EVI_attack-counts",
+          "sourceFindingId": "attack-counts",
+          "title": "アタックモードの機数",
+          "kind": "EVIDENCE",
+          "collapsible": true,
+          "defaultExpanded": false,
+          "description": "アタックモードの機数を確認したときに、該当する項目を1回加算して記録します。\n・注意：開始時の残機数と、消化中の特殊撃破数表示を記録します\n・反映：設定確定・設定否定の条件は、設定候補の絞り込みに自動反映します",
+          "descriptionPresentation": {
+            "collapsible": true,
+            "label": "説明",
+            "defaultExpanded": false
+          },
+          "runtimePolicyControlled": false,
+          "evidenceItems": [
+            {
+              "findingId": "attack-counts",
+              "label": "アタックモードの機数",
+              "sourceIds": [
+                "review"
+              ],
+              "details": [
+                "開始時の残機数と、消化中の特殊撃破数表示を記録します。"
+              ],
+              "semanticType": "EXACT_CONSTRAINT",
+              "semanticCategories": [
+                {
+                  "label": "1001機スタート",
+                  "meaning": "設定6",
+                  "semanticType": "EXACT_CONSTRAINT"
+                },
+                {
+                  "label": "22機撃破",
+                  "meaning": "設定2以上",
+                  "semanticType": "EXACT_CONSTRAINT"
+                },
+                {
+                  "label": "33機撃破",
+                  "meaning": "設定3以上",
+                  "semanticType": "EXACT_CONSTRAINT"
+                },
+                {
+                  "label": "44機撃破",
+                  "meaning": "設定4以上",
+                  "semanticType": "EXACT_CONSTRAINT"
+                },
+                {
+                  "label": "55機撃破",
+                  "meaning": "設定5以上",
+                  "semanticType": "EXACT_CONSTRAINT"
+                },
+                {
+                  "label": "66機撃破",
+                  "meaning": "設定6",
+                  "semanticType": "EXACT_CONSTRAINT"
+                }
+              ],
+              "runtimePolicyControlled": false,
+              "status": "SOURCE_REFERENCED",
+              "interaction": "REFERENCE_ONLY"
+            }
+          ]
+        },
+        {
+          "id": "EVI_payout",
+          "sourceFindingId": "payout",
+          "title": "獲得枚数表示",
+          "kind": "EVIDENCE",
+          "collapsible": true,
+          "defaultExpanded": false,
+          "description": "獲得枚数表示を確認したときに、該当する項目を1回加算して記録します。\n・注意：通常の獲得枚数とは異なる特殊表示を記録します\n・反映：設定確定・設定否定の条件は、設定候補の絞り込みに自動反映します",
+          "descriptionPresentation": {
+            "collapsible": true,
+            "label": "説明",
+            "defaultExpanded": false
+          },
+          "runtimePolicyControlled": false,
+          "evidenceItems": [
+            {
+              "findingId": "payout",
+              "label": "獲得枚数表示",
+              "sourceIds": [
+                "review"
+              ],
+              "details": [
+                "通常の獲得枚数とは異なる特殊表示を記録します。"
+              ],
+              "semanticType": "EXACT_CONSTRAINT",
+              "semanticCategories": [
+                {
+                  "label": "222枚OVER",
+                  "meaning": "設定2以上",
+                  "semanticType": "EXACT_CONSTRAINT"
+                },
+                {
+                  "label": "246枚OVER",
+                  "meaning": "設定2・4・6",
+                  "semanticType": "EXACT_CONSTRAINT"
+                },
+                {
+                  "label": "333枚OVER",
+                  "meaning": "設定3以上",
+                  "semanticType": "EXACT_CONSTRAINT"
+                },
+                {
+                  "label": "444枚OVER",
+                  "meaning": "設定4以上",
+                  "semanticType": "EXACT_CONSTRAINT"
+                },
+                {
+                  "label": "555枚OVER",
+                  "meaning": "設定5以上",
+                  "semanticType": "EXACT_CONSTRAINT"
+                },
+                {
+                  "label": "666枚OVER",
+                  "meaning": "設定6",
+                  "semanticType": "EXACT_CONSTRAINT"
+                }
+              ],
+              "runtimePolicyControlled": false,
+              "status": "SOURCE_REFERENCED",
+              "interaction": "REFERENCE_ONLY"
+            }
+          ]
+        },
+        {
+          "id": "EVI_road-games",
+          "sourceFindingId": "road-games",
+          "title": "聖戦士の道の初期G",
+          "kind": "EVIDENCE",
+          "collapsible": true,
+          "defaultExpanded": false,
+          "description": "聖戦士の道の初期Gを確認したときに、該当する項目を1回加算して記録します。\n・注意：初めから表示されたゲーム数だけが対象です。10G消化後の追加は設定示唆として数えません\n・反映：設定確定・設定否定の条件は、設定候補の絞り込みに自動反映します",
+          "descriptionPresentation": {
+            "collapsible": true,
+            "label": "説明",
+            "defaultExpanded": false
+          },
+          "runtimePolicyControlled": false,
+          "evidenceItems": [
+            {
+              "findingId": "road-games",
+              "label": "聖戦士の道の初期G",
+              "sourceIds": [
+                "review"
+              ],
+              "details": [
+                "初めから表示されたゲーム数だけが対象です。10G消化後の追加は設定示唆として数えません。"
+              ],
+              "semanticType": "EXACT_CONSTRAINT",
+              "semanticCategories": [
+                {
+                  "label": "初期20G（LAST19G）",
+                  "meaning": "設定2以上",
+                  "semanticType": "EXACT_CONSTRAINT"
+                },
+                {
+                  "label": "初期30G（LAST29G）",
+                  "meaning": "設定3以上",
+                  "semanticType": "EXACT_CONSTRAINT"
+                }
+              ],
+              "runtimePolicyControlled": false,
+              "status": "SOURCE_REFERENCED",
+              "interaction": "REFERENCE_ONLY"
+            }
+          ]
+        },
+        {
+          "id": "EVI_st-voice",
+          "sourceFindingId": "st-voice",
+          "title": "ST終了ボイス",
+          "kind": "EVIDENCE",
+          "collapsible": true,
+          "defaultExpanded": false,
+          "description": "ST終了ボイスを確認したときに、該当する項目を1回加算して記録します。\n・注意：ST終了画面でPUSHを押して確認します。引き戻しボイスを設定番号の示唆へ混ぜません\n・反映：設定確定・設定否定の条件は、設定候補の絞り込みに自動反映します\n・反映：設定別出現率が未確認の項目は記録のみです。出現率確認後は設定推測へ反映できる可能性があります",
+          "descriptionPresentation": {
+            "collapsible": true,
+            "label": "説明",
+            "defaultExpanded": false
+          },
+          "runtimePolicyControlled": false,
+          "evidenceItems": [
+            {
+              "findingId": "st-voice",
+              "label": "ST終了ボイス",
+              "sourceIds": [
+                "review"
+              ],
+              "details": [
+                "ST終了画面でPUSHを押して確認します。引き戻しボイスを設定番号の示唆へ混ぜません。"
+              ],
+              "semanticType": "DISPLAY_ONLY",
+              "semanticCategories": [
+                {
+                  "label": "来ます！悪しきオーラ力！",
+                  "meaning": "高設定示唆・弱",
+                  "semanticType": "PROBABILITY_UNKNOWN"
+                },
+                {
+                  "label": "私が受けた屈辱 この恨み 貴様に分るか！ショウ！",
+                  "meaning": "高設定示唆・中",
+                  "semanticType": "PROBABILITY_UNKNOWN"
+                },
+                {
+                  "label": "俺は人は殺さない！その怨念を殺す！",
+                  "meaning": "設定2以上",
+                  "semanticType": "EXACT_CONSTRAINT"
+                },
+                {
+                  "label": "私が欲しいのはLikemeじゃないわ Lovemeよ",
+                  "meaning": "設定4以上",
+                  "semanticType": "EXACT_CONSTRAINT"
+                },
+                {
+                  "label": "人々よ！バイストンウェルに帰還します！",
+                  "meaning": "設定6",
+                  "semanticType": "EXACT_CONSTRAINT"
+                }
+              ],
+              "runtimePolicyControlled": false,
+              "status": "SOURCE_REFERENCED",
+              "interaction": "REFERENCE_ONLY"
+            }
+          ]
+        },
+        {
+          "id": "EVI_trophy",
+          "sourceFindingId": "trophy",
+          "title": "サミートロフィー",
+          "kind": "EVIDENCE",
+          "collapsible": true,
+          "defaultExpanded": false,
+          "description": "サミートロフィーを確認したときに、該当する項目を1回加算して記録します。\n・注意：出現したトロフィーだけを記録します。消化ゲーム数やカスタムで出現率が変わるため、未出現を低設定の根拠にしません\n・反映：設定確定・設定否定の条件は、設定候補の絞り込みに自動反映します",
+          "descriptionPresentation": {
+            "collapsible": true,
+            "label": "説明",
+            "defaultExpanded": false
+          },
+          "runtimePolicyControlled": false,
+          "evidenceItems": [
+            {
+              "findingId": "trophy",
+              "label": "サミートロフィー",
+              "sourceIds": [
+                "review"
+              ],
+              "details": [
+                "出現したトロフィーだけを記録します。消化ゲーム数やカスタムで出現率が変わるため、未出現を低設定の根拠にしません。"
+              ],
+              "semanticType": "EXACT_CONSTRAINT",
+              "semanticCategories": [
+                {
+                  "label": "銅",
+                  "meaning": "設定2以上",
+                  "semanticType": "EXACT_CONSTRAINT"
+                },
+                {
+                  "label": "銀",
+                  "meaning": "設定3以上",
+                  "semanticType": "EXACT_CONSTRAINT"
+                },
+                {
+                  "label": "金",
+                  "meaning": "設定4以上",
+                  "semanticType": "EXACT_CONSTRAINT"
+                },
+                {
+                  "label": "キリン柄",
+                  "meaning": "設定5以上",
+                  "semanticType": "EXACT_CONSTRAINT"
+                },
+                {
+                  "label": "虹",
+                  "meaning": "設定6",
+                  "semanticType": "EXACT_CONSTRAINT"
+                }
+              ],
+              "runtimePolicyControlled": false,
+              "status": "SOURCE_REFERENCED",
+              "interaction": "REFERENCE_ONLY"
+            }
+          ]
+        }
+      ]
     },
-    "blockedItems": [],
+    "blockedItems": [
+      {
+        "blockId": "bonus-types",
+        "label": "初当たりボーナスの種類",
+        "reason": "実質割合は設定1・6だけが判明し、設定2～5は未公表です。オーラジャッジ自体の振り分けは全設定共通で、実質割合と置き換えません。",
+        "reevaluationCondition": "対象条件を識別でき、設定別の公開値と観測回数の対応を確認できる新しい資料が得られた場合。",
+        "sourceIds": [
+          "review"
+        ],
+        "publishedSettingDistribution": {
+          "1": {
+            "aura": 40.5,
+            "ferrario": 59.5
+          },
+          "6": {
+            "aura": 43,
+            "ferrario": 57
+          }
+        }
+      },
+      {
+        "blockId": "purple-state",
+        "label": "紫オーラのCZ・直撃振り分け",
+        "reason": "数値は通常・高確・超高確ごとに異なります。内部状態を演出だけで確定できず、状態別の母数を正しく分けられないため数値推測には使いません。",
+        "reevaluationCondition": "対象条件を識別でき、設定別の公開値と観測回数の対応を確認できる新しい資料が得られた場合。",
+        "sourceIds": [
+          "review"
+        ]
+      },
+      {
+        "blockId": "state-movement",
+        "label": "赤オーラ・チャンスタイム後の状態移行",
+        "reason": "高設定優遇は公表されていますが、演出から内部状態の実際の移行回数を確定できません。",
+        "reevaluationCondition": "対象条件を識別でき、設定別の公開値と観測回数の対応を確認できる新しい資料が得られた場合。",
+        "sourceIds": [
+          "review"
+        ]
+      },
+      {
+        "blockId": "eleven-point",
+        "label": "11pt規定ポイント選択",
+        "reason": "選択率は公表されていますが、途中の当選で未到達になった周期の規定値は分かりません。実際に11ptで当たった割合を選択率と同一視しません。",
+        "reevaluationCondition": "対象条件を識別でき、設定別の公開値と観測回数の対応を確認できる新しい資料が得られた場合。",
+        "sourceIds": [
+          "review"
+        ],
+        "publishedSettingDistribution": {
+          "1": 0.02,
+          "2": 0.02,
+          "3": 0.027000000000000003,
+          "4": 0.035,
+          "5": 0.043,
+          "6": 0.051
+        }
+      },
+      {
+        "blockId": "even-cycle",
+        "label": "偶数周期のボーナス",
+        "reason": "高設定期待度が上がるという説明のみで、設定別の当選率を確認できません。",
+        "reevaluationCondition": "対象条件を識別でき、設定別の公開値と観測回数の対応を確認できる新しい資料が得られた場合。",
+        "sourceIds": [
+          "review"
+        ]
+      },
+      {
+        "blockId": "attack-initial-draw",
+        "label": "アタックモード突入時の成功抽選",
+        "reason": "初期残機数や継続は当選を示唆しますが、すべての抽選当選・非当選を確定できる観測ではありません。示唆を当選回数へ置き換えません。",
+        "reevaluationCondition": "対象条件を識別でき、設定別の公開値と観測回数の対応を確認できる新しい資料が得られた場合。",
+        "sourceIds": [
+          "review"
+        ],
+        "publishedSettingDistribution": {
+          "1": 0.02,
+          "2": 0.023,
+          "3": 0.027000000000000003,
+          "4": 0.035,
+          "5": 0.043,
+          "6": 0.051
+        }
+      },
+      {
+        "blockId": "miss-high-state",
+        "label": "ハズレ3連・4連後の狙え高確",
+        "reason": "内部的な高確移行を見逃しなく識別する条件を確認できません。ハズレ連続の各重複区間を独立の抽選回数にしません。",
+        "reevaluationCondition": "対象条件を識別でき、設定別の公開値と観測回数の対応を確認できる新しい資料が得られた場合。",
+        "sourceIds": [
+          "review"
+        ],
+        "publishedSettingDistribution": {
+          "3": {
+            "1": 0.19899999999999998,
+            "2": 0.203,
+            "3": 0.207,
+            "4": 0.24600000000000002,
+            "5": 0.273,
+            "6": 0.301
+          },
+          "4": {
+            "1": 0.5,
+            "2": 0.504,
+            "3": 0.508,
+            "4": 0.516,
+            "5": 0.523,
+            "6": 0.531
+          }
+        }
+      },
+      {
+        "blockId": "aura-attack",
+        "label": "ST中のオーラアタック",
+        "reason": "高設定ほど発生しやすいと公表されていますが、設定別の発生率がありません。",
+        "reevaluationCondition": "対象条件を識別でき、設定別の公開値と観測回数の対応を確認できる新しい資料が得られた場合。",
+        "sourceIds": [
+          "review"
+        ]
+      },
+      {
+        "blockId": "mission-battle-rewrite",
+        "label": "ミッション経由2Gバトル勝利率",
+        "reason": "公表値はオーラ役の書き換え抽選を含みません。実際の勝利から書き換え分を確実に除けないため、そのまま公表率へ比較しません。",
+        "reevaluationCondition": "対象条件を識別でき、設定別の公開値と観測回数の対応を確認できる新しい資料が得られた場合。",
+        "sourceIds": [
+          "review"
+        ],
+        "publishedSettingDistribution": {
+          "1": 0.004,
+          "2": 0.004,
+          "3": 0.008,
+          "4": 0.008,
+          "5": 0.008,
+          "6": 0.012
+        }
+      },
+      {
+        "blockId": "roles-setting",
+        "label": "オーラ役・リプレイ・ベル",
+        "reason": "全設定共通の公表値で、出現率自体による設定差はありません。オーラ役後の抽選の差は別候補です。",
+        "reevaluationCondition": "対象条件を識別でき、設定別の公開値と観測回数の対応を確認できる新しい資料が得られた場合。",
+        "sourceIds": [
+          "roles"
+        ]
+      }
+    ],
     "ui": {
       "schemaVersion": "v8.5-runtime-ui-v1",
       "contractVersion": "runtime-ui-v8",
@@ -172,11 +1618,11 @@
       },
       "v8Sections": [
         {
-          "id": "OBS_primary-setting-difference",
-          "title": "AT初当たり確率",
+          "id": "OBS_bonus-initial",
+          "title": "ボーナス初当たり",
           "collapsible": true,
           "defaultExpanded": false,
-          "description": "通常時のAT初当たりを記録します。通常ゲーム数を基準に、実戦中の出現割合を設定別に比較します。\n・注意：AT中の継続当選は含めない。\n・注意：AT初当たりの設定別公表値を記録。",
+          "description": "通常時のボーナス初当たりを記録します。通常ゲーム数を基準に、実戦中の出現割合を設定別に比較します。\n・注意：ST中のボーナスを含めません。",
           "descriptionPresentation": {
             "collapsible": true,
             "label": "説明",
@@ -184,17 +1630,17 @@
           },
           "items": [
             {
-              "id": "NODE_primary-setting-difference",
-              "featureId": "primary-setting-difference",
-              "title": "AT初当たり確率",
+              "id": "NODE_bonus-initial",
+              "featureId": "bonus-initial",
+              "title": "ボーナス初当たり",
               "inputs": [
                 {
-                  "id": "primary-setting-difference.eligibleTrialCount",
+                  "id": "bonus-initial.eligibleTrialCount",
                   "label": "通常ゲーム数",
                   "input": "denominator",
-                  "inputId": "primary-setting-difference.eligibleTrialCount",
+                  "inputId": "bonus-initial.eligibleTrialCount",
                   "engineBinding": {
-                    "inputId": "primary-setting-difference.eligibleTrialCount"
+                    "inputId": "bonus-initial.eligibleTrialCount"
                   },
                   "gridSpan": 12,
                   "directNumeric": true,
@@ -207,12 +1653,12 @@
                   }
                 },
                 {
-                  "id": "primary-setting-difference.successCount",
-                  "label": "AT初当たり回数",
+                  "id": "bonus-initial.successCount",
+                  "label": "ボーナス初当たり回数",
                   "input": "counter",
-                  "inputId": "primary-setting-difference.successCount",
+                  "inputId": "bonus-initial.successCount",
                   "engineBinding": {
-                    "inputId": "primary-setting-difference.successCount"
+                    "inputId": "bonus-initial.successCount"
                   },
                   "directNumeric": true,
                   "quickAdd": [
@@ -222,6 +1668,428 @@
                   "unobservedDisplay": "—"
                 }
               ]
+            }
+          ]
+        },
+        {
+          "id": "OBS_rush-carry",
+          "title": "上位RUSH持ち越し率",
+          "collapsible": true,
+          "defaultExpanded": false,
+          "description": "対象となる機会のうち、RUSH持ち越しが実際に起きた割合を設定別に比較します。\n・注意：ビルバインRUSH後63G+αの引き戻し区間を抜け、次の初当たりまで追えた回数が母数です。\n・注意：その次の初当たりで前回RUSH情報を引き継いだ回数を数え、追跡できなかった実戦は除きます。",
+          "descriptionPresentation": {
+            "collapsible": true,
+            "label": "説明",
+            "defaultExpanded": false
+          },
+          "items": [
+            {
+              "id": "NODE_rush-carry",
+              "featureId": "rush-carry",
+              "title": "上位RUSH持ち越し率",
+              "inputs": [
+                {
+                  "id": "rush-carry.eligibleTrialCount",
+                  "label": "対象の上位RUSH終了回数",
+                  "input": "denominator",
+                  "inputId": "rush-carry.eligibleTrialCount",
+                  "engineBinding": {
+                    "inputId": "rush-carry.eligibleTrialCount"
+                  },
+                  "gridSpan": 6,
+                  "directNumeric": true,
+                  "quickAdd": [],
+                  "unobservedDisplay": "—"
+                },
+                {
+                  "id": "rush-carry.successCount",
+                  "label": "RUSH持ち越し回数",
+                  "input": "counter",
+                  "inputId": "rush-carry.successCount",
+                  "engineBinding": {
+                    "inputId": "rush-carry.successCount"
+                  },
+                  "directNumeric": true,
+                  "quickAdd": [
+                    1
+                  ],
+                  "gridSpan": 6,
+                  "unobservedDisplay": "—"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "OBS_chum-lamp",
+          "title": "チャムランプ色",
+          "collapsible": true,
+          "defaultExpanded": false,
+          "description": "対象の狙え成功回数に対する各ランプ色の出現回数。ST中ボーナスの狙えカットインでオーラ役を停止させた回数。緑・赤と、それ以外を全て記録します。\n・注意：ST中ボーナスの狙えカットインでオーラ役を停止させた回数。\n・注意：緑・赤と、それ以外を全て記録します。",
+          "descriptionPresentation": {
+            "collapsible": true,
+            "label": "説明",
+            "defaultExpanded": false
+          },
+          "items": [
+            {
+              "id": "NODE_chum-lamp",
+              "featureId": "chum-lamp",
+              "title": "チャムランプ色",
+              "interaction": {
+                "type": "CATEGORY_COUNTERS",
+                "preservePriorObservations": true,
+                "showAccumulatedCounts": true,
+                "categoryCoverage": "EXHAUSTIVE",
+                "totalOpportunities": "SUM_CATEGORY_COUNTS",
+                "categories": [
+                  {
+                    "id": "chum-lamp.categoryCounts.1_緑",
+                    "inputId": "chum-lamp.categoryCounts.1_緑",
+                    "label": "緑"
+                  },
+                  {
+                    "id": "chum-lamp.categoryCounts.2_赤",
+                    "inputId": "chum-lamp.categoryCounts.2_赤",
+                    "label": "赤"
+                  },
+                  {
+                    "id": "chum-lamp.categoryCounts.3_その他",
+                    "inputId": "chum-lamp.categoryCounts.3_その他",
+                    "label": "その他"
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "id": "EVI_remaining-bells",
+          "title": "残小Vベル表示",
+          "description": "残小Vベル表示を確認したときに、該当する項目を1回加算して記録します。\n・注意：起動ミッション突入前に実際に表示された残り回数を記録します\n・反映：設定確定・設定否定の条件は、設定候補の絞り込みに自動反映します",
+          "collapsible": true,
+          "defaultExpanded": false,
+          "descriptionPresentation": {
+            "collapsible": true,
+            "label": "説明",
+            "defaultExpanded": false
+          },
+          "items": [
+            {
+              "id": "REF_remaining-bells",
+              "evidenceId": "remaining-bells",
+              "label": "残小Vベル表示",
+              "interaction": {
+                "type": "CATEGORY_COUNTERS",
+                "preservePriorObservations": true,
+                "showAccumulatedCounts": true,
+                "categoryCoverage": "NON_EXHAUSTIVE",
+                "totalOpportunities": "NONE",
+                "categories": [
+                  {
+                    "id": "REF_remaining-bells_1",
+                    "inputId": "REF_remaining-bells_1",
+                    "label": "あと4回",
+                    "meaning": "設定4以上"
+                  },
+                  {
+                    "id": "REF_remaining-bells_2",
+                    "inputId": "REF_remaining-bells_2",
+                    "label": "あと5回",
+                    "meaning": "設定5以上"
+                  },
+                  {
+                    "id": "REF_remaining-bells_3",
+                    "inputId": "REF_remaining-bells_3",
+                    "label": "あと6回",
+                    "meaning": "設定6"
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "id": "EVI_attack-counts",
+          "title": "アタックモードの機数",
+          "description": "アタックモードの機数を確認したときに、該当する項目を1回加算して記録します。\n・注意：開始時の残機数と、消化中の特殊撃破数表示を記録します\n・反映：設定確定・設定否定の条件は、設定候補の絞り込みに自動反映します",
+          "collapsible": true,
+          "defaultExpanded": false,
+          "descriptionPresentation": {
+            "collapsible": true,
+            "label": "説明",
+            "defaultExpanded": false
+          },
+          "items": [
+            {
+              "id": "REF_attack-counts",
+              "evidenceId": "attack-counts",
+              "label": "アタックモードの機数",
+              "interaction": {
+                "type": "CATEGORY_COUNTERS",
+                "preservePriorObservations": true,
+                "showAccumulatedCounts": true,
+                "categoryCoverage": "NON_EXHAUSTIVE",
+                "totalOpportunities": "NONE",
+                "categories": [
+                  {
+                    "id": "REF_attack-counts_1",
+                    "inputId": "REF_attack-counts_1",
+                    "label": "1001機スタート",
+                    "meaning": "設定6"
+                  },
+                  {
+                    "id": "REF_attack-counts_2",
+                    "inputId": "REF_attack-counts_2",
+                    "label": "22機撃破",
+                    "meaning": "設定2以上"
+                  },
+                  {
+                    "id": "REF_attack-counts_3",
+                    "inputId": "REF_attack-counts_3",
+                    "label": "33機撃破",
+                    "meaning": "設定3以上"
+                  },
+                  {
+                    "id": "REF_attack-counts_4",
+                    "inputId": "REF_attack-counts_4",
+                    "label": "44機撃破",
+                    "meaning": "設定4以上"
+                  },
+                  {
+                    "id": "REF_attack-counts_5",
+                    "inputId": "REF_attack-counts_5",
+                    "label": "55機撃破",
+                    "meaning": "設定5以上"
+                  },
+                  {
+                    "id": "REF_attack-counts_6",
+                    "inputId": "REF_attack-counts_6",
+                    "label": "66機撃破",
+                    "meaning": "設定6"
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "id": "EVI_payout",
+          "title": "獲得枚数表示",
+          "description": "獲得枚数表示を確認したときに、該当する項目を1回加算して記録します。\n・注意：通常の獲得枚数とは異なる特殊表示を記録します\n・反映：設定確定・設定否定の条件は、設定候補の絞り込みに自動反映します",
+          "collapsible": true,
+          "defaultExpanded": false,
+          "descriptionPresentation": {
+            "collapsible": true,
+            "label": "説明",
+            "defaultExpanded": false
+          },
+          "items": [
+            {
+              "id": "REF_payout",
+              "evidenceId": "payout",
+              "label": "獲得枚数表示",
+              "interaction": {
+                "type": "CATEGORY_COUNTERS",
+                "preservePriorObservations": true,
+                "showAccumulatedCounts": true,
+                "categoryCoverage": "NON_EXHAUSTIVE",
+                "totalOpportunities": "NONE",
+                "categories": [
+                  {
+                    "id": "REF_payout_1",
+                    "inputId": "REF_payout_1",
+                    "label": "222枚OVER",
+                    "meaning": "設定2以上"
+                  },
+                  {
+                    "id": "REF_payout_2",
+                    "inputId": "REF_payout_2",
+                    "label": "246枚OVER",
+                    "meaning": "設定2・4・6"
+                  },
+                  {
+                    "id": "REF_payout_3",
+                    "inputId": "REF_payout_3",
+                    "label": "333枚OVER",
+                    "meaning": "設定3以上"
+                  },
+                  {
+                    "id": "REF_payout_4",
+                    "inputId": "REF_payout_4",
+                    "label": "444枚OVER",
+                    "meaning": "設定4以上"
+                  },
+                  {
+                    "id": "REF_payout_5",
+                    "inputId": "REF_payout_5",
+                    "label": "555枚OVER",
+                    "meaning": "設定5以上"
+                  },
+                  {
+                    "id": "REF_payout_6",
+                    "inputId": "REF_payout_6",
+                    "label": "666枚OVER",
+                    "meaning": "設定6"
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "id": "EVI_road-games",
+          "title": "聖戦士の道の初期G",
+          "description": "聖戦士の道の初期Gを確認したときに、該当する項目を1回加算して記録します。\n・注意：初めから表示されたゲーム数だけが対象です。10G消化後の追加は設定示唆として数えません\n・反映：設定確定・設定否定の条件は、設定候補の絞り込みに自動反映します",
+          "collapsible": true,
+          "defaultExpanded": false,
+          "descriptionPresentation": {
+            "collapsible": true,
+            "label": "説明",
+            "defaultExpanded": false
+          },
+          "items": [
+            {
+              "id": "REF_road-games",
+              "evidenceId": "road-games",
+              "label": "聖戦士の道の初期G",
+              "interaction": {
+                "type": "CATEGORY_COUNTERS",
+                "preservePriorObservations": true,
+                "showAccumulatedCounts": true,
+                "categoryCoverage": "NON_EXHAUSTIVE",
+                "totalOpportunities": "NONE",
+                "categories": [
+                  {
+                    "id": "REF_road-games_1",
+                    "inputId": "REF_road-games_1",
+                    "label": "初期20G（LAST19G）",
+                    "meaning": "設定2以上"
+                  },
+                  {
+                    "id": "REF_road-games_2",
+                    "inputId": "REF_road-games_2",
+                    "label": "初期30G（LAST29G）",
+                    "meaning": "設定3以上"
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "id": "EVI_st-voice",
+          "title": "ST終了ボイス",
+          "description": "ST終了ボイスを確認したときに、該当する項目を1回加算して記録します。\n・注意：ST終了画面でPUSHを押して確認します。引き戻しボイスを設定番号の示唆へ混ぜません\n・反映：設定確定・設定否定の条件は、設定候補の絞り込みに自動反映します\n・反映：設定別出現率が未確認の項目は記録のみです。出現率確認後は設定推測へ反映できる可能性があります",
+          "collapsible": true,
+          "defaultExpanded": false,
+          "descriptionPresentation": {
+            "collapsible": true,
+            "label": "説明",
+            "defaultExpanded": false
+          },
+          "items": [
+            {
+              "id": "REF_st-voice",
+              "evidenceId": "st-voice",
+              "label": "ST終了ボイス",
+              "interaction": {
+                "type": "CATEGORY_COUNTERS",
+                "preservePriorObservations": true,
+                "showAccumulatedCounts": true,
+                "categoryCoverage": "NON_EXHAUSTIVE",
+                "totalOpportunities": "NONE",
+                "categories": [
+                  {
+                    "id": "REF_st-voice_1",
+                    "inputId": "REF_st-voice_1",
+                    "label": "来ます！悪しきオーラ力！",
+                    "meaning": "高設定示唆・弱"
+                  },
+                  {
+                    "id": "REF_st-voice_2",
+                    "inputId": "REF_st-voice_2",
+                    "label": "私が受けた屈辱 この恨み 貴様に分るか！ショウ！",
+                    "meaning": "高設定示唆・中"
+                  },
+                  {
+                    "id": "REF_st-voice_3",
+                    "inputId": "REF_st-voice_3",
+                    "label": "俺は人は殺さない！その怨念を殺す！",
+                    "meaning": "設定2以上"
+                  },
+                  {
+                    "id": "REF_st-voice_4",
+                    "inputId": "REF_st-voice_4",
+                    "label": "私が欲しいのはLikemeじゃないわ Lovemeよ",
+                    "meaning": "設定4以上"
+                  },
+                  {
+                    "id": "REF_st-voice_5",
+                    "inputId": "REF_st-voice_5",
+                    "label": "人々よ！バイストンウェルに帰還します！",
+                    "meaning": "設定6"
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "id": "EVI_trophy",
+          "title": "サミートロフィー",
+          "description": "サミートロフィーを確認したときに、該当する項目を1回加算して記録します。\n・注意：出現したトロフィーだけを記録します。消化ゲーム数やカスタムで出現率が変わるため、未出現を低設定の根拠にしません\n・反映：設定確定・設定否定の条件は、設定候補の絞り込みに自動反映します",
+          "collapsible": true,
+          "defaultExpanded": false,
+          "descriptionPresentation": {
+            "collapsible": true,
+            "label": "説明",
+            "defaultExpanded": false
+          },
+          "items": [
+            {
+              "id": "REF_trophy",
+              "evidenceId": "trophy",
+              "label": "サミートロフィー",
+              "interaction": {
+                "type": "CATEGORY_COUNTERS",
+                "preservePriorObservations": true,
+                "showAccumulatedCounts": true,
+                "categoryCoverage": "NON_EXHAUSTIVE",
+                "totalOpportunities": "NONE",
+                "categories": [
+                  {
+                    "id": "REF_trophy_1",
+                    "inputId": "REF_trophy_1",
+                    "label": "銅",
+                    "meaning": "設定2以上"
+                  },
+                  {
+                    "id": "REF_trophy_2",
+                    "inputId": "REF_trophy_2",
+                    "label": "銀",
+                    "meaning": "設定3以上"
+                  },
+                  {
+                    "id": "REF_trophy_3",
+                    "inputId": "REF_trophy_3",
+                    "label": "金",
+                    "meaning": "設定4以上"
+                  },
+                  {
+                    "id": "REF_trophy_4",
+                    "inputId": "REF_trophy_4",
+                    "label": "キリン柄",
+                    "meaning": "設定5以上"
+                  },
+                  {
+                    "id": "REF_trophy_5",
+                    "inputId": "REF_trophy_5",
+                    "label": "虹",
+                    "meaning": "設定6"
+                  }
+                ]
+              }
             }
           ]
         }
@@ -245,18 +2113,134 @@
         "title": "この機種の設定推測について",
         "adopted": [
           {
-            "featureId": "primary-setting-difference",
-            "label": "AT初当たり確率",
+            "featureId": "bonus-initial",
+            "label": "ボーナス初当たり",
             "importance": "補助",
-            "selectionScore": 6.3,
+            "selectionScore": 7.9,
             "evaluation": {
               "userLabel": "設定判別スコア",
-              "value": 6.3
+              "value": 7.9
             },
-            "reason": "AT初当たり確率は設定1 1/597.7、設定6 1/505.6と設定差があります。「通常ゲーム数」に対する「AT初当たり回数」の発生割合を比較して推測に使用します。 観測条件：通常時のAT初当たりを記録します。"
+            "reason": "ボーナス初当たりは設定1 1/355.8、設定6 1/307.7と設定差があります。「通常ゲーム数」に対する「ボーナス初当たり回数」の発生割合を比較して推測に使用します。 観測条件：通常時のボーナス初当たりを記録します。"
+          },
+          {
+            "featureId": "rush-carry",
+            "label": "上位RUSH持ち越し率",
+            "importance": "補助",
+            "evaluation": {
+              "userLabel": "1回の判別力",
+              "value": 8.16973267572525
+            },
+            "reason": "上位RUSH持ち越し率は設定1 0.4%、設定6 15.2%と設定差があります。「対象の上位RUSH終了回数」に対する「RUSH持ち越し回数」の発生割合を比較して推測に使用します。 観測条件：対象となる機会のうち、RUSH持ち越しが実際に起きた割合を設定別に比較します。"
+          },
+          {
+            "featureId": "chum-lamp",
+            "label": "チャムランプ色",
+            "importance": "微小",
+            "evaluation": {
+              "userLabel": "1回の判別力",
+              "value": 0.19483902842410972
+            },
+            "reason": "チャムランプ色の「その他」の割合は設定6 93.8%、設定1 96.1%と設定差があります。「対象の狙え成功回数」を基準に、記録したカテゴリの振り分けを比較して推測に使用します。 観測条件：対象の狙え成功回数に対する各ランプ色の出現回数。"
           }
         ],
-        "notAdopted": [],
+        "notAdopted": [
+          {
+            "featureId": "primary-setting-difference",
+            "label": "ST初当たり",
+            "reason": "この項目にも設定差のある数値は確認できています。初当たりにつながる同じ抽選経路を含むため、同時に独立加算しません。 同じ情報を重ねて評価して判別力を過大に見積もらないため、現在は設定判別スコア等を比較して「ボーナス初当たり」を代表として使用し、この項目は単独では数値推測に使用しません。"
+          },
+          {
+            "featureId": "attack-entry",
+            "label": "アタックモード",
+            "reason": "この項目にも設定差のある数値は確認できています。初当たりにつながる同じ抽選経路を含むため、同時に独立加算しません。 同じ情報を重ねて評価して判別力を過大に見積もらないため、現在は設定判別スコア等を比較して「ボーナス初当たり」を代表として使用し、この項目は単独では数値推測に使用しません。"
+          },
+          {
+            "featureId": "mission-entry",
+            "label": "ミッションモード",
+            "reason": "この項目にも設定差のある数値は確認できています。初当たりにつながる同じ抽選経路を含むため、同時に独立加算しません。 同じ情報を重ねて評価して判別力を過大に見積もらないため、現在は設定判別スコア等を比較して「ボーナス初当たり」を代表として使用し、この項目は単独では数値推測に使用しません。"
+          },
+          {
+            "featureId": "starting-mission",
+            "label": "起動ミッション",
+            "reason": "この項目にも設定差のある数値は確認できています。初当たりにつながる同じ抽選経路を含むため、同時に独立加算しません。 同じ情報を重ねて評価して判別力を過大に見積もらないため、現在は設定判別スコア等を比較して「ボーナス初当たり」を代表として使用し、この項目は単独では数値推測に使用しません。"
+          },
+          {
+            "featureId": "cz-combined",
+            "label": "CZ合算",
+            "reason": "この項目にも設定差のある数値は確認できています。初当たりにつながる同じ抽選経路を含むため、同時に独立加算しません。 同じ情報を重ねて評価して判別力を過大に見積もらないため、現在は設定判別スコア等を比較して「ボーナス初当たり」を代表として使用し、この項目は単独では数値推測に使用しません。"
+          },
+          {
+            "featureId": "attack-success",
+            "label": "アタックモード成功率",
+            "reason": "この項目にも設定差のある数値は確認できています。初当たりにつながる同じ抽選経路を含むため、同時に独立加算しません。 同じ情報を重ねて評価して判別力を過大に見積もらないため、現在は設定判別スコア等を比較して「ボーナス初当たり」を代表として使用し、この項目は単独では数値推測に使用しません。"
+          },
+          {
+            "featureId": "dunbine-sp-win",
+            "label": "ダンバインSP勝率",
+            "reason": "この項目にも設定差のある数値は確認できています。初当たりにつながる同じ抽選経路を含むため、同時に独立加算しません。 同じ情報を重ねて評価して判別力を過大に見積もらないため、現在は設定判別スコア等を比較して「ボーナス初当たり」を代表として使用し、この項目は単独では数値推測に使用しません。"
+          },
+          {
+            "featureId": "bonus-types",
+            "label": "初当たりボーナスの種類",
+            "reason": "実質割合は設定1・6だけが判明し、設定2～5は未公表です。オーラジャッジ自体の振り分けは全設定共通で、実質割合と置き換えません。",
+            "reevaluationCondition": "対象条件を識別でき、設定別の公開値と観測回数の対応を確認できる新しい資料が得られた場合。"
+          },
+          {
+            "featureId": "purple-state",
+            "label": "紫オーラのCZ・直撃振り分け",
+            "reason": "数値は通常・高確・超高確ごとに異なります。内部状態を演出だけで確定できず、状態別の母数を正しく分けられないため数値推測には使いません。",
+            "reevaluationCondition": "対象条件を識別でき、設定別の公開値と観測回数の対応を確認できる新しい資料が得られた場合。"
+          },
+          {
+            "featureId": "state-movement",
+            "label": "赤オーラ・チャンスタイム後の状態移行",
+            "reason": "高設定優遇は公表されていますが、演出から内部状態の実際の移行回数を確定できません。",
+            "reevaluationCondition": "対象条件を識別でき、設定別の公開値と観測回数の対応を確認できる新しい資料が得られた場合。"
+          },
+          {
+            "featureId": "eleven-point",
+            "label": "11pt規定ポイント選択",
+            "reason": "選択率は公表されていますが、途中の当選で未到達になった周期の規定値は分かりません。実際に11ptで当たった割合を選択率と同一視しません。",
+            "reevaluationCondition": "対象条件を識別でき、設定別の公開値と観測回数の対応を確認できる新しい資料が得られた場合。"
+          },
+          {
+            "featureId": "even-cycle",
+            "label": "偶数周期のボーナス",
+            "reason": "高設定期待度が上がるという説明のみで、設定別の当選率を確認できません。",
+            "reevaluationCondition": "対象条件を識別でき、設定別の公開値と観測回数の対応を確認できる新しい資料が得られた場合。"
+          },
+          {
+            "featureId": "attack-initial-draw",
+            "label": "アタックモード突入時の成功抽選",
+            "reason": "初期残機数や継続は当選を示唆しますが、すべての抽選当選・非当選を確定できる観測ではありません。示唆を当選回数へ置き換えません。",
+            "reevaluationCondition": "対象条件を識別でき、設定別の公開値と観測回数の対応を確認できる新しい資料が得られた場合。"
+          },
+          {
+            "featureId": "miss-high-state",
+            "label": "ハズレ3連・4連後の狙え高確",
+            "reason": "内部的な高確移行を見逃しなく識別する条件を確認できません。ハズレ連続の各重複区間を独立の抽選回数にしません。",
+            "reevaluationCondition": "対象条件を識別でき、設定別の公開値と観測回数の対応を確認できる新しい資料が得られた場合。"
+          },
+          {
+            "featureId": "aura-attack",
+            "label": "ST中のオーラアタック",
+            "reason": "高設定ほど発生しやすいと公表されていますが、設定別の発生率がありません。",
+            "reevaluationCondition": "対象条件を識別でき、設定別の公開値と観測回数の対応を確認できる新しい資料が得られた場合。"
+          },
+          {
+            "featureId": "mission-battle-rewrite",
+            "label": "ミッション経由2Gバトル勝利率",
+            "reason": "公表値はオーラ役の書き換え抽選を含みません。実際の勝利から書き換え分を確実に除けないため、そのまま公表率へ比較しません。",
+            "reevaluationCondition": "対象条件を識別でき、設定別の公開値と観測回数の対応を確認できる新しい資料が得られた場合。"
+          },
+          {
+            "featureId": "roles-setting",
+            "label": "オーラ役・リプレイ・ベル",
+            "reason": "全設定共通の公表値で、出現率自体による設定差はありません。オーラ役後の抽選の差は別候補です。",
+            "reevaluationCondition": "対象条件を識別でき、設定別の公開値と観測回数の対応を確認できる新しい資料が得られた場合。"
+          }
+        ],
         "highLowDiscrimination": {
           "status": "COMPUTED",
           "method": "BEST_SINGLE_EXACT_ACTIVE_FEATURE",
@@ -268,23 +2252,32 @@
           "results": [
             {
               "games": 1500,
-              "balancedAccuracyPercent": 53.43
+              "balancedAccuracyPercent": 53.83
             },
             {
               "games": 3000,
-              "balancedAccuracyPercent": 54.83
+              "balancedAccuracyPercent": 55.31
             },
             {
               "games": 7000,
-              "balancedAccuracyPercent": 57.3
+              "balancedAccuracyPercent": 58.09
             }
           ],
           "eligibleFeatureIds": [
-            "primary-setting-difference"
+            "bonus-initial"
           ],
-          "selectedFeatureId": "primary-setting-difference",
-          "selectedFeatureLabel": "AT初当たり確率",
-          "excludedFeatures": [],
+          "selectedFeatureId": "bonus-initial",
+          "selectedFeatureLabel": "ボーナス初当たり",
+          "excludedFeatures": [
+            {
+              "findingId": "rush-carry",
+              "reason": "BENCHMARK_EXPOSURE_UNRESOLVED"
+            },
+            {
+              "findingId": "chum-lamp",
+              "reason": "BENCHMARK_EXPOSURE_UNRESOLVED"
+            }
+          ],
           "note": "7000Gへ正確に換算できるACTIVE要素だけを候補とし、要素間の独立性を仮定せず、単独で最も高い判別精度を持つ要素から保守的に算出しています。条件付き要素はこの指標には含めませんが、実戦中に実際の観測回数が入力された場合は設定推測に使用します。"
         },
         "unresolved": []

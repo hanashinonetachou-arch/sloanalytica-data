@@ -9,38 +9,62 @@
       "artifactId": "candidate-contract-L_DOUBLE_ATTACK2_EX",
       "kind": "candidate-contract",
       "path": "production/batches/batch-20261012-013/artifacts/L_DOUBLE_ATTACK2_EX/candidate_contract/result.json",
-      "sha256": "0b4e0291897fdd2295dc6c25204f9ea902c042a26be7b2812aa14c58f0e0defd",
-      "producerWorkId": "wrk_0a7f204314f84286"
+      "sha256": "e72fcabee5fb97999358f837aa463e437309bf1522504938a1405eff1662dca5",
+      "producerWorkId": "wrk_147a23364de94d78"
     },
     "observationEvidence": {
       "artifactId": "observation-evidence-L_DOUBLE_ATTACK2_EX",
       "kind": "observation-evidence",
       "path": "production/batches/batch-20261012-013/artifacts/L_DOUBLE_ATTACK2_EX/observation_evidence/result.json",
-      "sha256": "97e6deaf4868c6f9ed2347f85255ed1670fc1b3eff93592cf4e9079006829f08",
-      "producerWorkId": "wrk_6585bf45d0c4427e"
+      "sha256": "0406599b91592ed9da3b0a79ec9e45ea12832de61a6a6d6e9586e9f04a07218e",
+      "producerWorkId": "wrk_efc2ea1334644d71"
     },
     "evaluation": {
       "artifactId": "evaluation-L_DOUBLE_ATTACK2_EX",
       "kind": "evaluation",
       "path": "production/batches/batch-20261012-013/artifacts/L_DOUBLE_ATTACK2_EX/evaluation/result.json",
-      "sha256": "f75e4efa461eb72d10c980b8867f91c0b53e085fad7a6ef186e9efe407c86194",
-      "producerWorkId": "wrk_21bdd7632eae4b0b"
+      "sha256": "6472917b2ae0333200e1be9890a85899d262513e40853a9a9a526bef9931a54c",
+      "producerWorkId": "wrk_5b4218d777884ad4"
     }
   },
   "machineInferenceSummary": {
     "title": "この機種の設定推測について",
     "position": "TOP_ONLY",
     "highLowDiscrimination": {
-      "status": "NOT_COMPUTED",
-      "reason": "基準ゲーム数へ正確に換算できる設定推測要素がないため、高低判別精度を算出していません。",
-      "eligibleFeatureIds": [],
-      "excludedFeatures": []
+      "status": "COMPUTED",
+      "method": "BEST_SINGLE_EXACT_ACTIVE_FEATURE",
+      "bandDefinition": {
+        "lowSettings": "SETTING_1_TO_3",
+        "highSettings": "SETTING_4_TO_6",
+        "classPrior": "BALANCED"
+      },
+      "results": [
+        {
+          "games": 1500,
+          "balancedAccuracyPercent": 60.64
+        },
+        {
+          "games": 3000,
+          "balancedAccuracyPercent": 64.76
+        },
+        {
+          "games": 7000,
+          "balancedAccuracyPercent": 71.43
+        }
+      ],
+      "eligibleFeatureIds": [
+        "at-initial"
+      ],
+      "selectedFeatureId": "at-initial",
+      "selectedFeatureLabel": "AT初当たり",
+      "excludedFeatures": [],
+      "note": "7000Gへ正確に換算できるACTIVE要素だけを候補とし、要素間の独立性を仮定せず、単独で最も高い判別精度を持つ要素から保守的に算出しています。条件付き要素はこの指標には含めませんが、実戦中に実際の観測回数が入力された場合は設定推測に使用します。"
     }
   },
   "playInfo": {
     "visible": true,
     "collapsible": false,
-    "mode": "NONE",
+    "mode": "NORMAL_ONLY",
     "sessionFields": [
       {
         "id": "date",
@@ -58,8 +82,22 @@
         "mode": "TEXT"
       }
     ],
-    "startFields": [],
-    "currentFields": [],
+    "startFields": [
+      {
+        "id": "startNormalGames",
+        "label": "着席時 通常ゲーム数",
+        "mode": "NUMBER",
+        "directNumeric": true
+      }
+    ],
+    "currentFields": [
+      {
+        "id": "currentNormalGames",
+        "label": "現在 通常ゲーム数",
+        "mode": "NUMBER",
+        "directNumeric": true
+      }
+    ],
     "difference": {
       "autoCalculate": true
     },
@@ -72,17 +110,73 @@
     "enabled": true,
     "singleOpen": true
   },
-  "numericSections": [],
+  "numericSections": [
+    {
+      "id": "OBS_at-initial",
+      "sourceFindingId": "at-initial",
+      "title": "AT初当たり",
+      "kind": "NUMERIC_OBSERVATION",
+      "model": "BERNOULLI",
+      "trialUniverse": "NORMAL_GAME_TRIAL",
+      "description": "通常時のAT初当たりを記録します。通常ゲーム数を基準に、実戦中の出現割合を設定別に比較します。\n・注意：上位ATや引き戻し・連続当たりを重ねません。",
+      "collapsible": true,
+      "defaultExpanded": false,
+      "descriptionPresentation": {
+        "collapsible": true,
+        "label": "説明",
+        "defaultExpanded": false
+      },
+      "score": {
+        "label": "設定判別スコア",
+        "status": "COMPUTED",
+        "value": 50.4,
+        "precision": 1,
+        "importance": "主要"
+      },
+      "perEligibleTrialPower": {
+        "label": "1回の判別力",
+        "value": 50.36419804859605,
+        "metric": "PER_ELIGIBLE_TRIAL_POWER",
+        "thresholdSource": "RUNTIME_POLICY"
+      },
+      "inputs": [
+        {
+          "id": "at-initial.eligibleTrialCount",
+          "label": "通常ゲーム数",
+          "role": "trial",
+          "mode": "NUMBER",
+          "directNumeric": true,
+          "quickAdd": [
+            50
+          ],
+          "partialInputAllowed": true,
+          "emptyMeansUnobserved": true
+        },
+        {
+          "id": "at-initial.successCount",
+          "label": "AT初当たり回数",
+          "role": "success",
+          "mode": "NUMBER",
+          "directNumeric": true,
+          "quickAdd": [
+            1
+          ],
+          "partialInputAllowed": true,
+          "emptyMeansUnobserved": true,
+          "missingSubItemTreatment": "ZERO_WHEN_PARENT_OBSERVED"
+        }
+      ]
+    }
+  ],
   "evidenceSections": [
     {
       "id": "EVI_primary-setting-difference",
       "sourceFindingId": "primary-setting-difference",
-      "title": "AT終了時コインくん色",
+      "title": "AT終了時コインくん",
       "kind": "EVIDENCE",
-      "trialUniverse": "AT_END_SCREEN_TRIAL",
       "collapsible": true,
       "defaultExpanded": false,
-      "description": "AT終了時コインくん色を確認したときに、該当する項目を1回加算して記録します。\n・注意：終了画面の色別情報は設定示唆で、設定別出現率は未確認\n・注意：設定示唆の観測は数値確率へ変換せず記録に留める\n・反映：設定別出現率が未確認の項目は記録のみです。出現率確認後は設定推測へ反映できる可能性があります",
+      "description": "AT終了時コインくんを確認したときに、該当する項目を1回加算して記録します。\n・注意：通常AT・上位ATの終了画面に出たコインくんを確認します。設定5以上の特殊柄は資料間の識別表記が一致しないため、この入力から除外しています\n・反映：設定確定・設定否定の条件は、設定候補の絞り込みに自動反映します\n・反映：設定別出現率が未確認の項目は記録のみです。出現率確認後は設定推測へ反映できる可能性があります",
       "descriptionPresentation": {
         "collapsible": true,
         "label": "説明",
@@ -92,22 +186,117 @@
       "evidenceItems": [
         {
           "findingId": "primary-setting-difference",
-          "label": "AT終了時コインくん色",
+          "label": "AT終了時コインくん",
           "sourceIds": [
-            "onegeki"
+            "review"
           ],
-          "trialUniverse": "AT_END_SCREEN_TRIAL",
-          "denominatorSemantics": "AT終了画面で確認したコインくんの色を種類別に記録する。色の示唆だけで設定別出現率は作らない。",
           "details": [
-            "終了画面の色別情報は設定示唆で、設定別出現率は未確認。",
-            "設定示唆の観測は数値確率へ変換せず記録に留める。"
+            "通常AT・上位ATの終了画面に出たコインくんを確認します。設定5以上の特殊柄は資料間の識別表記が一致しないため、この入力から除外しています。"
           ],
-          "semanticType": "PROBABILITY_UNKNOWN",
+          "semanticType": "DISPLAY_ONLY",
           "semanticCategories": [
             {
-              "label": "終了時コインくん色",
-              "semanticType": "PROBABILITY_UNKNOWN",
-              "meaning": "終了時コインくん色は設定示唆。設定別出現率は未確認のため記録のみ。"
+              "label": "出現せず",
+              "meaning": "基本パターン",
+              "semanticType": "PROBABILITY_UNKNOWN"
+            },
+            {
+              "label": "青",
+              "meaning": "偶数設定示唆",
+              "semanticType": "PROBABILITY_UNKNOWN"
+            },
+            {
+              "label": "黄",
+              "meaning": "高設定示唆",
+              "semanticType": "PROBABILITY_UNKNOWN"
+            },
+            {
+              "label": "銅",
+              "meaning": "設定2以上",
+              "semanticType": "EXACT_CONSTRAINT"
+            },
+            {
+              "label": "銀",
+              "meaning": "設定3以上",
+              "semanticType": "EXACT_CONSTRAINT"
+            },
+            {
+              "label": "金",
+              "meaning": "設定4以上",
+              "semanticType": "EXACT_CONSTRAINT"
+            },
+            {
+              "label": "虹",
+              "meaning": "設定6",
+              "semanticType": "EXACT_CONSTRAINT"
+            }
+          ],
+          "runtimePolicyControlled": false,
+          "status": "SOURCE_REFERENCED",
+          "interaction": "REFERENCE_ONLY"
+        }
+      ]
+    },
+    {
+      "id": "EVI_ending-lamp",
+      "sourceFindingId": "ending-lamp",
+      "title": "エンディングの梁ランプ",
+      "kind": "EVIDENCE",
+      "collapsible": true,
+      "defaultExpanded": false,
+      "description": "エンディングの梁ランプを確認したときに、該当する項目を1回加算して記録します。\n・注意：エンディング中のレア小役成立時にPUSHを押して、梁ランプの色を確認します。ボイスと色は同じ演出なので二重入力しません\n・反映：設定確定・設定否定の条件は、設定候補の絞り込みに自動反映します\n・反映：設定別出現率が未確認の項目は記録のみです。出現率確認後は設定推測へ反映できる可能性があります",
+      "descriptionPresentation": {
+        "collapsible": true,
+        "label": "説明",
+        "defaultExpanded": false
+      },
+      "runtimePolicyControlled": false,
+      "evidenceItems": [
+        {
+          "findingId": "ending-lamp",
+          "label": "エンディングの梁ランプ",
+          "sourceIds": [
+            "review"
+          ],
+          "details": [
+            "エンディング中のレア小役成立時にPUSHを押して、梁ランプの色を確認します。ボイスと色は同じ演出なので二重入力しません。"
+          ],
+          "semanticType": "DISPLAY_ONLY",
+          "semanticCategories": [
+            {
+              "label": "白",
+              "meaning": "基本パターン",
+              "semanticType": "PROBABILITY_UNKNOWN"
+            },
+            {
+              "label": "青",
+              "meaning": "奇数設定示唆",
+              "semanticType": "PROBABILITY_UNKNOWN"
+            },
+            {
+              "label": "黄",
+              "meaning": "偶数設定示唆",
+              "semanticType": "PROBABILITY_UNKNOWN"
+            },
+            {
+              "label": "緑",
+              "meaning": "高設定示唆",
+              "semanticType": "PROBABILITY_UNKNOWN"
+            },
+            {
+              "label": "赤",
+              "meaning": "設定4以上",
+              "semanticType": "EXACT_CONSTRAINT"
+            },
+            {
+              "label": "紫",
+              "meaning": "設定5以上",
+              "semanticType": "EXACT_CONSTRAINT"
+            },
+            {
+              "label": "虹",
+              "meaning": "設定6",
+              "semanticType": "EXACT_CONSTRAINT"
             }
           ],
           "runtimePolicyControlled": false,

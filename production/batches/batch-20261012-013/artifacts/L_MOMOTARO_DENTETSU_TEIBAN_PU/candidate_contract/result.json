@@ -8,15 +8,15 @@
     "artifactId": "evaluation-L_MOMOTARO_DENTETSU_TEIBAN_PU",
     "kind": "evaluation",
     "path": "production/batches/batch-20261012-013/artifacts/L_MOMOTARO_DENTETSU_TEIBAN_PU/evaluation/result.json",
-    "sha256": "2d4265f8d54387a037817abdaaedee849ac0512cef32b69d990189f27fa45df7",
-    "producerWorkId": "wrk_e93787a634d2497a"
+    "sha256": "285da7429066f646b0962a75152cc17d58c937f64ccd408af4e344cf51ec3578",
+    "producerWorkId": "wrk_69c48151e94a443d"
   },
   "eligibilityArtifact": {
     "artifactId": "eligibility-L_MOMOTARO_DENTETSU_TEIBAN_PU",
     "kind": "eligibility",
     "path": "production/batches/batch-20261012-013/artifacts/L_MOMOTARO_DENTETSU_TEIBAN_PU/eligibility/result.json",
-    "sha256": "76dca11e07b7bb3b6779fb74961b9cf9ea8553fe2aa01a922393e574e93aed42",
-    "producerWorkId": "wrk_57c2462857f74fdc"
+    "sha256": "c78d7ca4004e3929ba0bf4486f5ff2e4efcab9be30205bb150f72208fcd48f01",
+    "producerWorkId": "wrk_2781eb26dfa147e0"
   },
   "candidates": [
     {
@@ -33,25 +33,337 @@
         "5": "1/159.5",
         "6": "1/153.2"
       },
-      "details": [
-        "定番チャンス初当たりの設定別確率を記録。",
-        "電鉄BONUS確率やCZ中ミッション成功率と独立加算しない。"
-      ],
-      "dependencyGroupId": null,
-      "dependencyKind": "REVIEWED_NO_SEMANTIC_OVERLAP",
-      "dependencyReason": "同じ観測母数を使うことだけでは情報重複とはみなさず、同じ成功事象・包含関係・上流下流関係が明示されていないため別の設定差情報として扱う。",
+      "details": [],
+      "dependencyGroupId": "momotetsu-entry",
+      "dependencyKind": "CAUSAL_PATH_OVERLAP",
+      "dependencyReason": "初当たりにつながる同じ抽選経路を含むため、同時に独立加算しません。",
       "runtimeInferenceAllowed": true,
-      "dependencyResolution": "NONE",
+      "dependencyResolution": "SINGLE_MEMBER_SELECTED",
       "runtimePolicyBinding": {
         "metric": "SELECTION_SCORE",
         "value": 24.065743973468017,
         "thresholdSource": "RUNTIME_POLICY"
       }
+    },
+    {
+      "findingId": "train-bonus",
+      "label": "電鉄ボーナス初当たり",
+      "model": "BERNOULLI",
+      "trialUniverse": "NORMAL_GAME_TRIAL",
+      "liveInferenceRoute": "LIVE_CONDITIONAL",
+      "settingDistribution": {
+        "1": "1/425.5",
+        "2": "1/416.3",
+        "3": "1/406",
+        "4": "1/379.6",
+        "5": "1/371.1",
+        "6": "1/357.8"
+      },
+      "details": [],
+      "dependencyGroupId": "momotetsu-entry",
+      "dependencyKind": "CAUSAL_PATH_OVERLAP",
+      "dependencyReason": "初当たりにつながる同じ抽選経路を含むため、同時に独立加算しません。",
+      "runtimeInferenceAllowed": false,
+      "dependencyResolution": "RESOLVED_BY_SINGLE_MEMBER",
+      "runtimePolicyBinding": {
+        "metric": "SELECTION_SCORE",
+        "value": 9.995830745626954,
+        "thresholdSource": "RUNTIME_POLICY"
+      },
+      "resolvedIntoFindingId": "primary-setting-difference"
+    },
+    {
+      "findingId": "rivals",
+      "label": "対戦相手の組み合わせ",
+      "model": "CATEGORICAL",
+      "trialUniverse": "RIVALS_TRIAL",
+      "liveInferenceRoute": "LIVE_CONDITIONAL",
+      "settingDistribution": {
+        "1": "妖鬼妃・エンマ 82.4% / まめ鬼・エンマ 12.5% / まめ鬼・妖鬼妃 5.1%",
+        "2": "妖鬼妃・エンマ 80.9% / まめ鬼・エンマ 13.3% / まめ鬼・妖鬼妃 5.9%",
+        "3": "妖鬼妃・エンマ 79.3% / まめ鬼・エンマ 14.1% / まめ鬼・妖鬼妃 6.6%",
+        "4": "妖鬼妃・エンマ 76.2% / まめ鬼・エンマ 15.6% / まめ鬼・妖鬼妃 8.2%",
+        "5": "妖鬼妃・エンマ 75.4% / まめ鬼・エンマ 16% / まめ鬼・妖鬼妃 8.6%",
+        "6": "妖鬼妃・エンマ 73.8% / まめ鬼・エンマ 16.8% / まめ鬼・妖鬼妃 9.4%"
+      },
+      "categoryModel": {
+        "residualPolicy": "SOURCE_EXHAUSTIVE"
+      },
+      "details": [],
+      "dependencyGroupId": null,
+      "dependencyKind": "INDEPENDENT",
+      "dependencyReason": "この対象機会の結果は、他の入力へ同じ成功回数を重ねて記録しません。",
+      "runtimeInferenceAllowed": true,
+      "dependencyResolution": "NONE",
+      "runtimePolicyBinding": {
+        "metric": "PER_ELIGIBLE_TRIAL_POWER",
+        "value": 0.8825728410948752,
+        "thresholdSource": "RUNTIME_POLICY"
+      }
     }
   ],
-  "dependencyGroups": [],
+  "dependencyGroups": [
+    {
+      "groupId": "momotetsu-entry",
+      "resolution": "SINGLE_MEMBER_SELECTED",
+      "members": [
+        "primary-setting-difference",
+        "train-bonus"
+      ],
+      "runtimeInferenceAllowed": true,
+      "selectedFindingId": "primary-setting-difference",
+      "selectionRationale": "依存関係を仮定せず二重評価を避けるため、依存関係グループ内で正式な7000G設定判別スコアが最大の候補を代表Featureとして使用する。",
+      "reason": "正式な設定判別スコアを比較できる候補から、最も情報量の高い1要素のみを採用する。"
+    }
+  ],
   "excludedDecisions": [],
-  "blockedItems": [],
-  "evidenceCandidates": [],
+  "blockedItems": [
+    {
+      "blockId": "mission-card",
+      "label": "ミッション駅のカード獲得",
+      "reason": "公表率はミッション駅停止時の初回抽選ですが、消化中のレア役で獲得への書き換えがあります。書き換え分を確実に除く観測条件を確認できないため、最終獲得回数を公表率に比較しません。",
+      "reevaluationCondition": "対象条件を識別でき、設定別の公開値と観測回数の対応を確認できる新しい資料が得られた場合。",
+      "sourceIds": [
+        "review"
+      ],
+      "publishedSettingDistribution": {
+        "1": 0.172,
+        "2": 0.174,
+        "3": 0.17600000000000002,
+        "4": 0.19699999999999998,
+        "5": 0.20199999999999999,
+        "6": 0.209
+      }
+    },
+    {
+      "blockId": "poor-god-weak",
+      "label": "貧乏神ターン・弱レア役の恩恵",
+      "reason": "弱チェリー・スイカ成立時のボンビラス星、デストロイ号、定番チャンスの抽選値を保存します。同じ成立役に対する当選内訳と合算を独立加算せず、告知時の対応を特定できる資料が得られた場合に再評価します。",
+      "reevaluationCondition": "対象条件を識別でき、設定別の公開値と観測回数の対応を確認できる新しい資料が得られた場合。",
+      "sourceIds": [
+        "review"
+      ],
+      "publishedSettingDistribution": {
+        "bonbiras": {
+          "1": 0.133,
+          "2": 0.145,
+          "3": 0.156,
+          "4": 0.184,
+          "5": 0.195,
+          "6": 0.21100000000000002
+        },
+        "destroy": {
+          "1": 0.051,
+          "2": 0.059000000000000004,
+          "3": 0.066,
+          "4": 0.07400000000000001,
+          "5": 0.08199999999999999,
+          "6": 0.09
+        },
+        "teiban": {
+          "1": 0.004,
+          "2": 0.008,
+          "3": 0.012,
+          "4": 0.016,
+          "5": 0.02,
+          "6": 0.023
+        },
+        "total": {
+          "1": 0.188,
+          "2": 0.212,
+          "3": 0.23399999999999999,
+          "4": 0.27399999999999997,
+          "5": 0.297,
+          "6": 0.324
+        }
+      }
+    },
+    {
+      "blockId": "poor-god-strong",
+      "label": "貧乏神ターン・強レア役の恩恵",
+      "reason": "強チェリー・強チャンス目の設定別内訳を保存します。複数の成立役がある区間で当選告知を特定の1回へ確実に割り当てる条件を確認できないため、今は数値推測に使いません。",
+      "reevaluationCondition": "対象条件を識別でき、設定別の公開値と観測回数の対応を確認できる新しい資料が得られた場合。",
+      "sourceIds": [
+        "review"
+      ],
+      "publishedSettingDistribution": {
+        "bonbiras": {
+          "1": 0.258,
+          "2": 0.27,
+          "3": 0.281,
+          "4": 0.32799999999999996,
+          "5": 0.35200000000000004,
+          "6": 0.375
+        },
+        "destroy": {
+          "1": 0.102,
+          "2": 0.109,
+          "3": 0.11699999999999999,
+          "4": 0.125,
+          "5": 0.133,
+          "6": 0.141
+        },
+        "teiban": {
+          "1": 0.012,
+          "2": 0.016,
+          "3": 0.02,
+          "4": 0.023,
+          "5": 0.027000000000000003,
+          "6": 0.031
+        },
+        "total": {
+          "1": 0.37200000000000005,
+          "2": 0.395,
+          "3": 0.418,
+          "4": 0.47600000000000003,
+          "5": 0.512,
+          "6": 0.547
+        }
+      }
+    },
+    {
+      "blockId": "vault-points",
+      "label": "キングボンビー金庫ポイント",
+      "reason": "設定変更時・発動時の初期選択と、その後に蓄積したポイントを区別できません。後から見えたポイントを初期振り分けの結果として数えません。",
+      "reevaluationCondition": "対象条件を識別でき、設定別の公開値と観測回数の対応を確認できる新しい資料が得られた場合。",
+      "sourceIds": [
+        "review"
+      ],
+      "publishedSettingDistribution": {
+        "categories": [
+          30,
+          40,
+          50
+        ],
+        "percentRows": [
+          [
+            81,
+            13,
+            6
+          ],
+          [
+            77,
+            15,
+            8
+          ],
+          [
+            73,
+            17,
+            9
+          ],
+          [
+            68,
+            20,
+            13
+          ],
+          [
+            64,
+            22,
+            14
+          ],
+          [
+            60,
+            24,
+            16
+          ]
+        ]
+      }
+    },
+    {
+      "blockId": "item-probabilities",
+      "label": "観光マスのアイテム出現割合",
+      "reason": "公開割合にはホールが都道府県を設定している条件があります。ホールの内部設定が分からない状態では対象マスの母数を確定できないため、一般の観光マスへ割合を流用しません。出現した確定アイテムは別途反映できます。",
+      "reevaluationCondition": "対象条件を識別でき、設定別の公開値と観測回数の対応を確認できる新しい資料が得られた場合。",
+      "sourceIds": [
+        "items"
+      ]
+    }
+  ],
+  "evidenceCandidates": [
+    {
+      "findingId": "tour-items",
+      "label": "観光マスのアイテム",
+      "sourceIds": [
+        "items"
+      ],
+      "details": [
+        "観光マスで実際に出現したアイテムを記録します。ネクタイは金太郎が奇数、浦島が偶数の示唆もありますが、その示唆だけで設定候補を限定しません。"
+      ],
+      "semanticCategories": [
+        {
+          "label": "桃太郎の腕章",
+          "meaning": "設定2以上",
+          "semanticType": "EXACT_CONSTRAINT"
+        },
+        {
+          "label": "夜叉姫の指示棒",
+          "meaning": "設定2以上",
+          "semanticType": "EXACT_CONSTRAINT"
+        },
+        {
+          "label": "金太郎のネクタイ",
+          "meaning": "設定2以上",
+          "semanticType": "EXACT_CONSTRAINT"
+        },
+        {
+          "label": "浦島のネクタイ",
+          "meaning": "設定2以上",
+          "semanticType": "EXACT_CONSTRAINT"
+        },
+        {
+          "label": "貧乏神の太鼓",
+          "meaning": "設定3・5・6",
+          "semanticType": "EXACT_CONSTRAINT"
+        },
+        {
+          "label": "ミニボンビーのおまる",
+          "meaning": "設定4・6",
+          "semanticType": "EXACT_CONSTRAINT"
+        },
+        {
+          "label": "キングボンビーの刀剣",
+          "meaning": "設定5以上",
+          "semanticType": "EXACT_CONSTRAINT"
+        }
+      ]
+    },
+    {
+      "findingId": "trophy",
+      "label": "アリストロフィー",
+      "sourceIds": [
+        "review"
+      ],
+      "details": [
+        "電鉄ボーナス終了画面のトロフィーを確認します。"
+      ],
+      "semanticCategories": [
+        {
+          "label": "銅",
+          "meaning": "設定2以上",
+          "semanticType": "EXACT_CONSTRAINT"
+        },
+        {
+          "label": "銀",
+          "meaning": "設定3以上",
+          "semanticType": "EXACT_CONSTRAINT"
+        },
+        {
+          "label": "金",
+          "meaning": "設定4以上",
+          "semanticType": "EXACT_CONSTRAINT"
+        },
+        {
+          "label": "クローバー柄",
+          "meaning": "設定5以上",
+          "semanticType": "EXACT_CONSTRAINT"
+        },
+        {
+          "label": "虹",
+          "meaning": "設定6",
+          "semanticType": "EXACT_CONSTRAINT"
+        }
+      ]
+    }
+  ],
   "sourceIntegrityIssues": []
 }

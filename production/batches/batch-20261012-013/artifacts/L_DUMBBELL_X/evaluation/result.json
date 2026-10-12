@@ -6,14 +6,26 @@
   "machineName": "Lパチスロ ダンベル何キロ持てる？",
   "dependencyReview": {
     "status": "COMPLETE",
-    "candidateCount": 1,
-    "groupCount": 0,
-    "groups": []
+    "candidateCount": 5,
+    "groupCount": 1,
+    "groups": [
+      {
+        "groupId": "dumbbell-entry",
+        "kinds": [
+          "CAUSAL_PATH_OVERLAP"
+        ],
+        "members": [
+          "primary-setting-difference",
+          "muscle-zone-entry",
+          "muscle-second-success"
+        ]
+      }
+    ]
   },
   "evaluations": [
     {
       "findingId": "primary-setting-difference",
-      "label": "AT初当たり確率",
+      "label": "AT初当たり",
       "observationType": "probability",
       "settingDistribution": {
         "1": "1/591",
@@ -24,22 +36,20 @@
         "6": "1/504"
       },
       "sourceIds": [
-        "pacnk"
+        "review"
       ],
       "trialUniverse": "NORMAL_GAME_TRIAL",
       "liveObservation": {
         "status": "EXACT_WITH_SCOPE_TRACKING",
-        "reason": "通常時のゲーム数に対するAT初当たり回数。AT中の継続当選は含めない。"
+        "reason": "通常時のゲーム数に対するAT初当たり。AT中の継続・上位への移行は含めません。"
       },
       "dependency": {
-        "status": "NONE",
-        "kind": "REVIEWED_NO_SEMANTIC_OVERLAP",
-        "reason": "同じ観測母数を使うことだけでは情報重複とはみなさず、同じ成功事象・包含関係・上流下流関係が明示されていないため別の設定差情報として扱う。"
+        "status": "DEFERRED_TO_CANDIDATE_CONTRACT",
+        "groupId": "dumbbell-entry",
+        "kind": "CAUSAL_PATH_OVERLAP",
+        "reason": "初当たりにつながる同じ抽選経路を含むため、同時に独立加算しません。"
       },
-      "details": [
-        "AT初当たりの公表確率は設定1から6まで1/591から1/504。",
-        "設定別AT初当たり確率の全6段階値を照合。"
-      ],
+      "details": [],
       "model": "BERNOULLI",
       "metrics": {
         "igPerEligibleTrial": 0.000004432333503268798,
@@ -55,8 +65,525 @@
       },
       "selectionClass": "JOINT_ELIGIBLE",
       "evaluationCompleteness": "COMPLETE"
+    },
+    {
+      "findingId": "muscle-zone-entry",
+      "label": "マッスルゾーン初当たり",
+      "observationType": "probability",
+      "settingDistribution": {
+        "1": "1/247",
+        "2": "1/245",
+        "3": "1/244",
+        "4": "1/242",
+        "5": "1/240",
+        "6": "1/239"
+      },
+      "sourceIds": [
+        "review"
+      ],
+      "trialUniverse": "NORMAL_GAME_TRIAL",
+      "liveObservation": {
+        "status": "EXACT_WITH_SCOPE_TRACKING",
+        "reason": "通常時のゲーム数に対するマッスルゾーンの初当たり。ATに至る経路と重複するため同時加算しません。"
+      },
+      "dependency": {
+        "status": "DEFERRED_TO_CANDIDATE_CONTRACT",
+        "groupId": "dumbbell-entry",
+        "kind": "CAUSAL_PATH_OVERLAP",
+        "reason": "初当たりにつながる同じ抽選経路を含むため、同時に独立加算しません。"
+      },
+      "details": [],
+      "model": "BERNOULLI",
+      "metrics": {
+        "igPerEligibleTrial": 3.947130147868849e-7,
+        "perEligibleTrialPower": 0.00007894260295737698,
+        "selectionScore": {
+          "status": "COMPUTED",
+          "value": 0.5515429611853031
+        }
+      },
+      "benchmarkExposure": {
+        "status": "EXACT",
+        "trials": 7000
+      },
+      "selectionClass": "EXCLUDE",
+      "evaluationCompleteness": "COMPLETE"
+    },
+    {
+      "findingId": "muscle-second-success",
+      "label": "CZ後半成功率",
+      "observationType": "conditional_probability",
+      "settingDistribution": {
+        "1": 0.52,
+        "2": 0.53,
+        "3": 0.56,
+        "4": 0.57,
+        "5": 0.59,
+        "6": 0.59
+      },
+      "sourceIds": [
+        "review"
+      ],
+      "trialUniverse": "MUSCLE_SECOND_SUCCESS_TRIAL",
+      "liveObservation": {
+        "status": "EXACT_WITH_SCOPE_TRACKING",
+        "reason": "CZ後半到達回数に対する後半成功回数。マッスルゾーン後半に実際に進んだ回数と、後半に成功した回数。前半失敗は母数に含めません。"
+      },
+      "dependency": {
+        "status": "DEFERRED_TO_CANDIDATE_CONTRACT",
+        "groupId": "dumbbell-entry",
+        "kind": "CAUSAL_PATH_OVERLAP",
+        "reason": "初当たりにつながる同じ抽選経路を含むため、同時に独立加算しません。"
+      },
+      "details": [],
+      "model": "BERNOULLI",
+      "metrics": {
+        "igPerEligibleTrial": 0.002145751142128116,
+        "perEligibleTrialPower": 0.4291502284256232,
+        "selectionScore": {
+          "status": "BLOCKED_UNRESOLVED",
+          "value": null
+        }
+      },
+      "benchmarkExposure": {
+        "status": "BLOCKED_UNRESOLVED"
+      },
+      "selectionClass": "EXCLUDE",
+      "evaluationCompleteness": "COMPLETE_LIKELIHOOD_BENCHMARK_UNRESOLVED"
+    },
+    {
+      "findingId": "golden-success",
+      "label": "ゴールデンチャレンジ成功率",
+      "observationType": "conditional_probability",
+      "settingDistribution": {
+        "1": 0.56,
+        "2": 0.57,
+        "3": 0.57,
+        "4": 0.58,
+        "5": 0.59,
+        "6": 0.64
+      },
+      "sourceIds": [
+        "review"
+      ],
+      "trialUniverse": "GOLDEN_SUCCESS_TRIAL",
+      "liveObservation": {
+        "status": "EXACT_WITH_SCOPE_TRACKING",
+        "reason": "ゴールデンチャレンジ突入回数に対する成功回数。当該上位CZに突入した回数と成功回数。2種類のCZの回数を混ぜません。"
+      },
+      "dependency": {
+        "status": "NONE",
+        "kind": "INDEPENDENT",
+        "reason": "この対象機会の結果は、他の入力へ同じ成功回数を重ねて記録しません。"
+      },
+      "details": [],
+      "model": "BERNOULLI",
+      "metrics": {
+        "igPerEligibleTrial": 0.0020756067049817473,
+        "perEligibleTrialPower": 0.41512134099634945,
+        "selectionScore": {
+          "status": "BLOCKED_UNRESOLVED",
+          "value": null
+        }
+      },
+      "benchmarkExposure": {
+        "status": "BLOCKED_UNRESOLVED"
+      },
+      "selectionClass": "EXCLUDE",
+      "evaluationCompleteness": "COMPLETE_LIKELIHOOD_BENCHMARK_UNRESOLVED"
+    },
+    {
+      "findingId": "rising-success",
+      "label": "ライジングアッパー成功率",
+      "observationType": "conditional_probability",
+      "settingDistribution": {
+        "1": 0.56,
+        "2": 0.57,
+        "3": 0.57,
+        "4": 0.58,
+        "5": 0.59,
+        "6": 0.64
+      },
+      "sourceIds": [
+        "review"
+      ],
+      "trialUniverse": "RISING_SUCCESS_TRIAL",
+      "liveObservation": {
+        "status": "EXACT_WITH_SCOPE_TRACKING",
+        "reason": "ライジングアッパー突入回数に対する成功回数。当該上位CZに突入した回数と成功回数。2種類のCZの回数を混ぜません。"
+      },
+      "dependency": {
+        "status": "NONE",
+        "kind": "INDEPENDENT",
+        "reason": "この対象機会の結果は、他の入力へ同じ成功回数を重ねて記録しません。"
+      },
+      "details": [],
+      "model": "BERNOULLI",
+      "metrics": {
+        "igPerEligibleTrial": 0.0020756067049817473,
+        "perEligibleTrialPower": 0.41512134099634945,
+        "selectionScore": {
+          "status": "BLOCKED_UNRESOLVED",
+          "value": null
+        }
+      },
+      "benchmarkExposure": {
+        "status": "BLOCKED_UNRESOLVED"
+      },
+      "selectionClass": "EXCLUDE",
+      "evaluationCompleteness": "COMPLETE_LIKELIHOOD_BENCHMARK_UNRESOLVED"
     }
   ],
-  "blockedItems": [],
-  "evidenceCandidates": []
+  "blockedItems": [
+    {
+      "blockId": "upper-cz-combined",
+      "label": "上位CZ合算確率",
+      "reason": "公表値は上位CZ全体の出現率で、通常時・AT中・終了後の異なる突入機会を含みます。通常ゲーム数だけを分母にする入力には使えません。",
+      "reevaluationCondition": "対象条件を識別でき、設定別の公開値と観測回数の対応を確認できる新しい資料が得られた場合。",
+      "sourceIds": [
+        "review"
+      ],
+      "publishedSettingDistribution": {
+        "1": "1/3500",
+        "2": "1/3500",
+        "3": "1/3300",
+        "4": "1/3100",
+        "5": "1/2900",
+        "6": "1/2500"
+      }
+    },
+    {
+      "blockId": "golden-acquisition",
+      "label": "ゴールデンチャレンジ獲得率",
+      "reason": "トータル獲得率は公表されていますが、設定別表に対応する抽選機会の数を特定できません。AT回数をそのまま抽選回数へ置き換えません。",
+      "reevaluationCondition": "対象条件を識別でき、設定別の公開値と観測回数の対応を確認できる新しい資料が得られた場合。",
+      "sourceIds": [
+        "review"
+      ],
+      "publishedSettingDistribution": {
+        "1": 0.17,
+        "2": 0.17,
+        "3": 0.17,
+        "4": 0.17,
+        "5": 0.18,
+        "6": 0.2
+      }
+    },
+    {
+      "blockId": "cz-high-state",
+      "label": "CZ高確移行率",
+      "reason": "高設定ほど優遇という公開説明はありますが、比較に使える設定別の当選率を確認できません。",
+      "reevaluationCondition": "対象条件を識別でき、設定別の公開値と観測回数の対応を確認できる新しい資料が得られた場合。",
+      "sourceIds": [
+        "review"
+      ]
+    },
+    {
+      "blockId": "golden-v-stock",
+      "label": "ゴールデンタイムのVストック",
+      "reason": "高設定ほど優遇という公開説明はありますが、比較に使える設定別の当選率を確認できません。",
+      "reevaluationCondition": "対象条件を識別でき、設定別の公開値と観測回数の対応を確認できる新しい資料が得られた場合。",
+      "sourceIds": [
+        "review"
+      ]
+    },
+    {
+      "blockId": "golden-bonus-add",
+      "label": "金肉ボーナスの上乗せ",
+      "reason": "高設定ほど優遇という公開説明はありますが、比較に使える設定別の当選率を確認できません。",
+      "reevaluationCondition": "対象条件を識別でき、設定別の公開値と観測回数の対応を確認できる新しい資料が得られた場合。",
+      "sourceIds": [
+        "review"
+      ]
+    },
+    {
+      "blockId": "golden-bonus-rate",
+      "label": "金肉ボーナス出現率",
+      "reason": "公表確率はありますが、上位CZやエンディング後を含む到達経路を通常時の初当たりとして数えません。",
+      "reevaluationCondition": "対象条件を識別でき、設定別の公開値と観測回数の対応を確認できる新しい資料が得られた場合。",
+      "sourceIds": [
+        "review"
+      ],
+      "publishedSettingDistribution": {
+        "1": "1/6300",
+        "2": "1/6200",
+        "3": "1/5800",
+        "4": "1/5300",
+        "5": "1/4900",
+        "6": "1/4000"
+      }
+    },
+    {
+      "blockId": "screen-distribution",
+      "label": "CZ・AT終了画面の出現割合",
+      "reason": "赤枠の1%未満やトランプの低確率など数値が確定しないカテゴリがあり、設定変更後初回や差枚条件でも出現率が変わります。1つの正確な分布へ補完せず、確定画面と示唆は記録できます。",
+      "reevaluationCondition": "対象条件を識別でき、設定別の公開値と観測回数の対応を確認できる新しい資料が得られた場合。",
+      "sourceIds": [
+        "screens"
+      ]
+    },
+    {
+      "blockId": "roles-setting-difference",
+      "label": "レア小役の出現率",
+      "reason": "スイカ・チェリー等は共通の確率表で、設定ごとの出現率の差は示されていません。小役後の抽選の差と小役自体の出現率を混同しません。",
+      "reevaluationCondition": "対象条件を識別でき、設定別の公開値と観測回数の対応を確認できる新しい資料が得られた場合。",
+      "sourceIds": [
+        "roles"
+      ]
+    }
+  ],
+  "evidenceCandidates": [
+    {
+      "findingId": "cz-end-screens",
+      "label": "CZ後半失敗画面",
+      "sourceIds": [
+        "screens"
+      ],
+      "details": [
+        "マッスルゾーン後半に失敗したときの画面を記録します。AT終了画面と別に記録し、出現割合による計算は行いません。"
+      ],
+      "semanticCategories": [
+        {
+          "label": "ひびき",
+          "meaning": "基本パターン",
+          "semanticType": "PROBABILITY_UNKNOWN"
+        },
+        {
+          "label": "サウナ",
+          "meaning": "規定カロリー示唆",
+          "semanticType": "PROBABILITY_UNKNOWN"
+        },
+        {
+          "label": "朱美",
+          "meaning": "設定2以上示唆",
+          "semanticType": "PROBABILITY_UNKNOWN"
+        },
+        {
+          "label": "彩也香",
+          "meaning": "偶数設定示唆",
+          "semanticType": "PROBABILITY_UNKNOWN"
+        },
+        {
+          "label": "里美",
+          "meaning": "奇数設定示唆",
+          "semanticType": "PROBABILITY_UNKNOWN"
+        },
+        {
+          "label": "ジーナ",
+          "meaning": "設定3以上示唆",
+          "semanticType": "PROBABILITY_UNKNOWN"
+        },
+        {
+          "label": "赤枠",
+          "meaning": "高設定示唆",
+          "semanticType": "PROBABILITY_UNKNOWN"
+        },
+        {
+          "label": "紫枠",
+          "meaning": "設定2以上",
+          "semanticType": "EXACT_CONSTRAINT"
+        },
+        {
+          "label": "銀枠・ドレス",
+          "meaning": "設定4以上",
+          "semanticType": "EXACT_CONSTRAINT"
+        },
+        {
+          "label": "銀枠・水着",
+          "meaning": "設定5以上",
+          "semanticType": "EXACT_CONSTRAINT"
+        },
+        {
+          "label": "金枠",
+          "meaning": "設定6",
+          "semanticType": "EXACT_CONSTRAINT"
+        },
+        {
+          "label": "トランプ",
+          "meaning": "設定1・6",
+          "semanticType": "EXACT_CONSTRAINT"
+        }
+      ]
+    },
+    {
+      "findingId": "at-end-screens",
+      "label": "AT終了画面",
+      "sourceIds": [
+        "screens"
+      ],
+      "details": [
+        "通常AT終了時の画面を記録します。上位AT終了画面は別項目です。"
+      ],
+      "semanticCategories": [
+        {
+          "label": "ひびき",
+          "meaning": "基本パターン",
+          "semanticType": "PROBABILITY_UNKNOWN"
+        },
+        {
+          "label": "サウナ",
+          "meaning": "規定カロリー示唆",
+          "semanticType": "PROBABILITY_UNKNOWN"
+        },
+        {
+          "label": "朱美",
+          "meaning": "設定2以上示唆",
+          "semanticType": "PROBABILITY_UNKNOWN"
+        },
+        {
+          "label": "彩也香",
+          "meaning": "偶数設定示唆",
+          "semanticType": "PROBABILITY_UNKNOWN"
+        },
+        {
+          "label": "里美",
+          "meaning": "奇数設定示唆",
+          "semanticType": "PROBABILITY_UNKNOWN"
+        },
+        {
+          "label": "ジーナ",
+          "meaning": "設定3以上示唆",
+          "semanticType": "PROBABILITY_UNKNOWN"
+        },
+        {
+          "label": "赤枠",
+          "meaning": "高設定示唆",
+          "semanticType": "PROBABILITY_UNKNOWN"
+        },
+        {
+          "label": "紫枠",
+          "meaning": "設定2以上",
+          "semanticType": "EXACT_CONSTRAINT"
+        },
+        {
+          "label": "銀枠・ドレス",
+          "meaning": "設定4以上",
+          "semanticType": "EXACT_CONSTRAINT"
+        },
+        {
+          "label": "銀枠・水着",
+          "meaning": "設定5以上",
+          "semanticType": "EXACT_CONSTRAINT"
+        },
+        {
+          "label": "金枠",
+          "meaning": "設定6",
+          "semanticType": "EXACT_CONSTRAINT"
+        },
+        {
+          "label": "トランプ",
+          "meaning": "設定1・6",
+          "semanticType": "EXACT_CONSTRAINT"
+        }
+      ]
+    },
+    {
+      "findingId": "upper-at-screens",
+      "label": "上位AT終了画面",
+      "sourceIds": [
+        "review"
+      ],
+      "details": [
+        "金肉ボーナス終了時に確認します。通常ATのひびき画面とは意味が異なります。"
+      ],
+      "semanticCategories": [
+        {
+          "label": "彩也香＆朱美",
+          "meaning": "奇数設定示唆",
+          "semanticType": "PROBABILITY_UNKNOWN"
+        },
+        {
+          "label": "ジーナ＆里美",
+          "meaning": "偶数設定示唆",
+          "semanticType": "PROBABILITY_UNKNOWN"
+        },
+        {
+          "label": "ひびき",
+          "meaning": "設定4以上",
+          "semanticType": "EXACT_CONSTRAINT"
+        },
+        {
+          "label": "街雄",
+          "meaning": "設定6",
+          "semanticType": "EXACT_CONSTRAINT"
+        }
+      ]
+    },
+    {
+      "findingId": "cheat-calories",
+      "label": "チートデイのカロリー",
+      "sourceIds": [
+        "review"
+      ],
+      "details": [
+        "チートデイで実際に表示された設定示唆カロリーを記録します。"
+      ],
+      "semanticCategories": [
+        {
+          "label": "456kcal",
+          "meaning": "設定4以上",
+          "semanticType": "EXACT_CONSTRAINT"
+        },
+        {
+          "label": "666kcal",
+          "meaning": "設定6",
+          "semanticType": "EXACT_CONSTRAINT"
+        }
+      ]
+    },
+    {
+      "findingId": "payout",
+      "label": "獲得枚数表示",
+      "sourceIds": [
+        "review"
+      ],
+      "details": [
+        "AT中に特定の獲得枚数表示が出た場合に記録します。"
+      ],
+      "semanticCategories": [
+        {
+          "label": "456枚OVER",
+          "meaning": "設定4以上",
+          "semanticType": "EXACT_CONSTRAINT"
+        },
+        {
+          "label": "555枚OVER",
+          "meaning": "設定5以上",
+          "semanticType": "EXACT_CONSTRAINT"
+        },
+        {
+          "label": "666枚OVER",
+          "meaning": "設定6",
+          "semanticType": "EXACT_CONSTRAINT"
+        }
+      ]
+    },
+    {
+      "findingId": "cheer-characters",
+      "label": "合いの手演出",
+      "sourceIds": [
+        "review"
+      ],
+      "details": [
+        "金肉ボーナス中、100枚獲得ごとに出る合いの手の人数を記録します。設定別出現率が不明なため確率計算には使いません。"
+      ],
+      "semanticCategories": [
+        {
+          "label": "1人",
+          "meaning": "基本パターン",
+          "semanticType": "PROBABILITY_UNKNOWN"
+        },
+        {
+          "label": "2人",
+          "meaning": "高設定示唆",
+          "semanticType": "PROBABILITY_UNKNOWN"
+        },
+        {
+          "label": "5人",
+          "meaning": "高設定示唆・強",
+          "semanticType": "PROBABILITY_UNKNOWN"
+        }
+      ]
+    }
+  ]
 }
