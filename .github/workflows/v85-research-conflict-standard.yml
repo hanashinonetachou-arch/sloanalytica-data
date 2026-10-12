@@ -1,0 +1,23 @@
+name: v8.5 Research Conflict Standard Regression
+on:
+  push:
+    branches:
+      - production/v85-batch-012-research-20261012
+    paths:
+      - .github/workflows/v85-research-conflict-standard.yml
+permissions:
+  contents: read
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Source-conflict contract tests
+        working-directory: production
+        run: node --experimental-strip-types --test test/source-conflict-standard.test.ts
+      - name: Existing production regression tests
+        working-directory: production
+        run: npm test
