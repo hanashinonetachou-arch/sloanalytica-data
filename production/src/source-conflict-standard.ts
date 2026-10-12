@@ -42,7 +42,7 @@ export function validateSourceConflictStandard(research:any){
   c.reopenPolicy!=='NEW_CONCRETE_SOURCE_ONLY')
    throw Error('SOURCE_CONFLICT_CLOSURE_INVALID:'+block.blockId);
   if(!filled(block.reason)||!filled(block.reevaluationCondition)||!filled(c.candidateId)||
-  !filled(c.conflictingClaim)||!filled(c.checkedAt)||!/^\\d{4}-\\d{2}-\\d{2}$/.test(c.checkedAt))
+  !filled(c.conflictingClaim)||!filled(c.checkedAt)||!/^\d{4}-\d{2}-\d{2}$/.test(c.checkedAt))
    throw Error('SOURCE_CONFLICT_PROVENANCE_REQUIRED:'+block.blockId);
   const initial=c.initialSourceIds,extra=c.additionalCheckSourceIds;
   const all=[...(Array.isArray(initial)?initial:[]),...(Array.isArray(extra)?extra:[])];
@@ -50,7 +50,7 @@ export function validateSourceConflictStandard(research:any){
   !Array.isArray(extra)||extra.length!==1||
   !all.every((id:string)=>filled(id)&&sources.has(id)&&block.sourceIds?.includes(id)))
    throw Error('SOURCE_CONFLICT_ONE_CHECK_AND_SOURCES_REQUIRED:'+block.blockId);
-  const distinctSites=new Set(initial.map((id:string)=>new URL(sources.get(id)!.url).hostname.replace(/^www\\./,'')));
+  const distinctSites=new Set(initial.map((id:string)=>new URL(sources.get(id)!.url).hostname.replace(/^www\./,'')));
   if(distinctSites.size<2)throw Error('SOURCE_CONFLICT_INDEPENDENT_SITES_REQUIRED:'+block.blockId);
   if(findings.has(c.candidateId))throw Error('SOURCE_CONFLICT_ACTIVE_FINDING_FORBIDDEN:'+c.candidateId);
   if(!ledger.some((row:any)=>row.disposition?.type==='BLOCKED'&&row.disposition.refId===block.blockId))
