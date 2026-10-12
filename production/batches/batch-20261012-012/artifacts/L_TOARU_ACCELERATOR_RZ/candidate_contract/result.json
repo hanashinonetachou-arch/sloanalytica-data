@@ -1,0 +1,244 @@
+{
+  "schemaVersion": "candidate-contract-v1",
+  "manifestVersion": "8.5",
+  "batchId": "batch-20261012-012",
+  "machineId": "L_TOARU_ACCELERATOR_RZ",
+  "machineName": "スマスロ 一方通行 とある魔術の禁書目録",
+  "evaluationArtifact": {
+    "artifactId": "evaluation-L_TOARU_ACCELERATOR_RZ",
+    "kind": "evaluation",
+    "path": "production/batches/batch-20261012-012/artifacts/L_TOARU_ACCELERATOR_RZ/evaluation/result.json",
+    "sha256": "201bf5b9b79569f1eca4ad0a0d8f2ac45edcfb9ee2de67324c412bc638e0b7fc",
+    "producerWorkId": "wrk_3e9d9db8d5d14115"
+  },
+  "eligibilityArtifact": {
+    "artifactId": "eligibility-L_TOARU_ACCELERATOR_RZ",
+    "kind": "eligibility",
+    "path": "production/batches/batch-20261012-012/artifacts/L_TOARU_ACCELERATOR_RZ/eligibility/result.json",
+    "sha256": "47ff0cc28f46e8ecd479a83b70a6eb776305a50e088fec0b3c02d59c075f5ed0",
+    "producerWorkId": "wrk_07801fff24bf42e5"
+  },
+  "candidates": [
+    {
+      "findingId": "at",
+      "label": "AT初当たり",
+      "model": "BERNOULLI",
+      "trialUniverse": "NORMAL_GAME_TRIAL",
+      "liveInferenceRoute": "LIVE_CONDITIONAL",
+      "settingDistribution": {
+        "1": "1/320.7",
+        "2": "1/313.8",
+        "3": "1/300.9",
+        "4": "1/275.2",
+        "5": "1/251.9",
+        "6": "1/231.9"
+      },
+      "details": [
+        "RUSH中の当たりと継続を除きます。"
+      ],
+      "dependencyGroupId": "accel-role-at",
+      "dependencyKind": "CAUSAL_PATH_OVERLAP",
+      "dependencyReason": "対応役CZ抽選がAT初当たりにつながります。同じ経路を加算せずATを優先し、未観測時だけ条件付き当選を代用します。",
+      "dependencyFallbackRank": 1,
+      "runtimeInferenceAllowed": true,
+      "dependencyResolution": "PREFERRED_MEMBER",
+      "runtimePolicyBinding": {
+        "metric": "SELECTION_SCORE",
+        "value": 44.17708903571168,
+        "thresholdSource": "RUNTIME_POLICY"
+      },
+      "suppressedByFeatureIds": []
+    },
+    {
+      "findingId": "acceleratorChancePercent",
+      "label": "対応役から一方通行チャンス",
+      "model": "BERNOULLI",
+      "trialUniverse": "ACCEL_SINGLE_SHUTTER_CORRESPONDING_ROLE_TRIAL",
+      "liveInferenceRoute": "LIVE_CONDITIONAL",
+      "settingDistribution": {
+        "1": 0.387,
+        "2": 0.395,
+        "3": 0.414,
+        "4": 0.434,
+        "5": 0.461,
+        "6": 0.516
+      },
+      "details": [
+        "CZ連中・W対応役・前兆の別契機は除きます。"
+      ],
+      "dependencyGroupId": "accel-role-at",
+      "dependencyKind": "CAUSAL_PATH_OVERLAP",
+      "dependencyReason": "対応役CZ抽選がAT初当たりにつながります。同じ経路を加算せずATを優先し、未観測時だけ条件付き当選を代用します。",
+      "dependencyFallbackRank": 2,
+      "runtimeInferenceAllowed": true,
+      "dependencyResolution": "FALLBACK_MEMBER",
+      "runtimePolicyBinding": {
+        "metric": "PER_ELIGIBLE_TRIAL_POWER",
+        "value": 1.1303110635638935,
+        "thresholdSource": "RUNTIME_POLICY"
+      },
+      "suppressedByFeatureIds": [
+        "at"
+      ]
+    },
+    {
+      "findingId": "lastOrderChancePercent",
+      "label": "対応役から打ち止めチャンス",
+      "model": "BERNOULLI",
+      "trialUniverse": "ACCEL_SINGLE_SHUTTER_CORRESPONDING_ROLE_TRIAL",
+      "liveInferenceRoute": "LIVE_CONDITIONAL",
+      "settingDistribution": {
+        "1": 0.012,
+        "2": 0.012,
+        "3": 0.016,
+        "4": 0.023,
+        "5": 0.031,
+        "6": 0.039
+      },
+      "details": [
+        "CZ連中・W対応役・前兆の別契機は除きます。"
+      ],
+      "dependencyGroupId": "accel-role-at",
+      "dependencyKind": "CAUSAL_PATH_OVERLAP",
+      "dependencyReason": "対応役CZ抽選がAT初当たりにつながります。同じ経路を加算せずATを優先し、未観測時だけ条件付き当選を代用します。",
+      "dependencyFallbackRank": 3,
+      "runtimeInferenceAllowed": true,
+      "dependencyResolution": "FALLBACK_MEMBER",
+      "runtimePolicyBinding": {
+        "metric": "PER_ELIGIBLE_TRIAL_POWER",
+        "value": 0.6562568779218403,
+        "thresholdSource": "RUNTIME_POLICY"
+      },
+      "suppressedByFeatureIds": [
+        "at",
+        "acceleratorChancePercent"
+      ]
+    }
+  ],
+  "dependencyGroups": [
+    {
+      "groupId": "accel-role-at",
+      "resolution": "PREFERRED_WITH_FALLBACK",
+      "members": [
+        "at",
+        "acceleratorChancePercent",
+        "lastOrderChancePercent"
+      ],
+      "runtimeInferenceAllowed": true,
+      "preferredFindingId": "at",
+      "fallbackOrder": [
+        "at",
+        "acceleratorChancePercent",
+        "lastOrderChancePercent"
+      ],
+      "reason": "依存関係がある候補を同時加算せず、観測できた優先Featureを使用し、未観測時だけ次順位のFeatureへ自動フォールバックする。",
+      "selectionRationale": "Researchで明示された優先順位に従い、同一セッションで重複情報を同時加算しない。"
+    }
+  ],
+  "excludedDecisions": [],
+  "blockedItems": [
+    {
+      "blockId": "cz-recurrence-denominator",
+      "label": "CZ合算の入力母数",
+      "reason": "CZの公表合算値にはAT終了後のCZ連状態が含まれる可能性があります。通常ゲーム数だけで割ると値の前提が一致しないため、現時点では数値推測に使いません。",
+      "reevaluationCondition": "引き戻しCZ連状態と通常時の当選を区別した公表数値と、実戦での区間記録方法が確認できた場合。",
+      "sourceIds": [
+        "source-1geki-routing",
+        "source-chonborista-warning"
+      ]
+    },
+    {
+      "blockId": "cz",
+      "label": "CZ合算",
+      "reason": "公表CZ合算にはAT終了後のCZ連中の当選が含まれる可能性があり、CZ連を除く通常ゲーム数に対する確率として使うと母数が一致しません。",
+      "reevaluationCondition": "対象条件を実戦で区別する方法と、全設定の確かな数値が公表された場合。",
+      "sourceIds": [
+        "numeric",
+        "source-chonborista-warning",
+        "review"
+      ],
+      "rawSourceValues": {
+        "1": "1/142.6",
+        "2": "1/139.7",
+        "3": "1/134.1",
+        "4": "1/124.6",
+        "5": "1/115.3",
+        "6": "1/105.9"
+      }
+    },
+    {
+      "blockId": "shutter-duration",
+      "label": "対応役状態の継続ゲーム数",
+      "reason": "追加チャンス目・W対応役への移行が継続観測に混ざる場合、最初に選択された18・23・33Gを確定できません。",
+      "reevaluationCondition": "対象条件を実戦で区別する方法と、全設定の確かな数値が公表された場合。",
+      "sourceIds": [
+        "review"
+      ]
+    },
+    {
+      "blockId": "mode-ceiling",
+      "label": "内部モードと天井短縮",
+      "reason": "上位モードや短縮の傾向はありますが、全設定の選択確率は今回の公開範囲で確認できません。",
+      "reevaluationCondition": "対象条件を実戦で区別する方法と、全設定の確かな数値が公表された場合。",
+      "sourceIds": [
+        "review"
+      ]
+    }
+  ],
+  "evidenceCandidates": [
+    {
+      "findingId": "setting-evidence-categories",
+      "label": "藤丸コイン・終了画面",
+      "sourceIds": [
+        "evidence-ref-1",
+        "evidence-ref-2"
+      ],
+      "details": [
+        "ATまたはBIG終了時に確認します。メモリーズボーナスや専用エピソード画面は通常の終了画面として集計しません。"
+      ],
+      "semanticCategories": [
+        {
+          "label": "藤丸コイン 銅",
+          "meaning": "設定2以上",
+          "semanticType": "EXACT_CONSTRAINT"
+        },
+        {
+          "label": "藤丸コイン 銀",
+          "meaning": "設定3以上",
+          "semanticType": "EXACT_CONSTRAINT"
+        },
+        {
+          "label": "藤丸コイン 金",
+          "meaning": "設定4以上",
+          "semanticType": "EXACT_CONSTRAINT"
+        },
+        {
+          "label": "藤丸コイン DANGER柄",
+          "meaning": "設定5以上",
+          "semanticType": "EXACT_CONSTRAINT"
+        },
+        {
+          "label": "藤丸コイン 虹",
+          "meaning": "設定6",
+          "semanticType": "EXACT_CONSTRAINT"
+        },
+        {
+          "label": "パンプキンガール",
+          "meaning": "設定2以上",
+          "semanticType": "EXACT_CONSTRAINT"
+        },
+        {
+          "label": "浴衣のスナイパー",
+          "meaning": "設定4以上",
+          "semanticType": "EXACT_CONSTRAINT"
+        },
+        {
+          "label": "ネコ耳メイド",
+          "meaning": "設定2・4・6",
+          "semanticType": "EXACT_CONSTRAINT"
+        }
+      ]
+    }
+  ],
+  "sourceIntegrityIssues": []
+}

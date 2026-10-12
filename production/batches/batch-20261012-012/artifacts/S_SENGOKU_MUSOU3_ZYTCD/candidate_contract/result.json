@@ -1,0 +1,297 @@
+{
+  "schemaVersion": "candidate-contract-v1",
+  "manifestVersion": "8.5",
+  "batchId": "batch-20261012-012",
+  "machineId": "S_SENGOKU_MUSOU3_ZYTCD",
+  "machineName": "パチスロ戦国無双3",
+  "evaluationArtifact": {
+    "artifactId": "evaluation-S_SENGOKU_MUSOU3_ZYTCD",
+    "kind": "evaluation",
+    "path": "production/batches/batch-20261012-012/artifacts/S_SENGOKU_MUSOU3_ZYTCD/evaluation/result.json",
+    "sha256": "dc2ef2e8d7fe12fe74fbcd8804551afdc2c6fbd7a5588a8f9a3c9a58ebc81a7f",
+    "producerWorkId": "wrk_72c4652660314454"
+  },
+  "eligibilityArtifact": {
+    "artifactId": "eligibility-S_SENGOKU_MUSOU3_ZYTCD",
+    "kind": "eligibility",
+    "path": "production/batches/batch-20261012-012/artifacts/S_SENGOKU_MUSOU3_ZYTCD/eligibility/result.json",
+    "sha256": "ff57e480fb0cc65a269c18fac4f41a9758a50991a81de0709dc4695c843edc70",
+    "producerWorkId": "wrk_39c2ae0763ea4ab3"
+  },
+  "candidates": [
+    {
+      "findingId": "bonus",
+      "label": "ボーナス初当たり",
+      "model": "BERNOULLI",
+      "trialUniverse": "NORMAL_GAME_TRIAL",
+      "liveInferenceRoute": "LIVE_CONDITIONAL",
+      "settingDistribution": {
+        "1": "1/271.6",
+        "2": "1/216",
+        "4": "1/174.5",
+        "5": "1/147.1",
+        "6": "1/127.6"
+      },
+      "details": [
+        "AT中の当たりは除きます。"
+      ],
+      "dependencyGroupId": "musou-bonus-at",
+      "dependencyKind": "CAUSAL_PATH_OVERLAP",
+      "dependencyReason": "通常ボーナスからATへつながり、REG信長バトルもその経路の内訳です。ボーナスを優先し、未観測時だけ次順位を使います。",
+      "dependencyFallbackRank": 1,
+      "runtimeInferenceAllowed": true,
+      "dependencyResolution": "PREFERRED_MEMBER",
+      "runtimePolicyBinding": {
+        "metric": "SELECTION_SCORE",
+        "value": 184.54630230539982,
+        "thresholdSource": "RUNTIME_POLICY"
+      },
+      "suppressedByFeatureIds": []
+    },
+    {
+      "findingId": "at",
+      "label": "AT初当たり",
+      "model": "BERNOULLI",
+      "trialUniverse": "NORMAL_GAME_TRIAL",
+      "liveInferenceRoute": "LIVE_CONDITIONAL",
+      "settingDistribution": {
+        "1": "1/582",
+        "2": "1/483.2",
+        "4": "1/385.3",
+        "5": "1/310.2",
+        "6": "1/247.8"
+      },
+      "details": [
+        "継続ラウンドは除きます。"
+      ],
+      "dependencyGroupId": "musou-bonus-at",
+      "dependencyKind": "CAUSAL_PATH_OVERLAP",
+      "dependencyReason": "通常ボーナスからATへつながり、REG信長バトルもその経路の内訳です。ボーナスを優先し、未観測時だけ次順位を使います。",
+      "dependencyFallbackRank": 2,
+      "runtimeInferenceAllowed": true,
+      "dependencyResolution": "FALLBACK_MEMBER",
+      "runtimePolicyBinding": {
+        "metric": "SELECTION_SCORE",
+        "value": 141.98307747030933,
+        "thresholdSource": "RUNTIME_POLICY"
+      },
+      "suppressedByFeatureIds": [
+        "bonus"
+      ]
+    },
+    {
+      "findingId": "regNobunagaPercent",
+      "label": "REG中の信長バトル",
+      "model": "BERNOULLI",
+      "trialUniverse": "MUSOU_NORMAL_REG_TRIAL",
+      "liveInferenceRoute": "LIVE_CONDITIONAL",
+      "settingDistribution": {
+        "1": 0.2,
+        "2": 0.231,
+        "4": 0.257,
+        "5": 0.287,
+        "6": 0.315
+      },
+      "details": [
+        "AT中REGは除きます。"
+      ],
+      "dependencyGroupId": "musou-bonus-at",
+      "dependencyKind": "CAUSAL_PATH_OVERLAP",
+      "dependencyReason": "通常ボーナスからATへつながり、REG信長バトルもその経路の内訳です。ボーナスを優先し、未観測時だけ次順位を使います。",
+      "dependencyFallbackRank": 3,
+      "runtimeInferenceAllowed": true,
+      "dependencyResolution": "FALLBACK_MEMBER",
+      "runtimePolicyBinding": {
+        "metric": "PER_ELIGIBLE_TRIAL_POWER",
+        "value": 1.241086752660614,
+        "thresholdSource": "RUNTIME_POLICY"
+      },
+      "suppressedByFeatureIds": [
+        "bonus",
+        "at"
+      ]
+    }
+  ],
+  "dependencyGroups": [
+    {
+      "groupId": "musou-bonus-at",
+      "resolution": "PREFERRED_WITH_FALLBACK",
+      "members": [
+        "bonus",
+        "at",
+        "regNobunagaPercent"
+      ],
+      "runtimeInferenceAllowed": true,
+      "preferredFindingId": "bonus",
+      "fallbackOrder": [
+        "bonus",
+        "at",
+        "regNobunagaPercent"
+      ],
+      "reason": "依存関係がある候補を同時加算せず、観測できた優先Featureを使用し、未観測時だけ次順位のFeatureへ自動フォールバックする。",
+      "selectionRationale": "Researchで明示された優先順位に従い、同一セッションで重複情報を同時加算しない。"
+    }
+  ],
+  "excludedDecisions": [],
+  "blockedItems": [
+    {
+      "blockId": "training-mean",
+      "label": "修練の刻の平均獲得刻数",
+      "reason": "平均値だけではばらつきを含む設定別分布を作れないため、刻数を単一試行の成功率として採用しません。",
+      "reevaluationCondition": "対象条件を実戦で区別する方法と、全設定の確かな数値が公表された場合。",
+      "sourceIds": [
+        "review"
+      ]
+    },
+    {
+      "blockId": "bonus-type",
+      "label": "ボーナス種別の振り分け",
+      "reason": "本前兆中の規定刻到達で昇格が起きるため、表示された種別を最初の内部抽選結果として数えることができません。",
+      "reevaluationCondition": "対象条件を実戦で区別する方法と、全設定の確かな数値が公表された場合。",
+      "sourceIds": [
+        "review"
+      ]
+    }
+  ],
+  "evidenceCandidates": [
+    {
+      "findingId": "setting-evidence-categories",
+      "label": "終了画面・REG紹介",
+      "sourceIds": [
+        "evidence-ref-1"
+      ],
+      "details": [
+        "ボーナス終了画面とREG中キャラ紹介は異なる観測機会として記録します。REG中は信長バトル非発生時のキャラ紹介を確認します。"
+      ],
+      "semanticCategories": [
+        {
+          "label": "義弘&忠勝",
+          "meaning": "設定1否定",
+          "semanticType": "EXACT_CONSTRAINT"
+        },
+        {
+          "label": "政宗&孫市",
+          "meaning": "設定2否定",
+          "semanticType": "EXACT_CONSTRAINT"
+        },
+        {
+          "label": "立花夫婦",
+          "meaning": "設定4否定",
+          "semanticType": "EXACT_CONSTRAINT"
+        },
+        {
+          "label": "信玄&謙信&氏康",
+          "meaning": "設定4以上",
+          "semanticType": "EXACT_CONSTRAINT"
+        },
+        {
+          "label": "REG紹介 背景炎",
+          "meaning": "設定2以上",
+          "semanticType": "EXACT_CONSTRAINT"
+        },
+        {
+          "label": "REG紹介 金・阿国",
+          "meaning": "設定4以上",
+          "semanticType": "EXACT_CONSTRAINT"
+        },
+        {
+          "label": "REG紹介 金・ガラシャ",
+          "meaning": "設定5以上",
+          "semanticType": "EXACT_CONSTRAINT"
+        },
+        {
+          "label": "REG紹介 金・今川義元",
+          "meaning": "設定6",
+          "semanticType": "EXACT_CONSTRAINT"
+        }
+      ]
+    },
+    {
+      "findingId": "reg-scenario",
+      "label": "REG紹介シナリオ",
+      "sourceIds": [
+        "review"
+      ],
+      "details": [
+        "4人の紹介順をすべて確認した場合だけ記録します。途中の見逃しは確定に使いません。"
+      ],
+      "semanticCategories": [
+        {
+          "label": "秀吉赤→家康赤→秀吉赤→家康赤",
+          "meaning": "設定4以上",
+          "semanticType": "EXACT_CONSTRAINT"
+        },
+        {
+          "label": "幸村炎→忠勝炎→幸村炎→忠勝炎",
+          "meaning": "設定5以上",
+          "semanticType": "EXACT_CONSTRAINT"
+        },
+        {
+          "label": "秀吉赤または幸村炎→阿国金→ガラシャ金→義元金",
+          "meaning": "設定6",
+          "semanticType": "EXACT_CONSTRAINT"
+        }
+      ]
+    },
+    {
+      "findingId": "round",
+      "label": "ATラウンド・左近アタック",
+      "sourceIds": [
+        "review"
+      ],
+      "details": [
+        "出現したタイミングとキャラを区別して記録します。"
+      ],
+      "semanticCategories": [
+        {
+          "label": "ラウンド：稲姫",
+          "meaning": "設定4以上",
+          "semanticType": "EXACT_CONSTRAINT"
+        },
+        {
+          "label": "ラウンド：ガラシャ",
+          "meaning": "設定5以上",
+          "semanticType": "EXACT_CONSTRAINT"
+        },
+        {
+          "label": "ラウンド：秀吉",
+          "meaning": "設定6",
+          "semanticType": "EXACT_CONSTRAINT"
+        },
+        {
+          "label": "左近アタック：ガラシャ",
+          "meaning": "設定5以上",
+          "semanticType": "EXACT_CONSTRAINT"
+        }
+      ]
+    },
+    {
+      "findingId": "tempai",
+      "label": "ボーナステンパイボイス",
+      "sourceIds": [
+        "review"
+      ],
+      "details": [
+        "図柄を狙ってテンパイさせたときのボイスを確認します。REGの信長ボイスは、最後までバトルが発生しなかった場合だけ確定条件です。"
+      ],
+      "semanticCategories": [
+        {
+          "label": "BIG・極意BIG：稲姫",
+          "meaning": "設定2・4・6",
+          "semanticType": "EXACT_CONSTRAINT"
+        },
+        {
+          "label": "BIG・極意BIG：前田慶次",
+          "meaning": "設定4以上",
+          "semanticType": "EXACT_CONSTRAINT"
+        },
+        {
+          "label": "REG：是非も無し→バトル非発生",
+          "meaning": "設定5以上",
+          "semanticType": "EXACT_CONSTRAINT"
+        }
+      ]
+    }
+  ],
+  "sourceIntegrityIssues": []
+}
