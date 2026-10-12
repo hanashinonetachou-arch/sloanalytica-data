@@ -18,8 +18,16 @@ export function validateResearchProcessContract(d:any){
   }
  }
  for(const domain of d.researchCompleteness?.domains??[]){
+  // Domain review is a factual survey, not an adoption decision. A shared
+  // placeholder cannot establish that a machine's domain was researched.
+  const note=String(domain.note??'').trim();
+  if(note==='設定判別総覧の該当範囲を確認し、候補台帳に対象条件・採否を記録。')
+   throw new Error('RESEARCH_DOMAIN_REVIEW_PLACEHOLDER:'+domain.domain);
+  if(domain.status==='NOT_APPLICABLE' && /採用可能な.*候補.*確認しなかった/.test(note))
+   throw new Error('RESEARCH_DOMAIN_APPLICABILITY_IS_NOT_ELIGIBILITY:'+domain.domain);
   const plan=domain.nextWorkDisposition;
   if(plan?.repeatPublicSearch===true && ['IMPLEMENTATION','CANDIDATE_CONTRACT','CANONICAL_UI','RUNTIME'].includes(plan.owner))
    throw new Error('IMPLEMENTATION_CANNOT_REQUIRE_REPEAT_PUBLIC_SEARCH:'+domain.domain);
  }
 }
+

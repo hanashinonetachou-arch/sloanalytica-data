@@ -4,6 +4,7 @@ import crypto from 'node:crypto';
 import {RepoStore,Orchestrator} from './core.ts';
 import {acceptAndRecord,promoteDependencies,reconcileBatch,scheduleByKind,productionRequest} from './runtime.ts';
 import type {WorkRequest,WorkResult,Concurrency} from './core.ts';
+import {validateResearchCandidateLedger} from './research-validator.ts';
 
 const batchId=process.argv[2];
 const waveId=process.argv[3];
@@ -25,6 +26,12 @@ function materialize(candidate:any){
   let x=o.stage(batchId,candidate.machineId,'RESEARCH');
   if(x.state==='COMPLETE')return {machineId:candidate.machineId,kind:'ALREADY_COMPLETE'};
   if(x.state!=='READY')throw new Error('RESEARCH_NOT_READY:'+candidate.machineId+':'+x.state);
+  const draftPath=s.p('batches',batchId,'research-drafts',waveId,candidate.machineId+'.json');
+  if(!fs.existsSync(draftPath))throw new Error('RESEARCH_DRAFT_MISSING:'+candidate.machineId);
+  const draft=JSON.parse(fs.readFileSync(draftPath,'utf8'));
+  // Reject an unreviewed survey before acquiring a writer or replacing the
+  // previous authoritative result; formal artifact validation still follows.
+  validateResearchCandidateLedger(draft,new Set((draft.sources??[]).map((src:any)=>src.sourceId)));
   const a=o.createAttempt(x);
   const l=o.acquire(x,a,300000);
   x=o.transition(o.stage(batchId,candidate.machineId,'RESEARCH'),'LEASED','DISPATCH',a.workId);
@@ -32,9 +39,6 @@ function materialize(candidate:any){
   const q=productionRequest(o,x,a,l,cfg.manifestVersion);
   s.write(q,'batches',batchId,'work-requests',q.workId+'.json');
 
-  const draftPath=s.p('batches',batchId,'research-drafts',waveId,candidate.machineId+'.json');
-  if(!fs.existsSync(draftPath))throw new Error('RESEARCH_DRAFT_MISSING:'+candidate.machineId);
-  const draft=JSON.parse(fs.readFileSync(draftPath,'utf8'));
   const doc={...draft,workId:q.workId};
   const rel='batches/'+batchId+'/artifacts/'+candidate.machineId+'/research/result.json';
   const full=s.p(rel);
@@ -75,3 +79,4 @@ if(!forceOnly)for(let guard=0;guard<20;guard++){
 const incomplete=[...targets].filter(machineId=>o.stage(batchId,machineId,'RESEARCH').state!=='COMPLETE');
 if(incomplete.length&&!forceOnly)throw new Error('RESEARCH_WAVE_INCOMPLETE:'+incomplete.join(','));
 console.log(JSON.stringify({batchId,waveId,completed,dashboard:reconcileBatch(o,s,batchId)},null,2));
+

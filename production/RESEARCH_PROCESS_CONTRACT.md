@@ -16,6 +16,27 @@ Tests protect confirmed rules, source integrity, observation accuracy and duplic
 
 Proceed through Research → Evaluation → Eligibility → Candidate Contract → Observation/Evidence → Canonical UI → Runtime → Distribution → APK → device QA. Normal commits use [skip ci]; Actions run at Integration Boundary. Batch008 distribution stays protected. A completed audit, commit or test suite is not a stopping point.
 
+## Candidate and domain review semantics
+
+Record discovered setting-inference candidates before Evaluation or Eligibility.
+Do not reduce Research to one representative candidate: dependent, weak and
+unusable candidates retain their source claims and existing downstream routes.
+Each source claim attached to a ledger row must concern that candidate, rather
+than merely appearing somewhere in the same overview article.
+
+`NOT_APPLICABLE` means the domain does not apply to this machine's mechanics.
+Missing published setting values or a lack of adoptable candidates are survey
+outcomes, not structural inapplicability. Record the observed candidates and
+their existing exclusion/closure routes. `CHECKED` notes describe the observed
+mechanic or review result; shared assertions that a review happened are not
+review evidence. No candidate-count quota, universal absence proof or new
+mandatory publisher-denominator equivalence is introduced.
+
+Mechanical validation rejects explicit placeholders and inconsistent recorded
+routes. Source review remains responsible for checking the overview's candidate
+headings against the ledger; validator success alone cannot establish semantic
+completeness. The source-conflict and bounded public-search rules remain in force.
+
 ## Canonical UI observation-opportunity contract (2026-10-11)
 
 For multiple setting-inference findings observed at the same occasion, Research may declare a strictly presentation-only `observationContext` on each finding:
@@ -26,3 +47,4 @@ The generator groups only two or more approved sections sharing the exact opport
 The opportunity context describes *where an event was observed*, not the denominator or probability model. Do not merge different trial universes, distributions, dependency groups, counts, evidence semantics, inputIds or exact-setting constraints. A single observation must not be copied into multiple tab groups; already curated sections are excluded from generated grouping.
 
 Before enabling grouping, Research must verify whether events are exclusive or overlapping, the observation period, numerical denominator, trigger and presentation labels. A context-only change must not re-materialize older unreviewed Research over audited Runtime. Golden regressions cover existing curated groups, numeric inputs and Evidence, and old saved inputs retain their IDs.
+
