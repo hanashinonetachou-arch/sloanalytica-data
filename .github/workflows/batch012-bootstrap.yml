@@ -32,7 +32,12 @@ jobs:
         run: |
           set -euo pipefail
           if [ ! -f batches/batch-20261012-012/machines/S_SHIN_ORE_NO_SORA_ST/stages/RESEARCH.json ]; then
-            node --experimental-strip-types src/init-batch.ts batches/batch-20261012-012/batch.json
+            saved="$(mktemp -d)"
+            cp -a batches/batch-20261012-012/. "$saved/"
+            rm -rf batches/batch-20261012-012
+            node --experimental-strip-types src/init-batch.ts "$saved/batch.json"
+            cp -an "$saved/." batches/batch-20261012-012/
+            rm -rf "$saved"
           else
             echo "Batch012 already initialized; preserving state"
           fi
@@ -40,12 +45,6 @@ jobs:
       - name: Run existing production test suite
         working-directory: production
         run: npm test
-      - name: Verify approved adoption reasons
-        working-directory: production
-        shell: bash
-        run: |
-          set -euo pipefail
-          node --experimental-strip-types src/verify-adoption-reasons.ts --help || true
       - name: Persist authoritative initialized batch
         shell: bash
         run: |
