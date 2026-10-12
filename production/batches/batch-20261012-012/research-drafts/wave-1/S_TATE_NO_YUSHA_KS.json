@@ -4,7 +4,7 @@
   "batchId": "batch-20261012-012",
   "machineId": "S_TATE_NO_YUSHA_KS",
   "machineName": "パチスロ盾の勇者の成り上がり",
-  "researchedAt": "2026-10-12",
+  "researchedAt": "2026-10-13",
   "researchStage": "SOURCE_REVIEWED_PENDING_FORMAL_VALIDATION",
   "settings": {
     "status": "SOURCE_DERIVED",
@@ -75,6 +75,26 @@
       "claims": [
         "CZボスバトルの書き換え：公開値・対象条件を照合し候補単位で処理。"
       ]
+    },
+    {
+      "sourceId": "bell-table",
+      "url": "https://www.slopachi-quest.com/article/tatenoyushanonariagari-settei/",
+      "title": "盾の勇者 共通ベルの全設定別確率",
+      "sourceType": "published_analysis",
+      "checkedAt": "2026-10-13",
+      "claims": [
+        "共通ベル確率は設定1から6まで1/21.70、1/21.03、1/20.40、1/18.72、1/18.06、1/16.21と掲載。"
+      ]
+    },
+    {
+      "sourceId": "bell-scope",
+      "url": "https://1geki.jp/slot/s_tat_yu/4/",
+      "title": "盾の勇者 通常時・AT中の小役確率",
+      "sourceType": "published_analysis",
+      "checkedAt": "2026-10-13",
+      "claims": [
+        "通常時/AT中の共通ベル確率として設定1の1/21.7を掲載。全設定の確率表とは範囲を区別する。"
+      ]
     }
   ],
   "findings": [
@@ -103,6 +123,45 @@
       ],
       "researchStatus": "SOURCE_REVIEWED",
       "denominatorSemantics": "通常ゲーム数に対するAT初当たり回数。ST継続・引き戻し中のボーナスを除きます。"
+    },
+    {
+      "findingId": "commonBell",
+      "label": "共通ベル",
+      "observationType": "probability",
+      "settingDistribution": {
+        "1": "1/21.70",
+        "2": "1/21.03",
+        "3": "1/20.40",
+        "4": "1/18.72",
+        "5": "1/18.06",
+        "6": "1/16.21"
+      },
+      "sourceIds": [
+        "bell-table",
+        "bell-scope"
+      ],
+      "trialUniverse": "TOTAL_GAME_TRIAL",
+      "denominatorSemantics": "実機連動機能で集計した共通ベル回数に対し、同じ集計期間の総ゲーム数を母数にします。通常時・CZ・AT中を含めます。",
+      "liveObservation": {
+        "status": "RETROSPECTIVE_EXACT",
+        "reason": "実機連動機能で共通ベルを集計できます。同じ集計期間の総ゲーム数と回数を入力します。観測条件は2026-10-13のユーザー実機確認に基づきます。"
+      },
+      "details": [
+        "実機連動機能に表示された集計値を転記します。",
+        "通常時・CZ・AT中を含め、集計期間をそろえて入力します。",
+        "集計開始前の消化分や押し順ベルを混ぜないでください。"
+      ],
+      "dependencyReview": {
+        "status": "INDEPENDENT",
+        "reason": "総ゲームでの役成立回数と通常時AT初当たり回数は、同一成功事象の合算・内訳や直接変換した回数ではありません。既存の小役成立率と初当たり率の併用方針に従います。共通ベルはCZの期待度に影響しますが、CZ成功率・レベル加算を追加の独立項目として重ねません。"
+      },
+      "researchStatus": "SOURCE_REVIEWED",
+      "observationConfirmation": {
+        "authority": "USER_EXPLICIT_INSTRUCTION",
+        "confirmedAt": "2026-10-13",
+        "countingMethod": "実機連動機能",
+        "denominator": "同じ集計期間の総ゲーム数"
+      }
     },
     {
       "findingId": "evidence-confirmations",
@@ -293,23 +352,6 @@
   ],
   "blockedItems": [
     {
-      "blockId": "commonBell",
-      "label": "共通7枚ベル",
-      "reason": "保存値の出典では実戦中に押し順ベルと区別して全件数える条件を確認できないため、今回の数値推測には採用しません。",
-      "reevaluationCondition": "対象条件を実戦で区別する方法と、全設定の確かな数値が公表された場合。",
-      "sourceIds": [
-        "numeric"
-      ],
-      "rawSourceValues": {
-        "1": "1/21.7",
-        "2": "1/21.03",
-        "3": "1/20.4",
-        "4": "1/18.72",
-        "5": "1/18.06",
-        "6": "1/16.21"
-      }
-    },
-    {
       "blockId": "czRewritePercent",
       "label": "CZボスバトルの書き換え",
       "reason": "最初の勝利抽選に外れた試行を実戦で全件識別できず、勝利全体を内部書き換えの成功回数にはできません。設定2の数値にも資料差があります。",
@@ -368,9 +410,10 @@
       {
         "domain": "SMALL_ROLE",
         "status": "CHECKED",
-        "note": "共通ベルの公表値は保存。押し順ベルとの全件識別条件が未確定のため不採用。",
+        "note": "共通ベルの全設定別確率を照合。ユーザーが実機連動機能の集計と総ゲーム数の母数を確認したため、数値候補として再評価。",
         "sourceIds": [
-          "review"
+          "bell-table",
+          "bell-scope"
         ]
       },
       {
@@ -616,11 +659,19 @@
           {
             "sourceId": "numeric",
             "claim": "共通7枚ベル：公開値・対象条件を照合し候補単位で処理。"
+          },
+          {
+            "sourceId": "bell-table",
+            "claim": "共通ベル確率は設定1から6まで1/21.70、1/21.03、1/20.40、1/18.72、1/18.06、1/16.21と掲載。"
+          },
+          {
+            "sourceId": "bell-scope",
+            "claim": "通常時/AT中の共通ベル確率として設定1の1/21.7を掲載。全設定の確率表とは範囲を区別する。"
           }
         ],
         "discoveryQueries": [],
         "disposition": {
-          "type": "BLOCKED",
+          "type": "FINDING",
           "refId": "commonBell"
         }
       },
@@ -682,5 +733,6 @@
       "正式Validator"
     ],
     "runtimeModified": false
-  }
+  },
+  "packageRevision": 2
 }
