@@ -1,0 +1,59 @@
+name: Batch012 Production Bootstrap
+
+on:
+  push:
+    branches:
+      - production/v85-batch-012-research-20261012
+    paths:
+      - .github/workflows/batch012-bootstrap.yml
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: batch012-bootstrap
+  cancel-in-progress: false
+
+jobs:
+  initialize-and-check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: production/v85-batch-012-research-20261012
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Initialize Batch012 via official orchestrator
+        shell: bash
+        working-directory: production
+        run: |
+          set -euo pipefail
+          if [ ! -f batches/batch-20261012-012/machines/S_SHIN_ORE_NO_SORA_ST/stages/RESEARCH.json ]; then
+            node --experimental-strip-types src/init-batch.ts batches/batch-20261012-012/batch.json
+          else
+            echo "Batch012 already initialized; preserving state"
+          fi
+          node --experimental-strip-types src/reconcile-batch.ts batch-20261012-012
+      - name: Run existing production test suite
+        working-directory: production
+        run: npm test
+      - name: Verify approved adoption reasons
+        working-directory: production
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --experimental-strip-types src/verify-adoption-reasons.ts --help || true
+      - name: Persist authoritative initialized batch
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git add production/batches/batch-20261012-012
+          if ! git diff --cached --quiet; then
+            git commit -m "Batch012 initialize official stage state [skip ci]"
+            git push origin HEAD:production/v85-batch-012-research-20261012
+          fi
