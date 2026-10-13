@@ -170,12 +170,14 @@ def source_owned_labels(m):
         cid=f['findingId'];p=f['inputPresentation']
         if cid in short:tl,sl=short[cid]
         elif cid.startswith('meter'):tl,sl='該当段階への上昇回数','CZ当選回数'
-        elif cid.startswith('cz-'):tl,sl='該当マスでの前半終了回数','前半突破回数'
+        elif cid in ['cz-start','cz-blue','cz-yellow','cz-green']:tl,sl='該当マスでの前半終了回数','前半突破回数'
         elif cid.endswith('-hit'):tl,sl='該当役の成立回数','ボーナス当選回数'
         elif cid.startswith('strategy-'):tl,sl='共通1枚ベル成立回数','計略発動回数'
         elif cid.startswith('screen-'):tl,sl='該当ゲーム帯のAT終了回数','各画面の回数'
         elif cid.startswith('ed-'):tl,sl='該当レア役の成立回数','各かるたの回数'
         else:tl,sl=p['trialLabel'],p['successLabel']
+        if f.get('trialUniverse')=='NORMAL_GAME_TRIAL':tl='通常ゲーム数'
+        if cid=='cz-entry':sl='CZ回数'
         f['inputPresentation']={'trialLabel':tl,'successLabel':sl}
 
 def machine1():
