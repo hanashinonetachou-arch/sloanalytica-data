@@ -50,3 +50,9 @@ Researchが短い母数/成功数ラベルを明示できる任意inputPresentat
 正本ブランチ：`production/v85-batch-014-research-20261013`。初期正本c15d058b2cb2881fffbc8ff8bc4e299f7f100357。各機種の調査完了時に既に順次コミット済み。最終正本コミットはこのブランチHEAD。
 
 Integration Boundaryで配信・保護対象の回帰・Pages・描画検証・署名APKを続行する。配信は正式DISTRIBUTIONの完了時のみ完了とする。APK成功と人による実機QA承認は別工程。既存Batch011まで承認済み、012/013実機未承認の状態を変更しない。
+
+## Integration Boundary実績
+
+配信成功：data commit `ef680ab639b08d43d366a529b202b36c44d6de63`、Production Distribution確定commit `e5555d035636c9d791bdb05eaaec270a8f558665`。Integration run 38334253571、Pages run 38334409555はsuccess。保護対象263機種、変更された既存package/catalogは0件。10機種DISTRIBUTIONはCOMPLETE。
+
+アプリQA：`qa/batch014-v85-20261013`、commit `6c93e2cbf9a8f3a6e89de525fc6a19401ab6e206`。run 38334467011は配信commit固定で描画・全機種互換性・署名APKを検証中。人による実機承認は未実施。
