@@ -21,6 +21,7 @@ const stageOrder=['RESEARCH','EVALUATION','ELIGIBILITY','CANDIDATE_CONTRACT','OB
 if(!batchId) throw new Error('USAGE: deterministic-production-worker <batch-id> [--through <stage>]');
 if(throughFlag&&!stageOrder.includes(throughFlag)) throw new Error('INVALID_THROUGH_STAGE:'+throughFlag);
 const withinThrough=(stage:string)=>!throughFlag||stageOrder.indexOf(stage)<=stageOrder.indexOf(throughFlag);
+const allowedStages=new Set(stageOrder.filter(withinThrough));
 const s=new RepoStore(process.cwd());
 const o=new Orchestrator(s);
 const cfg=JSON.parse(fs.readFileSync(s.p('config','orchestrator.json'),'utf8'));
@@ -63,9 +64,9 @@ function execute(q:WorkRequest):WorkResult{
 const completed:any[]=[];
 for(let guard=0;guard<100;guard++){
  reconcileBatch(o,s,batchId);
- const semantic=scheduleByKind(o,s,batchId,cfg.concurrency,'SEMANTIC').filter((x:any)=>['EVALUATION','ELIGIBILITY','CANDIDATE_CONTRACT','OBSERVATION_EVIDENCE','CANONICAL_UI'].includes(x.name));
- const production=scheduleByKind(o,s,batchId,cfg.concurrency,'PRODUCTION');
- const integration=scheduleByKind(o,s,batchId,cfg.concurrency,'INTEGRATION');
+ const semantic=scheduleByKind(o,s,batchId,cfg.concurrency,'SEMANTIC',allowedStages).filter((x:any)=>['EVALUATION','ELIGIBILITY','CANDIDATE_CONTRACT','OBSERVATION_EVIDENCE','CANONICAL_UI'].includes(x.name));
+ const production=scheduleByKind(o,s,batchId,cfg.concurrency,'PRODUCTION',allowedStages);
+ const integration=scheduleByKind(o,s,batchId,cfg.concurrency,'INTEGRATION',allowedStages);
  const selected=[...semantic,...production,...integration].filter((candidate:any)=>withinThrough(candidate.name));
  if(selected.length===0) break;
  for(const candidate of selected){

@@ -19,12 +19,17 @@ const nonEmpty=(x:any)=>typeof x==='string'&&x.trim().length>0;
 export const RESEARCH_LIVE_OBSERVATION_STATUSES=['DIRECT_EXACT','EXACT_WITH_SCOPE_TRACKING','EXHAUSTIVE_CATEGORICAL','RETROSPECTIVE_EXACT','UNRESOLVED'] as const;
 const researchLiveObservationStatuses=new Set<string>(RESEARCH_LIVE_OBSERVATION_STATUSES);
 export function validateResearchLiveObservationContract(f:any){
+  if(f?.inputPresentation!==undefined){
+    const p=f.inputPresentation;
+    if(!nonEmpty(p?.trialLabel)||!nonEmpty(p?.successLabel)||p.trialLabel.length>30||p.successLabel.length>30)
+      throw new Error('RESEARCH_VALIDATION:INPUT_PRESENTATION:'+String(f?.findingId??''));
+  }
   if(f?.liveObservation===undefined)return;
   if(!researchLiveObservationStatuses.has(String(f.liveObservation?.status??''))||!nonEmpty(f.liveObservation?.reason)) throw new Error('RESEARCH_VALIDATION:LIVE_OBSERVATION_CONTRACT:'+String(f?.findingId??''));
 }
 const forbiddenUserFacingResearchText=/opportunity model|candidate contract|runtime policy|denominator|benchmark|Evidence\b|\\n|\/n/i;
 export function validateResearchUserFacingTextContract(f:any){
-  const values:any[]=[f?.label,f?.denominatorSemantics,f?.liveObservation?.reason,...(Array.isArray(f?.details)?f.details:[])];
+  const values:any[]=[f?.label,f?.inputPresentation?.trialLabel,f?.inputPresentation?.successLabel,f?.denominatorSemantics,f?.liveObservation?.reason,...(Array.isArray(f?.details)?f.details:[])];
   for(const c of Array.isArray(f?.semanticCategories)?f.semanticCategories:[]) values.push(c?.label,c?.meaning);
   for(const value of values) if(typeof value==='string'&&forbiddenUserFacingResearchText.test(value)) throw new Error('RESEARCH_VALIDATION:USER_FACING_INTERNAL_TEXT:'+String(f?.findingId??''));
 }

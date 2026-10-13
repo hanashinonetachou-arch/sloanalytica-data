@@ -48,3 +48,15 @@ The opportunity context describes *where an event was observed*, not the denomin
 
 Before enabling grouping, Research must verify whether events are exclusive or overlapping, the observation period, numerical denominator, trigger and presentation labels. A context-only change must not re-materialize older unreviewed Research over audited Runtime. Golden regressions cover existing curated groups, numeric inputs and Evidence, and old saved inputs retain their IDs.
 
+
+## Source-owned concise input labels (2026-10-13)
+
+Research may declare optional `inputPresentation: { trialLabel, successLabel }`
+for a numeric finding. Both labels must be nonempty Japanese user-facing text
+of at most 30 characters. Observation/Evidence preserves this presentation
+metadata and Canonical UI uses it before its existing label inference fallback.
+The field never changes a denominator, model, input ID, dependency, score,
+setting constraint or quick-add policy. Detailed scope and exclusions remain
+in `denominatorSemantics` and the generated description. Game-count +50 remains
+controlled by the established trial-universe rule; event counts do not gain +50
+from a label. Existing findings without this metadata use the unchanged fallback.

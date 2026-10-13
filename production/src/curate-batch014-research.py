@@ -28,6 +28,13 @@ class Machine:
         self.ledger.append(dict(candidateId=cid,label=label,sourceClaims=[dict(sourceId=sid,claim=claim) for sid in src],discoveryQueries=self.queries,disposition=disposition,preliminaryCandidateIds=old or []))
     def numeric(self,cid,label,dist,scope,src,group=None,kind='CAUSAL_PATH_OVERLAP',ob='probability',trial='NORMAL_GAME_TRIAL',old=None):
         f=dict(findingId=cid,label=label,observationType=ob,sourceIds=src,settingDistribution=dist,trialUniverse=trial,denominatorSemantics=scope,details=[scope],liveObservation=dict(status='EXACT_WITH_SCOPE_TRACKING',reason=scope))
+        # Source-owned short labels; scope and exclusions remain in the explanation.
+        named={'bonus-initial':('通常ゲーム数','ボーナス回数'),'at-initial':('通常ゲーム数','AT回数'),'gg-initial':('通常ゲーム数','GG回数'),'initial-all':('通常ゲーム数','初当たり回数'),'normal-st':('通常ゲーム数','ST回数'),'cz-entry':('通常ゲーム数','CZ回数'),'at-direct':('通常ゲーム数','直撃回数'),'rise-zone-entry':('通常ゲーム数','ライズゾーン回数'),'hyakuryu-entry':('通常ゲーム数','百竜夜行回数'),'cerberus-screen':('ケルベロス終了回数','特殊画面回数'),'persephone-screen':('ペルセポネ終了回数','特殊画面回数'),'hades-screen':('ハーデス終了回数','特殊画面回数'),'weak-direct':('非前兆中の弱レア役回数','AT直撃回数'),'strong-direct':('非前兆中の強レア役回数','AT直撃回数'),'hyakuryu-fake':('クエストフェイク回数','百竜夜行突入回数'),'cycle-success':('周期到達回数','当選回数'),'death-return':('対象AT終了回数','死に戻り回数'),'cherry-hit':('通常時チェリー回数','チェリー当選回数'),'cherry-reg':('チェリー当選回数','REG回数'),'cherry-bonus-joint':('連チャン中を除くゲーム数','各区分の回数'),'big':('データカウンターゲーム数','BIG回数'),'reg':('データカウンターゲーム数','REG回数'),'bonus-all':('データカウンターゲーム数','ボーナス回数'),'big-reg-joint':('データカウンターゲーム数','各内訳の回数'),'ikkikake':('一騎駆け回数','出陣武将回数'),'end-outcome':('AT終了回数','各画面の回数'),'ending-weak':('ED中弱レア役回数','各色の回数'),'ending-chance':('ED中チャンス目回数','各色の回数')}
+        defaultTrial='連チャン中を除くゲーム数' if trial=='NON_CHAIN_BONUS_INITIAL_GAME_TRIAL' else '通常ゲーム数'
+        defaultSuccess=label.replace('出現率','出現').replace('当選率','当選').replace('比率','')+'回数'
+        tl,sl=named.get(cid,(defaultTrial,defaultSuccess))
+        if cid=='bonus-initial' and trial=='NON_CHAIN_BONUS_INITIAL_GAME_TRIAL':tl=defaultTrial
+        f['inputPresentation']=dict(trialLabel=tl,successLabel=sl)
         if group:f.update(dependencyGroupId=group,dependencyKind=kind,dependencyReason='同じ当選経路や内訳を含むため、同時に独立加算せず対応する入力から1つの推測経路だけを使用します。')
         self.findings.append(f);self.trace(cid,label,label+'：'+scope,src,dict(type='FINDING',refId=cid),old)
         self.models.append(dict(candidateId=cid,likelihood='BERNOULLI' if ob!='appearance_distribution' else 'CATEGORICAL',inputEvents=[dict(id=cid+'-trials',kind='eligible_trials',description=scope),dict(id=cid+'-observed',kind='observed_outcome',description=label)],settings=dist,excludedConditions=scope,dependencyGroup=group,liveObservation=f['liveObservation'],uiLabel=label,uiExplanation=[scope],benchmark='OWNED_BY_FORMAL_EVALUATION',parameterConfidence='PUBLISHED_VALUES_NO_IMPUTATION'))
@@ -41,8 +48,10 @@ class Machine:
         self.blocks.append(b);self.trace(cid,label,label+'：'+reason,src,dict(type='BLOCKED',refId=cid),old)
         self.models.append(dict(candidateId=cid,likelihood='DISABLED',inputEvents=[],retainedPublishedValues=raw,uiLabel=label,uiExplanation=[reason],reason=reason))
     def nodiff(self,cid,label,reason,src,raw=None):
-        self.trace(cid,label,label+'：'+reason,src,dict(type='NO_SETTING_DIFFERENCE',reason=reason))
-        self.models.append(dict(candidateId=cid,likelihood='DISABLED_NO_CONFIRMED_SETTING_INFORMATION',retainedPublishedValues=raw,uiLabel=label,uiExplanation=[reason]))
+        self.block(cid,label,reason,src,raw)
+        self.blocks[-1]['researchSurveyResult']='NO_CONFIRMED_SETTING_DIFFERENCE'
+        self.blocks[-1]['reevaluationCondition']='この機種の設定別の差を確認できる新しい具体的な公開資料が得られた場合に再確認します。'
+        self.models[-1]['likelihood']='DISABLED_NO_CONFIRMED_SETTING_INFORMATION'
     def save(self):
         groups=[0,0,1,0,0,2,2,2,2,2,2,2,5,2,1,2,2,3,4,5]
         d=dict(schemaVersion='research-v1',manifestVersion='8.5',batchId=BATCH,machineId=self.id,machineName=self.name,researchedAt=DATE,researchStage='SOURCE_REVIEWED_PENDING_FORMAL_VALIDATION',settings=dict(status='SOURCE_DERIVED',values=['SET_'+str(k) for k in self.settings]),sources=self.sources,findings=self.findings,blockedItems=self.blocks,researchCompleteness=dict(version=2,domains=[dict(domain=k,status='CHECKED',note=self.notes[g],sourceIds=[s['sourceId'] for s in self.sources]) for k,g in zip(DOMAINS,groups)],machineSpecificQueries=self.queries,candidateLedger=self.ledger),selfAudit=dict(status='COMPLETE_BOUNDED_SOURCE_SURVEY',independentExternalAudit='NOT_PERFORMED',reviewDate=DATE,findings=self.audit,scope='列挙した媒体・検索語・公開解析見出しに限定した調査。全公開資料の網羅や未公表情報の不存在は主張しない。'),modelDesign=self.models)
@@ -181,7 +190,7 @@ def machine7():
         ps=[pc*(1-ph),pc*ph*(1-pr),pc*ph*pr,pb-pc*ph,1-pc-pb+pc*ph]
         if min(ps)<0 or abs(sum(ps)-1)>1e-12:raise ValueError('FLOWER_JOINT_MASS')
         joint[str(k)]='/'.join(label+':'+format(p*100,'.12g')+'%' for label,p in zip(labels,ps))
-    m.numeric('cherry-bonus-joint','通常時の当選とチェリー',joint,scope+'各通常ゲームは5区分のいずれか1つだけです。チェリー成立、チェリー契機のBIG・REG、チェリー以外の当選を重複せず記録します。',['review','audit','mechanics'],group='flower-path',ob='appearance_distribution',trial='FLOWER_NORMAL_GAME_JOINT_TRIAL')
+    m.numeric('cherry-bonus-joint','通常時の当選とチェリー',joint,scope+'各通常ゲームは5区分のいずれか1つだけです。チェリー成立、チェリー契機のBIG・REG、チェリー以外の当選を重複せず記録します。',['review','audit','mechanics'],group='flower-path',ob='appearance_distribution',trial='FLOWER_NORMAL_JOINT_GAME_TRIAL')
     f=m.findings[-1];f['categoryModel']={'residualPolicy':'SOURCE_EXHAUSTIVE'};f['sourceDerivation']=dict(type='COMPLETE_PUBLIC_MARGINAL_AND_CONDITIONAL_FACTORIZATION',sourceIds=['review','audit'],expressions=['P(C,noB)=P(C)*(1-P(B|C))','P(C,BIG)=P(C)*P(B|C)*(1-P(REG|C,B))','P(C,REG)=P(C)*P(B|C)*P(REG|C,B)','P(nonC,B)=P(B)-P(C)*P(B|C)','P(other)=1-P(C)-P(B)+P(C)*P(B|C)'],assumedRates=[],publishedDenominatorEquivalence='NOT_ASSERTED',scope='通常時の小役と通常初当たり、チェリー同時当選を使用。32G連チャンの当選表とは混合しない。')
     order=['cherry-bonus-joint','bonus-initial','cherry','watermelon','reach-role','cherry-hit','cherry-reg']
     for f in m.findings:
@@ -214,6 +223,7 @@ def machine8():
     m.evidence('bonus-end','BIG終了画面',[display('オフィス・道場','通常パターン'),display('夕焼け・紅葉OL','ボーナスループ期待'),display('熊田＋熊女将','ボーナスループ確定'),unknown('社長（小熊）','高設定示唆・ボーナスループ'),exact('熊田＋ハワイ','設定4以上')],'BIG終了時の画面を記録。ハワイは設定4以上で、他のループ確定画面は設定確定ではありません。',['review','end','precision'],old=['M08C03'])
     m.nodiff('continuation-voice','昇進・終了後ボイス','昇進ジャッジの「昇進」は32G以内BIG、終了後の「ボーナス」は1G連という当選状態の確定です。設定確定として扱いません。',['voice'],{'promotion':'BIG_WITHIN_32G','postBonus':'ONE_GAME_CHAIN'})
     m.nodiff('roles','通常小役成立率','共通掲載の小役率に設定差は確認されていません。チェリーの疑似遊技は本前兆・連続状態で出方が変わる別事象です。',['spec'],None)
+    m.ledger[-1]['preliminaryCandidateIds']=['M08C04']
     m.block('pseudo-cherry','疑似チェリー・連続出現','疑似遊技のチェリーは前兆や状態によって出現率が変わります。設定別の完全な対象状態・当選表が揃わず、小役成立率として扱えません。',['spec'])
     m.block('mode-reset','会議室・昇進モード移行','ボーナス連チャンと通常初当たりに影響する内部モードが存在しますが、移行元・移行先の確定観測と設定別表を今回確認できません。',['spec','voice'])
     m.notes=['通常初当たりの小数率と全BB/RB率を分けて確認。設定3・Lを通常推測から除外。','通常小役成立と疑似チェリーを分離。疑似遊技の見かけの停止を成立役カウンターへ加算しない。','通常初当たり・会議室32G・1G連の母数を分離。全BB/RBは1ゲームの排他内訳で合算を独立加算しない。','333枚=設定6、ハワイ4以上、告知PUSHとテンパイのボイスを具体イベントへ展開。','昇進と終了後の松崎ボイスは当選・継続の確定で、設定確定ではない。','S課長熊田工作GZAの2023年メダル機。熊酒場の別作を除外。小数248.9と丸め249を履歴で保持。']
@@ -253,6 +263,7 @@ def machine10():
     m.numeric('bonus-initial','ボーナス初当たり',rates([240.3,236.1,231.2,225.7,221.4],ss),'通常時のゲーム数と新規ボーナス初当たりを数えます。ボーナス中ストック・1G連・怒気怒気上昇モードの引き戻しを分離し、新たな初当たりへ加算しません。',['official','audit','spec'],old=['M10C01'])
     m.evidence('reg-colors','REG中の決まり手',[unknown('青','高設定期待度・低'),unknown('緑','高設定期待度・中'),unknown('赤','高設定期待度・高'),unknown('金','高設定期待度・最上位')],'REG1回につき4回の決まり手紹介をそれぞれ記録します。金は高設定への期待を示す色で、旧作ちゃぶ台返しの「金=設定4以上」を流用しません。色別の設定確率は未公表のため記録のみです。',['audit','spec','mechanics'],old=['M10C02'])
     m.nodiff('role-rates','小役出現率','共通ベル・竹・弱強チェリー・弱強チャンス目・リプレイは全設定共通と掲載されています。',['spec'],{'commonBellApprox':'1/9','bambooApprox':'1/84','weakCherryApprox':'1/80','strongCherryApprox':'1/349','weakChanceApprox':'1/150','strongChanceApprox':'1/275','replayApprox':'1/8'})
+    m.ledger[-1]['preliminaryCandidateIds']=['M10C04']
     m.nodiff('bonus-type','BIG・REG振り分け','BIG55%・REG45%は全設定共通です。初当たりと各内訳を独立した設定差として重ねません。',['mechanics'],{'BIG':55,'REG':45})
     for cid,label,raw in [('cz-throw','ちゃぶ投げチャレンジ成功',{'approxSuccessPercent':25,'zeroPointsApproxSuccessPercent':50}),('cz-escape','緊急脱出チャレンジ成功',{'approxSuccessPercent':33}),('cz-rock','怒気っとロック成功',{'approxSuccessPercent':40})]:m.block(cid,label,'CZ種類・成立役・獲得ポイントによる成功期待度はありますが、設定別の完全な成功率を確認できません。3種類を混ぜて設定差の確率を作りません。',['mechanics','spec'],raw,old=['M10C03'])
     m.block('cz-promote','CZ準備の昇格・直撃','CZ準備中5Gの成立役・ポイントで昇格や直撃が抽選されますが、設定別の完全表を確認できません。周期初当たりと重なる経路は保持します。',['mechanics','spec'])

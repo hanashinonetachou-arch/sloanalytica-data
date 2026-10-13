@@ -177,3 +177,12 @@ test('awakening challenge distinguishes entries from successes',()=>{
  const o={label:'覚醒チャレンジ成功',trialUniverse:'AWAKENING_TRIAL',model:'BERNOULLI',denominatorSemantics:'上位AT・エンディング終了後に入る4Gの覚醒チャレンジを1試行として、引き戻し成功を数えます。'};
  assert.deepEqual(deriveObservationInputLabels(o),{trialLabel:'覚醒チャレンジ突入回数',successLabel:'覚醒チャレンジ成功回数'});
 });
+
+test('source-owned concise labels preserve independent game and event denominators',()=>{
+ const o:any=structuredClone(observation);o.observations[0].inputPresentation={trialLabel:'通常ゲーム数',successLabel:'当選回数'};o.observations[1].inputPresentation={trialLabel:'AT終了回数',successLabel:'画面回数'};
+ const d=buildCanonicalUi(candidate,o,evaluation,ca,oa,ea);
+ assert.deepEqual(d.numericSections[0].inputs.map((x:any)=>x.label),['通常ゲーム数','当選回数']);
+ assert.equal(d.numericSections[1].inputs[0].label,'AT終了回数');
+ assert.deepEqual(d.numericSections[0].inputs[0].quickAdd,[50]);assert.deepEqual(d.numericSections[1].inputs[0].quickAdd,[]);
+ assert.doesNotThrow(()=>validateCanonicalUiDocument(d,candidate,o,evaluation,ca,oa,ea));
+});

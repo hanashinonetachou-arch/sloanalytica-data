@@ -1,0 +1,475 @@
+{
+  "schemaVersion": "observation-evidence-v1",
+  "manifestVersion": "8.5",
+  "batchId": "batch-20261013-014",
+  "machineId": "L_BANDORI_S11",
+  "machineName": "Lバンドリ！",
+  "candidateContractArtifact": {
+    "artifactId": "candidate-contract-L_BANDORI_S11",
+    "kind": "candidate-contract",
+    "path": "production/batches/batch-20261013-014/artifacts/L_BANDORI_S11/candidate_contract/result.json",
+    "sha256": "b2a856f0bcb52d28eddfbb9297604caf0cd1652571cb7727aab1e36d9525fd84",
+    "producerWorkId": "wrk_74b570cb69694572"
+  },
+  "observations": [
+    {
+      "findingId": "initial-all",
+      "label": "初当たり合算",
+      "model": "BERNOULLI",
+      "observationType": "probability",
+      "trialUniverse": "NORMAL_GAME_TRIAL",
+      "denominatorSemantics": "通常時のゲーム数と初当たりボーナスを数えます。上位ST直撃を含み、ST中のボーナスとピコ引き戻しを除きます。",
+      "inputPresentation": {
+        "trialLabel": "通常ゲーム数",
+        "successLabel": "初当たり回数"
+      },
+      "liveObservation": {
+        "status": "EXACT_WITH_SCOPE_TRACKING",
+        "reason": "通常時のゲーム数と初当たりボーナスを数えます。上位ST直撃を含み、ST中のボーナスとピコ引き戻しを除きます。"
+      },
+      "liveInferenceRoute": "LIVE_CONDITIONAL",
+      "runtimeInferenceAllowed": false,
+      "dependencyResolution": "RESOLVED_BY_SINGLE_MEMBER",
+      "observationStatus": "RESOLVED_BY_SINGLE_MEMBER",
+      "collectionContract": null,
+      "details": [
+        "通常時のゲーム数と初当たりボーナスを数えます。上位ST直撃を含み、ST中のボーナスとピコ引き戻しを除きます。"
+      ],
+      "resolvedIntoFindingId": "normal-st"
+    },
+    {
+      "findingId": "normal-st",
+      "label": "通常ST初当たり",
+      "model": "BERNOULLI",
+      "observationType": "probability",
+      "trialUniverse": "NORMAL_GAME_TRIAL",
+      "denominatorSemantics": "通常時のゲーム数と通常STの初当たりを数えます。上位ST直撃を除いた公表値です。初当たり合算とは同時加算しません。",
+      "inputPresentation": {
+        "trialLabel": "通常ゲーム数",
+        "successLabel": "ST回数"
+      },
+      "liveObservation": {
+        "status": "EXACT_WITH_SCOPE_TRACKING",
+        "reason": "通常時のゲーム数と通常STの初当たりを数えます。上位ST直撃を除いた公表値です。初当たり合算とは同時加算しません。"
+      },
+      "liveInferenceRoute": "LIVE_CONDITIONAL",
+      "runtimeInferenceAllowed": true,
+      "dependencyResolution": "SINGLE_MEMBER_SELECTED",
+      "observationStatus": "READY",
+      "collectionContract": {
+        "type": "SUCCESS_TRIAL_COUNTS",
+        "successField": "successCount",
+        "trialField": "eligibleTrialCount"
+      },
+      "details": [
+        "通常時のゲーム数と通常STの初当たりを数えます。上位ST直撃を除いた公表値です。初当たり合算とは同時加算しません。"
+      ]
+    },
+    {
+      "findingId": "cycle-success",
+      "label": "周期当選率",
+      "model": "BERNOULLI",
+      "observationType": "conditional_probability",
+      "trialUniverse": "BANDORI_CYCLE_TRIAL",
+      "denominatorSemantics": "通常時に実際に到達した周期回数と当選回数を記録します。ST初当たりと同じ当選経路として同時に独立加算しません。",
+      "inputPresentation": {
+        "trialLabel": "周期到達回数",
+        "successLabel": "当選回数"
+      },
+      "liveObservation": {
+        "status": "EXACT_WITH_SCOPE_TRACKING",
+        "reason": "通常時に実際に到達した周期回数と当選回数を記録します。ST初当たりと同じ当選経路として同時に独立加算しません。"
+      },
+      "liveInferenceRoute": "LIVE_CONDITIONAL",
+      "runtimeInferenceAllowed": false,
+      "dependencyResolution": "RESOLVED_BY_SINGLE_MEMBER",
+      "observationStatus": "RESOLVED_BY_SINGLE_MEMBER",
+      "collectionContract": null,
+      "details": [
+        "通常時に実際に到達した周期回数と当選回数を記録します。ST初当たりと同じ当選経路として同時に独立加算しません。"
+      ],
+      "resolvedIntoFindingId": "normal-st"
+    }
+  ],
+  "evidence": [
+    {
+      "findingId": "payout",
+      "label": "獲得枚数表示",
+      "sourceIds": [
+        "review",
+        "audit"
+      ],
+      "observationType": "evidence",
+      "details": [
+        "ボーナスパート中の特定獲得枚数表示だけを記録します。"
+      ],
+      "semanticType": "EXACT_CONSTRAINT",
+      "semanticCategories": [
+        {
+          "label": "456枚OVER",
+          "meaning": "設定4以上",
+          "semanticType": "EXACT_CONSTRAINT"
+        },
+        {
+          "label": "666枚OVER",
+          "meaning": "設定6",
+          "semanticType": "EXACT_CONSTRAINT"
+        }
+      ],
+      "runtimePolicyControlled": false,
+      "status": "SOURCE_REFERENCED"
+    },
+    {
+      "findingId": "end-stamp",
+      "label": "ST終了画面",
+      "sourceIds": [
+        "review",
+        "audit"
+      ],
+      "observationType": "evidence",
+      "details": [
+        "ST終了時の画面・スタンプを記録します。写真のチャンスを確定条件や数値確率へ格上げしません。"
+      ],
+      "semanticType": "DISPLAY_ONLY",
+      "semanticCategories": [
+        {
+          "label": "香澄",
+          "meaning": "通常パターン",
+          "semanticType": "DISPLAY_ONLY"
+        },
+        {
+          "label": "写真リスト",
+          "meaning": "チャンス示唆（弱）",
+          "semanticType": "PROBABILITY_UNKNOWN"
+        },
+        {
+          "label": "バンドリーダー（ミニキャラ）",
+          "meaning": "チャンス示唆（強）",
+          "semanticType": "PROBABILITY_UNKNOWN"
+        },
+        {
+          "label": "スタンプ・良",
+          "meaning": "設定4以上",
+          "semanticType": "EXACT_CONSTRAINT"
+        },
+        {
+          "label": "スタンプ・優",
+          "meaning": "設定5以上",
+          "semanticType": "EXACT_CONSTRAINT"
+        },
+        {
+          "label": "スタンプ・極",
+          "meaning": "設定6",
+          "semanticType": "EXACT_CONSTRAINT"
+        }
+      ],
+      "runtimePolicyControlled": false,
+      "status": "SOURCE_REFERENCED"
+    },
+    {
+      "findingId": "nagi",
+      "label": "隠れ凪",
+      "sourceIds": [
+        "nagi",
+        "audit"
+      ],
+      "observationType": "evidence",
+      "details": [
+        "打-WIN LITE開始後のQR読取で1000Gごとに出るセリフを記録します。出典が他の平和機種を参考にした推定と明記しているため、今回の調査では設定否定の制約へ使いません。"
+      ],
+      "semanticType": "PROBABILITY_UNKNOWN",
+      "semanticCategories": [
+        {
+          "label": "青・一味違いますね",
+          "meaning": "掲載上は設定2以上示唆。機種固有の確定根拠を未確認。",
+          "semanticType": "PROBABILITY_UNKNOWN"
+        },
+        {
+          "label": "緑・何やら不思議な気配です",
+          "meaning": "掲載上は設定3以上示唆。機種固有の確定根拠を未確認。",
+          "semanticType": "PROBABILITY_UNKNOWN"
+        },
+        {
+          "label": "赤・良い予感がします",
+          "meaning": "掲載上は設定4以上示唆。機種固有の確定根拠を未確認。",
+          "semanticType": "PROBABILITY_UNKNOWN"
+        },
+        {
+          "label": "銀・遊び尽くしちゃいましょう",
+          "meaning": "掲載上は設定5以上示唆。機種固有の確定根拠を未確認。",
+          "semanticType": "PROBABILITY_UNKNOWN"
+        },
+        {
+          "label": "金・お肉",
+          "meaning": "掲載上は設定6以上示唆。機種固有の確定根拠を未確認。",
+          "semanticType": "PROBABILITY_UNKNOWN"
+        }
+      ],
+      "runtimePolicyControlled": false,
+      "status": "SOURCE_REFERENCED"
+    }
+  ],
+  "sourceReferences": [
+    {
+      "sourceId": "review",
+      "url": "https://nana-press.com/kaiseki/machine/823/25145/",
+      "title": "バンドリ設定差",
+      "sourceType": "published_analysis",
+      "checkedAt": "2026-10-13",
+      "claims": [
+        "初当たり合算：通常時のゲーム数と初当たりボーナスを数えます。上位ST直撃を含み、ST中のボーナスとピコ引き戻しを除きます。",
+        "通常ST初当たり：通常時のゲーム数と通常STの初当たりを数えます。上位ST直撃を除いた公表値です。初当たり合算とは同時加算しません。",
+        "周期当選率：通常時に実際に到達した周期回数と当選回数を記録します。ST初当たりと同じ当選経路として同時に独立加算しません。",
+        "ピコアタック平均当選率：公表平均値は成立役と駆け抜け状況の異なる抽選を合わせた値です。通常終了・駆け抜け・リンク役・レア役を混ぜた回数へ単一の当選率を割り当てず、条件別の不足を保持します。",
+        "5枚目以降の黒ディスク：設定2の約20%のみで、設定3～6の出現率が未公表です。5枚目以降という対象条件も保持し、推測値を埋めません。",
+        "上位ST高継続率の選択：84%・93%の内部継続モードは確認できますが、設定別の93%選択割合がありません。継続実績や別記事の94%表記で選択割合を補いません。",
+        "獲得枚数表示：ボーナスパート中の特定獲得枚数表示だけを記録します。",
+        "ST終了画面：ST終了時の画面・スタンプを記録します。写真のチャンスを確定条件や数値確率へ格上げしません。"
+      ],
+      "confidence": "SOURCE_REVIEWED",
+      "independence": "NOT_ASSERTED_SHARED_PUBLIC_ANALYSIS_POSSIBLE"
+    },
+    {
+      "sourceId": "audit",
+      "url": "https://1geki.jp/slot/l_bang_dream/0/",
+      "title": "バンドリ設定判別",
+      "sourceType": "published_analysis",
+      "checkedAt": "2026-10-13",
+      "claims": [
+        "初当たり合算：通常時のゲーム数と初当たりボーナスを数えます。上位ST直撃を含み、ST中のボーナスとピコ引き戻しを除きます。",
+        "ピコアタック平均当選率：公表平均値は成立役と駆け抜け状況の異なる抽選を合わせた値です。通常終了・駆け抜け・リンク役・レア役を混ぜた回数へ単一の当選率を割り当てず、条件別の不足を保持します。",
+        "駆け抜け時のピコ当選：ベル・リプレイ・その他の設定3以降は「以上」という下限だけで、正確な当選確率ではありません。リンク役50.7%やレア役100%を混ぜて補完しません。",
+        "ボーナス中無限STストック：1/698.3～1/392.3の平均出現値はありますが、ストック済みでは抽選されず、クライマックスライブ消化回数でも内容が変わります。全ボーナスゲームを同じ抽選回数として使わず、対象条件に合う設定別表の不足を保持します。",
+        "上位ST高継続率の選択：84%・93%の内部継続モードは確認できますが、設定別の93%選択割合がありません。継続実績や別記事の94%表記で選択割合を補いません。",
+        "獲得枚数表示：ボーナスパート中の特定獲得枚数表示だけを記録します。",
+        "ST終了画面：ST終了時の画面・スタンプを記録します。写真のチャンスを確定条件や数値確率へ格上げしません。",
+        "隠れ凪：打-WIN LITE開始後のQR読取で1000Gごとに出るセリフを記録します。出典が他の平和機種を参考にした推定と明記しているため、今回の調査では設定否定の制約へ使いません。"
+      ],
+      "confidence": "SOURCE_REVIEWED",
+      "independence": "NOT_ASSERTED_SHARED_PUBLIC_ANALYSIS_POSSIBLE"
+    },
+    {
+      "sourceId": "pico",
+      "url": "https://nana-press.com/kaiseki/machine/823/25401/",
+      "title": "ST終了時ピコ抽選",
+      "sourceType": "published_analysis",
+      "checkedAt": "2026-10-13",
+      "claims": [
+        "ピコアタック平均当選率：公表平均値は成立役と駆け抜け状況の異なる抽選を合わせた値です。通常終了・駆け抜け・リンク役・レア役を混ぜた回数へ単一の当選率を割り当てず、条件別の不足を保持します。"
+      ],
+      "confidence": "SOURCE_REVIEWED",
+      "independence": "NOT_ASSERTED_SHARED_PUBLIC_ANALYSIS_POSSIBLE"
+    },
+    {
+      "sourceId": "stock",
+      "url": "https://nana-press.com/kaiseki/machine/823/25162/",
+      "title": "ボーナス中ストック抽選条件",
+      "sourceType": "published_analysis",
+      "checkedAt": "2026-10-13",
+      "claims": [
+        "ボーナス中無限STストック：1/698.3～1/392.3の平均出現値はありますが、ストック済みでは抽選されず、クライマックスライブ消化回数でも内容が変わります。全ボーナスゲームを同じ抽選回数として使わず、対象条件に合う設定別表の不足を保持します。"
+      ],
+      "confidence": "SOURCE_REVIEWED",
+      "independence": "NOT_ASSERTED_SHARED_PUBLIC_ANALYSIS_POSSIBLE"
+    },
+    {
+      "sourceId": "roles",
+      "url": "https://1geki.jp/slot/l_bang_dream/4/",
+      "title": "状態別リンク役と共通小役",
+      "sourceType": "published_analysis",
+      "checkedAt": "2026-10-13",
+      "claims": [
+        "小役出現率：通常小役は全設定共通。バンドリンク役は状態ごとの確率であり、設定ごとの差ではありません。"
+      ],
+      "confidence": "SOURCE_REVIEWED",
+      "independence": "NOT_ASSERTED_SHARED_PUBLIC_ANALYSIS_POSSIBLE"
+    },
+    {
+      "sourceId": "reset",
+      "url": "https://1geki.jp/slot/l_bang_dream/3/",
+      "title": "周期短縮・持越し",
+      "sourceType": "published_analysis",
+      "checkedAt": "2026-10-13",
+      "claims": [
+        "周期モード・持越し・リセット：モードB以上・駆け抜け後C以上・上位CZ失敗後天国やスター持越しは状態の恩恵です。設定別の完全なモード移行表を確認できません。"
+      ],
+      "confidence": "SOURCE_REVIEWED",
+      "independence": "NOT_ASSERTED_SHARED_PUBLIC_ANALYSIS_POSSIBLE"
+    },
+    {
+      "sourceId": "nagi",
+      "url": "https://nana-press.com/kaiseki/machine/823/25493/",
+      "title": "隠れ凪の表と根拠の留保",
+      "sourceType": "published_analysis",
+      "checkedAt": "2026-10-13",
+      "claims": [
+        "隠れ凪：打-WIN LITE開始後のQR読取で1000Gごとに出るセリフを記録します。出典が他の平和機種を参考にした推定と明記しているため、今回の調査では設定否定の制約へ使いません。"
+      ],
+      "confidence": "SOURCE_REVIEWED",
+      "independence": "NOT_ASSERTED_SHARED_PUBLIC_ANALYSIS_POSSIBLE"
+    }
+  ],
+  "blockedItems": [
+    {
+      "blockId": "pico-average",
+      "label": "ピコアタック平均当選率",
+      "reason": "公表平均値は成立役と駆け抜け状況の異なる抽選を合わせた値です。通常終了・駆け抜け・リンク役・レア役を混ぜた回数へ単一の当選率を割り当てず、条件別の不足を保持します。",
+      "reevaluationCondition": "不足する設定別の数値または対象条件を確認できる新しい具体的な公開資料が得られた場合に再確認します。",
+      "sourceIds": [
+        "review",
+        "audit",
+        "pico"
+      ],
+      "retainedPublishedValues": {
+        "2": 0.077,
+        "3": 0.081,
+        "4": 0.13,
+        "5": 0.146,
+        "6": 0.149
+      }
+    },
+    {
+      "blockId": "pico-runthrough",
+      "label": "駆け抜け時のピコ当選",
+      "reason": "ベル・リプレイ・その他の設定3以降は「以上」という下限だけで、正確な当選確率ではありません。リンク役50.7%やレア役100%を混ぜて補完しません。",
+      "reevaluationCondition": "不足する設定別の数値または対象条件を確認できる新しい具体的な公開資料が得られた場合に再確認します。",
+      "sourceIds": [
+        "audit"
+      ],
+      "retainedPublishedValues": {
+        "settings": [
+          2,
+          3,
+          4,
+          5,
+          6
+        ],
+        "nonRare": [
+          {
+            "exactPercent": 9.3
+          },
+          {
+            "lowerBoundPercent": 10
+          },
+          {
+            "lowerBoundPercent": 12.5
+          },
+          {
+            "lowerBoundPercent": 15
+          },
+          {
+            "lowerBoundPercent": 20
+          }
+        ],
+        "linkRolePercent": 50.7,
+        "rarePercent": 100
+      }
+    },
+    {
+      "blockId": "infinite-stock",
+      "label": "ボーナス中無限STストック",
+      "reason": "1/698.3～1/392.3の平均出現値はありますが、ストック済みでは抽選されず、クライマックスライブ消化回数でも内容が変わります。全ボーナスゲームを同じ抽選回数として使わず、対象条件に合う設定別表の不足を保持します。",
+      "reevaluationCondition": "不足する設定別の数値または対象条件を確認できる新しい具体的な公開資料が得られた場合に再確認します。",
+      "sourceIds": [
+        "audit",
+        "stock"
+      ],
+      "retainedPublishedValues": {
+        "2": "1/698.3",
+        "3": "1/609.4",
+        "4": "1/549",
+        "5": "1/441.8",
+        "6": "1/392.3"
+      }
+    },
+    {
+      "blockId": "black-disk",
+      "label": "5枚目以降の黒ディスク",
+      "reason": "設定2の約20%のみで、設定3～6の出現率が未公表です。5枚目以降という対象条件も保持し、推測値を埋めません。",
+      "reevaluationCondition": "不足する設定別の数値または対象条件を確認できる新しい具体的な公開資料が得られた場合に再確認します。",
+      "sourceIds": [
+        "review"
+      ],
+      "retainedPublishedValues": {
+        "setting2ApproxPercent": 20,
+        "settings3to6": null
+      }
+    },
+    {
+      "blockId": "upper-loop",
+      "label": "上位ST高継続率の選択",
+      "reason": "84%・93%の内部継続モードは確認できますが、設定別の93%選択割合がありません。継続実績や別記事の94%表記で選択割合を補いません。",
+      "reevaluationCondition": "不足する設定別の数値または対象条件を確認できる新しい具体的な公開資料が得られた場合に再確認します。",
+      "sourceIds": [
+        "review",
+        "audit"
+      ],
+      "retainedPublishedValues": {
+        "internalLoopPct": [
+          84,
+          93
+        ],
+        "settingSpecificSelection": null
+      }
+    },
+    {
+      "blockId": "roles",
+      "label": "小役出現率",
+      "reason": "通常小役は全設定共通。バンドリンク役は状態ごとの確率であり、設定ごとの差ではありません。",
+      "reevaluationCondition": "この機種の設定別の差を確認できる新しい具体的な公開資料が得られた場合に再確認します。",
+      "sourceIds": [
+        "roles"
+      ],
+      "retainedPublishedValues": {
+        "replay": "1/7.3",
+        "commonBell": "1/28.1",
+        "weakCherry": "1/256",
+        "watermelon": "1/256",
+        "weakChance": "1/66.6",
+        "strongCherry": "1/799.2",
+        "strongChance": "1/799.2"
+      },
+      "researchSurveyResult": "NO_CONFIRMED_SETTING_DIFFERENCE"
+    },
+    {
+      "blockId": "mode-carry",
+      "label": "周期モード・持越し・リセット",
+      "reason": "モードB以上・駆け抜け後C以上・上位CZ失敗後天国やスター持越しは状態の恩恵です。設定別の完全なモード移行表を確認できません。",
+      "reevaluationCondition": "不足する設定別の数値または対象条件を確認できる新しい具体的な公開資料が得られた場合に再確認します。",
+      "sourceIds": [
+        "reset"
+      ]
+    }
+  ],
+  "sourceIntegrityIssues": [],
+  "highLowDiscrimination": {
+    "status": "COMPUTED",
+    "method": "BEST_SINGLE_EXACT_ACTIVE_FEATURE",
+    "bandDefinition": {
+      "lowSettings": "SETTING_1_TO_3",
+      "highSettings": "SETTING_4_TO_6",
+      "classPrior": "BALANCED"
+    },
+    "results": [
+      {
+        "games": 1500,
+        "balancedAccuracyPercent": 55.5
+      },
+      {
+        "games": 3000,
+        "balancedAccuracyPercent": 57.79
+      },
+      {
+        "games": 7000,
+        "balancedAccuracyPercent": 61.7
+      }
+    ],
+    "eligibleFeatureIds": [
+      "normal-st"
+    ],
+    "selectedFeatureId": "normal-st",
+    "selectedFeatureLabel": "通常ST初当たり",
+    "excludedFeatures": [],
+    "note": "7000Gへ正確に換算できるACTIVE要素だけを候補とし、要素間の独立性を仮定せず、単独で最も高い判別精度を持つ要素から保守的に算出しています。条件付き要素はこの指標には含めませんが、実戦中に実際の観測回数が入力された場合は設定推測に使用します。"
+  }
+}

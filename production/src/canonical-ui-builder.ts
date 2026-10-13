@@ -94,6 +94,11 @@ const userFacingEligibilityNotes=(o:any)=>{
  return unique(out);
 };
 export function deriveObservationInputLabels(o:any){
+ if(o?.inputPresentation){
+  const trialLabel=clean(o.inputPresentation.trialLabel),successLabel=clean(o.inputPresentation.successLabel);
+  if(!trialLabel||!successLabel||trialLabel.length>30||successLabel.length>30)throw new Error('OBSERVATION_INPUT_PRESENTATION_INVALID:'+String(o.findingId));
+  return {trialLabel,successLabel};
+ }
  const ss=sentences(o?.denominatorSemantics),first=ss[0]??'',against=first.match(/^(.+?)に対する[、,]?(.+)$/);
  const canonicalTrialLabel=knownTrialLabel(o?.trialUniverse);
  let trial=canonicalTrialLabel,success='';

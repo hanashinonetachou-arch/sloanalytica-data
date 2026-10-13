@@ -132,6 +132,10 @@
         "status": "EXACT_WITH_SCOPE_TRACKING",
         "reason": "32Gの会議室中当選・ボーナス中1G連を除く通常時初当たりを数えます。初当たり対象ゲームを別に記録し、BIG/REGの全出現率と母数を混ぜません。"
       },
+      "inputPresentation": {
+        "trialLabel": "連チャン中を除くゲーム数",
+        "successLabel": "ボーナス回数"
+      },
       "dependencyGroupId": "kumada-observation",
       "dependencyKind": "CAUSAL_PATH_OVERLAP",
       "dependencyReason": "BIG・REGは同じ試行の排他内訳で、合算は同じ当選をまとめた値です。内訳を使う場合は合算を使わず、通常初当たりとも同時加算しません。入力が揃った1経路だけを使用します。",
@@ -160,6 +164,10 @@
       "liveObservation": {
         "status": "EXACT_WITH_SCOPE_TRACKING",
         "reason": "同じ期間のデータカウンターがBB・RB確率の計算に使用するゲーム数を母数とします。会議室中当選や1G連を含む全出現回数を数え、通常時初当たりだけの回数へこの率を使いません。"
+      },
+      "inputPresentation": {
+        "trialLabel": "データカウンターゲーム数",
+        "successLabel": "BIG回数"
       },
       "dependencyGroupId": "kumada-observation",
       "dependencyKind": "CAUSAL_PATH_OVERLAP",
@@ -190,6 +198,10 @@
         "status": "EXACT_WITH_SCOPE_TRACKING",
         "reason": "同じ期間のデータカウンターがBB・RB確率の計算に使用するゲーム数を母数とします。会議室中当選や1G連を含む全出現回数を数え、通常時初当たりだけの回数へこの率を使いません。"
       },
+      "inputPresentation": {
+        "trialLabel": "データカウンターゲーム数",
+        "successLabel": "REG回数"
+      },
       "dependencyGroupId": "kumada-observation",
       "dependencyKind": "CAUSAL_PATH_OVERLAP",
       "dependencyReason": "BIG・REGは同じ試行の排他内訳で、合算は同じ当選をまとめた値です。内訳を使う場合は合算を使わず、通常初当たりとも同時加算しません。入力が揃った1経路だけを使用します。",
@@ -219,6 +231,10 @@
         "status": "EXACT_WITH_SCOPE_TRACKING",
         "reason": "同じ期間のデータカウンターがBB・RB確率の計算に使用するゲーム数を母数とします。会議室中当選や1G連を含む全出現回数を数え、通常時初当たりだけの回数へこの率を使いません。"
       },
+      "inputPresentation": {
+        "trialLabel": "データカウンターゲーム数",
+        "successLabel": "ボーナス回数"
+      },
       "dependencyGroupId": "kumada-observation",
       "dependencyKind": "CAUSAL_PATH_OVERLAP",
       "dependencyReason": "BIG・REGは同じ試行の排他内訳で、合算は同じ当選をまとめた値です。内訳を使う場合は合算を使わず、通常初当たりとも同時加算しません。入力が揃った1経路だけを使用します。",
@@ -247,6 +263,10 @@
       "liveObservation": {
         "status": "EXACT_WITH_SCOPE_TRACKING",
         "reason": "同じ期間のデータカウンターがBB・RB確率の計算に使用するゲーム数を母数とします。会議室中当選や1G連を含む全出現回数を数え、通常時初当たりだけの回数へこの率を使いません。1ゲームの結果はBIG・REG・非当選の3区分のいずれかで、同じ当選を合算へ重ねて加算しません。"
+      },
+      "inputPresentation": {
+        "trialLabel": "データカウンターゲーム数",
+        "successLabel": "各内訳の回数"
       },
       "dependencyGroupId": "kumada-observation",
       "dependencyKind": "CAUSAL_PATH_OVERLAP",
@@ -404,6 +424,30 @@
     }
   ],
   "blockedItems": [
+    {
+      "blockId": "continuation-voice",
+      "label": "昇進・終了後ボイス",
+      "reason": "昇進ジャッジの「昇進」は32G以内BIG、終了後の「ボーナス」は1G連という当選状態の確定です。設定確定として扱いません。",
+      "reevaluationCondition": "この機種の設定別の差を確認できる新しい具体的な公開資料が得られた場合に再確認します。",
+      "sourceIds": [
+        "voice"
+      ],
+      "retainedPublishedValues": {
+        "promotion": "BIG_WITHIN_32G",
+        "postBonus": "ONE_GAME_CHAIN"
+      },
+      "researchSurveyResult": "NO_CONFIRMED_SETTING_DIFFERENCE"
+    },
+    {
+      "blockId": "roles",
+      "label": "通常小役成立率",
+      "reason": "共通掲載の小役率に設定差は確認されていません。チェリーの疑似遊技は本前兆・連続状態で出方が変わる別事象です。",
+      "reevaluationCondition": "この機種の設定別の差を確認できる新しい具体的な公開資料が得られた場合に再確認します。",
+      "sourceIds": [
+        "spec"
+      ],
+      "researchSurveyResult": "NO_CONFIRMED_SETTING_DIFFERENCE"
+    },
     {
       "blockId": "pseudo-cherry",
       "label": "疑似チェリー・連続出現",
@@ -925,8 +969,8 @@
           "課長 熊田工作 小役確率 チェリー 擬似遊技 設定差"
         ],
         "disposition": {
-          "type": "NO_SETTING_DIFFERENCE",
-          "reason": "昇進ジャッジの「昇進」は32G以内BIG、終了後の「ボーナス」は1G連という当選状態の確定です。設定確定として扱いません。"
+          "type": "BLOCKED",
+          "refId": "continuation-voice"
         },
         "preliminaryCandidateIds": []
       },
@@ -945,10 +989,12 @@
           "課長 熊田工作 小役確率 チェリー 擬似遊技 設定差"
         ],
         "disposition": {
-          "type": "NO_SETTING_DIFFERENCE",
-          "reason": "共通掲載の小役率に設定差は確認されていません。チェリーの疑似遊技は本前兆・連続状態で出方が変わる別事象です。"
+          "type": "BLOCKED",
+          "refId": "roles"
         },
-        "preliminaryCandidateIds": []
+        "preliminaryCandidateIds": [
+          "M08C04"
+        ]
       },
       {
         "candidateId": "pseudo-cherry",
@@ -1411,6 +1457,7 @@
     {
       "candidateId": "continuation-voice",
       "likelihood": "DISABLED_NO_CONFIRMED_SETTING_INFORMATION",
+      "inputEvents": [],
       "retainedPublishedValues": {
         "promotion": "BIG_WITHIN_32G",
         "postBonus": "ONE_GAME_CHAIN"
@@ -1418,16 +1465,19 @@
       "uiLabel": "昇進・終了後ボイス",
       "uiExplanation": [
         "昇進ジャッジの「昇進」は32G以内BIG、終了後の「ボーナス」は1G連という当選状態の確定です。設定確定として扱いません。"
-      ]
+      ],
+      "reason": "昇進ジャッジの「昇進」は32G以内BIG、終了後の「ボーナス」は1G連という当選状態の確定です。設定確定として扱いません。"
     },
     {
       "candidateId": "roles",
       "likelihood": "DISABLED_NO_CONFIRMED_SETTING_INFORMATION",
+      "inputEvents": [],
       "retainedPublishedValues": null,
       "uiLabel": "通常小役成立率",
       "uiExplanation": [
         "共通掲載の小役率に設定差は確認されていません。チェリーの疑似遊技は本前兆・連続状態で出方が変わる別事象です。"
-      ]
+      ],
+      "reason": "共通掲載の小役率に設定差は確認されていません。チェリーの疑似遊技は本前兆・連続状態で出方が変わる別事象です。"
     },
     {
       "candidateId": "pseudo-cherry",
@@ -1550,5 +1600,5 @@
       "confidence": "secondary_source"
     }
   ],
-  "workId": "wrk_a5f4d6048c2b48d4"
+  "workId": "wrk_86be3a6fa63a4ac9"
 }
