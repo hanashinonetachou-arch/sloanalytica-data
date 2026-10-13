@@ -55,4 +55,8 @@ Integration Boundaryで配信・保護対象の回帰・Pages・描画検証・�
 
 配信成功：data commit `ef680ab639b08d43d366a529b202b36c44d6de63`、Production Distribution確定commit `e5555d035636c9d791bdb05eaaec270a8f558665`。Integration run 38334253571、Pages run 38334409555はsuccess。保護対象263機種、変更された既存package/catalogは0件。10機種DISTRIBUTIONはCOMPLETE。
 
-アプリQA：`qa/batch014-v85-20261013`、commit `6c93e2cbf9a8f3a6e89de525fc6a19401ab6e206`。run 38334467011は配信commit固定で描画・全機種互換性・署名APKを検証中。人による実機承認は未実施。
+アプリQA：`qa/batch014-v85-20261013`、commit `6c93e2cbf9a8f3a6e89de525fc6a19401ab6e206`。run 38334467011はsuccess。描画10/10、全140機種互換性140/140、署名APK生成・証明書継続確認が完了。人による実機承認は未実施。
+
+## HUMAN_REQUIRED：実機QA
+
+APK `SloAnalytica-Batch014-10Machine-vc2002850580.apk`を保存・提供済み。Actions取得archiveのSHA-256、APK署名証明書、versionCodeを確認。device-qa/readiness.jsonは10機種QA_READY。既存DEVICE_QA Contractに従い、人の実機確認待ちをOrchestratorへ記録する。外部Research監査も実機QAもAIテストから完了扱いにしない。具体的確認はdevice-qa/handoff.json。
