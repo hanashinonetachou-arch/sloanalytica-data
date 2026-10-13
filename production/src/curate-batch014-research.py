@@ -247,5 +247,21 @@ def machine9():
     m.nodiff('winning-rate','7000G実戦勝率','公表された勝率は出玉結果の集計で、個々の実戦入力イベントの抽選率ではありません。設定推測尤度へ入れません。',['review'],{'settings':[1,2,4,5,6],'winPct':[40.2,44.7,60.6,80.3,92.8]})
     m.notes=['CZ・AT・直撃を全て保持し同じ経路の二重計測を防ぐ。設定3とLは通常推測から除外。','メーカーがレア役全設定共通と明示。役成立と役からのCZ/ATを区別。','リセット秀吉率・天下マップ履歴条件を保持。一騎駆けの3武将は実際の同じ試行の排他分布。','AT全終了の画面とトロフィーを6区分へ統合。EDの弱レアとチャンス目ランプは別条件の5区分。確定制約は同じ入力へ明示連結。','メーカーPUSHボイスはモード示唆。7000G勝率を設定尤度としない。紫ランプの役条件で4以上と6を分ける。','S真天下布武DD・2023年6月のメダル機。スマスロと書く別媒体の誤表記を除外し、メーカー虎の巻で同定。']
     m.audit=['メーカー虎の巻と一撃・なな徹で機種を照合。旧M09C04を完全数値6区分とED役別分布へ展開。','終了画面率をトロフィー非出現時だけへ誤適用せず、トロフィー込み全終了分布を採用候補として保存。','AT確率・CZ・直撃の経路、一騎駆けとEDの観測場面、制約入力共有を設計。外部監査未実施。'];m.save()
+def machine10():
+    ss=(1,2,3,4,6);m=Machine(10,ss);m.queries=['ウルトラちゃぶ台返し 設定差 設定示唆 リセット REG','ウルトラちゃぶ台返し REG 金 設定確定 小役 共通 リセット','ウルトラちゃぶ台返し CZ 周期 モード 成功率 ストック']
+    m.source('official','https://www.s-bellco.co.jp/products/slot/ultrachabudai/','ベルコ公式スペック');m.sources[-1]['sourceType']='manufacturer';m.source('audit','https://1geki.jp/slot/s_ultra_chabu/0/','REG4回の決まり手色');m.source('spec','https://www.p-world.co.jp/machine/database/9818','小役・リセット・CZ');m.source('mechanics','https://chonborista.com/slot/belko-slot/186002/','CZ3種類・55対45・ループランプ')
+    m.numeric('bonus-initial','ボーナス初当たり',rates([240.3,236.1,231.2,225.7,221.4],ss),'通常時のゲーム数と新規ボーナス初当たりを数えます。ボーナス中ストック・1G連・怒気怒気上昇モードの引き戻しを分離し、新たな初当たりへ加算しません。',['official','audit','spec'],old=['M10C01'])
+    m.evidence('reg-colors','REG中の決まり手',[unknown('青','高設定期待度・低'),unknown('緑','高設定期待度・中'),unknown('赤','高設定期待度・高'),unknown('金','高設定期待度・最上位')],'REG1回につき4回の決まり手紹介をそれぞれ記録します。金は高設定への期待を示す色で、旧作ちゃぶ台返しの「金=設定4以上」を流用しません。色別の設定確率は未公表のため記録のみです。',['audit','spec','mechanics'],old=['M10C02'])
+    m.nodiff('role-rates','小役出現率','共通ベル・竹・弱強チェリー・弱強チャンス目・リプレイは全設定共通と掲載されています。',['spec'],{'commonBellApprox':'1/9','bambooApprox':'1/84','weakCherryApprox':'1/80','strongCherryApprox':'1/349','weakChanceApprox':'1/150','strongChanceApprox':'1/275','replayApprox':'1/8'})
+    m.nodiff('bonus-type','BIG・REG振り分け','BIG55%・REG45%は全設定共通です。初当たりと各内訳を独立した設定差として重ねません。',['mechanics'],{'BIG':55,'REG':45})
+    for cid,label,raw in [('cz-throw','ちゃぶ投げチャレンジ成功',{'approxSuccessPercent':25,'zeroPointsApproxSuccessPercent':50}),('cz-escape','緊急脱出チャレンジ成功',{'approxSuccessPercent':33}),('cz-rock','怒気っとロック成功',{'approxSuccessPercent':40})]:m.block(cid,label,'CZ種類・成立役・獲得ポイントによる成功期待度はありますが、設定別の完全な成功率を確認できません。3種類を混ぜて設定差の確率を作りません。',['mechanics','spec'],raw,old=['M10C03'])
+    m.block('cz-promote','CZ準備の昇格・直撃','CZ準備中5Gの成立役・ポイントで昇格や直撃が抽選されますが、設定別の完全表を確認できません。周期初当たりと重なる経路は保持します。',['mechanics','spec'])
+    m.block('mode-shorten','周期短縮・内部モード','通常A～C、CZ高確、レア役の周期短縮があります。内部状態を毎回確定できず、設定別の移行・短縮表も未確認です。平均周期70Gを設定別の抽選確率として補完しません。',['spec','mechanics'],{'maxCycleG':111,'averageCycleApproxG':70},old=['M10C03'])
+    m.block('bonus-stock','ボーナス中のストック','BIG・REG中のレア役によるストックと、1G連の当選は通常初当たりと別です。設定別の完全なストック当選率を確認できません。',['spec','mechanics'])
+    m.evidence('loop-lamp','ボーナス後ランプ',[display('白','80%ループ以上'),display('赤','83%ループ以上・95%期待'),display('虹','95%ループ濃厚')],'ボーナス2連目以降のレバー・停止ボタン周囲ランプはちゃぶ連モードの示唆です。設定確定や設定否定として扱いません。',['mechanics'])
+    m.nodiff('reset-first','初回周期の上位CZ','設定変更後の初回周期、通常時移行後の初回周期に上位CZが選ばれる状態恩恵で、設定差のある率ではありません。',['spec','audit'],{'resetFirstCycle':'ROCK_CZ','normalReturnFirstCycle':'ROCK_CZ'})
+    m.evidence('setting-l','設定Lの外観',[display('デモ中の下パネル点滅','設定Lの可能性。通常の設定推測対象外。')],'デモ画面中の下パネル点滅を記録できます。設定Lや非搭載の設定5を通常推測の候補へ追加しません。',['audit'])
+    m.notes=['メーカー初当たり240.3～221.4を確認。BIG/REGは疑似ボーナスで、BR55:45は全設定共通。','全設定共通小役率を確認し、約値から設定差を作らない。','周期最大111G、3種類CZ、準備5G、成立役・ポイント、通常A～C、ストック・ちゃぶ連の経路を個別保存。','REGの決まり手は1回4紹介。金を設定確定にしない。連チャンランプはモード示唆として記録。','確率未公表の色は記録のみ。設定Lデモ点滅は通常推測から分離。旧作のびん娘や金設定4以上を排除。','SチャブダイEB6・2023年6月メダル機。設定5非搭載。初回周期上位CZと怒気怒気30G＋αを母数で分離。']
+    m.audit=['公式と一撃・P-WORLDで設定1/2/3/4/6と初当たり全値を一致確認。','旧ちゃぶ台返しの金4以上・びん娘5以上を今回に混入させない。BIG/REG55:45とループランプを追加。','設定差未公表と全設定共通、状態恩恵を別々の台帳処分として保持。外部監査未実施。'];m.save()
 if __name__=='__main__':
     for n in map(int,sys.argv[1:] or ['1']):globals()['machine'+str(n)]()
