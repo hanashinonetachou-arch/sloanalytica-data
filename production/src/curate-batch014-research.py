@@ -196,5 +196,27 @@ def machine7():
     m.nodiff('reset-ceiling','リセット後の救済短縮','約70%の300G短縮はリセットの恩恵として掲載され、設定ごとの選択率ではありません。',['review','mechanics'],{'resetShortenApproxPct':70,'shortG':300,'normalG':1280})
     m.notes=['初当たりとチェリー出現→同時当選→BIG/REGを全て保持。完全な5区分へ公表値から因子分解し、他候補は同時使用せず入力不足時の代替にする。','ベルは押し順＋共通の成立合算で観測困難。チェリー・スイカ・リーチ目を別の公表役として保存。','通常時と32G連チャン、1G連、ボーナス中の抽選を分離。チェリー条件付き率とBR率の母数を別にする。','上下パネル2/3/5以上とBIG右上がり偶数示唆を照合。旧作のパネル4以上を排除。','HAZUSEの約BR割合と一撃の小数BR表を併記。公表値の丸めを保持し、未掲載値や設定Lを作らない。','SマイフラワーⅡEE-30・2023年機。旧作マイフラワー30のリーチ目1/5461等を排除。左1st、32G後の有利区間リセット、救済短縮を確認。']
     m.audit=['旧作混同を型式2S1504と現行全設定表で検証。チェリーBRは50/52.4/56.5/58.3/60/63を使用し約値は履歴へ。','既存6要素を消去せず、チェリーとボーナスの完全な同時区分を追加。単純な独立尤度の掛け算を禁止。','ベル成立合算を入賞回数と誤解しない。5区分の残差は確認された完全率の代数差であり架空の未公表率補完ではない。外部監査未実施。'];m.save()
+def machine8():
+    ss=(1,2,4,5,6);m=Machine(8,ss);m.queries=['課長 熊田工作 設定判別 小役 ボイス 終了画面','課長 熊田工作 ボーナス初当り 249 BIG 181.0 通常ゲーム 合算','課長 熊田工作 小役確率 チェリー 擬似遊技 設定差']
+    m.source('review','https://nana-press.com/kaiseki/machine/541/14981/','熊田設定差・示唆');m.source('audit','https://1geki.jp/slot/s_kacho_kumakou/0/','初当たりとデータカウンター率');m.source('precision','https://hazuse.com/machine/pachislot/SX0046/genre/208/','熊田型式・小数率・示唆');m.source('voice','https://nana-press.com/kaiseki/machine/541/15959/','発生時点別ボイス');m.source('end','https://nana-press.com/kaiseki/machine/541/15958/','BIG終了画面とループ');m.source('spec','https://www.p-world.co.jp/machine/database/9805','熊田機種仕様と疑似遊技')
+    m.numeric('bonus-initial','通常時ボーナス初当たり',rates([248.9,240.8,217.1,201.1,194.2],ss),'32Gの会議室中当選・ボーナス中1G連を除く通常時初当たりを数えます。初当たり対象ゲームを別に記録し、BIG/REGの全出現率と母数を混ぜません。',['audit','review'],group='kumada-observation',trial='NON_CHAIN_BONUS_INITIAL_GAME_TRIAL',old=['M08C01'])
+    bb=[181,172.3,157.9,144,138.2];rb=[330.7,326.1,299,288.5,278.3]
+    scope='同じ期間のデータカウンターがBB・RB確率の計算に使用するゲーム数を母数とします。会議室中当選や1G連を含む全出現回数を数え、通常時初当たりだけの回数へこの率を使いません。'
+    for cid,label,vals in [('big','BIG出現率',bb),('reg','REG出現率',rb),('bonus-all','ボーナス合算',[117,112.8,103.3,96,92.3])]:m.numeric(cid,label,rates(vals,ss),scope,['audit','precision'],group='kumada-observation',trial='KUMADA_DATA_COUNTER_GAME_TRIAL',old=['M08C02'])
+    joint={str(k):'BIG:'+format(100/bb[i],'.12g')+'%/REG:'+format(100/rb[i],'.12g')+'%/非当選:'+format(100-100/bb[i]-100/rb[i],'.12g')+'%' for i,k in enumerate(ss)}
+    m.numeric('big-reg-joint','BIG・REGの内訳',joint,scope+'1ゲームの結果はBIG・REG・非当選の3区分のいずれかで、同じ当選を合算へ重ねて加算しません。',['audit','precision'],group='kumada-observation',ob='appearance_distribution',trial='KUMADA_DATA_COUNTER_GAME_TRIAL',old=['M08C02'])
+    m.findings[-1]['categoryModel']={'residualPolicy':'SOURCE_EXHAUSTIVE'};m.findings[-1]['sourceDerivation']={'type':'PUBLIC_EXCLUSIVE_BB_RB_AND_EXPLICIT_COMPLEMENT','expression':'[1/BBdenominator,1/REGdenominator,1-1/BBdenominator-1/REGdenominator]','settings':[1,2,4,5,6],'assumedRates':[]}
+    order=['big-reg-joint','bonus-initial','big','reg','bonus-all']
+    for f in m.findings:
+        if 'settingDistribution'in f:f['dependencyFallbackRank']=order.index(f['findingId'])+1;f['dependencyReason']='BIG・REGは同じ試行の排他内訳で、合算は同じ当選をまとめた値です。内訳を使う場合は合算を使わず、通常初当たりとも同時加算しません。入力が揃った1経路だけを使用します。'
+    m.evidence('payout','獲得枚数表示',[exact(str(n)+'枚OVER','設定'+str(k)+'以上' if k<6 else '設定6') for n,k in [(333,6),(444,4),(456,4),(555,5),(666,6),(777,6),(3456,4)]]+[unknown('539枚OVER','高設定・高継続示唆'),unknown('ありがとねっと（赤）','高設定示唆'),exact('ありがとねっと（金）','設定4以上')],'ボーナス中の表示を記録。333は設定3以上ではなく、この機種では設定6のパターンです。',['review','audit','precision'],old=['M08C03'])
+    m.evidence('entry-voice','告知・入賞ボイス',[unknown('第1停止後PUSH・OL','高設定示唆・昇進モード滞在'),unknown('第1停止後PUSH・しげる松崎','高設定示唆・高継続'),unknown('7テンパイ・しげる松崎','高設定・高継続示唆')],'発生時点を分けて記録します。高継続の示唆や昇進モード確定を、設定の確定と読み替えません。',['voice','audit'],old=['M08C03'])
+    m.evidence('bonus-end','BIG終了画面',[display('オフィス・道場','通常パターン'),display('夕焼け・紅葉OL','ボーナスループ期待'),display('熊田＋熊女将','ボーナスループ確定'),unknown('社長（小熊）','高設定示唆・ボーナスループ'),exact('熊田＋ハワイ','設定4以上')],'BIG終了時の画面を記録。ハワイは設定4以上で、他のループ確定画面は設定確定ではありません。',['review','end','precision'],old=['M08C03'])
+    m.nodiff('continuation-voice','昇進・終了後ボイス','昇進ジャッジの「昇進」は32G以内BIG、終了後の「ボーナス」は1G連という当選状態の確定です。設定確定として扱いません。',['voice'],{'promotion':'BIG_WITHIN_32G','postBonus':'ONE_GAME_CHAIN'})
+    m.nodiff('roles','通常小役成立率','共通掲載の小役率に設定差は確認されていません。チェリーの疑似遊技は本前兆・連続状態で出方が変わる別事象です。',['spec'],None)
+    m.block('pseudo-cherry','疑似チェリー・連続出現','疑似遊技のチェリーは前兆や状態によって出現率が変わります。設定別の完全な対象状態・当選表が揃わず、小役成立率として扱えません。',['spec'])
+    m.block('mode-reset','会議室・昇進モード移行','ボーナス連チャンと通常初当たりに影響する内部モードが存在しますが、移行元・移行先の確定観測と設定別表を今回確認できません。',['spec','voice'])
+    m.notes=['通常初当たりの小数率と全BB/RB率を分けて確認。設定3・Lを通常推測から除外。','通常小役成立と疑似チェリーを分離。疑似遊技の見かけの停止を成立役カウンターへ加算しない。','通常初当たり・会議室32G・1G連の母数を分離。全BB/RBは1ゲームの排他内訳で合算を独立加算しない。','333枚=設定6、ハワイ4以上、告知PUSHとテンパイのボイスを具体イベントへ展開。','昇進と終了後の松崎ボイスは当選・継続の確定で、設定確定ではない。','S課長熊田工作GZAの2023年メダル機。熊酒場の別作を除外。小数248.9と丸め249を履歴で保持。']
+    m.audit=['一撃・HAZUSEのデータカウンター用BB/RB/合算を照合。合算と各内訳の二重計測を除き、3区分を追加。','通常初当たりは248.9/240.8/217.1/201.1/194.2へ精度保持。合算の117等と同じ母数へ入れない。','333=設定6、状態確定ボイスの誤用防止を追加。外部監査未実施。'];m.save()
 if __name__=='__main__':
     for n in map(int,sys.argv[1:] or ['1']):globals()['machine'+str(n)]()
