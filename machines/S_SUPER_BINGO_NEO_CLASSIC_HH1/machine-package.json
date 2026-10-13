@@ -1,12 +1,16 @@
 {
   "schemaVersion": 1,
+  "provenance": {
+    "manifestVersion": "8.5",
+    "generationPath": "V8_5_PRODUCTION_PIPELINE",
+    "legacyOracleUsed": false
+  },
   "machine": {
     "schemaVersion": "2.0.0",
     "machineId": "S_SUPER_BINGO_NEO_CLASSIC_HH1",
-    "machineDataVersion": "0.1.0",
+    "machineDataVersion": "8.5.1-batch-20261013-015",
     "displayName": "スーパービンゴネオクラシック",
-    "modelName": "SスーパービンゴHH1",
-    "manufacturer": "ベルコ",
+    "modelName": "スーパービンゴネオクラシック",
     "settings": [
       "SET_1",
       "SET_2",
@@ -27,288 +31,370 @@
     "schemaVersion": "2.0.0",
     "inputs": [
       {
-        "id": "INP_NORMAL_GAMES",
+        "id": "bc-initial.eligibleTrialCount",
         "name": "通常ゲーム数",
+        "category": "V8_NUMERIC",
         "type": "integer",
-        "category": "PLAY",
         "unit": "G",
+        "defaultValue": 0,
+        "minimum": 0,
         "displayOrder": 1,
-        "inferenceRole": "INCLUDE_FALLBACK",
-        "uiQuickAdd": [
-          50,
-          100
-        ],
-        "defaultValue": 0,
-        "minimum": 0
+        "inferenceRole": "INCLUDE_SUPPORT"
       },
       {
-        "id": "INP_BC_FIRST_HIT",
-        "name": "BC初当り",
+        "id": "bc-initial.successCount",
+        "name": "BC初当たり回数",
+        "category": "V8_NUMERIC",
         "type": "counter",
-        "category": "BC",
         "unit": "回",
+        "defaultValue": 0,
+        "minimum": 0,
         "displayOrder": 2,
-        "inferenceRole": "INCLUDE_FALLBACK",
-        "defaultValue": 0,
-        "minimum": 0
+        "parentInputId": "bc-initial.eligibleTrialCount",
+        "inferenceRole": "INCLUDE_SUPPORT"
       },
       {
-        "id": "INP_CYCLE_FIRST_TRIALS",
-        "name": "BC後初回デジ周期到達",
+        "id": "REF_setting-l_1",
+        "name": "デモ中の下パネル消灯：設定Lの可能性。通常の設定1・2・3・4・6とは別。",
+        "category": "EVIDENCE_REFERENCE",
         "type": "counter",
-        "category": "CYCLE",
         "unit": "回",
+        "defaultValue": 0,
+        "minimum": 0,
         "displayOrder": 3,
-        "inferenceRole": "INCLUDE_PRIMARY",
-        "defaultValue": 0,
-        "minimum": 0
-      },
-      {
-        "id": "INP_CYCLE_FIRST_WINS",
-        "name": "初回周期→BC",
-        "type": "counter",
-        "category": "CYCLE",
-        "unit": "回",
-        "displayOrder": 4,
-        "inferenceRole": "INCLUDE_PRIMARY",
-        "parentInputId": "INP_CYCLE_FIRST_TRIALS",
-        "uiGridSpan": 12,
-        "defaultValue": 0,
-        "minimum": 0
-      },
-      {
-        "id": "INP_CYCLE_LATER_TRIALS",
-        "name": "2回目以降デジ周期到達",
-        "type": "counter",
-        "category": "CYCLE",
-        "unit": "回",
-        "displayOrder": 5,
-        "inferenceRole": "INCLUDE_PRIMARY",
-        "defaultValue": 0,
-        "minimum": 0
-      },
-      {
-        "id": "INP_CYCLE_LATER_WINS",
-        "name": "2回目以降周期→BC",
-        "type": "counter",
-        "category": "CYCLE",
-        "unit": "回",
-        "displayOrder": 6,
-        "inferenceRole": "INCLUDE_PRIMARY",
-        "parentInputId": "INP_CYCLE_LATER_TRIALS",
-        "uiGridSpan": 12,
-        "defaultValue": 0,
-        "minimum": 0
+        "inferenceRole": "DISPLAY_ONLY"
       }
     ]
   },
   "features": {
-    "schemaVersion": "2.0.0",
+    "version": "8.5-runtime",
     "features": [
       {
-        "featureId": "FEAT_CYCLE_FIRST",
-        "name": "BC後初回デジ周期到達時のBC当選率",
-        "adoptionCategory": "INCLUDE_PRIMARY",
+        "featureId": "bc-initial",
+        "name": "BC初当たり",
+        "trialUniverse": "NORMAL_GAME_TRIAL",
+        "adoptionCategory": "INCLUDE_SUPPORT",
         "calculationRole": "PROBABILITY",
         "probabilityEngineUsage": true,
-        "modelType": "binomial",
-        "minimumSample": 5,
-        "sampleRecommendation": 30,
-        "denominatorInputId": "INP_CYCLE_FIRST_TRIALS",
-        "numeratorInputId": "INP_CYCLE_FIRST_WINS",
-        "displayFormat": "ratio_1_over_n",
+        "denominatorInputId": "bc-initial.eligibleTrialCount",
         "probabilities": {
-          "SET_1": 0.218,
-          "SET_2": 0.251,
-          "SET_3": 0.28,
-          "SET_4": 0.31,
-          "SET_6": 0.341
+          "SET_1": 0.0028200789622109417,
+          "SET_2": 0.0030293850348379276,
+          "SET_3": 0.003166561114629512,
+          "SET_4": 0.0033366700033366703,
+          "SET_6": 0.003523608174770965
         },
-        "sourceEvidenceRefs": [
-          "SRC_PWORLD",
-          "SRC_NANA"
-        ]
-      },
+        "selectionRationale": {
+          "summary": "設定推測に採用された要素です。",
+          "adoptionReason": "BC初当たりは設定1 1/354.6、設定6 1/283.8と設定差があります。「通常ゲーム数」に対する「BC初当たり回数」の発生割合を比較して推測に使用します。 観測条件：通常時のBC初当たりを記録します。",
+          "shortTermReason": "標本が少ない間は結果の振れが大きくなります。",
+          "longTermReason": "観測数が増えるほど設定別の比較が安定します。"
+        },
+        "modelType": "binomial",
+        "numeratorInputId": "bc-initial.successCount",
+        "displayFormat": "percentage"
+      }
+    ],
+    "runtimeProjection": [
       {
-        "featureId": "FEAT_CYCLE_LATER",
-        "name": "2回目以降デジ周期到達時のBC当選率",
-        "adoptionCategory": "INCLUDE_PRIMARY",
-        "calculationRole": "PROBABILITY",
-        "probabilityEngineUsage": true,
-        "modelType": "binomial",
-        "minimumSample": 5,
-        "sampleRecommendation": 30,
-        "denominatorInputId": "INP_CYCLE_LATER_TRIALS",
-        "numeratorInputId": "INP_CYCLE_LATER_WINS",
-        "displayFormat": "ratio_1_over_n",
-        "probabilities": {
-          "SET_1": 0.165,
-          "SET_2": 0.19,
-          "SET_3": 0.212,
-          "SET_4": 0.234,
-          "SET_6": 0.257
-        },
-        "sourceEvidenceRefs": [
-          "SRC_PWORLD",
-          "SRC_NANA"
-        ]
-      },
-      {
-        "featureId": "FEAT_BC_FIRST_HIT",
-        "name": "BC初当り確率",
-        "adoptionCategory": "INCLUDE_FALLBACK",
-        "calculationRole": "PROBABILITY",
-        "probabilityEngineUsage": true,
-        "modelType": "binomial",
-        "minimumSample": 500,
-        "sampleRecommendation": 5000,
-        "suppressedByFeatureIds": [
-          "FEAT_CYCLE_FIRST",
-          "FEAT_CYCLE_LATER"
-        ],
-        "denominatorInputId": "INP_NORMAL_GAMES",
-        "numeratorInputId": "INP_BC_FIRST_HIT",
-        "displayFormat": "ratio_1_over_n",
-        "probabilities": {
-          "SET_1": 0.00282007896221,
-          "SET_2": 0.00302938503484,
-          "SET_3": 0.00316656111463,
-          "SET_4": 0.00333667000334,
-          "SET_6": 0.00352360817477
-        },
-        "sourceEvidenceRefs": [
-          "SRC_PWORLD",
-          "SRC_NANA"
-        ]
+        "featureId": "bc-initial",
+        "runtimeStatus": "ACTIVE",
+        "metric": "SELECTION_SCORE",
+        "metricValue": 17.730771564956854,
+        "importance": "有力"
       }
     ]
   },
   "evidence": {
-    "version": "1.0.0",
+    "version": "8.5-runtime",
     "evidences": [],
-    "sources": [
+    "references": [
       {
-        "id": "SRC_PWORLD",
-        "classification": "ANALYSIS",
-        "pageName": "スーパービンゴネオクラシック",
-        "url": "https://www.p-world.co.jp/machine/database/9860",
-        "checkedAt": "2026-08-24"
-      },
-      {
-        "id": "SRC_NANA",
-        "classification": "ANALYSIS",
-        "pageName": "スーパービンゴネオクラシック 設定差のある要素まとめ",
-        "url": "https://nana-press.com/kaiseki/machine/589/16085/",
-        "checkedAt": "2026-08-24"
+        "id": "EVI_setting-l",
+        "sourceFindingId": "setting-l",
+        "title": "設定Lの外観",
+        "kind": "EVIDENCE",
+        "collapsible": true,
+        "defaultExpanded": false,
+        "description": "設定Lの外観を確認したときに、該当する項目を1回加算して記録します。\n・注意：デモ中の下パネル消灯を記録。通常統計の候補に設定Lや非搭載の設定5を加えません\n・反映：設定別出現率が未確認の項目は記録のみです。出現率確認後は設定推測へ反映できる可能性があります",
+        "descriptionPresentation": {
+          "collapsible": true,
+          "label": "説明",
+          "defaultExpanded": false
+        },
+        "runtimePolicyControlled": false,
+        "evidenceItems": [
+          {
+            "findingId": "setting-l",
+            "label": "設定Lの外観",
+            "sourceIds": [
+              "spec"
+            ],
+            "details": [
+              "デモ中の下パネル消灯を記録。通常統計の候補に設定Lや非搭載の設定5を加えません。"
+            ],
+            "semanticType": "DISPLAY_ONLY",
+            "semanticCategories": [
+              {
+                "label": "デモ中の下パネル消灯",
+                "meaning": "設定Lの可能性。通常の設定1・2・3・4・6とは別。",
+                "semanticType": "DISPLAY_ONLY"
+              }
+            ],
+            "runtimePolicyControlled": false,
+            "status": "SOURCE_REFERENCED",
+            "interaction": "REFERENCE_ONLY"
+          }
+        ]
       }
     ]
   },
+  "blockedItems": [
+    {
+      "blockId": "first-cycle",
+      "label": "デジ周期・初回",
+      "reason": "デジタル周期の到達時当選率は公開されていますが、同じロングリーチ告知がゲーム数周期でも発生します。初回か後続か・設定変更後の優遇・当選元を確定できない機会へ、この率を使うことはできません。",
+      "reevaluationCondition": "不足する設定別の数値または対象条件を確認できる新しい具体的な公開資料が得られた場合に再確認します。",
+      "sourceIds": [
+        "review",
+        "audit",
+        "reset"
+      ],
+      "retainedPublishedValues": {
+        "1": 0.218,
+        "2": 0.251,
+        "3": 0.28,
+        "4": 0.31,
+        "6": 0.341
+      },
+      "observedEventDefinition": "BINGO図柄規定回数到達によるデジタル周期のみ。レア役短縮を含む。ゲーム数周期は別。"
+    },
+    {
+      "blockId": "later-cycle",
+      "label": "デジ周期・2回目以降",
+      "reason": "デジタル周期の到達時当選率は公開されていますが、同じロングリーチ告知がゲーム数周期でも発生します。初回か後続か・設定変更後の優遇・当選元を確定できない機会へ、この率を使うことはできません。",
+      "reevaluationCondition": "不足する設定別の数値または対象条件を確認できる新しい具体的な公開資料が得られた場合に再確認します。",
+      "sourceIds": [
+        "review",
+        "audit",
+        "reset"
+      ],
+      "retainedPublishedValues": {
+        "1": 0.165,
+        "2": 0.19,
+        "3": 0.212,
+        "4": 0.23399999999999999,
+        "6": 0.257
+      },
+      "observedEventDefinition": "BINGO図柄規定回数到達によるデジタル周期のみ。レア役短縮を含む。ゲーム数周期は別。"
+    },
+    {
+      "blockId": "game-cycle",
+      "label": "ゲーム数周期の当選",
+      "reason": "111～999Gの当選期待度は全設定共通と掲載。デジタル周期の21.8～34.1％とは違う抽選です。",
+      "reevaluationCondition": "この機種の設定別の差を確認できる新しい具体的な公開資料が得られた場合に再確認します。",
+      "sourceIds": [
+        "audit"
+      ],
+      "retainedPublishedValues": {
+        "111": 20,
+        "222": 10,
+        "333": 20,
+        "444": 10,
+        "555": 15,
+        "666": 10,
+        "777": 27,
+        "888": 11,
+        "999": 100
+      },
+      "researchSurveyResult": "NO_CONFIRMED_SETTING_DIFFERENCE"
+    },
+    {
+      "blockId": "bingo-cycle-length",
+      "label": "BINGO図柄規定回数",
+      "reason": "初回・後続の11/33/55/77/99回振り分けは全設定共通です。周期の短さを設定差の当選率へ置き換えません。",
+      "reevaluationCondition": "この機種の設定別の差を確認できる新しい具体的な公開資料が得られた場合に再確認します。",
+      "sourceIds": [
+        "audit"
+      ],
+      "retainedPublishedValues": {
+        "first": [
+          20,
+          26.7,
+          20,
+          33.3,
+          0
+        ],
+        "later": [
+          9.8,
+          25.1,
+          20,
+          25.1,
+          20
+        ]
+      },
+      "researchSurveyResult": "NO_CONFIRMED_SETTING_DIFFERENCE"
+    },
+    {
+      "blockId": "reset-enhancement",
+      "label": "設定変更後の周期優遇",
+      "reason": "少ない規定回数と当選期待度の優遇は確認できますが、通常初回表と同じという根拠がありません。設定変更の確定判別も未解明のため、朝一の周期を通常周期と混ぜて計算しません。",
+      "reevaluationCondition": "不足する設定別の数値または対象条件を確認できる新しい具体的な公開資料が得られた場合に再確認します。",
+      "sourceIds": [
+        "reset",
+        "audit"
+      ]
+    }
+  ],
   "ui": {
-    "sections": [
+    "schemaVersion": "v8.5-runtime-ui-v1",
+    "contractVersion": "runtime-ui-v8",
+    "source": "CANONICAL_UI",
+    "sourceSchemaVersion": "canonical-ui-v1",
+    "manifestRevision": "8.5",
+    "playInfo": {
+      "visible": true,
+      "collapsible": false,
+      "mode": "NORMAL_ONLY",
+      "sessionFields": [
+        {
+          "id": "date",
+          "label": "日付",
+          "mode": "DATE"
+        },
+        {
+          "id": "storeName",
+          "label": "店舗名",
+          "mode": "TEXT"
+        },
+        {
+          "id": "machineNumber",
+          "label": "台番号",
+          "mode": "TEXT"
+        }
+      ],
+      "startFields": [
+        {
+          "id": "startNormalGames",
+          "label": "着席時 通常ゲーム数",
+          "mode": "NUMBER",
+          "directNumeric": true
+        }
+      ],
+      "currentFields": [
+        {
+          "id": "currentNormalGames",
+          "label": "現在 通常ゲーム数",
+          "mode": "NUMBER",
+          "directNumeric": true
+        }
+      ],
+      "difference": {
+        "autoCalculate": true
+      },
+      "useDifference": {
+        "label": "着席時との差分を使用",
+        "defaultWhenStartNormalGamesPresent": true
+      }
+    },
+    "accordion": {
+      "enabled": true,
+      "singleOpen": true
+    },
+    "quickInput": {
+      "enabled": false
+    },
+    "v8Sections": [
       {
-        "id": "AUTO_PLAY",
-        "title": "遊技情報",
-        "displayOrder": 1,
+        "id": "OBS_bc-initial",
+        "title": "BC初当たり",
+        "collapsible": true,
+        "defaultExpanded": false,
+        "description": "通常時のBC初当たりを記録します。通常ゲーム数を基準に、実戦中の出現割合を設定別に比較します。\n・注意：BC継続セット・カウントダウン7での継続を初当たりへ加算しません。\n・注意：通常ゲーム数と新規BC初当たりを記録。BC継続セット・カウントダウン7での継続を初当たりへ加算しません。",
+        "descriptionPresentation": {
+          "collapsible": true,
+          "label": "説明",
+          "defaultExpanded": false
+        },
         "items": [
           {
-            "type": "input",
-            "inputId": "INP_NORMAL_GAMES",
-            "label": "通常ゲーム数",
-            "config": {
-              "quickAdd": [
-                50,
-                100
+            "id": "NODE_bc-initial",
+            "featureId": "bc-initial",
+            "title": "BC初当たり",
+            "inputs": [
+              {
+                "id": "bc-initial.eligibleTrialCount",
+                "label": "通常ゲーム数",
+                "input": "denominator",
+                "inputId": "bc-initial.eligibleTrialCount",
+                "engineBinding": {
+                  "inputId": "bc-initial.eligibleTrialCount"
+                },
+                "gridSpan": 12,
+                "directNumeric": true,
+                "quickAdd": [
+                  50
+                ],
+                "unobservedDisplay": "—",
+                "playDataBinding": {
+                  "source": "PLAY_NORMAL_GAME_DELTA"
+                }
+              },
+              {
+                "id": "bc-initial.successCount",
+                "label": "BC初当たり回数",
+                "input": "counter",
+                "inputId": "bc-initial.successCount",
+                "engineBinding": {
+                  "inputId": "bc-initial.successCount"
+                },
+                "directNumeric": true,
+                "quickAdd": [
+                  1
+                ],
+                "gridSpan": 6,
+                "unobservedDisplay": "—"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "EVI_setting-l",
+        "title": "設定Lの外観",
+        "description": "設定Lの外観を確認したときに、該当する項目を1回加算して記録します。\n・注意：デモ中の下パネル消灯を記録。通常統計の候補に設定Lや非搭載の設定5を加えません\n・反映：設定別出現率が未確認の項目は記録のみです。出現率確認後は設定推測へ反映できる可能性があります",
+        "collapsible": true,
+        "defaultExpanded": false,
+        "descriptionPresentation": {
+          "collapsible": true,
+          "label": "説明",
+          "defaultExpanded": false
+        },
+        "items": [
+          {
+            "id": "REF_setting-l",
+            "evidenceId": "setting-l",
+            "label": "設定Lの外観",
+            "interaction": {
+              "type": "CATEGORY_COUNTERS",
+              "preservePriorObservations": true,
+              "showAccumulatedCounts": true,
+              "categoryCoverage": "NON_EXHAUSTIVE",
+              "totalOpportunities": "NONE",
+              "categories": [
+                {
+                  "id": "REF_setting-l_1",
+                  "inputId": "REF_setting-l_1",
+                  "label": "デモ中の下パネル消灯",
+                  "meaning": "設定Lの可能性。通常の設定1・2・3・4・6とは別。"
+                }
               ]
-            },
-            "widget": "number"
-          }
-        ]
-      },
-      {
-        "id": "AUTO_BC",
-        "title": "BC",
-        "displayOrder": 2,
-        "items": [
-          {
-            "type": "input",
-            "inputId": "INP_BC_FIRST_HIT",
-            "label": "BC初当り",
-            "widget": "counter"
-          }
-        ]
-      },
-      {
-        "id": "AUTO_CYCLE",
-        "title": "デジ周期",
-        "displayOrder": 3,
-        "items": [
-          {
-            "type": "input",
-            "inputId": "INP_CYCLE_FIRST_TRIALS",
-            "label": "BC後初回デジ周期到達",
-            "widget": "counter"
-          },
-          {
-            "type": "input",
-            "inputId": "INP_CYCLE_FIRST_WINS",
-            "label": "初回周期→BC",
-            "gridSpan": 12,
-            "widget": "counter"
-          },
-          {
-            "type": "input",
-            "inputId": "INP_CYCLE_LATER_TRIALS",
-            "label": "2回目以降デジ周期到達",
-            "widget": "counter"
-          },
-          {
-            "type": "input",
-            "inputId": "INP_CYCLE_LATER_WINS",
-            "label": "2回目以降周期→BC",
-            "gridSpan": 12,
-            "widget": "counter"
+            }
           }
         ]
       }
     ]
   },
-  "selectionSummary": {
-    "schemaVersion": "selection-summary-v1",
-    "evaluatedCount": 3,
-    "selectedCount": 3,
-    "rejectedCount": 0,
-    "selected": [
-      {
-        "featureId": "FEAT_CYCLE_FIRST",
-        "name": "BC後初回デジ周期到達時のBC当選率",
-        "reason": "BC後初回デジ周期の到達回数を分母にBC当選を直接観測でき、2回目以降とは異なる公開当選率を持つため独立した主Featureとして採用します。",
-        "requiredTrials": {
-          "value": 97,
-          "unit": "BC後初回デジ周期到達"
-        }
-      },
-      {
-        "featureId": "FEAT_CYCLE_LATER",
-        "name": "2回目以降デジ周期到達時のBC当選率",
-        "reason": "2回目以降のデジ周期到達回数を分母にBC当選を直接観測でき、初回周期とは異なる公開当選率を持つため独立した主Featureとして採用します。",
-        "requiredTrials": {
-          "value": 143,
-          "unit": "2回目以降デジ周期到達"
-        }
-      },
-      {
-        "featureId": "FEAT_BC_FIRST_HIT",
-        "name": "BC初当り確率",
-        "reason": "通常ゲーム数からBC初当りを観測できるため、周期別データを記録していない場合のFallbackとして採用します。周期別Featureが有効な場合は抑制して同じBC生成過程の二重評価を避けます。",
-        "requiredTrials": {
-          "value": 46683,
-          "unit": "通常ゲーム"
-        }
-      }
-    ],
-    "rejected": []
-  },
-  "reliability": {},
   "metadata": {
     "machineId": "S_SUPER_BINGO_NEO_CLASSIC_HH1",
     "displayName": "スーパービンゴネオクラシック",
@@ -318,10 +404,88 @@
       "SET_3",
       "SET_4",
       "SET_6"
-    ]
+    ],
+    "settingsStatus": "SOURCE_DERIVED"
   },
-  "validation": {
-    "cases": []
-  },
-  "statistics": {}
+  "v8": {
+    "machineResearchSummary": {
+      "title": "この機種の設定推測について",
+      "adopted": [
+        {
+          "featureId": "bc-initial",
+          "label": "BC初当たり",
+          "importance": "有力",
+          "selectionScore": 17.7,
+          "evaluation": {
+            "userLabel": "設定判別スコア",
+            "value": 17.7
+          },
+          "reason": "BC初当たりは設定1 1/354.6、設定6 1/283.8と設定差があります。「通常ゲーム数」に対する「BC初当たり回数」の発生割合を比較して推測に使用します。 観測条件：通常時のBC初当たりを記録します。"
+        }
+      ],
+      "notAdopted": [
+        {
+          "featureId": "first-cycle",
+          "label": "デジ周期・初回",
+          "reason": "デジタル周期の到達時当選率は公開されていますが、同じロングリーチ告知がゲーム数周期でも発生します。初回か後続か・設定変更後の優遇・当選元を確定できない機会へ、この率を使うことはできません。",
+          "reevaluationCondition": "不足する設定別の数値または対象条件を確認できる新しい具体的な公開資料が得られた場合に再確認します。"
+        },
+        {
+          "featureId": "later-cycle",
+          "label": "デジ周期・2回目以降",
+          "reason": "デジタル周期の到達時当選率は公開されていますが、同じロングリーチ告知がゲーム数周期でも発生します。初回か後続か・設定変更後の優遇・当選元を確定できない機会へ、この率を使うことはできません。",
+          "reevaluationCondition": "不足する設定別の数値または対象条件を確認できる新しい具体的な公開資料が得られた場合に再確認します。"
+        },
+        {
+          "featureId": "game-cycle",
+          "label": "ゲーム数周期の当選",
+          "reason": "111～999Gの当選期待度は全設定共通と掲載。デジタル周期の21.8～34.1％とは違う抽選です。",
+          "reevaluationCondition": "この機種の設定別の差を確認できる新しい具体的な公開資料が得られた場合に再確認します。"
+        },
+        {
+          "featureId": "bingo-cycle-length",
+          "label": "BINGO図柄規定回数",
+          "reason": "初回・後続の11/33/55/77/99回振り分けは全設定共通です。周期の短さを設定差の当選率へ置き換えません。",
+          "reevaluationCondition": "この機種の設定別の差を確認できる新しい具体的な公開資料が得られた場合に再確認します。"
+        },
+        {
+          "featureId": "reset-enhancement",
+          "label": "設定変更後の周期優遇",
+          "reason": "少ない規定回数と当選期待度の優遇は確認できますが、通常初回表と同じという根拠がありません。設定変更の確定判別も未解明のため、朝一の周期を通常周期と混ぜて計算しません。",
+          "reevaluationCondition": "不足する設定別の数値または対象条件を確認できる新しい具体的な公開資料が得られた場合に再確認します。"
+        }
+      ],
+      "highLowDiscrimination": {
+        "status": "COMPUTED",
+        "method": "BEST_SINGLE_EXACT_ACTIVE_FEATURE",
+        "bandDefinition": {
+          "lowSettings": "SETTING_1_TO_3",
+          "highSettings": "SETTING_4_TO_6",
+          "classPrior": "BALANCED"
+        },
+        "results": [
+          {
+            "games": 1500,
+            "balancedAccuracyPercent": 55.77
+          },
+          {
+            "games": 3000,
+            "balancedAccuracyPercent": 58.14
+          },
+          {
+            "games": 7000,
+            "balancedAccuracyPercent": 62.17
+          }
+        ],
+        "eligibleFeatureIds": [
+          "bc-initial"
+        ],
+        "selectedFeatureId": "bc-initial",
+        "selectedFeatureLabel": "BC初当たり",
+        "excludedFeatures": [],
+        "note": "7000Gへ正確に換算できるACTIVE要素だけを候補とし、要素間の独立性を仮定せず、単独で最も高い判別精度を持つ要素から保守的に算出しています。条件付き要素はこの指標には含めませんが、実戦中に実際の観測回数が入力された場合は設定推測に使用します。"
+      },
+      "unresolved": []
+    }
+  }
 }
