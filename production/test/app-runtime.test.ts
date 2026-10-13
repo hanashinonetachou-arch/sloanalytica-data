@@ -169,3 +169,8 @@ test('explicit categorical Evidence links prefer exact category names over subst
 
 
 test('inactive selection-score reason explains 7000G information threshold',()=>{const p:any={...base,inactiveFeatures:[{findingId:'middle',name:'中段チェリー',metric:'SELECTION_SCORE',value:1.7762,threshold:5}]};const d=buildAppRuntime(p,ref);const entry=d.package.v8.machineResearchSummary.notAdopted.find((x:any)=>x.featureId==='middle');assert.match(entry.reason,/7000G/);assert.match(entry.reason,/設定判別スコアが1\.8/);assert.match(entry.reason,/採用基準5\.0未満/);});
+test('game-based categorical opportunities retain an exact play-data binding',()=>{
+ const p:any={...base,activeFeatures:[{findingId:'j',name:'ボーナス内訳',model:'CATEGORICAL',trialUniverse:'NORMAL_GAME_TRIAL',settingDistribution:{'1':{'BIG':0.01,'REG':0.005},'2':{'BIG':0.02,'REG':0.01}},runtimePolicyBinding:{metric:'PER_ELIGIBLE_TRIAL_POWER',value:4},score:{status:'NOT_COMPUTED'}}],runtimeUi:{...base.runtimeUi,numericSections:[{id:'OBS_j',sourceFindingId:'j',title:'ボーナス内訳',inputs:[{id:'j.eligibleTrialCount',label:'通常ゲーム数',role:'trial',quickAdd:[50]},{id:'j.categoryCounts.1_BIG',label:'BIG',role:'categoryCount',quickAdd:[1]},{id:'j.categoryCounts.2_REG',label:'REG',role:'categoryCount',quickAdd:[1]}]}]}};
+ const d=buildAppRuntime(p,ref),tracking=d.package.ui.v8Sections[0].items[0].interaction.opportunityTracking;
+ assert.deepEqual(tracking.playDataBinding,{source:'PLAY_NORMAL_GAME_DELTA',mode:'AUTO_EXACT'});assert.deepEqual(tracking.quickAdd,[50]);assert.equal(d.package.features.features[0].denominatorRule,undefined);assert.doesNotThrow(()=>validateAppRuntimeDocument(d,p,ref));
+});
