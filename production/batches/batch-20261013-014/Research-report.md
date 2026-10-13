@@ -60,3 +60,7 @@ Integration Boundaryで配信・保護対象の回帰・Pages・描画検証・�
 ## HUMAN_REQUIRED：実機QA
 
 APK `SloAnalytica-Batch014-10Machine-vc2002850580.apk`を保存・提供済み。Actions取得archiveのSHA-256、APK署名証明書、versionCodeを確認。device-qa/readiness.jsonは10機種QA_READY。既存DEVICE_QA Contractに従い、人の実機確認待ちをOrchestratorへ記録する。外部Research監査も実機QAもAIテストから完了扱いにしない。具体的確認はdevice-qa/handoff.json。
+
+## 実機QA承認と次10機種選定（2026-10-13 21:45 JST）
+
+ユーザーの「QAはOKでした。」を根拠に今回10機種のDEVICE_QAを既存OrchestratorでCOMPLETEへ進めた。device-qa/acceptance.jsonに配信・APK・対象を固定して保存。以前のHUMAN_REQUIRED記述は承認前の履歴。次10機種はnext-ten-selected-20261013.jsonに保存し、Researchは未着手。過去BatchのQA状態は変更しない。
