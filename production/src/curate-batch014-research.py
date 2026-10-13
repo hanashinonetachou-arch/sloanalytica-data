@@ -218,5 +218,34 @@ def machine8():
     m.block('mode-reset','会議室・昇進モード移行','ボーナス連チャンと通常初当たりに影響する内部モードが存在しますが、移行元・移行先の確定観測と設定別表を今回確認できません。',['spec','voice'])
     m.notes=['通常初当たりの小数率と全BB/RB率を分けて確認。設定3・Lを通常推測から除外。','通常小役成立と疑似チェリーを分離。疑似遊技の見かけの停止を成立役カウンターへ加算しない。','通常初当たり・会議室32G・1G連の母数を分離。全BB/RBは1ゲームの排他内訳で合算を独立加算しない。','333枚=設定6、ハワイ4以上、告知PUSHとテンパイのボイスを具体イベントへ展開。','昇進と終了後の松崎ボイスは当選・継続の確定で、設定確定ではない。','S課長熊田工作GZAの2023年メダル機。熊酒場の別作を除外。小数248.9と丸め249を履歴で保持。']
     m.audit=['一撃・HAZUSEのデータカウンター用BB/RB/合算を照合。合算と各内訳の二重計測を除き、3区分を追加。','通常初当たりは248.9/240.8/217.1/201.1/194.2へ精度保持。合算の117等と同じ母数へ入れない。','333=設定6、状態確定ボイスの誤用防止を追加。外部監査未実施。'];m.save()
+def machine9():
+    ss=(1,2,4,5,6);m=Machine(9,ss);m.queries=['真天下布武 設定判別 秀吉モード 小役 終了画面','真天下布武 トロフィー 非出現 終了画面 出現率 エンディング ランプ','真天下布武 S真天下布武DD 小役確率 全設定共通 公式 モード移行']
+    m.source('review','https://nana-press.com/kaiseki/machine/532/15159/','真天下布武設定抽選');m.source('audit','https://1geki.jp/slot/s_shin_tenkafubu/0/','完全終了分布・役別ランプ');m.source('official','https://www1.yamasa.co.jp/toranomaki/tr_stnkfv/atend.html','山佐AT終了とモードボイス');m.source('spec','https://www1.yamasa.co.jp/toranomaki/tr_stnkfv/kihon.html','山佐基本仕様');m.source('map','https://www1.yamasa.co.jp/toranomaki/tr_stnkfv/tnkmp.html','山佐天下マップ');m.source('mode','https://nana-press.com/kaiseki/machine/532/15166/','モード適用条件')
+    for cid,label,vals,old in [('cz-entry','出陣チャレンジ初当たり',[116.7,110.3,97.7,86,75.9],'M09C01'),('at-initial','覚醒初当たり',[374.5,337.9,267.7,206.2,166.9],'M09C02'),('at-direct','AT直撃',[21845.3,10922.7,5461.3,3276.8,2048],'M09C03')]:m.numeric(cid,label,rates(vals,ss),'通常時のゲーム数と該当する新たな当選を数えます。CZ成功・持越しや直撃は同じAT経路を含むため、各初当たりを同時に独立加算しません。',['review','audit'],group='tenka-entry-path',old=[old])
+    m.block('reset-hideyoshi','リセット時秀吉モード','有利区間リセット時の秀吉選択割合は公表されていますが、リセットの発生と移行後の内部モードを毎回確定できません。前回履歴や示唆を、今回移行の確定結果へ置き換えません。',['review','audit','mode'],perc([14.5,17.6,25,31.3,37.5],ss),old=['M09C03'])
+    m.block('map-transition','天下マップ・モード移行','前回モード、AT当選ゲーム数、信長CZクリアなどの履歴を使う仕組みです。着席前を含む条件を確定できない試行へ単一の移行確率を適用しません。',['map','mode'],{'requiredTerms':['previousMode','ATWinningGames','NobunagaCZClear'],'sourceTableURL':'https://www1.yamasa.co.jp/toranomaki/tr_stnkfv/tnkmp.html'})
+    m.numeric('ikkikake','一騎駆け出陣武将',{str(k):'信長:'+str(40 if k<4 else 30)+'%/秀吉:'+str(35 if k<4 else 30)+'%/家康:'+str(25 if k<4 else 40)+'%' for k in ss},'天下バトルで殲滅できず一騎駆けへ進んだ機会を母数とし、出陣する武将を1人だけ記録します。通常CZの選択武将とは別です。',['review','audit'],ob='appearance_distribution',trial='TENKA_IKKIKAKE_TRIAL')
+    m.findings[-1]['categoryModel']={'residualPolicy':'SOURCE_EXHAUSTIVE'}
+    labels=['通常・トロフィーなし','銅トロフィー','金トロフィー','ケロット柄トロフィー','虹トロフィー','兜＆武具']
+    rows=[[80,0,0,0,0,20],[70,10,0,0,0,20],[63,4,3,0,0,30],[60,4,3,3,0,30],[60,4,2,2,2,30]]
+    dist={str(k):'/'.join(c+':'+str(p)+'%' for c,p in zip(labels,row)) for k,row in zip(ss,rows)}
+    m.numeric('end-outcome','AT終了画面・トロフィー',dist,'AT終了ごとに6区分から1つだけ記録します。通常画面のトロフィー有無と兜＆武具を同じ全終了回数の中で数え、画面とトロフィーを別々の独立確率へしません。',['review','audit'],ob='appearance_distribution',trial='TENKA_AT_END_TRIAL',old=['M09C04'])
+    f=m.findings[-1];f['categoryModel']={'residualPolicy':'SOURCE_EXHAUSTIVE'};f['mirrorsEvidenceFindingId']='end-constraints';f['categoricalEvidenceReconciliation']=dict(type='SINGLE_CANONICAL_CATEGORY_INPUT',evidenceFindingId='end-constraints',runtimeLinkContract='EXPLICIT_CATEGORY_LINK_V1')
+    cats=[display(labels[0],'通常パターン'),exact(labels[1],'設定2以上'),exact(labels[2],'設定4以上'),exact(labels[3],'設定5以上'),exact(labels[4],'設定6'),unknown(labels[5],'高設定示唆')]
+    for c in cats:c['linkedFindingId']='end-outcome'
+    m.evidence('end-constraints','終了画面の確定条件',cats,'終了画面の同じ6区分入力を確定制約と出現率で共有します。設定3非搭載なので銀トロフィーは作りません。',['review','audit'],old=['M09C04'])
+    colors=['青','黄','緑','赤','紫']
+    for cid,title,table,purple in [('ending-weak','ED弱レア役ランプ',[[35,30,35,0,0],[15,30,40,15,0],[10,25,50,15,0],[25,15,50,10,0],[10,25,50,10,5]],'設定6'),('ending-chance','EDチャンス目ランプ',[[35,30,35,0,0],[5,20,40,35,0],[2.5,7.5,50,30,10],[7.5,2.5,50,20,20],[2.5,7.5,50,20,20]],'設定4以上')]:
+        dist={str(k):'/'.join(c+':'+str(v)+'%' for c,v in zip(colors,row)) for k,row in zip(ss,table)}
+        m.numeric(cid,title,dist,'エンディング中の該当する成立役でPUSHした結果を1つ記録します。弱レア役とチャンス目で別の母数を使い、通常時のランプやモード示唆と混ぜません。',['review','audit'],group='ending-role-conditions',kind='CONDITIONALLY_SEPARATE',ob='appearance_distribution',trial=cid.upper().replace('-','_')+'_TRIAL')
+        f=m.findings[-1];f['dependencyReason']='成立役の種類によって条件ごとに独立した別母数へ分けます。1回の成立役は片方にだけ入り、同じランプ結果を重ねません。';f['categoryModel']={'residualPolicy':'SOURCE_EXHAUSTIVE'};f['mirrorsEvidenceFindingId']=cid+'-constraints';f['categoricalEvidenceReconciliation']=dict(type='SINGLE_CANONICAL_CATEGORY_INPUT',evidenceFindingId=cid+'-constraints',runtimeLinkContract='EXPLICIT_CATEGORY_LINK_V1')
+        cats=[unknown(c,'設定別出現率あり') for c in colors[:3]]+[exact('赤','設定2以上'),exact('紫',purple)]
+        for c in cats:c['linkedFindingId']=cid
+        m.evidence(cid+'-constraints',title+'の制約',cats,'同じ色入力を出現率と設定候補の絞り込みで共有します。紫は弱レア役なら設定6、チャンス目なら設定4以上です。',['review','audit'])
+    m.nodiff('role-rates','レア小役出現率','メーカーのレア役確率は全設定共通です。CZやAT抽選の設定差と成立役率を混同しません。',['spec'])
+    m.evidence('mode-voice','終了PUSHボイス',[display('奥方A','通常パターン'),display('奥方B','リセットまたは秀吉・家康の可能性'),display('忍者','リセットまたはSPモード'),display('3武将','有利区間引継ぎ・SPモード期待'),display('お雪','SPモード濃厚')],'メーカーがモード示唆として解説するボイスを状態の記録として保持。設定確定へ読み替えません。',['official'])
+    m.nodiff('winning-rate','7000G実戦勝率','公表された勝率は出玉結果の集計で、個々の実戦入力イベントの抽選率ではありません。設定推測尤度へ入れません。',['review'],{'settings':[1,2,4,5,6],'winPct':[40.2,44.7,60.6,80.3,92.8]})
+    m.notes=['CZ・AT・直撃を全て保持し同じ経路の二重計測を防ぐ。設定3とLは通常推測から除外。','メーカーがレア役全設定共通と明示。役成立と役からのCZ/ATを区別。','リセット秀吉率・天下マップ履歴条件を保持。一騎駆けの3武将は実際の同じ試行の排他分布。','AT全終了の画面とトロフィーを6区分へ統合。EDの弱レアとチャンス目ランプは別条件の5区分。確定制約は同じ入力へ明示連結。','メーカーPUSHボイスはモード示唆。7000G勝率を設定尤度としない。紫ランプの役条件で4以上と6を分ける。','S真天下布武DD・2023年6月のメダル機。スマスロと書く別媒体の誤表記を除外し、メーカー虎の巻で同定。']
+    m.audit=['メーカー虎の巻と一撃・なな徹で機種を照合。旧M09C04を完全数値6区分とED役別分布へ展開。','終了画面率をトロフィー非出現時だけへ誤適用せず、トロフィー込み全終了分布を採用候補として保存。','AT確率・CZ・直撃の経路、一騎駆けとEDの観測場面、制約入力共有を設計。外部監査未実施。'];m.save()
 if __name__=='__main__':
     for n in map(int,sys.argv[1:] or ['1']):globals()['machine'+str(n)]()
