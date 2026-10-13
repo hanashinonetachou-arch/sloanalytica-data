@@ -165,5 +165,36 @@ def machine6():
     m.block('reset-scope','リセット後の天井・内部加算','400・600・800・1000ptへの天井短縮と内部ランダム加算は確認できますが、設定ごとの選択率・加算率が揃っていません。',['reset'])
     m.notes=['殲滅ラッシュ初当たりと32G死に戻りを分離し、上位AT専用強欲ゾーンを対象外にする。','通常4役は全設定共通。役からのポイント特化と役成立率を区別。','規定ポイントは先決め。見た前兆数で置換せず、初回内部加算や雪合戦の競合経路を保持。32Gの確定区間単位で当選を入力。','時計と通常AT画面を展開。5時6分を訂正。叡智・ベアトリスは復活であり設定確定ではない。','設定別の実戦集計を公表確率と分けて保存。出現率不明の画面に重みを付けない。','2024年L Re:ゼロ season2 PA5。初代の白鯨・コンビニ等を混入しない。初回ポイント加算と上位AT条件を確認。']
     m.audit=['5:56を5:06へ訂正。32Gトータル死に戻り10.2～20%は毎ゲーム率ではないと照合。','先決めゾーン率と実戦42573Gの集計値を分離。公式Xリンクは読取不能で、原ポスト独立確認とは記載しない。','通常ATと上位ATの画面・引き戻し条件を分離。外部監査未実施。'];m.save()
+def machine7():
+    m=Machine(7);m.queries=['マイフラワー2 30 設定差 チェリー リーチ目 フラッシュ','マイフラワー2 チェリー REG 比率 通常時 チャンスゾーン 同時当選','マイフラワー2 押し順ベル 共通ベル 通常 打ち方']
+    m.source('review','https://1geki.jp/slot/s_myflower2_30/0/','マイフラワー2設定差と同時当選');m.source('audit','https://data.hazuse.com/?genre=208&machine_code=2S1504','マイフラワー2・型式と設定差');m.source('mechanics','https://chonborista.com/slot/kitadenshi/185402/','マイフラワー2通常時・打ち方・32G区間')
+    init=[210,200,190,180,170,160];cherry=[64,62.5,61.1,59.8,58.5,57.3];water=[102.4,101.1,99.9,98.7,97.5,96.4];reach=[1191.6,1149.8,1040.3,1008.2,873.8,840.2];hit=[3,3.2,3.4,3.6,3.8,4];reg=[50,52.4,56.5,58.3,60,63]
+    scope='ボーナス中・ボーナス終了後32Gの連チャン区間・1G連を除く通常時だけが対象です。総ゲーム数から除外ゲーム数を引いた値を母数として使います。'
+    m.numeric('bonus-initial','ボーナス初当たり',rates(init),scope+'通常時からの新しい当選だけを数えます。',['review','audit'],group='flower-path',trial='NON_CHAIN_BONUS_INITIAL_GAME_TRIAL',old=['M07C01'])
+    for cid,label,vals,old in [('cherry','チェリー',cherry,'M07C02'),('watermelon','スイカ',water,'M07C03'),('reach-role','リーチ目役',reach,'M07C05')]:m.numeric(cid,label,rates(vals),scope+'対象役成立を数え、取りこぼしや疑似遊技の見かけの停止形は含めません。',['review','audit'],group='flower-path',trial='NON_CHAIN_BONUS_INITIAL_GAME_TRIAL',old=[old])
+    m.numeric('cherry-hit','チェリー同時当選率',perc(hit),scope+'通常時チェリー成立回数を母数とし、そのチェリーに対応するボーナス当選を数えます。',['review','mechanics'],group='flower-path',ob='conditional_probability',trial='FLOWER_NORMAL_CHERRY_TRIAL',old=['M07C06'])
+    m.numeric('cherry-reg','チェリー当選時REG比率',perc(reg),scope+'チェリー契機と特定できたボーナスを母数とし、REG回数を数えます。全REG回数は使用しません。',['review'],group='flower-path',ob='conditional_probability',trial='FLOWER_CHERRY_BONUS_TRIAL',old=['M07C06'])
+    labels=['チェリー・非当選','チェリー＋BIG','チェリー＋REG','チェリー以外のボーナス','その他']
+    joint={}
+    for i,k in enumerate(m.settings):
+        pc=1/cherry[i];pb=1/init[i];ph=hit[i]/100;pr=reg[i]/100
+        ps=[pc*(1-ph),pc*ph*(1-pr),pc*ph*pr,pb-pc*ph,1-pc-pb+pc*ph]
+        if min(ps)<0 or abs(sum(ps)-1)>1e-12:raise ValueError('FLOWER_JOINT_MASS')
+        joint[str(k)]='/'.join(label+':'+format(p*100,'.12g')+'%' for label,p in zip(labels,ps))
+    m.numeric('cherry-bonus-joint','通常時の当選とチェリー',joint,scope+'各通常ゲームは5区分のいずれか1つだけです。チェリー成立、チェリー契機のBIG・REG、チェリー以外の当選を重複せず記録します。',['review','audit','mechanics'],group='flower-path',ob='appearance_distribution',trial='FLOWER_NORMAL_GAME_JOINT_TRIAL')
+    f=m.findings[-1];f['categoryModel']={'residualPolicy':'SOURCE_EXHAUSTIVE'};f['sourceDerivation']=dict(type='COMPLETE_PUBLIC_MARGINAL_AND_CONDITIONAL_FACTORIZATION',sourceIds=['review','audit'],expressions=['P(C,noB)=P(C)*(1-P(B|C))','P(C,BIG)=P(C)*P(B|C)*(1-P(REG|C,B))','P(C,REG)=P(C)*P(B|C)*P(REG|C,B)','P(nonC,B)=P(B)-P(C)*P(B|C)','P(other)=1-P(C)-P(B)+P(C)*P(B|C)'],assumedRates=[],publishedDenominatorEquivalence='NOT_ASSERTED',scope='通常時の小役と通常初当たり、チェリー同時当選を使用。32G連チャンの当選表とは混合しない。')
+    order=['cherry-bonus-joint','bonus-initial','cherry','watermelon','reach-role','cherry-hit','cherry-reg']
+    for f in m.findings:
+        if f.get('settingDistribution') is not None:
+            f['dependencyFallbackRank']=order.index(f['findingId'])+1
+            f['dependencyReason']='通常時のチェリーとボーナスは包含関係を持ちます。完全な5区分の入力があればそれだけを使用し、未入力時だけ他の観測へ優先順で切り替えます。複数の経路を同時に加算しません。'
+    m.block('bell-total','ベル合算','押し順ベルと共通ベルの成立合算です。通常の左1stでは押し順不正解の成立を入賞回数から全部数えられず、払い出し回数で公表成立率を代用できません。',['review','audit','mechanics'],rates([9,9,9,8.8,8.7,8.6]),old=['M07C04'])
+    m.evidence('panel','終了時パネルフラッシュ',[exact('上だけ','設定2以上'),exact('下だけ','設定3以上'),exact('上下両方','設定5以上')],'ボーナス終了時の筐体パネルのフラッシュが対象です。旧作の設定4以上等を混ぜません。',['review','audit','mechanics'],old=['M07C07'])
+    m.evidence('big-line','BIG入賞ライン',[display('中段・右下がり','基本パターン'),unknown('右上がり','偶数設定で出現しやすい')],'BIG入賞時のラインを記録します。右上がりは偶数示唆で、奇数設定を否定しません。',['review','audit'],old=['M07C07'])
+    m.block('water-hit','スイカ同時当選','スイカからの当選経路は確認できますが、設定別に完全な抽選確率を今回確認していません。チェリーの当選率を流用しません。',['mechanics'])
+    m.block('scenario','ボーナスシナリオ・32G連チャン','シナリオ別の連チャンや1G連抽選は通常初当たりとは別です。設定別の完全なシナリオ選択率を確認できず、通常時の当選率を連チャン区間へ適用しません。',['mechanics'])
+    m.nodiff('reset-ceiling','リセット後の救済短縮','約70%の300G短縮はリセットの恩恵として掲載され、設定ごとの選択率ではありません。',['review','mechanics'],{'resetShortenApproxPct':70,'shortG':300,'normalG':1280})
+    m.notes=['初当たりとチェリー出現→同時当選→BIG/REGを全て保持。完全な5区分へ公表値から因子分解し、他候補は同時使用せず入力不足時の代替にする。','ベルは押し順＋共通の成立合算で観測困難。チェリー・スイカ・リーチ目を別の公表役として保存。','通常時と32G連チャン、1G連、ボーナス中の抽選を分離。チェリー条件付き率とBR率の母数を別にする。','上下パネル2/3/5以上とBIG右上がり偶数示唆を照合。旧作のパネル4以上を排除。','HAZUSEの約BR割合と一撃の小数BR表を併記。公表値の丸めを保持し、未掲載値や設定Lを作らない。','SマイフラワーⅡEE-30・2023年機。旧作マイフラワー30のリーチ目1/5461等を排除。左1st、32G後の有利区間リセット、救済短縮を確認。']
+    m.audit=['旧作混同を型式2S1504と現行全設定表で検証。チェリーBRは50/52.4/56.5/58.3/60/63を使用し約値は履歴へ。','既存6要素を消去せず、チェリーとボーナスの完全な同時区分を追加。単純な独立尤度の掛け算を禁止。','ベル成立合算を入賞回数と誤解しない。5区分の残差は確認された完全率の代数差であり架空の未公表率補完ではない。外部監査未実施。'];m.save()
 if __name__=='__main__':
     for n in map(int,sys.argv[1:] or ['1']):globals()['machine'+str(n)]()
