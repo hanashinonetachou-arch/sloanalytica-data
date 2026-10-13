@@ -30,4 +30,13 @@ All 76 original candidates remain in preliminary history and map to explicit cur
 
 Formal Research, Evaluation, Eligibility, Candidate Contract, Observation/Evidence, Canonical UI, MachineData, Runtime Policy, Runtime Projection and App Runtime: COMPLETE for all ten. Validator records, attempts, input fingerprints and provenance are retained under this Batch.
 
-427 production tests passed; validate-recovered-batch passed. App-runtime validators already reject generic adopted reasons. Distribution, rendered fleet QA, signed APK and new human device QA are not complete at this checkpoint. Earlier Batches are untouched.
+Final integration: 429 production tests passed; recovered-batch validation passed. Distribution is COMPLETE for all ten. The actual App renderer passed all ten, and the V8.5 full-fleet smoke passed 150/150. Signed APK, same-certificate upgrade, increasing versionCode and archive/APK SHA-256 are verified. Only actual user device QA remains HUMAN_REQUIRED; earlier Batch QA is unchanged.
+
+
+Distribution commit: https://github.com/hanashinonetachou-arch/sloanalytica-data/commit/92c70eafff27f99150a2f8587743acff5b7064e0
+
+App commit: https://github.com/hanashinonetachou-arch/sloanalytica-app/commit/6c7dde575afda121064a49fbe54b2783b4da93a5
+
+QA run: https://github.com/hanashinonetachou-arch/sloanalytica-app/actions/runs/38424569906
+
+The first App UI boundary run failed on nested categorical denominators. The existing sum-of-categories route is preserved; separate game-trial opportunities now bind exactly to normal-game differences. Three APP_RUNTIME outputs were repaired without regenerating source stages or changing inference distributions. The failure and repair remain recorded.
