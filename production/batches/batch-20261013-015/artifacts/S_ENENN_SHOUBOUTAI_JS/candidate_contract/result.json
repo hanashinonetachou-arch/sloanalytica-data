@@ -1,0 +1,434 @@
+{
+  "schemaVersion": "candidate-contract-v1",
+  "manifestVersion": "8.5",
+  "batchId": "batch-20261013-015",
+  "machineId": "S_ENENN_SHOUBOUTAI_JS",
+  "machineName": "パチスロ 炎炎ノ消防隊",
+  "evaluationArtifact": {
+    "artifactId": "evaluation-S_ENENN_SHOUBOUTAI_JS",
+    "kind": "evaluation",
+    "path": "production/batches/batch-20261013-015/artifacts/S_ENENN_SHOUBOUTAI_JS/evaluation/result.json",
+    "sha256": "50148bcf4d2746553a0918c15e8ddf72e1500d2c98705eaf931f2b72bb06fcd8",
+    "producerWorkId": "wrk_3595d3e2e5a44552"
+  },
+  "eligibilityArtifact": {
+    "artifactId": "eligibility-S_ENENN_SHOUBOUTAI_JS",
+    "kind": "eligibility",
+    "path": "production/batches/batch-20261013-015/artifacts/S_ENENN_SHOUBOUTAI_JS/eligibility/result.json",
+    "sha256": "1b93cd678dbc01cba774d574365eae2e5d3327117fe61ca2d7f57394b289ddbc",
+    "producerWorkId": "wrk_5764aa78e4c046a2"
+  },
+  "candidates": [
+    {
+      "findingId": "bonus-initial",
+      "label": "ボーナス初当たり",
+      "model": "BERNOULLI",
+      "trialUniverse": "NORMAL_GAME_TRIAL",
+      "liveInferenceRoute": "LIVE_CONDITIONAL",
+      "settingDistribution": {
+        "1": "1/243",
+        "2": "1/240",
+        "4": "1/224",
+        "5": "1/218",
+        "6": "1/208"
+      },
+      "details": [
+        "通常時のゲーム数と初当たり回数を記録。炎炎激闘中のボーナスやストック継続を初当たりへ加算しません。"
+      ],
+      "dependencyGroupId": "fire-entry",
+      "dependencyKind": "CAUSAL_PATH_OVERLAP",
+      "dependencyReason": "同じ当選やその内訳を含むため、入力できた優先項目を1つだけ使用し、他の当選率へ重ねません。",
+      "dependencyFallbackRank": 2,
+      "runtimeInferenceAllowed": true,
+      "dependencyResolution": "FALLBACK_MEMBER",
+      "runtimePolicyBinding": {
+        "metric": "SELECTION_SCORE",
+        "value": 14.643829161999172,
+        "thresholdSource": "RUNTIME_POLICY"
+      },
+      "suppressedByFeatureIds": [
+        "fire-initial"
+      ]
+    },
+    {
+      "findingId": "fire-initial",
+      "label": "炎炎激闘初当たり",
+      "model": "BERNOULLI",
+      "trialUniverse": "NORMAL_GAME_TRIAL",
+      "liveInferenceRoute": "LIVE_CONDITIONAL",
+      "settingDistribution": {
+        "1": "1/689",
+        "2": "1/652",
+        "4": "1/581",
+        "5": "1/535",
+        "6": "1/479"
+      },
+      "details": [
+        "通常時のゲーム数と初当たり回数を記録。炎炎激闘中のボーナスやストック継続を初当たりへ加算しません。"
+      ],
+      "dependencyGroupId": "fire-entry",
+      "dependencyKind": "CAUSAL_PATH_OVERLAP",
+      "dependencyReason": "同じ当選やその内訳を含むため、入力できた優先項目を1つだけ使用し、他の当選率へ重ねません。",
+      "dependencyFallbackRank": 1,
+      "runtimeInferenceAllowed": true,
+      "dependencyResolution": "PREFERRED_MEMBER",
+      "runtimePolicyBinding": {
+        "metric": "SELECTION_SCORE",
+        "value": 27.66112840341572,
+        "thresholdSource": "RUNTIME_POLICY"
+      },
+      "suppressedByFeatureIds": []
+    },
+    {
+      "findingId": "cross-convert",
+      "label": "十字目変換からのボーナス",
+      "model": "BERNOULLI",
+      "trialUniverse": "CROSS_CONVERT_TRIAL",
+      "liveInferenceRoute": "LIVE_CONDITIONAL",
+      "settingDistribution": {
+        "1": 0.3,
+        "2": 0.3,
+        "4": 0.34,
+        "5": 0.35,
+        "6": 0.37
+      },
+      "details": [
+        "通常時の当該役成立と、その契機によるボーナスを記録。炎炎激闘中を除き、別契機が重なり当選元を区別できない機会は除外。公表値は約値です。"
+      ],
+      "dependencyGroupId": "fire-entry",
+      "dependencyKind": "CAUSAL_PATH_OVERLAP",
+      "dependencyReason": "同じ当選やその内訳を含むため、入力できた優先項目を1つだけ使用し、他の当選率へ重ねません。",
+      "dependencyFallbackRank": 5,
+      "runtimeInferenceAllowed": true,
+      "dependencyResolution": "FALLBACK_MEMBER",
+      "runtimePolicyBinding": {
+        "metric": "PER_ELIGIBLE_TRIAL_POWER",
+        "value": 0.5057191565693397,
+        "thresholdSource": "RUNTIME_POLICY"
+      },
+      "suppressedByFeatureIds": [
+        "fire-initial",
+        "bonus-initial",
+        "episode",
+        "cross-replay"
+      ]
+    },
+    {
+      "findingId": "cross-replay",
+      "label": "十字リプレイからのボーナス",
+      "model": "BERNOULLI",
+      "trialUniverse": "CROSS_REPLAY_TRIAL",
+      "liveInferenceRoute": "LIVE_CONDITIONAL",
+      "settingDistribution": {
+        "1": 0.5,
+        "2": 0.51,
+        "4": 0.55,
+        "5": 0.58,
+        "6": 0.65
+      },
+      "details": [
+        "通常時の当該役成立と、その契機によるボーナスを記録。炎炎激闘中を除き、別契機が重なり当選元を区別できない機会は除外。公表値は約値です。"
+      ],
+      "dependencyGroupId": "fire-entry",
+      "dependencyKind": "CAUSAL_PATH_OVERLAP",
+      "dependencyReason": "同じ当選やその内訳を含むため、入力できた優先項目を1つだけ使用し、他の当選率へ重ねません。",
+      "dependencyFallbackRank": 4,
+      "runtimeInferenceAllowed": true,
+      "dependencyResolution": "FALLBACK_MEMBER",
+      "runtimePolicyBinding": {
+        "metric": "PER_ELIGIBLE_TRIAL_POWER",
+        "value": 1.734018436087048,
+        "thresholdSource": "RUNTIME_POLICY"
+      },
+      "suppressedByFeatureIds": [
+        "fire-initial",
+        "bonus-initial",
+        "episode"
+      ]
+    },
+    {
+      "findingId": "episode",
+      "label": "初当たり後のエピソード",
+      "model": "BERNOULLI",
+      "trialUniverse": "FIRE_EPISODE_TRIAL",
+      "liveInferenceRoute": "LIVE_CONDITIONAL",
+      "settingDistribution": {
+        "1": 0.4,
+        "2": 0.41,
+        "4": 0.44,
+        "5": 0.46,
+        "6": 0.5
+      },
+      "details": [
+        "初当たりボーナス開始から、その後の伝導者の影ステージ終了までを1機会として、エピソードボーナスへ当選したかを記録。ボーナス中とステージ中の抽選を別の機会へ分けません。約値です。"
+      ],
+      "dependencyGroupId": "fire-entry",
+      "dependencyKind": "CAUSAL_PATH_OVERLAP",
+      "dependencyReason": "同じ当選やその内訳を含むため、入力できた優先項目を1つだけ使用し、他の当選率へ重ねません。",
+      "dependencyFallbackRank": 3,
+      "runtimeInferenceAllowed": true,
+      "dependencyResolution": "FALLBACK_MEMBER",
+      "runtimePolicyBinding": {
+        "metric": "PER_ELIGIBLE_TRIAL_POWER",
+        "value": 0.7576513518866124,
+        "thresholdSource": "RUNTIME_POLICY"
+      },
+      "suppressedByFeatureIds": [
+        "fire-initial",
+        "bonus-initial"
+      ]
+    },
+    {
+      "findingId": "shinra",
+      "label": "森羅万象の成功",
+      "model": "BERNOULLI",
+      "trialUniverse": "FIRE_SHINRA_TRIAL",
+      "liveInferenceRoute": "LIVE_CONDITIONAL",
+      "settingDistribution": {
+        "1": 0.27,
+        "2": 0.28,
+        "4": 0.29,
+        "5": 0.3,
+        "6": 0.31
+      },
+      "details": [
+        "通常の森羅万象突入を1機会に数え、成功を記録。森羅万象廻やアドラバースト、成功が確定した別契機を混ぜません。約値です。"
+      ],
+      "dependencyGroupId": null,
+      "dependencyKind": "REVIEWED_NO_SEMANTIC_OVERLAP",
+      "dependencyReason": "同じ観測母数を使うことだけでは情報重複とはみなさず、同じ成功事象・包含関係・上流下流関係が明示されていないため別の設定差情報として扱う。",
+      "runtimeInferenceAllowed": true,
+      "dependencyResolution": "NONE",
+      "runtimePolicyBinding": {
+        "metric": "PER_ELIGIBLE_TRIAL_POWER",
+        "value": 0.14020723923051648,
+        "thresholdSource": "RUNTIME_POLICY"
+      }
+    }
+  ],
+  "dependencyGroups": [
+    {
+      "groupId": "fire-entry",
+      "resolution": "PREFERRED_WITH_FALLBACK",
+      "members": [
+        "bonus-initial",
+        "fire-initial",
+        "cross-convert",
+        "cross-replay",
+        "episode"
+      ],
+      "runtimeInferenceAllowed": true,
+      "preferredFindingId": "fire-initial",
+      "fallbackOrder": [
+        "fire-initial",
+        "bonus-initial",
+        "episode",
+        "cross-replay",
+        "cross-convert"
+      ],
+      "reason": "依存関係がある候補を同時加算せず、観測できた優先Featureを使用し、未観測時だけ次順位のFeatureへ自動フォールバックする。",
+      "selectionRationale": "Researchで明示された優先順位に従い、同一セッションで重複情報を同時加算しない。"
+    }
+  ],
+  "excludedDecisions": [],
+  "blockedItems": [
+    {
+      "blockId": "cross-table",
+      "label": "十字目変換モード・テーブル",
+      "reason": "内部モードや変換周期の選択はボーナス経路に影響しますが、滞在モードと切替を毎回確定できません。周期の見かけを設定別の抽選機会へ置き換えません。",
+      "reevaluationCondition": "不足する設定別の数値または対象条件を確認できる新しい具体的な公開資料が得られた場合に再確認します。",
+      "sourceIds": [
+        "review",
+        "audit"
+      ]
+    },
+    {
+      "blockId": "strong-cherry",
+      "label": "強チェリーボーナス当選",
+      "reason": "公表の当選期待度は全設定で約25％です。設定差のある十字目変換・十字リプレイと区別します。",
+      "reevaluationCondition": "この機種の設定別の差を確認できる新しい具体的な公開資料が得られた場合に再確認します。",
+      "sourceIds": [
+        "review"
+      ],
+      "retainedPublishedValues": {
+        "1": 0.25,
+        "2": 0.25,
+        "4": 0.25,
+        "5": 0.25,
+        "6": 0.25
+      },
+      "researchSurveyResult": "NO_CONFIRMED_SETTING_DIFFERENCE"
+    }
+  ],
+  "evidenceCandidates": [
+    {
+      "findingId": "reg-scenario",
+      "label": "REGキャラ紹介",
+      "sourceIds": [
+        "review",
+        "audit"
+      ],
+      "details": [
+        "REG1回のキャラ紹介の順番・背景を確認し、シナリオを1つ記録。最後のキャラだけでシナリオ番号を推定しません。"
+      ],
+      "semanticCategories": [
+        {
+          "label": "第8①",
+          "meaning": "通常パターン",
+          "semanticType": "DISPLAY_ONLY"
+        },
+        {
+          "label": "アイリス②",
+          "meaning": "設定2否定",
+          "semanticType": "EXACT_CONSTRAINT"
+        },
+        {
+          "label": "アイリス③",
+          "meaning": "設定4否定",
+          "semanticType": "EXACT_CONSTRAINT"
+        },
+        {
+          "label": "アイリス④",
+          "meaning": "設定5否定",
+          "semanticType": "EXACT_CONSTRAINT"
+        },
+        {
+          "label": "伝道者①",
+          "meaning": "設定2・5示唆",
+          "semanticType": "PROBABILITY_UNKNOWN"
+        },
+        {
+          "label": "第8②",
+          "meaning": "設定1・4・6示唆",
+          "semanticType": "PROBABILITY_UNKNOWN"
+        },
+        {
+          "label": "アイリス①",
+          "meaning": "設定2以上",
+          "semanticType": "EXACT_CONSTRAINT"
+        },
+        {
+          "label": "第8③",
+          "meaning": "設定4以上",
+          "semanticType": "EXACT_CONSTRAINT"
+        },
+        {
+          "label": "大隊長",
+          "meaning": "設定4以上",
+          "semanticType": "EXACT_CONSTRAINT"
+        },
+        {
+          "label": "伝道者②",
+          "meaning": "設定5以上",
+          "semanticType": "EXACT_CONSTRAINT"
+        },
+        {
+          "label": "アイリス⑤",
+          "meaning": "設定6",
+          "semanticType": "EXACT_CONSTRAINT"
+        }
+      ]
+    },
+    {
+      "findingId": "bonus-end",
+      "label": "ボーナス終了画面",
+      "sourceIds": [
+        "review",
+        "audit"
+      ],
+      "details": [
+        "設定示唆の終了画面を記録。ラッキースケベられ・アクセル・エピソード等のストックや移行先示唆を設定確定へ読み替えません。"
+      ],
+      "semanticCategories": [
+        {
+          "label": "第8メンバー・シルエット",
+          "meaning": "通常パターン",
+          "semanticType": "DISPLAY_ONLY"
+        },
+        {
+          "label": "第8メンバー・正面",
+          "meaning": "高設定示唆（弱）",
+          "semanticType": "PROBABILITY_UNKNOWN"
+        },
+        {
+          "label": "第8メンバー・左向き",
+          "meaning": "高設定示唆（強）",
+          "semanticType": "PROBABILITY_UNKNOWN"
+        },
+        {
+          "label": "第8メンバー・全員集合",
+          "meaning": "設定4以上",
+          "semanticType": "EXACT_CONSTRAINT"
+        },
+        {
+          "label": "第8メンバー・赤枠9人",
+          "meaning": "設定5以上",
+          "semanticType": "EXACT_CONSTRAINT"
+        },
+        {
+          "label": "仲間全員集合・金枠",
+          "meaning": "設定6",
+          "semanticType": "EXACT_CONSTRAINT"
+        }
+      ]
+    },
+    {
+      "findingId": "jac-start",
+      "label": "炎炎JAC開始画面",
+      "sourceIds": [
+        "review"
+      ],
+      "details": [
+        "アドラバースト中の炎炎JAC開始画面を記録。別機種の同名キャラやボーナス終了画面を混ぜません。"
+      ],
+      "semanticCategories": [
+        {
+          "label": "シンラ",
+          "meaning": "設定2・5示唆",
+          "semanticType": "PROBABILITY_UNKNOWN"
+        },
+        {
+          "label": "アーサー",
+          "meaning": "設定2・5示唆",
+          "semanticType": "PROBABILITY_UNKNOWN"
+        },
+        {
+          "label": "ヒナワ",
+          "meaning": "設定2・5示唆",
+          "semanticType": "PROBABILITY_UNKNOWN"
+        },
+        {
+          "label": "マキ",
+          "meaning": "設定1・4・6示唆",
+          "semanticType": "PROBABILITY_UNKNOWN"
+        },
+        {
+          "label": "タマキ",
+          "meaning": "設定1・4・6示唆",
+          "semanticType": "PROBABILITY_UNKNOWN"
+        },
+        {
+          "label": "オウビ",
+          "meaning": "設定2以上",
+          "semanticType": "EXACT_CONSTRAINT"
+        },
+        {
+          "label": "ジョーカー",
+          "meaning": "設定1・4・6",
+          "semanticType": "EXACT_CONSTRAINT"
+        },
+        {
+          "label": "紅丸",
+          "meaning": "設定4以上",
+          "semanticType": "EXACT_CONSTRAINT"
+        },
+        {
+          "label": "アイリス",
+          "meaning": "設定5以上",
+          "semanticType": "EXACT_CONSTRAINT"
+        }
+      ]
+    }
+  ],
+  "sourceIntegrityIssues": []
+}
