@@ -36,7 +36,7 @@ test('uses unrounded selection score for importance threshold',()=>{
 test('derives only the game-count ranges consumed by adopted observations',()=>{
  assert.deepEqual(derivePlayInfoRequirement(['TOTAL_GAME_TRIAL']),{mode:'TOTAL_ONLY',needsTotal:true,needsNormal:false,needsExcludedGames:false});
  assert.deepEqual(derivePlayInfoRequirement(['NORMAL_GAME_TRIAL']),{mode:'NORMAL_ONLY',needsTotal:false,needsNormal:true,needsExcludedGames:false});
- assert.deepEqual(derivePlayInfoRequirement(['TOTAL_GAME_TRIAL','BONUS_ELIGIBLE_GAME_TRIAL']),{mode:'TOTAL_AND_NORMAL',needsTotal:true,needsNormal:true,needsExcludedGames:false});
+ assert.deepEqual(derivePlayInfoRequirement(['TOTAL_GAME_TRIAL','BONUS_ELIGIBLE_GAME_TRIAL']),{mode:'TOTAL_ONLY',needsTotal:true,needsNormal:false,needsExcludedGames:false});
  assert.deepEqual(derivePlayInfoRequirement(['END_SCREEN_TRIAL']),{mode:'NONE',needsTotal:false,needsNormal:false,needsExcludedGames:false});
  assert.deepEqual(derivePlayInfoRequirement(['LOTIS_NON_CHAIN_GAME_TRIAL']),{mode:'TOTAL_ONLY',needsTotal:true,needsNormal:false,needsExcludedGames:true,exclusionGames:{visible:true,label:'除外ゲーム数',quickAdd:[50],base:'TOTAL',resultLabel:'除外後の実戦ゲーム数',description:'連チャンゾーン中に消化したゲーム数を入力してください。総ゲーム数から差し引きます。ゾーン内の当選はすべて連チャンとして初当たりから除外します。'}});
 });

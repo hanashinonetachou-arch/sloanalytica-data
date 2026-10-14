@@ -48,10 +48,10 @@ test('PER adoption hides unavailable Selection Score reason and collapses explan
   assert.doesNotMatch(section.description,/算出不可|観測条件不足/);
 });
 
-test('bonus-eligible game denominator can bind to normal-game session difference',()=>{
+test('bonus-eligible game denominator includes AT/ART via the bonus-excluded total-game range',()=>{
   const app=buildAppRuntime(baseProjection(),{path:'p'});
   const trial=app.package.ui.v8Sections[0].items[0].inputs[0];
-  assert.deepEqual(trial.playDataBinding,{source:'PLAY_NORMAL_GAME_DELTA'});
+  assert.deepEqual(trial.playDataBinding,{source:'PLAY_TOTAL_GAME_DELTA'});
 });
 
 
