@@ -1,0 +1,16 @@
+import test from 'node:test';import assert from 'node:assert/strict';import fs from 'node:fs';import path from 'node:path';import crypto from 'node:crypto';
+const root=path.resolve(import.meta.dirname,'../batches/batch-20261014-016');
+const read=(mid:string)=>JSON.parse(fs.readFileSync(path.join(root,'artifacts',mid,'app_runtime/result.json'),'utf8')).package;
+const canonical=(v:any):string=>Array.isArray(v)?'['+v.map(canonical).join(',')+']':v&&typeof v==='object'?'{'+Object.keys(v).sort().map(k=>JSON.stringify(k)+':'+canonical(v[k])).join(',')+'}':JSON.stringify(v);
+test('Batch016 QA presentation revision preserves the complete inference model and all saved input identities',()=>{
+ const baseline=JSON.parse(fs.readFileSync(path.join(root,'device-qa/feedback-20261015-semantic-baseline.json'),'utf8'));
+ for(const row of baseline.machines){const p=read(row.machineId);assert.equal(p.machine.machineDataVersion,'8.5.2-batch-20261014-016');assert.deepEqual(p.inputs.inputs.map((x:any)=>x.id),row.inputIds);delete p.ui;delete p.machine.machineDataVersion;delete p.machine.packagePolicy.machineDataRevision;for(const f of p.features.features??[])delete f.selectionRationale?.adoptionReason;for(const f of p.v8.machineResearchSummary.adopted??[])delete f.reason;assert.equal(crypto.createHash('sha256').update(canonical(p)).digest('hex'),row.semanticSha256,row.machineId);}
+});
+test('requested related inputs form one tabbed section and the Kizumonogatari AT counter stays outside it',()=>{
+ const groups=[['S_KIZUMONOGATARI_FS','OPPORTUNITY_KIZU_ROLE_INPUT',['OBS_role-joint','OBS_weak','OBS_bell']],['L_GEGEGE_NO_KITARO_KAKUSEI_JC','OPPORTUNITY_KITARO_PRECURSOR',['OBS_precursor-12','OBS_precursor-13','OBS_precursor-17']],['L_ASLOT_KONOSUBA_FX','OPPORTUNITY_KONOSUBA_ROLE_BONUS',['OBS_overlap-チェリー','OBS_overlap-スイカ','OBS_overlap-チャンス目']],['S_FAMISTA_KAIDO_FB','OPPORTUNITY_FAMISTA_CHANCE_TIME',['OBS_cherry-cz','OBS_water-cz']]] as const;
+ for(const [mid,group,ids] of groups){const sections=read(mid).ui.v8Sections;const members=sections.filter((s:any)=>s.tabGroup?.id===group);assert.deepEqual(new Set(members.map((s:any)=>s.id)),new Set(ids));assert.equal(new Set(members.map((s:any)=>s.tabGroup.title)).size,1);assert.equal(new Set(members.map((s:any)=>s.tabGroup.label)).size,ids.length);}
+ const k=read('S_KIZUMONOGATARI_FS').ui.v8Sections;assert.equal(k.find((s:any)=>s.id==='OBS_at').tabGroup,undefined);assert.equal(k.some((s:any)=>s.id==='OBS_SHARED_NORMAL_GAME_TRIAL'),false);
+});
+test('Konosuba bonus character guidance is adjacent in BIG consumption, BIG end, REG order',()=>{
+ const order=read('L_ASLOT_KONOSUBA_FX').ui.v8Sections.map((s:any)=>s.id);const first=order.indexOf('EVI_mini');assert.deepEqual(order.slice(first,first+5),['EVI_mini','EVI_mini-sequences','EVI_stamp','OBS_big-screen','EVI_reg-character']);
+});
