@@ -30,7 +30,7 @@ All 76 original candidates remain in preliminary history and map to explicit cur
 
 Formal Research, Evaluation, Eligibility, Candidate Contract, Observation/Evidence, Canonical UI, MachineData, Runtime Policy, Runtime Projection and App Runtime: COMPLETE for all ten. Validator records, attempts, input fingerprints and provenance are retained under this Batch.
 
-Final integration: 429 production tests passed; recovered-batch validation passed. Distribution is COMPLETE for all ten. The actual App renderer passed all ten, and the V8.5 full-fleet smoke passed 150/150. Signed APK, same-certificate upgrade, increasing versionCode and archive/APK SHA-256 are verified. Only actual user device QA remains HUMAN_REQUIRED; earlier Batch QA is unchanged.
+Final integration: 429 production tests passed; recovered-batch validation passed. Distribution is COMPLETE for all ten. The actual App renderer passed all ten, and the V8.5 full-fleet smoke passed 150/150. Signed APK, same-certificate upgrade, increasing versionCode and archive/APK SHA-256 are verified. Actual user device QA was accepted on 2026-10-14: all ten DEVICE_QA stages are COMPLETE; earlier Batch QA is unchanged.
 
 
 Distribution commit: https://github.com/hanashinonetachou-arch/sloanalytica-data/commit/92c70eafff27f99150a2f8587743acff5b7064e0
@@ -40,3 +40,7 @@ App commit: https://github.com/hanashinonetachou-arch/sloanalytica-app/commit/6c
 QA run: https://github.com/hanashinonetachou-arch/sloanalytica-app/actions/runs/38424569906
 
 The first App UI boundary run failed on nested categorical denominators. The existing sum-of-categories route is preserved; separate game-trial opportunities now bind exactly to normal-game differences. Three APP_RUNTIME outputs were repaired without regenerating source stages or changing inference distributions. The failure and repair remain recorded.
+
+
+User device QA accepted: QAは問題ありませんでした。次の10機種を選定してください。
+Next ten selected in canonical source order; no Research or new Batch initialization performed. See next-ten-selected-20261014.json.
