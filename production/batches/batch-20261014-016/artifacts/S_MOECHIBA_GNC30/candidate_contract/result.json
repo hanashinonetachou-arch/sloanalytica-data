@@ -1,0 +1,176 @@
+{
+  "schemaVersion": "candidate-contract-v1",
+  "manifestVersion": "8.5",
+  "batchId": "batch-20261014-016",
+  "machineId": "S_MOECHIBA_GNC30",
+  "machineName": "燃えチバ-30",
+  "evaluationArtifact": {
+    "artifactId": "evaluation-S_MOECHIBA_GNC30",
+    "kind": "evaluation",
+    "path": "production/batches/batch-20261014-016/artifacts/S_MOECHIBA_GNC30/evaluation/result.json",
+    "sha256": "40297683d0be5238b6608bf6a4b1d23cefe3dd6824c912fbbb39c67ce5ddf5bd",
+    "producerWorkId": "wrk_8e6fc48f7d344aa5"
+  },
+  "eligibilityArtifact": {
+    "artifactId": "eligibility-S_MOECHIBA_GNC30",
+    "kind": "eligibility",
+    "path": "production/batches/batch-20261014-016/artifacts/S_MOECHIBA_GNC30/eligibility/result.json",
+    "sha256": "cdf95e13401fa683b13f9b0d8d256f482f54a648a62c5c4ed4df83197004c294",
+    "producerWorkId": "wrk_e86f7a4852cf4e3d"
+  },
+  "candidates": [
+    {
+      "findingId": "initial",
+      "label": "ボーナス初当たり",
+      "model": "BERNOULLI",
+      "trialUniverse": "NON_CHAIN_BONUS_INITIAL_GAME_TRIAL",
+      "liveInferenceRoute": "LIVE_CONDITIONAL",
+      "settingDistribution": {
+        "1": "1/279",
+        "2": "1/269",
+        "4": "1/246",
+        "5": "1/223",
+        "6": "1/202"
+      },
+      "details": [
+        "ボーナス中・1G連・天国等の連チャン区間G数を除いたゲーム数と連チャン外当選回数。32G以内の当選は連チャン扱いとして除外Gを入力。100G引き戻しモードの存在と32G天国の除外を混同しません。"
+      ],
+      "dependencyGroupId": "cherry-hit-path",
+      "dependencyKind": "CAUSAL_PATH_OVERLAP",
+      "dependencyReason": "同じ当選経路・小役と当選の重複を含むため、入力できた優先項目を1つだけ使用し、他の発生率へ重ねません。",
+      "dependencyFallbackRank": 3,
+      "runtimeInferenceAllowed": true,
+      "dependencyResolution": "FALLBACK_MEMBER",
+      "runtimePolicyBinding": {
+        "metric": "PER_ELIGIBLE_TRIAL_POWER",
+        "value": 0.008716735460298497,
+        "thresholdSource": "RUNTIME_POLICY"
+      },
+      "suppressedByFeatureIds": [
+        "diagonal",
+        "weak-hit"
+      ]
+    },
+    {
+      "findingId": "diagonal",
+      "label": "右上がりベル",
+      "model": "BERNOULLI",
+      "trialUniverse": "NORMAL_GAME_TRIAL",
+      "liveInferenceRoute": "LIVE_CONDITIONAL",
+      "settingDistribution": {
+        "1": "1/34.7",
+        "2": "1/33.6",
+        "4": "1/32.3",
+        "5": "1/30.6",
+        "6": "1/29.5"
+      },
+      "details": [
+        "通常時の右上がりベル出現回数と通常ゲーム数。チェリー抽選契機との重複を初当たり率と重ねません。"
+      ],
+      "dependencyGroupId": "cherry-hit-path",
+      "dependencyKind": "CAUSAL_PATH_OVERLAP",
+      "dependencyReason": "同じ当選経路・小役と当選の重複を含むため、入力できた優先項目を1つだけ使用し、他の発生率へ重ねません。",
+      "dependencyFallbackRank": 1,
+      "runtimeInferenceAllowed": true,
+      "dependencyResolution": "PREFERRED_MEMBER",
+      "runtimePolicyBinding": {
+        "metric": "SELECTION_SCORE",
+        "value": 83.81094865148107,
+        "thresholdSource": "RUNTIME_POLICY"
+      },
+      "suppressedByFeatureIds": []
+    },
+    {
+      "findingId": "weak-hit",
+      "label": "弱チェリーのボーナス当選",
+      "model": "BERNOULLI",
+      "trialUniverse": "WEAK_CHERRY_BONUS_TRIAL",
+      "liveInferenceRoute": "LIVE_CONDITIONAL",
+      "settingDistribution": {
+        "1": 0.048,
+        "2": 0.05,
+        "4": 0.059000000000000004,
+        "5": 0.063,
+        "6": 0.073
+      },
+      "details": [
+        "通常時の弱チェリー出現回数と、それによるボーナス当選回数。チェリー回数天井・ゲーム数天井・連チャン中・契機競合を除きます。"
+      ],
+      "dependencyGroupId": "cherry-hit-path",
+      "dependencyKind": "CAUSAL_PATH_OVERLAP",
+      "dependencyReason": "同じ当選経路・小役と当選の重複を含むため、入力できた優先項目を1つだけ使用し、他の発生率へ重ねません。",
+      "dependencyFallbackRank": 2,
+      "runtimeInferenceAllowed": true,
+      "dependencyResolution": "FALLBACK_MEMBER",
+      "runtimePolicyBinding": {
+        "metric": "PER_ELIGIBLE_TRIAL_POWER",
+        "value": 0.21403646915387764,
+        "thresholdSource": "RUNTIME_POLICY"
+      },
+      "suppressedByFeatureIds": [
+        "diagonal"
+      ]
+    }
+  ],
+  "dependencyGroups": [
+    {
+      "groupId": "cherry-hit-path",
+      "resolution": "PREFERRED_WITH_FALLBACK",
+      "members": [
+        "initial",
+        "diagonal",
+        "weak-hit"
+      ],
+      "runtimeInferenceAllowed": true,
+      "preferredFindingId": "diagonal",
+      "fallbackOrder": [
+        "diagonal",
+        "weak-hit",
+        "initial"
+      ],
+      "reason": "依存関係がある候補を同時加算せず、観測できた優先Featureを使用し、未観測時だけ次順位のFeatureへ自動フォールバックする。",
+      "selectionRationale": "Researchで明示された優先順位に従い、同一セッションで重複情報を同時加算しない。"
+    }
+  ],
+  "excludedDecisions": [],
+  "blockedItems": [
+    {
+      "blockId": "400-ceiling",
+      "label": "400Gの天井抽選",
+      "reason": "設定1・6のみ判明。設定2・4・5の選択率を補間せず、到達率と天井選択率を混同しません。",
+      "reevaluationCondition": "不足する設定別の数値や観測条件を確認できる新しい具体的な資料が得られた場合に再確認します。",
+      "sourceIds": [
+        "main"
+      ],
+      "retainedPublishedValues": {
+        "当選率": {
+          "1": 0.25,
+          "2": null,
+          "4": null,
+          "5": null,
+          "6": 0.5
+        }
+      }
+    }
+  ],
+  "evidenceCandidates": [
+    {
+      "findingId": "voice",
+      "label": "野沢雅子ボイス",
+      "sourceIds": [
+        "main"
+      ],
+      "details": [
+        "リール停止時等に確認した回数を記録。天国期待やパトランプ示唆も伴い、出現率未公表なので設定制約・数値重みへ使いません。"
+      ],
+      "semanticCategories": [
+        {
+          "label": "野沢雅子ボイス出現",
+          "meaning": "高設定示唆",
+          "semanticType": "PROBABILITY_UNKNOWN"
+        }
+      ]
+    }
+  ],
+  "sourceIntegrityIssues": []
+}
