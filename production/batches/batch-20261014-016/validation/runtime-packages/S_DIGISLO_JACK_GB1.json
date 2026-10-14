@@ -1,0 +1,831 @@
+{
+  "schemaVersion": 1,
+  "provenance": {
+    "manifestVersion": "8.5",
+    "generationPath": "V8_5_PRODUCTION_PIPELINE",
+    "legacyOracleUsed": false
+  },
+  "machine": {
+    "schemaVersion": "2.0.0",
+    "machineId": "S_DIGISLO_JACK_GB1",
+    "machineDataVersion": "8.5.1-batch-20261014-016",
+    "displayName": "デジスロ JAC INバージョン",
+    "modelName": "デジスロ JAC INバージョン",
+    "settings": [
+      "SET_1",
+      "SET_2",
+      "SET_3",
+      "SET_4",
+      "SET_6"
+    ],
+    "packagePolicy": {
+      "offlineCapable": true,
+      "containsImages": false,
+      "containsExecutableCode": false
+    }
+  },
+  "inputs": {
+    "schemaVersion": "2.0.0",
+    "inputs": [
+      {
+        "id": "big.eligibleTrialCount",
+        "name": "通常ゲーム数",
+        "category": "V8_NUMERIC",
+        "type": "integer",
+        "unit": "G",
+        "defaultValue": 0,
+        "minimum": 0,
+        "displayOrder": 1,
+        "inferenceRole": "INCLUDE_PRIMARY"
+      },
+      {
+        "id": "big.successCount",
+        "name": "BIGボーナス回数",
+        "category": "V8_NUMERIC",
+        "type": "counter",
+        "unit": "回",
+        "defaultValue": 0,
+        "minimum": 0,
+        "displayOrder": 2,
+        "parentInputId": "big.eligibleTrialCount",
+        "inferenceRole": "INCLUDE_PRIMARY"
+      },
+      {
+        "id": "reg.eligibleTrialCount",
+        "name": "通常ゲーム数",
+        "category": "V8_NUMERIC",
+        "type": "integer",
+        "unit": "G",
+        "defaultValue": 0,
+        "minimum": 0,
+        "displayOrder": 3,
+        "inferenceRole": "INCLUDE_SUPPORT"
+      },
+      {
+        "id": "reg.successCount",
+        "name": "REGボーナス回数",
+        "category": "V8_NUMERIC",
+        "type": "counter",
+        "unit": "回",
+        "defaultValue": 0,
+        "minimum": 0,
+        "displayOrder": 4,
+        "parentInputId": "reg.eligibleTrialCount",
+        "inferenceRole": "INCLUDE_SUPPORT"
+      },
+      {
+        "id": "all.eligibleTrialCount",
+        "name": "通常ゲーム数",
+        "category": "V8_NUMERIC",
+        "type": "integer",
+        "unit": "G",
+        "defaultValue": 0,
+        "minimum": 0,
+        "displayOrder": 5,
+        "inferenceRole": "INCLUDE_PRIMARY"
+      },
+      {
+        "id": "all.successCount",
+        "name": "ボーナス合算回数",
+        "category": "V8_NUMERIC",
+        "type": "counter",
+        "unit": "回",
+        "defaultValue": 0,
+        "minimum": 0,
+        "displayOrder": 6,
+        "parentInputId": "all.eligibleTrialCount",
+        "inferenceRole": "INCLUDE_PRIMARY"
+      },
+      {
+        "id": "bonus-joint.eligibleTrialCount",
+        "name": "通常ゲーム数",
+        "category": "V8_NUMERIC",
+        "type": "integer",
+        "unit": "G",
+        "defaultValue": 0,
+        "minimum": 0,
+        "displayOrder": 7,
+        "inferenceRole": "INCLUDE_SUPPORT",
+        "inputVisible": false,
+        "derivedCalculation": "sum",
+        "derivedFromInputIds": [
+          "bonus-joint.categoryCounts.1_BIGボーナス",
+          "bonus-joint.categoryCounts.2_REGボーナス",
+          "bonus-joint.categoryCounts.3_その他"
+        ]
+      },
+      {
+        "id": "bonus-joint.categoryCounts.1_BIGボーナス",
+        "name": "BIGボーナス",
+        "category": "V8_NUMERIC",
+        "type": "counter",
+        "unit": "回",
+        "defaultValue": 0,
+        "minimum": 0,
+        "displayOrder": 8,
+        "parentInputId": "bonus-joint.eligibleTrialCount",
+        "inferenceRole": "INCLUDE_SUPPORT"
+      },
+      {
+        "id": "bonus-joint.categoryCounts.2_REGボーナス",
+        "name": "REGボーナス",
+        "category": "V8_NUMERIC",
+        "type": "counter",
+        "unit": "回",
+        "defaultValue": 0,
+        "minimum": 0,
+        "displayOrder": 9,
+        "parentInputId": "bonus-joint.eligibleTrialCount",
+        "inferenceRole": "INCLUDE_SUPPORT"
+      },
+      {
+        "id": "bonus-joint.categoryCounts.3_その他",
+        "name": "その他",
+        "category": "V8_NUMERIC",
+        "type": "counter",
+        "unit": "回",
+        "defaultValue": 0,
+        "minimum": 0,
+        "displayOrder": 10,
+        "parentInputId": "bonus-joint.eligibleTrialCount",
+        "inferenceRole": "INCLUDE_SUPPORT"
+      }
+    ]
+  },
+  "features": {
+    "version": "8.5-runtime",
+    "features": [
+      {
+        "featureId": "big",
+        "name": "BIGボーナス",
+        "trialUniverse": "NORMAL_GAME_TRIAL",
+        "adoptionCategory": "INCLUDE_PRIMARY",
+        "calculationRole": "PROBABILITY",
+        "probabilityEngineUsage": true,
+        "denominatorInputId": "big.eligibleTrialCount",
+        "suppressedByFeatureIds": [
+          "bonus-joint",
+          "all"
+        ],
+        "probabilities": {
+          "SET_1": 0.00259000259000259,
+          "SET_2": 0.002718868950516585,
+          "SET_3": 0.0028677946659019216,
+          "SET_4": 0.0030778701138811943,
+          "SET_6": 0.003289473684210526
+        },
+        "selectionRationale": {
+          "summary": "設定推測に採用された要素です。",
+          "adoptionReason": "BIGボーナスは設定1 1/386.1、設定6 1/304と設定差があります。「通常ゲーム数」に対する「BIGボーナス回数」の発生割合を比較して推測に使用します。 観測条件：複数の設定推測項目で同じ「通常ゲーム数」を共通の基準として使用します。 「BIG・REG内訳」「ボーナス合算」を記録していない場合の補助として使用し、同じ設定差を重ねて評価しません。",
+          "shortTermReason": "標本が少ない間は結果の振れが大きくなります。",
+          "longTermReason": "観測数が増えるほど設定別の比較が安定します。"
+        },
+        "modelType": "binomial",
+        "numeratorInputId": "big.successCount",
+        "displayFormat": "percentage"
+      },
+      {
+        "featureId": "reg",
+        "name": "REGボーナス",
+        "trialUniverse": "NORMAL_GAME_TRIAL",
+        "adoptionCategory": "INCLUDE_SUPPORT",
+        "calculationRole": "PROBABILITY",
+        "probabilityEngineUsage": true,
+        "denominatorInputId": "reg.eligibleTrialCount",
+        "suppressedByFeatureIds": [
+          "bonus-joint",
+          "all",
+          "big"
+        ],
+        "probabilities": {
+          "SET_1": 0.002571355104139882,
+          "SET_2": 0.002677376171352075,
+          "SET_3": 0.002801905295601009,
+          "SET_4": 0.0029824038174768863,
+          "SET_6": 0.003162555344718533
+        },
+        "selectionRationale": {
+          "summary": "設定推測に採用された要素です。",
+          "adoptionReason": "REGボーナスは設定1 1/388.9、設定6 1/316.2と設定差があります。「通常ゲーム数」に対する「REGボーナス回数」の発生割合を比較して推測に使用します。 観測条件：複数の設定推測項目で同じ「通常ゲーム数」を共通の基準として使用します。 「BIG・REG内訳」「ボーナス合算」「BIGボーナス」を記録していない場合の補助として使用し、同じ設定差を重ねて評価しません。",
+          "shortTermReason": "標本が少ない間は結果の振れが大きくなります。",
+          "longTermReason": "観測数が増えるほど設定別の比較が安定します。"
+        },
+        "modelType": "binomial",
+        "numeratorInputId": "reg.successCount",
+        "displayFormat": "percentage"
+      },
+      {
+        "featureId": "all",
+        "name": "ボーナス合算",
+        "trialUniverse": "NORMAL_GAME_TRIAL",
+        "adoptionCategory": "INCLUDE_PRIMARY",
+        "calculationRole": "PROBABILITY",
+        "probabilityEngineUsage": true,
+        "denominatorInputId": "all.eligibleTrialCount",
+        "suppressedByFeatureIds": [
+          "bonus-joint"
+        ],
+        "probabilities": {
+          "SET_1": 0.005162622612287042,
+          "SET_2": 0.005396654074473826,
+          "SET_3": 0.005668934240362812,
+          "SET_4": 0.006060606060606061,
+          "SET_6": 0.0064516129032258064
+        },
+        "selectionRationale": {
+          "summary": "設定推測に採用された要素です。",
+          "adoptionReason": "ボーナス合算は設定1 1/193.7、設定6 1/155と設定差があります。「通常ゲーム数」に対する「ボーナス合算回数」の発生割合を比較して推測に使用します。 観測条件：複数の設定推測項目で同じ「通常ゲーム数」を共通の基準として使用します。 「BIG・REG内訳」を記録していない場合の補助として使用し、同じ設定差を重ねて評価しません。",
+          "shortTermReason": "標本が少ない間は結果の振れが大きくなります。",
+          "longTermReason": "観測数が増えるほど設定別の比較が安定します。"
+        },
+        "modelType": "binomial",
+        "numeratorInputId": "all.successCount",
+        "displayFormat": "percentage"
+      },
+      {
+        "featureId": "bonus-joint",
+        "name": "BIG・REG内訳",
+        "trialUniverse": "NORMAL_GAME_TRIAL",
+        "adoptionCategory": "INCLUDE_SUPPORT",
+        "calculationRole": "PROBABILITY",
+        "probabilityEngineUsage": true,
+        "denominatorInputId": "bonus-joint.eligibleTrialCount",
+        "probabilities": {},
+        "selectionRationale": {
+          "summary": "設定推測に採用された要素です。",
+          "adoptionReason": "BIG・REG内訳の「その他」の割合は設定6 99.35%、設定1 99.48%と設定差があります。「通常ゲーム数」を基準に、記録したカテゴリの振り分けを比較して推測に使用します。 観測条件：通常初当たりのBIG/REGを同じ母数で排他的に記録し、合算と重ねません。",
+          "shortTermReason": "標本が少ない間は結果の振れが大きくなります。",
+          "longTermReason": "観測数が増えるほど設定別の比較が安定します。"
+        },
+        "modelType": "multinomial",
+        "numeratorInputId": "bonus-joint.categoryCounts.1_BIGボーナス",
+        "categoryInputIds": [
+          "bonus-joint.categoryCounts.2_REGボーナス",
+          "bonus-joint.categoryCounts.3_その他"
+        ],
+        "denominatorRule": "SUM_CATEGORY_COUNTS",
+        "categoryProbabilities": {
+          "SET_1": [
+            0.00259000259,
+            0.002571355104,
+            0.9948386423
+          ],
+          "SET_2": [
+            0.0027188689510000003,
+            0.0026773761709999997,
+            0.9946037549000001
+          ],
+          "SET_3": [
+            0.002867794666,
+            0.002801905296,
+            0.9943303
+          ],
+          "SET_4": [
+            0.003077870114,
+            0.002982403817,
+            0.9939397261
+          ],
+          "SET_6": [
+            0.003289473684,
+            0.003162555345,
+            0.993547971
+          ]
+        }
+      }
+    ],
+    "runtimeProjection": [
+      {
+        "featureId": "big",
+        "runtimeStatus": "ACTIVE",
+        "metric": "SELECTION_SCORE",
+        "metricValue": 20.173366968369695,
+        "importance": "主要"
+      },
+      {
+        "featureId": "reg",
+        "runtimeStatus": "ACTIVE",
+        "metric": "SELECTION_SCORE",
+        "metricValue": 15.09504665816899,
+        "importance": "有力"
+      },
+      {
+        "featureId": "all",
+        "runtimeStatus": "ACTIVE",
+        "metric": "SELECTION_SCORE",
+        "metricValue": 33.229767010135234,
+        "importance": "主要"
+      },
+      {
+        "featureId": "bonus-joint",
+        "runtimeStatus": "ACTIVE",
+        "metric": "PER_ELIGIBLE_TRIAL_POWER",
+        "metricValue": 0.005385602916625765,
+        "importance": "微小"
+      }
+    ]
+  },
+  "evidence": {
+    "version": "8.5-runtime",
+    "evidences": [],
+    "references": []
+  },
+  "blockedItems": [
+    {
+      "blockId": "cherry-hit",
+      "label": "チェリーの小役連当選",
+      "reason": "デジタル非変動/変動中の条件別当選率は設定1・6のみ判明。小役連の初回・2回目を分離して保存し、設定2～4を補間しません。",
+      "reevaluationCondition": "不足する設定別の数値や観測条件を確認できる新しい具体的な資料が得られた場合に再確認します。",
+      "sourceIds": [
+        "second",
+        "pworld"
+      ],
+      "retainedPublishedValues": {
+        "ボーナス期待度-2": [
+          [
+            "デジタル非変動中"
+          ],
+          [
+            "設定",
+            "チェリー",
+            "スイカ"
+          ],
+          [
+            "設定1",
+            "3.1%",
+            "7.4%"
+          ],
+          [
+            "設定6",
+            "3.9%",
+            "9.4%"
+          ]
+        ],
+        "ボーナス期待度-3": [
+          [
+            "デジタル変動中"
+          ],
+          [
+            "設定",
+            "チェリー",
+            "スイカ"
+          ],
+          [
+            "設定1",
+            "13.3%",
+            "9.4%"
+          ],
+          [
+            "設定6",
+            "16.7%",
+            "25.1%"
+          ]
+        ]
+      }
+    },
+    {
+      "blockId": "water-hit",
+      "label": "スイカの小役連当選",
+      "reason": "デジタル非変動/変動中の条件別当選率は設定1・6のみ判明。小役連の初回・2回目を分離して保存し、設定2～4を補間しません。",
+      "reevaluationCondition": "不足する設定別の数値や観測条件を確認できる新しい具体的な資料が得られた場合に再確認します。",
+      "sourceIds": [
+        "second",
+        "pworld"
+      ],
+      "retainedPublishedValues": {
+        "ボーナス期待度-2": [
+          [
+            "デジタル非変動中"
+          ],
+          [
+            "設定",
+            "チェリー",
+            "スイカ"
+          ],
+          [
+            "設定1",
+            "3.1%",
+            "7.4%"
+          ],
+          [
+            "設定6",
+            "3.9%",
+            "9.4%"
+          ]
+        ],
+        "ボーナス期待度-3": [
+          [
+            "デジタル変動中"
+          ],
+          [
+            "設定",
+            "チェリー",
+            "スイカ"
+          ],
+          [
+            "設定1",
+            "13.3%",
+            "9.4%"
+          ],
+          [
+            "設定6",
+            "16.7%",
+            "25.1%"
+          ]
+        ]
+      }
+    },
+    {
+      "blockId": "reach-hit",
+      "label": "リーチ目役当選",
+      "reason": "リーチ目役出現は全設定1/4096。設定別の当選差を確認できず、出現率そのものを判別要素にしません。",
+      "reevaluationCondition": "不足する設定別の数値や観測条件を確認できる新しい具体的な資料が得られた場合に再確認します。",
+      "sourceIds": [
+        "second",
+        "pworld"
+      ],
+      "retainedPublishedValues": {
+        "allSettings": "1/4096"
+      }
+    },
+    {
+      "blockId": "extra-evidence",
+      "label": "追加の設定示唆",
+      "reason": "メーカー、公開解析と追加検索で設定確定・否定の専用演出を確認できませんでした。未発見であり不存在とは断定せず、架空の示唆項目を作りません。",
+      "reevaluationCondition": "不足する設定別の数値や観測条件を確認できる新しい具体的な資料が得られた場合に再確認します。",
+      "sourceIds": [
+        "main",
+        "second",
+        "spec"
+      ],
+      "retainedPublishedValues": null
+    }
+  ],
+  "ui": {
+    "schemaVersion": "v8.5-runtime-ui-v1",
+    "contractVersion": "runtime-ui-v8",
+    "source": "CANONICAL_UI",
+    "sourceSchemaVersion": "canonical-ui-v1",
+    "manifestRevision": "8.5",
+    "playInfo": {
+      "visible": true,
+      "collapsible": false,
+      "mode": "NORMAL_ONLY",
+      "sessionFields": [
+        {
+          "id": "date",
+          "label": "日付",
+          "mode": "DATE"
+        },
+        {
+          "id": "storeName",
+          "label": "店舗名",
+          "mode": "TEXT"
+        },
+        {
+          "id": "machineNumber",
+          "label": "台番号",
+          "mode": "TEXT"
+        }
+      ],
+      "startFields": [
+        {
+          "id": "startNormalGames",
+          "label": "着席時 通常ゲーム数",
+          "mode": "NUMBER",
+          "directNumeric": true
+        }
+      ],
+      "currentFields": [
+        {
+          "id": "currentNormalGames",
+          "label": "現在 通常ゲーム数",
+          "mode": "NUMBER",
+          "directNumeric": true
+        }
+      ],
+      "difference": {
+        "autoCalculate": true
+      },
+      "useDifference": {
+        "label": "着席時との差分を使用",
+        "defaultWhenStartNormalGamesPresent": true
+      }
+    },
+    "accordion": {
+      "enabled": true,
+      "singleOpen": true
+    },
+    "quickInput": {
+      "enabled": false
+    },
+    "v8Sections": [
+      {
+        "id": "OBS_SHARED_NORMAL_GAME_TRIAL",
+        "title": "BIGボーナス・REGボーナス・ボーナス合算",
+        "collapsible": true,
+        "defaultExpanded": false,
+        "description": "複数の設定推測項目で同じ「通常ゲーム数」を共通の基準として使用します。通常ゲーム数は1回だけ入力し、各項目では該当した回数だけを記録してください。",
+        "descriptionPresentation": {
+          "collapsible": true,
+          "label": "説明",
+          "defaultExpanded": false
+        },
+        "groups": [
+          {
+            "id": "DENOM_NORMAL_GAME_TRIAL",
+            "label": "通常ゲーム数",
+            "input": "denominator",
+            "inputId": "big.eligibleTrialCount",
+            "engineBinding": {
+              "inputIds": [
+                "big.eligibleTrialCount",
+                "reg.eligibleTrialCount",
+                "all.eligibleTrialCount"
+              ]
+            },
+            "gridSpan": 12,
+            "directNumeric": true,
+            "quickAdd": [
+              50
+            ],
+            "unobservedDisplay": "—",
+            "playDataBinding": {
+              "source": "PLAY_NORMAL_GAME_DELTA"
+            }
+          }
+        ],
+        "items": [
+          {
+            "id": "NODE_big",
+            "featureId": "big",
+            "title": "BIGボーナス",
+            "description": "通常時のBIGボーナスを記録します。通常ゲーム数を基準に、実戦中の出現割合を設定別に比較します。\n・注意：ボーナス消化中は対象に含めません。\n・注意：BIG/REG中からの1G連は初当たりへ含めず、連チャン・引き戻しの当選を分離します。",
+            "descriptionPresentation": {
+              "collapsible": true,
+              "label": "説明",
+              "defaultExpanded": false
+            },
+            "gridSpan": 6,
+            "inputs": [
+              {
+                "id": "big.successCount",
+                "label": "BIGボーナス回数",
+                "input": "counter",
+                "inputId": "big.successCount",
+                "engineBinding": {
+                  "inputId": "big.successCount"
+                },
+                "directNumeric": true,
+                "quickAdd": [
+                  1
+                ],
+                "gridSpan": 12,
+                "unobservedDisplay": "—"
+              }
+            ]
+          },
+          {
+            "id": "NODE_reg",
+            "featureId": "reg",
+            "title": "REGボーナス",
+            "description": "通常時のREGボーナスを記録します。通常ゲーム数を基準に、実戦中の出現割合を設定別に比較します。\n・注意：ボーナス消化中は対象に含めません。\n・注意：BIG/REG中からの1G連は初当たりへ含めず、連チャン・引き戻しの当選を分離します。",
+            "descriptionPresentation": {
+              "collapsible": true,
+              "label": "説明",
+              "defaultExpanded": false
+            },
+            "gridSpan": 6,
+            "inputs": [
+              {
+                "id": "reg.successCount",
+                "label": "REGボーナス回数",
+                "input": "counter",
+                "inputId": "reg.successCount",
+                "engineBinding": {
+                  "inputId": "reg.successCount"
+                },
+                "directNumeric": true,
+                "quickAdd": [
+                  1
+                ],
+                "gridSpan": 12,
+                "unobservedDisplay": "—"
+              }
+            ]
+          },
+          {
+            "id": "NODE_all",
+            "featureId": "all",
+            "title": "ボーナス合算",
+            "description": "通常時のボーナス合算を記録します。通常ゲーム数を基準に、実戦中の出現割合を設定別に比較します。\n・注意：ボーナス消化中は対象に含めません。\n・注意：BIG/REG中からの1G連は初当たりへ含めず、連チャン・引き戻しの当選を分離します。",
+            "descriptionPresentation": {
+              "collapsible": true,
+              "label": "説明",
+              "defaultExpanded": false
+            },
+            "gridSpan": 6,
+            "inputs": [
+              {
+                "id": "all.successCount",
+                "label": "ボーナス合算回数",
+                "input": "counter",
+                "inputId": "all.successCount",
+                "engineBinding": {
+                  "inputId": "all.successCount"
+                },
+                "directNumeric": true,
+                "quickAdd": [
+                  1
+                ],
+                "gridSpan": 12,
+                "unobservedDisplay": "—"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "OBS_bonus-joint",
+        "title": "BIG・REG内訳",
+        "collapsible": true,
+        "defaultExpanded": false,
+        "description": "通常初当たりのBIG/REGを同じ母数で排他的に記録し、合算と重ねません。\n・注意：通常初当たりのBIG/REGを同じ母数で排他的に記録し、合算と重ねません。",
+        "descriptionPresentation": {
+          "collapsible": true,
+          "label": "説明",
+          "defaultExpanded": false
+        },
+        "items": [
+          {
+            "id": "NODE_bonus-joint",
+            "featureId": "bonus-joint",
+            "title": "BIG・REG内訳",
+            "interaction": {
+              "type": "CATEGORY_COUNTERS",
+              "preservePriorObservations": true,
+              "showAccumulatedCounts": true,
+              "categoryCoverage": "EXHAUSTIVE",
+              "totalOpportunities": "SUM_CATEGORY_COUNTS",
+              "categories": [
+                {
+                  "id": "bonus-joint.categoryCounts.1_BIGボーナス",
+                  "inputId": "bonus-joint.categoryCounts.1_BIGボーナス",
+                  "label": "BIGボーナス"
+                },
+                {
+                  "id": "bonus-joint.categoryCounts.2_REGボーナス",
+                  "inputId": "bonus-joint.categoryCounts.2_REGボーナス",
+                  "label": "REGボーナス"
+                },
+                {
+                  "id": "bonus-joint.categoryCounts.3_その他",
+                  "inputId": "bonus-joint.categoryCounts.3_その他",
+                  "label": "その他",
+                  "quickAdd": [
+                    50
+                  ],
+                  "directNumeric": true,
+                  "unit": "G"
+                }
+              ]
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "metadata": {
+    "machineId": "S_DIGISLO_JACK_GB1",
+    "displayName": "デジスロ JAC INバージョン",
+    "settings": [
+      "SET_1",
+      "SET_2",
+      "SET_3",
+      "SET_4",
+      "SET_6"
+    ],
+    "settingsStatus": "SOURCE_DERIVED"
+  },
+  "v8": {
+    "machineResearchSummary": {
+      "title": "この機種の設定推測について",
+      "adopted": [
+        {
+          "featureId": "big",
+          "label": "BIGボーナス",
+          "importance": "主要",
+          "selectionScore": 20.2,
+          "evaluation": {
+            "userLabel": "設定判別スコア",
+            "value": 20.2
+          },
+          "reason": "BIGボーナスは設定1 1/386.1、設定6 1/304と設定差があります。「通常ゲーム数」に対する「BIGボーナス回数」の発生割合を比較して推測に使用します。 観測条件：複数の設定推測項目で同じ「通常ゲーム数」を共通の基準として使用します。 「BIG・REG内訳」「ボーナス合算」を記録していない場合の補助として使用し、同じ設定差を重ねて評価しません。"
+        },
+        {
+          "featureId": "reg",
+          "label": "REGボーナス",
+          "importance": "有力",
+          "selectionScore": 15.1,
+          "evaluation": {
+            "userLabel": "設定判別スコア",
+            "value": 15.1
+          },
+          "reason": "REGボーナスは設定1 1/388.9、設定6 1/316.2と設定差があります。「通常ゲーム数」に対する「REGボーナス回数」の発生割合を比較して推測に使用します。 観測条件：複数の設定推測項目で同じ「通常ゲーム数」を共通の基準として使用します。 「BIG・REG内訳」「ボーナス合算」「BIGボーナス」を記録していない場合の補助として使用し、同じ設定差を重ねて評価しません。"
+        },
+        {
+          "featureId": "all",
+          "label": "ボーナス合算",
+          "importance": "主要",
+          "selectionScore": 33.2,
+          "evaluation": {
+            "userLabel": "設定判別スコア",
+            "value": 33.2
+          },
+          "reason": "ボーナス合算は設定1 1/193.7、設定6 1/155と設定差があります。「通常ゲーム数」に対する「ボーナス合算回数」の発生割合を比較して推測に使用します。 観測条件：複数の設定推測項目で同じ「通常ゲーム数」を共通の基準として使用します。 「BIG・REG内訳」を記録していない場合の補助として使用し、同じ設定差を重ねて評価しません。"
+        },
+        {
+          "featureId": "bonus-joint",
+          "label": "BIG・REG内訳",
+          "importance": "微小",
+          "evaluation": {
+            "userLabel": "1回の判別力",
+            "value": 0.005385602916625765
+          },
+          "reason": "BIG・REG内訳の「その他」の割合は設定6 99.35%、設定1 99.48%と設定差があります。「通常ゲーム数」を基準に、記録したカテゴリの振り分けを比較して推測に使用します。 観測条件：通常初当たりのBIG/REGを同じ母数で排他的に記録し、合算と重ねません。"
+        }
+      ],
+      "notAdopted": [
+        {
+          "featureId": "cherry-hit",
+          "label": "チェリーの小役連当選",
+          "reason": "デジタル非変動/変動中の条件別当選率は設定1・6のみ判明。小役連の初回・2回目を分離して保存し、設定2～4を補間しません。",
+          "reevaluationCondition": "不足する設定別の数値や観測条件を確認できる新しい具体的な資料が得られた場合に再確認します。"
+        },
+        {
+          "featureId": "water-hit",
+          "label": "スイカの小役連当選",
+          "reason": "デジタル非変動/変動中の条件別当選率は設定1・6のみ判明。小役連の初回・2回目を分離して保存し、設定2～4を補間しません。",
+          "reevaluationCondition": "不足する設定別の数値や観測条件を確認できる新しい具体的な資料が得られた場合に再確認します。"
+        },
+        {
+          "featureId": "reach-hit",
+          "label": "リーチ目役当選",
+          "reason": "リーチ目役出現は全設定1/4096。設定別の当選差を確認できず、出現率そのものを判別要素にしません。",
+          "reevaluationCondition": "不足する設定別の数値や観測条件を確認できる新しい具体的な資料が得られた場合に再確認します。"
+        },
+        {
+          "featureId": "extra-evidence",
+          "label": "追加の設定示唆",
+          "reason": "メーカー、公開解析と追加検索で設定確定・否定の専用演出を確認できませんでした。未発見であり不存在とは断定せず、架空の示唆項目を作りません。",
+          "reevaluationCondition": "不足する設定別の数値や観測条件を確認できる新しい具体的な資料が得られた場合に再確認します。"
+        }
+      ],
+      "highLowDiscrimination": {
+        "status": "COMPUTED",
+        "method": "BEST_SINGLE_EXACT_ACTIVE_FEATURE",
+        "bandDefinition": {
+          "lowSettings": "SETTING_1_TO_3",
+          "highSettings": "SETTING_4_TO_6",
+          "classPrior": "BALANCED"
+        },
+        "results": [
+          {
+            "games": 1500,
+            "balancedAccuracyPercent": 58.51
+          },
+          {
+            "games": 3000,
+            "balancedAccuracyPercent": 61.88
+          },
+          {
+            "games": 7000,
+            "balancedAccuracyPercent": 67.54
+          }
+        ],
+        "eligibleFeatureIds": [
+          "big",
+          "reg",
+          "all"
+        ],
+        "selectedFeatureId": "all",
+        "selectedFeatureLabel": "ボーナス合算",
+        "excludedFeatures": [
+          {
+            "findingId": "big",
+            "reason": "CONSERVATIVE_SINGLE_FEATURE_NO_INDEPENDENCE_ASSUMPTION"
+          },
+          {
+            "findingId": "reg",
+            "reason": "CONSERVATIVE_SINGLE_FEATURE_NO_INDEPENDENCE_ASSUMPTION"
+          },
+          {
+            "findingId": "bonus-joint",
+            "reason": "BENCHMARK_EXPOSURE_UNRESOLVED"
+          }
+        ],
+        "note": "7000Gへ正確に換算できるACTIVE要素だけを候補とし、要素間の独立性を仮定せず、単独で最も高い判別精度を持つ要素から保守的に算出しています。条件付き要素はこの指標には含めませんが、実戦中に実際の観測回数が入力された場合は設定推測に使用します。"
+      },
+      "unresolved": []
+    }
+  }
+}
