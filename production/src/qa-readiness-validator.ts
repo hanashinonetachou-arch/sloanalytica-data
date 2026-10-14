@@ -28,7 +28,24 @@ export function validateMachineQaReadiness(machineId:string,stageStates:Record<s
  const uiEvidence=(pkg?.ui?.v8Sections??[]).filter((s:any)=>String(s?.id??'').startsWith('EVI_'));
  // Explicit linked categories are rendered by their numeric counter section.
  // Never require a second Evidence section for the same observation.
+ const linkedBernoulliSectionFor=(ref:any)=>{
+  const cats=(ref.evidenceItems??[]).flatMap((e:any)=>e.semanticCategories??[]);
+  if(cats.length!==1||!cats[0].linkedFindingId)return undefined;
+  const cat=cats[0],feature=(pkg.features?.features??[]).find((f:any)=>f.featureId===cat.linkedFindingId&&f.modelType==='binomial');
+  if(!feature?.numeratorInputId)return undefined;
+  const sections=(pkg.ui?.v8Sections??[]).filter((s:any)=>(s.items??[]).some((n:any)=>n.featureId===feature.featureId&&(n.inputs??[]).some((i:any)=>i.input==='counter'&&i.inputId===feature.numeratorInputId&&i.engineBinding?.inputId===feature.numeratorInputId)));
+  if(sections.length!==1)return undefined;
+  const input=(pkg.inputs?.inputs??[]).find((i:any)=>i.id===feature.numeratorInputId);
+  if(!input||input.type!=='counter'||input.inferenceRole==='DISPLAY_ONLY')return undefined;
+  const text=[sections[0].description,...(sections[0].items??[]).filter((n:any)=>n.featureId===feature.featureId).map((n:any)=>n.description)].filter(Boolean).join('\n');
+  if(!text.includes(cat.label)||(cat.meaning&&!text.includes(cat.meaning)))return undefined;
+  const sources=new Set((ref.evidenceItems??[]).map((e:any)=>e.findingId));
+  const linkedDefs=defs.filter((d:any)=>d.sourceEvidenceRefs?.some((id:string)=>sources.has(id)));
+  if(cat.semanticType==='EXACT_CONSTRAINT'&&(linkedDefs.length!==1||linkedDefs[0].inputId!==feature.numeratorInputId))fail(machineId+':LINKED_EVIDENCE_INPUT_MISMATCH');
+  return sections[0];
+ };
  const linkedSectionFor=(ref:any)=>{
+  const bernoulli=linkedBernoulliSectionFor(ref);if(bernoulli)return bernoulli;
   const cats=(ref.evidenceItems??[]).flatMap((e:any)=>e.semanticCategories??[]);
   if(!cats.length||cats.some((c:any)=>!c.linkedFindingId))return undefined;
   const ids=[...new Set(cats.map((c:any)=>c.linkedFindingId))];if(ids.length!==1)return undefined;
@@ -56,7 +73,7 @@ export function validateMachineQaReadiness(machineId:string,stageStates:Record<s
   const section=uiEvidence.find((s:any)=>s?.id===ref?.id)??linkedSectionFor(ref);
   const categories=(section?.items??[]).flatMap((node:any)=>node?.interaction?.type==='CATEGORY_COUNTERS'?(node?.interaction?.categories??[]).map((c:any)=>c?.label):[]);
   const linked=Boolean(linkedSectionFor(ref));const categoryDetails=items.flatMap((item:any)=>item.semanticCategories.map((c:any)=>{const meaning=linked?linkedCategoryMeaning(c):c.meaning;return meaning?`${c.label}：${meaning}`:c.label}));
-  if(!sameEvidencePresentation(categoryDetails,(section?.items??[]).flatMap((node:any)=>node?.interaction?.type==='CATEGORY_COUNTERS'?(node?.interaction?.categories??[]):[])))fail(machineId+':EVIDENCE_CATEGORY_MISMATCH:'+String(ref?.id??'UNKNOWN'));
+  if(!linkedBernoulliSectionFor(ref)&&!sameEvidencePresentation(categoryDetails,(section?.items??[]).flatMap((node:any)=>node?.interaction?.type==='CATEGORY_COUNTERS'?(node?.interaction?.categories??[]):[])))fail(machineId+':EVIDENCE_CATEGORY_MISMATCH:'+String(ref?.id??'UNKNOWN'));
  }
  if(renderReport?.schemaVersion!=='rendered-ui-validation-v1'||renderReport?.machineId!==machineId)fail(machineId+':RENDER_REPORT_IDENTITY');
  if(renderReport?.status!=='PASS')fail(machineId+':RENDERED_UI_VALIDATION');
