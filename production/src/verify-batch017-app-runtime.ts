@@ -35,4 +35,4 @@ for(const machineId of fs.readdirSync(path.join(base,'machines'))){
  if(machineId==='S_WORD_OF_LIGHTS_2')assert.deepEqual(settings,['SET_1','SET_2','SET_5','SET_6']);
  rows.push({machineId,status:'PASS',featuresTested:tested,evidenceDefinitions:pkg.evidence.evidences.length});
 }
-console.log(JSON.stringify({status:'PASS',appBranch:'qa/batch016-v85-20261015',appCommit:'aa25a7907e204992c84768c2422d4df957902c8b',machines:rows},null,2));
+console.log(JSON.stringify({status:'PASS',appBranch:'qa/batch017-v85-20261016',appCommit:'474fdf2221b3b920b90df9ac615dbd07b0c65fb3',machines:rows},null,2));
