@@ -78,7 +78,7 @@ class Machine:
    'EVIDENCE':'設定示唆は具体的カテゴリで記録。確率不明の示唆は重み付けしない。'+findingLabels,
    'EXTERNAL_DATA_ONLY':'実機連動データの未公表確率を補完しない。',
    'MACHINE_SPECIFIC':self.name+'の既存候補を全件追跡。'+closedLabels}
-  d=dict(schemaVersion='research-v1',manifestVersion='8.5',batchId=BATCH,machineId=self.id,machineName=self.name,researchedAt='2026-10-16',researchStage='SOURCE_REVIEWED_PENDING_FORMAL_VALIDATION',settings=dict(status='SOURCE_DERIVED',values=['SET_'+str(k) for k in self.settings]),identity=self.sel,sources=sources,findings=self.findings,blockedItems=self.blocks,researchCompleteness=dict(version=2,domains=[dict(domain=k,status='CHECKED',note=v,sourceIds=['main']) for k,v in notes.items()],machineSpecificQueries=[self.name+' 設定差',self.name+' 観測条件',self.name+' 設定示唆'],candidateLedger=self.rows),selfAudit=dict(status='COMPLETE_BOUNDED_SOURCE_SURVEY',independentExternalAudit='NOT_PERFORMED',scope='列挙した公開解析の見出し・表・観測条件の限定照合。未確認資料の不存在を主張しません。'),inheritedCandidateDispositions=[dict(**c,finalDisposition=self.decisions[c['candidate_id']]) for c in self.old['candidates']],packageRevision=1)
+  d=dict(schemaVersion='research-v1',manifestVersion='8.5',batchId=BATCH,machineId=self.id,machineName=self.name,researchedAt='2026-10-16',researchStage='SOURCE_REVIEWED_PENDING_FORMAL_VALIDATION',settings=dict(status='SOURCE_DERIVED',values=['SET_'+str(k) for k in self.settings]),identity=self.sel,sources=sources,findings=self.findings,blockedItems=self.blocks,researchCompleteness=dict(version=2,domains=[dict(domain=k,status='CHECKED',note=v,sourceIds=['main']) for k,v in notes.items()],machineSpecificQueries=[self.name+' 設定差',self.name+' 観測条件',self.name+' 設定示唆'],candidateLedger=self.rows),selfAudit=dict(status='COMPLETE_BOUNDED_SOURCE_SURVEY',independentExternalAudit='NOT_PERFORMED',scope='列挙した公開解析の見出し・表・観測条件の限定照合。未確認資料の不存在を主張しません。'),inheritedCandidateDispositions=[dict(**c,finalDisposition=self.decisions[c['candidate_id']]) for c in self.old['candidates']],packageRevision=2 if self.n in (3,4,5,6) else 1)
   # Discovery queries describe actual within-page candidate/condition/hint review, not a search-exhaustiveness claim.
   for i,q in enumerate(d['researchCompleteness']['machineSpecificQueries']):self.rows[i%len(self.rows)]['discoveryQueries'].append(q)
   p=OUT/'research-drafts'/('wave-1' if self.n<=5 else 'wave-2')/(self.id+'.json');p.parent.mkdir(parents=True,exist_ok=True);p.write_text(json.dumps(d,ensure_ascii=False,indent=2)+'\n')
@@ -138,7 +138,7 @@ m.save()
 m=Machine(5)
 m.numeric(1,'ST初当たり',[529.3,515.1,481.7,405,372.9,352.8],normal,group='hit-path',rank=3)
 m.numeric(2,'CZ合算',[196.6,193.6,185.9,175.2,165.3,157.3],normal+'We Are Franchouchou・絶叫ゾンビ屋敷・サガロックチャレンジの3種合計。待て！ロメロは除き、サガロックは天井経由も含めます。',group='hit-path',rank=2)
-m.numeric(3,'通常時SAGA揃い',[35.9,35.4,33.9,32.5,30.5,29.2],role+'SAGA揃い高確中は除きます。CZ高確とは別の状態です。',trial='NON_SAGA_HIGH_NORMAL_GAME_TRIAL',group='hit-path',rank=1)
+m.block(3,'SAGA揃い高確は実戦中に見抜けないため、高確以外の通常ゲーム数を正確に数えられません。設定別公表値は保持しますが、全通常Gへの置換や高確Gの推定をせず、通常時SAGA揃いは数値推測・入力対象から除外します。CZ高確とは別の状態です。',[35.9,35.4,33.9,32.5,30.5,29.2])
 m.block(4,'CZ高確の20G・30G・50G振分は公開されていますが、高確G数を演出上の滞在時間だけで確定できません。SAGA揃い高確とCZ高確を同一視せず、内部高確終了を未確定のまま数値推測へ使いません。')
 m.block(5,'SAGAレベルとCZ高確状態の両方で抽選率が異なります。示唆だけで全試行のレベルを固定できないため、レベル1・2・3の公開表を混ぜて評価しません。')
 m.numeric(6,'SAGA・BARからST直撃',[5226,4785,3856,2910,2691,2577],normal+'SAGA揃い・BAR揃いによる直撃のみ。SAGA揃い単独の状態別期待度とは別のトータル出現率です。',group='hit-path',rank=4)

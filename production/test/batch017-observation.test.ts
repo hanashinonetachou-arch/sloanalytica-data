@@ -22,6 +22,16 @@ test('Busou forced ninth CZ does not fabricate a success probability; Ryujin has
  const ry=research('S_RYUJIN_RZ30_SUIKA_VERSION');assert.ok(ry.findings.every((x:any)=>x.trialUniverse==='NON_CHAIN_BONUS_INITIAL_GAME_TRIAL'));assert.equal(pkg('S_RYUJIN_RZ30_SUIKA_VERSION').features.features.length,1);
 });
 test('game-based values display as inverse rates and the two latent-state populations stay separate',()=>{
- const r=research('L_ZOMBIE_LAND_SAGA');const f=r.findings.find((x:any)=>x.findingId==='05-003');assert.match(f.denominatorSemantics,/CZ高確とは別/);const source=read('source-review/web-review-5.json');assert.ok(JSON.stringify(source).includes('1.12%'));
+ const r=research('L_ZOMBIE_LAND_SAGA');assert.ok(!r.findings.some((x:any)=>x.findingId==='05-003'));assert.match(r.blockedItems.find((x:any)=>x.blockId==='05-003').reason,/見抜けない/);const z=pkg('L_ZOMBIE_LAND_SAGA');assert.ok(!JSON.stringify(z).includes('NON_SAGA_HIGH_NORMAL_GAME_TRIAL'));const c=read('artifacts/L_ZOMBIE_LAND_SAGA/candidate_contract/result.json');assert.equal(c.dependencyGroups.find((x:any)=>x.groupId==='hit-path').preferredFindingId,'05-002');const source=read('source-review/web-review-5.json');assert.ok(JSON.stringify(source).includes('1.12%'));
  for(const id of ['L_ONE_PUNCH_MAN','S_FIRE_DRIFT','S_WORD_OF_LIGHTS_2'])assert.ok(pkg(id).features.features.some((f:any)=>/_GAME_TRIAL$/.test(f.trialUniverse)));
+});
+
+test('all-reference sections explicitly disclose missing rates without disabling exact evidence',()=>{
+ for(const id of ['L_GOD_EATER_RESURRECTION','L_BOUNTY_ANGEL','L_ZOMBIE_LAND_SAGA','L_AKAME_GA_KILL_2']){
+  const r=research(id),ui=read(`artifacts/${id}/canonical_ui/result.json`);
+  for(const f of r.findings.filter((f:any)=>f.semanticCategories?.length&&f.semanticCategories.every((c:any)=>['PROBABILITY_UNKNOWN','DISPLAY_ONLY'].includes(c.semanticType)))){
+   const section=ui.evidenceSections.find((x:any)=>x.sourceFindingId===f.findingId);assert.match(section.description,/このセクションの全項目.*記録のみ/);assert.match(JSON.stringify(pkg(id)),/このセクションの全項目/);
+  }
+  for(const section of ui.evidenceSections.filter((s:any)=>s.evidenceItems?.some((e:any)=>e.semanticCategories?.some((c:any)=>c.semanticType==='EXACT_CONSTRAINT'))))assert.doesNotMatch(section.description,/このセクションの全項目.*記録のみ/);
+ }
 });
