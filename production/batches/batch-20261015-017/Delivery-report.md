@@ -1,6 +1,6 @@
 # Batch017 正式評価・量産結果
 
-10機種すべて Research → Evaluation → Eligibility → Candidate Contract → Observation/Evidence → Canonical UI → MachineData → Runtime Policy → Runtime Projection → App Runtime 完了。
+10機種すべて Research → Evaluation → Eligibility → Candidate Contract → Observation/Evidence → Canonical UI → MachineData → Runtime Policy → Runtime Projection → App Runtime → Distribution 完了。
 
 - 元候補102件を全件追跡。数値評価38モデル、EIG7000算出26モデル。
 - 7000G評価：CORE 16 / SUPPORT 5 / JOINT_ELIGIBLE 3 / EXCLUDE 2。
@@ -57,4 +57,13 @@
 - 元候補全件の根拠：candidate-final-dispositions.csv / .json
 - 観測母数と数値：evaluation-summary.json / research-drafts/
 - 公開資料の限定照合であり、独立した外部監査者による監査は未実施。
-- 配信・APK・実機QAはIntegration Boundaryの実測結果を確認して更新する。現時点では未配信・未生成・未QA。
+- 10機種の配信と公開カタログ・全パッケージのサイズ/SHA256照合はPASS。既存263機種は変更ゼロ。固定署名のQA APKはActions実行中。実機QAは未実施。
+
+## Repository
+
+- Production: `production/v85-batch-017-evaluation-20261016`
+- 正式評価コミット: `2dd4ef0c3ba21d647e21d1e76b64f9f8ff3503c9`
+- Distribution: `4dc806e6048771a3148383ea449cbdf5129ed664`
+- PR: https://github.com/hanashinonetachou-arch/sloanalytica-data/pull/470
+- Integration: https://github.com/hanashinonetachou-arch/sloanalytica-data/actions/runs/38776469577
+- QA build: https://github.com/hanashinonetachou-arch/sloanalytica-app/actions/runs/38776679000
