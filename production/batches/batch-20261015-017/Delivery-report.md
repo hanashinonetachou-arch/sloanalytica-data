@@ -57,7 +57,7 @@
 - 元候補全件の根拠：candidate-final-dispositions.csv / .json
 - 観測母数と数値：evaluation-summary.json / research-drafts/
 - 公開資料の限定照合であり、独立した外部監査者による監査は未実施。
-- 10機種の配信と公開カタログ・全パッケージのサイズ/SHA256照合はPASS。既存263機種は変更ゼロ。固定署名のQA APKはActions実行中。実機QAは未実施。
+- 10機種の配信と公開カタログ・全パッケージのサイズ/SHA256照合はPASS。既存263機種は変更ゼロ。固定署名QA APK完成（versionCode 2002875209）。前回と同じ署名、今回10機種描画10/10・V8.5全170機種170/170の互換性検証がPASS。残りはユーザーの実機QA。
 
 ## Repository
 
@@ -67,3 +67,11 @@
 - PR: https://github.com/hanashinonetachou-arch/sloanalytica-data/pull/470
 - Integration: https://github.com/hanashinonetachou-arch/sloanalytica-data/actions/runs/38776469577
 - QA build: https://github.com/hanashinonetachou-arch/sloanalytica-app/actions/runs/38776679000
+
+## 実機QA用APK
+
+- ファイル: `SloAnalytica-Batch017-10Machine-vc2002875209.apk`
+- SHA256: `e1a79ab5f34542e67040673b920e7e31496ae82089d7f987b4e1e7294443746e`
+- 署名証明書SHA256: `1c01974fc54a2c351539147179944dbab5a5104d92b9447c36e04f50cbf45ea0`
+- 既存263機種の変更ゼロ、公開配信10/10、描画10/10、全体互換性170/170。
+- 実機QAは未実施。完了扱いにはしていません。
