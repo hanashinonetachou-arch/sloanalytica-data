@@ -26,3 +26,8 @@ The remote publish protocol is:
 8. Only after the ref update succeeds may the worker regard the transition as durably published.
 
 Batch #001 migration rule: do not dispatch EVALUATION from the GitHub copy until the final local Research-completion state has been synchronized once to the Batch branch. This is a migration boundary, not a permanent operating step.
+
+
+## Required production contracts
+
+Future machine work and chat handoffs must retain [RESEARCH_PROCESS_CONTRACT.md](RESEARCH_PROCESS_CONTRACT.md), including the 2026-10-16 user-confirmed reference-input disclosure rule. Sections whose every category lacks a confirmed setting-specific appearance rate must explicitly state that entries are records only and do not enter inference calculations. Exact constraints and mixed known/unknown sections retain their existing semantics.

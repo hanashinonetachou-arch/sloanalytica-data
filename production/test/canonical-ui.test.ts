@@ -190,7 +190,7 @@ test('source-owned concise labels preserve independent game and event denominato
 
 test('reference-only notice is section-wide only when all categories lack published probabilities',()=>{
  const build=(types:string[])=>{const o=structuredClone(observation);o.evidence=[{findingId:'e1',label:'参考画面',sourceIds:['s'],runtimePolicyControlled:false,status:'SOURCE_REFERENCED',semanticCategories:types.map((semanticType,i)=>({label:'画面'+i,meaning:'示唆',semanticType}))} as any];return buildCanonicalUi(candidate,o,evaluation,ca,oa,ea).evidenceSections[0].description;};
- assert.match(build(['PROBABILITY_UNKNOWN','DISPLAY_ONLY']),/このセクションの全項目.*記録のみ/);
+ for(const types of [['PROBABILITY_UNKNOWN'],['DISPLAY_ONLY'],['PROBABILITY_UNKNOWN','DISPLAY_ONLY']]){const description=build(types);assert.match(description,/このセクションの全項目.*記録のみ/);assert.match(description,/設定推測の計算には使用しません/);}
  for(const types of [['EXACT_CONSTRAINT','PROBABILITY_UNKNOWN'],['PROBABILITY_BACKED','PROBABILITY_UNKNOWN']])assert.doesNotMatch(build(types),/このセクションの全項目.*記録のみ/);
  assert.match(build(['EXACT_CONSTRAINT','PROBABILITY_UNKNOWN']),/絞り込みに自動反映/);
 });
