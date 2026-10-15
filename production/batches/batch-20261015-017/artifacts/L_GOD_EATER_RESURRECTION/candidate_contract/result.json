@@ -1,0 +1,323 @@
+{
+  "schemaVersion": "candidate-contract-v1",
+  "manifestVersion": "8.5",
+  "batchId": "batch-20261015-017",
+  "machineId": "L_GOD_EATER_RESURRECTION",
+  "machineName": "スマスロ ゴッドイーター リザレクション",
+  "evaluationArtifact": {
+    "artifactId": "evaluation-L_GOD_EATER_RESURRECTION",
+    "kind": "evaluation",
+    "path": "production/batches/batch-20261015-017/artifacts/L_GOD_EATER_RESURRECTION/evaluation/result.json",
+    "sha256": "143f4542acd466918d79796e1593f34f2a63aaf2378011646ad53f1a3c297947",
+    "producerWorkId": "wrk_392a4a20e97f4a24"
+  },
+  "eligibilityArtifact": {
+    "artifactId": "eligibility-L_GOD_EATER_RESURRECTION",
+    "kind": "eligibility",
+    "path": "production/batches/batch-20261015-017/artifacts/L_GOD_EATER_RESURRECTION/eligibility/result.json",
+    "sha256": "2287f4549ba50fedcf177b2ca308064e0a782160abf3f4bf82e40741c401ff62",
+    "producerWorkId": "wrk_cc649a99e6634e0b"
+  },
+  "candidates": [
+    {
+      "findingId": "03-001",
+      "label": "AT初当たり",
+      "model": "BERNOULLI",
+      "trialUniverse": "NORMAL_GAME_TRIAL",
+      "liveInferenceRoute": "LIVE_CONDITIONAL",
+      "settingDistribution": {
+        "1": "1/351.9",
+        "2": "1/344.5",
+        "3": "1/330.1",
+        "4": "1/317",
+        "5": "1/302.2",
+        "6": "1/290.3"
+      },
+      "details": [
+        "通常時のゲーム数を母数に、対象の初当たり回数を数えます。AT中と明確な引き戻し区間の当選は除き、引き戻し終了後の当選は初当たりに含めます。公表資料と実戦の集計条件が完全に一致するとまでは主張しません。"
+      ],
+      "dependencyGroupId": "at-path",
+      "dependencyKind": "CAUSAL_PATH_OVERLAP",
+      "dependencyReason": "同じ当選経路やその内訳を含むため、同時に独立加算せず、観測できた優先項目を使用します。",
+      "dependencyFallbackRank": 2,
+      "runtimeInferenceAllowed": true,
+      "dependencyResolution": "FALLBACK_MEMBER",
+      "runtimePolicyBinding": {
+        "metric": "SELECTION_SCORE",
+        "value": 14.1302202384576,
+        "thresholdSource": "RUNTIME_POLICY"
+      },
+      "suppressedByFeatureIds": [
+        "03-004"
+      ]
+    },
+    {
+      "findingId": "03-004",
+      "label": "強チェリーからAT直撃",
+      "model": "BERNOULLI",
+      "trialUniverse": "NORMAL_STRONG_CHERRY_TRIAL",
+      "liveInferenceRoute": "LIVE_CONDITIONAL",
+      "settingDistribution": {
+        "1": 0.004,
+        "2": 0.012,
+        "3": 0.024,
+        "4": 0.043,
+        "5": 0.051,
+        "6": 0.059000000000000004
+      },
+      "details": [
+        "通常時の強チェリー成立回数と、その強チェリーによるAT直撃回数。チェリー変換による強チェリーも含み、既に当選済みの前兆中・AT中は除きます。契機を特定できない結果は加算しません。"
+      ],
+      "dependencyGroupId": "at-path",
+      "dependencyKind": "CAUSAL_PATH_OVERLAP",
+      "dependencyReason": "同じ当選経路やその内訳を含むため、同時に独立加算せず、観測できた優先項目を使用します。",
+      "dependencyFallbackRank": 1,
+      "runtimeInferenceAllowed": true,
+      "dependencyResolution": "PREFERRED_MEMBER",
+      "runtimePolicyBinding": {
+        "metric": "PER_ELIGIBLE_TRIAL_POWER",
+        "value": 2.2047685399762154,
+        "thresholdSource": "RUNTIME_POLICY"
+      },
+      "suppressedByFeatureIds": []
+    }
+  ],
+  "dependencyGroups": [
+    {
+      "groupId": "at-path",
+      "resolution": "PREFERRED_WITH_FALLBACK",
+      "members": [
+        "03-001",
+        "03-004"
+      ],
+      "runtimeInferenceAllowed": true,
+      "preferredFindingId": "03-004",
+      "fallbackOrder": [
+        "03-004",
+        "03-001"
+      ],
+      "reason": "依存関係がある候補を同時加算せず、観測できた優先Featureを使用し、未観測時だけ次順位のFeatureへ自動フォールバックする。",
+      "selectionRationale": "Researchで明示された優先順位に従い、同一セッションで重複情報を同時加算しない。"
+    }
+  ],
+  "excludedDecisions": [],
+  "blockedItems": [
+    {
+      "blockId": "03-002",
+      "label": "規定G数抽選",
+      "reason": "200G・450Gで高設定ほど当選しやすいことは公表されていますが、設定別の当選率表を確認できないため、ゲーム数到達を独立した確率に変換しません。",
+      "reevaluationCondition": "不足する設定別数値または対象条件を確認できる新しい具体的な公開資料が得られた場合のみ再確認します。",
+      "sourceIds": [
+        "main"
+      ],
+      "retainedPublishedValues": []
+    },
+    {
+      "blockId": "03-003",
+      "label": "通常滞在時のCZ当選",
+      "reason": "通常・高確の内部状態を外見だけで全試行確定できません。弱チェリー・スイカとチャンス目の通常滞在時抽選表は保持し、通常らしいステージを分母に代用しません。",
+      "reevaluationCondition": "不足する設定別数値または対象条件を確認できる新しい具体的な公開資料が得られた場合のみ再確認します。",
+      "sourceIds": [
+        "main"
+      ],
+      "retainedPublishedValues": [
+        [
+          0.2,
+          0.4,
+          0.6,
+          0.8,
+          1,
+          1.2
+        ],
+        [
+          15.8,
+          17.2,
+          19.1,
+          21.1,
+          23.4,
+          24.9
+        ]
+      ]
+    }
+  ],
+  "evidenceCandidates": [
+    {
+      "findingId": "03-005",
+      "label": "ユウタイマー",
+      "sourceIds": [
+        "main"
+      ],
+      "details": [
+        "作戦区域のユウタイマーが6から始まり、ATに当選しなかった場合だけ有効。"
+      ],
+      "semanticCategories": [
+        {
+          "label": "6開始かつAT非当選",
+          "meaning": "設定6濃厚",
+          "semanticType": "EXACT_CONSTRAINT"
+        }
+      ]
+    },
+    {
+      "findingId": "03-006",
+      "label": "ストーリー獲得枚数",
+      "sourceIds": [
+        "main"
+      ],
+      "details": [
+        "ストーリーパート中の特殊枚数表示を記録。"
+      ],
+      "semanticCategories": [
+        {
+          "label": "246OVER",
+          "meaning": "設定2・4・6濃厚",
+          "semanticType": "EXACT_CONSTRAINT"
+        },
+        {
+          "label": "456OVER",
+          "meaning": "設定4以上",
+          "semanticType": "EXACT_CONSTRAINT"
+        },
+        {
+          "label": "555OVER",
+          "meaning": "設定5以上",
+          "semanticType": "EXACT_CONSTRAINT"
+        },
+        {
+          "label": "666OVER",
+          "meaning": "設定6",
+          "semanticType": "EXACT_CONSTRAINT"
+        }
+      ]
+    },
+    {
+      "findingId": "03-007",
+      "label": "ストーリー終了ボイス",
+      "sourceIds": [
+        "main"
+      ],
+      "details": [
+        "ストーリー終了時のサブ液晶タッチ。エンディング中レア小役時も同じ示唆ですが、別の機会として記録します。"
+      ],
+      "semanticCategories": [
+        {
+          "label": "ヒバリ",
+          "meaning": "偶数示唆",
+          "semanticType": "PROBABILITY_UNKNOWN"
+        },
+        {
+          "label": "サクヤ",
+          "meaning": "偶数示唆（強）",
+          "semanticType": "PROBABILITY_UNKNOWN"
+        },
+        {
+          "label": "ソーマ",
+          "meaning": "高設定示唆",
+          "semanticType": "PROBABILITY_UNKNOWN"
+        },
+        {
+          "label": "レン",
+          "meaning": "高設定示唆（強）",
+          "semanticType": "PROBABILITY_UNKNOWN"
+        },
+        {
+          "label": "エリナ",
+          "meaning": "偶数設定濃厚",
+          "semanticType": "EXACT_CONSTRAINT"
+        },
+        {
+          "label": "リンドウ",
+          "meaning": "設定2以上",
+          "semanticType": "EXACT_CONSTRAINT"
+        },
+        {
+          "label": "シオ",
+          "meaning": "設定5以上",
+          "semanticType": "EXACT_CONSTRAINT"
+        }
+      ]
+    },
+    {
+      "findingId": "03-008",
+      "label": "上乗せ枚数",
+      "sourceIds": [
+        "main"
+      ],
+      "details": [
+        "神を喰らえ・ミズチ、神機覚醒・サクヤのPUSH上乗せ表示のみ。"
+      ],
+      "semanticCategories": [
+        {
+          "label": "+44",
+          "meaning": "設定4以上",
+          "semanticType": "EXACT_CONSTRAINT"
+        },
+        {
+          "label": "+55",
+          "meaning": "設定5以上",
+          "semanticType": "EXACT_CONSTRAINT"
+        },
+        {
+          "label": "+66",
+          "meaning": "設定6",
+          "semanticType": "EXACT_CONSTRAINT"
+        }
+      ]
+    },
+    {
+      "findingId": "03-009",
+      "label": "ST終了画面",
+      "sourceIds": [
+        "main"
+      ],
+      "details": [
+        "ST終了時の画面を記録。ユウの否定範囲は終了ボイスと異なるため混同しません。"
+      ],
+      "semanticCategories": [
+        {
+          "label": "コウタ",
+          "meaning": "高設定示唆（弱）",
+          "semanticType": "PROBABILITY_UNKNOWN"
+        },
+        {
+          "label": "アリサ",
+          "meaning": "偶数示唆（弱）",
+          "semanticType": "PROBABILITY_UNKNOWN"
+        },
+        {
+          "label": "ソーマ",
+          "meaning": "高設定示唆（強）",
+          "semanticType": "PROBABILITY_UNKNOWN"
+        },
+        {
+          "label": "ユウ",
+          "meaning": "設定2・3・4否定",
+          "semanticType": "EXACT_CONSTRAINT"
+        },
+        {
+          "label": "デフォルメキャラ",
+          "meaning": "設定6",
+          "semanticType": "EXACT_CONSTRAINT"
+        }
+      ]
+    },
+    {
+      "findingId": "03-010",
+      "label": "ケロットトロフィー",
+      "sourceIds": [
+        "main"
+      ],
+      "details": [
+        "他機種を参考とする表は本機での確定根拠と区別し記録のみ。"
+      ],
+      "semanticCategories": [
+        {
+          "label": "トロフィー出現",
+          "meaning": "出現を記録。本機資料が他機種参考と明記する条件を未確認の確定制約へ変換しません。",
+          "semanticType": "DISPLAY_ONLY"
+        }
+      ]
+    }
+  ],
+  "sourceIntegrityIssues": []
+}

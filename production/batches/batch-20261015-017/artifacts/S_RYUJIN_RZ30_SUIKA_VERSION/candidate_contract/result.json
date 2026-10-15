@@ -1,0 +1,178 @@
+{
+  "schemaVersion": "candidate-contract-v1",
+  "manifestVersion": "8.5",
+  "batchId": "batch-20261015-017",
+  "machineId": "S_RYUJIN_RZ30_SUIKA_VERSION",
+  "machineName": "パチスロ琉神−30 スイカバージョン",
+  "evaluationArtifact": {
+    "artifactId": "evaluation-S_RYUJIN_RZ30_SUIKA_VERSION",
+    "kind": "evaluation",
+    "path": "production/batches/batch-20261015-017/artifacts/S_RYUJIN_RZ30_SUIKA_VERSION/evaluation/result.json",
+    "sha256": "250f151069f0c0b890ada8c8cf5e81ffe14e12412ca8f0cf4d9a0e143befefed",
+    "producerWorkId": "wrk_f62da0c98b614284"
+  },
+  "eligibilityArtifact": {
+    "artifactId": "eligibility-S_RYUJIN_RZ30_SUIKA_VERSION",
+    "kind": "eligibility",
+    "path": "production/batches/batch-20261015-017/artifacts/S_RYUJIN_RZ30_SUIKA_VERSION/eligibility/result.json",
+    "sha256": "36aa793b6c9e07766a9ecd58eb35f5c03817cd927f83a61e55b5fbfa18760c02",
+    "producerWorkId": "wrk_94277838337b4b4e"
+  },
+  "candidates": [
+    {
+      "findingId": "01-001",
+      "label": "BIG初当たり",
+      "model": "CATEGORICAL",
+      "trialUniverse": "NON_CHAIN_BONUS_INITIAL_GAME_TRIAL",
+      "liveInferenceRoute": "LIVE_CONDITIONAL",
+      "settingDistribution": {
+        "1": {
+          "BIG初当たり": 0.002333722287047841,
+          "REG初当たり": 0.0019778481012658225
+        },
+        "2": {
+          "BIG初当たり": 0.00243427458617332,
+          "REG初当たり": 0.002002402883460152
+        },
+        "4": {
+          "BIG初当たり": 0.0025303643724696357,
+          "REG初当たり": 0.002061005770816158
+        },
+        "5": {
+          "BIG初当たり": 0.002683123155352831,
+          "REG初当たり": 0.0021253985122210413
+        },
+        "6": {
+          "BIG初当たり": 0.002813731007315701,
+          "REG初当たり": 0.0021706099413935317
+        }
+      },
+      "details": [
+        "総ゲーム数から連チャン区間とボーナス消化中の除外ゲーム数を引き、連チャン外の当選だけを数えます。天国など連チャン内の当選は含めません。公表集計との完全一致は主張しません。"
+      ],
+      "dependencyGroupId": "bonus-outcomes",
+      "dependencyKind": "CAUSAL_PATH_OVERLAP",
+      "dependencyReason": "同じゲームのBIGとREGは排他的な当選内訳です。単一のカテゴリ分布として扱います。",
+      "runtimeInferenceAllowed": true,
+      "dependencyResolution": "MUTUALLY_EXCLUSIVE_CATEGORICAL",
+      "runtimePolicyBinding": {
+        "metric": "PER_ELIGIBLE_TRIAL_POWER",
+        "value": 0.002032024701234536,
+        "thresholdSource": "RUNTIME_POLICY"
+      },
+      "jointSourceFindingIds": [
+        "01-001",
+        "01-002"
+      ]
+    },
+    {
+      "findingId": "01-002",
+      "label": "REG初当たり",
+      "model": "BERNOULLI",
+      "trialUniverse": "NON_CHAIN_BONUS_INITIAL_GAME_TRIAL",
+      "liveInferenceRoute": "LIVE_CONDITIONAL",
+      "settingDistribution": {
+        "1": "1/505.6",
+        "2": "1/499.4",
+        "4": "1/485.2",
+        "5": "1/470.5",
+        "6": "1/460.7"
+      },
+      "details": [
+        "総ゲーム数から連チャン区間とボーナス消化中の除外ゲーム数を引き、連チャン外の当選だけを数えます。天国など連チャン内の当選は含めません。公表集計との完全一致は主張しません。"
+      ],
+      "dependencyGroupId": "bonus-outcomes",
+      "dependencyKind": "CAUSAL_PATH_OVERLAP",
+      "dependencyReason": "同じゲームのBIGとREGは排他的な当選内訳です。単一のカテゴリ分布として扱います。",
+      "runtimeInferenceAllowed": false,
+      "dependencyResolution": "RESOLVED_IN_JOINT_MODEL",
+      "runtimePolicyBinding": {
+        "metric": "PER_ELIGIBLE_TRIAL_POWER",
+        "value": 0.00036726894928132414,
+        "thresholdSource": "RUNTIME_POLICY"
+      },
+      "resolvedIntoFindingId": "01-001"
+    }
+  ],
+  "dependencyGroups": [
+    {
+      "groupId": "bonus-outcomes",
+      "resolution": "MUTUALLY_EXCLUSIVE_CATEGORICAL",
+      "members": [
+        "01-001",
+        "01-002"
+      ],
+      "runtimeInferenceAllowed": true,
+      "jointFindingId": "01-001",
+      "jointSourceFindingIds": [
+        "01-001",
+        "01-002"
+      ],
+      "reason": "同一trial universeで排他的な観測カテゴリをjoint multinomialとして評価し、カテゴリ間の二重評価を避ける。"
+    }
+  ],
+  "excludedDecisions": [],
+  "blockedItems": [
+    {
+      "blockId": "01-004",
+      "label": "朝イチ専用モード",
+      "reason": "朝イチ専用モードは設定変更後の天国移行が優遇される仕様です。設定別の遷移確率を確認できないため設定推測には使いません。",
+      "reevaluationCondition": "不足する設定別数値または対象条件を確認できる新しい具体的な公開資料が得られた場合のみ再確認します。",
+      "sourceIds": [
+        "main"
+      ],
+      "retainedPublishedValues": [
+        {
+          "machine": "パチスロ琉神−30 スイカバージョン",
+          "parameter": "BIG_1_over",
+          "settings": [
+            "1",
+            "2",
+            "4",
+            "5",
+            "6"
+          ],
+          "values": [
+            428.5,
+            410.8,
+            395.2,
+            372.7,
+            355.4
+          ],
+          "unit": "1_over",
+          "opportunity": "通常Gと総Gのどちらか未確定（推測スコア未投入）",
+          "source": "https://www.fujimarukun.co.jp/products/s_ryujin/",
+          "route": "numeric",
+          "dependency": null,
+          "formally_evaluated": false
+        },
+        {
+          "machine": "パチスロ琉神−30 スイカバージョン",
+          "parameter": "REG_1_over",
+          "settings": [
+            "1",
+            "2",
+            "4",
+            "5",
+            "6"
+          ],
+          "values": [
+            505.6,
+            499.4,
+            485.2,
+            470.5,
+            460.7
+          ],
+          "unit": "1_over",
+          "opportunity": "通常Gと総Gのどちらか未確定（推測スコア未投入）",
+          "source": "https://www.fujimarukun.co.jp/products/s_ryujin/",
+          "route": "numeric",
+          "dependency": null,
+          "formally_evaluated": false
+        }
+      ]
+    }
+  ],
+  "evidenceCandidates": [],
+  "sourceIntegrityIssues": []
+}

@@ -1,0 +1,1457 @@
+{
+  "schemaVersion": "candidate-contract-v1",
+  "manifestVersion": "8.5",
+  "batchId": "batch-20261015-017",
+  "machineId": "S_FIRE_DRIFT",
+  "machineName": "パチスロ ファイヤードリフト",
+  "evaluationArtifact": {
+    "artifactId": "evaluation-S_FIRE_DRIFT",
+    "kind": "evaluation",
+    "path": "production/batches/batch-20261015-017/artifacts/S_FIRE_DRIFT/evaluation/result.json",
+    "sha256": "3a5d634668223b55660bc741ba39575e3ffbc67145cd5b9be98f0fab708b1f58",
+    "producerWorkId": "wrk_265d86be97424630"
+  },
+  "eligibilityArtifact": {
+    "artifactId": "eligibility-S_FIRE_DRIFT",
+    "kind": "eligibility",
+    "path": "production/batches/batch-20261015-017/artifacts/S_FIRE_DRIFT/eligibility/result.json",
+    "sha256": "389c9b1c95967c3838f1040c219614d076a4ead7dc5b99a27ab65b94c843be63",
+    "producerWorkId": "wrk_3d523ee750894e4f"
+  },
+  "candidates": [
+    {
+      "findingId": "07-001",
+      "label": "ボーナス初当たり",
+      "model": "BERNOULLI",
+      "trialUniverse": "NORMAL_GAME_TRIAL",
+      "liveInferenceRoute": "LIVE_CONDITIONAL",
+      "settingDistribution": {
+        "1": "1/249.7",
+        "2": "1/245.6",
+        "3": "1/228.4",
+        "4": "1/207.3",
+        "5": "1/193.4",
+        "6": "1/183.1"
+      },
+      "details": [
+        "通常時のゲーム数を母数に、対象の初当たり回数を数えます。AT中と明確な引き戻し区間の当選は除き、引き戻し終了後の当選は初当たりに含めます。公表資料と実戦の集計条件が完全に一致するとまでは主張しません。"
+      ],
+      "dependencyGroupId": "bonus-path",
+      "dependencyKind": "CAUSAL_PATH_OVERLAP",
+      "dependencyReason": "同じ当選経路やその内訳を含むため、同時に独立加算せず、観測できた優先項目を使用します。",
+      "dependencyFallbackRank": 2,
+      "runtimeInferenceAllowed": true,
+      "dependencyResolution": "FALLBACK_MEMBER",
+      "runtimePolicyBinding": {
+        "metric": "SELECTION_SCORE",
+        "value": 53.17880964678735,
+        "thresholdSource": "RUNTIME_POLICY"
+      },
+      "suppressedByFeatureIds": [
+        "07-002"
+      ]
+    },
+    {
+      "findingId": "07-002",
+      "label": "弱チェリー",
+      "model": "BERNOULLI",
+      "trialUniverse": "NORMAL_GAME_TRIAL",
+      "liveInferenceRoute": "LIVE_CONDITIONAL",
+      "settingDistribution": {
+        "1": "1/54.6",
+        "2": "1/54.4",
+        "3": "1/51.2",
+        "4": "1/48",
+        "5": "1/46.7",
+        "6": "1/45.4"
+      },
+      "details": [
+        "通常時のゲーム数を母数に、停止形で確認した回数を数えます。ボーナス・AT中は含めません。"
+      ],
+      "dependencyGroupId": "bonus-path",
+      "dependencyKind": "CAUSAL_PATH_OVERLAP",
+      "dependencyReason": "同じ当選経路やその内訳を含むため、同時に独立加算せず、観測できた優先項目を使用します。",
+      "dependencyFallbackRank": 1,
+      "runtimeInferenceAllowed": true,
+      "dependencyResolution": "PREFERRED_MEMBER",
+      "runtimePolicyBinding": {
+        "metric": "SELECTION_SCORE",
+        "value": 79.07534676289707,
+        "thresholdSource": "RUNTIME_POLICY"
+      },
+      "suppressedByFeatureIds": []
+    }
+  ],
+  "dependencyGroups": [
+    {
+      "groupId": "bonus-path",
+      "resolution": "PREFERRED_WITH_FALLBACK",
+      "members": [
+        "07-001",
+        "07-002"
+      ],
+      "runtimeInferenceAllowed": true,
+      "preferredFindingId": "07-002",
+      "fallbackOrder": [
+        "07-002",
+        "07-001"
+      ],
+      "reason": "依存関係がある候補を同時加算せず、観測できた優先Featureを使用し、未観測時だけ次順位のFeatureへ自動フォールバックする。",
+      "selectionRationale": "Researchで明示された優先順位に従い、同一セッションで重複情報を同時加算しない。"
+    }
+  ],
+  "excludedDecisions": [],
+  "blockedItems": [
+    {
+      "blockId": "07-003",
+      "label": "リプレイ3連時のミッション高確",
+      "reason": "リプレイ3連は観測できますが、当選先のミッション高確は昼ステージにも潜伏します。3連後の見かけのステージ移行を当選判定へ代用しないため不採用。",
+      "reevaluationCondition": "不足する設定別数値または対象条件を確認できる新しい具体的な公開資料が得られた場合のみ再確認します。",
+      "sourceIds": [
+        "main"
+      ],
+      "retainedPublishedValues": [
+        {
+          "machine": "パチスロ ファイヤードリフト",
+          "parameter": "bonus_1_over",
+          "settings": [
+            "1",
+            "2",
+            "3",
+            "4",
+            "5",
+            "6"
+          ],
+          "values": [
+            249.7,
+            245.6,
+            228.4,
+            207.3,
+            193.4,
+            183.1
+          ],
+          "unit": "1_over",
+          "opportunity": "通常Gと総Gのどちらか未確定（推測スコア未投入）",
+          "source": "https://nana-press.com/kaiseki/machine/648/18390/",
+          "route": "numeric",
+          "dependency": null,
+          "formally_evaluated": false
+        },
+        {
+          "machine": "パチスロ ファイヤードリフト",
+          "parameter": "weak_cherry_1_over",
+          "settings": [
+            "1",
+            "2",
+            "3",
+            "4",
+            "5",
+            "6"
+          ],
+          "values": [
+            54.6,
+            54.4,
+            51.2,
+            48,
+            46.7,
+            45.4
+          ],
+          "unit": "1_over",
+          "opportunity": "通常Gと総Gのどちらか未確定（推測スコア未投入）",
+          "source": "https://nana-press.com/kaiseki/machine/648/18390/",
+          "route": "numeric",
+          "dependency": null,
+          "formally_evaluated": false
+        },
+        {
+          "machine": "パチスロ ファイヤードリフト",
+          "parameter": "replay3_high_percent",
+          "settings": [
+            "1",
+            "2",
+            "3",
+            "4",
+            "5",
+            "6"
+          ],
+          "values": [
+            25.8,
+            26.2,
+            28.1,
+            29.3,
+            34.8,
+            39.1
+          ],
+          "unit": "percent",
+          "opportunity": "対象試行条件要照合",
+          "source": "https://nana-press.com/kaiseki/machine/648/18390/",
+          "route": "numeric",
+          "dependency": null,
+          "formally_evaluated": false
+        },
+        {
+          "machine": "パチスロ ファイヤードリフト",
+          "parameter": "weak_cherry_high_percent",
+          "settings": [
+            "1",
+            "2",
+            "3",
+            "4",
+            "5",
+            "6"
+          ],
+          "values": [
+            31.7,
+            32.5,
+            34.1,
+            35.3,
+            36,
+            36.7
+          ],
+          "unit": "percent",
+          "opportunity": "対象試行条件要照合",
+          "source": "https://nana-press.com/kaiseki/machine/648/18390/",
+          "route": "numeric",
+          "dependency": null,
+          "formally_evaluated": false
+        },
+        {
+          "machine": "パチスロ ファイヤードリフト",
+          "parameter": "miss_direct_1_over",
+          "settings": [
+            "1",
+            "2",
+            "3",
+            "4",
+            "5",
+            "6"
+          ],
+          "values": [
+            6867,
+            6376,
+            5251,
+            3881,
+            2975,
+            2232
+          ],
+          "unit": "1_over",
+          "opportunity": "通常Gと総Gのどちらか未確定（推測スコア未投入）",
+          "source": "https://nana-press.com/kaiseki/machine/648/18390/",
+          "route": "numeric",
+          "dependency": null,
+          "formally_evaluated": false
+        }
+      ]
+    },
+    {
+      "blockId": "07-004",
+      "label": "弱チェリー時のミッション高確",
+      "reason": "弱チェリー後のミッション高確は潜伏するため当選・非当選を全回確定できません。公開設定別抽選率は保持し、見かけの移行率は使いません。",
+      "reevaluationCondition": "不足する設定別数値または対象条件を確認できる新しい具体的な公開資料が得られた場合のみ再確認します。",
+      "sourceIds": [
+        "main"
+      ],
+      "retainedPublishedValues": [
+        {
+          "machine": "パチスロ ファイヤードリフト",
+          "parameter": "bonus_1_over",
+          "settings": [
+            "1",
+            "2",
+            "3",
+            "4",
+            "5",
+            "6"
+          ],
+          "values": [
+            249.7,
+            245.6,
+            228.4,
+            207.3,
+            193.4,
+            183.1
+          ],
+          "unit": "1_over",
+          "opportunity": "通常Gと総Gのどちらか未確定（推測スコア未投入）",
+          "source": "https://nana-press.com/kaiseki/machine/648/18390/",
+          "route": "numeric",
+          "dependency": null,
+          "formally_evaluated": false
+        },
+        {
+          "machine": "パチスロ ファイヤードリフト",
+          "parameter": "weak_cherry_1_over",
+          "settings": [
+            "1",
+            "2",
+            "3",
+            "4",
+            "5",
+            "6"
+          ],
+          "values": [
+            54.6,
+            54.4,
+            51.2,
+            48,
+            46.7,
+            45.4
+          ],
+          "unit": "1_over",
+          "opportunity": "通常Gと総Gのどちらか未確定（推測スコア未投入）",
+          "source": "https://nana-press.com/kaiseki/machine/648/18390/",
+          "route": "numeric",
+          "dependency": null,
+          "formally_evaluated": false
+        },
+        {
+          "machine": "パチスロ ファイヤードリフト",
+          "parameter": "replay3_high_percent",
+          "settings": [
+            "1",
+            "2",
+            "3",
+            "4",
+            "5",
+            "6"
+          ],
+          "values": [
+            25.8,
+            26.2,
+            28.1,
+            29.3,
+            34.8,
+            39.1
+          ],
+          "unit": "percent",
+          "opportunity": "対象試行条件要照合",
+          "source": "https://nana-press.com/kaiseki/machine/648/18390/",
+          "route": "numeric",
+          "dependency": null,
+          "formally_evaluated": false
+        },
+        {
+          "machine": "パチスロ ファイヤードリフト",
+          "parameter": "weak_cherry_high_percent",
+          "settings": [
+            "1",
+            "2",
+            "3",
+            "4",
+            "5",
+            "6"
+          ],
+          "values": [
+            31.7,
+            32.5,
+            34.1,
+            35.3,
+            36,
+            36.7
+          ],
+          "unit": "percent",
+          "opportunity": "対象試行条件要照合",
+          "source": "https://nana-press.com/kaiseki/machine/648/18390/",
+          "route": "numeric",
+          "dependency": null,
+          "formally_evaluated": false
+        },
+        {
+          "machine": "パチスロ ファイヤードリフト",
+          "parameter": "miss_direct_1_over",
+          "settings": [
+            "1",
+            "2",
+            "3",
+            "4",
+            "5",
+            "6"
+          ],
+          "values": [
+            6867,
+            6376,
+            5251,
+            3881,
+            2975,
+            2232
+          ],
+          "unit": "1_over",
+          "opportunity": "通常Gと総Gのどちらか未確定（推測スコア未投入）",
+          "source": "https://nana-press.com/kaiseki/machine/648/18390/",
+          "route": "numeric",
+          "dependency": null,
+          "formally_evaluated": false
+        }
+      ]
+    },
+    {
+      "blockId": "07-005",
+      "label": "ミッション低確中当選",
+      "reason": "低確中のミッション当選率は公開されていますが、昼ステージでも高確の可能性があり、低確の全ゲーム数を特定できないため不採用。",
+      "reevaluationCondition": "不足する設定別数値または対象条件を確認できる新しい具体的な公開資料が得られた場合のみ再確認します。",
+      "sourceIds": [
+        "main"
+      ],
+      "retainedPublishedValues": [
+        {
+          "machine": "パチスロ ファイヤードリフト",
+          "parameter": "bonus_1_over",
+          "settings": [
+            "1",
+            "2",
+            "3",
+            "4",
+            "5",
+            "6"
+          ],
+          "values": [
+            249.7,
+            245.6,
+            228.4,
+            207.3,
+            193.4,
+            183.1
+          ],
+          "unit": "1_over",
+          "opportunity": "通常Gと総Gのどちらか未確定（推測スコア未投入）",
+          "source": "https://nana-press.com/kaiseki/machine/648/18390/",
+          "route": "numeric",
+          "dependency": null,
+          "formally_evaluated": false
+        },
+        {
+          "machine": "パチスロ ファイヤードリフト",
+          "parameter": "weak_cherry_1_over",
+          "settings": [
+            "1",
+            "2",
+            "3",
+            "4",
+            "5",
+            "6"
+          ],
+          "values": [
+            54.6,
+            54.4,
+            51.2,
+            48,
+            46.7,
+            45.4
+          ],
+          "unit": "1_over",
+          "opportunity": "通常Gと総Gのどちらか未確定（推測スコア未投入）",
+          "source": "https://nana-press.com/kaiseki/machine/648/18390/",
+          "route": "numeric",
+          "dependency": null,
+          "formally_evaluated": false
+        },
+        {
+          "machine": "パチスロ ファイヤードリフト",
+          "parameter": "replay3_high_percent",
+          "settings": [
+            "1",
+            "2",
+            "3",
+            "4",
+            "5",
+            "6"
+          ],
+          "values": [
+            25.8,
+            26.2,
+            28.1,
+            29.3,
+            34.8,
+            39.1
+          ],
+          "unit": "percent",
+          "opportunity": "対象試行条件要照合",
+          "source": "https://nana-press.com/kaiseki/machine/648/18390/",
+          "route": "numeric",
+          "dependency": null,
+          "formally_evaluated": false
+        },
+        {
+          "machine": "パチスロ ファイヤードリフト",
+          "parameter": "weak_cherry_high_percent",
+          "settings": [
+            "1",
+            "2",
+            "3",
+            "4",
+            "5",
+            "6"
+          ],
+          "values": [
+            31.7,
+            32.5,
+            34.1,
+            35.3,
+            36,
+            36.7
+          ],
+          "unit": "percent",
+          "opportunity": "対象試行条件要照合",
+          "source": "https://nana-press.com/kaiseki/machine/648/18390/",
+          "route": "numeric",
+          "dependency": null,
+          "formally_evaluated": false
+        },
+        {
+          "machine": "パチスロ ファイヤードリフト",
+          "parameter": "miss_direct_1_over",
+          "settings": [
+            "1",
+            "2",
+            "3",
+            "4",
+            "5",
+            "6"
+          ],
+          "values": [
+            6867,
+            6376,
+            5251,
+            3881,
+            2975,
+            2232
+          ],
+          "unit": "1_over",
+          "opportunity": "通常Gと総Gのどちらか未確定（推測スコア未投入）",
+          "source": "https://nana-press.com/kaiseki/machine/648/18390/",
+          "route": "numeric",
+          "dependency": null,
+          "formally_evaluated": false
+        }
+      ]
+    },
+    {
+      "blockId": "07-006",
+      "label": "ハズレ契機ボーナス直撃",
+      "reason": "公表表はハズレ出現時の直撃抽選です。通常G全体の確率かハズレ成立回数あたりかを確定できる根拠が揃わないため、1/6867等を通常Gへ機械的に適用しません。",
+      "reevaluationCondition": "不足する設定別数値または対象条件を確認できる新しい具体的な公開資料が得られた場合のみ再確認します。",
+      "sourceIds": [
+        "main"
+      ],
+      "retainedPublishedValues": [
+        {
+          "machine": "パチスロ ファイヤードリフト",
+          "parameter": "bonus_1_over",
+          "settings": [
+            "1",
+            "2",
+            "3",
+            "4",
+            "5",
+            "6"
+          ],
+          "values": [
+            249.7,
+            245.6,
+            228.4,
+            207.3,
+            193.4,
+            183.1
+          ],
+          "unit": "1_over",
+          "opportunity": "通常Gと総Gのどちらか未確定（推測スコア未投入）",
+          "source": "https://nana-press.com/kaiseki/machine/648/18390/",
+          "route": "numeric",
+          "dependency": null,
+          "formally_evaluated": false
+        },
+        {
+          "machine": "パチスロ ファイヤードリフト",
+          "parameter": "weak_cherry_1_over",
+          "settings": [
+            "1",
+            "2",
+            "3",
+            "4",
+            "5",
+            "6"
+          ],
+          "values": [
+            54.6,
+            54.4,
+            51.2,
+            48,
+            46.7,
+            45.4
+          ],
+          "unit": "1_over",
+          "opportunity": "通常Gと総Gのどちらか未確定（推測スコア未投入）",
+          "source": "https://nana-press.com/kaiseki/machine/648/18390/",
+          "route": "numeric",
+          "dependency": null,
+          "formally_evaluated": false
+        },
+        {
+          "machine": "パチスロ ファイヤードリフト",
+          "parameter": "replay3_high_percent",
+          "settings": [
+            "1",
+            "2",
+            "3",
+            "4",
+            "5",
+            "6"
+          ],
+          "values": [
+            25.8,
+            26.2,
+            28.1,
+            29.3,
+            34.8,
+            39.1
+          ],
+          "unit": "percent",
+          "opportunity": "対象試行条件要照合",
+          "source": "https://nana-press.com/kaiseki/machine/648/18390/",
+          "route": "numeric",
+          "dependency": null,
+          "formally_evaluated": false
+        },
+        {
+          "machine": "パチスロ ファイヤードリフト",
+          "parameter": "weak_cherry_high_percent",
+          "settings": [
+            "1",
+            "2",
+            "3",
+            "4",
+            "5",
+            "6"
+          ],
+          "values": [
+            31.7,
+            32.5,
+            34.1,
+            35.3,
+            36,
+            36.7
+          ],
+          "unit": "percent",
+          "opportunity": "対象試行条件要照合",
+          "source": "https://nana-press.com/kaiseki/machine/648/18390/",
+          "route": "numeric",
+          "dependency": null,
+          "formally_evaluated": false
+        },
+        {
+          "machine": "パチスロ ファイヤードリフト",
+          "parameter": "miss_direct_1_over",
+          "settings": [
+            "1",
+            "2",
+            "3",
+            "4",
+            "5",
+            "6"
+          ],
+          "values": [
+            6867,
+            6376,
+            5251,
+            3881,
+            2975,
+            2232
+          ],
+          "unit": "1_over",
+          "opportunity": "通常Gと総Gのどちらか未確定（推測スコア未投入）",
+          "source": "https://nana-press.com/kaiseki/machine/648/18390/",
+          "route": "numeric",
+          "dependency": null,
+          "formally_evaluated": false
+        }
+      ]
+    },
+    {
+      "blockId": "07-009",
+      "label": "弱チェリー成立時のボーナス直撃",
+      "reason": "弱チェリーからのボーナス直撃は設定差の存在のみ確認。設定別当選率を確認できないため、弱チェリー回数から仮の成功率を作りません。",
+      "reevaluationCondition": "不足する設定別数値または対象条件を確認できる新しい具体的な公開資料が得られた場合のみ再確認します。",
+      "sourceIds": [
+        "main"
+      ],
+      "retainedPublishedValues": [
+        {
+          "machine": "パチスロ ファイヤードリフト",
+          "parameter": "bonus_1_over",
+          "settings": [
+            "1",
+            "2",
+            "3",
+            "4",
+            "5",
+            "6"
+          ],
+          "values": [
+            249.7,
+            245.6,
+            228.4,
+            207.3,
+            193.4,
+            183.1
+          ],
+          "unit": "1_over",
+          "opportunity": "通常Gと総Gのどちらか未確定（推測スコア未投入）",
+          "source": "https://nana-press.com/kaiseki/machine/648/18390/",
+          "route": "numeric",
+          "dependency": null,
+          "formally_evaluated": false
+        },
+        {
+          "machine": "パチスロ ファイヤードリフト",
+          "parameter": "weak_cherry_1_over",
+          "settings": [
+            "1",
+            "2",
+            "3",
+            "4",
+            "5",
+            "6"
+          ],
+          "values": [
+            54.6,
+            54.4,
+            51.2,
+            48,
+            46.7,
+            45.4
+          ],
+          "unit": "1_over",
+          "opportunity": "通常Gと総Gのどちらか未確定（推測スコア未投入）",
+          "source": "https://nana-press.com/kaiseki/machine/648/18390/",
+          "route": "numeric",
+          "dependency": null,
+          "formally_evaluated": false
+        },
+        {
+          "machine": "パチスロ ファイヤードリフト",
+          "parameter": "replay3_high_percent",
+          "settings": [
+            "1",
+            "2",
+            "3",
+            "4",
+            "5",
+            "6"
+          ],
+          "values": [
+            25.8,
+            26.2,
+            28.1,
+            29.3,
+            34.8,
+            39.1
+          ],
+          "unit": "percent",
+          "opportunity": "対象試行条件要照合",
+          "source": "https://nana-press.com/kaiseki/machine/648/18390/",
+          "route": "numeric",
+          "dependency": null,
+          "formally_evaluated": false
+        },
+        {
+          "machine": "パチスロ ファイヤードリフト",
+          "parameter": "weak_cherry_high_percent",
+          "settings": [
+            "1",
+            "2",
+            "3",
+            "4",
+            "5",
+            "6"
+          ],
+          "values": [
+            31.7,
+            32.5,
+            34.1,
+            35.3,
+            36,
+            36.7
+          ],
+          "unit": "percent",
+          "opportunity": "対象試行条件要照合",
+          "source": "https://nana-press.com/kaiseki/machine/648/18390/",
+          "route": "numeric",
+          "dependency": null,
+          "formally_evaluated": false
+        },
+        {
+          "machine": "パチスロ ファイヤードリフト",
+          "parameter": "miss_direct_1_over",
+          "settings": [
+            "1",
+            "2",
+            "3",
+            "4",
+            "5",
+            "6"
+          ],
+          "values": [
+            6867,
+            6376,
+            5251,
+            3881,
+            2975,
+            2232
+          ],
+          "unit": "1_over",
+          "opportunity": "通常Gと総Gのどちらか未確定（推測スコア未投入）",
+          "source": "https://nana-press.com/kaiseki/machine/648/18390/",
+          "route": "numeric",
+          "dependency": null,
+          "formally_evaluated": false
+        }
+      ]
+    },
+    {
+      "blockId": "07-010",
+      "label": "ミッション高確当選時のゲーム数振分",
+      "reason": "獲得した内部高確ゲーム数は滞在ステージと完全対応しません。設定別の振分表は保持し、演出上の継続Gを同じ当選結果として扱いません。",
+      "reevaluationCondition": "不足する設定別数値または対象条件を確認できる新しい具体的な公開資料が得られた場合のみ再確認します。",
+      "sourceIds": [
+        "main"
+      ],
+      "retainedPublishedValues": [
+        {
+          "machine": "パチスロ ファイヤードリフト",
+          "parameter": "bonus_1_over",
+          "settings": [
+            "1",
+            "2",
+            "3",
+            "4",
+            "5",
+            "6"
+          ],
+          "values": [
+            249.7,
+            245.6,
+            228.4,
+            207.3,
+            193.4,
+            183.1
+          ],
+          "unit": "1_over",
+          "opportunity": "通常Gと総Gのどちらか未確定（推測スコア未投入）",
+          "source": "https://nana-press.com/kaiseki/machine/648/18390/",
+          "route": "numeric",
+          "dependency": null,
+          "formally_evaluated": false
+        },
+        {
+          "machine": "パチスロ ファイヤードリフト",
+          "parameter": "weak_cherry_1_over",
+          "settings": [
+            "1",
+            "2",
+            "3",
+            "4",
+            "5",
+            "6"
+          ],
+          "values": [
+            54.6,
+            54.4,
+            51.2,
+            48,
+            46.7,
+            45.4
+          ],
+          "unit": "1_over",
+          "opportunity": "通常Gと総Gのどちらか未確定（推測スコア未投入）",
+          "source": "https://nana-press.com/kaiseki/machine/648/18390/",
+          "route": "numeric",
+          "dependency": null,
+          "formally_evaluated": false
+        },
+        {
+          "machine": "パチスロ ファイヤードリフト",
+          "parameter": "replay3_high_percent",
+          "settings": [
+            "1",
+            "2",
+            "3",
+            "4",
+            "5",
+            "6"
+          ],
+          "values": [
+            25.8,
+            26.2,
+            28.1,
+            29.3,
+            34.8,
+            39.1
+          ],
+          "unit": "percent",
+          "opportunity": "対象試行条件要照合",
+          "source": "https://nana-press.com/kaiseki/machine/648/18390/",
+          "route": "numeric",
+          "dependency": null,
+          "formally_evaluated": false
+        },
+        {
+          "machine": "パチスロ ファイヤードリフト",
+          "parameter": "weak_cherry_high_percent",
+          "settings": [
+            "1",
+            "2",
+            "3",
+            "4",
+            "5",
+            "6"
+          ],
+          "values": [
+            31.7,
+            32.5,
+            34.1,
+            35.3,
+            36,
+            36.7
+          ],
+          "unit": "percent",
+          "opportunity": "対象試行条件要照合",
+          "source": "https://nana-press.com/kaiseki/machine/648/18390/",
+          "route": "numeric",
+          "dependency": null,
+          "formally_evaluated": false
+        },
+        {
+          "machine": "パチスロ ファイヤードリフト",
+          "parameter": "miss_direct_1_over",
+          "settings": [
+            "1",
+            "2",
+            "3",
+            "4",
+            "5",
+            "6"
+          ],
+          "values": [
+            6867,
+            6376,
+            5251,
+            3881,
+            2975,
+            2232
+          ],
+          "unit": "1_over",
+          "opportunity": "通常Gと総Gのどちらか未確定（推測スコア未投入）",
+          "source": "https://nana-press.com/kaiseki/machine/648/18390/",
+          "route": "numeric",
+          "dependency": null,
+          "formally_evaluated": false
+        }
+      ]
+    },
+    {
+      "blockId": "07-011",
+      "label": "低確中のミッション当選率",
+      "reason": "07-005と同じ低確中のミッション当選率です。候補を保持し、同じ抽選を二重評価しません。",
+      "reevaluationCondition": "不足する設定別数値または対象条件を確認できる新しい具体的な公開資料が得られた場合のみ再確認します。",
+      "sourceIds": [
+        "main"
+      ],
+      "retainedPublishedValues": [
+        {
+          "machine": "パチスロ ファイヤードリフト",
+          "parameter": "bonus_1_over",
+          "settings": [
+            "1",
+            "2",
+            "3",
+            "4",
+            "5",
+            "6"
+          ],
+          "values": [
+            249.7,
+            245.6,
+            228.4,
+            207.3,
+            193.4,
+            183.1
+          ],
+          "unit": "1_over",
+          "opportunity": "通常Gと総Gのどちらか未確定（推測スコア未投入）",
+          "source": "https://nana-press.com/kaiseki/machine/648/18390/",
+          "route": "numeric",
+          "dependency": null,
+          "formally_evaluated": false
+        },
+        {
+          "machine": "パチスロ ファイヤードリフト",
+          "parameter": "weak_cherry_1_over",
+          "settings": [
+            "1",
+            "2",
+            "3",
+            "4",
+            "5",
+            "6"
+          ],
+          "values": [
+            54.6,
+            54.4,
+            51.2,
+            48,
+            46.7,
+            45.4
+          ],
+          "unit": "1_over",
+          "opportunity": "通常Gと総Gのどちらか未確定（推測スコア未投入）",
+          "source": "https://nana-press.com/kaiseki/machine/648/18390/",
+          "route": "numeric",
+          "dependency": null,
+          "formally_evaluated": false
+        },
+        {
+          "machine": "パチスロ ファイヤードリフト",
+          "parameter": "replay3_high_percent",
+          "settings": [
+            "1",
+            "2",
+            "3",
+            "4",
+            "5",
+            "6"
+          ],
+          "values": [
+            25.8,
+            26.2,
+            28.1,
+            29.3,
+            34.8,
+            39.1
+          ],
+          "unit": "percent",
+          "opportunity": "対象試行条件要照合",
+          "source": "https://nana-press.com/kaiseki/machine/648/18390/",
+          "route": "numeric",
+          "dependency": null,
+          "formally_evaluated": false
+        },
+        {
+          "machine": "パチスロ ファイヤードリフト",
+          "parameter": "weak_cherry_high_percent",
+          "settings": [
+            "1",
+            "2",
+            "3",
+            "4",
+            "5",
+            "6"
+          ],
+          "values": [
+            31.7,
+            32.5,
+            34.1,
+            35.3,
+            36,
+            36.7
+          ],
+          "unit": "percent",
+          "opportunity": "対象試行条件要照合",
+          "source": "https://nana-press.com/kaiseki/machine/648/18390/",
+          "route": "numeric",
+          "dependency": null,
+          "formally_evaluated": false
+        },
+        {
+          "machine": "パチスロ ファイヤードリフト",
+          "parameter": "miss_direct_1_over",
+          "settings": [
+            "1",
+            "2",
+            "3",
+            "4",
+            "5",
+            "6"
+          ],
+          "values": [
+            6867,
+            6376,
+            5251,
+            3881,
+            2975,
+            2232
+          ],
+          "unit": "1_over",
+          "opportunity": "通常Gと総Gのどちらか未確定（推測スコア未投入）",
+          "source": "https://nana-press.com/kaiseki/machine/648/18390/",
+          "route": "numeric",
+          "dependency": null,
+          "formally_evaluated": false
+        }
+      ]
+    },
+    {
+      "blockId": "07-012",
+      "label": "ミッション失敗時の高確抽選",
+      "reason": "失敗時の高確当選率は失敗前が低確の条件です。潜伏高確を除く正確な試行回数を観測できないため不採用。",
+      "reevaluationCondition": "不足する設定別数値または対象条件を確認できる新しい具体的な公開資料が得られた場合のみ再確認します。",
+      "sourceIds": [
+        "main"
+      ],
+      "retainedPublishedValues": [
+        {
+          "machine": "パチスロ ファイヤードリフト",
+          "parameter": "bonus_1_over",
+          "settings": [
+            "1",
+            "2",
+            "3",
+            "4",
+            "5",
+            "6"
+          ],
+          "values": [
+            249.7,
+            245.6,
+            228.4,
+            207.3,
+            193.4,
+            183.1
+          ],
+          "unit": "1_over",
+          "opportunity": "通常Gと総Gのどちらか未確定（推測スコア未投入）",
+          "source": "https://nana-press.com/kaiseki/machine/648/18390/",
+          "route": "numeric",
+          "dependency": null,
+          "formally_evaluated": false
+        },
+        {
+          "machine": "パチスロ ファイヤードリフト",
+          "parameter": "weak_cherry_1_over",
+          "settings": [
+            "1",
+            "2",
+            "3",
+            "4",
+            "5",
+            "6"
+          ],
+          "values": [
+            54.6,
+            54.4,
+            51.2,
+            48,
+            46.7,
+            45.4
+          ],
+          "unit": "1_over",
+          "opportunity": "通常Gと総Gのどちらか未確定（推測スコア未投入）",
+          "source": "https://nana-press.com/kaiseki/machine/648/18390/",
+          "route": "numeric",
+          "dependency": null,
+          "formally_evaluated": false
+        },
+        {
+          "machine": "パチスロ ファイヤードリフト",
+          "parameter": "replay3_high_percent",
+          "settings": [
+            "1",
+            "2",
+            "3",
+            "4",
+            "5",
+            "6"
+          ],
+          "values": [
+            25.8,
+            26.2,
+            28.1,
+            29.3,
+            34.8,
+            39.1
+          ],
+          "unit": "percent",
+          "opportunity": "対象試行条件要照合",
+          "source": "https://nana-press.com/kaiseki/machine/648/18390/",
+          "route": "numeric",
+          "dependency": null,
+          "formally_evaluated": false
+        },
+        {
+          "machine": "パチスロ ファイヤードリフト",
+          "parameter": "weak_cherry_high_percent",
+          "settings": [
+            "1",
+            "2",
+            "3",
+            "4",
+            "5",
+            "6"
+          ],
+          "values": [
+            31.7,
+            32.5,
+            34.1,
+            35.3,
+            36,
+            36.7
+          ],
+          "unit": "percent",
+          "opportunity": "対象試行条件要照合",
+          "source": "https://nana-press.com/kaiseki/machine/648/18390/",
+          "route": "numeric",
+          "dependency": null,
+          "formally_evaluated": false
+        },
+        {
+          "machine": "パチスロ ファイヤードリフト",
+          "parameter": "miss_direct_1_over",
+          "settings": [
+            "1",
+            "2",
+            "3",
+            "4",
+            "5",
+            "6"
+          ],
+          "values": [
+            6867,
+            6376,
+            5251,
+            3881,
+            2975,
+            2232
+          ],
+          "unit": "1_over",
+          "opportunity": "通常Gと総Gのどちらか未確定（推測スコア未投入）",
+          "source": "https://nana-press.com/kaiseki/machine/648/18390/",
+          "route": "numeric",
+          "dependency": null,
+          "formally_evaluated": false
+        }
+      ]
+    },
+    {
+      "blockId": "07-013",
+      "label": "チャンスミッション出現率",
+      "reason": "3～7スルーのチャンスミッション率は公開されていますが、内部の裏モード中は確定となり抽選対象外です。裏モードを全試行分離できないため不採用。",
+      "reevaluationCondition": "不足する設定別数値または対象条件を確認できる新しい具体的な公開資料が得られた場合のみ再確認します。",
+      "sourceIds": [
+        "main"
+      ],
+      "retainedPublishedValues": [
+        {
+          "machine": "パチスロ ファイヤードリフト",
+          "parameter": "bonus_1_over",
+          "settings": [
+            "1",
+            "2",
+            "3",
+            "4",
+            "5",
+            "6"
+          ],
+          "values": [
+            249.7,
+            245.6,
+            228.4,
+            207.3,
+            193.4,
+            183.1
+          ],
+          "unit": "1_over",
+          "opportunity": "通常Gと総Gのどちらか未確定（推測スコア未投入）",
+          "source": "https://nana-press.com/kaiseki/machine/648/18390/",
+          "route": "numeric",
+          "dependency": null,
+          "formally_evaluated": false
+        },
+        {
+          "machine": "パチスロ ファイヤードリフト",
+          "parameter": "weak_cherry_1_over",
+          "settings": [
+            "1",
+            "2",
+            "3",
+            "4",
+            "5",
+            "6"
+          ],
+          "values": [
+            54.6,
+            54.4,
+            51.2,
+            48,
+            46.7,
+            45.4
+          ],
+          "unit": "1_over",
+          "opportunity": "通常Gと総Gのどちらか未確定（推測スコア未投入）",
+          "source": "https://nana-press.com/kaiseki/machine/648/18390/",
+          "route": "numeric",
+          "dependency": null,
+          "formally_evaluated": false
+        },
+        {
+          "machine": "パチスロ ファイヤードリフト",
+          "parameter": "replay3_high_percent",
+          "settings": [
+            "1",
+            "2",
+            "3",
+            "4",
+            "5",
+            "6"
+          ],
+          "values": [
+            25.8,
+            26.2,
+            28.1,
+            29.3,
+            34.8,
+            39.1
+          ],
+          "unit": "percent",
+          "opportunity": "対象試行条件要照合",
+          "source": "https://nana-press.com/kaiseki/machine/648/18390/",
+          "route": "numeric",
+          "dependency": null,
+          "formally_evaluated": false
+        },
+        {
+          "machine": "パチスロ ファイヤードリフト",
+          "parameter": "weak_cherry_high_percent",
+          "settings": [
+            "1",
+            "2",
+            "3",
+            "4",
+            "5",
+            "6"
+          ],
+          "values": [
+            31.7,
+            32.5,
+            34.1,
+            35.3,
+            36,
+            36.7
+          ],
+          "unit": "percent",
+          "opportunity": "対象試行条件要照合",
+          "source": "https://nana-press.com/kaiseki/machine/648/18390/",
+          "route": "numeric",
+          "dependency": null,
+          "formally_evaluated": false
+        },
+        {
+          "machine": "パチスロ ファイヤードリフト",
+          "parameter": "miss_direct_1_over",
+          "settings": [
+            "1",
+            "2",
+            "3",
+            "4",
+            "5",
+            "6"
+          ],
+          "values": [
+            6867,
+            6376,
+            5251,
+            3881,
+            2975,
+            2232
+          ],
+          "unit": "1_over",
+          "opportunity": "通常Gと総Gのどちらか未確定（推測スコア未投入）",
+          "source": "https://nana-press.com/kaiseki/machine/648/18390/",
+          "route": "numeric",
+          "dependency": null,
+          "formally_evaluated": false
+        }
+      ]
+    }
+  ],
+  "evidenceCandidates": [
+    {
+      "findingId": "07-007",
+      "label": "BIG中JAC IN画面",
+      "sourceIds": [
+        "main"
+      ],
+      "details": [
+        "BIG・ハイパーBIGの1回目→2回目の組合せで記録。1枚だけで同じ示唆とみなしません。"
+      ],
+      "semanticCategories": [
+        {
+          "label": "ブラボー3人→ブラボー3人",
+          "meaning": "設定2以上濃厚",
+          "semanticType": "EXACT_CONSTRAINT"
+        },
+        {
+          "label": "クリス3人→クリス3人",
+          "meaning": "設定4以上濃厚",
+          "semanticType": "EXACT_CONSTRAINT"
+        },
+        {
+          "label": "ブラボー4人→ブラボー4人",
+          "meaning": "設定5以上濃厚",
+          "semanticType": "EXACT_CONSTRAINT"
+        },
+        {
+          "label": "クリス4人→クリス4人",
+          "meaning": "設定6濃厚",
+          "semanticType": "EXACT_CONSTRAINT"
+        },
+        {
+          "label": "ブラボー3人→クリス3人",
+          "meaning": "奇数設定示唆",
+          "semanticType": "PROBABILITY_UNKNOWN"
+        },
+        {
+          "label": "クリス3人→ブラボー3人",
+          "meaning": "偶数設定示唆",
+          "semanticType": "PROBABILITY_UNKNOWN"
+        }
+      ]
+    },
+    {
+      "findingId": "07-008",
+      "label": "サミートロフィー",
+      "sourceIds": [
+        "main"
+      ],
+      "details": [
+        "ボーナス終了画面のトロフィーを記録。"
+      ],
+      "semanticCategories": [
+        {
+          "label": "銅",
+          "meaning": "設定2以上",
+          "semanticType": "EXACT_CONSTRAINT"
+        },
+        {
+          "label": "銀",
+          "meaning": "設定3以上",
+          "semanticType": "EXACT_CONSTRAINT"
+        },
+        {
+          "label": "金",
+          "meaning": "設定4以上",
+          "semanticType": "EXACT_CONSTRAINT"
+        },
+        {
+          "label": "キリン",
+          "meaning": "設定5以上",
+          "semanticType": "EXACT_CONSTRAINT"
+        },
+        {
+          "label": "虹",
+          "meaning": "設定6",
+          "semanticType": "EXACT_CONSTRAINT"
+        }
+      ]
+    }
+  ],
+  "sourceIntegrityIssues": []
+}
