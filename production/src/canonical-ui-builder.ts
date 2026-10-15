@@ -162,7 +162,8 @@ function evidenceDescription(x:any){
  const lines=[clean(x?.label)+'を確認したときに、該当する項目を1回加算して記録します。'];
  for(const d of unique(details).slice(0,2))lines.push('・注意：'+d);
  if(types.includes('EXACT_CONSTRAINT'))lines.push('・反映：設定確定・設定否定の条件は、設定候補の絞り込みに自動反映します');
- if(types.some((t:any)=>t==='PROBABILITY_UNKNOWN'||t==='DISPLAY_ONLY'))lines.push('・反映：設定別出現率が未確認の項目は記録のみです。出現率確認後は設定推測へ反映できる可能性があります');
+ if(types.length>0&&types.every((t:any)=>t==='PROBABILITY_UNKNOWN'||t==='DISPLAY_ONLY'))lines.push('・参考入力：このセクションの全項目は設定別出現率が公表・確認されていないため、記録のみです。設定推測の計算には使用しません。');
+ else if(types.some((t:any)=>t==='PROBABILITY_UNKNOWN'||t==='DISPLAY_ONLY'))lines.push('・反映：設定別出現率が未確認の項目は記録のみです。出現率確認後は設定推測へ反映できる可能性があります');
  return lines.join('\n');
 }
 export function derivedSuccessCount(o:any,observations:any[]){

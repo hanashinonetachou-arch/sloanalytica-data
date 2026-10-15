@@ -60,3 +60,16 @@ setting constraint or quick-add policy. Detailed scope and exclusions remain
 in `denominatorSemantics` and the generated description. Game-count +50 remains
 controlled by the established trial-universe rule; event counts do not gain +50
 from a label. Existing findings without this metadata use the unchanged fallback.
+
+
+## 全項目の出現率が未確認の参考入力（2026-10-16 ユーザー確定）
+
+今後の全機種・全Batchで、セクション内の全項目が設定別出現率未公表・未確認の参考入力である場合、セクション内に次の説明を必ず明記する。
+
+> このセクションの全項目は設定別出現率が公表・確認されていないため、記録のみです。設定推測の計算には使用しません。
+
+対象は全カテゴリが `PROBABILITY_UNKNOWN` または `DISPLAY_ONLY` のセクション。ボーナス終了ミニキャラ等の今回5セクションだけに限定しない。未知の出現率に重みを付けず、入力は記録として保持する。
+
+設定確定・設定否定（`EXACT_CONSTRAINT`）を含むセクションは、設定候補の絞り込みへの反映を維持し、全項目が記録のみとは表示しない。既知の出現率で評価する項目と未知の項目が混在する場合も、セクション全体を記録のみと説明しない。
+
+共通実装は `src/canonical-ui-builder.ts`、継続適用の回帰テストは `test/canonical-ui.test.ts`。将来の機種生成・共通処理修正・チャット引き継ぎではこの規約を継承する。採否閾値や評価経路は変更しない。
