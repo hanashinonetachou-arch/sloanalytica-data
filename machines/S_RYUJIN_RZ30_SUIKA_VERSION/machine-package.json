@@ -1,12 +1,16 @@
 {
   "schemaVersion": 1,
+  "provenance": {
+    "manifestVersion": "8.5",
+    "generationPath": "V8_5_PRODUCTION_PIPELINE",
+    "legacyOracleUsed": false
+  },
   "machine": {
     "schemaVersion": "2.0.0",
     "machineId": "S_RYUJIN_RZ30_SUIKA_VERSION",
-    "machineDataVersion": "0.1.0",
+    "machineDataVersion": "8.5.1-batch-20261015-017",
     "displayName": "パチスロ琉神−30 スイカバージョン",
-    "modelName": "S琉神RZ-30 スイカバージョン",
-    "manufacturer": "オレンジ",
+    "modelName": "パチスロ琉神−30 スイカバージョン",
     "settings": [
       "SET_1",
       "SET_2",
@@ -17,7 +21,8 @@
     "packagePolicy": {
       "offlineCapable": true,
       "containsImages": false,
-      "containsExecutableCode": false
+      "containsExecutableCode": false,
+      "machineDataRevision": 1
     },
     "introductionDate": "2023-12-04",
     "machineType": "MEDAL",
@@ -27,63 +32,64 @@
     "schemaVersion": "2.0.0",
     "inputs": [
       {
-        "id": "INP_NORMAL_GAMES",
-        "name": "通常ゲーム数",
+        "id": "01-001.eligibleTrialCount",
+        "name": "連チャンを除くゲーム数",
+        "category": "V8_NUMERIC",
         "type": "integer",
-        "category": "NORMAL",
         "unit": "G",
-        "displayOrder": 10,
-        "inferenceRole": "INCLUDE_PRIMARY",
         "defaultValue": 0,
-        "minimum": 0
+        "minimum": 0,
+        "displayOrder": 1,
+        "inferenceRole": "INCLUDE_SUPPORT"
       },
       {
-        "id": "INP_BIG",
-        "name": "BIG初当り",
+        "id": "01-001.categoryCounts.1_BIG初当たり",
+        "name": "BIG初当たり",
+        "category": "V8_NUMERIC",
         "type": "counter",
-        "category": "NORMAL",
         "unit": "回",
-        "displayOrder": 11,
-        "inferenceRole": "INCLUDE_PRIMARY",
-        "defaultValue": null,
-        "parentInputId": "INP_NORMAL_GAMES",
-        "minimum": 0
+        "defaultValue": 0,
+        "minimum": 0,
+        "displayOrder": 2,
+        "parentInputId": "01-001.eligibleTrialCount",
+        "inferenceRole": "INCLUDE_SUPPORT"
       },
       {
-        "id": "INP_REG",
-        "name": "REG初当り",
+        "id": "01-001.categoryCounts.2_REG初当たり",
+        "name": "REG初当たり",
+        "category": "V8_NUMERIC",
         "type": "counter",
-        "category": "NORMAL",
         "unit": "回",
-        "displayOrder": 12,
-        "inferenceRole": "INCLUDE_PRIMARY",
-        "defaultValue": null,
-        "parentInputId": "INP_NORMAL_GAMES",
-        "minimum": 0
+        "defaultValue": 0,
+        "minimum": 0,
+        "displayOrder": 3,
+        "parentInputId": "01-001.eligibleTrialCount",
+        "inferenceRole": "INCLUDE_SUPPORT"
       }
     ]
   },
   "features": {
-    "schemaVersion": "2.0.0",
+    "version": "8.5-runtime",
     "features": [
       {
-        "featureId": "FEAT_BONUS_OUTCOME",
-        "name": "通常時BIG・REG初当り",
-        "adoptionCategory": "INCLUDE_PRIMARY",
+        "featureId": "01-001",
+        "name": "BIG初当たり",
+        "trialUniverse": "NON_CHAIN_BONUS_INITIAL_GAME_TRIAL",
+        "adoptionCategory": "INCLUDE_SUPPORT",
         "calculationRole": "PROBABILITY",
         "probabilityEngineUsage": true,
-        "modelType": "multinomial",
-        "minimumSample": 100,
-        "sampleRecommendation": 3000,
-        "numeratorInputId": "INP_BIG",
-        "denominatorInputId": "INP_NORMAL_GAMES",
-        "categoryInputIds": [
-          "INP_REG"
-        ],
+        "denominatorInputId": "01-001.eligibleTrialCount",
         "probabilities": {},
-        "categoryLabels": [
-          "BIG",
-          "REG"
+        "selectionRationale": {
+          "summary": "設定推測に採用された要素です。",
+          "adoptionReason": "BIG初当たりの「BIG初当たり」の割合は設定1 0.23%、設定6 0.28%と設定差があります。「連チャン区間を除いたゲーム数」を基準に、記録したカテゴリの振り分けを比較して推測に使用します。 観測条件：総ゲーム数から連チャン区間とボーナス消化中の除外ゲーム数を引き、連チャン外の当選だけを数えます。",
+          "shortTermReason": "標本が少ない間は結果の振れが大きくなります。",
+          "longTermReason": "観測数が増えるほど設定別の比較が安定します。"
+        },
+        "modelType": "multinomial",
+        "numeratorInputId": "01-001.categoryCounts.1_BIG初当たり",
+        "categoryInputIds": [
+          "01-001.categoryCounts.2_REG初当たり"
         ],
         "categoryProbabilities": {
           "SET_1": [
@@ -106,95 +112,207 @@
             0.002813731007315701,
             0.0021706099413935317
           ]
-        },
-        "categoryConditioning": {
-          "excludedCategories": [],
-          "normalization": "RENORMALIZE_INCLUDED",
-          "residualCategory": "RESIDUAL"
-        },
-        "sourceEvidenceRefs": [
-          "SRC_OFF",
-          "SRC_PW"
-        ]
+        }
+      }
+    ],
+    "runtimeProjection": [
+      {
+        "featureId": "01-001",
+        "runtimeStatus": "ACTIVE",
+        "metric": "PER_ELIGIBLE_TRIAL_POWER",
+        "metricValue": 0.002032024701234536,
+        "importance": "微小"
       }
     ]
   },
   "evidence": {
-    "version": "1.0.0",
+    "version": "8.5-runtime",
     "evidences": [],
-    "sources": [
-      {
-        "id": "SRC_OFF",
-        "classification": "OFFICIAL",
-        "pageName": "パチスロ 琉神-30 スイカバージョン 公式",
-        "url": "https://www.fujimarukun.co.jp/products/s_ryujin/",
-        "checkedAt": "2026-08-22"
-      },
-      {
-        "id": "SRC_PW",
-        "classification": "ANALYSIS",
-        "pageName": "パチスロ琉神-30 スイカバージョン",
-        "url": "https://www.p-world.co.jp/machine/database/9942",
-        "checkedAt": "2026-08-22"
-      }
-    ]
+    "references": []
   },
+  "blockedItems": [
+    {
+      "blockId": "01-004",
+      "label": "朝イチ専用モード",
+      "reason": "朝イチ専用モードは設定変更後の天国移行が優遇される仕様です。設定別の遷移確率を確認できないため設定推測には使いません。",
+      "reevaluationCondition": "不足する設定別数値または対象条件を確認できる新しい具体的な公開資料が得られた場合のみ再確認します。",
+      "sourceIds": [
+        "main"
+      ],
+      "retainedPublishedValues": [
+        {
+          "machine": "パチスロ琉神−30 スイカバージョン",
+          "parameter": "BIG_1_over",
+          "settings": [
+            "1",
+            "2",
+            "4",
+            "5",
+            "6"
+          ],
+          "values": [
+            428.5,
+            410.8,
+            395.2,
+            372.7,
+            355.4
+          ],
+          "unit": "1_over",
+          "opportunity": "通常Gと総Gのどちらか未確定（推測スコア未投入）",
+          "source": "https://www.fujimarukun.co.jp/products/s_ryujin/",
+          "route": "numeric",
+          "dependency": null,
+          "formally_evaluated": false
+        },
+        {
+          "machine": "パチスロ琉神−30 スイカバージョン",
+          "parameter": "REG_1_over",
+          "settings": [
+            "1",
+            "2",
+            "4",
+            "5",
+            "6"
+          ],
+          "values": [
+            505.6,
+            499.4,
+            485.2,
+            470.5,
+            460.7
+          ],
+          "unit": "1_over",
+          "opportunity": "通常Gと総Gのどちらか未確定（推測スコア未投入）",
+          "source": "https://www.fujimarukun.co.jp/products/s_ryujin/",
+          "route": "numeric",
+          "dependency": null,
+          "formally_evaluated": false
+        }
+      ]
+    }
+  ],
   "ui": {
-    "sections": [
+    "schemaVersion": "v8.5-runtime-ui-v1",
+    "contractVersion": "runtime-ui-v8",
+    "source": "CANONICAL_UI",
+    "sourceSchemaVersion": "canonical-ui-v1",
+    "manifestRevision": "8.5",
+    "playInfo": {
+      "visible": true,
+      "collapsible": false,
+      "mode": "TOTAL_ONLY",
+      "sessionFields": [
+        {
+          "id": "date",
+          "label": "日付",
+          "mode": "DATE"
+        },
+        {
+          "id": "storeName",
+          "label": "店舗名",
+          "mode": "TEXT"
+        },
+        {
+          "id": "machineNumber",
+          "label": "台番号",
+          "mode": "TEXT"
+        }
+      ],
+      "startFields": [
+        {
+          "id": "startTotalGames",
+          "label": "着席時 総ゲーム数",
+          "mode": "NUMBER",
+          "directNumeric": true
+        }
+      ],
+      "currentFields": [
+        {
+          "id": "currentTotalGames",
+          "label": "現在 総ゲーム数",
+          "mode": "NUMBER",
+          "directNumeric": true
+        }
+      ],
+      "difference": {
+        "autoCalculate": true
+      },
+      "useDifference": {
+        "label": "着席時との差分を使用",
+        "defaultWhenStartNormalGamesPresent": true
+      },
+      "exclusionGames": {
+        "visible": true,
+        "label": "除外ゲーム数",
+        "quickAdd": [
+          50
+        ],
+        "base": "TOTAL",
+        "resultLabel": "除外後の実戦ゲーム数",
+        "description": "連チャンゾーン中に消化したゲーム数を入力してください。総ゲーム数から差し引きます。ゾーン内の当選はすべて連チャンとして初当たりから除外します。"
+      }
+    },
+    "accordion": {
+      "enabled": true,
+      "singleOpen": true
+    },
+    "quickInput": {
+      "enabled": false
+    },
+    "v8Sections": [
       {
-        "id": "UI_DESIGN_1",
-        "title": "通常時",
-        "displayOrder": 1,
+        "id": "OBS_01-001",
+        "title": "BIG初当たり",
+        "collapsible": true,
+        "defaultExpanded": false,
+        "description": "総ゲーム数から連チャン区間とボーナス消化中の除外ゲーム数を引き、連チャン外の当選だけを数えます。天国など連チャン内の当選は含めません。公表集計との完全一致は主張しません。\n確認した全体回数も記録し、その中で各項目がどれだけ出たかを比較します。\n・注意：天国など連チャン内の当選は含めません。\n・注意：公表集計との完全一致は主張しません。",
+        "descriptionPresentation": {
+          "collapsible": true,
+          "label": "説明",
+          "defaultExpanded": false
+        },
         "items": [
           {
-            "type": "input",
-            "inputId": "INP_NORMAL_GAMES",
-            "label": "通常ゲーム数",
-            "widget": "number"
-          },
-          {
-            "type": "input",
-            "inputId": "INP_BIG",
-            "label": "BIG初当り",
-            "widget": "counter",
-            "gridSpan": 6,
-            "config": {
-              "compact": true
-            }
-          },
-          {
-            "type": "input",
-            "inputId": "INP_REG",
-            "label": "REG初当り",
-            "widget": "counter",
-            "gridSpan": 6,
-            "config": {
-              "compact": true
+            "id": "NODE_01-001",
+            "featureId": "01-001",
+            "title": "BIG初当たり",
+            "interaction": {
+              "type": "CATEGORY_COUNTERS",
+              "preservePriorObservations": true,
+              "showAccumulatedCounts": true,
+              "categoryCoverage": "NON_EXHAUSTIVE",
+              "totalOpportunities": "SEPARATE_COUNTER",
+              "opportunityTracking": {
+                "type": "SEPARATE_COUNTER",
+                "inputId": "01-001.eligibleTrialCount",
+                "label": "連チャンを除くゲーム数",
+                "playDataBinding": {
+                  "source": "PLAY_TOTAL_GAME_DELTA_EXCLUDED",
+                  "mode": "AUTO_EXACT"
+                },
+                "quickAdd": [
+                  50
+                ],
+                "directNumeric": true
+              },
+              "categories": [
+                {
+                  "id": "01-001.categoryCounts.1_BIG初当たり",
+                  "inputId": "01-001.categoryCounts.1_BIG初当たり",
+                  "label": "BIG初当たり"
+                },
+                {
+                  "id": "01-001.categoryCounts.2_REG初当たり",
+                  "inputId": "01-001.categoryCounts.2_REG初当たり",
+                  "label": "REG初当たり"
+                }
+              ]
             }
           }
         ]
       }
     ]
   },
-  "selectionSummary": {
-    "schemaVersion": "selection-summary-v1",
-    "evaluatedCount": 1,
-    "selectedCount": 1,
-    "rejectedCount": 0,
-    "selected": [
-      {
-        "featureId": "FEAT_BONUS_OUTCOME",
-        "name": "通常時BIG・REG初当り",
-        "reason": "推測計算に採用しています。",
-        "requiredTrials": {
-          "value": 67813,
-          "unit": "通常ゲーム"
-        }
-      }
-    ],
-    "rejected": []
-  },
-  "reliability": {},
   "metadata": {
     "machineId": "S_RYUJIN_RZ30_SUIKA_VERSION",
     "displayName": "パチスロ琉神−30 スイカバージョン",
@@ -205,12 +323,42 @@
       "SET_5",
       "SET_6"
     ],
-    "uiDesignMaterialized": true,
-    "uiDesignSchemaVersion": "ui-design-data-v1",
-    "uiDesignStatus": "PASS"
+    "settingsStatus": "SOURCE_DERIVED"
   },
-  "validation": {
-    "cases": []
-  },
-  "statistics": {}
+  "v8": {
+    "machineResearchSummary": {
+      "title": "この機種の設定推測について",
+      "adopted": [
+        {
+          "featureId": "01-001",
+          "label": "BIG初当たり",
+          "importance": "微小",
+          "evaluation": {
+            "userLabel": "1回の判別力",
+            "value": 0.002032024701234536
+          },
+          "reason": "BIG初当たりの「BIG初当たり」の割合は設定1 0.23%、設定6 0.28%と設定差があります。「連チャン区間を除いたゲーム数」を基準に、記録したカテゴリの振り分けを比較して推測に使用します。 観測条件：総ゲーム数から連チャン区間とボーナス消化中の除外ゲーム数を引き、連チャン外の当選だけを数えます。"
+        }
+      ],
+      "notAdopted": [
+        {
+          "featureId": "01-002",
+          "label": "REG初当たり",
+          "reason": "同じゲームのBIGとREGは排他的な当選内訳です。単一のカテゴリ分布として扱います。 「BIG初当たり」と同じ観測結果の内訳としてまとめて評価します。"
+        },
+        {
+          "featureId": "01-004",
+          "label": "朝イチ専用モード",
+          "reason": "朝イチ専用モードは設定変更後の天国移行が優遇される仕様です。設定別の遷移確率を確認できないため設定推測には使いません。",
+          "reevaluationCondition": "不足する設定別数値または対象条件を確認できる新しい具体的な公開資料が得られた場合のみ再確認します。"
+        }
+      ],
+      "unresolved": [
+        {
+          "label": "高低判別精度",
+          "reason": "基準ゲーム数へ正確に換算できる設定推測要素がないため、高低判別精度を算出していません。"
+        }
+      ]
+    }
+  }
 }
