@@ -142,7 +142,11 @@ export function buildObservationDescription(o:any,model:any,residualPolicy:any){
   lines.push('対象となる機会のうち、'+countSubject(labels.successLabel)+'が実際に起きた割合を設定別に比較します。');
  }
  const notes=unique([...userFacingEligibilityNotes(o),...operationalDetails(o).map((x:string)=>x.endsWith('。')?x:x+'。')]).slice(0,2);
- for(const note of notes)lines.push('・注意：'+note);
+ for(const note of notes){
+  // The explanation describes scope; the count field already names the counter.
+  const prose=labels.successLabel.endsWith('回数')?note.replaceAll(labels.successLabel,countSubject(labels.successLabel)):note;
+  lines.push('・注意：'+prose);
+ }
  return lines.join('\n');
 }
 export function derivePlayInfoRequirement(trialUniverses:Iterable<string>){

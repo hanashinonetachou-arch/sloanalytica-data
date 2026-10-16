@@ -31,6 +31,10 @@ export function validateRuntimeProjectionDocument(doc:any,machineData:any,policy
     expectedUi.playInfo.currentFields=(expectedUi.playInfo.currentFields??[]).filter((x:any)=>playRequirement.needsTotal?x.id==='currentTotalGames':playRequirement.needsNormal?x.id==='currentNormalGames':false);
     if(playRequirement.needsTotal&&playRequirement.needsNormal)expectedUi.playInfo.currentFields=(machineData.uiContract?.playInfo?.currentFields??[]).filter((x:any)=>x.id==='currentTotalGames'||x.id==='currentNormalGames');
     if(!playRequirement.needsExcludedGames)delete expectedUi.playInfo.exclusionGames;
+    if(!(expectedUi.numericSections??[]).some((x:any)=>x.trialUniverse==='BONUS_ELIGIBLE_GAME_TRIAL')){
+      delete expectedUi.playInfo.totalGamesLabel;
+      delete expectedUi.playInfo.totalGamesDescription;
+    }
   }
   if(canonical(doc.runtimeUi)!==canonical(expectedUi)) fail('UI_PROJECTION');
   if(canonical(doc.evidence)!==canonical(machineData.evidence??[])||(doc.evidence??[]).some((x:any)=>x.runtimePolicyControlled!==false)) fail('EVIDENCE_COPY');

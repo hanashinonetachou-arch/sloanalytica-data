@@ -266,6 +266,14 @@ D[1]['productObservationPolicy']['countingRule']='OKISLOT_CHAIN_ZONE_EXCLUDED'
 item(1,'M01-C01')['trialUniverse']='NON_CHAIN_BONUS_INITIAL_GAME_TRIAL'
 item(1,'M01-C01')['denominatorSemantics']='通常消化Gからボーナス後32Gの連チャンゾーン消化Gを除外。32G内の当選を初当たりに含めず、33G以降を記録。'
 
+# Separate the games counted under different reel-targeting methods.
+item(3,'M03-C03')['trialUniverse']='AOHARU_WHITE7_GAME_TRIAL'
+item(3,'M03-C03')['inputPresentation']={'trialLabel':'白7狙いのゲーム数','successLabel':'共通3枚ベルA回数'}
+item(3,'M03-C05')['trialUniverse']='AOHARU_PINK7_GAME_TRIAL'
+item(3,'M03-C05')['inputPresentation']={'trialLabel':'ピンク7狙いのゲーム数','successLabel':'ハズレB回数'}
+for cid,condition,label in [('M08-C06','screen','終了画面'),('M08-C09','voice','裏ボイス')]:
+ item(8,cid)['observationContext']={'groupingApproved':True,'opportunityId':'sympho_at_end','conditionId':condition,'groupTitle':'AT終了時の設定示唆','conditionLabel':label}
+
 # Correct scope descriptions are also the live-observation reason; no provisional placeholders.
 for d in D.values():
  for f in d['findings']:

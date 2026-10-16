@@ -25,6 +25,10 @@ export function buildRuntimeProjection(machineData:any,policy:any,machineDataArt
     runtimeUi.playInfo.currentFields=(runtimeUi.playInfo.currentFields??[]).filter((x:any)=>playRequirement.needsTotal?x.id==='currentTotalGames':playRequirement.needsNormal?x.id==='currentNormalGames':false);
     if(playRequirement.needsTotal&&playRequirement.needsNormal)runtimeUi.playInfo.currentFields=(machineData.uiContract?.playInfo?.currentFields??[]).filter((x:any)=>x.id==='currentTotalGames'||x.id==='currentNormalGames');
     if(!playRequirement.needsExcludedGames)delete runtimeUi.playInfo.exclusionGames;
+    if(!(runtimeUi.numericSections??[]).some((x:any)=>x.trialUniverse==='BONUS_ELIGIBLE_GAME_TRIAL')){
+      delete runtimeUi.playInfo.totalGamesLabel;
+      delete runtimeUi.playInfo.totalGamesDescription;
+    }
   }
   return {schemaVersion:'runtime-projection-v1',manifestVersion:'8.5',batchId:machineData.batchId,machineId:machineData.machineId,machineName:machineData.machineName,sourceArtifacts:{machineData:machineDataArtifact,runtimePolicy:policyArtifact},activeFeatures,inactiveFeatures,settings:machineData.settings,packagePolicy:machineData.packagePolicy,runtimeUi,evidence:machineData.evidence??[],heldObservations:machineData.heldObservations??[],nonRuntimeCandidates:machineData.nonRuntimeCandidates??[],excludedDecisions:machineData.excludedDecisions??[],blockedItems:machineData.blockedItems??[],highLowDiscrimination:machineData.highLowDiscrimination};
 }
