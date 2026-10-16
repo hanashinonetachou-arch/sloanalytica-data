@@ -1,3 +1,9 @@
+# 最新確定状態（2026-10-17 08:06 JST）
+
+ユーザー「QA問題なしでした。」を受け、防振りの修正後QAを既存経路で正式受理。Batch018の10機種は全12工程・120 stageがCOMPLETE。防振り以外9機種は元APK vc2002885170、防振りの表示修正はvc2002886741で確認済み。各受理の固定App/Data/QA参照は保持し、9機種を新APKで再検証済みとは扱わない。
+
+正本は `completion-summary.json`、`device-qa/completion.json`、各機種stage、受理成果物。未解決のQA・表示修正はない。参考サイト名を画面へ出さない共通修正・量産規則は維持。次の新規作業は次のユーザー指示に従う。以下のQA待ち記述は過去時点の履歴で、この確定状態により上書きされる。
+
 # 最新追記（2026-10-17 実機指摘対応）
 
 最優先: 参考サイト名・出典URLを採用/不採用理由や説明など画面へ一切表示しない。元の出典と主張はResearch監査記録で保持。量産標準は `production/RESEARCH_PROCESS_CONTRACT.md`、対応内容は `device-qa/SOURCE_NEUTRAL_COPY_FIX.md`。
