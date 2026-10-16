@@ -11,3 +11,11 @@ const rare=k.features.find(x=>x.featureId==="FEAT_RARE_ROLE_MULTI");assert.equal
 const allEvidence=[...g.evidenceContract.items,...l.evidenceContract.items,...k.evidenceContract.items];assert.ok(allEvidence.some(x=>x.runtimeType==="SETTING_CONFIRMATION"));assert.ok(allEvidence.some(x=>x.runtimeType==="SETTING_DENIAL"));assert.ok(allEvidence.some(x=>x.runtimeType==="DISPLAY_ONLY"));assert.equal(new Set(g.evidenceContract.items.map(x=>x.evidenceId)).size,g.evidenceContract.items.length);assert.equal(new Set(l.evidenceContract.items.map(x=>x.evidenceId)).size,l.evidenceContract.items.length);assert.equal(new Set(k.evidenceContract.items.map(x=>x.evidenceId)).size,k.evidenceContract.items.length);
 for(const s of [g,l,k])for(const i of s.evidenceContract.inputs)assert.ok(s.uiCategoryLabels[i.category]);
 });
+
+
+test("canonical numeric presentation survives the runtime adapter",()=>{
+  const load=id=>{const d=path.join(root,"research",id),read=n=>JSON.parse(fs.readFileSync(path.join(d,n),"utf8"));const r=adaptResearch(read("research-data.json"));return {s:adaptSelection(r,read("selection-data.json"),read("observation-data.json"),read("canonical-ui.json")),u:read("canonical-ui.json")};};
+  for(const id of ids){const {s,u}=load(id);const byFeature=new Map(s.features.map(f=>[f.featureId,f]));for(const item of u.sections.find(x=>x.kind==="NUMERIC")?.inputs??[]){const f=byFeature.get(item.featureId);if(!f)continue;const num=s.inputs.find(i=>i.id===f.numeratorInputId);assert.equal(num.name,item.label);assert.equal(num.uiGridSpan,6);assert.equal(num.uiCompactCounter,true);const den=s.inputs.find(i=>i.id===f.denominatorInputId);if(den){assert.equal(den.uiGridSpan,6);assert.equal(den.uiCompactCounter,true);if(item.denominatorLabel)assert.equal(den.name,item.denominatorLabel);}}}
+});
+
+test("canonical evidence observation action survives as runtime section description",()=>{const d=path.join(root,"research","L_LOVEJOU3_M4"),read=n=>JSON.parse(fs.readFileSync(path.join(d,n),"utf8"));const r=adaptResearch(read("research-data.json")),s=adaptSelection(r,read("selection-data.json"),read("observation-data.json"),read("canonical-ui.json"));assert.equal(s.uiCategoryDescriptions.SEC_AT_END,"PUSHで確認");});
