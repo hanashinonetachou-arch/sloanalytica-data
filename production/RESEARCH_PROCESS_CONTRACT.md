@@ -73,3 +73,7 @@ from a label. Existing findings without this metadata use the unchanged fallback
 設定確定・設定否定（`EXACT_CONSTRAINT`）を含むセクションは、設定候補の絞り込みへの反映を維持し、全項目が記録のみとは表示しない。既知の出現率で評価する項目と未知の項目が混在する場合も、セクション全体を記録のみと説明しない。
 
 共通実装は `src/canonical-ui-builder.ts`、継続適用の回帰テストは `test/canonical-ui.test.ts`。将来の機種生成・共通処理修正・チャット引き継ぎではこの規約を継承する。採否閾値や評価経路は変更しない。
+
+## Source-neutral product copy (user decision 2026-10-17)
+
+Never expose referenced website/publisher names or source URLs in user-facing reasons, explanations, labels, or guidance. Explain the actual adoption/rejection reason, observation limits, conflicting settings/values, and their inference effect in plain language. If contrasting sources is necessary, use anonymous public-document references. Keep original publisher names, URLs, exact claims, and conflict history in research/audit artifacts for reproducibility. Do not change probabilities, eligibility, or exact constraints to remove attribution. Apply this to existing and future machines; test actual rendered text as well as packaged summary adapters.

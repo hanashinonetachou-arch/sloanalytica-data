@@ -1,3 +1,7 @@
+# 最新修正・受理状態（2026-10-17）
+
+防振り以外9機種はユーザー確認により正式DEVICE_QA COMPLETE。防振りは画面文言修正の確認待ち。参考サイト名の画面表示はApp共通処理で除去し、Research出典記録は保持。修正版APK・CI結果は `device-qa/handoff.json`、対応詳細は `device-qa/SOURCE_NEUTRAL_COPY_FIX.md`。以下は初回配信時点の記録。
+
 # Batch018 配信・APK完了 / 実機QA待ち
 
 2026-10-17。対象10機種はResearchからDistributionまで正式COMPLETE（11工程×10機種）。DEVICE_QAは10機種ともHUMAN_REQUIRED。実機QAは未実施・未受理。

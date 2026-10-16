@@ -14,7 +14,7 @@ if(supplied){
 }
 const decision=supplied??{schemaVersion:'device-qa-acceptance-v1',batchId,status:'PASS',acceptedBy:'USER',acceptedAt:'2026-10-07',statement:'今回の機種調査は問題ありませんでした。',source:'User-authorized attached handoff 20261007-125207',appCommit:'3bef2eadbc17dca47de7a60a698c6b65aea543bb',distributionCommit:'c3728e85d36517898fe25c7ae6cf039f83a58e06',qaRunId:'37548381546',versionCode:2002787132,machineIds:ids};
 if(!supplied&&batchId!=='batch-20261007-007')throw Error('EXPLICIT_ACCEPTANCE_REQUIRED');
-const decisionFile=partial?'acceptance-partial-20261011.json':'acceptance.json';
+const decisionFile=partial?'acceptance-partial-'+String(decision.acceptedAt).slice(0,10).replaceAll('-','')+'.json':'acceptance.json';
 s.write(decision,'batches',batchId,'device-qa',decisionFile);
 for(const machineId of (partial?supplied.machineIds:ids)){
  if(o.stage(batchId,machineId,'DISTRIBUTION').state!=='COMPLETE')throw Error('DISTRIBUTION_REQUIRED:'+machineId);

@@ -1,3 +1,9 @@
+# 最新追記（2026-10-17 実機指摘対応）
+
+最優先: 参考サイト名・出典URLを採用/不採用理由や説明など画面へ一切表示しない。元の出典と主張はResearch監査記録で保持。量産標準は `production/RESEARCH_PROCESS_CONTRACT.md`、対応内容は `device-qa/SOURCE_NEUTRAL_COPY_FIX.md`。
+
+ユーザーの実機結果により防振り以外9機種は元APK(vc2002885170)で正式DEVICE_QA COMPLETE。防振りは表示修正の確認待ち。受理済み9機種を巻き戻さない。修正版Appは `7756b93942f5d434cbe2d027a18f6bea81c35163`、QA Action `38975910280`。配信データの固定コミットと設定推測モデルは変更なし。最新APKは `device-qa/handoff.json` を参照。以下の旧「10機種QA待ち」記述はこの追記と最新stageで上書きする。
+
 # SloAnalytica Batch018 — 配信・APK生成後の実機QAからの再開
 
 2026-10-17。Repository正本を再取得し、確認だけで止まらず、ユーザーが次に指定した工程を実行すること。
