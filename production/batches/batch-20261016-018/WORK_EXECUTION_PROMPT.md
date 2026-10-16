@@ -1,24 +1,27 @@
-# SloAnalytica Batch018 — Candidate Contract完了からの再開
+# SloAnalytica Batch018 — 配信・APK生成後の実機QAからの再開
 
 2026-10-17。Repository正本を再取得し、確認だけで止まらず、ユーザーが次に指定した工程を実行すること。
 
 - Data: `hanashinonetachou-arch/sloanalytica-data`
 - 正本作業ブランチ: `production/v85-batch-018-research-20261017`
 - Batch: `batch-20261016-018`
-- App最新確認: `qa/batch017-v85-20261016` (`474fdf2221b3b920b90df9ac615dbd07b0c65fb3`)、prototype (`c58cb84f7c172b013272abe6fb23a0ead2252dfe`)。Appへは今回書き込んでいない。
+- App: `qa/batch018-v85-20261017` (`db7992b31ececb0abdfab3f7d4dfb83ab01e9339`)。
+- 配信: `prototype-multi-machine` (`34f01c4e3be2381e25b44e79ceb58e74fc8ede90`)。
+- Data Integration run: `38937760438`。App QA run: `38938096567`。
 
 ## 完了状態
 
-`completion-summary.json` と各機種 `machines/<ID>/stages/*.json` が正本。10機種すべてResearch/Evaluation/Eligibility/Candidate Contractが正式COMPLETE。work/attempt/leaseとSHA256、既存Validator証跡を保持。未実施工程を完了扱いしない。
+`completion-summary.json` と各機種 `machines/<ID>/stages/*.json` が正本。10機種すべてResearchからDISTRIBUTIONまで正式COMPLETE。work/attempt/leaseとSHA256、既存Validator証跡を保持。未実施工程を完了扱いしない。
 
 元99候補のIDをすべて保持。調査により33候補追加、計132候補。Research findings88件・理由付きBLOCK44件。findingsのうち数値評価63件（参考分布3件を含む）、数値Contract候補60件、Evidence候補25件。
 
-数値Contract候補は最終採用数ではない。依存解決後に使用可能とされた代表31件にもRuntime Policyが未適用。正式Selection ScoreのEXCLUDEと、条件付き試行のスコア未算出・PER_ELIGIBLE_TRIAL_POWER経路を混同しない。
+数値Contract候補は最終採用数ではない。依存解決後の代表31件へ既存Runtime Policyを適用し、RuntimeのACTIVE数値特徴は30件。正式Selection ScoreのEXCLUDEと、条件付き試行のスコア未算出・PER_ELIGIBLE_TRIAL_POWER経路を混同しない。
 
 ## 次工程
 
-今回の依頼範囲はCandidate Contractまで。Observation/Evidence・Canonical UI・Runtime・配信・APK・実機QAは今回未実施。次回ユーザーが実装を指示した場合は、既存 `deterministic-production-worker.ts` と各Validatorを用いてObservation/Evidence以降へ進む。Researchを再作成・再選定しない。具体的な新出典がある場合に限り該当候補だけ再確認する。
+AI工程は署名済みAPKと実機QA引き継ぎまで実行する。最終状態・APK・検証は `device-qa/handoff.json`、`completion-summary.json`、`FINAL_DELIVERY_REPORT.md` を参照。DEVICE_QAは実ユーザーの端末確認結果が必要。ビルド成功・自動検証・「進めてください」だけでDEVICE_QAを受理しない。ユーザーから結果が届いたら、既存の受理経路で今回の10機種だけ処理する。過去Batchを受理・巻き戻ししない。
 
+Research・機種選定・候補IDを作り直さない。具体的な訂正出典がある場合だけ該当候補を再確認する。
 ## 必須の設計条件
 
 - バハマは2024アムテックス製Sバハマ30。擬似ノーマルATであり、通常GからAT消化Gを除外。3枚チェリー・スイカ・ロングフリーズ保持。1998オリンピア機の資料は使わない。
@@ -45,6 +48,6 @@ node --experimental-strip-types --test test/batch018-research.test.ts test/compl
 
 Review再構築は `src/curate-batch018-research.py`。入力は `research-inbox/batch018/imported-handoff/` に保存。正式出力を直接上書きせず、変更時は既存Orchestratorの無効化・再受理を使用する。
 
-通常の5+5 waveは第1wave配信後に第2waveResearchを解放する。今回は配信が対象外のため、Batch specを10機種の単一waveにした。Concurrency2と全Validator・段階依存は変更していない。`research-scope.json` 参照。
+通常の5+5 waveは第1wave配信後に第2waveResearchを解放する。今回は元の10機種一括Researchの認可範囲を保持するため、Batch specを10機種の単一waveにした。Concurrency2と全Validator・段階依存は変更していない。`research-scope.json` 参照。
 
-GitHub Actionsは起動していない。通常commitは[skip ci]、Integration Boundaryでのみまとめて実行。過去Batch/配信/QAの状態を巻き戻さない。ユーザー承認待ちは工程ごとに設けない。
+GitHub ActionsはIntegration Boundaryで配信とAPKの2実行（および配信が呼ぶPages）に集約した。通常commitは[skip ci]。過去Batch/配信/QAの状態を巻き戻さない。ユーザー承認待ちは工程ごとに設けない。
