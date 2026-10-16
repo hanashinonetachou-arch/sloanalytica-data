@@ -1,12 +1,16 @@
 {
   "schemaVersion": 1,
+  "provenance": {
+    "manifestVersion": "8.5",
+    "generationPath": "V8_5_PRODUCTION_PIPELINE",
+    "legacyOracleUsed": false
+  },
   "machine": {
     "schemaVersion": "2.0.0",
     "machineId": "S_OKIDOKI_BLACK_EP",
-    "machineDataVersion": "0.1.1",
+    "machineDataVersion": "8.5.1-batch-20261016-018",
     "displayName": "沖ドキ！BLACK",
-    "modelName": "S／沖ドキ！BLACK／EP",
-    "manufacturer": "ミズホ",
+    "modelName": "沖ドキ！BLACK",
     "settings": [
       "SET_1",
       "SET_2",
@@ -19,6 +23,7 @@
       "containsImages": false,
       "containsExecutableCode": false
     },
+    "manufacturer": "ミズホ",
     "introductionDate": "2024-07-01",
     "machineType": "MEDAL",
     "gameType": "AT"
@@ -27,120 +32,64 @@
     "schemaVersion": "2.0.0",
     "inputs": [
       {
-        "id": "INP_NORMAL_GAMES",
+        "id": "M04-C03.eligibleTrialCount",
         "name": "通常ゲーム数",
+        "category": "V8_NUMERIC",
         "type": "integer",
-        "category": "PRIMARY",
-        "displayOrder": 1,
-        "defaultValue": 0,
         "unit": "G",
-        "minimum": 0
-      },
-      {
-        "id": "INP_INITIAL",
-        "name": "ボーナス初当り回数",
-        "type": "counter",
-        "category": "PRIMARY",
-        "displayOrder": 2,
         "defaultValue": 0,
-        "unit": "回",
-        "description": "「初当り」は、前回ボーナス終了後32G以内の天国連チャン中のボーナスを除き、通常区間から新たに当選した最初のボーナスを1回として数えます。天国中の2連目以降のBIG・REGは初当り回数に加えません。",
-        "minimum": 0
+        "minimum": 0,
+        "displayOrder": 1,
+        "inferenceRole": "INCLUDE_SUPPORT"
       },
       {
-        "id": "INP_CHERRY_B",
-        "name": "チェリーB回数",
-        "type": "counter",
-        "category": "SMALL_ROLE",
-        "displayOrder": 10,
-        "defaultValue": 0,
-        "unit": "回",
-        "description": "停止形でチェリーBを判別できた場合のみ入力。",
-        "minimum": 0
-      },
-      {
-        "id": "INP_KAKUTEI_B",
+        "id": "M04-C03.successCount",
         "name": "確定役B回数",
+        "category": "V8_NUMERIC",
         "type": "counter",
-        "category": "SMALL_ROLE",
-        "displayOrder": 11,
-        "defaultValue": 0,
         "unit": "回",
-        "description": "左リール第1停止で判別できた場合のみ入力。",
-        "minimum": 0
+        "defaultValue": 0,
+        "minimum": 0,
+        "displayOrder": 2,
+        "parentInputId": "M04-C03.eligibleTrialCount",
+        "inferenceRole": "INCLUDE_SUPPORT"
+      },
+      {
+        "id": "M04-V01.eligibleTrialCount",
+        "name": "通常ゲーム数",
+        "category": "V8_NUMERIC",
+        "type": "integer",
+        "unit": "G",
+        "defaultValue": 0,
+        "minimum": 0,
+        "displayOrder": 3,
+        "inferenceRole": "INCLUDE_PRIMARY"
+      },
+      {
+        "id": "M04-V01.successCount",
+        "name": "チェリーB回数",
+        "category": "V8_NUMERIC",
+        "type": "counter",
+        "unit": "回",
+        "defaultValue": 0,
+        "minimum": 0,
+        "displayOrder": 4,
+        "parentInputId": "M04-V01.eligibleTrialCount",
+        "inferenceRole": "INCLUDE_PRIMARY"
       }
     ]
   },
   "features": {
-    "schemaVersion": "2.0.0",
+    "version": "8.5-runtime",
     "features": [
       {
-        "featureId": "FEAT_INITIAL",
-        "name": "ボーナス初当り",
-        "adoptionCategory": "INCLUDE_PRIMARY",
-        "calculationRole": "PROBABILITY",
-        "probabilityEngineUsage": true,
-        "modelType": "binomial",
-        "minimumSample": 1,
-        "sampleRecommendation": 7000,
-        "reliabilityProfile": {
-          "weight": 1
-        },
-        "displayFormat": "ratio_1_over_n",
-        "denominatorInputId": "INP_NORMAL_GAMES",
-        "numeratorInputId": "INP_INITIAL",
-        "probabilities": {
-          "SET_1": 0.0034638032559750607,
-          "SET_2": 0.003598416696653473,
-          "SET_3": 0.003762227238525207,
-          "SET_5": 0.003935458480913027,
-          "SET_6": 0.004113533525298231
-        },
-        "sourceEvidenceRefs": [
-          "SRC_ANALYSIS"
-        ]
-      },
-      {
-        "featureId": "FEAT_CHERRY_B",
-        "name": "チェリーB",
-        "adoptionCategory": "INCLUDE_SUPPORT",
-        "calculationRole": "PROBABILITY",
-        "probabilityEngineUsage": true,
-        "modelType": "binomial",
-        "minimumSample": 1,
-        "sampleRecommendation": 7000,
-        "reliabilityProfile": {
-          "weight": 1
-        },
-        "displayFormat": "ratio_1_over_n",
-        "denominatorInputId": "INP_NORMAL_GAMES",
-        "numeratorInputId": "INP_CHERRY_B",
-        "probabilities": {
-          "SET_1": 0.005952380952380952,
-          "SET_2": 0.006561679790026247,
-          "SET_3": 0.006868131868131868,
-          "SET_5": 0.007326007326007326,
-          "SET_6": 0.007782101167315175
-        },
-        "sourceEvidenceRefs": [
-          "SRC_ANALYSIS"
-        ]
-      },
-      {
-        "featureId": "FEAT_KAKUTEI_B",
+        "featureId": "M04-C03",
         "name": "確定役B",
+        "trialUniverse": "NORMAL_GAME_TRIAL",
         "adoptionCategory": "INCLUDE_SUPPORT",
         "calculationRole": "PROBABILITY",
         "probabilityEngineUsage": true,
-        "modelType": "binomial",
-        "minimumSample": 1,
-        "sampleRecommendation": 7000,
-        "reliabilityProfile": {
-          "weight": 1
-        },
-        "displayFormat": "ratio_1_over_n",
-        "denominatorInputId": "INP_NORMAL_GAMES",
-        "numeratorInputId": "INP_KAKUTEI_B",
+        "denominatorInputId": "M04-C03.eligibleTrialCount",
         "probabilities": {
           "SET_1": 0.00006103515625,
           "SET_2": 0.0000762939453125,
@@ -148,133 +97,328 @@
           "SET_5": 0.0001220703125,
           "SET_6": 0.000152587890625
         },
-        "sourceEvidenceRefs": [
-          "SRC_ANALYSIS"
-        ]
+        "selectionRationale": {
+          "summary": "設定推測に採用された要素です。",
+          "adoptionReason": "確定役Bは設定1 1/16384、設定6 1/6553.6と設定差があります。「通常ゲーム数」に対する「確定役B回数」の発生割合を比較して推測に使用します。 観測条件：複数の設定推測項目で同じ「通常ゲーム数」を共通の基準として使用します。",
+          "shortTermReason": "標本が少ない間は結果の振れが大きくなります。",
+          "longTermReason": "観測数が増えるほど設定別の比較が安定します。"
+        },
+        "modelType": "binomial",
+        "numeratorInputId": "M04-C03.successCount",
+        "displayFormat": "percentage"
+      },
+      {
+        "featureId": "M04-V01",
+        "name": "チェリーB確率",
+        "trialUniverse": "NORMAL_GAME_TRIAL",
+        "adoptionCategory": "INCLUDE_PRIMARY",
+        "calculationRole": "PROBABILITY",
+        "probabilityEngineUsage": true,
+        "denominatorInputId": "M04-V01.eligibleTrialCount",
+        "probabilities": {
+          "SET_1": 0.005952380952380952,
+          "SET_2": 0.006561679790026247,
+          "SET_3": 0.006868131868131868,
+          "SET_5": 0.007326007326007326,
+          "SET_6": 0.007782101167315175
+        },
+        "selectionRationale": {
+          "summary": "設定推測に採用された要素です。",
+          "adoptionReason": "チェリーB確率は設定1 1/168、設定6 1/128.5と設定差があります。「通常ゲーム数」に対する「チェリーB回数」の発生割合を比較して推測に使用します。 観測条件：複数の設定推測項目で同じ「通常ゲーム数」を共通の基準として使用します。",
+          "shortTermReason": "標本が少ない間は結果の振れが大きくなります。",
+          "longTermReason": "観測数が増えるほど設定別の比較が安定します。"
+        },
+        "modelType": "binomial",
+        "numeratorInputId": "M04-V01.successCount",
+        "displayFormat": "percentage"
+      }
+    ],
+    "runtimeProjection": [
+      {
+        "featureId": "M04-C03",
+        "runtimeStatus": "ACTIVE",
+        "metric": "SELECTION_SCORE",
+        "metricValue": 10.294483124281989,
+        "importance": "有力"
+      },
+      {
+        "featureId": "M04-V01",
+        "runtimeStatus": "ACTIVE",
+        "metric": "SELECTION_SCORE",
+        "metricValue": 49.08464976541529,
+        "importance": "主要"
       }
     ]
   },
   "evidence": {
-    "version": "1.0.0",
+    "version": "8.5-runtime",
     "evidences": [],
-    "sources": [
-      {
-        "id": "SRC_ID",
-        "classification": "ANALYSIS",
-        "url": "https://www.p-world.co.jp/machine/database/10051",
-        "checkedAt": "2026-08-21"
-      },
-      {
-        "id": "SRC_ANALYSIS",
-        "classification": "ANALYSIS",
-        "url": "https://1geki.jp/slot/s_oki_doki_black/0/",
-        "checkedAt": "2026-08-21"
-      }
-    ]
+    "references": []
   },
+  "blockedItems": [
+    {
+      "blockId": "M04-C02",
+      "label": "通常A/B滞在ボーナス",
+      "reason": "通常A・Bだけの抽選値ですが、引き戻し・チャンス・黒ドキなどの内部滞在を全ゲームで識別できません。32Gを除いただけでは対象モード限定になりません。",
+      "reevaluationCondition": "不足する値や観測条件を解決する新しい具体的な公開資料が得られた場合に、この候補のみ再確認します。",
+      "sourceIds": [
+        "overview",
+        "modes"
+      ],
+      "retainedPublishedValues": {
+        "1": "1/313.2",
+        "2": "1/299.2",
+        "3": "1/283.9",
+        "5": "1/269.9",
+        "6": "1/257.2"
+      }
+    },
+    {
+      "blockId": "M04-V02",
+      "label": "通常ABのスイカ当選率",
+      "reason": "通常A・Bだけの抽選値ですが、引き戻し・チャンス・黒ドキなどの内部滞在を全ゲームで識別できません。32Gを除いただけでは対象モード限定になりません。",
+      "reevaluationCondition": "不足する値や観測条件を解決する新しい具体的な公開資料が得られた場合に、この候補のみ再確認します。",
+      "sourceIds": [
+        "overview",
+        "modes"
+      ],
+      "retainedPublishedValues": {
+        "1": 0.028,
+        "2": 0.029,
+        "3": 0.034,
+        "5": 0.037,
+        "6": 0.04
+      }
+    },
+    {
+      "blockId": "M04-C04",
+      "label": "ハイビスカス点灯",
+      "reason": "光り方は次回モードやBIGを示唆するもの。確認した設定判別資料には、点灯パターンの全設定別分布や設定確定パターンはありません。",
+      "reevaluationCondition": "不足する値や観測条件を解決する新しい具体的な公開資料が得られた場合に、この候補のみ再確認します。",
+      "sourceIds": [
+        "modes"
+      ],
+      "retainedPublishedValues": [
+        "次回モード示唆"
+      ]
+    },
+    {
+      "blockId": "M04-C05",
+      "label": "チェリーB（重複台帳）",
+      "reason": "M04-V01と同じチェリーB。成立回数は1か所だけ記録し、同じ情報を2回使いません。",
+      "reevaluationCondition": "不足する値や観測条件を解決する新しい具体的な公開資料が得られた場合に、この候補のみ再確認します。",
+      "sourceIds": [
+        "overview"
+      ]
+    },
+    {
+      "blockId": "M04-C06",
+      "label": "モード別レア役当選率",
+      "reason": "チェリー通常ABは1.1～1.2%、スイカは通常AB2.8～4.0%・引き戻し7.5～8.8%・チャンス9.2～10.7%。対象モードを識別できないため、無条件のレア役抽選率として使えません。",
+      "reevaluationCondition": "不足する値や観測条件を解決する新しい具体的な公開資料が得られた場合に、この候補のみ再確認します。",
+      "sourceIds": [
+        "overview",
+        "modes"
+      ],
+      "retainedPublishedValues": {
+        "チェリー通常AB": [
+          1.1,
+          1.1,
+          1.1,
+          1.2,
+          1.2
+        ],
+        "スイカ引き戻し": [
+          7.5,
+          7.8,
+          8.1,
+          8.4,
+          8.8
+        ],
+        "スイカチャンス": [
+          9.2,
+          9.5,
+          9.9,
+          10.2,
+          10.7
+        ]
+      }
+    },
+    {
+      "blockId": "M04-C07",
+      "label": "モード移行",
+      "reason": "当選時に内部モードが移行。約40%のリセット後チャンスなどは掲載されているが、全設定×全移行元の表を確認できず、確定できない移行元を推定して使用しません。",
+      "reevaluationCondition": "不足する値や観測条件を解決する新しい具体的な公開資料が得られた場合に、この候補のみ再確認します。",
+      "sourceIds": [
+        "modes"
+      ]
+    },
+    {
+      "blockId": "M04-C08",
+      "label": "連チャン除外G・黒ドキ",
+      "reason": "32G以内の当選は連チャンとして初当たりから除外します。これは入力母数の定義で、別の設定差尤度ではありません。黒ドキは見た目で確定できません。",
+      "reevaluationCondition": "不足する値や観測条件を解決する新しい具体的な公開資料が得られた場合に、この候補のみ再確認します。",
+      "sourceIds": [
+        "modes"
+      ]
+    }
+  ],
   "ui": {
-    "sections": [
+    "schemaVersion": "v8.5-runtime-ui-v1",
+    "contractVersion": "runtime-ui-v8",
+    "source": "CANONICAL_UI",
+    "sourceSchemaVersion": "canonical-ui-v1",
+    "manifestRevision": "8.5",
+    "playInfo": {
+      "visible": true,
+      "collapsible": false,
+      "mode": "NORMAL_ONLY",
+      "sessionFields": [
+        {
+          "id": "date",
+          "label": "日付",
+          "mode": "DATE"
+        },
+        {
+          "id": "storeName",
+          "label": "店舗名",
+          "mode": "TEXT"
+        },
+        {
+          "id": "machineNumber",
+          "label": "台番号",
+          "mode": "TEXT"
+        }
+      ],
+      "startFields": [
+        {
+          "id": "startNormalGames",
+          "label": "着席時 通常ゲーム数",
+          "mode": "NUMBER",
+          "directNumeric": true
+        }
+      ],
+      "currentFields": [
+        {
+          "id": "currentNormalGames",
+          "label": "現在 通常ゲーム数",
+          "mode": "NUMBER",
+          "directNumeric": true
+        }
+      ],
+      "difference": {
+        "autoCalculate": true
+      },
+      "useDifference": {
+        "label": "着席時との差分を使用",
+        "defaultWhenStartNormalGamesPresent": true
+      }
+    },
+    "accordion": {
+      "enabled": true,
+      "singleOpen": true
+    },
+    "quickInput": {
+      "enabled": false
+    },
+    "v8Sections": [
       {
-        "id": "UI_DESIGN_1",
-        "title": "初当り",
-        "displayOrder": 1,
-        "items": [
+        "id": "OBS_SHARED_NORMAL_GAME_TRIAL",
+        "title": "確定役B・チェリーB確率",
+        "collapsible": true,
+        "defaultExpanded": false,
+        "description": "複数の設定推測項目で同じ「通常ゲーム数」を共通の基準として使用します。通常ゲーム数は1回だけ入力し、各項目では該当した回数だけを記録してください。",
+        "descriptionPresentation": {
+          "collapsible": true,
+          "label": "説明",
+          "defaultExpanded": false
+        },
+        "groups": [
           {
-            "type": "input",
-            "inputId": "INP_NORMAL_GAMES",
+            "id": "DENOM_NORMAL_GAME_TRIAL",
             "label": "通常ゲーム数",
-            "widget": "number"
-          },
-          {
-            "type": "input",
-            "inputId": "INP_INITIAL",
-            "label": "ボーナス初当り回数",
-            "widget": "counter"
+            "input": "denominator",
+            "inputId": "M04-C03.eligibleTrialCount",
+            "engineBinding": {
+              "inputIds": [
+                "M04-C03.eligibleTrialCount",
+                "M04-V01.eligibleTrialCount"
+              ]
+            },
+            "gridSpan": 12,
+            "directNumeric": true,
+            "quickAdd": [
+              50
+            ],
+            "unobservedDisplay": "—",
+            "playDataBinding": {
+              "source": "PLAY_NORMAL_GAME_DELTA"
+            }
           }
-        ]
-      },
-      {
-        "id": "UI_DESIGN_2",
-        "title": "小役",
-        "displayOrder": 2,
+        ],
         "items": [
           {
-            "type": "input",
-            "inputId": "INP_CHERRY_B",
-            "label": "チェリーB回数",
-            "widget": "counter",
+            "id": "NODE_M04-C03",
+            "featureId": "M04-C03",
+            "title": "確定役B",
+            "description": "通常時の確定役Bを記録します。通常ゲーム数を基準に、実戦中の出現割合を設定別に比較します。\n・注意：8枚役全体を数えません。\n・注意：通常Gを母数に左第1停止で確定役B（スイカ小V型）を識別した回数。8枚役全体を数えません。",
+            "descriptionPresentation": {
+              "collapsible": true,
+              "label": "説明",
+              "defaultExpanded": false
+            },
             "gridSpan": 6,
-            "config": {
-              "compact": true
-            }
+            "inputs": [
+              {
+                "id": "M04-C03.successCount",
+                "label": "確定役B回数",
+                "input": "counter",
+                "inputId": "M04-C03.successCount",
+                "engineBinding": {
+                  "inputId": "M04-C03.successCount"
+                },
+                "directNumeric": true,
+                "quickAdd": [
+                  1
+                ],
+                "gridSpan": 12,
+                "unobservedDisplay": "—"
+              }
+            ]
           },
           {
-            "type": "input",
-            "inputId": "INP_KAKUTEI_B",
-            "label": "確定役B回数",
-            "widget": "counter",
+            "id": "NODE_M04-V01",
+            "featureId": "M04-V01",
+            "title": "チェリーB確率",
+            "description": "通常時のチェリーBを記録します。通常ゲーム数を基準に、実戦中の出現割合を設定別に比較します。\n・注意：チェリーAを混ぜません。\n・注意：通常Gを母数に左または中第1停止で判別したチェリーBを記録。チェリーAを混ぜません。",
+            "descriptionPresentation": {
+              "collapsible": true,
+              "label": "説明",
+              "defaultExpanded": false
+            },
             "gridSpan": 6,
-            "config": {
-              "compact": true
-            }
+            "inputs": [
+              {
+                "id": "M04-V01.successCount",
+                "label": "チェリーB回数",
+                "input": "counter",
+                "inputId": "M04-V01.successCount",
+                "engineBinding": {
+                  "inputId": "M04-V01.successCount"
+                },
+                "directNumeric": true,
+                "quickAdd": [
+                  1
+                ],
+                "gridSpan": 12,
+                "unobservedDisplay": "—"
+              }
+            ]
           }
         ]
       }
     ]
   },
-  "selectionSummary": {
-    "schemaVersion": "selection-summary-v1",
-    "evaluatedCount": 6,
-    "selectedCount": 3,
-    "rejectedCount": 3,
-    "selected": [
-      {
-        "featureId": "FEAT_INITIAL",
-        "name": "ボーナス初当り",
-        "reason": "天国連中のボーナスを除いた「通常区間からのボーナス初当り」に設定差があるため主軸として採用。",
-        "requiredTrials": {
-          "value": 65418,
-          "unit": "通常ゲーム"
-        }
-      },
-      {
-        "featureId": "FEAT_CHERRY_B",
-        "name": "チェリーB",
-        "reason": "停止形で判別可能かつ設定差があるため採用。",
-        "requiredTrials": {
-          "value": 14867,
-          "unit": "通常ゲーム"
-        }
-      },
-      {
-        "featureId": "FEAT_KAKUTEI_B",
-        "name": "確定役B",
-        "reason": "左第1停止時に判別可能で設定差が大きいため採用。",
-        "requiredTrials": {
-          "value": 88895,
-          "unit": "通常ゲーム"
-        }
-      }
-    ],
-    "rejected": [
-      {
-        "featureId": "FEAT_BB",
-        "name": "BB確率",
-        "reason": "初当りと天国連を含む総ボーナスフローが重なり、同時採用すると同じ当選を重複評価する。"
-      },
-      {
-        "featureId": "FEAT_RB",
-        "name": "RB確率",
-        "reason": "初当りと天国連を含む総ボーナスフローが重なり、同時採用すると同じ当選を重複評価する。"
-      },
-      {
-        "featureId": "FEAT_CHERRY_COMBINED",
-        "name": "チェリー合算",
-        "reason": "チェリーBを包含するため同時採用は重複。"
-      }
-    ]
-  },
-  "reliability": {},
   "metadata": {
     "machineId": "S_OKIDOKI_BLACK_EP",
     "displayName": "沖ドキ！BLACK",
@@ -285,12 +429,126 @@
       "SET_5",
       "SET_6"
     ],
-    "uiDesignMaterialized": true,
-    "uiDesignSchemaVersion": "ui-design-data-v1",
-    "uiDesignStatus": "PASS"
+    "settingsStatus": "SOURCE_DERIVED"
   },
-  "validation": {
-    "cases": []
-  },
-  "statistics": {}
+  "v8": {
+    "machineResearchSummary": {
+      "title": "この機種の設定推測について",
+      "adopted": [
+        {
+          "featureId": "M04-C03",
+          "label": "確定役B",
+          "importance": "有力",
+          "selectionScore": 10.3,
+          "evaluation": {
+            "userLabel": "設定判別スコア",
+            "value": 10.3
+          },
+          "reason": "確定役Bは設定1 1/16384、設定6 1/6553.6と設定差があります。「通常ゲーム数」に対する「確定役B回数」の発生割合を比較して推測に使用します。 観測条件：複数の設定推測項目で同じ「通常ゲーム数」を共通の基準として使用します。"
+        },
+        {
+          "featureId": "M04-V01",
+          "label": "チェリーB確率",
+          "importance": "主要",
+          "selectionScore": 49.1,
+          "evaluation": {
+            "userLabel": "設定判別スコア",
+            "value": 49.1
+          },
+          "reason": "チェリーB確率は設定1 1/168、設定6 1/128.5と設定差があります。「通常ゲーム数」に対する「チェリーB回数」の発生割合を比較して推測に使用します。 観測条件：複数の設定推測項目で同じ「通常ゲーム数」を共通の基準として使用します。"
+        }
+      ],
+      "notAdopted": [
+        {
+          "featureId": "M04-C01",
+          "label": "初当たり合算",
+          "reason": "この項目にも設定差のある数値は確認できています。確定役Bはボーナスを伴うため、初当たりとの同時加算を避けます。 同じ情報を重ねて評価して判別力を過大に見積もらないため、現在は設定判別スコア等を比較して「確定役B」を代表として使用し、この項目は単独では数値推測に使用しません。"
+        },
+        {
+          "featureId": "M04-N01",
+          "label": "チェリー合算",
+          "reason": "この項目にも設定差のある数値は確認できています。チェリー合算はチェリーBを含むため、同じ回数を独立加算しません。 同じ情報を重ねて評価して判別力を過大に見積もらないため、現在は設定判別スコア等を比較して「チェリーB確率」を代表として使用し、この項目は単独では数値推測に使用しません。"
+        },
+        {
+          "featureId": "M04-C02",
+          "label": "通常A/B滞在ボーナス",
+          "reason": "通常A・Bだけの抽選値ですが、引き戻し・チャンス・黒ドキなどの内部滞在を全ゲームで識別できません。32Gを除いただけでは対象モード限定になりません。",
+          "reevaluationCondition": "不足する値や観測条件を解決する新しい具体的な公開資料が得られた場合に、この候補のみ再確認します。"
+        },
+        {
+          "featureId": "M04-V02",
+          "label": "通常ABのスイカ当選率",
+          "reason": "通常A・Bだけの抽選値ですが、引き戻し・チャンス・黒ドキなどの内部滞在を全ゲームで識別できません。32Gを除いただけでは対象モード限定になりません。",
+          "reevaluationCondition": "不足する値や観測条件を解決する新しい具体的な公開資料が得られた場合に、この候補のみ再確認します。"
+        },
+        {
+          "featureId": "M04-C04",
+          "label": "ハイビスカス点灯",
+          "reason": "光り方は次回モードやBIGを示唆するもの。確認した設定判別資料には、点灯パターンの全設定別分布や設定確定パターンはありません。",
+          "reevaluationCondition": "不足する値や観測条件を解決する新しい具体的な公開資料が得られた場合に、この候補のみ再確認します。"
+        },
+        {
+          "featureId": "M04-C05",
+          "label": "チェリーB（重複台帳）",
+          "reason": "M04-V01と同じチェリーB。成立回数は1か所だけ記録し、同じ情報を2回使いません。",
+          "reevaluationCondition": "不足する値や観測条件を解決する新しい具体的な公開資料が得られた場合に、この候補のみ再確認します。"
+        },
+        {
+          "featureId": "M04-C06",
+          "label": "モード別レア役当選率",
+          "reason": "チェリー通常ABは1.1～1.2%、スイカは通常AB2.8～4.0%・引き戻し7.5～8.8%・チャンス9.2～10.7%。対象モードを識別できないため、無条件のレア役抽選率として使えません。",
+          "reevaluationCondition": "不足する値や観測条件を解決する新しい具体的な公開資料が得られた場合に、この候補のみ再確認します。"
+        },
+        {
+          "featureId": "M04-C07",
+          "label": "モード移行",
+          "reason": "当選時に内部モードが移行。約40%のリセット後チャンスなどは掲載されているが、全設定×全移行元の表を確認できず、確定できない移行元を推定して使用しません。",
+          "reevaluationCondition": "不足する値や観測条件を解決する新しい具体的な公開資料が得られた場合に、この候補のみ再確認します。"
+        },
+        {
+          "featureId": "M04-C08",
+          "label": "連チャン除外G・黒ドキ",
+          "reason": "32G以内の当選は連チャンとして初当たりから除外します。これは入力母数の定義で、別の設定差尤度ではありません。黒ドキは見た目で確定できません。",
+          "reevaluationCondition": "不足する値や観測条件を解決する新しい具体的な公開資料が得られた場合に、この候補のみ再確認します。"
+        }
+      ],
+      "highLowDiscrimination": {
+        "status": "COMPUTED",
+        "method": "BEST_SINGLE_EXACT_ACTIVE_FEATURE",
+        "bandDefinition": {
+          "lowSettings": "SETTING_1_TO_3",
+          "highSettings": "SETTING_4_TO_6",
+          "classPrior": "BALANCED"
+        },
+        "results": [
+          {
+            "games": 1500,
+            "balancedAccuracyPercent": 59.98
+          },
+          {
+            "games": 3000,
+            "balancedAccuracyPercent": 63.76
+          },
+          {
+            "games": 7000,
+            "balancedAccuracyPercent": 69.93
+          }
+        ],
+        "eligibleFeatureIds": [
+          "M04-C03",
+          "M04-V01"
+        ],
+        "selectedFeatureId": "M04-V01",
+        "selectedFeatureLabel": "チェリーB確率",
+        "excludedFeatures": [
+          {
+            "findingId": "M04-C03",
+            "reason": "CONSERVATIVE_SINGLE_FEATURE_NO_INDEPENDENCE_ASSUMPTION"
+          }
+        ],
+        "note": "7000Gへ正確に換算できるACTIVE要素だけを候補とし、要素間の独立性を仮定せず、単独で最も高い判別精度を持つ要素から保守的に算出しています。条件付き要素はこの指標には含めませんが、実戦中に実際の観測回数が入力された場合は設定推測に使用します。"
+      },
+      "unresolved": []
+    }
+  }
 }

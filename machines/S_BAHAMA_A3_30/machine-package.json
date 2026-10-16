@@ -1,12 +1,16 @@
 {
   "schemaVersion": 1,
+  "provenance": {
+    "manifestVersion": "8.5",
+    "generationPath": "V8_5_PRODUCTION_PIPELINE",
+    "legacyOracleUsed": false
+  },
   "machine": {
     "schemaVersion": "2.0.0",
     "machineId": "S_BAHAMA_A3_30",
-    "machineDataVersion": "0.1.1",
+    "machineDataVersion": "8.5.1-batch-20261016-018",
     "displayName": "バハマ",
-    "modelName": "SバハマA3-30",
-    "manufacturer": "アムテックス",
+    "modelName": "バハマ",
     "settings": [
       "SET_1",
       "SET_2",
@@ -19,6 +23,7 @@
       "containsImages": false,
       "containsExecutableCode": false
     },
+    "manufacturer": "アムテックス",
     "introductionDate": "2024-07-08",
     "machineType": "MEDAL",
     "gameType": "AT"
@@ -27,75 +32,112 @@
     "schemaVersion": "2.0.0",
     "inputs": [
       {
-        "id": "INP_NORMAL_GAMES",
+        "id": "M05-C02.eligibleTrialCount",
         "name": "通常ゲーム数",
+        "category": "V8_NUMERIC",
         "type": "integer",
-        "category": "PRIMARY",
-        "displayOrder": 1,
-        "defaultValue": 0,
         "unit": "G",
-        "minimum": 0
+        "defaultValue": 0,
+        "minimum": 0,
+        "displayOrder": 1,
+        "inferenceRole": "INCLUDE_PRIMARY"
       },
       {
-        "id": "INP_BONUS",
-        "name": "ボーナス回数",
+        "id": "M05-C02.successCount",
+        "name": "REG回数",
+        "category": "V8_NUMERIC",
         "type": "counter",
-        "category": "PRIMARY",
+        "unit": "回",
+        "defaultValue": 0,
+        "minimum": 0,
         "displayOrder": 2,
-        "defaultValue": 0,
-        "unit": "回",
-        "minimum": 0
+        "parentInputId": "M05-C02.eligibleTrialCount",
+        "inferenceRole": "INCLUDE_PRIMARY"
       },
       {
-        "id": "INP_CHERRY3",
+        "id": "M05-N01.eligibleTrialCount",
+        "name": "通常ゲーム数",
+        "category": "V8_NUMERIC",
+        "type": "integer",
+        "unit": "G",
+        "defaultValue": 0,
+        "minimum": 0,
+        "displayOrder": 3,
+        "inferenceRole": "INCLUDE_PRIMARY"
+      },
+      {
+        "id": "M05-N01.successCount",
         "name": "3枚チェリー回数",
+        "category": "V8_NUMERIC",
         "type": "counter",
-        "category": "SMALL_ROLE",
-        "displayOrder": 10,
-        "defaultValue": 0,
         "unit": "回",
-        "minimum": 0
+        "defaultValue": 0,
+        "minimum": 0,
+        "displayOrder": 4,
+        "parentInputId": "M05-N01.eligibleTrialCount",
+        "inferenceRole": "INCLUDE_PRIMARY"
       },
       {
-        "id": "INP_SUIKA",
+        "id": "M05-N02.eligibleTrialCount",
+        "name": "通常ゲーム数",
+        "category": "V8_NUMERIC",
+        "type": "integer",
+        "unit": "G",
+        "defaultValue": 0,
+        "minimum": 0,
+        "displayOrder": 5,
+        "inferenceRole": "INCLUDE_PRIMARY"
+      },
+      {
+        "id": "M05-N02.successCount",
         "name": "スイカ回数",
+        "category": "V8_NUMERIC",
         "type": "counter",
-        "category": "SMALL_ROLE",
-        "displayOrder": 11,
-        "defaultValue": 0,
         "unit": "回",
-        "minimum": 0
-      },
-      {
-        "id": "INP_FREEZE",
-        "name": "ロングフリーズ回数",
-        "type": "counter",
-        "category": "OTHER",
-        "displayOrder": 20,
         "defaultValue": 0,
-        "unit": "回",
-        "minimum": 0
+        "minimum": 0,
+        "displayOrder": 6,
+        "parentInputId": "M05-N02.eligibleTrialCount",
+        "inferenceRole": "INCLUDE_PRIMARY"
       }
     ]
   },
   "features": {
-    "schemaVersion": "2.0.0",
+    "version": "8.5-runtime",
     "features": [
       {
-        "featureId": "FEAT_CHERRY3",
-        "name": "3枚チェリー",
-        "adoptionCategory": "INCLUDE_SUPPORT",
+        "featureId": "M05-C02",
+        "name": "REG",
+        "trialUniverse": "NORMAL_GAME_TRIAL",
+        "adoptionCategory": "INCLUDE_PRIMARY",
         "calculationRole": "PROBABILITY",
         "probabilityEngineUsage": true,
-        "modelType": "binomial",
-        "minimumSample": 1,
-        "sampleRecommendation": 7000,
-        "reliabilityProfile": {
-          "weight": 1
+        "denominatorInputId": "M05-C02.eligibleTrialCount",
+        "probabilities": {
+          "SET_1": 0.0019073049780659929,
+          "SET_2": 0.0020751193193608635,
+          "SET_3": 0.0023651844843897824,
+          "SET_5": 0.0027770063871146904,
+          "SET_6": 0.0031585596967782688
         },
-        "displayFormat": "ratio_1_over_n",
-        "denominatorInputId": "INP_NORMAL_GAMES",
-        "numeratorInputId": "INP_CHERRY3",
+        "selectionRationale": {
+          "summary": "設定推測に採用された要素です。",
+          "adoptionReason": "REGは設定1 1/524.3、設定6 1/316.6と設定差があります。「通常ゲーム数」に対する「REG回数」の発生割合を比較して推測に使用します。 観測条件：複数の設定推測項目で同じ「通常ゲーム数」を共通の基準として使用します。",
+          "shortTermReason": "標本が少ない間は結果の振れが大きくなります。",
+          "longTermReason": "観測数が増えるほど設定別の比較が安定します。"
+        },
+        "modelType": "binomial",
+        "numeratorInputId": "M05-C02.successCount",
+        "displayFormat": "percentage"
+      },
+      {
+        "featureId": "M05-N01",
+        "name": "3枚チェリー",
+        "trialUniverse": "NORMAL_GAME_TRIAL",
+        "adoptionCategory": "INCLUDE_PRIMARY",
+        "calculationRole": "PROBABILITY",
+        "probabilityEngineUsage": true,
+        "denominatorInputId": "M05-N01.eligibleTrialCount",
         "probabilities": {
           "SET_1": 0.00390625,
           "SET_2": 0.004271678769756515,
@@ -103,25 +145,24 @@
           "SET_5": 0.005005005005005005,
           "SET_6": 0.0053705692803437165
         },
-        "sourceEvidenceRefs": [
-          "SRC_ANALYSIS"
-        ]
+        "selectionRationale": {
+          "summary": "設定推測に採用された要素です。",
+          "adoptionReason": "3枚チェリーは設定1 1/256、設定6 1/186.2と設定差があります。「通常ゲーム数」に対する「3枚チェリー回数」の発生割合を比較して推測に使用します。 観測条件：複数の設定推測項目で同じ「通常ゲーム数」を共通の基準として使用します。",
+          "shortTermReason": "標本が少ない間は結果の振れが大きくなります。",
+          "longTermReason": "観測数が増えるほど設定別の比較が安定します。"
+        },
+        "modelType": "binomial",
+        "numeratorInputId": "M05-N01.successCount",
+        "displayFormat": "percentage"
       },
       {
-        "featureId": "FEAT_SUIKA",
+        "featureId": "M05-N02",
         "name": "スイカ",
-        "adoptionCategory": "INCLUDE_SUPPORT",
+        "trialUniverse": "NORMAL_GAME_TRIAL",
+        "adoptionCategory": "INCLUDE_PRIMARY",
         "calculationRole": "PROBABILITY",
         "probabilityEngineUsage": true,
-        "modelType": "binomial",
-        "minimumSample": 1,
-        "sampleRecommendation": 7000,
-        "reliabilityProfile": {
-          "weight": 1
-        },
-        "displayFormat": "ratio_1_over_n",
-        "denominatorInputId": "INP_NORMAL_GAMES",
-        "numeratorInputId": "INP_SUIKA",
+        "denominatorInputId": "M05-N02.eligibleTrialCount",
         "probabilities": {
           "SET_1": 0.01001001001001001,
           "SET_2": 0.01006036217303823,
@@ -129,227 +170,294 @@
           "SET_5": 0.011135857461024499,
           "SET_6": 0.011627906976744186
         },
-        "sourceEvidenceRefs": [
-          "SRC_ANALYSIS"
-        ]
+        "selectionRationale": {
+          "summary": "設定推測に採用された要素です。",
+          "adoptionReason": "スイカは設定1 1/99.9、設定6 1/86と設定差があります。「通常ゲーム数」に対する「スイカ回数」の発生割合を比較して推測に使用します。 観測条件：複数の設定推測項目で同じ「通常ゲーム数」を共通の基準として使用します。",
+          "shortTermReason": "標本が少ない間は結果の振れが大きくなります。",
+          "longTermReason": "観測数が増えるほど設定別の比較が安定します。"
+        },
+        "modelType": "binomial",
+        "numeratorInputId": "M05-N02.successCount",
+        "displayFormat": "percentage"
+      }
+    ],
+    "runtimeProjection": [
+      {
+        "featureId": "M05-C02",
+        "runtimeStatus": "ACTIVE",
+        "metric": "SELECTION_SCORE",
+        "metricValue": 66.75402357309225,
+        "importance": "主要"
       },
       {
-        "featureId": "FEAT_BONUS_FREEZE_OUTCOME",
-        "name": "ボーナス内訳（ロングフリーズ/その他）",
-        "adoptionCategory": "INCLUDE_PRIMARY",
-        "calculationRole": "PROBABILITY",
-        "probabilityEngineUsage": true,
-        "modelType": "marginal_multinomial",
-        "minimumSample": 1,
-        "sampleRecommendation": 7000,
-        "reliabilityProfile": {
-          "weight": 1
-        },
-        "numeratorInputId": "INP_FREEZE",
-        "denominatorInputId": "INP_NORMAL_GAMES",
-        "categoryInputIds": [
-          "INP_BONUS"
-        ],
-        "probabilities": {},
-        "categorySubtractInputIds": {
-          "INP_BONUS": [
-            "INP_FREEZE"
-          ]
-        },
-        "categoryLabels": [
-          "FREEZE_BONUS",
-          "OTHER_BONUS"
-        ],
-        "categoryProbabilities": {
-          "SET_1": [
-            0.00002384188064754548,
-            0.0052559891647590016
-          ],
-          "SET_2": [
-            0.000028610256777054574,
-            0.005511555948209095
-          ],
-          "SET_3": [
-            0.00003755092844670585,
-            0.005929036183725132
-          ],
-          "SET_5": [
-            0.00007867820613690008,
-            0.006513279605333107
-          ],
-          "SET_6": [
-            0.00012475205529011092,
-            0.007018105087567032
-          ]
-        },
-        "sourceEvidenceRefs": [
-          "SRC_ANALYSIS"
-        ]
+        "featureId": "M05-N01",
+        "runtimeStatus": "ACTIVE",
+        "metric": "SELECTION_SCORE",
+        "metricValue": 49.335719140258554,
+        "importance": "主要"
+      },
+      {
+        "featureId": "M05-N02",
+        "runtimeStatus": "ACTIVE",
+        "metric": "SELECTION_SCORE",
+        "metricValue": 33.311781994807696,
+        "importance": "主要"
       }
     ]
   },
   "evidence": {
-    "version": "1.0.0",
+    "version": "8.5-runtime",
     "evidences": [],
-    "sources": [
-      {
-        "id": "SRC_ID",
-        "classification": "ANALYSIS",
-        "url": "https://www.p-world.co.jp/machine/database/10053",
-        "checkedAt": "2026-08-21"
-      },
-      {
-        "id": "SRC_ANALYSIS",
-        "classification": "ANALYSIS",
-        "url": "https://www.p-world.co.jp/machine/database/10053",
-        "checkedAt": "2026-08-21"
-      }
-    ]
+    "references": []
   },
+  "blockedItems": [
+    {
+      "blockId": "M05-C03",
+      "label": "ボーナス告知演出",
+      "reason": "フラミンゴのプレミア点灯はBIGを示唆します。設定別出現率や設定確定演出の表は確認した資料にありません。",
+      "reevaluationCondition": "不足する値や観測条件を解決する新しい具体的な公開資料が得られた場合に、この候補のみ再確認します。",
+      "sourceIds": [
+        "overview",
+        "hazuse"
+      ]
+    },
+    {
+      "blockId": "M05-C04",
+      "label": "小役詳細（分離済み）",
+      "reason": "設定差のある小役はN01・N02・N04・N05へ分離。公開不足という旧判断を撤回し、この見出しを独立した設定差として重ねません。",
+      "reevaluationCondition": "不足する値や観測条件を解決する新しい具体的な公開資料が得られた場合に、この候補のみ再確認します。",
+      "sourceIds": [
+        "hazuse"
+      ]
+    },
+    {
+      "blockId": "M05-C05",
+      "label": "REG比率",
+      "reason": "BIG・REGの公開確率から得る比率はC01/C02と同じ情報で、独立の設定差尤度として加算しません。",
+      "reevaluationCondition": "不足する値や観測条件を解決する新しい具体的な公開資料が得られた場合に、この候補のみ再確認します。",
+      "sourceIds": [
+        "hazuse"
+      ]
+    },
+    {
+      "blockId": "M05-N04",
+      "label": "8枚押し順ベル",
+      "reason": "通常時の内部成立率1/7.0～1/6.9は公開。押し順不正解時に全フラグを識別する公開手順が今回の打ち方資料にないため、単なる8枚入賞回数と同一視しません。",
+      "reevaluationCondition": "不足する値や観測条件を解決する新しい具体的な公開資料が得られた場合に、この候補のみ再確認します。",
+      "sourceIds": [
+        "hazuse"
+      ],
+      "retainedPublishedValues": {
+        "1": "1/7",
+        "2": "1/7",
+        "3": "1/7",
+        "5": "1/6.9",
+        "6": "1/6.9"
+      }
+    },
+    {
+      "blockId": "M05-N05",
+      "label": "共通1枚役",
+      "reason": "通常時1/8.5～1/9.0は公開。ただし取りこぼした押し順役等と区別した全成立回数を記録する手順は確認できず、1枚払出の全回数で代用しません。",
+      "reevaluationCondition": "不足する値や観測条件を解決する新しい具体的な公開資料が得られた場合に、この候補のみ再確認します。",
+      "sourceIds": [
+        "hazuse"
+      ],
+      "retainedPublishedValues": {
+        "1": "1/8.5",
+        "2": "1/8.5",
+        "3": "1/8.7",
+        "5": "1/8.9",
+        "6": "1/9"
+      }
+    }
+  ],
   "ui": {
-    "sections": [
+    "schemaVersion": "v8.5-runtime-ui-v1",
+    "contractVersion": "runtime-ui-v8",
+    "source": "CANONICAL_UI",
+    "sourceSchemaVersion": "canonical-ui-v1",
+    "manifestRevision": "8.5",
+    "playInfo": {
+      "visible": true,
+      "collapsible": false,
+      "mode": "NORMAL_ONLY",
+      "sessionFields": [
+        {
+          "id": "date",
+          "label": "日付",
+          "mode": "DATE"
+        },
+        {
+          "id": "storeName",
+          "label": "店舗名",
+          "mode": "TEXT"
+        },
+        {
+          "id": "machineNumber",
+          "label": "台番号",
+          "mode": "TEXT"
+        }
+      ],
+      "startFields": [
+        {
+          "id": "startNormalGames",
+          "label": "着席時 通常ゲーム数",
+          "mode": "NUMBER",
+          "directNumeric": true
+        }
+      ],
+      "currentFields": [
+        {
+          "id": "currentNormalGames",
+          "label": "現在 通常ゲーム数",
+          "mode": "NUMBER",
+          "directNumeric": true
+        }
+      ],
+      "difference": {
+        "autoCalculate": true
+      },
+      "useDifference": {
+        "label": "着席時との差分を使用",
+        "defaultWhenStartNormalGamesPresent": true
+      }
+    },
+    "accordion": {
+      "enabled": true,
+      "singleOpen": true
+    },
+    "quickInput": {
+      "enabled": false
+    },
+    "v8Sections": [
       {
-        "id": "UI_DESIGN_1",
-        "title": "ボーナス",
-        "displayOrder": 1,
-        "items": [
+        "id": "OBS_SHARED_NORMAL_GAME_TRIAL",
+        "title": "REG・3枚チェリー・スイカ",
+        "collapsible": true,
+        "defaultExpanded": false,
+        "description": "複数の設定推測項目で同じ「通常ゲーム数」を共通の基準として使用します。通常ゲーム数は1回だけ入力し、各項目では該当した回数だけを記録してください。",
+        "descriptionPresentation": {
+          "collapsible": true,
+          "label": "説明",
+          "defaultExpanded": false
+        },
+        "groups": [
           {
-            "type": "input",
-            "inputId": "INP_NORMAL_GAMES",
+            "id": "DENOM_NORMAL_GAME_TRIAL",
             "label": "通常ゲーム数",
-            "widget": "number"
-          },
-          {
-            "type": "input",
-            "inputId": "INP_BONUS",
-            "label": "ボーナス回数",
-            "widget": "counter"
-          }
-        ]
-      },
-      {
-        "id": "UI_DESIGN_2",
-        "title": "小役",
-        "displayOrder": 2,
-        "items": [
-          {
-            "type": "input",
-            "inputId": "INP_CHERRY3",
-            "label": "3枚チェリー回数",
-            "widget": "counter",
-            "gridSpan": 6,
-            "config": {
-              "compact": true
-            }
-          },
-          {
-            "type": "input",
-            "inputId": "INP_SUIKA",
-            "label": "スイカ回数",
-            "widget": "counter",
-            "gridSpan": 6,
-            "config": {
-              "compact": true
+            "input": "denominator",
+            "inputId": "M05-C02.eligibleTrialCount",
+            "engineBinding": {
+              "inputIds": [
+                "M05-C02.eligibleTrialCount",
+                "M05-N01.eligibleTrialCount",
+                "M05-N02.eligibleTrialCount"
+              ]
+            },
+            "gridSpan": 12,
+            "directNumeric": true,
+            "quickAdd": [
+              50
+            ],
+            "unobservedDisplay": "—",
+            "playDataBinding": {
+              "source": "PLAY_NORMAL_GAME_DELTA"
             }
           }
-        ]
-      },
-      {
-        "id": "UI_DESIGN_3",
-        "title": "その他",
-        "displayOrder": 3,
+        ],
         "items": [
           {
-            "type": "input",
-            "inputId": "INP_FREEZE",
-            "label": "ロングフリーズ回数",
-            "widget": "counter"
+            "id": "NODE_M05-C02",
+            "featureId": "M05-C02",
+            "title": "REG",
+            "description": "通常時のREGを記録します。通常ゲーム数を基準に、実戦中の出現割合を設定別に比較します。\n・注意：ATボーナスは対象に含めません。\n・注意：総ゲーム数へAT消化分を混ぜません。",
+            "descriptionPresentation": {
+              "collapsible": true,
+              "label": "説明",
+              "defaultExpanded": false
+            },
+            "gridSpan": 6,
+            "inputs": [
+              {
+                "id": "M05-C02.successCount",
+                "label": "REG回数",
+                "input": "counter",
+                "inputId": "M05-C02.successCount",
+                "engineBinding": {
+                  "inputId": "M05-C02.successCount"
+                },
+                "directNumeric": true,
+                "quickAdd": [
+                  1
+                ],
+                "gridSpan": 12,
+                "unobservedDisplay": "—"
+              }
+            ]
+          },
+          {
+            "id": "NODE_M05-N01",
+            "featureId": "M05-N01",
+            "title": "3枚チェリー",
+            "description": "通常時の3枚チェリーを記録します。通常ゲーム数を基準に、実戦中の出現割合を設定別に比較します。\n・注意：ATボーナスは対象に含めません。\n・注意：総ゲーム数へAT消化分を混ぜません。",
+            "descriptionPresentation": {
+              "collapsible": true,
+              "label": "説明",
+              "defaultExpanded": false
+            },
+            "gridSpan": 6,
+            "inputs": [
+              {
+                "id": "M05-N01.successCount",
+                "label": "3枚チェリー回数",
+                "input": "counter",
+                "inputId": "M05-N01.successCount",
+                "engineBinding": {
+                  "inputId": "M05-N01.successCount"
+                },
+                "directNumeric": true,
+                "quickAdd": [
+                  1
+                ],
+                "gridSpan": 12,
+                "unobservedDisplay": "—"
+              }
+            ]
+          },
+          {
+            "id": "NODE_M05-N02",
+            "featureId": "M05-N02",
+            "title": "スイカ",
+            "description": "通常時のスイカを記録します。通常ゲーム数を基準に、実戦中の出現割合を設定別に比較します。\n・注意：ATボーナスは対象に含めません。\n・注意：総ゲーム数へAT消化分を混ぜません。",
+            "descriptionPresentation": {
+              "collapsible": true,
+              "label": "説明",
+              "defaultExpanded": false
+            },
+            "gridSpan": 6,
+            "inputs": [
+              {
+                "id": "M05-N02.successCount",
+                "label": "スイカ回数",
+                "input": "counter",
+                "inputId": "M05-N02.successCount",
+                "engineBinding": {
+                  "inputId": "M05-N02.successCount"
+                },
+                "directNumeric": true,
+                "quickAdd": [
+                  1
+                ],
+                "gridSpan": 12,
+                "unobservedDisplay": "—"
+              }
+            ]
           }
         ]
       }
     ]
   },
-  "selectionSummary": {
-    "schemaVersion": "selection-summary-v1",
-    "evaluatedCount": 10,
-    "selectedCount": 3,
-    "rejectedCount": 7,
-    "selected": [
-      {
-        "featureId": "FEAT_CHERRY3",
-        "name": "3枚チェリー",
-        "reason": "停止形で識別でき、設定差が大きいため採用。",
-        "requiredTrials": {
-          "value": 15685,
-          "unit": "通常ゲーム"
-        }
-      },
-      {
-        "featureId": "FEAT_SUIKA",
-        "name": "スイカ",
-        "reason": "取りこぼしにくく段階差があるため採用。",
-        "requiredTrials": {
-          "value": 29928,
-          "unit": "通常ゲーム"
-        }
-      },
-      {
-        "featureId": "FEAT_BONUS_FREEZE_OUTCOME",
-        "name": "ボーナス内訳（ロングフリーズ/その他）",
-        "reason": "ボーナス合成とロングフリーズを排他的な内訳として一体評価します。7000Gでも設定6ならフリーズ発生余地はありますが、単独で強い判別要素とはせずボーナス情報の一部として扱います。",
-        "requiredTrials": {
-          "value": 10938,
-          "unit": "通常ゲーム"
-        }
-      }
-    ],
-    "rejected": [
-      {
-        "featureId": "FEAT_BONUS",
-        "name": "ボーナス合成",
-        "reason": "ロングフリーズを含むボーナス内訳Featureへ統合。",
-        "requiredTrials": {
-          "value": 12963,
-          "unit": "通常ゲーム"
-        }
-      },
-      {
-        "featureId": "FEAT_FREEZE",
-        "name": "ロングフリーズ",
-        "reason": "ボーナス合成に含まれるため単独採用すると二重計上。ボーナス内訳Featureへ統合。",
-        "requiredTrials": {
-          "value": 46369,
-          "unit": "通常ゲーム"
-        }
-      },
-      {
-        "featureId": "FEAT_BIG",
-        "name": "BIG確率",
-        "reason": "ボーナス合成の内訳であり合成と同時採用すると重複。"
-      },
-      {
-        "featureId": "FEAT_REG",
-        "name": "REG確率",
-        "reason": "ボーナス合成の内訳であり合成と同時採用すると重複。"
-      },
-      {
-        "featureId": "FEAT_8BELL",
-        "name": "8枚押し順ベル",
-        "reason": "差が小さく、押し順・内部フラグの安定した手動判別が難しい。"
-      },
-      {
-        "featureId": "FEAT_COMMON1",
-        "name": "共通1枚役",
-        "reason": "停止形だけでの継続的な正確カウントが難しい。"
-      },
-      {
-        "featureId": "REJECTED_SETTING_L",
-        "name": "設定L",
-        "reason": "通常の設定推測対象ではない特殊設定のため確率推測対象から除外。"
-      }
-    ]
-  },
-  "reliability": {},
   "metadata": {
     "machineId": "S_BAHAMA_A3_30",
     "displayName": "バハマ",
@@ -360,12 +468,130 @@
       "SET_5",
       "SET_6"
     ],
-    "uiDesignMaterialized": true,
-    "uiDesignSchemaVersion": "ui-design-data-v1",
-    "uiDesignStatus": "PASS"
+    "settingsStatus": "SOURCE_DERIVED"
   },
-  "validation": {
-    "cases": []
-  },
-  "statistics": {}
+  "v8": {
+    "machineResearchSummary": {
+      "title": "この機種の設定推測について",
+      "adopted": [
+        {
+          "featureId": "M05-C02",
+          "label": "REG",
+          "importance": "主要",
+          "selectionScore": 66.8,
+          "evaluation": {
+            "userLabel": "設定判別スコア",
+            "value": 66.8
+          },
+          "reason": "REGは設定1 1/524.3、設定6 1/316.6と設定差があります。「通常ゲーム数」に対する「REG回数」の発生割合を比較して推測に使用します。 観測条件：複数の設定推測項目で同じ「通常ゲーム数」を共通の基準として使用します。"
+        },
+        {
+          "featureId": "M05-N01",
+          "label": "3枚チェリー",
+          "importance": "主要",
+          "selectionScore": 49.3,
+          "evaluation": {
+            "userLabel": "設定判別スコア",
+            "value": 49.3
+          },
+          "reason": "3枚チェリーは設定1 1/256、設定6 1/186.2と設定差があります。「通常ゲーム数」に対する「3枚チェリー回数」の発生割合を比較して推測に使用します。 観測条件：複数の設定推測項目で同じ「通常ゲーム数」を共通の基準として使用します。"
+        },
+        {
+          "featureId": "M05-N02",
+          "label": "スイカ",
+          "importance": "主要",
+          "selectionScore": 33.3,
+          "evaluation": {
+            "userLabel": "設定判別スコア",
+            "value": 33.3
+          },
+          "reason": "スイカは設定1 1/99.9、設定6 1/86と設定差があります。「通常ゲーム数」に対する「スイカ回数」の発生割合を比較して推測に使用します。 観測条件：複数の設定推測項目で同じ「通常ゲーム数」を共通の基準として使用します。"
+        }
+      ],
+      "notAdopted": [
+        {
+          "featureId": "M05-C01",
+          "label": "BIG",
+          "reason": "この項目にも設定差のある数値は確認できています。ロングフリーズはBIGを伴い、BIG/REGと同じ当選系列。正式スコアによる代表を使用。 同じ情報を重ねて評価して判別力を過大に見積もらないため、現在は設定判別スコア等を比較して「REG」を代表として使用し、この項目は単独では数値推測に使用しません。"
+        },
+        {
+          "featureId": "M05-N03",
+          "label": "ロングフリーズ",
+          "reason": "この項目にも設定差のある数値は確認できています。ロングフリーズはBIGを伴い、BIG/REGと同じ当選系列。正式スコアによる代表を使用。 同じ情報を重ねて評価して判別力を過大に見積もらないため、現在は設定判別スコア等を比較して「REG」を代表として使用し、この項目は単独では数値推測に使用しません。"
+        },
+        {
+          "featureId": "M05-C03",
+          "label": "ボーナス告知演出",
+          "reason": "フラミンゴのプレミア点灯はBIGを示唆します。設定別出現率や設定確定演出の表は確認した資料にありません。",
+          "reevaluationCondition": "不足する値や観測条件を解決する新しい具体的な公開資料が得られた場合に、この候補のみ再確認します。"
+        },
+        {
+          "featureId": "M05-C04",
+          "label": "小役詳細（分離済み）",
+          "reason": "設定差のある小役はN01・N02・N04・N05へ分離。公開不足という旧判断を撤回し、この見出しを独立した設定差として重ねません。",
+          "reevaluationCondition": "不足する値や観測条件を解決する新しい具体的な公開資料が得られた場合に、この候補のみ再確認します。"
+        },
+        {
+          "featureId": "M05-C05",
+          "label": "REG比率",
+          "reason": "BIG・REGの公開確率から得る比率はC01/C02と同じ情報で、独立の設定差尤度として加算しません。",
+          "reevaluationCondition": "不足する値や観測条件を解決する新しい具体的な公開資料が得られた場合に、この候補のみ再確認します。"
+        },
+        {
+          "featureId": "M05-N04",
+          "label": "8枚押し順ベル",
+          "reason": "通常時の内部成立率1/7.0～1/6.9は公開。押し順不正解時に全フラグを識別する公開手順が今回の打ち方資料にないため、単なる8枚入賞回数と同一視しません。",
+          "reevaluationCondition": "不足する値や観測条件を解決する新しい具体的な公開資料が得られた場合に、この候補のみ再確認します。"
+        },
+        {
+          "featureId": "M05-N05",
+          "label": "共通1枚役",
+          "reason": "通常時1/8.5～1/9.0は公開。ただし取りこぼした押し順役等と区別した全成立回数を記録する手順は確認できず、1枚払出の全回数で代用しません。",
+          "reevaluationCondition": "不足する値や観測条件を解決する新しい具体的な公開資料が得られた場合に、この候補のみ再確認します。"
+        }
+      ],
+      "highLowDiscrimination": {
+        "status": "COMPUTED",
+        "method": "BEST_SINGLE_EXACT_ACTIVE_FEATURE",
+        "bandDefinition": {
+          "lowSettings": "SETTING_1_TO_3",
+          "highSettings": "SETTING_4_TO_6",
+          "classPrior": "BALANCED"
+        },
+        "results": [
+          {
+            "games": 1500,
+            "balancedAccuracyPercent": 62.82
+          },
+          {
+            "games": 3000,
+            "balancedAccuracyPercent": 67.68
+          },
+          {
+            "games": 7000,
+            "balancedAccuracyPercent": 75.15
+          }
+        ],
+        "eligibleFeatureIds": [
+          "M05-C02",
+          "M05-N01",
+          "M05-N02"
+        ],
+        "selectedFeatureId": "M05-C02",
+        "selectedFeatureLabel": "REG",
+        "excludedFeatures": [
+          {
+            "findingId": "M05-N01",
+            "reason": "CONSERVATIVE_SINGLE_FEATURE_NO_INDEPENDENCE_ASSUMPTION"
+          },
+          {
+            "findingId": "M05-N02",
+            "reason": "CONSERVATIVE_SINGLE_FEATURE_NO_INDEPENDENCE_ASSUMPTION"
+          }
+        ],
+        "note": "7000Gへ正確に換算できるACTIVE要素だけを候補とし、要素間の独立性を仮定せず、単独で最も高い判別精度を持つ要素から保守的に算出しています。条件付き要素はこの指標には含めませんが、実戦中に実際の観測回数が入力された場合は設定推測に使用します。"
+      },
+      "unresolved": []
+    }
+  }
 }
