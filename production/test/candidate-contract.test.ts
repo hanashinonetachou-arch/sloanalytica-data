@@ -12,3 +12,14 @@ test('keeps ambiguous same-universe dependency held',()=>{const e={machineId:'M'
 
 test('distinct trial universes are not enough to prove independence',()=>{const e={machineId:'M',evaluations:[evalItem('a','A','TRIAL_A',{'1':0.1,'6':0.2},'G','AはBの一部を構成するため独立性を仮定しない。',1),evalItem('b','B','TRIAL_B',{'1':0.05,'6':0.1},'G','Aを含む上流下流関係のため独立性を仮定しない。',2)]};const el=eligibility([decision('a','A'),decision('b','B')]);const d=buildCandidateContract(e,el,er,ir);assert.equal(d.dependencyGroups[0].resolution,'HELD_NO_JOINT_MODEL');assert.ok(d.candidates.every((x:any)=>!x.runtimeInferenceAllowed));});
 test('uses explicit preferred member with observed fallback without double counting',()=>{const tenha:any=evalItem('tenha','天破','TENHA_GAME',{'1':'1/100','6':'1/80'},'HOKUTO','因果経路を共有する。',5);tenha.dependencyFallbackRank=1;const at:any=evalItem('at','AT初当たり','NORMAL',{'1':'1/366','6':'1/273'},'HOKUTO','因果経路を共有する。',4,30);at.dependencyFallbackRank=2;const e={machineId:'M',evaluations:[tenha,at]};const el=eligibility([decision('tenha','天破'),decision('at','AT初当たり')]);const d=buildCandidateContract(e,el,er,ir);const g=d.dependencyGroups[0];assert.equal(g.resolution,'PREFERRED_WITH_FALLBACK');assert.equal(g.preferredFindingId,'tenha');assert.deepEqual(g.fallbackOrder,['tenha','at']);const preferred=d.candidates.find((x:any)=>x.findingId==='tenha');const fallback=d.candidates.find((x:any)=>x.findingId==='at');assert.equal(preferred.runtimeInferenceAllowed,true);assert.deepEqual(preferred.suppressedByFeatureIds,[]);assert.equal(fallback.runtimeInferenceAllowed,true);assert.deepEqual(fallback.suppressedByFeatureIds,['tenha']);assert.doesNotThrow(()=>validateCandidateContractDocument(d,el,e))});
+
+test('mixed categorical and game-rate dependency selects one formal representative without parsing categories as scalar probabilities',()=>{
+ const a=evalItem('at','AT','NORMAL',{'1':'1/408.6','6':'1/303'},'PATH','同じ当選経路。',1,24);
+ const b=evalItem('cz','CZ','NORMAL',{'1':'1/133.9','6':'1/118.9'},'PATH','同じ当選経路。',1,9);
+ const c={...evalItem('reset','変更時CZ','RESET',{'1':'チャンス: 69.9% / レース: 29.7% / その他: 0.4%','6':'チャンス: 49.6% / レース: 50% / その他: 0.4%'},'PATH','同じ当選経路。',4),model:'CATEGORICAL',categoryModel:{residualPolicy:'SOURCE_EXHAUSTIVE'}};
+ const e={machineId:'M',evaluations:[a,b,c]},el=eligibility([decision('at','AT'),decision('cz','CZ'),decision('reset','変更時CZ')]);
+ const d=buildCandidateContract(e,el,er,ir);
+ assert.equal(d.dependencyGroups[0].selectedFindingId,'at');
+ assert.equal(d.candidates.filter((x:any)=>x.runtimeInferenceAllowed).length,1);
+ assert.doesNotThrow(()=>validateCandidateContractDocument(d,el,e));
+});

@@ -25,6 +25,9 @@ function jointDistribution(members:any[]){
  return out;
 }
 function isAggregateCandidate(candidate:any,others:any[]):boolean{
+ // A categorical row is not a scalar event probability. Mixed dependency
+ // groups still use the existing formal-score representative selection below.
+ if([candidate,...others].some(m=>m.model==='CATEGORICAL'))return false;
  const keys=Object.keys(candidate?.settingDistribution??{});
  if(!keys.length||others.length<2||others.some(m=>Object.keys(m?.settingDistribution??{}).join('|')!==keys.join('|')))return false;
  return keys.every(setting=>{
@@ -101,3 +104,4 @@ export function buildCandidateContract(evaluation:any,eligibility:any,evaluation
  }
  return {schemaVersion:'candidate-contract-v1',manifestVersion:'8.5',batchId:eligibility.batchId,machineId:eligibility.machineId,machineName:eligibility.machineName,evaluationArtifact,eligibilityArtifact,candidates,dependencyGroups,excludedDecisions:(eligibility.decisions??[]).filter((x:any)=>x.eligibility!=='ELIGIBLE'),blockedItems:eligibility.blockedItems??[],evidenceCandidates:eligibility.evidenceCandidates??[],sourceIntegrityIssues:eligibility.sourceIntegrityIssues??[]};
 }
+

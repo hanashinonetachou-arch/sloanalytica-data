@@ -1,0 +1,11 @@
+import {RepoStore} from './core.ts';
+import {initializeBatch} from './runtime.ts';
+const s=new RepoStore(process.cwd()),id='batch-20261017-021';
+const selection=s.read<any>('next-machine-selection-20261017-batch021.json');
+const spec=s.read<any>('specs',id+'.json');
+if(JSON.stringify(spec.waves.flatMap((x:any)=>x.machineIds))!==JSON.stringify(selection.selected.map((x:any)=>x.machineId)))throw Error('SELECTION_MISMATCH');
+if(s.exists('batches',id))throw Error('BATCH_ALREADY_EXISTS');
+initializeBatch(s,spec);
+s.write(s.read('config','runtime-policy-v8.5.json'),'batches',id,'runtime-policy-config.json');
+s.write({batchId:id,source:'production/next-machine-selection-20261017-batch021.json',productionHead:'75301b1ddcdbde32deb11d1884259446e9839e08',distributionHead:'078b34f52c18b4e2709a7a9aacf96590ea1450a3',matchedAllTen:true,existingBatchCount:20},'batches',id,'selection-gap-scan.json');
+s.write({batchId:id,authority:'USER_EXPLICIT_INSTRUCTION_WITH_ATTACHED_WORK_EXECUTION_PROMPT',through:'CANDIDATE_CONTRACT',noInterimApprovalRequired:true,implementation:false,apk:false,distribution:false,qa:false,actionsRuns:0,originalCandidatesPreserved:135,researchReopened:false,publishedDenominatorEquivalence:'NOT_ASSERTED'},'batches',id,'scope-authorization.json');
