@@ -14,14 +14,13 @@ test('Batch019 retains all original 90 candidates, source claims, and exact stag
  for(const m of ids){
   const r=doc(m,'research');
   for(const row of r.researchCompleteness.candidateLedger){assert(!seen.has(row.candidateId));seen.add(row.candidateId);assert(row.sourceClaims.length>0);}
-  for(const stage of ['RESEARCH','EVALUATION','ELIGIBILITY','CANDIDATE_CONTRACT']){
+  for(const stage of ['RESEARCH','EVALUATION','ELIGIBILITY','CANDIDATE_CONTRACT','OBSERVATION_EVIDENCE','CANONICAL_UI','MACHINE_DATA','RUNTIME_POLICY','RUNTIME_PROJECTION','APP_RUNTIME']){
    const s=read(`batches/${batch}/machines/${m}/stages/${stage}.json`);assert.equal(s.state,'COMPLETE');
    const ref=s.authoritativeOutputRef,bytes=fs.readFileSync(path.join(root,ref.path.replace(/^production\//,'')));
    assert.equal(crypto.createHash('sha256').update(bytes).digest('hex'),ref.sha256);
   }
-  for(const stage of ['OBSERVATION_EVIDENCE','CANONICAL_UI','MACHINE_DATA','RUNTIME_POLICY','RUNTIME_PROJECTION','APP_RUNTIME','DISTRIBUTION','DEVICE_QA']){
-   const s=read(`batches/${batch}/machines/${m}/stages/${stage}.json`);assert(!s.authoritativeOutputRef);assert(!['RUNNING','COMPLETE','HUMAN_REQUIRED'].includes(s.state));
-  }
+  const qa=read(`batches/${batch}/machines/${m}/stages/DEVICE_QA.json`);assert.notEqual(qa.state,'COMPLETE');
+
  }
  for(const c of originals)assert(seen.has(c.candidate_id));
 });

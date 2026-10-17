@@ -1,3 +1,5 @@
+> この文書は契約工程の集計です。その後ユーザーの継続指示によりAPP_RUNTIMEまで完了しました。現在の工程状態はRUNTIME_IMPLEMENTATION_REPORT.mdと正式stageを参照してください。
+
 # Batch019 — Research照合からCandidate Contractまで完了
 
 元90候補を削除せず再利用し、既存Researchとの照合で必要な内訳・明示的な設定制約9件を加えた99件を保持。既存のEvaluator・Eligibility・Candidate Contract builder・Validator・採否閾値は変更していません。

@@ -76,7 +76,12 @@ for c,vs in flagvals.items():
  changes.append({'candidateId':c,'change':'PUBLIC_VECTOR_AND_BUILT_IN_FLAG_DISPLAY_CONFIRMED','values':vs})
 evidence(2,'M02-C06',[('白・Turn it up!（点滅なし）','デフォルト'),('青・GOOD（点滅なし）','奇数設定示唆'),('黄・NICE!（点滅なし）','偶数設定示唆'),('紫・COOL!!（点滅なし）','高設定示唆'),('赤・It\'s on fire!（点滅なし）','高設定示唆'),('赤点滅・Dynamite!（点滅なし）','設定2以上'),('虹・PERFECT!!!（点滅なし）','設定4以上'),('白（パネル点滅あり）','高設定示唆'),('青（パネル点滅あり）','奇数設定示唆'),('黄（パネル点滅あり）','偶数設定示唆'),('紫（パネル点滅あり）','設定3以上示唆'),('赤（パネル点滅あり）','設定2以上'),('赤点滅（パネル点滅あり）','設定2・4・5・6'),('虹（パネル点滅あり）','設定5以上')],'SIDE-Bまたは初当りREG終了後のPUSH。パネルフラッシュ有無を区別。青・黄の比率は別の数値観測で同じ回数を再入力しません。',[u2])
 block(2,'M02-C07','対象機種の設定示唆総覧にトロフィーの出現条件を確認できません。別機種のトロフィーを転用せず、終了時ランプ・ボイスとは別の確定情報として使いません。',sids=[u2])
-rate(2,'M02-C09','パネルフラッシュなしで青GOODまたは黄NICEが出た回数のみが母数。青GOODの回数を成功として記録。他の色とフラッシュありは除外。',[.58,.42,.58,.42,.58,.42],'CONDITIONAL_EVENT_TRIAL',True,[u2],label='終了ボイスの青GOOD割合')
+categorical(2,'M02-C09',['青・GOOD（点滅なし）','黄・NICE!（点滅なし）'],[[58,42],[42,58],[58,42],[42,58],[58,42],[42,58]],'パネルフラッシュなしで青GOODまたは黄NICEが出た時だけ分類。ほかの色とフラッシュありは母数に含めません。対象回数は青・黄の合計から自動計算。',[u2],label='終了ボイスの青・黄比率')
+for f in D[2]['findings']:
+ if f['findingId']=='M02-C06':
+  for cat in f['semanticCategories']:
+   if cat['label'] in ['青・GOOD（点滅なし）','黄・NICE!（点滅なし）']:cat['linkedFindingId']='M02-C09'
+
 group(2,['M02-C01','M02-C02',*flagvals.keys()],'hyper_bonus','BIG・REGと決まり手のリーチ目フラグは同じボーナス成立を分類した情報。独立加算せず正式スコアで代表を選択。')
 group(2,['M02-C04','M02-C10'],'hyper_suika','スイカAB合算がスイカAを含むため、合算とAを同時加算せず代表を選択。','AGGREGATE_COMPONENT')
 # M03
@@ -185,6 +190,11 @@ mirror(3,'M03-C09','M03-N01',[(x,'設定2以上' if x=='MARVELOUS' else ('デフ
 for c,eid in [('M10-C07','M10-N02'),('M10-N01','M10-N03')]:mirror(10,c,eid,list(zip(catlabels,['デフォルト','高設定示唆','高設定示唆','設定4以上','設定5以上','設定6'])))
 mirror(10,'M10-C10','M10-N04',list(zip(reglabels,['デフォルト','設定2否定','設定4否定','設定5否定','設定2・5示唆','設定1・4・6示唆','設定2以上','設定4以上','設定4以上','設定5以上','設定6'])))
 mirror(10,'M10-N05','M10-N06',list(zip(jaclabels,['設定2・5示唆','設定2・5示唆','設定2・5示唆','設定1・4・6示唆','設定1・4・6示唆','設定2以上','設定1・4・6','設定4以上','設定5以上'])))
+# Presentation-only occasion groups. Numeric and evidence inputs keep their identities.
+for i,definitions in [(2,[('M02-C09','ratio','青・黄比率'),('M02-C06','hints','その他のランプ・ボイス')]),(10,[('M10-C07','ff','炎炎ボーナス'),('M10-N02','ff','炎炎ボーナス'),('M10-N01','reg','REG'),('M10-N03','reg','REG')])]:
+ for fid,cond,label0 in definitions:
+  f=next(f for f in D[i]['findings'] if f['findingId']==fid)
+  f['observationContext']={'groupingApproved':True,'opportunityId':'hyper_bonus_end' if i==2 else 'enen_bonus_end','conditionId':cond,'groupTitle':'ボーナス終了時のランプ・ボイス' if i==2 else 'ボーナス終了画面','conditionLabel':label0}
 # Candidate-local, truthful provenance. Legacy claims and input bytes stay immutable in inbox.
 for i,d in D.items():
  old=d.pop('_old');mid=f'M{i:02}'
