@@ -1,9 +1,11 @@
-# Batch019 — Runtime完了後の継続
+# Batch019 — 配信完了・実機QA待ち
 
-正本：hanashinonetachou-arch/sloanalytica-data の production/v85-batch-019-contract-20261017 と PR #471。最新HEADから再取得し、二重Batch作成・完了成果の再生成を避ける。
+正本はhanashinonetachou-arch/sloanalytica-dataのproduction/v85-batch-019-contract-20261017、PR #471。最新HEADを再取得して正式stageとFINAL_DELIVERY_REPORT.md、device-qa/handoff.json、validationを読む。二重生成・二重配信・Integration再起動をしない。
 
-元90候補＋内訳・同一入力の設定制約9件を保持。ユーザーの2026-10-17「進めてください」により、Observation/Evidenceから配信・実機QA準備まで継続が許可された。scope-authorization.json、RUNTIME_IMPLEMENTATION_REPORT.md、各正式stageとartifact refsを読む。
+10件はDistributionまで正式COMPLETE。配信SHA=10c5438ec06f2b92f51b981c01deeb56368ff84b、全件8.5.1-batch-20261017-019。今回10件の実アプリ検証、V8.5全190件の互換性、対象外263件の不変、公開raw/Pages各10件のサイズ・SHA検証はPASS。App本体は7756b939のまま、前回固定署名APKを再利用。
 
-10件はAPP_RUNTIMEまで正式COMPLETE。今回の入力画面・数値/制約・描画検証PASS、App型検査とテストPASS、V8.5全190件互換性PASS。配信対象外263件は不変。Integration Boundaryのbatch019-integration.ymlで配信・ページ展開・Distribution正式受理を行い、公開サイズ/SHAを確認して既存APKで実機QA待ちを記録する。Actionsの二重起動禁止。既存App 7756b939と固定署名APKを再利用できるためApp変更やAPK再生成は不要。
+実機QAは未実施で10件HUMAN_REQUIRED。ユーザーが結果を示したら実際の対象・APKを照合して既存record-device-qa-acceptance.tsの手順で受理。不具合報告なら該当範囲を修正し、既存確認済みの範囲を独断で取り消さない。前BatchのQAは変更しない。
 
-実機QAをユーザーが明示するまで完了にしない。前BatchのQAは保持。設定確定/否定、未知率の記録専用説明、出典名の画面非表示、連チャン区間除外、ゲーム数共通入力の標準を保持。候補探索LIMITED_CLOSEOUTを無制限再調査に戻さず、22件BLOCKは新しい具体的出典が出るまで個別クローズ。
+元90候補＋内訳・制約9件を保持。LIMITED_CLOSEOUT、内部状態の観測不能候補や公開資料競合の候補別クローズ、未知率の記録専用説明、確定・否定の反映、出典名の画面非表示、共通ゲーム数と連チャン除外、同一観測機会のタブ統合を維持。科学モデル・閾値・完了条件を独断で変更しない。
+
+ActionsはIntegration Boundary中心、通常コミットは[skip ci]。今回の実機QA承認なしに次の機種選定や全完了扱いへ進めない。ただしユーザーから出先QA不可等の次工程指示があれば、その指示に従う。

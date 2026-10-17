@@ -1,4 +1,4 @@
-> この文書は契約工程の集計です。その後ユーザーの継続指示によりAPP_RUNTIMEまで完了しました。現在の工程状態はRUNTIME_IMPLEMENTATION_REPORT.mdと正式stageを参照してください。
+> この文書は契約工程の集計です。その後ユーザーの継続指示により配信まで完了しました。現在の工程状態はFINAL_DELIVERY_REPORT.mdと正式stageを参照してください。
 
 # Batch019 — Research照合からCandidate Contractまで完了
 
