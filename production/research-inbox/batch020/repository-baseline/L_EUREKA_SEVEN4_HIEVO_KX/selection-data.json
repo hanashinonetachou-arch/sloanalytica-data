@@ -1,0 +1,353 @@
+{
+  "schemaVersion": "selection-data-v1",
+  "machineId": "L_EUREKA_SEVEN4_HIEVO_KX",
+  "machineDataVersion": "0.1.2",
+  "inputs": [
+    {
+      "id": "INP_NORMAL_GAMES",
+      "name": "通常ゲーム数",
+      "type": "integer",
+      "category": "PRIMARY",
+      "displayOrder": 1,
+      "defaultValue": 0,
+      "unit": "G"
+    },
+    {
+      "id": "INP_AT",
+      "name": "AT初当り回数",
+      "type": "counter",
+      "category": "PRIMARY",
+      "displayOrder": 2,
+      "defaultValue": 0,
+      "unit": "回"
+    },
+    {
+      "id": "INP_SC",
+      "name": "セブンチャンス回数",
+      "type": "counter",
+      "category": "SUPPORT",
+      "displayOrder": 10,
+      "defaultValue": 0,
+      "unit": "回"
+    },
+    {
+      "id": "INP_SC_LV12",
+      "name": "初期Lv12回数",
+      "type": "counter",
+      "category": "SUPPORT",
+      "displayOrder": 11,
+      "defaultValue": 0,
+      "unit": "回",
+      "parentInputId": "INP_SC",
+      "description": "初期Lvが12だった場合は、セブンチャンス回数と初期Lv12回数の両方に+1をしてください。"
+    },
+    {
+      "id": "INP_BIG_END_TOTAL",
+      "name": "BIG終了画面確認回数",
+      "type": "integer",
+      "category": "BIG_END_SCREEN",
+      "displayOrder": 30,
+      "defaultValue": null,
+      "unit": "回"
+    },
+    {
+      "id": "INP_BIG_END_FOUR",
+      "name": "4人画面",
+      "type": "counter",
+      "category": "BIG_END_SCREEN",
+      "displayOrder": 31,
+      "defaultValue": null,
+      "unit": "回",
+      "parentInputId": "INP_BIG_END_TOTAL"
+    },
+    {
+      "id": "INP_BIG_END_SIX",
+      "name": "6人画面",
+      "type": "counter",
+      "category": "BIG_END_SCREEN",
+      "displayOrder": 32,
+      "defaultValue": null,
+      "unit": "回",
+      "parentInputId": "INP_BIG_END_TOTAL"
+    },
+    {
+      "id": "INP_BIG_END_EIGHT",
+      "name": "8人画面",
+      "type": "counter",
+      "category": "BIG_END_SCREEN",
+      "displayOrder": 33,
+      "defaultValue": null,
+      "unit": "回",
+      "parentInputId": "INP_BIG_END_TOTAL"
+    }
+  ],
+  "features": [
+    {
+      "researchFeatureId": "RF_AT",
+      "featureId": "FEAT_AT",
+      "adoptionCategory": "INCLUDE_PRIMARY",
+      "numeratorInputId": "INP_AT",
+      "denominatorInputId": "INP_NORMAL_GAMES",
+      "minimumSample": 1,
+      "sampleRecommendation": 7000,
+      "weight": 1,
+      "displayFormat": "ratio_1_over_n",
+      "difficultyExposure": {
+        "mode": "per_game",
+        "factor": 1,
+        "quality": "EXACT",
+        "basisId": "NORMAL_GAMES"
+      },
+      "difficultyParticipation": "INCLUDE",
+      "userReason": "終日を通して観測でき、段階的な設定差があるため主軸採用。"
+    },
+    {
+      "researchFeatureId": "RF_SEVEN_CHANCE",
+      "featureId": "FEAT_SEVEN_CHANCE",
+      "adoptionCategory": "INCLUDE_SUPPORT",
+      "numeratorInputId": "INP_SC",
+      "denominatorInputId": "INP_NORMAL_GAMES",
+      "minimumSample": 1,
+      "sampleRecommendation": 7000,
+      "weight": 0.6,
+      "displayFormat": "ratio_1_over_n",
+      "difficultyExposure": {
+        "mode": "per_game",
+        "factor": 1,
+        "quality": "EXACT",
+        "basisId": "NORMAL_GAMES"
+      },
+      "difficultyParticipation": "INCLUDE",
+      "userReason": "高頻度で設定差がある。ATへつながるため相関を考慮して補助採用。"
+    },
+    {
+      "researchFeatureId": "RF_SC_LV12",
+      "featureId": "FEAT_SC_LV12",
+      "adoptionCategory": "INCLUDE_SUPPORT",
+      "numeratorInputId": "INP_SC_LV12",
+      "denominatorInputId": "INP_SC",
+      "minimumSample": 1,
+      "sampleRecommendation": 30,
+      "weight": 0.7,
+      "displayFormat": "percent",
+      "difficultyParticipation": "EXCLUDE",
+      "difficultyExclusionReason": "通常GからLv12判定可能なSC試行数を独立に確定できないため。",
+      "userReason": "SC発生後の条件付き情報として設定差を追加利用できるため補助採用。",
+      "categorySubtractInputIds": {
+        "INP_SC": [
+          "INP_SC_LV12"
+        ]
+      }
+    },
+    {
+      "researchFeatureId": "RF_AT_DIRECT",
+      "featureId": "FEAT_AT_DIRECT",
+      "adoptionCategory": "EXCLUDE",
+      "rejectionReason": "AT初当りに包含され、同時採用すると二重計上になる。"
+    },
+    {
+      "researchFeatureId": "RF_12_BELL",
+      "featureId": "FEAT_12_BELL",
+      "adoptionCategory": "EXCLUDE",
+      "rejectionReason": "設定差が極小で必要試行量が大きい。"
+    },
+    {
+      "researchFeatureId": "RF_BIG_END_SCREEN",
+      "featureId": "FEAT_BIG_END_SCREEN",
+      "adoptionCategory": "INCLUDE_SUPPORT",
+      "denominatorInputId": "INP_BIG_END_TOTAL",
+      "numeratorInputId": "INP_BIG_END_FOUR",
+      "categoryInputIds": [
+        "INP_BIG_END_SIX",
+        "INP_BIG_END_EIGHT"
+      ],
+      "residualCategoryLabel": "TWO",
+      "minimumSample": 1,
+      "sampleRecommendation": 20,
+      "weight": 1,
+      "displayFormat": "percent",
+      "difficultyParticipation": "EXCLUDE",
+      "difficultyExclusionReason": "通常ゲーム数からこの演出の確認試行数を正確に換算できないため共通Difficultyには含めない。",
+      "userReason": "BIG終了画面の設定別振り分けが公開され、4人・6人・8人の構成に段階差があるため補助採用。入力は任意です。"
+    }
+  ],
+  "rejectedElements": [],
+  "evidence": [],
+  "evidenceUi": {
+    "groups": [
+      {
+        "groupId": "SAMMY_TROPHY",
+        "label": "サミートロフィー",
+        "selectionMode": "single",
+        "normalizationMode": "ALLOWED_SETTINGS",
+        "options": [
+          {
+            "value": "TROPHY_BRONZE",
+            "label": "銅 設定2以上",
+            "allowedSettings": [
+              "SET_2",
+              "SET_3",
+              "SET_4",
+              "SET_5",
+              "SET_6"
+            ],
+            "excludedSettings": [
+              "SET_1"
+            ],
+            "sourceEvidenceIds": [
+              "RE_TROPHY_2PLUS"
+            ]
+          },
+          {
+            "value": "TROPHY_SILVER",
+            "label": "銀 設定3以上",
+            "allowedSettings": [
+              "SET_3",
+              "SET_4",
+              "SET_5",
+              "SET_6"
+            ],
+            "excludedSettings": [
+              "SET_1",
+              "SET_2"
+            ],
+            "sourceEvidenceIds": [
+              "RE_TROPHY_3PLUS"
+            ]
+          },
+          {
+            "value": "TROPHY_GOLD",
+            "label": "金 設定4以上",
+            "allowedSettings": [
+              "SET_4",
+              "SET_5",
+              "SET_6"
+            ],
+            "excludedSettings": [
+              "SET_1",
+              "SET_2",
+              "SET_3"
+            ],
+            "sourceEvidenceIds": [
+              "RE_TROPHY_4PLUS"
+            ]
+          },
+          {
+            "value": "TROPHY_KIRIN",
+            "label": "キリン柄 設定5以上",
+            "allowedSettings": [
+              "SET_5",
+              "SET_6"
+            ],
+            "excludedSettings": [
+              "SET_1",
+              "SET_2",
+              "SET_3",
+              "SET_4"
+            ],
+            "sourceEvidenceIds": [
+              "RE_TROPHY_5PLUS"
+            ]
+          },
+          {
+            "value": "TROPHY_RAINBOW",
+            "label": "レインボー 設定6",
+            "allowedSettings": [
+              "SET_6"
+            ],
+            "excludedSettings": [
+              "SET_1",
+              "SET_2",
+              "SET_3",
+              "SET_4",
+              "SET_5"
+            ],
+            "sourceEvidenceIds": [
+              "RE_TROPHY_6"
+            ]
+          }
+        ]
+      },
+      {
+        "groupId": "PAYOUT_DISPLAY",
+        "label": "獲得枚数表示",
+        "selectionMode": "single",
+        "normalizationMode": "ALLOWED_SETTINGS",
+        "options": [
+          {
+            "value": "PAYOUT_174",
+            "label": "174枚OVER 設定2以上",
+            "allowedSettings": [
+              "SET_2",
+              "SET_3",
+              "SET_4",
+              "SET_5",
+              "SET_6"
+            ],
+            "excludedSettings": [
+              "SET_1"
+            ],
+            "sourceEvidenceIds": [
+              "RE_PAYOUT_174_2PLUS"
+            ]
+          },
+          {
+            "value": "PAYOUT_456",
+            "label": "456枚OVER 設定4以上",
+            "allowedSettings": [
+              "SET_4",
+              "SET_5",
+              "SET_6"
+            ],
+            "excludedSettings": [
+              "SET_1",
+              "SET_2",
+              "SET_3"
+            ],
+            "sourceEvidenceIds": [
+              "RE_PAYOUT_456_4PLUS"
+            ]
+          },
+          {
+            "value": "PAYOUT_331_666",
+            "label": "331・666枚OVER 設定6",
+            "allowedSettings": [
+              "SET_6"
+            ],
+            "excludedSettings": [
+              "SET_1",
+              "SET_2",
+              "SET_3",
+              "SET_4",
+              "SET_5"
+            ],
+            "sourceEvidenceIds": [
+              "RE_PAYOUT_331_666_6"
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "evidenceReview": {
+    "policyVersion": 1,
+    "exclusions": []
+  },
+  "uiCategoryLabels": {
+    "PRIMARY": "初当り",
+    "SUPPORT": "セブンチャンス",
+    "BIG_END_SCREEN": "BIG終了画面"
+  },
+  "difficultyAnalysis": {
+    "targetGameBasis": {
+      "basisId": "NORMAL_GAMES",
+      "label": "通常ゲーム数",
+      "quality": "EXACT"
+    },
+    "calibrationAllowedExposureQualities": [
+      "EXACT",
+      "DERIVED",
+      "ESTIMATED"
+    ]
+  }
+}

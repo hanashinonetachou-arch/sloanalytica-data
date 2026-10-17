@@ -1,0 +1,387 @@
+{
+  "schemaVersion": "candidate-contract-v1",
+  "manifestVersion": "8.5",
+  "batchId": "batch-20261017-020",
+  "machineId": "L_URUSEI_YATSURA_EV",
+  "machineName": "Lパチスロうる星やつら",
+  "evaluationArtifact": {
+    "artifactId": "evaluation-L_URUSEI_YATSURA_EV",
+    "kind": "evaluation",
+    "path": "production/batches/batch-20261017-020/artifacts/L_URUSEI_YATSURA_EV/evaluation/result.json",
+    "sha256": "331b2e09c1277eda796201da4a40f18ae1ce8f0e9cf640ceeb57bbe670d90e26",
+    "producerWorkId": "wrk_b76b913bf2424381"
+  },
+  "eligibilityArtifact": {
+    "artifactId": "eligibility-L_URUSEI_YATSURA_EV",
+    "kind": "eligibility",
+    "path": "production/batches/batch-20261017-020/artifacts/L_URUSEI_YATSURA_EV/eligibility/result.json",
+    "sha256": "abe0135139787b42adb4347e52cf7b2fd4a7706ee6cf973cb249261a77f55a47",
+    "producerWorkId": "wrk_367f9830273848be"
+  },
+  "candidates": [
+    {
+      "findingId": "M03-C01",
+      "label": "ボーナス初当たり",
+      "model": "BERNOULLI",
+      "trialUniverse": "NORMAL_GAME_TRIAL",
+      "liveInferenceRoute": "LIVE_CONDITIONAL",
+      "settingDistribution": {
+        "1": "1/266.5",
+        "2": "1/256.3",
+        "4": "1/232.9",
+        "5": "1/216.4",
+        "6": "1/196.7"
+      },
+      "details": [
+        "通常ゲーム数と初当たり回数。AT・ボーナス消化中と明確な引き戻し区間の当選は混ぜません。引き戻し区間終了後の当選を初当たりに数えます。"
+      ],
+      "dependencyGroupId": "urusei_hit_chain",
+      "dependencyKind": "CAUSAL_PATH_OVERLAP",
+      "dependencyReason": "ボーナスからATへつながる同じ系列の初当たり。両方を独立加算せず正式スコアで代表を選択。",
+      "runtimeInferenceAllowed": false,
+      "dependencyResolution": "RESOLVED_BY_SINGLE_MEMBER",
+      "runtimePolicyBinding": {
+        "metric": "SELECTION_SCORE",
+        "value": 46.01470992577305,
+        "thresholdSource": "RUNTIME_POLICY"
+      },
+      "resolvedIntoFindingId": "M03-C02"
+    },
+    {
+      "findingId": "M03-C02",
+      "label": "AT初当たり",
+      "model": "BERNOULLI",
+      "trialUniverse": "NORMAL_GAME_TRIAL",
+      "liveInferenceRoute": "LIVE_CONDITIONAL",
+      "settingDistribution": {
+        "1": "1/535.4",
+        "2": "1/509",
+        "4": "1/429.3",
+        "5": "1/383.2",
+        "6": "1/329.9"
+      },
+      "details": [
+        "通常ゲーム数と初当たり回数。AT・ボーナス消化中と明確な引き戻し区間の当選は混ぜません。引き戻し区間終了後の当選を初当たりに数えます。"
+      ],
+      "dependencyGroupId": "urusei_hit_chain",
+      "dependencyKind": "CAUSAL_PATH_OVERLAP",
+      "dependencyReason": "ボーナスからATへつながる同じ系列の初当たり。両方を独立加算せず正式スコアで代表を選択。",
+      "runtimeInferenceAllowed": true,
+      "dependencyResolution": "SINGLE_MEMBER_SELECTED",
+      "runtimePolicyBinding": {
+        "metric": "SELECTION_SCORE",
+        "value": 61.52217589177486,
+        "thresholdSource": "RUNTIME_POLICY"
+      }
+    }
+  ],
+  "dependencyGroups": [
+    {
+      "groupId": "urusei_hit_chain",
+      "resolution": "SINGLE_MEMBER_SELECTED",
+      "members": [
+        "M03-C01",
+        "M03-C02"
+      ],
+      "runtimeInferenceAllowed": true,
+      "selectedFindingId": "M03-C02",
+      "selectionRationale": "依存関係を仮定せず二重評価を避けるため、依存関係グループ内で正式な7000G設定判別スコアが最大の候補を代表Featureとして使用する。",
+      "reason": "正式な設定判別スコアを比較できる候補から、最も情報量の高い1要素のみを採用する。"
+    }
+  ],
+  "excludedDecisions": [
+    {
+      "findingId": "M03-C04",
+      "label": "ボーナス直撃",
+      "supportingSourceIds": [
+        "S01",
+        "S02"
+      ],
+      "eligibility": "NOT_APPLICABLE",
+      "reason": "参考分布として保存するが設定推測Featureには使用しない。",
+      "ruleRefs": [
+        "manifest-v8.5-reference-only"
+      ],
+      "liveInferenceRoute": "NONE",
+      "userFacingReason": "雷RIZEモード当選1回ごとのボーナス昇格率です。ボーナスへ昇格して表示されなかった雷RIZE当選まで完全に数えられないため、通常ゲーム数で代用しません。"
+    }
+  ],
+  "blockedItems": [
+    {
+      "blockId": "M03-C03",
+      "label": "モードB移行",
+      "reason": "モードBへ移行しやすい傾向は確認しましたが、全設定の移行率と毎回の移行先は公表資料で揃いません。モード示唆から確率を補完しません。",
+      "reevaluationCondition": "不足を解決する新しい具体的な公開資料が得られた場合、この項目だけ再確認します。",
+      "publicSearchStatus": "CLOSED_BOUNDED_NO_REPEAT",
+      "retainedPublishedValues": "設定差あり;詳細値要抽出",
+      "sourceIds": [
+        "S01"
+      ],
+      "retainedHandoffClaim": {
+        "machine_id": "03",
+        "machine": "Lパチスロうる星やつら",
+        "candidate_id": "M03-C03",
+        "label": "モードB移行",
+        "model_type": "conditional",
+        "denominator": "移行機会",
+        "setting_values_or_signal": "設定差あり;詳細値要抽出",
+        "proposal": "conditional",
+        "source_url": "https://nana-press.com/kaiseki/machine/727/20610/",
+        "checked_on": "2026-10-17",
+        "source_grade": "secondary_public_web",
+        "audit": "initial_source_found_not_fully_independently_audited",
+        "dependency": "Must resolve overlaps with initial hit, modes, conditional triggers and category totals before multiplying",
+        "ui_note": "ゲーム数基準は1/形式、振分は％。数値未公表は『記録のみ・推測計算には使用しない』",
+        "unresolved": "Review complete setting-by-setting table and observation condition; do not impute missing cells; setting3 absent, L is not a numerical setting",
+        "verified_in_v4": "no",
+        "v4_sources": "",
+        "v4_model_gate": "BINOMIAL_ONLY_IF_CONDITION_OBSERVABLE",
+        "v4_input_strategy": "Record qualifying trials and successes; if internal mode unknown, do not use in inference",
+        "v4_dependency_group": "event_family_03"
+      }
+    }
+  ],
+  "evidenceCandidates": [
+    {
+      "findingId": "M03-C05",
+      "label": "ちゅどーん図柄ボイス",
+      "sourceIds": [
+        "S01"
+      ],
+      "details": [
+        "AT中のちゅどーん図柄停止時にPUSHで確認。",
+        "出現率が未確認の示唆は記録のみ・推測計算には使用しない。設定確定・否定の項目は設定候補の絞り込みに反映できる可能性があります。"
+      ],
+      "semanticCategories": [
+        {
+          "label": "ラム「大感激！だっちゃ」",
+          "meaning": "設定5・6示唆",
+          "semanticType": "PROBABILITY_UNKNOWN"
+        },
+        {
+          "label": "その他のボイス",
+          "meaning": "設定別出現率未確認",
+          "semanticType": "PROBABILITY_UNKNOWN"
+        }
+      ]
+    },
+    {
+      "findingId": "M03-C06",
+      "label": "あたる逃走中終了画面",
+      "sourceIds": [
+        "S01"
+      ],
+      "details": [
+        "あたる逃走中終了時。",
+        "出現率が未確認の示唆は記録のみ・推測計算には使用しない。設定確定・否定の項目は設定候補の絞り込みに反映できる可能性があります。"
+      ],
+      "semanticCategories": [
+        {
+          "label": "あたる＆テンちゃん",
+          "meaning": "デフォルト",
+          "semanticType": "DISPLAY_ONLY"
+        },
+        {
+          "label": "ラム（浴衣）",
+          "meaning": "高設定示唆（弱）",
+          "semanticType": "PROBABILITY_UNKNOWN"
+        },
+        {
+          "label": "ラム（ウエディング）",
+          "meaning": "高設定示唆（強）",
+          "semanticType": "PROBABILITY_UNKNOWN"
+        },
+        {
+          "label": "テンちゃん",
+          "meaning": "設定1否定",
+          "semanticType": "EXACT_CONSTRAINT"
+        },
+        {
+          "label": "錯乱坊",
+          "meaning": "設定2否定",
+          "semanticType": "EXACT_CONSTRAINT"
+        },
+        {
+          "label": "コタツネコ",
+          "meaning": "設定1・5否定",
+          "semanticType": "EXACT_CONSTRAINT"
+        },
+        {
+          "label": "ラム（3D）",
+          "meaning": "設定4以上",
+          "semanticType": "EXACT_CONSTRAINT"
+        },
+        {
+          "label": "ヒロイン集合",
+          "meaning": "設定5以上",
+          "semanticType": "EXACT_CONSTRAINT"
+        },
+        {
+          "label": "アイキャッチ",
+          "meaning": "設定6",
+          "semanticType": "EXACT_CONSTRAINT"
+        }
+      ]
+    },
+    {
+      "findingId": "M03-C07",
+      "label": "AT終了画面",
+      "sourceIds": [
+        "S01"
+      ],
+      "details": [
+        "AT終了時。",
+        "出現率が未確認の示唆は記録のみ・推測計算には使用しない。設定確定・否定の項目は設定候補の絞り込みに反映できる可能性があります。"
+      ],
+      "semanticCategories": [
+        {
+          "label": "あたる",
+          "meaning": "デフォルト",
+          "semanticType": "DISPLAY_ONLY"
+        },
+        {
+          "label": "ラム（チャイナ）",
+          "meaning": "高設定示唆（弱）",
+          "semanticType": "PROBABILITY_UNKNOWN"
+        },
+        {
+          "label": "ラム（浜辺）",
+          "meaning": "高設定示唆（強）",
+          "semanticType": "PROBABILITY_UNKNOWN"
+        },
+        {
+          "label": "テンちゃん",
+          "meaning": "設定1否定",
+          "semanticType": "EXACT_CONSTRAINT"
+        },
+        {
+          "label": "錯乱坊",
+          "meaning": "設定2否定",
+          "semanticType": "EXACT_CONSTRAINT"
+        },
+        {
+          "label": "コタツネコ",
+          "meaning": "設定1・5否定",
+          "semanticType": "EXACT_CONSTRAINT"
+        },
+        {
+          "label": "ラム＆あたる",
+          "meaning": "設定4以上",
+          "semanticType": "EXACT_CONSTRAINT"
+        },
+        {
+          "label": "ヒロイン集合",
+          "meaning": "設定5以上",
+          "semanticType": "EXACT_CONSTRAINT"
+        }
+      ]
+    },
+    {
+      "findingId": "M03-C08",
+      "label": "エンディングカード",
+      "sourceIds": [
+        "S01"
+      ],
+      "details": [
+        "エンディング中のレア役成立時に出現するカード。",
+        "出現率が未確認の示唆は記録のみ・推測計算には使用しない。設定確定・否定の項目は設定候補の絞り込みに反映できる可能性があります。"
+      ],
+      "semanticCategories": [
+        {
+          "label": "あたる",
+          "meaning": "デフォルト",
+          "semanticType": "DISPLAY_ONLY"
+        },
+        {
+          "label": "ラム（チャイナ）",
+          "meaning": "高設定示唆（弱）",
+          "semanticType": "PROBABILITY_UNKNOWN"
+        },
+        {
+          "label": "ラム（浜辺）",
+          "meaning": "高設定示唆（強）",
+          "semanticType": "PROBABILITY_UNKNOWN"
+        },
+        {
+          "label": "テンちゃん",
+          "meaning": "設定1否定",
+          "semanticType": "EXACT_CONSTRAINT"
+        },
+        {
+          "label": "錯乱坊",
+          "meaning": "設定2否定",
+          "semanticType": "EXACT_CONSTRAINT"
+        },
+        {
+          "label": "コタツネコ",
+          "meaning": "設定1・5否定",
+          "semanticType": "EXACT_CONSTRAINT"
+        },
+        {
+          "label": "ラム＆あたる",
+          "meaning": "設定4以上",
+          "semanticType": "EXACT_CONSTRAINT"
+        },
+        {
+          "label": "ヒロイン集合",
+          "meaning": "設定5以上",
+          "semanticType": "EXACT_CONSTRAINT"
+        },
+        {
+          "label": "全員集合",
+          "meaning": "設定6",
+          "semanticType": "EXACT_CONSTRAINT"
+        }
+      ]
+    }
+  ],
+  "sourceIntegrityIssues": [],
+  "observationPrerequisites": [
+    {
+      "findingId": "M03-C01",
+      "trialUniverse": "NORMAL_GAME_TRIAL",
+      "denominatorSemantics": "通常ゲーム数と初当たり回数。AT・ボーナス消化中と明確な引き戻し区間の当選は混ぜません。引き戻し区間終了後の当選を初当たりに数えます。",
+      "liveObservation": {
+        "status": "EXACT_WITH_SCOPE_TRACKING",
+        "reason": "通常ゲーム数と初当たり回数。AT・ボーナス消化中と明確な引き戻し区間の当選は混ぜません。引き戻し区間終了後の当選を初当たりに数えます。"
+      },
+      "observationContext": null,
+      "conditionalStateModel": null,
+      "operationalCounting": null,
+      "mirrorsEvidenceFindingId": null,
+      "categoricalEvidenceReconciliation": null,
+      "sourceIds": [
+        "S01"
+      ],
+      "unknownRequiredInput": "DISABLE_THIS_FINDING_ONLY",
+      "zeroVsUnobserved": "PRESERVE"
+    },
+    {
+      "findingId": "M03-C02",
+      "trialUniverse": "NORMAL_GAME_TRIAL",
+      "denominatorSemantics": "通常ゲーム数と初当たり回数。AT・ボーナス消化中と明確な引き戻し区間の当選は混ぜません。引き戻し区間終了後の当選を初当たりに数えます。",
+      "liveObservation": {
+        "status": "EXACT_WITH_SCOPE_TRACKING",
+        "reason": "通常ゲーム数と初当たり回数。AT・ボーナス消化中と明確な引き戻し区間の当選は混ぜません。引き戻し区間終了後の当選を初当たりに数えます。"
+      },
+      "observationContext": null,
+      "conditionalStateModel": null,
+      "operationalCounting": null,
+      "mirrorsEvidenceFindingId": null,
+      "categoricalEvidenceReconciliation": null,
+      "sourceIds": [
+        "S01"
+      ],
+      "unknownRequiredInput": "DISABLE_THIS_FINDING_ONLY",
+      "zeroVsUnobserved": "PRESERVE"
+    }
+  ],
+  "scopeBoundary": {
+    "through": "CANDIDATE_CONTRACT",
+    "observationEvidenceGenerated": false,
+    "implementation": false,
+    "distribution": false,
+    "apk": false,
+    "qa": false
+  }
+}
