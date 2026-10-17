@@ -1,21 +1,18 @@
-# Batch020 — 配信・QA用APK準備完了
+# Batch020 — QA指摘修正 R2 完了
 
-10機種すべて、確定済みCandidate ContractからObservation/Evidence、Canonical UI、MachineData、Runtime Policy、Runtime Projection、App Runtime、Distributionまで正式COMPLETEです。実機QAは未実施で、10機種ともREADYを維持しています。
+番長4の共通ベルの誤った一括除外を解除し、既存の採用基準で再判定した結果、採用へ変更しました。小役の出現回数とAT直撃の当選回数を「同じ当選情報」として扱う根拠が不足していました。同じ母数の使用だけでは重複としない既存の規則を適用し、完全な統計的独立が証明されたとは主張していません。
 
-- 元の86候補と、分割・補充後135件の採否履歴を維持。採用基準・数値モデル・閾値は変更していません。
-- 同じ観測面はセクション内タブに統合。数値入力と設定確定・否定は同じカウントを使用します。
-- 番長4・忍魂参の当日履歴不明時は専用の記録タブへ。数値推測から分け、設定確定・否定は保持します。
-- 番長4の富士山既出履歴は設定制約として扱い、履歴の出現率を追加加算しません。通常条件と7000G超の最初の特殊画面は別タブです。
-- 忍魂参の役別ボーナス6条件も1セクション内タブに集約し、契約済みの優先・代替関係によって同時加算を防止します。
-- ゲーム数ベースは逆数表示、割合系は％表示。Aタイプの総Gのみ、沖スロの除外G、ゲーム数母数だけの+50を保持。
-- ユーザー向け文言から参照サイト名と禁止された汎用採用理由を検出していません。
+- 共通ベルの全6設定の公表確率は変更なし。正式な7000Gスコアは捏造せず、既存の1回あたり評価・Runtime Policyを維持。
+- 共通ベルの母数は「実戦総G−エンブレム・ED中G」を自動使用。この区間のベルも数えません。AT直撃は従来の通常Gを使用します。
+- 番長4の機種データは `8.5.2-batch-20261017-020`。他272機種の配信パッケージ・カタログ項目は変更していません。
+- 不採用理由が完全一致する項目はアプリ共通で1つの枠へ集約。全項目名・個別スコア等を残し、理由は1回だけ表示。部分一致・近い意味・空白違いによる統合は行いません。保存された採否データは項目別のまま保持します。
 
-検証：Production回帰461件成功、今回の追加4件成功、全110工程成果物のSHA一致。10機種の実アプリ計算・公開パッケージのUI検証成功。V8.5の200機種で互換性検証成功、失敗0。既存263機種の配信データ・カタログ項目に変更なし。更新順の先頭10件も確認済み。
+Production回帰467件成功。完全一致／非一致の表示テスト、母数の自動計算、番長4の採用・設定値・依存関係の回帰テストが成功。10機種のUI・実アプリ計算と、V8.5全200機種の互換性検証も成功。110工程成果物のSHA一致を確認しました。
 
-配信コミット：`8ec2779ac9b33af026c714f310b714be1090bd05`（`prototype-multi-machine`）
+配信：`078b34f52c18b4e2709a7a9aacf96590ea1450a3`。
 
-QA用APK：`SloAnalytica-Batch020-10Machine-vc2002891828.apk`、versionCode `2002891828`。固定開発署名の検証済み。APKのSHA・署名・CI参照は `qa-apk-receipt.json` に記録しています。
+修正版APK：`SloAnalytica-Batch020-R2-10Machine-vc2002892148.apk`。固定開発署名とSHAを検証済み。詳細は `qa-apk-receipt.json`、今回の再判定根拠は `qa-revisions/reason-group-r2/common-bell-review.json` に記録しています。
 
-[データ統合検証](https://github.com/hanashinonetachou-arch/sloanalytica-data/actions/runs/39008755096)・[配信先更新](https://github.com/hanashinonetachou-arch/sloanalytica-data/actions/runs/39008808693)・[APK生成と全機種検証](https://github.com/hanashinonetachou-arch/sloanalytica-app/actions/runs/39008620565)はすべて成功です。Actionsは今回の統合境界の3実行のみです。
+[データ統合](https://github.com/hanashinonetachou-arch/sloanalytica-data/actions/runs/39012691469)・[配信先更新](https://github.com/hanashinonetachou-arch/sloanalytica-data/actions/runs/39012746993)・[アプリ検証とAPK生成](https://github.com/hanashinonetachou-arch/sloanalytica-app/actions/runs/39012576891)は成功しました。Actionsは修正の統合境界での3実行です。
 
-端末へのインストール・端末上の動作・ユーザー承認はこの報告の検証に含めていません。実機QA完了にはユーザーの明示判断が必要です。
+実機QAは未実施です。ユーザーによる完了・承認としては扱っていません。
