@@ -1,4 +1,5 @@
 import {concreteAdoptionReason,isGenericAdoptionReason} from './adoption-reason.ts';
+import {withUnknownHistoryRecords} from './unknown-history-records.ts';
 import {appRuntimeMachineDataVersion,playDataSourceForTrialUniverse,categoricalProbabilityRow,evidenceCategoryRecords,resolveEvidenceInputLinks} from './app-runtime-builder.ts';
 export const APP_RUNTIME_VALIDATOR_CONTRACT='app-runtime-v1';
 const canonical=(v:any):string=>Array.isArray(v)?'['+v.map(canonical).join(',')+']':v&&typeof v==='object'?'{'+Object.keys(v).sort().map(k=>JSON.stringify(k)+':'+canonical(v[k])).join(',')+'}':JSON.stringify(v);
@@ -8,6 +9,7 @@ const settingKey=(k:string)=>k.startsWith('SET_')?k:'SET_'+k;
 const near=(a:any,b:any)=>typeof a==='number'&&typeof b==='number'&&Number.isFinite(a)&&Number.isFinite(b)&&Math.abs(a-b)<=1e-10*Math.max(1,Math.abs(a),Math.abs(b));
 const sectionDescriptionRepeatsInputs=(section:any,sourceSection:any)=>{const description=String(section?.description??'');const labels=[...new Set((sourceSection?.inputs??[]).filter((input:any)=>['trial','success'].includes(String(input?.role??''))).map((input:any)=>String(input?.label??'').trim()).filter((label:string)=>label.length>=2))];return labels.filter((label:string)=>description.includes(label)).length>=2;};
 export function validateAppRuntimeDocument(doc:any,projection:any,projectionArtifact:any){
+ projection=withUnknownHistoryRecords(projection);
  if(doc?.schemaVersion!=='app-runtime-v1'||doc?.manifestVersion!=='8.5')fail('HEADER');
  if(doc.batchId!==projection.batchId||doc.machineId!==projection.machineId||doc.machineName!==projection.machineName)fail('IDENTITY');
  if(canonical(doc.sourceArtifact)!==canonical(projectionArtifact))fail('LINKAGE');

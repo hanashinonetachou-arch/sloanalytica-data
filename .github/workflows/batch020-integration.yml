@@ -1,0 +1,75 @@
+name: Batch020 Integration Boundary
+on:
+  push:
+    branches: [production/v85-batch-020-contract-20261017]
+    paths: [.github/workflows/batch020-integration.yml, production/.batch020-integration-trigger]
+permissions:
+  contents: write
+  actions: write
+concurrency:
+  group: batch020-integration
+  cancel-in-progress: false
+jobs:
+  integrate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          path: production-state
+          fetch-depth: 0
+      - uses: actions/checkout@v4
+        with:
+          ref: 8ec2779ac9b33af026c714f310b714be1090bd05
+          path: prototype
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - name: Verify complete contracts and scoped runtime
+        working-directory: production-state/production
+        run: |
+          node --experimental-strip-types src/validate-recovered-batch.mjs batch-20261017-020
+          node --experimental-strip-types --test test/batch020-runtime.test.ts
+      - name: Verify distribution catalog and UX
+        working-directory: prototype
+        run: |
+          npm ci
+          npm run ux-contract:audit
+          node tools/apply-machine-identity-classification.mjs --verify
+      - name: Deploy pinned production data pages
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          test "$(gh api repos/$GITHUB_REPOSITORY/git/ref/heads/prototype-multi-machine --jq .object.sha)" = 8ec2779ac9b33af026c714f310b714be1090bd05
+          gh workflow run deploy-pages.yml --ref prototype-multi-machine --repo "$GITHUB_REPOSITORY"
+          run_id=""
+          for _ in $(seq 1 40); do
+            run_id="$(gh api "repos/$GITHUB_REPOSITORY/actions/runs?branch=prototype-multi-machine&event=workflow_dispatch&per_page=30" --jq '.workflow_runs[] | select(.name == "Deploy SloAnalytica Data Pages" and .head_sha == "8ec2779ac9b33af026c714f310b714be1090bd05") | .id' | head -n1)"
+            [ -n "$run_id" ] && break
+            sleep 3
+          done
+          test -n "$run_id"
+          gh run watch "$run_id" --repo "$GITHUB_REPOSITORY" --exit-status
+          echo "BATCH020_PAGES_RUN_ID=$run_id" >> "$GITHUB_ENV"
+      - name: Finalize Distribution state
+        working-directory: production-state
+        run: |
+          node <<'NODE'
+          const fs=require('fs'),b='production/batches/batch-20261017-020';
+          const packages=JSON.parse(fs.readFileSync(b+'/distribution-metadata.json','utf8'));
+          const doc={batchId:'batch-20261017-020',integration:{repository:'hanashinonetachou-arch/sloanalytica-data',branch:'prototype-multi-machine',commit:'8ec2779ac9b33af026c714f310b714be1090bd05'},packages,checks:{catalogIntegrity:true,pagesDeployment:{runId:Number(process.env.BATCH020_PAGES_RUN_ID),conclusion:'success'},uxContractAudit:{runId:Number(process.env.GITHUB_RUN_ID),conclusion:'success'},machineIdentityConsistency:{runId:Number(process.env.GITHUB_RUN_ID),conclusion:'success',batchMachineVerified:true}}};
+          fs.writeFileSync(b+'/distribution-repair-attestation.json',JSON.stringify(doc,null,2)+'\n');
+          NODE
+          cd production
+          node --experimental-strip-types src/deterministic-production-worker.ts batch-20261017-020 --through DISTRIBUTION
+          node --experimental-strip-types src/reconcile-batch.ts batch-20261017-020
+      - name: Save authoritative state
+        working-directory: production-state
+        run: |
+          git fetch origin production/v85-batch-020-contract-20261017
+          test "$(git rev-parse HEAD)" = "$(git rev-parse FETCH_HEAD)"
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git add production/batches/batch-20261017-020
+          git commit -m "Complete Batch020 Distribution boundary [skip ci]"
+          git push origin HEAD:production/v85-batch-020-contract-20261017

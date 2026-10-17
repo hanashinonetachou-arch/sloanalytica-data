@@ -1,4 +1,5 @@
 import {concreteAdoptionReason} from './adoption-reason.ts';
+import {withUnknownHistoryRecords} from './unknown-history-records.ts';
 import {applyUiPresentation} from './ui-presentation.ts';
 export const appRuntimeMachineDataVersion=(batchId:string,revision:any=1)=>{if(!Number.isSafeInteger(revision)||revision<1)throw Error('INVALID_PACKAGE_REVISION');return '8.5.'+revision+'-'+batchId;};
 import {evidenceSemanticExplanation} from './evidence-semantics.ts';
@@ -231,6 +232,7 @@ const runtimeProjection=(projection:any)=>[
  ...(projection.inactiveFeatures??[]).map((f:any)=>({featureId:f.findingId,runtimeStatus:'INACTIVE',metric:f.metric,metricValue:f.value,threshold:f.threshold,runtimeReason:f.reason})),
 ];
 export function buildAppRuntime(projection:any,projectionArtifact:any){
+ projection=withUnknownHistoryRecords(projection);
  if(projection.settings?.status!=='SOURCE_DERIVED'||!(projection.settings?.values?.length>0))throw new Error('APP_RUNTIME_SETTINGS_REQUIRED');
  const version=appRuntimeMachineDataVersion(projection.batchId,projection.packagePolicy?.machineDataRevision??1),held=projection.heldObservations??[],hld=projection.highLowDiscrimination;
  const features=buildFeatures(projection),inputs=buildInputs(projection),rp=runtimeProjection(projection);
