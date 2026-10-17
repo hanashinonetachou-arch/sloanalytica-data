@@ -1,4 +1,4 @@
-name: Batch020 Integration Boundary
+name: Batch020 R2 Integration Boundary
 on:
   push:
     branches: [production/v85-batch-020-contract-20261017]
@@ -19,7 +19,7 @@ jobs:
           fetch-depth: 0
       - uses: actions/checkout@v4
         with:
-          ref: 8ec2779ac9b33af026c714f310b714be1090bd05
+          ref: 078b34f52c18b4e2709a7a9aacf96590ea1450a3
           path: prototype
       - uses: actions/setup-node@v4
         with:
@@ -28,7 +28,7 @@ jobs:
         working-directory: production-state/production
         run: |
           node --experimental-strip-types src/validate-recovered-batch.mjs batch-20261017-020
-          node --experimental-strip-types --test test/batch020-runtime.test.ts
+          node --experimental-strip-types --test test/batch020-runtime.test.ts test/batch020-bancho-r2.test.ts
       - name: Verify distribution catalog and UX
         working-directory: prototype
         run: |
@@ -40,11 +40,11 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           set -euo pipefail
-          test "$(gh api repos/$GITHUB_REPOSITORY/git/ref/heads/prototype-multi-machine --jq .object.sha)" = 8ec2779ac9b33af026c714f310b714be1090bd05
+          test "$(gh api repos/$GITHUB_REPOSITORY/git/ref/heads/prototype-multi-machine --jq .object.sha)" = 078b34f52c18b4e2709a7a9aacf96590ea1450a3
           gh workflow run deploy-pages.yml --ref prototype-multi-machine --repo "$GITHUB_REPOSITORY"
           run_id=""
           for _ in $(seq 1 40); do
-            run_id="$(gh api "repos/$GITHUB_REPOSITORY/actions/runs?branch=prototype-multi-machine&event=workflow_dispatch&per_page=30" --jq '.workflow_runs[] | select(.name == "Deploy SloAnalytica Data Pages" and .head_sha == "8ec2779ac9b33af026c714f310b714be1090bd05") | .id' | head -n1)"
+            run_id="$(gh api "repos/$GITHUB_REPOSITORY/actions/runs?branch=prototype-multi-machine&event=workflow_dispatch&per_page=30" --jq '.workflow_runs[] | select(.name == "Deploy SloAnalytica Data Pages" and .head_sha == "078b34f52c18b4e2709a7a9aacf96590ea1450a3") | .id' | head -n1)"
             [ -n "$run_id" ] && break
             sleep 3
           done
@@ -57,7 +57,7 @@ jobs:
           node <<'NODE'
           const fs=require('fs'),b='production/batches/batch-20261017-020';
           const packages=JSON.parse(fs.readFileSync(b+'/distribution-metadata.json','utf8'));
-          const doc={batchId:'batch-20261017-020',integration:{repository:'hanashinonetachou-arch/sloanalytica-data',branch:'prototype-multi-machine',commit:'8ec2779ac9b33af026c714f310b714be1090bd05'},packages,checks:{catalogIntegrity:true,pagesDeployment:{runId:Number(process.env.BATCH020_PAGES_RUN_ID),conclusion:'success'},uxContractAudit:{runId:Number(process.env.GITHUB_RUN_ID),conclusion:'success'},machineIdentityConsistency:{runId:Number(process.env.GITHUB_RUN_ID),conclusion:'success',batchMachineVerified:true}}};
+          const doc={batchId:'batch-20261017-020',integration:{repository:'hanashinonetachou-arch/sloanalytica-data',branch:'prototype-multi-machine',commit:'078b34f52c18b4e2709a7a9aacf96590ea1450a3'},packages,checks:{catalogIntegrity:true,pagesDeployment:{runId:Number(process.env.BATCH020_PAGES_RUN_ID),conclusion:'success'},uxContractAudit:{runId:Number(process.env.GITHUB_RUN_ID),conclusion:'success'},machineIdentityConsistency:{runId:Number(process.env.GITHUB_RUN_ID),conclusion:'success',batchMachineVerified:true}}};
           fs.writeFileSync(b+'/distribution-repair-attestation.json',JSON.stringify(doc,null,2)+'\n');
           NODE
           cd production

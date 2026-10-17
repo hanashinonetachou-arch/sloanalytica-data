@@ -111,6 +111,7 @@ const appendLinkedEvidenceNote=(description:string,featureId:any,links:any)=>{
  return [description,...(hints.length?['・示唆：'+hints.join('、')]:[]),'・反映：'+reflection+'別の欄へ重ねて入力する必要はありません。'].join('\n');
 };
 export const playDataSourceForTrialUniverse=(trialUniverse:any)=>
+ trialUniverse==='BANCHO_IDENTIFIABLE_GAME_TRIAL'?'PLAY_TOTAL_GAME_DELTA_EXCLUDED':
  trialUniverse==='TOTAL_GAME_TRIAL'?'PLAY_TOTAL_GAME_DELTA':
  trialUniverse==='LOTIS_NON_CHAIN_GAME_TRIAL'||trialUniverse==='NON_CHAIN_BONUS_INITIAL_GAME_TRIAL'?'PLAY_TOTAL_GAME_DELTA_EXCLUDED':
  trialUniverse==='NON_TENHA_NORMAL_GAME_TRIAL'?'PLAY_NORMAL_GAME_DELTA_EXCLUDED':
