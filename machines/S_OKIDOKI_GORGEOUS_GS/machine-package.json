@@ -1,12 +1,16 @@
 {
   "schemaVersion": 1,
+  "provenance": {
+    "manifestVersion": "8.5",
+    "generationPath": "V8_5_PRODUCTION_PIPELINE",
+    "legacyOracleUsed": false
+  },
   "machine": {
     "schemaVersion": "2.0.0",
     "machineId": "S_OKIDOKI_GORGEOUS_GS",
-    "machineDataVersion": "0.1.0",
+    "machineDataVersion": "8.5.1-batch-20261017-019",
     "displayName": "沖ドキ！ゴージャス25Φ",
-    "modelName": "S／沖ドキ！BLACK／GS",
-    "manufacturer": "ミズホ",
+    "modelName": "沖ドキ！ゴージャス25Φ",
     "settings": [
       "SET_1",
       "SET_2",
@@ -19,6 +23,7 @@
       "containsImages": false,
       "containsExecutableCode": false
     },
+    "manufacturer": "ミズホ",
     "introductionDate": "2024-12-02",
     "machineType": "MEDAL",
     "gameType": "AT"
@@ -27,259 +32,206 @@
     "schemaVersion": "2.0.0",
     "inputs": [
       {
-        "id": "INP_NORMAL_GAMES",
+        "id": "M07-C01.eligibleTrialCount",
         "name": "通常ゲーム数",
+        "category": "V8_NUMERIC",
         "type": "integer",
-        "category": "PRIMARY",
-        "displayOrder": 1,
-        "defaultValue": 0,
         "unit": "G",
-        "minimum": 0
+        "defaultValue": 0,
+        "minimum": 0,
+        "displayOrder": 1,
+        "inferenceRole": "INCLUDE_PRIMARY"
       },
       {
-        "id": "INP_INITIAL",
-        "name": "ボーナス初当り回数",
+        "id": "M07-C01.successCount",
+        "name": "BIG回数",
+        "category": "V8_NUMERIC",
         "type": "counter",
-        "category": "PRIMARY",
+        "unit": "回",
+        "defaultValue": 0,
+        "minimum": 0,
         "displayOrder": 2,
-        "defaultValue": 0,
-        "unit": "回",
-        "minimum": 0
-      },
-      {
-        "id": "INP_CHERRY_B",
-        "name": "チェリーB回数",
-        "type": "counter",
-        "category": "SMALL_ROLE",
-        "displayOrder": 10,
-        "defaultValue": 0,
-        "unit": "回",
-        "minimum": 0
-      },
-      {
-        "id": "INP_KAKUTEI_B",
-        "name": "確定役B回数",
-        "type": "counter",
-        "category": "SMALL_ROLE",
-        "displayOrder": 11,
-        "defaultValue": 0,
-        "unit": "回",
-        "minimum": 0
+        "parentInputId": "M07-C01.eligibleTrialCount",
+        "inferenceRole": "INCLUDE_PRIMARY"
       }
     ]
   },
   "features": {
-    "schemaVersion": "2.0.0",
+    "version": "8.5-runtime",
     "features": [
       {
-        "featureId": "FEAT_INITIAL",
-        "name": "ボーナス初当り",
+        "featureId": "M07-C01",
+        "name": "BIG",
+        "trialUniverse": "NORMAL_GAME_TRIAL",
         "adoptionCategory": "INCLUDE_PRIMARY",
         "calculationRole": "PROBABILITY",
         "probabilityEngineUsage": true,
-        "modelType": "binomial",
-        "minimumSample": 1,
-        "sampleRecommendation": 7000,
-        "reliabilityProfile": {
-          "weight": 1
-        },
-        "displayFormat": "ratio_1_over_n",
-        "denominatorInputId": "INP_NORMAL_GAMES",
-        "numeratorInputId": "INP_INITIAL",
+        "denominatorInputId": "M07-C01.eligibleTrialCount",
         "probabilities": {
-          "SET_1": 0.0034638032559750607,
-          "SET_2": 0.003591954022988506,
-          "SET_3": 0.0037425149700598802,
-          "SET_5": 0.003898635477582846,
-          "SET_6": 0.004058441558441558
+          "SET_1": 0.004679457182966776,
+          "SET_2": 0.004897159647404506,
+          "SET_3": 0.0053390282968499726,
+          "SET_5": 0.005827505827505828,
+          "SET_6": 0.006273525721455458
         },
-        "sourceEvidenceRefs": [
-          "SRC_ID"
-        ]
-      },
+        "selectionRationale": {
+          "summary": "設定推測に採用された要素です。",
+          "adoptionReason": "BIGは設定1 1/213.7、設定6 1/159.4と設定差があります。「通常ゲーム数」に対する「BIG回数」の発生割合を比較して推測に使用します。 観測条件：通常時のBIGを記録します。",
+          "shortTermReason": "標本が少ない間は結果の振れが大きくなります。",
+          "longTermReason": "観測数が増えるほど設定別の比較が安定します。"
+        },
+        "modelType": "binomial",
+        "numeratorInputId": "M07-C01.successCount",
+        "displayFormat": "percentage"
+      }
+    ],
+    "runtimeProjection": [
       {
-        "featureId": "FEAT_CHERRY_B",
-        "name": "チェリーB",
-        "adoptionCategory": "INCLUDE_SUPPORT",
-        "calculationRole": "PROBABILITY",
-        "probabilityEngineUsage": true,
-        "modelType": "binomial",
-        "minimumSample": 1,
-        "sampleRecommendation": 7000,
-        "reliabilityProfile": {
-          "weight": 1
-        },
-        "displayFormat": "ratio_1_over_n",
-        "denominatorInputId": "INP_NORMAL_GAMES",
-        "numeratorInputId": "INP_CHERRY_B",
-        "probabilities": {
-          "SET_1": 0.005952380952380952,
-          "SET_2": 0.006561679790026247,
-          "SET_3": 0.006868131868131868,
-          "SET_5": 0.007326007326007326,
-          "SET_6": 0.007782101167315175
-        },
-        "sourceEvidenceRefs": [
-          "SRC_ID"
-        ]
-      },
-      {
-        "featureId": "FEAT_KAKUTEI_B",
-        "name": "確定役B",
-        "adoptionCategory": "INCLUDE_SUPPORT",
-        "calculationRole": "PROBABILITY",
-        "probabilityEngineUsage": true,
-        "modelType": "binomial",
-        "minimumSample": 1,
-        "sampleRecommendation": 7000,
-        "reliabilityProfile": {
-          "weight": 1
-        },
-        "displayFormat": "ratio_1_over_n",
-        "denominatorInputId": "INP_NORMAL_GAMES",
-        "numeratorInputId": "INP_KAKUTEI_B",
-        "probabilities": {
-          "SET_1": 0.00006103515625,
-          "SET_2": 0.0000762939453125,
-          "SET_3": 0.00009155245497908026,
-          "SET_5": 0.0001220703125,
-          "SET_6": 0.000152587890625
-        },
-        "sourceEvidenceRefs": [
-          "SRC_ID"
-        ]
+        "featureId": "M07-C01",
+        "runtimeStatus": "ACTIVE",
+        "metric": "SELECTION_SCORE",
+        "metricValue": 53.03251009394769,
+        "importance": "主要"
       }
     ]
   },
   "evidence": {
-    "version": "1.0.0",
+    "version": "8.5-runtime",
     "evidences": [],
-    "sources": [
-      {
-        "id": "SRC_ID",
-        "classification": "ANALYSIS",
-        "url": "https://www.p-world.co.jp/machine/database/10136",
-        "checkedAt": "2026-08-21"
-      },
-      {
-        "id": "SRC_ANALYSIS",
-        "classification": "ANALYSIS",
-        "url": "https://1geki.jp/slot/s_okidoki_gorgeous25/0/",
-        "checkedAt": "2026-08-21"
-      }
-    ]
+    "references": []
   },
+  "blockedItems": [
+    {
+      "blockId": "M07-C06",
+      "label": "モード・点滅",
+      "reason": "点滅やモード示唆は主に連チャン状態の情報です。設定別の出現率や設定確定条件が確認できず、設定を直接絞る情報として使いません。",
+      "reevaluationCondition": "不足する設定別値や観測条件を解決する新しい具体的な公開資料が得られた場合、この項目だけ再確認します。",
+      "sourceIds": [
+        "s01"
+      ],
+      "retainedHandoffClaim": {
+        "parameters": {},
+        "condition": "モード示唆と設定示唆を区別",
+        "dependency": "連チャンゾーン判定と関連",
+        "verification": "要追加原典照合"
+      }
+    }
+  ],
   "ui": {
-    "sections": [
-      {
-        "id": "UI_DESIGN_1",
-        "title": "初当り",
-        "displayOrder": 1,
-        "items": [
-          {
-            "type": "input",
-            "inputId": "INP_NORMAL_GAMES",
-            "label": "通常ゲーム数",
-            "widget": "number"
-          },
-          {
-            "type": "input",
-            "inputId": "INP_INITIAL",
-            "label": "ボーナス初当り回数",
-            "widget": "counter"
-          }
-        ]
+    "schemaVersion": "v8.5-runtime-ui-v1",
+    "contractVersion": "runtime-ui-v8",
+    "source": "CANONICAL_UI",
+    "sourceSchemaVersion": "canonical-ui-v1",
+    "manifestRevision": "8.5",
+    "playInfo": {
+      "visible": true,
+      "collapsible": false,
+      "mode": "NORMAL_ONLY",
+      "sessionFields": [
+        {
+          "id": "date",
+          "label": "日付",
+          "mode": "DATE"
+        },
+        {
+          "id": "storeName",
+          "label": "店舗名",
+          "mode": "TEXT"
+        },
+        {
+          "id": "machineNumber",
+          "label": "台番号",
+          "mode": "TEXT"
+        }
+      ],
+      "startFields": [
+        {
+          "id": "startNormalGames",
+          "label": "着席時 通常ゲーム数",
+          "mode": "NUMBER",
+          "directNumeric": true
+        }
+      ],
+      "currentFields": [
+        {
+          "id": "currentNormalGames",
+          "label": "現在 通常ゲーム数",
+          "mode": "NUMBER",
+          "directNumeric": true
+        }
+      ],
+      "difference": {
+        "autoCalculate": true
       },
+      "useDifference": {
+        "label": "着席時との差分を使用",
+        "defaultWhenStartNormalGamesPresent": true
+      }
+    },
+    "accordion": {
+      "enabled": true,
+      "singleOpen": true
+    },
+    "quickInput": {
+      "enabled": false
+    },
+    "v8Sections": [
       {
-        "id": "UI_DESIGN_2",
-        "title": "小役",
-        "displayOrder": 2,
+        "id": "OBS_M07-C01",
+        "title": "BIG",
+        "collapsible": true,
+        "defaultExpanded": false,
+        "description": "通常時のBIGを記録します。通常ゲーム数を基準に、実戦中の出現割合を設定別に比較します。\n・注意：ボーナス消化以外のゲーム数と、天国などの連チャンも含む全BIG・REG回数。",
+        "descriptionPresentation": {
+          "collapsible": true,
+          "label": "説明",
+          "defaultExpanded": false
+        },
         "items": [
           {
-            "type": "input",
-            "inputId": "INP_CHERRY_B",
-            "label": "チェリーB回数",
-            "widget": "counter",
-            "gridSpan": 6,
-            "config": {
-              "compact": true
-            }
-          },
-          {
-            "type": "input",
-            "inputId": "INP_KAKUTEI_B",
-            "label": "確定役B回数",
-            "widget": "counter",
-            "gridSpan": 6,
-            "config": {
-              "compact": true
-            }
+            "id": "NODE_M07-C01",
+            "featureId": "M07-C01",
+            "title": "BIG",
+            "inputs": [
+              {
+                "id": "M07-C01.eligibleTrialCount",
+                "label": "通常ゲーム数",
+                "input": "denominator",
+                "inputId": "M07-C01.eligibleTrialCount",
+                "engineBinding": {
+                  "inputId": "M07-C01.eligibleTrialCount"
+                },
+                "gridSpan": 12,
+                "directNumeric": true,
+                "quickAdd": [
+                  50
+                ],
+                "unobservedDisplay": "—",
+                "playDataBinding": {
+                  "source": "PLAY_NORMAL_GAME_DELTA"
+                }
+              },
+              {
+                "id": "M07-C01.successCount",
+                "label": "BIG回数",
+                "input": "counter",
+                "inputId": "M07-C01.successCount",
+                "engineBinding": {
+                  "inputId": "M07-C01.successCount"
+                },
+                "directNumeric": true,
+                "quickAdd": [
+                  1
+                ],
+                "gridSpan": 6,
+                "unobservedDisplay": "—"
+              }
+            ]
           }
         ]
       }
     ]
   },
-  "selectionSummary": {
-    "schemaVersion": "selection-summary-v1",
-    "evaluatedCount": 6,
-    "selectedCount": 3,
-    "rejectedCount": 3,
-    "selected": [
-      {
-        "featureId": "FEAT_INITIAL",
-        "name": "ボーナス初当り",
-        "reason": "モード連中のボーナスと分離した通常時初当りとして主軸採用。",
-        "requiredTrials": {
-          "value": 77557,
-          "unit": "通常ゲーム"
-        }
-      },
-      {
-        "featureId": "FEAT_CHERRY_B",
-        "name": "チェリーB",
-        "reason": "判別可能な小役で高頻度かつ段階差があるため採用。",
-        "requiredTrials": {
-          "value": 14867,
-          "unit": "通常ゲーム"
-        }
-      },
-      {
-        "featureId": "FEAT_KAKUTEI_B",
-        "name": "確定役B",
-        "reason": "低頻度だが設定差が大きく、成立役として識別できるため採用。",
-        "requiredTrials": {
-          "value": 88895,
-          "unit": "通常ゲーム"
-        }
-      }
-    ],
-    "rejected": [
-      {
-        "featureId": "FEAT_BIG_TOTAL",
-        "name": "BIG確率",
-        "reason": "天国連を含み、初当りとモード移行性能を重複評価するため不採用。",
-        "requiredTrials": {
-          "value": 15629,
-          "unit": "総遊技区間"
-        }
-      },
-      {
-        "featureId": "FEAT_REG_TOTAL",
-        "name": "REG確率",
-        "reason": "天国連を含み、初当りとモード移行性能を重複評価するため不採用。",
-        "requiredTrials": {
-          "value": 54079,
-          "unit": "総遊技区間"
-        }
-      },
-      {
-        "featureId": "FEAT_NORMAL_AB_HIT",
-        "name": "通常A/B滞在時ボーナス",
-        "reason": "通常A/B滞在を実戦中に安定して確定できず分母が取れない。"
-      }
-    ]
-  },
-  "reliability": {},
   "metadata": {
     "machineId": "S_OKIDOKI_GORGEOUS_GS",
     "displayName": "沖ドキ！ゴージャス25Φ",
@@ -290,12 +242,83 @@
       "SET_5",
       "SET_6"
     ],
-    "uiDesignMaterialized": true,
-    "uiDesignSchemaVersion": "ui-design-data-v1",
-    "uiDesignStatus": "PASS"
+    "settingsStatus": "SOURCE_DERIVED"
   },
-  "validation": {
-    "cases": []
-  },
-  "statistics": {}
+  "v8": {
+    "machineResearchSummary": {
+      "title": "この機種の設定推測について",
+      "adopted": [
+        {
+          "featureId": "M07-C01",
+          "label": "BIG",
+          "importance": "主要",
+          "selectionScore": 53,
+          "evaluation": {
+            "userLabel": "設定判別スコア",
+            "value": 53
+          },
+          "reason": "BIGは設定1 1/213.7、設定6 1/159.4と設定差があります。「通常ゲーム数」に対する「BIG回数」の発生割合を比較して推測に使用します。 観測条件：通常時のBIGを記録します。"
+        }
+      ],
+      "notAdopted": [
+        {
+          "featureId": "M07-C02",
+          "label": "REG",
+          "reason": "この項目にも設定差のある数値は確認できています。BIG・REG・初当りとボーナス成立契機になる役は同じ当選経路。独立に重ねず、正式スコアで代表を選択。 同じ情報を重ねて評価して判別力を過大に見積もらないため、現在は設定判別スコア等を比較して「BIG」を代表として使用し、この項目は単独では数値推測に使用しません。"
+        },
+        {
+          "featureId": "M07-C03",
+          "label": "初当り",
+          "reason": "この項目にも設定差のある数値は確認できています。BIG・REG・初当りとボーナス成立契機になる役は同じ当選経路。独立に重ねず、正式スコアで代表を選択。 同じ情報を重ねて評価して判別力を過大に見積もらないため、現在は設定判別スコア等を比較して「BIG」を代表として使用し、この項目は単独では数値推測に使用しません。"
+        },
+        {
+          "featureId": "M07-C04",
+          "label": "チェリーB",
+          "reason": "この項目にも設定差のある数値は確認できています。BIG・REG・初当りとボーナス成立契機になる役は同じ当選経路。独立に重ねず、正式スコアで代表を選択。 同じ情報を重ねて評価して判別力を過大に見積もらないため、現在は設定判別スコア等を比較して「BIG」を代表として使用し、この項目は単独では数値推測に使用しません。"
+        },
+        {
+          "featureId": "M07-C05",
+          "label": "確定役B",
+          "reason": "この項目にも設定差のある数値は確認できています。BIG・REG・初当りとボーナス成立契機になる役は同じ当選経路。独立に重ねず、正式スコアで代表を選択。 同じ情報を重ねて評価して判別力を過大に見積もらないため、現在は設定判別スコア等を比較して「BIG」を代表として使用し、この項目は単独では数値推測に使用しません。"
+        },
+        {
+          "featureId": "M07-C06",
+          "label": "モード・点滅",
+          "reason": "点滅やモード示唆は主に連チャン状態の情報です。設定別の出現率や設定確定条件が確認できず、設定を直接絞る情報として使いません。",
+          "reevaluationCondition": "不足する設定別値や観測条件を解決する新しい具体的な公開資料が得られた場合、この項目だけ再確認します。"
+        }
+      ],
+      "highLowDiscrimination": {
+        "status": "COMPUTED",
+        "method": "BEST_SINGLE_EXACT_ACTIVE_FEATURE",
+        "bandDefinition": {
+          "lowSettings": "SETTING_1_TO_3",
+          "highSettings": "SETTING_4_TO_6",
+          "classPrior": "BALANCED"
+        },
+        "results": [
+          {
+            "games": 1500,
+            "balancedAccuracyPercent": 61.05
+          },
+          {
+            "games": 3000,
+            "balancedAccuracyPercent": 65.34
+          },
+          {
+            "games": 7000,
+            "balancedAccuracyPercent": 72.18
+          }
+        ],
+        "eligibleFeatureIds": [
+          "M07-C01"
+        ],
+        "selectedFeatureId": "M07-C01",
+        "selectedFeatureLabel": "BIG",
+        "excludedFeatures": [],
+        "note": "7000Gへ正確に換算できるACTIVE要素だけを候補とし、要素間の独立性を仮定せず、単独で最も高い判別精度を持つ要素から保守的に算出しています。条件付き要素はこの指標には含めませんが、実戦中に実際の観測回数が入力された場合は設定推測に使用します。"
+      },
+      "unresolved": []
+    }
+  }
 }
