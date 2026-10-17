@@ -1,12 +1,16 @@
 {
   "schemaVersion": 1,
+  "provenance": {
+    "manifestVersion": "8.5",
+    "generationPath": "V8_5_PRODUCTION_PIPELINE",
+    "legacyOracleUsed": false
+  },
   "machine": {
     "schemaVersion": "2.0.0",
     "machineId": "L_NANGOKU_SODACHI_S3",
-    "machineDataVersion": "0.1.0",
+    "machineDataVersion": "8.5.1-batch-20261017-020",
     "displayName": "L南国育ち",
-    "modelName": "L南国育ちS3",
-    "manufacturer": "オリンピアエステート",
+    "modelName": "L南国育ち",
     "settings": [
       "SET_1",
       "SET_2",
@@ -19,6 +23,7 @@
       "containsImages": false,
       "containsExecutableCode": false
     },
+    "manufacturer": "オリンピアエステート",
     "introductionDate": "2024-03-04",
     "machineType": "SMART_SLOT",
     "gameType": "AT"
@@ -27,93 +32,111 @@
     "schemaVersion": "2.0.0",
     "inputs": [
       {
-        "id": "INP_NORMAL_GAMES",
-        "name": "通常ゲーム数",
+        "id": "M10-C01.eligibleTrialCount",
+        "name": "連荘中を除くゲーム数",
+        "category": "V8_NUMERIC",
         "type": "integer",
-        "category": "PRIMARY",
         "unit": "G",
+        "defaultValue": 0,
+        "minimum": 0,
         "displayOrder": 1,
-        "defaultValue": 0,
-        "minimum": 0
+        "inferenceRole": "INCLUDE_SUPPORT"
       },
       {
-        "id": "INP_INITIAL",
-        "name": "ボーナス初当り回数",
+        "id": "M10-C01.successCount",
+        "name": "ボーナス初当たり回数",
+        "category": "V8_NUMERIC",
         "type": "counter",
-        "category": "PRIMARY",
         "unit": "回",
+        "defaultValue": 0,
+        "minimum": 0,
         "displayOrder": 2,
-        "defaultValue": 0,
-        "minimum": 0
+        "parentInputId": "M10-C01.eligibleTrialCount",
+        "inferenceRole": "INCLUDE_SUPPORT"
       },
       {
-        "id": "INP_SUNSHINE_TRIALS",
-        "name": "蝶飛翔時の楽曲選択機会",
+        "id": "M10-C07.eligibleTrialCount",
+        "name": "BGM回数",
+        "category": "V8_NUMERIC",
         "type": "integer",
-        "category": "BONUS",
         "unit": "回",
-        "displayOrder": 20,
-        "defaultValue": null,
-        "description": "ボーナス中1G連上乗せ時または赤7BIG先飛翔時など、対象となる楽曲選択機会を数えます。負担なら未入力で構いません。",
-        "minimum": 0
+        "defaultValue": 0,
+        "minimum": 0,
+        "displayOrder": 3,
+        "inferenceRole": "INCLUDE_SUPPORT"
       },
       {
-        "id": "INP_SUNSHINE",
-        "name": "感じてSunshine!!",
+        "id": "M10-C07.successCount",
+        "name": "BGM回数",
+        "category": "V8_NUMERIC",
         "type": "counter",
-        "category": "BONUS",
         "unit": "回",
-        "displayOrder": 21,
-        "defaultValue": null,
-        "parentInputId": "INP_SUNSHINE_TRIALS",
-        "minimum": 0
+        "defaultValue": 0,
+        "minimum": 0,
+        "displayOrder": 4,
+        "parentInputId": "M10-C07.eligibleTrialCount",
+        "inferenceRole": "INCLUDE_SUPPORT"
+      },
+      {
+        "id": "REF_M10-C09_1",
+        "name": "上下パネル消灯：設定Lの可能性",
+        "category": "EVIDENCE_REFERENCE",
+        "type": "counter",
+        "unit": "回",
+        "defaultValue": 0,
+        "minimum": 0,
+        "displayOrder": 5,
+        "inferenceRole": "DISPLAY_ONLY"
+      },
+      {
+        "id": "REF_M10-C09_2",
+        "name": "通常点灯：デフォルト",
+        "category": "EVIDENCE_REFERENCE",
+        "type": "counter",
+        "unit": "回",
+        "defaultValue": 0,
+        "minimum": 0,
+        "displayOrder": 6,
+        "inferenceRole": "DISPLAY_ONLY"
       }
     ]
   },
   "features": {
-    "schemaVersion": "2.0.0",
+    "version": "8.5-runtime",
     "features": [
       {
-        "featureId": "FEAT_INITIAL",
-        "name": "ボーナス初当り",
-        "adoptionCategory": "INCLUDE_PRIMARY",
-        "calculationRole": "PROBABILITY",
-        "probabilityEngineUsage": true,
-        "modelType": "binomial",
-        "minimumSample": 1,
-        "sampleRecommendation": 7000,
-        "reliabilityProfile": {
-          "weight": 1
-        },
-        "displayFormat": "ratio_1_over_n",
-        "denominatorInputId": "INP_NORMAL_GAMES",
-        "numeratorInputId": "INP_INITIAL",
-        "probabilities": {
-          "SET_1": 0.003336,
-          "SET_2": 0.003436,
-          "SET_3": 0.003741,
-          "SET_5": 0.004191,
-          "SET_6": 0.004789
-        },
-        "sourceEvidenceRefs": [
-          "SRC_NS_TOOL"
-        ]
-      },
-      {
-        "featureId": "FEAT_SUNSHINE",
-        "name": "蝶飛翔時「感じてSunshine!!」選択率",
+        "featureId": "M10-C01",
+        "name": "ボーナス初当たり",
+        "trialUniverse": "NON_CHAIN_BONUS_INITIAL_GAME_TRIAL",
         "adoptionCategory": "INCLUDE_SUPPORT",
         "calculationRole": "PROBABILITY",
         "probabilityEngineUsage": true,
-        "modelType": "binomial",
-        "minimumSample": 1,
-        "sampleRecommendation": 20,
-        "reliabilityProfile": {
-          "weight": 1
+        "denominatorInputId": "M10-C01.eligibleTrialCount",
+        "probabilities": {
+          "SET_1": 0.00333555703802535,
+          "SET_2": 0.003436426116838488,
+          "SET_3": 0.0037411148522259632,
+          "SET_5": 0.004191114836546521,
+          "SET_6": 0.004789272030651341
         },
-        "displayFormat": "percent",
-        "denominatorInputId": "INP_SUNSHINE_TRIALS",
-        "numeratorInputId": "INP_SUNSHINE",
+        "selectionRationale": {
+          "summary": "設定推測に採用された要素です。",
+          "adoptionReason": "ボーナス初当たりは設定1 1/299.8、設定6 1/208.8と設定差があります。「連チャン区間を除いたゲーム数」に対する「ボーナス初当たり回数」の発生割合を比較して推測に使用します。 観測条件：対象となる機会のうち、ボーナス初当たりが実際に起きた割合を設定別に比較します。",
+          "shortTermReason": "標本が少ない間は結果の振れが大きくなります。",
+          "longTermReason": "観測数が増えるほど設定別の比較が安定します。"
+        },
+        "modelType": "binomial",
+        "numeratorInputId": "M10-C01.successCount",
+        "displayFormat": "ratio_1_over_n"
+      },
+      {
+        "featureId": "M10-C07",
+        "name": "飛翔時BGM",
+        "trialUniverse": "NANGOKU_FLIGHT_MUSIC_TRIAL",
+        "adoptionCategory": "INCLUDE_SUPPORT",
+        "calculationRole": "PROBABILITY",
+        "probabilityEngineUsage": true,
+        "denominatorInputId": "M10-C07.eligibleTrialCount",
         "probabilities": {
           "SET_1": 0.02,
           "SET_2": 0.04,
@@ -121,150 +144,343 @@
           "SET_5": 0.08,
           "SET_6": 0.1
         },
-        "sourceEvidenceRefs": [
-          "SRC_NS_CHON"
-        ]
+        "selectionRationale": {
+          "summary": "設定推測に採用された要素です。",
+          "adoptionReason": "飛翔時BGMは設定1 2%、設定6 10%と設定差があります。「BGM回数」に対する「BGM回数」の発生割合を比較して推測に使用します。 観測条件：対象となる機会のうち、BGMが実際に起きた割合を設定別に比較します。",
+          "shortTermReason": "標本が少ない間は結果の振れが大きくなります。",
+          "longTermReason": "観測数が増えるほど設定別の比較が安定します。"
+        },
+        "modelType": "binomial",
+        "numeratorInputId": "M10-C07.successCount",
+        "displayFormat": "percentage"
+      }
+    ],
+    "runtimeProjection": [
+      {
+        "featureId": "M10-C01",
+        "runtimeStatus": "ACTIVE",
+        "metric": "PER_ELIGIBLE_TRIAL_POWER",
+        "metricValue": 0.010430308317188608,
+        "importance": "微小"
+      },
+      {
+        "featureId": "M10-C07",
+        "runtimeStatus": "ACTIVE",
+        "metric": "PER_ELIGIBLE_TRIAL_POWER",
+        "metricValue": 2.194886448084632,
+        "importance": "微小"
       }
     ]
   },
   "evidence": {
-    "version": "1.0.0",
+    "version": "8.5-runtime",
     "evidences": [],
-    "sources": [
+    "references": [
       {
-        "id": "SRC_NS_PW",
-        "classification": "ANALYSIS",
-        "pageName": "L南国育ち",
-        "url": "https://www.p-world.co.jp/machine/database/9983",
-        "checkedAt": "2026-08-19"
-      },
-      {
-        "id": "SRC_NS_TOOL",
-        "classification": "ANALYSIS",
-        "pageName": "L南国育ち 設定判別",
-        "url": "https://pacnk.com/slot/tools/sh_nangokusodachi.html",
-        "checkedAt": "2026-08-19"
-      },
-      {
-        "id": "SRC_NS_CHON",
-        "classification": "ANALYSIS",
-        "pageName": "スマスロ 南国育ち 設定判別",
-        "url": "https://chonborista.com/slot/orinpia-slot/205447/",
-        "checkedAt": "2026-08-20"
+        "id": "EVI_M10-C09",
+        "sourceFindingId": "M10-C09",
+        "title": "設定L下パネル",
+        "kind": "EVIDENCE",
+        "collapsible": true,
+        "defaultExpanded": false,
+        "description": "設定L下パネルを確認したときに、該当する項目を1回加算して記録します。\n・注意：設定Lの識別用参考記録。通常の設定1・2・3・5・6の推測へ低い出玉率を混ぜません\n・注意：出現率が未確認の示唆は記録のみ・推測計算には使用しない。設定確定・否定の項目は設定候補の絞り込みに反映できる可能性があります\n・参考入力：このセクションの全項目は設定別出現率が公表・確認されていないため、記録のみです。設定推測の計算には使用しません。",
+        "descriptionPresentation": {
+          "collapsible": true,
+          "label": "説明",
+          "defaultExpanded": false
+        },
+        "runtimePolicyControlled": false,
+        "evidenceItems": [
+          {
+            "findingId": "M10-C09",
+            "label": "設定L下パネル",
+            "sourceIds": [
+              "S01"
+            ],
+            "details": [
+              "設定Lの識別用参考記録。通常の設定1・2・3・5・6の推測へ低い出玉率を混ぜません。",
+              "出現率が未確認の示唆は記録のみ・推測計算には使用しない。設定確定・否定の項目は設定候補の絞り込みに反映できる可能性があります。"
+            ],
+            "semanticType": "DISPLAY_ONLY",
+            "semanticCategories": [
+              {
+                "label": "上下パネル消灯",
+                "meaning": "設定Lの可能性",
+                "semanticType": "DISPLAY_ONLY"
+              },
+              {
+                "label": "通常点灯",
+                "meaning": "デフォルト",
+                "semanticType": "DISPLAY_ONLY"
+              }
+            ],
+            "runtimePolicyControlled": false,
+            "status": "SOURCE_REFERENCED",
+            "interaction": "REFERENCE_ONLY"
+          }
+        ]
       }
     ]
   },
+  "blockedItems": [
+    {
+      "blockId": "M10-C04",
+      "label": "飛翔モード移行",
+      "reason": "飛翔A・B・超飛翔の内部移行率は全設定分が揃いません。平均獲得枚数は移行率ではないため、期待枚数から抽選率を作りません。",
+      "reevaluationCondition": "不足を解決する新しい具体的な公開資料が得られた場合、この項目だけ再確認します。",
+      "publicSearchStatus": "CLOSED_BOUNDED_NO_REPEAT",
+      "retainedPublishedValues": {
+        "averagePayoutFlightAB": [
+          1025.7,
+          1024.2,
+          1001.7,
+          949.7,
+          853.4
+        ],
+        "superFlight": "2500枚超"
+      },
+      "sourceIds": [
+        "S01"
+      ],
+      "retainedHandoffClaim": {
+        "machine_id": "10",
+        "machine": "L南国育ち",
+        "candidate_id": "M10-C04",
+        "label": "飛翔モード移行",
+        "model_type": "conditional",
+        "denominator": "移行機会",
+        "setting_values_or_signal": "移行と継続の依存あり",
+        "proposal": "conditional",
+        "source_url": "https://nana-press.com/kaiseki/machine/703/19741/",
+        "checked_on": "2026-10-17",
+        "source_grade": "secondary_public_web",
+        "audit": "initial_source_found_not_fully_independently_audited",
+        "dependency": "Must resolve overlaps with initial hit, modes, conditional triggers and category totals before multiplying",
+        "ui_note": "ゲーム数基準は1/形式、振分は％。数値未公表は『記録のみ・推測計算には使用しない』",
+        "unresolved": "Review complete setting-by-setting table and observation condition; do not impute missing cells; do not substitute 2026 L南国育ちSPECIAL",
+        "verified_in_v4": "no",
+        "v4_sources": "",
+        "v4_model_gate": "BINOMIAL_ONLY_IF_CONDITION_OBSERVABLE",
+        "v4_input_strategy": "Record qualifying trials and successes; if internal mode unknown, do not use in inference",
+        "v4_dependency_group": "event_family_10"
+      }
+    }
+  ],
   "ui": {
-    "sections": [
+    "schemaVersion": "v8.5-runtime-ui-v1",
+    "contractVersion": "runtime-ui-v8",
+    "source": "CANONICAL_UI",
+    "sourceSchemaVersion": "canonical-ui-v1",
+    "manifestRevision": "8.5",
+    "playInfo": {
+      "visible": true,
+      "collapsible": false,
+      "mode": "TOTAL_ONLY",
+      "sessionFields": [
+        {
+          "id": "date",
+          "label": "日付",
+          "mode": "DATE"
+        },
+        {
+          "id": "storeName",
+          "label": "店舗名",
+          "mode": "TEXT"
+        },
+        {
+          "id": "machineNumber",
+          "label": "台番号",
+          "mode": "TEXT"
+        }
+      ],
+      "startFields": [
+        {
+          "id": "startTotalGames",
+          "label": "着席時 総ゲーム数",
+          "mode": "NUMBER",
+          "directNumeric": true
+        }
+      ],
+      "currentFields": [
+        {
+          "id": "currentTotalGames",
+          "label": "現在 総ゲーム数",
+          "mode": "NUMBER",
+          "directNumeric": true
+        }
+      ],
+      "difference": {
+        "autoCalculate": true
+      },
+      "useDifference": {
+        "label": "着席時との差分を使用",
+        "defaultWhenStartNormalGamesPresent": true
+      },
+      "exclusionGames": {
+        "visible": true,
+        "label": "除外ゲーム数",
+        "quickAdd": [
+          50
+        ],
+        "base": "TOTAL",
+        "resultLabel": "除外後の実戦ゲーム数",
+        "description": "連チャンゾーン中に消化したゲーム数を入力してください。総ゲーム数から差し引きます。ゾーン内の当選はすべて連チャンとして初当たりから除外します。"
+      }
+    },
+    "accordion": {
+      "enabled": true,
+      "singleOpen": true
+    },
+    "quickInput": {
+      "enabled": false
+    },
+    "v8Sections": [
       {
-        "id": "UI_DESIGN_1",
-        "title": "初当り",
-        "displayOrder": 1,
-        "collapsible": false,
-        "defaultExpanded": true,
+        "id": "OBS_M10-C01",
+        "title": "ボーナス初当たり",
+        "collapsible": true,
+        "defaultExpanded": false,
+        "description": "対象となる機会のうち、ボーナス初当たりが実際に起きた割合を設定別に比較します。\n・注意：区間内の当選は連チャンとして除きます。\n・注意：ボーナス消化以外のゲーム数からバタフライ・ときめき等の連チャン確認区間を差し引いたゲーム数と、区間外のボーナス初当たり。区間内の当選は連チャンとして除きます。",
+        "descriptionPresentation": {
+          "collapsible": true,
+          "label": "説明",
+          "defaultExpanded": false
+        },
         "items": [
           {
-            "type": "input",
-            "inputId": "INP_NORMAL_GAMES",
-            "label": "通常ゲーム数",
-            "widget": "number",
-            "gridSpan": 12,
-            "config": {
-              "directInput": true
-            }
-          },
-          {
-            "type": "input",
-            "inputId": "INP_INITIAL",
-            "label": "ボーナス初当り回数",
-            "widget": "counter",
-            "gridSpan": 12,
-            "config": {
-              "directInput": true
-            }
+            "id": "NODE_M10-C01",
+            "featureId": "M10-C01",
+            "title": "ボーナス初当たり",
+            "inputs": [
+              {
+                "id": "M10-C01.eligibleTrialCount",
+                "label": "連荘中を除くゲーム数",
+                "input": "denominator",
+                "inputId": "M10-C01.eligibleTrialCount",
+                "engineBinding": {
+                  "inputId": "M10-C01.eligibleTrialCount"
+                },
+                "gridSpan": 12,
+                "directNumeric": true,
+                "quickAdd": [
+                  50
+                ],
+                "unobservedDisplay": "—",
+                "playDataBinding": {
+                  "source": "PLAY_TOTAL_GAME_DELTA_EXCLUDED",
+                  "mode": "AUTO_EXACT"
+                }
+              },
+              {
+                "id": "M10-C01.successCount",
+                "label": "ボーナス初当たり回数",
+                "input": "counter",
+                "inputId": "M10-C01.successCount",
+                "engineBinding": {
+                  "inputId": "M10-C01.successCount"
+                },
+                "directNumeric": true,
+                "quickAdd": [
+                  1
+                ],
+                "gridSpan": 6,
+                "unobservedDisplay": "—"
+              }
+            ]
           }
         ]
       },
       {
-        "id": "UI_DESIGN_2",
-        "title": "蝶飛翔時BGM",
-        "displayOrder": 2,
-        "collapsible": false,
-        "defaultExpanded": true,
+        "id": "OBS_M10-C07",
+        "title": "飛翔時BGM",
+        "collapsible": true,
+        "defaultExpanded": false,
+        "description": "対象となる機会のうち、BGMが実際に起きた割合を設定別に比較します。\n・注意：ほかの飛翔曲も母数に含め、同じ曲が続いているだけなら新しい1回にしません。\n・注意：ボーナス入賞時の先飛翔、または消化中の1G連当選でBGMが選ばれた回数と、「感じてSunshine」が選ばれた回数。ほかの飛翔曲も母数に含め、同じ曲が続いているだけなら新しい1回にしません。",
+        "descriptionPresentation": {
+          "collapsible": true,
+          "label": "説明",
+          "defaultExpanded": false
+        },
         "items": [
           {
-            "type": "input",
-            "inputId": "INP_SUNSHINE_TRIALS",
-            "label": "蝶飛翔時の楽曲選択機会",
-            "widget": "number",
-            "gridSpan": 12,
-            "config": {
-              "directInput": true
-            }
-          },
+            "id": "NODE_M10-C07",
+            "featureId": "M10-C07",
+            "title": "飛翔時BGM",
+            "inputs": [
+              {
+                "id": "M10-C07.eligibleTrialCount",
+                "label": "BGM回数",
+                "input": "denominator",
+                "inputId": "M10-C07.eligibleTrialCount",
+                "engineBinding": {
+                  "inputId": "M10-C07.eligibleTrialCount"
+                },
+                "gridSpan": 6,
+                "directNumeric": true,
+                "quickAdd": [],
+                "unobservedDisplay": "—"
+              },
+              {
+                "id": "M10-C07.successCount",
+                "label": "BGM回数",
+                "input": "counter",
+                "inputId": "M10-C07.successCount",
+                "engineBinding": {
+                  "inputId": "M10-C07.successCount"
+                },
+                "directNumeric": true,
+                "quickAdd": [
+                  1
+                ],
+                "gridSpan": 6,
+                "unobservedDisplay": "—"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "EVI_M10-C09",
+        "title": "設定L下パネル",
+        "description": "設定L下パネルを確認したときに、該当する項目を1回加算して記録します。\n・注意：設定Lの識別用参考記録。通常の設定1・2・3・5・6の推測へ低い出玉率を混ぜません\n・注意：出現率が未確認の示唆は記録のみ・推測計算には使用しない。設定確定・否定の項目は設定候補の絞り込みに反映できる可能性があります\n・参考入力：このセクションの全項目は設定別出現率が公表・確認されていないため、記録のみです。設定推測の計算には使用しません。",
+        "collapsible": true,
+        "defaultExpanded": false,
+        "descriptionPresentation": {
+          "collapsible": true,
+          "label": "説明",
+          "defaultExpanded": false
+        },
+        "items": [
           {
-            "type": "input",
-            "inputId": "INP_SUNSHINE",
-            "label": "感じてSunshine!!",
-            "widget": "counter",
-            "gridSpan": 12,
-            "config": {
-              "directInput": true
+            "id": "REF_M10-C09",
+            "evidenceId": "M10-C09",
+            "label": "設定L下パネル",
+            "interaction": {
+              "type": "CATEGORY_COUNTERS",
+              "preservePriorObservations": true,
+              "showAccumulatedCounts": true,
+              "categoryCoverage": "NON_EXHAUSTIVE",
+              "totalOpportunities": "NONE",
+              "categories": [
+                {
+                  "id": "REF_M10-C09_1",
+                  "inputId": "REF_M10-C09_1",
+                  "label": "上下パネル消灯",
+                  "meaning": "設定Lの可能性"
+                },
+                {
+                  "id": "REF_M10-C09_2",
+                  "inputId": "REF_M10-C09_2",
+                  "label": "通常点灯",
+                  "meaning": "デフォルト"
+                }
+              ]
             }
           }
         ]
       }
     ]
   },
-  "selectionSummary": {
-    "schemaVersion": "selection-summary-v1",
-    "evaluatedCount": 6,
-    "selectedCount": 2,
-    "rejectedCount": 4,
-    "selected": [
-      {
-        "featureId": "FEAT_INITIAL",
-        "name": "ボーナス初当り",
-        "reason": "通常ゲーム数と初当りを終日通して取得でき、設定1から6で約1.44倍の差があるため主軸採用。",
-        "requiredTrials": {
-          "value": 13935,
-          "unit": "通常ゲーム"
-        }
-      },
-      {
-        "featureId": "FEAT_SUNSHINE",
-        "name": "蝶飛翔時「感じてSunshine!!」選択率",
-        "reason": "選択率が設定1の2%から設定6の10%まで5倍差あり、対象機会を正確に数えられる場合は序盤から有効な補助材料になるため採用。入力は任意です。",
-        "requiredTrials": {
-          "value": 57,
-          "unit": "楽曲選択機会"
-        }
-      }
-    ],
-    "rejected": [
-      {
-        "featureId": "FEAT_BONUS_TYPE",
-        "name": "BIG/REG内訳",
-        "reason": "BIG比率は設定1～3の53.4%に対して設定6でも55.3%と差が小さく、終日のボーナス試行数では情報量が乏しいため不採用。"
-      },
-      {
-        "featureId": "FEAT_ROLE_HIT",
-        "name": "通常A/B滞在時のチェリー・スイカ当選",
-        "reason": "通常A/B滞在時という状態別の分母を正確に取得する必要があり、実戦で観測区間を保証できないため不採用。"
-      },
-      {
-        "featureId": "FEAT_FIRST_MODE",
-        "name": "初代モード移行",
-        "reason": "モード移行機会の分母を正確に数えることが難しく、終日の試行数も不足するため不採用。"
-      },
-      {
-        "featureId": "REJECTED_PREDECESSOR_DENOMINATOR",
-        "name": "着席時データ",
-        "reason": "店舗データカウンターの総ゲーム数は公開解析の通常ゲーム数と集計区間が一致する保証がないため、前任者区間の設定推測には使用しません。実機メニュー等で分子・分母を同一区間で直接取得できる場合のみ個別採用します。"
-      }
-    ]
-  },
-  "reliability": {},
   "metadata": {
     "machineId": "L_NANGOKU_SODACHI_S3",
     "displayName": "L南国育ち",
@@ -275,12 +491,120 @@
       "SET_5",
       "SET_6"
     ],
-    "uiDesignMaterialized": true,
-    "uiDesignSchemaVersion": "ui-design-data-v1",
-    "uiDesignStatus": "PASS"
+    "settingsStatus": "SOURCE_DERIVED",
+    "observationPrerequisites": [
+      {
+        "findingId": "M10-C01",
+        "trialUniverse": "NON_CHAIN_BONUS_INITIAL_GAME_TRIAL",
+        "denominatorSemantics": "ボーナス消化以外のゲーム数からバタフライ・ときめき等の連チャン確認区間を差し引いたゲーム数と、区間外のボーナス初当たり回数。区間内の当選は連チャンとして除きます。",
+        "liveObservation": {
+          "status": "EXACT_WITH_SCOPE_TRACKING",
+          "reason": "ボーナス消化以外のゲーム数からバタフライ・ときめき等の連チャン確認区間を差し引いたゲーム数と、区間外のボーナス初当たり回数。区間内の当選は連チャンとして除きます。"
+        },
+        "observationContext": null,
+        "conditionalStateModel": null,
+        "operationalCounting": {
+          "authority": "USER_EXPLICIT_INSTRUCTION",
+          "policyArtifact": "production/batches/batch-20261017-020/scope-authorization.json",
+          "publishedDenominatorEquivalence": "NOT_ASSERTED",
+          "gamesFormula": "nonBonusGames - chainZoneGames",
+          "negativeOrMissing": "UNOBSERVED_NOT_ZERO",
+          "chainGamesCountedOnce": true
+        },
+        "mirrorsEvidenceFindingId": null,
+        "categoricalEvidenceReconciliation": null,
+        "sourceIds": [
+          "S01"
+        ],
+        "unknownRequiredInput": "DISABLE_THIS_FINDING_ONLY",
+        "zeroVsUnobserved": "PRESERVE"
+      },
+      {
+        "findingId": "M10-C07",
+        "trialUniverse": "NANGOKU_FLIGHT_MUSIC_TRIAL",
+        "denominatorSemantics": "ボーナス入賞時の先飛翔、または消化中の1G連当選でBGMが選ばれた回数と、「感じてSunshine」が選ばれた回数。ほかの飛翔曲も母数に含め、同じ曲が続いているだけなら新しい1回にしません。",
+        "liveObservation": {
+          "status": "EXACT_WITH_SCOPE_TRACKING",
+          "reason": "ボーナス入賞時の先飛翔、または消化中の1G連当選でBGMが選ばれた回数と、「感じてSunshine」が選ばれた回数。ほかの飛翔曲も母数に含め、同じ曲が続いているだけなら新しい1回にしません。"
+        },
+        "observationContext": null,
+        "conditionalStateModel": null,
+        "operationalCounting": null,
+        "mirrorsEvidenceFindingId": null,
+        "categoricalEvidenceReconciliation": null,
+        "sourceIds": [
+          "S02",
+          "S03"
+        ],
+        "unknownRequiredInput": "DISABLE_THIS_FINDING_ONLY",
+        "zeroVsUnobserved": "PRESERVE"
+      }
+    ]
   },
-  "validation": {
-    "cases": []
-  },
-  "statistics": {}
+  "v8": {
+    "machineResearchSummary": {
+      "title": "この機種の設定推測について",
+      "adopted": [
+        {
+          "featureId": "M10-C01",
+          "label": "ボーナス初当たり",
+          "importance": "微小",
+          "evaluation": {
+            "userLabel": "1回の判別力",
+            "value": 0.010430308317188608
+          },
+          "reason": "ボーナス初当たりは設定1 1/299.8、設定6 1/208.8と設定差があります。「連チャン区間を除いたゲーム数」に対する「ボーナス初当たり回数」の発生割合を比較して推測に使用します。 観測条件：対象となる機会のうち、ボーナス初当たりが実際に起きた割合を設定別に比較します。"
+        },
+        {
+          "featureId": "M10-C07",
+          "label": "飛翔時BGM",
+          "importance": "微小",
+          "evaluation": {
+            "userLabel": "1回の判別力",
+            "value": 2.194886448084632
+          },
+          "reason": "飛翔時BGMは設定1 2%、設定6 10%と設定差があります。「BGM回数」に対する「BGM回数」の発生割合を比較して推測に使用します。 観測条件：対象となる機会のうち、BGMが実際に起きた割合を設定別に比較します。"
+        }
+      ],
+      "notAdopted": [
+        {
+          "featureId": "M10-C02",
+          "label": "モード別ボーナス",
+          "reason": "内部通常A・B、初代、引き戻し、チャンスの滞在ゲーム数を全例識別できません。見た目の通常ゲーム数を特定モードの滞在ゲーム数へ代用しません。"
+        },
+        {
+          "featureId": "M10-C03",
+          "label": "初代モード移行・継続",
+          "reason": "初代モード実質突入率は概数です。隠れた初代移行を全例識別できず、継続した回数を新規移行回数として代用しません。"
+        },
+        {
+          "featureId": "M10-C05",
+          "label": "チェリー・スイカ当選",
+          "reason": "通常A・B中だけの小役当選率です。初代・引き戻し・チャンスをすべて区別できず、通常時全小役にこの率を使いません。"
+        },
+        {
+          "featureId": "M10-C06",
+          "label": "ボーナス比率",
+          "reason": "全状態平均のBIG選択率です。連チャンを除いた初当たり限定比率へ読み替えず、初当たり率にも独立に重ねません。"
+        },
+        {
+          "featureId": "M10-C08",
+          "label": "リセット時モード",
+          "reason": "設定変更時のモード振分は全設定共通です。設定差のある確率としては使用しません。"
+        },
+        {
+          "featureId": "M10-C04",
+          "label": "飛翔モード移行",
+          "reason": "飛翔A・B・超飛翔の内部移行率は全設定分が揃いません。平均獲得枚数は移行率ではないため、期待枚数から抽選率を作りません。",
+          "reevaluationCondition": "不足を解決する新しい具体的な公開資料が得られた場合、この項目だけ再確認します。"
+        }
+      ],
+      "unresolved": [
+        {
+          "label": "高低判別精度",
+          "reason": "基準ゲーム数へ正確に換算できる設定推測要素がないため、高低判別精度を算出していません。"
+        }
+      ]
+    }
+  }
 }
