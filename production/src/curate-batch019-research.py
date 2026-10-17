@@ -103,8 +103,9 @@ for c,fid in [('M04-C01','RF_BONUS'),('M04-C02','RF_ST'),('M04-C03','RF_CZ')]:le
 legacyrate(4,'M04-C04','RF_COMMON_BELL','実機連動機能で集計した総ゲーム数と共通6枚ベル回数を使用。手動の場合も同じ対象区間を揃えます。','TOTAL_GAME_TRIAL')
 block(4,'M04-C05','CZ合算確率は確認できていますが、無名・生駒・美馬への振り分け全設定表は今回確認できていません。合算を種類別確率に分配しません。',sids=[u4])
 legacyrate(4,'M04-C06','RF_ST_END_SCREEN','ST終了画面を1回ずつ観測し、高設定示唆画面の回数を記録。トロフィーは同じ画面でも別の絞り込み情報として扱います。','CONDITIONAL_EVENT_TRIAL',True)
-D[4]['packageRevision']=3
-categorical(4,'M04-C07',['男性','女性'],[[60,40],[40,60],[60,40],[40,60],[60,40],[40,60]],'カバネリボーナス中のキャラ紹介で男性・女性をそれぞれ1回加算します。対象回数は男性・女性の合計から自動計算します。エピソード紹介は含めません。',[u4])
+D[4]['packageRevision']=4
+D[4]['uiPresentation']={'hiddenDerivedFindingIds': [], 'sectionOrder': ['OBS_M04-C01', 'OBS_M04-C04', 'OBS_M04-C07', 'OBS_M04-C06', 'EVI_M04-C08'], 'evidenceSectionMerges': [], 'tabGroups': []}
+categorical(4,'M04-C07',['男性','女性'],[[60,40],[40,60],[60,40],[40,60],[60,40],[40,60]],'カバネリボーナス中のキャラ紹介で男性・女性をそれぞれ1回加算します。対象回数は男性・女性の合計から自動計算します。エピソード紹介は含めません。',[u4],label='カバネリボーナス中のキャラ紹介')['inputPresentation']={'trialLabel':'キャラ紹介回数','successLabel':'男性出現回数'}
 evidence(4,'M04-C08',[(c,'設定'+str(n)+'以上' if n<6 else '設定6') for c,n in [('銅',2),('銀',3),('金',4),('キリン柄',5),('虹',6)]],'ST非当選の駿城ボーナス・ST・エンディング終了時に出たトロフィー。',[u4])
 legacyrate(4,'M04-N01','RF_MUMEI_3CHAIN','無名CZで小役3連が成立した回数と、その3連でのボーナス当選回数。既に当選した後の小役連は除外。','CONDITIONAL_EVENT_TRIAL',True)
 legacyrate(4,'M04-N02','RF_MUMEI_NAV','無名CZで2択ナビの抽選対象となる押し順ベル機会と、その2択ナビ出現回数。','CONDITIONAL_EVENT_TRIAL',True)
