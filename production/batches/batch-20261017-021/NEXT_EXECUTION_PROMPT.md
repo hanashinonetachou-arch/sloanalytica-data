@@ -1,9 +1,11 @@
 # Batch021 次工程への引き継ぎ
 
-正本は hanashinonetachou-arch/sloanalytica-data の production/v85-batch-021-contract-20261018。最新HEADを再確認し、RESULTS.md と validation/intake-contract-integrity.json、機種別のResearch/Evaluation/Eligibility/Candidate Contract成果物から再開。
+正本は `hanashinonetachou-arch/sloanalytica-data` の `production/v85-batch-021-contract-20261018`。最新HEADを確認し、RESULTS.md、device-qa/handoff.json、device-qa/CHECKLIST.mdから再開してください。
 
-元135IDは保持済み。追加8トピックの処理は production/research-inbox/batch021/discovered-topic-resolution.json。Research再調査は不要。公開情報不足・観測不能の39候補は理由付きで閉じており、新しい具体的資料なしで再調査しない。183台帳行は条件分岐と27補助行を含む。独立候補数と取り違えない。
+10機種ともDISTRIBUTIONまでCOMPLETE、DEVICE_QAはREADYでユーザー実機確認待ち。配信HEADはd8ceed0a30b2e16d73d5f80c2f580187d11b4903。機種データ8.5.1-batch-20261017-021。固定署名APK vc2002894706は保存済みで、保存先IDとハッシュはdevice-qa/apk-verification.jsonにあります。App HEADは3249c8dee702a261fa43b4996665fe42d717fcdc。APKの対象情報と10件の表示検証結果は一致済みです。
 
-今回の実行範囲はCandidate Contractまで。後続実装をユーザーが指示した場合にのみOBSERVATION_EVIDENCE→Canonical UI→Runtime→Distribution→APKへ進める。既存採用理由やUIが過去の汎用テンプレに巻き戻らないよう、現行Research Process Contractを引き継ぐ。GitHub ActionsはIntegration Boundaryでまとめ、通常コミットに[skip ci]を付ける。実機QA完了はユーザーの明示まで保留。
+元135ID保持、追加8トピック処理済み。台帳183行は条件分岐と27補助行を含み、独立候補183件ではありません。Researchは既存の区切りを維持し、新しい具体的な資料なしで閉じた39候補を再調査しないでください。過去のPARTIAL_PUBLICを一括VERIFIEDにしないでください。
 
-共通処理のカテゴリ混在グループ修正はテスト60件合格。評価式・閾値・Runtime Policyは変更していない。次工程でSOURCE_PENDINGを理由にResearch全体を再開したり、工程別承認を求めたりしない。
+ユーザーから実機QA合格の明示があった場合のみ、その対象を確定して正式なQA処理へ進めてください。自動テストの合格を実機QAやユーザー承認と見なさないでください。前BatchのQAは操作しません。実機不具合は再現内容を確認し該当箇所だけを修正します。source recordコミットは[skip ci]、新たなAPK生成は具体的な修正がある統合境界にまとめます。
+
+対象外263機種はGit blob/cat/registry不変で確認済みです。新たな263機種のRuntime全数テストではありません。既存request-batch-device-qa.tsが要求する別途のfleetPassed>=80を架空の件数で満たしていません。今回の状態はREADYのままで、COMPLETEやHUMAN_REQUIREDの追加承認処理を行っていません。
