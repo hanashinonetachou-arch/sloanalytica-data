@@ -8,7 +8,7 @@
   "machine": {
     "schemaVersion": "2.0.0",
     "machineId": "S_KABANERI_ZR",
-    "machineDataVersion": "8.5.2-batch-20261017-019",
+    "machineDataVersion": "8.5.3-batch-20261017-019",
     "displayName": "パチスロ甲鉄城のカバネリ",
     "modelName": "パチスロ甲鉄城のカバネリ",
     "settings": [
@@ -23,7 +23,7 @@
       "offlineCapable": true,
       "containsImages": false,
       "containsExecutableCode": false,
-      "machineDataRevision": 2
+      "machineDataRevision": 3
     },
     "manufacturer": "サミー",
     "introductionDate": "2022-07-04",
@@ -104,24 +104,42 @@
       },
       {
         "id": "M04-C07.eligibleTrialCount",
-        "name": "男性・女性の合計回数",
+        "name": "キャラ紹介回数",
         "category": "V8_NUMERIC",
         "type": "integer",
         "unit": "回",
         "defaultValue": 0,
         "minimum": 0,
         "displayOrder": 7,
-        "inferenceRole": "INCLUDE_SUPPORT"
+        "inferenceRole": "INCLUDE_SUPPORT",
+        "inputVisible": false,
+        "derivedCalculation": "sum",
+        "derivedFromInputIds": [
+          "M04-C07.categoryCounts.1_男性",
+          "M04-C07.categoryCounts.2_女性"
+        ]
       },
       {
-        "id": "M04-C07.successCount",
-        "name": "男性キャラ出現回数",
+        "id": "M04-C07.categoryCounts.1_男性",
+        "name": "男性",
         "category": "V8_NUMERIC",
         "type": "counter",
         "unit": "回",
         "defaultValue": 0,
         "minimum": 0,
         "displayOrder": 8,
+        "parentInputId": "M04-C07.eligibleTrialCount",
+        "inferenceRole": "INCLUDE_SUPPORT"
+      },
+      {
+        "id": "M04-C07.categoryCounts.2_女性",
+        "name": "女性",
+        "category": "V8_NUMERIC",
+        "type": "counter",
+        "unit": "回",
+        "defaultValue": 0,
+        "minimum": 0,
+        "displayOrder": 9,
         "parentInputId": "M04-C07.eligibleTrialCount",
         "inferenceRole": "INCLUDE_SUPPORT"
       },
@@ -133,7 +151,7 @@
         "unit": "回",
         "defaultValue": 0,
         "minimum": 0,
-        "displayOrder": 9,
+        "displayOrder": 10,
         "inferenceRole": "DISPLAY_ONLY"
       },
       {
@@ -144,7 +162,7 @@
         "unit": "回",
         "defaultValue": 0,
         "minimum": 0,
-        "displayOrder": 10,
+        "displayOrder": 11,
         "inferenceRole": "DISPLAY_ONLY"
       },
       {
@@ -155,7 +173,7 @@
         "unit": "回",
         "defaultValue": 0,
         "minimum": 0,
-        "displayOrder": 11,
+        "displayOrder": 12,
         "inferenceRole": "DISPLAY_ONLY"
       },
       {
@@ -166,7 +184,7 @@
         "unit": "回",
         "defaultValue": 0,
         "minimum": 0,
-        "displayOrder": 12,
+        "displayOrder": 13,
         "inferenceRole": "DISPLAY_ONLY"
       },
       {
@@ -177,7 +195,7 @@
         "unit": "回",
         "defaultValue": 0,
         "minimum": 0,
-        "displayOrder": 13,
+        "displayOrder": 14,
         "inferenceRole": "DISPLAY_ONLY"
       }
     ]
@@ -271,23 +289,45 @@
         "calculationRole": "PROBABILITY",
         "probabilityEngineUsage": true,
         "denominatorInputId": "M04-C07.eligibleTrialCount",
-        "probabilities": {
-          "SET_1": 0.6,
-          "SET_2": 0.4,
-          "SET_3": 0.6,
-          "SET_4": 0.4,
-          "SET_5": 0.6,
-          "SET_6": 0.4
-        },
+        "probabilities": {},
         "selectionRationale": {
           "summary": "設定推測に採用された要素です。",
-          "adoptionReason": "キャラ紹介は設定2 40%、設定5 60%と設定差があります。「男性・女性の合計回数」に対する「男性キャラ出現回数」の発生割合を比較して推測に使用します。 観測条件：対象となる機会のうち、男性キャラ出現が実際に起きた割合を設定別に比較します。",
+          "adoptionReason": "キャラ紹介の「男性」の割合は設定2 40%、設定5 60%と設定差があります。「キャラ紹介回数」を基準に、記録したカテゴリの振り分けを比較して推測に使用します。 観測条件：カバネリボーナス中のキャラ紹介で男性・女性をそれぞれ1回加算します。",
           "shortTermReason": "標本が少ない間は結果の振れが大きくなります。",
           "longTermReason": "観測数が増えるほど設定別の比較が安定します。"
         },
-        "modelType": "binomial",
-        "numeratorInputId": "M04-C07.successCount",
-        "displayFormat": "percentage"
+        "modelType": "multinomial",
+        "numeratorInputId": "M04-C07.categoryCounts.1_男性",
+        "categoryInputIds": [
+          "M04-C07.categoryCounts.2_女性"
+        ],
+        "denominatorRule": "SUM_CATEGORY_COUNTS",
+        "categoryProbabilities": {
+          "SET_1": [
+            0.6,
+            0.4
+          ],
+          "SET_2": [
+            0.4,
+            0.6
+          ],
+          "SET_3": [
+            0.6,
+            0.4
+          ],
+          "SET_4": [
+            0.4,
+            0.6
+          ],
+          "SET_5": [
+            0.6,
+            0.4
+          ],
+          "SET_6": [
+            0.4,
+            0.6
+          ]
+        }
       }
     ],
     "runtimeProjection": [
@@ -737,7 +777,7 @@
         "title": "キャラ紹介",
         "collapsible": true,
         "defaultExpanded": false,
-        "description": "対象となる機会のうち、男性キャラ出現が実際に起きた割合を設定別に比較します。\n・注意：エピソード紹介とは分けます。\n・注意：カバネリボーナス中のキャラ紹介で男性または女性が出た回数を母数に男性を記録。エピソード紹介とは分けます。",
+        "description": "カバネリボーナス中のキャラ紹介で男性・女性をそれぞれ1回加算します。対象回数は男性・女性の合計から自動計算します。エピソード紹介は含めません。\n・注意：対象回数は男性・女性の合計から自動計算します。\n・注意：エピソード紹介は含めません。",
         "descriptionPresentation": {
           "collapsible": true,
           "label": "説明",
@@ -748,36 +788,25 @@
             "id": "NODE_M04-C07",
             "featureId": "M04-C07",
             "title": "キャラ紹介",
-            "inputs": [
-              {
-                "id": "M04-C07.eligibleTrialCount",
-                "label": "男性・女性の合計回数",
-                "input": "denominator",
-                "inputId": "M04-C07.eligibleTrialCount",
-                "engineBinding": {
-                  "inputId": "M04-C07.eligibleTrialCount"
+            "interaction": {
+              "type": "CATEGORY_COUNTERS",
+              "preservePriorObservations": true,
+              "showAccumulatedCounts": true,
+              "categoryCoverage": "EXHAUSTIVE",
+              "totalOpportunities": "SUM_CATEGORY_COUNTS",
+              "categories": [
+                {
+                  "id": "M04-C07.categoryCounts.1_男性",
+                  "inputId": "M04-C07.categoryCounts.1_男性",
+                  "label": "男性"
                 },
-                "gridSpan": 6,
-                "directNumeric": true,
-                "quickAdd": [],
-                "unobservedDisplay": "—"
-              },
-              {
-                "id": "M04-C07.successCount",
-                "label": "男性キャラ出現回数",
-                "input": "counter",
-                "inputId": "M04-C07.successCount",
-                "engineBinding": {
-                  "inputId": "M04-C07.successCount"
-                },
-                "directNumeric": true,
-                "quickAdd": [
-                  1
-                ],
-                "gridSpan": 6,
-                "unobservedDisplay": "—"
-              }
-            ]
+                {
+                  "id": "M04-C07.categoryCounts.2_女性",
+                  "inputId": "M04-C07.categoryCounts.2_女性",
+                  "label": "女性"
+                }
+              ]
+            }
           }
         ]
       },
@@ -898,7 +927,7 @@
             "userLabel": "1回の判別力",
             "value": 5.809881109066262
           },
-          "reason": "キャラ紹介は設定2 40%、設定5 60%と設定差があります。「男性・女性の合計回数」に対する「男性キャラ出現回数」の発生割合を比較して推測に使用します。 観測条件：対象となる機会のうち、男性キャラ出現が実際に起きた割合を設定別に比較します。"
+          "reason": "キャラ紹介の「男性」の割合は設定2 40%、設定5 60%と設定差があります。「キャラ紹介回数」を基準に、記録したカテゴリの振り分けを比較して推測に使用します。 観測条件：カバネリボーナス中のキャラ紹介で男性・女性をそれぞれ1回加算します。"
         }
       ],
       "notAdopted": [
