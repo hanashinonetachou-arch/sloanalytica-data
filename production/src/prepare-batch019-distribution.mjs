@@ -1,0 +1,20 @@
+import fs from 'node:fs';import path from 'node:path';import crypto from 'node:crypto';import {createRequire} from 'node:module';
+const require=createRequire(import.meta.url),proto=path.resolve(process.argv[2]??'../prototype'),prod=path.resolve(import.meta.dirname,'../..'),batchId='batch-20261017-019';
+const base=path.join(prod,'production/batches',batchId),spec=JSON.parse(fs.readFileSync(path.join(base,'batch.json'),'utf8')),machines=spec.waves.flatMap(w=>w.machineIds),sha=b=>crypto.createHash('sha256').update(b).digest('hex');
+const catalogPath=path.join(proto,'catalog.json'),catalog=JSON.parse(fs.readFileSync(catalogPath,'utf8')),previousCatalog=structuredClone(catalog),byId=new Map(catalog.machines.map(x=>[x.machineId,x])),metadata={};
+const {resolveCatalogTimestamps}=require(path.join(proto,'tools/catalog-update-timestamp.mjs'));
+const protectedEntries=previousCatalog.machines.filter(x=>!machines.includes(x.machineId)),protectedHashes=new Map(protectedEntries.map(x=>[x.machineId,sha(fs.readFileSync(path.join(proto,'machines',x.machineId,'machine-package.json')))]));
+for(const machineId of machines){
+ const s=JSON.parse(fs.readFileSync(path.join(base,'machines',machineId,'stages/APP_RUNTIME.json'),'utf8'));if(s.state!=='COMPLETE')throw Error('APP_RUNTIME_REQUIRED:'+machineId);
+ const bytes0=fs.readFileSync(path.join(prod,s.authoritativeOutputRef.path));if(sha(bytes0)!==s.authoritativeOutputRef.sha256)throw Error('APP_RUNTIME_SHA:'+machineId);
+ const pkg=JSON.parse(bytes0).package,entry=byId.get(machineId);if(!entry)throw Error('CATALOG_ENTRY_MISSING:'+machineId);
+ for(const k of ['manufacturer','introductionDate','machineType','gameType'])if(entry[k]!==undefined)pkg.machine[k]=entry[k];
+ const bytes=Buffer.from(JSON.stringify(pkg,null,2)+'\n');fs.writeFileSync(path.join(proto,'machines',machineId,'machine-package.json'),bytes);
+ const caps=[];for(const f of pkg.features?.features??[]){const model=String(f.modelType).toLowerCase();if(['binomial','multinomial'].includes(model)&&!caps.includes(model))caps.push(model);}if((pkg.evidence?.references??[]).length)caps.push('evidence');
+ entry.packageUrl=`https://raw.githubusercontent.com/hanashinonetachou-arch/sloanalytica-data/prototype-multi-machine/machines/${encodeURIComponent(machineId)}/machine-package.json`;entry.machineDataVersion=pkg.machine.machineDataVersion;entry.sha256=sha(bytes);entry.packageSizeBytes=bytes.length;entry.requiredCapabilities=caps;Object.assign(entry,resolveCatalogTimestamps(previousCatalog.machines.find(x=>x.machineId===machineId),entry.sha256,new Date().toISOString()));
+ metadata[machineId]={machineId,machineDataVersion:pkg.machine.machineDataVersion,settings:pkg.machine.settings,sha256:entry.sha256,packageSizeBytes:bytes.length,introductionDate:entry.introductionDate,machineType:entry.machineType,gameType:entry.gameType};
+}
+for(const old of protectedEntries){if(JSON.stringify(byId.get(old.machineId))!==JSON.stringify(old))throw Error('PROTECTED_ENTRY_CHANGED:'+old.machineId);if(sha(fs.readFileSync(path.join(proto,'machines',old.machineId,'machine-package.json')))!==protectedHashes.get(old.machineId))throw Error('PROTECTED_PACKAGE_CHANGED:'+old.machineId);}
+for(const e of catalog.machines.filter(x=>x.status==='available')){const bytes=fs.readFileSync(path.join(proto,'machines',e.machineId,'machine-package.json'));if(sha(bytes)!==e.sha256||bytes.length!==e.packageSizeBytes)throw Error('CATALOG_INTEGRITY:'+e.machineId);}
+catalog.generatedAt=new Date().toISOString();fs.writeFileSync(catalogPath,JSON.stringify(catalog,null,2)+'\n');
+fs.writeFileSync(path.join(base,'distribution-metadata.json'),JSON.stringify(metadata,null,2)+'\n');fs.writeFileSync(path.join(base,'approved-fleet-regression.json'),JSON.stringify({status:'PASS',protectedMachines:protectedEntries.length,changedProtectedPackages:0,changedProtectedCatalogEntries:0,availableCatalogIntegrity:catalog.machines.filter(x=>x.status==='available').length},null,2)+'\n');console.log(JSON.stringify({status:'PASS',machines:machines.length,protected:protectedEntries.length}));

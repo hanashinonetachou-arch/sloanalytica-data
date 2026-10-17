@@ -60,6 +60,35 @@ export function validateMachineQaReadiness(machineId:string,stageStates:Record<s
   return sections[0];
  };
 
+ // A reference may share only some categories with a numeric observation.
+ // Verify each linked counter and each remaining reference counter explicitly;
+ // this is already supported by the materializer and the app renderer.
+ const partialLinkedPresentationFor=(ref:any)=>{
+  const sourceCats=(ref.evidenceItems??[]).flatMap((e:any)=>(e.semanticCategories??[]).map((cat:any,index:number)=>({cat,index,findingId:e.findingId})));
+  if(!sourceCats.some((x:any)=>x.cat.linkedFindingId)||sourceCats.every((x:any)=>x.cat.linkedFindingId))return false;
+  const referenceSection=uiEvidence.find((s:any)=>s.id===ref.id);
+  const inputBy=new Map((pkg.inputs?.inputs??[]).map((i:any)=>[i.id,i]));
+  const matched=new Map<string,any>();
+  for(const {cat,index,findingId} of sourceCats){
+   let controls:any[];
+   if(cat.linkedFindingId){
+    const feature=(pkg.features?.features??[]).find((f:any)=>f.featureId===cat.linkedFindingId&&f.modelType==='multinomial');
+    if(!feature)fail(machineId+':PARTIAL_LINKED_FEATURE_MISSING:'+findingId);
+    const owned=new Set([feature.numeratorInputId,...(feature.categoryInputIds??[])]);
+    controls=(pkg.ui.v8Sections??[]).flatMap((s:any)=>s.items??[]).filter((n:any)=>n.featureId===cat.linkedFindingId&&n.interaction?.type==='CATEGORY_COUNTERS').flatMap((n:any)=>n.interaction.categories??[]).filter((c:any)=>c.label===cat.label&&c.meaning===linkedCategoryMeaning(cat)&&owned.has(c.inputId));
+   }else{
+    controls=(referenceSection?.items??[]).filter((n:any)=>n.evidenceId===findingId&&n.interaction?.type==='CATEGORY_COUNTERS').flatMap((n:any)=>n.interaction.categories??[]).filter((c:any)=>c.label===cat.label&&c.meaning===cat.meaning);
+   }
+   if(controls.length!==1||!inputBy.has(controls[0].inputId))fail(machineId+':PARTIAL_LINKED_CATEGORY_MISMATCH:'+findingId+':'+index);
+   matched.set(findingId+':'+index,controls[0]);
+  }
+  for(const def of defs.filter((d:any)=>d.sourceEvidenceRefs?.some((id:string)=>ref.evidenceItems.some((e:any)=>e.findingId===id)))){
+   const fid=def.sourceEvidenceRefs[0],index=Number(String(def.id).split('__').pop())-1;
+   if(matched.get(fid+':'+index)?.inputId!==def.inputId)fail(machineId+':PARTIAL_LINKED_CONSTRAINT_INPUT_MISMATCH');
+  }
+  return true;
+ };
+
  if(expected.length&&uiEvidence.length!==refs.filter((ref:any)=>!linkedSectionFor(ref)).length)fail(machineId+':EVIDENCE_UI_COVERAGE');
  const blockedFindingIds=new Set((pkg?.blockedItems??[]).flatMap((b:any)=>Array.isArray(b?.blockedFindingIds)?b.blockedFindingIds:[]));
  for(const ref of refs){
@@ -70,6 +99,7 @@ export function validateMachineQaReadiness(machineId:string,stageStates:Record<s
   const details=items.flatMap((x:any)=>Array.isArray(x?.details)?x.details:[]);
   if(details.length===0||details.some((x:any)=>typeof x!=='string'||!x.trim()))fail(machineId+':EVIDENCE_DETAILS_MISSING:'+String(ref?.id??'UNKNOWN'));
   for(const item of items){const cats=Array.isArray(item?.semanticCategories)?item.semanticCategories:[];if(cats.length===0||cats.some((x:any)=>typeof x?.label!=='string'||!x.label.trim()||!['EXACT_CONSTRAINT','PROBABILITY_BACKED','PROBABILITY_UNKNOWN','DISPLAY_ONLY','BLOCK'].includes(x?.semanticType))||(cats.some((x:any)=>x.meaning!==undefined)?cats.some((x:any)=>typeof x.meaning!=='string'||!x.meaning.trim()):cats.length!==item.details.length||cats.some((x:any,i:number)=>x.label!==item.details[i])))fail(machineId+':EVIDENCE_SEMANTICS:'+String(ref?.id??'UNKNOWN'));}
+  if(partialLinkedPresentationFor(ref))continue;
   const section=uiEvidence.find((s:any)=>s?.id===ref?.id)??linkedSectionFor(ref);
   const categories=(section?.items??[]).flatMap((node:any)=>node?.interaction?.type==='CATEGORY_COUNTERS'?(node?.interaction?.categories??[]).map((c:any)=>c?.label):[]);
   const linked=Boolean(linkedSectionFor(ref));const categoryDetails=items.flatMap((item:any)=>item.semanticCategories.map((c:any)=>{const meaning=linked?linkedCategoryMeaning(c):c.meaning;return meaning?`${c.label}：${meaning}`:c.label}));
