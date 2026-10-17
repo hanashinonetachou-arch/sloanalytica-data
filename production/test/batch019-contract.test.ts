@@ -19,7 +19,7 @@ test('Batch019 retains all original 90 candidates, source claims, and exact stag
    const ref=s.authoritativeOutputRef,bytes=fs.readFileSync(path.join(root,ref.path.replace(/^production\//,'')));
    assert.equal(crypto.createHash('sha256').update(bytes).digest('hex'),ref.sha256);
   }
-  const qa=read(`batches/${batch}/machines/${m}/stages/DEVICE_QA.json`);assert.notEqual(qa.state,'COMPLETE');
+  const qa=read(`batches/${batch}/machines/${m}/stages/DEVICE_QA.json`);if(qa.state==='COMPLETE'){const acceptance=read(`batches/${batch}/artifacts/${m}/device_qa/result.json`);assert.equal(acceptance.acceptedBy,'USER');assert(acceptance.machineIds.includes(m));}
 
  }
  for(const c of originals)assert(seen.has(c.candidate_id));

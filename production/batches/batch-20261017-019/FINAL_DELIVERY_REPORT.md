@@ -18,3 +18,11 @@
 GitHub Actionsは必要な境界処理の3 run（Integration、既存PR回帰の自動起動、Pages）。工程別のActionsやAPK再生成は行っていません。
 
 最終 Production 回帰検証: 461/461 PASS。QA readiness 回帰検証: 26/26 PASS。
+
+## 2026-10-17 実機QAフィードバック対応
+
+ユーザーの「他はOKです」に基づき、カバネリ以外9機種を正式QA合格として受理。カバネリだけ再確認待ち。
+
+キャラ紹介の母数と男性カウントが同名だったため、Researchの既存inputPresentation契約で「男性・女性の合計回数」「男性キャラ出現回数」を明示し、正式工程から再生成。入力ID・モデル・確率は維持。カバネリのみ8.5.2-batch-20261017-019に更新し、他272機種のpackage/catalog entryは不変。対象UI描画・入力画面マウント・10機種推論と既存Batch019テスト4件がPASS。App再ビルドなし。
+
+配信コミット: 2432039c4d206abedaec462e7a0e797899c76604
