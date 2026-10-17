@@ -9,6 +9,7 @@ import {buildAppRuntime} from './app-runtime-builder.ts';
 const s=new RepoStore(process.cwd()),o=new Orchestrator(s),batchId='batch-20261017-020';
 const spec=s.read<any>('batches',batchId,'batch.json'),cfg=s.read<any>('config','orchestrator.json');
 const machines=spec.waves.flatMap((w:any)=>w.machineIds),log:any[]=[];
+for(const machineId of machines)if(o.stage(batchId,machineId,'DISTRIBUTION').state==='COMPLETE')throw Error('ALREADY_DISTRIBUTED: explicit revision/invalidation required');
 for(const machineId of machines){
  let x=o.stage(batchId,machineId,'APP_RUNTIME');
  if(x.state==='COMPLETE'){
