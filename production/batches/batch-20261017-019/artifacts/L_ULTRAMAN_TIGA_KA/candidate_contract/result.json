@@ -1,0 +1,289 @@
+{
+  "schemaVersion": "candidate-contract-v1",
+  "manifestVersion": "8.5",
+  "batchId": "batch-20261017-019",
+  "machineId": "L_ULTRAMAN_TIGA_KA",
+  "machineName": "Lウルトラマンティガ",
+  "evaluationArtifact": {
+    "artifactId": "evaluation-L_ULTRAMAN_TIGA_KA",
+    "kind": "evaluation",
+    "path": "production/batches/batch-20261017-019/artifacts/L_ULTRAMAN_TIGA_KA/evaluation/result.json",
+    "sha256": "82b3d7f724233f4f5fe79639152976d8813a6dadebaa40494b8c4d35414d99da",
+    "producerWorkId": "wrk_9acd873184434a0a"
+  },
+  "eligibilityArtifact": {
+    "artifactId": "eligibility-L_ULTRAMAN_TIGA_KA",
+    "kind": "eligibility",
+    "path": "production/batches/batch-20261017-019/artifacts/L_ULTRAMAN_TIGA_KA/eligibility/result.json",
+    "sha256": "6d3191d5cd2eb98dbc4bd97afd08005b801395d1f2efba127dbe41966fb82a91",
+    "producerWorkId": "wrk_d2f4814ce691492e"
+  },
+  "candidates": [
+    {
+      "findingId": "M09-C01",
+      "label": "ティガチャンス",
+      "model": "BERNOULLI",
+      "trialUniverse": "NORMAL_GAME_TRIAL",
+      "liveInferenceRoute": "LIVE_CONDITIONAL",
+      "settingDistribution": {
+        "1": "1/159",
+        "2": "1/155",
+        "4": "1/142",
+        "5": "1/133",
+        "6": "1/124"
+      },
+      "details": [
+        "通常ゲーム数とティガチャンスの初当り回数。連続継続の再突入を混ぜません。"
+      ],
+      "dependencyGroupId": "tiga_tc_path",
+      "dependencyKind": "CAUSAL_PATH_OVERLAP",
+      "dependencyReason": "TC初当りとその一部のTC+抽選は同じ経路。正式スコアで代表を選び二重加算しません。",
+      "runtimeInferenceAllowed": true,
+      "dependencyResolution": "SINGLE_MEMBER_SELECTED",
+      "runtimePolicyBinding": {
+        "metric": "SELECTION_SCORE",
+        "value": 51.71338477698816,
+        "thresholdSource": "RUNTIME_POLICY"
+      }
+    },
+    {
+      "findingId": "M09-C05",
+      "label": "TC3回目・6回目のTC+当選",
+      "model": "BERNOULLI",
+      "trialUniverse": "CONDITIONAL_EVENT_TRIAL",
+      "liveInferenceRoute": "LIVE_CONDITIONAL",
+      "settingDistribution": {
+        "1": 0.1016,
+        "2": 0.1211,
+        "4": 0.1602,
+        "5": 0.1797,
+        "6": 0.19920000000000002
+      },
+      "details": [
+        "TC3回目または6回目の到達回数を母数に、TC+当選回数を記録。その他の回や内部通常・高確によるレア役抽選とは混ぜません。"
+      ],
+      "dependencyGroupId": "tiga_tc_path",
+      "dependencyKind": "CAUSAL_PATH_OVERLAP",
+      "dependencyReason": "TC初当りとその一部のTC+抽選は同じ経路。正式スコアで代表を選び二重加算しません。",
+      "runtimeInferenceAllowed": false,
+      "dependencyResolution": "RESOLVED_BY_SINGLE_MEMBER",
+      "runtimePolicyBinding": {
+        "metric": "PER_ELIGIBLE_TRIAL_POWER",
+        "value": 1.4991692761330055,
+        "thresholdSource": "RUNTIME_POLICY"
+      },
+      "resolvedIntoFindingId": "M09-C01"
+    }
+  ],
+  "dependencyGroups": [
+    {
+      "groupId": "tiga_tc_path",
+      "resolution": "SINGLE_MEMBER_SELECTED",
+      "members": [
+        "M09-C01",
+        "M09-C05"
+      ],
+      "runtimeInferenceAllowed": true,
+      "selectedFindingId": "M09-C01",
+      "selectionRationale": "依存関係を仮定せず二重評価を避けるため、依存関係グループ内で正式な7000G設定判別スコアが最大の候補を代表Featureとして使用する。",
+      "reason": "正式な設定判別スコアを比較できる候補から、最も情報量の高い1要素のみを採用する。"
+    }
+  ],
+  "excludedDecisions": [],
+  "blockedItems": [
+    {
+      "blockId": "M09-C06",
+      "label": "ウルトラバトルモード天井",
+      "reason": "UBM終了時に内部で選ばれた天井G数は、途中当選すると確定できません。天井に到達した例だけを母数にすると偏るため、実際の当選G数から選択率を推測しません。",
+      "reevaluationCondition": "不足する設定別値や観測条件を解決する新しい具体的な公開資料が得られた場合、この項目だけ再確認します。",
+      "sourceIds": [
+        "s02"
+      ],
+      "retainedHandoffClaim": {
+        "parameters": {},
+        "condition": "内部モード選択・観測可否確認",
+        "dependency": "ゲーム数での当選と関連",
+        "verification": "要追加原典照合"
+      },
+      "retainedPublishedValues": {}
+    },
+    {
+      "blockId": "M09-C07",
+      "label": "短縮天井選択",
+      "reason": "UBM終了時に内部で選ばれた天井G数は、途中当選すると確定できません。天井に到達した例だけを母数にすると偏るため、実際の当選G数から選択率を推測しません。",
+      "reevaluationCondition": "不足する設定別値や観測条件を解決する新しい具体的な公開資料が得られた場合、この項目だけ再確認します。",
+      "sourceIds": [
+        "s02"
+      ],
+      "retainedHandoffClaim": {
+        "parameters": {
+          "1": [
+            2.34,
+            10.16,
+            87.5
+          ],
+          "2": [
+            3.91,
+            11.72,
+            84.38
+          ],
+          "4": [
+            7.03,
+            14.84,
+            78.13
+          ],
+          "5": [
+            8.59,
+            16.41,
+            75
+          ],
+          "6": [
+            10.16,
+            17.97,
+            71.88
+          ]
+        },
+        "condition": "256/896/1280G+α。途中当選では天井選択が識別できない→直接尤度不可",
+        "dependency": "ティガチャンス当選と依存",
+        "verification": "要追加原典照合"
+      },
+      "retainedPublishedValues": {
+        "1": [
+          2.34,
+          10.16,
+          87.5
+        ],
+        "2": [
+          3.91,
+          11.72,
+          84.38
+        ],
+        "4": [
+          7.03,
+          14.84,
+          78.13
+        ],
+        "5": [
+          8.59,
+          16.41,
+          75
+        ],
+        "6": [
+          10.16,
+          17.97,
+          71.88
+        ]
+      }
+    }
+  ],
+  "evidenceCandidates": [
+    {
+      "findingId": "M09-C02",
+      "label": "REG中キャラ",
+      "sourceIds": [
+        "s02"
+      ],
+      "details": [
+        "REG中のキャラ紹介。出現率は未確認。",
+        "設定別の出現率が未確認の項目は記録のみ・推測計算には使用しない。設定確定・否定の項目は候補の絞り込みに反映します。"
+      ],
+      "semanticCategories": [
+        {
+          "label": "ガタノゾーア",
+          "meaning": "設定6",
+          "semanticType": "EXACT_CONSTRAINT"
+        }
+      ]
+    },
+    {
+      "findingId": "M09-C03",
+      "label": "ティガチャンス終了画面",
+      "sourceIds": [
+        "s02"
+      ],
+      "details": [
+        "ティガチャンスでチャンス告知を選択した時の終了画面に限定。",
+        "設定別の出現率が未確認の項目は記録のみ・推測計算には使用しない。設定確定・否定の項目は候補の絞り込みに反映します。"
+      ],
+      "semanticCategories": [
+        {
+          "label": "1人点灯",
+          "meaning": "デフォルト",
+          "semanticType": "DISPLAY_ONLY"
+        },
+        {
+          "label": "3人点灯",
+          "meaning": "偶数設定示唆",
+          "semanticType": "PROBABILITY_UNKNOWN"
+        },
+        {
+          "label": "4人点灯",
+          "meaning": "設定2以上",
+          "semanticType": "EXACT_CONSTRAINT"
+        },
+        {
+          "label": "5人点灯",
+          "meaning": "設定2否定",
+          "semanticType": "EXACT_CONSTRAINT"
+        },
+        {
+          "label": "6人点灯",
+          "meaning": "設定4以上",
+          "semanticType": "EXACT_CONSTRAINT"
+        },
+        {
+          "label": "7人点灯",
+          "meaning": "設定6",
+          "semanticType": "EXACT_CONSTRAINT"
+        }
+      ]
+    },
+    {
+      "findingId": "M09-C04",
+      "label": "玉ちゃんトロフィー",
+      "sourceIds": [
+        "s02"
+      ],
+      "details": [
+        "各対象終了画面で実際に出た玉ちゃんトロフィー。未確認の色別下限は追加しません。",
+        "設定別の出現率が未確認の項目は記録のみ・推測計算には使用しない。設定確定・否定の項目は候補の絞り込みに反映します。"
+      ],
+      "semanticCategories": [
+        {
+          "label": "虹トロフィー",
+          "meaning": "設定6",
+          "semanticType": "EXACT_CONSTRAINT"
+        }
+      ]
+    },
+    {
+      "findingId": "M09-C08",
+      "label": "獲得枚数246/456",
+      "sourceIds": [
+        "s02"
+      ],
+      "details": [
+        "ウルトラボーナス中の専用獲得枚数表示。246・456の詳細条件は今回未照合として別途保持。",
+        "設定別の出現率が未確認の項目は記録のみ・推測計算には使用しない。設定確定・否定の項目は候補の絞り込みに反映します。"
+      ],
+      "semanticCategories": [
+        {
+          "label": "246枚表示",
+          "meaning": "意味未確認",
+          "semanticType": "PROBABILITY_UNKNOWN"
+        },
+        {
+          "label": "456枚表示",
+          "meaning": "意味未確認",
+          "semanticType": "PROBABILITY_UNKNOWN"
+        },
+        {
+          "label": "666枚表示",
+          "meaning": "設定6",
+          "semanticType": "EXACT_CONSTRAINT"
+        }
+      ]
+    }
+  ],
+  "sourceIntegrityIssues": []
+}
