@@ -128,6 +128,8 @@ rate(5,1,normal)
 block(5,2,'この機種の5枚役について、添付された設定別数値を参照先で裏付けられません。根拠未確認の成立率を推測計算へ入れません。')
 for n in [3,4,5]:rate(5,n,'通常時の'+row(5,n)['candidate'].split('：')[-1]+'成立回数と、優出モードを経由しないAT直撃回数。契機が不明な当選は混ぜません。','percent','MONKEY_DIRECT_ROLE_TRIAL_'+str(n))
 for n in [6,7,8,9]:rate(5,n,'激走チャージ中の'+row(5,n)['candidate'].replace('EX獲得 ','')+'成立回数とEXアイテム当選回数。同じ成立を一度だけ数えます。','percent','MONKEY_EX_ROLE_TRIAL_'+str(n))
+for n,role in [(6,'ボート・弱チェリー'),(7,'弱チャンス目'),(8,'強チャンス目')]:
+ f=next(f for f in D[5]['findings'] if f['findingId']==key(5,n));f['inputPresentation']={'trialLabel':role+'成立回数','successLabel':'EX獲得'};f['details']=['激走チャージ中に成立した'+role+'を対象とします。その役からEXアイテムに当選した分を記録し、同じ成立は一度だけ数えます。']
 rate(5,10,'AT終了または設定変更を確認した全機会と、即優出・通常画面復帰直後のAT前兆発生回数。条件が分からない開始は数値計算しません。','percent','MONKEY_AT_END_OR_RESET_TRIAL')
 for n in range(11,15):block(5,n,'内部ライバルモードへの突入全件を特定できません。ヘルメットの示唆や一部の確定表示だけを全突入の代わりにしません。')
 combine(5,15,[15,16],'激走チャージ終了タッチで波多野の青ランプ2セリフのどちらかだった回だけ1種類記録。榎木ボイスを母数に混ぜません。','激走チャージ終了時の波多野ボイス')
@@ -276,7 +278,7 @@ def presentation_family(i,name,title,members):
   tabs.append({'sectionId':prefix+f['findingId'],'label':label})
  policy['tabGroups'].append({'id':'B022_'+name,'title':title,'tabs':tabs})
 presentation_family(3,'KEIJI_OMIKUJI','おみくじ',[(36,'通常おみくじ'),(54,'特殊おみくじ')])
-presentation_family(5,'MONKEY_EX','EX獲得',[(6,'ボート・弱チェリー'),(7,'弱チャンス目'),(8,'強チャンス目')])
+presentation_family(5,'MONKEY_EX','激走チャージ中Ex獲得',[(6,'ボート・弱チェリー'),(7,'弱チャンス目'),(8,'強チャンス目')])
 presentation_family(5,'MONKEY_PAYOUT','特殊獲得枚数',[(23,'456枚到達時'),(24,'666枚到達時'),(25,'803枚到達時')])
 presentation_family(5,'MONKEY_MEDAL','SGメダル・トロフィー',[(32,'青・黄メダル（黒直後以外）'),(31,'黒メダル直後の次回'),('trophy-E','トロフィー（確定情報）')])
 presentation_family(5,'MONKEY_CHARGE_VOICE','激走チャージ終了時ボイス',[(15,'波多野の青ランプ2セリフ'),(34,'波多野・榎木の分類')])
