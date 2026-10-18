@@ -1,0 +1,1 @@
+SloAnalytica: このZIPの RESEARCH_DESIGN.md と candidates.csv、prior_candidates.csv、coverage.csv を読み、Repository正本を再取得する。対象はマジカルハロウィン8。Research済みの情報を重複調査せず、現行Contractと照合し、未確認点を必要な範囲で閉じた後、Evaluation → Eligibility → Candidate Contract を実施。実装・配信・QAは別工程。確認待ちで止まらず次HUMAN_REQUIRED地点まで進める。

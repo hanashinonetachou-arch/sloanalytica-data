@@ -1,0 +1,2 @@
+# Work Handoff — Machine 08 (まどかf)
+GitHub Production State と Manifest v8.5 を再取得し、既存完了機種1〜7の成果物と本ZIPの candidates.csv, coverage.csv, RESEARCH_DESIGN.md を突合。既存10候補を削らず、分類細分化を重複候補として統合する。公開情報の再検索は、矛盾した個別項目のみ指定サイトで限定照合。正本確認→Research取り込み・検証→Evaluation→Eligibility→Candidate Contractの順。独立加算しない。UIは共通ルール遵守。正式統計評価前に実装を開始しない。今回ZIPは機種08分であり、残機種09/10のChat Research完了を待つ。QA状態を変更しない。GitHub ActionsはIntegration Boundaryでのみ実行。

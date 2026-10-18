@@ -1,0 +1,3 @@
+# SloAnalytica — 7機種目 ケンガンアシュラ 引き継ぎ
+
+このZIPのRESEARCH_DESIGN.md、candidates.csv、coverage.csv、prior_candidates.csvを読み、Repository最新Production Stateと照合する。正式Evaluation→Eligibility→Candidate Contractへ進む。その他9機種のResearch完了を勝手に宣言しない。CZ成功率の二次ソースのみの数字はそのまま正式尤度に使わず、CZとATの包含関係を解消する。外部監査を実施したと偽らない。GitHub ActionsはIntegration Boundaryでのみ利用。

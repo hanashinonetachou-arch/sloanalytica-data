@@ -1,0 +1,347 @@
+{
+  "schemaVersion": "selection-data-v1",
+  "machineId": "L_GEN_CHOMUGEN_PH",
+  "machineDataVersion": "0.1.1",
+  "inputs": [
+    {
+      "id": "INP_NORMAL_GAMES",
+      "name": "通常ゲーム数",
+      "type": "integer",
+      "category": "PRIMARY",
+      "unit": "G",
+      "displayOrder": 1,
+      "defaultValue": 0
+    },
+    {
+      "id": "INP_BONUS_COUNT",
+      "name": "ボーナス初当り回数",
+      "type": "counter",
+      "category": "PRIMARY",
+      "unit": "回",
+      "displayOrder": 2,
+      "defaultValue": 0
+    },
+    {
+      "id": "INP_CZ_COUNT",
+      "name": "CZ初当り回数",
+      "type": "counter",
+      "category": "PRIMARY",
+      "unit": "回",
+      "displayOrder": 3,
+      "defaultValue": 0
+    },
+    {
+      "id": "INP_SEATED_GAMES",
+      "name": "着席時ゲーム数",
+      "type": "integer",
+      "category": "PREDECESSOR",
+      "unit": "G",
+      "displayOrder": 10,
+      "description": "データカウンター仕様が公開ボーナス初当り確率と合う場合のみ入力。",
+      "defaultValue": "",
+      "inferenceRole": "EXCLUDE"
+    },
+    {
+      "id": "INP_SEATED_BONUS_COUNT",
+      "name": "着席時ボーナス初当り回数",
+      "type": "counter",
+      "category": "PREDECESSOR",
+      "unit": "回",
+      "displayOrder": 11,
+      "defaultValue": "",
+      "inferenceRole": "EXCLUDE"
+    }
+  ],
+  "features": [
+    {
+      "researchFeatureId": "RF_BONUS_INITIAL",
+      "featureId": "FEAT_BONUS_INITIAL",
+      "adoptionCategory": "INCLUDE_PRIMARY",
+      "numeratorInputId": "INP_BONUS_COUNT",
+      "denominatorInputId": "INP_NORMAL_GAMES",
+      "minimumSample": 1,
+      "sampleRecommendation": 5000,
+      "weight": 1,
+      "displayFormat": "ratio_1_over_n",
+      "difficultyExposure": {
+        "mode": "per_game",
+        "factor": 1,
+        "quality": "ESTIMATED",
+        "basisId": "NORMAL_GAMES"
+      },
+      "difficultyParticipation": "INCLUDE",
+      "userReason": "ボーナス初当りは設定差が大きく最も追いやすいため主軸採用。"
+    },
+    {
+      "researchFeatureId": "RF_BONUS_PREDECESSOR",
+      "featureId": "FEAT_BONUS_PREDECESSOR",
+      "adoptionCategory": "EXCLUDE",
+      "rejectionReason": "機種固有の着席時データの取得元と公開確率の試行区間との同値性が実機未確認のため、確認完了まで推測には使用しません。",
+      "userReason": "着席時入力欄は記録用として残しますが、公開確率と同じ分母・分子の観測条件をデータカウンターから再現できることが実機で確定するまで、前任者Featureは推測不参加とします。"
+    },
+    {
+      "researchFeatureId": "RF_CZ_INITIAL",
+      "featureId": "FEAT_CZ_INITIAL",
+      "adoptionCategory": "INCLUDE_SUPPORT",
+      "numeratorInputId": "INP_CZ_COUNT",
+      "denominatorInputId": "INP_NORMAL_GAMES",
+      "minimumSample": 1,
+      "sampleRecommendation": 7000,
+      "weight": 1,
+      "displayFormat": "ratio_1_over_n",
+      "difficultyParticipation": "EXCLUDE",
+      "userReason": "CZにも設定差があるため補助採用するが低頻度のためDifficultyから除外。"
+    },
+    {
+      "researchFeatureId": "RF_BIG_SHARE",
+      "featureId": "FEAT_BIG_SHARE",
+      "adoptionCategory": "EXCLUDE",
+      "rejectionReason": "BIG/REG比率には設定差がありますが差が小さく、1日で得られるボーナス回数では比率の偶然変動が大きく残ります。ボーナス初当りとCZを優先した方が情報効率が高いため不採用です。"
+    }
+  ],
+  "rejectedElements": [
+    {
+      "id": "REJECTED_HAZURE_ZENCHO",
+      "name": "通常時ハズレからの前兆移行率",
+      "reason": "内部状態ごとに設定差がありますが、通常・高確・超高確を実戦中に完全には観測できません。状態を誤分類した母数を混ぜると設定差より大きなバイアスを作り得るため不採用です。"
+    },
+    {
+      "id": "REJECTED_TENGOKU_TRANSITION",
+      "name": "通常モードの天国移行率",
+      "reason": "通常A・B・Cごとに設定差がありますが、元の滞在モードを直接観測できないため、正しい条件付き母数を作れません。潜在状態を推定して数える方式は推測ロジックを二重に含むため不採用です。"
+    }
+  ],
+  "evidence": [],
+  "evidenceUi": {
+    "groups": [
+      {
+        "groupId": "TROPHY",
+        "label": "終了時トロフィー",
+        "selectionMode": "single",
+        "normalizationMode": "ALLOWED_SETTINGS",
+        "options": [
+          {
+            "value": "TROPHY_2PLUS",
+            "label": "銅クジ 設定2以上",
+            "allowedSettings": [
+              "SET_2",
+              "SET_4",
+              "SET_5",
+              "SET_6"
+            ],
+            "excludedSettings": [
+              "SET_1"
+            ],
+            "sourceEvidenceIds": [
+              "RE_TROPHY_2PLUS"
+            ]
+          },
+          {
+            "value": "TROPHY_4PLUS",
+            "label": "金クジ 設定4以上",
+            "allowedSettings": [
+              "SET_4",
+              "SET_5",
+              "SET_6"
+            ],
+            "excludedSettings": [
+              "SET_1",
+              "SET_2"
+            ],
+            "sourceEvidenceIds": [
+              "RE_TROPHY_4PLUS"
+            ]
+          },
+          {
+            "value": "TROPHY_5PLUS",
+            "label": "クマノミクジ 設定5以上",
+            "allowedSettings": [
+              "SET_5",
+              "SET_6"
+            ],
+            "excludedSettings": [
+              "SET_1",
+              "SET_2",
+              "SET_4"
+            ],
+            "sourceEvidenceIds": [
+              "RE_TROPHY_5PLUS"
+            ]
+          },
+          {
+            "value": "TROPHY_6",
+            "label": "虹クジ 設定6",
+            "allowedSettings": [
+              "SET_6"
+            ],
+            "excludedSettings": [
+              "SET_1",
+              "SET_2",
+              "SET_4",
+              "SET_5"
+            ],
+            "sourceEvidenceIds": [
+              "RE_TROPHY_6"
+            ]
+          }
+        ]
+      },
+      {
+        "groupId": "PAYOUT_DISPLAY",
+        "label": "獲得枚数表示",
+        "selectionMode": "single",
+        "normalizationMode": "ALLOWED_SETTINGS",
+        "options": [
+          {
+            "value": "PAYOUT_4PLUS",
+            "label": "456枚突破 設定4以上",
+            "allowedSettings": [
+              "SET_4",
+              "SET_5",
+              "SET_6"
+            ],
+            "excludedSettings": [
+              "SET_1",
+              "SET_2"
+            ],
+            "sourceEvidenceIds": [
+              "RE_PAYOUT_4PLUS"
+            ]
+          },
+          {
+            "value": "PAYOUT_5PLUS",
+            "label": "555枚突破 設定5以上",
+            "allowedSettings": [
+              "SET_5",
+              "SET_6"
+            ],
+            "excludedSettings": [
+              "SET_1",
+              "SET_2",
+              "SET_4"
+            ],
+            "sourceEvidenceIds": [
+              "RE_PAYOUT_5PLUS"
+            ]
+          },
+          {
+            "value": "PAYOUT_6",
+            "label": "666枚突破 設定6",
+            "allowedSettings": [
+              "SET_6"
+            ],
+            "excludedSettings": [
+              "SET_1",
+              "SET_2",
+              "SET_4",
+              "SET_5"
+            ],
+            "sourceEvidenceIds": [
+              "RE_PAYOUT_6"
+            ]
+          }
+        ]
+      },
+      {
+        "groupId": "GEN_WINDOW",
+        "label": "源ウインドウ",
+        "selectionMode": "single",
+        "normalizationMode": "ALLOWED_SETTINGS",
+        "options": [
+          {
+            "value": "WINDOW_4PLUS",
+            "label": "源ウインドウ サメ 設定4以上",
+            "allowedSettings": [
+              "SET_4",
+              "SET_5",
+              "SET_6"
+            ],
+            "excludedSettings": [
+              "SET_1",
+              "SET_2"
+            ],
+            "sourceEvidenceIds": [
+              "RE_WINDOW_4PLUS"
+            ]
+          },
+          {
+            "value": "WINDOW_5PLUS",
+            "label": "源ウインドウ エビ 設定5以上",
+            "allowedSettings": [
+              "SET_5",
+              "SET_6"
+            ],
+            "excludedSettings": [
+              "SET_1",
+              "SET_2",
+              "SET_4"
+            ],
+            "sourceEvidenceIds": [
+              "RE_WINDOW_5PLUS"
+            ]
+          },
+          {
+            "value": "WINDOW_6",
+            "label": "源ウインドウ アンコウ 設定6",
+            "allowedSettings": [
+              "SET_6"
+            ],
+            "excludedSettings": [
+              "SET_1",
+              "SET_2",
+              "SET_4",
+              "SET_5"
+            ],
+            "sourceEvidenceIds": [
+              "RE_WINDOW_6"
+            ]
+          }
+        ]
+      },
+      {
+        "groupId": "ENDING_LAMP",
+        "label": "エンディング中ランプ",
+        "selectionMode": "single",
+        "normalizationMode": "ALLOWED_SETTINGS",
+        "options": [
+          {
+            "value": "RED_4PLUS",
+            "label": "エンディング 極源炎舞ランプ赤 設定4以上",
+            "allowedSettings": [
+              "SET_4",
+              "SET_5",
+              "SET_6"
+            ],
+            "excludedSettings": [
+              "SET_1",
+              "SET_2"
+            ],
+            "sourceEvidenceIds": [
+              "RE_ENDING_RED_4PLUS"
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "evidenceReview": {
+    "policyVersion": 1,
+    "exclusions": []
+  },
+  "uiCategoryLabels": {
+    "PRIMARY": "ボーナス・CZ初当り",
+    "PREDECESSOR": "着席時データ"
+  },
+  "difficultyAnalysis": {
+    "targetGameBasis": {
+      "basisId": "NORMAL_GAMES",
+      "label": "通常ゲーム数",
+      "quality": "ESTIMATED"
+    },
+    "calibrationAllowedExposureQualities": [
+      "EXACT",
+      "DERIVED",
+      "ESTIMATED"
+    ]
+  }
+}
