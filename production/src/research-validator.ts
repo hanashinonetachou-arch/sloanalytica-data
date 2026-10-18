@@ -11,6 +11,11 @@ import {buildDependencyReview} from './dependency-gate.ts';
 import {categoricalEvidenceMirrorIssues} from './categorical-evidence-mirror.ts';
 
 export const RESEARCH_VALIDATOR_CONTRACT='research-v1';
+export function isDeclaredResearchSetting(d:any,key:string){
+ if(/^[1-6]$/.test(key))return true;
+ return key==='0' && d?.settings?.status==='SOURCE_DERIVED' && Array.isArray(d.settings.values) && d.settings.values.includes('SET_0');
+}
+
 export const RESEARCH_COMPLETENESS_DOMAINS=["INITIAL_HIT","BONUS","SMALL_ROLE","CZ","AT","INTERNAL_CONDITIONAL_DRAW","MODE_TRANSITION","STATE_TRANSITION","SUCCESS_RATE","POINTS_GAME_DISTRIBUTION","CARRY_OVER","THRESHOLD_BEHAVIOR","RESET_BEHAVIOR","POST_EVENT_TRANSITION","NAVIGATION","ROLE_CONDITIONAL_DISTRIBUTION","BONUS_TYPE_CONDITIONAL","EVIDENCE","EXTERNAL_DATA_ONLY","MACHINE_SPECIFIC"] as const;
 const researchCompletenessStatuses=new Set(['CHECKED','NOT_APPLICABLE']);
 const abstractResearchLabels=[/^設定推測要素$/,/設定示唆演出.*設定別出現率/,/有利区間リセット後の恩恵/,/外部集計に依存する要素/];
@@ -162,7 +167,7 @@ export function validateResearchArtifacts(s:RepoStore,a:Attempt,r:WorkResult){
     validateResearchProbabilityRouteContract(f);
     if(f.settingDistribution!==undefined){
       if(!f.settingDistribution||typeof f.settingDistribution!=='object'||Array.isArray(f.settingDistribution)||Object.keys(f.settingDistribution).length===0) throw new Error('RESEARCH_VALIDATION:RAW_DISTRIBUTION');
-      for(const [k,v] of Object.entries(f.settingDistribution)) if(!/^([1-6])$/.test(k)||!(typeof v==='number'||nonEmpty(v))) throw new Error('RESEARCH_VALIDATION:RAW_DISTRIBUTION');
+      for(const [k,v] of Object.entries(f.settingDistribution)) if(!isDeclaredResearchSetting(d,k)||!(typeof v==='number'||nonEmpty(v))) throw new Error('RESEARCH_VALIDATION:RAW_DISTRIBUTION');
     }
     if(f.observationType==='evidence'&&Array.isArray(f.semanticCategories)){
       for(const category of f.semanticCategories){
