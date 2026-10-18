@@ -147,15 +147,21 @@ const evidenceCategoryPresentation=(raw:string)=>{
 };
 export const evidenceCategoryRecords=(e:any)=>{
  const structured=Array.isArray(e.semanticCategories)?e.semanticCategories.filter((x:any)=>x&&typeof x==='object'&&typeof x.label==='string'&&x.label.trim()):[];
- if(structured.length)return structured.map((x:any)=>{const rawLabel=String(x.label).trim();const parsed=evidenceCategoryPresentation(rawLabel);const explicitMeaning=typeof x.meaning==='string'&&x.meaning.trim()?x.meaning.trim():undefined;const label=explicitMeaning?rawLabel:parsed.label,meaning=explicitMeaning??parsed.meaning;return {label,meaning,semanticType:x.semanticType??e.semanticType,linkedFindingId:x.linkedFindingId,raw:explicitMeaning?`${label}：${meaning}`:rawLabel};});
+ if(structured.length)return structured.map((x:any)=>{const rawLabel=String(x.label).trim();const parsed=evidenceCategoryPresentation(rawLabel);const explicitMeaning=typeof x.meaning==='string'&&x.meaning.trim()?x.meaning.trim():undefined;const label=explicitMeaning?rawLabel:parsed.label,meaning=explicitMeaning??parsed.meaning;return {label,meaning,semanticType:x.semanticType??e.semanticType,linkedFindingId:x.linkedFindingId,recordInputId:x.recordInputId,raw:explicitMeaning?`${label}：${meaning}`:rawLabel};});
  const details=Array.isArray(e.details)?e.details.filter((x:any)=>typeof x==='string'&&x.trim()):[];
  const labels=details.length?details:[e.label];
  return labels.map((raw:string)=>{const p=evidenceCategoryPresentation(raw);return {...p,semanticType:e.semanticType,raw};});
 };
+/** Keep an existing recorded counter when its source changes from frequency to exact-only evidence. */
+export const evidenceRecordInputId=(e:any,index:number):string=>{
+ const authored=evidenceCategoryRecords(e)[index]?.recordInputId;
+ if(authored!==undefined&&(typeof authored!=='string'||!authored.trim()||authored!==authored.trim()))throw new Error('EVIDENCE_RECORD_INPUT_ID_INVALID');
+ return authored??('REF_'+e.findingId+'_'+(index+1));
+};
 const evidenceUiSections=(projection:any)=>{
  const links=resolveEvidenceInputLinks(projection),out:any[]=[];
  for(const s of projection.runtimeUi?.evidenceSections??[]){
-  const items=(s.evidenceItems??[]).flatMap((e:any)=>{const records=evidenceCategoryRecords(e).map((p:any,i:number)=>({p,i})).filter(({i}:any)=>!links.categoryInputIdByKey.has(evidenceLinkKey(e.findingId,i)));if(!records.length)return [];return [{id:'REF_'+e.findingId,evidenceId:e.findingId,label:e.label,interaction:{type:'CATEGORY_COUNTERS',preservePriorObservations:true,showAccumulatedCounts:true,categoryCoverage:'NON_EXHAUSTIVE',totalOpportunities:'NONE',categories:records.map(({p,i}:any)=>({id:'REF_'+e.findingId+'_'+(i+1),inputId:'REF_'+e.findingId+'_'+(i+1),label:p.label,meaning:p.meaning}))}}]});
+  const items=(s.evidenceItems??[]).flatMap((e:any)=>{const records=evidenceCategoryRecords(e).map((p:any,i:number)=>({p,i})).filter(({i}:any)=>!links.categoryInputIdByKey.has(evidenceLinkKey(e.findingId,i)));if(!records.length)return [];return [{id:'REF_'+e.findingId,evidenceId:e.findingId,label:e.label,interaction:{type:'CATEGORY_COUNTERS',preservePriorObservations:true,showAccumulatedCounts:true,categoryCoverage:'NON_EXHAUSTIVE',totalOpportunities:'NONE',categories:records.map(({p,i}:any)=>({id:evidenceRecordInputId(e,i),inputId:evidenceRecordInputId(e,i),label:p.label,meaning:p.meaning}))}}]});
   if(items.length)out.push({id:s.id,title:s.title,description:evidenceExplanation(s),collapsible:s.collapsible!==false,defaultExpanded:s.defaultExpanded===true,descriptionPresentation:s.descriptionPresentation??{collapsible:true,label:'説明',defaultExpanded:false},items});
  }
  return out;
@@ -175,7 +181,7 @@ const buildInputs=(projection:any)=>{
   for(const e of s.evidenceItems??[]){
    for(const [i,category] of evidenceCategoryRecords(e).entries()){
     if(links.categoryInputIdByKey.has(evidenceLinkKey(e.findingId,i)))continue;
-    const id=`REF_${e.findingId}_${i+1}`;if(seen.has(id))continue;seen.add(id);
+    const id=evidenceRecordInputId(e,i);if(seen.has(id))continue;seen.add(id);
     out.push({id,name:category.raw,category:'EVIDENCE_REFERENCE',type:'counter',unit:'回',defaultValue:0,minimum:0,displayOrder:order++,inferenceRole:'DISPLAY_ONLY'});
    }
   }
@@ -218,7 +224,7 @@ const materializedEvidences=(projection:any)=>{
  return (projection.evidence??[]).flatMap((s:any)=>(s.evidenceItems??[]).flatMap((e:any)=>evidenceCategoryRecords(e).flatMap((category:any,i:number)=>{
   if(category.semanticType!=='EXACT_CONSTRAINT')return [];
   const constraint=evidenceConstraintFromLabel(category.meaning==='観測回数'?category.raw:category.meaning,allSettings);if(!constraint)throw new Error('APP_RUNTIME_EXACT_CONSTRAINT_UNPARSEABLE:'+e.findingId+':'+category.raw);
-  const inputId=links.categoryInputIdByKey.get(evidenceLinkKey(e.findingId,i))??('REF_'+e.findingId+'_'+(i+1));
+  const inputId=links.categoryInputIdByKey.get(evidenceLinkKey(e.findingId,i))??evidenceRecordInputId(e,i);
   return [{id:e.findingId+'__'+(i+1),name:category.raw,displayName:category.raw,inputId,details:[category.raw],confirmedSettings:constraint.confirmedSettings,deniedSettings:constraint.deniedSettings,hasImage:false,type:'SETTING_CONSTRAINT',sourceEvidenceRefs:[e.findingId]}];
  })));
 };

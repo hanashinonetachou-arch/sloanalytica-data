@@ -174,3 +174,15 @@ test('game-based categorical opportunities retain an exact play-data binding',()
  const d=buildAppRuntime(p,ref),tracking=d.package.ui.v8Sections[0].items[0].interaction.opportunityTracking;
  assert.deepEqual(tracking.playDataBinding,{source:'PLAY_NORMAL_GAME_DELTA',mode:'AUTO_EXACT'});assert.deepEqual(tracking.quickAdd,[50]);assert.equal(d.package.features.features[0].denominatorRule,undefined);assert.doesNotThrow(()=>validateAppRuntimeDocument(d,p,ref));
 });
+
+test('exact-only evidence retains the prior positive counter without a frequency feature',()=>{
+ const id='old.categoryCounts.2_特殊表示';
+ const ev:any={id:'EVI_payout',sourceFindingId:'payout',title:'獲得枚数',evidenceItems:[{findingId:'payout',label:'獲得枚数',semanticCategories:[{label:'456枚表示',meaning:'設定2',semanticType:'EXACT_CONSTRAINT',recordInputId:id}]}]};
+ const p:any={...base,evidence:[ev],runtimeUi:{...base.runtimeUi,evidenceSections:[ev]}};
+ const d=buildAppRuntime(p,ref);assert.deepEqual(d.package.features.features,[]);
+ assert.equal(d.package.inputs.inputs[0].id,id);assert.equal(d.package.evidence.evidences[0].inputId,id);
+ assert.equal(d.package.ui.v8Sections[0].items[0].interaction.categories[0].inputId,id);
+ assert.equal(d.package.ui.v8Sections[0].items[0].interaction.totalOpportunities,'NONE');
+ assert.doesNotThrow(()=>validateAppRuntimeDocument(d,p,ref));
+ const bad=structuredClone(d);bad.package.evidence.evidences[0].inputId='new.counter';assert.throws(()=>validateAppRuntimeDocument(bad,p,ref),/EVIDENCE_INPUT_LINK/);
+});

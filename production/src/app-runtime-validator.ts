@@ -1,6 +1,6 @@
 import {concreteAdoptionReason,isGenericAdoptionReason} from './adoption-reason.ts';
 import {withUnknownHistoryRecords} from './unknown-history-records.ts';
-import {appRuntimeMachineDataVersion,playDataSourceForTrialUniverse,categoricalProbabilityRow,evidenceCategoryRecords,resolveEvidenceInputLinks} from './app-runtime-builder.ts';
+import {appRuntimeMachineDataVersion,playDataSourceForTrialUniverse,categoricalProbabilityRow,evidenceCategoryRecords,resolveEvidenceInputLinks,evidenceRecordInputId} from './app-runtime-builder.ts';
 export const APP_RUNTIME_VALIDATOR_CONTRACT='app-runtime-v1';
 const canonical=(v:any):string=>Array.isArray(v)?'['+v.map(canonical).join(',')+']':v&&typeof v==='object'?'{'+Object.keys(v).sort().map(k=>JSON.stringify(k)+':'+canonical(v[k])).join(',')+'}':JSON.stringify(v);
 const fail=(m:string):never=>{throw new Error('APP_RUNTIME_VALIDATION_FAILED:'+m)};
@@ -18,7 +18,7 @@ export function validateAppRuntimeDocument(doc:any,projection:any,projectionArti
  if(canonical(p.machine?.settings)!==canonical(projection.settings.values)||canonical(p.metadata?.settings)!==canonical(projection.settings.values)||p.metadata?.settingsStatus!=='SOURCE_DERIVED')fail('SETTINGS_COPY');
  const expectedSections=projection.runtimeUi?.numericSections??[],active=projection.activeFeatures??[],inactive=projection.inactiveFeatures??[],links=resolveEvidenceInputLinks(projection);
  const expectedNumericInputs=expectedSections.flatMap((s:any)=>s.inputs??[]);
- const expectedEvidenceInputs=(projection.evidence??[]).flatMap((s:any)=>(s.evidenceItems??[]).flatMap((e:any)=>evidenceCategoryRecords(e).flatMap((category:any,i:number)=>links.categoryInputIdByKey.has(String(e.findingId)+':'+i)?[]:[{id:`REF_${e.findingId}_${i+1}`,label:category.raw}])));
+ const expectedEvidenceInputs=(projection.evidence??[]).flatMap((s:any)=>(s.evidenceItems??[]).flatMap((e:any)=>evidenceCategoryRecords(e).flatMap((category:any,i:number)=>links.categoryInputIdByKey.has(String(e.findingId)+':'+i)?[]:[{id:evidenceRecordInputId(e,i),label:category.raw}])));
  const expectedInputs=[...expectedNumericInputs,...expectedEvidenceInputs];
  if(!Array.isArray(p.inputs?.inputs)||p.inputs.inputs.length!==expectedInputs.length)fail('INPUT_COVERAGE');
  const inputBy=new Map((p.inputs.inputs??[]).map((x:any)=>[x.id,x]));if(inputBy.size!==expectedInputs.length)fail('INPUT_DUPLICATE');
@@ -69,7 +69,7 @@ export function validateAppRuntimeDocument(doc:any,projection:any,projectionArti
   const sourceId=Array.isArray(e.sourceEvidenceRefs)?e.sourceEvidenceRefs[0]:undefined;const src:any=evidenceSourceBy.get(sourceId);
   const hasConstraint=(Array.isArray(e.confirmedSettings)&&e.confirmedSettings.length>0)||(Array.isArray(e.deniedSettings)&&e.deniedSettings.length>0);
   if(!src||e.type!=='SETTING_CONSTRAINT'||typeof e.inputId!=='string'||!e.inputId||!Array.isArray(e.details)||e.details.length!==1||!hasConstraint||!Array.isArray(e.confirmedSettings)||!Array.isArray(e.deniedSettings))fail('EVIDENCE_DEFINITION');
-  const index=Number(String(e.id??'').split('__').pop())-1,linked=links.categoryInputIdByKey.get(String(sourceId)+':'+index),expectedInputId=linked??('REF_'+sourceId+'_'+(index+1));
+  const index=Number(String(e.id??'').split('__').pop())-1,linked=links.categoryInputIdByKey.get(String(sourceId)+':'+index),expectedInputId=linked??evidenceRecordInputId(src,index);
   if(!Number.isInteger(index)||index<0||e.inputId!==expectedInputId)fail('EVIDENCE_INPUT_LINK:'+String(sourceId));
   const input:any=inputBy.get(e.inputId);if(!input||input.type!=='counter'||(!linked&&input.inferenceRole!=='DISPLAY_ONLY')||(linked&&input.inferenceRole==='DISPLAY_ONLY'))fail('EVIDENCE_INPUT_BINDING');
  }

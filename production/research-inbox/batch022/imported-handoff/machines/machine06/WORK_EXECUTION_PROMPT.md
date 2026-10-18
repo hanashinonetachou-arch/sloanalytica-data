@@ -1,0 +1,1 @@
+SloAnalytica Ring ni Kakero 1 V: data/app Repository最新正本確認→このZIPのcandidates.csv/coverage.csv/RESEARCH_DESIGN.mdを取り込み旧候補との対応と矛盾を確認→正式Evaluation→Eligibility→Candidate Contract。採否と閾値を変更せず、未公表値を補完しない。HUMAN_REQUIRED以外で停止しない。GitHub ActionsはIntegration Boundary時のみ。
