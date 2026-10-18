@@ -24,3 +24,7 @@
 今回の実行範囲はCandidate Contractまで。実装・配信・APK・実機QAは未実施。GitHub Actions実行0。既存Batch021のQA完了状態を変更しない。
 
 次回は `work-checkpoint.json` と正式stage参照からOBSERVATION_EVIDENCEへ接続する。Researchは新しい具体的根拠がない限りやり直さない。同じ不採用理由は1枠にまとめ、各要素名を1項目ずつ箇条書きにする。
+
+## 継続実装（ユーザー指示 2026-10-18）
+
+上記はContract完了時点の記録です。その後の継続指示により、10機種のAPP_RUNTIME・配信まで正式受理しました。確率・スコア・採否・依存解決を維持。表示名の短縮と当日履歴不明タブ接続だけを修正し、履歴不明の入力は確定制約のみ・数値尤度には不使用と検証済みです。現在地点はwork-checkpoint.jsonを参照。

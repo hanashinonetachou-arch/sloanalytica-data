@@ -255,7 +255,7 @@ coinRows=[
  [[100,0,0,0,0,0],[79,21,0,0,0,0],[67,15,18,0,0,0],[55,15,15,15,0,0],[55,10,10,10,15,0],[55,7.5,7.5,7.5,7.5,15]]]
 for j,vs in enumerate(coinRows):
  place='扉ゾーン終了' if j<3 else 'フィアンマBATTLE終了';band=['0～4000G','4001～6000G','6001G以上'][j%3]
- f=cat(10,'coin-'+str(j),['出現なし','銅','銀','金','デンジャー柄','虹'],vs,'当日消化ゲーム数を確認できた'+band+'の'+place+'だけを1機会とし、出現なしも記録。履歴不明なら数値計算を停止し、確定色だけ保持します。',['デフォルト','設定2以上','設定3以上','設定4以上','設定5以上','設定6'],label='藤丸コイン（'+place+'・'+band+'）',refs=['https://nana-press.com/kaiseki/machine/608/17570/']);ctx(f,'index_coin',j,'藤丸コイン',place+'・'+band)
+ f=cat(10,'coin-'+str(j),['出現なし','銅','銀','金','デンジャー柄','虹'],vs,'当日累計ゲーム数を確認できた'+band+'の'+place+'だけを1機会とし、出現なしも記録。履歴不明なら数値計算を停止し、確定色だけ保持します。',['デフォルト','設定2以上','設定3以上','設定4以上','設定5以上','設定6'],label='藤丸コイン（'+place+'・'+band+'）',refs=['https://nana-press.com/kaiseki/machine/608/17570/']);ctx(f,'index_coin',j,'藤丸コイン',place+'・'+band);f['inputPresentation']={'trialLabel':'コイン表示確認回数','successLabel':'コイン出現回数'}
 ROUTE[10][56]=('FINDING',key(10,'coin-0'))
 # Exact coin-only surface is subsumed into each numeric category input, not a second count.
 D[10]['findings']=[f for f in D[10]['findings'] if f['findingId']!=key(10,31)]
