@@ -265,6 +265,25 @@ group(10,[1,2,5,6,7,9,11,13,15,16],'index_hit_path')
 # Discovered image-only numerical surface is retained and closed without inventing OCR values.
 D[8]['blockedItems'].append({'blockId':key(8,'petit-rate-image'),'label':'プチボーナス中のキャラ出現率（画像公表表）','sourceIds':[sid(8,'https://nana-press.com/kaiseki/machine/626/17116/')],'reason':'キャラ出現率の数値は画像表で公表されていますが、今回取得した本文では設定別数値と分類条件を確定できません。数値を作らず、確認できたキャラ別の設定確定・否定条件を保持します。','reevaluationCondition':'元の画像表の設定別数値と試行条件を正確に読み取れる資料が得られた場合、この要素だけ再評価します。','retainedSourceImageUrl':'https://image.nana-press.com/kaiseki/machine/626/20240314145147.png','retrievalStatus':'IMAGE_REQUEST_FAILED_AFTER_BOUNDED_ATTEMPTS','closure':'CLOSED_NO_REPEAT_PUBLIC_SEARCH','runtimeUse':'DISABLED'})
 
+# User-reviewed presentation families. Each tab retains its own denominator,
+# model, evidence identity and observation condition; no likelihoods are merged.
+def presentation_family(i,name,title,members):
+ policy=D[i].setdefault('uiPresentation',{'hiddenDerivedFindingIds':[],'sectionOrder':[],'evidenceSectionMerges':[],'tabGroups':[]})
+ tabs=[]
+ for n,label in members:
+  f=next(f for f in D[i]['findings'] if f['findingId']==key(i,n))
+  prefix='EVI_' if f['observationType']=='evidence' else 'OBS_'
+  tabs.append({'sectionId':prefix+f['findingId'],'label':label})
+ policy['tabGroups'].append({'id':'B022_'+name,'title':title,'tabs':tabs})
+presentation_family(3,'KEIJI_OMIKUJI','おみくじ',[(36,'通常おみくじ'),(54,'特殊おみくじ')])
+presentation_family(5,'MONKEY_EX','EX獲得',[(6,'ボート・弱チェリー'),(7,'弱チャンス目'),(8,'強チャンス目')])
+presentation_family(5,'MONKEY_PAYOUT','特殊獲得枚数',[(23,'456枚到達時'),(24,'666枚到達時'),(25,'803枚到達時')])
+presentation_family(5,'MONKEY_MEDAL','SGメダル・トロフィー',[(32,'青・黄メダル（黒直後以外）'),(31,'黒メダル直後の次回'),('trophy-E','トロフィー（確定情報）')])
+presentation_family(5,'MONKEY_CHARGE_VOICE','激走チャージ終了時ボイス',[(15,'波多野の青ランプ2セリフ'),(34,'波多野・榎木の分類')])
+presentation_family(6,'RING_CONFIRMED_VOICE','ボーナス確定画面のボイス',[(21,'黒チェリー・菊'),(22,'青チェリー・竜児')])
+presentation_family(6,'RING_BIG_MUSIC','BIG中の楽曲',[(23,'BIG開始時'),(24,'クイズ4問正解後（開始曲通常）')])
+presentation_family(8,'MADOKA_SG','ソウルジェム点灯',[(4,'さやか'),(5,'マミ'),(6,'杏子'),(7,'ほむら')])
+
 # Source-owned preservation and row-to-contract routing.
 for i,d in D.items():
  assert set(ROUTE[i])==set(range(1,len(ROWS[i])+1)),(i,set(range(1,len(ROWS[i])+1))-set(ROUTE[i]))
