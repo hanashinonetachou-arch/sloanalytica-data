@@ -142,6 +142,13 @@ for n in [23,24,25]:
  scope='AT中に'+row(5,n)['candidate'].replace('獲得','')+'へ到達した全回数と、対応する特殊枚数表示が出た回数。到達していないATを非出現へ数えません。'
  v=raw(5,n);yes=[float(str(v[k]).rstrip('%')) for k in settings(5)];minimum={23:4,24:6,25:5}[n]
  cat(5,n,['特殊表示なし',row(5,n)['candidate']],[ [100-p,p] for p in yes],scope,['デフォルト','設定'+str(minimum)+('以上' if minimum<6 else '')])
+# User choice: retain published rates as reference, use payout displays only as exact constraints.
+for n in [23,24,25]:
+ f=next(f for f in D[5]['findings'] if f['findingId']==key(5,n));f['observationType']='reference_distribution';f['details']=['特殊獲得枚数は、表示されたときの設定確定条件だけを使用します。入力負担を減らすため、出現頻度による判別は使用しません。'];f['userDecision']={'authority':'USER_EXPLICIT_INSTRUCTION','policy':'EXACT_CONSTRAINT_ONLY','requestedAt':'2026-10-18'}
+ mirror=f.pop('mirrorsEvidenceFindingId');f.pop('categoricalEvidenceReconciliation',None);D[5]['findings']=[e for e in D[5]['findings'] if e['findingId']!=mirror]
+payout=ev(5,'payout-E',[('456枚表示','設定4以上'),('666枚表示','設定6'),('803枚表示','設定5以上')],'特殊な獲得枚数が表示されたときだけ記録します。表示されなかった回数や到達回数の入力は不要です。設定確定条件だけを反映し、出現頻度による重み付けは行いません。','特殊獲得枚数')
+payout['details']=payout['details'][:1]
+for c,n,amount in zip(payout['semanticCategories'],[23,24,25],[456,666,803]):c['recordInputId']=key(5,n)+'.categoryCounts.2_獲得'+str(amount)+'枚'
 for n in [26,27,28,29,30]:block(5,n,'公表値は各種条件を考慮した平均値で、黒メダル直後の次回表示では分布が変わります。平均値をすべての終了画面へ一律適用しません。')
 ev(5,'trophy-E',[(l,'設定'+str(v)+('以上' if v<6 else '')) for l,v in [('銅',2),('金',4),('ケロット柄',5),('虹',6)]],'トロフィーの出現は設定制約。非出現に平均出現率を適用しません。','ケロットトロフィー')
 cat(5,31,['青メダル','黄メダル','銅トロフィー','金トロフィー','ケロット柄','虹トロフィー'],[[50,50,0,0,0,0],[45,30,25,0,0,0],[37.5,37.5,12.5,12.5,0,0],[25,50,10,11.25,3.75,0],[37.5,37.5,10,11,3,1]],'黒メダル出現後の次回表示1回のみ。黒メダル以前や2回目以降は混ぜず、終了履歴不明なら数値計算しません。',['デフォルト','デフォルト','設定2以上','設定4以上','設定5以上','設定6'],label='黒メダル後の次回メダル・トロフィー')
@@ -279,7 +286,6 @@ def presentation_family(i,name,title,members):
  policy['tabGroups'].append({'id':'B022_'+name,'title':title,'tabs':tabs})
 presentation_family(3,'KEIJI_OMIKUJI','おみくじ',[(36,'通常おみくじ'),(54,'特殊おみくじ')])
 presentation_family(5,'MONKEY_EX','激走チャージ中Ex獲得',[(6,'ボート・弱チェリー'),(7,'弱チャンス目'),(8,'強チャンス目')])
-presentation_family(5,'MONKEY_PAYOUT','特殊獲得枚数',[(23,'456枚到達時'),(24,'666枚到達時'),(25,'803枚到達時')])
 presentation_family(5,'MONKEY_MEDAL','SGメダル・トロフィー',[(32,'青・黄メダル（黒直後以外）'),(31,'黒メダル直後の次回'),('trophy-E','トロフィー（確定情報）')])
 presentation_family(5,'MONKEY_CHARGE_VOICE','激走チャージ終了時ボイス',[(15,'波多野の青ランプ2セリフ'),(34,'波多野・榎木の分類')])
 presentation_family(6,'RING_CONFIRMED_VOICE','ボーナス確定画面のボイス',[(21,'黒チェリー・菊'),(22,'青チェリー・竜児')])
