@@ -1,3 +1,7 @@
+# 現在の状態：Batch021 全10機種の実機QA完了
+
+2026-10-18 09:15 JST、ユーザー「QAはOKでした」により修正版APK vc2002895195の対象10機種を合格として正式記録。DEVICE_QAを10件ともCOMPLETEへ更新。正本：device-qa/acceptance.json。以下のQA待ち記述は作業時点の履歴。
+
 # Batch021 — 配信・確認用APK完成
 
 対象：2026-10-17に選定済みの10機種。Candidate Contract確定後のユーザー指示「進めてください」に従い、UI・Runtime・Distributionと確認用APKの生成まで完了。実機QAの承認は未記録。

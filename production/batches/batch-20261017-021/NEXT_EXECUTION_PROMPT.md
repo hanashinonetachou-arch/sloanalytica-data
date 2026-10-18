@@ -1,13 +1,9 @@
-# Batch021 次工程への引き継ぎ
+# Batch021 完了状態
 
-正本はhanashinonetachou-arch/sloanalytica-dataのproduction/v85-batch-021-contract-20261018。最新HEADを確認しRESULTS.md、device-qa/handoff.json、CHECKLIST.mdから再開。
+2026-10-18 09:15 JST、ユーザーが「QAはOKでした」と明示。修正版APK vc2002895195の対象10機種は全件QA合格。全12工程×10機種がCOMPLETE。QA待ちとして扱わない。
 
-10機種ともDISTRIBUTIONまでCOMPLETE、DEVICE_QAはREADYでユーザー確認待ち。Data HEAD d8ceed0a30b2e16d73d5f80c2f580187d11b4903、機種データ8.5.1-batch-20261017-021。最新App c6f75f81853525588c70fbd47b117165caf1575b、固定開発署名APK vc2002895195。保存先IDとハッシュはdevice-qa/apk-verification.json。旧vc2002894706の情報はdevice-qa/revisionsへ履歴保存済み。
+正本はproduction/v85-batch-021-contract-20261018の最新HEAD。device-qa/acceptance.jsonとhandoff.jsonを参照。App c6f75f81853525588c70fbd47b117165caf1575b、Data d8ceed0a30b2e16d73d5f80c2f580187d11b4903。機種データ8.5.1-batch-20261017-021。
 
-最優先の修正済み要件：同じ不採用理由は1枠へまとめ、対象名を1項目ずつ箇条書きにして、共通説明を1回だけ表示する。共通V8.5表示を修正し、既存と今後のV8.5機種にも適用。要素を削除して枠数を減らさない。異なる理由は統合しない。10機種の実際の説明ダイアログを描画し、79要素を個別のliとして保持、47理由枠へまとめたことを検証済み。device-qa/rejected-summary-groups.jsonとvalidation/rejection-grouping-fix.jsonが検証結果。通常npm testにも共通処理の回帰テストを追加済み。
+不採用理由の共通表示は修正・ユーザーQA確認済み。同じ理由を1枠にまとめ、対象名は1件ずつ箇条書き、説明は1回だけ表示。全79要素を保持。既存と今後のV8.5機種も共通処理を使用する。
 
-元135ID、追加8トピックは処理済み。183台帳行は条件分岐と27補助行を含む。Researchは終了を維持し、新しい具体的な資料なしで閉じた39候補を再調査しない。過去のPARTIAL_PUBLICを一括VERIFIEDにしない。今回の表示修正は確率・採否・MachineDataを変更していない。
-
-ユーザーの実機QA合格の明示があった場合のみ、その対象を確認して正式なQA処理へ進む。自動テスト合格は実機QAやユーザー承認を意味しない。前BatchのQAは操作しない。不具合は再現箇所に限定して修正。GitHub Actionsは具体的な修正のある統合境界にまとめ、記録コミットは[skip ci]。
-
-対象外263機種はGit blob、catalog、registry不変で確認済み。263機種の新たなRuntime全数テストは主張していない。request-batch-device-qa.tsの別途fleetPassed>=80を架空の件数で満たさず、DEVICE_QAはREADYのまま保持。
+次Batchはまだ開始していない。次のユーザー指示に従う。既存Research・採否・確率を再生成しない。GitHub Actionsは統合境界にまとめ、記録コミットは[skip ci]。
