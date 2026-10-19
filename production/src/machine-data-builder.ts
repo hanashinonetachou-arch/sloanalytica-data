@@ -1,5 +1,5 @@
 const settingKeys=(candidate:any)=>{const out=new Set<string>();for(const c of candidate?.candidates??[])for(const k of Object.keys(c?.settingDistribution??{}))out.add(k);return [...out].sort((a,b)=>Number(a)-Number(b))}
-const researchSettingKeys=(research:any)=>{const out=new Set<string>();for(const f of research?.findings??[])for(const k of Object.keys(f?.settingDistribution??{}))out.add(k);if(out.size===0&&research?.settings?.status==='SOURCE_DERIVED')for(const value of research.settings.values??[]){const match=String(value).match(/^SET_([1-6])$/);if(match)out.add(match[1])}return [...out].sort((a,b)=>Number(a)-Number(b))}
+const researchSettingKeys=(research:any)=>{const out=new Set<string>();for(const f of research?.findings??[])for(const k of Object.keys(f?.settingDistribution??{}))out.add(k);if(out.size===0&&research?.settings?.status==='SOURCE_DERIVED')for(const value of research.settings.values??[]){const match=String(value).match(/^SET_([0-6])$/);if(match)out.add(match[1])}return [...out].sort((a,b)=>Number(a)-Number(b))}
 
 function assertResearchLifecycle(research:any,candidate:any){
  if(!research)return;

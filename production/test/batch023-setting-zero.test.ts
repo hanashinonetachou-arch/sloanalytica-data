@@ -17,3 +17,9 @@ test('zero remains a distinct hypothesis through Evaluation Eligibility Candidat
  const g=buildEligibility(e),c=buildCandidateContract(e,g,{},{});
  assert.deepEqual(c.candidates[0].settingDistribution,settings);assert.equal('3' in c.candidates[0].settingDistribution,false);assert.equal(c.candidates[0].runtimeInferenceAllowed,true);
 });
+
+test('explicit source labels are compacted without losing the REG trial restriction',async()=>{
+ const {deriveObservationInputLabels}=await import('../src/canonical-ui-builder.ts');
+ const out=deriveObservationInputLabels({label:'REG中BAR揃い',inputPresentation:{trialLabel:'REG消化ゲーム数',successLabel:'REG中BAR揃い回数'}});
+ assert.equal(out.trialLabel,'REG消化ゲーム数');assert.equal(out.successLabel,'BAR揃い回数');
+});

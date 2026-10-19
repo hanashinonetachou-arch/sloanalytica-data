@@ -82,7 +82,7 @@ export function resolveEvidenceInputLinks(projection:any){
     let matches=inputs.filter((x:any)=>meaning&&compactEvidenceText(x.label).includes(meaning));
     if(matches.length===0&&raw)matches=inputs.filter((x:any)=>{const label=compactEvidenceText(x.label);return label===raw||label.includes(raw)||raw.includes(label)});
     if(matches.length!==1&&matches.length>0){
-     const tokens=String(cat.label??'').replace(/[（）()]/g,'・').split(/[・：:\s／\\/]+/).map(compactEvidenceText).filter((t:string)=>t.length>=2&&!/^設定[1-6]/.test(t)&&!/(?:濃厚|否定|示唆)$/.test(t));
+     const tokens=String(cat.label??'').replace(/[（）()]/g,'・').split(/[・：:\s／\\/]+/).map(compactEvidenceText).filter((t:string)=>t.length>=2&&!/^設定[0-6]/.test(t)&&!/(?:濃厚|否定|示唆)$/.test(t));
      const narrowed=matches.filter((x:any)=>tokens.some((t:string)=>compactEvidenceText(x.label).includes(t))||raw&&compactEvidenceText(x.label).includes(raw));
      if(narrowed.length===1)matches=narrowed;
     }
@@ -211,12 +211,12 @@ const buildFeatures=(projection:any)=>{
 };
 const evidenceConstraintFromLabel=(label:string,allSettings:string[])=>{
  const settings=[...allSettings];
- const above=label.match(/設定([1-6])以上/);if(above){const n=Number(above[1]);return {confirmedSettings:settings.filter(s=>Number(String(s).replace('SET_',''))>=n),deniedSettings:[]};}
- const deniedList=label.match(/設定([1-6](?:[・,／\\/][1-6])+)否定/);if(deniedList){const nums=deniedList[1].split(/[・,／\\/]/);return {confirmedSettings:[],deniedSettings:settings.filter(s=>nums.includes(String(s).replace('SET_','')))};}
- const denied=label.match(/設定([1-6])否定/);if(denied)return {confirmedSettings:[],deniedSettings:['SET_'+denied[1]]};
- const listed=label.match(/設定([1-6](?:[・,／\/][1-6])+)(?:濃厚)?/);if(listed){const nums=listed[1].split(/[・,／\/]/);return {confirmedSettings:settings.filter(s=>nums.includes(String(s).replace('SET_',''))),deniedSettings:[]};}
+ const above=label.match(/設定([0-6])以上/);if(above){const n=Number(above[1]);return {confirmedSettings:settings.filter(s=>Number(String(s).replace('SET_',''))>=n),deniedSettings:[]};}
+ const deniedList=label.match(/設定([0-6](?:[・,／\\/][0-6])+)否定/);if(deniedList){const nums=deniedList[1].split(/[・,／\\/]/);return {confirmedSettings:[],deniedSettings:settings.filter(s=>nums.includes(String(s).replace('SET_','')))};}
+ const denied=label.match(/設定([0-6])否定/);if(denied)return {confirmedSettings:[],deniedSettings:['SET_'+denied[1]]};
+ const listed=label.match(/設定([0-6](?:[・,／\/][0-6])+)(?:濃厚)?/);if(listed){const nums=listed[1].split(/[・,／\/]/);return {confirmedSettings:settings.filter(s=>nums.includes(String(s).replace('SET_',''))),deniedSettings:[]};}
  const parity=label.match(/(奇数|偶数)設定濃厚/);if(parity){const odd=parity[1]==='奇数';return {confirmedSettings:settings.filter(s=>{const n=Number(String(s).replace('SET_',''));return odd?n%2===1:n%2===0}),deniedSettings:[]};}
- const exact=label.match(/(?:^|[:：=]\s*)設定([1-6])(?:濃厚)?\s*$/);if(exact)return {confirmedSettings:['SET_'+exact[1]],deniedSettings:[]};
+ const exact=label.match(/(?:^|[:：=]\s*)設定([0-6])(?:濃厚)?\s*$/);if(exact)return {confirmedSettings:['SET_'+exact[1]],deniedSettings:[]};
  return null;
 };
 const materializedEvidences=(projection:any)=>{

@@ -96,7 +96,7 @@ const userFacingEligibilityNotes=(o:any)=>{
 };
 export function deriveObservationInputLabels(o:any){
  if(o?.inputPresentation){
-  const trialLabel=clean(o.inputPresentation.trialLabel),successLabel=clean(o.inputPresentation.successLabel);
+  const trialLabel=compactContextualInputLabel(o.inputPresentation.trialLabel,o.label),successLabel=compactContextualInputLabel(o.inputPresentation.successLabel,o.label);
   if(!trialLabel||!successLabel||trialLabel.length>30||successLabel.length>30)throw new Error('OBSERVATION_INPUT_PRESENTATION_INVALID:'+String(o.findingId));
   return {trialLabel,successLabel};
  }
@@ -124,7 +124,7 @@ export function deriveObservationInputLabels(o:any){
  if(!canonicalTrialLabel&&trial.length>30)trial=compactContextualInputLabel(normalizeTrialLabel(sectionTitle+'を確認した回数'),sectionTitle);
  return {trialLabel:trial,successLabel:success};
 }
-const isSettingMeaning=(s:string)=>/設定[1-6]|高設定|低設定|奇数|偶数|示唆|濃厚|否定/.test(s);
+const isSettingMeaning=(s:string)=>/設定[0-6]|高設定|低設定|奇数|偶数|示唆|濃厚|否定/.test(s);
 const unique=(xs:string[])=>xs.filter((x,i)=>x&&xs.indexOf(x)===i);
 const operationalDetails=(o:any)=>unique((Array.isArray(o?.details)?o.details:[]).filter((x:any)=>typeof x==='string'&&x.trim()).flatMap((x:any)=>normalizeUserText(x).split(/\n+/).map(clean)).filter((x:string)=>!isSettingMeaning(x)&&!/同じ.+(?:数値入力|別欄).*(?:1回|入力)|重ねて入力/.test(x)));
 const categoricalSubject=(label:any)=>clean(label).replace(/の設定別(?:選択率|振り分け)$/,'').replace(/設定別(?:選択率|振り分け)$/,'');
