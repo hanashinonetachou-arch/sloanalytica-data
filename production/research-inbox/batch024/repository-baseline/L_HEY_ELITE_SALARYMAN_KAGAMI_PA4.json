@@ -1,0 +1,529 @@
+{
+  "schemaVersion": 1,
+  "machine": {
+    "schemaVersion": "2.0.0",
+    "machineId": "L_HEY_ELITE_SALARYMAN_KAGAMI_PA4",
+    "machineDataVersion": "0.1.3",
+    "displayName": "HEY！エリートサラリーマン鏡",
+    "modelName": "L HEY！エリートサラリーマン鏡PA4",
+    "manufacturer": "パオン・ディーピー",
+    "settings": [
+      "SET_1",
+      "SET_2",
+      "SET_4",
+      "SET_5",
+      "SET_6"
+    ],
+    "packagePolicy": {
+      "offlineCapable": true,
+      "containsImages": false,
+      "containsExecutableCode": false
+    },
+    "introductionDate": "2022-12-05",
+    "machineType": "SMART_SLOT",
+    "gameType": "AT"
+  },
+  "inputs": {
+    "schemaVersion": "2.0.0",
+    "inputs": [
+      {
+        "id": "INP_NORMAL_GAMES",
+        "name": "通常ゲーム数",
+        "type": "integer",
+        "category": "PRIMARY",
+        "unit": "G",
+        "displayOrder": 1,
+        "defaultValue": 0,
+        "minimum": 0,
+        "uiGridSpan": 12
+      },
+      {
+        "id": "INP_INITIAL_COUNT",
+        "name": "初当り回数",
+        "type": "counter",
+        "category": "PRIMARY",
+        "unit": "回",
+        "displayOrder": 2,
+        "defaultValue": 0,
+        "minimum": 0,
+        "uiGridSpan": 12
+      },
+      {
+        "id": "INP_TRUNK_COUNT",
+        "name": "抽選対象トランク成立回数",
+        "type": "counter",
+        "category": "LFW",
+        "unit": "回",
+        "displayOrder": 10,
+        "description": "通常時のラブフォースワン抽選対象となるトランクだけを数えてください。CZ中・AT中など抽選対象外の成立は含めません。",
+        "defaultValue": 0,
+        "minimum": 0,
+        "uiGridSpan": 12,
+        "uiCompactCounter": true
+      },
+      {
+        "id": "INP_TRUNK_LFW_COUNT",
+        "name": "トランク契機ラブフォースワン当選回数",
+        "type": "counter",
+        "category": "LFW",
+        "unit": "回",
+        "displayOrder": 11,
+        "defaultValue": 0,
+        "minimum": 0,
+        "uiGridSpan": 6,
+        "uiCompactCounter": true
+      },
+      {
+        "id": "INP_AT_END_COUNT",
+        "name": "AT終了回数",
+        "type": "counter",
+        "category": "AT_RETURN",
+        "unit": "回",
+        "displayOrder": 20,
+        "defaultValue": 0,
+        "minimum": 0,
+        "uiGridSpan": 6,
+        "uiCompactCounter": true
+      },
+      {
+        "id": "INP_AT_PULLBACK_COUNT",
+        "name": "AT引き戻し回数",
+        "type": "counter",
+        "category": "AT_RETURN",
+        "unit": "回",
+        "displayOrder": 21,
+        "defaultValue": 0,
+        "minimum": 0,
+        "uiGridSpan": 6,
+        "uiCompactCounter": true
+      },
+      {
+        "id": "INP_EVI_BONUS_AT_END_SCREEN",
+        "name": "ボーナス・AT終了画面",
+        "type": "enum",
+        "category": "EVIDENCE",
+        "unit": "",
+        "displayOrder": 100,
+        "inferenceRole": "INCLUDE_SUPPORT",
+        "options": [
+          {
+            "key": "__UNSET__",
+            "label": "未選択",
+            "value": "__UNSET__"
+          },
+          {
+            "key": "TRAINING",
+            "label": "ボーナス・AT終了画面 トレーニング",
+            "value": "TRAINING"
+          },
+          {
+            "key": "BLACKJACK",
+            "label": "ボーナス・AT終了画面 ブラックジャック",
+            "value": "BLACKJACK"
+          },
+          {
+            "key": "ELITE_GUYS",
+            "label": "ボーナス・AT終了画面 エリートguys",
+            "value": "ELITE_GUYS"
+          },
+          {
+            "key": "PAJAMA_PARTY",
+            "label": "ボーナス・AT終了画面 パジャマパーティー",
+            "value": "PAJAMA_PARTY"
+          }
+        ],
+        "defaultValue": "__UNSET__"
+      }
+    ]
+  },
+  "features": {
+    "schemaVersion": "2.0.0",
+    "features": [
+      {
+        "featureId": "FEAT_INITIAL_COMBINED",
+        "name": "初当り合算",
+        "adoptionCategory": "INCLUDE_PRIMARY",
+        "calculationRole": "PROBABILITY",
+        "probabilityEngineUsage": true,
+        "modelType": "binomial",
+        "minimumSample": 1,
+        "sampleRecommendation": 5000,
+        "reliabilityProfile": {
+          "weight": 1
+        },
+        "displayFormat": "ratio_1_over_n",
+        "denominatorInputId": "INP_NORMAL_GAMES",
+        "numeratorInputId": "INP_INITIAL_COUNT",
+        "probabilities": {
+          "SET_1": 0.0036616623947272066,
+          "SET_2": 0.003795066413662239,
+          "SET_4": 0.004351610095735422,
+          "SET_5": 0.004985044865403789,
+          "SET_6": 0.005274261603375527
+        },
+        "sourceEvidenceRefs": [
+          "SRC_KAGAMI_NANA"
+        ]
+      },
+      {
+        "featureId": "FEAT_AT_PULLBACK",
+        "name": "AT終了後引き戻し",
+        "adoptionCategory": "INCLUDE_PRIMARY",
+        "calculationRole": "PROBABILITY",
+        "probabilityEngineUsage": true,
+        "modelType": "binomial",
+        "minimumSample": 1,
+        "sampleRecommendation": 15,
+        "reliabilityProfile": {
+          "weight": 1
+        },
+        "displayFormat": "percentage",
+        "denominatorInputId": "INP_AT_END_COUNT",
+        "numeratorInputId": "INP_AT_PULLBACK_COUNT",
+        "probabilities": {
+          "SET_1": 0.102,
+          "SET_2": 0.102,
+          "SET_4": 0.152,
+          "SET_5": 0.199,
+          "SET_6": 0.262
+        },
+        "sourceEvidenceRefs": [
+          "SRC_KAGAMI_NANA",
+          "SRC_KAGAMI_1GEKI"
+        ]
+      },
+      {
+        "featureId": "FEAT_TRUNK_LFW",
+        "name": "トランク成立時 ラブフォースワン当選",
+        "adoptionCategory": "INCLUDE_SUPPORT",
+        "calculationRole": "PROBABILITY",
+        "probabilityEngineUsage": true,
+        "modelType": "binomial",
+        "minimumSample": 1,
+        "sampleRecommendation": 30,
+        "reliabilityProfile": {
+          "weight": 1
+        },
+        "displayFormat": "percentage",
+        "denominatorInputId": "INP_TRUNK_COUNT",
+        "numeratorInputId": "INP_TRUNK_LFW_COUNT",
+        "probabilities": {
+          "SET_1": 0.168,
+          "SET_2": 0.176,
+          "SET_4": 0.211,
+          "SET_5": 0.238,
+          "SET_6": 0.25
+        },
+        "sourceEvidenceRefs": [
+          "SRC_KAGAMI_NANA",
+          "SRC_KAGAMI_1GEKI"
+        ]
+      }
+    ]
+  },
+  "evidence": {
+    "version": "1.0.0",
+    "evidences": [
+      {
+        "id": "EVI_BONUS_AT_END_SCREEN_TRAINING",
+        "name": "ボーナス・AT終了画面 トレーニング",
+        "displayName": "ボーナス・AT終了画面 トレーニング",
+        "inputId": "INP_EVI_BONUS_AT_END_SCREEN",
+        "triggerValue": "TRAINING",
+        "confirmedSettings": [
+          "SET_2",
+          "SET_4",
+          "SET_5",
+          "SET_6"
+        ],
+        "deniedSettings": [
+          "SET_1"
+        ],
+        "hasImage": false,
+        "type": "SETTING_CONFIRMATION",
+        "sourceEvidenceRefs": [
+          "RE_END_2PLUS"
+        ]
+      },
+      {
+        "id": "EVI_BONUS_AT_END_SCREEN_BLACKJACK",
+        "name": "ボーナス・AT終了画面 ブラックジャック",
+        "displayName": "ボーナス・AT終了画面 ブラックジャック",
+        "inputId": "INP_EVI_BONUS_AT_END_SCREEN",
+        "triggerValue": "BLACKJACK",
+        "confirmedSettings": [
+          "SET_4",
+          "SET_5",
+          "SET_6"
+        ],
+        "deniedSettings": [
+          "SET_1",
+          "SET_2"
+        ],
+        "hasImage": false,
+        "type": "SETTING_CONFIRMATION",
+        "sourceEvidenceRefs": [
+          "RE_END_4PLUS"
+        ]
+      },
+      {
+        "id": "EVI_BONUS_AT_END_SCREEN_ELITE_GUYS",
+        "name": "ボーナス・AT終了画面 エリートguys",
+        "displayName": "ボーナス・AT終了画面 エリートguys",
+        "inputId": "INP_EVI_BONUS_AT_END_SCREEN",
+        "triggerValue": "ELITE_GUYS",
+        "confirmedSettings": [
+          "SET_5",
+          "SET_6"
+        ],
+        "deniedSettings": [
+          "SET_1",
+          "SET_2",
+          "SET_4"
+        ],
+        "hasImage": false,
+        "type": "SETTING_CONFIRMATION",
+        "sourceEvidenceRefs": [
+          "RE_END_5PLUS"
+        ]
+      },
+      {
+        "id": "EVI_BONUS_AT_END_SCREEN_PAJAMA_PARTY",
+        "name": "ボーナス・AT終了画面 パジャマパーティー",
+        "displayName": "ボーナス・AT終了画面 パジャマパーティー",
+        "inputId": "INP_EVI_BONUS_AT_END_SCREEN",
+        "triggerValue": "PAJAMA_PARTY",
+        "confirmedSettings": [
+          "SET_6"
+        ],
+        "deniedSettings": [
+          "SET_1",
+          "SET_2",
+          "SET_4",
+          "SET_5"
+        ],
+        "hasImage": false,
+        "type": "SETTING_CONFIRMATION",
+        "sourceEvidenceRefs": [
+          "RE_END_6"
+        ]
+      }
+    ],
+    "sources": [
+      {
+        "id": "SRC_KAGAMI_DMM",
+        "classification": "ANALYSIS",
+        "pageName": "HEY！エリートサラリーマン鏡 機種情報",
+        "url": "https://p-town.dmm.com/machines/4254/shops?area=11208&prefecture=11",
+        "checkedAt": "2026-08-18"
+      },
+      {
+        "id": "SRC_KAGAMI_DAITO",
+        "classification": "OFFICIAL",
+        "pageName": "2022年発表機種 HEY！エリートサラリーマン鏡",
+        "url": "https://www.daito.co.jp/hanbai/products/pinballslot.html",
+        "checkedAt": "2026-08-18"
+      },
+      {
+        "id": "SRC_KAGAMI_NANA",
+        "classification": "ANALYSIS",
+        "pageName": "HEY！エリートサラリーマン鏡 設定差・設定示唆",
+        "url": "https://nana-press.com/kaiseki/machine/465/12693/",
+        "checkedAt": "2026-08-18"
+      },
+      {
+        "id": "SRC_KAGAMI_1GEKI",
+        "classification": "ANALYSIS",
+        "pageName": "鏡（スマスロ）設定差・設定判別要素まとめ",
+        "url": "https://1geki.jp/slot/s_hey_eskagami/0/",
+        "checkedAt": "2026-08-18"
+      },
+      {
+        "id": "SRC_KAGAMI_CITY_APP",
+        "classification": "ANALYSIS",
+        "pageName": "HEY！エリートサラリーマン鏡 大都吉宗CITYシミュレーター",
+        "url": "https://play.google.com/store/apps/details?id=com.paondp.dyctek",
+        "checkedAt": "2026-08-18"
+      }
+    ]
+  },
+  "ui": {
+    "sections": [
+      {
+        "id": "UID_主要入力_1",
+        "title": "主要入力",
+        "displayOrder": 1,
+        "collapsible": false,
+        "defaultExpanded": true,
+        "items": [
+          {
+            "type": "input",
+            "inputId": "INP_NORMAL_GAMES",
+            "label": "通常ゲーム数",
+            "widget": "number",
+            "gridSpan": 12
+          },
+          {
+            "type": "input",
+            "inputId": "INP_INITIAL_COUNT",
+            "label": "初当り回数",
+            "widget": "counter",
+            "gridSpan": 12
+          }
+        ]
+      },
+      {
+        "id": "UID_ラブフォースワン_2",
+        "title": "ラブフォースワン",
+        "displayOrder": 2,
+        "collapsible": false,
+        "defaultExpanded": true,
+        "items": [
+          {
+            "type": "input",
+            "inputId": "INP_TRUNK_COUNT",
+            "label": "抽選対象トランク成立回数",
+            "widget": "counter",
+            "gridSpan": 12,
+            "config": {
+              "compact": true
+            }
+          },
+          {
+            "type": "input",
+            "inputId": "INP_TRUNK_LFW_COUNT",
+            "label": "トランク契機ラブフォースワン当選回数",
+            "widget": "counter",
+            "gridSpan": 6,
+            "config": {
+              "compact": true
+            }
+          }
+        ]
+      },
+      {
+        "id": "UID_AT引き戻し_3",
+        "title": "AT引き戻し",
+        "displayOrder": 3,
+        "collapsible": false,
+        "defaultExpanded": true,
+        "items": [
+          {
+            "type": "input",
+            "inputId": "INP_AT_END_COUNT",
+            "label": "AT終了回数",
+            "widget": "counter",
+            "gridSpan": 6,
+            "config": {
+              "compact": true
+            }
+          },
+          {
+            "type": "input",
+            "inputId": "INP_AT_PULLBACK_COUNT",
+            "label": "AT引き戻し回数",
+            "widget": "counter",
+            "gridSpan": 6,
+            "config": {
+              "compact": true
+            }
+          }
+        ]
+      },
+      {
+        "id": "UID_設定確定_否定情報_4",
+        "title": "設定確定・否定情報",
+        "displayOrder": 4,
+        "collapsible": false,
+        "defaultExpanded": true,
+        "items": [
+          {
+            "type": "input",
+            "inputId": "INP_EVI_BONUS_AT_END_SCREEN",
+            "label": "ボーナス・AT終了画面",
+            "widget": "select",
+            "gridSpan": 12
+          }
+        ]
+      }
+    ],
+    "canonicalUiDesign": {
+      "schemaVersion": "ui-design-data-v1",
+      "materialized": true
+    }
+  },
+  "selectionSummary": {
+    "schemaVersion": "selection-summary-v1",
+    "evaluatedCount": 5,
+    "selectedCount": 3,
+    "rejectedCount": 2,
+    "selected": [
+      {
+        "featureId": "FEAT_INITIAL_COMBINED",
+        "name": "初当り合算",
+        "reason": "初当り合算の設定差が大きく観測しやすい。",
+        "requiredTrials": {
+          "value": 12436,
+          "unit": "通常ゲーム"
+        }
+      },
+      {
+        "featureId": "FEAT_AT_PULLBACK",
+        "name": "AT終了後引き戻し",
+        "reason": "AT終了回数を分母、引き戻し回数を分子として直接観測でき、公開値で設定1/2と設定6の引き戻し確率に大きな設定差があるため主軸採用。",
+        "requiredTrials": {
+          "value": 41,
+          "unit": "AT終了後引き戻し抽選"
+        }
+      },
+      {
+        "featureId": "FEAT_TRUNK_LFW",
+        "name": "トランク成立時 ラブフォースワン当選",
+        "reason": "通常時の対象トランク成立回数を分母、ラブフォースワン当選回数を分子として直接観測でき、公開当選率に16.8%～25.0%の設定差があるため補助採用。",
+        "requiredTrials": {
+          "value": 179,
+          "unit": "抽選対象の通常時トランク"
+        }
+      }
+    ],
+    "rejected": [
+      {
+        "featureId": "FEAT_COMMON_BELL",
+        "name": "共通ベル",
+        "reason": "共通ベルは設定差が小さく、終日規模の試行でも他の採用Featureに比べて追加の識別情報量が限定的なため、現構成では独立Featureとして採用しません。",
+        "requiredTrials": {
+          "value": 63787,
+          "unit": "全遊技ゲーム"
+        }
+      },
+      {
+        "featureId": "FEAT_AT_DIRECT",
+        "name": "AT直撃",
+        "reason": "設定差は大きいが低頻度。",
+        "requiredTrials": {
+          "value": 15268,
+          "unit": "通常ゲーム"
+        }
+      }
+    ]
+  },
+  "reliability": {},
+  "metadata": {
+    "machineId": "L_HEY_ELITE_SALARYMAN_KAGAMI_PA4",
+    "displayName": "HEY！エリートサラリーマン鏡",
+    "settings": [
+      "SET_1",
+      "SET_2",
+      "SET_4",
+      "SET_5",
+      "SET_6"
+    ],
+    "uiDesignMaterialized": true,
+    "uiDesignSchemaVersion": "ui-design-data-v1",
+    "uiDesignStatus": "PASS"
+  },
+  "validation": {
+    "cases": []
+  },
+  "statistics": {}
+}
