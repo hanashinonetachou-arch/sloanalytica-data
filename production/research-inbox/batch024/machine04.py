@@ -30,4 +30,11 @@ for f in m.findings:
   f.pop('dependencyReview',None);f.update(dependencyGroupId='nyanko_end_observation',dependencyKind='DEPENDENT',dependencyReason='同じ終了時の画面とトロフィーには組合せ条件があり、独立に重ねず明示優先順の一方だけ使用します。',dependencyFallbackRank=1 if f['label']=='AT終了画面の公表区分' else 2)
 legacy={f['featureId']:'同じAT初当りを正式再評価。CZとの重複は代表選択。' for f in m.baseline['features']['features']}
 legacy.update({e['id']:'元の確定条件を同じ終了機会の画面・トロフィーに保持。数値カテゴリのゼロ確率または複合条件と重複しない。' for e in m.baseline['evidence']['evidences']})
+mirror=m.evidence('玉ちゃんトロフィーの確定条件',{'銅':'設定2以上','銀':'設定4以上','金':'設定4以上','ゼブラ':'設定5以上','虹':'設定6','出現なし':'基本'},'数値入力と同じトロフィーのカウンターを使い、画面を優先して確率計算を抑制した場合にも設定確定条件を保持します。追加の確率として掛けません。',s=2)
+for cat in m.findings[-1]['semanticCategories']:cat['linkedFindingId']='B024-M04-026'
+for f in m.findings:
+ if f['findingId']=='B024-M04-026':
+  f['mirrorsEvidenceFindingId']=mirror
+  f['categoricalEvidenceReconciliation']={'type':'SINGLE_CANONICAL_CATEGORY_INPUT','evidenceFindingId':mirror,'runtimeLinkContract':'EXPLICIT_CATEGORY_LINK_V1'}
+m.notes.append('実装検証で、画面優先時にも旧候補のトロフィー確定条件を保持するため同一カウンターへの明示リンクを追加。数値、採否、優先順位は変更しない。')
 m.finish(legacy)

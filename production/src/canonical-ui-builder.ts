@@ -11,6 +11,19 @@ const normalizeUserText=(v:any)=>String(v??'').replace(/\\n/g,'\n').replace(/\/n
 const clean=(v:any)=>normalizeUserText(v).trim().replace(/[。．]+$/,'').trim();
 const sentences=(v:any)=>normalizeUserText(v).split(/[。．]|\n+/).map(clean).filter(Boolean);
 const knownTrialLabel=(u:any)=>{
+ const scopedLabels:Record<string,string>={
+ BIG_PREP_BEFORE_BELL_MISS_GAME_TRIAL:'ベルこぼし前RTゲーム数',REG_PREP_BEFORE_BELL_MISS_GAME_TRIAL:'ベルこぼし前RTゲーム数',ART_GAME_TRIAL:'対象AT・ARTゲーム数',NADE_START_TRIAL:'開始回数',
+ WATERMELON_TRIAL:'スイカ成立回数',CHERRY_TRIAL:'チェリー成立回数',SILENT_MODE_TRIAL:'サイレントモード突入回数',
+ AT_START_STAGE_TRIAL:'AT開始回数',ED_WEAK_ROLE_TRIAL:'弱レア役成立回数',ED_STRONG_ROLE_TRIAL:'強レア役成立回数',AT_END_SCREEN_TRIAL:'AT終了回数',AT_END_TAMA_TROPHY_TRIAL:'AT終了回数',
+ DAITOMO_TRACKED_GAME_TRIAL:'対象ゲーム数',ORDINARY_DIRECT_BONUS_TRIAL:'対象の直撃ボーナス回数',CZ_SUCCESS_BONUS_TRIAL:'CZ成功のボーナス回数',
+ NORMAL_KIRITO_SWIPE_TRIAL:'対象スワイプ回数',SAO_EP_END_SWIPE_TRIAL:'終了時スワイプ回数',ALO_END_SWIPE_TRIAL:'終了時スワイプ回数',ED_WEAK_ROLE_SWIPE_TRIAL:'弱レア役時スワイプ回数',ED_STRONG_ROLE_SWIPE_TRIAL:'強レア役時スワイプ回数',HOME_MODE_ENTRY_TRIAL:'おうちモード移行回数',ELIGIBLE_AT_SET_SCREEN_TRIAL:'対象のAT突入画面回数',
+ DEKA_CHANCE_OPPONENT_TRIAL:'デカチャンス突入回数',WEAK_SUIKA_IDENTIFIABLE_GAME_TRIAL:'判別可能なゲーム数',STRONG_SUIKA_A_IDENTIFIABLE_GAME_TRIAL:'判別可能なゲーム数',CHERRY_A_IDENTIFIABLE_GAME_TRIAL:'判別可能なゲーム数',REACH_ROLE_IDENTIFIABLE_GAME_TRIAL:'判別可能なゲーム数',BB_END_NON_1G_VOICE_TRIAL:'1G連非当選の終了回数',BB_END_1G_VOICE_TRIAL:'1G連当選の終了回数',
+ NORMAL_MISS_TRIAL:'通常時ハズレ回数',DCA_FAILED_AT_END_TRIAL:'DCA非当選のAT終了回数',NORMAL_TRUNK_TRIAL:'通常時トランク成立回数',VVV_CZ_END_SCREEN_TRIAL:'CZ終了回数',VVV_BONUS_END_SCREEN_TRIAL:'ボーナス終了回数'
+ };
+ if(scopedLabels[u])return scopedLabels[u];
+ if(/^AT_END_TROPHY_BAND_[1-9]_TRIAL$/.test(String(u)))return '対象G数帯のAT終了回数';
+ if(/^BOSS_END_SCREEN_PHASE_[1-3]_TRIAL$/.test(String(u)))return '対象条件のボスバトル終了回数';
+ if(/^KAGAMI_END_SCREEN_TABLE_[1-4]_TRIAL$/.test(String(u)))return '対象条件の終了画面回数';
  const batch008Labels:Record<string,string>={
   KAIJI_CZ_COMPLETED_TRIAL:'CZ完走回数',KAIJI_RED7_FIRST_BAR_TRIAL:'対象の初回BAR回数',
   LOVEJOU_CZ_START_TRIAL:'CZ開始回数',GOBLIN_REPLAY3_TRIAL:'リプレイ3連回数',
