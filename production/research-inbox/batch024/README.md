@@ -68,3 +68,14 @@ Manifest v8.5、既存の正式builder・validator・orchestratorを使用。候
 - ラブキューレ2の表示修正に伴う5旧版、ヴェンデッタ・SAOの表示修正の旧版、にゃんこの10旧版も保存。再確認は `verify-runtime-checkpoint.ts` を使用する。最初の `verify-checkpoint.py` と `verification.json` は候補契約時点の履歴である。
 
 実機QAは未実施。APKの最終状態、配信・アプリのコミットと検証結果は最新のwork-checkpointに記録する。ユーザーの明示確認までQA完了として扱わない。
+
+
+## QA用APKの準備完了（2026-10-20）
+
+- 正式110工程 COMPLETE、実機QA10機種 HUMAN_REQUIRED。実機QA完了は0。
+- 固定署名APKビルド `39347472429` 成功。アプリ `73bd2ac826ae8e4dd66556cb9ef07eaacc5fd49e`、versionCode `2002920124`。
+- APK内の `qa/batch024.json`、CIの検証記録、対象10機種の配信コミット・パッケージハッシュの一致を確認。前回承認済みビルドと署名証明書SHA-256が一致。
+- 公開Pagesの10パッケージも照合済み。統合Actionsは配信側3回とAPK側1回、計4回のみ。
+- QA用ファイル、機種一覧、更新手順と確認事項は `device-qa/handoff.json`（バッチ直下）と `work-checkpoint.json` に記録した。
+
+この状態は実機QAの準備完了を意味する。ユーザーの明示確認まで実機QA承認を記録しない。
