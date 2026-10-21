@@ -3,7 +3,18 @@
   "provenance": {
     "manifestVersion": "8.4-DRAFT",
     "generationPath": "V8_RESEARCH_PIPELINE",
-    "researchOrigin": "ZERO_BASE_PUBLIC_RESEARCH"
+    "researchOrigin": "ZERO_BASE_PUBLIC_RESEARCH",
+    "targetedRevision": {
+      "id": "revue-ui-20261021",
+      "date": "2026-10-21",
+      "scope": [
+        "SPECIFIC_BONUS_BREAKDOWN_UI",
+        "AT_NORMAL_VOICE_CONDITIONAL_DISTRIBUTION",
+        "LEGACY_UI_REPAIR"
+      ],
+      "preservesLegacyResearchOrigin": true,
+      "officialSource": "https://oizumi-slot-dev-room.com/qa/396"
+    }
   },
   "linkedPlay": {
     "status": "UNRESOLVED",
@@ -13,7 +24,7 @@
   "machine": {
     "schemaVersion": "2.0.0",
     "machineId": "S_REVUE_STARLIGHT_CX",
-    "machineDataVersion": "0.3.11",
+    "machineDataVersion": "0.3.12",
     "displayName": "L少女☆歌劇 レヴュースタァライト -The SLOT-",
     "modelName": "L少女☆歌劇 レヴュースタァライト -The SLOT-",
     "settings": [
@@ -117,13 +128,24 @@
       },
       {
         "id": "INP_SPECIFIC_BONUS_5_AGG",
-        "name": "特定ボーナス",
+        "name": "特定ボーナス合算（自動計算）",
         "type": "counter",
         "category": "NUMERIC",
         "unit": "回",
         "inferenceRole": "LIVE_CONDITIONAL",
         "defaultValue": null,
-        "minimum": 0
+        "minimum": 0,
+        "derivedCalculation": "sum",
+        "derivedFromInputIds": [
+          "INP_SPECIFIC_BONUS_KIRAMEKI_REG",
+          "INP_SPECIFIC_BONUS_CHANCE_REG",
+          "INP_SPECIFIC_BONUS_WATERMELON_REG",
+          "INP_SPECIFIC_BONUS_WATERMELON_BLUE_BIG",
+          "INP_SPECIFIC_BONUS_CHANCE_BLUE_BIG",
+          "INP_SPECIFIC_BONUS_UNKNOWN"
+        ],
+        "inputVisible": false,
+        "legacyAggregateTargetInputId": "INP_SPECIFIC_BONUS_UNKNOWN"
       },
       {
         "id": "INP_BONUS_BROADER_GAMES",
@@ -224,7 +246,8 @@
             "multiplier": -1,
             "observedZeroAllowed": true
           }
-        ]
+        ],
+        "requireAllTermsObserved": true
       },
       {
         "id": "INP_V8_EV_BONUS_END_2PLUS",
@@ -325,6 +348,96 @@
         "inferenceRole": "INCLUDE_SUPPORT",
         "defaultValue": null,
         "minimum": 0
+      },
+      {
+        "id": "INP_SPECIFIC_BONUS_KIRAMEKI_REG",
+        "name": "キラめき目＋REG",
+        "type": "counter",
+        "category": "NUMERIC",
+        "unit": "回",
+        "inferenceRole": "LIVE_CONDITIONAL",
+        "defaultValue": null,
+        "minimum": 0
+      },
+      {
+        "id": "INP_SPECIFIC_BONUS_CHANCE_REG",
+        "name": "チャンス目＋REG",
+        "type": "counter",
+        "category": "NUMERIC",
+        "unit": "回",
+        "inferenceRole": "LIVE_CONDITIONAL",
+        "defaultValue": null,
+        "minimum": 0
+      },
+      {
+        "id": "INP_SPECIFIC_BONUS_WATERMELON_REG",
+        "name": "スイカ＋REG",
+        "type": "counter",
+        "category": "NUMERIC",
+        "unit": "回",
+        "inferenceRole": "LIVE_CONDITIONAL",
+        "defaultValue": null,
+        "minimum": 0
+      },
+      {
+        "id": "INP_SPECIFIC_BONUS_WATERMELON_BLUE_BIG",
+        "name": "スイカ＋青7BIG",
+        "type": "counter",
+        "category": "NUMERIC",
+        "unit": "回",
+        "inferenceRole": "LIVE_CONDITIONAL",
+        "defaultValue": null,
+        "minimum": 0
+      },
+      {
+        "id": "INP_SPECIFIC_BONUS_CHANCE_BLUE_BIG",
+        "name": "チャンス目＋青7BIG",
+        "type": "counter",
+        "category": "NUMERIC",
+        "unit": "回",
+        "inferenceRole": "LIVE_CONDITIONAL",
+        "defaultValue": null,
+        "minimum": 0
+      },
+      {
+        "id": "INP_SPECIFIC_BONUS_UNKNOWN",
+        "name": "契機不明",
+        "type": "counter",
+        "category": "NUMERIC",
+        "unit": "回",
+        "inferenceRole": "LIVE_CONDITIONAL",
+        "defaultValue": null,
+        "minimum": 0
+      },
+      {
+        "id": "INP_AT_END_VOICE_DEFAULT",
+        "name": "デフォルト",
+        "type": "counter",
+        "category": "NUMERIC",
+        "unit": "回",
+        "inferenceRole": "LIVE_CONDITIONAL",
+        "defaultValue": null,
+        "minimum": 0
+      },
+      {
+        "id": "INP_AT_END_VOICE_HIGH_WEAK",
+        "name": "高設定示唆・弱",
+        "type": "counter",
+        "category": "NUMERIC",
+        "unit": "回",
+        "inferenceRole": "LIVE_CONDITIONAL",
+        "defaultValue": null,
+        "minimum": 0
+      },
+      {
+        "id": "INP_AT_END_VOICE_HIGH_STRONG",
+        "name": "高設定示唆・強",
+        "type": "counter",
+        "category": "NUMERIC",
+        "unit": "回",
+        "inferenceRole": "LIVE_CONDITIONAL",
+        "defaultValue": null,
+        "minimum": 0
       }
     ]
   },
@@ -403,15 +516,18 @@
       },
       {
         "featureId": "FEAT_AT_END_KIRIN_HINT_MULTINOMIAL",
-        "eligibility": "INELIGIBLE",
+        "eligibility": "ELIGIBLE",
         "evaluation": {
-          "metric": "UNAVAILABLE",
-          "value": null,
-          "status": "UNRESOLVED"
+          "metric": "PER_ELIGIBLE_TRIAL_POWER",
+          "value": 3.5446200114091386,
+          "status": "FORMAL",
+          "userLabel": "1回の判別力"
         },
         "runtimePolicyBinding": {
-          "mode": "NOT_THRESHOLD_CONTROLLED"
-        }
+          "mode": "THRESHOLD",
+          "metric": "PER_ELIGIBLE_TRIAL_POWER"
+        },
+        "importance": "補助"
       }
     ],
     "runtimeProjection": [
@@ -497,17 +613,20 @@
       },
       {
         "featureId": "FEAT_AT_END_KIRIN_HINT_MULTINOMIAL",
-        "eligibility": "INELIGIBLE",
+        "eligibility": "ELIGIBLE",
         "evaluation": {
-          "metric": "UNAVAILABLE",
-          "value": null,
-          "status": "UNRESOLVED"
+          "metric": "PER_ELIGIBLE_TRIAL_POWER",
+          "value": 3.5446200114091386,
+          "status": "FORMAL",
+          "userLabel": "1回の判別力"
         },
         "runtimePolicyBinding": {
-          "mode": "NOT_THRESHOLD_CONTROLLED"
+          "mode": "THRESHOLD",
+          "metric": "PER_ELIGIBLE_TRIAL_POWER"
         },
-        "runtimeStatus": "INACTIVE",
-        "runtimeReason": "INELIGIBLE"
+        "runtimeStatus": "ACTIVE",
+        "runtimeReason": "THRESHOLD_MET",
+        "importance": "補助"
       }
     ],
     "features": [
@@ -741,6 +860,65 @@
         },
         "sourceResearchFeatureIds": [
           "RF_BIG_END_HINT_DISTRIBUTION"
+        ]
+      },
+      {
+        "featureId": "FEAT_AT_END_KIRIN_HINT_MULTINOMIAL",
+        "name": "AT終了時の通常ボイス",
+        "adoptionCategory": "LIVE_CONDITIONAL",
+        "calculationRole": "PROBABILITY",
+        "probabilityEngineUsage": true,
+        "modelType": "multinomial",
+        "numeratorInputId": "INP_AT_END_VOICE_DEFAULT",
+        "categoryInputIds": [
+          "INP_AT_END_VOICE_HIGH_WEAK",
+          "INP_AT_END_VOICE_HIGH_STRONG"
+        ],
+        "denominatorInputId": "INP_AT_END_VOICE_DEFAULT",
+        "denominatorRule": "SUM_CATEGORY_COUNTS",
+        "probabilities": {},
+        "categoryLabels": [
+          "DEFAULT",
+          "HIGH_WEAK",
+          "HIGH_STRONG"
+        ],
+        "categoryProbabilities": {
+          "SET_1": [
+            0.9210789210789212,
+            0.06293706293706294,
+            0.015984015984015987
+          ],
+          "SET_2": [
+            0.921,
+            0.063,
+            0.016000000000000004
+          ],
+          "SET_4": [
+            0.8471528471528472,
+            0.1018981018981019,
+            0.05094905094905095
+          ],
+          "SET_5": [
+            0.81,
+            0.127,
+            0.063
+          ],
+          "SET_6": [
+            0.8079999999999999,
+            0.128,
+            0.064
+          ]
+        },
+        "categoryConditioning": {
+          "excludedCategories": [
+            "EV_KIRIN_2PLUS",
+            "EV_KIRIN_4PLUS",
+            "EV_KIRIN_6"
+          ],
+          "normalization": "SOURCE_CONDITIONAL_NO_RENORMALIZATION"
+        },
+        "sourceResearchFeatureIds": [
+          "RF_AT_END_KIRIN_HINT_DISTRIBUTION"
         ]
       }
     ]
@@ -996,7 +1174,13 @@
                 "engineBinding": {
                   "inputId": "INP_NORMAL_GAMES"
                 },
-                "featureId": "FEAT_CZ_INITIAL"
+                "featureId": "FEAT_CZ_INITIAL",
+                "inputId": "INP_NORMAL_GAMES",
+                "playDataBinding": {
+                  "source": "PLAY_NORMAL_GAME_DELTA",
+                  "mode": "AUTO_EXACT",
+                  "exactness": "EXACT_ONLY"
+                }
               },
               {
                 "id": "INP_CZ",
@@ -1006,7 +1190,8 @@
                 "engineBinding": {
                   "inputId": "INP_CZ"
                 },
-                "featureId": "FEAT_CZ_INITIAL"
+                "featureId": "FEAT_CZ_INITIAL",
+                "directNumeric": true
               },
               {
                 "id": "INP_AT_INITIAL",
@@ -1016,7 +1201,8 @@
                 "engineBinding": {
                   "inputId": "INP_AT_INITIAL"
                 },
-                "featureId": "FEAT_AT_INITIAL"
+                "featureId": "FEAT_AT_INITIAL",
+                "directNumeric": true
               }
             ]
           }
@@ -1051,7 +1237,6 @@
                 {
                   "id": "INP_CZ_LED_WHITE",
                   "label": "白",
-                  "meaning": "確認したLED色：白",
                   "engineBinding": {
                     "inputId": "INP_CZ_LED_WHITE"
                   },
@@ -1060,7 +1245,6 @@
                 {
                   "id": "INP_CZ_LED_BLUE",
                   "label": "青",
-                  "meaning": "確認したLED色：青",
                   "engineBinding": {
                     "inputId": "INP_CZ_LED_BLUE"
                   },
@@ -1069,7 +1253,6 @@
                 {
                   "id": "INP_CZ_LED_GREEN",
                   "label": "緑",
-                  "meaning": "確認したLED色：緑",
                   "engineBinding": {
                     "inputId": "INP_CZ_LED_GREEN"
                   },
@@ -1078,7 +1261,6 @@
                 {
                   "id": "INP_CZ_LED_RED",
                   "label": "赤",
-                  "meaning": "確認したLED色：赤",
                   "engineBinding": {
                     "inputId": "INP_CZ_LED_RED"
                   },
@@ -1087,7 +1269,6 @@
                 {
                   "id": "INP_CZ_LED_PURPLE",
                   "label": "紫",
-                  "meaning": "確認したLED色：紫",
                   "engineBinding": {
                     "inputId": "INP_CZ_LED_PURPLE"
                   },
@@ -1101,11 +1282,9 @@
       {
         "id": "SEC_SPECIFIC_BONUS",
         "title": "特定ボーナス",
-        "description": "対象5契機のボーナスを記録します。通常時の再生産モードは突入回数から20Gずつ自動除外し、CZ中・AT中は実際に再生産モードだったゲーム数を記録します。必要な記録がすべて揃った場合だけ設定推測に使用します。",
+        "description": "5契機と契機不明の回数を自動合算し、設定推測には合算だけを使用します。\n※同じボーナスは、いずれか1つの欄に入力してください。\n※「契機不明」は、対象5契機の特定ボーナスと確認できたものの、どの契機か区別できない場合に入力してください。対象かどうか不明なボーナスは含めません。\n※前兆中にレア役を引き、成立したボーナスとの組み合わせが特定ボーナスの対象外になる可能性がある場合は、合算対象から除外し、「契機不明」にも入力しないでください。",
         "descriptionPresentation": {
-          "collapsible": true,
-          "label": "説明",
-          "defaultExpanded": false
+          "collapsible": false
         },
         "importance": "補助",
         "collapsible": true,
@@ -1116,24 +1295,82 @@
         "items": [
           {
             "id": "GRP_SPECIFIC_BONUS",
-            "inferenceReadiness": {
-              "readyLabel": "推測に使用できます",
-              "incompleteLabel": "追加のゲーム数記録が必要です"
-            },
             "inputs": [
               {
-                "id": "INP_SPECIFIC_BONUS_5_AGG",
-                "label": "特定ボーナス",
+                "id": "INP_SPECIFIC_BONUS_KIRAMEKI_REG",
+                "inputId": "INP_SPECIFIC_BONUS_KIRAMEKI_REG",
+                "label": "キラめき目＋REG",
                 "input": "counter",
                 "gridSpan": 6,
+                "directNumeric": true,
                 "engineBinding": {
-                  "inputId": "INP_SPECIFIC_BONUS_5_AGG"
+                  "inputId": "INP_SPECIFIC_BONUS_KIRAMEKI_REG"
+                },
+                "featureId": "FEAT_SPECIFIC_BONUS_5_AGG"
+              },
+              {
+                "id": "INP_SPECIFIC_BONUS_CHANCE_REG",
+                "inputId": "INP_SPECIFIC_BONUS_CHANCE_REG",
+                "label": "チャンス目＋REG",
+                "input": "counter",
+                "gridSpan": 6,
+                "directNumeric": true,
+                "engineBinding": {
+                  "inputId": "INP_SPECIFIC_BONUS_CHANCE_REG"
+                },
+                "featureId": "FEAT_SPECIFIC_BONUS_5_AGG"
+              },
+              {
+                "id": "INP_SPECIFIC_BONUS_WATERMELON_REG",
+                "inputId": "INP_SPECIFIC_BONUS_WATERMELON_REG",
+                "label": "スイカ＋REG",
+                "input": "counter",
+                "gridSpan": 6,
+                "directNumeric": true,
+                "engineBinding": {
+                  "inputId": "INP_SPECIFIC_BONUS_WATERMELON_REG"
+                },
+                "featureId": "FEAT_SPECIFIC_BONUS_5_AGG"
+              },
+              {
+                "id": "INP_SPECIFIC_BONUS_WATERMELON_BLUE_BIG",
+                "inputId": "INP_SPECIFIC_BONUS_WATERMELON_BLUE_BIG",
+                "label": "スイカ＋青7BIG",
+                "input": "counter",
+                "gridSpan": 6,
+                "directNumeric": true,
+                "engineBinding": {
+                  "inputId": "INP_SPECIFIC_BONUS_WATERMELON_BLUE_BIG"
+                },
+                "featureId": "FEAT_SPECIFIC_BONUS_5_AGG"
+              },
+              {
+                "id": "INP_SPECIFIC_BONUS_CHANCE_BLUE_BIG",
+                "inputId": "INP_SPECIFIC_BONUS_CHANCE_BLUE_BIG",
+                "label": "チャンス目＋青7BIG",
+                "input": "counter",
+                "gridSpan": 6,
+                "directNumeric": true,
+                "engineBinding": {
+                  "inputId": "INP_SPECIFIC_BONUS_CHANCE_BLUE_BIG"
+                },
+                "featureId": "FEAT_SPECIFIC_BONUS_5_AGG"
+              },
+              {
+                "id": "INP_SPECIFIC_BONUS_UNKNOWN",
+                "inputId": "INP_SPECIFIC_BONUS_UNKNOWN",
+                "label": "契機不明",
+                "input": "counter",
+                "gridSpan": 6,
+                "directNumeric": true,
+                "engineBinding": {
+                  "inputId": "INP_SPECIFIC_BONUS_UNKNOWN"
                 },
                 "featureId": "FEAT_SPECIFIC_BONUS_5_AGG"
               },
               {
                 "id": "INP_BONUS_BROADER_GAMES",
-                "label": "対象ゲーム数",
+                "label": "通常・CZ・ATの対象G",
                 "input": "denominator",
                 "gridSpan": 12,
                 "directNumeric": true,
@@ -1142,7 +1379,14 @@
                 "engineBinding": {
                   "inputId": "INP_BONUS_BROADER_GAMES"
                 },
-                "featureId": "FEAT_SPECIFIC_BONUS_5_AGG"
+                "featureId": "FEAT_SPECIFIC_BONUS_5_AGG",
+                "quickAdd": [
+                  50
+                ],
+                "description": "同じ記録区間の通常・CZ・AT中のGを入力します。ボーナス中や、再生産モード以外の赤BIGを保持した区間は含めません。再生産モードの除外分は下の3欄から自動で差し引きます。",
+                "descriptionPresentation": {
+                  "collapsible": false
+                }
               },
               {
                 "id": "INP_NORMAL_REPRODUCTION_ENTRIES",
@@ -1154,7 +1398,12 @@
                 "engineBinding": {
                   "inputId": "INP_NORMAL_REPRODUCTION_ENTRIES"
                 },
-                "featureId": "FEAT_SPECIFIC_BONUS_5_AGG"
+                "featureId": "FEAT_SPECIFIC_BONUS_5_AGG",
+                "directNumeric": true,
+                "description": "1回につき20Gを自動で除外します。突入なしを確認できた場合は0を入力してください。",
+                "descriptionPresentation": {
+                  "collapsible": false
+                }
               },
               {
                 "id": "INP_CZ_REPRODUCTION_GAMES",
@@ -1168,7 +1417,11 @@
                 "engineBinding": {
                   "inputId": "INP_CZ_REPRODUCTION_GAMES"
                 },
-                "featureId": "FEAT_SPECIFIC_BONUS_5_AGG"
+                "featureId": "FEAT_SPECIFIC_BONUS_5_AGG",
+                "quickAdd": [
+                  50
+                ],
+                "description": "該当区間なしを確認できた場合は0を入力してください。"
               },
               {
                 "id": "INP_AT_REPRODUCTION_GAMES",
@@ -1182,7 +1435,36 @@
                 "engineBinding": {
                   "inputId": "INP_AT_REPRODUCTION_GAMES"
                 },
-                "featureId": "FEAT_SPECIFIC_BONUS_5_AGG"
+                "featureId": "FEAT_SPECIFIC_BONUS_5_AGG",
+                "quickAdd": [
+                  50
+                ],
+                "description": "該当区間なしを確認できた場合は0を入力してください。"
+              },
+              {
+                "id": "SPECIFIC_BONUS_STATUS",
+                "derivedObservationStatus": {
+                  "aggregateInputId": "INP_SPECIFIC_BONUS_5_AGG",
+                  "effectiveTrialInputId": "DERIVED_FEAT_SPECIFIC_BONUS_5_AGG_ELIGIBLE_TRIALS",
+                  "requiredInputs": [
+                    {
+                      "id": "INP_BONUS_BROADER_GAMES",
+                      "label": "通常・CZ・ATの対象G"
+                    },
+                    {
+                      "id": "INP_NORMAL_REPRODUCTION_ENTRIES",
+                      "label": "通常時の再生産モード突入"
+                    },
+                    {
+                      "id": "INP_CZ_REPRODUCTION_GAMES",
+                      "label": "CZ中の再生産モードG"
+                    },
+                    {
+                      "id": "INP_AT_REPRODUCTION_GAMES",
+                      "label": "AT中の再生産モードG"
+                    }
+                  ]
+                }
               }
             ]
           }
@@ -1191,7 +1473,7 @@
       {
         "id": "SEC_BONUS_END",
         "title": "BIG終了時の設定示唆",
-        "description": "BIG終了時に確認した内容を記録します。青・赤・金・虹が出なかった機会は、デフォルト・高設定示唆（弱）・高設定示唆（強）のいずれか1つを加算して設定推測に使用します。青・赤・金・虹は設定下限・確定Evidenceとして別に記録します。",
+        "description": "確定エフェクトが出なかった終了画面を、3種類のうち1つに記録します。3種類の確認回数から設定推測に使用します。",
         "descriptionPresentation": {
           "collapsible": true,
           "label": "説明",
@@ -1254,7 +1536,30 @@
             },
             "categoryCoverage": "EXHAUSTIVE",
             "totalOpportunities": "SUM_CATEGORY_COUNTS"
-          },
+          }
+        ],
+        "tabGroup": {
+          "id": "REVUE_BIG_END",
+          "title": "BIG終了時の設定示唆",
+          "label": "通常の示唆"
+        }
+      },
+      {
+        "id": "SEC_BONUS_END_EXACT",
+        "title": "BIG終了時の設定示唆",
+        "description": "青・赤・金・虹のエフェクトを記録します。同じ終了画面を「通常の示唆」にも入力しないでください。",
+        "descriptionPresentation": {
+          "collapsible": true,
+          "label": "説明",
+          "defaultExpanded": false
+        },
+        "importance": "補助",
+        "collapsible": true,
+        "defaultExpanded": false,
+        "headerToggle": true,
+        "genericEditButton": false,
+        "groups": [],
+        "items": [
           {
             "id": "EVI_BONUS_END",
             "observationMultiplicity": "REPEATED_CATEGORICAL_EVENT",
@@ -1309,12 +1614,80 @@
               "absenceIsNegativeEvidence": false
             }
           }
-        ]
+        ],
+        "tabGroup": {
+          "id": "REVUE_BIG_END",
+          "title": "BIG終了時の設定示唆",
+          "label": "確定エフェクト"
+        }
+      },
+      {
+        "id": "SEC_KIRIN_VOICE_NORMAL",
+        "title": "AT終了時の設定示唆",
+        "description": "AT終了時に「アタシ再生産」役物をタッチし、確定ボイス以外を3種類のうち1つに記録します。確認できなかった回は加算しません。",
+        "descriptionPresentation": {
+          "collapsible": true,
+          "label": "説明",
+          "defaultExpanded": false
+        },
+        "collapsible": true,
+        "defaultExpanded": false,
+        "headerToggle": true,
+        "genericEditButton": false,
+        "groups": [],
+        "items": [
+          {
+            "id": "OBS_AT_END_NORMAL_VOICE",
+            "observationMultiplicity": "REPEATED_CATEGORICAL_EVENT",
+            "interaction": {
+              "type": "CATEGORY_COUNTERS",
+              "categoryCoverage": "EXHAUSTIVE",
+              "totalOpportunities": "SUM_CATEGORY_COUNTS",
+              "preservePriorObservations": true,
+              "showAccumulatedCounts": true,
+              "categories": [
+                {
+                  "id": "INP_AT_END_VOICE_DEFAULT",
+                  "label": "デフォルト",
+                  "meaning": "オーディション終了します。",
+                  "engineBinding": {
+                    "inputId": "INP_AT_END_VOICE_DEFAULT"
+                  },
+                  "featureId": "FEAT_AT_END_KIRIN_HINT_MULTINOMIAL"
+                },
+                {
+                  "id": "INP_AT_END_VOICE_HIGH_WEAK",
+                  "label": "高設定示唆・弱",
+                  "meaning": "そこまでキラめきが残るなんて予測できませんでした。",
+                  "engineBinding": {
+                    "inputId": "INP_AT_END_VOICE_HIGH_WEAK"
+                  },
+                  "featureId": "FEAT_AT_END_KIRIN_HINT_MULTINOMIAL"
+                },
+                {
+                  "id": "INP_AT_END_VOICE_HIGH_STRONG",
+                  "label": "高設定示唆・強",
+                  "meaning": "トップスタァになったあなたが望む「運命の舞台」とは？",
+                  "engineBinding": {
+                    "inputId": "INP_AT_END_VOICE_HIGH_STRONG"
+                  },
+                  "featureId": "FEAT_AT_END_KIRIN_HINT_MULTINOMIAL"
+                }
+              ]
+            }
+          }
+        ],
+        "tabGroup": {
+          "id": "REVUE_AT_END",
+          "title": "AT終了時の設定示唆",
+          "label": "通常の示唆"
+        },
+        "importance": "補助"
       },
       {
         "id": "SEC_KIRIN_VOICE",
         "title": "AT終了時の設定示唆",
-        "description": "AT終了時に筐体上部の「アタシ再生産」役物をタッチし、確認した設定確定・下限情報を記録します。",
+        "description": "AT終了時に「アタシ再生産」役物をタッチして確認した確定ボイスを記録します。同じボイスを「通常の示唆」にも入力しないでください。",
         "descriptionPresentation": {
           "collapsible": true,
           "label": "説明",
@@ -1371,7 +1744,12 @@
               "absenceIsNegativeEvidence": false
             }
           }
-        ]
+        ],
+        "tabGroup": {
+          "id": "REVUE_AT_END",
+          "title": "AT終了時の設定示唆",
+          "label": "確定ボイス"
+        }
       },
       {
         "id": "SEC_PAYOUT",
@@ -1477,7 +1855,7 @@
     "selection": {
       "schemaVersion": "selection-data-v1",
       "machineId": "S_REVUE_STARLIGHT_CX",
-      "machineDataVersion": "0.3.11",
+      "machineDataVersion": "0.3.12",
       "provenance": {
         "manifestVersion": "8.4-DRAFT",
         "generationPath": "V8_RESEARCH_PIPELINE",
@@ -1486,178 +1864,396 @@
       "inputs": [
         {
           "id": "INP_NORMAL_GAMES",
-          "name": "通常ゲーム数",
-          "type": "integer",
-          "category": "通常時",
-          "unit": "G",
-          "displayOrder": 10,
-          "inferenceRole": "INCLUDE_PRIMARY"
+          "name": "INP_NORMAL_GAMES",
+          "type": "counter",
+          "category": "NUMERIC",
+          "unit": "",
+          "inferenceRole": "INCLUDE_PRIMARY",
+          "defaultValue": null,
+          "minimum": 0
         },
         {
           "id": "INP_CZ",
           "name": "CZ初当り",
           "type": "counter",
-          "category": "通常時",
+          "category": "NUMERIC",
           "unit": "回",
-          "displayOrder": 20,
-          "inferenceRole": "INCLUDE_PRIMARY"
+          "inferenceRole": "INCLUDE_PRIMARY",
+          "defaultValue": null,
+          "minimum": 0
         },
         {
           "id": "INP_AT_INITIAL",
           "name": "AT初当り",
           "type": "counter",
-          "category": "通常時",
+          "category": "NUMERIC",
           "unit": "回",
-          "displayOrder": 30,
-          "inferenceRole": "INCLUDE_PRIMARY"
+          "inferenceRole": "INCLUDE_PRIMARY",
+          "defaultValue": null,
+          "minimum": 0
         },
         {
           "id": "INP_CZ_LED_WHITE",
           "name": "白",
           "type": "counter",
-          "category": "CZ・フェイク前兆終了時LED",
+          "category": "NUMERIC",
           "unit": "回",
-          "displayOrder": 40,
-          "inferenceRole": "INCLUDE_PRIMARY"
+          "inferenceRole": "INCLUDE_PRIMARY",
+          "defaultValue": null,
+          "minimum": 0
         },
         {
           "id": "INP_CZ_LED_BLUE",
           "name": "青",
           "type": "counter",
-          "category": "CZ・フェイク前兆終了時LED",
+          "category": "NUMERIC",
           "unit": "回",
-          "displayOrder": 41,
-          "inferenceRole": "INCLUDE_PRIMARY"
+          "inferenceRole": "INCLUDE_PRIMARY",
+          "defaultValue": null,
+          "minimum": 0
         },
         {
           "id": "INP_CZ_LED_GREEN",
           "name": "緑",
           "type": "counter",
-          "category": "CZ・フェイク前兆終了時LED",
+          "category": "NUMERIC",
           "unit": "回",
-          "displayOrder": 42,
-          "inferenceRole": "INCLUDE_PRIMARY"
+          "inferenceRole": "INCLUDE_PRIMARY",
+          "defaultValue": null,
+          "minimum": 0
         },
         {
           "id": "INP_CZ_LED_RED",
           "name": "赤",
           "type": "counter",
-          "category": "CZ・フェイク前兆終了時LED",
+          "category": "NUMERIC",
           "unit": "回",
-          "displayOrder": 43,
-          "inferenceRole": "INCLUDE_PRIMARY"
+          "inferenceRole": "INCLUDE_PRIMARY",
+          "defaultValue": null,
+          "minimum": 0
         },
         {
           "id": "INP_CZ_LED_PURPLE",
           "name": "紫",
           "type": "counter",
-          "category": "CZ・フェイク前兆終了時LED",
+          "category": "NUMERIC",
           "unit": "回",
-          "displayOrder": 44,
-          "inferenceRole": "INCLUDE_PRIMARY"
+          "inferenceRole": "INCLUDE_PRIMARY",
+          "defaultValue": null,
+          "minimum": 0
         },
         {
           "id": "INP_SPECIFIC_BONUS_5_AGG",
-          "name": "特定ボーナス",
+          "name": "特定ボーナス合算（自動計算）",
           "type": "counter",
-          "category": "特定ボーナス",
+          "category": "NUMERIC",
           "unit": "回",
-          "displayOrder": 50,
-          "inferenceRole": "LIVE_CONDITIONAL"
+          "inferenceRole": "LIVE_CONDITIONAL",
+          "defaultValue": null,
+          "minimum": 0,
+          "derivedCalculation": "sum",
+          "derivedFromInputIds": [
+            "INP_SPECIFIC_BONUS_KIRAMEKI_REG",
+            "INP_SPECIFIC_BONUS_CHANCE_REG",
+            "INP_SPECIFIC_BONUS_WATERMELON_REG",
+            "INP_SPECIFIC_BONUS_WATERMELON_BLUE_BIG",
+            "INP_SPECIFIC_BONUS_CHANCE_BLUE_BIG",
+            "INP_SPECIFIC_BONUS_UNKNOWN"
+          ],
+          "inputVisible": false,
+          "legacyAggregateTargetInputId": "INP_SPECIFIC_BONUS_UNKNOWN"
         },
         {
           "id": "INP_BONUS_BROADER_GAMES",
           "name": "対象ゲーム数",
           "type": "integer",
-          "category": "特定ボーナス",
+          "category": "NUMERIC",
           "unit": "G",
-          "displayOrder": 51,
-          "inferenceRole": "EXPOSURE_RECONSTRUCTION"
+          "inferenceRole": "LIVE_CONDITIONAL",
+          "defaultValue": null,
+          "minimum": 0
         },
         {
           "id": "INP_NORMAL_REPRODUCTION_ENTRIES",
-          "name": "AT中の再生産モードG",
-          "type": "integer",
-          "category": "特定ボーナス",
+          "name": "通常時の再生産モード突入",
+          "type": "counter",
+          "category": "NUMERIC",
           "unit": "回",
-          "displayOrder": 52,
-          "inferenceRole": "EXPOSURE_RECONSTRUCTION",
-          "label": "通常時の再生産モード突入",
-          "role": "EXPOSURE_RECONSTRUCTION"
+          "inferenceRole": "LIVE_CONDITIONAL",
+          "defaultValue": null,
+          "minimum": 0
         },
         {
           "id": "INP_CZ_REPRODUCTION_GAMES",
-          "name": "AT中の再生産モードG",
+          "name": "CZ中の再生産モードG",
           "type": "integer",
-          "category": "特定ボーナス",
+          "category": "NUMERIC",
           "unit": "G",
-          "displayOrder": 52,
-          "inferenceRole": "EXPOSURE_RECONSTRUCTION",
-          "label": "CZ中の再生産モードG",
-          "role": "EXPOSURE_RECONSTRUCTION"
+          "inferenceRole": "LIVE_CONDITIONAL",
+          "defaultValue": null,
+          "minimum": 0
         },
         {
           "id": "INP_AT_REPRODUCTION_GAMES",
           "name": "AT中の再生産モードG",
           "type": "integer",
-          "category": "特定ボーナス",
+          "category": "NUMERIC",
           "unit": "G",
-          "displayOrder": 52,
-          "inferenceRole": "EXPOSURE_RECONSTRUCTION"
+          "inferenceRole": "LIVE_CONDITIONAL",
+          "defaultValue": null,
+          "minimum": 0
         },
         {
           "id": "INP_BIG_END_DEFAULT",
           "name": "デフォルト",
           "type": "counter",
-          "category": "BIG終了画面",
+          "category": "NUMERIC",
           "unit": "回",
-          "displayOrder": 60,
-          "inferenceRole": "LIVE_CONDITIONAL"
+          "inferenceRole": "LIVE_CONDITIONAL",
+          "defaultValue": null,
+          "minimum": 0
         },
         {
           "id": "INP_BIG_END_HIGH_WEAK",
           "name": "高設定示唆・弱",
           "type": "counter",
-          "category": "BIG終了画面",
+          "category": "NUMERIC",
           "unit": "回",
-          "displayOrder": 61,
-          "inferenceRole": "LIVE_CONDITIONAL"
+          "inferenceRole": "LIVE_CONDITIONAL",
+          "defaultValue": null,
+          "minimum": 0
         },
         {
           "id": "INP_BIG_END_HIGH_STRONG",
           "name": "高設定示唆・強",
           "type": "counter",
-          "category": "BIG終了画面",
+          "category": "NUMERIC",
           "unit": "回",
-          "displayOrder": 62,
-          "inferenceRole": "LIVE_CONDITIONAL"
+          "inferenceRole": "LIVE_CONDITIONAL",
+          "defaultValue": null,
+          "minimum": 0
+        },
+        {
+          "id": "DERIVED_FEAT_SPECIFIC_BONUS_5_AGG_ELIGIBLE_TRIALS",
+          "name": "特定ボーナス 実効抽選G",
+          "type": "integer",
+          "category": "DERIVED",
+          "inferenceRole": "LIVE_CONDITIONAL",
+          "defaultValue": null,
+          "minimum": 0,
+          "derivedCalculation": "linear_combination",
+          "derivedTerms": [
+            {
+              "inputId": "INP_BONUS_BROADER_GAMES",
+              "multiplier": 1
+            },
+            {
+              "inputId": "INP_NORMAL_REPRODUCTION_ENTRIES",
+              "multiplier": -20,
+              "observedZeroAllowed": true
+            },
+            {
+              "inputId": "INP_CZ_REPRODUCTION_GAMES",
+              "multiplier": -1,
+              "observedZeroAllowed": true
+            },
+            {
+              "inputId": "INP_AT_REPRODUCTION_GAMES",
+              "multiplier": -1,
+              "observedZeroAllowed": true
+            }
+          ],
+          "requireAllTermsObserved": true
+        },
+        {
+          "id": "INP_V8_EV_BONUS_END_2PLUS",
+          "name": "ボーナス終了画面: 青エフェクト",
+          "type": "counter",
+          "category": "EVIDENCE",
+          "unit": "回",
+          "inferenceRole": "INCLUDE_SUPPORT",
+          "defaultValue": null,
+          "minimum": 0
+        },
+        {
+          "id": "INP_V8_EV_BONUS_END_4PLUS",
+          "name": "ボーナス終了画面: 赤エフェクト",
+          "type": "counter",
+          "category": "EVIDENCE",
+          "unit": "回",
+          "inferenceRole": "INCLUDE_SUPPORT",
+          "defaultValue": null,
+          "minimum": 0
+        },
+        {
+          "id": "INP_V8_EV_BONUS_END_5PLUS",
+          "name": "ボーナス終了画面: 金エフェクト",
+          "type": "counter",
+          "category": "EVIDENCE",
+          "unit": "回",
+          "inferenceRole": "INCLUDE_SUPPORT",
+          "defaultValue": null,
+          "minimum": 0
+        },
+        {
+          "id": "INP_V8_EV_BONUS_END_6",
+          "name": "ボーナス終了画面: 虹エフェクト",
+          "type": "counter",
+          "category": "EVIDENCE",
+          "unit": "回",
+          "inferenceRole": "INCLUDE_SUPPORT",
+          "defaultValue": null,
+          "minimum": 0
+        },
+        {
+          "id": "INP_V8_EV_PAYOUT_99",
+          "name": "AT中の獲得枚数表示: 99枚OVER",
+          "type": "counter",
+          "category": "EVIDENCE",
+          "unit": "回",
+          "inferenceRole": "INCLUDE_SUPPORT",
+          "defaultValue": null,
+          "minimum": 0
+        },
+        {
+          "id": "INP_V8_EV_PAYOUT_456",
+          "name": "AT中の獲得枚数表示: 456枚OVER",
+          "type": "counter",
+          "category": "EVIDENCE",
+          "unit": "回",
+          "inferenceRole": "INCLUDE_SUPPORT",
+          "defaultValue": null,
+          "minimum": 0
+        },
+        {
+          "id": "INP_V8_EV_PAYOUT_666",
+          "name": "AT中の獲得枚数表示: 666枚OVER",
+          "type": "counter",
+          "category": "EVIDENCE",
+          "unit": "回",
+          "inferenceRole": "INCLUDE_SUPPORT",
+          "defaultValue": null,
+          "minimum": 0
+        },
+        {
+          "id": "INP_V8_EV_KIRIN_2PLUS",
+          "name": "AT終了時のキリンボイス: 眩しい舞台が",
+          "type": "counter",
+          "category": "EVIDENCE",
+          "unit": "回",
+          "inferenceRole": "INCLUDE_SUPPORT",
+          "defaultValue": null,
+          "minimum": 0
+        },
+        {
+          "id": "INP_V8_EV_KIRIN_4PLUS",
+          "name": "AT終了時のキリンボイス: 運命の二人",
+          "type": "counter",
+          "category": "EVIDENCE",
+          "unit": "回",
+          "inferenceRole": "INCLUDE_SUPPORT",
+          "defaultValue": null,
+          "minimum": 0
+        },
+        {
+          "id": "INP_V8_EV_KIRIN_6",
+          "name": "AT終了時のキリンボイス: これこそ私が観たかった舞台",
+          "type": "counter",
+          "category": "EVIDENCE",
+          "unit": "回",
+          "inferenceRole": "INCLUDE_SUPPORT",
+          "defaultValue": null,
+          "minimum": 0
+        },
+        {
+          "id": "INP_SPECIFIC_BONUS_KIRAMEKI_REG",
+          "name": "キラめき目＋REG",
+          "type": "counter",
+          "category": "NUMERIC",
+          "unit": "回",
+          "inferenceRole": "LIVE_CONDITIONAL",
+          "defaultValue": null,
+          "minimum": 0
+        },
+        {
+          "id": "INP_SPECIFIC_BONUS_CHANCE_REG",
+          "name": "チャンス目＋REG",
+          "type": "counter",
+          "category": "NUMERIC",
+          "unit": "回",
+          "inferenceRole": "LIVE_CONDITIONAL",
+          "defaultValue": null,
+          "minimum": 0
+        },
+        {
+          "id": "INP_SPECIFIC_BONUS_WATERMELON_REG",
+          "name": "スイカ＋REG",
+          "type": "counter",
+          "category": "NUMERIC",
+          "unit": "回",
+          "inferenceRole": "LIVE_CONDITIONAL",
+          "defaultValue": null,
+          "minimum": 0
+        },
+        {
+          "id": "INP_SPECIFIC_BONUS_WATERMELON_BLUE_BIG",
+          "name": "スイカ＋青7BIG",
+          "type": "counter",
+          "category": "NUMERIC",
+          "unit": "回",
+          "inferenceRole": "LIVE_CONDITIONAL",
+          "defaultValue": null,
+          "minimum": 0
+        },
+        {
+          "id": "INP_SPECIFIC_BONUS_CHANCE_BLUE_BIG",
+          "name": "チャンス目＋青7BIG",
+          "type": "counter",
+          "category": "NUMERIC",
+          "unit": "回",
+          "inferenceRole": "LIVE_CONDITIONAL",
+          "defaultValue": null,
+          "minimum": 0
+        },
+        {
+          "id": "INP_SPECIFIC_BONUS_UNKNOWN",
+          "name": "契機不明",
+          "type": "counter",
+          "category": "NUMERIC",
+          "unit": "回",
+          "inferenceRole": "LIVE_CONDITIONAL",
+          "defaultValue": null,
+          "minimum": 0
         },
         {
           "id": "INP_AT_END_VOICE_DEFAULT",
           "name": "デフォルト",
           "type": "counter",
-          "category": "AT終了時キリンボイス",
+          "category": "NUMERIC",
           "unit": "回",
-          "displayOrder": 70,
-          "inferenceRole": "LIVE_CONDITIONAL"
+          "inferenceRole": "LIVE_CONDITIONAL",
+          "defaultValue": null,
+          "minimum": 0
         },
         {
           "id": "INP_AT_END_VOICE_HIGH_WEAK",
           "name": "高設定示唆・弱",
           "type": "counter",
-          "category": "AT終了時キリンボイス",
+          "category": "NUMERIC",
           "unit": "回",
-          "displayOrder": 71,
-          "inferenceRole": "LIVE_CONDITIONAL"
+          "inferenceRole": "LIVE_CONDITIONAL",
+          "defaultValue": null,
+          "minimum": 0
         },
         {
           "id": "INP_AT_END_VOICE_HIGH_STRONG",
           "name": "高設定示唆・強",
           "type": "counter",
-          "category": "AT終了時キリンボイス",
+          "category": "NUMERIC",
           "unit": "回",
-          "displayOrder": 72,
-          "inferenceRole": "LIVE_CONDITIONAL"
+          "inferenceRole": "LIVE_CONDITIONAL",
+          "defaultValue": null,
+          "minimum": 0
         }
       ],
       "features": [
@@ -1761,7 +2357,7 @@
             "assumption": "再生産モード0回は有効抽選G数の最大ケースであり、保証下限ではない。",
             "exposureQuality": "UPPER_BOUND_ONLY"
           },
-          "IGPerEligibleTrial": 0.000032126724434907526,
+          "IGPerEligibleTrial": 3.2126724434907526e-05,
           "perEligibleTrialPower": 0.006425344886981505,
           "maximumBenchmarkIG": 0.19574050071518195,
           "maximumSelectionScore": 39.14810014303639,
@@ -1807,25 +2403,28 @@
         {
           "researchFeatureId": "RF_AT_END_KIRIN_HINT_DISTRIBUTION",
           "featureId": "FEAT_AT_END_KIRIN_HINT_MULTINOMIAL",
-          "adoptionCategory": "BLOCKED_UNRESOLVED",
+          "adoptionCategory": "LIVE_CONDITIONAL",
           "model": "multinomial",
-          "trialUniverse": "AT_END_TOUCH_VOICE_TRIAL",
+          "trialUniverse": "AT_END_NON_CONFIRMATION_VOICE_TRIAL",
           "benchmarkScoreStatus": "BLOCKED_UNRESOLVED_EXPOSURE",
-          "liveInferenceGate": "BLOCKED_INCOMPLETE_CATEGORICAL_MASS",
-          "userReason": "弱/強の設定差は公開されているが、公開3カテゴリの合計が100%未満で設定2以上・4以上・6ボイスの発生率が別掲されていないため、現時点では完全なカテゴリ尤度を構成しない。",
+          "liveInferenceGate": "EXACT_CATEGORY_COUNTS_COMPLETE",
+          "userReason": "通常3種の全設定の公開振り分けを、確定ボイスを除く確認回数だけに使用する。",
           "dependencyContract": {
             "relationship": "COLOCATED_WITH_AT_END_VOICE_EVIDENCE",
-            "combinationPolicy": "DO_NOT_FABRICATE_RESIDUAL_OR_NORMALIZE"
+            "combinationPolicy": "CONDITIONAL_NUMERIC_EXCLUDES_CONFIRMATION_EVIDENCE_TRIALS"
           },
-          "eligibility": "INELIGIBLE",
+          "eligibility": "ELIGIBLE",
           "evaluation": {
-            "metric": "UNAVAILABLE",
-            "value": null,
-            "status": "UNRESOLVED"
+            "metric": "PER_ELIGIBLE_TRIAL_POWER",
+            "value": 3.5446200114091386,
+            "status": "FORMAL",
+            "userLabel": "1回の判別力"
           },
           "runtimePolicyBinding": {
-            "mode": "NOT_THRESHOLD_CONTROLLED"
-          }
+            "mode": "THRESHOLD",
+            "metric": "PER_ELIGIBLE_TRIAL_POWER"
+          },
+          "importance": "補助"
         }
       ],
       "evidenceDecisions": [
@@ -1980,13 +2579,49 @@
           "featureId": "FEAT_SPECIFIC_BONUS_5_AGG",
           "context": "特定ボーナス",
           "runtimeRole": "LIVE_CONDITIONAL_EXACT_EXPOSURE",
-          "how": "特定5種合算回数と、正確な抽選対象ゲーム数を復元するため不可避な項目だけを記録",
+          "how": "5契機と対象と確認できた契機不明を自動合算する。※同じボーナスは、いずれか1つの欄に入力してください。\n※「契機不明」は、対象5契機の特定ボーナスと確認できたものの、どの契機か区別できない場合に入力してください。対象かどうか不明なボーナスは含めません。\n※前兆中にレア役を引き、成立したボーナスとの組み合わせが特定ボーナスの対象外になる可能性がある場合は、合算対象から除外し、「契機不明」にも入力しないでください。",
           "inputs": [
             {
-              "id": "INP_SPECIFIC_BONUS_5_AGG",
-              "label": "特定ボーナス",
+              "id": "INP_SPECIFIC_BONUS_KIRAMEKI_REG",
+              "label": "キラめき目＋REG",
               "type": "counter",
-              "unit": "回"
+              "unit": "回",
+              "directNumeric": true
+            },
+            {
+              "id": "INP_SPECIFIC_BONUS_CHANCE_REG",
+              "label": "チャンス目＋REG",
+              "type": "counter",
+              "unit": "回",
+              "directNumeric": true
+            },
+            {
+              "id": "INP_SPECIFIC_BONUS_WATERMELON_REG",
+              "label": "スイカ＋REG",
+              "type": "counter",
+              "unit": "回",
+              "directNumeric": true
+            },
+            {
+              "id": "INP_SPECIFIC_BONUS_WATERMELON_BLUE_BIG",
+              "label": "スイカ＋青7BIG",
+              "type": "counter",
+              "unit": "回",
+              "directNumeric": true
+            },
+            {
+              "id": "INP_SPECIFIC_BONUS_CHANCE_BLUE_BIG",
+              "label": "チャンス目＋青7BIG",
+              "type": "counter",
+              "unit": "回",
+              "directNumeric": true
+            },
+            {
+              "id": "INP_SPECIFIC_BONUS_UNKNOWN",
+              "label": "契機不明",
+              "type": "counter",
+              "unit": "回",
+              "directNumeric": true
             },
             {
               "id": "INP_BONUS_BROADER_GAMES",
@@ -2128,7 +2763,24 @@
         "fixed-duration exclusions are derived by the app where exact",
         "BIG-end hint likelihood uses only non-confirmation BIG-end trials; blue/red/gold/rainbow remain Evidence and are excluded from the Numeric denominator"
       ],
-      "conditional": []
+      "conditional": [],
+      "revisionContracts": [
+        {
+          "featureId": "FEAT_AT_END_KIRIN_HINT_MULTINOMIAL",
+          "trialUniverse": "AT_END_NON_CONFIRMATION_VOICE_TRIAL",
+          "categoryInputIds": [
+            "INP_AT_END_VOICE_DEFAULT",
+            "INP_AT_END_VOICE_HIGH_WEAK",
+            "INP_AT_END_VOICE_HIGH_STRONG"
+          ],
+          "excludedEvidenceInputIds": [
+            "INP_V8_EV_KIRIN_2PLUS",
+            "INP_V8_EV_KIRIN_4PLUS",
+            "INP_V8_EV_KIRIN_6"
+          ],
+          "sumCategoryCounts": true
+        }
+      ]
     },
     "evidence": {
       "schemaVersion": "evidence-contract-v8-repro",
@@ -2416,7 +3068,7 @@
     "machineResearchSummary": {
       "schemaVersion": "machine-research-summary-v8-repro",
       "machineId": "S_REVUE_STARLIGHT_CX",
-      "generatedAt": "2026-09-23",
+      "generatedAt": "2026-10-21",
       "provenance": {
         "manifestVersion": "8.4-DRAFT",
         "generationPath": "V8_RESEARCH_PIPELINE",
@@ -2470,6 +3122,19 @@
             "benchmarkScoreStatus": "BLOCKED_UNRESOLVED_EXPOSURE",
             "reason": "BIG終了時の特定設定示唆エフェクトを除くデフォルト・弱・強は全設定の公開振り分けが揃う。3カテゴリを漏れなく記録した実戦では条件付き尤度として使用する。",
             "importance": "補助"
+          },
+          {
+            "featureId": "FEAT_AT_END_KIRIN_HINT_MULTINOMIAL",
+            "label": "AT終了時の通常ボイス",
+            "reason": "通常3種の全設定の公開振り分けを、確定ボイスを除く確認回数だけに使用する。",
+            "evaluation": {
+              "metric": "PER_ELIGIBLE_TRIAL_POWER",
+              "value": 3.5446200114091386,
+              "status": "FORMAL",
+              "userLabel": "1回の判別力"
+            },
+            "importance": "補助",
+            "benchmarkScoreStatus": "BLOCKED_UNRESOLVED_EXPOSURE"
           }
         ],
         "suppressed": [
@@ -2509,12 +3174,8 @@
             ]
           }
         ],
-        "suggestionOnly": [
-          "AT終了時キリンボイスの弱/強高設定示唆"
-        ],
-        "unsupportedOrUnresolved": [
-          "AT終了時キリンボイスの弱/強高設定示唆: 設定差のある公開値は確認したが、確定系ボイスを含む完全なカテゴリ確率が公開されていないためNumeric inferenceはBLOCKED_UNRESOLVED。"
-        ]
+        "suggestionOnly": [],
+        "unsupportedOrUnresolved": []
       },
       "linkedPlay": {
         "status": "UNRESOLVED",
@@ -2532,14 +3193,13 @@
         ],
         "normalInput": "通常ゲーム数 + CZ初当り + AT初当り",
         "ledInput": "白/青/緑/赤/紫を各1回加算。確認回数は自動合計。",
-        "specificBonus": "特定ボーナス回数、対象ゲーム数、通常時の再生産モード突入回数、CZ中・AT中の再生産モード実Gを入力。通常時の除外Gは1回20Gとして自動計算。",
+        "specificBonus": "5契機と対象と確認できた契機不明を入力し、自動合算のみを評価。※同じボーナスは、いずれか1つの欄に入力してください。\n※「契機不明」は、対象5契機の特定ボーナスと確認できたものの、どの契機か区別できない場合に入力してください。対象かどうか不明なボーナスは含めません。\n※前兆中にレア役を引き、成立したボーナスとの組み合わせが特定ボーナスの対象外になる可能性がある場合は、合算対象から除外し、「契機不明」にも入力しないでください。",
         "internalIdsMustNotAppear": true,
-        "bonusEndInput": "BIG終了時、確定エフェクトなしの機会はデフォルト/高設定示唆・弱/高設定示唆・強のいずれかを加算。青/赤/金/虹はEvidenceとして別記録しNumeric分母へ含めない。"
+        "bonusEndInput": "確定エフェクトが出なかった終了画面を、3種類のうち1つに記録します。3種類の確認回数から設定推測に使用します。 青・赤・金・虹のエフェクトを記録します。同じ終了画面を「通常の示唆」にも入力しないでください。"
       },
       "unresolved": [
         "linked-play official availability/mapping",
-        "specific-bonus benchmark exposure; live inference remains available when exact exposure reconstruction is complete",
-        "AT-end Kirin weak/strong numeric likelihood: incomplete categorical probability mass because hard-evidence voice occurrence rates are not published"
+        "specific-bonus benchmark exposure; live inference remains available when exact exposure reconstruction is complete"
       ],
       "contaminationBoundary": {
         "existingMachinePackageInspected": false,
@@ -2576,7 +3236,24 @@
           "CZ・フェイク前兆終了時LED"
         ],
         "note": "LEDはCZ終了分だけの保守的最低機会数を使用し、フェイク前兆終了分を推定加算していない。"
-      }
+      },
+      "notAdopted": [
+        {
+          "name": "特定ボーナス5種の個別評価",
+          "label": "特定ボーナス5種の個別評価",
+          "reason": "各契機は入力できますが、同じボーナスを二重に評価しないよう、推測には合算だけを使用します。"
+        },
+        {
+          "name": "赤BIG・青BIG・REG・ボーナス合算",
+          "label": "赤BIG・青BIG・REG・ボーナス合算",
+          "reason": "特定ボーナスの成立経路と重なるため、独立した設定推測要素としては採用していません。"
+        },
+        {
+          "name": "条件付きAT直撃",
+          "label": "条件付きAT直撃",
+          "reason": "正確な抽選対象回数を実戦で常に確認できないため、設定推測には使用していません。"
+        }
+      ]
     }
   }
 }
