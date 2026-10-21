@@ -1,0 +1,13 @@
+import fs from 'node:fs';
+import {buildEvaluation} from '../../src/evaluation-builder.ts';
+import {buildEligibility} from '../../src/eligibility-builder.ts';
+import {buildCandidateContract} from '../../src/candidate-contract-builder.ts';
+import {validateEvaluationDocument} from '../../src/evaluation-validator.ts';
+const dir=new URL('.',import.meta.url);
+const rows:any={SET_1:[92.2,6.3,1.6],SET_2:[92.1,6.3,1.6],SET_4:[84.8,10.2,5.1],SET_5:[81,12.7,6.3],SET_6:[80.8,12.8,6.4]};
+const research={batchId:'revision-revue-ui-20261021',machineId:'S_REVUE_STARLIGHT_CX',machineName:'L少女☆歌劇 レヴュースタァライト -The SLOT-',scope:'AT_END_NORMAL_VOICES_ONLY',sources:[{sourceId:'OFFICIAL_QA396',url:'https://oizumi-slot-dev-room.com/qa/396',publishedAt:'2025-10-17',retrievedAt:'2026-10-21',image:'https://oizumi-slot-dev-room.com/uploads/qa/RS/No088_1.webp'}],findings:[{findingId:'RF_AT_END_KIRIN_HINT_DISTRIBUTION',label:'AT終了時の通常ボイス',observationType:'appearance_distribution',sourceIds:['OFFICIAL_QA396'],trialUniverse:'AT_END_NON_CONFIRMATION_VOICE_TRIAL',settingDistribution:Object.fromEntries(Object.entries(rows).map(([k,v]:any)=>[k,v.map((p:number)=>p+'%').join(' / ')])),categoryModel:{residualPolicy:'SOURCE_EXHAUSTIVE'},liveObservation:{status:'EXHAUSTIVE_CATEGORICAL',reason:'確定系ボイスを除いた通常3種を漏れなく記録した回数だけを分母とする。'},dependencyReview:{status:'INDEPENDENT',reason:'AT初当り回数とは別の、AT終了時の通常ボイスを条件とした観測分布。確定系3種は通常ボイスの試行から除外し、設定制約のみを適用する。'},details:['公式表の通常3種の百分率を使用し、丸め誤差（合計100.1%）だけを正規化する。確定系ボイスの発生率や7000Gの観測回数は推定しない。']}],blockedItems:[]};
+const evaluation=buildEvaluation(research);validateEvaluationDocument(evaluation,research);
+const eligibility=buildEligibility(evaluation);if(eligibility.decisions[0].eligibility!=='ELIGIBLE')throw Error('NOT_ELIGIBLE');
+const contract=buildCandidateContract(evaluation,eligibility,{path:'evaluation.json'},{path:'eligibility.json'});if(!contract.candidates[0].runtimeInferenceAllowed)throw Error('NOT_ALLOWED');
+for(const [name,value] of Object.entries({research,evaluation,eligibility,contract,normalizedRows:Object.fromEntries(Object.entries(rows).map(([k,r]:any)=>[k,r.map((x:number)=>x/r.reduce((a:number,b:number)=>a+b,0))]))}))fs.writeFileSync(new URL(name+'.json',dir),JSON.stringify(value,null,2)+'\n');
+console.log(JSON.stringify({status:'PASS',perEligibleTrialPower:evaluation.evaluations[0].metrics.perEligibleTrialPower}));
