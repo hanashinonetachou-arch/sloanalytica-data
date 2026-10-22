@@ -23,7 +23,7 @@ export function validateRuntimeProjectionDocument(doc:any,machineData:any,policy
   const expectedUi=structuredClone(machineData.uiContract);
   expectedUi.numericSections=(expectedUi.numericSections??[]).filter((x:any)=>activeIds.has(x.sourceFindingId));
   if(expectedUi.uiPresentation)expectedUi.uiPresentation=projectOpportunityTabGroups(expectedUi.uiPresentation,expectedUi.numericSections,expectedUi.evidenceSections??[]);
-  const playRequirement=derivePlayInfoRequirement((expectedUi.numericSections??[]).map((x:any)=>String(x.trialUniverse)));
+  const playRequirement=derivePlayInfoRequirement((expectedUi.numericSections??[]).map((x:any)=>String(x.trialUniverse)),machineData.uiContract?.gameCountPolicy);
   if(expectedUi.playInfo){
     expectedUi.playInfo.mode=playRequirement.mode;
     expectedUi.playInfo.startFields=(expectedUi.playInfo.startFields??[]).filter((x:any)=>playRequirement.needsTotal?x.id==='startTotalGames':playRequirement.needsNormal?x.id==='startNormalGames':false);
@@ -58,3 +58,4 @@ export function validateRuntimeProjectionArtifacts(s:any,a:any,r:any){
   const policy=s.read(...String(ps.authoritativeOutputRef.path).slice(prefix.length).split('/'));
   return validateRuntimeProjectionDocument(doc,machineData,policy,ms.authoritativeOutputRef,ps.authoritativeOutputRef);
 }
+

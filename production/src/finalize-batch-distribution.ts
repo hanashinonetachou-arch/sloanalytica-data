@@ -28,6 +28,7 @@ for(const machineId of targets){
   x=o.transition(o.stage(batchId,machineId,'DISTRIBUTION'),'LEASED','DISPATCH',a.workId);
   x=o.transition(x,'RUNNING','WORKER_START',a.workId);
   const q=productionRequest(o,x,a,l);
+  s.write(q,'batches',batchId,'work-requests',q.workId+'.json');
   const ar=q.inputArtifacts.find((z:any)=>z.kind==='app-runtime');
   if(!ar?.path)throw new Error('APP_RUNTIME_REF_MISSING:'+machineId);
   const app=s.read<any>(...String(ar.path).replace(/^production\//,'').split('/'));
