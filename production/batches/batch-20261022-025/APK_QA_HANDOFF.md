@@ -1,48 +1,27 @@
-# Batch025 — QA用APK生成完了
+# Batch025 — Device feedback revision 2
 
-2026-10-22（日本時間）。ユーザーの明示指示で対象範囲を実装・配信・APK生成まで拡張した。
+APK: SloAnalytica-Batch025-vc2002942980.apk
 
-- Research → Candidate Contractの確定成果物を再利用。公開情報の再調査・元Researchの再生成なし。
-- Observation Evidence → Canonical UI → MachineData → Runtime Policy → Runtime Projection → App Runtime → Distributionを10機種分正式受理。Researchから配信まで110ステージの正本SHA256・上流参照を検証済み。
-- 実機QAは10機種ともHUMAN_REQUIRED。ユーザーのQA受理は記録していない。他Batchの既存QAは変更していない。
+- App: e161e1f352c4f2042550aee2bfdd04c7a1ed735e
+- Distribution: de7fa72b2c184fdab14e1514971145743c36f5f8
+- Successful workflow: 39759222247
+- Version code: 2002942980 (greater than previous 2002942338)
+- APK SHA256: b788ec88af44fa324e49d5db5993766290806258778805c2c719bd9a4e79175d
+- Same signing certificate as previous QA APK: verified.
+- Rendered UI/inference: 10 machines PASS; approved fleet: 250 PASS / 0 FAIL.
+- Production: 110 authoritative stages verified; 78 unit tests PASS.
 
-## 正本
+## Corrections
 
-- Data control: `production/v85-batch-025-contract-20261022`。今回の実装・配信スコープは `apk-scope-authorization.json`。
-- Data distribution: `prototype-multi-machine` / `1f159719387fc132ea58ba97f3c4ad3c807cf78c`。
-- App: `qa/batch025-device-qa-20261022` / `6626eb69b6bd63b070fca3c32cc918f1c6bad61d`。
-- Data PR: https://github.com/hanashinonetachou-arch/sloanalytica-data/pull/473
-- App PR: https://github.com/hanashinonetachou-arch/sloanalytica-app/pull/134
-- APK build: https://github.com/hanashinonetachou-arch/sloanalytica-app/actions/runs/39742972052
+サンダーV: BIG前半の3連V狙いで、ベルBは下段ベル、ベルCは上段ベル、中段ベルはAであることを説明へ追記。通常時のベルBとは別分類。JAC・BT中を含めない。
 
-## APK
+クレアBT・マジハロBT: 公開ボーナス確率は有効。ベル1候補の固定採用では、ベル未観測時にもボーナスを利用できなかった。既存の優先順位付きフォールバックを使い、観測済み候補のうち正式スコアを基準とする最上位の1候補を使用する。BIG/REGのみの入力でも推測でき、同じ当選経路の二重評価は行わない。公開確率・設定集合・採用閾値は変更していない。厳密なjointモデルを新設したものではない。
 
-- `SloAnalytica-Batch025-vc2002942338.apk` / 4,510,425 bytes。
-- package: `com.sloanalytica.settingtool`。
-- versionCode: `2002942338`。前回QA版 `2002932925` より新しい。
-- SHA256: `f53d74d838eaf3279313c356bd240c126e6d537b3f12c24a6eb5721a52643e5e`。
-- certificate SHA256: `1c01974fc54a2c351539147179944dbab5a5104d92b9447c36e04f50cbf45ea0`。前回Revue QA版と一致。
-- persistent file ID: `libfile_b778792adb208191be9298772add7137`。
-- APK内部の `assets/public/qa/batch025.json` を読んで、App commit・Data commit・CI run・全10機種のハッシュ・回帰250機種PASSを照合済み。
+## Recheck on device
 
-## 検証
+- サンダーVのBIG前半の説明に、ベルB/Cの停止位置と対象区間が表示される。
+- クレアBT・マジハロBTでベルを未入力にし、BIGまたはREGを入力すると推測に反映される。
+- ベルも記録すると同じ依存グループのボーナスを重複加算しない。
+- 0回と未入力を区別する。
 
-- 今回10機種: 実際のAppで描画・タブ切替・入力・設定推測・確定制約・未知確率の記録のみ経路がPASS。
-- v8.5既存機種を含む250機種の回帰: PASS、失敗0。
-- 不採用説明: 193要素を47説明枠へ整理。対象名を1件ずつ箇条書きで保持。
-- Dataの共有UI生成・App Runtime・Runtime Projection等の78回帰テスト: PASS。
-- App: TypeScript、全テスト、prototype build、Android build、固定署名・versionCode検証がPASS。
-- 配信Pages・機種同定・既存UX保護チェック: 最終Data commitですべて成功。
-- 他263機種のパッケージ・カタログ項目は変更なし。差分は今回10パッケージとカタログのみ。
-
-## 実装上の要点
-
-- 設定Vを1・2・3・4・Vのまま扱い、5/6へ置換しない。BIG・REGは排他的な1モデル、その他は内部計算。公開合算値は二重加算しない。
-- ハナビは総G入力に統一。ボーナス中・RT中の別母数と、ピース花火の1枚役回数条件は維持。
-- 条件別の画面・JAC・カットイン等はタブ統合し、観測回数を別々に保持。
-- サンダーVの保護済み着席時ゲーム数・BIG・REGのID、名称、順序、観測区間を維持。その他Gは自動計算し、不整合な内訳は推測へ使わない。
-- 形式・表示の訂正履歴は `revisions/` に保存。未公表確率、数値衝突、未確認条件は元の除外・再開条件を保持。
-
-## 再開地点
-
-次はこのAPKでの実機QA。`device-qa/handoff.json`、各DEVICE_QA stage、action-requestsを正本とする。ユーザーのQA結果を受けて必要箇所だけ修正し、正式受理する。既存Batchを再初期化・Researchを再生成しない。
+実機QAは再確認待ち。今回のフィードバックを全10機種の合格承認とは扱わない。旧QA依頼は新版へ差し替え、旧成果物・依頼・履歴を保持する。

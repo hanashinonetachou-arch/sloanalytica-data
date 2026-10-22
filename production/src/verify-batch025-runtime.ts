@@ -5,7 +5,7 @@ const stages=['RESEARCH','EVALUATION','ELIGIBILITY','CANDIDATE_CONTRACT','OBSERV
 for(const id of ids){
  for(const stage of stages){const s=read(path.join(base,'machines',id,'stages',stage+'.json'));assert.equal(s.state,'COMPLETE');const ref=s.authoritativeOutputRef;assert.equal(sha(path.resolve(root,'..',ref.path)),ref.sha256);const q=read(path.join(base,'work-requests',ref.producerWorkId+'.json'));for(const input of q.inputArtifacts)assert.equal(sha(path.resolve(root,'..',input.path)),input.sha256,'Current upstream binding: '+id+':'+stage);}
  const research=read(path.join(base,'artifacts',id,'research/result.json')),runtime=read(path.join(base,'artifacts',id,'app_runtime/result.json')).package;
- assert.deepEqual(runtime.machine.settings,research.settings.values);assert.equal(runtime.machine.machineDataVersion,'8.5.1-'+batch);
+ assert.deepEqual(runtime.machine.settings,research.settings.values);assert.equal(runtime.machine.machineDataVersion,'8.5.'+(research.packageRevision??1)+'-'+batch);
  if(!['L_BAKI_L3','L_ANOTHER_RINO_HEAVEN_CC'].includes(id))assert.equal(runtime.ui.playInfo.mode,'TOTAL_ONLY');
  assert.notEqual(read(path.join(base,'machines',id,'stages/DEVICE_QA.json')).state,'COMPLETE');
  const r=read(path.join(base,'validation/rendered-ui',id+'.json'));assert.equal(r.status,'PASS');
