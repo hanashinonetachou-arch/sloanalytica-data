@@ -207,7 +207,8 @@ const buildFeatures=(projection:any)=>{
   }
   if(f.model==='CATEGORICAL'){
    const cats=(s.inputs??[]).filter((x:any)=>x.role==='categoryCount');if(cats.length<2)throw new Error('APP_RUNTIME_FEATURE_CATEGORIES:'+f.findingId);
-   base.modelType='multinomial';base.numeratorInputId=cats[0].id;base.categoryInputIds=cats.slice(1).map((x:any)=>x.id);if(!hasManualGameResidual(f)&&['SOURCE_EXHAUSTIVE','SOURCE_EXPLICIT_OTHER'].includes(String(f.categoryModel?.residualPolicy??'')))base.denominatorRule='SUM_CATEGORY_COUNTS';
+   if(hasManualGameResidual(f))base.requiredObservedInputIds=[trial.id,...cats.filter((x:any)=>x.label!=='その他').map((x:any)=>x.id)];
+   base.modelType=f.categoryModel?.observationMode==='MARGINAL_COUNTS'?'marginal_multinomial':'multinomial';base.numeratorInputId=cats[0].id;if(base.modelType==='marginal_multinomial')base.optionalCategoryInputIds=cats.map((x:any)=>x.id);base.categoryInputIds=cats.slice(1).map((x:any)=>x.id);if(!hasManualGameResidual(f)&&['SOURCE_EXHAUSTIVE','SOURCE_EXPLICIT_OTHER'].includes(String(f.categoryModel?.residualPolicy??'')))base.denominatorRule='SUM_CATEGORY_COUNTS';
    base.categoryProbabilities=Object.fromEntries(Object.entries(f.settingDistribution??{}).map(([k,row]:any)=>[settingKey(k),categoricalProbabilityRow(row,cats.map((x:any)=>x.label),f.findingId,k)]));
    return base;
   }

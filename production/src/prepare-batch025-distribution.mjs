@@ -15,7 +15,7 @@ for(const id of ids){
  assert.equal(JSON.parse(original).machine.machineId,id);
  for(const k of ['manufacturer','introductionDate','machineType','gameType'])if(entry[k]!==undefined)pkg.machine[k]=entry[k];
  const out=Buffer.from(JSON.stringify(pkg,null,2)+'\n'),dir=path.join(proto,'machines',id);fs.mkdirSync(dir,{recursive:true});fs.writeFileSync(path.join(dir,'machine-package.json'),out);
- const capabilities=[...new Set(pkg.features.features.map(f=>f.modelType))];if(pkg.evidence.references.length)capabilities.push('evidence');
+ const capabilities=[...new Set(pkg.features.features.map(f=>f.modelType))];if(pkg.evidence.references.length)capabilities.push('evidence');if(pkg.metadata?.observationContractRevision?.version>=3)capabilities.push('observed_categories_v2');
  entry.packageUrl='https://raw.githubusercontent.com/hanashinonetachou-arch/sloanalytica-data/prototype-multi-machine/machines/'+id+'/machine-package.json';
  entry.machineDataVersion=pkg.machine.machineDataVersion;entry.sha256=sha(out);entry.packageSizeBytes=out.length;entry.requiredCapabilities=capabilities;
  entry.displayName=pkg.machine.displayName;

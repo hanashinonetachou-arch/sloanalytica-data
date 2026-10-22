@@ -13,29 +13,29 @@
       "artifactId": "canonical-ui-LB_THUNDER_V_HA",
       "kind": "canonical-ui",
       "path": "production/batches/batch-20261022-025/artifacts/LB_THUNDER_V_HA/canonical_ui/result.json",
-      "sha256": "32c218e77b4146c2901fe8cc146ddc331fb46bccc37aa8ca2ceaa3cbb96c8fef",
-      "producerWorkId": "wrk_193441ddad794646"
+      "sha256": "6f4d2fa8e2ea4007282d048166ba78a09a79968b20a2e3c10e358e07fbe9bcc1",
+      "producerWorkId": "wrk_bf6f416cd83b4176"
     },
     "candidateContract": {
       "artifactId": "candidate-contract-LB_THUNDER_V_HA",
       "kind": "candidate-contract",
       "path": "production/batches/batch-20261022-025/artifacts/LB_THUNDER_V_HA/candidate_contract/result.json",
-      "sha256": "7337f014d686aaf17fede57169ec7fba61419830404f491b0f72f4bfbcf810d1",
-      "producerWorkId": "wrk_de672ce045434b89"
+      "sha256": "74f7cf562e99032a2fd0cce7ef03051cc2cbfeaafa4e4137e2ee6860d8448aec",
+      "producerWorkId": "wrk_f20416f761794fc6"
     },
     "observationEvidence": {
       "artifactId": "observation-evidence-LB_THUNDER_V_HA",
       "kind": "observation-evidence",
       "path": "production/batches/batch-20261022-025/artifacts/LB_THUNDER_V_HA/observation_evidence/result.json",
-      "sha256": "854a7209198e485c9a9172666ca6d93b5f3521f64a8eae8bfa840cbd8a48f7fe",
-      "producerWorkId": "wrk_ea797ce20a7748b4"
+      "sha256": "c16f59d93ef084ed16cca35c70df96c5a8fd2578a99c4194041cacf7f112a7c4",
+      "producerWorkId": "wrk_f886bbfbbb6b421b"
     },
     "research": {
       "artifactId": "research-LB_THUNDER_V_HA",
       "kind": "research",
       "path": "production/batches/batch-20261022-025/artifacts/LB_THUNDER_V_HA/research/result.json",
-      "sha256": "1b7a6925eaa65d7ac3a3ff8641cb20ae92bc0c1e411a4dc8e504cd7f741e7230",
-      "producerWorkId": "wrk_fdbf589aaa5b419c"
+      "sha256": "58a0b73fcf688944c384b9eb403629eb7eb69705ac9f917ee50fee095fd5abf2",
+      "producerWorkId": "wrk_a8105ef2c3724d62"
     }
   },
   "settings": {
@@ -51,44 +51,138 @@
     "offlineCapable": true,
     "containsImages": false,
     "containsExecutableCode": false,
-    "machineDataRevision": 2
+    "machineDataRevision": 4
   },
   "features": [
     {
-      "findingId": "BELL_B",
-      "name": "ベルB",
-      "model": "BERNOULLI",
-      "trialUniverse": "TOTAL_GAME_TRIAL",
+      "findingId": "REG",
+      "name": "REG",
+      "model": "CATEGORICAL",
+      "trialUniverse": "MANUAL_NORMAL_GAME_TRIAL",
       "settingDistribution": {
-        "1": "1/52.9",
-        "2": "1/62.1",
-        "5": "1/53.9",
-        "6": "1/47.1"
+        "1": {
+          "BIG": 0.0036010082823190494,
+          "REG": 0.002304147465437788
+        },
+        "2": {
+          "BIG": 0.0036310820624546117,
+          "REG": 0.0025329280648429585
+        },
+        "5": {
+          "BIG": 0.003692762186115214,
+          "REG": 0.0028993911278631487
+        },
+        "6": {
+          "BIG": 0.0037835792659856224,
+          "REG": 0.0031887755102040813
+        }
+      },
+      "categoryModel": {
+        "residualPolicy": "IMPLICIT_RESIDUAL",
+        "observationMode": "MARGINAL_COUNTS"
       },
       "details": [
+        "ボーナス・BT・成立後を除いた対象区間だけのゲーム数と、同じ区間の回数を入力します。総Gからは自動連動しません。",
+        "通常時小役とBIG・REGは重複評価を避け、観測できた小役の共同分布を優先し、未観測ならBIG・REGへ切り替えます。",
         "総G（ボーナス・BT中を除く）。RIZIN ZONEは通常抽選の演出区間で初当りの集計に含め、雷神ループのBIG前半再開を新しい初当りとして増算しない。通常役は成立後を除いた観測区間だけ記録。"
       ],
       "runtimeInferenceAllowed": true,
       "runtimePolicyBinding": {
-        "metric": "SELECTION_SCORE",
-        "value": 117.24913080704205,
+        "metric": "PER_ELIGIBLE_TRIAL_POWER",
+        "value": 0.006280074370258737,
+        "thresholdSource": "RUNTIME_POLICY"
+      },
+      "suppressedByFeatureIds": [
+        "BELL_B"
+      ],
+      "inputIds": [
+        "REG.verifiedTrialCount",
+        "BIG.successCount",
+        "REG.successCount"
+      ],
+      "score": {
+        "label": "設定判別スコア",
+        "status": "NOT_COMPUTED",
+        "display": "算出不可",
+        "reason": "共同分布の7000Gスコアは未算出です。対象1試行の判別力で評価します。",
+        "sourceReason": "JOINT_7000G_NOT_COMPUTED"
+      },
+      "perEligibleTrialPower": {
+        "label": "1回の判別力",
+        "value": 0.006280074370258737,
+        "metric": "PER_ELIGIBLE_TRIAL_POWER",
+        "thresholdSource": "RUNTIME_POLICY"
+      }
+    },
+    {
+      "findingId": "BELL_B",
+      "name": "ベルB",
+      "model": "CATEGORICAL",
+      "trialUniverse": "MANUAL_NORMAL_GAME_TRIAL",
+      "settingDistribution": {
+        "1": {
+          "ベルA": 0.06134969325153374,
+          "ベルB": 0.01890359168241966,
+          "スイカA": 0.009233610341643583,
+          "スイカB": 0.003097893432465923,
+          "チェリーB": 0.07575757575757576
+        },
+        "2": {
+          "ベルA": 0.06329113924050632,
+          "ベルB": 0.01610305958132045,
+          "スイカA": 0.009124087591240877,
+          "スイカB": 0.0030367446097783173,
+          "チェリーB": 0.08264462809917356
+        },
+        "5": {
+          "ベルA": 0.06535947712418301,
+          "ベルB": 0.01855287569573284,
+          "スイカA": 0.010040160642570281,
+          "スイカB": 0.003372681281618887,
+          "チェリーB": 0.08
+        },
+        "6": {
+          "ベルA": 0.06756756756756756,
+          "ベルB": 0.021231422505307854,
+          "スイカA": 0.009813542688910696,
+          "スイカB": 0.0032959789057350037,
+          "チェリーB": 0.0819672131147541
+        }
+      },
+      "categoryModel": {
+        "residualPolicy": "IMPLICIT_RESIDUAL",
+        "observationMode": "MARGINAL_COUNTS"
+      },
+      "details": [
+        "ボーナス・BT・成立後を除いた対象区間だけのゲーム数と、同じ区間の回数を入力します。総Gからは自動連動しません。",
+        "通常時ベルA/Bはリール制御が異なる内部役です。単に下段揃いだけで通常時Bと判断せず、実機連動機能のベルB分類と同区間の通常Gを使用してください。BIG前半の下段ベルBとは別です。",
+        "総G（ボーナス・BT中を除く）。RIZIN ZONEは通常抽選の演出区間で初当りの集計に含め、雷神ループのBIG前半再開を新しい初当りとして増算しない。通常役は成立後を除いた観測区間だけ記録。"
+      ],
+      "runtimeInferenceAllowed": true,
+      "runtimePolicyBinding": {
+        "metric": "PER_ELIGIBLE_TRIAL_POWER",
+        "value": 0.05932734233682346,
         "thresholdSource": "RUNTIME_POLICY"
       },
       "suppressedByFeatureIds": [],
       "inputIds": [
-        "BELL_B.eligibleTrialCount",
-        "BELL_B.successCount"
+        "BELL_B.verifiedTrialCount",
+        "BELL_A.successCount",
+        "BELL_B.successCount",
+        "WATER_A.successCount",
+        "WATER_B.successCount",
+        "CHERRY_B.successCount"
       ],
       "score": {
         "label": "設定判別スコア",
-        "status": "COMPUTED",
-        "value": 117.2,
-        "precision": 1,
-        "importance": "主要"
+        "status": "NOT_COMPUTED",
+        "display": "算出不可",
+        "reason": "共同分布の7000Gスコアは未算出です。対象1試行の判別力で評価します。",
+        "sourceReason": "JOINT_7000G_NOT_COMPUTED"
       },
       "perEligibleTrialPower": {
         "label": "1回の判別力",
-        "value": 117.24913080704205,
+        "value": 0.05932734233682346,
         "metric": "PER_ELIGIBLE_TRIAL_POWER",
         "thresholdSource": "RUNTIME_POLICY"
       }
@@ -120,10 +214,13 @@
           "BIG前半15枚リーチ目": 0.0022888532845044634
         }
       },
+      "categoryModel": {
+        "residualPolicy": "IMPLICIT_RESIDUAL",
+        "observationMode": "MARGINAL_COUNTS"
+      },
       "details": [
-        "BIG前半で左リールに3連Vを狙ったとき、ベルBは下段にベルが揃う形、ベルCは上段にベルが揃う形です。中段ベルはベルAです。",
-        "BIG前半だけを数えます。通常時のベルBとは別の分類です。JAC・BT待機中や枚数調整の14枚役は含めず、判別できない場合はユニメモの記録を確認してください。",
-        "BIG前半ボーナスゲームの試行数と、3連V狙いまたは実機連動機能で特定した停止形回数。JAC・BT中を含めず、その他回数は内部算出。"
+        "BIG前半の同じ対象区間で、確認した停止形だけを記録します。未入力は未観測、0回を入力した項目だけが観測済み0回です。",
+        "左3連V狙いではベルBが下段、Cが上段、Aが中段。実機連動機能の分類を使用できます。JAC・BT待機中・判別できないGは混在させません。雷神ループ後のBIG前半は同じ抽選表です。"
       ],
       "runtimeInferenceAllowed": true,
       "runtimePolicyBinding": {
@@ -133,10 +230,54 @@
       },
       "suppressedByFeatureIds": [],
       "inputIds": [
-        "BIG_BELL_B.eligibleTrialCount",
+        "BIG_BELL_B.verifiedTrialCount",
         "BIG_BELL_B.categoryCounts.1_BIG前半ベルB",
         "BIG_BELL_B.categoryCounts.2_BIG前半ベルC",
         "BIG_BELL_B.categoryCounts.3_BIG前半15枚リーチ目"
+      ],
+      "score": {
+        "label": "設定判別スコア",
+        "status": "NOT_COMPUTED",
+        "display": "算出不可",
+        "reason": "共同分布の7000Gスコアは未算出です。対象1試行の判別力で評価します。",
+        "sourceReason": "JOINT_7000G_NOT_COMPUTED"
+      },
+      "perEligibleTrialPower": {
+        "label": "1回の判別力",
+        "value": 0.6205211547426037,
+        "metric": "PER_ELIGIBLE_TRIAL_POWER",
+        "thresholdSource": "RUNTIME_POLICY"
+      }
+    },
+    {
+      "findingId": "OVERLAP_BELL_A",
+      "name": "ベルA同時当選期待度",
+      "model": "BERNOULLI",
+      "trialUniverse": "ROLE_BELL_A",
+      "settingDistribution": {
+        "1": 0.0005,
+        "2": 0.00048,
+        "5": 0.00047,
+        "6": 0.00045
+      },
+      "details": [
+        "ボーナス・BT・成立後を除いた対象区間だけのゲーム数と、同じ区間の回数を入力します。総Gからは自動連動しません。",
+        "通常時小役とBIG・REGは重複評価を避け、観測できた小役の共同分布を優先し、未観測ならBIG・REGへ切り替えます。",
+        "フリーズやスパークチャレンジなどで当選契機を確定した役だけを母数に記録。ボーナス総数・契機内訳との重複加算をしない。"
+      ],
+      "runtimeInferenceAllowed": true,
+      "runtimePolicyBinding": {
+        "metric": "PER_ELIGIBLE_TRIAL_POWER",
+        "value": 0.00009880156195685164,
+        "thresholdSource": "RUNTIME_POLICY"
+      },
+      "suppressedByFeatureIds": [
+        "BELL_B",
+        "REG"
+      ],
+      "inputIds": [
+        "OVERLAP_BELL_A.verifiedTrialCount",
+        "OVERLAP_BELL_A.successCount"
       ],
       "score": {
         "label": "設定判別スコア",
@@ -147,7 +288,193 @@
       },
       "perEligibleTrialPower": {
         "label": "1回の判別力",
-        "value": 0.6205211547426037,
+        "value": 0.00009880156195685164,
+        "metric": "PER_ELIGIBLE_TRIAL_POWER",
+        "thresholdSource": "RUNTIME_POLICY"
+      }
+    },
+    {
+      "findingId": "OVERLAP_CHERRY_B",
+      "name": "チェリーB同時当選期待度",
+      "model": "BERNOULLI",
+      "trialUniverse": "ROLE_CHERRY_B",
+      "settingDistribution": {
+        "1": 0.0052,
+        "2": 0.005,
+        "5": 0.0055000000000000005,
+        "6": 0.0058
+      },
+      "details": [
+        "ボーナス・BT・成立後を除いた対象区間だけのゲーム数と、同じ区間の回数を入力します。総Gからは自動連動しません。",
+        "通常時小役とBIG・REGは重複評価を避け、観測できた小役の共同分布を優先し、未観測ならBIG・REGへ切り替えます。",
+        "フリーズやスパークチャレンジなどで当選契機を確定した役だけを母数に記録。ボーナス総数・契機内訳との重複加算をしない。"
+      ],
+      "runtimeInferenceAllowed": true,
+      "runtimePolicyBinding": {
+        "metric": "PER_ELIGIBLE_TRIAL_POWER",
+        "value": 0.0024727972989940783,
+        "thresholdSource": "RUNTIME_POLICY"
+      },
+      "suppressedByFeatureIds": [
+        "BELL_B",
+        "REG",
+        "OVERLAP_BELL_A"
+      ],
+      "inputIds": [
+        "OVERLAP_CHERRY_B.verifiedTrialCount",
+        "OVERLAP_CHERRY_B.successCount"
+      ],
+      "score": {
+        "label": "設定判別スコア",
+        "status": "NOT_COMPUTED",
+        "display": "算出不可",
+        "reason": "基準遊技量7000Gでの判別力を算出するための観測条件が確定していないため算出できません。",
+        "sourceReason": "基準遊技量に対応するexact exposure modelが未確立のため算出しない。"
+      },
+      "perEligibleTrialPower": {
+        "label": "1回の判別力",
+        "value": 0.0024727972989940783,
+        "metric": "PER_ELIGIBLE_TRIAL_POWER",
+        "thresholdSource": "RUNTIME_POLICY"
+      }
+    },
+    {
+      "findingId": "OVERLAP_WATER_A",
+      "name": "スイカA同時当選期待度",
+      "model": "BERNOULLI",
+      "trialUniverse": "ROLE_WATER_A",
+      "settingDistribution": {
+        "1": 0.005,
+        "2": 0.005,
+        "5": 0.0046,
+        "6": 0.004699999999999999
+      },
+      "details": [
+        "ボーナス・BT・成立後を除いた対象区間だけのゲーム数と、同じ区間の回数を入力します。総Gからは自動連動しません。",
+        "通常時小役とBIG・REGは重複評価を避け、観測できた小役の共同分布を優先し、未観測ならBIG・REGへ切り替えます。",
+        "フリーズやスパークチャレンジなどで当選契機を確定した役だけを母数に記録。ボーナス総数・契機内訳との重複加算をしない。"
+      ],
+      "runtimeInferenceAllowed": true,
+      "runtimePolicyBinding": {
+        "metric": "PER_ELIGIBLE_TRIAL_POWER",
+        "value": 0.0009593048153885841,
+        "thresholdSource": "RUNTIME_POLICY"
+      },
+      "suppressedByFeatureIds": [
+        "BELL_B",
+        "REG",
+        "OVERLAP_BELL_A",
+        "OVERLAP_CHERRY_B",
+        "OVERLAP_REPLAY"
+      ],
+      "inputIds": [
+        "OVERLAP_WATER_A.verifiedTrialCount",
+        "OVERLAP_WATER_A.successCount"
+      ],
+      "score": {
+        "label": "設定判別スコア",
+        "status": "NOT_COMPUTED",
+        "display": "算出不可",
+        "reason": "基準遊技量7000Gでの判別力を算出するための観測条件が確定していないため算出できません。",
+        "sourceReason": "基準遊技量に対応するexact exposure modelが未確立のため算出しない。"
+      },
+      "perEligibleTrialPower": {
+        "label": "1回の判別力",
+        "value": 0.0009593048153885841,
+        "metric": "PER_ELIGIBLE_TRIAL_POWER",
+        "thresholdSource": "RUNTIME_POLICY"
+      }
+    },
+    {
+      "findingId": "OVERLAP_WATER_B",
+      "name": "スイカB同時当選期待度",
+      "model": "BERNOULLI",
+      "trialUniverse": "ROLE_WATER_B",
+      "settingDistribution": {
+        "1": 0.0148,
+        "2": 0.0151,
+        "5": 0.013600000000000001,
+        "6": 0.0139
+      },
+      "details": [
+        "ボーナス・BT・成立後を除いた対象区間だけのゲーム数と、同じ区間の回数を入力します。総Gからは自動連動しません。",
+        "通常時小役とBIG・REGは重複評価を避け、観測できた小役の共同分布を優先し、未観測ならBIG・REGへ切り替えます。",
+        "フリーズやスパークチャレンジなどで当選契機を確定した役だけを母数に記録。ボーナス総数・契機内訳との重複加算をしない。"
+      ],
+      "runtimeInferenceAllowed": true,
+      "runtimePolicyBinding": {
+        "metric": "PER_ELIGIBLE_TRIAL_POWER",
+        "value": 0.0039029532856421634,
+        "thresholdSource": "RUNTIME_POLICY"
+      },
+      "suppressedByFeatureIds": [
+        "BELL_B",
+        "REG",
+        "OVERLAP_BELL_A",
+        "OVERLAP_CHERRY_B",
+        "OVERLAP_REPLAY",
+        "OVERLAP_WATER_A"
+      ],
+      "inputIds": [
+        "OVERLAP_WATER_B.verifiedTrialCount",
+        "OVERLAP_WATER_B.successCount"
+      ],
+      "score": {
+        "label": "設定判別スコア",
+        "status": "NOT_COMPUTED",
+        "display": "算出不可",
+        "reason": "基準遊技量7000Gでの判別力を算出するための観測条件が確定していないため算出できません。",
+        "sourceReason": "基準遊技量に対応するexact exposure modelが未確立のため算出しない。"
+      },
+      "perEligibleTrialPower": {
+        "label": "1回の判別力",
+        "value": 0.0039029532856421634,
+        "metric": "PER_ELIGIBLE_TRIAL_POWER",
+        "thresholdSource": "RUNTIME_POLICY"
+      }
+    },
+    {
+      "findingId": "OVERLAP_REPLAY",
+      "name": "リプレイ同時当選期待度",
+      "model": "BERNOULLI",
+      "trialUniverse": "ROLE_REPLAY",
+      "settingDistribution": {
+        "1": 0.0029,
+        "2": 0.003,
+        "5": 0.0032,
+        "6": 0.0034999999999999996
+      },
+      "details": [
+        "ボーナス・BT・成立後を除いた対象区間だけのゲーム数と、同じ区間の回数を入力します。総Gからは自動連動しません。",
+        "通常時小役とBIG・REGは重複評価を避け、観測できた小役の共同分布を優先し、未観測ならBIG・REGへ切り替えます。",
+        "フリーズやスパークチャレンジなどで当選契機を確定した役だけを母数に記録。ボーナス総数・契機内訳との重複加算をしない。"
+      ],
+      "runtimeInferenceAllowed": true,
+      "runtimePolicyBinding": {
+        "metric": "PER_ELIGIBLE_TRIAL_POWER",
+        "value": 0.002386608168606502,
+        "thresholdSource": "RUNTIME_POLICY"
+      },
+      "suppressedByFeatureIds": [
+        "BELL_B",
+        "REG",
+        "OVERLAP_BELL_A",
+        "OVERLAP_CHERRY_B"
+      ],
+      "inputIds": [
+        "OVERLAP_REPLAY.verifiedTrialCount",
+        "OVERLAP_REPLAY.successCount"
+      ],
+      "score": {
+        "label": "設定判別スコア",
+        "status": "NOT_COMPUTED",
+        "display": "算出不可",
+        "reason": "基準遊技量7000Gでの判別力を算出するための観測条件が確定していないため算出できません。",
+        "sourceReason": "基準遊技量に対応するexact exposure modelが未確立のため算出しない。"
+      },
+      "perEligibleTrialPower": {
+        "label": "1回の判別力",
+        "value": 0.002386608168606502,
         "metric": "PER_ELIGIBLE_TRIAL_POWER",
         "thresholdSource": "RUNTIME_POLICY"
       }
@@ -333,50 +660,42 @@
     {
       "findingId": "BIG",
       "label": "BIG",
-      "dependencyResolution": "RESOLVED_BY_SINGLE_MEMBER",
-      "resolvedIntoFindingId": "BELL_B",
+      "dependencyResolution": "RESOLVED_IN_JOINT_MODEL",
+      "resolvedIntoFindingId": "REG",
       "dependencyKind": "CAUSAL_PATH_OVERLAP",
-      "dependencyReason": "同じ当選経路の合算・内訳は重複するため同時加算せず、正式な評価で代表を選ぶ。"
-    },
-    {
-      "findingId": "REG",
-      "label": "REG",
-      "dependencyResolution": "RESOLVED_BY_SINGLE_MEMBER",
-      "resolvedIntoFindingId": "BELL_B",
-      "dependencyKind": "CAUSAL_PATH_OVERLAP",
-      "dependencyReason": "同じ当選経路の合算・内訳は重複するため同時加算せず、正式な評価で代表を選ぶ。"
+      "dependencyReason": "通常時初当りのBIGとREGは排他的。内訳を共同評価し、通常小役を記録している場合は重複評価を避けて代替経路とする。"
     },
     {
       "findingId": "BELL_A",
       "label": "ベルA",
-      "dependencyResolution": "RESOLVED_BY_SINGLE_MEMBER",
+      "dependencyResolution": "RESOLVED_IN_JOINT_MODEL",
       "resolvedIntoFindingId": "BELL_B",
       "dependencyKind": "CAUSAL_PATH_OVERLAP",
-      "dependencyReason": "同じ当選経路の合算・内訳は重複するため同時加算せず、正式な評価で代表を選ぶ。"
+      "dependencyReason": "同じ通常時対象Gで排他的な成立役を共同評価する。未観測の役は0回とせず残余へ周辺化する。"
     },
     {
       "findingId": "WATER_A",
       "label": "スイカA",
-      "dependencyResolution": "RESOLVED_BY_SINGLE_MEMBER",
+      "dependencyResolution": "RESOLVED_IN_JOINT_MODEL",
       "resolvedIntoFindingId": "BELL_B",
       "dependencyKind": "CAUSAL_PATH_OVERLAP",
-      "dependencyReason": "同じ当選経路の合算・内訳は重複するため同時加算せず、正式な評価で代表を選ぶ。"
+      "dependencyReason": "同じ通常時対象Gで排他的な成立役を共同評価する。未観測の役は0回とせず残余へ周辺化する。"
     },
     {
       "findingId": "WATER_B",
       "label": "スイカB",
-      "dependencyResolution": "RESOLVED_BY_SINGLE_MEMBER",
+      "dependencyResolution": "RESOLVED_IN_JOINT_MODEL",
       "resolvedIntoFindingId": "BELL_B",
       "dependencyKind": "CAUSAL_PATH_OVERLAP",
-      "dependencyReason": "同じ当選経路の合算・内訳は重複するため同時加算せず、正式な評価で代表を選ぶ。"
+      "dependencyReason": "同じ通常時対象Gで排他的な成立役を共同評価する。未観測の役は0回とせず残余へ周辺化する。"
     },
     {
       "findingId": "CHERRY_B",
       "label": "チェリーB",
-      "dependencyResolution": "RESOLVED_BY_SINGLE_MEMBER",
+      "dependencyResolution": "RESOLVED_IN_JOINT_MODEL",
       "resolvedIntoFindingId": "BELL_B",
       "dependencyKind": "CAUSAL_PATH_OVERLAP",
-      "dependencyReason": "同じ当選経路の合算・内訳は重複するため同時加算せず、正式な評価で代表を選ぶ。"
+      "dependencyReason": "同じ通常時対象Gで排他的な成立役を共同評価する。未観測の役は0回とせず残余へ周辺化する。"
     },
     {
       "findingId": "BIG_BELL_C",
@@ -393,158 +712,6 @@
       "resolvedIntoFindingId": "BIG_BELL_B",
       "dependencyKind": "CAUSAL_PATH_OVERLAP",
       "dependencyReason": "同じBIG前半ゲームで排他的な停止形。ベルA/B/Cと15枚リーチ目を同時加算しない。"
-    },
-    {
-      "findingId": "OVERLAP_BELL_A",
-      "label": "ベルA同時当選期待度",
-      "dependencyResolution": "RESOLVED_BY_SINGLE_MEMBER",
-      "resolvedIntoFindingId": "BELL_B",
-      "dependencyKind": "CAUSAL_PATH_OVERLAP",
-      "dependencyReason": "同じ当選経路の合算・内訳は重複するため同時加算せず、正式な評価で代表を選ぶ。"
-    },
-    {
-      "findingId": "OVERLAP_CHERRY_B",
-      "label": "チェリーB同時当選期待度",
-      "dependencyResolution": "RESOLVED_BY_SINGLE_MEMBER",
-      "resolvedIntoFindingId": "BELL_B",
-      "dependencyKind": "CAUSAL_PATH_OVERLAP",
-      "dependencyReason": "同じ当選経路の合算・内訳は重複するため同時加算せず、正式な評価で代表を選ぶ。"
-    },
-    {
-      "findingId": "OVERLAP_WATER_A",
-      "label": "スイカA同時当選期待度",
-      "dependencyResolution": "RESOLVED_BY_SINGLE_MEMBER",
-      "resolvedIntoFindingId": "BELL_B",
-      "dependencyKind": "CAUSAL_PATH_OVERLAP",
-      "dependencyReason": "同じ当選経路の合算・内訳は重複するため同時加算せず、正式な評価で代表を選ぶ。"
-    },
-    {
-      "findingId": "OVERLAP_WATER_B",
-      "label": "スイカB同時当選期待度",
-      "dependencyResolution": "RESOLVED_BY_SINGLE_MEMBER",
-      "resolvedIntoFindingId": "BELL_B",
-      "dependencyKind": "CAUSAL_PATH_OVERLAP",
-      "dependencyReason": "同じ当選経路の合算・内訳は重複するため同時加算せず、正式な評価で代表を選ぶ。"
-    },
-    {
-      "findingId": "OVERLAP_REPLAY",
-      "label": "リプレイ同時当選期待度",
-      "dependencyResolution": "RESOLVED_BY_SINGLE_MEMBER",
-      "resolvedIntoFindingId": "BELL_B",
-      "dependencyKind": "CAUSAL_PATH_OVERLAP",
-      "dependencyReason": "同じ当選経路の合算・内訳は重複するため同時加算せず、正式な評価で代表を選ぶ。"
-    },
-    {
-      "findingId": "RED7_0",
-      "label": "赤7BIG・単独",
-      "dependencyResolution": "RESOLVED_BY_SINGLE_MEMBER",
-      "resolvedIntoFindingId": "BELL_B",
-      "dependencyKind": "CAUSAL_PATH_OVERLAP",
-      "dependencyReason": "同じ当選経路の合算・内訳は重複するため同時加算せず、正式な評価で代表を選ぶ。"
-    },
-    {
-      "findingId": "RED7_5",
-      "label": "赤7BIG・リーチ目役A",
-      "dependencyResolution": "RESOLVED_BY_SINGLE_MEMBER",
-      "resolvedIntoFindingId": "BELL_B",
-      "dependencyKind": "CAUSAL_PATH_OVERLAP",
-      "dependencyReason": "同じ当選経路の合算・内訳は重複するため同時加算せず、正式な評価で代表を選ぶ。"
-    },
-    {
-      "findingId": "RED7_6",
-      "label": "赤7BIG・リーチ目役B",
-      "dependencyResolution": "RESOLVED_BY_SINGLE_MEMBER",
-      "resolvedIntoFindingId": "BELL_B",
-      "dependencyKind": "CAUSAL_PATH_OVERLAP",
-      "dependencyReason": "同じ当選経路の合算・内訳は重複するため同時加算せず、正式な評価で代表を選ぶ。"
-    },
-    {
-      "findingId": "RED7_7",
-      "label": "赤7BIG・リーチ目役C",
-      "dependencyResolution": "RESOLVED_BY_SINGLE_MEMBER",
-      "resolvedIntoFindingId": "BELL_B",
-      "dependencyKind": "CAUSAL_PATH_OVERLAP",
-      "dependencyReason": "同じ当選経路の合算・内訳は重複するため同時加算せず、正式な評価で代表を選ぶ。"
-    },
-    {
-      "findingId": "RED7_8",
-      "label": "赤7BIG・リーチ目役D",
-      "dependencyResolution": "RESOLVED_BY_SINGLE_MEMBER",
-      "resolvedIntoFindingId": "BELL_B",
-      "dependencyKind": "CAUSAL_PATH_OVERLAP",
-      "dependencyReason": "同じ当選経路の合算・内訳は重複するため同時加算せず、正式な評価で代表を選ぶ。"
-    },
-    {
-      "findingId": "RED7_9",
-      "label": "赤7BIG・リーチ目役E",
-      "dependencyResolution": "RESOLVED_BY_SINGLE_MEMBER",
-      "resolvedIntoFindingId": "BELL_B",
-      "dependencyKind": "CAUSAL_PATH_OVERLAP",
-      "dependencyReason": "同じ当選経路の合算・内訳は重複するため同時加算せず、正式な評価で代表を選ぶ。"
-    },
-    {
-      "findingId": "VBIG_0",
-      "label": "VBIG・単独",
-      "dependencyResolution": "RESOLVED_BY_SINGLE_MEMBER",
-      "resolvedIntoFindingId": "BELL_B",
-      "dependencyKind": "CAUSAL_PATH_OVERLAP",
-      "dependencyReason": "同じ当選経路の合算・内訳は重複するため同時加算せず、正式な評価で代表を選ぶ。"
-    },
-    {
-      "findingId": "VBIG_5",
-      "label": "VBIG・リーチ目役A",
-      "dependencyResolution": "RESOLVED_BY_SINGLE_MEMBER",
-      "resolvedIntoFindingId": "BELL_B",
-      "dependencyKind": "CAUSAL_PATH_OVERLAP",
-      "dependencyReason": "同じ当選経路の合算・内訳は重複するため同時加算せず、正式な評価で代表を選ぶ。"
-    },
-    {
-      "findingId": "VBIG_6",
-      "label": "VBIG・リーチ目役B",
-      "dependencyResolution": "RESOLVED_BY_SINGLE_MEMBER",
-      "resolvedIntoFindingId": "BELL_B",
-      "dependencyKind": "CAUSAL_PATH_OVERLAP",
-      "dependencyReason": "同じ当選経路の合算・内訳は重複するため同時加算せず、正式な評価で代表を選ぶ。"
-    },
-    {
-      "findingId": "VBIG_8",
-      "label": "VBIG・リーチ目役D",
-      "dependencyResolution": "RESOLVED_BY_SINGLE_MEMBER",
-      "resolvedIntoFindingId": "BELL_B",
-      "dependencyKind": "CAUSAL_PATH_OVERLAP",
-      "dependencyReason": "同じ当選経路の合算・内訳は重複するため同時加算せず、正式な評価で代表を選ぶ。"
-    },
-    {
-      "findingId": "VBIG_9",
-      "label": "VBIG・リーチ目役E",
-      "dependencyResolution": "RESOLVED_BY_SINGLE_MEMBER",
-      "resolvedIntoFindingId": "BELL_B",
-      "dependencyKind": "CAUSAL_PATH_OVERLAP",
-      "dependencyReason": "同じ当選経路の合算・内訳は重複するため同時加算せず、正式な評価で代表を選ぶ。"
-    },
-    {
-      "findingId": "REG_CAUSE_0",
-      "label": "REG・単独",
-      "dependencyResolution": "RESOLVED_BY_SINGLE_MEMBER",
-      "resolvedIntoFindingId": "BELL_B",
-      "dependencyKind": "CAUSAL_PATH_OVERLAP",
-      "dependencyReason": "同じ当選経路の合算・内訳は重複するため同時加算せず、正式な評価で代表を選ぶ。"
-    },
-    {
-      "findingId": "REG_CAUSE_1",
-      "label": "REG・リプレイ",
-      "dependencyResolution": "RESOLVED_BY_SINGLE_MEMBER",
-      "resolvedIntoFindingId": "BELL_B",
-      "dependencyKind": "CAUSAL_PATH_OVERLAP",
-      "dependencyReason": "同じ当選経路の合算・内訳は重複するため同時加算せず、正式な評価で代表を選ぶ。"
-    },
-    {
-      "findingId": "REG_CAUSE_2",
-      "label": "REG・チェリーB",
-      "dependencyResolution": "RESOLVED_BY_SINGLE_MEMBER",
-      "resolvedIntoFindingId": "BELL_B",
-      "dependencyKind": "CAUSAL_PATH_OVERLAP",
-      "dependencyReason": "同じ当選経路の合算・内訳は重複するため同時加算せず、正式な評価で代表を選ぶ。"
     }
   ],
   "excludedDecisions": [
@@ -564,17 +731,34 @@
       "userFacingReason": "BIG前半で左リールに3連Vを狙ったとき、ベルBは下段にベルが揃う形、ベルCは上段にベルが揃う形です。中段ベルはベルAです。"
     },
     {
+      "findingId": "RED7_0",
+      "label": "赤7BIG・単独",
+      "supportingSourceIds": [
+        "S1"
+      ],
+      "eligibility": "NOT_APPLICABLE",
+      "reason": "参考分布として保存するが設定推測Featureには使用しない。",
+      "ruleRefs": [
+        "manifest-v8.5-reference-only"
+      ],
+      "liveInferenceRoute": "NONE",
+      "userFacingReason": "公表確率は保持していますが、通常の停止形記録から内部の当選契機を全件分類できる手順が確認できません。一部を見抜けた回数を全通常Gで割ると誤推測になるため、数値推測には使いません。",
+      "reevaluationCondition": "新しい具体的な公開資料または信頼できる内部契機の全件記録方法が確認された場合に限り再評価する。"
+    },
+    {
       "findingId": "RED7_1",
       "label": "赤7BIG・リプレイ",
       "supportingSourceIds": [
         "S1"
       ],
-      "eligibility": "INELIGIBLE",
-      "reason": "設定間の情報量がない。",
+      "eligibility": "NOT_APPLICABLE",
+      "reason": "参考分布として保存するが設定推測Featureには使用しない。",
       "ruleRefs": [
-        "manifest-v8.5-information-gain"
+        "manifest-v8.5-reference-only"
       ],
-      "liveInferenceRoute": "NONE"
+      "liveInferenceRoute": "NONE",
+      "userFacingReason": "公表確率は保持していますが、通常の停止形記録から内部の当選契機を全件分類できる手順が確認できません。一部を見抜けた回数を全通常Gで割ると誤推測になるため、数値推測には使いません。",
+      "reevaluationCondition": "新しい具体的な公開資料または信頼できる内部契機の全件記録方法が確認された場合に限り再評価する。"
     },
     {
       "findingId": "RED7_2",
@@ -582,12 +766,14 @@
       "supportingSourceIds": [
         "S1"
       ],
-      "eligibility": "INELIGIBLE",
-      "reason": "設定間の情報量がない。",
+      "eligibility": "NOT_APPLICABLE",
+      "reason": "参考分布として保存するが設定推測Featureには使用しない。",
       "ruleRefs": [
-        "manifest-v8.5-information-gain"
+        "manifest-v8.5-reference-only"
       ],
-      "liveInferenceRoute": "NONE"
+      "liveInferenceRoute": "NONE",
+      "userFacingReason": "公表確率は保持していますが、通常の停止形記録から内部の当選契機を全件分類できる手順が確認できません。一部を見抜けた回数を全通常Gで割ると誤推測になるため、数値推測には使いません。",
+      "reevaluationCondition": "新しい具体的な公開資料または信頼できる内部契機の全件記録方法が確認された場合に限り再評価する。"
     },
     {
       "findingId": "RED7_3",
@@ -595,12 +781,14 @@
       "supportingSourceIds": [
         "S1"
       ],
-      "eligibility": "INELIGIBLE",
-      "reason": "設定間の情報量がない。",
+      "eligibility": "NOT_APPLICABLE",
+      "reason": "参考分布として保存するが設定推測Featureには使用しない。",
       "ruleRefs": [
-        "manifest-v8.5-information-gain"
+        "manifest-v8.5-reference-only"
       ],
-      "liveInferenceRoute": "NONE"
+      "liveInferenceRoute": "NONE",
+      "userFacingReason": "公表確率は保持していますが、通常の停止形記録から内部の当選契機を全件分類できる手順が確認できません。一部を見抜けた回数を全通常Gで割ると誤推測になるため、数値推測には使いません。",
+      "reevaluationCondition": "新しい具体的な公開資料または信頼できる内部契機の全件記録方法が確認された場合に限り再評価する。"
     },
     {
       "findingId": "RED7_4",
@@ -608,12 +796,104 @@
       "supportingSourceIds": [
         "S1"
       ],
-      "eligibility": "INELIGIBLE",
-      "reason": "設定間の情報量がない。",
+      "eligibility": "NOT_APPLICABLE",
+      "reason": "参考分布として保存するが設定推測Featureには使用しない。",
       "ruleRefs": [
-        "manifest-v8.5-information-gain"
+        "manifest-v8.5-reference-only"
       ],
-      "liveInferenceRoute": "NONE"
+      "liveInferenceRoute": "NONE",
+      "userFacingReason": "公表確率は保持していますが、通常の停止形記録から内部の当選契機を全件分類できる手順が確認できません。一部を見抜けた回数を全通常Gで割ると誤推測になるため、数値推測には使いません。",
+      "reevaluationCondition": "新しい具体的な公開資料または信頼できる内部契機の全件記録方法が確認された場合に限り再評価する。"
+    },
+    {
+      "findingId": "RED7_5",
+      "label": "赤7BIG・リーチ目役A",
+      "supportingSourceIds": [
+        "S1"
+      ],
+      "eligibility": "NOT_APPLICABLE",
+      "reason": "参考分布として保存するが設定推測Featureには使用しない。",
+      "ruleRefs": [
+        "manifest-v8.5-reference-only"
+      ],
+      "liveInferenceRoute": "NONE",
+      "userFacingReason": "公表確率は保持していますが、通常の停止形記録から内部の当選契機を全件分類できる手順が確認できません。一部を見抜けた回数を全通常Gで割ると誤推測になるため、数値推測には使いません。",
+      "reevaluationCondition": "新しい具体的な公開資料または信頼できる内部契機の全件記録方法が確認された場合に限り再評価する。"
+    },
+    {
+      "findingId": "RED7_6",
+      "label": "赤7BIG・リーチ目役B",
+      "supportingSourceIds": [
+        "S1"
+      ],
+      "eligibility": "NOT_APPLICABLE",
+      "reason": "参考分布として保存するが設定推測Featureには使用しない。",
+      "ruleRefs": [
+        "manifest-v8.5-reference-only"
+      ],
+      "liveInferenceRoute": "NONE",
+      "userFacingReason": "公表確率は保持していますが、通常の停止形記録から内部の当選契機を全件分類できる手順が確認できません。一部を見抜けた回数を全通常Gで割ると誤推測になるため、数値推測には使いません。",
+      "reevaluationCondition": "新しい具体的な公開資料または信頼できる内部契機の全件記録方法が確認された場合に限り再評価する。"
+    },
+    {
+      "findingId": "RED7_7",
+      "label": "赤7BIG・リーチ目役C",
+      "supportingSourceIds": [
+        "S1"
+      ],
+      "eligibility": "NOT_APPLICABLE",
+      "reason": "参考分布として保存するが設定推測Featureには使用しない。",
+      "ruleRefs": [
+        "manifest-v8.5-reference-only"
+      ],
+      "liveInferenceRoute": "NONE",
+      "userFacingReason": "公表確率は保持していますが、通常の停止形記録から内部の当選契機を全件分類できる手順が確認できません。一部を見抜けた回数を全通常Gで割ると誤推測になるため、数値推測には使いません。",
+      "reevaluationCondition": "新しい具体的な公開資料または信頼できる内部契機の全件記録方法が確認された場合に限り再評価する。"
+    },
+    {
+      "findingId": "RED7_8",
+      "label": "赤7BIG・リーチ目役D",
+      "supportingSourceIds": [
+        "S1"
+      ],
+      "eligibility": "NOT_APPLICABLE",
+      "reason": "参考分布として保存するが設定推測Featureには使用しない。",
+      "ruleRefs": [
+        "manifest-v8.5-reference-only"
+      ],
+      "liveInferenceRoute": "NONE",
+      "userFacingReason": "公表確率は保持していますが、通常の停止形記録から内部の当選契機を全件分類できる手順が確認できません。一部を見抜けた回数を全通常Gで割ると誤推測になるため、数値推測には使いません。",
+      "reevaluationCondition": "新しい具体的な公開資料または信頼できる内部契機の全件記録方法が確認された場合に限り再評価する。"
+    },
+    {
+      "findingId": "RED7_9",
+      "label": "赤7BIG・リーチ目役E",
+      "supportingSourceIds": [
+        "S1"
+      ],
+      "eligibility": "NOT_APPLICABLE",
+      "reason": "参考分布として保存するが設定推測Featureには使用しない。",
+      "ruleRefs": [
+        "manifest-v8.5-reference-only"
+      ],
+      "liveInferenceRoute": "NONE",
+      "userFacingReason": "公表確率は保持していますが、通常の停止形記録から内部の当選契機を全件分類できる手順が確認できません。一部を見抜けた回数を全通常Gで割ると誤推測になるため、数値推測には使いません。",
+      "reevaluationCondition": "新しい具体的な公開資料または信頼できる内部契機の全件記録方法が確認された場合に限り再評価する。"
+    },
+    {
+      "findingId": "VBIG_0",
+      "label": "VBIG・単独",
+      "supportingSourceIds": [
+        "S1"
+      ],
+      "eligibility": "NOT_APPLICABLE",
+      "reason": "参考分布として保存するが設定推測Featureには使用しない。",
+      "ruleRefs": [
+        "manifest-v8.5-reference-only"
+      ],
+      "liveInferenceRoute": "NONE",
+      "userFacingReason": "公表確率は保持していますが、通常の停止形記録から内部の当選契機を全件分類できる手順が確認できません。一部を見抜けた回数を全通常Gで割ると誤推測になるため、数値推測には使いません。",
+      "reevaluationCondition": "新しい具体的な公開資料または信頼できる内部契機の全件記録方法が確認された場合に限り再評価する。"
     },
     {
       "findingId": "VBIG_1",
@@ -621,12 +901,14 @@
       "supportingSourceIds": [
         "S1"
       ],
-      "eligibility": "INELIGIBLE",
-      "reason": "設定間の情報量がない。",
+      "eligibility": "NOT_APPLICABLE",
+      "reason": "参考分布として保存するが設定推測Featureには使用しない。",
       "ruleRefs": [
-        "manifest-v8.5-information-gain"
+        "manifest-v8.5-reference-only"
       ],
-      "liveInferenceRoute": "NONE"
+      "liveInferenceRoute": "NONE",
+      "userFacingReason": "公表確率は保持していますが、通常の停止形記録から内部の当選契機を全件分類できる手順が確認できません。一部を見抜けた回数を全通常Gで割ると誤推測になるため、数値推測には使いません。",
+      "reevaluationCondition": "新しい具体的な公開資料または信頼できる内部契機の全件記録方法が確認された場合に限り再評価する。"
     },
     {
       "findingId": "VBIG_2",
@@ -634,12 +916,14 @@
       "supportingSourceIds": [
         "S1"
       ],
-      "eligibility": "INELIGIBLE",
-      "reason": "設定間の情報量がない。",
+      "eligibility": "NOT_APPLICABLE",
+      "reason": "参考分布として保存するが設定推測Featureには使用しない。",
       "ruleRefs": [
-        "manifest-v8.5-information-gain"
+        "manifest-v8.5-reference-only"
       ],
-      "liveInferenceRoute": "NONE"
+      "liveInferenceRoute": "NONE",
+      "userFacingReason": "公表確率は保持していますが、通常の停止形記録から内部の当選契機を全件分類できる手順が確認できません。一部を見抜けた回数を全通常Gで割ると誤推測になるため、数値推測には使いません。",
+      "reevaluationCondition": "新しい具体的な公開資料または信頼できる内部契機の全件記録方法が確認された場合に限り再評価する。"
     },
     {
       "findingId": "VBIG_3",
@@ -647,12 +931,14 @@
       "supportingSourceIds": [
         "S1"
       ],
-      "eligibility": "INELIGIBLE",
-      "reason": "設定間の情報量がない。",
+      "eligibility": "NOT_APPLICABLE",
+      "reason": "参考分布として保存するが設定推測Featureには使用しない。",
       "ruleRefs": [
-        "manifest-v8.5-information-gain"
+        "manifest-v8.5-reference-only"
       ],
-      "liveInferenceRoute": "NONE"
+      "liveInferenceRoute": "NONE",
+      "userFacingReason": "公表確率は保持していますが、通常の停止形記録から内部の当選契機を全件分類できる手順が確認できません。一部を見抜けた回数を全通常Gで割ると誤推測になるため、数値推測には使いません。",
+      "reevaluationCondition": "新しい具体的な公開資料または信頼できる内部契機の全件記録方法が確認された場合に限り再評価する。"
     },
     {
       "findingId": "VBIG_4",
@@ -660,12 +946,44 @@
       "supportingSourceIds": [
         "S1"
       ],
-      "eligibility": "INELIGIBLE",
-      "reason": "設定間の情報量がない。",
+      "eligibility": "NOT_APPLICABLE",
+      "reason": "参考分布として保存するが設定推測Featureには使用しない。",
       "ruleRefs": [
-        "manifest-v8.5-information-gain"
+        "manifest-v8.5-reference-only"
       ],
-      "liveInferenceRoute": "NONE"
+      "liveInferenceRoute": "NONE",
+      "userFacingReason": "公表確率は保持していますが、通常の停止形記録から内部の当選契機を全件分類できる手順が確認できません。一部を見抜けた回数を全通常Gで割ると誤推測になるため、数値推測には使いません。",
+      "reevaluationCondition": "新しい具体的な公開資料または信頼できる内部契機の全件記録方法が確認された場合に限り再評価する。"
+    },
+    {
+      "findingId": "VBIG_5",
+      "label": "VBIG・リーチ目役A",
+      "supportingSourceIds": [
+        "S1"
+      ],
+      "eligibility": "NOT_APPLICABLE",
+      "reason": "参考分布として保存するが設定推測Featureには使用しない。",
+      "ruleRefs": [
+        "manifest-v8.5-reference-only"
+      ],
+      "liveInferenceRoute": "NONE",
+      "userFacingReason": "公表確率は保持していますが、通常の停止形記録から内部の当選契機を全件分類できる手順が確認できません。一部を見抜けた回数を全通常Gで割ると誤推測になるため、数値推測には使いません。",
+      "reevaluationCondition": "新しい具体的な公開資料または信頼できる内部契機の全件記録方法が確認された場合に限り再評価する。"
+    },
+    {
+      "findingId": "VBIG_6",
+      "label": "VBIG・リーチ目役B",
+      "supportingSourceIds": [
+        "S1"
+      ],
+      "eligibility": "NOT_APPLICABLE",
+      "reason": "参考分布として保存するが設定推測Featureには使用しない。",
+      "ruleRefs": [
+        "manifest-v8.5-reference-only"
+      ],
+      "liveInferenceRoute": "NONE",
+      "userFacingReason": "公表確率は保持していますが、通常の停止形記録から内部の当選契機を全件分類できる手順が確認できません。一部を見抜けた回数を全通常Gで割ると誤推測になるため、数値推測には使いません。",
+      "reevaluationCondition": "新しい具体的な公開資料または信頼できる内部契機の全件記録方法が確認された場合に限り再評価する。"
     },
     {
       "findingId": "VBIG_7",
@@ -673,12 +991,89 @@
       "supportingSourceIds": [
         "S1"
       ],
-      "eligibility": "INELIGIBLE",
-      "reason": "設定間の情報量がない。",
+      "eligibility": "NOT_APPLICABLE",
+      "reason": "参考分布として保存するが設定推測Featureには使用しない。",
       "ruleRefs": [
-        "manifest-v8.5-information-gain"
+        "manifest-v8.5-reference-only"
       ],
-      "liveInferenceRoute": "NONE"
+      "liveInferenceRoute": "NONE",
+      "userFacingReason": "公表確率は保持していますが、通常の停止形記録から内部の当選契機を全件分類できる手順が確認できません。一部を見抜けた回数を全通常Gで割ると誤推測になるため、数値推測には使いません。",
+      "reevaluationCondition": "新しい具体的な公開資料または信頼できる内部契機の全件記録方法が確認された場合に限り再評価する。"
+    },
+    {
+      "findingId": "VBIG_8",
+      "label": "VBIG・リーチ目役D",
+      "supportingSourceIds": [
+        "S1"
+      ],
+      "eligibility": "NOT_APPLICABLE",
+      "reason": "参考分布として保存するが設定推測Featureには使用しない。",
+      "ruleRefs": [
+        "manifest-v8.5-reference-only"
+      ],
+      "liveInferenceRoute": "NONE",
+      "userFacingReason": "公表確率は保持していますが、通常の停止形記録から内部の当選契機を全件分類できる手順が確認できません。一部を見抜けた回数を全通常Gで割ると誤推測になるため、数値推測には使いません。",
+      "reevaluationCondition": "新しい具体的な公開資料または信頼できる内部契機の全件記録方法が確認された場合に限り再評価する。"
+    },
+    {
+      "findingId": "VBIG_9",
+      "label": "VBIG・リーチ目役E",
+      "supportingSourceIds": [
+        "S1"
+      ],
+      "eligibility": "NOT_APPLICABLE",
+      "reason": "参考分布として保存するが設定推測Featureには使用しない。",
+      "ruleRefs": [
+        "manifest-v8.5-reference-only"
+      ],
+      "liveInferenceRoute": "NONE",
+      "userFacingReason": "公表確率は保持していますが、通常の停止形記録から内部の当選契機を全件分類できる手順が確認できません。一部を見抜けた回数を全通常Gで割ると誤推測になるため、数値推測には使いません。",
+      "reevaluationCondition": "新しい具体的な公開資料または信頼できる内部契機の全件記録方法が確認された場合に限り再評価する。"
+    },
+    {
+      "findingId": "REG_CAUSE_0",
+      "label": "REG・単独",
+      "supportingSourceIds": [
+        "S1"
+      ],
+      "eligibility": "NOT_APPLICABLE",
+      "reason": "参考分布として保存するが設定推測Featureには使用しない。",
+      "ruleRefs": [
+        "manifest-v8.5-reference-only"
+      ],
+      "liveInferenceRoute": "NONE",
+      "userFacingReason": "公表確率は保持していますが、通常の停止形記録から内部の当選契機を全件分類できる手順が確認できません。一部を見抜けた回数を全通常Gで割ると誤推測になるため、数値推測には使いません。",
+      "reevaluationCondition": "新しい具体的な公開資料または信頼できる内部契機の全件記録方法が確認された場合に限り再評価する。"
+    },
+    {
+      "findingId": "REG_CAUSE_1",
+      "label": "REG・リプレイ",
+      "supportingSourceIds": [
+        "S1"
+      ],
+      "eligibility": "NOT_APPLICABLE",
+      "reason": "参考分布として保存するが設定推測Featureには使用しない。",
+      "ruleRefs": [
+        "manifest-v8.5-reference-only"
+      ],
+      "liveInferenceRoute": "NONE",
+      "userFacingReason": "公表確率は保持していますが、通常の停止形記録から内部の当選契機を全件分類できる手順が確認できません。一部を見抜けた回数を全通常Gで割ると誤推測になるため、数値推測には使いません。",
+      "reevaluationCondition": "新しい具体的な公開資料または信頼できる内部契機の全件記録方法が確認された場合に限り再評価する。"
+    },
+    {
+      "findingId": "REG_CAUSE_2",
+      "label": "REG・チェリーB",
+      "supportingSourceIds": [
+        "S1"
+      ],
+      "eligibility": "NOT_APPLICABLE",
+      "reason": "参考分布として保存するが設定推測Featureには使用しない。",
+      "ruleRefs": [
+        "manifest-v8.5-reference-only"
+      ],
+      "liveInferenceRoute": "NONE",
+      "userFacingReason": "公表確率は保持していますが、通常の停止形記録から内部の当選契機を全件分類できる手順が確認できません。一部を見抜けた回数を全通常Gで割ると誤推測になるため、数値推測には使いません。",
+      "reevaluationCondition": "新しい具体的な公開資料または信頼できる内部契機の全件記録方法が確認された場合に限り再評価する。"
     }
   ],
   "uiContract": {
@@ -687,76 +1082,81 @@
     "batchId": "batch-20261022-025",
     "machineId": "LB_THUNDER_V_HA",
     "machineName": "スマスロ サンダーV",
+    "gameCountPolicy": "TOTAL_ONLY",
     "sourceArtifacts": {
       "candidateContract": {
         "artifactId": "candidate-contract-LB_THUNDER_V_HA",
         "kind": "candidate-contract",
         "path": "production/batches/batch-20261022-025/artifacts/LB_THUNDER_V_HA/candidate_contract/result.json",
-        "sha256": "7337f014d686aaf17fede57169ec7fba61419830404f491b0f72f4bfbcf810d1",
-        "producerWorkId": "wrk_de672ce045434b89"
+        "sha256": "74f7cf562e99032a2fd0cce7ef03051cc2cbfeaafa4e4137e2ee6860d8448aec",
+        "producerWorkId": "wrk_f20416f761794fc6"
       },
       "observationEvidence": {
         "artifactId": "observation-evidence-LB_THUNDER_V_HA",
         "kind": "observation-evidence",
         "path": "production/batches/batch-20261022-025/artifacts/LB_THUNDER_V_HA/observation_evidence/result.json",
-        "sha256": "854a7209198e485c9a9172666ca6d93b5f3521f64a8eae8bfa840cbd8a48f7fe",
-        "producerWorkId": "wrk_ea797ce20a7748b4"
+        "sha256": "c16f59d93ef084ed16cca35c70df96c5a8fd2578a99c4194041cacf7f112a7c4",
+        "producerWorkId": "wrk_f886bbfbbb6b421b"
       },
       "evaluation": {
         "artifactId": "evaluation-LB_THUNDER_V_HA",
         "kind": "evaluation",
         "path": "production/batches/batch-20261022-025/artifacts/LB_THUNDER_V_HA/evaluation/result.json",
-        "sha256": "572bbbd9e1d05c6fc5493defe69e8923ac8bd0b4cb85e942141aeb3d3b5afb53",
-        "producerWorkId": "wrk_8f5392426f2e44ce"
+        "sha256": "9fc0475fbdfa7ae4b47060c8ad485b9aa9f87641af9bd1e596b3d95277b45005",
+        "producerWorkId": "wrk_cf9e3600b43b4729"
       }
     },
     "machineInferenceSummary": {
       "title": "この機種の設定推測について",
       "position": "TOP_ONLY",
       "highLowDiscrimination": {
-        "status": "COMPUTED",
-        "method": "BEST_SINGLE_EXACT_ACTIVE_FEATURE",
-        "bandDefinition": {
-          "lowSettings": "SETTING_1_TO_3",
-          "highSettings": "SETTING_4_TO_6",
-          "classPrior": "BALANCED"
-        },
-        "results": [
-          {
-            "games": 1500,
-            "balancedAccuracyPercent": 62.45
-          },
-          {
-            "games": 3000,
-            "balancedAccuracyPercent": 66.15
-          },
-          {
-            "games": 7000,
-            "balancedAccuracyPercent": 70.06
-          }
-        ],
-        "eligibleFeatureIds": [
-          "BELL_B"
-        ],
-        "selectedFeatureId": "BELL_B",
-        "selectedFeatureLabel": "ベルB",
+        "status": "NOT_COMPUTED",
+        "reason": "基準ゲーム数へ正確に換算できる設定推測要素がないため、高低判別精度を算出していません。",
+        "eligibleFeatureIds": [],
         "excludedFeatures": [
           {
+            "findingId": "REG",
+            "reason": "BENCHMARK_EXPOSURE_UNRESOLVED"
+          },
+          {
+            "findingId": "BELL_B",
+            "reason": "BENCHMARK_EXPOSURE_UNRESOLVED"
+          },
+          {
             "findingId": "BIG_BELL_B",
+            "reason": "BENCHMARK_EXPOSURE_UNRESOLVED"
+          },
+          {
+            "findingId": "OVERLAP_BELL_A",
+            "reason": "BENCHMARK_EXPOSURE_UNRESOLVED"
+          },
+          {
+            "findingId": "OVERLAP_CHERRY_B",
+            "reason": "BENCHMARK_EXPOSURE_UNRESOLVED"
+          },
+          {
+            "findingId": "OVERLAP_WATER_A",
+            "reason": "BENCHMARK_EXPOSURE_UNRESOLVED"
+          },
+          {
+            "findingId": "OVERLAP_WATER_B",
+            "reason": "BENCHMARK_EXPOSURE_UNRESOLVED"
+          },
+          {
+            "findingId": "OVERLAP_REPLAY",
             "reason": "BENCHMARK_EXPOSURE_UNRESOLVED"
           },
           {
             "findingId": "PREDECESSOR",
             "reason": "BENCHMARK_EXPOSURE_UNRESOLVED"
           }
-        ],
-        "note": "7000Gへ正確に換算できるACTIVE要素だけを候補とし、要素間の独立性を仮定せず、単独で最も高い判別精度を持つ要素から保守的に算出しています。条件付き要素はこの指標には含めませんが、実戦中に実際の観測回数が入力された場合は設定推測に使用します。"
+        ]
       }
     },
     "playInfo": {
       "visible": true,
       "collapsible": false,
-      "mode": "TOTAL_ONLY",
+      "mode": "NONE",
       "sessionFields": [
         {
           "id": "date",
@@ -774,22 +1174,8 @@
           "mode": "TEXT"
         }
       ],
-      "startFields": [
-        {
-          "id": "startTotalGames",
-          "label": "着席時 総ゲーム数",
-          "mode": "NUMBER",
-          "directNumeric": true
-        }
-      ],
-      "currentFields": [
-        {
-          "id": "currentTotalGames",
-          "label": "現在 総ゲーム数",
-          "mode": "NUMBER",
-          "directNumeric": true
-        }
-      ],
+      "startFields": [],
+      "currentFields": [],
       "difference": {
         "autoCalculate": true
       },
@@ -804,13 +1190,13 @@
     },
     "numericSections": [
       {
-        "id": "OBS_BELL_B",
-        "sourceFindingId": "BELL_B",
-        "title": "ベルB",
+        "id": "OBS_REG",
+        "sourceFindingId": "REG",
+        "title": "REG",
         "kind": "NUMERIC_OBSERVATION",
-        "model": "BERNOULLI",
-        "trialUniverse": "TOTAL_GAME_TRIAL",
-        "description": "ベルBを記録します。総ゲーム数を基準に、実戦中の出現割合を設定別に比較します。\n・注意：総G（ボーナス・BT中は対象に含めません。\n・注意：RIZIN ZONEは通常抽選の演出区間で初当りの集計に含め、雷神ループのBIG前半再開を新しい初当りとして増算しない。",
+        "model": "CATEGORICAL",
+        "trialUniverse": "MANUAL_NORMAL_GAME_TRIAL",
+        "description": "総G（ボーナス・BT中を除く）。RIZIN ZONEは通常抽選の演出区間で初当りの集計に含め、雷神ループのBIG前半再開を新しい初当りとして増算しない。通常役は成立後を除いた観測区間だけ記録。\n確認した全体回数も記録し、その中で各項目がどれだけ出たかを比較します。\n・注意：総G（ボーナス・BT中は対象に含めません。\n・注意：RIZIN ZONEは通常抽選の演出区間で初当りの集計に含め、雷神ループのBIG前半再開を新しい初当りとして増算しない。",
         "collapsible": true,
         "defaultExpanded": false,
         "descriptionPresentation": {
@@ -820,21 +1206,21 @@
         },
         "score": {
           "label": "設定判別スコア",
-          "status": "COMPUTED",
-          "value": 117.2,
-          "precision": 1,
-          "importance": "主要"
+          "status": "NOT_COMPUTED",
+          "display": "算出不可",
+          "reason": "共同分布の7000Gスコアは未算出です。対象1試行の判別力で評価します。",
+          "sourceReason": "JOINT_7000G_NOT_COMPUTED"
         },
         "perEligibleTrialPower": {
           "label": "1回の判別力",
-          "value": 117.24913080704205,
+          "value": 0.006280074370258737,
           "metric": "PER_ELIGIBLE_TRIAL_POWER",
           "thresholdSource": "RUNTIME_POLICY"
         },
         "inputs": [
           {
-            "id": "BELL_B.eligibleTrialCount",
-            "label": "総ゲーム数",
+            "id": "REG.verifiedTrialCount",
+            "label": "確認した対象通常G",
             "role": "trial",
             "mode": "NUMBER",
             "directNumeric": true,
@@ -845,9 +1231,130 @@
             "emptyMeansUnobserved": true
           },
           {
+            "id": "BIG.successCount",
+            "label": "BIG",
+            "role": "categoryCount",
+            "mode": "NUMBER",
+            "directNumeric": true,
+            "quickAdd": [
+              1
+            ],
+            "partialInputAllowed": true,
+            "emptyMeansUnobserved": true,
+            "missingSubItemTreatment": "ZERO_WHEN_PARENT_OBSERVED"
+          },
+          {
+            "id": "REG.successCount",
+            "label": "REG",
+            "role": "categoryCount",
+            "mode": "NUMBER",
+            "directNumeric": true,
+            "quickAdd": [
+              1
+            ],
+            "partialInputAllowed": true,
+            "emptyMeansUnobserved": true,
+            "missingSubItemTreatment": "ZERO_WHEN_PARENT_OBSERVED"
+          }
+        ]
+      },
+      {
+        "id": "OBS_BELL_B",
+        "sourceFindingId": "BELL_B",
+        "title": "ベルB",
+        "kind": "NUMERIC_OBSERVATION",
+        "model": "CATEGORICAL",
+        "trialUniverse": "MANUAL_NORMAL_GAME_TRIAL",
+        "description": "総G（ボーナス・BT中を除く）。RIZIN ZONEは通常抽選の演出区間で初当りの集計に含め、雷神ループのBIG前半再開を新しい初当りとして増算しない。通常役は成立後を除いた観測区間だけ記録。\n確認した全体回数も記録し、その中で各項目がどれだけ出たかを比較します。\n・注意：総G（ボーナス・BT中は対象に含めません。\n・注意：RIZIN ZONEは通常抽選の演出区間で初当りの集計に含め、雷神ループのBIG前半再開を新しい初当りとして増算しない。",
+        "collapsible": true,
+        "defaultExpanded": false,
+        "descriptionPresentation": {
+          "collapsible": true,
+          "label": "説明",
+          "defaultExpanded": false
+        },
+        "score": {
+          "label": "設定判別スコア",
+          "status": "NOT_COMPUTED",
+          "display": "算出不可",
+          "reason": "共同分布の7000Gスコアは未算出です。対象1試行の判別力で評価します。",
+          "sourceReason": "JOINT_7000G_NOT_COMPUTED"
+        },
+        "perEligibleTrialPower": {
+          "label": "1回の判別力",
+          "value": 0.05932734233682346,
+          "metric": "PER_ELIGIBLE_TRIAL_POWER",
+          "thresholdSource": "RUNTIME_POLICY"
+        },
+        "inputs": [
+          {
+            "id": "BELL_B.verifiedTrialCount",
+            "label": "確認した対象通常G",
+            "role": "trial",
+            "mode": "NUMBER",
+            "directNumeric": true,
+            "quickAdd": [
+              50
+            ],
+            "partialInputAllowed": true,
+            "emptyMeansUnobserved": true
+          },
+          {
+            "id": "BELL_A.successCount",
+            "label": "ベルA",
+            "role": "categoryCount",
+            "mode": "NUMBER",
+            "directNumeric": true,
+            "quickAdd": [
+              1
+            ],
+            "partialInputAllowed": true,
+            "emptyMeansUnobserved": true,
+            "missingSubItemTreatment": "ZERO_WHEN_PARENT_OBSERVED"
+          },
+          {
             "id": "BELL_B.successCount",
-            "label": "ベルB回数",
-            "role": "success",
+            "label": "ベルB",
+            "role": "categoryCount",
+            "mode": "NUMBER",
+            "directNumeric": true,
+            "quickAdd": [
+              1
+            ],
+            "partialInputAllowed": true,
+            "emptyMeansUnobserved": true,
+            "missingSubItemTreatment": "ZERO_WHEN_PARENT_OBSERVED"
+          },
+          {
+            "id": "WATER_A.successCount",
+            "label": "スイカA",
+            "role": "categoryCount",
+            "mode": "NUMBER",
+            "directNumeric": true,
+            "quickAdd": [
+              1
+            ],
+            "partialInputAllowed": true,
+            "emptyMeansUnobserved": true,
+            "missingSubItemTreatment": "ZERO_WHEN_PARENT_OBSERVED"
+          },
+          {
+            "id": "WATER_B.successCount",
+            "label": "スイカB",
+            "role": "categoryCount",
+            "mode": "NUMBER",
+            "directNumeric": true,
+            "quickAdd": [
+              1
+            ],
+            "partialInputAllowed": true,
+            "emptyMeansUnobserved": true,
+            "missingSubItemTreatment": "ZERO_WHEN_PARENT_OBSERVED"
+          },
+          {
+            "id": "CHERRY_B.successCount",
+            "label": "チェリーB",
+            "role": "categoryCount",
             "mode": "NUMBER",
             "directNumeric": true,
             "quickAdd": [
@@ -866,7 +1373,7 @@
         "kind": "NUMERIC_OBSERVATION",
         "model": "CATEGORICAL",
         "trialUniverse": "BIG_BONUS_GAME_TRIAL",
-        "description": "BIG前半ボーナスゲームの試行数と、3連V狙いまたは実機連動機能で特定した停止形回数。JAC・BT中を含めず、その他回数は内部算出。\n確認した全体回数も記録し、その中で各項目がどれだけ出たかを比較します。\n・注意：JAC・BT中を含めず、その他回数は内部算出。\n・注意：BIG前半で左リールに3連Vを狙ったとき、ベルBは下段にベルが揃う形、ベルCは上段にベルが揃う形です。中段ベルはベルAです。",
+        "description": "BIG前半ボーナスゲームの試行数と、3連V狙いまたは実機連動機能で特定した停止形回数。JAC・BT中を含めず、その他回数は内部算出。\n確認した全体回数も記録し、その中で各項目がどれだけ出たかを比較します。\n・注意：JAC・BT中を含めず、その他回数は内部算出。\n・注意：BIG前半の同じ対象区間で、確認した停止形だけを記録します。未入力は未観測、0回を入力した項目だけが観測済み0回です。",
         "collapsible": true,
         "defaultExpanded": false,
         "descriptionPresentation": {
@@ -878,8 +1385,8 @@
           "label": "設定判別スコア",
           "status": "NOT_COMPUTED",
           "display": "算出不可",
-          "reason": "基準遊技量7000Gでの判別力を算出するための観測条件が確定していないため算出できません。",
-          "sourceReason": "基準遊技量に対応するexact exposure modelが未確立のため算出しない。"
+          "reason": "共同分布の7000Gスコアは未算出です。対象1試行の判別力で評価します。",
+          "sourceReason": "JOINT_7000G_NOT_COMPUTED"
         },
         "perEligibleTrialPower": {
           "label": "1回の判別力",
@@ -889,7 +1396,7 @@
         },
         "inputs": [
           {
-            "id": "BIG_BELL_B.eligibleTrialCount",
+            "id": "BIG_BELL_B.verifiedTrialCount",
             "label": "BIG前半ゲーム数",
             "role": "trial",
             "mode": "NUMBER",
@@ -930,6 +1437,276 @@
             "id": "BIG_BELL_B.categoryCounts.3_BIG前半15枚リーチ目",
             "label": "BIG前半15枚リーチ目",
             "role": "categoryCount",
+            "mode": "NUMBER",
+            "directNumeric": true,
+            "quickAdd": [
+              1
+            ],
+            "partialInputAllowed": true,
+            "emptyMeansUnobserved": true,
+            "missingSubItemTreatment": "ZERO_WHEN_PARENT_OBSERVED"
+          }
+        ]
+      },
+      {
+        "id": "OBS_OVERLAP_BELL_A",
+        "sourceFindingId": "OVERLAP_BELL_A",
+        "title": "ベルA同時当選期待度",
+        "kind": "NUMERIC_OBSERVATION",
+        "model": "BERNOULLI",
+        "trialUniverse": "ROLE_BELL_A",
+        "description": "対象となる機会のうち、当選期待度が実際に起きた割合を設定別に比較します。\n・注意：ボーナス総数・契機内訳との重複加算をしない。\n・注意：ボーナス・BT・成立後を除いた対象区間だけのゲーム数と、同じ区間の回数を入力します。総Gからは自動連動しません。",
+        "collapsible": true,
+        "defaultExpanded": false,
+        "descriptionPresentation": {
+          "collapsible": true,
+          "label": "説明",
+          "defaultExpanded": false
+        },
+        "score": {
+          "label": "設定判別スコア",
+          "status": "NOT_COMPUTED",
+          "display": "算出不可",
+          "reason": "基準遊技量7000Gでの判別力を算出するための観測条件が確定していないため算出できません。",
+          "sourceReason": "基準遊技量に対応するexact exposure modelが未確立のため算出しない。"
+        },
+        "perEligibleTrialPower": {
+          "label": "1回の判別力",
+          "value": 0.00009880156195685164,
+          "metric": "PER_ELIGIBLE_TRIAL_POWER",
+          "thresholdSource": "RUNTIME_POLICY"
+        },
+        "inputs": [
+          {
+            "id": "OVERLAP_BELL_A.verifiedTrialCount",
+            "label": "当選期待度回数",
+            "role": "trial",
+            "mode": "NUMBER",
+            "directNumeric": true,
+            "quickAdd": [],
+            "partialInputAllowed": true,
+            "emptyMeansUnobserved": true
+          },
+          {
+            "id": "OVERLAP_BELL_A.successCount",
+            "label": "当選期待度回数",
+            "role": "success",
+            "mode": "NUMBER",
+            "directNumeric": true,
+            "quickAdd": [
+              1
+            ],
+            "partialInputAllowed": true,
+            "emptyMeansUnobserved": true,
+            "missingSubItemTreatment": "ZERO_WHEN_PARENT_OBSERVED"
+          }
+        ]
+      },
+      {
+        "id": "OBS_OVERLAP_CHERRY_B",
+        "sourceFindingId": "OVERLAP_CHERRY_B",
+        "title": "チェリーB同時当選期待度",
+        "kind": "NUMERIC_OBSERVATION",
+        "model": "BERNOULLI",
+        "trialUniverse": "ROLE_CHERRY_B",
+        "description": "対象となる機会のうち、当選期待度が実際に起きた割合を設定別に比較します。\n・注意：ボーナス総数・契機内訳との重複加算をしない。\n・注意：ボーナス・BT・成立後を除いた対象区間だけのゲーム数と、同じ区間の回数を入力します。総Gからは自動連動しません。",
+        "collapsible": true,
+        "defaultExpanded": false,
+        "descriptionPresentation": {
+          "collapsible": true,
+          "label": "説明",
+          "defaultExpanded": false
+        },
+        "score": {
+          "label": "設定判別スコア",
+          "status": "NOT_COMPUTED",
+          "display": "算出不可",
+          "reason": "基準遊技量7000Gでの判別力を算出するための観測条件が確定していないため算出できません。",
+          "sourceReason": "基準遊技量に対応するexact exposure modelが未確立のため算出しない。"
+        },
+        "perEligibleTrialPower": {
+          "label": "1回の判別力",
+          "value": 0.0024727972989940783,
+          "metric": "PER_ELIGIBLE_TRIAL_POWER",
+          "thresholdSource": "RUNTIME_POLICY"
+        },
+        "inputs": [
+          {
+            "id": "OVERLAP_CHERRY_B.verifiedTrialCount",
+            "label": "当選期待度回数",
+            "role": "trial",
+            "mode": "NUMBER",
+            "directNumeric": true,
+            "quickAdd": [],
+            "partialInputAllowed": true,
+            "emptyMeansUnobserved": true
+          },
+          {
+            "id": "OVERLAP_CHERRY_B.successCount",
+            "label": "当選期待度回数",
+            "role": "success",
+            "mode": "NUMBER",
+            "directNumeric": true,
+            "quickAdd": [
+              1
+            ],
+            "partialInputAllowed": true,
+            "emptyMeansUnobserved": true,
+            "missingSubItemTreatment": "ZERO_WHEN_PARENT_OBSERVED"
+          }
+        ]
+      },
+      {
+        "id": "OBS_OVERLAP_WATER_A",
+        "sourceFindingId": "OVERLAP_WATER_A",
+        "title": "スイカA同時当選期待度",
+        "kind": "NUMERIC_OBSERVATION",
+        "model": "BERNOULLI",
+        "trialUniverse": "ROLE_WATER_A",
+        "description": "対象となる機会のうち、当選期待度が実際に起きた割合を設定別に比較します。\n・注意：ボーナス総数・契機内訳との重複加算をしない。\n・注意：ボーナス・BT・成立後を除いた対象区間だけのゲーム数と、同じ区間の回数を入力します。総Gからは自動連動しません。",
+        "collapsible": true,
+        "defaultExpanded": false,
+        "descriptionPresentation": {
+          "collapsible": true,
+          "label": "説明",
+          "defaultExpanded": false
+        },
+        "score": {
+          "label": "設定判別スコア",
+          "status": "NOT_COMPUTED",
+          "display": "算出不可",
+          "reason": "基準遊技量7000Gでの判別力を算出するための観測条件が確定していないため算出できません。",
+          "sourceReason": "基準遊技量に対応するexact exposure modelが未確立のため算出しない。"
+        },
+        "perEligibleTrialPower": {
+          "label": "1回の判別力",
+          "value": 0.0009593048153885841,
+          "metric": "PER_ELIGIBLE_TRIAL_POWER",
+          "thresholdSource": "RUNTIME_POLICY"
+        },
+        "inputs": [
+          {
+            "id": "OVERLAP_WATER_A.verifiedTrialCount",
+            "label": "当選期待度回数",
+            "role": "trial",
+            "mode": "NUMBER",
+            "directNumeric": true,
+            "quickAdd": [],
+            "partialInputAllowed": true,
+            "emptyMeansUnobserved": true
+          },
+          {
+            "id": "OVERLAP_WATER_A.successCount",
+            "label": "当選期待度回数",
+            "role": "success",
+            "mode": "NUMBER",
+            "directNumeric": true,
+            "quickAdd": [
+              1
+            ],
+            "partialInputAllowed": true,
+            "emptyMeansUnobserved": true,
+            "missingSubItemTreatment": "ZERO_WHEN_PARENT_OBSERVED"
+          }
+        ]
+      },
+      {
+        "id": "OBS_OVERLAP_WATER_B",
+        "sourceFindingId": "OVERLAP_WATER_B",
+        "title": "スイカB同時当選期待度",
+        "kind": "NUMERIC_OBSERVATION",
+        "model": "BERNOULLI",
+        "trialUniverse": "ROLE_WATER_B",
+        "description": "対象となる機会のうち、当選期待度が実際に起きた割合を設定別に比較します。\n・注意：ボーナス総数・契機内訳との重複加算をしない。\n・注意：ボーナス・BT・成立後を除いた対象区間だけのゲーム数と、同じ区間の回数を入力します。総Gからは自動連動しません。",
+        "collapsible": true,
+        "defaultExpanded": false,
+        "descriptionPresentation": {
+          "collapsible": true,
+          "label": "説明",
+          "defaultExpanded": false
+        },
+        "score": {
+          "label": "設定判別スコア",
+          "status": "NOT_COMPUTED",
+          "display": "算出不可",
+          "reason": "基準遊技量7000Gでの判別力を算出するための観測条件が確定していないため算出できません。",
+          "sourceReason": "基準遊技量に対応するexact exposure modelが未確立のため算出しない。"
+        },
+        "perEligibleTrialPower": {
+          "label": "1回の判別力",
+          "value": 0.0039029532856421634,
+          "metric": "PER_ELIGIBLE_TRIAL_POWER",
+          "thresholdSource": "RUNTIME_POLICY"
+        },
+        "inputs": [
+          {
+            "id": "OVERLAP_WATER_B.verifiedTrialCount",
+            "label": "当選期待度回数",
+            "role": "trial",
+            "mode": "NUMBER",
+            "directNumeric": true,
+            "quickAdd": [],
+            "partialInputAllowed": true,
+            "emptyMeansUnobserved": true
+          },
+          {
+            "id": "OVERLAP_WATER_B.successCount",
+            "label": "当選期待度回数",
+            "role": "success",
+            "mode": "NUMBER",
+            "directNumeric": true,
+            "quickAdd": [
+              1
+            ],
+            "partialInputAllowed": true,
+            "emptyMeansUnobserved": true,
+            "missingSubItemTreatment": "ZERO_WHEN_PARENT_OBSERVED"
+          }
+        ]
+      },
+      {
+        "id": "OBS_OVERLAP_REPLAY",
+        "sourceFindingId": "OVERLAP_REPLAY",
+        "title": "リプレイ同時当選期待度",
+        "kind": "NUMERIC_OBSERVATION",
+        "model": "BERNOULLI",
+        "trialUniverse": "ROLE_REPLAY",
+        "description": "対象となる機会のうち、当選期待度が実際に起きた割合を設定別に比較します。\n・注意：ボーナス総数・契機内訳との重複加算をしない。\n・注意：ボーナス・BT・成立後を除いた対象区間だけのゲーム数と、同じ区間の回数を入力します。総Gからは自動連動しません。",
+        "collapsible": true,
+        "defaultExpanded": false,
+        "descriptionPresentation": {
+          "collapsible": true,
+          "label": "説明",
+          "defaultExpanded": false
+        },
+        "score": {
+          "label": "設定判別スコア",
+          "status": "NOT_COMPUTED",
+          "display": "算出不可",
+          "reason": "基準遊技量7000Gでの判別力を算出するための観測条件が確定していないため算出できません。",
+          "sourceReason": "基準遊技量に対応するexact exposure modelが未確立のため算出しない。"
+        },
+        "perEligibleTrialPower": {
+          "label": "1回の判別力",
+          "value": 0.002386608168606502,
+          "metric": "PER_ELIGIBLE_TRIAL_POWER",
+          "thresholdSource": "RUNTIME_POLICY"
+        },
+        "inputs": [
+          {
+            "id": "OVERLAP_REPLAY.verifiedTrialCount",
+            "label": "当選期待度回数",
+            "role": "trial",
+            "mode": "NUMBER",
+            "directNumeric": true,
+            "quickAdd": [],
+            "partialInputAllowed": true,
+            "emptyMeansUnobserved": true
+          },
+          {
+            "id": "OVERLAP_REPLAY.successCount",
+            "label": "当選期待度回数",
+            "role": "success",
             "mode": "NUMBER",
             "directNumeric": true,
             "quickAdd": [
@@ -1178,43 +1955,47 @@
     ]
   },
   "highLowDiscrimination": {
-    "status": "COMPUTED",
-    "method": "BEST_SINGLE_EXACT_ACTIVE_FEATURE",
-    "bandDefinition": {
-      "lowSettings": "SETTING_1_TO_3",
-      "highSettings": "SETTING_4_TO_6",
-      "classPrior": "BALANCED"
-    },
-    "results": [
-      {
-        "games": 1500,
-        "balancedAccuracyPercent": 62.45
-      },
-      {
-        "games": 3000,
-        "balancedAccuracyPercent": 66.15
-      },
-      {
-        "games": 7000,
-        "balancedAccuracyPercent": 70.06
-      }
-    ],
-    "eligibleFeatureIds": [
-      "BELL_B"
-    ],
-    "selectedFeatureId": "BELL_B",
-    "selectedFeatureLabel": "ベルB",
+    "status": "NOT_COMPUTED",
+    "reason": "基準ゲーム数へ正確に換算できる設定推測要素がないため、高低判別精度を算出していません。",
+    "eligibleFeatureIds": [],
     "excludedFeatures": [
       {
+        "findingId": "REG",
+        "reason": "BENCHMARK_EXPOSURE_UNRESOLVED"
+      },
+      {
+        "findingId": "BELL_B",
+        "reason": "BENCHMARK_EXPOSURE_UNRESOLVED"
+      },
+      {
         "findingId": "BIG_BELL_B",
+        "reason": "BENCHMARK_EXPOSURE_UNRESOLVED"
+      },
+      {
+        "findingId": "OVERLAP_BELL_A",
+        "reason": "BENCHMARK_EXPOSURE_UNRESOLVED"
+      },
+      {
+        "findingId": "OVERLAP_CHERRY_B",
+        "reason": "BENCHMARK_EXPOSURE_UNRESOLVED"
+      },
+      {
+        "findingId": "OVERLAP_WATER_A",
+        "reason": "BENCHMARK_EXPOSURE_UNRESOLVED"
+      },
+      {
+        "findingId": "OVERLAP_WATER_B",
+        "reason": "BENCHMARK_EXPOSURE_UNRESOLVED"
+      },
+      {
+        "findingId": "OVERLAP_REPLAY",
         "reason": "BENCHMARK_EXPOSURE_UNRESOLVED"
       },
       {
         "findingId": "PREDECESSOR",
         "reason": "BENCHMARK_EXPOSURE_UNRESOLVED"
       }
-    ],
-    "note": "7000Gへ正確に換算できるACTIVE要素だけを候補とし、要素間の独立性を仮定せず、単独で最も高い判別精度を持つ要素から保守的に算出しています。条件付き要素はこの指標には含めませんが、実戦中に実際の観測回数が入力された場合は設定推測に使用します。"
+    ]
   },
   "blockedItems": [
     {

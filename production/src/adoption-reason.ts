@@ -8,7 +8,7 @@ export function concreteAdoptionReason(pkg:any,id:string){
  const inputName=(id:string)=>{const i=(pkg.inputs?.inputs??[]).find((i:any)=>i.id===id);return String(i?.name??i?.label??'').trim()};
  const section=(pkg.ui?.v8Sections??[]).find((s:any)=>(s.items??[]).some((n:any)=>n.featureId===id));
  let values:[string,number][],category='';
- if(f.modelType==='multinomial'){
+ if(['multinomial','marginal_multinomial'].includes(f.modelType)){
   const rows=Object.entries(f.categoryProbabilities??{}) as [string,number[]][],ids=[f.numeratorInputId,...(f.categoryInputIds??[])];
   if(rows.length<2||rows.some(([,r])=>!Array.isArray(r)||r.length!==ids.length))throw Error('ADOPTION_REASON_CATEGORIES:'+id);
   let best=0,spread=-1;
@@ -28,3 +28,4 @@ export function concreteAdoptionReason(pkg:any,id:string){
  return reason;
 }
 export function repairGenericAdoptionReasons(pkg:any){let changed=0;for(const e of pkg.v8?.machineResearchSummary?.adopted??[]){if(!isGenericAdoptionReason(e.reason))continue;e.reason=concreteAdoptionReason(pkg,e.featureId);changed++;const f=pkg.features.features.find((f:any)=>f.featureId===e.featureId);if(f.selectionRationale&&isGenericAdoptionReason(f.selectionRationale.adoptionReason))f.selectionRationale.adoptionReason=e.reason;}return changed;}
+

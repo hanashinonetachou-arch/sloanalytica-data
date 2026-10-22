@@ -55,7 +55,7 @@ function resolveGroup(groupId:string,members:any[],evalBy:Map<string,any>){
  if(kinds.includes('UNRESOLVED'))return {resolution:'HELD_NO_JOINT_MODEL',members:members.map(c=>c.findingId),runtimeInferenceAllowed:false,reason:'候補間の依存関係が未解決のため、独立性を仮定しない。',reevaluationCondition:'候補間の包含・上流下流・条件付き関係が確認されること。'};
 
  if(/排他的/.test(reasons)){
-  const leader=members[0];
+  const leader=members.find(c=>c.jointObservationMode)||members[0];
   return {resolution:'MUTUALLY_EXCLUSIVE_CATEGORICAL',members:members.map(c=>c.findingId),runtimeInferenceAllowed:true,jointFindingId:leader.findingId,jointSourceFindingIds:members.map(c=>c.findingId),reason:'同一trial universeで排他的な観測カテゴリをjoint multinomialとして評価し、カテゴリ間の二重評価を避ける。'};
  }
  for(const candidate of members){
@@ -76,7 +76,7 @@ function resolveGroup(groupId:string,members:any[],evalBy:Map<string,any>){
 export function buildCandidateContract(evaluation:any,eligibility:any,evaluationArtifact:any,eligibilityArtifact:any){
  const evalBy=new Map((evaluation.evaluations??[]).map((x:any)=>[x.findingId,x]));
  const eligible=(eligibility.decisions??[]).filter((x:any)=>x.eligibility==='ELIGIBLE');
- const candidates=eligible.map((d:any)=>{const e:any=evalBy.get(d.findingId);if(!e)throw new Error('EVALUATION_MISSING:'+d.findingId);const group=e.dependency?.status==='DEFERRED_TO_CANDIDATE_CONTRACT'?e.dependency.groupId:null;return {findingId:d.findingId,label:d.label,model:e.model,trialUniverse:e.trialUniverse,liveInferenceRoute:d.liveInferenceRoute,settingDistribution:e.settingDistribution,categoryModel:e.categoryModel,details:Array.isArray(e.details)?structuredClone(e.details):[],dependencyGroupId:group,dependencyKind:e.dependency?.kind,dependencyReason:e.dependency?.reason,dependencyFallbackRank:e.dependencyFallbackRank,runtimeInferenceAllowed:!group,dependencyResolution:group?'UNRESOLVED':'NONE',runtimePolicyBinding:policyBindingForEvaluation(e)}});
+ const candidates=eligible.map((d:any)=>{const e:any=evalBy.get(d.findingId);if(!e)throw new Error('EVALUATION_MISSING:'+d.findingId);const group=e.dependency?.status==='DEFERRED_TO_CANDIDATE_CONTRACT'?e.dependency.groupId:null;return {findingId:d.findingId,label:d.label,model:e.model,trialUniverse:e.trialUniverse,liveInferenceRoute:d.liveInferenceRoute,settingDistribution:e.settingDistribution,categoryModel:e.categoryModel,details:Array.isArray(e.details)?structuredClone(e.details):[],upstreamSuppressionIds:e.upstreamSuppressionIds??[],jointObservationMode:e.jointObservationMode,dependencyGroupId:group,dependencyKind:e.dependency?.kind,dependencyReason:e.dependency?.reason,dependencyFallbackRank:e.dependencyFallbackRank,runtimeInferenceAllowed:!group,dependencyResolution:group?'UNRESOLVED':'NONE',runtimePolicyBinding:policyBindingForEvaluation(e)}});
  const groups=new Map<string,any[]>();for(const c of candidates)if(c.dependencyGroupId){const a=groups.get(c.dependencyGroupId)??[];a.push(c);groups.set(c.dependencyGroupId,a)}
  const dependencyGroups:any[]=[];
  for(const [groupId,members] of groups){
@@ -88,7 +88,7 @@ export function buildCandidateContract(evaluation:any,eligibility:any,evaluation
    const leader=members.find(c=>c.findingId===resolution.jointFindingId);
    if(!leader)throw new Error('CANDIDATE_JOINT_LEADER:'+groupId);
    const jointDist=jointDistribution(sourceMembers),power=jointPower(sourceMembers);
-   leader.model='CATEGORICAL';leader.settingDistribution=jointDist;leader.runtimeInferenceAllowed=true;leader.dependencyResolution='MUTUALLY_EXCLUSIVE_CATEGORICAL';leader.jointSourceFindingIds=[...resolution.jointSourceFindingIds];leader.runtimePolicyBinding={metric:'PER_ELIGIBLE_TRIAL_POWER',value:power,thresholdSource:'RUNTIME_POLICY'};
+   leader.model='CATEGORICAL';leader.settingDistribution=jointDist;if(leader.jointObservationMode==='MARGINAL_COUNTS')leader.categoryModel={residualPolicy:'IMPLICIT_RESIDUAL',observationMode:'MARGINAL_COUNTS'};leader.runtimeInferenceAllowed=true;leader.dependencyResolution='MUTUALLY_EXCLUSIVE_CATEGORICAL';leader.jointSourceFindingIds=[...resolution.jointSourceFindingIds];leader.runtimePolicyBinding={metric:'PER_ELIGIBLE_TRIAL_POWER',value:power,thresholdSource:'RUNTIME_POLICY'};
    for(const c of members)if(c!==leader){c.runtimeInferenceAllowed=false;c.dependencyResolution='RESOLVED_IN_JOINT_MODEL';c.resolvedIntoFindingId=leader.findingId}
   }else if(resolution.resolution==='SINGLE_MEMBER_SELECTED'){
    for(const c of members){
@@ -102,6 +102,16 @@ export function buildCandidateContract(evaluation:any,eligibility:any,evaluation
    for(const c of members){c.runtimeInferenceAllowed=false;c.dependencyResolution='HELD_NO_JOINT_MODEL'}
   }
  }
+ // Explicit cross-group suppression permits alternative models without assuming independence.
+ for(const c of candidates){
+  const upstream=c.upstreamSuppressionIds??[];
+  if(upstream.some((id:string)=>id===c.findingId||!candidates.some(x=>x.findingId===id&&x.runtimeInferenceAllowed)))throw Error('CANDIDATE_INVALID_SUPPRESSOR:'+c.findingId);
+  if(c.runtimeInferenceAllowed)c.suppressedByFeatureIds=[...new Set([...upstream,...(c.suppressedByFeatureIds??[])])];
+ }
+ const visiting=new Set<string>(),done=new Set<string>();
+ const visit=(id:string)=>{if(visiting.has(id))throw Error('CANDIDATE_SUPPRESSION_CYCLE:'+id);if(done.has(id))return;visiting.add(id);for(const p of candidates.find(c=>c.findingId===id)?.suppressedByFeatureIds??[])visit(p);visiting.delete(id);done.add(id)};
+ for(const c of candidates)visit(c.findingId);
  return {schemaVersion:'candidate-contract-v1',manifestVersion:'8.5',batchId:eligibility.batchId,machineId:eligibility.machineId,machineName:eligibility.machineName,evaluationArtifact,eligibilityArtifact,candidates,dependencyGroups,excludedDecisions:(eligibility.decisions??[]).filter((x:any)=>x.eligibility!=='ELIGIBLE'),blockedItems:eligibility.blockedItems??[],evidenceCandidates:eligibility.evidenceCandidates??[],sourceIntegrityIssues:eligibility.sourceIntegrityIssues??[]};
 }
+
 
