@@ -1,12 +1,16 @@
 {
   "schemaVersion": 1,
+  "provenance": {
+    "manifestVersion": "8.5",
+    "generationPath": "V8_5_PRODUCTION_PIPELINE",
+    "legacyOracleUsed": false
+  },
   "machine": {
     "schemaVersion": "2.0.0",
     "machineId": "LB_SHAKE_BONUS_TRIGGER_A1",
-    "machineDataVersion": "0.1.0",
+    "machineDataVersion": "8.5.1-batch-20261022-025",
     "displayName": "SHAKE BONUS TRIGGER",
-    "modelName": "LB／シェイクボーナストリガー／A1",
-    "manufacturer": "株式会社大都技研",
+    "modelName": "SHAKE BONUS TRIGGER",
     "settings": [
       "SET_1",
       "SET_2",
@@ -18,6 +22,7 @@
       "containsImages": false,
       "containsExecutableCode": false
     },
+    "manufacturer": "株式会社大都技研",
     "introductionDate": "2025-10-20",
     "machineType": "SMART_SLOT",
     "gameType": "BT"
@@ -26,378 +31,379 @@
     "schemaVersion": "2.0.0",
     "inputs": [
       {
-        "id": "INP_PREDECESSOR_GAMES",
-        "name": "着席時ゲーム数",
+        "id": "REG.eligibleTrialCount",
+        "name": "総ゲーム数",
+        "category": "V8_NUMERIC",
         "type": "integer",
-        "category": "PREDECESSOR",
         "unit": "G",
+        "defaultValue": 0,
+        "minimum": 0,
         "displayOrder": 1,
-        "inferenceRole": "EXCLUDE",
-        "defaultValue": 0,
-        "observationScope": "PREDECESSOR_SNAPSHOT",
-        "sessionDifferenceHelper": false,
-        "description": "着席時にデータカウンターへ表示されている累計ゲーム数を入力します。",
-        "minimum": 0
+        "inferenceRole": "INCLUDE_PRIMARY"
       },
       {
-        "id": "INP_PREDECESSOR_BIG_COUNT",
-        "name": "着席時BIG",
+        "id": "REG.successCount",
+        "name": "REG回数",
+        "category": "V8_NUMERIC",
         "type": "counter",
-        "category": "PREDECESSOR",
         "unit": "回",
+        "defaultValue": 0,
+        "minimum": 0,
         "displayOrder": 2,
-        "inferenceRole": "EXCLUDE",
-        "defaultValue": 0,
-        "observationScope": "PREDECESSOR_SNAPSHOT",
-        "parentInputId": "INP_PREDECESSOR_GAMES",
-        "description": "着席時のBIG回数を入力します。",
-        "minimum": 0
+        "parentInputId": "REG.eligibleTrialCount",
+        "inferenceRole": "INCLUDE_PRIMARY"
       },
       {
-        "id": "INP_PREDECESSOR_REG_COUNT",
-        "name": "着席時REG",
-        "type": "counter",
-        "category": "PREDECESSOR",
+        "id": "BT_JAC.eligibleTrialCount",
+        "name": "JAC開始回数",
+        "category": "V8_NUMERIC",
+        "type": "integer",
         "unit": "回",
+        "defaultValue": 0,
+        "minimum": 0,
         "displayOrder": 3,
-        "inferenceRole": "EXCLUDE",
-        "defaultValue": 0,
-        "observationScope": "PREDECESSOR_SNAPSHOT",
-        "parentInputId": "INP_PREDECESSOR_GAMES",
-        "description": "着席時のREG回数を入力します。",
-        "minimum": 0
+        "inferenceRole": "INCLUDE_SUPPORT",
+        "inputVisible": false,
+        "derivedCalculation": "sum",
+        "derivedFromInputIds": [
+          "BT_JAC.categoryCounts.1_SJAC",
+          "BT_JAC.categoryCounts.2_継続JAC",
+          "BT_JAC.categoryCounts.3_終了JAC"
+        ]
       },
       {
-        "id": "INP_NORMAL_GAMES",
-        "name": "自己実戦ゲーム数",
-        "type": "integer",
-        "category": "NORMAL",
-        "unit": "G",
-        "displayOrder": 10,
-        "inferenceRole": "INCLUDE_PRIMARY",
-        "defaultValue": 0,
-        "observationScope": "SELF_PLAY",
-        "sessionDifferenceHelper": false,
-        "description": "ダイトモに表示された自己実戦のゲーム数を入力します。ダイトモを使わない場合は自分で遊技した通常ゲーム数を入力します。",
-        "minimum": 0
-      },
-      {
-        "id": "INP_BIG_COUNT",
-        "name": "BIG",
-        "type": "counter",
-        "category": "NORMAL",
-        "unit": "回",
-        "displayOrder": 11,
-        "inferenceRole": "INCLUDE_PRIMARY",
-        "defaultValue": 0,
-        "parentInputId": "INP_NORMAL_GAMES",
-        "description": "自己実戦中のBIG回数を入力します。",
-        "minimum": 0
-      },
-      {
-        "id": "INP_REG_COUNT",
-        "name": "REG",
-        "type": "counter",
-        "category": "NORMAL",
-        "unit": "回",
-        "displayOrder": 12,
-        "inferenceRole": "INCLUDE_PRIMARY",
-        "defaultValue": 0,
-        "parentInputId": "INP_NORMAL_GAMES",
-        "description": "自己実戦中のREG回数を入力します。",
-        "minimum": 0
-      },
-      {
-        "id": "INP_BELL",
-        "name": "ベル",
-        "type": "counter",
-        "category": "SMALL_ROLE",
-        "unit": "回",
-        "displayOrder": 20,
-        "inferenceRole": "INCLUDE_PRIMARY",
-        "defaultValue": null,
-        "parentInputId": "INP_NORMAL_GAMES",
-        "description": "ダイトモのベル成立回数を入力します。未取得の場合は空欄にしてください。",
-        "minimum": 0
-      },
-      {
-        "id": "INP_CHERRY",
-        "name": "チェリー",
-        "type": "counter",
-        "category": "SMALL_ROLE",
-        "unit": "回",
-        "displayOrder": 21,
-        "inferenceRole": "INCLUDE_PRIMARY",
-        "defaultValue": null,
-        "parentInputId": "INP_NORMAL_GAMES",
-        "description": "ダイトモのチェリー成立回数を入力します。未取得の場合は空欄にしてください。",
-        "minimum": 0
-      },
-      {
-        "id": "INP_WATERMELON",
-        "name": "スイカ",
-        "type": "counter",
-        "category": "SMALL_ROLE",
-        "unit": "回",
-        "displayOrder": 22,
-        "inferenceRole": "INCLUDE_PRIMARY",
-        "defaultValue": null,
-        "parentInputId": "INP_NORMAL_GAMES",
-        "description": "ダイトモのスイカ成立回数を入力します。未取得の場合は空欄にしてください。",
-        "minimum": 0
-      },
-      {
-        "id": "INP_BT_JAC_TRIALS",
-        "name": "JAC合計",
-        "type": "integer",
-        "category": "BT_JAC",
-        "unit": "回",
-        "displayOrder": 30,
-        "inferenceRole": "INCLUDE_PRIMARY",
-        "defaultValue": 0,
-        "observationScope": "SELF_PLAY",
-        "description": "BT中に成立したSJAC・継続JAC・終了JACの合計回数を入力します。",
-        "minimum": 0
-      },
-      {
-        "id": "INP_BT_SJAC",
+        "id": "BT_JAC.categoryCounts.1_SJAC",
         "name": "SJAC",
+        "category": "V8_NUMERIC",
         "type": "counter",
-        "category": "BT_JAC",
         "unit": "回",
-        "displayOrder": 31,
-        "inferenceRole": "INCLUDE_PRIMARY",
         "defaultValue": 0,
-        "parentInputId": "INP_BT_JAC_TRIALS",
-        "description": "SJACの成立回数を入力します。",
-        "minimum": 0
+        "minimum": 0,
+        "displayOrder": 4,
+        "parentInputId": "BT_JAC.eligibleTrialCount",
+        "inferenceRole": "INCLUDE_SUPPORT"
       },
       {
-        "id": "INP_BT_CONTINUE_JAC",
+        "id": "BT_JAC.categoryCounts.2_継続JAC",
         "name": "継続JAC",
+        "category": "V8_NUMERIC",
         "type": "counter",
-        "category": "BT_JAC",
         "unit": "回",
-        "displayOrder": 32,
-        "inferenceRole": "INCLUDE_PRIMARY",
         "defaultValue": 0,
-        "parentInputId": "INP_BT_JAC_TRIALS",
-        "description": "最大104枚の継続JAC成立回数を入力します。",
-        "minimum": 0
+        "minimum": 0,
+        "displayOrder": 5,
+        "parentInputId": "BT_JAC.eligibleTrialCount",
+        "inferenceRole": "INCLUDE_SUPPORT"
       },
       {
-        "id": "INP_BT_END_JAC",
+        "id": "BT_JAC.categoryCounts.3_終了JAC",
         "name": "終了JAC",
+        "category": "V8_NUMERIC",
         "type": "counter",
-        "category": "BT_JAC",
         "unit": "回",
-        "displayOrder": 33,
-        "inferenceRole": "INCLUDE_PRIMARY",
         "defaultValue": 0,
-        "parentInputId": "INP_BT_JAC_TRIALS",
-        "description": "最大111枚の終了JAC成立回数を入力します。",
-        "minimum": 0
+        "minimum": 0,
+        "displayOrder": 6,
+        "parentInputId": "BT_JAC.eligibleTrialCount",
+        "inferenceRole": "INCLUDE_SUPPORT"
       },
       {
-        "id": "INP_EVI_SHAKE_BIG_END",
-        "name": "BIG終了画面",
-        "type": "multi_enum",
-        "category": "EVIDENCE",
-        "unit": "",
-        "displayOrder": 100,
-        "inferenceRole": "INCLUDE_SUPPORT",
-        "options": [
-          {
-            "key": "RAINBOW_6",
-            "label": "レインボー（設定6）",
-            "value": "RAINBOW_6"
-          }
-        ],
-        "defaultValue": []
+        "id": "JAC_HONEY.eligibleTrialCount",
+        "name": "スベリハニベル契機のJAC回数",
+        "category": "V8_NUMERIC",
+        "type": "integer",
+        "unit": "回",
+        "defaultValue": 0,
+        "minimum": 0,
+        "displayOrder": 7,
+        "inferenceRole": "INCLUDE_SUPPORT"
       },
       {
-        "id": "INP_EVI_SHAKE_TROPHY",
-        "name": "コパンダトロフィー",
-        "type": "multi_enum",
-        "category": "EVIDENCE",
-        "unit": "",
-        "displayOrder": 110,
-        "inferenceRole": "INCLUDE_SUPPORT",
-        "options": [
-          {
-            "key": "BRONZE_2PLUS",
-            "label": "銅（設定2以上）",
-            "value": "BRONZE_2PLUS"
-          },
-          {
-            "key": "LIGHTNING_5PLUS",
-            "label": "イナズマ柄（設定5以上）",
-            "value": "LIGHTNING_5PLUS"
-          },
-          {
-            "key": "RAINBOW_6",
-            "label": "レインボー（設定6）",
-            "value": "RAINBOW_6"
-          }
-        ],
-        "defaultValue": []
+        "id": "JAC_HONEY.successCount",
+        "name": "継続JAC以上の回数",
+        "category": "V8_NUMERIC",
+        "type": "counter",
+        "unit": "回",
+        "defaultValue": 0,
+        "minimum": 0,
+        "displayOrder": 8,
+        "parentInputId": "JAC_HONEY.eligibleTrialCount",
+        "inferenceRole": "INCLUDE_SUPPORT"
       },
       {
-        "id": "INP_EVI_SHAKE_REG_VOICE",
-        "name": "REG中ボイス",
-        "type": "multi_enum",
-        "category": "EVIDENCE",
-        "unit": "",
-        "displayOrder": 120,
-        "inferenceRole": "INCLUDE_SUPPORT",
-        "options": [
-          {
-            "key": "AMAZING_5PLUS",
-            "label": "Amazing（設定5以上）",
-            "value": "AMAZING_5PLUS"
-          }
-        ],
-        "defaultValue": []
+        "id": "JAC_WHITE.eligibleTrialCount",
+        "name": "白BAR狙え・黒もやのJAC回数",
+        "category": "V8_NUMERIC",
+        "type": "integer",
+        "unit": "回",
+        "defaultValue": 0,
+        "minimum": 0,
+        "displayOrder": 9,
+        "inferenceRole": "INCLUDE_SUPPORT"
+      },
+      {
+        "id": "JAC_WHITE.successCount",
+        "name": "継続JAC以上の回数",
+        "category": "V8_NUMERIC",
+        "type": "counter",
+        "unit": "回",
+        "defaultValue": 0,
+        "minimum": 0,
+        "displayOrder": 10,
+        "parentInputId": "JAC_WHITE.eligibleTrialCount",
+        "inferenceRole": "INCLUDE_SUPPORT"
+      },
+      {
+        "id": "JAC_BELL.eligibleTrialCount",
+        "name": "ベル契機のJAC回数",
+        "category": "V8_NUMERIC",
+        "type": "integer",
+        "unit": "回",
+        "defaultValue": 0,
+        "minimum": 0,
+        "displayOrder": 11,
+        "inferenceRole": "INCLUDE_SUPPORT"
+      },
+      {
+        "id": "JAC_BELL.successCount",
+        "name": "継続JAC以上の回数",
+        "category": "V8_NUMERIC",
+        "type": "counter",
+        "unit": "回",
+        "defaultValue": 0,
+        "minimum": 0,
+        "displayOrder": 12,
+        "parentInputId": "JAC_BELL.eligibleTrialCount",
+        "inferenceRole": "INCLUDE_SUPPORT"
+      },
+      {
+        "id": "JAC_REPLAY.eligibleTrialCount",
+        "name": "リプレイ契機のJAC回数",
+        "category": "V8_NUMERIC",
+        "type": "integer",
+        "unit": "回",
+        "defaultValue": 0,
+        "minimum": 0,
+        "displayOrder": 13,
+        "inferenceRole": "INCLUDE_SUPPORT"
+      },
+      {
+        "id": "JAC_REPLAY.successCount",
+        "name": "継続JAC以上の回数",
+        "category": "V8_NUMERIC",
+        "type": "counter",
+        "unit": "回",
+        "defaultValue": 0,
+        "minimum": 0,
+        "displayOrder": 14,
+        "parentInputId": "JAC_REPLAY.eligibleTrialCount",
+        "inferenceRole": "INCLUDE_SUPPORT"
+      },
+      {
+        "id": "REF_REG_VOICE_1",
+        "name": "OK：デフォルト",
+        "category": "EVIDENCE_REFERENCE",
+        "type": "counter",
+        "unit": "回",
+        "defaultValue": 0,
+        "minimum": 0,
+        "displayOrder": 15,
+        "inferenceRole": "DISPLAY_ONLY"
+      },
+      {
+        "id": "REF_REG_VOICE_2",
+        "name": "Feel so good：高設定示唆弱",
+        "category": "EVIDENCE_REFERENCE",
+        "type": "counter",
+        "unit": "回",
+        "defaultValue": 0,
+        "minimum": 0,
+        "displayOrder": 16,
+        "inferenceRole": "DISPLAY_ONLY"
+      },
+      {
+        "id": "REF_REG_VOICE_3",
+        "name": "Excellent：高設定示唆中",
+        "category": "EVIDENCE_REFERENCE",
+        "type": "counter",
+        "unit": "回",
+        "defaultValue": 0,
+        "minimum": 0,
+        "displayOrder": 17,
+        "inferenceRole": "DISPLAY_ONLY"
+      },
+      {
+        "id": "REF_REG_VOICE_4",
+        "name": "Unbelievable：高設定示唆強",
+        "category": "EVIDENCE_REFERENCE",
+        "type": "counter",
+        "unit": "回",
+        "defaultValue": 0,
+        "minimum": 0,
+        "displayOrder": 18,
+        "inferenceRole": "DISPLAY_ONLY"
+      },
+      {
+        "id": "REF_REG_VOICE_5",
+        "name": "Amazing：設定5以上",
+        "category": "EVIDENCE_REFERENCE",
+        "type": "counter",
+        "unit": "回",
+        "defaultValue": 0,
+        "minimum": 0,
+        "displayOrder": 19,
+        "inferenceRole": "DISPLAY_ONLY"
+      },
+      {
+        "id": "REF_BIG_END_1",
+        "name": "青：デフォルト",
+        "category": "EVIDENCE_REFERENCE",
+        "type": "counter",
+        "unit": "回",
+        "defaultValue": 0,
+        "minimum": 0,
+        "displayOrder": 20,
+        "inferenceRole": "DISPLAY_ONLY"
+      },
+      {
+        "id": "REF_BIG_END_2",
+        "name": "黄：高設定示唆弱",
+        "category": "EVIDENCE_REFERENCE",
+        "type": "counter",
+        "unit": "回",
+        "defaultValue": 0,
+        "minimum": 0,
+        "displayOrder": 21,
+        "inferenceRole": "DISPLAY_ONLY"
+      },
+      {
+        "id": "REF_BIG_END_3",
+        "name": "緑：高設定示唆中",
+        "category": "EVIDENCE_REFERENCE",
+        "type": "counter",
+        "unit": "回",
+        "defaultValue": 0,
+        "minimum": 0,
+        "displayOrder": 22,
+        "inferenceRole": "DISPLAY_ONLY"
+      },
+      {
+        "id": "REF_BIG_END_4",
+        "name": "紫：高設定示唆強",
+        "category": "EVIDENCE_REFERENCE",
+        "type": "counter",
+        "unit": "回",
+        "defaultValue": 0,
+        "minimum": 0,
+        "displayOrder": 23,
+        "inferenceRole": "DISPLAY_ONLY"
+      },
+      {
+        "id": "REF_BIG_END_5",
+        "name": "虹：設定6",
+        "category": "EVIDENCE_REFERENCE",
+        "type": "counter",
+        "unit": "回",
+        "defaultValue": 0,
+        "minimum": 0,
+        "displayOrder": 24,
+        "inferenceRole": "DISPLAY_ONLY"
+      },
+      {
+        "id": "REF_BIG_END_6",
+        "name": "金・黒の別条件背景：通常色とは異なる観測条件。設定別率未確認",
+        "category": "EVIDENCE_REFERENCE",
+        "type": "counter",
+        "unit": "回",
+        "defaultValue": 0,
+        "minimum": 0,
+        "displayOrder": 25,
+        "inferenceRole": "DISPLAY_ONLY"
+      },
+      {
+        "id": "REF_TROPHY_1",
+        "name": "銅：設定2以上",
+        "category": "EVIDENCE_REFERENCE",
+        "type": "counter",
+        "unit": "回",
+        "defaultValue": 0,
+        "minimum": 0,
+        "displayOrder": 26,
+        "inferenceRole": "DISPLAY_ONLY"
+      },
+      {
+        "id": "REF_TROPHY_2",
+        "name": "イナズマ：設定5以上",
+        "category": "EVIDENCE_REFERENCE",
+        "type": "counter",
+        "unit": "回",
+        "defaultValue": 0,
+        "minimum": 0,
+        "displayOrder": 27,
+        "inferenceRole": "DISPLAY_ONLY"
+      },
+      {
+        "id": "REF_TROPHY_3",
+        "name": "虹：設定6",
+        "category": "EVIDENCE_REFERENCE",
+        "type": "counter",
+        "unit": "回",
+        "defaultValue": 0,
+        "minimum": 0,
+        "displayOrder": 28,
+        "inferenceRole": "DISPLAY_ONLY"
       }
     ]
   },
   "features": {
-    "schemaVersion": "2.0.0",
+    "version": "8.5-runtime",
     "features": [
       {
-        "featureId": "FEAT_BONUS_OUTCOME",
-        "name": "自分のBIG・REG",
+        "featureId": "REG",
+        "name": "REG",
+        "trialUniverse": "TOTAL_GAME_TRIAL",
         "adoptionCategory": "INCLUDE_PRIMARY",
         "calculationRole": "PROBABILITY",
         "probabilityEngineUsage": true,
-        "modelType": "multinomial",
-        "minimumSample": 300,
-        "sampleRecommendation": 5000,
-        "reliabilityProfile": {
-          "weight": 1
+        "denominatorInputId": "REG.eligibleTrialCount",
+        "probabilities": {
+          "SET_1": 0.002349624060150376,
+          "SET_2": 0.003005710850616171,
+          "SET_5": 0.00244140625,
+          "SET_6": 0.0033568311513930854
         },
-        "suppressedByFeatureIds": [
-          "FEAT_SMALL_ROLE_OUTCOME"
-        ],
-        "numeratorInputId": "INP_BIG_COUNT",
-        "denominatorInputId": "INP_NORMAL_GAMES",
-        "categoryInputIds": [
-          "INP_REG_COUNT"
-        ],
-        "probabilities": {},
-        "categoryLabels": [
-          "BIG",
-          "REG"
-        ],
-        "categoryProbabilities": {
-          "SET_1": [
-            0.002853067047075607,
-            0.0023496240601503762
-          ],
-          "SET_2": [
-            0.003051571559353067,
-            0.003005711151186166
-          ],
-          "SET_5": [
-            0.002929973630237328,
-            0.00244140625
-          ],
-          "SET_6": [
-            0.0033568311513930854,
-            0.0033568311513930854
-          ]
+        "selectionRationale": {
+          "summary": "設定推測に採用された要素です。",
+          "adoptionReason": "REGは設定1 1/425.6、設定6 1/297.9と設定差があります。「総ゲーム数」に対する「REG回数」の発生割合を比較して推測に使用します。 観測条件：REGを記録します。",
+          "shortTermReason": "標本が少ない間は結果の振れが大きくなります。",
+          "longTermReason": "観測数が増えるほど設定別の比較が安定します。"
         },
-        "categoryConditioning": {
-          "excludedCategories": [],
-          "normalization": "RENORMALIZE_INCLUDED",
-          "residualCategory": "NO_BONUS"
-        },
-        "sourceEvidenceRefs": [
-          "SRC_HAZUSE",
-          "SRC_1GEKI"
-        ]
+        "modelType": "binomial",
+        "numeratorInputId": "REG.successCount",
+        "displayFormat": "ratio_1_over_n"
       },
       {
-        "featureId": "FEAT_SMALL_ROLE_OUTCOME",
-        "name": "通常時ベル・チェリー・スイカ",
-        "adoptionCategory": "INCLUDE_PRIMARY",
-        "calculationRole": "PROBABILITY",
-        "probabilityEngineUsage": true,
-        "modelType": "marginal_multinomial",
-        "minimumSample": 500,
-        "sampleRecommendation": 5000,
-        "reliabilityProfile": {
-          "weight": 1
-        },
-        "numeratorInputId": "INP_BELL",
-        "denominatorInputId": "INP_NORMAL_GAMES",
-        "categoryInputIds": [
-          "INP_CHERRY",
-          "INP_WATERMELON"
-        ],
-        "optionalCategoryInputIds": [
-          "INP_BELL",
-          "INP_CHERRY",
-          "INP_WATERMELON"
-        ],
-        "probabilities": {},
-        "categoryLabels": [
-          "BELL",
-          "CHERRY",
-          "WATERMELON"
-        ],
-        "categoryProbabilities": {
-          "SET_1": [
-            0.0970873786407767,
-            0.02710027100271003,
-            0.015267175572519083
-          ],
-          "SET_2": [
-            0.09803921568627451,
-            0.027472527472527472,
-            0.015723270440251572
-          ],
-          "SET_5": [
-            0.10101010101010101,
-            0.02785515320334262,
-            0.016666666666666666
-          ],
-          "SET_6": [
-            0.10416666666666667,
-            0.02976190476190476,
-            0.017123287671232876
-          ]
-        },
-        "sourceEvidenceRefs": [
-          "SRC_HAZUSE",
-          "SRC_1GEKI",
-          "SRC_DAITOMO_OFFICIAL"
-        ]
-      },
-      {
-        "featureId": "FEAT_BT_JAC_OUTCOME",
+        "featureId": "BT_JAC",
         "name": "BT中JAC種別",
-        "adoptionCategory": "INCLUDE_PRIMARY",
+        "trialUniverse": "BT_JAC_TRIAL",
+        "adoptionCategory": "INCLUDE_SUPPORT",
         "calculationRole": "PROBABILITY",
         "probabilityEngineUsage": true,
-        "modelType": "multinomial",
-        "minimumSample": 3,
-        "sampleRecommendation": 20,
-        "reliabilityProfile": {
-          "weight": 1
-        },
-        "numeratorInputId": "INP_BT_SJAC",
-        "denominatorInputId": "INP_BT_JAC_TRIALS",
-        "categoryInputIds": [
-          "INP_BT_CONTINUE_JAC",
-          "INP_BT_END_JAC"
-        ],
+        "denominatorInputId": "BT_JAC.eligibleTrialCount",
         "probabilities": {},
-        "categoryLabels": [
-          "SJAC",
-          "CONTINUE_JAC",
-          "END_JAC"
+        "selectionRationale": {
+          "summary": "設定推測に採用された要素です。",
+          "adoptionReason": "BT中JAC種別の「継続JAC」の割合は設定6 37.5%、設定5 52.5%と設定差があります。「JAC開始回数」を基準に、記録したカテゴリの振り分けを比較して推測に使用します。 観測条件：SJAC・継続JAC・終了JACの3種類を1回のJACごとに排他記録。",
+          "shortTermReason": "標本が少ない間は結果の振れが大きくなります。",
+          "longTermReason": "観測数が増えるほど設定別の比較が安定します。"
+        },
+        "modelType": "multinomial",
+        "numeratorInputId": "BT_JAC.categoryCounts.1_SJAC",
+        "categoryInputIds": [
+          "BT_JAC.categoryCounts.2_継続JAC",
+          "BT_JAC.categoryCounts.3_終了JAC"
         ],
+        "denominatorRule": "SUM_CATEGORY_COUNTS",
         "categoryProbabilities": {
           "SET_1": [
             0.025,
@@ -420,39 +426,216 @@
             0.6
           ]
         },
-        "sourceEvidenceRefs": [
-          "SRC_HAZUSE",
-          "SRC_NANAPRESS",
-          "SRC_PACHISEVEN"
-        ]
+        "displayFormat": "percentage"
+      },
+      {
+        "featureId": "JAC_HONEY",
+        "name": "スベリハニベル時継続JAC以上",
+        "trialUniverse": "BT_FIRST_ROLE_HONEY",
+        "adoptionCategory": "INCLUDE_SUPPORT",
+        "calculationRole": "PROBABILITY",
+        "probabilityEngineUsage": true,
+        "denominatorInputId": "JAC_HONEY.eligibleTrialCount",
+        "suppressedByFeatureIds": [
+          "BT_JAC"
+        ],
+        "probabilities": {
+          "SET_1": 0.632,
+          "SET_2": 0.565,
+          "SET_5": 0.677,
+          "SET_6": 0.536
+        },
+        "selectionRationale": {
+          "summary": "設定推測に採用された要素です。",
+          "adoptionReason": "スベリハニベル時継続JAC以上は設定6 53.6%、設定5 67.7%と設定差があります。「スベリハニベル契機のJAC回数」に対する「継続JAC以上の回数」の発生割合を比較して推測に使用します。 観測条件：対象となる機会のうち、継続JAC以上のが実際に起きた割合を設定別に比較します。 「BT中JAC種別」を記録していない場合の補助として使用し、同じ設定差を重ねて評価しません。",
+          "shortTermReason": "標本が少ない間は結果の振れが大きくなります。",
+          "longTermReason": "観測数が増えるほど設定別の比較が安定します。"
+        },
+        "modelType": "binomial",
+        "numeratorInputId": "JAC_HONEY.successCount",
+        "displayFormat": "percentage"
+      },
+      {
+        "featureId": "JAC_WHITE",
+        "name": "白BAR狙え・黒もや時継続JAC以上",
+        "trialUniverse": "BT_FIRST_ROLE_WHITE",
+        "adoptionCategory": "INCLUDE_SUPPORT",
+        "calculationRole": "PROBABILITY",
+        "probabilityEngineUsage": true,
+        "denominatorInputId": "JAC_WHITE.eligibleTrialCount",
+        "suppressedByFeatureIds": [
+          "BT_JAC",
+          "JAC_HONEY"
+        ],
+        "probabilities": {
+          "SET_1": 0.5,
+          "SET_2": 0.43,
+          "SET_5": 0.55,
+          "SET_6": 0.4
+        },
+        "selectionRationale": {
+          "summary": "設定推測に採用された要素です。",
+          "adoptionReason": "白BAR狙え・黒もや時継続JAC以上は設定6 40%、設定5 55%と設定差があります。「白BAR狙え・黒もやのJAC回数」に対する「継続JAC以上の回数」の発生割合を比較して推測に使用します。 観測条件：対象となる機会のうち、継続JAC以上のが実際に起きた割合を設定別に比較します。 「BT中JAC種別」「スベリハニベル時継続JAC以上」を記録していない場合の補助として使用し、同じ設定差を重ねて評価しません。",
+          "shortTermReason": "標本が少ない間は結果の振れが大きくなります。",
+          "longTermReason": "観測数が増えるほど設定別の比較が安定します。"
+        },
+        "modelType": "binomial",
+        "numeratorInputId": "JAC_WHITE.successCount",
+        "displayFormat": "percentage"
+      },
+      {
+        "featureId": "JAC_BELL",
+        "name": "ベル時継続JAC以上",
+        "trialUniverse": "BT_FIRST_ROLE_BELL",
+        "adoptionCategory": "INCLUDE_SUPPORT",
+        "calculationRole": "PROBABILITY",
+        "probabilityEngineUsage": true,
+        "denominatorInputId": "JAC_BELL.eligibleTrialCount",
+        "suppressedByFeatureIds": [
+          "BT_JAC",
+          "JAC_HONEY",
+          "JAC_WHITE"
+        ],
+        "probabilities": {
+          "SET_1": 0.466,
+          "SET_2": 0.397,
+          "SET_5": 0.517,
+          "SET_6": 0.36700000000000005
+        },
+        "selectionRationale": {
+          "summary": "設定推測に採用された要素です。",
+          "adoptionReason": "ベル時継続JAC以上は設定6 36.7%、設定5 51.7%と設定差があります。「ベル契機のJAC回数」に対する「継続JAC以上の回数」の発生割合を比較して推測に使用します。 観測条件：対象となる機会のうち、継続JAC以上のが実際に起きた割合を設定別に比較します。 「BT中JAC種別」「スベリハニベル時継続JAC以上」「白BAR狙え・黒もや時継続JAC以上」を記録していない場合の補助として使用し、同じ設定差を重ねて評価しません。",
+          "shortTermReason": "標本が少ない間は結果の振れが大きくなります。",
+          "longTermReason": "観測数が増えるほど設定別の比較が安定します。"
+        },
+        "modelType": "binomial",
+        "numeratorInputId": "JAC_BELL.successCount",
+        "displayFormat": "percentage"
+      },
+      {
+        "featureId": "JAC_REPLAY",
+        "name": "リプレイ時継続JAC以上",
+        "trialUniverse": "BT_FIRST_ROLE_REPLAY",
+        "adoptionCategory": "INCLUDE_SUPPORT",
+        "calculationRole": "PROBABILITY",
+        "probabilityEngineUsage": true,
+        "denominatorInputId": "JAC_REPLAY.eligibleTrialCount",
+        "suppressedByFeatureIds": [
+          "BT_JAC",
+          "JAC_HONEY",
+          "JAC_WHITE",
+          "JAC_BELL"
+        ],
+        "probabilities": {
+          "SET_1": 0.445,
+          "SET_2": 0.376,
+          "SET_5": 0.494,
+          "SET_6": 0.348
+        },
+        "selectionRationale": {
+          "summary": "設定推測に採用された要素です。",
+          "adoptionReason": "リプレイ時継続JAC以上は設定6 34.8%、設定5 49.4%と設定差があります。「リプレイ契機のJAC回数」に対する「継続JAC以上の回数」の発生割合を比較して推測に使用します。 観測条件：対象となる機会のうち、継続JAC以上のが実際に起きた割合を設定別に比較します。 「BT中JAC種別」「スベリハニベル時継続JAC以上」「白BAR狙え・黒もや時継続JAC以上」「ベル時継続JAC以上」を記録していない場合の補助として使用し、同じ設定差を重ねて評価しません。",
+          "shortTermReason": "標本が少ない間は結果の振れが大きくなります。",
+          "longTermReason": "観測数が増えるほど設定別の比較が安定します。"
+        },
+        "modelType": "binomial",
+        "numeratorInputId": "JAC_REPLAY.successCount",
+        "displayFormat": "percentage"
+      }
+    ],
+    "runtimeProjection": [
+      {
+        "featureId": "REG",
+        "runtimeStatus": "ACTIVE",
+        "metric": "SELECTION_SCORE",
+        "metricValue": 51.056168479083354,
+        "importance": "主要"
+      },
+      {
+        "featureId": "BT_JAC",
+        "runtimeStatus": "ACTIVE",
+        "metric": "PER_ELIGIBLE_TRIAL_POWER",
+        "metricValue": 2.0626676858351622,
+        "importance": "微小"
+      },
+      {
+        "featureId": "JAC_HONEY",
+        "runtimeStatus": "ACTIVE",
+        "metric": "PER_ELIGIBLE_TRIAL_POWER",
+        "metricValue": 1.8553747804119336,
+        "importance": "微小"
+      },
+      {
+        "featureId": "JAC_WHITE",
+        "runtimeStatus": "ACTIVE",
+        "metric": "PER_ELIGIBLE_TRIAL_POWER",
+        "metricValue": 2.003313432478082,
+        "importance": "微小"
+      },
+      {
+        "featureId": "JAC_BELL",
+        "runtimeStatus": "ACTIVE",
+        "metric": "PER_ELIGIBLE_TRIAL_POWER",
+        "metricValue": 2.0183043746827334,
+        "importance": "微小"
+      },
+      {
+        "featureId": "JAC_REPLAY",
+        "runtimeStatus": "ACTIVE",
+        "metric": "PER_ELIGIBLE_TRIAL_POWER",
+        "metricValue": 1.954896844626619,
+        "importance": "微小"
       }
     ]
   },
   "evidence": {
-    "version": "1.0.0",
+    "version": "8.5-runtime",
     "evidences": [
       {
-        "id": "EVI_SHAKE_BIG_END_RAINBOW_6",
-        "name": "レインボー（設定6）",
-        "displayName": "レインボー（設定6）",
-        "inputId": "INP_EVI_SHAKE_BIG_END",
-        "triggerValue": "RAINBOW_6",
+        "id": "REG_VOICE__5",
+        "name": "Amazing：設定5以上",
+        "displayName": "Amazing：設定5以上",
+        "inputId": "REF_REG_VOICE_5",
+        "details": [
+          "Amazing：設定5以上"
+        ],
+        "confirmedSettings": [
+          "SET_5",
+          "SET_6"
+        ],
+        "deniedSettings": [],
+        "hasImage": false,
+        "type": "SETTING_CONSTRAINT",
+        "sourceEvidenceRefs": [
+          "REG_VOICE"
+        ]
+      },
+      {
+        "id": "BIG_END__5",
+        "name": "虹：設定6",
+        "displayName": "虹：設定6",
+        "inputId": "REF_BIG_END_5",
+        "details": [
+          "虹：設定6"
+        ],
         "confirmedSettings": [
           "SET_6"
         ],
         "deniedSettings": [],
         "hasImage": false,
-        "type": "SETTING_CONFIRMATION",
+        "type": "SETTING_CONSTRAINT",
         "sourceEvidenceRefs": [
-          "RE_BIG_END_6"
+          "BIG_END"
         ]
       },
       {
-        "id": "EVI_SHAKE_TROPHY_BRONZE_2PLUS",
-        "name": "銅（設定2以上）",
-        "displayName": "銅（設定2以上）",
-        "inputId": "INP_EVI_SHAKE_TROPHY",
-        "triggerValue": "BRONZE_2PLUS",
+        "id": "TROPHY__1",
+        "name": "銅：設定2以上",
+        "displayName": "銅：設定2以上",
+        "inputId": "REF_TROPHY_1",
+        "details": [
+          "銅：設定2以上"
+        ],
         "confirmedSettings": [
           "SET_2",
           "SET_5",
@@ -460,355 +643,875 @@
         ],
         "deniedSettings": [],
         "hasImage": false,
-        "type": "SETTING_CONFIRMATION",
+        "type": "SETTING_CONSTRAINT",
         "sourceEvidenceRefs": [
-          "RE_TROPHY_2PLUS"
+          "TROPHY"
         ]
       },
       {
-        "id": "EVI_SHAKE_TROPHY_LIGHTNING_5PLUS",
-        "name": "イナズマ柄（設定5以上）",
-        "displayName": "イナズマ柄（設定5以上）",
-        "inputId": "INP_EVI_SHAKE_TROPHY",
-        "triggerValue": "LIGHTNING_5PLUS",
+        "id": "TROPHY__2",
+        "name": "イナズマ：設定5以上",
+        "displayName": "イナズマ：設定5以上",
+        "inputId": "REF_TROPHY_2",
+        "details": [
+          "イナズマ：設定5以上"
+        ],
         "confirmedSettings": [
           "SET_5",
           "SET_6"
         ],
         "deniedSettings": [],
         "hasImage": false,
-        "type": "SETTING_CONFIRMATION",
+        "type": "SETTING_CONSTRAINT",
         "sourceEvidenceRefs": [
-          "RE_TROPHY_5PLUS"
+          "TROPHY"
         ]
       },
       {
-        "id": "EVI_SHAKE_TROPHY_RAINBOW_6",
-        "name": "レインボー（設定6）",
-        "displayName": "レインボー（設定6）",
-        "inputId": "INP_EVI_SHAKE_TROPHY",
-        "triggerValue": "RAINBOW_6",
+        "id": "TROPHY__3",
+        "name": "虹：設定6",
+        "displayName": "虹：設定6",
+        "inputId": "REF_TROPHY_3",
+        "details": [
+          "虹：設定6"
+        ],
         "confirmedSettings": [
           "SET_6"
         ],
         "deniedSettings": [],
         "hasImage": false,
-        "type": "SETTING_CONFIRMATION",
+        "type": "SETTING_CONSTRAINT",
         "sourceEvidenceRefs": [
-          "RE_TROPHY_6"
-        ]
-      },
-      {
-        "id": "EVI_SHAKE_REG_VOICE_AMAZING_5PLUS",
-        "name": "Amazing（設定5以上）",
-        "displayName": "Amazing（設定5以上）",
-        "inputId": "INP_EVI_SHAKE_REG_VOICE",
-        "triggerValue": "AMAZING_5PLUS",
-        "confirmedSettings": [
-          "SET_5",
-          "SET_6"
-        ],
-        "deniedSettings": [],
-        "hasImage": false,
-        "type": "SETTING_CONFIRMATION",
-        "sourceEvidenceRefs": [
-          "RE_REG_VOICE_5PLUS"
+          "TROPHY"
         ]
       }
     ],
-    "sources": [
+    "references": [
       {
-        "id": "SRC_DAITO_OFFICIAL",
-        "classification": "OFFICIAL",
-        "pageName": "SHAKE BONUS TRIGGER 公式サイト",
-        "url": "https://www.daitogiken.com/contents/product/slot/shakeb/",
-        "checkedAt": "2026-08-17"
-      },
-      {
-        "id": "SRC_DAITOMO_OFFICIAL",
-        "classification": "OFFICIAL",
-        "pageName": "大都技研の実機連動サービス ダイトモ",
-        "url": "https://paon-dp.com/products/daitomo/",
-        "checkedAt": "2026-08-17"
-      },
-      {
-        "id": "SRC_OKAYAMA_KENTEI",
-        "classification": "OFFICIAL",
-        "pageName": "令和7年8月4日 遊技機型式検定告示",
-        "url": "https://www.pref.okayama.jp/uploaded/life/1015492_9802764_misc.pdf",
-        "checkedAt": "2026-08-17"
-      },
-      {
-        "id": "SRC_HAZUSE",
-        "classification": "ANALYSIS",
-        "pageName": "SHAKE BONUS TRIGGER 設定推測・解析",
-        "url": "https://hazuse.com/machine/pachislot/SX0111/",
-        "checkedAt": "2026-08-17"
-      },
-      {
-        "id": "SRC_1GEKI",
-        "classification": "ANALYSIS",
-        "pageName": "SHAKE BONUS TRIGGER 設定差・設定判別要素",
-        "url": "https://1geki.jp/slot/lb_shake/0/",
-        "checkedAt": "2026-08-17"
-      },
-      {
-        "id": "SRC_NANAPRESS",
-        "classification": "ANALYSIS",
-        "pageName": "SHAKE BONUS TRIGGER 設定判別・設定差まとめ",
-        "url": "https://nana-press.com/kaiseki/machine/1024/32546/",
-        "checkedAt": "2026-08-17"
-      },
-      {
-        "id": "SRC_PACHISEVEN",
-        "classification": "ANALYSIS",
-        "pageName": "SHAKE BONUS TRIGGER 設定差（設定推測）",
-        "url": "https://pachiseven.jp/machines/7266/cutout/4",
-        "checkedAt": "2026-08-17"
-      }
-    ]
-  },
-  "ui": {
-    "sections": [
-      {
-        "id": "UI_DESIGN_1",
-        "title": "着席時データ",
-        "displayOrder": 1,
-        "items": [
+        "id": "EVI_REG_VOICE",
+        "sourceFindingId": "REG_VOICE",
+        "title": "REG中チャレンジベル入賞時ボイス",
+        "kind": "EVIDENCE",
+        "collapsible": true,
+        "defaultExpanded": false,
+        "description": "REG中チャレンジベル入賞時ボイスを確認したときに、該当する項目を1回加算して記録します。\n・注意：入賞時に記録。技術介入成否で出現条件が変わるので成功・失敗を区別し、発生率未公表の声へ確率重みを付けない\n・反映：設定確定・設定否定の条件は、設定候補の絞り込みに自動反映します\n・反映：設定別出現率が未確認の項目は記録のみです。出現率確認後は設定推測へ反映できる可能性があります",
+        "descriptionPresentation": {
+          "collapsible": true,
+          "label": "説明",
+          "defaultExpanded": false
+        },
+        "runtimePolicyControlled": false,
+        "evidenceItems": [
           {
-            "type": "input",
-            "inputId": "INP_PREDECESSOR_GAMES",
-            "label": "着席時ゲーム数",
-            "widget": "number"
-          },
-          {
-            "type": "input",
-            "inputId": "INP_PREDECESSOR_BIG_COUNT",
-            "label": "着席時BIG",
-            "widget": "counter",
-            "gridSpan": 6,
-            "config": {
-              "compact": true
-            }
-          },
-          {
-            "type": "input",
-            "inputId": "INP_PREDECESSOR_REG_COUNT",
-            "label": "着席時REG",
-            "widget": "counter",
-            "gridSpan": 6,
-            "config": {
-              "compact": true
-            }
+            "findingId": "REG_VOICE",
+            "label": "REG中チャレンジベル入賞時ボイス",
+            "sourceIds": [
+              "S1"
+            ],
+            "details": [
+              "入賞時に記録。技術介入成否で出現条件が変わるので成功・失敗を区別し、発生率未公表の声へ確率重みを付けない。"
+            ],
+            "semanticType": "DISPLAY_ONLY",
+            "semanticCategories": [
+              {
+                "label": "OK",
+                "meaning": "デフォルト",
+                "semanticType": "PROBABILITY_UNKNOWN"
+              },
+              {
+                "label": "Feel so good",
+                "meaning": "高設定示唆弱",
+                "semanticType": "PROBABILITY_UNKNOWN"
+              },
+              {
+                "label": "Excellent",
+                "meaning": "高設定示唆中",
+                "semanticType": "PROBABILITY_UNKNOWN"
+              },
+              {
+                "label": "Unbelievable",
+                "meaning": "高設定示唆強",
+                "semanticType": "PROBABILITY_UNKNOWN"
+              },
+              {
+                "label": "Amazing",
+                "meaning": "設定5以上",
+                "semanticType": "EXACT_CONSTRAINT"
+              }
+            ],
+            "runtimePolicyControlled": false,
+            "status": "SOURCE_REFERENCED",
+            "interaction": "REFERENCE_ONLY"
           }
         ]
       },
       {
-        "id": "UI_DESIGN_2",
-        "title": "自己実戦",
-        "displayOrder": 2,
-        "items": [
+        "id": "EVI_BIG_END",
+        "sourceFindingId": "BIG_END",
+        "title": "BIG終了画面",
+        "kind": "EVIDENCE",
+        "collapsible": true,
+        "defaultExpanded": false,
+        "description": "BIG終了画面を確認したときに、該当する項目を1回加算して記録します。\n・注意：条件が明確な確定・否定表示は、設定候補の絞り込みへ反映できる可能性があります\n・反映：設定確定・設定否定の条件は、設定候補の絞り込みに自動反映します\n・反映：設定別出現率が未確認の項目は記録のみです。出現率確認後は設定推測へ反映できる可能性があります",
+        "descriptionPresentation": {
+          "collapsible": true,
+          "label": "説明",
+          "defaultExpanded": false
+        },
+        "runtimePolicyControlled": false,
+        "evidenceItems": [
           {
-            "type": "input",
-            "inputId": "INP_NORMAL_GAMES",
-            "label": "自己実戦ゲーム数",
-            "widget": "number"
-          },
-          {
-            "type": "input",
-            "inputId": "INP_BIG_COUNT",
-            "label": "BIG",
-            "widget": "counter",
-            "gridSpan": 6,
-            "config": {
-              "compact": true
-            }
-          },
-          {
-            "type": "input",
-            "inputId": "INP_REG_COUNT",
-            "label": "REG",
-            "widget": "counter",
-            "gridSpan": 6,
-            "config": {
-              "compact": true
-            }
-          }
-        ]
-      },
-      {
-        "id": "UI_DESIGN_3",
-        "title": "ダイトモ 小役",
-        "displayOrder": 3,
-        "items": [
-          {
-            "type": "input",
-            "inputId": "INP_BELL",
-            "label": "ベル",
-            "widget": "counter",
-            "gridSpan": 6,
-            "config": {
-              "compact": true
-            }
-          },
-          {
-            "type": "input",
-            "inputId": "INP_CHERRY",
-            "label": "チェリー",
-            "widget": "counter",
-            "gridSpan": 6,
-            "config": {
-              "compact": true
-            }
-          },
-          {
-            "type": "input",
-            "inputId": "INP_WATERMELON",
-            "label": "スイカ",
-            "widget": "counter"
-          }
-        ]
-      },
-      {
-        "id": "UI_DESIGN_4",
-        "title": "BT中JAC",
-        "displayOrder": 4,
-        "items": [
-          {
-            "type": "input",
-            "inputId": "INP_BT_JAC_TRIALS",
-            "label": "JAC合計",
-            "widget": "number"
-          },
-          {
-            "type": "input",
-            "inputId": "INP_BT_SJAC",
-            "label": "SJAC",
-            "widget": "counter",
-            "gridSpan": 6,
-            "config": {
-              "compact": true
-            }
-          },
-          {
-            "type": "input",
-            "inputId": "INP_BT_CONTINUE_JAC",
-            "label": "継続JAC",
-            "widget": "counter",
-            "gridSpan": 6,
-            "config": {
-              "compact": true
-            }
-          },
-          {
-            "type": "input",
-            "inputId": "INP_BT_END_JAC",
-            "label": "終了JAC",
-            "widget": "counter"
-          }
-        ]
-      },
-      {
-        "id": "UI_DESIGN_5",
-        "title": "設定確定情報",
-        "displayOrder": 5,
-        "items": [
-          {
-            "type": "input",
-            "inputId": "INP_EVI_SHAKE_BIG_END",
+            "findingId": "BIG_END",
             "label": "BIG終了画面",
-            "widget": "multi_select"
-          },
+            "sourceIds": [
+              "S1"
+            ],
+            "details": [
+              "条件が明確な確定・否定表示は、設定候補の絞り込みへ反映できる可能性があります。"
+            ],
+            "semanticType": "DISPLAY_ONLY",
+            "semanticCategories": [
+              {
+                "label": "青",
+                "meaning": "デフォルト",
+                "semanticType": "PROBABILITY_UNKNOWN"
+              },
+              {
+                "label": "黄",
+                "meaning": "高設定示唆弱",
+                "semanticType": "PROBABILITY_UNKNOWN"
+              },
+              {
+                "label": "緑",
+                "meaning": "高設定示唆中",
+                "semanticType": "PROBABILITY_UNKNOWN"
+              },
+              {
+                "label": "紫",
+                "meaning": "高設定示唆強",
+                "semanticType": "PROBABILITY_UNKNOWN"
+              },
+              {
+                "label": "虹",
+                "meaning": "設定6",
+                "semanticType": "EXACT_CONSTRAINT"
+              },
+              {
+                "label": "金・黒の別条件背景",
+                "meaning": "通常色とは異なる観測条件。設定別率未確認",
+                "semanticType": "PROBABILITY_UNKNOWN"
+              }
+            ],
+            "runtimePolicyControlled": false,
+            "status": "SOURCE_REFERENCED",
+            "interaction": "REFERENCE_ONLY"
+          }
+        ]
+      },
+      {
+        "id": "EVI_TROPHY",
+        "sourceFindingId": "TROPHY",
+        "title": "コパンダトロフィー",
+        "kind": "EVIDENCE",
+        "collapsible": true,
+        "defaultExpanded": false,
+        "description": "コパンダトロフィーを確認したときに、該当する項目を1回加算して記録します。\n・注意：条件が明確な確定・否定表示は、設定候補の絞り込みへ反映できる可能性があります\n・反映：設定確定・設定否定の条件は、設定候補の絞り込みに自動反映します",
+        "descriptionPresentation": {
+          "collapsible": true,
+          "label": "説明",
+          "defaultExpanded": false
+        },
+        "runtimePolicyControlled": false,
+        "evidenceItems": [
           {
-            "type": "input",
-            "inputId": "INP_EVI_SHAKE_TROPHY",
+            "findingId": "TROPHY",
             "label": "コパンダトロフィー",
-            "widget": "multi_select"
-          },
-          {
-            "type": "input",
-            "inputId": "INP_EVI_SHAKE_REG_VOICE",
-            "label": "REG中ボイス",
-            "widget": "multi_select"
+            "sourceIds": [
+              "S1"
+            ],
+            "details": [
+              "条件が明確な確定・否定表示は、設定候補の絞り込みへ反映できる可能性があります。"
+            ],
+            "semanticType": "EXACT_CONSTRAINT",
+            "semanticCategories": [
+              {
+                "label": "銅",
+                "meaning": "設定2以上",
+                "semanticType": "EXACT_CONSTRAINT"
+              },
+              {
+                "label": "イナズマ",
+                "meaning": "設定5以上",
+                "semanticType": "EXACT_CONSTRAINT"
+              },
+              {
+                "label": "虹",
+                "meaning": "設定6",
+                "semanticType": "EXACT_CONSTRAINT"
+              }
+            ],
+            "runtimePolicyControlled": false,
+            "status": "SOURCE_REFERENCED",
+            "interaction": "REFERENCE_ONLY"
           }
         ]
       }
     ]
   },
-  "selectionSummary": {
-    "schemaVersion": "selection-summary-v1",
-    "evaluatedCount": 7,
-    "selectedCount": 3,
-    "rejectedCount": 4,
-    "selected": [
-      {
-        "featureId": "FEAT_BONUS_OUTCOME",
-        "name": "自分のBIG・REG",
-        "reason": "BIG・REGには設定差があり、ダイトモ小役を取得していない場合でも利用できるため採用します。小役入力時は同時成立による情報重複を避けるため自動停止します。",
-        "requiredTrials": {
-          "value": 16565,
-          "unit": "通常ゲーム"
-        }
+  "blockedItems": [
+    {
+      "blockId": "WATER_RED",
+      "label": "スイカ＋ナディアBIG",
+      "reason": "設定6の資料値に1/5461.3と1/5451.3の不一致があるため、この候補の数値利用を止める。既存値と衝突値を保存し、他の当選契機は処理を継続する。",
+      "reevaluationCondition": "不足している観測条件または本機の設定別公表値が、新しい具体的な公開資料で確認できた場合に限り再評価する。",
+      "sourceIds": [
+        "S1"
+      ],
+      "closure": {
+        "basis": "Manifest v8.5 Research終了契約と添付の個別終了記録",
+        "ownerStage": "RESEARCH",
+        "releaseCondition": "NEW_CONCRETE_SOURCE_ONLY",
+        "repeatPublicSearch": false
       },
-      {
-        "featureId": "FEAT_SMALL_ROLE_OUTCOME",
-        "name": "通常時ベル・チェリー・スイカ",
-        "reason": "ダイトモで取得できるベル・チェリー・スイカは全て設定差があり、1日実戦で継続的に試行数を稼げるため主力Featureとして採用します。未取得の役は0回ではなく未観測として扱います。",
-        "requiredTrials": {
-          "value": 6558,
-          "unit": "通常ゲーム"
-        }
-      },
-      {
-        "featureId": "FEAT_BT_JAC_OUTCOME",
-        "name": "BT中JAC種別",
-        "reason": "継続JACと終了JACの比率には大きな偶奇差があり、実戦中に判別可能なため採用します。",
-        "requiredTrials": {
-          "value": 175,
-          "unit": "JAC成立"
-        }
+      "retainedSourceValues": {
+        "original": [
+          16384,
+          16384,
+          8192,
+          5461.3
+        ],
+        "conflictingSetting6": "1/5451.3",
+        "conflictingUrl": "https://chonborista.com/slot/daito-slot/241440/"
       }
-    ],
-    "rejected": [
+    },
+    {
+      "blockId": "ESTABLISHED_WATER_A",
+      "label": "ボーナス成立中スイカA",
+      "reason": "ボーナス成立の正確なゲームを常に確定できないため、成立後専用ゲーム数を通常時と混ぜて計算しない。成立ゲームを遡及確定できた場合だけ再評価する。",
+      "reevaluationCondition": "不足している観測条件または本機の設定別公表値が、新しい具体的な公開資料で確認できた場合に限り再評価する。",
+      "sourceIds": [
+        "S1"
+      ],
+      "closure": {
+        "basis": "Manifest v8.5 Research終了契約と添付の個別終了記録",
+        "ownerStage": "RESEARCH",
+        "releaseCondition": "NEW_CONCRETE_SOURCE_ONLY",
+        "repeatPublicSearch": false
+      },
+      "retainedSourceValues": [
+        "1/655.4",
+        "1/655.4",
+        "1/655.4",
+        "1/655.4"
+      ]
+    },
+    {
+      "blockId": "ESTABLISHED_WATER_B",
+      "label": "ボーナス成立中スイカB",
+      "reason": "ボーナス成立の正確なゲームを常に確定できないため、成立後専用ゲーム数を通常時と混ぜて計算しない。成立ゲームを遡及確定できた場合だけ再評価する。",
+      "reevaluationCondition": "不足している観測条件または本機の設定別公表値が、新しい具体的な公開資料で確認できた場合に限り再評価する。",
+      "sourceIds": [
+        "S1"
+      ],
+      "closure": {
+        "basis": "Manifest v8.5 Research終了契約と添付の個別終了記録",
+        "ownerStage": "RESEARCH",
+        "releaseCondition": "NEW_CONCRETE_SOURCE_ONLY",
+        "repeatPublicSearch": false
+      },
+      "retainedSourceValues": [
+        "1/72.8",
+        "1/70.5",
+        "1/66.1",
+        "1/64.1"
+      ]
+    },
+    {
+      "blockId": "ESTABLISHED_BELL_A",
+      "label": "ボーナス成立中ベルA",
+      "reason": "ボーナス成立の正確なゲームを常に確定できないため、成立後専用ゲーム数を通常時と混ぜて計算しない。成立ゲームを遡及確定できた場合だけ再評価する。",
+      "reevaluationCondition": "不足している観測条件または本機の設定別公表値が、新しい具体的な公開資料で確認できた場合に限り再評価する。",
+      "sourceIds": [
+        "S1"
+      ],
+      "closure": {
+        "basis": "Manifest v8.5 Research終了契約と添付の個別終了記録",
+        "ownerStage": "RESEARCH",
+        "releaseCondition": "NEW_CONCRETE_SOURCE_ONLY",
+        "repeatPublicSearch": false
+      },
+      "retainedSourceValues": [
+        "1/51.6",
+        "1/49.9",
+        "1/48.2",
+        "1/46.9"
+      ]
+    },
+    {
+      "blockId": "ESTABLISHED_BELL_B",
+      "label": "ボーナス成立中ベルB",
+      "reason": "ボーナス成立の正確なゲームを常に確定できないため、成立後専用ゲーム数を通常時と混ぜて計算しない。成立ゲームを遡及確定できた場合だけ再評価する。",
+      "reevaluationCondition": "不足している観測条件または本機の設定別公表値が、新しい具体的な公開資料で確認できた場合に限り再評価する。",
+      "sourceIds": [
+        "S1"
+      ],
+      "closure": {
+        "basis": "Manifest v8.5 Research終了契約と添付の個別終了記録",
+        "ownerStage": "RESEARCH",
+        "releaseCondition": "NEW_CONCRETE_SOURCE_ONLY",
+        "repeatPublicSearch": false
+      },
+      "retainedSourceValues": [
+        "1/12.8",
+        "1/12.8",
+        "1/12.5",
+        "1/12"
+      ]
+    }
+  ],
+  "ui": {
+    "schemaVersion": "v8.5-runtime-ui-v1",
+    "contractVersion": "runtime-ui-v8",
+    "source": "CANONICAL_UI",
+    "sourceSchemaVersion": "canonical-ui-v1",
+    "manifestRevision": "8.5",
+    "playInfo": {
+      "visible": true,
+      "collapsible": false,
+      "mode": "TOTAL_ONLY",
+      "sessionFields": [
+        {
+          "id": "date",
+          "label": "日付",
+          "mode": "DATE"
+        },
+        {
+          "id": "storeName",
+          "label": "店舗名",
+          "mode": "TEXT"
+        },
+        {
+          "id": "machineNumber",
+          "label": "台番号",
+          "mode": "TEXT"
+        }
+      ],
+      "startFields": [
+        {
+          "id": "startTotalGames",
+          "label": "着席時 総ゲーム数",
+          "mode": "NUMBER",
+          "directNumeric": true
+        }
+      ],
+      "currentFields": [
+        {
+          "id": "currentTotalGames",
+          "label": "現在 総ゲーム数",
+          "mode": "NUMBER",
+          "directNumeric": true
+        }
+      ],
+      "difference": {
+        "autoCalculate": true
+      },
+      "useDifference": {
+        "label": "着席時との差分を使用",
+        "defaultWhenStartNormalGamesPresent": true
+      }
+    },
+    "accordion": {
+      "enabled": true,
+      "singleOpen": true
+    },
+    "quickInput": {
+      "enabled": false
+    },
+    "v8Sections": [
       {
-        "featureId": "FEAT_PREDECESSOR_BONUS_OUTCOME",
-        "name": "着席前BIG・REG内訳",
-        "reason": "着席時入力欄は記録用として残しますが、観測元の実機確認完了まで前任者Featureは推測不参加とします。",
-        "requiredTrials": {
-          "value": 16565,
-          "unit": "通常ゲーム"
+        "id": "OBS_REG",
+        "title": "REG",
+        "collapsible": true,
+        "defaultExpanded": false,
+        "description": "REGを記録します。総ゲーム数を基準に、実戦中の出現割合を設定別に比較します。\n・注意：総G（ボーナス・BT中は対象に含めません。\n・注意：ボーナス成立後の小役は通常役に含めず、契機はWINチェックで確認。",
+        "descriptionPresentation": {
+          "collapsible": true,
+          "label": "説明",
+          "defaultExpanded": false
+        },
+        "items": [
+          {
+            "id": "NODE_REG",
+            "featureId": "REG",
+            "title": "REG",
+            "inputs": [
+              {
+                "id": "REG.eligibleTrialCount",
+                "label": "総ゲーム数",
+                "input": "denominator",
+                "inputId": "REG.eligibleTrialCount",
+                "engineBinding": {
+                  "inputId": "REG.eligibleTrialCount"
+                },
+                "gridSpan": 12,
+                "directNumeric": true,
+                "quickAdd": [
+                  50
+                ],
+                "unobservedDisplay": "—",
+                "playDataBinding": {
+                  "source": "PLAY_TOTAL_GAME_DELTA",
+                  "mode": "AUTO_EXACT"
+                }
+              },
+              {
+                "id": "REG.successCount",
+                "label": "REG回数",
+                "input": "counter",
+                "inputId": "REG.successCount",
+                "engineBinding": {
+                  "inputId": "REG.successCount"
+                },
+                "directNumeric": true,
+                "quickAdd": [
+                  1
+                ],
+                "gridSpan": 6,
+                "unobservedDisplay": "—"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "OBS_BT_JAC",
+        "title": "BT中JAC種別",
+        "collapsible": true,
+        "defaultExpanded": false,
+        "description": "SJAC・継続JAC・終了JACの3種類を1回のJACごとに排他記録。母数は3種類の合計から内部計算。継続率は別に掛け合わせない。\n・注意：母数は3種類の合計から内部計算。\n・注意：継続率は別に掛け合わせない。",
+        "descriptionPresentation": {
+          "collapsible": true,
+          "label": "説明",
+          "defaultExpanded": false
+        },
+        "items": [
+          {
+            "id": "NODE_BT_JAC",
+            "featureId": "BT_JAC",
+            "title": "BT中JAC種別",
+            "interaction": {
+              "type": "CATEGORY_COUNTERS",
+              "preservePriorObservations": true,
+              "showAccumulatedCounts": true,
+              "categoryCoverage": "EXHAUSTIVE",
+              "totalOpportunities": "SUM_CATEGORY_COUNTS",
+              "categories": [
+                {
+                  "id": "BT_JAC.categoryCounts.1_SJAC",
+                  "inputId": "BT_JAC.categoryCounts.1_SJAC",
+                  "label": "SJAC"
+                },
+                {
+                  "id": "BT_JAC.categoryCounts.2_継続JAC",
+                  "inputId": "BT_JAC.categoryCounts.2_継続JAC",
+                  "label": "継続JAC"
+                },
+                {
+                  "id": "BT_JAC.categoryCounts.3_終了JAC",
+                  "inputId": "BT_JAC.categoryCounts.3_終了JAC",
+                  "label": "終了JAC"
+                }
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "id": "OBS_JAC_HONEY",
+        "title": "スベリハニベル時継続JAC以上",
+        "collapsible": true,
+        "defaultExpanded": false,
+        "description": "対象となる機会のうち、継続JAC以上のが実際に起きた割合を設定別に比較します。\n・注意：JAC全体3分類と重複加算しない。\n・注意：BT突入1G目の成立役を識別できた回数とSJAC・継続JACの回数。JAC全体3分類と重複加算しない。",
+        "descriptionPresentation": {
+          "collapsible": true,
+          "label": "説明",
+          "defaultExpanded": false
+        },
+        "items": [
+          {
+            "id": "NODE_JAC_HONEY",
+            "featureId": "JAC_HONEY",
+            "title": "スベリハニベル時継続JAC以上",
+            "inputs": [
+              {
+                "id": "JAC_HONEY.eligibleTrialCount",
+                "label": "スベリハニベル契機のJAC回数",
+                "input": "denominator",
+                "inputId": "JAC_HONEY.eligibleTrialCount",
+                "engineBinding": {
+                  "inputId": "JAC_HONEY.eligibleTrialCount"
+                },
+                "gridSpan": 6,
+                "directNumeric": true,
+                "quickAdd": [],
+                "unobservedDisplay": "—"
+              },
+              {
+                "id": "JAC_HONEY.successCount",
+                "label": "継続JAC以上の回数",
+                "input": "counter",
+                "inputId": "JAC_HONEY.successCount",
+                "engineBinding": {
+                  "inputId": "JAC_HONEY.successCount"
+                },
+                "directNumeric": true,
+                "quickAdd": [
+                  1
+                ],
+                "gridSpan": 6,
+                "unobservedDisplay": "—"
+              }
+            ]
+          }
+        ],
+        "tabGroup": {
+          "id": "B025_M7_GROUP1",
+          "title": "BT開始時の役別JAC",
+          "label": "スベリハニベル"
         }
       },
       {
-        "featureId": "FEAT_WATERMELON_NADIA_BIG_EXCLUDED",
-        "name": "スイカ＋ナディアBIG",
-        "reason": "設定差は大きいですが、約1/5,500〜1/16,000と極端に低頻度で、1日実戦では試行量が不足するため不採用です。",
-        "requiredTrials": {
-          "value": 56020,
-          "unit": "通常ゲーム"
+        "id": "OBS_JAC_WHITE",
+        "title": "白BAR狙え・黒もや時継続JAC以上",
+        "collapsible": true,
+        "defaultExpanded": false,
+        "description": "対象となる機会のうち、継続JAC以上のが実際に起きた割合を設定別に比較します。\n・注意：JAC全体3分類と重複加算しない。\n・注意：BT突入1G目の成立役を識別できた回数とSJAC・継続JACの回数。JAC全体3分類と重複加算しない。",
+        "descriptionPresentation": {
+          "collapsible": true,
+          "label": "説明",
+          "defaultExpanded": false
+        },
+        "items": [
+          {
+            "id": "NODE_JAC_WHITE",
+            "featureId": "JAC_WHITE",
+            "title": "白BAR狙え・黒もや時継続JAC以上",
+            "inputs": [
+              {
+                "id": "JAC_WHITE.eligibleTrialCount",
+                "label": "白BAR狙え・黒もやのJAC回数",
+                "input": "denominator",
+                "inputId": "JAC_WHITE.eligibleTrialCount",
+                "engineBinding": {
+                  "inputId": "JAC_WHITE.eligibleTrialCount"
+                },
+                "gridSpan": 6,
+                "directNumeric": true,
+                "quickAdd": [],
+                "unobservedDisplay": "—"
+              },
+              {
+                "id": "JAC_WHITE.successCount",
+                "label": "継続JAC以上の回数",
+                "input": "counter",
+                "inputId": "JAC_WHITE.successCount",
+                "engineBinding": {
+                  "inputId": "JAC_WHITE.successCount"
+                },
+                "directNumeric": true,
+                "quickAdd": [
+                  1
+                ],
+                "gridSpan": 6,
+                "unobservedDisplay": "—"
+              }
+            ]
+          }
+        ],
+        "tabGroup": {
+          "id": "B025_M7_GROUP1",
+          "title": "BT開始時の役別JAC",
+          "label": "白BAR・黒もや"
         }
       },
       {
-        "featureId": "FEAT_BELL_REG_EXCLUDED",
-        "name": "ベル＋REG",
-        "reason": "設定差はありますが、約1/5,000〜1/8,200と低頻度で、1日実戦では安定した判別材料になりにくいため不採用です。",
-        "requiredTrials": {
-          "value": 198830,
-          "unit": "通常ゲーム"
+        "id": "OBS_JAC_BELL",
+        "title": "ベル時継続JAC以上",
+        "collapsible": true,
+        "defaultExpanded": false,
+        "description": "対象となる機会のうち、継続JAC以上のが実際に起きた割合を設定別に比較します。\n・注意：JAC全体3分類と重複加算しない。\n・注意：BT突入1G目の成立役を識別できた回数とSJAC・継続JACの回数。JAC全体3分類と重複加算しない。",
+        "descriptionPresentation": {
+          "collapsible": true,
+          "label": "説明",
+          "defaultExpanded": false
+        },
+        "items": [
+          {
+            "id": "NODE_JAC_BELL",
+            "featureId": "JAC_BELL",
+            "title": "ベル時継続JAC以上",
+            "inputs": [
+              {
+                "id": "JAC_BELL.eligibleTrialCount",
+                "label": "ベル契機のJAC回数",
+                "input": "denominator",
+                "inputId": "JAC_BELL.eligibleTrialCount",
+                "engineBinding": {
+                  "inputId": "JAC_BELL.eligibleTrialCount"
+                },
+                "gridSpan": 6,
+                "directNumeric": true,
+                "quickAdd": [],
+                "unobservedDisplay": "—"
+              },
+              {
+                "id": "JAC_BELL.successCount",
+                "label": "継続JAC以上の回数",
+                "input": "counter",
+                "inputId": "JAC_BELL.successCount",
+                "engineBinding": {
+                  "inputId": "JAC_BELL.successCount"
+                },
+                "directNumeric": true,
+                "quickAdd": [
+                  1
+                ],
+                "gridSpan": 6,
+                "unobservedDisplay": "—"
+              }
+            ]
+          }
+        ],
+        "tabGroup": {
+          "id": "B025_M7_GROUP1",
+          "title": "BT開始時の役別JAC",
+          "label": "ベル"
         }
       },
       {
-        "featureId": "FEAT_SPECIAL_I_BONUS_EXCLUDED",
-        "name": "特殊役I＋ボーナス",
-        "reason": "3契機の中では比較的軽いものの約1/1,900〜1/3,300で、1日実戦の主要Featureとしては試行不足になりやすいため不採用です。",
-        "requiredTrials": {
-          "value": 57584,
-          "unit": "通常ゲーム"
+        "id": "OBS_JAC_REPLAY",
+        "title": "リプレイ時継続JAC以上",
+        "collapsible": true,
+        "defaultExpanded": false,
+        "description": "対象となる機会のうち、継続JAC以上のが実際に起きた割合を設定別に比較します。\n・注意：JAC全体3分類と重複加算しない。\n・注意：BT突入1G目の成立役を識別できた回数とSJAC・継続JACの回数。JAC全体3分類と重複加算しない。",
+        "descriptionPresentation": {
+          "collapsible": true,
+          "label": "説明",
+          "defaultExpanded": false
+        },
+        "items": [
+          {
+            "id": "NODE_JAC_REPLAY",
+            "featureId": "JAC_REPLAY",
+            "title": "リプレイ時継続JAC以上",
+            "inputs": [
+              {
+                "id": "JAC_REPLAY.eligibleTrialCount",
+                "label": "リプレイ契機のJAC回数",
+                "input": "denominator",
+                "inputId": "JAC_REPLAY.eligibleTrialCount",
+                "engineBinding": {
+                  "inputId": "JAC_REPLAY.eligibleTrialCount"
+                },
+                "gridSpan": 6,
+                "directNumeric": true,
+                "quickAdd": [],
+                "unobservedDisplay": "—"
+              },
+              {
+                "id": "JAC_REPLAY.successCount",
+                "label": "継続JAC以上の回数",
+                "input": "counter",
+                "inputId": "JAC_REPLAY.successCount",
+                "engineBinding": {
+                  "inputId": "JAC_REPLAY.successCount"
+                },
+                "directNumeric": true,
+                "quickAdd": [
+                  1
+                ],
+                "gridSpan": 6,
+                "unobservedDisplay": "—"
+              }
+            ]
+          }
+        ],
+        "tabGroup": {
+          "id": "B025_M7_GROUP1",
+          "title": "BT開始時の役別JAC",
+          "label": "リプレイ"
         }
+      },
+      {
+        "id": "EVI_REG_VOICE",
+        "title": "REG中チャレンジベル入賞時ボイス",
+        "description": "REG中チャレンジベル入賞時ボイスを確認したときに、該当する項目を1回加算して記録します。\n・注意：入賞時に記録。技術介入成否で出現条件が変わるので成功・失敗を区別し、発生率未公表の声へ確率重みを付けない\n・反映：設定確定・設定否定の条件は、設定候補の絞り込みに反映できる可能性があります\n・反映：設定別出現率が未確認の項目は記録のみです。出現率確認後は設定推測へ反映できる可能性があります",
+        "collapsible": true,
+        "defaultExpanded": false,
+        "descriptionPresentation": {
+          "collapsible": true,
+          "label": "説明",
+          "defaultExpanded": false
+        },
+        "items": [
+          {
+            "id": "REF_REG_VOICE",
+            "evidenceId": "REG_VOICE",
+            "label": "REG中チャレンジベル入賞時ボイス",
+            "interaction": {
+              "type": "CATEGORY_COUNTERS",
+              "preservePriorObservations": true,
+              "showAccumulatedCounts": true,
+              "categoryCoverage": "NON_EXHAUSTIVE",
+              "totalOpportunities": "NONE",
+              "categories": [
+                {
+                  "id": "REF_REG_VOICE_1",
+                  "inputId": "REF_REG_VOICE_1",
+                  "label": "OK",
+                  "meaning": "デフォルト"
+                },
+                {
+                  "id": "REF_REG_VOICE_2",
+                  "inputId": "REF_REG_VOICE_2",
+                  "label": "Feel so good",
+                  "meaning": "高設定示唆弱"
+                },
+                {
+                  "id": "REF_REG_VOICE_3",
+                  "inputId": "REF_REG_VOICE_3",
+                  "label": "Excellent",
+                  "meaning": "高設定示唆中"
+                },
+                {
+                  "id": "REF_REG_VOICE_4",
+                  "inputId": "REF_REG_VOICE_4",
+                  "label": "Unbelievable",
+                  "meaning": "高設定示唆強"
+                },
+                {
+                  "id": "REF_REG_VOICE_5",
+                  "inputId": "REF_REG_VOICE_5",
+                  "label": "Amazing",
+                  "meaning": "設定5以上"
+                }
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "id": "EVI_BIG_END",
+        "title": "BIG終了画面",
+        "description": "BIG終了画面を確認したときに、該当する項目を1回加算して記録します。\n・注意：条件が明確な確定・否定表示は、設定候補の絞り込みへ反映できる可能性があります\n・反映：設定確定・設定否定の条件は、設定候補の絞り込みに反映できる可能性があります\n・反映：設定別出現率が未確認の項目は記録のみです。出現率確認後は設定推測へ反映できる可能性があります",
+        "collapsible": true,
+        "defaultExpanded": false,
+        "descriptionPresentation": {
+          "collapsible": true,
+          "label": "説明",
+          "defaultExpanded": false
+        },
+        "items": [
+          {
+            "id": "REF_BIG_END",
+            "evidenceId": "BIG_END",
+            "label": "BIG終了画面",
+            "interaction": {
+              "type": "CATEGORY_COUNTERS",
+              "preservePriorObservations": true,
+              "showAccumulatedCounts": true,
+              "categoryCoverage": "NON_EXHAUSTIVE",
+              "totalOpportunities": "NONE",
+              "categories": [
+                {
+                  "id": "REF_BIG_END_1",
+                  "inputId": "REF_BIG_END_1",
+                  "label": "青",
+                  "meaning": "デフォルト"
+                },
+                {
+                  "id": "REF_BIG_END_2",
+                  "inputId": "REF_BIG_END_2",
+                  "label": "黄",
+                  "meaning": "高設定示唆弱"
+                },
+                {
+                  "id": "REF_BIG_END_3",
+                  "inputId": "REF_BIG_END_3",
+                  "label": "緑",
+                  "meaning": "高設定示唆中"
+                },
+                {
+                  "id": "REF_BIG_END_4",
+                  "inputId": "REF_BIG_END_4",
+                  "label": "紫",
+                  "meaning": "高設定示唆強"
+                },
+                {
+                  "id": "REF_BIG_END_5",
+                  "inputId": "REF_BIG_END_5",
+                  "label": "虹",
+                  "meaning": "設定6"
+                },
+                {
+                  "id": "REF_BIG_END_6",
+                  "inputId": "REF_BIG_END_6",
+                  "label": "金・黒の別条件背景",
+                  "meaning": "通常色とは異なる観測条件。設定別率未確認"
+                }
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "id": "EVI_TROPHY",
+        "title": "コパンダトロフィー",
+        "description": "コパンダトロフィーを確認したときに、該当する項目を1回加算して記録します。\n・注意：条件が明確な確定・否定表示は、設定候補の絞り込みへ反映できる可能性があります\n・反映：設定確定・設定否定の条件は、設定候補の絞り込みに反映できる可能性があります",
+        "collapsible": true,
+        "defaultExpanded": false,
+        "descriptionPresentation": {
+          "collapsible": true,
+          "label": "説明",
+          "defaultExpanded": false
+        },
+        "items": [
+          {
+            "id": "REF_TROPHY",
+            "evidenceId": "TROPHY",
+            "label": "コパンダトロフィー",
+            "interaction": {
+              "type": "CATEGORY_COUNTERS",
+              "preservePriorObservations": true,
+              "showAccumulatedCounts": true,
+              "categoryCoverage": "NON_EXHAUSTIVE",
+              "totalOpportunities": "NONE",
+              "categories": [
+                {
+                  "id": "REF_TROPHY_1",
+                  "inputId": "REF_TROPHY_1",
+                  "label": "銅",
+                  "meaning": "設定2以上"
+                },
+                {
+                  "id": "REF_TROPHY_2",
+                  "inputId": "REF_TROPHY_2",
+                  "label": "イナズマ",
+                  "meaning": "設定5以上"
+                },
+                {
+                  "id": "REF_TROPHY_3",
+                  "inputId": "REF_TROPHY_3",
+                  "label": "虹",
+                  "meaning": "設定6"
+                }
+              ]
+            }
+          }
+        ]
       }
     ]
   },
-  "reliability": {},
   "metadata": {
     "machineId": "LB_SHAKE_BONUS_TRIGGER_A1",
     "displayName": "SHAKE BONUS TRIGGER",
@@ -818,12 +1521,443 @@
       "SET_5",
       "SET_6"
     ],
-    "uiDesignMaterialized": true,
-    "uiDesignSchemaVersion": "ui-design-data-v1",
-    "uiDesignStatus": "PASS"
+    "settingsStatus": "SOURCE_DERIVED",
+    "observationPrerequisites": [
+      {
+        "findingId": "BIG",
+        "trialUniverse": "TOTAL_GAME_TRIAL",
+        "denominatorSemantics": "総G（ボーナス・BT中を除く）を共通母数とする。ボーナス成立後の小役は通常役に含めず、契機はWINチェックで確認。BIG/REGと内訳を重複加算しない。",
+        "liveObservation": {
+          "status": "DIRECT_EXACT",
+          "reason": "総G（ボーナス・BT中を除く）を共通母数とする。ボーナス成立後の小役は通常役に含めず、契機はWINチェックで確認。BIG/REGと内訳を重複加算しない。"
+        },
+        "observationContext": null,
+        "sourceIds": [
+          "S1"
+        ],
+        "unknownRequiredInput": "DISABLE_THIS_FINDING_ONLY",
+        "zeroVsUnobserved": "PRESERVE"
+      },
+      {
+        "findingId": "REG",
+        "trialUniverse": "TOTAL_GAME_TRIAL",
+        "denominatorSemantics": "総G（ボーナス・BT中を除く）を共通母数とする。ボーナス成立後の小役は通常役に含めず、契機はWINチェックで確認。BIG/REGと内訳を重複加算しない。",
+        "liveObservation": {
+          "status": "DIRECT_EXACT",
+          "reason": "総G（ボーナス・BT中を除く）を共通母数とする。ボーナス成立後の小役は通常役に含めず、契機はWINチェックで確認。BIG/REGと内訳を重複加算しない。"
+        },
+        "observationContext": null,
+        "sourceIds": [
+          "S1"
+        ],
+        "unknownRequiredInput": "DISABLE_THIS_FINDING_ONLY",
+        "zeroVsUnobserved": "PRESERVE"
+      },
+      {
+        "findingId": "CHERRY",
+        "trialUniverse": "TOTAL_GAME_TRIAL",
+        "denominatorSemantics": "総G（ボーナス・BT中を除く）を共通母数とする。ボーナス成立後の小役は通常役に含めず、契機はWINチェックで確認。BIG/REGと内訳を重複加算しない。",
+        "liveObservation": {
+          "status": "DIRECT_EXACT",
+          "reason": "総G（ボーナス・BT中を除く）を共通母数とする。ボーナス成立後の小役は通常役に含めず、契機はWINチェックで確認。BIG/REGと内訳を重複加算しない。"
+        },
+        "observationContext": null,
+        "sourceIds": [
+          "S1"
+        ],
+        "unknownRequiredInput": "DISABLE_THIS_FINDING_ONLY",
+        "zeroVsUnobserved": "PRESERVE"
+      },
+      {
+        "findingId": "WATER_A",
+        "trialUniverse": "TOTAL_GAME_TRIAL",
+        "denominatorSemantics": "総G（ボーナス・BT中を除く）を共通母数とする。ボーナス成立後の小役は通常役に含めず、契機はWINチェックで確認。BIG/REGと内訳を重複加算しない。",
+        "liveObservation": {
+          "status": "DIRECT_EXACT",
+          "reason": "総G（ボーナス・BT中を除く）を共通母数とする。ボーナス成立後の小役は通常役に含めず、契機はWINチェックで確認。BIG/REGと内訳を重複加算しない。"
+        },
+        "observationContext": null,
+        "sourceIds": [
+          "S1"
+        ],
+        "unknownRequiredInput": "DISABLE_THIS_FINDING_ONLY",
+        "zeroVsUnobserved": "PRESERVE"
+      },
+      {
+        "findingId": "WATER_B",
+        "trialUniverse": "TOTAL_GAME_TRIAL",
+        "denominatorSemantics": "総G（ボーナス・BT中を除く）を共通母数とする。ボーナス成立後の小役は通常役に含めず、契機はWINチェックで確認。BIG/REGと内訳を重複加算しない。",
+        "liveObservation": {
+          "status": "DIRECT_EXACT",
+          "reason": "総G（ボーナス・BT中を除く）を共通母数とする。ボーナス成立後の小役は通常役に含めず、契機はWINチェックで確認。BIG/REGと内訳を重複加算しない。"
+        },
+        "observationContext": null,
+        "sourceIds": [
+          "S1"
+        ],
+        "unknownRequiredInput": "DISABLE_THIS_FINDING_ONLY",
+        "zeroVsUnobserved": "PRESERVE"
+      },
+      {
+        "findingId": "BELL_A",
+        "trialUniverse": "TOTAL_GAME_TRIAL",
+        "denominatorSemantics": "総G（ボーナス・BT中を除く）を共通母数とする。ボーナス成立後の小役は通常役に含めず、契機はWINチェックで確認。BIG/REGと内訳を重複加算しない。",
+        "liveObservation": {
+          "status": "DIRECT_EXACT",
+          "reason": "総G（ボーナス・BT中を除く）を共通母数とする。ボーナス成立後の小役は通常役に含めず、契機はWINチェックで確認。BIG/REGと内訳を重複加算しない。"
+        },
+        "observationContext": null,
+        "sourceIds": [
+          "S1"
+        ],
+        "unknownRequiredInput": "DISABLE_THIS_FINDING_ONLY",
+        "zeroVsUnobserved": "PRESERVE"
+      },
+      {
+        "findingId": "BELL_B",
+        "trialUniverse": "TOTAL_GAME_TRIAL",
+        "denominatorSemantics": "総G（ボーナス・BT中を除く）を共通母数とする。ボーナス成立後の小役は通常役に含めず、契機はWINチェックで確認。BIG/REGと内訳を重複加算しない。",
+        "liveObservation": {
+          "status": "DIRECT_EXACT",
+          "reason": "総G（ボーナス・BT中を除く）を共通母数とする。ボーナス成立後の小役は通常役に含めず、契機はWINチェックで確認。BIG/REGと内訳を重複加算しない。"
+        },
+        "observationContext": null,
+        "sourceIds": [
+          "S1"
+        ],
+        "unknownRequiredInput": "DISABLE_THIS_FINDING_ONLY",
+        "zeroVsUnobserved": "PRESERVE"
+      },
+      {
+        "findingId": "BELL_REG",
+        "trialUniverse": "TOTAL_GAME_TRIAL",
+        "denominatorSemantics": "総G（ボーナス・BT中を除く）を共通母数とする。ボーナス成立後の小役は通常役に含めず、契機はWINチェックで確認。BIG/REGと内訳を重複加算しない。",
+        "liveObservation": {
+          "status": "DIRECT_EXACT",
+          "reason": "総G（ボーナス・BT中を除く）を共通母数とする。ボーナス成立後の小役は通常役に含めず、契機はWINチェックで確認。BIG/REGと内訳を重複加算しない。"
+        },
+        "observationContext": null,
+        "sourceIds": [
+          "S1"
+        ],
+        "unknownRequiredInput": "DISABLE_THIS_FINDING_ONLY",
+        "zeroVsUnobserved": "PRESERVE"
+      },
+      {
+        "findingId": "SPECIAL_I",
+        "trialUniverse": "TOTAL_GAME_TRIAL",
+        "denominatorSemantics": "総G（ボーナス・BT中を除く）を共通母数とする。ボーナス成立後の小役は通常役に含めず、契機はWINチェックで確認。BIG/REGと内訳を重複加算しない。",
+        "liveObservation": {
+          "status": "DIRECT_EXACT",
+          "reason": "総G（ボーナス・BT中を除く）を共通母数とする。ボーナス成立後の小役は通常役に含めず、契機はWINチェックで確認。BIG/REGと内訳を重複加算しない。"
+        },
+        "observationContext": null,
+        "sourceIds": [
+          "S1"
+        ],
+        "unknownRequiredInput": "DISABLE_THIS_FINDING_ONLY",
+        "zeroVsUnobserved": "PRESERVE"
+      },
+      {
+        "findingId": "BT_JAC",
+        "trialUniverse": "BT_JAC_TRIAL",
+        "denominatorSemantics": "SJAC・継続JAC・終了JACの3種類を1回のJACごとに排他記録。母数は3種類の合計から内部計算。継続率は別に掛け合わせない。",
+        "liveObservation": {
+          "status": "EXACT_WITH_SCOPE_TRACKING",
+          "reason": "SJAC・継続JAC・終了JACの3種類を1回のJACごとに排他記録。母数は3種類の合計から内部計算。継続率は別に掛け合わせない。"
+        },
+        "observationContext": null,
+        "sourceIds": [
+          "S1"
+        ],
+        "unknownRequiredInput": "DISABLE_THIS_FINDING_ONLY",
+        "zeroVsUnobserved": "PRESERVE"
+      },
+      {
+        "findingId": "JAC_HONEY",
+        "trialUniverse": "BT_FIRST_ROLE_HONEY",
+        "denominatorSemantics": "BT突入1G目の成立役を識別できた回数とSJAC・継続JACの回数。JAC全体3分類と重複加算しない。",
+        "liveObservation": {
+          "status": "EXACT_WITH_SCOPE_TRACKING",
+          "reason": "BT突入1G目の成立役を識別できた回数とSJAC・継続JACの回数。JAC全体3分類と重複加算しない。"
+        },
+        "observationContext": null,
+        "sourceIds": [
+          "S1"
+        ],
+        "unknownRequiredInput": "DISABLE_THIS_FINDING_ONLY",
+        "zeroVsUnobserved": "PRESERVE"
+      },
+      {
+        "findingId": "JAC_WHITE",
+        "trialUniverse": "BT_FIRST_ROLE_WHITE",
+        "denominatorSemantics": "BT突入1G目の成立役を識別できた回数とSJAC・継続JACの回数。JAC全体3分類と重複加算しない。",
+        "liveObservation": {
+          "status": "EXACT_WITH_SCOPE_TRACKING",
+          "reason": "BT突入1G目の成立役を識別できた回数とSJAC・継続JACの回数。JAC全体3分類と重複加算しない。"
+        },
+        "observationContext": null,
+        "sourceIds": [
+          "S1"
+        ],
+        "unknownRequiredInput": "DISABLE_THIS_FINDING_ONLY",
+        "zeroVsUnobserved": "PRESERVE"
+      },
+      {
+        "findingId": "JAC_BELL",
+        "trialUniverse": "BT_FIRST_ROLE_BELL",
+        "denominatorSemantics": "BT突入1G目の成立役を識別できた回数とSJAC・継続JACの回数。JAC全体3分類と重複加算しない。",
+        "liveObservation": {
+          "status": "EXACT_WITH_SCOPE_TRACKING",
+          "reason": "BT突入1G目の成立役を識別できた回数とSJAC・継続JACの回数。JAC全体3分類と重複加算しない。"
+        },
+        "observationContext": null,
+        "sourceIds": [
+          "S1"
+        ],
+        "unknownRequiredInput": "DISABLE_THIS_FINDING_ONLY",
+        "zeroVsUnobserved": "PRESERVE"
+      },
+      {
+        "findingId": "JAC_REPLAY",
+        "trialUniverse": "BT_FIRST_ROLE_REPLAY",
+        "denominatorSemantics": "BT突入1G目の成立役を識別できた回数とSJAC・継続JACの回数。JAC全体3分類と重複加算しない。",
+        "liveObservation": {
+          "status": "EXACT_WITH_SCOPE_TRACKING",
+          "reason": "BT突入1G目の成立役を識別できた回数とSJAC・継続JACの回数。JAC全体3分類と重複加算しない。"
+        },
+        "observationContext": null,
+        "sourceIds": [
+          "S1"
+        ],
+        "unknownRequiredInput": "DISABLE_THIS_FINDING_ONLY",
+        "zeroVsUnobserved": "PRESERVE"
+      }
+    ],
+    "batch025Presentation": {
+      "adapter": "batch025-reviewed-presentation-v1",
+      "groups": [
+        {
+          "id": "B025_M7_GROUP1",
+          "title": "BT開始時の役別JAC",
+          "tabs": [
+            {
+              "sectionId": "OBS_JAC_HONEY",
+              "label": "スベリハニベル"
+            },
+            {
+              "sectionId": "OBS_JAC_WHITE",
+              "label": "白BAR・黒もや"
+            },
+            {
+              "sectionId": "OBS_JAC_BELL",
+              "label": "ベル"
+            },
+            {
+              "sectionId": "OBS_JAC_REPLAY",
+              "label": "リプレイ"
+            }
+          ]
+        }
+      ],
+      "statisticalModelsUnchanged": true
+    }
   },
-  "validation": {
-    "cases": []
-  },
-  "statistics": {}
+  "v8": {
+    "machineResearchSummary": {
+      "title": "この機種の設定推測について",
+      "adopted": [
+        {
+          "featureId": "REG",
+          "label": "REGの出現率",
+          "importance": "主要",
+          "selectionScore": 51.1,
+          "evaluation": {
+            "userLabel": "設定判別スコア",
+            "value": 51.1
+          },
+          "reason": "REGは設定1 1/425.6、設定6 1/297.9と設定差があります。「総ゲーム数」に対する「REG回数」の発生割合を比較して推測に使用します。 観測条件：REGを記録します。"
+        },
+        {
+          "featureId": "BT_JAC",
+          "label": "BT中JAC種別",
+          "importance": "微小",
+          "evaluation": {
+            "userLabel": "1回の判別力",
+            "value": 2.0626676858351622
+          },
+          "reason": "BT中JAC種別の「継続JAC」の割合は設定6 37.5%、設定5 52.5%と設定差があります。「JAC開始回数」を基準に、記録したカテゴリの振り分けを比較して推測に使用します。 観測条件：SJAC・継続JAC・終了JACの3種類を1回のJACごとに排他記録。"
+        },
+        {
+          "featureId": "JAC_HONEY",
+          "label": "スベリハニベル時継続JAC以上",
+          "importance": "微小",
+          "evaluation": {
+            "userLabel": "1回の判別力",
+            "value": 1.8553747804119336
+          },
+          "reason": "スベリハニベル時継続JAC以上は設定6 53.6%、設定5 67.7%と設定差があります。「スベリハニベル契機のJAC回数」に対する「継続JAC以上の回数」の発生割合を比較して推測に使用します。 観測条件：対象となる機会のうち、継続JAC以上のが実際に起きた割合を設定別に比較します。 「BT中JAC種別」を記録していない場合の補助として使用し、同じ設定差を重ねて評価しません。"
+        },
+        {
+          "featureId": "JAC_WHITE",
+          "label": "白BAR狙え・黒もや時継続JAC以上",
+          "importance": "微小",
+          "evaluation": {
+            "userLabel": "1回の判別力",
+            "value": 2.003313432478082
+          },
+          "reason": "白BAR狙え・黒もや時継続JAC以上は設定6 40%、設定5 55%と設定差があります。「白BAR狙え・黒もやのJAC回数」に対する「継続JAC以上の回数」の発生割合を比較して推測に使用します。 観測条件：対象となる機会のうち、継続JAC以上のが実際に起きた割合を設定別に比較します。 「BT中JAC種別」「スベリハニベル時継続JAC以上」を記録していない場合の補助として使用し、同じ設定差を重ねて評価しません。"
+        },
+        {
+          "featureId": "JAC_BELL",
+          "label": "ベル時継続JAC以上",
+          "importance": "微小",
+          "evaluation": {
+            "userLabel": "1回の判別力",
+            "value": 2.0183043746827334
+          },
+          "reason": "ベル時継続JAC以上は設定6 36.7%、設定5 51.7%と設定差があります。「ベル契機のJAC回数」に対する「継続JAC以上の回数」の発生割合を比較して推測に使用します。 観測条件：対象となる機会のうち、継続JAC以上のが実際に起きた割合を設定別に比較します。 「BT中JAC種別」「スベリハニベル時継続JAC以上」「白BAR狙え・黒もや時継続JAC以上」を記録していない場合の補助として使用し、同じ設定差を重ねて評価しません。"
+        },
+        {
+          "featureId": "JAC_REPLAY",
+          "label": "リプレイ時継続JAC以上",
+          "importance": "微小",
+          "evaluation": {
+            "userLabel": "1回の判別力",
+            "value": 1.954896844626619
+          },
+          "reason": "リプレイ時継続JAC以上は設定6 34.8%、設定5 49.4%と設定差があります。「リプレイ契機のJAC回数」に対する「継続JAC以上の回数」の発生割合を比較して推測に使用します。 観測条件：対象となる機会のうち、継続JAC以上のが実際に起きた割合を設定別に比較します。 「BT中JAC種別」「スベリハニベル時継続JAC以上」「白BAR狙え・黒もや時継続JAC以上」「ベル時継続JAC以上」を記録していない場合の補助として使用し、同じ設定差を重ねて評価しません。"
+        }
+      ],
+      "notAdopted": [
+        {
+          "featureId": "BIG",
+          "label": "BIGの出現率",
+          "reason": "この項目にも設定差のある数値は確認できています。同じ当選経路の合算・内訳は重複するため同時加算せず、正式な評価で代表を選ぶ。 同じ情報を重ねて評価して判別力を過大に見積もらないため、現在は設定判別スコア等を比較して「REG」を代表として使用し、この項目は単独では数値推測に使用しません。"
+        },
+        {
+          "featureId": "CHERRY",
+          "label": "チェリー",
+          "reason": "この項目にも設定差のある数値は確認できています。同じ当選経路の合算・内訳は重複するため同時加算せず、正式な評価で代表を選ぶ。 同じ情報を重ねて評価して判別力を過大に見積もらないため、現在は設定判別スコア等を比較して「REG」を代表として使用し、この項目は単独では数値推測に使用しません。"
+        },
+        {
+          "featureId": "WATER_A",
+          "label": "スイカA",
+          "reason": "この項目にも設定差のある数値は確認できています。同じ当選経路の合算・内訳は重複するため同時加算せず、正式な評価で代表を選ぶ。 同じ情報を重ねて評価して判別力を過大に見積もらないため、現在は設定判別スコア等を比較して「REG」を代表として使用し、この項目は単独では数値推測に使用しません。"
+        },
+        {
+          "featureId": "WATER_B",
+          "label": "スイカB",
+          "reason": "この項目にも設定差のある数値は確認できています。同じ当選経路の合算・内訳は重複するため同時加算せず、正式な評価で代表を選ぶ。 同じ情報を重ねて評価して判別力を過大に見積もらないため、現在は設定判別スコア等を比較して「REG」を代表として使用し、この項目は単独では数値推測に使用しません。"
+        },
+        {
+          "featureId": "BELL_A",
+          "label": "ベルA",
+          "reason": "この項目にも設定差のある数値は確認できています。同じ当選経路の合算・内訳は重複するため同時加算せず、正式な評価で代表を選ぶ。 同じ情報を重ねて評価して判別力を過大に見積もらないため、現在は設定判別スコア等を比較して「REG」を代表として使用し、この項目は単独では数値推測に使用しません。"
+        },
+        {
+          "featureId": "BELL_B",
+          "label": "ベルB",
+          "reason": "この項目にも設定差のある数値は確認できています。同じ当選経路の合算・内訳は重複するため同時加算せず、正式な評価で代表を選ぶ。 同じ情報を重ねて評価して判別力を過大に見積もらないため、現在は設定判別スコア等を比較して「REG」を代表として使用し、この項目は単独では数値推測に使用しません。"
+        },
+        {
+          "featureId": "BELL_REG",
+          "label": "ベル＋REG",
+          "reason": "この項目にも設定差のある数値は確認できています。同じ当選経路の合算・内訳は重複するため同時加算せず、正式な評価で代表を選ぶ。 同じ情報を重ねて評価して判別力を過大に見積もらないため、現在は設定判別スコア等を比較して「REG」を代表として使用し、この項目は単独では数値推測に使用しません。"
+        },
+        {
+          "featureId": "SPECIAL_I",
+          "label": "特殊役I＋ボーナス",
+          "reason": "この項目にも設定差のある数値は確認できています。同じ当選経路の合算・内訳は重複するため同時加算せず、正式な評価で代表を選ぶ。 同じ情報を重ねて評価して判別力を過大に見積もらないため、現在は設定判別スコア等を比較して「REG」を代表として使用し、この項目は単独では数値推測に使用しません。"
+        },
+        {
+          "featureId": "PREDECESSOR",
+          "label": "着席前BIG・REG内訳",
+          "reason": "既存の着席前記録を保持。観測元実機未確認のため推測不参加。"
+        },
+        {
+          "featureId": "WATER_RED",
+          "label": "スイカ＋ナディアBIG",
+          "reason": "設定6の資料値に1/5461.3と1/5451.3の不一致があるため、この候補の数値利用を止める。既存値と衝突値を保存し、他の当選契機は処理を継続する。",
+          "reevaluationCondition": "不足している観測条件または本機の設定別公表値が、新しい具体的な公開資料で確認できた場合に限り再評価する。"
+        },
+        {
+          "featureId": "ESTABLISHED_WATER_A",
+          "label": "ボーナス成立中スイカA",
+          "reason": "ボーナス成立の正確なゲームを常に確定できないため、成立後専用ゲーム数を通常時と混ぜて計算しない。成立ゲームを遡及確定できた場合だけ再評価する。",
+          "reevaluationCondition": "不足している観測条件または本機の設定別公表値が、新しい具体的な公開資料で確認できた場合に限り再評価する。"
+        },
+        {
+          "featureId": "ESTABLISHED_WATER_B",
+          "label": "ボーナス成立中スイカB",
+          "reason": "ボーナス成立の正確なゲームを常に確定できないため、成立後専用ゲーム数を通常時と混ぜて計算しない。成立ゲームを遡及確定できた場合だけ再評価する。",
+          "reevaluationCondition": "不足している観測条件または本機の設定別公表値が、新しい具体的な公開資料で確認できた場合に限り再評価する。"
+        },
+        {
+          "featureId": "ESTABLISHED_BELL_A",
+          "label": "ボーナス成立中ベルA",
+          "reason": "ボーナス成立の正確なゲームを常に確定できないため、成立後専用ゲーム数を通常時と混ぜて計算しない。成立ゲームを遡及確定できた場合だけ再評価する。",
+          "reevaluationCondition": "不足している観測条件または本機の設定別公表値が、新しい具体的な公開資料で確認できた場合に限り再評価する。"
+        },
+        {
+          "featureId": "ESTABLISHED_BELL_B",
+          "label": "ボーナス成立中ベルB",
+          "reason": "ボーナス成立の正確なゲームを常に確定できないため、成立後専用ゲーム数を通常時と混ぜて計算しない。成立ゲームを遡及確定できた場合だけ再評価する。",
+          "reevaluationCondition": "不足している観測条件または本機の設定別公表値が、新しい具体的な公開資料で確認できた場合に限り再評価する。"
+        }
+      ],
+      "highLowDiscrimination": {
+        "status": "COMPUTED",
+        "method": "BEST_SINGLE_EXACT_ACTIVE_FEATURE",
+        "bandDefinition": {
+          "lowSettings": "SETTING_1_TO_3",
+          "highSettings": "SETTING_4_TO_6",
+          "classPrior": "BALANCED"
+        },
+        "results": [
+          {
+            "games": 1500,
+            "balancedAccuracyPercent": 53.07
+          },
+          {
+            "games": 3000,
+            "balancedAccuracyPercent": 54.14
+          },
+          {
+            "games": 7000,
+            "balancedAccuracyPercent": 55.94
+          }
+        ],
+        "eligibleFeatureIds": [
+          "REG"
+        ],
+        "selectedFeatureId": "REG",
+        "selectedFeatureLabel": "REG",
+        "excludedFeatures": [
+          {
+            "findingId": "BT_JAC",
+            "reason": "BENCHMARK_EXPOSURE_UNRESOLVED"
+          },
+          {
+            "findingId": "JAC_HONEY",
+            "reason": "BENCHMARK_EXPOSURE_UNRESOLVED"
+          },
+          {
+            "findingId": "JAC_WHITE",
+            "reason": "BENCHMARK_EXPOSURE_UNRESOLVED"
+          },
+          {
+            "findingId": "JAC_BELL",
+            "reason": "BENCHMARK_EXPOSURE_UNRESOLVED"
+          },
+          {
+            "findingId": "JAC_REPLAY",
+            "reason": "BENCHMARK_EXPOSURE_UNRESOLVED"
+          }
+        ],
+        "note": "7000Gへ正確に換算できるACTIVE要素だけを候補とし、要素間の独立性を仮定せず、単独で最も高い判別精度を持つ要素から保守的に算出しています。条件付き要素はこの指標には含めませんが、実戦中に実際の観測回数が入力された場合は設定推測に使用します。"
+      },
+      "unresolved": []
+    }
+  }
 }
