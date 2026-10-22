@@ -101,7 +101,7 @@
         "inferenceRole": "INCLUDE_SUPPORT"
       },
       {
-        "id": "PREDECESSOR.eligibleTrialCount",
+        "id": "INP_PREDECESSOR_GAMES",
         "name": "着席前総ゲーム数",
         "category": "V8_NUMERIC",
         "type": "integer",
@@ -109,17 +109,10 @@
         "defaultValue": 0,
         "minimum": 0,
         "displayOrder": 7,
-        "inferenceRole": "INCLUDE_SUPPORT",
-        "inputVisible": false,
-        "derivedCalculation": "sum",
-        "derivedFromInputIds": [
-          "PREDECESSOR.categoryCounts.1_BIG",
-          "PREDECESSOR.categoryCounts.2_REG",
-          "PREDECESSOR.categoryCounts.3_その他"
-        ]
+        "inferenceRole": "INCLUDE_SUPPORT"
       },
       {
-        "id": "PREDECESSOR.categoryCounts.1_BIG",
+        "id": "INP_PREDECESSOR_BIG_COUNT",
         "name": "BIG",
         "category": "V8_NUMERIC",
         "type": "counter",
@@ -127,11 +120,11 @@
         "defaultValue": 0,
         "minimum": 0,
         "displayOrder": 8,
-        "parentInputId": "PREDECESSOR.eligibleTrialCount",
+        "parentInputId": "INP_PREDECESSOR_GAMES",
         "inferenceRole": "INCLUDE_SUPPORT"
       },
       {
-        "id": "PREDECESSOR.categoryCounts.2_REG",
+        "id": "INP_PREDECESSOR_REG_COUNT",
         "name": "REG",
         "category": "V8_NUMERIC",
         "type": "counter",
@@ -139,7 +132,7 @@
         "defaultValue": 0,
         "minimum": 0,
         "displayOrder": 9,
-        "parentInputId": "PREDECESSOR.eligibleTrialCount",
+        "parentInputId": "INP_PREDECESSOR_GAMES",
         "inferenceRole": "INCLUDE_SUPPORT"
       },
       {
@@ -151,8 +144,24 @@
         "defaultValue": 0,
         "minimum": 0,
         "displayOrder": 10,
-        "parentInputId": "PREDECESSOR.eligibleTrialCount",
-        "inferenceRole": "INCLUDE_SUPPORT"
+        "parentInputId": "INP_PREDECESSOR_GAMES",
+        "inferenceRole": "INCLUDE_SUPPORT",
+        "inputVisible": false,
+        "derivedCalculation": "linear_combination",
+        "derivedTerms": [
+          {
+            "inputId": "INP_PREDECESSOR_GAMES",
+            "multiplier": 1
+          },
+          {
+            "inputId": "INP_PREDECESSOR_BIG_COUNT",
+            "multiplier": -1
+          },
+          {
+            "inputId": "INP_PREDECESSOR_REG_COUNT",
+            "multiplier": -1
+          }
+        ]
       },
       {
         "id": "REF_BIG_END_1",
@@ -301,7 +310,7 @@
         "adoptionCategory": "INCLUDE_SUPPORT",
         "calculationRole": "PROBABILITY",
         "probabilityEngineUsage": true,
-        "denominatorInputId": "PREDECESSOR.eligibleTrialCount",
+        "denominatorInputId": "INP_PREDECESSOR_GAMES",
         "probabilities": {},
         "selectionRationale": {
           "summary": "設定推測に採用された要素です。",
@@ -310,12 +319,11 @@
           "longTermReason": "観測数が増えるほど設定別の比較が安定します。"
         },
         "modelType": "multinomial",
-        "numeratorInputId": "PREDECESSOR.categoryCounts.1_BIG",
+        "numeratorInputId": "INP_PREDECESSOR_BIG_COUNT",
         "categoryInputIds": [
-          "PREDECESSOR.categoryCounts.2_REG",
+          "INP_PREDECESSOR_REG_COUNT",
           "PREDECESSOR.categoryCounts.3_その他"
         ],
-        "denominatorRule": "SUM_CATEGORY_COUNTS",
         "categoryProbabilities": {
           "SET_1": [
             0.0036010082823190494,
@@ -791,23 +799,27 @@
               "type": "CATEGORY_COUNTERS",
               "preservePriorObservations": true,
               "showAccumulatedCounts": true,
-              "categoryCoverage": "EXHAUSTIVE",
-              "totalOpportunities": "SUM_CATEGORY_COUNTS",
+              "categoryCoverage": "NON_EXHAUSTIVE",
+              "totalOpportunities": "SEPARATE_COUNTER",
+              "opportunityTracking": {
+                "type": "SEPARATE_COUNTER",
+                "inputId": "INP_PREDECESSOR_GAMES",
+                "label": "着席前総ゲーム数",
+                "directNumeric": true,
+                "quickAdd": [
+                  50
+                ]
+              },
               "categories": [
                 {
-                  "id": "PREDECESSOR.categoryCounts.1_BIG",
-                  "inputId": "PREDECESSOR.categoryCounts.1_BIG",
+                  "id": "INP_PREDECESSOR_BIG_COUNT",
+                  "inputId": "INP_PREDECESSOR_BIG_COUNT",
                   "label": "BIG"
                 },
                 {
-                  "id": "PREDECESSOR.categoryCounts.2_REG",
-                  "inputId": "PREDECESSOR.categoryCounts.2_REG",
+                  "id": "INP_PREDECESSOR_REG_COUNT",
+                  "inputId": "INP_PREDECESSOR_REG_COUNT",
                   "label": "REG"
-                },
-                {
-                  "id": "PREDECESSOR.categoryCounts.3_その他",
-                  "inputId": "PREDECESSOR.categoryCounts.3_その他",
-                  "label": "その他"
                 }
               ]
             }
