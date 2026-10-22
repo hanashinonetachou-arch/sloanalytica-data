@@ -13,7 +13,9 @@ import {categoricalEvidenceMirrorIssues} from './categorical-evidence-mirror.ts'
 export const RESEARCH_VALIDATOR_CONTRACT='research-v1';
 export function isDeclaredResearchSetting(d:any,key:string){
  if(/^[1-6]$/.test(key))return true;
- return key==='0' && d?.settings?.status==='SOURCE_DERIVED' && Array.isArray(d.settings.values) && d.settings.values.includes('SET_0');
+ // Nonstandard hypotheses require an explicit source-derived declaration.
+ // Keep V distinct; it must never be renumbered to setting 5 or 6.
+ return (key==='0'||key==='V') && d?.settings?.status==='SOURCE_DERIVED' && Array.isArray(d.settings.values) && d.settings.values.includes('SET_'+key);
 }
 
 export const RESEARCH_COMPLETENESS_DOMAINS=["INITIAL_HIT","BONUS","SMALL_ROLE","CZ","AT","INTERNAL_CONDITIONAL_DRAW","MODE_TRANSITION","STATE_TRANSITION","SUCCESS_RATE","POINTS_GAME_DISTRIBUTION","CARRY_OVER","THRESHOLD_BEHAVIOR","RESET_BEHAVIOR","POST_EVENT_TRANSITION","NAVIGATION","ROLE_CONDITIONAL_DISTRIBUTION","BONUS_TYPE_CONDITIONAL","EVIDENCE","EXTERNAL_DATA_ONLY","MACHINE_SPECIFIC"] as const;
@@ -191,3 +193,4 @@ export function validateResearchArtifacts(s:RepoStore,a:Attempt,r:WorkResult){
   validateResearchPromotionReadiness(d);
   return [{validator:RESEARCH_VALIDATOR_CONTRACT,ok:true,artifactPath:ref.path,sha256:ref.sha256,sources:d.sources.length,findings:d.findings.length,blockedItems:d.blockedItems.length,coverageDomains:coverage.size,dependencyCandidates:dependencyAudit.summary.candidateCount,dependencyGroups:dependencyAudit.summary.groupCount,...ledgerValidation}];
 }
+

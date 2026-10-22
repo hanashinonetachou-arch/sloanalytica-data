@@ -17,7 +17,7 @@ export function buildRuntimeProjection(machineData:any,policy:any,machineDataArt
   const runtimeUi=structuredClone(machineData.uiContract);
   runtimeUi.numericSections=(runtimeUi.numericSections??[]).filter((x:any)=>activeIds.has(x.sourceFindingId));
   if(runtimeUi.uiPresentation)runtimeUi.uiPresentation=projectOpportunityTabGroups(runtimeUi.uiPresentation,runtimeUi.numericSections,runtimeUi.evidenceSections??[]);
-  const playRequirement=derivePlayInfoRequirement((runtimeUi.numericSections??[]).map((x:any)=>String(x.trialUniverse)));
+  const playRequirement=derivePlayInfoRequirement((runtimeUi.numericSections??[]).map((x:any)=>String(x.trialUniverse)),machineData.uiContract?.gameCountPolicy);
   if(runtimeUi.playInfo){
     runtimeUi.playInfo.mode=playRequirement.mode;
     runtimeUi.playInfo.startFields=(runtimeUi.playInfo.startFields??[]).filter((x:any)=>playRequirement.needsTotal?x.id==='startTotalGames':playRequirement.needsNormal?x.id==='startNormalGames':false);
@@ -32,3 +32,4 @@ export function buildRuntimeProjection(machineData:any,policy:any,machineDataArt
   }
   return {schemaVersion:'runtime-projection-v1',manifestVersion:'8.5',batchId:machineData.batchId,machineId:machineData.machineId,machineName:machineData.machineName,sourceArtifacts:{machineData:machineDataArtifact,runtimePolicy:policyArtifact},activeFeatures,inactiveFeatures,settings:machineData.settings,packagePolicy:machineData.packagePolicy,runtimeUi,evidence:machineData.evidence??[],heldObservations:machineData.heldObservations??[],nonRuntimeCandidates:machineData.nonRuntimeCandidates??[],excludedDecisions:machineData.excludedDecisions??[],blockedItems:machineData.blockedItems??[],highLowDiscrimination:machineData.highLowDiscrimination};
 }
+

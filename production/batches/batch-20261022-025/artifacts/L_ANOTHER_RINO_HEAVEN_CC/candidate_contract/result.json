@@ -1,0 +1,299 @@
+{
+  "schemaVersion": "candidate-contract-v1",
+  "manifestVersion": "8.5",
+  "batchId": "batch-20261022-025",
+  "machineId": "L_ANOTHER_RINO_HEAVEN_CC",
+  "machineName": "スマスロリノヘブン",
+  "evaluationArtifact": {
+    "artifactId": "evaluation-L_ANOTHER_RINO_HEAVEN_CC",
+    "kind": "evaluation",
+    "path": "production/batches/batch-20261022-025/artifacts/L_ANOTHER_RINO_HEAVEN_CC/evaluation/result.json",
+    "sha256": "8554006df47b25182c6c77cdf32ab2148a911eeaeab9a22c72484a1fc467f828",
+    "producerWorkId": "wrk_c45f594c1ba84e9b"
+  },
+  "eligibilityArtifact": {
+    "artifactId": "eligibility-L_ANOTHER_RINO_HEAVEN_CC",
+    "kind": "eligibility",
+    "path": "production/batches/batch-20261022-025/artifacts/L_ANOTHER_RINO_HEAVEN_CC/eligibility/result.json",
+    "sha256": "5a8ea8f5a9b3a2fe5ffc044bd70ecccfd9b201a71668ae28780589a85d3da96f",
+    "producerWorkId": "wrk_6ffb60ef0cbb4d53"
+  },
+  "candidates": [
+    {
+      "findingId": "BONUS_INITIAL",
+      "label": "ボーナス初当り",
+      "model": "BERNOULLI",
+      "trialUniverse": "NON_CHAIN_BONUS_INITIAL_GAME_TRIAL",
+      "liveInferenceRoute": "LIVE_CONDITIONAL",
+      "settingDistribution": {
+        "1": "1/252.9",
+        "2": "1/245.5",
+        "4": "1/231.9",
+        "5": "1/216.1",
+        "6": "1/202.6"
+      },
+      "details": [
+        "32G連チャン区間内の当選は連チャン扱い。総Gから実際に記録したボーナス中G・連チャン区間Gを除いたゲーム数と、その区間終了後の初当り回数を用いる。"
+      ],
+      "dependencyGroupId": "BONUS_PATH",
+      "dependencyKind": "CAUSAL_PATH_OVERLAP",
+      "dependencyReason": "同じ当選経路の合算・内訳は重複するため同時加算せず、正式な評価で代表を選ぶ。",
+      "runtimeInferenceAllowed": true,
+      "dependencyResolution": "SINGLE_MEMBER_SELECTED",
+      "runtimePolicyBinding": {
+        "metric": "PER_ELIGIBLE_TRIAL_POWER",
+        "value": 0.004269677905043012,
+        "thresholdSource": "RUNTIME_POLICY"
+      }
+    },
+    {
+      "findingId": "NORMAL_BELL",
+      "label": "通常時3枚ベル",
+      "model": "BERNOULLI",
+      "trialUniverse": "NORMAL_GAME_TRIAL",
+      "liveInferenceRoute": "LIVE_CONDITIONAL",
+      "settingDistribution": {
+        "1": "1/5.15",
+        "2": "1/5.09",
+        "4": "1/5.03",
+        "5": "1/4.97",
+        "6": "1/4.92"
+      },
+      "details": [
+        "ボーナス中を除く通常ゲーム数と通常時3枚ベル回数。初当り用の32G連チャン除外ゲーム数とは母数を分け、連チャン待機中の通常遊技も含む。"
+      ],
+      "dependencyGroupId": null,
+      "dependencyKind": "REVIEWED_NO_SEMANTIC_OVERLAP",
+      "dependencyReason": "同じ観測母数を使うことだけでは情報重複とはみなさず、同じ成功事象・包含関係・上流下流関係が明示されていないため別の設定差情報として扱う。",
+      "runtimeInferenceAllowed": true,
+      "dependencyResolution": "NONE",
+      "runtimePolicyBinding": {
+        "metric": "SELECTION_SCORE",
+        "value": 54.59739684580222,
+        "thresholdSource": "RUNTIME_POLICY"
+      }
+    }
+  ],
+  "dependencyGroups": [
+    {
+      "groupId": "BONUS_PATH",
+      "resolution": "SINGLE_MEMBER_SELECTED",
+      "members": [
+        "BONUS_INITIAL"
+      ],
+      "runtimeInferenceAllowed": true,
+      "selectedFindingId": "BONUS_INITIAL",
+      "selectionRationale": "他の依存候補は除外され、観測可能な候補が1件だけ残るため単一要素として扱う。設定判別スコア未算出なら既存の試行あたり評価と閾値を維持する。",
+      "reason": "同じ当選系列の別尤度を追加せず、残る1候補だけを既存の採用基準で評価する。"
+    }
+  ],
+  "excludedDecisions": [
+    {
+      "findingId": "BONUS_COMBINED",
+      "label": "連チャン込みボーナス合算",
+      "supportingSourceIds": [
+        "S1"
+      ],
+      "eligibility": "NOT_APPLICABLE",
+      "reason": "参考分布として保存するが設定推測Featureには使用しない。",
+      "ruleRefs": [
+        "manifest-v8.5-reference-only"
+      ],
+      "liveInferenceRoute": "NONE",
+      "userFacingReason": "連チャン込み合算は初当りを内包し、設定差のない連チャンを含むため参考表示のみ。32G連チャンを除外した初当りの代わりに採用しない。"
+    }
+  ],
+  "blockedItems": [
+    {
+      "blockId": "BIG_REG",
+      "label": "BIG・REG内訳",
+      "reason": "モードで振分が変化する疑似ボーナスで、設定別の当選比率が確認できないため合算から独立した設定確率として使わない。",
+      "reevaluationCondition": "不足している観測条件または本機の設定別公表値が、新しい具体的な公開資料で確認できた場合に限り再評価する。",
+      "sourceIds": [
+        "S1"
+      ],
+      "closure": {
+        "basis": "Manifest v8.5 Research終了契約と添付の個別終了記録",
+        "ownerStage": "RESEARCH",
+        "releaseCondition": "NEW_CONCRETE_SOURCE_ONLY",
+        "repeatPublicSearch": false
+      }
+    }
+  ],
+  "evidenceCandidates": [
+    {
+      "findingId": "TROPHY",
+      "label": "ケロットトロフィー",
+      "sourceIds": [
+        "S1"
+      ],
+      "details": [
+        "条件が明確な確定・否定表示は、設定候補の絞り込みへ反映できる可能性があります。"
+      ],
+      "semanticCategories": [
+        {
+          "label": "銅",
+          "meaning": "設定2以上",
+          "semanticType": "EXACT_CONSTRAINT"
+        },
+        {
+          "label": "金",
+          "meaning": "設定4以上",
+          "semanticType": "EXACT_CONSTRAINT"
+        },
+        {
+          "label": "ケロット柄",
+          "meaning": "設定5以上",
+          "semanticType": "EXACT_CONSTRAINT"
+        },
+        {
+          "label": "虹",
+          "meaning": "設定6",
+          "semanticType": "EXACT_CONSTRAINT"
+        }
+      ]
+    },
+    {
+      "findingId": "MODE_HINT",
+      "label": "モード示唆",
+      "sourceIds": [
+        "S1"
+      ],
+      "details": [
+        "このセクションの全項目は設定別出現率が公表・確認されていないため、記録のみです。設定推測の計算には使用しません。"
+      ],
+      "semanticCategories": [
+        {
+          "label": "パネルフラッシュ",
+          "meaning": "モード示唆・設定別出現率未確認",
+          "semanticType": "PROBABILITY_UNKNOWN"
+        },
+        {
+          "label": "ステージ",
+          "meaning": "モード示唆・設定別出現率未確認",
+          "semanticType": "PROBABILITY_UNKNOWN"
+        },
+        {
+          "label": "図柄揃いライン",
+          "meaning": "モード示唆・設定別出現率未確認",
+          "semanticType": "PROBABILITY_UNKNOWN"
+        },
+        {
+          "label": "テンパイボイス",
+          "meaning": "モード示唆・設定別出現率未確認",
+          "semanticType": "PROBABILITY_UNKNOWN"
+        },
+        {
+          "label": "違和感演出",
+          "meaning": "モード示唆・設定別出現率未確認",
+          "semanticType": "PROBABILITY_UNKNOWN"
+        }
+      ]
+    }
+  ],
+  "sourceIntegrityIssues": [],
+  "observationPrerequisites": [
+    {
+      "findingId": "BONUS_INITIAL",
+      "trialUniverse": "NON_CHAIN_BONUS_INITIAL_GAME_TRIAL",
+      "denominatorSemantics": "32G連チャン区間内の当選は連チャン扱い。総Gから実際に記録したボーナス中G・連チャン区間Gを除いたゲーム数と、その区間終了後の初当り回数を用いる。",
+      "liveObservation": {
+        "status": "EXACT_WITH_SCOPE_TRACKING",
+        "reason": "32G連チャン区間内の当選は連チャン扱い。総Gから実際に記録したボーナス中G・連チャン区間Gを除いたゲーム数と、その区間終了後の初当り回数を用いる。"
+      },
+      "observationContext": null,
+      "sourceIds": [
+        "S1"
+      ],
+      "unknownRequiredInput": "DISABLE_THIS_FINDING_ONLY",
+      "zeroVsUnobserved": "PRESERVE"
+    },
+    {
+      "findingId": "NORMAL_BELL",
+      "trialUniverse": "NORMAL_GAME_TRIAL",
+      "denominatorSemantics": "ボーナス中を除く通常ゲーム数と通常時3枚ベル回数。初当り用の32G連チャン除外ゲーム数とは母数を分け、連チャン待機中の通常遊技も含む。",
+      "liveObservation": {
+        "status": "EXACT_WITH_SCOPE_TRACKING",
+        "reason": "ボーナス中を除く通常ゲーム数と通常時3枚ベル回数。初当り用の32G連チャン除外ゲーム数とは母数を分け、連チャン待機中の通常遊技も含む。"
+      },
+      "observationContext": null,
+      "sourceIds": [
+        "S1"
+      ],
+      "unknownRequiredInput": "DISABLE_THIS_FINDING_ONLY",
+      "zeroVsUnobserved": "PRESERVE"
+    }
+  ],
+  "machineSettings": {
+    "status": "SOURCE_DERIVED",
+    "values": [
+      "SET_1",
+      "SET_2",
+      "SET_4",
+      "SET_5",
+      "SET_6"
+    ]
+  },
+  "uiRequirements": {
+    "alwaysVisibleEvidence": true,
+    "unknownSectionNotice": "このセクションの全項目は設定別出現率が公表・確認されていないため、記録のみです。設定推測の計算には使用しません。",
+    "siteNamesInProductCopy": false,
+    "gameCountInput": "TOTAL_GAMES_WITH_OBSERVED_EXCLUSIONS",
+    "automaticOther": true,
+    "groupSameOpportunity": true,
+    "sharedRejectedReasonBulletList": true,
+    "initialAndBellDenominators": "DISTINCT",
+    "unknownExclusions": "DISABLE_AFFECTED_FINDING_ONLY"
+  },
+  "originalCandidateReconciliation": [
+    {
+      "originalId": "FEAT_BONUS_INITIAL",
+      "label": "ボーナス初当り",
+      "reviewedCandidateId": "BONUS_INITIAL",
+      "preserved": true
+    },
+    {
+      "originalId": "FEAT_NORMAL_3COIN_BELL",
+      "label": "通常時3枚ベル",
+      "reviewedCandidateId": "NORMAL_BELL",
+      "preserved": true
+    },
+    {
+      "originalId": "FEAT_BONUS_COMBINED_EXCLUDED",
+      "label": "ボーナス合算",
+      "reviewedCandidateId": "BONUS_COMBINED",
+      "preserved": true
+    },
+    {
+      "originalId": "EVI_RINO_TROPHY_BRONZE_2PLUS",
+      "label": "銅（設定2以上）",
+      "reviewedCandidateId": "TROPHY",
+      "preserved": true
+    },
+    {
+      "originalId": "EVI_RINO_TROPHY_GOLD_4PLUS",
+      "label": "金（設定4以上）",
+      "reviewedCandidateId": "TROPHY",
+      "preserved": true
+    },
+    {
+      "originalId": "EVI_RINO_TROPHY_KEROT_5PLUS",
+      "label": "ケロット柄（設定5以上）",
+      "reviewedCandidateId": "TROPHY",
+      "preserved": true
+    },
+    {
+      "originalId": "EVI_RINO_TROPHY_RAINBOW_6",
+      "label": "虹（設定6）",
+      "reviewedCandidateId": "TROPHY",
+      "preserved": true
+    }
+  ],
+  "scopeBoundary": {
+    "through": "CANDIDATE_CONTRACT",
+    "implementation": false,
+    "distribution": false,
+    "apk": false,
+    "qa": false
+  }
+}

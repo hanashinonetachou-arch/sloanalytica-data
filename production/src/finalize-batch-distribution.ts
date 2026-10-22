@@ -23,11 +23,18 @@ reconcileBatch(o,s,batchId);
 for(const machineId of targets){
   let x=o.stage(batchId,machineId,'DISTRIBUTION');
   if(x.state==='COMPLETE')continue;
-  if(x.state!=='READY')throw new Error('DISTRIBUTION_NOT_READY:'+machineId+':'+x.state);
-  const a=o.createAttempt(x),l=o.acquire(x,a,300000);
-  x=o.transition(o.stage(batchId,machineId,'DISTRIBUTION'),'LEASED','DISPATCH',a.workId);
-  x=o.transition(x,'RUNNING','WORKER_START',a.workId);
-  const q=productionRequest(o,x,a,l);
+  let q:any;
+  if(x.state==='RUNNING'){
+    q=fs.readdirSync(s.p('batches',batchId,'work-requests')).map(f=>s.read<any>('batches',batchId,'work-requests',f)).find(v=>v.machineId===machineId&&v.stage==='DISTRIBUTION'&&v.attemptId===x.activeAttemptId);
+    if(!q)throw new Error('ACTIVE_REQUEST_NOT_FOUND:'+machineId);
+  }else{
+    if(x.state!=='READY')throw new Error('DISTRIBUTION_NOT_READY:'+machineId+':'+x.state);
+    const a=o.createAttempt(x),l=o.acquire(x,a,300000);
+    x=o.transition(o.stage(batchId,machineId,'DISTRIBUTION'),'LEASED','DISPATCH',a.workId);
+    x=o.transition(x,'RUNNING','WORKER_START',a.workId);
+    q=productionRequest(o,x,a,l);
+    s.write(q,'batches',batchId,'work-requests',q.workId+'.json');
+  }
   const ar=q.inputArtifacts.find((z:any)=>z.kind==='app-runtime');
   if(!ar?.path)throw new Error('APP_RUNTIME_REF_MISSING:'+machineId);
   const app=s.read<any>(...String(ar.path).replace(/^production\//,'').split('/'));

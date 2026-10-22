@@ -1,0 +1,434 @@
+{
+  "schemaVersion": "candidate-contract-v1",
+  "manifestVersion": "8.5",
+  "batchId": "batch-20261022-025",
+  "machineId": "LB_NEW_KING_HANAHANA_V_PF",
+  "machineName": "スマート沖スロ ニューキングハナハナV",
+  "evaluationArtifact": {
+    "artifactId": "evaluation-LB_NEW_KING_HANAHANA_V_PF",
+    "kind": "evaluation",
+    "path": "production/batches/batch-20261022-025/artifacts/LB_NEW_KING_HANAHANA_V_PF/evaluation/result.json",
+    "sha256": "420382e2220d9eec922680a29f4c22b2c9f2162aaa4591d83a4d37f0e33b0e88",
+    "producerWorkId": "wrk_82cb54121cab4c2d"
+  },
+  "eligibilityArtifact": {
+    "artifactId": "eligibility-LB_NEW_KING_HANAHANA_V_PF",
+    "kind": "eligibility",
+    "path": "production/batches/batch-20261022-025/artifacts/LB_NEW_KING_HANAHANA_V_PF/eligibility/result.json",
+    "sha256": "47d951251f491e676c65581bce39cba20986e44d8d187ca4b12edc2196da8e12",
+    "producerWorkId": "wrk_8827d819903b4cb0"
+  },
+  "candidates": [
+    {
+      "findingId": "BIG",
+      "label": "BIG",
+      "model": "CATEGORICAL",
+      "trialUniverse": "BONUS_ELIGIBLE_GAME_TRIAL",
+      "liveInferenceRoute": "LIVE_CONDITIONAL",
+      "settingDistribution": {
+        "1": {
+          "BIG": 0.0033444816053511705,
+          "REG": 0.0020161290322580645
+        },
+        "2": {
+          "BIG": 0.003436426116838488,
+          "REG": 0.0021231422505307855
+        },
+        "3": {
+          "BIG": 0.0035587188612099642,
+          "REG": 0.0022624434389140274
+        },
+        "4": {
+          "BIG": 0.0037313432835820895,
+          "REG": 0.0024449877750611247
+        },
+        "V": {
+          "BIG": 0.003952569169960474,
+          "REG": 0.002688172043010753
+        }
+      },
+      "details": [
+        "総G（ボーナス・BT中を除く）を母数とし、BIG前半・後半は1回のBIGとして記録する。"
+      ],
+      "dependencyGroupId": "BONUS_OUTCOME",
+      "dependencyKind": "MUTUALLY_EXCLUSIVE",
+      "dependencyReason": "同じ総GでBIG・REGは排他的な当選結果であり、その他の結果を残余として1つの観測にまとめる。独立には加算しない。",
+      "runtimeInferenceAllowed": true,
+      "dependencyResolution": "MUTUALLY_EXCLUSIVE_CATEGORICAL",
+      "runtimePolicyBinding": {
+        "metric": "PER_ELIGIBLE_TRIAL_POWER",
+        "value": 0.005422071258837091,
+        "thresholdSource": "RUNTIME_POLICY"
+      },
+      "jointSourceFindingIds": [
+        "BIG",
+        "REG"
+      ]
+    },
+    {
+      "findingId": "REG",
+      "label": "REG",
+      "model": "BERNOULLI",
+      "trialUniverse": "BONUS_ELIGIBLE_GAME_TRIAL",
+      "liveInferenceRoute": "LIVE_CONDITIONAL",
+      "settingDistribution": {
+        "1": "1/496",
+        "2": "1/471",
+        "3": "1/442",
+        "4": "1/409",
+        "V": "1/372"
+      },
+      "details": [
+        "総G（ボーナス・BT中を除く）を母数とし、BIG前半・後半は1回のBIGとして記録する。"
+      ],
+      "dependencyGroupId": "BONUS_OUTCOME",
+      "dependencyKind": "MUTUALLY_EXCLUSIVE",
+      "dependencyReason": "同じ総GでBIG・REGは排他的な当選結果であり、その他の結果を残余として1つの観測にまとめる。独立には加算しない。",
+      "runtimeInferenceAllowed": false,
+      "dependencyResolution": "RESOLVED_IN_JOINT_MODEL",
+      "runtimePolicyBinding": {
+        "metric": "SELECTION_SCORE",
+        "value": 22.780284456735725,
+        "thresholdSource": "RUNTIME_POLICY"
+      },
+      "resolvedIntoFindingId": "BIG"
+    }
+  ],
+  "dependencyGroups": [
+    {
+      "groupId": "BONUS_OUTCOME",
+      "resolution": "MUTUALLY_EXCLUSIVE_CATEGORICAL",
+      "members": [
+        "BIG",
+        "REG"
+      ],
+      "runtimeInferenceAllowed": true,
+      "jointFindingId": "BIG",
+      "jointSourceFindingIds": [
+        "BIG",
+        "REG"
+      ],
+      "reason": "同一trial universeで排他的な観測カテゴリをjoint multinomialとして評価し、カテゴリ間の二重評価を避ける。"
+    }
+  ],
+  "excludedDecisions": [
+    {
+      "findingId": "BONUS_COMBINED",
+      "label": "ボーナス合算",
+      "supportingSourceIds": [
+        "S1"
+      ],
+      "eligibility": "NOT_APPLICABLE",
+      "reason": "参考分布として保存するが設定推測Featureには使用しない。",
+      "ruleRefs": [
+        "manifest-v8.5-reference-only"
+      ],
+      "liveInferenceRoute": "NONE",
+      "userFacingReason": "総G（ボーナス・BT中を除く）を母数とし、BIG前半・後半は1回のBIGとして記録する。"
+    }
+  ],
+  "blockedItems": [
+    {
+      "blockId": "NORMAL_BELL",
+      "label": "通常時ベル",
+      "reason": "設定別確率が指定の公開範囲で確認できない。独自推定値を設定別の公表値として使用しない。",
+      "reevaluationCondition": "不足している観測条件または本機の設定別公表値が、新しい具体的な公開資料で確認できた場合に限り再評価する。",
+      "sourceIds": [
+        "S1"
+      ],
+      "closure": {
+        "basis": "Manifest v8.5 Research終了契約と添付の個別終了記録",
+        "ownerStage": "RESEARCH",
+        "releaseCondition": "NEW_CONCRETE_SOURCE_ONLY",
+        "repeatPublicSearch": false
+      }
+    },
+    {
+      "blockId": "NORMAL_OTHER",
+      "label": "通常時チェリー・スイカ",
+      "reason": "本機固有の設定別確率が指定の公開範囲で確認できないため、30Φ版や旧機種から値を転用しない。",
+      "reevaluationCondition": "不足している観測条件または本機の設定別公表値が、新しい具体的な公開資料で確認できた場合に限り再評価する。",
+      "sourceIds": [
+        "S1"
+      ],
+      "closure": {
+        "basis": "Manifest v8.5 Research終了契約と添付の個別終了記録",
+        "ownerStage": "RESEARCH",
+        "releaseCondition": "NEW_CONCRETE_SOURCE_ONLY",
+        "repeatPublicSearch": false
+      }
+    },
+    {
+      "blockId": "PREDECESSOR",
+      "label": "着席前BIG・REG内訳",
+      "reason": "旧正本で自己区間母数・実機観測元の確認が終わっていないため、着席前記録を自分の区間へ加算しない。設定Vを他設定に置換しない。",
+      "reevaluationCondition": "不足している観測条件または本機の設定別公表値が、新しい具体的な公開資料で確認できた場合に限り再評価する。",
+      "sourceIds": [
+        "S1"
+      ],
+      "closure": {
+        "basis": "Manifest v8.5 Research終了契約と添付の個別終了記録",
+        "ownerStage": "CANDIDATE_CONTRACT",
+        "releaseCondition": "NEW_CONCRETE_SOURCE_ONLY",
+        "repeatPublicSearch": false
+      }
+    }
+  ],
+  "evidenceCandidates": [
+    {
+      "findingId": "BIG_WATER",
+      "label": "BIG前半スイカ",
+      "sourceIds": [
+        "S1"
+      ],
+      "details": [
+        "このセクションの全項目は設定別出現率が公表・確認されていないため、記録のみです。設定推測の計算には使用しません。"
+      ],
+      "semanticCategories": [
+        {
+          "label": "スイカ成立",
+          "meaning": "高設定ほど優遇との記載。設定別出現率未確認",
+          "semanticType": "PROBABILITY_UNKNOWN"
+        }
+      ]
+    },
+    {
+      "findingId": "REG_WATER",
+      "label": "REG中スイカ",
+      "sourceIds": [
+        "S1"
+      ],
+      "details": [
+        "このセクションの全項目は設定別出現率が公表・確認されていないため、記録のみです。設定推測の計算には使用しません。"
+      ],
+      "semanticCategories": [
+        {
+          "label": "スイカ成立",
+          "meaning": "高設定ほど優遇との記載。設定別出現率未確認",
+          "semanticType": "PROBABILITY_UNKNOWN"
+        }
+      ]
+    },
+    {
+      "findingId": "SIDE_LAMP",
+      "label": "BIG後半サイドランプ",
+      "sourceIds": [
+        "S1"
+      ],
+      "details": [
+        "このセクションの全項目は設定別出現率が公表・確認されていないため、記録のみです。設定推測の計算には使用しません。",
+        "白7ビタ押し後にスイカ入賞した同一BIG内の初回示唆だけ記録。繰り返し入賞した同色ランプを独立観測として足さない。"
+      ],
+      "semanticCategories": [
+        {
+          "label": "青",
+          "meaning": "奇数設定示唆弱",
+          "semanticType": "PROBABILITY_UNKNOWN"
+        },
+        {
+          "label": "黄",
+          "meaning": "偶数設定示唆弱",
+          "semanticType": "PROBABILITY_UNKNOWN"
+        },
+        {
+          "label": "緑",
+          "meaning": "奇数設定示唆強",
+          "semanticType": "PROBABILITY_UNKNOWN"
+        },
+        {
+          "label": "赤",
+          "meaning": "偶数設定示唆強",
+          "semanticType": "PROBABILITY_UNKNOWN"
+        },
+        {
+          "label": "虹",
+          "meaning": "高設定示唆・設定確定ではない",
+          "semanticType": "PROBABILITY_UNKNOWN"
+        }
+      ]
+    },
+    {
+      "findingId": "END_LAMP",
+      "label": "ボーナス終了時ハイビスカス",
+      "sourceIds": [
+        "S1"
+      ],
+      "details": [
+        "このセクションの全項目は設定別出現率が公表・確認されていないため、記録のみです。設定推測の計算には使用しません。"
+      ],
+      "semanticCategories": [
+        {
+          "label": "白",
+          "meaning": "高設定期待度の順序1・設定確定ではない",
+          "semanticType": "PROBABILITY_UNKNOWN"
+        },
+        {
+          "label": "青",
+          "meaning": "高設定期待度の順序2・設定確定ではない",
+          "semanticType": "PROBABILITY_UNKNOWN"
+        },
+        {
+          "label": "黄",
+          "meaning": "高設定期待度の順序3・設定確定ではない",
+          "semanticType": "PROBABILITY_UNKNOWN"
+        },
+        {
+          "label": "緑",
+          "meaning": "高設定期待度の順序4・設定確定ではない",
+          "semanticType": "PROBABILITY_UNKNOWN"
+        },
+        {
+          "label": "紫",
+          "meaning": "高設定期待度の順序5・設定確定ではない",
+          "semanticType": "PROBABILITY_UNKNOWN"
+        },
+        {
+          "label": "虹",
+          "meaning": "高設定期待度の順序6・設定確定ではない",
+          "semanticType": "PROBABILITY_UNKNOWN"
+        }
+      ]
+    },
+    {
+      "findingId": "RETRO_SOUND",
+      "label": "レトロサウンド",
+      "sourceIds": [
+        "S1"
+      ],
+      "details": [
+        "このセクションの全項目は設定別出現率が公表・確認されていないため、記録のみです。設定推測の計算には使用しません。"
+      ],
+      "semanticCategories": [
+        {
+          "label": "発生",
+          "meaning": "本機の発生条件・設定別確率未確認",
+          "semanticType": "PROBABILITY_UNKNOWN"
+        }
+      ]
+    }
+  ],
+  "sourceIntegrityIssues": [],
+  "observationPrerequisites": [
+    {
+      "findingId": "BIG",
+      "trialUniverse": "BONUS_ELIGIBLE_GAME_TRIAL",
+      "denominatorSemantics": "総G（ボーナス・BT中を除く）を母数とし、BIG前半・後半は1回のBIGとして記録する。",
+      "liveObservation": {
+        "status": "EXACT_WITH_SCOPE_TRACKING",
+        "reason": "総G（ボーナス・BT中を除く）を母数とし、BIG前半・後半は1回のBIGとして記録する。"
+      },
+      "observationContext": null,
+      "sourceIds": [
+        "S1"
+      ],
+      "unknownRequiredInput": "DISABLE_THIS_FINDING_ONLY",
+      "zeroVsUnobserved": "PRESERVE"
+    },
+    {
+      "findingId": "REG",
+      "trialUniverse": "BONUS_ELIGIBLE_GAME_TRIAL",
+      "denominatorSemantics": "総G（ボーナス・BT中を除く）を母数とし、BIG前半・後半は1回のBIGとして記録する。",
+      "liveObservation": {
+        "status": "EXACT_WITH_SCOPE_TRACKING",
+        "reason": "総G（ボーナス・BT中を除く）を母数とし、BIG前半・後半は1回のBIGとして記録する。"
+      },
+      "observationContext": null,
+      "sourceIds": [
+        "S1"
+      ],
+      "unknownRequiredInput": "DISABLE_THIS_FINDING_ONLY",
+      "zeroVsUnobserved": "PRESERVE"
+    }
+  ],
+  "machineSettings": {
+    "status": "SOURCE_DERIVED",
+    "values": [
+      "SET_1",
+      "SET_2",
+      "SET_3",
+      "SET_4",
+      "SET_V"
+    ]
+  },
+  "uiRequirements": {
+    "alwaysVisibleEvidence": true,
+    "unknownSectionNotice": "このセクションの全項目は設定別出現率が公表・確認されていないため、記録のみです。設定推測の計算には使用しません。",
+    "siteNamesInProductCopy": false,
+    "gameCountInput": "TOTAL_GAMES",
+    "automaticOther": true,
+    "groupSameOpportunity": true,
+    "sharedRejectedReasonBulletList": true
+  },
+  "originalCandidateReconciliation": [
+    {
+      "originalId": "FEAT_PREDECESSOR_BONUS_OUTCOME",
+      "label": "着席前BIG・REG内訳",
+      "reviewedCandidateId": "PREDECESSOR",
+      "preserved": true
+    },
+    {
+      "originalId": "FEAT_BONUS_OUTCOME",
+      "label": "自分のBIG・REG",
+      "reviewedCandidateId": "BIG",
+      "preserved": true
+    },
+    {
+      "originalId": "FEAT_BIG_FIRST_HALF_WATERMELON_EXCLUDED",
+      "label": "BIG前半スイカ",
+      "reviewedCandidateId": "BIG_WATER",
+      "preserved": true
+    },
+    {
+      "originalId": "FEAT_REG_WATERMELON_EXCLUDED",
+      "label": "REG中スイカ",
+      "reviewedCandidateId": "REG_WATER",
+      "preserved": true
+    },
+    {
+      "originalId": "FEAT_BIG_SIDE_LAMP_EXCLUDED",
+      "label": "BIG後半サイドランプ",
+      "reviewedCandidateId": "SIDE_LAMP",
+      "preserved": true
+    },
+    {
+      "originalId": "FEAT_BONUS_END_HIBISCUS_LAMP_EXCLUDED",
+      "label": "ボーナス終了時ハイビスカスランプ",
+      "reviewedCandidateId": "END_LAMP",
+      "preserved": true
+    },
+    {
+      "originalId": "FEAT_NORMAL_BELL_EXCLUDED",
+      "label": "通常時ベル",
+      "reviewedCandidateId": "NORMAL_BELL",
+      "preserved": true
+    }
+  ],
+  "nativeSettingModelContract": {
+    "settingOrder": [
+      "1",
+      "2",
+      "3",
+      "4",
+      "V"
+    ],
+    "requiredModel": "BIG_REG_OTHER_MULTINOMIAL",
+    "trialInput": "総G（ボーナス・BT中を除く）",
+    "derivedOnly": [
+      "BONUS_COMBINED"
+    ],
+    "noRemapping": true,
+    "formalNumericEvaluation": "NATIVE_IDENTIFIER_SUPPORTED",
+    "researchSourceComplete": true,
+    "implementationRequired": true,
+    "otherProbability": "1 - P(BIG) - P(REG)",
+    "otherInput": "AUTOMATIC_FROM_TRIALS_MINUS_BIG_MINUS_REG",
+    "implementationScope": "APP_IMPLEMENTATION_OUTSIDE_THIS_BATCH_SCOPE"
+  },
+  "scopeBoundary": {
+    "through": "CANDIDATE_CONTRACT",
+    "implementation": false,
+    "distribution": false,
+    "apk": false,
+    "qa": false
+  }
+}

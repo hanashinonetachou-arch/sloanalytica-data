@@ -1,6 +1,7 @@
+import {protectedInputMetadata} from './protected-input-metadata.ts';
 import {concreteAdoptionReason,isGenericAdoptionReason} from './adoption-reason.ts';
 import {withUnknownHistoryRecords} from './unknown-history-records.ts';
-import {appRuntimeMachineDataVersion,playDataSourceForTrialUniverse,categoricalProbabilityRow,evidenceCategoryRecords,resolveEvidenceInputLinks,evidenceRecordInputId} from './app-runtime-builder.ts';
+import {hasManualGameResidual,appRuntimeMachineDataVersion,playDataSourceForTrialUniverse,categoricalProbabilityRow,evidenceCategoryRecords,resolveEvidenceInputLinks,evidenceRecordInputId} from './app-runtime-builder.ts';
 export const APP_RUNTIME_VALIDATOR_CONTRACT='app-runtime-v1';
 const canonical=(v:any):string=>Array.isArray(v)?'['+v.map(canonical).join(',')+']':v&&typeof v==='object'?'{'+Object.keys(v).sort().map(k=>JSON.stringify(k)+':'+canonical(v[k])).join(',')+'}':JSON.stringify(v);
 const fail=(m:string):never=>{throw new Error('APP_RUNTIME_VALIDATION_FAILED:'+m)};
@@ -22,10 +23,17 @@ export function validateAppRuntimeDocument(doc:any,projection:any,projectionArti
  const expectedInputs=[...expectedNumericInputs,...expectedEvidenceInputs];
  if(!Array.isArray(p.inputs?.inputs)||p.inputs.inputs.length!==expectedInputs.length)fail('INPUT_COVERAGE');
  const inputBy=new Map((p.inputs.inputs??[]).map((x:any)=>[x.id,x]));if(inputBy.size!==expectedInputs.length)fail('INPUT_DUPLICATE');
- for(const x of expectedNumericInputs){const a:any=inputBy.get(x.id);if(!a||a.name!==x.label||!['integer','counter'].includes(a.type))fail('INPUT:'+x.id);if(['対象回数','回数','観測機会数','該当回数'].includes(String(a.name)))fail('ABSTRACT_INPUT_LABEL:'+x.id);if(['trial','success'].includes(String(x.role??''))&&(String(a.name??'').length>30||/^(?:に|で|を|が|へ|から)/.test(String(a.name??''))))fail('INPUT_LABEL_NOT_CONCISE:'+x.id)}
+ for(const x of expectedNumericInputs){const a:any=inputBy.get(x.id);for(const [key,value] of Object.entries(protectedInputMetadata(projection.machineId,x.id)??{}))if(canonical(a?.[key])!==canonical(value))fail('PROTECTED_INPUT_METADATA:'+x.id+':'+key);if(!a||a.name!==(protectedInputMetadata(projection.machineId,x.id)?.name??x.label)||!['integer','counter'].includes(a.type))fail('INPUT:'+x.id);if(['対象回数','回数','観測機会数','該当回数'].includes(String(a.name)))fail('ABSTRACT_INPUT_LABEL:'+x.id);if(['trial','success'].includes(String(x.role??''))&&(String(a.name??'').length>30||/^(?:に|で|を|が|へ|から)/.test(String(a.name??''))))fail('INPUT_LABEL_NOT_CONCISE:'+x.id)}
  for(const x of expectedEvidenceInputs){const a:any=inputBy.get(x.id);if(!a||a.name!==x.label||a.type!=='counter'||a.inferenceRole!=='DISPLAY_ONLY'||a.unit!=='回')fail('EVIDENCE_INPUT:'+x.id)}
  if(!Array.isArray(p.features?.features)||p.features.features.length!==active.length)fail('FEATURE_COVERAGE');
  const featureBy=new Map((p.features.features??[]).map((x:any)=>[x.featureId,x]));
+ for(const f of active.filter(hasManualGameResidual)){
+  const s=expectedSections.find((x:any)=>x.sourceFindingId===f.findingId),trial=s.inputs.find((x:any)=>x.role==='trial'),cats=s.inputs.filter((x:any)=>x.role==='categoryCount'),other=cats.find((x:any)=>x.label==='その他');
+  const expectedTerms=[{inputId:trial.id,multiplier:1},...cats.filter((x:any)=>x.id!==other.id).map((x:any)=>({inputId:x.id,multiplier:-1}))];
+  const derived:any=inputBy.get(other.id);if(derived?.derivedCalculation!=='linear_combination'||derived.inputVisible!==false||canonical(derived.derivedTerms)!==canonical(expectedTerms)||(inputBy.get(trial.id) as any)?.derivedCalculation)fail('MANUAL_GAME_RESIDUAL:'+f.findingId);
+  const node=(p.ui.v8Sections??[]).flatMap((x:any)=>x.items??[]).find((x:any)=>x.featureId===f.findingId);
+  if(node?.interaction?.opportunityTracking?.inputId!==trial.id||node.interaction.totalOpportunities!=='SEPARATE_COUNTER'||canonical(node.interaction.categories.map((x:any)=>x.inputId))!==canonical(cats.filter((x:any)=>x.id!==other.id).map((x:any)=>x.id)))fail('MANUAL_GAME_RESIDUAL_UI:'+f.findingId);
+ }
  const secBy=new Map(expectedSections.map((s:any)=>[s.sourceFindingId,s]));
  for(const src of active){
   const a:any=featureBy.get(src.findingId),s:any=secBy.get(src.findingId);if(!a||!s)fail('FEATURE:'+src.findingId);
@@ -34,7 +42,7 @@ export function validateAppRuntimeDocument(doc:any,projection:any,projectionArti
    const success=s.inputs?.find((x:any)=>x.role==='success');if(a.modelType!=='binomial'||a.numeratorInputId!==success?.id)fail('FEATURE_BERNOULLI:'+src.findingId);
    for(const [k,v] of Object.entries(src.settingDistribution??{}))if(!near(a.probabilities?.[settingKey(k)],probability(v)))fail('FEATURE_PROB:'+src.findingId+':'+k);
   }else if(src.model==='CATEGORICAL'){
-   const cats=s.inputs?.filter((x:any)=>x.role==='categoryCount')??[];const sumMode=['SOURCE_EXHAUSTIVE','SOURCE_EXPLICIT_OTHER'].includes(String(src.categoryModel?.residualPolicy??''));if(a.modelType!=='multinomial'||a.numeratorInputId!==cats[0]?.id||canonical(a.categoryInputIds??[])!==canonical(cats.slice(1).map((x:any)=>x.id))||(sumMode?a.denominatorRule!=='SUM_CATEGORY_COUNTS':a.denominatorRule!==undefined))fail('FEATURE_CATEGORICAL:'+src.findingId);
+   const cats=s.inputs?.filter((x:any)=>x.role==='categoryCount')??[];const sumMode=!hasManualGameResidual(src)&&['SOURCE_EXHAUSTIVE','SOURCE_EXPLICIT_OTHER'].includes(String(src.categoryModel?.residualPolicy??''));if(a.modelType!=='multinomial'||a.numeratorInputId!==cats[0]?.id||canonical(a.categoryInputIds??[])!==canonical(cats.slice(1).map((x:any)=>x.id))||(sumMode?a.denominatorRule!=='SUM_CATEGORY_COUNTS':a.denominatorRule!==undefined))fail('FEATURE_CATEGORICAL:'+src.findingId);
    for(const [k,row] of Object.entries(src.settingDistribution??{}) as any){const expected=categoricalProbabilityRow(row,cats.map((x:any)=>x.label),src.findingId,k);if(canonical(a.categoryProbabilities?.[settingKey(k)])!==canonical(expected))fail('FEATURE_CATEGORY_PROB:'+src.findingId+':'+k)}
   }else fail('FEATURE_MODEL:'+src.findingId);
  }
@@ -44,10 +52,11 @@ export function validateAppRuntimeDocument(doc:any,projection:any,projectionArti
  for(const x of active){const rp:any=rpBy.get(x.findingId);if(rp?.runtimeStatus!=='ACTIVE')fail('RUNTIME_ACTIVE:'+x.findingId);if(!importanceVocabulary.has(rp?.importance))fail('RUNTIME_IMPORTANCE:'+x.findingId);}
  for(const x of inactive)if(rpBy.get(x.findingId)?.runtimeStatus!=='INACTIVE')fail('RUNTIME_INACTIVE:'+x.findingId);
  if(p.ui?.contractVersion!=='runtime-ui-v8'||p.ui?.source!=='CANONICAL_UI'||p.ui?.sourceSchemaVersion!==projection.runtimeUi?.schemaVersion||p.ui?.accordion?.singleOpen!==true||p.ui?.quickInput?.enabled!==false)fail('UI_HEADER');
+ if(p.ui?.gameCountPolicy!==projection.runtimeUi?.gameCountPolicy)fail('UI_GAME_COUNT_POLICY_COPY');
  if(p.ui?.playInfo?.visible!==true||!p.ui?.playInfo?.useDifference||canonical(p.ui?.playInfo)!==canonical(projection.runtimeUi?.playInfo))fail('UI_PLAY_INFO_COPY');if(!['TOTAL_ONLY','NORMAL_ONLY','TOTAL_AND_NORMAL','NONE'].includes(String(p.ui?.playInfo?.mode??'')))fail('UI_PLAY_INFO_MODE');
  const expectedSectionById=new Map(expectedSections.map((section:any)=>[section.id,section]));for(const s of (p.ui?.v8Sections??[]).filter((x:any)=>String(x.id??'').startsWith('OBS_'))){if(typeof s.description!=='string'||!s.description.trim())fail('NUMERIC_DESCRIPTION:'+s.id);if(/・数えるもの：|・基準：|opportunity model|candidate contract|runtime policy|denominator|benchmark/i.test(s.description)||/\\n|\/n/i.test(s.description))fail('NUMERIC_DESCRIPTION_RESPONSIBILITY:'+s.id);if(sectionDescriptionRepeatsInputs(s,expectedSectionById.get(s.id)))fail('NUMERIC_DESCRIPTION_REPEATS_INPUTS:'+s.id);if(s.descriptionPresentation?.collapsible!==true)fail('NUMERIC_DESCRIPTION_PRESENTATION:'+s.id);}
  for(const section of expectedSections){
-  const feature=active.find((f:any)=>f.findingId===section.sourceFindingId),source=playDataSourceForTrialUniverse(feature?.trialUniverse);
+  const feature=active.find((f:any)=>f.findingId===section.sourceFindingId),source=playDataSourceForTrialUniverse(feature?.trialUniverse,projection.runtimeUi?.gameCountPolicy);
   const cats=(section.inputs??[]).filter((x:any)=>x.role==='categoryCount'),other=cats.find((x:any)=>x.label==='その他'),trial=(section.inputs??[]).find((x:any)=>x.role==='trial');
   const expected=feature?.model==='CATEGORICAL'&&source&&other&&['SOURCE_EXHAUSTIVE','SOURCE_EXPLICIT_OTHER'].includes(String(feature.categoryModel?.residualPolicy??''))?{inputId:other.id,trialInputId:trial.id,categoryInputIds:cats.filter((x:any)=>x.id!==other.id).map((x:any)=>x.id),source,label:trial.label}:undefined;
   const nodes=(p.ui.v8Sections??[]).flatMap((s:any)=>s.items??[]).filter((n:any)=>n.featureId===section.sourceFindingId);
@@ -87,3 +96,4 @@ export function validateAppRuntimeDocument(doc:any,projection:any,projectionArti
  return [{validator:APP_RUNTIME_VALIDATOR_CONTRACT,sections:(p.ui.v8Sections??[]).length,evidenceReferences:(projection.evidence??[]).length,settings:p.machine.settings.length,features:active.length,inputs:expectedInputs.length}];
 }
 export function validateAppRuntimeArtifacts(s:any,a:any,r:any){const out=r.producedArtifacts??[];if(out.length!==1)fail('OUTPUT_COUNT');const ref=out[0];if(ref.kind!=='app-runtime'||typeof ref.path!=='string'||!ref.path.startsWith('production/batches/'+a.batchId+'/artifacts/'+a.machineId+'/app_runtime/'))fail('OUTPUT_REF');const prefix='production/';const doc=s.read(...ref.path.slice(prefix.length).split('/'));const ps=s.read('batches',a.batchId,'machines',a.machineId,'stages','RUNTIME_PROJECTION.json');if(!ps.authoritativeOutputRef?.path)fail('PROJECTION_AUTHORITY_MISSING');const projection=s.read(...String(ps.authoritativeOutputRef.path).slice(prefix.length).split('/'));return validateAppRuntimeDocument(doc,projection,ps.authoritativeOutputRef)}
+
