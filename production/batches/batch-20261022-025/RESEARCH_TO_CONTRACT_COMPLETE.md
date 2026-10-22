@@ -5,14 +5,18 @@
 ## 完了状態
 
 - 10機種を指定順に1機種ずつResearch正式受理。最初の10機種すべての受理後にEvaluationを開始。
-- Research / Evaluation / Eligibility / Candidate Contractの40ステージは既存バリデータで正式受理。
+- Research / Evaluation / Eligibility / Candidate Contractの40ステージは正式バリデータで受理。設定Vの形式対応後も全40正本を再検証済み。
 - 既存Repositoryの候補・確定表示106件を新しい候補台帳264件へ照合。消去なし。
-- 共有の評価器・バリデータ・閾値は変更なし。
+- Research検証形式は、SOURCE_DERIVEDでSET_Vが明示された場合に限り数値キーVを許可。評価器・採否閾値・設定0の扱いは変更なし。
 - App・配信パッケージ・既存QAは変更なし。Actionsの起動操作なし。
 
-## 計算側の残条件（Research不足ではない）
+## 設定Vの形式対応と正式再受理
 
-**ニューキングハナハナV:** 現行の数値Research schemaが設定Vを受け付けない。設定1/2/3/4/Vの全公表値、試行・入力設計を保持し、Vを5/6へ置換しない。定量尤度のEvaluationはこの機種のみ保留し、Candidate Contractに後工程の対応事項を明記した。型式はスマート沖スロ版で固定。再調査・人の承認待ちは不要。
+**ニューキングハナハナV:** 設定1/2/3/4/Vの公表値を変更せず、数値ResearchのV識別子制限を解消。旧成果物・検証・stageを `revisions/native-v-format-r2/` に保持してから正本を正式失効・再受理した。Research → Evaluation → Eligibility → Candidate Contractの4工程を新Work IDと検証証跡で完了。Vを5/6へ置換せず、スマート沖スロ版を維持した。公開情報の再調査なし。
+
+正式EIG7000×200はBIG=12.55591577883857（SUPPORT）、REG=22.780284456735725（CORE）。両者は同じ試行の排他的結果としてBIG・REG・残余の1モデルへ統合し、REGの独立二重加算を抑止。その他は総GからBIG・REGを引いて自動算出する契約とし、合算の公表丸め値は参考保存のみ。契約上の経路許可は実装・Runtime Policy採用の完了を意味しない。
+
+設定Vに関する工程保留・HUMAN_REQUIREDはなし。通常時小役の未公表値や、着席前区間の未確認観測条件は候補別の除外として保持し、完了扱いへ変更していない。
 
 ## 争点と経路
 
@@ -42,7 +46,7 @@
 | クレアの秘宝伝 〜はじまりの扉と太陽の石〜 ボーナストリガーver. | 24 | 13 | 19 | 3 |
 | マジカルハロウィン ボーナストリガー | 26 | 9 | 19 | 4 |
 | SHAKE BONUS TRIGGER | 23 | 12 | 15 | 3 |
-| スマート沖スロ ニューキングハナハナV | 11 | 7 | 0 | 5 |
+| スマート沖スロ ニューキングハナハナV | 11 | 7 | 3 | 5 |
 | スマスロ サンダーV | 45 | 8 | 40 | 3 |
 | スマスロケロット5BT | 22 | 20 | 12 | 8 |
 
@@ -54,6 +58,7 @@
 - 配信データ参照: `d711c44083bcce806058abbeab36b697357940c8`
 - App参照: `qa/revue-ui-20261021` / `934c6871f6d42d551c233ebf0e3c15631f06ff67`（読取のみ）
 - 検証: `node --experimental-strip-types src/verify-batch025-contract.ts`
+- 回帰検証: `node --experimental-strip-types --test test/batch025-native-setting-v.test.ts test/batch023-setting-zero.test.ts test/dependency-gate.test.ts test/evaluation-validator.test.ts`（14件PASS）
 - 結果: `validation/final-contract-verification.json`。上流成果物のSHA256、40正式ステージ、候補照合、依存経路、確定制約、境界を検証。
 
-現在の正本は `artifacts/*/{research,evaluation,eligibility,candidate_contract}/result.json` と各stageのauthoritativeOutputRef。curation scriptsとrevisionsは監査・再現用の履歴。既存Batchで再初期化・調査再生成を実行しない。次回はこの正本から未実装工程を開始する。
+現在の正本は `artifacts/*/{research,evaluation,eligibility,candidate_contract}/result.json` と各stageのauthoritativeOutputRef。curation scriptsとrevisionsは監査・再現用の履歴。review08.pyは形式対応前、resolve-native-v.pyは今回の一度だけの訂正記録。既存Batchで再初期化・調査再生成を実行しない。今回の指定範囲はCandidate Contractで完了し、以降の実装工程は開始していない。

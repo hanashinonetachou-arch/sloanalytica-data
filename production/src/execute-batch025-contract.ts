@@ -5,7 +5,7 @@ import {initializeBatch,productionRequest,acceptAndRecord,promoteDependencies} f
 import {buildEvaluation} from './evaluation-builder.ts';
 import {buildEligibility} from './eligibility-builder.ts';
 import {buildCandidateContract} from './candidate-contract-builder.ts';
-// Sequential research adapter; no changes to validators or statistical policy.
+// Sequential research adapter; uses shared validators and statistical policy.
 const s=new RepoStore(process.cwd()),o=new Orchestrator(s),id='batch-20261022-025';
 const selection=s.read<any>('next-machine-selection-20261022-batch025.json');
 const ids=selection.selected.map((x:any)=>x.machineId),action=process.argv[2],machine=process.argv[3];
@@ -40,6 +40,7 @@ if(action==='init'){
    doc=buildCandidateContract(read(er),read(gr),er,gr);
    doc.observationPrerequisites=research.findings.filter((f:any)=>f.settingDistribution&&f.observationType!=='reference_distribution').map((f:any)=>({findingId:f.findingId,trialUniverse:f.trialUniverse,denominatorSemantics:f.denominatorSemantics,liveObservation:f.liveObservation,observationContext:f.observationContext??null,sourceIds:f.sourceIds,unknownRequiredInput:'DISABLE_THIS_FINDING_ONLY',zeroVsUnobserved:'PRESERVE'}));
    doc.machineSettings=research.settings;doc.uiRequirements=research.uiRequirements;doc.originalCandidateReconciliation=research.originalCandidateReconciliation;
+   if(research.nativeSettingModelContract)doc.nativeSettingModelContract=structuredClone(research.nativeSettingModelContract);
    doc.scopeBoundary={through:'CANDIDATE_CONTRACT',implementation:false,distribution:false,apk:false,qa:false};
   }
   const rel=['batches',id,'artifacts',m,stage.toLowerCase(),'result.json'];s.write(doc,...rel);

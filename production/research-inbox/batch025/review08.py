@@ -1,3 +1,5 @@
+# Historical first acceptance only. Native V format limitation was resolved by
+# resolve-native-v.py and formally reaccepted. Do not rerun on the current batch.
 from curation import *
 r=Review(8);r.d['settings']['values']=['SET_1','SET_2','SET_3','SET_4','SET_V'];s=[r.src('34235')];p=json.loads((ROOT/'original-packages'/f'{r.id}.json').read_text())
 for id,label,vals in [('BIG','BIG',[299,291,281,268,253]),('REG','REG',[496,471,442,409,372]),('BONUS_COMBINED','ボーナス合算',[186,180,172,162,150])]:

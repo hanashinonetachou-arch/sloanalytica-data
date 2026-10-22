@@ -46,13 +46,41 @@ assert.ok(!rino.candidates.some((x:any)=>x.findingId==='BONUS_COMBINED'));
 assert.ok(rino.candidates.some((x:any)=>x.findingId==='BONUS_INITIAL'&&x.runtimeInferenceAllowed));
 const v=docs.LB_NEW_KING_HANAHANA_V_PF;
 assert.deepEqual(v.RESEARCH.settings.values,['SET_1','SET_2','SET_3','SET_4','SET_V']);
-assert.equal(v.EVALUATION.evaluations.length,0);
-assert.equal(v.RESEARCH.blockedItems.find((b:any)=>b.blockId==='BIG').retainedSourceValues.V,'1/253');
+assert.equal(v.EVALUATION.evaluations.length,3);
+const previousV=read(path.join(base,'revisions/native-v-format-r2/reviewed-research.json'));
+for(const findingId of ['BIG','REG','BONUS_COMBINED']){
+ const f=v.RESEARCH.findings.find((x:any)=>x.findingId===findingId),e=v.EVALUATION.evaluations.find((x:any)=>x.findingId===findingId);
+ assert.deepEqual(f.settingDistribution,previousV.blockedItems.find((b:any)=>b.blockId===findingId).retainedSourceValues);
+ assert.deepEqual(Object.keys(e.settingDistribution),['1','2','3','4','V']);
+ assert.deepEqual(e.settingDistribution,f.settingDistribution);
+ if(findingId==='BONUS_COMBINED'){
+  assert.equal(e.model,'REFERENCE_ONLY');assert.equal(e.selectionClass,'EXCLUDE');
+  assert.ok(!v.CANDIDATE_CONTRACT.candidates.some((x:any)=>x.findingId===findingId));
+ }else{
+  assert.equal(e.metrics.selectionScore.status,'COMPUTED');assert.equal(e.benchmarkExposure.trials,7000);
+  const score=e.metrics.selectionScore.value;assert.ok(Number.isFinite(score));
+  assert.equal(e.selectionClass,score>=20?'CORE':score>=10?'SUPPORT':score>=5?'JOINT_ELIGIBLE':'EXCLUDE');
+ }
+}
+const joint=v.CANDIDATE_CONTRACT.candidates.find((x:any)=>x.findingId==='BIG');
+assert.equal(joint.model,'CATEGORICAL');assert.equal(joint.runtimeInferenceAllowed,true);
+assert.deepEqual(joint.jointSourceFindingIds,['BIG','REG']);
+assert.deepEqual(Object.keys(joint.settingDistribution),['1','2','3','4','V']);
+for(const [setting,row] of Object.entries(joint.settingDistribution) as [string,any][]){
+ const big=v.RESEARCH.findings.find((x:any)=>x.findingId==='BIG').settingDistribution[setting];
+ const reg=v.RESEARCH.findings.find((x:any)=>x.findingId==='REG').settingDistribution[setting];
+ assert.equal(row.BIG,1/Number(big.slice(2)));assert.equal(row.REG,1/Number(reg.slice(2)));
+ assert.ok(1-row.BIG-row.REG>0);
+}
+assert.equal(v.CANDIDATE_CONTRACT.candidates.filter((x:any)=>x.runtimeInferenceAllowed).length,1);
+assert.equal(v.CANDIDATE_CONTRACT.candidates.find((x:any)=>x.findingId==='REG').resolvedIntoFindingId,'BIG');
+assert.equal(v.CANDIDATE_CONTRACT.nativeSettingModelContract.otherInput,'AUTOMATIC_FROM_TRIALS_MINUS_BIG_MINUS_REG');
+assert.equal(v.CANDIDATE_CONTRACT.nativeSettingModelContract.noRemapping,true);
 const k=docs.LB_KELLOT_5_ND05H.RESEARCH;
 assert.notEqual(k.findings.find((f:any)=>f.findingId==='REG_CUTIN').semanticCategories.find((c:any)=>c.label.includes('絵柄不明')).semanticType,'EXACT_CONSTRAINT');
 const m=docs.LB_MAGICAL_HALLOWEEN_GS.RESEARCH;
 assert.equal(m.findings.find((f:any)=>f.findingId==='MINI').semanticCategories.find((c:any)=>c.meaning==='設定1否定').semanticType,'EXACT_CONSTRAINT');
 assert.ok(m.findings.find((f:any)=>f.findingId==='ALICE_TROPHY').semanticCategories.every((c:any)=>c.semanticType!=='EXACT_CONSTRAINT'));
 const t=docs.LB_THUNDER_V_HA.RESEARCH;assert.notEqual(t.findings.find((f:any)=>f.findingId==='BIG_END').findingId,t.findings.find((f:any)=>f.findingId==='BIG_1G_END').findingId);
-const report={schemaVersion:'batch025-contract-verification-v1',batchId:batch,status:'PASS',ledgerCandidates:ledger,originalCandidatesReconciled:mapped,formalAcceptedStages:40,sequentialFirstAcceptance:true,allTenBeforeEvaluation:true,sharedValidatorsModified:false,actionsRuns:0,implementation:false,distribution:false,apk:false,qa:false,limitations:[{machineId:'LB_NEW_KING_HANAHANA_V_PF',type:'IMPLEMENTATION_PREREQUISITE',reason:'SET_V is preserved natively; the current Research numeric schema does not support V. Published rates are retained; numerical likelihood evaluation is deferred. No new public search or human approval is required.'}],machines:results};
+const report={schemaVersion:'batch025-contract-verification-v1',batchId:batch,status:'PASS',ledgerCandidates:ledger,originalCandidatesReconciled:mapped,formalAcceptedStages:40,sequentialFirstAcceptance:true,allTenBeforeEvaluation:true,sharedValidatorsModified:true,sharedValidatorChanges:['Explicit SOURCE_DERIVED SET_V permits numeric key V'],statisticalPolicyChanged:false,actionsRuns:0,implementation:false,distribution:false,apk:false,qa:false,limitations:[],resolvedPrerequisites:[{machineId:'LB_NEW_KING_HANAHANA_V_PF',type:'NATIVE_SETTING_IDENTIFIER',status:'FORMALLY_REACCEPTED_THROUGH_CANDIDATE_CONTRACT',noRemapping:true,newPublicSearch:false}],machines:results};
 fs.mkdirSync(path.join(base,'validation'),{recursive:true});fs.writeFileSync(path.join(base,'validation/final-contract-verification.json'),JSON.stringify(report,null,2)+'\n');console.log(JSON.stringify(report,null,2));
