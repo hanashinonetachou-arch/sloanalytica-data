@@ -1,5 +1,7 @@
 # Batch025 — ResearchからCandidate Contractまで
 
+追記: ユーザーの対象範囲拡張により、実装・配信・QA用APK生成まで完了。現在地点は `APK_QA_HANDOFF.md` と `device-qa/handoff.json`。以下はContract確定時の記録。
+
 基準: Manifest v8.5。元の37ファイルは `production/research-inbox/batch025/original/` に変更せず保存。
 
 ## 完了状態
