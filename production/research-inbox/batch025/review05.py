@@ -1,0 +1,27 @@
+from curation import *
+r=Review(5);r.d['settings']['values']=['SET_'+str(x) for x in range(1,7)];s=[r.src('31590')];p=json.loads((ROOT/'original-packages'/f'{r.id}.json').read_text())
+for i,(label,vals) in enumerate([('BIG',[299.3,293.9,284.9,274.2,262.1,240.1]),('REG',[383.3,376.6,358.1,334.4,299.3,247.3]),('ボーナス合算',[168,165.1,158.7,150.7,139.7,121.8]),('ベル',[5.98,5.90,5.81,5.73,5.69,5.63]),('チェリー',[91,90.6,89.5,89,87.5,86.1]),('確定チェリー',[21845.3,21845.3,21845.3,13107.2,13107.2,5461.3]),('スイカ',[99,96.4,92.8,89.8,86.9,84.1]),('滑りスイカ',[286.2,280.1,270.8,263.2,256,250.1]),('ピラミッド揃い',[8192,8192,5461.3,4096,2730.7,2048]),('チャンス目',[46.5,46.4,46.2,45.7,45.1,43.9]),('スイカ合算',[73.6,71.7,69.1,66.9,64.9,63])]):
+ r.numeric('NORMAL_'+str(i),label,ratios(vals),s,'TOTAL_GAME_TRIAL','総G（ボーナス・BT中を除く）を共通母数とする。ピラミッドちゃれんじ中のピラミッド・変換チャンス目は除外し、その対象ゲームも別管理。同じボーナス・小役の内訳と合算を重複加算しない。',group='NORMAL_BONUS_PATH')
+for i,(label,vals) in enumerate([('チェリー',[7.1,7.5,8.6,9.1,10.7,12.1]),('チャンス目',[19.6,19.8,20.2,21,22,24.2]),('スイカ',[.6,.6,.6,.7,.8,1]),('滑りスイカ',[1.7,1.7,1.7,2,2.3,3.1])]):r.numeric('OVERLAP_'+str(i),label+'同時当選',perc(vals),s,'ROLE_'+str(i),'契機が特定できた役成立回数とボーナス当選回数。前兆中の別契機混入・カスタムで判別できないものは契機不明として分ける。',typ='conditional_probability',group='NORMAL_BONUS_PATH')
+# Reuse the approved package probabilities exactly. This is not interpolation
+# of the incomplete raw BT game-rate table in the incoming handoff.
+bt=next(f for f in p['features']['features'] if f['featureId']=='FEAT_BT_MISS_SHARE')
+f=r.numeric('BT_MISS_SHARE',bt['name'],{k.removeprefix('SET_'):v for k,v in bt['probabilities'].items()},s,'BT_MISS_OR_JACIN','BAR成立前の純ハズレとJACINだけを数え、純ハズレ÷（純ハズレ＋JACIN）で扱う。BARを狙えを外した後や成立後の延命ゲームは対象外。',typ='conditional_probability')
+f['existingApprovedConditionalModel']={'packageFeatureId':bt['featureId'],'probabilitiesCopiedExactly':True,'packageVersion':p['machine']['machineDataVersion'],'formula':'P(MISS | MISS OR JACIN)','rawGameRateInterpolation':False,'sourceEvidenceRefs':bt['sourceEvidenceRefs']}
+r.block('BT_RAW_PARTIAL','BT中ハズレ・BAR揃いの生ゲーム確率','添付では設定1/4のみ転記されている。未転記の設定へ補間せず、既存正本で承認された純ハズレ対JACINの条件付きモデルを別に保持する。',s,{'miss':{'1':'1/420.1','4':'1/30.0'},'bar':{'1':'1/1.3','4':'1/1.4'}})
+for oldid,newid in [('FEAT_STANDALONE_SMALL_ROLE_OUTCOME','STANDALONE_ROLES'),('FEAT_BONUS_TRIGGER_COMPOSITION','BONUS_COMPOSITION')]:
+ old=next(f for f in p['features']['features'] if f['featureId']==oldid)
+ vals={k.removeprefix('SET_'):'/'.join(label+' '+str(v*100)+'%' for label,v in zip(old['categoryLabels'],vs)) for k,vs in old['categoryProbabilities'].items()}
+ f=r.numeric(newid,old['name'],vals,s,'TOTAL_GAME_TRIAL' if newid=='STANDALONE_ROLES' else 'BONUS_EVENT_TRIAL','旧正本の確率とカテゴリ定義をそのまま保存。同一ボーナスの合算・契機別内訳と重複加算しない。',typ='appearance_distribution',group='NORMAL_BONUS_PATH',categoryModel={'residualPolicy':'SOURCE_EXPLICIT_OTHER'})
+ f['existingApprovedConditionalModel']={'packageFeatureId':oldid,'categoryProbabilitiesCopiedExactly':True,'packageDefinition':old}
+r.evidence('REG_CARD','REG中のキャラカード',[('銅','デフォルト'),('銀','高設定示唆弱'),('金','高設定示唆強'),('同一REGで赤1回','設定4以上'),('同一REGで赤2回','設定6'),('同一REGの全カードが銀・金のみ','設定4以上')],s,details=['カードの構成は1回のREG単位で判定。銀・金が1枚出ただけで設定確定にはしない。複数REGにまたがる赤の累計2回で設定6にはしない。'])
+r.evidence('STAMP','BIG終了画面スタンプ',[('なし','デフォルト'),('レオン','偶数設定示唆'),('子供クレア','高設定示唆弱'),('シャロン','高設定示唆強')],s)
+r.evidence('TROPHY','コパンダトロフィー',[('銅','設定2以上'),('銀','設定3以上'),('金','設定4以上'),('イナズマ','設定5以上'),('虹','設定6')],s)
+r.numeric('PREDECESSOR','着席前BIG・REG内訳',ratios([168,165.1,158.7,150.7,139.7,121.8]),s,typ='reference_distribution',denom='既存の着席前記録を保持。データカウンターの区間とボーナス除外が実機未確認のため推測へ加算しない。')
+r.no_diff('COMMON_OVERLAP','共通同時当選期待度','ベル約0.1%・確定チェリー100%・ピラミッド100%は設定共通。契機出現率との差を混同しない。',s)
+r.d['audit']['standardSiteSupplement']=[dict(url='https://p-town.dmm.com/machines/4860',status='SEARCH_REVIEWED_DIRECT_403',webRef='turn5search0'),dict(url='https://chonborista.com/slot/daito-slot/239307/',status='REVIEWED',webRef='turn5view0'),dict(url='https://pachiseven.jp/articles/detail/25142',status='REVIEWED',webRef='turn5view1'),dict(url='https://1geki.jp/slot/l_crea/0/',status='HANDOFF_REUSED'),dict(url='https://nana-press.com/kaiseki/machine/1006/31590/',status='LIMITED_REVIEW',webRef='turn6view0')]
+r.d['audit']['rawVsConditional']='添付のBT生ゲーム率欠測と、既存正本の全設定条件付き分布を区別。旧条件付き確率を破壊・再推定せずそのまま保存。カードは同一REG内の構成条件を厳守。'
+notes=dict(INITIAL_HIT='BIG・REGと合算を包含として記録。',BONUS='ボーナス内訳と契機別組成を保存、旧承認モデルも保持。',SMALL_ROLE='ベル・チェリー・確定チェリー・スイカ・滑りスイカ・ピラミッド・チャンス目を確認。',CZ=None,AT=None,INTERNAL_CONDITIONAL_DRAW='BTはBAR成立前だけ対象。生ゲーム率の未転記値を補完しない。',MODE_TRANSITION='演出カスタムと内部抽選を混同しない。',STATE_TRANSITION='通常・ボーナス・BT・ピラミッドちゃれんじを分離。',SUCCESS_RATE='役別同時当選期待度と契機別ボーナス内訳は同じ情報を含む。',POINTS_GAME_DISTRIBUTION=None,CARRY_OVER=None,THRESHOLD_BEHAVIOR='同一REG赤2回・銀金のみをイベントごとに判定。',RESET_BEHAVIOR='天井なし、リセット固有の設定別数値は指定範囲で未確認。',POST_EVENT_TRANSITION='BIG後BTの純ハズレ/JACIN比を既存の条件付き観測で保持。',NAVIGATION='BAR狙えを外した後はハズレ試行に含めない。',ROLE_CONDITIONAL_DISTRIBUTION='契機ランプとカスタム条件が一致した時だけ役を確定。',BONUS_TYPE_CONDITIONAL='単独共通役と契機別BIG/REGの既存組成を保存。',EVIDENCE='カード・スタンプ・トロフィー。数値未知のスタンプは記録のみ。',EXTERNAL_DATA_ONLY='着席前データの実機未確認状態は維持。',MACHINE_SPECIFIC='LBクレアBT A2、設定1～6。実機連動機能の保存IDは元パッケージに保持。')
+mp={'FEAT_BONUS_OUTCOME':'NORMAL_0','FEAT_STANDALONE_SMALL_ROLE_OUTCOME':'STANDALONE_ROLES','FEAT_BONUS_TRIGGER_COMPOSITION':'BONUS_COMPOSITION','FEAT_BT_MISS_SHARE':'BT_MISS_SHARE','FEAT_PREDECESSOR_BONUS_OUTCOME':'PREDECESSOR'}
+for x in p['evidence']['evidences']:mp[x['id']]='TROPHY' if 'TROPHY' in x['id'] else 'REG_CARD'
+r.finish(notes,mp)
