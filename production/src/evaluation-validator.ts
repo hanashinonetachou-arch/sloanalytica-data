@@ -14,7 +14,7 @@ function binomialIg(ps:number[],n:number){let total=0;for(let k=0;k<=n;k++){cons
 function near(a:any,b:number,tol=1e-8){return typeof a==='number'&&Number.isFinite(a)&&Math.abs(a-b)<=tol*Math.max(1,Math.abs(a),Math.abs(b))}
 const liveStatuses=new Set(['DIRECT_EXACT','EXACT_WITH_SCOPE_TRACKING','EXHAUSTIVE_CATEGORICAL','RETROSPECTIVE_EXACT','UNRESOLVED']);
 const depStatuses=new Set(['NONE','DEFERRED_TO_CANDIDATE_CONTRACT','UNRESOLVED']);
-const exactBenchmarkTrialUniverses=new Set(['TOTAL_GAME_TRIAL','NORMAL_GAME_TRIAL','BONUS_ELIGIBLE_GAME_TRIAL']);
+const exactBenchmarkTrialUniverses=new Set(['TOTAL_GAME_TRIAL','NORMAL_GAME_TRIAL','MANUAL_NORMAL_GAME_TRIAL','BONUS_ELIGIBLE_GAME_TRIAL']);
 const selectionClass=(score:number)=>score>=20?'CORE':score>=10?'SUPPORT':score>=5?'JOINT_ELIGIBLE':'EXCLUDE';
 export function validateEvaluationDocument(doc:any,research:any){
  if(doc?.schemaVersion!=='evaluation-v2'||doc?.manifestVersion!=='8.5')fail('HEADER');
@@ -28,6 +28,7 @@ export function validateEvaluationDocument(doc:any,research:any){
  let complete=0,unavailable=0,reference=0;
  for(const f of candidates){
   const e:any=byId.get(f.findingId);if(!e)fail('MISSING:'+f.findingId);
+  if(canonical(e.jointObservationMode)!==canonical(f.jointObservationMode)||canonical(e.upstreamSuppressionIds??[])!==canonical(f.upstreamSuppressionIds??[]))fail('OBSERVATION_CONTRACT_COPY:'+f.findingId);
   if(e.label!==f.label||e.observationType!==f.observationType||canonical(e.sourceIds)!==canonical(f.sourceIds??[])||canonical(e.settingDistribution)!==canonical(f.settingDistribution))fail('SOURCE_COPY:'+f.findingId);
   if(!nonEmpty(e.trialUniverse)||!e.liveObservation||!liveStatuses.has(e.liveObservation.status)||!nonEmpty(e.liveObservation.reason)||!e.dependency||!depStatuses.has(e.dependency.status)||!nonEmpty(e.dependency.reason))fail('SEMANTIC_CONTRACT:'+f.findingId);
   if(e.dependency.status==='DEFERRED_TO_CANDIDATE_CONTRACT'&&!nonEmpty(e.dependency.groupId))fail('DEPENDENCY_GROUP:'+f.findingId);
@@ -67,3 +68,4 @@ export function validateEvaluationDocument(doc:any,research:any){
  return [{validator:EVALUATION_VALIDATOR_CONTRACT,candidates:candidates.length,complete,unavailable,reference,evidenceCandidates:evidence.length,blockedItems:(research.blockedItems??[]).length}];
 }
 export function validateEvaluationArtifacts(s:any,a:any,r:any){const out=r.producedArtifacts??[];if(out.length!==1)fail('OUTPUT_COUNT');const ref=out[0];if(ref.kind!=='evaluation'||typeof ref.path!=='string'||!ref.path.startsWith(`production/batches/${a.batchId}/artifacts/${a.machineId}/evaluation/`))fail('OUTPUT_REF');const prefix='production/';const doc=s.read(...ref.path.slice(prefix.length).split('/'));const research=s.read('batches',a.batchId,'artifacts',a.machineId,'research','result.json');return validateEvaluationDocument(doc,research)}
+

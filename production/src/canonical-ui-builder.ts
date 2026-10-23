@@ -3,12 +3,12 @@ const IMPORTANCE_LABELS=['主要','有力','補助','微小'] as const;
 const ABSTRACT_INPUT_LABELS=new Set(['対象回数','回数','観測機会数','該当回数']);
 function importanceFor(score:number){return score>=20?'主要':score>=10?'有力':score>=5?'補助':'微小'}
 function userFacingScoreUnavailableReason(raw:any){const reason=String(raw??'').trim();if(!reason||/opportunity model|research|exact exposure|denominator|benchmark/i.test(reason))return '基準遊技量7000Gでの判別力を算出するための観測条件が確定していないため算出できません。';return reason}
-function scoreView(e:any){const s=e?.metrics?.selectionScore;if(s?.status==='COMPUTED'&&typeof s.value==='number'&&Number.isFinite(s.value)){const value=Number(s.value.toFixed(1));return {label:'設定判別スコア',status:'COMPUTED',value,precision:1,importance:importanceFor(s.value)}}const sourceReason=e?.benchmarkExposure?.reason??'基準遊技量に対応するexact exposure modelが未確立のため算出しない。';const reason=userFacingScoreUnavailableReason(sourceReason);return {label:'設定判別スコア',status:'NOT_COMPUTED',display:'算出不可',reason,sourceReason}}
+function scoreView(e:any,c?:any){if(c?.jointObservationMode==='MARGINAL_COUNTS')return {label:'設定判別スコア',status:'NOT_COMPUTED',display:'算出不可',reason:'共同分布の7000Gスコアは未算出です。対象1試行の判別力で評価します。',sourceReason:'JOINT_7000G_NOT_COMPUTED'};const s=e?.metrics?.selectionScore;if(s?.status==='COMPUTED'&&typeof s.value==='number'&&Number.isFinite(s.value)){const value=Number(s.value.toFixed(1));return {label:'設定判別スコア',status:'COMPUTED',value,precision:1,importance:importanceFor(s.value)}}const sourceReason=e?.benchmarkExposure?.reason??'基準遊技量に対応するexact exposure modelが未確立のため算出しない。';const reason=userFacingScoreUnavailableReason(sourceReason);return {label:'設定判別スコア',status:'NOT_COMPUTED',display:'算出不可',reason,sourceReason}}
 function categoryLabels(distribution:any){const out:string[]=[];for(const v of Object.values(distribution??{})){if(v&&typeof v==='object'&&!Array.isArray(v)){for(const k of Object.keys(v))if(!out.includes(k))out.push(k);continue}if(typeof v!=='string')continue;for(const raw of v.split('/')){const label=raw.trim().replace(/[:\s]*[-+]?\d+(?:\.\d+)?%\s*$/,'').trim();if(label&&!out.includes(label))out.push(label)}}return out}
 const safeKey=(s:string,i:number)=>(i+1)+'_'+s.replace(/[^A-Za-z0-9一-龠ぁ-んァ-ヶー＋+_-]+/g,'_');
 export function observationInputId(o:any,id:string){
  const mapped=o.inputIdAliases?.[id];if(mapped===undefined)return id;
- if(!id.startsWith(o.findingId+'.')||typeof mapped!=='string'||!/^INP_[A-Z0-9_]+$/.test(mapped))throw Error('OBSERVATION_INPUT_ALIAS_INVALID:'+id);
+ if(!id.startsWith(o.findingId+'.')||typeof mapped!=='string'||!(/(^INP_[A-Z0-9_]+$)|(^[A-Z][A-Z0-9_]*\.[A-Za-z][A-Za-z0-9_]*$)/.test(mapped)))throw Error('OBSERVATION_INPUT_ALIAS_INVALID:'+id);
  return mapped;
 }
 const trialQuickAdd=(trialUniverse:any)=>typeof trialUniverse==='string'&&trialUniverse.includes('GAME_TRIAL')?[50]:[];
@@ -114,7 +114,7 @@ const userFacingEligibilityNotes=(o:any)=>{
 };
 export function deriveObservationInputLabels(o:any){
  if(o?.inputPresentation){
-  const trialLabel=compactContextualInputLabel(o.inputPresentation.trialLabel,o.label),successLabel=compactContextualInputLabel(o.inputPresentation.successLabel,o.label);
+  const trialLabel=compactContextualInputLabel(o.inputPresentation.trialLabel,o.label),successLabel=compactContextualInputLabel(o.inputPresentation.successLabel==='該当回数'?'当選回数':o.inputPresentation.successLabel,o.label);
   if(!trialLabel||!successLabel||trialLabel.length>30||successLabel.length>30)throw new Error('OBSERVATION_INPUT_PRESENTATION_INVALID:'+String(o.findingId));
   return {trialLabel,successLabel};
  }
@@ -212,7 +212,7 @@ export function buildCanonicalUi(candidate:any,observation:any,evaluation:any,ca
   }else throw new Error('CANONICAL_UI_COLLECTION_UNSUPPORTED:'+o.findingId);
   const derived=derivedSuccessCount(o,observation.observations??[]);if(derived)Object.assign(inputs.find((x:any)=>x.role==='success'),derived);
   for(const input of inputs)input.id=observationInputId(o,input.id);
-  return {id:'OBS_'+o.findingId,...(o.observationContext?{observationContext:structuredClone(o.observationContext)}:{}),sourceFindingId:o.findingId,title:o.label,kind:'NUMERIC_OBSERVATION',model:o.model,trialUniverse:o.trialUniverse,description:buildObservationDescription(o,o.model,e.categoryModel?.residualPolicy),collapsible:true,defaultExpanded:false,descriptionPresentation:{collapsible:true,label:'説明',defaultExpanded:false},score:scoreView(e),perEligibleTrialPower:{label:'1回の判別力',value:c.runtimePolicyBinding.value,metric:'PER_ELIGIBLE_TRIAL_POWER',thresholdSource:'RUNTIME_POLICY'},inputs};
+  return {id:'OBS_'+o.findingId,...(o.observationContext?{observationContext:structuredClone(o.observationContext)}:{}),sourceFindingId:o.findingId,title:o.label,kind:'NUMERIC_OBSERVATION',model:o.model,trialUniverse:o.trialUniverse,description:buildObservationDescription(o,o.model,e.categoryModel?.residualPolicy),collapsible:true,defaultExpanded:false,descriptionPresentation:{collapsible:true,label:'説明',defaultExpanded:false},score:scoreView(e,c),perEligibleTrialPower:{label:'1回の判別力',value:c.runtimePolicyBinding.value,metric:'PER_ELIGIBLE_TRIAL_POWER',thresholdSource:'RUNTIME_POLICY'},inputs};
  });
  const trialUniverses=new Set(numericSections.map((x:any)=>String(x.trialUniverse)));const playInfoRequirement=derivePlayInfoRequirement(trialUniverses,observation.gameCountPolicy);const playInfoMode=playInfoRequirement.mode;const needsExcludedGames=playInfoRequirement.needsExcludedGames;
  const evidenceSections=(observation.evidence??[]).map((x:any)=>{

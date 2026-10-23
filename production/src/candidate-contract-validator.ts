@@ -16,6 +16,7 @@ export function validateCandidateContractDocument(doc:any,eligibility:any,evalua
  const evalBy=new Map((evaluation.evaluations??[]).map((x:any)=>[x.findingId,x])),candBy=new Map(doc.candidates.map((x:any)=>[x.findingId,x])),groupBy=new Map((doc.dependencyGroups??[]).map((g:any)=>[g.groupId,g]));
  for(const d of eligible){
   const c:any=candBy.get(d.findingId),e:any=evalBy.get(d.findingId);if(!c||!e)fail('MISSING:'+d.findingId);
+  if(canonical(c.upstreamSuppressionIds??[])!==canonical(e.upstreamSuppressionIds??[])||canonical(c.jointObservationMode)!==canonical(e.jointObservationMode))fail('RESEARCH_MODEL_CONTRACT:'+d.findingId);
   if(c.label!==d.label||c.liveInferenceRoute!==d.liveInferenceRoute)fail('CANDIDATE_COPY:'+d.findingId);
   const expectedGroup=e.dependency?.status==='DEFERRED_TO_CANDIDATE_CONTRACT'?e.dependency.groupId:null;
   if((c.dependencyGroupId??null)!==(expectedGroup??null))fail('DEPENDENCY_GROUP:'+d.findingId);
@@ -35,17 +36,33 @@ export function validateCandidateContractDocument(doc:any,eligibility:any,evalua
     if(c.runtimeInferenceAllowed!==false||c.dependencyResolution!=='RESOLVED_BY_SINGLE_MEMBER'||c.resolvedIntoFindingId!==g.selectedFindingId||c.model!==e.model||c.trialUniverse!==e.trialUniverse||canonical(c.settingDistribution)!==canonical(e.settingDistribution))fail('SINGLE_MEMBER:'+d.findingId);
    }
   }else if(g.resolution==='PREFERRED_WITH_FALLBACK'){
-   const order=Array.isArray(g.fallbackOrder)?g.fallbackOrder:[];const index=order.indexOf(c.findingId);const expectedSuppressors=index>0?order.slice(0,index):[];
+   const order=Array.isArray(g.fallbackOrder)?g.fallbackOrder:[];const index=order.indexOf(c.findingId);const expectedSuppressors=[...new Set([...(e.upstreamSuppressionIds??[]),...(index>0?order.slice(0,index):[])])];
    if(index<0||c.runtimeInferenceAllowed!==true||!['PREFERRED_MEMBER','FALLBACK_MEMBER'].includes(c.dependencyResolution)||c.dependencyResolution!==(index===0?'PREFERRED_MEMBER':'FALLBACK_MEMBER')||c.model!==e.model||c.trialUniverse!==e.trialUniverse||canonical(c.settingDistribution)!==canonical(e.settingDistribution)||canonical(c.suppressedByFeatureIds??[])!==canonical(expectedSuppressors)||!bindingMatches(c,e))fail('PREFERRED_FALLBACK:'+d.findingId);
   }else if(g.resolution==='MUTUALLY_EXCLUSIVE_CATEGORICAL'){
    if(c.findingId===g.jointFindingId){
     if(c.runtimeInferenceAllowed!==true||c.dependencyResolution!=='MUTUALLY_EXCLUSIVE_CATEGORICAL'||c.model!=='CATEGORICAL'||c.trialUniverse!==e.trialUniverse||!Array.isArray(c.jointSourceFindingIds)||canonical([...c.jointSourceFindingIds].sort())!==canonical([...(g.jointSourceFindingIds??[])].sort())||typeof c.runtimePolicyBinding?.value!=='number'||!Number.isFinite(c.runtimePolicyBinding.value)||c.runtimePolicyBinding.value<=0)fail('JOINT_LEADER:'+d.findingId);
+    if(canonical(c.suppressedByFeatureIds??[])!==canonical(e.upstreamSuppressionIds??[]))fail('JOINT_SUPPRESSORS:'+d.findingId);
+    if(e.jointObservationMode==='MARGINAL_COUNTS'&&canonical(c.categoryModel)!==canonical({residualPolicy:'IMPLICIT_RESIDUAL',observationMode:'MARGINAL_COUNTS'}))fail('JOINT_OBSERVATION_MODE:'+d.findingId);
+    const sources=(g.jointSourceFindingIds??[]).map((id:string)=>evalBy.get(id) as any);
+    const prob=(v:any)=>typeof v==='number'?v:1/Number(String(v).slice(2));
+    for(const source of sources)if(source?.trialUniverse!==e.trialUniverse)fail('JOINT_TRIAL_UNIVERSE:'+d.findingId);
+    const entropy=(xs:number[])=>-xs.reduce((a,p)=>a+(p>0?p*Math.log2(p):0),0);
+    const rows=Object.keys(e.settingDistribution).map(setting=>{
+      const expected:any={};for(const source of sources)expected[source.label]=prob(source.settingDistribution[setting]);
+      if(canonical(expected)!==canonical(c.settingDistribution[setting]))fail('JOINT_SOURCE_PROBABILITY:'+d.findingId);
+      const values=Object.values(expected) as number[],sum=values.reduce((a,b)=>a+b,0);if(sum>1+1e-9)fail('JOINT_MASS:'+d.findingId);return [...values,Math.max(0,1-sum)];
+    });
+    const mean=rows[0].map((_x:number,i:number)=>rows.reduce((a:any,row:any)=>a+row[i],0)/rows.length);
+    if(!near(c.runtimePolicyBinding.value,200*(entropy(mean)-rows.reduce((a:any,row:any)=>a+entropy(row),0)/rows.length)))fail('JOINT_POWER:'+d.findingId);
     for(const row of Object.values(c.settingDistribution??{}))if(!row||typeof row!=='object'||Array.isArray(row)||Object.values(row).some((v:any)=>typeof v!=='number'||v<0||v>1))fail('JOINT_DISTRIBUTION:'+d.findingId);
    }else{
     if(c.runtimeInferenceAllowed!==false||c.dependencyResolution!=='RESOLVED_IN_JOINT_MODEL'||c.resolvedIntoFindingId!==g.jointFindingId||c.model!==e.model||c.trialUniverse!==e.trialUniverse||canonical(c.settingDistribution)!==canonical(e.settingDistribution))fail('JOINT_MEMBER:'+d.findingId);
    }
   }else fail('GROUP_RESOLUTION:'+g.resolution);
  }
+ const visiting=new Set<string>(),done=new Set<string>();
+ const visit=(id:string)=>{if(visiting.has(id))fail('SUPPRESSION_CYCLE:'+id);if(done.has(id))return;visiting.add(id);const c:any=candBy.get(id);for(const parent of c?.suppressedByFeatureIds??[]){if(!(candBy.get(parent) as any)?.runtimeInferenceAllowed)fail('SUPPRESSOR_MISSING:'+id);visit(parent)}visiting.delete(id);done.add(id)};
+ for(const c of doc.candidates)visit(c.findingId);
  const expectedGroups=new Map<string,string[]>();for(const d of eligible){const e:any=evalBy.get(d.findingId);if(e?.dependency?.status==='DEFERRED_TO_CANDIDATE_CONTRACT'){const id=e.dependency.groupId;if(!nonEmpty(id))fail('GROUP_ID:'+d.findingId);const a=expectedGroups.get(id)??[];a.push(d.findingId);expectedGroups.set(id,a)}}
  if(doc.dependencyGroups.length!==expectedGroups.size)fail('GROUP_COVERAGE');
  const seen=new Set<string>();
@@ -70,3 +87,4 @@ export function validateCandidateContractArtifacts(s:any,a:any,r:any){
  const eligibility=s.read(...String(gs.authoritativeOutputRef.path).slice(prefix.length).split('/')),evaluation=s.read(...String(es.authoritativeOutputRef.path).slice(prefix.length).split('/'));
  return validateCandidateContractDocument(doc,eligibility,evaluation);
 }
+

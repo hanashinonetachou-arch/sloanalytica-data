@@ -1,7 +1,8 @@
 // Input copy belongs to observation/UI construction. No source values change.
 export function applyBatch025ObservationLabels(doc:any){
- if(doc.machineId==='L_HANABI_KM')doc.gameCountPolicy='TOTAL_ONLY';
+ if(['L_HANABI_KM','LB_THUNDER_V_HA'].includes(doc.machineId))doc.gameCountPolicy='TOTAL_ONLY';
  const labels:Record<string,[string,string]>={
+  MANUAL_NORMAL_GAME_TRIAL:['確認した対象通常G','該当回数'],
   BIG_GAME_TRIAL:['BIG消化ゲーム数','風鈴B成立回数'],
   REG_GAME_TRIAL:['REG消化ゲーム数','1枚役成立回数'],
   HANABI_CHALLENGE_GAME:['消化ゲーム数','ハズレ回数'],
@@ -28,7 +29,19 @@ export function applyBatch025ObservationLabels(doc:any){
    'PREDECESSOR.categoryCounts.1_BIG':'INP_PREDECESSOR_BIG_COUNT',
    'PREDECESSOR.categoryCounts.2_REG':'INP_PREDECESSOR_REG_COUNT',
   };
+  if(doc.machineId==='LB_THUNDER_V_HA'&&o.findingId!=='PREDECESSOR'){
+   o.inputIdAliases={...(o.inputIdAliases??{}),[o.findingId+'.eligibleTrialCount']:o.findingId+'.verifiedTrialCount'};
+   if(o.findingId==='BELL_B'){
+    const ids=['BELL_A','BELL_B','WATER_A','WATER_B','CHERRY_B'],names=['ベルA','ベルB','スイカA','スイカB','チェリーB'];
+    ids.forEach((id,i)=>o.inputIdAliases['BELL_B.categoryCounts.'+(i+1)+'_'+names[i]]=id+'.successCount');
+   }
+   if(o.findingId==='REG')Object.assign(o.inputIdAliases,{'REG.categoryCounts.1_BIG':'BIG.successCount','REG.categoryCounts.2_REG':'REG.successCount'});
+  }
   const pair=labels[o.trialUniverse];
   if(pair)o.inputPresentation={trialLabel:pair[0],successLabel:pair[1]};
+  if(doc.machineId==='LB_THUNDER_V_HA' && o.findingId.startsWith('OVERLAP_')){
+   const role:Record<string,string>={OVERLAP_BELL_A:'ベルA',OVERLAP_CHERRY_B:'チェリーB',OVERLAP_WATER_A:'スイカA',OVERLAP_WATER_B:'スイカB',OVERLAP_REPLAY:'リプレイ'};
+   if(role[o.findingId])o.inputPresentation={trialLabel:role[o.findingId]+'成立回数',successLabel:role[o.findingId]+'からのボーナス同時当選回数'};
+  }
  }
 }
