@@ -76,7 +76,7 @@ function resolveGroup(groupId:string,members:any[],evalBy:Map<string,any>){
 export function buildCandidateContract(evaluation:any,eligibility:any,evaluationArtifact:any,eligibilityArtifact:any){
  const evalBy=new Map((evaluation.evaluations??[]).map((x:any)=>[x.findingId,x]));
  const eligible=(eligibility.decisions??[]).filter((x:any)=>x.eligibility==='ELIGIBLE');
- const candidates=eligible.map((d:any)=>{const e:any=evalBy.get(d.findingId);if(!e)throw new Error('EVALUATION_MISSING:'+d.findingId);const group=e.dependency?.status==='DEFERRED_TO_CANDIDATE_CONTRACT'?e.dependency.groupId:null;return {findingId:d.findingId,label:d.label,model:e.model,trialUniverse:e.trialUniverse,liveInferenceRoute:d.liveInferenceRoute,settingDistribution:e.settingDistribution,categoryModel:e.categoryModel,details:Array.isArray(e.details)?structuredClone(e.details):[],upstreamSuppressionIds:e.upstreamSuppressionIds??[],jointObservationMode:e.jointObservationMode,dependencyGroupId:group,dependencyKind:e.dependency?.kind,dependencyReason:e.dependency?.reason,dependencyFallbackRank:e.dependencyFallbackRank,runtimeInferenceAllowed:!group,dependencyResolution:group?'UNRESOLVED':'NONE',runtimePolicyBinding:policyBindingForEvaluation(e)}});
+ const candidates=eligible.map((d:any)=>{const e:any=evalBy.get(d.findingId);if(!e)throw new Error('EVALUATION_MISSING:'+d.findingId);const group=e.dependency?.status==='DEFERRED_TO_CANDIDATE_CONTRACT'?e.dependency.groupId:null;return {findingId:d.findingId,label:d.label,model:e.model,trialUniverse:e.trialUniverse,liveInferenceRoute:d.liveInferenceRoute,settingDistribution:e.settingDistribution,categoryModel:e.categoryModel,details:Array.isArray(e.details)?structuredClone(e.details):[],upstreamSuppressionIds:e.upstreamSuppressionIds,jointObservationMode:e.jointObservationMode,dependencyGroupId:group,dependencyKind:e.dependency?.kind,dependencyReason:e.dependency?.reason,dependencyFallbackRank:e.dependencyFallbackRank,runtimeInferenceAllowed:!group,dependencyResolution:group?'UNRESOLVED':'NONE',runtimePolicyBinding:policyBindingForEvaluation(e)}});
  const groups=new Map<string,any[]>();for(const c of candidates)if(c.dependencyGroupId){const a=groups.get(c.dependencyGroupId)??[];a.push(c);groups.set(c.dependencyGroupId,a)}
  const dependencyGroups:any[]=[];
  for(const [groupId,members] of groups){
@@ -106,7 +106,7 @@ export function buildCandidateContract(evaluation:any,eligibility:any,evaluation
  for(const c of candidates){
   const upstream=c.upstreamSuppressionIds??[];
   if(upstream.some((id:string)=>id===c.findingId||!candidates.some(x=>x.findingId===id&&x.runtimeInferenceAllowed)))throw Error('CANDIDATE_INVALID_SUPPRESSOR:'+c.findingId);
-  if(c.runtimeInferenceAllowed)c.suppressedByFeatureIds=[...new Set([...upstream,...(c.suppressedByFeatureIds??[])])];
+  if(c.runtimeInferenceAllowed&&(upstream.length>0||Array.isArray(c.suppressedByFeatureIds)))c.suppressedByFeatureIds=[...new Set([...upstream,...(c.suppressedByFeatureIds??[])])];
  }
  const visiting=new Set<string>(),done=new Set<string>();
  const visit=(id:string)=>{if(visiting.has(id))throw Error('CANDIDATE_SUPPRESSION_CYCLE:'+id);if(done.has(id))return;visiting.add(id);for(const p of candidates.find(c=>c.findingId===id)?.suppressedByFeatureIds??[])visit(p);visiting.delete(id);done.add(id)};
