@@ -8,7 +8,7 @@
   "machine": {
     "schemaVersion": "2.0.0",
     "machineId": "LB_THUNDER_V_HA",
-    "machineDataVersion": "8.5.9-batch-20261022-025",
+    "machineDataVersion": "8.5.10-batch-20261022-025",
     "displayName": "スマスロ サンダーV",
     "modelName": "スマスロ サンダーV",
     "settings": [
@@ -21,7 +21,7 @@
       "offlineCapable": true,
       "containsImages": false,
       "containsExecutableCode": false,
-      "machineDataRevision": 9
+      "machineDataRevision": 10
     }
   },
   "inputs": {
@@ -247,7 +247,8 @@
         "defaultValue": 0,
         "minimum": 0,
         "displayOrder": 19,
-        "inferenceRole": "INCLUDE_SUPPORT"
+        "inferenceRole": "INCLUDE_SUPPORT",
+        "inputVisible": false
       },
       {
         "id": "OVERLAP_BELL_A.successCount",
@@ -259,7 +260,8 @@
         "minimum": 0,
         "displayOrder": 20,
         "parentInputId": "OVERLAP_BELL_A.eligibleTrialCount",
-        "inferenceRole": "INCLUDE_SUPPORT"
+        "inferenceRole": "INCLUDE_SUPPORT",
+        "inputVisible": false
       },
       {
         "id": "INP_PREDECESSOR_GAMES",
@@ -584,6 +586,27 @@
         "parentInputId": "BIG_REACH.eligibleTrialCount",
         "inferenceRole": "INCLUDE_SUPPORT",
         "inputVisible": false
+      },
+      {
+        "id": "OVERLAP_BELL_A.sharedIntervalSuccessCount",
+        "name": "ベルA同時当選回数",
+        "category": "V8_NUMERIC",
+        "type": "counter",
+        "unit": "回",
+        "defaultValue": 0,
+        "minimum": 0,
+        "displayOrder": 20,
+        "parentInputId": "BELL_A.successCount",
+        "inferenceRole": "INCLUDE_SUPPORT"
+      },
+      {
+        "id": "INP_THUNDER_BELL_A_INTERVAL_RECHECK",
+        "name": "ベルA同時当選の区間再確認",
+        "category": "V8_NUMERIC",
+        "type": "integer",
+        "defaultValue": 0,
+        "minimum": 0,
+        "inputVisible": false
       }
     ]
   },
@@ -823,8 +846,8 @@
           "BIG_BELL_C"
         ],
         "probabilities": {
-          "SET_1": 0.00009155245497908026,
-          "SET_2": 0.00009155245497908026,
+          "SET_1": 9.155245497908026e-05,
+          "SET_2": 9.155245497908026e-05,
           "SET_5": 0.0022888532845044634,
           "SET_6": 0.0022888532845044634
         },
@@ -845,7 +868,7 @@
         "adoptionCategory": "INCLUDE_SUPPORT",
         "calculationRole": "PROBABILITY",
         "probabilityEngineUsage": true,
-        "denominatorInputId": "OVERLAP_BELL_A.eligibleTrialCount",
+        "denominatorInputId": "BELL_A.successCount",
         "suppressedByFeatureIds": [
           "BELL_B",
           "CHERRY_B",
@@ -863,12 +886,12 @@
         },
         "selectionRationale": {
           "summary": "設定推測に採用された要素です。",
-          "adoptionReason": "ベルA同時当選期待度は設定6 0.04%、設定1 0.05%と設定差があります。「ベルA成立回数」に対する「同時当選回数」の発生割合を比較して推測に使用します。 観測条件：全役成立が母数です。 「ベルB」「チェリーB」「ベルA」「REG」「スイカA」「スイカB」を記録していない場合の補助として使用し、同じ設定差を重ねて評価しません。",
+          "adoptionReason": "通常時に数えたベルA成立回数を母数、その同じ区間のフリーズを伴う同時当選回数を分子に、設定別の同時当選期待度で比較します。通常時の優先要素が有効な場合は重複加算しません。",
           "shortTermReason": "標本が少ない間は結果の振れが大きくなります。",
           "longTermReason": "観測数が増えるほど設定別の比較が安定します。"
         },
         "modelType": "binomial",
-        "numeratorInputId": "OVERLAP_BELL_A.successCount",
+        "numeratorInputId": "OVERLAP_BELL_A.sharedIntervalSuccessCount",
         "displayFormat": "percentage"
       },
       {
@@ -991,7 +1014,7 @@
         "featureId": "OVERLAP_BELL_A",
         "runtimeStatus": "ACTIVE",
         "metric": "PER_ELIGIBLE_TRIAL_POWER",
-        "metricValue": 0.00009880156195685164,
+        "metricValue": 9.880156195685164e-05,
         "importance": "微小"
       },
       {
@@ -1359,139 +1382,18 @@
               "defaultExpanded": false
             },
             "gridSpan": 6,
-            "inputs": [
-              {
-                "id": "REG.successCount",
-                "label": "REG回数",
-                "input": "counter",
-                "inputId": "REG.successCount",
-                "engineBinding": {
-                  "inputId": "REG.successCount"
-                },
-                "directNumeric": true,
-                "quickAdd": [
-                  1
-                ],
-                "gridSpan": 12,
-                "unobservedDisplay": "—"
-              }
-            ]
-          },
-          {
-            "id": "NODE_BELL_A",
-            "featureId": "BELL_A",
-            "title": "ベルA",
-            "description": "対象となる機会のうち、ベルAが実際に起きた割合を設定別に比較します。\n・注意：ボーナス・BT中は対象に含めません。\n・注意：同じ区間の回数だけを入力する。",
-            "descriptionPresentation": {
-              "collapsible": true,
-              "label": "説明",
-              "defaultExpanded": false
+            "label": "REG回数",
+            "input": "counter",
+            "inputId": "REG.successCount",
+            "engineBinding": {
+              "inputId": "REG.successCount"
             },
-            "gridSpan": 6,
-            "inputs": [
-              {
-                "id": "BELL_A.successCount",
-                "label": "ベルA回数",
-                "input": "counter",
-                "inputId": "BELL_A.successCount",
-                "engineBinding": {
-                  "inputId": "BELL_A.successCount"
-                },
-                "directNumeric": true,
-                "quickAdd": [
-                  1
-                ],
-                "gridSpan": 12,
-                "unobservedDisplay": "—"
-              }
-            ]
-          },
-          {
-            "id": "NODE_BELL_B",
-            "featureId": "BELL_B",
-            "title": "ベルB",
-            "description": "対象となる機会のうち、ベルBが実際に起きた割合を設定別に比較します。\n・注意：ボーナス・BT中は対象に含めません。\n・注意：同じ区間の回数だけを入力する。",
-            "descriptionPresentation": {
-              "collapsible": true,
-              "label": "説明",
-              "defaultExpanded": false
-            },
-            "gridSpan": 6,
-            "inputs": [
-              {
-                "id": "BELL_B.successCount",
-                "label": "ベルB回数",
-                "input": "counter",
-                "inputId": "BELL_B.successCount",
-                "engineBinding": {
-                  "inputId": "BELL_B.successCount"
-                },
-                "directNumeric": true,
-                "quickAdd": [
-                  1
-                ],
-                "gridSpan": 12,
-                "unobservedDisplay": "—"
-              }
-            ]
-          },
-          {
-            "id": "NODE_WATER_A",
-            "featureId": "WATER_A",
-            "title": "スイカA",
-            "description": "対象となる機会のうち、スイカAが実際に起きた割合を設定別に比較します。\n・注意：ボーナス・BT中は対象に含めません。\n・注意：同じ区間の回数だけを入力する。",
-            "descriptionPresentation": {
-              "collapsible": true,
-              "label": "説明",
-              "defaultExpanded": false
-            },
-            "gridSpan": 6,
-            "inputs": [
-              {
-                "id": "WATER_A.successCount",
-                "label": "スイカA回数",
-                "input": "counter",
-                "inputId": "WATER_A.successCount",
-                "engineBinding": {
-                  "inputId": "WATER_A.successCount"
-                },
-                "directNumeric": true,
-                "quickAdd": [
-                  1
-                ],
-                "gridSpan": 12,
-                "unobservedDisplay": "—"
-              }
-            ]
-          },
-          {
-            "id": "NODE_WATER_B",
-            "featureId": "WATER_B",
-            "title": "スイカB",
-            "description": "対象となる機会のうち、スイカBが実際に起きた割合を設定別に比較します。\n・注意：ボーナス・BT中は対象に含めません。\n・注意：同じ区間の回数だけを入力する。",
-            "descriptionPresentation": {
-              "collapsible": true,
-              "label": "説明",
-              "defaultExpanded": false
-            },
-            "gridSpan": 6,
-            "inputs": [
-              {
-                "id": "WATER_B.successCount",
-                "label": "スイカB回数",
-                "input": "counter",
-                "inputId": "WATER_B.successCount",
-                "engineBinding": {
-                  "inputId": "WATER_B.successCount"
-                },
-                "directNumeric": true,
-                "quickAdd": [
-                  1
-                ],
-                "gridSpan": 12,
-                "unobservedDisplay": "—"
-              }
-            ]
+            "directNumeric": true,
+            "quickAdd": [
+              1
+            ],
+            "unobservedDisplay": "—",
+            "compactCounter": true
           },
           {
             "id": "NODE_CHERRY_B",
@@ -1504,23 +1406,114 @@
               "defaultExpanded": false
             },
             "gridSpan": 6,
-            "inputs": [
-              {
-                "id": "CHERRY_B.successCount",
-                "label": "チェリーB回数",
-                "input": "counter",
-                "inputId": "CHERRY_B.successCount",
-                "engineBinding": {
-                  "inputId": "CHERRY_B.successCount"
-                },
-                "directNumeric": true,
-                "quickAdd": [
-                  1
-                ],
-                "gridSpan": 12,
-                "unobservedDisplay": "—"
-              }
-            ]
+            "label": "チェリーB回数",
+            "input": "counter",
+            "inputId": "CHERRY_B.successCount",
+            "engineBinding": {
+              "inputId": "CHERRY_B.successCount"
+            },
+            "directNumeric": true,
+            "quickAdd": [
+              1
+            ],
+            "unobservedDisplay": "—",
+            "compactCounter": true
+          },
+          {
+            "id": "NODE_BELL_A",
+            "featureId": "BELL_A",
+            "title": "ベルA",
+            "description": "対象となる機会のうち、ベルAが実際に起きた割合を設定別に比較します。\n・注意：ボーナス・BT中は対象に含めません。\n・注意：同じ区間の回数だけを入力する。",
+            "descriptionPresentation": {
+              "collapsible": true,
+              "label": "説明",
+              "defaultExpanded": false
+            },
+            "gridSpan": 6,
+            "label": "ベルA回数",
+            "input": "counter",
+            "inputId": "BELL_A.successCount",
+            "engineBinding": {
+              "inputId": "BELL_A.successCount"
+            },
+            "directNumeric": true,
+            "quickAdd": [
+              1
+            ],
+            "unobservedDisplay": "—",
+            "compactCounter": true
+          },
+          {
+            "id": "NODE_BELL_B",
+            "featureId": "BELL_B",
+            "title": "ベルB",
+            "description": "対象となる機会のうち、ベルBが実際に起きた割合を設定別に比較します。\n・注意：ボーナス・BT中は対象に含めません。\n・注意：同じ区間の回数だけを入力する。",
+            "descriptionPresentation": {
+              "collapsible": true,
+              "label": "説明",
+              "defaultExpanded": false
+            },
+            "gridSpan": 6,
+            "label": "ベルB回数",
+            "input": "counter",
+            "inputId": "BELL_B.successCount",
+            "engineBinding": {
+              "inputId": "BELL_B.successCount"
+            },
+            "directNumeric": true,
+            "quickAdd": [
+              1
+            ],
+            "unobservedDisplay": "—",
+            "compactCounter": true
+          },
+          {
+            "id": "NODE_WATER_A",
+            "featureId": "WATER_A",
+            "title": "スイカA",
+            "description": "対象となる機会のうち、スイカAが実際に起きた割合を設定別に比較します。\n・注意：ボーナス・BT中は対象に含めません。\n・注意：同じ区間の回数だけを入力する。",
+            "descriptionPresentation": {
+              "collapsible": true,
+              "label": "説明",
+              "defaultExpanded": false
+            },
+            "gridSpan": 6,
+            "label": "スイカA回数",
+            "input": "counter",
+            "inputId": "WATER_A.successCount",
+            "engineBinding": {
+              "inputId": "WATER_A.successCount"
+            },
+            "directNumeric": true,
+            "quickAdd": [
+              1
+            ],
+            "unobservedDisplay": "—",
+            "compactCounter": true
+          },
+          {
+            "id": "NODE_WATER_B",
+            "featureId": "WATER_B",
+            "title": "スイカB",
+            "description": "対象となる機会のうち、スイカBが実際に起きた割合を設定別に比較します。\n・注意：ボーナス・BT中は対象に含めません。\n・注意：同じ区間の回数だけを入力する。",
+            "descriptionPresentation": {
+              "collapsible": true,
+              "label": "説明",
+              "defaultExpanded": false
+            },
+            "gridSpan": 6,
+            "label": "スイカB回数",
+            "input": "counter",
+            "inputId": "WATER_B.successCount",
+            "engineBinding": {
+              "inputId": "WATER_B.successCount"
+            },
+            "directNumeric": true,
+            "quickAdd": [
+              1
+            ],
+            "unobservedDisplay": "—",
+            "compactCounter": true
           }
         ]
       },
@@ -1629,7 +1622,7 @@
         "title": "小役別のボーナス同時当選",
         "collapsible": true,
         "defaultExpanded": false,
-        "description": "全役成立が母数です。ベルAは全成立と必ず発生するフリーズを連続観測した場合のみ推測に使用します。他の4役は全試行を分類する手順が未確認のため記録のみです。",
+        "description": "ベルAの成立回数は「通常時の小役・REG」から自動取得します。2つのカウントは同時に始め、ボーナス成立後を含めず、同じ区間で数えてください。同時当選時は必ずフリーズが発生します。",
         "descriptionPresentation": {
           "collapsible": true,
           "label": "説明",
@@ -1639,182 +1632,25 @@
           {
             "id": "NODE_OVERLAP_BELL_A",
             "featureId": "OVERLAP_BELL_A",
-            "title": "ベルA",
+            "title": "ベルA同時当選回数",
             "inputs": [
               {
-                "id": "OVERLAP_BELL_A.eligibleTrialCount",
-                "label": "ベルA成立回数",
-                "input": "denominator",
-                "inputId": "OVERLAP_BELL_A.eligibleTrialCount",
-                "engineBinding": {
-                  "inputId": "OVERLAP_BELL_A.eligibleTrialCount"
-                },
-                "gridSpan": 6,
-                "directNumeric": true,
-                "quickAdd": [],
-                "unobservedDisplay": "—"
-              },
-              {
-                "id": "OVERLAP_BELL_A.successCount",
-                "label": "同時当選回数",
+                "id": "OVERLAP_BELL_A.sharedIntervalSuccessCount",
+                "label": "ベルA同時当選回数",
                 "input": "counter",
-                "inputId": "OVERLAP_BELL_A.successCount",
+                "inputId": "OVERLAP_BELL_A.sharedIntervalSuccessCount",
                 "engineBinding": {
-                  "inputId": "OVERLAP_BELL_A.successCount"
+                  "inputId": "OVERLAP_BELL_A.sharedIntervalSuccessCount"
                 },
                 "directNumeric": true,
                 "quickAdd": [
                   1
                 ],
-                "gridSpan": 6,
+                "gridSpan": 12,
                 "unobservedDisplay": "—"
               }
             ],
             "gridSpan": 12
-          },
-          {
-            "id": "NODE_OVERLAP_CHERRY_B",
-            "title": "チェリーB（記録のみ）",
-            "inputs": [
-              {
-                "id": "OVERLAP_CHERRY_B.eligibleTrialCount",
-                "label": "チェリーB成立回数",
-                "input": "denominator",
-                "inputId": "OVERLAP_CHERRY_B.eligibleTrialCount",
-                "engineBinding": {
-                  "inputId": "OVERLAP_CHERRY_B.eligibleTrialCount"
-                },
-                "gridSpan": 6,
-                "directNumeric": true,
-                "quickAdd": [],
-                "unobservedDisplay": "—"
-              },
-              {
-                "id": "OVERLAP_CHERRY_B.successCount",
-                "label": "同時当選回数",
-                "input": "counter",
-                "inputId": "OVERLAP_CHERRY_B.successCount",
-                "engineBinding": {
-                  "inputId": "OVERLAP_CHERRY_B.successCount"
-                },
-                "directNumeric": true,
-                "quickAdd": [
-                  1
-                ],
-                "gridSpan": 6,
-                "unobservedDisplay": "—"
-              }
-            ],
-            "gridSpan": 12,
-            "description": "全成立についてボーナス同時当選の有無を偏りなく確定する手順を確認できないため、記録のみ・推測計算には使用しません。演出が発生した例だけで確率を比較しません。"
-          },
-          {
-            "id": "NODE_OVERLAP_WATER_A",
-            "title": "スイカA（記録のみ）",
-            "inputs": [
-              {
-                "id": "OVERLAP_WATER_A.eligibleTrialCount",
-                "label": "スイカA成立回数",
-                "input": "denominator",
-                "inputId": "OVERLAP_WATER_A.eligibleTrialCount",
-                "engineBinding": {
-                  "inputId": "OVERLAP_WATER_A.eligibleTrialCount"
-                },
-                "gridSpan": 6,
-                "directNumeric": true,
-                "quickAdd": [],
-                "unobservedDisplay": "—"
-              },
-              {
-                "id": "OVERLAP_WATER_A.successCount",
-                "label": "同時当選回数",
-                "input": "counter",
-                "inputId": "OVERLAP_WATER_A.successCount",
-                "engineBinding": {
-                  "inputId": "OVERLAP_WATER_A.successCount"
-                },
-                "directNumeric": true,
-                "quickAdd": [
-                  1
-                ],
-                "gridSpan": 6,
-                "unobservedDisplay": "—"
-              }
-            ],
-            "gridSpan": 12,
-            "description": "全成立についてボーナス同時当選の有無を偏りなく確定する手順を確認できないため、記録のみ・推測計算には使用しません。演出が発生した例だけで確率を比較しません。"
-          },
-          {
-            "id": "NODE_OVERLAP_WATER_B",
-            "title": "スイカB（記録のみ）",
-            "inputs": [
-              {
-                "id": "OVERLAP_WATER_B.eligibleTrialCount",
-                "label": "スイカB成立回数",
-                "input": "denominator",
-                "inputId": "OVERLAP_WATER_B.eligibleTrialCount",
-                "engineBinding": {
-                  "inputId": "OVERLAP_WATER_B.eligibleTrialCount"
-                },
-                "gridSpan": 6,
-                "directNumeric": true,
-                "quickAdd": [],
-                "unobservedDisplay": "—"
-              },
-              {
-                "id": "OVERLAP_WATER_B.successCount",
-                "label": "同時当選回数",
-                "input": "counter",
-                "inputId": "OVERLAP_WATER_B.successCount",
-                "engineBinding": {
-                  "inputId": "OVERLAP_WATER_B.successCount"
-                },
-                "directNumeric": true,
-                "quickAdd": [
-                  1
-                ],
-                "gridSpan": 6,
-                "unobservedDisplay": "—"
-              }
-            ],
-            "gridSpan": 12,
-            "description": "全成立についてボーナス同時当選の有無を偏りなく確定する手順を確認できないため、記録のみ・推測計算には使用しません。演出が発生した例だけで確率を比較しません。"
-          },
-          {
-            "id": "NODE_OVERLAP_REPLAY",
-            "title": "リプレイ（記録のみ）",
-            "inputs": [
-              {
-                "id": "OVERLAP_REPLAY.eligibleTrialCount",
-                "label": "リプレイ成立回数",
-                "input": "denominator",
-                "inputId": "OVERLAP_REPLAY.eligibleTrialCount",
-                "engineBinding": {
-                  "inputId": "OVERLAP_REPLAY.eligibleTrialCount"
-                },
-                "gridSpan": 6,
-                "directNumeric": true,
-                "quickAdd": [],
-                "unobservedDisplay": "—"
-              },
-              {
-                "id": "OVERLAP_REPLAY.successCount",
-                "label": "同時当選回数",
-                "input": "counter",
-                "inputId": "OVERLAP_REPLAY.successCount",
-                "engineBinding": {
-                  "inputId": "OVERLAP_REPLAY.successCount"
-                },
-                "directNumeric": true,
-                "quickAdd": [
-                  1
-                ],
-                "gridSpan": 6,
-                "unobservedDisplay": "—"
-              }
-            ],
-            "gridSpan": 12,
-            "description": "全成立についてボーナス同時当選の有無を偏りなく確定する手順を確認できないため、記録のみ・推測計算には使用しません。演出が発生した例だけで確率を比較しません。"
           }
         ],
         "groups": []
@@ -2014,7 +1850,8 @@
           "label": "REG"
         }
       }
-    ]
+    ],
+    "thunderInputSharing": true
   },
   "metadata": {
     "machineId": "LB_THUNDER_V_HA",
@@ -2188,10 +2025,10 @@
       {
         "findingId": "OVERLAP_BELL_A",
         "trialUniverse": "ROLE_BELL_A",
-        "denominatorSemantics": "成立前の連続観測区間の全ベルA成立回数を母数に、必ず発生するフリーズを伴う同時当選回数を記録します。当選例だけを抜き取らず、ボーナス成立後のベルは含めません。",
+        "denominatorSemantics": "通常時のベルA成立回数を共有。同時当選と同時に数え始めた同じ区間のみ。成立後と、同時当選の記録開始前のベルAを含めない。旧専用母数・旧同時当選回数は自動移行しない。",
         "liveObservation": {
           "status": "EXACT_WITH_SCOPE_TRACKING",
-          "reason": "成立前の連続観測区間の全ベルA成立回数を母数に、必ず発生するフリーズを伴う同時当選回数を記録します。当選例だけを抜き取らず、ボーナス成立後のベルは含めません。"
+          "reason": "通常時のベルA成立回数を共有。同時当選と同時に数え始めた同じ区間のみ。成立後と、同時当選の記録開始前のベルAを含めない。旧専用母数・旧同時当選回数は自動移行しない。"
         },
         "sourceIds": [
           "S1",
@@ -2638,6 +2475,14 @@
       "revision": "20261025-859",
       "sharedBigGamesInputId": "INP_THUNDER_BIG_FIRST_HALF_G_V859",
       "legacyBigGamesRequireExplicitConfirmation": true
+    },
+    "thunderInputSharing": {
+      "revision": "20261025",
+      "normalBellCountInputId": "BELL_A.successCount",
+      "sharedSuccessCountInputId": "OVERLAP_BELL_A.sharedIntervalSuccessCount",
+      "intervalRecheckInputId": "INP_THUNDER_BELL_A_INTERVAL_RECHECK",
+      "legacyMigration": "PRESERVE_RAW_REQUIRE_EXPLICIT_NEW_COUNT",
+      "cohortRule": "START_BOTH_COUNTS_TOGETHER; NO_UNKNOWN_PREFIX; POST_ESTABLISHMENT_EXCLUDED"
     }
   },
   "v8": {
@@ -2746,9 +2591,9 @@
           "importance": "微小",
           "evaluation": {
             "userLabel": "1回の判別力",
-            "value": 0.00009880156195685164
+            "value": 9.880156195685164e-05
           },
-          "reason": "ベルA同時当選期待度は設定6 0.04%、設定1 0.05%と設定差があります。「ベルA成立回数」に対する「同時当選回数」の発生割合を比較して推測に使用します。 観測条件：全役成立が母数です。 「ベルB」「チェリーB」「ベルA」「REG」「スイカA」「スイカB」を記録していない場合の補助として使用し、同じ設定差を重ねて評価しません。"
+          "reason": "通常時に数えたベルA成立回数を母数、その同じ区間のフリーズを伴う同時当選回数を分子に、設定別の同時当選期待度で比較します。通常時の優先要素が有効な場合は重複加算しません。"
         },
         {
           "featureId": "PREDECESSOR",
