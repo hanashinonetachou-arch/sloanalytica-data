@@ -113,10 +113,10 @@ for(const item of os.items)if(held.includes(item.featureId)){item.title+='（記
 const pre=p.ui.v8Sections.find((s:any)=>s.id==='OBS_PREDECESSOR');
 pre.description=r.findings.find((x:any)=>x.findingId==='PREDECESSOR').denominatorSemantics+'\nG・BIG・REGをすべて確認した場合だけ計算します。空欄と0回は異なります。';
 pre.items=[{id:'NODE_PREDECESSOR',featureId:'PREDECESSOR',title:'着席前BIG・REG内訳',inputs:[['INP_PREDECESSOR_GAMES','着席前の対象通常ゲーム数','denominator'],['INP_PREDECESSOR_BIG_COUNT','着席前BIG','counter'],['INP_PREDECESSOR_REG_COUNT','着席前REG','counter']].map(([id,label,input])=>({id,inputId:id,engineBinding:{inputId:id},label,input,directNumeric:true,gridSpan:id==='INP_PREDECESSOR_GAMES'?12:6,unobservedDisplay:'—',...(id==='INP_PREDECESSOR_GAMES'?{quickAdd:[50]}:{})}))}];
-for(const sec of [normalSection,bs,os,pre])sec.descriptionPresentation={collapsible:false};
+for(const sec of [normalSection,bs,os,pre])sec.descriptionPresentation={collapsible:true,label:'説明',defaultExpanded:false};
 p.ui.playInfo.totalGamesLabel='総ゲーム数（遊技履歴用）';p.ui.playInfo.totalGamesDescription='推測には下の対象通常ゲーム数を使用します。';
 p.metadata.observationPrerequisites=c.observationPrerequisites;
-p.metadata.thunder859Correction={...r.audit.thunder859Correction,sharedBigGamesInputId:bigG,legacyCounts:'RETAIN_WITHOUT_INFERENCE_UNTIL_REENTERED',benchmarkNote};
+p.metadata.thunder859Correction={...r.audit.thunder859Correction,sharedBigGamesInputId:bigG,legacyCounts:'RETAIN_WITHOUT_INFERENCE_UNTIL_REENTERED',benchmarkNote,manualNormalDenominatorInputIds:normalSection.groups[0].engineBinding.inputIds};
 p.v8.machineResearchSummary.highLowDiscrimination=hld;
 // Remove duplicate old explanatory references in the UI; retain the source files and all raw values.
 for(const x of p.inputs.inputs)if(held.some(id=>x.id.startsWith(id)))x.inputVisible=false;

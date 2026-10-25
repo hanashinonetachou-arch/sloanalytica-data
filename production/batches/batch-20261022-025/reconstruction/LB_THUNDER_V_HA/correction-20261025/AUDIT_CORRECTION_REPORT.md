@@ -55,7 +55,7 @@ BIG前半の1試行の判別力は、ベルB0.237581、ベルC0.195068、15枚�
 - 実保存Repository：明示0と旧データを2回保存復元、入力消去、保存削除。
 - 独立Python oracle：Appの計算コードをimportせず、独自の優先妥当性判定・対数尤度・制約・正規化を実装。51件で一致。事後確率最大絶対誤差8.36e-14、評価スコア最大絶対誤差3.76e-12。
 - Research台帳と既存9工程のdocument validator成功。機種限定UI overlay後は別途package validator・実App engine/UI/storageテストを実施。工程の受理状態や本番公開状態を勝手にCOMPLETEへ変更していない。
-- TypeScript型検査、App既存全npm test、Vite production build成功。新テスト用react-test-renderer 19.0.1だけをdevDependencyへ追加。
+- TypeScript型検査、App既存全npm test、Vite production build成功。新テスト用react-test-renderer 19.0.1だけをdevDependencyへ追加。説明は既存標準の折りたたみを維持。UI検証の総G連動必須条件はサンダーVの6母数に限って、可視の手入力接続と総G非連動の検証へ置換した（共通エンジンの変更なし）。
 - 他機種では前処理は同一オブジェクトを返し、0復元特例・UI文言も機種ID条件で分岐する。共通計算ファイル136件の固定状態との一致を別途確認。
 
 ## 出典の再照合と終了条件
