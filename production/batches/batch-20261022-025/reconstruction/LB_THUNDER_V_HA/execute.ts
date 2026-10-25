@@ -75,6 +75,8 @@ if(process.argv[2]==='invalidate'){
   }else if(stage==='OBSERVATION_EVIDENCE'){
    doc=buildObservationEvidence(read('candidate-contract'),read('research'),ref('candidate-contract'));
    applyBatch025ObservationLabels(doc);
+   // Restore machine-owned labels after the legacy trial-universe label adapter.
+   for(const observation of doc.observations??[])if(['BIG_BELL_B','BIG_BELL_C','BIG_REACH'].includes(observation.findingId))observation.inputPresentation=structuredClone(read('research').findings.find((f:any)=>f.findingId===observation.findingId).inputPresentation);
    for(const observation of doc.observations??[])if(observation.trialUniverse==='BONUS_ELIGIBLE_GAME_TRIAL')observation.inputIdAliases={[observation.findingId+'.eligibleTrialCount']:'INP_THUNDER_VERIFIED_G_'+observation.findingId};
   }else if(stage==='CANONICAL_UI'){
    doc=buildCanonicalUi(read('candidate-contract'),read('observation-evidence'),read('evaluation'),ref('candidate-contract'),ref('observation-evidence'),ref('evaluation'));

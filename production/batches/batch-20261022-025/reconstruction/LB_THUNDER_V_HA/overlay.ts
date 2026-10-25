@@ -16,9 +16,14 @@ export function applyThunderOnlyOverlay(pkg:any){
   }
   for(const g of s.groups??[])if(g.playDataBinding?.source==='PLAY_TOTAL_GAME_DELTA')g.label='対象通常ゲーム数';
  }
- const screens=[['EVI_BIG_END','通常BIG'],['EVI_BIG_1G_END','1G連BIG'],['EVI_REG_END','REG']];
- for(const [id,label] of screens){const s=pkg.ui.v8Sections.find((s:any)=>s.id===id);if(!s)throw Error('SCREEN_MISSING');s.tabGroup={id:'THUNDER_END_SCREENS',title:'ボーナス終了画面',label};}
- pkg.metadata.batch025Presentation={adapter:'thunder-only-v85',groups:[{id:'THUNDER_END_SCREENS',title:'ボーナス終了画面',tabs:screens.map(([sectionId,label])=>({sectionId,label}))}],statisticalModelsUnchanged:false};
+ const groups=[
+  {id:'THUNDER_BIG_FIRST_HALF',title:'BIG前半の停止形',tabs:[['OBS_BIG_BELL_B','ベルB'],['OBS_BIG_BELL_C','ベルC'],['OBS_BIG_REACH','15枚リーチ目']]},
+  {id:'THUNDER_ROLE_OVERLAP',title:'小役別のボーナス同時当選',tabs:[['OBS_OVERLAP_BELL_A','ベルA'],['OBS_OVERLAP_CHERRY_B','チェリーB'],['OBS_OVERLAP_WATER_A','スイカA'],['OBS_OVERLAP_WATER_B','スイカB'],['OBS_OVERLAP_REPLAY','リプレイ']]},
+  {id:'THUNDER_END_SCREENS',title:'ボーナス終了画面',tabs:[['EVI_BIG_END','通常BIG'],['EVI_BIG_1G_END','1G連BIG'],['EVI_REG_END','REG']]},
+ ];
+ for(const group of groups)for(const [id,label] of group.tabs){const section=pkg.ui.v8Sections.find((s:any)=>s.id===id);if(!section)throw Error('TAB_SECTION_MISSING:'+id);section.tabGroup={id:group.id,title:group.title,label};}
+ pkg.metadata.batch025Presentation={adapter:'thunder-only-v85',groups:groups.map(g=>({...g,tabs:g.tabs.map(([sectionId,label])=>({sectionId,label}))})),statisticalModelsUnchanged:false};
+ pkg.metadata.thunderTabPresentation={revision:'20261025',presentationOnly:true,inputIdsAndNumericModelUnchanged:true};
  for(const f of pkg.features.features){
   f.displayFormat=String(f.trialUniverse).includes('GAME')?'ratio_1_over_n':'percentage';
   if(f.featureId==='PREDECESSOR')f.displayFormat='percentage';
