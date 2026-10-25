@@ -86,7 +86,7 @@ const pra=save('runtime-projection',proj),app=buildAppRuntime(proj,pra),p=app.pa
 save('app-runtime-before-overlay',app);
 await validateStages({r,e,elig,c,obs,ui,md,pol,proj,app,ra,ea,elia,ca,oa,ua,ma,pa,pra,conf});
 // Preserve the approved one-section presentation. Only this machine's bindings are replaced.
-const baseline=read('../baseline/machine-package.json');
+const baseline=read(root+'/reconstruction/LB_THUNDER_V_HA/presentation-inline-20261025/qa-package.json');
 p.ui=structuredClone(baseline.ui);
 p.inputs.inputs=[...p.inputs.inputs,...baseline.inputs.inputs.filter((x:any)=>!p.inputs.inputs.some((y:any)=>x.id===y.id))];
 const bigG='INP_THUNDER_BIG_FIRST_HALF_G_V859';
