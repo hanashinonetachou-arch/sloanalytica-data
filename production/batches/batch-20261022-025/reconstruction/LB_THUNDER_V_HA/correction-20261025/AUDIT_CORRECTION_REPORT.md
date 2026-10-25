@@ -127,3 +127,35 @@ arrows N / AQUOS sense7+で、着席前0入力→画面移動→再起動後0保
 | BIG_1G_END | 1G連BIG終了画面 | 終了画面：設定制約/記録 | 1G連で終了したBIGに限る画面。通常BIGの画面と混在集計しない。 |
 | REG_END | REG終了画面 | 終了画面：設定制約/記録 | 条件が明確な確定・否定表示は、設定候補の絞り込みへ反映できる可能性があります。 |
 | PREDECESSOR | 着席前BIG・REG内訳 | 数値推測（優先・入力条件あり） | 自分の観測と重ならない、同一区間の通常抽選G・初当りBIG・REGをすべて確認できる場合だけ入力。ボーナス・BT・成立後のG、雷神ループによる再開BIGを含めません。 |
+
+
+## 再実行方法
+
+Dataの固定是正commitを取得し、Repositoryルートから次を実行します（productionの既存依存をインストール済みであること）。
+
+```bash
+node --import ./production/node_modules/tsx/dist/loader.mjs production/batches/batch-20261022-025/reconstruction/LB_THUNDER_V_HA/correct-20261025.ts
+```
+
+UI/engine/storageの検証は対応するApp QA commitで、以下の2引数へ是正packageとレポート出力先を指定します。
+
+```bash
+node --import tsx scripts/verify-thunder-859.tsx MACHINE_PACKAGE_JSON VERIFICATION_REPORT_JSON
+```
+
+独立計算はData側のoracle-859.pyをPython（NumPy/SciPy）で実行します。入力は同じcorrection-20261025ディレクトリのmachine-package.jsonとverification.jsonです。固定8.5.8のUI正本はRepository内presentation-inline-20261025/qa-package.jsonから読み、作業場の一時ファイルには依存しません。
+
+
+## 最終統合証跡
+
+- App commit：42afadd70224fae797325357b632b4b295b6bc39
+- QA配布Data commit：fe8c4e5793eeb5dac4d2b0d6f0b739226a1e2db5
+- 機種限定是正コードと評価成果物commit：8f021a1c1c9a48743c4a0e150d7299180e5ed434（以降は本報告・CI証跡の追記のみ）
+- CI：https://github.com/hanashinonetachou-arch/sloanalytica-app/actions/runs/40157531206 — SUCCESS
+- 51推測ケース + 実Reactイベント + 実保存復元 + 描画検証：PASS
+- V8.5既存250機種：250 PASS / 0 FAIL。既存他機種272カタログ項目は変更なし。
+- 署名付きAPK versionCode：2002970977。SHA256：b654b617f957a054e8b25b8a907122438bb2c47424a765da2eb9dedb9a1d8256。
+- 署名証明書SHA256：1c01974fc54a2c351539147179944dbab5a5104d92b9447c36e04f50cbf45ea0。
+- 初回統合CI 40157331044は説明折りたたみ/手入力母数検証の不一致で失敗。是正後の上記再実行が成功しており、失敗を隠していない。
+
+実機QA用APKを用意済み。Android2機種での実機QAと独立外部監査者による再承認は未実施。本番マージ・公開は実行していない。
