@@ -27,3 +27,15 @@ Crea専用アダプター、状態説明、Creaデータ、任意のCrea参照�
 ## 実機QA
 同時当選の4役が同時表示されること、成立回数の編集がチェリーだけであること、通常時の3役変更が参照値へ反映すること、旧記録を再入力した後の保存・再起動、成立回数を減らした場合の案内を確認する。
 APKと最終commit/検証結果は生成後に追記。
+
+## 最終結果
+- App: b2e745672b7012f9a7aa8b5c497ec7aa95895151
+- 配信Data固定commit: 10efc9f14bbeaeae421c681777320b5e787eb55d
+- Actions: https://github.com/hanashinonetachou-arch/sloanalytica-app/actions/runs/40241554375 — SUCCESS（1回のIntegration Boundary）
+- ローカル76ケース、CI75ケース（旧版との差分比較1ケースはローカルのみ）、既存250機種の回帰成功。
+- 署名付きAPK: SloAnalytica_CreaBT_8.5.4_QA_vc2002976819.apk
+- versionCode: 2002976819 / versionName: 1.0.1-prototype.vc2002976819+b2e74567
+- APK SHA256: 7431e883adfe747d71ba4a61805843b84743e7c17bca5c279bcf0aec194dd2b4
+- 証明書SHA256: 1c01974fc54a2c351539147179944dbab5a5104d92b9447c36e04f50cbf45ea0
+- APK内のQA bindingとcatalog URLが上記App/Dataに一致することを検証。
+- クレアの本変更後の実機QAのみ未実施。他9機種のQA合格を維持。
