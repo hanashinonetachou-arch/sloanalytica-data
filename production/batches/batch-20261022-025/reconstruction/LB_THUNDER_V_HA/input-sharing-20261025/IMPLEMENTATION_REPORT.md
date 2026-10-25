@@ -50,3 +50,20 @@ Data：machines/LB_THUNDER_V_HA/machine-package.json、同機種のcatalog項目
 arrows N / AQUOS sense7+で、指定3段2列の視認性、同時当選の入力が1欄だけであること、通常時ベルA変更時の参照値更新、0入力の再起動後保持、旧データの再入力案内、ベルA消去/減算後の再確認案内を確認してください。
 
 この時点の実機QAは未実施です。署名付きAPKの生成とCI最終結果は最終証跡へ追記します。本番公開は行いません。
+
+
+## 最終統合結果
+
+- App：a89e84c7d10aa0aa17ee0593a1d74644ced67c0e（qa/thunder-v85-only-20261024へ反映済み）
+- QA Data：2923102ec99c38d11d40a2bf54ab876b29d1c8b0（qa/thunder-input-sharing-20261025）
+- 是正コード・ローカル証跡：1a803bd544c8cdcf8fb3df1331dc54ca15a434a4（fix/thunder-input-sharing-20261025。以降のcommitは証跡追記のみ）
+- CI：https://github.com/hanashinonetachou-arch/sloanalytica-app/actions/runs/40170038310 — SUCCESS。今回の統合Actionsは1回。
+- 61推測ケース・実InputScreenイベント・保存復元・描画検証PASS。
+- Chromeで320/360/393/412pxの3段2列、入力位置の一致、4桁表示、横はみ出しなし、同時当選入力1欄をCIでも再確認しPASS。
+- 既存V8.5機種：250 PASS / 0 FAIL。他272カタログ項目と他機種packageは変更なし。
+- 署名付きAPK：SloAnalytica_ThunderV_8.5.10_QA_vc2002972012.apk。
+- APK versionCode：2002972012。生成元App commit：a89e84c7d10aa0aa17ee0593a1d74644ced67c0e。
+- APK SHA256：c87ad7bb09f643b27890f799f1b6ad0de5d1859e6d00d7523344cccce597c24d。
+- 署名証明書SHA256：1c01974fc54a2c351539147179944dbab5a5104d92b9447c36e04f50cbf45ea0。
+
+実機QA用APKを生成済み。arrows N / AQUOS sense7+での実機QAは未実施です。ユーザーの次作業はAPKの実機QAのみであり、GitやPowerShellの操作は不要です。本番公開は行っていません。
