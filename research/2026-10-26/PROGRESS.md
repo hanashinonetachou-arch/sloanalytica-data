@@ -19,3 +19,6 @@ Machines #1 through #6 now have individual source-bounded Research closure appen
 
 ## 2026-10-26 sequential checkpoint: #7
 #7 ウルトラミラクルジャグラー individual six-domain self-audit and Research model closure committed at 790db409effd1b06da0c828d2bf27a90a637e7f0. The newly mandated grape equal-independent-site-mean was executed for setting6 using original 554/3000 Nana and 801/4449 1geki => 1/5.48385. Setting1-5 original grape samples and a claimed DMM 1/5.69 primary record not independently verified, NOT populated. Those values are closed as bounded unavailable research, not invented. Model remains unevaluated. #8 Mr Juggler is next; #8–#10 provisional files not completed. No change to existing QA, machines, manifests or formal Contracts.
+
+## 2026-10-26 sequential checkpoint: #8
+#8 ミスタージャグラー six-domain source-bounded Research audit and model completed in c9198c08462d724422952b2da43a2de19e1783eb. Critical Nana summary discrepancy (487 grape/70 cherry) superseded by original detailed trial 524/2988, cherry77; independently verified 1geki 1100/6604. Two-site equal-probability grape mean setting6 = 1/5.849084, no fabricated setting1–5 original direct observations. Full official Evaluation/Eligibility not done. #9 ジャグラーガールズSS next and #10 ゴーゴージャグラー3 after #9 closes. No app/QA changes.
