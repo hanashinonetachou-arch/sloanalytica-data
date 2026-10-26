@@ -1,3 +1,21 @@
+# Current Work checkpoint — 2026-10-27
+
+**10/10 machine contract artifacts completed and verified in the specified sequential order.**
+
+- Work branch: `production/v85-research-20261026-contract`.
+- Established selection ID: `batch-20261026-026`, recovered from canonical Repository selection rather than invented from this handoff.
+- Preserved all 97 original Research/evidence candidate IDs. Final ledger: 147 rows (43 complete numeric candidates, 49 evidence/record Findings, 50 bounded closed candidates, 5 incomplete setting distributions).
+- Outputs: `production/batches/batch-20261026-026/artifacts/<machineId>/{research,evaluation,eligibility,candidate_contract}/`.
+- Final report: `research/2026-10-26/WORK_RESULT.md`; audit: `production/batches/batch-20261026-026/validation/final-audit.json`.
+- Source-bounded coverage limitations remain explicit. This is not an exhaustive eight-site or independent external-audit certification.
+- Original builder outputs and artifact-only complete-multinomial benchmark supplement are separately retained. The pinned old Evaluation validator cannot accept resolved categorical benchmark fields; see WORK_RESULT.md. No common engine/validator implementation or Orchestrator stage state was changed.
+- No app implementation, Runtime generation, deployment, APK, device QA, or previous-QA status change. No Actions requested.
+- Next work must use the committed artifacts and hashes. Do not regenerate old candidates or reopen missing-source searches without a concrete new source/error.
+
+The following entries are **historical checkpoints** from the Research-only phase. Their older “Evaluation not done” wording is superseded by the artifact completion above; their evidence and source limitations are retained.
+
+---
+
 # Research progress — 2026-10-26
 10/10 machine research *artifacts saved* on main, all with bounded/limited self-audit classification.
 File list in exact order:

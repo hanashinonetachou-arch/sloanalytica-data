@@ -7,7 +7,7 @@
   "evaluationArtifact": {
     "kind": "evaluation",
     "path": "production/batches/batch-20261026-026/artifacts/LB_ISEKAI_QUARTET_KR/evaluation/result.json",
-    "sha256": "f18b79d16658bd5ef63e299230b48e39a457a126b3cecce89126e3c068ab2415",
+    "sha256": "4520f9d93f759705bbeb541737df38a1a2f862c43f5bc8b0fddf7a23c035f430",
     "producerWorkId": "research-20261026-LB_ISEKAI_QUARTET_KR"
   },
   "eligibilityArtifact": {
@@ -36,13 +36,15 @@
       "dependencyGroupId": "ISEKAI_NORMAL_SHARED",
       "dependencyKind": "DEPENDENT",
       "dependencyReason": "同じ遊技区間の情報を共有するため、正式な7000G情報量で代表候補を選び、同時加算しない。",
+      "dependencyFallbackRank": 1,
       "runtimeInferenceAllowed": true,
-      "dependencyResolution": "SINGLE_MEMBER_SELECTED",
+      "dependencyResolution": "PREFERRED_MEMBER",
       "runtimePolicyBinding": {
         "metric": "SELECTION_SCORE",
         "value": 170.0196287019893,
         "thresholdSource": "RUNTIME_POLICY"
-      }
+      },
+      "suppressedByFeatureIds": []
     },
     {
       "findingId": "RF_NORMAL_BT_OR_BIG",
@@ -63,14 +65,17 @@
       "dependencyGroupId": "ISEKAI_NORMAL_SHARED",
       "dependencyKind": "DEPENDENT",
       "dependencyReason": "同じ遊技区間の情報を共有するため、正式な7000G情報量で代表候補を選び、同時加算しない。",
-      "runtimeInferenceAllowed": false,
-      "dependencyResolution": "RESOLVED_BY_SINGLE_MEMBER",
+      "dependencyFallbackRank": 2,
+      "runtimeInferenceAllowed": true,
+      "dependencyResolution": "FALLBACK_MEMBER",
       "runtimePolicyBinding": {
         "metric": "SELECTION_SCORE",
         "value": 63.434116516614836,
         "thresholdSource": "RUNTIME_POLICY"
       },
-      "resolvedIntoFindingId": "RF_NORMAL_3COIN_SMALL_ROLES"
+      "suppressedByFeatureIds": [
+        "RF_NORMAL_3COIN_SMALL_ROLES"
+      ]
     },
     {
       "findingId": "RF_BIG_MISS_15",
@@ -124,15 +129,19 @@
   "dependencyGroups": [
     {
       "groupId": "ISEKAI_NORMAL_SHARED",
-      "resolution": "SINGLE_MEMBER_SELECTED",
+      "resolution": "PREFERRED_WITH_FALLBACK",
       "members": [
         "RF_NORMAL_3COIN_SMALL_ROLES",
         "RF_NORMAL_BT_OR_BIG"
       ],
       "runtimeInferenceAllowed": true,
-      "selectedFindingId": "RF_NORMAL_3COIN_SMALL_ROLES",
-      "selectionRationale": "依存関係を仮定せず二重評価を避けるため、依存関係グループ内で正式な7000G設定判別スコアが最大の候補を代表Featureとして使用する。",
-      "reason": "正式な設定判別スコアを比較できる候補から、最も情報量の高い1要素のみを採用する。"
+      "preferredFindingId": "RF_NORMAL_3COIN_SMALL_ROLES",
+      "fallbackOrder": [
+        "RF_NORMAL_3COIN_SMALL_ROLES",
+        "RF_NORMAL_BT_OR_BIG"
+      ],
+      "reason": "依存関係がある候補を同時加算せず、観測できた優先Featureを使用し、未観測時だけ次順位のFeatureへ自動フォールバックする。",
+      "selectionRationale": "Researchで明示された優先順位に従い、同一セッションで重複情報を同時加算しない。"
     }
   ],
   "excludedDecisions": [],
@@ -632,11 +641,21 @@
       "noDefaultAbsenceCounter": true
     },
     "recordOnlyCopy": "記録のみ・推測計算には使用しない",
-    "unobserved": "NULL_NOT_ZERO"
+    "unobserved": "NULL_NOT_ZERO",
+    "dependencyAlternatives": {
+      "ISEKAI_NORMAL_SHARED": {
+        "order": [
+          "RF_NORMAL_3COIN_SMALL_ROLES",
+          "RF_NORMAL_BT_OR_BIG"
+        ],
+        "rankBasis": "Resolved finite-7000G scores descending; exact-live-only alternatives retain source declaration order after scored candidates.",
+        "activation": "Use first valid observed and Runtime-Policy-active candidate only; never multiply alternatives; missing is null, not zero."
+      }
+    }
   },
   "reconciliationArtifact": {
     "path": "production/batches/batch-20261026-026/artifacts/LB_ISEKAI_QUARTET_KR/research/reconciliation.json",
-    "sha256": "ab0de410b0aaa6113dbf6b15a39579feb3cf511c4ae69950ed71fb5e4d896335"
+    "sha256": "66062794ad18d245fdefaa7eb368690e98b67df4357d5ea6758cdf6705528b6a"
   },
   "selectionAudit": [
     {

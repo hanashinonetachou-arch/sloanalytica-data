@@ -1,4 +1,4 @@
-import fs from 'node:fs';import path from 'node:path';import crypto from 'node:crypto';
+import fs from 'node:fs';import path from 'node:path';import crypto from 'node:crypto';import {fileURLToPath} from 'node:url';
 import {buildEvaluation} from '../../../production/src/evaluation-builder.ts';
 import {buildEligibility} from '../../../production/src/eligibility-builder.ts';
 import {buildCandidateContract} from '../../../production/src/candidate-contract-builder.ts';
@@ -7,16 +7,29 @@ import {validateEvaluationDocument} from '../../../production/src/evaluation-val
 import {validateEligibilityDocument} from '../../../production/src/eligibility-validator.ts';
 import {validateCandidateContractDocument} from '../../../production/src/candidate-contract-validator.ts';
 import {RepoStore} from '../../../production/src/core.ts';
-const dir=path.resolve(process.argv[2]),root=path.resolve('data/production');
+const dir=path.resolve(process.argv[2]),root=fileURLToPath(new URL('../../../production/',import.meta.url));
 const read=(p:string)=>JSON.parse(fs.readFileSync(path.join(dir,p),'utf8'));
 const write=(p:string,d:any)=>{const f=path.join(dir,p);fs.mkdirSync(path.dirname(f),{recursive:true});fs.writeFileSync(f,JSON.stringify(d,null,2)+'\n')};
 const sha=(p:string)=>crypto.createHash('sha256').update(fs.readFileSync(path.join(dir,p))).digest('hex');
 const r=read('research/result.json'),researchPath='production/'+path.relative(root,path.join(dir,'research/result.json'));
+const supplements=read('evaluation/multinomial-benchmark.json');
+// Rank known overlapping alternatives before committing the final Research.
+// The common builder supports this explicit contract. Unobserved optional role
+// counts must not prevent a valid, completely observed bonus fallback.
+const e=buildEvaluation(r);
+const alternatives=new Map<string,any[]>();
+for(const x of e.evaluations){if(x.dependency?.status!=='DEFERRED_TO_CANDIDATE_CONTRACT'||!(x.metrics?.igPerEligibleTrial>1e-15))continue;const id=x.dependency.groupId;const a=alternatives.get(id)??[];a.push(x);alternatives.set(id,a);}
+for(const [id,members] of alternatives){if(members.length<2)continue;
+ const score=(x:any)=>supplements[x.findingId]?.selectionScore??(x.metrics.selectionScore.status==='COMPUTED'?x.metrics.selectionScore.value:null);
+ members.sort((a:any,b:any)=>{const sa=score(a),sb=score(b);return sa!==null&&sb!==null?sb-sa:sa!==null?-1:sb!==null?1:0});
+ members.forEach((x:any,i:number)=>{x.dependencyFallbackRank=i+1;r.findings.find((f:any)=>f.findingId===x.findingId).dependencyFallbackRank=i+1});
+ r.observationContract.dependencyAlternatives??={};r.observationContract.dependencyAlternatives[id]={order:members.map((x:any)=>x.findingId),rankBasis:'Resolved finite-7000G scores descending; exact-live-only alternatives retain source declaration order after scored candidates.',activation:'Use first valid observed and Runtime-Policy-active candidate only; never multiply alternatives; missing is null, not zero.'};
+}
+write('research/result.json',r);
 const ref=(kind:string)=>({kind,path:'production/'+path.relative(root,path.join(dir,kind+'/result.json')),sha256:sha(kind+'/result.json'),producerWorkId:r.workId});
 const researchValidation=validateResearchArtifacts(new RepoStore(root),{stage:'RESEARCH',batchId:r.batchId,machineId:r.machineId} as any,{status:'SUCCESS',workId:r.workId,producedArtifacts:[{...ref('research'),path:researchPath}]} as any);
-const e=buildEvaluation(r);write('evaluation/builder-output.json',e);
+write('evaluation/builder-output.json',e);
 const baselineValidation=validateEvaluationDocument(e,r);
-const supplements=read('evaluation/multinomial-benchmark.json');
 for(const x of e.evaluations){const s=supplements[x.findingId];if(!s)continue;
  if(x.model!=='CATEGORICAL'||x.trialUniverse!=='NORMAL_GAME_TRIAL'||s.trials!==7000||s.ig7000<0||s.ig7000>Math.log2(Object.keys(x.settingDistribution).length))throw Error('MULTINOMIAL_BENCHMARK_INVALID');
  x.metrics.selectionScore={status:'COMPUTED',value:s.selectionScore};x.benchmarkExposure={status:'EXACT',trials:7000,exposureClass:'DERIVED_EXACT'};x.selectionClass=s.selectionScore>=20?'CORE':s.selectionScore>=10?'SUPPORT':s.selectionScore>=5?'JOINT_ELIGIBLE':'EXCLUDE';x.evaluationCompleteness='COMPLETE';x.numericalIntegration=s;
