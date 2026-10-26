@@ -1,0 +1,34 @@
+# LBパチスロ ヱヴァンゲリヲン ～約束の扉～ Research / model design
+date 2026-10-26. Status: RESEARCH_CLOSED_WITH_LIMITATIONS. No formal Evaluation/Eligibility/Contract.
+Identity: Bisty, introduced 2025-07-07, smart BT slot, setting [1,2,3,4,5,6].
+Sources:
+https://nana-press.com/kaiseki/machine/988/30579/
+https://nana-press.com/kaiseki/machine/988/30312/
+https://1geki.jp/slot/lb_eva/0/
+https://1geki.jp/slot/lb_eva/43/
+Six-domain audit:
+1 confirmed: normal red SBB [1985.9,1560.4,1872.5,1524.1,1771.2,1424.7], blue SBB [1365.3,1524.1,1365.3,1524.1,1365.3,1560.4], yellow BIG [520.1,508.0,478.4,448.9,414.8,390.1], 暴走 mode [5957.8,5461.3,5041.2,4681.1,4369.1,4096.0], REG [569.9,546.1,508.0,474.9,442.8,404.5]; derived all bonus [196.8,189.4,181.0,170.7,161.4,151.0].
+2 role/overlap confirmed in part: replay, bell, cherry, weak/strong watermelon, reach eye, 暴走 replay, solo. Individual role occurrence rates and state-specific denominators require direct cross-check; do not infer.
+3 conditional: bonus overlap by role reported as %, including bell [0.01,0.02,0.04,0.06,0.08,0.10], cherry [10.30,10.60,10.70,11.10,11.00,11.40], weak watermelon [1.82,1.91,1.97,2.23,2.31,2.54]. These are conditional ON role occurrences, not 1/G; no independent multiplication with all bonus categories. Distinct exact constraints: independent 暴走 triggers >=2; bell+yellow BIG >=2 per published descriptions.
+4 REG character order, BT special movie, bonus end screen documented; non-Kaworu probabilities generally unpublished. Movie appears only on BT red7 establishment with middle BAR precise input; failure to meet condition must not be counted default.
+5 exact hint candidates: REG カヲル =>6; BT movie ゲンドウ >=4, 加持 >=5, カヲル =>6; bonus-end カヲル=>6. Probabilities not guessed.
+6 separate normal 3coin game/BT, no AT/CZ/ceiling; SBB/暴走 after bonus enter BT; no independent BT and source category rates.
+Model: normal five-category multinomial incl none with published per-spin denominators (validate rate consistency first); derived BIG/REG/BT totals never independently multiply. Bonus overlap modeled as conditional partition by eligible observed role, only when triggering event reliably distinguishable. REG, movie, end-screen record categories when distributions absent, plus explicit hard constraints as warranted.
+UI: single normal G input; bonus kinds redSBB/blueSBB/yellowBIG/暴走/REG in one section; small roles with deduped counter; role-based bonus overlaps in same opportunity without separate duplicate denominators; REGキャラ紹介 / BTムービー / 終了画面 separate; movie requires conditional success status not default count; BT counters distinct if later applicable.
+Self-audit: 6 domains checked at summary level, no independent external audit. Nonpublished numerical splits closed as information unknown. Need Work verification against existing manifests and refined source page for setting-specific role occurrences; source coverage not claimed exhaustive.
+
+## 2026-10-26 focused self-audit correction and source-bounded closure
+Source directly verified: https://nana-press.com/kaiseki/machine/988/30579/ (published tables for every setting); https://1geki.jp/slot/lb_eva/0/ ; https://www.p-world.co.jp/machine/database/10301 ; plus https://chonborista.com/slot/bisty-slot/236773/ commentary checked but community guesses NOT evidence. DMM/pachi7 site-targeted searches returned no independently verified model page in this pass, recorded as '調査済み・数値未確認', not a guessed absence; SANKYO Secret Story targeted maker content not verified, noted as access/coverage limit.
+KEY FIX: previous draft wrongly said 'normal five-category multinomial incl none'. Correct exclusive partition is SIX categories: red SBIG, blue SBIG, yellow BIG, 暴走モード, REG, no qualifying event; model outcome G must be the same eligible normal game scope for each. Data tables from nana above are published as normal main game rates; check 3coin/BT context on implementation. BIG合算 = red+blue+yellow, REG合算 = REG+暴走, SBIG合算 = red+blue, BT合算 = red+blue+暴走. These are D E R I V E D and must NOT be multiplied as separate evidence. All-bonus published vector 1/[196.8,189.4,181.0,170.7,161.4,151.0] is likewise derived.
+Source-supported six area outcome:
+1 bonus outcomes as above, numeric published.
+2 small role counts replay/bell/cherry/weak+strong watermelon, reach and stand-alone documented. Where base small role rates show no settings differential, do not claim selection power from their marginal count. Keep observed role counts only as necessary mother denominators for conditional overlap.
+3 Bonus overlap percentages conditional on role event. Their likelihood double-counts with bonus category totals unless combined joint partition/conditional factoring with disjoint sets; recommend use normal bonus outcomes as core, conditional overlap only as ALTERNATIVE joint likelihood pending formal evaluation. No invented state probability. Bell+yellow BIG and independent 暴走 are candidate >=2 constraints, require same symbol event to be actually identifiable.
+4 REG character order first-red, Gendo/Fuyutsuki by fourth, Kaworu; PenPen ordinal meaning uncertain. Record full sequence or set appropriate grouped inputs; 'PenPen appears nth -> setting n denied' is community speculation, NOT exact setting denial. BT movie occurs on eligible red7 SBB in BT AND accurate middle BAR action; no movie when failed timing is NOT a default screen observation. Bonus end screen Kaworu => 6; other screen fractions unknown.
+5 Hard candidates Kaworu(REG,Movie,ending)=>6; Movie Gendo>=4, Kaji>=5; invalid condition excluded. Avoid using absence as exclusion/weight without distribution.
+6 3-coin normal and distinct BT mode 2-coin. Event count normal G shared only once. No AT/CZ. BT subtype 'loop probability ~20%' must not be used as setting-specific unless per-setting numerical distribution published.
+UI: ゲーム数 (通常G 1), 通常時ボーナス (red SBIG,blue SBIG,yellow BIG,暴走,REG all same section with combined automatically), 小役と同時当選 (same opportunity; denominator counts reused, avoid duplicate inputs), REG中キャラ紹介 (sequence, red background ordinal, Kaworu), BT中ムービー (only valid occurrence), ボーナス終了画面 (Kaworu; non-Kaworu can record only). Source-limited small role / hint panels carry 記録のみ・推測計算には使用しない for all-unpublished categories.
+Prior warnings about conditional probabilities still binding. Six domains checked, no independent external audit; label SELF AUDIT only.
+RESEARCH_CLOSED_SOURCE_BOUNDED: publish confirmed data, model proposal & unknown numerical parameters closed as unknown, no minimum candidate quota. Existing public data repo catalog includes only initial Juggler, and app main tree has no standalone Eva MachineData; no claim about other branches or hidden candidate inventories. No formal EIG7000/Eligibility/Contract, implementation, APK, QA.
+Next target in order: A-SLOT+ 異世界かるてっと BT.
+
