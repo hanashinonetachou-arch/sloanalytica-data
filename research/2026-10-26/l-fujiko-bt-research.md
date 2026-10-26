@@ -1,0 +1,42 @@
+# L不二子BT Research / Model Design — 2026-10-26
+status: RESEARCH_CLOSED_WITH_LIMITATIONS
+scope: Research, self-audit, proposed model only. No Evaluation/Eligibility/Contract.
+identity: L不二子BT / LB不二子M2 / アムテックス / BT / introduced 2025-12-22
+settings: [1,2,4,5,6]
+sources:
+- https://nana-press.com/kaiseki/machine/1070/
+- https://nana-press.com/kaiseki/machine/1070/34193/
+- https://nana-press.com/kaiseki/machine/1070/34202/
+- https://1geki.jp/slot/lb_fj2/0/
+- https://chonborista.com/slot/amute/246917/
+- https://www.p-world.co.jp/machine/database/10383
+- https://pachiseven.jp/articles/detail/25646
+checked: 2026-10-26
+## Six domains
+1 bonus: confirmed. Normal SBIG 1/697.2 common; normal BIG [394.8,364.1,319.7,291.3,229.1], REG [321.3,304.8,278.9,252.1,227.6]; overall [141.2,134.0,122.7,113.2,98.1]. Separate BT from normal. Source tables have merged cells; do not fill from blank as 0.
+2 roles/overlap: confirmed. Normal plum A [9.3,9.1,8.9,8.7,8.6], plum B [25.6,25.1,24.3,24.0,23.7], cherry [53.1,51.8,49.3,48.2,46.7]. Cherry+BIG [6553.6,5461.3,3120.8,2520.6,1560.4] and cherry+REG [2621.4,2184.5,1424.7,1170.3,978.1] per normal game. SBIG cherry overlap common-rate; track only if observable.
+3 transitions: BT entered after SBIG; 2-coin play until next bonus; BT SBIG continues, BT BIG ends; setting-dependent conditional BT outcomes not fully published -> record, no invented likelihood.
+4 screens/voices: confirmed. BIG/SBIG adjustment success voices 5 categories with probabilities depending on success at G1 vs G2+ (see sources). REG character scenario 1-12 with probability table groups and odd/even conditional; avoid multiplying grouping and breakdown likelihood. BIG/SBIG stamps [none,可,良,優,極] with estimated thresholds only, not confirmed constraints.
+5 hard hints: パチンコジャッジ8 -> >=2; カードジャッジ ハルルナPUSH -> >=4; BIG adjustment 不二子 voice -> >=5 with published 0 probability settings 1,2,4; REG scenario 8-10 >=2, 11 >=4, 12 >=5 subject to table accuracy. 'スタンプ' is previous-machine inference, not strict constraint pending confirmation. 隠れ凪 meaning unknown => record only.
+6 state/denominators: confirmed. Normal (3-coin) and BT (2-coin) distinctly denominated; no AT/CZ; no ceiling. Count normal-game G once; count BIG/SBIG game G separately for 斜めプラム [4.50,4.30,4.15,4.00,4.00].
+## Proposed likelihood graph (not formally approved)
+- Normal bonus categorical (SBIG,BIG,REG,none) over eligible normal spins; overall is derived only.
+- Cherry count and cherry/bonus overlap are nested: use joint category by game where identifiable, otherwise choose either marginal cherry or joint conditioned counts; never double count overlap. Cherry+SBB settings common.
+- Plum A/B and cherry marginal rates can be evaluated only after confirming exclusive flag categories and bonus overlap assumptions; avoid naive multiplication.
+- BT bonus statistics only with BT-specific distributions, never use normal bonus rates.
+- REG scenarios multinomial; group 1-3,4-6,7,8-10,11,12; detailed odd-even conditional counts only if established; avoid double counting.
+- BIG voice multinomial split by first vs later successful adjustment; denominator is number of successful trials, not all BIGs. No success => excluded.
+- Hard constraints and unknown-probability recording are separate.
+## Proposed UI
+Game count: one normal-games input, not total including BT; independent BIG/SBIG sampled spins for diagonal plum.
+Sections: 通常時のボーナス(SBIG/BIG/REG); 通常時の小役(プラムA/B/チェリー); チェリー同時当選(BIG/REG, use counted cherry denominator only if likelihood is conditional); BIG中の斜めプラム; 枚数調整時ボイス (1G目 vs 2G目以降); REG中のキャラ紹介; BIG終了画面; その他設定示唆 (specific trigger only).
+Do not ask for redundant totals; group common observation conditions. Unknown numeric hints label 記録のみ・推測計算には使用しない.
+## Self audit / issues closed or scoped
+- 1geki labels setting '3' in rows of voice / scenario tables: other sources explicitly label corresponding row as setting 4; transcribe 4 after source cross-check, preserve discrepancy.
+- Stamps cited as old-generation analogical inference, therefore do not convert to hard constraints.
+- '隠れ凪' documented but effect unknown; closed as no numeric likelihood.
+- No external independent auditor engaged: self-audit only.
+- P-town / manufacturer-site dedicated detailed checks not fully verified by this investigation: coverage limited, do not claim exhaustive site sweep.
+- All rates here are published/display-rounded; likelihood needs consistency and normalization verification in Work.
+Research closure means traceable scope, not validated statistical eligibility.
+Next: LB スロット GALFY; Work after entire batch: verify repository baseline, ingest research, Evaluation -> Eligibility -> Candidate Contract.
