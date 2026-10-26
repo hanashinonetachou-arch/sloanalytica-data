@@ -8,6 +8,7 @@ SAMPLES={
 9:{'6':[('Nana',471,3065,'https://nana-press.com/post/1589385'),('1geki',1215,7528,'https://1geki.jp/slot/s_gogojuggler3/4/')]}}
 def juggler(i):
  m=Machine(i);u=re.findall(r'https://nana-press.com/kaiseki/machine/\d+/\d+/',m.raw)[:1];assert u
+ if i==6:u=['https://nana-press.com/kaiseki/machine/838/24962/']
  rates={key:json.loads(re.search(key+r'_1_over:\s*(\[[^\]]+\])',m.raw).group(1))for key in ['big','reg']}
  orig=m.old['features'];bonuses=[f for f in orig if 'BONUS_OUTCOME' in f['researchFeatureId']];assert len(bonuses)==2
  for f in bonuses:
