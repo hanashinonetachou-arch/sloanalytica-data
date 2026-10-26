@@ -1,4 +1,22 @@
 from prepare import *
+def isekai():
+ m=Machine(3);u=['https://nana-press.com/kaiseki/machine/1125/36291/'];g='ISEKAI_NORMAL_SHARED'
+ for id in ['RF_PREDECESSOR_BONUS_INITIAL','RF_BONUS_INITIAL']:
+  e=m.old_by[id];m.block(id,e['name'],'公表のボーナス初当り1/197.6等と、通常時のBIG・いせかる目の発生率は集計対象が異なる。BT区間を含む表示と通常Gを混ぜず、直接記録できる通常時2事象の分布で評価する。',u,e['settingValues'])
+ m.numeric('RF_NORMAL_3COIN_SMALL_ROLES','通常時（3枚掛け）小役内訳',partition(BELL=[7,6.7,6.6,6.4],WATERMELON=[45,39.7,39,37.4],CHERRY=[179.1,179.1,176.6,174.3],SPECIAL_15=[21845.3,21845.3,13107.2,8192]),u,group=g,scope='通常3枚掛けの有効G。BT中・ボーナス中を除く。実機連動機能の丸め表示から回数×分母で正確なGを復元したとみなさず、実際の対象Gを使う。')
+ m.numeric('RF_NORMAL_BT_OR_BIG','通常時 いせかる目・BIG直撃',partition(ISEKARU_EYE=[107.6,106.2,97.1,89.2],DIRECT_BIG=[1337.5,1260.3,1040.3,923]),u,group=g)
+ m.numeric('RF_BIG_MISS_15','BIG中 入賞フラッシュ非発生バラケ目',[21845.3,2048,1024,512],u,'ISEKAI_BIG_ELIGIBLE_GAME_TRIAL','BIG消化中の実際の対象Gだけ。入賞フラッシュのないバラケ目15枚役を数え、通常小役の特殊15枚役と混ぜない。')
+ m.numeric('RF_BT_SPECIAL_7','BT中特殊7枚役',[2259.9,851.1,753.3,662],u,'ISEKAI_BT_ELIGIBLE_GAME_TRIAL','BTの2枚掛け有効G。いせかる目の次ゲームとBT転落目の次ゲームは、設定差のない特殊7枚役なので試行と成功の両方から除外する。')
+ for id,e in m.e_old.items():
+  a=[int(s.removeprefix('SET_'))for s in e['allowedSettings']];f=m.evidence(id,e['name'],[(e['name'],'設定6' if a==[6]else '設定'+str(min(a))+'以上',a)],u)
+  if id.startswith('RE_PAYOUT_086'):f['inputReuse']={'type':'DAILY_COUNT_THRESHOLD','canonicalInput':'086枚OVER当日発生回数','minimumCount':4 if id.endswith('_4')else 3 if id.endswith('_3')else 1,'extraInput':False}
+ m.evidence('RE_CHAR_OTHER','いせかるぼーなす中の参考キャラ',[(x,'設定別出現率未確認の高設定示唆',None)for x in ['ペテルギウス','主人公','ヒロイン集合','3くみの仲間たち','飼育小屋','学校の先生たち③','起動要塞デストロイヤー']],u)
+ m.evidence('RE_END_OTHER','BIG終了画面（参考）',[(x,'設定別出現率未確認の示唆',None)for x in ['赤カーテン','キャラ黄金背景','全キャラ登場']],u)
+ m.block('RF_ROLE_TRANSITION_OVERLAP','小役重複いせかる目・BIG','小役成立時の期待度の設定1データだけでは、設定2・5・6の同条件の分布を作れない。通常小役と当選の包含関係も保持する。',u,{'setting1':{'bellIsekaru':.033,'watermelonIsekaru':.089,'watermelonBIG':[.002,.003],'cherryIsekaru':.287,'cherryBIG':.104}})
+ m.notes=['旧初当り候補2件を削除せず、集計対象の相違を根拠に閉鎖。','086は当日同一設定の通算発生回数1/3/4の制約を一つのカウンターから派生。0回を設定否定へ使わない。','通常小役は実機連動機能の丸め確率表示から厳密復元しない。']
+ domains=['通常BIGといせかる目を排他的に記録。初当り・合算の異なる定義を混ぜない。','通常3枚掛けベル・スイカ・チェリー・特殊15枚役。BT中小役と分離。','小役重複期待度は設定1のみで比較値が不足。公開済み不足は再探索せず閉じる。','BIG非フラッシュ15枚役とBT特殊7枚役はそれぞれ別の対象Gを記録。','キャラ・色順・終了画面・トロフィー・獲得枚数の制約。086の当日回数を保持。','いせかる目直後とBT転落目直後の特殊7枚役を両側の母数・回数から除外。']
+ ui={'normalGames':'ONE_SHARED_3COIN_INPUT','normalEvents':['BIG直撃','いせかる目'],'BIG':'actual eligible G; no flash only','BT':'actual eligible G excluding both transition next-games','086':{'input':'one daily occurrence counter','thresholds':{'1':'設定2以上','3':'設定5以上','4':'設定6'},'sameDaySameSetting':True,'noDefaultAbsenceCounter':True},'recordOnlyCopy':'記録のみ・推測計算には使用しない','unobserved':'NULL_NOT_ZERO'}
+ return m.finalize(ui,domains,coverage('Sammy',{'nana-press':'2026-10-27 DIRECT_RECHECK_36291_36208','pachiseven':'existing original candidate source 7351 retained as historical; detailed rates corroborated by current Nana'}))
 def eva():
  m=Machine(2);u=['https://nana-press.com/kaiseki/machine/988/30579/','https://1geki.jp/slot/lb_eva/0/'];g='EVA_NORMAL_SHARED'
  m.numeric('RF_DAILY_BONUS_DETAIL','通常時ボーナス詳細（当日累積）',partition(RED_SBB=[1985.9,1560.4,1872.5,1524.1,1771.2,1424.7],BLUE_SBB=[1365.3,1524.1,1365.3,1524.1,1365.3,1560.4],YELLOW_BB=[520.1,508,478.4,448.9,414.8,390.1],BOUSOU=[5957.8,5461.3,5041.2,4681.1,4369.1,4096],REG=[569.9,546.1,508,474.9,442.8,404.5]),u,group=g,scope='同じ日の通常3枚掛けGとボーナス5種類を台メニューから確認する。当日累積と自分の区間を二重計上せず、BT中当選を混ぜない。')
