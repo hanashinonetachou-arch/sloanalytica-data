@@ -1,4 +1,29 @@
 from prepare import *
+def harem():
+ m=Machine(4);u=['https://nana-press.com/kaiseki/machine/961/30029/','https://1geki.jp/slot/lb_harema/0/'];third='https://chonborista.com/slot/net-slot/234350/';g='HAREM_NORMAL_SHARED'
+ normal=partition(HAREM_BONUS=[819.2]*4,BIG=[789.6,744.7,590.4,492.8],REG=[560.1,508,409.6,327.7])
+ coarse=[{'BIG_TOTAL':x['HAREM_BONUS']+x['BIG'],'REG':x['REG']}for x in normal]
+ m.numeric('RF_PREDECESSOR_BONUS_COARSE','着席時BIG合計・REG内訳',coarse,u,'PREDECESSOR_NORMAL_GAME_TRIAL','着席前に確認できた通常Gと初当りBIG合計・REG。BT最終BIGや自分の当選を混ぜない。')
+ m.numeric('RF_PREDECESSOR_HB_SHARE','着席時BIG内ハーレム構成',[x['HAREM_BONUS']/(x['BIG']+x['HAREM_BONUS'])for x in normal],u,'PREDECESSOR_HAREM_BIG_TRIAL','着席前BIG合計のうち、ハーレムと通常BIGを正確に区別できた場合だけ。着席前の全BIG回数を母数にし、同じ観測から別の合算情報を追加しない。')
+ m.numeric('RF_NORMAL_BONUS_OUTCOME','通常時ボーナス内訳',normal,u,group=g)
+ m.numeric('RF_BT_HAREM_BONUS','BT中ハーレムボーナス',[10922.7,993,993,257],u,'HAREM_BT_2COIN_GAME_TRIAL','実際のBT2枚掛けの消化G。通常時ハーレム当選やBT最終BIGを成功回数へ含めない。')
+ m.block('RF_BONUS_CHERRY_STOP','ボーナス中チェリー停止','チェリー停止1/10〜1/8は確認できるが、予告音発生時だけの回数とボーナス全Gのどちらを試行数にするかを混同しない。掲載表だけでは狙い・枚数調整を含めた対象Gの定義を確定できないため、任意の母数で数値化しない。',u,{'denominators':[10,9.5,8.5,8],'legacyDenominator':m.old_by['RF_BONUS_CHERRY_STOP']['denominatorDefinition']})
+ m.numeric('RF_STRONG_CHERRY_BONUS','強チェリー＋ボーナス',[799.2,753.3,636.3,541.6],u,group=g,scope='通常G。強チェリー当選を成立時に特定できる条件を全期間で継続し、成立後の後引きを当選契機へ数えない。契機不明を成功0としない。')
+ m.numeric('RF_DIAGONAL_WATERMELON_BONUS','斜めスイカ＋ボーナス',[829.6,789.6,668.7,565],u,group=g,scope='通常G。斜めスイカ契機を正確に判別できた全観測区間だけ。ボーナス成立後の小役を原因にしない。')
+ m.block('RF_REACH_ME_ROLE','リーチ目役（1枚役）','4種の内部1枚役と、ボーナス成立後にも表示されるリーチ目は同じ事象ではない。ハズレ目にも止まる内部役の全成立を再現する観測が確認できないため、見えたリーチ目だけで公表率を使用しない。',u+[third],{'rates':[682.7,630.2,516,428.3]})
+ m.numeric('RF_STOP_FREEZE','停止フリーズ',[11942,11520,10317,9327],u+[third],group=g)
+ m.numeric('RF_BET_FREEZE','BETフリーズ',[10813,10502,9124,8406],u,group=g)
+ for id,e in m.e_old.items():
+  a=[int(s.removeprefix('SET_'))for s in e['allowedSettings']];m.evidence(id,e['name'],[(e['name'],'設定6' if a==[6]else'設定'+str(min(a))+'以上',a)],u)
+ raw={'BIG':{'cherry':[10,9.5,8.5,8],'BAR':[None,819.2,689.9,655.4],'ZV':[None,None,1310.7,1092.3]},'HB_REG':{'cherry':[10,9.5,8.5,8],'BAR':[None,546.1,436.9,409.6],'ZV':[None,None,936.2,819.2]}}
+ m.block('RF_BAR_PATTERN_DISTRIBUTIONS','ボーナス種別BAR停止形の分布','ボーナス種別の表は多数派の公開資料に合わせて整理済み。ただし予告音・目押し・全消化Gの対象条件が特定できないため、表の率を任意の試行数へ当てはめない。BAR・Z/Vの設定制約は保持する。',u+[third],raw)
+ m.evidence('RE_END_OTHER','ボーナス終了画面（参考）',[(x,'設定別出現率未確認の示唆',None)for x in ['サクラ','サクラ＋流れ星','サクラ＋犬','サクラ私服']],u)
+ m.evidence('RE_VOICE_OTHER','枚数調整成功時ボイス（参考）',[(x,'設定別出現率未確認の示唆',None)for x in ['通常','特殊①']],u,details=['成功した時だけ記録。初回成功の早さ・カスタムキャラを保持する。記録のみ・推測計算には使用しない。'])
+ m.block('RF_NORMAL_ROLE_MARGINALS','通常時ベル・チェリー・スイカ','設定1以外の基礎出現率が公表されていない。50枚あたりのゲーム数から個別小役率を逆算しない。',u)
+ m.notes=['STOPフリーズは既存Researchの対立値1/23884等に対し、Nana・1geki・Chonboが1/11942等で一致。ユーザーの多数派採用指示を適用。','BAR表の種別はNanaとChonboがBIG / HB・REG、1gekiがHB / BIG・REG。追加照合はChonboの1回のみ。多数派のBIG / HB・REGを採用し旧表も原Researchに保持。','BAR表の種別相違は解消したが数値尤度の母数条件は別問題。恣意的に予告音試行へ率を転用しない。']
+ domains=['通常HB・BIG・REGの排他的分布。HBとBIG合算の名称差を解消。','設定1のみの基礎小役値と全設定の同時当選値を区別。表示リーチ目を内部1枚役へ読み替えない。','強チェリー・斜めスイカ同時当選、停止/BETフリーズはボーナスと情報重複のため代表選択。','BAR停止形はBIGとHB/REGへ多数派で整理。対象G条件を決め打ちせず数値化は閉じる。','ドールズ・ハウス2以上、敬礼5以上、婚礼6、BAR2以上、Z/V5以上、特殊②2以上を保持。','通常G・BT2枚G・技術介入成功を分離。流れ星はリセット示唆で設定番号の制約にしない。']
+ ui={'normalGames':'ONE_SHARED_INPUT','normalBonus':['HB','BIG','REG'],'BAR':{'oneSection':True,'tabs':['BIG','HB・REG'],'sourceConflict':'resolved by user majority rule; denominator unknown; record plus exact constraints only','categories':['チェリー','BAR','Z/V','その他'],'noDuplicateConstraintInputs':True},'BT':'separate actual 2coin games','voices':'successful execution only; character and first-success timing retained','recordOnlyCopy':'記録のみ・推測計算には使用しない','unobserved':'NULL_NOT_ZERO'}
+ return m.finalize(ui,domains,coverage('NET',{'nana-press':'2026-10-27 DIRECT_RECHECK_30029','1geki':'2026-10-27 DIRECT_RECHECK_0','chonborista':'2026-10-27 ONE_ADDITIONAL_CONFLICT_CHECK_234350'}))
 def isekai():
  m=Machine(3);u=['https://nana-press.com/kaiseki/machine/1125/36291/'];g='ISEKAI_NORMAL_SHARED'
  for id in ['RF_PREDECESSOR_BONUS_INITIAL','RF_BONUS_INITIAL']:
