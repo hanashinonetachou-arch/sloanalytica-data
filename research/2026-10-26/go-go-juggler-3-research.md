@@ -34,3 +34,27 @@ Required before numeric use:
 5. Build Binomial grape successes over one eligible A-type total G counter, where definition must exclude bonus-internal spins, and avoid duplicate denominator input. BIG/REG and grape joint per-spin outcomes are not automatically independent: verify likelihood factorization before adding grape to bonus likelihood; total BIG/REG unaffected.
 6. All Juggler machines in scope: Neo Im Juggler EX, Ultra Miracle Juggler, Mr Juggler, Juggler Girls SS, GoGo Juggler 3. This rule also applies to future/previous Juggler-related model revisions where the exact machine has per-setting ORIGINAL real-play values.
 Research remains source-bounded, not formally evaluated. If data isn't adequately verified, carry as '実戦推定・評価候補' rather than hardcode a fictional rate.
+
+## 2026-10-26 — #10 individual Research closure / self audit
+Machine identification: Sゴーゴージャグラー3 / 北電子 / introduced 2023-07-03 / normal A-type / six settings 1–6; must distinguish 2015 original ゴーゴージャグラー and ゴーゴージャグラー2. Manufacturer-special 3 sources Sammy/SANKYO/Spiky are N/A to 北電子.
+Verified standard original sources 2026-10-26:
+- Nana: https://nana-press.com/post/1589385 3000G-style article but **normal spins = 1043+1052+970=3065**, grapes 471 (common+single combined), cherries78.
+- Nana structured: https://nana-press.com/kaiseki/machine/565/15594/ repeats original sample; is NOT a second site.
+- 1geki https://1geki.jp/slot/s_gogojuggler3/0/ and https://1geki.jp/slot/s_gogojuggler3/4/ single original setting6 showroom run total8464, bonus936, eligible normal7528, grape1215, cherries216 **non-bonus-overlap only**.
+- Pachi7 https://pachiseven.jp/articles/detail/23694 confirms headline bonus and that machine is full late announcement; other Pachi7 user session 1/6.47 has **unconfirmed actual setting**, so cannot be counted for known setting6 site mean.
+- P-WORLD https://www.p-world.co.jp/machine/database/9848 bonus headline consistent, grape 1/6.1 setting6 field data 4515G noted but provenance of original event/count not established; not an independent original source for current mean.
+- DMM targeted no original verifiable setting6 grape count; Chonborista targeted results correspond to 2015/2019 predecessor machines so reject as machine-identity mismatch, not evidence new 2023 model lacks grape data. Do not broaden indefinitely.
+Critical empirical setting6 equal SITE average:
+site Nana: 471 grapes/3065 eligible normal G -> p=0.153670473083, 1/6.507431.
+site 1geki: 1215/7528 -> p=0.161397449522, 1/6.195885.
+Equal independent-site probability mean p=(0.153670473083+0.161397449522)/2=0.157533961302 => 1/6.347838. Each site gets equal weight. Do NOT pool game counts across sites, average reciprocal denominators, count Nana summary as separate trial, or include P-World/secondary without original provenance. This is original *empirical* setting6 estimate, not manufacturer published.
+Six-domain audit:
+1) BIG [259.0,258.0,257.0,254.0,247.3,234.9] / REG [354.2,332.7,306.2,268.6,247.3,234.9] and derived overall [149.6,145.3,139.7,130.5,123.7,117.4]. Normal multinomial categories BIG/REG/no event over one eligible G, not double-weight overall.
+2) Grapes above original setting6 only. No verified original per-setting grapes for 1-5 in standard sources; no derived payout reverse values or previous-juggler 1/6.48 imported. Cherry definition mismatch Nana all 78 vs 1geki non-overlap 216; do not site-average cherry. Bells and Pierrot lack verified six-setting source rate -> record/unmodel.
+3) Solo vs cherry-overlap BIG/REG data in some practical reports but source-verified six-setting quantitative split absent; do not use conditional no-event and marginal bonus evidence independently, or infer setting rate from one report.
+4) GOGO presentation/slow stop/blackout/sound doubling/etc are bonus announcement effects, not known setting-specific likelihood or exact condition. Source 1geki explicitly says full after-announcement, no early announcement. No fake setting hint.
+5) No verified fixed setting-number display, setting exclusion/upper/lower exact constraint; don't invent.
+6) A-type no AT/CZ/BT. Single eligible normal 'ゲーム数' (v8.5 A-type user UI naming 総G, explain game count excludes bonus-internal spins when converting displayed totals); no second G manual field. Input Grapes includes standalone+shared grapes combined, consistent with Nana observation; use same type for 1geki verified data. Grape conditional numerical likelihood cannot compare ALL six settings with only setting6; keep mean as candidate parameter, no fabricated full vector.
+UI: 'ゲーム数' one section one field, 'ボーナス' BIG/REG side by side + auto 合算, '通常時の小役' ブドウ and optional チェリー with source definition; grape source note 実戦データ平均から算出・メーカー非公表, cherry record-only if no matching settings split; no premium fake settings section. 2-column counters, no other game numbers.
+All 6 domains inspected, non-public setting-specific grape1-5 and cherry overlap closed as unknown under bounded v8.5 rules. SELF AUDIT (not external). Research status RESEARCH_CLOSED_SOURCE_BOUNDED with original source trace, scoring/eligibility not done. Do not present site mean as full likelihood. No machine packages, old QA changes or app deployment.
+Entire cohort: all 10 machine records source-bounded closure; formal Evaluation->Eligibility->Candidate Contract must be done by Work in order preserving source unknowns and existing candidate IDs. 
