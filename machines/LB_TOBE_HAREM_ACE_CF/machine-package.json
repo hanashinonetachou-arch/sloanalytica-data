@@ -1,12 +1,16 @@
 {
   "schemaVersion": 1,
+  "provenance": {
+    "manifestVersion": "8.5",
+    "generationPath": "V8_5_PRODUCTION_PIPELINE",
+    "legacyOracleUsed": false
+  },
   "machine": {
     "schemaVersion": "2.0.0",
     "machineId": "LB_TOBE_HAREM_ACE_CF",
-    "machineDataVersion": "0.1.2",
+    "machineDataVersion": "8.5.1-batch-20261026-026",
     "displayName": "翔べ！ハーレムエース",
-    "modelName": "LB翔べ！ハーレムエースCF",
-    "manufacturer": "ネット",
+    "modelName": "翔べ！ハーレムエース",
     "settings": [
       "SET_1",
       "SET_2",
@@ -17,421 +21,666 @@
       "offlineCapable": true,
       "containsImages": false,
       "containsExecutableCode": false
-    },
-    "introductionDate": "2025-06-02",
-    "machineType": "SMART_SLOT",
-    "gameType": "BT"
+    }
   },
   "inputs": {
     "schemaVersion": "2.0.0",
     "inputs": [
       {
-        "id": "INP_PREDECESSOR_GAMES",
-        "name": "着席時ゲーム数",
-        "category": "PREDECESSOR",
+        "id": "RF_PREDECESSOR_BONUS_COARSE.eligibleTrialCount",
+        "name": "通常ゲーム数",
+        "category": "V8_NUMERIC",
         "type": "integer",
         "unit": "G",
+        "defaultValue": 0,
+        "minimum": 0,
         "displayOrder": 1,
-        "inferenceRole": "INCLUDE_PRIMARY",
-        "observationScope": "PREDECESSOR_SNAPSHOT",
-        "defaultValue": 0,
-        "minimum": 0
-      },
-      {
-        "id": "INP_PREDECESSOR_BIG_COUNT",
-        "name": "着席時BIG合計",
-        "category": "PREDECESSOR",
-        "type": "counter",
-        "unit": "回",
-        "displayOrder": 2,
-        "inferenceRole": "INCLUDE_PRIMARY",
-        "observationScope": "PREDECESSOR_SNAPSHOT",
-        "defaultValue": 0,
-        "minimum": 0
-      },
-      {
-        "id": "INP_PREDECESSOR_REG_COUNT",
-        "name": "着席時REG",
-        "category": "PREDECESSOR",
-        "type": "counter",
-        "unit": "回",
-        "displayOrder": 3,
-        "inferenceRole": "INCLUDE_PRIMARY",
-        "observationScope": "PREDECESSOR_SNAPSHOT",
-        "defaultValue": 0,
-        "minimum": 0
-      },
-      {
-        "id": "INP_PREDECESSOR_HB_COUNT",
-        "name": "うちハーレムボーナス（判別時のみ）",
-        "category": "PREDECESSOR",
-        "type": "counter",
-        "unit": "回",
-        "displayOrder": 4,
         "inferenceRole": "INCLUDE_SUPPORT",
-        "observationScope": "PREDECESSOR_SNAPSHOT",
-        "defaultValue": null,
-        "minimum": 0
+        "observationScope": "PREDECESSOR_SNAPSHOT"
       },
       {
-        "id": "INP_NORMAL_GAMES",
-        "name": "通常時ゲーム数（BT中除外）",
-        "category": "NORMAL_BONUS",
+        "id": "RF_PREDECESSOR_BONUS_COARSE.categoryCounts.1_BIG_TOTAL",
+        "name": "BIG合計",
+        "category": "V8_NUMERIC",
+        "type": "counter",
+        "unit": "回",
+        "defaultValue": 0,
+        "minimum": 0,
+        "displayOrder": 2,
+        "parentInputId": "RF_PREDECESSOR_BONUS_COARSE.eligibleTrialCount",
+        "inferenceRole": "INCLUDE_SUPPORT",
+        "observationScope": "PREDECESSOR_SNAPSHOT"
+      },
+      {
+        "id": "RF_PREDECESSOR_BONUS_COARSE.categoryCounts.2_REG",
+        "name": "REG",
+        "category": "V8_NUMERIC",
+        "type": "counter",
+        "unit": "回",
+        "defaultValue": 0,
+        "minimum": 0,
+        "displayOrder": 3,
+        "parentInputId": "RF_PREDECESSOR_BONUS_COARSE.eligibleTrialCount",
+        "inferenceRole": "INCLUDE_SUPPORT",
+        "observationScope": "PREDECESSOR_SNAPSHOT"
+      },
+      {
+        "id": "RF_PREDECESSOR_BONUS_COARSE.categoryCounts.3_その他",
+        "name": "その他",
+        "category": "V8_NUMERIC",
+        "type": "counter",
+        "unit": "回",
+        "defaultValue": 0,
+        "minimum": 0,
+        "displayOrder": 4,
+        "parentInputId": "RF_PREDECESSOR_BONUS_COARSE.eligibleTrialCount",
+        "inferenceRole": "INCLUDE_SUPPORT",
+        "inputVisible": false,
+        "derivedCalculation": "linear_combination",
+        "derivedTerms": [
+          {
+            "inputId": "RF_PREDECESSOR_BONUS_COARSE.eligibleTrialCount",
+            "multiplier": 1
+          },
+          {
+            "inputId": "RF_PREDECESSOR_BONUS_COARSE.categoryCounts.1_BIG_TOTAL",
+            "multiplier": -1
+          },
+          {
+            "inputId": "RF_PREDECESSOR_BONUS_COARSE.categoryCounts.2_REG",
+            "multiplier": -1
+          }
+        ],
+        "observationScope": "PREDECESSOR_SNAPSHOT"
+      },
+      {
+        "id": "RF_PREDECESSOR_HB_SHARE.eligibleTrialCount",
+        "name": "BIG合計回数",
+        "category": "V8_NUMERIC",
+        "type": "integer",
+        "unit": "回",
+        "defaultValue": 0,
+        "minimum": 0,
+        "displayOrder": 5,
+        "inferenceRole": "INCLUDE_SUPPORT"
+      },
+      {
+        "id": "RF_PREDECESSOR_HB_SHARE.successCount",
+        "name": "BIG内ハーレム構成回数",
+        "category": "V8_NUMERIC",
+        "type": "counter",
+        "unit": "回",
+        "defaultValue": 0,
+        "minimum": 0,
+        "displayOrder": 6,
+        "parentInputId": "RF_PREDECESSOR_HB_SHARE.eligibleTrialCount",
+        "inferenceRole": "INCLUDE_SUPPORT"
+      },
+      {
+        "id": "RF_NORMAL_BONUS_OUTCOME.eligibleTrialCount",
+        "name": "通常ゲーム数",
+        "category": "V8_NUMERIC",
         "type": "integer",
         "unit": "G",
-        "displayOrder": 1,
-        "inferenceRole": "INCLUDE_PRIMARY",
         "defaultValue": 0,
-        "minimum": 0
+        "minimum": 0,
+        "displayOrder": 7,
+        "inferenceRole": "INCLUDE_PRIMARY",
+        "observationScope": "SELF_PLAY"
       },
       {
-        "id": "INP_NORMAL_HB_COUNT",
-        "name": "通常時ハーレムボーナス",
-        "category": "NORMAL_BONUS",
+        "id": "RF_NORMAL_BONUS_OUTCOME.categoryCounts.1_HAREM_BONUS",
+        "name": "ハーレムボーナス",
+        "category": "V8_NUMERIC",
         "type": "counter",
         "unit": "回",
-        "displayOrder": 2,
-        "parentInputId": "INP_NORMAL_GAMES",
-        "inferenceRole": "INCLUDE_PRIMARY",
         "defaultValue": 0,
-        "minimum": 0
+        "minimum": 0,
+        "displayOrder": 8,
+        "parentInputId": "RF_NORMAL_BONUS_OUTCOME.eligibleTrialCount",
+        "inferenceRole": "INCLUDE_PRIMARY",
+        "observationScope": "SELF_PLAY"
       },
       {
-        "id": "INP_NORMAL_BIG_COUNT",
-        "name": "通常時BIG",
-        "category": "NORMAL_BONUS",
+        "id": "RF_NORMAL_BONUS_OUTCOME.categoryCounts.2_BIG",
+        "name": "BIG",
+        "category": "V8_NUMERIC",
         "type": "counter",
         "unit": "回",
-        "displayOrder": 3,
-        "parentInputId": "INP_NORMAL_GAMES",
-        "inferenceRole": "INCLUDE_PRIMARY",
         "defaultValue": 0,
-        "minimum": 0
+        "minimum": 0,
+        "displayOrder": 9,
+        "parentInputId": "RF_NORMAL_BONUS_OUTCOME.eligibleTrialCount",
+        "inferenceRole": "INCLUDE_PRIMARY",
+        "observationScope": "SELF_PLAY"
       },
       {
-        "id": "INP_NORMAL_REG_COUNT",
-        "name": "通常時REG",
-        "category": "NORMAL_BONUS",
+        "id": "RF_NORMAL_BONUS_OUTCOME.categoryCounts.3_REG",
+        "name": "REG",
+        "category": "V8_NUMERIC",
         "type": "counter",
         "unit": "回",
-        "displayOrder": 4,
-        "parentInputId": "INP_NORMAL_GAMES",
-        "inferenceRole": "INCLUDE_PRIMARY",
         "defaultValue": 0,
-        "minimum": 0
-      },
-      {
-        "id": "INP_BT_GAMES",
-        "name": "BT中ゲーム数",
-        "category": "BT",
-        "type": "counter",
-        "unit": "G",
+        "minimum": 0,
         "displayOrder": 10,
+        "parentInputId": "RF_NORMAL_BONUS_OUTCOME.eligibleTrialCount",
         "inferenceRole": "INCLUDE_PRIMARY",
-        "defaultValue": 0,
-        "minimum": 0
+        "observationScope": "SELF_PLAY"
       },
       {
-        "id": "INP_BT_HB_COUNT",
-        "name": "BT中ハーレムボーナス",
-        "category": "BT",
+        "id": "RF_NORMAL_BONUS_OUTCOME.categoryCounts.4_その他",
+        "name": "その他",
+        "category": "V8_NUMERIC",
         "type": "counter",
         "unit": "回",
+        "defaultValue": 0,
+        "minimum": 0,
         "displayOrder": 11,
-        "parentInputId": "INP_BT_GAMES",
+        "parentInputId": "RF_NORMAL_BONUS_OUTCOME.eligibleTrialCount",
         "inferenceRole": "INCLUDE_PRIMARY",
-        "defaultValue": 0,
-        "minimum": 0
+        "observationScope": "SELF_PLAY",
+        "inputVisible": false,
+        "derivedCalculation": "linear_combination",
+        "derivedTerms": [
+          {
+            "inputId": "RF_NORMAL_BONUS_OUTCOME.eligibleTrialCount",
+            "multiplier": 1
+          },
+          {
+            "inputId": "RF_NORMAL_BONUS_OUTCOME.categoryCounts.1_HAREM_BONUS",
+            "multiplier": -1
+          },
+          {
+            "inputId": "RF_NORMAL_BONUS_OUTCOME.categoryCounts.2_BIG",
+            "multiplier": -1
+          },
+          {
+            "inputId": "RF_NORMAL_BONUS_OUTCOME.categoryCounts.3_REG",
+            "multiplier": -1
+          }
+        ]
       },
       {
-        "id": "INP_BONUS_CHERRY_STOP_COUNT",
-        "name": "ボーナス中チェリー停止",
-        "category": "BONUS_HINT",
+        "id": "RF_BT_HAREM_BONUS.eligibleTrialCount",
+        "name": "2枚掛けゲーム数",
+        "category": "V8_NUMERIC",
+        "type": "integer",
+        "unit": "G",
+        "defaultValue": 0,
+        "minimum": 0,
+        "displayOrder": 12,
+        "inferenceRole": "INCLUDE_SUPPORT"
+      },
+      {
+        "id": "RF_BT_HAREM_BONUS.successCount",
+        "name": "ハーレムボーナス回数",
+        "category": "V8_NUMERIC",
         "type": "counter",
         "unit": "回",
-        "displayOrder": 20,
-        "inferenceRole": "INCLUDE_SUPPORT",
         "defaultValue": 0,
-        "minimum": 0
+        "minimum": 0,
+        "displayOrder": 13,
+        "parentInputId": "RF_BT_HAREM_BONUS.eligibleTrialCount",
+        "inferenceRole": "INCLUDE_SUPPORT"
       },
       {
-        "id": "INP_EVI_HAREM_END_SCREEN",
-        "name": "ボーナス終了画面",
-        "type": "multi_enum",
-        "category": "EVIDENCE",
-        "unit": "",
-        "displayOrder": 100,
-        "inferenceRole": "INCLUDE_SUPPORT",
-        "options": [
-          {
-            "key": "DOLLS_HOUSE",
-            "label": "ドールズ・ハウス（設定2以上）",
-            "value": "DOLLS_HOUSE"
-          },
-          {
-            "key": "SALUTE",
-            "label": "敬礼（設定5以上）",
-            "value": "SALUTE"
-          },
-          {
-            "key": "WEDDING",
-            "label": "ウェディングドレス（設定6）",
-            "value": "WEDDING"
-          }
-        ],
-        "defaultValue": []
+        "id": "RF_STRONG_CHERRY_BONUS.eligibleTrialCount",
+        "name": "通常ゲーム数",
+        "category": "V8_NUMERIC",
+        "type": "integer",
+        "unit": "G",
+        "defaultValue": 0,
+        "minimum": 0,
+        "displayOrder": 14,
+        "inferenceRole": "INCLUDE_PRIMARY",
+        "observationScope": "SELF_PLAY"
       },
       {
-        "id": "INP_EVI_HAREM_BAR_STOP",
-        "name": "ボーナス中BAR停止形",
-        "type": "multi_enum",
-        "category": "BONUS_HINT",
-        "unit": "",
+        "id": "RF_STRONG_CHERRY_BONUS.successCount",
+        "name": "強チェリー＋ボーナス回数",
+        "category": "V8_NUMERIC",
+        "type": "counter",
+        "unit": "回",
+        "defaultValue": 0,
+        "minimum": 0,
+        "displayOrder": 15,
+        "parentInputId": "RF_STRONG_CHERRY_BONUS.eligibleTrialCount",
+        "inferenceRole": "INCLUDE_PRIMARY",
+        "observationScope": "SELF_PLAY"
+      },
+      {
+        "id": "RF_DIAGONAL_WATERMELON_BONUS.eligibleTrialCount",
+        "name": "通常ゲーム数",
+        "category": "V8_NUMERIC",
+        "type": "integer",
+        "unit": "G",
+        "defaultValue": 0,
+        "minimum": 0,
+        "displayOrder": 16,
+        "inferenceRole": "INCLUDE_PRIMARY",
+        "observationScope": "SELF_PLAY"
+      },
+      {
+        "id": "RF_DIAGONAL_WATERMELON_BONUS.successCount",
+        "name": "斜めスイカ＋ボーナス回数",
+        "category": "V8_NUMERIC",
+        "type": "counter",
+        "unit": "回",
+        "defaultValue": 0,
+        "minimum": 0,
+        "displayOrder": 17,
+        "parentInputId": "RF_DIAGONAL_WATERMELON_BONUS.eligibleTrialCount",
+        "inferenceRole": "INCLUDE_PRIMARY",
+        "observationScope": "SELF_PLAY"
+      },
+      {
+        "id": "REF_RE_END_DOLLS_HOUSE_1",
+        "name": "ボーナス終了画面 ドールズ・ハウス：設定2以上",
+        "category": "EVIDENCE_REFERENCE",
+        "type": "counter",
+        "unit": "回",
+        "defaultValue": 0,
+        "minimum": 0,
+        "displayOrder": 18,
+        "inferenceRole": "DISPLAY_ONLY"
+      },
+      {
+        "id": "REF_RE_END_SALUTE_1",
+        "name": "ボーナス終了画面 敬礼：設定5以上",
+        "category": "EVIDENCE_REFERENCE",
+        "type": "counter",
+        "unit": "回",
+        "defaultValue": 0,
+        "minimum": 0,
+        "displayOrder": 19,
+        "inferenceRole": "DISPLAY_ONLY"
+      },
+      {
+        "id": "REF_RE_END_WEDDING_1",
+        "name": "ボーナス終了画面 ウェディングドレス：設定6",
+        "category": "EVIDENCE_REFERENCE",
+        "type": "counter",
+        "unit": "回",
+        "defaultValue": 0,
+        "minimum": 0,
+        "displayOrder": 20,
+        "inferenceRole": "DISPLAY_ONLY"
+      },
+      {
+        "id": "REF_RE_BAR_LINE_1",
+        "name": "ボーナス中 BAR揃い：設定2以上",
+        "category": "EVIDENCE_REFERENCE",
+        "type": "counter",
+        "unit": "回",
+        "defaultValue": 0,
+        "minimum": 0,
         "displayOrder": 21,
-        "inferenceRole": "INCLUDE_SUPPORT",
-        "options": [
-          {
-            "key": "BAR_LINE",
-            "label": "BAR揃い（設定2以上）",
-            "value": "BAR_LINE"
-          },
-          {
-            "key": "BAR_ZV",
-            "label": "Z字/V字停止（設定5以上）",
-            "value": "BAR_ZV"
-          }
-        ],
-        "defaultValue": []
+        "inferenceRole": "DISPLAY_ONLY"
       },
       {
-        "id": "INP_EVI_HAREM_TECH_VOICE",
-        "name": "技術介入成功時ボイス",
-        "type": "multi_enum",
-        "category": "EVIDENCE",
-        "unit": "",
-        "displayOrder": 120,
-        "inferenceRole": "INCLUDE_SUPPORT",
-        "options": [
-          {
-            "key": "SPECIAL_2",
-            "label": "特殊ボイス②（設定2以上）",
-            "value": "SPECIAL_2"
-          }
-        ],
-        "defaultValue": []
+        "id": "REF_RE_BAR_ZV_1",
+        "name": "ボーナス中 BAR Z字/V字停止：設定5以上",
+        "category": "EVIDENCE_REFERENCE",
+        "type": "counter",
+        "unit": "回",
+        "defaultValue": 0,
+        "minimum": 0,
+        "displayOrder": 22,
+        "inferenceRole": "DISPLAY_ONLY"
+      },
+      {
+        "id": "REF_RE_VOICE_SPECIAL_2_1",
+        "name": "技術介入成功時 特殊ボイス②：設定2以上",
+        "category": "EVIDENCE_REFERENCE",
+        "type": "counter",
+        "unit": "回",
+        "defaultValue": 0,
+        "minimum": 0,
+        "displayOrder": 23,
+        "inferenceRole": "DISPLAY_ONLY"
+      },
+      {
+        "id": "REF_RE_END_OTHER_1",
+        "name": "サクラ：設定別出現率未確認の示唆",
+        "category": "EVIDENCE_REFERENCE",
+        "type": "counter",
+        "unit": "回",
+        "defaultValue": 0,
+        "minimum": 0,
+        "displayOrder": 24,
+        "inferenceRole": "DISPLAY_ONLY"
+      },
+      {
+        "id": "REF_RE_END_OTHER_2",
+        "name": "サクラ＋流れ星：設定別出現率未確認の示唆",
+        "category": "EVIDENCE_REFERENCE",
+        "type": "counter",
+        "unit": "回",
+        "defaultValue": 0,
+        "minimum": 0,
+        "displayOrder": 25,
+        "inferenceRole": "DISPLAY_ONLY"
+      },
+      {
+        "id": "REF_RE_END_OTHER_3",
+        "name": "サクラ＋犬：設定別出現率未確認の示唆",
+        "category": "EVIDENCE_REFERENCE",
+        "type": "counter",
+        "unit": "回",
+        "defaultValue": 0,
+        "minimum": 0,
+        "displayOrder": 26,
+        "inferenceRole": "DISPLAY_ONLY"
+      },
+      {
+        "id": "REF_RE_END_OTHER_4",
+        "name": "サクラ私服：設定別出現率未確認の示唆",
+        "category": "EVIDENCE_REFERENCE",
+        "type": "counter",
+        "unit": "回",
+        "defaultValue": 0,
+        "minimum": 0,
+        "displayOrder": 27,
+        "inferenceRole": "DISPLAY_ONLY"
+      },
+      {
+        "id": "REF_RE_VOICE_OTHER_1",
+        "name": "通常：設定別出現率未確認の示唆",
+        "category": "EVIDENCE_REFERENCE",
+        "type": "counter",
+        "unit": "回",
+        "defaultValue": 0,
+        "minimum": 0,
+        "displayOrder": 28,
+        "inferenceRole": "DISPLAY_ONLY"
+      },
+      {
+        "id": "REF_RE_VOICE_OTHER_2",
+        "name": "特殊①：設定別出現率未確認の示唆",
+        "category": "EVIDENCE_REFERENCE",
+        "type": "counter",
+        "unit": "回",
+        "defaultValue": 0,
+        "minimum": 0,
+        "displayOrder": 29,
+        "inferenceRole": "DISPLAY_ONLY"
       }
     ]
   },
   "features": {
-    "schemaVersion": "2.0.0",
+    "version": "8.5-runtime",
     "features": [
       {
-        "featureId": "FEAT_PREDECESSOR_BONUS_COARSE",
+        "featureId": "RF_PREDECESSOR_BONUS_COARSE",
         "name": "着席時BIG合計・REG内訳",
-        "adoptionCategory": "INCLUDE_PRIMARY",
-        "calculationRole": "PROBABILITY",
-        "probabilityEngineUsage": true,
-        "modelType": "multinomial",
-        "minimumSample": 500,
-        "sampleRecommendation": 5000,
-        "reliabilityProfile": {
-          "weight": 1
-        },
-        "numeratorInputId": "INP_PREDECESSOR_BIG_COUNT",
-        "denominatorInputId": "INP_PREDECESSOR_GAMES",
-        "categoryInputIds": [
-          "INP_PREDECESSOR_REG_COUNT"
-        ],
-        "probabilities": {},
-        "categoryLabels": [
-          "BIG_TOTAL",
-          "REG"
-        ],
-        "categoryProbabilities": {
-          "SET_1": [
-            0.0024871671574214793,
-            0.0017853954650955187
-          ],
-          "SET_2": [
-            0.002563525738132805,
-            0.001968503937007874
-          ],
-          "SET_5": [
-            0.002914470062669377,
-            0.00244140625
-          ],
-          "SET_6": [
-            0.003249923904220779,
-            0.003051571559353067
-          ]
-        },
-        "sourceEvidenceRefs": [
-          "SRC_DMM_MACHINE",
-          "SRC_NANA_SETTING",
-          "SRC_NANA_SPEC"
-        ]
-      },
-      {
-        "featureId": "FEAT_PREDECESSOR_HB_SHARE",
-        "name": "着席時BIG内ハーレムボーナス構成",
+        "trialUniverse": "PREDECESSOR_NORMAL_GAME_TRIAL",
         "adoptionCategory": "INCLUDE_SUPPORT",
         "calculationRole": "PROBABILITY",
         "probabilityEngineUsage": true,
-        "modelType": "binomial",
-        "minimumSample": 1,
-        "sampleRecommendation": 10,
-        "reliabilityProfile": {
-          "weight": 1
+        "denominatorInputId": "RF_PREDECESSOR_BONUS_COARSE.eligibleTrialCount",
+        "probabilities": {},
+        "selectionRationale": {
+          "summary": "設定推測に採用された要素です。",
+          "adoptionReason": "着席時BIG合計・REG内訳の「その他」の割合は設定6 99.37%、設定1 99.57%と設定差があります。「通常ゲーム数」を基準に、記録したカテゴリの振り分けを比較して推測に使用します。 観測条件：着席前に確認できた通常Gと初当りBIG合計・REG。",
+          "shortTermReason": "標本が少ない間は結果の振れが大きくなります。",
+          "longTermReason": "観測数が増えるほど設定別の比較が安定します。"
         },
-        "denominatorInputId": "INP_PREDECESSOR_BIG_COUNT",
-        "numeratorInputId": "INP_PREDECESSOR_HB_COUNT",
-        "displayFormat": "ratio_1_over_n",
+        "modelType": "multinomial",
+        "numeratorInputId": "RF_PREDECESSOR_BONUS_COARSE.categoryCounts.1_BIG_TOTAL",
+        "categoryInputIds": [
+          "RF_PREDECESSOR_BONUS_COARSE.categoryCounts.2_REG",
+          "RF_PREDECESSOR_BONUS_COARSE.categoryCounts.3_その他"
+        ],
+        "categoryProbabilities": {
+          "SET_1": [
+            0.0024871671574215,
+            0.0017853954650955,
+            0.995727437377483
+          ],
+          "SET_2": [
+            0.0025635257381328,
+            0.0019685039370079,
+            0.9954679703248593
+          ],
+          "SET_5": [
+            0.0029144700626694,
+            0.00244140625,
+            0.9946441236873306
+          ],
+          "SET_6": [
+            0.0032499239042208,
+            0.0030515715593531,
+            0.993698504536426
+          ]
+        },
+        "displayFormat": "percentage"
+      },
+      {
+        "featureId": "RF_PREDECESSOR_HB_SHARE",
+        "name": "着席時BIG内ハーレム構成",
+        "trialUniverse": "PREDECESSOR_HAREM_BIG_TRIAL",
+        "adoptionCategory": "INCLUDE_SUPPORT",
+        "calculationRole": "PROBABILITY",
+        "probabilityEngineUsage": true,
+        "denominatorInputId": "RF_PREDECESSOR_HB_SHARE.eligibleTrialCount",
         "probabilities": {
           "SET_1": 0.4908005967180507,
           "SET_2": 0.4761813415179999,
           "SET_5": 0.41884222474460836,
           "SET_6": 0.375609756097561
         },
-        "sourceEvidenceRefs": [
-          "SRC_DMM_MACHINE",
-          "SRC_NANA_SETTING",
-          "SRC_NANA_SPEC"
-        ]
+        "selectionRationale": {
+          "summary": "設定推測に採用された要素です。",
+          "adoptionReason": "着席時BIG内ハーレム構成は設定6 37.56%、設定1 49.08%と設定差があります。「BIG合計回数」に対する「BIG内ハーレム構成回数」の発生割合を比較して推測に使用します。 観測条件：対象となる機会のうち、BIG内ハーレム構成が実際に起きた割合を設定別に比較します。",
+          "shortTermReason": "標本が少ない間は結果の振れが大きくなります。",
+          "longTermReason": "観測数が増えるほど設定別の比較が安定します。"
+        },
+        "modelType": "binomial",
+        "numeratorInputId": "RF_PREDECESSOR_HB_SHARE.successCount",
+        "displayFormat": "percentage"
       },
       {
-        "featureId": "FEAT_NORMAL_BONUS_OUTCOME",
+        "featureId": "RF_NORMAL_BONUS_OUTCOME",
         "name": "通常時ボーナス内訳",
+        "trialUniverse": "NORMAL_GAME_TRIAL",
         "adoptionCategory": "INCLUDE_PRIMARY",
         "calculationRole": "PROBABILITY",
         "probabilityEngineUsage": true,
-        "modelType": "multinomial",
-        "minimumSample": 500,
-        "sampleRecommendation": 5000,
-        "reliabilityProfile": {
-          "weight": 1
-        },
-        "numeratorInputId": "INP_NORMAL_HB_COUNT",
-        "denominatorInputId": "INP_NORMAL_GAMES",
-        "categoryInputIds": [
-          "INP_NORMAL_BIG_COUNT",
-          "INP_NORMAL_REG_COUNT"
-        ],
+        "denominatorInputId": "RF_NORMAL_BONUS_OUTCOME.eligibleTrialCount",
         "probabilities": {},
-        "categoryLabels": [
-          "HAREM_BONUS",
-          "BIG",
-          "REG"
+        "selectionRationale": {
+          "summary": "設定推測に採用された要素です。",
+          "adoptionReason": "通常時ボーナス内訳の「その他」の割合は設定6 99.37%、設定1 99.57%と設定差があります。「通常ゲーム数」を基準に、記録したカテゴリの振り分けを比較して推測に使用します。 観測条件：通常時。",
+          "shortTermReason": "標本が少ない間は結果の振れが大きくなります。",
+          "longTermReason": "観測数が増えるほど設定別の比較が安定します。"
+        },
+        "modelType": "multinomial",
+        "numeratorInputId": "RF_NORMAL_BONUS_OUTCOME.categoryCounts.1_HAREM_BONUS",
+        "categoryInputIds": [
+          "RF_NORMAL_BONUS_OUTCOME.categoryCounts.2_BIG",
+          "RF_NORMAL_BONUS_OUTCOME.categoryCounts.3_REG",
+          "RF_NORMAL_BONUS_OUTCOME.categoryCounts.4_その他"
         ],
         "categoryProbabilities": {
           "SET_1": [
             0.001220703125,
-            0.0012664640324214793,
-            0.0017853954650955187
+            0.0012664640324215,
+            0.0017853954650955,
+            0.995727437377483
           ],
           "SET_2": [
             0.001220703125,
-            0.001342822613132805,
-            0.001968503937007874
+            0.0013428226131328,
+            0.0019685039370079,
+            0.9954679703248593
           ],
           "SET_5": [
             0.001220703125,
-            0.0016937669376693768,
-            0.00244140625
+            0.0016937669376694,
+            0.00244140625,
+            0.9946441236873306
           ],
           "SET_6": [
             0.001220703125,
-            0.002029220779220779,
-            0.003051571559353067
+            0.0020292207792208,
+            0.0030515715593531,
+            0.993698504536426
           ]
         },
-        "sourceEvidenceRefs": [
-          "SRC_DMM_MACHINE",
-          "SRC_NANA_SETTING",
-          "SRC_NANA_SPEC"
-        ]
+        "displayFormat": "percentage"
       },
       {
-        "featureId": "FEAT_BT_HAREM_BONUS",
+        "featureId": "RF_BT_HAREM_BONUS",
         "name": "BT中ハーレムボーナス",
+        "trialUniverse": "HAREM_BT_2COIN_GAME_TRIAL",
         "adoptionCategory": "INCLUDE_SUPPORT",
         "calculationRole": "PROBABILITY",
         "probabilityEngineUsage": true,
-        "modelType": "binomial",
-        "minimumSample": 1,
-        "sampleRecommendation": 100,
-        "reliabilityProfile": {
-          "weight": 1
-        },
-        "denominatorInputId": "INP_BT_GAMES",
-        "numeratorInputId": "INP_BT_HB_COUNT",
-        "displayFormat": "ratio_1_over_n",
+        "denominatorInputId": "RF_BT_HAREM_BONUS.eligibleTrialCount",
         "probabilities": {
-          "SET_1": 0.00009155245497908026,
+          "SET_1": 9.155245497908026e-05,
           "SET_2": 0.0010070493454179255,
           "SET_5": 0.0010070493454179255,
           "SET_6": 0.0038910505836575876
         },
-        "sourceEvidenceRefs": [
-          "SRC_DMM_MACHINE",
-          "SRC_NANA_SETTING",
-          "SRC_NANA_SPEC"
-        ]
+        "selectionRationale": {
+          "summary": "設定推測に採用された要素です。",
+          "adoptionReason": "BT中ハーレムボーナスは設定1 1/10922.7、設定6 1/257と設定差があります。「2枚掛けゲーム数」に対する「ハーレムボーナス回数」の発生割合を比較して推測に使用します。 観測条件：対象となる機会のうち、ハーレムボーナスが実際に起きた割合を設定別に比較します。",
+          "shortTermReason": "標本が少ない間は結果の振れが大きくなります。",
+          "longTermReason": "観測数が増えるほど設定別の比較が安定します。"
+        },
+        "modelType": "binomial",
+        "numeratorInputId": "RF_BT_HAREM_BONUS.successCount",
+        "displayFormat": "ratio_1_over_n"
       },
       {
-        "featureId": "FEAT_BONUS_CHERRY_STOP",
-        "name": "ボーナス中チェリー停止",
-        "adoptionCategory": "INCLUDE_SUPPORT",
+        "featureId": "RF_STRONG_CHERRY_BONUS",
+        "name": "強チェリー＋ボーナス",
+        "trialUniverse": "NORMAL_GAME_TRIAL",
+        "adoptionCategory": "INCLUDE_PRIMARY",
         "calculationRole": "PROBABILITY",
         "probabilityEngineUsage": true,
-        "modelType": "binomial",
-        "minimumSample": 20,
-        "sampleRecommendation": 500,
-        "reliabilityProfile": {
-          "weight": 1
-        },
-        "denominatorAdjustments": [
-          {
-            "inputId": "INP_NORMAL_HB_COUNT",
-            "multiplier": 39
-          },
-          {
-            "inputId": "INP_NORMAL_BIG_COUNT",
-            "multiplier": 20
-          },
-          {
-            "inputId": "INP_NORMAL_REG_COUNT",
-            "multiplier": 9
-          },
-          {
-            "inputId": "INP_BT_HB_COUNT",
-            "multiplier": 20
-          }
+        "denominatorInputId": "RF_STRONG_CHERRY_BONUS.eligibleTrialCount",
+        "suppressedByFeatureIds": [
+          "RF_NORMAL_BONUS_OUTCOME"
         ],
-        "denominatorInputId": "INP_NORMAL_HB_COUNT",
-        "numeratorInputId": "INP_BONUS_CHERRY_STOP_COUNT",
-        "displayFormat": "ratio_1_over_n",
         "probabilities": {
-          "SET_1": 0.1,
-          "SET_2": 0.10526315789473684,
-          "SET_5": 0.11764705882352941,
-          "SET_6": 0.125
+          "SET_1": 0.0012512512512512512,
+          "SET_2": 0.0013274923669188902,
+          "SET_5": 0.0015715857300015717,
+          "SET_6": 0.001846381093057607
         },
-        "sourceEvidenceRefs": [
-          "SRC_DMM_MACHINE",
-          "SRC_NANA_SETTING"
-        ]
+        "selectionRationale": {
+          "summary": "設定推測に採用された要素です。",
+          "adoptionReason": "強チェリー＋ボーナスは設定1 1/799.2、設定6 1/541.6と設定差があります。「通常ゲーム数」に対する「強チェリー＋ボーナス回数」の発生割合を比較して推測に使用します。 観測条件：複数の設定推測項目で同じ「通常ゲーム数」を共通の基準として使用します。 「通常時ボーナス内訳」を記録していない場合の補助として使用し、同じ設定差を重ねて評価しません。",
+          "shortTermReason": "標本が少ない間は結果の振れが大きくなります。",
+          "longTermReason": "観測数が増えるほど設定別の比較が安定します。"
+        },
+        "modelType": "binomial",
+        "numeratorInputId": "RF_STRONG_CHERRY_BONUS.successCount",
+        "displayFormat": "ratio_1_over_n"
+      },
+      {
+        "featureId": "RF_DIAGONAL_WATERMELON_BONUS",
+        "name": "斜めスイカ＋ボーナス",
+        "trialUniverse": "NORMAL_GAME_TRIAL",
+        "adoptionCategory": "INCLUDE_PRIMARY",
+        "calculationRole": "PROBABILITY",
+        "probabilityEngineUsage": true,
+        "denominatorInputId": "RF_DIAGONAL_WATERMELON_BONUS.eligibleTrialCount",
+        "suppressedByFeatureIds": [
+          "RF_NORMAL_BONUS_OUTCOME",
+          "RF_STRONG_CHERRY_BONUS"
+        ],
+        "probabilities": {
+          "SET_1": 0.0012054001928640309,
+          "SET_2": 0.0012664640324214793,
+          "SET_5": 0.0014954389113204724,
+          "SET_6": 0.0017699115044247787
+        },
+        "selectionRationale": {
+          "summary": "設定推測に採用された要素です。",
+          "adoptionReason": "斜めスイカ＋ボーナスは設定1 1/829.6、設定6 1/565と設定差があります。「通常ゲーム数」に対する「斜めスイカ＋ボーナス回数」の発生割合を比較して推測に使用します。 観測条件：複数の設定推測項目で同じ「通常ゲーム数」を共通の基準として使用します。 「通常時ボーナス内訳」「強チェリー＋ボーナス」を記録していない場合の補助として使用し、同じ設定差を重ねて評価しません。",
+          "shortTermReason": "標本が少ない間は結果の振れが大きくなります。",
+          "longTermReason": "観測数が増えるほど設定別の比較が安定します。"
+        },
+        "modelType": "binomial",
+        "numeratorInputId": "RF_DIAGONAL_WATERMELON_BONUS.successCount",
+        "displayFormat": "ratio_1_over_n"
+      }
+    ],
+    "runtimeProjection": [
+      {
+        "featureId": "RF_PREDECESSOR_BONUS_COARSE",
+        "runtimeStatus": "ACTIVE",
+        "metric": "PER_ELIGIBLE_TRIAL_POWER",
+        "metricValue": 0.01942606871087882,
+        "importance": "微小"
+      },
+      {
+        "featureId": "RF_PREDECESSOR_HB_SHARE",
+        "runtimeStatus": "ACTIVE",
+        "metric": "PER_ELIGIBLE_TRIAL_POWER",
+        "metricValue": 1.2468120066966293,
+        "importance": "微小"
+      },
+      {
+        "featureId": "RF_NORMAL_BONUS_OUTCOME",
+        "runtimeStatus": "ACTIVE",
+        "metric": "SELECTION_SCORE",
+        "metricValue": 105.5779567622245,
+        "importance": "主要"
+      },
+      {
+        "featureId": "RF_BT_HAREM_BONUS",
+        "runtimeStatus": "ACTIVE",
+        "metric": "PER_ELIGIBLE_TRIAL_POWER",
+        "metricValue": 0.19172663841525162,
+        "importance": "微小"
+      },
+      {
+        "featureId": "RF_STRONG_CHERRY_BONUS",
+        "runtimeStatus": "ACTIVE",
+        "metric": "SELECTION_SCORE",
+        "metricValue": 31.99322028805102,
+        "importance": "主要"
+      },
+      {
+        "featureId": "RF_DIAGONAL_WATERMELON_BONUS",
+        "runtimeStatus": "ACTIVE",
+        "metric": "SELECTION_SCORE",
+        "metricValue": 30.45865397153069,
+        "importance": "主要"
+      },
+      {
+        "featureId": "RF_STOP_FREEZE",
+        "runtimeStatus": "INACTIVE",
+        "metric": "SELECTION_SCORE",
+        "metricValue": 0.9038023491082552,
+        "threshold": 5,
+        "runtimeReason": "THRESHOLD_NOT_MET"
+      },
+      {
+        "featureId": "RF_BET_FREEZE",
+        "runtimeStatus": "INACTIVE",
+        "metric": "SELECTION_SCORE",
+        "metricValue": 1.1170261112268125,
+        "threshold": 5,
+        "runtimeReason": "THRESHOLD_NOT_MET"
       }
     ]
   },
   "evidence": {
-    "version": "1.0.0",
+    "version": "8.5-runtime",
     "evidences": [
       {
-        "id": "EVI_HAREM_END_SCREEN_DOLLS_HOUSE",
-        "name": "ドールズ・ハウス（設定2以上）",
-        "displayName": "ドールズ・ハウス（設定2以上）",
-        "inputId": "INP_EVI_HAREM_END_SCREEN",
-        "triggerValue": "DOLLS_HOUSE",
+        "id": "RE_END_DOLLS_HOUSE__1",
+        "name": "ボーナス終了画面 ドールズ・ハウス：設定2以上",
+        "displayName": "ボーナス終了画面 ドールズ・ハウス：設定2以上",
+        "inputId": "REF_RE_END_DOLLS_HOUSE_1",
+        "details": [
+          "ボーナス終了画面 ドールズ・ハウス：設定2以上"
+        ],
         "confirmedSettings": [
           "SET_2",
           "SET_5",
@@ -439,50 +688,56 @@
         ],
         "deniedSettings": [],
         "hasImage": false,
-        "type": "SETTING_CONFIRMATION",
+        "type": "SETTING_CONSTRAINT",
         "sourceEvidenceRefs": [
           "RE_END_DOLLS_HOUSE"
         ]
       },
       {
-        "id": "EVI_HAREM_END_SCREEN_SALUTE",
-        "name": "敬礼（設定5以上）",
-        "displayName": "敬礼（設定5以上）",
-        "inputId": "INP_EVI_HAREM_END_SCREEN",
-        "triggerValue": "SALUTE",
+        "id": "RE_END_SALUTE__1",
+        "name": "ボーナス終了画面 敬礼：設定5以上",
+        "displayName": "ボーナス終了画面 敬礼：設定5以上",
+        "inputId": "REF_RE_END_SALUTE_1",
+        "details": [
+          "ボーナス終了画面 敬礼：設定5以上"
+        ],
         "confirmedSettings": [
           "SET_5",
           "SET_6"
         ],
         "deniedSettings": [],
         "hasImage": false,
-        "type": "SETTING_CONFIRMATION",
+        "type": "SETTING_CONSTRAINT",
         "sourceEvidenceRefs": [
           "RE_END_SALUTE"
         ]
       },
       {
-        "id": "EVI_HAREM_END_SCREEN_WEDDING",
-        "name": "ウェディングドレス（設定6）",
-        "displayName": "ウェディングドレス（設定6）",
-        "inputId": "INP_EVI_HAREM_END_SCREEN",
-        "triggerValue": "WEDDING",
+        "id": "RE_END_WEDDING__1",
+        "name": "ボーナス終了画面 ウェディングドレス：設定6",
+        "displayName": "ボーナス終了画面 ウェディングドレス：設定6",
+        "inputId": "REF_RE_END_WEDDING_1",
+        "details": [
+          "ボーナス終了画面 ウェディングドレス：設定6"
+        ],
         "confirmedSettings": [
           "SET_6"
         ],
         "deniedSettings": [],
         "hasImage": false,
-        "type": "SETTING_CONFIRMATION",
+        "type": "SETTING_CONSTRAINT",
         "sourceEvidenceRefs": [
           "RE_END_WEDDING"
         ]
       },
       {
-        "id": "EVI_HAREM_BAR_STOP_BAR_LINE",
-        "name": "BAR揃い（設定2以上）",
-        "displayName": "BAR揃い（設定2以上）",
-        "inputId": "INP_EVI_HAREM_BAR_STOP",
-        "triggerValue": "BAR_LINE",
+        "id": "RE_BAR_LINE__1",
+        "name": "ボーナス中 BAR揃い：設定2以上",
+        "displayName": "ボーナス中 BAR揃い：設定2以上",
+        "inputId": "REF_RE_BAR_LINE_1",
+        "details": [
+          "ボーナス中 BAR揃い：設定2以上"
+        ],
         "confirmedSettings": [
           "SET_2",
           "SET_5",
@@ -490,34 +745,38 @@
         ],
         "deniedSettings": [],
         "hasImage": false,
-        "type": "SETTING_CONFIRMATION",
+        "type": "SETTING_CONSTRAINT",
         "sourceEvidenceRefs": [
           "RE_BAR_LINE"
         ]
       },
       {
-        "id": "EVI_HAREM_BAR_STOP_BAR_ZV",
-        "name": "Z字/V字停止（設定5以上）",
-        "displayName": "Z字/V字停止（設定5以上）",
-        "inputId": "INP_EVI_HAREM_BAR_STOP",
-        "triggerValue": "BAR_ZV",
+        "id": "RE_BAR_ZV__1",
+        "name": "ボーナス中 BAR Z字/V字停止：設定5以上",
+        "displayName": "ボーナス中 BAR Z字/V字停止：設定5以上",
+        "inputId": "REF_RE_BAR_ZV_1",
+        "details": [
+          "ボーナス中 BAR Z字/V字停止：設定5以上"
+        ],
         "confirmedSettings": [
           "SET_5",
           "SET_6"
         ],
         "deniedSettings": [],
         "hasImage": false,
-        "type": "SETTING_CONFIRMATION",
+        "type": "SETTING_CONSTRAINT",
         "sourceEvidenceRefs": [
           "RE_BAR_ZV"
         ]
       },
       {
-        "id": "EVI_HAREM_TECH_VOICE_SPECIAL_2",
-        "name": "特殊ボイス②（設定2以上）",
-        "displayName": "特殊ボイス②（設定2以上）",
-        "inputId": "INP_EVI_HAREM_TECH_VOICE",
-        "triggerValue": "SPECIAL_2",
+        "id": "RE_VOICE_SPECIAL_2__1",
+        "name": "技術介入成功時 特殊ボイス②：設定2以上",
+        "displayName": "技術介入成功時 特殊ボイス②：設定2以上",
+        "inputId": "REF_RE_VOICE_SPECIAL_2_1",
+        "details": [
+          "技術介入成功時 特殊ボイス②：設定2以上"
+        ],
         "confirmedSettings": [
           "SET_2",
           "SET_5",
@@ -525,344 +784,1174 @@
         ],
         "deniedSettings": [],
         "hasImage": false,
-        "type": "SETTING_CONFIRMATION",
+        "type": "SETTING_CONSTRAINT",
         "sourceEvidenceRefs": [
           "RE_VOICE_SPECIAL_2"
         ]
       }
     ],
-    "sources": [
+    "references": [
       {
-        "id": "SRC_NET_OFFICIAL",
-        "classification": "OFFICIAL",
-        "pageName": "翔べ！ハーレムエース",
-        "url": "https://www.net-fun.co.jp/haremA/",
-        "checkedAt": "2026-08-15"
+        "id": "EVI_RE_END_DOLLS_HOUSE",
+        "sourceFindingId": "RE_END_DOLLS_HOUSE",
+        "title": "ボーナス終了画面 ドールズ・ハウス",
+        "kind": "EVIDENCE",
+        "collapsible": true,
+        "defaultExpanded": false,
+        "description": "ボーナス終了画面 ドールズ・ハウスを確認したときに、該当する項目を1回加算して記録します。\n・注意：出現率が未確認の項目は記録のみ。条件が明確な設定制約は推測に反映できる可能性があります\n・反映：設定確定・設定否定の条件は、設定候補の絞り込みに自動反映します",
+        "descriptionPresentation": {
+          "collapsible": true,
+          "label": "説明",
+          "defaultExpanded": false
+        },
+        "runtimePolicyControlled": false,
+        "evidenceItems": [
+          {
+            "findingId": "RE_END_DOLLS_HOUSE",
+            "label": "ボーナス終了画面 ドールズ・ハウス",
+            "sourceIds": [
+              "SRC_NANA_SETTING",
+              "SRC_20261026_77777eb4f4"
+            ],
+            "details": [
+              "出現率が未確認の項目は記録のみ。条件が明確な設定制約は推測に反映できる可能性があります。"
+            ],
+            "semanticType": "EXACT_CONSTRAINT",
+            "semanticCategories": [
+              {
+                "label": "ボーナス終了画面 ドールズ・ハウス",
+                "meaning": "設定2以上",
+                "semanticType": "EXACT_CONSTRAINT",
+                "allowedSettings": [
+                  "SET_2",
+                  "SET_5",
+                  "SET_6"
+                ]
+              }
+            ],
+            "runtimePolicyControlled": false,
+            "status": "SOURCE_REFERENCED",
+            "interaction": "REFERENCE_ONLY"
+          }
+        ]
       },
       {
-        "id": "SRC_DMM_MACHINE",
-        "classification": "ANALYSIS",
-        "pageName": "翔べ！ハーレムエース 機種解析",
-        "url": "https://p-town.dmm.com/machines/4789",
-        "checkedAt": "2026-08-15"
+        "id": "EVI_RE_END_SALUTE",
+        "sourceFindingId": "RE_END_SALUTE",
+        "title": "ボーナス終了画面 敬礼",
+        "kind": "EVIDENCE",
+        "collapsible": true,
+        "defaultExpanded": false,
+        "description": "ボーナス終了画面 敬礼を確認したときに、該当する項目を1回加算して記録します。\n・注意：出現率が未確認の項目は記録のみ。条件が明確な設定制約は推測に反映できる可能性があります\n・反映：設定確定・設定否定の条件は、設定候補の絞り込みに自動反映します",
+        "descriptionPresentation": {
+          "collapsible": true,
+          "label": "説明",
+          "defaultExpanded": false
+        },
+        "runtimePolicyControlled": false,
+        "evidenceItems": [
+          {
+            "findingId": "RE_END_SALUTE",
+            "label": "ボーナス終了画面 敬礼",
+            "sourceIds": [
+              "SRC_NANA_SETTING",
+              "SRC_20261026_77777eb4f4"
+            ],
+            "details": [
+              "出現率が未確認の項目は記録のみ。条件が明確な設定制約は推測に反映できる可能性があります。"
+            ],
+            "semanticType": "EXACT_CONSTRAINT",
+            "semanticCategories": [
+              {
+                "label": "ボーナス終了画面 敬礼",
+                "meaning": "設定5以上",
+                "semanticType": "EXACT_CONSTRAINT",
+                "allowedSettings": [
+                  "SET_5",
+                  "SET_6"
+                ]
+              }
+            ],
+            "runtimePolicyControlled": false,
+            "status": "SOURCE_REFERENCED",
+            "interaction": "REFERENCE_ONLY"
+          }
+        ]
       },
       {
-        "id": "SRC_NANA_SETTING",
-        "classification": "ANALYSIS",
-        "pageName": "翔べ！ハーレムエース 設定判別",
-        "url": "https://nana-press.com/kaiseki/machine/961/30029/",
-        "checkedAt": "2026-08-15"
+        "id": "EVI_RE_END_WEDDING",
+        "sourceFindingId": "RE_END_WEDDING",
+        "title": "ボーナス終了画面 ウェディングドレス",
+        "kind": "EVIDENCE",
+        "collapsible": true,
+        "defaultExpanded": false,
+        "description": "ボーナス終了画面 ウェディングドレスを確認したときに、該当する項目を1回加算して記録します。\n・注意：出現率が未確認の項目は記録のみ。条件が明確な設定制約は推測に反映できる可能性があります\n・反映：設定確定・設定否定の条件は、設定候補の絞り込みに自動反映します",
+        "descriptionPresentation": {
+          "collapsible": true,
+          "label": "説明",
+          "defaultExpanded": false
+        },
+        "runtimePolicyControlled": false,
+        "evidenceItems": [
+          {
+            "findingId": "RE_END_WEDDING",
+            "label": "ボーナス終了画面 ウェディングドレス",
+            "sourceIds": [
+              "SRC_NANA_SETTING",
+              "SRC_20261026_77777eb4f4"
+            ],
+            "details": [
+              "出現率が未確認の項目は記録のみ。条件が明確な設定制約は推測に反映できる可能性があります。"
+            ],
+            "semanticType": "EXACT_CONSTRAINT",
+            "semanticCategories": [
+              {
+                "label": "ボーナス終了画面 ウェディングドレス",
+                "meaning": "設定6",
+                "semanticType": "EXACT_CONSTRAINT",
+                "allowedSettings": [
+                  "SET_6"
+                ]
+              }
+            ],
+            "runtimePolicyControlled": false,
+            "status": "SOURCE_REFERENCED",
+            "interaction": "REFERENCE_ONLY"
+          }
+        ]
       },
       {
-        "id": "SRC_NANA_SPEC",
-        "classification": "ANALYSIS",
-        "pageName": "翔べ！ハーレムエース ボーナス確率/小役確率",
-        "url": "https://nana-press.com/kaiseki/machine/961/30027/",
-        "checkedAt": "2026-08-15"
+        "id": "EVI_RE_BAR_LINE",
+        "sourceFindingId": "RE_BAR_LINE",
+        "title": "ボーナス中 BAR揃い",
+        "kind": "EVIDENCE",
+        "collapsible": true,
+        "defaultExpanded": false,
+        "description": "ボーナス中 BAR揃いを確認したときに、該当する項目を1回加算して記録します。\n・注意：出現率が未確認の項目は記録のみ。条件が明確な設定制約は推測に反映できる可能性があります\n・反映：設定確定・設定否定の条件は、設定候補の絞り込みに自動反映します",
+        "descriptionPresentation": {
+          "collapsible": true,
+          "label": "説明",
+          "defaultExpanded": false
+        },
+        "runtimePolicyControlled": false,
+        "evidenceItems": [
+          {
+            "findingId": "RE_BAR_LINE",
+            "label": "ボーナス中 BAR揃い",
+            "sourceIds": [
+              "SRC_NANA_SETTING",
+              "SRC_20261026_77777eb4f4"
+            ],
+            "details": [
+              "出現率が未確認の項目は記録のみ。条件が明確な設定制約は推測に反映できる可能性があります。"
+            ],
+            "semanticType": "EXACT_CONSTRAINT",
+            "semanticCategories": [
+              {
+                "label": "ボーナス中 BAR揃い",
+                "meaning": "設定2以上",
+                "semanticType": "EXACT_CONSTRAINT",
+                "allowedSettings": [
+                  "SET_2",
+                  "SET_5",
+                  "SET_6"
+                ]
+              }
+            ],
+            "runtimePolicyControlled": false,
+            "status": "SOURCE_REFERENCED",
+            "interaction": "REFERENCE_ONLY"
+          }
+        ]
       },
       {
-        "id": "SRC_DMM_END",
-        "classification": "ANALYSIS",
-        "pageName": "スマスロハーレムエースの終了画面について徹底網羅！",
-        "url": "https://p-town.dmm.com/specials/4286",
-        "checkedAt": "2026-08-15"
+        "id": "EVI_RE_BAR_ZV",
+        "sourceFindingId": "RE_BAR_ZV",
+        "title": "ボーナス中 BAR Z字/V字停止",
+        "kind": "EVIDENCE",
+        "collapsible": true,
+        "defaultExpanded": false,
+        "description": "ボーナス中 BAR Z字/V字停止を確認したときに、該当する項目を1回加算して記録します。\n・注意：出現率が未確認の項目は記録のみ。条件が明確な設定制約は推測に反映できる可能性があります\n・反映：設定確定・設定否定の条件は、設定候補の絞り込みに自動反映します",
+        "descriptionPresentation": {
+          "collapsible": true,
+          "label": "説明",
+          "defaultExpanded": false
+        },
+        "runtimePolicyControlled": false,
+        "evidenceItems": [
+          {
+            "findingId": "RE_BAR_ZV",
+            "label": "ボーナス中 BAR Z字/V字停止",
+            "sourceIds": [
+              "SRC_NANA_SETTING",
+              "SRC_20261026_77777eb4f4"
+            ],
+            "details": [
+              "出現率が未確認の項目は記録のみ。条件が明確な設定制約は推測に反映できる可能性があります。"
+            ],
+            "semanticType": "EXACT_CONSTRAINT",
+            "semanticCategories": [
+              {
+                "label": "ボーナス中 BAR Z字/V字停止",
+                "meaning": "設定5以上",
+                "semanticType": "EXACT_CONSTRAINT",
+                "allowedSettings": [
+                  "SET_5",
+                  "SET_6"
+                ]
+              }
+            ],
+            "runtimePolicyControlled": false,
+            "status": "SOURCE_REFERENCED",
+            "interaction": "REFERENCE_ONLY"
+          }
+        ]
+      },
+      {
+        "id": "EVI_RE_VOICE_SPECIAL_2",
+        "sourceFindingId": "RE_VOICE_SPECIAL_2",
+        "title": "技術介入成功時 特殊ボイス②",
+        "kind": "EVIDENCE",
+        "collapsible": true,
+        "defaultExpanded": false,
+        "description": "技術介入成功時 特殊ボイス②を確認したときに、該当する項目を1回加算して記録します。\n・注意：出現率が未確認の項目は記録のみ。条件が明確な設定制約は推測に反映できる可能性があります\n・反映：設定確定・設定否定の条件は、設定候補の絞り込みに自動反映します",
+        "descriptionPresentation": {
+          "collapsible": true,
+          "label": "説明",
+          "defaultExpanded": false
+        },
+        "runtimePolicyControlled": false,
+        "evidenceItems": [
+          {
+            "findingId": "RE_VOICE_SPECIAL_2",
+            "label": "技術介入成功時 特殊ボイス②",
+            "sourceIds": [
+              "SRC_NANA_SETTING",
+              "SRC_20261026_77777eb4f4"
+            ],
+            "details": [
+              "出現率が未確認の項目は記録のみ。条件が明確な設定制約は推測に反映できる可能性があります。"
+            ],
+            "semanticType": "EXACT_CONSTRAINT",
+            "semanticCategories": [
+              {
+                "label": "技術介入成功時 特殊ボイス②",
+                "meaning": "設定2以上",
+                "semanticType": "EXACT_CONSTRAINT",
+                "allowedSettings": [
+                  "SET_2",
+                  "SET_5",
+                  "SET_6"
+                ]
+              }
+            ],
+            "runtimePolicyControlled": false,
+            "status": "SOURCE_REFERENCED",
+            "interaction": "REFERENCE_ONLY"
+          }
+        ]
+      },
+      {
+        "id": "EVI_RE_END_OTHER",
+        "sourceFindingId": "RE_END_OTHER",
+        "title": "ボーナス終了画面（参考）",
+        "kind": "EVIDENCE",
+        "collapsible": true,
+        "defaultExpanded": false,
+        "description": "ボーナス終了画面（参考）を確認したときに、該当する項目を1回加算して記録します。\n・注意：出現率が未確認の項目は記録のみ。条件が明確な設定制約は推測に反映できる可能性があります\n・参考入力：このセクションの全項目は設定別出現率が公表・確認されていないため、記録のみです。設定推測の計算には使用しません。",
+        "descriptionPresentation": {
+          "collapsible": true,
+          "label": "説明",
+          "defaultExpanded": false
+        },
+        "runtimePolicyControlled": false,
+        "evidenceItems": [
+          {
+            "findingId": "RE_END_OTHER",
+            "label": "ボーナス終了画面（参考）",
+            "sourceIds": [
+              "SRC_NANA_SETTING",
+              "SRC_20261026_77777eb4f4"
+            ],
+            "details": [
+              "出現率が未確認の項目は記録のみ。条件が明確な設定制約は推測に反映できる可能性があります。"
+            ],
+            "semanticType": "PROBABILITY_UNKNOWN",
+            "semanticCategories": [
+              {
+                "label": "サクラ",
+                "meaning": "設定別出現率未確認の示唆",
+                "semanticType": "PROBABILITY_UNKNOWN"
+              },
+              {
+                "label": "サクラ＋流れ星",
+                "meaning": "設定別出現率未確認の示唆",
+                "semanticType": "PROBABILITY_UNKNOWN"
+              },
+              {
+                "label": "サクラ＋犬",
+                "meaning": "設定別出現率未確認の示唆",
+                "semanticType": "PROBABILITY_UNKNOWN"
+              },
+              {
+                "label": "サクラ私服",
+                "meaning": "設定別出現率未確認の示唆",
+                "semanticType": "PROBABILITY_UNKNOWN"
+              }
+            ],
+            "runtimePolicyControlled": false,
+            "status": "SOURCE_REFERENCED",
+            "interaction": "REFERENCE_ONLY"
+          }
+        ]
+      },
+      {
+        "id": "EVI_RE_VOICE_OTHER",
+        "sourceFindingId": "RE_VOICE_OTHER",
+        "title": "枚数調整成功時ボイス（参考）",
+        "kind": "EVIDENCE",
+        "collapsible": true,
+        "defaultExpanded": false,
+        "description": "枚数調整成功時ボイス（参考）を確認したときに、該当する項目を1回加算して記録します。\n・注意：成功した時だけ記録。初回成功の早さ・カスタムキャラを保持する。記録のみ・推測計算には使用しない\n・参考入力：このセクションの全項目は設定別出現率が公表・確認されていないため、記録のみです。設定推測の計算には使用しません。",
+        "descriptionPresentation": {
+          "collapsible": true,
+          "label": "説明",
+          "defaultExpanded": false
+        },
+        "runtimePolicyControlled": false,
+        "evidenceItems": [
+          {
+            "findingId": "RE_VOICE_OTHER",
+            "label": "枚数調整成功時ボイス（参考）",
+            "sourceIds": [
+              "SRC_NANA_SETTING",
+              "SRC_20261026_77777eb4f4"
+            ],
+            "details": [
+              "成功した時だけ記録。初回成功の早さ・カスタムキャラを保持する。記録のみ・推測計算には使用しない。"
+            ],
+            "semanticType": "PROBABILITY_UNKNOWN",
+            "semanticCategories": [
+              {
+                "label": "通常",
+                "meaning": "設定別出現率未確認の示唆",
+                "semanticType": "PROBABILITY_UNKNOWN"
+              },
+              {
+                "label": "特殊①",
+                "meaning": "設定別出現率未確認の示唆",
+                "semanticType": "PROBABILITY_UNKNOWN"
+              }
+            ],
+            "runtimePolicyControlled": false,
+            "status": "SOURCE_REFERENCED",
+            "interaction": "REFERENCE_ONLY"
+          }
+        ]
       }
     ]
   },
+  "blockedItems": [
+    {
+      "blockId": "RF_BONUS_CHERRY_STOP",
+      "label": "ボーナス中チェリー停止",
+      "reason": "チェリー停止1/10〜1/8は確認できるが、予告音発生時だけの回数とボーナス全Gのどちらを試行数にするかを混同しない。掲載表だけでは狙い・枚数調整を含めた対象Gの定義を確定できないため、任意の母数で数値化しない。",
+      "reevaluationCondition": "不足している設定別の値または観測条件を裏付ける新たな具体的な公開資料が確認された場合。",
+      "disposition": "CLOSED_SOURCE_BOUNDED",
+      "runtimeUse": "DISABLED",
+      "reopenPolicy": "NEW_CONCRETE_SOURCE_ONLY",
+      "retainedSourceData": {
+        "denominators": [
+          10,
+          9.5,
+          8.5,
+          8
+        ],
+        "legacyDenominator": "自分の遊技中に消化した全ボーナスゲーム数（HB/BIG各20G、REG 9G。HB後BTの最終BIGを含む）"
+      },
+      "sourceIds": [
+        "SRC_NANA_SETTING",
+        "SRC_20261026_77777eb4f4"
+      ]
+    },
+    {
+      "blockId": "RF_REACH_ME_ROLE",
+      "label": "リーチ目役（1枚役）",
+      "reason": "4種の内部1枚役と、ボーナス成立後にも表示されるリーチ目は同じ事象ではない。ハズレ目にも止まる内部役の全成立を再現する観測が確認できないため、見えたリーチ目だけで公表率を使用しない。",
+      "reevaluationCondition": "不足している設定別の値または観測条件を裏付ける新たな具体的な公開資料が確認された場合。",
+      "disposition": "CLOSED_SOURCE_BOUNDED",
+      "runtimeUse": "DISABLED",
+      "reopenPolicy": "NEW_CONCRETE_SOURCE_ONLY",
+      "retainedSourceData": {
+        "rates": [
+          682.7,
+          630.2,
+          516,
+          428.3
+        ]
+      },
+      "sourceIds": [
+        "SRC_NANA_SETTING",
+        "SRC_20261026_77777eb4f4",
+        "SRC_20261026_a4ef370e3f"
+      ]
+    },
+    {
+      "blockId": "RF_BAR_PATTERN_DISTRIBUTIONS",
+      "label": "ボーナス種別BAR停止形の分布",
+      "reason": "ボーナス種別の表は多数派の公開資料に合わせて整理済み。ただし予告音・目押し・全消化Gの対象条件が特定できないため、表の率を任意の試行数へ当てはめない。BAR・Z/Vの設定制約は保持する。",
+      "reevaluationCondition": "不足している設定別の値または観測条件を裏付ける新たな具体的な公開資料が確認された場合。",
+      "disposition": "CLOSED_SOURCE_BOUNDED",
+      "runtimeUse": "DISABLED",
+      "reopenPolicy": "NEW_CONCRETE_SOURCE_ONLY",
+      "retainedSourceData": {
+        "BIG": {
+          "cherry": [
+            10,
+            9.5,
+            8.5,
+            8
+          ],
+          "BAR": [
+            null,
+            819.2,
+            689.9,
+            655.4
+          ],
+          "ZV": [
+            null,
+            null,
+            1310.7,
+            1092.3
+          ]
+        },
+        "HB_REG": {
+          "cherry": [
+            10,
+            9.5,
+            8.5,
+            8
+          ],
+          "BAR": [
+            null,
+            546.1,
+            436.9,
+            409.6
+          ],
+          "ZV": [
+            null,
+            null,
+            936.2,
+            819.2
+          ]
+        }
+      },
+      "sourceIds": [
+        "SRC_NANA_SETTING",
+        "SRC_20261026_77777eb4f4",
+        "SRC_20261026_a4ef370e3f"
+      ]
+    },
+    {
+      "blockId": "RF_NORMAL_ROLE_MARGINALS",
+      "label": "通常時ベル・チェリー・スイカ",
+      "reason": "設定1以外の基礎出現率が公表されていない。50枚あたりのゲーム数から個別小役率を逆算しない。",
+      "reevaluationCondition": "不足している設定別の値または観測条件を裏付ける新たな具体的な公開資料が確認された場合。",
+      "disposition": "CLOSED_SOURCE_BOUNDED",
+      "runtimeUse": "DISABLED",
+      "reopenPolicy": "NEW_CONCRETE_SOURCE_ONLY",
+      "sourceIds": [
+        "SRC_NANA_SETTING",
+        "SRC_20261026_77777eb4f4"
+      ]
+    }
+  ],
   "ui": {
-    "sections": [
+    "schemaVersion": "v8.5-runtime-ui-v1",
+    "contractVersion": "runtime-ui-v8",
+    "source": "CANONICAL_UI",
+    "sourceSchemaVersion": "canonical-ui-v1",
+    "manifestRevision": "8.5",
+    "playInfo": {
+      "visible": true,
+      "collapsible": false,
+      "mode": "NORMAL_ONLY",
+      "sessionFields": [
+        {
+          "id": "date",
+          "label": "日付",
+          "mode": "DATE"
+        },
+        {
+          "id": "storeName",
+          "label": "店舗名",
+          "mode": "TEXT"
+        },
+        {
+          "id": "machineNumber",
+          "label": "台番号",
+          "mode": "TEXT"
+        }
+      ],
+      "startFields": [
+        {
+          "id": "startNormalGames",
+          "label": "着席時 通常ゲーム数",
+          "mode": "NUMBER",
+          "directNumeric": true
+        }
+      ],
+      "currentFields": [
+        {
+          "id": "currentNormalGames",
+          "label": "現在 通常ゲーム数",
+          "mode": "NUMBER",
+          "directNumeric": true
+        }
+      ],
+      "difference": {
+        "autoCalculate": true
+      },
+      "useDifference": {
+        "label": "着席時との差分を使用",
+        "defaultWhenStartNormalGamesPresent": true
+      }
+    },
+    "accordion": {
+      "enabled": true,
+      "singleOpen": true
+    },
+    "quickInput": {
+      "enabled": false
+    },
+    "v8Sections": [
       {
-        "id": "UI_DESIGN_1",
-        "title": "着席時データ",
-        "displayOrder": 1,
-        "collapsible": false,
-        "defaultExpanded": true,
+        "id": "OBS_RF_PREDECESSOR_BONUS_COARSE",
+        "title": "着席時BIG合計・REG内訳",
+        "collapsible": true,
+        "defaultExpanded": false,
+        "description": "着席前に確認できた通常Gと初当りBIG合計・REG。BT最終BIGや自分の当選を混ぜない。\n・注意：BT最終BIGや自分の当選を混ぜない。",
+        "descriptionPresentation": {
+          "collapsible": true,
+          "label": "説明",
+          "defaultExpanded": false
+        },
         "items": [
           {
-            "type": "input",
-            "inputId": "INP_PREDECESSOR_GAMES",
-            "label": "着席時ゲーム数",
-            "widget": "number",
-            "gridSpan": 12,
-            "config": {
-              "directInput": true
-            }
-          },
-          {
-            "type": "input",
-            "inputId": "INP_PREDECESSOR_BIG_COUNT",
-            "label": "着席時BIG合計",
-            "widget": "counter",
-            "gridSpan": 6,
-            "config": {
-              "directInput": true,
-              "compact": true
-            }
-          },
-          {
-            "type": "input",
-            "inputId": "INP_PREDECESSOR_REG_COUNT",
-            "label": "着席時REG",
-            "widget": "counter",
-            "gridSpan": 6,
-            "config": {
-              "directInput": true,
-              "compact": true
-            }
-          },
-          {
-            "type": "input",
-            "inputId": "INP_PREDECESSOR_HB_COUNT",
-            "label": "うちハーレムボーナス（判別時のみ）",
-            "widget": "counter",
-            "gridSpan": 12,
-            "config": {
-              "directInput": true
+            "id": "NODE_RF_PREDECESSOR_BONUS_COARSE",
+            "featureId": "RF_PREDECESSOR_BONUS_COARSE",
+            "title": "着席時BIG合計・REG内訳",
+            "interaction": {
+              "type": "CATEGORY_COUNTERS",
+              "preservePriorObservations": true,
+              "showAccumulatedCounts": true,
+              "categoryCoverage": "NON_EXHAUSTIVE",
+              "totalOpportunities": "SEPARATE_COUNTER",
+              "opportunityTracking": {
+                "type": "SEPARATE_COUNTER",
+                "inputId": "RF_PREDECESSOR_BONUS_COARSE.eligibleTrialCount",
+                "label": "通常ゲーム数",
+                "directNumeric": true,
+                "quickAdd": [
+                  50
+                ],
+                "playDataBinding": {
+                  "source": "PLAY_START_NORMAL_GAMES",
+                  "mode": "AUTO_EXACT",
+                  "exactness": "EXACT_ONLY"
+                }
+              },
+              "categories": [
+                {
+                  "id": "RF_PREDECESSOR_BONUS_COARSE.categoryCounts.1_BIG_TOTAL",
+                  "inputId": "RF_PREDECESSOR_BONUS_COARSE.categoryCounts.1_BIG_TOTAL",
+                  "label": "BIG合計",
+                  "directNumeric": true,
+                  "compactCounter": true,
+                  "quickAdd": [
+                    1
+                  ]
+                },
+                {
+                  "id": "RF_PREDECESSOR_BONUS_COARSE.categoryCounts.2_REG",
+                  "inputId": "RF_PREDECESSOR_BONUS_COARSE.categoryCounts.2_REG",
+                  "label": "REG",
+                  "directNumeric": true,
+                  "compactCounter": true,
+                  "quickAdd": [
+                    1
+                  ]
+                }
+              ]
             }
           }
         ]
       },
       {
-        "id": "UI_DESIGN_2",
-        "title": "通常時ボーナス",
-        "displayOrder": 2,
-        "collapsible": false,
-        "defaultExpanded": true,
+        "id": "OBS_RF_PREDECESSOR_HB_SHARE",
+        "title": "着席時BIG内ハーレム構成",
+        "collapsible": true,
+        "defaultExpanded": false,
+        "description": "対象となる機会のうち、BIG内ハーレム構成が実際に起きた割合を設定別に比較します。\n・注意：着席前の全BIG回数を母数にし、同じ観測から別の合算情報を追加しない。",
+        "descriptionPresentation": {
+          "collapsible": true,
+          "label": "説明",
+          "defaultExpanded": false
+        },
         "items": [
           {
-            "type": "input",
-            "inputId": "INP_NORMAL_GAMES",
-            "label": "通常時ゲーム数（BT中除外）",
-            "widget": "number",
-            "gridSpan": 12,
-            "config": {
-              "directInput": true
-            }
-          },
+            "id": "NODE_RF_PREDECESSOR_HB_SHARE",
+            "featureId": "RF_PREDECESSOR_HB_SHARE",
+            "title": "着席時BIG内ハーレム構成",
+            "inputs": [
+              {
+                "id": "RF_PREDECESSOR_HB_SHARE.eligibleTrialCount",
+                "label": "BIG合計回数",
+                "input": "denominator",
+                "inputId": "RF_PREDECESSOR_HB_SHARE.eligibleTrialCount",
+                "engineBinding": {
+                  "inputId": "RF_PREDECESSOR_HB_SHARE.eligibleTrialCount"
+                },
+                "gridSpan": 6,
+                "directNumeric": true,
+                "quickAdd": [
+                  1
+                ],
+                "unobservedDisplay": "—",
+                "compactCounter": true
+              },
+              {
+                "id": "RF_PREDECESSOR_HB_SHARE.successCount",
+                "label": "BIG内ハーレム構成回数",
+                "input": "counter",
+                "inputId": "RF_PREDECESSOR_HB_SHARE.successCount",
+                "engineBinding": {
+                  "inputId": "RF_PREDECESSOR_HB_SHARE.successCount"
+                },
+                "directNumeric": true,
+                "quickAdd": [
+                  1
+                ],
+                "gridSpan": 6,
+                "unobservedDisplay": "—",
+                "compactCounter": true
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "OBS_RF_NORMAL_BONUS_OUTCOME",
+        "title": "通常時ボーナス内訳",
+        "collapsible": true,
+        "defaultExpanded": false,
+        "description": "通常時。ボーナス消化中とBT中を除き、同じ対象ゲーム数を1回だけ入力する。\n・注意：ボーナス消化中とBT中を除き、同じ対象ゲーム数を1回だけ入力する。",
+        "descriptionPresentation": {
+          "collapsible": true,
+          "label": "説明",
+          "defaultExpanded": false
+        },
+        "items": [
           {
-            "type": "input",
-            "inputId": "INP_NORMAL_HB_COUNT",
-            "label": "通常時ハーレムボーナス",
-            "widget": "counter",
+            "id": "NODE_RF_NORMAL_BONUS_OUTCOME",
+            "featureId": "RF_NORMAL_BONUS_OUTCOME",
+            "title": "通常時ボーナス内訳",
+            "interaction": {
+              "type": "CATEGORY_COUNTERS",
+              "preservePriorObservations": true,
+              "showAccumulatedCounts": true,
+              "categoryCoverage": "NON_EXHAUSTIVE",
+              "totalOpportunities": "SEPARATE_COUNTER",
+              "categories": [
+                {
+                  "id": "RF_NORMAL_BONUS_OUTCOME.categoryCounts.1_HAREM_BONUS",
+                  "inputId": "RF_NORMAL_BONUS_OUTCOME.categoryCounts.1_HAREM_BONUS",
+                  "label": "ハーレムボーナス",
+                  "directNumeric": true,
+                  "compactCounter": true,
+                  "quickAdd": [
+                    1
+                  ]
+                },
+                {
+                  "id": "RF_NORMAL_BONUS_OUTCOME.categoryCounts.2_BIG",
+                  "inputId": "RF_NORMAL_BONUS_OUTCOME.categoryCounts.2_BIG",
+                  "label": "BIG",
+                  "directNumeric": true,
+                  "compactCounter": true,
+                  "quickAdd": [
+                    1
+                  ]
+                },
+                {
+                  "id": "RF_NORMAL_BONUS_OUTCOME.categoryCounts.3_REG",
+                  "inputId": "RF_NORMAL_BONUS_OUTCOME.categoryCounts.3_REG",
+                  "label": "REG",
+                  "directNumeric": true,
+                  "compactCounter": true,
+                  "quickAdd": [
+                    1
+                  ]
+                }
+              ],
+              "opportunityTracking": {
+                "type": "SEPARATE_COUNTER",
+                "inputId": "RF_NORMAL_BONUS_OUTCOME.eligibleTrialCount",
+                "label": "通常ゲーム数",
+                "directNumeric": true,
+                "quickAdd": [
+                  50
+                ],
+                "playDataBinding": {
+                  "source": "PLAY_NORMAL_GAME_DELTA",
+                  "mode": "AUTO_EXACT",
+                  "exactness": "EXACT_ONLY"
+                }
+              }
+            }
+          }
+        ]
+      },
+      {
+        "id": "OBS_RF_BT_HAREM_BONUS",
+        "title": "BT中ハーレムボーナス",
+        "collapsible": true,
+        "defaultExpanded": false,
+        "description": "対象となる機会のうち、ハーレムボーナスが実際に起きた割合を設定別に比較します。\n・注意：通常時ハーレム当選やBT最終BIGを成功回数へ含めない。",
+        "descriptionPresentation": {
+          "collapsible": true,
+          "label": "説明",
+          "defaultExpanded": false
+        },
+        "items": [
+          {
+            "id": "NODE_RF_BT_HAREM_BONUS",
+            "featureId": "RF_BT_HAREM_BONUS",
+            "title": "BT中ハーレムボーナス",
+            "inputs": [
+              {
+                "id": "RF_BT_HAREM_BONUS.eligibleTrialCount",
+                "label": "2枚掛けゲーム数",
+                "input": "denominator",
+                "inputId": "RF_BT_HAREM_BONUS.eligibleTrialCount",
+                "engineBinding": {
+                  "inputId": "RF_BT_HAREM_BONUS.eligibleTrialCount"
+                },
+                "gridSpan": 6,
+                "directNumeric": true,
+                "quickAdd": [
+                  1
+                ],
+                "unobservedDisplay": "—",
+                "compactCounter": true
+              },
+              {
+                "id": "RF_BT_HAREM_BONUS.successCount",
+                "label": "ハーレムボーナス回数",
+                "input": "counter",
+                "inputId": "RF_BT_HAREM_BONUS.successCount",
+                "engineBinding": {
+                  "inputId": "RF_BT_HAREM_BONUS.successCount"
+                },
+                "directNumeric": true,
+                "quickAdd": [
+                  1
+                ],
+                "gridSpan": 6,
+                "unobservedDisplay": "—",
+                "compactCounter": true
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "OBS_SHARED_NORMAL_GAME_TRIAL",
+        "title": "強チェリー＋ボーナス・斜めスイカ＋ボーナス",
+        "collapsible": true,
+        "defaultExpanded": false,
+        "description": "複数の設定推測項目で同じ「通常ゲーム数」を共通の基準として使用します。通常ゲーム数は1回だけ入力し、各項目では該当した回数だけを記録してください。",
+        "descriptionPresentation": {
+          "collapsible": true,
+          "label": "説明",
+          "defaultExpanded": false
+        },
+        "groups": [
+          {
+            "id": "DENOM_NORMAL_GAME_TRIAL",
+            "label": "通常ゲーム数",
+            "input": "denominator",
+            "inputId": "RF_STRONG_CHERRY_BONUS.eligibleTrialCount",
+            "engineBinding": {
+              "inputIds": [
+                "RF_STRONG_CHERRY_BONUS.eligibleTrialCount",
+                "RF_DIAGONAL_WATERMELON_BONUS.eligibleTrialCount"
+              ]
+            },
+            "gridSpan": 12,
+            "directNumeric": true,
+            "quickAdd": [
+              50
+            ],
+            "unobservedDisplay": "—",
+            "playDataBinding": {
+              "source": "PLAY_NORMAL_GAME_DELTA",
+              "mode": "AUTO_EXACT",
+              "exactness": "EXACT_ONLY"
+            }
+          }
+        ],
+        "items": [
+          {
+            "id": "NODE_RF_STRONG_CHERRY_BONUS",
+            "featureId": "RF_STRONG_CHERRY_BONUS",
+            "title": "強チェリー＋ボーナス",
+            "description": "通常時の強チェリー＋ボーナスを記録します。通常ゲーム数を基準に、実戦中の出現割合を設定別に比較します。\n・注意：強チェリー当選を成立時に特定できる条件を全期間で継続し、成立後の後引きを当選契機へ数えない。\n・注意：契機不明を成功0としない。",
+            "descriptionPresentation": {
+              "collapsible": true,
+              "label": "説明",
+              "defaultExpanded": false
+            },
             "gridSpan": 6,
-            "config": {
-              "directInput": true,
-              "compact": true
-            }
+            "inputs": [
+              {
+                "id": "RF_STRONG_CHERRY_BONUS.successCount",
+                "label": "強チェリー＋ボーナス回数",
+                "input": "counter",
+                "inputId": "RF_STRONG_CHERRY_BONUS.successCount",
+                "engineBinding": {
+                  "inputId": "RF_STRONG_CHERRY_BONUS.successCount"
+                },
+                "directNumeric": true,
+                "quickAdd": [
+                  1
+                ],
+                "gridSpan": 12,
+                "unobservedDisplay": "—",
+                "compactCounter": true
+              }
+            ]
           },
           {
-            "type": "input",
-            "inputId": "INP_NORMAL_BIG_COUNT",
-            "label": "通常時BIG",
-            "widget": "counter",
+            "id": "NODE_RF_DIAGONAL_WATERMELON_BONUS",
+            "featureId": "RF_DIAGONAL_WATERMELON_BONUS",
+            "title": "斜めスイカ＋ボーナス",
+            "description": "通常時の斜めスイカ＋ボーナスを記録します。通常ゲーム数を基準に、実戦中の出現割合を設定別に比較します。\n・注意：斜めスイカ契機を正確に判別できた全観測区間だけ。\n・注意：ボーナス成立後の小役を原因にしない。",
+            "descriptionPresentation": {
+              "collapsible": true,
+              "label": "説明",
+              "defaultExpanded": false
+            },
             "gridSpan": 6,
-            "config": {
-              "directInput": true,
-              "compact": true
+            "inputs": [
+              {
+                "id": "RF_DIAGONAL_WATERMELON_BONUS.successCount",
+                "label": "斜めスイカ＋ボーナス回数",
+                "input": "counter",
+                "inputId": "RF_DIAGONAL_WATERMELON_BONUS.successCount",
+                "engineBinding": {
+                  "inputId": "RF_DIAGONAL_WATERMELON_BONUS.successCount"
+                },
+                "directNumeric": true,
+                "quickAdd": [
+                  1
+                ],
+                "gridSpan": 12,
+                "unobservedDisplay": "—",
+                "compactCounter": true
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "EVI_RE_END_DOLLS_HOUSE",
+        "title": "ボーナス終了画面",
+        "description": "ボーナス終了画面 ドールズ・ハウスを確認したときに、該当する項目を1回加算して記録します。\n・注意：出現率が未確認の項目は記録のみ。条件が明確な設定制約は推測に反映できる可能性があります\n・反映：設定確定・設定否定の条件は、設定候補の絞り込みに自動反映します",
+        "collapsible": true,
+        "defaultExpanded": false,
+        "descriptionPresentation": {
+          "collapsible": true,
+          "label": "説明",
+          "defaultExpanded": false
+        },
+        "items": [
+          {
+            "id": "REF_RE_END_DOLLS_HOUSE",
+            "evidenceId": "RE_END_DOLLS_HOUSE",
+            "label": "ボーナス終了画面 ドールズ・ハウス",
+            "interaction": {
+              "type": "CATEGORY_COUNTERS",
+              "preservePriorObservations": true,
+              "showAccumulatedCounts": true,
+              "categoryCoverage": "NON_EXHAUSTIVE",
+              "totalOpportunities": "NONE",
+              "categories": [
+                {
+                  "id": "REF_RE_END_DOLLS_HOUSE_1",
+                  "inputId": "REF_RE_END_DOLLS_HOUSE_1",
+                  "label": "ボーナス終了画面 ドールズ・ハウス",
+                  "meaning": "設定2以上",
+                  "directNumeric": true,
+                  "compactCounter": true,
+                  "quickAdd": [
+                    1
+                  ]
+                }
+              ]
             }
           },
           {
-            "type": "input",
-            "inputId": "INP_NORMAL_REG_COUNT",
-            "label": "通常時REG",
-            "widget": "counter",
-            "gridSpan": 12,
-            "config": {
-              "directInput": true
+            "id": "REF_RE_END_SALUTE",
+            "evidenceId": "RE_END_SALUTE",
+            "label": "ボーナス終了画面 敬礼",
+            "interaction": {
+              "type": "CATEGORY_COUNTERS",
+              "preservePriorObservations": true,
+              "showAccumulatedCounts": true,
+              "categoryCoverage": "NON_EXHAUSTIVE",
+              "totalOpportunities": "NONE",
+              "categories": [
+                {
+                  "id": "REF_RE_END_SALUTE_1",
+                  "inputId": "REF_RE_END_SALUTE_1",
+                  "label": "ボーナス終了画面 敬礼",
+                  "meaning": "設定5以上",
+                  "directNumeric": true,
+                  "compactCounter": true,
+                  "quickAdd": [
+                    1
+                  ]
+                }
+              ]
+            }
+          },
+          {
+            "id": "REF_RE_END_WEDDING",
+            "evidenceId": "RE_END_WEDDING",
+            "label": "ボーナス終了画面 ウェディングドレス",
+            "interaction": {
+              "type": "CATEGORY_COUNTERS",
+              "preservePriorObservations": true,
+              "showAccumulatedCounts": true,
+              "categoryCoverage": "NON_EXHAUSTIVE",
+              "totalOpportunities": "NONE",
+              "categories": [
+                {
+                  "id": "REF_RE_END_WEDDING_1",
+                  "inputId": "REF_RE_END_WEDDING_1",
+                  "label": "ボーナス終了画面 ウェディングドレス",
+                  "meaning": "設定6",
+                  "directNumeric": true,
+                  "compactCounter": true,
+                  "quickAdd": [
+                    1
+                  ]
+                }
+              ]
+            }
+          },
+          {
+            "id": "REF_RE_END_OTHER",
+            "evidenceId": "RE_END_OTHER",
+            "label": "ボーナス終了画面（参考）",
+            "interaction": {
+              "type": "CATEGORY_COUNTERS",
+              "preservePriorObservations": true,
+              "showAccumulatedCounts": true,
+              "categoryCoverage": "NON_EXHAUSTIVE",
+              "totalOpportunities": "NONE",
+              "categories": [
+                {
+                  "id": "REF_RE_END_OTHER_1",
+                  "inputId": "REF_RE_END_OTHER_1",
+                  "label": "サクラ",
+                  "meaning": "設定別出現率未確認の示唆",
+                  "directNumeric": true,
+                  "compactCounter": true,
+                  "quickAdd": [
+                    1
+                  ]
+                },
+                {
+                  "id": "REF_RE_END_OTHER_2",
+                  "inputId": "REF_RE_END_OTHER_2",
+                  "label": "サクラ＋流れ星",
+                  "meaning": "設定別出現率未確認の示唆",
+                  "directNumeric": true,
+                  "compactCounter": true,
+                  "quickAdd": [
+                    1
+                  ]
+                },
+                {
+                  "id": "REF_RE_END_OTHER_3",
+                  "inputId": "REF_RE_END_OTHER_3",
+                  "label": "サクラ＋犬",
+                  "meaning": "設定別出現率未確認の示唆",
+                  "directNumeric": true,
+                  "compactCounter": true,
+                  "quickAdd": [
+                    1
+                  ]
+                },
+                {
+                  "id": "REF_RE_END_OTHER_4",
+                  "inputId": "REF_RE_END_OTHER_4",
+                  "label": "サクラ私服",
+                  "meaning": "設定別出現率未確認の示唆",
+                  "directNumeric": true,
+                  "compactCounter": true,
+                  "quickAdd": [
+                    1
+                  ]
+                }
+              ]
             }
           }
         ]
       },
       {
-        "id": "UI_DESIGN_3",
-        "title": "ボーナストリガー",
-        "displayOrder": 3,
-        "collapsible": false,
-        "defaultExpanded": true,
+        "id": "EVI_RE_BAR_LINE",
+        "title": "ボーナス中BAR停止形",
+        "description": "ボーナス中 BAR揃いを確認したときに、該当する項目を1回加算して記録します。\n・注意：出現率が未確認の項目は記録のみ。条件が明確な設定制約は推測に反映できる可能性があります\n・反映：設定確定・設定否定の条件は、設定候補の絞り込みに自動反映します",
+        "collapsible": true,
+        "defaultExpanded": false,
+        "descriptionPresentation": {
+          "collapsible": true,
+          "label": "説明",
+          "defaultExpanded": false
+        },
         "items": [
           {
-            "type": "input",
-            "inputId": "INP_BT_GAMES",
-            "label": "BT中ゲーム数",
-            "widget": "counter",
-            "gridSpan": 12,
-            "config": {
-              "directInput": true
+            "id": "REF_RE_BAR_LINE",
+            "evidenceId": "RE_BAR_LINE",
+            "label": "ボーナス中 BAR揃い",
+            "interaction": {
+              "type": "CATEGORY_COUNTERS",
+              "preservePriorObservations": true,
+              "showAccumulatedCounts": true,
+              "categoryCoverage": "NON_EXHAUSTIVE",
+              "totalOpportunities": "NONE",
+              "categories": [
+                {
+                  "id": "REF_RE_BAR_LINE_1",
+                  "inputId": "REF_RE_BAR_LINE_1",
+                  "label": "ボーナス中 BAR揃い",
+                  "meaning": "設定2以上",
+                  "directNumeric": true,
+                  "compactCounter": true,
+                  "quickAdd": [
+                    1
+                  ]
+                }
+              ]
             }
           },
           {
-            "type": "input",
-            "inputId": "INP_BT_HB_COUNT",
-            "label": "BT中ハーレムボーナス",
-            "widget": "counter",
-            "gridSpan": 12,
-            "config": {
-              "directInput": true
+            "id": "REF_RE_BAR_ZV",
+            "evidenceId": "RE_BAR_ZV",
+            "label": "ボーナス中 BAR Z字/V字停止",
+            "interaction": {
+              "type": "CATEGORY_COUNTERS",
+              "preservePriorObservations": true,
+              "showAccumulatedCounts": true,
+              "categoryCoverage": "NON_EXHAUSTIVE",
+              "totalOpportunities": "NONE",
+              "categories": [
+                {
+                  "id": "REF_RE_BAR_ZV_1",
+                  "inputId": "REF_RE_BAR_ZV_1",
+                  "label": "ボーナス中 BAR Z字/V字停止",
+                  "meaning": "設定5以上",
+                  "directNumeric": true,
+                  "compactCounter": true,
+                  "quickAdd": [
+                    1
+                  ]
+                }
+              ]
             }
           }
         ]
       },
       {
-        "id": "UI_DESIGN_4",
-        "title": "ボーナス中",
-        "displayOrder": 4,
-        "collapsible": false,
-        "defaultExpanded": true,
+        "id": "EVI_RE_VOICE_SPECIAL_2",
+        "title": "枚数調整成功ボイス",
+        "description": "技術介入成功時 特殊ボイス②を確認したときに、該当する項目を1回加算して記録します。\n・注意：出現率が未確認の項目は記録のみ。条件が明確な設定制約は推測に反映できる可能性があります\n・反映：設定確定・設定否定の条件は、設定候補の絞り込みに自動反映します",
+        "collapsible": true,
+        "defaultExpanded": false,
+        "descriptionPresentation": {
+          "collapsible": true,
+          "label": "説明",
+          "defaultExpanded": false
+        },
         "items": [
           {
-            "type": "input",
-            "inputId": "INP_BONUS_CHERRY_STOP_COUNT",
-            "label": "ボーナス中チェリー停止",
-            "widget": "counter",
-            "gridSpan": 12,
-            "config": {
-              "directInput": true
+            "id": "REF_RE_VOICE_SPECIAL_2",
+            "evidenceId": "RE_VOICE_SPECIAL_2",
+            "label": "技術介入成功時 特殊ボイス②",
+            "interaction": {
+              "type": "CATEGORY_COUNTERS",
+              "preservePriorObservations": true,
+              "showAccumulatedCounts": true,
+              "categoryCoverage": "NON_EXHAUSTIVE",
+              "totalOpportunities": "NONE",
+              "categories": [
+                {
+                  "id": "REF_RE_VOICE_SPECIAL_2_1",
+                  "inputId": "REF_RE_VOICE_SPECIAL_2_1",
+                  "label": "技術介入成功時 特殊ボイス②",
+                  "meaning": "設定2以上",
+                  "directNumeric": true,
+                  "compactCounter": true,
+                  "quickAdd": [
+                    1
+                  ]
+                }
+              ]
             }
           },
           {
-            "type": "input",
-            "inputId": "INP_EVI_HAREM_BAR_STOP",
-            "label": "ボーナス中BAR停止形",
-            "widget": "multi_select",
-            "gridSpan": 12,
-            "config": {
-              "directInput": true
-            }
-          }
-        ]
-      },
-      {
-        "id": "UI_DESIGN_5",
-        "title": "設定確定情報",
-        "displayOrder": 5,
-        "collapsible": false,
-        "defaultExpanded": true,
-        "items": [
-          {
-            "type": "input",
-            "inputId": "INP_EVI_HAREM_END_SCREEN",
-            "label": "ボーナス終了画面",
-            "widget": "multi_select",
-            "gridSpan": 12,
-            "config": {
-              "directInput": true
-            }
-          },
-          {
-            "type": "input",
-            "inputId": "INP_EVI_HAREM_TECH_VOICE",
-            "label": "技術介入成功時ボイス",
-            "widget": "multi_select",
-            "gridSpan": 12,
-            "config": {
-              "directInput": true
+            "id": "REF_RE_VOICE_OTHER",
+            "evidenceId": "RE_VOICE_OTHER",
+            "label": "枚数調整成功時ボイス（参考）",
+            "interaction": {
+              "type": "CATEGORY_COUNTERS",
+              "preservePriorObservations": true,
+              "showAccumulatedCounts": true,
+              "categoryCoverage": "NON_EXHAUSTIVE",
+              "totalOpportunities": "NONE",
+              "categories": [
+                {
+                  "id": "REF_RE_VOICE_OTHER_1",
+                  "inputId": "REF_RE_VOICE_OTHER_1",
+                  "label": "通常",
+                  "meaning": "設定別出現率未確認の示唆",
+                  "directNumeric": true,
+                  "compactCounter": true,
+                  "quickAdd": [
+                    1
+                  ]
+                },
+                {
+                  "id": "REF_RE_VOICE_OTHER_2",
+                  "inputId": "REF_RE_VOICE_OTHER_2",
+                  "label": "特殊①",
+                  "meaning": "設定別出現率未確認の示唆",
+                  "directNumeric": true,
+                  "compactCounter": true,
+                  "quickAdd": [
+                    1
+                  ]
+                }
+              ]
             }
           }
         ]
       }
     ]
   },
-  "selectionSummary": {
-    "schemaVersion": "selection-summary-v1",
-    "evaluatedCount": 10,
-    "selectedCount": 5,
-    "rejectedCount": 5,
-    "selected": [
-      {
-        "featureId": "FEAT_PREDECESSOR_BONUS_COARSE",
-        "name": "着席時BIG合計・REG内訳",
-        "reason": "着席時のBIG合計・REGも同じ設定の過去観測として利用できます。HBと通常BIGを判別できないデータカウンターでも利用できます。",
-        "requiredTrials": {
-          "value": 8306,
-          "unit": "着席時ゲーム"
-        }
-      },
-      {
-        "featureId": "FEAT_PREDECESSOR_HB_SHARE",
-        "name": "着席時BIG内ハーレムボーナス構成",
-        "reason": "データカウンターなどからHBと通常BIGを判別できる場合だけ、BIG内訳も追加情報として利用します。未入力なら計算から除外します。",
-        "requiredTrials": {
-          "value": 135,
-          "unit": "着席時BIG"
-        }
-      },
-      {
-        "featureId": "FEAT_NORMAL_BONUS_OUTCOME",
-        "name": "通常時ボーナス内訳",
-        "reason": "通常時のHB・BIG・REGは相互に排他的で、BIGとREGに明確な設定差があるため一体で評価します。",
-        "requiredTrials": {
-          "value": 7071,
-          "unit": "通常ゲーム"
-        }
-      },
-      {
-        "featureId": "FEAT_BT_HAREM_BONUS",
-        "name": "BT中ハーレムボーナス",
-        "reason": "BT中HBは設定6で特に出現しやすく、通常時とは別区間なので独立した推測材料として利用できます。",
-        "requiredTrials": {
-          "value": 656,
-          "unit": "BTゲーム"
-        }
-      },
-      {
-        "featureId": "FEAT_BONUS_CHERRY_STOP",
-        "name": "ボーナス中チェリー停止",
-        "reason": "全ボーナス中でチェリー停止確率が共通して公開されており、通常時とは別区間の高頻度示唆として利用できます。分母はHB/BIG各20G・REG 9GとBT連の終了BIGを重複しないよう自動算出します。",
-        "requiredTrials": {
-          "value": 1168,
-          "unit": "ボーナスゲーム"
-        }
-      }
-    ],
-    "rejected": [
-      {
-        "featureId": "FEAT_STRONG_CHERRY_BONUS",
-        "name": "強チェリー＋ボーナス",
-        "reason": "通常時ボーナス内訳と重複。",
-        "requiredTrials": {
-          "value": 31708,
-          "unit": "通常ゲーム"
-        }
-      },
-      {
-        "featureId": "FEAT_DIAGONAL_WATERMELON_BONUS",
-        "name": "斜めスイカ＋ボーナス",
-        "reason": "通常時ボーナス内訳と重複。",
-        "requiredTrials": {
-          "value": 33859,
-          "unit": "通常ゲーム"
-        }
-      },
-      {
-        "featureId": "FEAT_REACH_ME_ROLE",
-        "name": "リーチ目役（1枚役）",
-        "reason": "ボーナス成立と重複。",
-        "requiredTrials": {
-          "value": 18119,
-          "unit": "通常ゲーム"
-        }
-      },
-      {
-        "featureId": "FEAT_STOP_FREEZE",
-        "name": "停止フリーズ",
-        "reason": "低頻度かつボーナス成立と重複。",
-        "requiredTrials": {
-          "value": 1264807,
-          "unit": "通常ゲーム"
-        }
-      },
-      {
-        "featureId": "FEAT_BET_FREEZE",
-        "name": "BETフリーズ",
-        "reason": "低頻度かつボーナス成立と重複。",
-        "requiredTrials": {
-          "value": 1100649,
-          "unit": "通常ゲーム"
-        }
-      }
-    ]
-  },
-  "reliability": {},
   "metadata": {
     "machineId": "LB_TOBE_HAREM_ACE_CF",
     "displayName": "翔べ！ハーレムエース",
@@ -872,12 +1961,572 @@
       "SET_5",
       "SET_6"
     ],
-    "uiDesignMaterialized": true,
-    "uiDesignSchemaVersion": "ui-design-data-v1",
-    "uiDesignStatus": "PASS"
+    "settingsStatus": "SOURCE_DERIVED",
+    "manifestVersion": "8.5",
+    "observationPrerequisites": [],
+    "batch026Integration": {
+      "contract": "batch026-observation-contract-v1",
+      "rawCandidateCommit": "55d81dc66dadf57772ab30f78b71add4beef28df",
+      "deviceQa": "NOT_PERFORMED",
+      "ledgerCandidatesRetained": true,
+      "sourceBoundedLimitationsRetained": true,
+      "inputAliases": {}
+    },
+    "candidateLedger": [
+      {
+        "candidateId": "RF_PREDECESSOR_BONUS_COARSE",
+        "label": "着席時BIG合計・REG内訳",
+        "sourceClaims": [
+          {
+            "sourceId": "SRC_NANA_SETTING",
+            "claim": "着席時BIG合計・REG内訳：着席前に確認できた通常Gと初当りBIG合計・REG。BT最終BIGや自分の当選を混ぜない。"
+          },
+          {
+            "sourceId": "SRC_20261026_77777eb4f4",
+            "claim": "着席時BIG合計・REG内訳：着席前に確認できた通常Gと初当りBIG合計・REG。BT最終BIGや自分の当選を混ぜない。"
+          }
+        ],
+        "discoveryQueries": [
+          "翔べ！ハーレムエース 設定別ボーナスと対象ゲーム数"
+        ],
+        "disposition": {
+          "type": "FINDING",
+          "refId": "RF_PREDECESSOR_BONUS_COARSE"
+        }
+      },
+      {
+        "candidateId": "RF_PREDECESSOR_HB_SHARE",
+        "label": "着席時BIG内ハーレム構成",
+        "sourceClaims": [
+          {
+            "sourceId": "SRC_NANA_SETTING",
+            "claim": "着席時BIG内ハーレム構成：着席前BIG合計のうち、ハーレムと通常BIGを正確に区別できた場合だけ。着席前の全BIG回数を母数にし、同じ観測から別の合算情報を追加しない。"
+          },
+          {
+            "sourceId": "SRC_20261026_77777eb4f4",
+            "claim": "着席時BIG内ハーレム構成：着席前BIG合計のうち、ハーレムと通常BIGを正確に区別できた場合だけ。着席前の全BIG回数を母数にし、同じ観測から別の合算情報を追加しない。"
+          }
+        ],
+        "discoveryQueries": [
+          "翔べ！ハーレムエース 小役とボーナスの重複関係"
+        ],
+        "disposition": {
+          "type": "FINDING",
+          "refId": "RF_PREDECESSOR_HB_SHARE"
+        }
+      },
+      {
+        "candidateId": "RF_NORMAL_BONUS_OUTCOME",
+        "label": "通常時ボーナス内訳",
+        "sourceClaims": [
+          {
+            "sourceId": "SRC_NANA_SETTING",
+            "claim": "通常時ボーナス内訳：通常時。ボーナス消化中とBT中を除き、同じ対象ゲーム数を1回だけ入力する。"
+          },
+          {
+            "sourceId": "SRC_20261026_77777eb4f4",
+            "claim": "通常時ボーナス内訳：通常時。ボーナス消化中とBT中を除き、同じ対象ゲーム数を1回だけ入力する。"
+          }
+        ],
+        "discoveryQueries": [
+          "翔べ！ハーレムエース 設定示唆と観測条件"
+        ],
+        "disposition": {
+          "type": "FINDING",
+          "refId": "RF_NORMAL_BONUS_OUTCOME"
+        }
+      },
+      {
+        "candidateId": "RF_BT_HAREM_BONUS",
+        "label": "BT中ハーレムボーナス",
+        "sourceClaims": [
+          {
+            "sourceId": "SRC_NANA_SETTING",
+            "claim": "BT中ハーレムボーナス：実際のBT2枚掛けの消化G。通常時ハーレム当選やBT最終BIGを成功回数へ含めない。"
+          },
+          {
+            "sourceId": "SRC_20261026_77777eb4f4",
+            "claim": "BT中ハーレムボーナス：実際のBT2枚掛けの消化G。通常時ハーレム当選やBT最終BIGを成功回数へ含めない。"
+          }
+        ],
+        "discoveryQueries": [],
+        "disposition": {
+          "type": "FINDING",
+          "refId": "RF_BT_HAREM_BONUS"
+        }
+      },
+      {
+        "candidateId": "RF_BONUS_CHERRY_STOP",
+        "label": "ボーナス中チェリー停止",
+        "sourceClaims": [
+          {
+            "sourceId": "SRC_NANA_SETTING",
+            "claim": "ボーナス中チェリー停止：チェリー停止1/10〜1/8は確認できるが、予告音発生時だけの回数とボーナス全Gのどちらを試行数にするかを混同しない。掲載表だけでは狙い・枚数調整を含めた対象Gの定義を確定できないため、任意の母数で数値化しない。"
+          },
+          {
+            "sourceId": "SRC_20261026_77777eb4f4",
+            "claim": "ボーナス中チェリー停止：チェリー停止1/10〜1/8は確認できるが、予告音発生時だけの回数とボーナス全Gのどちらを試行数にするかを混同しない。掲載表だけでは狙い・枚数調整を含めた対象Gの定義を確定できないため、任意の母数で数値化しない。"
+          }
+        ],
+        "discoveryQueries": [],
+        "disposition": {
+          "type": "BLOCKED",
+          "refId": "RF_BONUS_CHERRY_STOP"
+        }
+      },
+      {
+        "candidateId": "RF_STRONG_CHERRY_BONUS",
+        "label": "強チェリー＋ボーナス",
+        "sourceClaims": [
+          {
+            "sourceId": "SRC_NANA_SETTING",
+            "claim": "強チェリー＋ボーナス：通常G。強チェリー当選を成立時に特定できる条件を全期間で継続し、成立後の後引きを当選契機へ数えない。契機不明を成功0としない。"
+          },
+          {
+            "sourceId": "SRC_20261026_77777eb4f4",
+            "claim": "強チェリー＋ボーナス：通常G。強チェリー当選を成立時に特定できる条件を全期間で継続し、成立後の後引きを当選契機へ数えない。契機不明を成功0としない。"
+          }
+        ],
+        "discoveryQueries": [],
+        "disposition": {
+          "type": "FINDING",
+          "refId": "RF_STRONG_CHERRY_BONUS"
+        }
+      },
+      {
+        "candidateId": "RF_DIAGONAL_WATERMELON_BONUS",
+        "label": "斜めスイカ＋ボーナス",
+        "sourceClaims": [
+          {
+            "sourceId": "SRC_NANA_SETTING",
+            "claim": "斜めスイカ＋ボーナス：通常G。斜めスイカ契機を正確に判別できた全観測区間だけ。ボーナス成立後の小役を原因にしない。"
+          },
+          {
+            "sourceId": "SRC_20261026_77777eb4f4",
+            "claim": "斜めスイカ＋ボーナス：通常G。斜めスイカ契機を正確に判別できた全観測区間だけ。ボーナス成立後の小役を原因にしない。"
+          }
+        ],
+        "discoveryQueries": [],
+        "disposition": {
+          "type": "FINDING",
+          "refId": "RF_DIAGONAL_WATERMELON_BONUS"
+        }
+      },
+      {
+        "candidateId": "RF_REACH_ME_ROLE",
+        "label": "リーチ目役（1枚役）",
+        "sourceClaims": [
+          {
+            "sourceId": "SRC_NANA_SETTING",
+            "claim": "リーチ目役（1枚役）：4種の内部1枚役と、ボーナス成立後にも表示されるリーチ目は同じ事象ではない。ハズレ目にも止まる内部役の全成立を再現する観測が確認できないため、見えたリーチ目だけで公表率を使用しない。"
+          },
+          {
+            "sourceId": "SRC_20261026_77777eb4f4",
+            "claim": "リーチ目役（1枚役）：4種の内部1枚役と、ボーナス成立後にも表示されるリーチ目は同じ事象ではない。ハズレ目にも止まる内部役の全成立を再現する観測が確認できないため、見えたリーチ目だけで公表率を使用しない。"
+          },
+          {
+            "sourceId": "SRC_20261026_a4ef370e3f",
+            "claim": "リーチ目役（1枚役）：4種の内部1枚役と、ボーナス成立後にも表示されるリーチ目は同じ事象ではない。ハズレ目にも止まる内部役の全成立を再現する観測が確認できないため、見えたリーチ目だけで公表率を使用しない。"
+          }
+        ],
+        "discoveryQueries": [],
+        "disposition": {
+          "type": "BLOCKED",
+          "refId": "RF_REACH_ME_ROLE"
+        }
+      },
+      {
+        "candidateId": "RF_STOP_FREEZE",
+        "label": "停止フリーズ",
+        "sourceClaims": [
+          {
+            "sourceId": "SRC_NANA_SETTING",
+            "claim": "停止フリーズ：通常時。ボーナス消化中とBT中を除き、同じ対象ゲーム数を1回だけ入力する。"
+          },
+          {
+            "sourceId": "SRC_20261026_77777eb4f4",
+            "claim": "停止フリーズ：通常時。ボーナス消化中とBT中を除き、同じ対象ゲーム数を1回だけ入力する。"
+          },
+          {
+            "sourceId": "SRC_20261026_a4ef370e3f",
+            "claim": "停止フリーズ：通常時。ボーナス消化中とBT中を除き、同じ対象ゲーム数を1回だけ入力する。"
+          }
+        ],
+        "discoveryQueries": [],
+        "disposition": {
+          "type": "FINDING",
+          "refId": "RF_STOP_FREEZE"
+        }
+      },
+      {
+        "candidateId": "RF_BET_FREEZE",
+        "label": "BETフリーズ",
+        "sourceClaims": [
+          {
+            "sourceId": "SRC_NANA_SETTING",
+            "claim": "BETフリーズ：通常時。ボーナス消化中とBT中を除き、同じ対象ゲーム数を1回だけ入力する。"
+          },
+          {
+            "sourceId": "SRC_20261026_77777eb4f4",
+            "claim": "BETフリーズ：通常時。ボーナス消化中とBT中を除き、同じ対象ゲーム数を1回だけ入力する。"
+          }
+        ],
+        "discoveryQueries": [],
+        "disposition": {
+          "type": "FINDING",
+          "refId": "RF_BET_FREEZE"
+        }
+      },
+      {
+        "candidateId": "RE_END_DOLLS_HOUSE",
+        "label": "ボーナス終了画面 ドールズ・ハウス",
+        "sourceClaims": [
+          {
+            "sourceId": "SRC_NANA_SETTING",
+            "claim": "ボーナス終了画面 ドールズ・ハウス：記録内容と示唆条件を照合。"
+          },
+          {
+            "sourceId": "SRC_20261026_77777eb4f4",
+            "claim": "ボーナス終了画面 ドールズ・ハウス：記録内容と示唆条件を照合。"
+          }
+        ],
+        "discoveryQueries": [],
+        "disposition": {
+          "type": "FINDING",
+          "refId": "RE_END_DOLLS_HOUSE"
+        }
+      },
+      {
+        "candidateId": "RE_END_SALUTE",
+        "label": "ボーナス終了画面 敬礼",
+        "sourceClaims": [
+          {
+            "sourceId": "SRC_NANA_SETTING",
+            "claim": "ボーナス終了画面 敬礼：記録内容と示唆条件を照合。"
+          },
+          {
+            "sourceId": "SRC_20261026_77777eb4f4",
+            "claim": "ボーナス終了画面 敬礼：記録内容と示唆条件を照合。"
+          }
+        ],
+        "discoveryQueries": [],
+        "disposition": {
+          "type": "FINDING",
+          "refId": "RE_END_SALUTE"
+        }
+      },
+      {
+        "candidateId": "RE_END_WEDDING",
+        "label": "ボーナス終了画面 ウェディングドレス",
+        "sourceClaims": [
+          {
+            "sourceId": "SRC_NANA_SETTING",
+            "claim": "ボーナス終了画面 ウェディングドレス：記録内容と示唆条件を照合。"
+          },
+          {
+            "sourceId": "SRC_20261026_77777eb4f4",
+            "claim": "ボーナス終了画面 ウェディングドレス：記録内容と示唆条件を照合。"
+          }
+        ],
+        "discoveryQueries": [],
+        "disposition": {
+          "type": "FINDING",
+          "refId": "RE_END_WEDDING"
+        }
+      },
+      {
+        "candidateId": "RE_BAR_LINE",
+        "label": "ボーナス中 BAR揃い",
+        "sourceClaims": [
+          {
+            "sourceId": "SRC_NANA_SETTING",
+            "claim": "ボーナス中 BAR揃い：記録内容と示唆条件を照合。"
+          },
+          {
+            "sourceId": "SRC_20261026_77777eb4f4",
+            "claim": "ボーナス中 BAR揃い：記録内容と示唆条件を照合。"
+          }
+        ],
+        "discoveryQueries": [],
+        "disposition": {
+          "type": "FINDING",
+          "refId": "RE_BAR_LINE"
+        }
+      },
+      {
+        "candidateId": "RE_BAR_ZV",
+        "label": "ボーナス中 BAR Z字/V字停止",
+        "sourceClaims": [
+          {
+            "sourceId": "SRC_NANA_SETTING",
+            "claim": "ボーナス中 BAR Z字/V字停止：記録内容と示唆条件を照合。"
+          },
+          {
+            "sourceId": "SRC_20261026_77777eb4f4",
+            "claim": "ボーナス中 BAR Z字/V字停止：記録内容と示唆条件を照合。"
+          }
+        ],
+        "discoveryQueries": [],
+        "disposition": {
+          "type": "FINDING",
+          "refId": "RE_BAR_ZV"
+        }
+      },
+      {
+        "candidateId": "RE_VOICE_SPECIAL_2",
+        "label": "技術介入成功時 特殊ボイス②",
+        "sourceClaims": [
+          {
+            "sourceId": "SRC_NANA_SETTING",
+            "claim": "技術介入成功時 特殊ボイス②：記録内容と示唆条件を照合。"
+          },
+          {
+            "sourceId": "SRC_20261026_77777eb4f4",
+            "claim": "技術介入成功時 特殊ボイス②：記録内容と示唆条件を照合。"
+          }
+        ],
+        "discoveryQueries": [],
+        "disposition": {
+          "type": "FINDING",
+          "refId": "RE_VOICE_SPECIAL_2"
+        }
+      },
+      {
+        "candidateId": "RF_BAR_PATTERN_DISTRIBUTIONS",
+        "label": "ボーナス種別BAR停止形の分布",
+        "sourceClaims": [
+          {
+            "sourceId": "SRC_NANA_SETTING",
+            "claim": "ボーナス種別BAR停止形の分布：ボーナス種別の表は多数派の公開資料に合わせて整理済み。ただし予告音・目押し・全消化Gの対象条件が特定できないため、表の率を任意の試行数へ当てはめない。BAR・Z/Vの設定制約は保持する。"
+          },
+          {
+            "sourceId": "SRC_20261026_77777eb4f4",
+            "claim": "ボーナス種別BAR停止形の分布：ボーナス種別の表は多数派の公開資料に合わせて整理済み。ただし予告音・目押し・全消化Gの対象条件が特定できないため、表の率を任意の試行数へ当てはめない。BAR・Z/Vの設定制約は保持する。"
+          },
+          {
+            "sourceId": "SRC_20261026_a4ef370e3f",
+            "claim": "ボーナス種別BAR停止形の分布：ボーナス種別の表は多数派の公開資料に合わせて整理済み。ただし予告音・目押し・全消化Gの対象条件が特定できないため、表の率を任意の試行数へ当てはめない。BAR・Z/Vの設定制約は保持する。"
+          }
+        ],
+        "discoveryQueries": [],
+        "disposition": {
+          "type": "BLOCKED",
+          "refId": "RF_BAR_PATTERN_DISTRIBUTIONS"
+        }
+      },
+      {
+        "candidateId": "RE_END_OTHER",
+        "label": "ボーナス終了画面（参考）",
+        "sourceClaims": [
+          {
+            "sourceId": "SRC_NANA_SETTING",
+            "claim": "ボーナス終了画面（参考）：記録内容と示唆条件を照合。"
+          },
+          {
+            "sourceId": "SRC_20261026_77777eb4f4",
+            "claim": "ボーナス終了画面（参考）：記録内容と示唆条件を照合。"
+          }
+        ],
+        "discoveryQueries": [],
+        "disposition": {
+          "type": "FINDING",
+          "refId": "RE_END_OTHER"
+        }
+      },
+      {
+        "candidateId": "RE_VOICE_OTHER",
+        "label": "枚数調整成功時ボイス（参考）",
+        "sourceClaims": [
+          {
+            "sourceId": "SRC_NANA_SETTING",
+            "claim": "枚数調整成功時ボイス（参考）：記録内容と示唆条件を照合。"
+          },
+          {
+            "sourceId": "SRC_20261026_77777eb4f4",
+            "claim": "枚数調整成功時ボイス（参考）：記録内容と示唆条件を照合。"
+          }
+        ],
+        "discoveryQueries": [],
+        "disposition": {
+          "type": "FINDING",
+          "refId": "RE_VOICE_OTHER"
+        }
+      },
+      {
+        "candidateId": "RF_NORMAL_ROLE_MARGINALS",
+        "label": "通常時ベル・チェリー・スイカ",
+        "sourceClaims": [
+          {
+            "sourceId": "SRC_NANA_SETTING",
+            "claim": "通常時ベル・チェリー・スイカ：設定1以外の基礎出現率が公表されていない。50枚あたりのゲーム数から個別小役率を逆算しない。"
+          },
+          {
+            "sourceId": "SRC_20261026_77777eb4f4",
+            "claim": "通常時ベル・チェリー・スイカ：設定1以外の基礎出現率が公表されていない。50枚あたりのゲーム数から個別小役率を逆算しない。"
+          }
+        ],
+        "discoveryQueries": [],
+        "disposition": {
+          "type": "BLOCKED",
+          "refId": "RF_NORMAL_ROLE_MARGINALS"
+        }
+      }
+    ]
   },
-  "validation": {
-    "cases": []
-  },
-  "statistics": {}
+  "v8": {
+    "machineResearchSummary": {
+      "title": "この機種の設定推測について",
+      "adopted": [
+        {
+          "featureId": "RF_PREDECESSOR_BONUS_COARSE",
+          "label": "着席時BIG合計・REG内訳",
+          "importance": "微小",
+          "evaluation": {
+            "userLabel": "1回の判別力",
+            "value": 0.01942606871087882
+          },
+          "reason": "着席時BIG合計・REG内訳の「その他」の割合は設定6 99.37%、設定1 99.57%と設定差があります。「通常ゲーム数」を基準に、記録したカテゴリの振り分けを比較して推測に使用します。 観測条件：着席前に確認できた通常Gと初当りBIG合計・REG。"
+        },
+        {
+          "featureId": "RF_PREDECESSOR_HB_SHARE",
+          "label": "着席時BIG内ハーレム構成",
+          "importance": "微小",
+          "evaluation": {
+            "userLabel": "1回の判別力",
+            "value": 1.2468120066966293
+          },
+          "reason": "着席時BIG内ハーレム構成は設定6 37.56%、設定1 49.08%と設定差があります。「BIG合計回数」に対する「BIG内ハーレム構成回数」の発生割合を比較して推測に使用します。 観測条件：対象となる機会のうち、BIG内ハーレム構成が実際に起きた割合を設定別に比較します。"
+        },
+        {
+          "featureId": "RF_NORMAL_BONUS_OUTCOME",
+          "label": "通常時ボーナス内訳",
+          "importance": "主要",
+          "selectionScore": 105.6,
+          "evaluation": {
+            "userLabel": "設定判別スコア",
+            "value": 105.6
+          },
+          "reason": "通常時ボーナス内訳の「その他」の割合は設定6 99.37%、設定1 99.57%と設定差があります。「通常ゲーム数」を基準に、記録したカテゴリの振り分けを比較して推測に使用します。 観測条件：通常時。"
+        },
+        {
+          "featureId": "RF_BT_HAREM_BONUS",
+          "label": "BT中ハーレムボーナス",
+          "importance": "微小",
+          "evaluation": {
+            "userLabel": "1回の判別力",
+            "value": 0.19172663841525162
+          },
+          "reason": "BT中ハーレムボーナスは設定1 1/10922.7、設定6 1/257と設定差があります。「2枚掛けゲーム数」に対する「ハーレムボーナス回数」の発生割合を比較して推測に使用します。 観測条件：対象となる機会のうち、ハーレムボーナスが実際に起きた割合を設定別に比較します。"
+        },
+        {
+          "featureId": "RF_STRONG_CHERRY_BONUS",
+          "label": "強チェリー＋ボーナス",
+          "importance": "主要",
+          "selectionScore": 32,
+          "evaluation": {
+            "userLabel": "設定判別スコア",
+            "value": 32
+          },
+          "reason": "強チェリー＋ボーナスは設定1 1/799.2、設定6 1/541.6と設定差があります。「通常ゲーム数」に対する「強チェリー＋ボーナス回数」の発生割合を比較して推測に使用します。 観測条件：複数の設定推測項目で同じ「通常ゲーム数」を共通の基準として使用します。 「通常時ボーナス内訳」を記録していない場合の補助として使用し、同じ設定差を重ねて評価しません。"
+        },
+        {
+          "featureId": "RF_DIAGONAL_WATERMELON_BONUS",
+          "label": "斜めスイカ＋ボーナス",
+          "importance": "主要",
+          "selectionScore": 30.5,
+          "evaluation": {
+            "userLabel": "設定判別スコア",
+            "value": 30.5
+          },
+          "reason": "斜めスイカ＋ボーナスは設定1 1/829.6、設定6 1/565と設定差があります。「通常ゲーム数」に対する「斜めスイカ＋ボーナス回数」の発生割合を比較して推測に使用します。 観測条件：複数の設定推測項目で同じ「通常ゲーム数」を共通の基準として使用します。 「通常時ボーナス内訳」「強チェリー＋ボーナス」を記録していない場合の補助として使用し、同じ設定差を重ねて評価しません。"
+        }
+      ],
+      "notAdopted": [
+        {
+          "featureId": "RF_STOP_FREEZE",
+          "label": "停止フリーズ",
+          "reason": "基準遊技量7000Gで得られる情報量を表す設定判別スコアが0.9で、現在の採用基準5.0未満のため、設定推測に使用しません。"
+        },
+        {
+          "featureId": "RF_BET_FREEZE",
+          "label": "BETフリーズ",
+          "reason": "基準遊技量7000Gで得られる情報量を表す設定判別スコアが1.1で、現在の採用基準5.0未満のため、設定推測に使用しません。"
+        },
+        {
+          "featureId": "RF_BONUS_CHERRY_STOP",
+          "label": "ボーナス中チェリー停止",
+          "reason": "チェリー停止1/10〜1/8は確認できるが、予告音発生時だけの回数とボーナス全Gのどちらを試行数にするかを混同しない。掲載表だけでは狙い・枚数調整を含めた対象Gの定義を確定できないため、任意の母数で数値化しない。",
+          "reevaluationCondition": "不足している設定別の値または観測条件を裏付ける新たな具体的な公開資料が確認された場合。"
+        },
+        {
+          "featureId": "RF_REACH_ME_ROLE",
+          "label": "リーチ目役（1枚役）",
+          "reason": "4種の内部1枚役と、ボーナス成立後にも表示されるリーチ目は同じ事象ではない。ハズレ目にも止まる内部役の全成立を再現する観測が確認できないため、見えたリーチ目だけで公表率を使用しない。",
+          "reevaluationCondition": "不足している設定別の値または観測条件を裏付ける新たな具体的な公開資料が確認された場合。"
+        },
+        {
+          "featureId": "RF_BAR_PATTERN_DISTRIBUTIONS",
+          "label": "ボーナス種別BAR停止形の分布",
+          "reason": "ボーナス種別の表は多数派の公開資料に合わせて整理済み。ただし予告音・目押し・全消化Gの対象条件が特定できないため、表の率を任意の試行数へ当てはめない。BAR・Z/Vの設定制約は保持する。",
+          "reevaluationCondition": "不足している設定別の値または観測条件を裏付ける新たな具体的な公開資料が確認された場合。"
+        },
+        {
+          "featureId": "RF_NORMAL_ROLE_MARGINALS",
+          "label": "通常時ベル・チェリー・スイカ",
+          "reason": "設定1以外の基礎出現率が公表されていない。50枚あたりのゲーム数から個別小役率を逆算しない。",
+          "reevaluationCondition": "不足している設定別の値または観測条件を裏付ける新たな具体的な公開資料が確認された場合。"
+        }
+      ],
+      "highLowDiscrimination": {
+        "status": "COMPUTED",
+        "method": "BEST_SINGLE_EXACT_ACTIVE_FEATURE",
+        "bandDefinition": {
+          "lowSettings": "SETTING_1_TO_2",
+          "highSettings": "SETTING_5_TO_6",
+          "classPrior": "BALANCED"
+        },
+        "selectedFeatureId": "RF_NORMAL_BONUS_OUTCOME",
+        "selectedFeatureLabel": "通常時ボーナス内訳",
+        "results": [
+          {
+            "games": 1500,
+            "balancedAccuracyPercent": 66.72,
+            "numerical95IntervalPercent": [
+              66.58915820006928,
+              66.84132275696197
+            ]
+          },
+          {
+            "games": 3000,
+            "balancedAccuracyPercent": 72.68,
+            "numerical95IntervalPercent": [
+              72.56139176129078,
+              72.79726607562328
+            ]
+          },
+          {
+            "games": 7000,
+            "balancedAccuracyPercent": 80.87,
+            "numerical95IntervalPercent": [
+              80.76292622775716,
+              80.96726786403971
+            ]
+          }
+        ],
+        "eligibleFeatureIds": [
+          "RF_NORMAL_BONUS_OUTCOME",
+          "RF_STRONG_CHERRY_BONUS",
+          "RF_DIAGONAL_WATERMELON_BONUS"
+        ],
+        "note": "低設定1・2と高設定5・6を同じ事前確率で比較します。設定3・4はこの参考指標のみ除外します。独立性を仮定せず、通常時の単独要素で算出した参考値です。",
+        "numericalIntegration": {
+          "method": "STRATIFIED_MULTINOMIAL_MONTE_CARLO",
+          "samplesPerSetting": 131072,
+          "seed": 3888463309,
+          "source": "Frozen Candidate Contract; Manifest HLD-001"
+        }
+      },
+      "unresolved": []
+    }
+  }
 }

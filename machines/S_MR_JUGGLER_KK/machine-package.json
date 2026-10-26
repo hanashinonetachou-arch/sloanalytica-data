@@ -1,12 +1,16 @@
 {
   "schemaVersion": 1,
+  "provenance": {
+    "manifestVersion": "8.5",
+    "generationPath": "V8_5_PRODUCTION_PIPELINE",
+    "legacyOracleUsed": false
+  },
   "machine": {
     "schemaVersion": "2.0.0",
     "machineId": "S_MR_JUGGLER_KK",
-    "machineDataVersion": "0.1.0",
+    "machineDataVersion": "8.5.1-batch-20261026-026",
     "displayName": "ミスタージャグラー",
-    "modelName": "SミスタージャグラーKK",
-    "manufacturer": "北電子",
+    "modelName": "ミスタージャグラー",
     "settings": [
       "SET_1",
       "SET_2",
@@ -19,294 +23,639 @@
       "offlineCapable": true,
       "containsImages": false,
       "containsExecutableCode": false
-    },
-    "introductionDate": "2024-07-22",
-    "machineType": "MEDAL",
-    "gameType": "A_TYPE"
+    }
   },
   "inputs": {
     "schemaVersion": "2.0.0",
     "inputs": [
       {
-        "id": "INP_PREDECESSOR_GAMES",
-        "name": "着席時ゲーム数",
-        "category": "PREDECESSOR",
+        "id": "RF_MRJ_PREDECESSOR_BONUS_OUTCOME.eligibleTrialCount",
+        "name": "通常ゲーム数",
+        "category": "V8_NUMERIC",
         "type": "integer",
         "unit": "G",
+        "defaultValue": 0,
+        "minimum": 0,
         "displayOrder": 1,
-        "inferenceRole": "EXCLUDE",
-        "observationScope": "PREDECESSOR_SNAPSHOT",
-        "defaultValue": 0,
-        "minimum": 0
+        "inferenceRole": "INCLUDE_SUPPORT",
+        "observationScope": "PREDECESSOR_SNAPSHOT"
       },
       {
-        "id": "INP_PREDECESSOR_BIG_COUNT",
-        "name": "着席時BIG",
-        "category": "PREDECESSOR",
+        "id": "RF_MRJ_PREDECESSOR_BONUS_OUTCOME.categoryCounts.1_BIG",
+        "name": "BIG",
+        "category": "V8_NUMERIC",
         "type": "counter",
         "unit": "回",
+        "defaultValue": 0,
+        "minimum": 0,
         "displayOrder": 2,
-        "inferenceRole": "EXCLUDE",
-        "observationScope": "PREDECESSOR_SNAPSHOT",
-        "defaultValue": 0,
-        "minimum": 0
+        "parentInputId": "RF_MRJ_PREDECESSOR_BONUS_OUTCOME.eligibleTrialCount",
+        "inferenceRole": "INCLUDE_SUPPORT",
+        "observationScope": "PREDECESSOR_SNAPSHOT"
       },
       {
-        "id": "INP_PREDECESSOR_REG_COUNT",
-        "name": "着席時REG",
-        "category": "PREDECESSOR",
+        "id": "RF_MRJ_PREDECESSOR_BONUS_OUTCOME.categoryCounts.2_REG",
+        "name": "REG",
+        "category": "V8_NUMERIC",
         "type": "counter",
         "unit": "回",
-        "displayOrder": 3,
-        "inferenceRole": "EXCLUDE",
-        "observationScope": "PREDECESSOR_SNAPSHOT",
         "defaultValue": 0,
-        "minimum": 0
+        "minimum": 0,
+        "displayOrder": 3,
+        "parentInputId": "RF_MRJ_PREDECESSOR_BONUS_OUTCOME.eligibleTrialCount",
+        "inferenceRole": "INCLUDE_SUPPORT",
+        "observationScope": "PREDECESSOR_SNAPSHOT"
       },
       {
-        "id": "INP_NORMAL_GAMES",
-        "name": "自分のゲーム数",
-        "category": "SELF_PLAY",
+        "id": "RF_MRJ_PREDECESSOR_BONUS_OUTCOME.categoryCounts.3_その他",
+        "name": "その他",
+        "category": "V8_NUMERIC",
+        "type": "counter",
+        "unit": "回",
+        "defaultValue": 0,
+        "minimum": 0,
+        "displayOrder": 4,
+        "parentInputId": "RF_MRJ_PREDECESSOR_BONUS_OUTCOME.eligibleTrialCount",
+        "inferenceRole": "INCLUDE_SUPPORT",
+        "inputVisible": false,
+        "derivedCalculation": "linear_combination",
+        "derivedTerms": [
+          {
+            "inputId": "RF_MRJ_PREDECESSOR_BONUS_OUTCOME.eligibleTrialCount",
+            "multiplier": 1
+          },
+          {
+            "inputId": "RF_MRJ_PREDECESSOR_BONUS_OUTCOME.categoryCounts.1_BIG",
+            "multiplier": -1
+          },
+          {
+            "inputId": "RF_MRJ_PREDECESSOR_BONUS_OUTCOME.categoryCounts.2_REG",
+            "multiplier": -1
+          }
+        ],
+        "observationScope": "PREDECESSOR_SNAPSHOT"
+      },
+      {
+        "id": "RF_MRJ_SELF_BONUS_OUTCOME.eligibleTrialCount",
+        "name": "通常ゲーム数",
+        "category": "V8_NUMERIC",
         "type": "integer",
         "unit": "G",
-        "displayOrder": 10,
-        "inferenceRole": "INCLUDE_PRIMARY",
-        "observationScope": "SELF_PLAY",
         "defaultValue": 0,
-        "minimum": 0
+        "minimum": 0,
+        "displayOrder": 5,
+        "inferenceRole": "INCLUDE_PRIMARY",
+        "observationScope": "SELF_PLAY"
       },
       {
-        "id": "INP_BIG_COUNT",
+        "id": "RF_MRJ_SELF_BONUS_OUTCOME.categoryCounts.1_BIG",
         "name": "BIG",
-        "category": "SELF_PLAY",
+        "category": "V8_NUMERIC",
         "type": "counter",
         "unit": "回",
-        "displayOrder": 11,
-        "inferenceRole": "INCLUDE_PRIMARY",
-        "observationScope": "SELF_PLAY",
         "defaultValue": 0,
-        "minimum": 0
+        "minimum": 0,
+        "displayOrder": 6,
+        "parentInputId": "RF_MRJ_SELF_BONUS_OUTCOME.eligibleTrialCount",
+        "inferenceRole": "INCLUDE_PRIMARY",
+        "observationScope": "SELF_PLAY"
       },
       {
-        "id": "INP_REG_COUNT",
+        "id": "RF_MRJ_SELF_BONUS_OUTCOME.categoryCounts.2_REG",
         "name": "REG",
-        "category": "SELF_PLAY",
+        "category": "V8_NUMERIC",
         "type": "counter",
         "unit": "回",
-        "displayOrder": 12,
+        "defaultValue": 0,
+        "minimum": 0,
+        "displayOrder": 7,
+        "parentInputId": "RF_MRJ_SELF_BONUS_OUTCOME.eligibleTrialCount",
+        "inferenceRole": "INCLUDE_PRIMARY",
+        "observationScope": "SELF_PLAY"
+      },
+      {
+        "id": "RF_MRJ_SELF_BONUS_OUTCOME.categoryCounts.3_その他",
+        "name": "その他",
+        "category": "V8_NUMERIC",
+        "type": "counter",
+        "unit": "回",
+        "defaultValue": 0,
+        "minimum": 0,
+        "displayOrder": 8,
+        "parentInputId": "RF_MRJ_SELF_BONUS_OUTCOME.eligibleTrialCount",
         "inferenceRole": "INCLUDE_PRIMARY",
         "observationScope": "SELF_PLAY",
+        "inputVisible": false,
+        "derivedCalculation": "linear_combination",
+        "derivedTerms": [
+          {
+            "inputId": "RF_MRJ_SELF_BONUS_OUTCOME.eligibleTrialCount",
+            "multiplier": 1
+          },
+          {
+            "inputId": "RF_MRJ_SELF_BONUS_OUTCOME.categoryCounts.1_BIG",
+            "multiplier": -1
+          },
+          {
+            "inputId": "RF_MRJ_SELF_BONUS_OUTCOME.categoryCounts.2_REG",
+            "multiplier": -1
+          }
+        ]
+      },
+      {
+        "id": "REC_GRAPE_COUNT",
+        "name": "ブドウ回数（記録のみ）",
+        "category": "EVIDENCE_REFERENCE",
+        "type": "counter",
+        "unit": "回",
         "defaultValue": 0,
-        "minimum": 0
+        "minimum": 0,
+        "inferenceRole": "DISPLAY_ONLY"
       }
     ]
   },
   "features": {
-    "schemaVersion": "2.0.0",
+    "version": "8.5-runtime",
     "features": [
       {
-        "featureId": "FEAT_SELF_BONUS_OUTCOME",
-        "name": "自分のBIG・REG内訳",
-        "adoptionCategory": "INCLUDE_PRIMARY",
+        "featureId": "RF_MRJ_PREDECESSOR_BONUS_OUTCOME",
+        "name": "着席時BIG・REG内訳",
+        "trialUniverse": "PREDECESSOR_NORMAL_GAME_TRIAL",
+        "adoptionCategory": "INCLUDE_SUPPORT",
         "calculationRole": "PROBABILITY",
         "probabilityEngineUsage": true,
-        "modelType": "multinomial",
-        "minimumSample": 1000,
-        "sampleRecommendation": 10000,
-        "reliabilityProfile": {
-          "weight": 1
-        },
-        "numeratorInputId": "INP_BIG_COUNT",
-        "denominatorInputId": "INP_NORMAL_GAMES",
-        "categoryInputIds": [
-          "INP_REG_COUNT"
-        ],
+        "denominatorInputId": "RF_MRJ_PREDECESSOR_BONUS_OUTCOME.eligibleTrialCount",
         "probabilities": {},
-        "categoryLabels": [
-          "BIG",
-          "REG"
+        "selectionRationale": {
+          "summary": "設定推測に採用された要素です。",
+          "adoptionReason": "着席時BIG・REG内訳の「その他」の割合は設定6 99.16%、設定1 99.36%と設定差があります。「通常ゲーム数」を基準に、記録したカテゴリの振り分けを比較して推測に使用します。 観測条件：着席前の総GとBIG・REG。",
+          "shortTermReason": "標本が少ない間は結果の振れが大きくなります。",
+          "longTermReason": "観測数が増えるほど設定別の比較が安定します。"
+        },
+        "modelType": "multinomial",
+        "numeratorInputId": "RF_MRJ_PREDECESSOR_BONUS_OUTCOME.categoryCounts.1_BIG",
+        "categoryInputIds": [
+          "RF_MRJ_PREDECESSOR_BONUS_OUTCOME.categoryCounts.2_REG",
+          "RF_MRJ_PREDECESSOR_BONUS_OUTCOME.categoryCounts.3_その他"
         ],
         "categoryProbabilities": {
           "SET_1": [
-            0.003723008190618019,
-            0.0026702269692923898
+            0.003723008190618,
+            0.0026702269692924,
+            0.9936067648400896
           ],
           "SET_2": [
-            0.003738317757009346,
-            0.0028232636928289105
+            0.0037383177570093,
+            0.0028232636928289,
+            0.9934384185501618
           ],
           "SET_3": [
-            0.0038446751249519412,
-            0.0030211480362537764
+            0.0038446751249519,
+            0.0030211480362538003,
+            0.9931341768387943
           ],
           "SET_4": [
-            0.004012841091492777,
-            0.0034328870580157913
+            0.0040128410914928,
+            0.0034328870580158,
+            0.9925542718504914
           ],
           "SET_5": [
             0.004151100041511,
-            0.0038910505836575876
+            0.0038910505836575997,
+            0.9919578493748314
           ],
           "SET_6": [
-            0.004212299915754001,
-            0.004212299915754001
+            0.004212299915754,
+            0.004212299915754,
+            0.991575400168492
           ]
         },
-        "sourceEvidenceRefs": [
-          "SRC_KITAC_OFFICIAL",
-          "SRC_NANAPRESS"
-        ]
+        "displayFormat": "percentage"
+      },
+      {
+        "featureId": "RF_MRJ_SELF_BONUS_OUTCOME",
+        "name": "自分のBIG・REG内訳",
+        "trialUniverse": "NORMAL_GAME_TRIAL",
+        "adoptionCategory": "INCLUDE_PRIMARY",
+        "calculationRole": "PROBABILITY",
+        "probabilityEngineUsage": true,
+        "denominatorInputId": "RF_MRJ_SELF_BONUS_OUTCOME.eligibleTrialCount",
+        "probabilities": {},
+        "selectionRationale": {
+          "summary": "設定推測に採用された要素です。",
+          "adoptionReason": "自分のBIG・REG内訳の「その他」の割合は設定6 99.16%、設定1 99.36%と設定差があります。「通常ゲーム数」を基準に、記録したカテゴリの振り分けを比較して推測に使用します。 観測条件：自分が観測した通常時の総G。",
+          "shortTermReason": "標本が少ない間は結果の振れが大きくなります。",
+          "longTermReason": "観測数が増えるほど設定別の比較が安定します。"
+        },
+        "modelType": "multinomial",
+        "numeratorInputId": "RF_MRJ_SELF_BONUS_OUTCOME.categoryCounts.1_BIG",
+        "categoryInputIds": [
+          "RF_MRJ_SELF_BONUS_OUTCOME.categoryCounts.2_REG",
+          "RF_MRJ_SELF_BONUS_OUTCOME.categoryCounts.3_その他"
+        ],
+        "categoryProbabilities": {
+          "SET_1": [
+            0.003723008190618,
+            0.0026702269692924,
+            0.9936067648400896
+          ],
+          "SET_2": [
+            0.0037383177570093,
+            0.0028232636928289,
+            0.9934384185501618
+          ],
+          "SET_3": [
+            0.0038446751249519,
+            0.0030211480362538003,
+            0.9931341768387943
+          ],
+          "SET_4": [
+            0.0040128410914928,
+            0.0034328870580158,
+            0.9925542718504914
+          ],
+          "SET_5": [
+            0.004151100041511,
+            0.0038910505836575997,
+            0.9919578493748314
+          ],
+          "SET_6": [
+            0.004212299915754,
+            0.004212299915754,
+            0.991575400168492
+          ]
+        },
+        "displayFormat": "percentage"
+      }
+    ],
+    "runtimeProjection": [
+      {
+        "featureId": "RF_MRJ_PREDECESSOR_BONUS_OUTCOME",
+        "runtimeStatus": "ACTIVE",
+        "metric": "PER_ELIGIBLE_TRIAL_POWER",
+        "metricValue": 0.014870860853496981,
+        "importance": "微小"
+      },
+      {
+        "featureId": "RF_MRJ_SELF_BONUS_OUTCOME",
+        "runtimeStatus": "ACTIVE",
+        "metric": "SELECTION_SCORE",
+        "metricValue": 77.55697918659287,
+        "importance": "主要"
       }
     ]
   },
   "evidence": {
-    "version": "1.0.0",
+    "version": "8.5-runtime",
     "evidences": [],
-    "sources": [
-      {
-        "id": "SRC_KITAC_OFFICIAL",
-        "classification": "OFFICIAL",
-        "pageName": "ミスタージャグラー｜パチスロ製品情報",
-        "url": "https://www.kitadenshi.co.jp/slot/mrjuggler/",
-        "checkedAt": "2026-08-14"
-      },
-      {
-        "id": "SRC_DMM_MACHINE",
-        "classification": "ANALYSIS",
-        "pageName": "ミスタージャグラー 機種情報",
-        "url": "https://p-town.dmm.com/machines/4588",
-        "checkedAt": "2026-08-14"
-      },
-      {
-        "id": "SRC_NANAPRESS",
-        "classification": "ANALYSIS",
-        "pageName": "ミスタージャグラー 設定判別要素まとめ",
-        "url": "https://nana-press.com/kaiseki/machine/779/22879/",
-        "checkedAt": "2026-08-14"
-      },
-      {
-        "id": "SRC_KENSLO",
-        "classification": "ANALYSIS",
-        "pageName": "ミスタージャグラー 解析情報",
-        "url": "https://kenslo65536.com/kaiseki/juggler-mr.html",
-        "checkedAt": "2026-08-14"
-      }
-    ]
+    "references": []
   },
+  "blockedItems": [
+    {
+      "blockId": "RF_MRJ_SINGLE_REG_CANDIDATE",
+      "label": "単独REG",
+      "reason": "全設定の同じ定義の発生率が確認できない。告知時にチェリーが見えた回数を内部の当選契機と同一視せず、REG合計との二重利用もしない。",
+      "reevaluationCondition": "不足している設定別の値または観測条件を裏付ける新たな具体的な公開資料が確認された場合。",
+      "disposition": "CLOSED_SOURCE_BOUNDED",
+      "runtimeUse": "DISABLED",
+      "reopenPolicy": "NEW_CONCRETE_SOURCE_ONLY",
+      "retainedSourceData": {
+        "legacyCandidate": {
+          "researchFeatureId": "RF_MRJ_SINGLE_REG_CANDIDATE",
+          "name": "単独REG",
+          "factStatus": "observed",
+          "candidateModel": "binomial",
+          "trialUnit": "通常時1G",
+          "observationScope": "通常時",
+          "numeratorDefinition": "単独REG回数",
+          "denominatorDefinition": "通常時ゲーム数",
+          "settingValues": {},
+          "sourceRefs": [
+            "SRC_NANAPRESS",
+            "SRC_KENSLO"
+          ],
+          "crossSourceStatus": "multiple_sources",
+          "sourceWording": "詳細ボーナス契機の設定別値は予測値として流通しているが、メーカー公式解析値として確認できない。",
+          "notes": "REG全体の部分集合で依存が強く、公開値も予測値のため統計入力には使用しない。"
+        }
+      },
+      "sourceIds": [
+        "SRC_NANAPRESS"
+      ]
+    },
+    {
+      "blockId": "RF_MRJ_CHERRY_REG_CANDIDATE",
+      "label": "チェリー重複REG",
+      "reason": "全設定の同じ定義の発生率が確認できない。告知時にチェリーが見えた回数を内部の当選契機と同一視せず、REG合計との二重利用もしない。",
+      "reevaluationCondition": "不足している設定別の値または観測条件を裏付ける新たな具体的な公開資料が確認された場合。",
+      "disposition": "CLOSED_SOURCE_BOUNDED",
+      "runtimeUse": "DISABLED",
+      "reopenPolicy": "NEW_CONCRETE_SOURCE_ONLY",
+      "retainedSourceData": {
+        "legacyCandidate": {
+          "researchFeatureId": "RF_MRJ_CHERRY_REG_CANDIDATE",
+          "name": "チェリー重複REG",
+          "factStatus": "observed",
+          "candidateModel": "binomial",
+          "trialUnit": "通常時1G",
+          "observationScope": "通常時",
+          "numeratorDefinition": "チェリー重複REG回数",
+          "denominatorDefinition": "通常時ゲーム数",
+          "settingValues": {},
+          "sourceRefs": [
+            "SRC_NANAPRESS",
+            "SRC_KENSLO"
+          ],
+          "crossSourceStatus": "multiple_sources",
+          "sourceWording": "詳細ボーナス契機の設定別値は予測値として流通しているが、メーカー公式解析値として確認できない。",
+          "notes": "REG全体の部分集合で依存が強く、公開値も予測値のため統計入力には使用しない。"
+        }
+      },
+      "sourceIds": [
+        "SRC_NANAPRESS"
+      ]
+    },
+    {
+      "blockId": "RF_CHERRY_MARGINAL",
+      "label": "チェリー出現率",
+      "reason": "実戦記事ごとにボーナス同時当選を含む回数と含まない回数が混在する。定義が異なる値は平均せず、全設定の比較分布も作らない。",
+      "reevaluationCondition": "不足している設定別の値または観測条件を裏付ける新たな具体的な公開資料が確認された場合。",
+      "disposition": "CLOSED_SOURCE_BOUNDED",
+      "runtimeUse": "DISABLED",
+      "reopenPolicy": "NEW_CONCRETE_SOURCE_ONLY",
+      "sourceIds": [
+        "SRC_NANAPRESS",
+        "SRC_20261026_89c0f52604",
+        "SRC_20261026_3b6e4c43c4"
+      ]
+    },
+    {
+      "blockId": "RF_RARE_ROLES",
+      "label": "ベル・ピエロ出現率",
+      "reason": "機種固有の全設定の出現率が確認できず、取りこぼしもあり得る。前機種や逆算表で不足値を補わない。",
+      "reevaluationCondition": "不足している設定別の値または観測条件を裏付ける新たな具体的な公開資料が確認された場合。",
+      "disposition": "CLOSED_SOURCE_BOUNDED",
+      "runtimeUse": "DISABLED",
+      "reopenPolicy": "NEW_CONCRETE_SOURCE_ONLY",
+      "sourceIds": [
+        "SRC_NANAPRESS"
+      ]
+    },
+    {
+      "blockId": "RF_PREMIUM_EFFECTS",
+      "label": "プレミアム告知・楽曲・ランプ",
+      "reason": "ボーナス告知や楽曲変化であり、設定ごとの出現率や設定番号の確定条件は確認できない。高設定の数値情報として扱わない。",
+      "reevaluationCondition": "不足している設定別の値または観測条件を裏付ける新たな具体的な公開資料が確認された場合。",
+      "disposition": "CLOSED_SOURCE_BOUNDED",
+      "runtimeUse": "DISABLED",
+      "reopenPolicy": "NEW_CONCRETE_SOURCE_ONLY",
+      "sourceIds": [
+        "SRC_NANAPRESS"
+      ]
+    },
+    {
+      "blockId": "RF_SINGLE_BIG_SPLIT",
+      "label": "単独BIG・チェリー重複BIG",
+      "reason": "BIG合計の内訳として候補を保持するが、同一定義の全設定率が確認できない。告知時の停止役だけで内部契機を決めず、BIG合計との二重評価もしない。",
+      "reevaluationCondition": "不足している設定別の値または観測条件を裏付ける新たな具体的な公開資料が確認された場合。",
+      "disposition": "CLOSED_SOURCE_BOUNDED",
+      "runtimeUse": "DISABLED",
+      "reopenPolicy": "NEW_CONCRETE_SOURCE_ONLY",
+      "sourceIds": [
+        "SRC_NANAPRESS"
+      ]
+    },
+    {
+      "blockId": "RF_PIERROT_BONUS",
+      "label": "ピエロ重複ボーナス",
+      "reason": "この機種にはピエロ重複があるが、全設定の同一定義の発生率が確認できない。実戦1例の比率を設定別の母集団確率へ転用しない。",
+      "reevaluationCondition": "不足している設定別の値または観測条件を裏付ける新たな具体的な公開資料が確認された場合。",
+      "disposition": "CLOSED_SOURCE_BOUNDED",
+      "runtimeUse": "DISABLED",
+      "reopenPolicy": "NEW_CONCRETE_SOURCE_ONLY",
+      "sourceIds": [
+        "SRC_20261026_89c0f52604",
+        "SRC_20261026_3b6e4c43c4"
+      ]
+    }
+  ],
   "ui": {
-    "sections": [
+    "schemaVersion": "v8.5-runtime-ui-v1",
+    "contractVersion": "runtime-ui-v8",
+    "source": "CANONICAL_UI",
+    "sourceSchemaVersion": "canonical-ui-v1",
+    "manifestRevision": "8.5",
+    "playInfo": {
+      "visible": true,
+      "collapsible": false,
+      "mode": "TOTAL_ONLY",
+      "sessionFields": [
+        {
+          "id": "date",
+          "label": "日付",
+          "mode": "DATE"
+        },
+        {
+          "id": "storeName",
+          "label": "店舗名",
+          "mode": "TEXT"
+        },
+        {
+          "id": "machineNumber",
+          "label": "台番号",
+          "mode": "TEXT"
+        }
+      ],
+      "startFields": [
+        {
+          "id": "startTotalGames",
+          "label": "着席時 総ゲーム数",
+          "mode": "NUMBER",
+          "directNumeric": true
+        }
+      ],
+      "currentFields": [
+        {
+          "id": "currentTotalGames",
+          "label": "現在 総ゲーム数",
+          "mode": "NUMBER",
+          "directNumeric": true
+        }
+      ],
+      "difference": {
+        "autoCalculate": true
+      },
+      "useDifference": {
+        "label": "着席時との差分を使用",
+        "defaultWhenStartNormalGamesPresent": true
+      }
+    },
+    "gameCountPolicy": "TOTAL_ONLY",
+    "accordion": {
+      "enabled": true,
+      "singleOpen": true
+    },
+    "quickInput": {
+      "enabled": false
+    },
+    "v8Sections": [
       {
-        "id": "UI_DESIGN_1",
-        "title": "着席時データ",
-        "displayOrder": 1,
+        "id": "OBS_RF_MRJ_PREDECESSOR_BONUS_OUTCOME",
+        "title": "着席時BIG・REG内訳",
+        "collapsible": true,
+        "defaultExpanded": false,
+        "description": "着席前の総GとBIG・REG。自分の区間と重複させず、ボーナス消化中のGを含めない。\n・注意：自分の区間と重複させず、ボーナス消化中のGを含めない。",
+        "descriptionPresentation": {
+          "collapsible": true,
+          "label": "説明",
+          "defaultExpanded": false
+        },
         "items": [
           {
-            "type": "input",
-            "inputId": "INP_PREDECESSOR_GAMES",
-            "label": "着席時ゲーム数",
-            "widget": "number"
-          },
-          {
-            "type": "input",
-            "inputId": "INP_PREDECESSOR_BIG_COUNT",
-            "label": "着席時BIG",
-            "widget": "counter",
-            "gridSpan": 6,
-            "config": {
-              "compact": true
-            }
-          },
-          {
-            "type": "input",
-            "inputId": "INP_PREDECESSOR_REG_COUNT",
-            "label": "着席時REG",
-            "widget": "counter",
-            "gridSpan": 6,
-            "config": {
-              "compact": true
+            "id": "NODE_RF_MRJ_PREDECESSOR_BONUS_OUTCOME",
+            "featureId": "RF_MRJ_PREDECESSOR_BONUS_OUTCOME",
+            "title": "着席時BIG・REG内訳",
+            "interaction": {
+              "type": "CATEGORY_COUNTERS",
+              "preservePriorObservations": true,
+              "showAccumulatedCounts": true,
+              "categoryCoverage": "NON_EXHAUSTIVE",
+              "totalOpportunities": "SEPARATE_COUNTER",
+              "opportunityTracking": {
+                "type": "SEPARATE_COUNTER",
+                "inputId": "RF_MRJ_PREDECESSOR_BONUS_OUTCOME.eligibleTrialCount",
+                "label": "通常ゲーム数",
+                "directNumeric": true,
+                "quickAdd": [
+                  50
+                ],
+                "playDataBinding": {
+                  "source": "PLAY_START_TOTAL_GAMES",
+                  "mode": "AUTO_EXACT",
+                  "exactness": "EXACT_ONLY"
+                }
+              },
+              "categories": [
+                {
+                  "id": "RF_MRJ_PREDECESSOR_BONUS_OUTCOME.categoryCounts.1_BIG",
+                  "inputId": "RF_MRJ_PREDECESSOR_BONUS_OUTCOME.categoryCounts.1_BIG",
+                  "label": "BIG",
+                  "directNumeric": true,
+                  "compactCounter": true,
+                  "quickAdd": [
+                    1
+                  ]
+                },
+                {
+                  "id": "RF_MRJ_PREDECESSOR_BONUS_OUTCOME.categoryCounts.2_REG",
+                  "inputId": "RF_MRJ_PREDECESSOR_BONUS_OUTCOME.categoryCounts.2_REG",
+                  "label": "REG",
+                  "directNumeric": true,
+                  "compactCounter": true,
+                  "quickAdd": [
+                    1
+                  ]
+                }
+              ]
             }
           }
         ]
       },
       {
-        "id": "UI_DESIGN_2",
-        "title": "自分の区間",
-        "displayOrder": 2,
+        "id": "OBS_RF_MRJ_SELF_BONUS_OUTCOME",
+        "title": "自分のBIG・REG内訳",
+        "collapsible": true,
+        "defaultExpanded": false,
+        "description": "自分が観測した通常時の総G。ボーナス消化中のGを含めず、着席前のGや当選を再加算しない。\n・注意：ボーナス消化中のGを含めず、着席前のGや当選を再加算しない。",
+        "descriptionPresentation": {
+          "collapsible": true,
+          "label": "説明",
+          "defaultExpanded": false
+        },
         "items": [
           {
-            "type": "input",
-            "inputId": "INP_NORMAL_GAMES",
-            "label": "自分のゲーム数",
-            "widget": "number"
-          },
-          {
-            "type": "input",
-            "inputId": "INP_BIG_COUNT",
-            "label": "BIG",
-            "widget": "counter",
-            "gridSpan": 6,
-            "config": {
-              "compact": true
+            "id": "NODE_RF_MRJ_SELF_BONUS_OUTCOME",
+            "featureId": "RF_MRJ_SELF_BONUS_OUTCOME",
+            "title": "自分のBIG・REG内訳",
+            "interaction": {
+              "type": "CATEGORY_COUNTERS",
+              "preservePriorObservations": true,
+              "showAccumulatedCounts": true,
+              "categoryCoverage": "NON_EXHAUSTIVE",
+              "totalOpportunities": "SEPARATE_COUNTER",
+              "categories": [
+                {
+                  "id": "RF_MRJ_SELF_BONUS_OUTCOME.categoryCounts.1_BIG",
+                  "inputId": "RF_MRJ_SELF_BONUS_OUTCOME.categoryCounts.1_BIG",
+                  "label": "BIG",
+                  "directNumeric": true,
+                  "compactCounter": true,
+                  "quickAdd": [
+                    1
+                  ]
+                },
+                {
+                  "id": "RF_MRJ_SELF_BONUS_OUTCOME.categoryCounts.2_REG",
+                  "inputId": "RF_MRJ_SELF_BONUS_OUTCOME.categoryCounts.2_REG",
+                  "label": "REG",
+                  "directNumeric": true,
+                  "compactCounter": true,
+                  "quickAdd": [
+                    1
+                  ]
+                }
+              ],
+              "opportunityTracking": {
+                "type": "SEPARATE_COUNTER",
+                "inputId": "RF_MRJ_SELF_BONUS_OUTCOME.eligibleTrialCount",
+                "label": "総ゲーム数",
+                "directNumeric": true,
+                "quickAdd": [
+                  50
+                ],
+                "playDataBinding": {
+                  "source": "PLAY_TOTAL_GAME_DELTA",
+                  "mode": "AUTO_EXACT",
+                  "exactness": "EXACT_ONLY"
+                }
+              }
             }
-          },
+          }
+        ]
+      },
+      {
+        "id": "EVI_GRAPE_REFERENCE",
+        "title": "ブドウ（記録のみ）",
+        "collapsible": true,
+        "defaultExpanded": false,
+        "description": "実戦値は確認済みの設定のみ保持しています。全設定の分布が揃わないため推測計算には使用しません。",
+        "descriptionPresentation": {
+          "collapsible": true,
+          "label": "説明",
+          "defaultExpanded": false
+        },
+        "items": [
           {
-            "type": "input",
-            "inputId": "INP_REG_COUNT",
-            "label": "REG",
-            "widget": "counter",
-            "gridSpan": 6,
-            "config": {
-              "compact": true
+            "id": "NODE_GRAPE_REFERENCE",
+            "label": "ブドウ回数",
+            "interaction": {
+              "type": "CATEGORY_COUNTERS",
+              "categoryCoverage": "NON_EXHAUSTIVE",
+              "totalOpportunities": "NONE",
+              "categories": [
+                {
+                  "id": "REC_GRAPE_COUNT",
+                  "inputId": "REC_GRAPE_COUNT",
+                  "label": "ブドウ",
+                  "meaning": "記録のみ・推測計算には使用しない"
+                }
+              ]
             }
           }
         ]
       }
     ]
   },
-  "selectionSummary": {
-    "schemaVersion": "selection-summary-v1",
-    "evaluatedCount": 5,
-    "selectedCount": 1,
-    "rejectedCount": 4,
-    "selected": [
-      {
-        "featureId": "FEAT_SELF_BONUS_OUTCOME",
-        "name": "自分のBIG・REG内訳",
-        "reason": "BIG・REG・非ボーナスを一体で評価し、合算の二重計上を避けます。",
-        "requiredTrials": {
-          "value": 9589,
-          "unit": "自分のゲーム"
-        }
-      }
-    ],
-    "rejected": [
-      {
-        "featureId": "FEAT_PREDECESSOR_BONUS_OUTCOME",
-        "name": "着席時BIG・REG内訳",
-        "reason": "着席時入力欄は記録用として残しますが、機種固有の実機確認完了まで前任者Featureは推測不参加とします。",
-        "requiredTrials": {
-          "value": 9589,
-          "unit": "通常時1G"
-        }
-      },
-      {
-        "featureId": "FEAT_MRJ_GRAPE_CANDIDATE",
-        "name": "ブドウ",
-        "reason": "公式の設定別解析値として確認できない。"
-      },
-      {
-        "featureId": "FEAT_MRJ_SINGLE_REG_CANDIDATE",
-        "name": "単独REG",
-        "reason": "REG全体と重複し、公開値は予測値。"
-      },
-      {
-        "featureId": "FEAT_MRJ_CHERRY_REG_CANDIDATE",
-        "name": "チェリー重複REG",
-        "reason": "REG全体と重複し、公開値は予測値。"
-      }
-    ]
-  },
-  "reliability": {},
   "metadata": {
     "machineId": "S_MR_JUGGLER_KK",
     "displayName": "ミスタージャグラー",
@@ -318,12 +667,355 @@
       "SET_5",
       "SET_6"
     ],
-    "uiDesignMaterialized": true,
-    "uiDesignSchemaVersion": "ui-design-data-v1",
-    "uiDesignStatus": "PASS"
+    "settingsStatus": "SOURCE_DERIVED",
+    "grapeReference": {
+      "6": {
+        "independentSites": [
+          {
+            "site": "Nana",
+            "hits": 524,
+            "eligibleNormalGames": 2988,
+            "probability": 0.1753681392235609,
+            "reciprocal": 5.702290076335878,
+            "originalUrl": "https://nana-press.com/post/1618292",
+            "verifiedAt": "2026-10-26",
+            "verificationBasis": "INHERITED_ORIGINAL_SOURCE_RECORD",
+            "sampleType": "ORIGINAL_FIELD_TRIAL",
+            "manufacturerPublished": false
+          },
+          {
+            "site": "1geki",
+            "hits": 1100,
+            "eligibleNormalGames": 6604,
+            "probability": 0.1665657177468201,
+            "reciprocal": 6.003636363636364,
+            "originalUrl": "https://1geki.jp/slot/s_mrjuggler/6/",
+            "verifiedAt": "2026-10-26",
+            "verificationBasis": "INHERITED_ORIGINAL_SOURCE_RECORD",
+            "sampleType": "ORIGINAL_FIELD_TRIAL",
+            "manufacturerPublished": false
+          }
+        ],
+        "equalSiteMeanProbability": 0.17096692848519052,
+        "reciprocalOfProbabilityMean": 5.849084433230734,
+        "siteCount": 2,
+        "samplingStandardError": 0.004165907593482058,
+        "approx95SamplingInterval": [
+          0.1628017496019657,
+          0.17913210736841534
+        ],
+        "intervalMeaning": "Binomial field-sample approximation; does not cover site selection, play bias, uncertain true setting, or definition errors. Not a likelihood for missing settings."
+      }
+    },
+    "manifestVersion": "8.5",
+    "observationPrerequisites": [],
+    "batch026Integration": {
+      "contract": "batch026-observation-contract-v1",
+      "rawCandidateCommit": "55d81dc66dadf57772ab30f78b71add4beef28df",
+      "deviceQa": "NOT_PERFORMED",
+      "ledgerCandidatesRetained": true,
+      "sourceBoundedLimitationsRetained": true,
+      "inputAliases": {}
+    },
+    "candidateLedger": [
+      {
+        "candidateId": "RF_MRJ_PREDECESSOR_BONUS_OUTCOME",
+        "label": "着席時BIG・REG内訳",
+        "sourceClaims": [
+          {
+            "sourceId": "SRC_NANAPRESS",
+            "claim": "着席時BIG・REG内訳：着席前の総GとBIG・REG。自分の区間と重複させず、ボーナス消化中のGを含めない。"
+          }
+        ],
+        "discoveryQueries": [
+          "ミスタージャグラー 設定別ボーナスと対象ゲーム数"
+        ],
+        "disposition": {
+          "type": "FINDING",
+          "refId": "RF_MRJ_PREDECESSOR_BONUS_OUTCOME"
+        }
+      },
+      {
+        "candidateId": "RF_MRJ_SELF_BONUS_OUTCOME",
+        "label": "自分のBIG・REG内訳",
+        "sourceClaims": [
+          {
+            "sourceId": "SRC_NANAPRESS",
+            "claim": "自分のBIG・REG内訳：自分が観測した通常時の総G。ボーナス消化中のGを含めず、着席前のGや当選を再加算しない。"
+          }
+        ],
+        "discoveryQueries": [
+          "ミスタージャグラー 小役とボーナスの重複関係"
+        ],
+        "disposition": {
+          "type": "FINDING",
+          "refId": "RF_MRJ_SELF_BONUS_OUTCOME"
+        }
+      },
+      {
+        "candidateId": "RF_MRJ_GRAPE_CANDIDATE",
+        "label": "ブドウ（実戦推定・設定別分布不完全）",
+        "sourceClaims": [
+          {
+            "sourceId": "SRC_20261026_89c0f52604",
+            "claim": "ブドウ（実戦推定・設定別分布不完全）：BIG・REGと共用する総G。ボーナス中を除く。ブドウは共通・単独合算を数える。"
+          },
+          {
+            "sourceId": "SRC_20261026_3b6e4c43c4",
+            "claim": "ブドウ（実戦推定・設定別分布不完全）：BIG・REGと共用する総G。ボーナス中を除く。ブドウは共通・単独合算を数える。"
+          }
+        ],
+        "discoveryQueries": [
+          "ミスタージャグラー 設定示唆と観測条件"
+        ],
+        "disposition": {
+          "type": "FINDING",
+          "refId": "RF_MRJ_GRAPE_CANDIDATE"
+        }
+      },
+      {
+        "candidateId": "RF_MRJ_SINGLE_REG_CANDIDATE",
+        "label": "単独REG",
+        "sourceClaims": [
+          {
+            "sourceId": "SRC_NANAPRESS",
+            "claim": "単独REG：全設定の同じ定義の発生率が確認できない。告知時にチェリーが見えた回数を内部の当選契機と同一視せず、REG合計との二重利用もしない。"
+          }
+        ],
+        "discoveryQueries": [],
+        "disposition": {
+          "type": "BLOCKED",
+          "refId": "RF_MRJ_SINGLE_REG_CANDIDATE"
+        }
+      },
+      {
+        "candidateId": "RF_MRJ_CHERRY_REG_CANDIDATE",
+        "label": "チェリー重複REG",
+        "sourceClaims": [
+          {
+            "sourceId": "SRC_NANAPRESS",
+            "claim": "チェリー重複REG：全設定の同じ定義の発生率が確認できない。告知時にチェリーが見えた回数を内部の当選契機と同一視せず、REG合計との二重利用もしない。"
+          }
+        ],
+        "discoveryQueries": [],
+        "disposition": {
+          "type": "BLOCKED",
+          "refId": "RF_MRJ_CHERRY_REG_CANDIDATE"
+        }
+      },
+      {
+        "candidateId": "RF_CHERRY_MARGINAL",
+        "label": "チェリー出現率",
+        "sourceClaims": [
+          {
+            "sourceId": "SRC_NANAPRESS",
+            "claim": "チェリー出現率：実戦記事ごとにボーナス同時当選を含む回数と含まない回数が混在する。定義が異なる値は平均せず、全設定の比較分布も作らない。"
+          },
+          {
+            "sourceId": "SRC_20261026_89c0f52604",
+            "claim": "チェリー出現率：実戦記事ごとにボーナス同時当選を含む回数と含まない回数が混在する。定義が異なる値は平均せず、全設定の比較分布も作らない。"
+          },
+          {
+            "sourceId": "SRC_20261026_3b6e4c43c4",
+            "claim": "チェリー出現率：実戦記事ごとにボーナス同時当選を含む回数と含まない回数が混在する。定義が異なる値は平均せず、全設定の比較分布も作らない。"
+          }
+        ],
+        "discoveryQueries": [],
+        "disposition": {
+          "type": "BLOCKED",
+          "refId": "RF_CHERRY_MARGINAL"
+        }
+      },
+      {
+        "candidateId": "RF_RARE_ROLES",
+        "label": "ベル・ピエロ出現率",
+        "sourceClaims": [
+          {
+            "sourceId": "SRC_NANAPRESS",
+            "claim": "ベル・ピエロ出現率：機種固有の全設定の出現率が確認できず、取りこぼしもあり得る。前機種や逆算表で不足値を補わない。"
+          }
+        ],
+        "discoveryQueries": [],
+        "disposition": {
+          "type": "BLOCKED",
+          "refId": "RF_RARE_ROLES"
+        }
+      },
+      {
+        "candidateId": "RF_PREMIUM_EFFECTS",
+        "label": "プレミアム告知・楽曲・ランプ",
+        "sourceClaims": [
+          {
+            "sourceId": "SRC_NANAPRESS",
+            "claim": "プレミアム告知・楽曲・ランプ：ボーナス告知や楽曲変化であり、設定ごとの出現率や設定番号の確定条件は確認できない。高設定の数値情報として扱わない。"
+          }
+        ],
+        "discoveryQueries": [],
+        "disposition": {
+          "type": "BLOCKED",
+          "refId": "RF_PREMIUM_EFFECTS"
+        }
+      },
+      {
+        "candidateId": "RF_SINGLE_BIG_SPLIT",
+        "label": "単独BIG・チェリー重複BIG",
+        "sourceClaims": [
+          {
+            "sourceId": "SRC_NANAPRESS",
+            "claim": "単独BIG・チェリー重複BIG：BIG合計の内訳として候補を保持するが、同一定義の全設定率が確認できない。告知時の停止役だけで内部契機を決めず、BIG合計との二重評価もしない。"
+          }
+        ],
+        "discoveryQueries": [],
+        "disposition": {
+          "type": "BLOCKED",
+          "refId": "RF_SINGLE_BIG_SPLIT"
+        }
+      },
+      {
+        "candidateId": "RF_PIERROT_BONUS",
+        "label": "ピエロ重複ボーナス",
+        "sourceClaims": [
+          {
+            "sourceId": "SRC_20261026_89c0f52604",
+            "claim": "ピエロ重複ボーナス：この機種にはピエロ重複があるが、全設定の同一定義の発生率が確認できない。実戦1例の比率を設定別の母集団確率へ転用しない。"
+          },
+          {
+            "sourceId": "SRC_20261026_3b6e4c43c4",
+            "claim": "ピエロ重複ボーナス：この機種にはピエロ重複があるが、全設定の同一定義の発生率が確認できない。実戦1例の比率を設定別の母集団確率へ転用しない。"
+          }
+        ],
+        "discoveryQueries": [],
+        "disposition": {
+          "type": "BLOCKED",
+          "refId": "RF_PIERROT_BONUS"
+        }
+      }
+    ]
   },
-  "validation": {
-    "cases": []
-  },
-  "statistics": {}
+  "v8": {
+    "machineResearchSummary": {
+      "title": "この機種の設定推測について",
+      "adopted": [
+        {
+          "featureId": "RF_MRJ_PREDECESSOR_BONUS_OUTCOME",
+          "label": "着席時BIG・REG内訳",
+          "importance": "微小",
+          "evaluation": {
+            "userLabel": "1回の判別力",
+            "value": 0.014870860853496981
+          },
+          "reason": "着席時BIG・REG内訳の「その他」の割合は設定6 99.16%、設定1 99.36%と設定差があります。「通常ゲーム数」を基準に、記録したカテゴリの振り分けを比較して推測に使用します。 観測条件：着席前の総GとBIG・REG。"
+        },
+        {
+          "featureId": "RF_MRJ_SELF_BONUS_OUTCOME",
+          "label": "自分のBIG・REG内訳",
+          "importance": "主要",
+          "selectionScore": 77.6,
+          "evaluation": {
+            "userLabel": "設定判別スコア",
+            "value": 77.6
+          },
+          "reason": "自分のBIG・REG内訳の「その他」の割合は設定6 99.16%、設定1 99.36%と設定差があります。「通常ゲーム数」を基準に、記録したカテゴリの振り分けを比較して推測に使用します。 観測条件：自分が観測した通常時の総G。"
+        }
+      ],
+      "notAdopted": [
+        {
+          "featureId": "RF_MRJ_GRAPE_CANDIDATE",
+          "label": "ブドウ（実戦推定・設定別分布不完全）",
+          "reason": "設定ごとの判別に必要な数値が揃っていないため、現在は数値推測に使用しません。",
+          "reevaluationCondition": "必要な設定別データや観測条件が確認できれば再評価します。"
+        },
+        {
+          "featureId": "RF_MRJ_SINGLE_REG_CANDIDATE",
+          "label": "単独REG",
+          "reason": "全設定の同じ定義の発生率が確認できない。告知時にチェリーが見えた回数を内部の当選契機と同一視せず、REG合計との二重利用もしない。",
+          "reevaluationCondition": "不足している設定別の値または観測条件を裏付ける新たな具体的な公開資料が確認された場合。"
+        },
+        {
+          "featureId": "RF_MRJ_CHERRY_REG_CANDIDATE",
+          "label": "チェリー重複REG",
+          "reason": "全設定の同じ定義の発生率が確認できない。告知時にチェリーが見えた回数を内部の当選契機と同一視せず、REG合計との二重利用もしない。",
+          "reevaluationCondition": "不足している設定別の値または観測条件を裏付ける新たな具体的な公開資料が確認された場合。"
+        },
+        {
+          "featureId": "RF_CHERRY_MARGINAL",
+          "label": "チェリー出現率",
+          "reason": "実戦記事ごとにボーナス同時当選を含む回数と含まない回数が混在する。定義が異なる値は平均せず、全設定の比較分布も作らない。",
+          "reevaluationCondition": "不足している設定別の値または観測条件を裏付ける新たな具体的な公開資料が確認された場合。"
+        },
+        {
+          "featureId": "RF_RARE_ROLES",
+          "label": "ベル・ピエロ出現率",
+          "reason": "機種固有の全設定の出現率が確認できず、取りこぼしもあり得る。前機種や逆算表で不足値を補わない。",
+          "reevaluationCondition": "不足している設定別の値または観測条件を裏付ける新たな具体的な公開資料が確認された場合。"
+        },
+        {
+          "featureId": "RF_PREMIUM_EFFECTS",
+          "label": "プレミアム告知・楽曲・ランプ",
+          "reason": "ボーナス告知や楽曲変化であり、設定ごとの出現率や設定番号の確定条件は確認できない。高設定の数値情報として扱わない。",
+          "reevaluationCondition": "不足している設定別の値または観測条件を裏付ける新たな具体的な公開資料が確認された場合。"
+        },
+        {
+          "featureId": "RF_SINGLE_BIG_SPLIT",
+          "label": "単独BIG・チェリー重複BIG",
+          "reason": "BIG合計の内訳として候補を保持するが、同一定義の全設定率が確認できない。告知時の停止役だけで内部契機を決めず、BIG合計との二重評価もしない。",
+          "reevaluationCondition": "不足している設定別の値または観測条件を裏付ける新たな具体的な公開資料が確認された場合。"
+        },
+        {
+          "featureId": "RF_PIERROT_BONUS",
+          "label": "ピエロ重複ボーナス",
+          "reason": "この機種にはピエロ重複があるが、全設定の同一定義の発生率が確認できない。実戦1例の比率を設定別の母集団確率へ転用しない。",
+          "reevaluationCondition": "不足している設定別の値または観測条件を裏付ける新たな具体的な公開資料が確認された場合。"
+        }
+      ],
+      "unresolved": [],
+      "highLowDiscrimination": {
+        "status": "COMPUTED",
+        "method": "BEST_SINGLE_EXACT_ACTIVE_FEATURE",
+        "bandDefinition": {
+          "lowSettings": "SETTING_1_TO_2",
+          "highSettings": "SETTING_5_TO_6",
+          "classPrior": "BALANCED"
+        },
+        "selectedFeatureId": "RF_MRJ_SELF_BONUS_OUTCOME",
+        "selectedFeatureLabel": "自分のBIG・REG内訳",
+        "results": [
+          {
+            "games": 1500,
+            "balancedAccuracyPercent": 67.65,
+            "numerical95IntervalPercent": [
+              67.5275886981213,
+              67.77972331359744
+            ]
+          },
+          {
+            "games": 3000,
+            "balancedAccuracyPercent": 73.96,
+            "numerical95IntervalPercent": [
+              73.83994212895334,
+              74.07647022456229
+            ]
+          },
+          {
+            "games": 7000,
+            "balancedAccuracyPercent": 83.58,
+            "numerical95IntervalPercent": [
+              83.47983497427795,
+              83.67905479622986
+            ]
+          }
+        ],
+        "eligibleFeatureIds": [
+          "RF_MRJ_SELF_BONUS_OUTCOME"
+        ],
+        "note": "低設定1・2と高設定5・6を同じ事前確率で比較します。設定3・4はこの参考指標のみ除外します。独立性を仮定せず、通常時の単独要素で算出した参考値です。",
+        "numericalIntegration": {
+          "method": "STRATIFIED_MULTINOMIAL_MONTE_CARLO",
+          "samplesPerSetting": 131072,
+          "seed": 1515754772,
+          "source": "Frozen Candidate Contract; Manifest HLD-001"
+        }
+      }
+    }
+  }
 }
