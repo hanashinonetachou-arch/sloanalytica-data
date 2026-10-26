@@ -22,3 +22,6 @@ Machines #1 through #6 now have individual source-bounded Research closure appen
 
 ## 2026-10-26 sequential checkpoint: #8
 #8 ミスタージャグラー six-domain source-bounded Research audit and model completed in c9198c08462d724422952b2da43a2de19e1783eb. Critical Nana summary discrepancy (487 grape/70 cherry) superseded by original detailed trial 524/2988, cherry77; independently verified 1geki 1100/6604. Two-site equal-probability grape mean setting6 = 1/5.849084, no fabricated setting1–5 original direct observations. Full official Evaluation/Eligibility not done. #9 ジャグラーガールズSS next and #10 ゴーゴージャグラー3 after #9 closes. No app/QA changes.
+
+## 2026-10-26 sequential checkpoint #9
+ジャグラーガールズSS Research six-domain audit and source-bounded closure recorded in commit 083d3287c760fa502af7230cced72134c6c38507. Setting6 grape independently recorded Nana 487/2971, 1geki 1554/9158, equal-site probability mean 1/5.995104. Cherry definitions disagree on overlap inclusion, so no simple average. Settings1-5 grape originals not source-verified. No official score/Eligibility or implementation. #10 ゴーゴージャグラー3 remains next; no #10 premature closure.
