@@ -6,9 +6,20 @@
   "machineName": "ジャグラーガールズSS",
   "dependencyReview": {
     "status": "COMPLETE",
-    "candidateCount": 2,
-    "groupCount": 0,
-    "groups": []
+    "candidateCount": 3,
+    "groupCount": 1,
+    "groups": [
+      {
+        "groupId": "B026_S_JUGGLER_GIRLS_SS_KH_NORMAL_BONUS_GRAPE",
+        "kinds": [
+          "DEPENDENT"
+        ],
+        "members": [
+          "RF_JGSS_SELF_BONUS_OUTCOME",
+          "RF_JGSS_GRAPE_CANDIDATE"
+        ]
+      }
+    ]
   },
   "evaluations": [
     {
@@ -76,9 +87,10 @@
         "reason": "自分が観測した通常時の総G。ボーナス消化中のGを含めず、着席前のGや当選を再加算しない。"
       },
       "dependency": {
-        "status": "NONE",
-        "kind": "INDEPENDENT",
-        "reason": "別の観測区間の試行数を記録する。"
+        "status": "DEFERRED_TO_CANDIDATE_CONTRACT",
+        "groupId": "B026_S_JUGGLER_GIRLS_SS_KH_NORMAL_BONUS_GRAPE",
+        "kind": "DEPENDENT",
+        "reason": "同一の通常時区間におけるボーナスとブドウの同時成立・成立後消化の扱いを独立とは断定しない。既存のボーナス内訳を優先し、推測に使用できない場合のみブドウへ切り替える。"
       },
       "details": [],
       "model": "CATEGORICAL",
@@ -116,47 +128,59 @@
         "exposureClass": "DERIVED_EXACT",
         "sourceRounding": "Retain published reciprocal rates; residual is 1 minus category sum. No arbitrary integer-frequency fit.",
         "uncertaintyScope": "Numerical integration error only; not uncertainty of empirical source estimates."
-      }
+      },
+      "dependencyFallbackRank": 1
     },
     {
       "findingId": "RF_JGSS_GRAPE_CANDIDATE",
-      "label": "ブドウ（実戦推定・設定別分布不完全）",
-      "observationType": "partial_distribution",
+      "label": "ブドウ（参考値の設定別平均）",
+      "observationType": "probability",
       "settingDistribution": {
-        "6": 0.16680278875456855
+        "1": 0.165984363033285,
+        "2": 0.16722408026755853,
+        "3": 0.16722408026755853,
+        "4": 0.16722408026755853,
+        "5": 0.1689266310551066,
+        "6": 0.17021977213972145
       },
       "sourceIds": [
-        "SRC_20261026_09769eff3b",
-        "SRC_20261026_e208f2ec1c"
+        "SRC_GRAPE_20261028_1GEKI",
+        "SRC_GRAPE_20261028_DMM",
+        "SRC_GRAPE_20261028_GARIZO",
+        "SRC_GRAPE_20261028_NANA"
       ],
       "trialUniverse": "NORMAL_GAME_TRIAL",
       "liveObservation": {
-        "status": "DIRECT_EXACT",
-        "reason": "BIG・REGと共用する総G。ボーナス中を除く。ブドウは共通・単独合算を数える。"
+        "status": "EXACT_WITH_SCOPE_TRACKING",
+        "reason": "ブドウを漏れなく数えた通常時3枚掛けの区間Gを直接記録する。部分区間はその区間だけを指定し、未入力を0回としない。"
       },
       "dependency": {
-        "status": "NONE",
-        "kind": "NOT_APPLICABLE",
-        "reason": "参照専用または不完全な設定別分布のため、数値推測のDependency / Overlap Review対象外です。"
+        "status": "DEFERRED_TO_CANDIDATE_CONTRACT",
+        "groupId": "B026_S_JUGGLER_GIRLS_SS_KH_NORMAL_BONUS_GRAPE",
+        "kind": "DEPENDENT",
+        "reason": "同一の通常時区間におけるボーナスとブドウの同時成立・成立後消化の扱いを独立とは断定しない。既存のボーナス内訳を優先し、推測に使用できない場合のみブドウへ切り替える。"
       },
       "details": [
-        "独立した実戦集計ごとの出現確率を同じ重みで平均した推定値。メーカー公表値ではない。",
-        "設定1・2・3・4・5の元実戦値が確認できず、全設定を比較できないため記録のみ・推測計算には使用しない。"
+        "設定別の参考値・実戦値を出現確率に直して、重複を除いた出典ごとに同じ重みで平均した値を使用する。",
+        "通常時3枚掛けの観測区間Gと、その区間のブドウ回数を記録する。ボーナス中・1枚掛け・未観測区間を含めない。",
+        "ボーナスと同じ区間の観測を重ねて評価せず、ボーナス内訳を計算に使えない場合の代替として使用する。"
       ],
-      "model": "UNAVAILABLE",
+      "dependencyFallbackRank": 2,
+      "model": "BERNOULLI",
       "metrics": {
-        "igPerEligibleTrial": null,
-        "perEligibleTrialPower": null,
+        "igPerEligibleTrial": 0.000009816520903815906,
+        "perEligibleTrialPower": 0.0019633041807631813,
         "selectionScore": {
-          "status": "BLOCKED_UNRESOLVED",
-          "value": null
+          "status": "COMPUTED",
+          "value": 13.120744246973231
         }
       },
       "benchmarkExposure": {
-        "status": "BLOCKED_UNRESOLVED"
+        "status": "EXACT",
+        "trials": 7000
       },
-      "selectionClass": "EXCLUDE",
-      "evaluationCompleteness": "INCOMPLETE_SETTING_DISTRIBUTION"
+      "selectionClass": "SUPPORT",
+      "evaluationCompleteness": "COMPLETE"
     }
   ],
   "blockedItems": [
@@ -276,20 +300,23 @@
     }
   ],
   "evidenceCandidates": [],
-  "artifactReview": {
-    "scope": "Artifact-only Manifest SELDEP-002 numerical integration of complete normal-game categorical observations.",
-    "commonBuilderChanged": false,
-    "legacyValidatorLimitation": "Pinned evaluator/validator assumes every appearance_distribution has unresolved benchmark, including a source-defined normal-game multinomial. Original output is separately validated and preserved; this supplemental artifact owns the finite-7000-trial MI. No engine or common validator changed.",
-    "baselineValidation": [
+  "correctionReview": {
+    "correctionId": "grape-correction-20261028",
+    "legacyFullValidatorScope": "Raw new builder output, before retaining approved existing multinomial supplements.",
+    "rawValidation": [
       {
         "validator": "evaluation-v2",
         "candidates": 3,
-        "complete": 2,
-        "unavailable": 1,
+        "complete": 3,
+        "unavailable": 0,
         "reference": 0,
         "evidenceCandidates": 0,
         "blockedItems": 6
       }
-    ]
-  }
+    ],
+    "finalGrapeValidation": "Shared exact finite-7000 Bernoulli evaluator and validator. No score thresholds changed.",
+    "existingBonusMetrics": "Retained exactly from authoritative pre-correction Evaluation; shared categorical benchmark limitation is the same documented prior artifact supplement, not a new exception.",
+    "baselineEvaluationSha256": "eaabc64ecb5dc6fdc7dae0916edddd99fef2c3f18a90ddf473ae5b96ee1b8ef0"
+  },
+  "correctionId": "grape-correction-20261028"
 }
