@@ -5,16 +5,18 @@
   "machineId": "S_NEO_IM_JUGGLER_EX_KK",
   "machineName": "ネオアイムジャグラーEX",
   "evaluationArtifact": {
+    "artifactId": "evaluation-S_NEO_IM_JUGGLER_EX_KK",
     "kind": "evaluation",
     "path": "production/batches/batch-20261026-026/artifacts/S_NEO_IM_JUGGLER_EX_KK/evaluation/result.json",
-    "sha256": "32ecffc5a56fbb365b11ca951b3c9b4c0d3443b83ec0707a432bb0214c4bee88",
-    "producerWorkId": "research-20261026-S_NEO_IM_JUGGLER_EX_KK"
+    "sha256": "fa45e444f6e0341254f1f90ad7431081a1b623a891ca6d077aabd8e7cd45d915",
+    "producerWorkId": "wrk_331db45ca790476b"
   },
   "eligibilityArtifact": {
+    "artifactId": "eligibility-S_NEO_IM_JUGGLER_EX_KK",
     "kind": "eligibility",
     "path": "production/batches/batch-20261026-026/artifacts/S_NEO_IM_JUGGLER_EX_KK/eligibility/result.json",
-    "sha256": "ab1404dad743968de678a4d71688899cfbf1b6d0e060e22dc6bbaa256ed7259c",
-    "producerWorkId": "research-20261026-S_NEO_IM_JUGGLER_EX_KK"
+    "sha256": "fc2e72c1e4fcb2f9cb34faee9fa352eb5b8684c1412e52a88a1304f8c3ec9dbf",
+    "producerWorkId": "wrk_314c7363db9d47d9"
   },
   "candidates": [
     {
@@ -64,36 +66,73 @@
         "residualPolicy": "SOURCE_EXPLICIT_OTHER"
       },
       "details": [],
-      "dependencyGroupId": null,
-      "dependencyKind": "INDEPENDENT",
-      "dependencyReason": "別の観測区間の試行数を記録する。",
+      "dependencyGroupId": "B026_S_NEO_IM_JUGGLER_EX_KK_NORMAL_BONUS_GRAPE",
+      "dependencyKind": "DEPENDENT",
+      "dependencyReason": "同一の通常時区間におけるボーナスとブドウの同時成立・成立後消化の扱いを独立とは断定しない。既存のボーナス内訳を優先し、推測に使用できない場合のみブドウへ切り替える。",
+      "dependencyFallbackRank": 1,
       "runtimeInferenceAllowed": true,
-      "dependencyResolution": "NONE",
+      "dependencyResolution": "PREFERRED_MEMBER",
       "runtimePolicyBinding": {
         "metric": "SELECTION_SCORE",
         "value": 93.55031332584912,
         "thresholdSource": "RUNTIME_POLICY"
-      }
-    }
-  ],
-  "dependencyGroups": [],
-  "excludedDecisions": [
+      },
+      "suppressedByFeatureIds": []
+    },
     {
       "findingId": "RF_NIJ_GRAPE_CANDIDATE",
-      "label": "ブドウ（実戦推定・設定別分布不完全）",
-      "supportingSourceIds": [
-        "SRC_20261026_3117230abb",
-        "SRC_NANAPRESS"
+      "label": "ブドウ（参考値の設定別平均）",
+      "model": "BERNOULLI",
+      "trialUniverse": "NORMAL_GAME_TRIAL",
+      "liveInferenceRoute": "LIVE_CONDITIONAL",
+      "settingDistribution": {
+        "1": 0.1655647292303981,
+        "2": 0.16583793535895802,
+        "3": 0.16583793535895802,
+        "4": 0.16583793535895802,
+        "5": 0.16611295681063123,
+        "6": 0.17382987647629253
+      },
+      "details": [
+        "設定別の参考値・実戦値を出現確率に直して、重複を除いた出典ごとに同じ重みで平均した値を使用する。",
+        "通常時3枚掛けの観測区間Gと、その区間のブドウ回数を記録する。ボーナス中・1枚掛け・未観測区間を含めない。",
+        "ボーナスと同じ区間の観測を重ねて評価せず、ボーナス内訳を計算に使えない場合の代替として使用する。"
       ],
-      "eligibility": "UNRESOLVED",
-      "reason": "設定別分布が不完全なため現在は推測Featureにできない。",
-      "ruleRefs": [
-        "manifest-v8.5-source-completeness"
-      ],
-      "liveInferenceRoute": "NONE",
-      "reevaluationCondition": "不足している設定別分布がsource-supportedで揃うこと。"
+      "dependencyGroupId": "B026_S_NEO_IM_JUGGLER_EX_KK_NORMAL_BONUS_GRAPE",
+      "dependencyKind": "DEPENDENT",
+      "dependencyReason": "同一の通常時区間におけるボーナスとブドウの同時成立・成立後消化の扱いを独立とは断定しない。既存のボーナス内訳を優先し、推測に使用できない場合のみブドウへ切り替える。",
+      "dependencyFallbackRank": 2,
+      "runtimeInferenceAllowed": true,
+      "dependencyResolution": "FALLBACK_MEMBER",
+      "runtimePolicyBinding": {
+        "metric": "SELECTION_SCORE",
+        "value": 50.37291523476304,
+        "thresholdSource": "RUNTIME_POLICY"
+      },
+      "suppressedByFeatureIds": [
+        "RF_NIJ_SELF_BONUS_OUTCOME"
+      ]
     }
   ],
+  "dependencyGroups": [
+    {
+      "groupId": "B026_S_NEO_IM_JUGGLER_EX_KK_NORMAL_BONUS_GRAPE",
+      "resolution": "PREFERRED_WITH_FALLBACK",
+      "members": [
+        "RF_NIJ_SELF_BONUS_OUTCOME",
+        "RF_NIJ_GRAPE_CANDIDATE"
+      ],
+      "runtimeInferenceAllowed": true,
+      "preferredFindingId": "RF_NIJ_SELF_BONUS_OUTCOME",
+      "fallbackOrder": [
+        "RF_NIJ_SELF_BONUS_OUTCOME",
+        "RF_NIJ_GRAPE_CANDIDATE"
+      ],
+      "reason": "依存関係がある候補を同時加算せず、観測できた優先Featureを使用し、未観測時だけ次順位のFeatureへ自動フォールバックする。",
+      "selectionRationale": "Researchで明示された優先順位に従い、同一セッションで重複情報を同時加算しない。"
+    }
+  ],
+  "excludedDecisions": [],
   "blockedItems": [
     {
       "blockId": "RF_NIJ_SINGLE_REG_CANDIDATE",
@@ -234,22 +273,39 @@
     "smallRoles": {
       "section": "通常時の小役",
       "fields": [
-        "ブドウ",
-        "チェリー"
+        "チェリー",
+        "ブドウ"
       ],
       "usesSameGameCount": true,
-      "currentNumericInference": false,
-      "explanation": "実戦推定値は保存しているが、全設定の同一定義の値が揃わないため記録のみ。"
+      "currentNumericInference": "CANDIDATE_PENDING_EVALUATION",
+      "explanation": "ブドウは全設定の参考確率を用いて評価する。ボーナスとの重複加算を避け、推測に必要な観測区間を分けて記録する。"
     },
     "futureGrapeBonusCombination": "Prove a joint outcome or correct likelihood factorization before combining; no independence assumption.",
     "recordOnlyCopy": "記録のみ・推測計算には使用しない",
     "unobserved": "NULL_NOT_ZERO",
-    "gameQuickAdd": 50
+    "gameQuickAdd": 50,
+    "grapeInputPolicy": {
+      "findingId": "RF_NIJ_GRAPE_CANDIDATE",
+      "recordOnly": false,
+      "requireObservedGrapeGames": true,
+      "inputRequiredOnlyIfUsed": true,
+      "zeroIsObservedNotDefault": true,
+      "sharedGameFieldAllowedOnlyIfFullScopeIdentical": true,
+      "partialScopeMustUseExactObservedGames": true
+    },
+    "grapeBonusDependency": {
+      "groupId": "B026_S_NEO_IM_JUGGLER_EX_KK_NORMAL_BONUS_GRAPE",
+      "resolution": "PREFERRED_WITH_FALLBACK",
+      "preferred": "RF_NIJ_SELF_BONUS_OUTCOME",
+      "fallback": "RF_NIJ_GRAPE_CANDIDATE",
+      "independenceAsserted": false,
+      "jointOutcomeProbabilitiesInvented": false,
+      "sameGameOverlap": "NOT_ASSERTED",
+      "predecessorBonusUnchanged": true
+    }
   },
-  "reconciliationArtifact": {
-    "path": "production/batches/batch-20261026-026/artifacts/S_NEO_IM_JUGGLER_EX_KK/research/reconciliation.json",
-    "sha256": "890c166d3238bbe954c53cbf97966d219c221dac0444d5f17bd5c1603de63b47"
-  },
+  "correctionId": "grape-correction-20261028",
+  "correctionBaseline": "b2953be8ac7dce4666edaf6ed22ff83d7518c136",
   "selectionAudit": [
     {
       "findingId": "RF_NIJ_PREDECESSOR_BONUS_OUTCOME",
@@ -260,8 +316,7 @@
       },
       "benchmarkExposure": {
         "status": "BLOCKED_UNRESOLVED"
-      },
-      "liveInferenceRoute": "LIVE_CONDITIONAL"
+      }
     },
     {
       "findingId": "RF_NIJ_SELF_BONUS_OUTCOME",
@@ -274,20 +329,19 @@
         "status": "EXACT",
         "trials": 7000,
         "exposureClass": "DERIVED_EXACT"
-      },
-      "liveInferenceRoute": "LIVE_CONDITIONAL"
+      }
     },
     {
       "findingId": "RF_NIJ_GRAPE_CANDIDATE",
-      "selectionClass": "EXCLUDE",
+      "selectionClass": "CORE",
       "selectionScore": {
-        "status": "BLOCKED_UNRESOLVED",
-        "value": null
+        "status": "COMPUTED",
+        "value": 50.37291523476304
       },
       "benchmarkExposure": {
-        "status": "BLOCKED_UNRESOLVED"
-      },
-      "liveInferenceRoute": "NONE"
+        "status": "EXACT",
+        "trials": 7000
+      }
     }
   ]
 }
