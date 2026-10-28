@@ -1,3 +1,20 @@
+# Current Work checkpoint — 2026-10-28
+
+Batch026のジャグラー5機種ブドウ訂正を、指定順にResearch → Evaluation → Eligibility → Candidate Contractまで完了した。新Batchなし。
+
+- 正本: production/v85-research-20261026-contract、訂正前head b2953be8ac7dce4666edaf6ed22ff83d7518c136。
+- ネオアイム、ウルトラミラクル、ガールズSS、ゴーゴー3: DMM本文を確認済み。参考サイトの設定別確率平均で全設定を評価しELIGIBLE。既存ボーナスを優先する依存関係上の代替推測候補として契約化。
+- ミスタージャグラー: 最新ユーザー指示によりブドウを対象外とし、入力・記録欄なし。追加調査終了。設定1〜5の調査を再開しない。
+- 既存候補ID、ボーナス分布・評価値・閾値を保持。Manifest v8.5・共通コード変更なし。
+- 20工程受理、20Lease解放。独立7000試行評価の照合PASS。
+- 後続Observation Evidence〜DistributionはREADY（今回未実行）。既存配信/APKを訂正済みとは扱わない。DEVICE_QAはPENDINGを保持。
+- 結果: [WORK_CORRECTION_RESULT.md](grape-correction-20261028/WORK_CORRECTION_RESULT.md)
+- 監査: [independent-audit.json](grape-correction-20261028/work/independent-audit.json)
+
+以下は過去時点の記録であり、ブドウのrecord-only決定と再調査条件は上記で置き換えた。
+
+---
+
 # Current Work checkpoint — 2026-10-27
 
 **10/10 machine contract artifacts completed and verified in the specified sequential order.**
